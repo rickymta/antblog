@@ -104,7 +104,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       ))}
       <div className="mt-auto border-t border-line pt-3">
         <a
-          href={SITE_URL}
+          href={SITE_URL || '/'}
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-3 rounded-ui px-3 py-2.5 text-sm font-medium text-muted hover:bg-surface-2 hover:text-ink"

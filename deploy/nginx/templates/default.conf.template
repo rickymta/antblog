@@ -1,0 +1,101 @@
+# Cổng vào duy nhất của stack. Ảnh nginx chính thức thay ${DOMAIN} lúc khởi động (envsubst chỉ thay biến
+# môi trường có thật, nên các biến nginx như $host, $remote_addr giữ nguyên).
+#
+#   :80   → /healthz cho healthcheck, mọi thứ khác chuyển hướng sang HTTPS
+#   :443  → /         trang đọc (apps/web, SPA)
+#           /admin/   trang quản trị (apps/admin, SPA, build với base /admin/)
+#           /api/     API Express (container `api`, cổng 4000) — giống proxy /api của Vite khi dev,
+#                     nên cookie đăng nhập cùng origin, không cần CORS.
+#
+# Đứng sau Cloudflare: chế độ SSL của Cloudflare PHẢI là "Full (strict)". Để "Flexible" thì Cloudflare gọi
+# vào port 80, port 80 lại chuyển hướng sang HTTPS ⇒ vòng lặp chuyển hướng.
+
+upstream tkh_api {
+  server api:4000;
+  keepalive 16;
+}
+
+# Giới hạn thô tầng nginx theo IP thật (sau real_ip của Cloudflare). API có rate limit riêng cho đăng nhập/bình luận.
+limit_req_zone $binary_remote_addr zone=tkh_api:10m rate=20r/s;
+
+server {
+  listen 80 default_server;
+  server_name _;
+  server_tokens off;
+
+  location = /healthz {
+    access_log off;
+    default_type text/plain;
+    return 200 "ok\n";
+  }
+
+  location / {
+    return 301 https://$host$request_uri;
+  }
+}
+
+server {
+  listen 443 ssl default_server;
+  http2 on;
+  server_name ${DOMAIN};
+  server_tokens off;
+
+  # Đường dẫn chứng chỉ do /usr/local/bin/tkh-select-cert.sh ghi: Let's Encrypt nếu đã có, không thì
+  # chứng chỉ tự ký tạm (để nginx vẫn khởi động được trong lúc certbot đang xin chứng chỉ thật).
+  include /etc/nginx/tkh-ssl.conf;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers off;
+  ssl_session_cache shared:tkh_ssl:10m;
+  ssl_session_timeout 1d;
+
+  client_max_body_size 4m;   # API nhận JSON tối đa 2 MB
+
+  gzip on;
+  gzip_comp_level 5;
+  gzip_min_length 1024;
+  gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+
+  # Header bảo mật + chặn máy tìm kiếm. LƯU Ý nginx: location nào có add_header riêng thì KHÔNG kế thừa
+  # add_header của server ⇒ mọi location có add_header phải include lại snippet này.
+  include /etc/nginx/snippets/tkh-headers.conf;
+
+  root /usr/share/nginx/html;
+
+  location /api/ {
+    limit_req zone=tkh_api burst=60 nodelay;
+    proxy_pass http://tkh_api;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    # $remote_addr đã là IP thật của người dùng (real_ip từ CF-Connecting-IP). GHI ĐÈ, không nối thêm,
+    # để không ai giả được X-Forwarded-For; API tin mạng nội bộ compose (TRUST_PROXY) nên req.ip = IP thật.
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_read_timeout 30s;
+  }
+
+  # Tệp tĩnh có hash trong tên ⇒ cache lâu.
+  location ~* ^/(admin/)?assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable" always;
+    include /etc/nginx/snippets/tkh-headers.conf;
+    try_files $uri =404;
+  }
+
+  location = /admin {
+    return 301 /admin/;
+  }
+
+  location /admin/ {
+    try_files $uri $uri/ /admin/index.html;
+    add_header Cache-Control "no-cache" always;
+    include /etc/nginx/snippets/tkh-headers.conf;
+  }
+
+  location / {
+    try_files $uri $uri/ /index.html;
+    add_header Cache-Control "no-cache" always;
+    include /etc/nginx/snippets/tkh-headers.conf;
+  }
+}

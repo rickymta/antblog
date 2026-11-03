@@ -35,6 +35,12 @@ Cả hai app gọi API qua proxy Vite (`/api` → `127.0.0.1:4000`), nên cookie
 
 Tài khoản quản trị nằm trong `H:\Work\tech-blog-api\.env` (`SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`).
 
+## Triển khai lên server (Docker)
+
+`docker-compose.yml` ở gốc repo chạy toàn bộ stack: nginx (cổng vào duy nhất 80/443, `/`, `/admin/`, `/api/`),
+API, MongoDB có xác thực, certbot (chứng chỉ Let's Encrypt qua DNS Cloudflare) và WireGuard (VPN vào database).
+Hướng dẫn từng bước: [`deploy/README.md`](deploy/README.md).
+
 ## Kiểm tra trước khi commit
 
 ```bash

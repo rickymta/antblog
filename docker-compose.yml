@@ -1,0 +1,174 @@
+# Tech Knowledge Hub — toàn bộ stack chạy bằng Docker trên server.
+#
+#   Internet ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ /, /admin/  (tệp tĩnh)
+#                                                                     └─▶ /api/  ─▶ api:4000 ─▶ mongo:27017
+#   Máy quản trị ─▶ WireGuard UDP :51820 ─▶ mongo 172.30.0.10:27017   (chỉ DB, không qua Cloudflare)
+#
+# Hai repo đặt cạnh nhau trên server:  <thư mục>/tech-blog (repo này)  và  <thư mục>/tech-blog-api
+# Lần đầu:  sh deploy/init-env.sh  → sửa .env  → docker compose up -d --build  → docker compose run --rm seed
+# Chi tiết: deploy/README.md
+
+name: tech-knowledge-hub
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tkh-nginx:local
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      DOMAIN: ${DOMAIN:?Đặt DOMAIN trong .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - tkh
+    logging: *logging
+
+  api:
+    build:
+      context: ${API_DIR:-../tech-blog-api}
+      target: runtime
+    image: tkh-api:local
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "4000"
+      MONGODB_URI: mongodb://${MONGO_APP_USERNAME:?}:${MONGO_APP_PASSWORD:?}@mongo:27017/tech_knowledge_hub?authSource=tech_knowledge_hub
+      JWT_SECRET: ${JWT_SECRET:?Đặt JWT_SECRET trong .env}
+      # Người dùng vào qua HTTPS (Cloudflare → nginx :443) ⇒ cookie phiên có cờ Secure.
+      COOKIE_SECURE: "true"
+      # Chỉ tin X-Forwarded-For từ mạng nội bộ compose (nginx) ⇒ rate limit tính theo IP thật.
+      TRUST_PROXY: 172.30.0.0/24
+    networks:
+      - tkh
+    logging: *logging
+
+  # Công cụ chạy tay (không tự chạy với `up`):  docker compose run --rm seed
+  #   tuỳ chọn: docker compose run --rm seed npm run seed:demo   |   ... npm run seed:demo -- --remove
+  seed:
+    profiles: ["tools"]
+    build:
+      context: ${API_DIR:-../tech-blog-api}
+      target: tools
+    image: tkh-api-tools:local
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://${MONGO_APP_USERNAME:?}:${MONGO_APP_PASSWORD:?}@mongo:27017/tech_knowledge_hub?authSource=tech_knowledge_hub
+      JWT_SECRET: ${JWT_SECRET:?}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:?}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-Quản trị viên}
+    command: ["npm", "run", "seed"]
+    networks:
+      - tkh
+
+  mongo:
+    image: mongo:8.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?}
+      # Đọc bởi deploy/mongo/init/01-create-users.js — chỉ có tác dụng ở lần khởi tạo volume đầu tiên.
+      MONGO_APP_DATABASE: tech_knowledge_hub
+      MONGO_APP_USERNAME: ${MONGO_APP_USERNAME:?}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:?}
+      MONGO_INSPECTOR_USERNAME: ${MONGO_INSPECTOR_USERNAME:?}
+      MONGO_INSPECTOR_PASSWORD: ${MONGO_INSPECTOR_PASSWORD:?}
+    command: ["mongod", "--bind_ip_all", "--auth"]
+    volumes:
+      - mongo-data:/data/db
+      - ./deploy/mongo/init:/docker-entrypoint-initdb.d:ro
+    # KHÔNG publish cổng: MongoDB chỉ với tới được từ trong mạng compose và qua VPN WireGuard.
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand('ping').ok ? 0 : 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      tkh:
+        ipv4_address: 172.30.0.10
+    logging: *logging
+
+  # Xin + tự gia hạn chứng chỉ Let's Encrypt qua DNS-01 của Cloudflare (chạy được khi bật proxy cam).
+  certbot:
+    image: certbot/dns-cloudflare:v5.9.0
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/scripts/certbot-loop.sh"]
+    environment:
+      DOMAIN: ${DOMAIN:?}
+      CERT_EXTRA_DOMAINS: ${CERT_EXTRA_DOMAINS:-}
+      ACME_EMAIL: ${ACME_EMAIL:?Đặt ACME_EMAIL trong .env}
+      CF_API_TOKEN: ${CF_API_TOKEN:?Đặt CF_API_TOKEN trong .env}
+      ACME_STAGING: ${ACME_STAGING:-0}
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - ./deploy/certbot/certbot-loop.sh:/scripts/certbot-loop.sh:ro
+    networks:
+      - tkh
+    logging: *logging
+
+  # VPN để kết nối thẳng vào MongoDB kiểm tra dữ liệu. Cấu hình máy khách sinh tự động trong
+  # deploy/wireguard/config/peer_<tên>/peer_<tên>.conf (chứa khoá bí mật — không commit).
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:1.0.20260223
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Asia/Ho_Chi_Minh
+      # Địa chỉ CÔNG KHAI của server cho máy khách gọi tới: IP, hoặc tên miền DNS-only (đám mây xám)
+      # — Cloudflare proxy không chuyển UDP nên KHÔNG dùng tên miền đang bật proxy.
+      SERVERURL: ${WG_SERVER_URL:?Đặt WG_SERVER_URL trong .env}
+      SERVERPORT: ${WG_PORT:-51820}
+      PEERS: ${WG_PEERS:-admin}
+      INTERNAL_SUBNET: 10.13.13.0
+      # Chia tuyến: máy khách CHỈ đi qua VPN khi gọi MongoDB; Internet và DNS đi đường thường.
+      ALLOWEDIPS: 172.30.0.10/32
+      PEERDNS: 1.1.1.1
+      LOG_CONFS: "false"
+    volumes:
+      - ./deploy/wireguard/config:/config
+    ports:
+      - "${WG_PORT:-51820}:51820/udp"
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      tkh:
+        ipv4_address: 172.30.0.20
+    logging: *logging
+
+networks:
+  tkh:
+    driver: bridge
+    ipam:
+      config:
+        # IP cố định (mongo .10, wireguard .20) nằm ngoài ip_range ⇒ container cấp động (.128–.255)
+        # không bao giờ chiếm mất địa chỉ của chúng.
+        - subnet: 172.30.0.0/24
+          ip_range: 172.30.0.128/25
+
+volumes:
+  mongo-data:
+  letsencrypt:

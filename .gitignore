@@ -6,3 +6,5 @@ dist/
 *.log
 *.tsbuildinfo
 .DS_Store
+# Cấu hình WireGuard sinh trên server (chứa khoá bí mật)
+deploy/wireguard/config/

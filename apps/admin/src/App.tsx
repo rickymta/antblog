@@ -83,7 +83,8 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+  // Dev chạy ở gốc cổng 5174 (BASE_URL '/'); bản Docker build với base '/admin/' sau nginx.
+], { basename: import.meta.env.BASE_URL.replace(/\/+$/, '') || '/' });
 
 export function App() {
   const [client] = useState(createQueryClient);

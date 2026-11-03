@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+.git
+.env
+.env.*
+deploy/wireguard
+deploy/mongo
+docker-compose.yml
+Dockerfile
+.dockerignore
+*.log
