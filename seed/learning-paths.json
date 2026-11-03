@@ -1,0 +1,11 @@
+[
+  {
+    "slug": "postgresql-tu-ben-trong",
+    "title": "PostgreSQL từ bên trong",
+    "description": "Đi từ cách PostgreSQL cất một dòng xuống đĩa tới index, MVCC, giao dịch và partition — mọi ví dụ chạy trên dữ liệu của dự án mẫu Tới Nơi.",
+    "level": "intermediate",
+    "category": "database",
+    "articles": ["du-an-mau-toi-noi", "heap-ctid-va-primary-key"],
+    "status": "published"
+  }
+]

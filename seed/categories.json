@@ -1,0 +1,79 @@
+[
+  {
+    "slug": "database",
+    "name": { "vi": "Database", "en": "Database" },
+    "description": {
+      "vi": "Lưu trữ, index, giao dịch, MVCC, partition, nhân bản — mổ xẻ trên PostgreSQL và MongoDB.",
+      "en": "Storage, indexes, transactions, MVCC, partitioning, replication — dissected on PostgreSQL and MongoDB."
+    },
+    "icon": "database",
+    "color": "#2563EB",
+    "order": 1
+  },
+  {
+    "slug": "programming",
+    "name": { "vi": "Lập trình", "en": "Programming" },
+    "description": {
+      "vi": "Ngôn ngữ, mô hình bộ nhớ, xử lý đồng thời, kiểm thử — viết các dịch vụ của dự án mẫu.",
+      "en": "Languages, memory models, concurrency, testing — building the services of the sample project."
+    },
+    "icon": "code",
+    "color": "#6366F1",
+    "order": 2
+  },
+  {
+    "slug": "design-pattern",
+    "name": { "vi": "Design Pattern", "en": "Design Patterns" },
+    "description": {
+      "vi": "Các mẫu thiết kế hướng đối tượng và hàm, khi nào nên dùng và cái giá đi kèm.",
+      "en": "Object-oriented and functional design patterns, when to use them and what they cost."
+    },
+    "icon": "pattern",
+    "color": "#10B981",
+    "order": 3
+  },
+  {
+    "slug": "architecture",
+    "name": { "vi": "Architecture", "en": "Architecture" },
+    "description": {
+      "vi": "Kiến trúc phần mềm: layered, hexagonal, CQRS, event-driven, microservices và monolith.",
+      "en": "Software architecture: layered, hexagonal, CQRS, event-driven, microservices and monoliths."
+    },
+    "icon": "architecture",
+    "color": "#8B5CF6",
+    "order": 4
+  },
+  {
+    "slug": "system-design",
+    "name": { "vi": "System Design", "en": "System Design" },
+    "description": {
+      "vi": "Thiết kế hệ thống chịu tải: ước lượng quy mô, cache, hàng đợi, sharding, tính sẵn sàng.",
+      "en": "Designing for load: capacity estimates, caching, queues, sharding, availability."
+    },
+    "icon": "system",
+    "color": "#0EA5E9",
+    "order": 5
+  },
+  {
+    "slug": "devops",
+    "name": { "vi": "DevOps", "en": "DevOps" },
+    "description": {
+      "vi": "Đóng gói, triển khai, giám sát và vận hành hệ thống trên máy chủ thật.",
+      "en": "Packaging, deployment, monitoring and operating systems in production."
+    },
+    "icon": "devops",
+    "color": "#F97316",
+    "order": 6
+  },
+  {
+    "slug": "security",
+    "name": { "vi": "Bảo mật", "en": "Security" },
+    "description": {
+      "vi": "Xác thực, phân quyền, lưu mật khẩu, chống tấn công web phổ biến.",
+      "en": "Authentication, authorization, password storage, common web attacks."
+    },
+    "icon": "security",
+    "color": "#EF4444",
+    "order": 7
+  }
+]

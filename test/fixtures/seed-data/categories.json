@@ -1,0 +1,4 @@
+[
+  { "slug": "database", "name": { "vi": "Cơ sở dữ liệu", "en": "Databases" }, "description": { "vi": "SQL, NoSQL", "en": "SQL, NoSQL" }, "icon": "database", "color": "#2563eb", "order": 1 },
+  { "slug": "devops", "name": { "vi": "DevOps", "en": "DevOps" }, "description": { "vi": "CI/CD", "en": "CI/CD" }, "icon": "devops", "color": "#16A34A", "order": 2 }
+]
