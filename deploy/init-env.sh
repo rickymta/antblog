@@ -20,4 +20,4 @@ sed \
   -e "s|^SEED_ADMIN_PASSWORD=$|SEED_ADMIN_PASSWORD=$(rand 24 20)|" \
   .env.example > .env
 
-echo "Đã tạo .env (quyền 600). Còn phải điền tay: DOMAIN, ACME_EMAIL, CF_API_TOKEN, WG_SERVER_URL, SEED_ADMIN_EMAIL."
+echo "Đã tạo .env (quyền 600). Còn phải kiểm/điền tay: DOMAIN, ADMIN_DOMAIN, ACME_EMAIL, CF_API_TOKEN, WG_SERVER_URL, SEED_ADMIN_EMAIL."

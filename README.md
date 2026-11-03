@@ -37,7 +37,7 @@ Tài khoản quản trị nằm trong `H:\Work\tech-blog-api\.env` (`SEED_ADMIN_
 
 ## Triển khai lên server (Docker)
 
-`docker-compose.yml` ở gốc repo chạy toàn bộ stack: nginx (cổng vào duy nhất 80/443, `/`, `/admin/`, `/api/`),
+`docker-compose.yml` ở gốc repo chạy toàn bộ stack: nginx (cổng vào duy nhất 80/443: `antblog.xyz` trang đọc, `admin.antblog.xyz` quản trị, `/api/` ở cả hai),
 API, MongoDB có xác thực, certbot (chứng chỉ Let's Encrypt qua DNS Cloudflare) và WireGuard (VPN vào database).
 Hướng dẫn từng bước: [`deploy/README.md`](deploy/README.md).
 

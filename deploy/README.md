@@ -3,17 +3,18 @@
 Toàn bộ stack chạy bằng một file `docker-compose.yml` ở gốc repo này.
 
 ```
-Người đọc ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ /  /admin/   tệp tĩnh (React)
-                                                                    └─▶ /api/        api:4000 ─▶ mongo:27017
-Bạn (Compass/mongosh) ─▶ WireGuard UDP :51820 ─────────────────────────────────▶ mongo 172.30.0.10:27017
+Người đọc ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ antblog.xyz          trang đọc (tĩnh)
+                                                                    ├─▶ admin.antblog.xyz    trang quản trị (tĩnh)
+                                                                    └─▶ <cả hai>/api/        api:4000 ─▶ mongo:27017
+Bạn (Compass/mongosh) ─▶ WireGuard UDP :51820 (vpn.antblog.xyz) ──────────────▶ mongo 172.30.0.10:27017
 ```
 
 | Container | Vai trò | Mở ra ngoài |
 |---|---|---|
-| `nginx` | Cổng vào duy nhất. `/` trang đọc, `/admin/` trang quản trị, `/api/` proxy tới API (giống proxy của Vite khi dev). Port 80 chỉ chuyển hướng sang HTTPS | TCP 80, 443 |
+| `nginx` | Cổng vào duy nhất. `antblog.xyz` trang đọc, `admin.antblog.xyz` trang quản trị; `/api/` ở cả hai tên miền proxy tới API (giống proxy của Vite khi dev). Port 80 chỉ chuyển hướng sang HTTPS; host lạ hoặc gọi thẳng IP bị đóng kết nối | TCP 80, 443 |
 | `api` | Express. Chỉ nghe trong mạng nội bộ | không |
 | `mongo` | MongoDB 8.0, **bật xác thực**, 3 tài khoản (root, ứng dụng, chỉ-đọc) | không |
-| `certbot` | Xin + tự gia hạn chứng chỉ Let's Encrypt bằng DNS-01 qua API Cloudflare | không |
+| `certbot` | Xin + tự gia hạn MỘT chứng chỉ Let's Encrypt cho cả `antblog.xyz` và `admin.antblog.xyz`, bằng DNS-01 qua API Cloudflare | không |
 | `wireguard` | VPN để bạn kết nối thẳng vào MongoDB | UDP 51820 |
 | `seed` | Chạy tay để nạp nội dung mẫu + tài khoản quản trị (`profiles: tools`) | không |
 
@@ -34,11 +35,20 @@ cd tech-blog
 
 ## 2. Chuẩn bị Cloudflare
 
-1. **DNS:** bản ghi `A` (và `AAAA` nếu có IPv6) cho tên miền blog (vd `blog.example.com`) trỏ về IP server, **bật proxy** (đám mây cam).
-2. **VPN:** WireGuard dùng UDP mà Cloudflare không chuyển tiếp. Dùng thẳng IP server, hoặc tạo bản ghi riêng (vd `vpn.example.com`) **tắt proxy** (đám mây xám). Giá trị này đặt vào `WG_SERVER_URL`.
+1. **DNS** của zone `antblog.xyz`:
+
+   | Loại | Tên | Trỏ tới | Proxy |
+   |---|---|---|---|
+   | A | `antblog.xyz` (`@`) | IP server | **Bật** (đám mây cam) |
+   | A | `admin` | IP server | **Bật** (đám mây cam) |
+   | A | `vpn` | IP server | **Tắt** (đám mây xám) |
+
+   (Thêm `AAAA` tương ứng nếu server có IPv6.)
+2. **VPN:** WireGuard dùng UDP mà Cloudflare không chuyển tiếp, nên `vpn.antblog.xyz` phải tắt proxy. Đặt `WG_SERVER_URL=vpn.antblog.xyz` (hoặc IP server). Lưu ý bản ghi này làm lộ IP thật của server — muốn giấu thì dùng thẳng IP và không tạo bản ghi `vpn`.
 3. **SSL/TLS › Overview:** chọn **Full (strict)**. Không dùng "Flexible": Cloudflare sẽ gọi vào port 80, nginx chuyển hướng sang HTTPS ⇒ vòng lặp chuyển hướng.
-4. **API token** (My Profile › API Tokens › Create Token › mẫu "Edit zone DNS"): quyền **Zone › DNS › Edit**, Zone Resources = đúng zone của tên miền. Dán vào `CF_API_TOKEN`.
+4. **API token** (My Profile › API Tokens › Create Token › mẫu "Edit zone DNS"): quyền **Zone › DNS › Edit**, Zone Resources = zone `antblog.xyz`. Dán vào `CF_API_TOKEN`.
 5. Tuỳ chọn, nên bật: SSL/TLS › Edge Certificates › **Always Use HTTPS**, và HSTS sau khi đã chạy ổn.
+6. Tuỳ chọn, nên làm cho trang quản trị: **Zero Trust › Access** tạo ứng dụng cho `admin.antblog.xyz`, chỉ cho email của bạn — người lạ bị chặn ở Cloudflare trước khi tới form đăng nhập. Ứng dụng Access phủ luôn `admin.antblog.xyz/api/*` là đúng, vì trang quản trị gọi API trên chính tên miền đó; trang đọc ở `antblog.xyz` không bị ảnh hưởng.
 
 Chứng chỉ ở server được xin bằng **thử thách DNS-01**: certbot tạo bản ghi TXT tạm qua API Cloudflare, nên chạy được dù tên miền đang bật proxy và không cần mở cổng nào cho Let's Encrypt.
 
@@ -52,13 +62,14 @@ Script chép `.env.example` thành `.env` (quyền 600) và **tự sinh** `JWT_S
 
 | Biến | Ví dụ |
 |---|---|
-| `DOMAIN` | `blog.example.com` |
-| `CERT_EXTRA_DOMAINS` | `www.blog.example.com` (tuỳ chọn) |
+| `DOMAIN` | `antblog.xyz` (đã điền sẵn) |
+| `ADMIN_DOMAIN` | `admin.antblog.xyz` (đã điền sẵn) |
+| `CERT_EXTRA_DOMAINS` | `www.antblog.xyz` (tuỳ chọn — nhớ tạo cả bản ghi DNS) |
 | `ACME_EMAIL` | email nhận cảnh báo hết hạn |
 | `CF_API_TOKEN` | token ở bước 2.4 |
-| `WG_SERVER_URL` | IP server hoặc `vpn.example.com` (đám mây xám) |
+| `WG_SERVER_URL` | `vpn.antblog.xyz` (đã điền sẵn) hoặc IP server |
 | `WG_PEERS` | tên máy khách VPN, vd `laptop,desktop` |
-| `SEED_ADMIN_EMAIL` | email đăng nhập trang quản trị |
+| `SEED_ADMIN_EMAIL` | email đăng nhập trang quản trị (mặc định `admin@antblog.xyz`) |
 
 Lần đầu nên đặt `ACME_STAGING=1` để thử luồng xin chứng chỉ mà không dính giới hạn tần suất của Let's Encrypt. Chạy ổn thì đổi về `0`, xoá chứng chỉ staging (`docker compose run --rm --entrypoint sh certbot -c 'rm -rf /etc/letsencrypt/live /etc/letsencrypt/archive /etc/letsencrypt/renewal'`) rồi `docker compose up -d certbot`.
 
@@ -70,7 +81,8 @@ docker compose ps                    # mọi dịch vụ "healthy"/"running"
 docker compose run --rm seed         # nạp chủ đề, bài viết, lộ trình + tài khoản quản trị
 ```
 
-- Trang đọc: `https://<DOMAIN>/` · Quản trị: `https://<DOMAIN>/admin/` (email `SEED_ADMIN_EMAIL`, mật khẩu `SEED_ADMIN_PASSWORD` trong `.env`).
+- Trang đọc: `https://antblog.xyz/` · Quản trị: `https://admin.antblog.xyz/` (email `SEED_ADMIN_EMAIL`, mật khẩu `SEED_ADMIN_PASSWORD` trong `.env`).
+- Đăng nhập ở hai tên miền là hai phiên riêng (cookie gắn theo từng tên miền): đăng nhập trang quản trị không làm bạn đăng nhập ở trang đọc và ngược lại.
 - Trong vài phút đầu nginx dùng **chứng chỉ tự ký tạm**: Cloudflare ở chế độ Full (strict) sẽ báo lỗi 526. Khi certbot xin xong (log `certbot: đã có chứng chỉ…`), nginx tự nạp chứng chỉ thật trong ≤ 5 phút.
 
 ```bash

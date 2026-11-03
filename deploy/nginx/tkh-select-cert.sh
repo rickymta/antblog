@@ -17,7 +17,7 @@ else
   if [ ! -s "$SELF_DIR/fullchain.pem" ]; then
     mkdir -p "$SELF_DIR"
     openssl req -x509 -nodes -newkey rsa:2048 -days 30 \
-      -subj "/CN=${DOMAIN}" -addext "subjectAltName=DNS:${DOMAIN}" \
+      -subj "/CN=${DOMAIN}" -addext "subjectAltName=DNS:${DOMAIN}${ADMIN_DOMAIN:+,DNS:${ADMIN_DOMAIN}}" \
       -keyout "$SELF_DIR/privkey.pem" -out "$SELF_DIR/fullchain.pem" >/dev/null 2>&1
     chmod 600 "$SELF_DIR/privkey.pem"
   fi
