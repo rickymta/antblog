@@ -1,4 +1,4 @@
-// Kiểu dữ liệu theo docs/api-contract.md — đổi hợp đồng thì sửa cả hai nơi (và bản chép ở repo tech-blog-api).
+// Kiểu dữ liệu theo docs/api-contract.md — đổi hợp đồng thì sửa cả file đó và code api/ trong cùng commit.
 
 export type Locale = 'vi' | 'en';
 export type Localized = { vi: string; en: string };

@@ -1,8 +1,9 @@
-# tech-blog-api — API cho Tech Knowledge Hub
+# api/ — API cho Tech Knowledge Hub
 
-Backend Express 5 + MongoDB (mongoose 8) cho blog kỹ thuật riêng **Tech Knowledge Hub**. Hợp đồng API (nguồn sự thật duy nhất):
-[`docs/api-contract.md`](docs/api-contract.md). Frontend (monorepo `tech-blog`) gọi qua proxy Vite `/api` → `http://127.0.0.1:4000`
-nên cùng origin — API **không bật CORS**.
+Backend Express 5 + MongoDB (mongoose 8) cho blog kỹ thuật **Tech Knowledge Hub**. Hợp đồng API (nguồn sự thật duy nhất):
+[`../docs/api-contract.md`](../docs/api-contract.md). Frontend (`apps/web`, `apps/admin`) gọi qua proxy Vite `/api` → `http://127.0.0.1:4000`
+khi dev và qua nginx khi chạy Docker, nên cùng origin — API **không bật CORS**. Thư mục này có `package.json`/`package-lock.json`
+riêng (không thuộc npm workspaces của gốc repo): chạy lệnh npm **trong `api/`**.
 
 ## Yêu cầu
 
@@ -24,7 +25,9 @@ npm run dev                 # http://127.0.0.1:4000/api/v1
 
 | Biến | Ý nghĩa |
 |---|---|
-| `NODE_ENV` | `production` ⇒ cookie có cờ `Secure` |
+| `NODE_ENV` | `production` ⇒ cookie có cờ `Secure` (trừ khi `COOKIE_SECURE=false`) |
+| `COOKIE_SECURE` | Ghi đè cờ `Secure` của cookie (`true`/`false`) |
+| `TRUST_PROXY` | `trust proxy` của Express — mặc định `loopback` (proxy Vite); Docker đặt subnet mạng compose |
 | `HOST` | Địa chỉ nghe, mặc định `127.0.0.1` (chỉ máy cục bộ) |
 | `PORT` | Cổng, mặc định `4000` |
 | `MONGODB_URI` | Ví dụ `mongodb://127.0.0.1:27017/tech_knowledge_hub` |

@@ -1,10 +1,10 @@
 # Hợp đồng API — Tech Knowledge Hub
 
-Nguồn sự thật DUY NHẤT giữa hai repo:
-- Frontend monorepo `H:\Work\tech-blog` (apps/web, apps/admin, packages/*) — kiểu TypeScript tương ứng ở `packages/shared/src/types.ts`.
-- Backend `H:\Work\tech-blog-api` (Express + MongoDB) — bản chép của file này ở `docs/api-contract.md`.
+Nguồn sự thật DUY NHẤT giữa frontend và API trong repo này:
+- Frontend (`apps/web`, `apps/admin`, `packages/*`) — kiểu TypeScript tương ứng ở `packages/shared/src/types.ts`.
+- Backend `api/` (Express + MongoDB).
 
-Đổi hợp đồng ⇒ sửa file này ở CẢ HAI repo + `packages/shared/src/types.ts` trong cùng đợt.
+Đổi hợp đồng ⇒ sửa file này + `packages/shared/src/types.ts` + code `api/` trong cùng một commit.
 
 ## 0. Quy ước chung
 

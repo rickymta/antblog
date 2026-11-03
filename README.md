@@ -1,39 +1,41 @@
-# Tech Knowledge Hub — frontend
+# Tech Knowledge Hub (antblog)
 
 Blog chia sẻ kiến thức kỹ thuật từ cơ bản tới nâng cao: database, ngôn ngữ lập trình, design pattern, architecture pattern. Mọi ví dụ dùng chung dự án mẫu hư cấu **Tới Nơi** (đặt xe + giao hàng).
 
-> Dự án chạy riêng trên máy này, **chưa công khai**: dev server chỉ nghe `127.0.0.1`, trang có `noindex`, git không có remote.
+- Trang đọc: `https://antblog.xyz` · Quản trị: `https://admin.antblog.xyz`
+- Trang có `noindex` (chặn máy tìm kiếm) cho tới khi quyết định mở công khai.
 
-## Hai repo
+## Cấu trúc
 
-| Repo | Nội dung |
+| Thư mục | Nội dung |
 |---|---|
-| `H:\Work\tech-blog` (repo này) | Monorepo frontend: `apps/web` (trang đọc), `apps/admin` (quản trị), `packages/shared` (kiểu dữ liệu + client API + định dạng), `packages/ui` (theme Tailwind, bộ hiển thị bài viết, component dùng chung) |
-| `H:\Work\tech-blog-api` | API Express + MongoDB, seed nội dung |
+| `apps/web` | Trang đọc (React + Vite) |
+| `apps/admin` | Trang quản trị (React + Vite) |
+| `packages/shared` | Kiểu dữ liệu + client API + định dạng, dùng chung hai app |
+| `packages/ui` | Theme Tailwind, bộ hiển thị bài viết, component dùng chung |
+| `api` | API Express + MongoDB, seed nội dung — `package.json` riêng, không thuộc npm workspaces |
+| `deploy` | nginx, certbot, MongoDB init, WireGuard, script sinh `.env` |
+| `docs` | [`api-contract.md`](docs/api-contract.md) (hợp đồng frontend ↔ API), [`ui-guide.md`](docs/ui-guide.md) (hướng giao diện) |
 
-Hợp đồng giữa hai repo: [`docs/api-contract.md`](docs/api-contract.md) (bản chép ở repo API). Hướng giao diện tổng hợp từ ảnh mẫu: [`docs/ui-guide.md`](docs/ui-guide.md).
+## Chạy trên máy (dev)
 
-## Chạy trên máy
-
-Yêu cầu: Node ≥ 22.12, MongoDB đang chạy ở `127.0.0.1:27017` (service Windows `MongoDB`).
+Yêu cầu: Node ≥ 22.12, MongoDB đang chạy ở `127.0.0.1:27017`.
 
 ```bash
 # 1. API (cửa sổ 1)
-cd H:/Work/tech-blog-api
+cd api
 npm install
-npm run seed        # chủ đề, bài viết, lộ trình, tài khoản quản trị (đọc .env)
-npm run dev         # http://127.0.0.1:4000
+cp .env.example .env   # điền JWT_SECRET, SEED_ADMIN_PASSWORD ngẫu nhiên
+npm run seed           # chủ đề, bài viết, lộ trình, tài khoản quản trị
+npm run dev            # http://127.0.0.1:4000
 
-# 2. Frontend (cửa sổ 2, 3)
-cd H:/Work/tech-blog
+# 2. Frontend (cửa sổ 2, 3) — ở gốc repo
 npm install
-npm run dev:web     # trang đọc   http://127.0.0.1:5173
-npm run dev:admin   # quản trị    http://127.0.0.1:5174
+npm run dev:web        # trang đọc   http://127.0.0.1:5173
+npm run dev:admin      # quản trị    http://127.0.0.1:5174
 ```
 
-Cả hai app gọi API qua proxy Vite (`/api` → `127.0.0.1:4000`), nên cookie đăng nhập dùng chung và không cần CORS. Đổi địa chỉ API: biến môi trường `TKH_API_URL`.
-
-Tài khoản quản trị nằm trong `H:\Work\tech-blog-api\.env` (`SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`).
+Cả hai app gọi API qua proxy Vite (`/api` → `127.0.0.1:4000`), nên cookie đăng nhập cùng origin và không cần CORS. Đổi địa chỉ API: biến môi trường `TKH_API_URL`.
 
 ## Triển khai lên server (Docker)
 
@@ -44,8 +46,8 @@ Hướng dẫn từng bước: [`deploy/README.md`](deploy/README.md).
 ## Kiểm tra trước khi commit
 
 ```bash
-npm run typecheck
-npm run build
+npm run typecheck && npm run build          # frontend, ở gốc repo
+cd api && npm run typecheck && npm test     # API (cần MongoDB cục bộ)
 ```
 
 ## Quy ước
@@ -55,3 +57,4 @@ npm run build
 - Nội dung bài viết render bằng `ArticleContent` của `@tkh/ui` ở CẢ trang đọc và bản xem trước quản trị. Bình luận của người đọc luôn hiển thị dạng văn bản thuần.
 - Hình minh hoạ trong bài là SVG viết tay dùng bộ lớp cố định trong `packages/ui/src/article.css` (phys = lớp vật lý, pk = lớp ứng dụng nhìn thấy, warn = chỗ phải trả giá, dead = đã chết).
 - Ví dụ trong bài luôn lấy từ dự án mẫu Tới Nơi; không đưa thông tin của dự án/công ty thật nào vào blog.
+- Đổi hợp đồng API ⇒ sửa `docs/api-contract.md`, `packages/shared/src/types.ts` và `api/` trong cùng một commit.

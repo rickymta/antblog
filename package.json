@@ -1,7 +1,7 @@
 {
   "name": "tech-knowledge-hub",
   "private": true,
-  "description": "Frontend monorepo của Tech Knowledge Hub — trang đọc (apps/web) và quản trị (apps/admin). Chạy riêng trên máy, chưa công khai.",
+  "description": "Tech Knowledge Hub — trang đọc (apps/web), quản trị (apps/admin) và API (api/, npm riêng).",
   "workspaces": [
     "apps/*",
     "packages/*"

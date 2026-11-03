@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// Chỉ nghe trên máy này. /api đi qua proxy tới tech-blog-api để cookie phiên cùng origin.
+// Chỉ nghe trên máy này. /api đi qua proxy tới API (thư mục api/) để cookie phiên cùng origin.
 // Bản Docker build với TKH_ADMIN_BASE=/admin/ (nginx phục vụ trang quản trị dưới /admin/).
 export default defineConfig({
   base: process.env.TKH_ADMIN_BASE ?? '/',

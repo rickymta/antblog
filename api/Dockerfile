@@ -1,4 +1,4 @@
-# API Tech Knowledge Hub — build từ thư mục gốc repo tech-blog-api.
+# API Tech Knowledge Hub — build context là thư mục api/ (docker-compose.yml ở gốc repo).
 # Stage `tools` (có devDependencies + seed) dùng cho `docker compose run --rm seed`.
 # Stage `runtime` (chỉ dependencies chạy) là ảnh API thật.
 

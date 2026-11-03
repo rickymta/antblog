@@ -5,7 +5,7 @@
 #                                                                     └─▶ <cả hai>/api/  ─▶ api:4000 ─▶ mongo:27017
 #   Máy quản trị ─▶ WireGuard UDP :51820 ─▶ mongo 172.30.0.10:27017   (chỉ DB, không qua Cloudflare)
 #
-# Hai repo đặt cạnh nhau trên server:  <thư mục>/tech-blog (repo này)  và  <thư mục>/tech-blog-api
+# Một repo: frontend ở apps/ + packages/, API ở api/.
 # Lần đầu:  sh deploy/init-env.sh  → sửa .env  → docker compose up -d --build  → docker compose run --rm seed
 # Chi tiết: deploy/README.md
 
@@ -44,7 +44,7 @@ services:
 
   api:
     build:
-      context: ${API_DIR:-../tech-blog-api}
+      context: ${API_DIR:-./api}
       target: runtime
     image: tkh-api:local
     restart: unless-stopped
@@ -70,7 +70,7 @@ services:
   seed:
     profiles: ["tools"]
     build:
-      context: ${API_DIR:-../tech-blog-api}
+      context: ${API_DIR:-./api}
       target: tools
     image: tkh-api-tools:local
     depends_on:

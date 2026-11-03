@@ -22,16 +22,12 @@ Bạn (Compass/mongosh) ─▶ WireGuard UDP :51820 (vpn.antblog.xyz) ───�
 
 - Linux có Docker Engine + Docker Compose v2 (`docker compose version`). Kernel ≥ 5.6 (có sẵn WireGuard).
 - Tường lửa mở: TCP 80, TCP 443, UDP 51820. **Không** mở 27017.
-- Hai repo đặt cạnh nhau:
+- Lấy mã nguồn (một repo gồm cả frontend và API):
 
 ```bash
-mkdir -p /srv/tkh && cd /srv/tkh
-git clone <repo tech-blog>      tech-blog
-git clone <repo tech-blog-api>  tech-blog-api
-cd tech-blog
+git clone https://github.com/rickymta/antblog.git /srv/antblog
+cd /srv/antblog
 ```
-
-(Repo API ở chỗ khác ⇒ đặt `API_DIR` trong `.env`.)
 
 ## 2. Chuẩn bị Cloudflare
 
@@ -124,7 +120,7 @@ Thêm máy khách: thêm tên vào `WG_PEERS` rồi `docker compose up -d wiregu
 
 | Việc | Lệnh |
 |---|---|
-| Cập nhật code | `git pull` ở cả hai repo ⇒ `docker compose up -d --build` |
+| Cập nhật code | `git pull` ⇒ `docker compose up -d --build` |
 | Xem log | `docker compose logs -f api nginx` |
 | Sao lưu DB | `docker compose exec mongo sh -c 'mongodump --archive --gzip -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db tech_knowledge_hub' > backup-$(date +%F).archive.gz` |
 | Khôi phục | `docker compose exec -T mongo sh -c 'mongorestore --archive --gzip --drop -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin' < backup-....archive.gz` |
