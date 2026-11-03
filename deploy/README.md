@@ -62,7 +62,7 @@ Script chép `.env.example` thành `.env` (quyền 600) và **tự sinh** `JWT_S
 | `ADMIN_DOMAIN` | `admin.antblog.xyz` (đã điền sẵn) |
 | `CERT_EXTRA_DOMAINS` | `www.antblog.xyz` (tuỳ chọn — nhớ tạo cả bản ghi DNS) |
 | `ACME_EMAIL` | email nhận cảnh báo hết hạn |
-| `CF_API_TOKEN` | token ở bước 2.4 |
+| `CF_API_TOKEN` | token ở bước 2.4 — để trống được khi domain chưa chuyển sang Cloudflare: certbot nằm chờ, nginx dùng chứng chỉ tự ký |
 | `WG_SERVER_URL` | `vpn.antblog.xyz` (đã điền sẵn) hoặc IP server |
 | `WG_PEERS` | tên máy khách VPN, vd `laptop,desktop` |
 | `SEED_ADMIN_EMAIL` | email đăng nhập trang quản trị (mặc định `admin@antblog.xyz`) |

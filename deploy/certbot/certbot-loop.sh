@@ -6,8 +6,14 @@
 set -eu
 
 : "${DOMAIN:?Thiếu biến DOMAIN}"
-: "${ACME_EMAIL:?Thiếu biến ACME_EMAIL}"
-: "${CF_API_TOKEN:?Thiếu biến CF_API_TOKEN}"
+
+# Chưa có token/email (vd domain chưa chuyển sang Cloudflare): KHÔNG thoát — thoát thì restart policy chạy lại
+# liên tục. Nằm chờ tới khi điền .env rồi `docker compose up -d certbot` (tạo lại container với biến mới).
+if [ -z "${CF_API_TOKEN:-}" ] || [ -z "${ACME_EMAIL:-}" ]; then
+  echo "certbot: chưa có CF_API_TOKEN hoặc ACME_EMAIL trong .env — tạm dừng. nginx vẫn chạy với chứng chỉ tự ký." >&2
+  echo "certbot: điền đủ rồi chạy: docker compose up -d certbot" >&2
+  while :; do sleep 86400; done
+fi
 
 umask 077
 CREDS=/tmp/cloudflare.ini

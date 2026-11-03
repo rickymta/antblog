@@ -123,8 +123,9 @@ services:
       DOMAIN: ${DOMAIN:?}
       ADMIN_DOMAIN: ${ADMIN_DOMAIN:?}
       CERT_EXTRA_DOMAINS: ${CERT_EXTRA_DOMAINS:-}
-      ACME_EMAIL: ${ACME_EMAIL:?Đặt ACME_EMAIL trong .env}
-      CF_API_TOKEN: ${CF_API_TOKEN:?Đặt CF_API_TOKEN trong .env}
+      # Để trống được: certbot sẽ nằm chờ (nginx dùng chứng chỉ tự ký) tới khi điền đủ.
+      ACME_EMAIL: ${ACME_EMAIL:-}
+      CF_API_TOKEN: ${CF_API_TOKEN:-}
       ACME_STAGING: ${ACME_STAGING:-0}
     volumes:
       - letsencrypt:/etc/letsencrypt
