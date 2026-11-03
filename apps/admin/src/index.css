@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "@tkh/ui/theme.css";
+@import "@tkh/ui/article.css";
+@source "../../../packages/ui/src";
+
+/*
+ * Màu biểu đồ trang Tổng quan. primary/secondary quá gần nhau để làm hai đường cùng một biểu đồ
+ * (lệch màu ΔE 6,6 — người mù màu không phân biệt được), nên đường thứ hai/ba dùng teal/cam;
+ * secondary dành cho biểu đồ cột bình luận (một chuỗi). Đã chạy bộ kiểm bảng màu cho cả hai theme.
+ */
+:root {
+  --chart-views: #2563eb;
+  --chart-visits: #0d9488;
+  --chart-unique: #c2410c;
+  --chart-comments: #6366f1;
+}
+.dark {
+  --chart-views: #3b82f6;
+  --chart-visits: #0d9488;
+  --chart-unique: #ea580c;
+  --chart-comments: #818cf8;
+}
+
+/* <dialog> mặc định có màu chữ/nền của trình duyệt — để thành phần tự đặt. */
+dialog {
+  color: inherit;
+}

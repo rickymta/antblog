@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@import "@tkh/ui/theme.css";
+@import "@tkh/ui/article.css";
+@source "../../../packages/ui/src";
+
+/* Chừa chỗ cho nút "Sao chép" (lớp phủ CodeCopyOverlay) ở góc trên phải mỗi khối mã của trang đọc. */
+.tkh-article-body .tkh-prose pre {
+  padding-top: 1.5rem; /* + 1em đệm của code.hljs ≈ 40px — đủ cho nút cao ~28px */
+}
+
+/* Đường nét đứt "chạy" trên sơ đồ lộ trình ở hero — tắt hẳn khi người dùng giảm chuyển động. */
+@keyframes tkh-dash-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.tkh-dash-flow {
+  animation: tkh-dash-flow 1.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tkh-dash-flow {
+    animation: none;
+  }
+}

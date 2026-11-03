@@ -1,0 +1,151 @@
+/*
+ * Kiểu nội dung bài viết (Markdown đã render) — dùng chung cho trang đọc và bản xem trước ở trang quản trị.
+ * Bọc nội dung trong `.tkh-prose`. Khối mã luôn nền tối (docs/ui-guide.md §6).
+ *
+ * Hình SVG trong bài dùng bộ lớp cố định (giữ nguyên tên — nội dung seed đã viết theo bộ lớp này):
+ *   khung:  <figure class="tkh-fig"><div class="tkh-fig-box"><svg …/></div><figcaption>…</figcaption></figure>
+ *   chữ:    t-mono t-small t-b t-big t-10 t-phys t-pk t-warn t-dead
+ *   tô:     f-surface f-bg f-phys-soft f-pk-soft f-warn-soft f-phys f-pk f-warn f-muted f-dead f-none
+ *   viền:   s-line s-muted s-phys s-pk s-warn s-dead dash
+ * Ý nghĩa màu cố định cả loạt bài: phys = lớp vật lý/lưu trữ thật, pk = lớp ứng dụng nhìn thấy,
+ * warn = chỗ phải trả giá, dead = đã chết/không còn dùng.
+ */
+.tkh-prose {
+  --fig-phys: #0F766E;
+  --fig-phys-soft: #CCFBF1;
+  --fig-pk: #2563EB;
+  --fig-pk-soft: #DBEAFE;
+  --fig-warn: #B45309;
+  --fig-warn-soft: #FEF3C7;
+  --fig-dead: #94A3B8;
+  --code-inline-bg: #F1F5F9;
+
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--tkh-ink);
+  min-width: 0;
+}
+.dark .tkh-prose {
+  --fig-phys: #2DD4BF;
+  --fig-phys-soft: #134E4A;
+  --fig-pk: #60A5FA;
+  --fig-pk-soft: #1E3A8A;
+  --fig-warn: #FBBF24;
+  --fig-warn-soft: #422006;
+  --fig-dead: #64748B;
+  --code-inline-bg: #0F172A;
+}
+
+.tkh-prose > * + * { margin-top: 1.1em; }
+.tkh-prose h2, .tkh-prose h3, .tkh-prose h4 {
+  font-weight: 700;
+  line-height: 1.3;
+  text-wrap: balance;
+  scroll-margin-top: 88px;
+}
+.tkh-prose h2 { font-size: 1.6rem; margin-top: 2.2em; letter-spacing: -0.01em; }
+.tkh-prose h3 { font-size: 1.25rem; margin-top: 1.8em; }
+.tkh-prose h4 { font-size: 1.05rem; margin-top: 1.5em; }
+.tkh-prose p, .tkh-prose ul, .tkh-prose ol, .tkh-prose blockquote { max-width: 72ch; }
+.tkh-prose a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 3px; }
+.tkh-prose strong { font-weight: 650; }
+.tkh-prose ul, .tkh-prose ol { padding-left: 1.4em; }
+.tkh-prose ul { list-style: disc; }
+.tkh-prose ol { list-style: decimal; }
+.tkh-prose li + li { margin-top: 0.35em; }
+.tkh-prose blockquote {
+  border-left: 4px solid var(--color-primary);
+  background: var(--tkh-primary-soft);
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  padding: 0.8em 1.1em;
+}
+.tkh-prose hr { border: 0; border-top: 1px solid var(--tkh-line); margin: 2em 0; }
+
+.tkh-prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--code-inline-bg);
+  border: 1px solid var(--tkh-line);
+  border-radius: 6px;
+  padding: 0.08em 0.38em;
+  overflow-wrap: anywhere;
+}
+.tkh-prose pre {
+  background: #0B1220;
+  color: #E2E8F0;
+  border-radius: var(--radius-card);
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  border: 1px solid #1E293B;
+}
+.tkh-prose pre code { font-family: var(--font-mono); background: transparent; }
+
+.tkh-prose table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+.tkh-prose .tkh-table, .tkh-prose > table {
+  display: block;
+  overflow-x: auto;
+  border: 1px solid var(--tkh-line);
+  border-radius: var(--radius-card);
+}
+.tkh-prose th, .tkh-prose td { text-align: left; vertical-align: top; padding: 0.6em 0.9em; border-bottom: 1px solid var(--tkh-line); }
+.tkh-prose thead th { background: var(--tkh-surface-2); font-weight: 600; }
+.tkh-prose tbody tr:last-child td { border-bottom: 0; }
+
+/* Hình SVG */
+.tkh-fig { margin: 1.6em 0; display: grid; gap: 0.6em; }
+.tkh-fig-box {
+  background: var(--tkh-surface);
+  border: 1px solid var(--tkh-line);
+  border-radius: var(--radius-card);
+  overflow-x: auto;
+  padding: 8px;
+}
+.tkh-fig-box svg { display: block; width: 100%; min-width: 720px; height: auto; }
+.tkh-fig figcaption { font-size: 0.875rem; color: var(--tkh-muted); line-height: 1.6; }
+.tkh-fig figcaption b { color: var(--tkh-ink); font-weight: 600; }
+
+.tkh-fig svg text { font-family: var(--font-sans); font-size: 12px; fill: var(--tkh-ink); }
+.tkh-fig svg .t-mono { font-family: var(--font-mono); font-size: 11px; }
+.tkh-fig svg .t-small { font-size: 11px; fill: var(--tkh-muted); }
+.tkh-fig svg .t-b { font-weight: 600; }
+.tkh-fig svg .t-big { font-family: var(--font-mono); font-size: 26px; font-weight: 600; }
+.tkh-fig svg .t-10 { font-size: 10.5px; }
+.tkh-fig svg .t-phys { fill: var(--fig-phys); }
+.tkh-fig svg .t-pk { fill: var(--fig-pk); }
+.tkh-fig svg .t-warn { fill: var(--fig-warn); }
+.tkh-fig svg .t-dead { fill: var(--fig-dead); }
+.tkh-fig .f-surface { fill: var(--tkh-surface); }
+.tkh-fig .f-bg { fill: var(--tkh-page); }
+.tkh-fig .f-phys-soft { fill: var(--fig-phys-soft); }
+.tkh-fig .f-pk-soft { fill: var(--fig-pk-soft); }
+.tkh-fig .f-warn-soft { fill: var(--fig-warn-soft); }
+.tkh-fig .f-phys { fill: var(--fig-phys); }
+.tkh-fig .f-pk { fill: var(--fig-pk); }
+.tkh-fig .f-warn { fill: var(--fig-warn); }
+.tkh-fig .f-muted { fill: var(--tkh-muted); }
+.tkh-fig .f-dead { fill: var(--fig-dead); }
+.tkh-fig .f-none { fill: none; }
+.tkh-fig .s-line { stroke: var(--tkh-line); }
+.tkh-fig .s-muted { stroke: var(--tkh-muted); }
+.tkh-fig .s-phys { stroke: var(--fig-phys); }
+.tkh-fig .s-pk { stroke: var(--fig-pk); }
+.tkh-fig .s-warn { stroke: var(--fig-warn); }
+.tkh-fig .s-dead { stroke: var(--fig-dead); }
+.tkh-fig .dash { stroke-dasharray: 5 4; }
+
+/* Khối ghi chú trong bài: <div class="tkh-callout">, biến thể tkh-callout--warn / --example */
+.tkh-prose .tkh-callout {
+  border: 1px solid var(--tkh-line);
+  border-left: 4px solid var(--color-primary);
+  background: var(--tkh-surface);
+  border-radius: var(--radius-card);
+  padding: 0.9em 1.1em;
+  max-width: 76ch;
+}
+.tkh-prose .tkh-callout--warn { border-left-color: var(--fig-warn); }
+.tkh-prose .tkh-callout--example { border-left-color: var(--color-secondary); }
+.tkh-prose .tkh-callout > :first-child { margin-top: 0; }
+.tkh-prose .tkh-callout > * + * { margin-top: 0.6em; }
+.tkh-prose .tkh-callout-title { font-weight: 650; display: block; }

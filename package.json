@@ -1,0 +1,25 @@
+{
+  "name": "tech-knowledge-hub",
+  "private": true,
+  "description": "Frontend monorepo của Tech Knowledge Hub — trang đọc (apps/web) và quản trị (apps/admin). Chạy riêng trên máy, chưa công khai.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @tkh/web",
+    "dev:admin": "npm run dev -w @tkh/admin",
+    "build": "npm run build -w @tkh/web && npm run build -w @tkh/admin",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "5.2.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
