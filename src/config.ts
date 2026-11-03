@@ -15,6 +15,25 @@ export interface Config {
   port: number;
   mongoUri: string;
   jwtSecret: string;
+  /**
+   * Cookie phiên/khách có cờ Secure. Mặc định = production; chạy HTTP thuần (nginx port 80) phải đặt
+   * COOKIE_SECURE=false, nếu không trình duyệt bỏ cookie và không ai đăng nhập được.
+   */
+  cookieSecure: boolean;
+  /** Giá trị `trust proxy` của Express — để rate limit tính theo IP thật của người dùng khi đứng sau nginx. */
+  trustProxy: boolean | number | string;
+}
+
+function parseBool(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined || value === '') return fallback;
+  return value === 'true' || value === '1';
+}
+
+/** TRUST_PROXY: `true`/`false`, số hop (`1`), hoặc danh sách địa chỉ/subnet (`loopback`, `172.30.0.0/24`). */
+function parseTrustProxy(value: string | undefined): boolean | number | string {
+  if (value === undefined || value === '') return 'loopback';
+  if (value === 'true' || value === 'false') return value === 'true';
+  return /^\d+$/.test(value) ? Number(value) : value;
 }
 
 let cached: Config | undefined;
@@ -32,6 +51,8 @@ export function getConfig(): Config {
     port: Number(process.env.PORT ?? 4000),
     mongoUri: required('MONGODB_URI'),
     jwtSecret,
+    cookieSecure: parseBool(process.env.COOKIE_SECURE, nodeEnv === 'production'),
+    trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
   };
   return cached;
 }

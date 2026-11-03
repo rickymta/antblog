@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
+import { getConfig } from './config.js';
 import './lib/validate.js';
 import { loadUser } from './middleware/auth.js';
 import {
@@ -26,8 +27,9 @@ export interface AppOptions {
 
 export function createApp(options: AppOptions = {}): Express {
   const app = express();
-  // API chỉ nghe trên 127.0.0.1, request đi qua proxy Vite cục bộ ⇒ tin X-Forwarded-For từ loopback.
-  app.set('trust proxy', 'loopback');
+  // Máy dev: request đi qua proxy Vite cục bộ ⇒ tin X-Forwarded-For từ loopback (mặc định).
+  // Docker: đặt TRUST_PROXY = subnet của mạng compose để tin nginx.
+  app.set('trust proxy', getConfig().trustProxy);
   app.set('etag', false);
   app.use(helmet());
 

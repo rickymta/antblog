@@ -21,7 +21,7 @@ export const SESSION_COOKIE = 'tkh_session';
 const SESSION_MAX_AGE_MS = 7 * 24 * 3600 * 1000;
 
 function baseCookie(): CookieOptions {
-  return { httpOnly: true, sameSite: 'lax', path: '/', secure: getConfig().isProduction };
+  return { httpOnly: true, sameSite: 'lax', path: '/', secure: getConfig().cookieSecure };
 }
 
 export function setSessionCookie(res: Response, user: IUser): void {

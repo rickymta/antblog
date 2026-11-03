@@ -18,7 +18,7 @@ export function visitorCookie(req: Request, res: Response, next: NextFunction): 
       httpOnly: true,
       sameSite: 'lax',
       path: '/',
-      secure: getConfig().isProduction,
+      secure: getConfig().cookieSecure,
       maxAge: VISITOR_MAX_AGE_MS,
     });
   }
