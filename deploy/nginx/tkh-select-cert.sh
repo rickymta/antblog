@@ -2,7 +2,7 @@
 # Ghi /etc/nginx/tkh-ssl.conf trỏ tới chứng chỉ đang dùng:
 #   - Let's Encrypt (/etc/letsencrypt/live/$DOMAIN/) nếu certbot đã xin được;
 #   - ngược lại chứng chỉ tự ký tạm (tạo một lần) để nginx vẫn khởi động được.
-# In "changed" khi đổi nguồn chứng chỉ (vòng lặp reload dựa vào đó để nạp lại ngay).
+# In "changed" khi đổi nguồn hoặc nội dung chứng chỉ (vòng lặp reload dựa vào đó để nạp lại ngay).
 set -eu
 
 : "${DOMAIN:?Thiếu biến DOMAIN}"
@@ -25,7 +25,10 @@ else
   key="$SELF_DIR/privkey.pem"
 fi
 
-printf 'ssl_certificate %s;\nssl_certificate_key %s;\n' "$cert" "$key" > "$OUT.tmp"
+# Dòng cuối ghi dấu vân tay chứng chỉ: cùng đường dẫn mà nội dung đổi (staging → thật, vừa gia hạn)
+# thì tệp cũng đổi ⇒ vòng lặp nạp lại nginx ngay thay vì chờ mốc 6 giờ.
+fp=$(openssl x509 -in "$cert" -noout -fingerprint -sha256 2>/dev/null | cut -d= -f2 || true)
+printf 'ssl_certificate %s;\nssl_certificate_key %s;\n# sha256 %s\n' "$cert" "$key" "${fp:-?}" > "$OUT.tmp"
 if [ -f "$OUT" ] && cmp -s "$OUT.tmp" "$OUT"; then
   rm -f "$OUT.tmp"
 else
