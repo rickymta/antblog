@@ -8,3 +8,10 @@ dist/
 .DS_Store
 # Cấu hình WireGuard sinh trên server (chứa khoá bí mật)
 deploy/wireguard/config/
+
+# Phòng thí nghiệm kiểm thử (examples/): báo cáo sinh ra khi chạy
+coverage/
+reports/
+.stryker-tmp/
+test-results/
+playwright-report/

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tới Nơi — Đặt chuyến</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Tới Nơi</h1>
+    <p class="note">Bản lab kiểm thử · <a href="/driver.html">Trang tài xế</a></p>
+  </header>
+
+  <main>
+    <form id="quote-form" data-testid="quote-form" novalidate>
+      <fieldset>
+        <legend>Thông tin chuyến</legend>
+
+        <label for="customer-id">Mã khách hàng</label>
+        <input id="customer-id" name="customerId" value="C001" data-testid="customer-id" required>
+
+        <label for="kind">Dịch vụ</label>
+        <select id="kind" name="kind" data-testid="kind">
+          <option value="ride">Đặt xe</option>
+          <option value="parcel">Giao bưu kiện</option>
+          <option value="food">Giao đồ ăn</option>
+        </select>
+
+        <label for="city">Thành phố</label>
+        <select id="city" name="cityCode" data-testid="city">
+          <option value="SG">TP. Hồ Chí Minh</option>
+          <option value="HN">Hà Nội</option>
+          <option value="DN">Đà Nẵng</option>
+          <option value="HP">Hải Phòng</option>
+          <option value="CT">Cần Thơ</option>
+          <option value="NT">Nha Trang</option>
+        </select>
+
+        <label for="vehicle">Loại xe</label>
+        <select id="vehicle" name="vehicle" data-testid="vehicle">
+          <option value="bike">Xe máy</option>
+          <option value="car">Ô tô</option>
+        </select>
+
+        <label for="distance">Quãng đường (km)</label>
+        <input id="distance" name="distanceKm" type="number" step="0.1" min="0" value="7.4" data-testid="distance">
+
+        <div id="parcel-fields" hidden>
+          <label for="parcel-weight">Khối lượng bưu kiện (kg)</label>
+          <input id="parcel-weight" name="parcelWeightKg" type="number" step="0.1" min="0" value="3" data-testid="parcel-weight">
+        </div>
+
+        <div id="food-fields" hidden>
+          <label for="food-amount">Tiền món (đ)</label>
+          <input id="food-amount" name="foodAmount" type="number" step="1000" min="0" value="60000" data-testid="food-amount">
+        </div>
+
+        <label for="voucher">Mã giảm giá (không bắt buộc)</label>
+        <input id="voucher" name="voucherCode" data-testid="voucher" autocomplete="off">
+
+        <label for="payment-method">Thanh toán</label>
+        <select id="payment-method" name="paymentMethod" data-testid="payment-method">
+          <option value="cash">Tiền mặt</option>
+          <option value="vixanh">Ví VíXanh</option>
+        </select>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" data-testid="quote-button">Báo giá</button>
+        <button type="button" id="book-button" data-testid="book-button" disabled>Đặt chuyến</button>
+      </div>
+    </form>
+
+    <p id="error" role="alert" data-testid="error" class="error"></p>
+
+    <section aria-labelledby="quote-heading" aria-live="polite" data-testid="quote-result" id="quote-result" hidden>
+      <h2 id="quote-heading">Báo giá</h2>
+      <p>Tổng tiền: <strong data-testid="quote-total" id="quote-total"></strong></p>
+      <p>Cao điểm: <span data-testid="quote-peak" id="quote-peak"></span> · Đang mưa: <span data-testid="quote-rain" id="quote-rain"></span></p>
+      <p>Giảm giá: <span data-testid="quote-discount" id="quote-discount"></span></p>
+      <p class="note">Báo giá <span data-testid="quote-id" id="quote-id"></span> có hiệu lực tới <span data-testid="quote-expires" id="quote-expires"></span></p>
+    </section>
+
+    <section aria-labelledby="trip-heading" aria-live="polite" data-testid="trip-panel" id="trip-panel" hidden>
+      <h2 id="trip-heading">Chuyến của bạn</h2>
+      <p>Mã chuyến: <code data-testid="trip-id" id="trip-id"></code></p>
+      <p>Trạng thái: <strong data-testid="trip-status" id="trip-status"></strong></p>
+      <p>Tài xế: <span data-testid="trip-driver" id="trip-driver">—</span></p>
+      <button type="button" id="cancel-button" data-testid="cancel-button">Huỷ chuyến</button>
+      <p data-testid="cancel-fee" id="cancel-fee"></p>
+    </section>
+  </main>
+
+  <script type="module" src="/customer.js"></script>
+</body>
+</html>

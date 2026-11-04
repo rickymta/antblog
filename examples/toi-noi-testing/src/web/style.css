@@ -1,0 +1,19 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --accent: #0b6e4f;
+  --error: #b42318;
+}
+body { margin: 0 auto; max-width: 640px; padding: 16px; line-height: 1.5; background: #fff; color: #1f2328; }
+h1 { margin: 0; color: var(--accent); }
+fieldset { border: 1px solid #d0d7de; border-radius: 8px; padding: 12px 16px; }
+label { display: block; margin-top: 10px; font-weight: 600; }
+input, select { width: 100%; box-sizing: border-box; padding: 6px 8px; font: inherit; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+button { padding: 8px 14px; font: inherit; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; }
+button.secondary { background: #57606a; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #f6b73c; outline-offset: 2px; }
+.error { color: var(--error); min-height: 1.5em; }
+.note { color: #57606a; font-size: 0.9em; }
+section { margin-top: 16px; }

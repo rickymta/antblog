@@ -13,3 +13,4 @@ Dockerfile
 api
 **/.next
 **/uploads
+examples

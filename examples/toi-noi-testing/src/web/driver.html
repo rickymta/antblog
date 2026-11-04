@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tới Nơi — Tài xế</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Tới Nơi · Tài xế</h1>
+    <p class="note">Bản lab kiểm thử · <a href="/">Trang khách</a></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Tài xế</legend>
+      <label for="driver-id">Mã tài xế</label>
+      <input id="driver-id" value="D101" data-testid="driver-id">
+      <label for="eta">ETA tới điểm đón (phút)</label>
+      <input id="eta" type="number" min="1" max="60" value="5" data-testid="eta">
+      <div class="actions">
+        <button type="button" id="load-available" data-testid="load-available">Tải chuyến đang chờ</button>
+      </div>
+    </fieldset>
+
+    <p id="error" role="alert" data-testid="error" class="error"></p>
+
+    <section aria-labelledby="available-heading">
+      <h2 id="available-heading">Chuyến đang chờ</h2>
+      <ul id="available-trips" data-testid="available-trips" aria-live="polite"></ul>
+    </section>
+
+    <section aria-labelledby="current-heading" id="current-trip" data-testid="current-trip" hidden>
+      <h2 id="current-heading">Chuyến đang chạy</h2>
+      <p>Mã chuyến: <code id="current-trip-id" data-testid="current-trip-id"></code></p>
+      <p>Trạng thái: <strong id="driver-trip-status" data-testid="driver-trip-status" aria-live="polite"></strong></p>
+      <div class="actions">
+        <button type="button" data-action="arrive" data-testid="action-arrive">Đang tới đón</button>
+        <button type="button" data-action="pickup" data-testid="action-pickup">Đã đón</button>
+        <button type="button" data-action="start" data-testid="action-start">Bắt đầu chở</button>
+        <button type="button" data-action="complete" data-testid="action-complete">Hoàn thành</button>
+        <button type="button" data-action="cancel" data-testid="action-cancel" class="secondary">Huỷ nhận</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/driver.js"></script>
+</body>
+</html>

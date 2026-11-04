@@ -1,0 +1,17 @@
+{
+  "id": "TD-PARCEL-01",
+  "description": "Bộ dữ liệu kiểm thử phụ phí khối lượng bưu kiện (SPEC R-PARCEL-01…04). Mọi dòng: thành phố SG, 3 km, không mưa, không voucher.",
+  "context": { "cityCode": "SG", "distanceKm": 3, "raining": false, "offPeakAt": "2026-11-04T09:00:00+07:00", "peakAt": "2026-11-04T11:30:00+07:00" },
+  "rows": [
+    { "id": "TD-01", "testCase": "TC-PARCEL-001", "requirements": ["R-PARCEL-03"], "weightKg": 5.0, "vehicle": "bike", "peak": false, "expected": { "surcharge": 0, "total": 26000 } },
+    { "id": "TD-02", "testCase": "TC-PARCEL-001", "requirements": ["R-PARCEL-01", "R-PARCEL-03"], "weightKg": 5.04, "vehicle": "bike", "peak": false, "expected": { "surcharge": 0, "total": 26000 } },
+    { "id": "TD-03", "testCase": "TC-PARCEL-002", "requirements": ["R-PARCEL-01", "R-PARCEL-03"], "weightKg": 5.05, "vehicle": "bike", "peak": false, "expected": { "surcharge": 2000, "total": 28000 } },
+    { "id": "TD-04", "testCase": "TC-PARCEL-002", "requirements": ["R-PARCEL-03"], "weightKg": 6.0, "vehicle": "bike", "peak": false, "expected": { "surcharge": 2000, "total": 28000 } },
+    { "id": "TD-05", "testCase": "TC-PARCEL-002", "requirements": ["R-PARCEL-03"], "weightKg": 6.1, "vehicle": "bike", "peak": false, "expected": { "surcharge": 4000, "total": 30000 } },
+    { "id": "TD-06", "testCase": "TC-PARCEL-003", "requirements": ["R-PARCEL-02", "R-PARCEL-03"], "weightKg": 20.0, "vehicle": "bike", "peak": false, "expected": { "surcharge": 30000, "total": 56000 } },
+    { "id": "TD-07", "testCase": "TC-PARCEL-003", "requirements": ["R-PARCEL-02"], "weightKg": 20.1, "vehicle": "bike", "peak": false, "expected": { "error": "VEHICLE_TOO_SMALL" } },
+    { "id": "TD-08", "testCase": "TC-PARCEL-004", "requirements": ["R-PARCEL-01", "R-PARCEL-03"], "weightKg": 30.0, "vehicle": "car", "peak": false, "expected": { "surcharge": 50000, "total": 108000 } },
+    { "id": "TD-09", "testCase": "TC-PARCEL-004", "requirements": ["R-PARCEL-01"], "weightKg": 30.05, "vehicle": "car", "peak": false, "expected": { "error": "WEIGHT_OUT_OF_RANGE" } },
+    { "id": "TD-10", "testCase": "TC-PARCEL-005", "requirements": ["R-PARCEL-04"], "weightKg": 6.1, "vehicle": "bike", "peak": true, "expected": { "surcharge": 4000, "total": 37000 } }
+  ]
+}
