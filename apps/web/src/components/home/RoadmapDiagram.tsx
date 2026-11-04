@@ -72,13 +72,13 @@ export function RoadmapDiagram({ className = '' }: { className?: string }) {
             <li key={n.key} className="absolute" style={style}>
               <Link
                 href={n.href}
-                aria-label={t('home.roadmapStep', { n: i + 1, label })}
                 className={`group/node flex h-full w-full items-center gap-[1.7cqw] rounded-[2.13cqw] pl-[2.13cqw] pr-[1.5cqw] text-[2.98cqw] leading-none font-semibold shadow-[0_6px_14px_rgba(2,6,23,0.35)] transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(2,6,23,0.45)] hover:ring-2 hover:ring-sky-300 focus-visible:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
                   final ? 'bg-gradient-to-br from-[#6366F1] to-[#2563EB] text-white' : 'bg-white text-[#0F172A]'
                 }`}
               >
+                {/* Tên truy cập = chữ nhìn thấy ("1 Cơ bản") + tiền tố chỉ cho trình đọc màn hình — không dùng aria-label khác chữ hiển thị. */}
+                <span className="sr-only">{t('home.roadmapStepPrefix')} </span>
                 <span
-                  aria-hidden="true"
                   className={`inline-flex h-[5.53cqw] w-[5.53cqw] shrink-0 items-center justify-center rounded-full text-[2.55cqw] font-bold ${
                     final ? 'bg-white/20 text-white' : 'bg-[#DBEAFE] text-[#1D4ED8] group-hover/node:bg-[#BFDBFE]'
                   }`}

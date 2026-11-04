@@ -11,7 +11,15 @@ import { useDismiss } from '../../hooks/useDismiss';
 import { loginHref } from '../../lib/navigation';
 import { btnPrimary, iconBtn } from '../../lib/ui';
 
-/** Avatar + menu tài khoản khi đã đăng nhập; nút "Đăng nhập" nền primary khi chưa. */
+/** Khung chờ (HTML máy chủ + lúc chưa biết phiên) — cũng là fallback của <Suspense> quanh UserMenu ở thanh đầu. */
+export function UserMenuSkeleton() {
+  return <span className="h-9 w-9 animate-pulse rounded-full bg-surface-2" aria-hidden="true" />;
+}
+
+/**
+ * Avatar + menu tài khoản khi đã đăng nhập; nút "Đăng nhập" nền primary khi chưa.
+ * Dùng useSearchParams ⇒ nơi đặt PHẢI bọc <Suspense> (trang bài/lộ trình là ISR — thiếu Suspense thì render lỗi).
+ */
 export function UserMenu() {
   const { t } = useTranslation();
   const { user, loading, logout } = useAuth();
@@ -24,7 +32,7 @@ export function UserMenu() {
   const close = useCallback(() => setOpen(false), []);
   useDismiss(wrapRef, open, close, btnRef);
 
-  if (loading) return <span className="h-9 w-9 animate-pulse rounded-full bg-surface-2" aria-hidden="true" />;
+  if (loading) return <UserMenuSkeleton />;
 
   if (!user) {
     const href = loginHref(search ? `${pathname}?${search}` : pathname);

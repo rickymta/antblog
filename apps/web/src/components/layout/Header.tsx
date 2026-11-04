@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ import { isActivePath, MAIN_LINKS } from './navLinks';
 import { SearchBox } from './SearchBox';
 import { LanguageToggle, ThemeToggle } from './Toggles';
 import { TopicsMenu } from './TopicsMenu';
-import { UserMenu } from './UserMenu';
+import { UserMenu, UserMenuSkeleton } from './UserMenu';
 
 const navItem = (active: boolean) =>
   `rounded-ui px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors ${active ? 'text-primary-ink' : 'text-muted hover:bg-surface-2 hover:text-ink'}`;
@@ -83,7 +83,9 @@ export function Header({ categories }: { categories: Category[] | null }) {
           </button>
           <LanguageToggle />
           <ThemeToggle />
-          <UserMenu />
+          <Suspense fallback={<UserMenuSkeleton />}>
+            <UserMenu />
+          </Suspense>
         </div>
       </div>
       {searchOpen && (

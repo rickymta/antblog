@@ -10,6 +10,7 @@ import type { Category } from '@tkh/shared';
 import { iconBtn } from '../../lib/ui';
 import { LogoMark } from './Logo';
 import { isActivePath, MAIN_LINKS } from './navLinks';
+import { I18N_ENABLED } from '../../i18n/config';
 import { LanguageToggle } from './Toggles';
 import { TopicLinks } from './TopicsMenu';
 
@@ -98,10 +99,12 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
             <p className="px-2 text-sm text-muted">{t('nav.topicsLoadFailed')}</p>
           )}
         </div>
-        <div className="mt-auto flex items-center justify-between border-t border-line px-5 py-4">
-          <span className="text-sm text-muted">{t('header.language')}</span>
-          <LanguageToggle />
-        </div>
+        {I18N_ENABLED && (
+          <div className="mt-auto flex items-center justify-between border-t border-line px-5 py-4">
+            <span className="text-sm text-muted">{t('header.language')}</span>
+            <LanguageToggle />
+          </div>
+        )}
       </div>
     </div>,
     document.body,

@@ -152,11 +152,12 @@ export function CommentItem({
               type="button"
               onClick={() => void toggleLike()}
               aria-pressed={comment.likedByMe}
-              aria-label={`${comment.likedByMe ? t('comments.unlike') : t('comments.like')} — ${t('comments.likeCount', { n: comment.likeCount })}`}
               className={`${actionBtn} ${comment.likedByMe ? 'text-primary-ink' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}
             >
               <ThumbsUp aria-hidden="true" className="h-4 w-4" fill={comment.likedByMe ? 'currentColor' : 'none'} />
-              <span aria-hidden="true">{formatCompact(comment.likeCount, locale)}</span>
+              {/* Tên truy cập chứa đúng số nhìn thấy (WCAG 2.5.3): hành động cho trình đọc màn hình + số đếm hiển thị. */}
+              <span className="sr-only">{comment.likedByMe ? t('comments.unlike') : t('comments.like')}: </span>
+              <span>{formatCompact(comment.likeCount, locale)}</span>
             </button>
             <button
               type="button"

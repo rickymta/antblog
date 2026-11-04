@@ -110,6 +110,7 @@ export const en: Messages = {
     statMembers: 'Members',
     statsLabel: 'Tech Knowledge Hub in numbers',
     roadmapStep: 'Step {{n}}: {{label}}',
+    roadmapStepPrefix: 'Step',
     roadmapLabel:
       'Learning roadmap: Fundamentals, then Database, then Programming languages and Design patterns, then Architecture and finally Advanced.',
     roadmap: {

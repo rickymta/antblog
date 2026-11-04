@@ -1,19 +1,14 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/600.css';
-import '@fontsource/inter/700.css';
-import '@fontsource/inter/800.css';
-import '@fontsource/jetbrains-mono/400.css';
 import './globals.css';
+import { fontVariables } from './fonts';
 import { Providers } from '../components/Providers';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
 import { SkipLink } from '../components/layout/SkipLink';
 import { getServerI18n } from '../i18n/server';
 import { serverApi, settle } from '../lib/server-api';
-import { DEFAULT_OG_IMAGE, OG_LOCALE, SITE_NAME, SITE_URL, siteNoindex } from '../lib/site';
+import { DEFAULT_OG_IMAGE, OG_LOCALE, RSS_ALTERNATE, SITE_NAME, SITE_URL, siteNoindex, siteVerification } from '../lib/site';
 
 // Áp theme trước khi trang hiển thị để không nháy màu: localStorage 'tkh-theme' = light|dark, không có thì theo hệ điều hành.
 const THEME_SCRIPT = `try{var t=localStorage.getItem('tkh-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`;
@@ -21,14 +16,29 @@ const THEME_SCRIPT = `try{var t=localStorage.getItem('tkh-theme');if(t==='dark'|
 export async function generateMetadata(): Promise<Metadata> {
   const { t, locale } = await getServerI18n();
   const noindex = siteNoindex();
+  const verification = siteVerification();
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: `${SITE_NAME} — ${t('meta.tagline')}`, template: `%s · ${SITE_NAME}` },
     description: t('meta.description'),
     applicationName: SITE_NAME,
+    // Trang con chỉ đặt robots khi cần noindex (ghi đè khối này); SITE_NOINDEX=true (staging) chặn toàn site.
     robots: noindex
       ? { index: false, follow: false, googleBot: { index: false, follow: false } }
-      : { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
+      : {
+          index: true,
+          follow: true,
+          googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 },
+        },
+    alternates: { types: RSS_ALTERNATE },
+    ...(verification.google || verification.bing
+      ? {
+          verification: {
+            ...(verification.google ? { google: verification.google } : {}),
+            ...(verification.bing ? { other: { 'msvalidate.01': verification.bing } } : {}),
+          },
+        }
+      : {}),
     openGraph: {
       type: 'website',
       siteName: SITE_NAME,
@@ -56,7 +66,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // Danh sách chủ đề cho menu "Chủ đề", ngăn kéo điện thoại và chân trang (cache 5 phút); lỗi ⇒ menu báo chưa tải được.
   const categories = await settle(serverApi.categories());
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

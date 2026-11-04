@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type User } from '@tkh/shared';
+import { api, ApiError, type User } from '@tkh/shared';
 import { isUnauthenticated } from './errors';
 
 export const ME_KEY = ['auth', 'me'] as const;
@@ -17,12 +17,20 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
-/** Tải phiên từ `GET /auth/me`. 401 = chưa đăng nhập (không phải lỗi); lỗi khác (API tắt) cũng coi như khách. */
+/**
+ * Tải phiên từ `GET /auth/session` — luôn 200 `{ user: User | null }`, khách vãng lai không sinh request 4xx (lỗi đỏ
+ * trong console). API cũ chưa có endpoint (404) ⇒ quay về `GET /auth/me` (401 = chưa đăng nhập).
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
   const me = useQuery({
     queryKey: ME_KEY,
     queryFn: async () => {
+      try {
+        return (await api.auth.session()).user ?? null;
+      } catch (e) {
+        if (!(e instanceof ApiError && e.status === 404)) throw e;
+      }
       try {
         return (await api.auth.me()).user;
       } catch (e) {

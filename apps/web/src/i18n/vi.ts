@@ -110,6 +110,7 @@ export const vi = {
     statMembers: 'Thành viên',
     statsLabel: 'Số liệu của Tech Knowledge Hub',
     roadmapStep: 'Bước {{n}}: {{label}}',
+    roadmapStepPrefix: 'Bước',
     roadmapLabel:
       'Sơ đồ lộ trình học: Cơ bản, rồi Database, tiếp theo Ngôn ngữ lập trình và Design Pattern, sau đó Architecture và cuối cùng Nâng cao.',
     roadmap: {

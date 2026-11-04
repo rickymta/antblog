@@ -2,6 +2,7 @@ import { createInstance, type i18n as I18n } from 'i18next';
 import type { Locale } from '@tkh/shared';
 import { vi, type Messages } from './vi';
 import { en } from './en';
+import { I18N_ENABLED } from './config';
 
 declare module 'i18next' {
   interface CustomTypeOptions {
@@ -26,10 +27,11 @@ export function normalizeLocale(value: string | null | undefined): Locale {
 export function createI18n(locale: Locale): I18n {
   const instance = createInstance();
   void instance.init({
-    resources: { vi: { translation: vi }, en: { translation: en } },
-    lng: locale,
+    // Cờ song ngữ tắt ⇒ chỉ nạp tiếng Việt (bundler bỏ hẳn tài nguyên tiếng Anh khỏi bundle).
+    resources: I18N_ENABLED ? { vi: { translation: vi }, en: { translation: en } } : { vi: { translation: vi } },
+    lng: I18N_ENABLED ? locale : DEFAULT_LOCALE,
     fallbackLng: DEFAULT_LOCALE,
-    supportedLngs: ['vi', 'en'],
+    supportedLngs: I18N_ENABLED ? ['vi', 'en'] : ['vi'],
     initAsync: false,
     // React đã tự thoát ký tự HTML; để i18next thoát nữa thì tên "A & B" sẽ hiện thành "A &amp; B".
     interpolation: { escapeValue: false },

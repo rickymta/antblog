@@ -1,5 +1,5 @@
 // Gọi API công khai từ Server Components (máy chủ Next → API nội bộ). Trình duyệt vẫn dùng `api` của @tkh/shared (URL tương đối).
-import { notFound } from 'next/navigation';
+import { notFound, unstable_rethrow } from 'next/navigation';
 import { connection } from 'next/server';
 import {
   ApiError,
@@ -33,9 +33,18 @@ function qs(query?: Query): string {
   return s ? `?${s}` : '';
 }
 
+/**
+ * Đang chạy `next build`? (Next đặt NEXT_PHASE cho tiến trình build + worker dựng trang; đọc bằng chỉ số để bundler
+ * không nhúng hằng lúc biên dịch.)
+ */
+const isBuildPhase = () => process.env['NEXT_PHASE'] === 'phase-production-build';
+
 async function get<T>(path: string, query?: Query, revalidate = DEFAULT_REVALIDATE): Promise<T> {
-  // Không bao giờ gọi API lúc `next build` (ảnh Docker build không có API) — mọi trang dùng dữ liệu là trang động.
-  await connection();
+  // Không bao giờ gọi API lúc `next build` (ảnh Docker build không có API): trang nào bị dựng sẵn lúc build mà gọi API
+  // ⇒ connection() đánh dấu trang đó là trang động (trang chủ, danh sách…). Lúc CHẠY thì KHÔNG gọi connection(): trang
+  // bài / lộ trình là ISR (generateStaticParams trả [] ⇒ không dựng gì lúc build, dựng lần đầu khi có request rồi cache
+  // `revalidate` giây) — gọi API động trong trang ISR lúc chạy là lỗi.
+  if (isBuildPhase()) await connection();
   const res = await fetch(`${API_BASE}${path}${qs(query)}`, {
     headers: { Accept: 'application/json' },
     next: { revalidate, tags: ['api'] },
@@ -59,6 +68,8 @@ export const serverApi = {
   categories: () => get<Category[]>('/categories', undefined, 300),
   category: (slug: string) => get<Category>(`/categories/${enc(slug)}`),
   articles: (query: ArticleQuery = {}) => get<Page<ArticleCard>>('/articles', { ...query }),
+  /** 50 bài mới nhất cho RSS (cache 10 phút). */
+  feed: () => get<Page<ArticleCard>>('/articles', { sort: 'latest', pageSize: 50 }, 600),
   trending: (limit = 4) => get<ArticleCard[]>('/articles/trending', { limit }),
   article: (slug: string) => get<ArticleDetail>(`/articles/${enc(slug)}`),
   related: (slug: string, limit = 3) => get<ArticleCard[]>(`/articles/${enc(slug)}/related`, { limit }),
@@ -72,6 +83,7 @@ export async function orNotFound<T>(promise: Promise<T>): Promise<T> {
   try {
     return await promise;
   } catch (e) {
+    unstable_rethrow(e);
     if (e instanceof ApiError && e.status === 404) notFound();
     throw e;
   }
@@ -85,6 +97,7 @@ export async function orNull<T>(promise: Promise<T>): Promise<T | null> {
   try {
     return await promise;
   } catch (e) {
+    unstable_rethrow(e);
     if (e instanceof ApiError && e.status === 404) return null;
     throw e;
   }
@@ -95,6 +108,8 @@ export async function settle<T>(promise: Promise<T>): Promise<T | null> {
   try {
     return await promise;
   } catch (e) {
+    // Lỗi điều khiển của Next (connection() lúc build ⇒ trang động, notFound…) phải đi tiếp, không được nuốt.
+    unstable_rethrow(e);
     console.error('[server-api]', e instanceof Error ? e.message : e);
     return null;
   }

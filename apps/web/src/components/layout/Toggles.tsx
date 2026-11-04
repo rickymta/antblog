@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@tkh/ui';
-import { LOCALES, useLocale, useSetLocale } from '../../i18n';
+import { I18N_ENABLED, LOCALES, useLocale, useSetLocale } from '../../i18n';
 import { iconBtn } from '../../lib/ui';
 
 /**
@@ -25,8 +25,16 @@ export function ThemeToggle() {
   );
 }
 
-/** Nút VI/EN dạng hai nửa; nửa đang chọn nền primary. Đổi ⇒ ghi cookie `tkh-locale` và render lại phía máy chủ. */
+/**
+ * Nút VI/EN dạng hai nửa; nửa đang chọn nền primary. Đổi ⇒ ghi cookie `tkh-locale` và render lại phía máy chủ.
+ * Chỉ hiện khi bật cờ `NEXT_PUBLIC_ENABLE_I18N` (nơi đặt nút kiểm `I18N_ENABLED` để ẩn cả khung bao quanh).
+ */
 export function LanguageToggle({ className = '' }: { className?: string }) {
+  if (!I18N_ENABLED) return null;
+  return <LanguageToggleButtons className={className} />;
+}
+
+function LanguageToggleButtons({ className }: { className: string }) {
   const { t } = useTranslation();
   const locale = useLocale();
   const { setLocale, pending } = useSetLocale();
@@ -38,7 +46,6 @@ export function LanguageToggle({ className = '' }: { className?: string }) {
           type="button"
           lang={l}
           aria-pressed={locale === l}
-          aria-label={l === 'vi' ? 'Tiếng Việt' : 'English'}
           onClick={() => {
             if (l !== locale) setLocale(l);
           }}
@@ -46,7 +53,9 @@ export function LanguageToggle({ className = '' }: { className?: string }) {
             locale === l ? 'bg-primary text-white' : 'text-muted hover:text-ink'
           }`}
         >
+          {/* Tên truy cập chứa đúng chữ nhìn thấy ("VI"), phần giải nghĩa chỉ cho trình đọc màn hình. */}
           {l.toUpperCase()}
+          <span className="sr-only"> — {l === 'vi' ? 'Tiếng Việt' : 'English'}</span>
         </button>
       ))}
     </div>

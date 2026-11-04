@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { Locale } from '@tkh/shared';
 import { getServerI18n } from '../i18n/server';
-import { absoluteUrl, DEFAULT_OG_IMAGE, OG_LOCALE, SITE_NAME } from './site';
+import { absoluteUrl, DEFAULT_OG_IMAGE, OG_LOCALE, RSS_ALTERNATE, SITE_NAME } from './site';
 
 interface PageMetaInput {
   /** Tiêu đề trang — ghép mẫu "%s · Tech Knowledge Hub". */
@@ -31,7 +31,7 @@ export function pageMetadata(input: PageMetaInput): Metadata {
   const meta: Metadata = {
     title: input.absoluteTitle ? { absolute: input.absoluteTitle } : input.title,
     description: input.description,
-    alternates: { canonical: input.path },
+    alternates: { canonical: input.path, types: RSS_ALTERNATE },
     openGraph: {
       type: 'website',
       siteName: SITE_NAME,
@@ -65,5 +65,5 @@ export function clampDescription(text: string, max = 160): string {
 /** Metadata khi API trả 404 (trang sẽ gọi notFound()): tiêu đề "Không tìm thấy trang"; Next tự thêm noindex. */
 export async function notFoundMetadata(): Promise<Metadata> {
   const { t } = await getServerI18n();
-  return { title: t('notFound.title') };
+  return { title: t('notFound.title'), robots: { index: false, follow: true } };
 }

@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import type { Locale } from '@tkh/shared';
 import { readStorage, writeStorage } from '../lib/storage';
+import { I18N_ENABLED } from './config';
 import { createI18n, LOCALE_COOKIE, LOCALES, normalizeLocale } from './resources';
 
-export { LOCALES };
+export { I18N_ENABLED, LOCALES };
 
 function writeLocaleCookie(locale: Locale) {
   document.cookie = `${LOCALE_COOKIE}=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
@@ -26,6 +27,8 @@ export function I18nProvider({ locale, children }: { locale: Locale; children: R
   }, [i18n, locale]);
 
   useEffect(() => {
+    // Cờ song ngữ tắt: luôn `vi`, không chuyển theo lựa chọn cũ.
+    if (!I18N_ENABLED) return;
     if (document.cookie.split('; ').some((c) => c.startsWith(`${LOCALE_COOKIE}=`))) return;
     const saved = readStorage(LOCALE_COOKIE);
     if (saved && normalizeLocale(saved) !== locale) {

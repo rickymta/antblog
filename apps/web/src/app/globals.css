@@ -4,6 +4,17 @@
 /* Lớp Tailwind dùng trong packages/ui (ArticleContent, Avatar, LevelBadge…) — đường dẫn tính từ tệp này (apps/web/src/app). */
 @source "../../../../packages/ui/src";
 
+/*
+ * Phông chữ trang đọc: Inter biến thiên nạp bằng next/font/local (app/fonts.ts) — 3 họ tách theo unicode-range, đặt biến
+ * --font-inter-* trên <html>. Ghi đè --font-sans của @tkh/ui/theme.css (lớp theme) — luật không thuộc lớp nào thắng.
+ * Thứ tự quan trọng: vietnamese → latin-ext → latin (kèm phông dự phòng Arial chỉnh số đo) → các phông hệ thống.
+ * JetBrains Mono KHÔNG nạp ở đây — chỉ trang bài (khối mã) nạp, xem app/articles/[slug]/page.tsx.
+ */
+:root {
+  --font-sans: var(--font-inter-vi), var(--font-inter-latin-ext), var(--font-inter-latin), "Inter Variable", "Inter",
+    ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+}
+
 /* Chừa chỗ cho nút "Sao chép" (lớp phủ CodeCopyOverlay) ở góc trên phải mỗi khối mã của trang đọc. */
 .tkh-article-body .tkh-prose pre {
   padding-top: 1.5rem; /* + 1em đệm của code.hljs ≈ 40px — đủ cho nút cao ~28px */

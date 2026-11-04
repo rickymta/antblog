@@ -61,13 +61,15 @@ function ReactionSummary() {
         e.preventDefault();
         scrollToId('reactions');
       }}
-      aria-label={`${t('article.reactionsSummary')}: ${REACTIONS.map((r) => `${r.name} ${article.stats.reactions[r.type]}`).join(', ')}`}
       className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-ui px-2 py-1.5 text-sm text-ink hover:bg-surface-2"
     >
+      {/* Tên truy cập dựng từ nội dung (chứa đúng các con số nhìn thấy) + chữ chỉ dành cho trình đọc màn hình. */}
+      <span className="sr-only">{t('article.reactionsSummary')}:</span>
       {REACTIONS.map((r) => (
         <span key={r.type} className={`inline-flex items-center gap-1 ${article.myReactions.includes(r.type) ? 'font-semibold text-primary-ink' : ''}`}>
           <span aria-hidden="true">{r.emoji}</span>
-          <span aria-hidden="true">{formatCompact(article.stats.reactions[r.type], locale)}</span>
+          <span className="sr-only">{r.name}</span>
+          <span>{formatCompact(article.stats.reactions[r.type], locale)}</span>
         </span>
       ))}
     </a>

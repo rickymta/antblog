@@ -12,13 +12,16 @@ import { RoadmapDiagram } from './RoadmapDiagram';
 
 function Stat({ icon, value, label }: { icon: ReactNode; value: string; label: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-card border border-sky-300/40 text-sky-300">{icon}</span>
-      {/* dt đứng trước dd trong DOM (đúng ngữ nghĩa), hiển thị số lên trên bằng flex-col-reverse. */}
-      <div className="flex flex-col-reverse">
-        <dt className="mt-1 text-sm text-blue-100">{label}</dt>
-        <dd className="text-2xl leading-none font-bold text-white sm:text-3xl">{value}</dd>
-      </div>
+    // Nhóm <div> con TRỰC TIẾP của <dl> chỉ chứa dt + dd (axe definition-list/dlitem). dt đứng trước dd trong DOM,
+    // hiển thị số lên trên bằng flex-col-reverse; biểu tượng nằm trong dt, đặt tuyệt đối ở cột trái (pl-14).
+    <div className="relative flex min-h-11 flex-col-reverse justify-center pl-14">
+      <dt className="mt-1 text-sm text-blue-100">
+        <span className="absolute top-1/2 left-0 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-card border border-sky-300/40 text-sky-300">
+          {icon}
+        </span>
+        {label}
+      </dt>
+      <dd className="text-2xl leading-none font-bold text-white sm:text-3xl">{value}</dd>
     </div>
   );
 }

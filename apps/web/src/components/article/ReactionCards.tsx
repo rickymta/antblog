@@ -47,11 +47,7 @@ export function ReactionCards() {
                 type="button"
                 aria-pressed={selected}
                 aria-busy={pending.has(r.type)}
-                aria-label={t('article.reactionAria', {
-                  name: `${r.name} (${t(`reactions.${r.type}`)})`,
-                  count,
-                  state: selected ? t('article.reactionSelected') : t('article.reactionNotSelected'),
-                })}
+                // Không đặt aria-label: tên truy cập là chính chữ trên thẻ (tên · nghĩa · số đếm), trạng thái qua aria-pressed.
                 onClick={() => void onClick(r.type)}
                 className={`flex h-full w-full flex-col items-center gap-1 rounded-card border-2 px-3 py-4 text-center transition-all motion-safe:active:scale-95 ${
                   selected ? 'border-primary bg-primary-soft' : 'border-line bg-surface hover:border-primary/50 hover:bg-surface-2'

@@ -13,7 +13,15 @@ declare module 'i18next' {
 
 const STORAGE_KEY = 'tkh-admin-locale';
 
+/**
+ * Bật giao diện song ngữ (nút VI/EN) — `VITE_ENABLE_I18N=true` lúc build. Mặc định TẮT (tạm ẩn theo yêu cầu):
+ * không có nút VI/EN, ngôn ngữ luôn là `vi` (bỏ qua lựa chọn cũ trong localStorage). Tài nguyên tiếng Anh + mã nút
+ * vẫn giữ nguyên để bật lại là chạy như cũ.
+ */
+export const I18N_ENABLED = String(import.meta.env.VITE_ENABLE_I18N ?? '').trim().toLowerCase() === 'true';
+
 function readStoredLocale(): Locale {
+  if (!I18N_ENABLED) return 'vi';
   try {
     const v = localStorage.getItem(STORAGE_KEY);
     if (v === 'vi' || v === 'en') return v;
@@ -35,6 +43,7 @@ void i18n.use(initReactI18next).init({
 });
 
 export function setLocale(locale: Locale): void {
+  if (!I18N_ENABLED) return;
   void i18n.changeLanguage(locale);
   document.documentElement.lang = locale;
   try {
