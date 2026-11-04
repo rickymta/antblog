@@ -11,5 +11,21 @@
       "page-don-vi-doc-ghi"
     ],
     "status": "published"
+  },
+  {
+    "slug": "design-pattern-qua-toi-noi",
+    "title": "Design Pattern qua dự án Tới Nơi",
+    "description": "23 design pattern kinh điển chia theo ba nhóm Khởi tạo, Cấu trúc, Hành vi — mỗi pattern gắn với một bài toán thật của hệ thống đặt xe và giao hàng Tới Nơi, có so sánh các pattern trong cùng nhóm và khi nào không nên dùng.",
+    "level": "intermediate",
+    "category": "design-pattern",
+    "articles": [
+      "du-an-mau-toi-noi",
+      "design-pattern-la-gi",
+      "nhom-khoi-tao-creational",
+      "nhom-cau-truc-structural",
+      "nhom-hanh-vi-dong-goi-hanh-vi",
+      "nhom-hanh-vi-giao-tiep-doi-tuong"
+    ],
+    "status": "published"
   }
 ]

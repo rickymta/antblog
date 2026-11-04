@@ -243,7 +243,7 @@ Kết quả: khoảng 40% chuyến đặt xe, 45% giao đồ ăn, 15% bưu kiệ
 | Vì sao 560 UPDATE/giây làm bảng phình và chậm dần? | MVCC, HOT update, VACUUM | Database |
 | Hai tài xế cùng bấm nhận một chuyến thì sao? | Giao dịch, khoá dòng, `SKIP LOCKED` | Database |
 | 730 triệu dòng/năm thì truy vấn tháng này có chậm không? | Partition theo thời gian | Database |
-| Tính giá chuyến theo nhiều loại xe, khuyến mãi | Strategy, Chain of Responsibility | Design Pattern |
+| Tạo chuyến cho ba dịch vụ, cộng phụ phí vào cước, đi qua 8 trạng thái, ghép tài xế… nên viết thế nào? | [23 design pattern theo ba nhóm](/articles/design-pattern-la-gi) | Design Pattern |
 | Tách dịch vụ điều phối tài xế khỏi phần còn lại? | Event-driven, monolith hay microservices | Architecture |
 | Theo dõi vị trí 25.000 tài xế theo thời gian thực | Hàng đợi, cache, xử lý đồng thời | System Design, Lập trình |
 
