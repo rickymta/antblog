@@ -35,8 +35,10 @@ export function createApp(options: AppOptions = {}): Express {
   app.use(helmet());
 
   const api = express.Router();
-  api.use((_req, res, next) => {
-    res.set('Cache-Control', 'no-store');
+  api.use((req, res, next) => {
+    // GET: `private, no-cache` — không chia sẻ, luôn hỏi lại server, nhưng không chặn back/forward cache của trình duyệt
+    // như `no-store`. Ghi: `no-store`.
+    res.set('Cache-Control', req.method === 'GET' || req.method === 'HEAD' ? 'private, no-cache' : 'no-store');
     next();
   });
   api.use(requireJsonContentType);

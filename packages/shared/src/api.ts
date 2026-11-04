@@ -102,6 +102,8 @@ export const api = {
     login: (input: { email: string; password: string }) => request<{ user: User }>('POST', '/auth/login', input),
     logout: () => request<void>('POST', '/auth/logout'),
     me: () => request<{ user: User }>('GET', '/auth/me'),
+    /** Luôn 200 — `user: null` khi chưa đăng nhập (trang đọc dùng để tránh lỗi 401 trong console). */
+    session: () => request<{ user: User | null }>('GET', '/auth/session'),
     updateMe: (input: { displayName?: string; avatarUrl?: string; bio?: string }) =>
       request<{ user: User }>('PATCH', '/auth/me', input),
   },

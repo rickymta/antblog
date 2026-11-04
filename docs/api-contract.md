@@ -199,3 +199,8 @@ Kiểu TypeScript tương ứng: `ArticleSeo`, `MediaItem`, `SitemapData`, `Publ
 
 - `POST /admin/articles/:id/publish` nhận thân `PublishInput` `{ publishAt? }`: vắng ⇒ xuất bản ngay (`publishedAt` = now nếu chưa có); có và ở tương lai ⇒ `status: 'published'`, `publishedAt = publishAt` (đã lên lịch — các endpoint công khai tự ẩn tới thời điểm đó). `publishAt` ở quá khứ ⇒ 400 `VALIDATION`.
 - Mọi `PUT /admin/articles/:id` đặt `editedInCms = true`. `npm run seed` chỉ ghi đè nội dung bài khi `editedInCms` khác `true`; bài đã sửa trong CMS ⇒ giữ nguyên + log "bỏ qua (đã sửa trong CMS)". Cờ `--force-content` ép ghi đè.
+
+## 9. Bổ sung 04/11/2026 — phiên không lỗi, cache header
+
+- `GET /auth/session` ⇒ LUÔN 200 `{ user: User | null }` (chưa đăng nhập ⇒ `null`). Trang đọc dùng endpoint này thay `/auth/me` để khách không sinh lỗi 401 trong console. `/auth/me` giữ nguyên (401 khi chưa đăng nhập) cho trang quản trị.
+- `Cache-Control` của API: GET/HEAD ⇒ `private, no-cache` (luôn hỏi lại server, không chia sẻ, không chặn back/forward cache); ghi ⇒ `no-store`.

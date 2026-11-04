@@ -85,6 +85,12 @@ export function authRouter(limiter: RequestHandler): Router {
     res.json({ user: toUser(currentUser(req)) });
   });
 
+  // Trang đọc dùng endpoint này để biết đã đăng nhập chưa: LUÔN 200, chưa đăng nhập ⇒ { user: null }.
+  // (/me trả 401 khi chưa đăng nhập ⇒ trình duyệt ghi lỗi console ở mọi lượt xem của khách — hại điểm chất lượng trang.)
+  r.get('/session', (req, res) => {
+    res.json({ user: req.user ? toUser(currentUser(req)) : null });
+  });
+
   r.patch('/me', requireAuth, async (req, res) => {
     const input = parse(updateMeSchema, req.body);
     const set: Record<string, string> = {};

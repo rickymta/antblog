@@ -14,6 +14,18 @@ function cookieNamed(res: request.Response, name: string): string | undefined {
 describe('xác thực', () => {
   beforeEach(resetDb);
 
+  it('GET /auth/session luôn 200: khách ⇒ user null, đã đăng nhập ⇒ user; GET không dùng no-store', async () => {
+    const anon = await request(app).get('/api/v1/auth/session').expect(200);
+    expect(anon.body).toEqual({ user: null });
+    expect(anon.headers['cache-control']).toBe('private, no-cache');
+    const user = await createUser('reader', { email: 'sess@example.com' });
+    const cookie = sessionCookie(user);
+    const me = await request(app).get('/api/v1/auth/session').set('Cookie', cookie).expect(200);
+    expect(me.body.user).toMatchObject({ email: 'sess@example.com' });
+    const write = await request(app).post('/api/v1/auth/logout').set('Cookie', cookie).send({}).expect(204);
+    expect(write.headers['cache-control']).toBe('no-store');
+  });
+
   it('đăng ký ⇒ 201, đặt cookie httpOnly SameSite=Lax, me/logout hoạt động', async () => {
     const agent = request.agent(app);
     const res = await agent
