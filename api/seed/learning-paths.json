@@ -27,5 +27,26 @@
       "nhom-hanh-vi-giao-tiep-doi-tuong"
     ],
     "status": "published"
+  },
+  {
+    "slug": "testing-s01-fundamentals",
+    "title": "Series 01 · Fundamentals of Software Testing",
+    "description": "Nền tảng tư duy kiểm thử theo ISTQB CTFL v4.0.1 qua dự án Tới Nơi: testing là gì, vì sao cần, bảy nguyên lý, error–defect–failure, verification và validation, mục tiêu và QA, quy trình kiểm thử, SDLC, vai trò, testware — kết thúc bằng bài thực hành phân tích tính năng đặt xe.",
+    "level": "beginner",
+    "category": "testing",
+    "articles": [
+      "software-testing-la-gi-testing-khac-debugging",
+      "vi-sao-can-kiem-thu",
+      "bay-nguyen-ly-kiem-thu",
+      "error-defect-failure-root-cause",
+      "verification-va-validation",
+      "muc-tieu-kiem-thu-va-quality-assurance",
+      "quy-trinh-kiem-thu-test-process",
+      "kiem-thu-trong-sdlc-agile-waterfall",
+      "vai-tro-trong-kiem-thu",
+      "testware-san-pham-kiem-thu",
+      "thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe"
+    ],
+    "status": "published"
   }
 ]
