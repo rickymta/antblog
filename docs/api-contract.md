@@ -167,3 +167,35 @@ Cần đăng nhập với vai trò `admin` hoặc `author` (`reader` ⇒ 403). `
 ### 7.7 Đăng ký tin
 
 `GET /admin/subscribers?page=` ⇒ trang `{ id, email, createdAt }`.
+
+## 8. Bổ sung 04/11/2026 — SEO, thư viện media, lên lịch đăng, sitemap, seed không ghi đè CMS
+
+Kiểu TypeScript tương ứng: `ArticleSeo`, `MediaItem`, `SitemapData`, `PublishInput`, các trường mới của `ArticleDetail`/`AdminArticle`/`ArticleInput` trong `packages/shared/src/types.ts`.
+
+### 8.1 Trường SEO của bài
+
+- `ArticleDetail.seo?: { title?, description?, ogImageUrl?, noindex? }` — trả ở `GET /articles/:slug` và `/admin/articles/:id`; vắng khi không có ghi đè.
+  Ràng buộc: `title` ≤ 70 ký tự, `description` ≤ 170, `ogImageUrl` là URL http(s) hoặc đường dẫn bắt đầu `/uploads/`.
+- `ArticleInput.seo` (tuỳ chọn). Trường rỗng/khoảng trắng ⇒ coi như không ghi đè.
+- Bài `seo.noindex = true` vẫn đọc được bình thường nhưng frontend gắn `robots: noindex` và không đưa vào sitemap.
+
+### 8.2 Thư viện media (ảnh)
+
+| Method | Path | Ghi chú |
+|---|---|---|
+| POST | `/admin/media` | `multipart/form-data`, trường `file` (bắt buộc) + `alt` (tuỳ chọn, ≤ 200). Chỉ `image/png`, `image/jpeg`, `image/webp`, `image/gif` (kiểm cả magic bytes, KHÔNG nhận SVG). Tối đa 5 MB ⇒ 413 `PAYLOAD_TOO_LARGE`; sai loại ⇒ 415 `UNSUPPORTED_MEDIA_TYPE`. ⇒ 201 `MediaItem`. Đây là ngoại lệ DUY NHẤT của luật "ghi phải là JSON". Vai trò `admin` hoặc `author` |
+| GET | `/admin/media` | `?page&pageSize&q` (tìm theo tên tệp/alt) ⇒ trang `MediaItem`, mới nhất trước. `author` chỉ thấy ảnh của mình |
+| PATCH | `/admin/media/:id` | `{ alt }` ⇒ `MediaItem` |
+| DELETE | `/admin/media/:id` | Xoá bản ghi + tệp. 204. `author` chỉ xoá ảnh của mình |
+
+- Tệp lưu ở thư mục `UPLOAD_DIR` (mặc định `./uploads`, Docker: volume `uploads`), đường dẫn `YYYY/MM/<id ngẫu nhiên>.<ext>`; `url` = `/uploads/YYYY/MM/<tên>.<ext>`.
+- Phục vụ tệp: Docker ⇒ nginx đọc thẳng volume ở `/uploads/` trên cả hai tên miền; dev ⇒ API tự phục vụ `GET /uploads/*` (express.static, `Cache-Control: public, max-age=31536000, immutable`, `X-Content-Type-Options: nosniff`) và proxy Vite/Next chuyển `/uploads` tới API.
+
+### 8.3 Sitemap
+
+`GET /site/sitemap` (công khai) ⇒ `SitemapData`: mọi bài đã xuất bản (`publishedAt <= now`) kèm `updatedAt` và `noindex`, mọi chủ đề, mọi lộ trình đã xuất bản. Không phân trang (quy mô blog nhỏ).
+
+### 8.4 Lên lịch đăng + seed không ghi đè CMS
+
+- `POST /admin/articles/:id/publish` nhận thân `PublishInput` `{ publishAt? }`: vắng ⇒ xuất bản ngay (`publishedAt` = now nếu chưa có); có và ở tương lai ⇒ `status: 'published'`, `publishedAt = publishAt` (đã lên lịch — các endpoint công khai tự ẩn tới thời điểm đó). `publishAt` ở quá khứ ⇒ 400 `VALIDATION`.
+- Mọi `PUT /admin/articles/:id` đặt `editedInCms = true`. `npm run seed` chỉ ghi đè nội dung bài khi `editedInCms` khác `true`; bài đã sửa trong CMS ⇒ giữ nguyên + log "bỏ qua (đã sửa trong CMS)". Cờ `--force-content` ép ghi đè.

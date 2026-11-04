@@ -78,10 +78,40 @@ export interface ArticleLearningPathRef {
   articles: { id: string; slug: string; title: string; readingMinutes: number }[];
 }
 
+/** Ghi đè SEO cho từng bài (hợp đồng §8.1). Trường vắng ⇒ dùng mặc định (title, summary, coverImageUrl). */
+export interface ArticleSeo {
+  title?: string;
+  description?: string;
+  ogImageUrl?: string;
+  noindex?: boolean;
+}
+
 export interface ArticleDetail extends ArticleCard {
   content: string;
+  seo?: ArticleSeo;
   learningPath?: ArticleLearningPathRef;
   myReactions: ReactionType[];
+}
+
+/** Dữ liệu dựng sitemap.xml (hợp đồng §8.3). */
+export interface SitemapData {
+  articles: { slug: string; updatedAt: string; noindex?: boolean }[];
+  categories: { slug: string; updatedAt?: string }[];
+  learningPaths: { slug: string; updatedAt: string }[];
+}
+
+/** Ảnh trong thư viện media (hợp đồng §8.2). `url` là đường dẫn tương đối cùng origin, vd `/uploads/2026/11/abc.webp`. */
+export interface MediaItem {
+  id: string;
+  url: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  width?: number;
+  height?: number;
+  alt?: string;
+  uploadedBy: AuthorRef;
+  createdAt: string;
 }
 
 export interface Page<T> {
@@ -174,8 +204,11 @@ export type ArticleStatus = 'draft' | 'published' | 'archived';
 export interface AdminArticle extends Omit<ArticleDetail, 'myReactions' | 'content' | 'publishedAt'> {
   content?: string;
   status: ArticleStatus;
+  /** `published` + `publishedAt` ở tương lai = ĐÃ LÊN LỊCH (công khai từ thời điểm đó). */
   publishedAt?: string;
   learningPathId?: string;
+  /** true khi bài đã được sửa trong CMS — lệnh seed không ghi đè nội dung nữa (hợp đồng §8.4). */
+  editedInCms?: boolean;
 }
 
 export interface ArticleInput {
@@ -188,6 +221,13 @@ export interface ArticleInput {
   categoryId: string;
   level: Level;
   tags: string[];
+  /** Ghi đè SEO; gửi `{}` hoặc bỏ trường để xoá ghi đè. */
+  seo?: ArticleSeo;
+}
+
+/** Thân `POST /admin/articles/:id/publish` — bỏ trống = xuất bản ngay; có `publishAt` ở tương lai = lên lịch. */
+export interface PublishInput {
+  publishAt?: string;
 }
 
 export interface CategoryInput {

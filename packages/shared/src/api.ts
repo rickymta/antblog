@@ -19,11 +19,14 @@ import type {
   LearningPathInput,
   LikeState,
   Level,
+  MediaItem,
   Page,
+  PublishInput,
   ReactionState,
   ReactionType,
   Role,
   SiteSummary,
+  SitemapData,
   StatsOverview,
   Subscriber,
   TagCount,
@@ -78,6 +81,20 @@ async function request<T>(method: string, path: string, body?: unknown, query?: 
 
 const enc = encodeURIComponent;
 
+/** Gửi multipart/form-data (tải ảnh) — ngoại lệ duy nhất của luật "ghi phải là JSON" (hợp đồng §8.2). */
+async function upload<T>(path: string, form: FormData): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { Accept: 'application/json' },
+    body: form,
+  });
+  const text = await res.text();
+  const data = text ? (JSON.parse(text) as unknown) : undefined;
+  if (!res.ok) throw new ApiError(res.status, data as ApiErrorBody | undefined);
+  return data as T;
+}
+
 export const api = {
   auth: {
     register: (input: { email: string; password: string; displayName: string }) =>
@@ -93,6 +110,7 @@ export const api = {
     summary: () => request<SiteSummary>('GET', '/site/summary'),
     trackVisit: (path: string) => request<void>('POST', '/track/visit', { path }),
     subscribe: (email: string) => request<{ ok: true }>('POST', '/subscribers', { email }),
+    sitemap: () => request<SitemapData>('GET', '/site/sitemap'),
   },
 
   categories: {
@@ -143,7 +161,9 @@ export const api = {
       get: (id: string) => request<AdminArticle>('GET', `/admin/articles/${enc(id)}`),
       create: (input: ArticleInput) => request<AdminArticle>('POST', '/admin/articles', input),
       update: (id: string, input: ArticleInput) => request<AdminArticle>('PUT', `/admin/articles/${enc(id)}`, input),
-      publish: (id: string) => request<AdminArticle>('POST', `/admin/articles/${enc(id)}/publish`),
+      /** Bỏ trống ⇒ xuất bản ngay; `publishAt` ở tương lai ⇒ lên lịch. */
+      publish: (id: string, input: PublishInput = {}) =>
+        request<AdminArticle>('POST', `/admin/articles/${enc(id)}/publish`, input),
       unpublish: (id: string) => request<AdminArticle>('POST', `/admin/articles/${enc(id)}/unpublish`),
       archive: (id: string) => request<void>('DELETE', `/admin/articles/${enc(id)}`),
     },
@@ -181,6 +201,19 @@ export const api = {
 
     subscribers: {
       list: (page = 1) => request<Page<Subscriber>>('GET', '/admin/subscribers', undefined, { page }),
+    },
+
+    media: {
+      list: (query: { q?: string; page?: number; pageSize?: number } = {}) =>
+        request<Page<MediaItem>>('GET', '/admin/media', undefined, { ...query }),
+      upload: (file: File | Blob, alt?: string) => {
+        const form = new FormData();
+        form.append('file', file);
+        if (alt) form.append('alt', alt);
+        return upload<MediaItem>('/admin/media', form);
+      },
+      update: (id: string, input: { alt: string }) => request<MediaItem>('PATCH', `/admin/media/${enc(id)}`, input),
+      remove: (id: string) => request<void>('DELETE', `/admin/media/${enc(id)}`),
     },
   },
 };
