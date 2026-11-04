@@ -159,3 +159,6 @@
 .tkh-prose .tkh-callout > :first-child { margin-top: 0; }
 .tkh-prose .tkh-callout > * + * { margin-top: 0.6em; }
 .tkh-prose .tkh-callout-title { font-weight: 650; display: block; }
+/* Khối «Thông tin bài» (bảng hai cột tên–giá trị trong callout): cột tên không bị ép xuống dòng từng chữ. */
+.tkh-prose .tkh-callout th[scope='row'] { width: 11rem; white-space: nowrap; }
+@media (max-width: 480px) { .tkh-prose .tkh-callout th[scope='row'] { width: auto; white-space: normal; } }

@@ -75,5 +75,16 @@
     "icon": "security",
     "color": "#EF4444",
     "order": 7
+  },
+  {
+    "slug": "testing",
+    "name": { "vi": "Kiểm thử", "en": "Testing" },
+    "description": {
+      "vi": "Kiểm thử phần mềm theo khung ISTQB: nguyên lý, cấp độ, kỹ thuật thiết kế test, quản lý kiểm thử và tự động hoá.",
+      "en": "Software testing along the ISTQB framework: principles, levels, test design techniques, test management and automation."
+    },
+    "icon": "testing",
+    "color": "#14B8A6",
+    "order": 8
   }
 ]

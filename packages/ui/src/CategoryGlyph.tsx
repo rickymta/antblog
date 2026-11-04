@@ -1,5 +1,5 @@
 import type { LucideIcon, LucideProps } from 'lucide-react';
-import { Container, Cpu, Database, CodeXml, Network, Shapes, ShieldCheck } from 'lucide-react';
+import { Container, Cpu, Database, CodeXml, FlaskConical, Network, Shapes, ShieldCheck } from 'lucide-react';
 import type { CategoryIcon } from '@tkh/shared';
 
 const ICONS: Record<CategoryIcon, LucideIcon> = {
@@ -10,6 +10,7 @@ const ICONS: Record<CategoryIcon, LucideIcon> = {
   devops: Container,
   system: Cpu,
   security: ShieldCheck,
+  testing: FlaskConical,
 };
 
 /** Biểu tượng của chủ đề (`category.icon`). Trang trí — đặt `aria-hidden`, tên chủ đề luôn đi kèm. */

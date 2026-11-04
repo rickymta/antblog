@@ -296,6 +296,7 @@ export const en: Messages = {
       devops: 'DevOps',
       system: 'Systems',
       security: 'Security',
+      testing: 'Testing',
     },
   },
   paths: {

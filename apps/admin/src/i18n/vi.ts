@@ -294,6 +294,7 @@ export const vi = {
       devops: 'DevOps',
       system: 'Hệ thống',
       security: 'Bảo mật',
+      testing: 'Kiểm thử',
     },
   },
   paths: {
