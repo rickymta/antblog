@@ -36,7 +36,8 @@ export function CategoryChip({
   const cls = 'inline-flex max-w-full items-center gap-1.5 truncate rounded-ui px-2 py-0.5 text-xs font-semibold text-ink';
   const style = { backgroundColor: withAlpha(color, 0.12) };
   return link ? (
-    <Link href={`/topics/${encodeURIComponent(category.slug)}`} className={`${cls} hover:underline`} style={style}>
+    // min-h-6: vùng bấm tối thiểu 24 × 24 px (WCAG 2.5.8) — các thẻ chủ đề trên lưới bài nằm sát nhau.
+    <Link href={`/topics/${encodeURIComponent(category.slug)}`} className={`${cls} min-h-6 hover:underline`} style={style}>
       {content}
     </Link>
   ) : (

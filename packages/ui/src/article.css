@@ -80,6 +80,16 @@
   line-height: 1.6;
   border: 1px solid #1E293B;
 }
+
+/* Bài dài (vài chục khối code, hình, bảng): khối ngoài màn hình chưa cần dựng bố cục — trình duyệt bỏ qua tới khi cuộn
+   gần, giảm thời gian Style & Layout lúc tải. `auto` trong contain-intrinsic-size: nhớ kích thước thật sau lần dựng đầu. */
+.tkh-prose > pre,
+.tkh-prose > .tkh-fig,
+.tkh-prose > table,
+.tkh-prose > .tkh-table {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 360px;
+}
 .tkh-prose pre code { font-family: var(--font-mono); background: transparent; }
 
 .tkh-prose table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
