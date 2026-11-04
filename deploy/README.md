@@ -134,4 +134,5 @@ Thêm máy khách: thêm tên vào `WG_PEERS` rồi `docker compose up -d wiregu
 Lưu ý:
 - Mật khẩu MongoDB trong `.env` chỉ có tác dụng ở **lần khởi tạo volume đầu tiên**. Đổi về sau phải dùng `db.changeUserPassword(...)` trong mongosh rồi mới sửa `.env`.
 - nginx lấy IP thật của người đọc từ header `CF-Connecting-IP` (chỉ khi request đến từ dải IP của Cloudflare). Muốn chặn hẳn truy cập vào thẳng IP server, giới hạn TCP 80/443 ở tường lửa chỉ cho dải IP Cloudflare (`https://www.cloudflare.com/ips/`).
+- nginx giữ HTML trang đọc 60 giây (micro-cache, header `X-Cache-Status: HIT|MISS|STALE`): bài vừa sửa/xuất bản trong CMS hiện ra trên trang đọc sau tối đa ~1 phút. Cần xoá ngay: `docker compose exec nginx sh -c 'rm -rf /var/cache/nginx/tkh_web/*'`.
 - Cookie đăng nhập có cờ `Secure` (`COOKIE_SECURE=true`) ⇒ chỉ đăng nhập được qua HTTPS.

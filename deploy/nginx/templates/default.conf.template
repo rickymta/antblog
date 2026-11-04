@@ -23,6 +23,25 @@ upstream tkh_web {
   keepalive 16;
 }
 
+# Micro-cache HTML của trang đọc: mỗi trang chỉ render lại tối đa 1 lần / 60 giây dù bao nhiêu người đọc
+# (TTFB thấp, chịu được lượt truy cập dồn dập). An toàn vì HTML trang đọc giống hệt nhau với mọi người:
+# không đọc cookie khi render, trạng thái đăng nhập/reaction/bình luận tải phía trình duyệt qua /api/.
+# Không cache: request RSC của bộ định tuyến Next.js (header `RSC`, nội dung khác HTML) và request có cookie
+# phiên (phòng khi sau này có trang render theo người dùng). Phản hồi có Set-Cookie nginx tự không cache.
+proxy_cache_path /var/cache/nginx/tkh_web levels=1:2 keys_zone=tkh_web:10m max_size=256m inactive=30m use_temp_path=off;
+
+map "$http_rsc$http_next_router_prefetch$cookie_tkh_session" $tkh_web_nocache {
+  ""      0;
+  default 1;
+}
+
+# Cache-Control gửi cho trình duyệt/Cloudflare thay cho của Next.js (trang render động gửi `no-store`, chặn
+# back/forward cache của trình duyệt). `no-cache` = luôn hỏi lại nhưng vẫn được giữ trong bfcache.
+map $tkh_web_nocache $tkh_web_cache_control {
+  0       "public, max-age=0, must-revalidate";
+  default "private, no-cache";
+}
+
 # Giới hạn thô tầng nginx theo IP thật (sau real_ip của Cloudflare). API có rate limit riêng cho đăng nhập/bình luận.
 limit_req_zone $binary_remote_addr zone=tkh_api:10m rate=20r/s;
 
@@ -84,6 +103,41 @@ server {
     proxy_hide_header Referrer-Policy;
     proxy_hide_header X-Frame-Options;
     proxy_read_timeout 60s;
+
+    proxy_cache tkh_web;
+    proxy_cache_key "$scheme$host$request_uri";
+    proxy_cache_bypass $tkh_web_nocache;
+    proxy_no_cache $tkh_web_nocache;
+    # Next.js gửi `private, no-store` cho trang render động ⇒ bỏ qua để micro-cache vẫn chạy.
+    proxy_ignore_headers Cache-Control Expires;
+    proxy_cache_valid 200 301 308 60s;
+    proxy_cache_valid 404 10s;
+    # Hết hạn ⇒ trả bản cũ ngay và làm mới ở nền; web lỗi/đang khởi động lại ⇒ vẫn trả bản cũ.
+    proxy_cache_use_stale updating error timeout http_500 http_502 http_503 http_504;
+    proxy_cache_background_update on;
+    proxy_cache_lock on;
+    proxy_cache_lock_timeout 5s;
+
+    proxy_hide_header Cache-Control;
+    add_header Cache-Control $tkh_web_cache_control always;
+    add_header X-Cache-Status $upstream_cache_status always;
+    # location có add_header riêng ⇒ không kế thừa header của server, phải include lại.
+    include /etc/nginx/snippets/tkh-headers.conf;
+  }
+
+  # Tệp tĩnh của Next.js có hash trong tên ⇒ cache lâu ở nginx (Next.js đã gửi `immutable`).
+  location /_next/static/ {
+    proxy_pass http://tkh_web;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    proxy_hide_header X-Content-Type-Options;
+    proxy_hide_header Referrer-Policy;
+    proxy_hide_header X-Frame-Options;
+    proxy_cache tkh_web;
+    proxy_cache_key "$scheme$host$request_uri";
+    proxy_cache_valid 200 7d;
+    proxy_cache_lock on;
   }
 }
 

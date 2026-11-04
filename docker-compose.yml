@@ -63,6 +63,9 @@ services:
       API_INTERNAL_URL: http://api:4000
       # true ⇒ robots.txt chặn hết + mọi trang noindex (dùng khi chưa muốn Google lập chỉ mục).
       SITE_NOINDEX: ${SITE_NOINDEX:-false}
+      # Mã xác minh Google Search Console / Bing Webmaster (thẻ meta) — để trống nếu xác minh bằng DNS.
+      GOOGLE_SITE_VERIFICATION: ${GOOGLE_SITE_VERIFICATION:-}
+      BING_SITE_VERIFICATION: ${BING_SITE_VERIFICATION:-}
     networks:
       - tkh
     logging: *logging
