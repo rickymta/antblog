@@ -1,7 +1,17 @@
+'use client';
+
+import { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ListOrdered } from 'lucide-react';
 import type { Heading } from '@tkh/ui';
+import { useScrollSpy } from '../../hooks/useScrollSpy';
 import { scrollToId } from '../../lib/dom';
+
+/** Tiêu đề đang đọc (scroll-spy) — mỗi khối mục lục tự theo dõi, danh sách tiêu đề do máy chủ tính sẵn. */
+function useActiveHeading(headings: Heading[]): string | undefined {
+  const ids = useMemo(() => headings.map((h) => h.id), [headings]);
+  return useScrollSpy(ids);
+}
 
 /** Danh sách mục lục H2/H3; mục đang đọc tô primary (scroll-spy, A4). */
 export function TocList({ headings, activeId, onNavigate }: { headings: Heading[]; activeId?: string; onNavigate?: () => void }) {
@@ -33,12 +43,14 @@ export function TocList({ headings, activeId, onNavigate }: { headings: Heading[
 }
 
 /** "Trên trang này" ở cột bên (màn rộng). */
-export function TocPanel({ headings, activeId, title }: { headings: Heading[]; activeId?: string; title?: string }) {
+export function TocPanel({ headings, title }: { headings: Heading[]; title?: string }) {
   const { t } = useTranslation();
+  const activeId = useActiveHeading(headings);
+  const titleId = useId();
   if (headings.length === 0) return null;
   return (
-    <nav aria-labelledby="toc-title">
-      <h2 id="toc-title" className="mb-3 text-xs font-bold tracking-wide text-ink uppercase">
+    <nav aria-labelledby={titleId}>
+      <h2 id={titleId} className="mb-3 text-xs font-bold tracking-wide text-ink uppercase">
         {title ?? t('article.toc')}
       </h2>
       <TocList headings={headings} activeId={activeId} />
@@ -47,8 +59,9 @@ export function TocPanel({ headings, activeId, title }: { headings: Heading[]; a
 }
 
 /** Mục lục thu gọn ở đầu bài trên màn hẹp (< 1024px). */
-export function TocCollapsible({ headings, activeId }: { headings: Heading[]; activeId?: string }) {
+export function TocCollapsible({ headings }: { headings: Heading[] }) {
   const { t } = useTranslation();
+  const activeId = useActiveHeading(headings);
   if (headings.length === 0) return null;
   return (
     <details className="group rounded-card border border-line bg-surface lg:hidden">

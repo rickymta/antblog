@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CategoryGlyph } from '@tkh/ui';
@@ -32,7 +34,10 @@ export function Cover({
       <img
         src={src}
         alt=""
+        width={640}
+        height={360}
         loading={eager ? 'eager' : 'lazy'}
+        fetchPriority={eager ? 'high' : undefined}
         decoding="async"
         referrerPolicy="no-referrer"
         onError={() => setFailed(src)}

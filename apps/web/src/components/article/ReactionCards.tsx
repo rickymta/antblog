@@ -1,21 +1,28 @@
+'use client';
+
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { LogIn } from 'lucide-react';
-import { formatCompact, type ArticleDetail, type ReactionType } from '@tkh/shared';
+import { formatCompact, type ReactionType } from '@tkh/shared';
 import { useLocale } from '../../i18n';
+import { useAuth } from '../../lib/auth';
 import { loginHref } from '../../lib/navigation';
+import { useArticle } from './ArticleContext';
 import { REACTIONS } from './reactionMeta';
 import { useReactions } from './useReactions';
 
 /**
  * "Bạn thấy bài viết này thế nào?" — 4 thẻ reaction ngang bằng nhau (A7): emoji lớn, tên tiếng Anh đậm, nghĩa tiếng Việt nhỏ, số đếm.
- * Đã chọn ⇒ viền primary + nền primary nhạt; bấm lại để bỏ. Chọn được nhiều loại.
+ * Đã chọn ⇒ viền primary + nền primary nhạt; bấm lại để bỏ. Chọn được nhiều loại. Số đếm có sẵn trong HTML máy chủ.
  */
-export function ReactionCards({ article }: { article: ArticleDetail }) {
+export function ReactionCards() {
   const { t } = useTranslation();
   const locale = useLocale();
-  const location = useLocation();
+  const pathname = usePathname();
+  const article = useArticle();
+  const { loading } = useAuth();
   const { toggle, pending, loggedIn } = useReactions(article.slug);
   const [message, setMessage] = useState<'login' | 'error' | null>(null);
 
@@ -66,10 +73,10 @@ export function ReactionCards({ article }: { article: ArticleDetail }) {
         })}
       </ul>
       <div aria-live="polite" className="mt-4 text-center text-sm">
-        {(message === 'login' || (!loggedIn && message !== 'error')) && (
+        {(message === 'login' || (!loggedIn && !loading && message !== 'error')) && (
           <p className="inline-flex flex-wrap items-center justify-center gap-2 text-muted">
             {t('article.reactionsLogin')}
-            <Link to={loginHref(location.pathname)} className="inline-flex items-center gap-1 font-semibold text-primary-ink hover:underline">
+            <Link href={loginHref(pathname)} rel="nofollow" className="inline-flex items-center gap-1 font-semibold text-primary-ink hover:underline">
               <LogIn aria-hidden="true" className="h-4 w-4" />
               {t('header.login')}
             </Link>

@@ -1,4 +1,6 @@
-import { Link } from 'react-router';
+'use client';
+
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -15,20 +17,34 @@ function pageItems(page: number, pageCount: number): (number | 'gap')[] {
   return out;
 }
 
+/** Liên kết trang N giữ nguyên các tham số lọc khác; trang 1 bỏ `page`. */
+export function pageHref(basePath: string, params: Record<string, string>, page: number): string {
+  const next = new URLSearchParams(params);
+  if (page > 1) next.set('page', String(page));
+  else next.delete('page');
+  const s = next.toString();
+  return s ? `${basePath}?${s}` : basePath;
+}
+
+/** Phân trang bằng liên kết thật (`<a href>`) — trình thu thập đi được qua mọi trang. */
 export function Pagination({
   page,
   total,
   pageSize,
-  hrefFor,
+  basePath,
+  params,
 }: {
   page: number;
   total: number;
   pageSize: number;
-  hrefFor: (page: number) => string;
+  basePath: string;
+  /** Tham số lọc hiện tại (không gồm `page`). */
+  params: Record<string, string>;
 }) {
   const { t } = useTranslation();
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   if (pageCount <= 1) return null;
+  const hrefFor = (p: number) => pageHref(basePath, params, p);
 
   const cell = 'inline-flex h-9 min-w-9 items-center justify-center rounded-ui px-2 text-sm font-medium';
   const arrow = `${cell} gap-1 border border-line bg-surface text-ink hover:bg-surface-2`;
@@ -37,7 +53,7 @@ export function Pagination({
   return (
     <nav aria-label={t('articles.pagination')} className="flex flex-wrap items-center justify-center gap-1.5">
       {page > 1 ? (
-        <Link to={hrefFor(page - 1)} className={arrow} aria-label={t('articles.prevPage')}>
+        <Link href={hrefFor(page - 1)} rel="prev" className={arrow} aria-label={t('articles.prevPage')}>
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />
         </Link>
       ) : (
@@ -53,7 +69,7 @@ export function Pagination({
         ) : (
           <Link
             key={item}
-            to={hrefFor(item)}
+            href={hrefFor(item)}
             aria-current={item === page ? 'page' : undefined}
             aria-label={t('articles.pageN', { n: item })}
             className={`${cell} ${item === page ? 'bg-primary text-white' : 'border border-line bg-surface text-ink hover:bg-surface-2'}`}
@@ -63,7 +79,7 @@ export function Pagination({
         ),
       )}
       {page < pageCount ? (
-        <Link to={hrefFor(page + 1)} className={arrow} aria-label={t('articles.nextPage')}>
+        <Link href={hrefFor(page + 1)} rel="next" className={arrow} aria-label={t('articles.nextPage')}>
           <ChevronRight aria-hidden="true" className="h-4 w-4" />
         </Link>
       ) : (

@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useEffect, useLayoutEffect, useState, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Copy } from 'lucide-react';

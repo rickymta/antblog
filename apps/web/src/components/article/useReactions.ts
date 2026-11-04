@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api, type ArticleDetail, type ReactionType } from '@tkh/shared';

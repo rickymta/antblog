@@ -1,4 +1,6 @@
-import { Link } from 'react-router';
+'use client';
+
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { CategoryGlyph, LevelBadge } from '@tkh/ui';
 import { pickLocalized, type CategoryRef, type Level } from '@tkh/shared';
@@ -34,7 +36,7 @@ export function CategoryChip({
   const cls = 'inline-flex max-w-full items-center gap-1.5 truncate rounded-ui px-2 py-0.5 text-xs font-semibold text-ink';
   const style = { backgroundColor: withAlpha(color, 0.12) };
   return link ? (
-    <Link to={`/topics/${encodeURIComponent(category.slug)}`} className={`${cls} hover:underline`} style={style}>
+    <Link href={`/topics/${encodeURIComponent(category.slug)}`} className={`${cls} hover:underline`} style={style}>
       {content}
     </Link>
   ) : (
@@ -47,7 +49,7 @@ export function CategoryChip({
 export function TagChip({ tag }: { tag: string }) {
   return (
     <Link
-      to={`/articles?tag=${encodeURIComponent(tag)}`}
+      href={`/articles?tag=${encodeURIComponent(tag)}`}
       className="inline-flex items-center rounded-ui border border-line bg-surface px-2 py-1 text-xs font-medium text-ink hover:border-primary hover:text-primary-ink"
     >
       #{tag}

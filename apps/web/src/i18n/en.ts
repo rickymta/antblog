@@ -6,6 +6,10 @@ export const en: Messages = {
     siteName: 'Tech Knowledge Hub',
     tagline: 'Learn • Share • Grow',
     titleSuffix: 'Tech Knowledge Hub',
+    description:
+      'A Vietnamese tech blog on databases, programming languages, design patterns and software architecture — learn along paths from beginner to advanced.',
+    searchTitle: 'Search “{{q}}”',
+    pageN: 'page {{n}}',
   },
   common: {
     loading: 'Loading…',
@@ -105,6 +109,7 @@ export const en: Messages = {
     statPaths: 'Learning paths',
     statMembers: 'Members',
     statsLabel: 'Tech Knowledge Hub in numbers',
+    roadmapStep: 'Step {{n}}: {{label}}',
     roadmapLabel:
       'Learning roadmap: Fundamentals, then Database, then Programming languages and Design patterns, then Architecture and finally Advanced.',
     roadmap: {

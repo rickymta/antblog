@@ -15,12 +15,15 @@ export interface SeedOptions {
   dataDir: string;
   admin: { email?: string; password?: string; name?: string };
   log?: (msg: string) => void;
+  /** `--force-content`: ghi đè cả bài đã sửa trong CMS (`editedInCms`). Mặc định false (hợp đồng §8.4). */
+  forceContent?: boolean;
 }
 
 export interface SeedResult {
   adminCreated: boolean;
   categories: number;
-  articles: { created: number; updated: number; skipped: number };
+  /** `keptCms`: bài có sẵn đã sửa trong CMS ⇒ giữ nguyên, không ghi đè từ tệp .md. */
+  articles: { created: number; updated: number; skipped: number; keptCms: number };
   learningPaths: number;
 }
 
@@ -61,7 +64,13 @@ const frontmatter = z.object({
     .default([])
     .transform((t) => [...new Set(t.map((x) => x.trim().toLowerCase()).filter(Boolean))].slice(0, 10)),
   language: z.enum(['vi', 'en']).default('vi'),
-  coverImageUrl: z.string().url().optional(),
+  coverImageUrl: z
+    .string()
+    .trim()
+    .refine((v) => /^https?:\/\/\S+$/i.test(v) || /^\/uploads\/(?!.*\.\.)[A-Za-z0-9._\/-]+$/.test(v), {
+      message: 'coverImageUrl phải là URL http(s) hoặc /uploads/...',
+    })
+    .optional(),
   publishedAt: z.coerce.date().optional(),
 });
 
@@ -105,7 +114,7 @@ async function ensureAdmin(opts: SeedOptions['admin'], log: (m: string) => void)
 
 export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
   const log = opts.log ?? ((m: string) => console.log(m));
-  const result: SeedResult = { adminCreated: false, categories: 0, articles: { created: 0, updated: 0, skipped: 0 }, learningPaths: 0 };
+  const result: SeedResult = { adminCreated: false, categories: 0, articles: { created: 0, updated: 0, skipped: 0, keptCms: 0 }, learningPaths: 0 };
 
   const { user: admin, created } = await ensureAdmin(opts.admin, log);
   result.adminCreated = created;
@@ -167,12 +176,20 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
       status: 'published' as const,
       ...(meta.coverImageUrl ? { coverImageUrl: meta.coverImageUrl } : {}),
     };
-    const existing = await Article.findOne({ slug: meta.slug }).select({ publishedAt: 1 }).lean();
-    if (existing) {
-      // Giữ `publishedAt` cũ khi chạy lại.
+    const existing = await Article.findOne({ slug: meta.slug }).select({ publishedAt: 1, editedInCms: 1 }).lean();
+    if (existing?.editedInCms === true && !opts.forceContent) {
+      // Bài đã sửa trong CMS: không đụng nội dung/tiêu đề/trạng thái — CMS là nguồn sự thật của bài này.
+      log(`[seed] ${meta.slug}: bỏ qua (đã sửa trong CMS). Dùng --force-content để ghi đè.`);
+      result.articles.keptCms++;
+    } else if (existing) {
+      // Giữ `publishedAt` cũ khi chạy lại. Ép ghi đè ⇒ bài trở lại khớp tệp .md, bỏ cờ đã sửa trong CMS.
+      if (existing.editedInCms === true) log(`[seed] ${meta.slug}: ghi đè bản đã sửa trong CMS (--force-content).`);
       await Article.updateOne(
         { _id: existing._id },
-        { $set: { ...fields, publishedAt: existing.publishedAt ?? meta.publishedAt ?? new Date() } },
+        {
+          $set: { ...fields, publishedAt: existing.publishedAt ?? meta.publishedAt ?? new Date() },
+          $unset: { editedInCms: 1 },
+        },
       );
       result.articles.updated++;
     } else {
@@ -181,7 +198,10 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
     }
   }
   if (files.length) {
-    log(`[seed] Bài viết: tạo ${result.articles.created}, cập nhật ${result.articles.updated}, bỏ qua ${result.articles.skipped}.`);
+    log(
+      `[seed] Bài viết: tạo ${result.articles.created}, cập nhật ${result.articles.updated}, ` +
+        `giữ bản CMS ${result.articles.keptCms}, bỏ qua ${result.articles.skipped}.`,
+    );
   }
 
   // ---- Lộ trình học ----

@@ -11,8 +11,11 @@ async function main(): Promise<void> {
   if (!uri) throw new Error('Thiếu MONGODB_URI (xem .env.example)');
   await connectDb(uri);
   try {
+    const forceContent = process.argv.includes('--force-content');
+    if (forceContent) console.log('[seed] --force-content: ghi đè cả bài đã sửa trong CMS.');
     const r = await runSeed({
       dataDir,
+      forceContent,
       admin: {
         email: process.env.SEED_ADMIN_EMAIL,
         password: process.env.SEED_ADMIN_PASSWORD,
@@ -21,7 +24,7 @@ async function main(): Promise<void> {
     });
     console.log(
       `[seed] Xong: admin ${r.adminCreated ? 'mới tạo' : 'đã có'}, ${r.categories} chủ đề, ` +
-        `${r.articles.created + r.articles.updated} bài, ${r.learningPaths} lộ trình.`,
+        `${r.articles.created + r.articles.updated} bài (giữ ${r.articles.keptCms} bài đã sửa trong CMS), ${r.learningPaths} lộ trình.`,
     );
   } finally {
     await disconnectDb();

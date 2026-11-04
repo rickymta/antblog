@@ -10,7 +10,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { ArticleStatus, CategoryIcon as CategoryIconName, Level, Role, UserStatus } from '@tkh/shared';
+import type { CategoryIcon as CategoryIconName, Level, Role, UserStatus } from '@tkh/shared';
+import type { DisplayStatus } from '../lib/articles';
 import { Badge, type Tone } from './ui';
 
 const LEVEL_TONE: Record<Level, Tone> = { beginner: 'success', intermediate: 'indigo', advanced: 'violet' };
@@ -20,9 +21,10 @@ export function LevelBadge({ level }: { level: Level }) {
   return <Badge tone={LEVEL_TONE[level]}>{t(`level.${level}`)}</Badge>;
 }
 
-const ARTICLE_STATUS_TONE: Record<ArticleStatus, Tone> = { draft: 'warning', published: 'success', archived: 'neutral' };
+const ARTICLE_STATUS_TONE: Record<DisplayStatus, Tone> = { draft: 'warning', published: 'success', archived: 'neutral', scheduled: 'primary' };
 
-export function ArticleStatusBadge({ status }: { status: ArticleStatus }) {
+/** Trạng thái bài; `scheduled` = đã xuất bản nhưng `publishedAt` ở tương lai (xem `displayStatus`). */
+export function ArticleStatusBadge({ status }: { status: DisplayStatus }) {
   const { t } = useTranslation();
   return <Badge tone={ARTICLE_STATUS_TONE[status]}>{t(`articleStatus.${status}`)}</Badge>;
 }

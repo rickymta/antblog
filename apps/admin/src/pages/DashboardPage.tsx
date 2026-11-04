@@ -18,6 +18,7 @@ import { ArrowDownRight, ArrowUpRight, Minus, PenLine } from 'lucide-react';
 import { api, formatCompact, formatDate, formatNumber, type Locale, type StatsOverview } from '@tkh/shared';
 import { buttonClass, Card, EmptyState, ErrorState, PageHeader, Skeleton, TableWrap, Td, Th, cx } from '../components/ui';
 import { ArticleStatusBadge } from '../components/domain';
+import { displayStatus } from '../lib/articles';
 import { useIsAdmin } from '../lib/session';
 import { errorMessage } from '../lib/errors';
 import { useLocale } from '../i18n';
@@ -397,7 +398,7 @@ function AuthorDashboard() {
                         </Link>
                       </Td>
                       <Td>
-                        <ArticleStatusBadge status={a.status} />
+                        <ArticleStatusBadge status={displayStatus(a)} />
                       </Td>
                       <Td className="text-right tabular-nums">{formatNumber(a.stats.views, locale)}</Td>
                       <Td className="text-right tabular-nums">{formatNumber(a.stats.comments, locale)}</Td>

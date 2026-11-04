@@ -1,4 +1,7 @@
-import type { ReactNode } from 'react';
+'use client';
+
+import { useTransition, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Inbox, RefreshCw, TriangleAlert } from 'lucide-react';
 import { btnSecondary } from '../../lib/ui';
@@ -69,6 +72,17 @@ export function PageLoading() {
     <div className="flex min-h-[50vh] items-center justify-center" role="status">
       <span className="h-8 w-8 animate-spin rounded-full border-4 border-primary/25 border-t-primary motion-reduce:animate-none" aria-hidden="true" />
       <span className="sr-only">{t('common.loading')}</span>
+    </div>
+  );
+}
+
+/** Khối lỗi cho dữ liệu do máy chủ tải: "Thử lại" = render lại trang phía máy chủ (giữ nguyên trạng thái phía trình duyệt). */
+export function RefreshErrorState({ compact = false }: { compact?: boolean }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  return (
+    <div aria-busy={pending} className={pending ? 'opacity-60' : undefined}>
+      <ErrorState compact={compact} onRetry={() => startTransition(() => router.refresh())} />
     </div>
   );
 }

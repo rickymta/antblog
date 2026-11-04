@@ -1,8 +1,11 @@
-import { Link } from 'react-router';
+'use client';
+
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { BookOpen, Calendar, Clock } from 'lucide-react';
 import { Skeleton } from '@tkh/ui';
-import { formatDate, type LearningPathCard } from '@tkh/shared';
+import { type LearningPathCard } from '@tkh/shared';
+import { formatDay } from '../../lib/dates';
 import { useLocale } from '../../i18n';
 import { formatDuration } from '../../lib/format';
 import { countReadInPath, useReadArticles } from '../../lib/reading';
@@ -59,7 +62,7 @@ export function PathCard({ path, showDate = false }: { path: LearningPathCard; s
           {showDate && (
             <span className="inline-flex items-center gap-1">
               <Calendar aria-hidden="true" className="h-3.5 w-3.5" />
-              {t('common.updatedOn', { date: formatDate(path.updatedAt, locale) })}
+              {t('common.updatedOn', { date: formatDay(path.updatedAt, locale) })}
             </span>
           )}
         </div>
@@ -67,7 +70,7 @@ export function PathCard({ path, showDate = false }: { path: LearningPathCard; s
           <ProgressBar value={read} max={path.articleCount} label={t('paths.progressLabel', { title: path.title })} />
           <p className="text-xs text-muted">{t('paths.progress', { read, total: path.articleCount })}</p>
         </div>
-        <Link to={pathHref(path.slug)} className={`${btnPrimary} w-full`}>
+        <Link href={pathHref(path.slug)} className={`${btnPrimary} w-full`}>
           {t('paths.view')}
           <span className="sr-only">: {path.title}</span>
         </Link>

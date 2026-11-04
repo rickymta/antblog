@@ -67,6 +67,46 @@ describe('seed', () => {
     expect(summary.body).toMatchObject({ articleCount: 2, categoryCount: 2, learningPathCount: 1 });
   });
 
+  it('bài đã sửa trong CMS: seed giữ nguyên + log, --force-content ghi đè lại; bài chưa sửa vẫn cập nhật', async () => {
+    await runSeed({ dataDir, admin, log: quiet });
+    const adminDoc = await User.findOne({ email: 'admin@tkh.local' }).lean();
+    const edited = await Article.findOne({ slug: 'chi-muc-co-ban' }).lean();
+    const untouched = await Article.findOne({ slug: 'giao-dich' }).lean();
+    const app = makeApp();
+    const c = sessionCookie(adminDoc!);
+    await request(app)
+      .put(`/api/v1/admin/articles/${edited!._id}`)
+      .set('Cookie', c)
+      .send({
+        title: 'Tiêu đề sửa trong CMS',
+        summary: 'Tóm tắt CMS',
+        content: 'Nội dung viết lại trong CMS.',
+        language: 'vi',
+        categoryId: edited!.categoryId.toString(),
+        level: 'advanced',
+        tags: ['cms'],
+      })
+      .expect(200);
+    await request(app).post(`/api/v1/admin/articles/${edited!._id}/unpublish`).set('Cookie', c).send({}).expect(200);
+    // Bài chưa sửa trong CMS nhưng bị đổi trực tiếp trong DB ⇒ seed vẫn đưa về tệp .md.
+    await Article.updateOne({ _id: untouched!._id }, { $set: { title: 'đổi tay' } });
+
+    const logs: string[] = [];
+    const again = await runSeed({ dataDir, admin, log: (m) => logs.push(m) });
+    expect(again.articles).toMatchObject({ created: 0, updated: 1, keptCms: 1, skipped: 1 });
+    expect(logs.some((l) => l.includes('chi-muc-co-ban') && l.includes('bỏ qua (đã sửa trong CMS)'))).toBe(true);
+    const kept = await Article.findById(edited!._id).lean();
+    expect(kept).toMatchObject({ title: 'Tiêu đề sửa trong CMS', content: 'Nội dung viết lại trong CMS.', level: 'advanced', tags: ['cms'], status: 'draft', editedInCms: true });
+    expect((await Article.findById(untouched!._id).lean())!.title).toBe(untouched!.title);
+
+    const forced = await runSeed({ dataDir, admin, log: quiet, forceContent: true });
+    expect(forced.articles).toMatchObject({ created: 0, updated: 2, keptCms: 0 });
+    const reset = await Article.findById(edited!._id).lean();
+    expect(reset).toMatchObject({ title: edited!.title, content: edited!.content, level: edited!.level, tags: edited!.tags, status: 'published' });
+    expect(reset!.editedInCms).toBeUndefined();
+    expect(reset!.publishedAt!.toISOString()).toBe(edited!.publishedAt!.toISOString());
+  });
+
   it('thiếu tệp dữ liệu ⇒ ghi log rõ ràng, vẫn tạo admin', async () => {
     const logs: string[] = [];
     await runSeed({ dataDir: path.join(dataDir, 'khong-co'), admin, log: (m) => logs.push(m) });

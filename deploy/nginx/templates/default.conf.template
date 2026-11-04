@@ -2,18 +2,24 @@
 # (envsubst chỉ thay biến môi trường có thật, nên các biến nginx như $host, $remote_addr giữ nguyên).
 #
 #   :80                     → /healthz cho healthcheck, mọi thứ khác chuyển hướng sang HTTPS
-#   :443 ${DOMAIN}          → trang đọc (apps/web, SPA)        + /api/
-#   :443 ${ADMIN_DOMAIN}    → trang quản trị (apps/admin, SPA)  + /api/
+#   :443 ${DOMAIN}          → trang đọc: proxy tới container `web` (Next.js, render phía server cho SEO)
+#   :443 ${ADMIN_DOMAIN}    → trang quản trị: tệp tĩnh (React SPA), luôn noindex
+#   cả hai tên miền         → /api/ proxy tới API, /uploads/ đọc thẳng volume ảnh
 #   :443 host lạ / gọi IP   → đóng kết nối (444)
 #
-# /api/ ở cả hai tên miền đều đi tới cùng API (giống proxy /api của Vite khi dev) ⇒ cookie đăng nhập cùng
-# origin với từng trang, không cần CORS. Cookie gắn theo host nên phiên của trang đọc và trang quản trị tách riêng.
+# /api/ ở cả hai tên miền đều đi tới cùng API ⇒ cookie đăng nhập cùng origin với từng trang, không cần CORS.
+# Cookie gắn theo host nên phiên của trang đọc và trang quản trị tách riêng.
 #
 # Đứng sau Cloudflare: chế độ SSL của Cloudflare PHẢI là "Full (strict)". Để "Flexible" thì Cloudflare gọi
 # vào port 80, port 80 lại chuyển hướng sang HTTPS ⇒ vòng lặp chuyển hướng.
 
 upstream tkh_api {
   server api:4000;
+  keepalive 16;
+}
+
+upstream tkh_web {
+  server web:3000;
   keepalive 16;
 }
 
@@ -53,7 +59,8 @@ server {
   return 444;
 }
 
-# Trang đọc
+# Trang đọc — Next.js. Không gắn X-Robots-Tag: robots do Next.js quản lý (metadata từng trang + /robots.txt,
+# biến SITE_NOINDEX của container `web`).
 server {
   listen 443 ssl;
   http2 on;
@@ -61,17 +68,26 @@ server {
   server_tokens off;
   include /etc/nginx/tkh-ssl.conf;
   include /etc/nginx/snippets/tkh-site-common.conf;
-
-  root /usr/share/nginx/html/web;
+  include /etc/nginx/snippets/tkh-headers.conf;
 
   location / {
-    try_files $uri $uri/ /index.html;
-    add_header Cache-Control "no-cache" always;
-    include /etc/nginx/snippets/tkh-headers.conf;
+    proxy_pass http://tkh_web;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-Host $host;
+    # Next.js đã tự gửi các header bảo mật này — bỏ bản của upstream để không bị trùng với bản của nginx.
+    proxy_hide_header X-Content-Type-Options;
+    proxy_hide_header Referrer-Policy;
+    proxy_hide_header X-Frame-Options;
+    proxy_read_timeout 60s;
   }
 }
 
-# Trang quản trị
+# Trang quản trị — tệp tĩnh, luôn noindex.
 server {
   listen 443 ssl;
   http2 on;
@@ -79,12 +95,24 @@ server {
   server_tokens off;
   include /etc/nginx/tkh-ssl.conf;
   include /etc/nginx/snippets/tkh-site-common.conf;
+  include /etc/nginx/snippets/tkh-headers.conf;
+  include /etc/nginx/snippets/tkh-noindex.conf;
 
   root /usr/share/nginx/html/admin;
+
+  # Tệp tĩnh có hash trong tên ⇒ cache lâu.
+  location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable" always;
+    include /etc/nginx/snippets/tkh-headers.conf;
+    include /etc/nginx/snippets/tkh-noindex.conf;
+    try_files $uri =404;
+  }
 
   location / {
     try_files $uri $uri/ /index.html;
     add_header Cache-Control "no-cache" always;
     include /etc/nginx/snippets/tkh-headers.conf;
+    include /etc/nginx/snippets/tkh-noindex.conf;
   }
 }

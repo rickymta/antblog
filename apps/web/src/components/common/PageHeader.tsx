@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router';
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { btnLink } from '../../lib/ui';
 
@@ -38,7 +38,7 @@ export function SectionHeader({
         {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
       </div>
       {link && (
-        <Link to={link.to} className={btnLink}>
+        <Link href={link.to} className={btnLink}>
           {link.label}
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>

@@ -1,13 +1,13 @@
+'use client';
+
 import type { ReactNode } from 'react';
-import { Link } from 'react-router';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { pickLocalized } from '@tkh/shared';
+import { pickLocalized, type Category } from '@tkh/shared';
 import { useLocale } from '../../i18n';
 import { useAuth } from '../../lib/auth';
 import { container } from '../../lib/ui';
 import { LogoMark } from './Logo';
-import { categoriesQuery } from './TopicsMenu';
 
 const linkCls = 'text-sm text-muted hover:text-ink hover:underline underline-offset-4';
 
@@ -21,11 +21,10 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 }
 
 /** Chân trang 4 cột: giới thiệu · chủ đề · tài nguyên · kết nối + dòng bản quyền. */
-export function Footer() {
+export function Footer({ categories, year }: { categories: Category[] | null; year: number }) {
   const { t } = useTranslation();
   const locale = useLocale();
   const { user } = useAuth();
-  const categories = useQuery(categoriesQuery);
 
   return (
     <footer className="mt-16 border-t border-line bg-surface">
@@ -38,54 +37,54 @@ export function Footer() {
           <p className="text-sm text-muted">{t('footer.about')}</p>
         </div>
         <Column title={t('footer.topics')}>
-          {(categories.data ?? []).slice(0, 6).map((c) => (
+          {(categories ?? []).slice(0, 6).map((c) => (
             <li key={c.id}>
-              <Link to={`/topics/${encodeURIComponent(c.slug)}`} className={linkCls}>
+              <Link href={`/topics/${encodeURIComponent(c.slug)}`} className={linkCls}>
                 {pickLocalized(c.name, locale)}
               </Link>
             </li>
           ))}
           <li>
-            <Link to="/articles" className={linkCls}>
+            <Link href="/articles" className={linkCls}>
               {t('nav.allTopics')}
             </Link>
           </li>
         </Column>
         <Column title={t('footer.resources')}>
           <li>
-            <Link to="/articles" className={linkCls}>
+            <Link href="/articles" className={linkCls}>
               {t('footer.allArticles')}
             </Link>
           </li>
           <li>
-            <Link to="/articles?sort=trending" className={linkCls}>
+            <Link href="/articles?sort=trending" className={linkCls}>
               {t('footer.trending')}
             </Link>
           </li>
           <li>
-            <Link to="/learning-paths" className={linkCls}>
+            <Link href="/learning-paths" className={linkCls}>
               {t('footer.learningPaths')}
             </Link>
           </li>
           <li>
-            <Link to="/about" className={linkCls}>
+            <Link href="/about" className={linkCls}>
               {t('nav.about')}
             </Link>
           </li>
         </Column>
         <Column title={t('footer.connect')}>
           <li>
-            <Link to="/#newsletter" className={linkCls}>
+            <Link href="/#newsletter" className={linkCls}>
               {t('footer.newsletter')}
             </Link>
           </li>
           <li>
             {user ? (
-              <Link to="/me" className={linkCls}>
+              <Link href="/me" className={linkCls}>
                 {t('footer.account')}
               </Link>
             ) : (
-              <Link to="/register" className={linkCls}>
+              <Link href="/register" rel="nofollow" className={linkCls}>
                 {t('footer.createAccount')}
               </Link>
             )}
@@ -93,7 +92,7 @@ export function Footer() {
         </Column>
       </div>
       <div className="border-t border-line">
-        <p className={`${container} py-5 text-xs text-muted`}>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
+        <p className={`${container} py-5 text-xs text-muted`}>{t('footer.copyright', { year })}</p>
       </div>
     </footer>
   );

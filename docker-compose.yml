@@ -1,8 +1,10 @@
 # Tech Knowledge Hub — toàn bộ stack chạy bằng Docker trên server.
 #
-#   Internet ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ antblog.xyz         trang đọc (tĩnh)
+#   Internet ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ antblog.xyz         ─▶ web:3000 (Next.js, SSR)
 #                                                                     ├─▶ admin.antblog.xyz   trang quản trị (tĩnh)
+#                                                                     ├─▶ <cả hai>/uploads/   volume ảnh (chỉ đọc)
 #                                                                     └─▶ <cả hai>/api/  ─▶ api:4000 ─▶ mongo:27017
+#   web (render phía server) gọi thẳng api:4000 trong mạng nội bộ, không qua nginx.
 #   Máy quản trị ─▶ WireGuard UDP :51820 ─▶ mongo 172.30.0.10:27017   (chỉ DB, không qua Cloudflare)
 #
 # Một repo: frontend ở apps/ + packages/, API ở api/.
@@ -30,6 +32,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
+      web:
+        condition: service_healthy
     environment:
       DOMAIN: ${DOMAIN:?Đặt DOMAIN trong .env}
       ADMIN_DOMAIN: ${ADMIN_DOMAIN:?Đặt ADMIN_DOMAIN trong .env}
@@ -38,6 +42,27 @@ services:
       - "443:443"
     volumes:
       - letsencrypt:/etc/letsencrypt:ro
+      - uploads:/var/www/uploads:ro
+    networks:
+      - tkh
+    logging: *logging
+
+  # Trang đọc (Next.js standalone). NEXT_PUBLIC_SITE_URL nhúng lúc build (canonical, Open Graph, JSON-LD).
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        NEXT_PUBLIC_SITE_URL: https://${DOMAIN:?Đặt DOMAIN trong .env}
+    image: tkh-web:local
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_INTERNAL_URL: http://api:4000
+      # true ⇒ robots.txt chặn hết + mọi trang noindex (dùng khi chưa muốn Google lập chỉ mục).
+      SITE_NOINDEX: ${SITE_NOINDEX:-false}
     networks:
       - tkh
     logging: *logging
@@ -61,6 +86,10 @@ services:
       COOKIE_SECURE: "true"
       # Chỉ tin X-Forwarded-For từ mạng nội bộ compose (nginx) ⇒ rate limit tính theo IP thật.
       TRUST_PROXY: 172.30.0.0/24
+      # Ảnh thư viện media: API ghi vào volume, nginx đọc thẳng ở /uploads/.
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
     networks:
       - tkh
     logging: *logging
@@ -179,3 +208,4 @@ networks:
 volumes:
   mongo-data:
   letsencrypt:
+  uploads:

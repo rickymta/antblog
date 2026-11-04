@@ -9,3 +9,5 @@ export function siteArticleUrl(slug: string): string {
 
 export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const HTTP_URL_RE = /^https?:\/\/\S+$/i;
+/** URL ảnh API nhận: http(s) tuyệt đối hoặc ảnh thư viện cùng origin `/uploads/...`. */
+export const IMAGE_URL_RE = /^(https?:\/\/\S+|\/uploads\/(?!.*\.\.)[A-Za-z0-9._/-]+)$/i;

@@ -1,3 +1,5 @@
+'use client';
+
 import { useTranslation } from 'react-i18next';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { isBookmarked, toggleBookmark, useBookmarks } from '../../lib/reading';

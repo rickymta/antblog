@@ -6,6 +6,10 @@ export const vi = {
     siteName: 'Tech Knowledge Hub',
     tagline: 'Learn • Share • Grow',
     titleSuffix: 'Tech Knowledge Hub',
+    description:
+      'Blog kỹ thuật tiếng Việt về database, ngôn ngữ lập trình, design pattern và kiến trúc phần mềm — học theo lộ trình từ cơ bản tới nâng cao.',
+    searchTitle: 'Tìm “{{q}}”',
+    pageN: 'trang {{n}}',
   },
   common: {
     loading: 'Đang tải…',
@@ -105,6 +109,7 @@ export const vi = {
     statPaths: 'Lộ trình học',
     statMembers: 'Thành viên',
     statsLabel: 'Số liệu của Tech Knowledge Hub',
+    roadmapStep: 'Bước {{n}}: {{label}}',
     roadmapLabel:
       'Sơ đồ lộ trình học: Cơ bản, rồi Database, tiếp theo Ngôn ngữ lập trình và Design Pattern, sau đó Architecture và cuối cùng Nâng cao.',
     roadmap: {

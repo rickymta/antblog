@@ -1,3 +1,4 @@
+import { mkdirSync } from 'node:fs';
 import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
@@ -52,7 +53,38 @@ export function createApp(options: AppOptions = {}): Express {
   api.use('/admin', adminRouter());
 
   app.use('/api/v1', api);
+  app.use('/uploads', uploadsStatic());
   app.use(notFoundHandler);
   app.use(errorHandler);
   return app;
+}
+
+/**
+ * Phục vụ ảnh thư viện media từ UPLOAD_DIR (hợp đồng §8.2). Docker: nginx đọc thẳng volume, nhánh này dành cho dev.
+ * Tên tệp ngẫu nhiên + không bao giờ ghi đè ⇒ cache vĩnh viễn. Không liệt kê thư mục, không phục vụ dotfile.
+ */
+function uploadsStatic(): express.RequestHandler {
+  const dir = getConfig().uploadDir;
+  try {
+    mkdirSync(dir, { recursive: true });
+  } catch (err) {
+    // Không tạo được thư mục (quyền) ⇒ API vẫn chạy, chỉ tải ảnh lên sẽ lỗi — báo rõ trong log.
+    console.error(`[api] Không tạo được UPLOAD_DIR ${dir}:`, err instanceof Error ? err.message : err);
+  }
+  return express.static(dir, {
+    index: false,
+    redirect: false,
+    dotfiles: 'deny',
+    fallthrough: true,
+    etag: true,
+    lastModified: true,
+    maxAge: '365d',
+    immutable: true,
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+      // Ảnh công khai, trang đọc và trang quản trị ở hai tên miền con ⇒ cho phép nhúng chéo.
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
+  });
 }

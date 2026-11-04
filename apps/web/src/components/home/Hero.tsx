@@ -1,14 +1,14 @@
-import type { ReactNode } from 'react';
-import { Link } from 'react-router';
+'use client';
+
+import { useTransition, type ReactNode } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, Layers, RefreshCw, Route, Users } from 'lucide-react';
-import { api, formatCompact } from '@tkh/shared';
+import { formatCompact, type SiteSummary } from '@tkh/shared';
 import { useLocale } from '../../i18n';
 import { container } from '../../lib/ui';
 import { RoadmapDiagram } from './RoadmapDiagram';
-
-export const summaryQuery = { queryKey: ['site-summary'] as const, queryFn: () => api.site.summary() };
 
 function Stat({ icon, value, label }: { icon: ReactNode; value: string; label: string }) {
   return (
@@ -23,11 +23,12 @@ function Stat({ icon, value, label }: { icon: ReactNode; value: string; label: s
   );
 }
 
-/** Hero trang chủ (A3): nền gradient xanh đậm → indigo, chữ trắng cực lớn, 2 nút, 3 con số, sơ đồ lộ trình bên phải. */
-export function Hero() {
+/** Hero trang chủ (A3): nền gradient xanh đậm → indigo, chữ trắng cực lớn, 2 nút, 3 con số, sơ đồ lộ trình bên phải (các bước bấm được). */
+export function Hero({ summary }: { summary: SiteSummary | null }) {
   const { t } = useTranslation();
   const locale = useLocale();
-  const summary = useQuery(summaryQuery);
+  const router = useRouter();
+  const [refreshing, startTransition] = useTransition();
   const value = (n: number | undefined) => (n === undefined ? '—' : formatCompact(n, locale));
 
   return (
@@ -52,14 +53,14 @@ export function Hero() {
           <p className="mt-6 max-w-xl text-base text-blue-100 sm:text-lg">{t('home.heroBody')}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              to="/learning-paths"
+              href="/learning-paths"
               className="inline-flex items-center gap-2 rounded-ui bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/40 hover:bg-primary-hover focus-visible:outline-white"
             >
               {t('home.ctaStart')}
               <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
             <Link
-              to="/articles"
+              href="/articles"
               className="inline-flex items-center gap-2 rounded-ui border border-white/30 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10 focus-visible:outline-white"
             >
               {t('home.ctaArticles')}
@@ -67,18 +68,18 @@ export function Hero() {
           </div>
 
           <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-6">
-            <dl aria-label={t('home.statsLabel')} className="flex flex-wrap gap-x-8 gap-y-6" aria-busy={summary.isPending}>
-              <Stat icon={<Layers aria-hidden="true" className="h-5 w-5" />} value={value(summary.data?.categoryCount)} label={t('home.statTopics')} />
-              <Stat icon={<Route aria-hidden="true" className="h-5 w-5" />} value={value(summary.data?.learningPathCount)} label={t('home.statPaths')} />
-              <Stat icon={<Users aria-hidden="true" className="h-5 w-5" />} value={value(summary.data?.memberCount)} label={t('home.statMembers')} />
+            <dl aria-label={t('home.statsLabel')} className="flex flex-wrap gap-x-8 gap-y-6" aria-busy={refreshing}>
+              <Stat icon={<Layers aria-hidden="true" className="h-5 w-5" />} value={value(summary?.categoryCount)} label={t('home.statTopics')} />
+              <Stat icon={<Route aria-hidden="true" className="h-5 w-5" />} value={value(summary?.learningPathCount)} label={t('home.statPaths')} />
+              <Stat icon={<Users aria-hidden="true" className="h-5 w-5" />} value={value(summary?.memberCount)} label={t('home.statMembers')} />
             </dl>
-            {summary.isError && (
+            {!summary && (
               <button
                 type="button"
-                onClick={() => void summary.refetch()}
+                onClick={() => startTransition(() => router.refresh())}
                 className="inline-flex items-center gap-1.5 rounded-ui border border-white/30 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10"
               >
-                <RefreshCw aria-hidden="true" className="h-3.5 w-3.5" />
+                <RefreshCw aria-hidden="true" className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
                 {t('common.retry')}
               </button>
             )}

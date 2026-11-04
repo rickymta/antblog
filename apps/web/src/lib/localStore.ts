@@ -7,6 +7,8 @@ import { readJson, writeStorage } from './storage';
  */
 export interface LocalStore<T> {
   get: () => T;
+  /** Giá trị mặc định — dùng làm snapshot phía máy chủ và lúc hydrate (máy chủ không đọc được localStorage). */
+  getServer: () => T;
   set: (update: (prev: T) => T) => void;
   subscribe: (listener: () => void) => () => void;
 }
@@ -29,6 +31,7 @@ export function createLocalStore<T>(key: string, isValid: (v: unknown) => v is T
 
   return {
     get,
+    getServer: () => fallback,
     set(update) {
       const next = update(get());
       if (next === cache) return;
@@ -48,7 +51,8 @@ export function createLocalStore<T>(key: string, isValid: (v: unknown) => v is T
 }
 
 export function useLocalStore<T>(store: LocalStore<T>): T {
-  return useSyncExternalStore(store.subscribe, store.get, store.get);
+  // HTML máy chủ và lần hydrate đầu dùng giá trị mặc định (không lệch hydrate), sau đó React tự đổi sang giá trị ở máy.
+  return useSyncExternalStore(store.subscribe, store.get, store.getServer);
 }
 
 export const isRecord = (v: unknown): v is Record<string, unknown> =>

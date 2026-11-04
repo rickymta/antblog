@@ -1,22 +1,24 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { NavLink } from 'react-router';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
 import { X } from 'lucide-react';
-import { Skeleton } from '@tkh/ui';
+import type { Category } from '@tkh/shared';
 import { iconBtn } from '../../lib/ui';
 import { LogoMark } from './Logo';
-import { MAIN_LINKS } from './navLinks';
+import { isActivePath, MAIN_LINKS } from './navLinks';
 import { LanguageToggle } from './Toggles';
-import { categoriesQuery, TopicLinks } from './TopicsMenu';
+import { TopicLinks } from './TopicsMenu';
 
 /** Ngăn kéo trái trên điện thoại: menu chính + danh sách chủ đề + VI/EN. Escape / bấm nền mờ để đóng; khoá cuộn trang khi mở. */
-export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function MobileDrawer({ open, onClose, categories }: { open: boolean; onClose: () => void; categories: Category[] | null }) {
   const { t } = useTranslation();
+  const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const categories = useQuery({ ...categoriesQuery, enabled: open });
 
   useEffect(() => {
     if (!open) return;
@@ -71,34 +73,29 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
         </div>
         <nav aria-label={t('nav.mainNav')} className="px-3 py-3">
           <ul className="space-y-1">
-            {MAIN_LINKS.map((l) => (
-              <li key={l.to}>
-                <NavLink
-                  to={l.to}
-                  end={l.end}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    `block rounded-ui px-3 py-2.5 text-sm font-semibold ${isActive ? 'bg-primary-soft text-primary-ink' : 'text-ink hover:bg-surface-2'}`
-                  }
-                >
-                  {t(l.label)}
-                </NavLink>
-              </li>
-            ))}
+            {MAIN_LINKS.map((l) => {
+              const active = isActivePath(pathname, l.to, l.end);
+              return (
+                <li key={l.to}>
+                  <Link
+                    href={l.to}
+                    onClick={onClose}
+                    aria-current={active ? 'page' : undefined}
+                    className={`block rounded-ui px-3 py-2.5 text-sm font-semibold ${active ? 'bg-primary-soft text-primary-ink' : 'text-ink hover:bg-surface-2'}`}
+                  >
+                    {t(l.label)}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
         <div className="border-t border-line px-3 py-3">
           <p className="px-2 pb-2 text-xs font-bold tracking-wide text-muted uppercase">{t('nav.topics')}</p>
-          {categories.isPending ? (
-            <div className="space-y-2 px-2">
-              {[0, 1, 2].map((i) => (
-                <Skeleton key={i} className="h-8 w-full" />
-              ))}
-            </div>
-          ) : categories.isError ? (
-            <p className="px-2 text-sm text-muted">{t('nav.topicsLoadFailed')}</p>
+          {categories ? (
+            <TopicLinks categories={categories} onNavigate={onClose} dense />
           ) : (
-            <TopicLinks categories={categories.data} onNavigate={onClose} dense />
+            <p className="px-2 text-sm text-muted">{t('nav.topicsLoadFailed')}</p>
           )}
         </div>
         <div className="mt-auto flex items-center justify-between border-t border-line px-5 py-4">

@@ -14,9 +14,10 @@ import { CommentsPage } from './pages/CommentsPage';
 import { UsersPage } from './pages/UsersPage';
 import { SubscribersPage } from './pages/SubscribersPage';
 
-// Hai trang nặng (biểu đồ recharts; bộ hiển thị Markdown + highlight.js) tách thành chunk riêng.
+// Hai trang nặng (biểu đồ recharts; trình soạn CodeMirror + bộ hiển thị Markdown + highlight.js) tách thành chunk riêng.
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
 const ArticleEditorPage = lazy(() => import('./pages/ArticleEditorPage').then((m) => ({ default: m.ArticleEditorPage })));
+const MediaPage = lazy(() => import('./pages/MediaPage').then((m) => ({ default: m.MediaPage })));
 
 function Lazy({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -71,6 +72,7 @@ const router = createBrowserRouter([
           { path: 'articles', element: <ArticlesPage /> },
           { path: 'articles/new', element: <Lazy><ArticleEditorPage /></Lazy> },
           { path: 'articles/:id', element: <Lazy><ArticleEditorPage /></Lazy> },
+          { path: 'media', element: <Lazy><MediaPage /></Lazy> },
           { path: 'categories', element: <AdminOnly><CategoriesPage /></AdminOnly> },
           { path: 'learning-paths', element: <AdminOnly><LearningPathsPage /></AdminOnly> },
           { path: 'learning-paths/new', element: <AdminOnly><LearningPathEditorPage /></AdminOnly> },

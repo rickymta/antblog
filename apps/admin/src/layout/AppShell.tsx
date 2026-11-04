@@ -5,6 +5,7 @@ import {
   ExternalLink,
   FileText,
   FolderTree,
+  Images,
   LayoutDashboard,
   LogOut,
   Mail,
@@ -30,6 +31,7 @@ interface NavItem {
   labelKey:
     | 'nav.dashboard'
     | 'nav.articles'
+    | 'nav.media'
     | 'nav.categories'
     | 'nav.learningPaths'
     | 'nav.comments'
@@ -43,6 +45,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/', labelKey: 'nav.dashboard', icon: LayoutDashboard, roles: ['admin', 'author'], end: true },
   { to: '/articles', labelKey: 'nav.articles', icon: FileText, roles: ['admin', 'author'] },
+  { to: '/media', labelKey: 'nav.media', icon: Images, roles: ['admin', 'author'] },
   { to: '/categories', labelKey: 'nav.categories', icon: FolderTree, roles: ['admin'] },
   { to: '/learning-paths', labelKey: 'nav.learningPaths', icon: RouteIcon, roles: ['admin'] },
   { to: '/comments', labelKey: 'nav.comments', icon: MessageSquare, roles: ['admin'] },

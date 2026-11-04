@@ -1,9 +1,12 @@
+'use client';
+
 import { useCallback, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { CornerDownRight, Ellipsis, Pencil, ThumbsUp, Trash } from 'lucide-react';
 import { Avatar } from '@tkh/ui';
-import { api, formatCompact, formatDate, formatRelative, type Comment } from '@tkh/shared';
+import { api, formatCompact, formatRelative, type Comment } from '@tkh/shared';
+import { formatDay } from '../../lib/dates';
 import { useLocale } from '../../i18n';
 import { useAuth } from '../../lib/auth';
 import { isUnauthenticated } from '../../lib/errors';
@@ -98,7 +101,7 @@ export function CommentItem({
   };
 
   const time = (
-    <time dateTime={comment.createdAt} title={formatDate(comment.createdAt, locale)} className="text-xs text-muted">
+    <time dateTime={comment.createdAt} title={formatDay(comment.createdAt, locale)} className="text-xs text-muted">
       {formatRelative(comment.createdAt, locale)}
     </time>
   );

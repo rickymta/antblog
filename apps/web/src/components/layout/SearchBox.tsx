@@ -1,26 +1,28 @@
+'use client';
+
 import { forwardRef, useId, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 
-/** Ô tìm kiếm thanh đầu: Enter ⇒ /articles?q=…; gợi ý phím tắt Ctrl K (thanh đầu đăng ký phím). */
+/** Ô tìm kiếm thanh đầu: Enter ⇒ /articles?q=…; gợi ý phím tắt Ctrl K (thanh đầu đăng ký phím). Không JS vẫn gửi được (GET /articles). */
 export const SearchBox = forwardRef<HTMLInputElement, { onSubmitted?: () => void; className?: string; showHint?: boolean }>(
   function SearchBox({ onSubmitted, className = '', showHint = true }, ref) {
     const { t } = useTranslation();
-    const navigate = useNavigate();
+    const router = useRouter();
     const [value, setValue] = useState('');
     const inputId = useId();
 
     const submit = (e: FormEvent) => {
       e.preventDefault();
       const q = value.trim();
-      navigate(q ? `/articles?q=${encodeURIComponent(q)}` : '/articles');
+      router.push(q ? `/articles?q=${encodeURIComponent(q)}` : '/articles');
       setValue('');
       onSubmitted?.();
     };
 
     return (
-      <form role="search" onSubmit={submit} className={`relative ${className}`}>
+      <form role="search" action="/articles" method="get" onSubmit={submit} className={`relative ${className}`}>
         <label className="sr-only" htmlFor={inputId}>
           {t('header.searchLabel')}
         </label>
@@ -28,6 +30,7 @@ export const SearchBox = forwardRef<HTMLInputElement, { onSubmitted?: () => void
         <input
           ref={ref}
           id={inputId}
+          name="q"
           type="search"
           value={value}
           onChange={(e) => setValue(e.target.value)}

@@ -14,6 +14,7 @@ import {
   type ICategory,
   type ILearningPath,
 } from '../models/index.js';
+import { withLiveArticleCounts } from '../services/counters.js';
 import { recordVisit } from '../services/stats.js';
 import { publicArticleFilter, toArticleCards, toCategory, toLearningPathCards } from '../services/serializers.js';
 import { isDuplicateKeyError } from '../lib/errors.js';
@@ -37,15 +38,51 @@ export function publicRouter(): Router {
     res.json({ articleCount, categoryCount, learningPathCount, memberCount, totalViews: views[0]?.total ?? 0 });
   });
 
+  r.get('/site/sitemap', async (_req, res) => {
+    const [articles, cats, paths] = await Promise.all([
+      Article.find(publicArticleFilter())
+        .select({ slug: 1, updatedAt: 1, categoryId: 1, 'seo.noindex': 1 })
+        .sort({ publishedAt: -1, _id: -1 })
+        .lean<Pick<IArticle, '_id' | 'slug' | 'updatedAt' | 'categoryId' | 'seo'>[]>(),
+      Category.find({}).sort({ order: 1, slug: 1 }).select({ slug: 1, updatedAt: 1 }).lean<Pick<ICategory, '_id' | 'slug' | 'updatedAt'>[]>(),
+      LearningPath.find({ status: 'published' })
+        .sort({ createdAt: 1, _id: 1 })
+        .select({ slug: 1, updatedAt: 1 })
+        .lean<Pick<ILearningPath, '_id' | 'slug' | 'updatedAt'>[]>(),
+    ]);
+    // Ngày sửa của chủ đề = mới nhất giữa bản ghi chủ đề và các bài công khai trong đó (trang chủ đề liệt kê bài).
+    const latestByCategory = new Map<string, number>();
+    for (const a of articles) {
+      const key = a.categoryId.toString();
+      const t = new Date(a.updatedAt).getTime();
+      if (t > (latestByCategory.get(key) ?? 0)) latestByCategory.set(key, t);
+    }
+    const iso = (d: Date | number | undefined) => (d === undefined ? undefined : new Date(d).toISOString());
+    res.json({
+      articles: articles.map((a) =>
+        a.seo?.noindex === true
+          ? { slug: a.slug, updatedAt: iso(a.updatedAt)!, noindex: true }
+          : { slug: a.slug, updatedAt: iso(a.updatedAt)! },
+      ),
+      categories: cats.map((c) => {
+        const own = c.updatedAt ? new Date(c.updatedAt).getTime() : 0;
+        const latest = Math.max(own, latestByCategory.get(c._id.toString()) ?? 0);
+        return latest ? { slug: c.slug, updatedAt: iso(latest)! } : { slug: c.slug };
+      }),
+      learningPaths: paths.map((p) => ({ slug: p.slug, updatedAt: iso(p.updatedAt)! })),
+    });
+  });
+
   r.get('/categories', async (_req, res) => {
     const cats = await Category.find({}).sort({ order: 1, slug: 1 }).lean<ICategory[]>();
-    res.json(cats.map(toCategory));
+    res.json((await withLiveArticleCounts(cats)).map(toCategory));
   });
 
   r.get('/categories/:slug', async (req, res) => {
     const cat = await Category.findOne({ slug: req.params.slug }).lean<ICategory>();
     if (!cat) throw notFound('Không tìm thấy chủ đề.');
-    res.json(toCategory(cat));
+    const [counted] = await withLiveArticleCounts([cat]);
+    res.json(toCategory(counted!));
   });
 
   r.get('/tags/popular', async (req, res) => {

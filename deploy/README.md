@@ -11,8 +11,9 @@ Bạn (Compass/mongosh) ─▶ WireGuard UDP :51820 (vpn.antblog.xyz) ───�
 
 | Container | Vai trò | Mở ra ngoài |
 |---|---|---|
-| `nginx` | Cổng vào duy nhất. `antblog.xyz` trang đọc, `admin.antblog.xyz` trang quản trị; `/api/` ở cả hai tên miền proxy tới API (giống proxy của Vite khi dev). Port 80 chỉ chuyển hướng sang HTTPS; host lạ hoặc gọi thẳng IP bị đóng kết nối | TCP 80, 443 |
-| `api` | Express. Chỉ nghe trong mạng nội bộ | không |
+| `nginx` | Cổng vào duy nhất. `antblog.xyz` proxy tới `web`, `admin.antblog.xyz` phục vụ tĩnh trang quản trị (luôn `noindex`); ở cả hai tên miền `/api/` proxy tới API và `/uploads/` đọc thẳng volume ảnh. Port 80 chỉ chuyển hướng sang HTTPS; host lạ hoặc gọi thẳng IP bị đóng kết nối | TCP 80, 443 |
+| `web` | Trang đọc Next.js (render phía server cho SEO: metadata, JSON-LD, `sitemap.xml`, `robots.txt`). Gọi thẳng `api:4000` trong mạng nội bộ | không |
+| `api` | Express. Chỉ nghe trong mạng nội bộ; ghi ảnh tải lên vào volume `uploads` | không |
 | `mongo` | MongoDB 8.0, **bật xác thực**, 3 tài khoản (root, ứng dụng, chỉ-đọc) | không |
 | `certbot` | Xin + tự gia hạn MỘT chứng chỉ Let's Encrypt cho cả `antblog.xyz` và `admin.antblog.xyz`, bằng DNS-01 qua API Cloudflare | không |
 | `wireguard` | VPN để bạn kết nối thẳng vào MongoDB | UDP 51820 |
@@ -121,11 +122,14 @@ Thêm máy khách: thêm tên vào `WG_PEERS` rồi `docker compose up -d wiregu
 | Việc | Lệnh |
 |---|---|
 | Cập nhật code | `git pull` ⇒ `docker compose up -d --build` |
+| Nạp bài mới / sửa từ `api/seed/content` | `docker compose run --rm --build seed` — bài đã sửa trong CMS được giữ nguyên; ép ghi đè: thêm `npm run seed -- --force-content` vào cuối lệnh |
+| Sao lưu ảnh | `docker run --rm -v tech-knowledge-hub_uploads:/u:ro -v "$PWD":/b alpine tar czf /b/uploads-$(date +%F).tgz -C /u .` |
 | Xem log | `docker compose logs -f api nginx` |
 | Sao lưu DB | `docker compose exec mongo sh -c 'mongodump --archive --gzip -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db tech_knowledge_hub' > backup-$(date +%F).archive.gz` |
 | Khôi phục | `docker compose exec -T mongo sh -c 'mongorestore --archive --gzip --drop -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin' < backup-....archive.gz` |
 | Cập nhật dải IP Cloudflare | `sh deploy/nginx/update-cloudflare-ips.sh && docker compose up -d --build nginx` |
-| Dừng | `docker compose down` (giữ dữ liệu) · `docker compose down -v` **xoá cả DB và chứng chỉ** |
+| Tạm chặn Google lập chỉ mục | `SITE_NOINDEX=true` trong `.env` ⇒ `docker compose up -d web` |
+| Dừng | `docker compose down` (giữ dữ liệu) · `docker compose down -v` **xoá cả DB, ảnh và chứng chỉ** |
 
 Lưu ý:
 - Mật khẩu MongoDB trong `.env` chỉ có tác dụng ở **lần khởi tạo volume đầu tiên**. Đổi về sau phải dùng `db.changeUserPassword(...)` trong mongosh rồi mới sửa `.env`.

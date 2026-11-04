@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 
 const PALETTE = ['#2563EB', '#4F46E5', '#047857', '#7C3AED', '#BE123C', '#B45309', '#0F766E', '#0369A1'];

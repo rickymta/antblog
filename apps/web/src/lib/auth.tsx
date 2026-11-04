@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type User } from '@tkh/shared';

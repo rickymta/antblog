@@ -1,5 +1,8 @@
+'use client';
+
 import { useCallback, useId, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { LogIn, LogOut, UserRound } from 'lucide-react';
 import { Avatar } from '@tkh/ui';
@@ -12,7 +15,8 @@ import { btnPrimary, iconBtn } from '../../lib/ui';
 export function UserMenu() {
   const { t } = useTranslation();
   const { user, loading, logout } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
+  const search = useSearchParams().toString();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -23,13 +27,13 @@ export function UserMenu() {
   if (loading) return <span className="h-9 w-9 animate-pulse rounded-full bg-surface-2" aria-hidden="true" />;
 
   if (!user) {
-    const href = loginHref(location.pathname + location.search);
+    const href = loginHref(search ? `${pathname}?${search}` : pathname);
     return (
       <>
-        <Link to={href} className={`${btnPrimary} max-sm:hidden`}>
+        <Link href={href} rel="nofollow" className={`${btnPrimary} max-sm:hidden`}>
           {t('header.login')}
         </Link>
-        <Link to={href} className={`${iconBtn} sm:hidden`} aria-label={t('header.login')}>
+        <Link href={href} rel="nofollow" className={`${iconBtn} sm:hidden`} aria-label={t('header.login')}>
           <LogIn aria-hidden="true" className="h-[18px] w-[18px]" />
         </Link>
       </>
@@ -60,7 +64,7 @@ export function UserMenu() {
           </div>
           <ul className="pt-1">
             <li>
-              <Link to="/me" onClick={close} className="flex items-center gap-2 rounded-ui px-2 py-2 text-sm text-ink hover:bg-surface-2">
+              <Link href="/me" onClick={close} className="flex items-center gap-2 rounded-ui px-2 py-2 text-sm text-ink hover:bg-surface-2">
                 <UserRound aria-hidden="true" className="h-4 w-4 text-muted" />
                 {t('header.profile')}
               </Link>

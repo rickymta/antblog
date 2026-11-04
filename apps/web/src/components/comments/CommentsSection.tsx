@@ -1,5 +1,8 @@
+'use client';
+
 import { useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageSquare } from 'lucide-react';
@@ -119,10 +122,10 @@ export function CommentsSection({ slug }: { slug: string }) {
   const locale = useLocale();
   const qc = useQueryClient();
   const { user, loading: authLoading } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const [sort, setSort] = useState<CommentSort>('newest');
-  const next = `${location.pathname}#comments`;
+  const next = `${pathname}#comments`;
 
   const query = useInfiniteQuery({
     queryKey: [...commentsKey(slug), sort],
@@ -150,7 +153,7 @@ export function CommentsSection({ slug }: { slug: string }) {
 
   const pages = query.data?.pages;
   const count = pages && pages.length > 0 ? pages[pages.length - 1]!.commentCount : undefined;
-  const requireLogin = () => navigate(loginHref(next));
+  const requireLogin = () => router.push(loginHref(next));
 
   const createRoot = async (body: string) => {
     await api.comments.create(slug, { body });
@@ -190,10 +193,10 @@ export function CommentsSection({ slug }: { slug: string }) {
               {t('comments.loginPrompt')}
             </p>
             <div className="flex gap-2">
-              <Link to={loginHref(next)} className={btnPrimary}>
+              <Link href={loginHref(next)} rel="nofollow" className={btnPrimary}>
                 {t('comments.loginCta')}
               </Link>
-              <Link to={registerHref(next)} className={btnSecondary}>
+              <Link href={registerHref(next)} rel="nofollow" className={btnSecondary}>
                 {t('comments.registerCta')}
               </Link>
             </div>

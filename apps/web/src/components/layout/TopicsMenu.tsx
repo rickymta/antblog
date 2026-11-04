@@ -1,17 +1,16 @@
+'use client';
+
 import { useCallback, useId, useRef, useState } from 'react';
-import { Link } from 'react-router';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
 import { ChevronDown } from 'lucide-react';
-import { CategoryGlyph, Skeleton } from '@tkh/ui';
-import { api, formatNumber, pickLocalized, type Category } from '@tkh/shared';
+import { CategoryGlyph } from '@tkh/ui';
+import { formatNumber, pickLocalized, type Category } from '@tkh/shared';
 import { useLocale } from '../../i18n';
 import { useDismiss } from '../../hooks/useDismiss';
 import { safeColor, withAlpha } from '../../lib/format';
 
-export const categoriesQuery = { queryKey: ['categories'] as const, queryFn: () => api.categories.list(), staleTime: 5 * 60_000 };
-
-/** Danh sách chủ đề (dùng ở menu thả, ngăn kéo điện thoại, chân trang). */
+/** Danh sách chủ đề (dùng ở menu thả, ngăn kéo điện thoại). */
 export function TopicLinks({ categories, onNavigate, dense = false }: { categories: Category[]; onNavigate?: () => void; dense?: boolean }) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -22,7 +21,7 @@ export function TopicLinks({ categories, onNavigate, dense = false }: { categori
         return (
           <li key={c.id}>
             <Link
-              to={`/topics/${encodeURIComponent(c.slug)}`}
+              href={`/topics/${encodeURIComponent(c.slug)}`}
               onClick={onNavigate}
               className="flex items-center gap-3 rounded-ui px-2 py-2 text-sm text-ink hover:bg-surface-2"
             >
@@ -39,8 +38,8 @@ export function TopicLinks({ categories, onNavigate, dense = false }: { categori
   );
 }
 
-/** Mục "Chủ đề ▾" trên thanh đầu (màn rộng). */
-export function TopicsMenu() {
+/** Mục "Chủ đề ▾" trên thanh đầu (màn rộng). Danh sách chủ đề do máy chủ tải sẵn (layout gốc). */
+export function TopicsMenu({ categories }: { categories: Category[] | null }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -48,7 +47,6 @@ export function TopicsMenu() {
   const panelId = useId();
   const close = useCallback(() => setOpen(false), []);
   useDismiss(wrapRef, open, close, btnRef);
-  const categories = useQuery({ ...categoriesQuery, enabled: open });
 
   return (
     <div ref={wrapRef} className="relative">
@@ -65,19 +63,9 @@ export function TopicsMenu() {
       </button>
       {open && (
         <div id={panelId} className="absolute left-0 top-full z-50 mt-2 w-80 rounded-card border border-line bg-surface p-2 shadow-xl shadow-slate-900/10">
-          {categories.isPending ? (
-            <div className="space-y-2 p-2" aria-busy="true">
-              {[0, 1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-8 w-full" />
-              ))}
-            </div>
-          ) : categories.isError ? (
-            <p className="p-3 text-sm text-muted">{t('nav.topicsLoadFailed')}</p>
-          ) : (
-            <TopicLinks categories={categories.data} onNavigate={close} />
-          )}
+          {categories ? <TopicLinks categories={categories} onNavigate={close} /> : <p className="p-3 text-sm text-muted">{t('nav.topicsLoadFailed')}</p>}
           <div className="mt-1 border-t border-line pt-1">
-            <Link to="/articles" onClick={close} className="block rounded-ui px-2 py-2 text-sm font-semibold text-primary-ink hover:bg-surface-2">
+            <Link href="/articles" onClick={close} className="block rounded-ui px-2 py-2 text-sm font-semibold text-primary-ink hover:bg-surface-2">
               {t('nav.allTopics')} →
             </Link>
           </div>

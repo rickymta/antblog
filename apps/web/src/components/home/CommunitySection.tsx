@@ -1,14 +1,15 @@
+'use client';
+
 import { useId, useState, type FormEvent } from 'react';
-import { Link } from 'react-router';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { CircleCheck, Mail, UserRound, Users } from 'lucide-react';
 import { api, formatCompact } from '@tkh/shared';
 import { useLocale } from '../../i18n';
 import { useAuth } from '../../lib/auth';
 import { fieldErrors } from '../../lib/errors';
 import { container } from '../../lib/ui';
-import { summaryQuery } from './Hero';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BUBBLES = ['bg-sky-400', 'bg-indigo-400', 'bg-emerald-400', 'bg-violet-400'];
@@ -39,7 +40,7 @@ function Newsletter() {
   const error = localError ?? (subscribe.isError ? (serverField ?? t('home.newsletterError')) : null);
 
   return (
-    <section id="newsletter" aria-labelledby="home-newsletter" className={panel}>
+    <section id="newsletter" aria-labelledby="home-newsletter" className={`${panel} scroll-mt-24`}>
       <div aria-hidden="true" className="absolute -top-16 -right-10 h-48 w-48 rounded-full bg-indigo-400/20 blur-2xl" />
       <div className="relative">
         <Mail aria-hidden="true" className="h-8 w-8 text-sky-300" />
@@ -88,11 +89,10 @@ function Newsletter() {
   );
 }
 
-function Community() {
+function Community({ memberCount }: { memberCount: number | undefined }) {
   const { t } = useTranslation();
   const locale = useLocale();
   const { user } = useAuth();
-  const summary = useQuery(summaryQuery);
 
   return (
     <section aria-labelledby="home-community" className={panel}>
@@ -111,15 +111,16 @@ function Community() {
               </span>
             ))}
           </div>
-          {summary.data && (
-            <span className="text-sm font-semibold">{t('home.communityMembers', { n: formatCompact(summary.data.memberCount, locale) })}</span>
+          {memberCount !== undefined && (
+            <span className="text-sm font-semibold">{t('home.communityMembers', { n: formatCompact(memberCount, locale) })}</span>
           )}
         </div>
         {user ? (
           <p className="mt-6 text-sm text-blue-100">{t('home.communityJoined')}</p>
         ) : (
           <Link
-            to="/register"
+            href="/register"
+            rel="nofollow"
             className="mt-6 inline-flex items-center justify-center rounded-ui bg-white px-5 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-50 focus-visible:outline-white"
           >
             {t('home.communityCta')}
@@ -130,10 +131,10 @@ function Community() {
   );
 }
 
-export function CommunitySection() {
+export function CommunitySection({ memberCount }: { memberCount: number | undefined }) {
   return (
     <div className={`${container} grid gap-6 pt-14 lg:grid-cols-2`}>
-      <Community />
+      <Community memberCount={memberCount} />
       <Newsletter />
     </div>
   );

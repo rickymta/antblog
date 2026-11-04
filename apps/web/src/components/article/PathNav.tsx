@@ -1,5 +1,7 @@
+'use client';
+
 import { useId, useState } from 'react';
-import { Link } from 'react-router';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { Check, ChevronRight } from 'lucide-react';
 import type { ArticleLearningPathRef } from '@tkh/shared';
@@ -33,7 +35,7 @@ export function PathNav({ path, currentSlug, defaultOpen = true }: { path: Artic
           <ChevronRight aria-hidden="true" className={`h-4 w-4 transition-transform ${open ? 'rotate-90' : ''}`} />
         </button>
         <div className="min-w-0">
-          <Link to={pathHref(path.slug)} className="font-semibold leading-snug text-ink hover:text-primary-ink hover:underline">
+          <Link href={pathHref(path.slug)} className="font-semibold leading-snug text-ink hover:text-primary-ink hover:underline">
             {path.title}
           </Link>
           <div className="mt-1">
@@ -49,7 +51,7 @@ export function PathNav({ path, currentSlug, defaultOpen = true }: { path: Artic
             return (
               <li key={a.id}>
                 <Link
-                  to={articleHref(a.slug)}
+                  href={articleHref(a.slug)}
                   aria-current={current ? 'page' : undefined}
                   className={`flex items-start gap-2.5 rounded-ui px-2 py-2 text-sm leading-snug transition-colors ${
                     current ? 'bg-primary-soft font-semibold text-primary-ink' : 'text-ink hover:bg-surface-2'

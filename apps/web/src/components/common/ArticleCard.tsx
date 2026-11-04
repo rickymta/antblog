@@ -1,8 +1,11 @@
-import { Link } from 'react-router';
+'use client';
+
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { Clock, Eye, Heart } from 'lucide-react';
 import { Skeleton } from '@tkh/ui';
-import { formatCompact, formatDate, type ArticleCard as ArticleCardData } from '@tkh/shared';
+import { formatCompact, type ArticleCard as ArticleCardData } from '@tkh/shared';
+import { formatDay } from '../../lib/dates';
 import { useLocale } from '../../i18n';
 import { totalReactions } from '../../lib/format';
 import { card } from '../../lib/ui';
@@ -35,7 +38,18 @@ export function ArticleMeta({ article, className = '' }: { article: ArticleCardD
  * Thẻ bài viết (lưới): ảnh bìa hoặc khối màu chủ đề, nhãn chủ đề + cấp độ, tiêu đề 2 dòng, phút đọc · lượt xem, ❤ tổng reaction, nút lưu.
  * Cả thẻ bấm được nhờ liên kết tiêu đề phủ toàn thẻ; nhãn chủ đề và nút lưu nằm lớp trên.
  */
-export function ArticleCard({ article, showSummary = false, headingLevel = 3 }: { article: ArticleCardData; showSummary?: boolean; headingLevel?: 2 | 3 }) {
+export function ArticleCard({
+  article,
+  showSummary = false,
+  headingLevel = 3,
+  eagerCover = false,
+}: {
+  article: ArticleCardData;
+  showSummary?: boolean;
+  headingLevel?: 2 | 3;
+  /** Thẻ ở màn hình đầu: tải ảnh bìa ngay (không lazy). */
+  eagerCover?: boolean;
+}) {
   const { t } = useTranslation();
   const locale = useLocale();
   const Heading = headingLevel === 2 ? 'h2' : 'h3';
@@ -44,7 +58,7 @@ export function ArticleCard({ article, showSummary = false, headingLevel = 3 }: 
   return (
     <article className={`group relative flex h-full flex-col overflow-hidden ${card} transition-shadow hover:shadow-lg hover:shadow-slate-900/5 dark:hover:shadow-black/30`}>
       <div className="aspect-[16/9] overflow-hidden">
-        <Cover src={article.coverImageUrl} category={article.category} />
+        <Cover src={article.coverImageUrl} category={article.category} eager={eagerCover} />
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="relative z-10 flex flex-wrap items-center gap-2">
@@ -53,7 +67,7 @@ export function ArticleCard({ article, showSummary = false, headingLevel = 3 }: 
         </div>
         <Heading className="line-clamp-2 text-base leading-snug font-semibold text-ink">
           <Link
-            to={articleHref(article.slug)}
+            href={articleHref(article.slug)}
             lang={article.language}
             className="after:absolute after:inset-0 after:content-[''] hover:text-primary-ink focus-visible:outline-none focus-visible:after:rounded-card focus-visible:after:ring-2 focus-visible:after:ring-primary"
           >
@@ -76,7 +90,7 @@ export function ArticleCard({ article, showSummary = false, headingLevel = 3 }: 
             <BookmarkButton article={article} />
           </div>
         </div>
-        <span className="sr-only">{t('common.publishedOn', { date: formatDate(article.publishedAt, locale) })}</span>
+        <span className="sr-only">{t('common.publishedOn', { date: formatDay(article.publishedAt, locale) })}</span>
       </div>
     </article>
   );
@@ -116,7 +130,7 @@ export function ArticleRow({ article, showMeta = true, compact = false }: { arti
         )}
         <h3 className={`line-clamp-2 leading-snug font-semibold text-ink ${compact ? 'text-sm' : 'text-base'}`}>
           <Link
-            to={articleHref(article.slug)}
+            href={articleHref(article.slug)}
             lang={article.language}
             className="after:absolute after:inset-0 after:content-[''] hover:text-primary-ink focus-visible:outline-none focus-visible:after:rounded-ui focus-visible:after:ring-2 focus-visible:after:ring-primary"
           >
@@ -126,7 +140,7 @@ export function ArticleRow({ article, showMeta = true, compact = false }: { arti
         {showMeta && (
           <div className="mt-1 flex flex-wrap items-center gap-x-3 text-xs text-muted">
             <ArticleMeta article={article} />
-            {!compact && <span>{formatDate(article.publishedAt, locale)}</span>}
+            {!compact && <span>{formatDay(article.publishedAt, locale)}</span>}
           </div>
         )}
       </div>

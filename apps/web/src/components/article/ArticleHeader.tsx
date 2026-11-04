@@ -1,37 +1,42 @@
-import { Link } from 'react-router';
+'use client';
+
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { BadgeCheck, ChevronRight, Clock, Eye, House } from 'lucide-react';
 import { Avatar } from '@tkh/ui';
-import { formatCompact, formatDate, pickLocalized, type ArticleDetail } from '@tkh/shared';
+import { formatCompact, pickLocalized } from '@tkh/shared';
 import { useLocale } from '../../i18n';
+import { formatDay } from '../../lib/dates';
 import { scrollToId } from '../../lib/dom';
 import { BookmarkButton } from '../common/BookmarkButton';
 import { CategoryChip, LevelTag } from '../common/Badges';
+import { useArticle } from './ArticleContext';
 import { REACTIONS } from './reactionMeta';
 import { ShareButton } from './ShareButton';
 
-export function Breadcrumb({ article }: { article: ArticleDetail }) {
+export function Breadcrumb() {
   const { t } = useTranslation();
   const locale = useLocale();
+  const article = useArticle();
   const sep = <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted" />;
   const link = 'shrink-0 text-muted hover:text-ink hover:underline';
   return (
     <nav aria-label={t('article.breadcrumb')}>
       <ol className="flex min-w-0 items-center gap-1.5 text-sm">
         <li className="flex items-center gap-1.5">
-          <Link to="/" className={`${link} inline-flex`} aria-label={t('nav.home')}>
+          <Link href="/" className={`${link} inline-flex`} aria-label={t('nav.home')}>
             <House aria-hidden="true" className="h-4 w-4" />
           </Link>
           {sep}
         </li>
         <li className="flex items-center gap-1.5">
-          <Link to="/articles" className={link}>
+          <Link href="/articles" className={link}>
             {t('nav.articles')}
           </Link>
           {sep}
         </li>
         <li className="flex shrink-0 items-center gap-1.5">
-          <Link to={`/topics/${encodeURIComponent(article.category.slug)}`} className={`${link} block max-w-[7rem] truncate sm:max-w-[12rem]`}>
+          <Link href={`/topics/${encodeURIComponent(article.category.slug)}`} className={`${link} block max-w-[7rem] truncate sm:max-w-[12rem]`}>
             {pickLocalized(article.category.name, locale)}
           </Link>
           {sep}
@@ -45,9 +50,10 @@ export function Breadcrumb({ article }: { article: ArticleDetail }) {
 }
 
 /** Thanh reaction nhỏ dưới tiêu đề (A2): chỉ hiển thị số — bấm để cuộn xuống 4 thẻ chọn cảm xúc. */
-function ReactionSummary({ article }: { article: ArticleDetail }) {
+function ReactionSummary() {
   const { t } = useTranslation();
   const locale = useLocale();
+  const article = useArticle();
   return (
     <a
       href="#reactions"
@@ -69,13 +75,14 @@ function ReactionSummary({ article }: { article: ArticleDetail }) {
 }
 
 /** Đầu bài (giữa): breadcrumb, nhãn, tiêu đề rất lớn, tác giả · phút đọc · ngày, thanh reaction + Lưu + Chia sẻ. */
-export function ArticleHeader({ article }: { article: ArticleDetail }) {
+export function ArticleHeader() {
   const { t } = useTranslation();
   const locale = useLocale();
+  const article = useArticle();
   const verified = article.author.role === 'admin' || article.author.role === 'author';
   return (
     <header className="space-y-5">
-      <Breadcrumb article={article} />
+      <Breadcrumb />
       <div className="flex flex-wrap items-center gap-2">
         <CategoryChip category={article.category} />
         <LevelTag level={article.level} />
@@ -92,9 +99,7 @@ export function ArticleHeader({ article }: { article: ArticleDetail }) {
         <span className="inline-flex items-center gap-2 text-ink">
           <Avatar name={article.author.displayName} src={article.author.avatarUrl} size={32} />
           <span className="font-semibold">{article.author.displayName}</span>
-          {verified && (
-            <BadgeCheck aria-label={t('common.verified')} role="img" className="h-4 w-4 text-primary" />
-          )}
+          {verified && <BadgeCheck aria-label={t('common.verified')} role="img" className="h-4 w-4 text-primary" />}
         </span>
         <span className="inline-flex items-center gap-1">
           <Clock aria-hidden="true" className="h-4 w-4" />
@@ -104,10 +109,10 @@ export function ArticleHeader({ article }: { article: ArticleDetail }) {
           <Eye aria-hidden="true" className="h-4 w-4" />
           {t('common.views', { n: formatCompact(article.stats.views, locale) })}
         </span>
-        <time dateTime={article.publishedAt}>{formatDate(article.publishedAt, locale)}</time>
+        <time dateTime={article.publishedAt}>{formatDay(article.publishedAt, locale)}</time>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 border-y border-line py-2">
-        <ReactionSummary article={article} />
+        <ReactionSummary />
         <div className="flex items-center gap-2">
           <BookmarkButton article={article} withLabel />
           <ShareButton />

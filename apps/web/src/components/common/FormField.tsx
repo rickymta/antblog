@@ -1,3 +1,5 @@
+'use client';
+
 import { useId, useState, type InputHTMLAttributes, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff } from 'lucide-react';

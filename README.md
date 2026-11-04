@@ -3,14 +3,14 @@
 Blog chia sẻ kiến thức kỹ thuật từ cơ bản tới nâng cao: database, ngôn ngữ lập trình, design pattern, architecture pattern. Mọi ví dụ dùng chung dự án mẫu hư cấu **Tới Nơi** (đặt xe + giao hàng).
 
 - Trang đọc: `https://antblog.xyz` · Quản trị: `https://admin.antblog.xyz`
-- Trang có `noindex` (chặn máy tìm kiếm) cho tới khi quyết định mở công khai.
+- Trang đọc cho phép máy tìm kiếm lập chỉ mục (tắt bằng `SITE_NOINDEX=true`); trang quản trị luôn `noindex`.
 
 ## Cấu trúc
 
 | Thư mục | Nội dung |
 |---|---|
-| `apps/web` | Trang đọc (React + Vite) |
-| `apps/admin` | Trang quản trị (React + Vite) |
+| `apps/web` | Trang đọc (Next.js, render phía server cho SEO) |
+| `apps/admin` | Trang quản trị / CMS (React + Vite): soạn Markdown, thư viện ảnh, SEO, lên lịch đăng |
 | `packages/shared` | Kiểu dữ liệu + client API + định dạng, dùng chung hai app |
 | `packages/ui` | Theme Tailwind, bộ hiển thị bài viết, component dùng chung |
 | `api` | API Express + MongoDB, seed nội dung — `package.json` riêng, không thuộc npm workspaces |
@@ -35,7 +35,7 @@ npm run dev:web        # trang đọc   http://127.0.0.1:5173
 npm run dev:admin      # quản trị    http://127.0.0.1:5174
 ```
 
-Cả hai app gọi API qua proxy Vite (`/api` → `127.0.0.1:4000`), nên cookie đăng nhập cùng origin và không cần CORS. Đổi địa chỉ API: biến môi trường `TKH_API_URL`.
+Cả hai app gọi API qua proxy của dev server (`/api`, `/uploads` → `127.0.0.1:4000`), nên cookie đăng nhập cùng origin và không cần CORS. Đổi địa chỉ API: biến môi trường `TKH_API_URL`.
 
 ## Triển khai lên server (Docker)
 

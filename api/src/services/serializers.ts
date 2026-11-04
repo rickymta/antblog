@@ -6,7 +6,9 @@ import {
   LearningPath,
   User,
   type IArticle,
+  type IArticleSeo,
   type ICategory,
+  type IMedia,
   type IComment,
   type ILearningPath,
   type IUser,
@@ -149,10 +151,22 @@ async function learningPathRefFor(a: IArticle) {
   };
 }
 
+/** `seo` theo hợp đồng §8.1: bỏ trường rỗng, `noindex` chỉ trả khi true; không còn gì ⇒ vắng. */
+export function toSeo(seo: IArticleSeo | undefined) {
+  if (!seo) return undefined;
+  const out = compact({
+    title: seo.title?.trim() || undefined,
+    description: seo.description?.trim() || undefined,
+    ogImageUrl: seo.ogImageUrl?.trim() || undefined,
+    noindex: seo.noindex === true ? true : undefined,
+  });
+  return Object.keys(out).length ? out : undefined;
+}
+
 export async function toArticleDetail(a: IArticle, myReactions: string[]) {
   const [card] = await toArticleCards([a]);
   const learningPath = await learningPathRefFor(a);
-  return compact({ ...card!, content: a.content ?? '', learningPath, myReactions });
+  return compact({ ...card!, content: a.content ?? '', seo: toSeo(a.seo), learningPath, myReactions });
 }
 
 /** `AdminArticle`: có cả bài nháp; `withContent` = false cho danh sách. */
@@ -164,7 +178,9 @@ export async function toAdminArticles(articles: IArticle[], withContent: boolean
       ...card,
       content: withContent ? (a.content ?? '') : undefined,
       status: a.status,
+      seo: toSeo(a.seo),
       learningPathId: a.learningPathId ? idOf(a.learningPathId) : undefined,
+      editedInCms: a.editedInCms === true ? true : undefined,
     });
   });
 }
@@ -266,4 +282,28 @@ export async function toComments(
       createdAt: iso(c.createdAt)!,
     }) as CommentOut;
   });
+}
+
+// ---------- Thư viện media ----------
+
+export function mediaUrl(storagePath: string): string {
+  return `/uploads/${storagePath}`;
+}
+
+export async function toMediaItems(items: IMedia[]) {
+  const users = await usersById(items.map((m) => m.uploadedBy));
+  return items.map((m) =>
+    compact({
+      id: idOf(m._id),
+      url: mediaUrl(m.storagePath),
+      fileName: m.fileName,
+      mimeType: m.mimeType,
+      size: m.size,
+      width: m.width,
+      height: m.height,
+      alt: m.alt || undefined,
+      uploadedBy: toAuthorRef(users.get(idOf(m.uploadedBy)), m.uploadedBy),
+      createdAt: iso(m.createdAt)!,
+    }),
+  );
 }

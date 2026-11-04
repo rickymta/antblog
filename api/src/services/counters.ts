@@ -1,16 +1,36 @@
 import type { Types } from 'mongoose';
-import { Article, Category, Comment, CommentLike, Reaction, REACTION_TYPES } from '../models/index.js';
+import { Article, Category, Comment, CommentLike, Reaction, REACTION_TYPES, type ICategory } from '../models/index.js';
 
-/** `category.articleCount` = số bài `published`. Không truyền id ⇒ tính lại mọi chủ đề. */
+/** Bài đang công khai (cùng điều kiện với `publicArticleFilter` của serializers — tránh vòng import). */
+const liveFilter = () => ({ status: 'published' as const, publishedAt: { $lte: new Date() } });
+
+/**
+ * `category.articleCount` = số bài ĐANG công khai (đã xuất bản, `publishedAt <= now`; bài lên lịch chưa tính).
+ * Không truyền id ⇒ tính lại mọi chủ đề.
+ */
 export async function recountCategories(ids?: (Types.ObjectId | string | undefined)[]): Promise<void> {
   const filter = ids ? { _id: { $in: ids.filter(Boolean) } } : {};
   const cats = await Category.find(filter).select({ _id: 1 }).lean();
   await Promise.all(
     cats.map(async (c) => {
-      const n = await Article.countDocuments({ categoryId: c._id, status: 'published' });
+      const n = await Article.countDocuments({ categoryId: c._id, ...liveFilter() });
       await Category.updateOne({ _id: c._id }, { $set: { articleCount: n } });
     }),
   );
+}
+
+/**
+ * Gắn `articleCount` tính TẠI LÚC ĐỌC: bài lên lịch tự "đến giờ" không cập nhật bộ đếm lưu sẵn,
+ * nên các endpoint trả chủ đề đếm lại bằng một aggregate thay vì tin trường lưu.
+ */
+export async function withLiveArticleCounts(cats: ICategory[]): Promise<ICategory[]> {
+  if (!cats.length) return cats;
+  const rows = await Article.aggregate<{ _id: Types.ObjectId; n: number }>([
+    { $match: { ...liveFilter(), categoryId: { $in: cats.map((c) => c._id) } } },
+    { $group: { _id: '$categoryId', n: { $sum: 1 } } },
+  ]);
+  const byId = new Map(rows.map((r) => [r._id.toString(), r.n]));
+  return cats.map((c) => ({ ...c, articleCount: byId.get(c._id.toString()) ?? 0 }));
 }
 
 /** Tính lại `stats.comments` (bình luận `visible`) + `stats.reactions` từ dữ liệu gốc. Không truyền id ⇒ mọi bài. */

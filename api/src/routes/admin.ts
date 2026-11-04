@@ -29,7 +29,8 @@ import {
 } from '../models/index.js';
 import { resolveArticleSlug, syncLearningPathArticles } from '../services/articles.js';
 import { setCommentVisibility, softDeleteComment } from '../services/comments.js';
-import { recountCategories } from '../services/counters.js';
+import { recountCategories, withLiveArticleCounts } from '../services/counters.js';
+import { mediaRouter } from './media.js';
 import {
   compact,
   toAdminArticles,
@@ -49,18 +50,35 @@ const slugSchema = z
   .max(120)
   .regex(SLUG_PATTERN, { message: 'Slug chỉ gồm a-z, 0-9 và dấu gạch ngang' });
 
-const httpUrl = z
+/** Đường dẫn ảnh trong thư viện media cùng origin: `/uploads/...` (không `..`, không ký tự lạ). */
+const UPLOAD_PATH = /^\/uploads\/(?!.*\.\.)[A-Za-z0-9._\/-]+$/;
+
+/** URL ảnh: http(s) tuyệt đối HOẶC đường dẫn `/uploads/...` của thư viện media. */
+const imageUrl = z
   .string()
   .trim()
   .max(500)
-  .refine((v) => /^https?:\/\/\S+$/i.test(v), { message: 'Phải là đường dẫn http(s) hợp lệ' });
+  .refine((v) => /^https?:\/\/\S+$/i.test(v) || UPLOAD_PATH.test(v), {
+    message: 'Phải là đường dẫn http(s) hoặc ảnh trong thư viện (/uploads/...)',
+  });
+
+/** Chuỗi tuỳ chọn: rỗng/khoảng trắng ⇒ vắng (hợp đồng §8.1). */
+const blankToUndefined = (v: unknown) => (v === null || (typeof v === 'string' && v.trim() === '') ? undefined : v);
+
+const seoSchema = z.object({
+  title: z.preprocess(blankToUndefined, z.string().trim().max(70).optional()),
+  description: z.preprocess(blankToUndefined, z.string().trim().max(170).optional()),
+  ogImageUrl: z.preprocess(blankToUndefined, imageUrl.optional()),
+  noindex: z.preprocess((v) => (v === null ? undefined : v), z.boolean().optional()),
+});
 
 const articleInputSchema = z.object({
   title: z.string().trim().min(3).max(200),
   slug: z.preprocess(emptyToUndefined, slugSchema.optional()),
   summary: z.string().trim().max(400),
   content: z.string().max(500_000),
-  coverImageUrl: z.preprocess(emptyToUndefined, httpUrl.optional()),
+  coverImageUrl: z.preprocess(blankToUndefined, imageUrl.optional()),
+  seo: z.preprocess((v) => (v === null ? undefined : v), seoSchema.optional()),
   language: z.enum(LANGUAGES),
   categoryId: objectIdSchema,
   level: z.enum(LEVELS),
@@ -137,6 +155,14 @@ export function adminRouter(): Router {
     return out;
   }
 
+  /** `seo` sau khi bỏ trường rỗng (`noindex: false` = mặc định ⇒ bỏ). Không còn gì ⇒ undefined (gỡ ghi đè). */
+  function seoFields(input: ArticleInput) {
+    const s = input.seo;
+    if (!s) return undefined;
+    const out = compact({ title: s.title, description: s.description, ogImageUrl: s.ogImageUrl, noindex: s.noindex === true ? true : undefined });
+    return Object.keys(out).length ? out : undefined;
+  }
+
   function articleFields(input: ArticleInput) {
     return {
       title: input.title,
@@ -153,7 +179,7 @@ export function adminRouter(): Router {
   r.get('/articles', async (req, res) => {
     const q = parse(
       z.object({
-        status: z.preprocess(emptyToUndefined, z.enum(ARTICLE_STATUSES).optional()),
+        status: z.preprocess(emptyToUndefined, z.enum([...ARTICLE_STATUSES, 'scheduled']).optional()),
         category: optionalQueryString(100),
         q: optionalQueryString(200),
         ...pagingSchema(12),
@@ -163,7 +189,11 @@ export function adminRouter(): Router {
     const user = currentUser(req);
     const filter: Record<string, unknown> = {};
     // Không lọc trạng thái ⇒ ẩn bài đã lưu trữ (DELETE = lưu trữ); `status=archived` để xem chúng.
-    filter.status = q.status ?? { $ne: 'archived' };
+    // `published` = đang công khai; `scheduled` = đã xuất bản nhưng `publishedAt` ở tương lai (lên lịch).
+    const now = new Date();
+    if (q.status === 'published') Object.assign(filter, { status: 'published', publishedAt: { $lte: now } });
+    else if (q.status === 'scheduled') Object.assign(filter, { status: 'published', publishedAt: { $gt: now } });
+    else filter.status = q.status ?? { $ne: 'archived' };
     if (user.role !== 'admin') filter.authorId = user._id;
     if (q.category) {
       const cat = await Category.findOne(isObjectId(q.category) ? { _id: q.category } : { slug: q.category })
@@ -199,8 +229,11 @@ export function adminRouter(): Router {
         ...articleFields(input),
         slug,
         coverImageUrl: input.coverImageUrl,
+        seo: seoFields(input),
         authorId: user._id,
         status: 'draft',
+        // Bài sinh ra trong CMS thuộc quyền CMS — seed không được ghi đè nếu sau này có tệp .md trùng slug.
+        editedInCms: true,
       });
     } catch (err) {
       if (isDuplicateKeyError(err)) throw conflict('SLUG_TAKEN', 'Slug này đã được dùng cho bài viết khác.');
@@ -220,9 +253,15 @@ export function adminRouter(): Router {
     await ensureCategory(input.categoryId);
     // Slug trống khi sửa ⇒ giữ slug hiện tại (không đổi URL bài đã có).
     const slug = input.slug ? await resolveArticleSlug({ explicit: input.slug, title: input.title, excludeId: article._id }) : article.slug;
-    const update: Record<string, unknown> = { $set: { ...articleFields(input), slug } };
-    if (input.coverImageUrl) (update.$set as Record<string, unknown>).coverImageUrl = input.coverImageUrl;
-    else update.$unset = { coverImageUrl: 1 };
+    const set: Record<string, unknown> = { ...articleFields(input), slug, editedInCms: true };
+    const unset: Record<string, 1> = {};
+    if (input.coverImageUrl) set.coverImageUrl = input.coverImageUrl;
+    else unset.coverImageUrl = 1;
+    const seo = seoFields(input);
+    if (seo) set.seo = seo;
+    else unset.seo = 1;
+    const update: Record<string, unknown> = { $set: set };
+    if (Object.keys(unset).length) update.$unset = unset;
     try {
       await Article.updateOne({ _id: article._id }, update);
     } catch (err) {
@@ -235,10 +274,27 @@ export function adminRouter(): Router {
 
   r.post('/articles/:id/publish', async (req, res) => {
     const article = await loadArticleFor(req);
-    await Article.updateOne(
-      { _id: article._id },
-      { $set: { status: 'published', publishedAt: article.publishedAt ?? new Date() } },
+    const { publishAt } = parse(
+      z.object({
+        publishAt: z.preprocess(
+          blankToUndefined,
+          z.iso.datetime({ offset: true, message: 'Thời điểm phải là ISO 8601 (vd 2026-11-05T02:00:00.000Z)' }).optional(),
+        ),
+      }),
+      req.body,
     );
+    const now = new Date();
+    let publishedAt: Date;
+    if (publishAt) {
+      publishedAt = new Date(publishAt);
+      if (!(publishedAt.getTime() > now.getTime())) {
+        throw validation({ publishAt: 'Thời điểm lên lịch phải ở tương lai.' });
+      }
+    } else {
+      // Xuất bản ngay: giữ ngày xuất bản cũ (đăng lại sau khi gỡ); bài đang lên lịch ⇒ đăng NGAY bây giờ.
+      publishedAt = article.publishedAt && article.publishedAt.getTime() <= now.getTime() ? article.publishedAt : now;
+    }
+    await Article.updateOne({ _id: article._id }, { $set: { status: 'published', publishedAt } });
     await recountCategories([article.categoryId]);
     res.json(await adminArticle(article._id));
   });
@@ -257,13 +313,16 @@ export function adminRouter(): Router {
     res.status(204).end();
   });
 
+  // ---------- Thư viện media (admin + author; author chỉ ảnh của mình) ----------
+  r.use('/media', mediaRouter());
+
   // ---------- Mọi mục còn lại: chỉ admin ----------
   r.use(adminOnly);
 
   // ---------- Chủ đề ----------
   r.get('/categories', async (_req, res) => {
     const cats = await Category.find({}).sort({ order: 1, slug: 1 }).lean<ICategory[]>();
-    res.json(cats.map(toCategory));
+    res.json((await withLiveArticleCounts(cats)).map(toCategory));
   });
 
   r.post('/categories', async (req, res) => {

@@ -287,7 +287,7 @@ export function Modal({
   title: string;
   children: ReactNode;
   footer?: ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -307,7 +307,7 @@ export function Modal({
       }}
       className={cx(
         'm-auto w-[calc(100vw-2rem)] rounded-card border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-slate-950/55',
-        size === 'sm' ? 'max-w-md' : size === 'lg' ? 'max-w-3xl' : 'max-w-xl',
+        size === 'sm' ? 'max-w-md' : size === 'lg' ? 'max-w-3xl' : size === 'xl' ? 'max-w-6xl' : 'max-w-xl',
       )}
     >
       {open && (

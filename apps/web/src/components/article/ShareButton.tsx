@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Link as LinkIcon, Share2 } from 'lucide-react';

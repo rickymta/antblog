@@ -1,23 +1,27 @@
+'use client';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { NavLink, useLocation } from 'react-router';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Menu, Search, X } from 'lucide-react';
+import type { Category } from '@tkh/shared';
 import { container, iconBtn } from '../../lib/ui';
 import { Logo } from './Logo';
 import { MobileDrawer } from './MobileDrawer';
-import { MAIN_LINKS } from './navLinks';
+import { isActivePath, MAIN_LINKS } from './navLinks';
 import { SearchBox } from './SearchBox';
 import { LanguageToggle, ThemeToggle } from './Toggles';
 import { TopicsMenu } from './TopicsMenu';
 import { UserMenu } from './UserMenu';
 
-const navItem = ({ isActive }: { isActive: boolean }) =>
-  `rounded-ui px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors ${isActive ? 'text-primary-ink' : 'text-muted hover:bg-surface-2 hover:text-ink'}`;
+const navItem = (active: boolean) =>
+  `rounded-ui px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors ${active ? 'text-primary-ink' : 'text-muted hover:bg-surface-2 hover:text-ink'}`;
 
 /** Thanh đầu dính (docs/ui-guide.md §2). Màn hẹp: menu vào ☰ (< 1024px); dưới 1280px ô tìm kiếm thành biểu tượng mở một hàng tìm kiếm. */
-export function Header() {
+export function Header({ categories }: { categories: Category[] | null }) {
   const { t } = useTranslation();
-  const location = useLocation();
+  const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const desktopSearch = useRef<HTMLInputElement>(null);
@@ -25,7 +29,7 @@ export function Header() {
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   // Đổi trang ⇒ đóng hàng tìm kiếm điện thoại.
-  useEffect(() => setSearchOpen(false), [location.pathname]);
+  useEffect(() => setSearchOpen(false), [pathname]);
 
   useEffect(() => {
     if (searchOpen) mobileSearch.current?.focus();
@@ -45,6 +49,15 @@ export function Header() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
+  const navLink = (to: string, end: boolean, label: string) => {
+    const active = isActivePath(pathname, to, end);
+    return (
+      <Link key={to} href={to} aria-current={active ? 'page' : undefined} className={navItem(active)}>
+        {label}
+      </Link>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className={`${container} flex h-16 items-center gap-2 sm:gap-3`}>
@@ -53,15 +66,9 @@ export function Header() {
         </button>
         <Logo />
         <nav aria-label={t('nav.mainNav')} className="ml-4 hidden items-center gap-0.5 lg:flex">
-          {MAIN_LINKS.slice(0, 3).map((l) => (
-            <NavLink key={l.to} to={l.to} end={l.end} className={navItem}>
-              {t(l.label)}
-            </NavLink>
-          ))}
-          <TopicsMenu />
-          <NavLink to="/about" className={navItem}>
-            {t('nav.about')}
-          </NavLink>
+          {MAIN_LINKS.slice(0, 3).map((l) => navLink(l.to, l.end, t(l.label)))}
+          <TopicsMenu categories={categories} />
+          {navLink('/about', false, t('nav.about'))}
         </nav>
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <SearchBox ref={desktopSearch} className="hidden w-56 xl:block 2xl:w-64" />
@@ -84,7 +91,7 @@ export function Header() {
           <SearchBox ref={mobileSearch} showHint={false} onSubmitted={() => setSearchOpen(false)} />
         </div>
       )}
-      <MobileDrawer open={drawerOpen} onClose={closeDrawer} />
+      <MobileDrawer open={drawerOpen} onClose={closeDrawer} categories={categories} />
     </header>
   );
 }

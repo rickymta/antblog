@@ -10,6 +10,14 @@ export const REACTION_TYPES = ['love', 'helpful', 'insightful', 'inspiring'] as 
 export type ReactionType = (typeof REACTION_TYPES)[number];
 export type ReactionCounts = Record<ReactionType, number>;
 
+/** Ghi đè SEO của bài (hợp đồng §8.1) — trường vắng = dùng mặc định. */
+export interface IArticleSeo {
+  title?: string;
+  description?: string;
+  ogImageUrl?: string;
+  noindex?: boolean;
+}
+
 export interface IArticle {
   _id: Types.ObjectId;
   slug: string;
@@ -26,6 +34,9 @@ export interface IArticle {
   status: ArticleStatus;
   publishedAt?: Date;
   learningPathId?: Types.ObjectId;
+  seo?: IArticleSeo;
+  /** true khi bài đã được sửa trong CMS — `npm run seed` không ghi đè nội dung nữa (hợp đồng §8.4). */
+  editedInCms?: boolean;
   stats: { views: number; comments: number; reactions: ReactionCounts };
   createdAt: Date;
   updatedAt: Date;
@@ -47,6 +58,14 @@ const articleSchema = new Schema<IArticle>(
     status: { type: String, enum: ARTICLE_STATUSES, default: 'draft' },
     publishedAt: Date,
     learningPathId: { type: Schema.Types.ObjectId, ref: 'LearningPath' },
+    seo: {
+      type: new Schema<IArticleSeo>(
+        { title: String, description: String, ogImageUrl: String, noindex: Boolean },
+        { _id: false },
+      ),
+      default: undefined,
+    },
+    editedInCms: Boolean,
     stats: {
       views: { type: Number, default: 0 },
       comments: { type: Number, default: 0 },

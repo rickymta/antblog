@@ -27,10 +27,16 @@ export function visitorCookie(req: Request, res: Response, next: NextFunction): 
 
 const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
+/** Ngoại lệ DUY NHẤT (hợp đồng §8.2): `POST /admin/media` gửi `multipart/form-data`. Đường dẫn tính trong router `/api/v1`. */
+function isMediaUpload(req: Request, type: string): boolean {
+  return req.method === 'POST' && type === 'multipart/form-data' && /^\/admin\/media\/?$/.test(req.path);
+}
+
 /** Request ghi phải có `Content-Type: application/json` (kể cả thân rỗng) — chống CSRF dạng form. */
 export function requireJsonContentType(req: Request, _res: Response, next: NextFunction): void {
   if (!WRITE_METHODS.has(req.method)) return next();
   const type = (req.headers['content-type'] ?? '').split(';')[0]!.trim().toLowerCase();
+  if (isMediaUpload(req, type)) return next();
   if (type !== 'application/json') {
     return next(new AppError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Request ghi phải gửi kèm Content-Type: application/json.'));
   }

@@ -11,3 +11,5 @@ Dockerfile
 .dockerignore
 *.log
 api
+**/.next
+**/uploads

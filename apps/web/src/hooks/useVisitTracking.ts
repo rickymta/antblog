@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { usePathname } from 'next/navigation';
 import { api } from '@tkh/shared';
 import { readStorage, writeStorage } from '../lib/storage';
 
@@ -9,7 +9,7 @@ let trackedInMemory = false;
 
 /** Ghi một lượt truy cập MỘT lần mỗi phiên trình duyệt (cờ ở sessionStorage), với đường dẫn trang đầu tiên. */
 export function useVisitTracking(): void {
-  const { pathname } = useLocation();
+  const pathname = usePathname();
   useEffect(() => {
     if (trackedInMemory || readStorage(FLAG, 'session')) return;
     trackedInMemory = true;

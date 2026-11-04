@@ -1,4 +1,6 @@
-import { Link } from 'react-router';
+'use client';
+
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 
 export function LogoMark({ className = 'h-9 w-9 text-sm' }: { className?: string }) {
@@ -15,7 +17,7 @@ export function LogoMark({ className = 'h-9 w-9 text-sm' }: { className?: string
 export function Logo({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useTranslation();
   return (
-    <Link to="/" onClick={onNavigate} aria-label={t('header.home')} className="flex min-w-0 items-center gap-2.5 rounded-ui">
+    <Link href="/" onClick={onNavigate} aria-label={t('header.home')} className="flex min-w-0 items-center gap-2.5 rounded-ui">
       <LogoMark />
       <span className="hidden min-w-0 leading-tight min-[400px]:block">
         <span className="block truncate text-[15px] font-bold text-ink">{t('meta.siteName')}</span>

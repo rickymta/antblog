@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
 dotenv.config({ quiet: true });
@@ -22,6 +24,15 @@ export interface Config {
   cookieSecure: boolean;
   /** Giá trị `trust proxy` của Express — để rate limit tính theo IP thật của người dùng khi đứng sau nginx. */
   trustProxy: boolean | number | string;
+  /** Thư mục lưu ảnh tải lên (đường dẫn tuyệt đối). UPLOAD_DIR tương đối ⇒ tính từ thư mục api/. */
+  uploadDir: string;
+}
+
+/** Thư mục gốc của api/ (src/config.ts và dist/config.js đều nằm một cấp dưới). */
+export const API_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+function resolveUploadDir(value: string | undefined): string {
+  return path.resolve(API_ROOT, value && value.trim() ? value.trim() : 'uploads');
 }
 
 function parseBool(value: string | undefined, fallback: boolean): boolean {
@@ -53,6 +64,7 @@ export function getConfig(): Config {
     jwtSecret,
     cookieSecure: parseBool(process.env.COOKIE_SECURE, nodeEnv === 'production'),
     trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
+    uploadDir: resolveUploadDir(process.env.UPLOAD_DIR),
   };
   return cached;
 }

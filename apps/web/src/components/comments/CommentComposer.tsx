@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@tkh/ui';

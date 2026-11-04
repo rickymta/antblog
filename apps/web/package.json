@@ -4,16 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -p tsconfig.json && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.json"
+    "dev": "next dev -H 127.0.0.1 -p 5173",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "@tailwindcss/postcss": "^4.3.4",
-    "@tailwindcss/vite": "^4.3.4",
     "@tanstack/react-query": "^5.105.3",
     "@tkh/shared": "*",
     "@tkh/ui": "*",
@@ -23,7 +22,9 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-i18next": "^17.1.12",
-    "react-router": "7.18.5",
     "tailwindcss": "^4.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5"
   }
 }

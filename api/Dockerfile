@@ -19,6 +19,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci --omit=dev && npm cache clean --force
 COPY --from=tools /app/dist ./dist
+# Thư mục ảnh tải lên (UPLOAD_DIR mặc định /app/uploads) — volume gắn vào đây nhận quyền của user node.
+RUN mkdir -p /app/uploads && chown node:node /app/uploads
 USER node
 EXPOSE 4000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \

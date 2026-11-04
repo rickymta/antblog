@@ -1,51 +1,41 @@
-import { Link } from 'react-router';
+'use client';
+
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { api, type ArticleDetail } from '@tkh/shared';
-import { articleHref, ArticleRow, ArticleRowSkeleton } from '../common/ArticleCard';
+import type { ArticleCard, ArticleDetail } from '@tkh/shared';
+import { articleHref, ArticleRow } from '../common/ArticleCard';
 import { TagChip } from '../common/Badges';
-import { ErrorState, LoadingRegion } from '../common/States';
 import { ShareButton } from './ShareButton';
 
 const asideTitle = 'mb-3 text-xs font-bold tracking-wide text-ink uppercase';
 
-export function RelatedArticles({ slug }: { slug: string }) {
+/** Bài liên quan — danh sách do máy chủ tải sẵn (liên kết nội bộ có trong HTML). `headingId` khác nhau khi khối xuất hiện hai lần. */
+export function RelatedArticles({ articles, headingId = 'related-title' }: { articles: ArticleCard[]; headingId?: string }) {
   const { t } = useTranslation();
-  const related = useQuery({ queryKey: ['article', slug, 'related'], queryFn: () => api.articles.related(slug, 3) });
-  if (related.isSuccess && related.data.length === 0) return null;
+  if (articles.length === 0) return null;
   return (
-    <section aria-labelledby="related-title">
-      <h2 id="related-title" className={asideTitle}>
+    <section aria-labelledby={headingId}>
+      <h2 id={headingId} className={asideTitle}>
         {t('article.related')}
       </h2>
-      {related.isPending ? (
-        <LoadingRegion className="space-y-4">
-          {[0, 1, 2].map((i) => (
-            <ArticleRowSkeleton key={i} compact />
-          ))}
-        </LoadingRegion>
-      ) : related.isError ? (
-        <ErrorState compact onRetry={() => void related.refetch()} />
-      ) : (
-        <ul className="space-y-4">
-          {related.data.map((a) => (
-            <li key={a.id}>
-              <ArticleRow article={a} compact />
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="space-y-4">
+        {articles.map((a) => (
+          <li key={a.id}>
+            <ArticleRow article={a} compact />
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
 
-export function TagsBlock({ tags }: { tags: string[] }) {
+export function TagsBlock({ tags, headingId = 'tags-title' }: { tags: string[]; headingId?: string }) {
   const { t } = useTranslation();
   if (tags.length === 0) return null;
   return (
-    <section aria-labelledby="tags-title">
-      <h2 id="tags-title" className={asideTitle}>
+    <section aria-labelledby={headingId}>
+      <h2 id={headingId} className={asideTitle}>
         {t('article.tags')}
       </h2>
       <ul className="flex flex-wrap gap-2">
@@ -73,7 +63,7 @@ export function ShareBlock() {
 }
 
 /** Bài trước / bài sau trong lộ trình. */
-export function PrevNext({ article }: { article: ArticleDetail }) {
+export function PrevNext({ article }: { article: Pick<ArticleDetail, 'slug' | 'learningPath'> }) {
   const { t } = useTranslation();
   const list = article.learningPath?.articles ?? [];
   const i = list.findIndex((a) => a.slug === article.slug);
@@ -85,7 +75,7 @@ export function PrevNext({ article }: { article: ArticleDetail }) {
   return (
     <nav aria-label={t('article.pathNav')} className="grid gap-3 sm:grid-cols-2">
       {prev ? (
-        <Link to={articleHref(prev.slug)} className={box}>
+        <Link href={articleHref(prev.slug)} rel="prev" className={box}>
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted">
             <ArrowLeft aria-hidden="true" className="h-3.5 w-3.5" />
             {t('article.prev')}
@@ -96,7 +86,7 @@ export function PrevNext({ article }: { article: ArticleDetail }) {
         <span className="hidden sm:block" />
       )}
       {next && (
-        <Link to={articleHref(next.slug)} className={`${box} sm:items-end sm:text-right`}>
+        <Link href={articleHref(next.slug)} rel="next" className={`${box} sm:items-end sm:text-right`}>
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted">
             {t('article.next')}
             <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />

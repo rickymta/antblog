@@ -1,7 +1,7 @@
 ---
 slug: heap-ctid-va-primary-key
 title: "Clustered index thật và clustered index nhìn thấy trong PostgreSQL"
-summary: "Primary key không quyết định dòng nằm ở đâu. Mổ xẻ heap, ctid và đường đi của một truy vấn trên bảng trips của Tới Nơi — kèm số đo thật về UPDATE, HOT và dòng bị dời trang."
+summary: "Primary key không quyết định dòng nằm ở đâu. Mổ xẻ heap, ctid và đường đi của một truy vấn trên bảng trips của Tới Nơi — kèm số đo thật về UPDATE, HOT và dòng bị dời page."
 category: database
 level: intermediate
 tags: [postgresql, index, heap, ctid, mvcc]
@@ -10,7 +10,7 @@ language: vi
 
 Mở lược đồ bảng `trips` của [Tới Nơi](/articles/du-an-mau-toi-noi), thứ ta thấy đầu tiên là `id uuid PRIMARY KEY`. Rất dễ nghĩ rằng primary key là thứ quyết định một chuyến nằm ở đâu trên đĩa — giống "clustered index" ở vài hệ quản trị khác. Với PostgreSQL thì không. Bảng có hai lớp tách rời:
 
-- **Clustered index thật — lớp vật lý:** tệp **heap** chia thành các trang 8 KB, mỗi dòng có một địa chỉ vật lý gọi là **`ctid`**. Đây là nơi duy nhất cất dữ liệu dòng.
+- **Clustered index thật — lớp vật lý:** tệp **heap** chia thành các **page** 8 KB (đơn vị lưu trữ và đọc ghi của PostgreSQL), mỗi dòng có một địa chỉ vật lý gọi là **`ctid`**. Đây là nơi duy nhất cất dữ liệu dòng.
 - **Clustered index nhìn thấy — primary key:** `trips_pkey` chỉ là một cây B-tree riêng, ánh xạ `id → ctid`. Về cấu trúc, nó ngang hàng với mọi index khác của bảng.
 
 Bài này đi qua hai lớp đó bằng chính bảng `trips`. Mọi kết quả truy vấn dưới đây là **kết quả chạy thật** trên PostgreSQL 18.6 với bộ dữ liệu mẫu thu nhỏ còn 20.000 chuyến (giá trị `id` và `ctid` ở máy bạn sẽ khác, nhưng hình dạng thì giống).
@@ -19,7 +19,7 @@ Bài này đi qua hai lớp đó bằng chính bảng `trips`. Mọi kết quả
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 920 430" role="img" aria-label="Lớp nhìn thấy gồm trips_pkey, uq_trips_code và các index khác; lớp vật lý là các trang heap. Ba mục liền nhau của uq_trips_code trỏ vào cùng trang 0, còn ba mục liền nhau của trips_pkey trỏ vào ba trang 148, 192 và 336.">
+<svg viewBox="0 0 920 430" role="img" aria-label="Lớp nhìn thấy gồm trips_pkey, uq_trips_code và các index khác; lớp vật lý là các page heap. Ba mục liền nhau của uq_trips_code trỏ vào cùng page 0, còn ba mục liền nhau của trips_pkey trỏ vào ba page 148, 192 và 336.">
 <defs>
 <marker id="h1-pk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-pk"/></marker>
 <marker id="h1-ph" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-phys"/></marker>
@@ -47,37 +47,37 @@ Bài này đi qua hai lớp đó bằng chính bảng `trips`. Mọi kết quả
 <text x="190" y="214" class="t-b">mọi index chỉ giữ ctid</text>
 <rect x="20" y="240" width="880" height="180" rx="12" class="f-bg s-phys" stroke-width="1.6"/>
 <rect x="30" y="254" width="200" height="98" rx="8" class="f-surface s-phys"/>
-<text x="40" y="272" class="t-small">heap · trang 0</text>
+<text x="40" y="272" class="t-small">heap · page 0</text>
 <text x="40" y="294" class="t-mono t-10">(0,1) │ 1ff65316 │ 100000</text>
 <text x="40" y="314" class="t-mono t-10">(0,2) │ c1d5b5c8 │ 100001</text>
 <text x="40" y="334" class="t-mono t-10">(0,3) │ f5404368 │ 100002</text>
 <rect x="250" y="254" width="200" height="98" rx="8" class="f-surface s-phys"/>
-<text x="260" y="272" class="t-small">heap · trang 148</text>
+<text x="260" y="272" class="t-small">heap · page 148</text>
 <text x="260" y="294" class="t-mono t-10 t-dead">(148,16) │ … │ 107924</text>
 <rect x="254" y="300" width="192" height="19" rx="4" class="f-pk-soft"/>
 <text x="260" y="314" class="t-mono t-10 t-b">(148,17) │ 000e2402 │ 107925</text>
 <text x="260" y="334" class="t-mono t-10 t-dead">(148,18) │ … │ 107926</text>
 <rect x="470" y="254" width="200" height="98" rx="8" class="f-surface s-phys"/>
-<text x="480" y="272" class="t-small">heap · trang 192</text>
+<text x="480" y="272" class="t-small">heap · page 192</text>
 <text x="480" y="294" class="t-mono t-10 t-dead">(192,9) │ … │ 110267</text>
 <rect x="474" y="300" width="192" height="19" rx="4" class="f-pk-soft"/>
 <text x="480" y="314" class="t-mono t-10 t-b">(192,10) │ 000e6594 │ 110268</text>
 <text x="480" y="334" class="t-mono t-10 t-dead">(192,11) │ … │ 110269</text>
 <rect x="690" y="254" width="200" height="98" rx="8" class="f-surface s-phys"/>
-<text x="700" y="272" class="t-small">heap · trang 336</text>
+<text x="700" y="272" class="t-small">heap · page 336</text>
 <text x="700" y="294" class="t-mono t-10 t-dead">(336,32) │ … │ 117998</text>
 <rect x="694" y="300" width="192" height="19" rx="4" class="f-pk-soft"/>
 <text x="700" y="314" class="t-mono t-10 t-b">(336,33) │ 000d094a │ 117999</text>
 <text x="700" y="334" class="t-mono t-10 t-dead">(336,34) │ … │ 118000</text>
 <text x="36" y="384" class="t-b t-phys">LỚP VẬT LÝ — heap + ctid: nơi dòng thật sự nằm (cột: ctid │ id │ code)</text>
-<text x="36" y="404" class="t-small">Dòng nằm theo thứ tự được chèn, mỗi trang 8 KB chứa khoảng 53 chuyến. Không cột nào, kể cả id, quyết định thứ tự này.</text>
+<text x="36" y="404" class="t-small">Dòng nằm theo thứ tự được chèn, mỗi page 8 KB chứa khoảng 53 chuyến. Không cột nào, kể cả id, quyết định thứ tự này.</text>
 <line x1="170" y1="168" x2="170" y2="250" class="s-phys" stroke-width="1.8" marker-end="url(#h1-ph)"/>
 <path d="M380 168 C 380 220, 438 225, 438 298" class="f-none s-pk" stroke-width="1.8" marker-end="url(#h1-pk)"/>
 <path d="M470 168 C 470 222, 658 220, 658 298" class="f-none s-pk" stroke-width="1.8" marker-end="url(#h1-pk)"/>
 <path d="M560 168 C 560 218, 878 214, 878 298" class="f-none s-pk" stroke-width="1.8" marker-end="url(#h1-pk)"/>
 </svg>
 </div>
-<figcaption><b>Hình 1 · Hai lớp của <code>trips</code>.</b> Ba mục liền nhau của <code>uq_trips_code</code> trỏ vào cùng trang 0, vì chuyến được chèn theo thứ tự số. Ba mục liền nhau của <code>trips_pkey</code> — đã xếp theo <code>id</code> — trỏ vào ba trang cách xa nhau: primary key có thứ tự trong cây của nó, heap thì không theo thứ tự đó.</figcaption>
+<figcaption><b>Hình 1 · Hai lớp của <code>trips</code>.</b> Ba mục liền nhau của <code>uq_trips_code</code> trỏ vào cùng page 0, vì chuyến được chèn theo thứ tự số. Ba mục liền nhau của <code>trips_pkey</code> — đã xếp theo <code>id</code> — trỏ vào ba page cách xa nhau: primary key có thứ tự trong cây của nó, heap thì không theo thứ tự đó.</figcaption>
 </figure>
 
 Bạn có thể tự kiểm tra hai câu sau trên bộ dữ liệu mẫu. Đọc 5 dòng đầu tiên **theo thứ tự vật lý** (không `ORDER BY`):
@@ -114,19 +114,19 @@ SELECT ctid, left(id::text, 8) AS id, code FROM trips ORDER BY id LIMIT 5;
 
 `ctid` nhảy lung tung: đọc theo primary key là đọc rải khắp tệp heap.
 
-## Bên trong một trang heap: ctid trỏ vào đâu
+## Bên trong một page heap: ctid trỏ vào đâu
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 920 340" role="img" aria-label="Một trang heap 8 KB: phần đầu trang, mảng line pointer lớn dần từ trên xuống, chỗ trống ở giữa, dữ liệu dòng ghi từ cuối trang ngược lên; ctid (0,2) nghĩa là trang 0, line pointer số 2.">
+<svg viewBox="0 0 920 340" role="img" aria-label="Một page heap 8 KB: page header, mảng line pointer lớn dần từ trên xuống, chỗ trống ở giữa, dữ liệu dòng ghi từ cuối page ngược lên; ctid (0,2) nghĩa là page 0, line pointer số 2.">
 <defs>
 <marker id="h2-ph" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-phys"/></marker>
 <marker id="h2-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-warn"/></marker>
 </defs>
 <rect x="40" y="24" width="460" height="270" rx="8" class="f-surface s-phys" stroke-width="1.8"/>
 <rect x="41" y="25" width="458" height="27" rx="7" class="f-bg"/>
-<text x="52" y="43" class="t-small">header trang · 24 byte</text>
-<text x="488" y="43" text-anchor="end" class="t-mono t-small">trang 0 · 8 KB</text>
+<text x="52" y="43" class="t-small">page header · 24 byte</text>
+<text x="488" y="43" text-anchor="end" class="t-mono t-small">page 0 · 8 KB</text>
 <rect x="48" y="60" width="58" height="28" rx="5" class="f-phys-soft s-phys"/><text x="77" y="79" text-anchor="middle" class="t-mono t-b">lp 1</text>
 <rect x="112" y="60" width="58" height="28" rx="5" class="f-warn-soft s-warn" stroke-width="1.6"/><text x="141" y="79" text-anchor="middle" class="t-mono t-b t-warn">lp 2</text>
 <rect x="176" y="60" width="58" height="28" rx="5" class="f-phys-soft s-phys"/><text x="205" y="79" text-anchor="middle" class="t-mono t-b">lp 3</text>
@@ -148,13 +148,13 @@ SELECT ctid, left(id::text, 8) AS id, code FROM trips ORDER BY id LIMIT 5;
 <path d="M77 90 C 90 150, 380 140, 420 202" class="f-none s-phys" stroke-width="1.5" marker-end="url(#h2-ph)"/>
 <path d="M141 90 C 150 150, 262 150, 268 202" class="f-none s-warn" stroke-width="1.8" marker-end="url(#h2-w)"/>
 <path d="M205 90 C 200 150, 125 150, 118 202" class="f-none s-phys" stroke-width="1.5" marker-end="url(#h2-ph)"/>
-<text x="270" y="316" text-anchor="middle" class="t-small">← dữ liệu dòng ghi từ cuối trang ngược lên; hai phía gặp nhau là trang đầy (≈ 53 chuyến)</text>
+<text x="270" y="316" text-anchor="middle" class="t-small">← dữ liệu dòng ghi từ cuối page ngược lên; hai phía gặp nhau là page đầy (≈ 53 chuyến)</text>
 <text x="540" y="40" class="t-small">địa chỉ của dòng thứ hai</text>
 <text x="540" y="76" class="t-big t-warn">ctid = (0,2)</text>
-<text x="540" y="102" class="t-mono">0 → trang số 0 của tệp heap</text>
+<text x="540" y="102" class="t-mono">0 → page số 0 của tệp heap</text>
 <text x="540" y="120" class="t-mono">2 → ô line pointer số 2</text>
-<text x="540" y="140" class="t-small">Line pointer giữ vị trí byte của dòng trong trang,</text>
-<text x="540" y="156" class="t-small">nên dòng dời chỗ TRONG trang thì ctid vẫn giữ.</text>
+<text x="540" y="140" class="t-small">Line pointer giữ vị trí byte của dòng trong page,</text>
+<text x="540" y="156" class="t-small">nên dòng dời chỗ TRONG page thì ctid vẫn giữ.</text>
 <rect x="540" y="176" width="350" height="118" rx="8" class="f-bg s-line"/>
 <text x="552" y="196" class="t-mono">SELECT ctid, left(id::text, 8), code</text>
 <text x="552" y="212" class="t-mono">FROM trips</text>
@@ -165,14 +165,14 @@ SELECT ctid, left(id::text, 8) AS id, code FROM trips ORDER BY id LIMIT 5;
 <text x="552" y="288" class="t-mono t-b t-warn"> (0,2) │ c1d5b5c8 │ 100001</text>
 </svg>
 </div>
-<figcaption><b>Hình 2 · Giải phẫu một trang heap.</b> <code>ctid</code> là cột hệ thống ẩn có ở mọi bảng. Số sau dấu phẩy là số thứ tự ô trong mảng line pointer — ô đó mới giữ vị trí byte thật của dòng.</figcaption>
+<figcaption><b>Hình 2 · Giải phẫu một page heap.</b> <code>ctid</code> là cột hệ thống ẩn có ở mọi bảng. Số sau dấu phẩy là số thứ tự ô trong mảng line pointer — ô đó mới giữ vị trí byte thật của dòng.</figcaption>
 </figure>
 
 ## Tìm theo primary key vẫn phải xuống lớp vật lý
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 920 340" role="img" aria-label="Truy vấn theo id: đi cây B-tree trips_pkey từ gốc xuống lá, lấy ctid (148,17), rồi mở trang heap 148 và đọc line pointer số 17 để tới dòng dữ liệu.">
+<svg viewBox="0 0 920 340" role="img" aria-label="Truy vấn theo id: đi cây B-tree trips_pkey từ gốc xuống lá, lấy ctid (148,17), rồi mở page heap 148 và đọc line pointer số 17 để tới dòng dữ liệu.">
 <defs>
 <marker id="h3-pk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-pk"/></marker>
 <marker id="h3-ph" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-phys"/></marker>
@@ -193,7 +193,7 @@ SELECT ctid, left(id::text, 8) AS id, code FROM trips ORDER BY id LIMIT 5;
 <rect x="46" y="237" width="248" height="19" rx="4" class="f-warn-soft"/>
 <text x="52" y="251" class="t-mono t-b t-warn">000e2402… → (148,17)</text>
 <text x="52" y="270" class="t-mono t-dead">000e6594… → (192,10)</text>
-<text x="710" y="70" text-anchor="middle" class="t-b t-phys">② heap, trang 148 (lớp vật lý)</text>
+<text x="710" y="70" text-anchor="middle" class="t-b t-phys">② heap, page 148 (lớp vật lý)</text>
 <rect x="520" y="80" width="380" height="198" rx="8" class="f-surface s-phys" stroke-width="1.8"/>
 <rect x="528" y="92" width="56" height="26" rx="5" class="f-phys-soft s-phys"/><text x="556" y="110" text-anchor="middle" class="t-mono">lp 16</text>
 <rect x="590" y="92" width="56" height="26" rx="5" class="f-warn-soft s-warn" stroke-width="1.6"/><text x="618" y="110" text-anchor="middle" class="t-mono t-b t-warn">lp 17</text>
@@ -214,7 +214,7 @@ SELECT ctid, left(id::text, 8) AS id, code FROM trips ORDER BY id LIMIT 5;
 <text x="786" y="230" class="t-mono">…</text>
 <text x="786" y="248" class="t-mono">107924</text>
 <path d="M296 246 C 420 246, 500 60, 612 90" class="f-none s-pk" stroke-width="1.8" marker-end="url(#h3-pk)"/>
-<text x="410" y="266" text-anchor="middle" class="t-small">ctid (148,17): mở trang 148,</text>
+<text x="410" y="266" text-anchor="middle" class="t-small">ctid (148,17): mở page 148,</text>
 <text x="410" y="281" text-anchor="middle" class="t-small">đọc ô line pointer 17</text>
 <path d="M624 120 C 640 150, 700 160, 708 190" class="f-none s-phys" stroke-width="1.8" marker-end="url(#h3-ph)"/>
 <rect x="20" y="294" width="880" height="38" rx="8" class="f-bg s-line"/>
@@ -223,7 +223,7 @@ SELECT ctid, left(id::text, 8) AS id, code FROM trips ORDER BY id LIMIT 5;
 <text x="884" y="318" text-anchor="end" class="t-small">"Index Scan" = đọc cây rồi đọc heap</text>
 </svg>
 </div>
-<figcaption><b>Hình 3 · Tra một chuyến theo <code>id</code>.</b> Hai cấu trúc, hai nhóm trang phải đọc: cây <code>trips_pkey</code> cho ra <code>ctid</code>, rồi trang heap cho ra dòng. Khoá trong nút gốc/trung gian là minh hoạ; dòng kế hoạch truy vấn là kết quả <code>EXPLAIN</code> thật.</figcaption>
+<figcaption><b>Hình 3 · Tra một chuyến theo <code>id</code>.</b> Hai cấu trúc, hai nhóm page phải đọc: cây <code>trips_pkey</code> cho ra <code>ctid</code>, rồi page heap cho ra dòng. Khoá trong nút gốc/trung gian là minh hoạ; dòng kế hoạch truy vấn là kết quả <code>EXPLAIN</code> thật.</figcaption>
 </figure>
 
 Primary key không có "đường tắt" nào so với index thường. Tra theo số chuyến đi y hệt, chỉ khác cây:
@@ -237,7 +237,7 @@ EXPLAIN SELECT * FROM trips WHERE code = 150000;
 
 Hai biến thể bạn sẽ gặp trong `EXPLAIN`:
 
-- **Nhiều dòng khớp** (vd. chuyến của một thành phố trong ngày) ⇒ `Bitmap Heap Scan`: gom hết `ctid` từ index, sắp theo số trang, rồi đọc mỗi trang heap một lần thay vì nhảy qua lại.
+- **Nhiều dòng khớp** (vd. chuyến của một thành phố trong ngày) ⇒ `Bitmap Heap Scan`: gom hết `ctid` từ index, sắp theo số page, rồi đọc mỗi page heap một lần thay vì nhảy qua lại.
 - **Tra thẳng theo địa chỉ vật lý** (`WHERE ctid = '(0,1)'`) ⇒ `Tid Scan`, bỏ qua mọi index. Chỉ dùng để chẩn đoán — lý do ở phần sau.
 
 ```text
@@ -285,7 +285,7 @@ PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mớ
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 920 330" role="img" aria-label="Ba câu UPDATE thật: nhận tài xế đổi ctid từ (373,14) sang (373,34), không HOT vì driver_id có index; sửa giá ngay sau đó đổi ctid sang (373,35) và là HOT; sửa giá một chuyến cũ ở trang 186 đã đầy làm dòng dời sang (373,36), không HOT.">
+<svg viewBox="0 0 920 330" role="img" aria-label="Ba câu UPDATE thật: nhận tài xế đổi ctid từ (373,14) sang (373,34), không HOT vì driver_id có index; sửa giá ngay sau đó đổi ctid sang (373,35) và là HOT; sửa giá một chuyến cũ ở page 186 đã đầy làm dòng dời sang (373,36), không HOT.">
 <defs>
 <marker id="h4-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-muted"/></marker>
 </defs>
@@ -297,7 +297,7 @@ PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mớ
 <line x1="160" y1="122" x2="160" y2="148" class="s-muted" stroke-width="1.5" marker-end="url(#h4-m)"/>
 <rect x="40" y="150" width="240" height="40" rx="8" class="f-warn-soft s-warn"/>
 <text x="160" y="175" text-anchor="middle" class="t-mono t-b t-warn">(373,34) · accepted</text>
-<text x="36" y="214" class="t-small">Cùng trang 373 (trang cuối còn chỗ),</text>
+<text x="36" y="214" class="t-small">Cùng page 373 (page cuối còn chỗ),</text>
 <text x="36" y="230" class="t-small">nhưng driver_id có index.</text>
 <rect x="36" y="246" width="248" height="34" rx="8" class="f-warn-soft s-warn"/>
 <text x="160" y="268" text-anchor="middle" class="t-b t-warn">Không HOT · cả 5 index thêm mục</text>
@@ -310,7 +310,7 @@ PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mớ
 <rect x="340" y="150" width="240" height="40" rx="8" class="f-phys-soft s-phys"/>
 <text x="460" y="175" text-anchor="middle" class="t-mono t-b t-phys">(373,35) · 138.000 đ</text>
 <text x="336" y="214" class="t-small">fare không thuộc index nào,</text>
-<text x="336" y="230" class="t-small">trang 373 còn chỗ.</text>
+<text x="336" y="230" class="t-small">page 373 còn chỗ.</text>
 <rect x="336" y="246" width="248" height="34" rx="8" class="f-phys-soft s-phys"/>
 <text x="460" y="268" text-anchor="middle" class="t-b t-phys">HOT · không index nào phải ghi</text>
 <rect x="620" y="16" width="280" height="276" rx="12" class="f-surface s-line"/>
@@ -321,8 +321,8 @@ PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mớ
 <line x1="760" y1="122" x2="760" y2="148" class="s-muted" stroke-width="1.5" marker-end="url(#h4-m)"/>
 <rect x="640" y="150" width="240" height="40" rx="8" class="f-warn-soft s-warn"/>
 <text x="760" y="175" text-anchor="middle" class="t-mono t-b t-warn">(373,36) · 117.000 đ</text>
-<text x="636" y="214" class="t-small">Trang 186 đã đầy ⇒ phiên bản mới</text>
-<text x="636" y="230" class="t-small">dời sang trang cuối, dù fare không có index.</text>
+<text x="636" y="214" class="t-small">Page 186 đã đầy ⇒ phiên bản mới</text>
+<text x="636" y="230" class="t-small">dời sang page cuối, dù fare không có index.</text>
 <rect x="636" y="246" width="248" height="34" rx="8" class="f-warn-soft s-warn"/>
 <text x="760" y="268" text-anchor="middle" class="t-b t-warn">Không HOT · cả 5 index thêm mục</text>
 <text x="460" y="318" text-anchor="middle" class="t-mono t-small">pg_stat_xact_user_tables sau 3 câu: n_tup_upd = 3, n_tup_hot_upd = 1</text>
@@ -331,7 +331,7 @@ PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mớ
 <figcaption><b>Hình 4 · Ba câu UPDATE thật trên <code>trips</code>.</b> Ở lớp nhìn thấy, mỗi chuyến vẫn là chính nó (<code>id</code> không đổi). Ở lớp vật lý, cả ba đều sinh phiên bản mới ở địa chỉ mới; phiên bản cũ nằm lại chờ VACUUM dọn. Vì index chỉ giữ <code>ctid</code>, chỉ có trường hợp ② tránh được việc ghi thêm vào cả 5 index.</figcaption>
 </figure>
 
-**HOT update** (Heap-Only Tuple) là lối thoát duy nhất: nếu (1) không cột nào có index bị đổi **và** (2) trang hiện tại còn chỗ cho phiên bản mới, PostgreSQL đặt phiên bản mới cùng trang, nối nó với phiên bản cũ, và không index nào phải ghi thêm. Trường hợp ③ cho thấy điều kiện (2) quan trọng không kém điều kiện (1): bảng chèn đầy trang (mặc định `fillfactor = 100`) thì một UPDATE "vô hại" cũng làm dòng dời trang.
+**HOT update** (Heap-Only Tuple) là lối thoát duy nhất: nếu (1) không cột nào có index bị đổi **và** (2) page hiện tại còn chỗ cho phiên bản mới, PostgreSQL đặt phiên bản mới cùng page, nối nó với phiên bản cũ, và không index nào phải ghi thêm. Trường hợp ③ cho thấy điều kiện (2) quan trọng không kém điều kiện (1): bảng chèn đầy page (mặc định `fillfactor = 100`) thì một UPDATE "vô hại" cũng làm dòng dời page.
 
 Tự xem tỉ lệ HOT trên bảng thật:
 
@@ -357,7 +357,7 @@ Với `trips` việc này còn phản tác dụng: `id` là uuid ngẫu nhiên, 
 
 | | Clustered index thật — heap + ctid | Clustered index nhìn thấy — primary key |
 |---|---|---|
-| Là gì | Tệp heap chia trang 8 KB; địa chỉ dòng `ctid = (trang, line pointer)` | B-tree riêng `trips_pkey`: `id → ctid`, kèm unique + not null |
+| Là gì | Tệp heap chia page 8 KB; địa chỉ dòng `ctid = (page, line pointer)` | B-tree riêng `trips_pkey`: `id → ctid`, kèm unique + not null |
 | Chứa dữ liệu dòng | Có — nơi duy nhất | Không — chỉ khoá và ctid |
 | Quyết định thứ tự trên đĩa | Có: dòng nằm theo chỗ trống lúc ghi (ở Tới Nơi ≈ theo `requested_at`) | Không: chỉ có thứ tự trong cây của chính nó |
 | Ổn định | Không: đổi sau mỗi UPDATE, `VACUUM FULL`, `CLUSTER` | Có: `id` không bao giờ đổi |
