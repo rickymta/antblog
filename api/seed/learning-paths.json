@@ -48,5 +48,45 @@
       "thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe"
     ],
     "status": "published"
+  },
+  {
+    "slug": "testing-s02-test-levels-test-types",
+    "title": "Series 02 · Test Levels & Test Types",
+    "description": "Năm test level của ISTQB CTFL v4.0.1 — component, component integration, system, system integration, acceptance — và các test type: functional, non-functional theo ISO/IEC 25010, confirmation và regression, maintenance testing, tất cả trên hệ thống Tới Nơi.",
+    "level": "beginner",
+    "category": "testing",
+    "articles": [
+      "tong-quan-5-test-level-istqb",
+      "component-testing-unit-testing-tong-quan",
+      "component-integration-testing",
+      "system-testing",
+      "system-integration-testing",
+      "acceptance-testing-tong-quan",
+      "functional-testing",
+      "non-functional-testing-tong-quan",
+      "confirmation-testing-va-regression-testing",
+      "maintenance-testing"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "testing-s03-static-testing-review",
+    "title": "Series 03 · Static Testing & Review Techniques",
+    "description": "Tìm defect trước khi chạy code: static testing và dynamic testing, quy trình review và các vai trò, informal review, walkthrough, technical review, inspection, checklist-based review, static analysis và shift-left — review thật trên đặc tả và mã Tới Nơi.",
+    "level": "intermediate",
+    "category": "testing",
+    "articles": [
+      "static-testing-la-gi",
+      "static-testing-va-dynamic-testing",
+      "review-process-va-cac-vai-tro",
+      "informal-review",
+      "walkthrough",
+      "technical-review-api-contract",
+      "inspection-review-hinh-thuc",
+      "checklist-based-review",
+      "static-analysis-phan-tich-code-tinh",
+      "shift-left-testing"
+    ],
+    "status": "published"
   }
 ]
