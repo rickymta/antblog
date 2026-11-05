@@ -59,7 +59,7 @@ export function Header({ categories }: { categories: Category[] | null }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
+    <header className="site-header sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className={`${container} flex h-16 items-center gap-2 sm:gap-3`}>
         <button type="button" className={`${iconBtn} lg:hidden`} onClick={() => setDrawerOpen(true)} aria-label={t('nav.openMenu')} aria-expanded={drawerOpen}>
           <Menu aria-hidden="true" className="h-5 w-5" />

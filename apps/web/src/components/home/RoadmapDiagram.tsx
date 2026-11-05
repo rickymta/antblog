@@ -51,7 +51,7 @@ export function RoadmapDiagram({ className = '' }: { className?: string }) {
   const arrowId = `tkh-arrow-${uid}`;
 
   return (
-    <div role="group" aria-label={t('home.roadmapLabel')} className={`@container relative aspect-[470/450] ${className}`}>
+    <div role="group" aria-label={t('home.areasTitle')} className={`@container relative aspect-[470/450] ${className}`}>
       <svg viewBox={`0 0 ${VW} ${VH}`} aria-hidden="true" focusable="false" className="absolute inset-0 h-full w-full overflow-visible">
         <defs>
           <marker id={arrowId} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -68,7 +68,7 @@ export function RoadmapDiagram({ className = '' }: { className?: string }) {
       <ol className="absolute inset-0 m-0 list-none p-0">
         {NODES.map((n, i) => {
           const final = n.key === 'devops';
-          const label = t(`home.roadmap.${n.key}`);
+          const label = t(`home.areas.${n.key}.title`);
           const style: CSSProperties = { left: pct(n.x, VW), top: pct(n.y, VH), width: pct(n.w, VW), height: pct(H, VH) };
           return (
             <li key={n.key} className="absolute" style={style}>
@@ -79,7 +79,7 @@ export function RoadmapDiagram({ className = '' }: { className?: string }) {
                 }`}
               >
                 {/* Tên truy cập = chữ nhìn thấy ("1 Cơ bản") + tiền tố chỉ cho trình đọc màn hình — không dùng aria-label khác chữ hiển thị. */}
-                <span className="sr-only">{t('home.roadmapStepPrefix')} </span>
+                
                 <span
                   className={`inline-flex h-[5.53cqw] w-[5.53cqw] shrink-0 items-center justify-center rounded-full text-[2.55cqw] font-bold ${
                     final ? 'bg-white/20 text-white' : 'bg-[#DBEAFE] text-[#1D4ED8] group-hover/node:bg-[#BFDBFE]'

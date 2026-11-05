@@ -14,7 +14,8 @@
     "test": "vitest run",
     "seed": "tsx seed/run.ts",
     "seed:demo": "tsx seed/demo.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "categories:tree": "tsx scripts/category-tree.ts"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",

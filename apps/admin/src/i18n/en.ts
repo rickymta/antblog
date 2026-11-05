@@ -258,6 +258,10 @@ export const en: Messages = {
     formSection: 'Article details',
   },
   categories: {
+    parent: "Parent category",
+    root: "None — top-level category",
+    treeHint: "Up to 3 levels. Moving a category also moves its descendants.",
+    depth: "Level {{depth}}",
     title: 'Topics',
     subtitle: 'Topic catalogue shown on the reader site, sorted by order.',
     newCategory: 'New topic',

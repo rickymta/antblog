@@ -29,6 +29,8 @@ export type CategoryIcon = (typeof CATEGORY_ICONS)[number];
 
 export interface Category {
   id: string;
+  /** Null/absent = root. Maximum tree depth: 3. */
+  parentId?: string | null;
   slug: string;
   name: Localized;
   description: Localized;
@@ -231,6 +233,8 @@ export interface PublishInput {
 }
 
 export interface CategoryInput {
+  /** Omitted on update preserves parent; null moves to root. */
+  parentId?: string | null;
   slug: string;
   name: Localized;
   description: Localized;

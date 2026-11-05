@@ -1,3 +1,4 @@
+import { validateCategoryParent } from '../src/services/categories.js';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
@@ -32,6 +33,7 @@ const localized = z.object({ vi: z.string().default(''), en: z.string().default(
 
 const categoryFile = z.array(
   z.object({
+    parent: z.string().optional(),
     slug,
     name: localized,
     description: localized.default({ vi: '', en: '' }),
@@ -130,6 +132,16 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
         { $set: { name: c.name, description: c.description, icon: c.icon, color: c.color.toUpperCase(), order: c.order }, $setOnInsert: { articleCount: 0 } },
         { upsert: true },
       );
+    }
+    const seeded = await Category.find({}).lean();
+    const categoryIds = new Map(seeded.map(c => [c.slug, c._id]));
+    for (const c of parsed.data) {
+      if (!c.parent) continue;
+      const parentId = categoryIds.get(c.parent);
+      const id = categoryIds.get(c.slug)!;
+      if (!parentId) throw new Error('Danh mục cha không tồn tại: ' + c.parent);
+      await validateCategoryParent(String(id), String(parentId));
+      await Category.updateOne({ _id: id }, { $set: { parentId } });
     }
     result.categories = parsed.data.length;
     log(`[seed] Chủ đề: ${parsed.data.length}.`);

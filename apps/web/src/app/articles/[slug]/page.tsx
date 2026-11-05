@@ -18,6 +18,8 @@ import { clampDescription, notFoundMetadata, pageMetadata } from '../../../lib/m
 import { orNotFound, orNull, serverApi, settle } from '../../../lib/server-api';
 import { absoluteUrl, LOGO_PATH, SITE_NAME, SITE_URL } from '../../../lib/site';
 import { card, container } from '../../../lib/ui';
+import { articleCover } from '../../../lib/article-cover';
+import { Cover } from '../../../components/common/Cover';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -38,7 +40,7 @@ const articlePath = (slug: string) => `/articles/${encodeURIComponent(slug)}`;
 
 /** Ảnh chia sẻ: ảnh SEO riêng › ảnh bìa › ảnh sinh tự động từ tiêu đề bài. */
 function shareImage(article: ArticleDetail): { url: string; generated: boolean } {
-  const custom = article.seo?.ogImageUrl || article.coverImageUrl;
+  const custom = article.seo?.ogImageUrl || articleCover(article);
   if (custom) return { url: absoluteUrl(custom), generated: false };
   return { url: absoluteUrl(`/og/articles/${encodeURIComponent(article.slug)}`), generated: true };
 }
@@ -160,19 +162,10 @@ export default async function ArticlePage({ params }: Props) {
             </div>
           )}
 
-          {article.coverImageUrl && (
+          {articleCover(article) && (
             <div className="mt-8 aspect-[16/9] overflow-hidden rounded-card border border-line bg-surface-2">
               {/* eslint-disable-next-line @next/next/no-img-element -- ảnh bìa có thể là URL ngoài hoặc /uploads; khung tỉ lệ cố định chống nhảy trang */}
-              <img
-                src={article.coverImageUrl}
-                alt={article.title}
-                width={1280}
-                height={720}
-                fetchPriority="high"
-                decoding="async"
-                className="h-full w-full object-cover"
-                referrerPolicy="no-referrer"
-              />
+              <Cover src={articleCover(article)} category={article.category} eager />
             </div>
           )}
 

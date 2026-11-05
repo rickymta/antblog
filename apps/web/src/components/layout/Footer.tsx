@@ -27,7 +27,7 @@ export function Footer({ categories, year }: { categories: Category[] | null; ye
   const { user } = useAuth();
 
   return (
-    <footer className="mt-16 border-t border-line bg-surface">
+    <footer className="site-footer mt-16 border-t border-line bg-surface">
       <div className={`${container} grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4`}>
         <div className="space-y-3">
           <p className="flex items-center gap-2 font-bold text-ink">
@@ -37,7 +37,7 @@ export function Footer({ categories, year }: { categories: Category[] | null; ye
           <p className="text-sm text-muted">{t('footer.about')}</p>
         </div>
         <Column title={t('footer.topics')}>
-          {(categories ?? []).slice(0, 6).map((c) => (
+          {(categories ?? []).filter(c => !c.parentId).sort((a,b) => b.articleCount - a.articleCount).slice(0, 6).map((c) => (
             <li key={c.id}>
               <Link href={`/topics/${encodeURIComponent(c.slug)}`} className={linkCls}>
                 {pickLocalized(c.name, locale)}

@@ -133,7 +133,7 @@ function Community({ memberCount }: { memberCount: number | undefined }) {
 
 export function CommunitySection({ memberCount }: { memberCount: number | undefined }) {
   return (
-    <div className={`${container} grid gap-6 pt-14 lg:grid-cols-2`}>
+    <div className={`${container} community-layout grid gap-6 lg:grid-cols-2`}>
       <Community memberCount={memberCount} />
       <Newsletter />
     </div>

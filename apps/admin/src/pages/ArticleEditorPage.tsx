@@ -1,3 +1,4 @@
+import { categoryOptions as treeCategoryOptions } from '@tkh/shared';
 // Màn soạn bài (CMS): CodeMirror + xem trước bằng đúng bộ hiển thị của trang đọc, các khung Thông tin / Ảnh bìa / SEO /
 // Xuất bản (lên lịch) / Mục lục, tự sao lưu bản nháp vào trình duyệt, Ctrl+S lưu lên máy chủ.
 import { useCallback, useDeferredValue, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
@@ -674,7 +675,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
   }, [mode, view]);
 
   const categoryOptions = useMemo(() => {
-    const opts = (categories.data ?? []).map((c) => ({ id: c.id, label: pickLocalized(c.name, locale) }));
+    const opts = treeCategoryOptions(categories.data ?? [], locale).map(({ category: c, label }) => ({ id: c.id, label }));
     if (article?.category && !opts.some((o) => o.id === article.category.id)) {
       opts.push({ id: article.category.id, label: pickLocalized(article.category.name, locale) });
     }

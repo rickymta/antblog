@@ -1,0 +1,492 @@
+{
+  "du-an-mau-toi-noi": {
+    "title": "TỚI NƠI",
+    "subtitle": "One project. Many perspectives.",
+    "diagram": "map",
+    "labels": [
+      "RIDER",
+      "BOOKING",
+      "DRIVER"
+    ]
+  },
+  "heap-ctid-va-primary-key": {
+    "title": "HEAP / CTID",
+    "subtitle": "PostgreSQL · Physical vs. logical",
+    "diagram": "storage",
+    "labels": [
+      "PRIMARY KEY",
+      "HEAP PAGE",
+      "CTID (42,7)"
+    ]
+  },
+  "page-don-vi-doc-ghi": {
+    "title": "8 KB",
+    "subtitle": "PostgreSQL · The unit of I/O",
+    "diagram": "pages",
+    "labels": [
+      "QUERY",
+      "BUFFER",
+      "PAGE 8192 B"
+    ]
+  },
+  "design-pattern-la-gi": {
+    "title": "23 PATTERNS",
+    "subtitle": "GoF · A map of reusable ideas",
+    "diagram": "network",
+    "labels": [
+      "CREATIONAL",
+      "STRUCTURAL",
+      "BEHAVIORAL"
+    ]
+  },
+  "nhom-cau-truc-structural": {
+    "title": "STRUCTURAL",
+    "subtitle": "Seven ways to compose objects",
+    "diagram": "blocks",
+    "labels": [
+      "ADAPTER",
+      "FACADE",
+      "PROXY"
+    ]
+  },
+  "nhom-hanh-vi-dong-goi-hanh-vi": {
+    "title": "BEHAVIOR / 01",
+    "subtitle": "Algorithms, state & undo",
+    "diagram": "flow",
+    "labels": [
+      "STRATEGY",
+      "STATE",
+      "COMMAND"
+    ]
+  },
+  "nhom-hanh-vi-giao-tiep-doi-tuong": {
+    "title": "BEHAVIOR / 02",
+    "subtitle": "How objects communicate",
+    "diagram": "network",
+    "labels": [
+      "OBSERVER",
+      "MEDIATOR",
+      "VISITOR"
+    ]
+  },
+  "nhom-khoi-tao-creational": {
+    "title": "CREATIONAL",
+    "subtitle": "Five ways to create objects",
+    "diagram": "blocks",
+    "labels": [
+      "FACTORY",
+      "BUILDER",
+      "PROTOTYPE"
+    ]
+  },
+  "bay-nguyen-ly-kiem-thu": {
+    "title": "7 PRINCIPLES",
+    "subtitle": "Testing · Focus on what matters",
+    "diagram": "matrix",
+    "labels": [
+      "RISK",
+      "CONTEXT",
+      "COVERAGE"
+    ]
+  },
+  "error-defect-failure-root-cause": {
+    "title": "THE DEFECT CHAIN",
+    "subtitle": "Trace the cause. Understand the failure.",
+    "diagram": "flow",
+    "labels": [
+      "ERROR",
+      "DEFECT",
+      "FAILURE"
+    ]
+  },
+  "kiem-thu-trong-sdlc-agile-waterfall": {
+    "title": "TESTING IN SDLC",
+    "subtitle": "Waterfall · Agile · DevOps",
+    "diagram": "cycle",
+    "labels": [
+      "BUILD",
+      "TEST",
+      "RELEASE"
+    ]
+  },
+  "muc-tieu-kiem-thu-va-quality-assurance": {
+    "title": "QUALITY / QA",
+    "subtitle": "Product evidence. Process improvement.",
+    "diagram": "target",
+    "labels": [
+      "OBJECTIVES",
+      "EVIDENCE",
+      "QUALITY"
+    ]
+  },
+  "quy-trinh-kiem-thu-test-process": {
+    "title": "TEST PROCESS",
+    "subtitle": "From planning to completion",
+    "diagram": "flow",
+    "labels": [
+      "PLAN",
+      "EXECUTE",
+      "COMPLETE"
+    ]
+  },
+  "software-testing-la-gi-testing-khac-debugging": {
+    "title": "TESTING ≠ DEBUGGING",
+    "subtitle": "Find the failure. Investigate the cause.",
+    "diagram": "split",
+    "labels": [
+      "TESTING",
+      "FAILURE",
+      "DEBUGGING"
+    ]
+  },
+  "testware-san-pham-kiem-thu": {
+    "title": "TESTWARE",
+    "subtitle": "Traceable artifacts, from plan to report",
+    "diagram": "pages",
+    "labels": [
+      "TEST PLAN",
+      "TEST CASE",
+      "TEST DATA"
+    ]
+  },
+  "thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe": {
+    "title": "BOOKING LAB",
+    "subtitle": "Series 01 · From pickup to arrival",
+    "diagram": "map",
+    "labels": [
+      "PICKUP",
+      "BOOKING",
+      "ARRIVAL"
+    ]
+  },
+  "vai-tro-trong-kiem-thu": {
+    "title": "ONE TEAM",
+    "subtitle": "Different roles. Shared quality.",
+    "diagram": "network",
+    "labels": [
+      "DEVELOPER",
+      "TESTER",
+      "TEST LEAD"
+    ]
+  },
+  "verification-va-validation": {
+    "title": "RIGHT / RIGHT",
+    "subtitle": "Build it right. Build the right thing.",
+    "diagram": "split",
+    "labels": [
+      "SPECIFICATION",
+      "PRODUCT",
+      "USER NEED"
+    ]
+  },
+  "vi-sao-can-kiem-thu": {
+    "title": "WHY TEST?",
+    "subtitle": "Find risk before it reaches the user",
+    "diagram": "target",
+    "labels": [
+      "RISK",
+      "TEST",
+      "CONFIDENCE"
+    ]
+  },
+  "acceptance-testing-tong-quan": {
+    "title": "ACCEPTANCE",
+    "subtitle": "Ready for the people who use it",
+    "diagram": "checklist",
+    "labels": [
+      "UAT",
+      "OAT",
+      "ALPHA / BETA"
+    ]
+  },
+  "checklist-based-review": {
+    "title": "REVIEW CHECKLIST",
+    "subtitle": "A structured lens on payment design",
+    "diagram": "checklist",
+    "labels": [
+      "PAYMENT",
+      "CHECKLIST",
+      "FINDINGS"
+    ]
+  },
+  "component-integration-testing": {
+    "title": "COMPONENT / ∫",
+    "subtitle": "Check the seams between components",
+    "diagram": "blocks",
+    "labels": [
+      "QUOTE",
+      "PRICING",
+      "VOUCHER"
+    ]
+  },
+  "component-testing-unit-testing-tong-quan": {
+    "title": "COMPONENT TESTING",
+    "subtitle": "One component. Isolated dependencies.",
+    "diagram": "target",
+    "labels": [
+      "INPUT",
+      "COMPONENT",
+      "EXPECTED"
+    ]
+  },
+  "confirmation-testing-va-regression-testing": {
+    "title": "FIX / REGRESSION",
+    "subtitle": "Verify the fix. Protect what works.",
+    "diagram": "cycle",
+    "labels": [
+      "BUILD RC1",
+      "BUILD RC2",
+      "BUILD RC3"
+    ]
+  },
+  "functional-testing": {
+    "title": "FUNCTIONAL",
+    "subtitle": "Correct. Complete. Appropriate.",
+    "diagram": "checklist",
+    "labels": [
+      "CORRECTNESS",
+      "COMPLETENESS",
+      "FIT"
+    ]
+  },
+  "informal-review": {
+    "title": "INFORMAL REVIEW",
+    "subtitle": "A quick conversation, a fresh perspective",
+    "diagram": "pages",
+    "labels": [
+      "USER STORY",
+      "QUESTIONS",
+      "FINDINGS"
+    ]
+  },
+  "inspection-review-hinh-thuc": {
+    "title": "INSPECTION",
+    "subtitle": "A formal review of the cancellation spec",
+    "diagram": "checklist",
+    "labels": [
+      "ENTRY",
+      "DEFECT LOG",
+      "EXIT"
+    ]
+  },
+  "maintenance-testing": {
+    "title": "MAINTENANCE",
+    "subtitle": "Changes need evidence, too",
+    "diagram": "cycle",
+    "labels": [
+      "CHANGE",
+      "IMPACT",
+      "REGRESSION"
+    ]
+  },
+  "non-functional-testing-tong-quan": {
+    "title": "BEYOND FUNCTION",
+    "subtitle": "ISO 25010 · How well does it work?",
+    "diagram": "target",
+    "labels": [
+      "PERFORMANCE",
+      "RELIABILITY",
+      "SECURITY"
+    ]
+  },
+  "review-process-va-cac-vai-tro": {
+    "title": "REVIEW PROCESS",
+    "subtitle": "Five activities. Six roles.",
+    "diagram": "flow",
+    "labels": [
+      "PLAN",
+      "REVIEW",
+      "REPORT"
+    ]
+  },
+  "shift-left-testing": {
+    "title": "SHIFT LEFT",
+    "subtitle": "Ask the important questions earlier",
+    "diagram": "flow",
+    "labels": [
+      "REQUIREMENTS",
+      "TEST FIRST",
+      "CODE"
+    ]
+  },
+  "static-analysis-phan-tich-code-tinh": {
+    "title": "STATIC ANALYSIS",
+    "subtitle": "Find signals without running the code",
+    "diagram": "code",
+    "labels": [
+      "TSC --STRICT",
+      "ESLINT",
+      "FINDINGS"
+    ]
+  },
+  "static-testing-la-gi": {
+    "title": "STATIC TESTING",
+    "subtitle": "Read the specification before writing code",
+    "diagram": "pages",
+    "labels": [
+      "SPECIFICATION",
+      "REVIEW",
+      "DEFECTS"
+    ]
+  },
+  "static-testing-va-dynamic-testing": {
+    "title": "STATIC / DYNAMIC",
+    "subtitle": "Two ways to uncover a defect",
+    "diagram": "split",
+    "labels": [
+      "READ CODE",
+      "DEFECT",
+      "RUN TEST"
+    ]
+  },
+  "system-integration-testing": {
+    "title": "SYSTEM / ∫",
+    "subtitle": "Where Tới Nơi meets the outside world",
+    "diagram": "network",
+    "labels": [
+      "VÍXANH",
+      "TỚI NƠI",
+      "MAPVIET"
+    ]
+  },
+  "system-testing": {
+    "title": "SYSTEM TESTING",
+    "subtitle": "One complete end-to-end journey",
+    "diagram": "map",
+    "labels": [
+      "CUSTOMER",
+      "BOOKING",
+      "DRIVER"
+    ]
+  },
+  "technical-review-api-contract": {
+    "title": "API CONTRACT",
+    "subtitle": "OpenAPI · Protobuf · Compatibility",
+    "diagram": "code",
+    "labels": [
+      "REQUEST",
+      "CONTRACT",
+      "RESPONSE"
+    ]
+  },
+  "tong-quan-5-test-level-istqb": {
+    "title": "5 TEST LEVELS",
+    "subtitle": "From components to acceptance",
+    "diagram": "layers",
+    "labels": [
+      "COMPONENT",
+      "SYSTEM",
+      "ACCEPTANCE"
+    ]
+  },
+  "walkthrough": {
+    "title": "WALKTHROUGH",
+    "subtitle": "Follow the author through the food order",
+    "diagram": "map",
+    "labels": [
+      "RESTAURANT",
+      "COURIER",
+      "CUSTOMER"
+    ]
+  },
+  "checklist-based-testing": {
+    "title": "CHECKLIST TESTING",
+    "subtitle": "Experience turned into repeatable checks",
+    "diagram": "checklist",
+    "labels": [
+      "CHECKLIST",
+      "EXECUTE",
+      "OBSERVE"
+    ]
+  },
+  "condition-coverage": {
+    "title": "CONDITION COVERAGE",
+    "subtitle": "True and false, one condition at a time",
+    "diagram": "matrix",
+    "labels": [
+      "A = TRUE",
+      "B = FALSE",
+      "DECISION"
+    ]
+  },
+  "decision-table-testing": {
+    "title": "DECISION TABLE",
+    "subtitle": "Turn business rules into combinations",
+    "diagram": "matrix",
+    "labels": [
+      "CONDITIONS",
+      "RULES",
+      "ACTIONS"
+    ]
+  },
+  "equivalence-partitioning": {
+    "title": "PARTITIONS",
+    "subtitle": "Representative inputs. Meaningful coverage.",
+    "diagram": "split",
+    "labels": [
+      "INVALID",
+      "VALID",
+      "INVALID"
+    ]
+  },
+  "error-guessing": {
+    "title": "ERROR GUESSING",
+    "subtitle": "Experience guides the next experiment",
+    "diagram": "target",
+    "labels": [
+      "HYPOTHESIS",
+      "ATTACK",
+      "OBSERVE"
+    ]
+  },
+  "loop-testing": {
+    "title": "LOOP TESTING",
+    "subtitle": "Zero. One. Many. Test the boundaries.",
+    "diagram": "cycle",
+    "labels": [
+      "0 TIMES",
+      "1 TIME",
+      "N TIMES"
+    ]
+  },
+  "mc-dc-testing": {
+    "title": "MC/DC",
+    "subtitle": "Each condition makes a difference",
+    "diagram": "matrix",
+    "labels": [
+      "CONDITION A",
+      "CONDITION B",
+      "DECISION"
+    ]
+  },
+  "random-testing": {
+    "title": "RANDOM TESTING",
+    "subtitle": "Generated inputs. A reliable oracle.",
+    "diagram": "matrix",
+    "labels": [
+      "SEED",
+      "GENERATOR",
+      "ORACLE"
+    ]
+  },
+  "statement-coverage": {
+    "title": "STATEMENT COVERAGE",
+    "subtitle": "Which lines did your tests execute?",
+    "diagram": "code",
+    "labels": [
+      "STATEMENTS",
+      "TEST SUITE",
+      "COVERAGE"
+    ]
+  },
+  "use-case-testing-scenario-based-testing": {
+    "title": "USE CASE TESTING",
+    "subtitle": "Follow the user through the system",
+    "diagram": "map",
+    "labels": [
+      "ACTOR",
+      "SCENARIO",
+      "OUTCOME"
+    ]
+  }
+}

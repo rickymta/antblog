@@ -9,6 +9,8 @@ const repoRoot = path.join(here, '../..');
 const apiInternal = (process.env.API_INTERNAL_URL ?? 'http://127.0.0.1:4000').replace(/\/+$/, '');
 
 const nextConfig: NextConfig = {
+  // Isolated verification builds can run while an existing standalone server holds .next open on Windows.
+  distDir: process.env.TKH_BUILD_DIR || '.next',
   output: 'standalone',
   // Monorepo npm workspaces: truy vết tệp từ gốc repo để bản standalone mang đủ node_modules hoisted + packages/*.
   outputFileTracingRoot: repoRoot,

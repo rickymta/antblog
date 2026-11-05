@@ -41,8 +41,12 @@ Chỉ trả bài `status = 'published'` và `publishedAt <= now`.
 
 `Localized = { vi: string, en: string }`
 
-`Category = { id, slug, name: Localized, description: Localized, icon: CategoryIcon, color: string (#RRGGBB), order: number, articleCount: number }`
+`Category = { id, parentId?: string, slug, name: Localized, description: Localized, icon: CategoryIcon, color: string (#RRGGBB), order: number, articleCount: number }`
 `CategoryIcon = 'database' | 'code' | 'pattern' | 'architecture' | 'devops' | 'system' | 'security' | 'testing' | 'analysis'`
+
+Danh mục tạo thành cây tối đa **3 cấp** (gốc là cấp 1). `parentId` vắng nghĩa là danh mục gốc. Danh sách API vẫn phẳng để tương thích; frontend dựng cây từ `parentId`. `articleCount` trả về là tổng bài công khai của chính danh mục **và toàn bộ danh mục con**, không tính nháp/lên lịch. Query `category` ở danh sách bài (công khai và quản trị) bao gồm nhánh con.
+
+POST/PUT `/admin/categories` nhận thêm `parentId?: string | null`: bỏ trường khi PUT để giữ cha cũ, `null` để đưa về gốc. API trả 400 VALIDATION tại `details.fields.parentId` khi cha không tồn tại, tự trỏ, tạo vòng lặp hoặc làm bất kỳ nhánh con nào vượt 3 cấp. Xoá danh mục có con trả 409 `CATEGORY_HAS_CHILDREN`.
 
 `Level = 'beginner' | 'intermediate' | 'advanced'`
 

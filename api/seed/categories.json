@@ -1,7 +1,10 @@
 [
   {
     "slug": "database",
-    "name": { "vi": "Database", "en": "Database" },
+    "name": {
+      "vi": "Database",
+      "en": "Database"
+    },
     "description": {
       "vi": "Lưu trữ, index, giao dịch, MVCC, partition, nhân bản — mổ xẻ trên PostgreSQL và MongoDB.",
       "en": "Storage, indexes, transactions, MVCC, partitioning, replication — dissected on PostgreSQL and MongoDB."
@@ -12,7 +15,10 @@
   },
   {
     "slug": "programming",
-    "name": { "vi": "Lập trình", "en": "Programming" },
+    "name": {
+      "vi": "Lập trình",
+      "en": "Programming"
+    },
     "description": {
       "vi": "Ngôn ngữ, mô hình bộ nhớ, xử lý đồng thời, kiểm thử — viết các dịch vụ của dự án mẫu.",
       "en": "Languages, memory models, concurrency, testing — building the services of the sample project."
@@ -23,40 +29,55 @@
   },
   {
     "slug": "design-pattern",
-    "name": { "vi": "Design Pattern", "en": "Design Patterns" },
+    "name": {
+      "vi": "Design Pattern",
+      "en": "Design Patterns"
+    },
     "description": {
       "vi": "Các mẫu thiết kế hướng đối tượng và hàm, khi nào nên dùng và cái giá đi kèm.",
       "en": "Object-oriented and functional design patterns, when to use them and what they cost."
     },
     "icon": "pattern",
     "color": "#10B981",
-    "order": 3
+    "order": 3,
+    "parent": "programming"
   },
   {
     "slug": "architecture",
-    "name": { "vi": "Architecture", "en": "Architecture" },
+    "name": {
+      "vi": "Architecture",
+      "en": "Architecture"
+    },
     "description": {
       "vi": "Kiến trúc phần mềm: layered, hexagonal, CQRS, event-driven, microservices và monolith.",
       "en": "Software architecture: layered, hexagonal, CQRS, event-driven, microservices and monoliths."
     },
     "icon": "architecture",
     "color": "#8B5CF6",
-    "order": 4
+    "order": 4,
+    "parent": "programming"
   },
   {
     "slug": "system-design",
-    "name": { "vi": "System Design", "en": "System Design" },
+    "name": {
+      "vi": "System Design",
+      "en": "System Design"
+    },
     "description": {
       "vi": "Thiết kế hệ thống chịu tải: ước lượng quy mô, cache, hàng đợi, sharding, tính sẵn sàng.",
       "en": "Designing for load: capacity estimates, caching, queues, sharding, availability."
     },
     "icon": "system",
     "color": "#0EA5E9",
-    "order": 5
+    "order": 5,
+    "parent": "programming"
   },
   {
     "slug": "devops",
-    "name": { "vi": "DevOps", "en": "DevOps" },
+    "name": {
+      "vi": "DevOps",
+      "en": "DevOps"
+    },
     "description": {
       "vi": "Đóng gói, triển khai, giám sát và vận hành hệ thống trên máy chủ thật.",
       "en": "Packaging, deployment, monitoring and operating systems in production."
@@ -67,7 +88,10 @@
   },
   {
     "slug": "security",
-    "name": { "vi": "Bảo mật", "en": "Security" },
+    "name": {
+      "vi": "Bảo mật",
+      "en": "Security"
+    },
     "description": {
       "vi": "Xác thực, phân quyền, lưu mật khẩu, chống tấn công web phổ biến.",
       "en": "Authentication, authorization, password storage, common web attacks."
@@ -78,7 +102,10 @@
   },
   {
     "slug": "testing",
-    "name": { "vi": "Kiểm thử", "en": "Testing" },
+    "name": {
+      "vi": "Kiểm thử",
+      "en": "Testing"
+    },
     "description": {
       "vi": "Kiểm thử phần mềm theo khung ISTQB: nguyên lý, cấp độ, kỹ thuật thiết kế test, quản lý kiểm thử và tự động hoá.",
       "en": "Software testing along the ISTQB framework: principles, levels, test design techniques, test management and automation."
@@ -89,7 +116,10 @@
   },
   {
     "slug": "business-analysis",
-    "name": { "vi": "Phân tích nghiệp vụ (BA)", "en": "Business Analysis" },
+    "name": {
+      "vi": "Phân tích nghiệp vụ (BA)",
+      "en": "Business Analysis"
+    },
     "description": {
       "vi": "Phân tích nghiệp vụ: khơi gợi yêu cầu, user story và tiêu chí chấp nhận, mô hình hoá quy trình, đặc tả và quản lý thay đổi yêu cầu.",
       "en": "Business analysis: requirements elicitation, user stories and acceptance criteria, process modelling, specifications and requirements change management."
@@ -97,5 +127,35 @@
     "icon": "analysis",
     "color": "#EAB308",
     "order": 9
+  },
+  {
+    "slug": "devops-aws",
+    "name": {
+      "vi": "DevOps (AWS)",
+      "en": "DevOps (AWS)"
+    },
+    "description": {
+      "vi": "CI/CD, hạ tầng và vận hành trên Amazon Web Services.",
+      "en": "CI/CD, infrastructure and operations on AWS."
+    },
+    "icon": "devops",
+    "color": "#D97706",
+    "order": 1,
+    "parent": "devops"
+  },
+  {
+    "slug": "devops-azure",
+    "name": {
+      "vi": "DevOps (Azure)",
+      "en": "DevOps (Azure)"
+    },
+    "description": {
+      "vi": "CI/CD, hạ tầng và vận hành trên Microsoft Azure.",
+      "en": "CI/CD, infrastructure and operations on Azure."
+    },
+    "icon": "devops",
+    "color": "#0284C7",
+    "order": 2,
+    "parent": "devops"
   }
 ]

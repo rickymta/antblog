@@ -25,12 +25,24 @@ export async function recountCategories(ids?: (Types.ObjectId | string | undefin
  */
 export async function withLiveArticleCounts(cats: ICategory[]): Promise<ICategory[]> {
   if (!cats.length) return cats;
+  const all = await Category.find({}).select({ _id: 1, parentId: 1 }).lean<ICategory[]>();
   const rows = await Article.aggregate<{ _id: Types.ObjectId; n: number }>([
-    { $match: { ...liveFilter(), categoryId: { $in: cats.map((c) => c._id) } } },
+    { $match: { ...liveFilter(), categoryId: { $in: all.map((c) => c._id) } } },
     { $group: { _id: '$categoryId', n: { $sum: 1 } } },
   ]);
   const byId = new Map(rows.map((r) => [r._id.toString(), r.n]));
-  return cats.map((c) => ({ ...c, articleCount: byId.get(c._id.toString()) ?? 0 }));
+  const parents = new Map(all.map(c => [String(c._id), c.parentId ? String(c.parentId) : null]));
+  const totals = new Map<string, number>();
+  for (const [id, count] of byId) {
+    let current: string | null = id;
+    const visited = new Set<string>();
+    while (current && !visited.has(current)) {
+      visited.add(current);
+      totals.set(current, (totals.get(current) ?? 0) + count);
+      current = parents.get(current) ?? null;
+    }
+  }
+  return cats.map(c => ({ ...c, articleCount: totals.get(String(c._id)) ?? 0 }));
 }
 
 /** Tính lại `stats.comments` (bình luận `visible`) + `stats.reactions` từ dữ liệu gốc. Không truyền id ⇒ mọi bài. */

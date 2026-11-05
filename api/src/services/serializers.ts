@@ -61,6 +61,7 @@ export function toCategory(c: ICategory) {
   return {
     id: idOf(c._id),
     slug: c.slug,
+    ...(c.parentId ? { parentId: idOf(c.parentId) } : {}),
     name: { vi: c.name?.vi ?? '', en: c.name?.en ?? '' },
     description: { vi: c.description?.vi ?? '', en: c.description?.en ?? '' },
     icon: c.icon,

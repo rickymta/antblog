@@ -11,6 +11,7 @@ export interface Localized {
 export interface ICategory {
   _id: Types.ObjectId;
   slug: string;
+  parentId?: Types.ObjectId | null;
   name: Localized;
   description: Localized;
   icon: CategoryIcon;
@@ -26,6 +27,7 @@ const localized = { vi: { type: String, default: '' }, en: { type: String, defau
 const categorySchema = new Schema<ICategory>(
   {
     slug: { type: String, required: true, unique: true },
+    parentId: { type: Schema.Types.ObjectId, ref: 'Category', default: null, index: true },
     name: localized,
     description: localized,
     icon: { type: String, enum: CATEGORY_ICONS, required: true },

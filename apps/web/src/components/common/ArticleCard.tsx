@@ -9,6 +9,7 @@ import { formatDay } from '../../lib/dates';
 import { useLocale } from '../../i18n';
 import { totalReactions } from '../../lib/format';
 import { card } from '../../lib/ui';
+import { articleCover } from '../../lib/article-cover';
 import { CategoryChip, LevelTag } from './Badges';
 import { BookmarkButton } from './BookmarkButton';
 import { Cover } from './Cover';
@@ -56,11 +57,11 @@ export function ArticleCard({
   const reactions = totalReactions(article.stats.reactions);
 
   return (
-    <article className={`group relative flex h-full flex-col overflow-hidden ${card} transition-shadow hover:shadow-lg hover:shadow-slate-900/5 dark:hover:shadow-black/30`}>
+    <article className={`article-card group relative flex h-full flex-col overflow-hidden ${card} transition-shadow hover:shadow-lg hover:shadow-slate-900/5 dark:hover:shadow-black/30`}>
       <div className="aspect-[16/9] overflow-hidden">
-        <Cover src={article.coverImageUrl} category={article.category} eager={eagerCover} />
+        <Cover src={articleCover(article)} category={article.category} eager={eagerCover} />
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="article-card-body flex flex-1 flex-col gap-3 p-4">
         <div className="relative z-10 flex flex-wrap items-center gap-2">
           <CategoryChip category={article.category} />
           <LevelTag level={article.level} />
@@ -119,7 +120,7 @@ export function ArticleRow({ article, showMeta = true, compact = false }: { arti
   return (
     <article className="group relative flex items-start gap-3">
       <div className={`shrink-0 overflow-hidden rounded-ui ${compact ? 'h-12 w-16' : 'h-16 w-24 sm:h-20 sm:w-32'}`}>
-        <Cover src={article.coverImageUrl} category={article.category} iconSize={compact ? 'h-5 w-5' : 'h-7 w-7'} />
+        <Cover src={articleCover(article)} category={article.category} iconSize={compact ? 'h-5 w-5' : 'h-7 w-7'} />
       </div>
       <div className="min-w-0 flex-1">
         {!compact && (

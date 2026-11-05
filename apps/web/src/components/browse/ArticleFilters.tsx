@@ -3,7 +3,7 @@
 import { useEffect, useId, useOptimistic, useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, X } from 'lucide-react';
-import { LEVELS, pickLocalized, type Category } from '@tkh/shared';
+import { LEVELS, categoryOptions, type Category } from '@tkh/shared';
 import { useLocale } from '../../i18n';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { articleFilterParams, hasArticleFilters, parseLevel, type ParsedArticleQuery } from '../../lib/articleQuery';
@@ -107,9 +107,9 @@ export function ArticleFilters({
             {(id) => (
               <select id={id} className={selectClass} value={current.category ?? ''} onChange={(e) => update({ category: e.target.value || undefined })}>
                 <option value="">{t('articles.allCategories')}</option>
-                {categories?.map((c) => (
+                {categoryOptions(categories ?? [], locale).map(({ category: c, label }) => (
                   <option key={c.id} value={c.slug}>
-                    {pickLocalized(c.name, locale)}
+                    {label}
                   </option>
                 ))}
                 {current.category && !categories?.some((c) => c.slug === current.category) && (

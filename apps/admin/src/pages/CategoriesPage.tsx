@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { api, CATEGORY_ICONS, formatNumber, pickLocalized, slugify, type Category, type CategoryIcon as CategoryIconName, type CategoryInput } from '@tkh/shared';
+import { api, categoryOptions, categoryDescendantIds, CATEGORY_ICONS, formatNumber, pickLocalized, slugify, type Category, type CategoryIcon as CategoryIconName, type CategoryInput } from '@tkh/shared';
 import {
   Button,
   Card,
@@ -59,7 +59,8 @@ export function CategoriesPage() {
     },
   });
 
-  const sorted = [...(list.data ?? [])].sort((a, b) => a.order - b.order);
+  const rows = categoryOptions(list.data ?? [], locale);
+  const sorted = rows.map(r => r.category);
 
   return (
     <>
@@ -99,7 +100,7 @@ export function CategoriesPage() {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((c) => {
+              {rows.map(({ category: c, depth }) => {
                 const name = pickLocalized(c.name, locale);
                 return (
                   <tr key={c.id} className="hover:bg-surface-2/60">
@@ -107,7 +108,7 @@ export function CategoriesPage() {
                       <CategoryIcon icon={c.icon} color={c.color} />
                     </Td>
                     <Td>
-                      <p className="font-medium">{name}</p>
+                      <p className="font-medium" style={{ paddingLeft: (depth - 1) * 20 }}>{depth > 1 && <span aria-hidden="true" className="mr-2 text-muted">↳</span>}{name}<span className="ml-2 text-xs text-muted">{t('categories.depth', { depth })}</span></p>
                       <p className="line-clamp-1 text-xs text-muted">{pickLocalized(c.description, locale)}</p>
                     </Td>
                     <Td className="font-mono text-xs text-muted">{c.slug}</Td>
@@ -136,6 +137,7 @@ export function CategoriesPage() {
       {editing && (
         <CategoryForm
           category={editing === 'new' ? undefined : editing}
+          categories={list.data ?? []}
           nextOrder={sorted.length > 0 ? Math.max(...sorted.map((c) => c.order)) + 1 : 1}
           onClose={() => setEditing(null)}
         />
@@ -156,6 +158,7 @@ export function CategoriesPage() {
 }
 
 interface FormState {
+  parentId: string;
   slug: string;
   nameVi: string;
   nameEn: string;
@@ -169,6 +172,7 @@ type Errors = Partial<Record<keyof FormState, string>>;
 
 /** Lỗi API theo đường dẫn trường (`name.vi`, `description.en`…) ⇒ ô tương ứng của form. */
 const API_FIELD_MAP: Record<string, keyof FormState> = {
+  parentId: 'parentId',
   slug: 'slug',
   'name.vi': 'nameVi',
   'name.en': 'nameEn',
@@ -181,12 +185,13 @@ const API_FIELD_MAP: Record<string, keyof FormState> = {
   order: 'order',
 };
 
-function CategoryForm({ category, nextOrder, onClose }: { category?: Category; nextOrder: number; onClose: () => void }) {
+function CategoryForm({ category, categories, nextOrder, onClose }: { category?: Category; categories: Category[]; nextOrder: number; onClose: () => void }) {
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const toast = useToast();
   const [slugTouched, setSlugTouched] = useState(Boolean(category));
   const [form, setForm] = useState<FormState>(() => ({
+    parentId: category?.parentId ?? '',
     slug: category?.slug ?? '',
     nameVi: category?.name.vi ?? '',
     nameEn: category?.name.en ?? '',
@@ -247,6 +252,7 @@ function CategoryForm({ category, nextOrder, onClose }: { category?: Category; n
     setErrors(v);
     if (Object.keys(v).length > 0) return;
     save.mutate({
+      parentId: form.parentId || null,
       slug: form.slug.trim(),
       name: { vi: form.nameVi.trim(), en: form.nameEn.trim() },
       description: { vi: form.descVi.trim(), en: form.descEn.trim() },
@@ -256,6 +262,8 @@ function CategoryForm({ category, nextOrder, onClose }: { category?: Category; n
     });
   };
 
+  const descendants = category ? categoryDescendantIds(categories, category.id) : new Set<string>();
+  const parentOptions = categoryOptions(categories, i18n.language === 'en' ? 'en' : 'vi').filter(o => !descendants.has(o.category.id) && o.depth < 3);
   const formId = 'category-form';
   return (
     <Modal
@@ -273,6 +281,10 @@ function CategoryForm({ category, nextOrder, onClose }: { category?: Category; n
       }
     >
       <form id={formId} onSubmit={submit} noValidate className="grid gap-4 sm:grid-cols-2">
+        <Field label={t('categories.parent')} error={errors.parentId}>
+          {(a) => <select {...a} className={selectClass} value={form.parentId} onChange={e => set('parentId', e.target.value)}><option value="">{t('categories.root')}</option>{parentOptions.map(o => <option key={o.category.id} value={o.category.id}>{o.label}</option>)}</select>}
+        </Field>
+        <p className="self-center text-xs text-muted">{t('categories.treeHint')}</p>
         <Field label={t('categories.fieldNameVi')} error={errors.nameVi} required>
           {(a) => <input {...a} className={inputClass} value={form.nameVi} onChange={(e) => set('nameVi', e.target.value)} autoFocus />}
         </Field>

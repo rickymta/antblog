@@ -1,3 +1,4 @@
+import { categorySubtreeIds } from '../services/categories.js';
 import { Router, type Request } from 'express';
 import type { Types } from 'mongoose';
 import { z } from 'zod';
@@ -55,7 +56,7 @@ export function articlesRouter(): Router {
     if (q.category) {
       const cat = await Category.findOne({ slug: q.category }).select({ _id: 1 }).lean<ICategory>();
       if (!cat) return void res.json(empty);
-      filter.categoryId = cat._id;
+      filter.categoryId = { $in: await categorySubtreeIds(cat._id) };
     }
     if (q.level) filter.level = q.level;
     if (q.tag) filter.tags = q.tag.toLowerCase();

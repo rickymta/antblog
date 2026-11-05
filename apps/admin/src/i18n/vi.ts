@@ -256,6 +256,10 @@ export const vi = {
     formSection: 'Thông tin bài viết',
   },
   categories: {
+    parent: "Danh mục cha",
+    root: "Không có — danh mục cấp 1",
+    treeHint: "Tối đa 3 cấp. Di chuyển danh mục cũng di chuyển toàn bộ nhánh con.",
+    depth: "Cấp {{depth}}",
     title: 'Chủ đề',
     subtitle: 'Danh mục chủ đề hiển thị trên trang đọc, sắp theo thứ tự.',
     newCategory: 'Chủ đề mới',

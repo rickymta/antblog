@@ -1,3 +1,4 @@
+import { validateCategoryParent, categorySubtreeIds } from '../services/categories.js';
 import { Router, type Request } from 'express';
 import { Types } from 'mongoose';
 import { z } from 'zod';
@@ -92,6 +93,7 @@ type ArticleInput = z.output<typeof articleInputSchema>;
 const localizedSchema = (max: number, min = 0) => z.object({ vi: z.string().trim().min(min).max(max), en: z.string().trim().min(min).max(max) });
 
 const categoryInputSchema = z.object({
+  parentId: objectIdSchema.nullable().optional(),
   slug: slugSchema,
   name: localizedSchema(100, 1),
   description: localizedSchema(500),
@@ -200,7 +202,7 @@ export function adminRouter(): Router {
         .select({ _id: 1 })
         .lean<ICategory>();
       if (!cat) return void res.json({ items: [], total: 0, page: q.page, pageSize: q.pageSize });
-      filter.categoryId = cat._id;
+      filter.categoryId = { $in: await categorySubtreeIds(cat._id) };
     }
     if (q.q) {
       const rx = new RegExp(escapeRegex(q.q), 'i');
@@ -328,6 +330,7 @@ export function adminRouter(): Router {
   r.post('/categories', async (req, res) => {
     const input = parse(categoryInputSchema, req.body);
     if (await Category.exists({ slug: input.slug })) throw conflict('SLUG_TAKEN', 'Slug chủ đề đã tồn tại.');
+    await validateCategoryParent('new-category', input.parentId ?? null);
     try {
       const created = await Category.create({ ...input, articleCount: 0 });
       res.status(201).json(toCategory(created.toObject()));
@@ -341,6 +344,7 @@ export function adminRouter(): Router {
     const id = idParam(req, 'chủ đề');
     const input = parse(categoryInputSchema, req.body);
     if (await Category.exists({ slug: input.slug, _id: { $ne: id } })) throw conflict('SLUG_TAKEN', 'Slug chủ đề đã tồn tại.');
+    if (input.parentId !== undefined) await validateCategoryParent(String(id), input.parentId);
     let updated: ICategory | null;
     try {
       updated = await Category.findByIdAndUpdate(id, { $set: input }, { new: true }).lean<ICategory>();
@@ -355,6 +359,7 @@ export function adminRouter(): Router {
   r.delete('/categories/:id', async (req, res) => {
     const id = idParam(req, 'chủ đề');
     if (!(await Category.exists({ _id: id }))) throw notFound('Không tìm thấy chủ đề.');
+    if (await Category.exists({ parentId: id })) throw conflict('CATEGORY_HAS_CHILDREN', 'Hãy chuyển hoặc xoá danh mục con trước khi xoá danh mục này.');
     if (await Article.exists({ categoryId: id })) {
       throw conflict('CATEGORY_IN_USE', 'Chủ đề vẫn còn bài viết (kể cả bản nháp/lưu trữ) — hãy chuyển bài sang chủ đề khác trước.');
     }
