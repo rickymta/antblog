@@ -1,0 +1,89 @@
+# BẢN NHÁP ĐƯA VÀO TECHNICAL REVIEW — CÓ LỖI GÀI SẴN (bài TEST-025). KHÔNG dùng làm hợp đồng thật.
+# Tác giả: developer Booking. Phạm vi: POST /api/trips của hệ thống đích (không phải lab).
+# Đối chiếu: SPEC R-API-02, R-API-05, R-API-06, R-API-08, R-API-13, R-API-14, R-IDEM-01…05, R-QUOTE-03/04,
+# R-GEN-01, R-PAY-01; kiến trúc §12.3 (OpenAPI cho REST, idempotency key cho create).
+# Mã TR-xx ở cuối dòng là chỗ người viết bài gài lỗi — trong buổi review thật, bản nháp KHÔNG có các mã này.
+openapi: 3.0.3
+info:
+  title: Tới Nơi — Booking API
+  version: 0.9.0
+paths:
+  /api/trips:
+    post:
+      operationId: createTrip
+      summary: Tạo chuyến từ báo giá
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false                      # TR-01
+          schema:
+            type: string                       # TR-01 (không có độ dài, ký tự cho phép)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quoteId, fare]
+              properties:
+                quoteId:
+                  type: string                 # TR-11 (không giới hạn độ dài)
+                fare:
+                  type: number                 # TR-02
+                  format: double
+                  description: Giá khách nhìn thấy trên app, gửi kèm để Booking lưu vào chuyến.
+                paymentMethod:
+                  type: string
+                  enum: [cash, vixanh, card]   # TR-03
+      responses:
+        '200':                                 # TR-04
+          description: Đã tạo chuyến.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'   # TR-05 (thiếu lớp bọc { trip })
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':                                 # TR-06
+          description: Không tìm thấy báo giá.
+        '422':
+          $ref: '#/components/responses/Error'
+                                               # TR-07 (thiếu 409, 429)
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  responses:
+    Error:
+      description: Lỗi.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Trip:
+      type: object
+      properties:
+        id: { type: string }
+        quoteId: { type: string }
+        status:
+          type: string
+          enum: [searching, accepted, arriving, picked_up, in_transit, completed]   # TR-10
+        fare:
+          type: number                         # TR-08
+          format: float
+        discount:
+          type: number                         # TR-08
+          format: float
+        paymentMethod: { type: string }
+        paymentStatus: { type: string }
+    Error:
+      type: object                             # TR-09
+      properties:
+        code: { type: string }
+        message: { type: string }

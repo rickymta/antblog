@@ -30,7 +30,8 @@ export function roundUpToThousandDong(milli: number): number {
 
 /**
  * Làm tròn tới 0,1 theo kiểu half-up (0,45 ⇒ 0,5; 0,44 ⇒ 0,4).
- * Đi qua toPrecision để 8,35 × 10 = 83,49999… vẫn được hiểu là 83,5.
+ * Đi qua toPrecision để khử sai số dấu phẩy động của phép × 10 trước khi làm tròn
+ * (trong JavaScript 0,18 × 10 = 1,7999999999999998, 0,23 × 10 = 2,3000000000000003).
  */
 export function roundToTenth(value: number): number {
   const tenths = Number((value * 10).toPrecision(12));

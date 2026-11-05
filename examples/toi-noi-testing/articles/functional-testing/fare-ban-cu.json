@@ -1,0 +1,14 @@
+{
+  "_ghiChu": "Bảng chi tiết cước GIẢ ĐỊNH của một phiên bản cũ (không phải đầu ra của lab) — thiếu phụ phí mưa và cước tối thiểu. Dùng để chứng minh kiểm tra completeness bắt được trường vắng.",
+  "vehicle": "bike",
+  "distanceKm": 7.4,
+  "openingFee": 12000,
+  "distanceCharge": 33300,
+  "parcelSurcharge": 0,
+  "base": 45300,
+  "afterPeak": 56625,
+  "beforeDiscount": 64625,
+  "discount": 12925,
+  "afterDiscount": 51700,
+  "total": 52000
+}

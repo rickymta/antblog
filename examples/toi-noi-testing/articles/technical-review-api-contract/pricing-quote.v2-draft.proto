@@ -1,0 +1,43 @@
+// BẢN NHÁP v2 ĐƯA VÀO TECHNICAL REVIEW — CÓ LỖI GÀI SẴN (bài TEST-025). KHÔNG dùng làm hợp đồng thật.
+// Tác giả: developer Pricing. Mục đích: thêm dịch vụ giao đồ ăn (R-FOOD) vào báo giá.
+// So với pricing-quote.v1.proto (đang chạy, Booking đang dùng). Mã PQ-xx là chỗ người viết bài gài lỗi.
+syntax = "proto3";
+
+package toinoi.pricing.v1;                     // PQ-08: đổi không tương thích nhưng vẫn giữ package v1
+
+service QuoteService {
+  // Pricing luôn trả lời nhanh nên Booking không cần đặt deadline.        // PQ-07
+  // Báo giá hết hạn: trả Quote với total = 0 để Booking tự hiểu.          // PQ-06
+  rpc GetQuote(GetQuoteRequest) returns (Quote);
+}
+
+message GetQuoteRequest {
+  string quote_id = 1;
+}
+
+enum ServiceKind {
+  RIDE = 0;                                    // PQ-05
+  PARCEL = 1;
+  FOOD = 2;
+}
+
+message FoodItem {
+  string name = 1;
+  int64 unit_price_dong = 2;
+  int32 quantity = 3;
+}
+
+message Quote {
+  string quote_id = 1;
+  string customer_id = 2;
+  double total = 3;                            // PQ-01 (v1: int64 total_dong = 3)
+  string pricing_version = 4;
+  bool raining = 5;                            // PQ-02 (v1: Timestamp expires_at = 5, nay bị bỏ)
+  string voucher_code = 6;
+  ServiceKind kind = 7;
+  float distance_km = 8;                       // PQ-04
+  repeated FoodItem items = 9;
+  int64 items_subtotal_dong = 10;
+  int64 delivery_fee_dong = 11;
+  int64 items_discount_dong = 12;              // PQ-03: không ghi rõ voucher chỉ trừ tiền món (R-FOOD-04/05)
+}

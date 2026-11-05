@@ -1,0 +1,25 @@
+// Hợp đồng gRPC Booking → Pricing ĐANG CHẠY (bài TEST-025). Hư cấu, chỉ để review.
+// Booking gọi GetQuote khi tạo chuyến để lấy ảnh chụp giá (R-QUOTE-04) và kiểm chủ báo giá, hạn báo giá (R-QUOTE-03).
+syntax = "proto3";
+
+package toinoi.pricing.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service QuoteService {
+  // Deadline phía gọi: bắt buộc (kiến trúc §7.2).
+  rpc GetQuote(GetQuoteRequest) returns (Quote);
+}
+
+message GetQuoteRequest {
+  string quote_id = 1;
+}
+
+message Quote {
+  string quote_id = 1;
+  string customer_id = 2;
+  int64 total_dong = 3;                        // số nguyên đồng (R-GEN-01)
+  string pricing_version = 4;                  // R-QUOTE-02
+  google.protobuf.Timestamp expires_at = 5;    // R-QUOTE-01
+  string voucher_code = 6;
+}

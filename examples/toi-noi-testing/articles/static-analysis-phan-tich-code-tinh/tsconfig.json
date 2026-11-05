@@ -1,0 +1,4 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["voucher-smelly.mts", "../../src/domain/voucher.ts", "../../src/app/quote.ts", "../../src/domain/cancel.ts", "../../src/domain/fare.ts"]
+}

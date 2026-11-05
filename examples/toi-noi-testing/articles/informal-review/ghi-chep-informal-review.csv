@@ -1,0 +1,10 @@
+﻿#,AC,Ký hiệu (? câu hỏi / ! nghi defect / + đề xuất),Ghi chú,Đối chiếu SPEC,Tác giả xử lý
+,,,,,
+N1,AC2,!,«Trong vòng 2 phút» — đúng 2:00 thì sao?,R-CANCEL-02: đúng 2:00 có phí,Sửa AC2
+N2,AC3,!,Chỉ nêu 10.000 đ; chuyến ô tô 20.000 đ,R-CANCEL-03,Sửa AC3
+N3,AC4,?,«Trễ quá 10 phút» — trễ so với cái gì?,"R-CANCEL-04: acceptedAt + ETA + 10 phút, lớn hơn hẳn",Sửa AC4
+N4,AC5,?,API chỉ trả phí sau khi huỷ; hiện trước cần API mới; phí có thể đổi giữa lúc xem và lúc bấm,R-API-11,Tách story «Xem trước phí huỷ»
+N5,AC7,!,«Bất cứ lúc nào trước khi hoàn thành» mâu thuẫn SPEC: từ picked_up không huỷ được,"R-CANCEL-01, R-STATE-02",Sửa AC7
+N6,AC6,?,Lý do nào khi nhiều lý do miễn cùng đúng? grace_period và driver_late không thể cùng đúng; chỉ cần ánh xạ 4 mã ra câu chữ,R-CANCEL-06,Sửa AC6
+N7,—,+,"Thêm ví dụ số: huỷ ở 1:59 và 2:00; ETA 5 phút, huỷ ở 15:00 (thu) và 15:01 (miễn)","R-CANCEL-02, R-CANCEL-04",Nhận
+N8,—,?,Thu phí qua ví thuộc story này hay story thanh toán?,"R-CANCEL-07, R-PAY-05",Ngoài story này
