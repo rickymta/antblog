@@ -488,5 +488,125 @@
       "SCENARIO",
       "OUTCOME"
     ]
+  },
+  "crud-testing": {
+    "title": "CRUD TESTING",
+    "subtitle": "Trace the complete lifecycle of trip data",
+    "diagram": "matrix",
+    "labels": [
+      "CREATE",
+      "READ / UPDATE",
+      "DELETE"
+    ]
+  },
+  "pairwise-testing": {
+    "title": "PAIRWISE TESTING",
+    "subtitle": "Cover every pair with nine configurations",
+    "diagram": "matrix",
+    "labels": [
+      "FACTORS",
+      "PAIRS",
+      "9 TESTS"
+    ]
+  },
+  "api-testing-tu-goc-nhin-code": {
+    "title": "API TESTING",
+    "subtitle": "Handler branches · Requests · Responses",
+    "diagram": "code",
+    "labels": [
+      "REQUEST",
+      "HANDLER",
+      "RESPONSE"
+    ]
+  },
+  "boundary-value-analysis": {
+    "title": "BOUNDARY VALUES",
+    "subtitle": "Two-value and three-value boundary analysis",
+    "diagram": "split",
+    "labels": [
+      "BELOW",
+      "BOUNDARY",
+      "ABOVE"
+    ]
+  },
+  "branch-coverage-decision-coverage": {
+    "title": "BRANCH COVERAGE",
+    "subtitle": "Every decision has more than one outcome",
+    "diagram": "flow",
+    "labels": [
+      "DECISION",
+      "TRUE",
+      "FALSE"
+    ]
+  },
+  "classification-tree-method": {
+    "title": "CLASSIFICATION TREE",
+    "subtitle": "Model the input space before choosing tests",
+    "diagram": "network",
+    "labels": [
+      "CLASSES",
+      "INPUT MODEL",
+      "CONSTRAINTS"
+    ]
+  },
+  "combinatorial-testing": {
+    "title": "COMBINATORIAL",
+    "subtitle": "Each-choice · Pairwise · t-wise",
+    "diagram": "matrix",
+    "labels": [
+      "FACTORS",
+      "CONSTRAINTS",
+      "T-WISE"
+    ]
+  },
+  "defect-based-testing": {
+    "title": "DEFECT-BASED",
+    "subtitle": "Turn defect history into better tests",
+    "diagram": "target",
+    "labels": [
+      "HISTORY",
+      "TAXONOMY",
+      "TESTS"
+    ]
+  },
+  "metamorphic-testing": {
+    "title": "METAMORPHIC",
+    "subtitle": "Test the relations between executions",
+    "diagram": "split",
+    "labels": [
+      "SOURCE TEST",
+      "RELATION",
+      "FOLLOW-UP"
+    ]
+  },
+  "multiple-condition-testing": {
+    "title": "MULTIPLE CONDITIONS",
+    "subtitle": "Every feasible combination of conditions",
+    "diagram": "matrix",
+    "labels": [
+      "CONDITIONS",
+      "COMBINATIONS",
+      "OUTCOMES"
+    ]
+  },
+  "path-testing": {
+    "title": "PATH TESTING",
+    "subtitle": "Independent paths through the control flow",
+    "diagram": "network",
+    "labels": [
+      "CONTROL FLOW",
+      "BASIS PATHS",
+      "COVERAGE"
+    ]
+  },
+  "state-transition-testing-co-ban": {
+    "title": "STATE TRANSITIONS",
+    "subtitle": "Eight trip states. Valid and invalid moves.",
+    "diagram": "cycle",
+    "labels": [
+      "STATE",
+      "EVENT",
+      "NEXT STATE"
+    ]
   }
 }

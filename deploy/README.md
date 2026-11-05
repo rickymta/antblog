@@ -136,3 +136,32 @@ Lưu ý:
 - nginx lấy IP thật của người đọc từ header `CF-Connecting-IP` (chỉ khi request đến từ dải IP của Cloudflare). Muốn chặn hẳn truy cập vào thẳng IP server, giới hạn TCP 80/443 ở tường lửa chỉ cho dải IP Cloudflare (`https://www.cloudflare.com/ips/`).
 - nginx giữ HTML trang đọc 60 giây (micro-cache, header `X-Cache-Status: HIT|MISS|STALE`): bài vừa sửa/xuất bản trong CMS hiện ra trên trang đọc sau tối đa ~1 phút. Cần xoá ngay: `docker compose exec nginx sh -c 'rm -rf /var/cache/nginx/tkh_web/*'`.
 - Cookie đăng nhập có cờ `Secure` (`COOKIE_SECURE=true`) ⇒ chỉ đăng nhập được qua HTTPS.
+
+## 7. Kiểm tra ảnh bìa và cây danh mục sau deploy
+
+Next.js standalone không tự đóng gói thư mục public. Dockerfile.web phải chép cả apps/web/public và .next/static vào cạnh server.js; thiếu public khiến /images/articles/*.webp trả 404 dù giao diện và API vẫn hoạt động. Build chạy covers:check trước khi tạo bundle.
+
+Rebuild bản web sau khi kéo commit mới:
+
+```bash
+docker compose up -d --build web
+docker compose exec nginx nginx -s reload
+curl -I https://antblog.xyz/images/articles/page-don-vi-doc-ghi.webp
+```
+
+Mong đợi HTTP 200 và Content-Type: image/webp. Nếu CDN còn giữ phản hồi 404 cũ, purge cache cho /images/articles/* trên Cloudflare. Từ checkout có Node/dependencies, kiểm tra mọi ảnh qua HTTP:
+
+```bash
+npm run covers:check -w @tkh/web -- --base-url https://antblog.xyz
+```
+
+Cây danh mục tối đa 3 cấp cần deploy cả API và CMS. Để chỉ cập nhật cấu trúc đã thống nhất, không nạp lại nội dung bài viết:
+
+```bash
+docker compose up -d --build api web nginx
+docker compose run --rm --build seed npm run categories:tree
+mkdir -p backups/categories
+docker compose run --rm -v "$PWD/backups/categories:/app/.migration-backups" seed npm run categories:tree -- --apply
+```
+
+Lệnh đầu của categories:tree chỉ xem kế hoạch. Lệnh --apply thêm BA/AWS/Azure nếu thiếu, đặt Design Pattern/Architecture/System Design dưới Lập trình và AWS/Azure dưới DevOps. Backup các danh mục trước thay đổi nằm trên host trong backups/categories. Không chạy đồng thời với thao tác sửa cây trong CMS. Tài khoản inspector chỉ đọc, không dùng để migrate; container tools dùng tài khoản ứng dụng đã cấu hình. Sau cập nhật, cache danh mục của Next có thể cần tối đa 5 phút để làm mới.

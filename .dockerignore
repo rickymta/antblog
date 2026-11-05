@@ -12,5 +12,7 @@ Dockerfile
 *.log
 api
 **/.next
+**/.next-verify
+**/.migration-backups
 **/uploads
 examples
