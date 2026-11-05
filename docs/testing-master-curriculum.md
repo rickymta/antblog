@@ -88,16 +88,16 @@ Cột «Thực hành»: **Lab (code)** = làm trên phòng lab · **Lab + thiế
 
 | ID | Tiêu đề | Level | ISTQB ref | Bài cần đọc trước | Thực hành | Trạng thái |
 |---|---|---|---|---|---|---|
-| TEST-011 | Tổng quan 5 test level của ISTQB | L1 | CTFL v4.0.1 — 2.2.1 | 007, 008 | Giấy/bảng tính | Kế hoạch |
-| TEST-012 | Component Testing (Unit Testing): góc nhìn tổng quan | L1 | CTFL v4.0.1 — 2.2.1 | 011 | Lab (code) | Kế hoạch |
-| TEST-013 | Component Integration Testing | L1 | CTFL v4.0.1 — 2.2.1 | 011, 012 | Lab (code) | Kế hoạch |
-| TEST-014 | System Testing | L1 | CTFL v4.0.1 — 2.2.1 | 011 | Lab (code) | Kế hoạch |
-| TEST-015 | System Integration Testing | L1 | CTFL v4.0.1 — 2.2.1 | 013, 014 | Lab (code) | Kế hoạch |
-| TEST-016 | Acceptance Testing: UAT, OAT, hợp đồng, alpha/beta | L1 | CTFL v4.0.1; tham khảo CT-AcT — 2.2.1 | 011 | Giấy/bảng tính | Kế hoạch |
-| TEST-017 | Functional Testing | L1 | CTFL v4.0.1 — 2.2.2 | 011 | Lab (code) | Kế hoạch |
-| TEST-018 | Non-functional Testing: tổng quan theo ISO/IEC 25010 | L2 | CTFL v4.0.1 — 2.2.2 | 017 | Lab (đọc SPEC) | Kế hoạch |
-| TEST-019 | Confirmation Testing và Regression Testing | L2 | CTFL v4.0.1 — 2.2.3 | 004, 017 | Lab (code) | Kế hoạch |
-| TEST-020 | Maintenance Testing | L2 | CTFL v4.0.1 — 2.3 | 019 | Lab (đọc SPEC) | Kế hoạch |
+| TEST-011 | Tổng quan 5 test level của ISTQB | L1 | CTFL v4.0.1 — 2.2.1 | 007, 008 | Giấy/bảng tính | Đã viết |
+| TEST-012 | Component Testing (Unit Testing): góc nhìn tổng quan | L1 | CTFL v4.0.1 — 2.2.1 | 011 | Lab (đọc code) | Đã viết |
+| TEST-013 | Component Integration Testing | L1 | CTFL v4.0.1 — 2.2.1 | 011, 012 | Lab (code) | Đã viết |
+| TEST-014 | System Testing | L1 | CTFL v4.0.1 — 2.2.1 | 011 | Lab (code) | Đã viết |
+| TEST-015 | System Integration Testing | L1 | CTFL v4.0.1 — 2.2.1 | 013, 014 | Lab (code) | Đã viết |
+| TEST-016 | Acceptance Testing: UAT, OAT, hợp đồng, alpha/beta | L1 | CTFL v4.0.1; tham khảo CT-AcT — 2.2.1 | 011 | Giấy/bảng tính | Đã viết |
+| TEST-017 | Functional Testing | L1 | CTFL v4.0.1 — 2.2.2 | 011 | Lab (code) | Đã viết |
+| TEST-018 | Non-functional Testing: tổng quan theo ISO/IEC 25010 | L2 | CTFL v4.0.1 — 2.2.2 | 017 | Lab (đọc SPEC) | Đã viết |
+| TEST-019 | Confirmation Testing và Regression Testing | L2 | CTFL v4.0.1 — 2.2.3 | 004, 017 | Lab (code) | Đã viết |
+| TEST-020 | Maintenance Testing | L2 | CTFL v4.0.1 — 2.3 | 019 | Lab (đọc SPEC) | Đã viết |
 
 ### S03 — Static Testing & Review Techniques
 
@@ -105,16 +105,16 @@ Cột «Thực hành»: **Lab (code)** = làm trên phòng lab · **Lab + thiế
 
 | ID | Tiêu đề | Level | ISTQB ref | Bài cần đọc trước | Thực hành | Trạng thái |
 |---|---|---|---|---|---|---|
-| TEST-021 | Static Testing là gì? | L2 | CTFL v4.0.1 — 3.1.1; 3.1.2 | 004, 007 | Lab (đọc SPEC) | Kế hoạch |
-| TEST-022 | Static Testing và Dynamic Testing | L2 | CTFL v4.0.1 — 3.1.3 | 021 | Lab (code) | Kế hoạch |
-| TEST-023 | Informal Review | L2 | CTFL v4.0.1 — 3.2.4 | 021 | Giấy/bảng tính | Kế hoạch |
-| TEST-024 | Walkthrough | L2 | CTFL v4.0.1 — 3.2.4 | 023 | Lab (đọc SPEC) | Kế hoạch |
-| TEST-025 | Technical Review: review API contract | L2 | CTFL v4.0.1; CTAL-TTA v4.0 — CTFL 3.2.4; TTA 5.1 | 023 | Lab (code) | Kế hoạch |
-| TEST-026 | Inspection: review hình thức nhất | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 3.2.4; TA 5.2 | 024, 025, 027 | Lab (đọc SPEC) | Kế hoạch |
-| TEST-027 | Review Process và các vai trò | L2 | CTFL v4.0.1 — 3.2.2; 3.2.3; 3.2.5 | 021 | Lab (đọc SPEC) | Kế hoạch |
-| TEST-028 | Checklist-based Review | L2 | CTFL v4.0.1; CTAL-TA v4.0; CTAL-TTA v4.0 — CTFL 3.2.4; TA 5.2; TTA 5.2 | 027 | Lab (đọc SPEC) | Kế hoạch |
-| TEST-029 | Static Analysis: phân tích code tĩnh | L2 | CTAL-TTA v4.0; CTFL v4.0.1 — TTA 3.2; CTFL 3.1, 6.1 | 021, 022 | Lab (code) | Kế hoạch |
-| TEST-030 | Shift-left Testing | L2 | CTFL v4.0.1 — 2.1.3; 2.1.5; 3.2.1 | 008, 021 | Lab (code) | Kế hoạch |
+| TEST-021 | Static Testing là gì? | L2 | CTFL v4.0.1 — 3.1.1; 3.1.2 | 004, 007 | Lab (đọc SPEC) | Đã viết |
+| TEST-022 | Static Testing và Dynamic Testing | L2 | CTFL v4.0.1 — 3.1.3 | 021 | Lab (code) | Đã viết |
+| TEST-023 | Informal Review | L2 | CTFL v4.0.1 — 3.2.4 | 021 | Giấy/bảng tính | Đã viết |
+| TEST-024 | Walkthrough | L2 | CTFL v4.0.1 — 3.2.4 | 023 | Lab (đọc SPEC) | Đã viết |
+| TEST-025 | Technical Review: review API contract | L2 | CTFL v4.0.1; CTAL-TTA v4.0 — CTFL 3.2.4; TTA 5.1 | 023 | Lab (code) | Đã viết |
+| TEST-026 | Inspection: review hình thức nhất | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 3.2.4; TA 5.2 | 024, 025, 027 | Lab (đọc SPEC) | Đã viết |
+| TEST-027 | Review Process và các vai trò | L2 | CTFL v4.0.1 — 3.2.2; 3.2.3; 3.2.5 | 021 | Lab (đọc SPEC) | Đã viết |
+| TEST-028 | Checklist-based Review | L2 | CTFL v4.0.1; CTAL-TA v4.0; CTAL-TTA v4.0 — CTFL 3.2.4; TA 5.2; TTA 5.2 | 027 | Lab (đọc SPEC) | Đã viết |
+| TEST-029 | Static Analysis: phân tích code tĩnh | L2 | CTAL-TTA v4.0; CTFL v4.0.1 — TTA 3.2; CTFL 3.1, 6.1 | 021, 022 | Lab (code) | Đã viết |
+| TEST-030 | Shift-left Testing | L2 | CTFL v4.0.1 — 2.1.3; 2.1.5; 3.2.1 | 008, 021 | Lab (code) | Đã viết |
 
 ### S04 — Black-box Test Design Techniques
 
