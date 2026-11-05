@@ -1,0 +1,8 @@
+# Mô hình PICT cho TEST-037 — tham khảo, CHƯA chạy trong bài (lab không cài PICT).
+# Chạy (nếu có PICT):  pict toi-noi-app.pict.txt          -> pairwise (mặc định /o:2)
+#                      pict toi-noi-app.pict.txt /o:3     -> 3-wise
+NenTang:   Android, iOS, Web
+PhienBan:  CuNhat, PhoBien, MoiNhat
+ThanhToan: cash, vixanh
+NgonNgu:   vi, en
+Mang:      WiFi, 4G, MangYeu
