@@ -102,7 +102,7 @@ export const vi = {
     heroLine1: 'Hiểu sâu công nghệ.',
     heroLine2: 'Xây giải pháp tốt hơn.',
     heroBody:
-      'Bài viết có hệ thống về database, ngôn ngữ lập trình, design pattern và kiến trúc phần mềm — đi theo lộ trình từ cơ bản tới nâng cao, kèm hình minh hoạ và ví dụ chạy được.',
+      'Bài viết có hệ thống về phân tích nghiệp vụ, lập trình, database, design pattern, kiểm thử và DevOps — đi theo lộ trình từ cơ bản tới nâng cao, kèm hình minh hoạ và ví dụ chạy được.',
     ctaStart: 'Bắt đầu học',
     ctaArticles: 'Xem bài viết',
     statTopics: 'Chủ đề',
@@ -112,14 +112,14 @@ export const vi = {
     roadmapStep: 'Bước {{n}}: {{label}}',
     roadmapStepPrefix: 'Bước',
     roadmapLabel:
-      'Sơ đồ lộ trình học: Cơ bản, rồi Database, tiếp theo Ngôn ngữ lập trình và Design Pattern, sau đó Architecture và cuối cùng Nâng cao.',
+      'Các mảng kiến thức theo dòng chảy làm phần mềm: Phân tích nghiệp vụ, rồi Lập trình, tiếp theo Database và Design Pattern, sau đó Kiểm thử và cuối cùng DevOps.',
     roadmap: {
-      basics: 'Cơ bản',
+      ba: 'Phân tích nghiệp vụ',
+      programming: 'Lập trình',
       database: 'Database',
-      languages: 'Ngôn ngữ lập trình',
       patterns: 'Design Pattern',
-      architecture: 'Architecture',
-      advanced: 'Nâng cao',
+      testing: 'Kiểm thử',
+      devops: 'DevOps',
     },
     topicsTitle: 'Khám phá theo chủ đề',
     topicsSubtitle: 'Chọn mảng bạn quan tâm để đọc theo chiều sâu.',

@@ -295,6 +295,7 @@ export const vi = {
       system: 'Hệ thống',
       security: 'Bảo mật',
       testing: 'Kiểm thử',
+      analysis: 'Phân tích nghiệp vụ',
     },
   },
   paths: {

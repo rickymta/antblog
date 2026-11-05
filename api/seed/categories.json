@@ -86,5 +86,16 @@
     "icon": "testing",
     "color": "#14B8A6",
     "order": 8
+  },
+  {
+    "slug": "business-analysis",
+    "name": { "vi": "Phân tích nghiệp vụ (BA)", "en": "Business Analysis" },
+    "description": {
+      "vi": "Phân tích nghiệp vụ: khơi gợi yêu cầu, user story và tiêu chí chấp nhận, mô hình hoá quy trình, đặc tả và quản lý thay đổi yêu cầu.",
+      "en": "Business analysis: requirements elicitation, user stories and acceptance criteria, process modelling, specifications and requirements change management."
+    },
+    "icon": "analysis",
+    "color": "#EAB308",
+    "order": 9
   }
 ]

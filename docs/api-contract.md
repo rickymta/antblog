@@ -42,7 +42,7 @@ Chỉ trả bài `status = 'published'` và `publishedAt <= now`.
 `Localized = { vi: string, en: string }`
 
 `Category = { id, slug, name: Localized, description: Localized, icon: CategoryIcon, color: string (#RRGGBB), order: number, articleCount: number }`
-`CategoryIcon = 'database' | 'code' | 'pattern' | 'architecture' | 'devops' | 'system' | 'security' | 'testing'`
+`CategoryIcon = 'database' | 'code' | 'pattern' | 'architecture' | 'devops' | 'system' | 'security' | 'testing' | 'analysis'`
 
 `Level = 'beginner' | 'intermediate' | 'advanced'`
 

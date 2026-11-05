@@ -1,6 +1,6 @@
 import { Schema, model, type Types } from 'mongoose';
 
-export const CATEGORY_ICONS = ['database', 'code', 'pattern', 'architecture', 'devops', 'system', 'security', 'testing'] as const;
+export const CATEGORY_ICONS = ['database', 'code', 'pattern', 'architecture', 'devops', 'system', 'security', 'testing', 'analysis'] as const;
 export type CategoryIcon = (typeof CATEGORY_ICONS)[number];
 
 export interface Localized {

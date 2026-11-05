@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 
 interface RoadNode {
-  key: 'basics' | 'database' | 'languages' | 'patterns' | 'architecture' | 'advanced';
+  key: 'ba' | 'programming' | 'database' | 'patterns' | 'testing' | 'devops';
   href: string;
   x: number;
   y: number;
@@ -17,18 +17,20 @@ interface RoadNode {
 const VW = 470;
 const VH = 450;
 const H = 46;
+// Các mảng blog chia sẻ, xếp theo dòng chảy làm phần mềm: phân tích yêu cầu → viết code → dữ liệu → thiết kế
+// → kiểm thử → đưa lên vận hành. Mỗi thẻ dẫn tới trang chủ đề tương ứng (chủ đề đã có sẵn kể cả khi chưa có bài).
 const NODES: RoadNode[] = [
-  { key: 'basics', href: '/articles?level=beginner', x: 30, y: 16, w: 170 },
-  { key: 'database', href: '/topics/database', x: 260, y: 100, w: 170 },
-  { key: 'languages', href: '/topics/programming', x: 0, y: 200, w: 222 },
+  { key: 'ba', href: '/topics/business-analysis', x: 20, y: 16, w: 230 },
+  { key: 'programming', href: '/topics/programming', x: 260, y: 100, w: 170 },
+  { key: 'database', href: '/topics/database', x: 0, y: 200, w: 222 },
   { key: 'patterns', href: '/topics/design-pattern', x: 250, y: 200, w: 200 },
-  { key: 'architecture', href: '/topics/architecture', x: 140, y: 300, w: 190 },
-  { key: 'advanced', href: '/articles?level=advanced', x: 270, y: 390, w: 180 },
+  { key: 'testing', href: '/topics/testing', x: 140, y: 300, w: 190 },
+  { key: 'devops', href: '/topics/devops', x: 270, y: 390, w: 180 },
 ];
 
 // Đường nối nét đứt: từ đáy thẻ nguồn tới đỉnh thẻ đích (cong bậc ba), mũi tên ở cuối.
 const EDGES = [
-  'M115 62 C115 92 345 70 345 96',
+  'M135 62 C135 92 345 70 345 96',
   'M315 146 C315 178 110 168 110 196',
   'M365 146 C365 172 350 172 350 196',
   'M110 246 C110 278 210 270 210 296',
@@ -40,7 +42,7 @@ const pct = (v: number, total: number) => `${(v / total) * 100}%`;
 
 /**
  * Sơ đồ lộ trình trong hero (kiểu A3): thẻ trắng nhỏ nối bằng nét đứt có mũi tên.
- * Mỗi thẻ là một liên kết thật (Tab tới được, có viền khi focus) dẫn tới bài theo cấp độ hoặc trang chủ đề tương ứng.
+ * Mỗi thẻ là một liên kết thật (Tab tới được, có viền khi focus) dẫn tới trang chủ đề tương ứng.
  * Kích thước chữ theo `cqw` của khung ⇒ sơ đồ co giãn đồng đều như một hình SVG.
  */
 export function RoadmapDiagram({ className = '' }: { className?: string }) {
@@ -65,7 +67,7 @@ export function RoadmapDiagram({ className = '' }: { className?: string }) {
 
       <ol className="absolute inset-0 m-0 list-none p-0">
         {NODES.map((n, i) => {
-          const final = n.key === 'advanced';
+          const final = n.key === 'devops';
           const label = t(`home.roadmap.${n.key}`);
           const style: CSSProperties = { left: pct(n.x, VW), top: pct(n.y, VH), width: pct(n.w, VW), height: pct(H, VH) };
           return (

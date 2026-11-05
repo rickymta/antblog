@@ -1,6 +1,7 @@
 // Nhãn và biểu tượng theo nghiệp vụ: cấp độ, trạng thái, vai trò, biểu tượng chủ đề.
 import {
   Building2,
+  ClipboardList,
   Code,
   Database,
   FlaskConical,
@@ -67,6 +68,7 @@ export const CATEGORY_ICON_COMPONENT: Record<CategoryIconName, LucideIcon> = {
   system: Network,
   security: Shield,
   testing: FlaskConical,
+  analysis: ClipboardList,
 };
 
 /** Ô biểu tượng chủ đề: nền màu chủ đề, biểu tượng trắng. */

@@ -102,7 +102,7 @@ export const en: Messages = {
     heroLine1: 'Understand tech deeply.',
     heroLine2: 'Build better solutions.',
     heroBody:
-      'Structured articles on databases, programming languages, design patterns and software architecture — follow a path from beginner to advanced, with diagrams and runnable examples.',
+      'Structured articles on business analysis, programming, databases, design patterns, testing and DevOps — follow a path from beginner to advanced, with diagrams and runnable examples.',
     ctaStart: 'Start learning',
     ctaArticles: 'Browse articles',
     statTopics: 'Topics',
@@ -112,14 +112,14 @@ export const en: Messages = {
     roadmapStep: 'Step {{n}}: {{label}}',
     roadmapStepPrefix: 'Step',
     roadmapLabel:
-      'Learning roadmap: Fundamentals, then Database, then Programming languages and Design patterns, then Architecture and finally Advanced.',
+      'Knowledge areas along the software delivery flow: Business analysis, then Programming, then Database and Design patterns, then Testing and finally DevOps.',
     roadmap: {
-      basics: 'Fundamentals',
+      ba: 'Business analysis',
+      programming: 'Programming',
       database: 'Database',
-      languages: 'Programming languages',
       patterns: 'Design patterns',
-      architecture: 'Architecture',
-      advanced: 'Advanced',
+      testing: 'Testing',
+      devops: 'DevOps',
     },
     topicsTitle: 'Explore by topic',
     topicsSubtitle: 'Pick an area you care about and go deep.',
