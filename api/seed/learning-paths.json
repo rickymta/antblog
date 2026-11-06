@@ -474,7 +474,7 @@
   {
     "slug": "flutter-toi-noi-ios-android",
     "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android",
-    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1–5.",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có 52 bài.",
     "level": "beginner",
     "category": "programming",
     "articles": [
@@ -519,7 +519,17 @@
       "flutter-thanh-toan-vi-xanh-webview-deep-link-idempotency",
       "flutter-platform-channel-pigeon-ffi-goi-native",
       "flutter-hieu-nang-rebuild-isolate-devtools",
-      "flutter-bao-mat-mobile-secure-storage-pinning-obfuscation-masvs"
+      "flutter-bao-mat-mobile-secure-storage-pinning-obfuscation-masvs",
+      "flutter-flavors-bundle-id-icon-firebase-theo-moi-truong-build",
+      "flutter-ky-ung-dung-android-keystore-play-app-signing-aab",
+      "flutter-ky-ung-dung-ios-certificate-provisioning-profile-capabilities",
+      "flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build",
+      "flutter-ci-cd-github-actions-macos-build-ios-android-secrets",
+      "flutter-firebase-app-distribution-phan-phoi-noi-bo-tester",
+      "flutter-testflight-internal-external-testing-beta-review",
+      "flutter-google-play-internal-closed-open-production-staged-rollout",
+      "flutter-app-store-production-metadata-privacy-review-phased-release",
+      "flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback"
     ],
     "status": "published"
   }

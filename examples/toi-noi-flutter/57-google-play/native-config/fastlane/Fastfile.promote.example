@@ -1,0 +1,100 @@
+# Lane promote của Tới Nơi. Đặt thành android/fastlane/Promote.fastfile, rồi thêm
+# dòng sau lên đầu android/fastlane/Fastfile của lab 53, phía trên các lane:
+#
+#   import "Promote.fastfile"
+#
+# Không dán thẳng vào Fastfile của lab 53: audit của lab đó cấm track_promote_to
+# và các chuỗi "production", "beta", "alpha" trong file ấy. Chỉ đặt file này
+# trong app của bạn, đừng đặt vào native-config của lab 53 (test danh sách file
+# của lab đó sẽ đỏ). File này dùng lại env! và
+# pick_target đã định nghĩa trong Fastfile của lab 53 (Ruby chỉ tìm chúng lúc
+# lane chạy, nên thứ tự khai báo không quan trọng).
+#
+#   bundle exec fastlane android promote app:customer flavor:staging from:internal to:closed version_code:43
+#   bundle exec fastlane android promote app:customer flavor:prod from:closed to:production version_code:43 rollout_percent:1
+#
+# Lane này CHƯA được chạy thật: repository không có tài khoản Google Play
+# Console và máy kiểm không cài fastlane. Tên tham số theo docs.fastlane.tools
+# (upload_to_play_store, kiểm tại 11/2026) và mã nguồn supply.
+
+# Tên track ở Console (trái) và tên track trong Play API (phải). Fastlane
+# (docs.fastlane.tools, upload_to_play_store) liệt kê internal, alpha, beta,
+# production là track mặc định. Trang developers.google.com/android-publisher/tracks
+# ghép open testing với beta và có ví dụ alpha, nhưng ghi closed testing tạo tay
+# có tên tuỳ ý, và ghi internal là "qa". supply lọc track theo tên chính xác,
+# nên nếu API của bạn trả "qa" thì lane dừng. CHƯA KIỂM: gọi tracks.list của
+# Play Developer API cho package của bạn trước lần chạy đầu, rồi sửa bảng này.
+TRACK_NAMES = {
+  "internal" => "internal",
+  "closed" => "alpha",
+  "open" => "beta",
+  "production" => "production",
+}.freeze
+
+# Đường đi hợp lệ, trùng với TrackPromotion.allowed trong lib/track_promotion.dart.
+PROMOTIONS = {
+  "internal" => %w[closed],
+  "closed" => %w[open production],
+  "open" => %w[production],
+}.freeze
+
+def pick_promotion(options)
+  from = options[:from].to_s
+  to = options[:to].to_s
+  unless PROMOTIONS.fetch(from, []).include?(to)
+    UI.user_error!("không promote trực tiếp #{from} -> #{to}")
+  end
+  [from, to]
+end
+
+# version_code chọn đúng bản ở track nguồn. supply lọc bản theo version_code khi
+# có, nếu không thì theo trạng thái và đòi đúng một bản khớp; đòi tham số này để
+# bản được promote là bản đã qua preflight.
+def pick_version_code(options)
+  raw = options[:version_code].to_s
+  unless raw =~ /\A[1-9][0-9]*\z/ && raw.to_i <= 2_100_000_000
+    UI.user_error!("version_code phải là số nguyên từ 1 đến 2100000000")
+  end
+  raw
+end
+
+# rollout_percent là số nguyên 1..99, bắt buộc khi lên production (staged
+# rollout) và cấm ở các track khác. Trả về tỉ lệ 0..1 như tham số rollout của supply.
+def pick_rollout_fraction(options, to)
+  raw = options[:rollout_percent].to_s
+  if to != "production"
+    UI.user_error!("rollout_percent chỉ dùng khi promote lên production") unless raw.empty?
+    return nil
+  end
+  unless raw =~ /\A[1-9][0-9]?\z/
+    UI.user_error!("promote lên production cần rollout_percent từ 1 đến 99")
+  end
+  raw.to_i / 100.0
+end
+
+platform :android do
+  desc "Promote bản đã có trên Play sang track kế tiếp; lên production thì chạy staged rollout."
+  lane :promote do |options|
+    _flavor, package_name = pick_target(options)
+    from, to = pick_promotion(options)
+    version_code = pick_version_code(options)
+    fraction = pick_rollout_fraction(options, to)
+    json_key_data = env!("PLAY_JSON_KEY_DATA")
+
+    params = {
+      package_name: package_name,
+      track: TRACK_NAMES.fetch(from),
+      track_promote_to: TRACK_NAMES.fetch(to),
+      version_code: version_code,
+      json_key_data: json_key_data,
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+    }
+    params[:rollout] = fraction.to_s unless fraction.nil?
+    upload_to_play_store(**params)
+  end
+end

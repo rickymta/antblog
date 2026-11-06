@@ -40,7 +40,7 @@ Loạt gồm **64 bài** chia **8 phần**, mỗi phần tối đa 10 bài, đi 
 | Android Studio + Android SDK + emulator, JDK 17 | 07 (chạy Android) | Cần cho `flutter build apk/appbundle` |
 | Node ≥ 22 | 06 | Chạy script `verify-*.mjs` của lab |
 | .NET 10 SDK + PostgreSQL | 19 (tuỳ chọn) | Chỉ khi muốn gọi trip-service thật thay cho fake API |
-| Ruby ≥ 3.1 + fastlane | 53 | Tự động hoá ký và upload |
+| Ruby ≥ 3.2 + fastlane 2.241 | 53 | Tự động hoá ký và upload |
 
 ### 3.2 Môi trường ứng dụng và kênh phân phối
 
@@ -219,7 +219,7 @@ Mục tiêu: từ source đến người dùng với quy trình lặp lại đư
 | FL-54 | `flutter-ci-cd-github-actions-macos-build-ios-android-secrets` | CI/CD build: GitHub Actions macOS/ubuntu, secrets, build number và artifact | nâng cao | Job Android trên ubuntu, job iOS trên macOS, giải mã keystore/profile từ secrets, build number từ `run_number`, artifact AAB/IPA, chi phí phút macOS, so với Codemagic | `54-ci-cd-build` | 53 | CH |
 | FL-55 | `flutter-firebase-app-distribution-phan-phoi-noi-bo-tester` | Firebase App Distribution: phân phối nội bộ cho tester iOS và Android | nâng cao | Nhóm tester, upload APK/IPA ad-hoc từ CI, UDID thiết bị iOS, release notes tự sinh từ commit, feedback và crash từ bản nội bộ, giới hạn so với TestFlight | `55-app-distribution` | 54 | CH |
 | FL-56 | `flutter-testflight-internal-external-testing-beta-review` | TestFlight: internal/external testing, Beta App Review và export compliance | nâng cao | Upload build, xử lý, internal tester (tới 100) không cần review, external cần Beta App Review, export compliance và mã hoá, hết hạn 90 ngày, thu thập feedback và crash | `56-testflight` | 55 | CH |
-| FL-57 | `flutter-google-play-internal-closed-open-production-staged-rollout` | Google Play: internal, closed, open testing, production và staged rollout | nâng cao | Bốn track, promote giữa track, pre-launch report, Data safety và quyền nhạy cảm (vị trí nền), yêu cầu 12 tester cho tài khoản cá nhân, staged rollout và halt | `57-google-play` | 56 | CH |
+| FL-57 | `flutter-google-play-internal-closed-open-production-staged-rollout` | Google Play: internal, closed, open testing, production và staged rollout | nâng cao | Bốn track, promote giữa track, pre-launch report, Data safety và quyền nhạy cảm (vị trí nền), yêu cầu 12 tester opt-in 14 ngày cho tài khoản cá nhân mới (kiểm 11/2026), staged rollout và halt | `57-google-play` | 56 | CH |
 | FL-58 | `flutter-app-store-production-metadata-privacy-review-phased-release` | App Store production: metadata, privacy labels, App Review và phased release | nâng cao | Bản ghi app, ảnh chụp theo kích thước, privacy nutrition labels, tài khoản demo cho reviewer, lý do bị từ chối hay gặp với app gọi xe, phased release 7 ngày, expedited review | `58-app-store-release` | 57 | CH |
 | FL-59 | `flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback` | Vận hành sau phát hành: force update, remote config, Shorebird và rollback | nâng cao | Kiểm phiên bản tối thiểu từ server, feature flag/remote config, Shorebird code push cho Dart (giới hạn và chính sách store), rollback bằng halt rollout/phased release, hotfix nhánh release | `59-post-release-ops` | 58 | CH |
 

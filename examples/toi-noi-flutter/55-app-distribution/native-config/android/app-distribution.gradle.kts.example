@@ -1,0 +1,8 @@
+// Đoạn thêm vào android/app/build.gradle.kts (bài 50 đã khai báo flavor staging).
+// SDK App Distribution của Android gồm hai thư viện: bản "api" chỉ là vỏ gọi
+// hàm, nhận mọi variant; bản đầy đủ có sẵn tính năng tự cập nhật nên CHỈ được
+// vào variant staging, không bao giờ vào bản đưa lên Google Play.
+dependencies {
+    implementation("com.google.firebase:firebase-appdistribution-api:16.0.0-beta21")
+    "stagingImplementation"("com.google.firebase:firebase-appdistribution:16.0.0-beta21")
+}

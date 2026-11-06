@@ -1,0 +1,17 @@
+name: toi_noi_54
+description: "Lab bài 54 (Flutter qua Tới Nơi): kiểm tra workflow mẫu release-staging.yml (build Android và iOS, secrets, build number) bằng test Dart."
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  # Tái dùng WorkflowAudit (ghim Flutter, ref của action, permissions, quét bí mật) của lab 33.
+  toi_noi_33:
+    path: ../33-ci-github-actions
+  yaml: ^3.1.4
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.33.0

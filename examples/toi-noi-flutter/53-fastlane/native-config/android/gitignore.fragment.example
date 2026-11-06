@@ -1,0 +1,7 @@
+# Thêm các dòng này vào android/.gitignore của app (Flutter đã sinh sẵn file đó).
+# Bí mật của fastlane không bao giờ vào repo. Gemfile.lock thì CÓ commit.
+.env
+.env.*
+!.env.example
+play-service-account*.json
+fastlane/report.xml

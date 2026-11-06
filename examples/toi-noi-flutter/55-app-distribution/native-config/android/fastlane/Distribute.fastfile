@@ -1,0 +1,49 @@
+# Lane phân phối Android qua Firebase App Distribution. Chép vào
+# android/fastlane/ và thêm một dòng vào Fastfile của bài 53:
+#
+#   import("Distribute.fastfile")
+#
+# Lane CHƯA được chạy thật (không tài khoản Firebase, không Ruby >= 3.2).
+#
+#   bundle exec fastlane android distribute_staging app:customer apk:../build/app/outputs/flutter-apk/app-staging-release.apk notes_file:../build/release-notes.txt
+
+require "json"
+
+# Đọc app-distribution.json ở gốc project Flutter. Mã Fastfile chạy trong
+# thư mục fastlane/, nên gốc project cách hai cấp.
+def distro_target(app, platform)
+  path = File.expand_path("../../app-distribution.json")
+  unless File.exist?(path)
+    UI.user_error!("Thiếu #{path}: chép từ native-config/app-distribution.example.json")
+  end
+  config = JSON.parse(File.read(path))
+  # Chỉ flavor staging có trong file; dev và prod không có đường vào đây.
+  entry = config.dig("apps", app, "staging", platform)
+  UI.user_error!("app phải là customer hoặc driver, và có mục staging/#{platform}") if entry.nil?
+  [entry.fetch("appId"), config.dig("testerGroups", "internal", "alias")]
+end
+
+# Truyền tường minh file service account: xem ghi chú ở lane iOS.
+def distro_credentials
+  path = ENV["GOOGLE_APPLICATION_CREDENTIALS"].to_s.strip
+  UI.user_error!("Thiếu GOOGLE_APPLICATION_CREDENTIALS (đường dẫn file service account)") if path.empty?
+  path
+end
+
+platform :android do
+  desc "Phân phối APK của flavor staging cho nhóm tester nội bộ."
+  lane :distribute_staging do |options|
+    app_id, group = distro_target(options[:app].to_s, "android")
+    apk = options[:apk].to_s
+    UI.user_error!("apk:<đường dẫn> là bắt buộc") if apk.empty?
+
+    firebase_app_distribution(
+      app: app_id,
+      android_artifact_type: "APK",
+      android_artifact_path: apk,
+      groups: group,
+      release_notes_file: options[:notes_file].to_s,
+      service_credentials_file: distro_credentials,
+    )
+  end
+end

@@ -1,0 +1,66 @@
+# Lane phân phối iOS qua Firebase App Distribution. Chép vào ios/fastlane/ và
+# thêm một dòng vào Fastfile của bài 53:
+#
+#   import("Distribute.fastfile")
+#
+# Lane CHƯA được chạy thật: repository không có tài khoản Firebase, và máy viết
+# lab không có Ruby >= 3.2 mà plugin yêu cầu.
+#
+#   bundle exec fastlane ios distribute_staging app:customer ipa:../build/ios/ipa/Runner.ipa notes_file:../build/release-notes.txt
+#   bundle exec fastlane ios download_udids app:customer
+
+require "json"
+
+# Đọc app-distribution.json ở gốc project Flutter. Mã Fastfile chạy trong
+# thư mục fastlane/, nên gốc project cách hai cấp.
+def distro_target(app, platform)
+  path = File.expand_path("../../app-distribution.json")
+  unless File.exist?(path)
+    UI.user_error!("Thiếu #{path}: chép từ native-config/app-distribution.example.json")
+  end
+  config = JSON.parse(File.read(path))
+  # Chỉ flavor staging có trong file; dev và prod không có đường vào đây.
+  entry = config.dig("apps", app, "staging", platform)
+  UI.user_error!("app phải là customer hoặc driver, và có mục staging/#{platform}") if entry.nil?
+  [entry.fetch("appId"), config.dig("testerGroups", "internal", "alias")]
+end
+
+# Truyền tường minh file service account. Nếu bỏ trống, plugin thử lần lượt
+# FIREBASE_TOKEN, đăng nhập của Firebase CLI trên máy, rồi mới tới
+# Application Default Credentials: máy cá nhân sẽ dùng nhầm tài khoản của bạn.
+def distro_credentials
+  path = ENV["GOOGLE_APPLICATION_CREDENTIALS"].to_s.strip
+  UI.user_error!("Thiếu GOOGLE_APPLICATION_CREDENTIALS (đường dẫn file service account)") if path.empty?
+  path
+end
+
+platform :ios do
+  desc "Phân phối IPA ad-hoc của flavor staging cho nhóm tester nội bộ."
+  lane :distribute_staging do |options|
+    app_id, group = distro_target(options[:app].to_s, "ios")
+    ipa = options[:ipa].to_s
+    UI.user_error!("ipa:<đường dẫn> là bắt buộc") if ipa.empty?
+
+    firebase_app_distribution(
+      app: app_id,
+      ipa_path: ipa,
+      groups: group,
+      release_notes_file: options[:notes_file].to_s,
+      service_credentials_file: distro_credentials,
+    )
+  end
+
+  desc "Xuất UDID thiết bị tester đã đăng ký thành CSV để nhập vào Apple Developer."
+  lane :download_udids do |options|
+    app_id, _group = distro_target(options[:app].to_s, "ios")
+    # Số dự án là đoạn thứ hai của App ID (1:<số dự án>:ios:<mã>). Plugin 1.0.0
+    # đánh dấu tham số app: là deprecated cho action này, dù trang Firebase còn ghi.
+    project_number = app_id.split(":")[1]
+    # build/ nằm trong .gitignore: UDID là mã định danh thiết bị của người thật.
+    firebase_app_distribution_get_udids(
+      project_number: project_number,
+      output_file: "../build/udids.csv",
+      service_credentials_file: distro_credentials,
+    )
+  end
+end

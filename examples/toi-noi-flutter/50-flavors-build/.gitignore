@@ -1,0 +1,22 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+.metadata
+
+# Runner sinh bằng `flutter create`, không commit (file cấu hình đang dạy nằm trong native-config/).
+# Có neo `/` để không nuốt native-config/customer/android và native-config/customer/ios.
+/android/
+/ios/
+
+# Cấu hình Firebase thật: KHÔNG BAO GIỜ commit (chỉ có bản .example).
+# Tên khớp chính xác nên không chặn google-services.json.example.
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+*.keystore
+*.jks
+key.properties

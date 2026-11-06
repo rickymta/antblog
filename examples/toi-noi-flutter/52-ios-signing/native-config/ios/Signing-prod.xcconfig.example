@@ -1,0 +1,9 @@
+// Flavor prod: build phát hành, ký bằng Apple Distribution và profile App Store.
+// Dán vào Release-prod.xcconfig.
+PRODUCT_BUNDLE_IDENTIFIER = vn.toinoi.customer
+CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements
+CODE_SIGN_STYLE = Manual
+// ABCDE12345 là Team ID giả. Thay bằng Team ID của bạn.
+DEVELOPMENT_TEAM = ABCDE12345
+CODE_SIGN_IDENTITY = Apple Distribution
+PROVISIONING_PROFILE_SPECIFIER = ToiNoi Customer AppStore

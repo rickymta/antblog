@@ -92,3 +92,5 @@ jobs:
         run: node examples/toi-noi-flutter/verify-27-33.mjs
       - name: Analyze and test labs 34–42
         run: node examples/toi-noi-flutter/verify-34-42.mjs
+      - name: Analyze and test labs 50–59
+        run: node examples/toi-noi-flutter/verify-50-59.mjs

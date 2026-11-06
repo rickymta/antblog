@@ -73,16 +73,16 @@ Khung biên tập loạt bài Flutter của Tech Knowledge Hub. Ứng dụng xuy
 
 ## Phần 7 · Build, phân phối và phát hành (nâng cao)
 
-50. Flavors khi build: bundle ID, application ID, icon, tên app và Firebase theo môi trường — kế hoạch
-51. Ký ứng dụng Android: keystore, Play App Signing, AAB và versionCode — kế hoạch
-52. Ký ứng dụng iOS: Apple Developer Program, certificate, provisioning profile và capabilities — kế hoạch
-53. fastlane cho Flutter: match, gym, pilot, supply — kế hoạch
-54. CI/CD build: GitHub Actions macOS/ubuntu, secrets, build number và artifact — kế hoạch
-55. Firebase App Distribution: phân phối nội bộ cho tester iOS và Android — kế hoạch
-56. TestFlight: internal/external testing, Beta App Review và export compliance — kế hoạch
-57. Google Play: internal, closed, open testing, production và staged rollout — kế hoạch
-58. App Store production: metadata, privacy labels, App Review và phased release — kế hoạch
-59. Vận hành sau phát hành: force update, remote config, Shorebird và rollback — kế hoạch
+50. Flavors khi build: bundle ID, application ID, icon, tên app và Firebase theo môi trường — **đã viết, đã review**
+51. Ký ứng dụng Android: keystore, Play App Signing, AAB và versionCode — **đã viết, đã review**
+52. Ký ứng dụng iOS: Apple Developer Program, certificate, provisioning profile và capabilities — **đã viết, đã review**
+53. fastlane cho Flutter: match, gym, pilot, supply — **đã viết, đã review**
+54. CI/CD build: GitHub Actions macOS/ubuntu, secrets, build number và artifact — **đã viết, đã review**
+55. Firebase App Distribution: phân phối nội bộ cho tester iOS và Android — **đã viết, đã review**
+56. TestFlight: internal/external testing, Beta App Review và export compliance — **đã viết, đã review**
+57. Google Play: internal, closed, open testing, production và staged rollout — **đã viết, đã review**
+58. App Store production: metadata, privacy labels, App Review và phased release — **đã viết, đã review**
+59. Vận hành sau phát hành: force update, remote config, Shorebird và rollback — **đã viết, đã review**
 
 ## Phần 8 · Chuyên sâu và tổng kết (nâng cao)
 
@@ -154,6 +154,14 @@ Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `a
 
 ```bash
 node examples/toi-noi-flutter/verify-34-42.mjs
+```
+
+Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.
+
+## Chạy bài 50–59
+
+```bash
+node examples/toi-noi-flutter/verify-50-59.mjs
 ```
 
 Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.

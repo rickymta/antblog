@@ -1,0 +1,15 @@
+Tới Nơi Tài Xế là ứng dụng dành cho tài xế đối tác của Tới Nơi. Cần có tài khoản đã được Tới Nơi duyệt hồ sơ.
+
+NHẬN CUỐC
+Bật Online khi sẵn sàng. Khi có chuyến phù hợp, ứng dụng hiện lời mời kèm đồng hồ đếm ngược; nếu nhiều tài xế cùng nhận, chỉ một người nhận được chuyến.
+
+THEO DÕI CHUYẾN
+Xem điểm đón, điểm đến và mở ứng dụng dẫn đường để đi. Cập nhật từng bước: đã tới điểm đón, đã đón khách, hoàn thành.
+
+VỊ TRÍ
+Khi bạn Online, Tới Nơi Tài Xế dùng vị trí để gợi ý cuốc gần nhất. Trong lúc có chuyến, ứng dụng gửi vị trí của bạn cho khách, kể cả khi bạn chuyển sang ứng dụng dẫn đường. Hết chuyến hoặc khi bạn Offline, ứng dụng ngừng gửi.
+
+TÀI KHOẢN
+Bạn có thể xoá tài khoản ngay trong ứng dụng, tại Hồ sơ > Xoá tài khoản.
+
+Cần hỗ trợ? Truy cập toinoi.example/tai-xe/ho-tro.

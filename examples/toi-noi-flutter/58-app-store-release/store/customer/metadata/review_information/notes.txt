@@ -1,0 +1,22 @@
+HƯỚNG DẪN DUYỆT APP KHÁCH TỚI NƠI
+
+1. Đăng nhập
+Nhập số điện thoại của tài khoản demo (ô Username ở trên) rồi bấm Tiếp tục. Mã OTP của tài khoản này nằm ở ô Password, không gửi SMS. Tài khoản demo nằm trên hệ thống production, cô lập theo tài khoản, và chuyến mô phỏng không tới tài xế thật. Tài khoản không hết hạn; nếu bạn xoá nó (mục 5), hệ thống tự tạo lại.
+
+2. Đặt thử một chuyến xe
+- Dịch vụ chỉ hoạt động trong khu vực thử nghiệm Hà Nội. Nếu máy duyệt ở ngoài Việt Nam, bấm "Chọn trên bản đồ" thay vì "Dùng vị trí hiện tại": app vẫn đặt được chuyến mà không cần cấp quyền vị trí.
+- Chọn điểm đón và điểm đến cách nhau khoảng 5 km. Cước dự kiến hiển thị 25.500 VND.
+- Với tài khoản demo, hệ thống mô phỏng tài xế: tài xế tự nhận chuyến sau khoảng 10 giây và đi qua các bước cho tới "Hoàn thành".
+- Khách huỷ được chuyến khi tài xế chưa đón khách.
+
+3. Thanh toán
+Chuyến xe, giao đồ ăn và gửi bưu kiện được dùng ngoài ứng dụng, nên thanh toán bằng ví VíXanh (App Review Guideline 3.1.3(e)), không dùng In-App Purchase. Tài khoản demo dùng ví thử nghiệm, không trừ tiền thật.
+
+4. Quyền
+- Vị trí: chỉ xin "Khi dùng ứng dụng", để đặt điểm đón. App khách không dùng vị trí nền.
+- Thông báo đẩy: không bắt buộc, từ chối vẫn dùng đủ tính năng.
+
+5. Xoá tài khoản
+Hồ sơ > Xoá tài khoản, xác nhận bằng OTP. Hồ sơ khách bị xoá; dữ liệu mà pháp luật buộc phải giữ (ví dụ hoá đơn chuyến) được giữ và app báo rõ trước khi xoá.
+
+Cần hỏi thêm, xin liên hệ email ở mục Contact.

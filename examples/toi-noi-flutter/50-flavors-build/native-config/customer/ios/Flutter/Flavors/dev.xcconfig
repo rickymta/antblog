@@ -1,0 +1,5 @@
+// Giá trị riêng của flavor dev. Được #include từ Debug-dev, Profile-dev và Release-dev.
+TN_FLAVOR = dev
+PRODUCT_BUNDLE_IDENTIFIER = vn.toinoi.customer.dev
+APP_DISPLAY_NAME = Tới Nơi Dev
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon-dev

@@ -1,0 +1,9 @@
+# Sao chép thành android/key.properties và điền giá trị thật. File thật KHÔNG
+# được commit (đã nằm trong .gitignore); trên CI ghi lại từ secrets.
+#
+# storeFile: đường dẫn tới upload keystore, nên nằm ngoài repository. Đường dẫn
+# tương đối được hiểu từ thư mục android/app. Windows phải viết \\ (hai dấu).
+storeFile=/duong/dan/ngoai/repo/upload-keystore.jks
+storePassword=CHANGE_ME
+keyAlias=upload
+keyPassword=CHANGE_ME
