@@ -1,0 +1,25 @@
+name: toi_noi_18
+description: "Lab bài 18 (Flutter qua Tới Nơi): Riverpod với Provider, Notifier, AsyncNotifier, family và test bằng ProviderContainer, ProviderScope override."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  toi_noi_ui:
+    path: ../packages/toi_noi_ui
+
+dev_dependencies:
+  fake_async: ^1.3.3
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

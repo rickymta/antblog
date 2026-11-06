@@ -503,7 +503,7 @@ flutter test
 
 Đối chiếu mục tiêu Phần 2 (các màn hình chính của app khách, theme Tới Nơi, song ngữ, có widget test): app có báo giá (bài 07, 10), danh sách (bài 08, 09), điều hướng và hộp thoại (bài 12), theme (bài 13) và test; chi tiết chuyến thay cho màn xác nhận. Thiếu màn nhập điểm đón và điểm đến (bài 11), song ngữ vi/en (bài 14, ta chỉ đặt locale vi) và animation (bài 15). Giới hạn hiện rõ ở `_trips` và `_replace` trong `_AdaptiveShellState`: danh sách chuyến phải đi qua các tầng bằng callback (`onBook`, `onSelect`, `onCancelled`). Đó là bài toán quản lý state.
 
-Bài trước: [Animation cơ bản: implicit animation và Hero](/articles/flutter-animation-implicit-hero-tim-tai-xe). Bài tiếp theo mở đầu Phần 3 với quản lý state.
+Bài trước: [Animation cơ bản: implicit animation và Hero](/articles/flutter-animation-implicit-hero-tim-tai-xe). Bài tiếp: [Quản lý state: InheritedWidget, ChangeNotifier và ranh giới rebuild](/articles/flutter-state-inheritedwidget-changenotifier-bao-gia).
 
 ## Tài liệu gốc
 

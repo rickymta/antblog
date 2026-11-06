@@ -140,7 +140,7 @@
   {
     "slug": "flutter-toi-noi-ios-android",
     "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android",
-    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1–2.",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1–3.",
     "level": "beginner",
     "category": "programming",
     "articles": [
@@ -159,7 +159,17 @@
       "flutter-theme-material-3-dark-mode-design-system-toi-noi",
       "flutter-asset-intl-localization-tien-vnd-ngay-gio",
       "flutter-animation-implicit-hero-tim-tai-xe",
-      "flutter-accessibility-responsive-adaptive-ios-android"
+      "flutter-accessibility-responsive-adaptive-ios-android",
+      "flutter-state-inheritedwidget-changenotifier-bao-gia",
+      "flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen",
+      "flutter-http-dio-json-dto-goi-api-bao-gia",
+      "flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong",
+      "flutter-clean-architecture-domain-data-presentation-mobile",
+      "flutter-local-persistence-drift-secure-storage-lich-su-offline",
+      "flutter-go-router-deep-link-shellroute-guard",
+      "flutter-authentication-otp-jwt-refresh-token-secure-storage",
+      "flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod",
+      "flutter-code-generation-freezed-json-serializable-riverpod-generator"
     ],
     "status": "published"
   }

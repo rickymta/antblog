@@ -28,16 +28,16 @@ Khung biên tập loạt bài Flutter của Tech Knowledge Hub. Ứng dụng xuy
 
 ## Phần 3 · Trạng thái, dữ liệu và kiến trúc (trung bình)
 
-17. Quản lý state: InheritedWidget, ChangeNotifier và ranh giới rebuild — kế hoạch
-18. Riverpod: Provider, Notifier và AsyncNotifier cho luồng đặt chuyến — kế hoạch
-19. HTTP, dio và JSON: gọi API báo giá của trip-service — kế hoạch
-20. Xử lý lỗi, retry, timeout và mất mạng: mạng di động không ổn định — kế hoạch
-21. Clean Architecture cho mobile: domain, data, presentation và repository — kế hoạch
-22. Lưu trữ cục bộ: drift, shared_preferences và secure storage — kế hoạch
-23. go_router: deep link, ShellRoute, guard đăng nhập — kế hoạch
-24. Authentication: OTP, JWT, refresh token rotation và interceptor — kế hoạch
-25. Cấu hình môi trường: flavors, --dart-define-from-file và DI theo môi trường — kế hoạch
-26. Code generation: freezed, json_serializable, riverpod_generator và build_runner — kế hoạch
+17. Quản lý state: InheritedWidget, ChangeNotifier và ranh giới rebuild — **đã viết, đã review**
+18. Riverpod: Provider, Notifier và AsyncNotifier cho luồng đặt chuyến — **đã viết, đã review**
+19. HTTP, dio và JSON: gọi API báo giá của trip-service — **đã viết, đã review**
+20. Xử lý lỗi, retry, timeout và mất mạng: mạng di động không ổn định — **đã viết, đã review**
+21. Clean Architecture cho mobile: domain, data, presentation và repository — **đã viết, đã review**
+22. Lưu trữ cục bộ: drift, shared_preferences và secure storage — **đã viết, đã review**
+23. go_router: deep link, ShellRoute, guard đăng nhập — **đã viết, đã review**
+24. Authentication: OTP, JWT, refresh token rotation và interceptor — **đã viết, đã review**
+25. Cấu hình môi trường: flavors, --dart-define-from-file và DI theo môi trường — **đã viết, đã review**
+26. Code generation: freezed, json_serializable, riverpod_generator và build_runner — **đã viết, đã review**
 
 ## Phần 4 · Kiểm thử và chất lượng (trung bình → nâng cao)
 
@@ -108,6 +108,7 @@ Khung biên tập loạt bài Flutter của Tech Knowledge Hub. Ứng dụng xuy
 - **Dữ liệu**: tên khách, tài xế, địa chỉ đều hư cấu; không có key, token, chứng chỉ, file `google-services.json`/`GoogleService-Info.plist` thật trong repo (chỉ có bản mẫu `.example`).
 - **Thư mục nền tảng**: từ bài 07, lab không commit `android/`, `ios/` để repo gọn; muốn chạy trên máy thì sinh runner một lần bằng lệnh trong README của lab (`flutter create --platforms=ios,android ...`). Bài dạy cấu hình native chỉ commit đúng file cấu hình đang dạy.
 - **`toi_noi_ui`** (bài 13): `ToiNoiTheme.light()/dark()` (cache theo độ sáng và nền tảng), `ToiNoiColors` (`ThemeExtension`, bộ `danger` bằng `error` của scheme), `ToiNoiSpacing`, `ToiNoiRadius`, `TripStatusChip(status:, label:)`, `MoneyText(money, style:, textAlign:, formatter:)`.
+- **`toi_noi_api`** (bài 19–20): `ToiNoiApiClient`, DTO có kiểm kiểu, `TripSnapshot`, `ApiFailure`, `guardApi`, `RetryInterceptor`, `SafeLogInterceptor`. **`tools/fake_api`** (bài 19, 24): server `shelf` mô phỏng trip-service và auth; test dùng `InProcessAdapter` trong `package:toi_noi_fake_api/testing.dart`, không cần socket.
 - **Lab**: mỗi thư mục có `README.md` ghi bài tương ứng, lệnh chạy, lệnh kiểm chứng, phiên bản đã kiểm và phạm vi chưa làm. Lab Dart thuần kiểm bằng `dart test`; lab Flutter kiểm bằng `flutter analyze` + `flutter test`. Không commit `build/`, `.dart_tool/`, `pubspec.lock` của lab (lab là ví dụ, không phải app phát hành; lockfile chỉ giữ từ `toi-noi-app`).
 - **Bài viết** đặt tại `api/seed/content/<slug>.md`, khuôn theo §8 của master curriculum, ảnh bìa qua `apps/web/src/lib/article-covers.json`.
 
@@ -129,6 +130,14 @@ Script chạy `flutter analyze` + `flutter test` cho lab 01 và `dart analyze` +
 
 ```bash
 node examples/toi-noi-flutter/verify-07-16.mjs
+```
+
+Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.
+
+## Chạy bài 17–26
+
+```bash
+node examples/toi-noi-flutter/verify-17-26.mjs
 ```
 
 Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.

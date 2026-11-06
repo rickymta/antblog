@@ -1,0 +1,7 @@
+{
+  "FLAVOR": "dev",
+  "API_BASE_URL": "http://192.168.1.50:8787",
+  "LOG_HTTP": true,
+  "CONNECT_TIMEOUT_MS": 15000,
+  "RECEIVE_TIMEOUT_MS": 30000
+}

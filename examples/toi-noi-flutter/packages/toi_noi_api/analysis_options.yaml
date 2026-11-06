@@ -1,0 +1,25 @@
+# Bộ lint nền của Dart team, cộng thêm vài rule chặt hơn cho package dùng chung.
+include: package:lints/recommended.yaml
+
+analyzer:
+  language:
+    # Ép kiểu ngầm từ dynamic thành lỗi, không để lọt qua âm thầm.
+    strict-casts: true
+    # Không tự suy ra dynamic khi thiếu thông tin kiểu.
+    strict-inference: true
+    # List, Map, Future... trống tham số kiểu bị báo, tránh List<dynamic> vô tình.
+    strict-raw-types: true
+
+linter:
+  rules:
+    # Biến cục bộ không đổi thì phải final.
+    - prefer_final_locals
+    # Future bị bỏ quên (không await, không unawaited) là lỗi thật khi có async.
+    - unawaited_futures
+    # Gọi member trên dynamic là chỗ compiler hết bảo vệ.
+    - avoid_dynamic_calls
+    # Giá trị bất biến dùng const để tái sử dụng một instance.
+    - prefer_const_constructors
+    - prefer_const_declarations
+    # import và export theo thứ tự cố định cho diff dễ đọc.
+    - directives_ordering

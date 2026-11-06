@@ -1148,5 +1148,105 @@
       "RESPONSIVE",
       "ADAPTIVE"
     ]
+  },
+  "flutter-state-inheritedwidget-changenotifier-bao-gia": {
+    "title": "STATE / NOTIFIER",
+    "subtitle": "Flutter 17 · InheritedWidget, ChangeNotifier, rebuilds",
+    "diagram": "layers",
+    "labels": [
+      "INHERITED",
+      "NOTIFIER",
+      "REBUILD"
+    ]
+  },
+  "flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen": {
+    "title": "RIVERPOD",
+    "subtitle": "Flutter 18 · Provider, Notifier and AsyncNotifier",
+    "diagram": "network",
+    "labels": [
+      "PROVIDER",
+      "REF",
+      "NOTIFIER"
+    ]
+  },
+  "flutter-http-dio-json-dto-goi-api-bao-gia": {
+    "title": "HTTP / JSON",
+    "subtitle": "Flutter 19 · dio client, DTOs and a fake API",
+    "diagram": "flow",
+    "labels": [
+      "DIO",
+      "DTO",
+      "DOMAIN"
+    ]
+  },
+  "flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong": {
+    "title": "ERROR / RETRY",
+    "subtitle": "Flutter 20 · Timeouts, backoff and failure types",
+    "diagram": "target",
+    "labels": [
+      "TIMEOUT",
+      "RETRY",
+      "FAILURE"
+    ]
+  },
+  "flutter-clean-architecture-domain-data-presentation-mobile": {
+    "title": "CLEAN / LAYERS",
+    "subtitle": "Flutter 21 · Domain, data, presentation, repository",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "DATA",
+      "UI"
+    ]
+  },
+  "flutter-local-persistence-drift-secure-storage-lich-su-offline": {
+    "title": "LOCAL / DRIFT",
+    "subtitle": "Flutter 22 · SQLite, preferences and secure storage",
+    "diagram": "storage",
+    "labels": [
+      "DRIFT",
+      "PREFS",
+      "SECURE"
+    ]
+  },
+  "flutter-go-router-deep-link-shellroute-guard": {
+    "title": "GO ROUTER",
+    "subtitle": "Flutter 23 · Deep links, ShellRoute and auth guards",
+    "diagram": "map",
+    "labels": [
+      "ROUTE",
+      "SHELL",
+      "GUARD"
+    ]
+  },
+  "flutter-authentication-otp-jwt-refresh-token-secure-storage": {
+    "title": "AUTH / REFRESH",
+    "subtitle": "Flutter 24 · OTP, JWT rotation and interceptors",
+    "diagram": "cycle",
+    "labels": [
+      "OTP",
+      "ACCESS",
+      "REFRESH"
+    ]
+  },
+  "flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod": {
+    "title": "CONFIG / ENV",
+    "subtitle": "Flutter 25 · dev, staging, prod and dart-define",
+    "diagram": "split",
+    "labels": [
+      "DEV",
+      "STAGING",
+      "PROD"
+    ]
+  },
+  "flutter-code-generation-freezed-json-serializable-riverpod-generator": {
+    "title": "CODEGEN",
+    "subtitle": "Flutter 26 · freezed, json_serializable, build_runner",
+    "diagram": "code",
+    "labels": [
+      "FREEZED",
+      "GENERATED",
+      "RUNNER"
+    ]
   }
 }

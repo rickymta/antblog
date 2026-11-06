@@ -1,0 +1,32 @@
+name: toi_noi_24
+description: "Lab bài 24 (Flutter qua Tới Nơi): đăng nhập OTP, JWT, refresh token rotation, AuthInterceptor và đăng xuất."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  dio: ^5.11.1
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.5.0
+  flutter_secure_storage: ^11.2.0
+  toi_noi_api:
+    path: ../packages/toi_noi_api
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  toi_noi_ui:
+    path: ../packages/toi_noi_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_secure_storage_platform_interface: ^2.1.1
+  flutter_test:
+    sdk: flutter
+  shelf: ^1.4.3
+  toi_noi_fake_api:
+    path: ../tools/fake_api
+
+flutter:
+  uses-material-design: true
