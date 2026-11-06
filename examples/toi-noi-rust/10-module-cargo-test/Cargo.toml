@@ -1,0 +1,16 @@
+[package]
+name = "ledger_10_module_cargo_test"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 10: module, crate, cargo test và clippy cho sổ cái Tới Nơi"
+
+# Tên package (ở trên) khác tên crate thư viện (dưới đây): code khác gọi `ledger_lab::...`.
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]

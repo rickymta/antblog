@@ -988,5 +988,105 @@
       "DELIVERY",
       "EVIDENCE"
     ]
+  },
+  "rust-vi-sao-so-cai-toi-noi-chon-rust": {
+    "title": "WHY RUST / LEDGER",
+    "subtitle": "Rust 01 · Why the ledger service is written in Rust",
+    "diagram": "split",
+    "labels": [
+      "C# CORE",
+      "LEDGER",
+      "RUST LEDGER"
+    ]
+  },
+  "rust-cargo-tu-source-code-den-but-toan-dau-tien": {
+    "title": "CARGO / FIRST ENTRY",
+    "subtitle": "Rust 02 · From source code to the first journal entry",
+    "diagram": "cycle",
+    "labels": [
+      "RUSTUP",
+      "CARGO",
+      "RUSTC"
+    ]
+  },
+  "rust-kieu-so-tien-vnd-i64-decimal": {
+    "title": "INTEGER / DECIMAL",
+    "subtitle": "Rust 03 · i64, checked math and rust_decimal",
+    "diagram": "storage",
+    "labels": [
+      "I64 DONG",
+      "CHECKED",
+      "DECIMAL"
+    ]
+  },
+  "rust-ownership-move-borrow-but-toan": {
+    "title": "OWNERSHIP / BORROW",
+    "subtitle": "Rust 04 · One owner per ledger entry, borrow to read",
+    "diagram": "flow",
+    "labels": [
+      "MOVE",
+      "&T READ",
+      "&MUT WRITE"
+    ]
+  },
+  "rust-struct-enum-match-tai-khoan-but-toan": {
+    "title": "STRUCT / ENUM / MATCH",
+    "subtitle": "Rust 05 · Structs, enums and exhaustive matching",
+    "diagram": "blocks",
+    "labels": [
+      "STRUCT",
+      "ENUM",
+      "MATCH"
+    ]
+  },
+  "rust-ham-dieu-kien-vong-lap-iterator-so-du": {
+    "title": "FN / ITERATOR",
+    "subtitle": "Rust 06 · Functions, loops and iterators over postings",
+    "diagram": "flow",
+    "labels": [
+      "ITER",
+      "FILTER",
+      "SUM"
+    ]
+  },
+  "rust-result-option-toan-tu-hoi-loi-la-gia-tri": {
+    "title": "RESULT / OPTION",
+    "subtitle": "Rust 07 · Errors as values with Result and ?",
+    "diagram": "target",
+    "labels": [
+      "OK",
+      "ERR",
+      "PANIC"
+    ]
+  },
+  "rust-string-str-ngay-gio-dinh-dang-tien": {
+    "title": "STRINGS / UTC TIME",
+    "subtitle": "Rust 08 · String, &str, UTC timestamps and VND display",
+    "diagram": "code",
+    "labels": [
+      "UTF-8",
+      "UTC",
+      "DISPLAY"
+    ]
+  },
+  "rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho": {
+    "title": "COLLECTIONS / LIFETIME",
+    "subtitle": "Rust 09 · Vec, HashMap, BTreeMap and lifetimes",
+    "diagram": "matrix",
+    "labels": [
+      "VEC",
+      "HASHMAP",
+      "BTREEMAP"
+    ]
+  },
+  "rust-module-crate-cargo-test-clippy": {
+    "title": "MODULE / TEST / CLIPPY",
+    "subtitle": "Rust 10 · Crates, cargo test and clippy for the ledger lab",
+    "diagram": "layers",
+    "labels": [
+      "UNIT",
+      "DOC",
+      "INTEGRATION"
+    ]
   }
 }

@@ -23,3 +23,6 @@ examples/toi-noi-dotnet/**/obj/
 
 # BenchmarkDotNet generated measurements/build artifacts
 BenchmarkDotNet.Artifacts/
+
+# Rust example build outputs
+examples/toi-noi-rust/**/target/

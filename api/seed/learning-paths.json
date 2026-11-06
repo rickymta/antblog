@@ -136,5 +136,25 @@
       "dotnet10-tong-hop-service-dat-chuyen"
     ],
     "status": "published"
+  },
+  {
+    "slug": "rust-co-ban-qua-toi-noi",
+    "title": "Rust cơ bản qua Tới Nơi",
+    "description": "Lộ trình 20 bài cấp cơ bản: vì sao service sổ cái Tới Nơi chọn Rust khi backend chính là C#, rồi cargo, kiểu số và tiền VND, ownership, struct/enum/match, iterator, Result/Option, String và thời gian, collections, module và cargo test; tiếp theo là trait, newtype, double-entry, typestate, serde và property test để có thư viện ledger-core.",
+    "level": "beginner",
+    "category": "programming",
+    "articles": [
+      "rust-vi-sao-so-cai-toi-noi-chon-rust",
+      "rust-cargo-tu-source-code-den-but-toan-dau-tien",
+      "rust-kieu-so-tien-vnd-i64-decimal",
+      "rust-ownership-move-borrow-but-toan",
+      "rust-struct-enum-match-tai-khoan-but-toan",
+      "rust-ham-dieu-kien-vong-lap-iterator-so-du",
+      "rust-result-option-toan-tu-hoi-loi-la-gia-tri",
+      "rust-string-str-ngay-gio-dinh-dang-tien",
+      "rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho",
+      "rust-module-crate-cargo-test-clippy"
+    ],
+    "status": "published"
   }
 ]
