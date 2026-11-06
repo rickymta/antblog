@@ -55,3 +55,5 @@ Các vai trò trên là phân công giả lập của Tới Nơi cho bài tập,
 3. Có phương án không xây tính năng và lý do so sánh không?
 4. Quyết định có người sở hữu, trạng thái và bước tiếp không?
 5. Yêu cầu mới có được ghi là đề xuất, tránh bị hiểu là SPEC đã duyệt không?
+
+P04 hoàn thành BA-025–BA-032; [gói yêu cầu điểm đón](p04-goi-yeu-cau.md) là thiết kế đề xuất, chưa có trong lab theo R-GEN-06.

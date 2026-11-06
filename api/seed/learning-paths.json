@@ -531,5 +531,23 @@
       "ba-thuc-hanh-thay-doi-chinh-sach-huy"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p04-dac-ta-yeu-cau",
+    "title": "BA · Phần 4 · Đặc tả yêu cầu",
+    "description": "Tám bài từ user story, acceptance criteria và use case tới story mapping, prototype, chất lượng đo được, tài liệu và review gói yêu cầu. Ba bài cơ bản, ba trung bình, hai nâng cao qua đề xuất điểm đón Tới Nơi.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-user-story-vai-tro-nhu-cau-gia-tri",
+      "ba-acceptance-criteria-given-when-then",
+      "ba-use-case-xac-nhan-diem-don",
+      "ba-story-mapping-lat-cat-gia-tri",
+      "ba-wireframe-prototype-kiem-tra-hieu-biet",
+      "ba-yeu-cau-phi-chuc-nang-do-duoc",
+      "ba-brd-srs-tai-lieu-theo-rui-ro",
+      "ba-thuc-hanh-review-goi-yeu-cau"
+    ],
+    "status": "published"
   }
 ]

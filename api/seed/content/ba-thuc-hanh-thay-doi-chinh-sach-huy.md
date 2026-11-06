@@ -98,4 +98,4 @@ Tự trả lời ba câu trước review: arriving có thay không; khách huỷ
 - Hồ sơ thực hành: `examples/toi-noi-ba/p03-mo-hinh-quy-trinh.md`.
 - [Review liên mô hình](/articles/ba-kiem-tra-nhat-quan-mo-hinh), [Decision table](/articles/ba-decision-table-phi-huy).
 
-Phần 3 hoàn thành ở đây. Phần 4 sẽ chuyển mô hình và quyết định đã xác nhận thành user story, acceptance criteria, use case và gói đặc tả. BA-025 nằm trong kế hoạch, chưa xuất bản.
+Phần 3 hoàn thành ở đây. Tiếp tục với [User story: vai trò, nhu cầu và giá trị](/articles/ba-user-story-vai-tro-nhu-cau-gia-tri).

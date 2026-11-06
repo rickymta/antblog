@@ -3138,5 +3138,85 @@
       "IMPACT",
       "3 MINUTES"
     ]
+  },
+  "ba-user-story-vai-tro-nhu-cau-gia-tri": {
+    "title": "USER STORIES",
+    "subtitle": "Roles, needs and useful outcomes",
+    "diagram": "flow",
+    "labels": [
+      "ROLE",
+      "NEED",
+      "VALUE"
+    ]
+  },
+  "ba-acceptance-criteria-given-when-then": {
+    "title": "ACCEPTANCE CRITERIA",
+    "subtitle": "Examples that expose ambiguity",
+    "diagram": "flow",
+    "labels": [
+      "GIVEN",
+      "WHEN",
+      "THEN"
+    ]
+  },
+  "ba-use-case-xac-nhan-diem-don": {
+    "title": "USE CASE",
+    "subtitle": "Follow the interaction and its alternatives",
+    "diagram": "flow",
+    "labels": [
+      "ACTOR",
+      "INTERACTION",
+      "OUTCOME"
+    ]
+  },
+  "ba-story-mapping-lat-cat-gia-tri": {
+    "title": "STORY MAP",
+    "subtitle": "Deliver a complete slice of value",
+    "diagram": "map",
+    "labels": [
+      "VIEW",
+      "CONFIRM",
+      "UNDERSTAND"
+    ]
+  },
+  "ba-wireframe-prototype-kiem-tra-hieu-biet": {
+    "title": "PROTOTYPE",
+    "subtitle": "Test understanding before commitment",
+    "diagram": "split",
+    "labels": [
+      "ASSUMPTION",
+      "OBSERVE",
+      "LEARNING"
+    ]
+  },
+  "ba-yeu-cau-phi-chuc-nang-do-duoc": {
+    "title": "QUALITY REQUIREMENTS",
+    "subtitle": "Define conditions, measures and limits",
+    "diagram": "target",
+    "labels": [
+      "CONDITIONS",
+      "MEASURES",
+      "LIMITS"
+    ]
+  },
+  "ba-brd-srs-tai-lieu-theo-rui-ro": {
+    "title": "RIGHT-SIZED DOCS",
+    "subtitle": "One source for each decision",
+    "diagram": "checklist",
+    "labels": [
+      "PURPOSE",
+      "VERSION",
+      "APPROVAL"
+    ]
+  },
+  "ba-thuc-hanh-review-goi-yeu-cau": {
+    "title": "BA CASE / 04",
+    "subtitle": "Toi Noi · Review the requirements package",
+    "diagram": "checklist",
+    "labels": [
+      "STORY + RULES",
+      "EXAMPLES",
+      "REVIEW"
+    ]
   }
 }
