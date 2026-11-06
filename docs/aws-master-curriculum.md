@@ -29,7 +29,7 @@ Chứng chỉ chỉ là mốc tham chiếu để người đọc biết phần n
 |---|---|
 | Region mặc định | `ap-southeast-1` (Singapore). Khi cần region thứ hai dùng `ap-northeast-1`; CloudFront/ACM cho CloudFront dùng `us-east-1`. |
 | Tài khoản, ARN | Account ID giả `123456789012`; ARN ví dụ `arn:aws:iam::123456789012:role/toinoi-booking-task`. Không bao giờ dùng account, key, secret, tên miền hay IP thật. |
-| Tên tài nguyên | Prefix `toinoi-<env>-<service>`, ví dụ `toinoi-prod-booking`; bucket `toinoi-lab-delivery-photos`; tên miền minh hoạ `toinoi.example`, `api.toinoi.example`. |
+| Tên tài nguyên | Prefix `toinoi-<env>-<service>`, ví dụ `toinoi-prod-booking`; bucket `toinoi-lab-delivery-photos-<account-id>` (tên bucket toàn cục nên có hậu tố account id, bài 06); tên miền minh hoạ `toinoi.example`, `api.toinoi.example`. |
 | Tag bắt buộc | `Project=ToiNoi`, `Env=lab|dev|staging|prod`, `Service=<tên>`, `Owner=<team>`. |
 | Chi phí | Mỗi bài có lab ghi rõ tài nguyên nào tính tiền theo giờ và có bước **dọn tài nguyên**. Không ghi giá cụ thể (đổi theo thời gian); nếu buộc phải nêu thì ghi "số liệu minh hoạ, xem Pricing Calculator". |
 | Số liệu | Lấy từ hồ sơ Tới Nơi (70 chuyến/giây, 560 UPDATE/giây, 6.250 toạ độ/giây, 30.000 đọc/giây, 730 triệu dòng/năm). Mọi con số khác ghi rõ là giả định. |
@@ -804,7 +804,7 @@ Mỗi mục là đề cương bắt buộc cho người viết (và là checklis
 - **Tóm tắt**: Bài 54: lớp phát hiện của Tới Nơi: CloudTrail org trail với data event S3 và Lake truy vấn SQL, Config rule và remediation tự động, Security Hub gom finding theo chuẩn CIS/FSBP, GuardDuty phân tích CloudTrail/VPC Flow/DNS/EKS/RDS, Inspector quét EC2/ECR/Lambda, Detective điều tra; quy trình xử lý sự cố và Macie cho PII trong S3.
 - **Tags riêng**: `cloudtrail`, `aws-config`, `security-hub`, `guardduty`, `inspector`, `incident-response`, `macie`
 - **Nội dung bắt buộc**:
-  - CloudTrail: management vs data event (S3 object, Lambda invoke), org trail vào log archive, log file validation, CloudTrail Lake query 'ai đọc secret X tuần qua'; CloudWatch alarm từ CloudTrail (root login, policy change).
+  - CloudTrail: management vs data event (S3 object, Lambda invoke), org trail vào log archive, log file validation, truy vấn "ai đọc secret X tuần qua" bằng Logs Insights trên log group của trail (CloudTrail Lake đã đóng với khách mới từ 31/05/2026, chỉ nhắc cho tài khoản đã có Lake); CloudWatch alarm từ CloudTrail (root login, policy change).
   - Config: recorder, rule managed/custom (Lambda/Guard), conformance pack, remediation SSM Automation (bật mã hoá, tắt public); timeline tài nguyên.
   - Security Hub: chuẩn CIS/AWS FSBP/PCI, severity, automation rule, tích hợp finding từ GuardDuty/Inspector/Macie/Access Analyzer; aggregation nhiều tài khoản/region.
   - GuardDuty: nguồn dữ liệu, finding type (credential exfiltration, crypto mining, EKS runtime, RDS login anomaly), Malware Protection; Inspector cho ECR/EC2/Lambda; Macie quét PII (số điện thoại, CCCD) trong bucket.
@@ -830,7 +830,7 @@ Mỗi mục là đề cương bắt buộc cho người viết (và là checklis
 - **Nội dung bắt buộc**:
   - Nguyên tắc: AZ độc lập, static stability (không phụ thuộc control plane khi sự cố), cell-based theo thành phố, giới hạn blast radius; quota và throttling; retry với exponential backoff + jitter, circuit breaker; dependency timeout.
   - Dữ liệu đa region: Aurora Global Database (RPO giây, failover managed/unplanned), DynamoDB Global Tables (conflict last-writer-wins), S3 CRR, ElastiCache Global Datastore; secret và KMS multi-region; IaC deploy region B.
-  - Điều hướng: Route 53 health check + failover record, ARC readiness check, routing control (tắt region chủ động), zonal shift; Global Accelerator anycast IP và endpoint weight; DNS TTL và client caching.
+  - Điều hướng: Route 53 health check + failover record, Application Recovery Controller với routing control (tắt region chủ động), Region switch (thay readiness check đã đóng với khách mới) và zonal shift; Global Accelerator anycast IP và endpoint weight; DNS TTL và client caching.
   - Fault Injection Service: experiment template (stop instance, AZ power interruption, network latency, EKS pod delete), stop condition bằng alarm, game day runbook; liên hệ DR bài 37.
   - Lab: FIS experiment + failover record Terraform (p06-56-resilience); bài tập: failover DNS 60 giây nhưng app vẫn lỗi 10 phút, vì sao?
 
@@ -877,20 +877,20 @@ Mỗi mục là đề cương bắt buộc cho người viết (và là checklis
 - **Tags riêng**: `architecture`, `production`, `reference-architecture`, `runbook`, `tong-hop`
 - **Nội dung bắt buộc**:
   - Bản vẽ tổng: 3 SVG theo lớp (account/network, compute/data, delivery/observability) nhất quán với tài liệu kiến trúc §19 và các bài trước; mỗi khối ghi số bài tham chiếu.
-  - Luồng một chuyến: CloudFront/WAF → API Gateway/ALB → booking (ECS/EKS) → pricing cache → Aurora + outbox → MSK → dispatch (DynamoDB vị trí) → Step Functions thanh toán → EventBridge → Kinesis/Firehose → S3/Athena; chỗ nào idempotent, chỗ nào có thể mất.
+  - Luồng một chuyến: CloudFront/WAF → API Gateway/ALB → booking (ECS/EKS) → pricing cache → Aurora + outbox → MSK → Step Functions saga (giữ tiền, chờ dispatch qua task token, thu tiền; bài 57) với dispatch đọc vị trí từ DynamoDB → EventBridge → Kinesis/Firehose → S3/Athena; chỗ nào idempotent, chỗ nào có thể mất.
   - Vận hành: SLO và alarm, on-call runbook 5 sự cố (Aurora failover, Spot thu hồi, MSK lag, WAF chặn nhầm, deploy lỗi), game day và DR; bảo mật tóm tắt theo lớp.
   - Chi phí: bảng ước lượng theo lớp và theo môi trường (dev nhỏ, prod), nhấn mạnh con số minh hoạ cần Pricing Calculator; quyết định ECS vs EKS, Kinesis vs MSK đã chọn và lý do.
   - Lộ trình tiếp: chứng chỉ theo phần (CLF, SAA, DVA, DOP, SCS, SAP), chủ đề chưa phủ (ML/Bedrock, IoT, media), cách dùng repo examples; không lab; bài tập: tự vẽ lại luồng huỷ chuyến với compensation.
 
 ## 6. Trạng thái
 
-Cập nhật khi bài được viết/review/xuất bản. Bài được tính "đã viết" khi tệp `.md` qua review và `npm run seed` nạp không lỗi.
+Cập nhật khi bài được viết/review/xuất bản. Bài được tính "đã viết" khi tệp `.md` qua review và `npm run seed` nạp không lỗi. Ngày 06/11/2026: seed thử trên MongoDB cục bộ nạp 149 bài (89 cũ + 60 AWS) và 12 lộ trình, không bài nào bị bỏ qua; `npm run typecheck` và `covers:check` qua; trang lộ trình và bài render đúng ở dev server. Chưa có lab nào chạy trên tài khoản AWS thật.
 
 | Phần | Viết | Review | Ghi chú |
 |---|---|---|---|
-| Phần 01 · Nền tảng AWS | chưa | xong 2026-11-06 | Lab 05/07/08/10 nối nhau qua tag Name của lab 04 (env.sh để trống ID). Chưa chạy trên tài khoản thật. Cần quyết: viện dẫn pháp lý VN ở bài 01; khoá tag trong `FilterExpression` của Budgets (bài 10) |
-| Phần 02 · Container, serverless và dịch vụ ứng dụng | chưa | xong 2026-11-06 | Cần chốt: secret DB dạng connection string (bài 12, bài 36 .NET) hay JSON có rotation (bài 14); `healthCheck` dùng curl trong khi image `aspnet` không có curl. |
-| Phần 03 · Infrastructure as Code và CI/CD | chưa | xong 2026-11-06 | Terraform các lab qua fmt/validate; Checkov 3.4.3, cfn-guard 3.2.1, cfn-lint, CDK synth/jest đã chạy. Cần chốt: major version action GitHub (đang ghi bản mới nhất 11/2026, chưa ghim SHA); infracost/actions giữ @v3 theo README dự án. |
-| Phần 04 · Dữ liệu, lưu trữ và messaging | chưa | xong 2026-11-06 | 10 lab qua fmt/validate, chưa chạy trên tài khoản thật. Kafka (bài 34, sự kiện nghiệp vụ) và Kinesis (bài 35, GPS) trình bày là hai phương án cho hai bài toán. Cần quyết: mã thành phố trong lab dùng `hcm`/`hn` chữ thường trong khi seed Tới Nơi dùng `SG`/`HN`; Blue/Green (bài 31) không chạy được khi giữ mật khẩu master do RDS quản lý. |
-| Phần 05 · Kubernetes trên AWS với EKS | chưa | xong 2026-11-06 | Thống nhất cluster `toinoi-<env>-eks`, ServiceAccount trùng tên service (`booking`…), role pod `toinoi-<env>-<service>-pod`. 7 lab Terraform qua fmt/validate (module eks 21.29.0); chart lab 46 qua `helm lint`/`template`, Kustomize render được; manifest chưa áp lên cluster thật. Cần quyết: lab 48 thay role/association `booking` của lab 42; `pricing` ở namespace EKS (bài 48) hay ECS (kịch bản bài 49). |
-| Phần 06 · Bảo mật, resilience và vận hành ở quy mô | chưa | xong 2026-11-06 | Terraform 8 lab qua fmt/validate (provider 6.72), ASL qua asl-validator, SLO JSON kiểm bằng botocore; chưa chạy trên tài khoản thật. Cần chốt: CloudTrail Lake đóng với khách mới từ 31/05/2026 nên bài 54 chuyển sang Logs Insights (đề cương §5 vẫn ghi Lake); ARC readiness check đóng với khách mới, bài 56 thay bằng Region switch; SLO Application Signals vẫn tạo bằng CLI vì provider chưa có resource; độ dài 51–60 khoảng 1.840–1.970 từ, hơi vượt 1.900. |
+| Phần 01 · Nền tảng AWS | xong 2026-11-06 | xong 2026-11-06 | Lab 05/07/08/10 nối nhau qua tag Name của lab 04 (env.sh để trống ID). Chưa chạy trên tài khoản thật. Cần quyết: viện dẫn pháp lý VN ở bài 01; khoá tag trong `FilterExpression` của Budgets (bài 10) |
+| Phần 02 · Container, serverless và dịch vụ ứng dụng | xong 2026-11-06 | xong 2026-11-06 | Cần chốt: secret DB dạng connection string (bài 12, bài 36 .NET) hay JSON có rotation (bài 14); `healthCheck` dùng curl trong khi image `aspnet` không có curl. |
+| Phần 03 · Infrastructure as Code và CI/CD | xong 2026-11-06 | xong 2026-11-06 | Terraform các lab qua fmt/validate; Checkov 3.4.3, cfn-guard 3.2.1, cfn-lint, CDK synth/jest đã chạy. Cần chốt: major version action GitHub (đang ghi bản mới nhất 11/2026, chưa ghim SHA); infracost/actions giữ @v3 theo README dự án. |
+| Phần 04 · Dữ liệu, lưu trữ và messaging | xong 2026-11-06 | xong 2026-11-06 | 10 lab qua fmt/validate, chưa chạy trên tài khoản thật. Kafka (bài 34, sự kiện nghiệp vụ) và Kinesis (bài 35, GPS) trình bày là hai phương án cho hai bài toán. Cần quyết: mã thành phố trong lab dùng `hcm`/`hn` chữ thường trong khi seed Tới Nơi dùng `SG`/`HN`; Blue/Green (bài 31) không chạy được khi giữ mật khẩu master do RDS quản lý. |
+| Phần 05 · Kubernetes trên AWS với EKS | xong 2026-11-06 | xong 2026-11-06 | Thống nhất cluster `toinoi-<env>-eks`, ServiceAccount trùng tên service (`booking`…), role pod `toinoi-<env>-<service>-pod`. 7 lab Terraform qua fmt/validate (module eks 21.29.0); chart lab 46 qua `helm lint`/`template`, Kustomize render được; manifest chưa áp lên cluster thật. Cần quyết: lab 48 thay role/association `booking` của lab 42; `pricing` ở namespace EKS (bài 48) hay ECS (kịch bản bài 49). |
+| Phần 06 · Bảo mật, resilience và vận hành ở quy mô | xong 2026-11-06 | xong 2026-11-06 | Terraform 8 lab qua fmt/validate (provider 6.72), ASL qua asl-validator, SLO JSON kiểm bằng botocore; chưa chạy trên tài khoản thật. Cần chốt: CloudTrail Lake đóng với khách mới từ 31/05/2026 nên bài 54 chuyển sang Logs Insights (đề cương §5 vẫn ghi Lake); ARC readiness check đóng với khách mới, bài 56 thay bằng Region switch; SLO Application Signals vẫn tạo bằng CLI vì provider chưa có resource; độ dài 51–60 khoảng 1.840–1.970 từ, hơi vượt 1.900. |
