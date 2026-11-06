@@ -1588,5 +1588,585 @@
       "SERVICES",
       "DATA"
     ]
+  },
+  "azure-la-gi-cloud-region-trach-nhiem-chia-se": {
+    "title": "AZURE / REGION",
+    "subtitle": "Azure 01 · Azure là gì",
+    "diagram": "map",
+    "labels": [
+      "REGION",
+      "ZONE",
+      "TENANT"
+    ]
+  },
+  "azure-tenant-subscription-resource-group": {
+    "title": "SCOPE / HIERARCHY",
+    "subtitle": "Azure 02 · Tenant, subscription, management group và resource…",
+    "diagram": "layers",
+    "labels": [
+      "TENANT",
+      "SUBSCRIPTION",
+      "RESOURCE GROUP"
+    ]
+  },
+  "azure-portal-cli-cloud-shell-resource-group-dau-tien": {
+    "title": "PORTAL / CLI",
+    "subtitle": "Azure 03 · Azure Portal, Azure CLI và Cloud Shell",
+    "diagram": "code",
+    "labels": [
+      "PORTAL",
+      "az CLI",
+      "CLOUD SHELL"
+    ]
+  },
+  "azure-resource-manager-resource-id-tag-lock": {
+    "title": "ARM / RESOURCE ID",
+    "subtitle": "Azure 04 · Azure Resource Manager",
+    "diagram": "blocks",
+    "labels": [
+      "PROVIDER",
+      "RESOURCE ID",
+      "LOCK"
+    ]
+  },
+  "azure-chi-phi-pricing-cost-management-budget": {
+    "title": "COST / BUDGET",
+    "subtitle": "Azure 05 · Chi phí Azure",
+    "diagram": "matrix",
+    "labels": [
+      "PRICING",
+      "BUDGET",
+      "TAG"
+    ]
+  },
+  "azure-vnet-subnet-nsg-public-ip": {
+    "title": "VNET / SUBNET",
+    "subtitle": "Azure 06 · Mạng cơ bản",
+    "diagram": "network",
+    "labels": [
+      "SUBNET",
+      "NSG",
+      "PUBLIC IP"
+    ]
+  },
+  "azure-virtual-machine-linux-chay-api": {
+    "title": "VM / LINUX",
+    "subtitle": "Azure 07 · Virtual Machine Linux",
+    "diagram": "storage",
+    "labels": [
+      "VM SIZE",
+      "OS DISK",
+      "DATA DISK"
+    ]
+  },
+  "azure-storage-account-blob-tier-sas": {
+    "title": "BLOB / STORAGE",
+    "subtitle": "Azure 08 · Storage Account và Blob",
+    "diagram": "pages",
+    "labels": [
+      "CONTAINER",
+      "HOT / COOL",
+      "SAS"
+    ]
+  },
+  "azure-database-postgresql-flexible-server-co-ban": {
+    "title": "POSTGRES / FLEX",
+    "subtitle": "Azure 09 · Azure Database for PostgreSQL Flexible Server",
+    "diagram": "storage",
+    "labels": [
+      "TRIPS",
+      "FLEXIBLE",
+      "BACKUP"
+    ]
+  },
+  "azure-monitor-metrics-activity-log-alert-dau-tien": {
+    "title": "MONITOR / ALERT",
+    "subtitle": "Azure 10 · Azure Monitor cơ bản",
+    "diagram": "target",
+    "labels": [
+      "METRIC",
+      "ACTIVITY LOG",
+      "ALERT"
+    ]
+  },
+  "azure-entra-id-tenant-user-group-app-registration": {
+    "title": "ENTRA / IDENTITY",
+    "subtitle": "Azure 11 · Microsoft Entra ID",
+    "diagram": "network",
+    "labels": [
+      "USER",
+      "GROUP",
+      "APP"
+    ]
+  },
+  "azure-rbac-role-scope-assignment-pim": {
+    "title": "RBAC / SCOPE",
+    "subtitle": "Azure 12 · Azure RBAC",
+    "diagram": "layers",
+    "labels": [
+      "ROLE",
+      "SCOPE",
+      "PRINCIPAL"
+    ]
+  },
+  "azure-managed-identity-workload-identity": {
+    "title": "IDENTITY / NO SECRET",
+    "subtitle": "Azure 13 · Managed identity",
+    "diagram": "flow",
+    "labels": [
+      "WORKLOAD",
+      "TOKEN",
+      "RESOURCE"
+    ]
+  },
+  "azure-key-vault-secret-key-certificate": {
+    "title": "KEY VAULT",
+    "subtitle": "Azure 14 · Key Vault",
+    "diagram": "checklist",
+    "labels": [
+      "SECRET",
+      "KEY",
+      "CERTIFICATE"
+    ]
+  },
+  "azure-policy-deny-audit-initiative": {
+    "title": "POLICY / GUARDRAIL",
+    "subtitle": "Azure 15 · Azure Policy",
+    "diagram": "checklist",
+    "labels": [
+      "DENY",
+      "AUDIT",
+      "INITIATIVE"
+    ]
+  },
+  "azure-defender-for-cloud-secure-score": {
+    "title": "DEFENDER / SCORE",
+    "subtitle": "Azure 16 · Defender for Cloud và Secure Score",
+    "diagram": "target",
+    "labels": [
+      "POSTURE",
+      "RECOMMENDATION",
+      "ALERT"
+    ]
+  },
+  "azure-private-endpoint-private-dns-service-endpoint": {
+    "title": "PRIVATE / ENDPOINT",
+    "subtitle": "Azure 17 · Private Endpoint, Private DNS và service endpoint",
+    "diagram": "split",
+    "labels": [
+      "PUBLIC",
+      "PRIVATE LINK",
+      "DNS"
+    ]
+  },
+  "azure-firewall-waf-ddos-bao-ve-bien": {
+    "title": "EDGE / WAF",
+    "subtitle": "Azure 18 · Azure Firewall, WAF và DDoS Protection",
+    "diagram": "target",
+    "labels": [
+      "DDOS",
+      "WAF",
+      "FIREWALL"
+    ]
+  },
+  "azure-entra-external-id-xac-thuc-khach-tai-xe": {
+    "title": "EXTERNAL ID / JWT",
+    "subtitle": "Azure 19 · Entra External ID",
+    "diagram": "flow",
+    "labels": [
+      "CUSTOMER",
+      "TOKEN",
+      "API"
+    ]
+  },
+  "azure-app-service-deploy-slot-scale": {
+    "title": "APP SERVICE",
+    "subtitle": "Azure 20 · App Service",
+    "diagram": "cycle",
+    "labels": [
+      "STAGING SLOT",
+      "SWAP",
+      "PRODUCTION"
+    ]
+  },
+  "azure-container-registry-build-push-digest": {
+    "title": "ACR / DIGEST",
+    "subtitle": "Azure 21 · Azure Container Registry",
+    "diagram": "pages",
+    "labels": [
+      "BUILD",
+      "PUSH",
+      "sha256"
+    ]
+  },
+  "azure-container-apps-revision-ingress-scale": {
+    "title": "CONTAINER APPS",
+    "subtitle": "Azure 22 · Azure Container Apps",
+    "diagram": "cycle",
+    "labels": [
+      "REVISION",
+      "INGRESS",
+      "KEDA"
+    ]
+  },
+  "azure-aks-co-ban-cluster-node-pool-deploy": {
+    "title": "AKS / CLUSTER",
+    "subtitle": "Azure 23 · AKS cơ bản",
+    "diagram": "blocks",
+    "labels": [
+      "CONTROL PLANE",
+      "NODE POOL",
+      "POD"
+    ]
+  },
+  "azure-aks-nang-cao-ingress-workload-identity-upgrade": {
+    "title": "AKS / OPERATE",
+    "subtitle": "Azure 24 · AKS nâng cao",
+    "diagram": "layers",
+    "labels": [
+      "INGRESS",
+      "WORKLOAD ID",
+      "UPGRADE"
+    ]
+  },
+  "azure-functions-trigger-binding-durable": {
+    "title": "FUNCTIONS",
+    "subtitle": "Azure 25 · Azure Functions",
+    "diagram": "flow",
+    "labels": [
+      "TRIGGER",
+      "BINDING",
+      "DURABLE"
+    ]
+  },
+  "azure-chon-compute-cho-tung-service-toi-noi": {
+    "title": "COMPUTE / CHOICE",
+    "subtitle": "Azure 26 · Chọn compute cho từng service Tới Nơi",
+    "diagram": "matrix",
+    "labels": [
+      "VM",
+      "CONTAINER",
+      "SERVERLESS"
+    ]
+  },
+  "azure-vnet-integration-application-gateway": {
+    "title": "APP / NETWORK",
+    "subtitle": "Azure 27 · Mạng cho ứng dụng",
+    "diagram": "network",
+    "labels": [
+      "APP GATEWAY",
+      "VNET",
+      "PRIVATE"
+    ]
+  },
+  "azure-front-door-cdn-custom-domain-tls": {
+    "title": "FRONT DOOR",
+    "subtitle": "Azure 28 · Front Door, CDN, custom domain và TLS",
+    "diagram": "map",
+    "labels": [
+      "POP",
+      "ORIGIN",
+      "TLS"
+    ]
+  },
+  "azure-app-configuration-feature-flag-key-vault-reference": {
+    "title": "CONFIG / FLAG",
+    "subtitle": "Azure 29 · App Configuration",
+    "diagram": "checklist",
+    "labels": [
+      "KEY-VALUE",
+      "LABEL",
+      "FEATURE FLAG"
+    ]
+  },
+  "azure-postgresql-ha-read-replica-pitr-entra-auth": {
+    "title": "POSTGRES / HA",
+    "subtitle": "Azure 30 · PostgreSQL Flexible Server nâng cao",
+    "diagram": "split",
+    "labels": [
+      "PRIMARY",
+      "STANDBY",
+      "REPLICA"
+    ]
+  },
+  "azure-chon-database-sql-postgresql-cosmos": {
+    "title": "DATABASE / CHOICE",
+    "subtitle": "Azure 31 · Chọn database",
+    "diagram": "matrix",
+    "labels": [
+      "SQL",
+      "POSTGRES",
+      "COSMOS"
+    ]
+  },
+  "azure-cosmos-db-partition-key-ru-consistency": {
+    "title": "COSMOS / PARTITION",
+    "subtitle": "Azure 32 · Cosmos DB",
+    "diagram": "storage",
+    "labels": [
+      "PARTITION KEY",
+      "RU/s",
+      "CONSISTENCY"
+    ]
+  },
+  "azure-cache-for-redis-cache-geospatial-rate-limit": {
+    "title": "REDIS / CACHE",
+    "subtitle": "Azure 33 · Azure Cache for Redis",
+    "diagram": "pages",
+    "labels": [
+      "GEO",
+      "TTL",
+      "RATE LIMIT"
+    ]
+  },
+  "azure-service-bus-queue-topic-session-dead-letter": {
+    "title": "SERVICE BUS",
+    "subtitle": "Azure 34 · Service Bus",
+    "diagram": "flow",
+    "labels": [
+      "TOPIC",
+      "SUBSCRIPTION",
+      "DEAD-LETTER"
+    ]
+  },
+  "azure-event-hubs-stream-gps-consumer-group": {
+    "title": "EVENT HUBS",
+    "subtitle": "Azure 35 · Event Hubs",
+    "diagram": "cycle",
+    "labels": [
+      "PARTITION",
+      "CONSUMER GROUP",
+      "CAPTURE"
+    ]
+  },
+  "azure-event-grid-system-custom-topic": {
+    "title": "EVENT GRID",
+    "subtitle": "Azure 36 · Event Grid",
+    "diagram": "network",
+    "labels": [
+      "SOURCE",
+      "TOPIC",
+      "HANDLER"
+    ]
+  },
+  "azure-chon-messaging-storage-queue-service-bus-event-hubs": {
+    "title": "MESSAGING / CHOICE",
+    "subtitle": "Azure 37 · Chọn messaging",
+    "diagram": "matrix",
+    "labels": [
+      "QUEUE",
+      "STREAM",
+      "EVENT"
+    ]
+  },
+  "azure-data-lake-data-factory-bao-cao": {
+    "title": "DATA / PIPELINE",
+    "subtitle": "Azure 38 · Data Lake, Data Factory và Synapse",
+    "diagram": "layers",
+    "labels": [
+      "RAW",
+      "CURATED",
+      "REPORT"
+    ]
+  },
+  "azure-api-management-gateway-policy-versioning": {
+    "title": "APIM / GATEWAY",
+    "subtitle": "Azure 39 · API Management",
+    "diagram": "flow",
+    "labels": [
+      "POLICY",
+      "PRODUCT",
+      "VERSION"
+    ]
+  },
+  "azure-bicep-co-ban-module-parameter-what-if": {
+    "title": "BICEP / IaC",
+    "subtitle": "Azure 40 · Bicep",
+    "diagram": "code",
+    "labels": [
+      "MODULE",
+      "PARAM",
+      "WHAT-IF"
+    ]
+  },
+  "azure-terraform-azurerm-state-workspace": {
+    "title": "TERRAFORM / STATE",
+    "subtitle": "Azure 41 · Terraform trên Azure",
+    "diagram": "storage",
+    "labels": [
+      "azurerm",
+      "STATE",
+      "PLAN"
+    ]
+  },
+  "azure-github-actions-oidc-federated-credential": {
+    "title": "OIDC / PIPELINE",
+    "subtitle": "Azure 42 · GitHub Actions và Azure DevOps",
+    "diagram": "flow",
+    "labels": [
+      "GITHUB",
+      "FEDERATED",
+      "AZURE"
+    ]
+  },
+  "azure-ci-pipeline-build-test-scan-push-acr": {
+    "title": "CI / PIPELINE",
+    "subtitle": "Azure 43 · CI",
+    "diagram": "checklist",
+    "labels": [
+      "TEST",
+      "SCAN",
+      "PUSH"
+    ]
+  },
+  "azure-cd-environment-approval-blue-green-canary": {
+    "title": "CD / CANARY",
+    "subtitle": "Azure 44 · CD",
+    "diagram": "split",
+    "labels": [
+      "BLUE",
+      "CANARY 10%",
+      "GREEN"
+    ]
+  },
+  "azure-developer-cli-azd-deployment-stacks-moi-truong": {
+    "title": "AZD / STACKS",
+    "subtitle": "Azure 45 · Azure Developer CLI, deployment stacks và môi…",
+    "diagram": "blocks",
+    "labels": [
+      "azd up",
+      "STACK",
+      "ENV"
+    ]
+  },
+  "azure-database-migration-trong-pipeline": {
+    "title": "MIGRATION / GATE",
+    "subtitle": "Azure 46 · Migration database trong pipeline",
+    "diagram": "cycle",
+    "labels": [
+      "EXPAND",
+      "DEPLOY",
+      "CONTRACT"
+    ]
+  },
+  "azure-application-insights-opentelemetry-kql": {
+    "title": "TELEMETRY / KQL",
+    "subtitle": "Azure 47 · Application Insights, OpenTelemetry và Log…",
+    "diagram": "code",
+    "labels": [
+      "TRACE",
+      "METRIC",
+      "KQL"
+    ]
+  },
+  "azure-alert-action-group-slo-workbook": {
+    "title": "SLO / ALERT",
+    "subtitle": "Azure 48 · Alert, action group, SLO và workbook",
+    "diagram": "target",
+    "labels": [
+      "SLI",
+      "ERROR BUDGET",
+      "ON-CALL"
+    ]
+  },
+  "azure-landing-zone-subscription-vending": {
+    "title": "LANDING ZONE",
+    "subtitle": "Azure 49 · Landing zone và subscription vending cho nhiều môi…",
+    "diagram": "layers",
+    "labels": [
+      "PLATFORM",
+      "CONNECTIVITY",
+      "WORKLOAD"
+    ]
+  },
+  "azure-well-architected-framework-5-tru-cot": {
+    "title": "WAF / 5 PILLARS",
+    "subtitle": "Azure 50 · Well-Architected Framework",
+    "diagram": "checklist",
+    "labels": [
+      "RELIABILITY",
+      "SECURITY",
+      "COST"
+    ]
+  },
+  "azure-ha-dr-zone-region-rto-rpo": {
+    "title": "HA / DR",
+    "subtitle": "Azure 51 · HA và DR",
+    "diagram": "split",
+    "labels": [
+      "ZONE",
+      "REGION PAIR",
+      "RTO / RPO"
+    ]
+  },
+  "azure-kien-truc-tham-chieu-microservices-toi-noi": {
+    "title": "REFERENCE / ARCH",
+    "subtitle": "Azure 52 · Kiến trúc tham chiếu microservices Tới Nơi trên…",
+    "diagram": "map",
+    "labels": [
+      "FRONT DOOR",
+      "SERVICES",
+      "DATA"
+    ]
+  },
+  "azure-saga-outbox-service-bus-postgresql": {
+    "title": "SAGA / OUTBOX",
+    "subtitle": "Azure 53 · Saga và Outbox trên Service Bus và PostgreSQL",
+    "diagram": "cycle",
+    "labels": [
+      "BOOK",
+      "CHARGE",
+      "COMPENSATE"
+    ]
+  },
+  "azure-toi-uu-chi-phi-reservation-savings-plan-finops": {
+    "title": "FINOPS",
+    "subtitle": "Azure 54 · Tối ưu chi phí",
+    "diagram": "matrix",
+    "labels": [
+      "RESERVE",
+      "RIGHT-SIZE",
+      "SHOW-BACK"
+    ]
+  },
+  "azure-zero-trust-network-segmentation-sentinel": {
+    "title": "ZERO TRUST",
+    "subtitle": "Azure 55 · Bảo mật nâng cao",
+    "diagram": "target",
+    "labels": [
+      "VERIFY",
+      "LEAST PRIVILEGE",
+      "ASSUME BREACH"
+    ]
+  },
+  "azure-load-testing-autoscale-chaos-studio": {
+    "title": "LOAD / CHAOS",
+    "subtitle": "Azure 56 · Hiệu năng",
+    "diagram": "cycle",
+    "labels": [
+      "LOAD TEST",
+      "AUTOSCALE",
+      "FAULT"
+    ]
+  },
+  "azure-multi-region-data-residency-multi-tenant": {
+    "title": "MULTI-REGION",
+    "subtitle": "Azure 57 · Multi-region, data residency và multi-tenant",
+    "diagram": "map",
+    "labels": [
+      "SEA",
+      "EAST ASIA",
+      "RESIDENCY"
+    ]
+  },
+  "azure-tong-ket-go-live-checklist-chung-chi": {
+    "title": "GO-LIVE",
+    "subtitle": "Azure 58 · Tổng kết",
+    "diagram": "checklist",
+    "labels": [
+      "CHECKLIST",
+      "RUNBOOK",
+      "CERTS"
+    ]
   }
 }
