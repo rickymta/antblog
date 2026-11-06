@@ -2268,5 +2268,105 @@
       "PROPTEST",
       "FIXTURE"
     ]
+  },
+  "location-go-goroutine-channel-nhap-mon-cho-ingest": {
+    "title": "GOROUTINE",
+    "subtitle": "Định vị 11 · Go đủ dùng cho ingest",
+    "diagram": "code",
+    "labels": [
+      "GOROUTINE",
+      "CHANNEL",
+      "CONTEXT"
+    ]
+  },
+  "location-go-ingest-websocket-batch-gps-tai-xe": {
+    "title": "INGEST",
+    "subtitle": "Định vị 12 · Nhận GPS theo lô từ app tài xế",
+    "diagram": "flow",
+    "labels": [
+      "APP TÀI XẾ",
+      "WEBSOCKET",
+      "KAFKA"
+    ]
+  },
+  "location-go-backpressure-coalesce-drop-race-detector": {
+    "title": "BACKPRESSURE",
+    "subtitle": "Định vị 13 · Coalesce, drop có chủ đích, tắt êm",
+    "diagram": "storage",
+    "labels": [
+      "HÀNG ĐỢI",
+      "COALESCE",
+      "DROP"
+    ]
+  },
+  "location-validate-gps-timestamp-accuracy-gia-mao": {
+    "title": "GPS XẤU",
+    "subtitle": "Định vị 14 · Đồng hồ lệch, nhảy vị trí, giả mạo",
+    "diagram": "checklist",
+    "labels": [
+      "ĐỒNG HỒ",
+      "TỐC ĐỘ",
+      "GẮN CỜ"
+    ]
+  },
+  "location-kalman-loc-nhieu-gps-rust": {
+    "title": "KALMAN",
+    "subtitle": "Định vị 15 · Lọc nhiễu GPS mà không chậm",
+    "diagram": "split",
+    "labels": [
+      "ĐO",
+      "DỰ ĐOÁN",
+      "LÀM MƯỢT"
+    ]
+  },
+  "location-map-matching-hmm-viterbi-rust": {
+    "title": "HMM",
+    "subtitle": "Định vị 16 · Bám đường bằng HMM và Viterbi",
+    "diagram": "network",
+    "labels": [
+      "ĐIỂM GPS",
+      "ỨNG VIÊN",
+      "VITERBI"
+    ]
+  },
+  "location-map-matching-online-cua-so-cau-vuot-duong-song-song": {
+    "title": "CẦU VƯỢT",
+    "subtitle": "Định vị 17 · Bám đường online, cửa sổ trượt",
+    "diagram": "map",
+    "labels": [
+      "CỬA SỔ",
+      "CẦU VƯỢT",
+      "SONG SONG"
+    ]
+  },
+  "location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka": {
+    "title": "KHO VỊ TRÍ",
+    "subtitle": "Định vị 18 · Vị trí mới nhất theo ô H3",
+    "diagram": "storage",
+    "labels": [
+      "KAFKA",
+      "Ô H3",
+      "REDIS"
+    ]
+  },
+  "location-go-fan-out-tracking-khach-noi-suy-marker": {
+    "title": "TRACKING",
+    "subtitle": "Định vị 19 · Fan-out và nội suy marker",
+    "diagram": "network",
+    "labels": [
+      "HUB",
+      "KHÁCH",
+      "NỘI SUY"
+    ]
+  },
+  "location-lich-su-gps-parquet-retention-quyen-rieng-tu": {
+    "title": "LỊCH SỬ GPS",
+    "subtitle": "Định vị 20 · Parquet, retention, quyền riêng tư",
+    "diagram": "pages",
+    "labels": [
+      "PARQUET",
+      "RETENTION",
+      "RIÊNG TƯ"
+    ]
   }
 }

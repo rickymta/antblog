@@ -237,7 +237,7 @@ Mọi số ở đây là số hình học và số đếm, tái lập từng ch�
 <p>Hai ghim chỉ cách nhau 56,0 m nhưng ô tô đi 305,5 m một chiều và 114,8 m chiều kia; điểm đón ở phía nào của dải phân cách làm quãng đường chênh gấp 2,7 lần (305,5 chia 114,8). Khoảng cách chim bay không biết dải phân cách, một chiều và nút chặn. Đây là số đo trên một khu mẫu tổng hợp, nên chỉ minh họa cơ chế; mức độ ngoài đời phải đo bằng engine định tuyến và simulator ở các phần sau.</p>
 </details>
 
-Bài trước: [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do).
+Bài trước: [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do). Bài tiếp: [bài 11](/articles/location-go-goroutine-channel-nhap-mon-cho-ingest).
 
 ## Tài liệu gốc
 

@@ -391,7 +391,17 @@
       "location-rstar-r-tree-snap-diem-ve-duong",
       "location-h3-geohash-chi-muc-luoi-k-ring",
       "location-tim-tai-xe-gan-nhat-bon-cach-co-so-do",
-      "location-tong-hop-geo-core-kiem-thu-hinh-hoc"
+      "location-tong-hop-geo-core-kiem-thu-hinh-hoc",
+      "location-go-goroutine-channel-nhap-mon-cho-ingest",
+      "location-go-ingest-websocket-batch-gps-tai-xe",
+      "location-go-backpressure-coalesce-drop-race-detector",
+      "location-validate-gps-timestamp-accuracy-gia-mao",
+      "location-kalman-loc-nhieu-gps-rust",
+      "location-map-matching-hmm-viterbi-rust",
+      "location-map-matching-online-cua-so-cau-vuot-duong-song-song",
+      "location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka",
+      "location-go-fan-out-tracking-khach-noi-suy-marker",
+      "location-lich-su-gps-parquet-retention-quyen-rieng-tu"
     ],
     "status": "published"
   }

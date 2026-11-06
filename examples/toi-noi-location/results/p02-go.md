@@ -188,7 +188,7 @@ STEP	target_pts_s	achieved_pts_s	msgs_s	p50_ms	p95_ms	p99_ms	max_ms	errs	ingest_
 STEP	6250	6250	6250	0.75	11.04	30.38	109.22	0	29	587.2	1085.4	25012	304	0	0	33	752.0
 ```
 
-Cùng 6.250 điểm/s nhưng 6.250 lô/s thay vì 2.083: CPU ingest 29% so với 19%, p99 ack 30,38 ms so với 10,25 ms. Batching phía app giảm khoảng một phần ba CPU của ingest và độ trễ đuôi; cái giá là điểm cũ nhất trong lô đã chờ ở app tối đa 8 giây (xem LOC-19).
+Cùng 6.250 điểm/s nhưng 6.250 lô/s thay vì 2.083: CPU ingest 29% so với 19%, p99 ack 30,38 ms so với 10,25 ms. Batching phía app giảm khoảng một phần ba CPU của ingest và độ trễ đuôi; cái giá là điểm cũ nhất trong lô đã chờ ở app tối đa 8 giây, và lô chỉ đi mỗi 12 giây nên vị trí mới nhất server biết có thể cũ gần 12 giây (xem LOC-19).
 
 #### C. Tìm điểm không theo kịp: tăng dần tốc độ, sink `discard` (bỏ Kafka ra)
 
@@ -240,7 +240,7 @@ Tiêu chí «theo kịp» dùng ở đây: tốc độ đạt được ≥ 98% m
 | 50.000 | 49.368 / 219 ms | 49.338 / 396 ms | có, p99 đã gấp 9 đến 16 lần so với 6.250 |
 | 100.000 | 59.606 / 6.141 ms, 11 lỗi | 69.594 / 9.116 ms, 50.766 lỗi ack | **không** |
 
-Điểm gãy nằm giữa 50.000 và 100.000 điểm/giây (8 đến 16 lần đỉnh của Tới Nơi) trên máy này, khi loadgen cũng chạy ở máy này và đã dùng 70 đến 90% một lõi.
+Điểm gãy nằm giữa 50.000 và 100.000 điểm/giây (8 đến 16 lần đỉnh của Tới Nơi) trên máy này, khi loadgen cũng chạy ở máy này và đã dùng 68 đến 142% một lõi ở hai bước cao nhất.
 
 #### E. Vì sao gãy: profile ở 100.000 điểm/s
 
@@ -337,9 +337,9 @@ Chia khoá **không** dời điểm gãy một cách rõ ràng: bước 100.000 
 Lab này chỉ đo WebSocket; chưa dựng gRPC stream để đối chứng.
 
 - **Qua proxy và mạng di động.** WebSocket bắt đầu bằng một HTTP/1.1 Upgrade nên đi qua hầu hết CDN, L7 load balancer và proxy doanh nghiệp. gRPC cần HTTP/2 xuyên suốt (kể cả trailers) và thường bị proxy/LB cấu hình sai hoặc hạ cấp. Kiến trúc §7.3 cũng nói không mặc định dùng gRPC trực tiếp từ mobile, gRPC streaming hợp hơn cho service-với-service.
-- **Hợp đồng.** gRPC cho schema, codegen client/server, deadline, keepalive có sẵn. Với WebSocket phải tự đặt: ở đây dùng protobuf trong binary frame, `batch_seq` và `BatchAck` do ta định nghĩa; nghĩa là phải tự viết và tự kiểm các chuyện gRPC làm hộ.
+- **Hợp đồng.** gRPC cho schema, codegen client/server, deadline, keepalive có sẵn. Với WebSocket phải tự đặt: ở đây dùng protobuf trong binary frame, hạn đọc và hạn ghi tự đặt. `batch_seq` và `BatchAck` do ta định nghĩa, nhưng phần này gửi theo stream ở giao thức nào cũng phải tự làm: stream gRPC không xác nhận từng message.
 - **Flow control.** HTTP/2 có cửa sổ theo stream; WebSocket chỉ có TCP, nên backpressure tầng ứng dụng (ack, độ sâu hàng đợi) phải tự làm. Ở LOC-19 chính vì vậy mà hub cần `TrackingAck` (xem mục đó).
-- **Mạng chập chờn.** Điều quyết định ở đây không phải giao thức mà là hợp đồng: app giữ lô cho tới khi nhận `BatchAck` rồi gửi lại sau khi nối lại, server dùng `seq` và giờ để loại điểm trùng/cũ (`validate`). Cả hai giao thức cần phần này. Lab **chưa** chạy kịch bản mất mạng, nối lại và gửi lại; mới có test đơn vị cho điểm đến sau (LOC-14).
+- **Mạng chập chờn.** Điều quyết định ở đây không phải giao thức mà là hợp đồng: app giữ lô cho tới khi nhận `BatchAck` rồi gửi lại sau khi nối lại, server phải chịu được điểm trùng. `validate` chỉ loại điểm trùng/cũ trong một kết nối vì `State` là biến của goroutine giữ kết nối; nối lại thì `State` trống. Cả hai giao thức cần phần này. Lab **chưa** chạy kịch bản mất mạng, nối lại và gửi lại; mới có test đơn vị cho điểm đến sau (LOC-14).
 - **Chi phí đo được của WebSocket ở đây:** khoảng 41 KB RSS mỗi kết nối (1.020 MB / 25.012), 19% một lõi cho 6.250 điểm/s, và ack p99 10 ms trên loopback. Số này không gồm độ trễ mạng thật.
 
 Hợp đồng protobuf và quy ước số: `examples/toi-noi-location/proto/README.md`.
@@ -552,7 +552,7 @@ STEP	6250	6250	2083	0.50	8.01	17.21	95.83	0	17	596.3	1100.2	25010	30000	108090	0
 queue/kafka cuối: {"queue": {"depth": 0, "max_depth": 30000, "offered": 643818, "coalesced": 0, "stale_ignored": 0, "dropped": 108090, "evicted": 0, "taken": 535728, "shutdown_dropped": 0}, "kafka": {"delivered": 535728, "failed": 0}, "max_rss_mb": 1104}
 ```
 
-Số cho thấy: trong lúc Kafka đứng, `kafka_delivered` đóng băng (182.280 và 164.787), hàng đợi đầy lên (27.000 điểm ở coalesce, 30.000 ở drop-newest) và gộp/bỏ từ đó (`q_coalesced` lên 136.126, hoặc `q_dropped` lên 108.090), nhưng **độ trễ ack phía app không đổi** (`win_p99` trong các cửa sổ có Kafka đứng nằm trong khoảng 10 đến 32 ms, ngang các cửa sổ khác) và `acked_pts_s` giữ 6.2xx: goroutine đọc WebSocket không bị kẹt, đúng ý đồ. Sau khi Kafka chạy lại, hàng rỗng sau 5 đến 15 giây. Bộ nhớ ingest không phình thêm (đỉnh RSS 1.097 và 1.100 MB so với 1.020 MB khi không có sự cố).
+Số cho thấy: trong lúc Kafka đứng, `kafka_delivered` đóng băng (182.280 và 164.787), hàng đợi đầy lên (27.000 điểm ở coalesce, 30.000 ở drop-newest) và gộp/bỏ từ đó (`q_coalesced` lên 136.126, hoặc `q_dropped` lên 108.090), nhưng **độ trễ ack phía app không đổi** (`win_p99` trong các cửa sổ có Kafka đứng nằm trong khoảng 7 đến 32 ms, ngang các cửa sổ khác) và `acked_pts_s` giữ 6.2xx: goroutine đọc WebSocket không bị kẹt, đúng ý đồ. Sau khi Kafka chạy lại, hàng rỗng sau 5 đến 15 giây. Bộ nhớ ingest không phình thêm (đỉnh RSS 1.097 và 1.100 MB so với 1.020 MB khi không có sự cố).
 
 Bất ngờ cần ghi: **bộ đệm nội bộ của client Kafka là hàng đợi thứ hai**, và lần chạy coalesce báo `kafka.failed = 20000`, đúng bằng `MaxBufferedRecords(20000)`, trong khi lần drop-newest báo `failed = 0` với cùng thời gian dừng (26 so với 25 giây) và `RecordDeliveryTimeout` 30 giây. Nguyên nhân của con số đó (và của khoảng chênh `taken − (delivered + failed)` ở hai lần chạy này) được điều tra ở mục «Điều tra `taken − (delivered + failed)` và `kafka.failed`» ngay dưới. Điều chắc chắn: bộ đếm của hàng đợi phía trước không thấy phần mất này, nên ingest phải xuất cả `queue.*` lẫn `kafka.failed` (nay `/debug/stats` còn xuất `kafka.buffered` và `kafka.failed_<nguyên nhân>`). Với coalesce, `drop-newest` ở trên, so sánh tuổi điểm đã giao trong lần Kafka thật **chưa đo** (chỉ có ở thí nghiệm offline).
 
@@ -593,7 +593,7 @@ Kết luận cho (1): **không có bản ghi nào mất và không có lỗi ở
 | drop-newest | 30 | 0 | |
 | drop-newest | 34 | 0 | |
 
-Lần coalesce 30 giây tái hiện đúng con số 20.000, và log của ingest ghi lỗi gốc `records have timed out before they were able to be produced`: đó là `kgo.ErrRecordTimeout`, tức `RecordDeliveryTimeout(30s)` hết hạn ở các bản ghi chờ gửi trong lúc broker đứng. Tài liệu của franz-go nói khi một bản ghi hết hạn thì **mọi bản ghi đang đệm cùng partition bị coi là lỗi theo**; bộ đệm lúc đó đầy (20.000) nên toàn bộ 20.000 bản ghi lỗi cùng lúc, và con số bằng `MaxBufferedRecords` là hệ quả của đó, không phải sự trùng hợp. Nhưng hai dòng drop-newest (30 và 34 giây, không ngắn hơn hạn 30 giây) không lỗi. Mỗi ô chỉ một lần chạy nên bảng này chưa đủ để nói chính sách có liên quan hay không; thí nghiệm sau bỏ hẳn hàng đợi để trả lời.
+Lần coalesce 30 giây tái hiện đúng con số 20.000, và log của ingest ghi lỗi gốc `records have timed out before they were able to be produced`: đó là `kgo.ErrRecordTimeout`, tức `RecordDeliveryTimeout(30s)` hết hạn ở các bản ghi chờ gửi trong lúc broker đứng. Tài liệu của franz-go nói khi một bản ghi hết hạn thì **mọi bản ghi đang đệm cùng partition bị coi là lỗi theo**; topic có 6 partition, nên con số đúng bằng `MaxBufferedRecords` chỉ khớp nếu cả sáu partition cùng hết hạn khi bộ đệm đầy; đó là cách đọc hợp lý, chưa lần theo từng partition. Nhưng hai dòng drop-newest (30 và 34 giây, không ngắn hơn hạn 30 giây) không lỗi. Mỗi ô chỉ một lần chạy nên bảng này chưa đủ để nói chính sách có liên quan hay không; thí nghiệm sau bỏ hẳn hàng đợi để trả lời.
 
 Để cô lập khỏi hàng đợi và 25.000 kết nối, `kafka_lab timeouts` chạy 8 producer cùng cấu hình `NewSink` (linger 5 ms, `MaxBufferedRecords(20000)`, 6.200 bản ghi/giây mỗi producer) chỉ khác `RecordDeliveryTimeout`, cùng chịu một lần `docker pause` (`p02-go-raw/loc13k_timeouts.txt`; cột là hạn 20, 25, 30, 30, 35, 40, 60 giây và không hạn):
 
@@ -817,7 +817,7 @@ So với SLO kiến trúc §14.1 (lan truyền realtime p95 dưới 2 đến 3 g
 | Hub: ingest nhận → hub ghi, p95 / p99 (gồm cả 10 khách chậm, khung của họ chờ ack) | 28 / 54 ms | 34 / 2.072 ms |
 | Khung gửi / điểm hub nhận cho chuyến có gán | 1.056 / 3.162 | 3.072 / 3.160 |
 
-Số cho thấy: độ trễ của riêng đường ống (app gửi → Kafka → hub → khách) có p95 khoảng 34 ms trên loopback, nhỏ hơn mục tiêu hai bậc độ lớn, và gần như không phụ thuộc cách chia lô. Con số này **không** gồm mạng di động thật và không phải bằng chứng cho SLO. Với lô 3 điểm, ba điểm tới hub gần như cùng lúc nên ô chờ chỉ giữ điểm mới nhất: hub gộp 2.103 trong 3.162 điểm, khách thấy ít khung hơn (1.056) nhưng khung nào cũng là điểm mới nhất; điểm cũ nhất trong lô đã chờ ở app tối đa 8 giây, thể hiện ở `max` 8.015 ms của `sample_to_recv`. Bất ngờ: batching phía app cho tracking đáng giá về CPU của ingest (LOC-12) nhưng chỉ làm marker chậm khi điểm bị chọn là điểm đầu lô; hub đã tự chọn điểm cuối.
+Số cho thấy: độ trễ của riêng đường ống (app gửi → Kafka → hub → khách) có p95 khoảng 34 ms trên loopback, nhỏ hơn mục tiêu hai bậc độ lớn, và gần như không phụ thuộc cách chia lô. Con số này **không** gồm mạng di động thật và không phải bằng chứng cho SLO. Với lô 3 điểm, ba điểm tới hub gần như cùng lúc nên ô chờ chỉ giữ điểm mới nhất: hub gộp 2.103 trong 3.162 điểm, khách thấy ít khung hơn (1.056) nhưng khung nào cũng là điểm mới nhất; điểm cũ nhất trong lô đã chờ ở app tối đa 8 giây, thể hiện ở `max` 8.015 ms của `sample_to_recv`. Hub tự chọn điểm cuối lô nên điểm khách thấy không phải điểm đã chờ 8 giây, nhưng batching vẫn làm marker thưa đi: 190 khách thường nhận 1.005 khung trong 60 giây (cỡ 11 giây một khung) so với 2.959 khung (cỡ 3,9 giây một khung) ở lô 1 điểm. Độ trễ đường ống không đo khoảng chờ đó.
 
 Khách đọc chậm (10 người, 6 giây mỗi khung): lô 1 điểm, 104 khung, hub gộp 30 điểm, tuổi điểm lúc nhận p50 6.141 ms, p99 10.062 ms: bị chặn ở khoảng hai khung bay (cửa sổ ack) thay vì tăng mãi. Ở lần chạy đầu của chính hub này, **trước khi có ack tầng ứng dụng**, cùng cấu hình cho `sample_to_recv` p50 10.062 ms, p99 20.089 ms và hub gộp 0 điểm: bộ đệm TCP nuốt các khung cũ nên hub không bao giờ thấy client chậm. Output đó không còn trong file (đã bị lần chạy sau ghi đè), con số chép từ log phiên làm việc; test `TestClientChamBiCoalesce` ghi lại hành vi hiện tại (2.001 điểm tới trong lúc client không ack: client nhận 3 khung, hub gộp 1.998).
 

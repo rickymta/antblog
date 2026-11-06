@@ -213,10 +213,8 @@ pub fn rts_fixed_lag(steps: &[Step], k: usize, lag: usize) -> [f64; 2] {
     let mut xs = steps[end].x_filt;
     for j in (k..end).rev() {
         let next = &steps[j + 1];
-        let f = [[1.0, next.dt], [0.0, 1.0]];
         let ft = [[1.0, 0.0], [next.dt, 1.0]];
         let c = mul(mul(mat(steps[j].p_filt), ft), inv(mat(next.p_pred)));
-        let _ = f;
         for (a, x) in xs.iter_mut().enumerate() {
             let d = [x[0] - next.x_pred[a][0], x[1] - next.x_pred[a][1]];
             *x = [

@@ -153,7 +153,7 @@ uptime lúc kết thúc: 23:24  up 35 days, 15:07, 1 user, load averages: 69.33 
 
 - Kalman **giúp ít hơn người ta tưởng** vì sai số GPS tương quan theo thời gian. Cùng σ = 6 m: nhiễu trắng giảm RMSE 23,2% (9,20 → 7,07 m), nhưng với tương quan 8 s chỉ giảm 3,7% (9,22 → 8,87 m); σ = 10 m tương quan: 0,2%; σ = 20 m: **tệ hơn** 2,2% (28,59 → 29,23). Lọc trung bình hóa nhiễu nhanh, không xóa được độ lệch chậm.
 - p95 **xấu đi** ở mọi mức tương quan dù RMSE tốt hơn (σ = 4 m: 10,03 → 10,23; σ = 6 m: 15,04 → 15,35), tức đuôi sai số không được cải thiện.
-- Độ trễ phải trả nằm ở sai số dọc hướng đi khi vận tốc đổi: −1,09 m lúc tăng tốc, +0,98 m lúc phanh, −0,65 m ở khúc cua (σ = 6 m); khi GPS tốt (σ = 2 m trắng) là −0,54 m, +0,58 m, −0,29 m. Nhỏ so với nhiễu, nhưng là sai số có hướng, không phải ngẫu nhiên. Làm mượt RTS biết thêm L điểm sau thì RMSE giảm 7,4% (L = 1), 9,3% (L = 2) rồi dừng (L = 3: 9,3%, L = 12: 9,2%): chờ 2 giây là đủ, chờ thêm không lợi vì phần còn lại là sai số tương quan.
+- Độ trễ phải trả nằm ở sai số dọc hướng đi khi vận tốc đổi: −1,09 m lúc tăng tốc, +0,98 m lúc phanh, −0,65 m ở khúc cua (σ = 6 m); khi GPS tốt (σ = 2 m trắng) là −0,54 m, +0,58 m, −0,29 m. Nhỏ so với nhiễu, nhưng là sai số có hướng, không phải ngẫu nhiên. Làm mượt RTS biết thêm L điểm sau thì RMSE giảm 7,4% (L = 1), 9,3% (L = 2) rồi dừng (L = 3: 9,3%, L = 12: 9,2%): chờ 2 giây là đủ, chờ thêm không lợi. Chỗ phẳng này suy được từ tham số, không cần tới sai số tương quan: với `accel_sigma` = 4, `R` = 36, 1 Hz, tính tay từ công thức trọng số của điểm đo sau 1, 2, 3 bước chỉ còn cỡ 0,22, 0,07, 0,02, dù nhiễu thật thế nào. Phần RMSE còn lại chưa tách được bao nhiêu là do tương quan.
 - Khi **hại hoặc vô ích**: `accel_sigma = 0,25` (mô hình quá mượt so với gia tốc thật của xe) làm RMSE tệ hơn 43,1% (9,22 → 13,19); lệch ổn định 15 m suốt 40% chuyến chỉ giảm 1,8% (13,23 → 12,99), Kalman không sửa được độ lệch; lấy mẫu thưa 5 s giảm 0,2%. Cổng NIS giúp rõ khi có điểm nhảy xa: 3% điểm nhảy làm RMSE thô 12,05 m, Kalman không cổng 10,98 m, có cổng 9,99 m.
 - Bất ngờ nhỏ: vắng accuracy (dùng 8 m mặc định) gần như không khác báo cáo (8,85 so với 8,87 m), vì accuracy trong mô hình nhiễu của lab hiệu chuẩn tốt (lệch lognormal 0,25). Với điện thoại báo accuracy sai hẳn thì kết luận này không đúng.
 - Chọn tham số: bảng 1 gần như hòa giữa `accel_sigma` 2 và 4 (8,820 và 8,810 m); lab chọn 4.
@@ -316,7 +316,7 @@ Biến thể chạy trên **fixture** (đồ thị nhỏ, chuyến 0,4–1,5 km)
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc16_hmm -- --fixture --trips 20
 ```
 
-(chỉ chép đầu output, dòng chọn tham số và mục 2; các mục còn lại cùng lệnh, không chép)
+(chỉ chép đầu output, dòng chọn tham số và mục 2; các mục còn lại cùng lệnh, không chép. Mục 2 dùng `MatchConfig::default()` đã chọn trên HCM, không dùng giá trị mà dòng «chọn» của fixture trả về)
 
 ```text
 == LOC-16: HMM + Viterbi ==
@@ -571,7 +571,7 @@ Và một lần chạy lúc phát triển (lệnh như lần chính, `uptime` c�
 
 Điều nó cho thấy:
 
-- **Độ trễ quyết định đổi lấy độ chính xác và lộ trình sạch.** Trễ 0 (chốt ngay trạng thái tốt nhất) cho đúng cạnh y hệt snap (75,73% nới) nhưng **lộ trình tệ hơn snap** (RMF 2,683 so với 1,152), vì chốt ngay mà không sửa được thì cạnh nhảy và đoạn nối giữa các điểm vòng vèo. Trễ 3 giây: 84,19% nới, RMF 0,454; trễ 8 giây: 88,68%, 0,219; trễ 20 giây: 90,87%, 0,177; offline 92,53%, 0,073. Phần lớn lợi ích có trong 5–8 giây đầu; sau đó tăng chậm.
+- **Độ trễ quyết định đổi lấy độ chính xác và lộ trình sạch.** Trễ 0 trong mã thực chất là snap: lớp vừa dựng được chốt ngay nên cửa sổ rỗng, `push` gọi `extend` với `prev = None` và chỉ còn điểm số phát; vì vậy cạnh gán y hệt snap (75,73% nới, 55,76% chặt). **Lộ trình tệ hơn snap** (RMF 2,683 so với 1,152) chỉ vì cách dựng: `reconstruct_route` nối hai điểm liên tiếp bằng đường ngắn nhất, còn snap không lấp khoảng trống. Bản tham lam thật (nối tiếp từ trạng thái vừa chốt) chưa đo. Trễ 3 giây: 84,19% nới, RMF 0,454; trễ 8 giây: 88,68%, 0,219; trễ 20 giây: 90,87%, 0,177; offline 92,53%, 0,073. Phần lớn lợi ích có trong 5–8 giây đầu; sau đó tăng chậm.
 - Ước lượng tạm bị sửa: ở trễ 3 điểm, 13,7% điểm bị đổi cạnh ít nhất một lần trước khi chốt, và 11,5% có cạnh gán lần đầu khác cạnh chốt. Với app, đó là lý do hiển thị vị trí bám đường cho khách phải dùng điểm đã chốt hoặc chấp nhận nhảy lại.
 - Ca khó, kết quả «cạnh nới» (snap → online trễ 3 → online trễ 8 → offline): chạy trên cầu vượt 26,60% → 58,58% → 60,47% → 76,60%; hai đường song song 61,29% → 81,65% → 86,81% → 92,30%; đường gom bên đường chính 65,21% → 78,69% → 83,86% → 81,28%.
 - **Không phải ca nào offline cũng hơn online:** đường chính có đường gom bên cạnh: offline 76,28% **thấp hơn** online trễ 3 (81,57%); hầm: online trễ 3 chặt 54,91% so với trễ 8 46,43%. Offline tối ưu xác suất của mô hình, không tối ưu độ chính xác; khi lệch ổn định 12 m đẩy cả chuỗi về phía đường kia thì đường đi «xác suất nhất» là đường sai.
@@ -671,13 +671,13 @@ Một lần chạy khác lúc tải cao (`uptime` 23:26, tải 125,58), cũng ch
 
 Điều nó cho thấy:
 
-- **Đường ghi và đọc trong bộ nhớ rất rẻ:** một cập nhật `apply` 0,92 µs (đổi ô H3 ở 10,8% số cập nhật), điểm cũ đến sau bị bỏ trong 0,39 µs, truy vấn gần nhất k = 5 (bán kính ≤ 2 km) p50 5,71 µs trên 25.000 tài xế; kết quả khớp vét cạn với 0/200 truy vấn khác. Tải tham chiếu 6.250 cập nhật/giây chỉ dùng một phần nhỏ của một lõi.
+- **Đường ghi và đọc trong bộ nhớ rất rẻ:** một cập nhật `apply` 0,73 µs (đổi ô H3 ở 10,8% số cập nhật), điểm cũ đến sau bị bỏ trong 0,30 µs, truy vấn gần nhất k = 5 (bán kính ≤ 2 km) p50 5,25 µs trên 25.000 tài xế (lần chính, tải khoảng 90); kết quả khớp vét cạn với 0/200 truy vấn khác. Tải tham chiếu 6.250 cập nhật/giây chỉ dùng một phần nhỏ của một lõi.
 - **Chia mảnh khóa quyết định khi vừa đọc vừa ghi.** Với một khóa toàn cục (1 mảnh) và 4 luồng đọc, tốc độ ghi rơi từ 0,72–1,6 triệu/s (không có đọc) xuống 12.440–174.080 cập nhật/s, còn với 64 mảnh vẫn 679.723 (lần chính) và 1.663.963 (lần ít tải) ở 4 luồng ghi + 4 luồng đọc. Chiều ngược lại có thật: ở 4 ghi + 4 đọc lần chính, một mảnh cho đọc nhiều hơn (188.216 so với 93.112 truy vấn/s), vì luồng ghi bị chặn. Cơ chế (luồng đọc giữ `RwLock` gần như liên tục nên luồng ghi chờ) là suy đoán hợp lý, **chưa kiểm riêng**; con số thì đo thật.
 - TTL: tài xế im lặng quá 30 s bị truy vấn bỏ qua **ngay**, chưa cần dọn (truy vấn bán kính 30 km thấy 2.500 trong số 25.000); `sweep` xóa 22.500 tài xế trong 1,9 ms.
 - Giảm mẫu sang lịch sử, chính sách như `history-writer` của Go (60 m, rẽ 30° sau 4 s, nhịp 60 s): trên 60 chuyến HCM sinh có seed, giữ **33,7%** (3.400/10.101): di chuyển 2.483, rẽ 848, điểm đầu 60, nhịp 9. Con số 60,2% ở mục 7 là của luồng đi ngẫu nhiên do lab sinh (đổi hướng nhiều), **không đại diện** cho xe chạy trên đường.
 - Redis là bản phụ: ghi 25.000 tài xế qua `MirrorWriter` (gộp theo tài xế, lô 500) mất 1,25 s lần chính và 0,19 s lần ít tải, không bị bỏ cập nhật nào; 5.000 cập nhật cho 1.000 tài xế trong một lần xả chỉ ghi 1.000 lệnh; hàng đợi có giới hạn nên Redis chậm thì bỏ và đếm, không chặn luồng Kafka (kiểm bằng test: hàng đợi 4 chỗ, 50.000 `upsert` không chặn và có bản ghi bị bỏ). `GEOSEARCH` của Redis trả cùng tập tài xế với kho trên 100/100 truy vấn.
 - **Khởi động lại thì nạp từ đâu** (cùng 25.000 tài xế): từ Redis (`HGETALL`) 46,0 ms lần chính, 81,0 ms lần ít tải; từ Kafka phát lại 34 giây cuối bằng `offsets_for_times`: 0,65 s lần chính cộng 0,08 s kết nối (200.000 bản ghi, 3 partition); nguội hoàn toàn (`Latest`, không nạp gì) thì kho đầy lại sau **4 giây**, đúng một chu kỳ báo cáo (25% sau 1 s, 49–50% sau 2 s, 75% sau 3 s, 99–100% sau 4 s). Tức Kafka không cần Redis để khởi động nóng, vì TTL chỉ 30 s nên phần phát lại ngắn; Redis có ích khi muốn khởi động dưới 0,1 s hoặc khi Kafka chậm.
-- Độ trễ gửi→kho khi chạy trực tiếp qua Kafka: p50 5–27 ms, p95 11–214 ms, p99 21–303 ms tùy tải máy (lần chính p99 303 ms ở khởi động nóng, 83 ms ở nguội); SLO tham chiếu là độ tươi vị trí p95 dưới 5–10 giây, tức dư rất xa trong lab này (một broker, cùng máy, không có mạng thật).
+- Độ trễ gửi→kho khi chạy trực tiếp qua Kafka: p50 5–27 ms, p95 11–214 ms, p99 26–303 ms tùy tải máy (lần chính p99 303 ms ở khởi động nóng, 83 ms ở nguội); SLO tham chiếu là độ tươi vị trí p95 dưới 5–10 giây, tức dư rất xa trong lab này (một broker, cùng máy, không có mạng thật).
 
 ### Test, và những gì test chứng minh
 
