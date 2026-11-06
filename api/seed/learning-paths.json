@@ -378,13 +378,18 @@
   {
     "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
     "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
-    "description": "Mở đầu chương trình Business Analysis qua Tới Nơi: từ vấn đề điểm đón đến nhu cầu, vai trò phối hợp và phân loại yêu cầu. Hiện có 3/8 bài; phần hoàn chỉnh gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao.",
+    "description": "Tám bài mở đầu chương trình Business Analysis qua Tới Nơi: tư duy BA, vai trò phối hợp, phân loại yêu cầu, BACCM, mục tiêu đo lường, phạm vi và quyết định khi thiếu bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao; kết thúc bằng hồ sơ đề xuất cải thiện điểm đón.",
     "level": "beginner",
     "category": "business-analysis",
     "articles": [
       "ba-la-gi-tu-tinh-nang-den-bai-toan",
       "ba-po-pm-ux-dev-tester-phoi-hop",
-      "ba-phan-loai-yeu-cau-nghiep-vu"
+      "ba-phan-loai-yeu-cau-nghiep-vu",
+      "ba-baccm-sau-khai-niem-cot-loi",
+      "ba-problem-statement-muc-tieu-chi-so",
+      "ba-scope-assumption-constraint-dependency",
+      "ba-quyet-dinh-khi-thieu-bang-chung",
+      "ba-thuc-hanh-de-xuat-cai-thien-diem-don"
     ],
     "status": "published"
   }

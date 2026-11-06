@@ -138,4 +138,4 @@ Gợi ý: câu 1 nghiêng về chất lượng sử dụng nhưng cần nhiệm 
 - [IIBA — Glossary](https://production.iiba.org/career-resources/a-business-analysis-professionals-foundation-for-success/babok/glossary/): tra các nhóm requirement; các câu minh hoạ trong bài là nội dung riêng của Tới Nơi.
 - Bài liên quan: [BA là gì?](/articles/ba-la-gi-tu-tinh-nang-den-bai-toan), [Phối hợp giữa BA và các vai trò](/articles/ba-po-pm-ux-dev-tester-phoi-hop), [Verification và Validation](/articles/verification-va-validation).
 
-Bài tiếp theo trong kế hoạch là BA-004 — BACCM: nhìn bài toán qua sáu khái niệm cốt lõi (chưa xuất bản). Trong lúc chờ, hoàn thành bảng truy vết của ba bài đầu và ghi những giả định cần kiểm chứng.
+Bài tiếp theo: [BACCM: nhìn bài toán qua sáu khái niệm cốt lõi](/articles/ba-baccm-sau-khai-niem-cot-loi).
