@@ -4,22 +4,114 @@
 //!
 //! Chạy từ gốc repo:
 //!   cargo run --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc42_ghep_theo_lo_hungarian
-//! Tham số: --seeds N (20), --jobs N (3), --batches N (200), --fixture
+//! Tham số: --seeds N (20), --jobs N (3), --batches N (200), --fixture,
+//! --bo-roi (chỉ chạy phép đo «ai bị bỏ rơi»: khách hết kiên nhẫn có bị bỏ qua và bị khách đặt sau vượt không, theo vùng)
 
 use labs::p03::uptime;
-use labs::p05::{f1, jobs, n_seeds, pickup_of, print_paired, setup};
+use labs::p05::{
+    Probe, ProbeStats, abandoned_vs_probe, f1, jobs, n_seeds, pickup_of, print_paired,
+    select_variants, setup,
+};
 use labs::{Args, Rand, percentile, timed};
 use matcher::assign::{brute_force, greedy_fifo, greedy_global, hungarian, total_cost};
 use matcher::batch::{Algo, BatchMatcher, MatcherConfig, MatcherStats, Window};
 use matcher::cost::{Dense, FORBIDDEN, eta_matrix_ms};
-use matcher::eval::{Zones, eval_seeds, paired, sweep};
+use matcher::eval::{RunMetrics, ZONE_NAMES, Zones, column, eval_seeds, paired, sweep};
 use route_engine::position::Position;
 use simulator::world::generate;
 use simulator::{AtPin, RunOptions, run};
 use std::sync::Mutex;
 
+/// Khách hết kiên nhẫn là ai: đối chiếu từng khách với các lô mà họ có mặt (đo bằng `Probe`, không đổi quyết định nào).
+fn abandoned_probe(args: &Args) {
+    let (engine, info, sc, fixture) = setup(args);
+    println!("đồ thị: {info}; kịch bản gốc: {}", sc.name);
+    let zones = Zones::hcm();
+    let n = n_seeds(args);
+    let seeds = eval_seeds(n);
+    println!(
+        "\n-- ai bị bỏ rơi: cửa sổ lô 10 s, {n} seed đánh giá {}…{}. «bị bỏ qua» = còn chờ trong một lô mà có khách khác được gán xe; «bị vượt» = khách đặt SAU mình được gán xe trong lô đó --",
+        seeds[0],
+        seeds[n - 1]
+    );
+    let default: &[&str] = if fixture {
+        &["thường"]
+    } else {
+        &["cao điểm", "thưa xe"]
+    };
+    for (vname, vdesc, tweak) in select_variants(args, default) {
+        let mut s = sc.clone();
+        tweak(&mut s);
+        println!("\n=== bộ giả định «{vname}»: {vdesc} ===");
+        let mut arms: Vec<(&str, Vec<RunMetrics>)> = Vec::new();
+        for (label, algo) in [
+            ("tham lam theo thứ tự", Algo::FifoGreedy),
+            ("Hungarian", Algo::Hungarian),
+        ] {
+            let sink: Mutex<Vec<(usize, usize, usize, u64)>> = Mutex::new(Vec::new());
+            let r = sweep(&s, &seeds, &zones, jobs(args), |sc| {
+                let (m, _) =
+                    BatchMatcher::new(MatcherConfig::new(label, algo, Window::Fixed(10_000)));
+                let (p, h) = Probe::new(m);
+                let o = run(
+                    &engine,
+                    sc,
+                    Box::new(AtPin),
+                    Box::new(p),
+                    RunOptions { trace: true },
+                );
+                let st: ProbeStats = h.lock().expect("khoá").clone();
+                sink.lock()
+                    .expect("khoá")
+                    .push(abandoned_vs_probe(&o.trips, &st));
+                o
+            });
+            let v = sink.into_inner().expect("khoá");
+            let (t, sk, ov, tot) = v.iter().fold((0, 0, 0, 0u64), |a, b| {
+                (a.0 + b.0, a.1 + b.1, a.2 + b.2, a.3 + b.3)
+            });
+            println!(
+                "  {label:<22} hết kiên nhẫn {t} khách trên {n} seed; từng bị bỏ qua {sk} ({:.1}%); từng bị khách đặt sau vượt {ov} ({:.1}%); trung bình {:.1} lần bị bỏ qua mỗi khách hết kiên nhẫn",
+                100.0 * sk as f64 / t.max(1) as f64,
+                100.0 * ov as f64 / t.max(1) as f64,
+                tot as f64 / t.max(1) as f64
+            );
+            arms.push((label, r));
+        }
+        println!(
+            "  tỉ lệ hết kiên nhẫn theo vùng (trên số khách đặt của vùng), hiệu Hungarian − tham lam, có cặp:"
+        );
+        for (z, zn) in ZONE_NAMES.iter().enumerate() {
+            let rate = |rs: &[RunMetrics]| {
+                column(rs, |r| {
+                    r.zone[z].unserved as f64 / r.zone[z].requests.max(1) as f64
+                })
+            };
+            let p = paired(&rate(&arms[0].1), &rate(&arms[1].1));
+            println!(
+                "    {zn:<22} {:.4} → {:.4}  hiệu {:+.4} [{:.4}, {:.4}]{}",
+                p.mean_a,
+                p.mean_b,
+                p.mean_diff,
+                p.ci_lo,
+                p.ci_hi,
+                if p.significant() { " *" } else { "" }
+            );
+        }
+    }
+    println!("uptime lúc kết thúc: {}", uptime());
+}
+
 fn main() {
     let args = Args::from_env();
+    if args.flag("--bo-roi") {
+        println!(
+            "== LOC-42: ai bị bỏ rơi khi Hungarian được chọn khách (trên dữ liệu mô phỏng) =="
+        );
+        println!("uptime lúc bắt đầu: {}", uptime());
+        abandoned_probe(&args);
+        return;
+    }
     println!(
         "== LOC-42: ghép theo lô, Hungarian (Kuhn–Munkres) so với tham lam (trên dữ liệu mô phỏng) =="
     );

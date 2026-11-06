@@ -3,15 +3,20 @@
 //!
 //! Chạy từ gốc repo:
 //!   cargo run --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc45_chi_phi_cong_bang_rui_ro_huy
-//! Tham số: --seeds N (20), --jobs N (3), --fixture
+//! Tham số: --seeds N (20), --jobs N (3), --fixture,
+//! --hinh-dang-lo (chỉ đếm hình dạng lô khi ghép ngay: có lô nào n ≥ 2 khách × m ≥ 2 xe không, và khách lô 1 × m đã chờ bao lâu),
+//! --thu-lo (chỉ chạy các chính sách với cửa sổ lô 10 s ở `cao điểm`, nơi `v1-risk` và `v1-age` mới có dữ liệu để tác động)
 
 use labs::Args;
 use labs::p03::uptime;
-use labs::p05::{jobs, n_seeds, print_paired, print_zones, setup, variants};
+use labs::p05::{
+    Probe, ProbeStats, jobs, n_seeds, print_paired, print_zones, select_variants, setup, variants,
+};
 use matcher::batch::{Algo, BatchMatcher, MatcherConfig, Window};
 use matcher::eval::{RunMetrics, ZONE_NAMES, Zones, column, eval_seeds, paired, sweep};
 use matcher::policy::CostPolicy;
 use simulator::{AtPin, RunOptions, Scenario, run};
+use std::sync::Mutex;
 
 /// Chính sách đặt trước. Mọi bộ trọng số đều được đo và báo cáo, kể cả bộ xấu.
 fn policies() -> Vec<(&'static str, CostPolicy)> {
@@ -174,6 +179,88 @@ fn compact(a: &[RunMetrics], rows: &[(String, Vec<RunMetrics>)]) {
     }
 }
 
+/// Hình dạng lô khi Hungarian ghép ngay: phép đo cho thấy vì sao `v1-risk` và `v1-age` không đổi kết quả.
+fn lot_shapes(args: &Args, engine: &route_engine::engine::Engine, sc: &Scenario, zones: &Zones) {
+    let n = n_seeds(args);
+    let seeds = eval_seeds(n);
+    println!(
+        "\n-- hình dạng lô khi Hungarian ghép ngay, chính sách v0-eta, {n} seed đánh giá {}…{} --",
+        seeds[0],
+        seeds[n - 1]
+    );
+    for (vname, _, tweak) in select_variants(args, &["thường", "thưa xe", "huỷ nặng", "cao điểm"])
+    {
+        let mut s = sc.clone();
+        tweak(&mut s);
+        let sink: Mutex<Vec<ProbeStats>> = Mutex::new(Vec::new());
+        sweep(&s, &seeds, zones, jobs(args), |c| {
+            let (m, _) = BatchMatcher::new(MatcherConfig::new(
+                "v0-eta",
+                Algo::Hungarian,
+                Window::Immediate,
+            ));
+            let (p, h) = Probe::new(m);
+            let o = run(
+                engine,
+                c,
+                Box::new(AtPin),
+                Box::new(p),
+                RunOptions { trace: true },
+            );
+            sink.lock()
+                .expect("khoá")
+                .push(h.lock().expect("khoá").clone());
+            o
+        });
+        let v = sink.into_inner().expect("khoá");
+        println!(
+            "  {vname:<10} lô 1 khách × m xe: {}; n ≥ 2 khách × 1 xe: {}; n ≥ 2 khách × m ≥ 2 xe: {}; khách của lô 1 × m đã chờ tối đa {} ms",
+            v.iter().map(|s| s.one_by_m).sum::<usize>(),
+            v.iter().map(|s| s.n_by_one).sum::<usize>(),
+            v.iter().map(|s| s.n_by_m).sum::<usize>(),
+            v.iter().map(|s| s.max_wait_one_by_m_ms).max().unwrap_or(0)
+        );
+    }
+}
+
+/// Cùng các chính sách nhưng có cửa sổ lô 10 s ở `cao điểm`: lô có nhiều khách, nhiều xe và khách đã chờ thật.
+fn windowed(args: &Args, engine: &route_engine::engine::Engine, sc: &Scenario, zones: &Zones) {
+    let n = n_seeds(args);
+    let seeds = eval_seeds(n);
+    println!(
+        "\n-- các chính sách với cửa sổ lô 10 s, Hungarian, {n} seed đánh giá {}…{}; hiệu so với v0-eta cùng cửa sổ --",
+        seeds[0],
+        seeds[n - 1]
+    );
+    for (vname, vdesc, tweak) in select_variants(args, &["cao điểm"]) {
+        let mut s = sc.clone();
+        tweak(&mut s);
+        println!("\n=== bộ giả định «{vname}»: {vdesc} ===");
+        let mut results: Vec<(String, Vec<RunMetrics>)> = Vec::new();
+        for (name, p) in &policies() {
+            let r = sweep(&s, &seeds, zones, jobs(args), |c| {
+                let mut cfg =
+                    MatcherConfig::new(&p.version, Algo::Hungarian, Window::Fixed(10_000));
+                cfg.policy = p.clone();
+                let (m, _) = BatchMatcher::new(cfg);
+                run(
+                    engine,
+                    c,
+                    Box::new(AtPin),
+                    Box::new(m),
+                    RunOptions { trace: true },
+                )
+            });
+            results.push(((*name).to_string(), r));
+        }
+        let a = results[0].1.clone();
+        for (nm, r) in &results[1..] {
+            print_paired(&format!("  v0-eta so với {nm}"), "v0-eta", nm, &a, r);
+            print_zones("v0-eta", nm, &a, r);
+        }
+    }
+}
+
 fn main() {
     let args = Args::from_env();
     println!("== LOC-45: chi phí ghép ngoài quãng đường (trên dữ liệu mô phỏng) ==");
@@ -183,6 +270,16 @@ fn main() {
     let n = n_seeds(&args);
     let seeds = eval_seeds(n);
     println!("đồ thị: {info}; kịch bản gốc: {}", sc.name);
+    if args.flag("--hinh-dang-lo") || args.flag("--thu-lo") {
+        if args.flag("--hinh-dang-lo") {
+            lot_shapes(&args, &engine, &sc, &zones);
+        }
+        if args.flag("--thu-lo") {
+            windowed(&args, &engine, &sc, &zones);
+        }
+        println!("uptime lúc kết thúc: {}", uptime());
+        return;
+    }
     println!(
         "{n} seed đánh giá {}…{}; thuật toán: Hungarian, ghép ngay (không cửa sổ); chi phí cặp theo chính sách có version:",
         seeds[0],

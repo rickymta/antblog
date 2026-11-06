@@ -4,7 +4,8 @@
 //!
 //! Chạy từ gốc repo:
 //!   cargo run --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc44_cat_tia_h3_ma_tran_thua
-//! Tham số: --seeds N (20), --jobs N (3), --instances N (số lô mỗi cỡ cho phần A, mặc định 10), --fixture
+//! Tham số: --seeds N (20), --jobs N (3), --instances N (số lô mỗi cỡ cho phần A, mặc định 10), --fixture,
+//! --chi-thanh-pho (chỉ chạy cỡ thành phố trên một lô riêng, có thêm Hungarian trên ma trận đầy đủ làm mốc tối ưu)
 
 use labs::p03::uptime;
 use labs::p05::{jobs, n_seeds, pickup_of, print_paired, select_variants, setup};
@@ -127,6 +128,7 @@ fn main() {
 
     // --only-b: chỉ chạy phần B (để thử thêm bộ giả định bằng --variant mà không lặp lại A và C)
     let only_b = args.flag("--only-b");
+    let only_city = args.flag("--chi-thanh-pho");
     let mut rng = Rand::new(44_001);
     if !only_b {
         // ---------- A ----------
@@ -149,7 +151,7 @@ fn main() {
                 (400, 1600),
             ]
         };
-        for &(cn, dn) in sizes {
+        for &(cn, dn) in sizes.iter().filter(|_| !only_city) {
             let insts: Vec<Inst> = (0..n_inst).map(|_| draw(cn, dn, &mut rng)).collect();
             let mut full_cost = Vec::new();
             let mut full_match = Vec::new();
@@ -271,8 +273,15 @@ fn main() {
         // ---------- city scale ----------
         let big = if fixture { 150 } else { 3000 };
         println!(
-            "\n  cỡ thành phố {big} × {big} (mỗi cấu hình 1 lô; Hungarian đầy đủ KHÔNG chạy ở cỡ này vì O(n³) ≈ {:.1e} phép), chuẩn so sánh = tham lam toàn cục trên ma trận đầy đủ:",
-            (big as f64).powi(3)
+            "\n  cỡ thành phố {big} × {big} (mỗi cấu hình 1 lô; {}, chuẩn so sánh = tham lam toàn cục trên ma trận đầy đủ:",
+            if only_city {
+                "có chạy Hungarian trên ma trận đầy đủ, in ngay dưới)".to_string()
+            } else {
+                format!(
+                    "Hungarian đầy đủ KHÔNG chạy ở cỡ này vì O(n³) ≈ {:.1e} phép)",
+                    (big as f64).powi(3)
+                )
+            }
         );
         let inst = draw(big, big, &mut rng);
         let to: Vec<&[Position]> = inst.picks.iter().map(Vec::as_slice).collect();
@@ -287,6 +296,18 @@ fn main() {
             gcost,
             gcost / gref.len().max(1) as f64
         );
+        if only_city {
+            let (h, th) = timed(|| hungarian(&m));
+            let hcost = total_cost(&m, &h) as f64 / 1000.0;
+            println!(
+                "  Hungarian trên ma trận đầy đủ của lô này: {} cặp, tổng {:.0} s ({:.1} s/cặp), giải {:.2} s (máy chịu tải); tham lam toàn cục / Hungarian = {:.3}",
+                h.len(),
+                hcost,
+                hcost / h.len().max(1) as f64,
+                th,
+                gcost / hcost
+            );
+        }
         println!(
             "  {:<30} {:>9} {:>9} {:>9} {:>11} {:>8} {:>13} {:>13} {:>13} {:>10}",
             "cấu hình cắt tỉa",
@@ -323,6 +344,11 @@ fn main() {
                 (r.candidates_us + r.eta_us + r.solve_us) / 1e6
             );
         }
+    }
+
+    if only_city {
+        println!("uptime lúc kết thúc: {}", uptime());
+        return;
     }
 
     // ---------- B ----------

@@ -3,11 +3,15 @@
 //!
 //! Chạy từ gốc repo (cần data/hcm-graph.bin, hoặc thêm --fixture):
 //!   cargo run --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc41_gan_nhat_sai_o_dau
-//! Tham số: --seeds N (mặc định 20), --jobs N (mặc định 3), --trials N (mẫu cho phần 1–2, mặc định 2000), --fixture
+//! Tham số: --seeds N (mặc định 20), --jobs N (mặc định 3), --trials N (mẫu cho phần 1–2, mặc định 2000), --fixture,
+//! --ca-te (chỉ chạy mục 1, in thêm tuyến thật của ca tệ nhất rồi dừng),
+//! --variant 'thường' --skip-seeds 20 (lặp lại mục 3 trên dải seed chưa dùng, để xem một kết quả có lặp lại không)
 
 use geo_core::haversine_m;
 use labs::p03::uptime;
-use labs::p05::{f1, jobs, n_seeds, pickup_of, print_paired, print_zones, setup, variants};
+use labs::p05::{
+    f1, jobs, n_seeds, pickup_of, print_paired, print_zones, select_variants, setup, variants,
+};
 use labs::{Args, Rand, percentile};
 use matcher::assign::{greedy_fifo, hungarian, total_cost};
 use matcher::batch::{BatchMatcher, MatcherConfig};
@@ -15,7 +19,9 @@ use matcher::cost::{Dense, eta_matrix_ms};
 use matcher::eval::{Zones, eval_seeds, sweep};
 use route_engine::engine::Engine;
 use route_engine::position::Position;
-use simulator::world::generate;
+use route_engine::profile::Profile;
+use route_engine::turn::{EdgeRoute, Goal, Start};
+use simulator::world::{Router, generate};
 use simulator::{AtPin, NearestStraightLine, RunOptions, Scenario, run};
 
 fn pool(
@@ -30,6 +36,99 @@ fn pool(
         .collect();
     let pins = w.customers.iter().map(|c| c.view.pin).collect();
     (drivers, pins)
+}
+
+/// Tuyến thật của ca tệ nhất: định tuyến theo cạnh có hướng như simulator, và theo nút như ma trận CH sau khi snap lại không xét hướng.
+fn explain_worst(
+    engine: &Engine,
+    sc: &Scenario,
+    drivers: &[(Position, geo_core::LatLng)],
+    (pin, crow_driver, eta_driver): (geo_core::LatLng, usize, usize),
+) {
+    println!("  tuyến của ca tệ nhất (bbox đồ thị HCM: lat 10,70–10,86, lng 106,60–106,78):");
+    let router = Router::new(engine, sc);
+    let Some((_, approach)) = pickup_of(engine, pin) else {
+        return;
+    };
+    for (label, d) in [("chim bay chọn", crow_driver), ("ETA chọn", eta_driver)] {
+        let (pos, ll) = drivers[d];
+        let mut best: Option<EdgeRoute> = None;
+        for &a in &approach {
+            if let Some(r) = router.route_car(0, Start::Pos(pos), Goal::Pos(a))
+                && best.as_ref().is_none_or(|b| r.cost < b.cost)
+            {
+                best = Some(r);
+            }
+        }
+        let Some(r) = best else {
+            println!("    {label} DR-{d:03}: không có tuyến");
+            continue;
+        };
+        let pts: Vec<geo_core::LatLng> = r
+            .edges
+            .iter()
+            .flat_map(|&e| engine.g.edge_points(e))
+            .collect();
+        let (mut lat_min, mut lng_min) = (f64::MAX, f64::MAX);
+        let far = pts
+            .iter()
+            .map(|&p| {
+                lat_min = lat_min.min(p.lat());
+                lng_min = lng_min.min(p.lng());
+                haversine_m(p, pin)
+            })
+            .fold(0.0, f64::max);
+        println!(
+            "    {label} DR-{d:03} ({:.5}, {:.5}): tuyến có hướng {:.0} m, {:.0} s (kể cả chi phí rẽ {:.0} s), {} cạnh; xa ghim nhất {:.0} m; lat nhỏ nhất {:.5}, lng nhỏ nhất {:.5}",
+            ll.lat(),
+            ll.lng(),
+            r.length_cm(&engine.g) as f64 / 100.0,
+            f64::from(r.cost) / 1000.0,
+            f64::from(r.turn_cost) / 1000.0,
+            r.edges.len(),
+            far,
+            lat_min,
+            lng_min
+        );
+        if let Ok(u) = engine.route(Profile::Car, ll, pin, None) {
+            println!(
+                "      snap lại tài xế không xét hướng xe đang chạy (được đi cả hai chiều cạnh nếu đường cho phép): {:.0} m, {:.0} s",
+                u.distance_m,
+                f64::from(u.duration_ms) / 1000.0
+            );
+        }
+    }
+    // DR-079 đứng sát mép cắt bản đồ: thử lại trên đồ thị cắt rộng hơn về phía nam và tây để xem đường vòng có do mép cắt không
+    let pbf = labs::pbf_path();
+    if !pbf.exists() {
+        println!("  không có {}: bỏ qua phép thử mép bản đồ", pbf.display());
+        return;
+    }
+    let wide = [10.62, 10.86, 106.54, 106.78];
+    let Ok(g) = road_graph::compile_pbf(&pbf, wide) else {
+        println!("  không đọc được PBF: bỏ qua phép thử mép bản đồ");
+        return;
+    };
+    println!(
+        "  cùng hai cặp điểm trên đồ thị cắt rộng hơn (lat {:.2}–{:.2}, lng {:.2}–{:.2}): {} nút, {} cạnh",
+        wide[0],
+        wide[1],
+        wide[2],
+        wide[3],
+        g.node_count(),
+        g.edge_count()
+    );
+    let e = Engine::new(g, route_engine::engine::EngineConfig::default());
+    for (label, d) in [("chim bay chọn", crow_driver), ("ETA chọn", eta_driver)] {
+        match e.route(Profile::Car, drivers[d].1, pin, None) {
+            Ok(u) => println!(
+                "    {label} DR-{d:03}: {:.0} m, {:.0} s",
+                u.distance_m,
+                f64::from(u.duration_ms) / 1000.0
+            ),
+            Err(err) => println!("    {label} DR-{d:03}: không có tuyến ({err:?})"),
+        }
+    }
 }
 
 fn main() {
@@ -53,6 +152,7 @@ fn main() {
     let idle_n = (drivers.len() * 2 / 3).max(2);
     let (mut regrets, mut differ, mut tried) = (Vec::new(), 0usize, 0usize);
     let mut worst: Option<(f64, String)> = None;
+    let mut worst_case: Option<(geo_core::LatLng, usize, usize)> = None;
     let mut ratio_far = Vec::new();
     while tried < trials {
         let pin = pins[rng.usize(pins.len())];
@@ -89,6 +189,7 @@ fn main() {
             differ += 1;
             ratio_far.push(e_c as f64 / e_e.max(1) as f64);
             if worst.as_ref().is_none_or(|w| regret > w.0) {
+                worst_case = Some((pin, idx[by_crow], idx[by_eta]));
                 worst = Some((
                     regret,
                     format!(
@@ -142,6 +243,13 @@ fn main() {
     }
     if let Some((_, w)) = worst {
         println!("  ca tệ nhất trong mẫu: {w}");
+    }
+    if args.flag("--ca-te") {
+        if let Some(case) = worst_case {
+            explain_worst(&engine, &sc, &drivers, case);
+        }
+        println!("uptime lúc kết thúc: {}", uptime());
+        return;
     }
 
     // ---------- 2. phản ví dụ: tham lam cướp tài xế ----------
@@ -253,7 +361,8 @@ fn main() {
 
     // ---------- 3. baseline trên simulator, so có cặp ----------
     let n = n_seeds(&args);
-    let seeds = eval_seeds(n);
+    let skip = args.u64_or("--skip-seeds", 0) as usize;
+    let seeds = eval_seeds(n + skip)[skip..].to_vec();
     println!(
         "\n-- 3. trong simulator: «gần nhất chim bay» (baseline P03) so với «gần nhất ETA» (ghép ngay), {n} seed đánh giá {}…{} --",
         seeds[0],
@@ -281,7 +390,8 @@ fn main() {
             ""
         }
     );
-    for (i, (vname, vdesc, tweak)) in variants().into_iter().enumerate() {
+    let all_names: Vec<&str> = variants().iter().map(|v| v.0).collect();
+    for (i, (vname, vdesc, tweak)) in select_variants(&args, &all_names).into_iter().enumerate() {
         if fixture && i > 1 {
             break;
         }

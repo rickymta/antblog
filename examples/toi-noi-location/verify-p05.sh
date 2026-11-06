@@ -68,12 +68,16 @@ expect loc41_gan_nhat_sai_o_dau 'FNV-1a = 1e0c1a5b30a19582'   # baseline của P
 expect loc41_gan_nhat_sai_o_dau 'ví dụ cụ thể'
 run loc42_ghep_theo_lo_hungarian --fixture --seeds 2 --batches 30 --jobs 2
 expect loc42_ghep_theo_lo_hungarian 'số lần Hungarian khác vét cạn = 0'
+run loc42_ghep_theo_lo_hungarian --fixture --bo-roi --seeds 2 --jobs 2
+expect loc42_ghep_theo_lo_hungarian 'từng bị khách đặt sau vượt' 2
 run loc43_cua_so_lo --fixture --seeds 2 --tuning-seeds 2 --jobs 2
 expect loc43_cua_so_lo 'chọn theo tiêu chí đặt trước'
 run loc44_cat_tia_h3_ma_tran_thua --fixture --seeds 2 --instances 2 --jobs 2
 expect loc44_cat_tia_h3_ma_tran_thua 'cắt tỉa r8, k-ring 2, 8 gần nhất|H3 r8, k-ring 2, 8 gần nhất' 2
 run loc45_chi_phi_cong_bang_rui_ro_huy --fixture --seeds 2 --jobs 2
 expect loc45_chi_phi_cong_bang_rui_ro_huy 'v1-all'
+run loc45_chi_phi_cong_bang_rui_ro_huy --fixture --hinh-dang-lo --thu-lo --variant 'thường' --seeds 2 --jobs 2
+expect loc45_chi_phi_cong_bang_rui_ro_huy 'n ≥ 2 khách × m ≥ 2 xe: 0;'   # ghép ngay không bao giờ có lô nhiều khách nhiều xe
 if command -v dotnet >/dev/null && [ "${SKIP_DOTNET:-0}" != "1" ]; then
   run loc46_goi_y_sang_dispatch --fixture
   expect loc46_goi_y_sang_dispatch 'KẾT QUẢ: [0-9]+ PASS, 0 FAIL'

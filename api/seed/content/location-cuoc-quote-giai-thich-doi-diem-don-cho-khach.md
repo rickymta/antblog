@@ -293,7 +293,7 @@ Máy đang chịu tải rất nặng khi đo, nên bài không dùng số giây 
 <p>Ô <code>deadhead_m</code> trung bình ở cột «60 xe» là 0 (−111,5 m [−289,6; +66,7], khoảng chứa 0). Câu đúng: «km rỗng giảm ở 5 trong 6 bộ giả định đã thử; khi chỉ có 60 xe, chênh lệch không khác biệt rõ.» Nên nêu thêm những chỉ số bền ở cả 6 bộ (ETA, <code>meet_gap_s</code>, quay đầu, hủy, chuyến hoàn thành) và chi phí của khách (<code>walk_m</code> p50 xấu hơn ở 5/6 bộ).</p>
 </details>
 
-Bài trước: [bài 39](/articles/location-hoc-diem-don-tu-lich-su-dbscan-python).
+Bài trước: [bài 39](/articles/location-hoc-diem-don-tu-lich-su-dbscan-python). Bài tiếp: [bài 41](/articles/location-gan-nhat-sai-o-dau-do-bang-mo-phong).
 
 ## Tài liệu gốc
 

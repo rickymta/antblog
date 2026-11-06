@@ -8,6 +8,10 @@ use route_engine::engine::{Engine, EngineConfig};
 use route_engine::position::Position;
 use route_engine::profile::Profile;
 use simulator::Scenario;
+use simulator::metrics::Outcome;
+use simulator::strategy::{Assignment, Ctx, DriverView, MatchStrategy, PendingView};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 /// Nạp đồ thị, dựng engine (CH ô tô nạp từ cache ở `rust/target/ch-cache` nếu là đồ thị HCM) và kịch bản.
 /// Trả (engine, mô tả đồ thị, kịch bản, cờ fixture).
@@ -253,4 +257,112 @@ pub fn print_zones(a_name: &str, b_name: &str, a: &[RunMetrics], b: &[RunMetrics
         );
     }
     println!("  (* = KTC 95% không chứa 0)  A = {a_name}; B = {b_name}");
+}
+
+/// Số đo của [`Probe`] trong một lần chạy.
+#[derive(Debug, Clone, Default)]
+pub struct ProbeStats {
+    /// Lô 1 khách × m xe: bài toán suy biến thành chọn phần tử nhỏ nhất của một hàng.
+    pub one_by_m: usize,
+    /// Lô n ≥ 2 khách × 1 xe: suy biến thành chọn phần tử nhỏ nhất của một cột.
+    pub n_by_one: usize,
+    /// Lô n ≥ 2 khách × m ≥ 2 xe: chỉ ở đây phép gán mới có thể khác việc chọn phần tử nhỏ nhất.
+    pub n_by_m: usize,
+    /// Thời gian đã chờ lớn nhất (ms) của khách trong các lô 1 × m.
+    pub max_wait_one_by_m_ms: u64,
+    /// Số lần khách bị bỏ qua: còn chờ trong một lô mà có khách khác được gán xe.
+    pub skipped: HashMap<u32, u32>,
+    /// Khách từng thấy một khách đặt **sau** mình được gán xe trước mình.
+    pub overtaken: HashMap<u32, u32>,
+}
+
+/// Bọc một chiến lược ghép chỉ để đo hình dạng lô và ai bị bỏ qua. Không đổi quyết định nào của chiến lược bên trong.
+pub struct Probe<M> {
+    inner: M,
+    stats: Arc<Mutex<ProbeStats>>,
+}
+
+impl<M> Probe<M> {
+    pub fn new(inner: M) -> (Self, Arc<Mutex<ProbeStats>>) {
+        let stats: Arc<Mutex<ProbeStats>> = Arc::default();
+        (
+            Self {
+                inner,
+                stats: Arc::clone(&stats),
+            },
+            stats,
+        )
+    }
+}
+
+impl<M: MatchStrategy> MatchStrategy for Probe<M> {
+    fn name(&self) -> &str {
+        self.inner.name()
+    }
+    fn window_ms(
+        &mut self,
+        ctx: &Ctx,
+        pending: &[PendingView],
+        idle: &[DriverView],
+    ) -> Option<u64> {
+        self.inner.window_ms(ctx, pending, idle)
+    }
+    fn assign(
+        &mut self,
+        ctx: &Ctx,
+        pending: &[PendingView],
+        idle: &[DriverView],
+    ) -> Vec<Assignment> {
+        let out = self.inner.assign(ctx, pending, idle);
+        let mut st = self.stats.lock().expect("khoá");
+        match (pending.len(), idle.len()) {
+            (0, _) | (_, 0) => {}
+            (1, _) => {
+                st.one_by_m += 1;
+                let w = ctx.now_ms.saturating_sub(pending[0].request_ms);
+                st.max_wait_one_by_m_ms = st.max_wait_one_by_m_ms.max(w);
+            }
+            (_, 1) => st.n_by_one += 1,
+            _ => st.n_by_m += 1,
+        }
+        let assigned_latest = pending
+            .iter()
+            .filter(|p| out.iter().any(|a| a.customer == p.customer))
+            .map(|p| p.request_ms)
+            .max();
+        for p in pending {
+            if out.iter().any(|a| a.customer == p.customer) {
+                continue;
+            }
+            if let Some(latest) = assigned_latest {
+                *st.skipped.entry(p.customer).or_default() += 1;
+                if latest > p.request_ms {
+                    *st.overtaken.entry(p.customer).or_default() += 1;
+                }
+            }
+        }
+        out
+    }
+}
+
+/// Khách hết kiên nhẫn của một lần chạy, đối chiếu với [`ProbeStats`]: (số khách, từng bị bỏ qua, từng bị khách đặt sau vượt, tổng lần bỏ qua).
+pub fn abandoned_vs_probe(
+    trips: &[simulator::TripRecord],
+    st: &ProbeStats,
+) -> (usize, usize, usize, u64) {
+    let (mut n, mut skipped, mut overtaken, mut total) = (0, 0, 0, 0u64);
+    for t in trips
+        .iter()
+        .filter(|t| t.outcome == Outcome::CancelledNoDriver)
+    {
+        n += 1;
+        if let Some(&k) = st.skipped.get(&t.customer) {
+            skipped += 1;
+            total += u64::from(k);
+        }
+        if st.overtaken.contains_key(&t.customer) {
+            overtaken += 1;
+        }
+    }
+    (n, skipped, overtaken, total)
 }

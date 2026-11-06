@@ -63,9 +63,17 @@ def solve(matrix, n, limit_s):
     t = time.perf_counter()
     sol = routing.SolveWithParameters(params)
     wall = time.perf_counter() - t
-    status = {0: "NOT_SOLVED", 1: "SUCCESS", 2: "FAIL", 3: "FAIL_TIMEOUT", 4: "INVALID", 5: "INFEASIBLE"}.get(
-        routing.status(), str(routing.status())
-    )
+    # routing_enums_pb2.RoutingSearchStatus của ortools 9.15
+    status = {
+        0: "NOT_SOLVED",
+        1: "SUCCESS",
+        2: "PARTIAL_SUCCESS_LOCAL_OPTIMUM_NOT_REACHED",
+        3: "FAIL",
+        4: "FAIL_TIMEOUT",
+        5: "INVALID",
+        6: "INFEASIBLE",
+        7: "OPTIMAL",
+    }.get(routing.status(), str(routing.status()))
     if not sol:
         return None, None, status, wall
     route, idx = [], routing.Start(0)
