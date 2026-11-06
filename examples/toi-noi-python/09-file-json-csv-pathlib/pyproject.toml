@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-09-file-json-csv-pathlib"
+version = "0.1.0"
+description = "Bài 09: đọc CSV/JSON bằng pathlib, tính cước và ghi summary.json an toàn"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

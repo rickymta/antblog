@@ -1,0 +1,16 @@
+[project]
+name = "toi-noi-py-37-grpc-fraud-scoring"
+version = "0.1.0"
+description = "Bài 37: service chấm điểm gian lận qua gRPC (grpcio, grpc.aio): protobuf, deadline, status code, interceptor"
+requires-python = ">=3.14"
+dependencies = [
+    "grpcio>=1.85.1",
+    "protobuf>=7.35.1",
+]
+
+[dependency-groups]
+# grpcio-tools chỉ cần khi sinh lại file *_pb2*.py; --verify dùng nó để kiểm file đã commit còn khớp .proto.
+dev = ["grpcio-tools>=1.85.1"]
+
+[tool.uv]
+package = false

@@ -1,0 +1,15 @@
+[project]
+name = "toi-noi-py-53-face-matching-danh-gia-bias-privacy"
+version = "0.1.0"
+description = "Bài 53: đánh giá so khớp khuôn mặt (SFace) theo nhóm, lưu embedding thay ảnh, retention, đồng ý, quyết định cuối do người"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.5",
+    "onnx>=1.23",
+    "onnxruntime>=1.31.1",
+    "opencv-python-headless>=5.0.0.93",
+    "scikit-learn>=1.9.1",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-21-asyncio-task-timeout"
+version = "0.1.0"
+description = "Bài 21: asyncio - coroutine, Task, TaskGroup, timeout và hủy khi gọi dịch vụ báo giá"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

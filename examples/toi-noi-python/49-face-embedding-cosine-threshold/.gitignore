@@ -1,0 +1,7 @@
+out/
+.venv/
+__pycache__/
+*.onnx
+*.zip
+*.part
+.pytest_cache/

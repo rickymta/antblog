@@ -1,0 +1,18 @@
+[project]
+name = "toi-noi-py-07-module-package-import"
+version = "0.1.0"
+description = "Bài 07: module, package và import qua gói toinoi_fare"
+requires-python = ">=3.14"
+dependencies = []
+
+# Backend build để uv cài gói src/toinoi_fare vào môi trường ở chế độ editable.
+[build-system]
+requires = ["uv_build>=0.12.11,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = true
+
+# Tên project có dấu gạch (toi-noi-py-07-...) khác tên package import, nên khai báo tường minh.
+[tool.uv.build-backend]
+module-name = "toinoi_fare"

@@ -1,0 +1,28 @@
+// Hợp đồng giữa Dispatch (gọi) và fraud-scoring (Python, phục vụ).
+// Số hiệu field là phần của hợp đồng: đã phát hành thì không đổi, không tái sử dụng.
+syntax = "proto3";
+
+package toinoi.fraud.v1;
+
+service FraudScoring {
+  // Chấm điểm một chuyến vừa đặt. Điểm là đầu vào cho người duyệt, không phải quyết định.
+  rpc Score(ScoreRequest) returns (ScoreResponse);
+}
+
+message ScoreRequest {
+  string trip_id = 1;
+  string customer_id = 2;
+  // optional: lúc đặt chuyến có thể chưa có tài xế; có optional thì phân biệt được "chưa có" và "rỗng".
+  optional string driver_id = 3;
+  string device_id = 4;
+  // Chuỗi thập phân ("2.5"), cùng quy ước với Money: không dùng double cho số cần chính xác.
+  string distance_km = 5;
+}
+
+message ScoreResponse {
+  // 0.0 .. 1.0; càng cao càng cần người xem.
+  double score = 1;
+  // Mã lý do (ổn định, máy đọc được), vd "device_shared".
+  repeated string reasons = 2;
+  string model_version = 3;
+}

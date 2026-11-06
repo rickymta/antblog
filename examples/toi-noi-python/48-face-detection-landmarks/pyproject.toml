@@ -1,0 +1,18 @@
+[project]
+name = "toi-noi-py-48-face-detection-landmarks"
+version = "0.1.0"
+description = "Bài 48: face detection và landmarks, căn chỉnh khuôn mặt, chất lượng ảnh"
+requires-python = ">=3.14"
+dependencies = [
+    # opencv-contrib-python vì mediapipe cũng kéo gói này; hai gói cv2 khác tên cùng ghi đè thư mục cv2 nên không
+    # để chung. Chặn dưới 5 (kiểm 2026-11-06): bản chính 5.0.0.93 bỏ CascadeClassifier và xml; bản contrib 5.0.0.93
+    # còn class nhưng không kèm file haarcascade_*.xml, nên Haar không nạp được.
+    "opencv-contrib-python>=4.14,<5",
+    "mediapipe>=1.2",
+    "numpy>=2.5",
+    "pillow>=13",
+    "scikit-learn>=1.9",
+]
+
+[tool.uv]
+package = false

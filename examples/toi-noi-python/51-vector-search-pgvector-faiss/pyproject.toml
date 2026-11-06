@@ -1,0 +1,16 @@
+[project]
+name = "toi-noi-py-51-vector-search-pgvector-faiss"
+version = "0.1.0"
+description = "Bài 51: vector search với pgvector và FAISS, tìm một người nhiều tài khoản"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.5",
+    "scikit-learn>=1.8",
+    "psycopg[binary]>=3.2",
+    "pgvector>=0.4",
+    "faiss-cpu>=1.12",
+    "threadpoolctl>=3",
+]
+
+[tool.uv]
+package = false

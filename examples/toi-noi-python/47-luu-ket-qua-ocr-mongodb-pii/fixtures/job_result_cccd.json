@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "kyc_id": "KYC-0007",
+  "document_type": "cccd",
+  "image_sha256": "dec89321f6b5dcdba573fe24133ca6de1870045570ca746a870f2038e8d7edd9",
+  "fields": {
+    "id_number": "099090159083",
+    "date_of_birth": "13/03/1990",
+    "full_name": "NGUYEN VAN A",
+    "sex": "Nam",
+    "hometown_city": "Cần Thơ"
+  },
+  "field_confidence": {
+    "id_number": 0.965,
+    "date_of_birth": 0.966,
+    "full_name": 0.952,
+    "sex": 0.964,
+    "hometown_city": 0.966
+  },
+  "confidence": 0.952,
+  "needs_review": false,
+  "model_version": "tesseract-5.5.4+vie+eng/psm6",
+  "ocr_ms": 2087,
+  "raw_text": "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nCĂN CƯỚC CÔNG DÂN\nMAU THU’ NGHIỆM - DỮ LIEU TONG HOP\nSố /No.:\n099090159083\nHọ và tên: = 5\n› : NGUYEN VAN A\nANH MAU cea\nNgay sinh:\n13/03/1990\nGiới tính:\nNam\nQuê quán:\nCần Thơ\nDU’ LIEU TONG HỢP - KHÔNG PHẢI GIAY TỜ THAT"
+}

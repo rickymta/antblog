@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-08-exception-debug-logging"
+version = "0.1.0"
+description = "Bài 08: exception, debug và logging qua một báo giá sai"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

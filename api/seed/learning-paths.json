@@ -549,5 +549,88 @@
       "ba-thuc-hanh-review-goi-yeu-cau"
     ],
     "status": "published"
+  },
+  {
+    "slug": "python-co-ban-qua-toi-noi",
+    "title": "Python cơ bản qua Tới Nơi",
+    "description": "Lộ trình 20 bài cấp cơ bản: Python 3.14 với uv, kiểu dữ liệu và Decimal, hàm, cấu trúc dữ liệu, generator, module, exception, file và pytest, rồi mô hình hóa nghiệp vụ bằng dataclass, type hints, Protocol, pydantic và pattern matching. Mọi ví dụ là chuyến xe và hồ sơ tài xế của Tới Nơi.",
+    "level": "beginner",
+    "category": "programming",
+    "articles": [
+      "python-va-uv-tu-source-code-den-chuong-trinh",
+      "python-bien-kieu-du-lieu-decimal",
+      "python-dieu-kien-vong-lap-ham",
+      "python-chuoi-f-string-ngay-gio-timezone",
+      "python-list-dict-set-tuple",
+      "python-comprehension-generator-iterator",
+      "python-module-package-import",
+      "python-exception-debug-logging",
+      "python-file-json-csv-pathlib",
+      "python-pytest-kiem-thu-chinh-sach-cuoc",
+      "python-class-dataclass-property-encapsulation",
+      "python-type-hints-mypy-protocol-generics",
+      "python-frozen-dataclass-enum-immutability",
+      "python-abc-protocol-composition-dependency-injection",
+      "python-pydantic-validation-settings",
+      "python-match-pattern-matching-none",
+      "python-decorator-context-manager",
+      "python-functools-itertools-pipeline",
+      "python-design-pattern-strategy-state-adapter",
+      "python-dong-goi-ruff-pre-commit-cau-truc-du-an"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "python-trung-binh-qua-toi-noi",
+    "title": "Python trung bình qua Tới Nơi",
+    "description": "Lộ trình 20 bài cấp trung bình: asyncio, GIL và free-threaded, đồng thời, SQLAlchemy với PostgreSQL, transaction và idempotency, MongoDB, Redis, integration test, polars và xử lý ảnh, rồi service FastAPI, xác thực, gRPC, Kafka, outbox và worker nền. Mọi lab chạy với hạ tầng thật trong Docker.",
+    "level": "intermediate",
+    "category": "programming",
+    "articles": [
+      "python-asyncio-coroutine-task-timeout-cancellation",
+      "python-gil-threading-multiprocessing-free-threaded",
+      "python-concurrency-lock-queue-semaphore",
+      "python-sqlalchemy-psycopg-postgresql-mapping-migration",
+      "python-transaction-optimistic-concurrency-idempotency",
+      "python-mongodb-pymongo-motor-document-ocr",
+      "python-redis-cache-rate-limit-geo",
+      "python-integration-test-testcontainers-fixture",
+      "python-polars-pandas-parquet-phan-tich-chuyen",
+      "python-numpy-pillow-opencv-tien-xu-ly-anh",
+      "python-fastapi-http-endpoint-bao-gia",
+      "python-fastapi-validation-problem-details-openapi",
+      "python-fastapi-dependency-middleware-settings-logging",
+      "python-fastapi-jwt-oauth2-authorization",
+      "python-fastapi-upload-background-task-streaming",
+      "python-fastapi-api-test-httpx",
+      "python-grpc-fraud-scoring-service",
+      "python-kafka-aiokafka-producer-consumer-schema",
+      "python-outbox-inbox-idempotent-consumer",
+      "python-worker-arq-scheduling-retry-dead-letter"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "python-nang-cao-qua-toi-noi",
+    "title": "Python nâng cao qua Tới Nơi",
+    "description": "Lộ trình 39 bài cấp nâng cao: OCR giấy tờ định danh, so khớp khuôn mặt, chấm điểm gian lận, dự đoán ETA và nhu cầu, Clean Architecture cho service Python, profiling, container, CI/CD, triển khai AWS và Azure, OpenTelemetry, kết thúc bằng pipeline KYC và fraud từ code tới vận hành. Dữ liệu trong lab đều là dữ liệu tổng hợp.",
+    "level": "advanced",
+    "category": "programming",
+    "articles": [
+      "python-kyc-tai-xe-bai-toan-du-lieu-metric",
+      "python-opencv-phat-hien-canh-perspective-deskew",
+      "python-tesseract-easyocr-paddleocr-so-sanh",
+      "python-hau-xu-ly-ocr-regex-parse-truong-checksum",
+      "python-danh-gia-ocr-cer-wer-threshold",
+      "python-ocr-service-fastapi-worker-timeout",
+      "python-luu-ket-qua-ocr-mongodb-pii-retention",
+      "python-face-detection-landmarks-mediapipe-opencv",
+      "python-face-embedding-cosine-threshold-far-frr",
+      "python-liveness-anti-spoofing-chat-luong-anh",
+      "python-vector-search-pgvector-faiss-trung-tai-xe",
+      "python-face-match-grpc-service-batching-model-loading",
+      "python-face-matching-danh-gia-bias-privacy-consent"
+    ],
+    "status": "published"
   }
 ]

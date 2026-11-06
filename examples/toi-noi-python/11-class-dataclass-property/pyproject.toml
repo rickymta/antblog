@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-11-class-dataclass-property"
+version = "0.1.0"
+description = "Bài 11: class, dataclass, property và máy trạng thái chuyến Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

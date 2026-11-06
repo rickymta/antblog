@@ -1,0 +1,21 @@
+[project]
+name = "toi-noi-py-45-danh-gia-ocr-cer-wer"
+version = "0.1.0"
+description = "Bài 45: đánh giá OCR - CER/WER với jiwer, bộ test vàng, ngưỡng đưa người duyệt, regression test"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.5",
+    "pillow>=13",
+    "rapidfuzz>=3",
+    "jiwer>=4",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

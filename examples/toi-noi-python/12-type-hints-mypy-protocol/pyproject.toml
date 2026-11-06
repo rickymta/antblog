@@ -1,0 +1,16 @@
+[project]
+name = "toi-noi-py-12-type-hints-mypy-protocol"
+version = "0.1.0"
+description = "Bài 12: type hints, mypy, Protocol và generics cho mã nghiệp vụ Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = ["mypy>=2.4"]
+
+[tool.uv]
+package = false
+
+[tool.mypy]
+# Cấu hình mặc định khi chạy `mypy` trong lab; lệnh trong bài vẫn ghi --strict rõ ràng.
+python_version = "3.14"

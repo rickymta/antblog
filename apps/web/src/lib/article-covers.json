@@ -3218,5 +3218,535 @@
       "EXAMPLES",
       "REVIEW"
     ]
+  },
+  "python-va-uv-tu-source-code-den-chuong-trinh": {
+    "title": "PYTHON / UV",
+    "subtitle": "Python 01 · From source to a running fare",
+    "diagram": "flow",
+    "labels": [
+      "SOURCE .PY",
+      "BYTECODE",
+      "INTERPRETER"
+    ]
+  },
+  "python-bien-kieu-du-lieu-decimal": {
+    "title": "DECIMAL",
+    "subtitle": "Python 02 · Money and distance without float drift",
+    "diagram": "matrix",
+    "labels": [
+      "0.1 + 0.2",
+      "DECIMAL",
+      "ROUND_HALF_UP"
+    ]
+  },
+  "python-dieu-kien-vong-lap-ham": {
+    "title": "IF / FOR / DEF",
+    "subtitle": "Python 03 · Splitting the fare rules into functions",
+    "diagram": "flow",
+    "labels": [
+      "CONDITION",
+      "LOOP",
+      "FUNCTION"
+    ]
+  },
+  "python-chuoi-f-string-ngay-gio-timezone": {
+    "title": "UTC / +07:00",
+    "subtitle": "Python 04 · Strings, f-strings and aware datetimes",
+    "diagram": "split",
+    "labels": [
+      "DISPLAY",
+      "↔",
+      "STORE UTC"
+    ]
+  },
+  "python-list-dict-set-tuple": {
+    "title": "LIST · DICT · SET",
+    "subtitle": "Python 05 · Trips and drivers in memory",
+    "diagram": "blocks",
+    "labels": [
+      "LIST",
+      "DICT",
+      "SET"
+    ]
+  },
+  "python-comprehension-generator-iterator": {
+    "title": "YIELD",
+    "subtitle": "Python 06 · Streaming driver locations lazily",
+    "diagram": "cycle",
+    "labels": [
+      "SOURCE",
+      "GENERATOR",
+      "CONSUMER"
+    ]
+  },
+  "python-module-package-import": {
+    "title": "IMPORT",
+    "subtitle": "Python 07 · Modules, packages and the src layout",
+    "diagram": "layers",
+    "labels": [
+      "MODULE",
+      "PACKAGE",
+      "PROJECT"
+    ]
+  },
+  "python-exception-debug-logging": {
+    "title": "TRACEBACK",
+    "subtitle": "Python 08 · Following a wrong quote to its cause",
+    "diagram": "code",
+    "labels": [
+      "RAISE",
+      "CAUGHT",
+      "LOGGED"
+    ]
+  },
+  "python-file-json-csv-pathlib": {
+    "title": "JSON / CSV",
+    "subtitle": "Python 09 · Reading the Tới Nơi sample dataset",
+    "diagram": "storage",
+    "labels": [
+      "PATHLIB",
+      "FILE",
+      "UTF-8"
+    ]
+  },
+  "python-pytest-kiem-thu-chinh-sach-cuoc": {
+    "title": "PYTEST",
+    "subtitle": "Python 10 · Testing the fare policy",
+    "diagram": "checklist",
+    "labels": [
+      "PARAMETRIZE",
+      "FIXTURE",
+      "RAISES"
+    ]
+  },
+  "python-class-dataclass-property-encapsulation": {
+    "title": "PYTHON / DATACLASS",
+    "subtitle": "Python 11 · Protecting trip state",
+    "diagram": "flow",
+    "labels": [
+      "CLASS",
+      "PROPERTY",
+      "STATE"
+    ]
+  },
+  "python-type-hints-mypy-protocol-generics": {
+    "title": "PYTHON / TYPE HINTS",
+    "subtitle": "Python 12 · Type contracts for domain code",
+    "diagram": "checklist",
+    "labels": [
+      "MYPY",
+      "PROTOCOL",
+      "GENERICS"
+    ]
+  },
+  "python-frozen-dataclass-enum-immutability": {
+    "title": "PYTHON / FROZEN ENUM",
+    "subtitle": "Python 13 · Immutable Money and Quote",
+    "diagram": "blocks",
+    "labels": [
+      "ENUM",
+      "FROZEN",
+      "QUOTE"
+    ]
+  },
+  "python-abc-protocol-composition-dependency-injection": {
+    "title": "PYTHON / INJECTION",
+    "subtitle": "Python 14 · Swapping fare policies by DI",
+    "diagram": "layers",
+    "labels": [
+      "ABC",
+      "PROTOCOL",
+      "INJECT"
+    ]
+  },
+  "python-pydantic-validation-settings": {
+    "title": "PYTHON / PYDANTIC",
+    "subtitle": "Python 15 · Validate at the boundary",
+    "diagram": "checklist",
+    "labels": [
+      "VALIDATE",
+      "MODEL",
+      "SETTINGS"
+    ]
+  },
+  "python-match-pattern-matching-none": {
+    "title": "PYTHON / MATCH",
+    "subtitle": "Python 16 · Explicit trip transitions",
+    "diagram": "split",
+    "labels": [
+      "PATTERN",
+      "GUARD",
+      "NONE"
+    ]
+  },
+  "python-decorator-context-manager": {
+    "title": "PYTHON / DECORATOR",
+    "subtitle": "Python 17 · Retry, timing and transactions",
+    "diagram": "layers",
+    "labels": [
+      "DECORATOR",
+      "RETRY",
+      "WITH"
+    ]
+  },
+  "python-functools-itertools-pipeline": {
+    "title": "PYTHON / PIPELINE",
+    "subtitle": "Python 18 · Batch processing with itertools",
+    "diagram": "flow",
+    "labels": [
+      "FILTER",
+      "PRICE",
+      "GROUP"
+    ]
+  },
+  "python-design-pattern-strategy-state-adapter": {
+    "title": "PYTHON / PATTERNS",
+    "subtitle": "Python 19 · Strategy, State, Adapter",
+    "diagram": "split",
+    "labels": [
+      "STRATEGY",
+      "STATE",
+      "ADAPTER"
+    ]
+  },
+  "python-dong-goi-ruff-pre-commit-cau-truc-du-an": {
+    "title": "PYTHON / PACKAGING",
+    "subtitle": "Python 20 · Ruff, mypy and project layout",
+    "diagram": "checklist",
+    "labels": [
+      "RUFF",
+      "MYPY",
+      "PYTEST"
+    ]
+  },
+  "python-asyncio-coroutine-task-timeout-cancellation": {
+    "title": "PYTHON / ASYNCIO",
+    "subtitle": "Python 21 · Concurrent quote calls",
+    "diagram": "flow",
+    "labels": [
+      "TASK",
+      "TIMEOUT",
+      "CANCEL"
+    ]
+  },
+  "python-gil-threading-multiprocessing-free-threaded": {
+    "title": "PYTHON / GIL & POOLS",
+    "subtitle": "Python 22 · Threads, processes, free-threaded",
+    "diagram": "split",
+    "labels": [
+      "THREAD",
+      "PROCESS",
+      "GIL"
+    ]
+  },
+  "python-concurrency-lock-queue-semaphore": {
+    "title": "PYTHON / LOCK QUEUE",
+    "subtitle": "Python 23 · No double trip accept",
+    "diagram": "blocks",
+    "labels": [
+      "LOCK",
+      "QUEUE",
+      "SEMAPHORE"
+    ]
+  },
+  "python-sqlalchemy-psycopg-postgresql-mapping-migration": {
+    "title": "PYTHON / SQLALCHEMY",
+    "subtitle": "Python 24 · ORM and migrations",
+    "diagram": "layers",
+    "labels": [
+      "MAPPING",
+      "SESSION",
+      "ALEMBIC"
+    ]
+  },
+  "python-transaction-optimistic-concurrency-idempotency": {
+    "title": "PYTHON / TRANSACTION",
+    "subtitle": "Python 25 · Safe booking writes",
+    "diagram": "split",
+    "labels": [
+      "VERSION",
+      "IDEMPOTENT",
+      "RETRY"
+    ]
+  },
+  "python-mongodb-pymongo-motor-document-ocr": {
+    "title": "PYTHON / MONGODB",
+    "subtitle": "Python 26 · OCR results as documents",
+    "diagram": "storage",
+    "labels": [
+      "DOCUMENT",
+      "INDEX",
+      "SCHEMA"
+    ]
+  },
+  "python-redis-cache-rate-limit-geo": {
+    "title": "PYTHON / REDIS",
+    "subtitle": "Python 27 · Cache, limits and driver GEO",
+    "diagram": "layers",
+    "labels": [
+      "CACHE",
+      "BUCKET",
+      "GEO"
+    ]
+  },
+  "python-integration-test-testcontainers-fixture": {
+    "title": "PYTHON / TESTCONTAINERS",
+    "subtitle": "Python 28 · Real databases in tests",
+    "diagram": "layers",
+    "labels": [
+      "PYTEST",
+      "CONTAINER",
+      "SCHEMA"
+    ]
+  },
+  "python-polars-pandas-parquet-phan-tich-chuyen": {
+    "title": "PYTHON / POLARS",
+    "subtitle": "Python 29 · Analysing 2M trips a day",
+    "diagram": "matrix",
+    "labels": [
+      "PARQUET",
+      "LAZY",
+      "GROUP BY"
+    ]
+  },
+  "python-numpy-pillow-opencv-tien-xu-ly-anh": {
+    "title": "PYTHON / NUMPY IMAGE",
+    "subtitle": "Python 30 · Images as arrays for ID cards",
+    "diagram": "matrix",
+    "labels": [
+      "NDARRAY",
+      "THRESHOLD",
+      "OPENCV"
+    ]
+  },
+  "python-fastapi-http-endpoint-bao-gia": {
+    "title": "PYTHON / FASTAPI",
+    "subtitle": "Python 31 · Quote endpoint over HTTP",
+    "diagram": "flow",
+    "labels": [
+      "ASGI",
+      "ROUTE",
+      "QUOTE"
+    ]
+  },
+  "python-fastapi-validation-problem-details-openapi": {
+    "title": "PYTHON / PROBLEM JSON",
+    "subtitle": "Python 32 · Errors as an API contract",
+    "diagram": "checklist",
+    "labels": [
+      "422",
+      "PROBLEM",
+      "OPENAPI"
+    ]
+  },
+  "python-fastapi-dependency-middleware-settings-logging": {
+    "title": "PYTHON / FASTAPI DEPS",
+    "subtitle": "Python 33 · Dependencies, logging, request id",
+    "diagram": "layers",
+    "labels": [
+      "DEPENDS",
+      "MIDDLEWARE",
+      "LOGGING"
+    ]
+  },
+  "python-fastapi-jwt-oauth2-authorization": {
+    "title": "PYTHON / JWT AUTH",
+    "subtitle": "Python 34 · OAuth2, JWT and scopes",
+    "diagram": "checklist",
+    "labels": [
+      "TOKEN",
+      "SCOPE",
+      "OWNER"
+    ]
+  },
+  "python-fastapi-upload-background-task-streaming": {
+    "title": "PYTHON / UPLOAD + SSE",
+    "subtitle": "Python 35 · Upload, background, streaming",
+    "diagram": "flow",
+    "labels": [
+      "UPLOAD",
+      "BACKGROUND",
+      "SSE"
+    ]
+  },
+  "python-fastapi-api-test-httpx": {
+    "title": "PYTHON / API TEST",
+    "subtitle": "Python 36 · Contract tests with httpx",
+    "diagram": "checklist",
+    "labels": [
+      "ASGI CLIENT",
+      "OVERRIDE",
+      "SNAPSHOT"
+    ]
+  },
+  "python-grpc-fraud-scoring-service": {
+    "title": "PYTHON / GRPC",
+    "subtitle": "Python 37 · Fraud scoring over gRPC",
+    "diagram": "flow",
+    "labels": [
+      "PROTO",
+      "DEADLINE",
+      "STATUS"
+    ]
+  },
+  "python-kafka-aiokafka-producer-consumer-schema": {
+    "title": "PYTHON / KAFKA",
+    "subtitle": "Python 38 · Events, offsets and schema",
+    "diagram": "layers",
+    "labels": [
+      "PRODUCER",
+      "PARTITION",
+      "CONSUMER"
+    ]
+  },
+  "python-outbox-inbox-idempotent-consumer": {
+    "title": "PYTHON / OUTBOX",
+    "subtitle": "Python 39 · Outbox, inbox, idempotent consumer",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "KAFKA",
+      "INBOX"
+    ]
+  },
+  "python-worker-arq-scheduling-retry-dead-letter": {
+    "title": "PYTHON / WORKER ARQ",
+    "subtitle": "Python 40 · Retry, dead-letter, shutdown",
+    "diagram": "cycle",
+    "labels": [
+      "RETRY",
+      "DEAD-LETTER",
+      "SIGTERM"
+    ]
+  },
+  "python-kyc-tai-xe-bai-toan-du-lieu-metric": {
+    "title": "PYTHON / KYC METRICS",
+    "subtitle": "Python 41 · Measuring ID-card OCR",
+    "diagram": "checklist",
+    "labels": [
+      "DATASET",
+      "CER",
+      "REVIEW"
+    ]
+  },
+  "python-opencv-phat-hien-canh-perspective-deskew": {
+    "title": "PYTHON / OPENCV DESKEW",
+    "subtitle": "Python 42 · Edges, warp and deskew",
+    "diagram": "flow",
+    "labels": [
+      "CANNY",
+      "WARP",
+      "DESKEW"
+    ]
+  },
+  "python-tesseract-easyocr-paddleocr-so-sanh": {
+    "title": "PYTHON / OCR ENGINES",
+    "subtitle": "Python 43 · Comparing three OCR engines",
+    "diagram": "matrix",
+    "labels": [
+      "TESSERACT",
+      "EASYOCR",
+      "PADDLEOCR"
+    ]
+  },
+  "python-hau-xu-ly-ocr-regex-parse-truong-checksum": {
+    "title": "PYTHON / OCR PARSING",
+    "subtitle": "Python 44 · Fields from raw OCR text",
+    "diagram": "checklist",
+    "labels": [
+      "NFC",
+      "REGEX",
+      "FUZZY"
+    ]
+  },
+  "python-danh-gia-ocr-cer-wer-threshold": {
+    "title": "PYTHON / OCR METRICS",
+    "subtitle": "Python 45 · CER, WER and review thresholds",
+    "diagram": "target",
+    "labels": [
+      "CER",
+      "WER",
+      "THRESHOLD"
+    ]
+  },
+  "python-ocr-service-fastapi-worker-timeout": {
+    "title": "PYTHON / OCR SERVICE",
+    "subtitle": "Python 46 · OCR behind a job queue",
+    "diagram": "flow",
+    "labels": [
+      "API",
+      "QUEUE",
+      "WORKER"
+    ]
+  },
+  "python-luu-ket-qua-ocr-mongodb-pii-retention": {
+    "title": "PYTHON / PII + TTL",
+    "subtitle": "Python 47 · Masked OCR records in MongoDB",
+    "diagram": "storage",
+    "labels": [
+      "MASK",
+      "TTL",
+      "AUDIT"
+    ]
+  },
+  "python-face-detection-landmarks-mediapipe-opencv": {
+    "title": "PYTHON / FACE DETECT",
+    "subtitle": "Python 48 · Finding and aligning faces",
+    "diagram": "flow",
+    "labels": [
+      "DETECT",
+      "LANDMARK",
+      "ALIGN"
+    ]
+  },
+  "python-face-embedding-cosine-threshold-far-frr": {
+    "title": "PYTHON / FACE MATCH",
+    "subtitle": "Python 49 · Cosine, FAR/FRR and thresholds",
+    "diagram": "split",
+    "labels": [
+      "EMBEDDING",
+      "COSINE",
+      "THRESHOLD"
+    ]
+  },
+  "python-liveness-anti-spoofing-chat-luong-anh": {
+    "title": "PYTHON / LIVENESS",
+    "subtitle": "Python 50 · Image quality, not liveness",
+    "diagram": "checklist",
+    "labels": [
+      "BLUR",
+      "MOIRE",
+      "REVIEW"
+    ]
+  },
+  "python-vector-search-pgvector-faiss-trung-tai-xe": {
+    "title": "PYTHON / VECTOR SEARCH",
+    "subtitle": "Python 51 · pgvector and FAISS duplicates",
+    "diagram": "network",
+    "labels": [
+      "EMBED",
+      "HNSW",
+      "TOP-K"
+    ]
+  },
+  "python-face-match-grpc-service-batching-model-loading": {
+    "title": "PYTHON / FACE MATCH RPC",
+    "subtitle": "Python 52 · Face match as a service",
+    "diagram": "flow",
+    "labels": [
+      "QUEUE",
+      "BATCH",
+      "ONNX"
+    ]
+  },
+  "python-face-matching-danh-gia-bias-privacy-consent": {
+    "title": "PYTHON / FACE BIAS",
+    "subtitle": "Python 53 · Bias, privacy and consent",
+    "diagram": "checklist",
+    "labels": [
+      "GROUPS",
+      "CONSENT",
+      "HUMAN"
+    ]
   }
 }

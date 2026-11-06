@@ -1,0 +1,17 @@
+[project]
+name = "toi-noi-py-34-fastapi-jwt-authorization"
+version = "0.1.0"
+description = "Bài 34: FastAPI OAuth2 password + bearer, JWT HS256 (PyJWT), scope và băm mật khẩu argon2 (pwdlib)"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.162",
+    "uvicorn>=0.54",
+    "pydantic-settings>=2.16",
+    "httpx>=0.28",
+    "pyjwt>=2.15",
+    "pwdlib[argon2]>=0.3",
+    "python-multipart>=0.0.33",
+]
+
+[tool.uv]
+package = false

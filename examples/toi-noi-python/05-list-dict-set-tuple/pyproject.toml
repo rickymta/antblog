@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-05-list-dict-set-tuple"
+version = "0.1.0"
+description = "Bài 05: list, dict, set, tuple qua dữ liệu chuyến và tài xế của Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

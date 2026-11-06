@@ -1,0 +1,13 @@
+[project]
+name = "toi-noi-py-44-hau-xu-ly-ocr-regex-checksum"
+version = "0.1.0"
+description = "Bài 44: hậu xử lý OCR - chuẩn hóa Unicode, regex có tên, sửa lỗi theo ngữ cảnh, rapidfuzz, kiểm cấu trúc số"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.5",
+    "pillow>=13",
+    "rapidfuzz>=3",
+]
+
+[tool.uv]
+package = false

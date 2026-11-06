@@ -1,0 +1,14 @@
+[project]
+name = "toi-noi-py-29-polars-pandas-parquet"
+version = "0.1.0"
+description = "Bài 29: phân tích chuyến Tới Nơi bằng polars, pandas và Parquet"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.5",
+    "polars>=2.1",
+    "pandas>=3.1",
+    "pyarrow>=26",
+]
+
+[tool.uv]
+package = false
