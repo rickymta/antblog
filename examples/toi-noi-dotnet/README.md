@@ -38,19 +38,19 @@ Khung biên tập từ cơ bản tới nâng cao. Mỗi bài có câu hỏi mở
 
 ## 05 · Dữ liệu và độ tin cậy
 
-21. EF Core 10 và PostgreSQL: mapping, migration, truy vấn — dự kiến
-22. Tracking, projection và N+1: đọc SQL trước khi tối ưu — dự kiến
-23. Transaction, optimistic concurrency và idempotency: đặt chuyến an toàn — dự kiến
-24. BackgroundService và hàng đợi: tác vụ sau khi đặt chuyến — dự kiến
-25. Cache, timeout, retry và rate limiting: giữ API ổn định — dự kiến
-26. Outbox và xử lý thông điệp trùng: nối dịch vụ có kiểm soát — dự kiến
+21. EF Core 10 và PostgreSQL: mapping, migration, truy vấn — **đã viết**
+22. Tracking, projection và N+1: đọc SQL trước khi tối ưu — **đã viết**
+23. Transaction, optimistic concurrency và idempotency: đặt chuyến an toàn — **đã viết**
+24. BackgroundService và hàng đợi: tác vụ sau khi đặt chuyến — **đã viết**
+25. Cache, timeout, retry và rate limiting: giữ API ổn định — **đã viết**
+26. Outbox và xử lý thông điệp trùng: nối dịch vụ có kiểm soát — **đã viết**
 
 ## 06 · Nâng cao và vận hành
 
-27. Allocation, GC, IDisposable và async disposal — dự kiến
-28. BenchmarkDotNet, profiling và Span: tối ưu có số đo — dự kiến
-29. C# 14 trong thực tế: extension members, field và tính năng mới — dự kiến
-30. DDD: bounded context, aggregate, value object và invariant của chuyến — dự kiến
+27. Allocation, GC, IDisposable và async disposal — **đã viết**
+28. BenchmarkDotNet, profiling và Span: tối ưu có số đo — **đã viết**
+29. C# 14 trong thực tế: extension members, field và tính năng mới — **đã viết**
+30. DDD: bounded context, aggregate, value object và invariant của chuyến — **đã viết**
 31. Clean Architecture: chia Domain, Application, Infrastructure, API — dự kiến
 32. CQRS và Mediator: command/query handler và pipeline behavior — dự kiến
 33. Repository và Unit of Work với EF Core: aggregate, tracking và commit — dự kiến
@@ -110,3 +110,15 @@ node examples/toi-noi-dotnet/verify-11-20.mjs
 Script chạy 3 project console (16 ca kiểm chứng), 9 unit test, 4 integration test JSON/file và 24 API test. Cần SDK .NET 10 và mạng ở lần restore NuGet đầu. API 16–19 được test bằng WebApplicationFactory bài 20, không mở port; README từng bài có lệnh mở host localhost để thử tay.
 
 Các API dùng lại FareDomain bài 14, chưa ghép service DDD/Clean/CQRS hoàn chỉnh. Package ASP.NET pin 10.0.10; Microsoft.OpenApi pin 2.7.5 đã vá advisory trên dòng 2.x. Không có credential production trong fixture. Các file tạm của bài 15 nằm trong thư mục riêng dưới thư mục temp của hệ điều hành và được dọn sau từng ca.
+
+## Chạy bài 21–30
+
+Thiết lập TOI_NOI_PG cho database PostgreSQL local riêng `toi_noi_dotnet_lab` theo [hướng dẫn bài 21](21-efcore-postgres/README.md). Sau đó:
+
+```bash
+node examples/toi-noi-dotnet/verify-21-30.mjs
+```
+
+Script chạy 20 test xUnit (mapping, query, transaction, worker, resilience, Outbox và domain) cùng 3 harness console về lifetime, parser và C# 14. Test database fail rõ nếu thiếu cấu hình; không dùng InMemory để thay PostgreSQL.
+
+Benchmark thật là lệnh riêng trong [bài 28](28-benchmark-span/README.md); script verify không tự chạy phép đo hiệu năng dài. [Report lượt đo ngắn](28-benchmark-span/results/short-run.md) ghi runtime/hardware, số lần lặp và error. Schema của các ca database có tên GUID, được tạo/dọn riêng. Không có connection string chứa credential thật trong source.

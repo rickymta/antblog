@@ -20,3 +20,6 @@ playwright-report/
 # .NET example build outputs
 examples/toi-noi-dotnet/**/bin/
 examples/toi-noi-dotnet/**/obj/
+
+# BenchmarkDotNet generated measurements/build artifacts
+BenchmarkDotNet.Artifacts/

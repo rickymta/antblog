@@ -297,7 +297,7 @@ public sealed class AuthTests
 }
 ```
 
-Bài trước: [bài 19](/articles/dotnet10-authentication-authorization). Bài tiếp theo dự kiến về EF Core 10 và PostgreSQL; chưa tạo liên kết tới bài chưa viết.
+Bài trước: [bài 19](/articles/dotnet10-authentication-authorization). Bài tiếp: [bài 21 — EF Core 10 và PostgreSQL](/articles/dotnet10-efcore-postgresql-mapping-migration).
 
 ## Tài liệu gốc
 

@@ -808,5 +808,105 @@
       "TEST HOST",
       "ASSERTIONS"
     ]
+  },
+  "dotnet10-efcore-postgresql-mapping-migration": {
+    "title": "EF CORE / POSTGRES",
+    "subtitle": "C# 21 · Mapping, migrations and real round trips",
+    "diagram": "storage",
+    "labels": [
+      "MODEL",
+      "MIGRATION",
+      "POSTGRES"
+    ]
+  },
+  "dotnet10-efcore-tracking-projection-n-plus-one": {
+    "title": "TRACKING / SQL",
+    "subtitle": "C# 22 · Count round trips before optimizing",
+    "diagram": "pages",
+    "labels": [
+      "TRACKER",
+      "PROJECTION",
+      "SQL"
+    ]
+  },
+  "dotnet10-transaction-concurrency-idempotency": {
+    "title": "TRANSACTION / VERSION",
+    "subtitle": "C# 23 · Atomicity, conflicts and durable keys",
+    "diagram": "cycle",
+    "labels": [
+      "COMMIT",
+      "VERSION",
+      "REQUEST KEY"
+    ]
+  },
+  "dotnet10-backgroundservice-channel": {
+    "title": "WORKER / BACKPRESSURE",
+    "subtitle": "C# 24 · Bounded channels and per-job scopes",
+    "diagram": "flow",
+    "labels": [
+      "PRODUCER",
+      "BOUNDED QUEUE",
+      "WORKER"
+    ]
+  },
+  "dotnet10-cache-timeout-retry-rate-limit": {
+    "title": "CACHE / RESILIENCE",
+    "subtitle": "C# 25 · Bound load, wait and retries",
+    "diagram": "target",
+    "labels": [
+      "CACHE",
+      "TIME BUDGET",
+      "RATE LIMIT"
+    ]
+  },
+  "dotnet10-outbox-inbox-idempotent-consumer": {
+    "title": "OUTBOX / INBOX",
+    "subtitle": "C# 26 · Durable intent and duplicate delivery",
+    "diagram": "network",
+    "labels": [
+      "COMMIT INTENT",
+      "PUBLISH",
+      "DEDUPE"
+    ]
+  },
+  "dotnet10-allocation-gc-disposal": {
+    "title": "OWNERSHIP / LIFETIME",
+    "subtitle": "C# 27 · Allocation is not resource ownership",
+    "diagram": "cycle",
+    "labels": [
+      "RENT",
+      "USE",
+      "RETURN"
+    ]
+  },
+  "dotnet10-benchmarkdotnet-span-profiling": {
+    "title": "BENCHMARK / SPAN",
+    "subtitle": "C# 28 · Same contract, measured allocation",
+    "diagram": "matrix",
+    "labels": [
+      "CORRECTNESS",
+      "BENCHMARK",
+      "PROFILE"
+    ]
+  },
+  "csharp14-extension-members-field": {
+    "title": "C# 14 / MEMBERS",
+    "subtitle": "C# 29 · Extensions, field and conditional assignment",
+    "diagram": "code",
+    "labels": [
+      "EXTENSION",
+      "FIELD",
+      "SHORT CIRCUIT"
+    ]
+  },
+  "dotnet10-ddd-bounded-context-aggregate": {
+    "title": "DDD / AGGREGATE",
+    "subtitle": "C# 30 · Context, identity and invariants",
+    "diagram": "map",
+    "labels": [
+      "CONTEXT",
+      "AGGREGATE",
+      "EVENT"
+    ]
   }
 }

@@ -92,7 +92,7 @@
   {
     "slug": "csharp-dotnet-10-qua-toi-noi",
     "title": "C# và .NET 10 qua Tới Nơi",
-    "description": "Từ console tính cước tới API đặt chuyến: nền tảng C#, bất đồng bộ, kiểm thử, ASP.NET Core 10, EF Core 10 và vận hành. Đang biên soạn, hiện có hai mươi bài đầu.",
+    "description": "Từ console tính cước tới API đặt chuyến: nền tảng C#, bất đồng bộ, kiểm thử, ASP.NET Core 10, EF Core 10 và vận hành. Đang biên soạn, hiện có ba mươi bài đầu.",
     "level": "beginner",
     "category": "programming",
     "articles": [
@@ -115,7 +115,17 @@
       "dotnet10-validation-problem-details-openapi",
       "dotnet10-middleware-di-options-logging",
       "dotnet10-authentication-authorization",
-      "dotnet10-webapplicationfactory-integration-test"
+      "dotnet10-webapplicationfactory-integration-test",
+      "dotnet10-efcore-postgresql-mapping-migration",
+      "dotnet10-efcore-tracking-projection-n-plus-one",
+      "dotnet10-transaction-concurrency-idempotency",
+      "dotnet10-backgroundservice-channel",
+      "dotnet10-cache-timeout-retry-rate-limit",
+      "dotnet10-outbox-inbox-idempotent-consumer",
+      "dotnet10-allocation-gc-disposal",
+      "dotnet10-benchmarkdotnet-span-profiling",
+      "csharp14-extension-members-field",
+      "dotnet10-ddd-bounded-context-aggregate"
     ],
     "status": "published"
   }
