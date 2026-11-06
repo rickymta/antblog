@@ -1,0 +1,55 @@
+[project]
+name = "toi-noi-py-20-dong-goi-ruff-cau-truc-du-an"
+version = "0.1.0"
+description = "Bài 20: gói toinoi_pricing có kiểu, test, ruff, mypy và entry point toinoi-fare"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+# Lệnh `toinoi-fare` được tạo khi cài gói: trỏ tới hàm main trong module cli.
+[project.scripts]
+toinoi-fare = "toinoi_pricing.cli:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4",
+    "pytest>=9",
+    "ruff>=0.17",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.11,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = true
+
+# Tên project (toi-noi-py-20-...) khác tên package import nên khai báo tường minh.
+[tool.uv.build-backend]
+module-name = "toinoi_pricing"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["src", "tests"]
+# demo-errors/ chứa file cố ý sai; chỉ chạy khi ta chỉ đích danh từng file.
+extend-exclude = ["demo-errors"]
+
+[tool.ruff.lint]
+# E/W: pycodestyle, F: pyflakes, I: sắp xếp import, UP: cú pháp Python hiện đại,
+# B: bẫy phổ biến (flake8-bugbear), SIM: đơn giản hóa, RUF: quy tắc riêng của ruff,
+# PT: pytest, DTZ: datetime thiếu múi giờ, S: bảo mật (bandit).
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "RUF", "PT", "DTZ", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test dùng assert là đúng chỗ; S101 chỉ đáng cảnh báo trong mã chạy thật.
+"tests/*" = ["S101"]
+
+[tool.mypy]
+strict = true
+python_version = "3.14"
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
+exclude = ["demo-errors/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

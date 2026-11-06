@@ -1,0 +1,7 @@
+{
+  "_note": "Dữ liệu học tập: giá 5.000 VND/km vượt ở Đà Nẵng là giả định để thử nghiệm, không phải bảng giá thật.",
+  "default": {"base_fare": "12000", "included_km": "2", "price_per_extra_km": "4500"},
+  "cities": {
+    "Đà Nẵng": {"base_fare": "12000", "included_km": "2", "price_per_extra_km": "5000"}
+  }
+}

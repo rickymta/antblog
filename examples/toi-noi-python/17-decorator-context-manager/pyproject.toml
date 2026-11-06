@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-17-decorator-context-manager"
+version = "0.1.0"
+description = "Bài 17: decorator retry/timed và context manager transaction cho Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

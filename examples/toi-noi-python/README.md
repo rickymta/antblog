@@ -41,7 +41,20 @@ C#/.NET giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng, �
 09. File, JSON, CSV và pathlib: đọc bộ dữ liệu mẫu Tới Nơi — **đã viết**
 10. Unit test với pytest: kiểm thử chính sách cước — **đã viết**
 
-Các phần P02–P10 (bài 11–79) xem master curriculum.
+## P02 · Mô hình hóa nghiệp vụ
+
+11. Class, dataclass, property và encapsulation: bảo vệ trạng thái chuyến — **đã viết**
+12. Type hints, mypy/pyright, Protocol và generics: hợp đồng kiểu cho mã nghiệp vụ — **đã viết**
+13. Frozen dataclass, Enum, equality và immutability: thiết kế Money, Quote — **đã viết**
+14. ABC, Protocol, composition và dependency injection: thay chính sách cước — **đã viết**
+15. Pydantic v2: validate hồ sơ tài xế và cấu hình ứng dụng — **đã viết**
+16. Pattern matching và xử lý None: chuyển trạng thái chuyến rõ ràng — **đã viết**
+17. Decorator và context manager: retry, đo thời gian, transaction — **đã viết**
+18. functools, itertools và pipeline hàm: xử lý lô chuyến — **đã viết**
+19. Design pattern kiểu Python: Strategy, State, Adapter cho Tới Nơi — **đã viết**
+20. Đóng gói, ruff, mypy và cấu trúc dự án: sẵn sàng cho service — **đã viết**
+
+Các phần P03–P10 (bài 21–79) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -53,4 +66,12 @@ uv run --project examples/toi-noi-python/01-python-va-uv examples/toi-noi-python
 sh examples/toi-noi-python/verify-01-10.sh
 ```
 
-`verify-01-10.sh` chạy `--verify` của 9 lab console và pytest của bài 10. Mọi `--verify` in `OK n/n` khi đạt, `FAIL n/m` và exit 1 khi lệch; các con số in trong bài là output của chính lab.
+`verify-01-10.sh` chạy `--verify` của 9 lab console và pytest của bài 10. Mọi `--verify` in `OK n/n` khi đạt, `FAIL n/m` và exit 1 khi lệch, với n là số ca đạt; các con số in trong bài là output của chính lab.
+
+## Chạy lab phần 02
+
+Lần đầu cần mạng để uv tải mypy, pytest, pydantic, ruff. Lab 20 có `verify.sh` riêng gồm ruff, mypy, pytest, `uv build` và thử công cụ bắt lỗi.
+
+```bash
+sh examples/toi-noi-python/verify-11-20.sh
+```

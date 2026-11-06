@@ -74,16 +74,16 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| PY-11 | `python-class-dataclass-property-encapsulation` | Class, dataclass, property và encapsulation: bảo vệ trạng thái chuyến | `__init__`, `self`, `@dataclass`, `@property`, `_private`, `__slots__`, máy trạng thái chuyến 8 trạng thái | PY-10 | Kế hoạch |
-| PY-12 | `python-type-hints-mypy-protocol-generics` | Type hints, mypy/pyright, Protocol và generics: hợp đồng kiểu cho mã nghiệp vụ | PEP 484/695, `list[T]`, `TypedDict`, `Protocol`, `TypeVar` cú pháp mới, annotation lười (PEP 649) trong 3.14 | PY-11 | Kế hoạch |
-| PY-13 | `python-frozen-dataclass-enum-immutability` | Frozen dataclass, Enum, equality và immutability: thiết kế Money, Quote | `frozen=True`, `__eq__`/`__hash__`, `Enum`/`StrEnum`, `NamedTuple`, value object, quote có hạn | PY-11 | Kế hoạch |
-| PY-14 | `python-abc-protocol-composition-dependency-injection` | ABC, Protocol, composition và dependency injection: thay chính sách cước | Duck typing vs ABC, `Protocol` structural, inject qua constructor, không cần framework DI | PY-12 | Kế hoạch |
-| PY-15 | `python-pydantic-validation-settings` | Pydantic v2: validate hồ sơ tài xế và cấu hình ứng dụng | `BaseModel`, validator, `model_validate`, `BaseSettings`, lỗi có cấu trúc, khác dataclass ở đâu | PY-12 | Kế hoạch |
-| PY-16 | `python-match-pattern-matching-none` | Pattern matching và xử lý None: chuyển trạng thái chuyến rõ ràng | `match/case` với class/mapping/guard, `Optional`, `None` không phải giá trị thiếu mặc định | PY-13 | Kế hoạch |
-| PY-17 | `python-decorator-context-manager` | Decorator và context manager: retry, đo thời gian, transaction | Closure, `functools.wraps`, decorator có tham số, `contextlib`, `with` cho tài nguyên | PY-14 | Kế hoạch |
-| PY-18 | `python-functools-itertools-pipeline` | functools, itertools và pipeline hàm: xử lý lô chuyến | `partial`, `reduce`, `lru_cache`, `groupby`, `chain`, pipeline generator, so với LINQ | PY-06, PY-17 | Kế hoạch |
-| PY-19 | `python-design-pattern-strategy-state-adapter` | Design pattern kiểu Python: Strategy, State, Adapter cho Tới Nơi | Pattern GoF khi ngôn ngữ có first-class function; khi không cần class; liên kết loạt Design Pattern | PY-14, PY-16 | Kế hoạch |
-| PY-20 | `python-dong-goi-ruff-pre-commit-cau-truc-du-an` | Đóng gói, ruff, mypy và cấu trúc dự án: sẵn sàng cho service | `pyproject.toml` đầy đủ, `uv lock`, ruff format/lint, mypy strict, `src/` layout, entry point, bài tổng hợp P01–P02 | PY-07, PY-10 | Kế hoạch |
+| PY-11 | `python-class-dataclass-property-encapsulation` | Class, dataclass, property và encapsulation: bảo vệ trạng thái chuyến | `__init__`, `self`, `@dataclass`, `@property`, `_private`, `__slots__`, máy trạng thái chuyến 8 trạng thái | PY-10 | Đã viết |
+| PY-12 | `python-type-hints-mypy-protocol-generics` | Type hints, mypy/pyright, Protocol và generics: hợp đồng kiểu cho mã nghiệp vụ | PEP 484/695, `list[T]`, `TypedDict`, `Protocol`, `TypeVar` cú pháp mới, annotation lười (PEP 649) trong 3.14 | PY-11 | Đã viết |
+| PY-13 | `python-frozen-dataclass-enum-immutability` | Frozen dataclass, Enum, equality và immutability: thiết kế Money, Quote | `frozen=True`, `__eq__`/`__hash__`, `Enum`/`StrEnum`, `NamedTuple`, value object, quote có hạn | PY-11 | Đã viết |
+| PY-14 | `python-abc-protocol-composition-dependency-injection` | ABC, Protocol, composition và dependency injection: thay chính sách cước | Duck typing vs ABC, `Protocol` structural, inject qua constructor, không cần framework DI | PY-12 | Đã viết |
+| PY-15 | `python-pydantic-validation-settings` | Pydantic v2: validate hồ sơ tài xế và cấu hình ứng dụng | `BaseModel`, validator, `model_validate`, `BaseSettings`, lỗi có cấu trúc, khác dataclass ở đâu | PY-12 | Đã viết |
+| PY-16 | `python-match-pattern-matching-none` | Pattern matching và xử lý None: chuyển trạng thái chuyến rõ ràng | `match/case` với class/mapping/guard, `Optional`, `None` không phải giá trị thiếu mặc định | PY-13 | Đã viết |
+| PY-17 | `python-decorator-context-manager` | Decorator và context manager: retry, đo thời gian, transaction | Closure, `functools.wraps`, decorator có tham số, `contextlib`, `with` cho tài nguyên | PY-14 | Đã viết |
+| PY-18 | `python-functools-itertools-pipeline` | functools, itertools và pipeline hàm: xử lý lô chuyến | `partial`, `reduce`, `lru_cache`, `groupby`, `chain`, pipeline generator, so với LINQ | PY-06, PY-17 | Đã viết |
+| PY-19 | `python-design-pattern-strategy-state-adapter` | Design pattern kiểu Python: Strategy, State, Adapter cho Tới Nơi | Pattern GoF khi ngôn ngữ có first-class function; khi không cần class; liên kết loạt Design Pattern | PY-14, PY-16 | Đã viết |
+| PY-20 | `python-dong-goi-ruff-pre-commit-cau-truc-du-an` | Đóng gói, ruff, mypy và cấu trúc dự án: sẵn sàng cho service | `pyproject.toml` đầy đủ, `uv lock`, ruff format/lint, mypy strict, `src/` layout, entry point, bài tổng hợp P01–P02 | PY-07, PY-10 | Đã viết |
 
 ### Cấp độ trung bình · Lộ trình `python-trung-binh-qua-toi-noi`
 

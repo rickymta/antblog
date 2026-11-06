@@ -1,0 +1,12 @@
+[project]
+name = "toi-noi-py-16-match-pattern-none"
+version = "0.1.0"
+description = "Bài 16: match/case và xử lý None cho chuyến Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = ["mypy>=2.4"]
+
+[tool.uv]
+package = false

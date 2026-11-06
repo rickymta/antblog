@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-13-frozen-dataclass-enum"
+version = "0.1.0"
+description = "Bài 13: frozen dataclass, Enum, equality và immutability cho Money, Quote Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

@@ -387,7 +387,7 @@ def verify() -> None:
         check(name, outcome, "ValueError")
 
     if failures:
-        print(f"FAIL {len(failures)}/{total}")
+        print(f"FAIL {total - len(failures)}/{total}")
         sys.exit(1)
     print(f"OK {total}/{total}")
 

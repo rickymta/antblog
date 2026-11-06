@@ -1,0 +1,16 @@
+[project]
+name = "toi-noi-py-19-design-pattern-strategy-state-adapter"
+version = "0.1.0"
+description = "Bài 19: Strategy, State và Adapter kiểu Python cho Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = ["mypy>=2.4"]
+
+[tool.uv]
+package = false
+
+[tool.mypy]
+strict = true
+python_version = "3.14"

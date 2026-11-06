@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-18-functools-itertools-pipeline"
+version = "0.1.0"
+description = "Bài 18: functools, itertools và pipeline generator xử lý lô chuyến Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

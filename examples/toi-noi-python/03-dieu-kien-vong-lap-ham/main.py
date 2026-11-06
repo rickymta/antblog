@@ -182,7 +182,7 @@ def verify() -> None:
     check("format_vnd làm tròn HALF_UP", format_vnd(Decimal("12004.5")), "12.005")
 
     if failures:
-        print(f"FAIL {len(failures)}/{total}")
+        print(f"FAIL {total - len(failures)}/{total}")
         sys.exit(1)
     print(f"OK {total}/{total}")
 

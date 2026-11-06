@@ -153,7 +153,17 @@
       "python-module-package-import",
       "python-exception-debug-logging",
       "python-file-json-csv-pathlib",
-      "python-pytest-kiem-thu-chinh-sach-cuoc"
+      "python-pytest-kiem-thu-chinh-sach-cuoc",
+      "python-class-dataclass-property-encapsulation",
+      "python-type-hints-mypy-protocol-generics",
+      "python-frozen-dataclass-enum-immutability",
+      "python-abc-protocol-composition-dependency-injection",
+      "python-pydantic-validation-settings",
+      "python-match-pattern-matching-none",
+      "python-decorator-context-manager",
+      "python-functools-itertools-pipeline",
+      "python-design-pattern-strategy-state-adapter",
+      "python-dong-goi-ruff-pre-commit-cau-truc-du-an"
     ],
     "status": "published"
   }

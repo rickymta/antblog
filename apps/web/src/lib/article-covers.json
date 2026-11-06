@@ -1088,5 +1088,105 @@
       "FIXTURE",
       "RAISES"
     ]
+  },
+  "python-class-dataclass-property-encapsulation": {
+    "title": "PYTHON / DATACLASS",
+    "subtitle": "Python 11 · Protecting trip state",
+    "diagram": "flow",
+    "labels": [
+      "CLASS",
+      "PROPERTY",
+      "STATE"
+    ]
+  },
+  "python-type-hints-mypy-protocol-generics": {
+    "title": "PYTHON / TYPE HINTS",
+    "subtitle": "Python 12 · Type contracts for domain code",
+    "diagram": "checklist",
+    "labels": [
+      "MYPY",
+      "PROTOCOL",
+      "GENERICS"
+    ]
+  },
+  "python-frozen-dataclass-enum-immutability": {
+    "title": "PYTHON / FROZEN ENUM",
+    "subtitle": "Python 13 · Immutable Money and Quote",
+    "diagram": "blocks",
+    "labels": [
+      "ENUM",
+      "FROZEN",
+      "QUOTE"
+    ]
+  },
+  "python-abc-protocol-composition-dependency-injection": {
+    "title": "PYTHON / INJECTION",
+    "subtitle": "Python 14 · Swapping fare policies by DI",
+    "diagram": "layers",
+    "labels": [
+      "ABC",
+      "PROTOCOL",
+      "INJECT"
+    ]
+  },
+  "python-pydantic-validation-settings": {
+    "title": "PYTHON / PYDANTIC",
+    "subtitle": "Python 15 · Validate at the boundary",
+    "diagram": "checklist",
+    "labels": [
+      "VALIDATE",
+      "MODEL",
+      "SETTINGS"
+    ]
+  },
+  "python-match-pattern-matching-none": {
+    "title": "PYTHON / MATCH",
+    "subtitle": "Python 16 · Explicit trip transitions",
+    "diagram": "split",
+    "labels": [
+      "PATTERN",
+      "GUARD",
+      "NONE"
+    ]
+  },
+  "python-decorator-context-manager": {
+    "title": "PYTHON / DECORATOR",
+    "subtitle": "Python 17 · Retry, timing and transactions",
+    "diagram": "layers",
+    "labels": [
+      "DECORATOR",
+      "RETRY",
+      "WITH"
+    ]
+  },
+  "python-functools-itertools-pipeline": {
+    "title": "PYTHON / PIPELINE",
+    "subtitle": "Python 18 · Batch processing with itertools",
+    "diagram": "flow",
+    "labels": [
+      "FILTER",
+      "PRICE",
+      "GROUP"
+    ]
+  },
+  "python-design-pattern-strategy-state-adapter": {
+    "title": "PYTHON / PATTERNS",
+    "subtitle": "Python 19 · Strategy, State, Adapter",
+    "diagram": "split",
+    "labels": [
+      "STRATEGY",
+      "STATE",
+      "ADAPTER"
+    ]
+  },
+  "python-dong-goi-ruff-pre-commit-cau-truc-du-an": {
+    "title": "PYTHON / PACKAGING",
+    "subtitle": "Python 20 · Ruff, mypy and project layout",
+    "diagram": "checklist",
+    "labels": [
+      "RUFF",
+      "MYPY",
+      "PYTEST"
+    ]
   }
 }
