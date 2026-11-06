@@ -1,0 +1,34 @@
+# Service không cần template (CronJob dọn dữ liệu) dùng Kustomize: base + overlay theo môi trường.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: toinoi-kustomize-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/toinoi-org/toi-noi-deploy.git
+        revision: main
+        directories:
+          - path: kustomize/*/overlays/*
+  template:
+    metadata:
+      name: '{{index .path.segments 1}}-{{.path.basename}}'
+      # Finalizer để xoá Application thì xoá luôn tài nguyên trong cluster.
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: 'toinoi-{{.path.basename}}'
+      source:
+        repoURL: https://github.com/toinoi-org/toi-noi-deploy.git
+        targetRevision: main
+        path: '{{.path.path}}'
+      destination:
+        name: 'toinoi-{{.path.basename}}'
+        namespace: tracking
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

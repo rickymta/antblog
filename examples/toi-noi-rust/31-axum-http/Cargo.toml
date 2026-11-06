@@ -1,0 +1,18 @@
+[package]
+name = "ledger_31_axum_http"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+anyhow = "1.0.104"
+axum = "0.8.9"
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+reqwest = { version = "0.13.5", default-features = false, features = ["json"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "signal", "net"] }
+tower = { version = "0.5.3", features = ["util"] }
+uuid = { version = "1.29.0", features = ["v4"] }

@@ -1,0 +1,9 @@
+{
+  "type": "BookingCreated",
+  "eventId": "evt-1001",
+  "tripId": "1001",
+  "city": "HCM",
+  "service": "ride",
+  "pickup": { "lat": 10.7769, "lng": 106.7009 },
+  "fareVnd": 52500
+}

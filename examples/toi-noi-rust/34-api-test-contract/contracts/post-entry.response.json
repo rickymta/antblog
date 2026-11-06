@@ -1,0 +1,10 @@
+{
+  "entryId": "JE-000001",
+  "idempotencyKey": "trip:TN-0001:capture",
+  "replayed": false,
+  "postings": [
+    { "account": "customer:CU-001", "amountDong": -25500 },
+    { "account": "platform:revenue", "amountDong": 5100 },
+    { "account": "driver:DR-001", "amountDong": 20400 }
+  ]
+}

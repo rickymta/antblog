@@ -47,7 +47,7 @@
 .tkh-prose h3 { font-size: 1.25rem; margin-top: 1.8em; }
 .tkh-prose h4 { font-size: 1.05rem; margin-top: 1.5em; }
 .tkh-prose p, .tkh-prose ul, .tkh-prose ol, .tkh-prose blockquote { max-width: 72ch; }
-.tkh-prose a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 3px; }
+.tkh-prose a { color: var(--tkh-link); text-decoration: underline; text-underline-offset: 3px; }
 .tkh-prose strong { font-weight: 650; }
 .tkh-prose ul, .tkh-prose ol { padding-left: 1.4em; }
 .tkh-prose ul { list-style: disc; }
@@ -162,3 +162,7 @@
 /* Khối «Thông tin bài» (bảng hai cột tên–giá trị trong callout): cột tên không bị ép xuống dòng từng chữ. */
 .tkh-prose .tkh-callout th[scope='row'] { width: 11rem; white-space: nowrap; }
 @media (max-width: 480px) { .tkh-prose .tkh-callout th[scope='row'] { width: auto; white-space: normal; } }
+
+.tkh-prose a:visited { color: var(--tkh-link-visited); }
+.tkh-prose a:hover, .tkh-prose a:focus-visible { color: var(--tkh-link-hover); }
+.tkh-prose a code { color: inherit; }

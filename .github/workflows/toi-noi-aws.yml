@@ -1,0 +1,53 @@
+name: Toi Noi AWS lab
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'examples/toi-noi-aws/**'
+      - '.github/workflows/toi-noi-aws.yml'
+  pull_request:
+    paths:
+      - 'examples/toi-noi-aws/**'
+      - '.github/workflows/toi-noi-aws.yml'
+permissions:
+  contents: read
+jobs:
+  terraform:
+    # Chỉ kiểm cú pháp và kiểu: không có credential AWS, không tạo tài nguyên.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.5'
+      - name: fmt + validate từng lab có Terraform
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=0
+          while IFS= read -r dir; do
+            echo "== $dir"
+            (cd "$dir" && terraform fmt -check -recursive && terraform init -backend=false -input=false >/dev/null && terraform validate) || status=1
+          done < <(find examples/toi-noi-aws -name '*.tf' -not -path '*/.terraform/*' -exec dirname {} \; | sort -u)
+          exit $status
+  json-yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JSON và YAML phải parse được
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund js-yaml@4 >/dev/null
+          node -e '
+            const fs = require("fs"), path = require("path"), yaml = require("js-yaml");
+            let bad = 0;
+            const walk = (d) => { for (const f of fs.readdirSync(d)) { const p = path.join(d, f);
+              if (fs.statSync(p).isDirectory()) { if (f !== ".terraform" && f !== "node_modules") walk(p); continue; }
+              try { if (/\.json$/.test(f) && !/\.template$/.test(f)) JSON.parse(fs.readFileSync(p, "utf8"));
+                    else if (/\.ya?ml$/.test(f)) yaml.loadAll(fs.readFileSync(p, "utf8")); }
+              catch (e) { bad++; console.log("✗", p, e.message); } } };
+            walk("examples/toi-noi-aws"); if (bad) process.exit(1); console.log("OK");'

@@ -1,0 +1,8 @@
+# Namespace của cổng thanh toán giả lập VíXanh và database của nó.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: payment
+  labels:
+    app.kubernetes.io/part-of: toinoi
+    toinoi.example/context: payment

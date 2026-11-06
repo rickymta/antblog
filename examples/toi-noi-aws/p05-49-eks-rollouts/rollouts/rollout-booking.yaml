@@ -1,0 +1,103 @@
+# Thay Deployment bằng Rollout: cùng pod template, thêm strategy canary.
+# Bước: header cho tester nội bộ -> 5% + phân tích -> 25% -> 50% -> 100% (promote cuối).
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: booking
+  namespace: booking
+  labels:
+    Project: ToiNoi
+    Service: booking
+spec:
+  replicas: 6
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: booking
+        Project: ToiNoi
+        Service: booking
+        Env: prod
+    spec:
+      serviceAccountName: booking
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: booking
+          image: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/booking@sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              memory: 768Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+  strategy:
+    canary:
+      canaryService: booking-canary
+      stableService: booking-stable
+      maxSurge: "25%"
+      maxUnavailable: 0
+      trafficRouting:
+        alb:
+          ingress: booking
+          servicePort: 80
+        managedRoutes:
+          - name: qa-header
+      analysis:
+        templates:
+          - templateName: booking-canary-health
+        # Bắt đầu phân tích ở bước setWeight: 5 (chỉ số tính từ 0).
+        startingStep: 4
+        args:
+          - name: namespace
+            value: booking
+          - name: canary-hash
+            valueFrom:
+              podTemplateHashValue: Latest
+      steps:
+        # Dựng một pod canary, rồi cho tester nội bộ gọi bản mới bằng header; khách thật chưa nhận request nào.
+        - setCanaryScale:
+            replicas: 1
+        - setHeaderRoute:
+            name: qa-header
+            match:
+              - headerName: X-Toinoi-Tester
+                headerValue:
+                  exact: qa
+        - pause: {duration: 10m}
+        # Trả số pod canary về theo trọng số; thiếu bước này canary giữ 1 pod cho mọi bước sau.
+        - setCanaryScale:
+            matchTrafficWeight: true
+        - setWeight: 5
+        - pause: {duration: 10m}
+        - setWeight: 25
+        - pause: {duration: 10m}
+        - setWeight: 50
+        - pause: {duration: 10m}
+        # Gỡ route header trước khi chuyển 100%.
+        - setHeaderRoute:
+            name: qa-header

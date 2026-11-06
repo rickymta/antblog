@@ -1,0 +1,34 @@
+# Pod Security Admission: enforce restricted, đồng thời audit và warn để thấy cảnh báo sớm.
+# "latest" theo phiên bản Kubernetes của cluster; ghim phiên bản nếu muốn kiểm soát lúc nâng cấp (bài 50).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: booking
+  labels:
+    Project: ToiNoi
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dispatch
+  labels:
+    Project: ToiNoi
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tracking
+  labels:
+    Project: ToiNoi
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

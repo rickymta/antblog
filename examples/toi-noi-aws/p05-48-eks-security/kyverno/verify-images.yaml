@@ -1,0 +1,33 @@
+# Chỉ cho chạy image của Tới Nơi trong ECR đã được ký bằng cosign (khoá công khai bên dưới).
+# Khoá minh hoạ: thay bằng khoá công khai thật của pipeline (bài 25 sinh chữ ký sau khi build).
+# Kyverno cần quyền đọc ECR để lấy chữ ký (Pod Identity hoặc IRSA cho ServiceAccount của Kyverno).
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: toinoi-verify-images
+spec:
+  webhookTimeoutSeconds: 30
+  rules:
+    - name: verify-cosign-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [booking, dispatch, tracking]
+      verifyImages:
+        - imageReferences:
+            - "123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/*"
+          failureAction: Enforce
+          required: true
+          mutateDigest: true
+          verifyDigest: true
+          attestors:
+            - count: 1
+              entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      THAY_BANG_KHOA_CONG_KHAI_COSIGN_CUA_TOI_NOI
+                      -----END PUBLIC KEY-----
+                    rekor:
+                      ignoreTlog: true

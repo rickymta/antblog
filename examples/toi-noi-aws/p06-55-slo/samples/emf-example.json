@@ -1,0 +1,19 @@
+{
+  "_aws": {
+    "Timestamp": 1793959200000,
+    "CloudWatchMetrics": [
+      {
+        "Namespace": "ToiNoi/Booking",
+        "Dimensions": [["City"]],
+        "Metrics": [
+          { "Name": "QuoteLatencyMs", "Unit": "Milliseconds" },
+          { "Name": "TripsCreated", "Unit": "Count" }
+        ]
+      }
+    ]
+  },
+  "City": "HCM",
+  "QuoteLatencyMs": 212,
+  "TripsCreated": 1,
+  "trace_id": "67a1b2c30123456789abcdef01234567"
+}

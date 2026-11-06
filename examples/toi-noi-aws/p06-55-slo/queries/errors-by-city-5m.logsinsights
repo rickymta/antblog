@@ -1,0 +1,3 @@
+filter level = "ERROR"
+| stats count() as errors by bin(5m), city
+| sort @timestamp desc

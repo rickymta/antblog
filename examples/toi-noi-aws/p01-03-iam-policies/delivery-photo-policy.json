@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ProofObjectsReadWrite",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": "arn:aws:s3:::toinoi-lab-delivery-photos/proof/*"
+    },
+    {
+      "Sid": "ListProofPrefixOnly",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::toinoi-lab-delivery-photos",
+      "Condition": {
+        "StringLike": { "s3:prefix": ["proof/*"] }
+      }
+    }
+  ]
+}

@@ -74,7 +74,12 @@ function illustration(kind, labels, bg, accent, ink, seed) {
   return s;
 }
 
+const prefixArg = process.argv.indexOf('--prefix');
+const prefix = prefixArg === -1 ? '' : process.argv[prefixArg + 1];
+if (prefixArg !== -1 && (!prefix || prefix.startsWith('--'))) throw new Error('--prefix requires a slug prefix.');
+let generated = 0;
 for (const [index, [slug, brief]] of Object.entries(briefs).entries()) {
+  if (!slug.startsWith(prefix)) continue;
   const [bg, accent, ink] = palettes[brief.diagram];
   const titleSize = brief.title.length > 20 ? 39 : brief.title.length > 15 ? 47 : 60;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675"><title>${escape(brief.title)}</title><desc>${escape(brief.subtitle)}</desc>
@@ -88,5 +93,7 @@ for (const [index, [slug, brief]] of Object.entries(briefs).entries()) {
   </svg>`;
   await writeFile(path.join(output, `${slug}.svg`), svg);
   await sharp(Buffer.from(svg)).webp({quality:86}).toFile(path.join(output, `${slug}.webp`));
+  generated++;
 }
-console.log(`Generated ${Object.keys(briefs).length} SVG originals and WebP covers.`);
+if (!generated) throw new Error('No cover briefs match the requested prefix.');
+console.log(`Generated ${generated} SVG originals and WebP covers.`);

@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-11-06T10:15:02.114Z",
+  "level": "INFO",
+  "service": "toinoi-booking",
+  "city": "HCM",
+  "trip_id": "5f1c2e0a-9b7d-4c1e-8a33-0d6f4b2a9c11",
+  "trace_id": "67a1b2c30123456789abcdef01234567",
+  "span_id": "89abcdef01234567",
+  "message": "trip created",
+  "duration_ms": 412,
+  "customer_phone": "0901234567",
+  "customer_email": "khach@example.com"
+}

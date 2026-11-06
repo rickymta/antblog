@@ -41,6 +41,12 @@
   --tkh-line: #E2E8F0;
   --tkh-primary-soft: #DBEAFE;
   --tkh-primary-ink: #1D4ED8;
+  --tkh-link: #1D4ED8;
+  --tkh-link-hover: #1E40AF;
+  --tkh-link-visited: #6D28D9;
+  --tkh-scroll-thumb: #64748B;
+  --tkh-scroll-track: #E2E8F0;
+  --tkh-scroll-hover: #475569;
   color-scheme: light;
 }
 
@@ -53,12 +59,19 @@
   --tkh-line: #334155;
   --tkh-primary-soft: rgba(37, 99, 235, 0.18);
   --tkh-primary-ink: #93C5FD;
+  --tkh-link: #93C5FD;
+  --tkh-link-hover: #BFDBFE;
+  --tkh-link-visited: #C4B5FD;
+  --tkh-scroll-thumb: #64748B;
+  --tkh-scroll-track: #172033;
+  --tkh-scroll-hover: #94A3B8;
   color-scheme: dark;
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    scrollbar-gutter: stable;
   }
   body {
     background-color: var(--tkh-page);
@@ -66,7 +79,7 @@
     font-family: var(--font-sans);
   }
   :focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--tkh-link);
     outline-offset: 2px;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -76,4 +89,14 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/* Available before hydration, including nested menus, code blocks and reader rails. */
+* { scrollbar-width: thin; scrollbar-color: var(--tkh-scroll-thumb) var(--tkh-scroll-track); }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track, *::-webkit-scrollbar-corner { background: var(--tkh-scroll-track); }
+*::-webkit-scrollbar-thumb { background: var(--tkh-scroll-thumb); border: 2px solid var(--tkh-scroll-track); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--tkh-scroll-hover); }
+@media (forced-colors: active) {
+  * { scrollbar-color: auto; }
 }

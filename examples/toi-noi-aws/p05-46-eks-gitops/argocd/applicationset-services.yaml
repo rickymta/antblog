@@ -1,0 +1,56 @@
+# Một ApplicationSet sinh Application cho mọi cặp <service, env> tìm thấy trong repo deploy:
+# thêm thư mục apps/<service>/overlays/<env> là có Application mới, không cần sửa file này.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: toinoi-services
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/toinoi-org/toi-noi-deploy.git
+        revision: main
+        directories:
+          - path: apps/*/overlays/*
+  template:
+    metadata:
+      name: '{{index .path.segments 1}}-{{.path.basename}}'
+      # Finalizer để xoá Application thì xoá luôn tài nguyên trong cluster.
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      labels:
+        Project: ToiNoi
+        Env: '{{.path.basename}}'
+        Service: '{{index .path.segments 1}}'
+    spec:
+      project: 'toinoi-{{.path.basename}}'
+      sources:
+        - repoURL: https://github.com/toinoi-org/toi-noi-deploy.git
+          targetRevision: main
+          path: charts/toinoi-service
+          helm:
+            releaseName: '{{index .path.segments 1}}'
+            valueFiles:
+              - '$values/apps/{{index .path.segments 1}}/base/values.yaml'
+              - '$values/apps/{{index .path.segments 1}}/overlays/{{.path.basename}}/values.yaml'
+        - repoURL: https://github.com/toinoi-org/toi-noi-deploy.git
+          targetRevision: main
+          ref: values
+      destination:
+        name: 'toinoi-{{.path.basename}}'
+        namespace: '{{index .path.segments 1}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 3
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 2m

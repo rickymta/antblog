@@ -1,0 +1,38 @@
+# Một ALB internet-facing cho api.toinoi.example. IngressGroup toinoi-public gộp nhiều Ingress (kể cả khác namespace) vào cùng ALB.
+# Cần: AWS Load Balancer Controller đã cài (helm/lbc-values.yaml), subnet có tag role/elb, chứng chỉ ACM ở ap-southeast-1.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: booking
+  namespace: booking
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # ip: ALB gọi thẳng IP của pod (cần VPC CNI), không đi qua NodePort.
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:123456789012:certificate/12345678-1234-1234-1234-123456789012
+    # Health check dùng đúng đường dẫn readiness của service .NET, không phải "/".
+    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/target-group-attributes: deregistration_delay.timeout_seconds=30
+    alb.ingress.kubernetes.io/group.name: toinoi-public
+    alb.ingress.kubernetes.io/group.order: "10"
+    alb.ingress.kubernetes.io/tags: Project=ToiNoi,Env=lab,Service=booking,Owner=platform
+spec:
+  ingressClassName: alb
+  rules:
+    - host: api.toinoi.example
+      http:
+        paths:
+          - path: /v1/bookings
+            pathType: Prefix
+            backend:
+              service:
+                name: booking
+                port:
+                  number: 80

@@ -1,0 +1,335 @@
+{
+  "Comment": "Saga đặt chuyến của Tới Nơi: giữ tiền, tìm tài xế (chờ callback), xác nhận chuyến, thu tiền; bù trừ khi thất bại.",
+  "QueryLanguage": "JSONata",
+  "StartAt": "InitSaga",
+  "States": {
+    "InitSaga": {
+      "Type": "Pass",
+      "Assign": {
+        "bookingId": "{% $states.input.bookingId %}",
+        "tripId": "{% $states.input.tripId %}",
+        "customerId": "{% $states.input.customerId %}",
+        "city": "{% $states.input.city %}",
+        "fareVnd": "{% $states.input.fareVnd %}",
+        "failureReason": "{% 'UNKNOWN' %}",
+        "holdId": "{% '' %}",
+        "driverId": "{% '' %}"
+      },
+      "Next": "HoldFunds"
+    },
+    "HoldFunds": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Arguments": {
+        "FunctionName": "${hold_funds_function_arn}",
+        "Payload": {
+          "idempotencyKey": "{% $bookingId & '#hold' %}",
+          "customerId": "{% $customerId %}",
+          "amountVnd": "{% $fareVnd %}"
+        }
+      },
+      "Assign": {
+        "holdId": "{% $states.result.Payload.holdId %}"
+      },
+      "TimeoutSeconds": 15,
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException", "Lambda.TooManyRequestsException"],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Assign": { "failureReason": "{% 'HOLD_FAILED:' & $states.errorOutput.Error %}" },
+          "Next": "MarkBookingFailed"
+        }
+      ],
+      "Next": "FindDriver"
+    },
+    "FindDriver": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage.waitForTaskToken",
+      "Arguments": {
+        "QueueUrl": "${dispatch_queue_url}",
+        "MessageBody": {
+          "action": "FIND_DRIVER",
+          "bookingId": "{% $bookingId %}",
+          "tripId": "{% $tripId %}",
+          "city": "{% $city %}",
+          "taskToken": "{% $states.context.Task.Token %}"
+        }
+      },
+      "Assign": {
+        "driverId": "{% $states.result.driverId %}"
+      },
+      "TimeoutSeconds": 180,
+      "HeartbeatSeconds": 45,
+      "Catch": [
+        {
+          "ErrorEquals": ["States.Timeout", "States.HeartbeatTimeout", "NoDriverAvailable"],
+          "Assign": { "failureReason": "{% 'NO_DRIVER' %}" },
+          "Next": "ReleaseFunds"
+        },
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Assign": { "failureReason": "{% 'DISPATCH_FAILED:' & $states.errorOutput.Error %}" },
+          "Next": "ReleaseFunds"
+        }
+      ],
+      "Next": "ConfirmTrip"
+    },
+    "ConfirmTrip": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Arguments": {
+        "TableName": "${dispatch_table_name}",
+        "Key": {
+          "pk": { "S": "{% 'TRIP#' & $tripId %}" },
+          "sk": { "S": "META" }
+        },
+        "UpdateExpression": "SET #s = :confirmed, confirmed_by_saga = :b",
+        "ConditionExpression": "#s = :accepted AND driver_id = :d",
+        "ExpressionAttributeNames": { "#s": "status" },
+        "ExpressionAttributeValues": {
+          ":confirmed": { "S": "CONFIRMED" },
+          ":accepted": { "S": "ACCEPTED" },
+          ":d": { "S": "{% $driverId %}" },
+          ":b": { "S": "{% $bookingId %}" }
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": ["DynamoDB.ProvisionedThroughputExceededException", "DynamoDB.RequestLimitExceeded", "DynamoDB.InternalServerErrorException"],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 4,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Assign": { "failureReason": "{% 'CONFIRM_FAILED:' & $states.errorOutput.Error %}" },
+          "Next": "ReleaseDriver"
+        }
+      ],
+      "Next": "CapturePayment"
+    },
+    "CapturePayment": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Arguments": {
+        "FunctionName": "${capture_payment_function_arn}",
+        "Payload": {
+          "idempotencyKey": "{% $bookingId & '#capture' %}",
+          "holdId": "{% $holdId %}"
+        }
+      },
+      "TimeoutSeconds": 30,
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException", "Lambda.TooManyRequestsException", "PspTemporaryError"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 4,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Assign": { "failureReason": "{% 'CAPTURE_FAILED:' & $states.errorOutput.Error %}" },
+          "Next": "CancelTrip"
+        }
+      ],
+      "Next": "PublishTripConfirmed"
+    },
+    "PublishTripConfirmed": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::events:putEvents",
+      "Arguments": {
+        "Entries": [
+          {
+            "EventBusName": "${event_bus_name}",
+            "Source": "toinoi.booking",
+            "DetailType": "TripConfirmed",
+            "Detail": {
+              "eventId": "{% $bookingId & '#confirmed' %}",
+              "bookingId": "{% $bookingId %}",
+              "tripId": "{% $tripId %}",
+              "driverId": "{% $driverId %}",
+              "city": "{% $city %}",
+              "fareVnd": "{% $fareVnd %}"
+            }
+          }
+        ]
+      },
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Next": "SagaCompleted"
+    },
+    "SagaCompleted": {
+      "Type": "Succeed"
+    },
+    "CancelTrip": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Arguments": {
+        "TableName": "${dispatch_table_name}",
+        "Key": {
+          "pk": { "S": "{% 'TRIP#' & $tripId %}" },
+          "sk": { "S": "META" }
+        },
+        "UpdateExpression": "SET #s = :cancelled",
+        "ExpressionAttributeNames": { "#s": "status" },
+        "ExpressionAttributeValues": {
+          ":cancelled": { "S": "CANCELLED" }
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 5,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ManualReview"
+        }
+      ],
+      "Next": "ReleaseDriver"
+    },
+    "ReleaseDriver": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Arguments": {
+        "QueueUrl": "${dispatch_queue_url}",
+        "MessageBody": {
+          "action": "RELEASE_DRIVER",
+          "bookingId": "{% $bookingId %}",
+          "tripId": "{% $tripId %}",
+          "driverId": "{% $driverId %}"
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 5,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ManualReview"
+        }
+      ],
+      "Next": "ReleaseFunds"
+    },
+    "ReleaseFunds": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Arguments": {
+        "FunctionName": "${release_funds_function_arn}",
+        "Payload": {
+          "idempotencyKey": "{% $bookingId & '#release' %}",
+          "holdId": "{% $holdId %}"
+        }
+      },
+      "TimeoutSeconds": 30,
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ManualReview"
+        }
+      ],
+      "Next": "MarkBookingFailed"
+    },
+    "MarkBookingFailed": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Arguments": {
+        "TableName": "${dispatch_table_name}",
+        "Key": {
+          "pk": { "S": "{% 'TRIP#' & $tripId %}" },
+          "sk": { "S": "META" }
+        },
+        "UpdateExpression": "SET #s = :unfulfilled, failure_reason = :r",
+        "ExpressionAttributeNames": { "#s": "status" },
+        "ExpressionAttributeValues": {
+          ":unfulfilled": { "S": "UNFULFILLED" },
+          ":r": { "S": "{% $failureReason %}" }
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 5,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ManualReview"
+        }
+      ],
+      "Next": "BookingFailed"
+    },
+    "ManualReview": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Arguments": {
+        "QueueUrl": "${manual_review_queue_url}",
+        "MessageBody": {
+          "bookingId": "{% $bookingId %}",
+          "tripId": "{% $tripId %}",
+          "holdId": "{% $holdId %}",
+          "driverId": "{% $driverId %}",
+          "failureReason": "{% $failureReason %}",
+          "executionId": "{% $states.context.Execution.Id %}",
+          "problem": "COMPENSATION_FAILED"
+        }
+      },
+      "Next": "CompensationFailed"
+    },
+    "CompensationFailed": {
+      "Type": "Fail",
+      "Error": "CompensationFailed",
+      "Cause": "Một bước bù trừ thất bại sau khi retry; đã gửi yêu cầu xử lý thủ công."
+    },
+    "BookingFailed": {
+      "Type": "Fail",
+      "Error": "BookingFailed",
+      "Cause": "{% $failureReason %}"
+    }
+  }
+}

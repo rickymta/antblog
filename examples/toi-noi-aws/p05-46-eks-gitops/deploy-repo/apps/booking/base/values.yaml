@@ -1,0 +1,7 @@
+# Giá trị chung của service booking cho mọi môi trường.
+nameOverride: booking
+image:
+  repository: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/booking
+serviceAccount:
+  # Trùng service_account của Pod Identity association (bài 42, 48).
+  name: booking

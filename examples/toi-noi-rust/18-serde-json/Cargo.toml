@@ -1,0 +1,19 @@
+[package]
+name = "ledger_18_serde_json"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 18: serde và serde_json cho bút toán, Money, Decimal và thời gian"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]
+jiff = { version = "0.2.39", features = ["serde"] }
+rust_decimal = { version = "1.43.0", features = ["serde-with-str"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"

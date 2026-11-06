@@ -1,0 +1,16 @@
+# Values bổ sung cho chart toinoi-service (bài 46): trỏ OTLP của service .NET tới ADOT collector.
+# Đặt vào apps/booking/base/values.yaml hoặc overlays/<env>/values.yaml.
+extraEnv:
+  - name: OTEL_SERVICE_NAME
+    value: booking
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://adot-collector.observability.svc.cluster.local:4317
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: grpc
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: deployment.environment=prod,service.namespace=toinoi
+  # Giữ 10% trace; quyết định theo trace cha để một chuyến không bị cắt giữa chừng.
+  - name: OTEL_TRACES_SAMPLER
+    value: parentbased_traceidratio
+  - name: OTEL_TRACES_SAMPLER_ARG
+    value: "0.1"

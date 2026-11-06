@@ -1,0 +1,18 @@
+# helm upgrade --install external-dns external-dns/external-dns -n kube-system -f helm/external-dns-values.yaml
+# Chỉ tạo record trong toinoi.example, không xoá record của người khác (upsert-only), đánh dấu bằng TXT owner.
+provider:
+  name: aws
+sources:
+  - ingress
+  - service
+domainFilters:
+  - toinoi.example
+policy: upsert-only
+registry: txt
+txtOwnerId: toinoi-lab-eks
+serviceAccount:
+  create: true
+  name: external-dns
+env:
+  - name: AWS_DEFAULT_REGION
+    value: ap-southeast-1

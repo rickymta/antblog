@@ -1,0 +1,12 @@
+# Values cho chart external-secrets (repo https://charts.external-secrets.io), namespace external-secrets.
+# Kiểm tên khoá bằng `helm show values external-secrets/external-secrets` theo phiên bản bạn cài.
+serviceAccount:
+  create: true
+  name: external-secrets   # khớp aws_eks_pod_identity_association trong terraform/main.tf
+replicaCount: 2
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
