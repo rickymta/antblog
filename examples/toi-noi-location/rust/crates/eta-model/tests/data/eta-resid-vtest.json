@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "model_version": "eta-resid-vtest",
+  "output": "residual_s",
+  "features": [
+    "route_eta_s",
+    "route_dist_m",
+    "n_edges",
+    "leg_kind",
+    "tod",
+    "dow",
+    "is_weekend",
+    "o_lat",
+    "o_lng",
+    "d_lat",
+    "d_lng",
+    "crow_m",
+    "detour",
+    "o_dist_centre_m",
+    "d_dist_centre_m",
+    "req_to_depart_s",
+    "hist_speed_o",
+    "hist_speed_d",
+    "hist_resid_o"
+  ],
+  "sha256": "e742aefa96d4e52819e6ef2eee35b74e9a5c298be7302c9d14a44cb9cc7b6c4a",
+  "objective": "regression_l1",
+  "trained_on": "dữ liệu giả seed 53",
+  "notes": "mô hình thử nghiệm nhỏ cho test crate eta-model; dữ liệu giả"
+}

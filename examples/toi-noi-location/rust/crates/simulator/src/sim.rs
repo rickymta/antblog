@@ -79,7 +79,9 @@ impl ActiveRoute {
             let mv = f64::from(tm.view.w[e as usize]) * f64::from((b - a).max(0.0));
             planned += wait + mv;
             // hệ số thế giới thật của cạnh, tính theo giờ lúc xe vào cạnh (1,0 khi không có `Truth`)
-            let ef = truth.map_or(1.0, |tr| tr.edge_factor(engine, e, start_ms + t.round() as u64));
+            let ef = truth.map_or(1.0, |tr| {
+                tr.edge_factor(engine, e, start_ms + t.round() as u64)
+            });
             noiseless += (wait + mv) * ef;
             t += (wait + mv) * factor * ef;
             wait_end.push((t - mv * factor * ef).round() as u64);
@@ -807,14 +809,8 @@ impl Sim<'_> {
         };
         let factor = self.jitter();
         let tm = self.router.turn_model(now);
-        let active = ActiveRoute::build_with(
-            self.engine,
-            &tm,
-            &route,
-            now,
-            factor,
-            self.truth.as_deref(),
-        );
+        let active =
+            ActiveRoute::build_with(self.engine, &tm, &route, now, factor, self.truth.as_deref());
         let u_turns = tm.u_turns(&route.edges);
         let eta_planned_s = active.planned_ms as f64 / 1000.0;
         let walk_m = pickup.walk_m;
@@ -1271,15 +1267,7 @@ pub fn run_with<'a>(
     opts: RunOptions,
     extras: Extras<'a>,
 ) -> SimOutput {
-    run_hooked(
-        engine,
-        sc,
-        pickup,
-        matcher,
-        opts,
-        extras,
-        Hooks::default(),
-    )
+    run_hooked(engine, sc, pickup, matcher, opts, extras, Hooks::default())
 }
 
 /// Như [`run_with`] nhưng có thêm «thế giới thật» và người quan sát của P06. `Hooks::default()` cho đúng kết quả của `run_with`.

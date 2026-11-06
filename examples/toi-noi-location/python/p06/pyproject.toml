@@ -1,0 +1,25 @@
+[project]
+name = "p06"
+version = "0.1.0"
+description = "P06 (LOC-51…LOC-56): pipeline offline bằng Python cho ETA, nhu cầu và thí nghiệm, trên dữ liệu mô phỏng"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "polars",
+    "pyarrow",
+    "numpy",
+    "scipy",
+    "lightgbm",
+    "scikit-learn",
+    "onnx",
+    "onnxmltools",
+    "onnxruntime",
+    "h3",
+    "pytest",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

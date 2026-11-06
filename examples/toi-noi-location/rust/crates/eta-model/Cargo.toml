@@ -1,0 +1,25 @@
+[package]
+name = "eta-model"
+description = "Nạp mô hình ETA dạng ONNX (LightGBM phần dư của route-engine) bằng tract và ort, kiểm tra phiên bản, có fallback khi mô hình lỗi (LOC-53)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["tract", "ort"]
+tract = ["dep:tract-onnx"]
+# `ort` cần thư viện libonnxruntime lúc chạy: đặt ORT_DYLIB_PATH (feature load-dynamic, không tải nhị phân lúc build)
+ort = ["dep:ort"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+sha2.workspace = true
+tract-onnx = { workspace = true, optional = true }
+ort = { workspace = true, optional = true }
+
+[lints]
+workspace = true

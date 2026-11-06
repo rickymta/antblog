@@ -8,16 +8,17 @@
 //!
 //! Chạy từ gốc repo:
 //!   cargo run --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc51_xuat_du_lieu
-//! Tham số: --out DIR  --days N (14)  --demand-days N (28)  --hours 0-23|a,b,c  --gap G (1.0)  --jobs N (4)
-//!          --world-seed S  --mode train|eval (eval: 20 seed đánh giá, mỗi seed một ngày từ ngày 28, không ghi GPS)  --seeds N  --fixture
+//! Tham số: --out DIR  --days N (21)  --demand-days N (42)  --hours 0-23|a,b,c  --gap G (1.0)  --jobs N (4)
+//!          --world-seed S  --mode train|eval (eval: 20 seed đánh giá, mỗi seed một ngày từ ngày 28, không ghi GPS)  --seeds N
+//!          --no-gps (không ghi GPS: dùng cho chạy độ nhạy)  --fixture
 
-use geo_core::{LatLng, haversine_m};
+use geo_core::LatLng;
 use labs::p03::{uptime, vn};
 use labs::p05::setup;
 use labs::p06::{
-    Col, DemandWorld, HIDDEN_SCHEMA, HiddenStatic, LEGS_SCHEMA, LegLog, LegRec, Recorder,
-    RunTruth, TRIPS_SCHEMA, day_start_unix_ms, gps_rows_for_driver, local_date, pseudonym,
-    scenario_for, splitmix, write_gps, write_parquet,
+    Col, DemandWorld, HIDDEN_SCHEMA, HiddenStatic, LEGS_SCHEMA, LegLog, LegRec, Recorder, RunTruth,
+    TRIPS_SCHEMA, day_start_unix_ms, gps_rows_for_driver, local_date, pseudonym, scenario_for,
+    splitmix, write_gps, write_parquet,
 };
 use labs::{Args, die, lab_root};
 use matcher::eval::{eval_seeds, tuning_seeds};
@@ -58,6 +59,7 @@ struct Tables {
     assign_ms: Vec<Option<i64>>,
     arrive_ms: Vec<Option<i64>>,
     dropoff_ms: Vec<Option<i64>>,
+    walk_m: Vec<Option<f64>>,
     // legs
     leg_id: Vec<String>,
     leg_trip: Vec<String>,
@@ -83,9 +85,32 @@ impl Tables {
     fn append(&mut self, o: Tables) {
         macro_rules! ext { ($($f:ident),*) => { $( self.$f.extend(o.$f); )* } }
         ext!(
-            request_id, request_ms, pin, dest, simulated, trip_id, driver_ref, outcome, assign_ms,
-            arrive_ms, dropoff_ms, leg_id, leg_trip, leg_kind, leg_driver, leg_depart_ms, leg_eta_s,
-            leg_dist_m, leg_edges, leg_o, leg_d, leg_actual_s, leg_cancelled, h_noiseless_s, h_noise
+            request_id,
+            request_ms,
+            pin,
+            dest,
+            simulated,
+            trip_id,
+            driver_ref,
+            outcome,
+            assign_ms,
+            arrive_ms,
+            dropoff_ms,
+            walk_m,
+            leg_id,
+            leg_trip,
+            leg_kind,
+            leg_driver,
+            leg_depart_ms,
+            leg_eta_s,
+            leg_dist_m,
+            leg_edges,
+            leg_o,
+            leg_d,
+            leg_actual_s,
+            leg_cancelled,
+            h_noiseless_s,
+            h_noise
         );
         self.gps_rows += o.gps_rows;
         self.sim_wall_s += o.sim_wall_s;
@@ -123,7 +148,7 @@ fn run_one(
     let sc = scenario_for(base, dw, spec.day, spec.hour, spec.seed);
     let unix0 = day_start_unix_ms(spec.day) + i64::from(spec.hour) * 3_600_000;
     let world = generate(engine, &sc);
-    let key = format!("{}", &local_date(unix0)[..7]); // khóa giả danh đổi theo tháng
+    let key = local_date(unix0)[..7].to_string(); // khóa giả danh đổi theo tháng
     let mut t = Tables::default();
     let rid = |c: usize| format!("RQ-{:03}{:02}{:04}", spec.day, spec.hour, c);
     let tid = |c: usize| format!("TN-{:03}{:02}{:04}", spec.day, spec.hour, c);
@@ -142,6 +167,7 @@ fn run_one(
             t.assign_ms.push(None);
             t.arrive_ms.push(None);
             t.dropoff_ms.push(None);
+            t.walk_m.push(None);
         }
         return Ok(t);
     }
@@ -192,8 +218,7 @@ fn run_one(
         t.simulated.push(true);
         t.trip_id.push(assigned.then(|| tid(i)));
         t.driver_ref.push(p.map(|l| dref(l.driver)));
-        t.outcome
-            .push(r.map(|r| r.outcome.as_str().to_string()));
+        t.outcome.push(r.map(|r| r.outcome.as_str().to_string()));
         t.assign_ms.push(p.map(|l| unix0 + l.start_ms as i64));
         t.arrive_ms.push(p.and_then(|l| {
             l.cancelled_at
@@ -205,7 +230,10 @@ fn run_one(
                 .get(&cu)
                 .map(|l| unix0 + (l.start_ms + l.total_ms) as i64),
         );
-        debug_assert!(r.is_none_or(|r| r.outcome != Outcome::Completed || onboard.contains_key(&cu)));
+        t.walk_m.push(r.map(|r| r.walk_m));
+        debug_assert!(
+            r.is_none_or(|r| r.outcome != Outcome::Completed || onboard.contains_key(&cu))
+        );
     }
     for l in &legs {
         let trip = tid(l.customer as usize);
@@ -224,7 +252,8 @@ fn run_one(
             .push(l.cancelled_at.is_none().then(|| l.total_ms as f64 / 1000.0));
         t.leg_cancelled.push(l.cancelled_at.is_some());
         t.h_noiseless_s.push(l.noiseless_ms as f64 / 1000.0);
-        t.h_noise.push(l.total_ms as f64 / l.noiseless_ms.max(1) as f64);
+        t.h_noise
+            .push(l.total_ms as f64 / l.noiseless_ms.max(1) as f64);
     }
     if let Some(root) = gps_root {
         let mut by_driver: BTreeMap<u32, Vec<(&LegRec, String)>> = BTreeMap::new();
@@ -269,6 +298,7 @@ fn write_tables(dir: &Path, t: Tables) -> Result<(), Box<dyn std::error::Error>>
             Col::I64N(t.assign_ms),
             Col::I64N(t.arrive_ms),
             Col::I64N(t.dropoff_ms),
+            Col::F64N(t.walk_m),
         ],
         &kv,
     )?;
@@ -331,17 +361,24 @@ fn main() {
     let mode = args.value("--mode").unwrap_or("train").to_string();
     let eval = mode == "eval";
     let out_dir: PathBuf = args.value("--out").map_or_else(
-        || lab_root().join("python/p06/artifacts").join(if eval { "eval" } else { "data" }),
+        || {
+            lab_root()
+                .join("python/p06/artifacts")
+                .join(if eval { "eval" } else { "data" })
+        },
         PathBuf::from,
     );
     let gap: f64 = args
         .value("--gap")
         .map_or(1.0, |v| v.parse().unwrap_or_else(|_| die("--gap cần số")));
     let world_seed = args.u64_or("--world-seed", 20_261_107);
-    let days = args.u64_or("--days", 14) as u32;
-    let demand_days = args.u64_or("--demand-days", 28).max(u64::from(days)) as u32;
+    let days = args.u64_or("--days", 21) as u32;
+    let demand_days = args.u64_or("--demand-days", 42).max(u64::from(days)) as u32;
     let jobs = args.u64_or("--jobs", 4) as usize;
-    let hours = parse_hours(args.value("--hours").unwrap_or(if eval { "8,13,18" } else { "0-23" }));
+    let hours = parse_hours(
+        args.value("--hours")
+            .unwrap_or(if eval { "8,13,18" } else { "0-23" }),
+    );
     let n_eval = args.u64_or("--seeds", 20) as usize;
 
     let mut specs: Vec<Spec> = Vec::new();
@@ -382,9 +419,10 @@ fn main() {
     let t0 = Instant::now();
     let hidden = HiddenStatic::new(&engine, gap, world_seed);
     let dw = DemandWorld::new(world_seed);
-    let gps_root = (!eval).then(|| out_dir.join("history-pseudo"));
+    let gps_root = (!eval && !args.flag("--no-gps")).then(|| out_dir.join("history-pseudo"));
     if out_dir.exists() {
-        std::fs::remove_dir_all(&out_dir).unwrap_or_else(|e| die(&format!("không xoá được {}: {e}", out_dir.display())));
+        std::fs::remove_dir_all(&out_dir)
+            .unwrap_or_else(|e| die(&format!("không xoá được {}: {e}", out_dir.display())));
     }
     std::fs::create_dir_all(&out_dir).unwrap_or_else(|e| die(&format!("{e}")));
     let next = AtomicUsize::new(0);
@@ -405,8 +443,13 @@ fn main() {
                             .expect("khoá")
                             .push(format!("lần chạy {i}: {e}")),
                     }
-                    if (i + 1) % 20 == 0 {
-                        eprintln!("  đã xong ~{}/{} lần chạy, {:.0} s", i + 1, specs.len(), t0.elapsed().as_secs_f64());
+                    if (i + 1).is_multiple_of(20) {
+                        eprintln!(
+                            "  đã xong ~{}/{} lần chạy, {:.0} s",
+                            i + 1,
+                            specs.len(),
+                            t0.elapsed().as_secs_f64()
+                        );
                     }
                 }
             });
@@ -414,7 +457,11 @@ fn main() {
     });
     let failed = failed.into_inner().expect("khoá");
     if !failed.is_empty() {
-        die(&format!("{} lần chạy lỗi, ví dụ: {}", failed.len(), failed[0]));
+        die(&format!(
+            "{} lần chạy lỗi, ví dụ: {}",
+            failed.len(),
+            failed[0]
+        ));
     }
     let mut all = Tables::default();
     for t in results.into_inner().expect("khoá").into_iter().flatten() {
@@ -426,23 +473,46 @@ fn main() {
     let n_req = all.request_id.len();
     let n_sim_req = all.simulated.iter().filter(|&&b| b).count();
     let n_trips = all.trip_id.iter().flatten().count();
-    let n_completed = all.outcome.iter().flatten().filter(|o| o.as_str() == "completed").count();
+    let n_completed = all
+        .outcome
+        .iter()
+        .flatten()
+        .filter(|o| o.as_str() == "completed")
+        .count();
     let n_legs = all.leg_id.len();
     let n_cancelled_legs = all.leg_cancelled.iter().filter(|&&b| b).count();
     // sai số của route-engine so với thời gian thật, theo giờ (để thấy khoảng cách do lab dựng)
     let mut by_hour: Vec<Vec<(f64, f64)>> = vec![Vec::new(); 24];
     for i in 0..n_legs {
         if let Some(a) = all.leg_actual_s[i] {
-            let h = (((all.leg_depart_ms[i] - day_start_unix_ms(0)).div_euclid(3_600_000)).rem_euclid(24)) as usize;
+            let h = (((all.leg_depart_ms[i] - day_start_unix_ms(0)).div_euclid(3_600_000))
+                .rem_euclid(24)) as usize;
             by_hour[h].push((all.leg_eta_s[i], a));
         }
     }
-    let _ = haversine_m; // (giữ import cho lab mở rộng)
     println!("\n-- dữ liệu đã ghi vào {} --", out_dir.display());
-    println!("yêu cầu đặt xe: {} ({} ở ngày có mô phỏng); chuyến có tài xế: {}; hoàn thành: {}", vn(n_req as u64), vn(n_sim_req as u64), vn(n_trips as u64), vn(n_completed as u64));
-    println!("chặng xe: {} (huỷ giữa đường {}); dòng GPS đã ghi (gồm bản trùng): {}", vn(n_legs as u64), vn(n_cancelled_legs as u64), vn(all.gps_rows as u64));
-    println!("dung lượng thư mục: {:.1} MB; thời gian chạy {:.0} s (cộng dồn thời gian mô phỏng các luồng {:.0} s)", dir_size(&out_dir) as f64 / 1e6, wall, all.sim_wall_s);
-    println!("\ntỉ lệ thời gian thật / ETA route-engine theo giờ khởi hành (trung vị; n chặng hoàn tất):");
+    println!(
+        "yêu cầu đặt xe: {} ({} ở ngày có mô phỏng); chuyến có tài xế: {}; hoàn thành: {}",
+        vn(n_req as u64),
+        vn(n_sim_req as u64),
+        vn(n_trips as u64),
+        vn(n_completed as u64)
+    );
+    println!(
+        "chặng xe: {} (huỷ giữa đường {}); dòng GPS đã ghi (gồm bản trùng): {}",
+        vn(n_legs as u64),
+        vn(n_cancelled_legs as u64),
+        vn(all.gps_rows as u64)
+    );
+    println!(
+        "dung lượng thư mục: {:.1} MB; thời gian chạy {:.0} s (cộng dồn thời gian mô phỏng các luồng {:.0} s)",
+        dir_size(&out_dir) as f64 / 1e6,
+        wall,
+        all.sim_wall_s
+    );
+    println!(
+        "\ntỉ lệ thời gian thật / ETA route-engine theo giờ khởi hành (trung vị; n chặng hoàn tất):"
+    );
     for (h, v) in by_hour.iter_mut().enumerate() {
         if v.len() < 5 {
             continue;
@@ -450,21 +520,45 @@ fn main() {
         let mut r: Vec<f64> = v.iter().map(|&(e, a)| a / e.max(1.0)).collect();
         r.sort_by(f64::total_cmp);
         let mae: f64 = v.iter().map(|&(e, a)| (a - e).abs()).sum::<f64>() / v.len() as f64;
-        println!("  {h:02}h  n={:>6}  trung vị tỉ lệ {:.3}  MAE của route-engine {:.1} s", v.len(), r[r.len() / 2], mae);
+        println!(
+            "  {h:02}h  n={:>6}  trung vị tỉ lệ {:.3}  MAE của route-engine {:.1} s",
+            v.len(),
+            r[r.len() / 2],
+            mae
+        );
     }
     let mut manifest = String::from("{\n");
-    manifest += &format!("  \"mode\": \"{mode}\",\n  \"gap\": {gap},\n  \"world_seed\": {world_seed},\n  \"sim_days\": {days},\n  \"demand_days\": {demand_days},\n");
-    manifest += &format!("  \"zone_sigma\": {},\n  \"day_sigma\": {},\n  \"leg_noise_sigma\": {},\n", labs::p06::ZONE_SIGMA, labs::p06::DAY_SIGMA, labs::p06::LEG_NOISE_SIGMA);
+    manifest += &format!(
+        "  \"mode\": \"{mode}\",\n  \"gap\": {gap},\n  \"world_seed\": {world_seed},\n  \"sim_days\": {days},\n  \"demand_days\": {demand_days},\n"
+    );
+    manifest += &format!(
+        "  \"zone_sigma\": {},\n  \"day_sigma\": {},\n  \"leg_noise_sigma\": {},\n",
+        labs::p06::ZONE_SIGMA,
+        labs::p06::DAY_SIGMA,
+        labs::p06::LEG_NOISE_SIGMA
+    );
     let events: Vec<String> = (0..demand_days)
         .filter_map(|d| dw.event(d))
-        .map(|e| format!("    {{\"day\": {}, \"hotspot\": {}, \"from_h\": {}, \"to_h\": {}, \"mult\": {}}}", e.day, e.hotspot, e.from_h, e.to_h, e.mult))
+        .map(|e| {
+            format!(
+                "    {{\"day\": {}, \"hotspot\": {}, \"from_h\": {}, \"to_h\": {}, \"mult\": {}}}",
+                e.day, e.hotspot, e.from_h, e.to_h, e.mult
+            )
+        })
         .collect();
     manifest += &format!("  \"hidden_events\": [\n{}\n  ],\n", events.join(",\n"));
-    manifest += &format!("  \"requests\": {n_req},\n  \"legs\": {n_legs},\n  \"gps_rows\": {}\n}}\n", all.gps_rows);
+    manifest += &format!(
+        "  \"requests\": {n_req},\n  \"legs\": {n_legs},\n  \"gps_rows\": {}\n}}\n",
+        all.gps_rows
+    );
     if let Err(e) = write_tables(&out_dir, all) {
         die(&format!("lỗi ghi bảng: {e}"));
     }
-    std::fs::write(out_dir.join("hidden").join("manifest.json"), manifest).unwrap_or_else(|e| die(&format!("{e}")));
-    println!("sự kiện ẩn (chỉ để chấm điểm dự báo, không đưa cho mô hình): {}", (0..demand_days).filter(|&d| dw.event(d).is_some()).count());
+    std::fs::write(out_dir.join("hidden").join("manifest.json"), manifest)
+        .unwrap_or_else(|e| die(&format!("{e}")));
+    println!(
+        "sự kiện ẩn (chỉ để chấm điểm dự báo, không đưa cho mô hình): {}",
+        (0..demand_days).filter(|&d| dw.event(d).is_some()).count()
+    );
     println!("uptime lúc kết thúc: {}", uptime());
 }

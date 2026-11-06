@@ -106,12 +106,11 @@ fn truth_slows_the_world_but_not_what_the_engine_believes() {
         .iter()
         .filter(|t| t.outcome == Outcome::Completed)
         .count();
-    let onboard = log
-        .legs
-        .iter()
-        .filter(|l| l.0 == LegKind::Onboard)
-        .count();
-    assert_eq!(onboard, completed, "mỗi chuyến hoàn thành có đúng một chặng có khách");
+    let onboard = log.legs.iter().filter(|l| l.0 == LegKind::Onboard).count();
+    assert_eq!(
+        onboard, completed,
+        "mỗi chuyến hoàn thành có đúng một chặng có khách"
+    );
     assert!(log.legs.iter().any(|l| l.0 == LegKind::Pickup));
     for &(_, _, _, planned, _, noiseless) in &log.legs {
         // thời gian «thật không nhiễu» = 1,5 × ước lượng của route-engine (sai số làm tròn từng cạnh)

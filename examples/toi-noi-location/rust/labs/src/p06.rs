@@ -228,7 +228,11 @@ const PROFILES: [HotspotProfile; 8] = [
     // Phú Mỹ Hưng: sáng ngày thường, tối cuối tuần
     (0.3, &[(1.0, 8.0, 1.5), (0.8, 19.0, 2.0)], 0.9),
     // Đại học Bách Khoa: học sinh sinh viên, ngày thường, gần như vắng cuối tuần
-    (0.1, &[(1.4, 7.0, 1.3), (1.0, 12.0, 1.0), (1.2, 17.0, 1.4)], 0.2),
+    (
+        0.1,
+        &[(1.4, 7.0, 1.3), (1.0, 12.0, 1.0), (1.2, 17.0, 1.4)],
+        0.2,
+    ),
     // Gò Vấp: dân cư, ra đi buổi sáng, về buổi tối
     (0.4, &[(1.2, 6.5, 1.5), (0.7, 21.0, 2.0)], 0.8),
     // Thảo Điền: tối và cuối tuần
@@ -415,7 +419,8 @@ pub fn write_parquet(
             Col::F64N(v) => {
                 let d = levels(&v);
                 let vals: Vec<f64> = v.into_iter().flatten().collect();
-                cw.typed::<DoubleType>().write_batch(&vals, Some(&d), None)?;
+                cw.typed::<DoubleType>()
+                    .write_batch(&vals, Some(&d), None)?;
             }
             Col::Bool(v) => {
                 cw.typed::<BoolType>().write_batch(&v, None, None)?;
@@ -431,7 +436,8 @@ pub fn write_parquet(
                     .flatten()
                     .map(|s| ByteArray::from(s.as_str()))
                     .collect();
-                cw.typed::<ByteArrayType>().write_batch(&vals, Some(&d), None)?;
+                cw.typed::<ByteArrayType>()
+                    .write_batch(&vals, Some(&d), None)?;
             }
         }
         cw.close()?;
@@ -474,6 +480,7 @@ pub const TRIPS_SCHEMA: &str = "message toinoi_trips {
   optional int64 assign_time (TIMESTAMP(MILLIS,true));
   optional int64 arrive_time (TIMESTAMP(MILLIS,true));
   optional int64 dropoff_time (TIMESTAMP(MILLIS,true));
+  optional double walk_m;
 }";
 
 pub const LEGS_SCHEMA: &str = "message toinoi_legs {
@@ -617,7 +624,9 @@ pub fn gps_rows_for_driver(
     for (leg, trip_id) in legs {
         let mut prev_in_leg: Option<(u64, LatLng)> = None;
         for &(t, p) in &leg.samples {
-            let heading = prev.filter(|&(_, q)| haversine_m(q, p) > 0.5).map(|(_, q)| bearing_deg(q, p));
+            let heading = prev
+                .filter(|&(_, q)| haversine_m(q, p) > 0.5)
+                .map(|(_, q)| bearing_deg(q, p));
             let reason = match last_kept {
                 None => Some("first"),
                 Some((tk, pk)) => {
@@ -634,7 +643,8 @@ pub fn gps_rows_for_driver(
                     }
                 }
             };
-            let speed_mps = prev_in_leg.map(|(tp, q)| haversine_m(q, p) / ((t - tp).max(1) as f64 / 1000.0));
+            let speed_mps =
+                prev_in_leg.map(|(tp, q)| haversine_m(q, p) / ((t - tp).max(1) as f64 / 1000.0));
             if heading.is_some() {
                 prev_heading = heading;
             }
@@ -657,9 +667,13 @@ pub fn gps_rows_for_driver(
                 lng_e7: e7.lng_e7(),
                 accuracy_dm: (rng.f64() >= 0.04).then(|| (acc_m * 10.0).round() as i32),
                 // NULL = app không báo; 0 = đứng yên (hai thứ khác nhau, hợp đồng LOC-20)
-                speed_dmps: speed_mps
-                    .filter(|_| rng.f64() >= 0.03)
-                    .map(|v| if v < 0.2 { 0 } else { (v * 10.0).round() as i32 }),
+                speed_dmps: speed_mps.filter(|_| rng.f64() >= 0.03).map(|v| {
+                    if v < 0.2 {
+                        0
+                    } else {
+                        (v * 10.0).round() as i32
+                    }
+                }),
                 heading_ddeg: heading
                     .filter(|_| rng.f64() >= 0.03)
                     .map(|h| ((h * 10.0).round() as i32).rem_euclid(3600)),
@@ -702,7 +716,9 @@ pub fn write_gps(
                 replay_rows.push(r);
             }
         }
-        let dir = root.join(format!("date={date}")).join(format!("city={city}"));
+        let dir = root
+            .join(format!("date={date}"))
+            .join(format!("city={city}"));
         let stem = format!("part-{unix0_ms}-{run_idx:04}");
         for (suffix, set) in [("", &out), ("-replay", &replay_rows)] {
             if set.is_empty() {
@@ -728,10 +744,7 @@ pub fn write_gps(
                 &dir.join(format!("{stem}{suffix}.parquet")),
                 GPS_SCHEMA,
                 cols,
-                &[
-                    ("toinoi.schema_version", "1"),
-                    ("toinoi.id_level", "1"),
-                ],
+                &[("toinoi.schema_version", "1"), ("toinoi.id_level", "1")],
             )?;
             total += n;
         }
