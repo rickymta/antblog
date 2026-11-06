@@ -16,6 +16,18 @@ pub struct Ctx<'a> {
     pub scenario: &'a Scenario,
     pub now_ms: u64,
     pub(crate) router: &'a Router<'a>,
+    /// Thống kê từng tài xế, chỉ mục theo `DriverView::id` (P05: công bằng cho tài xế, LOC-45).
+    pub(crate) fleet: &'a [FleetStat],
+}
+
+/// Thống kê một tài xế tại thời điểm gọi chiến lược (cộng thêm, không đổi baseline).
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FleetStat {
+    /// Lúc tài xế rảnh gần nhất (0 nếu rảnh từ đầu mô phỏng).
+    pub idle_since_ms: u64,
+    pub trips_done: u32,
+    /// Tổng thời gian đã bận (đón và chở khách), mili giây, chưa tính chuyến đang chạy.
+    pub busy_ms: u64,
 }
 
 impl Ctx<'_> {
@@ -40,6 +52,10 @@ impl Ctx<'_> {
     }
     pub fn point_of(&self, p: Position) -> LatLng {
         p.point(&self.engine.g)
+    }
+    /// Thống kê của tài xế `id` (mặc định toàn 0 nếu `id` ngoài phạm vi).
+    pub fn fleet_stat(&self, id: u32) -> FleetStat {
+        self.fleet.get(id as usize).copied().unwrap_or_default()
     }
 }
 
@@ -68,6 +84,28 @@ pub trait PickupStrategy {
     fn name(&self) -> &str;
     /// `None` nếu không có điểm đón khả thi (khách bị tính huỷ vì không có đường).
     fn choose(&mut self, ctx: &Ctx, c: &CustomerView) -> Option<PickupChoice>;
+    /// P04: gọi ngay trước `choose` với các tài xế đang rảnh lúc khách đặt (vị trí có hướng). Mặc định bỏ qua,
+    /// nên baseline và mọi chiến lược cũ không đổi.
+    fn observe_idle(&mut self, _idle: &[DriverView]) {}
+    /// P04, LOC-38: chọn điểm trả khi tài xế đã đón khách. `None` (mặc định) = baseline: xe tới đúng điểm đích đã snap.
+    /// Trả về các vị trí có hướng mà xe được phép vào; mô phỏng chọn đường rẻ nhất tới một trong chúng.
+    fn choose_dropoff(&mut self, _ctx: &Ctx, _d: &DropView) -> Option<Vec<Position>> {
+        None
+    }
+}
+
+/// Thông tin cho `choose_dropoff` (P04): đích thật, đích đã snap lên đường, và chỗ xe đang đứng.
+#[derive(Debug, Clone)]
+pub struct DropView {
+    pub customer: u32,
+    /// Điểm đến thật của khách (có thể cách đường tới vài chục mét).
+    pub dest_true: LatLng,
+    /// Điểm đến đã snap lên đường: nơi baseline trả khách.
+    pub dest_snap: LatLng,
+    /// Vị trí có hướng của xe lúc đón xong.
+    pub from: Position,
+    /// Các vị trí baseline sẽ dùng.
+    pub default_positions: Vec<Position>,
 }
 
 /// Baseline: tài xế đến đúng điểm ghim (đã snap lên đường), khách đi bộ từ chỗ đứng thật tới đó.
@@ -127,6 +165,68 @@ pub trait MatchStrategy {
         pending: &[PendingView],
         idle: &[DriverView],
     ) -> Vec<Assignment>;
+
+    /// Cửa sổ lô (LOC-43). `None` (mặc định, baseline) = ghép ngay mỗi khi có khách mới hoặc tài xế rảnh.
+    /// `Some(ms)` = khi có khách chờ và có tài xế rảnh mà chưa có lô đang mở, mở lô và ghép **một lần** sau `ms` mili giây;
+    /// khách chưa được ghép ở lô đó chờ lô sau. Gọi lại mỗi lần cần quyết định, nên cửa sổ có thể thích ứng.
+    fn window_ms(
+        &mut self,
+        _ctx: &Ctx,
+        _pending: &[PendingView],
+        _idle: &[DriverView],
+    ) -> Option<u64> {
+        None
+    }
+
+    /// Tầm nhìn của ghép nối chuyến (LOC-47): `Some(ms)` thì simulator đưa thêm các tài xế đang chở khách và sẽ trả khách
+    /// trong vòng `ms` tới (ước lượng) vào `assign_chain`. `None` (mặc định) = chỉ tài xế rảnh.
+    fn chain_horizon_ms(&self) -> Option<u64> {
+        None
+    }
+
+    /// Ghép có cả tài xế sắp trả khách. Cặp (khách, tài xế đang bận) nghĩa là xếp khách vào hàng chờ của tài xế đó:
+    /// tài xế tự đi đón ngay khi trả khách hiện tại. Mặc định bỏ qua `finishing` và gọi [`MatchStrategy::assign`].
+    fn assign_chain(
+        &mut self,
+        ctx: &Ctx,
+        pending: &[PendingView],
+        idle: &[DriverView],
+        _finishing: &[FinishingView],
+    ) -> Vec<Assignment> {
+        self.assign(ctx, pending, idle)
+    }
+}
+
+/// Tài xế đang chở khách (LOC-47): ứng viên cho chuyến kế. Chỉ có **ước lượng** theo kế hoạch; thời gian thật còn nhiễu tốc độ
+/// của mô phỏng (`driver.speed_jitter`) mà chiến lược không được biết.
+#[derive(Debug, Clone, Copy)]
+pub struct FinishingView {
+    pub id: u32,
+    /// Nơi tài xế sẽ trả khách (cạnh có hướng).
+    pub end_pos: Position,
+    pub end_latlng: LatLng,
+    /// Còn bao lâu nữa tài xế rảnh (ước lượng theo kế hoạch, gồm thời gian dừng trả khách), mili giây.
+    pub remaining_est_ms: u64,
+}
+
+/// Một gợi ý di chuyển cho tài xế rảnh (LOC-49). Chỉ là gợi ý: tài xế nghe theo với xác suất do kịch bản đặt.
+#[derive(Debug, Clone, Copy)]
+pub struct RepositionSuggestion {
+    pub driver: u32,
+    pub target: Position,
+}
+
+/// Điều hướng tài xế rảnh theo nhu cầu (LOC-49). Gắn qua [`crate::sim::run_with`]; không gắn thì không có gì đổi.
+pub trait Repositioner {
+    fn name(&self) -> &str;
+    /// Chu kỳ gọi `suggest`, mili giây.
+    fn interval_ms(&self) -> u64;
+    fn suggest(
+        &mut self,
+        ctx: &Ctx,
+        idle: &[DriverView],
+        pending: &[PendingView],
+    ) -> Vec<RepositionSuggestion>;
 }
 
 /// Baseline: duyệt khách theo thứ tự đặt, mỗi khách lấy tài xế rảnh gần nhất theo đường chim bay (hoà thì mã nhỏ hơn).

@@ -1,0 +1,133 @@
+// Hợp đồng gRPC `SuggestMatch` giữa `geo-engine` (Rust) và Dispatch (C#), LOC-46.
+// Dùng chung quy ước của routing.proto: toạ độ E7, thời gian mili giây. Không đổi ý nghĩa hay số thứ tự field đã có; chỉ thêm field mới.
+//
+// RANH GIỚI (kiến trúc §4.5): Rust ĐỀ XUẤT, C# QUYẾT ĐỊNH.
+//   - Một `Suggestion` chỉ là lời khuyên có hạn dùng. Nó KHÔNG phải assignment, KHÔNG giữ chỗ tài xế, KHÔNG ghi trạng thái nào.
+//     Rust không bao giờ ghi trạng thái assignment; không có RPC nào ở đây làm việc đó.
+//   - Dispatch (C#) kiểm lại gợi ý với trạng thái của chính nó rồi mới lấy lease, tạo offer (offer_id, TTL riêng của offer), nhận
+//     accept/reject idempotent, và persist assignment. Gợi ý cũ (quá `valid_until_ms`, `driver_state_version` đã đổi, tài xế hết rảnh,
+//     booking đã có assignment) phải bị từ chối phía C#.
+//   - `valid_until_ms` là hạn để ÁP DỤNG gợi ý (tạo offer), tính theo đồng hồ của người gọi (`now_ms` trong yêu cầu). Nó ngắn hơn TTL của
+//     offer và độc lập với TTL của offer: sau khi offer đã tạo, TTL của offer mới là cái quyết định.
+//   - `request_id` làm lời gọi idempotent: cùng `request_id` và cùng nội dung cho cùng gợi ý, cùng `suggestion_id`.
+syntax = "proto3";
+
+package toinoi.location.v1;
+
+import "location/v1/routing.proto";
+
+option go_package = "toinoi/location/gen/location/v1;locationv1";
+option csharp_namespace = "ToiNoi.Location.V1";
+option java_package = "vn.toinoi.location.v1";
+
+// Chính sách chi phí có phiên bản (LOC-45). Để trống trọng số = 0; `version` rỗng = «v0-eta» (chỉ ETA).
+message MatchPolicy {
+  string version = 1;
+  // Giới hạn cứng đón xa (giây). 0 = không giới hạn. Cặp có ETA vượt giới hạn không bao giờ được gợi ý.
+  uint32 hard_pickup_s = 2;
+  // Từ ngưỡng này (giây) ETA bị phạt thêm `soft_weight` cho mỗi mili giây vượt.
+  uint32 soft_pickup_s = 3;
+  double soft_weight = 4;
+  // Thưởng (ms chi phí giảm) cho mỗi ms khách đã chờ, và cho mỗi ms tài xế đã rảnh.
+  double age_bonus = 5;
+  double idle_bonus = 6;
+}
+
+// Yêu cầu ghép đang chờ.
+message PendingRequest {
+  string booking_id = 1;
+  LatLngE7 pickup = 2;
+  int64 requested_at_ms = 3;
+  // Khách đã chờ (ms). Vắng = `now_ms − requested_at_ms`.
+  optional uint32 waited_ms = 4;
+}
+
+// Tài xế ứng viên. `state_version` tăng đơn điệu mỗi khi Dispatch đổi trạng thái tài xế (nhận offer, rảnh lại, di chuyển đáng kể…);
+// gợi ý ghi lại phiên bản đã dùng để C# phát hiện gợi ý cũ.
+message DriverCandidate {
+  string driver_id = 1;
+  LatLngE7 position = 2;
+  uint64 state_version = 3;
+  int64 idle_since_ms = 4;
+  // Có giá trị = tài xế đang chở khách, còn chừng này ms nữa rảnh (ước lượng); `position` khi đó là nơi dự kiến trả khách (chain, LOC-47).
+  optional uint32 busy_remaining_ms = 5;
+}
+
+message SuggestMatchRequest {
+  // Khoá idempotent của lời gọi; bắt buộc.
+  string request_id = 1;
+  string city_code = 2;
+  // Đồng hồ của người gọi (epoch ms). TTL của gợi ý tính từ đây.
+  int64 now_ms = 3;
+  MatchPolicy policy = 4;
+  // Phiên bản ảnh chụp bể tài xế mà Dispatch đã dùng; được trả lại nguyên vẹn.
+  uint64 snapshot_version = 5;
+  repeated PendingRequest pending = 6;
+  repeated DriverCandidate drivers = 7;
+  // Hạn dùng gợi ý, ms (mặc định 10000; kẹp vào 1000..120000).
+  optional uint32 suggestion_ttl_ms = 8;
+  // Ngân sách tính toán riêng (ms), ngoài deadline gRPC. Hết ngân sách thì trả ước lượng chim bay (quality = ESTIMATED).
+  // Vắng = chỉ theo deadline gRPC. 0 = không tính, trả ước lượng ngay.
+  optional uint32 compute_budget_ms = 9;
+}
+
+message Suggestion {
+  // Tất định: băm của (request_id, booking_id, driver_id, driver_state_version).
+  string suggestion_id = 1;
+  string booking_id = 2;
+  string driver_id = 3;
+  // ETA tài xế tới điểm đón (gồm `busy_remaining_ms` nếu là chain), ms.
+  uint32 eta_ms = 4;
+  // Khoảng chim bay tài xế → điểm đón, mét (gợi ý rẻ, không phải quãng đường lái).
+  uint32 distance_hint_m = 5;
+  // Chi phí theo chính sách (ms tương đương), thấp hơn là tốt hơn.
+  int64 cost = 6;
+  // Phiên bản trạng thái tài xế mà gợi ý này dựa trên.
+  uint64 driver_state_version = 7;
+  // Hạn áp dụng, theo đồng hồ của người gọi.
+  int64 valid_until_ms = 8;
+  string policy_version = 9;
+}
+
+enum UnmatchedReason {
+  UNMATCHED_REASON_UNSPECIFIED = 0;
+  // Có tài xế dùng được nhưng thua cặp tốt hơn trong lô, hoặc hết tài xế (thừa khách).
+  UNMATCHED_REASON_NO_DRIVER_AVAILABLE = 1;
+  // Mọi tài xế đều vượt giới hạn cứng đón xa.
+  UNMATCHED_REASON_BEYOND_PICKUP_LIMIT = 2;
+  // Không tài xế nào có đường tới điểm đón.
+  UNMATCHED_REASON_NO_ROUTE = 3;
+  // Điểm đón không nằm gần đường ô tô đi được.
+  UNMATCHED_REASON_NOT_SNAPPABLE = 4;
+}
+
+message Unmatched {
+  string booking_id = 1;
+  UnmatchedReason reason = 2;
+}
+
+message SolverStats {
+  // "hungarian" hoặc "hungarian-estimated" (ma trận chim bay khi quá hạn).
+  string algo = 1;
+  uint32 rows = 2;
+  uint32 cols = 3;
+  uint32 matrix_us = 4;
+  uint32 solve_us = 5;
+}
+
+message SuggestMatchResponse {
+  string request_id = 1;
+  uint64 snapshot_version = 2;
+  string policy_version = 3;
+  repeated Suggestion suggestions = 4;
+  repeated Unmatched unmatched = 5;
+  SolverStats stats = 6;
+  // ROUTED: ETA từ đồ thị đường. ESTIMATED: chim bay × hệ số vòng vì hết ngân sách (ETA kém tin cậy hơn).
+  RoutingQuality quality = 7;
+  string source = 8;
+}
+
+service MatchingService {
+  // Đề xuất cặp (booking, tài xế) cho một lô. Chỉ đề xuất: không lease, không offer, không ghi assignment.
+  rpc SuggestMatch(SuggestMatchRequest) returns (SuggestMatchResponse);
+}

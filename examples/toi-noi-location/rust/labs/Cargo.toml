@@ -23,6 +23,11 @@ petgraph.workspace = true
 fast_paths.workspace = true
 simulator.workspace = true
 geo-engine.workspace = true
+matcher.workspace = true
+geocode.workspace = true
+pickup.workspace = true
+cpu-time = "1.0.0"
+parquet.workspace = true
 tokio.workspace = true
 tonic.workspace = true
 tokio-stream = { version = "0.1.19", features = ["net"] }

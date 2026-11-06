@@ -3,10 +3,10 @@
 
 use crate::metrics::{Outcome, Summary, TripRecord, fnv1a, summarize, trips_csv};
 use crate::rng::Rng;
-use crate::scenario::Scenario;
+use crate::scenario::{CancelBasis, Scenario};
 use crate::strategy::{
-    Assignment, Ctx, CustomerView, DriverView, MatchStrategy, PendingView, PickupChoice,
-    PickupStrategy,
+    Assignment, Ctx, CustomerView, DriverView, DropView, FinishingView, FleetStat, MatchStrategy,
+    PendingView, PickupChoice, PickupStrategy, Repositioner,
 };
 use crate::world::{Router, generate};
 use geo_core::LatLng;
@@ -33,6 +33,9 @@ pub struct ActiveRoute {
     cum_m: Vec<f64>,
     pub planned_ms: u64,
     pub total_ms: u64,
+    /// P06: thời gian chạy khi chỉ có hiệu ứng «thế giới thật» của [`Truth`], chưa có nhiễu của chặng (`factor`). Không có `Truth`
+    /// thì bằng `planned_ms`. Chỉ để lab P06 tính sàn nhiễu; không dùng trong mô phỏng.
+    pub noiseless_ms: u64,
 }
 
 impl ActiveRoute {
@@ -43,12 +46,26 @@ impl ActiveRoute {
         start_ms: u64,
         factor: f64,
     ) -> Self {
+        Self::build_with(engine, tm, route, start_ms, factor, None)
+    }
+
+    /// Như [`ActiveRoute::build`], thêm hệ số «thế giới thật» của từng cạnh (P06). `truth = None` cho đúng từng bit kết quả của `build`
+    /// (nhân với 1,0 không đổi giá trị).
+    pub fn build_with(
+        engine: &Engine,
+        tm: &route_engine::turn::TurnModel,
+        route: &EdgeRoute,
+        start_ms: u64,
+        factor: f64,
+        truth: Option<&dyn Truth>,
+    ) -> Self {
         let g = &engine.g;
         let n = route.edges.len();
         let (mut from_frac, mut to_frac) = (Vec::with_capacity(n), Vec::with_capacity(n));
         let (mut wait_end, mut end, mut cum_m) = (Vec::new(), Vec::new(), Vec::new());
         let (mut t, mut dist) = (0f64, 0f64);
         let mut planned = 0f64;
+        let mut noiseless = 0f64;
         for (i, &e) in route.edges.iter().enumerate() {
             let a = if i == 0 { route.start_frac } else { 0.0 };
             let b = if i + 1 == n { route.end_frac } else { 1.0 };
@@ -61,8 +78,11 @@ impl ActiveRoute {
             };
             let mv = f64::from(tm.view.w[e as usize]) * f64::from((b - a).max(0.0));
             planned += wait + mv;
-            t += (wait + mv) * factor;
-            wait_end.push((t - mv * factor).round() as u64);
+            // hệ số thế giới thật của cạnh, tính theo giờ lúc xe vào cạnh (1,0 khi không có `Truth`)
+            let ef = truth.map_or(1.0, |tr| tr.edge_factor(engine, e, start_ms + t.round() as u64));
+            noiseless += (wait + mv) * ef;
+            t += (wait + mv) * factor * ef;
+            wait_end.push((t - mv * factor * ef).round() as u64);
             end.push(t.round() as u64);
             dist += f64::from(g.length_cm[e as usize]) / 100.0 * f64::from((b - a).max(0.0));
             cum_m.push(dist);
@@ -77,6 +97,7 @@ impl ActiveRoute {
             cum_m,
             planned_ms: planned.round() as u64,
             total_ms: t.round() as u64,
+            noiseless_ms: noiseless.round() as u64,
         }
     }
 
@@ -134,6 +155,13 @@ enum Ev {
     TripEnds(u32),
     Cancel(u32),
     Patience(u32),
+    /// Hết cửa sổ lô (P05, LOC-43): ghép một lần.
+    Tick,
+    /// Khách đã xếp hàng chờ tài xế đang bận huỷ (P05, LOC-47).
+    CancelQueued(u32),
+    /// Chu kỳ gợi ý di chuyển cho tài xế rảnh (P05, LOC-49).
+    RepoTick,
+    RepoDone(u32, u32),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -141,6 +169,8 @@ enum CStatus {
     NotYet,
     Pending,
     Assigned,
+    /// Đã xếp hàng chờ một tài xế đang chở khách (P05, LOC-47).
+    Queued,
     Closed,
 }
 
@@ -148,8 +178,12 @@ struct Cust {
     view: CustomerView,
     request_ms: u64,
     dropoff: Vec<Position>,
+    /// Điểm đến thật chưa snap (P04).
+    dest_true: LatLng,
     status: CStatus,
     pickup: Option<PickupChoice>,
+    queued_ms: u64,
+    queued_driver: Option<u32>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -159,10 +193,24 @@ enum DState {
     WithPassenger(u32),
 }
 
+/// Tài xế đang di chuyển theo gợi ý (P05, LOC-49). Vẫn tính là rảnh: có khách thì đổi sang đón ngay.
+struct Repos {
+    id: u32,
+    route: ActiveRoute,
+}
+
 struct Drv {
     pos: Position,
     state: DState,
     busy_since_ms: u64,
+    idle_since_ms: u64,
+    trips_done: u32,
+    busy_total_ms: u64,
+    /// Giờ (mô phỏng) tài xế rảnh khi đang chở khách, gồm thời gian dừng trả khách (thật, có nhiễu).
+    free_at_ms: u64,
+    /// Khách xếp hàng chờ chuyến kế (P05, LOC-47).
+    queued: Option<u32>,
+    repos: Option<Repos>,
 }
 
 struct Trip {
@@ -197,6 +245,69 @@ pub struct RunOptions {
     pub trace: bool,
 }
 
+/// «Thế giới thật» của P06: hệ số nhân thời gian chạy của từng cạnh mà route-engine **không biết** (hiệu ứng vùng, giờ, ngày).
+/// Mô phỏng dùng nó để quyết định xe thật sự mất bao lâu; mọi ETA mà chiến lược nhìn thấy vẫn là ước lượng của route-engine.
+pub trait Truth: Send {
+    /// Hệ số nhân thời gian chạy của cạnh `edge` khi xe vào cạnh lúc `sim_ms` (mili giây mô phỏng); 1,0 = đúng như route-engine tin.
+    fn edge_factor(&self, engine: &Engine, edge: EdgeId, sim_ms: u64) -> f64;
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LegKind {
+    /// Tài xế chạy không tới điểm đón.
+    Pickup,
+    /// Đoạn có khách, từ điểm đón tới điểm trả.
+    Onboard,
+}
+
+/// Một chặng xe vừa bắt đầu (P06): để lab xuất chuyến và GPS. `route` gồm cả `planned_ms` (ETA của route-engine) và `total_ms` (thật).
+pub struct LegInfo<'a> {
+    pub kind: LegKind,
+    pub customer: u32,
+    pub driver: u32,
+    pub start_ms: u64,
+    pub route: &'a ActiveRoute,
+}
+
+/// Người quan sát chỉ đọc (P06): không ảnh hưởng mô phỏng.
+pub trait Observer: Send {
+    fn leg_started(&mut self, leg: &LegInfo);
+    /// Khách huỷ khi xe còn đang chạy tới điểm đón: chặng đón dừng ở `at_ms`.
+    fn leg_cancelled(&mut self, customer: u32, at_ms: u64);
+}
+
+/// Phần cắm thêm của P06 cho [`run_hooked`]; mặc định không có gì nên baseline giữ nguyên từng byte.
+#[derive(Default)]
+pub struct Hooks<'a> {
+    pub truth: Option<Box<dyn Truth + 'a>>,
+    pub observer: Option<Box<dyn Observer + 'a>>,
+}
+
+/// Số đếm phụ của P05 (cửa sổ lô, ghép nối chuyến, gợi ý di chuyển). Toàn 0 ở baseline.
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub struct ExtraStats {
+    /// Số lần cửa sổ lô đóng lại và ghép.
+    pub batches: usize,
+    /// Khách được xếp hàng chờ tài xế đang chở khách.
+    pub chained: usize,
+    /// Trong số đó, khách huỷ khi còn đang xếp hàng.
+    pub chain_cancelled_in_queue: usize,
+    pub reposition_suggested: usize,
+    pub reposition_accepted: usize,
+    /// Gợi ý bị bỏ dở vì tài xế được gán khách trước khi tới nơi.
+    pub reposition_interrupted: usize,
+    /// Tổng quãng tài xế chạy không theo gợi ý (mét), gồm cả quãng chạy dở.
+    pub cruise_m: f64,
+}
+
+/// Phần cắm thêm (P05) cho [`run_with`]; mặc định không có gì nên [`run`] giữ nguyên hành vi baseline.
+#[derive(Default)]
+pub struct Extras<'a> {
+    pub repositioner: Option<Box<dyn Repositioner + 'a>>,
+    /// Xác suất tài xế nghe theo một gợi ý di chuyển (rút từ dòng ngẫu nhiên riêng).
+    pub reposition_accept_prob: f64,
+}
+
 pub struct SimOutput {
     pub scenario: Scenario,
     pub pickup_strategy: String,
@@ -204,6 +315,7 @@ pub struct SimOutput {
     pub summary: Summary,
     pub trips: Vec<TripRecord>,
     pub trace: Vec<TraceEvent>,
+    pub extras: ExtraStats,
 }
 
 impl SimOutput {
@@ -345,6 +457,15 @@ struct Sim<'a> {
     busy_ms: u64,
     trace: Vec<TraceEvent>,
     opts: RunOptions,
+    tick_open: bool,
+    in_tick: bool,
+    extras: ExtraStats,
+    repositioner: Option<Box<dyn Repositioner + 'a>>,
+    reposition_accept_prob: f64,
+    rng_repo: Rng,
+    repo_seq: u32,
+    truth: Option<Box<dyn Truth + 'a>>,
+    observer: Option<Box<dyn Observer + 'a>>,
 }
 
 impl Sim<'_> {
@@ -413,23 +534,131 @@ impl Sim<'_> {
         }));
     }
 
+    fn current_pos(&self, d: &Drv) -> Position {
+        d.repos
+            .as_ref()
+            .map_or(d.pos, |r| r.route.position_at(self.now_ms))
+    }
+
     fn idle_views(&self) -> Vec<DriverView> {
         self.drivers
             .iter()
             .enumerate()
             .filter(|(_, d)| d.state == DState::Idle)
-            .map(|(i, d)| DriverView {
-                id: i as u32,
-                pos: d.pos,
-                latlng: self.latlng(d.pos),
+            .map(|(i, d)| {
+                let pos = self.current_pos(d);
+                DriverView {
+                    id: i as u32,
+                    pos,
+                    latlng: self.latlng(pos),
+                }
             })
             .collect()
     }
 
+    fn fleet_stats(&self) -> Vec<FleetStat> {
+        self.drivers
+            .iter()
+            .map(|d| FleetStat {
+                idle_since_ms: d.idle_since_ms,
+                trips_done: d.trips_done,
+                busy_ms: d.busy_total_ms,
+            })
+            .collect()
+    }
+
+    /// Tài xế đang chở khách và sẽ rảnh trong `chain_horizon_ms` tới (ước lượng theo kế hoạch, không biết nhiễu tốc độ).
+    fn finishing_views(&self) -> Vec<FinishingView> {
+        let Some(horizon) = self.matcher.chain_horizon_ms() else {
+            return Vec::new();
+        };
+        let dwell = (self.sc.driver.dwell_dropoff_s * 1000.0) as u64;
+        let mut out = Vec::new();
+        for (i, d) in self.drivers.iter().enumerate() {
+            let DState::WithPassenger(tid) = d.state else {
+                continue;
+            };
+            if d.queued.is_some() {
+                continue;
+            }
+            let Some(a) = self.trips[tid as usize].trip.as_ref() else {
+                continue;
+            };
+            let left_true = d.free_at_ms.saturating_sub(self.now_ms);
+            let dwell_left = left_true.min(dwell);
+            let drive_true = (left_true - dwell_left) as f64;
+            let est = (drive_true * a.planned_ms as f64 / a.total_ms.max(1) as f64).round() as u64
+                + dwell_left;
+            if est <= horizon {
+                let end_pos = a.end_position();
+                out.push(FinishingView {
+                    id: i as u32,
+                    end_pos,
+                    end_latlng: self.latlng(end_pos),
+                    remaining_est_ms: est,
+                });
+            }
+        }
+        out
+    }
+
+    /// Cửa sổ lô: nếu chiến lược muốn gom thì mở lô (một `Tick`) và báo đã hoãn việc ghép.
+    fn maybe_open_window(&mut self) -> bool {
+        if self.tick_open {
+            return true;
+        }
+        let idle = self.idle_views();
+        let finishing = self.finishing_views();
+        if idle.is_empty() && finishing.is_empty() {
+            return false;
+        }
+        let mut pending_ids: Vec<u32> = (0..self.custs.len() as u32)
+            .filter(|&c| self.custs[c as usize].status == CStatus::Pending)
+            .collect();
+        if pending_ids.is_empty() {
+            return false;
+        }
+        pending_ids.sort_by_key(|&c| (self.custs[c as usize].request_ms, c));
+        let w = {
+            let pending: Vec<PendingView> = pending_ids
+                .iter()
+                .map(|&c| PendingView {
+                    customer: c,
+                    request_ms: self.custs[c as usize].request_ms,
+                    pickup: self.custs[c as usize]
+                        .pickup
+                        .as_ref()
+                        .expect("đang chờ thì có điểm đón"),
+                })
+                .collect();
+            let fleet = self.fleet_stats();
+            let ctx = Ctx {
+                engine: self.engine,
+                scenario: self.sc,
+                now_ms: self.now_ms,
+                router: &self.router,
+                fleet: &fleet,
+            };
+            self.matcher.window_ms(&ctx, &pending, &idle)
+        };
+        match w {
+            Some(ms) => {
+                self.tick_open = true;
+                self.push(self.now_ms + ms.max(1), Ev::Tick);
+                true
+            }
+            None => false,
+        }
+    }
+
     fn try_match(&mut self) {
+        if !self.in_tick && self.maybe_open_window() {
+            return;
+        }
         loop {
             let idle = self.idle_views();
-            if idle.is_empty() {
+            let finishing = self.finishing_views();
+            if idle.is_empty() && finishing.is_empty() {
                 return;
             }
             let mut pending_ids: Vec<u32> = (0..self.custs.len() as u32)
@@ -451,13 +680,19 @@ impl Sim<'_> {
                             .expect("đang chờ thì có điểm đón"),
                     })
                     .collect();
+                let fleet = self.fleet_stats();
                 let ctx = Ctx {
                     engine: self.engine,
                     scenario: self.sc,
                     now_ms: self.now_ms,
                     router: &self.router,
+                    fleet: &fleet,
                 };
-                self.matcher.assign(&ctx, &pending, &idle)
+                if self.matcher.chain_horizon_ms().is_some() {
+                    self.matcher.assign_chain(&ctx, &pending, &idle, &finishing)
+                } else {
+                    self.matcher.assign(&ctx, &pending, &idle)
+                }
             };
             let mut progressed = false;
             for a in assignments {
@@ -468,15 +703,19 @@ impl Sim<'_> {
                 {
                     continue;
                 }
-                if self
-                    .drivers
-                    .get(a.driver as usize)
-                    .is_none_or(|d| d.state != DState::Idle)
-                {
-                    continue;
+                match self.drivers.get(a.driver as usize).map(|d| d.state) {
+                    Some(DState::Idle) => {
+                        self.start_trip(a.customer, a.driver, None);
+                        progressed = true;
+                    }
+                    Some(DState::WithPassenger(_))
+                        if self.matcher.chain_horizon_ms().is_some()
+                            && self.drivers[a.driver as usize].queued.is_none() =>
+                    {
+                        progressed |= self.queue_chain(a.customer, a.driver);
+                    }
+                    _ => {}
                 }
-                self.start_trip(a.customer, a.driver);
-                progressed = true;
             }
             // nếu một khách không có đường tới (bị đóng), tài xế vẫn rảnh: thử lại với phần còn lại
             if !progressed {
@@ -489,8 +728,66 @@ impl Sim<'_> {
         }
     }
 
-    fn start_trip(&mut self, c: u32, d: u32) {
+    /// Xếp khách `c` vào hàng chờ của tài xế đang chở khách `d` (LOC-47). `false` nếu không có đường tới điểm đón.
+    fn queue_chain(&mut self, c: u32, d: u32) -> bool {
         let now = self.now_ms;
+        let Some(fv) = self.finishing_views().into_iter().find(|f| f.id == d) else {
+            return false;
+        };
+        let pickup = self.custs[c as usize].pickup.clone().expect("có điểm đón");
+        let mut best: Option<EdgeRoute> = None;
+        for &ap in &pickup.approach {
+            if let Some(r) = self
+                .router
+                .route_car(now, Start::Pos(fv.end_pos), Goal::Pos(ap))
+                && best.as_ref().is_none_or(|b| r.cost < b.cost)
+            {
+                best = Some(r);
+            }
+        }
+        let Some(route) = best else {
+            return false;
+        };
+        let tm = self.router.turn_model(now);
+        let planned = ActiveRoute::build(self.engine, &tm, &route, now, 1.0).planned_ms;
+        let waited_s = match self.sc.cancel.basis {
+            CancelBasis::Eta => 0.0,
+            CancelBasis::TotalWait => (now - self.custs[c as usize].request_ms) as f64 / 1000.0,
+        };
+        let eta_planned_s = (fv.remaining_est_ms + planned) as f64 / 1000.0 + waited_s;
+        // mô hình huỷ như start_trip: rút (u, phản ứng) ngay lúc gán, vì khách huỷ được cả khi còn xếp hàng
+        let (u, react) = (self.rng_cancel.f64(), self.rng_cancel.f64());
+        let cn = &self.sc.cancel;
+        let p = cn.probability(eta_planned_s, pickup.walk_m);
+        let cancel_at = now
+            + ((cn.reaction_min_s + react * (cn.reaction_max_s - cn.reaction_min_s)) * 1000.0)
+                .round() as u64;
+        let expected_arrival = now + fv.remaining_est_ms + planned;
+        {
+            let cu = &mut self.custs[c as usize];
+            cu.status = CStatus::Queued;
+            cu.queued_ms = now;
+            cu.queued_driver = Some(d);
+        }
+        self.drivers[d as usize].queued = Some(c);
+        self.extras.chained += 1;
+        let at = self.latlng(fv.end_pos);
+        self.trace("chain_queue", Some(c), Some(d), at);
+        if u < p && cancel_at < expected_arrival {
+            self.push(cancel_at, Ev::CancelQueued(c));
+        }
+        true
+    }
+
+    /// `chain_assign_ms`: khách đã xếp hàng từ lúc đó (đã rút xác suất huỷ lúc xếp hàng); `None` = gán ngay như baseline.
+    fn start_trip(&mut self, c: u32, d: u32, chain_assign_ms: Option<u64>) {
+        let now = self.now_ms;
+        // đang di chuyển theo gợi ý (LOC-49): dừng lại tại chỗ, ghi quãng đã chạy
+        if let Some(r) = self.drivers[d as usize].repos.take() {
+            self.extras.cruise_m += r.route.distance_until(now);
+            self.extras.reposition_interrupted += 1;
+            self.drivers[d as usize].pos = r.route.position_at(now);
+        }
         let driver_pos = self.drivers[d as usize].pos;
         let pickup = self.custs[c as usize].pickup.clone().expect("có điểm đón");
         // đường rẻ nhất tới một trong các hướng vào điểm đón
@@ -510,17 +807,32 @@ impl Sim<'_> {
         };
         let factor = self.jitter();
         let tm = self.router.turn_model(now);
-        let active = ActiveRoute::build(self.engine, &tm, &route, now, factor);
+        let active = ActiveRoute::build_with(
+            self.engine,
+            &tm,
+            &route,
+            now,
+            factor,
+            self.truth.as_deref(),
+        );
         let u_turns = tm.u_turns(&route.edges);
         let eta_planned_s = active.planned_ms as f64 / 1000.0;
         let walk_m = pickup.walk_m;
         let cust_arrive_ms =
             self.custs[c as usize].request_ms + (pickup.walk_s * 1000.0).round() as u64;
 
-        // huỷ chuyến: rút hai số để dòng ngẫu nhiên ổn định
-        let (u, react) = (self.rng_cancel.f64(), self.rng_cancel.f64());
+        // huỷ chuyến: rút hai số để dòng ngẫu nhiên ổn định (khách xếp hàng đã rút lúc xếp hàng)
+        let (u, react) = if chain_assign_ms.is_some() {
+            (1.0, 0.0)
+        } else {
+            (self.rng_cancel.f64(), self.rng_cancel.f64())
+        };
         let cn = &self.sc.cancel;
-        let p = cn.probability(eta_planned_s, walk_m);
+        let waited_s = match cn.basis {
+            CancelBasis::Eta => 0.0,
+            CancelBasis::TotalWait => (now - self.custs[c as usize].request_ms) as f64 / 1000.0,
+        };
+        let p = cn.probability(eta_planned_s + waited_s, walk_m);
         let arrive_ms = now + active.total_ms;
         let cancel_at = now
             + ((cn.reaction_min_s + react * (cn.reaction_max_s - cn.reaction_min_s)) * 1000.0)
@@ -531,7 +843,7 @@ impl Sim<'_> {
         self.trips.push(Trip {
             customer: c,
             driver: d,
-            assign_ms: now,
+            assign_ms: chain_assign_ms.unwrap_or(now),
             to_pickup: active,
             cust_arrive_ms,
             driver_arrive_ms: 0,
@@ -544,11 +856,29 @@ impl Sim<'_> {
             cancelled: false,
         });
         self.custs[c as usize].status = CStatus::Assigned;
+        if let Some(o) = self.observer.as_mut() {
+            o.leg_started(&LegInfo {
+                kind: LegKind::Pickup,
+                customer: c,
+                driver: d,
+                start_ms: now,
+                route: &self.trips[tid as usize].to_pickup,
+            });
+        }
         let drv = &mut self.drivers[d as usize];
         drv.state = DState::ToPickup(tid);
         drv.busy_since_ms = now;
         let at = self.latlng(driver_pos);
-        self.trace("assign", Some(c), Some(d), at);
+        self.trace(
+            if chain_assign_ms.is_some() {
+                "chain_start"
+            } else {
+                "assign"
+            },
+            Some(c),
+            Some(d),
+            at,
+        );
         self.push(arrive_ms, Ev::DriverArrives(tid));
         if u < p && cancel_at < arrive_ms {
             self.push(cancel_at, Ev::Cancel(tid));
@@ -558,6 +888,8 @@ impl Sim<'_> {
     fn release_driver(&mut self, d: u32, pos: Position) {
         let drv = &mut self.drivers[d as usize];
         self.busy_ms += self.now_ms - drv.busy_since_ms;
+        drv.busy_total_ms += self.now_ms - drv.busy_since_ms;
+        drv.idle_since_ms = self.now_ms;
         drv.pos = pos;
         drv.state = DState::Idle;
     }
@@ -566,12 +898,17 @@ impl Sim<'_> {
         match ev {
             Ev::Request(c) => {
                 let view = self.custs[c as usize].view;
+                // P04: chiến lược điểm đón được biết các tài xế rảnh (mặc định bỏ qua, baseline không đổi)
+                let idle_now = self.idle_views();
+                self.pickup.observe_idle(&idle_now);
                 let choice = {
+                    let fleet = self.fleet_stats();
                     let ctx = Ctx {
                         engine: self.engine,
                         scenario: self.sc,
                         now_ms: self.now_ms,
                         router: &self.router,
+                        fleet: &fleet,
                     };
                     self.pickup.choose(&ctx, &view)
                 };
@@ -617,7 +954,30 @@ impl Sim<'_> {
                 );
                 let from = self.drivers[d as usize].pos;
                 let mut best: Option<EdgeRoute> = None;
-                for &p in &self.custs[c as usize].dropoff {
+                // P04, LOC-38: chiến lược có thể chọn điểm trả khác điểm đích đã snap (mặc định `None`: baseline)
+                let drop_positions: Vec<Position> = {
+                    let cu = &self.custs[c as usize];
+                    let dv = DropView {
+                        customer: c,
+                        dest_true: cu.dest_true,
+                        dest_snap: cu.view.dropoff,
+                        from,
+                        default_positions: cu.dropoff.clone(),
+                    };
+                    let fleet = self.fleet_stats();
+                    let ctx = Ctx {
+                        engine: self.engine,
+                        scenario: self.sc,
+                        now_ms: self.now_ms,
+                        router: &self.router,
+                        fleet: &fleet,
+                    };
+                    self.pickup
+                        .choose_dropoff(&ctx, &dv)
+                        .filter(|v| !v.is_empty())
+                        .unwrap_or_else(|| dv.default_positions.clone())
+                };
+                for &p in &drop_positions {
                     if let Some(r) =
                         self.router
                             .route_car(self.now_ms, Start::Pos(from), Goal::Pos(p))
@@ -637,7 +997,14 @@ impl Sim<'_> {
                 };
                 let factor = self.jitter();
                 let tm = self.router.turn_model(self.now_ms);
-                let active = ActiveRoute::build(self.engine, &tm, &route, self.now_ms, factor);
+                let active = ActiveRoute::build_with(
+                    self.engine,
+                    &tm,
+                    &route,
+                    self.now_ms,
+                    factor,
+                    self.truth.as_deref(),
+                );
                 let u = tm.u_turns(&route.edges);
                 let end_ms = self.now_ms
                     + active.total_ms
@@ -645,7 +1012,19 @@ impl Sim<'_> {
                 let t = &mut self.trips[tid as usize];
                 t.u_turns += u;
                 t.trip = Some(active);
+                if let Some(o) = self.observer.as_mut()
+                    && let Some(a) = self.trips[tid as usize].trip.as_ref()
+                {
+                    o.leg_started(&LegInfo {
+                        kind: LegKind::Onboard,
+                        customer: c,
+                        driver: d,
+                        start_ms: self.now_ms,
+                        route: a,
+                    });
+                }
                 self.drivers[d as usize].state = DState::WithPassenger(tid);
+                self.drivers[d as usize].free_at_ms = end_ms;
                 self.push(end_ms, Ev::TripEnds(tid));
             }
             Ev::TripEnds(tid) => {
@@ -677,7 +1056,15 @@ impl Sim<'_> {
                 let at = self.latlng(end);
                 self.trace("trip_ends", Some(c), Some(d), at);
                 self.release_driver(d, end);
+                self.drivers[d as usize].trips_done += 1;
                 self.close_customer(c, Outcome::Completed, Some(d), Some(rec));
+                // khách đã xếp hàng chờ tài xế này (LOC-47): đi đón ngay
+                if let Some(next) = self.drivers[d as usize].queued.take()
+                    && self.custs[next as usize].status == CStatus::Queued
+                {
+                    let queued_ms = self.custs[next as usize].queued_ms;
+                    self.start_trip(next, d, Some(queued_ms));
+                }
                 self.try_match();
             }
             Ev::Cancel(tid) => {
@@ -689,6 +1076,9 @@ impl Sim<'_> {
                     return;
                 }
                 self.trips[tid as usize].cancelled = true;
+                if let Some(o) = self.observer.as_mut() {
+                    o.leg_cancelled(c, self.now_ms);
+                }
                 let (pos, travelled) = {
                     let r = &self.trips[tid as usize].to_pickup;
                     (r.position_at(self.now_ms), r.distance_until(self.now_ms))
@@ -723,6 +1113,140 @@ impl Sim<'_> {
                     self.close_customer(c, Outcome::CancelledNoDriver, None, None);
                 }
             }
+            Ev::Tick => {
+                self.tick_open = false;
+                self.in_tick = true;
+                self.extras.batches += 1;
+                self.try_match();
+                self.in_tick = false;
+                // khách chưa được ghép ở lô này (ví dụ vượt giới hạn đón xa) chờ lô sau
+                self.maybe_open_window();
+            }
+            Ev::CancelQueued(c) => match self.custs[c as usize].status {
+                CStatus::Queued => {
+                    let d = self.custs[c as usize]
+                        .queued_driver
+                        .expect("đang xếp hàng thì có tài xế");
+                    self.drivers[d as usize].queued = None;
+                    self.extras.chain_cancelled_in_queue += 1;
+                    let cu = &self.custs[c as usize];
+                    let rec = TripRecord {
+                        customer: c,
+                        driver: Some(d),
+                        request_s: cu.request_ms as f64 / 1000.0,
+                        outcome: Outcome::CancelledAfterAssign,
+                        walk_m: cu.pickup.as_ref().map_or(0.0, |p| p.walk_m),
+                        deadhead_m: 0.0,
+                        pickup_eta_s: (self.now_ms - cu.queued_ms) as f64 / 1000.0,
+                        wait_s: (self.now_ms - cu.request_ms) as f64 / 1000.0,
+                        meet_gap_s: 0.0,
+                        trip_m: 0.0,
+                        trip_s: 0.0,
+                        u_turns: 0,
+                        pin_snap_m: cu.pickup.as_ref().map_or(0.0, |p| p.pin_snap_m),
+                    };
+                    let at = cu.view.pin;
+                    self.trace("cancel_queued", Some(c), Some(d), at);
+                    self.close_customer(c, Outcome::CancelledAfterAssign, Some(d), Some(rec));
+                    self.try_match();
+                }
+                CStatus::Assigned => {
+                    if let Some(tid) = self.trips.iter().rposition(|t| t.customer == c) {
+                        self.handle(Ev::Cancel(tid as u32));
+                    }
+                }
+                _ => {}
+            },
+            Ev::RepoTick => self.reposition_tick(),
+            Ev::RepoDone(d, id) => {
+                let drv = &mut self.drivers[d as usize];
+                if drv.repos.as_ref().is_some_and(|r| r.id == id) {
+                    let r = drv.repos.take().expect("vừa kiểm tra");
+                    drv.pos = r.route.end_position();
+                    self.extras.cruise_m += r.route.length_m();
+                }
+            }
+        }
+    }
+
+    /// Gọi `Repositioner` cho các tài xế rảnh chưa đang di chuyển; tài xế nghe theo với xác suất `reposition_accept_prob`.
+    fn reposition_tick(&mut self) {
+        let Some(interval) = self.repositioner.as_ref().map(|r| r.interval_ms()) else {
+            return;
+        };
+        let idle: Vec<DriverView> = self
+            .idle_views()
+            .into_iter()
+            .filter(|v| self.drivers[v.id as usize].repos.is_none())
+            .collect();
+        let mut pending_ids: Vec<u32> = (0..self.custs.len() as u32)
+            .filter(|&c| self.custs[c as usize].status == CStatus::Pending)
+            .collect();
+        pending_ids.sort_by_key(|&c| (self.custs[c as usize].request_ms, c));
+        let suggestions = {
+            let pending: Vec<PendingView> = pending_ids
+                .iter()
+                .map(|&c| PendingView {
+                    customer: c,
+                    request_ms: self.custs[c as usize].request_ms,
+                    pickup: self.custs[c as usize]
+                        .pickup
+                        .as_ref()
+                        .expect("đang chờ thì có điểm đón"),
+                })
+                .collect();
+            let fleet = self.fleet_stats();
+            let ctx = Ctx {
+                engine: self.engine,
+                scenario: self.sc,
+                now_ms: self.now_ms,
+                router: &self.router,
+                fleet: &fleet,
+            };
+            self.repositioner
+                .as_mut()
+                .map(|r| r.suggest(&ctx, &idle, &pending))
+                .unwrap_or_default()
+        };
+        for s in suggestions {
+            let Some(drv) = self.drivers.get(s.driver as usize) else {
+                continue;
+            };
+            if drv.state != DState::Idle || drv.repos.is_some() {
+                continue;
+            }
+            self.extras.reposition_suggested += 1;
+            let u = self.rng_repo.f64();
+            if u >= self.reposition_accept_prob {
+                continue;
+            }
+            let from = drv.pos;
+            let Some(route) =
+                self.router
+                    .route_car(self.now_ms, Start::Pos(from), Goal::Pos(s.target))
+            else {
+                continue;
+            };
+            let tm = self.router.turn_model(self.now_ms);
+            let active = ActiveRoute::build_with(
+                self.engine,
+                &tm,
+                &route,
+                self.now_ms,
+                1.0,
+                self.truth.as_deref(),
+            );
+            let id = self.repo_seq;
+            self.repo_seq += 1;
+            let done = self.now_ms + active.total_ms;
+            self.drivers[s.driver as usize].repos = Some(Repos { id, route: active });
+            self.extras.reposition_accepted += 1;
+            let at = self.latlng(from);
+            self.trace("reposition", None, Some(s.driver), at);
+            self.push(done, Ev::RepoDone(s.driver, id));
+        }
+        if (self.now_ms + interval) as f64 / 1000.0 < self.sc.duration_s {
+            self.push(self.now_ms + interval, Ev::RepoTick);
         }
     }
 }
@@ -734,6 +1258,39 @@ pub fn run<'a>(
     pickup: Box<dyn PickupStrategy + 'a>,
     matcher: Box<dyn MatchStrategy + 'a>,
     opts: RunOptions,
+) -> SimOutput {
+    run_with(engine, sc, pickup, matcher, opts, Extras::default())
+}
+
+/// Như [`run`] nhưng có phần cắm thêm của P05 (gợi ý di chuyển cho tài xế rảnh). `Extras::default()` cho đúng kết quả của `run`.
+pub fn run_with<'a>(
+    engine: &'a Engine,
+    sc: &'a Scenario,
+    pickup: Box<dyn PickupStrategy + 'a>,
+    matcher: Box<dyn MatchStrategy + 'a>,
+    opts: RunOptions,
+    extras: Extras<'a>,
+) -> SimOutput {
+    run_hooked(
+        engine,
+        sc,
+        pickup,
+        matcher,
+        opts,
+        extras,
+        Hooks::default(),
+    )
+}
+
+/// Như [`run_with`] nhưng có thêm «thế giới thật» và người quan sát của P06. `Hooks::default()` cho đúng kết quả của `run_with`.
+pub fn run_hooked<'a>(
+    engine: &'a Engine,
+    sc: &'a Scenario,
+    pickup: Box<dyn PickupStrategy + 'a>,
+    matcher: Box<dyn MatchStrategy + 'a>,
+    opts: RunOptions,
+    extras: Extras<'a>,
+    hooks: Hooks<'a>,
 ) -> SimOutput {
     let world = generate(engine, sc);
     let router = Router::new(engine, sc);
@@ -751,8 +1308,11 @@ pub fn run<'a>(
                 view: c.view,
                 request_ms: c.request_ms,
                 dropoff: c.dropoff.clone(),
+                dest_true: c.dest_true,
                 status: CStatus::NotYet,
                 pickup: None,
+                queued_ms: 0,
+                queued_driver: None,
             })
             .collect(),
         drivers: world
@@ -762,6 +1322,12 @@ pub fn run<'a>(
                 pos: d.pos,
                 state: DState::Idle,
                 busy_since_ms: 0,
+                idle_since_ms: 0,
+                trips_done: 0,
+                busy_total_ms: 0,
+                free_at_ms: 0,
+                queued: None,
+                repos: None,
             })
             .collect(),
         trips: Vec::new(),
@@ -774,10 +1340,22 @@ pub fn run<'a>(
         busy_ms: 0,
         trace: Vec::new(),
         opts,
+        tick_open: false,
+        in_tick: false,
+        extras: ExtraStats::default(),
+        reposition_accept_prob: extras.reposition_accept_prob,
+        repositioner: extras.repositioner,
+        rng_repo: Rng::new(sc.seed, 5),
+        repo_seq: 0,
+        truth: hooks.truth,
+        observer: hooks.observer,
     };
     for i in 0..sim.custs.len() {
         let t = sim.custs[i].request_ms;
         sim.push(t, Ev::Request(i as u32));
+    }
+    if let Some(iv) = sim.repositioner.as_ref().map(|r| r.interval_ms()) {
+        sim.push(iv, Ev::RepoTick);
     }
     while let Some(Reverse((t, seq))) = sim.heap.pop() {
         sim.now_ms = t;
@@ -801,5 +1379,6 @@ pub fn run<'a>(
         summary,
         trips: records,
         trace: std::mem::take(&mut sim.trace),
+        extras: sim.extras,
     }
 }

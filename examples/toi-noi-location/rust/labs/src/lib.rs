@@ -2,6 +2,9 @@
 
 pub mod p02;
 pub mod p03;
+pub mod p04;
+pub mod p05;
+pub mod p06;
 
 use road_graph::Graph;
 use std::path::PathBuf;

@@ -11,6 +11,7 @@ publish.workspace = true
 geo-core.workspace = true
 road-graph.workspace = true
 route-engine.workspace = true
+matcher.workspace = true
 rustc-hash.workspace = true
 prost.workspace = true
 tonic.workspace = true

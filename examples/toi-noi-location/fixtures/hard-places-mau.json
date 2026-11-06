@@ -1,0 +1,32 @@
+{
+  "_ghi_chu": "DỮ LIỆU BỊA cho lab LOC-37, không phải OSM và không phải khu vực thật. Toạ độ chỉ đặt gần các tâm nhu cầu của kịch bản mô phỏng để có khách rơi vào; không đại diện cho sân bay, trung tâm thương mại hay chung cư nào. Điểm đón được snap lên đường xe gần nhất khi chạy.",
+  "zones": [
+    {
+      "name": "Khu đón sân bay giả (bịa)",
+      "kind": "mandatory_pickup",
+      "center": [10.8150, 106.6650],
+      "radius_m": 700.0,
+      "bays": [[10.8135, 106.6642], [10.8163, 106.6671]],
+      "gps_sigma_m": 0.0,
+      "invented": true
+    },
+    {
+      "name": "Trung tâm thương mại giả (bịa): chỉ đón ở cổng phía đường lớn",
+      "kind": "mandatory_pickup",
+      "center": [10.7951, 106.7218],
+      "radius_m": 350.0,
+      "bays": [[10.7940, 106.7205]],
+      "gps_sigma_m": 0.0,
+      "invented": true
+    },
+    {
+      "name": "Chung cư giả (bịa): tầng hầm, GPS kém",
+      "kind": "indoor_poor_gps",
+      "center": [10.7292, 106.7218],
+      "radius_m": 250.0,
+      "bays": [],
+      "gps_sigma_m": 45.0,
+      "invented": true
+    }
+  ]
+}

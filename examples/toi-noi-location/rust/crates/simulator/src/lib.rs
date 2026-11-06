@@ -18,5 +18,11 @@ pub mod world;
 
 pub use metrics::{Outcome, Summary, TripRecord};
 pub use scenario::Scenario;
-pub use sim::{RunOptions, SimOutput, run};
-pub use strategy::{AtPin, MatchStrategy, NearestStraightLine, PickupStrategy};
+pub use sim::{
+    ExtraStats, Extras, Hooks, LegInfo, LegKind, Observer, RunOptions, SimOutput, Truth, run,
+    run_hooked, run_with,
+};
+pub use strategy::{
+    AtPin, DropView, FinishingView, FleetStat, MatchStrategy, NearestStraightLine, PickupStrategy,
+    RepositionSuggestion, Repositioner,
+};

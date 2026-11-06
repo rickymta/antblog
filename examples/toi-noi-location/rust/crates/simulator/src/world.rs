@@ -88,6 +88,8 @@ pub struct GeneratedCustomer {
     pub request_ms: u64,
     /// Các vị trí có hướng mà xe vào được tại điểm trả.
     pub dropoff: Vec<Position>,
+    /// Điểm đến thật chưa snap (P04, LOC-38). Không ảnh hưởng baseline.
+    pub dest_true: LatLng,
 }
 
 /// Tài xế ban đầu: vị trí có hướng.
@@ -270,6 +272,7 @@ fn sample_customer(
                         },
                         request_ms,
                         dropoff,
+                        dest_true: dest,
                     });
                 }
             }

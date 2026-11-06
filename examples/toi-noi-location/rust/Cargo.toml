@@ -20,6 +20,9 @@ simulator = { path = "crates/simulator" }
 geo-engine = { path = "crates/geo-engine" }
 map-match = { path = "crates/map-match" }
 location-store = { path = "crates/location-store" }
+geocode = { path = "crates/geocode" }
+pickup = { path = "crates/pickup" }
+matcher = { path = "crates/matcher" }
 # hình học và chỉ mục
 h3o = "0.11.1"
 rstar = "0.14.0"
@@ -55,6 +58,10 @@ tonic = "0.14.9"
 tonic-prost = "0.14.9"
 tonic-prost-build = "0.14.9"
 toml = "1.2.0"
+# ghép chuyến (P05): thuật toán Hungarian (Kuhn–Munkres) cho bài toán phân công
+pathfinding = "4.16.0"
+# học từ dữ liệu (P06): ghi Parquet (lược đồ LOC-20) từ Rust, không kéo theo arrow
+parquet = { version = "60.1.0", default-features = false, features = ["zstd"] }
 # đo và kiểm thử
 criterion = { version = "0.8.2", default-features = false, features = ["cargo_bench_support"] }
 proptest = "1.12.0"

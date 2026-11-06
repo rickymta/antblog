@@ -51,8 +51,20 @@ pub struct Customer {
 /// `p = max_prob × clamp((eta_s - eta_free_s) / (eta_max_s - eta_free_s), 0, 1) + walk_extra_per_100m × walk_m / 100`
 /// (kẹp vào [0, 1]). Rút một số đều: nếu nhỏ hơn `p` thì khách huỷ sau một khoảng phản ứng ngẫu nhiên đều trong
 /// `[reaction_min_s, reaction_max_s]`, miễn là tài xế chưa tới. Ngoài ra khách huỷ khi hết `patience_s` chưa có tài xế.
+/// Biến đầu vào của mô hình huỷ (P05): ETA từ lúc gán (mặc định, baseline) hay tổng thời gian khách đã chờ kể từ lúc đặt.
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum CancelBasis {
+    #[default]
+    Eta,
+    TotalWait,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Cancel {
+    /// Mặc định `eta`: giữ nguyên mô hình của LOC-30. `total_wait`: `eta_s` trong công thức là thời gian chờ tính từ lúc đặt.
+    #[serde(default)]
+    pub basis: CancelBasis,
     pub eta_free_s: f64,
     pub eta_max_s: f64,
     pub max_prob: f64,
