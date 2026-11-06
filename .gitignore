@@ -23,3 +23,8 @@ examples/toi-noi-dotnet/**/obj/
 
 # BenchmarkDotNet generated measurements/build artifacts
 BenchmarkDotNet.Artifacts/
+examples/toi-noi-python/**/.venv/
+examples/toi-noi-python/**/__pycache__/
+examples/toi-noi-python/**/.pytest_cache/
+examples/toi-noi-python/**/.ruff_cache/
+examples/toi-noi-python/**/.mypy_cache/

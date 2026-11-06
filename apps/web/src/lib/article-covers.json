@@ -988,5 +988,105 @@
       "DELIVERY",
       "EVIDENCE"
     ]
+  },
+  "python-va-uv-tu-source-code-den-chuong-trinh": {
+    "title": "PYTHON / UV",
+    "subtitle": "Python 01 · From source to a running fare",
+    "diagram": "flow",
+    "labels": [
+      "SOURCE .PY",
+      "BYTECODE",
+      "INTERPRETER"
+    ]
+  },
+  "python-bien-kieu-du-lieu-decimal": {
+    "title": "DECIMAL",
+    "subtitle": "Python 02 · Money and distance without float drift",
+    "diagram": "matrix",
+    "labels": [
+      "0.1 + 0.2",
+      "DECIMAL",
+      "ROUND_HALF_UP"
+    ]
+  },
+  "python-dieu-kien-vong-lap-ham": {
+    "title": "IF / FOR / DEF",
+    "subtitle": "Python 03 · Splitting the fare rules into functions",
+    "diagram": "flow",
+    "labels": [
+      "CONDITION",
+      "LOOP",
+      "FUNCTION"
+    ]
+  },
+  "python-chuoi-f-string-ngay-gio-timezone": {
+    "title": "UTC / +07:00",
+    "subtitle": "Python 04 · Strings, f-strings and aware datetimes",
+    "diagram": "split",
+    "labels": [
+      "DISPLAY",
+      "↔",
+      "STORE UTC"
+    ]
+  },
+  "python-list-dict-set-tuple": {
+    "title": "LIST · DICT · SET",
+    "subtitle": "Python 05 · Trips and drivers in memory",
+    "diagram": "blocks",
+    "labels": [
+      "LIST",
+      "DICT",
+      "SET"
+    ]
+  },
+  "python-comprehension-generator-iterator": {
+    "title": "YIELD",
+    "subtitle": "Python 06 · Streaming driver locations lazily",
+    "diagram": "cycle",
+    "labels": [
+      "SOURCE",
+      "GENERATOR",
+      "CONSUMER"
+    ]
+  },
+  "python-module-package-import": {
+    "title": "IMPORT",
+    "subtitle": "Python 07 · Modules, packages and the src layout",
+    "diagram": "layers",
+    "labels": [
+      "MODULE",
+      "PACKAGE",
+      "PROJECT"
+    ]
+  },
+  "python-exception-debug-logging": {
+    "title": "TRACEBACK",
+    "subtitle": "Python 08 · Following a wrong quote to its cause",
+    "diagram": "code",
+    "labels": [
+      "RAISE",
+      "CAUGHT",
+      "LOGGED"
+    ]
+  },
+  "python-file-json-csv-pathlib": {
+    "title": "JSON / CSV",
+    "subtitle": "Python 09 · Reading the Tới Nơi sample dataset",
+    "diagram": "storage",
+    "labels": [
+      "PATHLIB",
+      "FILE",
+      "UTF-8"
+    ]
+  },
+  "python-pytest-kiem-thu-chinh-sach-cuoc": {
+    "title": "PYTEST",
+    "subtitle": "Python 10 · Testing the fare policy",
+    "diagram": "checklist",
+    "labels": [
+      "PARAMETRIZE",
+      "FIXTURE",
+      "RAISES"
+    ]
   }
 }

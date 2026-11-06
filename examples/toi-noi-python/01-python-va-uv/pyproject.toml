@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-01-python-va-uv"
+version = "0.1.0"
+description = "Bài 01: chương trình tính cước Tới Nơi đầu tiên bằng Python 3.14 và uv"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

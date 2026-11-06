@@ -1,0 +1,9 @@
+[project]
+name = "toi-noi-py-02-bien-kieu-du-lieu-decimal"
+version = "0.1.0"
+description = "Bài 02: biến, kiểu dữ liệu và Decimal cho tiền, khoảng cách của Tới Nơi"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+package = false

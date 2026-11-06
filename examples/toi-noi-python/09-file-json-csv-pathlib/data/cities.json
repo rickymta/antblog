@@ -1,0 +1,10 @@
+{
+  "cities": [
+    {"code": "SG", "name": "TP. Hồ Chí Minh", "center": {"lat": 10.7769, "lng": 106.7009}},
+    {"code": "HN", "name": "Hà Nội", "center": {"lat": 21.0285, "lng": 105.8542}},
+    {"code": "DN", "name": "Đà Nẵng", "center": {"lat": 16.0544, "lng": 108.2022}},
+    {"code": "HP", "name": "Hải Phòng", "center": {"lat": 20.8449, "lng": 106.6881}},
+    {"code": "CT", "name": "Cần Thơ", "center": {"lat": 10.0452, "lng": 105.7469}},
+    {"code": "NT", "name": "Nha Trang", "center": {"lat": 12.2388, "lng": 109.1967}}
+  ]
+}

@@ -136,5 +136,25 @@
       "dotnet10-tong-hop-service-dat-chuyen"
     ],
     "status": "published"
+  },
+  {
+    "slug": "python-co-ban-qua-toi-noi",
+    "title": "Python cơ bản qua Tới Nơi",
+    "description": "Lộ trình 20 bài cấp cơ bản: Python 3.14 với uv, kiểu dữ liệu và Decimal, hàm, cấu trúc dữ liệu, generator, module, exception, file và pytest, rồi mô hình hóa nghiệp vụ bằng dataclass, type hints, Protocol, pydantic và pattern matching. Mọi ví dụ là chuyến xe và hồ sơ tài xế của Tới Nơi.",
+    "level": "beginner",
+    "category": "programming",
+    "articles": [
+      "python-va-uv-tu-source-code-den-chuong-trinh",
+      "python-bien-kieu-du-lieu-decimal",
+      "python-dieu-kien-vong-lap-ham",
+      "python-chuoi-f-string-ngay-gio-timezone",
+      "python-list-dict-set-tuple",
+      "python-comprehension-generator-iterator",
+      "python-module-package-import",
+      "python-exception-debug-logging",
+      "python-file-json-csv-pathlib",
+      "python-pytest-kiem-thu-chinh-sach-cuoc"
+    ],
+    "status": "published"
   }
 ]
