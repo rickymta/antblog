@@ -374,5 +374,18 @@
       "azure-tong-ket-go-live-checklist-chung-chi"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
+    "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
+    "description": "Mở đầu chương trình Business Analysis qua Tới Nơi: từ vấn đề điểm đón đến nhu cầu, vai trò phối hợp và phân loại yêu cầu. Hiện có 3/8 bài; phần hoàn chỉnh gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao.",
+    "level": "beginner",
+    "category": "business-analysis",
+    "articles": [
+      "ba-la-gi-tu-tinh-nang-den-bai-toan",
+      "ba-po-pm-ux-dev-tester-phoi-hop",
+      "ba-phan-loai-yeu-cau-nghiep-vu"
+    ],
+    "status": "published"
   }
 ]
