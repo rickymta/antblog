@@ -175,7 +175,7 @@ Chỉ số bắt đầu bằng 0, nên điều kiện phải là `< distances.Le
 
 <details><summary>Xem lời giải</summary><p>1. Cập nhật guard của hàm, tầng điều phối, thông báo lỗi, bảng hợp đồng và các ca kiểm tra quanh 80 km; đây cũng là dấu hiệu cần gom rule khi cấu trúc lớn lên. 2. Vòng lặp dừng ngay sau REJECT đầu tiên; các phần tử còn lại không được xử lý. 3. Cước thô 12000 + 0,001 × 5000 = 12005, nên trả 12005 VND.</p></details>
 
-Tới đây, công thức đã có tên, miền hợp lệ và kết quả kiểm chứng được. Bài tiếp theo sẽ đi vào chuỗi, ngày giờ và culture: cùng một báo giá cần được trao đổi giữa service và trình bày cho khách theo hai nhu cầu khác nhau.
+Tới đây, công thức đã có tên, miền hợp lệ và kết quả kiểm chứng được. [Bài 04](/articles/csharp-chuoi-ngay-gio-culture) đi vào chuỗi, ngày giờ và culture: cùng một báo giá cần được trao đổi giữa service và trình bày cho khách theo hai nhu cầu khác nhau.
 
 ## Tài liệu gốc
 

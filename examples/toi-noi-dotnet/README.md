@@ -9,16 +9,16 @@ Khung biên tập từ cơ bản tới nâng cao. Mỗi bài có câu hỏi mở
 01. C# và .NET 10: từ source code đến chương trình tính cước — **đã viết**
 02. Biến, kiểu dữ liệu và decimal: biểu diễn tiền và khoảng cách — **đã viết**
 03. Điều kiện, vòng lặp và phương thức: tách quy tắc tính cước — **đã viết**
-04. Chuỗi, ngày giờ và văn hóa: hiển thị đúng, lưu trữ đúng — dự kiến
-05. Debug và exception: lần theo một báo giá sai — dự kiến
+04. Chuỗi, ngày giờ và văn hóa: hiển thị đúng, lưu trữ đúng — **đã viết**
+05. Debug và exception: lần theo một báo giá sai — **đã viết**
 
 ## 02 · Mô hình hóa nghiệp vụ
 
-06. Class, property và encapsulation: bảo vệ trạng thái chuyến — dự kiến
-07. Record, struct, equality và immutability: thiết kế Money, Quote — dự kiến
-08. Interface, composition và dependency injection: thay chính sách cước — dự kiến
-09. Generics và collections: quản lý chuyến và tài xế — dự kiến
-10. LINQ và deferred execution: truy vấn dữ liệu trong bộ nhớ — dự kiến
+06. Class, property và encapsulation: bảo vệ trạng thái chuyến — **đã viết**
+07. Record, struct, equality và immutability: thiết kế Money, Quote — **đã viết**
+08. Interface, composition và dependency injection: thay chính sách cước — **đã viết**
+09. Generics và collections: quản lý chuyến và tài xế — **đã viết**
+10. LINQ và deferred execution: truy vấn dữ liệu trong bộ nhớ — **đã viết**
 11. Nullable reference types và pattern matching: xử lý trạng thái thiếu — dự kiến
 
 ## 03 · Bất đồng bộ và kiểm thử
@@ -86,3 +86,17 @@ dotnet run --project examples/toi-noi-dotnet/03-dieu-kien-vong-lap-phuong-thuc -
 ```
 
 Các bài 01–03 đều có ảnh bìa riêng và sơ đồ SVG nội tuyến theo hệ thống hình minh họa của blog. Chế độ --verify của bài 03 gọi đúng hàm CalculateFare đang minh họa với 10 ca biên độc lập về kết quả kỳ vọng, bao gồm từ chối ngoài miền.
+
+## Chạy bài 04–10
+
+Mỗi project có --verify kiểm chứng các kết quả kỳ vọng, không cần package NuGet bổ sung.
+
+```bash
+dotnet run --project examples/toi-noi-dotnet/04-chuoi-ngay-gio-culture -- --verify
+dotnet run --project examples/toi-noi-dotnet/05-debug-exception -- --verify
+dotnet run --project examples/toi-noi-dotnet/06-class-encapsulation -- --verify
+dotnet run --project examples/toi-noi-dotnet/07-record-struct-money-quote -- --verify
+dotnet run --project examples/toi-noi-dotnet/08-interface-composition-di -- --verify
+dotnet run --project examples/toi-noi-dotnet/09-generics-collections -- --verify
+dotnet run --project examples/toi-noi-dotnet/10-linq-deferred-execution -- --verify
+```

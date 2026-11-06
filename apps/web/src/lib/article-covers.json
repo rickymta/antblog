@@ -638,5 +638,75 @@
       "CALCULATE",
       "RETURN"
     ]
+  },
+  "csharp-chuoi-ngay-gio-culture": {
+    "title": "CULTURE / TIME",
+    "subtitle": "C# 04 · Human display vs wire format",
+    "diagram": "flow",
+    "labels": [
+      "INPUT",
+      "TYPED VALUE",
+      "OUTPUT"
+    ]
+  },
+  "csharp-debug-exception-bao-gia": {
+    "title": "DEBUG / ERRORS",
+    "subtitle": "C# 05 · Trace the cause, preserve the signal",
+    "diagram": "split",
+    "labels": [
+      "INPUT",
+      "CALL STACK",
+      "CAUSE"
+    ]
+  },
+  "csharp-class-property-encapsulation": {
+    "title": "CLASS / INVARIANTS",
+    "subtitle": "C# 06 · Protect state through behavior",
+    "diagram": "cycle",
+    "labels": [
+      "REQUESTED",
+      "ACCEPT",
+      "ACCEPTED"
+    ]
+  },
+  "csharp-record-struct-money-quote": {
+    "title": "VALUE / IDENTITY",
+    "subtitle": "C# 07 · Records, equality and shallow copies",
+    "diagram": "blocks",
+    "labels": [
+      "ENTITY",
+      "MONEY",
+      "SNAPSHOT"
+    ]
+  },
+  "csharp-interface-composition-di": {
+    "title": "INTERFACE / COMPOSE",
+    "subtitle": "C# 08 · Strategy and constructor injection",
+    "diagram": "layers",
+    "labels": [
+      "USE CASE",
+      "CONTRACT",
+      "POLICY"
+    ]
+  },
+  "csharp-generics-collections": {
+    "title": "COLLECTIONS / KEYS",
+    "subtitle": "C# 09 · Order, lookup, uniqueness and FIFO",
+    "diagram": "matrix",
+    "labels": [
+      "LIST",
+      "DICTIONARY",
+      "QUEUE"
+    ]
+  },
+  "csharp-linq-deferred-execution": {
+    "title": "LINQ / EXECUTION",
+    "subtitle": "C# 10 · Deferred query vs materialized result",
+    "diagram": "flow",
+    "labels": [
+      "SOURCE",
+      "QUERY",
+      "MATERIALIZE"
+    ]
   }
 }

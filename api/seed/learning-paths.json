@@ -92,13 +92,20 @@
   {
     "slug": "csharp-dotnet-10-qua-toi-noi",
     "title": "C# và .NET 10 qua Tới Nơi",
-    "description": "Từ console tính cước tới API đặt chuyến: nền tảng C#, bất đồng bộ, kiểm thử, ASP.NET Core 10, EF Core 10 và vận hành. Đang biên soạn, hiện có ba bài đầu.",
+    "description": "Từ console tính cước tới API đặt chuyến: nền tảng C#, bất đồng bộ, kiểm thử, ASP.NET Core 10, EF Core 10 và vận hành. Đang biên soạn, hiện có mười bài đầu.",
     "level": "beginner",
     "category": "programming",
     "articles": [
       "csharp-va-dotnet-10-tu-source-code-den-chuong-trinh",
       "csharp-bien-kieu-du-lieu-decimal",
-      "csharp-dieu-kien-vong-lap-phuong-thuc"
+      "csharp-dieu-kien-vong-lap-phuong-thuc",
+      "csharp-chuoi-ngay-gio-culture",
+      "csharp-debug-exception-bao-gia",
+      "csharp-class-property-encapsulation",
+      "csharp-record-struct-money-quote",
+      "csharp-interface-composition-di",
+      "csharp-generics-collections",
+      "csharp-linq-deferred-execution"
     ],
     "status": "published"
   }
