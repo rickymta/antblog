@@ -4,6 +4,8 @@
 
 P01 đã có đủ BA-001–BA-008 trong source. Dùng [mẫu hồ sơ đề xuất](p01-ho-so-de-xuat.md) để làm bài tổng hợp BA-008; để nguyên trạng thái chưa xác nhận cho thông tin chưa được cung cấp. Các biến thể khu vực B, số liệu luyện tính và khoảng giả định trong từng bài chỉ phục vụ bài tập đó, không thay thế baseline dưới đây.
 
+P02 đã có đủ BA-009–BA-016. [Hồ sơ discovery P02](p02-discovery-ho-so.md) cung cấp nguồn INT/OBS/DOC/DATA/WS và mẫu evidence matrix, confirmation log, conflict log. P02 giả định discovery đã được chấp thuận trong bài tập; không sửa trạng thái lịch sử của D-01 dưới đây và không ngụ ý chat/pilot đã được duyệt. Mẫu định tính P02 độc lập baseline P01.
+
 ## Ca P01: khách và tài xế khó tìm nhau
 
 **Dữ kiện giả lập:** trong một tuần quan sát ở khu vực A có 1.000 lượt đặt xe đã được tài xế nhận. Có 120 lượt kết thúc bằng huỷ trước khi đón; 50 trong 120 lượt mang lý do do người dùng chọn “không tìm thấy nhau”. Có 80 cuộc gọi CSKH được gắn nhãn liên quan tới điểm đón; một lượt có thể sinh nhiều cuộc gọi. Bộ số liệu không khẳng định chất lượng gắn nhãn hoặc quan hệ nhân quả.

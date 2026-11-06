@@ -392,5 +392,23 @@
       "ba-thuc-hanh-de-xuat-cai-thien-diem-don"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p02-discovery-khai-thac-thong-tin",
+    "title": "BA · Phần 2 · Discovery và khai thác thông tin",
+    "description": "Tám bài discovery qua tình huống điểm đón Tới Nơi: stakeholder map, phỏng vấn, quan sát và tài liệu, workshop, khảo sát và lấy mẫu, journey và blueprint, xử lý xung đột và tổng hợp bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao, có hồ sơ nguồn giả lập và bài thực hành tổng hợp.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-stakeholder-map-quyen-quyet-dinh",
+      "ba-phong-van-nghiep-vu-khong-dan-dat",
+      "ba-quan-sat-quy-trinh-doc-tai-lieu",
+      "ba-workshop-dieu-phoi-xac-nhan",
+      "ba-khao-sat-lay-mau-thien-lech",
+      "ba-customer-journey-service-blueprint",
+      "ba-giai-quyet-yeu-cau-xung-dot",
+      "ba-thuc-hanh-tong-hop-discovery"
+    ],
+    "status": "published"
   }
 ]

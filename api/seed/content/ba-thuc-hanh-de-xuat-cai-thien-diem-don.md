@@ -144,4 +144,4 @@ Mốc tự học đề xuất: đạt từ 8/10, đồng thời không có tiêu
 - Hồ sơ và mẫu điền: `examples/toi-noi-ba/README.md`, `examples/toi-noi-ba/p01-ho-so-de-xuat.md` trong repository.
 - [BA là gì?](/articles/ba-la-gi-tu-tinh-nang-den-bai-toan) · [BACCM](/articles/ba-baccm-sau-khai-niem-cot-loi) · [Metric card](/articles/ba-problem-statement-muc-tieu-chi-so) · [Quyết định khi thiếu bằng chứng](/articles/ba-quyet-dinh-khi-thieu-bang-chung).
 
-Phần 1 hoàn thành ở đây. Phần 2 sẽ đi sâu vào discovery: stakeholder map, phỏng vấn, quan sát, workshop và tổng hợp bằng chứng. BA-009 về stakeholder map nằm trong kế hoạch, chưa xuất bản.
+Phần 1 hoàn thành ở đây. Tiếp tục phần 2 với [Stakeholder map: ai chịu tác động, ai có quyền quyết định?](/articles/ba-stakeholder-map-quyen-quyet-dinh), rồi đi sâu vào phỏng vấn, quan sát, workshop và tổng hợp bằng chứng.
