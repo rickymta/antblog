@@ -121,4 +121,4 @@ Ba câu phản biện nên tự trả lời trước khi nộp:
 - Hồ sơ/mẫu: `examples/toi-noi-ba/p02-discovery-ho-so.md`.
 - [Phỏng vấn](/articles/ba-phong-van-nghiep-vu-khong-dan-dat) · [Quan sát/tài liệu](/articles/ba-quan-sat-quy-trinh-doc-tai-lieu) · [Khảo sát](/articles/ba-khao-sat-lay-mau-thien-lech) · [Xử lý xung đột](/articles/ba-giai-quyet-yeu-cau-xung-dot).
 
-Phần 2 hoàn thành ở đây. Phần 3 sẽ chuyển các hiểu biết đã xác nhận thành mô hình as-is/to-be, BPMN, business rule và trạng thái. BA-017 nằm trong kế hoạch, chưa xuất bản; không coi các giả thuyết còn mở của P02 là quy trình đã duyệt khi bắt đầu mô hình hoá.
+Phần 2 hoàn thành ở đây. Tiếp tục với [As-is và to-be: mô tả hiện tại trước khi cải tiến](/articles/ba-as-is-to-be-quy-trinh). Không coi các giả thuyết còn mở của P02 là quy trình đã duyệt khi bắt đầu mô hình hoá.

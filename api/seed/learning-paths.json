@@ -513,5 +513,23 @@
       "flutter-ci-github-actions-analyze-test-golden-cache"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p03-mo-hinh-quy-trinh-quy-tac",
+    "title": "BA · Phần 3 · Mô hình hoá quy trình và quy tắc",
+    "description": "Tám bài qua luồng đặt xe và huỷ chuyến Tới Nơi: as-is/to-be, BPMN, business rule, decision table, state model, timer và ngoại lệ, review liên mô hình và phân tích thay đổi chính sách. Gồm 3 bài cơ bản, 3 trung bình và 2 nâng cao; có sơ đồ, case biên và hồ sơ thực hành.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-as-is-to-be-quy-trinh",
+      "ba-bpmn-task-event-gateway-lane",
+      "ba-business-rule-chinh-sach-nghiep-vu",
+      "ba-decision-table-phi-huy",
+      "ba-state-model-trang-thai-chuyen",
+      "ba-bpmn-handoff-timer-ngoai-le",
+      "ba-kiem-tra-nhat-quan-mo-hinh",
+      "ba-thuc-hanh-thay-doi-chinh-sach-huy"
+    ],
+    "status": "published"
   }
 ]

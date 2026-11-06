@@ -3058,5 +3058,85 @@
       "TEST",
       "REPORT"
     ]
+  },
+  "ba-as-is-to-be-quy-trinh": {
+    "title": "AS-IS / TO-BE",
+    "subtitle": "Understand the present. Design the change.",
+    "diagram": "split",
+    "labels": [
+      "CURRENT STATE",
+      "GAPS",
+      "FUTURE STATE"
+    ]
+  },
+  "ba-bpmn-task-event-gateway-lane": {
+    "title": "BPMN BASICS",
+    "subtitle": "Tasks, events and decision paths",
+    "diagram": "flow",
+    "labels": [
+      "RECEIVE",
+      "CHECK",
+      "OUTCOME"
+    ]
+  },
+  "ba-business-rule-chinh-sach-nghiep-vu": {
+    "title": "BUSINESS RULES",
+    "subtitle": "Policy beyond the screen",
+    "diagram": "checklist",
+    "labels": [
+      "SOURCE + SCOPE",
+      "CONDITION",
+      "OUTCOME"
+    ]
+  },
+  "ba-decision-table-phi-huy": {
+    "title": "DECISION TABLE",
+    "subtitle": "Conditions, priority and boundary cases",
+    "diagram": "flow",
+    "labels": [
+      "CONDITIONS",
+      "FIRST MATCH",
+      "FEE + REASON"
+    ]
+  },
+  "ba-state-model-trang-thai-chuyen": {
+    "title": "STATE MODEL",
+    "subtitle": "Events, guards and consistent effects",
+    "diagram": "flow",
+    "labels": [
+      "STATE",
+      "EVENT + GUARD",
+      "NEW STATE"
+    ]
+  },
+  "ba-bpmn-handoff-timer-ngoai-le": {
+    "title": "HANDOFF + TIMEOUT",
+    "subtitle": "Bounded retries. One payment key.",
+    "diagram": "flow",
+    "labels": [
+      "SEND",
+      "WAIT / RETRY",
+      "OUTCOME"
+    ]
+  },
+  "ba-kiem-tra-nhat-quan-mo-hinh": {
+    "title": "MODEL REVIEW",
+    "subtitle": "One case across process, state and rules",
+    "diagram": "checklist",
+    "labels": [
+      "PROCESS",
+      "STATE + RULES",
+      "CONSISTENCY"
+    ]
+  },
+  "ba-thuc-hanh-thay-doi-chinh-sach-huy": {
+    "title": "BA CASE / 03",
+    "subtitle": "Toi Noi · Review a cancellation policy change",
+    "diagram": "split",
+    "labels": [
+      "2 MINUTES",
+      "IMPACT",
+      "3 MINUTES"
+    ]
   }
 }
