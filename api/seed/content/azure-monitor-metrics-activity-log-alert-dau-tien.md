@@ -172,7 +172,7 @@ az monitor alert-processing-rule create \
 
 Bạn vừa có đủ ba lớp quan sát cơ bản: metrics tự có, Activity Log cho thao tác quản trị, và đường dẫn resource logs về Log Analytics. Hai alert đầu tiên cùng một action group sẽ báo cho đội platform khi VM quá tải hoặc `trips` sắp hết chỗ.
 
-Đây là bài cuối của Phần 1. Bạn đã đi từ khái niệm cloud và resource group, qua mạng, VM, storage, PostgreSQL tới giám sát. Phần 2 bắt đầu bằng [bài 11 về Microsoft Entra ID](/articles/azure-entra-id-tenant-user-group-app-registration), nơi ta trả lời "ai được làm gì" trước khi thêm managed identity và mạng riêng cho `trip-service`. Về mặt telemetry trong code, xem lại [bài 35 về OpenTelemetry](/articles/dotnet10-opentelemetry-traces-metrics-logs).
+Đây là bài cuối của Phần 1. Bạn đã đi từ khái niệm cloud và resource group, qua mạng, VM, storage, PostgreSQL tới giám sát. Phần 2 bắt đầu bằng [bài 11 về Microsoft Entra ID](/articles/azure-entra-id-tenant-user-group-app-registration), nơi ta trả lời "ai được làm gì" trước khi thêm managed identity và mạng riêng cho `trip-service`. Về mặt telemetry trong code, xem lại [bài 37 về OpenTelemetry](/articles/dotnet10-opentelemetry-traces-metrics-logs).
 
 ## Tài liệu gốc
 
