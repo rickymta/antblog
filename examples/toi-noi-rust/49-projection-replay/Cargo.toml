@@ -1,0 +1,14 @@
+[package]
+name = "ledger_49_projection_replay"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[dependencies]
+anyhow = "1.0.104"
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+uuid = { version = "1.29.0", features = ["v4"] }

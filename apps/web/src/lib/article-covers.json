@@ -2728,5 +2728,105 @@
       "POSTGRES",
       "GRPC"
     ]
+  },
+  "rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen": {
+    "title": "CHART OF ACCOUNTS",
+    "subtitle": "Rust 41 · Account chart, trip cash flow, SQL health metrics",
+    "diagram": "map",
+    "labels": [
+      "ASSET",
+      "LIABILITY",
+      "REVENUE"
+    ]
+  },
+  "rust-hold-capture-void-so-du-kha-dung": {
+    "title": "HOLD / CAPTURE / VOID",
+    "subtitle": "Rust 42 · Wallet holds and available balance",
+    "diagram": "flow",
+    "labels": [
+      "HOLD",
+      "CAPTURE",
+      "VOID"
+    ]
+  },
+  "rust-refund-reversal-chargeback-but-toan-dao-maker-checker": {
+    "title": "REFUND / REVERSAL",
+    "subtitle": "Rust 43 · Reversal, chargeback and maker-checker",
+    "diagram": "flow",
+    "labels": [
+      "REVERSAL",
+      "CHARGEBACK",
+      "CHECKER"
+    ]
+  },
+  "rust-vi-tai-xe-chia-tien-payout-theo-lo": {
+    "title": "DRIVER PAYOUT / BATCH",
+    "subtitle": "Rust 44 · Driver wallet, batch payout, bank statement",
+    "diagram": "flow",
+    "labels": [
+      "WALLET",
+      "BATCH",
+      "BANK"
+    ]
+  },
+  "rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach": {
+    "title": "PROMO / BUDGET",
+    "subtitle": "Rust 45 · Promo budget, multi-party postings",
+    "diagram": "split",
+    "labels": [
+      "PLATFORM",
+      "DRIVER",
+      "BUDGET"
+    ]
+  },
+  "rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong": {
+    "title": "LARGEST REMAINDER",
+    "subtitle": "Rust 46 · Split money without losing a single dong",
+    "diagram": "split",
+    "labels": [
+      "FLOOR",
+      "REMAINDER",
+      "TIE-BREAK"
+    ]
+  },
+  "rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao": {
+    "title": "PSP RECONCILIATION",
+    "subtitle": "Rust 47 · Match PSP statements to the ledger via SQL",
+    "diagram": "flow",
+    "labels": [
+      "CSV",
+      "COPY",
+      "MATCH"
+    ]
+  },
+  "rust-so-du-theo-thoi-diem-snapshot-dong-ky": {
+    "title": "SNAPSHOT / PERIOD CLOSE",
+    "subtitle": "Rust 48 · Balance as-of, snapshots and period close",
+    "diagram": "layers",
+    "labels": [
+      "AS-OF",
+      "SNAPSHOT",
+      "CLOSE"
+    ]
+  },
+  "rust-event-sourcing-co-chung-muc-projection-replay": {
+    "title": "EVENT LOG / PROJECTION",
+    "subtitle": "Rust 49 · Ledger entries as events, replay and rebuild",
+    "diagram": "flow",
+    "labels": [
+      "LOG",
+      "PROJECT",
+      "REPLAY"
+    ]
+  },
+  "rust-audit-append-only-hash-chain-phan-quyen-pii": {
+    "title": "AUDIT / HASH CHAIN",
+    "subtitle": "Rust 50 · Append-only audit, hash chain, role, PII",
+    "diagram": "blocks",
+    "labels": [
+      "REVOKE",
+      "HASH CHAIN",
+      "ANCHOR"
+    ]
   }
 }

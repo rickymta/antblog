@@ -81,7 +81,20 @@ C#/.NET 10 giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng
 39. Graceful shutdown, health, readiness và backpressure — **đã viết**
 40. Bài tổng hợp trung bình: ledger-api với PostgreSQL và Kafka chạy end-to-end — **đã viết**
 
-Các phần còn lại (bài 41–68) xem master curriculum.
+## P05 · Nghiệp vụ sổ cái và đối soát
+
+41. Bài toán sổ cái Tới Nơi: chart of accounts và dòng tiền một chuyến — **đã viết**
+42. Hold, capture, void: giữ tiền trong ví và số dư khả dụng — **đã viết**
+43. Refund, reversal và chargeback: bút toán đảo và maker-checker — **đã viết**
+44. Ví tài xế: chia tiền, thu nhập và payout theo lô — **đã viết**
+45. Khuyến mãi và trợ giá: bút toán nhiều bên và ngân sách campaign — **đã viết**
+46. Làm tròn và chia tiền không mất đồng: largest remainder — **đã viết**
+47. Đối soát với VíXanh: nhập sao kê, khớp theo external ref, báo lệch — **đã viết**
+48. Số dư theo thời điểm, snapshot và đóng kỳ — **đã viết**
+49. Event sourcing có chừng mực: bút toán là sự kiện, projection và replay — **đã viết**
+50. Audit, bất biến dữ liệu và bảo mật sổ cái — **đã viết**
+
+Các phần còn lại (bài 51–68) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -90,7 +103,7 @@ cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml
 cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml -- --verify
 ```
 
-Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03, `verify-31-40.sh` phần 04 (hai script này cần hạ tầng trong `infra/`).
+Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03, `verify-31-40.sh` phần 04, `verify-41-50.sh` phần 05 (ba script này cần hạ tầng trong `infra/`).
 
 ## Hạ tầng cho phần P03 trở đi
 

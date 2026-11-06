@@ -56,6 +56,12 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 
 **Quy ước sổ dòng tiền (chốt ở bài 13).** Số có dấu theo dòng tiền: dương = tiền vào tài khoản, âm = tiền ra, tổng bút toán = 0. Dấu này KHÔNG phải cặp nợ/có của kế toán, và không dịch được từng dòng sang nợ/có; ánh xạ chỉ đúng khi đọc số dư theo loại tài khoản. Code dùng `Flow { In, Out }`, không dùng `Debit`/`Credit`. RS-41 (chart of accounts) phải nối tiếp cách trình bày này. Bút toán `trip:TN-0001:capture` có 2 dòng qua clearing ở bài 13, có 3 dòng ở bài 10, 14 và `ledger-core`; đừng gộp hai dạng vào cùng một sổ vì sẽ ra `IdempotencyConflict`.
 
+**Tài khoản biên (chốt ở bài 41).** Sổ đóng kín nên tiền từ ngoài vào hiện thành số âm ở một tài khoản biên: trả theo chuyến thì biên là ví khách, nạp ví thì biên là `psp:vixanh:clearing`. Số dư clearing vì vậy không phải tiền thật đang nằm ở VíXanh và có thể âm; phân biệt nạp ví, chargeback hay lỗi bằng tham chiếu của bút toán. Đối soát so theo dòng clearing, không theo số dư.
+
+**Khóa của bút toán đảo và hoàn tiền (chốt ở bài 43).** Đảo toàn phần dùng `<key gốc>:reversal` và có `reversal_of`, mỗi bút toán chỉ có một bản đảo. Hoàn một phần dùng `trip:<id>:refund:<n>` và không đặt `reversal_of`, vì nó không phải ảnh gương của bút toán nào.
+
+**Tài khoản mở rộng cho khuyến mãi (bài 45).** Tám mẫu tài khoản của bài 41 là sơ đồ nền. Bài 45 thêm `platform:treasury` (asset, nguồn cấp ngân sách) và `platform:promo-wallet` (liability, trả thay khách phần nền tảng chịu), để doanh thu vẫn là 5.100 và chi phí khuyến mãi là 5.000 thay vì trừ vào doanh thu. Bài nào có khuyến mãi thì dùng cùng hai tài khoản này.
+
 ## 3. Danh sách bài
 
 ### Cấp độ cơ bản · Lộ trình `rust-co-ban-qua-toi-noi`
@@ -128,16 +134,16 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| RS-41 | `rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen` | Bài toán sổ cái Tới Nơi: chart of accounts và dòng tiền một chuyến | Tài khoản khách/tài xế/nền tảng/PSP/thuế/khuyến mãi, dòng tiền đặt xe và giao hàng, metric đúng/sai (lệch đối soát, bút toán không cân), ranh giới với Payment C# | RS-40 | Kế hoạch |
-| RS-42 | `rust-hold-capture-void-so-du-kha-dung` | Hold, capture, void: giữ tiền trong ví và số dư khả dụng | Authorization hold có hạn, `available = ledger − holds`, capture một phần, void khi hủy chuyến, hold hết hạn bằng job, typestate áp dụng | RS-41 | Kế hoạch |
-| RS-43 | `rust-refund-reversal-chargeback-but-toan-dao-maker-checker` | Refund, reversal và chargeback: bút toán đảo và maker-checker | Không xóa, bút toán đảo liên kết nguyên nhân, refund một phần, chargeback từ PSP, quy trình người tạo/người duyệt, reason code, audit | RS-42 | Kế hoạch |
-| RS-44 | `rust-vi-tai-xe-chia-tien-payout-theo-lo` | Ví tài xế: chia tiền, thu nhập và payout theo lô | Split theo tỷ lệ, thu nhập theo ngày, payout batch sang ngân hàng (giả), trạng thái payout, giới hạn rút, đối chiếu với sao kê ngân hàng | RS-42 | Kế hoạch |
-| RS-45 | `rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach` | Khuyến mãi và trợ giá: bút toán nhiều bên và ngân sách campaign | Tài khoản chi phí marketing, bút toán 3–4 posting, ngân sách campaign là tài khoản có giới hạn, hợp đồng với Promotion service | RS-43 | Kế hoạch |
-| RS-46 | `rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong` | Làm tròn và chia tiền không mất đồng: largest remainder | Chia 25.500 cho nhiều bên không lệch 1 đồng, `rust_decimal` chiến lược làm tròn, property test «tổng phần = tổng gốc», quy tắc VND, lỗi hay gặp | RS-19, RS-44 | Kế hoạch |
-| RS-47 | `rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao` | Đối soát với VíXanh: nhập sao kê, khớp theo external ref, báo lệch | `csv` crate streaming, khớp 1-1/1-n, phân loại lệch (thiếu bên ta, thiếu bên PSP, lệch tiền), báo cáo, job đối soát định kỳ, hiệu năng với file lớn | RS-41 | Kế hoạch |
-| RS-48 | `rust-so-du-theo-thoi-diem-snapshot-dong-ky` | Số dư theo thời điểm, snapshot và đóng kỳ | Tính lại từ bút toán, snapshot hàng ngày, đóng kỳ cấm ghi lùi, điều chỉnh sau đóng kỳ bằng bút toán kỳ sau, truy vấn «số dư lúc 23:59» | RS-47 | Kế hoạch |
-| RS-49 | `rust-event-sourcing-co-chung-muc-projection-replay` | Event sourcing có chừng mực: bút toán là sự kiện, projection và replay | Bút toán vốn là event log, projection số dư/báo cáo, rebuild từ đầu, phiên bản projection, so với CQRS loạt C#, khi không nên event sourcing toàn hệ thống | RS-48 | Kế hoạch |
-| RS-50 | `rust-audit-append-only-hash-chain-phan-quyen-pii` | Audit, bất biến dữ liệu và bảo mật sổ cái | `REVOKE UPDATE/DELETE`, trigger, hash chain từng bút toán, phân quyền Finance/CS/Admin theo §11.2 kiến trúc, PII tối thiểu, mask trong log | RS-43 | Kế hoạch |
+| RS-41 | `rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen` | Bài toán sổ cái Tới Nơi: chart of accounts và dòng tiền một chuyến | Tài khoản khách/tài xế/nền tảng/PSP/thuế/khuyến mãi, dòng tiền đặt xe và giao hàng, metric đúng/sai (lệch đối soát, bút toán không cân), ranh giới với Payment C# | RS-40 | Đã viết |
+| RS-42 | `rust-hold-capture-void-so-du-kha-dung` | Hold, capture, void: giữ tiền trong ví và số dư khả dụng | Authorization hold có hạn, `available = ledger − holds`, capture một phần, void khi hủy chuyến, hold hết hạn bằng job, typestate áp dụng | RS-41 | Đã viết |
+| RS-43 | `rust-refund-reversal-chargeback-but-toan-dao-maker-checker` | Refund, reversal và chargeback: bút toán đảo và maker-checker | Không xóa, bút toán đảo liên kết nguyên nhân, refund một phần, chargeback từ PSP, quy trình người tạo/người duyệt, reason code, audit | RS-42 | Đã viết |
+| RS-44 | `rust-vi-tai-xe-chia-tien-payout-theo-lo` | Ví tài xế: chia tiền, thu nhập và payout theo lô | Split theo tỷ lệ, thu nhập theo ngày, payout batch sang ngân hàng (giả), trạng thái payout, giới hạn rút, đối chiếu với sao kê ngân hàng | RS-42 | Đã viết |
+| RS-45 | `rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach` | Khuyến mãi và trợ giá: bút toán nhiều bên và ngân sách campaign | Tài khoản chi phí marketing, bút toán 3–4 posting, ngân sách campaign là tài khoản có giới hạn, hợp đồng với Promotion service | RS-43 | Đã viết |
+| RS-46 | `rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong` | Làm tròn và chia tiền không mất đồng: largest remainder | Chia 25.500 cho nhiều bên không lệch 1 đồng, `rust_decimal` chiến lược làm tròn, property test «tổng phần = tổng gốc», quy tắc VND, lỗi hay gặp | RS-19, RS-44 | Đã viết |
+| RS-47 | `rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao` | Đối soát với VíXanh: nhập sao kê, khớp theo external ref, báo lệch | `csv` crate streaming, khớp 1-1/1-n, phân loại lệch (thiếu bên ta, thiếu bên PSP, lệch tiền), báo cáo, job đối soát định kỳ, hiệu năng với file lớn | RS-41 | Đã viết |
+| RS-48 | `rust-so-du-theo-thoi-diem-snapshot-dong-ky` | Số dư theo thời điểm, snapshot và đóng kỳ | Tính lại từ bút toán, snapshot hàng ngày, đóng kỳ cấm ghi lùi, điều chỉnh sau đóng kỳ bằng bút toán kỳ sau, truy vấn «số dư lúc 23:59» | RS-47 | Đã viết |
+| RS-49 | `rust-event-sourcing-co-chung-muc-projection-replay` | Event sourcing có chừng mực: bút toán là sự kiện, projection và replay | Bút toán vốn là event log, projection số dư/báo cáo, rebuild từ đầu, phiên bản projection, so với CQRS loạt C#, khi không nên event sourcing toàn hệ thống | RS-48 | Đã viết |
+| RS-50 | `rust-audit-append-only-hash-chain-phan-quyen-pii` | Audit, bất biến dữ liệu và bảo mật sổ cái | `REVOKE UPDATE/DELETE`, trigger, hash chain từng bút toán, phân quyền Finance/CS/Admin theo §11.2 kiến trúc, PII tối thiểu, mask trong log | RS-43 | Đã viết |
 
 #### P06 · Kiến trúc service Rust theo kiến trúc đích (8 bài)
 
