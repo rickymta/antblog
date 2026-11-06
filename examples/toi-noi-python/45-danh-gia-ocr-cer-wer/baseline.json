@@ -1,0 +1,40 @@
+{
+  "environment": {
+    "tesseract": "tesseract 5.5.4",
+    "traineddata_sha256": {
+      "vie": "79df64caf7bcfb2a",
+      "eng": "7d4322bd2a774972"
+    },
+    "font": {
+      "name": "Arial.ttf",
+      "sha256": "525979822591a344"
+    }
+  },
+  "ocr": {
+    "lang": "vie+eng",
+    "psm": 6
+  },
+  "dataset": {
+    "n": 50,
+    "first_seed": 1000
+  },
+  "threshold": 0.8,
+  "cer_raw_overall": 0.0943,
+  "cer_raw_by_field": {
+    "date_of_birth": 0.132,
+    "expiry_date": 0.004,
+    "full_name": 0.1612,
+    "hometown_city": 0.1333,
+    "id_number": 0.0133,
+    "license_class": 0.225,
+    "license_number": 0.0033,
+    "sex": 0.2623,
+    "full_name_diacritics": 0.2408
+  },
+  "page_recall": 0.94,
+  "fields_correct": 213,
+  "fields_total": 250,
+  "card_review_rate": 0.4,
+  "auto_wrong_fields": 4,
+  "auto_wrong_cards": 1
+}

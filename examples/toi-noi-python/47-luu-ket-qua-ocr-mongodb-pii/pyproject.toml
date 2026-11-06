@@ -1,0 +1,14 @@
+[project]
+name = "toi-noi-py-47-luu-ket-qua-ocr-mongodb-pii"
+version = "0.1.0"
+description = "Bài 47: lưu kết quả OCR vào MongoDB: mặt nạ PII, hash có khóa, TTL retention, audit, migration schema"
+requires-python = ">=3.14"
+dependencies = [
+    "pymongo>=4.13",
+    "pydantic-settings>=2.16",
+    "numpy>=2.5",
+    "pillow>=13",
+]
+
+[tool.uv]
+package = false

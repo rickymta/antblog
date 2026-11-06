@@ -196,5 +196,22 @@
       "python-worker-arq-scheduling-retry-dead-letter"
     ],
     "status": "published"
+  },
+  {
+    "slug": "python-nang-cao-qua-toi-noi",
+    "title": "Python nâng cao qua Tới Nơi",
+    "description": "Lộ trình 39 bài cấp nâng cao: OCR giấy tờ định danh, so khớp khuôn mặt, chấm điểm gian lận, dự đoán ETA và nhu cầu, Clean Architecture cho service Python, profiling, container, CI/CD, triển khai AWS và Azure, OpenTelemetry, kết thúc bằng pipeline KYC và fraud từ code tới vận hành. Dữ liệu trong lab đều là dữ liệu tổng hợp.",
+    "level": "advanced",
+    "category": "programming",
+    "articles": [
+      "python-kyc-tai-xe-bai-toan-du-lieu-metric",
+      "python-opencv-phat-hien-canh-perspective-deskew",
+      "python-tesseract-easyocr-paddleocr-so-sanh",
+      "python-hau-xu-ly-ocr-regex-parse-truong-checksum",
+      "python-danh-gia-ocr-cer-wer-threshold",
+      "python-ocr-service-fastapi-worker-timeout",
+      "python-luu-ket-qua-ocr-mongodb-pii-retention"
+    ],
+    "status": "published"
   }
 ]

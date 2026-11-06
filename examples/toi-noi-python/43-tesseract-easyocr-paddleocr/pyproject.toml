@@ -1,0 +1,18 @@
+[project]
+name = "toi-noi-py-43-tesseract-easyocr-paddleocr"
+version = "0.1.0"
+description = "Bài 43: Tesseract, EasyOCR và PaddleOCR chạy trên cùng bộ thẻ căn cước giả"
+requires-python = ">=3.14"
+# Lõi chỉ cần Tesseract (cài ngoài Python: brew install tesseract tesseract-lang).
+dependencies = [
+    "numpy>=2.5",
+    "pillow>=13",
+    "pytesseract>=0.3.13",
+]
+
+[project.optional-dependencies]
+# EasyOCR kéo theo PyTorch (vài trăm MB); mô hình khoảng 94 MB tải ở lần chạy đầu.
+easyocr = ["easyocr>=1.7.2"]
+
+[tool.uv]
+package = false

@@ -1,0 +1,16 @@
+[project]
+name = "toi-noi-py-43-paddle"
+version = "0.1.0"
+description = "Bài 43: PaddleOCR chạy riêng trên Python 3.13 vì paddlepaddle chưa có wheel cp314"
+# Kiểm ngày 2026-11-06: paddlepaddle 3.3.1 chỉ có wheel cp39 đến cp313, không có cp314.
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "numpy>=2.3",
+    "pillow>=13",
+    "pytesseract>=0.3.13",
+    "paddlepaddle>=3.3.1",
+    "paddleocr>=3.7",
+]
+
+[tool.uv]
+package = false

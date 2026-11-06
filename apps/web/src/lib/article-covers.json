@@ -1388,5 +1388,75 @@
       "DEAD-LETTER",
       "SIGTERM"
     ]
+  },
+  "python-kyc-tai-xe-bai-toan-du-lieu-metric": {
+    "title": "PYTHON / KYC METRICS",
+    "subtitle": "Python 41 · Measuring ID-card OCR",
+    "diagram": "checklist",
+    "labels": [
+      "DATASET",
+      "CER",
+      "REVIEW"
+    ]
+  },
+  "python-opencv-phat-hien-canh-perspective-deskew": {
+    "title": "PYTHON / OPENCV DESKEW",
+    "subtitle": "Python 42 · Edges, warp and deskew",
+    "diagram": "flow",
+    "labels": [
+      "CANNY",
+      "WARP",
+      "DESKEW"
+    ]
+  },
+  "python-tesseract-easyocr-paddleocr-so-sanh": {
+    "title": "PYTHON / OCR ENGINES",
+    "subtitle": "Python 43 · Comparing three OCR engines",
+    "diagram": "matrix",
+    "labels": [
+      "TESSERACT",
+      "EASYOCR",
+      "PADDLEOCR"
+    ]
+  },
+  "python-hau-xu-ly-ocr-regex-parse-truong-checksum": {
+    "title": "PYTHON / OCR PARSING",
+    "subtitle": "Python 44 · Fields from raw OCR text",
+    "diagram": "checklist",
+    "labels": [
+      "NFC",
+      "REGEX",
+      "FUZZY"
+    ]
+  },
+  "python-danh-gia-ocr-cer-wer-threshold": {
+    "title": "PYTHON / OCR METRICS",
+    "subtitle": "Python 45 · CER, WER and review thresholds",
+    "diagram": "target",
+    "labels": [
+      "CER",
+      "WER",
+      "THRESHOLD"
+    ]
+  },
+  "python-ocr-service-fastapi-worker-timeout": {
+    "title": "PYTHON / OCR SERVICE",
+    "subtitle": "Python 46 · OCR behind a job queue",
+    "diagram": "flow",
+    "labels": [
+      "API",
+      "QUEUE",
+      "WORKER"
+    ]
+  },
+  "python-luu-ket-qua-ocr-mongodb-pii-retention": {
+    "title": "PYTHON / PII + TTL",
+    "subtitle": "Python 47 · Masked OCR records in MongoDB",
+    "diagram": "storage",
+    "labels": [
+      "MASK",
+      "TTL",
+      "AUDIT"
+    ]
   }
 }

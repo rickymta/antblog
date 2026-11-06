@@ -80,7 +80,17 @@ C#/.NET giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng, �
 39. Outbox, Inbox và idempotent consumer trong Python — **đã viết**
 40. Worker nền với arq/taskiq: lịch, retry, dead-letter — **đã viết**
 
-Các phần P05–P10 (bài 41–79) xem master curriculum.
+## P05 · OCR giấy tờ định danh
+
+41. Bài toán KYC tài xế: luồng nghiệp vụ, dữ liệu tổng hợp và metric — **đã viết**
+42. Phát hiện cạnh, biến đổi phối cảnh và deskew ảnh giấy tờ — **đã viết**
+43. Tesseract, EasyOCR và PaddleOCR: chạy và so sánh trên cùng bộ ảnh — **đã viết**
+44. Hậu xử lý OCR: regex, tách trường CCCD/GPLX, checksum và fuzzy matching — **đã viết**
+45. Đánh giá OCR: CER/WER, bộ test vàng và ngưỡng chấp nhận — **đã viết**
+46. Đóng gói OCR thành service: FastAPI nhận ảnh, worker xử lý, timeout — **đã viết**
+47. Lưu kết quả OCR: document MongoDB, mặt nạ PII, versioning và retention — **đã viết**
+
+Các phần P06–P10 (bài 48–79) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -116,4 +126,12 @@ Bài 31–37 chạy trong tiến trình, không cần Docker. Bài 38–40 cần
 
 ```bash
 sh examples/toi-noi-python/verify-31-40.sh
+```
+
+## Chạy lab phần 05
+
+Cần Tesseract có gói `vie` (`brew install tesseract tesseract-lang`) và hạ tầng chung cho bài 46, 47. Lab 41, 42 chạy vài phút. PaddleOCR ở bài 43 cần Python 3.13 qua project con `paddle/`; `--verify` chỉ cần Tesseract. Ảnh giấy tờ đều là dữ liệu tổng hợp.
+
+```bash
+sh examples/toi-noi-python/verify-41-47.sh
 ```

@@ -123,13 +123,13 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| PY-41 | `python-kyc-tai-xe-bai-toan-du-lieu-metric` | Bài toán KYC tài xế: luồng nghiệp vụ, dữ liệu tổng hợp và metric | Luồng nộp hồ sơ → OCR → face → duyệt; sinh ảnh giấy tờ tổng hợp; CER/WER, precision theo trường; ranh giới service | PY-40 | Kế hoạch |
-| PY-42 | `python-opencv-phat-hien-canh-perspective-deskew` | Phát hiện cạnh, biến đổi phối cảnh và deskew ảnh giấy tờ | Canny, contour, `warpPerspective`, xoay, nhị phân hóa thích nghi, đo ảnh hưởng tới OCR | PY-30, PY-41 | Kế hoạch |
-| PY-43 | `python-tesseract-easyocr-paddleocr-so-sanh` | Tesseract, EasyOCR và PaddleOCR: chạy và so sánh trên cùng bộ ảnh | Cài, gọi, ngôn ngữ vi, bounding box, confidence, thời gian/CPU, bảng so sánh có số đo | PY-42 | Kế hoạch |
-| PY-44 | `python-hau-xu-ly-ocr-regex-parse-truong-checksum` | Hậu xử lý OCR: regex, tách trường CCCD/GPLX, checksum và fuzzy matching | Chuẩn hóa Unicode, regex có tên, `rapidfuzz`, kiểm tra định dạng số, ngày, confidence per field | PY-43 | Kế hoạch |
-| PY-45 | `python-danh-gia-ocr-cer-wer-threshold` | Đánh giá OCR: CER/WER, bộ test vàng và ngưỡng chấp nhận | Tập ground truth, `jiwer`, phân tích lỗi theo loại, ngưỡng đưa người duyệt, regression test cho mô hình | PY-44 | Kế hoạch |
-| PY-46 | `python-ocr-service-fastapi-worker-timeout` | Đóng gói OCR thành service: FastAPI nhận ảnh, worker xử lý, timeout | Tách API/worker, giới hạn ảnh, timeout, trạng thái job, idempotency theo hồ sơ, tải thử | PY-45, PY-40 | Kế hoạch |
-| PY-47 | `python-luu-ket-qua-ocr-mongodb-pii-retention` | Lưu kết quả OCR: document MongoDB, mặt nạ PII, versioning và retention | Schema document, mask số giấy tờ, TTL index, phiên bản mô hình trong document, audit | PY-46, PY-26 | Kế hoạch |
+| PY-41 | `python-kyc-tai-xe-bai-toan-du-lieu-metric` | Bài toán KYC tài xế: luồng nghiệp vụ, dữ liệu tổng hợp và metric | Luồng nộp hồ sơ → OCR → face → duyệt; sinh ảnh giấy tờ tổng hợp; CER/WER, precision theo trường; ranh giới service | PY-40 | Đã viết |
+| PY-42 | `python-opencv-phat-hien-canh-perspective-deskew` | Phát hiện cạnh, biến đổi phối cảnh và deskew ảnh giấy tờ | Canny, contour, `warpPerspective`, xoay, nhị phân hóa thích nghi, đo ảnh hưởng tới OCR | PY-30, PY-41 | Đã viết |
+| PY-43 | `python-tesseract-easyocr-paddleocr-so-sanh` | Tesseract, EasyOCR và PaddleOCR: chạy và so sánh trên cùng bộ ảnh | Cài, gọi, ngôn ngữ vi, bounding box, confidence, thời gian/CPU, bảng so sánh có số đo | PY-42 | Đã viết |
+| PY-44 | `python-hau-xu-ly-ocr-regex-parse-truong-checksum` | Hậu xử lý OCR: regex, tách trường CCCD/GPLX, checksum và fuzzy matching | Chuẩn hóa Unicode, regex có tên, `rapidfuzz`, kiểm tra định dạng số, ngày, confidence per field | PY-43 | Đã viết |
+| PY-45 | `python-danh-gia-ocr-cer-wer-threshold` | Đánh giá OCR: CER/WER, bộ test vàng và ngưỡng chấp nhận | Tập ground truth, `jiwer`, phân tích lỗi theo loại, ngưỡng đưa người duyệt, regression test cho mô hình | PY-44 | Đã viết |
+| PY-46 | `python-ocr-service-fastapi-worker-timeout` | Đóng gói OCR thành service: FastAPI nhận ảnh, worker xử lý, timeout | Tách API/worker, giới hạn ảnh, timeout, trạng thái job, idempotency theo hồ sơ, tải thử | PY-45, PY-40 | Đã viết |
+| PY-47 | `python-luu-ket-qua-ocr-mongodb-pii-retention` | Lưu kết quả OCR: document MongoDB, mặt nạ PII, versioning và retention | Schema document, mask số giấy tờ, TTL index, phiên bản mô hình trong document, audit | PY-46, PY-26 | Đã viết |
 
 #### P06 · So khớp khuôn mặt (6 bài)
 
