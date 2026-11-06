@@ -988,5 +988,605 @@
       "DELIVERY",
       "EVIDENCE"
     ]
+  },
+  "aws-la-gi-region-az-shared-responsibility": {
+    "title": "AWS / 101",
+    "subtitle": "AWS 01 · Regions, zones and who secures what",
+    "diagram": "map",
+    "labels": [
+      "REGION",
+      "AZ",
+      "EDGE"
+    ]
+  },
+  "aws-tai-khoan-iam-identity-center-cli": {
+    "title": "FIRST / LOGIN",
+    "subtitle": "AWS 02 · Identity Center, MFA and the CLI",
+    "diagram": "checklist",
+    "labels": [
+      "ROOT + MFA",
+      "IDENTITY CENTER",
+      "AWS CLI"
+    ]
+  },
+  "aws-iam-user-role-policy": {
+    "title": "LEAST / PRIVILEGE",
+    "subtitle": "AWS 03 · Users, roles and the policy language",
+    "diagram": "matrix",
+    "labels": [
+      "ALLOW",
+      "DENY",
+      "CONDITION"
+    ]
+  },
+  "aws-vpc-subnet-route-security-group": {
+    "title": "VPC / LAYOUT",
+    "subtitle": "AWS 04 · Subnets, routes and security groups",
+    "diagram": "layers",
+    "labels": [
+      "PUBLIC",
+      "APP",
+      "DATA"
+    ]
+  },
+  "aws-ec2-ami-ebs-user-data": {
+    "title": "EC2 / BOOT",
+    "subtitle": "AWS 05 · AMI, user data and the first service",
+    "diagram": "code",
+    "labels": [
+      "AMI",
+      "USER DATA",
+      "SSM"
+    ]
+  },
+  "aws-s3-bucket-versioning-presigned-url": {
+    "title": "S3 / OBJECTS",
+    "subtitle": "AWS 06 · Buckets, versions and presigned URLs",
+    "diagram": "storage",
+    "labels": [
+      "PUT PRESIGNED",
+      "BUCKET",
+      "proof/trip-42.jpg"
+    ]
+  },
+  "aws-rds-postgresql-multi-az-backup": {
+    "title": "RDS / POSTGRES",
+    "subtitle": "AWS 07 · Managed PostgreSQL in a private subnet",
+    "diagram": "split",
+    "labels": [
+      "PRIMARY",
+      "SYNC",
+      "STANDBY"
+    ]
+  },
+  "aws-alb-target-group-auto-scaling": {
+    "title": "SCALE / OUT",
+    "subtitle": "AWS 08 · Load balancing and auto scaling",
+    "diagram": "flow",
+    "labels": [
+      "ALB",
+      "TARGET GROUP",
+      "ASG ×N"
+    ]
+  },
+  "aws-route53-acm-https": {
+    "title": "DNS / TLS",
+    "subtitle": "AWS 09 · Route 53 records and ACM certificates",
+    "diagram": "target",
+    "labels": [
+      "api.toinoi",
+      "ALIAS → ALB",
+      "ACM"
+    ]
+  },
+  "aws-cloudwatch-budgets-tagging-co-ban": {
+    "title": "SEE / COST",
+    "subtitle": "AWS 10 · Metrics, alarms and the bill",
+    "diagram": "checklist",
+    "labels": [
+      "ALARM 5XX",
+      "TAG Project",
+      "BUDGET"
+    ]
+  },
+  "aws-ecr-image-scan-lifecycle": {
+    "title": "ECR / DIGEST",
+    "subtitle": "AWS 11 · Registry, scanning and immutable tags",
+    "diagram": "storage",
+    "labels": [
+      "docker push",
+      "REPOSITORY",
+      "sha256:…"
+    ]
+  },
+  "aws-ecs-fargate-task-definition-roles": {
+    "title": "ECS / FARGATE",
+    "subtitle": "AWS 12 · Task definitions and two roles",
+    "diagram": "split",
+    "labels": [
+      "EXECUTION ROLE",
+      "TASK",
+      "TASK ROLE"
+    ]
+  },
+  "aws-ecs-alb-rolling-deploy-autoscaling": {
+    "title": "ROLL / OUT",
+    "subtitle": "AWS 13 · Rolling updates and scaling ECS services",
+    "diagram": "cycle",
+    "labels": [
+      "NEW TASKS",
+      "HEALTHY",
+      "DRAIN OLD"
+    ]
+  },
+  "aws-secrets-manager-parameter-store": {
+    "title": "SECRET / ROTATE",
+    "subtitle": "AWS 14 · Parameters, secrets and rotation",
+    "diagram": "cycle",
+    "labels": [
+      "AWSCURRENT",
+      "ROTATE",
+      "AWSPREVIOUS"
+    ]
+  },
+  "aws-elasticache-redis-cache-rate-limit": {
+    "title": "CACHE / HIT",
+    "subtitle": "AWS 15 · Redis-compatible caching on AWS",
+    "diagram": "target",
+    "labels": [
+      "APP",
+      "CACHE HIT 94%",
+      "RDS"
+    ]
+  },
+  "aws-sqs-sns-dlq-fan-out": {
+    "title": "FAN / OUT",
+    "subtitle": "AWS 16 · Queues, topics and dead letters",
+    "diagram": "network",
+    "labels": [
+      "PUSH",
+      "BookingCreated",
+      "DLQ"
+    ]
+  },
+  "aws-eventbridge-event-bus-rule-schedule": {
+    "title": "EVENT / ROUTE",
+    "subtitle": "AWS 17 · Buses, rules and schedules",
+    "diagram": "network",
+    "labels": [
+      "TripCompleted",
+      "RULE",
+      "TARGETS"
+    ]
+  },
+  "aws-lambda-webhook-thanh-toan-cold-start": {
+    "title": "LAMBDA / HOOK",
+    "subtitle": "AWS 18 · Functions, triggers and cold starts",
+    "diagram": "code",
+    "labels": [
+      "WEBHOOK",
+      "VERIFY SIG",
+      "SQS"
+    ]
+  },
+  "aws-api-gateway-authorizer-websocket": {
+    "title": "API / EDGE",
+    "subtitle": "AWS 19 · Gateways, authorizers and WebSockets",
+    "diagram": "flow",
+    "labels": [
+      "JWT",
+      "ROUTE",
+      "LAMBDA / ALB"
+    ]
+  },
+  "aws-cloudfront-waf-shield": {
+    "title": "EDGE / SHIELD",
+    "subtitle": "AWS 20 · CDN, WAF rules and DDoS protection",
+    "diagram": "layers",
+    "labels": [
+      "CLOUDFRONT",
+      "WAF",
+      "ORIGIN"
+    ]
+  },
+  "aws-cloudformation-stack-change-set-drift": {
+    "title": "STACK / DIFF",
+    "subtitle": "AWS 21 · CloudFormation templates and change sets",
+    "diagram": "code",
+    "labels": [
+      "TEMPLATE",
+      "CHANGE SET",
+      "STACK"
+    ]
+  },
+  "aws-terraform-provider-state-s3-lock": {
+    "title": "STATE / LOCK",
+    "subtitle": "AWS 22 · Terraform state on S3",
+    "diagram": "storage",
+    "labels": [
+      "terraform apply",
+      "STATE",
+      "use_lockfile"
+    ]
+  },
+  "aws-terraform-module-vpc-ecs-rds": {
+    "title": "MODULES / ENVS",
+    "subtitle": "AWS 23 · Reusable Terraform for every environment",
+    "diagram": "blocks",
+    "labels": [
+      "NETWORK",
+      "RDS",
+      "ECS SERVICE"
+    ]
+  },
+  "aws-cdk-construct-synth-diff": {
+    "title": "CDK / SYNTH",
+    "subtitle": "AWS 24 · Constructs that compile to CloudFormation",
+    "diagram": "code",
+    "labels": [
+      "CONSTRUCT",
+      "cdk diff",
+      "TEMPLATE"
+    ]
+  },
+  "aws-github-actions-oidc-ecr-deploy": {
+    "title": "OIDC / DEPLOY",
+    "subtitle": "AWS 25 · Keyless CI from GitHub to ECS",
+    "diagram": "flow",
+    "labels": [
+      "GITHUB TOKEN",
+      "ASSUME ROLE",
+      "ECR → ECS"
+    ]
+  },
+  "aws-codepipeline-codebuild-codedeploy-blue-green": {
+    "title": "BLUE / GREEN",
+    "subtitle": "AWS 26 · Shifting traffic one target group at a time",
+    "diagram": "split",
+    "labels": [
+      "BLUE 90%",
+      "",
+      "GREEN 10%"
+    ]
+  },
+  "aws-chien-luoc-deploy-rolling-canary-rollback": {
+    "title": "SHIP / SAFELY",
+    "subtitle": "AWS 27 · Choosing a rollout strategy",
+    "diagram": "matrix",
+    "labels": [
+      "ROLLING",
+      "CANARY",
+      "ROLLBACK"
+    ]
+  },
+  "aws-organizations-scp-control-tower-landing-zone": {
+    "title": "MANY / ACCOUNTS",
+    "subtitle": "AWS 28 · Organizations, OUs and guardrails",
+    "diagram": "layers",
+    "labels": [
+      "ORG",
+      "OU",
+      "ACCOUNT"
+    ]
+  },
+  "aws-appconfig-feature-flag-cau-hinh-dong": {
+    "title": "FLAG / ON",
+    "subtitle": "AWS 29 · Configuration deployed like code",
+    "diagram": "cycle",
+    "labels": [
+      "VALIDATE",
+      "ROLL OUT 5%",
+      "BAKE"
+    ]
+  },
+  "aws-policy-as-code-checkov-infracost-drift": {
+    "title": "GATE / PLAN",
+    "subtitle": "AWS 30 · Lint, policy and cost before apply",
+    "diagram": "checklist",
+    "labels": [
+      "CHECKOV",
+      "INFRACOST",
+      "PLAN REVIEWED"
+    ]
+  },
+  "aws-aurora-postgresql-rds-proxy-failover": {
+    "title": "AURORA / 6×",
+    "subtitle": "AWS 31 · Distributed storage and reader endpoints",
+    "diagram": "pages",
+    "labels": [
+      "WRITER",
+      "SHARED STORAGE",
+      "READERS"
+    ]
+  },
+  "aws-dynamodb-single-table-gsi-ttl-streams": {
+    "title": "KEY / VALUE",
+    "subtitle": "AWS 32 · Access patterns before schema",
+    "diagram": "matrix",
+    "labels": [
+      "PK DRIVER#",
+      "SK TS#",
+      "GSI CITY#"
+    ]
+  },
+  "aws-elasticache-nang-cao-memorydb-ha": {
+    "title": "CACHE / HA",
+    "subtitle": "AWS 33 · Shards, replicas and failover",
+    "diagram": "blocks",
+    "labels": [
+      "SHARD 0",
+      "SHARD 1",
+      "SHARD 2"
+    ]
+  },
+  "aws-msk-kafka-iam-auth-msk-connect": {
+    "title": "MSK / KAFKA",
+    "subtitle": "AWS 34 · Managed brokers and the outbox",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "DEBEZIUM",
+      "TOPIC trips"
+    ]
+  },
+  "aws-kinesis-data-streams-firehose-gps": {
+    "title": "6 250 / s",
+    "subtitle": "AWS 35 · Streaming GPS points to S3",
+    "diagram": "flow",
+    "labels": [
+      "PRODUCERS",
+      "SHARDS",
+      "FIREHOSE → S3"
+    ]
+  },
+  "aws-s3-nang-cao-storage-class-replication-object-lock": {
+    "title": "S3 / TIERS",
+    "subtitle": "AWS 36 · Classes, replication and immutability",
+    "diagram": "layers",
+    "labels": [
+      "STANDARD",
+      "IA",
+      "GLACIER"
+    ]
+  },
+  "aws-backup-disaster-recovery-rpo-rto": {
+    "title": "RPO / RTO",
+    "subtitle": "AWS 37 · Backup plans and recovery drills",
+    "diagram": "target",
+    "labels": [
+      "BACKUP VAULT",
+      "RESTORE 42 MIN",
+      "REGION B"
+    ]
+  },
+  "aws-glue-athena-redshift-lakehouse": {
+    "title": "LAKE / QUERY",
+    "subtitle": "AWS 38 · Parquet, catalogs and warehouses",
+    "diagram": "layers",
+    "labels": [
+      "RAW",
+      "CURATED",
+      "SERVING"
+    ]
+  },
+  "aws-opensearch-tim-kiem-log-analytics": {
+    "title": "SEARCH / GEO",
+    "subtitle": "AWS 39 · Full-text and geo queries at scale",
+    "diagram": "map",
+    "labels": [
+      "QUERY 'pho'",
+      "GEO 3 KM",
+      "RESULTS"
+    ]
+  },
+  "aws-dms-migration-postgresql-zero-downtime": {
+    "title": "CUT / OVER",
+    "subtitle": "AWS 40 · Full load, CDC and the switch",
+    "diagram": "flow",
+    "labels": [
+      "SOURCE PG",
+      "DMS CDC",
+      "AURORA"
+    ]
+  },
+  "aws-eks-tong-quan-control-plane-node-group": {
+    "title": "EKS / PLANES",
+    "subtitle": "AWS 41 · What AWS runs and what you run",
+    "diagram": "split",
+    "labels": [
+      "CONTROL PLANE",
+      "",
+      "DATA PLANE"
+    ]
+  },
+  "aws-eks-terraform-eksctl-kubectl-namespace": {
+    "title": "KUBECTL / APPLY",
+    "subtitle": "AWS 42 · A cluster from code",
+    "diagram": "code",
+    "labels": [
+      "TERRAFORM",
+      "NODE GROUP",
+      "NAMESPACE"
+    ]
+  },
+  "aws-eks-vpc-cni-load-balancer-controller-ingress": {
+    "title": "PODS / IPS",
+    "subtitle": "AWS 43 · Networking pods and load balancers",
+    "diagram": "network",
+    "labels": [
+      "INGRESS",
+      "ALB",
+      "PODS"
+    ]
+  },
+  "aws-eks-ebs-efs-csi-statefulset": {
+    "title": "PVC / BOUND",
+    "subtitle": "AWS 44 · Block and file storage for pods",
+    "diagram": "storage",
+    "labels": [
+      "STATEFULSET",
+      "PVC",
+      "gp3 · ap-southeast-1a"
+    ]
+  },
+  "aws-eks-hpa-karpenter-spot": {
+    "title": "SCALE / PODS",
+    "subtitle": "AWS 45 · HPA for pods, Karpenter for nodes",
+    "diagram": "cycle",
+    "labels": [
+      "QUEUE DEPTH",
+      "HPA",
+      "KARPENTER"
+    ]
+  },
+  "aws-eks-gitops-argocd-helm-kustomize": {
+    "title": "GIT / SYNC",
+    "subtitle": "AWS 46 · Argo CD keeps the cluster honest",
+    "diagram": "cycle",
+    "labels": [
+      "GIT",
+      "ARGO CD",
+      "CLUSTER"
+    ]
+  },
+  "aws-eks-observability-container-insights-adot-prometheus": {
+    "title": "SIGNALS / 3",
+    "subtitle": "AWS 47 · Metrics, logs and traces on EKS",
+    "diagram": "network",
+    "labels": [
+      "METRICS",
+      "ADOT",
+      "TRACES"
+    ]
+  },
+  "aws-eks-bao-mat-pod-identity-external-secrets": {
+    "title": "POD / GUARD",
+    "subtitle": "AWS 48 · Identity, secrets and admission policy",
+    "diagram": "checklist",
+    "labels": [
+      "POD IDENTITY",
+      "RESTRICTED PSS",
+      "SIGNED IMAGE"
+    ]
+  },
+  "aws-eks-progressive-delivery-argo-rollouts-vpc-lattice": {
+    "title": "CANARY / 5%",
+    "subtitle": "AWS 49 · Metric-driven rollouts and Lattice",
+    "diagram": "split",
+    "labels": [
+      "STABLE 95%",
+      "",
+      "CANARY 5%"
+    ]
+  },
+  "aws-eks-van-hanh-upgrade-addon-chi-phi": {
+    "title": "UPGRADE / PATH",
+    "subtitle": "AWS 50 · Versions, add-ons and the bill",
+    "diagram": "flow",
+    "labels": [
+      "CONTROL PLANE",
+      "ADD-ONS",
+      "NODES"
+    ]
+  },
+  "aws-iam-nang-cao-permission-boundary-abac-access-analyzer": {
+    "title": "POLICY / EVAL",
+    "subtitle": "AWS 51 · How AWS decides allow or deny",
+    "diagram": "layers",
+    "labels": [
+      "SCP",
+      "BOUNDARY",
+      "IDENTITY"
+    ]
+  },
+  "aws-kms-envelope-encryption-key-policy": {
+    "title": "KMS / ENVELOPE",
+    "subtitle": "AWS 52 · Keys, data keys and who may use them",
+    "diagram": "pages",
+    "labels": [
+      "KMS KEY",
+      "DATA KEY",
+      "CIPHERTEXT"
+    ]
+  },
+  "aws-privatelink-transit-gateway-network-firewall": {
+    "title": "PRIVATE / PATH",
+    "subtitle": "AWS 53 · Endpoints, hubs and inspection",
+    "diagram": "network",
+    "labels": [
+      "VPC DEV",
+      "TRANSIT GW",
+      "VPC PROD"
+    ]
+  },
+  "aws-cloudtrail-config-security-hub-guardduty": {
+    "title": "DETECT / AUDIT",
+    "subtitle": "AWS 54 · Every call logged, every finding triaged",
+    "diagram": "checklist",
+    "labels": [
+      "CLOUDTRAIL",
+      "GUARDDUTY",
+      "SECURITY HUB"
+    ]
+  },
+  "aws-observability-nang-cao-xray-adot-logs-insights-slo": {
+    "title": "SLO / 99.9",
+    "subtitle": "AWS 55 · Traces, logs and error budgets",
+    "diagram": "target",
+    "labels": [
+      "TRACE",
+      "p99 < 800 ms",
+      "ERROR BUDGET"
+    ]
+  },
+  "aws-resilience-multi-region-route53-failover-fis": {
+    "title": "FAIL / OVER",
+    "subtitle": "AWS 56 · Surviving a zone, planning for a region",
+    "diagram": "map",
+    "labels": [
+      "REGION A",
+      "ROUTE 53",
+      "REGION B"
+    ]
+  },
+  "aws-step-functions-saga-dat-chuyen": {
+    "title": "SAGA / STEPS",
+    "subtitle": "AWS 57 · Orchestrating a booking with compensation",
+    "diagram": "flow",
+    "labels": [
+      "HOLD",
+      "MATCH",
+      "CAPTURE / UNDO"
+    ]
+  },
+  "aws-well-architected-review-toi-noi": {
+    "title": "SIX / PILLARS",
+    "subtitle": "AWS 58 · Reviewing Tới Nơi against the framework",
+    "diagram": "matrix",
+    "labels": [
+      "PILLAR",
+      "QUESTION",
+      "HRI"
+    ]
+  },
+  "aws-finops-savings-plans-spot-right-sizing": {
+    "title": "COST / TRIP",
+    "subtitle": "AWS 59 · Commitments, Spot and what you forgot",
+    "diagram": "matrix",
+    "labels": [
+      "ON-DEMAND",
+      "SAVINGS PLAN",
+      "SPOT"
+    ]
+  },
+  "aws-tong-hop-kien-truc-production-toi-noi": {
+    "title": "ONE / TRIP",
+    "subtitle": "AWS 60 · The whole platform, end to end",
+    "diagram": "map",
+    "labels": [
+      "EDGE",
+      "SERVICES",
+      "DATA"
+    ]
   }
 }

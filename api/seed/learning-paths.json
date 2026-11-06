@@ -136,5 +136,125 @@
       "dotnet10-tong-hop-service-dat-chuyen"
     ],
     "status": "published"
+  },
+  {
+    "slug": "aws-p01-nen-tang-aws",
+    "title": "AWS qua Tới Nơi · Phần 01 · Nền tảng AWS",
+    "description": "Bắt đầu từ con số không: region và availability zone, tài khoản và IAM, VPC, EC2, S3, RDS PostgreSQL, ALB và Auto Scaling, Route 53 với ACM, CloudWatch và chi phí. Mỗi bài dựng một mảnh hạ tầng đầu tiên của Tới Nơi bằng console và AWS CLI, kết thúc bằng bước dọn tài nguyên.",
+    "level": "beginner",
+    "category": "devops-aws",
+    "articles": [
+      "aws-la-gi-region-az-shared-responsibility",
+      "aws-tai-khoan-iam-identity-center-cli",
+      "aws-iam-user-role-policy",
+      "aws-vpc-subnet-route-security-group",
+      "aws-ec2-ami-ebs-user-data",
+      "aws-s3-bucket-versioning-presigned-url",
+      "aws-rds-postgresql-multi-az-backup",
+      "aws-alb-target-group-auto-scaling",
+      "aws-route53-acm-https",
+      "aws-cloudwatch-budgets-tagging-co-ban"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p02-container-serverless",
+    "title": "AWS qua Tới Nơi · Phần 02 · Container, serverless và dịch vụ ứng dụng",
+    "description": "Đưa service đặt chuyến của Tới Nơi lên ECS Fargate với ECR, ALB và auto scaling; quản lý secret bằng Secrets Manager và Parameter Store; thêm Redis, SQS, SNS, EventBridge, Lambda, API Gateway, CloudFront và WAF để hệ thống có cache, hàng đợi, sự kiện và lớp chắn ở biên.",
+    "level": "intermediate",
+    "category": "devops-aws",
+    "articles": [
+      "aws-ecr-image-scan-lifecycle",
+      "aws-ecs-fargate-task-definition-roles",
+      "aws-ecs-alb-rolling-deploy-autoscaling",
+      "aws-secrets-manager-parameter-store",
+      "aws-elasticache-redis-cache-rate-limit",
+      "aws-sqs-sns-dlq-fan-out",
+      "aws-eventbridge-event-bus-rule-schedule",
+      "aws-lambda-webhook-thanh-toan-cold-start",
+      "aws-api-gateway-authorizer-websocket",
+      "aws-cloudfront-waf-shield"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p03-iac-ci-cd",
+    "title": "AWS qua Tới Nơi · Phần 03 · Infrastructure as Code và CI/CD",
+    "description": "Mô tả hạ tầng bằng CloudFormation, Terraform và CDK; pipeline GitHub Actions với OIDC, CodePipeline với blue/green; chiến lược rolling, canary, rollback có migration; nhiều tài khoản với Organizations và Control Tower; AppConfig và policy as code để pipeline tự kiểm hạ tầng trước khi áp dụng.",
+    "level": "intermediate",
+    "category": "devops-aws",
+    "articles": [
+      "aws-cloudformation-stack-change-set-drift",
+      "aws-terraform-provider-state-s3-lock",
+      "aws-terraform-module-vpc-ecs-rds",
+      "aws-cdk-construct-synth-diff",
+      "aws-github-actions-oidc-ecr-deploy",
+      "aws-codepipeline-codebuild-codedeploy-blue-green",
+      "aws-chien-luoc-deploy-rolling-canary-rollback",
+      "aws-organizations-scp-control-tower-landing-zone",
+      "aws-appconfig-feature-flag-cau-hinh-dong",
+      "aws-policy-as-code-checkov-infracost-drift"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p04-du-lieu-messaging",
+    "title": "AWS qua Tới Nơi · Phần 04 · Dữ liệu, lưu trữ và messaging",
+    "description": "Aurora PostgreSQL và RDS Proxy, DynamoDB cho vị trí tài xế, ElastiCache và MemoryDB, Amazon MSK cho outbox, Kinesis cho GPS, S3 nâng cao, AWS Backup và DR, lakehouse với Glue, Athena, Redshift Serverless, OpenSearch và DMS: dữ liệu của 2 triệu chuyến mỗi ngày đi đâu và được giữ an toàn thế nào.",
+    "level": "advanced",
+    "category": "devops-aws",
+    "articles": [
+      "aws-aurora-postgresql-rds-proxy-failover",
+      "aws-dynamodb-single-table-gsi-ttl-streams",
+      "aws-elasticache-nang-cao-memorydb-ha",
+      "aws-msk-kafka-iam-auth-msk-connect",
+      "aws-kinesis-data-streams-firehose-gps",
+      "aws-s3-nang-cao-storage-class-replication-object-lock",
+      "aws-backup-disaster-recovery-rpo-rto",
+      "aws-glue-athena-redshift-lakehouse",
+      "aws-opensearch-tim-kiem-log-analytics",
+      "aws-dms-migration-postgresql-zero-downtime"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p05-eks",
+    "title": "AWS qua Tới Nơi · Phần 05 · Kubernetes trên AWS với EKS",
+    "description": "Dựng và vận hành EKS cho Tới Nơi: control plane, node group, Pod Identity, VPC CNI và Load Balancer Controller, EBS/EFS CSI, HPA và Karpenter, GitOps với Argo CD, quan sát bằng ADOT và Managed Prometheus, bảo mật pod, progressive delivery với Argo Rollouts và VPC Lattice, nâng cấp cluster và chi phí.",
+    "level": "advanced",
+    "category": "devops-aws",
+    "articles": [
+      "aws-eks-tong-quan-control-plane-node-group",
+      "aws-eks-terraform-eksctl-kubectl-namespace",
+      "aws-eks-vpc-cni-load-balancer-controller-ingress",
+      "aws-eks-ebs-efs-csi-statefulset",
+      "aws-eks-hpa-karpenter-spot",
+      "aws-eks-gitops-argocd-helm-kustomize",
+      "aws-eks-observability-container-insights-adot-prometheus",
+      "aws-eks-bao-mat-pod-identity-external-secrets",
+      "aws-eks-progressive-delivery-argo-rollouts-vpc-lattice",
+      "aws-eks-van-hanh-upgrade-addon-chi-phi"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p06-bao-mat-van-hanh",
+    "title": "AWS qua Tới Nơi · Phần 06 · Bảo mật, resilience và vận hành ở quy mô",
+    "description": "IAM nâng cao, KMS, PrivateLink và Transit Gateway, CloudTrail với Security Hub và GuardDuty, quan sát nâng cao với SLO, multi-region và Fault Injection Service, Step Functions cho Saga đặt chuyến, Well-Architected review, FinOps và bài tổng hợp kiến trúc production Tới Nơi trên AWS kèm runbook.",
+    "level": "advanced",
+    "category": "devops-aws",
+    "articles": [
+      "aws-iam-nang-cao-permission-boundary-abac-access-analyzer",
+      "aws-kms-envelope-encryption-key-policy",
+      "aws-privatelink-transit-gateway-network-firewall",
+      "aws-cloudtrail-config-security-hub-guardduty",
+      "aws-observability-nang-cao-xray-adot-logs-insights-slo",
+      "aws-resilience-multi-region-route53-failover-fis",
+      "aws-step-functions-saga-dat-chuyen",
+      "aws-well-architected-review-toi-noi",
+      "aws-finops-savings-plans-spot-right-sizing",
+      "aws-tong-hop-kien-truc-production-toi-noi"
+    ],
+    "status": "published"
   }
 ]
