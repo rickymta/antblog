@@ -1,0 +1,7 @@
+{
+  "ServiceNamespace": "ecs",
+  "ScalableDimension": "ecs:service:DesiredCount",
+  "ResourceId": "service/toinoi-lab/toinoi-lab-ledger",
+  "MinCapacity": 2,
+  "MaxCapacity": 5
+}

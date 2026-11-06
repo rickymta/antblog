@@ -495,7 +495,17 @@
       "rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version",
       "rust-feature-flag-config-migration-expand-contract",
       "rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao",
-      "rust-tong-hop-kien-truc-ledger-service-workspace"
+      "rust-tong-hop-kien-truc-ledger-service-workspace",
+      "rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet",
+      "rust-profiling-flamegraph-tokio-console-dhat",
+      "rust-toi-uu-co-so-do-clone-cow-batching-copy-p99",
+      "rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3",
+      "rust-container-dockerfile-da-stage-cargo-chef-distroless",
+      "rust-ci-cd-github-actions-clippy-audit-deny-postgresql",
+      "rust-trien-khai-aws-azure-secrets-health-autoscale",
+      "rust-opentelemetry-trace-tu-csharp-sang-rust-grpc-kafka",
+      "rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay",
+      "rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh"
     ],
     "status": "published"
   }

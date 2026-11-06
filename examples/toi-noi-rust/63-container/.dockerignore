@@ -1,0 +1,9 @@
+# Mọi thứ không cần cho build. `target/` là mục quan trọng nhất: hàng trăm MB build debug của máy dev.
+**/target
+experiments
+.git
+.env
+.env.*
+*.md
+Dockerfile*
+.dockerignore

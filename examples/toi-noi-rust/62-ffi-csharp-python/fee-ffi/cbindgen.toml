@@ -1,0 +1,14 @@
+# Cấu hình cbindgen: sinh include/fee_ffi.h từ các item `pub extern "C"` của crate.
+language = "C"
+include_guard = "FEE_FFI_H"
+cpp_compat = true
+documentation = true
+documentation_style = "c99"
+header = "/* Tới Nơi: C ABI của thư viện tính phí. Sinh bởi cbindgen, không sửa tay. */"
+usize_is_size_t = true
+
+[export]
+include = ["FeeSplit", "FeeStatus"]
+
+[enum]
+prefix_with_name = true

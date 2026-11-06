@@ -1,0 +1,9 @@
+# Một stage, một image: cách ngây thơ nhất. Toolchain, mã nguồn, thư mục target/ và cả registry cache
+# của cargo nằm lại trong image chạy; tiến trình chạy bằng root. Dùng làm mốc so sánh, không dùng để deploy.
+FROM rust:1.98-bookworm
+WORKDIR /app
+COPY . .
+RUN cargo build --release --locked --no-default-features
+EXPOSE 8080
+ENTRYPOINT ["/app/target/release/ledger-service"]
+CMD ["serve"]

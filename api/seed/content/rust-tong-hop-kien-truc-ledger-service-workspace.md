@@ -353,7 +353,7 @@ Liệt kê thẳng, theo thứ tự việc phải làm trước khi vận hành:
 
 <details><summary>Xem lời giải</summary><p>Không luật <code>cargo tree</code> nào bắt: <code>jiff</code> là dependency hợp lệ của <code>domain</code>, nên cây không đổi. <code>cargo clippy -D warnings</code> với <code>clippy.toml</code> cấm <code>jiff::Timestamp::now</code> bắt được (<code>use of a disallowed method</code>). Gỡ <code>clippy.toml</code> thì test <code>settle_depends_only_on_the_clock_argument</code> vẫn xanh, vì nó chỉ chứng minh <code>settle</code> nhận <code>now</code> làm đối số, không chứng minh không hàm nào khác đọc giờ thật. Chỉ còn người review.</p></details>
 
-Bài trước: [bài 57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao). Bài tiếp: phần P07, hiệu năng và vận hành.
+Bài trước: [bài 57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao). Bài tiếp: [bài 59](/articles/rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet).
 
 ## Tài liệu gốc
 

@@ -1,0 +1,17 @@
+# Lab 62: unsafe và FFI. Gốc workspace đồng thời là binary `--verify`.
+#   fee-ffi: cdylib C ABI (extern "C"), P/Invoke từ C# gọi vào
+#   fee-py : module Python bằng PyO3, build bằng maturin
+[package]
+name = "ledger_62_ffi_csharp_python"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+members = ["fee-ffi", "fee-py"]
+# fee-py không nằm trong default-members: nó chỉ link được khi maturin dựng (xem README).
+default-members = [".", "fee-ffi"]
+resolver = "3"
+
+[dependencies]
+fee-ffi = { path = "fee-ffi" }

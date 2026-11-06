@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select balance_dong from account_balances where account_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "balance_dong",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "account_balances",
+            "name": "balance_dong"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "bc7feddb76e965b353261b7b628167173dbbade8e6b4e3cf8c01d59b589c5518"
+}

@@ -1,0 +1,101 @@
+# Container Apps: dùng với `az containerapp create --yaml deploy/containerapp.yaml`.
+# Chưa triển khai thật. Chuỗi trong <...> là chỗ phải thay.
+name: ca-toinoi-ledger-dev
+type: Microsoft.App/containerApps
+location: southeastasia
+identity:
+  type: UserAssigned
+  userAssignedIdentities:
+    "/subscriptions/<subscription-id>/resourceGroups/rg-toinoi-ledger-dev-sea/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-toinoi-ledger-dev": {}
+properties:
+  environmentId: "/subscriptions/<subscription-id>/resourceGroups/rg-toinoi-trips-dev-sea/providers/Microsoft.App/managedEnvironments/cae-toinoi-dev"
+  workloadProfileName: Consumption
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: false
+      targetPort: 8080
+      allowInsecure: false
+    registries:
+      - server: acrtoinoidev.azurecr.io
+        identity: "/subscriptions/<subscription-id>/resourceGroups/rg-toinoi-ledger-dev-sea/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-toinoi-ledger-dev"
+    secrets:
+      - name: pg-url
+        keyVaultUrl: "https://kv-toinoi-dev-sea.vault.azure.net/secrets/Postgres--Ledger"
+        identity: "/subscriptions/<subscription-id>/resourceGroups/rg-toinoi-ledger-dev-sea/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-toinoi-ledger-dev"
+      - name: jwt-secret
+        keyVaultUrl: "https://kv-toinoi-dev-sea.vault.azure.net/secrets/Ledger--JwtSecret"
+        identity: "/subscriptions/<subscription-id>/resourceGroups/rg-toinoi-ledger-dev-sea/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-toinoi-ledger-dev"
+      - name: kafka-scaler-username
+        keyVaultUrl: "https://kv-toinoi-dev-sea.vault.azure.net/secrets/Ledger--KafkaScalerUsername"
+        identity: "/subscriptions/<subscription-id>/resourceGroups/rg-toinoi-ledger-dev-sea/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-toinoi-ledger-dev"
+      - name: kafka-scaler-password
+        keyVaultUrl: "https://kv-toinoi-dev-sea.vault.azure.net/secrets/Ledger--KafkaScalerPassword"
+        identity: "/subscriptions/<subscription-id>/resourceGroups/rg-toinoi-ledger-dev-sea/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-toinoi-ledger-dev"
+  template:
+    terminationGracePeriodSeconds: 30
+    containers:
+      - name: ledger-service
+        image: "acrtoinoidev.azurecr.io/ledger@sha256:<digest>"
+        args: ["serve"]
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+        env:
+          - name: LEDGER_HTTP_ADDR
+            value: "0.0.0.0:8080"
+          - name: LEDGER_GRPC_ADDR
+            value: "0.0.0.0:9090"
+          - name: LEDGER_TOPIC_PREFIX
+            value: "toi-noi"
+          - name: LEDGER_CONSUMER_GROUP
+            value: "ledger-service"
+          - name: LEDGER_SHUTDOWN_TIMEOUT_MS
+            value: "10000"
+          - name: TOI_NOI_KAFKA
+            value: "kafka.toinoi-dev.internal:9093"
+          - name: RUST_LOG
+            value: "info"
+          - name: TOI_NOI_PG_URL
+            secretRef: pg-url
+          - name: LEDGER_JWT_SECRET
+            secretRef: jwt-secret
+        probes:
+          - type: Startup
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 10
+          - type: Liveness
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 3
+          - type: Readiness
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+    scale:
+      minReplicas: 2
+      maxReplicas: 5
+      rules:
+        - name: kafka-lag
+          custom:
+            type: kafka
+            metadata:
+              bootstrapServers: "kafka.toinoi-dev.internal:9093"
+              consumerGroup: "ledger-service"
+              topic: "toi-noi.trip.completed"
+              lagThreshold: "500"
+              sasl: "scram_sha512"
+              tls: "enable"
+            auth:
+              - secretRef: kafka-scaler-username
+                triggerParameter: username
+              - secretRef: kafka-scaler-password
+                triggerParameter: password

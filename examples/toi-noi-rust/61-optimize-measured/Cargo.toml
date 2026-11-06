@@ -1,0 +1,28 @@
+[package]
+name = "ledger_61_optimize_measured"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 61: tối ưu có số đo (Cow, borrow, batching, COPY, p99) trên PostgreSQL thật"
+publish = false
+default-run = "optimize-measured"
+
+[lib]
+name = "optimize_measured"
+path = "src/lib.rs"
+
+[[bin]]
+name = "optimize-measured"
+path = "src/main.rs"
+
+[dependencies]
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "io-util", "time", "sync"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+
+# Số đo cần release; lto + 1 codegen unit như bài 30.
+[profile.release]
+lto = "fat"
+codegen-units = 1
+# strip mặc định gọi rust-objcopy; trên máy viết bài nó không nạp được libLLVM.dylib (như bài 30).
+strip = "none"

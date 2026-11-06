@@ -1,0 +1,6 @@
+<Project>
+  <!-- Đưa bin/obj vào target/ của lab (đã được gitignore), không làm bẩn thư mục nguồn. -->
+  <PropertyGroup>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)../target/dotnet-compare</ArtifactsPath>
+  </PropertyGroup>
+</Project>

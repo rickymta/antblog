@@ -1,0 +1,55 @@
+{
+  "PolicyName": "toinoi-lab-ledger-kafka-lag",
+  "ServiceNamespace": "ecs",
+  "ScalableDimension": "ecs:service:DesiredCount",
+  "ResourceId": "service/toinoi-lab/toinoi-lab-ledger",
+  "PolicyType": "TargetTrackingScaling",
+  "TargetTrackingScalingPolicyConfiguration": {
+    "CustomizedMetricSpecification": {
+      "Metrics": [
+        {
+          "Label": "Sum offset lag of the consumer group",
+          "Id": "m1",
+          "MetricStat": {
+            "Metric": {
+              "MetricName": "SumOffsetLag",
+              "Namespace": "AWS/Kafka",
+              "Dimensions": [
+                { "Name": "Cluster Name", "Value": "toinoi-lab-msk" },
+                { "Name": "Consumer Group", "Value": "ledger-service" },
+                { "Name": "Topic", "Value": "toi-noi.trip.completed" }
+              ]
+            },
+            "Stat": "Maximum"
+          },
+          "ReturnData": false
+        },
+        {
+          "Label": "Running task count",
+          "Id": "m2",
+          "MetricStat": {
+            "Metric": {
+              "MetricName": "RunningTaskCount",
+              "Namespace": "ECS/ContainerInsights",
+              "Dimensions": [
+                { "Name": "ClusterName", "Value": "toinoi-lab" },
+                { "Name": "ServiceName", "Value": "toinoi-lab-ledger" }
+              ]
+            },
+            "Stat": "Average"
+          },
+          "ReturnData": false
+        },
+        {
+          "Label": "Lag per task",
+          "Id": "e1",
+          "Expression": "m1 / m2",
+          "ReturnData": true
+        }
+      ]
+    },
+    "TargetValue": 500,
+    "ScaleOutCooldown": 60,
+    "ScaleInCooldown": 300
+  }
+}

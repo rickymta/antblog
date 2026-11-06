@@ -1,0 +1,26 @@
+[package]
+name = "ledger_67_operations_runbook"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Lab bài 67: SLI bằng SQL và Kafka, burn rate đa cửa sổ, alert lệch đối soát, diễn tập runbook, replay an toàn, pg_dump và restore"
+
+[dependencies]
+anyhow = "1.0.104"
+hex = "0.4.3"
+jiff = "0.2.39"
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+rdkafka = "0.39.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sha2 = "0.11.1"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "time", "sync", "process"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[dev-dependencies]
+tokio = { version = "1.54.1", features = ["test-util"] }
+
+[lints.rust]
+unsafe_code = "forbid"

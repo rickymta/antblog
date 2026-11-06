@@ -2908,5 +2908,105 @@
       "APPLICATION",
       "ADAPTERS"
     ]
+  },
+  "rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet": {
+    "title": "MEMORY / ALLOCATOR",
+    "subtitle": "Rust 59 · Drop, allocators and the .NET GC",
+    "diagram": "layers",
+    "labels": [
+      "STACK",
+      "HEAP",
+      "ALLOCATOR"
+    ]
+  },
+  "rust-profiling-flamegraph-tokio-console-dhat": {
+    "title": "PROFILING / FLAMEGRAPH",
+    "subtitle": "Rust 60 · Find hot spots with samply, dhat, console",
+    "diagram": "layers",
+    "labels": [
+      "CPU",
+      "HEAP",
+      "TASKS"
+    ]
+  },
+  "rust-toi-uu-co-so-do-clone-cow-batching-copy-p99": {
+    "title": "OPTIMIZE / MEASURE",
+    "subtitle": "Rust 61 · Cow, batching, COPY and p99 under load",
+    "diagram": "target",
+    "labels": [
+      "COW",
+      "BATCH",
+      "P99"
+    ]
+  },
+  "rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3": {
+    "title": "UNSAFE / FFI",
+    "subtitle": "Rust 62 · Calling Rust from C# and Python",
+    "diagram": "layers",
+    "labels": [
+      "C ABI",
+      "PINVOKE",
+      "PYO3"
+    ]
+  },
+  "rust-container-dockerfile-da-stage-cargo-chef-distroless": {
+    "title": "CONTAINER / CARGO-CHEF",
+    "subtitle": "Rust 63 · Multi-stage image, distroless and SIGTERM",
+    "diagram": "layers",
+    "labels": [
+      "BUILDER",
+      "DISTROLESS",
+      "PID 1"
+    ]
+  },
+  "rust-ci-cd-github-actions-clippy-audit-deny-postgresql": {
+    "title": "CI/CD / SUPPLY CHAIN",
+    "subtitle": "Rust 64 · GitHub Actions, clippy, audit, deny",
+    "diagram": "checklist",
+    "labels": [
+      "CLIPPY",
+      "AUDIT",
+      "DENY"
+    ]
+  },
+  "rust-trien-khai-aws-azure-secrets-health-autoscale": {
+    "title": "DEPLOY / AUTOSCALE",
+    "subtitle": "Rust 65 · ECS and Container Apps, Kafka lag autoscale",
+    "diagram": "checklist",
+    "labels": [
+      "ECS",
+      "AZURE APPS",
+      "KAFKA LAG"
+    ]
+  },
+  "rust-opentelemetry-trace-tu-csharp-sang-rust-grpc-kafka": {
+    "title": "OPENTELEMETRY / TRACE",
+    "subtitle": "Rust 66 · One trace_id across C#, gRPC and Kafka",
+    "diagram": "flow",
+    "labels": [
+      "C# CLIENT",
+      "GRPC",
+      "KAFKA"
+    ]
+  },
+  "rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay": {
+    "title": "SLO / RUNBOOK / REPLAY",
+    "subtitle": "Rust 67 · SLO, alerts, replay and restore drills",
+    "diagram": "checklist",
+    "labels": [
+      "SLI",
+      "ALERT",
+      "REPLAY"
+    ]
+  },
+  "rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh": {
+    "title": "SERIES / EVIDENCE",
+    "subtitle": "Rust 68 · Back to the ADR, with evidence and gaps",
+    "diagram": "map",
+    "labels": [
+      "ADR",
+      "EVIDENCE",
+      "68 LESSONS"
+    ]
   }
 }
