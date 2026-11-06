@@ -632,5 +632,41 @@
       "python-face-matching-danh-gia-bias-privacy-consent"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p05-du-lieu-api-tich-hop",
+    "title": "BA · Phần 5 · Dữ liệu, API và tích hợp",
+    "description": "Tám bài về glossary, dictionary, API, SQL, mapping, event, idempotency và review hợp đồng hoàn tiền. Ba bài cơ bản, ba trung bình, hai nâng cao.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-domain-glossary-mo-hinh-du-lieu",
+      "ba-data-dictionary-don-vi-null",
+      "ba-doc-api-request-response-loi",
+      "ba-sql-kiem-chung-gia-thuyet",
+      "ba-mapping-du-lieu-doi-soat",
+      "ba-event-dong-bo-trang-thai-cho",
+      "ba-idempotency-retry-giao-dich-loi",
+      "ba-thuc-hanh-hop-dong-hoan-tien"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "ba-p06-quan-ly-backlog-thay-doi",
+    "title": "BA · Phần 6 · Backlog và quản lý thay đổi",
+    "description": "Tám bài thực hành backlog và quản lý thay đổi qua dự án Tới Nơi; ba bài cơ bản, ba trung bình và hai nâng cao, kèm hồ sơ tổng hợp cuối phần.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-backlog-refinement-cau-hoi-mo",
+      "ba-moscow-uu-tien-theo-muc-tieu",
+      "ba-traceability-muc-tieu-yeu-cau-test",
+      "ba-baseline-version-approval",
+      "ba-change-request-impact-analysis",
+      "ba-uu-tien-gia-tri-chi-phi-do-tin-cay",
+      "ba-phu-thuoc-yeu-cau-xuyen-doi",
+      "ba-thuc-hanh-doi-phi-sat-ngay-phat-hanh"
+    ],
+    "status": "published"
   }
 ]
