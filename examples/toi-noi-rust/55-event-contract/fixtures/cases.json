@@ -1,0 +1,308 @@
+[
+  {
+    "file": "data/s1.bin",
+    "format": "bin",
+    "id": "s1/bin",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s1.json",
+    "format": "json",
+    "id": "s1/json",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s1.plain.json",
+    "format": "json",
+    "id": "s1/plain",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s1.big.bin",
+    "format": "bin",
+    "id": "big/bin",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s1.big.json",
+    "format": "json",
+    "id": "big/json",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s1.big.plain.json",
+    "format": "json",
+    "id": "big/plain",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s1.bin",
+    "format": "bin",
+    "id": "add-field/backward/bin",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s1.json",
+    "format": "json",
+    "id": "add-field/backward/json",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s1.json",
+    "format": "json-lenient",
+    "id": "add-field/backward/json-lenient",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2.bin",
+    "format": "bin",
+    "id": "add-field/forward/bin",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json",
+    "id": "add-field/forward/json",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json-lenient",
+    "id": "add-field/forward/json-lenient",
+    "kind": "decode",
+    "reader": "s1"
+  },
+  {
+    "file": "data/s2.bin",
+    "format": "bin",
+    "id": "rename/backward/bin",
+    "kind": "decode",
+    "reader": "s2r"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json",
+    "id": "rename/backward/json",
+    "kind": "decode",
+    "reader": "s2r"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json-lenient",
+    "id": "rename/backward/json-lenient",
+    "kind": "decode",
+    "reader": "s2r"
+  },
+  {
+    "file": "data/s2r.bin",
+    "format": "bin",
+    "id": "rename/forward/bin",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2r.json",
+    "format": "json",
+    "id": "rename/forward/json",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2r.json",
+    "format": "json-lenient",
+    "id": "rename/forward/json-lenient",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2.bin",
+    "format": "bin",
+    "id": "renumber/backward/bin",
+    "kind": "decode",
+    "reader": "s2n"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json",
+    "id": "renumber/backward/json",
+    "kind": "decode",
+    "reader": "s2n"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json-lenient",
+    "id": "renumber/backward/json-lenient",
+    "kind": "decode",
+    "reader": "s2n"
+  },
+  {
+    "file": "data/s2n.bin",
+    "format": "bin",
+    "id": "renumber/forward/bin",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2n.json",
+    "format": "json",
+    "id": "renumber/forward/json",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2n.json",
+    "format": "json-lenient",
+    "id": "renumber/forward/json-lenient",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2.bin",
+    "format": "bin",
+    "id": "remove-reserved/backward/bin",
+    "kind": "decode",
+    "reader": "s3"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json",
+    "id": "remove-reserved/backward/json",
+    "kind": "decode",
+    "reader": "s3"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json-lenient",
+    "id": "remove-reserved/backward/json-lenient",
+    "kind": "decode",
+    "reader": "s3"
+  },
+  {
+    "file": "data/s3.bin",
+    "format": "bin",
+    "id": "remove-reserved/forward/bin",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s3.json",
+    "format": "json",
+    "id": "remove-reserved/forward/json",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s3.json",
+    "format": "json-lenient",
+    "id": "remove-reserved/forward/json-lenient",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2.bin",
+    "format": "bin",
+    "id": "reuse-number/backward/bin",
+    "kind": "decode",
+    "reader": "s3x"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json",
+    "id": "reuse-number/backward/json",
+    "kind": "decode",
+    "reader": "s3x"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json-lenient",
+    "id": "reuse-number/backward/json-lenient",
+    "kind": "decode",
+    "reader": "s3x"
+  },
+  {
+    "file": "data/s3x.bin",
+    "format": "bin",
+    "id": "reuse-number/forward/bin",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s3x.json",
+    "format": "json",
+    "id": "reuse-number/forward/json",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s3x.json",
+    "format": "json-lenient",
+    "id": "reuse-number/forward/json-lenient",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2.bin",
+    "format": "bin",
+    "id": "enum-add/backward/bin",
+    "kind": "decode",
+    "reader": "s2e"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json",
+    "id": "enum-add/backward/json",
+    "kind": "decode",
+    "reader": "s2e"
+  },
+  {
+    "file": "data/s2.json",
+    "format": "json-lenient",
+    "id": "enum-add/backward/json-lenient",
+    "kind": "decode",
+    "reader": "s2e"
+  },
+  {
+    "file": "data/s2e.bin",
+    "format": "bin",
+    "id": "enum-add/forward/bin",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2e.json",
+    "format": "json",
+    "id": "enum-add/forward/json",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s2e.json",
+    "format": "json-lenient",
+    "id": "enum-add/forward/json-lenient",
+    "kind": "decode",
+    "reader": "s2"
+  },
+  {
+    "file": "data/s1.big.plain.json",
+    "id": "naive/plain",
+    "kind": "naive",
+    "path": "postings.1.amountDong"
+  },
+  {
+    "file": "data/s1.big.json",
+    "id": "naive/canonical",
+    "kind": "naive",
+    "path": "postings.1.amountDong"
+  }
+]

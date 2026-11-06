@@ -2828,5 +2828,85 @@
       "HASH CHAIN",
       "ANCHOR"
     ]
+  },
+  "rust-hexagonal-clean-workspace-crates-port-adapter": {
+    "title": "HEXAGONAL / CRATES",
+    "subtitle": "Rust 51 · Workspace crates, ports and adapters",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "PORTS",
+      "ADAPTERS"
+    ]
+  },
+  "rust-command-handler-pipeline-domain-event-khong-framework": {
+    "title": "COMMAND / PIPELINE",
+    "subtitle": "Rust 52 · Typed handlers, layers and domain events",
+    "diagram": "layers",
+    "labels": [
+      "VALIDATE",
+      "TRANSACTION",
+      "OUTBOX"
+    ]
+  },
+  "rust-aggregate-invariant-optimistic-locking-for-update": {
+    "title": "VERSION / FOR UPDATE",
+    "subtitle": "Rust 53 · Aggregate, optimistic locking and deadlock order",
+    "diagram": "cycle",
+    "labels": [
+      "VERSION",
+      "FOR UPDATE",
+      "40P01"
+    ]
+  },
+  "rust-use-case-thanh-toan-chuyen-end-to-end": {
+    "title": "TRIP PAYMENT / E2E",
+    "subtitle": "Rust 54 · Two events, any order, one ledger",
+    "diagram": "flow",
+    "labels": [
+      "EVENTS",
+      "AGGREGATE",
+      "LEDGER"
+    ]
+  },
+  "rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version": {
+    "title": "EVENT CONTRACT / SCHEMA",
+    "subtitle": "Rust 55 · Cross-language protobuf events and versioning",
+    "diagram": "matrix",
+    "labels": [
+      "PROTOBUF",
+      "JSON SCHEMA",
+      "BACKWARD"
+    ]
+  },
+  "rust-feature-flag-config-migration-expand-contract": {
+    "title": "FEATURE FLAG / MIGRATION",
+    "subtitle": "Rust 56 · Expand/contract, flags, safe rollback",
+    "diagram": "split",
+    "labels": [
+      "EXPAND",
+      "BACKFILL",
+      "CONTRACT"
+    ]
+  },
+  "rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao": {
+    "title": "MUTATION / FUZZ",
+    "subtitle": "Rust 57 · Mutation, fuzz and snapshot testing",
+    "diagram": "checklist",
+    "labels": [
+      "MUTANTS",
+      "FUZZ",
+      "SNAPSHOT"
+    ]
+  },
+  "rust-tong-hop-kien-truc-ledger-service-workspace": {
+    "title": "SERVICE / WORKSPACE",
+    "subtitle": "Rust 58 · Five crates, one ledger service, checked",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "APPLICATION",
+      "ADAPTERS"
+    ]
   }
 }

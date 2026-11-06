@@ -1,0 +1,16 @@
+[package]
+name = "ledger-domain"
+description = "Miền sổ cái của ledger-service: luật nghiệp vụ thuần, không I/O, không runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Chỉ ba dependency, và không cái nào là runtime hay I/O. `cargo tree` kiểm điều này.
+[dependencies]
+jiff.workspace = true
+ledger-core.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

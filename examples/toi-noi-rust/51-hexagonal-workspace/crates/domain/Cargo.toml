@@ -1,0 +1,15 @@
+[package]
+name = "domain"
+description = "Luật nghiệp vụ của một chuyến đi: cước, hai bút toán capture và split (lab bài 51)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Hai dependency: thư viện sổ cái của bài 20 và thiserror. Không async, không IO.
+[dependencies]
+ledger-core.workspace = true
+thiserror = "2.0.21"
+
+[lints]
+workspace = true

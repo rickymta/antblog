@@ -1,0 +1,11 @@
+# Sản phẩm build và dữ liệu sinh khi fuzz: không commit.
+target/
+fuzz/target/
+fuzz/corpus/
+fuzz/artifacts/
+# Kết quả cargo-mutants.
+mutants.out/
+mutants.out.old/
+# Snapshot chờ duyệt của insta.
+*.snap.new
+*.pending-snap

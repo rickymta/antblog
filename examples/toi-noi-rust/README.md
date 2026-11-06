@@ -94,7 +94,18 @@ C#/.NET 10 giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng
 49. Event sourcing có chừng mực: bút toán là sự kiện, projection và replay — **đã viết**
 50. Audit, bất biến dữ liệu và bảo mật sổ cái — **đã viết**
 
-Các phần còn lại (bài 51–68) xem master curriculum.
+## P06 · Kiến trúc service Rust theo kiến trúc đích
+
+51. Hexagonal/Clean trong Rust: workspace crates domain, application, infrastructure, api — **đã viết**
+52. Command handler, pipeline và domain event không cần framework — **đã viết**
+53. Aggregate, invariant và concurrency: version, optimistic locking, FOR UPDATE — **đã viết**
+54. Use case thanh toán chuyến end-to-end — **đã viết**
+55. Hợp đồng sự kiện xuyên ngôn ngữ: protobuf, JSON Schema và version — **đã viết**
+56. Feature flag, cấu hình kiểu an toàn và migration không dừng — **đã viết**
+57. Kiểm thử nâng cao: mutation, fuzz, snapshot và test tất định — **đã viết**
+58. Bài tổng hợp kiến trúc: ledger service hoàn chỉnh trong workspace — **đã viết**
+
+Các phần còn lại (bài 59–68) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -103,7 +114,7 @@ cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml
 cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml -- --verify
 ```
 
-Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03, `verify-31-40.sh` phần 04, `verify-41-50.sh` phần 05 (ba script này cần hạ tầng trong `infra/`).
+Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03, `verify-31-40.sh` phần 04, `verify-41-50.sh` phần 05, `verify-51-58.sh` phần 06 (các script từ phần 03 cần hạ tầng trong `infra/`).
 
 ## Hạ tầng cho phần P03 trở đi
 

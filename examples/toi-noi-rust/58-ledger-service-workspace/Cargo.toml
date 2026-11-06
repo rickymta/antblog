@@ -1,0 +1,60 @@
+# Workspace gốc của lab 58: chỉ khai báo, không có code. Chiều phụ thuộc:
+#   ledger-service -> api, infrastructure -> application -> domain -> ledger-core (lab 20)
+[workspace]
+members = [
+    "crates/domain",
+    "crates/application",
+    "crates/infrastructure",
+    "crates/api",
+    "crates/ledger-service",
+]
+# `cargo run/test` từ gốc repo (qua --manifest-path) chạy trên cả năm crate; chỉ một crate có binary.
+default-members = [
+    "crates/domain",
+    "crates/application",
+    "crates/infrastructure",
+    "crates/api",
+    "crates/ledger-service",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+# Phiên bản khai báo MỘT chỗ. Crate nào cần gì thì tự chọn, domain và application chỉ lấy rất ít.
+[workspace.dependencies]
+anyhow = "1.0.104"
+axum = "0.8.9"
+http-body-util = "0.1.5"
+hyper = { version = "1.12.0", features = ["client", "http1"] }
+hyper-util = { version = "0.1.21", features = ["client-legacy", "http1", "tokio"] }
+jiff = { version = "0.2.39", features = ["serde"] }
+jsonwebtoken = { version = "11.1.0", features = ["rust_crypto"] }
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+prost = "0.14.4"
+prost-types = "0.14.4"
+rdkafka = "0.39.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres", "json"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "signal", "time", "sync", "net", "process", "io-util"] }
+tokio-stream = "0.1.19"
+tokio-util = "0.7.20"
+tonic = "0.14.9"
+tonic-prost = "0.14.9"
+tower-http = { version = "0.7.1", features = ["request-id", "trace", "propagate-header"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+# Bốn crate của chính workspace.
+ledger-domain = { path = "crates/domain" }
+ledger-application = { path = "crates/application" }
+ledger-infrastructure = { path = "crates/infrastructure" }
+ledger-api = { path = "crates/api" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

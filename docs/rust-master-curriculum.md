@@ -149,14 +149,14 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| RS-51 | `rust-hexagonal-clean-workspace-crates-port-adapter` | Hexagonal/Clean trong Rust: workspace crates domain, application, infrastructure, api | Chiều phụ thuộc bằng Cargo workspace, trait làm port, adapter sqlx/kafka/grpc, không để domain phụ thuộc tokio, feature flag crate | RS-40 | Kế hoạch |
-| RS-52 | `rust-command-handler-pipeline-domain-event-khong-framework` | Command handler, pipeline và domain event không cần framework | Dispatch theo kiểu generic, layer validate/trace/transaction, domain event trong aggregate, so với MediatR | RS-51 | Kế hoạch |
-| RS-53 | `rust-aggregate-invariant-optimistic-locking-for-update` | Aggregate, invariant và concurrency: version, optimistic locking, FOR UPDATE | Aggregate `Account`/`JournalEntry`, cột `version`, `SELECT … FOR UPDATE` khi cần, retry, test chạy song song | RS-52, RS-24 | Kế hoạch |
-| RS-54 | `rust-use-case-thanh-toan-chuyen-end-to-end` | Use case thanh toán chuyến end-to-end | TripCompleted → tính phí → bút toán → PaymentCaptured → LedgerEntryPosted → số dư; test toàn luồng; ghép P05 | RS-53, RS-50 | Kế hoạch |
-| RS-55 | `rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version` | Hợp đồng sự kiện xuyên ngôn ngữ: protobuf/JSON schema và version | Schema registry, tương thích tiến/lùi, consumer C#/Python/Go, contract test, đổi schema không dừng | RS-54, RS-35 | Kế hoạch |
-| RS-56 | `rust-feature-flag-config-migration-expand-contract` | Feature flag, cấu hình kiểu an toàn và migration không dừng | Expand/contract, flag bật quy tắc phí mới, migration tương thích hai phiên bản, rollback | RS-54 | Kế hoạch |
-| RS-57 | `rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao` | Kiểm thử nâng cao: mutation, fuzz, snapshot và test tất định | `cargo-mutants`, `cargo-fuzz` cho parser sao kê, `insta` snapshot, clock giả, seed cố định, ngân sách test trong CI | RS-54 | Kế hoạch |
-| RS-58 | `rust-tong-hop-kien-truc-ledger-service-workspace` | Bài tổng hợp kiến trúc: ledger service hoàn chỉnh trong workspace | Repo lab hoàn chỉnh, tiêu chí review, bản đồ crate, hợp đồng với service C#, những gì chưa có | RS-55, RS-56, RS-57 | Kế hoạch |
+| RS-51 | `rust-hexagonal-clean-workspace-crates-port-adapter` | Hexagonal/Clean trong Rust: workspace crates domain, application, infrastructure, api | Chiều phụ thuộc bằng Cargo workspace, trait làm port, adapter sqlx/kafka (gRPC ở bài 58), không để domain phụ thuộc tokio, feature flag crate | RS-40 | Đã viết |
+| RS-52 | `rust-command-handler-pipeline-domain-event-khong-framework` | Command handler, pipeline và domain event không cần framework | Dispatch theo kiểu generic, layer validate/trace/transaction, domain event trong aggregate, so với mediator tự viết của loạt C# | RS-51 | Đã viết |
+| RS-53 | `rust-aggregate-invariant-optimistic-locking-for-update` | Aggregate, invariant và concurrency: version, optimistic locking, FOR UPDATE | Aggregate `Account`/`JournalEntry`, cột `version`, `SELECT … FOR UPDATE` khi cần, retry, test chạy song song | RS-52, RS-24 | Đã viết |
+| RS-54 | `rust-use-case-thanh-toan-chuyen-end-to-end` | Use case thanh toán chuyến end-to-end | TripCompleted → tính phí → bút toán → PaymentCaptured → LedgerEntryPosted → số dư; test toàn luồng; ghép P05 | RS-53, RS-50 | Đã viết |
+| RS-55 | `rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version` | Hợp đồng sự kiện xuyên ngôn ngữ: protobuf/JSON schema và version | Schema registry, tương thích tiến/lùi, consumer C#/Python/Go, contract test, đổi schema không dừng | RS-54, RS-35 | Đã viết |
+| RS-56 | `rust-feature-flag-config-migration-expand-contract` | Feature flag, cấu hình kiểu an toàn và migration không dừng | Expand/contract, flag bật quy tắc phí mới, migration tương thích hai phiên bản, rollback | RS-54 | Đã viết |
+| RS-57 | `rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao` | Kiểm thử nâng cao: mutation, fuzz, snapshot và test tất định | `cargo-mutants`, `cargo-fuzz` cho parser sao kê, `insta` snapshot, clock giả, seed cố định, ngân sách test trong CI | RS-54 | Đã viết |
+| RS-58 | `rust-tong-hop-kien-truc-ledger-service-workspace` | Bài tổng hợp kiến trúc: ledger service hoàn chỉnh trong workspace | Repo lab hoàn chỉnh, tiêu chí review, bản đồ crate, hợp đồng với service C#, những gì chưa có | RS-55, RS-56, RS-57 | Đã viết |
 
 #### P07 · Hiệu năng, bộ nhớ và vận hành (10 bài)
 

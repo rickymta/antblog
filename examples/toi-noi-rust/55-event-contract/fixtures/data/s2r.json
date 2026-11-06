@@ -1,0 +1,1 @@
+{"schemaVersion":1,"entryId":"JE-000001","dedupKey":"trip:TN-0001:capture","postings":[{"account":"customer:CU-001","amountDong":"-25500"},{"account":"psp:vixanh:clearing","amountDong":"25500"}],"postedAt":"2026-11-06T02:30:00Z","traceId":"4bf92f3577b34da6a3ce929d0e0e4736","kind":"ENTRY_KIND_CAPTURE"}

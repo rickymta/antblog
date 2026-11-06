@@ -1,0 +1,32 @@
+// Biến thể thí nghiệm s3. Chỉ dùng để đo tương thích, không phải hợp đồng thật.
+syntax = "proto3";
+
+package toinoi.lab.s3;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "ToiNoi.Lab.S3";
+
+message Posting {
+  string account = 1;
+  int64 amount_dong = 2;
+}
+
+enum EntryKind {
+  ENTRY_KIND_UNSPECIFIED = 0;
+  ENTRY_KIND_CAPTURE = 1;
+  ENTRY_KIND_SPLIT = 2;
+}
+
+message LedgerEntryPosted {
+  // Gỡ trace_id và giữ chỗ để không ai dùng lại số 6 hay tên cũ.
+  reserved 6;
+  reserved "trace_id";
+
+  uint32 schema_version = 1;
+  string entry_id = 2;
+  string idempotency_key = 3;
+  repeated Posting postings = 4;
+  google.protobuf.Timestamp posted_at = 5;
+  EntryKind kind = 7;
+}

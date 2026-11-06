@@ -293,7 +293,7 @@ cargo run  --release --manifest-path examples/toi-noi-rust/50-audit-hash-chain/C
 
 <details><summary>Xem lời giải</summary><p>Dòng 4 qua được (hash khớp nội dung mới), nhưng <code>prev_hash</code> của dòng 5 vẫn là hash cũ, nên báo <code>PrevMismatch</code> ở <code>seq = 5</code> sau khi đã duyệt 4 dòng; test <code>forging_one_row_hash_is_caught_at_the_next_row</code> kiểm đúng điều này. Muốn xanh, kẻ đó phải tính lại mọi dòng từ 4 tới cuối. Khi đó chỉ điểm neo còn lệch (<code>Mismatch</code>), và nếu hắn cắt đuôi thì <code>seq</code> của neo không còn tồn tại (<code>Missing</code>).</p></details>
 
-Bài trước: [bài 49](/articles/rust-event-sourcing-co-chung-muc-projection-replay). Bài tiếp: phần P06, kiến trúc service.
+Bài trước: [bài 49](/articles/rust-event-sourcing-co-chung-muc-projection-replay). Bài tiếp: [bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter).
 
 ## Tài liệu gốc
 

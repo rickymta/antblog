@@ -1,0 +1,44 @@
+---
+source: tests/report_snapshot.rs
+expression: report
+---
+{
+  "run_id": "[run_id]",
+  "generated_at": "[timestamp]",
+  "duration_ms": "[ms]",
+  "matched": 2,
+  "bad_lines": [
+    {
+      "line_no": 7,
+      "reason": "số tiền không hợp lệ"
+    },
+    {
+      "line_no": 8,
+      "reason": "external_ref rỗng"
+    },
+    {
+      "line_no": 9,
+      "reason": "số cột sai: có 2, cần 3"
+    }
+  ],
+  "mismatches": [
+    {
+      "external_ref": "vx_ch_0003",
+      "kind": "AMOUNT_MISMATCH",
+      "ledger_dong": 30000,
+      "psp_dong": 31000
+    },
+    {
+      "external_ref": "vx_ch_0004",
+      "kind": "MISSING_IN_PSP",
+      "ledger_dong": 18000,
+      "psp_dong": null
+    },
+    {
+      "external_ref": "vx_ch_0005",
+      "kind": "MISSING_IN_LEDGER",
+      "ledger_dong": null,
+      "psp_dong": 52000
+    }
+  ]
+}

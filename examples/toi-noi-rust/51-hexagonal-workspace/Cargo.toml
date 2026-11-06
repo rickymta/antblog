@@ -1,0 +1,40 @@
+# Workspace gốc của lab bài 51: bốn crate theo kiểu hexagonal. Chỉ khai báo, không có code.
+[workspace]
+members = [
+    "crates/domain",
+    "crates/application",
+    "crates/infrastructure",
+    "crates/api",
+]
+# Resolver 3 là mặc định của edition 2024; workspace ảo phải khai báo tường minh.
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+# Phiên bản dependency khai báo MỘT chỗ. Crate con viết `x.workspace = true`.
+[workspace.dependencies]
+# Dùng lại thư viện bài 20 (không sao chép, không sửa).
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+# Bốn crate của lab. `infrastructure` tắt feature mặc định ở đây để `api` tự quyết định bật `kafka`.
+domain = { path = "crates/domain" }
+application = { path = "crates/application" }
+infrastructure = { path = "crates/infrastructure", default-features = false }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+module_name_repetitions = "allow"
+# Tên riêng tiếng Việt (VíXanh) bị doc_markdown đòi backtick.
+doc_markdown = "allow"
+# Adapter bộ nhớ và kho giả phải khai báo `async fn` theo port dù không có `.await`.
+unused_async_trait_impl = "allow"
+unused_async = "allow"
+single_match_else = "allow"

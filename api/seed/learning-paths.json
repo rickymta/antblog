@@ -487,7 +487,15 @@
       "rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao",
       "rust-so-du-theo-thoi-diem-snapshot-dong-ky",
       "rust-event-sourcing-co-chung-muc-projection-replay",
-      "rust-audit-append-only-hash-chain-phan-quyen-pii"
+      "rust-audit-append-only-hash-chain-phan-quyen-pii",
+      "rust-hexagonal-clean-workspace-crates-port-adapter",
+      "rust-command-handler-pipeline-domain-event-khong-framework",
+      "rust-aggregate-invariant-optimistic-locking-for-update",
+      "rust-use-case-thanh-toan-chuyen-end-to-end",
+      "rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version",
+      "rust-feature-flag-config-migration-expand-contract",
+      "rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao",
+      "rust-tong-hop-kien-truc-ledger-service-workspace"
     ],
     "status": "published"
   }

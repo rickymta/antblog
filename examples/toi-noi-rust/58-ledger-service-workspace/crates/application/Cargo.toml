@@ -1,0 +1,21 @@
+[package]
+name = "ledger-application"
+description = "Use case của ledger-service và các port (trait) mà adapter phải cài"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Chỉ phụ thuộc domain (và thiserror/jiff dùng chung). KHÔNG có tokio, sqlx, axum, rdkafka:
+# `async fn` trong trait chỉ cần `std::future::Future`, runtime là việc của composition root.
+[dependencies]
+jiff.workspace = true
+ledger-domain.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true
+
+# Chỉ test mới cần runtime để chạy `async fn`; `cargo tree -e normal` không tính dev-dependency.
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt", "macros"] }
