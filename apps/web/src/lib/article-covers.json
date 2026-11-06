@@ -1088,5 +1088,105 @@
       "DOC",
       "INTEGRATION"
     ]
+  },
+  "rust-trait-generics-chinh-sach-phi-lam-tron": {
+    "title": "TRAIT / GENERICS",
+    "subtitle": "Rust 11 · Swappable fee and rounding policies via traits",
+    "diagram": "layers",
+    "labels": [
+      "TRAIT",
+      "IMPL",
+      "DISPATCH"
+    ]
+  },
+  "rust-newtype-value-object-money-account-id": {
+    "title": "NEWTYPE / VALUE OBJECT",
+    "subtitle": "Rust 12 · Money, AccountId, EntryId as distinct types",
+    "diagram": "layers",
+    "labels": [
+      "MONEY",
+      "ACCOUNT ID",
+      "ENTRY ID"
+    ]
+  },
+  "rust-double-entry-journal-entry-posting": {
+    "title": "DOUBLE-ENTRY / LEDGER",
+    "subtitle": "Rust 13 · Journal entry, posting and the zero-sum invariant",
+    "diagram": "flow",
+    "labels": [
+      "MONEY IN",
+      "MONEY OUT",
+      "BALANCED"
+    ]
+  },
+  "rust-typestate-may-trang-thai-thanh-toan": {
+    "title": "TYPESTATE / STATE",
+    "subtitle": "Rust 14 · Payment states checked at compile time",
+    "diagram": "flow",
+    "labels": [
+      "AUTHORIZED",
+      "CAPTURED",
+      "REFUNDED"
+    ]
+  },
+  "rust-closure-iterator-adapter-doi-soat-bo-nho": {
+    "title": "CLOSURE / ITERATOR",
+    "subtitle": "Rust 15 · Closures, lazy iterators and reconciliation",
+    "diagram": "flow",
+    "labels": [
+      "LEDGER",
+      "PSP",
+      "FINDINGS"
+    ]
+  },
+  "rust-box-rc-arc-refcell-smart-pointer": {
+    "title": "SMART POINTERS",
+    "subtitle": "Rust 16 · Box, Rc, Arc, RefCell and Cell in the ledger",
+    "diagram": "layers",
+    "labels": [
+      "BOX",
+      "RC / ARC",
+      "REFCELL"
+    ]
+  },
+  "rust-thiserror-anyhow-xu-ly-loi-thuc-te": {
+    "title": "ERRORS / CONTEXT",
+    "subtitle": "Rust 17 · thiserror, anyhow and error context",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "INFRA",
+      "BOUNDARY"
+    ]
+  },
+  "rust-serde-json-but-toan-decimal-thoi-gian": {
+    "title": "SERDE / JSON",
+    "subtitle": "Rust 18 · Serialize ledger entries to JSON contracts",
+    "diagram": "code",
+    "labels": [
+      "STRUCT",
+      "JSON",
+      "CONTRACT"
+    ]
+  },
+  "rust-proptest-property-test-bat-bien-so-cai": {
+    "title": "PROPERTY TEST",
+    "subtitle": "Rust 19 · Prove ledger invariants with proptest",
+    "diagram": "checklist",
+    "labels": [
+      "STRATEGY",
+      "INVARIANT",
+      "SHRINK"
+    ]
+  },
+  "rust-tong-hop-ledger-core-cargo-doc-workspace": {
+    "title": "LEDGER-CORE / WORKSPACE",
+    "subtitle": "Rust 20 · Workspace, docs and invariants for ledger-core",
+    "diagram": "layers",
+    "labels": [
+      "CORE",
+      "CLI",
+      "TESTS"
+    ]
   }
 }

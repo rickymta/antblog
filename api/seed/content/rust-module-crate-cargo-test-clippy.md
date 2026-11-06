@@ -269,7 +269,7 @@ Một crate nhỏ gom lại đa số điều của P01:
 
 Điều lab **chưa có**: database (mất dữ liệu khi tắt), mạng (gRPC, Kafka), async và concurrency, ngày giờ trên bút toán (`jiff` mới dùng ở bài 08), máy trạng thái thanh toán sáu trạng thái của bài 05, `rust_decimal` cho tỷ lệ phí (chỉ có ở bài 03; ở đây 5.100 là số cố định), kiểu riêng cho `EntryId`, trait cho chính sách phí, lỗi dựng bằng `thiserror`, serialize JSON, property test. Số dư tính lại từ bút toán mỗi lần, chưa phải projection được lưu.
 
-Bài trước: [bài 09](/articles/rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho). Bài tiếp: phần P02, mô hình hóa sổ cái bằng kiểu.
+Bài trước: [bài 09](/articles/rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho). Bài tiếp: [bài 11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron).
 
 ## Tài liệu gốc
 

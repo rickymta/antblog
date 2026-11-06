@@ -54,6 +54,8 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 - **Mã**: chuyến `TN-0001`, tài xế `DR-001`, khách `CU-001`, bút toán `JE-000001`, 6 thành phố theo hồ sơ Tới Nơi.
 - **Hợp đồng với service C#**: Booking/Trip (C#) phát `TripCompleted`, Payment (C#) phát `PaymentCaptured` lên Kafka; ledger Rust tiêu thụ, ghi bút toán, phát `LedgerEntryPosted`; Payment/Admin BFF gọi gRPC `GetBalance`/`PostEntry`. Ledger sở hữu database riêng; không service nào ghi trực tiếp vào bảng của nó.
 
+**Quy ước sổ dòng tiền (chốt ở bài 13).** Số có dấu theo dòng tiền: dương = tiền vào tài khoản, âm = tiền ra, tổng bút toán = 0. Dấu này KHÔNG phải cặp nợ/có của kế toán, và không dịch được từng dòng sang nợ/có; ánh xạ chỉ đúng khi đọc số dư theo loại tài khoản. Code dùng `Flow { In, Out }`, không dùng `Debit`/`Credit`. RS-41 (chart of accounts) phải nối tiếp cách trình bày này. Bút toán `trip:TN-0001:capture` có 2 dòng qua clearing ở bài 13, có 3 dòng ở bài 10, 14 và `ledger-core`; đừng gộp hai dạng vào cùng một sổ vì sẽ ra `IdempotencyConflict`.
+
 ## 3. Danh sách bài
 
 ### Cấp độ cơ bản · Lộ trình `rust-co-ban-qua-toi-noi`
@@ -77,16 +79,16 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| RS-11 | `rust-trait-generics-chinh-sach-phi-lam-tron` | Trait, generics và trait bound: chính sách phí và làm tròn thay thế được | `trait`, `impl Trait for`, generic `fn<T: Trait>`, `impl Trait`/`dyn Trait`, default method, so với interface C#; `FeePolicy`, `RoundingPolicy` | RS-10 | Kế hoạch |
-| RS-12 | `rust-newtype-value-object-money-account-id` | Newtype và value object: Money, AccountId, EntryId không nhầm được | Newtype pattern, `From`/`TryFrom`, `#[derive]` (`PartialEq`, `Eq`, `Hash`, `Ord`), operator overloading `Add`/`Sub` có checked, không cộng Money khác đơn vị tiền | RS-11 | Kế hoạch |
-| RS-13 | `rust-double-entry-journal-entry-posting` | Double-entry: journal entry, posting và bất biến tổng bằng 0 | Nợ/có, chart of accounts rút gọn, `JournalEntry::new` chỉ tạo được khi cân, builder, bút toán đảo, số dư là projection, vì sao không lưu một cột balance | RS-12 | Kế hoạch |
-| RS-14 | `rust-typestate-may-trang-thai-thanh-toan` | Typestate và máy trạng thái: hold → capture → settle không thể đi sai | Enum state vs typestate generic (`Payment<Authorized>`), chuyển trạng thái chỉ qua method hợp lệ, lỗi compile khi chuyển sai, khi dùng enum là đủ | RS-13 | Kế hoạch |
-| RS-15 | `rust-closure-iterator-adapter-doi-soat-bo-nho` | Closure, iterator adapter và lazy evaluation: đối soát trong bộ nhớ | `Fn`/`FnMut`/`FnOnce`, capture by move, `impl Iterator`, `zip`/`group_by` thủ công, `collect` vào `HashMap`, lazy vs `collect` sớm, so với LINQ | RS-09, RS-11 | Kế hoạch |
-| RS-16 | `rust-box-rc-arc-refcell-smart-pointer` | Box, Rc, Arc, RefCell và Cell: khi nào cần smart pointer | Stack/heap, `Box<dyn Trait>`, `Rc` chia sẻ sở hữu, `RefCell` interior mutability và panic runtime, `Arc` cho đa luồng, cây tài khoản cha–con | RS-11 | Kế hoạch |
-| RS-17 | `rust-thiserror-anyhow-xu-ly-loi-thuc-te` | thiserror, anyhow và ngữ cảnh lỗi: lỗi nghiệp vụ khác lỗi hạ tầng | `thiserror` cho lỗi domain, `anyhow` ở biên, `#[from]`, `context`, `Box<dyn Error>`, `std::error::Error::source`, mapping lỗi ra mã trả về | RS-07 | Kế hoạch |
-| RS-18 | `rust-serde-json-but-toan-decimal-thoi-gian` | serde: serialize bút toán sang JSON, Decimal và thời gian | `#[derive(Serialize, Deserialize)]`, `rename_all`, `serde_json`, `Money` dạng chuỗi/số nguyên, `jiff` + serde, version schema, lỗi deserialize có vị trí | RS-12 | Kế hoạch |
-| RS-19 | `rust-proptest-property-test-bat-bien-so-cai` | Property-based test với proptest: chứng minh bất biến sổ cái | Strategy sinh bút toán ngẫu nhiên, bất biến tổng bằng 0 và không mất đồng khi chia, shrinking, test tổ chức theo module, `cargo test -- --nocapture` | RS-13 | Kế hoạch |
-| RS-20 | `rust-tong-hop-ledger-core-cargo-doc-workspace` | Bài tổng hợp cấp cơ bản: thư viện ledger-core có bất biến, test và tài liệu | Cargo workspace, crate `ledger-core`, `cargo doc`, `#![deny(missing_docs)]`, clippy pedantic có chọn lọc, README, chế độ `--verify`, những gì chưa có (DB, mạng) | RS-14, RS-17, RS-19 | Kế hoạch |
+| RS-11 | `rust-trait-generics-chinh-sach-phi-lam-tron` | Trait, generics và trait bound: chính sách phí và làm tròn thay thế được | `trait`, `impl Trait for`, generic `fn<T: Trait>`, `impl Trait`/`dyn Trait`, default method, so với interface C#; `FeePolicy`, `RoundingPolicy` | RS-10 | Đã viết |
+| RS-12 | `rust-newtype-value-object-money-account-id` | Newtype và value object: Money, AccountId, EntryId không nhầm được | Newtype pattern, `From`/`TryFrom`, `#[derive]` (`PartialEq`, `Eq`, `Hash`, `Ord`), operator overloading `Add`/`Sub` có checked, không cộng Money khác đơn vị tiền | RS-11 | Đã viết |
+| RS-13 | `rust-double-entry-journal-entry-posting` | Double-entry: journal entry, posting và bất biến tổng bằng 0 | Nợ/có, chart of accounts rút gọn, `JournalEntry::new` chỉ tạo được khi cân, builder, bút toán đảo, số dư là projection, vì sao không lưu một cột balance | RS-12 | Đã viết |
+| RS-14 | `rust-typestate-may-trang-thai-thanh-toan` | Typestate và máy trạng thái: hold → capture → settle không thể đi sai | Enum state vs typestate generic (`Payment<Authorized>`), chuyển trạng thái chỉ qua method hợp lệ, lỗi compile khi chuyển sai, khi dùng enum là đủ | RS-13 | Đã viết |
+| RS-15 | `rust-closure-iterator-adapter-doi-soat-bo-nho` | Closure, iterator adapter và lazy evaluation: đối soát trong bộ nhớ | `Fn`/`FnMut`/`FnOnce`, capture by move, `impl Iterator`, `zip`/`group_by` thủ công, `collect` vào `HashMap`, lazy vs `collect` sớm, so với LINQ | RS-09, RS-11 | Đã viết |
+| RS-16 | `rust-box-rc-arc-refcell-smart-pointer` | Box, Rc, Arc, RefCell và Cell: khi nào cần smart pointer | Stack/heap, `Box<dyn Trait>`, `Rc` chia sẻ sở hữu, `RefCell` interior mutability và panic runtime, `Arc` cho đa luồng, cây tài khoản cha–con | RS-11 | Đã viết |
+| RS-17 | `rust-thiserror-anyhow-xu-ly-loi-thuc-te` | thiserror, anyhow và ngữ cảnh lỗi: lỗi nghiệp vụ khác lỗi hạ tầng | `thiserror` cho lỗi domain, `anyhow` ở biên, `#[from]`, `context`, `Box<dyn Error>`, `std::error::Error::source`, mapping lỗi ra mã trả về | RS-07 | Đã viết |
+| RS-18 | `rust-serde-json-but-toan-decimal-thoi-gian` | serde: serialize bút toán sang JSON, Decimal và thời gian | `#[derive(Serialize, Deserialize)]`, `rename_all`, `serde_json`, `Money` dạng chuỗi/số nguyên, `jiff` + serde, version schema, lỗi deserialize có vị trí | RS-12 | Đã viết |
+| RS-19 | `rust-proptest-property-test-bat-bien-so-cai` | Property-based test với proptest: chứng minh bất biến sổ cái | Strategy sinh bút toán ngẫu nhiên, bất biến tổng bằng 0 và không mất đồng khi chia, shrinking, test tổ chức theo module, `cargo test -- --nocapture` | RS-13 | Đã viết |
+| RS-20 | `rust-tong-hop-ledger-core-cargo-doc-workspace` | Bài tổng hợp cấp cơ bản: thư viện ledger-core có bất biến, test và tài liệu | Cargo workspace, crate `ledger-core`, `cargo doc`, `#![deny(missing_docs)]`, clippy pedantic có chọn lọc, README, chế độ `--verify`, những gì chưa có (DB, mạng) | RS-14, RS-17, RS-19 | Đã viết |
 
 ### Cấp độ trung bình · Lộ trình `rust-trung-binh-qua-toi-noi`
 
@@ -96,7 +98,7 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 |---|---|---|---|---|---|
 | RS-21 | `rust-async-await-tokio-task-timeout-cancellation` | async/await và tokio: task, join, timeout và hủy khi gọi VíXanh | `Future`, `async fn`, runtime tokio, `spawn`, `join!`/`select!`, `tokio::time::timeout`, cancellation safety, `CancellationToken`, không block runtime | RS-20 | Kế hoạch |
 | RS-22 | `rust-send-sync-arc-mutex-channel-concurrency` | Send, Sync, Arc\<Mutex\> và channel: concurrency không data race | Vì sao compile chặn data race, `Send`/`Sync`, `Arc<Mutex<T>>` vs `RwLock`, `mpsc`/`oneshot`/`broadcast`, tránh ghi trùng bút toán trong một process | RS-21 | Kế hoạch |
-| RS-23 | `rust-sqlx-postgresql-pool-migration-query` | sqlx với PostgreSQL: pool, migration và query kiểm tra lúc biên dịch | `PgPool`, `sqlx migrate`, `query!`/`query_as!`, `SQLX_OFFLINE`, mapping `i64`/`NUMERIC`/`TIMESTAMPTZ`, `TOI_NOI_PG` trỏ DB lab riêng `toi_noi_rust_lab` | RS-20 | Kế hoạch |
+| RS-23 | `rust-sqlx-postgresql-pool-migration-query` | sqlx với PostgreSQL: pool, migration và query kiểm tra lúc biên dịch | `PgPool`, `sqlx migrate`, `query!`/`query_as!`, `SQLX_OFFLINE`, mapping `i64`/`NUMERIC`/`TIMESTAMPTZ`, `TOI_NOI_PG_URL` trỏ DB lab riêng `toi_noi_rust_lab` | RS-20 | Kế hoạch |
 | RS-24 | `rust-transaction-isolation-append-only-idempotency-key` | Transaction, isolation và idempotency key: ghi bút toán an toàn | `BEGIN`/`COMMIT` qua `Transaction`, READ COMMITTED vs SERIALIZABLE, retry SQLSTATE 40001, unique `idempotency_key`, `ON CONFLICT DO NOTHING` + đọc lại, trigger cấm UPDATE/DELETE | RS-23 | Kế hoạch |
 | RS-25 | `rust-schema-so-cai-accounts-journal-postings-partition` | Schema sổ cái: accounts, journal_entries, postings, balance là projection | Thiết kế bảng, ràng buộc CHECK, index theo `account_id, posted_at`, partition theo tháng, bảng `account_balances` cập nhật trong cùng transaction, kiểm tổng bằng 0 ở DB | RS-24 | Kế hoạch |
 | RS-26 | `rust-repository-unit-of-work-trait-transaction` | Repository và Unit of Work kiểu Rust: trait, generic transaction, không ORM | Port `LedgerRepository` là trait, adapter sqlx, UoW bao `Transaction<'_, Postgres>`, `async fn` trong trait, test với adapter giả và adapter thật | RS-24 | Kế hoạch |
@@ -177,10 +179,10 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 
 Đồ thị «Đọc trước» không có chu trình; mọi bài P05–P07 có thể đọc sau khi hoàn thành P04.
 
-## 5. Điểm cần chủ blog quyết
+## 5. Quyết định kỹ thuật đã chốt (có thể đổi, ghi lý do)
 
-1. **Thư viện thời gian**: đề xuất `jiff` (API gọn, múi giờ chuẩn IANA). Nếu muốn khớp phần lớn tài liệu cộng đồng thì dùng `chrono` + `chrono-tz`; quyết định áp dụng từ bài 08.
-2. **Kafka client**: `rdkafka` (bọc librdkafka, cần C toolchain khi build) hay `rskafka` (thuần Rust, ít tính năng hơn). Đề xuất `rdkafka` vì consumer group và transaction đầy đủ.
-3. **OpenAPI**: `utoipa` (macro, phổ biến) hay `aide`. Đề xuất `utoipa`.
-4. **Hạ tầng lab**: từ P03 cần PostgreSQL local (`TOI_NOI_PG`, database `toi_noi_rust_lab`); từ bài 36 cần Kafka qua Docker Compose. Lab không chạy được trong CI nếu thiếu dịch vụ sẽ fail rõ, không skip.
-5. **Interop .NET** (bài 35, 62, 66): cần SDK .NET 10 trên máy viết bài để kiểm client C# gọi được; nếu không có thì chỉ đưa code client và ghi rõ chưa chạy.
+1. **Thư viện thời gian**: `jiff` (API gọn, múi giờ IANA có sẵn), dùng từ bài 08. Nếu đổi sang `chrono` + `chrono-tz` thì sửa lại bài 08, 18 và các lab dùng `Timestamp`.
+2. **Kafka client**: `rdkafka` 0.39 (bọc librdkafka, build từ source không cần cmake trên macOS, ~20 giây lần đầu). Lý do: consumer group, commit offset và transaction đầy đủ. `rskafka` chỉ nhắc như lựa chọn thuần Rust.
+3. **OpenAPI**: `utoipa` + `utoipa-swagger-ui` (bài 32).
+4. **Hạ tầng lab**: `examples/toi-noi-rust/infra/docker-compose.yml` dựng PostgreSQL 18 (cổng 5433), Kafka 4.1 KRaft (9092) và Redis 7 (6379), chỉ bind `127.0.0.1`. Lab đọc `TOI_NOI_PG_URL` (dạng URL của sqlx, khác chuỗi Npgsql `TOI_NOI_PG` của loạt .NET), `TOI_NOI_KAFKA`, `TOI_NOI_REDIS`. Thiếu dịch vụ thì lab fail rõ, không skip. Integration test tạo schema `lab_<uuid>` riêng mỗi ca.
+5. **Interop .NET** (bài 35, 62, 66): máy viết bài có SDK .NET 10.0.401, nên client C# trong các bài này được build và chạy thật.

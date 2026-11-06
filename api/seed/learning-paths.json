@@ -153,7 +153,17 @@
       "rust-result-option-toan-tu-hoi-loi-la-gia-tri",
       "rust-string-str-ngay-gio-dinh-dang-tien",
       "rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho",
-      "rust-module-crate-cargo-test-clippy"
+      "rust-module-crate-cargo-test-clippy",
+      "rust-trait-generics-chinh-sach-phi-lam-tron",
+      "rust-newtype-value-object-money-account-id",
+      "rust-double-entry-journal-entry-posting",
+      "rust-typestate-may-trang-thai-thanh-toan",
+      "rust-closure-iterator-adapter-doi-soat-bo-nho",
+      "rust-box-rc-arc-refcell-smart-pointer",
+      "rust-thiserror-anyhow-xu-ly-loi-thuc-te",
+      "rust-serde-json-but-toan-decimal-thoi-gian",
+      "rust-proptest-property-test-bat-bien-so-cai",
+      "rust-tong-hop-ledger-core-cargo-doc-workspace"
     ],
     "status": "published"
   }

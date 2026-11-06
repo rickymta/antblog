@@ -1,0 +1,24 @@
+{
+  "type": "LedgerEntryPosted",
+  "schemaVersion": 1,
+  "entryId": "JE-000001",
+  "postedAt": "2026-11-06T03:15:00Z",
+  "feeRate": "0.20",
+  "entry": {
+    "idempotencyKey": "trip:TN-0001:capture",
+    "postings": [
+      {
+        "account": "customer:CU-001",
+        "amount": -25500
+      },
+      {
+        "account": "platform:revenue",
+        "amount": 5100
+      },
+      {
+        "account": "driver:DR-001",
+        "amount": 20400
+      }
+    ]
+  }
+}

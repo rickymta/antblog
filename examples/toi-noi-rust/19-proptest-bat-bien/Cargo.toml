@@ -1,0 +1,16 @@
+[package]
+name = "ledger_19_proptest_bat_bien"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 19: property-based test với proptest cho sổ cái Tới Nơi"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]
+proptest = "1.12.0"

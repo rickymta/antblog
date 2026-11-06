@@ -42,7 +42,20 @@ C#/.NET 10 giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng
 09. Vec, HashMap, BTreeMap và lifetime cơ bản: sổ cái trong bộ nhớ — **đã viết**
 10. Module, crate, cargo test và clippy: tổ chức lab sổ cái — **đã viết**
 
-Các phần P02–P07 (bài 11–68) xem master curriculum.
+## P02 · Mô hình hóa sổ cái bằng kiểu
+
+11. Trait, generics và trait bound: chính sách phí và làm tròn thay thế được — **đã viết**
+12. Newtype và value object: Money, AccountId, EntryId không nhầm được — **đã viết**
+13. Double-entry: journal entry, posting và bất biến tổng bằng 0 — **đã viết**
+14. Typestate và máy trạng thái: hold → capture → settle không thể đi sai — **đã viết**
+15. Closure, iterator adapter và lazy evaluation: đối soát trong bộ nhớ — **đã viết**
+16. Box, Rc, Arc, RefCell và Cell: khi nào cần smart pointer — **đã viết**
+17. thiserror, anyhow và ngữ cảnh lỗi: lỗi nghiệp vụ khác lỗi hạ tầng — **đã viết**
+18. serde: serialize bút toán sang JSON, Decimal và thời gian — **đã viết**
+19. Property-based test với proptest: chứng minh bất biến sổ cái — **đã viết**
+20. Bài tổng hợp cấp cơ bản: thư viện ledger-core có bất biến, test và tài liệu — **đã viết**
+
+Các phần P03–P07 (bài 21–68) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -51,4 +64,8 @@ cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml
 cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml -- --verify
 ```
 
-Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01.
+Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02.
+
+## Hạ tầng cho phần P03 trở đi
+
+PostgreSQL, Kafka và Redis chạy local bằng Docker Compose trong [`infra/`](infra/README.md): `docker compose -f examples/toi-noi-rust/infra/docker-compose.yml up -d --wait`, rồi đặt `TOI_NOI_PG_URL`, `TOI_NOI_KAFKA`, `TOI_NOI_REDIS` theo README đó. Lab thiếu dịch vụ sẽ fail rõ, không skip.
