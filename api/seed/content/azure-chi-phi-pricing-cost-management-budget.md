@@ -47,7 +47,7 @@ Bài này cố tình không ghi giá. Đơn giá khác nhau theo region, SKU, lo
 | Container Apps `ca-toinoi-trips-dev` | vCPU và GiB mỗi replica, số replica tối thiểu, số request, thời gian active so với idle | Dev có cần `minReplicas: 1` suốt đêm không? |
 | VM nhỏ cho lab (tuỳ chọn) | Size, số giờ chạy, loại và dung lượng OS disk | Mỗi ngày VM thật sự chạy mấy giờ? |
 | PostgreSQL `psql-toinoi-dev-sea` (Burstable) | Tier compute, giờ chạy, dung lượng storage cấp phát, backup vượt mức, có bật HA không | Dev có cần HA và backup dài không? |
-| Storage `sttoinoidocsdev` | GB-tháng theo tier, số thao tác, kiểu replication, egress | Ảnh giấy tờ mẫu nặng bao nhiêu GB, đọc bao nhiêu lần? |
+| Storage `sttoinoidriverdocsdev` | GB-tháng theo tier, số thao tác, kiểu replication, egress | Ảnh giấy tờ mẫu nặng bao nhiêu GB, đọc bao nhiêu lần? |
 | Container Registry `acrtoinoidev` | SKU (tính theo ngày), dung lượng image lưu giữ | Có dọn image cũ không? |
 | Log Analytics của `cae-toinoi-dev` | GB log đưa vào mỗi ngày, số ngày giữ | Log mức Debug có bật ở dev không? |
 | Public IP | Số IP Standard (luôn tĩnh, tính theo giờ giữ), có gắn resource không | IP nào đang giữ chỗ mà không ai dùng? |

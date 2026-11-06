@@ -2,6 +2,16 @@
 
 Loạt bài Azure của Tech Knowledge Hub (antblog.xyz), chủ đề `devops-azure`. Gồm **58 bài** trong **6 phần** (mỗi phần tối đa 10 bài), đi từ người chưa dùng cloud tới người thiết kế và vận hành hệ thống đặt xe Tới Nơi trên Azure. Mỗi phần là một lộ trình học riêng trong `api/seed/learning-paths.json`; bài viết nằm ở `api/seed/content/azure-*.md`; ảnh bìa sinh từ `apps/web/src/lib/article-covers.json`.
 
+## Trạng thái (06/11/2026)
+
+Cả 58 bài đã viết và đã qua review kỹ thuật; frontmatter hợp lệ theo schema seed; 6 lộ trình và 58 ảnh bìa đã sinh. Chưa seed lên MongoDB production và chưa chạy lab trên subscription thật. Những điểm chủ blog nên quyết trước khi đăng:
+
+- Bài 33: Azure Cache for Redis (Basic/Standard/Premium) đã chặn tạo mới với khách hàng mới từ 04/2026 và có lịch nghỉ hưu; bài giữ lab Standard C1 theo đề cương và kèm phương án Azure Managed Redis. Có thể đổi tiêu đề và lab chính sang Azure Managed Redis.
+- Bài 46, 48: lab giả định role `toinoi_migrator`/`toinoi_app` và Dockerfile cho project Migrator, hiện chưa có trong `examples/toi-noi-dotnet/31-38-trip-service`.
+- Bài 47, 48: mô tả thêm gói `Azure.Monitor.OpenTelemetry.AspNetCore` và `Npgsql.OpenTelemetry`, repo chưa tham chiếu.
+- Bài 58: kiểm lại danh sách kỳ thi còn hiệu lực (AZ-204) trước khi đăng.
+- Các chi tiết lệnh `az` được đối chiếu với tài liệu, chưa chạy thật: hành vi `az group create` lần hai không có `--tags` (bài 3), tên cờ của một số extension (`alertsmanagement`, `costmanagement`, `load`, `sentinel`).
+
 ## Nguyên tắc biên tập
 
 - Một hệ thống mẫu xuyên suốt: Tới Nơi, với `trip-service` của loạt C# và .NET 10 làm workload đưa lên Azure. Region chính Southeast Asia, cặp East Asia (Azure không có region tại Việt Nam).
