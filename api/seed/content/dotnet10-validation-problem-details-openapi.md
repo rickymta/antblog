@@ -2,7 +2,7 @@
 slug: dotnet10-validation-problem-details-openapi
 title: "Validation, Problem Details và OpenAPI: hợp đồng API trong .NET 10"
 summary: "Bài 17: bật validation tích hợp của Minimal API .NET 10, phân biệt thiếu/null/ngoài miền, trả lỗi có cấu trúc và xuất tài liệu OpenAPI để kiểm chứng."
-category: programming
+category: csharp
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi

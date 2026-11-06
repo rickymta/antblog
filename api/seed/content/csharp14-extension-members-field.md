@@ -2,7 +2,7 @@
 slug: csharp14-extension-members-field
 title: "C# 14 trong thực tế: extension members, field và null-conditional assignment"
 summary: "Bài 29: chạy tính năng C# 14 trên net10.0, dùng extension property có chủ đích, field-backed setter và kiểm tra RHS bị bỏ qua khi receiver null."
-category: programming
+category: csharp
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

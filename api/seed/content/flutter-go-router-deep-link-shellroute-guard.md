@@ -2,7 +2,7 @@
 slug: flutter-go-router-deep-link-shellroute-guard
 title: "go_router: deep link, ShellRoute, guard đăng nhập"
 summary: "Bài 23: điều hướng app khách Tới Nơi bằng go_router 18.1: StatefulShellRoute cho ba tab giữ state, tham số /trip/:id, redirect async theo đăng nhập Riverpod kèm refreshListenable và from, deep link toinoi://trip/{id}, universal/app link, cấu hình native và 90 test router."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, go-router, deep-link, riverpod, ios, android]
 language: vi

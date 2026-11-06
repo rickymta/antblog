@@ -2,7 +2,7 @@
 slug: python-match-pattern-matching-none
 title: "Pattern matching và xử lý None: chuyển trạng thái chuyến rõ ràng"
 summary: "Bài 16: dùng match/case với class, sequence và mapping pattern, guard để mô tả chuyến và định tuyến sự kiện; tách None, chuỗi rỗng và khóa vắng; sentinel, TypeIs và mypy kiểm tra đủ trường hợp. Có output thật."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, pattern-matching, none]
 language: vi

@@ -302,6 +302,7 @@ export const en: Messages = {
       security: 'Security',
       testing: 'Testing',
       analysis: 'Business analysis',
+      location: 'Location & routing',
     },
   },
   paths: {

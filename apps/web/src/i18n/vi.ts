@@ -185,6 +185,9 @@ export const vi = {
   topic: {
     children: "Danh mục con",
     eyebrow: 'Chủ đề',
+    comingSoon: 'Sắp ra mắt',
+    childCount_one: '{{n}} danh mục con',
+    childCount_other: '{{n}} danh mục con',
     notFound: 'Không tìm thấy chủ đề này.',
   },
   paths: {

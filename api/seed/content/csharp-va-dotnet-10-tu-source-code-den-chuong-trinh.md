@@ -2,7 +2,7 @@
 slug: csharp-va-dotnet-10-tu-source-code-den-chuong-trinh
 title: "C# và .NET 10: từ source code đến chương trình tính cước"
 summary: "Bài 01: phân biệt C#, SDK, runtime và ASP.NET Core; tạo ứng dụng net10.0, tính cước Tới Nơi và lần theo đường đi từ source code tới lúc chạy. Có bài tập và ví dụ chạy được."
-category: programming
+category: csharp
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

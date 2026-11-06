@@ -139,6 +139,28 @@ describe('quản trị — bài viết', () => {
     await request(app).delete(`/api/v1/admin/categories/${empty._id}`).set('Cookie', c).send({}).expect(404);
   });
 
+  it('bài viết chỉ gắn vào chủ đề lá: POST/PUT vào chủ đề cha ⇒ 400 trên categoryId; lộ trình vẫn trỏ được tới chủ đề cha', async () => {
+    const admin = await createUser('admin');
+    const c = sessionCookie(admin);
+    const parent = await createCategory();
+    const leaf = await createCategory({ parentId: parent._id });
+    const created = await request(app).post('/api/v1/admin/articles').set('Cookie', c).send(articleInput(leaf._id.toString())).expect(201);
+    expect(created.body.category.slug).toBe(leaf.slug);
+
+    const post = await request(app).post('/api/v1/admin/articles').set('Cookie', c).send(articleInput(parent._id.toString())).expect(400);
+    expect(post.body.error.details.fields.categoryId).toContain('chủ đề con');
+    const put = await request(app).put(`/api/v1/admin/articles/${created.body.id}`).set('Cookie', c).send(articleInput(parent._id.toString())).expect(400);
+    expect(put.body.error.details.fields.categoryId).toBeTruthy();
+    expect((await Article.findById(created.body.id).lean())!.categoryId.toString()).toBe(leaf._id.toString());
+    expect(await Article.countDocuments()).toBe(1);
+
+    // Sửa bài ở chủ đề lá vẫn bình thường.
+    await request(app).put(`/api/v1/admin/articles/${created.body.id}`).set('Cookie', c).send(articleInput(leaf._id.toString(), { title: 'Tiêu đề mới' })).expect(200);
+    // Lộ trình học được phép trỏ tới chủ đề cha.
+    const base = { title: 'Lộ trình cha', description: 'mô tả', level: 'beginner', status: 'published', articleIds: [] };
+    await request(app).post('/api/v1/admin/learning-paths').set('Cookie', c).send({ ...base, slug: 'lo-trinh-cha', categoryId: parent._id.toString() }).expect(201);
+  });
+
   it('lộ trình: một bài thuộc tối đa một lộ trình, totalMinutes chỉ tính bài đã xuất bản', async () => {
     const admin = await createUser('admin');
     const c = sessionCookie(admin);

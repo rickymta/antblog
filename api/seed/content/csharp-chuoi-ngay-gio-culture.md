@@ -2,7 +2,7 @@
 slug: csharp-chuoi-ngay-gio-culture
 title: "Chuỗi, ngày giờ và culture: hiển thị đúng, trao đổi đúng trong C#"
 summary: "Bài 04: tách format giao diện khỏi hợp đồng dữ liệu, parse khoảng cách có culture, dùng DateTimeOffset và biểu diễn UTC cho báo giá Tới Nơi."
-category: programming
+category: csharp
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

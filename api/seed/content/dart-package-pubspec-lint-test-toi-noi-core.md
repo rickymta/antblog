@@ -2,7 +2,7 @@
 slug: dart-package-pubspec-lint-test-toi-noi-core
 title: "Package, pubspec, lint và test: thư viện toi_noi_core kiểm chứng được"
 summary: "Bài 06: gom tiền, cước, trạng thái chuyến và sự kiện của bài 02–05 thành package Dart toi_noi_core; đọc pubspec.yaml, dependency và version constraint, bật lint strict, tổ chức test theo group và dùng package này từ một project khác bằng path dependency."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, package, testing]
 language: vi

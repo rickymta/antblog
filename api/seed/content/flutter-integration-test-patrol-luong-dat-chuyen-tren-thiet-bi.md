@@ -2,7 +2,7 @@
 slug: flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi
 title: "Integration test và patrol: luồng đặt chuyến trên simulator/emulator"
 summary: "Bài 31: viết luồng đặt chuyến một lần thành runBookingFlow, chạy bằng flutter test, integration_test và Patrol. Fake API qua 10.0.2.2, chính sách HTTP của nền tảng không áp cho dart:io, bấm hộp thoại quyền thật, chụp màn hình, chi phí của test chậm. Phần trên thiết bị chưa chạy."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, testing, integration-test, patrol, android, ios]
 language: vi

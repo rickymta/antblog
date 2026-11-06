@@ -2,7 +2,7 @@
 slug: python-vector-search-pgvector-faiss-trung-tai-xe
 title: "Vector search với pgvector và FAISS: phát hiện một người nhiều tài khoản"
 summary: "Bài 51: lưu embedding khuôn mặt trong PostgreSQL pgvector và FAISS, tìm top-k cùng người khác tài khoản. So HNSW, IVFFlat về recall, độ trễ, kích thước; bẫy khi kèm WHERE. Có số đo thật."
-category: programming
+category: python
 level: advanced
 tags: [python, toi-noi, pgvector, faiss, vector-search]
 language: vi

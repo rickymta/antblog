@@ -2,7 +2,7 @@
 slug: rust-sqlx-postgresql-pool-migration-query
 title: "sqlx với PostgreSQL: pool, migration và query kiểm tra lúc biên dịch"
 summary: "Bài 23: dựng PgPool đọc TOI_NOI_PG_URL, chạy migration bằng sqlx::migrate!, ghi và đọc bút toán TN-0001 bằng query!/query_as!, build offline với .sqlx, và mapping i64, NUMERIC, TIMESTAMPTZ."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, sqlx, postgresql, migration]
 language: vi

@@ -2,7 +2,7 @@
 slug: python-transaction-optimistic-concurrency-idempotency
 title: "Transaction, optimistic concurrency và idempotency: đặt chuyến an toàn"
 summary: "Bài 25: Session.begin(), isolation level, cột version với UPDATE có điều kiện, khóa idempotency với UNIQUE và SQLSTATE 23505, retry có giới hạn. Tái hiện mất cập nhật và race bằng PostgreSQL thật."
-category: programming
+category: python
 level: intermediate
 tags: [python, toi-noi, postgresql, transaction, idempotency]
 language: vi

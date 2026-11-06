@@ -2,7 +2,7 @@
 slug: csharp-class-property-encapsulation
 title: "Class, property và encapsulation: bảo vệ trạng thái chuyến trong C#"
 summary: "Bài 06: dùng class có identity, property chỉ đọc từ bên ngoài và hành vi chuyển trạng thái để giữ invariant; phân biệt encapsulation với khóa đồng thời."
-category: programming
+category: csharp
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

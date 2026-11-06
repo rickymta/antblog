@@ -2,7 +2,7 @@
 slug: dotnet10-opentelemetry-traces-metrics-logs
 title: "OpenTelemetry: lần theo request qua HTTP, handler và PostgreSQL"
 summary: "Bài 37: ActivitySource/Meter cùng instrumentation ASP.NET/HTTP, traceparent đi qua handler tới commit và metric có tag hữu hạn; xuất OTLP chỉ khi cấu hình rõ."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi

@@ -2,7 +2,7 @@
 slug: dotnet10-container-ci-cd
 title: "Container và CI/CD: build, test và publish service .NET 10"
 summary: "Bài 35: Dockerfile nhiều stage, image non-root và publish OCI archive không cần Docker daemon; CI kiểm PostgreSQL thật rồi lưu artifact, chưa tự deploy cloud."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi

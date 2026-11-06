@@ -2,7 +2,7 @@
 slug: flutter-code-generation-freezed-json-serializable-riverpod-generator
 title: "Code generation: freezed, json_serializable, riverpod_generator và build_runner"
 summary: "Bài 26: viết lại TripDto và QuoteDto bằng freezed 4 và json_serializable, chứng minh trên cùng một JSON rằng hành vi giữ nguyên, chỉ ra chỗ code sinh lỏng hơn bản viết tay và siết bằng JsonConverter. Thêm union sealed, @riverpod, commit file sinh. 134 test."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, code-generation, freezed, json-serializable, riverpod, build-runner]
 language: vi

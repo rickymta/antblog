@@ -2,7 +2,7 @@
 slug: python-tesseract-easyocr-paddleocr-so-sanh
 title: "Tesseract, EasyOCR và PaddleOCR: chạy và so sánh trên cùng bộ ảnh"
 summary: "Bài 43: chạy Tesseract, EasyOCR và PaddleOCR trên 24 thẻ căn cước giả, đưa bounding box và confidence về một dạng, đo lỗi theo trường, thời gian và CPU. PaddleOCR chỉ có wheel đến Python 3.13. Có output thật."
-category: programming
+category: python
 level: advanced
 tags: [python, toi-noi, ocr, tesseract, easyocr]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-proptest-property-test-bat-bien-so-cai
 title: "Property-based test với proptest: chứng minh bất biến sổ cái"
 summary: "Bài 19: dùng proptest kiểm bất biến sổ cái Tới Nơi: strategy sinh bút toán luôn cân, tổng bằng 0, idempotency, chia tiền không mất đồng, và shrinking thu nhỏ phản ví dụ về còn 1 đồng."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, proptest, property-test]
 language: vi

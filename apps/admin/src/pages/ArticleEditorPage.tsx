@@ -675,9 +675,11 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
   }, [mode, view]);
 
   const categoryOptions = useMemo(() => {
-    const opts = treeCategoryOptions(categories.data ?? [], locale).map(({ category: c, label }) => ({ id: c.id, label }));
+    // Chủ đề có chủ đề con chỉ làm nhãn nhóm trong cây (API từ chối gắn bài vào chủ đề cha) ⇒ `disabled`.
+    const parentIds = new Set((categories.data ?? []).map((c) => c.parentId).filter(Boolean));
+    const opts = treeCategoryOptions(categories.data ?? [], locale).map(({ category: c, label }) => ({ id: c.id, label, isParent: parentIds.has(c.id) }));
     if (article?.category && !opts.some((o) => o.id === article.category.id)) {
-      opts.push({ id: article.category.id, label: pickLocalized(article.category.name, locale) });
+      opts.push({ id: article.category.id, label: pickLocalized(article.category.name, locale), isParent: false });
     }
     return opts;
   }, [categories.data, article, locale]);
@@ -943,7 +945,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
                 <select {...a} className={selectClass} value={form.categoryId} onChange={(e) => update('categoryId', e.target.value)}>
                   <option value="">{t('editor.chooseCategory')}</option>
                   {categoryOptions.map((c) => (
-                    <option key={c.id} value={c.id}>
+                    <option key={c.id} value={c.id} disabled={c.isParent}>
                       {c.label}
                     </option>
                   ))}

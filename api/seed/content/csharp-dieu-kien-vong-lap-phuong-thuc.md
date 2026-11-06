@@ -2,7 +2,7 @@
 slug: csharp-dieu-kien-vong-lap-phuong-thuc
 title: "Điều kiện, vòng lặp và phương thức: tách quy tắc tính cước trong C#"
 summary: "Bài 03: từ chối khoảng cách ngoài miền, dùng if/return/foreach/continue và tách hàm tính cước. Có sơ đồ luồng, bảng biên và bộ kiểm tra chạy được."
-category: programming
+category: csharp
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

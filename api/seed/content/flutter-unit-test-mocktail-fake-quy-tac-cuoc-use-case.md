@@ -2,7 +2,7 @@
 slug: flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case
 title: "Unit test với mocktail và fake: quy tắc cước và use case"
 summary: "Bài 27: kiểm quy tắc cước bằng phân vùng tương đương và giá trị biên, lặp đủ 56 cặp (trạng thái, sự kiện) của chuyến, rồi test use case RequestTrip với dummy, stub, spy, mock và fake. Dùng mocktail (when, verify, any(named:), registerFallbackValue), chỉ ra khi nào fake bền hơn mock. 131 test."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, testing, unit-test, mocktail, test-double]
 language: vi

@@ -123,8 +123,12 @@ function idParam(req: Request, what: string): Types.ObjectId {
   return oid(id);
 }
 
-async function ensureCategory(categoryId: string): Promise<void> {
+/** `leafOnly`: bài viết chỉ được gắn vào chủ đề lá (chủ đề cha chỉ liệt kê chủ đề con). Lộ trình học vẫn được trỏ tới chủ đề cha. */
+async function ensureCategory(categoryId: string, { leafOnly = false }: { leafOnly?: boolean } = {}): Promise<void> {
   if (!(await Category.exists({ _id: categoryId }))) throw validation({ categoryId: 'Chủ đề không tồn tại' });
+  if (leafOnly && (await Category.exists({ parentId: categoryId }))) {
+    throw validation({ categoryId: 'Chủ đề này có chủ đề con — chỉ chủ đề con (chủ đề lá) mới chứa bài viết, hãy chọn một chủ đề con.' });
+  }
 }
 
 export function adminRouter(): Router {
@@ -222,7 +226,7 @@ export function adminRouter(): Router {
 
   r.post('/articles', async (req, res) => {
     const input = parse(articleInputSchema, req.body);
-    await ensureCategory(input.categoryId);
+    await ensureCategory(input.categoryId, { leafOnly: true });
     const slug = await resolveArticleSlug({ explicit: input.slug, title: input.title });
     const user = currentUser(req);
     let created;
@@ -252,7 +256,7 @@ export function adminRouter(): Router {
   r.put('/articles/:id', async (req, res) => {
     const article = await loadArticleFor(req);
     const input = parse(articleInputSchema, req.body);
-    await ensureCategory(input.categoryId);
+    await ensureCategory(input.categoryId, { leafOnly: true });
     // Slug trống khi sửa ⇒ giữ slug hiện tại (không đổi URL bài đã có).
     const slug = input.slug ? await resolveArticleSlug({ explicit: input.slug, title: input.title, excludeId: article._id }) : article.slug;
     const set: Record<string, unknown> = { ...articleFields(input), slug, editedInCms: true };

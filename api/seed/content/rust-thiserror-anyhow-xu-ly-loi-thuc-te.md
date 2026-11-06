@@ -2,7 +2,7 @@
 slug: rust-thiserror-anyhow-xu-ly-loi-thuc-te
 title: "thiserror, anyhow và ngữ cảnh lỗi: lỗi nghiệp vụ khác lỗi hạ tầng"
 summary: "Bài 17: thay impl Display/Error viết tay của LedgerError bằng thiserror, tách lỗi domain khỏi lỗi hạ tầng, dùng anyhow và context ở biên, in chuỗi nguyên nhân, downcast_ref và ánh xạ lỗi ra mã trả về."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, error-handling, thiserror, anyhow]
 language: vi

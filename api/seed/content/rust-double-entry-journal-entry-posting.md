@@ -2,7 +2,7 @@
 slug: rust-double-entry-journal-entry-posting
 title: "Double-entry: journal entry, posting và bất biến tổng bằng 0"
 summary: "Bài 13: ghi posting bằng số có dấu và ánh xạ sang nợ/có kế toán, dựng JournalEntry chỉ tồn tại khi cân (try_new, builder), chia tiền TN-0001 qua clearing, sửa sai bằng bút toán đảo, tính số dư từ posting."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, double-entry, journal-entry, builder]
 language: vi

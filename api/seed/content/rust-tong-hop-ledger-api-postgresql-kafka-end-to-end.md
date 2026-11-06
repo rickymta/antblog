@@ -2,7 +2,7 @@
 slug: rust-tong-hop-ledger-api-postgresql-kafka-end-to-end
 title: "Bài tổng hợp trung bình: ledger-api với PostgreSQL và Kafka chạy end-to-end"
 summary: "Bài 40: gom P03–P04 thành service ledger-api chạy thật. TripCompleted từ Kafka thành bút toán, inbox và outbox cùng transaction, HTTP và gRPC trả số dư, tắt có thứ tự; test chờ sự kiện thật, phát lại và kill giữa chừng."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, kafka, postgresql, end-to-end]
 language: vi

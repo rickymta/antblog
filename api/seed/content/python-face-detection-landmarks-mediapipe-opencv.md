@@ -2,7 +2,7 @@
 slug: python-face-detection-landmarks-mediapipe-opencv
 title: "Face detection và landmarks: tìm khuôn mặt trong ảnh giấy tờ và selfie"
 summary: "Bài 48: so Haar, YuNet (OpenCV DNN) và MediaPipe trên ảnh thẻ, selfie tổng hợp; căn chỉnh theo 5 landmark về mẫu 112x112; đo mờ, tối; gom lý do chuyển người duyệt. Có số đo thật và lab chạy được."
-category: programming
+category: python
 level: advanced
 tags: [python, toi-noi, opencv, mediapipe, face-detection]
 language: vi

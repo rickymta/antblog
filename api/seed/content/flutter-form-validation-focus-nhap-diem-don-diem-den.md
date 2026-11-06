@@ -2,7 +2,7 @@
 slug: flutter-form-validation-focus-nhap-diem-don-diem-den
 title: "Form, TextFormField và validation: nhập điểm đón, điểm đến"
 summary: "Bài 11: dựng TripRequestForm của Tới Nơi với Form, TextFormField và validator thuần Dart có unit test; AutovalidateMode, FocusNode và TextInputAction.next chuyển ô, dispose controller, chuẩn hoá dữ liệu khi submit và cách Scaffold xử lý bàn phím."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, form, validation]
 language: vi

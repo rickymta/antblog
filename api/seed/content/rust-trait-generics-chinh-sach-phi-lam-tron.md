@@ -2,7 +2,7 @@
 slug: rust-trait-generics-chinh-sach-phi-lam-tron
 title: "Trait, generics và trait bound: chính sách phí và làm tròn thay thế được"
 summary: "Bài 11: tách phí nền tảng và cách làm tròn thành hai trait, viết generic có trait bound, thêm chính sách phí thứ hai mà không sửa hàm dựng bút toán; so static với dynamic dispatch và đối chiếu interface C#."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, trait, generics]
 language: vi

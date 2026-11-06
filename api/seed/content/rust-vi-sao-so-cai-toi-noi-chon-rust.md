@@ -2,7 +2,7 @@
 slug: rust-vi-sao-so-cai-toi-noi-chon-rust
 title: "Vì sao sổ cái Tới Nơi viết bằng Rust khi backend chính là C#?"
 summary: "Bài 01: quyết định kiến trúc vì sao riêng service sổ cái dùng Rust dù backend chính là C#/.NET 10; bốn tiêu chí có bằng chứng chạy được, cái giá phải trả, ranh giới hẹp và điều kiện để xét lại."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, adr, kien-truc]
 language: vi

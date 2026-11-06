@@ -2,7 +2,7 @@
 slug: flutter-layout-constraints-row-column-the-chuyen
 title: "Layout và constraints: Row, Column, Expanded và thẻ chuyến"
 summary: "Bài 08: hiểu quy tắc constraints đi xuống, kích thước đi lên, cha đặt vị trí; chia chỗ bằng Row, Column, Expanded, Flexible; dựng TripCard không overflow ở màn hình 320 px, tái hiện overflow bằng test và đổi bố cục theo breakpoint với LayoutBuilder."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, layout, widget-test]
 language: vi

@@ -2,7 +2,7 @@
 slug: dotnet10-allocation-gc-disposal
 title: "Allocation, GC, IDisposable và async disposal trong .NET 10"
 summary: "Bài 27: tách cấp phát, thu gom và quyền sở hữu tài nguyên; dùng lease trả buffer đúng một lần, quan sát cleanup khi lỗi và await using."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

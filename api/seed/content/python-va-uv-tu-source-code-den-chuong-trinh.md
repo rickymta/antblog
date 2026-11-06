@@ -2,7 +2,7 @@
 slug: python-va-uv-tu-source-code-den-chuong-trinh
 title: "Python 3.14 và uv: từ source code đến chương trình tính cước"
 summary: "Bài 01: Python và CPython là gì, từ file .py tới bytecode và máy ảo; cài Python 3.14 bằng uv, đọc pyproject.toml, chạy chương trình tính cước 5 km đầu tiên của Tới Nơi. Có bài tập và lab chạy được."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, uv]
 language: vi

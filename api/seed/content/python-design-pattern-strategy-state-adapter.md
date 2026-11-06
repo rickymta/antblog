@@ -2,7 +2,7 @@
 slug: python-design-pattern-strategy-state-adapter
 title: "Design pattern kiểu Python: Strategy, State, Adapter cho Tới Nơi"
 summary: "Bài 19: Strategy bằng hàm và Protocol, State bằng bảng hay lớp, Adapter bọc SDK bản đồ trả mét. Khi nào pattern GoF rút gọn thành vài dòng Python, khi nào cần class. Có lab chạy được."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, design-pattern, strategy, adapter]
 language: vi

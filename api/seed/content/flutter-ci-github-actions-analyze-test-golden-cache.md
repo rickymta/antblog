@@ -2,7 +2,7 @@
 slug: flutter-ci-github-actions-analyze-test-golden-cache
 title: "CI với GitHub Actions: analyze, test, golden và cache pub"
 summary: "Bài 33: đưa các lệnh của bài 27 đến 32 vào workflow GitHub Actions cho Tới Nơi: trigger theo path, quyền chỉ đọc, ghim Flutter 3.47.4 và action, cache pub đúng khoá, golden trên macOS, dart analyze --fatal-infos, coverage không ngưỡng; test Dart đọc chính workflow. Workflow chưa chạy trên GitHub."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, ci, github-actions, testing]
 language: vi

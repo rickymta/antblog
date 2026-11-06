@@ -2,7 +2,7 @@
 slug: rust-ownership-move-borrow-but-toan
 title: "Ownership, move và borrow: mỗi bút toán chỉ có một chủ"
 summary: "Bài 04: ba quy tắc ownership, move, Copy và Clone, &T và &mut T qua hàm post(&mut Ledger, JournalEntry); đọc lỗi E0382, E0502, E0499 thật và hiểu vì sao bút toán đã vào sổ không bị sửa qua tham chiếu cũ."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, ownership, borrow-checker]
 language: vi

@@ -20,12 +20,101 @@
       "en": "Programming"
     },
     "description": {
-      "vi": "Ngôn ngữ, mô hình bộ nhớ, xử lý đồng thời, kiểm thử — viết các dịch vụ của dự án mẫu.",
-      "en": "Languages, memory models, concurrency, testing — building the services of the sample project."
+      "vi": "Học lập trình theo từng ngôn ngữ: C#/.NET, Rust, Flutter/Dart, Python — cú pháp, mô hình bộ nhớ, xử lý đồng thời và cách viết các dịch vụ của dự án mẫu.",
+      "en": "Learn programming language by language: C#/.NET, Rust, Flutter/Dart, Python — syntax, memory models, concurrency and how the services of the sample project are written."
     },
     "icon": "code",
     "color": "#6366F1",
     "order": 2
+  },
+  {
+    "slug": "csharp",
+    "name": {
+      "vi": "C# / .NET",
+      "en": "C# / .NET"
+    },
+    "description": {
+      "vi": "C# và .NET: từ cú pháp, LINQ, async/await đến ASP.NET Core, EF Core và vận hành dịch vụ thật.",
+      "en": "C# and .NET: from syntax, LINQ and async/await to ASP.NET Core, EF Core and running real services."
+    },
+    "icon": "code",
+    "color": "#7C3AED",
+    "order": 1,
+    "parent": "programming"
+  },
+  {
+    "slug": "rust",
+    "name": {
+      "vi": "Rust",
+      "en": "Rust"
+    },
+    "description": {
+      "vi": "Rust: quyền sở hữu, borrow checker, trait, async và viết dịch vụ an toàn bộ nhớ mà không cần GC.",
+      "en": "Rust: ownership, the borrow checker, traits, async and writing memory-safe services without a GC."
+    },
+    "icon": "code",
+    "color": "#C2410C",
+    "order": 2,
+    "parent": "programming"
+  },
+  {
+    "slug": "flutter",
+    "name": {
+      "vi": "Flutter & Dart",
+      "en": "Flutter & Dart"
+    },
+    "description": {
+      "vi": "Dart và Flutter: xây ứng dụng di động iOS/Android từ một mã nguồn, quản lý trạng thái, kiểm thử và phát hành.",
+      "en": "Dart and Flutter: building iOS/Android apps from one codebase, state management, testing and release."
+    },
+    "icon": "code",
+    "color": "#0891B2",
+    "order": 3,
+    "parent": "programming"
+  },
+  {
+    "slug": "python",
+    "name": {
+      "vi": "Python",
+      "en": "Python"
+    },
+    "description": {
+      "vi": "Python: từ nền tảng ngôn ngữ, kiểu dữ liệu, bất đồng bộ đến dịch vụ web, xử lý dữ liệu và kiểm thử.",
+      "en": "Python: from language fundamentals, data types and asyncio to web services, data processing and testing."
+    },
+    "icon": "code",
+    "color": "#CA8A04",
+    "order": 4,
+    "parent": "programming"
+  },
+  {
+    "slug": "location-routing",
+    "name": {
+      "vi": "Định vị & Chỉ đường",
+      "en": "Location & Routing"
+    },
+    "description": {
+      "vi": "Cụm dịch vụ xử lý vị trí và chỉ đường cho tài xế. Dùng nhiều ngôn ngữ (Rust, Go, Python) nhưng gom chung vì cùng một miền nghiệp vụ chuyên biệt.",
+      "en": "The cluster of location-processing and driver-routing services. It uses several languages (Rust, Go, Python) but is grouped together because of its specialised domain."
+    },
+    "icon": "location",
+    "color": "#059669",
+    "order": 5,
+    "parent": "programming"
+  },
+  {
+    "slug": "software-design",
+    "name": {
+      "vi": "Thiết kế phần mềm",
+      "en": "Software Design"
+    },
+    "description": {
+      "vi": "Thiết kế phần mềm độc lập ngôn ngữ: mẫu thiết kế, kiến trúc và thiết kế hệ thống chịu tải.",
+      "en": "Language-independent software design: design patterns, architecture and designing systems for load."
+    },
+    "icon": "architecture",
+    "color": "#DB2777",
+    "order": 3
   },
   {
     "slug": "design-pattern",
@@ -39,8 +128,8 @@
     },
     "icon": "pattern",
     "color": "#10B981",
-    "order": 3,
-    "parent": "programming"
+    "order": 1,
+    "parent": "software-design"
   },
   {
     "slug": "architecture",
@@ -54,8 +143,8 @@
     },
     "icon": "architecture",
     "color": "#8B5CF6",
-    "order": 4,
-    "parent": "programming"
+    "order": 2,
+    "parent": "software-design"
   },
   {
     "slug": "system-design",
@@ -69,8 +158,8 @@
     },
     "icon": "system",
     "color": "#0EA5E9",
-    "order": 5,
-    "parent": "programming"
+    "order": 3,
+    "parent": "software-design"
   },
   {
     "slug": "devops",
@@ -84,55 +173,13 @@
     },
     "icon": "devops",
     "color": "#F97316",
-    "order": 6
-  },
-  {
-    "slug": "security",
-    "name": {
-      "vi": "Bảo mật",
-      "en": "Security"
-    },
-    "description": {
-      "vi": "Xác thực, phân quyền, lưu mật khẩu, chống tấn công web phổ biến.",
-      "en": "Authentication, authorization, password storage, common web attacks."
-    },
-    "icon": "security",
-    "color": "#EF4444",
-    "order": 7
-  },
-  {
-    "slug": "testing",
-    "name": {
-      "vi": "Kiểm thử",
-      "en": "Testing"
-    },
-    "description": {
-      "vi": "Kiểm thử phần mềm theo khung ISTQB: nguyên lý, cấp độ, kỹ thuật thiết kế test, quản lý kiểm thử và tự động hoá.",
-      "en": "Software testing along the ISTQB framework: principles, levels, test design techniques, test management and automation."
-    },
-    "icon": "testing",
-    "color": "#14B8A6",
-    "order": 8
-  },
-  {
-    "slug": "business-analysis",
-    "name": {
-      "vi": "Phân tích nghiệp vụ (BA)",
-      "en": "Business Analysis"
-    },
-    "description": {
-      "vi": "Phân tích nghiệp vụ: khơi gợi yêu cầu, user story và tiêu chí chấp nhận, mô hình hoá quy trình, đặc tả và quản lý thay đổi yêu cầu.",
-      "en": "Business analysis: requirements elicitation, user stories and acceptance criteria, process modelling, specifications and requirements change management."
-    },
-    "icon": "analysis",
-    "color": "#EAB308",
-    "order": 9
+    "order": 4
   },
   {
     "slug": "devops-aws",
     "name": {
-      "vi": "DevOps (AWS)",
-      "en": "DevOps (AWS)"
+      "vi": "AWS",
+      "en": "AWS"
     },
     "description": {
       "vi": "CI/CD, hạ tầng và vận hành trên Amazon Web Services.",
@@ -146,8 +193,8 @@
   {
     "slug": "devops-azure",
     "name": {
-      "vi": "DevOps (Azure)",
-      "en": "DevOps (Azure)"
+      "vi": "Azure",
+      "en": "Azure"
     },
     "description": {
       "vi": "CI/CD, hạ tầng và vận hành trên Microsoft Azure.",
@@ -157,5 +204,47 @@
     "color": "#0284C7",
     "order": 2,
     "parent": "devops"
+  },
+  {
+    "slug": "security",
+    "name": {
+      "vi": "Bảo mật",
+      "en": "Security"
+    },
+    "description": {
+      "vi": "Xác thực, phân quyền, lưu mật khẩu, chống tấn công web phổ biến.",
+      "en": "Authentication, authorization, password storage, common web attacks."
+    },
+    "icon": "security",
+    "color": "#EF4444",
+    "order": 5
+  },
+  {
+    "slug": "testing",
+    "name": {
+      "vi": "Kiểm thử",
+      "en": "Testing"
+    },
+    "description": {
+      "vi": "Kiểm thử phần mềm theo khung ISTQB: nguyên lý, cấp độ, kỹ thuật thiết kế test, quản lý kiểm thử và tự động hoá.",
+      "en": "Software testing along the ISTQB framework: principles, levels, test design techniques, test management and automation."
+    },
+    "icon": "testing",
+    "color": "#14B8A6",
+    "order": 6
+  },
+  {
+    "slug": "business-analysis",
+    "name": {
+      "vi": "Phân tích nghiệp vụ (BA)",
+      "en": "Business Analysis"
+    },
+    "description": {
+      "vi": "Phân tích nghiệp vụ: khơi gợi yêu cầu, user story và tiêu chí chấp nhận, mô hình hoá quy trình, đặc tả và quản lý thay đổi yêu cầu.",
+      "en": "Business analysis: requirements elicitation, user stories and acceptance criteria, process modelling, specifications and requirements change management."
+    },
+    "icon": "analysis",
+    "color": "#EAB308",
+    "order": 7
   }
 ]

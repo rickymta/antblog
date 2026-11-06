@@ -2,7 +2,7 @@
 slug: dotnet10-repository-unit-of-work
 title: "Repository và Unit of Work với EF Core: aggregate, tracking và commit"
 summary: "Bài 33: repository theo Trip aggregate, read port riêng, mapping domain event vào Outbox và một điểm commit local; không bọc mọi API EF thành CRUD generic."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi

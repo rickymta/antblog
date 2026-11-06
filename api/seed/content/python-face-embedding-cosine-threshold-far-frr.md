@@ -2,7 +2,7 @@
 slug: python-face-embedding-cosine-threshold-far-frr
 title: "Embedding và so khớp: cosine, ngưỡng, FAR/FRR và ROC"
 summary: "Bài 49: embedding khuôn mặt bằng SFace (ONNX), cosine bằng numpy, ROC, FAR/FRR, EER tự tính trên Olivetti; báo riêng ảnh không lấy được mặt, chọn ngưỡng theo chi phí và kiểm trên nhiều cách chia người. Có số đo thật."
-category: programming
+category: python
 level: advanced
 tags: [python, toi-noi, face-embedding, onnx, far-frr]
 language: vi

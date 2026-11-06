@@ -2,7 +2,7 @@
 slug: python-fastapi-jwt-oauth2-authorization
 title: "Authentication và authorization: khách, tài xế, điều phối"
 summary: "Bài 34: bảo vệ API FastAPI bằng OAuth2 password và bearer: mật khẩu băm argon2, JWT HS256 ký bằng PyJWT, scope customer/driver/dispatcher, 401 khác 403. Có chín ca token xấu và lab chạy thật."
-category: programming
+category: python
 level: intermediate
 tags: [python, toi-noi, fastapi, jwt, security]
 language: vi

@@ -2,7 +2,7 @@
 slug: flutter-clean-architecture-domain-data-presentation-mobile
 title: "Clean Architecture cho mobile: domain, data, presentation và repository"
 summary: "Bài 21: chia luồng đặt chuyến thành domain, data và presentation với một chiều phụ thuộc; repository là interface do domain sở hữu, DTO và ApiFailure được đổi ở lớp data, use case chỉ giữ khi có quy tắc, provider nối lớp, test đọc source để khoá chiều import và phân tích khi nào kiến trúc quá tay."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, architecture, clean-architecture, riverpod, repository]
 language: vi

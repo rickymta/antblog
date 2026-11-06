@@ -2,7 +2,7 @@
 slug: csharp-debug-exception-bao-gia
 title: "Debug và exception: lần theo một báo giá sai trong C#"
 summary: "Bài 05: tái hiện sai lệch đơn vị, đặt breakpoint, đọc call stack và phân biệt validation với exception. Không nuốt lỗi thành báo giá 0 VND."
-category: programming
+category: csharp
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

@@ -2,7 +2,7 @@
 slug: flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia
 title: "Widget, cây widget và hot reload: màn hình báo giá đầu tiên"
 summary: "Bài 07: dựng màn hình báo giá đầu tiên của Tới Nơi bằng StatelessWidget; phân biệt Widget, Element và RenderObject bằng source framework, hiểu vì sao build chạy nhiều mà app vẫn nhanh, hot reload khác hot restart ở đâu và viết widget test kiểm cước 5 km."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, widget, testing]
 language: vi

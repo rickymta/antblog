@@ -2,7 +2,7 @@
 slug: rust-validation-problem-details-openapi-utoipa
 title: "Validation, Problem Details và OpenAPI với utoipa: hợp đồng API"
 summary: "Bài 32: validate thủ công gom mọi lỗi theo trường, trả application/problem+json (RFC 9457), ánh xạ LedgerError sang 422/409, bắt rejection của axum::Json và sinh OpenAPI 3.1 bằng utoipa kèm Swagger UI."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, openapi, utoipa]
 language: vi

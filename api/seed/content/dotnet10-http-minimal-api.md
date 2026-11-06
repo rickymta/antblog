@@ -2,7 +2,7 @@
 slug: dotnet10-http-minimal-api
 title: "HTTP và Minimal API: xuất bản endpoint báo giá bằng ASP.NET Core 10"
 summary: "Bài 16: đưa policy đã kiểm thử lên POST /quotes, hiểu JSON binding, status code và DI; API tính báo giá chưa tạo tài nguyên hay lưu chuyến."
-category: programming
+category: csharp
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi

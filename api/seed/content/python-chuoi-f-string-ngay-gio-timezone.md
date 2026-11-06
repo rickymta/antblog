@@ -2,7 +2,7 @@
 slug: python-chuoi-f-string-ngay-gio-timezone
 title: "Chuỗi, f-string, ngày giờ và múi giờ: hiển thị đúng, lưu đúng"
 summary: "Bài 04: str, bytes và UTF-8 với «Tới Nơi», f-string và format_vnd, datetime naive và aware, zoneinfo Asia/Ho_Chi_Minh, ISO 8601, timedelta; lưu UTC, hiển thị giờ địa phương, tính đúng ngày chuyến."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, datetime, unicode]
 language: vi

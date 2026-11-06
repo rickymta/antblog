@@ -2,7 +2,7 @@
 slug: dart-ham-class-enum-sealed-pattern-matching-trang-thai-chuyen
 title: "Hàm, class, enum và sealed class: mô hình trạng thái chuyến bằng Dart"
 summary: "Bài 03: viết hàm có tham số đặt tên, class bất biến Trip, enhanced enum tám trạng thái chuyến, sealed class TripEvent và switch vét cạn; dùng record và pattern matching để chuyển trạng thái an toàn, có bảng test mọi cặp trạng thái–sự kiện."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, pattern-matching]
 language: vi

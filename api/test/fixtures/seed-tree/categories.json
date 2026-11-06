@@ -1,0 +1,5 @@
+[
+  { "slug": "database", "name": { "vi": "Cơ sở dữ liệu", "en": "Databases" }, "description": { "vi": "SQL, NoSQL", "en": "SQL, NoSQL" }, "icon": "database", "color": "#2563EB", "order": 1 },
+  { "slug": "programming", "name": { "vi": "Lập trình", "en": "Programming" }, "description": { "vi": "Theo ngôn ngữ", "en": "By language" }, "icon": "code", "color": "#6366F1", "order": 2 },
+  { "slug": "rust", "name": { "vi": "Rust", "en": "Rust" }, "description": { "vi": "Rust", "en": "Rust" }, "icon": "code", "color": "#C2410C", "order": 1, "parent": "programming" }
+]

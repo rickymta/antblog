@@ -19,8 +19,8 @@ Loạt gồm **64 bài** chia **8 phần**, mỗi phần tối đa 10 bài, đi 
 |---|---|
 | Article ID | `FL-01` … `FL-64`, tăng dần theo thứ tự đọc. Một bài chỉ thuộc một phần |
 | Slug | Chữ thường ASCII, gạch nối, ≤ 80 ký tự, bắt đầu bằng `flutter-` (bài Flutter) hoặc `dart-` (bài Dart thuần). Duy nhất trong toàn blog |
-| Frontmatter | `category: programming`, `level: beginner \| intermediate \| advanced`, `tags` luôn có `flutter`, `dart`, `mobile`, `toi-noi`; thêm `ios`, `android`, `release`… theo bài. `summary` bắt đầu bằng `Bài NN:` |
-| Lộ trình học | `learning-paths.json` slug `flutter-toi-noi-ios-android`, tên **Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android**, level `beginner`, category `programming`. Chỉ liệt kê bài đã viết |
+| Frontmatter | `category: flutter`, `level: beginner \| intermediate \| advanced`, `tags` luôn có `flutter`, `dart`, `mobile`, `toi-noi`; thêm `ios`, `android`, `release`… theo bài. `summary` bắt đầu bằng `Bài NN:` |
+| Lộ trình học | `learning-paths.json` slug `flutter-toi-noi-ios-android`, tên **Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android**, level `beginner`, category `flutter`. Chỉ liệt kê bài đã viết |
 | Phần (Part) | P1 … P8. Mỗi phần có một bài kết thúc gắn kết các bài trong phần (bài lab tổng hợp hoặc bài bản lề sang phần sau) |
 | Mức bài | `beginner` (cơ bản): đọc xong chạy được, không cần kiến thức trước ngoài bài trước; `intermediate` (trung bình): kết hợp nhiều cơ chế, cần hiểu trade-off; `advanced` (nâng cao): đụng tới nền tảng, vận hành, nhiều ràng buộc thật của store/OS |
 | Thời lượng đọc | 8–14 phút (bài UI có nhiều code hơn bài Dart); bài tổng hợp có thể dài hơn |

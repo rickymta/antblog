@@ -2,7 +2,7 @@
 slug: dotnet10-use-case-dat-chuyen-end-to-end
 title: "Ghép use case đặt chuyến: validation, transaction, domain event và kiểm thử"
 summary: "Bài 34: lần theo POST /trips từ subject đã xác thực đến aggregate và commit PostgreSQL; kiểm replay, conflict và hai tài xế cùng nhận bằng HTTP thật trong test host."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi

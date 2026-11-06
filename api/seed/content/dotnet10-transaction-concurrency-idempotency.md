@@ -2,7 +2,7 @@
 slug: dotnet10-transaction-concurrency-idempotency
 title: "Transaction, optimistic concurrency và idempotency: đặt chuyến an toàn với PostgreSQL"
 summary: "Bài 23: kiểm rollback thật, phát hiện version cũ bằng EF Core và dùng khóa idempotency kèm unique constraint để một ý định đặt chuyến có một kết quả bền."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, postgresql, ef-core]
 language: vi

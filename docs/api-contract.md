@@ -146,6 +146,7 @@ Cần đăng nhập với vai trò `admin` hoặc `author` (`reader` ⇒ 403). `
 | DELETE | `/admin/articles/:id` | chuyển `archived` (không xoá cứng); 204 |
 
 `ArticleInput = { title (3–200), slug? (a-z0-9-, tự sinh từ tiêu đề bỏ dấu nếu trống), summary (≤ 400), content (Markdown), coverImageUrl?, language: 'vi'|'en', categoryId, level, tags: string[] (≤ 10, chữ thường) }`
+`categoryId` của bài chỉ được là chủ đề lá (chủ đề không có chủ đề con): `POST/PUT /admin/articles` với chủ đề cha ⇒ 400 `VALIDATION_ERROR`, `details.fields.categoryId`. Chủ đề cha chỉ liệt kê chủ đề con; lộ trình học vẫn được trỏ tới chủ đề cha.
 `readingMinutes` do API tính: số từ của `content` (bỏ thẻ HTML/SVG, khối mã tính 1/2) ÷ 200, làm tròn lên, tối thiểu 1.
 
 ### 7.3 Chủ đề

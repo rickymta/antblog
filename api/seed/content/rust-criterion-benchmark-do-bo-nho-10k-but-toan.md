@@ -2,7 +2,7 @@
 slug: rust-criterion-benchmark-do-bo-nho-10k-but-toan
 title: "criterion và đo bộ nhớ: sổ cái có ghi nổi 10.000 bút toán/giây không?"
 summary: "Bài 30: đo thay vì đoán. criterion với black_box, debug so với release, dhat đếm allocation, rồi ghi 10.000 bút toán vào PostgreSQL thật: trên máy viết bài, chỉ gộp lô bằng unnest vượt 10.000 bút toán/giây."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, benchmark, criterion, dhat]
 language: vi

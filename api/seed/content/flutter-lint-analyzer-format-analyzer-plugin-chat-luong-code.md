@@ -2,7 +2,7 @@
 slug: flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code
 title: "Lint, analyzer, dart format và analyzer plugin: chất lượng code có kiểm chứng"
 summary: "Bài 32: dựng cổng chất lượng cho Tới Nơi: analysis_options với flutter_lints và ba cờ strict, riverpod_lint qua analyzer plugin chính thức (custom_lint không còn là đường khuyên dùng), một lint tự viết cấm presentation import data và test bằng analyzer_testing, dart format, dart fix, pre-commit."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, lint, analyzer, riverpod, testing]
 language: vi

@@ -6,6 +6,7 @@ import {
   Database,
   FlaskConical,
   Infinity as InfinityIcon,
+  MapPin,
   Network,
   Puzzle,
   Shield,
@@ -69,6 +70,7 @@ export const CATEGORY_ICON_COMPONENT: Record<CategoryIconName, LucideIcon> = {
   security: Shield,
   testing: FlaskConical,
   analysis: ClipboardList,
+  location: MapPin,
 };
 
 /** Ô biểu tượng chủ đề: nền màu chủ đề, biểu tượng trắng. */

@@ -2,7 +2,7 @@
 slug: python-mongodb-pymongo-motor-document-ocr
 title: "MongoDB với pymongo/motor: lưu kết quả OCR dạng document"
 summary: "Bài 26: lưu kết quả OCR giấy tờ thành document MongoDB bằng AsyncMongoClient của PyMongo: insert, find, unique index, validator, explain và schema_version; Motor đã deprecated. Có lab chạy thật."
-category: programming
+category: python
 level: intermediate
 tags: [python, toi-noi, mongodb, pymongo, ocr]
 language: vi

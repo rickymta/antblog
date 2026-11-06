@@ -2,7 +2,7 @@
 slug: flutter-statefulwidget-lifecycle-setstate-chon-dich-vu
 title: "StatefulWidget, lifecycle và setState: chọn dịch vụ và đếm ngược tìm tài xế"
 summary: "Bài 10: tại sao widget bất biến mà màn hình vẫn đổi; vòng đời State (initState, didUpdateWidget, dispose), phạm vi rebuild của setState, Timer.periodic huỷ đúng chỗ, mounted sau await và khi nào cần GlobalKey. Có ServicePicker, SearchingCountdown và 37 test dùng pump."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, state, lifecycle, testing]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-tong-hop-ledger-core-cargo-doc-workspace
 title: "Bài tổng hợp cấp cơ bản: thư viện ledger-core có bất biến, test và tài liệu"
 summary: "Bài 20: gom P02 thành workspace ledger-core và ledger-cli; bảng bất biến double-entry và test chứng minh; cargo doc với deny(missing_docs), clippy pedantic có chọn lọc; điều còn thiếu trước khi thành service."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, workspace, cargo-doc, clippy]
 language: vi

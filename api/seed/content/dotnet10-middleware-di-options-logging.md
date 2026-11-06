@@ -2,7 +2,7 @@
 slug: dotnet10-middleware-di-options-logging
 title: "Middleware, DI lifetime, cấu hình và logging trong ASP.NET Core 10"
 summary: "Bài 18: theo dõi request qua middleware, quan sát scoped/transient, validate options khi khởi động và tiêm TimeProvider để kiểm thử thời gian."
-category: programming
+category: csharp
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi

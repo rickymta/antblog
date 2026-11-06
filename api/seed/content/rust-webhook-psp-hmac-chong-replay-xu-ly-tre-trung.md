@@ -2,7 +2,7 @@
 slug: rust-webhook-psp-hmac-chong-replay-xu-ly-tre-trung
 title: "Webhook từ VíXanh: verify chữ ký HMAC, chống replay, xử lý trễ và trùng"
 summary: "Bài 38: endpoint axum đọc body thô, verify HMAC-SHA256 bằng verify_slice, chặn replay bằng cửa sổ thời gian, khử trùng bằng external_ref, xử lý webhook đến trước hay sau event nội bộ, xoay vòng khóa."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, webhook, hmac]
 language: vi

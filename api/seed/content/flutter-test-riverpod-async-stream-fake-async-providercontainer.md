@@ -2,7 +2,7 @@
 slug: flutter-test-riverpod-async-stream-fake-async-providercontainer
 title: "Kiểm thử Riverpod, async và Stream: ProviderContainer, fakeAsync, fake clock"
 summary: "Bài 30: test provider Riverpod bằng ProviderContainer.test và container.listen, tắt hoặc chạy retry trên fake_async, tiêm Clock cho hạn báo giá và đếm ngược nhận cuốc, test Stream vị trí tài xế với emitsInOrder, timeout, huỷ subscription; phân biệt fakeAsync với testWidgets."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, testing, riverpod, fake-async]
 language: vi

@@ -25,7 +25,7 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 | Mã bài | `PY-01` … `PY-79`, tăng dần theo phần. |
 | Mã phần | `P01` … `P10`. |
 | Slug | Chữ thường ASCII, gạch nối, bắt đầu bằng `python-`, ≤ 60 ký tự, duy nhất. |
-| Category | `programming` (giống loạt C#). Tags luôn có `python`, `toi-noi`, thêm tag chủ đề (`fastapi`, `asyncio`, `ocr`, `fraud`…). |
+| Category | `python` (chủ đề lá riêng, không dùng chủ đề cha `programming`). Tags luôn có `python`, `toi-noi`, thêm tag chủ đề (`fastapi`, `asyncio`, `ocr`, `fraud`…). |
 | Level | `beginner` (P01–P02) · `intermediate` (P03–P04) · `advanced` (P05–P10). Có thể lệch một bậc khi bài thực sự khó/dễ hơn phần. |
 | Phiên bản | **Python 3.14** (bản ổn định hiện tại), quản lý bằng **uv** (`uv python install 3.14`, `uv run`). Không dùng tính năng còn ở bản rc. Free-threaded build chỉ nhắc ở bài 22 với phạm vi thử nghiệm. |
 | Thư viện chính | pytest · pydantic v2 · FastAPI · SQLAlchemy 2 + psycopg 3 · pymongo/motor · redis-py · aiokafka · grpcio · NumPy · OpenCV · Pillow · scikit-learn · LightGBM · polars · OpenTelemetry. Phiên bản pin trong `pyproject.toml` của từng lab. |
@@ -35,7 +35,7 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 
 ### 2.2 Template một bài (giống loạt C#)
 
-1. Frontmatter: `slug`, `title`, `summary` (bắt đầu bằng «Bài NN: …»), `category: programming`, `level`, `tags`, `language: vi`.
+1. Frontmatter: `slug`, `title`, `summary` (bắt đầu bằng «Bài NN: …»), `category: python`, `level`, `tags`, `language: vi`.
 2. Mở bài bằng một tình huống thật của Tới Nơi (1–2 đoạn), câu «Đây là bài NN của lộ trình …».
 3. Callout «Thử trước khi đọc» (`tkh-callout tkh-callout--example`) với một câu hỏi và `<details>` đáp án.
 4. 4–7 mục `##` giải thích cơ chế; ít nhất **một hình SVG nội tuyến** theo bộ lớp `packages/ui/src/article.css` (`f-phys-soft`, `s-phys`, `t-b`, `t-small`, `f-pk-soft`, `f-warn-soft`…), có `role="img"`, `aria-label`, `figcaption` «Hình N. …».

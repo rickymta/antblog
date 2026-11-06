@@ -2,7 +2,7 @@
 slug: dotnet10-clean-architecture-layers
 title: "Clean Architecture: chia Domain, Application, Infrastructure và API của Tới Nơi"
 summary: "Bài 31: ghép service mẫu bốn tầng, giữ phụ thuộc hướng vào lõi và phân biệt chiều gọi runtime với chiều tham chiếu mã nguồn."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi
