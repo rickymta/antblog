@@ -45,6 +45,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"   #
 4. Việc không chạy được thì viết thẳng là chưa chạy và vì sao. Không bao giờ giả vờ đã thành công.
 5. Không có GPS người thật. Dữ liệu chuyến, GPS, tắc nghẽn đều do simulator sinh ra. Không gán số cho công ty thật nếu không có nguồn công bố. Không ghi giá tiền provider hay cloud.
 6. Trích dẫn bài báo, văn bản pháp luật chỉ sau khi kiểm tra được nguồn; không chắc thì viết rõ là cần kiểm lại, không tự chế số hiệu, năm, tác giả.
+7. Máy viết dùng chung với nhiều việc khác và thường chịu tải rất nặng, nên số **thời gian** nhiễu và phóng đại, trong khi số đếm, tỉ lệ, sai số thì tái lập được. Trong bài: nêu thời gian kèm câu «đo khi máy đang chịu tải nặng», ưu tiên tỉ lệ so sánh trong cùng một lần chạy, không kết luận về thời gian tuyệt đối. Trong `results/`: ghi `uptime` khi đo.
 
 ## Cấu trúc một bài
 
