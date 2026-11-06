@@ -549,5 +549,23 @@
       "ba-thuc-hanh-review-goi-yeu-cau"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p05-du-lieu-api-tich-hop",
+    "title": "BA · Phần 5 · Dữ liệu, API và tích hợp",
+    "description": "Tám bài về glossary, dictionary, API, SQL, mapping, event, idempotency và review hợp đồng hoàn tiền. Ba bài cơ bản, ba trung bình, hai nâng cao.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-domain-glossary-mo-hinh-du-lieu",
+      "ba-data-dictionary-don-vi-null",
+      "ba-doc-api-request-response-loi",
+      "ba-sql-kiem-chung-gia-thuyet",
+      "ba-mapping-du-lieu-doi-soat",
+      "ba-event-dong-bo-trang-thai-cho",
+      "ba-idempotency-retry-giao-dich-loi",
+      "ba-thuc-hanh-hop-dong-hoan-tien"
+    ],
+    "status": "published"
   }
 ]

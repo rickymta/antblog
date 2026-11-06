@@ -57,3 +57,5 @@ Các vai trò trên là phân công giả lập của Tới Nơi cho bài tập,
 5. Yêu cầu mới có được ghi là đề xuất, tránh bị hiểu là SPEC đã duyệt không?
 
 P04 hoàn thành BA-025–BA-032; [gói yêu cầu điểm đón](p04-goi-yeu-cau.md) là thiết kế đề xuất, chưa có trong lab theo R-GEN-06.
+
+P05 hoàn thành BA-033–BA-040; [hồ sơ tích hợp](p05-tich-hop.md) gồm dữ liệu SQL độc lập và hợp đồng refund đề xuất.

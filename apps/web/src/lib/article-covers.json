@@ -3218,5 +3218,85 @@
       "EXAMPLES",
       "REVIEW"
     ]
+  },
+  "ba-domain-glossary-mo-hinh-du-lieu": {
+    "title": "DOMAIN LANGUAGE",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "network",
+    "labels": [
+      "TERMS",
+      "RELATIONS",
+      "MEANING"
+    ]
+  },
+  "ba-data-dictionary-don-vi-null": {
+    "title": "DATA DICTIONARY",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "checklist",
+    "labels": [
+      "TYPE",
+      "UNIT",
+      "NULL"
+    ]
+  },
+  "ba-doc-api-request-response-loi": {
+    "title": "READ THE API",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "flow",
+    "labels": [
+      "REQUEST",
+      "OUTCOME",
+      "ERROR"
+    ]
+  },
+  "ba-sql-kiem-chung-gia-thuyet": {
+    "title": "SQL FOR BA",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "code",
+    "labels": [
+      "COHORT",
+      "COUNTS",
+      "EVIDENCE"
+    ]
+  },
+  "ba-mapping-du-lieu-doi-soat": {
+    "title": "RECONCILIATION",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "split",
+    "labels": [
+      "INTERNAL",
+      "MATCH",
+      "PROVIDER"
+    ]
+  },
+  "ba-event-dong-bo-trang-thai-cho": {
+    "title": "ASYNC OUTCOMES",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "cycle",
+    "labels": [
+      "REQUEST",
+      "WAIT",
+      "CONFIRM"
+    ]
+  },
+  "ba-idempotency-retry-giao-dich-loi": {
+    "title": "ONE INTENT",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "flow",
+    "labels": [
+      "KEY",
+      "RETRY",
+      "RESULT"
+    ]
+  },
+  "ba-thuc-hanh-hop-dong-hoan-tien": {
+    "title": "BA CASE / 05",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "checklist",
+    "labels": [
+      "CONTRACT",
+      "EXCEPTIONS",
+      "REVIEW"
+    ]
   }
 }

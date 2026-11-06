@@ -76,3 +76,5 @@ Chấm 0–2 cho: phát hiện đúng trigger; sửa có căn cứ; nhất quán
 - [Use case](/articles/ba-use-case-xac-nhan-diem-don), [NFR](/articles/ba-yeu-cau-phi-chuc-nang-do-duoc).
 
 Phần 5 tiếp tục dữ liệu, API và tích hợp cho BA; các trường dữ liệu mới của P04 vẫn là đề xuất cần review, không mặc định đã tồn tại trong lab.
+
+Bắt đầu phần 5: [glossary và mô hình dữ liệu](/articles/ba-domain-glossary-mo-hinh-du-lieu).
