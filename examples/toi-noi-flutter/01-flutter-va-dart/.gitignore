@@ -1,0 +1,14 @@
+# Dart / Flutter
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Sinh ra khi chạy hoặc build, không commit
+ios/Pods/
+ios/Flutter/ephemeral/
+android/.gradle/
+android/local.properties

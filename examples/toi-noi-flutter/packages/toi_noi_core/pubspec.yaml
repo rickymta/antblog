@@ -1,0 +1,14 @@
+name: toi_noi_core
+description: "Thư viện domain dùng chung của Tới Nơi: Money, cước, trạng thái chuyến, sự kiện và Trip bất biến (Flutter qua Tới Nơi, bài 06)."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  collection: ^1.19.1
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.33.0

@@ -988,5 +988,65 @@
       "DELIVERY",
       "EVIDENCE"
     ]
+  },
+  "flutter-va-dart-tu-source-code-den-ung-dung-toi-noi": {
+    "title": "FLUTTER / DART",
+    "subtitle": "Flutter 01 · From source code to a running app",
+    "diagram": "layers",
+    "labels": [
+      "DART APP",
+      "FRAMEWORK",
+      "ENGINE"
+    ]
+  },
+  "dart-bien-kieu-du-lieu-null-safety-tinh-cuoc": {
+    "title": "TYPES / NULL",
+    "subtitle": "Flutter 02 · int for VND, null as a contract",
+    "diagram": "split",
+    "labels": [
+      "INT VND",
+      "DOUBLE KM",
+      "NULLABLE"
+    ]
+  },
+  "dart-ham-class-enum-sealed-pattern-matching-trang-thai-chuyen": {
+    "title": "STATE / SEALED",
+    "subtitle": "Flutter 03 · Eight statuses, exhaustive switch",
+    "diagram": "cycle",
+    "labels": [
+      "REQUESTED",
+      "ACCEPTED",
+      "COMPLETED"
+    ]
+  },
+  "dart-collections-generics-extension-danh-sach-chuyen": {
+    "title": "COLLECTIONS / LAZY",
+    "subtitle": "Flutter 04 · List, Set, Map and lazy iterables",
+    "diagram": "matrix",
+    "labels": [
+      "LIST",
+      "SET",
+      "MAP"
+    ]
+  },
+  "dart-future-async-await-stream-bao-gia-va-vi-tri": {
+    "title": "ASYNC / STREAM",
+    "subtitle": "Flutter 05 · Event loop, Future and Stream",
+    "diagram": "flow",
+    "labels": [
+      "FUTURE",
+      "AWAIT",
+      "STREAM"
+    ]
+  },
+  "dart-package-pubspec-lint-test-toi-noi-core": {
+    "title": "PACKAGE / TEST",
+    "subtitle": "Flutter 06 · pubspec, lints and dart test",
+    "diagram": "checklist",
+    "labels": [
+      "PUBSPEC",
+      "LINTS",
+      "DART TEST"
+    ]
   }
 }

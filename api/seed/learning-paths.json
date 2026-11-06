@@ -136,5 +136,21 @@
       "dotnet10-tong-hop-service-dat-chuyen"
     ],
     "status": "published"
+  },
+  {
+    "slug": "flutter-toi-noi-ios-android",
+    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1.",
+    "level": "beginner",
+    "category": "programming",
+    "articles": [
+      "flutter-va-dart-tu-source-code-den-ung-dung-toi-noi",
+      "dart-bien-kieu-du-lieu-null-safety-tinh-cuoc",
+      "dart-ham-class-enum-sealed-pattern-matching-trang-thai-chuyen",
+      "dart-collections-generics-extension-danh-sach-chuyen",
+      "dart-future-async-await-stream-bao-gia-va-vi-tri",
+      "dart-package-pubspec-lint-test-toi-noi-core"
+    ],
+    "status": "published"
   }
 ]

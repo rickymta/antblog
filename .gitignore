@@ -23,3 +23,13 @@ examples/toi-noi-dotnet/**/obj/
 
 # BenchmarkDotNet generated measurements/build artifacts
 BenchmarkDotNet.Artifacts/
+
+# Flutter/Dart example labs
+examples/toi-noi-flutter/**/.dart_tool/
+examples/toi-noi-flutter/**/build/
+examples/toi-noi-flutter/**/.flutter-plugins-dependencies
+examples/toi-noi-flutter/**/ios/Pods/
+examples/toi-noi-flutter/**/ios/.symlinks/
+examples/toi-noi-flutter/**/android/.gradle/
+examples/toi-noi-flutter/**/android/local.properties
+examples/toi-noi-flutter/**/*.iml
