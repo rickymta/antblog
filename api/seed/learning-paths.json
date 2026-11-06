@@ -140,7 +140,7 @@
   {
     "slug": "flutter-toi-noi-ios-android",
     "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android",
-    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1–3.",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1–4.",
     "level": "beginner",
     "category": "programming",
     "articles": [
@@ -169,7 +169,14 @@
       "flutter-go-router-deep-link-shellroute-guard",
       "flutter-authentication-otp-jwt-refresh-token-secure-storage",
       "flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod",
-      "flutter-code-generation-freezed-json-serializable-riverpod-generator"
+      "flutter-code-generation-freezed-json-serializable-riverpod-generator",
+      "flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case",
+      "flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia",
+      "flutter-golden-test-semantics-test-giao-dien-on-dinh",
+      "flutter-test-riverpod-async-stream-fake-async-providercontainer",
+      "flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi",
+      "flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code",
+      "flutter-ci-github-actions-analyze-test-golden-cache"
     ],
     "status": "published"
   }

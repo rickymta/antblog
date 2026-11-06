@@ -1248,5 +1248,75 @@
       "GENERATED",
       "RUNNER"
     ]
+  },
+  "flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case": {
+    "title": "UNIT TEST",
+    "subtitle": "Flutter 27 · mocktail, fakes, fare rules and use cases",
+    "diagram": "checklist",
+    "labels": [
+      "FAKE",
+      "MOCK",
+      "VERIFY"
+    ]
+  },
+  "flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia": {
+    "title": "WIDGET TEST",
+    "subtitle": "Flutter 28 · pumpWidget, finders and matchers",
+    "diagram": "code",
+    "labels": [
+      "PUMP",
+      "FIND",
+      "EXPECT"
+    ]
+  },
+  "flutter-golden-test-semantics-test-giao-dien-on-dinh": {
+    "title": "GOLDEN / SEMANTICS",
+    "subtitle": "Flutter 29 · Lock the UI and accessibility guidelines",
+    "diagram": "matrix",
+    "labels": [
+      "GOLDEN",
+      "DIFF",
+      "A11Y"
+    ]
+  },
+  "flutter-test-riverpod-async-stream-fake-async-providercontainer": {
+    "title": "TEST ASYNC",
+    "subtitle": "Flutter 30 · ProviderContainer, fakeAsync, fake clock",
+    "diagram": "flow",
+    "labels": [
+      "CONTAINER",
+      "FAKE ASYNC",
+      "CLOCK"
+    ]
+  },
+  "flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi": {
+    "title": "INTEGRATION",
+    "subtitle": "Flutter 31 · Patrol and the booking flow on devices",
+    "diagram": "network",
+    "labels": [
+      "DEVICE",
+      "PATROL",
+      "NATIVE"
+    ]
+  },
+  "flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code": {
+    "title": "LINT / FORMAT",
+    "subtitle": "Flutter 32 · Analyzer, custom_lint and zero warnings",
+    "diagram": "checklist",
+    "labels": [
+      "ANALYZE",
+      "FORMAT",
+      "FIX"
+    ]
+  },
+  "flutter-ci-github-actions-analyze-test-golden-cache": {
+    "title": "CI / TESTS",
+    "subtitle": "Flutter 33 · GitHub Actions, cache, coverage, goldens",
+    "diagram": "flow",
+    "labels": [
+      "ANALYZE",
+      "TEST",
+      "REPORT"
+    ]
   }
 }

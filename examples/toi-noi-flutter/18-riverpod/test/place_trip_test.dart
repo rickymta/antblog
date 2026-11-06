@@ -122,7 +122,7 @@ void main() {
         final pending = notifier.place(quoteFor(5));
         subscription.close(); // khách rời màn hình
         await container.pump();
-        expect(container.exists(placeTripProvider), isFalse);
+        expect(container.read(placeTripProvider.exists), isFalse);
 
         reply.complete(tripFor('T-0001'));
         await pending; // không ném lỗi

@@ -1,0 +1,5 @@
+tags:
+  # Test so ảnh với ảnh chuẩn (baseline) đã commit. Ảnh chuẩn của lab sinh
+  # trên macOS; chạy riêng bằng `flutter test --tags golden`, bỏ qua bằng
+  # `flutter test --exclude-tags golden`.
+  golden:

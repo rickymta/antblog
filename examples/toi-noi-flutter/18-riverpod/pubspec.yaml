@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^3.4.3
+  flutter_riverpod: ^3.5.0
   toi_noi_core:
     path: ../packages/toi_noi_core
   toi_noi_ui:

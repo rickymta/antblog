@@ -1,7 +1,7 @@
 ---
 slug: flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen
 title: "Riverpod: Provider, Notifier và AsyncNotifier cho luồng đặt chuyến"
-summary: "Bài 18: dựng luồng đặt chuyến bằng flutter_riverpod 3.4: ProviderScope, Provider, Notifier, FutureProvider và AsyncNotifier, ref.watch/read/listen, AsyncValue, family, auto-dispose, retry mặc định và override để test. Có 87 test, kiểm các phát biểu về retry và dispose."
+summary: "Bài 18: dựng luồng đặt chuyến bằng flutter_riverpod 3.5: ProviderScope, Provider, Notifier, FutureProvider và AsyncNotifier, ref.watch/read/listen, AsyncValue, family, auto-dispose, retry mặc định và override để test. Có 87 test, kiểm các phát biểu về retry và dispose."
 category: programming
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, riverpod, state-management]
@@ -12,7 +12,7 @@ Khách mở app Tới Nơi, chọn **Giao đồ ăn** và nâng quãng đường
 
 Riverpod lo đúng phần đó. Mỗi mảnh state là một **provider** có tên, provider này đọc provider kia và tự tính lại khi nguồn đổi, còn lỗi và trạng thái chờ được gói trong `AsyncValue`. Đây là bài 18 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 17 về InheritedWidget và ChangeNotifier](/articles/flutter-state-inheritedwidget-changenotifier-bao-gia) trước, và nắm `Future` ở [bài 05](/articles/dart-future-async-await-stream-bao-gia-va-vi-tri). Mọi ví dụ dùng `Trip`, `Money` và `calculateFare` của [`toi_noi_core`](/articles/dart-package-pubspec-lint-test-toi-noi-core), bảng giá là số minh hoạ của hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi).
 
-Bài dựa trên `flutter_riverpod` **3.4.3**. Nhiều hướng dẫn trên mạng viết cho Riverpod 2 và không còn đúng, nên mọi câu về retry, dispose và `mounted` dưới đây có test hoặc mã nguồn package làm chứng.
+Bài dựa trên `flutter_riverpod` **3.5.0**. Nhiều hướng dẫn trên mạng viết cho Riverpod 2 và không còn đúng, nên mọi câu về retry, dispose và `mounted` dưới đây có test hoặc mã nguồn package làm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -120,11 +120,11 @@ Future<ProviderContainer> pumpApp(
 }
 ```
 
-Test không cần widget thì dùng `ProviderContainer.test(overrides: [...])`, tự `dispose` container cuối mỗi test nhờ `addTearDown`.
+Test không cần widget dùng `ProviderContainer.test(overrides: [...])`, tự `dispose` cuối mỗi test.
 
-Một vài điều khác tài liệu cũ, đã đối chiếu với `CHANGELOG.md` và mã nguồn của `riverpod` 3.4.3:
+Một vài điều khác tài liệu cũ, đã đối chiếu với `CHANGELOG.md` và mã nguồn của `riverpod` 3.5.0:
 
-| Cách viết cũ (Riverpod 2) | Riverpod 3.4.3 |
+| Cách viết cũ (Riverpod 2) | Riverpod 3.5.0 |
 |---|---|
 | `FutureProviderRef`, `AutoDisposeNotifier`, `FamilyNotifier` | Chỉ còn một `Ref`, `Notifier` và `AsyncNotifier`; tham số của family đi vào hàm tạo (chữ ký trong `builder.dart`) |
 | Provider lỗi thì dừng ở lỗi | Tự thử lại theo chính sách mặc định (mục 6) |
@@ -385,7 +385,7 @@ final tripByIdProvider = FutureProvider.autoDispose.family<Trip, String>((
 
 `tripByIdProvider('T-1')` bằng `tripByIdProvider('T-1')` và khác `tripByIdProvider('T-2')`; hai nơi cùng nghe một mã dùng chung một lần gọi repository (test `mỗi id có state riêng`). Ghi đè một thành viên cũng được: `tripByIdProvider('T-9').overrideWithValue(AsyncData(chuyến))`, hoặc cả family bằng `overrideWith((ref, id) => ...)`.
 
-**Auto-dispose** quyết định state sống bao lâu. Với `.autoDispose` hoặc `isAutoDispose: true` (hai cách viết cho cùng hành vi, test kiểm cả hai), state bị bỏ khi không còn ai nghe. Theo ghi chú trong mã nguồn của scheduler, provider chỉ bị bỏ khi đã trọn một khung hình không có người nghe, chứ không phải ngay lúc người nghe cuối rời đi. Trong test ta chờ bằng `await container.pump()`:
+**Auto-dispose** quyết định state sống bao lâu. Với `.autoDispose` hoặc `isAutoDispose: true` (hai cách viết cho cùng hành vi, test kiểm cả hai), state bị bỏ khi không còn ai nghe. Theo ghi chú trong mã nguồn của scheduler, provider chỉ bị bỏ khi đã trọn một khung hình không có người nghe, chứ không phải ngay lúc người nghe cuối rời đi. Trong test ta chờ bằng `await container.pump()` và hỏi `container.read(provider.exists)`. `container.exists` đã bị đánh dấu deprecated từ 3.5.0; thông báo của analyzer ghi `provider.exist`, nhưng tên thật của getter là `exists`.
 
 ### quote_provider_test.dart · 18-riverpod/test/quote_provider_test.dart (trích)
 
@@ -398,11 +398,11 @@ final tripByIdProvider = FutureProvider.autoDispose.family<Trip, String>((
 
       final first = container.listen(quoteProvider, (_, _) {});
       await container.read(quoteProvider.future);
-      expect(container.exists(quoteProvider), isTrue);
+      expect(container.read(quoteProvider.exists), isTrue);
 
       first.close();
       await container.pump();
-      expect(container.exists(quoteProvider), isFalse);
+      expect(container.read(quoteProvider.exists), isFalse);
 
       container.listen(quoteProvider, (_, _) {});
       await container.read(quoteProvider.future);
@@ -410,7 +410,7 @@ final tripByIdProvider = FutureProvider.autoDispose.family<Trip, String>((
     });
 ```
 
-Provider thường giữ state sau khi hết người nghe. `ref.keepAlive()` giữ state của provider auto-dispose. `ref.onDispose` chạy mỗi lần state bị bỏ, kể cả khi provider tính lại vì nguồn đổi, nên dùng được để huỷ request đang dở hoặc đóng stream. Trong lab, rời `TripScreen` làm `tripByIdProvider('T-0001')` biến mất (test `rời màn hình chuyến thì tripByIdProvider(id) bị bỏ`).
+Provider thường giữ state sau khi hết người nghe. `ref.keepAlive()` giữ state của provider auto-dispose. `ref.onDispose` chạy mỗi lần state bị bỏ, kể cả khi provider tính lại vì nguồn đổi, nên dùng được để huỷ request đang dở hoặc đóng stream. Rời `TripScreen` làm `tripByIdProvider('T-0001')` biến mất (test `rời màn hình chuyến...`).
 
 Disposal gài một bẫy cho code sau `await`. Khách bấm Đặt chuyến rồi rời màn hình: `placeTripProvider` bị bỏ khi `placeTrip` còn chạy, và gán `state` lúc đó ném lỗi. `ref.mounted` cho biết provider còn sống, nên `place` có dòng `if (!ref.mounted) return;` sau `await`. Trong method của `Notifier`, `ref` luôn là của lần dựng hiện tại nên chỉ dispose mới làm nó `false`; `ref` bắt trong thân provider dạng hàm thì là của lần dựng cũ và trả `false` sau khi tính lại (test `ref của provider dạng hàm...`). Test dựng bản `_UnsafePlaceTripNotifier` bỏ dòng ấy: nó ném một `Exception` có thông điệp `after it has been disposed`, còn bản thật kết thúc êm.
 
@@ -499,7 +499,7 @@ flutter analyze
 flutter test
 ```
 
-Đã kiểm với Flutter 3.47.4, Dart 3.13.3, `flutter_riverpod` 3.4.3: `flutter analyze` 0 issue, **87 test** xanh. Mức: **Kiểm chứng tự động**, không cần thiết bị hay mạng. Đồng hồ giả (`fake_async`) thay thời gian thật ở các test retry.
+Đã kiểm với Flutter 3.47.4, Dart 3.13.3, `flutter_riverpod` 3.5.0: `flutter analyze` 0 issue, **87 test** xanh. Mức: **Kiểm chứng tự động**, không cần thiết bị hay mạng. Đồng hồ giả (`fake_async`) thay thời gian thật ở các test retry.
 
 | Test | Chứng minh điều gì |
 |---|---|
@@ -534,5 +534,5 @@ Bài trước: [Quản lý state: InheritedWidget, ChangeNotifier và ranh giớ
 - [Providers](https://riverpod.dev/docs/concepts2/providers), [Refs](https://riverpod.dev/docs/concepts2/refs) và [Auto dispose](https://riverpod.dev/docs/concepts2/auto_dispose) (riverpod.dev).
 - [Automatic retry](https://riverpod.dev/docs/concepts2/retry) và [Testing](https://riverpod.dev/docs/how_to/testing) (riverpod.dev).
 - [flutter_riverpod](https://pub.dev/packages/flutter_riverpod), [riverpod](https://pub.dev/packages/riverpod) và [changelog của riverpod](https://pub.dev/packages/riverpod/changelog) (pub.dev).
-- [AsyncValue](https://pub.dev/documentation/riverpod/3.4.3/riverpod/AsyncValue-class.html) và [ProviderContainer.defaultRetry](https://pub.dev/documentation/riverpod/3.4.3/riverpod/ProviderContainer/defaultRetry.html) (pub.dev).
+- [AsyncValue](https://pub.dev/documentation/riverpod/3.5.0/riverpod/AsyncValue-class.html) và [ProviderContainer.defaultRetry](https://pub.dev/documentation/riverpod/3.5.0/riverpod/ProviderContainer/defaultRetry.html) (pub.dev).
 - [State management](https://docs.flutter.dev/data-and-backend/state-mgmt/options) (docs.flutter.dev).

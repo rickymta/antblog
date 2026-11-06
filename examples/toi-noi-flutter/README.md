@@ -41,13 +41,13 @@ Khung biên tập loạt bài Flutter của Tech Knowledge Hub. Ứng dụng xuy
 
 ## Phần 4 · Kiểm thử và chất lượng (trung bình → nâng cao)
 
-27. Unit test với mocktail và fake: quy tắc cước và use case — kế hoạch
-28. Widget test: pumpWidget, finder, matcher và màn hình báo giá — kế hoạch
-29. Golden test và Semantics test: khoá giao diện và accessibility — kế hoạch
-30. Kiểm thử Riverpod, async và Stream: ProviderContainer, fakeAsync, fake clock — kế hoạch
-31. Integration test và patrol: luồng đặt chuyến trên simulator/emulator — kế hoạch
-32. Lint, analyzer, dart format và custom_lint: chất lượng code có kiểm chứng — kế hoạch
-33. CI với GitHub Actions: analyze, test, golden và cache pub — kế hoạch
+27. Unit test với mocktail và fake: quy tắc cước và use case — **đã viết, đã review**
+28. Widget test: pumpWidget, finder, matcher và màn hình báo giá — **đã viết, đã review**
+29. Golden test và Semantics test: khoá giao diện và accessibility — **đã viết, đã review**
+30. Kiểm thử Riverpod, async và Stream: ProviderContainer, fakeAsync, fake clock — **đã viết, đã review**
+31. Integration test và patrol: luồng đặt chuyến trên simulator/emulator — **đã viết, đã review**
+32. Lint, analyzer, dart format và analyzer plugin: chất lượng code có kiểm chứng — **đã viết, đã review**
+33. CI với GitHub Actions: analyze, test, golden và cache pub — **đã viết, đã review**
 
 ## Phần 5 · Tính năng di động (trung bình → nâng cao)
 
@@ -138,6 +138,14 @@ Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `a
 
 ```bash
 node examples/toi-noi-flutter/verify-17-26.mjs
+```
+
+Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.
+
+## Chạy bài 27–33
+
+```bash
+node examples/toi-noi-flutter/verify-27-33.mjs
 ```
 
 Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.

@@ -51,7 +51,7 @@ Repository mặc định trong `main()` là bản giả có độ trễ 400 ms v
 
 ## Phiên bản đã kiểm
 
-Flutter 3.47.4 stable, Dart 3.13.3, `flutter_riverpod` 3.4.3 (kéo theo `riverpod` 3.4.3), `fake_async` 1.3.3 (dev), `flutter_lints` 6.0.0, `toi_noi_core` 0.1.0 và `toi_noi_ui` 0.1.0 (path), Material 3. Không dùng code generator (`riverpod_generator`, `riverpod_lint`): thuộc bài 26.
+Flutter 3.47.4 stable, Dart 3.13.3, `flutter_riverpod` 3.5.0 (kéo theo `riverpod` 3.5.0), `fake_async` 1.3.3 (dev), `flutter_lints` 6.0.0, `toi_noi_core` 0.1.0 và `toi_noi_ui` 0.1.0 (path), Material 3. Không dùng code generator (`riverpod_generator`, `riverpod_lint`): thuộc bài 26.
 
 ## Chưa làm
 

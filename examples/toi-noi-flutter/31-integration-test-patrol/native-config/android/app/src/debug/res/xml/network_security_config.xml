@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Từ Android 9 (API 28) tầng nền tảng (HttpURLConnection, WebView, adapter
+         native như cronet_http) cấm HTTP không mã hoá mặc định. dio mặc định gửi
+         qua dart:io, socket của Dart không chịu chính sách này (đọc từ source
+         engine, chưa chạy trên thiết bị), nên file này là lớp phòng khi đổi
+         adapter hoặc mở WebView. Chỉ mở cho địa chỉ emulator dùng để thấy máy dev. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

@@ -554,7 +554,7 @@ Còn hai điều chưa đạt: backend của lab là fake API (trip-service .NET
 <p><strong>3.</strong> Sau khi chạy lại <code>build_runner</code>, ta đã thử và analyzer báo ba lỗi: <code>non_exhaustive_switch_expression</code> ở <code>switch</code> trong <code>quote_screen.dart</code>, cùng lỗi đó ở hàm <code>describe</code> trong <code>quote_state_test.dart</code>, và <code>missing_required_argument</code> (thiếu tham số <code>offline</code>) ở lời gọi <code>state.when</code> của test <code>when và map vẫn có</code>. <code>_describe(ApiFailure)</code> không đổi vì nó <code>switch</code> trên <code>ApiFailure</code>.</p>
 </details>
 
-Bài trước: [Cấu hình môi trường: flavors, --dart-define-from-file và DI theo môi trường](/articles/flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod). Bài tiếp theo mở đầu Phần 4 với unit test.
+Bài trước: [Cấu hình môi trường: flavors, --dart-define-from-file và DI theo môi trường](/articles/flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod). Bài tiếp: [Unit test với mocktail và fake: quy tắc cước và use case](/articles/flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case).
 
 ## Tài liệu gốc
 

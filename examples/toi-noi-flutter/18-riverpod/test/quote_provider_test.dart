@@ -183,11 +183,11 @@ void main() {
 
       final first = container.listen(quoteProvider, (_, _) {});
       await container.read(quoteProvider.future);
-      expect(container.exists(quoteProvider), isTrue);
+      expect(container.read(quoteProvider.exists), isTrue);
 
       first.close();
       await container.pump();
-      expect(container.exists(quoteProvider), isFalse);
+      expect(container.read(quoteProvider.exists), isFalse);
 
       container.listen(quoteProvider, (_, _) {});
       await container.read(quoteProvider.future);
@@ -206,11 +206,11 @@ void main() {
 
       a.close();
       await container.pump();
-      expect(container.exists(quoteProvider), isTrue);
+      expect(container.read(quoteProvider.exists), isTrue);
 
       b.close();
       await container.pump();
-      expect(container.exists(quoteProvider), isFalse);
+      expect(container.read(quoteProvider.exists), isFalse);
       expect(repository.quoteRequests, hasLength(1));
     });
 
@@ -232,7 +232,7 @@ void main() {
         subscription.close();
         await container.pump();
 
-        expect(container.exists(keepAlive), isTrue);
+        expect(container.read(keepAlive.exists), isTrue);
       },
     );
 
@@ -252,8 +252,8 @@ void main() {
       }
       await container.pump();
 
-      expect(container.exists(withFlag), isFalse);
-      expect(container.exists(withBuilder), isFalse);
+      expect(container.read(withFlag.exists), isFalse);
+      expect(container.read(withBuilder.exists), isFalse);
     });
 
     test('ref.keepAlive() giữ state của provider auto-dispose', () async {
@@ -268,7 +268,7 @@ void main() {
       subscription.close();
       await container.pump();
 
-      expect(container.exists(provider), isTrue);
+      expect(container.read(provider.exists), isTrue);
     });
 
     test('ref.onDispose chạy cả mỗi lần provider tính lại', () async {

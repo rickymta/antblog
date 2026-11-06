@@ -82,7 +82,7 @@ flutter doctor
 | --- | --- | --- |
 | Flutter | SDK, Dart và tooling hoạt động | Mọi bài. Dòng này phải xanh |
 | Android toolchain | Android SDK, JDK, giấy phép đã chấp nhận | Chạy trên Android emulator hoặc máy Android |
-| Xcode, gồm dòng con CocoaPods | Xcode đầy đủ, không chỉ command line tools; CocoaPods quản lý thư viện native của iOS | Chạy trên iOS Simulator (chỉ macOS); CocoaPods cần khi dùng plugin trên iOS |
+| Xcode, gồm dòng con CocoaPods | Xcode đầy đủ, không chỉ command line tools; CocoaPods quản lý thư viện native của iOS | Chạy trên iOS Simulator (chỉ macOS); CocoaPods chỉ cần khi có plugin iOS chưa hỗ trợ Swift Package Manager |
 | Chrome | Trình duyệt để chạy Flutter web | Không cần cho loạt này |
 | Connected device | Thiết bị, simulator, emulator đang thấy được | Lệnh `flutter run` |
 

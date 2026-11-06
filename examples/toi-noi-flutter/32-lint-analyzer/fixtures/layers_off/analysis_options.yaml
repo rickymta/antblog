@@ -1,0 +1,5 @@
+# Plugin được khai báo nhưng không có khối `diagnostics`: lint rule của plugin
+# tắt mặc định nên không rule nào chạy.
+plugins:
+  toi_noi_lints:
+    path: ../../lint_plugin

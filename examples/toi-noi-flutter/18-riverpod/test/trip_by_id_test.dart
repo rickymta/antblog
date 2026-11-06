@@ -61,8 +61,8 @@ void main() {
       one.close();
       await container.pump();
 
-      expect(container.exists(tripByIdProvider('T-1')), isFalse);
-      expect(container.exists(tripByIdProvider('T-2')), isTrue);
+      expect(container.read(tripByIdProvider('T-1').exists), isFalse);
+      expect(container.read(tripByIdProvider('T-2').exists), isTrue);
     });
 
     test(

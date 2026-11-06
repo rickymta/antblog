@@ -36,7 +36,7 @@ Loạt gồm **64 bài** chia **8 phần**, mỗi phần tối đa 10 bài, đi 
 | Thành phần | Bắt buộc từ bài | Ghi chú |
 |---|---|---|
 | Flutter SDK 3.47 stable + Dart 3.13 | 01 | `flutter doctor` phải xanh ở mục Flutter |
-| Xcode đầy đủ + CocoaPods + iOS Simulator | 07 (chạy iOS) | Chỉ trên macOS. Không có macOS vẫn học được toàn bộ bằng Android/emulator; các bài iOS (52, 56, 58) cần macOS để build thật |
+| Xcode đầy đủ + iOS Simulator | 07 (chạy iOS) | Chỉ trên macOS. Template Flutter 3.47 dùng Swift Package Manager; CocoaPods chỉ cần khi có plugin chưa hỗ trợ SPM. Không có macOS vẫn học được toàn bộ bằng Android/emulator; các bài iOS (52, 56, 58) cần macOS để build thật |
 | Android Studio + Android SDK + emulator, JDK 17 | 07 (chạy Android) | Cần cho `flutter build apk/appbundle` |
 | Node ≥ 22 | 06 | Chạy script `verify-*.mjs` của lab |
 | .NET 10 SDK + PostgreSQL | 19 (tuỳ chọn) | Chỉ khi muốn gọi trip-service thật thay cho fake API |
@@ -86,7 +86,7 @@ Repo này **không** chứa tài khoản store hay chứng chỉ, nên mỗi bà
 | Push | `firebase_messaging`, `flutter_local_notifications` | 17.0 / — | OneSignal |
 | Nền | `workmanager` | 0.10 | `flutter_background_service` |
 | Test | `flutter_test`, `mocktail`, `patrol`, `integration_test` | — / 1.0 / 4.11 / — | `mockito` |
-| Lint | `flutter_lints`, `custom_lint`, `riverpod_lint` | — | `very_good_analysis` |
+| Lint | `flutter_lints`, analyzer plugin chính thức (`analysis_server_plugin`), `riverpod_lint` 3.2 | — | `very_good_analysis`; `custom_lint` không còn là đường khuyên dùng (kiểm 11/2026) |
 | Build/phát hành | fastlane, GitHub Actions, Firebase App Distribution, TestFlight, Google Play Console, Shorebird (code push) | — | Codemagic, Bitrise |
 | Quan sát | Firebase Crashlytics, Sentry, trace header W3C nối với OpenTelemetry của backend | — | — |
 | Backend lab | `tools/fake_api` (Dart `shelf` + WebSocket) mô phỏng trip-service và Realtime Gateway; tuỳ chọn trip-service .NET thật | — | — |
@@ -173,8 +173,8 @@ Mục tiêu: mỗi lớp của app có loại test phù hợp, chạy xanh trên
 | FL-29 | `flutter-golden-test-semantics-test-giao-dien-on-dinh` | Golden test và Semantics test: khoá giao diện và accessibility | trung bình | `matchesGoldenFile`, font và kích thước cố định, cập nhật golden có chủ đích, `meetsGuideline` (tap target, contrast, label), chạy golden trên CI Linux | `29-golden-semantics` | 28 | TĐ |
 | FL-30 | `flutter-test-riverpod-async-stream-fake-async-providercontainer` | Kiểm thử Riverpod, async và Stream: ProviderContainer, fakeAsync, fake clock | trung bình | `ProviderContainer.test`, `listen`, `AsyncValue` các trạng thái, `fake_async`, `Clock` tiêm được, test Stream và timeout | `30-test-riverpod-async` | 29 | TĐ |
 | FL-31 | `flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi` | Integration test và patrol: luồng đặt chuyến trên simulator/emulator | nâng cao | `integration_test`, `patrol` tương tác native (quyền, thông báo), chạy với fake API, chụp màn hình, chi phí và khi nào đáng chạy | `31-integration-test-patrol` | 30 | TB |
-| FL-32 | `flutter-lint-analyzer-format-custom-lint-chat-luong-code` | Lint, analyzer, dart format và custom_lint: chất lượng code có kiểm chứng | trung bình | `analysis_options.yaml`, `flutter_lints` mức strict, `riverpod_lint`, `custom_lint`, `dart format`, `dart fix`, pre-commit, ngân sách cảnh báo bằng 0 | `32-lint-analyzer` | 31 | TĐ |
-| FL-33 | `flutter-ci-github-actions-analyze-test-golden-cache` | CI với GitHub Actions: analyze, test, golden và cache pub | trung bình | Workflow ubuntu: setup Flutter pin phiên bản, cache pub, `analyze`, `test --coverage`, golden ổn định trên Linux, artifact báo cáo, trigger theo path; `.github/workflows/toi-noi-flutter.yml` | `33-ci-github-actions` | 32 | TĐ |
+| FL-32 | `flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code` | Lint, analyzer, dart format và analyzer plugin: chất lượng code có kiểm chứng | trung bình | `analysis_options.yaml`, `flutter_lints` mức strict, `riverpod_lint`, analyzer plugin chính thức (`plugins:`), lint tự viết, `dart format`, `dart fix`, pre-commit, ngân sách cảnh báo bằng 0 | `32-lint-analyzer` | 31 | TĐ |
+| FL-33 | `flutter-ci-github-actions-analyze-test-golden-cache` | CI với GitHub Actions: analyze, test, golden và cache pub | trung bình | Workflow ubuntu: setup Flutter pin phiên bản, cache pub, `analyze`, `test --coverage`, golden chạy riêng trên macOS vì baseline sinh ở đó, artifact báo cáo, trigger theo path; `.github/workflows/toi-noi-flutter.yml` | `33-ci-github-actions` | 32 | TĐ |
 
 ### Phần 5 · Tính năng di động (trung bình → nâng cao, 9 bài)
 

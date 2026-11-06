@@ -1,0 +1,18 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner sinh bằng `flutter create`, không commit (file cấu hình đang dạy nằm trong native-config/)
+/android/
+/ios/
+.metadata
+
+# Patrol: file sinh tự động và biến môi trường có thể chứa bí mật
+**/test_bundle.dart
+.patrol.env
+patrol_test/screenshots/
+patrol_test/videos/

@@ -330,13 +330,13 @@ void main() {
       await tester.pump();
       await tester.tap(find.widgetWithText(FilledButton, 'Đặt chuyến'));
       await tester.pumpAndSettle();
-      expect(container.exists(tripByIdProvider('T-0001')), isTrue);
+      expect(container.read(tripByIdProvider('T-0001').exists), isTrue);
 
       await tester.pageBack();
       await tester.pumpAndSettle();
       await container.pump();
 
-      expect(container.exists(tripByIdProvider('T-0001')), isFalse);
+      expect(container.read(tripByIdProvider('T-0001').exists), isFalse);
     });
 
     testWidgets('chuyến không tồn tại: màn hình chuyến hiện lỗi', (

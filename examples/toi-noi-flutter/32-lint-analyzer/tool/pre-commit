@@ -1,0 +1,64 @@
+#!/bin/sh
+# Pre-commit tối giản cho lab 32. Không tự cài: đọc README để chọn cách dùng.
+#
+# 1. Mọi file .dart đang staged trong thư mục lab phải đã được `dart format`.
+# 2. Phân tích với ngân sách bằng 0: bất kỳ error, warning hay info nào
+#    (kể cả của plugin) làm commit dừng lại.
+#
+# ANALYZE_CMD chỉ để test thay lệnh phân tích; mặc định là lệnh thật.
+set -eu
+
+lab="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$lab"
+
+# Khi git gọi hook, nó đặt GIT_DIR (và GIT_WORK_TREE). Trong worktree liên kết
+# giá trị đó không còn khớp với thư mục lab sau `cd`, làm `dart format` đọc sai
+# đường dẫn mà vẫn thoát 0. Bỏ chúng để git tự tìm repo từ thư mục lab.
+# GIT_INDEX_FILE thì giữ: `git commit <file>` dùng một index tạm.
+unset GIT_DIR GIT_WORK_TREE
+
+# core.quotePath=false: tên file có dấu không bị bọc nháy và escape.
+# ACMR: thêm, sửa, copy và đổi tên (R); bỏ file đã xoá.
+staged="$(git -c core.quotePath=false diff --cached --name-only \
+  --diff-filter=ACMR --relative -- . | grep '\.dart$' || true)"
+
+if [ -z "$staged" ]; then
+  echo "pre-commit: không có file .dart nào staged, bỏ qua."
+  exit 0
+fi
+
+# Mỗi dòng của $staged là một đường dẫn: tách theo xuống dòng, không theo dấu cách.
+unformatted=""
+broken=""
+old_ifs="$IFS"
+IFS='
+'
+for file in $staged; do
+  code=0
+  out="$(dart format --output=none --set-exit-if-changed "$file" 2>&1)" ||
+    code=$?
+  case "$code" in
+  0) ;;
+  # Mã 1 của --set-exit-if-changed: file sẽ bị đổi, tức chưa format.
+  1) unformatted="$unformatted$file
+" ;;
+  # Mã khác (ví dụ 65 khi file có lỗi cú pháp): không phải chuyện format.
+  *) broken="$broken$file: $(printf '%s' "$out" | head -n 1)
+" ;;
+  esac
+done
+IFS="$old_ifs"
+
+if [ -n "$broken" ]; then
+  echo "pre-commit: dart format không xử lý được (lỗi cú pháp?):" >&2
+  printf '%s' "$broken" | sed 's/^/  /' >&2
+  exit 1
+fi
+
+if [ -n "$unformatted" ]; then
+  echo "pre-commit: các file chưa format (chạy 'dart format .' rồi git add lại):" >&2
+  printf '%s' "$unformatted" | sed 's/^/  /' >&2
+  exit 1
+fi
+
+${ANALYZE_CMD:-dart analyze --fatal-infos}

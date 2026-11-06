@@ -1,0 +1,6 @@
+linter:
+  rules:
+    - directives_ordering
+    - prefer_final_locals
+    - prefer_single_quotes
+    - unnecessary_this

@@ -2,6 +2,8 @@ name: Toi Noi Flutter labs
 on:
   workflow_dispatch:
   push:
+    # Nhánh có PR đã chạy qua pull_request; push chỉ cần cho main.
+    branches: [main]
     paths:
       - 'examples/toi-noi-flutter/**'
       - '.github/workflows/toi-noi-flutter.yml'
@@ -11,22 +13,80 @@ on:
       - '.github/workflows/toi-noi-flutter.yml'
 permissions:
   contents: read
+# Nhánh khác: run mới huỷ run cũ cùng ref. Main: mỗi commit một group (theo
+# SHA) nên không run nào bị huỷ hay bị thay thế khi đang chờ.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
-  verify:
-    runs-on: ubuntu-latest
+  # Ảnh golden của lab 29 sinh trên macOS; trên Linux các test golden tự skip.
+  golden-macos:
+    name: Golden lab 29 (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2.23.0
         with:
           flutter-version: '3.47.4'
           channel: stable
           cache: true
-      - uses: actions/setup-node@v6
+          # Lab không commit pubspec.lock nên khoá mặc định của action không
+          # đổi khi dependency đổi; băm các pubspec.yaml thay vào đó.
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('examples/toi-noi-flutter/**/pubspec.yaml') }}
+      - name: Golden tests lab 29
+        working-directory: examples/toi-noi-flutter/29-golden-semantics
+        run: |
+          flutter pub get
+          flutter test --tags golden
+      - name: Upload golden failures
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: golden-failures-lab29
+          path: examples/toi-noi-flutter/29-golden-semantics/test/failures/
+          if-no-files-found: ignore
+          retention-days: 7
+  verify:
+    runs-on: ubuntu-latest
+    # Chạy tay 01–26 mất khoảng 20 phút ở máy có cache; chừa 2-3 lần cho runner
+    # chậm và các lab thêm sau. Quá lâu thì chia job hoặc matrix.
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: '3.47.4'
+          channel: stable
+          cache: true
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('examples/toi-noi-flutter/**/pubspec.yaml') }}
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: '22'
+      # flutter analyze không in chẩn đoán của analyzer plugin; dart analyze có.
+      - name: Analyzer plugins gate lab 32
+        working-directory: examples/toi-noi-flutter/32-lint-analyzer
+        run: |
+          flutter pub get
+          dart analyze --fatal-infos
+      # Báo cáo, không phải cổng: không có ngưỡng coverage tối thiểu.
+      - name: Coverage lab 28
+        working-directory: examples/toi-noi-flutter/28-widget-test
+        run: |
+          flutter pub get
+          flutter test --coverage
+          awk -F: '/^LF:/{f+=$2} /^LH:/{h+=$2} END{printf "Lab 28 line coverage: %d/%d (%.1f%%)\n", h, f, 100*h/f}' coverage/lcov.info | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Upload coverage lab 28
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: lcov-lab28
+          path: examples/toi-noi-flutter/28-widget-test/coverage/lcov.info
+          retention-days: 14
       - name: Analyze and test labs 01–06
         run: node examples/toi-noi-flutter/verify-01-06.mjs
       - name: Analyze and test labs 07–16
         run: node examples/toi-noi-flutter/verify-07-16.mjs
       - name: Analyze and test labs 17–26
         run: node examples/toi-noi-flutter/verify-17-26.mjs
+      - name: Analyze and test labs 27–33
+        run: node examples/toi-noi-flutter/verify-27-33.mjs
