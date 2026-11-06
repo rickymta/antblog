@@ -1,0 +1,28 @@
+# Scrape /metrics của service booking mỗi 30 giây và bỏ nhãn có cardinality không giới hạn.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: booking
+  namespace: booking
+  labels:
+    Project: ToiNoi
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  namespaceSelector:
+    matchNames:
+      - booking
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      metricRelabelings:
+        # Nếu code lỡ gắn user_id, trip_id vào label thì bỏ ở đây trước khi vào AMP.
+        - action: labeldrop
+          regex: (user_id|trip_id|driver_id)
+        # Bỏ metric không dùng để giảm số series phải trả tiền.
+        - action: drop
+          sourceLabels: [__name__]
+          regex: dotnet_gc_heap_size_bytes_bucket

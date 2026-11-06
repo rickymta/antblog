@@ -1,0 +1,120 @@
+# dispatch-worker xử lý job điều phối từ hàng đợi SQS. KEDA scale theo độ sâu hàng đợi và theo lịch giờ cao điểm.
+# Quyền ReceiveMessage/DeleteMessage của worker cấp qua Pod Identity cho ServiceAccount dispatch-worker theo cùng khuôn bài 48; lab này không tạo.
+# Cần KEDA đã cài (README). Giờ trong cron là múi giờ Asia/Ho_Chi_Minh.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dispatch-worker
+  namespace: dispatch
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dispatch-worker
+  namespace: dispatch
+  labels:
+    app.kubernetes.io/name: dispatch-worker
+    app.kubernetes.io/part-of: toinoi
+spec:
+  # Không đặt replicas: KEDA (qua HPA) quyết định số bản sao.
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dispatch-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dispatch-worker
+        app.kubernetes.io/part-of: toinoi
+    spec:
+      serviceAccountName: dispatch-worker
+      # Spot chỉ báo trước 2 phút nên đặt thấp hơn 2 phút: đủ để nhận SIGTERM, ngừng nhận message mới và xử lý nốt message đang cầm.
+      terminationGracePeriodSeconds: 90
+      tolerations:
+        - key: toinoi.example/capacity
+          operator: Equal
+          value: spot
+          effect: NoSchedule
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: dispatch-worker
+        - maxSkew: 2
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: dispatch-worker
+      containers:
+        - name: worker
+          image: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/dispatch-worker:1.0.0
+          env:
+            - name: QUEUE_URL
+              value: https://sqs.ap-southeast-1.amazonaws.com/123456789012/toinoi-lab-dispatch-jobs
+            - name: AWS_REGION
+              value: ap-southeast-1
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 512Mi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: dispatch-worker
+  namespace: dispatch
+spec:
+  maxUnavailable: 20%
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dispatch-worker
+---
+# provider aws không kèm roleArn: KEDA dùng chính danh tính của operator (role keda-operator trong Terraform) để đọc thuộc tính hàng đợi.
+# Tài liệu KEDA mô tả cơ chế này qua IRSA; việc operator nhận credential qua Pod Identity chưa được kiểm chứng trên cluster thật.
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-aws
+  namespace: dispatch
+spec:
+  podIdentity:
+    provider: aws
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: dispatch-worker
+  namespace: dispatch
+spec:
+  scaleTargetRef:
+    name: dispatch-worker
+  minReplicaCount: 1
+  maxReplicaCount: 40
+  pollingInterval: 15
+  cooldownPeriod: 120
+  triggers:
+    # Mỗi replica gánh khoảng 100 message (mặc định tính cả message đang xử lý). KEDA lấy trigger đòi nhiều replica nhất.
+    - type: aws-sqs-queue
+      authenticationRef:
+        name: keda-aws
+      metadata:
+        queueURL: https://sqs.ap-southeast-1.amazonaws.com/123456789012/toinoi-lab-dispatch-jobs
+        queueLength: "100"
+        awsRegion: ap-southeast-1
+    # Giữ sẵn 10 worker lúc 10:45-13:15 và 16:45-19:15 để không phải chờ node mới khi tải đổ vào.
+    - type: cron
+      metadata:
+        timezone: Asia/Ho_Chi_Minh
+        start: 45 10 * * *
+        end: 15 13 * * *
+        desiredReplicas: "10"
+    - type: cron
+      metadata:
+        timezone: Asia/Ho_Chi_Minh
+        start: 45 16 * * *
+        end: 15 19 * * *
+        desiredReplicas: "10"

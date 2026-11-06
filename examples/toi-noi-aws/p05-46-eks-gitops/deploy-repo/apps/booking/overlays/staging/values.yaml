@@ -1,0 +1,11 @@
+env: staging
+image:
+  # Promote = chép dòng digest này sang overlay kế tiếp bằng pull request (xem bài 25).
+  digest: sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1
+replicaCount: 2
+ingress:
+  enabled: true
+  host: api.staging.toinoi.example
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip

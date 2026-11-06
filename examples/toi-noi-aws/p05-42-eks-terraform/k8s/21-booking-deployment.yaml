@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking
+  namespace: booking
+  labels:
+    app.kubernetes.io/name: booking
+    app.kubernetes.io/part-of: toinoi
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: booking
+        app.kubernetes.io/part-of: toinoi
+    spec:
+      serviceAccountName: booking
+      # Cho pod chạy nốt request đang bay sau SIGTERM trước khi bị SIGKILL.
+      terminationGracePeriodSeconds: 30
+      # Không có tolerations: pod chỉ lên node group base (on-demand), không lên node Spot có taint.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: booking
+      containers:
+        - name: booking
+          image: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/booking:1.0.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "8080"
+            - name: AWS_REGION
+              value: ap-southeast-1
+            - name: PROOF_BUCKET
+              value: toinoi-lab-delivery-photos
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]

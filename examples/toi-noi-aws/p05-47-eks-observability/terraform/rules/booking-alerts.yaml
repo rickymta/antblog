@@ -1,0 +1,31 @@
+groups:
+  - name: booking-latency
+    rules:
+      - record: booking:http_server_request_duration_seconds:p95_5m
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(http_server_request_duration_seconds_bucket{namespace="booking"}[5m])
+            )
+          )
+      - alert: BookingP95LatencyHigh
+        expr: booking:http_server_request_duration_seconds:p95_5m > 0.8
+        for: 10m
+        labels:
+          severity: page
+          service: booking
+        annotations:
+          summary: "p95 của booking vượt 800 ms trong 10 phút"
+          description: "Ngưỡng 800 ms là giả định của lab, hiệu chỉnh theo SLO thật (bài 55)."
+      - alert: BookingErrorRateHigh
+        expr: |
+          sum(rate(http_server_request_duration_seconds_count{namespace="booking", http_response_status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_server_request_duration_seconds_count{namespace="booking"}[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: page
+          service: booking
+        annotations:
+          summary: "Tỷ lệ 5xx của booking vượt 1% trong 5 phút"

@@ -1,0 +1,14 @@
+# Security group for pods: pod booking dùng security group riêng để vào RDS, thay vì dùng security group của node.
+# Cần bật ENABLE_POD_ENI trong VPC CNI và instance hỗ trợ trunk ENI; security group ID dưới đây là giả.
+apiVersion: vpcresources.k8s.aws/v1beta1
+kind: SecurityGroupPolicy
+metadata:
+  name: booking-sgp
+  namespace: booking
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  securityGroups:
+    groupIds:
+      - sg-0booking1234
