@@ -146,14 +146,14 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| PY-54 | `python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric` | Gian lận trong Tới Nơi: loại hình, nhãn, dữ liệu và metric | Chuyến ảo, GPS giả, lạm dụng khuyến mãi, cấu kết; nhãn trễ; precision/recall/PR-AUC; bộ dữ liệu tổng hợp | PY-40 | Kế hoạch |
-| PY-55 | `python-feature-engineering-tu-event-kafka` | Feature engineering: từ event Kafka tới đặc trưng velocity, thiết bị, GPS | Cửa sổ thời gian, đếm theo khóa, khoảng cách haversine, tốc độ phi lý, leakage | PY-54, PY-38 | Kế hoạch |
-| PY-56 | `python-rule-engine-scoring-strategy-explainability` | Rule engine và điểm rủi ro: Strategy, cấu hình và giải thích được | Rule có trọng số, cấu hình YAML, lý do kèm điểm, kiểm thử rule, khi rule đủ | PY-55, PY-19 | Kế hoạch |
-| PY-57 | `python-scikit-learn-lightgbm-imbalanced-cross-validation` | scikit-learn và LightGBM: huấn luyện trên dữ liệu mất cân bằng | Pipeline, train/valid theo thời gian, class weight, threshold tuning, calibration, lưu mô hình | PY-56 | Kế hoạch |
-| PY-58 | `python-networkx-graph-cau-ket-tai-xe-khach` | Đồ thị với networkx: tìm cấu kết tài xế–khách | Đồ thị hai phía, thành phần liên thông, độ trung tâm, thiết bị dùng chung, quy mô | PY-55 | Kế hoạch |
-| PY-59 | `python-real-time-scoring-feature-store-redis-latency` | Chấm điểm thời gian thực: feature store trên Redis, ngân sách độ trễ, fallback | Online/offline feature, p99, timeout trả điểm mặc định, không chặn Dispatch | PY-57, PY-27 | Kế hoạch |
-| PY-60 | `python-model-registry-ab-drift-retraining` | Model registry, A/B, drift và huấn luyện lại | Phiên bản mô hình (MLflow), shadow mode, PSI/drift, lịch retrain, rollback | PY-59 | Kế hoạch |
-| PY-61 | `python-shap-explainability-audit-human-review` | SHAP, audit và quy trình người duyệt | Giải thích từng dự đoán, log quyết định, hàng đợi review, tỉ lệ sai cho phép | PY-60 | Kế hoạch |
+| PY-54 | `python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric` | Gian lận trong Tới Nơi: loại hình, nhãn, dữ liệu và metric | Chuyến ảo, GPS giả, lạm dụng khuyến mãi, cấu kết; nhãn trễ; precision/recall/PR-AUC; bộ dữ liệu tổng hợp | PY-40 | Đã viết |
+| PY-55 | `python-feature-engineering-tu-event-kafka` | Feature engineering: từ event Kafka tới đặc trưng velocity, thiết bị, GPS | Cửa sổ thời gian, đếm theo khóa, khoảng cách haversine, tốc độ phi lý, leakage | PY-54, PY-38 | Đã viết |
+| PY-56 | `python-rule-engine-scoring-strategy-explainability` | Rule engine và điểm rủi ro: Strategy, cấu hình và giải thích được | Rule có trọng số, cấu hình YAML, lý do kèm điểm, kiểm thử rule, khi rule đủ | PY-55, PY-19 | Đã viết |
+| PY-57 | `python-scikit-learn-lightgbm-imbalanced-cross-validation` | scikit-learn và LightGBM: huấn luyện trên dữ liệu mất cân bằng | Pipeline, train/valid theo thời gian, class weight, threshold tuning, calibration, lưu mô hình | PY-56 | Đã viết |
+| PY-58 | `python-networkx-graph-cau-ket-tai-xe-khach` | Đồ thị với networkx: tìm cấu kết tài xế–khách | Đồ thị hai phía, thành phần liên thông, độ trung tâm, thiết bị dùng chung, quy mô | PY-55 | Đã viết |
+| PY-59 | `python-real-time-scoring-feature-store-redis-latency` | Chấm điểm thời gian thực: feature store trên Redis, ngân sách độ trễ, fallback | Online/offline feature, p99, timeout trả điểm mặc định, không chặn Dispatch | PY-57, PY-27 | Đã viết |
+| PY-60 | `python-model-registry-ab-drift-retraining` | Model registry, A/B, drift và huấn luyện lại | Phiên bản mô hình (MLflow), shadow mode, PSI/drift, lịch retrain, rollback | PY-59 | Đã viết |
+| PY-61 | `python-shap-explainability-audit-human-review` | SHAP, audit và quy trình người duyệt | Giải thích từng dự đoán, log quyết định, hàng đợi review, tỉ lệ sai cho phép | PY-60 | Đã viết |
 
 #### P08 · Phân tích và dự đoán (5 bài)
 

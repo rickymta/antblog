@@ -1,0 +1,22 @@
+[project]
+name = "toi-noi-py-56-rule-engine-scoring"
+version = "0.1.0"
+description = "Bài 56: rule engine chấm điểm rủi ro gian lận - Strategy, cấu hình YAML, lý do kèm điểm, kiểm thử rule"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.5",
+    "polars>=2.1",
+    "pyyaml>=6",
+    "scikit-learn>=1.8",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+# pytest thêm thư mục lab vào sys.path để `import rules` thấy rules.py đặt phẳng cạnh pyproject.toml.
+pythonpath = ["."]
+testpaths = ["tests"]

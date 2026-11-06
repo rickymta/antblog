@@ -1,0 +1,57 @@
+# Cấu hình rule chấm điểm rủi ro của fraud-scoring (bài 56). Dữ liệu là TỔNG HỢP: ngưỡng và điểm dưới đây
+# chọn theo phần train (thanh toán trước ngày 30) của bộ dữ liệu bài 54, không phải số vận hành.
+# Điểm 0..100 chỉ để xếp hàng cho người duyệt; không dải nào tự khóa tài khoản.
+version: 1
+review_at: 40   # từ mức này đưa vào hàng đợi người duyệt
+watch_at: 15    # từ mức này chỉ ghi nhận, chưa duyệt
+aggregate: noisy_or   # sum | max | noisy_or
+
+rules:
+  # --- GPS và hành trình ---
+  - id: gps_jump_impossible
+    points: 90
+    when: ["drv_jump_speed_kmh > 120", "drv_jump_km >= 5"]
+    reason: "tài xế nhảy {drv_jump_km:.0f} km giữa hai chuyến, tương đương {drv_jump_speed_kmh:.0f} km/h"
+  - id: speed_impossible
+    points: 70
+    when: ["speed_kmh > 120"]
+    reason: "tốc độ trung bình trong chuyến {speed_kmh:.0f} km/h"
+  - id: pickup_far
+    points: 65
+    when: ["start_pickup_gap_km > 3"]
+    reason: "GPS tài xế lúc bắt đầu cách điểm đón khách khai báo {start_pickup_gap_km:.1f} km"
+  - id: trip_not_moving
+    points: 95
+    when: ["hav_start_end_km < 0.3", "distance_km >= 3"]
+    reason: "đồng hồ cước báo {distance_km:.1f} km nhưng điểm cuối cách điểm đầu {hav_start_end_km:.2f} km"
+  # --- thiết bị và tài khoản ---
+  - id: device_many_accounts_24h
+    points: 90
+    when: ["dev_customers_24h >= 3"]
+    reason: "{dev_customers_24h:.0f} tài khoản khách khác nhau trên một thiết bị trong 24 giờ"
+  - id: device_night_activity
+    points: 70
+    when: ["is_night == 1", "dev_trips_1h >= 1"]
+    reason: "thiết bị đã có {dev_trips_1h:.0f} chuyến trong giờ trước, và chuyến này đặt ban đêm"
+  - id: route_short_repeat
+    points: 35
+    when: ["route_ratio < 0.4", "dev_trips_24h >= 2"]
+    reason: "đường chim bay chỉ {route_ratio:.2f} lần quãng đường khai báo, thiết bị có {dev_trips_24h:.0f} chuyến trong 24 giờ"
+  # --- khuyến mãi ---
+  - id: promo_farm
+    points: 95
+    when: ["dev_newuser_7d >= 2"]
+    reason: "mã NEWUSER50 đã dùng {dev_newuser_7d:.0f} lần trên thiết bị này trong 7 ngày"
+  - id: promo_shared_device
+    points: 85
+    when: ["has_newuser_promo == 1", "dev_customers_7d >= 2"]
+    reason: "chuyến dùng NEWUSER50 trên thiết bị có {dev_customers_7d:.0f} khách trong 7 ngày"
+  # --- cặp khách và tài xế ---
+  - id: pair_repeat
+    points: 15
+    when: ["pair_trips_7d >= 3"]
+    reason: "cùng cặp khách-tài xế đã đi {pair_trips_7d:.0f} chuyến trong 7 ngày"
+  - id: driver_device_booking
+    points: 40
+    when: ["same_device == 1"]
+    reason: "khách đặt bằng chính điện thoại của tài xế"

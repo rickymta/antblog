@@ -3798,5 +3798,85 @@
       "V1 TO V2",
       "C# READER"
     ]
+  },
+  "python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric": {
+    "title": "PYTHON / FRAUD DATA",
+    "subtitle": "Python 54 · Fraud labels, data and metrics",
+    "diagram": "matrix",
+    "labels": [
+      "LABELS",
+      "PR-AUC",
+      "COST"
+    ]
+  },
+  "python-feature-engineering-tu-event-kafka": {
+    "title": "PYTHON / FEATURES",
+    "subtitle": "Python 55 · Event windows and leakage",
+    "diagram": "flow",
+    "labels": [
+      "EVENTS",
+      "WINDOW",
+      "FEATURES"
+    ]
+  },
+  "python-rule-engine-scoring-strategy-explainability": {
+    "title": "PYTHON / RULE ENGINE",
+    "subtitle": "Python 56 · Explainable risk scoring",
+    "diagram": "checklist",
+    "labels": [
+      "RULES",
+      "SCORE",
+      "REASONS"
+    ]
+  },
+  "python-scikit-learn-lightgbm-imbalanced-cross-validation": {
+    "title": "PYTHON / LIGHTGBM",
+    "subtitle": "Python 57 · Imbalanced fraud models",
+    "diagram": "target",
+    "labels": [
+      "PIPELINE",
+      "CALIBRATE",
+      "THRESHOLD"
+    ]
+  },
+  "python-networkx-graph-cau-ket-tai-xe-khach": {
+    "title": "PYTHON / NETWORKX",
+    "subtitle": "Python 58 · Finding driver-customer collusion",
+    "diagram": "network",
+    "labels": [
+      "CUSTOMER",
+      "DRIVER",
+      "DEVICE"
+    ]
+  },
+  "python-real-time-scoring-feature-store-redis-latency": {
+    "title": "PYTHON / REDIS SCORING",
+    "subtitle": "Python 59 · Scoring within 50 ms",
+    "diagram": "flow",
+    "labels": [
+      "REDIS",
+      "50 MS",
+      "FALLBACK"
+    ]
+  },
+  "python-model-registry-ab-drift-retraining": {
+    "title": "PYTHON / MODEL REGISTRY",
+    "subtitle": "Python 60 · Versioning, shadow and rollback",
+    "diagram": "cycle",
+    "labels": [
+      "REGISTRY",
+      "SHADOW",
+      "ROLLBACK"
+    ]
+  },
+  "python-shap-explainability-audit-human-review": {
+    "title": "PYTHON / SHAP AUDIT",
+    "subtitle": "Python 61 · Explainable human review",
+    "diagram": "checklist",
+    "labels": [
+      "SHAP",
+      "QUEUE",
+      "AUDIT LOG"
+    ]
   }
 }

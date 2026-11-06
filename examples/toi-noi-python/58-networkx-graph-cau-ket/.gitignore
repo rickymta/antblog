@@ -1,0 +1,4 @@
+.venv/
+__pycache__/
+# Dữ liệu sinh ra khi chạy
+out/
