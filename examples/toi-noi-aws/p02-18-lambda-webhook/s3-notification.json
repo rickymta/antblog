@@ -1,0 +1,17 @@
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "Id": "delivery-photo-uploaded",
+      "LambdaFunctionArn": "arn:aws:lambda:ap-southeast-1:123456789012:function:toinoi-lab-photo-handler",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            { "Name": "prefix", "Value": "photos/" },
+            { "Name": "suffix", "Value": ".jpg" }
+          ]
+        }
+      }
+    }
+  ]
+}

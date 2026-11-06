@@ -1,0 +1,29 @@
+{
+  "rules": [
+    {
+      "rule-type": "selection",
+      "rule-id": "1",
+      "rule-name": "trips-da-nang-only",
+      "object-locator": { "schema-name": "public", "table-name": "trips" },
+      "rule-action": "include",
+      "filters": [
+        {
+          "filter-type": "source",
+          "column-name": "city_id",
+          "filter-conditions": [
+            { "filter-operator": "eq", "value": "3" }
+          ]
+        }
+      ]
+    },
+    {
+      "rule-type": "transformation",
+      "rule-id": "2",
+      "rule-name": "rename-trips-for-rehearsal",
+      "rule-target": "table",
+      "object-locator": { "schema-name": "public", "table-name": "trips" },
+      "rule-action": "rename",
+      "value": "trips_rehearsal"
+    }
+  ]
+}

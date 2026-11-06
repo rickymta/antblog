@@ -1,0 +1,25 @@
+{
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Xoá image untagged sau 7 ngày",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "sinceImagePushed",
+        "countUnit": "days",
+        "countNumber": 7
+      },
+      "action": { "type": "expire" }
+    },
+    {
+      "rulePriority": 2,
+      "description": "Giữ 10 image mới nhất, xoá phần còn lại",
+      "selection": {
+        "tagStatus": "any",
+        "countType": "imageCountMoreThan",
+        "countNumber": 10
+      },
+      "action": { "type": "expire" }
+    }
+  ]
+}

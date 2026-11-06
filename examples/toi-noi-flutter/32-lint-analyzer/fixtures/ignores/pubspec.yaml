@@ -1,0 +1,6 @@
+name: fixture_ignores
+description: "Mẫu ignore có và không có lý do, để kiểm document_ignores và unnecessary_ignore."
+publish_to: none
+
+environment:
+  sdk: ^3.13.3

@@ -1,0 +1,32 @@
+# Chặn pod booking nói chuyện thẳng với database thanh toán. Cần bật network policy của VPC CNI (vpc-cni/addon-config-prefix-delegation.json).
+# Mặc định chặn mọi ingress vào namespace payment...
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: payment
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# ...rồi chỉ cho payment-api (cổng VíXanh) vào cổng 5432 của payment-db.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payment-db-from-api-only
+  namespace: payment
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: payment-db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: payment-api
+      ports:
+        - protocol: TCP
+          port: 5432

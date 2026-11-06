@@ -1,0 +1,38 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    # Mẫu cố ý có lỗi để test kiểm; có analysis_options riêng, không thuộc app.
+    - fixtures/**
+    # Package plugin có pubspec và test riêng (dart analyze, dart test trong đó).
+    - lint_plugin/**
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    - avoid_dynamic_calls
+    - directives_ordering
+    - document_ignores
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_final_locals
+    - prefer_single_quotes
+    - unawaited_futures
+    - unnecessary_ignore
+
+# Analyzer plugin chính thức (Dart 3.10+). Rule của plugin tắt mặc định,
+# nên toi_noi_lints phải bật từng rule dưới `diagnostics`.
+# riverpod_lint ghim đúng một bản: plugin không có lockfile, bản mới có thể
+# thêm lint và làm đỏ ngân sách bằng 0 mà không ai đổi code.
+plugins:
+  riverpod_lint: 3.2.0
+  toi_noi_lints:
+    path: lint_plugin
+    diagnostics:
+      no_data_import_in_presentation: true

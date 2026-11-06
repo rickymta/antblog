@@ -1,0 +1,43 @@
+[package]
+name = "ledger_40_ledger_api_e2e"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[lib]
+name = "ledger_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-api"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+axum = "0.8.9"
+http-body-util = "0.1.5"
+hyper = { version = "1.12.0", features = ["client", "http1"] }
+hyper-util = { version = "0.1.21", features = ["client-legacy", "http1", "tokio"] }
+jiff = { version = "0.2.39", features = ["serde"] }
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+prost = "0.14.4"
+prost-types = "0.14.4"
+rdkafka = "0.39.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres", "json"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "signal", "time", "sync", "net", "process", "io-util"] }
+tokio-stream = "0.1.19"
+tokio-util = "0.7.20"
+tonic = "0.14.9"
+tonic-prost = "0.14.9"
+tower-http = { version = "0.7.1", features = ["request-id", "trace", "propagate-header"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[build-dependencies]
+protoc-bin-vendored = "3.3.0"
+tonic-prost-build = "0.14.9"

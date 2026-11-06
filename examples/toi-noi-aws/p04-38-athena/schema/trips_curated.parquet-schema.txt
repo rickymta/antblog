@@ -1,0 +1,19 @@
+// Schema Parquet mô tả của một file trong curated/trips/dt=2026-03-02/city=hcm/part-0000.zstd.parquet
+// Đây chỉ là mô tả: lab KHÔNG tạo file Parquet thật. File thật sinh ra từ CTAS (sql/01-ctas-curated.sql) hoặc Glue ETL.
+// Cột dt và city KHÔNG nằm trong file: chúng là partition lấy từ đường dẫn.
+message trips_curated {
+  optional binary trip_id (STRING);
+  optional int64  code;
+  optional binary kind (STRING);
+  optional binary customer_id (STRING);
+  optional binary customer_phone (STRING);   // PII, che bằng Lake Formation
+  optional binary driver_id (STRING);
+  optional binary merchant_id (STRING);
+  optional binary status (STRING);
+  optional int32  fare;                      // đồng
+  optional int64  requested_at (TIMESTAMP(MILLIS,false));
+  optional int64  accepted_at  (TIMESTAMP(MILLIS,false));
+  optional int64  completed_at (TIMESTAMP(MILLIS,false));
+}
+// Kích thước ước tính (GIẢ ĐỊNH, cần đo trên dữ liệu thật): khoảng 100 byte mỗi dòng sau nén,
+// tức ~200 MB mỗi ngày và ~73 GB cho 730 triệu dòng một năm.

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "required": ["currency", "vehicles"],
+  "properties": {
+    "currency": { "type": "string", "enum": ["VND"] },
+    "vehicles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["baseFare", "includedKm", "pricePerExtraKm"],
+        "properties": {
+          "baseFare": { "type": "number", "minimum": 1000 },
+          "includedKm": { "type": "number", "minimum": 0 },
+          "pricePerExtraKm": { "type": "number", "minimum": 1000 }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

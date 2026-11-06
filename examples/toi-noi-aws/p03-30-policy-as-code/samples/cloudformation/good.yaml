@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Mau DUNG cho cfn-guard va Checkov. Khong deploy.
+Resources:
+  PhotosBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: toinoi-lab-delivery-photos-cfn-good
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: alias/toinoi-lab-data
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Project
+          Value: ToiNoi
+        - Key: Env
+          Value: lab
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: PostgreSQL chi cho subnet ung dung
+      VpcId: vpc-0123456789abcdef0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 10.20.0.0/20
+      Tags:
+        - Key: Project
+          Value: ToiNoi
+        - Key: Env
+          Value: lab
+  TripsDb:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: toinoi-lab-trips-cfn-good
+      Engine: postgres
+      DBInstanceClass: db.t4g.micro
+      AllocatedStorage: "20"
+      MasterUsername: toinoi
+      ManageMasterUserPassword: true
+      PubliclyAccessible: false
+      StorageEncrypted: true
+      KmsKeyId: alias/toinoi-lab-data
+      Tags:
+        - Key: Project
+          Value: ToiNoi
+        - Key: Env
+          Value: lab

@@ -1,0 +1,14 @@
+# helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system -f helm/lbc-values.yaml
+# Credential lấy qua Pod Identity: ServiceAccount phải có tên aws-load-balancer-controller để khớp với association trong main.tf.
+clusterName: toinoi-lab-eks
+# Đặt region và vpcId tường minh: pod không phải lúc nào cũng đọc được IMDS để tự dò.
+region: ap-southeast-1
+vpcId: vpc-0abc1234
+replicaCount: 2
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+defaultTags:
+  Project: ToiNoi
+  Env: lab
+  Owner: platform

@@ -1,0 +1,10 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+
+# Runner sinh bằng `flutter create`, không commit (lab này là Dart thuần nên thường không cần)
+android/
+ios/

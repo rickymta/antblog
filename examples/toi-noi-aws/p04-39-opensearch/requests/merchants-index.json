@@ -1,0 +1,38 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    },
+    "analysis": {
+      "filter": {
+        "vi_asciifold": {
+          "type": "asciifolding",
+          "preserve_original": true
+        }
+      },
+      "analyzer": {
+        "vi_folded": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "vi_asciifold"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "merchant_id": { "type": "keyword" },
+      "name": {
+        "type": "text",
+        "analyzer": "vi_folded",
+        "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+      },
+      "address": { "type": "text", "analyzer": "vi_folded" },
+      "city": { "type": "keyword" },
+      "kind": { "type": "keyword" },
+      "is_open": { "type": "boolean" },
+      "location": { "type": "geo_point" }
+    }
+  }
+}

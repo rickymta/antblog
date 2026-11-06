@@ -1,0 +1,10 @@
+{
+  "name": "toinoi-lab-vixanh-webhook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Lab bài 18: Lambda nhận webhook VíXanh (giả lập), xác minh chữ ký HMAC và ghi SQS.",
+  "scripts": {
+    "test": "node --test test/"
+  }
+}

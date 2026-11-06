@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          databases:
+            app_database: lib/db/app_database.dart
+          # Giữ mặc định: ảnh chụp schema ở drift_schemas/, test sinh ra ở test/drift/

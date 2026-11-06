@@ -29,7 +29,7 @@ export function TocList({ headings, activeId, onNavigate }: { headings: Heading[
                 scrollToId(h.id);
                 onNavigate?.();
               }}
-              className={`-ml-px block border-l-2 py-1.5 pr-2 text-sm leading-snug transition-colors ${h.depth === 3 ? 'pl-6' : 'pl-3'} ${
+              className={`-ml-px block [overflow-wrap:anywhere] border-l-2 py-1.5 pr-2 text-sm leading-snug transition-colors ${h.depth === 3 ? 'pl-6' : 'pl-3'} ${
                 active ? 'border-primary font-semibold text-primary-ink' : 'border-transparent text-muted hover:border-line hover:text-ink'
               }`}
             >
@@ -58,13 +58,13 @@ export function TocPanel({ headings, title }: { headings: Heading[]; title?: str
   );
 }
 
-/** Mục lục thu gọn ở đầu bài trên màn hẹp (< 1024px). */
+/** Mục lục thu gọn ở đầu bài trên màn hẹp (< 1280px). */
 export function TocCollapsible({ headings }: { headings: Heading[] }) {
   const { t } = useTranslation();
   const activeId = useActiveHeading(headings);
   if (headings.length === 0) return null;
   return (
-    <details className="group rounded-card border border-line bg-surface lg:hidden">
+    <details className="group rounded-card border border-line bg-surface min-[1280px]:hidden">
       <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
         <ListOrdered aria-hidden="true" className="h-4 w-4 text-muted" />
         {t('article.tocMobile')}

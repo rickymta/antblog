@@ -1,0 +1,33 @@
+version: 0.2
+
+# Chạy trong CodeBuild với source từ CodePipeline. Cần privileged mode để dùng docker.
+# Biến ECR_REPOSITORY do project CodeBuild khai báo; AWS_ACCOUNT_ID và AWS_DEFAULT_REGION
+# do CodeBuild tự cung cấp.
+env:
+  shell: bash
+  variables:
+    CONTAINER_NAME: booking
+
+phases:
+  pre_build:
+    commands:
+      - ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+      - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+      - SOURCE_ID="${CODEBUILD_RESOLVED_SOURCE_VERSION:-build-${CODEBUILD_BUILD_NUMBER}}"
+      - IMAGE_TAG="${SOURCE_ID:0:12}"
+      - IMAGE_REPO="${ECR_REGISTRY}/${ECR_REPOSITORY}"
+  build:
+    commands:
+      - docker build --tag "${IMAGE_REPO}:${IMAGE_TAG}" .
+  post_build:
+    commands:
+      - docker push "${IMAGE_REPO}:${IMAGE_TAG}"
+      # Lấy digest để task definition trỏ tới image bất biến, không trỏ tag.
+      - IMAGE_DIGEST=$(aws ecr describe-images --repository-name "$ECR_REPOSITORY" --image-ids imageTag="$IMAGE_TAG" --query 'imageDetails[0].imageDigest' --output text)
+      - printf '{"ImageURI":"%s@%s"}' "$IMAGE_REPO" "$IMAGE_DIGEST" > imageDetail.json
+      - cat imageDetail.json
+
+artifacts:
+  files:
+    - imageDetail.json
+

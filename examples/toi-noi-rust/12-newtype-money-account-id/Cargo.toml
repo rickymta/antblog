@@ -1,0 +1,15 @@
+[package]
+name = "ledger_12_newtype_money_account_id"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 12: newtype và value object (Money, AccountId, EntryId) cho sổ cái Tới Nơi"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]

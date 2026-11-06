@@ -1,0 +1,11 @@
+name: toi_noi_03
+description: "Lab bài 03 (Flutter qua Tới Nơi): hàm, class bất biến, enhanced enum, sealed class và switch vét cạn cho trạng thái chuyến."
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.3
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

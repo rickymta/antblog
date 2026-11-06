@@ -1,0 +1,10 @@
+<!-- Dán vào Info.plist của target Runner. ATS chỉ áp cho tầng nền tảng
+     (URLSession, WebView), không áp cho socket của dart:io mà dio mặc định
+     dùng; đoạn này là lớp phòng khi đổi sang adapter native. Cho phép HTTP tới
+     địa chỉ cục bộ (localhost, tên .local, địa chỉ IP) mà không tắt ATS cho
+     phần còn lại. -->
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsLocalNetworking</key>
+    <true/>
+</dict>

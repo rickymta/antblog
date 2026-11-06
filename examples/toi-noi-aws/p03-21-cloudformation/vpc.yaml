@@ -1,0 +1,254 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Tới Nơi lab - VPC 2 AZ (public và private) cùng bucket ảnh chứng từ giao hàng.
+  Bài 21 của lộ trình AWS qua Tới Nơi. Không có dữ liệu thật.
+
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: Môi trường; quyết định dải CIDR (Mappings) và có tạo NAT hay không (Conditions).
+  EnableNat:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: NAT Gateway tính tiền theo giờ; chỉ bật khi cần thử egress từ private subnet.
+  Owner:
+    Type: String
+    Default: platform
+    Description: Tag Owner theo quy ước Tới Nơi.
+
+Mappings:
+  EnvConfig:
+    dev:
+      VpcCidr: 10.10.0.0/16
+    staging:
+      VpcCidr: 10.20.0.0/16
+    prod:
+      VpcCidr: 10.30.0.0/16
+
+Conditions:
+  IsProd: !Equals [!Ref Env, prod]
+  CreateNat: !Or
+    - !Condition IsProd
+    - !Equals [!Ref EnableNat, "true"]
+
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !FindInMap [EnvConfig, !Ref Env, VpcCidr]
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-vpc" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-igw" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  IgwAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Select [0, !Cidr [!GetAtt Vpc.CidrBlock, 4, 8]]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-public-a" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Select [1, !Cidr [!GetAtt Vpc.CidrBlock, 4, 8]]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-public-b" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Select [2, !Cidr [!GetAtt Vpc.CidrBlock, 4, 8]]
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-private-a" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Select [3, !Cidr [!GetAtt Vpc.CidrBlock, 4, 8]]
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-private-b" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-public-rt" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IgwAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-private-rt" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  PrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+
+  NatEip:
+    Type: AWS::EC2::EIP
+    Condition: CreateNat
+    DependsOn: IgwAttachment
+    Properties:
+      Domain: vpc
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-nat-eip" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Condition: CreateNat
+    Properties:
+      AllocationId: !GetAtt NatEip.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - { Key: Name, Value: !Sub "toinoi-${Env}-nat-a" }
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: network }
+        - { Key: Owner, Value: !Ref Owner }
+
+  PrivateDefaultRoute:
+    Type: AWS::EC2::Route
+    Condition: CreateNat
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  DeliveryPhotosBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "toinoi-${Env}-delivery-photos-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - { Key: Project, Value: ToiNoi }
+        - { Key: Env, Value: !Ref Env }
+        - { Key: Service, Value: tracking }
+        - { Key: Owner, Value: !Ref Owner }
+
+Outputs:
+  VpcId:
+    Description: VPC của Tới Nơi theo môi trường.
+    Value: !Ref Vpc
+    Export:
+      Name: !Sub "toinoi-${Env}-network-VpcId"
+  PrivateSubnetIds:
+    Description: Hai private subnet cho ECS task và RDS.
+    Value: !Join [",", [!Ref PrivateSubnetA, !Ref PrivateSubnetB]]
+    Export:
+      Name: !Sub "toinoi-${Env}-network-PrivateSubnetIds"
+  PublicSubnetIds:
+    Description: Hai public subnet cho ALB.
+    Value: !Join [",", [!Ref PublicSubnetA, !Ref PublicSubnetB]]
+    Export:
+      Name: !Sub "toinoi-${Env}-network-PublicSubnetIds"
+  DeliveryPhotosBucketName:
+    Description: Bucket ảnh chứng từ giao hàng.
+    Value: !Ref DeliveryPhotosBucket
+  NatGatewayId:
+    Condition: CreateNat
+    Description: Chỉ có khi CreateNat là true.
+    Value: !Ref NatGateway

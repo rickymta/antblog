@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["ABCDE12345.vn.toinoi.customer"],
+        "components": [
+          { "/": "/trip/*" }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+env: dev
+image:
+  # Promote = chép dòng digest này sang overlay kế tiếp bằng pull request (xem bài 25).
+  digest: sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1
+replicaCount: 1
+resources:
+  requests:
+    cpu: 100m
+    memory: 192Mi
+  limits:
+    memory: 384Mi
+pdb:
+  enabled: false
+ingress:
+  enabled: true
+  host: api.dev.toinoi.example
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip

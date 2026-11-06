@@ -1,0 +1,120 @@
+{
+  "Comment": "Đối soát đêm: đọc danh sách chuyến trong ngày từ S3 (CSV), chia lô 500 dòng, mỗi lô một Lambda đối chiếu với sổ cái VíXanh.",
+  "QueryLanguage": "JSONata",
+  "StartAt": "SaveBusinessDate",
+  "States": {
+    "SaveBusinessDate": {
+      "Type": "Pass",
+      "Assign": {
+        "businessDate": "{% $states.input.businessDate %}"
+      },
+      "Next": "ReconcileTrips"
+    },
+    "ReconcileTrips": {
+      "Type": "Map",
+      "Label": "ReconcileTrips",
+      "ItemReader": {
+        "Resource": "arn:aws:states:::s3:getObject",
+        "ReaderConfig": {
+          "InputType": "CSV",
+          "CSVHeaderLocation": "FIRST_ROW"
+        },
+        "Arguments": {
+          "Bucket": "${recon_bucket_name}",
+          "Key": "{% 'manifests/' & $states.input.businessDate & '/trips.csv' %}"
+        }
+      },
+      "ItemBatcher": {
+        "MaxItemsPerBatch": 500,
+        "BatchInput": {
+          "businessDate": "{% $states.input.businessDate %}"
+        }
+      },
+      "MaxConcurrency": 100,
+      "ToleratedFailurePercentage": 1,
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "DISTRIBUTED",
+          "ExecutionType": "EXPRESS"
+        },
+        "StartAt": "ReconcileBatch",
+        "States": {
+          "ReconcileBatch": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Arguments": {
+              "FunctionName": "${reconcile_batch_function_arn}",
+              "Payload": "{% $states.input %}"
+            },
+            "Retry": [
+              {
+                "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException", "Lambda.TooManyRequestsException"],
+                "IntervalSeconds": 2,
+                "MaxAttempts": 3,
+                "BackoffRate": 2,
+                "JitterStrategy": "FULL"
+              }
+            ],
+            "Output": "{% $states.result.Payload %}",
+            "End": true
+          }
+        }
+      },
+      "ResultWriter": {
+        "Resource": "arn:aws:states:::s3:putObject",
+        "Arguments": {
+          "Bucket": "${recon_bucket_name}",
+          "Prefix": "{% 'results/' & $states.input.businessDate %}"
+        }
+      },
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ReportFailure"
+        }
+      ],
+      "Next": "ReportDone"
+    },
+    "ReportDone": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::events:putEvents",
+      "Arguments": {
+        "Entries": [
+          {
+            "EventBusName": "${event_bus_name}",
+            "Source": "toinoi.reconciliation",
+            "DetailType": "ReconciliationFinished",
+            "Detail": {
+              "businessDate": "{% $businessDate %}",
+              "status": "SUCCEEDED"
+            }
+          }
+        ]
+      },
+      "End": true
+    },
+    "ReportFailure": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::events:putEvents",
+      "Arguments": {
+        "Entries": [
+          {
+            "EventBusName": "${event_bus_name}",
+            "Source": "toinoi.reconciliation",
+            "DetailType": "ReconciliationFailed",
+            "Detail": {
+              "businessDate": "{% $businessDate %}",
+              "status": "FAILED"
+            }
+          }
+        ]
+      },
+      "Next": "ReconciliationFailed"
+    },
+    "ReconciliationFailed": {
+      "Type": "Fail",
+      "Error": "ReconciliationFailed",
+      "Cause": "Job đối soát vượt ngưỡng thất bại; xem execution và tệp kết quả trong S3."
+    }
+  }
+}

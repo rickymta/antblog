@@ -1,0 +1,15 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner sinh bằng `flutter create`, không commit
+android/
+ios/
+.metadata
+
+# Cấu hình riêng của từng máy (địa chỉ LAN của điện thoại thật...), không commit
+config/local.json

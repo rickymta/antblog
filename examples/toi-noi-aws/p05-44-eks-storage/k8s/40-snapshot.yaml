@@ -1,0 +1,18 @@
+# Snapshot cần CRD VolumeSnapshot và snapshot controller (add-on EKS snapshot-controller, cài bằng Terraform của lab); EBS CSI driver chỉ cung cấp phần driver.
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: toinoi-ebs-snapshot
+driver: ebs.csi.aws.com
+deletionPolicy: Delete
+---
+# Chụp đĩa checkpoint của pod reconcile-0. PVC nguồn do volumeClaimTemplates tạo ra.
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: reconcile-checkpoint-0
+  namespace: dispatch
+spec:
+  volumeSnapshotClassName: toinoi-ebs-snapshot
+  source:
+    persistentVolumeClaimName: data-reconcile-0

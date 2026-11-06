@@ -1,0 +1,130 @@
+# ADOT collector chạy dạng StatefulSet kèm Target Allocator: nó đọc ServiceMonitor/PodMonitor
+# và chia target cho các collector, rồi remote write vào Amazon Managed Prometheus.
+# Yêu cầu: add-on EKS "adot" (cert-manager phải cài trước) và CRD của ServiceMonitor/PodMonitor
+# (từ prometheus-operator, cài riêng, không cần cài cả Prometheus).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    Project: ToiNoi
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: adot-collector
+  namespace: observability
+---
+# Target Allocator dùng ServiceAccount riêng. Khi spec.targetAllocator.serviceAccount được đặt tường minh,
+# operator không tự tạo ServiceAccount nên phải khai ở đây.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: adot-targetallocator
+  namespace: observability
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: toinoi-adot-targetallocator
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints", "namespaces", "nodes", "nodes/metrics"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get"]
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["servicemonitors", "podmonitors"]
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: toinoi-adot-targetallocator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: toinoi-adot-targetallocator
+subjects:
+  - kind: ServiceAccount
+    name: adot-targetallocator
+    namespace: observability
+---
+# v1beta1 là API của OpenTelemetry Operator bản mới (config dạng object). Ví dụ trong tài liệu ADOT vẫn dùng v1alpha1
+# (config là chuỗi YAML); kiểm `kubectl api-resources | grep opentelemetrycollectors` sau khi cài add-on rồi chọn bản phù hợp.
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: adot
+  namespace: observability
+spec:
+  mode: statefulset
+  replicas: 2
+  serviceAccount: adot-collector
+  # Không đặt image: dùng image ADOT mặc định của add-on. Nếu tự đặt, ghim phiên bản cụ thể.
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  targetAllocator:
+    enabled: true
+    serviceAccount: adot-targetallocator
+    prometheusCR:
+      enabled: true
+      serviceMonitorSelector: {}
+      podMonitorSelector: {}
+  config:
+    extensions:
+      sigv4auth:
+        region: ap-southeast-1
+        service: aps
+    receivers:
+      # Danh sách scrape do Target Allocator cấp; để trống ở đây.
+      prometheus:
+        config:
+          scrape_configs: []
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+      batch:
+        timeout: 10s
+      resource:
+        attributes:
+          - key: cluster
+            value: toinoi-lab-eks
+            action: upsert
+    exporters:
+      prometheusremotewrite:
+        endpoint: https://aps-workspaces.ap-southeast-1.amazonaws.com/workspaces/ws-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/api/v1/remote_write
+        auth:
+          authenticator: sigv4auth
+      awsxray:
+        region: ap-southeast-1
+    service:
+      extensions: [sigv4auth]
+      pipelines:
+        metrics:
+          receivers: [prometheus, otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [prometheusremotewrite]
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [awsxray]

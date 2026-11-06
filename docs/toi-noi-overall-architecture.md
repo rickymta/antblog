@@ -1,9 +1,9 @@
 # Tới Nơi — Đề xuất kiến trúc tổng thể ứng dụng
 
-> **Phiên bản:** 1.0  
+> **Phiên bản:** 1.1 — ứng dụng di động chuyển sang Flutter (đa nền tảng iOS/Android)  
 > **Phạm vi:** Ride-hailing (đặt xe) và Delivery (giao hàng)  
 > **Kiến trúc chủ đạo:** Microservices, Event-driven Architecture, Apache Kafka, REST, gRPC  
-> **Ứng dụng khách:** iOS Native (Swift), Android Native (Kotlin), Driver/Delivery Partner apps, Public Website, Admin Portal
+> **Ứng dụng khách:** Customer App và Driver/Delivery Partner App viết bằng **Flutter** (một mã nguồn cho iOS và Android), Public Website, Admin Portal
 
 ---
 
@@ -38,10 +38,10 @@ Kiến trúc cần đáp ứng:
 ```mermaid
 flowchart TB
     subgraph Clients["Kênh người dùng"]
-        IOS["Customer iOS<br/>Swift"]
-        AND["Customer Android<br/>Kotlin"]
-        DRIOS["Driver iOS<br/>Swift"]
-        DRAND["Driver Android<br/>Kotlin"]
+        IOS["Customer App iOS<br/>Flutter"]
+        AND["Customer App Android<br/>Flutter"]
+        DRIOS["Driver App iOS<br/>Flutter"]
+        DRAND["Driver App Android<br/>Flutter"]
         WEB["Public Website<br/>Giới thiệu / Tra cứu mã đơn"]
         ADMIN["Admin & Operations Portal"]
     end
@@ -170,14 +170,12 @@ flowchart TB
 
 | Client | Công nghệ | Đối tượng | Trách nhiệm chính |
 |---|---|---|---|
-| Customer iOS | Swift, SwiftUI/UIKit | Khách hàng | Đặt xe/đơn giao hàng, thanh toán, theo dõi, lịch sử, đánh giá |
-| Customer Android | Kotlin, Jetpack Compose/View | Khách hàng | Tương tự iOS |
-| Driver iOS | Swift | Tài xế/đối tác | Online/offline, nhận/từ chối cuốc, dẫn đường, cập nhật trạng thái |
-| Driver Android | Kotlin | Tài xế/đối tác | Tương tự Driver iOS |
+| Customer App (iOS + Android) | Flutter, Dart; Material 3 có điều chỉnh theo nền tảng | Khách hàng | Đặt xe/đơn giao hàng, thanh toán, theo dõi, lịch sử, đánh giá |
+| Driver App (iOS + Android) | Flutter, Dart; dùng chung package Dart với Customer App | Tài xế/đối tác | Online/offline, nhận/từ chối cuốc, dẫn đường, cập nhật trạng thái, gửi vị trí theo chuyến |
 | Public Website | SSR/SSG framework | Người dùng công khai | Giới thiệu dịch vụ, FAQ, hỗ trợ, tra cứu mã đơn |
 | Admin Portal | Web SPA | CS, điều phối, tài chính, quản trị | Vận hành, tra cứu, xử lý ngoại lệ, cấu hình và báo cáo |
 
-**Khuyến nghị:** Customer App và Driver App nên là hai sản phẩm riêng. Quyền, vòng đời sử dụng, yêu cầu chạy nền, UX và chính sách bảo mật khác nhau đáng kể. Có thể chia sẻ design system, SDK nội bộ và một số thư viện nghiệp vụ, nhưng không nên ép thành một ứng dụng nhiều vai trò nếu không có lý do sản phẩm rõ ràng.
+**Khuyến nghị:** Customer App và Driver App là hai ứng dụng Flutter riêng (hai bundle ID / application ID), đặt trong một workspace và dùng chung package Dart nội bộ (domain, API client, design system). Quyền, vòng đời sử dụng, yêu cầu chạy nền, UX và chính sách bảo mật khác nhau đáng kể. Có thể chia sẻ design system, SDK nội bộ và một số thư viện nghiệp vụ, nhưng không nên ép thành một ứng dụng nhiều vai trò nếu không có lý do sản phẩm rõ ràng.
 
 ### 3.2 Edge layer: CDN, WAF, Load Balancer, API Gateway
 
@@ -754,36 +752,28 @@ Các thao tác nhạy cảm như refund, điều chỉnh giá, khoá tài khoả
 
 ## 12. Mobile architecture
 
-### 12.1 iOS — Swift
+Cả hai ứng dụng di động của Tới Nơi — **Customer App** và **Driver App** — viết bằng **Flutter** (Dart), một mã nguồn chạy trên iOS và Android. Lựa chọn này ưu tiên tốc độ phát triển và tính nhất quán giữa hai nền tảng; phần phụ thuộc nền tảng (vị trí nền, push, lưu bí mật) đi qua plugin hoặc platform channel và được kiểm riêng trên từng OS. Loạt bài chi tiết: `docs/flutter-master-curriculum.md`.
 
-Gợi ý phân lớp:
-- Presentation: SwiftUI/UIKit, ViewModel.
-- Domain: Use Cases, Entities, Repository protocols.
-- Data: API clients, DTO, Repository implementations, local persistence.
-- Platform: Core Location, APNs, Keychain, background tasks.
+### 12.1 Phân lớp ứng dụng Flutter
 
-Các yêu cầu:
-- Keychain cho token/secret.
-- Refresh token rotation và revoke.
+Gợi ý phân lớp (feature-first, mỗi feature có đủ ba lớp):
+- Presentation: widget, màn hình, Riverpod provider/notifier giữ trạng thái màn hình.
+- Domain: entity, value object, use case, repository interface — Dart thuần, không phụ thuộc Flutter hay plugin.
+- Data: API client (REST qua BFF), DTO và mapper, local persistence (SQLite qua drift, secure storage), realtime client.
+- Platform: plugin và platform channel cho vị trí, push, nền, Keychain/Keystore; được bọc sau interface của lớp Data.
+
+Workspace gồm `apps/customer`, `apps/driver` và các package dùng chung `toi_noi_core` (domain), `toi_noi_api` (client, DTO), `toi_noi_ui` (design system). Driver App không import code của Customer App và ngược lại; mọi thứ dùng chung phải đi qua package.
+
+### 12.2 Yêu cầu chung cho cả hai nền tảng
+
+- Token/secret lưu qua Keychain (iOS) và Keystore (Android) thông qua secure storage; không lưu trong SharedPreferences hay file thường.
+- Refresh token rotation và revoke; access token ngắn hạn; interceptor làm mới token một lần khi 401.
 - Certificate/public key pinning chỉ khi có quy trình vận hành rotation phù hợp; không triển khai pinning cứng thiếu cơ chế cập nhật.
-- GPS background mode theo đúng mục đích và chính sách nền tảng.
-- Offline queue cho một số thao tác có thể trì hoãn; không tự giả định một hành động nhạy cảm đã thành công khi chưa có server confirmation.
-- Deep link/universal link cho tracking và hỗ trợ.
-
-### 12.2 Android — Kotlin
-
-Gợi ý phân lớp:
-- Presentation: Jetpack Compose, ViewModel.
-- Domain: Use Cases, Entities, Repository interfaces.
-- Data: Retrofit/OkHttp hoặc client phù hợp, DTO, Room.
-- Platform: Fused Location Provider, FCM, WorkManager, Android Keystore.
-
-Các yêu cầu:
-- Bảo vệ token bằng Android Keystore.
-- Xử lý background location đúng policy Android/Google Play.
-- WorkManager cho tác vụ nền có thể trì hoãn.
-- Retry có backoff, network state awareness.
-- Không giữ GPS tracking liên tục nếu không có trạng thái công việc hợp lệ.
+- Vị trí nền chỉ khi có trạng thái công việc hợp lệ (Driver App đang có chuyến hoặc đang online nhận cuốc); tuân thủ usage description của iOS và chính sách quyền nền của Google Play.
+- Tác vụ nền trì hoãn được dùng cơ chế của hệ điều hành (BGTaskScheduler trên iOS, WorkManager trên Android) qua plugin; không giả định app chạy nền liên tục.
+- Offline queue (outbox trên client) cho thao tác có thể trì hoãn; không tự coi một hành động nhạy cảm (thanh toán, nhận cuốc) đã thành công khi chưa có server confirmation.
+- Deep link/universal link/app link cho tracking, hỗ trợ và quay về từ cổng thanh toán.
+- Ba flavor `dev`/`staging`/`prod` với bundle ID, application ID, icon và cấu hình Firebase riêng; phân phối nội bộ qua Firebase App Distribution, TestFlight và Google Play testing track trước khi lên production.
 
 ### 12.3 Mobile API contract
 

@@ -1,0 +1,16 @@
+[package]
+name = "ledger_11_trait_generics_phi"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 11: trait, generics, FeePolicy và RoundingPolicy cho sổ cái Tới Nơi"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]
+rust_decimal = "1.43.0"

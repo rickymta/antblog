@@ -1,0 +1,4 @@
+fields @timestamp, city, duration_ms, trace_id, trip_id
+| filter service = "toinoi-booking" and duration_ms > 800
+| stats count() as slow_requests, pct(duration_ms, 99) as p99_ms by city
+| sort slow_requests desc

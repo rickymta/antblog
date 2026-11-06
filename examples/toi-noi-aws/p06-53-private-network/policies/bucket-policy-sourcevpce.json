@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyAccessOutsideOurEndpoint",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::toinoi-prod-delivery-photos",
+        "arn:aws:s3:::toinoi-prod-delivery-photos/*"
+      ],
+      "Condition": {
+        "StringNotEquals": { "aws:SourceVpce": "vpce-0123456789abcdef0" },
+        "Bool": { "aws:PrincipalIsAWSService": "false" }
+      }
+    }
+  ]
+}

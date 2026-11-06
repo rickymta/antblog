@@ -1,0 +1,7 @@
+{
+  "currency": "VND",
+  "vehicles": {
+    "bike": { "baseFare": 12000, "includedKm": 2, "pricePerExtraKm": 4500 },
+    "car": { "baseFare": 25000, "includedKm": 2, "pricePerExtraKm": 9000 }
+  }
+}

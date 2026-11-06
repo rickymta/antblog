@@ -1,0 +1,16 @@
+name: toi_noi_27
+description: "Lab bài 27 (Flutter qua Tới Nơi): unit test quy tắc cước và use case RequestTrip bằng fake và mocktail."
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+
+dev_dependencies:
+  lints: ^6.1.0
+  mocktail: ^1.0.5
+  test: ^1.33.0

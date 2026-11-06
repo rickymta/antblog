@@ -1,0 +1,27 @@
+[package]
+name = "ledger_27_integration_test_pg"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "Lab bài 27: integration test với PostgreSQL thật, schema riêng mỗi ca"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[features]
+# Bật để chạy thêm ca so sánh dùng #[sqlx::test] (cần DATABASE_URL và quyền CREATEDB).
+sqlx-test = []
+
+[dependencies]
+anyhow = "1.0.104"
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "tls-none", "postgres", "macros", "migrate"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }
+uuid = { version = "1.29.0", features = ["v4"] }

@@ -1,0 +1,5 @@
+plugins:
+  toi_noi_lints:
+    path: ../../lint_plugin
+    diagnostics:
+      no_data_import_in_presentation: true

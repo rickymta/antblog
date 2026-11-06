@@ -1,0 +1,15 @@
+[package]
+name = "ledger_16_box_rc_arc_refcell"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 16: Box, Rc, Arc, RefCell và Cell trong sổ cái Tới Nơi"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]

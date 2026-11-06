@@ -1,0 +1,42 @@
+# Rule cfn-guard của Tới Nơi cho template CloudFormation.
+# Chạy: cfn-guard validate --data samples/cloudformation/good.yaml --rules policies/cfn-guard/toinoi.guard
+# Kiểm rule: cfn-guard test --rules-file policies/cfn-guard/toinoi.guard --test-data policies/cfn-guard/toinoi.tests.yaml
+
+let s3_buckets = Resources.*[ Type == 'AWS::S3::Bucket' ]
+let rds_instances = Resources.*[ Type == 'AWS::RDS::DBInstance' ]
+let security_groups = Resources.*[ Type == 'AWS::EC2::SecurityGroup' ]
+let taggable = Resources.*[ Type in ['AWS::S3::Bucket', 'AWS::RDS::DBInstance', 'AWS::EC2::SecurityGroup'] ]
+
+rule s3_bucket_must_be_encrypted when %s3_buckets !empty {
+    %s3_buckets {
+        Properties.BucketEncryption.ServerSideEncryptionConfiguration[*].ServerSideEncryptionByDefault.SSEAlgorithm in ['AES256', 'aws:kms']
+            <<Bucket S3 phai bat ma hoa mac dinh (AES256 hoac aws:kms)>>
+    }
+}
+
+rule rds_must_not_be_public when %rds_instances !empty {
+    %rds_instances {
+        Properties.PubliclyAccessible == false
+            <<RDS instance khong duoc PubliclyAccessible>>
+        Properties.StorageEncrypted == true
+            <<RDS instance phai bat StorageEncrypted>>
+    }
+}
+
+rule no_open_postgres when %security_groups !empty {
+    %security_groups {
+        when Properties.SecurityGroupIngress[ FromPort == 5432 ] !empty {
+            Properties.SecurityGroupIngress[ FromPort == 5432 ].CidrIp != '0.0.0.0/0'
+                <<Khong mo cong 5432 cho 0.0.0.0/0>>
+        }
+    }
+}
+
+rule required_tags when %taggable !empty {
+    %taggable {
+        Properties.Tags[ Key == 'Project' ] !empty
+            <<Thieu tag Project>>
+        Properties.Tags[ Key == 'Env' ] !empty
+            <<Thieu tag Env>>
+    }
+}

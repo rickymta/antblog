@@ -1,0 +1,11 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadOnlyThisSession",
+      "Effect": "Allow",
+      "Action": ["lambda:GetFunction", "logs:GetLogEvents", "logs:FilterLogEvents"],
+      "Resource": "*"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+name: toi_noi_12
+description: "Lab bài 12 (Flutter qua Tới Nơi): Navigator, route và truyền dữ liệu từ báo giá sang xác nhận chuyến."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

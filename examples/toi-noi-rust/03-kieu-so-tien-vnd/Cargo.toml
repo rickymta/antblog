@@ -1,0 +1,11 @@
+[package]
+name = "ledger_03_kieu_so_tien_vnd"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rust_decimal = "1.43.0"
+
+# Bỏ comment hai dòng dưới để release cũng panic khi tràn số:
+# [profile.release]
+# overflow-checks = true

@@ -1,0 +1,29 @@
+# Values cho chart aws-for-fluent-bit (repo https://aws.github.io/eks-charts), namespace observability.
+# Tên khoá có thể khác giữa các phiên bản chart: kiểm bằng `helm show values eks/aws-for-fluent-bit`.
+serviceAccount:
+  create: true
+  name: fluent-bit   # khớp aws_eks_pod_identity_association trong terraform/main.tf
+
+cloudWatchLogs:
+  enabled: true
+  region: ap-southeast-1
+  # Mỗi namespace một log group; Terraform đã tạo sẵn (biến namespaces) nên không để Fluent Bit tự tạo.
+  # Log của namespace chưa có log group (kube-system, observability...) sẽ bị từ chối vì role chỉ ghi được vào
+  # các group đã tạo: thêm namespace vào biến namespaces, hoặc lọc input chỉ lấy container của namespace cần thu.
+  logGroupTemplate: /toinoi/lab/eks/$kubernetes['namespace_name']
+  logStreamPrefix: pod-
+  autoCreateGroup: false
+
+firehose:
+  enabled: false
+kinesis:
+  enabled: false
+elasticsearch:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 100Mi
+  limits:
+    memory: 200Mi

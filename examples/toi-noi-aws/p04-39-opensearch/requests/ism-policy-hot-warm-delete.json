@@ -1,0 +1,30 @@
+{
+  "policy": {
+    "description": "Log Tới Nơi: hot 7 ngày, UltraWarm tới ngày 30, rồi xoá. Cần domain bật UltraWarm.",
+    "default_state": "hot",
+    "states": [
+      {
+        "name": "hot",
+        "actions": [],
+        "transitions": [
+          { "state_name": "warm", "conditions": { "min_index_age": "7d" } }
+        ]
+      },
+      {
+        "name": "warm",
+        "actions": [{ "warm_migration": {} }],
+        "transitions": [
+          { "state_name": "delete", "conditions": { "min_index_age": "30d" } }
+        ]
+      },
+      {
+        "name": "delete",
+        "actions": [{ "delete": {} }],
+        "transitions": []
+      }
+    ],
+    "ism_template": [
+      { "index_patterns": ["toinoi-logs-*"], "priority": 100 }
+    ]
+  }
+}

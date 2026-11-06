@@ -1,0 +1,11 @@
+name: toi_noi_02
+description: Lab bài 02 - biến, kiểu dữ liệu và null safety khi tính cước Tới Nơi.
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ^3.13.3
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

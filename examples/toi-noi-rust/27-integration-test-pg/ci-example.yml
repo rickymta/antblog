@@ -1,0 +1,65 @@
+# Workflow MẪU cho lab 27. Đặt tạm trong thư mục lab; muốn dùng thật thì chép vào .github/workflows/.
+# CHƯA CHẠY TRÊN GITHUB: mới kiểm bằng JSON schema workflow của SchemaStore và tra phiên bản action.
+name: rust-ledger-integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    # Service container: PostgreSQL 18 khởi động trước các bước, runner đợi healthcheck xanh.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: toi_noi
+          POSTGRES_PASSWORD: toi_noi_lab # giá trị lab, không phải secret
+          POSTGRES_DB: toi_noi_rust_lab
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U toi_noi -d toi_noi_rust_lab"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      # Giống hệt URL chạy local, nên cùng một lệnh test chạy được ở cả hai nơi.
+      TOI_NOI_PG_URL: postgres://toi_noi:toi_noi_lab@127.0.0.1:5433/toi_noi_rust_lab
+
+    defaults:
+      run:
+        working-directory: examples/toi-noi-rust/27-integration-test-pg
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: examples/toi-noi-rust/27-integration-test-pg
+
+      # Biên dịch tách khỏi test: lỗi biên dịch và lỗi test không lẫn nhau.
+      - name: Build
+        run: cargo build --tests --locked
+
+      - name: Integration test
+        run: cargo test --locked
+
+      - name: Verify
+        run: cargo run --locked -- --verify
+
+      # Lưới an toàn: test panic có thể để sót schema. Job mới có database mới nên thường không có gì;
+      # bước này vẫn in số schema lab_% còn lại, và chạy cả khi bước trước đỏ.
+      - name: Dọn schema mồ côi
+        if: always()
+        run: cargo run --locked -- --cleanup-stale 0

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Phần ios/Runner/Info.plist liên quan tới deep link. Các khoá còn lại
+  (CFBundleExecutable, UIApplicationSceneManifest...) giữ như file
+  `flutter create` sinh. Không khai báo FlutterDeepLinkingEnabled: vắng khoá
+  này thì Flutter xử lý deep link (mặc định bật).
+-->
+<plist version="1.0">
+<dict>
+	<!-- Custom scheme: toinoi://trip/{id} -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>vn.toinoi.customer</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>toinoi</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,18 @@
+# PodMonitor (không phải ServiceMonitor) vì Rollout có hai Service cùng chọn pod booking: scrape qua Service sẽ trùng target.
+# PodMonitor này thay ServiceMonitor booking của lab 47 khi chuyển sang Rollout; giữ cả hai thì metric bị thu hai lần.
+# podTargetLabels đưa nhãn rollouts-pod-template-hash của pod thành nhãn metric (rollouts_pod_template_hash).
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: booking
+  namespace: booking
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  podTargetLabels:
+    - rollouts-pod-template-hash
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

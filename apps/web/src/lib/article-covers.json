@@ -989,6 +989,2236 @@
       "EVIDENCE"
     ]
   },
+  "aws-la-gi-region-az-shared-responsibility": {
+    "title": "AWS / 101",
+    "subtitle": "AWS 01 · Regions, zones and who secures what",
+    "diagram": "map",
+    "labels": [
+      "REGION",
+      "AZ",
+      "EDGE"
+    ]
+  },
+  "aws-tai-khoan-iam-identity-center-cli": {
+    "title": "FIRST / LOGIN",
+    "subtitle": "AWS 02 · Identity Center, MFA and the CLI",
+    "diagram": "checklist",
+    "labels": [
+      "ROOT + MFA",
+      "IDENTITY CENTER",
+      "AWS CLI"
+    ]
+  },
+  "aws-iam-user-role-policy": {
+    "title": "LEAST / PRIVILEGE",
+    "subtitle": "AWS 03 · Users, roles and the policy language",
+    "diagram": "matrix",
+    "labels": [
+      "ALLOW",
+      "DENY",
+      "CONDITION"
+    ]
+  },
+  "aws-vpc-subnet-route-security-group": {
+    "title": "VPC / LAYOUT",
+    "subtitle": "AWS 04 · Subnets, routes and security groups",
+    "diagram": "layers",
+    "labels": [
+      "PUBLIC",
+      "APP",
+      "DATA"
+    ]
+  },
+  "aws-ec2-ami-ebs-user-data": {
+    "title": "EC2 / BOOT",
+    "subtitle": "AWS 05 · AMI, user data and the first service",
+    "diagram": "code",
+    "labels": [
+      "AMI",
+      "USER DATA",
+      "SSM"
+    ]
+  },
+  "aws-s3-bucket-versioning-presigned-url": {
+    "title": "S3 / OBJECTS",
+    "subtitle": "AWS 06 · Buckets, versions and presigned URLs",
+    "diagram": "storage",
+    "labels": [
+      "PUT PRESIGNED",
+      "BUCKET",
+      "proof/trip-42.jpg"
+    ]
+  },
+  "aws-rds-postgresql-multi-az-backup": {
+    "title": "RDS / POSTGRES",
+    "subtitle": "AWS 07 · Managed PostgreSQL in a private subnet",
+    "diagram": "split",
+    "labels": [
+      "PRIMARY",
+      "SYNC",
+      "STANDBY"
+    ]
+  },
+  "aws-alb-target-group-auto-scaling": {
+    "title": "SCALE / OUT",
+    "subtitle": "AWS 08 · Load balancing and auto scaling",
+    "diagram": "flow",
+    "labels": [
+      "ALB",
+      "TARGET GROUP",
+      "ASG ×N"
+    ]
+  },
+  "aws-route53-acm-https": {
+    "title": "DNS / TLS",
+    "subtitle": "AWS 09 · Route 53 records and ACM certificates",
+    "diagram": "target",
+    "labels": [
+      "api.toinoi",
+      "ALIAS → ALB",
+      "ACM"
+    ]
+  },
+  "aws-cloudwatch-budgets-tagging-co-ban": {
+    "title": "SEE / COST",
+    "subtitle": "AWS 10 · Metrics, alarms and the bill",
+    "diagram": "checklist",
+    "labels": [
+      "ALARM 5XX",
+      "TAG Project",
+      "BUDGET"
+    ]
+  },
+  "aws-ecr-image-scan-lifecycle": {
+    "title": "ECR / DIGEST",
+    "subtitle": "AWS 11 · Registry, scanning and immutable tags",
+    "diagram": "storage",
+    "labels": [
+      "docker push",
+      "REPOSITORY",
+      "sha256:…"
+    ]
+  },
+  "aws-ecs-fargate-task-definition-roles": {
+    "title": "ECS / FARGATE",
+    "subtitle": "AWS 12 · Task definitions and two roles",
+    "diagram": "split",
+    "labels": [
+      "EXECUTION ROLE",
+      "TASK",
+      "TASK ROLE"
+    ]
+  },
+  "aws-ecs-alb-rolling-deploy-autoscaling": {
+    "title": "ROLL / OUT",
+    "subtitle": "AWS 13 · Rolling updates and scaling ECS services",
+    "diagram": "cycle",
+    "labels": [
+      "NEW TASKS",
+      "HEALTHY",
+      "DRAIN OLD"
+    ]
+  },
+  "aws-secrets-manager-parameter-store": {
+    "title": "SECRET / ROTATE",
+    "subtitle": "AWS 14 · Parameters, secrets and rotation",
+    "diagram": "cycle",
+    "labels": [
+      "AWSCURRENT",
+      "ROTATE",
+      "AWSPREVIOUS"
+    ]
+  },
+  "aws-elasticache-redis-cache-rate-limit": {
+    "title": "CACHE / HIT",
+    "subtitle": "AWS 15 · Redis-compatible caching on AWS",
+    "diagram": "target",
+    "labels": [
+      "APP",
+      "CACHE HIT 94%",
+      "RDS"
+    ]
+  },
+  "aws-sqs-sns-dlq-fan-out": {
+    "title": "FAN / OUT",
+    "subtitle": "AWS 16 · Queues, topics and dead letters",
+    "diagram": "network",
+    "labels": [
+      "PUSH",
+      "BookingCreated",
+      "DLQ"
+    ]
+  },
+  "aws-eventbridge-event-bus-rule-schedule": {
+    "title": "EVENT / ROUTE",
+    "subtitle": "AWS 17 · Buses, rules and schedules",
+    "diagram": "network",
+    "labels": [
+      "TripCompleted",
+      "RULE",
+      "TARGETS"
+    ]
+  },
+  "aws-lambda-webhook-thanh-toan-cold-start": {
+    "title": "LAMBDA / HOOK",
+    "subtitle": "AWS 18 · Functions, triggers and cold starts",
+    "diagram": "code",
+    "labels": [
+      "WEBHOOK",
+      "VERIFY SIG",
+      "SQS"
+    ]
+  },
+  "aws-api-gateway-authorizer-websocket": {
+    "title": "API / EDGE",
+    "subtitle": "AWS 19 · Gateways, authorizers and WebSockets",
+    "diagram": "flow",
+    "labels": [
+      "JWT",
+      "ROUTE",
+      "LAMBDA / ALB"
+    ]
+  },
+  "aws-cloudfront-waf-shield": {
+    "title": "EDGE / SHIELD",
+    "subtitle": "AWS 20 · CDN, WAF rules and DDoS protection",
+    "diagram": "layers",
+    "labels": [
+      "CLOUDFRONT",
+      "WAF",
+      "ORIGIN"
+    ]
+  },
+  "aws-cloudformation-stack-change-set-drift": {
+    "title": "STACK / DIFF",
+    "subtitle": "AWS 21 · CloudFormation templates and change sets",
+    "diagram": "code",
+    "labels": [
+      "TEMPLATE",
+      "CHANGE SET",
+      "STACK"
+    ]
+  },
+  "aws-terraform-provider-state-s3-lock": {
+    "title": "STATE / LOCK",
+    "subtitle": "AWS 22 · Terraform state on S3",
+    "diagram": "storage",
+    "labels": [
+      "terraform apply",
+      "STATE",
+      "use_lockfile"
+    ]
+  },
+  "aws-terraform-module-vpc-ecs-rds": {
+    "title": "MODULES / ENVS",
+    "subtitle": "AWS 23 · Reusable Terraform for every environment",
+    "diagram": "blocks",
+    "labels": [
+      "NETWORK",
+      "RDS",
+      "ECS SERVICE"
+    ]
+  },
+  "aws-cdk-construct-synth-diff": {
+    "title": "CDK / SYNTH",
+    "subtitle": "AWS 24 · Constructs that compile to CloudFormation",
+    "diagram": "code",
+    "labels": [
+      "CONSTRUCT",
+      "cdk diff",
+      "TEMPLATE"
+    ]
+  },
+  "aws-github-actions-oidc-ecr-deploy": {
+    "title": "OIDC / DEPLOY",
+    "subtitle": "AWS 25 · Keyless CI from GitHub to ECS",
+    "diagram": "flow",
+    "labels": [
+      "GITHUB TOKEN",
+      "ASSUME ROLE",
+      "ECR → ECS"
+    ]
+  },
+  "aws-codepipeline-codebuild-codedeploy-blue-green": {
+    "title": "BLUE / GREEN",
+    "subtitle": "AWS 26 · Shifting traffic one target group at a time",
+    "diagram": "split",
+    "labels": [
+      "BLUE 90%",
+      "",
+      "GREEN 10%"
+    ]
+  },
+  "aws-chien-luoc-deploy-rolling-canary-rollback": {
+    "title": "SHIP / SAFELY",
+    "subtitle": "AWS 27 · Choosing a rollout strategy",
+    "diagram": "matrix",
+    "labels": [
+      "ROLLING",
+      "CANARY",
+      "ROLLBACK"
+    ]
+  },
+  "aws-organizations-scp-control-tower-landing-zone": {
+    "title": "MANY / ACCOUNTS",
+    "subtitle": "AWS 28 · Organizations, OUs and guardrails",
+    "diagram": "layers",
+    "labels": [
+      "ORG",
+      "OU",
+      "ACCOUNT"
+    ]
+  },
+  "aws-appconfig-feature-flag-cau-hinh-dong": {
+    "title": "FLAG / ON",
+    "subtitle": "AWS 29 · Configuration deployed like code",
+    "diagram": "cycle",
+    "labels": [
+      "VALIDATE",
+      "ROLL OUT 5%",
+      "BAKE"
+    ]
+  },
+  "aws-policy-as-code-checkov-infracost-drift": {
+    "title": "GATE / PLAN",
+    "subtitle": "AWS 30 · Lint, policy and cost before apply",
+    "diagram": "checklist",
+    "labels": [
+      "CHECKOV",
+      "INFRACOST",
+      "PLAN REVIEWED"
+    ]
+  },
+  "aws-aurora-postgresql-rds-proxy-failover": {
+    "title": "AURORA / 6×",
+    "subtitle": "AWS 31 · Distributed storage and reader endpoints",
+    "diagram": "pages",
+    "labels": [
+      "WRITER",
+      "SHARED STORAGE",
+      "READERS"
+    ]
+  },
+  "aws-dynamodb-single-table-gsi-ttl-streams": {
+    "title": "KEY / VALUE",
+    "subtitle": "AWS 32 · Access patterns before schema",
+    "diagram": "matrix",
+    "labels": [
+      "PK DRIVER#",
+      "SK TS#",
+      "GSI CITY#"
+    ]
+  },
+  "aws-elasticache-nang-cao-memorydb-ha": {
+    "title": "CACHE / HA",
+    "subtitle": "AWS 33 · Shards, replicas and failover",
+    "diagram": "blocks",
+    "labels": [
+      "SHARD 0",
+      "SHARD 1",
+      "SHARD 2"
+    ]
+  },
+  "aws-msk-kafka-iam-auth-msk-connect": {
+    "title": "MSK / KAFKA",
+    "subtitle": "AWS 34 · Managed brokers and the outbox",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "DEBEZIUM",
+      "TOPIC trips"
+    ]
+  },
+  "aws-kinesis-data-streams-firehose-gps": {
+    "title": "6 250 / s",
+    "subtitle": "AWS 35 · Streaming GPS points to S3",
+    "diagram": "flow",
+    "labels": [
+      "PRODUCERS",
+      "SHARDS",
+      "FIREHOSE → S3"
+    ]
+  },
+  "aws-s3-nang-cao-storage-class-replication-object-lock": {
+    "title": "S3 / TIERS",
+    "subtitle": "AWS 36 · Classes, replication and immutability",
+    "diagram": "layers",
+    "labels": [
+      "STANDARD",
+      "IA",
+      "GLACIER"
+    ]
+  },
+  "aws-backup-disaster-recovery-rpo-rto": {
+    "title": "RPO / RTO",
+    "subtitle": "AWS 37 · Backup plans and recovery drills",
+    "diagram": "target",
+    "labels": [
+      "BACKUP VAULT",
+      "RESTORE 42 MIN",
+      "REGION B"
+    ]
+  },
+  "aws-glue-athena-redshift-lakehouse": {
+    "title": "LAKE / QUERY",
+    "subtitle": "AWS 38 · Parquet, catalogs and warehouses",
+    "diagram": "layers",
+    "labels": [
+      "RAW",
+      "CURATED",
+      "SERVING"
+    ]
+  },
+  "aws-opensearch-tim-kiem-log-analytics": {
+    "title": "SEARCH / GEO",
+    "subtitle": "AWS 39 · Full-text and geo queries at scale",
+    "diagram": "map",
+    "labels": [
+      "QUERY 'pho'",
+      "GEO 3 KM",
+      "RESULTS"
+    ]
+  },
+  "aws-dms-migration-postgresql-zero-downtime": {
+    "title": "CUT / OVER",
+    "subtitle": "AWS 40 · Full load, CDC and the switch",
+    "diagram": "flow",
+    "labels": [
+      "SOURCE PG",
+      "DMS CDC",
+      "AURORA"
+    ]
+  },
+  "aws-eks-tong-quan-control-plane-node-group": {
+    "title": "EKS / PLANES",
+    "subtitle": "AWS 41 · What AWS runs and what you run",
+    "diagram": "split",
+    "labels": [
+      "CONTROL PLANE",
+      "",
+      "DATA PLANE"
+    ]
+  },
+  "aws-eks-terraform-eksctl-kubectl-namespace": {
+    "title": "KUBECTL / APPLY",
+    "subtitle": "AWS 42 · A cluster from code",
+    "diagram": "code",
+    "labels": [
+      "TERRAFORM",
+      "NODE GROUP",
+      "NAMESPACE"
+    ]
+  },
+  "aws-eks-vpc-cni-load-balancer-controller-ingress": {
+    "title": "PODS / IPS",
+    "subtitle": "AWS 43 · Networking pods and load balancers",
+    "diagram": "network",
+    "labels": [
+      "INGRESS",
+      "ALB",
+      "PODS"
+    ]
+  },
+  "aws-eks-ebs-efs-csi-statefulset": {
+    "title": "PVC / BOUND",
+    "subtitle": "AWS 44 · Block and file storage for pods",
+    "diagram": "storage",
+    "labels": [
+      "STATEFULSET",
+      "PVC",
+      "gp3 · ap-southeast-1a"
+    ]
+  },
+  "aws-eks-hpa-karpenter-spot": {
+    "title": "SCALE / PODS",
+    "subtitle": "AWS 45 · HPA for pods, Karpenter for nodes",
+    "diagram": "cycle",
+    "labels": [
+      "QUEUE DEPTH",
+      "HPA",
+      "KARPENTER"
+    ]
+  },
+  "aws-eks-gitops-argocd-helm-kustomize": {
+    "title": "GIT / SYNC",
+    "subtitle": "AWS 46 · Argo CD keeps the cluster honest",
+    "diagram": "cycle",
+    "labels": [
+      "GIT",
+      "ARGO CD",
+      "CLUSTER"
+    ]
+  },
+  "aws-eks-observability-container-insights-adot-prometheus": {
+    "title": "SIGNALS / 3",
+    "subtitle": "AWS 47 · Metrics, logs and traces on EKS",
+    "diagram": "network",
+    "labels": [
+      "METRICS",
+      "ADOT",
+      "TRACES"
+    ]
+  },
+  "aws-eks-bao-mat-pod-identity-external-secrets": {
+    "title": "POD / GUARD",
+    "subtitle": "AWS 48 · Identity, secrets and admission policy",
+    "diagram": "checklist",
+    "labels": [
+      "POD IDENTITY",
+      "RESTRICTED PSS",
+      "SIGNED IMAGE"
+    ]
+  },
+  "aws-eks-progressive-delivery-argo-rollouts-vpc-lattice": {
+    "title": "CANARY / 5%",
+    "subtitle": "AWS 49 · Metric-driven rollouts and Lattice",
+    "diagram": "split",
+    "labels": [
+      "STABLE 95%",
+      "",
+      "CANARY 5%"
+    ]
+  },
+  "aws-eks-van-hanh-upgrade-addon-chi-phi": {
+    "title": "UPGRADE / PATH",
+    "subtitle": "AWS 50 · Versions, add-ons and the bill",
+    "diagram": "flow",
+    "labels": [
+      "CONTROL PLANE",
+      "ADD-ONS",
+      "NODES"
+    ]
+  },
+  "aws-iam-nang-cao-permission-boundary-abac-access-analyzer": {
+    "title": "POLICY / EVAL",
+    "subtitle": "AWS 51 · How AWS decides allow or deny",
+    "diagram": "layers",
+    "labels": [
+      "SCP",
+      "BOUNDARY",
+      "IDENTITY"
+    ]
+  },
+  "aws-kms-envelope-encryption-key-policy": {
+    "title": "KMS / ENVELOPE",
+    "subtitle": "AWS 52 · Keys, data keys and who may use them",
+    "diagram": "pages",
+    "labels": [
+      "KMS KEY",
+      "DATA KEY",
+      "CIPHERTEXT"
+    ]
+  },
+  "aws-privatelink-transit-gateway-network-firewall": {
+    "title": "PRIVATE / PATH",
+    "subtitle": "AWS 53 · Endpoints, hubs and inspection",
+    "diagram": "network",
+    "labels": [
+      "VPC DEV",
+      "TRANSIT GW",
+      "VPC PROD"
+    ]
+  },
+  "aws-cloudtrail-config-security-hub-guardduty": {
+    "title": "DETECT / AUDIT",
+    "subtitle": "AWS 54 · Every call logged, every finding triaged",
+    "diagram": "checklist",
+    "labels": [
+      "CLOUDTRAIL",
+      "GUARDDUTY",
+      "SECURITY HUB"
+    ]
+  },
+  "aws-observability-nang-cao-xray-adot-logs-insights-slo": {
+    "title": "SLO / 99.9",
+    "subtitle": "AWS 55 · Traces, logs and error budgets",
+    "diagram": "target",
+    "labels": [
+      "TRACE",
+      "p99 < 800 ms",
+      "ERROR BUDGET"
+    ]
+  },
+  "aws-resilience-multi-region-route53-failover-fis": {
+    "title": "FAIL / OVER",
+    "subtitle": "AWS 56 · Surviving a zone, planning for a region",
+    "diagram": "map",
+    "labels": [
+      "REGION A",
+      "ROUTE 53",
+      "REGION B"
+    ]
+  },
+  "aws-step-functions-saga-dat-chuyen": {
+    "title": "SAGA / STEPS",
+    "subtitle": "AWS 57 · Orchestrating a booking with compensation",
+    "diagram": "flow",
+    "labels": [
+      "HOLD",
+      "MATCH",
+      "CAPTURE / UNDO"
+    ]
+  },
+  "aws-well-architected-review-toi-noi": {
+    "title": "SIX / PILLARS",
+    "subtitle": "AWS 58 · Reviewing Tới Nơi against the framework",
+    "diagram": "matrix",
+    "labels": [
+      "PILLAR",
+      "QUESTION",
+      "HRI"
+    ]
+  },
+  "aws-finops-savings-plans-spot-right-sizing": {
+    "title": "COST / TRIP",
+    "subtitle": "AWS 59 · Commitments, Spot and what you forgot",
+    "diagram": "matrix",
+    "labels": [
+      "ON-DEMAND",
+      "SAVINGS PLAN",
+      "SPOT"
+    ]
+  },
+  "aws-tong-hop-kien-truc-production-toi-noi": {
+    "title": "ONE / TRIP",
+    "subtitle": "AWS 60 · The whole platform, end to end",
+    "diagram": "map",
+    "labels": [
+      "EDGE",
+      "SERVICES",
+      "DATA"
+    ]
+  },
+  "azure-la-gi-cloud-region-trach-nhiem-chia-se": {
+    "title": "AZURE / REGION",
+    "subtitle": "Azure 01 · Azure là gì",
+    "diagram": "map",
+    "labels": [
+      "REGION",
+      "ZONE",
+      "TENANT"
+    ]
+  },
+  "azure-tenant-subscription-resource-group": {
+    "title": "SCOPE / HIERARCHY",
+    "subtitle": "Azure 02 · Tenant, subscription, management group và resource…",
+    "diagram": "layers",
+    "labels": [
+      "TENANT",
+      "SUBSCRIPTION",
+      "RESOURCE GROUP"
+    ]
+  },
+  "azure-portal-cli-cloud-shell-resource-group-dau-tien": {
+    "title": "PORTAL / CLI",
+    "subtitle": "Azure 03 · Azure Portal, Azure CLI và Cloud Shell",
+    "diagram": "code",
+    "labels": [
+      "PORTAL",
+      "az CLI",
+      "CLOUD SHELL"
+    ]
+  },
+  "azure-resource-manager-resource-id-tag-lock": {
+    "title": "ARM / RESOURCE ID",
+    "subtitle": "Azure 04 · Azure Resource Manager",
+    "diagram": "blocks",
+    "labels": [
+      "PROVIDER",
+      "RESOURCE ID",
+      "LOCK"
+    ]
+  },
+  "azure-chi-phi-pricing-cost-management-budget": {
+    "title": "COST / BUDGET",
+    "subtitle": "Azure 05 · Chi phí Azure",
+    "diagram": "matrix",
+    "labels": [
+      "PRICING",
+      "BUDGET",
+      "TAG"
+    ]
+  },
+  "azure-vnet-subnet-nsg-public-ip": {
+    "title": "VNET / SUBNET",
+    "subtitle": "Azure 06 · Mạng cơ bản",
+    "diagram": "network",
+    "labels": [
+      "SUBNET",
+      "NSG",
+      "PUBLIC IP"
+    ]
+  },
+  "azure-virtual-machine-linux-chay-api": {
+    "title": "VM / LINUX",
+    "subtitle": "Azure 07 · Virtual Machine Linux",
+    "diagram": "storage",
+    "labels": [
+      "VM SIZE",
+      "OS DISK",
+      "DATA DISK"
+    ]
+  },
+  "azure-storage-account-blob-tier-sas": {
+    "title": "BLOB / STORAGE",
+    "subtitle": "Azure 08 · Storage Account và Blob",
+    "diagram": "pages",
+    "labels": [
+      "CONTAINER",
+      "HOT / COOL",
+      "SAS"
+    ]
+  },
+  "azure-database-postgresql-flexible-server-co-ban": {
+    "title": "POSTGRES / FLEX",
+    "subtitle": "Azure 09 · Azure Database for PostgreSQL Flexible Server",
+    "diagram": "storage",
+    "labels": [
+      "TRIPS",
+      "FLEXIBLE",
+      "BACKUP"
+    ]
+  },
+  "azure-monitor-metrics-activity-log-alert-dau-tien": {
+    "title": "MONITOR / ALERT",
+    "subtitle": "Azure 10 · Azure Monitor cơ bản",
+    "diagram": "target",
+    "labels": [
+      "METRIC",
+      "ACTIVITY LOG",
+      "ALERT"
+    ]
+  },
+  "azure-entra-id-tenant-user-group-app-registration": {
+    "title": "ENTRA / IDENTITY",
+    "subtitle": "Azure 11 · Microsoft Entra ID",
+    "diagram": "network",
+    "labels": [
+      "USER",
+      "GROUP",
+      "APP"
+    ]
+  },
+  "azure-rbac-role-scope-assignment-pim": {
+    "title": "RBAC / SCOPE",
+    "subtitle": "Azure 12 · Azure RBAC",
+    "diagram": "layers",
+    "labels": [
+      "ROLE",
+      "SCOPE",
+      "PRINCIPAL"
+    ]
+  },
+  "azure-managed-identity-workload-identity": {
+    "title": "IDENTITY / NO SECRET",
+    "subtitle": "Azure 13 · Managed identity",
+    "diagram": "flow",
+    "labels": [
+      "WORKLOAD",
+      "TOKEN",
+      "RESOURCE"
+    ]
+  },
+  "azure-key-vault-secret-key-certificate": {
+    "title": "KEY VAULT",
+    "subtitle": "Azure 14 · Key Vault",
+    "diagram": "checklist",
+    "labels": [
+      "SECRET",
+      "KEY",
+      "CERTIFICATE"
+    ]
+  },
+  "azure-policy-deny-audit-initiative": {
+    "title": "POLICY / GUARDRAIL",
+    "subtitle": "Azure 15 · Azure Policy",
+    "diagram": "checklist",
+    "labels": [
+      "DENY",
+      "AUDIT",
+      "INITIATIVE"
+    ]
+  },
+  "azure-defender-for-cloud-secure-score": {
+    "title": "DEFENDER / SCORE",
+    "subtitle": "Azure 16 · Defender for Cloud và Secure Score",
+    "diagram": "target",
+    "labels": [
+      "POSTURE",
+      "RECOMMENDATION",
+      "ALERT"
+    ]
+  },
+  "azure-private-endpoint-private-dns-service-endpoint": {
+    "title": "PRIVATE / ENDPOINT",
+    "subtitle": "Azure 17 · Private Endpoint, Private DNS và service endpoint",
+    "diagram": "split",
+    "labels": [
+      "PUBLIC",
+      "PRIVATE LINK",
+      "DNS"
+    ]
+  },
+  "azure-firewall-waf-ddos-bao-ve-bien": {
+    "title": "EDGE / WAF",
+    "subtitle": "Azure 18 · Azure Firewall, WAF và DDoS Protection",
+    "diagram": "target",
+    "labels": [
+      "DDOS",
+      "WAF",
+      "FIREWALL"
+    ]
+  },
+  "azure-entra-external-id-xac-thuc-khach-tai-xe": {
+    "title": "EXTERNAL ID / JWT",
+    "subtitle": "Azure 19 · Entra External ID",
+    "diagram": "flow",
+    "labels": [
+      "CUSTOMER",
+      "TOKEN",
+      "API"
+    ]
+  },
+  "azure-app-service-deploy-slot-scale": {
+    "title": "APP SERVICE",
+    "subtitle": "Azure 20 · App Service",
+    "diagram": "cycle",
+    "labels": [
+      "STAGING SLOT",
+      "SWAP",
+      "PRODUCTION"
+    ]
+  },
+  "azure-container-registry-build-push-digest": {
+    "title": "ACR / DIGEST",
+    "subtitle": "Azure 21 · Azure Container Registry",
+    "diagram": "pages",
+    "labels": [
+      "BUILD",
+      "PUSH",
+      "sha256"
+    ]
+  },
+  "azure-container-apps-revision-ingress-scale": {
+    "title": "CONTAINER APPS",
+    "subtitle": "Azure 22 · Azure Container Apps",
+    "diagram": "cycle",
+    "labels": [
+      "REVISION",
+      "INGRESS",
+      "KEDA"
+    ]
+  },
+  "azure-aks-co-ban-cluster-node-pool-deploy": {
+    "title": "AKS / CLUSTER",
+    "subtitle": "Azure 23 · AKS cơ bản",
+    "diagram": "blocks",
+    "labels": [
+      "CONTROL PLANE",
+      "NODE POOL",
+      "POD"
+    ]
+  },
+  "azure-aks-nang-cao-ingress-workload-identity-upgrade": {
+    "title": "AKS / OPERATE",
+    "subtitle": "Azure 24 · AKS nâng cao",
+    "diagram": "layers",
+    "labels": [
+      "INGRESS",
+      "WORKLOAD ID",
+      "UPGRADE"
+    ]
+  },
+  "azure-functions-trigger-binding-durable": {
+    "title": "FUNCTIONS",
+    "subtitle": "Azure 25 · Azure Functions",
+    "diagram": "flow",
+    "labels": [
+      "TRIGGER",
+      "BINDING",
+      "DURABLE"
+    ]
+  },
+  "azure-chon-compute-cho-tung-service-toi-noi": {
+    "title": "COMPUTE / CHOICE",
+    "subtitle": "Azure 26 · Chọn compute cho từng service Tới Nơi",
+    "diagram": "matrix",
+    "labels": [
+      "VM",
+      "CONTAINER",
+      "SERVERLESS"
+    ]
+  },
+  "azure-vnet-integration-application-gateway": {
+    "title": "APP / NETWORK",
+    "subtitle": "Azure 27 · Mạng cho ứng dụng",
+    "diagram": "network",
+    "labels": [
+      "APP GATEWAY",
+      "VNET",
+      "PRIVATE"
+    ]
+  },
+  "azure-front-door-cdn-custom-domain-tls": {
+    "title": "FRONT DOOR",
+    "subtitle": "Azure 28 · Front Door, CDN, custom domain và TLS",
+    "diagram": "map",
+    "labels": [
+      "POP",
+      "ORIGIN",
+      "TLS"
+    ]
+  },
+  "azure-app-configuration-feature-flag-key-vault-reference": {
+    "title": "CONFIG / FLAG",
+    "subtitle": "Azure 29 · App Configuration",
+    "diagram": "checklist",
+    "labels": [
+      "KEY-VALUE",
+      "LABEL",
+      "FEATURE FLAG"
+    ]
+  },
+  "azure-postgresql-ha-read-replica-pitr-entra-auth": {
+    "title": "POSTGRES / HA",
+    "subtitle": "Azure 30 · PostgreSQL Flexible Server nâng cao",
+    "diagram": "split",
+    "labels": [
+      "PRIMARY",
+      "STANDBY",
+      "REPLICA"
+    ]
+  },
+  "azure-chon-database-sql-postgresql-cosmos": {
+    "title": "DATABASE / CHOICE",
+    "subtitle": "Azure 31 · Chọn database",
+    "diagram": "matrix",
+    "labels": [
+      "SQL",
+      "POSTGRES",
+      "COSMOS"
+    ]
+  },
+  "azure-cosmos-db-partition-key-ru-consistency": {
+    "title": "COSMOS / PARTITION",
+    "subtitle": "Azure 32 · Cosmos DB",
+    "diagram": "storage",
+    "labels": [
+      "PARTITION KEY",
+      "RU/s",
+      "CONSISTENCY"
+    ]
+  },
+  "azure-cache-for-redis-cache-geospatial-rate-limit": {
+    "title": "REDIS / CACHE",
+    "subtitle": "Azure 33 · Azure Cache for Redis",
+    "diagram": "pages",
+    "labels": [
+      "GEO",
+      "TTL",
+      "RATE LIMIT"
+    ]
+  },
+  "azure-service-bus-queue-topic-session-dead-letter": {
+    "title": "SERVICE BUS",
+    "subtitle": "Azure 34 · Service Bus",
+    "diagram": "flow",
+    "labels": [
+      "TOPIC",
+      "SUBSCRIPTION",
+      "DEAD-LETTER"
+    ]
+  },
+  "azure-event-hubs-stream-gps-consumer-group": {
+    "title": "EVENT HUBS",
+    "subtitle": "Azure 35 · Event Hubs",
+    "diagram": "cycle",
+    "labels": [
+      "PARTITION",
+      "CONSUMER GROUP",
+      "CAPTURE"
+    ]
+  },
+  "azure-event-grid-system-custom-topic": {
+    "title": "EVENT GRID",
+    "subtitle": "Azure 36 · Event Grid",
+    "diagram": "network",
+    "labels": [
+      "SOURCE",
+      "TOPIC",
+      "HANDLER"
+    ]
+  },
+  "azure-chon-messaging-storage-queue-service-bus-event-hubs": {
+    "title": "MESSAGING / CHOICE",
+    "subtitle": "Azure 37 · Chọn messaging",
+    "diagram": "matrix",
+    "labels": [
+      "QUEUE",
+      "STREAM",
+      "EVENT"
+    ]
+  },
+  "azure-data-lake-data-factory-bao-cao": {
+    "title": "DATA / PIPELINE",
+    "subtitle": "Azure 38 · Data Lake, Data Factory và Synapse",
+    "diagram": "layers",
+    "labels": [
+      "RAW",
+      "CURATED",
+      "REPORT"
+    ]
+  },
+  "azure-api-management-gateway-policy-versioning": {
+    "title": "APIM / GATEWAY",
+    "subtitle": "Azure 39 · API Management",
+    "diagram": "flow",
+    "labels": [
+      "POLICY",
+      "PRODUCT",
+      "VERSION"
+    ]
+  },
+  "azure-bicep-co-ban-module-parameter-what-if": {
+    "title": "BICEP / IaC",
+    "subtitle": "Azure 40 · Bicep",
+    "diagram": "code",
+    "labels": [
+      "MODULE",
+      "PARAM",
+      "WHAT-IF"
+    ]
+  },
+  "azure-terraform-azurerm-state-workspace": {
+    "title": "TERRAFORM / STATE",
+    "subtitle": "Azure 41 · Terraform trên Azure",
+    "diagram": "storage",
+    "labels": [
+      "azurerm",
+      "STATE",
+      "PLAN"
+    ]
+  },
+  "azure-github-actions-oidc-federated-credential": {
+    "title": "OIDC / PIPELINE",
+    "subtitle": "Azure 42 · GitHub Actions và Azure DevOps",
+    "diagram": "flow",
+    "labels": [
+      "GITHUB",
+      "FEDERATED",
+      "AZURE"
+    ]
+  },
+  "azure-ci-pipeline-build-test-scan-push-acr": {
+    "title": "CI / PIPELINE",
+    "subtitle": "Azure 43 · CI",
+    "diagram": "checklist",
+    "labels": [
+      "TEST",
+      "SCAN",
+      "PUSH"
+    ]
+  },
+  "azure-cd-environment-approval-blue-green-canary": {
+    "title": "CD / CANARY",
+    "subtitle": "Azure 44 · CD",
+    "diagram": "split",
+    "labels": [
+      "BLUE",
+      "CANARY 10%",
+      "GREEN"
+    ]
+  },
+  "azure-developer-cli-azd-deployment-stacks-moi-truong": {
+    "title": "AZD / STACKS",
+    "subtitle": "Azure 45 · Azure Developer CLI, deployment stacks và môi…",
+    "diagram": "blocks",
+    "labels": [
+      "azd up",
+      "STACK",
+      "ENV"
+    ]
+  },
+  "azure-database-migration-trong-pipeline": {
+    "title": "MIGRATION / GATE",
+    "subtitle": "Azure 46 · Migration database trong pipeline",
+    "diagram": "cycle",
+    "labels": [
+      "EXPAND",
+      "DEPLOY",
+      "CONTRACT"
+    ]
+  },
+  "azure-application-insights-opentelemetry-kql": {
+    "title": "TELEMETRY / KQL",
+    "subtitle": "Azure 47 · Application Insights, OpenTelemetry và Log…",
+    "diagram": "code",
+    "labels": [
+      "TRACE",
+      "METRIC",
+      "KQL"
+    ]
+  },
+  "azure-alert-action-group-slo-workbook": {
+    "title": "SLO / ALERT",
+    "subtitle": "Azure 48 · Alert, action group, SLO và workbook",
+    "diagram": "target",
+    "labels": [
+      "SLI",
+      "ERROR BUDGET",
+      "ON-CALL"
+    ]
+  },
+  "azure-landing-zone-subscription-vending": {
+    "title": "LANDING ZONE",
+    "subtitle": "Azure 49 · Landing zone và subscription vending cho nhiều môi…",
+    "diagram": "layers",
+    "labels": [
+      "PLATFORM",
+      "CONNECTIVITY",
+      "WORKLOAD"
+    ]
+  },
+  "azure-well-architected-framework-5-tru-cot": {
+    "title": "WAF / 5 PILLARS",
+    "subtitle": "Azure 50 · Well-Architected Framework",
+    "diagram": "checklist",
+    "labels": [
+      "RELIABILITY",
+      "SECURITY",
+      "COST"
+    ]
+  },
+  "azure-ha-dr-zone-region-rto-rpo": {
+    "title": "HA / DR",
+    "subtitle": "Azure 51 · HA và DR",
+    "diagram": "split",
+    "labels": [
+      "ZONE",
+      "REGION PAIR",
+      "RTO / RPO"
+    ]
+  },
+  "azure-kien-truc-tham-chieu-microservices-toi-noi": {
+    "title": "REFERENCE / ARCH",
+    "subtitle": "Azure 52 · Kiến trúc tham chiếu microservices Tới Nơi trên…",
+    "diagram": "map",
+    "labels": [
+      "FRONT DOOR",
+      "SERVICES",
+      "DATA"
+    ]
+  },
+  "azure-saga-outbox-service-bus-postgresql": {
+    "title": "SAGA / OUTBOX",
+    "subtitle": "Azure 53 · Saga và Outbox trên Service Bus và PostgreSQL",
+    "diagram": "cycle",
+    "labels": [
+      "BOOK",
+      "CHARGE",
+      "COMPENSATE"
+    ]
+  },
+  "azure-toi-uu-chi-phi-reservation-savings-plan-finops": {
+    "title": "FINOPS",
+    "subtitle": "Azure 54 · Tối ưu chi phí",
+    "diagram": "matrix",
+    "labels": [
+      "RESERVE",
+      "RIGHT-SIZE",
+      "SHOW-BACK"
+    ]
+  },
+  "azure-zero-trust-network-segmentation-sentinel": {
+    "title": "ZERO TRUST",
+    "subtitle": "Azure 55 · Bảo mật nâng cao",
+    "diagram": "target",
+    "labels": [
+      "VERIFY",
+      "LEAST PRIVILEGE",
+      "ASSUME BREACH"
+    ]
+  },
+  "azure-load-testing-autoscale-chaos-studio": {
+    "title": "LOAD / CHAOS",
+    "subtitle": "Azure 56 · Hiệu năng",
+    "diagram": "cycle",
+    "labels": [
+      "LOAD TEST",
+      "AUTOSCALE",
+      "FAULT"
+    ]
+  },
+  "azure-multi-region-data-residency-multi-tenant": {
+    "title": "MULTI-REGION",
+    "subtitle": "Azure 57 · Multi-region, data residency và multi-tenant",
+    "diagram": "map",
+    "labels": [
+      "SEA",
+      "EAST ASIA",
+      "RESIDENCY"
+    ]
+  },
+  "azure-tong-ket-go-live-checklist-chung-chi": {
+    "title": "GO-LIVE",
+    "subtitle": "Azure 58 · Tổng kết",
+    "diagram": "checklist",
+    "labels": [
+      "CHECKLIST",
+      "RUNBOOK",
+      "CERTS"
+    ]
+  },
+  "ba-la-gi-tu-tinh-nang-den-bai-toan": {
+    "title": "BUSINESS ANALYSIS",
+    "subtitle": "From needs to valuable change",
+    "diagram": "flow",
+    "labels": [
+      "NEED",
+      "OPTIONS",
+      "VALUE"
+    ]
+  },
+  "ba-po-pm-ux-dev-tester-phoi-hop": {
+    "title": "SHARED DECISIONS",
+    "subtitle": "BA · Roles, evidence and ownership",
+    "diagram": "network",
+    "labels": [
+      "STAKEHOLDERS",
+      "DECISION",
+      "OWNER"
+    ]
+  },
+  "ba-phan-loai-yeu-cau-nghiep-vu": {
+    "title": "REQUIREMENTS",
+    "subtitle": "Connect outcomes to solution behaviour",
+    "diagram": "flow",
+    "labels": [
+      "BUSINESS",
+      "STAKEHOLDER",
+      "SOLUTION"
+    ]
+  },
+  "ba-baccm-sau-khai-niem-cot-loi": {
+    "title": "BACCM",
+    "subtitle": "Six concepts · One connected analysis",
+    "diagram": "network",
+    "labels": [
+      "NEED + CONTEXT",
+      "VALUE",
+      "CHANGE"
+    ]
+  },
+  "ba-problem-statement-muc-tieu-chi-so": {
+    "title": "MEASURE VALUE",
+    "subtitle": "Baseline, target and guardrails",
+    "diagram": "target",
+    "labels": [
+      "BASELINE",
+      "TARGET",
+      "GUARDRAILS"
+    ]
+  },
+  "ba-scope-assumption-constraint-dependency": {
+    "title": "DEFINE THE SCOPE",
+    "subtitle": "Boundaries, assumptions and dependencies",
+    "diagram": "split",
+    "labels": [
+      "IN SCOPE",
+      "ASSUMPTIONS",
+      "OUT OF SCOPE"
+    ]
+  },
+  "ba-quyet-dinh-khi-thieu-bang-chung": {
+    "title": "DECIDE WITH EVIDENCE",
+    "subtitle": "Compare options under uncertainty",
+    "diagram": "flow",
+    "labels": [
+      "HYPOTHESIS",
+      "EVIDENCE",
+      "DECISION"
+    ]
+  },
+  "ba-thuc-hanh-de-xuat-cai-thien-diem-don": {
+    "title": "BA CASE / 01",
+    "subtitle": "Toi Noi · Defend the pickup proposal",
+    "diagram": "checklist",
+    "labels": [
+      "PROBLEM BRIEF",
+      "OPTIONS",
+      "RECOMMENDATION"
+    ]
+  },
+  "ba-stakeholder-map-quyen-quyet-dinh": {
+    "title": "STAKEHOLDER MAP",
+    "subtitle": "Who is affected? Who decides?",
+    "diagram": "network",
+    "labels": [
+      "RIDER + DRIVER",
+      "DISCOVERY",
+      "OPERATIONS"
+    ]
+  },
+  "ba-phong-van-nghiep-vu-khong-dan-dat": {
+    "title": "ASK, THEN LISTEN",
+    "subtitle": "Interviews grounded in real situations",
+    "diagram": "flow",
+    "labels": [
+      "OPEN QUESTION",
+      "EXPERIENCE",
+      "FOLLOW-UP"
+    ]
+  },
+  "ba-quan-sat-quy-trinh-doc-tai-lieu": {
+    "title": "OBSERVE THE WORK",
+    "subtitle": "Compare practice with documented intent",
+    "diagram": "split",
+    "labels": [
+      "OBSERVATION",
+      "CONTEXT",
+      "DOCUMENTS"
+    ]
+  },
+  "ba-workshop-dieu-phoi-xac-nhan": {
+    "title": "WORKSHOP",
+    "subtitle": "Facilitate, record and confirm",
+    "diagram": "checklist",
+    "labels": [
+      "SHARED QUESTION",
+      "OPEN ISSUES",
+      "CONFIRMATION"
+    ]
+  },
+  "ba-khao-sat-lay-mau-thien-lech": {
+    "title": "SAMPLE WITH CARE",
+    "subtitle": "Respondents are not the whole population",
+    "diagram": "split",
+    "labels": [
+      "POPULATION",
+      "SELECTION",
+      "RESPONDENTS"
+    ]
+  },
+  "ba-customer-journey-service-blueprint": {
+    "title": "SERVICE JOURNEY",
+    "subtitle": "Connect touchpoints with backstage work",
+    "diagram": "map",
+    "labels": [
+      "PICKUP",
+      "HANDOFF",
+      "SUPPORT"
+    ]
+  },
+  "ba-giai-quyet-yeu-cau-xung-dot": {
+    "title": "RESOLVE CONFLICT",
+    "subtitle": "Needs, trade-offs and decision rights",
+    "diagram": "split",
+    "labels": [
+      "POSITIONS",
+      "TRADE-OFFS",
+      "SHARED NEEDS"
+    ]
+  },
+  "ba-thuc-hanh-tong-hop-discovery": {
+    "title": "BA CASE / 02",
+    "subtitle": "Toi Noi · Synthesize discovery evidence",
+    "diagram": "checklist",
+    "labels": [
+      "SOURCE IDS",
+      "EVIDENCE MATRIX",
+      "DISCOVERY MEMO"
+    ]
+  },
+  "rust-vi-sao-so-cai-toi-noi-chon-rust": {
+    "title": "WHY RUST / LEDGER",
+    "subtitle": "Rust 01 · Why the ledger service is written in Rust",
+    "diagram": "split",
+    "labels": [
+      "C# CORE",
+      "LEDGER",
+      "RUST LEDGER"
+    ]
+  },
+  "rust-cargo-tu-source-code-den-but-toan-dau-tien": {
+    "title": "CARGO / FIRST ENTRY",
+    "subtitle": "Rust 02 · From source code to the first journal entry",
+    "diagram": "cycle",
+    "labels": [
+      "RUSTUP",
+      "CARGO",
+      "RUSTC"
+    ]
+  },
+  "rust-kieu-so-tien-vnd-i64-decimal": {
+    "title": "INTEGER / DECIMAL",
+    "subtitle": "Rust 03 · i64, checked math and rust_decimal",
+    "diagram": "storage",
+    "labels": [
+      "I64 DONG",
+      "CHECKED",
+      "DECIMAL"
+    ]
+  },
+  "rust-ownership-move-borrow-but-toan": {
+    "title": "OWNERSHIP / BORROW",
+    "subtitle": "Rust 04 · One owner per ledger entry, borrow to read",
+    "diagram": "flow",
+    "labels": [
+      "MOVE",
+      "&T READ",
+      "&MUT WRITE"
+    ]
+  },
+  "rust-struct-enum-match-tai-khoan-but-toan": {
+    "title": "STRUCT / ENUM / MATCH",
+    "subtitle": "Rust 05 · Structs, enums and exhaustive matching",
+    "diagram": "blocks",
+    "labels": [
+      "STRUCT",
+      "ENUM",
+      "MATCH"
+    ]
+  },
+  "rust-ham-dieu-kien-vong-lap-iterator-so-du": {
+    "title": "FN / ITERATOR",
+    "subtitle": "Rust 06 · Functions, loops and iterators over postings",
+    "diagram": "flow",
+    "labels": [
+      "ITER",
+      "FILTER",
+      "SUM"
+    ]
+  },
+  "rust-result-option-toan-tu-hoi-loi-la-gia-tri": {
+    "title": "RESULT / OPTION",
+    "subtitle": "Rust 07 · Errors as values with Result and ?",
+    "diagram": "target",
+    "labels": [
+      "OK",
+      "ERR",
+      "PANIC"
+    ]
+  },
+  "rust-string-str-ngay-gio-dinh-dang-tien": {
+    "title": "STRINGS / UTC TIME",
+    "subtitle": "Rust 08 · String, &str, UTC timestamps and VND display",
+    "diagram": "code",
+    "labels": [
+      "UTF-8",
+      "UTC",
+      "DISPLAY"
+    ]
+  },
+  "rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho": {
+    "title": "COLLECTIONS / LIFETIME",
+    "subtitle": "Rust 09 · Vec, HashMap, BTreeMap and lifetimes",
+    "diagram": "matrix",
+    "labels": [
+      "VEC",
+      "HASHMAP",
+      "BTREEMAP"
+    ]
+  },
+  "rust-module-crate-cargo-test-clippy": {
+    "title": "MODULE / TEST / CLIPPY",
+    "subtitle": "Rust 10 · Crates, cargo test and clippy for the ledger lab",
+    "diagram": "layers",
+    "labels": [
+      "UNIT",
+      "DOC",
+      "INTEGRATION"
+    ]
+  },
+  "rust-trait-generics-chinh-sach-phi-lam-tron": {
+    "title": "TRAIT / GENERICS",
+    "subtitle": "Rust 11 · Swappable fee and rounding policies via traits",
+    "diagram": "layers",
+    "labels": [
+      "TRAIT",
+      "IMPL",
+      "DISPATCH"
+    ]
+  },
+  "rust-newtype-value-object-money-account-id": {
+    "title": "NEWTYPE / VALUE OBJECT",
+    "subtitle": "Rust 12 · Money, AccountId, EntryId as distinct types",
+    "diagram": "layers",
+    "labels": [
+      "MONEY",
+      "ACCOUNT ID",
+      "ENTRY ID"
+    ]
+  },
+  "rust-double-entry-journal-entry-posting": {
+    "title": "DOUBLE-ENTRY / LEDGER",
+    "subtitle": "Rust 13 · Journal entry, posting and the zero-sum invariant",
+    "diagram": "flow",
+    "labels": [
+      "MONEY IN",
+      "MONEY OUT",
+      "BALANCED"
+    ]
+  },
+  "rust-typestate-may-trang-thai-thanh-toan": {
+    "title": "TYPESTATE / STATE",
+    "subtitle": "Rust 14 · Payment states checked at compile time",
+    "diagram": "flow",
+    "labels": [
+      "AUTHORIZED",
+      "CAPTURED",
+      "REFUNDED"
+    ]
+  },
+  "rust-closure-iterator-adapter-doi-soat-bo-nho": {
+    "title": "CLOSURE / ITERATOR",
+    "subtitle": "Rust 15 · Closures, lazy iterators and reconciliation",
+    "diagram": "flow",
+    "labels": [
+      "LEDGER",
+      "PSP",
+      "FINDINGS"
+    ]
+  },
+  "rust-box-rc-arc-refcell-smart-pointer": {
+    "title": "SMART POINTERS",
+    "subtitle": "Rust 16 · Box, Rc, Arc, RefCell and Cell in the ledger",
+    "diagram": "layers",
+    "labels": [
+      "BOX",
+      "RC / ARC",
+      "REFCELL"
+    ]
+  },
+  "rust-thiserror-anyhow-xu-ly-loi-thuc-te": {
+    "title": "ERRORS / CONTEXT",
+    "subtitle": "Rust 17 · thiserror, anyhow and error context",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "INFRA",
+      "BOUNDARY"
+    ]
+  },
+  "rust-serde-json-but-toan-decimal-thoi-gian": {
+    "title": "SERDE / JSON",
+    "subtitle": "Rust 18 · Serialize ledger entries to JSON contracts",
+    "diagram": "code",
+    "labels": [
+      "STRUCT",
+      "JSON",
+      "CONTRACT"
+    ]
+  },
+  "rust-proptest-property-test-bat-bien-so-cai": {
+    "title": "PROPERTY TEST",
+    "subtitle": "Rust 19 · Prove ledger invariants with proptest",
+    "diagram": "checklist",
+    "labels": [
+      "STRATEGY",
+      "INVARIANT",
+      "SHRINK"
+    ]
+  },
+  "rust-tong-hop-ledger-core-cargo-doc-workspace": {
+    "title": "LEDGER-CORE / WORKSPACE",
+    "subtitle": "Rust 20 · Workspace, docs and invariants for ledger-core",
+    "diagram": "layers",
+    "labels": [
+      "CORE",
+      "CLI",
+      "TESTS"
+    ]
+  },
+  "rust-async-await-tokio-task-timeout-cancellation": {
+    "title": "ASYNC / TOKIO",
+    "subtitle": "Rust 21 · Futures, timeout and cancellation with tokio",
+    "diagram": "flow",
+    "labels": [
+      "FUTURE",
+      "TIMEOUT",
+      "CANCEL"
+    ]
+  },
+  "rust-send-sync-arc-mutex-channel-concurrency": {
+    "title": "SEND / SYNC / CHANNEL",
+    "subtitle": "Rust 22 · Arc<Mutex>, actor and channels without data races",
+    "diagram": "flow",
+    "labels": [
+      "SEND",
+      "MUTEX",
+      "CHANNEL"
+    ]
+  },
+  "rust-sqlx-postgresql-pool-migration-query": {
+    "title": "SQLX / POSTGRESQL",
+    "subtitle": "Rust 23 · Pool, migrations and compile-time queries",
+    "diagram": "storage",
+    "labels": [
+      "POOL",
+      "MIGRATE",
+      "QUERY!"
+    ]
+  },
+  "rust-transaction-isolation-append-only-idempotency-key": {
+    "title": "TRANSACTION / ISOLATION",
+    "subtitle": "Rust 24 · Idempotent ledger writes on PostgreSQL",
+    "diagram": "layers",
+    "labels": [
+      "COMMIT",
+      "SERIALIZABLE",
+      "APPEND-ONLY"
+    ]
+  },
+  "rust-schema-so-cai-accounts-journal-postings-partition": {
+    "title": "LEDGER SCHEMA / INDEX",
+    "subtitle": "Rust 25 · Ledger tables, commit-time check, partition",
+    "diagram": "storage",
+    "labels": [
+      "ACCOUNTS",
+      "POSTINGS",
+      "BALANCES"
+    ]
+  },
+  "rust-repository-unit-of-work-trait-transaction": {
+    "title": "REPOSITORY / UOW",
+    "subtitle": "Rust 26 · Repository trait and Unit of Work over sqlx",
+    "diagram": "layers",
+    "labels": [
+      "PORT",
+      "ADAPTER",
+      "UOW"
+    ]
+  },
+  "rust-integration-test-postgresql-schema-rieng-ci": {
+    "title": "PG INTEGRATION TEST",
+    "subtitle": "Rust 27 · Schema per test, fixtures and CI",
+    "diagram": "layers",
+    "labels": [
+      "SCHEMA",
+      "FIXTURE",
+      "CI"
+    ]
+  },
+  "rust-redis-cache-so-du-rate-limit-lock-ttl": {
+    "title": "REDIS / CACHE",
+    "subtitle": "Rust 28 · Cache, rate limit and TTL locks",
+    "diagram": "layers",
+    "labels": [
+      "CACHE",
+      "BUCKET",
+      "LOCK"
+    ]
+  },
+  "rust-config-secrets-tracing-structured-logging": {
+    "title": "TRACING / CONFIG",
+    "subtitle": "Rust 29 · Config, secrets and structured JSON logging",
+    "diagram": "layers",
+    "labels": [
+      "CONFIG",
+      "SPAN",
+      "JSON LOG"
+    ]
+  },
+  "rust-criterion-benchmark-do-bo-nho-10k-but-toan": {
+    "title": "CRITERION / DHAT",
+    "subtitle": "Rust 30 · Benchmarks, allocations and 10k writes/s",
+    "diagram": "target",
+    "labels": [
+      "CRITERION",
+      "DHAT",
+      "POSTGRES"
+    ]
+  },
+  "rust-axum-http-endpoint-ghi-but-toan-tra-so-du": {
+    "title": "AXUM / HTTP ENDPOINT",
+    "subtitle": "Rust 31 · Router, extractor and IntoResponse for the ledger",
+    "diagram": "network",
+    "labels": [
+      "ROUTER",
+      "EXTRACTOR",
+      "RESPONSE"
+    ]
+  },
+  "rust-validation-problem-details-openapi-utoipa": {
+    "title": "PROBLEM DETAILS / API",
+    "subtitle": "Rust 32 · Validation, RFC 9457 and OpenAPI with utoipa",
+    "diagram": "layers",
+    "labels": [
+      "VALIDATE",
+      "PROBLEM",
+      "OPENAPI"
+    ]
+  },
+  "rust-tower-middleware-timeout-request-id-jwt-rate-limit": {
+    "title": "TOWER / MIDDLEWARE",
+    "subtitle": "Rust 33 · Layer order, request id, JWT and rate limit",
+    "diagram": "layers",
+    "labels": [
+      "TRACE",
+      "TIMEOUT",
+      "JWT"
+    ]
+  },
+  "rust-axum-api-test-oneshot-hop-dong-bff": {
+    "title": "API TEST / CONTRACT",
+    "subtitle": "Rust 34 · oneshot, real PostgreSQL, C# contract",
+    "diagram": "checklist",
+    "labels": [
+      "ONESHOT",
+      "SNAPSHOT",
+      "CONTRACT"
+    ]
+  },
+  "rust-tonic-grpc-get-balance-post-entry-interop-dotnet": {
+    "title": "TONIC / GRPC",
+    "subtitle": "Rust 35 · gRPC ledger service, .NET client",
+    "diagram": "network",
+    "labels": [
+      "PROTO",
+      "TONIC",
+      "C# CLIENT"
+    ]
+  },
+  "rust-kafka-rdkafka-consumer-producer-schema": {
+    "title": "KAFKA / RDKAFKA",
+    "subtitle": "Rust 36 · Consumer, producer and at-least-once",
+    "diagram": "split",
+    "labels": [
+      "PARTITION",
+      "OFFSET",
+      "COMMIT"
+    ]
+  },
+  "rust-outbox-inbox-idempotent-consumer": {
+    "title": "OUTBOX / INBOX",
+    "subtitle": "Rust 37 · Outbox, inbox, idempotent consumer, DLQ",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "KAFKA",
+      "INBOX"
+    ]
+  },
+  "rust-webhook-psp-hmac-chong-replay-xu-ly-tre-trung": {
+    "title": "WEBHOOK / HMAC",
+    "subtitle": "Rust 38 · Verify signature, replay window, dedupe",
+    "diagram": "checklist",
+    "labels": [
+      "SIGNATURE",
+      "REPLAY",
+      "DEDUPE"
+    ]
+  },
+  "rust-graceful-shutdown-health-readiness-backpressure": {
+    "title": "GRACEFUL / SHUTDOWN",
+    "subtitle": "Rust 39 · Shutdown, readiness and backpressure",
+    "diagram": "flow",
+    "labels": [
+      "SIGTERM",
+      "DRAIN",
+      "READYZ"
+    ]
+  },
+  "rust-tong-hop-ledger-api-postgresql-kafka-end-to-end": {
+    "title": "LEDGER API / E2E",
+    "subtitle": "Rust 40 · PostgreSQL + Kafka end-to-end ledger service",
+    "diagram": "flow",
+    "labels": [
+      "KAFKA",
+      "POSTGRES",
+      "GRPC"
+    ]
+  },
+  "flutter-va-dart-tu-source-code-den-ung-dung-toi-noi": {
+    "title": "FLUTTER / DART",
+    "subtitle": "Flutter 01 · From source code to a running app",
+    "diagram": "layers",
+    "labels": [
+      "DART APP",
+      "FRAMEWORK",
+      "ENGINE"
+    ]
+  },
+  "dart-bien-kieu-du-lieu-null-safety-tinh-cuoc": {
+    "title": "TYPES / NULL",
+    "subtitle": "Flutter 02 · int for VND, null as a contract",
+    "diagram": "split",
+    "labels": [
+      "INT VND",
+      "DOUBLE KM",
+      "NULLABLE"
+    ]
+  },
+  "dart-ham-class-enum-sealed-pattern-matching-trang-thai-chuyen": {
+    "title": "STATE / SEALED",
+    "subtitle": "Flutter 03 · Eight statuses, exhaustive switch",
+    "diagram": "cycle",
+    "labels": [
+      "REQUESTED",
+      "ACCEPTED",
+      "COMPLETED"
+    ]
+  },
+  "dart-collections-generics-extension-danh-sach-chuyen": {
+    "title": "COLLECTIONS / LAZY",
+    "subtitle": "Flutter 04 · List, Set, Map and lazy iterables",
+    "diagram": "matrix",
+    "labels": [
+      "LIST",
+      "SET",
+      "MAP"
+    ]
+  },
+  "dart-future-async-await-stream-bao-gia-va-vi-tri": {
+    "title": "ASYNC / STREAM",
+    "subtitle": "Flutter 05 · Event loop, Future and Stream",
+    "diagram": "flow",
+    "labels": [
+      "FUTURE",
+      "AWAIT",
+      "STREAM"
+    ]
+  },
+  "dart-package-pubspec-lint-test-toi-noi-core": {
+    "title": "PACKAGE / TEST",
+    "subtitle": "Flutter 06 · pubspec, lints and dart test",
+    "diagram": "checklist",
+    "labels": [
+      "PUBSPEC",
+      "LINTS",
+      "DART TEST"
+    ]
+  },
+  "flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia": {
+    "title": "WIDGET / TREE",
+    "subtitle": "Flutter 07 · Widget, Element, RenderObject and hot reload",
+    "diagram": "layers",
+    "labels": [
+      "WIDGET",
+      "ELEMENT",
+      "RENDER"
+    ]
+  },
+  "flutter-layout-constraints-row-column-the-chuyen": {
+    "title": "LAYOUT / CONSTRAINTS",
+    "subtitle": "Flutter 08 · Constraints down, sizes up, Row and Column",
+    "diagram": "blocks",
+    "labels": [
+      "CONSTRAINT",
+      "SIZE",
+      "POSITION"
+    ]
+  },
+  "flutter-listview-sliver-scroll-lich-su-chuyen": {
+    "title": "LIST / SLIVER",
+    "subtitle": "Flutter 09 · Lazy lists, slivers and pagination",
+    "diagram": "pages",
+    "labels": [
+      "BUILDER",
+      "SLIVER",
+      "PAGING"
+    ]
+  },
+  "flutter-statefulwidget-lifecycle-setstate-chon-dich-vu": {
+    "title": "STATE / LIFECYCLE",
+    "subtitle": "Flutter 10 · initState, setState, dispose and timers",
+    "diagram": "cycle",
+    "labels": [
+      "INIT",
+      "BUILD",
+      "DISPOSE"
+    ]
+  },
+  "flutter-form-validation-focus-nhap-diem-don-diem-den": {
+    "title": "FORM / VALIDATE",
+    "subtitle": "Flutter 11 · TextFormField, focus and validators",
+    "diagram": "checklist",
+    "labels": [
+      "FORM",
+      "FOCUS",
+      "VALIDATE"
+    ]
+  },
+  "flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen": {
+    "title": "NAVIGATOR / ROUTE",
+    "subtitle": "Flutter 12 · push, pop with result and PopScope",
+    "diagram": "flow",
+    "labels": [
+      "PUSH",
+      "POP",
+      "RESULT"
+    ]
+  },
+  "flutter-theme-material-3-dark-mode-design-system-toi-noi": {
+    "title": "THEME / MATERIAL 3",
+    "subtitle": "Flutter 13 · ColorScheme, dark mode, design tokens",
+    "diagram": "split",
+    "labels": [
+      "LIGHT",
+      "SEED",
+      "DARK"
+    ]
+  },
+  "flutter-asset-intl-localization-tien-vnd-ngay-gio": {
+    "title": "INTL / L10N",
+    "subtitle": "Flutter 14 · Assets, VND money and vi/en strings",
+    "diagram": "map",
+    "labels": [
+      "ASSET",
+      "INTL",
+      "ARB"
+    ]
+  },
+  "flutter-animation-implicit-hero-tim-tai-xe": {
+    "title": "ANIMATION / HERO",
+    "subtitle": "Flutter 15 · Implicit animation and reduced motion",
+    "diagram": "cycle",
+    "labels": [
+      "TWEEN",
+      "HERO",
+      "MOTION"
+    ]
+  },
+  "flutter-accessibility-responsive-adaptive-ios-android": {
+    "title": "A11Y / ADAPTIVE",
+    "subtitle": "Flutter 16 · Semantics, text scale, iOS and Android",
+    "diagram": "target",
+    "labels": [
+      "SEMANTICS",
+      "RESPONSIVE",
+      "ADAPTIVE"
+    ]
+  },
+  "flutter-state-inheritedwidget-changenotifier-bao-gia": {
+    "title": "STATE / NOTIFIER",
+    "subtitle": "Flutter 17 · InheritedWidget, ChangeNotifier, rebuilds",
+    "diagram": "layers",
+    "labels": [
+      "INHERITED",
+      "NOTIFIER",
+      "REBUILD"
+    ]
+  },
+  "flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen": {
+    "title": "RIVERPOD",
+    "subtitle": "Flutter 18 · Provider, Notifier and AsyncNotifier",
+    "diagram": "network",
+    "labels": [
+      "PROVIDER",
+      "REF",
+      "NOTIFIER"
+    ]
+  },
+  "flutter-http-dio-json-dto-goi-api-bao-gia": {
+    "title": "HTTP / JSON",
+    "subtitle": "Flutter 19 · dio client, DTOs and a fake API",
+    "diagram": "flow",
+    "labels": [
+      "DIO",
+      "DTO",
+      "DOMAIN"
+    ]
+  },
+  "flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong": {
+    "title": "ERROR / RETRY",
+    "subtitle": "Flutter 20 · Timeouts, backoff and failure types",
+    "diagram": "target",
+    "labels": [
+      "TIMEOUT",
+      "RETRY",
+      "FAILURE"
+    ]
+  },
+  "flutter-clean-architecture-domain-data-presentation-mobile": {
+    "title": "CLEAN / LAYERS",
+    "subtitle": "Flutter 21 · Domain, data, presentation, repository",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "DATA",
+      "UI"
+    ]
+  },
+  "flutter-local-persistence-drift-secure-storage-lich-su-offline": {
+    "title": "LOCAL / DRIFT",
+    "subtitle": "Flutter 22 · SQLite, preferences and secure storage",
+    "diagram": "storage",
+    "labels": [
+      "DRIFT",
+      "PREFS",
+      "SECURE"
+    ]
+  },
+  "flutter-go-router-deep-link-shellroute-guard": {
+    "title": "GO ROUTER",
+    "subtitle": "Flutter 23 · Deep links, ShellRoute and auth guards",
+    "diagram": "map",
+    "labels": [
+      "ROUTE",
+      "SHELL",
+      "GUARD"
+    ]
+  },
+  "flutter-authentication-otp-jwt-refresh-token-secure-storage": {
+    "title": "AUTH / REFRESH",
+    "subtitle": "Flutter 24 · OTP, JWT rotation and interceptors",
+    "diagram": "cycle",
+    "labels": [
+      "OTP",
+      "ACCESS",
+      "REFRESH"
+    ]
+  },
+  "flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod": {
+    "title": "CONFIG / ENV",
+    "subtitle": "Flutter 25 · dev, staging, prod and dart-define",
+    "diagram": "split",
+    "labels": [
+      "DEV",
+      "STAGING",
+      "PROD"
+    ]
+  },
+  "flutter-code-generation-freezed-json-serializable-riverpod-generator": {
+    "title": "CODEGEN",
+    "subtitle": "Flutter 26 · freezed, json_serializable, build_runner",
+    "diagram": "code",
+    "labels": [
+      "FREEZED",
+      "GENERATED",
+      "RUNNER"
+    ]
+  },
+  "flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case": {
+    "title": "UNIT TEST",
+    "subtitle": "Flutter 27 · mocktail, fakes, fare rules and use cases",
+    "diagram": "checklist",
+    "labels": [
+      "FAKE",
+      "MOCK",
+      "VERIFY"
+    ]
+  },
+  "flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia": {
+    "title": "WIDGET TEST",
+    "subtitle": "Flutter 28 · pumpWidget, finders and matchers",
+    "diagram": "code",
+    "labels": [
+      "PUMP",
+      "FIND",
+      "EXPECT"
+    ]
+  },
+  "flutter-golden-test-semantics-test-giao-dien-on-dinh": {
+    "title": "GOLDEN / SEMANTICS",
+    "subtitle": "Flutter 29 · Lock the UI and accessibility guidelines",
+    "diagram": "matrix",
+    "labels": [
+      "GOLDEN",
+      "DIFF",
+      "A11Y"
+    ]
+  },
+  "flutter-test-riverpod-async-stream-fake-async-providercontainer": {
+    "title": "TEST ASYNC",
+    "subtitle": "Flutter 30 · ProviderContainer, fakeAsync, fake clock",
+    "diagram": "flow",
+    "labels": [
+      "CONTAINER",
+      "FAKE ASYNC",
+      "CLOCK"
+    ]
+  },
+  "flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi": {
+    "title": "INTEGRATION",
+    "subtitle": "Flutter 31 · Patrol and the booking flow on devices",
+    "diagram": "network",
+    "labels": [
+      "DEVICE",
+      "PATROL",
+      "NATIVE"
+    ]
+  },
+  "flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code": {
+    "title": "LINT / FORMAT",
+    "subtitle": "Flutter 32 · Analyzer, custom_lint and zero warnings",
+    "diagram": "checklist",
+    "labels": [
+      "ANALYZE",
+      "FORMAT",
+      "FIX"
+    ]
+  },
+  "flutter-ci-github-actions-analyze-test-golden-cache": {
+    "title": "CI / TESTS",
+    "subtitle": "Flutter 33 · GitHub Actions, cache, coverage, goldens",
+    "diagram": "flow",
+    "labels": [
+      "ANALYZE",
+      "TEST",
+      "REPORT"
+    ]
+  },
+  "ba-as-is-to-be-quy-trinh": {
+    "title": "AS-IS / TO-BE",
+    "subtitle": "Understand the present. Design the change.",
+    "diagram": "split",
+    "labels": [
+      "CURRENT STATE",
+      "GAPS",
+      "FUTURE STATE"
+    ]
+  },
+  "ba-bpmn-task-event-gateway-lane": {
+    "title": "BPMN BASICS",
+    "subtitle": "Tasks, events and decision paths",
+    "diagram": "flow",
+    "labels": [
+      "RECEIVE",
+      "CHECK",
+      "OUTCOME"
+    ]
+  },
+  "ba-business-rule-chinh-sach-nghiep-vu": {
+    "title": "BUSINESS RULES",
+    "subtitle": "Policy beyond the screen",
+    "diagram": "checklist",
+    "labels": [
+      "SOURCE + SCOPE",
+      "CONDITION",
+      "OUTCOME"
+    ]
+  },
+  "ba-decision-table-phi-huy": {
+    "title": "DECISION TABLE",
+    "subtitle": "Conditions, priority and boundary cases",
+    "diagram": "flow",
+    "labels": [
+      "CONDITIONS",
+      "FIRST MATCH",
+      "FEE + REASON"
+    ]
+  },
+  "ba-state-model-trang-thai-chuyen": {
+    "title": "STATE MODEL",
+    "subtitle": "Events, guards and consistent effects",
+    "diagram": "flow",
+    "labels": [
+      "STATE",
+      "EVENT + GUARD",
+      "NEW STATE"
+    ]
+  },
+  "ba-bpmn-handoff-timer-ngoai-le": {
+    "title": "HANDOFF + TIMEOUT",
+    "subtitle": "Bounded retries. One payment key.",
+    "diagram": "flow",
+    "labels": [
+      "SEND",
+      "WAIT / RETRY",
+      "OUTCOME"
+    ]
+  },
+  "ba-kiem-tra-nhat-quan-mo-hinh": {
+    "title": "MODEL REVIEW",
+    "subtitle": "One case across process, state and rules",
+    "diagram": "checklist",
+    "labels": [
+      "PROCESS",
+      "STATE + RULES",
+      "CONSISTENCY"
+    ]
+  },
+  "ba-thuc-hanh-thay-doi-chinh-sach-huy": {
+    "title": "BA CASE / 03",
+    "subtitle": "Toi Noi · Review a cancellation policy change",
+    "diagram": "split",
+    "labels": [
+      "2 MINUTES",
+      "IMPACT",
+      "3 MINUTES"
+    ]
+  },
+  "ba-user-story-vai-tro-nhu-cau-gia-tri": {
+    "title": "USER STORIES",
+    "subtitle": "Roles, needs and useful outcomes",
+    "diagram": "flow",
+    "labels": [
+      "ROLE",
+      "NEED",
+      "VALUE"
+    ]
+  },
+  "ba-acceptance-criteria-given-when-then": {
+    "title": "ACCEPTANCE CRITERIA",
+    "subtitle": "Examples that expose ambiguity",
+    "diagram": "flow",
+    "labels": [
+      "GIVEN",
+      "WHEN",
+      "THEN"
+    ]
+  },
+  "ba-use-case-xac-nhan-diem-don": {
+    "title": "USE CASE",
+    "subtitle": "Follow the interaction and its alternatives",
+    "diagram": "flow",
+    "labels": [
+      "ACTOR",
+      "INTERACTION",
+      "OUTCOME"
+    ]
+  },
+  "ba-story-mapping-lat-cat-gia-tri": {
+    "title": "STORY MAP",
+    "subtitle": "Deliver a complete slice of value",
+    "diagram": "map",
+    "labels": [
+      "VIEW",
+      "CONFIRM",
+      "UNDERSTAND"
+    ]
+  },
+  "ba-wireframe-prototype-kiem-tra-hieu-biet": {
+    "title": "PROTOTYPE",
+    "subtitle": "Test understanding before commitment",
+    "diagram": "split",
+    "labels": [
+      "ASSUMPTION",
+      "OBSERVE",
+      "LEARNING"
+    ]
+  },
+  "ba-yeu-cau-phi-chuc-nang-do-duoc": {
+    "title": "QUALITY REQUIREMENTS",
+    "subtitle": "Define conditions, measures and limits",
+    "diagram": "target",
+    "labels": [
+      "CONDITIONS",
+      "MEASURES",
+      "LIMITS"
+    ]
+  },
+  "ba-brd-srs-tai-lieu-theo-rui-ro": {
+    "title": "RIGHT-SIZED DOCS",
+    "subtitle": "One source for each decision",
+    "diagram": "checklist",
+    "labels": [
+      "PURPOSE",
+      "VERSION",
+      "APPROVAL"
+    ]
+  },
+  "ba-thuc-hanh-review-goi-yeu-cau": {
+    "title": "BA CASE / 04",
+    "subtitle": "Toi Noi · Review the requirements package",
+    "diagram": "checklist",
+    "labels": [
+      "STORY + RULES",
+      "EXAMPLES",
+      "REVIEW"
+    ]
+  },
   "python-va-uv-tu-source-code-den-chuong-trinh": {
     "title": "PYTHON / UV",
     "subtitle": "Python 01 · From source to a running fare",

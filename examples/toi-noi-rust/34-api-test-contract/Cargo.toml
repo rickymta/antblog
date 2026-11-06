@@ -1,0 +1,32 @@
+[package]
+name = "ledger_34_api_test_contract"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "Lab bài 34: API test với oneshot, PostgreSQL thật, snapshot OpenAPI và hợp đồng với client C#"
+
+[lib]
+name = "ledger_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-api-lab"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+axum = "0.8.9"
+jsonwebtoken = { version = "11.1.0", default-features = false, features = ["rust_crypto"] }
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "tls-none", "postgres", "macros", "migrate"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "io-util"] }
+tower = { version = "0.5.3", features = ["util"] }
+utoipa = "6.0.0"
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[dev-dependencies]
+insta = { version = "1.49.0", features = ["json"] }

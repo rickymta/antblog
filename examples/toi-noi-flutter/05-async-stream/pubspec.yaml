@@ -1,0 +1,12 @@
+name: toi_noi_05
+description: "Lab bài 05 (Flutter qua Tới Nơi): Future, async/await, Stream và Isolate.run với báo giá và vị trí tài xế."
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.3
+
+dev_dependencies:
+  fake_async: ^1.3.3
+  lints: ^6.1.0
+  test: ^1.33.0

@@ -1,0 +1,20 @@
+name: toi_noi_13
+description: "Lab bài 13 (Flutter qua Tới Nơi): app demo dùng package toi_noi_ui, theme Material 3 sáng/tối theo hệ thống."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  toi_noi_ui:
+    path: ../packages/toi_noi_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

@@ -1,0 +1,61 @@
+# Values cho Helm chart argo/argo-cd (repo https://argoproj.github.io/argo-helm).
+# Cài vào cluster quản lý (ở đây: toinoi-lab-eks), namespace argocd.
+# Tên khoá có thể đổi giữa các phiên bản chart: chạy `helm show values argo/argo-cd` để đối chiếu.
+global:
+  domain: argocd.toinoi.example
+
+configs:
+  params:
+    # TLS kết thúc ở ALB, Argo CD server nhận HTTP trong VPC.
+    server.insecure: true
+  cm:
+    url: https://argocd.toinoi.example
+    # Tắt tài khoản admin cục bộ sau khi SSO chạy được.
+    admin.enabled: "false"
+    # Theo dõi tài nguyên bằng annotation, không dùng label app.kubernetes.io/instance.
+    application.resourceTrackingMethod: annotation
+    # Chu kỳ so sánh Git với cluster (webhook từ GitHub rút ngắn độ trễ).
+    timeout.reconciliation: 180s
+    # IAM Identity Center chỉ có ứng dụng tuỳ chỉnh dạng SAML 2.0, nên đi qua connector SAML của Dex.
+    # Thay URL và chứng chỉ bằng giá trị từ ứng dụng SAML bạn tạo trong Identity Center.
+    dex.config: |
+      connectors:
+        - type: saml
+          id: identity-center
+          name: IAM Identity Center
+          config:
+            ssoURL: https://portal.sso.ap-southeast-1.amazonaws.com/saml/assertion/EXAMPLE_APP_ID
+            caData: BASE64_CHUNG_CHI_IDENTITY_CENTER
+            entityIssuer: https://argocd.toinoi.example/api/dex/callback
+            redirectURI: https://argocd.toinoi.example/api/dex/callback
+            usernameAttr: email
+            emailAttr: email
+  rbac:
+    policy.default: role:readonly
+    scopes: "[email]"
+    policy.csv: |
+      p, role:dev-deployer, applications, get, toinoi-*/*, allow
+      p, role:dev-deployer, applications, sync, toinoi-dev/*, allow
+      p, role:dev-deployer, applications, sync, toinoi-staging/*, allow
+      p, role:prod-release, applications, get, toinoi-*/*, allow
+      p, role:prod-release, applications, sync, toinoi-prod/*, allow
+      g, an.nguyen@toinoi.example, role:dev-deployer
+      g, binh.tran@toinoi.example, role:prod-release
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:123456789012:certificate/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+      alb.ingress.kubernetes.io/healthcheck-path: /healthz
+
+applicationSet:
+  replicas: 1
+
+controller:
+  # Một replica đủ cho vài chục Application; tăng và bật sharding khi số cluster, app tăng nhiều.
+  replicas: 1

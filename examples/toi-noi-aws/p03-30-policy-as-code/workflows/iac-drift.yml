@@ -1,0 +1,53 @@
+# Kiểm drift định kỳ: terraform plan -detailed-exitcode (0: không đổi, 1: lỗi, 2: có thay đổi).
+# Chưa được chạy trên GitHub thật.
+name: iac-drift
+
+on:
+  schedule:
+    - cron: "0 20 * * *" # 20:00 UTC, tức 03:00 giờ Việt Nam
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+env:
+  TF_DIR: infra/envs/lab
+  AWS_REGION: ap-southeast-1
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/toinoi-lab-iac-plan
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.x
+      - name: plan phát hiện drift
+        id: plan
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          terraform init -input=false
+          set +e
+          # -lock=false để role chỉ đọc không cần ghi tệp khoá trên S3.
+          terraform plan -detailed-exitcode -lock=false -input=false -no-color > plan.txt
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+      - name: mở issue khi có drift
+        if: steps.plan.outputs.exit_code == '2'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "Drift hạ tầng $(date -u +%F): ${TF_DIR}" \
+            --body "terraform plan phát hiện khác biệt giữa code và hạ tầng thật. Xem log của lần chạy: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+      - name: lỗi plan
+        if: steps.plan.outputs.exit_code == '1'
+        run: |
+          echo "terraform plan lỗi, kiểm log" >&2
+          exit 1

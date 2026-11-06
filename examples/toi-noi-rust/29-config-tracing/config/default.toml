@@ -1,0 +1,16 @@
+# Cấu hình mặc định của service sổ cái (lab bài 29).
+# Mật khẩu KHÔNG nằm ở đây: nó đến từ biến môi trường LEDGER__DATABASE__PASSWORD.
+
+[server]
+host = "127.0.0.1"
+port = 8080
+
+[database]
+host = "127.0.0.1"
+port = 5433
+name = "toi_noi_rust_lab"
+user = "toi_noi"
+max_connections = 10
+
+[log]
+filter = "info"

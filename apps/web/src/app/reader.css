@@ -1,0 +1,32 @@
+/* Keep reading space before adding rails; long series titles wrap within each rail. */
+.tkh-reader-grid {
+  display: grid;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1700px;
+  margin-inline: auto;
+  padding: 2rem clamp(1rem, 2vw, 2rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+.tkh-reader-left, .tkh-reader-right { display: none; min-width: 0; }
+.tkh-reader-scroll {
+  position: sticky;
+  top: 6rem;
+  max-height: calc(100dvh - 7rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-right: 0.5rem;
+  padding-bottom: 1rem;
+  overflow-wrap: anywhere;
+}
+.tkh-reader-scroll :where(section, nav, ul, ol, li, a, p, h2, h3) { min-width: 0; }
+@media (min-width: 1280px) {
+  .tkh-reader-grid { grid-template-columns: minmax(0, 1fr) 18.5rem; }
+  .tkh-reader-right { display: block; }
+}
+@media (min-width: 1600px) {
+  .tkh-reader-grid { grid-template-columns: 18.5rem minmax(0, 1fr) 18.5rem; }
+  .tkh-reader-left { display: block; }
+}

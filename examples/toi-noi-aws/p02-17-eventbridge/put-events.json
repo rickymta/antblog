@@ -1,0 +1,20 @@
+[
+  {
+    "EventBusName": "toinoi-lab-trips",
+    "Source": "toinoi.booking",
+    "DetailType": "TripCompleted",
+    "Detail": "{\"eventId\":\"evt-1001-completed\",\"tripId\":\"1001\",\"city\":\"HCM\",\"service\":\"ride\",\"fareVnd\":52500}"
+  },
+  {
+    "EventBusName": "toinoi-lab-trips",
+    "Source": "toinoi.booking",
+    "DetailType": "TripCompleted",
+    "Detail": "{\"eventId\":\"evt-1002-completed\",\"tripId\":\"1002\",\"city\":\"HN\",\"service\":\"food\",\"fareVnd\":90000}"
+  },
+  {
+    "EventBusName": "toinoi-lab-trips",
+    "Source": "toinoi.booking",
+    "DetailType": "TripCancelled",
+    "Detail": "{\"eventId\":\"evt-1003-cancelled\",\"tripId\":\"1003\",\"city\":\"HCM\",\"reason\":\"driver_unreachable\"}"
+  }
+]

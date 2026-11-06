@@ -1,0 +1,7 @@
+{
+  "FLAVOR": "staging",
+  "API_BASE_URL": "https://api.staging.toinoi.example",
+  "LOG_HTTP": true,
+  "CONNECT_TIMEOUT_MS": 10000,
+  "RECEIVE_TIMEOUT_MS": 15000
+}
