@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0
+
+- Bài 36 của loạt Flutter qua Tới Nơi. Chỉ thêm, hành vi mặc định không đổi: không truyền `RealtimeModule` thì mọi route và mọi response (kể cả JSON của chuyến) chạy như 0.2.0.
+- `RealtimeModule` (`FakeApiModule`): WebSocket `GET /realtime` xác thực bằng header `Authorization: Bearer`.
+  - Chuyến: `subscribe` với `lastSequence` và `logEpoch` để phát lại; `event` bền có `sequence` (tăng đúng 1 trong một `logEpoch`) và `version` (cùng thước đo với REST); `location` tạm thời; `ping`/`pong`; `error` (`bad_frame`, `unknown_type`, `trip_not_found`, `forbidden`, `log_reset`, `replay_unavailable`) không làm rớt kết nối.
+  - Kênh `offers` theo người dùng trong token (chỉ vai trò `driver`): frame `offer` cho FL-47.
+  - Xác thực: token xấu bị đóng mã 4401 (hoặc HTTP 401 ở bước nâng cấp khi `rejectBeforeUpgrade: true`); kết nối đang mở bị đóng 4401 khi token hết hạn. `dropConnections()` đóng mã 4001 và giữ log; `restart()` xoá log, sang `logEpoch` mới.
+  - `publish` ghi vào kho (áp dụng `Trip.apply`, tăng `version`), nên REST và realtime cùng một chuyến. Khi mount, response REST trả chuyến có thêm `lastSequence` và `logEpoch`.
+  - Simulator thay Kafka: `POST /realtime/trips/{id}/events` (409 nếu sai thứ tự), `POST /realtime/trips/{id}/location`, `POST /realtime/drivers/{userId}/offers`; hàm Dart `publish`, `publishLocation`, `publishOffer`, `dropConnections`, `restart`, `closeExpired`. Tuỳ chọn `maxLogPerTrip`, `authorize`, `rejectBeforeUpgrade`, `offerTtl`.
+- `AuthModule.verifyAccessToken(token)` (hàm công khai mới, trả cả `expiresAt`) cho bước bắt tay realtime.
+- `FakeApiContext` bỏ `const` (có thêm danh sách `tripJsonExtras`, rỗng thì response không đổi); `tripToJson` nhận thêm tham số tuỳ chọn `extras`.
+- Sửa nhỏ không đổi hành vi hiện có: middleware bắt lỗi thành problem+json cho `HijackException` đi qua thay vì trả 500, để nâng cấp WebSocket hoạt động trong cùng pipeline.
+- `bin/server.dart --with-realtime` (kèm `AuthModule` để lấy token); `ServerOptions.withRealtime` (mặc định `false`).
+- Thêm dependency `shelf_web_socket` ^3.0.0 và `web_socket_channel` ^3.0.3. 41 test mới (`test/realtime_test.dart`, socket thật tới `shelf_io` ở localhost), tổng 132.
+
 ## 0.2.0
 
 - Bài 24 của loạt Flutter qua Tới Nơi. Chỉ thêm, hành vi mặc định không đổi: không truyền `AuthModule` thì mọi route chạy như 0.1.0.

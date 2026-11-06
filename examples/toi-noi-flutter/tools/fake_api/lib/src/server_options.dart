@@ -10,6 +10,7 @@ final class ServerOptions {
     required this.faults,
     required this.showHelp,
     this.withAuth = false,
+    this.withRealtime = false,
   });
 
   final String host;
@@ -19,6 +20,10 @@ final class ServerOptions {
 
   /// Bật `AuthModule` (OTP, JWT, refresh token) và đòi Bearer ở `/trips`.
   final bool withAuth;
+
+  /// Bật `RealtimeModule` (WebSocket `/realtime`). Module cần token nên server
+  /// cũng mount `AuthModule`, nhưng chỉ đòi Bearer ở `/trips` khi có [withAuth].
+  final bool withRealtime;
 }
 
 ArgParser _parser() => ArgParser()
@@ -48,6 +53,13 @@ ArgParser _parser() => ArgParser()
     negatable: false,
     help:
         'Bật xác thực giả (OTP cố định, JWT không ký) và đòi Bearer ở /trips.',
+  )
+  ..addFlag(
+    'with-realtime',
+    negatable: false,
+    help:
+        'Bật Realtime Gateway giả (WebSocket /realtime) và kèm AuthModule để '
+        'lấy token.',
   )
   ..addFlag('help', abbr: 'h', negatable: false, help: 'Hiện trợ giúp.');
 
@@ -84,5 +96,6 @@ ServerOptions parseServerOptions(List<String> args) {
     ),
     showHelp: results.flag('help'),
     withAuth: results.flag('with-auth'),
+    withRealtime: results.flag('with-realtime'),
   );
 }

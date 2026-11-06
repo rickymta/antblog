@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chỉ gồm khoá của bài này; dán vào <dict> của ios/Runner/Info.plist.
+     Đăng ký scheme toinoi để iOS đưa toinoi://payment/return về app. Không có
+     LSApplicationQueriesSchemes: ta không gọi canLaunchUrl. Scheme này dùng
+     chung với deep link toinoi://trip của bài 23, chỉ khai báo một lần. -->
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>vn.toinoi.customer</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>toinoi</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App KHÁCH. Đoạn cần ghép vào android/app/src/main/AndroidManifest.xml.
+     Chỉ vị trí khi dùng app: không quyền nền, không khai báo foreground
+     service. COARSE luôn có; FINE để chọn điểm đón chính xác. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+</manifest>

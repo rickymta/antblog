@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App TÀI XẾ. Đoạn cần ghép vào android/app/src/main/AndroidManifest.xml.
+     FOREGROUND_SERVICE và FOREGROUND_SERVICE_LOCATION cần cho luồng vị trí có
+     thông báo (Android 14+). geolocator_android 5.2.1 không tự khai quyền này
+     (CHANGELOG 5.1.1+1), nên app phải tự thêm.
+     KHÔNG khai ACCESS_BACKGROUND_LOCATION: tài liệu Android tính foreground
+     service là truy cập vị trí foreground, và nếu manifest có quyền này thì
+     geolocator_android thêm nó vào cùng yêu cầu xin quyền (kể cả lúc nâng lên
+     vị trí chính xác), mà Android 11+ bỏ qua yêu cầu gộp như vậy. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+</manifest>

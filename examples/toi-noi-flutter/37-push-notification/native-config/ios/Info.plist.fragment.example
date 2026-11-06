@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hai khoá thêm vào ios/Runner/Info.plist. Hai background mode (fetch, remote-notification) theo hướng dẫn Firebase. -->
+<plist version="1.0">
+<dict>
+    <key>FirebaseMessagingInstallationIdEnabled</key>
+    <true/>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+</dict>
+</plist>

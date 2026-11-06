@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Với app nhắm Android 12 (API 31) trở lên, tài liệu Android ghi: trên một số
+  máy, allowBackup="false" chỉ tắt sao lưu lên cloud mà không tắt chuyển máy
+  trực tiếp. Hai khối dưới loại cả hai tệp SharedPreferences của
+  flutter_secure_storage 11.2.0 khỏi cả hai đường: dữ liệu đã mã hoá
+  ("FlutterSecureStorage") và khoá bọc ("FlutterSecureKeyStorage"). Khôi phục
+  một tệp mà thiếu tệp kia là nguồn của lỗi "Failed to unwrap key" mà README
+  của plugin cảnh báo (chưa thử trên máy thật).
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+        <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+        <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+    </device-transfer>
+</data-extraction-rules>

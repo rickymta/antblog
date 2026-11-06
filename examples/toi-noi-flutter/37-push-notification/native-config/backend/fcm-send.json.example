@@ -1,0 +1,16 @@
+{
+  "message": {
+    "fid": "FAKE-FID-REPLACE-ME",
+    "notification": {
+      "title": "Tài xế đã nhận chuyến",
+      "body": "Mở Tới Nơi để xem tài xế và vị trí."
+    },
+    "data": {
+      "type": "trip_update",
+      "tripId": "T-1002"
+    },
+    "android": {
+      "notification": { "channel_id": "trip_updates" }
+    }
+  }
+}

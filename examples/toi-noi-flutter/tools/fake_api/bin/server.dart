@@ -20,14 +20,17 @@ Future<void> main(List<String> args) async {
     return;
   }
 
-  final auth = options.withAuth ? AuthModule() : null;
+  final auth = options.withAuth || options.withRealtime ? AuthModule() : null;
+  final realtime = options.withRealtime
+      ? RealtimeModule(verifyToken: auth!.verifyAccessToken)
+      : null;
   final handler = const Pipeline()
       .addMiddleware(logRequests())
       .addHandler(
         createFakeApiHandler(
           faults: options.faults,
-          modules: [?auth],
-          middleware: [?auth?.requireBearer],
+          modules: [?auth, ?realtime],
+          middleware: [if (options.withAuth) auth!.requireBearer],
         ),
       );
   final server = await shelf_io.serve(handler, options.host, options.port);
@@ -37,8 +40,14 @@ Future<void> main(List<String> args) async {
   );
   if (auth != null) {
     stdout.writeln(
-      'Xác thực giả đang bật: mã OTP cố định $fakeOtpCode (CHỈ DÀNH CHO FAKE), '
-      '/trips đòi Authorization: Bearer.',
+      'Xác thực giả đang bật: mã OTP cố định $fakeOtpCode (CHỈ DÀNH CHO FAKE)'
+      '${options.withAuth ? ', /trips đòi Authorization: Bearer' : ''}.',
+    );
+  }
+  if (realtime != null) {
+    stdout.writeln(
+      'Realtime giả đang bật: ws://${server.address.host}:${server.port}'
+      '$realtimePath (Authorization: Bearer <access token>).',
     );
   }
 }

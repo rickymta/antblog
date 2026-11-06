@@ -30,7 +30,10 @@ final class TripsModule implements FakeApiModule {
       if (stored == null) {
         throw const ProblemException(404, 'Trip not found');
       }
-      return jsonResponse(200, tripToJson(stored));
+      return jsonResponse(
+        200,
+        tripToJson(stored, extras: _extras(context, stored)),
+      );
     });
     router.post('/trips/<id>/accept', (Request request) {
       return _accept(request, context);
@@ -63,7 +66,7 @@ final class TripsModule implements FakeApiModule {
           'Request conflicts with current state',
         );
       }
-      return _created(context.store.trip(previous.tripId)!);
+      return _created(context, context.store.trip(previous.tripId)!);
     }
 
     final trip = Trip.request(
@@ -82,12 +85,12 @@ final class TripsModule implements FakeApiModule {
         tripId: trip.id,
       ),
     );
-    return _created(stored);
+    return _created(context, stored);
   }
 
-  Response _created(StoredTrip stored) => jsonResponse(
+  Response _created(FakeApiContext context, StoredTrip stored) => jsonResponse(
     201,
-    tripToJson(stored),
+    tripToJson(stored, extras: _extras(context, stored)),
     headers: {'location': '/trips/${stored.trip.id}'},
   );
 
@@ -126,13 +129,21 @@ final class TripsModule implements FakeApiModule {
         .apply(DriverAccepted(driverId));
     final next = StoredTrip(accepted, stored.version + 1);
     context.store.putTrip(next);
-    return jsonResponse(200, tripToJson(next));
+    return jsonResponse(200, tripToJson(next, extras: _extras(context, next)));
   }
 }
 
+Map<String, Object?> _extras(FakeApiContext context, StoredTrip stored) => {
+  for (final extra in context.tripJsonExtras) ...extra(stored),
+};
+
 /// Hình dạng JSON của một chuyến (camelCase, tiền là `int` đồng, khoảng cách
-/// là `int` mét, thời điểm UTC ISO-8601, trạng thái là tên enum).
-Map<String, Object?> tripToJson(StoredTrip stored) {
+/// là `int` mét, thời điểm UTC ISO-8601, trạng thái là tên enum). [extras] là
+/// các trường thêm của module khác (xem `FakeApiContext.tripJsonExtras`).
+Map<String, Object?> tripToJson(
+  StoredTrip stored, {
+  Map<String, Object?> extras = const {},
+}) {
   final trip = stored.trip;
   return <String, Object?>{
     'id': trip.id,
@@ -144,5 +155,6 @@ Map<String, Object?> tripToJson(StoredTrip stored) {
     'driverId': trip.driverId,
     'requestedAt': trip.requestedAt.toUtc().toIso8601String(),
     'version': stored.version,
+    ...extras,
   };
 }

@@ -68,6 +68,10 @@ Middleware _problemMiddleware() {
   return (Handler inner) => (Request request) async {
     try {
       return await inner(request);
+    } on HijackException {
+      // Nâng cấp WebSocket (route /realtime) ném HijackException để báo cho
+      // server rằng socket đã được nhận đi: phải để nó đi tiếp lên trên.
+      rethrow;
     } on ProblemException catch (e) {
       return problemResponse(request, e.status, e.title, errors: e.errors);
     } on Object {

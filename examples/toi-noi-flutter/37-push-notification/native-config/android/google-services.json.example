@@ -1,0 +1,31 @@
+{
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "toi-noi-example",
+    "storage_bucket": "toi-noi-example.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:FAKE-DEV-REPLACE-ME",
+        "android_client_info": { "package_name": "vn.toinoi.customer.dev" }
+      },
+      "api_key": [{ "current_key": "FAKE_API_KEY_REPLACE_ME" }]
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:FAKE-STAGING-REPLACE-ME",
+        "android_client_info": { "package_name": "vn.toinoi.customer.staging" }
+      },
+      "api_key": [{ "current_key": "FAKE_API_KEY_REPLACE_ME" }]
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:FAKE-PROD-REPLACE-ME",
+        "android_client_info": { "package_name": "vn.toinoi.customer" }
+      },
+      "api_key": [{ "current_key": "FAKE_API_KEY_REPLACE_ME" }]
+    }
+  ],
+  "configuration_version": "1"
+}

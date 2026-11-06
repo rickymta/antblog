@@ -1,0 +1,17 @@
+name: toi_noi_42
+description: "Lab bài 42 (Flutter qua Tới Nơi): mô hình đe doạ, Redactor cho log, certificate pinning với dio, obfuscation map, tín hiệu root/jailbreak và checklist OWASP MASVS."
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  crypto: ^3.0.8
+  dio: ^5.11.1
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.33.0

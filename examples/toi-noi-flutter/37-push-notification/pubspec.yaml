@@ -1,0 +1,25 @@
+name: toi_noi_37
+description: "Lab bài 37 (Flutter qua Tới Nơi): push notification với FCM và APNs, thông báo cục bộ, đăng ký thiết bị với backend và mở đúng màn hình bằng go_router."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  dio: ^5.11.1
+  firebase_core: ^5.1.0
+  firebase_messaging: ^17.0.1
+  flutter:
+    sdk: flutter
+  flutter_local_notifications: ^23.0.0
+  go_router: ^18.1.3
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  xml: ^7.0.1
+
+flutter:
+  uses-material-design: true

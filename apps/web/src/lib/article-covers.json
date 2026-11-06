@@ -3058,5 +3058,95 @@
       "TEST",
       "REPORT"
     ]
+  },
+  "flutter-ban-do-flutter-map-marker-polyline-chon-diem-don": {
+    "title": "MAP / MARKERS",
+    "subtitle": "Flutter 34 · flutter_map, polylines and pickup points",
+    "diagram": "map",
+    "labels": [
+      "PICKUP",
+      "ROUTE",
+      "DROPOFF"
+    ]
+  },
+  "flutter-vi-tri-geolocator-permission-foreground-background": {
+    "title": "GEOLOCATION",
+    "subtitle": "Flutter 35 · Permissions, position streams and battery",
+    "diagram": "target",
+    "labels": [
+      "PERMISSION",
+      "STREAM",
+      "ACCURACY"
+    ]
+  },
+  "flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe": {
+    "title": "REALTIME / WS",
+    "subtitle": "Flutter 36 · Reconnect, backoff, jitter and resume",
+    "diagram": "network",
+    "labels": [
+      "SOCKET",
+      "BACKOFF",
+      "RESUME"
+    ]
+  },
+  "flutter-push-notification-fcm-apns-deep-link": {
+    "title": "PUSH / FCM",
+    "subtitle": "Flutter 37 · APNs, FCM and deep links from messages",
+    "diagram": "flow",
+    "labels": [
+      "TOKEN",
+      "PUSH",
+      "OPEN"
+    ]
+  },
+  "flutter-background-work-workmanager-vi-tri-nen-app-tai-xe": {
+    "title": "BACKGROUND",
+    "subtitle": "Flutter 38 · workmanager, driver location, store rules",
+    "diagram": "cycle",
+    "labels": [
+      "DEFER",
+      "LOCATE",
+      "POLICY"
+    ]
+  },
+  "flutter-thanh-toan-vi-xanh-webview-deep-link-idempotency": {
+    "title": "PAYMENT / WALLET",
+    "subtitle": "Flutter 39 · Hosted checkout, deep link, idempotency",
+    "diagram": "flow",
+    "labels": [
+      "CHECKOUT",
+      "RETURN",
+      "CONFIRM"
+    ]
+  },
+  "flutter-platform-channel-pigeon-ffi-goi-native": {
+    "title": "NATIVE / PIGEON",
+    "subtitle": "Flutter 40 · Platform channels, Pigeon and dart:ffi",
+    "diagram": "split",
+    "labels": [
+      "DART",
+      "PIGEON",
+      "NATIVE"
+    ]
+  },
+  "flutter-hieu-nang-rebuild-isolate-devtools": {
+    "title": "PERFORMANCE",
+    "subtitle": "Flutter 41 · DevTools, const, RepaintBoundary, isolates",
+    "diagram": "target",
+    "labels": [
+      "MEASURE",
+      "REBUILD",
+      "ISOLATE"
+    ]
+  },
+  "flutter-bao-mat-mobile-secure-storage-pinning-obfuscation-masvs": {
+    "title": "SECURITY / MASVS",
+    "subtitle": "Flutter 42 · Threat model, storage, pinning, obfuscation",
+    "diagram": "checklist",
+    "labels": [
+      "STORAGE",
+      "NETWORK",
+      "MASVS"
+    ]
   }
 }

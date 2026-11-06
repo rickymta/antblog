@@ -4,7 +4,7 @@ import 'store.dart';
 
 /// Những thứ một module route cần: kho dữ liệu, đồng hồ và bộ sinh mã.
 final class FakeApiContext {
-  const FakeApiContext({
+  FakeApiContext({
     required this.store,
     required this.clock,
     required this.newId,
@@ -17,6 +17,12 @@ final class FakeApiContext {
 
   /// Sinh mã chuyến mới.
   final String Function() newId;
+
+  /// Trường thêm vào JSON của chuyến ở mọi route REST trả chuyến. Mặc định rỗng
+  /// nên response không đổi; `RealtimeModule` thêm `lastSequence` và `logEpoch`
+  /// khi được mount.
+  final List<Map<String, Object?> Function(StoredTrip stored)> tripJsonExtras =
+      [];
 }
 
 /// Một nhóm route gắn vào router của fake API.

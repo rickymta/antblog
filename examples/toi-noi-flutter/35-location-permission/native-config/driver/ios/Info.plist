@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- App TÀI XẾ. Đoạn cần ghép vào ios/Runner/Info.plist do `flutter create` sinh.
+     Có thêm quyền "luôn cho phép" và UIBackgroundModes location; mục đích này
+     phải giải thích được với App Review. -->
+<plist version="1.0">
+<dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tới Nơi dùng vị trí của bạn khi đang mở app để biết bạn đang online ở đâu và gợi ý cuốc gần nhất.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Tới Nơi gửi vị trí của bạn cho khách trong lúc có chuyến, kể cả khi bạn chuyển sang app dẫn đường. Hết chuyến, Tới Nơi ngừng gửi.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>PickupPrecise</key>
+		<string>Tới Nơi cần vị trí chính xác để khách thấy đúng chỗ xe đang đứng.</string>
+	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
+</dict>
+</plist>

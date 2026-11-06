@@ -1,0 +1,8 @@
+<!--
+  Mảnh cần dán vào thẻ <application> của android/app/src/main/AndroidManifest.xml
+  (runner sinh bằng `flutter create`). Chỉ ghi các thuộc tính đang dạy ở bài 42.
+-->
+<application
+    android:allowBackup="false"
+    android:dataExtractionRules="@xml/data_extraction_rules">
+</application>

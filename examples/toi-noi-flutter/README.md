@@ -51,15 +51,15 @@ Khung biên tập loạt bài Flutter của Tech Knowledge Hub. Ứng dụng xuy
 
 ## Phần 5 · Tính năng di động (trung bình → nâng cao)
 
-34. Bản đồ với flutter_map: marker, polyline và chọn điểm đón — kế hoạch
-35. Vị trí: geolocator, quyền foreground/background và cấu hình iOS, Android — kế hoạch
-36. Realtime WebSocket: reconnect, backoff và theo dõi tài xế — kế hoạch
-37. Push notification: FCM, APNs, local notification và deep link từ thông báo — kế hoạch
-38. Tác vụ nền: workmanager, vị trí nền cho app tài xế và chính sách store — kế hoạch
-39. Thanh toán qua VíXanh: WebView, deep link quay về và idempotency key — kế hoạch
-40. Platform channel, Pigeon và FFI: gọi native khi plugin không đủ — kế hoạch
-41. Hiệu năng: rebuild, const, RepaintBoundary, isolate và DevTools — kế hoạch
-42. Bảo mật mobile: secure storage, pinning, obfuscation và OWASP MASVS — kế hoạch
+34. Bản đồ với flutter_map: marker, polyline và chọn điểm đón — **đã viết, đã review**
+35. Vị trí: geolocator, quyền foreground/background và cấu hình iOS, Android — **đã viết, đã review**
+36. Realtime WebSocket: reconnect, backoff và theo dõi tài xế — **đã viết, đã review**
+37. Push notification: FCM, APNs, local notification và deep link từ thông báo — **đã viết, đã review**
+38. Tác vụ nền: workmanager, vị trí nền cho app tài xế và chính sách store — **đã viết, đã review**
+39. Thanh toán qua VíXanh: WebView, deep link quay về và idempotency key — **đã viết, đã review**
+40. Platform channel, Pigeon và FFI: gọi native khi plugin không đủ — **đã viết, đã review**
+41. Hiệu năng: rebuild, const, RepaintBoundary, isolate và DevTools — **đã viết, đã review**
+42. Bảo mật mobile: secure storage, pinning, obfuscation và OWASP MASVS — **đã viết, đã review**
 
 ## Phần 6 · Ứng dụng hoàn chỉnh: app khách và app tài xế (nâng cao)
 
@@ -146,6 +146,14 @@ Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `a
 
 ```bash
 node examples/toi-noi-flutter/verify-27-33.mjs
+```
+
+Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.
+
+## Chạy bài 34–42
+
+```bash
+node examples/toi-noi-flutter/verify-34-42.mjs
 ```
 
 Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.
