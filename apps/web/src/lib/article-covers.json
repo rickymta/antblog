@@ -608,5 +608,35 @@
       "EVENT",
       "NEXT STATE"
     ]
+  },
+  "csharp-va-dotnet-10-tu-source-code-den-chuong-trinh": {
+    "title": "C# / .NET 10",
+    "subtitle": "From source code to a running fare calculator",
+    "diagram": "flow",
+    "labels": [
+      "SOURCE",
+      "BUILD / IL",
+      "RUNTIME"
+    ]
+  },
+  "csharp-bien-kieu-du-lieu-decimal": {
+    "title": "DECIMAL / MONEY",
+    "subtitle": "C# 02 · Precision, units and rounding",
+    "diagram": "split",
+    "labels": [
+      "DISTANCE",
+      "RAW FARE",
+      "PAYABLE"
+    ]
+  },
+  "csharp-dieu-kien-vong-lap-phuong-thuc": {
+    "title": "RULES / FLOW",
+    "subtitle": "C# 03 · Validate, branch and calculate",
+    "diagram": "flow",
+    "labels": [
+      "VALIDATE",
+      "CALCULATE",
+      "RETURN"
+    ]
   }
 }

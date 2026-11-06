@@ -25,6 +25,76 @@ Tới Nơi chạy ở 6 thành phố, gộp ba dịch vụ dùng chung một đ�
 
 Vì ba dịch vụ dùng chung tài xế, mọi yêu cầu đều quy về một khái niệm duy nhất: **chuyến** (bảng `trips`). Một chuyến luôn có khách, thành phố, giá; có thể có tài xế (sau khi có người nhận) và quán (với đơn đồ ăn).
 
+## Kiến trúc đích cho các backend service chính
+
+Các backend service chính của Tới Nơi thống nhất dùng **DDD, Clean Architecture, CQRS, Mediator, Repository và Unit of Work**. Đây là định hướng triển khai xuyên suốt các loạt bài. Ví dụ console hoặc SQL độc lập vẫn tập trung vào cơ chế đang học; khi phát triển thành service hoàn chỉnh, chúng sẽ được đặt vào kiến trúc này.
+
+| Thành phần | Trách nhiệm trong Tới Nơi |
+| --- | --- |
+| DDD | Xác định bounded context, ngôn ngữ nghiệp vụ, aggregate và invariant; ranh giới service được quyết định từ nghiệp vụ |
+| Clean Architecture | Tách Domain, Application, Infrastructure và API; phụ thuộc mã nguồn hướng vào Domain/Application |
+| CQRS | Tách command thay đổi trạng thái với query đọc dữ liệu, mỗi use case có hợp đồng và handler rõ ràng |
+| Mediator | Điều phối command/query tới handler trong cùng tiến trình; pipeline xử lý các mối quan tâm chung phù hợp |
+| Repository | Cung cấp truy cập aggregate ở phía ghi theo nhu cầu domain; implementation lưu trữ thuộc Infrastructure |
+| Unit of Work | Quản lý commit thay đổi trong một transaction cục bộ của service/use case |
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box">
+<svg viewBox="0 0 900 260" role="img" aria-label="Luồng ghi: API gửi command qua Mediator tới Application handler, handler dùng Domain aggregate và Repository, Unit of Work commit transaction cục bộ. Infrastructure hiện thực các abstraction.">
+<rect x="20" y="35" width="170" height="80" rx="10" class="f-phys-soft s-phys"/><text x="35" y="65" class="t-b">API</text><text x="35" y="92" class="t-small">Command / Query</text>
+<text x="200" y="82" class="t-b">→</text>
+<rect x="235" y="35" width="170" height="80" rx="10" class="f-phys-soft s-phys"/><text x="250" y="65" class="t-b">Mediator</text><text x="250" y="92" class="t-small">Pipeline</text>
+<text x="415" y="82" class="t-b">→</text>
+<rect x="450" y="35" width="200" height="80" rx="10" class="f-phys-soft s-phys"/><text x="465" y="65" class="t-b">Application</text><text x="465" y="92" class="t-small">Use-case handler</text>
+<text x="660" y="82" class="t-b">→</text>
+<rect x="695" y="35" width="185" height="80" rx="10" class="f-phys-soft s-phys"/><text x="710" y="65" class="t-b">Domain</text><text x="710" y="92" class="t-small">Aggregate / Rules</text>
+<rect x="235" y="155" width="645" height="75" rx="10" class="f-bg s-line"/><text x="255" y="184" class="t-b">Repository + Unit of Work → lưu trữ cục bộ</text><text x="255" y="210" class="t-small">Infrastructure hiện thực abstraction; không đặt luật nghiệp vụ ở đây.</text>
+</svg>
+</div>
+<figcaption>Luồng điều phối của một use case. Mũi tên trên biểu diễn luồng xử lý; chiều phụ thuộc mã nguồn được quản lý theo Clean Architecture.</figcaption>
+</figure>
+
+CQRS không bắt buộc tách hai database hoặc dùng event sourcing. Query có thể projection trực tiếp ra DTO qua abstraction đọc riêng, không cần dựng lại aggregate chỉ để hiển thị. Repository phía ghi được thiết kế theo aggregate, tránh một generic CRUD repository che mất ý nghĩa nghiệp vụ. Với EF Core, DbContext đã có cơ chế tracking và transaction; abstraction Repository/Unit of Work cần làm rõ ranh giới nghiệp vụ và commit, không chỉ sao chép mọi API của DbContext.
+
+Mediator ở đây là pattern điều phối trong tiến trình, không thay message broker giữa các service; lựa chọn thư viện sẽ được chốt và giải thích trong bài triển khai. Unit of Work chỉ bao trùm transaction cục bộ, không giữ transaction xuyên nhiều service. Các luồng liên service sẽ bổ sung cơ chế phù hợp như Outbox, idempotency và bù trừ khi bài toán cần.
+
+Những Design Pattern khác được bổ sung theo từng tình huống: Strategy cho chính sách tính cước, State cho chuyển trạng thái chuyến, Adapter cho cổng thanh toán… Mỗi bài cần chỉ ra vấn đề, vị trí trong kiến trúc, lợi ích, cái giá và kiểm thử tương ứng trước khi chọn pattern.
+
+## Đa ngôn ngữ theo trách nhiệm service
+
+Tới Nơi dùng chung nghiệp vụ để nối các loạt C#, Python, Rust, Go và database. Bảng dưới là **định hướng thiết kế của dự án mẫu**, không phải kết luận một ngôn ngữ độc quyền một loại bài toán. Các backend chính tiếp tục giữ kiến trúc đích đã nêu; cách hiện thực abstraction cần phù hợp hệ sinh thái của từng ngôn ngữ.
+
+| Ngôn ngữ | Service dự kiến | Điều bài viết cần chứng minh |
+| --- | --- | --- |
+| C# / .NET 10 | Đặt chuyến, quản lý đơn, điều phối nghiệp vụ chính | Aggregate, invariant, command/query, transaction và kiểm thử |
+| Python | Fraud scoring, phân tích/dự đoán, OCR giấy tờ định danh | Pipeline dữ liệu, đánh giá mô hình, độ tin cậy kết quả, thời gian xử lý |
+| Rust | Sổ cái, đối soát và các thành phần nhạy với độ trễ/tài nguyên | Tính đúng của tiền, idempotency, hiệu năng đo được, kiểm soát bộ nhớ |
+| Go (Golang) | Tiếp nhận vị trí tài xế, fan-out thông báo, worker nhiều tác vụ đồng thời | Goroutine, giới hạn concurrency, backpressure, cancellation và race safety |
+
+Rust không tự bảo đảm đúng nghiệp vụ tài chính; sổ cái cần invariant, quy tắc làm tròn và đối soát. Go được chọn cho mô hình concurrency của service dự kiến, không có nghĩa C# hoặc Rust thiếu khả năng xử lý đồng thời. Python OCR dùng dữ liệu giấy tờ tổng hợp trong bài minh họa; kết quả OCR và điểm fraud là đầu vào cho quy trình nghiệp vụ, không tự động đồng nhất với quyết định xác minh hay kết luận gian lận.
+
+Service sở hữu dữ liệu của mình. Giao tiếp qua hợp đồng API/event có version, timeout, idempotency và trace xuyên ngôn ngữ; không để service khác ghi trực tiếp vào bảng nghiệp vụ nội bộ. Không mở một Unit of Work xuyên nhiều service hoặc nhiều loại database.
+
+## Hành trình PostgreSQL, MySQL và MongoDB
+
+**Giai đoạn đầu dùng PostgreSQL làm database chủ đạo.** Các bảng SQL và quy mô bên dưới là mô hình tham chiếu cho chặng này, không ngụ ý mọi service dùng chung một database trong kiến trúc đích.
+
+Khi workload tăng, loạt bài sẽ tái hiện áp lực ghi, MVCC và vacuum, đo rồi quyết định cách tiến hóa. MySQL và MongoDB có mặt trong lộ trình để học so sánh, tách dữ liệu và migration theo từng service; không đặt quy luật “đạt một số giao dịch đồng thời thì bắt buộc rời PostgreSQL”.
+
+| Chặng | Nội dung chia sẻ | Bằng chứng để ra quyết định |
+| --- | --- | --- |
+| PostgreSQL nền tảng | Heap, index, MVCC, transaction, autovacuum | Query plan, latency p95/p99, throughput, lock wait, WAL, dead tuples và bloat |
+| PostgreSQL dưới tải | Ghi trạng thái chuyến, transaction dài, vacuum không theo kịp | Tải tái lập, cấu hình/hardware, tốc độ sinh và dọn phiên bản cũ; thử tối ưu transaction, index, vacuum và phân vùng phù hợp |
+| MySQL / InnoDB | Clustered index, undo/purge, locking và replication | So sánh cùng workload và yêu cầu durability; đánh giá bottleneck và chi phí vận hành |
+| MongoDB | Mô hình document cho kết quả OCR, hồ sơ phân tích hoặc read model phù hợp | Access pattern, kích thước document, index, consistency và ranh giới transaction |
+| Migration có kiểm soát | Chuyển một tập dữ liệu/service khi kết quả đo đủ thuyết phục | Backfill, CDC/event, đối chiếu, cutover, rollback và quyền sở hữu dữ liệu |
+
+`VACUUM` là cơ chế bảo trì phiên bản hàng của PostgreSQL; vacuum thông thường có thể chạy cùng hoạt động đọc/ghi, dù tiêu tốn I/O. Nó khác `VACUUM FULL`, vốn cần khóa độc quyền. Vì vậy phải mô tả đúng loại vacuum và điều kiện gây chậm, không gộp chúng thành “vacuum khóa toàn bộ hệ thống”. Xem [tài liệu PostgreSQL về routine vacuuming](https://www.postgresql.org/docs/18/routine-vacuuming.html).
+
+Bài [Uber Engineering ngày 26/07/2016](https://www.uber.com/us/en/blog/postgres-to-mysql-migration/) là case study lịch sử, chủ yếu dựa trên PostgreSQL 9.2: Uber nêu write amplification, replication và các khó khăn vận hành, rồi dùng Schemaless xây trên MySQL cho nhiều trường hợp. Đây không phải bằng chứng rằng PostgreSQL hiện đại luôn phải nhường chỗ khi concurrency tăng, cũng không phải case chuyển sang MongoDB. Khi tái hiện cần ghi phiên bản và tách kết luận của Uber khỏi số đo của Tới Nơi.
+
+MySQL cũng phải dọn lịch sử MVCC qua [InnoDB purge](https://dev.mysql.com/doc/refman/8.4/en/innodb-purge-configuration.html). MongoDB được chọn theo mô hình dữ liệu và truy cập, không phải thuốc chữa chung cho vacuum. Mọi bài so sánh phải nêu cùng tiêu chí tính đúng, durability, tải và ngân sách tài nguyên trước khi công bố kết quả.
+
 ## Quy mô tải
 
 Đây là con số các bài sau sẽ dùng khi nói "nặng" hay "nhẹ":

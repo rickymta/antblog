@@ -16,3 +16,7 @@ reports/
 test-results/
 playwright-report/
 .migration-backups/
+
+# .NET example build outputs
+examples/toi-noi-dotnet/**/bin/
+examples/toi-noi-dotnet/**/obj/
