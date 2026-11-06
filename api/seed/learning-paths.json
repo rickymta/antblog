@@ -166,5 +166,25 @@
       "rust-tong-hop-ledger-core-cargo-doc-workspace"
     ],
     "status": "published"
+  },
+  {
+    "slug": "rust-trung-binh-qua-toi-noi",
+    "title": "Rust trung bình qua Tới Nơi",
+    "description": "Lộ trình 20 bài cấp trung bình: đưa thư viện ledger-core thành service sổ cái thật. Async với tokio, concurrency, PostgreSQL qua sqlx, transaction và idempotency, schema sổ cái, Redis, tracing, đo hiệu năng; tiếp theo là HTTP với axum, gRPC với tonic, Kafka, outbox, webhook VíXanh và graceful shutdown.",
+    "level": "intermediate",
+    "category": "programming",
+    "articles": [
+      "rust-async-await-tokio-task-timeout-cancellation",
+      "rust-send-sync-arc-mutex-channel-concurrency",
+      "rust-sqlx-postgresql-pool-migration-query",
+      "rust-transaction-isolation-append-only-idempotency-key",
+      "rust-schema-so-cai-accounts-journal-postings-partition",
+      "rust-repository-unit-of-work-trait-transaction",
+      "rust-integration-test-postgresql-schema-rieng-ci",
+      "rust-redis-cache-so-du-rate-limit-lock-ttl",
+      "rust-config-secrets-tracing-structured-logging",
+      "rust-criterion-benchmark-do-bo-nho-10k-but-toan"
+    ],
+    "status": "published"
   }
 ]

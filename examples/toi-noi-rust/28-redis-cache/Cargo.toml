@@ -1,0 +1,17 @@
+[package]
+name = "ledger_28_redis_cache"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Lab bài 28: Redis cache-aside, token bucket Lua, lock có TTL cho sổ cái Tới Nơi"
+
+[dependencies]
+anyhow = "1.0.104"
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+redis = { version = "1.8.1", features = ["tokio-comp", "connection-manager"] }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "time", "sync"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[lints.rust]
+unsafe_code = "forbid"

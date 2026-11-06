@@ -1,0 +1,13 @@
+[package]
+name = "ledger_25_schema_so_cai"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Lab bài 25: schema sổ cái PostgreSQL, kiểm tổng bằng 0 ở DB, projection số dư, index và partition"
+
+[dependencies]
+anyhow = "1.0.104"
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }
+uuid = { version = "1.29.0", features = ["v4"] }

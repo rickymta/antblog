@@ -1188,5 +1188,105 @@
       "CLI",
       "TESTS"
     ]
+  },
+  "rust-async-await-tokio-task-timeout-cancellation": {
+    "title": "ASYNC / TOKIO",
+    "subtitle": "Rust 21 · Futures, timeout and cancellation with tokio",
+    "diagram": "flow",
+    "labels": [
+      "FUTURE",
+      "TIMEOUT",
+      "CANCEL"
+    ]
+  },
+  "rust-send-sync-arc-mutex-channel-concurrency": {
+    "title": "SEND / SYNC / CHANNEL",
+    "subtitle": "Rust 22 · Arc<Mutex>, actor and channels without data races",
+    "diagram": "flow",
+    "labels": [
+      "SEND",
+      "MUTEX",
+      "CHANNEL"
+    ]
+  },
+  "rust-sqlx-postgresql-pool-migration-query": {
+    "title": "SQLX / POSTGRESQL",
+    "subtitle": "Rust 23 · Pool, migrations and compile-time queries",
+    "diagram": "storage",
+    "labels": [
+      "POOL",
+      "MIGRATE",
+      "QUERY!"
+    ]
+  },
+  "rust-transaction-isolation-append-only-idempotency-key": {
+    "title": "TRANSACTION / ISOLATION",
+    "subtitle": "Rust 24 · Idempotent ledger writes on PostgreSQL",
+    "diagram": "layers",
+    "labels": [
+      "COMMIT",
+      "SERIALIZABLE",
+      "APPEND-ONLY"
+    ]
+  },
+  "rust-schema-so-cai-accounts-journal-postings-partition": {
+    "title": "LEDGER SCHEMA / INDEX",
+    "subtitle": "Rust 25 · Ledger tables, commit-time check, partition",
+    "diagram": "storage",
+    "labels": [
+      "ACCOUNTS",
+      "POSTINGS",
+      "BALANCES"
+    ]
+  },
+  "rust-repository-unit-of-work-trait-transaction": {
+    "title": "REPOSITORY / UOW",
+    "subtitle": "Rust 26 · Repository trait and Unit of Work over sqlx",
+    "diagram": "layers",
+    "labels": [
+      "PORT",
+      "ADAPTER",
+      "UOW"
+    ]
+  },
+  "rust-integration-test-postgresql-schema-rieng-ci": {
+    "title": "PG INTEGRATION TEST",
+    "subtitle": "Rust 27 · Schema per test, fixtures and CI",
+    "diagram": "layers",
+    "labels": [
+      "SCHEMA",
+      "FIXTURE",
+      "CI"
+    ]
+  },
+  "rust-redis-cache-so-du-rate-limit-lock-ttl": {
+    "title": "REDIS / CACHE",
+    "subtitle": "Rust 28 · Cache, rate limit and TTL locks",
+    "diagram": "layers",
+    "labels": [
+      "CACHE",
+      "BUCKET",
+      "LOCK"
+    ]
+  },
+  "rust-config-secrets-tracing-structured-logging": {
+    "title": "TRACING / CONFIG",
+    "subtitle": "Rust 29 · Config, secrets and structured JSON logging",
+    "diagram": "layers",
+    "labels": [
+      "CONFIG",
+      "SPAN",
+      "JSON LOG"
+    ]
+  },
+  "rust-criterion-benchmark-do-bo-nho-10k-but-toan": {
+    "title": "CRITERION / DHAT",
+    "subtitle": "Rust 30 · Benchmarks, allocations and 10k writes/s",
+    "diagram": "target",
+    "labels": [
+      "CRITERION",
+      "DHAT",
+      "POSTGRES"
+    ]
   }
 }

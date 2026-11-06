@@ -1,0 +1,15 @@
+[package]
+name = "ledger-port"
+description = "Cổng LedgerRepository, Unit of Work, service và adapter bộ nhớ (lab bài 26); không phụ thuộc sqlx"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ledger-core.workspace = true
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt", "sync"] }
+
+[dev-dependencies]
+tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread"] }

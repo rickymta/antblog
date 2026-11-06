@@ -55,7 +55,20 @@ C#/.NET 10 giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng
 19. Property-based test với proptest: chứng minh bất biến sổ cái — **đã viết**
 20. Bài tổng hợp cấp cơ bản: thư viện ledger-core có bất biến, test và tài liệu — **đã viết**
 
-Các phần P03–P07 (bài 21–68) xem master curriculum.
+## P03 · Bất đồng bộ, dữ liệu và lưu trữ
+
+21. async/await và tokio: task, join, timeout và hủy khi gọi VíXanh — **đã viết**
+22. Send, Sync, Arc<Mutex> và channel: concurrency không data race — **đã viết**
+23. sqlx với PostgreSQL: pool, migration và query kiểm tra lúc biên dịch — **đã viết**
+24. Transaction, isolation và idempotency key: ghi bút toán an toàn — **đã viết**
+25. Schema sổ cái: accounts, journal_entries, postings, balance là projection — **đã viết**
+26. Repository và Unit of Work kiểu Rust: trait, generic transaction, không ORM — **đã viết**
+27. Integration test với PostgreSQL thật: schema riêng mỗi ca, fixture, CI — **đã viết**
+28. Redis: cache số dư, rate limit và lock có TTL; Redis không là nguồn sự thật — **đã viết**
+29. Cấu hình, secrets và tracing: log có cấu trúc cho service sổ cái — **đã viết**
+30. criterion và đo bộ nhớ: sổ cái có ghi nổi 10.000 bút toán/giây không? — **đã viết**
+
+Các phần P04–P07 (bài 31–68) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -64,7 +77,7 @@ cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml
 cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml -- --verify
 ```
 
-Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02.
+Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03 (cần hạ tầng trong `infra/`).
 
 ## Hạ tầng cho phần P03 trở đi
 

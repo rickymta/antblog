@@ -296,7 +296,7 @@ Các mục này mở sang lộ trình cấp trung bình.
 
 <details><summary>Xem lời giải</summary><p>Bút toán mới là <code>JE-000003</code> với key <code>trip:TN-0001:capture:reversal:reversal</code>; <code>ledger.len()</code> bằng 3 và số dư tài xế trở lại 20.400 VND, tổng toàn sổ vẫn bằng 0. Gọi lại <code>reverse</code> với <code>JE-000001</code> chỉ là replay, vì key suy ra từ bản gốc nên trùng bản đã ghi; sổ vẫn có 3 bút toán. Không cần sửa thư viện: bút toán đảo cũng là một bút toán cân bình thường, nên <code>reverse</code> áp dụng được cho nó.</p></details>
 
-Bài trước: [bài 19](/articles/rust-proptest-property-test-bat-bien-so-cai). Bài tiếp: phần P03, bất đồng bộ và dữ liệu.
+Bài trước: [bài 19](/articles/rust-proptest-property-test-bat-bien-so-cai). Bài tiếp: [bài 21](/articles/rust-async-await-tokio-task-timeout-cancellation), đầu lộ trình Rust trung bình.
 
 ## Tài liệu gốc
 

@@ -1,0 +1,16 @@
+# Workspace gốc của lab 26: hai package để tách cổng (port) khỏi adapter sqlx.
+[workspace]
+members = ["ledger-port", "ledger-pg"]
+default-members = ["ledger-port", "ledger-pg"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[workspace.dependencies]
+# Dùng lại thư viện bài 20, không sao chép. Crate này KHÔNG có sqlx trong cây phụ thuộc.
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+ledger-port = { path = "ledger-port" }

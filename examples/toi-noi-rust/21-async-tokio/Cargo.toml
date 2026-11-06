@@ -1,0 +1,12 @@
+[package]
+name = "ledger_21_async_tokio"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+# `test-util` cho đồng hồ ảo (pause/start_paused). Ở dự án thật để trong [dev-dependencies].
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync", "test-util"] }
+tokio-util = "0.7"
+thiserror = "2"

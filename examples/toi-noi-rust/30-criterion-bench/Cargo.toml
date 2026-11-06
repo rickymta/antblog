@@ -1,0 +1,52 @@
+[package]
+name = "ledger_30_criterion_bench"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 30: criterion, dhat và đo ghi PostgreSQL cho sổ cái Tới Nơi"
+publish = false
+default-run = "ledger-bench"
+
+[lib]
+name = "ledger_bench"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-bench"
+path = "src/main.rs"
+
+# Binary đếm allocation chỉ build khi bật feature `dhat-heap`.
+[[bin]]
+name = "alloc-profile"
+path = "src/bin/alloc_profile.rs"
+required-features = ["dhat-heap"]
+
+# criterion tự cung cấp `main`, nên phải tắt harness mặc định của libtest.
+[[bench]]
+name = "ledger"
+harness = false
+
+[[bench]]
+name = "black_box_demo"
+harness = false
+
+[dependencies]
+dhat = { version = "0.3.3", optional = true }
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres", "macros"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[dev-dependencies]
+criterion = "0.8.2"
+
+[features]
+# Bật dhat: `cargo run --release --features dhat-heap --bin alloc-profile`.
+dhat-heap = ["dep:dhat"]
+
+# Release cho số đo: LTO toàn chương trình + 1 codegen unit để inline xuyên crate (ledger-core).
+[profile.release]
+lto = "fat"
+codegen-units = 1
+# Không liên quan tới tốc độ: strip mặc định gọi rust-objcopy, trên máy viết bài nó không nạp được
+# libLLVM.dylib nên in cảnh báo mỗi lần build. Máy khác không gặp thì bỏ dòng này.
+strip = "none"

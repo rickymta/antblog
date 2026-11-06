@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select idempotency_key, posted_at from journal_entries where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "idempotency_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "journal_entries",
+            "name": "idempotency_key"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "posted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "journal_entries",
+            "name": "posted_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "3e45af899fde6ac2f33b7676138b18c36c98cfcbce7d9e59935a278def6ceca0"
+}
