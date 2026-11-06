@@ -2168,5 +2168,165 @@
       "RUNBOOK",
       "CERTS"
     ]
+  },
+  "ba-la-gi-tu-tinh-nang-den-bai-toan": {
+    "title": "BUSINESS ANALYSIS",
+    "subtitle": "From needs to valuable change",
+    "diagram": "flow",
+    "labels": [
+      "NEED",
+      "OPTIONS",
+      "VALUE"
+    ]
+  },
+  "ba-po-pm-ux-dev-tester-phoi-hop": {
+    "title": "SHARED DECISIONS",
+    "subtitle": "BA · Roles, evidence and ownership",
+    "diagram": "network",
+    "labels": [
+      "STAKEHOLDERS",
+      "DECISION",
+      "OWNER"
+    ]
+  },
+  "ba-phan-loai-yeu-cau-nghiep-vu": {
+    "title": "REQUIREMENTS",
+    "subtitle": "Connect outcomes to solution behaviour",
+    "diagram": "flow",
+    "labels": [
+      "BUSINESS",
+      "STAKEHOLDER",
+      "SOLUTION"
+    ]
+  },
+  "ba-baccm-sau-khai-niem-cot-loi": {
+    "title": "BACCM",
+    "subtitle": "Six concepts · One connected analysis",
+    "diagram": "network",
+    "labels": [
+      "NEED + CONTEXT",
+      "VALUE",
+      "CHANGE"
+    ]
+  },
+  "ba-problem-statement-muc-tieu-chi-so": {
+    "title": "MEASURE VALUE",
+    "subtitle": "Baseline, target and guardrails",
+    "diagram": "target",
+    "labels": [
+      "BASELINE",
+      "TARGET",
+      "GUARDRAILS"
+    ]
+  },
+  "ba-scope-assumption-constraint-dependency": {
+    "title": "DEFINE THE SCOPE",
+    "subtitle": "Boundaries, assumptions and dependencies",
+    "diagram": "split",
+    "labels": [
+      "IN SCOPE",
+      "ASSUMPTIONS",
+      "OUT OF SCOPE"
+    ]
+  },
+  "ba-quyet-dinh-khi-thieu-bang-chung": {
+    "title": "DECIDE WITH EVIDENCE",
+    "subtitle": "Compare options under uncertainty",
+    "diagram": "flow",
+    "labels": [
+      "HYPOTHESIS",
+      "EVIDENCE",
+      "DECISION"
+    ]
+  },
+  "ba-thuc-hanh-de-xuat-cai-thien-diem-don": {
+    "title": "BA CASE / 01",
+    "subtitle": "Toi Noi · Defend the pickup proposal",
+    "diagram": "checklist",
+    "labels": [
+      "PROBLEM BRIEF",
+      "OPTIONS",
+      "RECOMMENDATION"
+    ]
+  },
+  "ba-stakeholder-map-quyen-quyet-dinh": {
+    "title": "STAKEHOLDER MAP",
+    "subtitle": "Who is affected? Who decides?",
+    "diagram": "network",
+    "labels": [
+      "RIDER + DRIVER",
+      "DISCOVERY",
+      "OPERATIONS"
+    ]
+  },
+  "ba-phong-van-nghiep-vu-khong-dan-dat": {
+    "title": "ASK, THEN LISTEN",
+    "subtitle": "Interviews grounded in real situations",
+    "diagram": "flow",
+    "labels": [
+      "OPEN QUESTION",
+      "EXPERIENCE",
+      "FOLLOW-UP"
+    ]
+  },
+  "ba-quan-sat-quy-trinh-doc-tai-lieu": {
+    "title": "OBSERVE THE WORK",
+    "subtitle": "Compare practice with documented intent",
+    "diagram": "split",
+    "labels": [
+      "OBSERVATION",
+      "CONTEXT",
+      "DOCUMENTS"
+    ]
+  },
+  "ba-workshop-dieu-phoi-xac-nhan": {
+    "title": "WORKSHOP",
+    "subtitle": "Facilitate, record and confirm",
+    "diagram": "checklist",
+    "labels": [
+      "SHARED QUESTION",
+      "OPEN ISSUES",
+      "CONFIRMATION"
+    ]
+  },
+  "ba-khao-sat-lay-mau-thien-lech": {
+    "title": "SAMPLE WITH CARE",
+    "subtitle": "Respondents are not the whole population",
+    "diagram": "split",
+    "labels": [
+      "POPULATION",
+      "SELECTION",
+      "RESPONDENTS"
+    ]
+  },
+  "ba-customer-journey-service-blueprint": {
+    "title": "SERVICE JOURNEY",
+    "subtitle": "Connect touchpoints with backstage work",
+    "diagram": "map",
+    "labels": [
+      "PICKUP",
+      "HANDOFF",
+      "SUPPORT"
+    ]
+  },
+  "ba-giai-quyet-yeu-cau-xung-dot": {
+    "title": "RESOLVE CONFLICT",
+    "subtitle": "Needs, trade-offs and decision rights",
+    "diagram": "split",
+    "labels": [
+      "POSITIONS",
+      "TRADE-OFFS",
+      "SHARED NEEDS"
+    ]
+  },
+  "ba-thuc-hanh-tong-hop-discovery": {
+    "title": "BA CASE / 02",
+    "subtitle": "Toi Noi · Synthesize discovery evidence",
+    "diagram": "checklist",
+    "labels": [
+      "SOURCE IDS",
+      "EVIDENCE MATRIX",
+      "DISCOVERY MEMO"
+    ]
   }
 }
