@@ -91,16 +91,16 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| PY-21 | `python-asyncio-coroutine-task-timeout-cancellation` | asyncio: coroutine, Task, timeout và hủy: gọi dịch vụ báo giá | Event loop, `await`, `gather`, `TaskGroup`, `asyncio.timeout`, cancellation, không chặn loop | PY-20 | Kế hoạch |
-| PY-22 | `python-gil-threading-multiprocessing-free-threaded` | GIL, threading, multiprocessing và free-threaded 3.14: chọn mô hình cho OCR | I/O-bound vs CPU-bound, `ThreadPoolExecutor`, `ProcessPoolExecutor`, đo thật, free-threaded là thử nghiệm | PY-21 | Kế hoạch |
-| PY-23 | `python-concurrency-lock-queue-semaphore` | Lock, Queue, Semaphore: tránh nhận trùng chuyến | Race condition tái hiện, `asyncio.Lock`, `Semaphore` giới hạn, `Queue` producer/consumer, backpressure | PY-22 | Kế hoạch |
-| PY-24 | `python-sqlalchemy-psycopg-postgresql-mapping-migration` | SQLAlchemy 2 và psycopg 3 với PostgreSQL: mapping, migration Alembic | ORM 2.0 style, `Mapped[]`, session, Alembic, đọc SQL sinh ra, async engine | PY-20 | Kế hoạch |
-| PY-25 | `python-transaction-optimistic-concurrency-idempotency` | Transaction, optimistic concurrency và idempotency: đặt chuyến an toàn | `begin()`, isolation, cột version, unique idempotency key, SQLSTATE 23505, retry | PY-24 | Kế hoạch |
-| PY-26 | `python-mongodb-pymongo-motor-document-ocr` | MongoDB với pymongo/motor: lưu kết quả OCR dạng document | Document model, index, schema versioning, `insert_one`/`find`, khi nào chọn document thay bảng | PY-24 | Kế hoạch |
-| PY-27 | `python-redis-cache-rate-limit-geo` | Redis: cache, rate limit và GEO cho vị trí tài xế | redis-py async, TTL, cache-aside, token bucket, `GEOADD/GEOSEARCH`, pipeline, không dùng Redis làm nguồn sự thật | PY-21 | Kế hoạch |
-| PY-28 | `python-integration-test-testcontainers-fixture` | Integration test với PostgreSQL/MongoDB thật: testcontainers và fixture | Fixture scope, testcontainers, schema riêng mỗi ca, không InMemory thay PostgreSQL, CI | PY-24, PY-26 | Kế hoạch |
-| PY-29 | `python-polars-pandas-parquet-phan-tich-chuyen` | polars, pandas và Parquet: phân tích 2 triệu chuyến mỗi ngày | DataFrame, lazy query, group by, Parquet vs CSV, bộ nhớ, khi nào không nên pandas | PY-09 | Kế hoạch |
-| PY-30 | `python-numpy-pillow-opencv-tien-xu-ly-anh` | NumPy, Pillow và OpenCV: ảnh là mảng, tiền xử lý ảnh giấy tờ | ndarray, dtype, broadcasting, đọc/ghi ảnh, resize, grayscale, threshold, vectorize thay vòng lặp | PY-29 | Kế hoạch |
+| PY-21 | `python-asyncio-coroutine-task-timeout-cancellation` | asyncio: coroutine, Task, timeout và hủy: gọi dịch vụ báo giá | Event loop, `await`, `gather`, `TaskGroup`, `asyncio.timeout`, cancellation, không chặn loop | PY-20 | Đã viết |
+| PY-22 | `python-gil-threading-multiprocessing-free-threaded` | GIL, threading, multiprocessing và free-threaded 3.14: chọn mô hình cho OCR | I/O-bound vs CPU-bound, `ThreadPoolExecutor`, `ProcessPoolExecutor`, đo thật, free-threaded là thử nghiệm | PY-21 | Đã viết |
+| PY-23 | `python-concurrency-lock-queue-semaphore` | Lock, Queue, Semaphore: tránh nhận trùng chuyến | Race condition tái hiện, `asyncio.Lock`, `Semaphore` giới hạn, `Queue` producer/consumer, backpressure | PY-22 | Đã viết |
+| PY-24 | `python-sqlalchemy-psycopg-postgresql-mapping-migration` | SQLAlchemy 2 và psycopg 3 với PostgreSQL: mapping, migration Alembic | ORM 2.0 style, `Mapped[]`, session, Alembic, đọc SQL sinh ra, async engine | PY-20 | Đã viết |
+| PY-25 | `python-transaction-optimistic-concurrency-idempotency` | Transaction, optimistic concurrency và idempotency: đặt chuyến an toàn | `begin()`, isolation, cột version, unique idempotency key, SQLSTATE 23505, retry | PY-24 | Đã viết |
+| PY-26 | `python-mongodb-pymongo-motor-document-ocr` | MongoDB với pymongo/motor: lưu kết quả OCR dạng document | Document model, index, schema versioning, `insert_one`/`find`, khi nào chọn document thay bảng | PY-24 | Đã viết |
+| PY-27 | `python-redis-cache-rate-limit-geo` | Redis: cache, rate limit và GEO cho vị trí tài xế | redis-py async, TTL, cache-aside, token bucket, `GEOADD/GEOSEARCH`, pipeline, không dùng Redis làm nguồn sự thật | PY-21 | Đã viết |
+| PY-28 | `python-integration-test-testcontainers-fixture` | Integration test với PostgreSQL/MongoDB thật: testcontainers và fixture | Fixture scope, testcontainers, schema riêng mỗi ca, không InMemory thay PostgreSQL, CI | PY-24, PY-26 | Đã viết |
+| PY-29 | `python-polars-pandas-parquet-phan-tich-chuyen` | polars, pandas và Parquet: phân tích 2 triệu chuyến mỗi ngày | DataFrame, lazy query, group by, Parquet vs CSV, bộ nhớ, khi nào không nên pandas | PY-09 | Đã viết |
+| PY-30 | `python-numpy-pillow-opencv-tien-xu-ly-anh` | NumPy, Pillow và OpenCV: ảnh là mảng, tiền xử lý ảnh giấy tờ | ndarray, dtype, broadcasting, đọc/ghi ảnh, resize, grayscale, threshold, vectorize thay vòng lặp | PY-29 | Đã viết |
 
 #### P04 · Dịch vụ HTTP, gRPC và thông điệp (10 bài)
 

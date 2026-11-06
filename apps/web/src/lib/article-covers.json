@@ -1188,5 +1188,105 @@
       "MYPY",
       "PYTEST"
     ]
+  },
+  "python-asyncio-coroutine-task-timeout-cancellation": {
+    "title": "PYTHON / ASYNCIO",
+    "subtitle": "Python 21 · Concurrent quote calls",
+    "diagram": "flow",
+    "labels": [
+      "TASK",
+      "TIMEOUT",
+      "CANCEL"
+    ]
+  },
+  "python-gil-threading-multiprocessing-free-threaded": {
+    "title": "PYTHON / GIL & POOLS",
+    "subtitle": "Python 22 · Threads, processes, free-threaded",
+    "diagram": "split",
+    "labels": [
+      "THREAD",
+      "PROCESS",
+      "GIL"
+    ]
+  },
+  "python-concurrency-lock-queue-semaphore": {
+    "title": "PYTHON / LOCK QUEUE",
+    "subtitle": "Python 23 · No double trip accept",
+    "diagram": "blocks",
+    "labels": [
+      "LOCK",
+      "QUEUE",
+      "SEMAPHORE"
+    ]
+  },
+  "python-sqlalchemy-psycopg-postgresql-mapping-migration": {
+    "title": "PYTHON / SQLALCHEMY",
+    "subtitle": "Python 24 · ORM and migrations",
+    "diagram": "layers",
+    "labels": [
+      "MAPPING",
+      "SESSION",
+      "ALEMBIC"
+    ]
+  },
+  "python-transaction-optimistic-concurrency-idempotency": {
+    "title": "PYTHON / TRANSACTION",
+    "subtitle": "Python 25 · Safe booking writes",
+    "diagram": "split",
+    "labels": [
+      "VERSION",
+      "IDEMPOTENT",
+      "RETRY"
+    ]
+  },
+  "python-mongodb-pymongo-motor-document-ocr": {
+    "title": "PYTHON / MONGODB",
+    "subtitle": "Python 26 · OCR results as documents",
+    "diagram": "storage",
+    "labels": [
+      "DOCUMENT",
+      "INDEX",
+      "SCHEMA"
+    ]
+  },
+  "python-redis-cache-rate-limit-geo": {
+    "title": "PYTHON / REDIS",
+    "subtitle": "Python 27 · Cache, limits and driver GEO",
+    "diagram": "layers",
+    "labels": [
+      "CACHE",
+      "BUCKET",
+      "GEO"
+    ]
+  },
+  "python-integration-test-testcontainers-fixture": {
+    "title": "PYTHON / TESTCONTAINERS",
+    "subtitle": "Python 28 · Real databases in tests",
+    "diagram": "layers",
+    "labels": [
+      "PYTEST",
+      "CONTAINER",
+      "SCHEMA"
+    ]
+  },
+  "python-polars-pandas-parquet-phan-tich-chuyen": {
+    "title": "PYTHON / POLARS",
+    "subtitle": "Python 29 · Analysing 2M trips a day",
+    "diagram": "matrix",
+    "labels": [
+      "PARQUET",
+      "LAZY",
+      "GROUP BY"
+    ]
+  },
+  "python-numpy-pillow-opencv-tien-xu-ly-anh": {
+    "title": "PYTHON / NUMPY IMAGE",
+    "subtitle": "Python 30 · Images as arrays for ID cards",
+    "diagram": "matrix",
+    "labels": [
+      "NDARRAY",
+      "THRESHOLD",
+      "OPENCV"
+    ]
   }
 }

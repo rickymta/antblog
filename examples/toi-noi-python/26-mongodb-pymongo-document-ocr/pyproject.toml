@@ -1,0 +1,11 @@
+[project]
+name = "toi-noi-py-26-mongodb-pymongo-document-ocr"
+version = "0.1.0"
+description = "Bài 26: lưu kết quả OCR giấy tờ dạng document bằng PyMongo async"
+requires-python = ">=3.14"
+dependencies = [
+    "pymongo>=4.13",
+]
+
+[tool.uv]
+package = false

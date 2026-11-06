@@ -166,5 +166,25 @@
       "python-dong-goi-ruff-pre-commit-cau-truc-du-an"
     ],
     "status": "published"
+  },
+  {
+    "slug": "python-trung-binh-qua-toi-noi",
+    "title": "Python trung bình qua Tới Nơi",
+    "description": "Lộ trình 20 bài cấp trung bình: asyncio, GIL và free-threaded, đồng thời, SQLAlchemy với PostgreSQL, transaction và idempotency, MongoDB, Redis, integration test, polars và xử lý ảnh, rồi service FastAPI, xác thực, gRPC, Kafka, outbox và worker nền. Mọi lab chạy với hạ tầng thật trong Docker.",
+    "level": "intermediate",
+    "category": "programming",
+    "articles": [
+      "python-asyncio-coroutine-task-timeout-cancellation",
+      "python-gil-threading-multiprocessing-free-threaded",
+      "python-concurrency-lock-queue-semaphore",
+      "python-sqlalchemy-psycopg-postgresql-mapping-migration",
+      "python-transaction-optimistic-concurrency-idempotency",
+      "python-mongodb-pymongo-motor-document-ocr",
+      "python-redis-cache-rate-limit-geo",
+      "python-integration-test-testcontainers-fixture",
+      "python-polars-pandas-parquet-phan-tich-chuyen",
+      "python-numpy-pillow-opencv-tien-xu-ly-anh"
+    ],
+    "status": "published"
   }
 ]

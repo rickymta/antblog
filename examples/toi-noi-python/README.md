@@ -54,7 +54,20 @@ C#/.NET giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng, �
 19. Design pattern kiểu Python: Strategy, State, Adapter cho Tới Nơi — **đã viết**
 20. Đóng gói, ruff, mypy và cấu trúc dự án: sẵn sàng cho service — **đã viết**
 
-Các phần P03–P10 (bài 21–79) xem master curriculum.
+## P03 · Bất đồng bộ, dữ liệu và lưu trữ
+
+21. asyncio: coroutine, Task, timeout và hủy: gọi dịch vụ báo giá — **đã viết**
+22. GIL, threading, multiprocessing và free-threaded 3.14: chọn mô hình cho OCR — **đã viết**
+23. Lock, Queue, Semaphore: tránh nhận trùng chuyến — **đã viết**
+24. SQLAlchemy 2 và psycopg 3 với PostgreSQL: mapping, migration Alembic — **đã viết**
+25. Transaction, optimistic concurrency và idempotency: đặt chuyến an toàn — **đã viết**
+26. MongoDB với pymongo/motor: lưu kết quả OCR dạng document — **đã viết**
+27. Redis: cache, rate limit và GEO cho vị trí tài xế — **đã viết**
+28. Integration test với PostgreSQL/MongoDB thật: testcontainers và fixture — **đã viết**
+29. polars, pandas và Parquet: phân tích 2 triệu chuyến mỗi ngày — **đã viết**
+30. NumPy, Pillow và OpenCV: ảnh là mảng, tiền xử lý ảnh giấy tờ — **đã viết**
+
+Các phần P04–P10 (bài 31–79) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -74,4 +87,12 @@ Lần đầu cần mạng để uv tải mypy, pytest, pydantic, ruff. Lab 20 c�
 
 ```bash
 sh examples/toi-noi-python/verify-11-20.sh
+```
+
+## Chạy lab phần 03
+
+Bài 24–27 cần hạ tầng chung trong `infra/`, bài 28 cần Docker. Khởi động trước bằng `docker compose -f examples/toi-noi-python/infra/compose.yml up -d --wait`. Số đo thời gian trong bài in kèm load average; `--verify` chỉ kiểm bất biến.
+
+```bash
+sh examples/toi-noi-python/verify-21-30.sh
 ```

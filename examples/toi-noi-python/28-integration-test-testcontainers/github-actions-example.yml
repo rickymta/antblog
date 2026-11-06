@@ -1,0 +1,16 @@
+# Ví dụ minh họa (KHÔNG chạy trong lab này): chạy bộ integration test trên runner có Docker.
+# Đặt vào .github/workflows/ của repository thật để dùng; phiên bản action kiểm lần cuối ngày 06/11/2026.
+name: integration-test
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  pytest:
+    runs-on: ubuntu-latest        # runner cần có Docker daemon để testcontainers dựng container
+    timeout-minutes: 15           # container treo thì job không chạy mãi
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+      - run: uv python install 3.14
+      # --locked: fail nếu uv.lock lệch pyproject.toml, thay vì lặng lẽ cập nhật
+      - run: uv run --locked --project examples/toi-noi-python/28-integration-test-testcontainers pytest examples/toi-noi-python/28-integration-test-testcontainers

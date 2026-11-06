@@ -1,0 +1,13 @@
+[project]
+name = "toi-noi-py-24-sqlalchemy-postgresql-alembic"
+version = "0.1.0"
+description = "Bài 24: SQLAlchemy 2, psycopg 3 và Alembic với PostgreSQL"
+requires-python = ">=3.14"
+dependencies = [
+    "sqlalchemy[asyncio]>=2.1",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.14",
+]
+
+[tool.uv]
+package = false

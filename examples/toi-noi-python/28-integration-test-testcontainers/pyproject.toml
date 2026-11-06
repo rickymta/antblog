@@ -1,0 +1,22 @@
+[project]
+name = "toi-noi-py-28-integration-test-testcontainers"
+version = "0.1.0"
+description = "Bài 28: integration test với PostgreSQL và MongoDB thật bằng testcontainers và fixture pytest"
+requires-python = ">=3.14"
+dependencies = [
+    "psycopg[binary]>=3.3",
+    "pymongo>=4.19",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "testcontainers[postgres,mongodb]>=4.15",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
