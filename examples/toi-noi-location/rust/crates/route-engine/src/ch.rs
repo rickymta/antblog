@@ -581,6 +581,61 @@ mod tests {
         assert!(checked > 100);
     }
 
+    /// Đồ thị bảy cạnh hai chiều của Hình 1, LOC-25: a=0, b=1, c=2, d=3, e=4, f=5.
+    fn article_toy() -> (road_graph::Graph, Vec<u32>) {
+        let undirected: [(u32, u32, u32); 7] = [
+            (0, 1, 4),
+            (0, 2, 2),
+            (1, 2, 5),
+            (2, 3, 5),
+            (2, 4, 2),
+            (3, 5, 3),
+            (4, 5, 5),
+        ];
+        let mut by_tail: Vec<Vec<(u32, u32)>> = vec![Vec::new(); 6];
+        for &(a, b, w) in &undirected {
+            by_tail[a as usize].push((b, w));
+            by_tail[b as usize].push((a, w));
+        }
+        let mut g = road_graph::Graph::default();
+        let mut weights = Vec::new();
+        g.first_out.push(0);
+        for (a, list) in by_tail.iter().enumerate() {
+            for &(b, w) in list {
+                g.tail.push(a as u32);
+                g.head.push(b);
+                g.length_cm.push(w);
+                weights.push(w);
+            }
+            g.first_out.push(g.head.len() as u32);
+        }
+        g.modes = vec![road_graph::Mode::CAR_BIT; g.head.len()];
+        g.node_ll = vec![geo_core::LatLngE7::new(0, 0); 6];
+        (g, weights)
+    }
+
+    #[test]
+    fn article_toy_graph_gives_the_order_and_shortcut_in_the_text() {
+        let (g, w) = article_toy();
+        let rev = Rev::build(&g);
+        let view = View::new(&g, &rev, &w);
+        let ch = Ch::build(view);
+        // a, d, e, b, f, c
+        assert_eq!(ch.old_id, vec![0, 3, 4, 1, 5, 2]);
+        // một shortcut hai chiều c–f = 7 qua e, tức hai cung
+        assert_eq!(ch.stats.shortcuts, 2);
+        let (rank_c, rank_e, rank_f) = (ch.new_id[2], ch.new_id[4], ch.new_id[5]);
+        for up in [&ch.fwd, &ch.bwd] {
+            let a = up.find(rank_f, rank_c).expect("cung f–c");
+            assert_eq!((up.w[a], up.mid[a]), (7, rank_e));
+        }
+        // truy vấn a → f của Hình 2
+        let mut ws = ChWorkspace::new(g.node_count());
+        let p = ch.path(&mut ws, 0, 5).expect("có đường");
+        assert_eq!(p.cost, 9);
+        assert_eq!(p.nodes(&g), vec![0, 2, 4, 5]);
+    }
+
     #[test]
     fn save_and_load_round_trip() {
         let g = compile_fixture(&generate());

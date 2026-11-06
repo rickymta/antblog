@@ -164,7 +164,7 @@ impl StraightLineProvider {
         let dist = haversine_m(a, b) * self.detour;
         (dist, dist / (self.speed_kmh[p.index()] / 3.6))
     }
-    /// Như [`StraightLineProvider::estimate`] nhưng dùng equirectangular (rẻ hơn khoảng 3–5 lần, sai dưới 0,1% trong một thành phố):
+    /// Như [`StraightLineProvider::estimate`] nhưng dùng equirectangular (rẻ hơn haversine, tỉ lệ dao động theo tải, xem LOC-04; sai rất nhỏ trong một thành phố),
     /// dành cho ma trận dự phòng hàng trăm nghìn ô.
     pub fn estimate_fast(&self, p: Profile, a: LatLng, b: LatLng) -> (f64, f64) {
         let dist = geo_core::equirect_m(a, b) * self.detour;

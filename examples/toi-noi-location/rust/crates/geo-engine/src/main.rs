@@ -6,7 +6,7 @@
 //! In ra dòng `READY <địa chỉ>` khi đã sẵn sàng nhận yêu cầu.
 
 use geo_core::LatLng;
-use geo_engine::{GeoEngineConfig, RoutingSvc};
+use geo_engine::{GeoEngineConfig, MatchingSvc, RoutingSvc};
 use route_engine::engine::{Engine, EngineConfig};
 use route_engine::profile::Profile;
 use route_engine::traffic::TrafficModel;
@@ -71,7 +71,9 @@ async fn main() {
         eprintln!("CH {}: {:.2} s", p.name(), t.elapsed().as_secs_f64());
     }
     eprintln!("engine sẵn sàng sau {:.2} s", t.elapsed().as_secs_f64());
-    let svc = RoutingSvc::new(Arc::new(engine), GeoEngineConfig::default());
+    let engine = Arc::new(engine);
+    let matching = MatchingSvc::new(Arc::clone(&engine), GeoEngineConfig::default());
+    let svc = RoutingSvc::new(engine, GeoEngineConfig::default());
     let listener = tokio::net::TcpListener::bind(&addr)
         .await
         .unwrap_or_else(|e| {
@@ -82,6 +84,7 @@ async fn main() {
     println!("READY {local}");
     tonic::transport::Server::builder()
         .add_service(svc.into_server())
+        .add_service(matching.into_server())
         .serve_with_incoming_shutdown(
             tokio_stream::wrappers::TcpListenerStream::new(listener),
             async {

@@ -401,7 +401,17 @@
       "location-map-matching-online-cua-so-cau-vuot-duong-song-song",
       "location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka",
       "location-go-fan-out-tracking-khach-noi-suy-marker",
-      "location-lich-su-gps-parquet-retention-quyen-rieng-tu"
+      "location-lich-su-gps-parquet-retention-quyen-rieng-tu",
+      "location-dijkstra-a-star-rust-do-thi-csr",
+      "location-bidirectional-alt-landmark-tang-toc-truy-van",
+      "location-chi-phi-re-u-turn-do-thi-theo-canh",
+      "location-profile-xe-may-o-to-di-bo-trong-hem",
+      "location-contraction-hierarchies-tu-cai-dat-fast-paths",
+      "location-ma-tran-many-to-many-bucket-ch",
+      "location-toc-do-theo-gio-customizable-ch-ket-xe",
+      "location-self-host-osrm-valhalla-hay-map-provider",
+      "location-routing-service-tonic-cache-fallback-p99",
+      "location-tong-hop-mo-phong-su-kien-roi-rac-seed"
     ],
     "status": "published"
   }

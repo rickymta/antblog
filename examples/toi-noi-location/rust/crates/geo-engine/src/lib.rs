@@ -7,6 +7,7 @@
 //! - binary `geo-engine` chạy máy chủ; lab `loc29_dich_vu_dinh_tuyen` đo p50/p99 dưới tải
 
 pub mod cache;
+pub mod matching;
 pub mod service;
 
 #[allow(clippy::all, clippy::pedantic)]
@@ -14,4 +15,5 @@ pub mod pb {
     tonic::include_proto!("toinoi.location.v1");
 }
 
+pub use matching::MatchingSvc;
 pub use service::{GeoEngineConfig, Metrics, MetricsSnapshot, RoutingSvc};

@@ -5,9 +5,12 @@
 //!   cargo run --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc30_mo_phong
 //! Tham số: --scenario FILE.toml (mặc định theo đồ thị), --fixture, --seeds N (số seed phụ, mặc định 4), --csv DIR (ghi nhật ký chuyến)
 
+use geo_core::haversine_m;
 use labs::p03::{mean, uptime, vn};
 use labs::{Args, die, lab_root, load_graph};
 use route_engine::engine::{Engine, EngineConfig};
+use route_engine::profile::Profile;
+use simulator::world::generate;
 use simulator::{AtPin, NearestStraightLine, RunOptions, Scenario, SimOutput, run};
 use std::time::Instant;
 
@@ -21,6 +24,63 @@ fn sim(engine: &Engine, sc: &Scenario, trace: bool) -> (SimOutput, f64) {
         RunOptions { trace },
     );
     (out, t.elapsed().as_secs_f64())
+}
+
+/// Đuôi `walk_m`: so đường đi bộ với chim bay từ chỗ đứng thật tới điểm đón, đúng phép tính của `AtPin`, cho mọi khách đặt.
+fn walk_tail(engine: &Engine, sc: &Scenario) {
+    let g = &engine.g;
+    let mut rows = Vec::new();
+    let mut same_edge = 0;
+    for c in &generate(engine, sc).customers {
+        let v = &c.view;
+        let Ok(stop) = engine.snap_point(Profile::Car, v.pin, "ghim") else {
+            continue;
+        };
+        let Ok(r) = engine.route(Profile::Foot, v.true_pos, stop.point, None) else {
+            continue;
+        };
+        same_edge += usize::from(r.algo == "same-edge");
+        let crow = haversine_m(v.true_pos, stop.point);
+        let mut names: Vec<String> = Vec::new();
+        for &e in &r.edges {
+            let n = g.name[e as usize];
+            if n != u32::MAX && names.last() != Some(&g.names[n as usize]) {
+                names.push(g.names[n as usize].clone());
+            }
+        }
+        rows.push((r.distance_m, crow, v.id, names));
+    }
+    if rows.is_empty() {
+        return;
+    }
+    let pct = |mut x: Vec<f64>, p: f64| {
+        x.sort_by(f64::total_cmp);
+        x[((p / 100.0) * x.len() as f64).ceil().max(1.0) as usize - 1]
+    };
+    let walk: Vec<f64> = rows.iter().map(|r| r.0).collect();
+    let crow: Vec<f64> = rows.iter().map(|r| r.1).collect();
+    println!(
+        "\n-- 6. đuôi walk_m: đường đi bộ so với chim bay, mọi khách đặt ({}) --",
+        rows.len()
+    );
+    println!(
+        "  đường đi bộ p50 {:.1}, p95 {:.1}, lớn nhất {:.1} m; chim bay chỗ đứng → điểm đón p50 {:.1}, p95 {:.1}, lớn nhất {:.1} m; hai đầu snap về cùng một cạnh đi bộ: {}/{}",
+        pct(walk.clone(), 50.0),
+        pct(walk.clone(), 95.0),
+        pct(walk, 100.0),
+        pct(crow.clone(), 50.0),
+        pct(crow.clone(), 95.0),
+        pct(crow, 100.0),
+        same_edge,
+        rows.len()
+    );
+    rows.sort_by(|a, b| b.0.total_cmp(&a.0));
+    for (w, c, id, names) in rows.iter().take(8) {
+        println!(
+            "  khách {id}: đi bộ {w:.1} m, chim bay {c:.1} m, qua: {}",
+            names.join(" > ")
+        );
+    }
 }
 
 fn main() {
@@ -183,6 +243,8 @@ fn main() {
         std::fs::write(d.join("summary.json"), out.summary_json()).expect("ghi");
         println!("\nđã ghi trips.csv, events.csv, summary.json vào {dir}");
     }
+    walk_tail(&engine, &sc);
+
     println!("\nuptime lúc kết thúc: {}", uptime());
 }
 

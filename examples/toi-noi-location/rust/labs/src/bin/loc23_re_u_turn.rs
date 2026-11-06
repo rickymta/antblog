@@ -339,6 +339,9 @@ fn main() {
     struct Acc {
         delta_restr: Vec<f64>,
         delta_urban: Vec<f64>,
+        delta_costed: Vec<f64>,
+        delta_urban_a_ok: Vec<f64>,
+        delta_urban_a_bad: Vec<f64>,
         a_violates: usize,
         a_free_reversal: usize,
         u_a: usize,
@@ -400,12 +403,20 @@ fn main() {
             .push((f64::from(b.cost) - f64::from(a.cost)) / 1000.0);
         acc.delta_urban
             .push((f64::from(c.cost) - f64::from(a.cost)) / 1000.0);
+        acc.delta_costed
+            .push((f64::from(d.cost) - f64::from(a.cost)) / 1000.0);
+        let delta_c = (f64::from(c.cost) - f64::from(a.cost)) / 1000.0;
         let rescored = urban.route_cost(&a);
         match rescored {
-            None => acc.a_violates += 1,
-            Some(x) => acc
-                .rescored_gap
-                .push((x as f64 - f64::from(a.cost)) / 1000.0),
+            None => {
+                acc.a_violates += 1;
+                acc.delta_urban_a_bad.push(delta_c);
+            }
+            Some(x) => {
+                acc.rescored_gap
+                    .push((x as f64 - f64::from(a.cost)) / 1000.0);
+                acc.delta_urban_a_ok.push(delta_c);
+            }
         }
         acc.a_free_reversal +=
             usize::from(a.edges.windows(2).any(|w| g.twin[w[0] as usize] == w[1]));
@@ -465,6 +476,7 @@ fn main() {
     for (name, v) in [
         ("B (có cấm rẽ)", &mut acc.delta_restr),
         ("C (đầy đủ)", &mut acc.delta_urban),
+        ("D (20 s)", &mut acc.delta_costed),
     ] {
         println!(
             "    {name:<14} trung bình {:+.1}, trung vị {:+.1}, p95 {:+.1}, lớn nhất {:+.1}",
@@ -479,6 +491,15 @@ fn main() {
             "  với tuyến của A hợp lệ ({}): chấm lại bằng chi phí rẽ cộng thêm trung bình {:.1} s",
             acc.rescored_gap.len(),
             mean(&acc.rescored_gap)
+        );
+    }
+    if !acc.delta_urban_a_ok.is_empty() && !acc.delta_urban_a_bad.is_empty() {
+        println!(
+            "  C so với A, tách theo tuyến của A: hợp lệ ({}) trung bình {:+.1} s; vi phạm ({}) trung bình {:+.1} s",
+            acc.delta_urban_a_ok.len(),
+            mean(&acc.delta_urban_a_ok),
+            acc.delta_urban_a_bad.len(),
+            mean(&acc.delta_urban_a_bad)
         );
     }
     println!(

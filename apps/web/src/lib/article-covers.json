@@ -2368,5 +2368,105 @@
       "RETENTION",
       "RIÊNG TƯ"
     ]
+  },
+  "location-dijkstra-a-star-rust-do-thi-csr": {
+    "title": "DIJKSTRA",
+    "subtitle": "Định vị 21 · Dijkstra và A* trên đồ thị CSR",
+    "diagram": "network",
+    "labels": [
+      "CSR",
+      "A*",
+      "NÚT ĐÃ DUYỆT"
+    ]
+  },
+  "location-bidirectional-alt-landmark-tang-toc-truy-van": {
+    "title": "ALT",
+    "subtitle": "Định vị 22 · Tìm hai chiều và landmark",
+    "diagram": "split",
+    "labels": [
+      "HAI CHIỀU",
+      "LANDMARK",
+      "DỪNG ĐÚNG"
+    ]
+  },
+  "location-chi-phi-re-u-turn-do-thi-theo-canh": {
+    "title": "QUAY ĐẦU",
+    "subtitle": "Định vị 23 · Chi phí rẽ, đồ thị theo cạnh",
+    "diagram": "cycle",
+    "labels": [
+      "RẼ",
+      "QUAY ĐẦU",
+      "THEO CẠNH"
+    ]
+  },
+  "location-profile-xe-may-o-to-di-bo-trong-hem": {
+    "title": "3 PROFILE",
+    "subtitle": "Định vị 24 · Xe máy, ô tô, đi bộ",
+    "diagram": "layers",
+    "labels": [
+      "XE MÁY",
+      "Ô TÔ",
+      "ĐI BỘ"
+    ]
+  },
+  "location-contraction-hierarchies-tu-cai-dat-fast-paths": {
+    "title": "CH",
+    "subtitle": "Định vị 25 · Contraction Hierarchies tự cài đặt",
+    "diagram": "layers",
+    "labels": [
+      "CO NÚT",
+      "SHORTCUT",
+      "TRUY VẤN"
+    ]
+  },
+  "location-ma-tran-many-to-many-bucket-ch": {
+    "title": "N × M",
+    "subtitle": "Định vị 26 · Ma trận chi phí many-to-many",
+    "diagram": "matrix",
+    "labels": [
+      "BUCKET",
+      "MA TRẬN",
+      "RAYON"
+    ]
+  },
+  "location-toc-do-theo-gio-customizable-ch-ket-xe": {
+    "title": "KẸT XE",
+    "subtitle": "Định vị 27 · Tốc độ theo giờ, Customizable CH",
+    "diagram": "cycle",
+    "labels": [
+      "KHUNG GIỜ",
+      "TRỌNG SỐ",
+      "CCH"
+    ]
+  },
+  "location-self-host-osrm-valhalla-hay-map-provider": {
+    "title": "TỰ VIẾT?",
+    "subtitle": "Định vị 28 · OSRM, Valhalla hay map provider",
+    "diagram": "split",
+    "labels": [
+      "TỰ VIẾT",
+      "SELF-HOST",
+      "PROVIDER"
+    ]
+  },
+  "location-routing-service-tonic-cache-fallback-p99": {
+    "title": "ROUTING API",
+    "subtitle": "Định vị 29 · gRPC, cache, fallback và p99",
+    "diagram": "flow",
+    "labels": [
+      "GRPC",
+      "CACHE",
+      "FALLBACK"
+    ]
+  },
+  "location-tong-hop-mo-phong-su-kien-roi-rac-seed": {
+    "title": "MÔ PHỎNG",
+    "subtitle": "Định vị 30 · Thước đo cho mọi tối ưu",
+    "diagram": "cycle",
+    "labels": [
+      "SEED",
+      "SỰ KIỆN",
+      "BASELINE"
+    ]
   }
 }

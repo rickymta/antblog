@@ -365,7 +365,7 @@ Số đếm (điểm, dòng, file) tái lập được; kích thước byte ph�
 
 <details><summary>Xem lời giải</summary><p>Mức coarse (2): nhu cầu theo khu vực không cần biết tài xế nào, nên NULL <code>driver_ref</code> và tọa độ làm tròn đủ dùng, đồng thời giảm lượng dữ liệu cá nhân mà đội đó chạm tới. Họ mất khả năng dựng đặc trưng theo từng tài xế (thời gian chờ trung bình của riêng một tài xế) và nối quỹ đạo với chuyến vì <code>trip_id</code> cũng bị bỏ. Ngoài ra độ phân giải làm tròn cỡ 111 m thô hơn một ô H3 nhỏ, nên không có ý nghĩa khi chọn ô lưới mịn hơn mức làm tròn này.</p></details>
 
-Bài trước: [bài 19](/articles/location-go-fan-out-tracking-khach-noi-suy-marker).
+Bài trước: [bài 19](/articles/location-go-fan-out-tracking-khach-noi-suy-marker). Bài tiếp: [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr).
 
 ## Tài liệu gốc
 

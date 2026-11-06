@@ -2,12 +2,12 @@
 //!
 //! Ba pha:
 //! 1. **Thứ tự** (một lần, chỉ phụ thuộc hình dạng đồ thị): chia đệ quy theo toạ độ (nested dissection kiểu đơn giản):
-//!    cắt đôi theo trục dài, lấy các nút biên của nửa nhỏ làm «vách ngăn» và xếp vách ngăn **sau** hai nửa.
+//!    cắt đôi theo trục dài, lấy tập phủ đỉnh nhỏ nhất của các cạnh cắt làm «vách ngăn» và xếp vách ngăn **sau** hai nửa.
 //! 2. **Cấu trúc** (một lần): co nút theo thứ tự đó **không cần tìm nhân chứng**, nên tập shortcut không phụ thuộc trọng số.
 //! 3. **Tuỳ biến** (mỗi lần đổi trọng số, nhanh): duyệt các tam giác theo hạng, `w(y,z) = min(w(y,z), w(y,x) + w(x,z))`.
 //!    Kết quả là một [`Ch`] dùng được với mọi truy vấn và ma trận của LOC-25, LOC-26.
 //!
-//! Đánh đổi: không nhân chứng nên nhiều cung hơn CH thường, truy vấn chậm hơn một chút; đổi lại cập nhật trọng số
+//! Đánh đổi: không nhân chứng nên nhiều cung hơn CH thường, truy vấn chậm hơn nhiều (đo ở LOC-27); đổi lại cập nhật trọng số
 //! (theo giờ, theo kẹt xe) không phải dựng lại.
 
 use crate::ch::{Ch, ChStats, UpGraph};
