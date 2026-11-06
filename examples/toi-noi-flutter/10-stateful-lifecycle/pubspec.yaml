@@ -1,0 +1,21 @@
+name: toi_noi_10
+description: "Lab bài 10 (Flutter qua Tới Nơi): StatefulWidget, lifecycle và setState với ServicePicker và SearchingCountdown."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

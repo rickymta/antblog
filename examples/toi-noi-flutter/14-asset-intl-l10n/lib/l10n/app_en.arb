@@ -1,0 +1,16 @@
+{
+  "@@locale": "en",
+  "appTitle": "Toi Noi",
+  "quoteTitle": "Trip quote",
+  "quoteDistance": "Distance: {km} km",
+  "quoteFare": "Estimated fare",
+  "quoteRequestedAt": "Requested at {time}",
+  "driversNearby": "{count, plural, =0{No drivers nearby} =1{1 driver nearby} other{{count} drivers nearby}}",
+  "statusSearching": "Finding a driver",
+  "languageLabel": "Language",
+  "languageVi": "Tiếng Việt",
+  "languageEn": "English",
+  "logoSemantics": "Toi Noi logo",
+  "addDriver": "Add a driver",
+  "removeDriver": "Remove a driver"
+}

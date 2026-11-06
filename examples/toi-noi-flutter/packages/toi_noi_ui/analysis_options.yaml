@@ -1,0 +1,17 @@
+# Bộ lint nền của Flutter team, cộng vài rule chặt hơn cho package dùng chung.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    # Package dùng chung: mọi thứ công khai phải có tài liệu.
+    - public_member_api_docs
+    - prefer_final_locals
+    - directives_ordering

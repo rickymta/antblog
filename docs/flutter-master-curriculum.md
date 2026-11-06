@@ -109,7 +109,7 @@ examples/toi-noi-flutter/
   verify-01-06.mjs …        chạy analyze + test của một nhóm bài
 ```
 
-Mỗi thư mục lab có `README.md` (bài tương ứng, lệnh chạy, lệnh kiểm chứng, phiên bản đã kiểm, phạm vi chưa làm). Lab bài 01–42 là project nhỏ độc lập; từ bài 43, code dồn vào `toi-noi-app` và các bài sau chỉ giải thích lát cắt của cùng một workspace (giống cách bài 31–38 lộ trình .NET dùng chung `31-38-trip-service`).
+Mỗi thư mục lab có `README.md` (bài tương ứng, lệnh chạy, lệnh kiểm chứng, phiên bản đã kiểm, phạm vi chưa làm). Từ bài 07, lab không commit thư mục `android/`, `ios/` (README ghi lệnh `flutter create` sinh runner một lần khi cần chạy trên máy); bài dạy cấu hình native chỉ commit đúng file cấu hình đang dạy. Lab bài 01–42 là project nhỏ độc lập; từ bài 43, code dồn vào `toi-noi-app` và các bài sau chỉ giải thích lát cắt của cùng một workspace (giống cách bài 31–38 lộ trình .NET dùng chung `31-38-trip-service`).
 
 ## 6. Chương trình chi tiết
 

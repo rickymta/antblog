@@ -643,7 +643,7 @@ Hoặc chạy cả bài 01 đến 06 bằng `node examples/toi-noi-flutter/verif
 <p><strong>3.</strong> Không: <code>^1.19.1</code> nghĩa là <code>&lt;2.0.0</code>, nên <code>dart pub upgrade</code> dừng ở bản 1.x mới nhất. Muốn lên 2.0.0 phải đổi ràng buộc, thủ công hoặc bằng <code>dart pub upgrade --major-versions</code>, rồi chạy lại <code>dart analyze</code> và <code>dart test</code> vì major mới có thể phá vỡ API.</p>
 </details>
 
-Bài trước: [Future, async/await và Stream](/articles/dart-future-async-await-stream-bao-gia-va-vi-tri). Bài tiếp theo mở đầu Phần 2 với widget đầu tiên.
+Bài trước: [Future, async/await và Stream](/articles/dart-future-async-await-stream-bao-gia-va-vi-tri). Bài tiếp: [Widget, cây widget và hot reload: màn hình báo giá đầu tiên](/articles/flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia).
 
 ## Tài liệu gốc
 

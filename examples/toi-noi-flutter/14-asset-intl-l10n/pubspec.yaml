@@ -1,0 +1,43 @@
+name: toi_noi_14
+description: "Lab bài 14 (Flutter qua Tới Nơi): asset nhiều độ phân giải, intl cho tiền VND và ngày giờ, song ngữ vi/en bằng gen-l10n."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.3
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  toi_noi_ui:
+    path: ../packages/toi_noi_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  # Bật sinh code localization: `flutter pub get` đọc l10n.yaml và ghi
+  # lib/l10n/app_localizations*.dart (các file này không commit).
+  generate: true
+
+  assets:
+    # Chỉ cần liệt kê bản 1.0x; Flutter tự tìm 2.0x/logo.png và 3.0x/logo.png.
+    - assets/images/logo.png
+
+  # Font tuỳ chỉnh khai báo theo mẫu dưới đây. Lab không kèm file font vì
+  # không đưa font bản quyền vào repository.
+  # fonts:
+  #   - family: ToiNoiSans
+  #     fonts:
+  #       - asset: assets/fonts/ToiNoiSans-Regular.ttf
+  #       - asset: assets/fonts/ToiNoiSans-Bold.ttf
+  #         weight: 700
+

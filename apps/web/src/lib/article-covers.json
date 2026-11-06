@@ -1048,5 +1048,105 @@
       "LINTS",
       "DART TEST"
     ]
+  },
+  "flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia": {
+    "title": "WIDGET / TREE",
+    "subtitle": "Flutter 07 · Widget, Element, RenderObject and hot reload",
+    "diagram": "layers",
+    "labels": [
+      "WIDGET",
+      "ELEMENT",
+      "RENDER"
+    ]
+  },
+  "flutter-layout-constraints-row-column-the-chuyen": {
+    "title": "LAYOUT / CONSTRAINTS",
+    "subtitle": "Flutter 08 · Constraints down, sizes up, Row and Column",
+    "diagram": "blocks",
+    "labels": [
+      "CONSTRAINT",
+      "SIZE",
+      "POSITION"
+    ]
+  },
+  "flutter-listview-sliver-scroll-lich-su-chuyen": {
+    "title": "LIST / SLIVER",
+    "subtitle": "Flutter 09 · Lazy lists, slivers and pagination",
+    "diagram": "pages",
+    "labels": [
+      "BUILDER",
+      "SLIVER",
+      "PAGING"
+    ]
+  },
+  "flutter-statefulwidget-lifecycle-setstate-chon-dich-vu": {
+    "title": "STATE / LIFECYCLE",
+    "subtitle": "Flutter 10 · initState, setState, dispose and timers",
+    "diagram": "cycle",
+    "labels": [
+      "INIT",
+      "BUILD",
+      "DISPOSE"
+    ]
+  },
+  "flutter-form-validation-focus-nhap-diem-don-diem-den": {
+    "title": "FORM / VALIDATE",
+    "subtitle": "Flutter 11 · TextFormField, focus and validators",
+    "diagram": "checklist",
+    "labels": [
+      "FORM",
+      "FOCUS",
+      "VALIDATE"
+    ]
+  },
+  "flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen": {
+    "title": "NAVIGATOR / ROUTE",
+    "subtitle": "Flutter 12 · push, pop with result and PopScope",
+    "diagram": "flow",
+    "labels": [
+      "PUSH",
+      "POP",
+      "RESULT"
+    ]
+  },
+  "flutter-theme-material-3-dark-mode-design-system-toi-noi": {
+    "title": "THEME / MATERIAL 3",
+    "subtitle": "Flutter 13 · ColorScheme, dark mode, design tokens",
+    "diagram": "split",
+    "labels": [
+      "LIGHT",
+      "SEED",
+      "DARK"
+    ]
+  },
+  "flutter-asset-intl-localization-tien-vnd-ngay-gio": {
+    "title": "INTL / L10N",
+    "subtitle": "Flutter 14 · Assets, VND money and vi/en strings",
+    "diagram": "map",
+    "labels": [
+      "ASSET",
+      "INTL",
+      "ARB"
+    ]
+  },
+  "flutter-animation-implicit-hero-tim-tai-xe": {
+    "title": "ANIMATION / HERO",
+    "subtitle": "Flutter 15 · Implicit animation and reduced motion",
+    "diagram": "cycle",
+    "labels": [
+      "TWEEN",
+      "HERO",
+      "MOTION"
+    ]
+  },
+  "flutter-accessibility-responsive-adaptive-ios-android": {
+    "title": "A11Y / ADAPTIVE",
+    "subtitle": "Flutter 16 · Semantics, text scale, iOS and Android",
+    "diagram": "target",
+    "labels": [
+      "SEMANTICS",
+      "RESPONSIVE",
+      "ADAPTIVE"
+    ]
   }
 }

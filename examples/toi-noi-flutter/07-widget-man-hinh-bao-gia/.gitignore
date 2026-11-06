@@ -1,0 +1,15 @@
+# Dart / Flutter
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner nền tảng: sinh một lần bằng flutter create (xem README), không commit
+android/
+ios/
+
+# flutter create thêm test mẫu của app counter; lab này có test riêng
+test/widget_test.dart

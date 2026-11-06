@@ -15,16 +15,16 @@ Khung biên tập loạt bài Flutter của Tech Knowledge Hub. Ứng dụng xuy
 
 ## Phần 2 · Flutter UI cơ bản (cơ bản → trung bình)
 
-07. Widget, cây widget và hot reload: màn hình báo giá đầu tiên — kế hoạch
-08. Layout và constraints: Row, Column, Expanded và thẻ chuyến — kế hoạch
-09. ListView, Sliver và cuộn: danh sách lịch sử chuyến — kế hoạch
-10. StatefulWidget, lifecycle và setState: chọn dịch vụ và đếm ngược tìm tài xế — kế hoạch
-11. Form, TextFormField và validation: nhập điểm đón, điểm đến — kế hoạch
-12. Navigator, route và truyền dữ liệu: từ báo giá sang xác nhận chuyến — kế hoạch
-13. Theme Material 3, màu, chữ và dark mode: design system Tới Nơi — kế hoạch
-14. Asset, intl và localization: hiển thị tiền VND, ngày giờ và song ngữ vi/en — kế hoạch
-15. Animation cơ bản: implicit animation và Hero khi tìm tài xế — kế hoạch
-16. Accessibility, responsive và adaptive: một giao diện cho iOS và Android — kế hoạch
+07. Widget, cây widget và hot reload: màn hình báo giá đầu tiên — **đã viết, đã review**
+08. Layout và constraints: Row, Column, Expanded và thẻ chuyến — **đã viết, đã review**
+09. ListView, Sliver và cuộn: danh sách lịch sử chuyến — **đã viết, đã review**
+10. StatefulWidget, lifecycle và setState: chọn dịch vụ và đếm ngược tìm tài xế — **đã viết, đã review**
+11. Form, TextFormField và validation: nhập điểm đón, điểm đến — **đã viết, đã review**
+12. Navigator, route và truyền dữ liệu: từ báo giá sang xác nhận chuyến — **đã viết, đã review**
+13. Theme Material 3, màu, chữ và dark mode: design system Tới Nơi — **đã viết, đã review**
+14. Asset, intl và localization: hiển thị tiền VND, ngày giờ và song ngữ vi/en — **đã viết, đã review**
+15. Animation cơ bản: implicit animation và Hero khi tìm tài xế — **đã viết, đã review**
+16. Accessibility, responsive và adaptive: một giao diện cho iOS và Android — **đã viết, đã review**
 
 ## Phần 3 · Trạng thái, dữ liệu và kiến trúc (trung bình)
 
@@ -106,6 +106,8 @@ Khung biên tập loạt bài Flutter của Tech Knowledge Hub. Ứng dụng xuy
   - `class Money` (bài 06, trong `toi_noi_core`): `const Money(int vnd)` (assert không âm), `Money.fromVnd(int)` kiểm bằng `ArgumentError` cho dữ liệu từ ngoài, `Money.zero`, toán tử `+`, `-`, `*` (nhân int), so sánh `<`/`<=`/`>`/`>=`, `Comparable<Money>`, `==`/`hashCode`, `toString()` dạng "25.500 VND". Từ bài 06 trở đi `Trip.fare` là `Money` (lấy số đồng bằng `trip.fare.vnd`); các lab 02–05 còn dùng `fareVnd: int` vì viết trước khi có package.
   - `toi_noi_core` còn có `FarePolicy` (hằng bảng giá), `calculateFare(double km) → Money`, `Trip.request(id, serviceKind, distanceKm, requestedAt)` tạo chuyến `requested`, `Trip ==` so cả 7 trường và `isSameTrip` so theo id, constructor kiểm `driverId` khớp trạng thái, `enum CancelledBy { customer, driver }`, extension `TripIterableX` (`totalFare`, `byStatus`, `active`). Mọi bài sau import package này thay vì định nghĩa lại.
 - **Dữ liệu**: tên khách, tài xế, địa chỉ đều hư cấu; không có key, token, chứng chỉ, file `google-services.json`/`GoogleService-Info.plist` thật trong repo (chỉ có bản mẫu `.example`).
+- **Thư mục nền tảng**: từ bài 07, lab không commit `android/`, `ios/` để repo gọn; muốn chạy trên máy thì sinh runner một lần bằng lệnh trong README của lab (`flutter create --platforms=ios,android ...`). Bài dạy cấu hình native chỉ commit đúng file cấu hình đang dạy.
+- **`toi_noi_ui`** (bài 13): `ToiNoiTheme.light()/dark()` (cache theo độ sáng và nền tảng), `ToiNoiColors` (`ThemeExtension`, bộ `danger` bằng `error` của scheme), `ToiNoiSpacing`, `ToiNoiRadius`, `TripStatusChip(status:, label:)`, `MoneyText(money, style:, textAlign:, formatter:)`.
 - **Lab**: mỗi thư mục có `README.md` ghi bài tương ứng, lệnh chạy, lệnh kiểm chứng, phiên bản đã kiểm và phạm vi chưa làm. Lab Dart thuần kiểm bằng `dart test`; lab Flutter kiểm bằng `flutter analyze` + `flutter test`. Không commit `build/`, `.dart_tool/`, `pubspec.lock` của lab (lab là ví dụ, không phải app phát hành; lockfile chỉ giữ từ `toi-noi-app`).
 - **Bài viết** đặt tại `api/seed/content/<slug>.md`, khuôn theo §8 của master curriculum, ảnh bìa qua `apps/web/src/lib/article-covers.json`.
 
@@ -122,3 +124,11 @@ node examples/toi-noi-flutter/verify-01-06.mjs
 ```
 
 Script chạy `flutter analyze` + `flutter test` cho lab 01 và `dart analyze` + `dart test` cho lab 02–05, `packages/toi_noi_core` và `06-dung-toi-noi-core` (tổng cộng hơn 350 test). Không cần simulator, emulator hay thiết bị; bài 01 mô tả cách chạy app trên iOS Simulator và Android emulator để tự thử.
+
+## Chạy bài 07–16
+
+```bash
+node examples/toi-noi-flutter/verify-07-16.mjs
+```
+
+Không cần simulator, emulator hay thiết bị. Lab không kèm thư mục `android/`, `ios/`; muốn chạy trên máy thì làm theo README của từng lab để sinh runner một lần.

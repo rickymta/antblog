@@ -1,0 +1,12 @@
+# Dart / Flutter
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner sinh bằng flutter create khi muốn chạy trên máy, không commit
+android/
+ios/

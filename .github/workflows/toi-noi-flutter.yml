@@ -26,3 +26,5 @@ jobs:
           node-version: '22'
       - name: Analyze and test labs 01–06
         run: node examples/toi-noi-flutter/verify-01-06.mjs
+      - name: Analyze and test labs 07–16
+        run: node examples/toi-noi-flutter/verify-07-16.mjs

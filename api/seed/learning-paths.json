@@ -140,7 +140,7 @@
   {
     "slug": "flutter-toi-noi-ios-android",
     "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android",
-    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1.",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1–2.",
     "level": "beginner",
     "category": "programming",
     "articles": [
@@ -149,7 +149,17 @@
       "dart-ham-class-enum-sealed-pattern-matching-trang-thai-chuyen",
       "dart-collections-generics-extension-danh-sach-chuyen",
       "dart-future-async-await-stream-bao-gia-va-vi-tri",
-      "dart-package-pubspec-lint-test-toi-noi-core"
+      "dart-package-pubspec-lint-test-toi-noi-core",
+      "flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia",
+      "flutter-layout-constraints-row-column-the-chuyen",
+      "flutter-listview-sliver-scroll-lich-su-chuyen",
+      "flutter-statefulwidget-lifecycle-setstate-chon-dich-vu",
+      "flutter-form-validation-focus-nhap-diem-don-diem-den",
+      "flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen",
+      "flutter-theme-material-3-dark-mode-design-system-toi-noi",
+      "flutter-asset-intl-localization-tien-vnd-ngay-gio",
+      "flutter-animation-implicit-hero-tim-tai-xe",
+      "flutter-accessibility-responsive-adaptive-ios-android"
     ],
     "status": "published"
   }
