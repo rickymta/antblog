@@ -2728,5 +2728,335 @@
       "POSTGRES",
       "GRPC"
     ]
+  },
+  "flutter-va-dart-tu-source-code-den-ung-dung-toi-noi": {
+    "title": "FLUTTER / DART",
+    "subtitle": "Flutter 01 · From source code to a running app",
+    "diagram": "layers",
+    "labels": [
+      "DART APP",
+      "FRAMEWORK",
+      "ENGINE"
+    ]
+  },
+  "dart-bien-kieu-du-lieu-null-safety-tinh-cuoc": {
+    "title": "TYPES / NULL",
+    "subtitle": "Flutter 02 · int for VND, null as a contract",
+    "diagram": "split",
+    "labels": [
+      "INT VND",
+      "DOUBLE KM",
+      "NULLABLE"
+    ]
+  },
+  "dart-ham-class-enum-sealed-pattern-matching-trang-thai-chuyen": {
+    "title": "STATE / SEALED",
+    "subtitle": "Flutter 03 · Eight statuses, exhaustive switch",
+    "diagram": "cycle",
+    "labels": [
+      "REQUESTED",
+      "ACCEPTED",
+      "COMPLETED"
+    ]
+  },
+  "dart-collections-generics-extension-danh-sach-chuyen": {
+    "title": "COLLECTIONS / LAZY",
+    "subtitle": "Flutter 04 · List, Set, Map and lazy iterables",
+    "diagram": "matrix",
+    "labels": [
+      "LIST",
+      "SET",
+      "MAP"
+    ]
+  },
+  "dart-future-async-await-stream-bao-gia-va-vi-tri": {
+    "title": "ASYNC / STREAM",
+    "subtitle": "Flutter 05 · Event loop, Future and Stream",
+    "diagram": "flow",
+    "labels": [
+      "FUTURE",
+      "AWAIT",
+      "STREAM"
+    ]
+  },
+  "dart-package-pubspec-lint-test-toi-noi-core": {
+    "title": "PACKAGE / TEST",
+    "subtitle": "Flutter 06 · pubspec, lints and dart test",
+    "diagram": "checklist",
+    "labels": [
+      "PUBSPEC",
+      "LINTS",
+      "DART TEST"
+    ]
+  },
+  "flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia": {
+    "title": "WIDGET / TREE",
+    "subtitle": "Flutter 07 · Widget, Element, RenderObject and hot reload",
+    "diagram": "layers",
+    "labels": [
+      "WIDGET",
+      "ELEMENT",
+      "RENDER"
+    ]
+  },
+  "flutter-layout-constraints-row-column-the-chuyen": {
+    "title": "LAYOUT / CONSTRAINTS",
+    "subtitle": "Flutter 08 · Constraints down, sizes up, Row and Column",
+    "diagram": "blocks",
+    "labels": [
+      "CONSTRAINT",
+      "SIZE",
+      "POSITION"
+    ]
+  },
+  "flutter-listview-sliver-scroll-lich-su-chuyen": {
+    "title": "LIST / SLIVER",
+    "subtitle": "Flutter 09 · Lazy lists, slivers and pagination",
+    "diagram": "pages",
+    "labels": [
+      "BUILDER",
+      "SLIVER",
+      "PAGING"
+    ]
+  },
+  "flutter-statefulwidget-lifecycle-setstate-chon-dich-vu": {
+    "title": "STATE / LIFECYCLE",
+    "subtitle": "Flutter 10 · initState, setState, dispose and timers",
+    "diagram": "cycle",
+    "labels": [
+      "INIT",
+      "BUILD",
+      "DISPOSE"
+    ]
+  },
+  "flutter-form-validation-focus-nhap-diem-don-diem-den": {
+    "title": "FORM / VALIDATE",
+    "subtitle": "Flutter 11 · TextFormField, focus and validators",
+    "diagram": "checklist",
+    "labels": [
+      "FORM",
+      "FOCUS",
+      "VALIDATE"
+    ]
+  },
+  "flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen": {
+    "title": "NAVIGATOR / ROUTE",
+    "subtitle": "Flutter 12 · push, pop with result and PopScope",
+    "diagram": "flow",
+    "labels": [
+      "PUSH",
+      "POP",
+      "RESULT"
+    ]
+  },
+  "flutter-theme-material-3-dark-mode-design-system-toi-noi": {
+    "title": "THEME / MATERIAL 3",
+    "subtitle": "Flutter 13 · ColorScheme, dark mode, design tokens",
+    "diagram": "split",
+    "labels": [
+      "LIGHT",
+      "SEED",
+      "DARK"
+    ]
+  },
+  "flutter-asset-intl-localization-tien-vnd-ngay-gio": {
+    "title": "INTL / L10N",
+    "subtitle": "Flutter 14 · Assets, VND money and vi/en strings",
+    "diagram": "map",
+    "labels": [
+      "ASSET",
+      "INTL",
+      "ARB"
+    ]
+  },
+  "flutter-animation-implicit-hero-tim-tai-xe": {
+    "title": "ANIMATION / HERO",
+    "subtitle": "Flutter 15 · Implicit animation and reduced motion",
+    "diagram": "cycle",
+    "labels": [
+      "TWEEN",
+      "HERO",
+      "MOTION"
+    ]
+  },
+  "flutter-accessibility-responsive-adaptive-ios-android": {
+    "title": "A11Y / ADAPTIVE",
+    "subtitle": "Flutter 16 · Semantics, text scale, iOS and Android",
+    "diagram": "target",
+    "labels": [
+      "SEMANTICS",
+      "RESPONSIVE",
+      "ADAPTIVE"
+    ]
+  },
+  "flutter-state-inheritedwidget-changenotifier-bao-gia": {
+    "title": "STATE / NOTIFIER",
+    "subtitle": "Flutter 17 · InheritedWidget, ChangeNotifier, rebuilds",
+    "diagram": "layers",
+    "labels": [
+      "INHERITED",
+      "NOTIFIER",
+      "REBUILD"
+    ]
+  },
+  "flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen": {
+    "title": "RIVERPOD",
+    "subtitle": "Flutter 18 · Provider, Notifier and AsyncNotifier",
+    "diagram": "network",
+    "labels": [
+      "PROVIDER",
+      "REF",
+      "NOTIFIER"
+    ]
+  },
+  "flutter-http-dio-json-dto-goi-api-bao-gia": {
+    "title": "HTTP / JSON",
+    "subtitle": "Flutter 19 · dio client, DTOs and a fake API",
+    "diagram": "flow",
+    "labels": [
+      "DIO",
+      "DTO",
+      "DOMAIN"
+    ]
+  },
+  "flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong": {
+    "title": "ERROR / RETRY",
+    "subtitle": "Flutter 20 · Timeouts, backoff and failure types",
+    "diagram": "target",
+    "labels": [
+      "TIMEOUT",
+      "RETRY",
+      "FAILURE"
+    ]
+  },
+  "flutter-clean-architecture-domain-data-presentation-mobile": {
+    "title": "CLEAN / LAYERS",
+    "subtitle": "Flutter 21 · Domain, data, presentation, repository",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "DATA",
+      "UI"
+    ]
+  },
+  "flutter-local-persistence-drift-secure-storage-lich-su-offline": {
+    "title": "LOCAL / DRIFT",
+    "subtitle": "Flutter 22 · SQLite, preferences and secure storage",
+    "diagram": "storage",
+    "labels": [
+      "DRIFT",
+      "PREFS",
+      "SECURE"
+    ]
+  },
+  "flutter-go-router-deep-link-shellroute-guard": {
+    "title": "GO ROUTER",
+    "subtitle": "Flutter 23 · Deep links, ShellRoute and auth guards",
+    "diagram": "map",
+    "labels": [
+      "ROUTE",
+      "SHELL",
+      "GUARD"
+    ]
+  },
+  "flutter-authentication-otp-jwt-refresh-token-secure-storage": {
+    "title": "AUTH / REFRESH",
+    "subtitle": "Flutter 24 · OTP, JWT rotation and interceptors",
+    "diagram": "cycle",
+    "labels": [
+      "OTP",
+      "ACCESS",
+      "REFRESH"
+    ]
+  },
+  "flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod": {
+    "title": "CONFIG / ENV",
+    "subtitle": "Flutter 25 · dev, staging, prod and dart-define",
+    "diagram": "split",
+    "labels": [
+      "DEV",
+      "STAGING",
+      "PROD"
+    ]
+  },
+  "flutter-code-generation-freezed-json-serializable-riverpod-generator": {
+    "title": "CODEGEN",
+    "subtitle": "Flutter 26 · freezed, json_serializable, build_runner",
+    "diagram": "code",
+    "labels": [
+      "FREEZED",
+      "GENERATED",
+      "RUNNER"
+    ]
+  },
+  "flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case": {
+    "title": "UNIT TEST",
+    "subtitle": "Flutter 27 · mocktail, fakes, fare rules and use cases",
+    "diagram": "checklist",
+    "labels": [
+      "FAKE",
+      "MOCK",
+      "VERIFY"
+    ]
+  },
+  "flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia": {
+    "title": "WIDGET TEST",
+    "subtitle": "Flutter 28 · pumpWidget, finders and matchers",
+    "diagram": "code",
+    "labels": [
+      "PUMP",
+      "FIND",
+      "EXPECT"
+    ]
+  },
+  "flutter-golden-test-semantics-test-giao-dien-on-dinh": {
+    "title": "GOLDEN / SEMANTICS",
+    "subtitle": "Flutter 29 · Lock the UI and accessibility guidelines",
+    "diagram": "matrix",
+    "labels": [
+      "GOLDEN",
+      "DIFF",
+      "A11Y"
+    ]
+  },
+  "flutter-test-riverpod-async-stream-fake-async-providercontainer": {
+    "title": "TEST ASYNC",
+    "subtitle": "Flutter 30 · ProviderContainer, fakeAsync, fake clock",
+    "diagram": "flow",
+    "labels": [
+      "CONTAINER",
+      "FAKE ASYNC",
+      "CLOCK"
+    ]
+  },
+  "flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi": {
+    "title": "INTEGRATION",
+    "subtitle": "Flutter 31 · Patrol and the booking flow on devices",
+    "diagram": "network",
+    "labels": [
+      "DEVICE",
+      "PATROL",
+      "NATIVE"
+    ]
+  },
+  "flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code": {
+    "title": "LINT / FORMAT",
+    "subtitle": "Flutter 32 · Analyzer, custom_lint and zero warnings",
+    "diagram": "checklist",
+    "labels": [
+      "ANALYZE",
+      "FORMAT",
+      "FIX"
+    ]
+  },
+  "flutter-ci-github-actions-analyze-test-golden-cache": {
+    "title": "CI / TESTS",
+    "subtitle": "Flutter 33 · GitHub Actions, cache, coverage, goldens",
+    "diagram": "flow",
+    "labels": [
+      "ANALYZE",
+      "TEST",
+      "REPORT"
+    ]
   }
 }

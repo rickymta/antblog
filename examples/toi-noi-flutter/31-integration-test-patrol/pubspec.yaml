@@ -1,0 +1,42 @@
+name: toi_noi_31
+description: "Lab bài 31 (Flutter qua Tới Nơi): luồng đặt chuyến viết một lần, chạy bằng flutter test, integration_test và patrol."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  dio: ^5.11.1
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.5.0
+  permission_handler: ^13.0.2
+  toi_noi_api:
+    path: ../packages/toi_noi_api
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  patrol: ^4.11.0
+  shelf: ^1.4.3
+  toi_noi_fake_api:
+    path: ../tools/fake_api
+  yaml: ^3.1.4
+
+flutter:
+  uses-material-design: true
+
+# Cấu hình của patrol_cli (patrol.leancode.co/documentation). Thư mục test mặc
+# định là patrol_test/. Thư mục integration_test/ dành cho integration_test thuần.
+patrol:
+  app_name: Toi Noi
+  android:
+    package_name: vn.toinoi.toi_noi_31
+  ios:
+    bundle_id: vn.toinoi.toiNoi31

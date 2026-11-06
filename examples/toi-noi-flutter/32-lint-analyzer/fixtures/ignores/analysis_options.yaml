@@ -1,0 +1,4 @@
+linter:
+  rules:
+    - document_ignores
+    - unnecessary_ignore

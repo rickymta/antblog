@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Phần AndroidManifest.xml (android/app/src/main/) liên quan tới deep link của
+  app khách Tới Nơi. Các thuộc tính còn lại (icon, theme, configChanges...)
+  giữ như file `flutter create` sinh. applicationId nằm trong
+  android/app/build.gradle(.kts), không nằm ở đây: vn.toinoi.customer.
+  Tên miền toinoi.example là hư cấu.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:label="Tới Nơi">
+        <!-- exported="true" bắt buộc vì activity có intent-filter.
+             singleTop: link tới khi app đang chạy vào onNewIntent của
+             activity cũ thay vì mở thêm một activity. -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+
+            <!-- Biểu tượng trên launcher. Tách riêng, không trộn với <data>. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!-- Custom scheme: toinoi://trip/{id}. Ai cũng đăng ký được scheme
+                 này, nên không dùng cho việc nhạy cảm. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="toinoi" android:host="trip"/>
+            </intent-filter>
+
+            <!-- App Link: https://toinoi.example/trip/{id}. autoVerify làm
+                 hệ thống tải https://toinoi.example/.well-known/assetlinks.json
+                 khi cài app. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="toinoi.example"
+                    android:pathPrefix="/trip/"/>
+            </intent-filter>
+
+            <!-- Không khai báo meta-data flutter_deeplinking_enabled: mặc định
+                 Flutter đã bật xử lý deep link. Chỉ đặt "false" khi dùng
+                 plugin deep link riêng. -->
+        </activity>
+    </application>
+</manifest>

@@ -1,0 +1,21 @@
+name: toi_noi_07
+description: "Lab bài 07 (Flutter qua Tới Nơi): màn hình báo giá đầu tiên, dùng ToiNoiApp, QuoteScreen và toi_noi_core."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

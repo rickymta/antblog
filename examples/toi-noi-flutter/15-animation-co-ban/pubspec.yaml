@@ -1,0 +1,20 @@
+name: toi_noi_15
+description: "Lab bài 15 (Flutter qua Tới Nơi): animation ngầm định và Hero khi tìm tài xế, tôn trọng cài đặt giảm chuyển động."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  toi_noi_ui:
+    path: ../packages/toi_noi_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

@@ -1,0 +1,16 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    # File do build_runner sinh: không phải mã ta viết, không phân tích, để
+    # kết quả của analyze chỉ nói về code của ta. Hiện chúng vốn sạch, nhưng
+    # điều đó phụ thuộc phiên bản generator và bộ lint (xem bài viết).
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    # `@JsonSerializable(...)` đặt trên factory của freezed (naive_trip_dto.dart)
+    # bị cảnh báo này dù là cách dùng đúng theo tài liệu của freezed.
+    invalid_annotation_target: ignore

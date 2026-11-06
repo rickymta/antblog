@@ -1,0 +1,6 @@
+name: fixture_fixable
+description: "Mẫu để chạy dart fix --apply trong test."
+publish_to: none
+
+environment:
+  sdk: ^3.13.3

@@ -1,0 +1,6 @@
+name: fixture_layers
+description: "Mẫu ba lớp để kiểm toi_noi_lints qua dart analyze thật."
+publish_to: none
+
+environment:
+  sdk: ^3.13.3

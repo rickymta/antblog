@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Công cụ Flutter cần INTERNET để hot reload và breakpoint. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Lớp phòng cho tầng nền tảng (xem network_security_config.xml): chỉ bản
+         debug được gọi HTTP không mã hoá, chỉ tới các địa chỉ trong file đó.
+         Bản release không có dòng này. -->
+    <application android:networkSecurityConfig="@xml/network_security_config"/>
+</manifest>

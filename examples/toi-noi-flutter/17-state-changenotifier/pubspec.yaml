@@ -1,0 +1,23 @@
+name: toi_noi_17
+description: "Lab bài 17 (Flutter qua Tới Nơi): InheritedWidget, ChangeNotifier, ValueNotifier và ranh giới rebuild, đo bằng test đếm số lần build."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  toi_noi_ui:
+    path: ../packages/toi_noi_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

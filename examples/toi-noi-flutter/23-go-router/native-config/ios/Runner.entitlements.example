@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  ios/Runner/Runner.entitlements. Khoá này chỉ có hiệu lực khi App ID đã bật
+  capability Associated Domains và provisioning profile được tạo lại sau đó.
+  Giá trị là "applinks:" + tên miền: không có https://, không có đường dẫn.
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:toinoi.example</string>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,51 @@
+{
+  "@@locale": "vi",
+  "appTitle": "Tới Nơi",
+  "@appTitle": {
+    "description": "Tên ứng dụng, hiện trên thanh tiêu đề"
+  },
+  "quoteTitle": "Báo giá chuyến",
+  "quoteDistance": "Quãng đường: {km} km",
+  "@quoteDistance": {
+    "description": "Quãng đường chuyến, số thực theo locale",
+    "placeholders": {
+      "km": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "quoteFare": "Cước tạm tính",
+  "@quoteFare": {
+    "description": "Nhãn đứng cạnh số tiền; số tiền do MoneyText định dạng"
+  },
+  "quoteRequestedAt": "Đặt lúc {time}",
+  "@quoteRequestedAt": {
+    "description": "Thời điểm đặt chuyến, đã đổi sang giờ máy",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "driversNearby": "{count, plural, =0{Chưa có tài xế ở gần} other{{count} tài xế ở gần}}",
+  "@driversNearby": {
+    "description": "Số tài xế quanh điểm đón",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "statusSearching": "Đang tìm tài xế",
+  "@statusSearching": {
+    "description": "Nhãn chip trạng thái searching của chuyến"
+  },
+  "languageLabel": "Ngôn ngữ",
+  "languageVi": "Tiếng Việt",
+  "languageEn": "English",
+  "logoSemantics": "Biểu tượng Tới Nơi",
+  "addDriver": "Thêm tài xế",
+  "removeDriver": "Bớt tài xế"
+}

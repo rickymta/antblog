@@ -1,0 +1,6 @@
+name: fixture_layers_off
+description: "Giống layers nhưng không bật rule nào của plugin."
+publish_to: none
+
+environment:
+  sdk: ^3.13.3

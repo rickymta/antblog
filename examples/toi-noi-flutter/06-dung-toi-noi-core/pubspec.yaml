@@ -1,0 +1,15 @@
+name: toi_noi_06
+description: "Lab bài 06 (Flutter qua Tới Nơi): dùng package toi_noi_core từ một project khác bằng path dependency."
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.33.0

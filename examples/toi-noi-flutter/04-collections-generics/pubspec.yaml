@@ -1,0 +1,14 @@
+name: toi_noi_04
+description: "Lab bài 04 (Flutter qua Tới Nơi): List, Set, Map, Iterable lười, generics và extension cho danh sách chuyến và tài xế."
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  collection: ^1.19.1
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.33.0

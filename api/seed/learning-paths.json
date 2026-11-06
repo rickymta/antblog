@@ -470,5 +470,48 @@
       "rust-tong-hop-ledger-api-postgresql-kafka-end-to-end"
     ],
     "status": "published"
+  },
+  {
+    "slug": "flutter-toi-noi-ios-android",
+    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1–4.",
+    "level": "beginner",
+    "category": "programming",
+    "articles": [
+      "flutter-va-dart-tu-source-code-den-ung-dung-toi-noi",
+      "dart-bien-kieu-du-lieu-null-safety-tinh-cuoc",
+      "dart-ham-class-enum-sealed-pattern-matching-trang-thai-chuyen",
+      "dart-collections-generics-extension-danh-sach-chuyen",
+      "dart-future-async-await-stream-bao-gia-va-vi-tri",
+      "dart-package-pubspec-lint-test-toi-noi-core",
+      "flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia",
+      "flutter-layout-constraints-row-column-the-chuyen",
+      "flutter-listview-sliver-scroll-lich-su-chuyen",
+      "flutter-statefulwidget-lifecycle-setstate-chon-dich-vu",
+      "flutter-form-validation-focus-nhap-diem-don-diem-den",
+      "flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen",
+      "flutter-theme-material-3-dark-mode-design-system-toi-noi",
+      "flutter-asset-intl-localization-tien-vnd-ngay-gio",
+      "flutter-animation-implicit-hero-tim-tai-xe",
+      "flutter-accessibility-responsive-adaptive-ios-android",
+      "flutter-state-inheritedwidget-changenotifier-bao-gia",
+      "flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen",
+      "flutter-http-dio-json-dto-goi-api-bao-gia",
+      "flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong",
+      "flutter-clean-architecture-domain-data-presentation-mobile",
+      "flutter-local-persistence-drift-secure-storage-lich-su-offline",
+      "flutter-go-router-deep-link-shellroute-guard",
+      "flutter-authentication-otp-jwt-refresh-token-secure-storage",
+      "flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod",
+      "flutter-code-generation-freezed-json-serializable-riverpod-generator",
+      "flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case",
+      "flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia",
+      "flutter-golden-test-semantics-test-giao-dien-on-dinh",
+      "flutter-test-riverpod-async-stream-fake-async-providercontainer",
+      "flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi",
+      "flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code",
+      "flutter-ci-github-actions-analyze-test-golden-cache"
+    ],
+    "status": "published"
   }
 ]

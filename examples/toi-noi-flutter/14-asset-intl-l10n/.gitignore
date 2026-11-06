@@ -1,0 +1,15 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner sinh bằng `flutter create`, không commit
+android/
+ios/
+.metadata
+
+# Code do `flutter pub get` / `flutter gen-l10n` sinh từ ARB, không commit
+lib/l10n/app_localizations*.dart
