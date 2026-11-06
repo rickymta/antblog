@@ -1458,5 +1458,65 @@
       "TTL",
       "AUDIT"
     ]
+  },
+  "python-face-detection-landmarks-mediapipe-opencv": {
+    "title": "PYTHON / FACE DETECT",
+    "subtitle": "Python 48 · Finding and aligning faces",
+    "diagram": "flow",
+    "labels": [
+      "DETECT",
+      "LANDMARK",
+      "ALIGN"
+    ]
+  },
+  "python-face-embedding-cosine-threshold-far-frr": {
+    "title": "PYTHON / FACE MATCH",
+    "subtitle": "Python 49 · Cosine, FAR/FRR and thresholds",
+    "diagram": "split",
+    "labels": [
+      "EMBEDDING",
+      "COSINE",
+      "THRESHOLD"
+    ]
+  },
+  "python-liveness-anti-spoofing-chat-luong-anh": {
+    "title": "PYTHON / LIVENESS",
+    "subtitle": "Python 50 · Image quality, not liveness",
+    "diagram": "checklist",
+    "labels": [
+      "BLUR",
+      "MOIRE",
+      "REVIEW"
+    ]
+  },
+  "python-vector-search-pgvector-faiss-trung-tai-xe": {
+    "title": "PYTHON / VECTOR SEARCH",
+    "subtitle": "Python 51 · pgvector and FAISS duplicates",
+    "diagram": "network",
+    "labels": [
+      "EMBED",
+      "HNSW",
+      "TOP-K"
+    ]
+  },
+  "python-face-match-grpc-service-batching-model-loading": {
+    "title": "PYTHON / FACE MATCH RPC",
+    "subtitle": "Python 52 · Face match as a service",
+    "diagram": "flow",
+    "labels": [
+      "QUEUE",
+      "BATCH",
+      "ONNX"
+    ]
+  },
+  "python-face-matching-danh-gia-bias-privacy-consent": {
+    "title": "PYTHON / FACE BIAS",
+    "subtitle": "Python 53 · Bias, privacy and consent",
+    "diagram": "checklist",
+    "labels": [
+      "GROUPS",
+      "CONSENT",
+      "HUMAN"
+    ]
   }
 }

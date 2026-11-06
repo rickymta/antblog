@@ -135,12 +135,12 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| PY-48 | `python-face-detection-landmarks-mediapipe-opencv` | Face detection và landmarks: tìm khuôn mặt trong ảnh giấy tờ và selfie | OpenCV DNN / MediaPipe, bounding box, căn chỉnh theo landmark, chất lượng ảnh | PY-47 | Kế hoạch |
-| PY-49 | `python-face-embedding-cosine-threshold-far-frr` | Embedding và so khớp: cosine, ngưỡng, FAR/FRR và ROC | Mô hình embedding (InsightFace/ONNX), cosine similarity, chọn ngưỡng từ ROC, chi phí sai | PY-48 | Kế hoạch |
-| PY-50 | `python-liveness-anti-spoofing-chat-luong-anh` | Liveness và chống giả mạo cơ bản: ảnh in, màn hình, mờ, tối | Blur/brightness metric, heuristic đơn giản, giới hạn rõ của bài, khi cần nhà cung cấp chuyên | PY-48 | Kế hoạch |
-| PY-51 | `python-vector-search-pgvector-faiss-trung-tai-xe` | Vector search với pgvector và FAISS: phát hiện một người nhiều tài khoản | Lưu embedding, HNSW/IVF, top-k, tích hợp PostgreSQL, giới hạn độ chính xác | PY-49, PY-24 | Kế hoạch |
-| PY-52 | `python-face-match-grpc-service-batching-model-loading` | Service face match qua gRPC: nạp mô hình, batching, CPU/GPU | Nạp mô hình một lần, warm-up, batch inference, deadline, health, ONNX Runtime | PY-49, PY-37 | Kế hoạch |
-| PY-53 | `python-face-matching-danh-gia-bias-privacy-consent` | Đánh giá, thiên lệch, quyền riêng tư và sự đồng ý | Đánh giá theo nhóm, lưu embedding thay ảnh, retention, đồng ý, quyết định cuối do người | PY-52 | Kế hoạch |
+| PY-48 | `python-face-detection-landmarks-mediapipe-opencv` | Face detection và landmarks: tìm khuôn mặt trong ảnh giấy tờ và selfie | OpenCV DNN / MediaPipe, bounding box, căn chỉnh theo landmark, chất lượng ảnh | PY-47 | Đã viết |
+| PY-49 | `python-face-embedding-cosine-threshold-far-frr` | Embedding và so khớp: cosine, ngưỡng, FAR/FRR và ROC | Mô hình embedding SFace (ONNX), cosine similarity, chọn ngưỡng từ ROC, chi phí sai | PY-48 | Đã viết |
+| PY-50 | `python-liveness-anti-spoofing-chat-luong-anh` | Liveness và chống giả mạo cơ bản: ảnh in, màn hình, mờ, tối | Blur/brightness metric, heuristic đơn giản, giới hạn rõ của bài, khi cần nhà cung cấp chuyên | PY-48 | Đã viết |
+| PY-51 | `python-vector-search-pgvector-faiss-trung-tai-xe` | Vector search với pgvector và FAISS: phát hiện một người nhiều tài khoản | Lưu embedding, HNSW/IVF, top-k, tích hợp PostgreSQL, giới hạn độ chính xác | PY-49, PY-24 | Đã viết |
+| PY-52 | `python-face-match-grpc-service-batching-model-loading` | Service face match qua gRPC: nạp mô hình, batching, CPU/GPU | Nạp mô hình một lần, warm-up, batch inference, deadline, health, ONNX Runtime | PY-49, PY-37 | Đã viết |
+| PY-53 | `python-face-matching-danh-gia-bias-privacy-consent` | Đánh giá, thiên lệch, quyền riêng tư và sự đồng ý | Đánh giá theo nhóm, lưu embedding thay ảnh, retention, đồng ý, quyết định cuối do người | PY-52 | Đã viết |
 
 #### P07 · Phát hiện gian lận (8 bài)
 
@@ -202,6 +202,6 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 ## 5. Điểm cần chủ blog quyết
 
 1. **Thư viện OCR**: Tesseract có sẵn qua Homebrew/apt, dễ chạy trong CI; EasyOCR/PaddleOCR cần tải mô hình lớn. Bài 43 so sánh, các bài sau mặc định Tesseract để lab chạy được trong CI, có ghi rõ hạn chế với tiếng Việt.
-2. **Mô hình face embedding**: dùng mô hình ONNX công khai (InsightFace buffalo_l) tải lúc chạy, không commit file mô hình vào repo. Nếu muốn lab offline hoàn toàn, cần quyết định nơi lưu mô hình.
+2. **Mô hình face embedding**: mặc định SFace + YuNet (OpenCV Zoo, Apache 2.0 và MIT), tải lúc chạy, không commit file mô hình vào repo. Mô hình InsightFace có giấy phép chỉ cho nghiên cứu phi thương mại, nên chỉ là tùy chọn so sánh `--with-arcface` ở lab 49. Nếu muốn lab offline hoàn toàn, cần quyết định nơi lưu mô hình.
 3. **Dữ liệu tổng hợp**: ảnh giấy tờ và khuôn mặt trong lab đều sinh bằng code (Pillow vẽ mẫu, khuôn mặt từ bộ dữ liệu có giấy phép mở). Không dùng ảnh người thật.
 4. **Orchestrator (bài 65)**: chọn Prefect hay Dagster; đề xuất Prefect vì chạy local nhẹ hơn.

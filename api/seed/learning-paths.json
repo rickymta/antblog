@@ -210,7 +210,13 @@
       "python-hau-xu-ly-ocr-regex-parse-truong-checksum",
       "python-danh-gia-ocr-cer-wer-threshold",
       "python-ocr-service-fastapi-worker-timeout",
-      "python-luu-ket-qua-ocr-mongodb-pii-retention"
+      "python-luu-ket-qua-ocr-mongodb-pii-retention",
+      "python-face-detection-landmarks-mediapipe-opencv",
+      "python-face-embedding-cosine-threshold-far-frr",
+      "python-liveness-anti-spoofing-chat-luong-anh",
+      "python-vector-search-pgvector-faiss-trung-tai-xe",
+      "python-face-match-grpc-service-batching-model-loading",
+      "python-face-matching-danh-gia-bias-privacy-consent"
     ],
     "status": "published"
   }

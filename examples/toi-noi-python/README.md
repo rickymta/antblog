@@ -1,6 +1,6 @@
 # Python qua dự án Tới Nơi
 
-Khung biên tập cho loạt bài Python của Tech Knowledge Hub. Danh sách 79 bài, phụ thuộc và trạng thái nằm trong [`docs/python-master-curriculum.md`](../../docs/python-master-curriculum.md). Mỗi bài có câu hỏi mở đầu, hình SVG giải thích cơ chế, ví dụ chạy được, lỗi thường gặp, bài tập có đáp án và nguồn chính thức. Tách rõ code minh họa với giải pháp production. Không tạo link cho bài chưa viết.
+Khung biên tập cho loạt bài Python của Tech Knowledge Hub. Danh sách 79 bài, phụ thuộc và trạng thái nằm trong [`docs/python-master-curriculum.md`](../../docs/python-master-curriculum.md). Mỗi bài có câu hỏi mở đầu, hình SVG giải thích cơ chế, ví dụ chạy được, lỗi thường gặp, bài tập có đáp án và nguồn chính thức. Tách rõ code minh họa với giải pháp production. Link sang bài khác theo đúng slug trong curriculum; loạt bài chỉ seed khi các bài được link đã có mặt.
 
 Đối tượng cấp cơ bản: người mới biết dùng terminal, chưa cần biết Python. Người đã đọc loạt C# sẽ gặp lại cùng mô hình cước, cùng chuyến xe để đối chiếu hai ngôn ngữ.
 
@@ -90,7 +90,16 @@ C#/.NET giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng, �
 46. Đóng gói OCR thành service: FastAPI nhận ảnh, worker xử lý, timeout — **đã viết**
 47. Lưu kết quả OCR: document MongoDB, mặt nạ PII, versioning và retention — **đã viết**
 
-Các phần P06–P10 (bài 48–79) xem master curriculum.
+## P06 · So khớp khuôn mặt
+
+48. Face detection và landmarks: tìm khuôn mặt trong ảnh giấy tờ và selfie — **đã viết**
+49. Embedding và so khớp: cosine, ngưỡng, FAR/FRR và ROC — **đã viết**
+50. Liveness và chống giả mạo cơ bản: ảnh in, màn hình, mờ, tối — **đã viết**
+51. Vector search với pgvector và FAISS: phát hiện một người nhiều tài khoản — **đã viết**
+52. Service face match qua gRPC: nạp mô hình, batching, CPU/GPU — **đã viết**
+53. Đánh giá, thiên lệch, quyền riêng tư và sự đồng ý — **đã viết**
+
+Các phần P07–P10 (bài 54–79) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -134,4 +143,12 @@ Cần Tesseract có gói `vie` (`brew install tesseract tesseract-lang`) và h�
 
 ```bash
 sh examples/toi-noi-python/verify-41-47.sh
+```
+
+## Chạy lab phần 06
+
+Bài 51 cần hạ tầng chung trong `infra/`. Lần chạy đầu cần mạng để tải bộ Olivetti (AT&T Laboratories Cambridge, qua scikit-learn) và các mô hình YuNet, SFace, MediaPipe vào cache; repo không chứa ảnh người hay file mô hình. InsightFace chỉ là tùy chọn `--with-arcface` của lab 49 và có giới hạn giấy phép, xem bài 49.
+
+```bash
+sh examples/toi-noi-python/verify-48-53.sh
 ```

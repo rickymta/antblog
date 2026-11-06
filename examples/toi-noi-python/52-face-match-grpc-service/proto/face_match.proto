@@ -1,0 +1,35 @@
+// Hợp đồng giữa kyc-face (Python, phục vụ) và dịch vụ hồ sơ tài xế (gọi).
+// Số hiệu field là phần của hợp đồng: đã phát hành thì không đổi, không tái sử dụng.
+syntax = "proto3";
+
+package toinoi.face.v1;
+
+service FaceMatch {
+  // Vector đặc trưng của một ảnh đã cắt mặt. Vector là dữ liệu sinh trắc học: không ghi log, không gửi ra ngoài.
+  rpc Embed(EmbedRequest) returns (EmbedResponse);
+  // Độ giống nhau của hai ảnh đã cắt mặt. Điểm là đầu vào cho người duyệt, không phải quyết định.
+  rpc Compare(CompareRequest) returns (CompareResponse);
+}
+
+message EmbedRequest {
+  // PNG hoặc JPEG của MỘT khuôn mặt đã cắt; tối đa 512 x 512 điểm ảnh, tối đa 1 MiB.
+  bytes image = 1;
+}
+
+message EmbedResponse {
+  // 512 số thực, đã chuẩn hóa L2 (độ dài 1): tích vô hướng của hai vector chính là cosine.
+  repeated float embedding = 1;
+  // Hai vector chỉ so được với nhau khi cùng model_version.
+  string model_version = 2;
+}
+
+message CompareRequest {
+  bytes image_a = 1;
+  bytes image_b = 2;
+}
+
+message CompareResponse {
+  // Cosine similarity, -1.0 .. 1.0. Không phải xác suất; ngưỡng thuộc về bên gọi (bài 49), quyết định cuối thuộc về người.
+  double score = 1;
+  string model_version = 2;
+}
