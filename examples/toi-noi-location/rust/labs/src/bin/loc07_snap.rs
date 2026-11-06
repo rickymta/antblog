@@ -2,7 +2,8 @@
 //!
 //! Chạy từ gốc repo (cần data/hcm-graph.bin từ lab LOC-06, hoặc thêm --fixture):
 //!   cargo run --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc07_snap
-//! Tham số: --queries N (mặc định 20000 cho R-tree), --scan-queries N (mặc định 1000), --seed S, --fixture
+//! Tham số: --queries N (mặc định 20000 cho R-tree), --scan-queries N (mặc định 1000), --seed S, --fixture,
+//! --ratio-rounds N (so R-tree với quét xen kẽ N lượt; mặc định không chạy)
 
 use geo_core::geojson::{line_feature, point_feature, to_string};
 use geo_core::segment::point_at;
@@ -65,6 +66,69 @@ fn heading_penalty(g: &Graph, c: &SnapCandidate, heading: f64) -> f64 {
     best
 }
 
+/// So R-tree với quét xen kẽ từng lượt, để hai bên chịu cùng một mức tải máy. Hai bộ điểm: 256 điểm cố định sát nút
+/// lặp lại (như `benches/loc07_snap.rs`, cache đã nóng) và điểm mới mỗi lượt (như mục 2).
+fn ratio_rounds(g: &Graph, index: &SnapIndex, queries: &[LatLng], seed: u64, rounds: usize) {
+    let mut rng = Rand::new(seed ^ 0x7);
+    let fixed: Vec<LatLng> = (0..256)
+        .map(|_| {
+            let e = loop {
+                let e = rng.0.u32(0..g.edge_count() as u32);
+                if g.edge(e).allows(Mode::Car) {
+                    break e;
+                }
+            };
+            destination(
+                g.node_latlng(g.tail[e as usize]),
+                rng.range(0.0, 360.0),
+                rng.range(0.0, 10.0),
+            )
+        })
+        .collect();
+    let per_rtree = |pts: &[LatLng]| {
+        let (_, s) = timed(|| {
+            pts.iter()
+                .filter_map(|&q| black_box(index.nearest(g, black_box(q), Mode::Car)))
+                .count()
+        });
+        s * 1e6 / pts.len() as f64
+    };
+    let per_scan = |pts: &[LatLng]| {
+        let (_, s) = timed(|| {
+            pts.iter()
+                .filter_map(|&q| black_box(index.nearest_scan(g, black_box(q), Mode::Car)))
+                .count()
+        });
+        s * 1e6 / pts.len() as f64
+    };
+    println!("  xen kẽ {rounds} lượt, tỉ lệ quét / R-tree từng lượt rồi trung vị:");
+    let report = |ten: &str, mut v: Vec<(f64, f64)>| {
+        let line: Vec<String> = v.iter().map(|(r, q)| format!("{:.0}", q / r)).collect();
+        v.sort_by(|a, b| (a.1 / a.0).total_cmp(&(b.1 / b.0)));
+        let (r, q) = v[v.len() / 2];
+        println!(
+            "    {ten}: {} ; trung vị {:.0} (R-tree {r:.2} µs, quét {q:.1} µs)",
+            line.join(" "),
+            q / r
+        );
+    };
+    let warm: Vec<(f64, f64)> = (0..rounds)
+        .map(|_| {
+            let r = (0..20).map(|_| per_rtree(&fixed)).sum::<f64>() / 20.0;
+            (r, per_scan(&fixed[..64]))
+        })
+        .collect();
+    report("256 điểm cố định sát nút, lặp lại", warm);
+    let fresh: Vec<(f64, f64)> = (0..rounds)
+        .map(|i| {
+            let n = queries.len() / rounds;
+            let chunk = &queries[i * n..(i + 1) * n];
+            (per_rtree(chunk), per_scan(&chunk[..64.min(chunk.len())]))
+        })
+        .collect();
+    report("điểm mới mỗi lượt, nhiễu σ = 10 m", fresh);
+}
+
 fn main() {
     let args = Args::from_env();
     let seed = args.u64_or("--seed", SEED);
@@ -110,19 +174,18 @@ fn main() {
     let (scan_res, sc_s) = timed(|| {
         queries[..ns]
             .iter()
-            .map(|&q| {
-                index
-                    .nearest_scan(&g, black_box(q), Mode::Car)
-                    .map(|c| c.edge)
-            })
+            .map(|&q| index.nearest_scan(&g, black_box(q), Mode::Car))
             .collect::<Vec<_>>()
     });
     let sc_us = sc_s * 1e6 / ns as f64;
-    let agree = queries[..ns]
-        .iter()
-        .zip(&scan_res)
-        .filter(|&(&q, s)| index.nearest(&g, q, Mode::Car).map(|c| c.edge) == *s)
-        .count();
+    let mut differ = Vec::new();
+    for (&q, s) in queries[..ns].iter().zip(&scan_res) {
+        let r = index.nearest(&g, q, Mode::Car);
+        if r.map(|c| c.edge) != s.map(|c| c.edge) {
+            differ.push((q, r, *s));
+        }
+    }
+    let agree = ns - differ.len();
     println!(
         "  R-tree (nearest_neighbor_iter): {nq} truy vấn, {hits} có kết quả, {:.2} µs/truy vấn",
         rt_us
@@ -136,7 +199,29 @@ fn main() {
         "  tỉ lệ thời gian quét / R-tree = {:.0}; cùng cạnh gần nhất ở {agree}/{ns} truy vấn",
         sc_us / rt_us
     );
+    for (q, r, s) in differ
+        .iter()
+        .filter_map(|(q, r, s)| Some((q, (*r)?, (*s)?)))
+    {
+        println!("  truy vấn khác cạnh, điểm {q}:");
+        for (ten, c) in [("R-tree", r), ("quét  ", s)] {
+            println!(
+                "    {ten}: cạnh {} (nút {} → {}), đoạn {}, t = {:.6}, cách {:.9} m, chân {}",
+                c.edge,
+                g.tail[c.edge as usize],
+                g.head[c.edge as usize],
+                c.segment,
+                c.t,
+                c.dist_m,
+                c.point
+            );
+        }
+    }
     println!("  (đo chặt hơn bằng criterion: cargo bench -p labs --bench loc07_snap)");
+    let rounds = args.u64_or("--ratio-rounds", 0) as usize;
+    if rounds > 0 {
+        ratio_rounds(&g, &index, &queries, seed, rounds);
+    }
 
     println!(
         "\n-- 3. ứng viên theo bán kính (σ = 10 m): số cạnh trong bán kính và tỉ lệ có cạnh thật --"

@@ -54,7 +54,7 @@ proptest! {
     }
 
     #[test]
-    fn e7_round_trip_error_below_6mm(a in vn_point()) {
+    fn e7_round_trip_error_below_8mm(a in vn_point()) {
         let back = a.to_e7().to_latlng();
         prop_assert!(haversine_m(a, back) < 0.008); // đường chéo ô E7 lớn nhất ~ 7,9 mm
     }

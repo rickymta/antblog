@@ -4,12 +4,15 @@
 - Viết lại dòng «Bài trước / Bài tiếp», chỉ link bài đã có.
 - Cập nhật cột Trạng thái trong curriculum.
 - Ghi ba lộ trình vào api/seed/learning-paths.json, chỉ gồm bài đã có.
+- Thêm entry ảnh bìa vào apps/web/src/lib/article-covers.json từ covers-location.json.
 """
+import argparse
 import json
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+COVERS_FILE = ROOT / "apps/web/src/lib/article-covers.json"
 CONTENT = ROOT / "api/seed/content"
 CURRICULUM = ROOT / "docs/location-master-curriculum.md"
 PATHS_FILE = ROOT / "api/seed/learning-paths.json"
@@ -39,10 +42,24 @@ PATHS = [
 ]
 
 
+def sync_covers(exists):
+    """Thêm entry ảnh bìa cho bài đang có; giữ nguyên thứ tự entry cũ vì seed màu phụ thuộc vị trí."""
+    table = json.loads((Path(__file__).parent / "covers-location.json").read_text("utf-8"))
+    covers = json.loads(COVERS_FILE.read_text("utf-8"))
+    for n, slug in sorted(exists.items()):
+        title, subtitle, diagram, labels = table[str(n)]
+        covers[slug] = {"title": title, "subtitle": f"Định vị {n:02d} · {subtitle}", "diagram": diagram, "labels": labels}
+    COVERS_FILE.write_text(json.dumps(covers, ensure_ascii=False, indent=2) + "\n", "utf-8")
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--upto", type=int, default=64, help="chỉ tính các bài có số thứ tự đến đây (bài đã review)")
+    args = ap.parse_args()
     text = CURRICULUM.read_text("utf-8")
     order = [(int(n), s) for n, s in ROW.findall(text)]
-    exists = {n: s for n, s in order if (CONTENT / f"{s}.md").exists()}
+    exists = {n: s for n, s in order if n <= args.upto and (CONTENT / f"{s}.md").exists()}
+    sync_covers(exists)
 
     for n, slug in exists.items():
         path = CONTENT / f"{slug}.md"

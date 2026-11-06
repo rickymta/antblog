@@ -217,6 +217,7 @@ fn run_redis(
     w: &Workload,
     half: usize,
     scan_ids: &[Vec<DriverId>],
+    scan_gap: &[f64],
     pipelined: bool,
 ) -> Row {
     let key = if pipelined {
@@ -268,6 +269,7 @@ fn run_redis(
 
     let mut lat = Vec::with_capacity(w.probe.len());
     let (mut ok, mut cmp) = (0usize, 0usize);
+    let mut gaps = Vec::new();
     for (i, &q) in w.probe.iter().enumerate() {
         let t = Instant::now();
         let res = r.nearest(q, K, REDIS_RADIUS_M).expect("GEOSEARCH");
@@ -280,10 +282,22 @@ fn run_redis(
             b.sort_unstable();
             if a == b {
                 ok += 1;
+            } else {
+                gaps.push(scan_gap[i]);
             }
         }
     }
     let (q_p50, q_p99, q_mean) = lat_stats(lat);
+    if !gaps.is_empty() {
+        gaps.sort_by(f64::total_cmp);
+        println!(
+            "  {} / {cmp} truy vấn lệch tập id; khoảng cách giữa người thứ {K} và thứ {} theo quét ở các truy vấn đó: trung vị {:.3} m, lớn nhất {:.3} m",
+            gaps.len(),
+            K + 1,
+            percentile(&gaps, 50.0),
+            gaps[gaps.len() - 1]
+        );
+    }
 
     let t = Instant::now();
     let mut sink = 0usize;
@@ -432,6 +446,19 @@ fn main() {
             })
             .collect();
 
+        // Khoảng cách giữa người thứ K và thứ K+1 theo quét: nếu rất nhỏ thì sai số nhỏ của Redis đủ đổi tập K người.
+        let scan_gap: Vec<f64> = w.probe[..ncmp]
+            .iter()
+            .map(|&q| {
+                let v = truth.nearest(q, K + 1);
+                if v.len() > K {
+                    v[K].dist_m - v[K - 1].dist_m
+                } else {
+                    f64::INFINITY
+                }
+            })
+            .collect();
+
         print_header();
         let variants: Vec<Box<dyn DriverIndex>> = vec![
             Box::new(FullScan::new(n)),
@@ -452,7 +479,7 @@ fn main() {
             if let Some(url) = &redis_info {
                 for pipelined in [false, true] {
                     // Redis chỉ trả người trong bán kính; so khớp với đáp án quét đã lọc cùng bán kính.
-                    let row = run_redis(url, &w, half, &scan_ids, pipelined);
+                    let row = run_redis(url, &w, half, &scan_ids, &scan_gap, pipelined);
                     print_row(&row);
                 }
             }

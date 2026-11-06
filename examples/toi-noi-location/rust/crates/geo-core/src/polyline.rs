@@ -1,5 +1,5 @@
 //! Google Encoded Polyline: mỗi điểm là hiệu so với điểm trước, nhân 10^precision, mã hóa theo khối 5 bit.
-//! Độ chính xác 5 chữ số thập phân (khoảng 1 m) là chuẩn của Google; 6 (khoảng 0,1 m) dùng bởi OSRM.
+//! Độ chính xác 5 chữ số thập phân (khoảng 1 m) là chuẩn của Google và mặc định của OSRM; 6 (khoảng 0,1 m) là tùy chọn `polyline6` của OSRM.
 
 use crate::coord::{GeoError, LatLng};
 

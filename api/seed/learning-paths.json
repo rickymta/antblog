@@ -374,5 +374,25 @@
       "azure-tong-ket-go-live-checklist-chung-chi"
     ],
     "status": "published"
+  },
+  {
+    "slug": "location-nen-tang-qua-toi-noi",
+    "title": "Service định vị · Nền tảng định vị",
+    "description": "Từ tọa độ tới engine định tuyến đường bộ bằng Rust, nhận và làm sạch GPS bằng Go và Rust, có bộ mô phỏng làm thước đo cho mọi tối ưu.",
+    "level": "intermediate",
+    "category": "system-design",
+    "articles": [
+      "location-bai-toan-quang-duong-khach-va-tai-xe",
+      "location-adr-rust-go-python-csharp-ranh-gioi-service",
+      "location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac",
+      "location-khoang-cach-haversine-equirectangular-sai-so",
+      "location-geometry-crate-geo-chieu-diem-polyline-bearing",
+      "location-osm-pbf-do-thi-duong-bo-xe-may-o-to",
+      "location-rstar-r-tree-snap-diem-ve-duong",
+      "location-h3-geohash-chi-muc-luoi-k-ring",
+      "location-tim-tai-xe-gan-nhat-bon-cach-co-so-do",
+      "location-tong-hop-geo-core-kiem-thu-hinh-hoc"
+    ],
+    "status": "published"
   }
 ]

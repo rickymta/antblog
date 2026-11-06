@@ -113,7 +113,7 @@ impl LatLng {
         Self::try_new(pos[1], pos[0])
     }
 
-    /// Nén về hai `i32` (độ × 10⁷, làm tròn gần nhất). Sai số tối đa 0,5·10⁻⁷ độ, khoảng 5,6 mm.
+    /// Nén về hai `i32` (độ × 10⁷, làm tròn gần nhất). Sai số tối đa 0,5·10⁻⁷ độ mỗi trục, khoảng 5,6 mm; theo đường chéo hai trục khoảng 7,8 mm.
     pub fn to_e7(self) -> LatLngE7 {
         LatLngE7 {
             lat_e7: (self.lat.0 * 1e7).round() as i32,

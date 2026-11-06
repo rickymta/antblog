@@ -2168,5 +2168,105 @@
       "RUNBOOK",
       "CERTS"
     ]
+  },
+  "location-bai-toan-quang-duong-khach-va-tai-xe": {
+    "title": "HAI NGƯỜI",
+    "subtitle": "Định vị 01 · Quãng đường của khách và tài xế",
+    "diagram": "map",
+    "labels": [
+      "KHÁCH",
+      "ĐIỂM HẸN",
+      "TÀI XẾ"
+    ]
+  },
+  "location-adr-rust-go-python-csharp-ranh-gioi-service": {
+    "title": "ADR",
+    "subtitle": "Định vị 02 · Rust, Go, Python, C#: mỗi bên làm gì",
+    "diagram": "layers",
+    "labels": [
+      "RUST ĐỀ XUẤT",
+      "GO NHẬN GPS",
+      "C# QUYẾT ĐỊNH"
+    ]
+  },
+  "location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac": {
+    "title": "LAT / LNG",
+    "subtitle": "Định vị 03 · Tọa độ, WGS84 và newtype",
+    "diagram": "code",
+    "labels": [
+      "WGS84",
+      "LATLNG",
+      "E7"
+    ]
+  },
+  "location-khoang-cach-haversine-equirectangular-sai-so": {
+    "title": "HAVERSINE",
+    "subtitle": "Định vị 04 · Khoảng cách và sai số đo được",
+    "diagram": "split",
+    "labels": [
+      "CHIM BAY",
+      "ĐƯỜNG BỘ",
+      "HỆ SỐ VÒNG"
+    ]
+  },
+  "location-geometry-crate-geo-chieu-diem-polyline-bearing": {
+    "title": "POLYLINE",
+    "subtitle": "Định vị 05 · Chiếu điểm, bearing, GeoJSON",
+    "diagram": "map",
+    "labels": [
+      "CHIẾU ĐIỂM",
+      "BEARING",
+      "GEOJSON"
+    ]
+  },
+  "location-osm-pbf-do-thi-duong-bo-xe-may-o-to": {
+    "title": "OSM → CSR",
+    "subtitle": "Định vị 06 · Từ OpenStreetMap tới đồ thị đường bộ",
+    "diagram": "flow",
+    "labels": [
+      "PBF",
+      "LỌC BBOX",
+      "ĐỒ THỊ CSR"
+    ]
+  },
+  "location-rstar-r-tree-snap-diem-ve-duong": {
+    "title": "R-TREE",
+    "subtitle": "Định vị 07 · Snap điểm GPS về đúng cạnh đường",
+    "diagram": "network",
+    "labels": [
+      "ĐIỂM GPS",
+      "ỨNG VIÊN",
+      "CẠNH ĐƯỜNG"
+    ]
+  },
+  "location-h3-geohash-chi-muc-luoi-k-ring": {
+    "title": "H3",
+    "subtitle": "Định vị 08 · Chia thành phố thành ô lục giác",
+    "diagram": "matrix",
+    "labels": [
+      "Ô H3",
+      "K-RING",
+      "GEOHASH"
+    ]
+  },
+  "location-tim-tai-xe-gan-nhat-bon-cach-co-so-do": {
+    "title": "GẦN NHẤT",
+    "subtitle": "Định vị 09 · Quét, R-tree, H3 và Redis GEO có số đo",
+    "diagram": "target",
+    "labels": [
+      "QUÉT",
+      "H3",
+      "REDIS GEO"
+    ]
+  },
+  "location-tong-hop-geo-core-kiem-thu-hinh-hoc": {
+    "title": "GEO-CORE",
+    "subtitle": "Định vị 10 · Tổng hợp P01: thư viện và kiểm thử",
+    "diagram": "checklist",
+    "labels": [
+      "HÌNH HỌC",
+      "PROPTEST",
+      "FIXTURE"
+    ]
   }
 }
