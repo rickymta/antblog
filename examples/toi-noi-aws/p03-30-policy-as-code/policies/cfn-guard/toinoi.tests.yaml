@@ -1,0 +1,88 @@
+---
+- name: RDS public bi bat
+  input:
+    Resources:
+      TripsDb:
+        Type: AWS::RDS::DBInstance
+        Properties:
+          PubliclyAccessible: true
+          StorageEncrypted: true
+          Tags:
+            - Key: Project
+              Value: ToiNoi
+            - Key: Env
+              Value: lab
+  expectations:
+    rules:
+      rds_must_not_be_public: FAIL
+      required_tags: PASS
+- name: RDS private va ma hoa duoc chap nhan
+  input:
+    Resources:
+      TripsDb:
+        Type: AWS::RDS::DBInstance
+        Properties:
+          PubliclyAccessible: false
+          StorageEncrypted: true
+          Tags:
+            - Key: Project
+              Value: ToiNoi
+            - Key: Env
+              Value: lab
+  expectations:
+    rules:
+      rds_must_not_be_public: PASS
+      required_tags: PASS
+- name: Security group mo 5432 cho Internet bi bat
+  input:
+    Resources:
+      DbSg:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          GroupDescription: db
+          SecurityGroupIngress:
+            - IpProtocol: tcp
+              FromPort: 5432
+              ToPort: 5432
+              CidrIp: 0.0.0.0/0
+          Tags:
+            - Key: Project
+              Value: ToiNoi
+            - Key: Env
+              Value: lab
+  expectations:
+    rules:
+      no_open_postgres: FAIL
+      required_tags: PASS
+- name: Security group chi mo 5432 cho subnet ung dung duoc chap nhan
+  input:
+    Resources:
+      DbSg:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          GroupDescription: db
+          SecurityGroupIngress:
+            - IpProtocol: tcp
+              FromPort: 5432
+              ToPort: 5432
+              CidrIp: 10.20.0.0/20
+          Tags:
+            - Key: Project
+              Value: ToiNoi
+            - Key: Env
+              Value: lab
+  expectations:
+    rules:
+      no_open_postgres: PASS
+      required_tags: PASS
+- name: Bucket khong ma hoa va thieu tag bi bat
+  input:
+    Resources:
+      PhotosBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+          BucketName: toinoi-lab-delivery-photos
+  expectations:
+    rules:
+      s3_bucket_must_be_encrypted: FAIL
+      required_tags: FAIL

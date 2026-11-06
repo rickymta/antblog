@@ -1,0 +1,11 @@
+# Cấu hình Checkov cho pipeline của Tới Nơi. Chạy: checkov --config-file .checkov.yaml -d <thư mục>
+framework:
+  - terraform
+  - cloudformation
+external-checks-dir:
+  - policies/checkov
+compact: true
+quiet: true
+# Mọi skip phải có lý do và hạn; ghi cạnh tài nguyên bằng comment dạng
+#   #checkov:skip=CKV_AWS_18:Access log ghi ở bucket log tập trung (bài 54), hạn 2026-12-31
+# Skip theo từng tài nguyên, không skip toàn cục ở đây.

@@ -1,0 +1,15 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        # CodeDeploy thay <TASK_DEFINITION> bằng ARN revision vừa đăng ký.
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+          ContainerName: booking
+          ContainerPort: 8080
+        PlatformVersion: LATEST
+Hooks:
+  # Sau khi task set mới (green) nhận traffic ở test listener, gọi Lambda smoke test.
+  # Lambda phải báo Succeeded/Failed qua PutLifecycleEventHookExecutionStatus.
+  - AfterAllowTestTraffic: toinoi-lab-booking-smoke

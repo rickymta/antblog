@@ -890,7 +890,7 @@ Cập nhật khi bài được viết/review/xuất bản. Bài được tính "
 |---|---|---|---|
 | Phần 01 · Nền tảng AWS | chưa | xong 2026-11-06 | Lab 05/07/08/10 nối nhau qua tag Name của lab 04 (env.sh để trống ID). Chưa chạy trên tài khoản thật. Cần quyết: viện dẫn pháp lý VN ở bài 01; khoá tag trong `FilterExpression` của Budgets (bài 10) |
 | Phần 02 · Container, serverless và dịch vụ ứng dụng | chưa | xong 2026-11-06 | Cần chốt: secret DB dạng connection string (bài 12, bài 36 .NET) hay JSON có rotation (bài 14); `healthCheck` dùng curl trong khi image `aspnet` không có curl. |
-| Phần 03 · Infrastructure as Code và CI/CD | chưa | chưa | |
+| Phần 03 · Infrastructure as Code và CI/CD | chưa | xong 2026-11-06 | Terraform các lab qua fmt/validate; Checkov 3.4.3, cfn-guard 3.2.1, cfn-lint, CDK synth/jest đã chạy. Cần chốt: major version action GitHub (đang ghi bản mới nhất 11/2026, chưa ghim SHA); infracost/actions giữ @v3 theo README dự án. |
 | Phần 04 · Dữ liệu, lưu trữ và messaging | chưa | chưa | |
 | Phần 05 · Kubernetes trên AWS với EKS | chưa | chưa | |
 | Phần 06 · Bảo mật, resilience và vận hành ở quy mô | chưa | chưa | |

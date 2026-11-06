@@ -1,0 +1,11 @@
+# Đổi tên tệp thành backend.tf SAU KHI đã tạo bucket state (xem bootstrap/) rồi chạy `terraform init -migrate-state`.
+# Không commit tên bucket thật. Terraform >= 1.10: khoá bằng tệp .tflock ngay trong S3, không cần bảng DynamoDB.
+terraform {
+  backend "s3" {
+    bucket       = "toinoi-lab-tfstate-123456789012-ap-southeast-1"
+    key          = "p03-22/lab/terraform.tfstate"
+    region       = "ap-southeast-1"
+    encrypt      = true
+    use_lockfile = true
+  }
+}

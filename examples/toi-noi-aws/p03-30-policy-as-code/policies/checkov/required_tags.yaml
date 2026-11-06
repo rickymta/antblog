@@ -1,0 +1,21 @@
+metadata:
+  id: "CKV2_TOINOI_1"
+  name: "Tai nguyen Tới Nơi phai co tag Project=ToiNoi"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+        - "aws_s3_bucket"
+        - "aws_db_instance"
+        - "aws_security_group"
+      attribute: "tags.Project"
+      operator: "equals"
+      value: "ToiNoi"
+    - cond_type: "attribute"
+      resource_types:
+        - "aws_s3_bucket"
+        - "aws_db_instance"
+        - "aws_security_group"
+      attribute: "tags.Env"
+      operator: "exists"
