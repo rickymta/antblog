@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select account_id, sum(amount_dong)::bigint as \"balance!\"\n           from postings group by account_id order by account_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "account_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "postings",
+            "name": "account_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "balance!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "edf6ae2daf787e20290a96aff95c2b4df76ec08923ebd1ed490278739702226a"
+}

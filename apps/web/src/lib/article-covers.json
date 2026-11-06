@@ -2328,5 +2328,405 @@
       "EVIDENCE MATRIX",
       "DISCOVERY MEMO"
     ]
+  },
+  "rust-vi-sao-so-cai-toi-noi-chon-rust": {
+    "title": "WHY RUST / LEDGER",
+    "subtitle": "Rust 01 · Why the ledger service is written in Rust",
+    "diagram": "split",
+    "labels": [
+      "C# CORE",
+      "LEDGER",
+      "RUST LEDGER"
+    ]
+  },
+  "rust-cargo-tu-source-code-den-but-toan-dau-tien": {
+    "title": "CARGO / FIRST ENTRY",
+    "subtitle": "Rust 02 · From source code to the first journal entry",
+    "diagram": "cycle",
+    "labels": [
+      "RUSTUP",
+      "CARGO",
+      "RUSTC"
+    ]
+  },
+  "rust-kieu-so-tien-vnd-i64-decimal": {
+    "title": "INTEGER / DECIMAL",
+    "subtitle": "Rust 03 · i64, checked math and rust_decimal",
+    "diagram": "storage",
+    "labels": [
+      "I64 DONG",
+      "CHECKED",
+      "DECIMAL"
+    ]
+  },
+  "rust-ownership-move-borrow-but-toan": {
+    "title": "OWNERSHIP / BORROW",
+    "subtitle": "Rust 04 · One owner per ledger entry, borrow to read",
+    "diagram": "flow",
+    "labels": [
+      "MOVE",
+      "&T READ",
+      "&MUT WRITE"
+    ]
+  },
+  "rust-struct-enum-match-tai-khoan-but-toan": {
+    "title": "STRUCT / ENUM / MATCH",
+    "subtitle": "Rust 05 · Structs, enums and exhaustive matching",
+    "diagram": "blocks",
+    "labels": [
+      "STRUCT",
+      "ENUM",
+      "MATCH"
+    ]
+  },
+  "rust-ham-dieu-kien-vong-lap-iterator-so-du": {
+    "title": "FN / ITERATOR",
+    "subtitle": "Rust 06 · Functions, loops and iterators over postings",
+    "diagram": "flow",
+    "labels": [
+      "ITER",
+      "FILTER",
+      "SUM"
+    ]
+  },
+  "rust-result-option-toan-tu-hoi-loi-la-gia-tri": {
+    "title": "RESULT / OPTION",
+    "subtitle": "Rust 07 · Errors as values with Result and ?",
+    "diagram": "target",
+    "labels": [
+      "OK",
+      "ERR",
+      "PANIC"
+    ]
+  },
+  "rust-string-str-ngay-gio-dinh-dang-tien": {
+    "title": "STRINGS / UTC TIME",
+    "subtitle": "Rust 08 · String, &str, UTC timestamps and VND display",
+    "diagram": "code",
+    "labels": [
+      "UTF-8",
+      "UTC",
+      "DISPLAY"
+    ]
+  },
+  "rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho": {
+    "title": "COLLECTIONS / LIFETIME",
+    "subtitle": "Rust 09 · Vec, HashMap, BTreeMap and lifetimes",
+    "diagram": "matrix",
+    "labels": [
+      "VEC",
+      "HASHMAP",
+      "BTREEMAP"
+    ]
+  },
+  "rust-module-crate-cargo-test-clippy": {
+    "title": "MODULE / TEST / CLIPPY",
+    "subtitle": "Rust 10 · Crates, cargo test and clippy for the ledger lab",
+    "diagram": "layers",
+    "labels": [
+      "UNIT",
+      "DOC",
+      "INTEGRATION"
+    ]
+  },
+  "rust-trait-generics-chinh-sach-phi-lam-tron": {
+    "title": "TRAIT / GENERICS",
+    "subtitle": "Rust 11 · Swappable fee and rounding policies via traits",
+    "diagram": "layers",
+    "labels": [
+      "TRAIT",
+      "IMPL",
+      "DISPATCH"
+    ]
+  },
+  "rust-newtype-value-object-money-account-id": {
+    "title": "NEWTYPE / VALUE OBJECT",
+    "subtitle": "Rust 12 · Money, AccountId, EntryId as distinct types",
+    "diagram": "layers",
+    "labels": [
+      "MONEY",
+      "ACCOUNT ID",
+      "ENTRY ID"
+    ]
+  },
+  "rust-double-entry-journal-entry-posting": {
+    "title": "DOUBLE-ENTRY / LEDGER",
+    "subtitle": "Rust 13 · Journal entry, posting and the zero-sum invariant",
+    "diagram": "flow",
+    "labels": [
+      "MONEY IN",
+      "MONEY OUT",
+      "BALANCED"
+    ]
+  },
+  "rust-typestate-may-trang-thai-thanh-toan": {
+    "title": "TYPESTATE / STATE",
+    "subtitle": "Rust 14 · Payment states checked at compile time",
+    "diagram": "flow",
+    "labels": [
+      "AUTHORIZED",
+      "CAPTURED",
+      "REFUNDED"
+    ]
+  },
+  "rust-closure-iterator-adapter-doi-soat-bo-nho": {
+    "title": "CLOSURE / ITERATOR",
+    "subtitle": "Rust 15 · Closures, lazy iterators and reconciliation",
+    "diagram": "flow",
+    "labels": [
+      "LEDGER",
+      "PSP",
+      "FINDINGS"
+    ]
+  },
+  "rust-box-rc-arc-refcell-smart-pointer": {
+    "title": "SMART POINTERS",
+    "subtitle": "Rust 16 · Box, Rc, Arc, RefCell and Cell in the ledger",
+    "diagram": "layers",
+    "labels": [
+      "BOX",
+      "RC / ARC",
+      "REFCELL"
+    ]
+  },
+  "rust-thiserror-anyhow-xu-ly-loi-thuc-te": {
+    "title": "ERRORS / CONTEXT",
+    "subtitle": "Rust 17 · thiserror, anyhow and error context",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "INFRA",
+      "BOUNDARY"
+    ]
+  },
+  "rust-serde-json-but-toan-decimal-thoi-gian": {
+    "title": "SERDE / JSON",
+    "subtitle": "Rust 18 · Serialize ledger entries to JSON contracts",
+    "diagram": "code",
+    "labels": [
+      "STRUCT",
+      "JSON",
+      "CONTRACT"
+    ]
+  },
+  "rust-proptest-property-test-bat-bien-so-cai": {
+    "title": "PROPERTY TEST",
+    "subtitle": "Rust 19 · Prove ledger invariants with proptest",
+    "diagram": "checklist",
+    "labels": [
+      "STRATEGY",
+      "INVARIANT",
+      "SHRINK"
+    ]
+  },
+  "rust-tong-hop-ledger-core-cargo-doc-workspace": {
+    "title": "LEDGER-CORE / WORKSPACE",
+    "subtitle": "Rust 20 · Workspace, docs and invariants for ledger-core",
+    "diagram": "layers",
+    "labels": [
+      "CORE",
+      "CLI",
+      "TESTS"
+    ]
+  },
+  "rust-async-await-tokio-task-timeout-cancellation": {
+    "title": "ASYNC / TOKIO",
+    "subtitle": "Rust 21 · Futures, timeout and cancellation with tokio",
+    "diagram": "flow",
+    "labels": [
+      "FUTURE",
+      "TIMEOUT",
+      "CANCEL"
+    ]
+  },
+  "rust-send-sync-arc-mutex-channel-concurrency": {
+    "title": "SEND / SYNC / CHANNEL",
+    "subtitle": "Rust 22 · Arc<Mutex>, actor and channels without data races",
+    "diagram": "flow",
+    "labels": [
+      "SEND",
+      "MUTEX",
+      "CHANNEL"
+    ]
+  },
+  "rust-sqlx-postgresql-pool-migration-query": {
+    "title": "SQLX / POSTGRESQL",
+    "subtitle": "Rust 23 · Pool, migrations and compile-time queries",
+    "diagram": "storage",
+    "labels": [
+      "POOL",
+      "MIGRATE",
+      "QUERY!"
+    ]
+  },
+  "rust-transaction-isolation-append-only-idempotency-key": {
+    "title": "TRANSACTION / ISOLATION",
+    "subtitle": "Rust 24 · Idempotent ledger writes on PostgreSQL",
+    "diagram": "layers",
+    "labels": [
+      "COMMIT",
+      "SERIALIZABLE",
+      "APPEND-ONLY"
+    ]
+  },
+  "rust-schema-so-cai-accounts-journal-postings-partition": {
+    "title": "LEDGER SCHEMA / INDEX",
+    "subtitle": "Rust 25 · Ledger tables, commit-time check, partition",
+    "diagram": "storage",
+    "labels": [
+      "ACCOUNTS",
+      "POSTINGS",
+      "BALANCES"
+    ]
+  },
+  "rust-repository-unit-of-work-trait-transaction": {
+    "title": "REPOSITORY / UOW",
+    "subtitle": "Rust 26 · Repository trait and Unit of Work over sqlx",
+    "diagram": "layers",
+    "labels": [
+      "PORT",
+      "ADAPTER",
+      "UOW"
+    ]
+  },
+  "rust-integration-test-postgresql-schema-rieng-ci": {
+    "title": "PG INTEGRATION TEST",
+    "subtitle": "Rust 27 · Schema per test, fixtures and CI",
+    "diagram": "layers",
+    "labels": [
+      "SCHEMA",
+      "FIXTURE",
+      "CI"
+    ]
+  },
+  "rust-redis-cache-so-du-rate-limit-lock-ttl": {
+    "title": "REDIS / CACHE",
+    "subtitle": "Rust 28 · Cache, rate limit and TTL locks",
+    "diagram": "layers",
+    "labels": [
+      "CACHE",
+      "BUCKET",
+      "LOCK"
+    ]
+  },
+  "rust-config-secrets-tracing-structured-logging": {
+    "title": "TRACING / CONFIG",
+    "subtitle": "Rust 29 · Config, secrets and structured JSON logging",
+    "diagram": "layers",
+    "labels": [
+      "CONFIG",
+      "SPAN",
+      "JSON LOG"
+    ]
+  },
+  "rust-criterion-benchmark-do-bo-nho-10k-but-toan": {
+    "title": "CRITERION / DHAT",
+    "subtitle": "Rust 30 · Benchmarks, allocations and 10k writes/s",
+    "diagram": "target",
+    "labels": [
+      "CRITERION",
+      "DHAT",
+      "POSTGRES"
+    ]
+  },
+  "rust-axum-http-endpoint-ghi-but-toan-tra-so-du": {
+    "title": "AXUM / HTTP ENDPOINT",
+    "subtitle": "Rust 31 · Router, extractor and IntoResponse for the ledger",
+    "diagram": "network",
+    "labels": [
+      "ROUTER",
+      "EXTRACTOR",
+      "RESPONSE"
+    ]
+  },
+  "rust-validation-problem-details-openapi-utoipa": {
+    "title": "PROBLEM DETAILS / API",
+    "subtitle": "Rust 32 · Validation, RFC 9457 and OpenAPI with utoipa",
+    "diagram": "layers",
+    "labels": [
+      "VALIDATE",
+      "PROBLEM",
+      "OPENAPI"
+    ]
+  },
+  "rust-tower-middleware-timeout-request-id-jwt-rate-limit": {
+    "title": "TOWER / MIDDLEWARE",
+    "subtitle": "Rust 33 · Layer order, request id, JWT and rate limit",
+    "diagram": "layers",
+    "labels": [
+      "TRACE",
+      "TIMEOUT",
+      "JWT"
+    ]
+  },
+  "rust-axum-api-test-oneshot-hop-dong-bff": {
+    "title": "API TEST / CONTRACT",
+    "subtitle": "Rust 34 · oneshot, real PostgreSQL, C# contract",
+    "diagram": "checklist",
+    "labels": [
+      "ONESHOT",
+      "SNAPSHOT",
+      "CONTRACT"
+    ]
+  },
+  "rust-tonic-grpc-get-balance-post-entry-interop-dotnet": {
+    "title": "TONIC / GRPC",
+    "subtitle": "Rust 35 · gRPC ledger service, .NET client",
+    "diagram": "network",
+    "labels": [
+      "PROTO",
+      "TONIC",
+      "C# CLIENT"
+    ]
+  },
+  "rust-kafka-rdkafka-consumer-producer-schema": {
+    "title": "KAFKA / RDKAFKA",
+    "subtitle": "Rust 36 · Consumer, producer and at-least-once",
+    "diagram": "split",
+    "labels": [
+      "PARTITION",
+      "OFFSET",
+      "COMMIT"
+    ]
+  },
+  "rust-outbox-inbox-idempotent-consumer": {
+    "title": "OUTBOX / INBOX",
+    "subtitle": "Rust 37 · Outbox, inbox, idempotent consumer, DLQ",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "KAFKA",
+      "INBOX"
+    ]
+  },
+  "rust-webhook-psp-hmac-chong-replay-xu-ly-tre-trung": {
+    "title": "WEBHOOK / HMAC",
+    "subtitle": "Rust 38 · Verify signature, replay window, dedupe",
+    "diagram": "checklist",
+    "labels": [
+      "SIGNATURE",
+      "REPLAY",
+      "DEDUPE"
+    ]
+  },
+  "rust-graceful-shutdown-health-readiness-backpressure": {
+    "title": "GRACEFUL / SHUTDOWN",
+    "subtitle": "Rust 39 · Shutdown, readiness and backpressure",
+    "diagram": "flow",
+    "labels": [
+      "SIGTERM",
+      "DRAIN",
+      "READYZ"
+    ]
+  },
+  "rust-tong-hop-ledger-api-postgresql-kafka-end-to-end": {
+    "title": "LEDGER API / E2E",
+    "subtitle": "Rust 40 · PostgreSQL + Kafka end-to-end ledger service",
+    "diagram": "flow",
+    "labels": [
+      "KAFKA",
+      "POSTGRES",
+      "GRPC"
+    ]
   }
 }

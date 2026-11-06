@@ -1,0 +1,15 @@
+[package]
+name = "ledger_13_double_entry_journal"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 13: double-entry, journal entry, posting, builder, bút toán đảo và số dư là projection"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]

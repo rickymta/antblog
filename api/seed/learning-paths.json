@@ -410,5 +410,65 @@
       "ba-thuc-hanh-tong-hop-discovery"
     ],
     "status": "published"
+  },
+  {
+    "slug": "rust-co-ban-qua-toi-noi",
+    "title": "Rust cơ bản qua Tới Nơi",
+    "description": "Lộ trình 20 bài cấp cơ bản: vì sao service sổ cái Tới Nơi chọn Rust khi backend chính là C#, rồi cargo, kiểu số và tiền VND, ownership, struct/enum/match, iterator, Result/Option, String và thời gian, collections, module và cargo test; tiếp theo là trait, newtype, double-entry, typestate, serde và property test để có thư viện ledger-core.",
+    "level": "beginner",
+    "category": "programming",
+    "articles": [
+      "rust-vi-sao-so-cai-toi-noi-chon-rust",
+      "rust-cargo-tu-source-code-den-but-toan-dau-tien",
+      "rust-kieu-so-tien-vnd-i64-decimal",
+      "rust-ownership-move-borrow-but-toan",
+      "rust-struct-enum-match-tai-khoan-but-toan",
+      "rust-ham-dieu-kien-vong-lap-iterator-so-du",
+      "rust-result-option-toan-tu-hoi-loi-la-gia-tri",
+      "rust-string-str-ngay-gio-dinh-dang-tien",
+      "rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho",
+      "rust-module-crate-cargo-test-clippy",
+      "rust-trait-generics-chinh-sach-phi-lam-tron",
+      "rust-newtype-value-object-money-account-id",
+      "rust-double-entry-journal-entry-posting",
+      "rust-typestate-may-trang-thai-thanh-toan",
+      "rust-closure-iterator-adapter-doi-soat-bo-nho",
+      "rust-box-rc-arc-refcell-smart-pointer",
+      "rust-thiserror-anyhow-xu-ly-loi-thuc-te",
+      "rust-serde-json-but-toan-decimal-thoi-gian",
+      "rust-proptest-property-test-bat-bien-so-cai",
+      "rust-tong-hop-ledger-core-cargo-doc-workspace"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "rust-trung-binh-qua-toi-noi",
+    "title": "Rust trung bình qua Tới Nơi",
+    "description": "Lộ trình 20 bài cấp trung bình: đưa thư viện ledger-core thành service sổ cái thật. Async với tokio, concurrency, PostgreSQL qua sqlx, transaction và idempotency, schema sổ cái, Redis, tracing, đo hiệu năng; tiếp theo là HTTP với axum, gRPC với tonic, Kafka, outbox, webhook VíXanh và graceful shutdown.",
+    "level": "intermediate",
+    "category": "programming",
+    "articles": [
+      "rust-async-await-tokio-task-timeout-cancellation",
+      "rust-send-sync-arc-mutex-channel-concurrency",
+      "rust-sqlx-postgresql-pool-migration-query",
+      "rust-transaction-isolation-append-only-idempotency-key",
+      "rust-schema-so-cai-accounts-journal-postings-partition",
+      "rust-repository-unit-of-work-trait-transaction",
+      "rust-integration-test-postgresql-schema-rieng-ci",
+      "rust-redis-cache-so-du-rate-limit-lock-ttl",
+      "rust-config-secrets-tracing-structured-logging",
+      "rust-criterion-benchmark-do-bo-nho-10k-but-toan",
+      "rust-axum-http-endpoint-ghi-but-toan-tra-so-du",
+      "rust-validation-problem-details-openapi-utoipa",
+      "rust-tower-middleware-timeout-request-id-jwt-rate-limit",
+      "rust-axum-api-test-oneshot-hop-dong-bff",
+      "rust-tonic-grpc-get-balance-post-entry-interop-dotnet",
+      "rust-kafka-rdkafka-consumer-producer-schema",
+      "rust-outbox-inbox-idempotent-consumer",
+      "rust-webhook-psp-hmac-chong-replay-xu-ly-tre-trung",
+      "rust-graceful-shutdown-health-readiness-backpressure",
+      "rust-tong-hop-ledger-api-postgresql-kafka-end-to-end"
+    ],
+    "status": "published"
   }
 ]

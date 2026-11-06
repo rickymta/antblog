@@ -1,0 +1,16 @@
+[package]
+name = "ledger_15_closure_iterator_doi_soat"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 15: closure, iterator adapter và lazy evaluation, đối soát sổ cái với sao kê VíXanh trong bộ nhớ"
+
+# Thư viện giữ tên `ledger_lab` như bài 10 để code gọi giống nhau giữa các lab.
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]

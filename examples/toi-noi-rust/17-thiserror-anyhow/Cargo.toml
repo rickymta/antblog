@@ -1,0 +1,17 @@
+[package]
+name = "ledger_17_thiserror_anyhow"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 17: thiserror, anyhow và ngữ cảnh lỗi cho sổ cái Tới Nơi"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+thiserror = "2.0.21"

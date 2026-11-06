@@ -24,5 +24,10 @@ examples/toi-noi-dotnet/**/obj/
 # BenchmarkDotNet generated measurements/build artifacts
 BenchmarkDotNet.Artifacts/
 
+# Rust example build outputs
+examples/toi-noi-rust/**/target/
+examples/toi-noi-rust/**/dotnet-client/**/bin/
+examples/toi-noi-rust/**/dotnet-client/**/obj/
+
 # Canary CloudWatch Synthetics: layout bắt buộc nodejs/node_modules/<script>.js, không phải thư viện cài
 !examples/toi-noi-aws/p06-55-slo/canary/nodejs/node_modules/
