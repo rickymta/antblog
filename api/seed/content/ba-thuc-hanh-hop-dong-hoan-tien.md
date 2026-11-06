@@ -64,3 +64,5 @@ Nộp một bộ liên kết gồm dictionary, bảng transition, mapping, tám 
 ## 8. Tổng kết phần 5
 
 Ôn [glossary và mô hình dữ liệu](/articles/ba-domain-glossary-mo-hinh-du-lieu) khi các tên gọi chưa nhất quán. Phần tiếp theo chuyển sang quản lý backlog, phiên bản và tác động thay đổi. Hồ sơ P05 là đề xuất học tập, không phải bằng chứng tính năng đã triển khai.
+
+Bắt đầu phần 6: [Backlog và quản lý thay đổi](/articles/ba-backlog-refinement-cau-hoi-mo).

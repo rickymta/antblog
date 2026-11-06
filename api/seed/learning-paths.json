@@ -567,5 +567,23 @@
       "ba-thuc-hanh-hop-dong-hoan-tien"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p06-quan-ly-backlog-thay-doi",
+    "title": "BA · Phần 6 · Backlog và quản lý thay đổi",
+    "description": "Tám bài thực hành backlog và quản lý thay đổi qua dự án Tới Nơi; ba bài cơ bản, ba trung bình và hai nâng cao, kèm hồ sơ tổng hợp cuối phần.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-backlog-refinement-cau-hoi-mo",
+      "ba-moscow-uu-tien-theo-muc-tieu",
+      "ba-traceability-muc-tieu-yeu-cau-test",
+      "ba-baseline-version-approval",
+      "ba-change-request-impact-analysis",
+      "ba-uu-tien-gia-tri-chi-phi-do-tin-cay",
+      "ba-phu-thuoc-yeu-cau-xuyen-doi",
+      "ba-thuc-hanh-doi-phi-sat-ngay-phat-hanh"
+    ],
+    "status": "published"
   }
 ]

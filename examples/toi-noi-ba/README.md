@@ -59,3 +59,5 @@ Các vai trò trên là phân công giả lập của Tới Nơi cho bài tập,
 P04 hoàn thành BA-025–BA-032; [gói yêu cầu điểm đón](p04-goi-yeu-cau.md) là thiết kế đề xuất, chưa có trong lab theo R-GEN-06.
 
 P05 hoàn thành BA-033–BA-040; [hồ sơ tích hợp](p05-tich-hop.md) gồm dữ liệu SQL độc lập và hợp đồng refund đề xuất.
+
+P06 hoàn thành BA-041–BA-048; [hồ sơ thực hành](p06-quan-ly-thay-doi.md) liên kết các quyết định và bài tập của phần.

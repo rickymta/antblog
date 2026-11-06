@@ -3298,5 +3298,85 @@
       "EXCEPTIONS",
       "REVIEW"
     ]
+  },
+  "ba-backlog-refinement-cau-hoi-mo": {
+    "title": "BACKLOG REFINEMENT",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "flow",
+    "labels": [
+      "NEED",
+      "QUESTIONS",
+      "READY"
+    ]
+  },
+  "ba-moscow-uu-tien-theo-muc-tieu": {
+    "title": "MOSCOW PRIORITIES",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "checklist",
+    "labels": [
+      "MUST",
+      "SHOULD",
+      "COULD"
+    ]
+  },
+  "ba-traceability-muc-tieu-yeu-cau-test": {
+    "title": "TRACE THE WHY",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "network",
+    "labels": [
+      "GOAL",
+      "REQUIREMENT",
+      "EVIDENCE"
+    ]
+  },
+  "ba-baseline-version-approval": {
+    "title": "BASELINE + VERSION",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "pages",
+    "labels": [
+      "DRAFT",
+      "REVIEW",
+      "APPROVAL"
+    ]
+  },
+  "ba-change-request-impact-analysis": {
+    "title": "CHANGE IMPACT",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "network",
+    "labels": [
+      "RULE",
+      "CHANGE",
+      "CONSEQUENCES"
+    ]
+  },
+  "ba-uu-tien-gia-tri-chi-phi-do-tin-cay": {
+    "title": "VALUE + CONFIDENCE",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "target",
+    "labels": [
+      "VALUE",
+      "EVIDENCE",
+      "EFFORT"
+    ]
+  },
+  "ba-phu-thuoc-yeu-cau-xuyen-doi": {
+    "title": "TEAM DEPENDENCIES",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "flow",
+    "labels": [
+      "PROVIDER",
+      "CONTRACT",
+      "CONSUMER"
+    ]
+  },
+  "ba-thuc-hanh-doi-phi-sat-ngay-phat-hanh": {
+    "title": "BA CASE / 06",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "checklist",
+    "labels": [
+      "OPTIONS",
+      "IMPACT",
+      "DECISION"
+    ]
   }
 }
