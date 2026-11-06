@@ -18,7 +18,7 @@ Tham khảo khái niệm của IIBA; đây là chương trình thực hành riê
 
 Mức độ là độ khó của bài trong chủ đề, không phải chức danh nghề nghiệp. Trong mỗi phần đọc lần lượt 1–8; phần sau kế thừa sản phẩm phần trước. Người có kinh nghiệm có thể bắt đầu từ bài 7, nhưng cần đọc hồ sơ tình huống và các đầu ra được nhắc tới. Đường học đầy đủ: P01 → P02 → P03 → P04 → P05 → P06 → P07 → P08.
 
-Các bảng dưới đây là kế hoạch toàn bộ 64 bài. **BA-001 đến BA-032 đã viết trong source, hoàn thành P01–P04; 32 bài còn lại là kế hoạch, chưa xuất bản.** Tệp seed chỉ liệt kê bài đã có nội dung; không tạo bài rỗng hoặc liên kết đọc tới bài tương lai.
+Các bảng dưới đây là kế hoạch toàn bộ 64 bài. **BA-001 đến BA-048 đã viết trong source, hoàn thành P01–P06; 16 bài còn lại là kế hoạch, chưa xuất bản.** Tệp seed chỉ liệt kê bài đã có nội dung; không tạo bài rỗng hoặc liên kết đọc tới bài tương lai.
 
 ## P01 · Tư duy BA: hiểu vấn đề trước khi viết yêu cầu
 
@@ -198,9 +198,27 @@ Mỗi bài nhắm khoảng 10–18 phút đọc, bài thực hành 18–25 phút
 | BA-031 | `ba-brd-srs-tai-lieu-theo-rui-ro` | Đã viết |
 | BA-032 | `ba-thuc-hanh-review-goi-yeu-cau` | Đã viết |
 
-P01–P04 mỗi phần có đủ 8 bài, phân bổ 3 CB / 3 TB / 2 NC. Hồ sơ trong `examples/toi-noi-ba`: `p01-ho-so-de-xuat.md`, `p02-discovery-ho-so.md`, `p03-mo-hinh-quy-trinh.md`. Tiếp theo viết BA-033–BA-040 cho P05. Trước khi hoàn tất phần, kiểm tra đủ bài, mức độ, ảnh đại diện và sản phẩm thực hành.
+| BA-033 | `ba-domain-glossary-mo-hinh-du-lieu` | Đã viết |
+| BA-034 | `ba-data-dictionary-don-vi-null` | Đã viết |
+| BA-035 | `ba-doc-api-request-response-loi` | Đã viết |
+| BA-036 | `ba-sql-kiem-chung-gia-thuyet` | Đã viết |
+| BA-037 | `ba-mapping-du-lieu-doi-soat` | Đã viết |
+| BA-038 | `ba-event-dong-bo-trang-thai-cho` | Đã viết |
+| BA-039 | `ba-idempotency-retry-giao-dich-loi` | Đã viết |
+| BA-040 | `ba-thuc-hanh-hop-dong-hoan-tien` | Đã viết |
 
-Bốn lộ trình seed P01–P04 mỗi phần chứa tám bài; P05–P08 chưa tạo lộ trình rỗng. Lệnh seed đặt bài ở trạng thái published khi chạy, nên file source không đồng nghĩa đã lên website. Phiên làm nội dung này không chạy seed hay deploy.
+| BA-041 | `ba-backlog-refinement-cau-hoi-mo` | Đã viết |
+| BA-042 | `ba-moscow-uu-tien-theo-muc-tieu` | Đã viết |
+| BA-043 | `ba-traceability-muc-tieu-yeu-cau-test` | Đã viết |
+| BA-044 | `ba-baseline-version-approval` | Đã viết |
+| BA-045 | `ba-change-request-impact-analysis` | Đã viết |
+| BA-046 | `ba-uu-tien-gia-tri-chi-phi-do-tin-cay` | Đã viết |
+| BA-047 | `ba-phu-thuoc-yeu-cau-xuyen-doi` | Đã viết |
+| BA-048 | `ba-thuc-hanh-doi-phi-sat-ngay-phat-hanh` | Đã viết |
+
+P01–P06 mỗi phần đủ 8 bài, phân bổ 3 CB / 3 TB / 2 NC. Hồ sơ từng phần ở `examples/toi-noi-ba`; mới nhất là `p06-quan-ly-thay-doi.md`. Tiếp theo viết BA-049–BA-056 cho P07.
+
+Có 6 lộ trình seed BA, mỗi phần tám bài. File source không đồng nghĩa đã lên website; phiên làm nội dung này không chạy seed hay deploy.
 
 ## Kiểm tra hình ảnh trước khi hoàn tất phần
 

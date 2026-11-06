@@ -3748,5 +3748,165 @@
       "CONSENT",
       "HUMAN"
     ]
+  },
+  "ba-domain-glossary-mo-hinh-du-lieu": {
+    "title": "DOMAIN LANGUAGE",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "network",
+    "labels": [
+      "TERMS",
+      "RELATIONS",
+      "MEANING"
+    ]
+  },
+  "ba-data-dictionary-don-vi-null": {
+    "title": "DATA DICTIONARY",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "checklist",
+    "labels": [
+      "TYPE",
+      "UNIT",
+      "NULL"
+    ]
+  },
+  "ba-doc-api-request-response-loi": {
+    "title": "READ THE API",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "flow",
+    "labels": [
+      "REQUEST",
+      "OUTCOME",
+      "ERROR"
+    ]
+  },
+  "ba-sql-kiem-chung-gia-thuyet": {
+    "title": "SQL FOR BA",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "code",
+    "labels": [
+      "COHORT",
+      "COUNTS",
+      "EVIDENCE"
+    ]
+  },
+  "ba-mapping-du-lieu-doi-soat": {
+    "title": "RECONCILIATION",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "split",
+    "labels": [
+      "INTERNAL",
+      "MATCH",
+      "PROVIDER"
+    ]
+  },
+  "ba-event-dong-bo-trang-thai-cho": {
+    "title": "ASYNC OUTCOMES",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "cycle",
+    "labels": [
+      "REQUEST",
+      "WAIT",
+      "CONFIRM"
+    ]
+  },
+  "ba-idempotency-retry-giao-dich-loi": {
+    "title": "ONE INTENT",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "flow",
+    "labels": [
+      "KEY",
+      "RETRY",
+      "RESULT"
+    ]
+  },
+  "ba-thuc-hanh-hop-dong-hoan-tien": {
+    "title": "BA CASE / 05",
+    "subtitle": "Toi Noi · Data and integration analysis",
+    "diagram": "checklist",
+    "labels": [
+      "CONTRACT",
+      "EXCEPTIONS",
+      "REVIEW"
+    ]
+  },
+  "ba-backlog-refinement-cau-hoi-mo": {
+    "title": "BACKLOG REFINEMENT",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "flow",
+    "labels": [
+      "NEED",
+      "QUESTIONS",
+      "READY"
+    ]
+  },
+  "ba-moscow-uu-tien-theo-muc-tieu": {
+    "title": "MOSCOW PRIORITIES",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "checklist",
+    "labels": [
+      "MUST",
+      "SHOULD",
+      "COULD"
+    ]
+  },
+  "ba-traceability-muc-tieu-yeu-cau-test": {
+    "title": "TRACE THE WHY",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "network",
+    "labels": [
+      "GOAL",
+      "REQUIREMENT",
+      "EVIDENCE"
+    ]
+  },
+  "ba-baseline-version-approval": {
+    "title": "BASELINE + VERSION",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "pages",
+    "labels": [
+      "DRAFT",
+      "REVIEW",
+      "APPROVAL"
+    ]
+  },
+  "ba-change-request-impact-analysis": {
+    "title": "CHANGE IMPACT",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "network",
+    "labels": [
+      "RULE",
+      "CHANGE",
+      "CONSEQUENCES"
+    ]
+  },
+  "ba-uu-tien-gia-tri-chi-phi-do-tin-cay": {
+    "title": "VALUE + CONFIDENCE",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "target",
+    "labels": [
+      "VALUE",
+      "EVIDENCE",
+      "EFFORT"
+    ]
+  },
+  "ba-phu-thuoc-yeu-cau-xuyen-doi": {
+    "title": "TEAM DEPENDENCIES",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "flow",
+    "labels": [
+      "PROVIDER",
+      "CONTRACT",
+      "CONSUMER"
+    ]
+  },
+  "ba-thuc-hanh-doi-phi-sat-ngay-phat-hanh": {
+    "title": "BA CASE / 06",
+    "subtitle": "Toi Noi · Business Analysis / Part 06",
+    "diagram": "checklist",
+    "labels": [
+      "OPTIONS",
+      "IMPACT",
+      "DECISION"
+    ]
   }
 }
