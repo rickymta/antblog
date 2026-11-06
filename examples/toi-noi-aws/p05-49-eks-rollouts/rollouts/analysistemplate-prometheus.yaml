@@ -1,0 +1,48 @@
+# Hai metric chạy song song: tỷ lệ 5xx của riêng pod canary phải dưới 1%,
+# và lưu lượng vào canary phải đủ để con số đó có ý nghĩa (nếu không, kết quả là inconclusive, rollout dừng chờ người).
+# Truy vấn dựa vào nhãn rollouts_pod_template_hash do PodMonitor ở podmonitor-booking.yaml thêm vào metric.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: booking-canary-health
+  namespace: booking
+spec:
+  args:
+    - name: namespace
+    - name: canary-hash
+  metrics:
+    - name: error-rate
+      interval: 1m
+      count: 5
+      failureLimit: 1
+      consecutiveErrorLimit: 3
+      successCondition: isNaN(result[0]) || result[0] < 0.01
+      provider:
+        prometheus:
+          address: https://aps-workspaces.ap-southeast-1.amazonaws.com/workspaces/ws-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+          authentication:
+            sigv4:
+              region: ap-southeast-1
+          query: |
+            (
+              sum(rate(http_server_request_duration_seconds_count{namespace="{{args.namespace}}", rollouts_pod_template_hash="{{args.canary-hash}}", http_response_status_code=~"5.."}[2m]))
+              or vector(0)
+            )
+            /
+            sum(rate(http_server_request_duration_seconds_count{namespace="{{args.namespace}}", rollouts_pod_template_hash="{{args.canary-hash}}"}[2m]))
+    - name: request-volume
+      interval: 1m
+      count: 5
+      # Ít hơn 1 request/giây vào canary: không thành công cũng không thất bại, kết quả inconclusive.
+      successCondition: result[0] >= 1
+      failureCondition: result[0] < 0
+      inconclusiveLimit: 1
+      provider:
+        prometheus:
+          address: https://aps-workspaces.ap-southeast-1.amazonaws.com/workspaces/ws-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+          authentication:
+            sigv4:
+              region: ap-southeast-1
+          query: |
+            sum(rate(http_server_request_duration_seconds_count{namespace="{{args.namespace}}", rollouts_pod_template_hash="{{args.canary-hash}}"}[2m]))
+              or vector(0)

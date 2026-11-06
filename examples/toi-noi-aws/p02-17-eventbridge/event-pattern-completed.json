@@ -1,0 +1,8 @@
+{
+  "source": ["toinoi.booking"],
+  "detail-type": ["TripCompleted"],
+  "detail": {
+    "city": ["HCM"],
+    "fareVnd": [{ "numeric": [">=", 50000] }]
+  }
+}

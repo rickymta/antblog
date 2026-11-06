@@ -1,0 +1,15 @@
+# Mẫu ~/.aws/config cho AWS CLI v2 dùng IAM Identity Center.
+# Thay start URL và account id bằng giá trị của bạn; các giá trị dưới đây chỉ minh hoạ.
+# Không có access key hay secret trong tệp này: credential được cấp tạm thời sau `aws sso login`.
+
+[sso-session toinoi]
+sso_start_url = https://toinoi-lab.awsapps.com/start
+sso_region = ap-southeast-1
+sso_registration_scopes = sso:account:access
+
+[profile toinoi-lab]
+sso_session = toinoi
+sso_account_id = 123456789012
+sso_role_name = ToiNoiLabAdmin
+region = ap-southeast-1
+output = json

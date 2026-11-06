@@ -1,0 +1,5 @@
+[
+  { "ParameterKey": "Env", "ParameterValue": "dev" },
+  { "ParameterKey": "EnableNat", "ParameterValue": "false" },
+  { "ParameterKey": "Owner", "ParameterValue": "platform" }
+]

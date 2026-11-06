@@ -1,0 +1,101 @@
+# Bản eksctl tương đương main.tf để so sánh. eksctl tạo CloudFormation stack, không phải Terraform state.
+# Tên trường đã đối chiếu với tài liệu eksctl nhưng chưa chạy trên tài khoản thật; kiểm lại với phiên bản eksctl bạn dùng.
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: toinoi-lab-eks
+  region: ap-southeast-1
+  version: "1.36"
+  tags:
+    Project: ToiNoi
+    Env: lab
+    Owner: platform
+
+# Dùng lại VPC của lab p03-23: thay ID bằng giá trị của bạn.
+vpc:
+  id: vpc-0abc1234
+  subnets:
+    private:
+      ap-southeast-1a:
+        id: subnet-0aaa1111
+      ap-southeast-1b:
+        id: subnet-0bbb2222
+  clusterEndpoints:
+    privateAccess: true
+    publicAccess: true
+  publicAccessCIDRs:
+    - 203.0.113.0/24
+
+accessConfig:
+  authenticationMode: API
+  accessEntries:
+    - principalARN: arn:aws:iam::123456789012:role/toinoi-lab-ci-deploy
+      accessPolicies:
+        - policyARN: arn:aws:eks::aws:cluster-access-policy/AmazonEKSEditPolicy
+          accessScope:
+            type: namespace
+            namespaces:
+              - booking
+              - dispatch
+    - principalARN: arn:aws:iam::123456789012:role/toinoi-lab-dev
+      accessPolicies:
+        - policyARN: arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy
+          accessScope:
+            type: cluster
+
+addons:
+  - name: vpc-cni
+  - name: coredns
+  - name: kube-proxy
+  - name: eks-pod-identity-agent
+
+iam:
+  podIdentityAssociations:
+    - namespace: booking
+      serviceAccountName: booking
+      createServiceAccount: false
+      roleName: toinoi-lab-booking-pod
+      permissionPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+            Resource: arn:aws:s3:::toinoi-lab-delivery-photos/proof/*
+
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+      - api
+      - audit
+    logRetentionInDays: 14
+
+managedNodeGroups:
+  - name: base
+    amiFamily: AmazonLinux2023
+    instanceType: m7g.large
+    minSize: 2
+    maxSize: 3
+    desiredCapacity: 2
+    privateNetworking: true
+    labels:
+      toinoi.example/capacity: on-demand
+  - name: spot
+    amiFamily: AmazonLinux2023
+    instanceTypes:
+      - m7g.large
+      - m6g.large
+      - m7gd.large
+    spot: true
+    minSize: 0
+    maxSize: 6
+    desiredCapacity: 1
+    privateNetworking: true
+    labels:
+      toinoi.example/capacity: spot
+    taints:
+      - key: toinoi.example/capacity
+        value: spot
+        effect: NoSchedule

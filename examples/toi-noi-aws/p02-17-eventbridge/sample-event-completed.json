@@ -1,0 +1,17 @@
+{
+  "version": "0",
+  "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
+  "detail-type": "TripCompleted",
+  "source": "toinoi.booking",
+  "account": "123456789012",
+  "time": "2026-11-06T04:30:00Z",
+  "region": "ap-southeast-1",
+  "resources": [],
+  "detail": {
+    "eventId": "evt-1001-completed",
+    "tripId": "1001",
+    "city": "HCM",
+    "service": "ride",
+    "fareVnd": 52500
+  }
+}

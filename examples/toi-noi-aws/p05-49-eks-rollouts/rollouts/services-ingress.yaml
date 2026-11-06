@@ -1,0 +1,54 @@
+# Hai Service cùng chọn pod booking; Argo Rollouts tự thêm selector rollouts-pod-template-hash
+# để booking-stable trỏ bản cũ và booking-canary trỏ bản mới.
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-stable
+  namespace: booking
+spec:
+  selector:
+    app.kubernetes.io/name: booking
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-canary
+  namespace: booking
+spec:
+  selector:
+    app.kubernetes.io/name: booking
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+# Backend dùng port "use-annotation": AWS Load Balancer Controller đọc hành động forward từ annotation,
+# và Argo Rollouts viết lại trọng số trong annotation này theo từng bước canary.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: booking
+  namespace: booking
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/actions.booking-stable: |
+      {"Type":"forward","ForwardConfig":{"TargetGroups":[{"ServiceName":"booking-stable","ServicePort":"80","Weight":100}]}}
+spec:
+  ingressClassName: alb
+  rules:
+    - host: api.toinoi.example
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: booking-stable
+                port:
+                  name: use-annotation

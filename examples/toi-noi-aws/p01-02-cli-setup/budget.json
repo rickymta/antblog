@@ -1,0 +1,9 @@
+{
+  "BudgetName": "toinoi-lab-monthly",
+  "BudgetType": "COST",
+  "TimeUnit": "MONTHLY",
+  "BudgetLimit": {
+    "Amount": "10",
+    "Unit": "USD"
+  }
+}

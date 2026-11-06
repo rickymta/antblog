@@ -1,0 +1,6 @@
+# Sao chép thành lab.tfvars rồi thay bằng giá trị trong tài khoản lab của bạn (các giá trị dưới đây là giả).
+env                = "lab"
+vpc_id             = "vpc-0abc1234"
+private_subnet_ids = ["subnet-0aaa1111", "subnet-0bbb2222"]
+public_subnet_ids  = ["subnet-0ccc3333", "subnet-0ddd4444"]
+api_allowed_cidrs  = ["203.0.113.0/24"]

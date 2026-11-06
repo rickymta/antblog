@@ -1,0 +1,133 @@
+# Cần bật network policy cho VPC CNI (add-on config enableNetworkPolicy="true") để các policy này có hiệu lực.
+# Namespace booking: mặc định chặn hết, rồi mở đúng từng đường.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: booking
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+# Cho ALB (target-type ip) vào cổng 8080. 10.10.0.0/23 là hai public subnet của VPC lab p03-23 (nơi ALB nằm); đổi theo mạng của bạn.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-alb
+  namespace: booking
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 10.10.0.0/23
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# DNS tới CoreDNS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-dns
+  namespace: booking
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# Pod Identity Agent ở 169.254.170.23:80. Thiếu rule này, SDK không lấy được credentials sau khi default-deny egress.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-pod-identity-agent
+  namespace: booking
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 169.254.170.23/32
+      ports:
+        - protocol: TCP
+          port: 80
+---
+# booking chỉ được gọi service quote (namespace pricing) ở cổng 8080.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-booking-to-quote
+  namespace: booking
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: pricing
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: quote
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# Ra AWS API (kể cả VPC endpoint trong VPC) qua HTTPS, trừ IMDS 169.254.169.254.
+# Policy này cho phép tới mọi IP khác ở cổng 443; nếu cần chặt hơn, thay bằng danh sách CIDR của VPC endpoint.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-https-except-metadata
+  namespace: booking
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.169.254/32
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# Kết nối PostgreSQL tới hai private subnet của VPC lab p03-23 (nơi RDS nằm, 10.10.10.0/23). Với security group for pods, RDS vẫn chỉ mở cho SG của pod.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-postgres
+  namespace: booking
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.10.10.0/23
+      ports:
+        - protocol: TCP
+          port: 5432

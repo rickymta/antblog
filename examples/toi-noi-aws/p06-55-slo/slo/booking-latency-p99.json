@@ -1,0 +1,35 @@
+{
+  "Name": "toinoi-booking-latency-p99",
+  "Description": "p99 latency của POST /v1/trips dưới 800 ms trong ít nhất 99% số phút của 30 ngày",
+  "SliConfig": {
+    "SliMetricConfig": {
+      "KeyAttributes": {
+        "Type": "Service",
+        "Name": "toinoi-booking",
+        "Environment": "ecs:toinoi-lab"
+      },
+      "OperationName": "POST /v1/trips",
+      "MetricType": "LATENCY",
+      "Statistic": "p99",
+      "PeriodSeconds": 60
+    },
+    "MetricThreshold": 800,
+    "ComparisonOperator": "LessThan"
+  },
+  "Goal": {
+    "Interval": {
+      "RollingInterval": { "DurationUnit": "DAY", "Duration": 30 }
+    },
+    "AttainmentGoal": 99.0,
+    "WarningThreshold": 30.0
+  },
+  "BurnRateConfigurations": [
+    { "LookBackWindowMinutes": 60 }
+  ],
+  "Tags": [
+    { "Key": "Project", "Value": "ToiNoi" },
+    { "Key": "Env", "Value": "lab" },
+    { "Key": "Service", "Value": "booking" },
+    { "Key": "Owner", "Value": "platform" }
+  ]
+}

@@ -1,0 +1,15 @@
+# Security group for pods: pod booking dùng security group riêng để RDS chỉ mở cho nhóm này.
+# Yêu cầu: VPC CNI bật ENABLE_POD_ENI=true, node là loại instance hỗ trợ branch ENI (không áp dụng cho Fargate).
+# sg-... là ID minh hoạ; security group của RDS cho phép nguồn là security group này ở cổng 5432.
+apiVersion: vpcresources.k8s.aws/v1beta1
+kind: SecurityGroupPolicy
+metadata:
+  name: booking-db-access
+  namespace: booking
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: booking
+  securityGroups:
+    groupIds:
+      - sg-0123456789abcdef0

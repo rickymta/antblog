@@ -1,0 +1,70 @@
+# EFS cho cache ảnh tạm dùng chung giữa nhiều pod (ReadWriteMany). Mỗi PVC được cấp một access point riêng.
+# Thay fileSystemId bằng output efs_file_system_id của Terraform.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: toinoi-efs
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: fs-0abc1234
+  directoryPerms: "700"
+  basePath: /photo-cache
+  uid: "1000"
+  gid: "1000"
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: photo-cache
+  namespace: booking
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: toinoi-efs
+  resources:
+    requests:
+      # EFS đàn hồi, giá trị này không giới hạn dung lượng thật nhưng bắt buộc phải có.
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: photo-resizer
+  namespace: booking
+  labels:
+    app.kubernetes.io/name: photo-resizer
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: photo-resizer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: photo-resizer
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: resizer
+          image: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/photo-resizer:1.0.0
+          env:
+            - name: CACHE_DIR
+              value: /cache
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: photo-cache

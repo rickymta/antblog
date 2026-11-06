@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: toinoi-dev
+  namespace: argocd
+spec:
+  description: Môi trường dev của Tới Nơi
+  sourceRepos:
+    - https://github.com/toinoi-org/toi-noi-deploy.git
+  destinations:
+    - name: toinoi-dev
+      namespace: "*"
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceBlacklist:
+    - group: ""
+      kind: ResourceQuota
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: toinoi-staging
+  namespace: argocd
+spec:
+  description: Môi trường staging của Tới Nơi
+  sourceRepos:
+    - https://github.com/toinoi-org/toi-noi-deploy.git
+  destinations:
+    - name: toinoi-staging
+      namespace: "*"
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: toinoi-prod
+  namespace: argocd
+spec:
+  description: Môi trường prod của Tới Nơi, có cửa sổ cấm đồng bộ giờ cao điểm
+  sourceRepos:
+    - https://github.com/toinoi-org/toi-noi-deploy.git
+  destinations:
+    - name: toinoi-prod
+      namespace: booking
+    - name: toinoi-prod
+      namespace: dispatch
+    - name: toinoi-prod
+      namespace: tracking
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  # Cấm sync (kể cả thủ công) quanh hai khung cao điểm 11:00 và 17:00.
+  syncWindows:
+    - kind: deny
+      schedule: "30 10 * * *"
+      duration: 2h30m
+      applications: ["*"]
+      manualSync: false
+      timeZone: Asia/Ho_Chi_Minh
+    - kind: deny
+      schedule: "30 16 * * *"
+      duration: 2h30m
+      applications: ["*"]
+      manualSync: false
+      timeZone: Asia/Ho_Chi_Minh
+  roles:
+    - name: release
+      description: Người được sync prod ngoài cửa sổ cấm
+      policies:
+        - p, proj:toinoi-prod:release, applications, sync, toinoi-prod/*, allow

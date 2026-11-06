@@ -1,0 +1,6 @@
+{
+  "actions": [
+    { "remove": { "index": "toinoi-merchants-v1", "alias": "toinoi-merchants" } },
+    { "add": { "index": "toinoi-merchants-v2", "alias": "toinoi-merchants" } }
+  ]
+}

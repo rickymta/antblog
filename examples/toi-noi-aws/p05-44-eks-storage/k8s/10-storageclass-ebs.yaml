@@ -1,0 +1,31 @@
+# gp3 là lựa chọn mặc định hợp lý: baseline IOPS và throughput độc lập với dung lượng, khai thêm bằng iops/throughput.
+# WaitForFirstConsumer: chỉ tạo volume sau khi scheduler chọn node, để volume nằm đúng AZ của pod (EBS gắn theo AZ).
+# Auto Mode dùng provisioner ebs.csi.eks.amazonaws.com thay cho ebs.csi.aws.com; đổi nếu bạn chạy EKS Auto Mode.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: toinoi-gp3
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  iops: "3000"
+  throughput: "125"
+  fsType: ext4
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+---
+# Bản Retain cho dữ liệu không được mất khi xoá PVC: volume và dữ liệu còn lại, bạn tự dọn.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: toinoi-gp3-retain
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  fsType: ext4
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain

@@ -1,0 +1,96 @@
+# Worker đối soát (reconcile) giữ checkpoint trên đĩa riêng của từng pod. Cần namespace dispatch (lab p05-42) và image reconcile trong ECR.
+# Headless Service cho mỗi pod một tên DNS ổn định: reconcile-0.reconcile.dispatch.svc.cluster.local.
+apiVersion: v1
+kind: Service
+metadata:
+  name: reconcile
+  namespace: dispatch
+  labels:
+    app.kubernetes.io/name: reconcile
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: reconcile
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: reconcile
+  namespace: dispatch
+  labels:
+    app.kubernetes.io/name: reconcile
+    app.kubernetes.io/part-of: toinoi
+spec:
+  serviceName: reconcile
+  replicas: 2
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  # Giữ PVC khi xoá StatefulSet hoặc giảm số replica: checkpoint không mất vì một lệnh scale nhầm.
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: reconcile
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: reconcile
+        app.kubernetes.io/part-of: toinoi
+    spec:
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: reconcile
+          image: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/reconcile:1.0.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: CHECKPOINT_DIR
+              value: /var/lib/reconcile
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/reconcile
+  # PVC được tạo theo mẫu này cho từng pod: data-reconcile-0, data-reconcile-1.
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: toinoi-gp3
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: reconcile
+  namespace: dispatch
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: reconcile

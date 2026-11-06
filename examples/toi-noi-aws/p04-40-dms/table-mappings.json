@@ -1,0 +1,53 @@
+{
+  "rules": [
+    {
+      "rule-type": "selection",
+      "rule-id": "1",
+      "rule-name": "include-trips",
+      "object-locator": { "schema-name": "public", "table-name": "trips" },
+      "rule-action": "include"
+    },
+    {
+      "rule-type": "selection",
+      "rule-id": "2",
+      "rule-name": "include-trip-events",
+      "object-locator": { "schema-name": "public", "table-name": "trip_events" },
+      "rule-action": "include"
+    },
+    {
+      "rule-type": "selection",
+      "rule-id": "3",
+      "rule-name": "include-customers",
+      "object-locator": { "schema-name": "public", "table-name": "customers" },
+      "rule-action": "include"
+    },
+    {
+      "rule-type": "selection",
+      "rule-id": "4",
+      "rule-name": "include-drivers",
+      "object-locator": { "schema-name": "public", "table-name": "drivers" },
+      "rule-action": "include"
+    },
+    {
+      "rule-type": "selection",
+      "rule-id": "5",
+      "rule-name": "include-merchants",
+      "object-locator": { "schema-name": "public", "table-name": "merchants" },
+      "rule-action": "include"
+    },
+    {
+      "rule-type": "selection",
+      "rule-id": "6",
+      "rule-name": "include-cities",
+      "object-locator": { "schema-name": "public", "table-name": "cities" },
+      "rule-action": "include"
+    },
+    {
+      "rule-type": "selection",
+      "rule-id": "7",
+      "rule-name": "exclude-driver-locations",
+      "object-locator": { "schema-name": "public", "table-name": "driver_locations" },
+      "rule-action": "exclude"
+    }
+  ]
+}

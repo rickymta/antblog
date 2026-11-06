@@ -1,0 +1,54 @@
+# Bắt buộc nhãn, request/limit, digest và cấm tag latest cho pod trong ba namespace của Tới Nơi.
+# failureAction ở cấp rule theo cú pháp Kyverno 1.13 trở lên; bản cũ hơn dùng spec.validationFailureAction.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: toinoi-pod-baseline
+spec:
+  background: true
+  rules:
+    - name: require-labels
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [booking, dispatch, tracking]
+      validate:
+        failureAction: Enforce
+        message: "Pod phải có nhãn Project=ToiNoi và Service."
+        pattern:
+          metadata:
+            labels:
+              Project: ToiNoi
+              Service: "?*"
+    - name: require-requests-limits
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [booking, dispatch, tracking]
+      validate:
+        failureAction: Enforce
+        message: "Mỗi container phải có requests.cpu, requests.memory và limits.memory."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"
+                  limits:
+                    memory: "?*"
+    - name: require-image-digest
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [booking, dispatch, tracking]
+      validate:
+        failureAction: Enforce
+        message: "Image phải ghim theo digest (@sha256:...), không dùng tag."
+        pattern:
+          spec:
+            containers:
+              - image: "*@sha256:*"

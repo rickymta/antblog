@@ -1,0 +1,46 @@
+# Phương án thay thế: đọc số 5xx từ metric ALB trong CloudWatch (không cần Prometheus).
+# Độ trễ metric ALB lớn hơn Prometheus (chu kỳ phút), nên interval dài hơn. Dimension LoadBalancer là giá trị minh hoạ.
+# Cấu trúc cloudWatch.interval + metricDataQueries theo tài liệu Argo Rollouts (stable); chưa chạy với ALB thật.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: booking-alb-5xx
+  namespace: booking
+spec:
+  metrics:
+    - name: alb-target-5xx-rate
+      interval: 5m
+      count: 3
+      failureLimit: 1
+      successCondition: isNaN(result[0]) || result[0] < 0.01
+      provider:
+        cloudWatch:
+          interval: 5m
+          metricDataQueries:
+            - id: rate
+              expression: errors / requests
+              label: Tỷ lệ 5xx
+            - id: errors
+              returnData: false
+              metricStat:
+                metric:
+                  namespace: AWS/ApplicationELB
+                  metricName: HTTPCode_Target_5XX_Count
+                  dimensions:
+                    - name: LoadBalancer
+                      value: app/k8s-booking-0123456789abcdef/0123456789abcdef
+                period: 300
+                stat: Sum
+                unit: Count
+            - id: requests
+              returnData: false
+              metricStat:
+                metric:
+                  namespace: AWS/ApplicationELB
+                  metricName: RequestCount
+                  dimensions:
+                    - name: LoadBalancer
+                      value: app/k8s-booking-0123456789abcdef/0123456789abcdef
+                period: 300
+                stat: Sum
+                unit: Count

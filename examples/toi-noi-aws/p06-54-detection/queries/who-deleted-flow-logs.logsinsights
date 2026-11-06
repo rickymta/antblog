@@ -1,0 +1,5 @@
+# CloudWatch Logs Insights trên log group của trail: ai xoá VPC Flow Logs, từ đâu, bằng credential nào?
+fields @timestamp, userIdentity.arn, userIdentity.accessKeyId, sourceIPAddress, userAgent, awsRegion, errorCode
+| filter eventSource = "ec2.amazonaws.com" and eventName = "DeleteFlowLogs"
+| sort @timestamp desc
+| limit 100

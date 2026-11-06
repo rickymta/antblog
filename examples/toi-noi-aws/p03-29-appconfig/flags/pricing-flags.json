@@ -1,0 +1,28 @@
+{
+  "version": "1",
+  "flags": {
+    "peak-pricing-v2": {
+      "name": "peak-pricing-v2",
+      "description": "Công thức giá giờ cao điểm mới; áp cho một thành phố và một phần trăm khách",
+      "attributes": {
+        "multiplier": {
+          "constraints": { "type": "number", "required": true, "minimum": 1, "maximum": 3 }
+        },
+        "city": {
+          "constraints": { "type": "string", "required": true, "pattern": "^[a-z-]+$" }
+        },
+        "rolloutPercent": {
+          "constraints": { "type": "number", "required": true, "minimum": 0, "maximum": 100 }
+        }
+      }
+    }
+  },
+  "values": {
+    "peak-pricing-v2": {
+      "enabled": true,
+      "multiplier": 1.2,
+      "city": "ho-chi-minh",
+      "rolloutPercent": 5
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "family": "toinoi-lab-booking",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "runtimePlatform": { "operatingSystemFamily": "LINUX", "cpuArchitecture": "X86_64" },
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "${EXECUTION_ROLE_ARN}",
+  "taskRoleArn": "${TASK_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "booking",
+      "image": "${IMAGE_DIGEST}",
+      "essential": true,
+      "portMappings": [{ "containerPort": 8080, "protocol": "tcp" }],
+      "environment": [
+        { "name": "ASPNETCORE_ENVIRONMENT", "value": "Production" },
+        { "name": "ASPNETCORE_HTTP_PORTS", "value": "8080" },
+        { "name": "Auth__Authority", "value": "${AUTH_AUTHORITY}" },
+        { "name": "Auth__Audience", "value": "${AUTH_AUDIENCE}" }
+      ],
+      "secrets": [
+        { "name": "ConnectionStrings__Trips", "valueFrom": "${DB_SECRET_ARN}" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"],
+        "interval": 15,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "stopTimeout": 30,
+      "linuxParameters": { "initProcessEnabled": true },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "booking"
+        }
+      }
+    }
+  ],
+  "tags": [
+    { "key": "Project", "value": "ToiNoi" },
+    { "key": "Env", "value": "lab" },
+    { "key": "Service", "value": "booking" },
+    { "key": "Owner", "value": "platform" }
+  ]
+}

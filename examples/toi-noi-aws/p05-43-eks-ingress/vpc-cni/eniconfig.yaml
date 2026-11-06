@@ -1,0 +1,20 @@
+# Custom networking: pod lấy IP từ subnet phụ (secondary CIDR 100.64.0.0/16), không tiêu IP của subnet chính.
+# Mỗi AZ một ENIConfig, tên trùng với giá trị nhãn topology.kubernetes.io/zone của node (ENI_CONFIG_LABEL_DEF).
+# Subnet và security group ID là giả; subnet 100.64.x.x phải tạo trước trong VPC.
+apiVersion: crd.k8s.amazonaws.com/v1alpha1
+kind: ENIConfig
+metadata:
+  name: ap-southeast-1a
+spec:
+  subnet: subnet-0pod1aaaa
+  securityGroups:
+    - sg-0node1234
+---
+apiVersion: crd.k8s.amazonaws.com/v1alpha1
+kind: ENIConfig
+metadata:
+  name: ap-southeast-1b
+spec:
+  subnet: subnet-0pod1bbbb
+  securityGroups:
+    - sg-0node1234
