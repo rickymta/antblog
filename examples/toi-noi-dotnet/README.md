@@ -19,22 +19,22 @@ Khung biên tập từ cơ bản tới nâng cao. Mỗi bài có câu hỏi mở
 08. Interface, composition và dependency injection: thay chính sách cước — **đã viết**
 09. Generics và collections: quản lý chuyến và tài xế — **đã viết**
 10. LINQ và deferred execution: truy vấn dữ liệu trong bộ nhớ — **đã viết**
-11. Nullable reference types và pattern matching: xử lý trạng thái thiếu — dự kiến
+11. Nullable reference types và pattern matching: xử lý trạng thái thiếu — **đã viết**
 
 ## 03 · Bất đồng bộ và kiểm thử
 
-12. Task, async/await và CancellationToken: gọi dịch vụ báo giá — dự kiến
-13. Concurrency và thread safety: tránh nhận trùng chuyến — dự kiến
-14. Unit test và test double: kiểm thử chính sách cước — dự kiến
-15. Integration test: kiểm chứng ranh giới hệ thống — dự kiến
+12. Task, async/await và CancellationToken: gọi dịch vụ báo giá — **đã viết**
+13. Concurrency và thread safety: tránh nhận trùng chuyến — **đã viết**
+14. Unit test và test double: kiểm thử chính sách cước — **đã viết**
+15. Integration test: kiểm chứng ranh giới hệ thống — **đã viết**
 
 ## 04 · ASP.NET Core 10
 
-16. HTTP và Minimal API: xuất bản endpoint báo giá — dự kiến
-17. Validation, Problem Details và OpenAPI: hợp đồng API — dự kiến
-18. Middleware, DI lifetime, cấu hình và logging — dự kiến
-19. Authentication và authorization: khách, tài xế, điều phối — dự kiến
-20. API integration test với WebApplicationFactory — dự kiến
+16. HTTP và Minimal API: xuất bản endpoint báo giá — **đã viết**
+17. Validation, Problem Details và OpenAPI: hợp đồng API — **đã viết**
+18. Middleware, DI lifetime, cấu hình và logging — **đã viết**
+19. Authentication và authorization: khách, tài xế, điều phối — **đã viết**
+20. API integration test với WebApplicationFactory — **đã viết**
 
 ## 05 · Dữ liệu và độ tin cậy
 
@@ -100,3 +100,13 @@ dotnet run --project examples/toi-noi-dotnet/08-interface-composition-di -- --ve
 dotnet run --project examples/toi-noi-dotnet/09-generics-collections -- --verify
 dotnet run --project examples/toi-noi-dotnet/10-linq-deferred-execution -- --verify
 ```
+
+## Chạy bài 11–20
+
+```bash
+node examples/toi-noi-dotnet/verify-11-20.mjs
+```
+
+Script chạy 3 project console (16 ca kiểm chứng), 9 unit test, 4 integration test JSON/file và 24 API test. Cần SDK .NET 10 và mạng ở lần restore NuGet đầu. API 16–19 được test bằng WebApplicationFactory bài 20, không mở port; README từng bài có lệnh mở host localhost để thử tay.
+
+Các API dùng lại FareDomain bài 14, chưa ghép service DDD/Clean/CQRS hoàn chỉnh. Package ASP.NET pin 10.0.10; Microsoft.OpenApi pin 2.7.5 đã vá advisory trên dòng 2.x. Không có credential production trong fixture. Các file tạm của bài 15 nằm trong thư mục riêng dưới thư mục temp của hệ điều hành và được dọn sau từng ca.

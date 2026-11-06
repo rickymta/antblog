@@ -708,5 +708,105 @@
       "QUERY",
       "MATERIALIZE"
     ]
+  },
+  "csharp-nullable-pattern-matching": {
+    "title": "NULL / PATTERNS",
+    "subtitle": "C# 11 · Missing data is part of the contract",
+    "diagram": "split",
+    "labels": [
+      "MISSING",
+      "UNASSIGNED",
+      "INVALID"
+    ]
+  },
+  "csharp-async-await-cancellation": {
+    "title": "ASYNC / CANCEL",
+    "subtitle": "C# 12 · Await completion, propagate cancellation",
+    "diagram": "flow",
+    "labels": [
+      "REQUEST",
+      "AWAIT",
+      "CANCEL"
+    ]
+  },
+  "csharp-concurrency-thread-safety": {
+    "title": "CONCURRENCY / LOCK",
+    "subtitle": "C# 13 · Protect the whole invariant",
+    "diagram": "split",
+    "labels": [
+      "READ",
+      "CHECK",
+      "WRITE"
+    ]
+  },
+  "csharp-unit-test-test-double": {
+    "title": "UNIT TEST / CONTRACT",
+    "subtitle": "C# 14 · Real rules, independent expectations",
+    "diagram": "checklist",
+    "labels": [
+      "ARRANGE",
+      "ACT",
+      "ASSERT"
+    ]
+  },
+  "csharp-integration-test-json-filesystem": {
+    "title": "INTEGRATION / BOUNDARY",
+    "subtitle": "C# 15 · Real JSON and filesystem round trips",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "JSON / FILE",
+      "READ BACK"
+    ]
+  },
+  "dotnet10-http-minimal-api": {
+    "title": "HTTP / MINIMAL API",
+    "subtitle": "ASP.NET Core 16 · Bind, validate and respond",
+    "diagram": "network",
+    "labels": [
+      "HTTP",
+      "POLICY",
+      "JSON"
+    ]
+  },
+  "dotnet10-validation-problem-details-openapi": {
+    "title": "VALIDATION / CONTRACT",
+    "subtitle": "ASP.NET Core 17 · Problem Details and OpenAPI",
+    "diagram": "checklist",
+    "labels": [
+      "REQUIRED",
+      "RANGE",
+      "PROBLEM"
+    ]
+  },
+  "dotnet10-middleware-di-options-logging": {
+    "title": "PIPELINE / LIFETIME",
+    "subtitle": "ASP.NET Core 18 · Scope, options and traces",
+    "diagram": "layers",
+    "labels": [
+      "MIDDLEWARE",
+      "REQUEST SCOPE",
+      "OPTIONS"
+    ]
+  },
+  "dotnet10-authentication-authorization": {
+    "title": "IDENTITY / PERMISSION",
+    "subtitle": "ASP.NET Core 19 · Verify token, enforce ownership",
+    "diagram": "target",
+    "labels": [
+      "AUTHENTICATE",
+      "AUTHORIZE",
+      "OWNERSHIP"
+    ]
+  },
+  "dotnet10-webapplicationfactory-integration-test": {
+    "title": "API TEST / PIPELINE",
+    "subtitle": "ASP.NET Core 20 · Real handlers in a test host",
+    "diagram": "network",
+    "labels": [
+      "HTTP CLIENT",
+      "TEST HOST",
+      "ASSERTIONS"
+    ]
   }
 }

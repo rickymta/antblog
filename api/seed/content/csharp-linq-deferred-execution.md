@@ -141,7 +141,7 @@ sealed record TripRow(string Id, string Status, decimal Fare);
 sealed record FareRow(string Id, decimal Fare);
 ```
 
-Bài trước: [bài 09](/articles/csharp-generics-collections). Bài tiếp dự kiến về nullable reference types và pattern matching; chưa liên kết tới bài chưa viết.
+Bài trước: [bài 09](/articles/csharp-generics-collections). Bài tiếp: [bài 11 — nullable reference types và pattern matching](/articles/csharp-nullable-pattern-matching).
 
 ## Tài liệu gốc
 
