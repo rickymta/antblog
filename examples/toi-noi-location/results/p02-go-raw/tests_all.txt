@@ -1,3 +1,6 @@
+$ uptime
+23:29  up 35 days, 15:12, 1 user, load averages: 137.72 99.93 85.64
+
 $ test -z "$(gofmt -l examples/toi-noi-location/go)" && echo gofmt-sach
 gofmt-sach
 
@@ -6,21 +9,21 @@ $ go -C examples/toi-noi-location/go vet ./...
 
 $ go -C examples/toi-noi-location/go test -race -count=1 ./...
 ?   	toinoi/location/cmd/history-writer	[no test files]
+?   	toinoi/location/cmd/kafka_lab	[no test files]
 ?   	toinoi/location/cmd/loadgen	[no test files]
-ok  	toinoi/location/cmd/loc11_nhap_mon	3.180s
+ok  	toinoi/location/cmd/loc11_nhap_mon	1.946s
 ?   	toinoi/location/cmd/loc13_backpressure	[no test files]
 ?   	toinoi/location/cmd/location-ingest	[no test files]
 ?   	toinoi/location/cmd/tracking-hub	[no test files]
 ?   	toinoi/location/gen/location/v1	[no test files]
-ok  	toinoi/location/internal/backpressure	3.108s
-ok  	toinoi/location/internal/geo	4.545s
-ok  	toinoi/location/internal/history	2.837s
-ok  	toinoi/location/internal/hub	4.035s
-ok  	toinoi/location/internal/ingest	4.111s
-ok  	toinoi/location/internal/kafkax	2.048s
-ok  	toinoi/location/internal/labauth	5.075s
-ok  	toinoi/location/internal/sim	5.980s
+ok  	toinoi/location/internal/backpressure	2.213s
+ok  	toinoi/location/internal/geo	2.797s
+ok  	toinoi/location/internal/history	3.353s
+ok  	toinoi/location/internal/hub	2.762s
+ok  	toinoi/location/internal/ingest	3.823s
+ok  	toinoi/location/internal/kafkax	4.286s
+ok  	toinoi/location/internal/labauth	4.706s
+ok  	toinoi/location/internal/sim	5.178s
 ?   	toinoi/location/internal/stat	[no test files]
-ok  	toinoi/location/internal/validate	5.524s
+ok  	toinoi/location/internal/validate	5.625s
 (exit=0)
-

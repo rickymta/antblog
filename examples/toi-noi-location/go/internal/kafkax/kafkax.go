@@ -5,8 +5,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -54,6 +56,9 @@ type Sink struct {
 	cl        *kgo.Client
 	Delivered atomic.Int64
 	Failed    atomic.Int64
+
+	mu      sync.Mutex
+	reasons map[string]int64 // số bản ghi lỗi theo nguyên nhân, xem failReason
 }
 
 // NewSink kết nối producer.
@@ -68,21 +73,65 @@ func NewSink(brokers []string) (*Sink, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Sink{cl: cl}, nil
+	return &Sink{cl: cl, reasons: map[string]int64{}}, nil
 }
+
+// failReason gom lỗi của promise thành vài nhóm đọc được.
+func failReason(err error) string {
+	switch {
+	case errors.Is(err, kgo.ErrRecordTimeout):
+		return "record_timeout"
+	case errors.Is(err, kgo.ErrRecordRetries):
+		return "record_retries"
+	case errors.Is(err, kgo.ErrClientClosed):
+		return "client_closed"
+	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+		return "context"
+	default:
+		return "other"
+	}
+}
+
+// fail đếm một bản ghi lỗi và ghi log lần đầu thấy mỗi nguyên nhân (kèm lỗi gốc), để lỗi không chỉ là một con số.
+func (s *Sink) fail(err error) {
+	s.Failed.Add(1)
+	r := failReason(err)
+	s.mu.Lock()
+	s.reasons[r]++
+	first := s.reasons[r] == 1
+	s.mu.Unlock()
+	if first {
+		slog.Warn("bản ghi Kafka lỗi lần đầu theo nguyên nhân", "reason", r, "err", err)
+	}
+}
+
+// FailedReasons trả số bản ghi lỗi theo nguyên nhân (chỉ nhóm đã có bản ghi lỗi).
+func (s *Sink) FailedReasons() map[string]int64 {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	out := make(map[string]int64, len(s.reasons))
+	for k, v := range s.reasons {
+		out[k] = v
+	}
+	return out
+}
+
+// Buffered là số bản ghi client đã nhận từ Send nhưng chưa có kết quả (đang chờ hoặc đang bay).
+// Quan hệ đã kiểm trong results/p02-go.md: taken của hàng đợi = Delivered + Failed + Buffered, lệch vài bản ghi vì các bộ đếm không được đọc cùng lúc.
+func (s *Sink) Buffered() int64 { return s.cl.BufferedProduceRecords() }
 
 // Send cài đặt backpressure.Sink.
 func (s *Sink) Send(ctx context.Context, batch []backpressure.Entry[*pb.DriverLocationUpdated]) error {
 	for i := range batch {
 		val, err := proto.Marshal(batch[i].Val)
 		if err != nil {
-			s.Failed.Add(1)
+			s.fail(err)
 			continue
 		}
 		rec := &kgo.Record{Key: []byte(batch[i].Key), Value: val}
 		s.cl.Produce(ctx, rec, func(_ *kgo.Record, err error) {
 			if err != nil {
-				s.Failed.Add(1)
+				s.fail(err)
 			} else {
 				s.Delivered.Add(1)
 			}

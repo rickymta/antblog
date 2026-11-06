@@ -1,0 +1,77 @@
+// Hợp đồng gRPC của dịch vụ định tuyến `geo-engine` (LOC-29): Route và Matrix.
+// Dùng chung cho Rust (tonic), C# (Grpc.Net.Client) và Go. Quy ước số như location.proto:
+//   toạ độ E7 (độ × 10^7, sint32), quãng đường mét nguyên, thời gian mili giây.
+// Không đổi ý nghĩa hay số thứ tự field đã có; chỉ thêm field mới.
+syntax = "proto3";
+
+package toinoi.location.v1;
+
+option go_package = "toinoi/location/gen/location/v1;locationv1";
+option csharp_namespace = "ToiNoi.Location.V1";
+option java_package = "vn.toinoi.location.v1";
+
+message LatLngE7 {
+  sint32 lat_e7 = 1;
+  sint32 lng_e7 = 2;
+}
+
+enum RoutingProfile {
+  ROUTING_PROFILE_UNSPECIFIED = 0;
+  ROUTING_PROFILE_CAR = 1;
+  ROUTING_PROFILE_MOTORBIKE = 2;
+  ROUTING_PROFILE_FOOT = 3;
+}
+
+// Kết quả đến từ đâu, để bên gọi biết nên tin tới mức nào.
+enum RoutingQuality {
+  ROUTING_QUALITY_UNSPECIFIED = 0;
+  // Tính trên đồ thị đường ngay cho yêu cầu này.
+  ROUTING_QUALITY_ROUTED = 1;
+  // Lấy từ bộ nhớ đệm theo ô H3 và khung giờ: có thể lệch vài chục mét so với tính mới.
+  ROUTING_QUALITY_CACHED = 2;
+  // Ước lượng chim bay × hệ số vòng vì quá hạn, quá tải hoặc không có đường.
+  ROUTING_QUALITY_ESTIMATED = 3;
+}
+
+message RouteRequest {
+  LatLngE7 from = 1;
+  LatLngE7 to = 2;
+  RoutingProfile profile = 3;
+  // Giây trong ngày lúc khởi hành (0..86399) để dùng hồ sơ tốc độ theo giờ. Vắng = tốc độ tự do.
+  optional uint32 depart_sec_of_day = 4;
+  // Có trả hình học (polyline precision 6) hay không. Tuyến có hình học không dùng bộ nhớ đệm.
+  bool want_geometry = 5;
+}
+
+message RouteResponse {
+  uint32 duration_ms = 1;
+  uint32 distance_m = 2;
+  RoutingQuality quality = 3;
+  // Nguồn cụ thể: "ch", "astar", "same-edge", "cache", "straight-line:deadline", "straight-line:overload", "straight-line:no-route".
+  string source = 4;
+  // Google Encoded Polyline precision 6, rỗng nếu không yêu cầu hoặc là ước lượng.
+  string polyline6 = 5;
+}
+
+message MatrixRequest {
+  repeated LatLngE7 sources = 1;
+  repeated LatLngE7 targets = 2;
+  RoutingProfile profile = 3;
+  optional uint32 depart_sec_of_day = 4;
+}
+
+message MatrixResponse {
+  uint32 rows = 1;
+  uint32 cols = 2;
+  // Hàng-chính, rows × cols phần tử, mili giây. 4294967295 (u32::MAX) là không tới được.
+  repeated uint32 duration_ms = 3 [packed = true];
+  RoutingQuality quality = 4;
+  string source = 5;
+}
+
+service RoutingService {
+  // Tuyến ngắn nhất giữa hai điểm. Tôn trọng deadline của gọi (header grpc-timeout): quá hạn thì trả ước lượng, không lỗi.
+  rpc Route(RouteRequest) returns (RouteResponse);
+  // Ma trận thời gian nguồn × đích (nền của ghép chuyến).
+  rpc Matrix(MatrixRequest) returns (MatrixResponse);
+}

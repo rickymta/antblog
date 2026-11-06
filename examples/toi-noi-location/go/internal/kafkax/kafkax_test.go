@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"google.golang.org/protobuf/proto"
 
@@ -24,6 +25,13 @@ func TestSinkGhiDungKeyVaNoiDung(t *testing.T) {
 	if err := EnsureTopic(ctx, Brokers(), 6); err != nil {
 		t.Fatalf("TOI_NOI_KAFKA đã đặt nhưng Kafka không dùng được: %v", err)
 	}
+	// Chốt offset cuối của từng partition TRƯỚC khi ghi, rồi chỉ đọc từ đó trở đi. Topic của lab
+	// tích luỹ hàng triệu bản ghi qua các lần chạy tải; đọc từ đầu topic thì thời gian test tỉ lệ
+	// với kích thước topic và hết hạn 30 giây dù bản ghi đã nằm trong Kafka.
+	ends, err := listEnds(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 	sink, err := NewSink(Brokers())
 	if err != nil {
 		t.Fatal(err)
@@ -37,8 +45,7 @@ func TestSinkGhiDungKeyVaNoiDung(t *testing.T) {
 	if err := sink.Flush(ctx); err != nil || sink.Delivered.Load() != 1 {
 		t.Fatalf("flush=%v delivered=%d failed=%d", err, sink.Delivered.Load(), sink.Failed.Load())
 	}
-	cl, err := kgo.NewClient(kgo.SeedBrokers(Brokers()...), kgo.ConsumeTopics(Topic),
-		kgo.ConsumeResetOffset(kgo.NewOffset().AtStart()))
+	cl, err := kgo.NewClient(kgo.SeedBrokers(Brokers()...), kgo.ConsumePartitions(map[string]map[int32]kgo.Offset{Topic: ends}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,4 +68,20 @@ func TestSinkGhiDungKeyVaNoiDung(t *testing.T) {
 		}
 	}
 	t.Fatal("không đọc lại được bản ghi vừa ghi")
+}
+
+// listEnds trả offset cuối hiện tại của mọi partition trong topic, dùng làm điểm bắt đầu đọc.
+func listEnds(ctx context.Context) (map[int32]kgo.Offset, error) {
+	adm, err := kgo.NewClient(kgo.SeedBrokers(Brokers()...))
+	if err != nil {
+		return nil, err
+	}
+	defer adm.Close()
+	ends, err := kadm.NewClient(adm).ListEndOffsets(ctx, Topic)
+	if err != nil {
+		return nil, err
+	}
+	out := map[int32]kgo.Offset{}
+	ends.Each(func(o kadm.ListedOffset) { out[o.Partition] = kgo.NewOffset().At(o.Offset) })
+	return out, nil
 }

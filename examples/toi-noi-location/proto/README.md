@@ -8,6 +8,15 @@ Một file duy nhất cho cả ba ngôn ngữ: [`location/v1/location.proto`](lo
 | `DriverLocationUpdated` | `location-ingest` → Kafka → `geo-engine` (Rust), `tracking-hub` (Go), `history-writer` (Go), Fraud (Python) | topic `location.updates.v1`, key `driver_id` |
 | `TrackingUpdate` / `TrackingAck` | `tracking-hub` → app khách, và ack ngược lại | WebSocket, binary frame; hợp đồng nội suy và ack ở [`tracking-contract.md`](location/v1/tracking-contract.md) |
 
+[`location/v1/routing.proto`](location/v1/routing.proto) (cùng package) là hợp đồng gRPC của `geo-engine` (LOC-29):
+
+| Message | Ai gửi → ai nhận | Kênh |
+|---|---|---|
+| `RouteRequest` / `RouteResponse` | Dispatch C#, simulator, Go → `geo-engine` (Rust) | gRPC unary `RoutingService.Route`, deadline qua header `grpc-timeout` |
+| `MatrixRequest` / `MatrixResponse` | như trên | gRPC unary `RoutingService.Matrix` |
+
+Rust biên dịch file này bằng `protox` (thuần Rust, không cần `protoc`) trong `build.rs` của `geo-engine`; C# bằng `Grpc.Tools` trong `dotnet/GeoEngineClient`.
+
 Lịch sử lưu ở Parquet có schema riêng: [`gps-history-parquet.md`](location/v1/gps-history-parquet.md).
 
 ## Quy ước số (đừng đổi)

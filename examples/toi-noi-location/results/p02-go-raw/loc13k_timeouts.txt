@@ -1,0 +1,141 @@
+# Cô lập nguyên nhân: 8 producer kafka_lab cùng cấu hình NewSink, chỉ khác RecordDeliveryTimeout, cùng một lần docker pause Kafka (dừng ở giây 20 của lần chạy).
+
+## pause=26s
+$ examples/toi-noi-location/go/bin/kafka_lab timeouts 85s 20,25,30,30,35,40,60,0
+$ (sleep 20; docker pause toi-noi-location-kafka; sleep 26; docker unpause toi-noi-location-kafka) &
+giờ pause/unpause:
+pause_start 23:17:48.039
+pause_done 23:17:48.125
+unpause_start 23:18:14.159
+unpause_done 23:18:15.043
+uptime: 23:17  up 35 days, 15 hrs, 1 user, load averages: 61.21 62.14 74.82
+t=  5s | hạn=20s ok=29481 lỗi=0 đệm=124 | hạn=25s ok=29574 lỗi=0 đệm=62 | hạn=30s ok=29512 lỗi=0 đệm=124 | hạn=30s ok=29481 lỗi=0 đệm=62 | hạn=35s ok=29388 lỗi=0 đệm=155 | hạn=40s ok=29512 lỗi=0 đệm=124 | hạn=60s ok=29388 lỗi=0 đệm=124 | hạn= 0s ok=29574 lỗi=0 đệm=186
+t= 10s | hạn=20s ok=58311 lỗi=0 đệm=62 | hạn=25s ok=58435 lỗi=0 đệm=62 | hạn=30s ok=58559 lỗi=0 đệm=62 | hạn=30s ok=58218 lỗi=0 đệm=62 | hạn=35s ok=58125 lỗi=0 đệm=62 | hạn=40s ok=58466 lỗi=0 đệm=62 | hạn=60s ok=58249 lỗi=0 đệm=62 | hạn= 0s ok=58652 lỗi=0 đệm=124
+t= 15s | hạn=20s ok=87482 lỗi=0 đệm=155 | hạn=25s ok=87730 lỗi=0 đệm=217 | hạn=30s ok=87823 lỗi=0 đệm=93 | hạn=30s ok=87358 lỗi=0 đệm=124 | hạn=35s ok=87389 lỗi=0 đệm=124 | hạn=40s ok=87544 lỗi=0 đệm=217 | hạn=60s ok=87451 lỗi=0 đệm=155 | hạn= 0s ok=87978 lỗi=0 đệm=217
+t= 20s | hạn=20s ok=118203 lỗi=0 đệm=62 | hạn=25s ok=118451 lỗi=0 đệm=62 | hạn=30s ok=118420 lỗi=0 đệm=62 | hạn=30s ok=117955 lỗi=0 đệm=62 | hạn=35s ok=118048 lỗi=0 đệm=62 | hạn=40s ok=118389 lỗi=0 đệm=62 | hạn=60s ok=118141 lỗi=0 đệm=62 | hạn= 0s ok=118699 lỗi=0 đệm=62
+t= 25s | hạn=20s ok=118389 lỗi=0 đệm=20002 | hạn=25s ok=118637 lỗi=0 đệm=20002 | hạn=30s ok=118606 lỗi=0 đệm=20002 | hạn=30s ok=118141 lỗi=0 đệm=20002 | hạn=35s ok=118234 lỗi=0 đệm=20002 | hạn=40s ok=118575 lỗi=0 đệm=20002 | hạn=60s ok=118327 lỗi=0 đệm=20002 | hạn= 0s ok=118885 lỗi=0 đệm=20002
+t= 30s | hạn=20s ok=118389 lỗi=0 đệm=20002 | hạn=25s ok=118637 lỗi=0 đệm=20002 | hạn=30s ok=118606 lỗi=0 đệm=20002 | hạn=30s ok=118141 lỗi=0 đệm=20002 | hạn=35s ok=118234 lỗi=0 đệm=20002 | hạn=40s ok=118575 lỗi=0 đệm=20002 | hạn=60s ok=118327 lỗi=0 đệm=20002 | hạn= 0s ok=118885 lỗi=0 đệm=20002
+t= 35s | hạn=20s ok=118389 lỗi=0 đệm=20002 | hạn=25s ok=118637 lỗi=0 đệm=20002 | hạn=30s ok=118606 lỗi=0 đệm=20002 | hạn=30s ok=118141 lỗi=0 đệm=20002 | hạn=35s ok=118234 lỗi=0 đệm=20002 | hạn=40s ok=118575 lỗi=0 đệm=20002 | hạn=60s ok=118327 lỗi=0 đệm=20002 | hạn= 0s ok=118885 lỗi=0 đệm=20002
+t= 40s | hạn=20s ok=118389 lỗi=0 đệm=20002 | hạn=25s ok=118637 lỗi=0 đệm=20002 | hạn=30s ok=118606 lỗi=0 đệm=20002 | hạn=30s ok=118141 lỗi=0 đệm=20002 | hạn=35s ok=118234 lỗi=0 đệm=20002 | hạn=40s ok=118575 lỗi=0 đệm=20002 | hạn=60s ok=118327 lỗi=0 đệm=20002 | hạn= 0s ok=118885 lỗi=0 đệm=20002
+t= 45s | hạn=20s ok=118389 lỗi=0 đệm=20002 | hạn=25s ok=118637 lỗi=0 đệm=20002 | hạn=30s ok=118606 lỗi=0 đệm=20002 | hạn=30s ok=118141 lỗi=0 đệm=20002 | hạn=35s ok=118234 lỗi=0 đệm=20002 | hạn=40s ok=118575 lỗi=0 đệm=20002 | hạn=60s ok=118327 lỗi=0 đệm=20002 | hạn= 0s ok=118885 lỗi=0 đệm=20002
+t= 50s | hạn=20s ok=156581 lỗi=0 đệm=217 | hạn=25s ok=156550 lỗi=0 đệm=248 | hạn=30s ok=156674 lỗi=0 đệm=217 | hạn=30s ok=156116 lỗi=0 đệm=217 | hạn=35s ok=156364 lỗi=0 đệm=217 | hạn=40s ok=156643 lỗi=0 đệm=248 | hạn=60s ok=156147 lỗi=0 đệm=248 | hạn= 0s ok=156891 lỗi=0 đệm=248
+t= 55s | hạn=20s ok=186775 lỗi=0 đệm=124 | hạn=25s ok=186837 lỗi=0 đệm=155 | hạn=30s ok=186992 lỗi=0 đệm=155 | hạn=30s ok=186403 lỗi=0 đệm=0 | hạn=35s ok=186713 lỗi=0 đệm=155 | hạn=40s ok=186992 lỗi=0 đệm=186 | hạn=60s ok=186558 lỗi=0 đệm=0 | hạn= 0s ok=187333 lỗi=0 đệm=62
+t= 60s | hạn=20s ok=216504 lỗi=0 đệm=124 | hạn=25s ok=216442 lỗi=0 đệm=124 | hạn=30s ok=216690 lỗi=0 đệm=124 | hạn=30s ok=215977 lỗi=0 đệm=124 | hạn=35s ok=216504 lỗi=0 đệm=124 | hạn=40s ok=216752 lỗi=0 đệm=124 | hạn=60s ok=216163 lỗi=0 đệm=124 | hạn= 0s ok=216969 lỗi=0 đệm=124
+t= 65s | hạn=20s ok=246884 lỗi=0 đệm=62 | hạn=25s ok=246636 lỗi=0 đệm=62 | hạn=30s ok=247008 lỗi=0 đệm=62 | hạn=30s ok=246326 lỗi=0 đệm=62 | hạn=35s ok=246853 lỗi=0 đệm=62 | hạn=40s ok=247008 lỗi=0 đệm=62 | hạn=60s ok=246450 lỗi=0 đệm=62 | hạn= 0s ok=247318 lỗi=0 đệm=62
+t= 70s | hạn=20s ok=276551 lỗi=0 đệm=434 | hạn=25s ok=276520 lỗi=0 đệm=310 | hạn=30s ok=276985 lỗi=0 đệm=372 | hạn=30s ok=276334 lỗi=0 đệm=186 | hạn=35s ok=276675 lỗi=0 đệm=372 | hạn=40s ok=276985 lỗi=0 đệm=186 | hạn=60s ok=276458 lỗi=0 đệm=186 | hạn= 0s ok=277295 lỗi=0 đệm=403
+t= 75s | hạn=20s ok=307706 lỗi=0 đệm=62 | hạn=25s ok=307489 lỗi=0 đệm=62 | hạn=30s ok=308016 lỗi=0 đệm=62 | hạn=30s ok=307210 lỗi=0 đệm=62 | hạn=35s ok=307675 lỗi=0 đệm=62 | hạn=40s ok=307737 lỗi=0 đệm=62 | hạn=60s ok=307303 lỗi=0 đệm=62 | hạn= 0s ok=308388 lỗi=0 đệm=62
+t= 80s | hạn=20s ok=338086 lỗi=0 đệm=186 | hạn=25s ok=337745 lỗi=0 đệm=186 | hạn=30s ok=338272 lỗi=0 đệm=248 | hạn=30s ok=337466 lỗi=0 đệm=186 | hạn=35s ok=337838 lỗi=0 đệm=248 | hạn=40s ok=338055 lỗi=0 đệm=186 | hạn=60s ok=337590 lỗi=0 đệm=248 | hạn= 0s ok=338551 lỗi=0 đệm=248
+t= 85s | hạn=20s ok=368342 lỗi=0 đệm=0 | hạn=25s ok=368001 lỗi=0 đệm=0 | hạn=30s ok=368590 lỗi=0 đệm=0 | hạn=30s ok=367753 lỗi=0 đệm=0 | hạn=35s ok=368249 lỗi=0 đệm=0 | hạn=40s ok=368311 lỗi=0 đệm=0 | hạn=60s ok=367908 lỗi=0 đệm=0 | hạn= 0s ok=368993 lỗi=0 đệm=0
+CUỐI hạn=20s ok=368342 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=25s ok=368001 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=30s ok=368590 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=30s ok=367753 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=35s ok=368249 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=40s ok=368311 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=60s ok=367908 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn= 0s ok=368993 lỗi=0 lỗi_đầu=<nil>
+
+## pause=30s
+$ examples/toi-noi-location/go/bin/kafka_lab timeouts 85s 20,25,30,30,35,40,60,0
+$ (sleep 20; docker pause toi-noi-location-kafka; sleep 30; docker unpause toi-noi-location-kafka) &
+giờ pause/unpause:
+pause_start 23:21:05.686
+pause_done 23:21:05.864
+unpause_start 23:21:35.888
+unpause_done 23:21:36.054
+uptime: 23:20  up 35 days, 15:04, 1 user, load averages: 68.68 64.60 73.16
+t=  5s | hạn=20s ok=30504 lỗi=0 đệm=62 | hạn=25s ok=30535 lỗi=0 đệm=62 | hạn=30s ok=30535 lỗi=0 đệm=62 | hạn=30s ok=30721 lỗi=0 đệm=62 | hạn=35s ok=30566 lỗi=0 đệm=62 | hạn=40s ok=30566 lỗi=0 đệm=62 | hạn=60s ok=30504 lỗi=0 đệm=62 | hạn= 0s ok=30597 lỗi=0 đệm=93
+t= 10s | hạn=20s ok=60760 lỗi=0 đệm=186 | hạn=25s ok=60853 lỗi=0 đệm=186 | hạn=30s ok=60884 lỗi=0 đệm=186 | hạn=30s ok=60915 lỗi=0 đệm=186 | hạn=35s ok=60667 lỗi=0 đệm=186 | hạn=40s ok=60729 lỗi=0 đệm=186 | hạn=60s ok=60760 lỗi=0 đệm=186 | hạn= 0s ok=60884 lỗi=0 đệm=186
+t= 15s | hạn=20s ok=91109 lỗi=0 đệm=248 | hạn=25s ok=91388 lỗi=0 đệm=248 | hạn=30s ok=91295 lỗi=0 đệm=217 | hạn=30s ok=91295 lỗi=0 đệm=248 | hạn=35s ok=91047 lỗi=0 đệm=217 | hạn=40s ok=91202 lỗi=0 đệm=217 | hạn=60s ok=91264 lỗi=0 đệm=248 | hạn= 0s ok=91357 lỗi=0 đệm=248
+t= 20s | hạn=20s ok=121024 lỗi=0 đệm=434 | hạn=25s ok=121148 lỗi=0 đệm=558 | hạn=30s ok=121117 lỗi=0 đệm=496 | hạn=30s ok=120993 lỗi=0 đệm=558 | hạn=35s ok=120869 lỗi=0 đệm=496 | hạn=40s ok=121117 lỗi=0 đệm=496 | hạn=60s ok=121210 lỗi=0 đệm=434 | hạn= 0s ok=121148 lỗi=0 đệm=496
+t= 25s | hạn=20s ok=121768 lỗi=0 đệm=20002 | hạn=25s ok=122016 lỗi=0 đệm=20002 | hạn=30s ok=121923 lỗi=0 đệm=20002 | hạn=30s ok=121861 lỗi=0 đệm=20002 | hạn=35s ok=121675 lỗi=0 đệm=20002 | hạn=40s ok=121923 lỗi=0 đệm=20002 | hạn=60s ok=121954 lỗi=0 đệm=20002 | hạn= 0s ok=121954 lỗi=0 đệm=20002
+t= 30s | hạn=20s ok=121768 lỗi=0 đệm=20002 | hạn=25s ok=122016 lỗi=0 đệm=20002 | hạn=30s ok=121923 lỗi=0 đệm=20002 | hạn=30s ok=121861 lỗi=0 đệm=20002 | hạn=35s ok=121675 lỗi=0 đệm=20002 | hạn=40s ok=121923 lỗi=0 đệm=20002 | hạn=60s ok=121954 lỗi=0 đệm=20002 | hạn= 0s ok=121954 lỗi=0 đệm=20002
+t= 35s | hạn=20s ok=121768 lỗi=0 đệm=20002 | hạn=25s ok=122016 lỗi=0 đệm=20002 | hạn=30s ok=121923 lỗi=0 đệm=20002 | hạn=30s ok=121861 lỗi=0 đệm=20002 | hạn=35s ok=121675 lỗi=0 đệm=20002 | hạn=40s ok=121923 lỗi=0 đệm=20002 | hạn=60s ok=121954 lỗi=0 đệm=20002 | hạn= 0s ok=121954 lỗi=0 đệm=20002
+t= 40s | hạn=20s ok=121768 lỗi=0 đệm=20002 | hạn=25s ok=122016 lỗi=0 đệm=20002 | hạn=30s ok=121923 lỗi=0 đệm=20002 | hạn=30s ok=121861 lỗi=0 đệm=20002 | hạn=35s ok=121675 lỗi=0 đệm=20002 | hạn=40s ok=121923 lỗi=0 đệm=20002 | hạn=60s ok=121954 lỗi=0 đệm=20002 | hạn= 0s ok=121954 lỗi=0 đệm=20002
+t= 45s | hạn=20s ok=121768 lỗi=0 đệm=20002 | hạn=25s ok=122016 lỗi=0 đệm=20002 | hạn=30s ok=121923 lỗi=0 đệm=20002 | hạn=30s ok=121861 lỗi=0 đệm=20002 | hạn=35s ok=121675 lỗi=0 đệm=20002 | hạn=40s ok=121923 lỗi=0 đệm=20002 | hạn=60s ok=121954 lỗi=0 đệm=20002 | hạn= 0s ok=121954 lỗi=0 đệm=20002
+t= 50s | hạn=20s ok=121768 lỗi=0 đệm=20002 | hạn=25s ok=122016 lỗi=0 đệm=20002 | hạn=30s ok=121923 lỗi=0 đệm=20002 | hạn=30s ok=121861 lỗi=0 đệm=20002 | hạn=35s ok=121675 lỗi=0 đệm=20002 | hạn=40s ok=121923 lỗi=0 đệm=20002 | hạn=60s ok=121954 lỗi=0 đệm=20002 | hạn= 0s ok=121954 lỗi=0 đệm=20002
+t= 55s | hạn=20s ok=170779 lỗi=0 đệm=62 | hạn=25s ok=151505 lỗi=19708 đệm=62 | hạn=30s ok=151492 lỗi=19628 đệm=62 | hạn=30s ok=170748 lỗi=0 đệm=62 | hạn=35s ok=170345 lỗi=0 đệm=62 | hạn=40s ok=170717 lỗi=0 đệm=62 | hạn=60s ok=170841 lỗi=0 đệm=62 | hạn= 0s ok=170717 lỗi=0 đệm=62
+t= 60s | hạn=20s ok=201624 lỗi=0 đệm=62 | hạn=25s ok=182381 lỗi=19708 đệm=62 | hạn=30s ok=182337 lỗi=19628 đệm=62 | hạn=30s ok=201562 lỗi=0 đệm=62 | hạn=35s ok=201159 lỗi=0 đệm=62 | hạn=40s ok=201562 lỗi=0 đệm=62 | hạn=60s ok=201655 lỗi=0 đệm=62 | hạn= 0s ok=201531 lỗi=0 đệm=62
+t= 65s | hạn=20s ok=231694 lỗi=0 đệm=248 | hạn=25s ok=212544 lỗi=19708 đệm=248 | hạn=30s ok=212407 lỗi=19628 đệm=217 | hạn=30s ok=231601 lỗi=0 đệm=248 | hạn=35s ok=231198 lỗi=0 đệm=248 | hạn=40s ok=231539 lỗi=0 đệm=248 | hạn=60s ok=231725 lỗi=0 đệm=279 | hạn= 0s ok=231477 lỗi=0 đệm=248
+t= 70s | hạn=20s ok=262756 lỗi=0 đệm=62 | hạn=25s ok=243606 lỗi=19708 đệm=62 | hạn=30s ok=243407 lỗi=19628 đệm=62 | hạn=30s ok=262601 lỗi=0 đệm=62 | hạn=35s ok=262198 lỗi=0 đệm=62 | hạn=40s ok=262570 lỗi=0 đệm=62 | hạn=60s ok=262725 lỗi=0 đệm=62 | hạn= 0s ok=262477 lỗi=0 đệm=62
+t= 75s | hạn=20s ok=293260 lỗi=0 đệm=186 | hạn=25s ok=274048 lỗi=19708 đệm=248 | hạn=30s ok=273756 lỗi=19628 đệm=279 | hạn=30s ok=293012 lỗi=0 đệm=279 | hạn=35s ok=292578 lỗi=0 đệm=248 | hạn=40s ok=292950 lỗi=0 đệm=217 | hạn=60s ok=293136 lỗi=0 đệm=248 | hạn= 0s ok=292826 lỗi=0 đệm=186
+t= 80s | hạn=20s ok=324012 lỗi=0 đệm=62 | hạn=25s ok=304862 lỗi=19708 đệm=62 | hạn=30s ok=304508 lỗi=19628 đệm=62 | hạn=30s ok=323795 lỗi=0 đệm=62 | hạn=35s ok=323392 lỗi=0 đệm=62 | hạn=40s ok=323702 lỗi=0 đệm=62 | hạn=60s ok=324012 lỗi=0 đệm=62 | hạn= 0s ok=323547 lỗi=0 đệm=62
+t= 85s | hạn=20s ok=354702 lỗi=0 đệm=0 | hạn=25s ok=335583 lỗi=19708 đệm=0 | hạn=30s ok=335260 lỗi=19628 đệm=0 | hạn=30s ok=354516 lỗi=0 đệm=0 | hạn=35s ok=354082 lỗi=0 đệm=0 | hạn=40s ok=354454 lỗi=0 đệm=0 | hạn=60s ok=354733 lỗi=0 đệm=0 | hạn= 0s ok=354237 lỗi=0 đệm=0
+CUỐI hạn=20s ok=354702 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=25s ok=335583 lỗi=19708 lỗi_đầu=records have timed out before they were able to be produced
+CUỐI hạn=30s ok=335260 lỗi=19628 lỗi_đầu=records have timed out before they were able to be produced
+CUỐI hạn=30s ok=354516 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=35s ok=354082 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=40s ok=354454 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=60s ok=354733 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn= 0s ok=354237 lỗi=0 lỗi_đầu=<nil>
+
+## pause=34s
+$ examples/toi-noi-location/go/bin/kafka_lab timeouts 85s 20,25,30,30,35,40,60,0
+$ (sleep 20; docker pause toi-noi-location-kafka; sleep 34; docker unpause toi-noi-location-kafka) &
+giờ pause/unpause:
+pause_start 23:16:22.972
+pause_done 23:16:23.323
+unpause_start 23:16:57.340
+unpause_done 23:16:57.451
+uptime: 23:16  up 35 days, 14:59, 1 user, load averages: 26.44 55.78 73.96
+t=  5s | hạn=20s ok=28861 lỗi=0 đệm=186 | hạn=25s ok=28861 lỗi=0 đệm=217 | hạn=30s ok=28768 lỗi=0 đệm=248 | hạn=30s ok=28706 lỗi=0 đệm=248 | hạn=35s ok=28861 lỗi=0 đệm=217 | hạn=40s ok=28799 lỗi=0 đệm=217 | hạn=60s ok=28613 lỗi=0 đệm=248 | hạn= 0s ok=28706 lỗi=0 đệm=279
+t= 10s | hạn=20s ok=59303 lỗi=0 đệm=93 | hạn=25s ok=59148 lỗi=0 đệm=62 | hạn=30s ok=59210 lỗi=0 đệm=93 | hạn=30s ok=59241 lỗi=0 đệm=62 | hạn=35s ok=59303 lỗi=0 đệm=62 | hạn=40s ok=59334 lỗi=0 đệm=62 | hạn=60s ok=58993 lỗi=0 đệm=93 | hạn= 0s ok=59179 lỗi=0 đệm=62
+t= 15s | hạn=20s ok=88567 lỗi=0 đệm=186 | hạn=25s ok=88536 lỗi=0 đệm=248 | hạn=30s ok=88443 lỗi=0 đệm=248 | hạn=30s ok=88505 lỗi=0 đệm=186 | hạn=35s ok=88691 lỗi=0 đệm=186 | hạn=40s ok=88567 lỗi=0 đệm=248 | hạn=60s ok=88474 lỗi=0 đệm=186 | hạn= 0s ok=88505 lỗi=0 đệm=186
+t= 20s | hạn=20s ok=118544 lỗi=0 đệm=124 | hạn=25s ok=118513 lỗi=0 đệm=124 | hạn=30s ok=118420 lỗi=0 đệm=124 | hạn=30s ok=118451 lỗi=0 đệm=124 | hạn=35s ok=118637 lỗi=0 đệm=124 | hạn=40s ok=118513 lỗi=0 đệm=124 | hạn=60s ok=118637 lỗi=0 đệm=93 | hạn= 0s ok=118575 lỗi=0 đệm=124
+t= 25s | hạn=20s ok=120218 lỗi=0 đệm=20002 | hạn=25s ok=120187 lỗi=0 đệm=20002 | hạn=30s ok=120156 lỗi=0 đệm=20002 | hạn=30s ok=120125 lỗi=0 đệm=20002 | hạn=35s ok=120373 lỗi=0 đệm=20002 | hạn=40s ok=120187 lỗi=0 đệm=20002 | hạn=60s ok=120311 lỗi=0 đệm=20002 | hạn= 0s ok=120249 lỗi=0 đệm=20002
+t= 30s | hạn=20s ok=120218 lỗi=0 đệm=20002 | hạn=25s ok=120187 lỗi=0 đệm=20002 | hạn=30s ok=120156 lỗi=0 đệm=20002 | hạn=30s ok=120125 lỗi=0 đệm=20002 | hạn=35s ok=120373 lỗi=0 đệm=20002 | hạn=40s ok=120187 lỗi=0 đệm=20002 | hạn=60s ok=120311 lỗi=0 đệm=20002 | hạn= 0s ok=120249 lỗi=0 đệm=20002
+t= 35s | hạn=20s ok=120218 lỗi=0 đệm=20002 | hạn=25s ok=120187 lỗi=0 đệm=20002 | hạn=30s ok=120156 lỗi=0 đệm=20002 | hạn=30s ok=120125 lỗi=0 đệm=20002 | hạn=35s ok=120373 lỗi=0 đệm=20002 | hạn=40s ok=120187 lỗi=0 đệm=20002 | hạn=60s ok=120311 lỗi=0 đệm=20002 | hạn= 0s ok=120249 lỗi=0 đệm=20002
+t= 40s | hạn=20s ok=120218 lỗi=0 đệm=20002 | hạn=25s ok=120187 lỗi=0 đệm=20002 | hạn=30s ok=120156 lỗi=0 đệm=20002 | hạn=30s ok=120125 lỗi=0 đệm=20002 | hạn=35s ok=120373 lỗi=0 đệm=20002 | hạn=40s ok=120187 lỗi=0 đệm=20002 | hạn=60s ok=120311 lỗi=0 đệm=20002 | hạn= 0s ok=120249 lỗi=0 đệm=20002
+t= 45s | hạn=20s ok=120218 lỗi=0 đệm=20002 | hạn=25s ok=120187 lỗi=0 đệm=20002 | hạn=30s ok=120156 lỗi=0 đệm=20002 | hạn=30s ok=120125 lỗi=0 đệm=20002 | hạn=35s ok=120373 lỗi=0 đệm=20002 | hạn=40s ok=120187 lỗi=0 đệm=20002 | hạn=60s ok=120311 lỗi=0 đệm=20002 | hạn= 0s ok=120249 lỗi=0 đệm=20002
+t= 50s | hạn=20s ok=120218 lỗi=0 đệm=20002 | hạn=25s ok=120187 lỗi=0 đệm=20002 | hạn=30s ok=120156 lỗi=0 đệm=20002 | hạn=30s ok=120125 lỗi=0 đệm=20002 | hạn=35s ok=120373 lỗi=0 đệm=20002 | hạn=40s ok=120187 lỗi=0 đệm=20002 | hạn=60s ok=120311 lỗi=0 đệm=20002 | hạn= 0s ok=120249 lỗi=0 đệm=20002
+t= 55s | hạn=20s ok=123906 lỗi=19717 đệm=62 | hạn=25s ok=143637 lỗi=17 đệm=62 | hạn=30s ok=123819 lỗi=19742 đệm=62 | hạn=30s ok=123875 lỗi=19717 đệm=62 | hạn=35s ok=143778 lỗi=0 đệm=62 | hạn=40s ok=143623 lỗi=0 đệm=62 | hạn=60s ok=143716 lỗi=0 đệm=62 | hạn= 0s ok=143716 lỗi=0 đệm=62
+t= 60s | hạn=20s ok=153356 lỗi=19717 đệm=62 | hạn=25s ok=173087 lỗi=17 đệm=124 | hạn=30s ok=153362 lỗi=19742 đệm=62 | hạn=30s ok=153325 lỗi=19717 đệm=62 | hạn=35s ok=173321 lỗi=0 đệm=124 | hạn=40s ok=173135 lỗi=0 đệm=63 | hạn=60s ok=173197 lỗi=0 đệm=62 | hạn= 0s ok=173228 lỗi=0 đệm=62
+t= 65s | hạn=20s ok=181690 lỗi=19717 đệm=186 | hạn=25s ok=201452 lỗi=17 đệm=186 | hạn=30s ok=181789 lỗi=19742 đệm=186 | hạn=30s ok=181380 lỗi=19717 đệm=248 | hạn=35s ok=201655 lỗi=0 đệm=155 | hạn=40s ok=201314 lỗi=0 đệm=186 | hạn=60s ok=201438 lỗi=0 đệm=186 | hạn= 0s ok=201438 lỗi=0 đệm=186
+t= 70s | hạn=20s ok=211233 lỗi=19717 đệm=62 | hạn=25s ok=230995 lỗi=17 đệm=62 | hạn=30s ok=211549 lỗi=19742 đệm=62 | hạn=30s ok=211233 lỗi=19717 đệm=62 | hạn=35s ok=231198 lỗi=0 đệm=62 | hạn=40s ok=230950 lỗi=0 đệm=62 | hạn=60s ok=231322 lỗi=0 đệm=62 | hạn= 0s ok=230981 lỗi=0 đệm=62
+t= 75s | hạn=20s ok=241644 lỗi=19717 đệm=186 | hạn=25s ok=261344 lỗi=17 đệm=248 | hạn=30s ok=241836 lỗi=19742 đệm=310 | hạn=30s ok=241582 lỗi=19717 đệm=248 | hạn=35s ok=261485 lỗi=0 đệm=248 | hạn=40s ok=261237 lỗi=0 đệm=248 | hạn=60s ok=261578 lỗi=0 đệm=248 | hạn= 0s ok=261361 lỗi=0 đệm=248
+t= 80s | hạn=20s ok=272520 lỗi=19717 đệm=186 | hạn=25s ok=292251 lỗi=17 đệm=186 | hạn=30s ok=272774 lỗi=19742 đệm=186 | hạn=30s ok=272458 lỗi=19717 đệm=186 | hạn=35s ok=292423 lỗi=0 đệm=186 | hạn=40s ok=292206 lỗi=0 đệm=186 | hạn=60s ok=292485 lỗi=0 đệm=186 | hạn= 0s ok=292268 lỗi=0 đệm=186
+t= 85s | hạn=20s ok=303520 lỗi=19717 đệm=0 | hạn=25s ok=323189 lỗi=17 đệm=0 | hạn=30s ok=303650 lỗi=19742 đệm=0 | hạn=30s ok=303334 lỗi=19717 đệm=0 | hạn=35s ok=323299 lỗi=0 đệm=0 | hạn=40s ok=323144 lỗi=0 đệm=0 | hạn=60s ok=323361 lỗi=0 đệm=0 | hạn= 0s ok=323144 lỗi=0 đệm=0
+CUỐI hạn=20s ok=303520 lỗi=19717 lỗi_đầu=records have timed out before they were able to be produced
+CUỐI hạn=25s ok=323189 lỗi=17 lỗi_đầu=records have timed out before they were able to be produced
+CUỐI hạn=30s ok=303650 lỗi=19742 lỗi_đầu=records have timed out before they were able to be produced
+CUỐI hạn=30s ok=303334 lỗi=19717 lỗi_đầu=records have timed out before they were able to be produced
+CUỐI hạn=35s ok=323299 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=40s ok=323144 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=60s ok=323361 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn= 0s ok=323144 lỗi=0 lỗi_đầu=<nil>
+
+## pause=34s
+$ examples/toi-noi-location/go/bin/kafka_lab timeouts 85s 20,25,30,30,35,40,60,0
+$ (sleep 20; docker pause toi-noi-location-kafka; sleep 34; docker unpause toi-noi-location-kafka) &
+giờ pause/unpause:
+pause_start 23:19:40.487
+pause_done 23:19:40.576
+unpause_start 23:20:14.602
+unpause_done 23:20:14.765
+uptime: 23:19  up 35 days, 15:02, 1 user, load averages: 72.60 65.09 74.29
+t=  5s | hạn=20s ok=30163 lỗi=0 đệm=62 | hạn=25s ok=30256 lỗi=0 đệm=31 | hạn=30s ok=30163 lỗi=0 đệm=0 | hạn=30s ok=30132 lỗi=0 đệm=0 | hạn=35s ok=30101 lỗi=0 đệm=31 | hạn=40s ok=30194 lỗi=0 đệm=31 | hạn=60s ok=30132 lỗi=0 đệm=0 | hạn= 0s ok=30256 lỗi=0 đệm=31
+t= 10s | hạn=20s ok=60605 lỗi=0 đệm=248 | hạn=25s ok=60729 lỗi=0 đệm=248 | hạn=30s ok=60636 lỗi=0 đệm=248 | hạn=30s ok=60667 lỗi=0 đệm=248 | hạn=35s ok=60574 lỗi=0 đệm=248 | hạn=40s ok=60667 lỗi=0 đệm=248 | hạn=60s ok=60636 lỗi=0 đệm=248 | hạn= 0s ok=60760 lỗi=0 đệm=248
+t= 15s | hạn=20s ok=91109 lỗi=0 đệm=62 | hạn=25s ok=91264 lỗi=0 đệm=124 | hạn=30s ok=90985 lỗi=0 đệm=124 | hạn=30s ok=91140 lỗi=0 đệm=124 | hạn=35s ok=90954 lỗi=0 đệm=124 | hạn=40s ok=91202 lỗi=0 đệm=124 | hạn=60s ok=91016 lỗi=0 đệm=124 | hạn= 0s ok=91264 lỗi=0 đệm=124
+t= 20s | hạn=20s ok=121737 lỗi=0 đệm=124 | hạn=25s ok=121892 lỗi=0 đệm=124 | hạn=30s ok=121675 lỗi=0 đệm=124 | hạn=30s ok=121768 lỗi=0 đệm=124 | hạn=35s ok=121365 lỗi=0 đệm=186 | hạn=40s ok=121830 lỗi=0 đệm=124 | hạn=60s ok=121489 lỗi=0 đệm=248 | hạn= 0s ok=121892 lỗi=0 đệm=124
+t= 25s | hạn=20s ok=122109 lỗi=0 đệm=20002 | hạn=25s ok=122264 lỗi=0 đệm=20002 | hạn=30s ok=122047 lỗi=0 đệm=20002 | hạn=30s ok=122140 lỗi=0 đệm=20002 | hạn=35s ok=121799 lỗi=0 đệm=20002 | hạn=40s ok=122202 lỗi=0 đệm=20002 | hạn=60s ok=121985 lỗi=0 đệm=20002 | hạn= 0s ok=122264 lỗi=0 đệm=20002
+t= 30s | hạn=20s ok=122109 lỗi=0 đệm=20002 | hạn=25s ok=122264 lỗi=0 đệm=20002 | hạn=30s ok=122047 lỗi=0 đệm=20002 | hạn=30s ok=122140 lỗi=0 đệm=20002 | hạn=35s ok=121799 lỗi=0 đệm=20002 | hạn=40s ok=122202 lỗi=0 đệm=20002 | hạn=60s ok=121985 lỗi=0 đệm=20002 | hạn= 0s ok=122264 lỗi=0 đệm=20002
+t= 35s | hạn=20s ok=122109 lỗi=0 đệm=20002 | hạn=25s ok=122264 lỗi=0 đệm=20002 | hạn=30s ok=122047 lỗi=0 đệm=20002 | hạn=30s ok=122140 lỗi=0 đệm=20002 | hạn=35s ok=121799 lỗi=0 đệm=20002 | hạn=40s ok=122202 lỗi=0 đệm=20002 | hạn=60s ok=121985 lỗi=0 đệm=20002 | hạn= 0s ok=122264 lỗi=0 đệm=20002
+t= 40s | hạn=20s ok=122109 lỗi=0 đệm=20002 | hạn=25s ok=122264 lỗi=0 đệm=20002 | hạn=30s ok=122047 lỗi=0 đệm=20002 | hạn=30s ok=122140 lỗi=0 đệm=20002 | hạn=35s ok=121799 lỗi=0 đệm=20002 | hạn=40s ok=122202 lỗi=0 đệm=20002 | hạn=60s ok=121985 lỗi=0 đệm=20002 | hạn= 0s ok=122264 lỗi=0 đệm=20002
+t= 45s | hạn=20s ok=122109 lỗi=0 đệm=20002 | hạn=25s ok=122264 lỗi=0 đệm=20002 | hạn=30s ok=122047 lỗi=0 đệm=20002 | hạn=30s ok=122140 lỗi=0 đệm=20002 | hạn=35s ok=121799 lỗi=0 đệm=20002 | hạn=40s ok=122202 lỗi=0 đệm=20002 | hạn=60s ok=121985 lỗi=0 đệm=20002 | hạn= 0s ok=122264 lỗi=0 đệm=20002
+t= 50s | hạn=20s ok=122109 lỗi=0 đệm=20002 | hạn=25s ok=122264 lỗi=0 đệm=20002 | hạn=30s ok=122047 lỗi=0 đệm=20002 | hạn=30s ok=122140 lỗi=0 đệm=20002 | hạn=35s ok=121799 lỗi=0 đệm=20002 | hạn=40s ok=122202 lỗi=0 đệm=20002 | hạn=60s ok=121985 lỗi=0 đệm=20002 | hạn= 0s ok=122264 lỗi=0 đệm=20002
+t= 55s | hạn=20s ok=146444 lỗi=0 đệm=310 | hạn=25s ok=145855 lỗi=0 đệm=310 | hạn=30s ok=145700 lỗi=0 đệm=310 | hạn=30s ok=145638 lỗi=0 đệm=434 | hạn=35s ok=145638 lỗi=0 đệm=341 | hạn=40s ok=145824 lỗi=0 đệm=310 | hạn=60s ok=145514 lỗi=0 đệm=372 | hạn= 0s ok=145793 lỗi=0 đệm=434
+t= 60s | hạn=20s ok=177506 lỗi=0 đệm=93 | hạn=25s ok=176886 lỗi=0 đệm=155 | hạn=30s ok=176762 lỗi=0 đệm=186 | hạn=30s ok=176731 lỗi=0 đệm=93 | hạn=35s ok=176638 lỗi=0 đệm=186 | hạn=40s ok=176638 lỗi=0 đệm=186 | hạn=60s ok=176607 lỗi=0 đệm=124 | hạn= 0s ok=176855 lỗi=0 đệm=93
+t= 65s | hạn=20s ok=207607 lỗi=0 đệm=93 | hạn=25s ok=207049 lỗi=0 đệm=217 | hạn=30s ok=206987 lỗi=0 đệm=62 | hạn=30s ok=207049 lỗi=0 đệm=124 | hạn=35s ok=206708 lỗi=0 đệm=62 | hạn=40s ok=206894 lỗi=0 đệm=186 | hạn=60s ok=207111 lỗi=0 đệm=62 | hạn= 0s ok=206894 lỗi=0 đệm=93
+t= 70s | hạn=20s ok=238080 lỗi=0 đệm=372 | hạn=25s ok=237708 lỗi=0 đệm=310 | hạn=30s ok=237429 lỗi=0 đệm=310 | hạn=30s ok=237646 lỗi=0 đệm=310 | hạn=35s ok=237119 lỗi=0 đệm=372 | hạn=40s ok=237646 lỗi=0 đệm=310 | hạn=60s ok=237646 lỗi=0 đệm=310 | hạn= 0s ok=237398 lỗi=0 đệm=310
+t= 75s | hạn=20s ok=268522 lỗi=0 đệm=186 | hạn=25s ok=268181 lỗi=0 đệm=124 | hạn=30s ok=267871 lỗi=0 đệm=186 | hạn=30s ok=267933 lỗi=0 đệm=186 | hạn=35s ok=267437 lỗi=0 đệm=186 | hạn=40s ok=268057 lỗi=0 đệm=186 | hạn=60s ok=268088 lỗi=0 đệm=248 | hạn= 0s ok=267654 lỗi=0 đệm=186
+t= 80s | hạn=20s ok=298468 lỗi=0 đệm=124 | hạn=25s ok=298282 lỗi=0 đệm=124 | hạn=30s ok=297755 lỗi=0 đệm=124 | hạn=30s ok=297817 lỗi=0 đệm=124 | hạn=35s ok=297104 lỗi=0 đệm=124 | hạn=40s ok=297879 lỗi=0 đệm=124 | hạn=60s ok=297972 lỗi=0 đệm=124 | hạn= 0s ok=297631 lỗi=0 đệm=124
+t= 85s | hạn=20s ok=328414 lỗi=0 đệm=248 | hạn=25s ok=328321 lỗi=0 đệm=372 | hạn=30s ok=327763 lỗi=0 đệm=248 | hạn=30s ok=327825 lỗi=0 đệm=248 | hạn=35s ok=327174 lỗi=0 đệm=217 | hạn=40s ok=327887 lỗi=0 đệm=279 | hạn=60s ok=327949 lỗi=0 đệm=279 | hạn= 0s ok=327701 lỗi=0 đệm=186
+CUỐI hạn=20s ok=328662 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=25s ok=328693 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=30s ok=328011 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=30s ok=328073 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=35s ok=327391 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=40s ok=328166 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn=60s ok=328228 lỗi=0 lỗi_đầu=<nil>
+CUỐI hạn= 0s ok=327887 lỗi=0 lỗi_đầu=<nil>

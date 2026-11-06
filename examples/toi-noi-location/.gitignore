@@ -10,3 +10,6 @@ go/bin/
 *.onnx
 !fixtures/**
 go/out/
+dotnet/**/bin/
+dotnet/**/obj/
+data/ch-cache/

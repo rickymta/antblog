@@ -1,3 +1,7 @@
+# Test Kafka (kafkax). Lần đầu FAIL sau 30 giây; nguyên nhân là lỗi của test (đọc topic từ đầu), không phải của Sink.
+# Bốn khối đầu của file này là output thật theo thứ tự thời gian; mỗi khối ghi rõ trạng thái topic và test.
+
+# [1] Lần chạy gốc (trước khi điều tra), topic tích luỹ sau nhiều lần chạy tải ở các mục LOC-12/13. Không ghi lại uptime lúc đó.
 $ TOI_NOI_KAFKA=1 go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/kafkax
 === RUN   TestSinkGhiDungKeyVaNoiDung
     kafkax_test.go:63: không đọc lại được bản ghi vừa ghi
@@ -7,10 +11,58 @@ FAIL	toinoi/location/internal/kafkax	30.452s
 FAIL
 (exit=1)
 
-$ TOI_NOI_KAFKA=127.0.0.1:1 go -C examples/toi-noi-location/go test -count=1 ./internal/kafkax   # đã yêu cầu mà Kafka không có: phải FAIL
---- FAIL: TestSinkGhiDungKeyVaNoiDung (0.00s)
-    kafkax_test.go:25: TOI_NOI_KAFKA đã đặt nhưng Kafka không dùng được: không kết nối được Kafka [127.0.0.1:1]: unable to dial: dial tcp 127.0.0.1:1: connect: connection refused
+# [2] Tái hiện: Kafka mới (container tạo lại), thêm 5.000.000 bản ghi giả bằng `kafka_lab fill` rồi test CHƯA sửa. Vẫn qua, nhưng mất 8 giây.
+$ uptime
+22:53  up 35 days, 14:37, 1 user, load averages: 62.59 72.44 124.54
+
+# topic: 394.002 bản ghi của ingest + 5.000.000 bản ghi giả (+ vài bản ghi của các lần test), test CHƯA sửa
+$ TOI_NOI_KAFKA=1 go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/kafkax
+=== RUN   TestSinkGhiDungKeyVaNoiDung
+--- PASS: TestSinkGhiDungKeyVaNoiDung (8.23s)
+PASS
+ok  	toinoi/location/internal/kafkax	9.609s
+(exit=0)
+
+# [3] Thêm 15.000.000 bản ghi giả nữa (tổng 20.394.002 bản ghi của ingest và bản ghi giả, cộng vài bản ghi của chính các lần test), test CHƯA sửa. FAIL đúng như lần gốc: bản ghi đã ghi xong (flush ok, delivered=1) mà đọc từ đầu topic không tới kịp trong 30 giây.
+$ uptime
+22:54  up 35 days, 14:37, 1 user, load averages: 45.45 66.78 120.07
+
+# topic: 394.002 bản ghi của ingest + 20.000.000 bản ghi giả (+ vài bản ghi của các lần test), test CHƯA sửa
+$ TOI_NOI_KAFKA=1 go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/kafkax
+=== RUN   TestSinkGhiDungKeyVaNoiDung
+    kafkax_test.go:63: không đọc lại được bản ghi vừa ghi
+--- FAIL: TestSinkGhiDungKeyVaNoiDung (30.26s)
 FAIL
-FAIL	toinoi/location/internal/kafkax	0.306s
+FAIL	toinoi/location/internal/kafkax	30.650s
 FAIL
 (exit=1)
+
+# [4] Test ĐÃ sửa, trên topic đã lớn hơn nhiều (sau [3] còn thêm các lần chạy ingest và `kafka_lab timeouts` ở loc13k_*; tổng đếm ở cuối file), rồi ca Kafka không tồn tại vẫn phải FAIL.
+$ uptime
+23:22  up 35 days, 15:06, 1 user, load averages: 62.14 65.37 72.52
+
+# test ĐÃ sửa (đọc từ offset cuối chốt trước khi ghi)
+$ TOI_NOI_KAFKA=1 go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/kafkax
+=== RUN   TestSinkGhiDungKeyVaNoiDung
+--- PASS: TestSinkGhiDungKeyVaNoiDung (0.41s)
+PASS
+ok  	toinoi/location/internal/kafkax	1.979s
+(exit=0)
+
+$ TOI_NOI_KAFKA=127.0.0.1:1 go -C examples/toi-noi-location/go test -count=1 ./internal/kafkax   # đã yêu cầu mà Kafka không có: phải FAIL
+--- FAIL: TestSinkGhiDungKeyVaNoiDung (0.00s)
+    kafkax_test.go:26: TOI_NOI_KAFKA đã đặt nhưng Kafka không dùng được: không kết nối được Kafka [127.0.0.1:1]: unable to dial: dial tcp 127.0.0.1:1: connect: connection refused
+FAIL
+FAIL	toinoi/location/internal/kafkax	0.525s
+FAIL
+(exit=1)
+
+# Số bản ghi trong topic sau mọi lần chạy ở trên (cộng offset cuối của 6 partition)
+$ docker exec toi-noi-location-kafka /opt/kafka/bin/kafka-get-offsets.sh --bootstrap-server 127.0.0.1:29092 --topic location.updates.v1
+location.updates.v1:0:5704398
+location.updates.v1:1:7482549
+location.updates.v1:2:8688480
+location.updates.v1:3:8792912
+location.updates.v1:4:5054924
+location.updates.v1:5:6327306
+tổng=42050569

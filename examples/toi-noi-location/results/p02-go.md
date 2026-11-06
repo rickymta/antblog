@@ -23,7 +23,7 @@ docker compose -f examples/toi-noi-location/infra/docker-compose.yml up -d --wai
 go -C examples/toi-noi-location/go build -o bin/ ./cmd/...
 ```
 
-Ghi chú hạ tầng: lệnh `up -d --wait` chạy hơn 3 phút mới trả về và container Kafka hiển thị `unhealthy`. Healthcheck trong `infra/docker-compose.yml` gọi `kafka-topics.sh` vào `127.0.0.1:9092` nhưng broker quảng bá `127.0.0.1:9096`, địa chỉ này không truy cập được từ bên trong container (log health ghi `Connection to node 1 (/127.0.0.1:9096) could not be established`). Kafka vẫn dùng được từ máy chủ (test Kafka và mọi lần đo bên dưới đều chạy). Chưa sửa vì file nằm ngoài phạm vi việc này.
+Ghi chú hạ tầng: lần dựng đầu, lệnh `up -d --wait` chạy hơn 3 phút và container Kafka hiển thị `unhealthy`, vì healthcheck gọi `kafka-topics.sh` vào `127.0.0.1:9092` trong khi broker quảng bá `127.0.0.1:9096`, địa chỉ này không truy cập được từ bên trong container (log health ghi `Connection to node 1 (/127.0.0.1:9096) could not be established`). Đã sửa trong `infra/docker-compose.yml`: healthcheck dùng listener `INTERNAL` ở `127.0.0.1:29092`. Kiểm lại lúc điều tra ở dưới: `up -d --wait kafka` trả về với container `Up 7 seconds (healthy)`. Các phép đo ở phần này chạy trước khi sửa, nhưng Kafka vẫn dùng được từ máy chủ nên số đo không bị ảnh hưởng.
 
 Cách đọc cột của loadgen (dòng `STEP`):
 
@@ -496,7 +496,7 @@ D	5s	5000	9500	10400	100	Closed
 D	15s	10434	20000	0	0	Closed
 ```
 
-Hạn 1 giây xả được 1.800 điểm, bỏ 18.100 (có đếm vào `shutdown_dropped`), cộng 100 điểm của lô đang gửi dở bị huỷ (`lost_in_flight`); tổng bằng 20.000. Hạn 15 giây vừa đủ xả hết (10,4 giây thực tế). Sau `Shutdown`, `Offer` trả `Closed`. Thứ tự tắt trong `location-ingest`: ngừng nhận kết nối, đóng kết nối WebSocket (`GoingAway`), xả hàng đợi trong hạn, flush Kafka, in bộ đếm cuối.
+Hạn 1 giây xả được 1.900 điểm, bỏ 18.000 (có đếm vào `shutdown_dropped`), cộng 100 điểm của lô đang gửi dở bị huỷ (`lost_in_flight`); tổng bằng 20.000 (hạn 5 giây: 9.500 + 10.400 + 100). Hạn 15 giây vừa đủ xả hết (10,4 giây thực tế). Sau `Shutdown`, `Offer` trả `Closed`. Thứ tự tắt trong `location-ingest`: ngừng nhận kết nối, đóng kết nối WebSocket (`GoingAway`), xả hàng đợi trong hạn, flush Kafka, in bộ đếm cuối.
 
 #### Kafka thật bị tạm dừng 25 giây
 
@@ -554,7 +554,62 @@ queue/kafka cuối: {"queue": {"depth": 0, "max_depth": 30000, "offered": 643818
 
 Số cho thấy: trong lúc Kafka đứng, `kafka_delivered` đóng băng (182.280 và 164.787), hàng đợi đầy lên (27.000 điểm ở coalesce, 30.000 ở drop-newest) và gộp/bỏ từ đó (`q_coalesced` lên 136.126, hoặc `q_dropped` lên 108.090), nhưng **độ trễ ack phía app không đổi** (`win_p99` trong các cửa sổ có Kafka đứng nằm trong khoảng 10 đến 32 ms, ngang các cửa sổ khác) và `acked_pts_s` giữ 6.2xx: goroutine đọc WebSocket không bị kẹt, đúng ý đồ. Sau khi Kafka chạy lại, hàng rỗng sau 5 đến 15 giây. Bộ nhớ ingest không phình thêm (đỉnh RSS 1.097 và 1.100 MB so với 1.020 MB khi không có sự cố).
 
-Bất ngờ cần ghi: **bộ đệm nội bộ của client Kafka là hàng đợi thứ hai**, và lần chạy coalesce báo `kafka.failed = 20000`, đúng bằng `MaxBufferedRecords(20000)`, trong khi lần drop-newest báo `failed = 0` với cùng thời gian dừng (26 so với 25 giây) và `RecordDeliveryTimeout` 30 giây. Chưa điều tra vì sao hai lần khác nhau. Điều chắc chắn: bộ đếm của hàng đợi phía trước không thấy phần mất này, nên ingest phải xuất cả `queue.*` lẫn `kafka.failed` (hiện đã xuất cả hai ở `/debug/stats`). Với coalesce, `drop-newest` ở trên, so sánh tuổi điểm đã giao trong lần Kafka thật **chưa đo** (chỉ có ở thí nghiệm offline).
+Bất ngờ cần ghi: **bộ đệm nội bộ của client Kafka là hàng đợi thứ hai**, và lần chạy coalesce báo `kafka.failed = 20000`, đúng bằng `MaxBufferedRecords(20000)`, trong khi lần drop-newest báo `failed = 0` với cùng thời gian dừng (26 so với 25 giây) và `RecordDeliveryTimeout` 30 giây. Nguyên nhân của con số đó (và của khoảng chênh `taken − (delivered + failed)` ở hai lần chạy này) được điều tra ở mục «Điều tra `taken − (delivered + failed)` và `kafka.failed`» ngay dưới. Điều chắc chắn: bộ đếm của hàng đợi phía trước không thấy phần mất này, nên ingest phải xuất cả `queue.*` lẫn `kafka.failed` (nay `/debug/stats` còn xuất `kafka.buffered` và `kafka.failed_<nguyên nhân>`). Với coalesce, `drop-newest` ở trên, so sánh tuổi điểm đã giao trong lần Kafka thật **chưa đo** (chỉ có ở thí nghiệm offline).
+
+#### Điều tra `taken − (delivered + failed)` và `kafka.failed`
+
+Hai điều chưa khớp sau các lần chạy trên: (1) ở ba trong bốn bộ đếm cuối của ingest, `queue.taken − (kafka.delivered + kafka.failed)` khác 0; (2) `kafka.failed = 20000` ở một trong hai lần dừng Kafka. Các lần chạy bên dưới dùng ingest đã thêm `kafka.buffered` (`Sink.Buffered()`, bằng `BufferedProduceRecords()` của client) và `kafka.failed_<nguyên nhân>` (nhóm lỗi của promise, lần đầu mỗi nhóm còn ghi log kèm lỗi gốc); `uptime` ghi trong từng file raw.
+
+**Bốn bộ đếm cuối đã có** (đọc từ `loc12_a_ingest.json`, `loc12_b_ingest.json`, `loc13k_coalesce_ingest.json`, `loc13k_drop-newest_ingest.json`; đều là `/debug/stats` chụp ngay sau khi loadgen kết thúc, ingest vẫn đang chạy):
+
+| Lần chạy | `taken` | `delivered` | `failed` | `taken − (delivered + failed)` |
+|---|---|---|---|---|
+| LOC-12 A (lô 3) | 393.561 | 388.746 | 0 | 4.815 |
+| LOC-12 B (lô 1) | 393.642 | 393.169 | 0 | 473 |
+| LOC-13 coalesce, dừng 26 giây | 507.776 | 481.494 | 20.000 | 6.282 |
+| LOC-13 drop-newest, dừng 25 giây | 535.728 | 535.728 | 0 | 0 |
+
+`taken` tăng trong `Queue.TakeBatch`, trước khi `Sink.Send` đưa bản ghi cho producer; `delivered` và `failed` chỉ tăng trong promise, sau khi broker xác nhận hoặc lỗi. Bản ghi nằm giữa hai mốc đó (đợi linger 5 ms, đang trên đường tới broker) là «đang bay». Ở `loc12_a_ingest.json`, lúc chụp `conns_open` còn 766: loadgen đang đóng kết nối, tức bộ đếm được chụp giữa chừng.
+
+Muốn phân biệt «đang bay» với «mất» hoặc «bộ đếm sai» thì phải chụp lại sau khi mọi thứ lắng xuống. Chạy lại cấu hình A (`p02-go-raw/loc12_final_snapshot.txt`): ngay khi loadgen xong khoảng chênh là 3.672, một giây sau là 0 và giữ nguyên 0 trong 18 giây; sau `SIGTERM` (ngừng nhận kết nối, xả hàng đợi, `Flush` Kafka) bộ đếm cuối là `taken = delivered = 394.002`, `failed = 0`.
+
+```text
+# 22:52:39.879  {"queue": {"depth": 0, "offered": 393870, ..., "taken": 393870}, "kafka": {"delivered": 390198, "failed": 0}, "taken_minus_delivered_failed": 3672}
+# 22:52:41.012  {"queue": {"depth": 0, "offered": 394002, ..., "taken": 394002}, "kafka": {"delivered": 394002, "failed": 0}, "taken_minus_delivered_failed": 0}
+cuối sau SIGTERM: "taken": 394002, "kafka": {"delivered": 394002, "failed": 0}
+```
+
+Với `kafka.buffered` thì khoảng chênh trùng đúng số bản ghi đang bay ở năm lần chạy sau (`loc13k_failed_runs.txt`, snapshot đầu tiên sau loadgen). Từng cặp (khoảng chênh / `buffered`): 3.897 / 3.897, 4.965 / 4.968, 4.563 / 4.563 (lần này còn có `failed = 20000`), 5.919 / 5.919, 5.139 / 5.139; lệch 3 ở lần thứ hai vì `taken` và `BufferedProduceRecords()` không được đọc cùng một lúc. Một giây sau cả năm lần đều về 0 và bộ đếm cuối sau `SIGTERM` cũng 0. Ở cả sáu bộ đếm cuối còn có: `offered − coalesced − dropped − evicted − stale_ignored − shutdown_dropped − taken − depth = 0`, tức hàng đợi phía trước không làm rơi điểm nào ngoài những gì nó đếm.
+
+Kết luận cho (1): **không có bản ghi nào mất và không có lỗi ở bộ đếm; đó là bản ghi đang bay lúc chụp**. Bốn bộ đếm cũ không có `buffered` nên không tự chúng chứng minh được điều này; bằng chứng là cơ chế trên, lần chạy lặp lại cùng cấu hình, và các lần chụp lại sau đó. Lần drop-newest ở bảng trên chênh 0, cách hiểu hợp lý là lúc chụp tình cờ không còn bản ghi nào đang bay (không kiểm riêng). Hệ quả cho cách đọc số: đối soát giữa `queue.taken` và `kafka.delivered + kafka.failed` phải làm sau khi flush, hoặc cộng thêm `kafka.buffered`.
+
+**`kafka.failed = 20000`.** Lặp lại thí nghiệm dừng Kafka với ingest mới (`p02-go-raw/loc13k_failed_runs.txt`), cùng lệnh như mục trên, chỉ đổi thời gian dừng:
+
+| Chính sách | Dừng Kafka (giây) | `kafka.failed` | Nguyên nhân (`failed_*`) |
+|---|---|---|---|
+| coalesce | 26 | 0 | |
+| coalesce | 28 | 0 | |
+| coalesce | 30 | 20.000 | `record_timeout` = 20.000 |
+| drop-newest | 30 | 0 | |
+| drop-newest | 34 | 0 | |
+
+Lần coalesce 30 giây tái hiện đúng con số 20.000, và log của ingest ghi lỗi gốc `records have timed out before they were able to be produced`: đó là `kgo.ErrRecordTimeout`, tức `RecordDeliveryTimeout(30s)` hết hạn ở các bản ghi chờ gửi trong lúc broker đứng. Tài liệu của franz-go nói khi một bản ghi hết hạn thì **mọi bản ghi đang đệm cùng partition bị coi là lỗi theo**; bộ đệm lúc đó đầy (20.000) nên toàn bộ 20.000 bản ghi lỗi cùng lúc, và con số bằng `MaxBufferedRecords` là hệ quả của đó, không phải sự trùng hợp. Nhưng hai dòng drop-newest (30 và 34 giây, không ngắn hơn hạn 30 giây) không lỗi. Mỗi ô chỉ một lần chạy nên bảng này chưa đủ để nói chính sách có liên quan hay không; thí nghiệm sau bỏ hẳn hàng đợi để trả lời.
+
+Để cô lập khỏi hàng đợi và 25.000 kết nối, `kafka_lab timeouts` chạy 8 producer cùng cấu hình `NewSink` (linger 5 ms, `MaxBufferedRecords(20000)`, 6.200 bản ghi/giây mỗi producer) chỉ khác `RecordDeliveryTimeout`, cùng chịu một lần `docker pause` (`p02-go-raw/loc13k_timeouts.txt`; cột là hạn 20, 25, 30, 30, 35, 40, 60 giây và không hạn):
+
+```bash
+examples/toi-noi-location/go/bin/kafka_lab timeouts 85s 20,25,30,30,35,40,60,0
+(sleep 20; docker pause toi-noi-location-kafka; sleep <P>; docker unpause toi-noi-location-kafka) &
+```
+
+| Dừng (giây) | Số producer lỗi trên 8 | Producer lỗi (số bản ghi lỗi) |
+|---|---|---|
+| 26 | 0 | |
+| 30 | 2 | hạn 25 giây (19.708), một trong hai producer hạn 30 giây (19.628) |
+| 34, lần 1 | 4 | hạn 20 giây (19.717), hạn 25 giây (17), cả hai hạn 30 giây (19.742 và 19.717) |
+| 34, lần 2 | 0 | |
+
+Đọc được từ đây: mọi lỗi đều là `record_timeout`; producer hạn 35, 40, 60 giây và không hạn không lỗi ở cả bốn lần chạy; không producer nào lỗi khi dừng 26 giây (kể cả hạn 20 giây); và **hai producer hạn 30 giây giống hệt nhau, cùng một lần dừng 30 giây, một lỗi 19.628 bản ghi còn một không lỗi**; cùng thời gian dừng 34 giây, hai lần chạy cho kết quả khác nhau (4 producer lỗi so với 0). Vậy nguyên nhân là hạn giao `RecordDeliveryTimeout` của client Kafka hết hạn khi broker đứng cỡ 30 giây trở lên, và việc nó xảy ra hay không ở vùng 30 đến 34 giây là một cuộc đua thời gian bên trong client; 8 producer này không có hàng đợi hay chính sách nào phía trước mà vẫn tái hiện, nên chính sách coalesce hay drop-newest không phải là nguyên nhân. Số `failed` ở lần coalesce gốc không còn là bí ẩn về loại lỗi, nhưng giữ hai điều **chưa giải quyết**: (a) thời điểm chính xác franz-go xét hạn (tài liệu: chỉ trước khi ghi một request hoặc sau một phản hồi produce, và chỉ khi an toàn với idempotence) chưa được lần theo, nên chưa giải thích được vì sao cùng hạn, cùng thời gian dừng, hai producer cho kết quả khác nhau; (b) lần coalesce gốc lỗi ở thời gian dừng danh nghĩa 26 giây (hiệu hai mốc giờ ghi theo giây, độ trễ lệnh `docker pause`/`unpause` lúc máy rất nặng không ghi), còn các lần lặp 26 giây ở trên (ingest, 8 producer) đều không lỗi; khả năng cao là thời gian Kafka thực sự đóng băng dài hơn 26 giây, nhưng chưa chứng minh được. Hạn 30 giây là tham số chọn cho lab; tăng nó lên trên thời gian sự cố dự kiến là hướng sửa hiển nhiên, chưa thử trong lab này.
 
 Test liên quan (`-race`): `go test -race -v ./internal/backpressure` (`p02-go-raw/tests_backpressure.txt`) gồm bảo toàn số điểm (vào = ra + mất có đếm) với nhiều producer và consumer ở cả ba chính sách, coalesce chỉ bật khi vượt ngưỡng, tắt êm trong hạn và hết hạn.
 
@@ -1007,6 +1062,9 @@ bash examples/toi-noi-location/verify-p02-go.sh
 (`p02-go-raw/tests_all.txt`)
 
 ```text
+$ uptime
+23:29  up 35 days, 15:12, 1 user, load averages: 137.72 99.93 85.64
+
 $ test -z "$(gofmt -l examples/toi-noi-location/go)" && echo gofmt-sach
 gofmt-sach
 
@@ -1015,42 +1073,60 @@ $ go -C examples/toi-noi-location/go vet ./...
 
 $ go -C examples/toi-noi-location/go test -race -count=1 ./...
 ?   	toinoi/location/cmd/history-writer	[no test files]
+?   	toinoi/location/cmd/kafka_lab	[no test files]
 ?   	toinoi/location/cmd/loadgen	[no test files]
-ok  	toinoi/location/cmd/loc11_nhap_mon	3.180s
+ok  	toinoi/location/cmd/loc11_nhap_mon	1.946s
 ?   	toinoi/location/cmd/loc13_backpressure	[no test files]
 ?   	toinoi/location/cmd/location-ingest	[no test files]
 ?   	toinoi/location/cmd/tracking-hub	[no test files]
 ?   	toinoi/location/gen/location/v1	[no test files]
-ok  	toinoi/location/internal/backpressure	3.108s
-ok  	toinoi/location/internal/geo	4.545s
-ok  	toinoi/location/internal/history	2.837s
-ok  	toinoi/location/internal/hub	4.035s
-ok  	toinoi/location/internal/ingest	4.111s
-ok  	toinoi/location/internal/kafkax	2.048s
-ok  	toinoi/location/internal/labauth	5.075s
-ok  	toinoi/location/internal/sim	5.980s
+ok  	toinoi/location/internal/backpressure	2.213s
+ok  	toinoi/location/internal/geo	2.797s
+ok  	toinoi/location/internal/history	3.353s
+ok  	toinoi/location/internal/hub	2.762s
+ok  	toinoi/location/internal/ingest	3.823s
+ok  	toinoi/location/internal/kafkax	4.286s
+ok  	toinoi/location/internal/labauth	4.706s
+ok  	toinoi/location/internal/sim	5.178s
 ?   	toinoi/location/internal/stat	[no test files]
-ok  	toinoi/location/internal/validate	5.524s
+ok  	toinoi/location/internal/validate	5.625s
 (exit=0)
 ```
 
-Test cần Kafka nằm sau biến môi trường `TOI_NOI_KAFKA` (`1` hoặc `host:port`); không đặt thì bỏ qua, đặt mà không kết nối được thì **thất bại** có thông báo rõ (`p02-go-raw/tests_kafka.txt`):
+Test cần Kafka nằm sau biến môi trường `TOI_NOI_KAFKA` (`1` hoặc `host:port`); không đặt thì bỏ qua, đặt mà không kết nối được thì **thất bại** có thông báo rõ. Lần chạy đầu của test này **FAIL sau 30 giây** (`kafkax_test.go:63: không đọc lại được bản ghi vừa ghi`), và lỗi đó đã được điều tra (`p02-go-raw/tests_kafka.txt`).
+
+Nguyên nhân là **lỗi của test**, không phải của `Sink` và không phải cuộc đua: test ghi một bản ghi (đã `Flush` xong, `delivered = 1`) rồi mở consumer với `ConsumeResetOffset(AtStart())` và đọc **từ đầu topic** cho tới khi gặp key của mình. Topic `location.updates.v1` của lab tích luỹ hàng triệu bản ghi qua các lần chạy tải (LOC-12, 13, 19, 20), nên thời gian của test tỉ lệ với kích thước topic và hết hạn 30 giây của `context` trước khi đọc tới bản ghi nằm ở cuối. Tái hiện: dựng lại Kafka (topic trống), ghi bản ghi giả bằng `kafka_lab fill`, chạy test chưa sửa:
+
+| Số bản ghi trong topic | Test chưa sửa |
+|---|---|
+| 5.394.002 (+ vài bản ghi của test) | qua, 8,23 giây |
+| 20.394.002 (+ vài bản ghi của test) | **FAIL sau 30,26 giây**, đúng thông báo cũ |
+
+Cách sửa (`internal/kafkax/kafkax_test.go`): trước khi ghi, lấy offset cuối của từng partition (`kadm.ListEndOffsets`), rồi consumer chỉ đọc từ các offset đó (`kgo.ConsumePartitions`), nên thời gian test không còn phụ thuộc kích thước topic. Sau khi sửa, test qua trong 0,41 giây trên topic đã có 42.050.569 bản ghi, và ca «đã yêu cầu mà Kafka không có» vẫn FAIL với thông báo rõ (nay ở `kafkax_test.go:26`).
+
+```bash
+go -C examples/toi-noi-location/go run ./cmd/kafka_lab fill 5000000       # rồi 15000000 để tái hiện FAIL
+TOI_NOI_KAFKA=1 go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/kafkax
+```
+
+Output sau khi sửa, trên topic 42.050.569 bản ghi (`p02-go-raw/tests_kafka.txt`, khối [4]):
 
 ```text
+$ uptime
+23:22  up 35 days, 15:06, 1 user, load averages: 62.14 65.37 72.52
+
 $ TOI_NOI_KAFKA=1 go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/kafkax
 === RUN   TestSinkGhiDungKeyVaNoiDung
-    kafkax_test.go:63: không đọc lại được bản ghi vừa ghi
---- FAIL: TestSinkGhiDungKeyVaNoiDung (30.07s)
-FAIL
-FAIL	toinoi/location/internal/kafkax	30.452s
-FAIL
-(exit=1)
+--- PASS: TestSinkGhiDungKeyVaNoiDung (0.41s)
+PASS
+ok  	toinoi/location/internal/kafkax	1.979s
+(exit=0)
 
 $ TOI_NOI_KAFKA=127.0.0.1:1 go -C examples/toi-noi-location/go test -count=1 ./internal/kafkax   # đã yêu cầu mà Kafka không có: phải FAIL
 --- FAIL: TestSinkGhiDungKeyVaNoiDung (0.00s)
-    kafkax_test.go:25: TOI_NOI_KAFKA đã đặt nhưng Kafka không dùng được: không kết nối được Kafka [127.0.0.1:1]: unable to dial: dial tcp 127.0.0.1:1: connect: connection refused
+    kafkax_test.go:26: TOI_NOI_KAFKA đã đặt nhưng Kafka không dùng được: không kết nối được Kafka [127.0.0.1:1]: unable to dial: dial tcp 127.0.0.1:1: connect: connection refused
 FAIL
-FAIL	toinoi/location/internal/kafkax	0.306s
+FAIL	toinoi/location/internal/kafkax	0.525s
 FAIL
 (exit=1)
 ```
@@ -1063,7 +1139,7 @@ FAIL
 - Kịch bản mạng chập chờn thật (mất kết nối, nối lại, gửi lại lô chưa ack) chưa chạy. Chỉ có test đơn vị cho điểm đến sau và trùng.
 - Mọi số đo là một lần chạy trên một máy với Kafka một broker trong Docker; chưa lặp, chưa có khoảng tin cậy, và loadgen chiếm CPU cùng máy.
 - Nguyên nhân gãy ở 100.000 điểm/s chưa tách trọn vẹn (xem LOC-12, mục E và F).
-- Khác biệt `kafka.failed` giữa hai lần dừng Kafka (LOC-13) chưa điều tra.
+- `kafka.failed = 20000` ở lần dừng Kafka (LOC-13): đã xác định là `RecordDeliveryTimeout` hết hạn của client Kafka (xem mục điều tra ở LOC-13). Còn chưa giải quyết: vì sao cùng hạn và cùng thời gian dừng mà lúc lỗi lúc không (cuộc đua bên trong franz-go chưa lần theo), và vì sao lần gốc lỗi ở thời gian dừng danh nghĩa 26 giây trong khi các lần lặp 26 giây không lỗi.
 - Tuổi điểm đã giao khi Kafka thật bị dừng chưa đo (chỉ có ở thí nghiệm offline).
 - Redis (cổng 6391) được bật cùng compose nhưng phần Go không dùng.
 - Nghĩa vụ pháp lý Việt Nam về lưu vị trí chưa kiểm; không có số nào trong lab là khuyến nghị pháp lý.

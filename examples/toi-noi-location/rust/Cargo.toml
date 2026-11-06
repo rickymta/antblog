@@ -15,6 +15,11 @@ publish = false
 geo-core = { path = "crates/geo-core" }
 road-graph = { path = "crates/road-graph" }
 driver-store = { path = "crates/driver-store" }
+route-engine = { path = "crates/route-engine" }
+simulator = { path = "crates/simulator" }
+geo-engine = { path = "crates/geo-engine" }
+map-match = { path = "crates/map-match" }
+location-store = { path = "crates/location-store" }
 # hình học và chỉ mục
 h3o = "0.11.1"
 rstar = "0.14.0"
@@ -36,6 +41,20 @@ fastrand = "2.5.0"
 thiserror = "2.0.21"
 # Redis: bản ổn định 1.x (bản 2.0.0-rc.2 mới nhất là prerelease nên không dùng)
 redis = { version = "1.8.1", default-features = false }
+# Kafka và protobuf (location-store): không có cmake/protoc trên máy viết, nên rdkafka dùng build tự cấu hình
+# của librdkafka (make + cc) và protobuf biên dịch bằng protox (thuần Rust) + prost-build::compile_fds
+rdkafka = { version = "0.39.0", default-features = false, features = ["libz"] }
+prost = "0.14.4"
+prost-build = "0.14.4"
+protox = "0.10.0"
+# định tuyến (P03): đối chiếu petgraph và fast_paths; dịch vụ gRPC tonic; kịch bản mô phỏng TOML
+petgraph = "0.8.3"
+fast_paths = "1.0.0"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "time", "net", "sync"] }
+tonic = "0.14.9"
+tonic-prost = "0.14.9"
+tonic-prost-build = "0.14.9"
+toml = "1.2.0"
 # đo và kiểm thử
 criterion = { version = "0.8.2", default-features = false, features = ["cargo_bench_support"] }
 proptest = "1.12.0"

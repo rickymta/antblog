@@ -71,7 +71,11 @@ func main() {
 		}
 		sink = ks
 		kafkaStats = func() map[string]int64 {
-			return map[string]int64{"delivered": ks.Delivered.Load(), "failed": ks.Failed.Load()}
+			m := map[string]int64{"delivered": ks.Delivered.Load(), "failed": ks.Failed.Load(), "buffered": ks.Buffered()}
+			for r, n := range ks.FailedReasons() {
+				m["failed_"+r] = n
+			}
+			return m
 		}
 		flush = func(c context.Context) { _ = ks.Flush(c); ks.Close() }
 	case *sinkSpec == "discard":

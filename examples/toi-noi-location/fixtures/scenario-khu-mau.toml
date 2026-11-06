@@ -1,0 +1,55 @@
+# Kịch bản mô phỏng trên fixture «khu mẫu» (1,5 km × 1,2 km, dữ liệu giả lập). Mọi tham số là giả định của lab.
+name = "khu-mau-baseline"
+graph = "fixture"
+seed = 20261106
+start_hour = 8
+duration_s = 1200
+drivers = 8
+traffic = "free_flow"
+decision = "immediate"
+
+[demand]
+requests_per_min = 1.5
+background_share = 0.4
+trip_min_m = 300
+trip_max_m = 1000
+
+# khung giờ: nửa sau đông gấp rưỡi
+[[demand.phases]]
+from_s = 600
+to_s = 1200
+multiplier = 1.5
+
+# điểm nóng quanh các điểm có tên của fixture (toạ độ gốc 10,7700 / 106,6900); tâm đặt gần chung cư và trung tâm thương mại mẫu
+[[demand.hotspot]]
+name = "chung-cu-mau-a"
+lat = 10.77855
+lng = 106.69315
+sigma_m = 60
+weight = 2.0
+
+[[demand.hotspot]]
+name = "trung-tam-thuong-mai-mau"
+lat = 10.77225
+lng = 106.69765
+sigma_m = 60
+weight = 1.5
+
+[customer]
+pin_sigma_m = 12
+walk_speed_mps = 1.3
+patience_s = 300
+
+[cancel]
+eta_free_s = 120
+eta_max_s = 480
+max_prob = 0.5
+walk_extra_per_100m = 0.0
+reaction_min_s = 10
+reaction_max_s = 60
+
+[driver]
+background_share = 0.5
+speed_jitter = 0.1
+dwell_pickup_s = 20
+dwell_dropoff_s = 10

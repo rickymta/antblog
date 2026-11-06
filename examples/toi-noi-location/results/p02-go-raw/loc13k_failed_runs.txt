@@ -1,0 +1,129 @@
+# Điều tra kafka.failed: lặp lại thí nghiệm docker pause Kafka (LOC-13) với ingest đã xuất `buffered` và `failed_<nguyên nhân>`.
+# Mỗi khối: 25.000 kết nối, 6.250 điểm/s, hàng đợi 30.000, loadgen 100 giây, pause bắt đầu 45 giây sau khi bắt đầu loadgen.
+
+## policy=coalesce pause=26s
+$ location-ingest --sink kafka --listen '127.0.0.1:8081,[::1]:8083' --policy coalesce --queue-cap 30000
+$ loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 100s --report-every 5s
+$ (sleep 45; docker pause toi-noi-location-kafka; sleep 26; docker unpause toi-noi-location-kafka) &
+uptime: 22:56  up 35 days, 14:39, 1 user, load averages: 30.96 56.16 110.06
+giờ pause/unpause (lệnh docker từng dòng):
+pause 22:56:47
+unpause 22:57:13
+log WARN của ingest (lần đầu thấy mỗi nguyên nhân lỗi):
+(không có)
+snapshot /debug/stats sau loadgen (ngay, +1s, +3s, +8s, +18s), kèm taken - delivered - failed:
+# 22:57:58
+{"queue": {"depth": 0, "offered": 643023, "coalesced": 117666, "dropped": 0, "evicted": 0, "taken": 525357}, "kafka": {"buffered": 3897, "delivered": 521460, "failed": 0}, "taken_minus_delivered_failed": 3897}
+# 22:58:00
+{"queue": {"depth": 0, "offered": 643569, "coalesced": 117666, "dropped": 0, "evicted": 0, "taken": 525903}, "kafka": {"buffered": 0, "delivered": 525903, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 22:58:02
+{"queue": {"depth": 0, "offered": 643569, "coalesced": 117666, "dropped": 0, "evicted": 0, "taken": 525903}, "kafka": {"buffered": 0, "delivered": 525903, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 22:58:07
+{"queue": {"depth": 0, "offered": 643569, "coalesced": 117666, "dropped": 0, "evicted": 0, "taken": 525903}, "kafka": {"buffered": 0, "delivered": 525903, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 22:58:17
+{"queue": {"depth": 0, "offered": 643569, "coalesced": 117666, "dropped": 0, "evicted": 0, "taken": 525903}, "kafka": {"buffered": 0, "delivered": 525903, "failed": 0}, "taken_minus_delivered_failed": 0}
+bộ đếm cuối sau SIGTERM (xả hàng đợi + Flush): {"queue": {"depth": 0, "max_depth": 27000, "offered": 643569, "coalesced": 117666, "stale_ignored": 0, "dropped": 0, "evicted": 0, "taken": 525903, "shutdown_dropped": 0}, "kafka": {"buffered": 0, "delivered": 525903, "failed": 0}}
+taken - delivered - failed = 0
+
+## policy=coalesce pause=28s
+$ location-ingest --sink kafka --listen '127.0.0.1:8081,[::1]:8083' --policy coalesce --queue-cap 30000
+$ loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 100s --report-every 5s
+$ (sleep 45; docker pause toi-noi-location-kafka; sleep 28; docker unpause toi-noi-location-kafka) &
+uptime: 23:01  up 35 days, 14:44, 1 user, load averages: 83.41 59.80 93.55
+giờ pause/unpause (lệnh docker từng dòng):
+pause_start 23:02:11.530
+pause_done 23:02:11.688
+unpause_start 23:02:39.704
+unpause_done 23:02:39.808
+log WARN của ingest (lần đầu thấy mỗi nguyên nhân lỗi):
+(không có)
+snapshot /debug/stats sau loadgen (ngay, +1s, +3s, +8s, +18s), kèm taken - delivered - failed:
+# 23:03:25.528
+{"queue": {"depth": 0, "offered": 643179, "coalesced": 129328, "dropped": 0, "evicted": 0, "taken": 513851}, "kafka": {"buffered": 4968, "delivered": 508886, "failed": 0}, "taken_minus_delivered_failed": 4965}
+# 23:03:26.802
+{"queue": {"depth": 0, "offered": 643845, "coalesced": 129328, "dropped": 0, "evicted": 0, "taken": 514517}, "kafka": {"buffered": 0, "delivered": 514517, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:03:28.894
+{"queue": {"depth": 0, "offered": 643845, "coalesced": 129328, "dropped": 0, "evicted": 0, "taken": 514517}, "kafka": {"buffered": 0, "delivered": 514517, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:03:34.018
+{"queue": {"depth": 0, "offered": 643845, "coalesced": 129328, "dropped": 0, "evicted": 0, "taken": 514517}, "kafka": {"buffered": 0, "delivered": 514517, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:03:44.192
+{"queue": {"depth": 0, "offered": 643845, "coalesced": 129328, "dropped": 0, "evicted": 0, "taken": 514517}, "kafka": {"buffered": 0, "delivered": 514517, "failed": 0}, "taken_minus_delivered_failed": 0}
+bộ đếm cuối sau SIGTERM (xả hàng đợi + Flush): {"queue": {"depth": 0, "max_depth": 26999, "offered": 643845, "coalesced": 129328, "stale_ignored": 0, "dropped": 0, "evicted": 0, "taken": 514517, "shutdown_dropped": 0}, "kafka": {"buffered": 0, "delivered": 514517, "failed": 0}}
+taken - delivered - failed = 0
+
+## policy=coalesce pause=30s
+$ location-ingest --sink kafka --listen '127.0.0.1:8081,[::1]:8083' --policy coalesce --queue-cap 30000
+$ loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 100s --report-every 5s
+$ (sleep 45; docker pause toi-noi-location-kafka; sleep 30; docker unpause toi-noi-location-kafka) &
+uptime: 22:58  up 35 days, 14:41, 1 user, load averages: 45.65 52.23 99.69
+giờ pause/unpause (lệnh docker từng dòng):
+pause 22:59:15
+unpause 22:59:45
+log WARN của ingest (lần đầu thấy mỗi nguyên nhân lỗi):
+2026/11/06 22:59:45 WARN bản ghi Kafka lỗi lần đầu theo nguyên nhân reason=record_timeout err="records have timed out before they were able to be produced"
+snapshot /debug/stats sau loadgen (ngay, +1s, +3s, +8s, +18s), kèm taken - delivered - failed:
+# 23:00:29
+{"queue": {"depth": 0, "offered": 643413, "coalesced": 163100, "dropped": 0, "evicted": 0, "taken": 480313}, "kafka": {"buffered": 4563, "delivered": 455750, "failed": 20000, "failed_record_timeout": 20000}, "taken_minus_delivered_failed": 4563}
+# 23:00:30
+{"queue": {"depth": 0, "offered": 643863, "coalesced": 163100, "dropped": 0, "evicted": 0, "taken": 480763}, "kafka": {"buffered": 0, "delivered": 460763, "failed": 20000, "failed_record_timeout": 20000}, "taken_minus_delivered_failed": 0}
+# 23:00:32
+{"queue": {"depth": 0, "offered": 643863, "coalesced": 163100, "dropped": 0, "evicted": 0, "taken": 480763}, "kafka": {"buffered": 0, "delivered": 460763, "failed": 20000, "failed_record_timeout": 20000}, "taken_minus_delivered_failed": 0}
+# 23:00:37
+{"queue": {"depth": 0, "offered": 643863, "coalesced": 163100, "dropped": 0, "evicted": 0, "taken": 480763}, "kafka": {"buffered": 0, "delivered": 460763, "failed": 20000, "failed_record_timeout": 20000}, "taken_minus_delivered_failed": 0}
+# 23:00:47
+{"queue": {"depth": 0, "offered": 643863, "coalesced": 163100, "dropped": 0, "evicted": 0, "taken": 480763}, "kafka": {"buffered": 0, "delivered": 460763, "failed": 20000, "failed_record_timeout": 20000}, "taken_minus_delivered_failed": 0}
+bộ đếm cuối sau SIGTERM (xả hàng đợi + Flush): {"queue": {"depth": 0, "max_depth": 27000, "offered": 643863, "coalesced": 163100, "stale_ignored": 0, "dropped": 0, "evicted": 0, "taken": 480763, "shutdown_dropped": 0}, "kafka": {"buffered": 0, "delivered": 460763, "failed": 20000, "failed_record_timeout": 20000}}
+taken - delivered - failed = 0
+
+## policy=drop-newest pause=30s
+$ location-ingest --sink kafka --listen '127.0.0.1:8081,[::1]:8083' --policy drop-newest --queue-cap 30000
+$ loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 100s --report-every 5s
+$ (sleep 45; docker pause toi-noi-location-kafka; sleep 30; docker unpause toi-noi-location-kafka) &
+uptime: 23:03  up 35 days, 14:47, 1 user, load averages: 66.83 64.15 90.09
+giờ pause/unpause (lệnh docker từng dòng):
+pause_start 23:04:42.374
+pause_done 23:04:42.482
+unpause_start 23:05:12.498
+unpause_done 23:05:12.576
+log WARN của ingest (lần đầu thấy mỗi nguyên nhân lỗi):
+(không có)
+snapshot /debug/stats sau loadgen (ngay, +1s, +3s, +8s, +18s), kèm taken - delivered - failed:
+# 23:05:56.140
+{"queue": {"depth": 0, "offered": 643605, "coalesced": 0, "dropped": 138309, "evicted": 0, "taken": 505296}, "kafka": {"buffered": 5919, "delivered": 499377, "failed": 0}, "taken_minus_delivered_failed": 5919}
+# 23:05:57.325
+{"queue": {"depth": 0, "offered": 643704, "coalesced": 0, "dropped": 138309, "evicted": 0, "taken": 505395}, "kafka": {"buffered": 0, "delivered": 505395, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:05:59.441
+{"queue": {"depth": 0, "offered": 643704, "coalesced": 0, "dropped": 138309, "evicted": 0, "taken": 505395}, "kafka": {"buffered": 0, "delivered": 505395, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:06:04.519
+{"queue": {"depth": 0, "offered": 643704, "coalesced": 0, "dropped": 138309, "evicted": 0, "taken": 505395}, "kafka": {"buffered": 0, "delivered": 505395, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:06:14.602
+{"queue": {"depth": 0, "offered": 643704, "coalesced": 0, "dropped": 138309, "evicted": 0, "taken": 505395}, "kafka": {"buffered": 0, "delivered": 505395, "failed": 0}, "taken_minus_delivered_failed": 0}
+bộ đếm cuối sau SIGTERM (xả hàng đợi + Flush): {"queue": {"depth": 0, "max_depth": 30000, "offered": 643704, "coalesced": 0, "stale_ignored": 0, "dropped": 138309, "evicted": 0, "taken": 505395, "shutdown_dropped": 0}, "kafka": {"buffered": 0, "delivered": 505395, "failed": 0}}
+taken - delivered - failed = 0
+
+## policy=drop-newest pause=34s
+$ location-ingest --sink kafka --listen '127.0.0.1:8081,[::1]:8083' --policy drop-newest --queue-cap 30000
+$ loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 100s --report-every 5s
+$ (sleep 45; docker pause toi-noi-location-kafka; sleep 34; docker unpause toi-noi-location-kafka) &
+uptime: 23:06  up 35 days, 14:50, 1 user, load averages: 48.16 60.20 84.25
+giờ pause/unpause (lệnh docker từng dòng):
+pause_start 23:07:22.981
+pause_done 23:07:23.033
+unpause_start 23:07:57.045
+unpause_done 23:07:57.139
+log WARN của ingest (lần đầu thấy mỗi nguyên nhân lỗi):
+(không có)
+snapshot /debug/stats sau loadgen (ngay, +1s, +3s, +8s, +18s), kèm taken - delivered - failed:
+# 23:08:34.895
+{"queue": {"depth": 0, "offered": 643584, "coalesced": 0, "dropped": 163341, "evicted": 0, "taken": 480243}, "kafka": {"buffered": 5139, "delivered": 475104, "failed": 0}, "taken_minus_delivered_failed": 5139}
+# 23:08:36.133
+{"queue": {"depth": 0, "offered": 644073, "coalesced": 0, "dropped": 163341, "evicted": 0, "taken": 480732}, "kafka": {"buffered": 0, "delivered": 480732, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:08:38.202
+{"queue": {"depth": 0, "offered": 644073, "coalesced": 0, "dropped": 163341, "evicted": 0, "taken": 480732}, "kafka": {"buffered": 0, "delivered": 480732, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:08:43.268
+{"queue": {"depth": 0, "offered": 644073, "coalesced": 0, "dropped": 163341, "evicted": 0, "taken": 480732}, "kafka": {"buffered": 0, "delivered": 480732, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 23:08:53.354
+{"queue": {"depth": 0, "offered": 644073, "coalesced": 0, "dropped": 163341, "evicted": 0, "taken": 480732}, "kafka": {"buffered": 0, "delivered": 480732, "failed": 0}, "taken_minus_delivered_failed": 0}
+bộ đếm cuối sau SIGTERM (xả hàng đợi + Flush): {"queue": {"depth": 0, "max_depth": 30000, "offered": 644073, "coalesced": 0, "stale_ignored": 0, "dropped": 163341, "evicted": 0, "taken": 480732, "shutdown_dropped": 0}, "kafka": {"buffered": 0, "delivered": 480732, "failed": 0}}
+taken - delivered - failed = 0
+

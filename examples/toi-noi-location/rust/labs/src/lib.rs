@@ -1,5 +1,8 @@
 //! Tiện ích dùng chung cho các lab (đường dẫn, tham số dòng lệnh, đo thời gian, số ngẫu nhiên có seed).
 
+pub mod p02;
+pub mod p03;
+
 use road_graph::Graph;
 use std::path::PathBuf;
 use std::time::Instant;
