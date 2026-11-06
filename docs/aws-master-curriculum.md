@@ -888,7 +888,7 @@ Cập nhật khi bài được viết/review/xuất bản. Bài được tính "
 
 | Phần | Viết | Review | Ghi chú |
 |---|---|---|---|
-| Phần 01 · Nền tảng AWS | chưa | chưa | |
+| Phần 01 · Nền tảng AWS | chưa | xong 2026-11-06 | Lab 05/07/08/10 nối nhau qua tag Name của lab 04 (env.sh để trống ID). Chưa chạy trên tài khoản thật. Cần quyết: viện dẫn pháp lý VN ở bài 01; khoá tag trong `FilterExpression` của Budgets (bài 10) |
 | Phần 02 · Container, serverless và dịch vụ ứng dụng | chưa | xong 2026-11-06 | Cần chốt: secret DB dạng connection string (bài 12, bài 36 .NET) hay JSON có rotation (bài 14); `healthCheck` dùng curl trong khi image `aspnet` không có curl. |
 | Phần 03 · Infrastructure as Code và CI/CD | chưa | chưa | |
 | Phần 04 · Dữ liệu, lưu trữ và messaging | chưa | chưa | |
