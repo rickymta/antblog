@@ -2,7 +2,7 @@
 slug: rust-integration-test-postgresql-schema-rieng-ci
 title: "Integration test với PostgreSQL thật: schema riêng mỗi ca, fixture, CI"
 summary: "Bài 27: fixture TestDb tạo schema lab_<uuid>, đặt search_path bằng after_connect, dọn bằng close(); so với #[sqlx::test]; test trigger, ON CONFLICT, SQLSTATE 40001 song song; vì sao không dùng SQLite; workflow CI mẫu."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, sqlx, postgresql, testing]
 language: vi

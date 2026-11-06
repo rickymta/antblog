@@ -2,7 +2,7 @@
 slug: flutter-animation-implicit-hero-tim-tai-xe
 title: "Animation cơ bản: implicit animation và Hero khi tìm tài xế"
 summary: "Bài 15: dùng AnimatedSwitcher, AnimatedContainer, AnimatedOpacity, TweenAnimationBuilder và Hero để màn hình tìm tài xế Tới Nơi chuyển trạng thái mượt, rồi gom thời lượng vào một helper đọc cờ disableAnimations (Android); iOS chưa đọc reduceMotion. Có 43 test dùng pump(Duration)."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, animation, hero, accessibility]
 language: vi

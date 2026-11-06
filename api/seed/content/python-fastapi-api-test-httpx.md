@@ -2,7 +2,7 @@
 slug: python-fastapi-api-test-httpx
 title: "API test với httpx AsyncClient: kiểm chứng hợp đồng"
 summary: "Bài 36: kiểm chứng API FastAPI không mở cổng mạng bằng httpx.AsyncClient và ASGITransport: lifespan, dependency_overrides, token JWT, lỗi Problem Details, snapshot OpenAPI. Lab 59 test chạy thật."
-category: programming
+category: python
 level: intermediate
 tags: [python, toi-noi, fastapi, pytest, httpx]
 language: vi

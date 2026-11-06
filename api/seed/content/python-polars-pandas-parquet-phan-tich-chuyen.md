@@ -2,7 +2,7 @@
 slug: python-polars-pandas-parquet-phan-tich-chuyen
 title: "polars, pandas và Parquet: phân tích 2 triệu chuyến mỗi ngày"
 summary: "Bài 29: sinh 2 triệu chuyến giả, so CSV với Parquet, truy vấn lazy bằng polars, đặt pandas cạnh nhau về thời gian và bộ nhớ, và bẫy tràn Int32. Có số đo thật và lab chạy được."
-category: programming
+category: python
 level: intermediate
 tags: [python, toi-noi, polars, pandas, parquet]
 language: vi

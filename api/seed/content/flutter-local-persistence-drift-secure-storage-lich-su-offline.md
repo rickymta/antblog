@@ -2,7 +2,7 @@
 slug: flutter-local-persistence-drift-secure-storage-lich-su-offline
 title: "Lưu trữ cục bộ: drift, shared_preferences và secure storage"
 summary: "Bài 22: chọn kho lưu trên máy theo loại dữ liệu của Tới Nơi. drift (SQLite) cho lịch sử chuyến với bảng, DAO, stream query và migration có test; SharedPreferencesAsync cho chế độ sáng/tối; flutter_secure_storage sau interface TokenStore cho token. Test chạy không cần thiết bị."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, drift, sqlite, shared-preferences, secure-storage, persistence]
 language: vi

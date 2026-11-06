@@ -2,7 +2,7 @@
 slug: python-frozen-dataclass-enum-immutability
 title: "Frozen dataclass, Enum, equality và immutability: thiết kế Money, Quote"
 summary: "Bài 13: StrEnum cho trạng thái chuyến, frozen dataclass cho Money và Quote có hạn, __eq__/__hash__ sinh sẵn, replace, so với NamedTuple; chỉ ra frozen là bản nông và không chặn người cố tình. Có output thật."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, dataclass, enum, immutability]
 language: vi

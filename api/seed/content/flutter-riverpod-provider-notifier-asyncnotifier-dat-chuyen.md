@@ -2,7 +2,7 @@
 slug: flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen
 title: "Riverpod: Provider, Notifier và AsyncNotifier cho luồng đặt chuyến"
 summary: "Bài 18: dựng luồng đặt chuyến bằng flutter_riverpod 3.5: ProviderScope, Provider, Notifier, FutureProvider và AsyncNotifier, ref.watch/read/listen, AsyncValue, family, auto-dispose, retry mặc định và override để test. Có 87 test, kiểm các phát biểu về retry và dispose."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, riverpod, state-management]
 language: vi

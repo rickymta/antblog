@@ -2,7 +2,7 @@
 slug: rust-module-crate-cargo-test-clippy
 title: "Module, crate, cargo test và clippy: tổ chức lab sổ cái"
 summary: "Bài 10: tách lab sổ cái thành crate thư viện và binary, chia module, dùng pub/use, viết unit, doc và integration test, chạy clippy và fmt; tổng kết điều phần P01 đã chứng minh và chưa có."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, module, cargo-test, clippy]
 language: vi

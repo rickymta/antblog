@@ -2,7 +2,7 @@
 slug: flutter-authentication-otp-jwt-refresh-token-secure-storage
 title: "Authentication: OTP, JWT, refresh token rotation và interceptor"
 summary: "Bài 24: đăng nhập app khách Tới Nơi bằng OTP, access và refresh token JWT, rotation phát hiện dùng lại, SessionManager chỉ refresh một lần cho nhiều request song song, AuthInterceptor của dio, đăng xuất và vì sao client không tin role trong token."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, authentication, jwt, dio, riverpod, security, ios, android]
 language: vi

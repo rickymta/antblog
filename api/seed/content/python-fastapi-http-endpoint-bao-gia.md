@@ -2,7 +2,7 @@
 slug: python-fastapi-http-endpoint-bao-gia
 title: "HTTP và FastAPI: xuất bản endpoint báo giá"
 summary: "Bài 31: đưa calculate_fare lên POST /v1/quotes bằng FastAPI và uvicorn: ASGI, model pydantic, 201/400/422, OpenAPI tự sinh, async def và def. Lab chạy thật, kiểm bằng httpx ngay trong tiến trình."
-category: programming
+category: python
 level: intermediate
 tags: [python, toi-noi, fastapi, http, openapi]
 language: vi

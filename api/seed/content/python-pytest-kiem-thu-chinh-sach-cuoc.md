@@ -2,7 +2,7 @@
 slug: python-pytest-kiem-thu-chinh-sach-cuoc
 title: "Unit test với pytest: kiểm thử chính sách cước"
 summary: "Bài 10: chuyển bảng --verify thành test pytest: Arrange–Act–Assert, parametrize giá trị biên, pytest.raises, fixture và conftest, chính sách cước thay thế. Có output thật và lab chạy được."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, pytest, unit-test]
 language: vi

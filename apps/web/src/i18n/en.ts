@@ -185,6 +185,9 @@ export const en: Messages = {
   topic: {
     children: "Subcategories",
     eyebrow: 'Topic',
+    comingSoon: 'Coming soon',
+    childCount_one: '{{n}} subcategory',
+    childCount_other: '{{n}} subcategories',
     notFound: 'This topic could not be found.',
   },
   paths: {

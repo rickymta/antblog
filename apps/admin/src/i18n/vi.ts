@@ -300,6 +300,7 @@ export const vi = {
       security: 'Bảo mật',
       testing: 'Kiểm thử',
       analysis: 'Phân tích nghiệp vụ',
+      location: 'Định vị & chỉ đường',
     },
   },
   paths: {

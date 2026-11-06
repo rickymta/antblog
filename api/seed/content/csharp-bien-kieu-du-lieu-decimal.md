@@ -2,7 +2,7 @@
 slug: csharp-bien-kieu-du-lieu-decimal
 title: "Biến, kiểu dữ liệu và decimal: biểu diễn tiền và khoảng cách trong C#"
 summary: "Bài 02: chọn kiểu cho dữ liệu chuyến, hiểu var, const, phép chia và chuyển đổi số; tách tiền tính toán khỏi tiền phải trả bằng quy tắc làm tròn minh bạch."
-category: programming
+category: csharp
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

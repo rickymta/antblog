@@ -2,7 +2,7 @@
 slug: flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod
 title: "Cấu hình môi trường: flavors, --dart-define-from-file và DI theo môi trường"
 summary: "Bài 25: tách cấu hình dev, staging, prod bằng --dart-define-from-file. String.fromEnvironment là hằng lúc biên dịch nên giá trị nằm trong binary. AppConfig kiểm tra khi khởi động, đối chiếu appFlavor, và appConfigProvider được ghi đè trong main. 86 test."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, flavors, dart-define, riverpod, configuration]
 language: vi

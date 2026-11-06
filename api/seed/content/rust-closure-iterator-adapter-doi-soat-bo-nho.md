@@ -2,7 +2,7 @@
 slug: rust-closure-iterator-adapter-doi-soat-bo-nho
 title: "Closure, iterator adapter và lazy evaluation: đối soát trong bộ nhớ"
 summary: "Bài 15: đối soát sổ cái với sao kê VíXanh giả theo external_ref bằng closure Fn/FnMut/FnOnce, iterator adapter, group-by thủ công và collect; chứng minh iterator lazy bằng inspect, đối chiếu LINQ."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, closure, iterator, reconciliation]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-kafka-rdkafka-consumer-producer-schema
 title: "Kafka với rdkafka: consume TripCompleted, produce LedgerEntryPosted"
 summary: "Bài 36: rdkafka FutureProducer và StreamConsumer, commit offset sau khi ghi bút toán, at-least-once chạy thật, chọn key partition, rebalance và bỏ qua thông điệp hỏng không kẹt partition, trên Kafka thật."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, kafka, rdkafka, at-least-once]
 language: vi

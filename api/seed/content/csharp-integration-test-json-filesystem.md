@@ -2,7 +2,7 @@
 slug: csharp-integration-test-json-filesystem
 title: "Integration test: kiểm chứng JSON và filesystem của báo giá C#"
 summary: "Bài 15: dùng rule thật, serializer thật và file tạm để kiểm tra round-trip báo giá; phân biệt lỗi I/O, JSON lỗi và giới hạn transaction của file demo."
-category: programming
+category: csharp
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

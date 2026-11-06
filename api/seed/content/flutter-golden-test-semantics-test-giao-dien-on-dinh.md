@@ -2,7 +2,7 @@
 slug: flutter-golden-test-semantics-test-giao-dien-on-dinh
 title: "Golden test và Semantics test: khoá giao diện và accessibility"
 summary: "Bài 29: khoá thẻ chuyến và chip trạng thái Tới Nơi bằng golden test sáng và tối, kích thước cố định, comparator có ngưỡng, tag golden cho CI, quy trình cập nhật ảnh chuẩn; khoá cây semantics bằng meetsGuideline. Nêu rõ phần chưa chạy trên Linux."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, testing, golden-test, accessibility]
 language: vi

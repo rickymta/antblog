@@ -2,7 +2,7 @@
 slug: dart-bien-kieu-du-lieu-null-safety-tinh-cuoc
 title: "Dart cơ bản: biến, kiểu dữ liệu và null safety khi tính cước Tới Nơi"
 summary: "Bài 02: chọn kiểu cho tiền VND, khoảng cách và trạng thái; hiểu var, final, const, late, phép chia và làm tròn; dùng null safety để phân biệt chưa có tài xế với dữ liệu lỗi. Có bộ test ca biên chạy bằng dart test."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, null-safety]
 language: vi

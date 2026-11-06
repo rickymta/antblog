@@ -1,4 +1,4 @@
-/** Add the agreed hierarchy without re-seeding or touching articles/users. Dry-run by default. */
+/** Áp cây chủ đề trong seed/categories.json (thêm chủ đề thiếu + quan hệ cha–con), không seed lại, không di chuyển bài viết. Mặc định chạy thử (dry-run). */
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -17,13 +17,14 @@ try {
   const before = await Category.find({}).lean<ICategory[]>();
   const backupJson = JSON.stringify(before, null, 2);
   const bySlug = new Map(before.map(c => [c.slug, c]));
-  const additions = seed.filter(c => ['business-analysis', 'devops-aws', 'devops-azure'].includes(c.slug) && !bySlug.has(c.slug));
+  // Dữ liệu lấy từ seed/categories.json: thêm chủ đề còn thiếu trong DB, rồi áp mọi cạnh cha–con. Không đụng bài viết.
+  const additions = seed.filter(c => !bySlug.has(c.slug));
   for (const c of additions) bySlug.set(c.slug, { ...c, _id: new mongoose.Types.ObjectId(), parentId: null, articleCount: 0 });
-  const edges = [['design-pattern','programming'], ['architecture','programming'], ['system-design','programming'], ['devops-aws','devops'], ['devops-azure','devops']];
+  const edges = seed.filter(c => c.parent).map(c => [c.slug, c.parent!] as const);
   for (const [childSlug, parentSlug] of edges) {
-    const child = bySlug.get(childSlug!);
-    const parent = bySlug.get(parentSlug!);
-    if (!child || !parent) throw new Error(`Missing category: ${childSlug} or ${parentSlug}. Seed the base categories first.`);
+    const child = bySlug.get(childSlug);
+    const parent = bySlug.get(parentSlug);
+    if (!child || !parent) throw new Error(`Missing category: ${childSlug} or ${parentSlug}.`);
     child.parentId = parent._id;
   }
   const proposed = [...bySlug.values()];

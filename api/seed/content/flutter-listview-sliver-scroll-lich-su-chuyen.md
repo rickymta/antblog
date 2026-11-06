@@ -2,7 +2,7 @@
 slug: flutter-listview-sliver-scroll-lich-su-chuyen
 title: "ListView, Sliver và cuộn: danh sách lịch sử chuyến"
 summary: "Bài 09: dựng màn hình lịch sử chuyến của Tới Nơi với ListView.builder chỉ build phần tử trong vùng nhìn, CustomScrollView + SliverAppBar + SliverList, tải thêm cuối trang bằng ScrollController, kéo để làm mới, ValueKey cùng findItemIndexCallback giữ state khi đổi thứ tự."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, listview, sliver, scroll, ios, android]
 language: vi

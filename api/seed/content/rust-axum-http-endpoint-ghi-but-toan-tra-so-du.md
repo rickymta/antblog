@@ -2,7 +2,7 @@
 slug: rust-axum-http-endpoint-ghi-but-toan-tra-so-du
 title: "HTTP với axum: endpoint ghi bút toán và tra số dư"
 summary: "Bài 31: đưa sổ cái ra HTTP bằng axum. Router, handler async, extractor State/Json/Path và thứ tự của chúng, AppError thành 400/404/409/413/415/422, Router là tower::Service, chạy trên PostgreSQL thật."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, http, tower]
 language: vi

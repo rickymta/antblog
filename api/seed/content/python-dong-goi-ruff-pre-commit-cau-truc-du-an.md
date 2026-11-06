@@ -2,7 +2,7 @@
 slug: python-dong-goi-ruff-pre-commit-cau-truc-du-an
 title: "Đóng gói, ruff, mypy và cấu trúc dự án: sẵn sàng cho service"
 summary: "Bài 20: gom P01 và P02 thành gói toinoi_pricing có src layout, entry point, ruff, mypy strict, pytest và pre-commit. Chạy từng công cụ, xem nó bắt gì và không bắt gì, rồi build wheel thật."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, ruff, mypy, packaging]
 language: vi

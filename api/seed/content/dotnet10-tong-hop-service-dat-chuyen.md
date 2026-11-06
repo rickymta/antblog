@@ -2,7 +2,7 @@
 slug: dotnet10-tong-hop-service-dat-chuyen
 title: "Bài tổng hợp: service đặt chuyến từ domain tới vận hành có kiểm chứng"
 summary: "Bài 38: tổng kết một lát cắt Tới Nơi có Clean Architecture, CQRS/Mediator, Repository/UoW và PostgreSQL; phân biệt điều đã test với phần cần ghép để thành sản phẩm."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi

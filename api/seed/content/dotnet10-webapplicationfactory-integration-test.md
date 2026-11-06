@@ -2,7 +2,7 @@
 slug: dotnet10-webapplicationfactory-integration-test
 title: "API integration test với WebApplicationFactory: kiểm chứng pipeline .NET 10"
 summary: "Bài 20: chạy các API báo giá trong TestServer, kiểm binding, validation, OpenAPI, DI/options và JWT bằng WebApplicationFactory; xác định rõ ranh giới chưa được kiểm chứng."
-category: programming
+category: csharp
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi

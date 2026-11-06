@@ -2,7 +2,7 @@
 slug: python-redis-cache-rate-limit-geo
 title: "Redis: cache, rate limit và GEO cho vị trí tài xế"
 summary: "Bài 27: dùng Redis qua redis-py async cho Tới Nơi: cache-aside báo giá với TTL, token bucket bằng Lua, GEOADD/GEOSEARCH cho 25.000 tài xế, pipeline; Redis không phải nguồn sự thật. Lab chạy thật."
-category: programming
+category: python
 level: intermediate
 tags: [python, toi-noi, redis, cache, rate-limit]
 language: vi

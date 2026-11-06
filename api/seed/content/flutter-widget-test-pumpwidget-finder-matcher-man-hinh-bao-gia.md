@@ -2,7 +2,7 @@
 slug: flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia
 title: "Widget test: pumpWidget, finder, matcher và màn hình báo giá"
 summary: "Bài 28: widget test cho màn hình báo giá Tới Nơi: pumpWidget trong ProviderScope override, pump, pump(Duration), pumpAndSettle (kèm ca hết hạn), finder và matcher, enterText, tap, warnIfMissed, ensureVisible, runAsync, font FlutterTest, kích thước màn hình và điều hướng go_router."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, testing, widget-test, riverpod, go-router]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-send-sync-arc-mutex-channel-concurrency
 title: "Send, Sync, Arc<Mutex> và channel: concurrency không data race"
 summary: "Bài 22: Send và Sync chặn data race lúc biên dịch; Arc<Mutex> và RwLock cho dữ liệu chung; actor dùng mpsc, oneshot, broadcast. Nhiều task ghi cùng idempotency_key chỉ ra một bút toán trong một process."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, concurrency, tokio, channel]
 language: vi

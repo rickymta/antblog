@@ -2,7 +2,7 @@
 slug: flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen
 title: "Navigator, route và truyền dữ liệu: từ báo giá sang xác nhận chuyến"
 summary: "Bài 12: mở màn hình xác nhận chuyến bằng Navigator.push và nhận Trip? khi pop, truyền báo giá qua constructor, chọn phương thức trả tiền bằng showModalBottomSheet, chặn back bằng PopScope, kiểm mounted sau await và hiểu giới hạn của named route. Có 25 test."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, navigation, ui]
 language: vi

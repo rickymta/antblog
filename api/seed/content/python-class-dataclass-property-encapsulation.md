@@ -2,7 +2,7 @@
 slug: python-class-dataclass-property-encapsulation
 title: "Class, dataclass, property và encapsulation: bảo vệ trạng thái chuyến"
 summary: "Bài 11: dựng Trip bằng class thường rồi @dataclass, @property chỉ đọc, quy ước _private, __slots__ có đo thật và máy trạng thái 8 trạng thái với advance() từ chối chuyển sai. Có output thật và lab chạy được."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, dataclass, encapsulation]
 language: vi

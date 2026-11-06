@@ -2,7 +2,7 @@
 slug: rust-async-await-tokio-task-timeout-cancellation
 title: "async/await và tokio: task, join, timeout và hủy khi gọi VíXanh"
 summary: "Bài 21: async fn là future lười; đo join! so với tuần tự bằng đồng hồ ảo, timeout, select!, spawn, CancellationToken; hủy future không hủy việc VíXanh đã làm nên cần idempotency key; spawn_blocking thay vì chặn runtime."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, tokio, async, cancellation]
 language: vi

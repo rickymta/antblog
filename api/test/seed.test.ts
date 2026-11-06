@@ -20,6 +20,7 @@ import { makeApp, resetDb, sessionCookie, useTestDb } from './helpers.js';
 
 useTestDb();
 const dataDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'seed-data');
+const treeDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'seed-tree');
 const admin = { email: 'Admin@TKH.local', password: 'mat-khau-admin-1', name: 'Quản trị viên' };
 const quiet = () => undefined;
 
@@ -105,6 +106,43 @@ describe('seed', () => {
     expect(reset).toMatchObject({ title: edited!.title, content: edited!.content, level: edited!.level, tags: edited!.tags, status: 'published' });
     expect(reset!.editedInCms).toBeUndefined();
     expect(reset!.publishedAt!.toISOString()).toBe(edited!.publishedAt!.toISOString());
+  });
+
+  it('chủ đề cha không chứa bài: tệp trỏ vào chủ đề cha bị bỏ qua + log, chủ đề lá nhận bài bình thường', async () => {
+    const logs: string[] = [];
+    const first = await runSeed({ dataDir: treeDir, admin, log: (m) => logs.push(m) });
+    expect(first.articles).toMatchObject({ created: 3, skipped: 1 });
+    expect(logs.some((l) => l.includes('02-cha.md') && l.includes('chủ đề cha'))).toBe(true);
+    expect(await Article.exists({ slug: 'bai-vao-cha' })).toBeNull();
+    const rust = await Category.findOne({ slug: 'rust' }).lean();
+    expect(await Article.countDocuments({ slug: 'bai-o-la', categoryId: rust!._id })).toBe(1);
+    expect((await Category.findOne({ slug: 'rust' }).lean())!.articleCount).toBe(3);
+    expect((await Category.findOne({ slug: 'programming' }).lean())!.articleCount).toBe(0);
+    expect(logs.some((l) => l.includes('CẢNH BÁO'))).toBe(false);
+  });
+
+  it('bài đã sửa trong CMS đang ở chủ đề cha ⇒ chỉ đổi chủ đề; đang ở chủ đề lá ⇒ không bị chuyển; còn bài ở chủ đề cha ⇒ log cảnh báo', async () => {
+    await runSeed({ dataDir: treeDir, admin, log: quiet });
+    const [parent, leaf, rust] = await Promise.all(['programming', 'database', 'rust'].map((s) => Category.findOne({ slug: s }).lean()));
+    const cms = { content: 'Nội dung viết trong CMS.', title: 'Tiêu đề CMS', status: 'draft' as const, editedInCms: true };
+    await Article.updateOne({ slug: 'bai-cms-tren-cha' }, { $set: { ...cms, categoryId: parent!._id } });
+    await Article.updateOne({ slug: 'bai-cms-tren-la' }, { $set: { ...cms, categoryId: leaf!._id } });
+    // Bài chỉ tạo trong CMS, không có tệp .md ⇒ seed không biết chuyển đi đâu, chỉ cảnh báo.
+    await Article.updateOne({ slug: 'bai-o-la' }, { $set: { categoryId: parent!._id, slug: 'bai-chi-co-trong-cms' } });
+
+    const logs: string[] = [];
+    const again = await runSeed({ dataDir: treeDir, admin, log: (m) => logs.push(m) });
+    expect(again.articles).toMatchObject({ created: 1, keptCms: 2, skipped: 1 });
+    const moved = await Article.findOne({ slug: 'bai-cms-tren-cha' }).lean();
+    expect(moved).toMatchObject({ ...cms });
+    expect(moved!.categoryId.equals(rust!._id)).toBe(true);
+    expect(logs.some((l) => l.includes('bai-cms-tren-cha') && l.includes('chỉ chuyển'))).toBe(true);
+    const stayed = await Article.findOne({ slug: 'bai-cms-tren-la' }).lean();
+    expect(stayed).toMatchObject({ ...cms });
+    expect(stayed!.categoryId.equals(leaf!._id)).toBe(true);
+    const warn = logs.find((l) => l.includes('CẢNH BÁO'));
+    expect(warn).toContain('1 bài');
+    expect(warn).toContain('bai-chi-co-trong-cms');
   });
 
   it('thiếu tệp dữ liệu ⇒ ghi log rõ ràng, vẫn tạo admin', async () => {

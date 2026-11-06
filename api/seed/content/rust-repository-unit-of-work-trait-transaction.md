@@ -2,7 +2,7 @@
 slug: rust-repository-unit-of-work-trait-transaction
 title: "Repository và Unit of Work kiểu Rust: trait, generic transaction, không ORM"
 summary: "Bài 26: tách port LedgerRepository khỏi sqlx bằng trait, async fn trong trait và hai giới hạn thật (dyn, Send), Unit of Work bao Transaction với rollback khi drop, một bộ test hợp đồng chạy cho adapter giả và adapter PostgreSQL."
-category: programming
+category: rust
 level: intermediate
 tags: [rust, toi-noi, ledger, repository, unit-of-work, sqlx]
 language: vi

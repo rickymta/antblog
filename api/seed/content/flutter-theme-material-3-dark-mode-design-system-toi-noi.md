@@ -2,7 +2,7 @@
 slug: flutter-theme-material-3-dark-mode-design-system-toi-noi
 title: "Theme Material 3, màu, chữ và dark mode: design system Tới Nơi"
 summary: "Bài 13: dựng theme Material 3 sáng/tối cho Tới Nơi bằng ColorScheme.fromSeed, TextTheme, ThemeExtension cho màu trạng thái chuyến và component theme; đóng gói thành package toi_noi_ui, kiểm dark mode theo hệ thống bằng widget test."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, theme, material-3, dark-mode, design-system]
 language: vi

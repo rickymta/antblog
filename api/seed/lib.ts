@@ -146,7 +146,10 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
     result.categories = parsed.data.length;
     log(`[seed] Chủ đề: ${parsed.data.length}.`);
   }
-  const catIdBySlug = new Map((await Category.find({}).select({ slug: 1 }).lean()).map((c) => [c.slug, c._id]));
+  const allCats = await Category.find({}).select({ slug: 1, parentId: 1 }).lean();
+  const catIdBySlug = new Map(allCats.map((c) => [c.slug, c._id]));
+  // Chủ đề cha (có chủ đề con) không chứa bài viết trực tiếp — bài chỉ gắn vào chủ đề lá.
+  const parentCatIds = new Set(allCats.filter((c) => c.parentId).map((c) => String(c.parentId)));
 
   // ---- Bài viết ----
   const contentDir = path.join(opts.dataDir, 'content');
@@ -175,6 +178,11 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
       result.articles.skipped++;
       continue;
     }
+    if (parentCatIds.has(String(categoryId))) {
+      log(`[seed] Bỏ qua ${file}: chủ đề "${meta.category}" là chủ đề cha, chỉ chủ đề lá mới chứa bài viết — sửa \`category\` trong frontmatter.`);
+      result.articles.skipped++;
+      continue;
+    }
     const body = content.replace(/^\s*\n/, '');
     const fields = {
       title: meta.title,
@@ -188,10 +196,17 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
       status: 'published' as const,
       ...(meta.coverImageUrl ? { coverImageUrl: meta.coverImageUrl } : {}),
     };
-    const existing = await Article.findOne({ slug: meta.slug }).select({ publishedAt: 1, editedInCms: 1 }).lean();
+    const existing = await Article.findOne({ slug: meta.slug }).select({ publishedAt: 1, editedInCms: 1, categoryId: 1 }).lean();
     if (existing?.editedInCms === true && !opts.forceContent) {
       // Bài đã sửa trong CMS: không đụng nội dung/tiêu đề/trạng thái — CMS là nguồn sự thật của bài này.
-      log(`[seed] ${meta.slug}: bỏ qua (đã sửa trong CMS). Dùng --force-content để ghi đè.`);
+      if (parentCatIds.has(String(existing.categoryId))) {
+        // Ngoại lệ: bài đang nằm ở chủ đề cha là trạng thái không hợp lệ, không phải lựa chọn có chủ ý trong CMS.
+        // Chỉ chuyển chủ đề; giữ nguyên nội dung, tiêu đề, trạng thái và cờ editedInCms. Bài đang ở chủ đề lá thì không bao giờ bị chuyển.
+        await Article.updateOne({ _id: existing._id }, { $set: { categoryId } });
+        log(`[seed] ${meta.slug}: đã sửa trong CMS nhưng đang ở chủ đề cha — chỉ chuyển sang "${meta.category}", giữ nguyên nội dung.`);
+      } else {
+        log(`[seed] ${meta.slug}: bỏ qua (đã sửa trong CMS). Dùng --force-content để ghi đè.`);
+      }
       result.articles.keptCms++;
     } else if (existing) {
       // Giữ `publishedAt` cũ khi chạy lại. Ép ghi đè ⇒ bài trở lại khớp tệp .md, bỏ cờ đã sửa trong CMS.
@@ -214,6 +229,14 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
       `[seed] Bài viết: tạo ${result.articles.created}, cập nhật ${result.articles.updated}, ` +
         `giữ bản CMS ${result.articles.keptCms}, bỏ qua ${result.articles.skipped}.`,
     );
+  }
+
+  if (parentCatIds.size) {
+    const stuck = await Article.find({ categoryId: { $in: [...parentCatIds] } }).select({ slug: 1 }).lean();
+    if (stuck.length) {
+      const sample = stuck.slice(0, 10).map((a) => a.slug).join(', ');
+      log(`[seed] CẢNH BÁO: ${stuck.length} bài vẫn gắn trực tiếp vào chủ đề cha (ví dụ: ${sample}${stuck.length > 10 ? ', …' : ''}). Hãy chuyển sang chủ đề lá trong CMS.`);
+    }
   }
 
   // ---- Lộ trình học ----

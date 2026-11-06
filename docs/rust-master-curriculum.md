@@ -25,7 +25,7 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 | Mã bài | `RS-01` … `RS-68`, tăng dần theo phần. |
 | Mã phần | `P01` … `P07`. |
 | Slug | Chữ thường ASCII, gạch nối, bắt đầu bằng `rust-`, ≤ 60 ký tự, duy nhất. |
-| Category | `programming` (giống loạt C#, Python). Tags luôn có `rust`, `toi-noi`, `ledger`; thêm tag chủ đề (`ownership`, `tokio`, `sqlx`, `axum`, `tonic`, `kafka`…). |
+| Category | `rust` (chủ đề lá riêng, không dùng chủ đề cha `programming`). Tags luôn có `rust`, `toi-noi`, `ledger`; thêm tag chủ đề (`ownership`, `tokio`, `sqlx`, `axum`, `tonic`, `kafka`…). |
 | Level | `beginner` (P01–P02) · `intermediate` (P03–P04) · `advanced` (P05–P07). Có thể lệch một bậc khi bài thực sự khó/dễ hơn phần. |
 | Phiên bản | **Rust stable** (1.98 tại thời điểm viết, 11/2026), cài bằng **rustup**, **edition 2024**. Không dùng tính năng nightly. Mỗi lab là một crate độc lập có `Cargo.toml` và `Cargo.lock` được commit. |
 | Thư viện chính | rust_decimal · serde/serde_json · thiserror/anyhow · jiff (thời gian) · proptest · tokio · sqlx (PostgreSQL) · redis · axum/tower/tower-http · utoipa · jsonwebtoken · tonic/prost · rdkafka · tracing/tracing-subscriber · opentelemetry · criterion · insta · cargo-mutants. Phiên bản pin trong `Cargo.toml` của từng lab. |
@@ -35,7 +35,7 @@ Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 b�
 
 ### 2.2 Template một bài (giống loạt C# và Python)
 
-1. Frontmatter: `slug`, `title`, `summary` (bắt đầu bằng «Bài NN: …», ≤ 234 ký tự), `category: programming`, `level`, `tags`, `language: vi`.
+1. Frontmatter: `slug`, `title`, `summary` (bắt đầu bằng «Bài NN: …», ≤ 234 ký tự), `category: rust`, `level`, `tags`, `language: vi`.
 2. Mở bài bằng một tình huống thật của Tới Nơi (1–2 đoạn), câu «Đây là bài NN của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**» (hoặc trung bình / nâng cao).
 3. Callout «Thử trước khi đọc» (`tkh-callout tkh-callout--example`) với một câu hỏi và `<details>` đáp án.
 4. 4–7 mục `##` giải thích cơ chế; ít nhất **một hình SVG nội tuyến** theo bộ lớp `packages/ui/src/article.css` (`f-phys-soft`, `s-phys`, `t-b`, `t-small`, `f-pk-soft`, `s-pk`, `f-warn-soft`, `s-warn`, `f-none`, `dash`…), `viewBox` rộng 880, `role="img"`, `aria-label`, `figcaption` «Hình N. …».

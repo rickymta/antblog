@@ -2,7 +2,7 @@
 slug: flutter-asset-intl-localization-tien-vnd-ngay-gio
 title: "Asset, intl và localization: hiển thị tiền VND, ngày giờ và song ngữ vi/en"
 summary: "Bài 14: khai báo asset với biến thể 2.0x/3.0x, định dạng tiền VND bằng NumberFormat.currency, đổi giờ UTC sang giờ máy bằng DateFormat, rồi làm song ngữ vi/en với ARB, gen-l10n và số nhiều ICU. Mọi kết quả bám đầu ra thật của intl."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, intl, localization, asset, i18n]
 language: vi

@@ -2,7 +2,7 @@
 slug: python-opencv-phat-hien-canh-perspective-deskew
 title: "Phát hiện cạnh, biến đổi phối cảnh và deskew ảnh giấy tờ"
 summary: "Bài 42: tìm tứ giác của thẻ bằng Canny và findContours, nắn phối cảnh, deskew bằng minAreaRect, thử CLAHE và ngưỡng thích nghi, rồi đo CER của Tesseract trước và sau trên 50 ảnh chụp giả."
-category: programming
+category: python
 level: advanced
 tags: [python, toi-noi, opencv, ocr, deskew]
 language: vi

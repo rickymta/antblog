@@ -2,7 +2,7 @@
 slug: dart-collections-generics-extension-danh-sach-chuyen
 title: "Collections, generics và extension: quản lý danh sách chuyến và tài xế"
 summary: "Bài 04: chọn List, Set, Map theo thao tác nghiệp vụ; hiểu Iterable lười, where/map/fold, sắp xếp ổn định; viết generic Paged<T> và extension trên Iterable<Trip> để tổng cước, nhóm theo trạng thái. Có test chứng minh query lười chỉ chạy khi duyệt."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, collections, generics]
 language: vi

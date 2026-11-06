@@ -2,7 +2,7 @@
 slug: python-gil-threading-multiprocessing-free-threaded
 title: "GIL, threading, multiprocessing và free-threaded 3.14: chọn mô hình cho OCR"
 summary: "Bài 22: phân biệt chờ I/O với tính toán CPU bằng số đo thật, so ThreadPoolExecutor, ProcessPoolExecutor và InterpreterPoolExecutor, giải thích GIL và thử bản free-threaded 3.14t cho tiền xử lý ảnh OCR."
-category: programming
+category: python
 level: intermediate
 tags: [python, toi-noi, concurrency, gil, multiprocessing]
 language: vi

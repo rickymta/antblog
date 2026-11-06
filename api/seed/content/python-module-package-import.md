@@ -2,7 +2,7 @@
 slug: python-module-package-import
 title: "Module, package và import: tổ chức mã tính cước thành gói"
 summary: "Bài 07: import chạy file một lần và cache trong sys.modules, sys.path quyết định tìm module ở đâu, package, import tuyệt đối và tương đối, import vòng, src layout và uv với package = true."
-category: programming
+category: python
 level: beginner
 tags: [python, toi-noi, uv, import]
 language: vi

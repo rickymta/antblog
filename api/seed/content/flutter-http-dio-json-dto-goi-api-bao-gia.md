@@ -2,7 +2,7 @@
 slug: flutter-http-dio-json-dto-goi-api-bao-gia
 title: "HTTP, dio và JSON: gọi API báo giá của trip-service"
 summary: "Bài 19: dựng package toi_noi_api với dio, DTO viết tay kiểm kiểu từng trường và mapper sang domain; thêm tools/fake_api (shelf) mô phỏng trip-service, interceptor log không lộ dữ liệu nhạy cảm, adapter giả để test không socket và màn hình báo giá bằng Riverpod."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, dio, http, json, api, riverpod]
 language: vi

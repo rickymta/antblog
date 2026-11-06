@@ -2,7 +2,7 @@
 slug: rust-struct-enum-match-tai-khoan-but-toan
 title: "Struct, enum và pattern matching: mô hình tài khoản và bút toán"
 summary: "Bài 05: mô hình tài khoản và bút toán bằng struct, enum có dữ liệu và match vét cạn; máy trạng thái thanh toán trả Option, cùng if let, let else, Display, đối chiếu class, record, enum C#."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, struct, enum, pattern-matching]
 language: vi

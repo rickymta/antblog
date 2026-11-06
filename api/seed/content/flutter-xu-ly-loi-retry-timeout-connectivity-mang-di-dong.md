@@ -2,7 +2,7 @@
 slug: flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong
 title: "Xử lý lỗi, retry, timeout và mất mạng: mạng di động không ổn định"
 summary: "Bài 20: phân loại lỗi mạng thành sealed ApiFailure, đặt timeout có ngân sách, viết RetryInterceptor với backoff có jitter chỉ cho request lặp lại được, bọc connectivity_plus sau interface và dựng màn hình lỗi có nút Thử lại, Mở cài đặt; test lỗi mạng trên đồng hồ giả."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, dio, riverpod, retry, networking]
 language: vi

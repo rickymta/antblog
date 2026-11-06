@@ -51,7 +51,15 @@ Thứ tự khối:
 
 - Thanh lọc: chủ đề, cấp độ, tag, sắp xếp (Mới nhất / Xem nhiều / Thịnh hành), ô tìm kiếm rộng như A6.
 - Lưới thẻ bài như mục 3.3; phân trang dưới.
-- Trang chủ đề: đầu trang có biểu tượng lớn + mô tả chủ đề + số bài, rồi lưới bài lọc sẵn.
+- Trang chủ đề **lá**: banner chủ đề (biểu tượng, tên, mô tả, số bài), rồi bộ lọc + lưới bài lọc sẵn.
+- Trang chủ đề **cha** (có chủ đề con): banner + lưới thẻ chủ đề con, KHÔNG hiện bài viết nào (không gọi API bài viết/thẻ; bài chỉ gắn vào chủ đề lá). Nếu không tải được cây chủ đề thì trang rơi về danh sách bài như trang lá.
+
+### Banner chủ đề
+
+- **Ảnh**: mỗi chủ đề một banner `apps/web/public/images/categories/<slug>.svg` + `.webp` (1600×400), vẽ bằng `apps/web/scripts/generate-category-banners.mjs` (hình minh hoạ vector gốc, không dùng logo/nhãn hiệu thật, không đóng chữ vào ảnh vì chữ được địa phương hoá ở HTML). Dựng lại: `npm run banners:generate -w @tkh/web`; kiểm: `npm run banners:check -w @tkh/web` (mọi slug trong `api/seed/categories.json` phải có đủ cặp tệp 1600×400; không có `api/` thì chỉ kiểm tệp ảnh). Thêm/đổi chủ đề trong seed ⇒ thêm minh hoạ + màu tương ứng trong script (màu trùng `color` của seed) rồi chạy lại.
+- **Bố cục**: nửa trái (x < 720) để trống vì chữ phủ lên đó; toàn bộ hình nằm trong x ≥ 780 để còn nguyên khi thẻ chủ đề con (16:7, neo phải) cắt ảnh.
+- **Hiển thị**: `CategoryBanner` (đầu trang) và `ChildCategoryCard` (thẻ chủ đề con) dùng chung nền CSS nhiều lớp `url(ảnh), linear-gradient(màu chủ đề → #0F172A)`, cover, neo phải-giữa. Chủ đề tạo từ CMS chưa có ảnh ⇒ ảnh 404, tự hiện gradient (không cần JS). Chữ trắng cố định ở cả hai theme, có lớp phủ tối (đặc hơn trên điện thoại) để đạt tương phản ≥ 4.5:1.
+- **Triển khai**: ảnh nằm trong `apps/web/public` nên được đóng vào image `web` — thêm/đổi banner phải build lại và deploy lại image `web` (không đủ chỉ seed DB).
 
 ## 5. Lộ trình học `/learning-paths` (A6) và `/learning-paths/:slug` (A4)
 

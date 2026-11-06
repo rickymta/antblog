@@ -2,7 +2,7 @@
 slug: csharp-linq-deferred-execution
 title: "LINQ và deferred execution: truy vấn dữ liệu trong bộ nhớ bằng C#"
 summary: "Bài 10: lọc, sắp xếp, projection và tổng hợp chuyến bằng LINQ; quan sát query trì hoãn, snapshot ToList và ranh giới IEnumerable với IQueryable."
-category: programming
+category: csharp
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

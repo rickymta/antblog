@@ -2,7 +2,7 @@
 slug: dotnet10-cqrs-mediator-pipeline
 title: "CQRS và Mediator: command/query handler và pipeline có thứ tự"
 summary: "Bài 32: tách use case ghi/đọc, xây dispatcher typed trong process, kiểm validator trước handler và quan sát toàn bộ đường gọi bằng telemetry behavior."
-category: programming
+category: csharp
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi

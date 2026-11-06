@@ -20,7 +20,7 @@ C#/.NET giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng, �
 
 ## Cấu trúc một bài
 
-1. Frontmatter: `slug`, `title`, `summary` («Bài NN: …», ≤ 234 ký tự), `category: programming`, `level`, `tags` (`python`, `toi-noi`, thêm chủ đề), `language: vi`.
+1. Frontmatter: `slug`, `title`, `summary` («Bài NN: …», ≤ 234 ký tự), `category: python`, `level`, `tags` (`python`, `toi-noi`, thêm chủ đề), `language: vi`.
 2. Mở bài bằng một tình huống của Tới Nơi, câu «Đây là bài NN của lộ trình **Python cơ bản qua Tới Nơi**» (hoặc trung bình / nâng cao) với link `[Tới Nơi](/articles/du-an-mau-toi-noi)`.
 3. Callout «Thử trước khi đọc» với `<details>` đáp án.
 4. 4–7 mục `##`, ít nhất một hình SVG, code chạy được, bảng «Hiện tượng / Kiểm tra trước» khi phù hợp.

@@ -2,7 +2,7 @@
 slug: rust-string-str-ngay-gio-dinh-dang-tien
 title: "String, &str, ngày giờ UTC và định dạng tiền: hiển thị đúng, lưu đúng"
 summary: "Bài 08: String sở hữu, &str mượn; UTF-8 với len() là byte; tách mã tài khoản bằng split_once; impl Display in 25.500 VND; jiff lưu Timestamp UTC và hiển thị giờ Asia/Ho_Chi_Minh."
-category: programming
+category: rust
 level: beginner
 tags: [rust, toi-noi, ledger, string, jiff, utf-8]
 language: vi

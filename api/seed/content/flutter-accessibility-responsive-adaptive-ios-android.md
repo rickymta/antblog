@@ -2,7 +2,7 @@
 slug: flutter-accessibility-responsive-adaptive-ios-android
 title: "Accessibility, responsive và adaptive: một giao diện cho iOS và Android"
 summary: "Bài 16: làm cho app Tới Nơi nhỏ dùng được với trình đọc màn hình, chữ cỡ lớn, tai thỏ, tablet, iOS và Android: Semantics, guideline vùng chạm, text scale, SafeArea, breakpoint, Theme.platform; kiểm bằng widget test, nêu rõ phần Phần 2 còn thiếu."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, accessibility, responsive, adaptive, ios, android]
 language: vi

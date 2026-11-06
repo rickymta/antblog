@@ -155,13 +155,23 @@ Mong đợi HTTP 200 và Content-Type: image/webp. Nếu CDN còn giữ phản h
 npm run covers:check -w @tkh/web -- --base-url https://antblog.xyz
 ```
 
-Cây danh mục tối đa 3 cấp cần deploy cả API và CMS. Để chỉ cập nhật cấu trúc đã thống nhất, không nạp lại nội dung bài viết:
+Cây danh mục tối đa 3 cấp, và chủ đề cha (có chủ đề con) không chứa bài viết riêng: bài chỉ gắn vào chủ đề lá, trang chủ đề cha chỉ liệt kê các chủ đề con. Cập nhật cây và chuyển bài theo `category` trong frontmatter bằng seed:
 
 ```bash
 docker compose up -d --build api web nginx
+docker compose run --rm --build seed
+```
+
+Seed cập nhật tên, mô tả, biểu tượng, thứ tự và quan hệ cha–con của chủ đề theo `api/seed/categories.json`, rồi chuyển bài sang chủ đề lá ghi trong frontmatter. Bài đã sửa trong CMS vẫn được giữ nguyên nội dung; riêng bài đang nằm ở chủ đề cha (trạng thái không hợp lệ) thì seed chỉ đổi chủ đề của bài, không đụng nội dung, tiêu đề, trạng thái hay cờ đã sửa trong CMS. Bài đang ở một chủ đề lá không bao giờ bị seed chuyển đi. Seed bỏ qua tệp .md có `category` là chủ đề cha và ghi log. Cuối lần chạy, seed ghi cảnh báo `CẢNH BÁO: … bài vẫn gắn trực tiếp vào chủ đề cha` kèm danh sách mẫu slug (ví dụ bài chỉ tạo trong CMS); hãy chuyển các bài đó sang chủ đề lá trong CMS.
+
+Cần build lại cả `api`, `web` và `nginx`: API để kiểm tra chủ đề lá khi lưu bài, `web` cho trang chủ đề và ảnh bìa (ảnh banner nằm trong image `web`), `nginx` để nhận lại upstream.
+
+Nếu chỉ cần cập nhật cấu trúc cây từ `categories.json` mà không nạp lại nội dung bài viết, dùng `categories:tree`. Lệnh này chỉ thêm chủ đề còn thiếu và đặt quan hệ cha–con, không đổi tên/mô tả và không chuyển bài viết:
+
+```bash
 docker compose run --rm --build seed npm run categories:tree
 mkdir -p backups/categories
 docker compose run --rm -v "$PWD/backups/categories:/app/.migration-backups" seed npm run categories:tree -- --apply
 ```
 
-Lệnh đầu của categories:tree chỉ xem kế hoạch. Lệnh --apply thêm BA/AWS/Azure nếu thiếu, đặt Design Pattern/Architecture/System Design dưới Lập trình và AWS/Azure dưới DevOps. Backup các danh mục trước thay đổi nằm trên host trong backups/categories. Không chạy đồng thời với thao tác sửa cây trong CMS. Tài khoản inspector chỉ đọc, không dùng để migrate; container tools dùng tài khoản ứng dụng đã cấu hình. Sau cập nhật, cache danh mục của Next có thể cần tối đa 5 phút để làm mới.
+Lệnh đầu của categories:tree chỉ xem kế hoạch. Lệnh --apply thêm các chủ đề có trong categories.json mà DB chưa có và đặt quan hệ cha–con theo trường `parent` của từng mục. Backup các danh mục trước thay đổi nằm trên host trong backups/categories. Không chạy đồng thời với thao tác sửa cây trong CMS. Tài khoản inspector chỉ đọc, không dùng để migrate; container tools dùng tài khoản ứng dụng đã cấu hình. Sau cập nhật, cache danh mục của Next có thể cần tối đa 5 phút để làm mới.

@@ -2,7 +2,7 @@
 slug: flutter-state-inheritedwidget-changenotifier-bao-gia
 title: "Quản lý state: InheritedWidget, ChangeNotifier và ranh giới rebuild"
 summary: "Bài 17: đưa bản nháp báo giá và danh sách chuyến ra khỏi State của khung app bằng InheritedWidget, ChangeNotifier, ValueNotifier và ListenableBuilder. Test đếm số lần build chỉ ra ranh giới rebuild; so sánh ngắn provider, bloc, Riverpod và lý do lộ trình chọn Riverpod."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, state-management, changenotifier, inheritedwidget]
 language: vi

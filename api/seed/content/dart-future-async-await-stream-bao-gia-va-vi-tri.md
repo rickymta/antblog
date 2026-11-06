@@ -2,7 +2,7 @@
 slug: dart-future-async-await-stream-bao-gia-va-vi-tri
 title: "Future, async/await và Stream: gọi báo giá và lắng nghe vị trí tài xế"
 summary: "Bài 05: hiểu event loop một luồng của Dart, Future và async/await khi gọi dịch vụ báo giá, timeout và lỗi; Stream, StreamController và await for khi theo dõi vị trí tài xế, huỷ subscription đúng lúc; Isolate.run cho việc nặng. Test dùng fake_async nên không chờ thời gian thật."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, async, stream]
 language: vi

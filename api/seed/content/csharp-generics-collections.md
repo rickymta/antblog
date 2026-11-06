@@ -2,7 +2,7 @@
 slug: csharp-generics-collections
 title: "Generics và collections: quản lý chuyến và tài xế trong C#"
 summary: "Bài 09: chọn List, Dictionary, HashSet và Queue theo thao tác nghiệp vụ; hiểu generic type safety, alias và giới hạn thread safety của collection thường."
-category: programming
+category: csharp
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

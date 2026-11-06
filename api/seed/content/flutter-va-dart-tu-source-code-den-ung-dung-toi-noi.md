@@ -2,7 +2,7 @@
 slug: flutter-va-dart-tu-source-code-den-ung-dung-toi-noi
 title: "Flutter và Dart: từ source code đến ứng dụng Tới Nơi chạy trên iOS và Android"
 summary: "Bài 01: phân biệt Dart, Flutter framework, engine và tooling; tạo app Tới Nơi đầu tiên, đọc cấu trúc dự án, hiểu JIT khi dev và AOT khi release, hot reload và cách chạy trên iOS Simulator, Android emulator. Có widget test chạy được."
-category: programming
+category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, ios, android]
 language: vi

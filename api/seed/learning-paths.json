@@ -94,7 +94,7 @@
     "title": "C# và .NET 10 qua Tới Nơi",
     "description": "Lộ trình 38 bài qua Tới Nơi: C# cơ bản, ASP.NET Core 10, EF Core/PostgreSQL, DDD/Clean Architecture/CQRS và vận hành có kiểm chứng.",
     "level": "beginner",
-    "category": "programming",
+    "category": "csharp",
     "articles": [
       "csharp-va-dotnet-10-tu-source-code-den-chuong-trinh",
       "csharp-bien-kieu-du-lieu-decimal",
@@ -416,7 +416,7 @@
     "title": "Rust cơ bản qua Tới Nơi",
     "description": "Lộ trình 20 bài cấp cơ bản: vì sao service sổ cái Tới Nơi chọn Rust khi backend chính là C#, rồi cargo, kiểu số và tiền VND, ownership, struct/enum/match, iterator, Result/Option, String và thời gian, collections, module và cargo test; tiếp theo là trait, newtype, double-entry, typestate, serde và property test để có thư viện ledger-core.",
     "level": "beginner",
-    "category": "programming",
+    "category": "rust",
     "articles": [
       "rust-vi-sao-so-cai-toi-noi-chon-rust",
       "rust-cargo-tu-source-code-den-but-toan-dau-tien",
@@ -446,7 +446,7 @@
     "title": "Rust trung bình qua Tới Nơi",
     "description": "Lộ trình 20 bài cấp trung bình: đưa thư viện ledger-core thành service sổ cái thật. Async với tokio, concurrency, PostgreSQL qua sqlx, transaction và idempotency, schema sổ cái, Redis, tracing, đo hiệu năng; tiếp theo là HTTP với axum, gRPC với tonic, Kafka, outbox, webhook VíXanh và graceful shutdown.",
     "level": "intermediate",
-    "category": "programming",
+    "category": "rust",
     "articles": [
       "rust-async-await-tokio-task-timeout-cancellation",
       "rust-send-sync-arc-mutex-channel-concurrency",
@@ -476,7 +476,7 @@
     "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android",
     "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có Phần 1–4.",
     "level": "beginner",
-    "category": "programming",
+    "category": "flutter",
     "articles": [
       "flutter-va-dart-tu-source-code-den-ung-dung-toi-noi",
       "dart-bien-kieu-du-lieu-null-safety-tinh-cuoc",
@@ -555,7 +555,7 @@
     "title": "Python cơ bản qua Tới Nơi",
     "description": "Lộ trình 20 bài cấp cơ bản: Python 3.14 với uv, kiểu dữ liệu và Decimal, hàm, cấu trúc dữ liệu, generator, module, exception, file và pytest, rồi mô hình hóa nghiệp vụ bằng dataclass, type hints, Protocol, pydantic và pattern matching. Mọi ví dụ là chuyến xe và hồ sơ tài xế của Tới Nơi.",
     "level": "beginner",
-    "category": "programming",
+    "category": "python",
     "articles": [
       "python-va-uv-tu-source-code-den-chuong-trinh",
       "python-bien-kieu-du-lieu-decimal",
@@ -585,7 +585,7 @@
     "title": "Python trung bình qua Tới Nơi",
     "description": "Lộ trình 20 bài cấp trung bình: asyncio, GIL và free-threaded, đồng thời, SQLAlchemy với PostgreSQL, transaction và idempotency, MongoDB, Redis, integration test, polars và xử lý ảnh, rồi service FastAPI, xác thực, gRPC, Kafka, outbox và worker nền. Mọi lab chạy với hạ tầng thật trong Docker.",
     "level": "intermediate",
-    "category": "programming",
+    "category": "python",
     "articles": [
       "python-asyncio-coroutine-task-timeout-cancellation",
       "python-gil-threading-multiprocessing-free-threaded",
@@ -615,7 +615,7 @@
     "title": "Python nâng cao qua Tới Nơi",
     "description": "Lộ trình 39 bài cấp nâng cao: OCR giấy tờ định danh, so khớp khuôn mặt, chấm điểm gian lận, dự đoán ETA và nhu cầu, Clean Architecture cho service Python, profiling, container, CI/CD, triển khai AWS và Azure, OpenTelemetry, kết thúc bằng pipeline KYC và fraud từ code tới vận hành. Dữ liệu trong lab đều là dữ liệu tổng hợp.",
     "level": "advanced",
-    "category": "programming",
+    "category": "python",
     "articles": [
       "python-kyc-tai-xe-bai-toan-du-lieu-metric",
       "python-opencv-phat-hien-canh-perspective-deskew",
