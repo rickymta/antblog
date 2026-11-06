@@ -1288,5 +1288,105 @@
       "DHAT",
       "POSTGRES"
     ]
+  },
+  "rust-axum-http-endpoint-ghi-but-toan-tra-so-du": {
+    "title": "AXUM / HTTP ENDPOINT",
+    "subtitle": "Rust 31 · Router, extractor and IntoResponse for the ledger",
+    "diagram": "network",
+    "labels": [
+      "ROUTER",
+      "EXTRACTOR",
+      "RESPONSE"
+    ]
+  },
+  "rust-validation-problem-details-openapi-utoipa": {
+    "title": "PROBLEM DETAILS / API",
+    "subtitle": "Rust 32 · Validation, RFC 9457 and OpenAPI with utoipa",
+    "diagram": "layers",
+    "labels": [
+      "VALIDATE",
+      "PROBLEM",
+      "OPENAPI"
+    ]
+  },
+  "rust-tower-middleware-timeout-request-id-jwt-rate-limit": {
+    "title": "TOWER / MIDDLEWARE",
+    "subtitle": "Rust 33 · Layer order, request id, JWT and rate limit",
+    "diagram": "layers",
+    "labels": [
+      "TRACE",
+      "TIMEOUT",
+      "JWT"
+    ]
+  },
+  "rust-axum-api-test-oneshot-hop-dong-bff": {
+    "title": "API TEST / CONTRACT",
+    "subtitle": "Rust 34 · oneshot, real PostgreSQL, C# contract",
+    "diagram": "checklist",
+    "labels": [
+      "ONESHOT",
+      "SNAPSHOT",
+      "CONTRACT"
+    ]
+  },
+  "rust-tonic-grpc-get-balance-post-entry-interop-dotnet": {
+    "title": "TONIC / GRPC",
+    "subtitle": "Rust 35 · gRPC ledger service, .NET client",
+    "diagram": "network",
+    "labels": [
+      "PROTO",
+      "TONIC",
+      "C# CLIENT"
+    ]
+  },
+  "rust-kafka-rdkafka-consumer-producer-schema": {
+    "title": "KAFKA / RDKAFKA",
+    "subtitle": "Rust 36 · Consumer, producer and at-least-once",
+    "diagram": "split",
+    "labels": [
+      "PARTITION",
+      "OFFSET",
+      "COMMIT"
+    ]
+  },
+  "rust-outbox-inbox-idempotent-consumer": {
+    "title": "OUTBOX / INBOX",
+    "subtitle": "Rust 37 · Outbox, inbox, idempotent consumer, DLQ",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "KAFKA",
+      "INBOX"
+    ]
+  },
+  "rust-webhook-psp-hmac-chong-replay-xu-ly-tre-trung": {
+    "title": "WEBHOOK / HMAC",
+    "subtitle": "Rust 38 · Verify signature, replay window, dedupe",
+    "diagram": "checklist",
+    "labels": [
+      "SIGNATURE",
+      "REPLAY",
+      "DEDUPE"
+    ]
+  },
+  "rust-graceful-shutdown-health-readiness-backpressure": {
+    "title": "GRACEFUL / SHUTDOWN",
+    "subtitle": "Rust 39 · Shutdown, readiness and backpressure",
+    "diagram": "flow",
+    "labels": [
+      "SIGTERM",
+      "DRAIN",
+      "READYZ"
+    ]
+  },
+  "rust-tong-hop-ledger-api-postgresql-kafka-end-to-end": {
+    "title": "LEDGER API / E2E",
+    "subtitle": "Rust 40 · PostgreSQL + Kafka end-to-end ledger service",
+    "diagram": "flow",
+    "labels": [
+      "KAFKA",
+      "POSTGRES",
+      "GRPC"
+    ]
   }
 }

@@ -183,7 +183,17 @@
       "rust-integration-test-postgresql-schema-rieng-ci",
       "rust-redis-cache-so-du-rate-limit-lock-ttl",
       "rust-config-secrets-tracing-structured-logging",
-      "rust-criterion-benchmark-do-bo-nho-10k-but-toan"
+      "rust-criterion-benchmark-do-bo-nho-10k-but-toan",
+      "rust-axum-http-endpoint-ghi-but-toan-tra-so-du",
+      "rust-validation-problem-details-openapi-utoipa",
+      "rust-tower-middleware-timeout-request-id-jwt-rate-limit",
+      "rust-axum-api-test-oneshot-hop-dong-bff",
+      "rust-tonic-grpc-get-balance-post-entry-interop-dotnet",
+      "rust-kafka-rdkafka-consumer-producer-schema",
+      "rust-outbox-inbox-idempotent-consumer",
+      "rust-webhook-psp-hmac-chong-replay-xu-ly-tre-trung",
+      "rust-graceful-shutdown-health-readiness-backpressure",
+      "rust-tong-hop-ledger-api-postgresql-kafka-end-to-end"
     ],
     "status": "published"
   }

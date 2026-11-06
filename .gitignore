@@ -26,3 +26,5 @@ BenchmarkDotNet.Artifacts/
 
 # Rust example build outputs
 examples/toi-noi-rust/**/target/
+examples/toi-noi-rust/**/dotnet-client/**/bin/
+examples/toi-noi-rust/**/dotnet-client/**/obj/

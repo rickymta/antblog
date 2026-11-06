@@ -269,7 +269,7 @@ LỖI: thiếu TOI_NOI_PG_URL. Bật hạ tầng: docker compose -f examples/toi
 
 <details><summary>Xem lời giải</summary><p>Quét: 1.000 × 0,7 ms = 0,7 giây CPU mỗi giây, khoảng 70% một core. Tra bảng: 1.000 × 15 ns = 15 µs mỗi giây, cỡ 0,002% một core. Cái giá là bộ nhớ, việc <code>post</code> phải cập nhật thêm, và nguy cơ bảng lệch khỏi bút toán, nên trong PostgreSQL <code>account_balances</code> phải cập nhật cùng transaction. Hai nguồn lệch thì tin các bút toán.</p></details>
 
-Bài trước: [bài 29](/articles/rust-config-secrets-tracing-structured-logging). Bài tiếp: phần P04, HTTP, gRPC và Kafka.
+Bài trước: [bài 29](/articles/rust-config-secrets-tracing-structured-logging). Bài tiếp: [bài 31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du).
 
 ## Tài liệu gốc
 

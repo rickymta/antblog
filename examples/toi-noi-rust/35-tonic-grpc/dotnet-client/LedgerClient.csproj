@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ToiNoi.LedgerClient</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.36.2" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.85.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.85.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Cùng một file proto với server Rust. Chỉ cần phần client. -->
+    <Protobuf Include="../proto/ledger/v1/ledger.proto" ProtoRoot="../proto" GrpcServices="Client" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,19 @@
+[package]
+name = "ledger_33_tower_middleware"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+axum = "0.8.9"
+jiff = "0.2.39"
+jsonwebtoken = { version = "11.1.0", features = ["rust_crypto"] }
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util"] }
+tower = { version = "0.5.3", features = ["limit", "buffer", "util", "load-shed"] }
+tower-http = { version = "0.7.1", features = ["trace", "timeout", "request-id", "cors", "sensitive-headers"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["fmt"] }
+uuid = { version = "1.29.0", features = ["v4"] }

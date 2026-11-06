@@ -1,0 +1,22 @@
+[package]
+name = "ledger_35_tonic_grpc"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+anyhow = "1.0.104"
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+prost = "0.14.4"
+prost-types = "0.14.4"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "time", "signal", "process", "io-util"] }
+tokio-stream = "0.1.19"
+tonic = "0.14.9"
+tonic-prost = "0.14.9"
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[build-dependencies]
+protoc-bin-vendored = "3.3.0"
+tonic-prost-build = "0.14.9"

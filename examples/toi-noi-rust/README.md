@@ -68,7 +68,20 @@ C#/.NET 10 giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng
 29. Cấu hình, secrets và tracing: log có cấu trúc cho service sổ cái — **đã viết**
 30. criterion và đo bộ nhớ: sổ cái có ghi nổi 10.000 bút toán/giây không? — **đã viết**
 
-Các phần P04–P07 (bài 31–68) xem master curriculum.
+## P04 · HTTP, gRPC, Kafka và tích hợp
+
+31. HTTP với axum: endpoint ghi bút toán và tra số dư — **đã viết**
+32. Validation, Problem Details và OpenAPI với utoipa: hợp đồng API — **đã viết**
+33. Middleware với tower: timeout, request id, JWT và rate limit — **đã viết**
+34. API test với axum: oneshot, DB thật và hợp đồng với BFF C# — **đã viết**
+35. gRPC với tonic: GetBalance và PostEntry cho service C# gọi — **đã viết**
+36. Kafka với rdkafka: consume TripCompleted, produce LedgerEntryPosted — **đã viết**
+37. Outbox, inbox và idempotent consumer trong Rust — **đã viết**
+38. Webhook từ VíXanh: verify chữ ký HMAC, chống replay, xử lý trễ và trùng — **đã viết**
+39. Graceful shutdown, health, readiness và backpressure — **đã viết**
+40. Bài tổng hợp trung bình: ledger-api với PostgreSQL và Kafka chạy end-to-end — **đã viết**
+
+Các phần còn lại (bài 41–68) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -77,7 +90,7 @@ cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml
 cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml -- --verify
 ```
 
-Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03 (cần hạ tầng trong `infra/`).
+Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03, `verify-31-40.sh` phần 04 (hai script này cần hạ tầng trong `infra/`).
 
 ## Hạ tầng cho phần P03 trở đi
 

@@ -1,0 +1,8 @@
+{
+  "type": "https://toi-noi.example/problems/unbalanced-entry",
+  "title": "Bút toán lệch",
+  "status": 422,
+  "detail": "bút toán lệch, tổng bằng -5.100 VND",
+  "instance": "/v1/entries",
+  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736"
+}
