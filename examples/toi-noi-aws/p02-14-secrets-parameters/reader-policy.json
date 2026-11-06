@@ -1,0 +1,37 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadBookingParameters",
+      "Effect": "Allow",
+      "Action": ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"],
+      "Resource": [
+        "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/toinoi/${ENV}/booking",
+        "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/toinoi/${ENV}/booking/*"
+      ]
+    },
+    {
+      "Sid": "ReadBookingSecretsWithTag",
+      "Effect": "Allow",
+      "Action": "secretsmanager:GetSecretValue",
+      "Resource": "arn:aws:secretsmanager:${REGION}:${ACCOUNT_ID}:secret:toinoi/${ENV}/booking/*",
+      "Condition": {
+        "StringEquals": { "secretsmanager:ResourceTag/Project": "ToiNoi" }
+      }
+    },
+    {
+      "Sid": "DecryptOnlyThroughSsmAndSecretsManager",
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "${KMS_KEY_ARN}",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": [
+            "ssm.${REGION}.amazonaws.com",
+            "secretsmanager.${REGION}.amazonaws.com"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -889,7 +889,7 @@ Cập nhật khi bài được viết/review/xuất bản. Bài được tính "
 | Phần | Viết | Review | Ghi chú |
 |---|---|---|---|
 | Phần 01 · Nền tảng AWS | chưa | chưa | |
-| Phần 02 · Container, serverless và dịch vụ ứng dụng | chưa | chưa | |
+| Phần 02 · Container, serverless và dịch vụ ứng dụng | chưa | xong 2026-11-06 | Cần chốt: secret DB dạng connection string (bài 12, bài 36 .NET) hay JSON có rotation (bài 14); `healthCheck` dùng curl trong khi image `aspnet` không có curl. |
 | Phần 03 · Infrastructure as Code và CI/CD | chưa | chưa | |
 | Phần 04 · Dữ liệu, lưu trữ và messaging | chưa | chưa | |
 | Phần 05 · Kubernetes trên AWS với EKS | chưa | chưa | |
