@@ -908,5 +908,85 @@
       "AGGREGATE",
       "EVENT"
     ]
+  },
+  "dotnet10-clean-architecture-layers": {
+    "title": "CLEAN / BOUNDARIES",
+    "subtitle": "C# 31 · Dependencies point inward",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "APPLICATION",
+      "ADAPTERS"
+    ]
+  },
+  "dotnet10-cqrs-mediator-pipeline": {
+    "title": "CQRS / DISPATCH",
+    "subtitle": "C# 32 · Typed requests and ordered behaviors",
+    "diagram": "flow",
+    "labels": [
+      "REQUEST",
+      "PIPELINE",
+      "HANDLER"
+    ]
+  },
+  "dotnet10-repository-unit-of-work": {
+    "title": "REPOSITORY / UOW",
+    "subtitle": "C# 33 · Aggregate-aware persistence and one commit",
+    "diagram": "layers",
+    "labels": [
+      "AGGREGATE",
+      "TRACKING",
+      "COMMIT"
+    ]
+  },
+  "dotnet10-use-case-dat-chuyen-end-to-end": {
+    "title": "USE CASE / END TO END",
+    "subtitle": "C# 34 · From verified identity to durable intent",
+    "diagram": "flow",
+    "labels": [
+      "VALIDATE",
+      "DOMAIN",
+      "COMMIT"
+    ]
+  },
+  "dotnet10-container-ci-cd": {
+    "title": "CONTAINER / PIPELINE",
+    "subtitle": "C# 35 · Test, publish and promote one artifact",
+    "diagram": "blocks",
+    "labels": [
+      "BUILD",
+      "VERIFY",
+      "PUBLISH"
+    ]
+  },
+  "dotnet10-aws-azure-deployment": {
+    "title": "CLOUD / RELEASE",
+    "subtitle": "C# 36 · AWS and Azure deployment boundaries",
+    "diagram": "network",
+    "labels": [
+      "IDENTITY",
+      "SECRETS",
+      "READINESS"
+    ]
+  },
+  "dotnet10-opentelemetry-traces-metrics-logs": {
+    "title": "OBSERVABILITY / OTEL",
+    "subtitle": "C# 37 · Trace context and bounded metric tags",
+    "diagram": "map",
+    "labels": [
+      "TRACES",
+      "METRICS",
+      "LOGS"
+    ]
+  },
+  "dotnet10-tong-hop-service-dat-chuyen": {
+    "title": "FROM CODE / TO OPERATIONS",
+    "subtitle": "C# 38 · A verified service slice, clear next steps",
+    "diagram": "network",
+    "labels": [
+      "DOMAIN",
+      "DELIVERY",
+      "EVIDENCE"
+    ]
   }
 }

@@ -1,0 +1,27 @@
+{
+  "family": "toi-noi-trips",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "runtimePlatform": { "operatingSystemFamily": "LINUX", "cpuArchitecture": "X86_64" },
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "${EXECUTION_ROLE_ARN}",
+  "taskRoleArn": "${TASK_ROLE_ARN}",
+  "containerDefinitions": [{
+    "name": "trips",
+    "image": "${IMAGE_DIGEST}",
+    "essential": true,
+    "portMappings": [{ "containerPort": 8080, "protocol": "tcp" }],
+    "environment": [
+      { "name": "ASPNETCORE_ENVIRONMENT", "value": "Production" },
+      { "name": "ASPNETCORE_HTTP_PORTS", "value": "8080" },
+      { "name": "Auth__Authority", "value": "${AUTH_AUTHORITY}" },
+      { "name": "Auth__Audience", "value": "${AUTH_AUDIENCE}" }
+    ],
+    "secrets": [{ "name": "ConnectionStrings__Trips", "valueFrom": "${PG_SECRET_ARN}" }],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": { "awslogs-group": "${LOG_GROUP}", "awslogs-region": "${AWS_REGION}", "awslogs-stream-prefix": "trips" }
+    }
+  }]
+}

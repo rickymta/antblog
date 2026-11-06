@@ -1,0 +1,7 @@
+**/bin
+**/obj
+**/*.tar.gz
+**/*.log
+Tests
+.env*
+artifacts

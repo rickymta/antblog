@@ -51,14 +51,14 @@ Khung biên tập từ cơ bản tới nâng cao. Mỗi bài có câu hỏi mở
 28. BenchmarkDotNet, profiling và Span: tối ưu có số đo — **đã viết**
 29. C# 14 trong thực tế: extension members, field và tính năng mới — **đã viết**
 30. DDD: bounded context, aggregate, value object và invariant của chuyến — **đã viết**
-31. Clean Architecture: chia Domain, Application, Infrastructure, API — dự kiến
-32. CQRS và Mediator: command/query handler và pipeline behavior — dự kiến
-33. Repository và Unit of Work với EF Core: aggregate, tracking và commit — dự kiến
-34. Ghép use case đặt chuyến: validation, transaction, domain event và kiểm thử — dự kiến
-35. Container và CI/CD: build, test, publish ứng dụng .NET 10 — dự kiến
-36. Triển khai AWS và Azure: cấu hình, secrets và health check — dự kiến
-37. OpenTelemetry: lần theo một yêu cầu chậm — dự kiến
-38. Bài tổng hợp: dịch vụ đặt chuyến từ code tới vận hành — dự kiến
+31. Clean Architecture: chia Domain, Application, Infrastructure, API — **đã viết**
+32. CQRS và Mediator: command/query handler và pipeline behavior — **đã viết**
+33. Repository và Unit of Work với EF Core: aggregate, tracking và commit — **đã viết**
+34. Ghép use case đặt chuyến: validation, transaction, domain event và kiểm thử — **đã viết**
+35. Container và CI/CD: build, test, publish ứng dụng .NET 10 — **đã viết**
+36. Triển khai AWS và Azure: cấu hình, secrets và health check — **đã viết**
+37. OpenTelemetry: lần theo một yêu cầu chậm — **đã viết**
+38. Bài tổng hợp: dịch vụ đặt chuyến từ code tới vận hành — **đã viết**
 
 ## Quy ước xuyên suốt
 
@@ -122,3 +122,7 @@ node examples/toi-noi-dotnet/verify-21-30.mjs
 Script chạy 20 test xUnit (mapping, query, transaction, worker, resilience, Outbox và domain) cùng 3 harness console về lifetime, parser và C# 14. Test database fail rõ nếu thiếu cấu hình; không dùng InMemory để thay PostgreSQL.
 
 Benchmark thật là lệnh riêng trong [bài 28](28-benchmark-span/README.md); script verify không tự chạy phép đo hiệu năng dài. [Report lượt đo ngắn](28-benchmark-span/results/short-run.md) ghi runtime/hardware, số lần lặp và error. Schema của các ca database có tên GUID, được tạo/dọn riêng. Không có connection string chứa credential thật trong source.
+
+## Service tổng hợp bài 31–38
+
+[Code và cách chạy](31-38-trip-service/README.md); 20 test PostgreSQL/HTTP/architecture/telemetry. Dockerfile, CI, AWS task spec và Azure Bicep có phạm vi kiểm chứng được ghi rõ.

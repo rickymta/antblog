@@ -162,7 +162,7 @@ public sealed class DomainTests
 }
 ```
 
-Bài trước: [bài 29](/articles/csharp14-extension-members-field). Bài tiếp theo dự kiến về Clean Architecture; chưa liên kết tới nội dung chưa viết.
+Bài trước: [bài 29](/articles/csharp14-extension-members-field). Bài tiếp: [bài 31 — Clean Architecture](/articles/dotnet10-clean-architecture-layers).
 
 ## Tài liệu gốc
 

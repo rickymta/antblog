@@ -92,7 +92,7 @@
   {
     "slug": "csharp-dotnet-10-qua-toi-noi",
     "title": "C# và .NET 10 qua Tới Nơi",
-    "description": "Từ console tính cước tới API đặt chuyến: nền tảng C#, bất đồng bộ, kiểm thử, ASP.NET Core 10, EF Core 10 và vận hành. Đang biên soạn, hiện có ba mươi bài đầu.",
+    "description": "Lộ trình 38 bài qua Tới Nơi: C# cơ bản, ASP.NET Core 10, EF Core/PostgreSQL, DDD/Clean Architecture/CQRS và vận hành có kiểm chứng.",
     "level": "beginner",
     "category": "programming",
     "articles": [
@@ -125,7 +125,15 @@
       "dotnet10-allocation-gc-disposal",
       "dotnet10-benchmarkdotnet-span-profiling",
       "csharp14-extension-members-field",
-      "dotnet10-ddd-bounded-context-aggregate"
+      "dotnet10-ddd-bounded-context-aggregate",
+      "dotnet10-clean-architecture-layers",
+      "dotnet10-cqrs-mediator-pipeline",
+      "dotnet10-repository-unit-of-work",
+      "dotnet10-use-case-dat-chuyen-end-to-end",
+      "dotnet10-container-ci-cd",
+      "dotnet10-aws-azure-deployment",
+      "dotnet10-opentelemetry-traces-metrics-logs",
+      "dotnet10-tong-hop-service-dat-chuyen"
     ],
     "status": "published"
   }
