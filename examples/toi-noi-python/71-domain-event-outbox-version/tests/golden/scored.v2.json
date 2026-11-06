@@ -1,0 +1,18 @@
+{
+  "event_id": "00000000-0000-4000-8000-000000000001",
+  "event_type": "KycApplicationScored",
+  "occurred_at": "2026-11-06T03:00:00+00:00",
+  "version": 2,
+  "payload": {
+    "application_id": "KYC-0001",
+    "driver_id": "DR-002",
+    "risk_score": 0.35,
+    "review_reasons": [
+      "ocr_low_confidence",
+      "face_low_score",
+      "risk_high"
+    ],
+    "face_score": 0.71,
+    "ocr_min_confidence": 0.58
+  }
+}

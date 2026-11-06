@@ -169,11 +169,11 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| PY-67 | `python-clean-architecture-domain-application-infrastructure` | Clean Architecture trong Python: domain, application, infrastructure, api | Package theo lớp, chiều phụ thuộc, import-linter, Protocol làm port | PY-40 | Kế hoạch |
-| PY-68 | `python-cqrs-command-query-handler-mediator` | CQRS và mediator: command/query handler, pipeline không cần thư viện nặng | Dispatch handler theo kiểu, pipeline (log, validate, transaction), so với MediatR | PY-67 | Kế hoạch |
-| PY-69 | `python-repository-unit-of-work-sqlalchemy` | Repository và Unit of Work với SQLAlchemy | Repository theo aggregate, UoW bao session/transaction, test với PostgreSQL thật | PY-68, PY-25 | Kế hoạch |
-| PY-70 | `python-use-case-ho-so-tai-xe-end-to-end` | Use case nộp hồ sơ tài xế end-to-end: OCR → face → điểm rủi ro → quyết định | Ghép P05–P07 qua use case, domain event, trạng thái hồ sơ, test toàn luồng | PY-69, PY-47, PY-53, PY-61 | Kế hoạch |
-| PY-71 | `python-domain-event-outbox-integration-event-version` | Domain event, outbox và version hợp đồng sự kiện | Domain vs integration event, outbox trong UoW, schema version, tương thích với consumer C# | PY-70, PY-39 | Kế hoạch |
+| PY-67 | `python-clean-architecture-domain-application-infrastructure` | Clean Architecture trong Python: domain, application, infrastructure, api | Package theo lớp, chiều phụ thuộc, import-linter, Protocol làm port | PY-40 | Đã viết |
+| PY-68 | `python-cqrs-command-query-handler-mediator` | CQRS và mediator: command/query handler, pipeline không cần thư viện nặng | Dispatch handler theo kiểu, pipeline (log, validate, transaction), so với MediatR | PY-67 | Đã viết |
+| PY-69 | `python-repository-unit-of-work-sqlalchemy` | Repository và Unit of Work với SQLAlchemy | Repository theo aggregate, UoW bao session/transaction, test với PostgreSQL thật | PY-68, PY-25 | Đã viết |
+| PY-70 | `python-use-case-ho-so-tai-xe-end-to-end` | Use case nộp hồ sơ tài xế end-to-end: OCR → face → điểm rủi ro → quyết định | Ghép P05–P07 qua use case, domain event, trạng thái hồ sơ, test toàn luồng | PY-69, PY-47, PY-53, PY-61 | Đã viết |
+| PY-71 | `python-domain-event-outbox-integration-event-version` | Domain event, outbox và version hợp đồng sự kiện | Domain vs integration event, outbox trong UoW, schema version, tương thích với consumer C# | PY-70, PY-39 | Đã viết |
 
 #### P10 · Hiệu năng, vận hành và tổng hợp (8 bài)
 

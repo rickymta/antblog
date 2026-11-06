@@ -3748,5 +3748,55 @@
       "CONSENT",
       "HUMAN"
     ]
+  },
+  "python-clean-architecture-domain-application-infrastructure": {
+    "title": "PYTHON / CLEAN ARCH",
+    "subtitle": "Python 67 · Four layers, one direction",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "PORT",
+      "ADAPTER"
+    ]
+  },
+  "python-cqrs-command-query-handler-mediator": {
+    "title": "PYTHON / CQRS",
+    "subtitle": "Python 68 · Mediator and pipeline",
+    "diagram": "flow",
+    "labels": [
+      "COMMAND",
+      "MEDIATOR",
+      "HANDLER"
+    ]
+  },
+  "python-repository-unit-of-work-sqlalchemy": {
+    "title": "PYTHON / UNIT OF WORK",
+    "subtitle": "Python 69 · Repository on PostgreSQL",
+    "diagram": "layers",
+    "labels": [
+      "REPOSITORY",
+      "SESSION",
+      "VERSION"
+    ]
+  },
+  "python-use-case-ho-so-tai-xe-end-to-end": {
+    "title": "PYTHON / KYC USE CASE",
+    "subtitle": "Python 70 · Machine stops at review",
+    "diagram": "flow",
+    "labels": [
+      "OCR",
+      "FACE",
+      "REVIEW"
+    ]
+  },
+  "python-domain-event-outbox-integration-event-version": {
+    "title": "PYTHON / EVENT OUTBOX",
+    "subtitle": "Python 71 · Event contract and versions",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "V1 TO V2",
+      "C# READER"
+    ]
   }
 }

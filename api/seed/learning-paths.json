@@ -629,7 +629,12 @@
       "python-liveness-anti-spoofing-chat-luong-anh",
       "python-vector-search-pgvector-faiss-trung-tai-xe",
       "python-face-match-grpc-service-batching-model-loading",
-      "python-face-matching-danh-gia-bias-privacy-consent"
+      "python-face-matching-danh-gia-bias-privacy-consent",
+      "python-clean-architecture-domain-application-infrastructure",
+      "python-cqrs-command-query-handler-mediator",
+      "python-repository-unit-of-work-sqlalchemy",
+      "python-use-case-ho-so-tai-xe-end-to-end",
+      "python-domain-event-outbox-integration-event-version"
     ],
     "status": "published"
   }

@@ -1,0 +1,104 @@
+[project]
+name = "toi-noi-py-71-domain-event-outbox-version"
+version = "0.1.0"
+description = "Bài 71: domain event, outbox trong Unit of Work, dispatcher Kafka và version hợp đồng sự kiện KycApplicationScored"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.162",
+    "pydantic>=2.14",
+    "sqlalchemy>=2.1",
+    "psycopg[binary]>=3.3",
+    "aiokafka>=0.15",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "httpx>=0.28",
+    "httpx2>=2.0",  # Starlette 1.x: TestClient cần httpx2
+    "import-linter>=2.5",
+    "mypy>=2.4",
+    "ruff>=0.17",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.11,<0.13.0"]
+build-backend = "uv_build"
+
+# Tên project khác tên package import nên khai báo tường minh.
+[tool.uv]
+package = true
+
+[tool.uv.build-backend]
+module-name = "kyc_service"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Test và demo cố ý dùng adapter giả; cảnh báo vẫn có test riêng (pytest.warns).
+filterwarnings = ["ignore::kyc_service.api.container.FakeAdapterWarning"]
+pythonpath = ["."]  # để import `consumers`: mã consumer nằm ngoài package kyc_service
+markers = ["csharp: cần .NET SDK 10 để chạy consumer C#"]
+
+# ---- Kiến trúc: import-linter đọc cấu hình ở đây -------------------------------------------
+[tool.importlinter]
+root_package = "kyc_service"
+include_external_packages = true  # để luật "domain không import fastapi" thấy được thư viện ngoài
+
+# Hợp đồng 1: chiều phụ thuộc. Lớp trên được import lớp dưới, không ngược lại.
+[[tool.importlinter.contracts]]
+name = "Bốn lớp: api > infrastructure > application > domain"
+type = "layers"
+layers = [
+    "kyc_service.api",
+    "kyc_service.infrastructure",
+    "kyc_service.application",
+    "kyc_service.domain",
+]
+
+# Hợp đồng 2: lõi không biết framework web. Application ĐƯỢC dùng pydantic (behavior validation
+# kiểm hình dạng command); domain thì không.
+[[tool.importlinter.contracts]]
+name = "Lõi không import framework web"
+type = "forbidden"
+source_modules = ["kyc_service.domain", "kyc_service.application"]
+forbidden_modules = ["fastapi", "starlette"]
+
+[[tool.importlinter.contracts]]
+name = "Domain không import pydantic"
+type = "forbidden"
+source_modules = ["kyc_service.domain"]
+forbidden_modules = ["pydantic"]
+
+# Hợp đồng 4: chi tiết lưu trữ không rò vào lõi. Chỉ infrastructure biết SQLAlchemy và psycopg.
+[[tool.importlinter.contracts]]
+name = "Lõi không import thư viện cơ sở dữ liệu"
+type = "forbidden"
+source_modules = ["kyc_service.domain", "kyc_service.application"]
+forbidden_modules = ["sqlalchemy", "psycopg"]
+
+# Hợp đồng 5: lõi không biết Kafka. Chỉ infrastructure nói chuyện với broker.
+[[tool.importlinter.contracts]]
+name = "Lõi không import thư viện Kafka"
+type = "forbidden"
+source_modules = ["kyc_service.domain", "kyc_service.application"]
+forbidden_modules = ["aiokafka"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "RUF", "PT", "DTZ"]
+# RUF001-003: dấu gạch ngang trong chú thích tiếng Việt không phải ký tự gây nhầm.
+ignore = ["RUF001", "RUF002", "RUF003", "PT018", "PT012"]
+
+[tool.mypy]
+strict = true
+python_version = "3.14"
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
+
+# aiokafka không có type stubs.
+[[tool.mypy.overrides]]
+module = "aiokafka.*"
+ignore_missing_imports = true
