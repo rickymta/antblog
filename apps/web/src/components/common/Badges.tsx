@@ -51,7 +51,7 @@ export function TagChip({ tag }: { tag: string }) {
   return (
     <Link
       href={`/articles?tag=${encodeURIComponent(tag)}`}
-      className="inline-flex items-center rounded-ui border border-line bg-surface px-2 py-1 text-xs font-medium text-ink hover:border-primary hover:text-primary-ink"
+      className="inline-flex max-w-full [overflow-wrap:anywhere] items-center rounded-ui border border-line bg-surface px-2 py-1 text-xs font-medium text-ink hover:border-primary hover:text-primary-ink"
     >
       #{tag}
     </Link>

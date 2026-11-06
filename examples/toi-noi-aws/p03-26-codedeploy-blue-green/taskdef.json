@@ -1,0 +1,46 @@
+{
+  "family": "toinoi-lab-booking",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "runtimePlatform": {
+    "operatingSystemFamily": "LINUX",
+    "cpuArchitecture": "X86_64"
+  },
+  "executionRoleArn": "arn:aws:iam::123456789012:role/toinoi-lab-booking-execution",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/toinoi-lab-booking-task",
+  "containerDefinitions": [
+    {
+      "name": "booking",
+      "image": "<IMAGE1_NAME>",
+      "essential": true,
+      "portMappings": [{ "containerPort": 8080, "protocol": "tcp" }],
+      "environment": [
+        { "name": "ASPNETCORE_HTTP_PORTS", "value": "8080" },
+        { "name": "APP_ENV", "value": "lab" }
+      ],
+      "secrets": [
+        {
+          "name": "ConnectionStrings__Trips",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:123456789012:secret:toinoi/lab/booking/db-connection-string-AbCdEf"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/toinoi-lab-booking",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "booking"
+        }
+      },
+      "stopTimeout": 30
+    }
+  ],
+  "tags": [
+    { "key": "Project", "value": "ToiNoi" },
+    { "key": "Env", "value": "lab" },
+    { "key": "Service", "value": "booking" },
+    { "key": "Owner", "value": "platform" }
+  ]
+}

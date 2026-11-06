@@ -21,7 +21,7 @@ export function PathNav({ path, currentSlug, defaultOpen = true }: { path: Artic
   const listId = useId();
 
   return (
-    <nav aria-label={t('article.pathNav')}>
+    <nav className="[overflow-wrap:anywhere]" aria-label={t('article.pathNav')}>
       <p className="mb-1 text-xs font-bold tracking-wide text-muted uppercase">{t('article.inPath')}</p>
       <div className="flex items-start gap-1">
         <button

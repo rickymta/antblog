@@ -1,0 +1,29 @@
+{
+  "cluster": "toinoi-lab",
+  "serviceName": "toinoi-lab-booking",
+  "taskDefinition": "toinoi-lab-booking",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "deploymentController": { "type": "CODE_DEPLOY" },
+  "healthCheckGracePeriodSeconds": 30,
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:ap-southeast-1:123456789012:targetgroup/toinoi-lab-booking-blue/0123456789abcdef",
+      "containerName": "booking",
+      "containerPort": 8080
+    }
+  ],
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": ["subnet-0aaaaaaaaaaaaaaa1", "subnet-0bbbbbbbbbbbbbbb2"],
+      "securityGroups": ["sg-0ccccccccccccccc3"],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "tags": [
+    { "key": "Project", "value": "ToiNoi" },
+    { "key": "Env", "value": "lab" },
+    { "key": "Service", "value": "booking" },
+    { "key": "Owner", "value": "platform" }
+  ]
+}

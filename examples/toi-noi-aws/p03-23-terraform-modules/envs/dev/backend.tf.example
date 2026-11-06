@@ -1,0 +1,11 @@
+# Mỗi môi trường có backend và key riêng, tốt nhất ở bucket trong CHÍNH tài khoản của môi trường đó.
+# Đổi tên thành backend.tf khi đã có bucket state (bài 22). Terraform >= 1.10: khoá bằng .tflock trong S3.
+terraform {
+  backend "s3" {
+    bucket       = "toinoi-dev-tfstate-123456789012-ap-southeast-1"
+    key          = "toinoi/dev/platform/terraform.tfstate"
+    region       = "ap-southeast-1"
+    encrypt      = true
+    use_lockfile = true
+  }
+}

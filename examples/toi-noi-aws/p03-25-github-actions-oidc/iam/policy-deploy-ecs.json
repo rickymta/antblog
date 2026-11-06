@@ -1,0 +1,37 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RegisterTaskDefinition",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:RegisterTaskDefinition",
+        "ecs:DescribeTaskDefinition"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "UpdateOnlyQuoteService",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:UpdateService",
+        "ecs:DescribeServices"
+      ],
+      "Resource": "arn:aws:ecs:ap-southeast-1:123456789012:service/toinoi-prod/toinoi-prod-quote"
+    },
+    {
+      "Sid": "PassOnlyQuoteRolesToEcsTasks",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::123456789012:role/toinoi-prod-quote-execution",
+        "arn:aws:iam::123456789012:role/toinoi-prod-quote-task"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "ecs-tasks.amazonaws.com"
+        }
+      }
+    }
+  ]
+}

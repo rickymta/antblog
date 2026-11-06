@@ -1,0 +1,30 @@
+# Ingress thứ hai nằm ở namespace khác nhưng cùng group.name nên dùng chung ALB với booking.
+# Cần Service tracking (ClusterIP, cổng 80) do bạn tự triển khai; lab này chỉ có Deployment booking.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tracking
+  namespace: tracking
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:123456789012:certificate/12345678-1234-1234-1234-123456789012
+    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
+    alb.ingress.kubernetes.io/group.name: toinoi-public
+    alb.ingress.kubernetes.io/group.order: "20"
+    alb.ingress.kubernetes.io/tags: Project=ToiNoi,Env=lab,Service=tracking,Owner=platform
+spec:
+  ingressClassName: alb
+  rules:
+    - host: api.toinoi.example
+      http:
+        paths:
+          - path: /v1/trips
+            pathType: Prefix
+            backend:
+              service:
+                name: tracking
+                port:
+                  number: 80

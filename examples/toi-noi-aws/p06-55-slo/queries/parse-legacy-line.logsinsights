@@ -1,0 +1,4 @@
+# Log cũ chưa có JSON: tách trip_id và thời gian xử lý từ chuỗi "trip=... took=...ms".
+parse @message "trip=* took=*ms" as trip, took_ms
+| filter ispresent(trip)
+| stats avg(took_ms), max(took_ms) by bin(5m)

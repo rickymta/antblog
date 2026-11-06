@@ -1,0 +1,88 @@
+# ResourceQuota chặn một namespace chiếm hết cluster; LimitRange đặt request/limit mặc định cho container quên khai.
+# Con số là điểm bắt đầu cho lab, hãy chỉnh theo kết quả đo.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: booking-quota
+  namespace: booking
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.memory: 16Gi
+    pods: "40"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: booking-defaults
+  namespace: booking
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        memory: 256Mi
+      max:
+        cpu: "2"
+        memory: 2Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dispatch-quota
+  namespace: dispatch
+spec:
+  hard:
+    requests.cpu: "6"
+    requests.memory: 12Gi
+    limits.memory: 12Gi
+    pods: "30"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dispatch-defaults
+  namespace: dispatch
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        memory: 256Mi
+      max:
+        cpu: "2"
+        memory: 2Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: tracking-quota
+  namespace: tracking
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.memory: 8Gi
+    pods: "20"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: tracking-defaults
+  namespace: tracking
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        memory: 256Mi
+      max:
+        cpu: "2"
+        memory: 2Gi

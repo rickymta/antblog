@@ -1,0 +1,105 @@
+# Ví dụ cho bài 25. Tệp này CỐ Ý nằm ngoài .github/workflows để không chạy trong CI của repo blog.
+# Muốn dùng: chép vào .github/workflows/ của repo toinoi-org/toi-noi, đổi tên org/repo, ARN và region cho đúng.
+# Major version của action là bản mới nhất lúc review (11/2026); kiểm lại hoặc ghim theo commit SHA khi dùng.
+name: deploy-quote
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/quote/**"
+      - ".github/workflows/deploy-quote.yml"
+  workflow_dispatch:
+
+# Mặc định không cấp quyền gì; từng job tự xin thêm.
+permissions: {}
+
+# Hai lần deploy cùng service không chạy chồng nhau; lần sau xếp hàng, không huỷ lần đang chạy.
+concurrency:
+  group: deploy-quote-prod
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REPOSITORY: toinoi/quote
+  ECS_CLUSTER: toinoi-prod
+  ECS_SERVICE: toinoi-prod-quote
+  CONTAINER_NAME: quote
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # bắt buộc để runner xin OIDC token
+      contents: read
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Role build chỉ push được vào repository ECR của quote (iam/policy-build-ecr-push.json).
+      - name: Assume role build bằng OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/toinoi-github-quote-build
+          role-session-name: gha-quote-build-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Đăng nhập ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - uses: docker/setup-buildx-action@v4
+
+      # Cache layer nằm ở GitHub Actions cache. SBOM và provenance gắn vào image.
+      - name: Build và push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: services/quote
+          push: true
+          tags: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          sbom: true
+          provenance: mode=max
+
+      # Deploy theo digest bất biến, không theo tag.
+      - name: Ghép tham chiếu image theo digest
+        id: meta
+        run: echo "image=${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}@${{ steps.build.outputs.digest }}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    # Environment prod có required reviewers (cấu hình trong Settings của repo). Job dừng chờ duyệt.
+    environment: prod
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      # Role deploy khác role build; trust policy khớp sub "environment:prod" (iam/trust-policy-deploy-prod.json).
+      - name: Assume role deploy bằng OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/toinoi-github-quote-deploy-prod
+          role-session-name: gha-quote-deploy-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Render task definition với image mới
+        id: render
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: examples/toi-noi-aws/p03-25-github-actions-oidc/quote-task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ needs.build.outputs.image }}
+
+      - name: Deploy và chờ service ổn định
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true

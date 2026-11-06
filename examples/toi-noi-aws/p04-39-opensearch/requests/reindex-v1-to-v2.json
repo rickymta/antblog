@@ -1,0 +1,4 @@
+{
+  "source": { "index": "toinoi-merchants-v1" },
+  "dest": { "index": "toinoi-merchants-v2" }
+}

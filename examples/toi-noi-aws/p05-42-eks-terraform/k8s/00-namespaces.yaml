@@ -1,0 +1,24 @@
+# Mỗi bounded context một namespace: quota, quyền và NetworkPolicy gắn theo ranh giới này.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: booking
+  labels:
+    app.kubernetes.io/part-of: toinoi
+    toinoi.example/context: booking
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dispatch
+  labels:
+    app.kubernetes.io/part-of: toinoi
+    toinoi.example/context: dispatch
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tracking
+  labels:
+    app.kubernetes.io/part-of: toinoi
+    toinoi.example/context: tracking

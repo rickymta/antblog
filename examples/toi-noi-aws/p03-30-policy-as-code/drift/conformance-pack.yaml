@@ -1,0 +1,39 @@
+# Conformance pack: ba luật detective khớp với ba rule policy-as-code trong pipeline.
+Resources:
+  S3BucketEncrypted:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: toinoi-s3-sse-enabled
+      Description: Bucket S3 phai bat ma hoa mac dinh
+      Source:
+        Owner: AWS
+        SourceIdentifier: S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::S3::Bucket
+  RdsNotPublic:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: toinoi-rds-not-public
+      Description: RDS instance khong duoc publicly accessible
+      Source:
+        Owner: AWS
+        SourceIdentifier: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::RDS::DBInstance
+  RequiredTags:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: toinoi-required-tags
+      Description: Tai nguyen phai co tag Project va Env
+      InputParameters:
+        tag1Key: Project
+        tag2Key: Env
+      Source:
+        Owner: AWS
+        SourceIdentifier: REQUIRED_TAGS
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::S3::Bucket
+          - AWS::RDS::DBInstance

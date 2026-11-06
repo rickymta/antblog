@@ -1,0 +1,20 @@
+# Service type LoadBalancer do AWS Load Balancer Controller xử lý thành NLB (nhờ loadBalancerClass).
+# Ví dụ giả định: cổng TCP nhận toạ độ từ thiết bị GPS cũ, chỉ mở trong VPC (internal).
+apiVersion: v1
+kind: Service
+metadata:
+  name: tracking-gps
+  namespace: tracking
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+spec:
+  type: LoadBalancer
+  loadBalancerClass: service.k8s.aws/nlb
+  selector:
+    app.kubernetes.io/name: tracking
+  ports:
+    - name: gps
+      protocol: TCP
+      port: 9000
+      targetPort: 9000

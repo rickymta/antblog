@@ -1,0 +1,17 @@
+# Khôi phục: PVC mới lấy dữ liệu từ snapshot. Dung lượng không được nhỏ hơn snapshot.
+# Dùng PVC này cho pod thử nghiệm hoặc thay PVC hỏng; không áp đồng thời với StatefulSet nếu tên trùng.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-reconcile-restore
+  namespace: dispatch
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: toinoi-gp3
+  resources:
+    requests:
+      storage: 5Gi
+  dataSource:
+    name: reconcile-checkpoint-0
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io

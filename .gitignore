@@ -28,3 +28,6 @@ BenchmarkDotNet.Artifacts/
 examples/toi-noi-rust/**/target/
 examples/toi-noi-rust/**/dotnet-client/**/bin/
 examples/toi-noi-rust/**/dotnet-client/**/obj/
+
+# Canary CloudWatch Synthetics: layout bắt buộc nodejs/node_modules/<script>.js, không phải thư viện cài
+!examples/toi-noi-aws/p06-55-slo/canary/nodejs/node_modules/

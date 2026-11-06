@@ -17,7 +17,7 @@ import { breadcrumbList, JsonLd } from '../../../lib/jsonld';
 import { clampDescription, notFoundMetadata, pageMetadata } from '../../../lib/metadata';
 import { orNotFound, orNull, serverApi, settle } from '../../../lib/server-api';
 import { absoluteUrl, LOGO_PATH, SITE_NAME, SITE_URL } from '../../../lib/site';
-import { card, container } from '../../../lib/ui';
+import { card } from '../../../lib/ui';
 import { articleCover } from '../../../lib/article-cover';
 import { Cover } from '../../../components/common/Cover';
 
@@ -32,9 +32,8 @@ type Props = { params: Promise<{ slug: string }> };
 export const revalidate = 60;
 export const generateStaticParams = I18N_ENABLED ? undefined : async (): Promise<{ slug: string }[]> => [];
 
-const stickyAside = 'sticky top-24 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto overscroll-contain pr-1 pb-4';
-// Trang bài rộng hơn khung chung (max-w-7xl) để cột giữa đạt 760px ở màn ≥ 1400px — hình SVG trong bài cần ~720px mới khỏi cuộn ngang.
-const articleGrid = `${container} min-[1400px]:max-w-[1440px] grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_16rem] xl:grid-cols-[15rem_minmax(0,1fr)_16rem]`;
+const stickyAside = 'tkh-reader-scroll space-y-8';
+const articleGrid = 'tkh-reader-grid';
 
 const articlePath = (slug: string) => `/articles/${encodeURIComponent(slug)}`;
 
@@ -139,15 +138,15 @@ export default async function ArticlePage({ params }: Props) {
           dung lượng payload RSC trong HTML. Không thành phần client nào đọc `content`. */}
       <ArticleProvider key={article.slug} initial={{ ...article, content: '' }}>
       <div className={articleGrid}>
-        <aside className="hidden xl:block" aria-label={path ? t('article.pathNav') : t('article.toc')}>
+        <aside className="tkh-reader-left" aria-label={path ? t('article.pathNav') : t('article.toc')}>
           <div className={stickyAside}>{path ? <PathNav path={path} currentSlug={article.slug} /> : <TocPanel headings={headings} />}</div>
         </aside>
 
-        <article className="mx-auto w-full max-w-[760px] min-w-0">
+        <article className="mx-auto w-full max-w-[820px] min-w-0">
           <ArticleHeader />
 
           {(path || headings.length > 0) && (
-            <div className="mt-6 space-y-3 lg:hidden">
+            <div className="mt-6 space-y-3 min-[1280px]:hidden">
               {path && (
                 <details className={`group ${card} px-4 py-3`}>
                   <summary className="cursor-pointer text-sm font-semibold text-ink">
@@ -173,29 +172,29 @@ export default async function ArticlePage({ params }: Props) {
             <ArticleContent markdown={article.content} />
           </ArticleBody>
 
-          <div className="mt-10 lg:hidden">
+          <div className="mt-10 min-[1280px]:hidden">
             <TagsBlock tags={article.tags} headingId="tags-title-inline" />
           </div>
 
           <div className="mt-12 space-y-10">
             <ReactionCards />
             <PrevNext article={article} />
-            <div className="lg:hidden">
+            <div className="min-[1280px]:hidden">
               <RelatedArticles articles={relatedArticles} headingId="related-title-inline" />
             </div>
             <LazyComments slug={article.slug} />
           </div>
         </article>
 
-        <aside className="hidden lg:block" aria-label={t('article.toc')}>
+        <aside className="tkh-reader-right" aria-label={t('article.toc')}>
           <div className={stickyAside}>
             {headings.length > 0 && (
-              <div className={path ? '' : 'xl:hidden'}>
+              <div className={path ? '' : 'min-[1600px]:hidden'}>
                 <TocPanel headings={headings} />
               </div>
             )}
             {path && (
-              <div className="xl:hidden">
+              <div className="min-[1600px]:hidden">
                 <PathNav path={path} currentSlug={article.slug} />
               </div>
             )}

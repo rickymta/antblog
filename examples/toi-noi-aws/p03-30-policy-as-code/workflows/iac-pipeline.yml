@@ -1,0 +1,146 @@
+# Workflow mẫu cho repository hạ tầng của Tới Nơi. KHÔNG nằm trong .github/workflows của repo này,
+# nên không chạy ở đây. Chép vào repo hạ tầng khi dùng, thay org/repo, role và thư mục.
+# Chưa được chạy trên GitHub thật. Major version của action và Terraform 1.17.x là bản mới nhất lúc review
+# (11/2026); kiểm lại hoặc ghim theo commit SHA khi dùng. infracost/actions giữ @v3 theo README của dự án.
+name: iac-pipeline
+
+on:
+  pull_request:
+    paths: ["infra/**"]
+  push:
+    branches: [main]
+    paths: ["infra/**"]
+
+# Mặc định chỉ đọc; từng job xin thêm quyền cần thiết.
+permissions:
+  contents: read
+
+# Hai lần chạy cùng ref xếp hàng, không huỷ nhau giữa chừng khi đang apply.
+concurrency:
+  group: iac-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TF_DIR: infra/envs/lab
+  AWS_REGION: ap-southeast-1
+
+jobs:
+  static:
+    name: fmt, validate, lint, policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.x
+      - name: terraform fmt
+        run: terraform fmt -check -recursive infra
+      - name: terraform validate
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+      - uses: terraform-linters/setup-tflint@v6
+      - name: tflint
+        run: |
+          tflint --init
+          tflint --recursive
+      - name: checkov (rule có sẵn và rule riêng của Tới Nơi)
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: infra
+          framework: terraform
+          config_file: .checkov.yaml
+          external_checks_dirs: policies/checkov
+
+  plan:
+    name: plan (role chỉ đọc)
+    needs: static
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/toinoi-lab-iac-plan
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.x
+      - name: terraform plan
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          terraform init -input=false
+          terraform plan -input=false -lock-timeout=60s -out=tfplan
+          terraform show -json tfplan > plan.json
+      - name: checkov trên plan (thấy cả giá trị đã được tính)
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          file: ${{ env.TF_DIR }}/plan.json
+          framework: terraform_plan
+          external_checks_dirs: policies/checkov
+      # Plan có thể chứa giá trị nhạy cảm: giữ ngắn ngày, chỉ dùng cho job apply.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tfplan
+          path: ${{ env.TF_DIR }}/tfplan
+          retention-days: 3
+
+  cost:
+    name: infracost diff
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+      - uses: actions/checkout@v7
+        with:
+          path: pr
+      - uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+      - name: breakdown bản gốc
+        run: infracost breakdown --path=base/${{ env.TF_DIR }} --format=json --out-file=/tmp/infracost-base.json
+      - name: diff bản PR
+        run: infracost diff --path=pr/${{ env.TF_DIR }} --compare-to=/tmp/infracost-base.json --format=json --out-file=/tmp/infracost.json
+      - name: bình luận vào PR
+        run: |
+          infracost comment github --path=/tmp/infracost.json \
+            --repo="$GITHUB_REPOSITORY" --github-token="${{ github.token }}" \
+            --pull-request=${{ github.event.pull_request.number }} --behavior=update
+
+  apply:
+    name: apply đúng plan đã review
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: plan
+    runs-on: ubuntu-latest
+    # Environment có required reviewers: người duyệt thấy plan trước khi bấm cho chạy.
+    environment: lab-apply
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/toinoi-lab-iac-apply
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.x
+      - uses: actions/download-artifact@v8
+        with:
+          name: tfplan
+          path: ${{ env.TF_DIR }}
+      - name: terraform apply
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          terraform init -input=false
+          terraform apply -input=false tfplan

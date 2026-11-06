@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Mau SAI co chu dich cho cfn-guard va Checkov. Khong deploy.
+Resources:
+  PhotosBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: toinoi-lab-delivery-photos-cfn-bad
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Database mo cho moi noi
+      VpcId: vpc-0123456789abcdef0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 0.0.0.0/0
+  TripsDb:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: toinoi-lab-trips-cfn-bad
+      Engine: postgres
+      DBInstanceClass: db.t4g.micro
+      AllocatedStorage: "20"
+      MasterUsername: toinoi
+      ManageMasterUserPassword: true
+      PubliclyAccessible: true
+      StorageEncrypted: false

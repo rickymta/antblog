@@ -1,9 +1,25 @@
-import { readFile, access } from 'node:fs/promises';
+import { readFile, access, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const covers = JSON.parse(await readFile(path.join(root, 'src/lib/article-covers.json'), 'utf8'));
+// Audit source coverage in a full checkout. The web-only Docker context excludes
+// api/, so source coverage is unavailable there; asset validation still runs.
+const contentDir = path.resolve(root, '../../api/seed/content');
+let contentFiles;
+try {
+  contentFiles = await readdir(contentDir);
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+  console.log('Article sources are not included in this checkout/build context; checking cover assets only.');
+  contentFiles = [];
+}
+for (const file of contentFiles.filter(file => file.startsWith('ba-') && file.endsWith('.md'))) {
+  const source = await readFile(path.join(contentDir, file), 'utf8');
+  const slug = source.match(/^slug:\s*([a-z0-9-]+)\s*$/m)?.[1];
+  if (!slug || !Object.hasOwn(covers, slug)) throw new Error('Missing BA cover brief: ' + file);
+}
 const baseUrlIndex = process.argv.indexOf('--base-url');
 const baseUrl = baseUrlIndex === -1 ? undefined : process.argv[baseUrlIndex + 1];
 if (baseUrlIndex !== -1 && !baseUrl) throw new Error('--base-url requires an HTTP(S) origin.');

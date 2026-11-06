@@ -2,6 +2,7 @@
 @import "@tkh/ui/theme.css";
 @import "@tkh/ui/article.css";
 @import "./home.css";
+@import "./reader.css";
 /* Lớp Tailwind dùng trong packages/ui (ArticleContent, Avatar, LevelBadge…) — đường dẫn tính từ tệp này (apps/web/src/app). */
 @source "../../../../packages/ui/src";
 

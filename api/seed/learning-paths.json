@@ -138,6 +138,280 @@
     "status": "published"
   },
   {
+    "slug": "aws-p01-nen-tang-aws",
+    "title": "AWS qua Tới Nơi · Phần 01 · Nền tảng AWS",
+    "description": "Bắt đầu từ con số không: region và availability zone, tài khoản và IAM, VPC, EC2, S3, RDS PostgreSQL, ALB và Auto Scaling, Route 53 với ACM, CloudWatch và chi phí. Mỗi bài dựng một mảnh hạ tầng đầu tiên của Tới Nơi bằng console và AWS CLI, kết thúc bằng bước dọn tài nguyên.",
+    "level": "beginner",
+    "category": "devops-aws",
+    "articles": [
+      "aws-la-gi-region-az-shared-responsibility",
+      "aws-tai-khoan-iam-identity-center-cli",
+      "aws-iam-user-role-policy",
+      "aws-vpc-subnet-route-security-group",
+      "aws-ec2-ami-ebs-user-data",
+      "aws-s3-bucket-versioning-presigned-url",
+      "aws-rds-postgresql-multi-az-backup",
+      "aws-alb-target-group-auto-scaling",
+      "aws-route53-acm-https",
+      "aws-cloudwatch-budgets-tagging-co-ban"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p02-container-serverless",
+    "title": "AWS qua Tới Nơi · Phần 02 · Container, serverless và dịch vụ ứng dụng",
+    "description": "Đưa service đặt chuyến của Tới Nơi lên ECS Fargate với ECR, ALB và auto scaling; quản lý secret bằng Secrets Manager và Parameter Store; thêm Redis, SQS, SNS, EventBridge, Lambda, API Gateway, CloudFront và WAF để hệ thống có cache, hàng đợi, sự kiện và lớp chắn ở biên.",
+    "level": "intermediate",
+    "category": "devops-aws",
+    "articles": [
+      "aws-ecr-image-scan-lifecycle",
+      "aws-ecs-fargate-task-definition-roles",
+      "aws-ecs-alb-rolling-deploy-autoscaling",
+      "aws-secrets-manager-parameter-store",
+      "aws-elasticache-redis-cache-rate-limit",
+      "aws-sqs-sns-dlq-fan-out",
+      "aws-eventbridge-event-bus-rule-schedule",
+      "aws-lambda-webhook-thanh-toan-cold-start",
+      "aws-api-gateway-authorizer-websocket",
+      "aws-cloudfront-waf-shield"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p03-iac-ci-cd",
+    "title": "AWS qua Tới Nơi · Phần 03 · Infrastructure as Code và CI/CD",
+    "description": "Mô tả hạ tầng bằng CloudFormation, Terraform và CDK; pipeline GitHub Actions với OIDC, CodePipeline với blue/green; chiến lược rolling, canary, rollback có migration; nhiều tài khoản với Organizations và Control Tower; AppConfig và policy as code để pipeline tự kiểm hạ tầng trước khi áp dụng.",
+    "level": "intermediate",
+    "category": "devops-aws",
+    "articles": [
+      "aws-cloudformation-stack-change-set-drift",
+      "aws-terraform-provider-state-s3-lock",
+      "aws-terraform-module-vpc-ecs-rds",
+      "aws-cdk-construct-synth-diff",
+      "aws-github-actions-oidc-ecr-deploy",
+      "aws-codepipeline-codebuild-codedeploy-blue-green",
+      "aws-chien-luoc-deploy-rolling-canary-rollback",
+      "aws-organizations-scp-control-tower-landing-zone",
+      "aws-appconfig-feature-flag-cau-hinh-dong",
+      "aws-policy-as-code-checkov-infracost-drift"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p04-du-lieu-messaging",
+    "title": "AWS qua Tới Nơi · Phần 04 · Dữ liệu, lưu trữ và messaging",
+    "description": "Aurora PostgreSQL và RDS Proxy, DynamoDB cho vị trí tài xế, ElastiCache và MemoryDB, Amazon MSK cho outbox, Kinesis cho GPS, S3 nâng cao, AWS Backup và DR, lakehouse với Glue, Athena, Redshift Serverless, OpenSearch và DMS: dữ liệu của 2 triệu chuyến mỗi ngày đi đâu và được giữ an toàn thế nào.",
+    "level": "advanced",
+    "category": "devops-aws",
+    "articles": [
+      "aws-aurora-postgresql-rds-proxy-failover",
+      "aws-dynamodb-single-table-gsi-ttl-streams",
+      "aws-elasticache-nang-cao-memorydb-ha",
+      "aws-msk-kafka-iam-auth-msk-connect",
+      "aws-kinesis-data-streams-firehose-gps",
+      "aws-s3-nang-cao-storage-class-replication-object-lock",
+      "aws-backup-disaster-recovery-rpo-rto",
+      "aws-glue-athena-redshift-lakehouse",
+      "aws-opensearch-tim-kiem-log-analytics",
+      "aws-dms-migration-postgresql-zero-downtime"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p05-eks",
+    "title": "AWS qua Tới Nơi · Phần 05 · Kubernetes trên AWS với EKS",
+    "description": "Dựng và vận hành EKS cho Tới Nơi: control plane, node group, Pod Identity, VPC CNI và Load Balancer Controller, EBS/EFS CSI, HPA và Karpenter, GitOps với Argo CD, quan sát bằng ADOT và Managed Prometheus, bảo mật pod, progressive delivery với Argo Rollouts và VPC Lattice, nâng cấp cluster và chi phí.",
+    "level": "advanced",
+    "category": "devops-aws",
+    "articles": [
+      "aws-eks-tong-quan-control-plane-node-group",
+      "aws-eks-terraform-eksctl-kubectl-namespace",
+      "aws-eks-vpc-cni-load-balancer-controller-ingress",
+      "aws-eks-ebs-efs-csi-statefulset",
+      "aws-eks-hpa-karpenter-spot",
+      "aws-eks-gitops-argocd-helm-kustomize",
+      "aws-eks-observability-container-insights-adot-prometheus",
+      "aws-eks-bao-mat-pod-identity-external-secrets",
+      "aws-eks-progressive-delivery-argo-rollouts-vpc-lattice",
+      "aws-eks-van-hanh-upgrade-addon-chi-phi"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "aws-p06-bao-mat-van-hanh",
+    "title": "AWS qua Tới Nơi · Phần 06 · Bảo mật, resilience và vận hành ở quy mô",
+    "description": "IAM nâng cao, KMS, PrivateLink và Transit Gateway, CloudTrail với Security Hub và GuardDuty, quan sát nâng cao với SLO, multi-region và Fault Injection Service, Step Functions cho Saga đặt chuyến, Well-Architected review, FinOps và bài tổng hợp kiến trúc production Tới Nơi trên AWS kèm runbook.",
+    "level": "advanced",
+    "category": "devops-aws",
+    "articles": [
+      "aws-iam-nang-cao-permission-boundary-abac-access-analyzer",
+      "aws-kms-envelope-encryption-key-policy",
+      "aws-privatelink-transit-gateway-network-firewall",
+      "aws-cloudtrail-config-security-hub-guardduty",
+      "aws-observability-nang-cao-xray-adot-logs-insights-slo",
+      "aws-resilience-multi-region-route53-failover-fis",
+      "aws-step-functions-saga-dat-chuyen",
+      "aws-well-architected-review-toi-noi",
+      "aws-finops-savings-plans-spot-right-sizing",
+      "aws-tong-hop-kien-truc-production-toi-noi"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "azure-p1-nen-tang-azure",
+    "title": "Azure · Phần 1 · Nền tảng Azure",
+    "description": "Mười bài đầu để một người chưa từng dùng cloud đứng được trên Azure: region và trách nhiệm chia sẻ, tenant/subscription/resource group, Portal và CLI, Resource Manager, chi phí, VNet, VM, Storage, PostgreSQL Flexible Server và Azure Monitor — mỗi bài dựng một mảnh hạ tầng đầu tiên cho dịch vụ đặt xe Tới Nơi.",
+    "level": "beginner",
+    "category": "devops-azure",
+    "articles": [
+      "azure-la-gi-cloud-region-trach-nhiem-chia-se",
+      "azure-tenant-subscription-resource-group",
+      "azure-portal-cli-cloud-shell-resource-group-dau-tien",
+      "azure-resource-manager-resource-id-tag-lock",
+      "azure-chi-phi-pricing-cost-management-budget",
+      "azure-vnet-subnet-nsg-public-ip",
+      "azure-virtual-machine-linux-chay-api",
+      "azure-storage-account-blob-tier-sas",
+      "azure-database-postgresql-flexible-server-co-ban",
+      "azure-monitor-metrics-activity-log-alert-dau-tien"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "azure-p2-danh-tinh-bao-mat",
+    "title": "Azure · Phần 2 · Danh tính và bảo mật",
+    "description": "Chín bài về lớp danh tính và bảo vệ: Microsoft Entra ID, RBAC và PIM, managed identity, Key Vault, Azure Policy, Defender for Cloud, Private Endpoint và Private DNS, Firewall/WAF/DDoS, và xác thực khách–tài xế bằng Entra External ID — để hạ tầng Tới Nơi không còn mật khẩu trong cấu hình và không còn database mở ra Internet.",
+    "level": "intermediate",
+    "category": "devops-azure",
+    "articles": [
+      "azure-entra-id-tenant-user-group-app-registration",
+      "azure-rbac-role-scope-assignment-pim",
+      "azure-managed-identity-workload-identity",
+      "azure-key-vault-secret-key-certificate",
+      "azure-policy-deny-audit-initiative",
+      "azure-defender-for-cloud-secure-score",
+      "azure-private-endpoint-private-dns-service-endpoint",
+      "azure-firewall-waf-ddos-bao-ve-bien",
+      "azure-entra-external-id-xac-thuc-khach-tai-xe"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "azure-p3-compute-ung-dung",
+    "title": "Azure · Phần 3 · Compute và ứng dụng",
+    "description": "Mười bài đưa trip-service và các service Tới Nơi lên đúng nền tảng: App Service, Container Registry, Container Apps, AKS cơ bản và nâng cao, Functions, cách chọn compute cho từng service, mạng cho ứng dụng với Application Gateway, Front Door và custom domain, và App Configuration với feature flag.",
+    "level": "intermediate",
+    "category": "devops-azure",
+    "articles": [
+      "azure-app-service-deploy-slot-scale",
+      "azure-container-registry-build-push-digest",
+      "azure-container-apps-revision-ingress-scale",
+      "azure-aks-co-ban-cluster-node-pool-deploy",
+      "azure-aks-nang-cao-ingress-workload-identity-upgrade",
+      "azure-functions-trigger-binding-durable",
+      "azure-chon-compute-cho-tung-service-toi-noi",
+      "azure-vnet-integration-application-gateway",
+      "azure-front-door-cdn-custom-domain-tls",
+      "azure-app-configuration-feature-flag-key-vault-reference"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "azure-p4-du-lieu-tich-hop",
+    "title": "Azure · Phần 4 · Dữ liệu và tích hợp",
+    "description": "Mười bài về nơi dữ liệu Tới Nơi sống và cách các service nói chuyện: PostgreSQL Flexible Server nâng cao, chọn Azure SQL/PostgreSQL/Cosmos DB, Cosmos DB cho vị trí tài xế, Redis, Service Bus, Event Hubs, Event Grid, cách chọn messaging, Data Lake và Data Factory cho báo cáo, và API Management.",
+    "level": "intermediate",
+    "category": "devops-azure",
+    "articles": [
+      "azure-postgresql-ha-read-replica-pitr-entra-auth",
+      "azure-chon-database-sql-postgresql-cosmos",
+      "azure-cosmos-db-partition-key-ru-consistency",
+      "azure-cache-for-redis-cache-geospatial-rate-limit",
+      "azure-service-bus-queue-topic-session-dead-letter",
+      "azure-event-hubs-stream-gps-consumer-group",
+      "azure-event-grid-system-custom-topic",
+      "azure-chon-messaging-storage-queue-service-bus-event-hubs",
+      "azure-data-lake-data-factory-bao-cao",
+      "azure-api-management-gateway-policy-versioning"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "azure-p5-devops-tren-azure",
+    "title": "Azure · Phần 5 · DevOps trên Azure",
+    "description": "Mười bài biến hạ tầng Tới Nơi thành mã và đường ống: Bicep, Terraform, đăng nhập OIDC từ GitHub Actions/Azure DevOps, CI build–test–scan–push, CD với approval và canary, Azure Developer CLI và deployment stacks, migration database trong pipeline, Application Insights với OpenTelemetry và KQL, alert và SLO, và landing zone cho nhiều môi trường.",
+    "level": "advanced",
+    "category": "devops-azure",
+    "articles": [
+      "azure-bicep-co-ban-module-parameter-what-if",
+      "azure-terraform-azurerm-state-workspace",
+      "azure-github-actions-oidc-federated-credential",
+      "azure-ci-pipeline-build-test-scan-push-acr",
+      "azure-cd-environment-approval-blue-green-canary",
+      "azure-developer-cli-azd-deployment-stacks-moi-truong",
+      "azure-database-migration-trong-pipeline",
+      "azure-application-insights-opentelemetry-kql",
+      "azure-alert-action-group-slo-workbook",
+      "azure-landing-zone-subscription-vending"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "azure-p6-kien-truc-nang-cao",
+    "title": "Azure · Phần 6 · Kiến trúc nâng cao và vận hành",
+    "description": "Chín bài khép lại loạt: Well-Architected Framework, HA/DR với zone và region pair, kiến trúc tham chiếu microservices Tới Nơi trên Azure, Saga và Outbox trên Service Bus, tối ưu chi phí và FinOps, Zero Trust và Sentinel, Load Testing và Chaos Studio, multi-region và data residency, và tổng kết với checklist go-live cùng bản đồ chứng chỉ.",
+    "level": "advanced",
+    "category": "devops-azure",
+    "articles": [
+      "azure-well-architected-framework-5-tru-cot",
+      "azure-ha-dr-zone-region-rto-rpo",
+      "azure-kien-truc-tham-chieu-microservices-toi-noi",
+      "azure-saga-outbox-service-bus-postgresql",
+      "azure-toi-uu-chi-phi-reservation-savings-plan-finops",
+      "azure-zero-trust-network-segmentation-sentinel",
+      "azure-load-testing-autoscale-chaos-studio",
+      "azure-multi-region-data-residency-multi-tenant",
+      "azure-tong-ket-go-live-checklist-chung-chi"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
+    "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
+    "description": "Tám bài mở đầu chương trình Business Analysis qua Tới Nơi: tư duy BA, vai trò phối hợp, phân loại yêu cầu, BACCM, mục tiêu đo lường, phạm vi và quyết định khi thiếu bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao; kết thúc bằng hồ sơ đề xuất cải thiện điểm đón.",
+    "level": "beginner",
+    "category": "business-analysis",
+    "articles": [
+      "ba-la-gi-tu-tinh-nang-den-bai-toan",
+      "ba-po-pm-ux-dev-tester-phoi-hop",
+      "ba-phan-loai-yeu-cau-nghiep-vu",
+      "ba-baccm-sau-khai-niem-cot-loi",
+      "ba-problem-statement-muc-tieu-chi-so",
+      "ba-scope-assumption-constraint-dependency",
+      "ba-quyet-dinh-khi-thieu-bang-chung",
+      "ba-thuc-hanh-de-xuat-cai-thien-diem-don"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "ba-p02-discovery-khai-thac-thong-tin",
+    "title": "BA · Phần 2 · Discovery và khai thác thông tin",
+    "description": "Tám bài discovery qua tình huống điểm đón Tới Nơi: stakeholder map, phỏng vấn, quan sát và tài liệu, workshop, khảo sát và lấy mẫu, journey và blueprint, xử lý xung đột và tổng hợp bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao, có hồ sơ nguồn giả lập và bài thực hành tổng hợp.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-stakeholder-map-quyen-quyet-dinh",
+      "ba-phong-van-nghiep-vu-khong-dan-dat",
+      "ba-quan-sat-quy-trinh-doc-tai-lieu",
+      "ba-workshop-dieu-phoi-xac-nhan",
+      "ba-khao-sat-lay-mau-thien-lech",
+      "ba-customer-journey-service-blueprint",
+      "ba-giai-quyet-yeu-cau-xung-dot",
+      "ba-thuc-hanh-tong-hop-discovery"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "rust-co-ban-qua-toi-noi",
     "title": "Rust cơ bản qua Tới Nơi",
     "description": "Lộ trình 20 bài cấp cơ bản: vì sao service sổ cái Tới Nơi chọn Rust khi backend chính là C#, rồi cargo, kiểu số và tiền VND, ownership, struct/enum/match, iterator, Result/Option, String và thời gian, collections, module và cargo test; tiếp theo là trait, newtype, double-entry, typestate, serde và property test để có thư viện ledger-core.",

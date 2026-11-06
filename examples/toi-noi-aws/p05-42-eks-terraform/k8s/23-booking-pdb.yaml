@@ -1,0 +1,11 @@
+# Khi node bị drain (cập nhật AMI, Spot bị thu hồi), luôn còn ít nhất một pod booking phục vụ.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: booking
+  namespace: booking
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: booking

@@ -1,0 +1,19 @@
+metadata:
+  id: "CKV2_TOINOI_2"
+  name: "Security group khong mo cong 5432 cho 0.0.0.0/0"
+  category: "NETWORKING"
+definition:
+  not:
+    and:
+      - cond_type: "attribute"
+        resource_types:
+          - "aws_security_group"
+        attribute: "ingress.*.from_port"
+        operator: "equals"
+        value: 5432
+      - cond_type: "attribute"
+        resource_types:
+          - "aws_security_group"
+        attribute: "ingress.*.cidr_blocks"
+        operator: "contains"
+        value: "0.0.0.0/0"

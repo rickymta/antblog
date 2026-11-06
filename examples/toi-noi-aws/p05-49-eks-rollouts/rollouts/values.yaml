@@ -1,0 +1,15 @@
+# Values cho chart argo/argo-rollouts (repo https://argoproj.github.io/argo-helm), namespace argo-rollouts.
+# Kiểm tên khoá bằng `helm show values argo/argo-rollouts` theo phiên bản chart bạn cài.
+controller:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+serviceAccount:
+  create: true
+  name: argo-rollouts   # khớp aws_eks_pod_identity_association trong terraform/main.tf
+dashboard:
+  enabled: false

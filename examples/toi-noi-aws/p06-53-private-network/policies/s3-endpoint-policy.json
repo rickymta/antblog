@@ -1,0 +1,24 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ToiNoiBucketsOnly",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::toinoi-prod-delivery-photos",
+        "arn:aws:s3:::toinoi-prod-delivery-photos/*",
+        "arn:aws:s3:::toinoi-prod-exports",
+        "arn:aws:s3:::toinoi-prod-exports/*"
+      ]
+    },
+    {
+      "Sid": "EcrImageLayers",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::prod-ap-southeast-1-starport-layer-bucket/*"
+    }
+  ]
+}

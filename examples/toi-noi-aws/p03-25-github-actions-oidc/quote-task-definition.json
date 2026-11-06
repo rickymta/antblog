@@ -1,0 +1,30 @@
+{
+  "family": "toinoi-prod-quote",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "runtimePlatform": { "operatingSystemFamily": "LINUX", "cpuArchitecture": "X86_64" },
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/toinoi-prod-quote-execution",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/toinoi-prod-quote-task",
+  "containerDefinitions": [
+    {
+      "name": "quote",
+      "image": "123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/quote:placeholder",
+      "essential": true,
+      "portMappings": [{ "containerPort": 8080, "protocol": "tcp" }],
+      "environment": [
+        { "name": "ENVIRONMENT", "value": "prod" },
+        { "name": "SERVICE_NAME", "value": "quote" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/toinoi/prod/quote",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "quote"
+        }
+      }
+    }
+  ]
+}

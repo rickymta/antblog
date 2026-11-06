@@ -1,0 +1,65 @@
+# Giá trị mặc định của chart. Mỗi service ghi đè trong apps/<service>/base/values.yaml,
+# mỗi môi trường ghi đè tiếp trong apps/<service>/overlays/<env>/values.yaml.
+nameOverride: ""
+
+image:
+  repository: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/booking
+  # Luôn ghim theo digest; CI cập nhật giá trị này bằng pull request.
+  digest: ""
+  pullPolicy: IfNotPresent
+
+env: dev
+replicaCount: 2
+
+serviceAccount:
+  create: true
+  # Pod Identity gắn role qua EKS API (aws_eks_pod_identity_association),
+  # nên ServiceAccount không cần annotation eks.amazonaws.com/role-arn như IRSA.
+  name: ""
+
+containerPort: 8080
+service:
+  port: 80
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+probes:
+  startupPath: /health/live
+  livenessPath: /health/live
+  readinessPath: /health/ready
+
+# Khi bật HPA, template bỏ trường replicas của Deployment để Argo CD không giằng co với HPA.
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+ingress:
+  enabled: false
+  className: alb
+  host: ""
+  annotations: {}
+
+# Job migration database chạy ở PreSync, trước khi Deployment được cập nhật.
+migration:
+  enabled: false
+  image: ""
+  command: ["/app/migrate", "--apply"]
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+extraEnv: []

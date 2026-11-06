@@ -1,0 +1,32 @@
+{
+  "Name": "toinoi-booking-availability",
+  "Description": "99,9% request tạo chuyến (POST /v1/trips) thành công trong 30 ngày",
+  "RequestBasedSliConfig": {
+    "RequestBasedSliMetricConfig": {
+      "KeyAttributes": {
+        "Type": "Service",
+        "Name": "toinoi-booking",
+        "Environment": "ecs:toinoi-lab"
+      },
+      "OperationName": "POST /v1/trips",
+      "MetricType": "AVAILABILITY"
+    }
+  },
+  "Goal": {
+    "Interval": {
+      "RollingInterval": { "DurationUnit": "DAY", "Duration": 30 }
+    },
+    "AttainmentGoal": 99.9,
+    "WarningThreshold": 30.0
+  },
+  "BurnRateConfigurations": [
+    { "LookBackWindowMinutes": 60 },
+    { "LookBackWindowMinutes": 360 }
+  ],
+  "Tags": [
+    { "Key": "Project", "Value": "ToiNoi" },
+    { "Key": "Env", "Value": "lab" },
+    { "Key": "Service", "Value": "booking" },
+    { "Key": "Owner", "Value": "platform" }
+  ]
+}

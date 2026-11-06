@@ -1,0 +1,5 @@
+env         = "lab"
+owner       = "platform"
+aws_profile = "toinoi-lab-admin"
+# Chỉ bật cho lab để dọn bucket còn object:
+# force_destroy_photos_bucket = true
