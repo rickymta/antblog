@@ -2468,5 +2468,105 @@
       "SỰ KIỆN",
       "BASELINE"
     ]
+  },
+  "location-geocoding-dia-chi-viet-nam-autocomplete": {
+    "title": "GEOCODING",
+    "subtitle": "Định vị 31 · Địa chỉ Việt Nam thành tọa độ",
+    "diagram": "code",
+    "labels": [
+      "ĐỊA CHỈ",
+      "CHUẨN HÓA",
+      "TỌA ĐỘ"
+    ]
+  },
+  "location-ham-muc-tieu-diem-hen-khach-va-tai-xe": {
+    "title": "J(p)",
+    "subtitle": "Định vị 32 · Hàm mục tiêu cho điểm hẹn",
+    "diagram": "target",
+    "labels": [
+      "KHÁCH",
+      "TÀI XẾ",
+      "CÙNG MỘT CÂN"
+    ]
+  },
+  "location-sinh-ung-vien-diem-don-do-thi-di-bo": {
+    "title": "ỨNG VIÊN",
+    "subtitle": "Định vị 33 · Khách đi bộ tới được đâu",
+    "diagram": "map",
+    "labels": [
+      "ĐI BỘ",
+      "SNAP",
+      "LOẠI BỎ"
+    ]
+  },
+  "location-phia-duong-huong-tiep-can-tranh-quay-dau": {
+    "title": "PHÍA ĐƯỜNG",
+    "subtitle": "Định vị 34 · Bớt một vòng quay đầu",
+    "diagram": "map",
+    "labels": [
+      "PHÍA ĐƯỜNG",
+      "HƯỚNG ĐI",
+      "DẢI PHÂN CÁCH"
+    ]
+  },
+  "location-xep-hang-diem-don-one-to-many-ngan-sach-do-tre": {
+    "title": "TOP 3",
+    "subtitle": "Định vị 35 · Xếp hạng điểm đón trong ngân sách",
+    "diagram": "target",
+    "labels": [
+      "MA TRẬN",
+      "XẾP HẠNG",
+      "P99"
+    ]
+  },
+  "location-diem-hen-dong-cap-nhat-khi-hai-ben-di-chuyen": {
+    "title": "ĐIỂM HẸN ĐỘNG",
+    "subtitle": "Định vị 36 · Khi cả hai đang di chuyển",
+    "diagram": "cycle",
+    "labels": [
+      "TÍNH LẠI",
+      "NGƯỠNG",
+      "ĐỒNG Ý"
+    ]
+  },
+  "location-hem-chung-cu-tttm-san-bay-cong-sanh": {
+    "title": "CỔNG, SẢNH",
+    "subtitle": "Định vị 37 · Hẻm, chung cư, sân bay",
+    "diagram": "layers",
+    "labels": [
+      "HẺM",
+      "SẢNH",
+      "KHU ĐÓN"
+    ]
+  },
+  "location-toi-uu-diem-tra-cong-vao-chuyen-ke-tiep": {
+    "title": "ĐIỂM TRẢ",
+    "subtitle": "Định vị 38 · Gần đích thật, dễ bắt chuyến kế",
+    "diagram": "target",
+    "labels": [
+      "ĐÍCH THẬT",
+      "CỔNG VÀO",
+      "CHUYẾN KẾ"
+    ]
+  },
+  "location-hoc-diem-don-tu-lich-su-dbscan-python": {
+    "title": "DBSCAN",
+    "subtitle": "Định vị 39 · Học điểm đón từ lịch sử",
+    "diagram": "matrix",
+    "labels": [
+      "LỊCH SỬ",
+      "PHÂN CỤM",
+      "BẢNG ĐIỂM"
+    ]
+  },
+  "location-cuoc-quote-giai-thich-doi-diem-don-cho-khach": {
+    "title": "CƯỚC",
+    "subtitle": "Định vị 40 · Đổi điểm đón và nói với khách",
+    "diagram": "checklist",
+    "labels": [
+      "TUYẾN MỚI",
+      "QUOTE",
+      "GIẢI THÍCH"
+    ]
   }
 }

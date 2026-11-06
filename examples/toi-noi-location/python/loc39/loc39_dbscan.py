@@ -49,6 +49,16 @@ def load(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return np.array(seeds), np.array(lat), np.array(lng)
 
 
+def coverage_of_bbox(hx: np.ndarray, sig: np.ndarray, lat0: float, lng0: float) -> float:
+    """Tỉ lệ diện tích bbox lab (lat 10,70–10,86, lng 106,60–106,78) nằm trong 2σ của ít nhất một điểm nóng, tính trên lưới 100 m."""
+    lo = to_metres(np.array([10.70]), np.array([106.60]), lat0, lng0)[0]
+    hi = to_metres(np.array([10.86]), np.array([106.78]), lat0, lng0)[0]
+    gx, gy = np.meshgrid(np.arange(lo[0], hi[0], 100.0), np.arange(lo[1], hi[1], 100.0))
+    pts = np.column_stack([gx.ravel(), gy.ravel()])
+    d = np.linalg.norm(pts[:, None, :] - hx[None, :, :], axis=2) / sig
+    return float((d.min(axis=1) <= 2).mean())
+
+
 def fit_hubs(xy: np.ndarray, eps: float, min_samples: int) -> tuple[np.ndarray, np.ndarray]:
     """DBSCAN trên mét. Mỗi cụm cho một hub là ĐIỂM THẬT của cụm gần tâm nhất (medoid xấp xỉ), để hub luôn là nơi đã có người đón."""
     labels = DBSCAN(eps=eps, min_samples=min_samples).fit_predict(xy)
@@ -175,8 +185,12 @@ def main() -> None:
     for h, dist in zip(hs, d[:, 0]):
         within = int((np.linalg.norm(hubs - to_metres(np.array([h["lat"]]), np.array([h["lng"]]), lat0, lng0)[0], axis=1) <= 2 * h["sigma_m"]).sum())
         print(f"  {h['name'][:44]:<44} σ {h['sigma_m']:>5.0f} m, trọng số {h['weight']:.1f}: hub gần nhất {dist:7.0f} m; số hub trong 2σ: {within}")
-    share_in = float(np.mean([np.min(np.linalg.norm(hx - p, axis=1)) <= 2 * max(h["sigma_m"] for h in hs) for p in hubs]))
-    print(f"  {share_in:.0%} hub nằm trong 2σ của một điểm nóng đã đặt: cụm học được = vùng nhu cầu đã đặt, không phải khám phá mới")
+    sig = np.array([h["sigma_m"] for h in hs], dtype=float)
+    # σ chuẩn hoá: khoảng cách tới điểm nóng chia cho σ của CHÍNH điểm nóng đó, lấy điểm nóng gần nhất theo thước này
+    z = np.array([np.min(np.linalg.norm(hx - p, axis=1) / sig) for p in hubs])
+    n_in = int((z <= 2).sum())
+    print(f"  {n_in}/{len(hubs)} hub ({n_in / len(hubs):.0%}) nằm trong 2σ (σ riêng của từng điểm nóng) của một điểm nóng đã đặt; {int((z <= 1).sum())} hub trong 1σ; xa nhất {z.max():.1f}σ")
+    print(f"  «2σ» ở đây là vòng rộng: tám vòng 2σ phủ {coverage_of_bbox(hx, sig, lat0, lng0):.0%} diện tích bbox lab, nên con số trên chỉ nói hub nằm trong vùng đã đặt, không nói hub trùng điểm nóng")
 
 
 if __name__ == "__main__":

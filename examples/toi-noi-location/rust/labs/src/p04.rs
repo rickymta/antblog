@@ -364,6 +364,61 @@ pub fn print_who_pays(base: &[RunResult], new: &[RunResult]) {
     );
 }
 
+/// `walk_m` khi bỏ đuôi đi vòng của baseline, vẫn so cặp theo seed (đơn vị phân tích là seed). Chỉ tính khách hoàn thành ở cả hai
+/// lần chạy. Ba bộ lọc: không lọc; bỏ khách có `walk_m` baseline > 300 m; bỏ khách có một trong hai bên > 300 m, để không chỉ
+/// lọc theo baseline (lọc theo baseline chọn đúng những khách baseline xấu, nên phần còn lại vẫn nghiêng một chút về phía baseline).
+pub fn print_walk_excl_tail(base: &[RunResult], new: &[RunResult]) {
+    type Keep = fn(f64, f64) -> bool;
+    let filters: [(&str, Keep); 3] = [
+        ("mọi cặp (không lọc)", |_, _| true),
+        ("bỏ khách baseline > 300 m", |b, _| b <= 300.0),
+        ("bỏ khách có một bên > 300 m", |b, n| {
+            b <= 300.0 && n <= 300.0
+        }),
+    ];
+    println!(
+        "  {:<30} {:>8} {:<9} {:>9} {:>9} {:>8} {:>17}  {:>5}",
+        "bộ lọc", "cặp", "chỉ số", "baseline", "chiến lược", "chênh TB", "KTC 95% (t)", "↓/↑"
+    );
+    for (name, keep) in filters {
+        let mut per_seed: Vec<(Vec<f64>, Vec<f64>)> = Vec::new();
+        for (b, n) in base.iter().zip(new) {
+            let (mut vb, mut vn): (Vec<f64>, Vec<f64>) = customer_pairs(&b.out, &n.out)
+                .into_iter()
+                .filter(|(tb, tn)| keep(tb.walk_m, tn.walk_m))
+                .map(|(tb, tn)| (tb.walk_m, tn.walk_m))
+                .unzip();
+            vb.sort_by(f64::total_cmp);
+            vn.sort_by(f64::total_cmp);
+            per_seed.push((vb, vn));
+        }
+        let pairs: usize = per_seed.iter().map(|s| s.0.len()).sum();
+        type Stat = fn(&[f64]) -> f64;
+        let stats: [(&str, Stat); 3] = [
+            ("trung bình", |v| crate::p03::mean(v)),
+            ("p50", |v| simulator::metrics::percentile(v, 50.0)),
+            ("p95", |v| simulator::metrics::percentile(v, 95.0)),
+        ];
+        for (sname, f) in stats {
+            let b: Vec<f64> = per_seed.iter().map(|s| f(&s.0)).collect();
+            let n: Vec<f64> = per_seed.iter().map(|s| f(&s.1)).collect();
+            let p = paired(&b, &n);
+            println!(
+                "  {:<30} {:>8} {:<9} {:>9.1} {:>9.1} {:>+8.1} {:>17}  {:>5}{}",
+                name,
+                pairs,
+                sname,
+                p.mean_base,
+                p.mean_new,
+                p.mean_diff,
+                format!("[{:+.1}, {:+.1}]", p.t_lo, p.t_hi),
+                format!("{}/{}", p.lower, p.higher),
+                if p.significant() { "  *" } else { "" }
+            );
+        }
+    }
+}
+
 /// Hệ số `uptime` cho dòng cấu hình.
 pub fn config_line(env: &Env, seeds: &[u64], extra: &str) -> String {
     format!(

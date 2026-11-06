@@ -145,7 +145,7 @@ pub struct AlleyStats {
     pub bike_ok: usize,
     /// Xe máy đi được, ô tô không.
     pub bike_only: usize,
-    /// Cạnh hẹp (`width` < 3 m) hoặc hẻm mà cả hai đi được nhưng ô tô bị giới hạn tốc độ thấp.
+    /// Cạnh hẹp (`width` < 4 m) hoặc hẻm mà cả hai đi được nhưng ô tô bị giới hạn tốc độ thấp.
     pub car_slow: usize,
 }
 

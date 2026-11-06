@@ -283,7 +283,7 @@ Tất cả các số này tái lập từng chữ số với cùng seed. Lab cò
 <p>Không: xác suất hủy phụ thuộc ETA dự tính chứ không phụ thuộc quãng đi bộ, vì hệ số `walk_extra_per_100m` bằng 0. Nên bài phải báo `walk_m` (p50 và p95, kể cả đuôi) cạnh `deadhead_m` để người đọc thấy ai được lợi và ai chịu thiệt, và có thể thử thêm một kịch bản với `walk_extra_per_100m` khác 0 như một phân tích độ nhạy, nói rõ đó là giả định.</p>
 </details>
 
-Bài trước: [bài 29](/articles/location-routing-service-tonic-cache-fallback-p99).
+Bài trước: [bài 29](/articles/location-routing-service-tonic-cache-fallback-p99). Bài tiếp: [bài 31](/articles/location-geocoding-dia-chi-viet-nam-autocomplete).
 
 ## Tài liệu gốc
 

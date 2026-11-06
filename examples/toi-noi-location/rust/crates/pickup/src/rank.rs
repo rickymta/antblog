@@ -276,7 +276,13 @@ impl Ranker {
         let walk_m = Self::walk_m(engine, req.from, c.point);
         let walk_s = walk_m / self.cfg.walk_speed_mps;
         let mut times = Vec::with_capacity(drivers.len());
-        for d in drivers.iter().take(self.cfg.k_exact_drivers.max(1)) {
+        // phân bố quanh đó: lấy trung bình mọi tài xế ảo được truyền vào; `k_exact_drivers` chỉ giới hạn tài xế thật
+        let k_exact = if prior {
+            drivers.len()
+        } else {
+            self.cfg.k_exact_drivers.max(1)
+        };
+        for d in drivers.iter().take(k_exact) {
             *n_routes += 1;
             times.push(route(Start::Pos(d.pos), Goal::Pos(c.pos)).map_or(INF, |r| r.cost));
         }
@@ -533,7 +539,9 @@ impl Ranker {
                 let sel: Vec<DriverRef> = if drive_ms.is_empty() {
                     Vec::new()
                 } else if prior {
-                    drivers.iter().take(4).copied().collect()
+                    // bốn tài xế ảo cách đều nhau, không phải bốn người đầu danh sách (sẽ lệch về một phía của ghim)
+                    let step = (drivers.len() / 4).max(1);
+                    drivers.iter().step_by(step).take(4).copied().collect()
                 } else {
                     if let Some(a) = &assigned {
                         vec![drivers[a[idx]]]

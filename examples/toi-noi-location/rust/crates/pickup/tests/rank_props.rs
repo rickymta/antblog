@@ -125,3 +125,24 @@ fn hard_constraint_excludes_where_penalty_would_only_discourage() {
         }
     }
 }
+
+#[test]
+fn prior_stage_two_averages_virtual_drivers_on_all_sides_of_the_pin() {
+    // phân bố quanh đó: tầng 2 phải chấm bốn tài xế ảo cách đều (0°, 90°, 180°, 270°), không chỉ hai hướng đầu danh sách
+    let e = engine();
+    let c: LatLng = e.g.center();
+    let mut ranker = Ranker::new(e, ObjectiveWeights::default(), RankConfig::default());
+    let req = Request {
+        from: c,
+        pin: c,
+        dest: destination(c, 60.0, 1000.0),
+    };
+    let belief = DriverBelief::Prior {
+        n: 8,
+        radius_m: 500.0,
+    };
+    let r = rank_one(&mut ranker, &req, &belief);
+    assert!(r.stats.drivers_used >= 4, "cần đủ tài xế ảo trên fixture");
+    // mỗi ứng viên chấm lại: 4 tuyến tài xế + 1 tuyến tới điểm trả
+    assert_eq!(r.stats.n_edge_routes, 5 * r.stats.n_refined);
+}

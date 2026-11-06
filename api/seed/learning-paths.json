@@ -414,5 +414,25 @@
       "location-tong-hop-mo-phong-su-kien-roi-rac-seed"
     ],
     "status": "published"
+  },
+  {
+    "slug": "location-toi-uu-quang-duong-qua-toi-noi",
+    "title": "Service định vị · Tối ưu quãng đường hai phía",
+    "description": "Trọng tâm của loạt: chọn điểm đón, điểm trả, ghép chuyến và giảm km rỗng cho cả khách lẫn tài xế, mọi cải thiện có số đo trên dữ liệu mô phỏng.",
+    "level": "advanced",
+    "category": "system-design",
+    "articles": [
+      "location-geocoding-dia-chi-viet-nam-autocomplete",
+      "location-ham-muc-tieu-diem-hen-khach-va-tai-xe",
+      "location-sinh-ung-vien-diem-don-do-thi-di-bo",
+      "location-phia-duong-huong-tiep-can-tranh-quay-dau",
+      "location-xep-hang-diem-don-one-to-many-ngan-sach-do-tre",
+      "location-diem-hen-dong-cap-nhat-khi-hai-ben-di-chuyen",
+      "location-hem-chung-cu-tttm-san-bay-cong-sanh",
+      "location-toi-uu-diem-tra-cong-vao-chuyen-ke-tiep",
+      "location-hoc-diem-don-tu-lich-su-dbscan-python",
+      "location-cuoc-quote-giai-thich-doi-diem-don-cho-khach"
+    ],
+    "status": "published"
   }
 ]

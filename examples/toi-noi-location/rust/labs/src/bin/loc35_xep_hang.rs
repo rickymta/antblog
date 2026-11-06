@@ -35,6 +35,181 @@ fn run_one(
     ranker.rank(e, req, belief, &mut route)
 }
 
+/// Mục 3: hối tiếc của từng mức hiểu biết về tài xế. Cờ `--belief-only` chỉ chạy mục này.
+fn belief_section(
+    e: &Engine,
+    drivers: &[DriverRef],
+    reqs: &[Request],
+    es: &RefCell<EdgeSearcher>,
+    live: &DriverBelief,
+) {
+    println!("\n-- 3. chưa biết tài xế: phân bố quanh đó so với biết tài xế --");
+    println!(
+        "  «J thật» của một ứng viên = J chính xác (A* theo cạnh) với tài xế mà bộ ghép baseline sẽ gán cho ĐIỂM đó (rảnh gần nhất theo chim bay). Hối tiếc = J thật của điểm được chọn trừ J thật nhỏ nhất trong mọi ứng viên."
+    );
+    // J thật cho mọi ứng viên của mỗi yêu cầu
+    let truth_cfg = RankConfig {
+        stage2: false,
+        ..RankConfig::default()
+    };
+    let belief_modes: Vec<(String, DriverBelief, DriverModel)> = vec![
+        (
+            "biết tài xế rảnh, bộ ghép = gần điểm nhất (mặc định)".into(),
+            live.clone(),
+            DriverModel::NearestCrow,
+        ),
+        (
+            "biết tài xế rảnh, giả định ghép nhanh nhất (4 người)".into(),
+            live.clone(),
+            DriverModel::BestTime,
+        ),
+        (
+            "biết đúng 1 tài xế gần khách nhất".into(),
+            DriverBelief::Live(vec![]),
+            DriverModel::BestTime,
+        ),
+        (
+            "phân bố quanh đó, bán kính 800 m".into(),
+            DriverBelief::Prior {
+                n: 8,
+                radius_m: 800.0,
+            },
+            DriverModel::BestTime,
+        ),
+        (
+            "phân bố quanh đó, bán kính 1.500 m".into(),
+            DriverBelief::Prior {
+                n: 8,
+                radius_m: 1500.0,
+            },
+            DriverModel::BestTime,
+        ),
+        (
+            "phân bố quanh đó, bán kính 3.000 m".into(),
+            DriverBelief::Prior {
+                n: 8,
+                radius_m: 3000.0,
+            },
+            DriverModel::BestTime,
+        ),
+        (
+            "không biết gì về tài xế (T_drive = 0)".into(),
+            DriverBelief::Unknown,
+            DriverModel::BestTime,
+        ),
+    ];
+    let mut reg: Vec<Vec<f64>> = vec![Vec::new(); belief_modes.len() + 1];
+    let mut hit: Vec<usize> = vec![0; belief_modes.len() + 1];
+    let mut counted = 0usize;
+    let mut truth_ranker = Ranker::new(e, ObjectiveWeights::default(), truth_cfg);
+    let mut rankers: Vec<Ranker> = (0..belief_modes.len())
+        .map(|i| {
+            Ranker::new(
+                e,
+                ObjectiveWeights::default(),
+                RankConfig {
+                    refine_top: 4,
+                    driver_model: belief_modes[i].2,
+                    ..RankConfig::default()
+                },
+            )
+        })
+        .collect();
+    let m = reqs.len().min(80);
+    for rq in reqs.iter().take(m) {
+        // ứng viên: dùng kết quả tầng 1 để liệt kê, rồi chấm J thật cho từng ứng viên
+        let list = run_one(e, &mut truth_ranker, es, rq, live);
+        let cands: Vec<_> = list.all.iter().map(|s| s.cand).collect();
+        let dest_pos: Vec<_> = e
+            .snap_point(Profile::Car, rq.dest, "đích")
+            .map(|s| s.positions(e.view(Profile::Car)))
+            .unwrap_or_default();
+        let tm = e.turn_model(Profile::Car, TurnCosts::urban());
+        let vmax = e.costs(Profile::Car).vmax_cm_per_unit;
+        let mut route = |f, t| es.borrow_mut().route(&tm, &e.xy, vmax, f, t, true).0;
+        let mut nr = 0;
+        let mut truth: Vec<(pickup::rank::Scored, f64)> = Vec::new();
+        for c in &cands {
+            let near = drivers
+                .iter()
+                .min_by(|a, b| {
+                    haversine_m(a.latlng, c.point).total_cmp(&haversine_m(b.latlng, c.point))
+                })
+                .copied();
+            let Some(d) = near else { continue };
+            let s = truth_ranker.score_exact(e, rq, &[d], false, &dest_pos, c, &mut route, &mut nr);
+            if s.j.is_finite() {
+                truth.push((s, s.j));
+            }
+        }
+        let best = truth.iter().map(|t| t.1).fold(f64::INFINITY, f64::min);
+        if !best.is_finite() {
+            continue;
+        }
+        counted += 1;
+        let truth_of = |pos: route_engine::position::Position| -> Option<f64> {
+            truth
+                .iter()
+                .find(|(s, _)| s.cand.pos.edge == pos.edge && s.cand.pos.frac == pos.frac)
+                .map(|t| t.1)
+        };
+        for (i, (_, b, _)) in belief_modes.iter().enumerate() {
+            let belief = if i == 2 {
+                // một tài xế gần nhất theo chim bay tới chỗ khách
+                let d = drivers
+                    .iter()
+                    .min_by(|a, b| {
+                        haversine_m(a.latlng, rq.from).total_cmp(&haversine_m(b.latlng, rq.from))
+                    })
+                    .copied()
+                    .expect("tài xế");
+                DriverBelief::Live(vec![d])
+            } else {
+                b.clone()
+            };
+            let r = run_one(e, &mut rankers[i], es, rq, &belief);
+            if let Some(top) = r.top.first()
+                && let Some(t) = truth_of(top.cand.pos)
+            {
+                reg[i].push(t - best);
+                hit[i] += usize::from((t - best).abs() < 1e-6);
+            }
+        }
+        // đối chứng: điểm ghim (baseline)
+        let pin_best = truth
+            .iter()
+            .filter(|(s, _)| s.cand.is_pin)
+            .map(|t| t.1)
+            .fold(f64::INFINITY, f64::min);
+        if pin_best.is_finite() {
+            let i = belief_modes.len();
+            reg[i].push(pin_best - best);
+            hit[i] += usize::from((pin_best - best).abs() < 1e-6);
+        }
+    }
+    println!(
+        "  {counted} yêu cầu; {:<42} {:>10} {:>14} {:>10} {:>10}",
+        "chế độ", "chọn đúng", "hối tiếc TB (s)", "p95", "max"
+    );
+    for i in 0..=belief_modes.len() {
+        reg[i].sort_by(f64::total_cmp);
+        let name = if i < belief_modes.len() {
+            belief_modes[i].0.clone()
+        } else {
+            "đối chứng: luôn chọn điểm ghim".into()
+        };
+        println!(
+            "  {:>14} {:<42} {:>9.1}% {:>14.2} {:>10.2} {:>10.2}",
+            "",
+            name,
+            100.0 * hit[i] as f64 / counted.max(1) as f64,
+            mean(&reg[i]),
+            percentile(&reg[i], 95.0),
+            reg[i].last().copied().unwrap_or(f64::NAN)
+        );
+    }
+}
+
 fn main() {
     let args = Args::from_env();
     let env = setup(&args);
@@ -83,6 +258,12 @@ fn main() {
         &reqs[0],
         &live,
     );
+
+    if args.flag("--belief-only") {
+        belief_section(e, &drivers, &reqs, &es, &live);
+        println!("\nuptime lúc kết thúc: {}", uptime());
+        return;
+    }
 
     println!("\n-- 1. độ trễ một lần xếp hạng, một luồng (µs) --");
     println!(
@@ -220,171 +401,7 @@ fn main() {
         "  caveat: máy đang chịu tải rất nặng (xem uptime): p99 tường là cận trên bị phóng đại; chưa đo trên máy rảnh; p99 CPU chưa bao gồm chờ I/O hay mạng của một dịch vụ thật"
     );
 
-    println!("\n-- 3. chưa biết tài xế: phân bố quanh đó so với biết tài xế --");
-    println!(
-        "  «J thật» của một ứng viên = J chính xác (A* theo cạnh) với tài xế mà bộ ghép baseline sẽ gán cho ĐIỂM đó (rảnh gần nhất theo chim bay). Hối tiếc = J thật của điểm được chọn trừ J thật nhỏ nhất trong mọi ứng viên."
-    );
-    // J thật cho mọi ứng viên của mỗi yêu cầu
-    let truth_cfg = RankConfig {
-        stage2: false,
-        ..RankConfig::default()
-    };
-    let belief_modes: Vec<(String, DriverBelief, DriverModel)> = vec![
-        (
-            "biết tài xế rảnh, bộ ghép = gần điểm nhất (mặc định)".into(),
-            live.clone(),
-            DriverModel::NearestCrow,
-        ),
-        (
-            "biết tài xế rảnh, giả định ghép nhanh nhất (4 người)".into(),
-            live.clone(),
-            DriverModel::BestTime,
-        ),
-        (
-            "biết đúng 1 tài xế gần khách nhất".into(),
-            DriverBelief::Live(vec![]),
-            DriverModel::BestTime,
-        ),
-        (
-            "phân bố quanh đó, bán kính 800 m".into(),
-            DriverBelief::Prior {
-                n: 8,
-                radius_m: 800.0,
-            },
-            DriverModel::BestTime,
-        ),
-        (
-            "phân bố quanh đó, bán kính 1.500 m".into(),
-            DriverBelief::Prior {
-                n: 8,
-                radius_m: 1500.0,
-            },
-            DriverModel::BestTime,
-        ),
-        (
-            "phân bố quanh đó, bán kính 3.000 m".into(),
-            DriverBelief::Prior {
-                n: 8,
-                radius_m: 3000.0,
-            },
-            DriverModel::BestTime,
-        ),
-        (
-            "không biết gì về tài xế (T_drive = 0)".into(),
-            DriverBelief::Unknown,
-            DriverModel::BestTime,
-        ),
-    ];
-    let mut reg: Vec<Vec<f64>> = vec![Vec::new(); belief_modes.len() + 1];
-    let mut hit: Vec<usize> = vec![0; belief_modes.len() + 1];
-    let mut counted = 0usize;
-    let mut truth_ranker = Ranker::new(e, ObjectiveWeights::default(), truth_cfg);
-    let mut rankers: Vec<Ranker> = (0..belief_modes.len())
-        .map(|i| {
-            Ranker::new(
-                e,
-                ObjectiveWeights::default(),
-                RankConfig {
-                    refine_top: 4,
-                    driver_model: belief_modes[i].2,
-                    ..RankConfig::default()
-                },
-            )
-        })
-        .collect();
-    let m = reqs.len().min(80);
-    for rq in reqs.iter().take(m) {
-        // ứng viên: dùng kết quả tầng 1 để liệt kê, rồi chấm J thật cho từng ứng viên
-        let list = run_one(e, &mut truth_ranker, &es, rq, &live);
-        let cands: Vec<_> = list.all.iter().map(|s| s.cand).collect();
-        let dest_pos: Vec<_> = e
-            .snap_point(Profile::Car, rq.dest, "đích")
-            .map(|s| s.positions(e.view(Profile::Car)))
-            .unwrap_or_default();
-        let tm = e.turn_model(Profile::Car, TurnCosts::urban());
-        let vmax = e.costs(Profile::Car).vmax_cm_per_unit;
-        let mut route = |f, t| es.borrow_mut().route(&tm, &e.xy, vmax, f, t, true).0;
-        let mut nr = 0;
-        let mut truth: Vec<(pickup::rank::Scored, f64)> = Vec::new();
-        for c in &cands {
-            let near = drivers
-                .iter()
-                .min_by(|a, b| {
-                    haversine_m(a.latlng, c.point).total_cmp(&haversine_m(b.latlng, c.point))
-                })
-                .copied();
-            let Some(d) = near else { continue };
-            let s = truth_ranker.score_exact(e, rq, &[d], false, &dest_pos, c, &mut route, &mut nr);
-            if s.j.is_finite() {
-                truth.push((s, s.j));
-            }
-        }
-        let best = truth.iter().map(|t| t.1).fold(f64::INFINITY, f64::min);
-        if !best.is_finite() {
-            continue;
-        }
-        counted += 1;
-        let truth_of = |pos: route_engine::position::Position| -> Option<f64> {
-            truth
-                .iter()
-                .find(|(s, _)| s.cand.pos.edge == pos.edge && s.cand.pos.frac == pos.frac)
-                .map(|t| t.1)
-        };
-        for (i, (_, b, _)) in belief_modes.iter().enumerate() {
-            let belief = if i == 2 {
-                // một tài xế gần nhất theo chim bay tới chỗ khách
-                let d = drivers
-                    .iter()
-                    .min_by(|a, b| {
-                        haversine_m(a.latlng, rq.from).total_cmp(&haversine_m(b.latlng, rq.from))
-                    })
-                    .copied()
-                    .expect("tài xế");
-                DriverBelief::Live(vec![d])
-            } else {
-                b.clone()
-            };
-            let r = run_one(e, &mut rankers[i], &es, rq, &belief);
-            if let Some(top) = r.top.first()
-                && let Some(t) = truth_of(top.cand.pos)
-            {
-                reg[i].push(t - best);
-                hit[i] += usize::from((t - best).abs() < 1e-6);
-            }
-        }
-        // đối chứng: điểm ghim (baseline)
-        let pin_best = truth
-            .iter()
-            .filter(|(s, _)| s.cand.is_pin)
-            .map(|t| t.1)
-            .fold(f64::INFINITY, f64::min);
-        if pin_best.is_finite() {
-            let i = belief_modes.len();
-            reg[i].push(pin_best - best);
-            hit[i] += usize::from((pin_best - best).abs() < 1e-6);
-        }
-    }
-    println!(
-        "  {counted} yêu cầu; {:<42} {:>10} {:>14} {:>10} {:>10}",
-        "chế độ", "chọn đúng", "hối tiếc TB (s)", "p95", "max"
-    );
-    for i in 0..=belief_modes.len() {
-        reg[i].sort_by(f64::total_cmp);
-        let name = if i < belief_modes.len() {
-            belief_modes[i].0.clone()
-        } else {
-            "đối chứng: luôn chọn điểm ghim".into()
-        };
-        println!(
-            "  {:>14} {:<42} {:>9.1}% {:>14.2} {:>10.2} {:>10.2}",
-            "",
-            name,
-            100.0 * hit[i] as f64 / counted.max(1) as f64,
-            mean(&reg[i]),
-            percentile(&reg[i], 95.0),
-            reg[i].last().copied().unwrap_or(f64::NAN)
-        );
-    }
+    belief_section(e, &drivers, &reqs, &es, &live);
 
     println!("\n-- 4. bất biến: kết quả không bao giờ tệ hơn điểm ghim theo J --");
     let mut violations = 0usize;

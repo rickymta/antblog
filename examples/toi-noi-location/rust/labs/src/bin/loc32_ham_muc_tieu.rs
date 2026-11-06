@@ -5,7 +5,8 @@
 //! Chạy từ gốc repo (cần data/hcm-graph.bin, hoặc thêm --fixture):
 //!   cargo run --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc32_ham_muc_tieu
 //! Tham số: --fixture, --jobs N (mặc định 3), --seeds N (số seed đánh giá, mặc định 20), --tuning-seeds N (mặc định 10),
-//!          --skip-golden, --skip-oddity
+//!          --skip-golden, --skip-oddity,
+//!          --walk-tail (chỉ chạy `walk_m` khi bỏ đuôi đi vòng của baseline, trên ba dải seed, rồi thoát)
 
 #![allow(clippy::print_literal)] // tiêu đề cột bảng viết thẳng trong chuỗi định dạng cho dễ đọc
 
@@ -243,6 +244,55 @@ fn oddity(env: &Env) {
     );
 }
 
+/// `walk_m` của `p04-v1` khi bỏ đuôi đi vòng của baseline, trên cả ba dải seed (ghi ở results/p04.md, mục LOC-32).
+fn walk_tail(args: &Args, env: &Env, j: usize) {
+    println!(
+        "\n-- walk_m khi bỏ đuôi đi vòng của baseline: p04-v1 (a=b=c=d=1), J hai tầng, so cặp theo seed --"
+    );
+    println!(
+        "  chỉ tính khách hoàn thành ở cả hai lần chạy; p50, p95 tính trong từng seed trên đúng các cặp còn lại nên khác bảng 19 chỉ số (bảng đó tính trên mọi chuyến hoàn thành của từng lần chạy)"
+    );
+    let n = args.u64_or("--seeds", 20) as usize;
+    let ranges: [(&str, Vec<u64>); 3] = [
+        (
+            "dải CHỈNH",
+            TUNING_SEEDS
+                .take(args.u64_or("--tuning-seeds", 10) as usize)
+                .collect(),
+        ),
+        ("dải ĐÁNH GIÁ", EVAL_SEEDS.take(n).collect()),
+        ("dải XÁC NHẬN", (20_270_101..=20_270_120).take(n).collect()),
+    ];
+    let cfg = JConfig::new("j-p04-v1", ObjectiveWeights::default());
+    for (label, seeds) in &ranges {
+        println!(
+            "\n  {label}: {}",
+            config_line(env, seeds, &format!("jobs {j}"))
+        );
+        let base = par_seeds(j, seeds, |s| {
+            run_baseline(&env.engine, &with_seed(&env.scenario, s), false)
+        });
+        let new = par_seeds(j, seeds, |s| {
+            run_j(&env.engine, &with_seed(&env.scenario, s), &cfg)
+        });
+        print_walk_excl_tail(&base, &new);
+        let col =
+            |f: &dyn Fn(&RunResult) -> f64, v: &[RunResult]| v.iter().map(f).collect::<Vec<_>>();
+        let d = paired(
+            &col(&|r| r.out.summary.deadhead_m.mean, &base),
+            &col(&|r| r.out.summary.deadhead_m.mean, &new),
+        );
+        let w = paired(
+            &col(&|r| r.out.summary.walk_m.mean, &base),
+            &col(&|r| r.out.summary.walk_m.mean, &new),
+        );
+        println!(
+            "  đối chiếu với bảng 19 chỉ số: deadhead_m trung bình {:+.1} [{:+.1}, {:+.1}], walk_m trung bình {:+.1} [{:+.1}, {:+.1}]",
+            d.mean_diff, d.t_lo, d.t_hi, w.mean_diff, w.t_lo, w.t_hi
+        );
+    }
+}
+
 fn main() {
     let args = Args::from_env();
     let env = setup(&args);
@@ -253,6 +303,12 @@ fn main() {
         env.graph_info
     );
     let j = jobs(&args);
+
+    if args.flag("--walk-tail") {
+        walk_tail(&args, &env, j);
+        println!("\nuptime lúc kết thúc: {}", uptime());
+        return;
+    }
 
     hand_example();
 

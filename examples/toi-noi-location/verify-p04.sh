@@ -61,6 +61,9 @@ expect loc31_geocode 'kiểm tra: tên quận/phường số cũ không có tron
 run loc32_ham_muc_tieu --fixture --jobs 4 --seeds 4 --tuning-seeds 2
 expect loc32_ham_muc_tieu 'bất biến «không tệ hơn ghim»: true'
 expect loc32_ham_muc_tieu 'CHÍNH SÁCH `p04-v1`'
+step "lab: loc32_ham_muc_tieu --fixture --walk-tail --jobs 4 --seeds 3 --tuning-seeds 2"
+cargo run --manifest-path "$manifest" --release -q -p labs --bin loc32_ham_muc_tieu -- --fixture --walk-tail --jobs 4 --seeds 3 --tuning-seeds 2 > "$out/loc32_tail.txt"
+expect loc32_tail 'bỏ khách baseline > 300 m'
 run loc33_sinh_ung_vien --fixture --n 60
 expect loc33_sinh_ung_vien 'ứng viên đầu ra vi phạm ràng buộc cứng .* = 0; ứng viên đi bộ ước lượng quá 250 m = 0'
 run loc34_phia_duong --fixture --n 30 --seeds 3 --jobs 3
@@ -68,6 +71,7 @@ expect loc34_phia_duong 'top 4 \+ ghim'
 expect loc34_phia_duong '\(a\) J đầy đủ'
 run loc35_xep_hang --fixture --n 40 --threads 2
 expect loc35_xep_hang 'số lần ứng viên tốt nhất có J lớn hơn J điểm ghim = 0'
+expect loc35_xep_hang 'phân bố quanh đó, bán kính 800 m'
 run loc36_diem_hen_dong --fixture --seeds 3 --per-seed 4 --jobs 3
 expect loc36_diem_hen_dong 'tình huống: bình thường'
 run loc37_hem_cong_sanh --fixture --n 30
