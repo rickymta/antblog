@@ -1,0 +1,8 @@
+[
+  { "merchant_id": "m-0001", "name": "Bún bò Huế Bà Tuyết", "address": "12 Lê Duẩn, Hải Châu", "city": "DN", "kind": "food", "is_open": true, "location": { "lat": 16.0689, "lon": 108.2208 } },
+  { "merchant_id": "m-0002", "name": "Bún bò O Hương", "address": "45 Trần Phú, Hải Châu", "city": "DN", "kind": "food", "is_open": true, "location": { "lat": 16.0611, "lon": 108.2247 } },
+  { "merchant_id": "m-0003", "name": "Mì Quảng Bà Mua", "address": "19 Trần Bình Trọng, Hải Châu", "city": "DN", "kind": "food", "is_open": true, "location": { "lat": 16.0722, "lon": 108.2177 } },
+  { "merchant_id": "m-0004", "name": "Cơm tấm Sài Gòn", "address": "88 Nguyễn Văn Linh, Thanh Khê", "city": "DN", "kind": "food", "is_open": false, "location": { "lat": 16.0598, "lon": 108.2096 } },
+  { "merchant_id": "m-0005", "name": "Phở Hà Nội", "address": "7 Hùng Vương, Hải Châu", "city": "DN", "kind": "food", "is_open": true, "location": { "lat": 16.0674, "lon": 108.2135 } },
+  { "merchant_id": "m-0006", "name": "Bún bò Huế Cô Ba", "address": "101 Hoàng Diệu, Sơn Trà", "city": "DN", "kind": "food", "is_open": true, "location": { "lat": 16.0987, "lon": 108.2455 } }
+]

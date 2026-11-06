@@ -1,0 +1,35 @@
+{
+  "size": 20,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": {
+              "query": "bun bo",
+              "fuzziness": "AUTO"
+            }
+          }
+        }
+      ],
+      "filter": [
+        { "term": { "is_open": true } },
+        {
+          "geo_distance": {
+            "distance": "3km",
+            "location": { "lat": 16.0544, "lon": 108.2022 }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "_geo_distance": {
+        "location": { "lat": 16.0544, "lon": 108.2022 },
+        "order": "asc",
+        "unit": "m"
+      }
+    }
+  ]
+}

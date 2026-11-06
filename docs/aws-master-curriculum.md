@@ -891,6 +891,6 @@ Cập nhật khi bài được viết/review/xuất bản. Bài được tính "
 | Phần 01 · Nền tảng AWS | chưa | xong 2026-11-06 | Lab 05/07/08/10 nối nhau qua tag Name của lab 04 (env.sh để trống ID). Chưa chạy trên tài khoản thật. Cần quyết: viện dẫn pháp lý VN ở bài 01; khoá tag trong `FilterExpression` của Budgets (bài 10) |
 | Phần 02 · Container, serverless và dịch vụ ứng dụng | chưa | xong 2026-11-06 | Cần chốt: secret DB dạng connection string (bài 12, bài 36 .NET) hay JSON có rotation (bài 14); `healthCheck` dùng curl trong khi image `aspnet` không có curl. |
 | Phần 03 · Infrastructure as Code và CI/CD | chưa | xong 2026-11-06 | Terraform các lab qua fmt/validate; Checkov 3.4.3, cfn-guard 3.2.1, cfn-lint, CDK synth/jest đã chạy. Cần chốt: major version action GitHub (đang ghi bản mới nhất 11/2026, chưa ghim SHA); infracost/actions giữ @v3 theo README dự án. |
-| Phần 04 · Dữ liệu, lưu trữ và messaging | chưa | chưa | |
+| Phần 04 · Dữ liệu, lưu trữ và messaging | chưa | xong 2026-11-06 | 10 lab qua fmt/validate, chưa chạy trên tài khoản thật. Kafka (bài 34, sự kiện nghiệp vụ) và Kinesis (bài 35, GPS) trình bày là hai phương án cho hai bài toán. Cần quyết: mã thành phố trong lab dùng `hcm`/`hn` chữ thường trong khi seed Tới Nơi dùng `SG`/`HN`; Blue/Green (bài 31) không chạy được khi giữ mật khẩu master do RDS quản lý. |
 | Phần 05 · Kubernetes trên AWS với EKS | chưa | chưa | |
 | Phần 06 · Bảo mật, resilience và vận hành ở quy mô | chưa | chưa | |
