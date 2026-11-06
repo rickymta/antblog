@@ -1,0 +1,13 @@
+[project]
+name = "toi-noi-py-39-outbox-inbox-idempotent-consumer"
+version = "0.1.0"
+description = "Bài 39: outbox, inbox và idempotent consumer với SQLAlchemy 2, PostgreSQL và aiokafka"
+requires-python = ">=3.14"
+dependencies = [
+    "sqlalchemy>=2.1",
+    "psycopg[binary]>=3.3",
+    "aiokafka>=0.15",
+]
+
+[tool.uv]
+package = false

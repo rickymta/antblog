@@ -1,0 +1,13 @@
+[project]
+name = "toi-noi-py-31-fastapi-endpoint-bao-gia"
+version = "0.1.0"
+description = "Bài 31: xuất bản endpoint báo giá của Tới Nơi bằng FastAPI và uvicorn"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.162",
+    "uvicorn>=0.54",
+    "httpx>=0.28",
+]
+
+[tool.uv]
+package = false

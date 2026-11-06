@@ -1,0 +1,31 @@
+[project]
+name = "toi-noi-py-36-fastapi-api-test-httpx"
+version = "0.1.0"
+description = "Bài 36: kiểm chứng API FastAPI bằng httpx.AsyncClient, pytest-asyncio, dependency_overrides và snapshot OpenAPI"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.162",
+    "uvicorn>=0.54",
+    "pyjwt>=2.15",
+    "pydantic-settings>=2.16",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=1.0",
+    "httpx>=0.28",
+    "httpx2>=2.0",  # Starlette 1.x: TestClient cần httpx2; chỉ có httpx thì chạy nhưng cảnh báo deprecated
+    "jsonschema>=4.23",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+# Cấu hình của test runner: thêm thư mục lab vào sys.path để `import app` chạy được.
+pythonpath = ["."]
+testpaths = ["tests"]
+# auto: hàm test và fixture async không cần @pytest.mark.asyncio; mỗi test một event loop riêng.
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

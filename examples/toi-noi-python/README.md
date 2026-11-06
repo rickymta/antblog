@@ -67,7 +67,20 @@ C#/.NET giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng, �
 29. polars, pandas và Parquet: phân tích 2 triệu chuyến mỗi ngày — **đã viết**
 30. NumPy, Pillow và OpenCV: ảnh là mảng, tiền xử lý ảnh giấy tờ — **đã viết**
 
-Các phần P04–P10 (bài 31–79) xem master curriculum.
+## P04 · Dịch vụ HTTP, gRPC và thông điệp
+
+31. HTTP và FastAPI: xuất bản endpoint báo giá — **đã viết**
+32. Validation, lỗi có cấu trúc (Problem Details) và OpenAPI: hợp đồng API — **đã viết**
+33. Dependency, middleware, cấu hình và structured logging — **đã viết**
+34. Authentication và authorization: khách, tài xế, điều phối — **đã viết**
+35. Upload ảnh giấy tờ, background task và streaming — **đã viết**
+36. API test với httpx AsyncClient: kiểm chứng hợp đồng — **đã viết**
+37. gRPC với grpcio: service chấm điểm gian lận cho Dispatch — **đã viết**
+38. Kafka với aiokafka: producer, consumer và schema sự kiện — **đã viết**
+39. Outbox, Inbox và idempotent consumer trong Python — **đã viết**
+40. Worker nền với arq/taskiq: lịch, retry, dead-letter — **đã viết**
+
+Các phần P05–P10 (bài 41–79) xem master curriculum.
 
 ## Chạy lab phần 01
 
@@ -95,4 +108,12 @@ Bài 24–27 cần hạ tầng chung trong `infra/`, bài 28 cần Docker. Khở
 
 ```bash
 sh examples/toi-noi-python/verify-21-30.sh
+```
+
+## Chạy lab phần 04
+
+Bài 31–37 chạy trong tiến trình, không cần Docker. Bài 38–40 cần hạ tầng chung trong `infra/`. Bài 34 không có giá trị mặc định cho môi trường và khóa ký, nên chạy server tay cần đặt `TOINOI_ENVIRONMENT` và `TOINOI_JWT_SECRET`; xem README của lab.
+
+```bash
+sh examples/toi-noi-python/verify-31-40.sh
 ```

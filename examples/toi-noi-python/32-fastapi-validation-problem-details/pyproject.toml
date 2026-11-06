@@ -1,0 +1,13 @@
+[project]
+name = "toi-noi-py-32-fastapi-validation-problem-details"
+version = "0.1.0"
+description = "Bài 32: lỗi có cấu trúc (RFC 9457 Problem Details), validation và hợp đồng OpenAPI của API báo giá"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.162",
+    "uvicorn>=0.54",
+    "httpx>=0.28",
+]
+
+[tool.uv]
+package = false

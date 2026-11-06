@@ -106,16 +106,16 @@ Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 b
 
 | Mã | Slug | Tiêu đề | Cần chứng minh | Đọc trước | Trạng thái |
 |---|---|---|---|---|---|
-| PY-31 | `python-fastapi-http-endpoint-bao-gia` | HTTP và FastAPI: xuất bản endpoint báo giá | ASGI, uvicorn, route, request/response model, status code, OpenAPI tự sinh | PY-21, PY-15 | Kế hoạch |
-| PY-32 | `python-fastapi-validation-problem-details-openapi` | Validation, lỗi có cấu trúc (Problem Details) và OpenAPI: hợp đồng API | Lỗi 422 chuẩn, `application/problem+json`, exception handler, version API, tài liệu | PY-31 | Kế hoạch |
-| PY-33 | `python-fastapi-dependency-middleware-settings-logging` | Dependency, middleware, cấu hình và structured logging | `Depends`, lifespan, middleware, `BaseSettings`, structlog/JSON log, correlation id | PY-31 | Kế hoạch |
-| PY-34 | `python-fastapi-jwt-oauth2-authorization` | Authentication và authorization: khách, tài xế, điều phối | OAuth2 password/bearer, JWT ký/verify, scope, role, không tự viết crypto, token tối thiểu | PY-33 | Kế hoạch |
-| PY-35 | `python-fastapi-upload-background-task-streaming` | Upload ảnh giấy tờ, background task và streaming | `UploadFile`, giới hạn kích thước/loại, lưu object storage giả, `BackgroundTasks` vs worker, SSE | PY-33 | Kế hoạch |
-| PY-36 | `python-fastapi-api-test-httpx` | API test với httpx AsyncClient: kiểm chứng hợp đồng | `TestClient`/`AsyncClient`, override dependency, test auth, test lỗi, snapshot OpenAPI | PY-35, PY-28 | Kế hoạch |
-| PY-37 | `python-grpc-fraud-scoring-service` | gRPC với grpcio: service chấm điểm gian lận cho Dispatch | Protobuf, codegen, server/client async, deadline, status code, interceptor, khi dùng gRPC thay REST | PY-33 | Kế hoạch |
-| PY-38 | `python-kafka-aiokafka-producer-consumer-schema` | Kafka với aiokafka: producer, consumer và schema sự kiện | Topic/partition/consumer group, serialization, schema version, at-least-once, offset commit | PY-23 | Kế hoạch |
-| PY-39 | `python-outbox-inbox-idempotent-consumer` | Outbox, Inbox và idempotent consumer trong Python | Dual-write, outbox trong transaction SQLAlchemy, dispatcher, inbox unique key, đối chiếu bài 26 loạt C# | PY-25, PY-38 | Kế hoạch |
-| PY-40 | `python-worker-arq-scheduling-retry-dead-letter` | Worker nền với arq/taskiq: lịch, retry, dead-letter | Job queue trên Redis, retry backoff, DLQ, graceful shutdown, idempotent job, bài tổng hợp P03–P04 | PY-27, PY-39 | Kế hoạch |
+| PY-31 | `python-fastapi-http-endpoint-bao-gia` | HTTP và FastAPI: xuất bản endpoint báo giá | ASGI, uvicorn, route, request/response model, status code, OpenAPI tự sinh | PY-21, PY-15 | Đã viết |
+| PY-32 | `python-fastapi-validation-problem-details-openapi` | Validation, lỗi có cấu trúc (Problem Details) và OpenAPI: hợp đồng API | Lỗi 422 chuẩn, `application/problem+json`, exception handler, version API, tài liệu | PY-31 | Đã viết |
+| PY-33 | `python-fastapi-dependency-middleware-settings-logging` | Dependency, middleware, cấu hình và structured logging | `Depends`, lifespan, middleware, `BaseSettings`, structlog/JSON log, correlation id | PY-31 | Đã viết |
+| PY-34 | `python-fastapi-jwt-oauth2-authorization` | Authentication và authorization: khách, tài xế, điều phối | OAuth2 password/bearer, JWT ký/verify, scope, role, không tự viết crypto, token tối thiểu | PY-33 | Đã viết |
+| PY-35 | `python-fastapi-upload-background-task-streaming` | Upload ảnh giấy tờ, background task và streaming | `UploadFile`, giới hạn kích thước/loại, lưu object storage giả, `BackgroundTasks` vs worker, SSE | PY-33 | Đã viết |
+| PY-36 | `python-fastapi-api-test-httpx` | API test với httpx AsyncClient: kiểm chứng hợp đồng | `TestClient`/`AsyncClient`, override dependency, test auth, test lỗi, snapshot OpenAPI | PY-35, PY-28 | Đã viết |
+| PY-37 | `python-grpc-fraud-scoring-service` | gRPC với grpcio: service chấm điểm gian lận cho Dispatch | Protobuf, codegen, server/client async, deadline, status code, interceptor, khi dùng gRPC thay REST | PY-33 | Đã viết |
+| PY-38 | `python-kafka-aiokafka-producer-consumer-schema` | Kafka với aiokafka: producer, consumer và schema sự kiện | Topic/partition/consumer group, serialization, schema version, at-least-once, offset commit | PY-23 | Đã viết |
+| PY-39 | `python-outbox-inbox-idempotent-consumer` | Outbox, Inbox và idempotent consumer trong Python | Dual-write, outbox trong transaction SQLAlchemy, dispatcher, inbox unique key, đối chiếu bài 26 loạt C# | PY-25, PY-38 | Đã viết |
+| PY-40 | `python-worker-arq-scheduling-retry-dead-letter` | Worker nền với arq/taskiq: lịch, retry, dead-letter | Job queue trên Redis, retry backoff, DLQ, graceful shutdown, idempotent job, bài tổng hợp P03–P04 | PY-27, PY-39 | Đã viết |
 
 ### Cấp độ nâng cao · Lộ trình `python-nang-cao-qua-toi-noi`
 

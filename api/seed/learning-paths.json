@@ -183,7 +183,17 @@
       "python-redis-cache-rate-limit-geo",
       "python-integration-test-testcontainers-fixture",
       "python-polars-pandas-parquet-phan-tich-chuyen",
-      "python-numpy-pillow-opencv-tien-xu-ly-anh"
+      "python-numpy-pillow-opencv-tien-xu-ly-anh",
+      "python-fastapi-http-endpoint-bao-gia",
+      "python-fastapi-validation-problem-details-openapi",
+      "python-fastapi-dependency-middleware-settings-logging",
+      "python-fastapi-jwt-oauth2-authorization",
+      "python-fastapi-upload-background-task-streaming",
+      "python-fastapi-api-test-httpx",
+      "python-grpc-fraud-scoring-service",
+      "python-kafka-aiokafka-producer-consumer-schema",
+      "python-outbox-inbox-idempotent-consumer",
+      "python-worker-arq-scheduling-retry-dead-letter"
     ],
     "status": "published"
   }

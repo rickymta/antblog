@@ -1288,5 +1288,105 @@
       "THRESHOLD",
       "OPENCV"
     ]
+  },
+  "python-fastapi-http-endpoint-bao-gia": {
+    "title": "PYTHON / FASTAPI",
+    "subtitle": "Python 31 · Quote endpoint over HTTP",
+    "diagram": "flow",
+    "labels": [
+      "ASGI",
+      "ROUTE",
+      "QUOTE"
+    ]
+  },
+  "python-fastapi-validation-problem-details-openapi": {
+    "title": "PYTHON / PROBLEM JSON",
+    "subtitle": "Python 32 · Errors as an API contract",
+    "diagram": "checklist",
+    "labels": [
+      "422",
+      "PROBLEM",
+      "OPENAPI"
+    ]
+  },
+  "python-fastapi-dependency-middleware-settings-logging": {
+    "title": "PYTHON / FASTAPI DEPS",
+    "subtitle": "Python 33 · Dependencies, logging, request id",
+    "diagram": "layers",
+    "labels": [
+      "DEPENDS",
+      "MIDDLEWARE",
+      "LOGGING"
+    ]
+  },
+  "python-fastapi-jwt-oauth2-authorization": {
+    "title": "PYTHON / JWT AUTH",
+    "subtitle": "Python 34 · OAuth2, JWT and scopes",
+    "diagram": "checklist",
+    "labels": [
+      "TOKEN",
+      "SCOPE",
+      "OWNER"
+    ]
+  },
+  "python-fastapi-upload-background-task-streaming": {
+    "title": "PYTHON / UPLOAD + SSE",
+    "subtitle": "Python 35 · Upload, background, streaming",
+    "diagram": "flow",
+    "labels": [
+      "UPLOAD",
+      "BACKGROUND",
+      "SSE"
+    ]
+  },
+  "python-fastapi-api-test-httpx": {
+    "title": "PYTHON / API TEST",
+    "subtitle": "Python 36 · Contract tests with httpx",
+    "diagram": "checklist",
+    "labels": [
+      "ASGI CLIENT",
+      "OVERRIDE",
+      "SNAPSHOT"
+    ]
+  },
+  "python-grpc-fraud-scoring-service": {
+    "title": "PYTHON / GRPC",
+    "subtitle": "Python 37 · Fraud scoring over gRPC",
+    "diagram": "flow",
+    "labels": [
+      "PROTO",
+      "DEADLINE",
+      "STATUS"
+    ]
+  },
+  "python-kafka-aiokafka-producer-consumer-schema": {
+    "title": "PYTHON / KAFKA",
+    "subtitle": "Python 38 · Events, offsets and schema",
+    "diagram": "layers",
+    "labels": [
+      "PRODUCER",
+      "PARTITION",
+      "CONSUMER"
+    ]
+  },
+  "python-outbox-inbox-idempotent-consumer": {
+    "title": "PYTHON / OUTBOX",
+    "subtitle": "Python 39 · Outbox, inbox, idempotent consumer",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "KAFKA",
+      "INBOX"
+    ]
+  },
+  "python-worker-arq-scheduling-retry-dead-letter": {
+    "title": "PYTHON / WORKER ARQ",
+    "subtitle": "Python 40 · Retry, dead-letter, shutdown",
+    "diagram": "cycle",
+    "labels": [
+      "RETRY",
+      "DEAD-LETTER",
+      "SIGTERM"
+    ]
   }
 }
