@@ -1,0 +1,19 @@
+$ uv run --no-project --with polars --with pyarrow python -I examples/toi-noi-location/go/scripts/readback_history.py examples/toi-noi-location/go/out/history-live
+polars 2.1.0 rows 142693
+Schema({'event_time': Datetime(time_unit='ms', time_zone='UTC'), 'received_time': Datetime(time_unit='ms', time_zone='UTC'), 'driver_ref': String, 'id_level': Int32, 'trip_id': String, 'lat_e7': Int32, 'lng_e7': Int32, 'accuracy_dm': Int32, 'speed_dmps': Int32, 'heading_ddeg': Int32, 'seq': Int64, 'flags': Int32, 'sample_reason': String, 'date': Date, 'city': String})
+shape: (6, 2)
+┌──────┬───────┐
+│ city ┆ rows  │
+│ ---  ┆ ---   │
+│ str  ┆ u32   │
+╞══════╪═══════╡
+│ CT   ┆ 11368 │
+│ DN   ┆ 14153 │
+│ HCM  ┆ 56750 │
+│ HN   ┆ 42891 │
+│ HP   ┆ 10111 │
+│ NT   ┆ 7420  │
+└──────┴───────┘
+speed_dmps null: 0 | speed_dmps == 0: 7869
+sample_reason: [('first', 25000), ('flagged', 32), ('heartbeat', 36), ('move', 93037), ('turn', 24588)]
+pyarrow rows 142693 | event_time type: timestamp[ms, tz=UTC]

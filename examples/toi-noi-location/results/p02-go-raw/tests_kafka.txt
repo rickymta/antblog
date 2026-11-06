@@ -1,0 +1,16 @@
+$ TOI_NOI_KAFKA=1 go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/kafkax
+=== RUN   TestSinkGhiDungKeyVaNoiDung
+    kafkax_test.go:63: không đọc lại được bản ghi vừa ghi
+--- FAIL: TestSinkGhiDungKeyVaNoiDung (30.07s)
+FAIL
+FAIL	toinoi/location/internal/kafkax	30.452s
+FAIL
+(exit=1)
+
+$ TOI_NOI_KAFKA=127.0.0.1:1 go -C examples/toi-noi-location/go test -count=1 ./internal/kafkax   # đã yêu cầu mà Kafka không có: phải FAIL
+--- FAIL: TestSinkGhiDungKeyVaNoiDung (0.00s)
+    kafkax_test.go:25: TOI_NOI_KAFKA đã đặt nhưng Kafka không dùng được: không kết nối được Kafka [127.0.0.1:1]: unable to dial: dial tcp 127.0.0.1:1: connect: connection refused
+FAIL
+FAIL	toinoi/location/internal/kafkax	0.306s
+FAIL
+(exit=1)

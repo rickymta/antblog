@@ -1,0 +1,33 @@
+$ go -C examples/toi-noi-location/go run -race ./cmd/loc11_nhap_mon race-bad 2>&1 | head -32
+==================
+WARNING: DATA RACE
+Read at 0x00c0001140b8 by goroutine 10:
+  main.raceBad.func1()
+      /Users/quandh/Other/github/antblog/.claude/worktrees/location-series/examples/toi-noi-location/go/cmd/loc11_nhap_mon/race.go:25 +0x88
+
+Previous write at 0x00c0001140b8 by goroutine 14:
+  main.raceBad.func1()
+      /Users/quandh/Other/github/antblog/.claude/worktrees/location-series/examples/toi-noi-location/go/cmd/loc11_nhap_mon/race.go:25 +0x98
+
+Goroutine 10 (running) created at:
+  main.raceBad()
+      /Users/quandh/Other/github/antblog/.claude/worktrees/location-series/examples/toi-noi-location/go/cmd/loc11_nhap_mon/race.go:22 +0x70
+  main.main()
+      /Users/quandh/Other/github/antblog/.claude/worktrees/location-series/examples/toi-noi-location/go/cmd/loc11_nhap_mon/main.go:28 +0x1d0
+  runtime.main()
+      /usr/local/go/src/runtime/proc.go:302 +0x37c
+
+Goroutine 14 (running) created at:
+  main.raceBad()
+      /Users/quandh/Other/github/antblog/.claude/worktrees/location-series/examples/toi-noi-location/go/cmd/loc11_nhap_mon/race.go:22 +0x70
+  main.main()
+      /Users/quandh/Other/github/antblog/.claude/worktrees/location-series/examples/toi-noi-location/go/cmd/loc11_nhap_mon/main.go:28 +0x1d0
+  runtime.main()
+      /usr/local/go/src/runtime/proc.go:302 +0x37c
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c0001140b8 by goroutine 10:
+  main.raceBad.func1()
+      /Users/quandh/Other/github/antblog/.claude/worktrees/location-series/examples/toi-noi-location/go/cmd/loc11_nhap_mon/race.go:25 +0x98
+

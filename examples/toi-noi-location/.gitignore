@@ -9,3 +9,4 @@ go/bin/
 *.parquet
 *.onnx
 !fixtures/**
+go/out/

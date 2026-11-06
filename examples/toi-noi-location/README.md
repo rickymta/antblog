@@ -10,8 +10,8 @@ Làm sao tổng quãng đường và thời gian của **cả khách lẫn tài 
 
 ```text
 examples/toi-noi-location/
-├── data/        bản đồ tải về, gitignore. fetch.sh tải OSM Việt Nam; lab LOC-06 cắt ra hcm.pbf
-├── fixtures/    đồ thị tổng hợp nhỏ và kịch bản simulator, commit, dùng cho test và CI
+├── data/        bản đồ tải về, gitignore. fetch.sh tải OSM Việt Nam; lab LOC-06 lọc theo bbox và biên dịch ra hcm-graph.bin
+├── fixtures/    đồ thị tổng hợp nhỏ (khu-mau.json, sinh bằng `gen_khu_mau`) và kịch bản simulator, commit, dùng cho test và CI
 ├── infra/       Redis (127.0.0.1:6391), Kafka (127.0.0.1:9096)
 ├── proto/       hợp đồng gRPC và Kafka dùng chung cho Rust, Go, C#
 ├── results/     pNN.md: lệnh và output thật của từng bài, nguồn duy nhất cho số trong bài
@@ -35,7 +35,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"   #
 - Rust 1.98.1 edition 2024, stable, không nightly. Go 1.27. `uv` với Python 3.13; Python hệ thống 3.9 không dùng.
 - .NET SDK có sẵn cho client C# trong các bài interop.
 - Docker dùng được với image đã có: `redis:7`, `apache/kafka:4.1.0`. Pull image mới từ Docker Hub có thể treo; đừng để bài phụ thuộc vào việc đó.
-- Bản đồ: `data/vietnam-latest.osm.pbf` đã có trên máy viết. Bbox lab là nội thành TP.HCM: lat 10.70–10.86, lng 106.60–106.78.
+- Bản đồ: `data/vietnam-latest.osm.pbf` đã có trên máy viết. Bbox lab là nội thành TP.HCM: lat 10.70–10.86, lng 106.60–106.78. `osmpbf` chỉ đọc PBF, không ghi, nên «cắt» nghĩa là lọc theo bbox rồi ghi file đồ thị nhị phân `data/hcm-graph.bin` (định dạng có phiên bản, nạp vài chục ms); không có file `hcm.pbf`.
 
 ## Quy tắc số liệu
 

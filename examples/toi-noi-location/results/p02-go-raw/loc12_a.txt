@@ -1,0 +1,12 @@
+$ examples/toi-noi-location/go/bin/loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 60s --report-every 10s
+# loadgen drivers=25000 seed=1 batch=3 urls=2 viewers=0 slow_viewers=0
+# kết nối: 25000/25000 thành công, 0 lỗi, mất 2.6s
+# khởi động 14s ở 6250 điểm/s (không tính)
+STEP	target_pts_s	achieved_pts_s	msgs_s	p50_ms	p95_ms	p99_ms	max_ms	errs	ingest_cpu_pct	ingest_heap_mb	ingest_rss_mb	ingest_goroutines	q_max_depth	q_dropped	q_coalesced	loadgen_cpu_pct	loadgen_rss_mb
+  t= 10s target=6250 acked_pts_s=6261 win_p50=0.2ms win_p99=8.8ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=74958 heap_mb=496
+  t= 20s target=6250 acked_pts_s=6203 win_p50=0.2ms win_p99=7.3ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=136980 heap_mb=597
+  t= 30s target=6250 acked_pts_s=6281 win_p50=0.4ms win_p99=13.1ms errs=0 q_depth=9 q_coalesced=0 q_dropped=0 kafka_delivered=199806 heap_mb=431
+  t= 40s target=6250 acked_pts_s=6262 win_p50=0.3ms win_p99=8.6ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=262437 heap_mb=532
+  t= 50s target=6250 acked_pts_s=6243 win_p50=0.4ms win_p99=11.6ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=324837 heap_mb=632
+  t= 60s target=6250 acked_pts_s=6251 win_p50=0.4ms win_p99=9.1ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=387357 heap_mb=733
+STEP	6250	6250	2083	0.28	6.25	10.25	51.38	0	19	733.0	1020.1	25012	108	0	0	24	684.4

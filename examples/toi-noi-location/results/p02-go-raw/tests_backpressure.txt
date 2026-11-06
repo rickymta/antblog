@@ -1,0 +1,27 @@
+$ go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/backpressure
+=== RUN   TestCoalesceGiuDiemMoiNhat
+--- PASS: TestCoalesceGiuDiemMoiNhat (0.00s)
+=== RUN   TestCoalesceDayThiDayTaiXeChoLauNhat
+--- PASS: TestCoalesceDayThiDayTaiXeChoLauNhat (0.00s)
+=== RUN   TestCoalesceChiBatKhiVuotNguong
+--- PASS: TestCoalesceChiBatKhiVuotNguong (0.00s)
+=== RUN   TestDropNewestDemDuoc
+--- PASS: TestDropNewestDemDuoc (0.00s)
+=== RUN   TestDongThoiKhongMatDauVet
+=== RUN   TestDongThoiKhongMatDauVet/unbounded
+=== RUN   TestDongThoiKhongMatDauVet/drop-newest
+=== RUN   TestDongThoiKhongMatDauVet/coalesce
+--- PASS: TestDongThoiKhongMatDauVet (0.96s)
+    --- PASS: TestDongThoiKhongMatDauVet/unbounded (0.26s)
+    --- PASS: TestDongThoiKhongMatDauVet/drop-newest (0.31s)
+    --- PASS: TestDongThoiKhongMatDauVet/coalesce (0.39s)
+=== RUN   TestTatEmTrongHan
+--- PASS: TestTatEmTrongHan (0.06s)
+=== RUN   TestTatEmHetHanThiBoVaDem
+--- PASS: TestTatEmHetHanThiBoVaDem (0.30s)
+=== RUN   TestShardedCungKeyCungPhanVaCongDonThongKe
+--- PASS: TestShardedCungKeyCungPhanVaCongDonThongKe (0.00s)
+PASS
+ok  	toinoi/location/internal/backpressure	2.592s
+(exit=0)
+

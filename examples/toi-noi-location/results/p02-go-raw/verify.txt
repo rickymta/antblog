@@ -1,0 +1,37 @@
+== gofmt
+== go vet
+== go test -race
+?   	toinoi/location/cmd/history-writer	[no test files]
+?   	toinoi/location/cmd/loadgen	[no test files]
+ok  	toinoi/location/cmd/loc11_nhap_mon	1.344s
+?   	toinoi/location/cmd/loc13_backpressure	[no test files]
+?   	toinoi/location/cmd/location-ingest	[no test files]
+?   	toinoi/location/cmd/tracking-hub	[no test files]
+?   	toinoi/location/gen/location/v1	[no test files]
+ok  	toinoi/location/internal/backpressure	2.493s
+ok  	toinoi/location/internal/geo	1.699s
+ok  	toinoi/location/internal/history	2.260s
+ok  	toinoi/location/internal/hub	3.122s
+ok  	toinoi/location/internal/ingest	3.090s
+ok  	toinoi/location/internal/kafkax	1.468s
+ok  	toinoi/location/internal/labauth	1.677s
+ok  	toinoi/location/internal/sim	1.897s
+?   	toinoi/location/internal/stat	[no test files]
+ok  	toinoi/location/internal/validate	2.426s
+== LOC-11: race detector bắt được lỗi, bản sửa thì sạch
+== LOC-13: thí nghiệm tắt êm và hàng đợi (rút gọn)
+D	1s	1001	1800	18100	100	Closed
+D	5s	5000	9300	10600	100	Closed
+D	15s	10817	20000	0	0	Closed
+S	phase	offered	delivered	lost	stale_delivered	stale_pct	age_p50_ms	age_p99_ms	age_max_ms	max_depth
+S	normal	12625	12500	0	0	0.0	9	30	32	63
+S	slow	38187	6125	8387	200	3.3	1619	4240	4158	24600
+S	recover	19250	29115	13813	495	1.7	588	4036	4041	15000
+== LOC-20: giảm mẫu, Parquet, retention (rút gọn)
+không giảm mẫu: 22500 dòng, 310506 byte Parquet (13.8 byte/dòng)
+giảm mẫu:       6459 dòng (giữ 28.7%), 133185 byte Parquet (20.6 byte/dòng), nhỏ hơn 2.3 lần so với không giảm mẫu
+sai số vẽ lại quỹ đạo từ điểm đã giữ (khoảng cách điểm bị bỏ tới đoạn nối hai điểm giữ): p50=5.0 m p95=15.4 m p99=21.3 m max=37.0 m (15340 điểm bị bỏ)
+đã xoá 10 phân vùng, 60 file, 534064 byte; còn 30 phân vùng ngày
+== LOC-12/14: ingest (sink discard) + loadgen nhỏ, có điểm xấu
+STEP	150	150	50	0.49	6.90	14.85	25.97	0	1	7.1	27.8	307	6	0	0	1	29.4
+PASS

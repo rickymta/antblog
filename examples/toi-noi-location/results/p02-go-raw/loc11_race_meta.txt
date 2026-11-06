@@ -1,0 +1,4 @@
+exit=1
+so khối WARNING: DATA RACE: 2
+Found 2 data race(s)
+exit status 66

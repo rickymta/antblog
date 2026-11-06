@@ -1,0 +1,26 @@
+$ test -z "$(gofmt -l examples/toi-noi-location/go)" && echo gofmt-sach
+gofmt-sach
+
+$ go -C examples/toi-noi-location/go vet ./...
+(exit=0)
+
+$ go -C examples/toi-noi-location/go test -race -count=1 ./...
+?   	toinoi/location/cmd/history-writer	[no test files]
+?   	toinoi/location/cmd/loadgen	[no test files]
+ok  	toinoi/location/cmd/loc11_nhap_mon	3.180s
+?   	toinoi/location/cmd/loc13_backpressure	[no test files]
+?   	toinoi/location/cmd/location-ingest	[no test files]
+?   	toinoi/location/cmd/tracking-hub	[no test files]
+?   	toinoi/location/gen/location/v1	[no test files]
+ok  	toinoi/location/internal/backpressure	3.108s
+ok  	toinoi/location/internal/geo	4.545s
+ok  	toinoi/location/internal/history	2.837s
+ok  	toinoi/location/internal/hub	4.035s
+ok  	toinoi/location/internal/ingest	4.111s
+ok  	toinoi/location/internal/kafkax	2.048s
+ok  	toinoi/location/internal/labauth	5.075s
+ok  	toinoi/location/internal/sim	5.980s
+?   	toinoi/location/internal/stat	[no test files]
+ok  	toinoi/location/internal/validate	5.524s
+(exit=0)
+

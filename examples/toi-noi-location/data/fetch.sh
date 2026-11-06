@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Tải bản trích OSM Việt Nam từ Geofabrik (khoảng 330 MB). Dữ liệu © OpenStreetMap contributors, giấy phép ODbL.
-# Sau đó chạy lab LOC-06 để cắt bbox nội thành TP.HCM ra data/hcm.pbf.
+# Sau đó chạy lab LOC-06 (loc06_osm_do_thi): lọc bbox nội thành TP.HCM và biên dịch ra data/hcm-graph.bin.
+# (osmpbf chỉ đọc PBF, không ghi được, nên không có file hcm.pbf.)
 set -euo pipefail
 dir="$(cd "$(dirname "$0")" && pwd)"
 out="$dir/vietnam-latest.osm.pbf"

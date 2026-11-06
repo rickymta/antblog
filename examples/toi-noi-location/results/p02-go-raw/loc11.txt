@@ -1,0 +1,30 @@
+$ go -C examples/toi-noi-location/go run ./cmd/loc11_nhap_mon pipeline
+sinh=10000 kiểm=10000 gom=10000 thành phố=map[CT:400 DN:1150 HCM:4750 HN:2750 HP:500 NT:450]
+hoàn tất, không lỗi
+(exit=0)
+
+$ go -C examples/toi-noi-location/go run ./cmd/loc11_nhap_mon timeout
+sinh=1242 kiểm=1242 gom=1242 thành phố=map[CT:48 DN:146 HCM:590 HN:339 HP:63 NT:56]
+kết thúc sớm vì context hết hạn: context deadline exceeded
+(exit=0)
+
+$ go -C examples/toi-noi-location/go run ./cmd/loc11_nhap_mon fail
+sinh=729 kiểm=704 gom=701 thành phố=map[CT:27 DN:83 HCM:333 HN:188 HP:38 NT:32]
+kết thúc vì lỗi, errgroup huỷ các stage còn lại: điểm hỏng ở stage kiểm tra
+(exit=0)
+
+$ go -C examples/toi-noi-location/go run ./cmd/loc11_nhap_mon race-bad
+race-bad: đếm được 270093, đúng phải là 800000 (mất 529907)
+(exit=0)
+
+$ go -C examples/toi-noi-location/go run -race ./cmd/loc11_nhap_mon race-fixed
+mutex:   đếm được 800000, muốn 800000
+atomic:  đếm được 800000, muốn 800000
+channel: đếm được 800000, muốn 800000
+(exit=0)
+
+$ go -C examples/toi-noi-location/go run -race ./cmd/loc11_nhap_mon pipeline
+sinh=10000 kiểm=10000 gom=10000 thành phố=map[CT:400 DN:1150 HCM:4750 HN:2750 HP:500 NT:450]
+hoàn tất, không lỗi
+(exit=0)
+
