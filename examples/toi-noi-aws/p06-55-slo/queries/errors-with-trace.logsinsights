@@ -1,0 +1,4 @@
+fields @timestamp, level, message, city, trip_id, trace_id
+| filter level = "ERROR" and ispresent(trace_id)
+| sort @timestamp desc
+| limit 50

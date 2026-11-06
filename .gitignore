@@ -23,3 +23,6 @@ examples/toi-noi-dotnet/**/obj/
 
 # BenchmarkDotNet generated measurements/build artifacts
 BenchmarkDotNet.Artifacts/
+
+# Canary CloudWatch Synthetics: layout bắt buộc nodejs/node_modules/<script>.js, không phải thư viện cài
+!examples/toi-noi-aws/p06-55-slo/canary/nodejs/node_modules/
