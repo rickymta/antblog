@@ -629,7 +629,20 @@
       "python-liveness-anti-spoofing-chat-luong-anh",
       "python-vector-search-pgvector-faiss-trung-tai-xe",
       "python-face-match-grpc-service-batching-model-loading",
-      "python-face-matching-danh-gia-bias-privacy-consent"
+      "python-face-matching-danh-gia-bias-privacy-consent",
+      "python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric",
+      "python-feature-engineering-tu-event-kafka",
+      "python-rule-engine-scoring-strategy-explainability",
+      "python-scikit-learn-lightgbm-imbalanced-cross-validation",
+      "python-networkx-graph-cau-ket-tai-xe-khach",
+      "python-real-time-scoring-feature-store-redis-latency",
+      "python-model-registry-ab-drift-retraining",
+      "python-shap-explainability-audit-human-review",
+      "python-clean-architecture-domain-application-infrastructure",
+      "python-cqrs-command-query-handler-mediator",
+      "python-repository-unit-of-work-sqlalchemy",
+      "python-use-case-ho-so-tai-xe-end-to-end",
+      "python-domain-event-outbox-integration-event-version"
     ],
     "status": "published"
   },

@@ -1,0 +1,14 @@
+[project]
+name = "toi-noi-py-55-feature-engineering-event"
+version = "0.1.0"
+description = "Bài 55: feature engineering cho gian lận từ event Kafka - cửa sổ thời gian, haversine, thiết bị, leakage"
+requires-python = ">=3.14"
+dependencies = [
+    "aiokafka>=0.15",
+    "numpy>=2.5",
+    "polars>=2.1",
+    "scikit-learn>=1.8",
+]
+
+[tool.uv]
+package = false

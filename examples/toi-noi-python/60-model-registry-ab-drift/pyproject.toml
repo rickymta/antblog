@@ -1,0 +1,24 @@
+[project]
+name = "toi-noi-py-60-model-registry-ab-drift"
+version = "0.1.0"
+description = "Bài 60: model registry dạng thư mục, shadow mode, A/B theo hash khách, PSI/drift, lịch retrain và rollback cho bộ chấm điểm gian lận"
+requires-python = ">=3.14"
+dependencies = [
+    "lightgbm>=4.6",
+    "numpy>=2.5",
+    "polars>=2.1",
+    "scikit-learn>=1.8",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = ["pytest>=8"]
+# Chỉ cho mlflow_demo.py: `uv run --group mlflow ...`. Không cần cho main.py.
+mlflow = ["mlflow>=3.18"]
+
+[tool.pytest.ini_options]
+# pytest thêm thư mục lab vào sys.path để `import registry` thấy file đặt phẳng cạnh pyproject.toml.
+pythonpath = ["."]
+testpaths = ["tests"]

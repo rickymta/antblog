@@ -1,0 +1,25 @@
+[project]
+name = "toi-noi-py-61-shap-audit-human-review"
+version = "0.1.0"
+description = "Bài 61: SHAP giải thích từng điểm gian lận, hàng đợi người duyệt và nhật ký quyết định trên PostgreSQL"
+requires-python = ">=3.14"
+dependencies = [
+    "lightgbm>=4.6",
+    "numpy>=2.5",
+    "polars>=2.1",
+    "psycopg[binary]>=3.2",
+    "pyyaml>=6",
+    "scikit-learn>=1.8",
+    "shap>=0.54",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+# pytest thêm thư mục lab vào sys.path để `import explain` thấy file đặt phẳng cạnh pyproject.toml.
+pythonpath = ["."]
+testpaths = ["tests"]
