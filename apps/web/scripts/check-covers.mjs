@@ -1,4 +1,4 @@
-import { readFile, access, readdir } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -15,20 +15,34 @@ try {
   console.log('Article sources are not included in this checkout/build context; checking cover assets only.');
   contentFiles = [];
 }
-for (const file of contentFiles.filter(file => file.startsWith('ba-') && file.endsWith('.md'))) {
+const articleSlugs = new Set();
+const missingBriefs = [];
+for (const file of contentFiles.filter(file => file.endsWith('.md'))) {
   const source = await readFile(path.join(contentDir, file), 'utf8');
-  const slug = source.match(/^slug:\s*([a-z0-9-]+)\s*$/m)?.[1];
-  if (!slug || !Object.hasOwn(covers, slug)) throw new Error('Missing BA cover brief: ' + file);
+  const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1];
+  const slug = frontmatter?.match(/^slug:[ \t]*([a-z0-9-]+)[ \t]*\r?$/m)?.[1];
+  if (!slug) throw new Error('Missing or invalid article slug: ' + file);
+  if (articleSlugs.has(slug)) throw new Error('Duplicate article slug: ' + slug);
+  articleSlugs.add(slug);
+  if (!Object.hasOwn(covers, slug)) missingBriefs.push(`${slug} (${file})`);
 }
+if (missingBriefs.length) throw new Error('Missing article cover briefs:\n' + missingBriefs.join('\n'));
+if (!Object.keys(covers).length) throw new Error('No article covers to validate.');
 const baseUrlIndex = process.argv.indexOf('--base-url');
 const baseUrl = baseUrlIndex === -1 ? undefined : process.argv[baseUrlIndex + 1];
 if (baseUrlIndex !== -1 && !baseUrl) throw new Error('--base-url requires an HTTP(S) origin.');
 if (baseUrl && !/^https?:\/\//.test(baseUrl)) throw new Error('Expected an HTTP(S) origin.');
 for (const slug of Object.keys(covers)) {
   if (!/^[a-z0-9-]+$/.test(slug)) throw new Error('Invalid slug: ' + slug);
-  await access(path.join(root, 'public/images/articles', slug + '.svg'));
-  const meta = await sharp(path.join(root, 'public/images/articles', slug + '.webp')).metadata();
-  if (meta.width !== 1200 || meta.height !== 675) throw new Error('Unexpected dimensions: ' + slug);
+  for (const format of ['svg', 'webp']) {
+    const asset = sharp(path.join(root, 'public/images/articles', slug + '.' + format));
+    const meta = await asset.metadata().catch(() => { throw new Error(`Missing or unreadable cover ${format}: ${slug}`); });
+    if (meta.format !== format || meta.width !== 1200 || meta.height !== 675) {
+      throw new Error(`Unexpected cover format or dimensions (${format}): ${slug}`);
+    }
+    // Decode the complete image too: a valid header alone does not prove the asset is readable.
+    await asset.raw().toBuffer().catch(() => { throw new Error(`Cannot decode cover ${format}: ${slug}`); });
+  }
   if (baseUrl) {
     const response = await fetch(new URL('/images/articles/' + slug + '.webp', baseUrl), { signal: AbortSignal.timeout(10000) });
     if (!response.ok || !response.headers.get('content-type')?.startsWith('image/webp')) {
@@ -38,4 +52,6 @@ for (const slug of Object.keys(covers)) {
     if (served.width !== 1200 || served.height !== 675) throw new Error('Served cover dimensions differ: ' + slug);
   }
 }
-console.log(Object.keys(covers).length + ' covers validated (1200 × 675)' + (baseUrl ? ' and served correctly by ' + baseUrl : '') + '.');
+console.log(Object.keys(covers).length + ' covers validated (SVG + WebP, 1200 × 675)' +
+  (articleSlugs.size ? `; all ${articleSlugs.size} source articles have covers` : '') +
+  (baseUrl ? ' and served correctly by ' + baseUrl : '') + '.');

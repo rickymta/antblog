@@ -58,6 +58,19 @@ PORT=3000 HOSTNAME=0.0.0.0 node apps/web/server.js
 - Phiên đăng nhập: `GET /api/v1/auth/session` (luôn 200) — khách vãng lai không sinh request 4xx.
 - `browserslist` (package.json): Chrome/Edge/Firefox 111, Safari 16.4.
 
+## Kiểm tra ảnh bìa
+
+Chạy từ gốc repository:
+
+```bash
+npm run covers:check -w @tkh/web
+npm run banners:check -w @tkh/web
+```
+
+Kiểm tra ảnh bìa đối chiếu **mọi bài Markdown** trong `api/seed/content` với `src/lib/article-covers.json`, phát hiện slug trùng hoặc thiếu khai báo, rồi giải mã cả SVG và WebP để kiểm định dạng và kích thước 1200 × 675. Kiểm tra banner đối chiếu các chủ đề trong seed và ảnh 1600 × 400. Khi build chỉ có thư mục web, kiểm tra ảnh bìa vẫn xác thực các asset nhưng không đối chiếu nguồn bài.
+
+Khi thêm bài, bổ sung brief và sinh ảnh bằng `node apps/web/scripts/generate-covers.mjs --prefix <slug>`, rồi chạy lại kiểm tra. Ảnh do CMS cung cấp được ưu tiên khi hiển thị; kiểm tra local không xác nhận URL ảnh CMS còn hoạt động. Có thể kiểm các WebP được phục vụ trên website bằng `npm run covers:check -w @tkh/web -- --base-url https://your-site.example`.
+
 ## Ngôn ngữ & giao diện
 
 - Song ngữ đang **tạm ẩn** (cờ `NEXT_PUBLIC_ENABLE_I18N`, mặc định tắt): `<html lang="vi">`, không nút VI/EN. Bật cờ (build lại) ⇒ hành vi dưới đây.
