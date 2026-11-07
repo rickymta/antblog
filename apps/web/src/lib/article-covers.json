@@ -4538,5 +4538,285 @@
       "QUEUE",
       "AUDIT LOG"
     ]
+  },
+  "rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen": {
+    "title": "CHART OF ACCOUNTS",
+    "subtitle": "Rust 41 · Account chart, trip cash flow, SQL health metrics",
+    "diagram": "map",
+    "labels": [
+      "ASSET",
+      "LIABILITY",
+      "REVENUE"
+    ]
+  },
+  "rust-hold-capture-void-so-du-kha-dung": {
+    "title": "HOLD / CAPTURE / VOID",
+    "subtitle": "Rust 42 · Wallet holds and available balance",
+    "diagram": "flow",
+    "labels": [
+      "HOLD",
+      "CAPTURE",
+      "VOID"
+    ]
+  },
+  "rust-refund-reversal-chargeback-but-toan-dao-maker-checker": {
+    "title": "REFUND / REVERSAL",
+    "subtitle": "Rust 43 · Reversal, chargeback and maker-checker",
+    "diagram": "flow",
+    "labels": [
+      "REVERSAL",
+      "CHARGEBACK",
+      "CHECKER"
+    ]
+  },
+  "rust-vi-tai-xe-chia-tien-payout-theo-lo": {
+    "title": "DRIVER PAYOUT / BATCH",
+    "subtitle": "Rust 44 · Driver wallet, batch payout, bank statement",
+    "diagram": "flow",
+    "labels": [
+      "WALLET",
+      "BATCH",
+      "BANK"
+    ]
+  },
+  "rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach": {
+    "title": "PROMO / BUDGET",
+    "subtitle": "Rust 45 · Promo budget, multi-party postings",
+    "diagram": "split",
+    "labels": [
+      "PLATFORM",
+      "DRIVER",
+      "BUDGET"
+    ]
+  },
+  "rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong": {
+    "title": "LARGEST REMAINDER",
+    "subtitle": "Rust 46 · Split money without losing a single dong",
+    "diagram": "split",
+    "labels": [
+      "FLOOR",
+      "REMAINDER",
+      "TIE-BREAK"
+    ]
+  },
+  "rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao": {
+    "title": "PSP RECONCILIATION",
+    "subtitle": "Rust 47 · Match PSP statements to the ledger via SQL",
+    "diagram": "flow",
+    "labels": [
+      "CSV",
+      "COPY",
+      "MATCH"
+    ]
+  },
+  "rust-so-du-theo-thoi-diem-snapshot-dong-ky": {
+    "title": "SNAPSHOT / PERIOD CLOSE",
+    "subtitle": "Rust 48 · Balance as-of, snapshots and period close",
+    "diagram": "layers",
+    "labels": [
+      "AS-OF",
+      "SNAPSHOT",
+      "CLOSE"
+    ]
+  },
+  "rust-event-sourcing-co-chung-muc-projection-replay": {
+    "title": "EVENT LOG / PROJECTION",
+    "subtitle": "Rust 49 · Ledger entries as events, replay and rebuild",
+    "diagram": "flow",
+    "labels": [
+      "LOG",
+      "PROJECT",
+      "REPLAY"
+    ]
+  },
+  "rust-audit-append-only-hash-chain-phan-quyen-pii": {
+    "title": "AUDIT / HASH CHAIN",
+    "subtitle": "Rust 50 · Append-only audit, hash chain, role, PII",
+    "diagram": "blocks",
+    "labels": [
+      "REVOKE",
+      "HASH CHAIN",
+      "ANCHOR"
+    ]
+  },
+  "rust-hexagonal-clean-workspace-crates-port-adapter": {
+    "title": "HEXAGONAL / CRATES",
+    "subtitle": "Rust 51 · Workspace crates, ports and adapters",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "PORTS",
+      "ADAPTERS"
+    ]
+  },
+  "rust-command-handler-pipeline-domain-event-khong-framework": {
+    "title": "COMMAND / PIPELINE",
+    "subtitle": "Rust 52 · Typed handlers, layers and domain events",
+    "diagram": "layers",
+    "labels": [
+      "VALIDATE",
+      "TRANSACTION",
+      "OUTBOX"
+    ]
+  },
+  "rust-aggregate-invariant-optimistic-locking-for-update": {
+    "title": "VERSION / FOR UPDATE",
+    "subtitle": "Rust 53 · Aggregate, optimistic locking and deadlock order",
+    "diagram": "cycle",
+    "labels": [
+      "VERSION",
+      "FOR UPDATE",
+      "40P01"
+    ]
+  },
+  "rust-use-case-thanh-toan-chuyen-end-to-end": {
+    "title": "TRIP PAYMENT / E2E",
+    "subtitle": "Rust 54 · Two events, any order, one ledger",
+    "diagram": "flow",
+    "labels": [
+      "EVENTS",
+      "AGGREGATE",
+      "LEDGER"
+    ]
+  },
+  "rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version": {
+    "title": "EVENT CONTRACT / SCHEMA",
+    "subtitle": "Rust 55 · Cross-language protobuf events and versioning",
+    "diagram": "matrix",
+    "labels": [
+      "PROTOBUF",
+      "JSON SCHEMA",
+      "BACKWARD"
+    ]
+  },
+  "rust-feature-flag-config-migration-expand-contract": {
+    "title": "FEATURE FLAG / MIGRATION",
+    "subtitle": "Rust 56 · Expand/contract, flags, safe rollback",
+    "diagram": "split",
+    "labels": [
+      "EXPAND",
+      "BACKFILL",
+      "CONTRACT"
+    ]
+  },
+  "rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao": {
+    "title": "MUTATION / FUZZ",
+    "subtitle": "Rust 57 · Mutation, fuzz and snapshot testing",
+    "diagram": "checklist",
+    "labels": [
+      "MUTANTS",
+      "FUZZ",
+      "SNAPSHOT"
+    ]
+  },
+  "rust-tong-hop-kien-truc-ledger-service-workspace": {
+    "title": "SERVICE / WORKSPACE",
+    "subtitle": "Rust 58 · Five crates, one ledger service, checked",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "APPLICATION",
+      "ADAPTERS"
+    ]
+  },
+  "rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet": {
+    "title": "MEMORY / ALLOCATOR",
+    "subtitle": "Rust 59 · Drop, allocators and the .NET GC",
+    "diagram": "layers",
+    "labels": [
+      "STACK",
+      "HEAP",
+      "ALLOCATOR"
+    ]
+  },
+  "rust-profiling-flamegraph-tokio-console-dhat": {
+    "title": "PROFILING / FLAMEGRAPH",
+    "subtitle": "Rust 60 · Find hot spots with samply, dhat, console",
+    "diagram": "layers",
+    "labels": [
+      "CPU",
+      "HEAP",
+      "TASKS"
+    ]
+  },
+  "rust-toi-uu-co-so-do-clone-cow-batching-copy-p99": {
+    "title": "OPTIMIZE / MEASURE",
+    "subtitle": "Rust 61 · Cow, batching, COPY and p99 under load",
+    "diagram": "target",
+    "labels": [
+      "COW",
+      "BATCH",
+      "P99"
+    ]
+  },
+  "rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3": {
+    "title": "UNSAFE / FFI",
+    "subtitle": "Rust 62 · Calling Rust from C# and Python",
+    "diagram": "layers",
+    "labels": [
+      "C ABI",
+      "PINVOKE",
+      "PYO3"
+    ]
+  },
+  "rust-container-dockerfile-da-stage-cargo-chef-distroless": {
+    "title": "CONTAINER / CARGO-CHEF",
+    "subtitle": "Rust 63 · Multi-stage image, distroless and SIGTERM",
+    "diagram": "layers",
+    "labels": [
+      "BUILDER",
+      "DISTROLESS",
+      "PID 1"
+    ]
+  },
+  "rust-ci-cd-github-actions-clippy-audit-deny-postgresql": {
+    "title": "CI/CD / SUPPLY CHAIN",
+    "subtitle": "Rust 64 · GitHub Actions, clippy, audit, deny",
+    "diagram": "checklist",
+    "labels": [
+      "CLIPPY",
+      "AUDIT",
+      "DENY"
+    ]
+  },
+  "rust-trien-khai-aws-azure-secrets-health-autoscale": {
+    "title": "DEPLOY / AUTOSCALE",
+    "subtitle": "Rust 65 · ECS and Container Apps, Kafka lag autoscale",
+    "diagram": "checklist",
+    "labels": [
+      "ECS",
+      "AZURE APPS",
+      "KAFKA LAG"
+    ]
+  },
+  "rust-opentelemetry-trace-tu-csharp-sang-rust-grpc-kafka": {
+    "title": "OPENTELEMETRY / TRACE",
+    "subtitle": "Rust 66 · One trace_id across C#, gRPC and Kafka",
+    "diagram": "flow",
+    "labels": [
+      "C# CLIENT",
+      "GRPC",
+      "KAFKA"
+    ]
+  },
+  "rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay": {
+    "title": "SLO / RUNBOOK / REPLAY",
+    "subtitle": "Rust 67 · SLO, alerts, replay and restore drills",
+    "diagram": "checklist",
+    "labels": [
+      "SLI",
+      "ALERT",
+      "REPLAY"
+    ]
+  },
+  "rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh": {
+    "title": "SERIES / EVIDENCE",
+    "subtitle": "Rust 68 · Back to the ADR, with evidence and gaps",
+    "diagram": "map",
+    "labels": [
+      "ADR",
+      "EVIDENCE",
+      "68 LESSONS"
+    ]
   }
 }

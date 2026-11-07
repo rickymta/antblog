@@ -1,0 +1,27 @@
+[package]
+name = "api"
+description = "Adapter HTTP (axum) và composition root: nơi duy nhất biết adapter nào cắm vào port nào (lab bài 51)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["kafka"]
+# Chuyển tiếp feature xuống crate hạ tầng.
+kafka = ["infrastructure/kafka"]
+
+[dependencies]
+anyhow = "1.0.104"
+application.workspace = true
+axum = "0.8.9"
+domain.workspace = true
+http-body-util = "0.1.5"
+infrastructure.workspace = true
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }
+tower = { version = "0.5.3", features = ["util"] }
+
+[lints]
+workspace = true

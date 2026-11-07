@@ -1,0 +1,13 @@
+[package]
+name = "fee-py"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+name = "toi_noi_fee"
+crate-type = ["cdylib"]
+
+[dependencies]
+ledger-core = { path = "../../20-ledger-core-workspace/ledger-core" }
+pyo3 = "0.30.1"

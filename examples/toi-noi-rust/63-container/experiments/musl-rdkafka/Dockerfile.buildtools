@@ -1,0 +1,6 @@
+# Thêm công cụ để biên dịch librdkafka (C++, ./configure, make) và zlib tĩnh. Kỳ vọng build THÀNH CÔNG, binary tĩnh.
+FROM rust:1.98-alpine
+RUN apk add --no-cache musl-dev make g++ perl python3 bash curl zlib-dev zlib-static
+WORKDIR /app
+COPY . .
+RUN cargo build --release --locked

@@ -1,0 +1,24 @@
+# Đo kích thước binary theo từng núm, cùng mã nguồn, cùng toolchain. Không tạo image chạy được:
+# target `report` chỉ chứa sizes.txt, lấy ra bằng `docker build --output`.
+FROM rust:1.98-bookworm AS builder
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+COPY src src
+ENV CARGO_TARGET_DIR=/t
+# A: không LTO, 16 codegen unit, strip=none (còn symbol và debuginfo của std). Mặc định release tự thêm strip=debuginfo; ở đây tắt để có mốc.
+RUN CARGO_PROFILE_RELEASE_LTO=false CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 CARGO_PROFILE_RELEASE_STRIP=none \
+    CARGO_TARGET_DIR=/t/a cargo build --release --locked --no-default-features \
+ && cp /t/a/release/ledger-service /bin-a
+# B: A rồi `strip` (bỏ bảng symbol).
+RUN cp /bin-a /bin-b && strip /bin-b
+# C: profile của lab (fat LTO, 1 codegen unit, strip=symbols).
+RUN CARGO_TARGET_DIR=/t/c cargo build --release --locked --no-default-features \
+ && cp /t/c/release/ledger-service /bin-c
+# D: C thêm opt-level=z (ưu tiên nhỏ) và panic=abort qua RUSTFLAGS.
+RUN CARGO_PROFILE_RELEASE_OPT_LEVEL=z RUSTFLAGS="-C panic=abort" CARGO_TARGET_DIR=/t/d \
+    cargo build --release --locked --no-default-features \
+ && cp /t/d/release/ledger-service /bin-d
+RUN for v in a b c d; do echo "$v $(stat -c %s /bin-$v)"; done > /sizes.txt
+
+FROM scratch AS report
+COPY --from=builder /sizes.txt /sizes.txt

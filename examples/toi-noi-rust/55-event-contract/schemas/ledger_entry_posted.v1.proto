@@ -1,0 +1,23 @@
+// Hợp đồng sự kiện LedgerEntryPosted (ledger phát, topic `ledger.entry-posted`, key = idempotency_key).
+// Cùng nội dung với JSON camelCase của loạt: schemaVersion, entryId, idempotencyKey, postings, postedAt.
+syntax = "proto3";
+
+package toinoi.events.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "ToiNoi.Events.V1";
+
+message Posting {
+  string account = 1;
+  // Có dấu theo dòng tiền: dương = vào tài khoản, âm = ra. Số nguyên đơn vị đồng.
+  int64 amount_dong = 2;
+}
+
+message LedgerEntryPosted {
+  uint32 schema_version = 1;
+  string entry_id = 2;
+  string idempotency_key = 3;
+  repeated Posting postings = 4;
+  google.protobuf.Timestamp posted_at = 5;
+}

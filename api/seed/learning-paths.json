@@ -751,5 +751,43 @@
       "location-nhieu-diem-dung-chen-2-opt-doi-chieu-ortools"
     ],
     "status": "published"
+  },
+  {
+    "slug": "rust-nang-cao-qua-toi-noi",
+    "title": "Rust nâng cao qua Tới Nơi",
+    "description": "Lộ trình 28 bài cấp nâng cao: nghiệp vụ sổ cái (chart of accounts, hold và capture, hoàn tiền, ví tài xế, khuyến mãi, làm tròn, đối soát, đóng kỳ, projection, audit), kiến trúc service theo workspace, rồi hiệu năng, FFI, container, CI/CD, OpenTelemetry và vận hành, kết thúc bằng việc quay lại quyết định chọn Rust với bằng chứng đo được.",
+    "level": "advanced",
+    "category": "programming",
+    "articles": [
+      "rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen",
+      "rust-hold-capture-void-so-du-kha-dung",
+      "rust-refund-reversal-chargeback-but-toan-dao-maker-checker",
+      "rust-vi-tai-xe-chia-tien-payout-theo-lo",
+      "rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach",
+      "rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong",
+      "rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao",
+      "rust-so-du-theo-thoi-diem-snapshot-dong-ky",
+      "rust-event-sourcing-co-chung-muc-projection-replay",
+      "rust-audit-append-only-hash-chain-phan-quyen-pii",
+      "rust-hexagonal-clean-workspace-crates-port-adapter",
+      "rust-command-handler-pipeline-domain-event-khong-framework",
+      "rust-aggregate-invariant-optimistic-locking-for-update",
+      "rust-use-case-thanh-toan-chuyen-end-to-end",
+      "rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version",
+      "rust-feature-flag-config-migration-expand-contract",
+      "rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao",
+      "rust-tong-hop-kien-truc-ledger-service-workspace",
+      "rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet",
+      "rust-profiling-flamegraph-tokio-console-dhat",
+      "rust-toi-uu-co-so-do-clone-cow-batching-copy-p99",
+      "rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3",
+      "rust-container-dockerfile-da-stage-cargo-chef-distroless",
+      "rust-ci-cd-github-actions-clippy-audit-deny-postgresql",
+      "rust-trien-khai-aws-azure-secrets-health-autoscale",
+      "rust-opentelemetry-trace-tu-csharp-sang-rust-grpc-kafka",
+      "rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay",
+      "rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh"
+    ],
+    "status": "published"
   }
 ]

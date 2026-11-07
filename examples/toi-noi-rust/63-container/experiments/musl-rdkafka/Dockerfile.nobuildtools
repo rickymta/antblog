@@ -1,0 +1,6 @@
+# Thiếu công cụ: chỉ có musl-dev như Dockerfile.musl của service. Kỳ vọng build THẤT BẠI ở build script của rdkafka-sys.
+FROM rust:1.98-alpine
+RUN apk add --no-cache musl-dev
+WORKDIR /app
+COPY . .
+RUN cargo build --release --locked

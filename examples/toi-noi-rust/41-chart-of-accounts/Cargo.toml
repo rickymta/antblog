@@ -1,0 +1,13 @@
+[package]
+name = "ledger_41_chart_of_accounts"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Lab bài 41: chart of accounts, dòng tiền chuyến và giao hàng, metric đúng/sai bằng SQL thật"
+
+[dependencies]
+anyhow = "1.0.104"
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }
+uuid = { version = "1.29.0", features = ["v4"] }

@@ -1,0 +1,14 @@
+# Thí nghiệm riêng của bài 63: rdkafka (librdkafka, C++) và openssl-sys có build tĩnh với musl được không.
+# Không phải thành viên của service; chỉ Dockerfile.* ở đây dùng nó.
+[package]
+name = "musl_rdkafka_probe"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+rdkafka = "0.39.0"
+
+[features]
+# Bật TLS qua openssl-sys, cái làm khó thứ hai.
+ssl = ["rdkafka/ssl"]

@@ -1,0 +1,19 @@
+[package]
+name = "domain"
+description = "Domain thanh toán chuyến: aggregate, bút toán và đối soát thuần, không async, không I/O (lab bài 54)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Không tokio, không sqlx, không rdkafka: test `dependency_direction_is_domain_then_application_then_infrastructure` kiểm điều này.
+[dependencies]
+ledger-core.workspace = true
+serde = { version = "1.0.229", features = ["derive"] }
+thiserror = "2.0.21"
+
+[dev-dependencies]
+serde_json = "1.0.154"
+
+[lints]
+workspace = true

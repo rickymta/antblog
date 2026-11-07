@@ -1,0 +1,18 @@
+[package]
+name = "ledger_46_largest_remainder"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 46: làm tròn và chia tiền không mất đồng bằng largest remainder"
+
+[lib]
+name = "ledger_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-cli"
+path = "src/main.rs"
+
+[dependencies]
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+proptest = "1.12.0"
+rust_decimal = "1.43.0"

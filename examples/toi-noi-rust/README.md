@@ -81,7 +81,42 @@ C#/.NET 10 giữ các backend nghiệp vụ chính (đặt chuyến, đơn hàng
 39. Graceful shutdown, health, readiness và backpressure — **đã viết**
 40. Bài tổng hợp trung bình: ledger-api với PostgreSQL và Kafka chạy end-to-end — **đã viết**
 
-Các phần còn lại (bài 41–68) xem master curriculum.
+## P05 · Nghiệp vụ sổ cái và đối soát
+
+41. Bài toán sổ cái Tới Nơi: chart of accounts và dòng tiền một chuyến — **đã viết**
+42. Hold, capture, void: giữ tiền trong ví và số dư khả dụng — **đã viết**
+43. Refund, reversal và chargeback: bút toán đảo và maker-checker — **đã viết**
+44. Ví tài xế: chia tiền, thu nhập và payout theo lô — **đã viết**
+45. Khuyến mãi và trợ giá: bút toán nhiều bên và ngân sách campaign — **đã viết**
+46. Làm tròn và chia tiền không mất đồng: largest remainder — **đã viết**
+47. Đối soát với VíXanh: nhập sao kê, khớp theo external ref, báo lệch — **đã viết**
+48. Số dư theo thời điểm, snapshot và đóng kỳ — **đã viết**
+49. Event sourcing có chừng mực: bút toán là sự kiện, projection và replay — **đã viết**
+50. Audit, bất biến dữ liệu và bảo mật sổ cái — **đã viết**
+
+## P06 · Kiến trúc service Rust theo kiến trúc đích
+
+51. Hexagonal/Clean trong Rust: workspace crates domain, application, infrastructure, api — **đã viết**
+52. Command handler, pipeline và domain event không cần framework — **đã viết**
+53. Aggregate, invariant và concurrency: version, optimistic locking, FOR UPDATE — **đã viết**
+54. Use case thanh toán chuyến end-to-end — **đã viết**
+55. Hợp đồng sự kiện xuyên ngôn ngữ: protobuf, JSON Schema và version — **đã viết**
+56. Feature flag, cấu hình kiểu an toàn và migration không dừng — **đã viết**
+57. Kiểm thử nâng cao: mutation, fuzz, snapshot và test tất định — **đã viết**
+58. Bài tổng hợp kiến trúc: ledger service hoàn chỉnh trong workspace — **đã viết**
+
+## P07 · Hiệu năng, bộ nhớ và vận hành
+
+59. Bộ nhớ không GC: stack, heap, allocator và so với .NET — **đã viết**
+60. Profiling: flamegraph, tokio-console và dhat tìm chỗ chậm — **đã viết**
+61. Tối ưu có số đo: tránh clone, Cow, batching và COPY — **đã viết**
+62. unsafe và FFI: gọi Rust từ C# (P/Invoke) và Python (PyO3) — **đã viết**
+63. Container: Dockerfile đa stage, cargo-chef và distroless — **đã viết**
+64. CI/CD: GitHub Actions với clippy, test, audit, deny và PostgreSQL — **đã viết**
+65. Triển khai AWS và Azure: cấu hình, secrets, health và autoscale theo lag Kafka — **đã viết**
+66. OpenTelemetry: lần theo một yêu cầu từ C# sang Rust qua gRPC và Kafka — **đã viết**
+67. Vận hành sổ cái: SLO, alert lệch đối soát, runbook, DLQ và replay an toàn — **đã viết**
+68. Bài tổng hợp toàn loạt: sổ cái từ quyết định chọn Rust tới vận hành — **đã viết**
 
 ## Chạy lab phần 01
 
@@ -90,7 +125,7 @@ cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml
 cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml -- --verify
 ```
 
-Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03, `verify-31-40.sh` phần 04 (hai script này cần hạ tầng trong `infra/`).
+Mỗi thư mục `NN-…` có README ghi lệnh chạy và `--verify`. Script `verify-01-10.sh` chạy toàn bộ phần 01, `verify-11-20.sh` phần 02, `verify-21-30.sh` phần 03, `verify-31-40.sh` phần 04, `verify-41-50.sh` phần 05, `verify-51-58.sh` phần 06, `verify-59-68.sh` phần 07 (các script từ phần 03 cần hạ tầng trong `infra/`).
 
 ## Hạ tầng cho phần P03 trở đi
 

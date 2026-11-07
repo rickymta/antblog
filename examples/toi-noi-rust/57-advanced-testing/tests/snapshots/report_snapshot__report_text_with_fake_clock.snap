@@ -1,0 +1,12 @@
+---
+source: tests/report_snapshot.rs
+expression: report.render_text()
+---
+Đối soát run-0001 lúc 2026-11-05T17:00:00.25Z (250 ms)
+khớp 2 | lệch 3 | dòng hỏng 3
+  vx_ch_0003  AmountMismatch   sổ=30.000 sao kê=31.000
+  vx_ch_0004  MissingInPsp     sổ=18.000 sao kê=-
+  vx_ch_0005  MissingInLedger  sổ=- sao kê=52.000
+  dòng 7: số tiền không hợp lệ
+  dòng 8: external_ref rỗng
+  dòng 9: số cột sai: có 2, cần 3

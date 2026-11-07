@@ -1,0 +1,161 @@
+# Workflow MẪU cho lab 64. Nằm trong thư mục lab; muốn dùng thật thì chép vào .github/workflows/.
+# CHƯA CHẠY TRÊN GITHUB. Đã kiểm: actionlint, JSON schema workflow của SchemaStore, `--verify` của lab;
+# các lệnh cargo trong từng bước đã chạy local. Phiên bản action tra bằng git ls-remote (không dùng gh).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Quyền tối thiểu cho cả workflow. Job nào cần thêm thì khai riêng ở job đó.
+permissions:
+  contents: read
+
+# Push mới lên cùng PR thì hủy lượt chạy cũ. Nhánh main không bao giờ bị hủy giữa chừng.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  # sqlx biên dịch query! từ thư mục .sqlx, không cần database lúc build.
+  SQLX_OFFLINE: "true"
+  # URL giống hệt máy dev; credential của lab, chỉ dùng cho service container của job.
+  TOI_NOI_PG_URL: postgres://toi_noi:toi_noi_lab@127.0.0.1:5432/toi_noi_ci
+
+defaults:
+  run:
+    working-directory: examples/toi-noi-rust/64-ci-cd
+
+jobs:
+  # Rẻ nhất, không biên dịch gì nên báo kết quả sớm nhất. Không job nào `needs` job này: lỗi định dạng không che lỗi test.
+  fmt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cài rustfmt
+        run: rustup toolchain install stable --profile minimal --component rustfmt && rustup default stable
+      - run: cargo fmt --check
+
+  clippy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cài clippy
+        run: rustup toolchain install stable --profile minimal --component clippy && rustup default stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: examples/toi-noi-rust/64-ci-cd
+      # -D warnings đặt SAU `--`: chỉ crate của repo bị nâng cảnh báo thành lỗi, không đổi hash của dependency.
+      - run: cargo clippy --locked --all-targets -- -D warnings
+
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        # stable bắt hồi quy của compiler mới; 1.94 là rust-version trong Cargo.toml (--verify kiểm hai số này khớp).
+        toolchain: [stable, "1.94"]
+
+    # PostgreSQL 18 khởi động trước các bước; runner đợi healthcheck xanh rồi mới chạy step đầu tiên.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: toi_noi
+          POSTGRES_PASSWORD: toi_noi_lab # giá trị lab, không phải secret
+          POSTGRES_DB: toi_noi_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U toi_noi -d toi_noi_ci"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cài toolchain ${{ matrix.toolchain }}
+        run: rustup toolchain install ${{ matrix.toolchain }} --profile minimal && rustup default ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: examples/toi-noi-rust/64-ci-cd
+      # Biên dịch tách khỏi chạy test: lỗi build và lỗi test không lẫn nhau.
+      - name: Build test
+        run: cargo build --locked --tests
+      - name: Test với PostgreSQL thật
+        run: cargo test --locked
+      - name: Verify
+        run: cargo run --locked -- --verify
+
+  # Câu query! đã đổi mà quên chạy `cargo sqlx prepare` thì job này đỏ.
+  sqlx-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: toi_noi
+          POSTGRES_PASSWORD: toi_noi_lab
+          POSTGRES_DB: toi_noi_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U toi_noi -d toi_noi_ci"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      SQLX_CLI_VERSION: "0.9.0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cài toolchain
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: examples/toi-noi-rust/64-ci-cd
+      # Công cụ cài sau bước cache nên được lưu cùng cache (~/.cargo/bin); lần đầu mất vài phút.
+      - name: Cài sqlx-cli
+        run: cargo install sqlx-cli --locked --version "$SQLX_CLI_VERSION" --no-default-features --features postgres,rustls
+      - name: Migrate vào database trống rồi so .sqlx
+        env:
+          DATABASE_URL: ${{ env.TOI_NOI_PG_URL }}
+        run: |
+          sqlx migrate run --source migrations
+          cargo sqlx prepare --check
+
+  supply-chain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CARGO_AUDIT_VERSION: "0.22.2"
+      CARGO_DENY_VERSION: "0.20.2"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cài toolchain
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: examples/toi-noi-rust/64-ci-cd
+      - name: Cài cargo-audit và cargo-deny
+        run: |
+          cargo install cargo-audit --locked --version "$CARGO_AUDIT_VERSION"
+          cargo install cargo-deny --locked --version "$CARGO_DENY_VERSION"
+      # Hai lệnh cùng đọc cơ sở dữ liệu RustSec; deny còn kiểm giấy phép, nguồn và trùng phiên bản.
+      - run: cargo audit
+      - run: cargo deny check

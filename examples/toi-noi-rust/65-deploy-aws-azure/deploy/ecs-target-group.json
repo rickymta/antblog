@@ -1,0 +1,14 @@
+{
+  "Name": "toinoi-lab-ledger-tg",
+  "Protocol": "HTTP",
+  "Port": 8080,
+  "VpcId": "vpc-0123456789abcdef0",
+  "TargetType": "ip",
+  "HealthCheckProtocol": "HTTP",
+  "HealthCheckPath": "/readyz",
+  "HealthCheckIntervalSeconds": 15,
+  "HealthCheckTimeoutSeconds": 5,
+  "HealthyThresholdCount": 2,
+  "UnhealthyThresholdCount": 3,
+  "Matcher": { "HttpCode": "200" }
+}

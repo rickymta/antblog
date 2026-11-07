@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select account_id, amount_dong from postings where entry_id = $1 order by line_no",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "account_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "postings",
+            "name": "account_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "amount_dong",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "postings",
+            "name": "amount_dong"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "3cf014fb316f533c6c23c1c4bece85f9e4b1a4373cd4fcb3ca8415e02421888e"
+}

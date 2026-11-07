@@ -1,0 +1,6 @@
+# Cấu hình clippy cho cả workspace (đặt ở gốc workspace, mọi crate đều đọc).
+# Thời gian nghiệp vụ phải đi qua `Clock` truyền vào (bài 42, 57). Chỉ `SystemClock` được đọc đồng hồ thật.
+disallowed-methods = [
+    { path = "jiff::Timestamp::now", reason = "dùng Clock truyền vào; chỉ SystemClock được gọi hàm này" },
+    { path = "std::time::SystemTime::now", reason = "dùng Clock truyền vào" },
+]

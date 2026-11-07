@@ -1,0 +1,15 @@
+[package]
+name = "fee-ffi"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+# cdylib: thư viện động cho C#/Python/C; rlib: để binary --verify và test gọi như Rust thường.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ledger-core = { path = "../../20-ledger-core-workspace/ledger-core" }
+
+[build-dependencies]
+cbindgen = { version = "0.29.4", default-features = false }

@@ -1,0 +1,21 @@
+[package]
+name = "api"
+description = "Composition root của lab bài 54: nối ba crate, chạy kịch bản end-to-end và `serve`"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "trip-payment"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+application.workspace = true
+domain.workspace = true
+infrastructure.workspace = true
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "time", "sync", "signal", "process"] }
+
+[lints]
+workspace = true

@@ -1,0 +1,15 @@
+[package]
+name = "application"
+description = "Use case thanh toán chuyến: command, handler, port lưu trữ; không biết PostgreSQL hay Kafka (lab bài 54)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Chỉ phụ thuộc domain. `async fn` trong trait không cần runtime nên cũng không có tokio.
+[dependencies]
+domain.workspace = true
+thiserror = "2.0.21"
+
+[lints]
+workspace = true

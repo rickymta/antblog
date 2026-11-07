@@ -1,0 +1,35 @@
+[package]
+name = "ledger_66_opentelemetry"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Lab bài 66: một trace_id đi từ client C# qua gRPC (tonic) và Kafka (rdkafka) bằng tracing-opentelemetry"
+
+[dependencies]
+anyhow = "1.0.104"
+jiff = { version = "0.2.39", features = ["serde"] }
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+prost = "0.14.4"
+prost-types = "0.14.4"
+rdkafka = "0.39.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "time", "sync", "signal", "process", "io-util"] }
+tokio-stream = "0.1.19"
+tonic = "0.14.9"
+tonic-prost = "0.14.9"
+uuid = { version = "1.29.0", features = ["v4"] }
+opentelemetry = "0.33.1"
+opentelemetry_sdk = { version = "0.33.1", features = ["testing"] }
+opentelemetry-otlp = { version = "0.33.1", default-features = false, features = ["http-proto", "reqwest-blocking-client", "trace"] }
+tracing = "0.1.44"
+tracing-opentelemetry = "0.34.0"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
+
+[build-dependencies]
+protoc-bin-vendored = "3.3.0"
+tonic-prost-build = "0.14.9"
+
+[lints.rust]
+unsafe_code = "forbid"

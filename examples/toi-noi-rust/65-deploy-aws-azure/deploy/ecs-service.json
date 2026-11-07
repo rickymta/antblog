@@ -1,0 +1,27 @@
+{
+  "cluster": "toinoi-lab",
+  "serviceName": "toinoi-lab-ledger",
+  "taskDefinition": "toinoi-lab-ledger",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": ["subnet-0aaa1111", "subnet-0bbb2222"],
+      "securityGroups": ["sg-0ledger123"],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:ap-southeast-1:123456789012:targetgroup/toinoi-lab-ledger-tg/0123456789abcdef",
+      "containerName": "ledger-service",
+      "containerPort": 8080
+    }
+  ],
+  "healthCheckGracePeriodSeconds": 60,
+  "deploymentConfiguration": {
+    "minimumHealthyPercent": 100,
+    "maximumPercent": 150,
+    "deploymentCircuitBreaker": { "enable": true, "rollback": true }
+  }
+}

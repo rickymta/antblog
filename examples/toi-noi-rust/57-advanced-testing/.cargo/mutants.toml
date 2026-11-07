@@ -1,0 +1,3 @@
+# Hai hàm v1 là bản ngây thơ có lỗi, giữ lại chỉ để cargo-fuzz và test hồi quy tái hiện.
+# Đột biến trên code cố ý sai không cho thông tin gì, nên bỏ ra khỏi danh sách.
+exclude_re = ["parse_amount_v1", "parse_line_v1"]

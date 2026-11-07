@@ -1,0 +1,37 @@
+# Chính sách chuỗi cung ứng của lab 64. `cargo deny check` đọc file này ở thư mục hiện tại.
+# Phần chặn merge (deny) nằm ở advisories, licenses, sources; trùng phiên bản chỉ cảnh báo vì phần lớn
+# do dependency bắc cầu, mình không quyết được.
+
+[graph]
+# Chỉ xét đồ thị dependency của những nền tảng thật sự build: runner CI và máy dev.
+targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin"]
+
+[advisories]
+# Crate bị yanked là lỗi. `unmaintained = "workspace"`: advisory "không còn bảo trì" chỉ gây lỗi khi crate đó
+# là dependency TRỰC TIẾP của repo; crate bắc cầu mình không gỡ được nên không chặn merge.
+yanked = "deny"
+unmaintained = "workspace"
+ignore = []
+
+[licenses]
+# Allow-list: giấy phép nào không nằm đây là lỗi. Thêm một dòng là một quyết định pháp lý, phải qua review.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Unicode-3.0",
+    "BSD-3-Clause",
+    "Zlib",
+]
+confidence-threshold = 0.9
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+# Crate của repo dùng path dependency tới lab 20: không phải wildcard.
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

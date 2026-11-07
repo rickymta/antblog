@@ -1,0 +1,59 @@
+{
+  "family": "toinoi-lab-ledger",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "runtimePlatform": { "operatingSystemFamily": "LINUX", "cpuArchitecture": "X86_64" },
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/toinoi-lab-ledger-execution",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/toinoi-lab-ledger-task",
+  "containerDefinitions": [
+    {
+      "name": "ledger-service",
+      "image": "123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/toinoi/ledger@sha256:<digest>",
+      "essential": true,
+      "command": ["serve"],
+      "user": "65532:65532",
+      "readonlyRootFilesystem": true,
+      "stopTimeout": 30,
+      "healthCheck": {
+        "command": ["CMD", "/app/ledger-service", "healthcheck"],
+        "interval": 15,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "portMappings": [
+        { "containerPort": 8080, "protocol": "tcp" },
+        { "containerPort": 9090, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "LEDGER_HTTP_ADDR", "value": "0.0.0.0:8080" },
+        { "name": "LEDGER_GRPC_ADDR", "value": "0.0.0.0:9090" },
+        { "name": "LEDGER_TOPIC_PREFIX", "value": "toi-noi" },
+        { "name": "LEDGER_CONSUMER_GROUP", "value": "ledger-service" },
+        { "name": "LEDGER_SHUTDOWN_TIMEOUT_MS", "value": "10000" },
+        { "name": "TOI_NOI_KAFKA", "value": "kafka.toinoi-lab.internal:9092" },
+        { "name": "RUST_LOG", "value": "info" }
+      ],
+      "secrets": [
+        {
+          "name": "TOI_NOI_PG_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:123456789012:secret:toinoi/lab/ledger/pg-url-AbCdEf"
+        },
+        {
+          "name": "LEDGER_JWT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:123456789012:secret:toinoi/lab/ledger/jwt-secret-GhIjKl"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/toinoi-lab-ledger",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ledger"
+        }
+      }
+    }
+  ]
+}

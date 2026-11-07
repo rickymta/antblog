@@ -1,0 +1,32 @@
+[package]
+name = "ledger_57_advanced_testing-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.ledger_57_advanced_testing]
+path = ".."
+
+# Use independent workspace for fuzzers
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "parse_line_v1"
+path = "fuzz_targets/parse_line_v1.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "parse_line"
+path = "fuzz_targets/parse_line.rs"
+test = false
+doc = false
+bench = false

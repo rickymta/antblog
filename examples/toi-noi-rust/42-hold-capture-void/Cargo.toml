@@ -1,0 +1,17 @@
+[package]
+name = "ledger_42_hold_capture_void"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "Lab bài 42: hold, capture, void và số dư khả dụng trên PostgreSQL"
+
+[dependencies]
+anyhow = "1.0.104"
+jiff = "0.2.39"
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres", "time"] }
+thiserror = "2.0.21"
+time = "0.3.55"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+uuid = { version = "1.29.0", features = ["v4"] }

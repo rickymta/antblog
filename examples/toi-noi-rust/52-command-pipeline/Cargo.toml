@@ -1,0 +1,20 @@
+[package]
+name = "ledger_52_command_pipeline"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Lab bài 52: command handler generic, pipeline validate/trace/transaction, domain event qua outbox cùng transaction"
+
+[dependencies]
+anyhow = "1.0.104"
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[lints.rust]
+# unsafe chỉ được phép ở một chỗ: bộ đếm cấp phát trong src/counting.rs (cho phần đo).
+unsafe_code = "deny"
