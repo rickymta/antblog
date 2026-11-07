@@ -125,3 +125,22 @@ Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-04`.
 | PG-038 | Serializable và retry toàn giao dịch<br>`postgresql-serializable-retry` | NC | Tái hiện xung đột, kiểm retry giới hạn và tính đúng đắn | Kế hoạch |
 | PG-039 | Idempotency và transactional outbox<br>`postgresql-idempotency-outbox-transaction` | NC | Kiểm request lặp, lỗi giữa chừng và xử lý sự kiện trùng | Kế hoạch |
 | PG-040 | Thực hành: hai tài xế cùng nhận một chuyến<br>`postgresql-thuc-hanh-tranh-chap-nhan-chuyen` | NC | Bàn giao lịch chạy, invariant và bằng chứng chỉ một người thắng | Kế hoạch |
+
+## P05 · Bảo mật, bảo trì và phục hồi
+
+Đầu vào: P01–P04; môi trường lab có thể huỷ và dựng lại. Đầu ra: Runbook phân quyền, giám sát, bảo trì và restore đã đối soát.
+
+Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-05`.
+
+| ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
+|---|---|---|---|---|
+| PG-041 | Role, GRANT và quyền tối thiểu<br>`postgresql-role-grant-least-privilege` | CB | Tách tài khoản ứng dụng, migration và đọc báo cáo | Kế hoạch |
+| PG-042 | Xác thực và bảo vệ kết nối PostgreSQL<br>`postgresql-ket-noi-auth-tls` | CB | Kiểm kết nối hợp lệ/bị từ chối và cấu hình TLS trong lab | Kế hoạch |
+| PG-043 | Quan sát phiên làm việc và truy vấn chậm<br>`postgresql-pg-stat-activity-quan-sat` | CB | Đọc hoạt động, thời gian chờ và thông tin chẩn đoán | Kế hoạch |
+| PG-044 | VACUUM, autovacuum và bloat<br>`postgresql-vacuum-autovacuum-bloat` | TB | Quan sát vòng đời tuple và lập lịch bảo trì dựa trên bằng chứng | Kế hoạch |
+| PG-045 | WAL, checkpoint và độ bền dữ liệu<br>`postgresql-wal-checkpoint-durability` | TB | Mô tả đường ghi và đo ảnh hưởng checkpoint trong lab | Kế hoạch |
+| PG-046 | Backup logic và khôi phục với pg_dump<br>`postgresql-pg-dump-restore` | TB | Restore vào database riêng và đối soát schema, số dòng, quyền | Kế hoạch |
+| PG-047 | Connection pool, giới hạn kết nối và timeout<br>`postgresql-connection-pool-timeout` | TB | Đo tải chờ kết nối, lập ngân sách và kiểm tương thích pool | Kế hoạch |
+| PG-048 | Khôi phục theo thời điểm với base backup và WAL<br>`postgresql-pitr-base-backup-wal` | NC | Diễn tập lỗi thao tác, restore và đối chiếu mục tiêu RPO/RTO | Kế hoạch |
+| PG-049 | Row-level security và cách ly tenant<br>`postgresql-rls-tenant-security` | NC | Kiểm ma trận quyền, ngữ cảnh tenant và trường hợp đặc quyền | Kế hoạch |
+| PG-050 | Thực hành: bàn giao runbook vận hành và phục hồi<br>`postgresql-thuc-hanh-runbook-phuc-hoi` | NC | Bàn giao bằng chứng restore, cảnh báo và quy trình xử lý lỗi | Kế hoạch |
