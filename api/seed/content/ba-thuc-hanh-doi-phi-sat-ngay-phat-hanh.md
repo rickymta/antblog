@@ -57,3 +57,5 @@ Viết một trang quyết định cho sponsor và phụ lục cho nhóm triển
 ## 8. Tổng kết phần 6
 
 Từ [backlog](/articles/ba-backlog-refinement-cau-hoi-mo) đến quyết định thay đổi, đầu ra của BA là làm rõ lựa chọn và hệ quả. Phần 7 tiếp tục nghiệm thu, chuyển đổi vận hành và đo giá trị sau phát hành.
+
+Bắt đầu phần 7: [UAT, triển khai và đánh giá](/articles/ba-uat-vai-tro-nguoi-dung-nghiep-vu).

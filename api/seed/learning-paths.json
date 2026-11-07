@@ -668,5 +668,23 @@
       "ba-thuc-hanh-doi-phi-sat-ngay-phat-hanh"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p07-uat-trien-khai-danh-gia",
+    "title": "BA · Phần 7 · UAT, triển khai và đánh giá",
+    "description": "Tám bài thực hành uat, triển khai và đánh giá qua dự án Tới Nơi; ba bài cơ bản, ba trung bình và hai nâng cao, kèm hồ sơ tổng hợp cuối phần.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-uat-vai-tro-nguoi-dung-nghiep-vu",
+      "ba-thiet-ke-uat-scenario",
+      "ba-defect-change-cau-hoi-mo",
+      "ba-nghiem-thu-co-dieu-kien-go-no-go",
+      "ba-transition-migration-dao-tao-van-hanh",
+      "ba-dashboard-do-ket-qua-sau-phat-hanh",
+      "ba-pilot-ab-test-tuong-quan-tac-dong",
+      "ba-thuc-hanh-uat-dat-chua-co-gia-tri"
+    ],
+    "status": "published"
   }
 ]

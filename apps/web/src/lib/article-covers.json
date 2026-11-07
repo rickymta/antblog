@@ -3908,5 +3908,85 @@
       "IMPACT",
       "DECISION"
     ]
+  },
+  "ba-uat-vai-tro-nguoi-dung-nghiep-vu": {
+    "title": "BUSINESS ACCEPTANCE",
+    "subtitle": "Toi Noi · Business Analysis / Part 07",
+    "diagram": "checklist",
+    "labels": [
+      "USERS",
+      "OUTCOMES",
+      "EVIDENCE"
+    ]
+  },
+  "ba-thiet-ke-uat-scenario": {
+    "title": "UAT SCENARIOS",
+    "subtitle": "Toi Noi · Business Analysis / Part 07",
+    "diagram": "flow",
+    "labels": [
+      "CONTEXT",
+      "ACTION",
+      "OUTCOME"
+    ]
+  },
+  "ba-defect-change-cau-hoi-mo": {
+    "title": "CLASSIFY FEEDBACK",
+    "subtitle": "Toi Noi · Business Analysis / Part 07",
+    "diagram": "split",
+    "labels": [
+      "BASELINE",
+      "COMPARE",
+      "REQUEST"
+    ]
+  },
+  "ba-nghiem-thu-co-dieu-kien-go-no-go": {
+    "title": "GO / NO-GO",
+    "subtitle": "Toi Noi · Business Analysis / Part 07",
+    "diagram": "target",
+    "labels": [
+      "READINESS",
+      "RISK",
+      "DECISION"
+    ]
+  },
+  "ba-transition-migration-dao-tao-van-hanh": {
+    "title": "TRANSITION PLAN",
+    "subtitle": "Toi Noi · Business Analysis / Part 07",
+    "diagram": "map",
+    "labels": [
+      "PREPARE",
+      "SWITCH",
+      "SUPPORT"
+    ]
+  },
+  "ba-dashboard-do-ket-qua-sau-phat-hanh": {
+    "title": "MEASURE OUTCOMES",
+    "subtitle": "Toi Noi · Business Analysis / Part 07",
+    "diagram": "blocks",
+    "labels": [
+      "COHORT",
+      "METRIC",
+      "QUALITY"
+    ]
+  },
+  "ba-pilot-ab-test-tuong-quan-tac-dong": {
+    "title": "PILOT + CAUSALITY",
+    "subtitle": "Toi Noi · Business Analysis / Part 07",
+    "diagram": "split",
+    "labels": [
+      "CONTROL",
+      "COMPARE",
+      "TREATMENT"
+    ]
+  },
+  "ba-thuc-hanh-uat-dat-chua-co-gia-tri": {
+    "title": "BA CASE / 07",
+    "subtitle": "Toi Noi · Business Analysis / Part 07",
+    "diagram": "checklist",
+    "labels": [
+      "ADOPTION",
+      "OUTCOME",
+      "NEXT STEP"
+    ]
   }
 }
