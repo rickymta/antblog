@@ -5088,5 +5088,85 @@
       "OUTCOME",
       "NEXT STEP"
     ]
+  },
+  "ba-business-case-quyet-dinh-dau-tu": {
+    "title": "BUSINESS CASE",
+    "subtitle": "Toi Noi · Business Analysis / Part 08",
+    "diagram": "target",
+    "labels": [
+      "BENEFIT",
+      "COST",
+      "EVIDENCE"
+    ]
+  },
+  "ba-capability-map-nang-luc-to-chuc": {
+    "title": "CAPABILITY MAP",
+    "subtitle": "Toi Noi · Business Analysis / Part 08",
+    "diagram": "blocks",
+    "labels": [
+      "PEOPLE",
+      "PROCESS",
+      "TOOLS"
+    ]
+  },
+  "ba-risk-assumption-log": {
+    "title": "RISKS + ASSUMPTIONS",
+    "subtitle": "Toi Noi · Business Analysis / Part 08",
+    "diagram": "checklist",
+    "labels": [
+      "SIGNAL",
+      "OWNER",
+      "RESPONSE"
+    ]
+  },
+  "ba-gap-analysis-roadmap": {
+    "title": "GAPS TO ROADMAP",
+    "subtitle": "Toi Noi · Business Analysis / Part 08",
+    "diagram": "map",
+    "labels": [
+      "CURRENT",
+      "GAP",
+      "TARGET"
+    ]
+  },
+  "ba-facilitation-ke-chuyen-bang-chung": {
+    "title": "EVIDENCE TO DECISION",
+    "subtitle": "Toi Noi · Business Analysis / Part 08",
+    "diagram": "flow",
+    "labels": [
+      "FACTS",
+      "OPTIONS",
+      "DECISION"
+    ]
+  },
+  "ba-ai-ho-tro-kiem-chung-nguon-du-lieu": {
+    "title": "AI WITH REVIEW",
+    "subtitle": "Toi Noi · Business Analysis / Part 08",
+    "diagram": "split",
+    "labels": [
+      "DRAFT",
+      "VERIFY",
+      "EVIDENCE"
+    ]
+  },
+  "ba-trade-off-giao-hang-nhieu-diem": {
+    "title": "MULTI-STOP TRADEOFFS",
+    "subtitle": "Toi Noi · Business Analysis / Part 08",
+    "diagram": "network",
+    "labels": [
+      "CUSTOMER",
+      "OPTIONS",
+      "OPERATIONS"
+    ]
+  },
+  "ba-capstone-bao-ve-ho-so-phan-tich": {
+    "title": "BA CAPSTONE",
+    "subtitle": "Toi Noi · Business Analysis / Part 08",
+    "diagram": "checklist",
+    "labels": [
+      "TRACEABILITY",
+      "TRADEOFFS",
+      "LEARNING"
+    ]
   }
 }

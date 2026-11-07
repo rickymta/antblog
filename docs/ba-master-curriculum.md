@@ -18,7 +18,7 @@ Tham khảo khái niệm của IIBA; đây là chương trình thực hành riê
 
 Mức độ là độ khó của bài trong chủ đề, không phải chức danh nghề nghiệp. Trong mỗi phần đọc lần lượt 1–8; phần sau kế thừa sản phẩm phần trước. Người có kinh nghiệm có thể bắt đầu từ bài 7, nhưng cần đọc hồ sơ tình huống và các đầu ra được nhắc tới. Đường học đầy đủ: P01 → P02 → P03 → P04 → P05 → P06 → P07 → P08.
 
-Các bảng dưới đây là kế hoạch toàn bộ 64 bài. **BA-001 đến BA-056 đã viết trong source, hoàn thành P01–P07; 8 bài còn lại là kế hoạch, chưa xuất bản.** Tệp seed chỉ liệt kê bài đã có nội dung; không tạo bài rỗng hoặc liên kết đọc tới bài tương lai.
+Các bảng dưới đây là kế hoạch toàn bộ 64 bài. **BA-001 đến BA-064 đã viết trong source, hoàn thành P01–P08; đủ 64 bài của chương trình. Source chưa đồng nghĩa đã xuất bản.** Tệp seed chỉ liệt kê bài đã có nội dung; không tạo bài rỗng hoặc liên kết đọc tới bài tương lai.
 
 ## P01 · Tư duy BA: hiểu vấn đề trước khi viết yêu cầu
 
@@ -197,7 +197,6 @@ Mỗi bài nhắm khoảng 10–18 phút đọc, bài thực hành 18–25 phút
 | BA-030 | `ba-yeu-cau-phi-chuc-nang-do-duoc` | Đã viết |
 | BA-031 | `ba-brd-srs-tai-lieu-theo-rui-ro` | Đã viết |
 | BA-032 | `ba-thuc-hanh-review-goi-yeu-cau` | Đã viết |
-
 | BA-033 | `ba-domain-glossary-mo-hinh-du-lieu` | Đã viết |
 | BA-034 | `ba-data-dictionary-don-vi-null` | Đã viết |
 | BA-035 | `ba-doc-api-request-response-loi` | Đã viết |
@@ -206,7 +205,6 @@ Mỗi bài nhắm khoảng 10–18 phút đọc, bài thực hành 18–25 phút
 | BA-038 | `ba-event-dong-bo-trang-thai-cho` | Đã viết |
 | BA-039 | `ba-idempotency-retry-giao-dich-loi` | Đã viết |
 | BA-040 | `ba-thuc-hanh-hop-dong-hoan-tien` | Đã viết |
-
 | BA-041 | `ba-backlog-refinement-cau-hoi-mo` | Đã viết |
 | BA-042 | `ba-moscow-uu-tien-theo-muc-tieu` | Đã viết |
 | BA-043 | `ba-traceability-muc-tieu-yeu-cau-test` | Đã viết |
@@ -215,7 +213,6 @@ Mỗi bài nhắm khoảng 10–18 phút đọc, bài thực hành 18–25 phút
 | BA-046 | `ba-uu-tien-gia-tri-chi-phi-do-tin-cay` | Đã viết |
 | BA-047 | `ba-phu-thuoc-yeu-cau-xuyen-doi` | Đã viết |
 | BA-048 | `ba-thuc-hanh-doi-phi-sat-ngay-phat-hanh` | Đã viết |
-
 | BA-049 | `ba-uat-vai-tro-nguoi-dung-nghiep-vu` | Đã viết |
 | BA-050 | `ba-thiet-ke-uat-scenario` | Đã viết |
 | BA-051 | `ba-defect-change-cau-hoi-mo` | Đã viết |
@@ -224,10 +221,18 @@ Mỗi bài nhắm khoảng 10–18 phút đọc, bài thực hành 18–25 phút
 | BA-054 | `ba-dashboard-do-ket-qua-sau-phat-hanh` | Đã viết |
 | BA-055 | `ba-pilot-ab-test-tuong-quan-tac-dong` | Đã viết |
 | BA-056 | `ba-thuc-hanh-uat-dat-chua-co-gia-tri` | Đã viết |
+| BA-057 | `ba-business-case-quyet-dinh-dau-tu` | Đã viết |
+| BA-058 | `ba-capability-map-nang-luc-to-chuc` | Đã viết |
+| BA-059 | `ba-risk-assumption-log` | Đã viết |
+| BA-060 | `ba-gap-analysis-roadmap` | Đã viết |
+| BA-061 | `ba-facilitation-ke-chuyen-bang-chung` | Đã viết |
+| BA-062 | `ba-ai-ho-tro-kiem-chung-nguon-du-lieu` | Đã viết |
+| BA-063 | `ba-trade-off-giao-hang-nhieu-diem` | Đã viết |
+| BA-064 | `ba-capstone-bao-ve-ho-so-phan-tich` | Đã viết |
 
-P01–P07 mỗi phần đủ 8 bài, phân bổ 3 CB / 3 TB / 2 NC. Hồ sơ từng phần ở `examples/toi-noi-ba`; mới nhất là `p07-nghiem-thu-gia-tri.md`. Tiếp theo viết BA-057–BA-064 cho P08.
+P01–P08 mỗi phần đủ 8 bài, phân bổ 3 CB / 3 TB / 2 NC. Hồ sơ từng phần ở `examples/toi-noi-ba`; mới nhất là `p08-capstone.md`. Đã hoàn thành khung và nội dung cả tám phần.
 
-Có 7 lộ trình seed BA, mỗi phần tám bài. File source không đồng nghĩa đã lên website; phiên làm nội dung này không chạy seed hay deploy.
+Có 8 lộ trình seed BA, mỗi phần tám bài. File source không đồng nghĩa đã lên website; phiên làm nội dung này không chạy seed hay deploy.
 
 ## Kiểm tra hình ảnh trước khi hoàn tất phần
 

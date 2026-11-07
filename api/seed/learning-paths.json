@@ -826,5 +826,23 @@
       "ba-thuc-hanh-uat-dat-chua-co-gia-tri"
     ],
     "status": "published"
+  },
+  {
+    "slug": "ba-p08-chien-luoc-capstone",
+    "title": "BA · Phần 8 · Phân tích chiến lược và capstone",
+    "description": "Tám bài thực hành phân tích chiến lược và capstone qua dự án Tới Nơi; ba bài cơ bản, ba trung bình và hai nâng cao, kèm hồ sơ tổng hợp cuối phần.",
+    "level": "intermediate",
+    "category": "business-analysis",
+    "articles": [
+      "ba-business-case-quyet-dinh-dau-tu",
+      "ba-capability-map-nang-luc-to-chuc",
+      "ba-risk-assumption-log",
+      "ba-gap-analysis-roadmap",
+      "ba-facilitation-ke-chuyen-bang-chung",
+      "ba-ai-ho-tro-kiem-chung-nguon-du-lieu",
+      "ba-trade-off-giao-hang-nhieu-diem",
+      "ba-capstone-bao-ve-ho-so-phan-tich"
+    ],
+    "status": "published"
   }
 ]

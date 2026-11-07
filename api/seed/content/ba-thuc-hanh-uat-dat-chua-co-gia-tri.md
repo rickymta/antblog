@@ -52,3 +52,5 @@ Nộp một trang cho PO gồm ba kết luận được dữ liệu hỗ trợ, 
 ## 8. Tổng kết phần 7
 
 Ôn [dashboard](/articles/ba-dashboard-do-ket-qua-sau-phat-hanh) và [pilot](/articles/ba-pilot-ab-test-tuong-quan-tac-dong). Phần cuối đưa các bằng chứng vào business case, roadmap và hồ sơ capstone để bảo vệ quyết định đầu tư.
+
+Bắt đầu phần 8: [Phân tích chiến lược và capstone](/articles/ba-business-case-quyet-dinh-dau-tu).
