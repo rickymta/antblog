@@ -68,3 +68,22 @@ Lộ trình khi hoàn tất: `postgresql-tu-ben-trong`.
 | PG-008 | Chuẩn hoá và ranh giới mô hình dữ liệu<br>`postgresql-mo-hinh-quan-he-chuan-hoa` | NC | Giải thích bất thường cập nhật và đánh đổi khi tách bảng | Kế hoạch |
 | PG-009 | Thay đổi schema mà dữ liệu cũ vẫn đọc được<br>`postgresql-schema-migration-tuong-thich` | NC | Thực hiện migration nhỏ, kiểm dữ liệu và kế hoạch khôi phục | Kế hoạch |
 | PG-010 | Thực hành: schema chuyến xe có kiểm tra ràng buộc<br>`postgresql-thuc-hanh-schema-chuyen-xe` | NC | Bàn giao DDL, fixture hợp lệ/sai và bằng chứng kiểm tra | Kế hoạch |
+
+## P02 · SQL cho nghiệp vụ
+
+Đầu vào: P01 và fixture chuyến xe. Đầu ra: Bộ truy vấn có expected output, đối soát số dòng và tổng tiền.
+
+Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-02`.
+
+| ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
+|---|---|---|---|---|
+| PG-011 | NULL, CASE và COALESCE trong dữ liệu chuyến<br>`postgresql-null-case-coalesce` | CB | Phân biệt thiếu dữ liệu, không áp dụng và giá trị 0 | Kế hoạch |
+| PG-012 | COUNT, SUM, GROUP BY và HAVING<br>`postgresql-aggregate-group-by-having` | CB | Tổng hợp theo thành phố và dịch vụ với mẫu số rõ ràng | Kế hoạch |
+| PG-013 | JOIN và số dòng sau khi nối bảng<br>`postgresql-join-quan-he-cardinality` | CB | Kiểm quan hệ một–nhiều, không nhân đôi tổng tiền | Kế hoạch |
+| PG-014 | Subquery, EXISTS và CTE<br>`postgresql-subquery-exists-cte` | TB | Tách truy vấn đối soát thành bước kiểm chứng được | Kế hoạch |
+| PG-015 | Window function và cửa sổ tính toán<br>`postgresql-window-function-frame` | TB | Tính luỹ kế, xếp hạng và so sánh chuyến trước với frame rõ ràng | Kế hoạch |
+| PG-016 | Ngày giờ và múi giờ trong truy vấn<br>`postgresql-date-time-timezone` | TB | Viết bộ lọc ngày nghiệp vụ với kiểm tra hai biên | Kế hoạch |
+| PG-017 | UPSERT và xung đột khoá duy nhất<br>`postgresql-upsert-on-conflict` | TB | Nhập dữ liệu có quy tắc cập nhật và fixture trùng khoá | Kế hoạch |
+| PG-018 | Phân trang lịch sử chuyến bằng keyset<br>`postgresql-pagination-keyset` | NC | Xử lý khoá sắp xếp trùng và chứng minh điều kiện trang kế tiếp | Kế hoạch |
+| PG-019 | Recursive CTE với cây khu vực<br>`postgresql-recursive-cte-cay-khu-vuc` | NC | Duyệt cây có điều kiện dừng, phát hiện dữ liệu chu trình | Kế hoạch |
+| PG-020 | Thực hành: truy vấn vận hành và đối soát thanh toán<br>`postgresql-thuc-hanh-sql-doi-soat` | NC | Bàn giao SQL, expected output và giải thích chênh lệch | Kế hoạch |
