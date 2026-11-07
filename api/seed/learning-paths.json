@@ -902,12 +902,13 @@
   {
     "slug": "da-p01-nen-tang-phan-tich-du-lieu",
     "title": "DA · Phần 1 · Nền tảng phân tích dữ liệu",
-    "description": "DA qua Tới Nơi: hiểu câu hỏi, vai trò và quy trình phân tích. Đã có DA-001–DA-002; phần đang được viết tiếp, tối đa 10 bài.",
+    "description": "DA qua Tới Nơi: hiểu câu hỏi, vai trò và quy trình phân tích. Đã có DA-001–DA-003; phần đang được viết tiếp, tối đa 10 bài.",
     "level": "beginner",
     "category": "data-analysis",
     "articles": [
       "da-la-gi-tu-so-lieu-toi-quyet-dinh",
-      "da-vai-tro-phoi-hop-ba-bi-de-ds"
+      "da-vai-tro-phoi-hop-ba-bi-de-ds",
+      "da-vong-doi-bai-toan-phan-tich"
     ],
     "status": "published"
   }

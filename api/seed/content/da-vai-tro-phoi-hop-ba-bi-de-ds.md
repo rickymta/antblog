@@ -120,3 +120,5 @@ Checklist bàn giao: từng việc có người sở hữu; có người xác nh
 - [DA-001: từ số liệu tới quyết định](/articles/da-la-gi-tu-so-lieu-toi-quyet-dinh).
 
 Mẫu thực hành trong repository: `examples/toi-noi-da/p01-nen-tang.md`.
+
+Bài tiếp theo: [DA-003: vòng đời một bài toán phân tích dữ liệu](/articles/da-vong-doi-bai-toan-phan-tich).

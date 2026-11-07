@@ -43,3 +43,35 @@ Bảng trách nhiệm phải có các hàng: chốt câu hỏi/phạm vi; xác n
 Phiếu bàn giao tối thiểu: câu hỏi; tập dữ liệu/phiên bản; thời điểm trích; grain; định nghĩa thời gian; kiểm tra đã chạy; giới hạn; quyền sử dụng; người tiếp nhận; câu hỏi còn mở. Với P01 hiện tại, ghi rõ chỉ có bảng tổng hợp minh hoạ, chưa có extract hệ thống.
 
 Biến thể nhóm nhỏ (DA, backend, quản lý vận hành): được kiêm nhiệm nhưng phải chỉ rõ khoảng trống review và người duy trì báo cáo. Không thêm DS chỉ để tính tỷ lệ, không mặc định DA có quyền thay database hoặc sửa dữ liệu nguồn.
+
+## Sản phẩm DA-003 · Checklist vòng đời
+
+Điền người cụ thể và bằng chứng ở thời điểm thực hiện. Bảng này là mẫu công việc, không khẳng định đã thực hiện kiểm tra dữ liệu nguồn.
+
+| Bước | Đầu vào | Đầu ra / điều kiện hoàn thành | Người làm / người xác nhận |
+|---|---|---|---|
+| 1. Câu hỏi | Đề nghị vận hành | Brief xác định người dùng, quyết định và phạm vi | Điền khi làm bài |
+| 2. Định nghĩa | Brief, nghiệp vụ | Metric contract; các ví dụ được hiểu thống nhất | Điền khi làm bài |
+| 3. Nguồn | Danh sách thông tin cần | Inventory, giới hạn, phiên bản và quyền sử dụng | Điền khi làm bài |
+| 4. Chuẩn bị | Dữ liệu và hợp đồng | Quality log, biến đổi, kiểm tra tổng và điểm chưa biết | Điền khi làm bài |
+| 5. Phân tích | Dữ liệu đã kiểm tra | Bảng, công thức và kết luận trong phạm vi bằng chứng | Điền khi làm bài |
+| 6. Review | Kết quả và cách tính | Phản hồi về độ đúng, diễn giải và vấn đề còn mở | Điền khi làm bài |
+| 7. Bàn giao | Gói đã review | Bản nhận định, decision log có trạng thái | Điền khi làm bài |
+| 8. Theo dõi | Quyết định / yêu cầu dùng lặp | Owner, cách cập nhật, điều kiện đóng và đo lại | Điền khi làm bài |
+
+### Phiếu bàn giao tối thiểu
+
+- Mã / phiên bản phân tích:
+- Người nhận / quyết định cần hỗ trợ:
+- Phạm vi / nguồn / thời điểm chốt:
+- Định nghĩa chỉ số / cách tính lại:
+- Phát hiện / giới hạn / giả thuyết:
+- Kiểm tra và review đã thực hiện:
+- Khuyến nghị / người chốt / trạng thái:
+- Người theo dõi / khi nào cần xem lại:
+
+### Biến thể sự cố dữ liệu trễ
+
+Chỉ dùng cho DA-003, không sửa baseline: 15 lượt cao điểm W2 đã nằm trong mẫu số 750 nhưng trước đó chưa có kết quả, nay xác nhận huỷ trước đón. Biến thể này thay thế giả định W2 đã đủ kết quả trong bài tập sự cố; mẫu số chung giữ 1.500. Cao điểm: (135 + 15)/750 = 20%. Toàn W2: (180 + 15)/1.500 = 13%. Chênh W2–W1 là +1 điểm phần trăm.
+
+Đầu ra cần có: quality log bổ sung; kết quả/câu kết luận sửa lại; lịch sử phiên bản; thông báo đính chính; danh sách quyết định cần xem lại; cách tránh chốt kỳ quá sớm. Chưa được quy kết nguyên nhân huỷ từ dữ liệu sửa lại.
