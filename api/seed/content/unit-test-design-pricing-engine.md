@@ -235,4 +235,4 @@ Các câu hỏi là bài tự luyện do tác giả biên soạn, không phải 
 - [Vitest — Test API](https://vitest.dev/api/test): `it.each` và tổ chức các ca dữ liệu. Dùng API tương thích phiên bản khóa trong lab.
 - [Lab Tới Nơi](https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing): SPEC R-FARE, R-GEN-01, R-VOUCHER-06, R-VALID-01; `fare.ts`, `pricing.ts`, `money.ts`, `api/schemas.ts`.
 
-Bài trước: [TEST-055 · Unit Testing Fundamentals](/articles/unit-testing-fundamentals). Bài tiếp theo trong kế hoạch: TEST-057 · Test Doubles — Dummy, Stub, Fake, Mock, Spy.
+Bài trước: [TEST-055 · Unit Testing Fundamentals](/articles/unit-testing-fundamentals). Bài tiếp theo: [TEST-057 · Test Doubles — Dummy, Stub, Fake, Mock, Spy](/articles/test-doubles-dummy-stub-fake-mock-spy).

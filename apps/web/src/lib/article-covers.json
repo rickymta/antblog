@@ -5188,5 +5188,25 @@
       "DECISIONS",
       "ORACLE"
     ]
+  },
+  "test-doubles-dummy-stub-fake-mock-spy": {
+    "title": "TEST DOUBLES",
+    "subtitle": "Toi Noi · Testing / Series 06",
+    "diagram": "blocks",
+    "labels": [
+      "STUB",
+      "FAKE",
+      "SPY"
+    ]
+  },
+  "dependency-isolation": {
+    "title": "DEPENDENCY ISOLATION",
+    "subtitle": "Toi Noi · Testing / Series 06",
+    "diagram": "network",
+    "labels": [
+      "CLOCK",
+      "USE CASE",
+      "WEATHER"
+    ]
   }
 }

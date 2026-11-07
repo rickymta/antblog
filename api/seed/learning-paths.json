@@ -888,12 +888,14 @@
   {
     "slug": "testing-s06-unit-component-testing",
     "title": "Testing · Series 06 · Unit Testing & Component Testing",
-    "description": "Thực hành unit testing trên Tới Nơi: AAA, FIRST, thiết kế test cho Pricing Engine. Hai bài mở đầu TEST-055–056; series đang được viết tiếp.",
+    "description": "Thực hành unit testing trên Tới Nơi: AAA, FIRST, thiết kế test Pricing Engine, test doubles và cô lập phụ thuộc thời gian/thời tiết. Đã có TEST-055–058; series đang được viết tiếp.",
     "level": "advanced",
     "category": "testing",
     "articles": [
       "unit-testing-fundamentals",
-      "unit-test-design-pricing-engine"
+      "unit-test-design-pricing-engine",
+      "test-doubles-dummy-stub-fake-mock-spy",
+      "dependency-isolation"
     ],
     "status": "published"
   }

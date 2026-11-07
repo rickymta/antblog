@@ -9,7 +9,7 @@ Bản quản lý toàn bộ chuyên mục Testing của Tech Knowledge Hub (antb
 
 1. **Người viết**: chọn bài theo Phase, đọc dòng tương ứng trong CSV (Description + Learning Objectives + Practical Exercise) làm đề cương, rồi viết theo template 8 phần ở §6 của tài liệu định hướng. Đối chiếu cột ISTQB LO với syllabus trước khi xuất bản; ô ghi «Đối chiếu khi viết» nghĩa là chưa kiểm được mã LO chính thức.
 2. **Người đọc / lộ trình học**: đi theo cột «Bài cần đọc trước». Mọi tham chiếu tạo thành một đồ thị không chu trình (DAG — đã kiểm bằng script), nên luôn có thứ tự đọc hợp lệ.
-3. **Theo dõi tiến độ**: cập nhật cột Publication Status trong CSV (`Kế hoạch` → `Đang viết` → `Đã viết` → `Đã xuất bản`). Đối chiếu repo ngày 07/11/2026: S01–S05 và hai bài đầu S06 (TEST-055–056) đã có nội dung; «Đã viết» không khẳng định đã triển khai lên website.
+3. **Theo dõi tiến độ**: cập nhật cột Publication Status trong CSV (`Kế hoạch` → `Đang viết` → `Đã viết` → `Đã xuất bản`). Đối chiếu repo ngày 07/11/2026: S01–S05 và bốn bài đầu S06 (TEST-055–058) đã có nội dung; «Đã viết» không khẳng định đã triển khai lên website.
 
 ## 2. Quy ước
 
@@ -162,8 +162,8 @@ Cột «Thực hành»: **Lab (code)** = làm trên phòng lab · **Lab + thiế
 |---|---|---|---|---|---|---|
 | TEST-055 | Unit Testing Fundamentals | L3 | CTFL v4.0.1; mở rộng Engineering Practice — CTFL 2.1.3; 2.2.1 | 012, 031 | Lab (code) | Đã viết |
 | TEST-056 | Unit Test Design cho Pricing Engine | L3 | CTFL v4.0.1; mở rộng Engineering Practice — CTFL 4.2 | 055, 032, 033 | Lab (code) | Đã viết |
-| TEST-057 | Test Doubles: Dummy, Stub, Fake, Mock, Spy | L3 | Mở rộng ngoài ISTQB | 055 | Lab (code) | Kế hoạch |
-| TEST-058 | Dependency Isolation | L3 | Mở rộng ngoài ISTQB | 057 | Lab (code) | Kế hoạch |
+| TEST-057 | Test Doubles: Dummy, Stub, Fake, Mock, Spy | L3 | Mở rộng ngoài ISTQB | 055 | Lab (code) | Đã viết |
+| TEST-058 | Dependency Isolation | L3 | Mở rộng ngoài ISTQB | 057 | Lab (code) | Đã viết |
 | TEST-059 | Parameterized Testing | L3 | Mở rộng ngoài ISTQB (liên quan CTAL-TAE v2.0 3.1.4) | 055, 031 | Lab (code) | Kế hoạch |
 | TEST-060 | Data-driven Unit Testing | L3 | Mở rộng ngoài ISTQB (liên quan CTAL-TTA v4.0 6.1) — TTA 6.1 (bối cảnh) | 059 | Lab (code) | Kế hoạch |
 | TEST-061 | Exception Testing | L3 | Mở rộng ngoài ISTQB | 056 | Lab (code) | Kế hoạch |
