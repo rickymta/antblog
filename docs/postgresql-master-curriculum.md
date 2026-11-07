@@ -106,3 +106,22 @@ Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-03`.
 | PG-028 | Khi nào cân nhắc GIN, GiST và BRIN?<br>`postgresql-gin-gist-brin-lua-chon` | NC | Lập ma trận workload, operator và giới hạn từng loại index | Kế hoạch |
 | PG-029 | Sort, hash và truy vấn tràn ra đĩa<br>`postgresql-sort-hash-memory-spill` | NC | Đo spill và đánh đổi tài nguyên với tải đồng thời | Kế hoạch |
 | PG-030 | Thực hành: tối ưu truy vấn bằng bằng chứng<br>`postgresql-thuc-hanh-toi-uu-truy-van` | NC | Bàn giao plan, fixture, phép đo lặp và chi phí ghi của index | Kế hoạch |
+
+## P04 · Giao dịch, MVCC và đồng thời
+
+Đầu vào: P01–P03; lab có ít nhất hai phiên kết nối. Đầu ra: Kịch bản tranh chấp nhận chuyến với kiểm tra bất biến và retry.
+
+Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-04`.
+
+| ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
+|---|---|---|---|---|
+| PG-031 | Transaction, COMMIT và ROLLBACK<br>`postgresql-transaction-commit-rollback` | CB | Chứng minh ghi chuyến và sự kiện cùng thành công hoặc cùng huỷ | Kế hoạch |
+| PG-032 | MVCC và snapshot: mỗi phiên nhìn thấy gì?<br>`postgresql-mvcc-snapshot` | CB | Chạy hai phiên để quan sát phiên bản dữ liệu | Kế hoạch |
+| PG-033 | Khoá dòng, khoá bảng và thời gian chờ<br>`postgresql-lock-row-table` | CB | Nhận diện phiên giữ khoá và phiên bị chặn | Kế hoạch |
+| PG-034 | Read Committed và Repeatable Read<br>`postgresql-isolation-read-committed-repeatable-read` | TB | So sánh cùng lịch thực thi dưới hai mức cô lập | Kế hoạch |
+| PG-035 | Optimistic concurrency và cập nhật có điều kiện<br>`postgresql-optimistic-version-conditional-update` | TB | Ngăn ghi đè trạng thái với version và kiểm số dòng đổi | Kế hoạch |
+| PG-036 | FOR UPDATE, NOWAIT và SKIP LOCKED<br>`postgresql-for-update-skip-locked` | TB | Thử hàng đợi worker và ghi rõ trường hợp bỏ qua dòng | Kế hoạch |
+| PG-037 | Deadlock, thứ tự lấy khoá và timeout<br>`postgresql-deadlock-lock-order-timeout` | TB | Tái hiện vòng chờ và sửa thứ tự truy cập | Kế hoạch |
+| PG-038 | Serializable và retry toàn giao dịch<br>`postgresql-serializable-retry` | NC | Tái hiện xung đột, kiểm retry giới hạn và tính đúng đắn | Kế hoạch |
+| PG-039 | Idempotency và transactional outbox<br>`postgresql-idempotency-outbox-transaction` | NC | Kiểm request lặp, lỗi giữa chừng và xử lý sự kiện trùng | Kế hoạch |
+| PG-040 | Thực hành: hai tài xế cùng nhận một chuyến<br>`postgresql-thuc-hanh-tranh-chap-nhan-chuyen` | NC | Bàn giao lịch chạy, invariant và bằng chứng chỉ một người thắng | Kế hoạch |
