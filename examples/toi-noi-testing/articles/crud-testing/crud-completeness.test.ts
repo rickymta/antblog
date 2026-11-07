@@ -22,7 +22,7 @@ describe('TEST-039 · completeness của ma trận CRUD theo SPEC', () => {
     ['drivers', 'CD', 'đăng ký / xoá tài xế ngoài phạm vi lab'],
     ['vouchers', 'CUD', 'quản trị voucher ngoài phạm vi lab'],
     ['idempotency_keys', '', 'đủ C, R, U, D'],
-  ] as const)('%s thiếu [%s] — %s', (entity, ops) => {
+  ] as const)('%s thiếu [%s] — %s', (entity, ops, _reason) => {
     expect(missing[entity].join('')).toBe(ops);
   });
 });

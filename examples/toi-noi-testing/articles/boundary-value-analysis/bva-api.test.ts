@@ -51,7 +51,7 @@ describe('Biên giờ cao điểm qua báo giá (ride, xe máy 7,4 km, SG)', () 
     { time: [12, 59, 59], peak: true, total: 57_000 },
     { time: [13, 0, 0], peak: false, total: 46_000 },
   ] as const)('BVA-API $time ⇒ peak $peak, total $total', async ({ time, peak, total }) => {
-    const res = await quote(appAt(...time), { kind: 'ride', cityCode: 'SG', vehicle: 'bike', distanceKm: 7.4 }).expect(200);
+    const res = await quote(appAt(time[0], time[1], time[2]), { kind: 'ride', cityCode: 'SG', vehicle: 'bike', distanceKm: 7.4 }).expect(200);
     expect(res.body.quote.peak).toBe(peak);
     expect(res.body.quote.total).toBe(total);
   });
