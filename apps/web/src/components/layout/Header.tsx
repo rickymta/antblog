@@ -24,6 +24,7 @@ export function Header({ categories }: { categories: Category[] | null }) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [focusMenuSearch, setFocusMenuSearch] = useState(false);
   const desktopSearch = useRef<HTMLInputElement>(null);
   const mobileSearch = useRef<HTMLInputElement>(null);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
@@ -42,7 +43,10 @@ export function Header({ categories }: { categories: Category[] | null }) {
         e.preventDefault();
         const desktop = desktopSearch.current;
         if (desktop && desktop.offsetParent !== null) desktop.focus();
-        else setSearchOpen(true);
+        else if (window.matchMedia('(max-width: 1023px)').matches) {
+          setFocusMenuSearch(true);
+          setDrawerOpen(true);
+        } else setSearchOpen(true);
       }
     };
     document.addEventListener('keydown', onKey);
@@ -60,7 +64,7 @@ export function Header({ categories }: { categories: Category[] | null }) {
 
   return (
     <>
-    <header className="site-header sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
+    <header className="site-header hidden lg:block sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className={`${container} flex h-16 items-center gap-2 sm:gap-3`}>
         <Logo />
         <nav aria-label={t('nav.mainNav')} className="ml-4 hidden items-center gap-0.5 lg:flex">
@@ -95,7 +99,7 @@ export function Header({ categories }: { categories: Category[] | null }) {
       )}
     </header>
     <nav aria-label={t('nav.mobileNav')} className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur lg:hidden">
-      <div className="mx-auto grid max-w-xl grid-cols-4 gap-1 px-2 pt-2">
+      <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2 pt-2">
         {MAIN_LINKS.slice(0, 3).map((link, index) => {
           const Icon = [House, BookOpen, Route][index] ?? House;
           const active = isActivePath(pathname, link.to, link.end);
@@ -107,7 +111,13 @@ export function Header({ categories }: { categories: Category[] | null }) {
             </Link>
           );
         })}
-        <button type="button" onClick={() => setDrawerOpen(true)} aria-label={t('nav.openMenu')}
+        <button type="button" onClick={() => { setFocusMenuSearch(true); setDrawerOpen(true); }}
+          aria-label={t('header.openSearch')} aria-haspopup="dialog"
+          className="mobile-nav-item text-muted hover:bg-surface-2 hover:text-ink">
+          <Search aria-hidden="true" className="h-5 w-5" />
+          <span>{t('nav.search')}</span>
+        </button>
+        <button type="button" onClick={() => { setFocusMenuSearch(false); setDrawerOpen(true); }} aria-label={t('nav.openMenu')}
           aria-expanded={drawerOpen} aria-controls={drawerOpen ? 'mobile-menu' : undefined} aria-haspopup="dialog"
           className={`mobile-nav-item ${drawerOpen || pathname.startsWith('/topics/') || pathname === '/about' ? 'bg-primary-soft text-primary-ink' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}>
           <Menu aria-hidden="true" className="h-5 w-5" />
@@ -115,7 +125,7 @@ export function Header({ categories }: { categories: Category[] | null }) {
         </button>
       </div>
     </nav>
-    <MobileDrawer open={drawerOpen} onClose={closeDrawer} categories={categories} />
+    <MobileDrawer focusSearch={focusMenuSearch} open={drawerOpen} onClose={closeDrawer} categories={categories} />
     </>
   );
 }

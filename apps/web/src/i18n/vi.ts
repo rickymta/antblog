@@ -54,6 +54,7 @@ export const vi = {
   },
   nav: {
     menu: 'Menu',
+    search: 'Tìm kiếm',
     home: 'Trang chủ',
     articles: 'Bài viết',
     paths: 'Lộ trình học',

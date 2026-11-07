@@ -20,7 +20,7 @@ export function UserMenuSkeleton() {
  * Avatar + menu tài khoản khi đã đăng nhập; nút "Đăng nhập" nền primary khi chưa.
  * Dùng useSearchParams ⇒ nơi đặt PHẢI bọc <Suspense> (trang bài/lộ trình là ISR — thiếu Suspense thì render lỗi).
  */
-export function UserMenu() {
+export function UserMenu({ inline = false, onNavigate }: { inline?: boolean; onNavigate?: () => void } = {}) {
   const { t } = useTranslation();
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
@@ -36,6 +36,7 @@ export function UserMenu() {
 
   if (!user) {
     const href = loginHref(search ? `${pathname}?${search}` : pathname);
+    if (inline) return <Link href={href} rel="nofollow" onClick={onNavigate} className={`${btnPrimary} w-full`}>{t('header.login')}</Link>;
     return (
       <>
         <Link href={href} rel="nofollow" className={`${btnPrimary} max-sm:hidden`}>
@@ -47,6 +48,18 @@ export function UserMenu() {
       </>
     );
   }
+
+  if (inline) return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Link href="/me" onClick={onNavigate} className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-ui px-3 text-sm font-semibold text-ink hover:bg-surface-2">
+        <UserRound aria-hidden="true" className="h-5 w-5 shrink-0" />
+        {t('header.profile')}
+      </Link>
+      <button type="button" onClick={() => { onNavigate?.(); void logout(); }} className="flex min-h-11 items-center gap-2 rounded-ui px-3 text-sm text-muted hover:bg-surface-2">
+        <LogOut aria-hidden="true" className="h-5 w-5" />{t('header.logout')}
+      </button>
+    </div>
+  );
 
   return (
     <div ref={wrapRef} className="relative">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,11 +13,14 @@ import { isActivePath, MAIN_LINKS } from './navLinks';
 import { I18N_ENABLED } from '../../i18n/config';
 import { LanguageToggle, ThemeToggle } from './Toggles';
 import { TopicLinks } from './TopicsMenu';
+import { SearchBox } from './SearchBox';
+import { UserMenu, UserMenuSkeleton } from './UserMenu';
 
 /** Bottom sheet with focus trapping, scroll locking and focus restoration. */
-export function MobileDrawer({ open, onClose, categories }: { open: boolean; onClose: () => void; categories: Category[] | null }) {
+export function MobileDrawer({ open, onClose, categories, focusSearch = false }: { focusSearch?: boolean; open: boolean; onClose: () => void; categories: Category[] | null }) {
   const { t } = useTranslation();
   const pathname = usePathname();
+  const searchRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -32,12 +35,13 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
     const shell = document.querySelector<HTMLElement>('.site-shell');
     const wasInert = shell?.inert ?? false;
     if (shell) shell.inert = true;
-    closeRef.current?.focus();
+    if (focusSearch) searchRef.current?.focus();
+    else closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       // Giữ focus trong ngăn kéo khi Tab.
       if (e.key === 'Tab' && panelRef.current) {
-        const focusables = Array.from(panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), summary')).filter(el => el.getClientRects().length > 0);
+        const focusables = Array.from(panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), summary')).filter(el => el.getClientRects().length > 0);
         const first = focusables[0];
         const last = focusables[focusables.length - 1];
         if (!first || !last) return;
@@ -58,7 +62,7 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
       document.body.style.overflow = prevOverflow;
       document.removeEventListener('keydown', onKey);
     };
-  }, [open, onClose]);
+  }, [open, onClose, focusSearch]);
 
   if (!open) return null;
 
@@ -74,15 +78,6 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
         aria-label={t('nav.mobileNav')}
         className="mobile-menu-sheet absolute inset-x-0 bottom-0 mx-auto flex max-h-[85dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border border-line bg-surface shadow-2xl"
       >
-        <div className="flex items-center justify-between border-b border-line px-4 py-3">
-          <span className="flex items-center gap-2 font-bold text-ink">
-            <LogoMark className="h-8 w-8 text-xs" />
-            {t('meta.siteName')}
-          </span>
-          <button ref={closeRef} type="button" onClick={onClose} className={iconBtn} aria-label={t('nav.closeMenu')}>
-            <X aria-hidden="true" className="h-5 w-5" />
-          </button>
-        </div>
         <div className="min-h-0 overflow-y-auto overscroll-contain">
         <nav aria-label={t('nav.mainNav')} className="px-3 py-3">
           <ul className="space-y-1">
@@ -111,17 +106,28 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
             <p className="px-2 text-sm text-muted">{t('nav.topicsLoadFailed')}</p>
           )}
         </div>
-        <div className="flex items-center gap-3 border-t border-line px-5 py-3">
-          <ThemeToggle />
-          <Link href="/#newsletter" onClick={onClose} className="flex min-h-11 items-center text-sm font-semibold text-primary-ink">{t('footer.newsletter')}</Link>
         </div>
-        {I18N_ENABLED && (
-          <div className="mt-auto flex items-center justify-between border-t border-line px-5 py-4">
-            <span className="text-sm text-muted">{t('header.language')}</span>
-            <LanguageToggle />
+        <div className="shrink-0 space-y-3 border-t border-line px-4 py-3">
+          <SearchBox ref={searchRef} showHint={false} onSubmitted={onClose} />
+          <div className="flex flex-wrap items-center gap-3">
+            <ThemeToggle />
+            {I18N_ENABLED && <LanguageToggle />}
+            <Link href="/#newsletter" onClick={onClose} className="flex min-h-11 items-center text-sm font-semibold text-primary-ink">{t('footer.newsletter')}</Link>
           </div>
-        )}
+          <Suspense fallback={<UserMenuSkeleton />}>
+            <UserMenu inline onNavigate={onClose} />
+          </Suspense>
         </div>
+        <div className="flex items-center justify-between shrink-0 border-t border-line px-4 py-3">
+          <span className="flex items-center gap-2 font-bold text-ink">
+            <LogoMark className="h-8 w-8 text-xs" />
+            {t('meta.siteName')}
+          </span>
+          <button ref={closeRef} type="button" onClick={onClose} className={iconBtn} aria-label={t('nav.closeMenu')}>
+            <X aria-hidden="true" className="h-5 w-5" />
+          </button>
+        </div>
+
       </div>
     </div>,
     document.body,

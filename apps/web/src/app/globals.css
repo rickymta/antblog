@@ -41,7 +41,7 @@
 @media (max-width: 1023px) {
   :root { --mobile-nav-space: calc(5rem + env(safe-area-inset-bottom, 0px)); }
   html { scroll-padding-bottom: var(--mobile-nav-space); }
-  .site-shell { padding-bottom: var(--mobile-nav-space); }
+  .site-shell { padding-top: env(safe-area-inset-top, 0px); padding-bottom: var(--mobile-nav-space); }
   .site-header { padding-top: env(safe-area-inset-top, 0px); }
   .site-header button { min-width: 44px; min-height: 44px; }
   .mobile-bottom-nav {
@@ -67,6 +67,7 @@
   }
   .mobile-nav-item:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
   .mobile-menu-sheet { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .mobile-menu-sheet input { min-height: 44px; font-size: 16px; }
   .mobile-menu-sheet :is(button, a, summary) { min-height: 44px; }
 }
 @media print {

@@ -54,6 +54,7 @@ export const en: Messages = {
   },
   nav: {
     menu: 'Menu',
+    search: 'Search',
     home: 'Home',
     articles: 'Articles',
     paths: 'Learning paths',
