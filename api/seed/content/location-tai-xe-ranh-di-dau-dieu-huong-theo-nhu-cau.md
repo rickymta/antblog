@@ -2,7 +2,7 @@
 slug: location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau
 title: "Tài xế rảnh nên đi đâu: gợi ý theo nhu cầu, và ai trả cho km rỗng"
 summary: "Bài 49: gợi ý di chuyển cho tài xế rảnh theo bảng nhu cầu H3, chống bầy đàn, chỉ gợi ý không ép. Trên dữ liệu mô phỏng khách chờ đón ít hơn 36,1 s nhưng km rỗng tổng tăng 1.428,9 m mỗi khách đặt: tài xế gánh chi phí."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, h3, reposition, demand, herding, simulation]
 language: vi

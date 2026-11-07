@@ -2,7 +2,7 @@
 slug: rust-container-dockerfile-da-stage-cargo-chef-distroless
 title: "Container: Dockerfile đa stage, cargo-chef và distroless"
 summary: "Bài 63: đóng gói ledger-service nhỏ bằng Docker thật và đo: kích thước image, cache của cargo-chef, non-root, HEALTHCHECK không cần shell, SIGTERM và PID 1. Build đa kiến trúc chưa làm."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, docker, cargo-chef, distroless]
 language: vi

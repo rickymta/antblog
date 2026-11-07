@@ -2,7 +2,7 @@
 slug: python-rule-engine-scoring-strategy-explainability
 title: "Rule engine và điểm rủi ro: Strategy, cấu hình và giải thích được"
 summary: "Bài 56: rule engine chấm điểm rủi ro gian lận: rule là hàm trả điểm kèm lý do, cấu hình YAML kiểm khi nạp, ba strategy gộp điểm, kiểm thử bằng pytest, đo từng rule và chỉ ra khi nào rule hết đủ. Số đo thật."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, rule-engine, strategy]
 language: vi

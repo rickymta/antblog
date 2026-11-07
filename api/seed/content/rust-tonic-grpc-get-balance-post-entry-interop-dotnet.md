@@ -2,7 +2,7 @@
 slug: rust-tonic-grpc-get-balance-post-entry-interop-dotnet
 title: "gRPC với tonic: GetBalance và PostEntry cho service C# gọi"
 summary: "Bài 35: ledger.proto với số tiền int64, sinh code bằng tonic-prost-build, server tonic map LedgerError sang Status, deadline và interceptor, client .NET Grpc.Net.Client chạy thật, và bảng chọn gRPC hay REST."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, tonic, grpc, dotnet]
 language: vi

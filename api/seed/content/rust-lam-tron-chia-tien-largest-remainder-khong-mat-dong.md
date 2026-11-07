@@ -2,7 +2,7 @@
 slug: rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong
 title: "Làm tròn và chia tiền không mất đồng: largest remainder"
 summary: "Bài 46: vì sao làm tròn từng phần làm lệch đồng, các RoundingStrategy của rust_decimal, largest remainder tất định với số âm và i128, ghi quy tắc đồng lẻ vào bút toán, proptest tìm phản ví dụ."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, rounding, decimal, proptest]
 language: vi

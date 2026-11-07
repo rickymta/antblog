@@ -2,7 +2,7 @@
 slug: rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen
 title: "Bài toán sổ cái Tới Nơi: chart of accounts và dòng tiền một chuyến"
 summary: "Bài 41: chart of accounts của Tới Nơi chạy trên PostgreSQL thật. Tám mẫu tài khoản, dòng tiền TN-0001 và DL-0001 qua clearing, ranh giới với Payment C#, bốn metric đúng/sai đo bằng SQL."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, chart-of-accounts, double-entry, postgresql]
 language: vi

@@ -2,7 +2,7 @@
 slug: flutter-bao-mat-mobile-secure-storage-pinning-obfuscation-masvs
 title: "Bảo mật mobile: secure storage, pinning, obfuscation và OWASP MASVS"
 summary: "Bài 42: mô hình đe doạ app khách và app tài xế, bí mật không nằm trong app, Redactor che log, ghim SPKI bằng dio kiểm trên HTTPS localhost (validateCertificate chạy sau khi gửi), --obfuscate không bảo vệ bí mật, root là tín hiệu, checklist MASVS v2. 86 test."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, security, certificate-pinning, owasp, masvs, obfuscation]
 language: vi

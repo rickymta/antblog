@@ -2,7 +2,7 @@
 slug: rust-audit-append-only-hash-chain-phan-quyen-pii
 title: "Audit, bất biến dữ liệu và bảo mật sổ cái"
 summary: "Bài 50: REVOKE và trigger chặn sửa sổ nhưng chủ bảng vượt được; hash chain SHA-256 phát hiện dòng bị sửa, điểm neo ngoài database lộ cả chuỗi bị tính lại; phân quyền Finance/CS/Admin đo bằng role thật; PII tối thiểu."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, security, audit]
 language: vi

@@ -2,7 +2,7 @@
 slug: flutter-push-notification-fcm-apns-deep-link
 title: "Push notification: FCM, APNs, local notification và deep link từ thông báo"
 summary: "Bài 37: đưa tin push của Tới Nơi tới đúng màn hình chuyến: cấu hình Firebase, APNs key, quyền Android 13 và kênh thông báo, ba trạng thái foreground, background, terminated, PushRouter từ chối payload lạ, đăng ký FID và huỷ khi đăng xuất. Phần trên thiết bị chưa chạy."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, push-notification, fcm, apns, go-router, ios, android]
 language: vi

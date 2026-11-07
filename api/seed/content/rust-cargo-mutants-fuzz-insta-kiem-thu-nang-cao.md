@@ -2,7 +2,7 @@
 slug: rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao
 title: "Kiểm thử nâng cao: mutation, fuzz, snapshot và test tất định"
 summary: "Bài 57: cargo-mutants chỉ ra chỗ test còn hở, cargo-fuzz tìm panic ở parser sao kê, insta snapshot có redaction, clock giả và seed cố định chặn test flaky, kèm ngân sách test trong CI với số đo thật."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, testing, fuzzing, mutation]
 language: vi

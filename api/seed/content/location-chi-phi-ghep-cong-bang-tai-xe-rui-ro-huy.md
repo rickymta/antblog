@@ -2,7 +2,7 @@
 slug: location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy
 title: "Chi phí ghép ngoài quãng đường: công bằng cho tài xế và rủi ro hủy"
 summary: "Bài 45: thêm rủi ro hủy, thưởng chờ, thưởng xe rảnh và giới hạn đón xa vào chi phí ghép. Khi ghép ngay, hai số hạng không có gì để tác động; giới hạn đón xa làm đẹp số trung bình, ngoại vi hoàn thành −0,031. Trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dispatch, matching, fairness, policy, cancellation]
 language: vi

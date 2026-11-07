@@ -2,7 +2,7 @@
 slug: rust-aggregate-invariant-optimistic-locking-for-update
 title: "Aggregate, invariant và concurrency: version, optimistic locking, FOR UPDATE"
 summary: "Bài 53: aggregate Account giữ hạn mức rút trong domain; optimistic locking bằng version so với SELECT FOR UPDATE, retry có giới hạn và jitter, thứ tự khóa theo id tránh deadlock 40P01, kiểm bằng N task Barrier trên PostgreSQL."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, concurrency, aggregate]
 language: vi

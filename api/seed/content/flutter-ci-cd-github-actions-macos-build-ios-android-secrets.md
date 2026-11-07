@@ -2,7 +2,7 @@
 slug: flutter-ci-cd-github-actions-macos-build-ios-android-secrets
 title: "CI/CD build: GitHub Actions macOS và ubuntu, secrets, build number và artifact cho Tới Nơi"
 summary: "Bài 54: workflow mẫu dựng AAB trên ubuntu và IPA trên macOS: build number từ run_number, keystore và certificate từ secrets, keychain tạm có dọn, artifact, chi phí phút so với Codemagic. Test Dart chạy script thật với secret giả. Chưa chạy trên GitHub."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, ios, android, release, ci, github-actions]
 language: vi

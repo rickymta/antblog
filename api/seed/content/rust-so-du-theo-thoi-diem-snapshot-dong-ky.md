@@ -2,7 +2,7 @@
 slug: rust-so-du-theo-thoi-diem-snapshot-dong-ky
 title: "Số dư theo thời điểm, snapshot và đóng kỳ"
 summary: "Bài 48: tính số dư lúc 23:59 giờ Việt Nam bằng ranh giới nửa mở, so snapshot với tính lại trên 150.400 posting, đóng kỳ bằng trigger, sửa sai ở kỳ sau và dựng cuộc đua ghi/đóng kỳ bằng Barrier."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, snapshot, period-close]
 language: vi

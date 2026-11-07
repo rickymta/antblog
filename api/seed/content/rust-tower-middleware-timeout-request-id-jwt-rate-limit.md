@@ -2,7 +2,7 @@
 slug: rust-tower-middleware-timeout-request-id-jwt-rate-limit
 title: "Middleware với tower: timeout, request id, JWT và rate limit"
 summary: "Bài 33: dựng chồng middleware tower cho API sổ cái, chạy thật: thứ tự layer, request id vào span, timeout 504, JWT HS256, phân quyền finance/cs, giới hạn tải bằng tower::limit và các bẫy axum gặp phải."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, tower, jwt]
 language: vi

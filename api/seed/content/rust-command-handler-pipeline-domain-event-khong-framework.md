@@ -2,7 +2,7 @@
 slug: rust-command-handler-pipeline-domain-event-khong-framework
 title: "Command handler, pipeline và domain event không cần framework"
 summary: "Bài 52: trait Command có Output liên kết, dispatch generic bắt thiếu handler lúc biên dịch, pipeline validate, trace, transaction đo bằng log, domain event ghi outbox cùng transaction, chi phí Box, so với mediator của loạt C#."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, cqrs, pipeline, domain-event]
 language: vi

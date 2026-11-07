@@ -2,7 +2,7 @@
 slug: rust-opentelemetry-trace-tu-csharp-sang-rust-grpc-kafka
 title: "OpenTelemetry: lần theo một yêu cầu từ C# sang Rust qua gRPC và Kafka"
 summary: "Bài 66: một trace_id đi từ client C# qua gRPC tonic và Kafka tới consumer Rust bằng tracing-opentelemetry và traceparent; cha-con hay link, sampling, metric hữu hạn, log có trace_id, mất span khi quên shutdown."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, opentelemetry, tracing, observability]
 language: vi

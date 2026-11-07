@@ -2,7 +2,7 @@
 slug: location-chain-dispatch-tai-xe-sap-tra-khach
 title: "Ghép nối chuyến: nhận chuyến kế khi tài xế sắp trả khách"
 summary: "Bài 47: tài xế đang chở khách cũng là ứng viên, ETA còn lại có độ bất định. Trên dữ liệu mô phỏng, chain giảm khách bị bỏ rơi và thêm chuyến, nhưng khi xe thưa khách điển hình chờ lâu hơn; margin rủi ro không thấy giúp."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dispatch, chain-dispatch, matching, eta-uncertainty, simulation]
 language: vi

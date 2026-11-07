@@ -2,7 +2,7 @@
 slug: location-bidirectional-alt-landmark-tang-toc-truy-van
 title: "Bidirectional và ALT: giảm số nút duyệt mà vẫn đúng"
 summary: "Bài 22: Dijkstra hai chiều với điều kiện dừng đúng, lỗi dừng ở nút gặp đầu tiên cho chi phí sai ở 29/300 truy vấn HCM, ALT với landmark và bất đẳng thức tam giác, tiền xử lý đổi lấy số nút đã duyệt."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, bidirectional, alt, landmark, a-star, openstreetmap]
 language: vi

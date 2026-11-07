@@ -2,7 +2,7 @@
 slug: flutter-ky-ung-dung-ios-certificate-provisioning-profile-capabilities
 title: "Ký ứng dụng iOS: Apple Developer Program, certificate, provisioning profile và capabilities"
 summary: "Bài 52: vì sao iPhone chỉ chạy app được Apple cho phép. Vai trò tài khoản, certificate, App ID, profile development, ad hoc và App Store, capabilities và allowlist entitlement, ký tự động hay thủ công theo flavor, ExportOptions.plist, công cụ Dart đọc profile. Kiểm chứng cấu hình, chưa ký thật."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, ios, release, signing]
 language: vi

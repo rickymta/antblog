@@ -2,7 +2,7 @@
 slug: python-liveness-anti-spoofing-chat-luong-anh
 title: "Liveness và chống giả mạo cơ bản: ảnh in, màn hình, mờ, tối"
 summary: "Bài 50: kiểm chất lượng selfie (blur, sáng, tương phản, cỡ mặt) và dò mẫu lặp của màn hình, ảnh in bằng FFT. Nói rõ đây không phải liveness thật. Có lab chạy được và số đo thật."
-category: python
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, liveness, opencv, fft]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-result-option-toan-tu-hoi-loi-la-gia-tri
 title: "Result, Option và toán tử ?: lỗi là giá trị, không phải exception"
 summary: "Bài 07: Rust không có exception. Dùng Result, Option và ? để bút toán lệch tổng trả Err(Unbalanced), ghi trùng idempotency key trả bút toán cũ, và phân biệt lỗi nghiệp vụ với bug (panic)."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, error-handling, result]
 language: vi

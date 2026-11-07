@@ -2,7 +2,7 @@
 slug: location-ma-tran-many-to-many-bucket-ch
 title: "Ma trận many-to-many bằng bucket trên CH: nền của ghép chuyến"
 summary: "Bài 26: tính ma trận thời gian N×M bằng N+M tìm kiếm đi lên trên CH thay cho N×M truy vấn, kiểm đúng từng ô, đo rayon, ngân sách độ trễ, và nói rõ ma trận theo nút nên chưa có chi phí rẽ."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, contraction-hierarchies, rayon, matrix, dispatch]
 language: vi

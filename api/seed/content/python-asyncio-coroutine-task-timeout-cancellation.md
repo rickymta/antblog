@@ -2,7 +2,7 @@
 slug: python-asyncio-coroutine-task-timeout-cancellation
 title: "asyncio: coroutine, Task, timeout và hủy: gọi dịch vụ báo giá"
 summary: "Bài 21: gọi mười báo giá đồng thời bằng gather và TaskGroup, giới hạn chờ bằng asyncio.timeout, hủy an toàn với CancelledError, không chặn event loop bằng to_thread. Có số đo thật và lab --verify."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, asyncio, concurrency]
 language: vi

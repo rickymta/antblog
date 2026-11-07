@@ -2,7 +2,7 @@
 slug: python-use-case-ho-so-tai-xe-end-to-end
 title: "Use case nộp hồ sơ tài xế end-to-end: OCR → face → điểm rủi ro → quyết định"
 summary: "Bài 70: ghép OCR, khuôn mặt, điểm rủi ro thành một use case. Máy luôn dừng ở needs_review, ngưỡng chỉ chọn lý do vào hàng chờ, người duyệt mới quyết định. Có domain event KycApplicationScored và test toàn luồng."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, use-case, kyc, domain-event]
 language: vi

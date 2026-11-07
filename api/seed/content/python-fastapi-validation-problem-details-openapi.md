@@ -2,7 +2,7 @@
 slug: python-fastapi-validation-problem-details-openapi
 title: "Validation, lỗi có cấu trúc (Problem Details) và OpenAPI: hợp đồng API"
 summary: "Bài 32: đưa mọi lỗi của API báo giá về application/problem+json (RFC 9457) bằng exception handler, tách 400 và 422, khai báo lỗi trong OpenAPI, version /v1 và snapshot hợp đồng. Lab chạy thật."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, fastapi, openapi, problem-details]
 language: vi

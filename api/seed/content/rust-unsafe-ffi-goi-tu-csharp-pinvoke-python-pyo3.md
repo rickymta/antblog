@@ -2,7 +2,7 @@
 slug: rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3
 title: "unsafe và FFI: gọi Rust từ C# (P/Invoke) và Python (PyO3)"
 summary: "Bài 62: thư viện tính phí thành cdylib với hàm extern C, header cbindgen, client C# P/Invoke có SafeHandle, module Python bằng PyO3 và maturin, panic và double free ở ranh giới unsafe, và vì sao sổ cái vẫn đi qua gRPC."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, unsafe, ffi, pyo3]
 language: vi

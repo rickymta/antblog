@@ -2,7 +2,7 @@
 slug: python-abc-protocol-composition-dependency-injection
 title: "ABC, Protocol, composition và dependency injection: thay chính sách cước"
 summary: "Bài 14: từ duck typing đến abc.ABC và typing.Protocol, tiêm Clock và nguồn chính sách qua constructor để thay chính sách cước theo thành phố và test báo giá hết hạn mà không chờ, không cần DI container."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, dependency-injection, protocol]
 language: vi

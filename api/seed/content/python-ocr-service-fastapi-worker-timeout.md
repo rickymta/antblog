@@ -2,7 +2,7 @@
 slug: python-ocr-service-fastapi-worker-timeout
 title: "Đóng gói OCR thành service: FastAPI nhận ảnh, worker xử lý, timeout"
 summary: "Bài 46: đưa OCR Tesseract thành service. FastAPI nhận ảnh, worker arq chạy OCR như tiến trình con có thể kill, timeout dừng việc thật, job idempotent theo hồ sơ và hash ảnh, tải thử p50/p95 bằng httpx."
-category: python
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fastapi, arq, ocr, timeout]
 language: vi

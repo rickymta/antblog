@@ -2,7 +2,7 @@
 slug: flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe
 title: "Realtime WebSocket: reconnect, backoff và theo dõi tài xế"
 summary: "Bài 36: viết RealtimeClient cho Tới Nơi trên WebSocket: kết nối sau xác thực bằng token, tách sự kiện bền (sequence, logEpoch) khỏi vị trí tạm thời, reconnect với backoff full jitter, heartbeat, resume không mất và không trùng, gộp vị trí, ngắt khi app đi nền."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, realtime, websocket, ios, android]
 language: vi

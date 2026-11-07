@@ -2,7 +2,7 @@
 slug: location-routing-service-tonic-cache-fallback-p99
 title: "Dịch vụ định tuyến: gRPC với tonic, deadline, cache H3, dự phòng và p99"
 summary: "Bài 29: bọc engine thành dịch vụ gRPC Route và Matrix bằng tonic, deadline và giấy phép tính toán, cache theo ô H3 và khung giờ, dự phòng chim bay, client C# chạy thật, đo p50 và p99 khi máy chịu tải."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, tonic, grpc, cache, h3, fallback, csharp]
 language: vi

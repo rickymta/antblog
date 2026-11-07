@@ -2,7 +2,7 @@
 slug: python-fastapi-dependency-middleware-settings-logging
 title: "Dependency, middleware, cấu hình và structured logging"
 summary: "Bài 33: dựng khung vận hành cho FastAPI: Depends có cache và yield, lifespan, middleware gán request id, pydantic-settings fail fast, log JSON mang correlation id nhờ contextvars. Có lab chạy thật."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, fastapi, dependency-injection, logging]
 language: vi

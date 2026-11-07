@@ -2,7 +2,7 @@
 slug: location-go-backpressure-coalesce-drop-race-detector
 title: "Backpressure trong ingest: coalesce, drop có chủ đích và tắt êm"
 summary: "Bài 13: hàng đợi giới hạn cho vị trí tài xế, so unbounded, drop-newest và coalesce khi sink chậm, tắt êm trong hạn, thử bằng docker pause Kafka; kafka.failed = 20000 tái hiện được, vì sao lúc lỗi lúc không thì chưa rõ."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, go, backpressure, coalesce, graceful-shutdown, kafka, race-detector]
 language: vi

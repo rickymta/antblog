@@ -2,7 +2,7 @@
 slug: location-cat-tia-ung-vien-h3-ma-tran-thua
 title: "Cắt tỉa ứng viên: ma trận thưa ở quy mô thành phố"
 summary: "Bài 44: cắt tỉa ứng viên bằng H3 k-ring và k gần nhất. Khi xe gấp 4 lần khách, mất 2,4–4,6% tổng ETA; khi xe bằng khách, mất 4–16% số khách mỗi lô. Bộ giải đặc nên vùng khổng lồ vẫn chậm. Trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dispatch, matching, h3, sparse-matrix, latency]
 language: vi

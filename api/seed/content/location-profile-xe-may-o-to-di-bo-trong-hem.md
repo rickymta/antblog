@@ -2,7 +2,7 @@
 slug: location-profile-xe-may-o-to-di-bo-trong-hem
 title: "Profile xe máy, ô tô, đi bộ: cùng thành phố, ba đồ thị"
 summary: "Bài 24: một đồ thị CSR dùng chung, ba mảng trọng số cho ô tô, xe máy, đi bộ; quyền đi đọc từ thẻ OSM, tốc độ theo loại đường là giả định, hẻm, và đo tuyến ô tô khác tuyến xe máy trên 300 cặp nút HCM."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, profile, motorbike, openstreetmap, hem]
 language: vi

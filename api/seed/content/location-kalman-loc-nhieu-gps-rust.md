@@ -2,7 +2,7 @@
 slug: location-kalman-loc-nhieu-gps-rust
 title: "Lọc nhiễu GPS bằng Kalman: giúp được bao nhiêu và trả giá gì"
 summary: "Bài 15: Kalman vận tốc không đổi cho điểm GPS, nhiễu đo theo accuracy, cổng NIS cho điểm nhảy, làm mượt RTS; đo với ground truth của simulator: giảm 23,2% RMSE khi nhiễu trắng nhưng chỉ 3,7% khi nhiễu tương quan 8 s."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, kalman, gps, filtering, rts-smoother, synthetic-data]
 language: vi

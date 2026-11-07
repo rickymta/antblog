@@ -2,7 +2,7 @@
 slug: location-go-goroutine-channel-nhap-mon-cho-ingest
 title: "Go đủ dùng cho ingest: goroutine, channel, context và race detector"
 summary: "Bài 11: Go tối thiểu để đọc location-ingest, đối chiếu tokio và Rust: goroutine, channel có đệm, select, context, errgroup; tái hiện một data race mất hơn nửa số đếm rồi để -race bắt."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, go, goroutine, channel, context, errgroup, race-detector]
 language: vi

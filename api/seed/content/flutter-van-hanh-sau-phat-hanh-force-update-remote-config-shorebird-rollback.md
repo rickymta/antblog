@@ -2,7 +2,7 @@
 slug: flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback
 title: "Vận hành sau phát hành: force update, remote config, Shorebird và rollback cho Tới Nơi"
 summary: "Bài 59: store không có nút lùi, nên ta dựng sẵn force update fail open, remote config với kill switch, đối chiếu Shorebird theo tài liệu, và runbook halt hay pause rollout theo crash-free. Test tự động cho logic; chưa chạy với store, Firebase hay Shorebird thật. Kết Phần 7."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, ios, android, release, remote-config, shorebird]
 language: vi

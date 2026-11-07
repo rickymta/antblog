@@ -2,7 +2,7 @@
 slug: python-grpc-fraud-scoring-service
 title: "gRPC với grpcio: service chấm điểm gian lận cho Dispatch"
 summary: "Bài 37: dựng service fraud-scoring bằng grpcio: hợp đồng protobuf, sinh mã, server grpc.aio, client có deadline, status code, interceptor, và khi nào chọn gRPC thay REST. Lab chạy thật, --verify 41 ca."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, grpc, protobuf, fraud-scoring]
 language: vi

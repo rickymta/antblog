@@ -2,7 +2,7 @@
 slug: python-shap-explainability-audit-human-review
 title: "SHAP, audit và quy trình người duyệt"
 summary: "Bài 61: giải thích từng điểm gian lận bằng SHAP thành reasons[], đưa chuyến bị gắn cờ vào hàng đợi PostgreSQL, ghi nhật ký quyết định khó sửa, chỉ RV-001 được chốt, và đo công suất, SLA, dải điểm đáng duyệt."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, shap, audit]
 language: vi

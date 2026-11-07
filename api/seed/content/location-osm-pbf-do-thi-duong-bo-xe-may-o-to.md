@@ -2,7 +2,7 @@
 slug: location-osm-pbf-do-thi-duong-bo-xe-may-o-to
 title: "Từ OpenStreetMap tới đồ thị đường bộ: một chiều, xe máy, ô tô"
 summary: "Bài 06: đọc PBF OpenStreetMap bằng osmpbf, lọc bbox TP.HCM, đọc thẻ highway, oneway, motorcycle, tách way thành cạnh CSR cho ô tô, xe máy, đi bộ; đo chất lượng dữ liệu hẻm và thành phần liên thông."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, openstreetmap, osm-pbf, graph, csr, routing]
 language: vi

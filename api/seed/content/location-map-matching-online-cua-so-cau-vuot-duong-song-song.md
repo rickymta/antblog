@@ -2,7 +2,7 @@
 slug: location-map-matching-online-cua-so-cau-vuot-duong-song-song
 title: "Map matching online: cửa sổ trượt, cầu vượt và đường song song"
 summary: "Bài 17: bám đường theo luồng với độ trễ quyết định, ca khó cầu vượt, đường gom, hầm, mất tín hiệu và ngân sách CPU cho 25.000 tài xế; offline không phải lúc nào cũng chính xác hơn online (đường gom)."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, map-matching, online, sliding-window, overpass, synthetic-data]
 language: vi

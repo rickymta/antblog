@@ -2,7 +2,7 @@
 slug: python-clean-architecture-domain-application-infrastructure
 title: "Clean Architecture trong Python: domain, application, infrastructure, api"
 summary: "Bài 67: chia service hồ sơ KYC thành bốn lớp, dùng Protocol làm port, adapter giả ở infrastructure và import-linter giữ chiều phụ thuộc, kể cả khi ta cố ý phá. Có lab chạy được."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, clean-architecture, import-linter]
 language: vi

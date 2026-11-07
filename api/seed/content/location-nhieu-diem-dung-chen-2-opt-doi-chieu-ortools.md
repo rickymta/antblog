@@ -2,7 +2,7 @@
 slug: location-nhieu-diem-dung-chen-2-opt-doi-chieu-ortools
 title: "Nhiều điểm dừng: chèn và 2-opt trong Rust, đối chiếu OR-Tools, tổng hợp P05"
 summary: "Bài 50: một người giao hàng, n cặp lấy trước giao sau; chèn rẻ nhất và 2-opt/Or-opt trong Rust cách OR-Tools 0,39 đến 2,77% ở cực tiểu cục bộ. Thời gian, ngân sách, giới hạn của mốc so sánh và tổng hợp P05."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, python, ortools, 2-opt, insertion, pickup-delivery, vrp]
 language: vi

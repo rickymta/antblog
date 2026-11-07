@@ -2,7 +2,7 @@
 slug: python-kafka-aiokafka-producer-consumer-schema
 title: "Kafka với aiokafka: producer, consumer và schema sự kiện"
 summary: "Bài 38: dùng aiokafka cho Tới Nơi: key theo khách để giữ thứ tự, consumer group, commit offset sau xử lý (at-least-once), tái hiện xử lý trùng và mất sự kiện, schema version trong envelope. Lab chạy thật."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, kafka, aiokafka, event]
 language: vi

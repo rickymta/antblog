@@ -2,7 +2,7 @@
 slug: rust-graceful-shutdown-health-readiness-backpressure
 title: "Graceful shutdown, health, readiness và backpressure"
 summary: "Bài 39: bắt SIGTERM và ctrl-c bằng tokio::signal, lan CancellationToken tới HTTP, consumer Kafka và relay outbox; tắt đúng thứ tự, tách /healthz với /readyz, hàng đợi bounded với pause/resume; bị SIGKILL vẫn không mất bút toán."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, tokio, kafka, graceful-shutdown]
 language: vi

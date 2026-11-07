@@ -2,7 +2,7 @@
 slug: rust-profiling-flamegraph-tokio-console-dhat
 title: "Profiling: flamegraph, tokio-console và dhat tìm chỗ chậm"
 summary: "Bài 60: lab có ba chỗ chậm cố ý. samply cho CPU, dhat cho từng dòng cấp phát, tokio-console cho task chặn runtime; sửa rồi đo lại bằng bộ đếm không phụ thuộc tải. Nói rõ công cụ nào không chạy được trên máy viết bài."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, profiling, dhat, tokio-console]
 language: vi

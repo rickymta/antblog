@@ -2,7 +2,7 @@
 slug: python-repository-unit-of-work-sqlalchemy
 title: "Repository và Unit of Work với SQLAlchemy"
 summary: "Bài 69: repository theo aggregate KycApplication, Unit of Work bao một Session cho mỗi command, optimistic concurrency và bẫy identity map giữ tham chiếu yếu, kiểm bằng PostgreSQL thật. Có lab chạy được."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, sqlalchemy, repository, unit-of-work]
 language: vi

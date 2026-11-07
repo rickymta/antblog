@@ -2,7 +2,7 @@
 slug: python-model-registry-ab-drift-retraining
 title: "Model registry, A/B, drift và huấn luyện lại"
 summary: "Bài 60: đăng ký phiên bản mô hình vào registry dạng thư mục, chạy shadow mode và A/B theo hash khách, đo drift bằng PSI hai phía, đặt lịch huấn luyện lại và rollback bằng con trỏ. Số đo thật, lặp lại trên ba seed."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, mlops, drift]
 language: vi

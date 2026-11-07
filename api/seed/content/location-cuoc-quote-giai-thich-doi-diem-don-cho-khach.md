@@ -2,7 +2,7 @@
 slug: location-cuoc-quote-giai-thich-doi-diem-don-cho-khach
 title: "Đổi điểm đón thì cước ra sao, nói với khách thế nào, và tổng kết P04"
 summary: "Bài 40: cước 12.000 + 4.500/km, quote bất biến, không tăng giá lén, câu chữ cho khách và tài xế; rồi tổng kết P04 trên 20 seed, dải xác nhận và độ nhạy: cái gì có ích, cái gì không, ai trả. Trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, pricing, quote, fare, sensitivity-analysis, simulation, summary]
 language: vi

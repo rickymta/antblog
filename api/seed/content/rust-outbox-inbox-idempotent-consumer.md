@@ -2,7 +2,7 @@
 slug: rust-outbox-inbox-idempotent-consumer
 title: "Outbox, inbox và idempotent consumer trong Rust"
 summary: "Bài 37: tái hiện dual-write mất và sinh sự kiện bằng tiến trình con thoát giữa hai bước, ghi outbox cùng transaction sqlx, relay SKIP LOCKED, inbox event_id, DLQ và thứ tự khi nhiều worker, chạy trên PostgreSQL và Kafka."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, kafka, outbox, sqlx]
 language: vi

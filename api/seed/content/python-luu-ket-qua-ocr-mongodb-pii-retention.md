@@ -2,7 +2,7 @@
 slug: python-luu-ket-qua-ocr-mongodb-pii-retention
 title: "Lưu kết quả OCR: document MongoDB, mặt nạ PII, versioning và retention"
 summary: "Bài 47: lưu kết quả OCR vào MongoDB có chính sách PII. Che số giấy tờ, băm HMAC có khóa bí mật để đối chiếu, TTL index cho bản gốc, audit ai xem, migration schema v2 (bài 26) sang v3 đọc được cả hai."
-category: python
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, mongodb, pii, retention]
 language: vi

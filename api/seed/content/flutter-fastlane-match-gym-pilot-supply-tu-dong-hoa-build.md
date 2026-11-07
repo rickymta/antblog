@@ -2,7 +2,7 @@
 slug: flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build
 title: "fastlane cho Flutter: match, gym, pilot và supply tự động hoá build Tới Nơi"
 summary: "Bài 53: viết Fastfile cho Tới Nơi: match giữ chứng chỉ mã hoá và chỉ đọc trên CI, gym xuất IPA, pilot lên TestFlight, supply lên track internal của Google Play. Đăng nhập bằng App Store Connect API key, bí mật từ ENV, lane chọn theo flavor. Chưa chạy thật."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, ios, android, release, fastlane]
 language: vi

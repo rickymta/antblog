@@ -2,7 +2,7 @@
 slug: rust-trien-khai-aws-azure-secrets-health-autoscale
 title: "Triển khai AWS và Azure: cấu hình, secrets, health và autoscale theo lag Kafka"
 summary: "Bài 65: cấu hình ECS và Container Apps cho ledger-service: secret từ kho bí mật, /healthz và /readyz, ngân sách tắt, autoscale theo lag Kafka bị chặn bởi partition và kết nối PostgreSQL. Kiểm bằng code, chưa triển khai thật."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, deployment, aws, azure]
 language: vi

@@ -2,7 +2,7 @@
 slug: python-outbox-inbox-idempotent-consumer
 title: "Outbox, Inbox và idempotent consumer trong Python"
 summary: "Bài 39: ghi chuyến và outbox trong một transaction, dispatcher thuê dòng bằng SKIP LOCKED rồi phát Kafka, consumer khử trùng bằng inbox. Tái hiện crash sinh thông điệp trùng trên PostgreSQL và Kafka thật."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, outbox, kafka, idempotency]
 language: vi

@@ -2,7 +2,7 @@
 slug: flutter-platform-channel-pigeon-ffi-goi-native
 title: "Platform channel, Pigeon và FFI: gọi native khi plugin không đủ"
 summary: "Bài 40: app tài xế đọc pin và chế độ tiết kiệm pin để giãn tần suất gửi vị trí. So sánh plugin có sẵn, MethodChannel, Pigeon và dart:ffi (DynamicLibrary, build hook), luồng platform thread, PlatformException, MissingPluginException, test bằng messenger giả. Phần native chưa chạy trên thiết bị."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, platform-channel, pigeon, ffi, android, ios]
 language: vi

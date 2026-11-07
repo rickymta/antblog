@@ -20,8 +20,8 @@
       "en": "Programming"
     },
     "description": {
-      "vi": "Học lập trình theo từng ngôn ngữ: C#/.NET, Rust, Flutter/Dart, Python — cú pháp, mô hình bộ nhớ, xử lý đồng thời và cách viết các dịch vụ của dự án mẫu.",
-      "en": "Learn programming language by language: C#/.NET, Rust, Flutter/Dart, Python — syntax, memory models, concurrency and how the services of the sample project are written."
+      "vi": "Học lập trình theo từng ngôn ngữ: C#/.NET, Rust, Flutter/Dart, Python, Go — cú pháp, mô hình bộ nhớ, xử lý đồng thời và cách viết các dịch vụ của dự án mẫu.",
+      "en": "Learn programming language by language: C#/.NET, Rust, Flutter/Dart, Python, Go — syntax, memory models, concurrency and how the services of the sample project are written."
     },
     "icon": "code",
     "color": "#6366F1",
@@ -94,8 +94,8 @@
       "en": "Location & Routing"
     },
     "description": {
-      "vi": "Cụm dịch vụ xử lý vị trí và chỉ đường cho tài xế. Dùng nhiều ngôn ngữ (Rust, Go, Python) nhưng gom chung vì cùng một miền nghiệp vụ chuyên biệt.",
-      "en": "The cluster of location-processing and driver-routing services. It uses several languages (Rust, Go, Python) but is grouped together because of its specialised domain."
+      "vi": "Cụm dịch vụ xử lý vị trí và chỉ đường cho tài xế. Dùng nhiều ngôn ngữ (Rust, Go, Python, C#) nhưng gom chung vì cùng một miền nghiệp vụ chuyên biệt.",
+      "en": "The cluster of location-processing and driver-routing services. It uses several languages (Rust, Go, Python, C#) but is grouped together because of its specialised domain."
     },
     "icon": "location",
     "color": "#059669",

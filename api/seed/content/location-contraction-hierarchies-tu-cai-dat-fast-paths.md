@@ -2,7 +2,7 @@
 slug: location-contraction-hierarchies-tu-cai-dat-fast-paths
 title: "Contraction Hierarchies: tự cài đặt rồi đối chiếu fast_paths"
 summary: "Bài 25: tự cài Contraction Hierarchies bằng Rust (thứ tự co, shortcut, truy vấn hai chiều đi lên), đối chiếu fast_paths và Dijkstra trên đồ thị HCM, và vì sao CH theo nút không mang chi phí rẽ."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, contraction-hierarchies, fast-paths, openstreetmap]
 language: vi

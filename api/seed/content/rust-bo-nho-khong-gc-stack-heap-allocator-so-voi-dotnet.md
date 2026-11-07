@@ -2,7 +2,7 @@
 slug: rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet
 title: "Bộ nhớ không GC: stack, heap, allocator và so với .NET"
 summary: "Bài 59: Drop tất định và RAII, đếm allocation bằng allocator tự viết (90.026 block cho 10.000 bút toán), so mimalloc và jemalloc, chạy C# thật cùng khối lượng để so RSS và GC, cùng lifetime nâng cao."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, memory, allocator, drop]
 language: vi

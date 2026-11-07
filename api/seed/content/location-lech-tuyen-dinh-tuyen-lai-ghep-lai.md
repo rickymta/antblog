@@ -2,7 +2,7 @@
 slug: location-lech-tuyen-dinh-tuyen-lai-ghep-lai
 title: "Lệch tuyến, định tuyến lại và ghép lại: khi nào đáng làm phiền cả khách lẫn tài xế"
 summary: "Bài 48: phát hiện lệch tuyến từ bám đường bằng hysteresis, định tuyến lại phía server, ngân sách thông báo và biên chỉ ghép lại khi lợi đủ lớn. Lab độc lập vì simulator chưa có mô hình lệch tuyến, nên không có số toàn thành phố."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, map-matching, off-route, rerouting, hysteresis, dispatch]
 language: vi

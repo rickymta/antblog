@@ -2,7 +2,7 @@
 slug: location-chi-phi-re-u-turn-do-thi-theo-canh
 title: "Chi phí rẽ và quay đầu: đồ thị theo cạnh"
 summary: "Bài 23: vì sao Dijkstra theo nút bỏ sót quay đầu và cấm rẽ, đồ thị theo cạnh với chi phí rẽ, đọc cấm rẽ OSM (bỏ qua 784 có điều kiện và 112 có via là way), lối qua dải phân cách, đo 300 truy vấn HCM."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, turn-cost, u-turn, edge-based, openstreetmap]
 language: vi

@@ -2,7 +2,7 @@
 slug: python-networkx-graph-cau-ket-tai-xe-khach
 title: "Đồ thị với networkx: tìm cấu kết tài xế–khách"
 summary: "Bài 58: dựng đồ thị khách, tài xế, thiết bị theo cửa sổ thời gian bằng networkx, tách nhóm bằng Louvain, gắn cờ nhóm cho người duyệt và đo trên dữ liệu tổng hợp; nói rõ giới hạn quy mô."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, networkx, graph]
 language: vi

@@ -2,7 +2,7 @@
 slug: python-scikit-learn-lightgbm-imbalanced-cross-validation
 title: "scikit-learn và LightGBM: huấn luyện trên dữ liệu mất cân bằng"
 summary: "Bài 57: huấn luyện bộ chấm điểm gian lận bằng scikit-learn Pipeline và LightGBM: cross-validation theo thời gian, class weight, calibration, ngưỡng theo chi phí, lưu mô hình bằng joblib kèm metadata. Đo lặp trên 3 seed."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, scikit-learn, lightgbm]
 language: vi

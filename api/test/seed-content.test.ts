@@ -27,6 +27,18 @@ function depth(slug: string): number {
 }
 
 describe('dữ liệu seed thật', () => {
+  it('giữ cụm định vị đa ngôn ngữ riêng và phân loại các loạt bài ngôn ngữ', () => {
+    const bad: string[] = [];
+    for (const file of files) {
+      const { slug, category, level } = matter(readFileSync(path.join(contentDir, file), 'utf8')).data;
+      const language = ['python', 'rust', 'go'].find(lang => String(slug).startsWith(`${lang}-`));
+      const expected = String(slug).startsWith('location-') ? 'location-routing'
+        : String(slug).startsWith('flutter-') ? 'flutter'
+        : language ? `${language}-${level}` : undefined;
+      if (expected && category !== expected) bad.push(`${slug}: ${category} → ${expected}`);
+    }
+    expect(bad).toEqual([]);
+  });
   it('slug chủ đề duy nhất, mọi chủ đề cha tồn tại, cây không quá 3 cấp và không có vòng', () => {
     expect(new Set(categories.map((c) => c.slug)).size).toBe(categories.length);
     expect(categories.filter((c) => c.parent && !bySlug.has(c.parent)).map((c) => `${c.slug} → ${c.parent}`)).toEqual([]);

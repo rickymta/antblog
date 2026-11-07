@@ -2,7 +2,7 @@
 slug: python-kyc-tai-xe-bai-toan-du-lieu-metric
 title: "Bài toán KYC tài xế: luồng nghiệp vụ, dữ liệu tổng hợp và metric"
 summary: "Bài 41: luồng KYC của tài xế Tới Nơi, trạng thái hồ sơ, ranh giới ba service Python, bộ 50 ảnh giấy tờ tổng hợp có đáp án, CER, WER, precision theo trường và baseline Tesseract đo thật."
-category: python
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, kyc, ocr, metric]
 language: vi

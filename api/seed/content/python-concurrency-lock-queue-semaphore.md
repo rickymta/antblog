@@ -2,7 +2,7 @@
 slug: python-concurrency-lock-queue-semaphore
 title: "Lock, Queue, Semaphore: tránh nhận trùng chuyến"
 summary: "Bài 23: tái hiện race hai tài xế cùng nhận một chuyến bằng asyncio và thread, sửa bằng asyncio.Lock, threading.Lock, giới hạn bằng Semaphore, điều tiết bằng Queue có maxsize. Có số đo thật và lab --verify."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, concurrency, asyncio]
 language: vi

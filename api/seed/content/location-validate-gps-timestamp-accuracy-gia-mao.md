@@ -2,7 +2,7 @@
 slug: location-validate-gps-timestamp-accuracy-gia-mao
 title: "Kiểm tra GPS: đồng hồ lệch, accuracy, nhảy vị trí và cờ nghi giả mạo"
 summary: "Bài 14: validator của ingest sửa đồng hồ lệch, loại điểm vô nghĩa, gắn cờ điểm đáng nghi nhưng không kết luận gian lận; bộ test 16 ca điểm xấu và một lần chạy toàn tuyến có tiêm lỗi."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, go, validation, clock-skew, gps-spoofing, testing]
 language: vi

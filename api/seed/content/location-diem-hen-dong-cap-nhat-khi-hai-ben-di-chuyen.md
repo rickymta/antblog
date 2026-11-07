@@ -2,7 +2,7 @@
 slug: location-diem-hen-dong-cap-nhat-khi-hai-ben-di-chuyen
 title: "Điểm hẹn động: cập nhật khi hai bên đang đi, và kết quả rỗng của hysteresis"
 summary: "Bài 36: tính lại điểm hẹn khi khách và tài xế đang di chuyển. «Đổi ngay» có lợi nhưng khách đi thêm và đổi qua đổi lại; hysteresis đặt trước gần như không đổi gì. Kết quả rỗng, trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, rendezvous, hysteresis, simulation, optimization, meet-gap]
 language: vi

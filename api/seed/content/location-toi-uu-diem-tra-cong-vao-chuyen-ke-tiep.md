@@ -2,7 +2,7 @@
 slug: location-toi-uu-diem-tra-cong-vao-chuyen-ke-tiep
 title: "Tối ưu điểm trả: gần đích thật, đúng phía, dễ bắt chuyến kế, và vì sao số đo nhỏ"
 summary: "Bài 38: hàm mục tiêu cho điểm trả với chi phí thóat của tài xế. Riêng điểm trả không có ý nghĩa thống kê (km rỗng −16,3 m [−51,5; +18,9]) và khách đi thêm 10,6 m ở cuối chuyến. Trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dropoff, objective, simulation, deadhead, paired-evaluation]
 language: vi

@@ -2,7 +2,7 @@
 slug: flutter-app-store-production-metadata-privacy-review-phased-release
 title: "App Store production: metadata, privacy labels, App Review và phased release"
 summary: "Bài 58: đưa Tới Nơi lên App Store. Giới hạn metadata (keywords tính bằng byte), ảnh chụp, PrivacyInfo.xcprivacy và required reason API, privacy label khớp mô tả quyền, demo account, điều App Review hỏi app gọi xe, phased release 7 ngày. Chưa gửi duyệt thật."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, ios, release, app-store, privacy]
 language: vi

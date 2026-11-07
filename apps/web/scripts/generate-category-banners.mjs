@@ -5,7 +5,7 @@
  * Bố cục: nửa trái (x < 720) để TRỐNG — HTML phủ chữ lên đó; toàn bộ hình nằm trong x ≥ 780 để còn nguyên khi thẻ
  * cắt theo phần bên phải (16:7 neo phải ⇒ thấy từ x ≈ 686). Không đóng tên chủ đề vào ảnh (chữ được địa phương hoá ở HTML).
  */
-import { writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -473,7 +473,16 @@ const art = {
 };
 
 // ───────────────────────── lắp SVG ─────────────────────────
-const slugs = Object.keys(COLORS);
+const categories = JSON.parse(await readFile(path.resolve(root, '../../api/seed/categories.json'), 'utf8'));
+const slugs = categories.map(c => c.slug);
+for (const category of categories) {
+  COLORS[category.slug] = category.color;
+  if (!art[category.slug]) {
+    const base = category.slug === 'go' ? 'programming' : category.parent;
+    if (!art[base]) throw new Error('Missing base illustration: ' + category.slug);
+    art[category.slug] = k => art[base](k) + T(1510, 370, category.slug.toUpperCase(), 18, k.a, { anchor: 'end' });
+  }
+}
 for (const slug of slugs) {
   if (!art[slug]) throw new Error('Missing illustration: ' + slug);
   const k = palette(COLORS[slug]);

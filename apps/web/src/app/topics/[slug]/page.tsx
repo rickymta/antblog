@@ -34,7 +34,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const description = clampDescription(pickLocalized(category.description, locale) || t('meta.description'));
   // Chủ đề cha chỉ liệt kê chủ đề con (không có danh sách bài) ⇒ bỏ qua ?page=, ?q=, bộ lọc: một URL chuẩn duy nhất, luôn được index.
   // Cùng URL `/categories` với trang (fetch được Next dedupe trong một request) nên không tốn thêm lượt gọi API.
-  const categories = await settle(serverApi.categories());
+  const categories = await serverApi.categories();
   if (categories?.some(c => c.parentId === category.id)) {
     return pageMetadata({ title: name, description, path: topicPath(category.slug), locale });
   }
@@ -53,8 +53,8 @@ export default async function TopicPage({ params, searchParams }: Props) {
   const { t, locale } = await getServerI18n();
   const query = parseArticleQuery(await searchParams, slug);
   // Chủ đề + cây chủ đề tải song song. Chủ đề cha (có chủ đề con) chỉ liệt kê chủ đề con, KHÔNG gọi API bài viết/thẻ.
-  // Nếu không tải được cây chủ đề (`categories = null`) thì coi như chủ đề lá: vẫn hiện danh sách bài (phương án an toàn).
-  const [category, categories] = await Promise.all([orNotFound(serverApi.category(slug)), settle(serverApi.categories())]);
+  // Cây chủ đề phải tải thành công trước khi quyết định có hiển thị bài viết.
+  const [category, categories] = await Promise.all([orNotFound(serverApi.category(slug)), serverApi.categories()]);
   const children = (categories ?? []).filter(c => c.parentId === category.id); // API đã sắp theo `order`, giữ nguyên thứ tự.
   const isParent = children.length > 0;
   const [articles, tags] = isParent

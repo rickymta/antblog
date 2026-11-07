@@ -2,7 +2,7 @@
 slug: python-decorator-context-manager
 title: "Decorator và context manager: retry, đo thời gian, transaction"
 summary: "Bài 17: closure, functools.wraps, decorator có tham số retry và timed, thứ tự chồng decorator; @contextmanager, class và ExitStack cho transaction giả. Kiểm thử bằng FakeTimer, không ngủ thật."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, decorator, context-manager]
 language: vi

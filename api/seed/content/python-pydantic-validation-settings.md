@@ -2,7 +2,7 @@
 slug: python-pydantic-validation-settings
 title: "Pydantic v2: validate hồ sơ tài xế và cấu hình ứng dụng"
 summary: "Bài 15: dùng pydantic v2 kiểm hồ sơ tài xế ở biên hệ thống: BaseModel, field và model validator, lỗi có cấu trúc, lax và strict; BaseSettings đọc TOINOI_*. Khi nào dùng dataclass. Có output thật."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, pydantic, validation]
 language: vi

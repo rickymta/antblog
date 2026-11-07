@@ -2,7 +2,7 @@
 slug: location-hem-chung-cu-tttm-san-bay-cong-sanh
 title: "Hẻm, chung cư, TTTM, sân bay: nơi GPS vô dụng và dữ liệu cổng gần như trống"
 summary: "Bài 37: lớp cổng OSM gần như trống ở TP.HCM (0,7% khách mẫu có cổng trong 80 m), hẻm khác nhau cho xe máy và ô tô, vùng đón bắt buộc là dữ liệu BỊA, GPS kém và chuỗi lùi không âm thầm. Trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, openstreetmap, entrance, alley, gps, fallback, simulation]
 language: vi

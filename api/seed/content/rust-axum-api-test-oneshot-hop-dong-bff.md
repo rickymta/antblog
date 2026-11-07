@@ -2,7 +2,7 @@
 slug: rust-axum-api-test-oneshot-hop-dong-bff
 title: "API test với axum: oneshot, DB thật và hợp đồng với BFF C#"
 summary: "Bài 34: gọi Router bằng oneshot không cần socket, khi nào cần server thật; ca 401, 403, 409, 422 trên PostgreSQL thật; snapshot OpenAPI bằng insta; file JSON chung để test Rust và client C# cùng kiểm."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, testing, openapi]
 language: vi

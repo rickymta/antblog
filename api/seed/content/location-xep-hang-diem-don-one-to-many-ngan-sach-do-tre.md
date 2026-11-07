@@ -2,7 +2,7 @@
 slug: location-xep-hang-diem-don-one-to-many-ngan-sach-do-tre
 title: "Xếp hạng điểm đón trong ngân sách độ trễ"
 summary: "Bài 35: tính J cho mọi ứng viên từ ma trận, trả top 3, chấm lại bằng A* theo cạnh; ngân sách 120 ms cho p99 bị vượt (145,9 ms CPU); chưa biết tài xế thì dùng phân bố quanh đó; bất biến không tệ hơn điểm ghim theo J."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, pickup, latency, p99, proptest, ranking]
 language: vi

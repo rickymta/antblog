@@ -2,7 +2,7 @@
 slug: rust-refund-reversal-chargeback-but-toan-dao-maker-checker
 title: "Refund, reversal và chargeback: bút toán đảo và maker-checker"
 summary: "Bài 43: đảo toàn phần có reversal_of và không đảo được hai lần, hoàn một phần tách theo tỷ lệ, tổng hoàn không vượt số đã thu khi duyệt đồng thời, chargeback từ VíXanh và maker-checker, chạy trên PostgreSQL."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, refund, chargeback, postgresql]
 language: vi

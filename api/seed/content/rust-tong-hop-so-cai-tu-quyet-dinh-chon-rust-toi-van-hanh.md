@@ -2,7 +2,7 @@
 slug: rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh
 title: "Bài tổng hợp toàn loạt: sổ cái từ quyết định chọn Rust tới vận hành"
 summary: "Bài 68: quay lại ADR bài 01 với sổ bằng chứng 15 dòng kiểm được bằng lệnh, nói thẳng điều loạt không chứng minh, bản đồ 68 bài, ba đường đọc, hợp đồng với C#, Go, Python và điều lab chưa có."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, adr, tong-hop]
 language: vi

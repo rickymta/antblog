@@ -16,6 +16,7 @@
     "seed:demo": "tsx seed/demo.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "categories:tree": "tsx scripts/category-tree.ts",
+    "categories:content": "tsx scripts/category-content.ts",
     "programming:structure": "tsx scripts/programming-structure.ts"
   },
   "dependencies": {

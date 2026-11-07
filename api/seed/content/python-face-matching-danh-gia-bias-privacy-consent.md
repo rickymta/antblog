@@ -2,7 +2,7 @@
 slug: python-face-matching-danh-gia-bias-privacy-consent
 title: "Đánh giá, thiên lệch, quyền riêng tư và sự đồng ý"
 summary: "Bài 53: đo FAR/FRR theo nhóm kèm khoảng tin cậy và nói thẳng điều Olivetti không đo được; lưu embedding thay ảnh, đồng ý, retention, quyền xóa; hệ thống chỉ gợi ý, người quyết định. Lab chạy thật."
-category: python
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, face-matching, bias, privacy]
 language: vi

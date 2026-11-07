@@ -2,7 +2,7 @@
 slug: location-go-ingest-websocket-batch-gps-tai-xe
 title: "Location ingest bằng Go: nhận GPS theo lô từ app tài xế qua WebSocket"
 summary: "Bài 12: hợp đồng protobuf GpsBatch/BatchAck, một goroutine mỗi kết nối, batching phía app, đo 6.250 điểm/s với 25.000 kết nối và tìm điểm gãy; so WebSocket với gRPC stream bằng lập luận, chưa đo."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, go, websocket, protobuf, batching, load-test, kafka]
 language: vi

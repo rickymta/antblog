@@ -2,7 +2,7 @@
 slug: location-adr-rust-go-python-csharp-ranh-gioi-service
 title: "ADR: Rust, Go, Python và C# mỗi bên làm gì trong service định vị"
 summary: "Bài 02: ADR phân vai bốn ngôn ngữ. Rust không yếu thuật toán; Go và Python giữ chỗ chúng có lợi thật; Rust đề xuất, C# quyết định; cái giá của bốn ngôn ngữ và khi nào nên gộp lại."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, go, python, csharp, adr, grpc]
 language: vi

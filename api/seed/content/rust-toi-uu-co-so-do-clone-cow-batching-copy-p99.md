@@ -2,7 +2,7 @@
 slug: rust-toi-uu-co-so-do-clone-cow-batching-copy-p99
 title: "Tối ưu có số đo: tránh clone, Cow, batching và COPY"
 summary: "Bài 61: đặt mục tiêu trước rồi đo. Cow giảm 10.000 cấp phát còn 500, mượn thay clone, gộp lô giảm 8.991 round trip còn 10, COPY và trigger, prepared statement, p99 với coordinated omission, khi nào dừng."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, performance, cow, copy]
 language: vi

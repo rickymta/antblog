@@ -2,7 +2,7 @@
 slug: location-geometry-crate-geo-chieu-diem-polyline-bearing
 title: "Hình học với crate geo: chiếu điểm, polyline, bearing và GeoJSON"
 summary: "Bài 05: chiếu điểm GPS lên đoạn và polyline, vị trí dọc tuyến, bearing, hệ độ so với hệ mét trong crate geo, mã hóa polyline và xuất GeoJSON để xem kết quả trên bản đồ như một thói quen debug."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, geo, polyline, bearing, geojson, projection]
 language: vi

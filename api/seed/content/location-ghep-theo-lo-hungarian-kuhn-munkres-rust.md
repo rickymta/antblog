@@ -2,7 +2,7 @@
 slug: location-ghep-theo-lo-hungarian-kuhn-munkres-rust
 title: "Ghép theo lô: bài toán phân công và thuật toán Hungarian"
 summary: "Bài 42: ghép theo lô bằng Hungarian trên ma trận ETA. Giảm 911,7 m km rỗng ở cao điểm nhưng khách bị bỏ rơi tăng 0,0149 lên 0,0717; ở mật độ thường lô chỉ 1,6 khách nên không có gì để chọn. Trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dispatch, matching, hungarian, assignment, simulation]
 language: vi

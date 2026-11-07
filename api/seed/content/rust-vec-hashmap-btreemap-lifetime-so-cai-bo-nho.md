@@ -2,7 +2,7 @@
 slug: rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho
 title: "Vec, HashMap, BTreeMap và lifetime cơ bản: sổ cái trong bộ nhớ"
 summary: "Bài 09: dựng sổ cái trong bộ nhớ bằng Vec, HashMap, BTreeMap, HashSet; dùng entry API, slice, range query và hiểu vì sao lifetime 'a xuất hiện khi hàm trả về tham chiếu."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, collections, lifetime]
 language: vi

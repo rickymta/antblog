@@ -2,7 +2,7 @@
 slug: rust-hexagonal-clean-workspace-crates-port-adapter
 title: "Hexagonal/Clean trong Rust: workspace crates domain, application, infrastructure, api"
 summary: "Bài 51: tách ledger-api thành bốn crate. Cargo cưỡng chế chiều phụ thuộc nhưng không cấm khai báo sai, nên cần test đọc cargo metadata. Port là trait, adapter bộ nhớ, sqlx và Kafka, feature kafka, khi nào chưa cần tách."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, architecture, workspace, hexagonal]
 language: vi

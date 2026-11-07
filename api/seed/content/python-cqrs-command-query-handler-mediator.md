@@ -2,7 +2,7 @@
 slug: python-cqrs-command-query-handler-mediator
 title: "CQRS và mediator: command/query handler, pipeline không cần thư viện nặng"
 summary: "Bài 68: tách command và query thành thông điệp có handler riêng, viết mediator dispatch theo kiểu và pipeline log, validate, transaction bằng hàm bọc, rồi so với MediatR. Có lab chạy được."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, cqrs, mediator, clean-architecture]
 language: vi

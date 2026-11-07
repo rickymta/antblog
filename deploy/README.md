@@ -166,6 +166,16 @@ Seed cập nhật tên, mô tả, biểu tượng, thứ tự và quan hệ cha�
 
 Cần build lại cả `api`, `web` và `nginx`: API để kiểm tra chủ đề lá khi lưu bài, `web` cho trang chủ đề và ảnh bìa (ảnh banner nằm trong image `web`), `nginx` để nhận lại upstream.
 
+Để đồng bộ cả cây danh mục, banner và phân loại bài theo bản rà soát mới, triển khai lại web (banner được đóng gói trong web) và chạy migration metadata dưới đây. Migration dùng slug bài trong seed để chuyển đúng danh mục lá, kể cả bài hiện ở một danh mục lá khác; không sửa nội dung, tiêu đề, trạng thái hoặc lộ trình học. Xem kỹ danh sách `moves` trước khi áp dụng. Bài chỉ có trong CMS không được tự đoán danh mục; nếu còn bài CMS ở danh mục cha, lệnh apply dừng trước khi ghi. Không sửa cây/bài trong CMS trong lúc migration chạy. Chạy lại an toàn nếu bị gián đoạn.
+
+```bash
+docker compose run --rm --build seed npm run categories:content
+mkdir -p backups/categories
+docker compose run --rm -v "$PWD/backups/categories:/app/.migration-backups" seed npm run categories:content -- --apply
+```
+
+Backup chứa cây trước thay đổi và ánh xạ danh mục của bài. Sau migration, kiểm tra `/topics/programming`, `/topics/python`, `/topics/location-routing`: trang cha chỉ có thẻ danh mục con; trang lá mới có bộ lọc và bài viết. Cache cây có thể cần tối đa 5 phút để làm mới.
+
 Nếu chỉ cần cập nhật cấu trúc cây từ `categories.json` mà không nạp lại nội dung bài viết, dùng `categories:tree`. Lệnh này chỉ thêm chủ đề còn thiếu và đặt quan hệ cha–con, không đổi tên/mô tả và không chuyển bài viết:
 
 ```bash

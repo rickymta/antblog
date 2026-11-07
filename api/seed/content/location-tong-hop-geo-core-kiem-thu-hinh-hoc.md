@@ -2,7 +2,7 @@
 slug: location-tong-hop-geo-core-kiem-thu-hinh-hoc
 title: "Tổng hợp P01: thư viện geo-core và kiểm thử hình học"
 summary: "Bài 10: tổng kết Phần 1: crate geo-core có gì và chưa có gì, kiểm thử thuộc tính bằng proptest, đồ thị tổng hợp «khu mẫu» cho CI, và danh sách việc chưa làm hoặc chưa tra của P01."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, geo-core, proptest, testing, fixture, ci]
 language: vi

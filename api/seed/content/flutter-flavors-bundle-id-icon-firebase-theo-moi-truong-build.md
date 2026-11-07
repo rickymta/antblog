@@ -2,7 +2,7 @@
 slug: flutter-flavors-bundle-id-icon-firebase-theo-moi-truong-build
 title: "Flavors khi build: bundle ID, application ID, icon, tên app và Firebase theo môi trường"
 summary: "Bài 50: một tên flavor chọn productFlavor của Gradle và scheme, configuration, xcconfig của Xcode, để ba bản dev, staging, prod có ID, tên, icon và file Firebase riêng, cài cạnh nhau được. Kiểm bằng script và 131 test; chưa build trên Gradle, Xcode hay thiết bị."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, flavors, android, ios, firebase, release]
 language: vi

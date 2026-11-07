@@ -2,7 +2,7 @@
 slug: rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay
 title: "Vận hành sổ cái: SLO, alert lệch đối soát, runbook, DLQ và replay an toàn"
 summary: "Bài 67: SLO gợi ý §14.1 thành SLI bằng SQL và Kafka, burn rate đa cửa sổ bằng hàm thuần, alert lệch đối soát không tự sửa sổ, runbook diễn tập thật, replay an toàn và pg_dump restore khớp hash chain."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, slo, runbook, replay]
 language: vi

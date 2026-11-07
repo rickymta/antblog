@@ -2,7 +2,7 @@
 slug: python-face-match-grpc-service-batching-model-loading
 title: "Service face match qua gRPC: nạp mô hình, batching, CPU/GPU"
 summary: "Bài 52: service kyc-face qua gRPC: nạp mô hình SFace một lần, warm-up, health, micro-batching bằng asyncio.Queue, deadline hai đầu, hàng chờ có giới hạn, tắt có thứ tự, providers của ONNX Runtime. Số đo thật kèm tải máy."
-category: python
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, grpc, onnx-runtime, face-matching]
 language: vi

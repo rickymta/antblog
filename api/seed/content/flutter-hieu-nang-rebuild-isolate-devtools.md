@@ -2,7 +2,7 @@
 slug: flutter-hieu-nang-rebuild-isolate-devtools
 title: "Hiệu năng: rebuild, const, RepaintBoundary, isolate và DevTools"
 summary: "Bài 41: đo trước khi sửa hiệu năng app Tới Nơi. Đếm rebuild và paint bằng test (const, tách widget, select, RepaintBoundary), danh sách lười, ResizeImage, Isolate.run cho JSON lớn, DevTools ở profile mode. flutter test không đo được mili giây khung hình."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, performance, isolate, devtools]
 language: vi

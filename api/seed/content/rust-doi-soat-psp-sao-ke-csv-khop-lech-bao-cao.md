@@ -2,7 +2,7 @@
 slug: rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao
 title: "Đối soát với VíXanh: nhập sao kê, khớp theo external ref, báo lệch"
 summary: "Bài 47: đọc sao kê CSV streaming với csv crate, hash SHA-256 làm khóa idempotent, COPY vào bảng tạm rồi khớp bằng SQL, phân loại lệch, job định kỳ với clock truyền vào, báo cáo CSV cho Finance."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, csv, reconciliation, postgresql]
 language: vi

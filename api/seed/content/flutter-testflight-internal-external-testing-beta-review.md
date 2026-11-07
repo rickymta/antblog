@@ -2,7 +2,7 @@
 slug: flutter-testflight-internal-external-testing-beta-review
 title: "TestFlight: internal và external testing, Beta App Review và export compliance cho Tới Nơi"
 summary: "Bài 56: đưa bản staging của Tới Nơi lên TestFlight. Tải lên bằng Xcode, Transporter hay pilot, đọc trạng thái build, nhóm internal tới 100 người và external tới 10.000, Beta App Review, export compliance, hạn 90 ngày, feedback và crash. Chưa chạy với tài khoản thật."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, ios, release, testflight]
 language: vi

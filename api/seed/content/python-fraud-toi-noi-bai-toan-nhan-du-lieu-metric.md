@@ -2,7 +2,7 @@
 slug: python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric
 title: "Gian lận trong Tới Nơi: loại hình, nhãn, dữ liệu và metric"
 summary: "Bài 54: bốn loại gian lận của Tới Nơi và dấu vết của chúng, bộ dữ liệu tổng hợp dùng chung cả phần 07, nhãn trễ, chia train/valid theo thời gian, PR-AUC so với ROC-AUC và chi phí hai chiều. Có số đo thật."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, metric, imbalanced-data]
 language: vi

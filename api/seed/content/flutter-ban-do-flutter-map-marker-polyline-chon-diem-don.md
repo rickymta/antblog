@@ -2,7 +2,7 @@
 slug: flutter-ban-do-flutter-map-marker-polyline-chon-diem-don
 title: "Bản đồ với flutter_map: marker, polyline và chọn điểm đón"
 summary: "Bài 34: màn hình chọn điểm đón của Tới Nơi bằng flutter_map: tile OSM và điều khoản dùng (attribution, User-Agent, không chạy app lớn trên server cộng đồng), marker, polyline, kéo bản đồ đọc MapCamera.center, haversine, cước bằng calculateFare, test không ra mạng, so với Google Maps và Mapbox."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, ios, android, map, flutter-map, openstreetmap, testing]
 language: vi

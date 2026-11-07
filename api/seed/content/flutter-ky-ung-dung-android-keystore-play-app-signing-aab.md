@@ -2,7 +2,7 @@
 slug: flutter-ky-ung-dung-android-keystore-play-app-signing-aab
 title: "Ký ứng dụng Android: keystore, Play App Signing, AAB và versionCode"
 summary: "Bài 51: dựng chuỗi ký Android cho Tới Nơi: upload keystore bằng keytool, key.properties ngoài git, signingConfigs không lui về khoá debug, Play App Signing, AAB và APK, kiểm chữ ký bằng apksigner và jarsigner, versionCode luôn tăng. Gradle và Play chưa chạy."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, android, release, signing, google-play]
 language: vi

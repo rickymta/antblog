@@ -2,7 +2,7 @@
 slug: rust-ci-cd-github-actions-clippy-audit-deny-postgresql
 title: "CI/CD: GitHub Actions với clippy, test, audit, deny và PostgreSQL"
 summary: "Bài 64: pipeline GitHub Actions cho crate Rust có PostgreSQL: matrix stable và MSRV, rust-cache, clippy -D warnings, audit, deny, sqlx offline, quyền tối thiểu, pin SHA. Lệnh chạy thật ở local, workflow chưa chạy trên GitHub."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, ci-cd, github-actions, supply-chain]
 language: vi

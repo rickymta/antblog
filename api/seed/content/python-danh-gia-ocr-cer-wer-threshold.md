@@ -2,7 +2,7 @@
 slug: python-danh-gia-ocr-cer-wer-threshold
 title: "Đánh giá OCR: CER/WER, bộ test vàng và ngưỡng chấp nhận"
 summary: "Bài 45: đo OCR bằng CER/WER với jiwer trên bộ test vàng 50 thẻ giả, phân tích thay/xóa/chèn theo trường, chọn ngưỡng đưa người duyệt từ số liệu, và chặn regression bằng baseline.json. Có output thật."
-category: python
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, ocr, jiwer, evaluation]
 language: vi

@@ -2,7 +2,7 @@
 slug: location-toc-do-theo-gio-customizable-ch-ket-xe
 title: "Tốc độ theo giờ và kẹt xe: Customizable CH, đổi trọng số không dựng lại"
 summary: "Bài 27: hồ sơ kẹt xe theo giờ (tổng hợp, không phải dữ liệu thật), Customizable CH tách thứ tự khỏi trọng số, kết quả đúng nhưng truy vấn chậm hơn CH thường 31–35 lần, và ETA tĩnh sai bao nhiêu."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, customizable-ch, traffic, time-dependent]
 language: vi

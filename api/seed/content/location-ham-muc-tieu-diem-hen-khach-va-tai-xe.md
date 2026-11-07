@@ -2,7 +2,7 @@
 slug: location-ham-muc-tieu-diem-hen-khach-va-tai-xe
 title: "Hàm mục tiêu điểm hẹn: đặt khách và tài xế lên cùng một cân"
 summary: "Bài 32: hàm J(p) với bốn trọng số, đường đánh đổi đi bộ và km rỗng, so sánh cặp trên 20 seed, và một lần sửa quy tắc chọn trọng số sau khi thấy kết quả, có dải seed xác nhận. Khách điển hình đi bộ thêm 26,5 m."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, pickup, objective-function, paired-comparison, simulation, trade-off]
 language: vi

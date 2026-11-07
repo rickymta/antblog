@@ -2,7 +2,7 @@
 slug: python-dieu-kien-vong-lap-ham
 title: "Điều kiện, vòng lặp và hàm: tách quy tắc tính cước"
 summary: "Bài 03: dùng if/elif/else, for, while, tham số mặc định và keyword-only để tách calculate_fare(distance_km, *, service) cho ride, food, parcel; từ chối ngoài miền bằng ValueError, kiểm bằng --verify."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, control-flow, functions]
 language: vi

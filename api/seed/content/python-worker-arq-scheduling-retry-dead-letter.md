@@ -2,7 +2,7 @@
 slug: python-worker-arq-scheduling-retry-dead-letter
 title: "Worker nền với arq/taskiq: lịch, retry, dead-letter"
 summary: "Bài 40: worker arq trên Redis chấm điểm chuyến với retry backoff, dead-letter, job hoãn và cron, job idempotent theo trip_id, graceful shutdown khi SIGTERM. Chạy trên Python 3.14; tổng kết P03 và P04."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, arq, redis, retry, dead-letter]
 language: vi

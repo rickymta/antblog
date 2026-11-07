@@ -2,7 +2,7 @@
 slug: flutter-google-play-internal-closed-open-production-staged-rollout
 title: "Google Play: internal, closed, open testing, production và staged rollout cho Tới Nơi"
 summary: "Bài 57: đưa app tài xế Tới Nơi qua bốn track của Google Play. Cổng 12 tester và 14 ngày cho tài khoản cá nhân mới, Data safety khớp manifest, vị trí nền và foreground service, target API, staged rollout, halt và vì sao không có rollback. Chưa chạy trên tài khoản thật."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, android, release, google-play]
 language: vi

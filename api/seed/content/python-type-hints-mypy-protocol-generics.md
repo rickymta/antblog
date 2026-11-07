@@ -2,7 +2,7 @@
 slug: python-type-hints-mypy-protocol-generics
 title: "Type hints, mypy/pyright, Protocol và generics: hợp đồng kiểu cho mã nghiệp vụ"
 summary: "Bài 12: type hint không được Python kiểm lúc chạy, mypy mới đọc chúng. Dùng PEP 695, TypedDict, Protocol, annotation lười (PEP 649) trên mã Tới Nơi, chạy mypy --strict thật và xem 9 lỗi kiểu bị bắt."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, type-hints, mypy]
 language: vi

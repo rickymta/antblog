@@ -2,7 +2,7 @@
 slug: python-bien-kieu-du-lieu-decimal
 title: "Biến, kiểu dữ liệu và Decimal: biểu diễn tiền và khoảng cách"
 summary: "Bài 02: biến là tên gắn với đối tượng, dynamic typing, int, float và 0.1 + 0.2, Decimal với quantize và ROUND_HALF_UP, chuyển đổi kiểu, bool, None. Có bảng kiểm tay và lab chạy được."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, decimal]
 language: vi

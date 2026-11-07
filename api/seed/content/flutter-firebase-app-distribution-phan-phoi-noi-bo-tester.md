@@ -2,7 +2,7 @@
 slug: flutter-firebase-app-distribution-phan-phoi-noi-bo-tester
 title: "Firebase App Distribution: phân phối nội bộ cho tester iOS và Android của Tới Nơi"
 summary: "Bài 55: đưa APK và IPA ad-hoc từ CI tới nhóm tester qa-noi-bo bằng firebase CLI và service account (không dùng token đã deprecated), release notes tiếng Việt sinh từ commit, vòng UDID cho iOS, feedback, crash và so với TestFlight. Test chạy script thật với lệnh giả. Chưa chạy trên Firebase."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, ios, android, release, firebase, app-distribution, ci]
 language: vi

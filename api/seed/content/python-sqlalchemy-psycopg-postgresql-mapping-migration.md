@@ -2,7 +2,7 @@
 slug: python-sqlalchemy-psycopg-postgresql-mapping-migration
 title: "SQLAlchemy 2 và psycopg 3 với PostgreSQL: mapping, migration Alembic"
 summary: "Bài 24: SQLAlchemy 2 và psycopg 3 với PostgreSQL: mapping Mapped[], Session, select() và SQL sinh ra, migration Alembic có autogenerate và check, async engine. Có lab chạy thật trên schema riêng."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, sqlalchemy, postgresql, alembic]
 language: vi

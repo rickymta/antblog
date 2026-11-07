@@ -2,7 +2,7 @@
 slug: python-numpy-pillow-opencv-tien-xu-ly-anh
 title: "NumPy, Pillow và OpenCV: ảnh là mảng, tiền xử lý ảnh giấy tờ"
 summary: "Bài 30: đọc thẻ căn cước giả thành ndarray, hiểu shape, dtype, broadcasting, đổi xám, resize, ngưỡng Otsu và thích nghi, rồi đo vòng lặp Python so với phép toán mảng. Có output thật và lab chạy được."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, numpy, pillow, opencv]
 language: vi

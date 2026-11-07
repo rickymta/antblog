@@ -2,7 +2,7 @@
 slug: flutter-vi-tri-geolocator-permission-foreground-background
 title: "Vị trí: geolocator, quyền foreground/background và cấu hình iOS, Android"
 summary: "Bài 35: dựng lớp vị trí cho app khách và app tài xế Tới Nơi bằng geolocator: khai báo Info.plist và AndroidManifest khác nhau theo app, LocationSource bọc plugin, máy trạng thái quyền bảy trạng thái, xin quyền sau khi giải thích, getPositionStream theo vai trò. Phần trên thiết bị chưa chạy."
-category: programming
+category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, geolocator, location, permission, ios, android]
 language: vi

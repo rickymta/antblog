@@ -2,7 +2,7 @@
 slug: python-functools-itertools-pipeline
 title: "functools, itertools và pipeline hàm: xử lý lô chuyến"
 summary: "Bài 18: partial, reduce, lru_cache, groupby phải sort trước, chain, batched, accumulate; pipeline generator lọc, tính cước, nhóm theo thành phố cho lô 10.000 chuyến giả; đối chiếu LINQ, không dùng pandas."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, functools, itertools]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-tong-hop-kien-truc-ledger-service-workspace
 title: "Bài tổng hợp kiến trúc: ledger service hoàn chỉnh trong workspace"
 summary: "Bài 58: ledger-service là workspace năm crate chạy thật với PostgreSQL và Kafka. Chiều phụ thuộc kiểm bằng cargo tree, luồng TripCompleted tới số dư HTTP và gRPC, hợp đồng với C#, bảng P03–P06 và những gì chưa có."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, hexagonal, workspace, end-to-end]
 language: vi

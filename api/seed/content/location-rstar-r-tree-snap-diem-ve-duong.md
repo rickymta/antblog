@@ -2,7 +2,7 @@
 slug: location-rstar-r-tree-snap-diem-ve-duong
 title: "R-tree với rstar: snap điểm GPS về đúng cạnh đường"
 summary: "Bài 07: dựng R-tree các đoạn đường bằng rstar, snap điểm GPS về cạnh gần nhất, chọn ứng viên theo bán kính, đo tỉ lệ snap sai sang đường song song trên đồ thị HCM và so tốc độ với quét toàn bộ."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, rstar, r-tree, snap, map-matching, openstreetmap]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-vi-tai-xe-chia-tien-payout-theo-lo
 title: "Ví tài xế: chia tiền, thu nhập và payout theo lô"
 summary: "Bài 44: thu nhập theo ngày giờ Việt Nam khi chuyến qua nửa đêm UTC, payout theo lô với bốn trạng thái và bút toán đảo, hạn mức rút theo clock truyền vào, SKIP LOCKED, ngân hàng giả timeout, đối chiếu sao kê, trên PostgreSQL."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, payout, postgresql, jiff]
 language: vi

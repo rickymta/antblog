@@ -2,7 +2,7 @@
 slug: rust-hold-capture-void-so-du-kha-dung
 title: "Hold, capture, void: giữ tiền trong ví và số dư khả dụng"
 summary: "Bài 42: hold chỉ giảm số dư khả dụng, không ghi bút toán; capture toàn phần và một phần, void, hai hold đồng thời với SELECT FOR UPDATE, job hết hạn với SKIP LOCKED và capture lặp lại idempotent."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, hold, concurrency]
 language: vi

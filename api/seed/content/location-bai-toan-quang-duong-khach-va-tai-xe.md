@@ -2,7 +2,7 @@
 slug: location-bai-toan-quang-duong-khach-va-tai-xe
 title: "Quãng đường của hai người: bài toán thật của service định vị"
 summary: "Bài 01: ghim sai phía đường, tài xế «gần nhất» đi vòng hai cây số. Vì sao tối ưu cho một bên đều sai, và các chỉ số walk_m, deadhead_m, meet_gap_s đặt khách lẫn tài xế lên cùng một cân."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, dispatch, pickup, metrics]
 language: vi

@@ -2,7 +2,7 @@
 slug: location-cua-so-lo-do-tre-doi-chat-luong-ghep
 title: "Cửa sổ lô: đợi bao lâu là đáng"
 summary: "Bài 43: quét cửa sổ lô 5–60 s theo mật độ. Ngày thường cửa sổ chỉ thêm chờ, kết quả rỗng; cao điểm 30 s giảm cả chờ 13,7 s lẫn km rỗng 327,9 m. Cửa sổ thích ứng không thắng cố định. Trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dispatch, matching, batching, simulation, latency]
 language: vi

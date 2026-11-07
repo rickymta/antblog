@@ -2,7 +2,7 @@
 slug: flutter-thanh-toan-vi-xanh-webview-deep-link-idempotency
 title: "Thanh toán qua VíXanh: WebView, deep link quay về và idempotency key"
 summary: "Bài 39: trả cước bằng ví VíXanh mà app không chạm vào thẻ. Chọn trình duyệt trong app thay WebView, idempotency key giữ qua các lần thử, deep link chỉ là tín hiệu, máy trạng thái hỏi server có giới hạn, trạng thái bền khi app bị kill, đối chiếu chính sách Apple và Google."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, payment, deep-link, idempotency, riverpod, ios, android]
 language: vi

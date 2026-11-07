@@ -2,7 +2,7 @@
 slug: python-fastapi-upload-background-task-streaming
 title: "Upload ảnh giấy tờ, background task và streaming"
 summary: "Bài 35: nhận ảnh CCCD/GPLX bằng UploadFile qua ba lớp kiểm, lưu object storage giả, xử lý nền bằng BackgroundTasks (và khi nào cần worker), báo tiến độ qua SSE. Lab chạy cả uvicorn thật."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, fastapi, upload, sse]
 language: vi

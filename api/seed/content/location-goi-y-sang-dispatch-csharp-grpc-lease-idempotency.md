@@ -2,7 +2,7 @@
 slug: location-goi-y-sang-dispatch-csharp-grpc-lease-idempotency
 title: "Từ gợi ý tới assignment: Rust đề xuất, C# quyết định qua gRPC SuggestMatch"
 summary: "Bài 46: hợp đồng gRPC SuggestMatch giữa geo-engine Rust và Dispatch C#: gợi ý có hạn, lease, offer có TTL, accept idempotent, gợi ý cũ, phản hồi muộn. Contract test 23 PASS với stub .NET và những gì nó không chứng minh."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, csharp, grpc, dispatch, idempotency, contract-test, matching]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-use-case-thanh-toan-chuyen-end-to-end
 title: "Use case thanh toán chuyến end-to-end"
 summary: "Bài 54: ghép P05 thành một luồng chạy thật trên PostgreSQL và Kafka. TripCompleted và PaymentCaptured đến lệch thứ tự vẫn ra cùng sổ hai bút toán; có khuyến mãi, hoàn một phần, abort giữa chừng, đối soát clearing."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, use-case, kafka, postgresql]
 language: vi

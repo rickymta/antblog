@@ -2,7 +2,7 @@
 slug: rust-schema-so-cai-accounts-journal-postings-partition
 title: "Schema sổ cái: accounts, journal_entries, postings, balance là projection"
 summary: "Bài 25: dựng bốn bảng sổ cái trong PostgreSQL, để DB tự từ chối bút toán lệch bằng constraint trigger lúc commit, giữ account_balances làm projection, đọc EXPLAIN trên 120.000 posting và thử partition theo tháng."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, postgresql, schema, partition]
 language: vi

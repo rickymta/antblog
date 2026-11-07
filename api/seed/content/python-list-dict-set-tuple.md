@@ -2,7 +2,7 @@
 slug: python-list-dict-set-tuple
 title: "List, dict, set, tuple: quản lý chuyến và tài xế trong bộ nhớ"
 summary: "Bài 05: chọn list, tuple, dict, set, deque theo thao tác; hiểu mutability, alias, hashability; dùng Counter và defaultdict để đếm, gom chuyến Tới Nơi. Có lab chạy được và --verify."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, collections, dict]
 language: vi

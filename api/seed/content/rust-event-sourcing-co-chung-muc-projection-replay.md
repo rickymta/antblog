@@ -2,7 +2,7 @@
 slug: rust-event-sourcing-co-chung-muc-projection-replay
 title: "Event sourcing có chừng mực: bút toán là sự kiện, projection và replay"
 summary: "Bài 49: dùng journal_entries làm event log, dựng projection số dư và thu nhập theo ngày có checkpoint, tái hiện lỗi bỏ sót giao dịch commit muộn trên PostgreSQL, rebuild, đổi phiên bản và biết khi nào không nên."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, event-sourcing, projection]
 language: vi

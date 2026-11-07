@@ -2,7 +2,7 @@
 slug: rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version
 title: "Hợp đồng sự kiện xuyên ngôn ngữ: protobuf, JSON Schema và version"
 summary: "Bài 55: LedgerEntryPosted bằng protobuf và JSON Schema, consumer C#, Go, Python đọc cùng fixture do Rust sinh, int64 qua JSON, bảng đo sáu thay đổi schema, kiểm tương thích bằng descriptor, thứ tự triển khai."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, protobuf, schema-registry, kafka]
 language: vi

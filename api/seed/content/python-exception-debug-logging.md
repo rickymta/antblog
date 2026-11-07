@@ -2,7 +2,7 @@
 slug: python-exception-debug-logging
 title: "Exception, debug và logging: lần theo một báo giá sai"
 summary: "Bài 08: lần theo báo giá 2,5 km bị tính 25.500 VND, đọc traceback từ dưới lên, try/except/else/finally, exception tùy biến và chaining, pdb, vì sao assert không phải validation và logging cơ bản."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, debug, logging]
 language: vi

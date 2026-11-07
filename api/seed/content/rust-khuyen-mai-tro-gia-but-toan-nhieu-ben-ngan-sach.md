@@ -2,7 +2,7 @@
 slug: rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach
 title: "Khuyến mãi và trợ giá: bút toán nhiều bên và ngân sách campaign"
 summary: "Bài 45: mã giảm 5.000 của TN-0002 do nền tảng chịu thành bút toán cân; ai chịu giảm giá thì posting đổi thế nào; ngân sách campaign là tài khoản có giới hạn, chứng minh bằng Barrier; hết ngân sách, hoàn chuyến, trợ giá."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, concurrency, promotion]
 language: vi

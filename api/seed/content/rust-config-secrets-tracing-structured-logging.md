@@ -2,7 +2,7 @@
 slug: rust-config-secrets-tracing-structured-logging
 title: "Cấu hình, secrets và tracing: log có cấu trúc cho service sổ cái"
 summary: "Bài 29: nạp cấu hình bằng config và biến môi trường, validate rồi fail fast; SecretString che mật khẩu; tracing span, #[instrument], JSON log và request_id đi qua tokio::spawn mà không log PII."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, tracing, config, observability]
 language: vi

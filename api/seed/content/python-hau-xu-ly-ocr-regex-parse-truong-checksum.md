@@ -2,7 +2,7 @@
 slug: python-hau-xu-ly-ocr-regex-parse-truong-checksum
 title: "Hậu xử lý OCR: regex, tách trường CCCD/GPLX, checksum và fuzzy matching"
 summary: "Bài 44: biến chữ OCR thô thành trường có kiểu: chuẩn hóa Unicode, regex có tên, sửa ký tự theo ngữ cảnh, kiểm cấu trúc số, rapidfuzz, confidence là min các từ. Có output thật và lab chạy được."
-category: python
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, ocr, regex, rapidfuzz]
 language: vi

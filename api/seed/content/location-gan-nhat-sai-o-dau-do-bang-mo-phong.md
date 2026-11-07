@@ -2,7 +2,7 @@
 slug: location-gan-nhat-sai-o-dau-do-bang-mo-phong
 title: "Tài xế gần nhất sai ở đâu: đo bằng mô phỏng"
 summary: "Bài 41: chim bay so với ETA đường bộ, phản ví dụ tham lam cướp tài xế, cách đọc so sánh có cặp 20 seed. ETA thắng rõ ở đuôi, trung vị không phân biệt được, dấu sao ở trung tâm không lặp lại trên seed mới. Trên dữ liệu mô phỏng."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dispatch, matching, simulation, baseline, statistics]
 language: vi

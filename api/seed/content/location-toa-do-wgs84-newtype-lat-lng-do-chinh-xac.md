@@ -2,7 +2,7 @@
 slug: location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac
 title: "Tọa độ: WGS84, newtype LatLng và lỗi đảo lat/lng"
 summary: "Bài 03: WGS84 và VN-2000, newtype Lat/Lng chặn đảo thứ tự lúc biên dịch, GeoJSON ngược thứ tự, mỗi chữ số thập phân là bao nhiêu mét, f64 so với i32 E7 và vì sao float ổn với tọa độ mà không ổn với tiền."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, wgs84, geojson, newtype, e7, precision]
 language: vi

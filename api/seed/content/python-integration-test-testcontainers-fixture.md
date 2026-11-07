@@ -2,7 +2,7 @@
 slug: python-integration-test-testcontainers-fixture
 title: "Integration test với PostgreSQL/MongoDB thật: testcontainers và fixture"
 summary: "Bài 28: dựng PostgreSQL và MongoDB thật bằng testcontainers, fixture scope session cho container, schema riêng mỗi ca, SKIP LOCKED và unique index. Có output thật và lab 19 ca chạy được."
-category: python
+category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, pytest, testcontainers, integration-test]
 language: vi

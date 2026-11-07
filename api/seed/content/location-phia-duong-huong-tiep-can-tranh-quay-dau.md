@@ -2,7 +2,7 @@
 slug: location-phia-duong-huong-tiep-can-tranh-quay-dau
 title: "Phía đường và hướng tiếp cận: bớt một vòng quay đầu"
 summary: "Bài 34: ứng viên có hướng, phạt phía đường, chi phí quay đầu, xếp hạng hai tầng vì ma trận không có chi phí rẽ (đo ma trận sai bao nhiêu). Phạt phía đường chỉ có cơ chế, simulator không đo được lợi ích của nó."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, pickup, u-turn, side-of-road, turn-cost, ranking]
 language: vi

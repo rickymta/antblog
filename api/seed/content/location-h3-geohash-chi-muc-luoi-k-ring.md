@@ -2,7 +2,7 @@
 slug: location-h3-geohash-chi-muc-luoi-k-ring
 title: "H3 và geohash: chia thành phố thành ô để tìm nhanh"
 summary: "Bài 08: chia TP.HCM thành ô bằng geohash và H3 (h3o), đo lỗi biên ô của geohash, k-ring của H3, chọn độ phân giải theo bán kính tìm kiếm và biết khi nào lưới hơn cây."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, h3, geohash, spatial-index, k-ring]
 language: vi

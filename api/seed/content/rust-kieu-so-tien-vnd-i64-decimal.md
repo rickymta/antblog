@@ -2,7 +2,7 @@
 slug: rust-kieu-so-tien-vnd-i64-decimal
 title: "Kiểu số và tiền VND: i64, checked arithmetic và rust_decimal, không dùng float"
 summary: "Bài 03: các kiểu số của Rust, vì sao 0.1 + 0.2 != 0.3, tràn số debug và release, checked_add, as và try_from, rồi tính phí 20% bằng rust_decimal và chốt lưu i64 đồng."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, integer, decimal]
 language: vi

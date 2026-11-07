@@ -2,7 +2,7 @@
 slug: flutter-background-work-workmanager-vi-tri-nen-app-tai-xe
 title: "Tác vụ nền: workmanager, vị trí nền cho app tài xế và chính sách store"
 summary: "Bài 38: giới hạn nền của iOS và Android, workmanager cho việc chờ được, DriverLocationPolicy chỉ cho gửi vị trí nền khi chuyến từ accepted tới inTransit, bộ đệm giới hạn khi mất mạng, foreground service location, chỉ báo xanh dương iOS và điều khoản Google Play, App Store. Chưa chạy trên thiết bị."
-category: programming
+category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, android, ios, background, location, workmanager, store]
 language: vi

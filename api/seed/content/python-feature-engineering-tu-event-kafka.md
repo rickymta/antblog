@@ -2,7 +2,7 @@
 slug: python-feature-engineering-tu-event-kafka
 title: "Feature engineering: từ event Kafka tới đặc trưng velocity, thiết bị, GPS"
 summary: "Bài 55: biến event Kafka thành đặc trưng gian lận: cửa sổ thời gian với polars rolling, đếm theo thiết bị/khách/tài xế, haversine và tốc độ phi lý, tái hiện leakage bằng số đo và tính online khớp tính theo lô."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, polars, feature-engineering]
 language: vi

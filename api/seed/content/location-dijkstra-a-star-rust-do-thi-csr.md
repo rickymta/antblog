@@ -2,7 +2,7 @@
 slug: location-dijkstra-a-star-rust-do-thi-csr
 title: "Dijkstra và A* trên đồ thị CSR: tuyến đường đầu tiên"
 summary: "Bài 21: cài Dijkstra và A* trên đồ thị CSR bằng BinaryHeap, kiểm heuristic chim bay hợp lệ trên mọi cạnh, đếm nút đã duyệt trên đồ thị HCM 126.699 nút và đối chiếu Vec<Vec>, petgraph."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, dijkstra, a-star, csr, petgraph, openstreetmap]
 language: vi

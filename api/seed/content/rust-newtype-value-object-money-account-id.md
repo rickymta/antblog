@@ -2,7 +2,7 @@
 slug: rust-newtype-value-object-money-account-id
 title: "Newtype và value object: Money, AccountId, EntryId không nhầm được"
 summary: "Bài 12: bọc i64 và chuỗi thành Money, AccountId, EntryId bằng newtype; dựng từ chuỗi bằng FromStr/TryFrom, chọn derive đúng, cộng trừ tiền trả Result và chặn cộng khác loại tiền bằng phantom type."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, newtype, value-object, traits]
 language: vi

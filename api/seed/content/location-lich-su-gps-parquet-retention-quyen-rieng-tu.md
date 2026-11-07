@@ -2,7 +2,7 @@
 slug: location-lich-su-gps-parquet-retention-quyen-rieng-tu
 title: "Lịch sử GPS: Parquet theo ngày và thành phố, giảm mẫu, retention và quyền riêng tư"
 summary: "Bài 20: history-writer tách luồng lịch sử khỏi luồng nóng, giảm mẫu giữ 26,7% điểm, ghi Parquet theo ngày và thành phố, xóa theo hạn, ba mức định danh; số ngày lưu là tham số lab, không phải yêu cầu pháp lý."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, go, parquet, retention, privacy, downsampling, kafka]
 language: vi

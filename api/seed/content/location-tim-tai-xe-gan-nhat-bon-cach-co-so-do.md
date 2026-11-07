@@ -2,7 +2,7 @@
 slug: location-tim-tai-xe-gan-nhat-bon-cach-co-so-do
 title: "Tìm tài xế gần nhất: quét, R-tree, H3 và Redis GEO có số đo"
 summary: "Bài 09: dựng tải 6.250 cập nhật/giây và 70 truy vấn/giây theo hồ sơ Tới Nơi, đo quét toàn bộ, R-tree, ô H3 và Redis GEO (Docker, loopback); PostGIS chưa chạy nên chỉ đối chiếu khái niệm."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, rstar, h3, redis, geo, benchmark, nearest-neighbor]
 language: vi

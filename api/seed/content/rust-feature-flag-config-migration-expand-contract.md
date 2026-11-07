@@ -2,7 +2,7 @@
 slug: rust-feature-flag-config-migration-expand-contract
 title: "Feature flag, cấu hình kiểu an toàn và migration không dừng"
 summary: "Bài 56: thêm cột và bật quy tắc phí mới khi sổ đang nhận bút toán: expand/contract với hai phiên bản code, backfill có checkpoint, khóa thật qua pg_locks, cờ theo tripId, policy_version để replay, rollback."
-category: programming
+category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, migration, feature-flag]
 language: vi

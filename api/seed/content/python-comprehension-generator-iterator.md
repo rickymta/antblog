@@ -2,7 +2,7 @@
 slug: python-comprehension-generator-iterator
 title: "Comprehension, iterator và generator: dòng vị trí tài xế không cần nạp hết"
 summary: "Bài 06: viết comprehension đúng chỗ, hiểu iterator và vòng for, dùng generator với yield và itertools để lọc 1 triệu điểm GPS giả; đo bộ nhớ list và generator bằng tracemalloc."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, generator, itertools]
 language: vi

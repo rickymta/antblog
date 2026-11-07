@@ -2,7 +2,7 @@
 slug: python-domain-event-outbox-integration-event-version
 title: "Domain event, outbox và version hợp đồng sự kiện"
 summary: "Bài 71: tách domain event khỏi integration event, ghi outbox trong Unit of Work, dispatcher Kafka, nâng version v1 lên v2 tương thích ngược và quy ước tên trường snake_case cho consumer C#. Chạy thật trên PostgreSQL và Kafka."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, outbox, kafka, domain-event]
 language: vi

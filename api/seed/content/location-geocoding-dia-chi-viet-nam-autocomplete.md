@@ -2,7 +2,7 @@
 slug: location-geocoding-dia-chi-viet-nam-autocomplete
 title: "Từ địa chỉ tới tọa độ: geocoding và gợi ý địa chỉ Việt Nam"
 summary: "Bài 31: chuẩn hóa có dấu, số nhà và hẻm, chỉ mục địa chỉ từ OSM thưa, gợi ý khi gõ, tìm ngược, độ tin cậy; tập thử sinh từ chính OSM nên chỉ đo độ bền trước nhiễu chữ; kiểm đổi tên hành chính 2025 chưa đầy đủ."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, geocoding, openstreetmap, unicode, autocomplete, reverse-geocoding]
 language: vi

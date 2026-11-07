@@ -2,7 +2,7 @@
 slug: rust-serde-json-but-toan-decimal-thoi-gian
 title: "serde: serialize bút toán sang JSON, Decimal và thời gian"
 summary: "Bài 18: serde và serde_json cho bút toán TN-0001: camelCase khớp service C#, Money số nguyên, tỷ lệ phí Decimal dạng chuỗi, jiff Timestamp UTC, schemaVersion, deny_unknown_fields và lỗi đọc JSON có dòng, cột."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, serde, json, jiff]
 language: vi

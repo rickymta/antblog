@@ -2,7 +2,7 @@
 slug: rust-typestate-may-trang-thai-thanh-toan
 title: "Typestate và máy trạng thái: hold → capture → settle không thể đi sai"
 summary: "Bài 14: mô hình hóa sáu trạng thái thanh toán bằng enum và match trả Result, rồi bằng typestate Payment<S> với PhantomData để capture sai thứ tự không biên dịch được; cách nối với database và khi nào enum là đủ."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, typestate, state-machine]
 language: vi

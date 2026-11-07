@@ -2,7 +2,7 @@
 slug: location-sinh-ung-vien-diem-don-do-thi-di-bo
 title: "Sinh ứng viên điểm đón: khách đi bộ tới được đâu"
 summary: "Bài 33: Dijkstra có giới hạn trên đồ thị đi bộ, ứng viên theo từng chiều xe, loại cầu, hầm, vòng xuyến, đoạn quá ngắn, gom ứng viên gần nhau; đo số ứng viên ở từng bước và vì sao bán kính chim bay đánh lừa."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, pickup, candidate-generation, dijkstra, walking-graph, openstreetmap]
 language: vi

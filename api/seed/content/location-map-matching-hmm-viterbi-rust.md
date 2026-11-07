@@ -2,7 +2,7 @@
 slug: location-map-matching-hmm-viterbi-rust
 title: "Map matching bằng HMM và Viterbi: tài xế đang ở đường nào"
 summary: "Bài 16: bám đường Newson–Krumm trên HCM, nhiễu mô phỏng: σ = 10 m, HMM 86,87% cạnh nới nút (69,09% chặt), snap 66,06% (49,85%); trên fixture σ = 3 m snap nhỉnh ở thước nới (99,57% so với 99,16%), thua ở thước chặt."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, map-matching, hmm, viterbi, newson-krumm, synthetic-data]
 language: vi

@@ -2,7 +2,7 @@
 slug: rust-box-rc-arc-refcell-smart-pointer
 title: "Box, Rc, Arc, RefCell và Cell: khi nào cần smart pointer"
 summary: "Bài 16: dùng Box cho kiểu đệ quy và Box<dyn FeePolicy>, Rc + Weak cho cây tài khoản, RefCell và Cell cho sửa qua tham chiếu chung, Arc<Mutex> cho nhiều luồng; chọn theo ba câu hỏi."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, smart-pointer, rc, refcell]
 language: vi

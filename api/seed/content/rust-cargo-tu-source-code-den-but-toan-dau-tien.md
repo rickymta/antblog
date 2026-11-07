@@ -2,7 +2,7 @@
 slug: rust-cargo-tu-source-code-den-but-toan-dau-tien
 title: "Rust và cargo: từ source code đến bút toán đầu tiên"
 summary: "Bài 02: phân biệt rustup, rustc, cargo; tạo crate edition 2024, hiểu Cargo.lock, check/build/run/release, rồi ghi bút toán 25.500 VND của chuyến TN-0001, in số dư và kiểm bằng --verify."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, cargo, toolchain]
 language: vi

@@ -2,7 +2,7 @@
 slug: location-self-host-osrm-valhalla-hay-map-provider
 title: "ADR: tự viết engine, self-host OSRM/Valhalla hay dùng map provider?"
 summary: "Bài 28: ADR thứ hai của loạt. So ba hướng định tuyến theo tiêu chí, chưa chạy OSRM hay Valhalla thật, port RoutingProvider để thay adapter, dự phòng chim bay có số đo, và kế hoạch đo trước khi chọn."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, adr, routing, osrm, valhalla, architecture]
 language: vi

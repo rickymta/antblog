@@ -2,7 +2,7 @@
 slug: location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka
 title: "Kho vị trí mới nhất: bộ nhớ theo ô H3, Redis GEO và Kafka"
 summary: "Bài 18: kho vị trí mới nhất của 25.000 tài xế trong bộ nhớ theo ô H3, TTL cho tài xế im lặng, Redis làm bản phụ, khởi động lại từ Redis, Kafka hoặc để nguội (đầy lại sau 4 giây), giảm mẫu sang lịch sử."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, h3, redis, kafka, ttl, synthetic-data]
 language: vi

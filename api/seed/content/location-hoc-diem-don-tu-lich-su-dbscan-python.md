@@ -2,7 +2,7 @@
 slug: location-hoc-diem-don-tu-lich-su-dbscan-python
 title: "Học điểm đón từ lịch sử bằng DBSCAN: vòng tròn và kết quả rỗng"
 summary: "Bài 39: DBSCAN trên đơn vị mét bằng Python và uv, xuất bảng hub cho Rust. Bảng học được không làm J tốt hơn (km rỗng −0,4 m [−1,5; +0,7]) vì lịch sử là vòng tròn và thưa. Trên dữ liệu mô phỏng, chỉ chứng minh phương pháp."
-category: system-design
+category: location-routing
 level: advanced
 tags: [toi-noi, location, python, uv, dbscan, clustering, rust, simulation, bias]
 language: vi

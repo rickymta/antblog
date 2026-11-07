@@ -2,7 +2,7 @@
 slug: python-real-time-scoring-feature-store-redis-latency
 title: "Chấm điểm thời gian thực: feature store trên Redis, ngân sách độ trễ, fallback"
 summary: "Bài 59: đưa bộ chấm điểm gian lận vào phục vụ: 30 đặc trưng trong Redis, ngân sách 50 ms bằng asyncio.timeout, điểm mặc định kèm cờ degraded, đo p50 và p99, cầu dao và từ chối bớt tải. Lab kiểm bằng độ trễ tiêm vào."
-category: programming
+category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, redis, latency]
 language: vi

@@ -2,7 +2,7 @@
 slug: location-go-fan-out-tracking-khach-noi-suy-marker
 title: "Tracking cho khách: fan-out bằng Go, ô chờ, ack và nội suy marker"
 summary: "Bài 19: tracking-hub chỉ mở sau khi gán tài xế, mỗi client một ô chờ, cửa sổ hai khung với TrackingAck vì bộ đệm TCP nuốt khung cũ; p95 34 ms đo trên loopback; hợp đồng để app nội suy marker."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, go, websocket, fan-out, backpressure, tracking, interpolation]
 language: vi

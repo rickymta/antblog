@@ -2,7 +2,7 @@
 slug: rust-ham-dieu-kien-vong-lap-iterator-so-du
 title: "Hàm, điều kiện, vòng lặp và iterator: tính số dư từ dòng bút toán"
 summary: "Bài 06: viết hàm có kiểu bắt buộc, phân biệt biểu thức và câu lệnh, dùng loop/while/for rồi iterator để tính cước và số dư từng tài khoản từ dòng bút toán. Có hai hình, lab chạy được và bài tập."
-category: rust
+category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, iterator, closure]
 language: vi

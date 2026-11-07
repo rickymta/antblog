@@ -2,7 +2,7 @@
 slug: rust-redis-cache-so-du-rate-limit-lock-ttl
 title: "Redis: cache số dư, rate limit và lock có TTL; Redis không là nguồn sự thật"
 summary: "Bài 28: dùng Redis làm cache số dư có TTL, rate limit bằng token bucket Lua và lock SET NX PX trong Rust; thấy cache lệch thật, lock hết hạn thật, và vì sao sổ cái luôn nằm ở PostgreSQL."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, redis, cache, rate-limit]
 language: vi

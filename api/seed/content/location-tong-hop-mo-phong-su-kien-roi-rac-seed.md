@@ -2,7 +2,7 @@
 slug: location-tong-hop-mo-phong-su-kien-roi-rac-seed
 title: "Tổng hợp P03: bộ mô phỏng sự kiện rời rạc làm thước đo cho mọi tối ưu"
 summary: "Bài 30: mô phỏng sự kiện rời rạc khách và tài xế, mọi giả định nêu rõ, cùng seed ra từng byte, baseline đón đúng ghim và tài xế gần nhất, nhiễu giữa 5 seed, vì sao một seed không đủ chứng minh cải thiện."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, simulation, discrete-event, baseline, benchmark, determinism]
 language: vi

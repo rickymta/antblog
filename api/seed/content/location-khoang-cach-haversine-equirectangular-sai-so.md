@@ -2,7 +2,7 @@
 slug: location-khoang-cach-haversine-equirectangular-sai-so
 title: "Khoảng cách: haversine, equirectangular và sai số đo được"
 summary: "Bài 04: công thức haversine và equirectangular, sai số đo ở vĩ độ Việt Nam, sai số của mô hình mặt cầu so với ellipsoid, tốc độ (đo khi máy tải nặng) và hệ số vòng đường đi trên chim bay ở TP.HCM."
-category: system-design
+category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, haversine, equirectangular, geodesic, routing]
 language: vi

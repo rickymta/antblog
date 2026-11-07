@@ -2,7 +2,7 @@
 slug: python-file-json-csv-pathlib
 title: "File, JSON, CSV và pathlib: đọc bộ dữ liệu mẫu Tới Nơi"
 summary: "Bài 09: đọc CSV và JSON bằng pathlib với UTF-8, tính cước chuyến theo thành phố, ghi summary.json bằng file tạm rồi replace. Giải thích cwd, newline, Decimal trong JSON; lab chạy được."
-category: python
+category: python-beginner
 level: beginner
 tags: [python, toi-noi, pathlib, json, csv]
 language: vi

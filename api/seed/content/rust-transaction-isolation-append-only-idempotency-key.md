@@ -2,7 +2,7 @@
 slug: rust-transaction-isolation-append-only-idempotency-key
 title: "Transaction, isolation và idempotency key: ghi bút toán an toàn"
 summary: "Bài 24: ghi journal_entries và postings trong một transaction sqlx, chống ghi trùng bằng ON CONFLICT DO NOTHING, thấy write skew ở READ COMMITTED, retry 40001 ở SERIALIZABLE và cấm sửa sổ bằng trigger."
-category: rust
+category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, sqlx, postgresql, transaction]
 language: vi
