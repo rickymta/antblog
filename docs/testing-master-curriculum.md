@@ -9,7 +9,7 @@ Bản quản lý toàn bộ chuyên mục Testing của Tech Knowledge Hub (antb
 
 1. **Người viết**: chọn bài theo Phase, đọc dòng tương ứng trong CSV (Description + Learning Objectives + Practical Exercise) làm đề cương, rồi viết theo template 8 phần ở §6 của tài liệu định hướng. Đối chiếu cột ISTQB LO với syllabus trước khi xuất bản; ô ghi «Đối chiếu khi viết» nghĩa là chưa kiểm được mã LO chính thức.
 2. **Người đọc / lộ trình học**: đi theo cột «Bài cần đọc trước». Mọi tham chiếu tạo thành một đồ thị không chu trình (DAG — đã kiểm bằng script), nên luôn có thứ tự đọc hợp lệ.
-3. **Theo dõi tiến độ**: cập nhật cột Publication Status trong CSV (`Kế hoạch` → `Đang viết` → `Đã xuất bản`). Series 01 đang viết; các series còn lại ở trạng thái Kế hoạch.
+3. **Theo dõi tiến độ**: cập nhật cột Publication Status trong CSV (`Kế hoạch` → `Đang viết` → `Đã viết` → `Đã xuất bản`). Đối chiếu repo ngày 07/11/2026: S01–S05 và hai bài đầu S06 (TEST-055–056) đã có nội dung; «Đã viết» không khẳng định đã triển khai lên website.
 
 ## 2. Quy ước
 
@@ -122,18 +122,18 @@ Cột «Thực hành»: **Lab (code)** = làm trên phòng lab · **Lab + thiế
 
 | ID | Tiêu đề | Level | ISTQB ref | Bài cần đọc trước | Thực hành | Trạng thái |
 |---|---|---|---|---|---|---|
-| TEST-031 | Equivalence Partitioning | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.2.1; TA 3.1.1 | 010, 017 | Lab (code) | Kế hoạch |
-| TEST-032 | Boundary Value Analysis | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.2.2; TA 3.1.1 | 031 | Lab (code) | Kế hoạch |
-| TEST-033 | Decision Table Testing | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.2.3; TA 3.3.1 | 031 | Lab (code) | Kế hoạch |
-| TEST-034 | State Transition Testing (cơ bản) | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.2.4; TA 3.2.2 | 031 | Lab (code) | Kế hoạch |
-| TEST-035 | Use Case Testing và Scenario-based Testing | L2 | CTAL-TA v4.0 — 3.2.3 | 034 | Lab (đọc SPEC) | Kế hoạch |
-| TEST-036 | Classification Tree Method | L2 | CTAL-TA v4.0 — 3.1.2 | 031 | Giấy/bảng tính | Kế hoạch |
-| TEST-037 | Pairwise Testing | L2 | CTAL-TA v4.0 — 3.1.2 | 036 | Giấy/bảng tính | Kế hoạch |
-| TEST-038 | Combinatorial Testing | L2 | CTAL-TA v4.0 — 3.1.2 | 037 | Lab (code) | Kế hoạch |
-| TEST-039 | CRUD Testing | L2 | CTAL-TA v4.0 — 3.2.1 | 034 | Lab (code) | Kế hoạch |
+| TEST-031 | Equivalence Partitioning | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.2.1; TA 3.1.1 | 010, 017 | Lab (code) | Đã viết |
+| TEST-032 | Boundary Value Analysis | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.2.2; TA 3.1.1 | 031 | Lab (code) | Đã viết |
+| TEST-033 | Decision Table Testing | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.2.3; TA 3.3.1 | 031 | Lab (code) | Đã viết |
+| TEST-034 | State Transition Testing (cơ bản) | L2 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.2.4; TA 3.2.2 | 031 | Lab (code) | Đã viết |
+| TEST-035 | Use Case Testing và Scenario-based Testing | L2 | CTAL-TA v4.0 — 3.2.3 | 034 | Lab (đọc SPEC) | Đã viết |
+| TEST-036 | Classification Tree Method | L2 | CTAL-TA v4.0 — 3.1.2 | 031 | Giấy/bảng tính | Đã viết |
+| TEST-037 | Pairwise Testing | L2 | CTAL-TA v4.0 — 3.1.2 | 036 | Giấy/bảng tính | Đã viết |
+| TEST-038 | Combinatorial Testing | L2 | CTAL-TA v4.0 — 3.1.2 | 037 | Lab (code) | Đã viết |
+| TEST-039 | CRUD Testing | L2 | CTAL-TA v4.0 — 3.2.1 | 034 | Lab (code) | Đã viết |
 | TEST-040 | Data-based test techniques: domain testing nhiều biến | L3 | CTAL-TA v4.0 — 3.1.1 | 032, 038 | Lab (code) | Kế hoạch |
-| TEST-041 | Random Testing | L3 | CTAL-TA v4.0 — 3.1.3 | 031, 040 | Lab (code) | Kế hoạch |
-| TEST-042 | Metamorphic Testing | L3 | CTAL-TA v4.0 — 3.3.2 | 041 | Lab (code) | Kế hoạch |
+| TEST-041 | Random Testing | L3 | CTAL-TA v4.0 — 3.1.3 | 031, 040 | Lab (code) | Đã viết |
+| TEST-042 | Metamorphic Testing | L3 | CTAL-TA v4.0 — 3.3.2 | 041 | Lab (code) | Đã viết |
 
 ### S05 — White-box & Experience-based Testing
 
@@ -141,18 +141,18 @@ Cột «Thực hành»: **Lab (code)** = làm trên phòng lab · **Lab + thiế
 
 | ID | Tiêu đề | Level | ISTQB ref | Bài cần đọc trước | Thực hành | Trạng thái |
 |---|---|---|---|---|---|---|
-| TEST-043 | Statement Coverage | L3 | CTFL v4.0.1; CTAL-TTA v4.0 — CTFL 4.3.1; TTA 2.2 | 012, 031 | Lab (code) | Kế hoạch |
-| TEST-044 | Branch Coverage / Decision Coverage | L3 | CTFL v4.0.1; CTAL-TTA v4.0 — CTFL 4.3.2; TTA 2.3 | 043 | Lab (code) | Kế hoạch |
-| TEST-045 | Condition Coverage | L3 | CTAL-TTA v4.0 (mở rộng) — TTA 2.4–2.5 (bối cảnh) | 044 | Lab (code) | Kế hoạch |
-| TEST-046 | Multiple Condition Testing | L3 | CTAL-TTA v4.0 — 2.5 | 045 | Lab (code) | Kế hoạch |
-| TEST-047 | MC/DC Testing | L3 | CTAL-TTA v4.0 — 2.4 | 046 | Lab (code) | Kế hoạch |
-| TEST-048 | Path Testing | L3 | CTAL-TTA v4.0 (mở rộng) — TTA 2.6; TTA 3.2.1 | 044 | Lab (code) | Kế hoạch |
-| TEST-049 | Loop Testing | L3 | Mở rộng ngoài ISTQB | 044 | Lab (code) | Kế hoạch |
-| TEST-050 | API Testing từ góc nhìn code | L3 | CTAL-TTA v4.0 — 2.7 | 044 | Lab (code) | Kế hoạch |
-| TEST-051 | Error Guessing | L3 | CTFL v4.0.1 — 4.4.1 | 017 | Lab (code) | Kế hoạch |
+| TEST-043 | Statement Coverage | L3 | CTFL v4.0.1; CTAL-TTA v4.0 — CTFL 4.3.1; TTA 2.2 | 012, 031 | Lab (code) | Đã viết |
+| TEST-044 | Branch Coverage / Decision Coverage | L3 | CTFL v4.0.1; CTAL-TTA v4.0 — CTFL 4.3.2; TTA 2.3 | 043 | Lab (code) | Đã viết |
+| TEST-045 | Condition Coverage | L3 | CTAL-TTA v4.0 (mở rộng) — TTA 2.4–2.5 (bối cảnh) | 044 | Lab (code) | Đã viết |
+| TEST-046 | Multiple Condition Testing | L3 | CTAL-TTA v4.0 — 2.5 | 045 | Lab (code) | Đã viết |
+| TEST-047 | MC/DC Testing | L3 | CTAL-TTA v4.0 — 2.4 | 046 | Lab (code) | Đã viết |
+| TEST-048 | Path Testing | L3 | CTAL-TTA v4.0 (mở rộng) — TTA 2.6; TTA 3.2.1 | 044 | Lab (code) | Đã viết |
+| TEST-049 | Loop Testing | L3 | Mở rộng ngoài ISTQB | 044 | Lab (code) | Đã viết |
+| TEST-050 | API Testing từ góc nhìn code | L3 | CTAL-TTA v4.0 — 2.7 | 044 | Lab (code) | Đã viết |
+| TEST-051 | Error Guessing | L3 | CTFL v4.0.1 — 4.4.1 | 017 | Lab (code) | Đã viết |
 | TEST-052 | Exploratory Testing | L3 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.4.2; TA 3.4.1 | 051 | Lab (code) | Kế hoạch |
-| TEST-053 | Checklist-based Testing | L3 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.4.3; TA 3.4.2 | 028, 051 | Lab (code) | Kế hoạch |
-| TEST-054 | Defect-based Testing | L3 | CTAL-TA v4.0 (mở rộng) — TA 5.3 | 004, 051 | Giấy/bảng tính | Kế hoạch |
+| TEST-053 | Checklist-based Testing | L3 | CTFL v4.0.1; CTAL-TA v4.0 — CTFL 4.4.3; TA 3.4.2 | 028, 051 | Lab (code) | Đã viết |
+| TEST-054 | Defect-based Testing | L3 | CTAL-TA v4.0 (mở rộng) — TA 5.3 | 004, 051 | Giấy/bảng tính | Đã viết |
 
 ### S06 — Unit Testing & Component Testing
 
@@ -160,8 +160,8 @@ Cột «Thực hành»: **Lab (code)** = làm trên phòng lab · **Lab + thiế
 
 | ID | Tiêu đề | Level | ISTQB ref | Bài cần đọc trước | Thực hành | Trạng thái |
 |---|---|---|---|---|---|---|
-| TEST-055 | Unit Testing Fundamentals | L3 | CTFL v4.0.1; mở rộng Engineering Practice — CTFL 2.1.3; 2.2.1 | 012, 031 | Lab (code) | Kế hoạch |
-| TEST-056 | Unit Test Design cho Pricing Engine | L3 | CTFL v4.0.1; mở rộng Engineering Practice — CTFL 4.2 | 055, 032, 033 | Lab (code) | Kế hoạch |
+| TEST-055 | Unit Testing Fundamentals | L3 | CTFL v4.0.1; mở rộng Engineering Practice — CTFL 2.1.3; 2.2.1 | 012, 031 | Lab (code) | Đã viết |
+| TEST-056 | Unit Test Design cho Pricing Engine | L3 | CTFL v4.0.1; mở rộng Engineering Practice — CTFL 4.2 | 055, 032, 033 | Lab (code) | Đã viết |
 | TEST-057 | Test Doubles: Dummy, Stub, Fake, Mock, Spy | L3 | Mở rộng ngoài ISTQB | 055 | Lab (code) | Kế hoạch |
 | TEST-058 | Dependency Isolation | L3 | Mở rộng ngoài ISTQB | 057 | Lab (code) | Kế hoạch |
 | TEST-059 | Parameterized Testing | L3 | Mở rộng ngoài ISTQB (liên quan CTAL-TAE v2.0 3.1.4) | 055, 031 | Lab (code) | Kế hoạch |

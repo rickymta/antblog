@@ -5168,5 +5168,25 @@
       "TRADEOFFS",
       "LEARNING"
     ]
+  },
+  "unit-testing-fundamentals": {
+    "title": "UNIT TESTING",
+    "subtitle": "Toi Noi · Testing / Series 06",
+    "diagram": "code",
+    "labels": [
+      "ARRANGE",
+      "ACT / ASSERT",
+      "FIRST"
+    ]
+  },
+  "unit-test-design-pricing-engine": {
+    "title": "PRICING TEST DESIGN",
+    "subtitle": "Toi Noi · Testing / Series 06",
+    "diagram": "matrix",
+    "labels": [
+      "BOUNDARIES",
+      "DECISIONS",
+      "ORACLE"
+    ]
   }
 }

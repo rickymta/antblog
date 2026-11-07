@@ -884,5 +884,17 @@
       "ba-capstone-bao-ve-ho-so-phan-tich"
     ],
     "status": "published"
+  },
+  {
+    "slug": "testing-s06-unit-component-testing",
+    "title": "Testing · Series 06 · Unit Testing & Component Testing",
+    "description": "Thực hành unit testing trên Tới Nơi: AAA, FIRST, thiết kế test cho Pricing Engine. Hai bài mở đầu TEST-055–056; series đang được viết tiếp.",
+    "level": "advanced",
+    "category": "testing",
+    "articles": [
+      "unit-testing-fundamentals",
+      "unit-test-design-pricing-engine"
+    ],
+    "status": "published"
   }
 ]
