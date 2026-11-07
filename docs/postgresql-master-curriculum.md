@@ -144,3 +144,22 @@ Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-05`.
 | PG-048 | Khôi phục theo thời điểm với base backup và WAL<br>`postgresql-pitr-base-backup-wal` | NC | Diễn tập lỗi thao tác, restore và đối chiếu mục tiêu RPO/RTO | Kế hoạch |
 | PG-049 | Row-level security và cách ly tenant<br>`postgresql-rls-tenant-security` | NC | Kiểm ma trận quyền, ngữ cảnh tenant và trường hợp đặc quyền | Kế hoạch |
 | PG-050 | Thực hành: bàn giao runbook vận hành và phục hồi<br>`postgresql-thuc-hanh-runbook-phuc-hoi` | NC | Bàn giao bằng chứng restore, cảnh báo và quy trình xử lý lỗi | Kế hoạch |
+
+## P06 · Mở rộng, tích hợp và vận hành đầu cuối
+
+Đầu vào: P01–P05; có baseline đo và runbook phục hồi. Đầu ra: Capstone vận hành PostgreSQL với kế hoạch thay đổi và diễn tập sự cố.
+
+Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-06`.
+
+| ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
+|---|---|---|---|---|
+| PG-051 | Partition là gì và dùng khi nào?<br>`postgresql-partition-co-ban` | CB | Phân biệt partition với index và chọn khoá theo workload | Kế hoạch |
+| PG-052 | Primary, standby và replication lag<br>`postgresql-replication-primary-standby` | CB | Quan sát sao chép trong lab và diễn giải độ trễ đọc | Kế hoạch |
+| PG-053 | JSONB và dữ liệu quan hệ<br>`postgresql-jsonb-quan-he` | CB | Chọn cột quan hệ hoặc JSONB theo ràng buộc và truy vấn | Kế hoạch |
+| PG-054 | Partition pruning và vòng đời dữ liệu<br>`postgresql-partition-pruning-retention` | TB | Đo pruning, chuẩn bị partition và thử retention có kiểm tra | Kế hoạch |
+| PG-055 | Logical replication và CDC<br>`postgresql-logical-replication-cdc` | TB | Thử initial copy, thay đổi dữ liệu và giám sát replication slot | Kế hoạch |
+| PG-056 | Materialized view và dữ liệu báo cáo<br>`postgresql-materialized-view-reporting` | TB | Định nghĩa độ tươi, quy trình refresh và đối soát kết quả | Kế hoạch |
+| PG-057 | Đánh giá PostGIS và pgvector theo workload<br>`postgresql-extension-postgis-pgvector` | TB | Thiết kế hai thử nghiệm độc lập cho vị trí và vector, nêu điều kiện dùng | Kế hoạch |
+| PG-058 | Failover, split-brain và tính nhất quán khi đọc<br>`postgresql-ha-failover-read-consistency` | NC | Lập kịch bản mất primary, fencing, kết nối lại và đo mất dữ liệu | Kế hoạch |
+| PG-059 | Nâng phiên bản và cutover có phương án quay lại<br>`postgresql-upgrade-migration-cutover` | NC | Rehearsal tương thích, đối soát, cổng go/no-go và giới hạn rollback | Kế hoạch |
+| PG-060 | Capstone: vận hành dữ liệu Tới Nơi từ schema tới sự cố<br>`postgresql-capstone-van-hanh-toi-noi` | NC | Bàn giao schema, SQL, benchmark, restore, failover và quyết định kiến trúc | Kế hoạch |
