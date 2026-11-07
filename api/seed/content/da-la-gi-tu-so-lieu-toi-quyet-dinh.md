@@ -124,3 +124,5 @@ Trước khi bàn giao, kiểm tra: đã ghi cohort và thời gian; đã tính 
 - [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi).
 
 Hồ sơ và số đối soát trong repository: `examples/toi-noi-da/p01-nen-tang.md`. Khung chương trình: `docs/da-master-curriculum.md`.
+
+Bài tiếp theo: [DA-002: DA phối hợp với BA, BI, DE và DS](/articles/da-vai-tro-phoi-hop-ba-bi-de-ds).

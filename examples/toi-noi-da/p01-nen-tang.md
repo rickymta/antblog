@@ -35,3 +35,11 @@
 Viết bản nhận định tối đa một trang: phạm vi, số liệu và công thức, phát hiện theo nhóm, điều chưa biết, khuyến nghị xác minh và người phối hợp. Tiêu chí: đúng mẫu số; đủ số đếm/tỷ lệ; tổng nhóm khớp; không quy kết nhân quả; có bước tiếp.
 
 Bài tập cohort 2.000/220 là biến thể độc lập: 11%, giảm 1 điểm phần trăm so với W2. Không thêm vào bảng baseline.
+
+## Sản phẩm DA-002
+
+Bảng trách nhiệm phải có các hàng: chốt câu hỏi/phạm vi; xác nhận metric; trích dữ liệu; review/đối soát; công bố báo cáo; duy trì refresh; duyệt bước điều tra hoặc pilot. Mỗi hàng điền người thực hiện, người review, người chốt và bằng chứng bàn giao. Các vai trò trong bài là giả lập, không phải sơ đồ tổ chức đã được duyệt.
+
+Phiếu bàn giao tối thiểu: câu hỏi; tập dữ liệu/phiên bản; thời điểm trích; grain; định nghĩa thời gian; kiểm tra đã chạy; giới hạn; quyền sử dụng; người tiếp nhận; câu hỏi còn mở. Với P01 hiện tại, ghi rõ chỉ có bảng tổng hợp minh hoạ, chưa có extract hệ thống.
+
+Biến thể nhóm nhỏ (DA, backend, quản lý vận hành): được kiêm nhiệm nhưng phải chỉ rõ khoảng trống review và người duy trì báo cáo. Không thêm DS chỉ để tính tỷ lệ, không mặc định DA có quyền thay database hoặc sửa dữ liệu nguồn.

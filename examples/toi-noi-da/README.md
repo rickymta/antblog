@@ -2,7 +2,7 @@
 
 Đọc cùng [khung chương trình Data Analysis](../../docs/da-master-curriculum.md) và [hồ sơ nghiệp vụ chung](../../api/seed/content/du-an-mau-toi-noi.md).
 
-**Trạng thái: DA-001 đã có trong source cùng [hồ sơ P01](p01-nen-tang.md); chưa có dataset từng chuyến hoặc script thực thi.** Dự án xuyên suốt là Tới Nơi với đặt xe, giao đồ ăn và giao bưu kiện. Mọi dữ liệu bổ sung sẽ là giả lập và phải ghi nguồn, phiên bản, grain, thời gian cùng kết quả đối soát.
+**Trạng thái: DA-001–DA-002 đã có trong source cùng [hồ sơ P01](p01-nen-tang.md); chưa có dataset từng chuyến hoặc script thực thi.** Dự án xuyên suốt là Tới Nơi với đặt xe, giao đồ ăn và giao bưu kiện. Mọi dữ liệu bổ sung sẽ là giả lập và phải ghi nguồn, phiên bản, grain, thời gian cùng kết quả đối soát.
 
 ## Tình huống xuyên suốt
 
