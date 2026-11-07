@@ -147,4 +147,4 @@ Checklist cuối: câu hỏi có người dùng; metric có định nghĩa; ngu�
 - [DA-001: từ số liệu tới quyết định](/articles/da-la-gi-tu-so-lieu-toi-quyet-dinh).
 - [DA-002: vai trò và phối hợp](/articles/da-vai-tro-phoi-hop-ba-bi-de-ds).
 
-Checklist và phiếu bàn giao nằm trong repository: `examples/toi-noi-da/p01-nen-tang.md`. Phần tiếp của chương trình sẽ đào sâu cách viết analysis brief; chưa cần chọn công cụ mới để hoàn thành ba bài nền tảng này.
+Checklist và phiếu bàn giao nằm trong repository: `examples/toi-noi-da/p01-nen-tang.md`. Bài tiếp theo: [DA-004: từ “huỷ chuyến tăng” tới câu hỏi kiểm chứng được](/articles/da-analysis-brief-cau-hoi-kiem-chung).

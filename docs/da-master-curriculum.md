@@ -10,7 +10,7 @@ Trục học: **câu hỏi kinh doanh → định nghĩa chỉ số → thu th�
 
 Đối tượng: người mới học DA; BA, developer, tester và vận hành muốn phân tích dữ liệu; DA muốn hiểu lựa chọn database và các đánh đổi của hệ thống. P01 không yêu cầu lập trình; P02 xây nền SQL. Python là công cụ bổ trợ ở các phần sau, không phải điều kiện để bắt đầu.
 
-Khung gồm 80 bài dự kiến; **DA-001–DA-003 đã viết trong source**, các bài còn lại đang ở kế hoạch. Chưa có bộ dữ liệu thực thi. Không thêm bài rỗng vào seed, không tạo URL công khai cho bài chưa viết. Các lựa chọn công nghệ dưới đây là chủ đề cần khảo sát và thực nghiệm, chưa phải quyết định thay kiến trúc Tới Nơi.
+Khung gồm 80 bài dự kiến; **DA-001–DA-010 đã viết trong source**, các bài còn lại đang ở kế hoạch. Chưa có bộ dữ liệu thực thi. Không thêm bài rỗng vào seed, không tạo URL công khai cho bài chưa viết. Các lựa chọn công nghệ dưới đây là chủ đề cần khảo sát và thực nghiệm, chưa phải quyết định thay kiến trúc Tới Nơi.
 
 ## Cấp độ và lộ trình
 
@@ -211,14 +211,21 @@ Mục tiêu khoảng 10–18 phút đọc; bài thực hành 18–25 phút, đi�
 
 ## Tiến độ và thứ tự triển khai
 
-**Đã dựng khung P01–P08; DA-001–DA-003 đã viết trong source, DA-004–DA-080 còn ở kế hoạch. Source chưa đồng nghĩa đã xuất bản.**
+**Đã dựng khung P01–P08; DA-001–DA-010 đã viết trong source, hoàn thành P01; DA-011–DA-080 còn ở kế hoạch. Source chưa đồng nghĩa đã xuất bản.**
 
 | ID | Slug | Trạng thái source |
 |---|---|---|
 | DA-001 | `da-la-gi-tu-so-lieu-toi-quyet-dinh` | Đã viết |
 | DA-002 | `da-vai-tro-phoi-hop-ba-bi-de-ds` | Đã viết |
 | DA-003 | `da-vong-doi-bai-toan-phan-tich` | Đã viết |
+| DA-004 | `da-analysis-brief-cau-hoi-kiem-chung` | Đã viết |
+| DA-005 | `da-kpi-metric-chi-so-bao-ve` | Đã viết |
+| DA-006 | `da-mo-ta-chan-doan-du-bao-hanh-dong` | Đã viết |
+| DA-007 | `da-nguon-du-lieu-chuyen-su-kien-thanh-toan-cskh` | Đã viết |
+| DA-008 | `da-yeu-to-anh-huong-ban-do-gia-thuyet` | Đã viết |
+| DA-009 | `da-chua-du-du-lieu-bat-dinh-dieu-kien-dung` | Đã viết |
+| DA-010 | `da-thuc-hanh-ke-hoach-phan-tich-huy-chuyen` | Đã viết |
 
-Viết P01 trước để chốt câu hỏi và metric contract. Tiếp đó tạo dataset nhỏ có kết quả đối soát cho P02–P03, rồi mới mở rộng dữ liệu và workload để khảo sát database ở P04. Mỗi phần hoàn thành cùng hồ sơ thực hành và kiểm tra đầu ra trước khi chuyển phần tiếp theo.
+P01 đã đủ 10 bài (3 CB / 4 TB / 3 NC), có [hồ sơ nền tảng](../examples/toi-noi-da/p01-nen-tang.md) và [gói kế hoạch phân tích](../examples/toi-noi-da/p01-ke-hoach-phan-tich.md). Bước tiếp theo là viết DA-011 và tạo dataset nhỏ có kết quả đối soát cho P02–P03, rồi mới mở rộng dữ liệu và workload để khảo sát database ở P04. Mỗi phần hoàn thành cùng hồ sơ thực hành và kiểm tra đầu ra trước khi chuyển phần tiếp theo.
 
-Khi đưa bài vào source: dùng ID `DA-xxx`, slug ASCII có tiền tố `da-`, level `beginner` / `intermediate` / `advanced`; đề xuất category `data-analysis` và đăng ký khi có nội dung thật. Cập nhật series/learning path theo cơ chế hiện có, mỗi phần tối đa 10 bài, không coi việc viết source là đã xuất bản.
+Khi đưa bài vào source: dùng ID `DA-xxx`, slug ASCII có tiền tố `da-`, level `beginner` / `intermediate` / `advanced`; category `data-analysis` đã đăng ký cùng P01. Cập nhật series/learning path theo cơ chế hiện có, mỗi phần tối đa 10 bài, không coi việc viết source là đã xuất bản.

@@ -2,7 +2,7 @@
 
 Đọc cùng [khung chương trình Data Analysis](../../docs/da-master-curriculum.md) và [hồ sơ nghiệp vụ chung](../../api/seed/content/du-an-mau-toi-noi.md).
 
-**Trạng thái: DA-001–DA-003 đã có trong source cùng [hồ sơ P01](p01-nen-tang.md); chưa có dataset từng chuyến hoặc script thực thi.** Dự án xuyên suốt là Tới Nơi với đặt xe, giao đồ ăn và giao bưu kiện. Mọi dữ liệu bổ sung sẽ là giả lập và phải ghi nguồn, phiên bản, grain, thời gian cùng kết quả đối soát.
+**Trạng thái: P01 đã đủ DA-001–DA-010 trong source cùng [hồ sơ nền tảng](p01-nen-tang.md) và [gói kế hoạch phân tích](p01-ke-hoach-phan-tich.md); chưa có dataset từng chuyến hoặc script thực thi.** Dự án xuyên suốt là Tới Nơi với đặt xe, giao đồ ăn và giao bưu kiện. Mọi dữ liệu bổ sung sẽ là giả lập và phải ghi nguồn, phiên bản, grain, thời gian cùng kết quả đối soát.
 
 ## Tình huống xuyên suốt
 
@@ -10,11 +10,11 @@ Vận hành đặt câu hỏi: “Báo cáo cho thấy tỷ lệ huỷ tăng; m�
 
 Các hướng cần kiểm tra gồm cách định nghĩa chỉ số, thay đổi thành phần dịch vụ/thành phố, thời gian đón, cung tài xế, thời tiết, khuyến mãi, thay đổi chính sách và lỗi ghi nhận dữ liệu. Chưa có số liệu thì giữ trạng thái giả thuyết.
 
-## Gói đầu ra dự kiến
+## Gói đầu ra theo phần
 
 | Phần | Hồ sơ cần tạo khi triển khai |
 |---|---|
-| P01 | Analysis brief, source inventory, metric contract, assumption log |
+| P01 | Đã có mẫu brief, inventory, metric/assumption/hypothesis/decision log và bài tổng hợp; thông tin chưa xác nhận giữ trạng thái đề xuất |
 | P02 | Dataset SQL nhỏ, truy vấn, số đối soát và hướng dẫn chạy |
 | P03 | Data dictionary, quality report, cleaning log và notebook EDA |
 | P04 | Workload, ma trận tiêu chí, benchmark plan và decision record |

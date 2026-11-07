@@ -75,3 +75,7 @@ Biến thể nhóm nhỏ (DA, backend, quản lý vận hành): được kiêm n
 Chỉ dùng cho DA-003, không sửa baseline: 15 lượt cao điểm W2 đã nằm trong mẫu số 750 nhưng trước đó chưa có kết quả, nay xác nhận huỷ trước đón. Biến thể này thay thế giả định W2 đã đủ kết quả trong bài tập sự cố; mẫu số chung giữ 1.500. Cao điểm: (135 + 15)/750 = 20%. Toàn W2: (180 + 15)/1.500 = 13%. Chênh W2–W1 là +1 điểm phần trăm.
 
 Đầu ra cần có: quality log bổ sung; kết quả/câu kết luận sửa lại; lịch sử phiên bản; thông báo đính chính; danh sách quyết định cần xem lại; cách tránh chốt kỳ quá sớm. Chưa được quy kết nguyên nhân huỷ từ dữ liệu sửa lại.
+
+## Tiếp tục DA-004–DA-010
+
+Dùng [gói kế hoạch phân tích](p01-ke-hoach-phan-tich.md) cho brief, metric contract, inventory, các log và capstone. BASE-P01 giữ nguyên bảng ở trên; MIX-01 và MISS-01 là biến thể độc lập, không gộp với bài 15 lượt trễ. P01 đã đủ 10 bài trong source; chưa có dataset từng chuyến hoặc kết quả pilot.

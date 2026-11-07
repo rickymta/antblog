@@ -902,13 +902,20 @@
   {
     "slug": "da-p01-nen-tang-phan-tich-du-lieu",
     "title": "DA · Phần 1 · Nền tảng phân tích dữ liệu",
-    "description": "DA qua Tới Nơi: hiểu câu hỏi, vai trò và quy trình phân tích. Đã có DA-001–DA-003; phần đang được viết tiếp, tối đa 10 bài.",
+    "description": "Đủ 10 bài DA-001–DA-010 qua Tới Nơi: câu hỏi, vai trò, quy trình, chỉ số, nguồn dữ liệu, giả thuyết và bất định; kết thúc bằng kế hoạch phân tích huỷ chuyến. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.",
     "level": "beginner",
     "category": "data-analysis",
     "articles": [
       "da-la-gi-tu-so-lieu-toi-quyet-dinh",
       "da-vai-tro-phoi-hop-ba-bi-de-ds",
-      "da-vong-doi-bai-toan-phan-tich"
+      "da-vong-doi-bai-toan-phan-tich",
+      "da-analysis-brief-cau-hoi-kiem-chung",
+      "da-kpi-metric-chi-so-bao-ve",
+      "da-mo-ta-chan-doan-du-bao-hanh-dong",
+      "da-nguon-du-lieu-chuyen-su-kien-thanh-toan-cskh",
+      "da-yeu-to-anh-huong-ban-do-gia-thuyet",
+      "da-chua-du-du-lieu-bat-dinh-dieu-kien-dung",
+      "da-thuc-hanh-ke-hoach-phan-tich-huy-chuyen"
     ],
     "status": "published"
   }
