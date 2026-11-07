@@ -17,6 +17,10 @@ Blog chia sẻ kiến thức kỹ thuật từ cơ bản tới nâng cao: databa
 | `deploy` | nginx, certbot, MongoDB init, WireGuard, script sinh `.env` |
 | `docs` | [`api-contract.md`](docs/api-contract.md) (hợp đồng frontend ↔ API), [`ui-guide.md`](docs/ui-guide.md) (hướng giao diện) |
 
+## Khung nội dung Database
+
+[PostgreSQL qua Tới Nơi](docs/postgresql-master-curriculum.md): 6 phần, tối đa 10 bài/phần, đủ cấp độ cơ bản, trung bình và nâng cao. Các series MySQL, MongoDB, MSSQL, Oracle và Cassandra sẽ có khung riêng dưới chuyên mục Database.
+
 ## Chạy trên máy (dev)
 
 Yêu cầu: Node ≥ 22.12, MongoDB đang chạy ở `127.0.0.1:27017`.

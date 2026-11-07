@@ -2,7 +2,7 @@
 slug: heap-ctid-va-primary-key
 title: "Clustered index thật và clustered index nhìn thấy trong PostgreSQL"
 summary: "Primary key không quyết định dòng nằm ở đâu. Mổ xẻ heap, ctid và đường đi của một truy vấn trên bảng trips của Tới Nơi — kèm số đo thật về UPDATE, HOT và dòng bị dời page."
-category: database
+category: postgresql
 level: intermediate
 tags: [postgresql, index, heap, ctid, mvcc]
 language: vi

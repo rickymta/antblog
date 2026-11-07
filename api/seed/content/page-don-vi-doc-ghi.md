@@ -2,7 +2,7 @@
 slug: page-don-vi-doc-ghi
 title: "Đơn vị đọc ghi nhỏ nhất của cơ sở dữ liệu là gì?"
 summary: "Một dòng? Một bản ghi? Một ô giá trị? Đo bằng EXPLAIN BUFFERS và WAL trên bảng trips của Tới Nơi để thấy vì sao lấy một chuyến cũng phải đọc cả 8 KB — và điều đó đổi cách ta viết truy vấn ra sao."
-category: database
+category: postgresql
 level: beginner
 tags: [postgresql, page, storage, io, wal]
 language: vi

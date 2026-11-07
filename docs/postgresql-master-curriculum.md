@@ -1,0 +1,70 @@
+# PostgreSQL qua dự án Tới Nơi
+
+Khung biên tập v1 · 07/11/2026 · **6 phần × 10 bài = 60 bài**. Mỗi phần có **3 cơ bản / 4 trung bình / 3 nâng cao**, gồm cả bài thực hành cuối phần. Đây là khung viết bài; hoàn thành khung không có nghĩa đã hoàn thành nội dung.
+
+## Phạm vi và cách đọc
+
+Series riêng cho PostgreSQL thuộc chuyên mục cha Database, dùng xuyên suốt hệ thống hư cấu **Tới Nơi**: đặt xe, giao đồ ăn và giao bưu kiện. Bắt đầu từ một chuyến xe, xây mô hình và SQL, quan sát lưu trữ/index, kiểm chứng giao dịch đồng thời, rồi vận hành và mở rộng. Đối tượng gồm người mới, backend developer và người vận hành database.
+
+Đọc hồ sơ chung `du-an-mau-toi-noi` trước P01; đây là tài liệu dùng chung toàn blog, không chiếm một trong 60 bài và vẫn thuộc `system-design`. P01 không yêu cầu kiến thức PostgreSQL. Mỗi phần sau kế thừa các phần trước; mức nâng cao là độ khó trong phạm vi chủ đề, không yêu cầu kiến thức chưa được giới thiệu. CB = `beginner`, TB = `intermediate`, NC = `advanced`; toàn khung có 18 CB / 24 TB / 18 NC.
+
+| Phần | Chủ đề | Đầu vào | Sản phẩm cuối phần |
+|---|---|---|---|
+| P01 | Nền tảng và mô hình dữ liệu | Hồ sơ Tới Nơi | Schema, fixture và kiểm tra ràng buộc |
+| P02 | SQL cho nghiệp vụ | P01 | Bộ truy vấn và đối soát |
+| P03 | Lưu trữ, index và kế hoạch thực thi | P01–P02 | Báo cáo đo và lựa chọn index |
+| P04 | Giao dịch, MVCC và đồng thời | P01–P03 | Kịch bản tranh chấp và bất biến |
+| P05 | Bảo mật, bảo trì và phục hồi | P01–P04 | Runbook và bằng chứng restore |
+| P06 | Mở rộng, tích hợp và vận hành đầu cuối | P01–P05 | Hồ sơ vận hành và diễn tập sự cố |
+
+## Tổ chức Database để bổ sung các series khác
+
+`database` là chuyên mục cha. Mỗi engine có chuyên mục con, curriculum và lộ trình độc lập; không dùng một lộ trình PostgreSQL để chứa bài của engine khác.
+
+| Engine | Slug chuyên mục | Tiền tố bài mới | Curriculum dự kiến | Trạng thái |
+|---|---|---|---|---|
+| PostgreSQL | `postgresql` | `postgresql-` | `postgresql-master-curriculum.md` | Dựng khung trong đợt này |
+| MySQL | `mysql` | `mysql-` | `mysql-master-curriculum.md` | Dự kiến |
+| MongoDB | `mongodb` | `mongodb-` | `mongodb-master-curriculum.md` | Dự kiến |
+| Microsoft SQL Server (MSSQL) | `mssql` | `mssql-` | `mssql-master-curriculum.md` | Dự kiến |
+| Oracle Database | `oracle` | `oracle-` | `oracle-master-curriculum.md` | Dự kiến |
+| Apache Cassandra | `cassandra` | `cassandra-` | `cassandra-master-curriculum.md` | Dự kiến |
+
+Chỉ đăng ký chuyên mục có nội dung; các dòng dự kiến không phải liên kết công khai hay file đã có. Các engine khác cùng dùng nghiệp vụ Tới Nơi nhưng thiết kế theo mô hình và cơ chế riêng, không chỉ thay cú pháp của PostgreSQL. Bài tích hợp ở Rust, Python, .NET, AWS, Azure giữ chuyên mục hiện tại; liên kết tới đây khi cần đào sâu database. Series DA tập trung trả lời câu hỏi phân tích, series này tập trung tính đúng đắn, cơ chế và vận hành PostgreSQL.
+
+## Giữ nội dung hiện có và quy ước xuất bản
+
+- Giữ URL lộ trình `postgresql-tu-ben-trong` và ba liên kết hiện có; đổi chuyên mục lộ trình sang `postgresql`. Đây là lộ trình đang đọc được, không phải P01 đã hoàn tất.
+- Giữ nguyên slug hai bài đã có: `page-don-vi-doc-ghi` → PG-022, `heap-ctid-va-primary-key` → PG-024. Chuyển chuyên mục sang `postgresql`, không viết bản sao. Khi làm P03 phải rà lại nội dung, phép đo và thứ tự đọc trước khi đánh dấu hoàn tất phần.
+- Khi P01 hoàn tất, cập nhật lộ trình gốc thành P01 với 10 bài PG-001–010; hồ sơ chung trở thành tài liệu đọc trước. Hai bài cũ giữ URL và đăng ký vào P03 khi phần đó sẵn sàng. Các phần tiếp theo dùng `postgresql-tu-ben-trong-phan-02` … `-phan-06`.
+- Chỉ thêm các bài đã viết và kiểm tra vào `api/seed/learning-paths.json`; tối đa 10 bài/phần. Không thêm slug kế hoạch vào seed, không tạo Markdown rỗng. Level lộ trình dự kiến: P01 beginner, P02 intermediate, P03–P06 advanced; level từng bài theo bảng.
+- Danh sách chi tiết dưới đây là nguồn quản lý ID, slug và đầu ra. Trạng thái mặc định **Kế hoạch**; chỉ PG-022 và PG-024 là **Đã có — chờ rà soát**. Có 58 bài mới dự kiến và 2 bài kế thừa.
+
+## Tiêu chuẩn viết và hoàn tất một phần
+
+Mỗi bài có frontmatter `slug`, `title`, `summary`, `category: postgresql`, `level`, `tags`, `language: vi` theo seed hiện hành. Giọng văn tiếng Việt, giải nghĩa thuật ngữ lần đầu, mở bằng vấn đề Tới Nơi, trình bày cơ chế, ví dụ có kết quả mong đợi, lỗi thường gặp, đánh đổi, bài tập và liên kết đọc tiếp. Không suy rộng cơ chế của PostgreSQL cho tất cả database.
+
+Lab dự kiến ở `examples/toi-noi-postgresql/p01` … `p06`: README nêu prerequisites, phiên bản PostgreSQL/extension cố định sau khi kiểm chứng, cách chạy, fixture tái lập, kết quả, kiểm tra và dọn môi trường lab. Dùng tiền và múi giờ nhất quán với hồ sơ Tới Nơi; dữ liệu hư cấu, không lấy PII thật. Những bài concurrency cần hai phiên kết nối và lịch chạy rõ ràng. Bài hiệu năng ghi cấu hình máy, số dòng, phân bố, cache nóng/lạnh, số lần đo và giới hạn kết luận; không bịa số đo. Bài phục hồi phải thực sự restore vào môi trường riêng và đối soát.
+
+Khi viết bài, tra tài liệu PostgreSQL chính thức đúng phiên bản và tài liệu chính thức của extension/công cụ dùng trong bài. Khung này chưa chốt phiên bản hay tuyên bố benchmark đã thực hiện. Ảnh bìa theo hệ thống brief/SVG/WebP hiện có; sơ đồ nội dung có nhãn, caption và được xem lại trực quan. Kiểm frontmatter, liên kết, số bài, SQL/lab và ảnh trước commit.
+
+Hoàn thành **nội dung** phần nào: cập nhật trạng thái, seed và README lab của phần đó, chạy kiểm tra phù hợp rồi commit riêng `content(postgresql): complete part N`. Commit dựng khung dùng `docs(postgresql): scaffold part N` để phân biệt với bài đã viết. Chỉ stage file thuộc phần PostgreSQL; không gom thay đổi khác. Seed/deploy là bước riêng, không được coi việc sửa source là đã xuất bản lên website.
+
+## P01 · Nền tảng và mô hình dữ liệu
+
+Đầu vào: Hồ sơ chung Tới Nơi; chưa cần biết SQL. Đầu ra: Schema tối thiểu cho khách, tài xế và chuyến, fixture nhỏ và kiểm tra dữ liệu sai.
+
+Lộ trình khi hoàn tất: `postgresql-tu-ben-trong`.
+
+| ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
+|---|---|---|---|---|
+| PG-001 | PostgreSQL là gì và nằm ở đâu trong Tới Nơi?<br>`postgresql-la-gi-va-vai-tro-trong-toi-noi` | CB | Phân biệt DBMS, database, schema, bảng và trách nhiệm lưu dữ liệu | Kế hoạch |
+| PG-002 | Dựng môi trường lab và kết nối bằng psql<br>`postgresql-cai-dat-lab-psql-ket-noi` | CB | Tạo lab riêng, chạy truy vấn đầu tiên, ghi phiên bản và cách dọn | Kế hoạch |
+| PG-003 | Bảng, dòng, cột và khoá trong nghiệp vụ chuyến xe<br>`postgresql-bang-dong-cot-primary-foreign-key` | CB | Vẽ quan hệ khách–chuyến–tài xế và nhận diện một dòng | Kế hoạch |
+| PG-004 | Chọn kiểu dữ liệu cho tiền, thời gian và định danh<br>`postgresql-kieu-du-lieu-tien-thoi-gian-uuid` | TB | Lập data dictionary có đơn vị, NULL và múi giờ | Kế hoạch |
+| PG-005 | CREATE TABLE và ràng buộc dữ liệu<br>`postgresql-create-table-constraints` | TB | Viết DDL với primary key, foreign key, unique, check và not null | Kế hoạch |
+| PG-006 | Thêm, sửa, xoá và đọc kết quả với RETURNING<br>`postgresql-insert-update-delete-returning` | TB | Thực hiện vòng đời một chuyến trên fixture có thể chạy lại | Kế hoạch |
+| PG-007 | SELECT đầu tiên: lọc, sắp xếp và giới hạn<br>`postgresql-select-filter-order-limit` | TB | Lấy chuyến theo trạng thái, thời gian và thứ tự xác định | Kế hoạch |
+| PG-008 | Chuẩn hoá và ranh giới mô hình dữ liệu<br>`postgresql-mo-hinh-quan-he-chuan-hoa` | NC | Giải thích bất thường cập nhật và đánh đổi khi tách bảng | Kế hoạch |
+| PG-009 | Thay đổi schema mà dữ liệu cũ vẫn đọc được<br>`postgresql-schema-migration-tuong-thich` | NC | Thực hiện migration nhỏ, kiểm dữ liệu và kế hoạch khôi phục | Kế hoạch |
+| PG-010 | Thực hành: schema chuyến xe có kiểm tra ràng buộc<br>`postgresql-thuc-hanh-schema-chuyen-xe` | NC | Bàn giao DDL, fixture hợp lệ/sai và bằng chứng kiểm tra | Kế hoạch |

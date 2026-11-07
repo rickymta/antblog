@@ -6,12 +6,27 @@
       "en": "Database"
     },
     "description": {
-      "vi": "Lưu trữ, index, giao dịch, MVCC, partition, nhân bản — mổ xẻ trên PostgreSQL và MongoDB.",
-      "en": "Storage, indexes, transactions, MVCC, partitioning, replication — dissected on PostgreSQL and MongoDB."
+      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL; lộ trình mở rộng MySQL, MongoDB, Microsoft SQL Server, Oracle và Cassandra.",
+      "en": "Database engines through Toi Noi: PostgreSQL, with future series for MySQL, MongoDB, Microsoft SQL Server, Oracle and Cassandra."
     },
     "icon": "database",
     "color": "#2563EB",
     "order": 1
+  },
+  {
+    "slug": "postgresql",
+    "name": {
+      "vi": "PostgreSQL",
+      "en": "PostgreSQL"
+    },
+    "description": {
+      "vi": "PostgreSQL qua Tới Nơi: từ mô hình dữ liệu và SQL đến index, giao dịch, phục hồi và vận hành.",
+      "en": "PostgreSQL through Toi Noi: data modeling, SQL, indexes, transactions, recovery and operations."
+    },
+    "icon": "database",
+    "color": "#336791",
+    "order": 1,
+    "parent": "database"
   },
   {
     "slug": "programming",
