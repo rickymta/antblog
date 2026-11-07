@@ -1,0 +1,13 @@
+[build-system]
+requires = ["maturin>=1.5,<2"]
+build-backend = "maturin"
+
+[project]
+name = "toi-noi-fee"
+version = "0.1.0"
+description = "Thư viện tính phí Tới Nơi: Rust (ledger-core) gọi từ Python bằng PyO3"
+requires-python = ">=3.9"
+
+[tool.maturin]
+# Nhãn extension-module do maturin bật khi build; cargo test/clippy thường không cần.
+module-name = "toi_noi_fee"

@@ -1,0 +1,15 @@
+{
+  "android": {
+    "minSupported": "1.4.0+60",
+    "recommended": "1.6.0+87",
+    "latestPublished": "1.6.0+87",
+    "storeUrl": "https://play.google.com/store/apps/details?id=vn.toinoi.customer",
+    "message": "Bản này thiếu bản vá an toàn cho thanh toán. Hãy cập nhật để tiếp tục đặt chuyến."
+  },
+  "ios": {
+    "minSupported": "1.4.0+61",
+    "recommended": "1.6.0+88",
+    "latestPublished": "1.6.0+88",
+    "storeUrl": "https://apps.apple.com/app/id0000000000"
+  }
+}

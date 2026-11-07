@@ -1,0 +1,6 @@
+$ examples/toi-noi-location/go/bin/loc13_backpressure --mode shutdown
+# backlog=20000 điểm, sink 2000 điểm/s, lô 100
+D	deadline	elapsed_ms	sink_got	dropped_at_shutdown	lost_in_flight	late_offer_result
+D	1s	1001	1900	18000	100	Closed
+D	5s	5000	9500	10400	100	Closed
+D	15s	10434	20000	0	0	Closed

@@ -1,0 +1,302 @@
+{
+  "cases": {
+    "add-field/backward/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "add-field/backward/json": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "add-field/backward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "add-field/forward/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "add-field/forward/json": {
+      "dotnet": "ERR",
+      "go": "ERR",
+      "python": "ERR",
+      "rust": "ERR"
+    },
+    "add-field/forward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "big/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "big/json": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "big/plain": {
+      "dotnet": "LOSS",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "enum-add/backward/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "enum-add/backward/json": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "enum-add/backward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "enum-add/forward/bin": {
+      "dotnet": "OK*",
+      "go": "OK*",
+      "python": "OK*",
+      "rust": "OK*"
+    },
+    "enum-add/forward/json": {
+      "dotnet": "ERR",
+      "go": "ERR",
+      "python": "ERR",
+      "rust": "ERR"
+    },
+    "enum-add/forward/json-lenient": {
+      "dotnet": "LOSS",
+      "go": "LOSS",
+      "python": "LOSS",
+      "rust": "LOSS"
+    },
+    "remove-reserved/backward/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "remove-reserved/backward/json": {
+      "dotnet": "ERR",
+      "go": "ERR",
+      "python": "ERR",
+      "rust": "ERR"
+    },
+    "remove-reserved/backward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "remove-reserved/forward/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "remove-reserved/forward/json": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "remove-reserved/forward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "rename/backward/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "rename/backward/json": {
+      "dotnet": "ERR",
+      "go": "ERR",
+      "python": "ERR",
+      "rust": "ERR"
+    },
+    "rename/backward/json-lenient": {
+      "dotnet": "LOSS",
+      "go": "LOSS",
+      "python": "LOSS",
+      "rust": "LOSS"
+    },
+    "rename/forward/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "rename/forward/json": {
+      "dotnet": "ERR",
+      "go": "ERR",
+      "python": "ERR",
+      "rust": "ERR"
+    },
+    "rename/forward/json-lenient": {
+      "dotnet": "LOSS",
+      "go": "LOSS",
+      "python": "LOSS",
+      "rust": "LOSS"
+    },
+    "renumber/backward/bin": {
+      "dotnet": "LOSS",
+      "go": "LOSS",
+      "python": "LOSS",
+      "rust": "LOSS"
+    },
+    "renumber/backward/json": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "renumber/backward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "renumber/forward/bin": {
+      "dotnet": "LOSS",
+      "go": "LOSS",
+      "python": "LOSS",
+      "rust": "LOSS"
+    },
+    "renumber/forward/json": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "renumber/forward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "reuse-number/backward/bin": {
+      "dotnet": "LOSS",
+      "go": "LOSS",
+      "python": "LOSS",
+      "rust": "LOSS"
+    },
+    "reuse-number/backward/json": {
+      "dotnet": "ERR",
+      "go": "ERR",
+      "python": "ERR",
+      "rust": "ERR"
+    },
+    "reuse-number/backward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "reuse-number/forward/bin": {
+      "dotnet": "LOSS",
+      "go": "LOSS",
+      "python": "LOSS",
+      "rust": "LOSS"
+    },
+    "reuse-number/forward/json": {
+      "dotnet": "ERR",
+      "go": "ERR",
+      "python": "ERR",
+      "rust": "ERR"
+    },
+    "reuse-number/forward/json-lenient": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "s1/bin": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "s1/json": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    },
+    "s1/plain": {
+      "dotnet": "OK",
+      "go": "OK",
+      "python": "OK",
+      "rust": "OK"
+    }
+  },
+  "naive": {
+    "naive/canonical": {
+      "dotnet": {
+        "default": "JsonElement String 9007199254740993",
+        "viaDouble": null,
+        "viaInt64": "9007199254740993"
+      },
+      "go": {
+        "default": "string 9007199254740993",
+        "viaDouble": null,
+        "viaInt64": "9007199254740993"
+      },
+      "python": {
+        "default": "str 9007199254740993",
+        "viaDouble": null,
+        "viaInt64": "9007199254740993"
+      },
+      "rust": {
+        "default": "string 9007199254740993",
+        "viaDouble": null,
+        "viaInt64": "9007199254740993"
+      }
+    },
+    "naive/plain": {
+      "dotnet": {
+        "default": "JsonElement Number 9007199254740993",
+        "viaDouble": "9007199254740992",
+        "viaInt64": "9007199254740993"
+      },
+      "go": {
+        "default": "float64 9007199254740992",
+        "viaDouble": "9007199254740992",
+        "viaInt64": "9007199254740993"
+      },
+      "python": {
+        "default": "int 9007199254740993",
+        "viaDouble": "9007199254740992",
+        "viaInt64": "9007199254740993"
+      },
+      "rust": {
+        "default": "i64 9007199254740993",
+        "viaDouble": "9007199254740992",
+        "viaInt64": "9007199254740993"
+      }
+    }
+  }
+}

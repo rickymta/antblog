@@ -1,0 +1,632 @@
+{
+ "_ghi_chu": "dữ liệu bịa cho test, không phải OSM: tên đường mượn tên thật nhưng toạ độ, số nhà, phường đều do người viết đặt.",
+ "bbox": [
+  10.7,
+  10.86,
+  106.6,
+  106.78
+ ],
+ "source": "fixtures/geocode-mau.json (bịa)",
+ "records": [
+  {
+   "id": 9100,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "12",
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107700500,
+   "lng_e7": 1066910000
+  },
+  {
+   "id": 9101,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "12A",
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107700500,
+   "lng_e7": 1066913000
+  },
+  {
+   "id": 9102,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "14",
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107700500,
+   "lng_e7": 1066916000
+  },
+  {
+   "id": 9103,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "45",
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107700500,
+   "lng_e7": 1066930000
+  },
+  {
+   "id": 9104,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "45/6",
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107700500,
+   "lng_e7": 1066931000
+  },
+  {
+   "id": 9105,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "123/45/6",
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107700500,
+   "lng_e7": 1066960000
+  },
+  {
+   "id": 9106,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "123",
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107700500,
+   "lng_e7": 1066958000
+  },
+  {
+   "id": 9107,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "200",
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107700500,
+   "lng_e7": 1066980000
+  },
+  {
+   "id": 9200,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "5",
+   "street": "Lê Lợi",
+   "ward": "Phường 9",
+   "district": "Quận 3",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107660000,
+   "lng_e7": 1066950500
+  },
+  {
+   "id": 9201,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "9",
+   "street": "Lê Lợi",
+   "ward": "Phường 9",
+   "district": "Quận 3",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107670000,
+   "lng_e7": 1066950500
+  },
+  {
+   "id": 9202,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "21",
+   "street": "Lê Lợi",
+   "ward": "Phường 9",
+   "district": "Quận 3",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107690000,
+   "lng_e7": 1066950500
+  },
+  {
+   "id": 9203,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "33",
+   "street": "Lê Lợi",
+   "ward": "Phường 9",
+   "district": "Quận 3",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107720000,
+   "lng_e7": 1066950500
+  },
+  {
+   "id": 9300,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "12",
+   "street": "Đường số 7",
+   "ward": "Phường Tân Phú",
+   "district": "Quận 7",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107800500,
+   "lng_e7": 1066710000
+  },
+  {
+   "id": 9301,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "30",
+   "street": "Đường số 7",
+   "ward": "Phường Tân Phú",
+   "district": "Quận 7",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107800500,
+   "lng_e7": 1066730000
+  },
+  {
+   "id": 9302,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "12",
+   "street": "Đường số 7",
+   "ward": "Phường Hiệp Bình",
+   "district": "Thành phố Thủ Đức",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 108200500,
+   "lng_e7": 1067310000
+  },
+  {
+   "id": 9303,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "40",
+   "street": "Đường số 7",
+   "ward": "Phường Hiệp Bình",
+   "district": "Thành phố Thủ Đức",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 108200500,
+   "lng_e7": 1067330000
+  },
+  {
+   "id": 9400,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "8",
+   "street": "3 Tháng 2",
+   "ward": "Phường 12",
+   "district": "Quận 10",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107600500,
+   "lng_e7": 1066820000
+  },
+  {
+   "id": 9401,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "5",
+   "street": "Huyền Trân Công Chúa",
+   "ward": "Phường Bến Thành",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107740500,
+   "lng_e7": 1067010000
+  },
+  {
+   "id": 9500,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "10",
+   "street": "Bà Lê",
+   "ward": "Phường Dương Mẫu",
+   "district": null,
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107900500,
+   "lng_e7": 1066510000
+  },
+  {
+   "id": 9501,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "10",
+   "street": "Ba Lê",
+   "ward": "Phường Cây Mẫu",
+   "district": null,
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 108300500,
+   "lng_e7": 1067510000
+  },
+  {
+   "id": 9600,
+   "kind": "Addr",
+   "name": null,
+   "housenumber": "77",
+   "street": null,
+   "ward": null,
+   "district": null,
+   "city": null,
+   "lat_e7": 107701000,
+   "lng_e7": 1066941000
+  },
+  {
+   "id": 9700,
+   "kind": "Poi",
+   "name": "Cà phê Góc Phố",
+   "housenumber": null,
+   "street": "Nguyễn Trãi",
+   "ward": "Phường Bến Nghé",
+   "district": "Quận 1",
+   "city": "Thành phố Hồ Chí Minh",
+   "lat_e7": 107710000,
+   "lng_e7": 1066940000
+  },
+  {
+   "id": 9701,
+   "kind": "Poi",
+   "name": "Hiệu sách Mẫu",
+   "housenumber": null,
+   "street": null,
+   "ward": null,
+   "district": null,
+   "city": null,
+   "lat_e7": 107860000,
+   "lng_e7": 1066650000
+  },
+  {
+   "id": 9702,
+   "kind": "Place",
+   "name": "Khu Dân Cư Mẫu",
+   "housenumber": null,
+   "street": null,
+   "ward": null,
+   "district": null,
+   "city": null,
+   "lat_e7": 107750000,
+   "lng_e7": 1066990000
+  }
+ ],
+ "street_ways": [
+  {
+   "id": 9001,
+   "name": "Đường Nguyễn Trãi",
+   "pts": [
+    [
+     107700000,
+     1066900000
+    ],
+    [
+     107700000,
+     1066910000
+    ],
+    [
+     107700000,
+     1066920000
+    ],
+    [
+     107700000,
+     1066930000
+    ],
+    [
+     107700000,
+     1066940000
+    ],
+    [
+     107700000,
+     1066950000
+    ],
+    [
+     107700000,
+     1066960000
+    ],
+    [
+     107700000,
+     1066970000
+    ],
+    [
+     107700000,
+     1066980000
+    ],
+    [
+     107700000,
+     1066990000
+    ]
+   ]
+  },
+  {
+   "id": 9002,
+   "name": "Lê Lợi",
+   "pts": [
+    [
+     107650000,
+     1066950000
+    ],
+    [
+     107660000,
+     1066950000
+    ],
+    [
+     107670000,
+     1066950000
+    ],
+    [
+     107680000,
+     1066950000
+    ],
+    [
+     107690000,
+     1066950000
+    ],
+    [
+     107700000,
+     1066950000
+    ],
+    [
+     107710000,
+     1066950000
+    ],
+    [
+     107720000,
+     1066950000
+    ],
+    [
+     107730000,
+     1066950000
+    ],
+    [
+     107740000,
+     1066950000
+    ]
+   ]
+  },
+  {
+   "id": 9003,
+   "name": "Đường số 7",
+   "pts": [
+    [
+     107800000,
+     1066700000
+    ],
+    [
+     107800000,
+     1066710000
+    ],
+    [
+     107800000,
+     1066720000
+    ],
+    [
+     107800000,
+     1066730000
+    ],
+    [
+     107800000,
+     1066740000
+    ],
+    [
+     107800000,
+     1066750000
+    ],
+    [
+     107800000,
+     1066760000
+    ]
+   ]
+  },
+  {
+   "id": 9004,
+   "name": "Đường số 7",
+   "pts": [
+    [
+     108200000,
+     1067300000
+    ],
+    [
+     108200000,
+     1067310000
+    ],
+    [
+     108200000,
+     1067320000
+    ],
+    [
+     108200000,
+     1067330000
+    ],
+    [
+     108200000,
+     1067340000
+    ],
+    [
+     108200000,
+     1067350000
+    ],
+    [
+     108200000,
+     1067360000
+    ]
+   ]
+  },
+  {
+   "id": 9005,
+   "name": "3 Tháng 2",
+   "pts": [
+    [
+     107600000,
+     1066800000
+    ],
+    [
+     107600000,
+     1066810000
+    ],
+    [
+     107600000,
+     1066820000
+    ],
+    [
+     107600000,
+     1066830000
+    ],
+    [
+     107600000,
+     1066840000
+    ],
+    [
+     107600000,
+     1066850000
+    ],
+    [
+     107600000,
+     1066860000
+    ],
+    [
+     107600000,
+     1066870000
+    ],
+    [
+     107600000,
+     1066880000
+    ],
+    [
+     107600000,
+     1066890000
+    ]
+   ]
+  },
+  {
+   "id": 9006,
+   "name": "Huyền Trân Công Chúa",
+   "pts": [
+    [
+     107740000,
+     1067000000
+    ],
+    [
+     107740000,
+     1067010000
+    ],
+    [
+     107740000,
+     1067020000
+    ],
+    [
+     107740000,
+     1067030000
+    ],
+    [
+     107740000,
+     1067040000
+    ]
+   ]
+  },
+  {
+   "id": 9007,
+   "name": "Bà Lê",
+   "pts": [
+    [
+     107900000,
+     1066500000
+    ],
+    [
+     107900000,
+     1066510000
+    ],
+    [
+     107900000,
+     1066520000
+    ],
+    [
+     107900000,
+     1066530000
+    ],
+    [
+     107900000,
+     1066540000
+    ]
+   ]
+  },
+  {
+   "id": 9008,
+   "name": "Ba Lê",
+   "pts": [
+    [
+     108300000,
+     1067500000
+    ],
+    [
+     108300000,
+     1067510000
+    ],
+    [
+     108300000,
+     1067520000
+    ],
+    [
+     108300000,
+     1067530000
+    ],
+    [
+     108300000,
+     1067540000
+    ]
+   ]
+  },
+  {
+   "id": 9009,
+   "name": "Đường Cách Mạng Tháng Tám",
+   "pts": [
+    [
+     107850000,
+     1066600000
+    ],
+    [
+     107850000,
+     1066610000
+    ],
+    [
+     107850000,
+     1066620000
+    ],
+    [
+     107850000,
+     1066630000
+    ],
+    [
+     107850000,
+     1066640000
+    ],
+    [
+     107850000,
+     1066650000
+    ],
+    [
+     107850000,
+     1066660000
+    ],
+    [
+     107850000,
+     1066670000
+    ],
+    [
+     107850000,
+     1066680000
+    ],
+    [
+     107850000,
+     1066690000
+    ]
+   ]
+  }
+ ]
+}

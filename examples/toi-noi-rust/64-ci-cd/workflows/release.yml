@@ -1,0 +1,55 @@
+# Workflow MẪU cho lab 64: build release và lưu artifact khi đẩy tag vX.Y.Z.
+# CHƯA CHẠY TRÊN GITHUB. Không đăng nhập registry, không xin quyền ghi, không deploy:
+# artifact là đầu vào cho bước đóng gói image (bài 63) và triển khai (bài 65).
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false # một release đang build thì không bị hủy
+
+env:
+  CARGO_TERM_COLOR: always
+  SQLX_OFFLINE: "true"
+
+defaults:
+  run:
+    working-directory: examples/toi-noi-rust/64-ci-cd
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Cài toolchain
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: examples/toi-noi-rust/64-ci-cd
+      # Tag phải khớp version trong Cargo.toml: tag v0.1.0 chỉ build được khi package là 0.1.0.
+      - name: Kiểm tag khớp Cargo.toml
+        run: |
+          version="$(cargo metadata --locked --no-deps --format-version 1 | python3 -c 'import json,sys; print(json.load(sys.stdin)["packages"][0]["version"])')"
+          test "v${version}" = "${GITHUB_REF_NAME}"
+      - name: Build release
+        run: cargo build --release --locked
+      - name: Gom artifact và checksum
+        run: |
+          mkdir -p dist
+          cp target/release/ledger-ci dist/
+          (cd dist && sha256sum ledger-ci > ledger-ci.sha256)
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ledger-ci-${{ github.ref_name }}-linux-x86_64
+          path: examples/toi-noi-rust/64-ci-cd/dist/
+          if-no-files-found: error
+          retention-days: 30

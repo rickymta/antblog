@@ -1,0 +1,47 @@
+[package]
+name = "ledger_63_container"
+description = "Lab bài 63: binary ledger-service nhỏ và các Dockerfile đóng gói nó"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+# Thư viện chứa toàn bộ logic để test không cần cổng thật; binary `ledger-service` chỉ là vỏ.
+[lib]
+name = "ledger_container"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-service"
+path = "src/main.rs"
+
+[features]
+# `lab` = mã kiểm chứng (`--verify`, `--with-docker`). Dockerfile build với --no-default-features,
+# nên binary đóng gói không mang theo mã dựng test.
+default = ["lab"]
+lab = []
+
+[dependencies]
+axum = "0.8.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "signal", "net", "time", "sync"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt", "json", "std"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+tower = { version = "0.5", features = ["util"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+
+# Số liệu kích thước của bài đo từng núm này (Dockerfile.size).
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = "symbols"

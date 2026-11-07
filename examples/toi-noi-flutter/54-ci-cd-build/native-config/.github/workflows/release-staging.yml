@@ -1,0 +1,197 @@
+# MẪU của bài 54, KHÔNG chạy ở repository này: file nằm trong native-config/ chứ
+# không phải .github/workflows/ vì repository không có secret nào. Muốn dùng,
+# chép vào .github/workflows/ của repository ứng dụng (gốc là workspace
+# toi-noi-app, có apps/customer và runner android/ ios/ đã commit), tạo
+# environment "staging" và các secret ở README của lab.
+name: Release staging (mẫu)
+on:
+  workflow_dispatch:
+  push:
+    tags: ['staging-v*']
+permissions:
+  contents: read
+# Không huỷ run đang build: mỗi run có build number riêng, huỷ giữa chừng chỉ
+# đốt phút mà không để lại gì.
+concurrency:
+  group: release-staging-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    name: Build number
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      build_number: ${{ steps.number.outputs.build_number }}
+    steps:
+      - name: Compute build number
+        id: number
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+          OFFSET: ${{ vars.BUILD_NUMBER_OFFSET || '0' }}
+        run: |
+          for v in "$RUN_NUMBER" "$OFFSET"; do
+            case "$v" in
+              ''|*[!0-9]*) echo "RUN_NUMBER and OFFSET must be non-negative integers" >&2; exit 1 ;;
+            esac
+            if [ "${#v}" -gt 10 ]; then echo "value too long" >&2; exit 1; fi
+          done
+          BUILD_NUMBER=$((10#$RUN_NUMBER + 10#$OFFSET))
+          if [ "$BUILD_NUMBER" -lt 1 ] || [ "$BUILD_NUMBER" -gt 2100000000 ]; then
+            echo "build number $BUILD_NUMBER is outside 1..2100000000" >&2
+            exit 1
+          fi
+          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Build number: $BUILD_NUMBER" >> "$GITHUB_STEP_SUMMARY"
+
+  android:
+    name: Android AAB (ubuntu)
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: staging
+    env:
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+    defaults:
+      run:
+        working-directory: apps/customer
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6.2.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: '3.47.4'
+          channel: stable
+          cache: true
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('**/pubspec.lock') }}
+      - name: Restore upload keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          : "${ANDROID_KEYSTORE_BASE64:?ANDROID_KEYSTORE_BASE64 is empty}"
+          : "${ANDROID_KEYSTORE_PASSWORD:?ANDROID_KEYSTORE_PASSWORD is empty}"
+          : "${ANDROID_KEY_ALIAS:?ANDROID_KEY_ALIAS is empty}"
+          : "${ANDROID_KEY_PASSWORD:?ANDROID_KEY_PASSWORD is empty}"
+          KEYSTORE_PATH="$RUNNER_TEMP/upload-keystore.jks"
+          PROPS=android/key.properties
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          : > "$PROPS"
+          printf 'storeFile=%s\n' "$KEYSTORE_PATH" >> "$PROPS"
+          printf 'storePassword=%s\n' "$ANDROID_KEYSTORE_PASSWORD" >> "$PROPS"
+          printf 'keyAlias=%s\n' "$ANDROID_KEY_ALIAS" >> "$PROPS"
+          printf 'keyPassword=%s\n' "$ANDROID_KEY_PASSWORD" >> "$PROPS"
+      - name: Build AAB
+        run: |
+          flutter pub get --enforce-lockfile
+          flutter build appbundle --release --flavor staging \
+            --dart-define-from-file=config/staging.json \
+            --build-number="$BUILD_NUMBER" \
+            --obfuscate --split-debug-info=build/symbols/android
+      - name: Remove keystore and key.properties
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/upload-keystore.jks" android/key.properties
+      - name: Upload AAB
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: toi-noi-customer-staging-aab-${{ needs.prepare.outputs.build_number }}
+          path: apps/customer/build/app/outputs/bundle/stagingRelease/*.aab
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload Dart symbols
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: toi-noi-customer-staging-android-symbols-${{ needs.prepare.outputs.build_number }}
+          path: apps/customer/build/symbols/android/
+          if-no-files-found: error
+          retention-days: 14
+
+  ios:
+    name: iOS IPA (macOS)
+    needs: prepare
+    runs-on: macos-26
+    timeout-minutes: 45
+    environment: staging
+    env:
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+    defaults:
+      run:
+        working-directory: apps/customer
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
+          xcodebuild -version
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: '3.47.4'
+          channel: stable
+          cache: true
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('**/pubspec.lock') }}
+      - name: Install certificate and provisioning profile
+        env:
+          IOS_CERTIFICATE_P12_BASE64: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          : "${IOS_CERTIFICATE_P12_BASE64:?IOS_CERTIFICATE_P12_BASE64 is empty}"
+          : "${IOS_CERTIFICATE_PASSWORD:?IOS_CERTIFICATE_PASSWORD is empty}"
+          : "${IOS_PROVISIONING_PROFILE_BASE64:?IOS_PROVISIONING_PROFILE_BASE64 is empty}"
+          CERT_PATH="$RUNNER_TEMP/distribution.p12"
+          PROFILE_NAME=toi-noi-staging.mobileprovision
+          KEYCHAIN_PATH="$RUNNER_TEMP/toi-noi-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 16)"
+          printf '%s' "$IOS_CERTIFICATE_P12_BASE64" | base64 --decode > "$CERT_PATH"
+          for dir in "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+            mkdir -p "$dir"
+            printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$dir/$PROFILE_NAME"
+          done
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$IOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          rm -f "$CERT_PATH"
+      - name: Build IPA
+        run: |
+          flutter pub get --enforce-lockfile
+          flutter build ipa --release --flavor staging \
+            --dart-define-from-file=config/staging.json \
+            --build-number="$BUILD_NUMBER" \
+            --export-options-plist=ios/ExportOptions-adhoc.plist \
+            --obfuscate --split-debug-info=build/symbols/ios
+      - name: Clean up keychain and provisioning profile
+        if: always()
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/toi-noi-signing.keychain-db"
+          if [ -f "$KEYCHAIN_PATH" ]; then security delete-keychain "$KEYCHAIN_PATH"; fi
+          rm -f "$RUNNER_TEMP/distribution.p12" "$HOME/Library/MobileDevice/Provisioning Profiles/toi-noi-staging.mobileprovision" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/toi-noi-staging.mobileprovision"
+      - name: Upload IPA
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: toi-noi-customer-staging-ipa-${{ needs.prepare.outputs.build_number }}
+          path: apps/customer/build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload Dart symbols
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: toi-noi-customer-staging-ios-symbols-${{ needs.prepare.outputs.build_number }}
+          path: apps/customer/build/symbols/ios/
+          if-no-files-found: error
+          retention-days: 14

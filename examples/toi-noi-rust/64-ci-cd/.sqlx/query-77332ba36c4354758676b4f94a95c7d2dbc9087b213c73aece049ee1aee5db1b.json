@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into accounts (id, kind) values ($1, $2) on conflict (id) do nothing",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "77332ba36c4354758676b4f94a95c7d2dbc9087b213c73aece049ee1aee5db1b"
+}

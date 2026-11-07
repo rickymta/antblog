@@ -1,0 +1,25 @@
+[package]
+name = "pickup"
+description = "Chọn điểm đón và điểm trả để tổng quãng đường, thời gian của cả khách lẫn tài xế nhỏ nhất (P04: LOC-32…38, 40)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+geo-core.workspace = true
+road-graph.workspace = true
+route-engine.workspace = true
+simulator.workspace = true
+rustc-hash.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+fastrand.workspace = true
+rstar.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+
+[lints]
+workspace = true

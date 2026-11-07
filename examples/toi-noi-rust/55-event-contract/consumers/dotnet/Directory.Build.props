@@ -1,0 +1,9 @@
+<Project>
+  <!-- Đưa bin/ và obj/ ra ngoài cây mã nguồn: vào target/ của lab (đã được gitignore), nên không cần ignore thêm. -->
+  <PropertyGroup>
+    <LabTarget>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../target/dotnet/'))</LabTarget>
+    <BaseIntermediateOutputPath>$(LabTarget)obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(LabTarget)obj/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(LabTarget)bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

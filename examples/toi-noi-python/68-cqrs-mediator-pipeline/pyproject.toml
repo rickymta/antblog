@@ -1,0 +1,79 @@
+[project]
+name = "toi-noi-py-68-cqrs-mediator-pipeline"
+version = "0.1.0"
+description = "Bài 68: CQRS và mediator tự viết: command, query, handler, pipeline logging - validation - transaction trên service hồ sơ KYC"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.162",
+    "pydantic>=2.14",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "httpx>=0.28",
+    "httpx2>=2.0",  # Starlette 1.x: TestClient cần httpx2
+    "import-linter>=2.5",
+    "mypy>=2.4",
+    "ruff>=0.17",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.11,<0.13.0"]
+build-backend = "uv_build"
+
+# Tên project khác tên package import nên khai báo tường minh.
+[tool.uv]
+package = true
+
+[tool.uv.build-backend]
+module-name = "kyc_service"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Test cố ý dùng adapter giả; cảnh báo của build_container() có test riêng nên không làm ồn ở đây.
+filterwarnings = ["ignore:build_container\\(\\) dùng adapter giả:UserWarning"]
+
+# ---- Kiến trúc: import-linter đọc cấu hình ở đây -------------------------------------------
+[tool.importlinter]
+root_package = "kyc_service"
+include_external_packages = true  # để luật "domain không import fastapi" thấy được thư viện ngoài
+
+# Hợp đồng 1: chiều phụ thuộc. Lớp trên được import lớp dưới, không ngược lại.
+[[tool.importlinter.contracts]]
+name = "Bốn lớp: api > infrastructure > application > domain"
+type = "layers"
+containers = ["kyc_service"]
+layers = ["api", "infrastructure", "application", "domain"]
+# exhaustive: mọi module con trực tiếp của kyc_service phải thuộc một lớp. Thêm
+# `kyc_service/workers.py` mà không xếp lớp thì hợp đồng vỡ, thay vì lặng lẽ không kiểm.
+exhaustive = true
+
+# Hợp đồng 2: lõi không biết framework web. Application ĐƯỢC dùng pydantic (behavior validation
+# kiểm hình dạng command); domain thì không.
+[[tool.importlinter.contracts]]
+name = "Lõi không import framework web"
+type = "forbidden"
+source_modules = ["kyc_service.domain", "kyc_service.application"]
+forbidden_modules = ["fastapi", "starlette"]
+
+[[tool.importlinter.contracts]]
+name = "Domain không import pydantic"
+type = "forbidden"
+source_modules = ["kyc_service.domain"]
+forbidden_modules = ["pydantic"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "RUF", "PT", "DTZ"]
+# RUF001-003: dấu gạch ngang trong chú thích tiếng Việt không phải ký tự gây nhầm.
+ignore = ["RUF001", "RUF002", "RUF003", "PT018"]
+
+[tool.mypy]
+strict = true
+python_version = "3.14"
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src"

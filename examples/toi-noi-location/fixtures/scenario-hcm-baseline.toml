@@ -1,0 +1,105 @@
+# Kịch bản baseline trên đồ thị TP.HCM (data/hcm-graph.bin, bbox lat 10,70–10,86, lng 106,60–106,78).
+# Mọi tham số là GIẢ ĐỊNH của lab để có thước đo lặp lại được, không đo từ dữ liệu thật và không đại diện cho công ty nào.
+# Toạ độ các điểm nóng là toạ độ gần đúng của địa danh, chỉ dùng làm tâm nhu cầu mô phỏng.
+name = "hcm-baseline"
+graph = "hcm"
+seed = 20261106
+start_hour = 8
+duration_s = 3600
+drivers = 120
+traffic = "free_flow"
+traffic_center = [10.7725, 106.6980]
+traffic_radius_m = 5000
+decision = "immediate"
+
+[demand]
+requests_per_min = 3.5
+background_share = 0.3
+trip_min_m = 1500
+trip_max_m = 8000
+
+# giờ đầu: 10 phút đầu thưa, rồi đông dần
+[[demand.phases]]
+from_s = 0
+to_s = 600
+multiplier = 0.6
+
+[[demand.phases]]
+from_s = 2400
+to_s = 3600
+multiplier = 1.4
+
+[[demand.hotspot]]
+name = "Cho Ben Thanh"
+lat = 10.7725
+lng = 106.6980
+sigma_m = 900
+weight = 3.0
+
+[[demand.hotspot]]
+name = "San bay Tan Son Nhat (khu nha ga, gan dung)"
+lat = 10.8150
+lng = 106.6650
+sigma_m = 700
+weight = 1.5
+
+[[demand.hotspot]]
+name = "Landmark 81"
+lat = 10.7951
+lng = 106.7218
+sigma_m = 900
+weight = 2.0
+
+[[demand.hotspot]]
+name = "Nga tu Hang Xanh"
+lat = 10.8016
+lng = 106.7109
+sigma_m = 800
+weight = 1.5
+
+[[demand.hotspot]]
+name = "Phu My Hung"
+lat = 10.7292
+lng = 106.7218
+sigma_m = 900
+weight = 1.5
+
+[[demand.hotspot]]
+name = "Dai hoc Bach Khoa"
+lat = 10.7721
+lng = 106.6606
+sigma_m = 800
+weight = 1.5
+
+[[demand.hotspot]]
+name = "Go Vap"
+lat = 10.8386
+lng = 106.6652
+sigma_m = 1000
+weight = 1.0
+
+[[demand.hotspot]]
+name = "Thao Dien"
+lat = 10.8030
+lng = 106.7377
+sigma_m = 800
+weight = 1.0
+
+[customer]
+pin_sigma_m = 12
+walk_speed_mps = 1.3
+patience_s = 300
+
+[cancel]
+eta_free_s = 180
+eta_max_s = 900
+max_prob = 0.5
+walk_extra_per_100m = 0.0
+reaction_min_s = 10
+reaction_max_s = 60
+
+[driver]
+background_share = 0.4
+speed_jitter = 0.1
+dwell_pickup_s = 30
+dwell_dropoff_s = 10

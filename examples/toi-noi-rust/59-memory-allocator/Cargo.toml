@@ -1,0 +1,44 @@
+[package]
+name = "ledger_59_memory_allocator"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 59: Drop tất định, đếm allocation, so sánh allocator và so với GC .NET"
+publish = false
+default-run = "ledger-memory"
+
+[lib]
+name = "ledger_memory"
+path = "src/lib.rs"
+
+# Demo và --verify: có bộ đếm allocation tự viết bọc allocator mặc định.
+[[bin]]
+name = "ledger-memory"
+path = "src/main.rs"
+
+# Đo thời gian và RSS với allocator chọn bằng feature; cố ý KHÔNG có bộ đếm để không làm lệch số đo.
+[[bin]]
+name = "alloc-bench"
+path = "src/bin/alloc_bench.rs"
+
+[dependencies]
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+
+[features]
+# Mỗi feature thay allocator toàn chương trình của binary `alloc-bench`; chỉ bật một.
+mimalloc = ["dep:mimalloc"]
+jemalloc = ["dep:tikv-jemallocator"]
+
+[dependencies.mimalloc]
+version = "0.1"
+optional = true
+
+[dependencies.tikv-jemallocator]
+version = "0.7"
+optional = true
+
+# Giống lab 30: LTO toàn chương trình để số đo release có nghĩa.
+[profile.release]
+lto = "fat"
+codegen-units = 1
+# Xem lab 30: strip mặc định gọi rust-objcopy, không nạp được trên máy viết bài.
+strip = "none"

@@ -1,0 +1,25 @@
+name: toi_noi_38
+description: "Lab bài 38 (Flutter qua Tới Nơi): tác vụ nền với workmanager, vị trí nền cho app tài xế và cấu hình native khác nhau giữa app khách và app tài xế."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  geolocator: ^14.1.2
+  path_provider: ^2.1.6
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  workmanager: ^0.10.10
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  xml: ^7.1.0
+
+flutter:
+  uses-material-design: true

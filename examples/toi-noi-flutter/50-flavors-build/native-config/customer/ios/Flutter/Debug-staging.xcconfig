@@ -1,0 +1,3 @@
+// Cấu hình Debug của flavor staging: base Debug.xcconfig, rồi ghi đè bằng giá trị của flavor.
+#include "Debug.xcconfig"
+#include "Flavors/staging.xcconfig"

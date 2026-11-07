@@ -3909,6 +3909,1106 @@
       "DECISION"
     ]
   },
+  "location-bai-toan-quang-duong-khach-va-tai-xe": {
+    "title": "HAI NGƯỜI",
+    "subtitle": "Định vị 01 · Quãng đường của khách và tài xế",
+    "diagram": "map",
+    "labels": [
+      "KHÁCH",
+      "ĐIỂM HẸN",
+      "TÀI XẾ"
+    ]
+  },
+  "location-adr-rust-go-python-csharp-ranh-gioi-service": {
+    "title": "ADR",
+    "subtitle": "Định vị 02 · Rust, Go, Python, C#: mỗi bên làm gì",
+    "diagram": "layers",
+    "labels": [
+      "RUST ĐỀ XUẤT",
+      "GO NHẬN GPS",
+      "C# QUYẾT ĐỊNH"
+    ]
+  },
+  "location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac": {
+    "title": "LAT / LNG",
+    "subtitle": "Định vị 03 · Tọa độ, WGS84 và newtype",
+    "diagram": "code",
+    "labels": [
+      "WGS84",
+      "LATLNG",
+      "E7"
+    ]
+  },
+  "location-khoang-cach-haversine-equirectangular-sai-so": {
+    "title": "HAVERSINE",
+    "subtitle": "Định vị 04 · Khoảng cách và sai số đo được",
+    "diagram": "split",
+    "labels": [
+      "CHIM BAY",
+      "ĐƯỜNG BỘ",
+      "HỆ SỐ VÒNG"
+    ]
+  },
+  "location-geometry-crate-geo-chieu-diem-polyline-bearing": {
+    "title": "POLYLINE",
+    "subtitle": "Định vị 05 · Chiếu điểm, bearing, GeoJSON",
+    "diagram": "map",
+    "labels": [
+      "CHIẾU ĐIỂM",
+      "BEARING",
+      "GEOJSON"
+    ]
+  },
+  "location-osm-pbf-do-thi-duong-bo-xe-may-o-to": {
+    "title": "OSM → CSR",
+    "subtitle": "Định vị 06 · Từ OpenStreetMap tới đồ thị đường bộ",
+    "diagram": "flow",
+    "labels": [
+      "PBF",
+      "LỌC BBOX",
+      "ĐỒ THỊ CSR"
+    ]
+  },
+  "location-rstar-r-tree-snap-diem-ve-duong": {
+    "title": "R-TREE",
+    "subtitle": "Định vị 07 · Snap điểm GPS về đúng cạnh đường",
+    "diagram": "network",
+    "labels": [
+      "ĐIỂM GPS",
+      "ỨNG VIÊN",
+      "CẠNH ĐƯỜNG"
+    ]
+  },
+  "location-h3-geohash-chi-muc-luoi-k-ring": {
+    "title": "H3",
+    "subtitle": "Định vị 08 · Chia thành phố thành ô lục giác",
+    "diagram": "matrix",
+    "labels": [
+      "Ô H3",
+      "K-RING",
+      "GEOHASH"
+    ]
+  },
+  "location-tim-tai-xe-gan-nhat-bon-cach-co-so-do": {
+    "title": "GẦN NHẤT",
+    "subtitle": "Định vị 09 · Quét, R-tree, H3 và Redis GEO có số đo",
+    "diagram": "target",
+    "labels": [
+      "QUÉT",
+      "H3",
+      "REDIS GEO"
+    ]
+  },
+  "location-tong-hop-geo-core-kiem-thu-hinh-hoc": {
+    "title": "GEO-CORE",
+    "subtitle": "Định vị 10 · Tổng hợp P01: thư viện và kiểm thử",
+    "diagram": "checklist",
+    "labels": [
+      "HÌNH HỌC",
+      "PROPTEST",
+      "FIXTURE"
+    ]
+  },
+  "location-go-goroutine-channel-nhap-mon-cho-ingest": {
+    "title": "GOROUTINE",
+    "subtitle": "Định vị 11 · Go đủ dùng cho ingest",
+    "diagram": "code",
+    "labels": [
+      "GOROUTINE",
+      "CHANNEL",
+      "CONTEXT"
+    ]
+  },
+  "location-go-ingest-websocket-batch-gps-tai-xe": {
+    "title": "INGEST",
+    "subtitle": "Định vị 12 · Nhận GPS theo lô từ app tài xế",
+    "diagram": "flow",
+    "labels": [
+      "APP TÀI XẾ",
+      "WEBSOCKET",
+      "KAFKA"
+    ]
+  },
+  "location-go-backpressure-coalesce-drop-race-detector": {
+    "title": "BACKPRESSURE",
+    "subtitle": "Định vị 13 · Coalesce, drop có chủ đích, tắt êm",
+    "diagram": "storage",
+    "labels": [
+      "HÀNG ĐỢI",
+      "COALESCE",
+      "DROP"
+    ]
+  },
+  "location-validate-gps-timestamp-accuracy-gia-mao": {
+    "title": "GPS XẤU",
+    "subtitle": "Định vị 14 · Đồng hồ lệch, nhảy vị trí, giả mạo",
+    "diagram": "checklist",
+    "labels": [
+      "ĐỒNG HỒ",
+      "TỐC ĐỘ",
+      "GẮN CỜ"
+    ]
+  },
+  "location-kalman-loc-nhieu-gps-rust": {
+    "title": "KALMAN",
+    "subtitle": "Định vị 15 · Lọc nhiễu GPS mà không chậm",
+    "diagram": "split",
+    "labels": [
+      "ĐO",
+      "DỰ ĐOÁN",
+      "LÀM MƯỢT"
+    ]
+  },
+  "location-map-matching-hmm-viterbi-rust": {
+    "title": "HMM",
+    "subtitle": "Định vị 16 · Bám đường bằng HMM và Viterbi",
+    "diagram": "network",
+    "labels": [
+      "ĐIỂM GPS",
+      "ỨNG VIÊN",
+      "VITERBI"
+    ]
+  },
+  "location-map-matching-online-cua-so-cau-vuot-duong-song-song": {
+    "title": "CẦU VƯỢT",
+    "subtitle": "Định vị 17 · Bám đường online, cửa sổ trượt",
+    "diagram": "map",
+    "labels": [
+      "CỬA SỔ",
+      "CẦU VƯỢT",
+      "SONG SONG"
+    ]
+  },
+  "location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka": {
+    "title": "KHO VỊ TRÍ",
+    "subtitle": "Định vị 18 · Vị trí mới nhất theo ô H3",
+    "diagram": "storage",
+    "labels": [
+      "KAFKA",
+      "Ô H3",
+      "REDIS"
+    ]
+  },
+  "location-go-fan-out-tracking-khach-noi-suy-marker": {
+    "title": "TRACKING",
+    "subtitle": "Định vị 19 · Fan-out và nội suy marker",
+    "diagram": "network",
+    "labels": [
+      "HUB",
+      "KHÁCH",
+      "NỘI SUY"
+    ]
+  },
+  "location-lich-su-gps-parquet-retention-quyen-rieng-tu": {
+    "title": "LỊCH SỬ GPS",
+    "subtitle": "Định vị 20 · Parquet, retention, quyền riêng tư",
+    "diagram": "pages",
+    "labels": [
+      "PARQUET",
+      "RETENTION",
+      "RIÊNG TƯ"
+    ]
+  },
+  "location-dijkstra-a-star-rust-do-thi-csr": {
+    "title": "DIJKSTRA",
+    "subtitle": "Định vị 21 · Dijkstra và A* trên đồ thị CSR",
+    "diagram": "network",
+    "labels": [
+      "CSR",
+      "A*",
+      "NÚT ĐÃ DUYỆT"
+    ]
+  },
+  "location-bidirectional-alt-landmark-tang-toc-truy-van": {
+    "title": "ALT",
+    "subtitle": "Định vị 22 · Tìm hai chiều và landmark",
+    "diagram": "split",
+    "labels": [
+      "HAI CHIỀU",
+      "LANDMARK",
+      "DỪNG ĐÚNG"
+    ]
+  },
+  "location-chi-phi-re-u-turn-do-thi-theo-canh": {
+    "title": "QUAY ĐẦU",
+    "subtitle": "Định vị 23 · Chi phí rẽ, đồ thị theo cạnh",
+    "diagram": "cycle",
+    "labels": [
+      "RẼ",
+      "QUAY ĐẦU",
+      "THEO CẠNH"
+    ]
+  },
+  "location-profile-xe-may-o-to-di-bo-trong-hem": {
+    "title": "3 PROFILE",
+    "subtitle": "Định vị 24 · Xe máy, ô tô, đi bộ",
+    "diagram": "layers",
+    "labels": [
+      "XE MÁY",
+      "Ô TÔ",
+      "ĐI BỘ"
+    ]
+  },
+  "location-contraction-hierarchies-tu-cai-dat-fast-paths": {
+    "title": "CH",
+    "subtitle": "Định vị 25 · Contraction Hierarchies tự cài đặt",
+    "diagram": "layers",
+    "labels": [
+      "CO NÚT",
+      "SHORTCUT",
+      "TRUY VẤN"
+    ]
+  },
+  "location-ma-tran-many-to-many-bucket-ch": {
+    "title": "N × M",
+    "subtitle": "Định vị 26 · Ma trận chi phí many-to-many",
+    "diagram": "matrix",
+    "labels": [
+      "BUCKET",
+      "MA TRẬN",
+      "RAYON"
+    ]
+  },
+  "location-toc-do-theo-gio-customizable-ch-ket-xe": {
+    "title": "KẸT XE",
+    "subtitle": "Định vị 27 · Tốc độ theo giờ, Customizable CH",
+    "diagram": "cycle",
+    "labels": [
+      "KHUNG GIỜ",
+      "TRỌNG SỐ",
+      "CCH"
+    ]
+  },
+  "location-self-host-osrm-valhalla-hay-map-provider": {
+    "title": "TỰ VIẾT?",
+    "subtitle": "Định vị 28 · OSRM, Valhalla hay map provider",
+    "diagram": "split",
+    "labels": [
+      "TỰ VIẾT",
+      "SELF-HOST",
+      "PROVIDER"
+    ]
+  },
+  "location-routing-service-tonic-cache-fallback-p99": {
+    "title": "ROUTING API",
+    "subtitle": "Định vị 29 · gRPC, cache, fallback và p99",
+    "diagram": "flow",
+    "labels": [
+      "GRPC",
+      "CACHE",
+      "FALLBACK"
+    ]
+  },
+  "location-tong-hop-mo-phong-su-kien-roi-rac-seed": {
+    "title": "MÔ PHỎNG",
+    "subtitle": "Định vị 30 · Thước đo cho mọi tối ưu",
+    "diagram": "cycle",
+    "labels": [
+      "SEED",
+      "SỰ KIỆN",
+      "BASELINE"
+    ]
+  },
+  "location-geocoding-dia-chi-viet-nam-autocomplete": {
+    "title": "GEOCODING",
+    "subtitle": "Định vị 31 · Địa chỉ Việt Nam thành tọa độ",
+    "diagram": "code",
+    "labels": [
+      "ĐỊA CHỈ",
+      "CHUẨN HÓA",
+      "TỌA ĐỘ"
+    ]
+  },
+  "location-ham-muc-tieu-diem-hen-khach-va-tai-xe": {
+    "title": "J(p)",
+    "subtitle": "Định vị 32 · Hàm mục tiêu cho điểm hẹn",
+    "diagram": "target",
+    "labels": [
+      "KHÁCH",
+      "TÀI XẾ",
+      "CÙNG MỘT CÂN"
+    ]
+  },
+  "location-sinh-ung-vien-diem-don-do-thi-di-bo": {
+    "title": "ỨNG VIÊN",
+    "subtitle": "Định vị 33 · Khách đi bộ tới được đâu",
+    "diagram": "map",
+    "labels": [
+      "ĐI BỘ",
+      "SNAP",
+      "LOẠI BỎ"
+    ]
+  },
+  "location-phia-duong-huong-tiep-can-tranh-quay-dau": {
+    "title": "PHÍA ĐƯỜNG",
+    "subtitle": "Định vị 34 · Bớt một vòng quay đầu",
+    "diagram": "map",
+    "labels": [
+      "PHÍA ĐƯỜNG",
+      "HƯỚNG ĐI",
+      "DẢI PHÂN CÁCH"
+    ]
+  },
+  "location-xep-hang-diem-don-one-to-many-ngan-sach-do-tre": {
+    "title": "TOP 3",
+    "subtitle": "Định vị 35 · Xếp hạng điểm đón trong ngân sách",
+    "diagram": "target",
+    "labels": [
+      "MA TRẬN",
+      "XẾP HẠNG",
+      "P99"
+    ]
+  },
+  "location-diem-hen-dong-cap-nhat-khi-hai-ben-di-chuyen": {
+    "title": "ĐIỂM HẸN ĐỘNG",
+    "subtitle": "Định vị 36 · Khi cả hai đang di chuyển",
+    "diagram": "cycle",
+    "labels": [
+      "TÍNH LẠI",
+      "NGƯỠNG",
+      "ĐỒNG Ý"
+    ]
+  },
+  "location-hem-chung-cu-tttm-san-bay-cong-sanh": {
+    "title": "CỔNG, SẢNH",
+    "subtitle": "Định vị 37 · Hẻm, chung cư, sân bay",
+    "diagram": "layers",
+    "labels": [
+      "HẺM",
+      "SẢNH",
+      "KHU ĐÓN"
+    ]
+  },
+  "location-toi-uu-diem-tra-cong-vao-chuyen-ke-tiep": {
+    "title": "ĐIỂM TRẢ",
+    "subtitle": "Định vị 38 · Gần đích thật, dễ bắt chuyến kế",
+    "diagram": "target",
+    "labels": [
+      "ĐÍCH THẬT",
+      "CỔNG VÀO",
+      "CHUYẾN KẾ"
+    ]
+  },
+  "location-hoc-diem-don-tu-lich-su-dbscan-python": {
+    "title": "DBSCAN",
+    "subtitle": "Định vị 39 · Học điểm đón từ lịch sử",
+    "diagram": "matrix",
+    "labels": [
+      "LỊCH SỬ",
+      "PHÂN CỤM",
+      "BẢNG ĐIỂM"
+    ]
+  },
+  "location-cuoc-quote-giai-thich-doi-diem-don-cho-khach": {
+    "title": "CƯỚC",
+    "subtitle": "Định vị 40 · Đổi điểm đón và nói với khách",
+    "diagram": "checklist",
+    "labels": [
+      "TUYẾN MỚI",
+      "QUOTE",
+      "GIẢI THÍCH"
+    ]
+  },
+  "location-gan-nhat-sai-o-dau-do-bang-mo-phong": {
+    "title": "GẦN NHẤT?",
+    "subtitle": "Định vị 41 · Tài xế gần nhất sai ở đâu",
+    "diagram": "split",
+    "labels": [
+      "CHIM BAY",
+      "ETA",
+      "THAM LAM"
+    ]
+  },
+  "location-ghep-theo-lo-hungarian-kuhn-munkres-rust": {
+    "title": "HUNGARIAN",
+    "subtitle": "Định vị 42 · Ghép theo lô",
+    "diagram": "matrix",
+    "labels": [
+      "LÔ",
+      "CHI PHÍ",
+      "PHÂN CÔNG"
+    ]
+  },
+  "location-cua-so-lo-do-tre-doi-chat-luong-ghep": {
+    "title": "CỬA SỔ LÔ",
+    "subtitle": "Định vị 43 · Đợi bao lâu là đáng",
+    "diagram": "cycle",
+    "labels": [
+      "ĐỢI",
+      "CHẤT LƯỢNG",
+      "THÍCH ỨNG"
+    ]
+  },
+  "location-cat-tia-ung-vien-h3-ma-tran-thua": {
+    "title": "CẮT TỈA",
+    "subtitle": "Định vị 44 · Ma trận thưa ở quy mô thành phố",
+    "diagram": "matrix",
+    "labels": [
+      "K-RING",
+      "K GẦN NHẤT",
+      "THƯA"
+    ]
+  },
+  "location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy": {
+    "title": "CÔNG BẰNG",
+    "subtitle": "Định vị 45 · Ngoài quãng đường còn gì",
+    "diagram": "split",
+    "labels": [
+      "THỜI GIAN RẢNH",
+      "ĐÓN XA",
+      "RỦI RO HỦY"
+    ]
+  },
+  "location-goi-y-sang-dispatch-csharp-grpc-lease-idempotency": {
+    "title": "GỢI Ý → GÁN",
+    "subtitle": "Định vị 46 · Hợp đồng với Dispatch C#",
+    "diagram": "flow",
+    "labels": [
+      "RUST GỢI Ý",
+      "LEASE",
+      "C# GÁN"
+    ]
+  },
+  "location-chain-dispatch-tai-xe-sap-tra-khach": {
+    "title": "NỐI CHUYẾN",
+    "subtitle": "Định vị 47 · Nhận chuyến kế khi sắp trả khách",
+    "diagram": "flow",
+    "labels": [
+      "SẮP TRẢ",
+      "ETA CÒN LẠI",
+      "CHUYẾN KẾ"
+    ]
+  },
+  "location-lech-tuyen-dinh-tuyen-lai-ghep-lai": {
+    "title": "LỆCH TUYẾN",
+    "subtitle": "Định vị 48 · Định tuyến lại và ghép lại",
+    "diagram": "cycle",
+    "labels": [
+      "PHÁT HIỆN",
+      "TUYẾN MỚI",
+      "GIỚI HẠN"
+    ]
+  },
+  "location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau": {
+    "title": "ĐI ĐÂU?",
+    "subtitle": "Định vị 49 · Tài xế rảnh và nhu cầu theo ô",
+    "diagram": "map",
+    "labels": [
+      "NHU CẦU",
+      "CHI PHÍ",
+      "BẦY ĐÀN"
+    ]
+  },
+  "location-nhieu-diem-dung-chen-2-opt-doi-chieu-ortools": {
+    "title": "NHIỀU ĐIỂM",
+    "subtitle": "Định vị 50 · Chèn, 2-opt, đối chiếu OR-Tools",
+    "diagram": "network",
+    "labels": [
+      "CHÈN",
+      "2-OPT",
+      "OR-TOOLS"
+    ]
+  },
+  "python-clean-architecture-domain-application-infrastructure": {
+    "title": "PYTHON / CLEAN ARCH",
+    "subtitle": "Python 67 · Four layers, one direction",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "PORT",
+      "ADAPTER"
+    ]
+  },
+  "python-cqrs-command-query-handler-mediator": {
+    "title": "PYTHON / CQRS",
+    "subtitle": "Python 68 · Mediator and pipeline",
+    "diagram": "flow",
+    "labels": [
+      "COMMAND",
+      "MEDIATOR",
+      "HANDLER"
+    ]
+  },
+  "python-repository-unit-of-work-sqlalchemy": {
+    "title": "PYTHON / UNIT OF WORK",
+    "subtitle": "Python 69 · Repository on PostgreSQL",
+    "diagram": "layers",
+    "labels": [
+      "REPOSITORY",
+      "SESSION",
+      "VERSION"
+    ]
+  },
+  "python-use-case-ho-so-tai-xe-end-to-end": {
+    "title": "PYTHON / KYC USE CASE",
+    "subtitle": "Python 70 · Machine stops at review",
+    "diagram": "flow",
+    "labels": [
+      "OCR",
+      "FACE",
+      "REVIEW"
+    ]
+  },
+  "python-domain-event-outbox-integration-event-version": {
+    "title": "PYTHON / EVENT OUTBOX",
+    "subtitle": "Python 71 · Event contract and versions",
+    "diagram": "flow",
+    "labels": [
+      "OUTBOX",
+      "V1 TO V2",
+      "C# READER"
+    ]
+  },
+  "python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric": {
+    "title": "PYTHON / FRAUD DATA",
+    "subtitle": "Python 54 · Fraud labels, data and metrics",
+    "diagram": "matrix",
+    "labels": [
+      "LABELS",
+      "PR-AUC",
+      "COST"
+    ]
+  },
+  "python-feature-engineering-tu-event-kafka": {
+    "title": "PYTHON / FEATURES",
+    "subtitle": "Python 55 · Event windows and leakage",
+    "diagram": "flow",
+    "labels": [
+      "EVENTS",
+      "WINDOW",
+      "FEATURES"
+    ]
+  },
+  "python-rule-engine-scoring-strategy-explainability": {
+    "title": "PYTHON / RULE ENGINE",
+    "subtitle": "Python 56 · Explainable risk scoring",
+    "diagram": "checklist",
+    "labels": [
+      "RULES",
+      "SCORE",
+      "REASONS"
+    ]
+  },
+  "python-scikit-learn-lightgbm-imbalanced-cross-validation": {
+    "title": "PYTHON / LIGHTGBM",
+    "subtitle": "Python 57 · Imbalanced fraud models",
+    "diagram": "target",
+    "labels": [
+      "PIPELINE",
+      "CALIBRATE",
+      "THRESHOLD"
+    ]
+  },
+  "python-networkx-graph-cau-ket-tai-xe-khach": {
+    "title": "PYTHON / NETWORKX",
+    "subtitle": "Python 58 · Finding driver-customer collusion",
+    "diagram": "network",
+    "labels": [
+      "CUSTOMER",
+      "DRIVER",
+      "DEVICE"
+    ]
+  },
+  "python-real-time-scoring-feature-store-redis-latency": {
+    "title": "PYTHON / REDIS SCORING",
+    "subtitle": "Python 59 · Scoring within 50 ms",
+    "diagram": "flow",
+    "labels": [
+      "REDIS",
+      "50 MS",
+      "FALLBACK"
+    ]
+  },
+  "python-model-registry-ab-drift-retraining": {
+    "title": "PYTHON / MODEL REGISTRY",
+    "subtitle": "Python 60 · Versioning, shadow and rollback",
+    "diagram": "cycle",
+    "labels": [
+      "REGISTRY",
+      "SHADOW",
+      "ROLLBACK"
+    ]
+  },
+  "python-shap-explainability-audit-human-review": {
+    "title": "PYTHON / SHAP AUDIT",
+    "subtitle": "Python 61 · Explainable human review",
+    "diagram": "checklist",
+    "labels": [
+      "SHAP",
+      "QUEUE",
+      "AUDIT LOG"
+    ]
+  },
+  "rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen": {
+    "title": "CHART OF ACCOUNTS",
+    "subtitle": "Rust 41 · Account chart, trip cash flow, SQL health metrics",
+    "diagram": "map",
+    "labels": [
+      "ASSET",
+      "LIABILITY",
+      "REVENUE"
+    ]
+  },
+  "rust-hold-capture-void-so-du-kha-dung": {
+    "title": "HOLD / CAPTURE / VOID",
+    "subtitle": "Rust 42 · Wallet holds and available balance",
+    "diagram": "flow",
+    "labels": [
+      "HOLD",
+      "CAPTURE",
+      "VOID"
+    ]
+  },
+  "rust-refund-reversal-chargeback-but-toan-dao-maker-checker": {
+    "title": "REFUND / REVERSAL",
+    "subtitle": "Rust 43 · Reversal, chargeback and maker-checker",
+    "diagram": "flow",
+    "labels": [
+      "REVERSAL",
+      "CHARGEBACK",
+      "CHECKER"
+    ]
+  },
+  "rust-vi-tai-xe-chia-tien-payout-theo-lo": {
+    "title": "DRIVER PAYOUT / BATCH",
+    "subtitle": "Rust 44 · Driver wallet, batch payout, bank statement",
+    "diagram": "flow",
+    "labels": [
+      "WALLET",
+      "BATCH",
+      "BANK"
+    ]
+  },
+  "rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach": {
+    "title": "PROMO / BUDGET",
+    "subtitle": "Rust 45 · Promo budget, multi-party postings",
+    "diagram": "split",
+    "labels": [
+      "PLATFORM",
+      "DRIVER",
+      "BUDGET"
+    ]
+  },
+  "rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong": {
+    "title": "LARGEST REMAINDER",
+    "subtitle": "Rust 46 · Split money without losing a single dong",
+    "diagram": "split",
+    "labels": [
+      "FLOOR",
+      "REMAINDER",
+      "TIE-BREAK"
+    ]
+  },
+  "rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao": {
+    "title": "PSP RECONCILIATION",
+    "subtitle": "Rust 47 · Match PSP statements to the ledger via SQL",
+    "diagram": "flow",
+    "labels": [
+      "CSV",
+      "COPY",
+      "MATCH"
+    ]
+  },
+  "rust-so-du-theo-thoi-diem-snapshot-dong-ky": {
+    "title": "SNAPSHOT / PERIOD CLOSE",
+    "subtitle": "Rust 48 · Balance as-of, snapshots and period close",
+    "diagram": "layers",
+    "labels": [
+      "AS-OF",
+      "SNAPSHOT",
+      "CLOSE"
+    ]
+  },
+  "rust-event-sourcing-co-chung-muc-projection-replay": {
+    "title": "EVENT LOG / PROJECTION",
+    "subtitle": "Rust 49 · Ledger entries as events, replay and rebuild",
+    "diagram": "flow",
+    "labels": [
+      "LOG",
+      "PROJECT",
+      "REPLAY"
+    ]
+  },
+  "rust-audit-append-only-hash-chain-phan-quyen-pii": {
+    "title": "AUDIT / HASH CHAIN",
+    "subtitle": "Rust 50 · Append-only audit, hash chain, role, PII",
+    "diagram": "blocks",
+    "labels": [
+      "REVOKE",
+      "HASH CHAIN",
+      "ANCHOR"
+    ]
+  },
+  "rust-hexagonal-clean-workspace-crates-port-adapter": {
+    "title": "HEXAGONAL / CRATES",
+    "subtitle": "Rust 51 · Workspace crates, ports and adapters",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "PORTS",
+      "ADAPTERS"
+    ]
+  },
+  "rust-command-handler-pipeline-domain-event-khong-framework": {
+    "title": "COMMAND / PIPELINE",
+    "subtitle": "Rust 52 · Typed handlers, layers and domain events",
+    "diagram": "layers",
+    "labels": [
+      "VALIDATE",
+      "TRANSACTION",
+      "OUTBOX"
+    ]
+  },
+  "rust-aggregate-invariant-optimistic-locking-for-update": {
+    "title": "VERSION / FOR UPDATE",
+    "subtitle": "Rust 53 · Aggregate, optimistic locking and deadlock order",
+    "diagram": "cycle",
+    "labels": [
+      "VERSION",
+      "FOR UPDATE",
+      "40P01"
+    ]
+  },
+  "rust-use-case-thanh-toan-chuyen-end-to-end": {
+    "title": "TRIP PAYMENT / E2E",
+    "subtitle": "Rust 54 · Two events, any order, one ledger",
+    "diagram": "flow",
+    "labels": [
+      "EVENTS",
+      "AGGREGATE",
+      "LEDGER"
+    ]
+  },
+  "rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version": {
+    "title": "EVENT CONTRACT / SCHEMA",
+    "subtitle": "Rust 55 · Cross-language protobuf events and versioning",
+    "diagram": "matrix",
+    "labels": [
+      "PROTOBUF",
+      "JSON SCHEMA",
+      "BACKWARD"
+    ]
+  },
+  "rust-feature-flag-config-migration-expand-contract": {
+    "title": "FEATURE FLAG / MIGRATION",
+    "subtitle": "Rust 56 · Expand/contract, flags, safe rollback",
+    "diagram": "split",
+    "labels": [
+      "EXPAND",
+      "BACKFILL",
+      "CONTRACT"
+    ]
+  },
+  "rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao": {
+    "title": "MUTATION / FUZZ",
+    "subtitle": "Rust 57 · Mutation, fuzz and snapshot testing",
+    "diagram": "checklist",
+    "labels": [
+      "MUTANTS",
+      "FUZZ",
+      "SNAPSHOT"
+    ]
+  },
+  "rust-tong-hop-kien-truc-ledger-service-workspace": {
+    "title": "SERVICE / WORKSPACE",
+    "subtitle": "Rust 58 · Five crates, one ledger service, checked",
+    "diagram": "layers",
+    "labels": [
+      "DOMAIN",
+      "APPLICATION",
+      "ADAPTERS"
+    ]
+  },
+  "rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet": {
+    "title": "MEMORY / ALLOCATOR",
+    "subtitle": "Rust 59 · Drop, allocators and the .NET GC",
+    "diagram": "layers",
+    "labels": [
+      "STACK",
+      "HEAP",
+      "ALLOCATOR"
+    ]
+  },
+  "rust-profiling-flamegraph-tokio-console-dhat": {
+    "title": "PROFILING / FLAMEGRAPH",
+    "subtitle": "Rust 60 · Find hot spots with samply, dhat, console",
+    "diagram": "layers",
+    "labels": [
+      "CPU",
+      "HEAP",
+      "TASKS"
+    ]
+  },
+  "rust-toi-uu-co-so-do-clone-cow-batching-copy-p99": {
+    "title": "OPTIMIZE / MEASURE",
+    "subtitle": "Rust 61 · Cow, batching, COPY and p99 under load",
+    "diagram": "target",
+    "labels": [
+      "COW",
+      "BATCH",
+      "P99"
+    ]
+  },
+  "rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3": {
+    "title": "UNSAFE / FFI",
+    "subtitle": "Rust 62 · Calling Rust from C# and Python",
+    "diagram": "layers",
+    "labels": [
+      "C ABI",
+      "PINVOKE",
+      "PYO3"
+    ]
+  },
+  "rust-container-dockerfile-da-stage-cargo-chef-distroless": {
+    "title": "CONTAINER / CARGO-CHEF",
+    "subtitle": "Rust 63 · Multi-stage image, distroless and SIGTERM",
+    "diagram": "layers",
+    "labels": [
+      "BUILDER",
+      "DISTROLESS",
+      "PID 1"
+    ]
+  },
+  "rust-ci-cd-github-actions-clippy-audit-deny-postgresql": {
+    "title": "CI/CD / SUPPLY CHAIN",
+    "subtitle": "Rust 64 · GitHub Actions, clippy, audit, deny",
+    "diagram": "checklist",
+    "labels": [
+      "CLIPPY",
+      "AUDIT",
+      "DENY"
+    ]
+  },
+  "rust-trien-khai-aws-azure-secrets-health-autoscale": {
+    "title": "DEPLOY / AUTOSCALE",
+    "subtitle": "Rust 65 · ECS and Container Apps, Kafka lag autoscale",
+    "diagram": "checklist",
+    "labels": [
+      "ECS",
+      "AZURE APPS",
+      "KAFKA LAG"
+    ]
+  },
+  "rust-opentelemetry-trace-tu-csharp-sang-rust-grpc-kafka": {
+    "title": "OPENTELEMETRY / TRACE",
+    "subtitle": "Rust 66 · One trace_id across C#, gRPC and Kafka",
+    "diagram": "flow",
+    "labels": [
+      "C# CLIENT",
+      "GRPC",
+      "KAFKA"
+    ]
+  },
+  "rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay": {
+    "title": "SLO / RUNBOOK / REPLAY",
+    "subtitle": "Rust 67 · SLO, alerts, replay and restore drills",
+    "diagram": "checklist",
+    "labels": [
+      "SLI",
+      "ALERT",
+      "REPLAY"
+    ]
+  },
+  "rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh": {
+    "title": "SERIES / EVIDENCE",
+    "subtitle": "Rust 68 · Back to the ADR, with evidence and gaps",
+    "diagram": "map",
+    "labels": [
+      "ADR",
+      "EVIDENCE",
+      "68 LESSONS"
+    ]
+  },
+  "flutter-ban-do-flutter-map-marker-polyline-chon-diem-don": {
+    "title": "MAP / MARKERS",
+    "subtitle": "Flutter 34 · flutter_map, polylines and pickup points",
+    "diagram": "map",
+    "labels": [
+      "PICKUP",
+      "ROUTE",
+      "DROPOFF"
+    ]
+  },
+  "flutter-vi-tri-geolocator-permission-foreground-background": {
+    "title": "GEOLOCATION",
+    "subtitle": "Flutter 35 · Permissions, position streams and battery",
+    "diagram": "target",
+    "labels": [
+      "PERMISSION",
+      "STREAM",
+      "ACCURACY"
+    ]
+  },
+  "flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe": {
+    "title": "REALTIME / WS",
+    "subtitle": "Flutter 36 · Reconnect, backoff, jitter and resume",
+    "diagram": "network",
+    "labels": [
+      "SOCKET",
+      "BACKOFF",
+      "RESUME"
+    ]
+  },
+  "flutter-push-notification-fcm-apns-deep-link": {
+    "title": "PUSH / FCM",
+    "subtitle": "Flutter 37 · APNs, FCM and deep links from messages",
+    "diagram": "flow",
+    "labels": [
+      "TOKEN",
+      "PUSH",
+      "OPEN"
+    ]
+  },
+  "flutter-background-work-workmanager-vi-tri-nen-app-tai-xe": {
+    "title": "BACKGROUND",
+    "subtitle": "Flutter 38 · workmanager, driver location, store rules",
+    "diagram": "cycle",
+    "labels": [
+      "DEFER",
+      "LOCATE",
+      "POLICY"
+    ]
+  },
+  "flutter-thanh-toan-vi-xanh-webview-deep-link-idempotency": {
+    "title": "PAYMENT / WALLET",
+    "subtitle": "Flutter 39 · Hosted checkout, deep link, idempotency",
+    "diagram": "flow",
+    "labels": [
+      "CHECKOUT",
+      "RETURN",
+      "CONFIRM"
+    ]
+  },
+  "flutter-platform-channel-pigeon-ffi-goi-native": {
+    "title": "NATIVE / PIGEON",
+    "subtitle": "Flutter 40 · Platform channels, Pigeon and dart:ffi",
+    "diagram": "split",
+    "labels": [
+      "DART",
+      "PIGEON",
+      "NATIVE"
+    ]
+  },
+  "flutter-hieu-nang-rebuild-isolate-devtools": {
+    "title": "PERFORMANCE",
+    "subtitle": "Flutter 41 · DevTools, const, RepaintBoundary, isolates",
+    "diagram": "target",
+    "labels": [
+      "MEASURE",
+      "REBUILD",
+      "ISOLATE"
+    ]
+  },
+  "flutter-bao-mat-mobile-secure-storage-pinning-obfuscation-masvs": {
+    "title": "SECURITY / MASVS",
+    "subtitle": "Flutter 42 · Threat model, storage, pinning, obfuscation",
+    "diagram": "checklist",
+    "labels": [
+      "STORAGE",
+      "NETWORK",
+      "MASVS"
+    ]
+  },
+  "flutter-flavors-bundle-id-icon-firebase-theo-moi-truong-build": {
+    "title": "BUILD FLAVORS",
+    "subtitle": "Flutter 50 · Bundle IDs, icons, Firebase per flavor",
+    "diagram": "split",
+    "labels": [
+      "DEV",
+      "STAGING",
+      "PROD"
+    ]
+  },
+  "flutter-ky-ung-dung-android-keystore-play-app-signing-aab": {
+    "title": "ANDROID SIGNING",
+    "subtitle": "Flutter 51 · Keystore, Play App Signing, AAB",
+    "diagram": "checklist",
+    "labels": [
+      "KEYSTORE",
+      "AAB",
+      "VERSION"
+    ]
+  },
+  "flutter-ky-ung-dung-ios-certificate-provisioning-profile-capabilities": {
+    "title": "IOS SIGNING",
+    "subtitle": "Flutter 52 · Certificates, profiles and capabilities",
+    "diagram": "checklist",
+    "labels": [
+      "CERT",
+      "PROFILE",
+      "CAPABILITY"
+    ]
+  },
+  "flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build": {
+    "title": "FASTLANE",
+    "subtitle": "Flutter 53 · match, gym, pilot and supply",
+    "diagram": "code",
+    "labels": [
+      "MATCH",
+      "BUILD",
+      "UPLOAD"
+    ]
+  },
+  "flutter-ci-cd-github-actions-macos-build-ios-android-secrets": {
+    "title": "CI / CD BUILD",
+    "subtitle": "Flutter 54 · macOS and ubuntu jobs, secrets, artifacts",
+    "diagram": "flow",
+    "labels": [
+      "SECRETS",
+      "BUILD",
+      "ARTIFACT"
+    ]
+  },
+  "flutter-firebase-app-distribution-phan-phoi-noi-bo-tester": {
+    "title": "APP DISTRIBUTION",
+    "subtitle": "Flutter 55 · Internal builds for iOS and Android testers",
+    "diagram": "network",
+    "labels": [
+      "UPLOAD",
+      "TESTERS",
+      "FEEDBACK"
+    ]
+  },
+  "flutter-testflight-internal-external-testing-beta-review": {
+    "title": "TESTFLIGHT",
+    "subtitle": "Flutter 56 · Internal, external and Beta App Review",
+    "diagram": "flow",
+    "labels": [
+      "UPLOAD",
+      "INTERNAL",
+      "EXTERNAL"
+    ]
+  },
+  "flutter-google-play-internal-closed-open-production-staged-rollout": {
+    "title": "GOOGLE PLAY",
+    "subtitle": "Flutter 57 · Testing tracks and staged rollout",
+    "diagram": "pages",
+    "labels": [
+      "INTERNAL",
+      "CLOSED",
+      "PRODUCTION"
+    ]
+  },
+  "flutter-app-store-production-metadata-privacy-review-phased-release": {
+    "title": "APP STORE",
+    "subtitle": "Flutter 58 · Metadata, privacy, review, phased release",
+    "diagram": "checklist",
+    "labels": [
+      "METADATA",
+      "REVIEW",
+      "PHASED"
+    ]
+  },
+  "flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback": {
+    "title": "AFTER RELEASE",
+    "subtitle": "Flutter 59 · Force update, flags, patches and rollback",
+    "diagram": "cycle",
+    "labels": [
+      "MONITOR",
+      "PATCH",
+      "ROLLBACK"
+    ]
+  },
   "ba-uat-vai-tro-nguoi-dung-nghiep-vu": {
     "title": "BUSINESS ACCEPTANCE",
     "subtitle": "Toi Noi · Business Analysis / Part 07",

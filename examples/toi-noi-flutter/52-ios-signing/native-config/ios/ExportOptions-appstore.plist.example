@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Bản production gửi lên App Store Connect (TestFlight, App Store).
+         "app-store-connect" là tên hiện hành của "app-store". -->
+    <key>method</key>
+    <string>app-store-connect</string>
+    <!-- ABCDE12345 là Team ID giả. Thay bằng Team ID của bạn. -->
+    <key>teamID</key>
+    <string>ABCDE12345</string>
+    <key>signingStyle</key>
+    <string>manual</string>
+    <key>signingCertificate</key>
+    <string>Apple Distribution</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>vn.toinoi.customer</key>
+        <string>ToiNoi Customer AppStore</string>
+    </dict>
+    <key>destination</key>
+    <string>export</string>
+    <key>uploadSymbols</key>
+    <true/>
+    <key>stripSwiftSymbols</key>
+    <true/>
+</dict>
+</plist>

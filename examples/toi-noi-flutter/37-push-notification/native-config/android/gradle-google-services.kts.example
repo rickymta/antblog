@@ -1,0 +1,27 @@
+// Đoạn thêm vào project Flutter đã sinh. Chưa build thử bằng Gradle.
+// Template Flutter 3.47.4: compileSdk = flutter.compileSdkVersion (36) và AGP 9.1.0,
+// nên các dòng dưới đây là phần PHẢI đổi vì flutter_local_notifications 23.0.0.
+
+// 1) android/settings.gradle.kts, trong khối plugins { ... }
+//    Google services theo firebase.google.com/docs/android/setup (kiểm 11/2026);
+//    AGP tối thiểu 9.1.1 theo README flutter_local_notifications (template đang ghi 9.1.0).
+id("com.android.application") version "9.1.1" apply false
+id("com.google.gms.google-services") version "4.5.0" apply false
+
+// 2) android/app/build.gradle.kts, trong khối plugins { ... }
+id("com.google.gms.google-services")
+
+// 3) android/app/build.gradle.kts, trong khối android { ... }
+compileSdk = 37 // README flutter_local_notifications: tối thiểu 37
+compileOptions {
+    isCoreLibraryDesugaringEnabled = true // bắt buộc kể cả khi không đặt lịch thông báo
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+// 4) android/app/build.gradle.kts, cuối file
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
+
+// google-services.json (file thật, KHÔNG commit) đặt ở android/app/.

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into account_balances (account_id, balance_dong, version) values ($1, $2, 1) on conflict (account_id) do update set balance_dong = account_balances.balance_dong + excluded.balance_dong, version = account_balances.version + 1, updated_at = now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b24be521cc13acfed228d954f9e39c0cbc4fd011b07928ceff377b7c5a4fd0be"
+}

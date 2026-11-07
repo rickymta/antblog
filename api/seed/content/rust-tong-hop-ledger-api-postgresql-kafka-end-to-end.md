@@ -231,7 +231,7 @@ Các mục trên thuộc phần P05, nghiệp vụ sổ cái, và các phần sa
 
 <details><summary>Xem lời giải</summary><p>Lab bỏ qua im lặng: <code>event_id</code> là <code>TripCompleted:TN-0001</code> đã có trong inbox nên <code>apply_trip_completed</code> trả <code>Duplicate</code> trước khi đụng tới sổ; số dư tài xế vẫn 20.400. Lớp thứ hai (<code>idempotency_key</code> unique, kèm so sánh nội dung ở <code>replayed</code>) có thể báo <code>IdempotencyConflict</code> nhưng không bao giờ được chạm tới. Cách xử lý đúng không nằm ở inbox: dùng <code>eventId</code> riêng cho từng sự kiện, phát hiện cước đổi, và ghi bút toán đảo cho bản cũ rồi bút toán mới. Test <code>same_trip_with_other_fare_is_ignored_silently</code> ghi nhận hành vi hiện tại.</p></details>
 
-Bài trước: [bài 39](/articles/rust-graceful-shutdown-health-readiness-backpressure). Bài tiếp: phần P05, nghiệp vụ sổ cái, ở lộ trình Rust nâng cao.
+Bài trước: [bài 39](/articles/rust-graceful-shutdown-health-readiness-backpressure). Bài tiếp: [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen), đầu lộ trình Rust nâng cao.
 
 ## Tài liệu gốc
 

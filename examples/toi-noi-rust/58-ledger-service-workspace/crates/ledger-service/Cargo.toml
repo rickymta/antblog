@@ -1,0 +1,43 @@
+[package]
+name = "ledger-service"
+description = "Composition root: lắp domain, application, infrastructure và api thành binary ledger-service"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "ledger_service"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-service"
+path = "src/main.rs"
+
+# Chỉ crate này được phép biết cả bốn crate còn lại: nó là nơi duy nhất chọn adapter nào nối vào port nào.
+[dependencies]
+anyhow.workspace = true
+http-body-util.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+jiff.workspace = true
+jsonwebtoken.workspace = true
+ledger-api.workspace = true
+ledger-application.workspace = true
+ledger-domain.workspace = true
+ledger-infrastructure.workspace = true
+rdkafka.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+tokio-util.workspace = true
+tonic.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true
+axum.workspace = true
+
+[lints]
+workspace = true

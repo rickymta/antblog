@@ -1,0 +1,1 @@
+{"schemaVersion":1,"entryId":"JE-000001","idempotencyKey":"trip:TN-0001:capture","postings":[{"account":"customer:CU-001","amountDong":-9007199254740993},{"account":"psp:vixanh:clearing","amountDong":9007199254740993}],"postedAt":"2026-11-06T02:30:00Z"}

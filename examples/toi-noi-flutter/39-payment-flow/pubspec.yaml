@@ -1,0 +1,30 @@
+name: toi_noi_39
+description: "Lab bài 39 (Flutter qua Tới Nơi): thanh toán qua cổng VíXanh với idempotency key, deep link quay về và xác nhận từ server."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  dio: ^5.11.1
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  url_launcher: ^6.3.3
+  webview_flutter: ^4.14.1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  shelf: ^1.4.3
+  shelf_router: ^1.1.5
+  toi_noi_fake_api:
+    path: ../tools/fake_api
+  xml: ^7.1.0
+
+flutter:
+  uses-material-design: true

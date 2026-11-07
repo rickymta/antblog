@@ -1,0 +1,32 @@
+[package]
+name = "ledger-api"
+description = "Adapter hướng vào của ledger-service: HTTP (axum) và gRPC (tonic) gọi use case"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Phụ thuộc application + domain để GỌI use case. Không sqlx, không rdkafka, không infrastructure:
+# API không biết dữ liệu nằm ở đâu.
+[dependencies]
+axum.workspace = true
+jiff.workspace = true
+jsonwebtoken.workspace = true
+ledger-application.workspace = true
+ledger-domain.workspace = true
+prost.workspace = true
+prost-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tonic.workspace = true
+tonic-prost.workspace = true
+tower-http.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+
+[build-dependencies]
+protoc-bin-vendored = "3.3.0"
+tonic-prost-build = "0.14.9"
+
+[lints]
+workspace = true

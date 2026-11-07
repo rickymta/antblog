@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- App TÀI XẾ, ios/Runner/Info.plist trước khi tải lên TestFlight (xem ghi chú ở bản app khách). -->
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!-- Chỉ quyền "khi đang dùng", như bài 38: không khai NSLocationAlways... -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tới Nơi dùng vị trí của bạn để ghép chuyến gần nhất. Trong chuyến đang chạy, app tiếp tục gửi vị trí khi bạn chuyển sang app dẫn đường để khách thấy xe đang tới. Ngoài chuyến, app không thu vị trí.</string>
+
+	<!-- location: gửi vị trí khi chuyển sang app dẫn đường (bài 38).
+	     remote-notification: để app được đánh thức xử lý background
+	     notification (bài 37). -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>remote-notification</string>
+	</array>
+</dict>
+</plist>

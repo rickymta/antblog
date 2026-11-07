@@ -1,0 +1,30 @@
+[package]
+name = "geo-engine"
+description = "Dịch vụ định tuyến gRPC (tonic): Route và Matrix, deadline, cache theo ô H3 và khung giờ, fallback chim bay × hệ số vòng"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+geo-core.workspace = true
+road-graph.workspace = true
+route-engine.workspace = true
+matcher.workspace = true
+rustc-hash.workspace = true
+prost.workspace = true
+tonic.workspace = true
+tonic-prost.workspace = true
+tokio = { workspace = true, features = ["signal"] }
+tokio-stream = { version = "0.1.19", features = ["net"] }
+thiserror.workspace = true
+
+[build-dependencies]
+protox.workspace = true
+tonic-prost-build.workspace = true
+
+[dev-dependencies]
+
+[lints]
+workspace = true

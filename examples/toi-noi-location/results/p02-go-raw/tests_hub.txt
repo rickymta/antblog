@@ -1,0 +1,20 @@
+$ go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/hub
+=== RUN   TestChiMoSauKhiGan
+--- PASS: TestChiMoSauKhiGan (0.01s)
+=== RUN   TestVeKhongPhaiCuaChuyenNaoBiBoQua
+--- PASS: TestVeKhongPhaiCuaChuyenNaoBiBoQua (0.00s)
+=== RUN   TestDiemNghiVanKhongToiKhach
+--- PASS: TestDiemNghiVanKhongToiKhach (0.00s)
+=== RUN   TestClientChamBiCoalesce
+    hub_test.go:174: 2001 điểm tới trong lúc client không ack: client nhận 3 khung, hub gộp bỏ 1998
+--- PASS: TestClientChamBiCoalesce (0.12s)
+=== RUN   TestKetThucChuyenDongKetNoi
+--- PASS: TestKetThucChuyenDongKetNoi (0.00s)
+=== RUN   TestAssignChiChoAdmin
+--- PASS: TestAssignChiChoAdmin (0.00s)
+=== RUN   TestClientKhongAckBiNgat
+--- PASS: TestClientKhongAckBiNgat (0.26s)
+PASS
+ok  	toinoi/location/internal/hub	1.737s
+(exit=0)
+

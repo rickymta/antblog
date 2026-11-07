@@ -1,0 +1,26 @@
+[package]
+name = "ledger_50_audit_hash_chain"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "Lab bài 50: audit, append-only, hash chain và phân quyền sổ cái trên PostgreSQL thật"
+
+[lib]
+name = "ledger_audit"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-audit"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+hex = "0.4.3"
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+sha2 = "0.11.1"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "sync"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["json"] }
+uuid = { version = "1.29.0", features = ["v4"] }

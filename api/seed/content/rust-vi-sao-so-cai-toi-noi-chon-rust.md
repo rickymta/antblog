@@ -24,12 +24,12 @@ Tài liệu kiến trúc Tới Nơi (mục 4.9, Payment & Wallet) có một khuy
 
 Từ đó, tiêu chí của service sổ cái là:
 
-- **Tiền đúng tuyệt đối.** Mọi phép cộng trừ hoặc đúng, hoặc báo lỗi rõ ràng; không được lặng lẽ sai.
+- **Tiền không được lặng lẽ sai.** Mọi phép cộng trừ hoặc đúng, hoặc báo lỗi rõ ràng.
 - **Append-only và idempotent.** Bút toán đã ghi không bị sửa; ghi lần hai cùng `idempotency_key` (ví dụ `trip:TN-0001:capture`) trả về bút toán cũ.
 - **Mọi trạng thái đều được xử lý.** Thêm trạng thái mới mà một chỗ quên xử lý là lỗi tiền bạc.
 - **Độ trễ p99 và bộ nhớ dễ đoán.** Sổ cái nằm trên đường thanh toán; độ trễ đuôi tăng bất thường kéo cả luồng chờ.
 
-Lưu ý: với khoảng 70 chuyến tạo mới mỗi giây lúc cao điểm (theo hồ sơ), **thông lượng thô không phải lý do** đổi ngôn ngữ; C# xử lý con số đó thoải mái.
+Lưu ý: với khoảng 70 chuyến tạo mới mỗi giây lúc cao điểm (theo hồ sơ), **thông lượng thô không phải lý do** đổi ngôn ngữ: ở mức đó, giới hạn nhiều khả năng nằm ở database và mạng hơn là ở ngôn ngữ. Đây là lập luận, loạt này không đo C# trên tải sổ cái.
 
 ## C#/.NET 10 có đủ tốt để viết sổ cái không?
 

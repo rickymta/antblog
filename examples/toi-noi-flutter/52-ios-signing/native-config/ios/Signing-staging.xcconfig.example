@@ -1,0 +1,10 @@
+// Flavor staging: build trên CI, ký bằng Apple Distribution và profile ad-hoc.
+// Dán vào Release-staging.xcconfig.
+PRODUCT_BUNDLE_IDENTIFIER = vn.toinoi.customer.staging
+CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements
+CODE_SIGN_STYLE = Manual
+// ABCDE12345 là Team ID giả. Thay bằng Team ID của bạn.
+DEVELOPMENT_TEAM = ABCDE12345
+CODE_SIGN_IDENTITY = Apple Distribution
+// Tên profile đúng như trong Certificates, Identifiers & Profiles.
+PROVISIONING_PROFILE_SPECIFIER = ToiNoi Customer Staging AdHoc

@@ -1,0 +1,15 @@
+$ examples/toi-noi-location/go/bin/location-ingest --sink discard
+$ examples/toi-noi-location/go/bin/loadgen --drivers 2000 --rate 500 --batch 3 --duration 30s --report-every 15s --seed 1 --fault-rate 0.002 --skew-fraction 0.02 --reorder-fraction 0.05 --mock-fraction 0.01
+# loadgen drivers=2000 seed=1 batch=3 urls=1 viewers=0 slow_viewers=0
+# kết nối: 2000/2000 thành công, 0 lỗi, mất 0.3s
+# khởi động 14s ở 500 điểm/s (không tính)
+STEP	target_pts_s	achieved_pts_s	msgs_s	p50_ms	p95_ms	p99_ms	max_ms	errs	ingest_cpu_pct	ingest_heap_mb	ingest_rss_mb	ingest_goroutines	q_max_depth	q_dropped	q_coalesced	loadgen_cpu_pct	loadgen_rss_mb
+  t= 15s target=500 acked_pts_s=494 win_p50=0.4ms win_p99=9.8ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=8185 heap_mb=36
+  t= 30s target=500 acked_pts_s=503 win_p50=0.5ms win_p99=14.8ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=15457 heap_mb=45
+STEP	500	499	166	0.40	6.25	14.13	34.66	0	2	45.3	83.4	2007	14	0	0	4	81.8
+$ curl -s http://127.0.0.1:8081/debug/stats | python3 -c 'chọn forwarded, flagged, rejected, flag_counts'
+points 16572
+forwarded 15982
+flagged 572
+rejected {"bad_coord": 0, "duplicate": 0, "future": 0, "other": 0, "out_of_order": 590, "too_old": 0}
+flag_counts {"POINT_FLAG_CLOCK_SKEW": 378, "POINT_FLAG_MOCK_REPORTED": 163, "POINT_FLAG_POOR_ACCURACY": 0, "POINT_FLAG_SPEED_IMPLAUSIBLE": 32, "POINT_FLAG_SPEED_MISMATCH": 36, "POINT_FLAG_TELEPORT": 32}

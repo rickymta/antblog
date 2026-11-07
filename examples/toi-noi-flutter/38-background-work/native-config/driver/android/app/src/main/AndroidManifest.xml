@@ -1,0 +1,58 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Vị trí khi app đang mở. Người dùng có thể chỉ cấp "gần đúng". -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <!-- Foreground service chia sẻ vị trí trong chuyến (Android 14 trở lên bắt
+         buộc khai quyền theo loại: loại `location` cần FOREGROUND_SERVICE_LOCATION).
+         Service của geolocator (GeolocatorLocationService) khai sẵn
+         foregroundServiceType="location" trong manifest của plugin. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+
+    <!-- Từ Android 13, thông báo cần quyền lúc chạy. Không cần quyền này để chạy
+         foreground service, nhưng nếu người dùng từ chối thì thông báo của
+         service không hiện trong khay thông báo (vẫn hiện trong Task Manager). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!-- CỐ Ý KHÔNG khai ACCESS_BACKGROUND_LOCATION: service khởi động lúc tài
+         xế vừa bấm nhận chuyến (activity đang hiện). Tài liệu Android chỉ đòi
+         quyền này khi tạo service loại location lúc app đã ở nền. Lưu ý: Google
+         Play vẫn có thể coi việc chia sẻ vị trí bằng foreground service là
+         tương đương vị trí nền, nên đừng coi việc bỏ quyền là thoát thủ tục. -->
+
+    <application
+        android:label="Tới Nơi Tài xế"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>

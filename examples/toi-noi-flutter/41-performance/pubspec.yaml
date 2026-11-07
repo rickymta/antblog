@@ -1,0 +1,24 @@
+name: toi_noi_41
+description: "Lab bài 41 (Flutter qua Tới Nơi): đếm rebuild, paint và item được build; Isolate.run cho JSON lớn; ResizeImage; phân loại jank theo ngân sách khung hình."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+  toi_noi_ui:
+    path: ../packages/toi_noi_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

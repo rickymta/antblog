@@ -1,0 +1,47 @@
+[package]
+name = "labs"
+description = "Mỗi bài LOC-03…LOC-10 một binary: src/bin/locNN_<tên>.rs, in kết quả có nhãn"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+geo-core.workspace = true
+road-graph.workspace = true
+driver-store = { workspace = true, features = ["redis"] }
+geo.workspace = true
+fastrand.workspace = true
+serde_json.workspace = true
+rustc-hash.workspace = true
+map-match.workspace = true
+location-store.workspace = true
+route-engine.workspace = true
+rayon.workspace = true
+petgraph.workspace = true
+fast_paths.workspace = true
+simulator.workspace = true
+geo-engine.workspace = true
+matcher.workspace = true
+geocode.workspace = true
+pickup.workspace = true
+cpu-time = "1.0.0"
+parquet.workspace = true
+tokio.workspace = true
+tonic.workspace = true
+tokio-stream = { version = "0.1.19", features = ["net"] }
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name = "loc04_khoang_cach"
+harness = false
+
+[[bench]]
+name = "loc07_snap"
+harness = false
+
+[lints]
+workspace = true

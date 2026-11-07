@@ -1,0 +1,9 @@
+[project]
+name = "loc39"
+version = "0.1.0"
+description = "LOC-39: học điểm đón từ lịch sử bằng DBSCAN trên đơn vị mét (dữ liệu mô phỏng)"
+requires-python = ">=3.13,<3.14"
+dependencies = ["numpy", "scikit-learn"]
+
+[tool.uv]
+package = false

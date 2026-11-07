@@ -1,0 +1,24 @@
+[package]
+name = "ledger-infrastructure"
+description = "Adapter của ledger-service: PostgreSQL (sqlx), Kafka (rdkafka), outbox relay"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# Phụ thuộc application + domain để CÀI các port. Không axum, không tonic: API là việc của crate khác.
+[dependencies]
+anyhow.workspace = true
+jiff.workspace = true
+ledger-application.workspace = true
+ledger-domain.workspace = true
+rdkafka.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+tracing.workspace = true
+
+[lints]
+workspace = true

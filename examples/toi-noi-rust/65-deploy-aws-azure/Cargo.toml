@@ -1,0 +1,17 @@
+[package]
+name = "ledger_65_deploy_aws_azure"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Lab bài 65: cấu hình triển khai ECS và Container Apps cho ledger-service, kiểm ràng buộc chéo và mô phỏng autoscale theo lag Kafka"
+
+[dependencies]
+anyhow = "1.0.104"
+secrecy = "0.10.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+serde_yaml_ng = "0.10.0"
+thiserror = "2.0.21"
+
+[lints.rust]
+unsafe_code = "forbid"

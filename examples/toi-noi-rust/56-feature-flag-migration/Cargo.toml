@@ -1,0 +1,18 @@
+[package]
+name = "ledger_56_feature_flag_migration"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "Lab bài 56: expand/contract, feature flag phí, policy_version và rollback trên PostgreSQL thật"
+
+[dependencies]
+anyhow = "1.0.104"
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+rust_decimal = "1.43.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+uuid = { version = "1.29.0", features = ["v4"] }

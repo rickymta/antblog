@@ -1,6 +1,6 @@
 name: toi_noi_fake_api
-description: "Server giả của Tới Nơi dựng bằng shelf: báo giá, đặt chuyến, nhận chuyến, xác thực giả (OTP, JWT, refresh token) và lỗi có chủ đích, dùng cho lab Flutter qua Tới Nơi từ bài 19."
-version: 0.2.0
+description: "Server giả của Tới Nơi dựng bằng shelf: báo giá, đặt chuyến, nhận chuyến, xác thực giả (OTP, JWT, refresh token), Realtime Gateway giả (WebSocket) và lỗi có chủ đích, dùng cho lab Flutter qua Tới Nơi từ bài 19."
+version: 0.3.0
 publish_to: none
 
 environment:
@@ -11,8 +11,10 @@ dependencies:
   dio: ^5.11.1
   shelf: ^1.4.3
   shelf_router: ^1.1.5
+  shelf_web_socket: ^3.0.0
   toi_noi_core:
     path: ../../packages/toi_noi_core
+  web_socket_channel: ^3.0.3
 
 dev_dependencies:
   lints: ^6.1.0

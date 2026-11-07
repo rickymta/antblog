@@ -1,0 +1,49 @@
+$ examples/toi-noi-location/go/bin/history-writer run --out examples/toi-noi-location/go/out/history-live --id-level pseudonym --flush-every 10s --group history-lab-1793972459 --from end
+$ examples/toi-noi-location/go/bin/loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 60s --report-every 20s
+# loadgen drivers=25000 seed=1 batch=3 urls=2 viewers=0 slow_viewers=0
+# kết nối: 25000/25000 thành công, 0 lỗi, mất 3.5s
+# khởi động 14s ở 6250 điểm/s (không tính)
+  t= 20s target=6250 acked_pts_s=6232 win_p50=0.6ms win_p99=40.9ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=137107 heap_mb=596
+  t= 40s target=6250 acked_pts_s=6272 win_p50=0.5ms win_p99=24.3ms errs=0 q_depth=9 q_coalesced=0 q_dropped=0 kafka_delivered=262641 heap_mb=521
+  t= 60s target=6250 acked_pts_s=6249 win_p50=0.8ms win_p99=25.6ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=387642 heap_mb=721
+STEP	6250	6252	2084	0.57	10.00	23.15	141.45	0	17	721.3	1008.2	25010	561	0	0	21	732.4
+ingest kafka delivered 393882
+$ examples/toi-noi-location/go/bin/history-writer run (log)
+flush: in=0 kept=0 rows=0 bytes=0
+flush: in=0 kept=0 rows=0 bytes=0
+flush: in=52560 kept=27573 rows=27573 bytes=691884
+flush: in=115668 kept=52912 rows=52912 bytes=1365996
+flush: in=178797 kept=74475 rows=74475 bytes=1963461
+flush: in=241722 kept=96067 rows=96067 bytes=2543065
+flush: in=304704 kept=115713 rows=115713 bytes=3078530
+flush: in=367881 kept=135065 rows=135065 bytes=3603741
+flush: in=393882 kept=142693 rows=142693 bytes=3824371
+
+$ examples/toi-noi-location/go/bin/history-writer inspect --out examples/toi-noi-location/go/out/history-live
+schema (file đầu tiên):
+  event_time     NOT NULL TIMESTAMP(isAdjustedToUTC=true,unit=MILLIS)
+  received_time  NOT NULL TIMESTAMP(isAdjustedToUTC=true,unit=MILLIS)
+  driver_ref     NULLABLE STRING
+  id_level       NOT NULL INT(32,true)
+  trip_id        NULLABLE STRING
+  lat_e7         NOT NULL INT(32,true)
+  lng_e7         NOT NULL INT(32,true)
+  accuracy_dm    NULLABLE INT(32,true)
+  speed_dmps     NULLABLE INT(32,true)
+  heading_ddeg   NULLABLE INT(32,true)
+  seq            NOT NULL INT(64,true)
+  flags          NOT NULL INT(32,true)
+  sample_reason  NOT NULL STRING
+metadata: toinoi.schema_version=1 toinoi.id_level=1
+driver_ref của hai dòng đầu: 0003183859138434, 0003183859138434 (id_level=1)
+date=2026-11-06/city=CT      rows=11368    bytes=315876
+date=2026-11-06/city=DN      rows=14153    bytes=387156
+date=2026-11-06/city=HCM     rows=56750    bytes=1492964
+date=2026-11-06/city=HN      rows=42891    bytes=1131908
+date=2026-11-06/city=HP      rows=10111    bytes=283178
+date=2026-11-06/city=NT      rows=7420     bytes=213289
+tổng: 142693 dòng trong 6 phân vùng
+
+$ du -sh examples/toi-noi-location/go/out/history-live; find examples/toi-noi-location/go/out/history-live -name '*.parquet' | wc -l
+3.7M	/Users/quandh/Other/github/antblog/.claude/worktrees/location-series/examples/toi-noi-location/go/out/history-live
+      42

@@ -1,0 +1,30 @@
+// Biến thể thí nghiệm s2n. Chỉ dùng để đo tương thích, không phải hợp đồng thật.
+syntax = "proto3";
+
+package toinoi.lab.s2n;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "ToiNoi.Lab.S2n";
+
+message Posting {
+  string account = 1;
+  // Đổi số field: amount_dong từ 2 sang 3.
+  int64 amount_dong = 3;
+}
+
+enum EntryKind {
+  ENTRY_KIND_UNSPECIFIED = 0;
+  ENTRY_KIND_CAPTURE = 1;
+  ENTRY_KIND_SPLIT = 2;
+}
+
+message LedgerEntryPosted {
+  uint32 schema_version = 1;
+  string entry_id = 2;
+  string idempotency_key = 3;
+  repeated Posting postings = 4;
+  google.protobuf.Timestamp posted_at = 5;
+  string trace_id = 6;
+  EntryKind kind = 7;
+}

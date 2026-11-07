@@ -1,0 +1,25 @@
+{
+  "note": "Giả định của lab, không đo từ môi trường thật. Thay bằng số đo của bạn trước khi dùng.",
+  "kafka": {
+    "topic": "toi-noi.trip.completed",
+    "consumer_group": "ledger-service",
+    "partitions": 6
+  },
+  "postgres": {
+    "max_connections": 100,
+    "reserved_connections": 20,
+    "pool_max_per_replica": 8
+  },
+  "shutdown": {
+    "shutdown_timeout_ms": 10000,
+    "after_deadline_allowance_ms": 5000,
+    "margin_ms": 5000
+  },
+  "startup": {
+    "ready_allowance_s": 30
+  },
+  "autoscale": {
+    "lag_threshold": 500,
+    "container_apps_surge_percent": 200
+  }
+}

@@ -162,6 +162,25 @@ final class AuthModule implements FakeApiModule {
         return inner(request);
       };
 
+  /// Đổi access token thành người dùng, hoặc `null` khi token lạ hoặc hết hạn.
+  ///
+  /// Realtime Gateway giả (`RealtimeModule`) dùng hàm này ở bước bắt tay. Giống
+  /// [requireBearer], nó tra nguyên chuỗi token trong bảng đã phát chứ không
+  /// đọc payload.
+  ({String userId, String role, DateTime expiresAt})? verifyAccessToken(
+    String token,
+  ) {
+    final record = _access[token];
+    if (record == null || !_ctx.clock().isBefore(record.expiresAt)) {
+      return null;
+    }
+    return (
+      userId: record.userId,
+      role: record.role,
+      expiresAt: record.expiresAt,
+    );
+  }
+
   bool _isProtected(String path) => protectedPrefixes.any(
     (prefix) => path == prefix || path.startsWith('$prefix/'),
   );

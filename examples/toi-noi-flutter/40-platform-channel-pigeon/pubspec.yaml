@@ -1,0 +1,24 @@
+name: toi_noi_40
+description: "Lab bài 40 (Flutter qua Tới Nơi): gọi native từ app tài xế bằng MethodChannel, Pigeon và dart:ffi để điều chỉnh tần suất gửi vị trí theo pin."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meta: ^1.17.0
+  toi_noi_core:
+    path: ../packages/toi_noi_core
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  pigeon: ^29.1.0
+  yaml: ^3.1.4
+
+flutter:
+  uses-material-design: true

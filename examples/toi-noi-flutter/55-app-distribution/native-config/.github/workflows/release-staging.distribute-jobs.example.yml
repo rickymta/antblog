@@ -1,0 +1,119 @@
+  # MẪU của bài 55, KHÔNG chạy ở repository này (không có secret). Hai job dán vào
+  # CUỐI mục `jobs:` của release-staging.yml (bài 54), sau job `ios`, thụt hai
+  # dấu cách như bên dưới. Đặt chung workflow để job có secret:
+  #   - dùng đúng artifact của run này, không tải chéo run;
+  #   - chạy cùng ref với bản đã dựng (tag staging-v*), nên environment `staging`
+  #     (giới hạn deployment theo tag) áp dụng đúng;
+  #   - không checkout mã nào khác với mã đã build, và không chạy mã của repository.
+  # Cần thêm: environment secret FIREBASE_SERVICE_ACCOUNT_JSON, file
+  # app-distribution.json ở gốc repository, và thư mục tool/release_notes
+  # (xem README của lab). Job `android` của bài 54 phải có thêm bước dựng APK
+  # (build-apk-steps.example.yml).
+  notes:
+    name: Release notes (ubuntu, không secret)
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+      BUILD_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: '3.47.4'
+          channel: stable
+          cache: true
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('**/pubspec.lock') }}
+      - name: Write release notes
+        run: |
+          set -euo pipefail
+          case "$BUILD_NUMBER" in ''|*[!0-9]*) echo "build number must be a positive integer" >&2; exit 1 ;; esac
+          VERSION="$(sed -n 's/^version: *\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' apps/customer/pubspec.yaml | head -n 1)"
+          if [ -z "$VERSION" ]; then echo "cannot read version from pubspec.yaml" >&2; exit 1; fi
+          NOTES_FILE="$RUNNER_TEMP/release-notes.txt"
+          # Commit từ tag staging-v* gần nhất trước commit đã dựng. Chưa có tag thì lấy 30 commit cuối.
+          PREV_TAG="$(git describe --tags --abbrev=0 --match 'staging-v*' "$BUILD_SHA^" 2>/dev/null || true)"
+          if [ -n "$PREV_TAG" ]; then
+            RANGE=("$PREV_TAG..$BUILD_SHA")
+          else
+            RANGE=(-n 30 "$BUILD_SHA")
+          fi
+          git log --no-merges --pretty=format:'%h%x09%s' "${RANGE[@]}" > "$RUNNER_TEMP/commits.tsv"
+          (
+            cd tool/release_notes
+            dart pub get
+            dart run bin/release_notes.dart --app customer --version "$VERSION" --build "$BUILD_NUMBER" < "$RUNNER_TEMP/commits.tsv" > "$NOTES_FILE"
+          )
+          cat "$NOTES_FILE" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload release notes
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: toi-noi-customer-staging-release-notes-${{ needs.prepare.outputs.build_number }}
+          path: ${{ runner.temp }}/release-notes.txt
+          if-no-files-found: error
+          retention-days: 14
+
+  distribute:
+    name: Distribute to the internal tester group (ubuntu)
+    needs: [prepare, android, ios, notes]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: staging
+    env:
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+      FIREBASE_CLI_VERSION: '15.35.0'
+    steps:
+      # Chỉ để đọc app-distribution.json: job này không chạy mã của repository.
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download APK
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: toi-noi-customer-staging-apk-${{ needs.prepare.outputs.build_number }}
+          path: dist/apk
+      - name: Download IPA
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: toi-noi-customer-staging-ipa-${{ needs.prepare.outputs.build_number }}
+          path: dist/ipa
+      - name: Download release notes
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: toi-noi-customer-staging-release-notes-${{ needs.prepare.outputs.build_number }}
+          path: dist/notes
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+      - name: Install Firebase CLI
+        run: npm install --global "firebase-tools@$FIREBASE_CLI_VERSION"
+      - name: Distribute to the internal tester group
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          umask 077
+          : "${FIREBASE_SERVICE_ACCOUNT_JSON:?missing FIREBASE_SERVICE_ACCOUNT_JSON}"
+          APK_FILE="dist/apk/app-staging-release.apk"
+          IPA_FILE="$(find dist/ipa -name '*.ipa' -print -quit)"
+          NOTES_FILE="dist/notes/release-notes.txt"
+          for f in "$APK_FILE" "$IPA_FILE" "$NOTES_FILE"; do
+            [ -f "$f" ] || { echo "missing $f" >&2; exit 1; }
+          done
+          CREDENTIALS_FILE="$RUNNER_TEMP/firebase-service-account.json"
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$CREDENTIALS_FILE"
+          export GOOGLE_APPLICATION_CREDENTIALS="$CREDENTIALS_FILE"
+          ANDROID_APP_ID="$(jq -er '.apps.customer.staging.android.appId' app-distribution.json)"
+          IOS_APP_ID="$(jq -er '.apps.customer.staging.ios.appId' app-distribution.json)"
+          GROUP="$(jq -er '.testerGroups.internal.alias' app-distribution.json)"
+          firebase appdistribution:distribute "$APK_FILE" --app "$ANDROID_APP_ID" --groups "$GROUP" --release-notes-file "$NOTES_FILE"
+          firebase appdistribution:distribute "$IPA_FILE" --app "$IOS_APP_ID" --groups "$GROUP" --release-notes-file "$NOTES_FILE"
+      - name: Remove service account key
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/firebase-service-account.json"

@@ -14,6 +14,19 @@ export 'src/handler.dart' show createFakeApiHandler;
 export 'src/module.dart' show FakeApiContext, FakeApiModule;
 export 'src/problem.dart'
     show ProblemException, jsonResponse, problemResponse, traceIdContextKey;
+export 'src/realtime_module.dart'
+    show
+        DriverLocationUpdate,
+        DurableTripEvent,
+        PublishedOffer,
+        RealtimeModule,
+        RealtimePrincipal,
+        RealtimeSubscribeAuthorizer,
+        RealtimeTokenVerifier,
+        realtimeCloseRestart,
+        realtimeCloseUnauthorized,
+        realtimePath,
+        tripEventToJson;
 export 'src/server_options.dart'
     show ServerOptions, parseServerOptions, serverUsage;
 export 'src/store.dart' show Booking, FakeApiStore, StoredTrip, uuidGenerator;

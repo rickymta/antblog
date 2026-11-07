@@ -1,0 +1,23 @@
+name: toi_noi_59
+description: "Lab bài 59 (Flutter qua Tới Nơi): vận hành sau phát hành với kiểm phiên bản tối thiểu, feature flag, kill switch, chặn cập nhật và quyết định halt rollout."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  firebase_remote_config: ^7.0.1
+  flutter:
+    sdk: flutter
+  url_launcher: ^6.3.3
+  yaml: ^3.1.4
+
+dev_dependencies:
+  fake_async: ^1.3.3
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,22 @@
+[package]
+name = "infrastructure"
+description = "Adapter: PostgreSQL (sqlx), Kafka (rdkafka), outbox relay, môi trường lab riêng mỗi ca (lab bài 54)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+application.workspace = true
+domain.workspace = true
+rdkafka = "0.39.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "postgres", "json"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "time", "sync"] }
+tokio-util = "0.7.20"
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[lints]
+workspace = true

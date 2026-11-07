@@ -1,0 +1,21 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner sinh bằng `flutter create`, không commit (file cấu hình đang dạy nằm trong native-config/)
+/android/
+/ios/
+.metadata
+
+# Chứng chỉ, khoá và profile thật: KHÔNG BAO GIỜ commit (samples/ chỉ có profile giả dạng plist)
+*.p12
+*.p8
+*.cer
+*.mobileprovision
+*.certSigningRequest
+*.jks
+*.keystore

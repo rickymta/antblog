@@ -1,0 +1,7 @@
+// Flavor dev: chạy trên máy lập trình viên, để Xcode tự quản lý.
+// Dán vào Debug-dev.xcconfig (bài 50 dạy cách tạo configuration theo flavor).
+PRODUCT_BUNDLE_IDENTIFIER = vn.toinoi.customer.dev
+CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements
+CODE_SIGN_STYLE = Automatic
+// ABCDE12345 là Team ID giả. Thay bằng Team ID của bạn.
+DEVELOPMENT_TEAM = ABCDE12345

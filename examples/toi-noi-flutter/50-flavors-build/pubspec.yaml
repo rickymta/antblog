@@ -1,0 +1,20 @@
+name: toi_noi_50
+description: "Lab bài 50 (Flutter qua Tới Nơi): flavors khi build với bundle ID, application ID, icon, tên app và Firebase theo môi trường, kiểm bằng script."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  xml: ^7.0.1
+
+flutter:
+  uses-material-design: true

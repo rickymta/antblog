@@ -1,0 +1,18 @@
+# Static musl + scratch. rust:alpine có host target là musl nên cargo tạo binary tĩnh mà không cần
+# cross toolchain. Image cuối chỉ có đúng một file. Chỉ hợp khi mọi dependency C biên dịch được với musl.
+FROM rust:1.98-alpine AS builder
+RUN apk add --no-cache musl-dev
+WORKDIR /app
+COPY . .
+RUN cargo build --release --locked --no-default-features --bin ledger-service
+
+FROM scratch
+COPY --from=builder /app/target/release/ledger-service /ledger-service
+ENV LEDGER_ADDR=0.0.0.0:8080
+# scratch không có /etc/passwd: chỉ dùng được UID số.
+USER 65532:65532
+EXPOSE 8080
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+  CMD ["/ledger-service", "healthcheck"]
+ENTRYPOINT ["/ledger-service"]
+CMD ["serve"]

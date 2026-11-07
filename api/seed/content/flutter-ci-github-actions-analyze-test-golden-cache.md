@@ -357,7 +357,7 @@ dart test
 <p><strong>3.</strong> Với khoá của workflow, băm các <code>pubspec.yaml</code> đổi nên khoá mới trượt cache, <code>pub get</code> tải gói rồi cache mới được lưu cho lần sau. Với khoá mặc định, khoá không đổi (không có lockfile), nên vẫn trúng cache cũ không có gói mới và gói đó phải tải lại ở mọi lần chạy.</p>
 </details>
 
-Bài trước: [Lint, analyzer, dart format và analyzer plugin: chất lượng code có kiểm chứng](/articles/flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code). Bài tiếp theo mở đầu Phần 5 với bản đồ flutter_map.
+Bài trước: [Lint, analyzer, dart format và analyzer plugin: chất lượng code có kiểm chứng](/articles/flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code). Bài tiếp: [Bản đồ với flutter_map: marker, polyline và chọn điểm đón](/articles/flutter-ban-do-flutter-map-marker-polyline-chon-diem-don).
 
 ## Tài liệu gốc
 

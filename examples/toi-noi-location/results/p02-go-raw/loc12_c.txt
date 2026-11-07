@@ -1,0 +1,21 @@
+$ examples/toi-noi-location/go/bin/location-ingest --sink discard --listen '127.0.0.1:8081,[::1]:8083'
+$ examples/toi-noi-location/go/bin/loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --batch 3 --sweep 6250,12500,25000,50000,100000 --step 20s --report-every 10s
+# loadgen drivers=25000 seed=1 batch=3 urls=2 viewers=0 slow_viewers=0
+# kết nối: 25000/25000 thành công, 0 lỗi, mất 3.6s
+# khởi động 14s ở 6250 điểm/s (không tính)
+STEP	target_pts_s	achieved_pts_s	msgs_s	p50_ms	p95_ms	p99_ms	max_ms	errs	ingest_cpu_pct	ingest_heap_mb	ingest_rss_mb	ingest_goroutines	q_max_depth	q_dropped	q_coalesced	loadgen_cpu_pct	loadgen_rss_mb
+  t= 10s target=6250 acked_pts_s=6261 win_p50=1.3ms win_p99=26.2ms errs=0 q_depth=6 q_coalesced=0 q_dropped=0 kafka_delivered=74958 heap_mb=462
+  t= 20s target=6250 acked_pts_s=6233 win_p50=0.8ms win_p99=20.0ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=137289 heap_mb=538
+STEP	6250	6248	2083	1.01	10.51	23.15	123.61	0	12	538.2	803.7	25008	183	0	0	19	634.0
+  t= 10s target=12500 acked_pts_s=11255 win_p50=0.4ms win_p99=17.6ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=249840 heap_mb=677
+  t= 20s target=12500 acked_pts_s=12512 win_p50=0.4ms win_p99=16.0ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=374955 heap_mb=453
+STEP	12500	11883	3961	0.37	7.43	16.39	113.26	0	23	452.9	1040.3	25008	384	0	0	32	699.3
+  t= 10s target=25000 acked_pts_s=23731 win_p50=0.9ms win_p99=30.4ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=612414 heap_mb=746
+  t= 20s target=25000 acked_pts_s=24987 win_p50=0.8ms win_p99=31.9ms errs=0 q_depth=30 q_coalesced=0 q_dropped=0 kafka_delivered=862224 heap_mb=657
+STEP	25000	24371	8124	0.85	12.80	31.92	175.90	0	34	656.8	1071.1	25008	1113	0	0	47	727.2
+  t= 10s target=50000 acked_pts_s=48755 win_p50=2.1ms win_p99=266.9ms errs=0 q_depth=0 q_coalesced=2247 q_dropped=0 kafka_delivered=1347792 heap_mb=433
+  t= 20s target=50000 acked_pts_s=49975 win_p50=1.7ms win_p99=158.9ms errs=0 q_depth=0 q_coalesced=2247 q_dropped=0 kafka_delivered=1847583 heap_mb=603
+STEP	50000	49368	16456	1.86	79.58	219.02	433.33	0	60	603.1	1147.8	25008	5989	0	2247	70	788.1
+  t= 10s target=100000 acked_pts_s=76987 win_p50=39.9ms win_p99=2071.8ms errs=0 q_depth=195 q_coalesced=22224 q_dropped=0 kafka_delivered=2641073 heap_mb=728
+  t= 20s target=100000 acked_pts_s=42749 win_p50=1012.4ms win_p99=7668.7ms errs=0 q_depth=0 q_coalesced=22322 q_dropped=0 kafka_delivered=3087981 heap_mb=587
+STEP	100000	59606	20954	519.78	3394.95	6140.54	14454.70	11	80	497.1	1292.1	25008	11966	0	20075	91	985.3

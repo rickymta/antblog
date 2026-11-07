@@ -1,0 +1,14 @@
+[package]
+name = "application"
+description = "Use case và các port (trait) mà hạ tầng phải cắm vào (lab bài 51)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+domain.workspace = true
+thiserror = "2.0.21"
+
+[lints]
+workspace = true

@@ -1,0 +1,68 @@
+# Fastfile Android của Tới Nơi: chạy trong thư mục android/ của app Flutter.
+#
+#   bundle exec fastlane android internal app:customer flavor:staging build_number:42
+#
+# Bí mật đọc từ ENV (xem ../../.env.example). Lane này CHƯA được chạy thật vì
+# repository không có tài khoản Google Play Console.
+
+default_platform(:android)
+
+# Application ID theo curriculum §3.2, mỗi dòng một cặp app/flavor.
+APP_IDS = {
+  "customer/dev" => "vn.toinoi.customer.dev",
+  "customer/staging" => "vn.toinoi.customer.staging",
+  "customer/prod" => "vn.toinoi.customer",
+  "driver/dev" => "vn.toinoi.driver.dev",
+  "driver/staging" => "vn.toinoi.driver.staging",
+  "driver/prod" => "vn.toinoi.driver",
+}.freeze
+
+# Flavor được phân phối qua cửa hàng. dev chỉ chạy trên máy lập trình viên.
+STORE_FLAVORS = %w[staging prod].freeze
+
+def env!(name)
+  value = ENV[name].to_s.strip
+  UI.user_error!("Thiếu biến môi trường #{name}, xem native-config/.env.example") if value.empty?
+  value
+end
+
+def pick_target(options)
+  app = options[:app].to_s
+  flavor = options[:flavor].to_s
+  unless STORE_FLAVORS.include?(flavor)
+    UI.user_error!("flavor phải là một trong: #{STORE_FLAVORS.join(', ')}")
+  end
+  package_name = APP_IDS["#{app}/#{flavor}"]
+  UI.user_error!("app phải là customer hoặc driver") if package_name.nil?
+  [flavor, package_name]
+end
+
+def build_number!(options)
+  value = options[:build_number].to_s
+  UI.user_error!("build_number phải là số nguyên dương") unless value =~ /\A[1-9][0-9]*\z/
+  value
+end
+
+platform :android do
+  desc "Đẩy AAB lên track internal của Google Play."
+  lane :internal do |options|
+    flavor, package_name = pick_target(options)
+    build_number = build_number!(options)
+    env!("PLAY_JSON_KEY_DATA") # dừng sớm, trước khi mất vài phút để build
+
+    sh("cd ../.. && flutter build appbundle --release --flavor #{flavor} --build-number #{build_number} --dart-define-from-file=config/#{flavor}.json")
+    aab = "build/app/outputs/bundle/#{flavor}Release/app-#{flavor}-release.aab"
+    UI.user_error!("Không thấy #{aab} sau flutter build appbundle") unless File.exist?("../../#{aab}")
+
+    upload_to_play_store(
+      package_name: package_name,
+      track: "internal",
+      aab: "../#{aab}",
+      json_key_data: env!("PLAY_JSON_KEY_DATA"),
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+    )
+  end
+end

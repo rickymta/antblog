@@ -1,0 +1,20 @@
+[package]
+name = "map-match"
+description = "Lọc Kalman, bám đường HMM + Viterbi (offline và online), sinh vết GPS tổng hợp có ground truth"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+geo-core.workspace = true
+road-graph.workspace = true
+fastrand.workspace = true
+rustc-hash.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+
+[lints]
+workspace = true

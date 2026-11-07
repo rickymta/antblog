@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.toi-noi.example/events/ledger-entry-posted/1.json",
+  "title": "LedgerEntryPosted v1",
+  "description": "JSON camelCase của sự kiện LedgerEntryPosted trên topic ledger.entry-posted. int64 là số nguyên JSON, nhưng hợp đồng giới hạn trong khoảng an toàn của IEEE 754 (±(2^53 - 1)) để client không phải Rust không mất chữ số.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "entryId", "idempotencyKey", "postings", "postedAt"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "entryId": { "type": "string", "pattern": "^JE-[0-9]{6,}$" },
+    "idempotencyKey": { "type": "string", "minLength": 1 },
+    "postings": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/posting" }
+    },
+    "postedAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$" }
+  },
+  "$defs": {
+    "posting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["account", "amountDong"],
+      "properties": {
+        "account": { "type": "string", "minLength": 1 },
+        "amountDong": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+# Workspace gốc của lab bài 54: bốn crate theo kiểu hexagonal của bài 51. Chỉ khai báo, không có code.
+[workspace]
+members = [
+    "crates/domain",
+    "crates/application",
+    "crates/infrastructure",
+    "crates/api",
+]
+# `cargo test`/`cargo clippy` không kèm -p chạy trên cả bốn crate; chỉ `api` có binary nên `cargo run` chọn được.
+default-members = [
+    "crates/domain",
+    "crates/application",
+    "crates/infrastructure",
+    "crates/api",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+# Phiên bản dependency khai báo MỘT chỗ. Crate con viết `x.workspace = true`.
+[workspace.dependencies]
+# Dùng lại thư viện bài 20 (không sao chép, không sửa).
+ledger-core = { path = "../20-ledger-core-workspace/ledger-core" }
+domain = { path = "crates/domain" }
+application = { path = "crates/application" }
+infrastructure = { path = "crates/infrastructure" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

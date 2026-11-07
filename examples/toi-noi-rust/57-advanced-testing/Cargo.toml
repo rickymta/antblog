@@ -1,0 +1,15 @@
+[package]
+name = "ledger_57_advanced_testing"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Lab bài 57: mutation testing, fuzz parser sao kê, insta snapshot và test tất định cho phần chia tiền và đối soát"
+
+[dependencies]
+jiff = "0.2.39"
+serde = { version = "1.0.229", features = ["derive"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+
+[dev-dependencies]
+insta = { version = "1.49.0", features = ["json", "redactions"] }
+serde_json = "1.0.154"

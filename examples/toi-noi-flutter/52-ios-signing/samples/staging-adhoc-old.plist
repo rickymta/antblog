@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- GIẢ để minh hoạ. File thật là CMS, giải bằng: security cms -D -i file.mobileprovision -->
+    <key>Name</key>
+    <string>ToiNoi Customer Staging AdHoc</string>
+    <key>UUID</key>
+    <string>00000000-0000-4000-8000-000000000002</string>
+    <key>TeamIdentifier</key>
+    <array>
+        <string>ABCDE12345</string>
+    </array>
+    <key>TeamName</key>
+    <string>Toi Noi Demo</string>
+    <key>CreationDate</key>
+    <date>2026-01-20T00:00:00Z</date>
+    <key>ExpirationDate</key>
+    <date>2026-11-20T00:00:00Z</date>
+    <key>ProvisionedDevices</key>
+    <array>
+        <string>00008030-000000000000000A</string>
+        <string>00008030-000000000000000B</string>
+    </array>
+    <key>DeveloperCertificates</key>
+    <array>
+        <data>RkFLRQ==</data>
+    </array>
+    <key>Entitlements</key>
+    <dict>
+        <key>application-identifier</key>
+        <string>ABCDE12345.vn.toinoi.customer.staging</string>
+        <key>com.apple.developer.team-identifier</key>
+        <string>ABCDE12345</string>
+        <key>get-task-allow</key>
+        <false/>
+    </dict>
+</dict>
+</plist>

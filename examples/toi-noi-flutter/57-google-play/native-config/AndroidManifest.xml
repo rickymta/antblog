@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App TÀI XẾ của Tới Nơi: đoạn quyền cần ghép vào
+     android/app/src/main/AndroidManifest.xml (cùng bộ quyền với lab 35 và 38).
+     Đây là manifest NGUỒN. Bản Play nhìn thấy là manifest đã gộp với manifest
+     của các plugin, nên khi phát hành phải đối chiếu cả bản gộp (xem README).
+
+     Cố ý KHÔNG khai ACCESS_BACKGROUND_LOCATION: tài xế bật Online khi app đang
+     mở, rồi foreground service giữ luồng vị trí. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+</manifest>

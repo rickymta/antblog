@@ -1,0 +1,12 @@
+name: toi_noi_51
+description: "Lab bài 51 (Flutter qua Tới Nơi): ký ứng dụng Android, kiểm file cấu hình Gradle và key.properties, versionCode tăng đơn điệu, kiểm keystore và chữ ký bằng JDK."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+dependencies:
+  yaml: ^3.1.4
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.33.0

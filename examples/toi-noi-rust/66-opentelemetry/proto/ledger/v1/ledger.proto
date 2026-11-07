@@ -1,0 +1,44 @@
+// Hợp đồng gRPC của service sổ cái Tới Nơi. Cùng file này sinh code cho Rust (tonic) và C# (Grpc.Tools).
+syntax = "proto3";
+
+package ledger.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "ToiNoi.Ledger.V1";
+
+service Ledger {
+  // Số dư đã commit của một tài khoản.
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+  // Ghi một bút toán, idempotent theo idempotency_key.
+  rpc PostEntry(PostEntryRequest) returns (PostEntryResponse);
+}
+
+message GetBalanceRequest {
+  string account = 1;
+}
+
+message GetBalanceResponse {
+  string account = 1;
+  // Tiền là số nguyên đơn vị đồng. Không dùng double.
+  int64 balance_dong = 2;
+  google.protobuf.Timestamp as_of = 3;
+}
+
+message Posting {
+  string account = 1;
+  // Có dấu theo dòng tiền: dương = vào tài khoản, âm = ra khỏi tài khoản.
+  int64 amount_dong = 2;
+}
+
+message PostEntryRequest {
+  string idempotency_key = 1;
+  repeated Posting postings = 2;
+}
+
+message PostEntryResponse {
+  // Mã bút toán dạng JE-000001.
+  string entry_id = 1;
+  // true nếu idempotency_key đã có và server trả lại bút toán cũ.
+  bool replayed = 2;
+}

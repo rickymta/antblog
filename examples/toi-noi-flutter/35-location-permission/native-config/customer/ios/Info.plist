@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- App KHÁCH. Đoạn cần ghép vào ios/Runner/Info.plist do `flutter create` sinh.
+     Chỉ có quyền "khi dùng app": không có NSLocationAlwaysAndWhenInUseUsageDescription
+     và không có UIBackgroundModes. -->
+<plist version="1.0">
+<dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tới Nơi dùng vị trí của bạn khi đang mở app để đặt ghim điểm đón và tìm tài xế gần nhất.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>PickupPrecise</key>
+		<string>Tới Nơi cần vị trí chính xác một lần để đặt ghim điểm đón đúng chỗ bạn đứng.</string>
+	</dict>
+</dict>
+</plist>

@@ -1,0 +1,48 @@
+[package]
+name = "ledger_60_profiling"
+version = "0.1.0"
+edition = "2024"
+description = "Lab bài 60: flamegraph/samply, dhat và tokio-console tìm chỗ chậm của sổ cái Tới Nơi"
+publish = false
+default-run = "ledger-profiling"
+
+[lib]
+name = "ledger_profiling"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-profiling"
+path = "src/main.rs"
+
+# Đếm allocation bằng dhat: chỉ build khi bật feature `dhat-heap`.
+[[bin]]
+name = "alloc-profile"
+path = "src/bin/alloc_profile.rs"
+required-features = ["dhat-heap"]
+
+# Đọc số liệu task từ console-subscriber: cần feature `console` VÀ RUSTFLAGS="--cfg tokio_unstable".
+[[bin]]
+name = "console-probe"
+path = "src/bin/console_probe.rs"
+required-features = ["console"]
+
+[dependencies]
+ledger-core = { version = "0.1.0", path = "../20-ledger-core-workspace/ledger-core" }
+serde_json = "1"
+tokio = { version = "1.54.1", features = ["rt", "macros", "sync"] }
+dhat = { version = "0.3.3", optional = true }
+console-subscriber = { version = "0.5.0", optional = true }
+console-api = { version = "0.9.0", optional = true }
+tonic = { version = "0.14.9", default-features = false, features = ["transport"], optional = true }
+
+[features]
+dhat-heap = ["dep:dhat"]
+console = ["dep:console-subscriber", "dep:console-api", "dep:tonic", "tokio/time", "tokio/net"]
+
+[profile.release]
+# Giữ bảng dòng/tên hàm (DWARF) cho profiler. Không đổi opt-level nên không đổi mã máy được tối ưu.
+debug = true
+
+[lints.rust]
+# `tokio_unstable` là cfg do RUSTFLAGS bật, không phải feature của cargo.
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tokio_unstable)'] }

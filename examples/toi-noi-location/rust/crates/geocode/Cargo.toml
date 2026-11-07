@@ -1,0 +1,30 @@
+[package]
+name = "geocode"
+description = "Geocoding địa chỉ Việt Nam: chuẩn hoá, chỉ mục từ OSM addr:*, gợi ý, reverse geocoding, độ tin cậy (LOC-31)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+geo-core.workspace = true
+rustc-hash.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+postcard.workspace = true
+osmpbf.workspace = true
+rayon.workspace = true
+rstar.workspace = true
+thiserror.workspace = true
+fastrand.workspace = true
+# chuẩn hoá Unicode (NFC/NFD, dấu kết hợp) và khoảng cách sửa chữ; không có trong [workspace.dependencies]
+unicode-normalization = "0.1.25"
+strsim = "0.11.1"
+
+[dev-dependencies]
+proptest.workspace = true
+unicode-normalization = "0.1.25"
+
+[lints]
+workspace = true

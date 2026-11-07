@@ -1,0 +1,82 @@
+# Workspace lab «Service định vị qua Tới Nơi». Phiên bản thư viện ghim ở đây và trong Cargo.lock (commit).
+[workspace]
+resolver = "3"
+members = ["crates/*", "labs"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+license = "MIT"
+publish = false
+
+[workspace.dependencies]
+# nội bộ
+geo-core = { path = "crates/geo-core" }
+road-graph = { path = "crates/road-graph" }
+driver-store = { path = "crates/driver-store" }
+route-engine = { path = "crates/route-engine" }
+simulator = { path = "crates/simulator" }
+geo-engine = { path = "crates/geo-engine" }
+map-match = { path = "crates/map-match" }
+location-store = { path = "crates/location-store" }
+geocode = { path = "crates/geocode" }
+pickup = { path = "crates/pickup" }
+matcher = { path = "crates/matcher" }
+# hình học và chỉ mục
+h3o = "0.11.1"
+rstar = "0.14.0"
+geo = "0.33.1"
+geo-types = "0.7.20"
+geojson = "1.0.0"
+polyline = "0.11.0"
+# dữ liệu bản đồ
+osmpbf = "0.3.8"
+rayon = "1.12.0"
+# tuần tự hóa
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+postcard = { version = "1.1.3", features = ["use-std"] }
+bytemuck = { version = "1.25.2", features = ["derive", "extern_crate_alloc"] }
+# tiện ích
+rustc-hash = "2.1.3"
+fastrand = "2.5.0"
+thiserror = "2.0.21"
+# Redis: bản ổn định 1.x (bản 2.0.0-rc.2 mới nhất là prerelease nên không dùng)
+redis = { version = "1.8.1", default-features = false }
+# Kafka và protobuf (location-store): không có cmake/protoc trên máy viết, nên rdkafka dùng build tự cấu hình
+# của librdkafka (make + cc) và protobuf biên dịch bằng protox (thuần Rust) + prost-build::compile_fds
+rdkafka = { version = "0.39.0", default-features = false, features = ["libz"] }
+prost = "0.14.4"
+prost-build = "0.14.4"
+protox = "0.10.0"
+# định tuyến (P03): đối chiếu petgraph và fast_paths; dịch vụ gRPC tonic; kịch bản mô phỏng TOML
+petgraph = "0.8.3"
+fast_paths = "1.0.0"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "time", "net", "sync"] }
+tonic = "0.14.9"
+tonic-prost = "0.14.9"
+tonic-prost-build = "0.14.9"
+toml = "1.2.0"
+# ghép chuyến (P05): thuật toán Hungarian (Kuhn–Munkres) cho bài toán phân công
+pathfinding = "4.16.0"
+# học từ dữ liệu (P06): ghi Parquet (lược đồ LOC-20) từ Rust, không kéo theo arrow
+parquet = { version = "60.1.0", default-features = false, features = ["zstd"] }
+# đo và kiểm thử
+criterion = { version = "0.8.2", default-features = false, features = ["cargo_bench_support"] }
+proptest = "1.12.0"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+dbg_macro = "warn"
+todo = "warn"
+unimplemented = "warn"
+
+[profile.release]
+debug = 1          # giữ symbol cho flamegraph ở các bài sau, không đổi tốc độ
+lto = "thin"
+codegen-units = 4
