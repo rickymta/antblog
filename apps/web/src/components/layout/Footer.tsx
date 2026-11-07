@@ -27,7 +27,7 @@ export function Footer({ categories, year }: { categories: Category[] | null; ye
   const { user } = useAuth();
 
   return (
-    <footer className="site-footer mt-16 border-t border-line bg-surface">
+    <footer className="site-footer hidden lg:block mt-16 border-t border-line bg-surface">
       <div className={`${container} grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4`}>
         <div className="space-y-3">
           <p className="flex items-center gap-2 font-bold text-ink">

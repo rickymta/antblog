@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { Menu, Search, X } from 'lucide-react';
+import { BookOpen, House, Menu, Route, Search, X } from 'lucide-react';
 import type { Category } from '@tkh/shared';
 import { container, iconBtn } from '../../lib/ui';
 import { Logo } from './Logo';
@@ -18,7 +18,7 @@ import { UserMenu, UserMenuSkeleton } from './UserMenu';
 const navItem = (active: boolean) =>
   `rounded-ui px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors ${active ? 'text-primary-ink' : 'text-muted hover:bg-surface-2 hover:text-ink'}`;
 
-/** Thanh đầu dính (docs/ui-guide.md §2). Màn hẹp: menu vào ☰ (< 1024px); dưới 1280px ô tìm kiếm thành biểu tượng mở một hàng tìm kiếm. */
+/** Desktop header and thumb-friendly mobile navigation below 1024px. */
 export function Header({ categories }: { categories: Category[] | null }) {
   const { t } = useTranslation();
   const pathname = usePathname();
@@ -59,11 +59,9 @@ export function Header({ categories }: { categories: Category[] | null }) {
   };
 
   return (
+    <>
     <header className="site-header sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className={`${container} flex h-16 items-center gap-2 sm:gap-3`}>
-        <button type="button" className={`${iconBtn} lg:hidden`} onClick={() => setDrawerOpen(true)} aria-label={t('nav.openMenu')} aria-expanded={drawerOpen}>
-          <Menu aria-hidden="true" className="h-5 w-5" />
-        </button>
         <Logo />
         <nav aria-label={t('nav.mainNav')} className="ml-4 hidden items-center gap-0.5 lg:flex">
           {MAIN_LINKS.slice(0, 3).map((l) => navLink(l.to, l.end, t(l.label)))}
@@ -81,8 +79,10 @@ export function Header({ categories }: { categories: Category[] | null }) {
           >
             {searchOpen ? <X aria-hidden="true" className="h-5 w-5" /> : <Search aria-hidden="true" className="h-5 w-5" />}
           </button>
-          <LanguageToggle />
-          <ThemeToggle />
+          <div className="hidden items-center gap-2 lg:flex">
+            <LanguageToggle />
+            <ThemeToggle />
+          </div>
           <Suspense fallback={<UserMenuSkeleton />}>
             <UserMenu />
           </Suspense>
@@ -93,7 +93,29 @@ export function Header({ categories }: { categories: Category[] | null }) {
           <SearchBox ref={mobileSearch} showHint={false} onSubmitted={() => setSearchOpen(false)} />
         </div>
       )}
-      <MobileDrawer open={drawerOpen} onClose={closeDrawer} categories={categories} />
     </header>
+    <nav aria-label={t('nav.mobileNav')} className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur lg:hidden">
+      <div className="mx-auto grid max-w-xl grid-cols-4 gap-1 px-2 pt-2">
+        {MAIN_LINKS.slice(0, 3).map((link, index) => {
+          const Icon = [House, BookOpen, Route][index] ?? House;
+          const active = isActivePath(pathname, link.to, link.end);
+          return (
+            <Link key={link.to} href={link.to} aria-current={active ? 'page' : undefined}
+              className={`mobile-nav-item ${active ? 'bg-primary-soft text-primary-ink' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}>
+              <Icon aria-hidden="true" className="h-5 w-5" />
+              <span>{t(link.label)}</span>
+            </Link>
+          );
+        })}
+        <button type="button" onClick={() => setDrawerOpen(true)} aria-label={t('nav.openMenu')}
+          aria-expanded={drawerOpen} aria-controls={drawerOpen ? 'mobile-menu' : undefined} aria-haspopup="dialog"
+          className={`mobile-nav-item ${drawerOpen || pathname.startsWith('/topics/') || pathname === '/about' ? 'bg-primary-soft text-primary-ink' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}>
+          <Menu aria-hidden="true" className="h-5 w-5" />
+          <span>{t('nav.menu')}</span>
+        </button>
+      </div>
+    </nav>
+    <MobileDrawer open={drawerOpen} onClose={closeDrawer} categories={categories} />
+    </>
   );
 }

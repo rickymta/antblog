@@ -11,10 +11,10 @@ import { iconBtn } from '../../lib/ui';
 import { LogoMark } from './Logo';
 import { isActivePath, MAIN_LINKS } from './navLinks';
 import { I18N_ENABLED } from '../../i18n/config';
-import { LanguageToggle } from './Toggles';
+import { LanguageToggle, ThemeToggle } from './Toggles';
 import { TopicLinks } from './TopicsMenu';
 
-/** Ngăn kéo trái trên điện thoại: menu chính + danh sách chủ đề + VI/EN. Escape / bấm nền mờ để đóng; khoá cuộn trang khi mở. */
+/** Bottom sheet with focus trapping, scroll locking and focus restoration. */
 export function MobileDrawer({ open, onClose, categories }: { open: boolean; onClose: () => void; categories: Category[] | null }) {
   const { t } = useTranslation();
   const pathname = usePathname();
@@ -23,14 +23,21 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
 
   useEffect(() => {
     if (!open) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const onResize = () => { if (desktop.matches) onClose(); };
+    desktop.addEventListener('change', onResize);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    const shell = document.querySelector<HTMLElement>('.site-shell');
+    const wasInert = shell?.inert ?? false;
+    if (shell) shell.inert = true;
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       // Giữ focus trong ngăn kéo khi Tab.
       if (e.key === 'Tab' && panelRef.current) {
-        const focusables = panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+        const focusables = Array.from(panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), summary')).filter(el => el.getClientRects().length > 0);
         const first = focusables[0];
         const last = focusables[focusables.length - 1];
         if (!first || !last) return;
@@ -45,6 +52,9 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
     };
     document.addEventListener('keydown', onKey);
     return () => {
+      desktop.removeEventListener('change', onResize);
+      if (shell) shell.inert = wasInert;
+      previousFocus?.focus({ preventScroll: true });
       document.body.style.overflow = prevOverflow;
       document.removeEventListener('keydown', onKey);
     };
@@ -57,11 +67,12 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
     <div className="fixed inset-0 z-50 lg:hidden">
       <div className="absolute inset-0 bg-slate-950/50" onClick={onClose} aria-hidden="true" />
       <div
+        id="mobile-menu"
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={t('nav.mobileNav')}
-        className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col overflow-y-auto border-r border-line bg-surface shadow-2xl"
+        className="mobile-menu-sheet absolute inset-x-0 bottom-0 mx-auto flex max-h-[85dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border border-line bg-surface shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
           <span className="flex items-center gap-2 font-bold text-ink">
@@ -72,6 +83,7 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
             <X aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
+        <div className="min-h-0 overflow-y-auto overscroll-contain">
         <nav aria-label={t('nav.mainNav')} className="px-3 py-3">
           <ul className="space-y-1">
             {MAIN_LINKS.map((l) => {
@@ -99,12 +111,17 @@ export function MobileDrawer({ open, onClose, categories }: { open: boolean; onC
             <p className="px-2 text-sm text-muted">{t('nav.topicsLoadFailed')}</p>
           )}
         </div>
+        <div className="flex items-center gap-3 border-t border-line px-5 py-3">
+          <ThemeToggle />
+          <Link href="/#newsletter" onClick={onClose} className="flex min-h-11 items-center text-sm font-semibold text-primary-ink">{t('footer.newsletter')}</Link>
+        </div>
         {I18N_ENABLED && (
           <div className="mt-auto flex items-center justify-between border-t border-line px-5 py-4">
             <span className="text-sm text-muted">{t('header.language')}</span>
             <LanguageToggle />
           </div>
         )}
+        </div>
       </div>
     </div>,
     document.body,

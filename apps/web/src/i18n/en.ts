@@ -53,6 +53,7 @@ export const en: Messages = {
     allLevels: 'All levels',
   },
   nav: {
+    menu: 'Menu',
     home: 'Home',
     articles: 'Articles',
     paths: 'Learning paths',

@@ -55,6 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#F8FAFC' },
     { media: '(prefers-color-scheme: dark)', color: '#0F172A' },
@@ -72,7 +73,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body>
         <Providers locale={locale}>
-          <div className="flex min-h-dvh flex-col overflow-x-clip">
+          <div className="site-shell flex min-h-dvh flex-col overflow-x-clip">
             <SkipLink />
             <Header categories={categories} />
             <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">

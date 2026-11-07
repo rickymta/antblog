@@ -53,6 +53,7 @@ export const vi = {
     allLevels: 'Mọi cấp độ',
   },
   nav: {
+    menu: 'Menu',
     home: 'Trang chủ',
     articles: 'Bài viết',
     paths: 'Lộ trình học',

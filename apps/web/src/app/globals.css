@@ -36,3 +36,40 @@
     animation: none;
   }
 }
+
+/* Shared space keeps the last content and keyboard focus above mobile navigation. */
+@media (max-width: 1023px) {
+  :root { --mobile-nav-space: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+  html { scroll-padding-bottom: var(--mobile-nav-space); }
+  .site-shell { padding-bottom: var(--mobile-nav-space); }
+  .site-header { padding-top: env(safe-area-inset-top, 0px); }
+  .site-header button { min-width: 44px; min-height: 44px; }
+  .mobile-bottom-nav {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    box-shadow: 0 -4px 20px rgb(0 0 0 / 0.05);
+  }
+  .mobile-nav-item {
+    display: flex;
+    min-height: 56px;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 12px;
+    padding: 4px 2px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-nav-item:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+  .mobile-menu-sheet { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .mobile-menu-sheet :is(button, a, summary) { min-height: 44px; }
+}
+@media print {
+  .mobile-bottom-nav { display: none; }
+  .site-shell { padding-bottom: 0; }
+}
