@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { ArticleFilters } from '../../components/browse/ArticleFilters';
 import { ArticleResults } from '../../components/browse/ArticleResults';
 import { BrowseProvider } from '../../components/browse/BrowseContext';
-import { PageHeader } from '../../components/common/PageHeader';
+import { PageBanner } from '../../components/common/PageBanner';
 import { getServerI18n } from '../../i18n/server';
 import {
   ARTICLES_PAGE_SIZE,
@@ -46,7 +46,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
 
   return (
     <div className={container}>
-      <PageHeader title={t('articles.title')} subtitle={t('articles.subtitle')} />
+      <PageBanner variant="articles" title={t('articles.title')} subtitle={t('articles.subtitle')} />
       <BrowseProvider>
         <div className="space-y-6">
           <ArticleFilters basePath="/articles" query={query} categories={categories} tags={tags?.map((x) => x.tag) ?? []} />

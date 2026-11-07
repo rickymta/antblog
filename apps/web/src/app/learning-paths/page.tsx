@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { SearchX } from 'lucide-react';
 import { BrowseProvider, BrowseResults } from '../../components/browse/BrowseContext';
 import { PathFilters } from '../../components/browse/PathFilters';
-import { PageHeader } from '../../components/common/PageHeader';
+import { PageBanner } from '../../components/common/PageBanner';
 import { PathCard } from '../../components/common/PathCard';
 import { EmptyState, RefreshErrorState } from '../../components/common/States';
 import { getServerI18n } from '../../i18n/server';
@@ -34,7 +34,7 @@ export default async function LearningPathsPage({ searchParams }: Props) {
 
   return (
     <div className={container}>
-      <PageHeader title={t('paths.title')} subtitle={t('paths.subtitle')} />
+      <PageBanner variant="paths" title={t('paths.title')} subtitle={t('paths.subtitle')} />
       <BrowseProvider>
         <PathFilters query={query} />
         <div className="mt-8">

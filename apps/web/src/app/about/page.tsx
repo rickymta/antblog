@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BookOpen, MessageSquare, Route } from 'lucide-react';
-import { PageHeader } from '../../components/common/PageHeader';
+import { PageBanner } from '../../components/common/PageBanner';
 import { getServerI18n } from '../../i18n/server';
 import { pageMetadata } from '../../lib/metadata';
 import { btnPrimary, btnSecondary, card, container } from '../../lib/ui';
@@ -20,7 +20,7 @@ export default async function AboutPage() {
   ];
   return (
     <div className={`${container} max-w-4xl`}>
-      <PageHeader title={t('about.title')} subtitle={t('about.lead')} />
+      <PageBanner variant="about" title={t('about.title')} subtitle={t('about.lead')} />
       <div className="grid gap-5 md:grid-cols-3">
         {blocks.map(({ icon: Icon, title, body }) => (
           <section key={title} className={`p-5 ${card}`}>
