@@ -2,7 +2,7 @@
 slug: dotnet10-outbox-inbox-idempotent-consumer
 title: "Outbox và Inbox: nối service có kiểm soát bằng .NET 10 và PostgreSQL"
 summary: "Bài 26: ghi chuyến cùng Outbox trong transaction local, tái hiện publish rồi crash và chống hiệu ứng trùng bằng Inbox; không tuyên bố exactly-once delivery."
-category: csharp
+category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, postgresql, ef-core]
 language: vi

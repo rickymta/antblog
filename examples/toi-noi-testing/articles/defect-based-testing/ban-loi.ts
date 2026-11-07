@@ -17,11 +17,20 @@ export function fareTotalRoundNearest(input: FareInput): number {
   return Math.round(Math.max(b.afterDiscount, b.minimumFare) / 1000) * 1000;
 }
 
-/** D-09 / D-17: làm tròn về đồng ngay sau bước cao điểm (17.812,5 ⇒ 17.813), trái R-GEN-01 «không làm tròn giữa chừng». */
+/** D-06 / D-09: tiền giảm voucher làm tròn tới 1.000 đ gần nhất TRƯỚC khi trừ (R-VOUCHER-06 không làm tròn tiền giảm). */
+export function fareTotalRoundDiscount(input: FareInput): number {
+  const b = calculateFare(input);
+  const discount = Math.round(b.discount / 1000) * 1000;
+  return Math.ceil(Math.max(b.beforeDiscount - discount, b.minimumFare) / 1000) * 1000;
+}
+
+/**
+ * Biến thể «làm tròn về đồng ngay sau ×1,25» (17.812,5 ⇒ 17.813) — trái chữ của R-GEN-01 nhưng, như bộ test cho thấy,
+ * KHÔNG đổi tổng tiền nào trong miền hợp lệ: phần lẻ chỉ là 0,5 đ và bước cuối luôn làm tròn LÊN 1.000 đ. Biến thể tương đương.
+ */
 export function fareTotalRoundAfterPeak(input: FareInput): number {
   const b = calculateFare(input);
-  const afterPeak = Math.round(b.afterPeak);
-  const before = afterPeak + b.rainSurcharge;
+  const before = Math.round(b.afterPeak) + b.rainSurcharge;
   const v = input.voucher;
   const discount = v ? Math.min((before * v.percent) / 100, v.maxDiscount) : 0;
   return Math.ceil(Math.max(before - discount, b.minimumFare) / 1000) * 1000;

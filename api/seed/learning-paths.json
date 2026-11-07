@@ -30,7 +30,7 @@
   },
   {
     "slug": "testing-s01-fundamentals",
-    "title": "Series 01 · Fundamentals of Software Testing",
+    "title": "Series 01 · Fundamentals of Software Testing · Phần 1/2",
     "description": "Nền tảng tư duy kiểm thử theo ISTQB CTFL v4.0.1 qua dự án Tới Nơi: testing là gì, vì sao cần, bảy nguyên lý, error–defect–failure, verification và validation, mục tiêu và QA, quy trình kiểm thử, SDLC, vai trò, testware — kết thúc bằng bài thực hành phân tích tính năng đặt xe.",
     "level": "beginner",
     "category": "testing",
@@ -44,7 +44,17 @@
       "quy-trinh-kiem-thu-test-process",
       "kiem-thu-trong-sdlc-agile-waterfall",
       "vai-tro-trong-kiem-thu",
-      "testware-san-pham-kiem-thu",
+      "testware-san-pham-kiem-thu"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "testing-s01-fundamentals-phan-02",
+    "title": "Series 01 · Fundamentals of Software Testing · Phần 2/2",
+    "description": "Nền tảng tư duy kiểm thử theo ISTQB CTFL v4.0.1 qua dự án Tới Nơi: testing là gì, vì sao cần, bảy nguyên lý, error–defect–failure, verification và validation, mục tiêu và QA, quy trình kiểm thử, SDLC, vai trò, testware — kết thúc bằng bài thực hành phân tích tính năng đặt xe.",
+    "level": "beginner",
+    "category": "testing",
+    "articles": [
       "thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe"
     ],
     "status": "published"
@@ -91,8 +101,8 @@
   },
   {
     "slug": "csharp-dotnet-10-qua-toi-noi",
-    "title": "C# và .NET 10 qua Tới Nơi",
-    "description": "Lộ trình 38 bài qua Tới Nơi: C# cơ bản, ASP.NET Core 10, EF Core/PostgreSQL, DDD/Clean Architecture/CQRS và vận hành có kiểm chứng.",
+    "title": "C# và .NET 10 · Phần 1: Nền tảng C#",
+    "description": "Bài 01–10 trong lộ trình 38 bài qua Tới Nơi. Nền tảng C#.",
     "level": "beginner",
     "category": "csharp",
     "articles": [
@@ -105,7 +115,17 @@
       "csharp-record-struct-money-quote",
       "csharp-interface-composition-di",
       "csharp-generics-collections",
-      "csharp-linq-deferred-execution",
+      "csharp-linq-deferred-execution"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "csharp-dotnet-10-qua-toi-noi-phan-02",
+    "title": "C# và .NET 10 · Phần 2: Async, kiểm thử và Web API",
+    "description": "Bài 11–20 trong lộ trình 38 bài qua Tới Nơi. Async, kiểm thử và Web API.",
+    "level": "intermediate",
+    "category": "csharp",
+    "articles": [
       "csharp-nullable-pattern-matching",
       "csharp-async-await-cancellation",
       "csharp-concurrency-thread-safety",
@@ -115,7 +135,17 @@
       "dotnet10-validation-problem-details-openapi",
       "dotnet10-middleware-di-options-logging",
       "dotnet10-authentication-authorization",
-      "dotnet10-webapplicationfactory-integration-test",
+      "dotnet10-webapplicationfactory-integration-test"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "csharp-dotnet-10-qua-toi-noi-phan-03",
+    "title": "C# và .NET 10 · Phần 3: Dữ liệu, độ tin cậy và DDD",
+    "description": "Bài 21–30 trong lộ trình 38 bài qua Tới Nơi. Dữ liệu, độ tin cậy và DDD.",
+    "level": "advanced",
+    "category": "csharp",
+    "articles": [
       "dotnet10-efcore-postgresql-mapping-migration",
       "dotnet10-efcore-tracking-projection-n-plus-one",
       "dotnet10-transaction-concurrency-idempotency",
@@ -125,7 +155,17 @@
       "dotnet10-allocation-gc-disposal",
       "dotnet10-benchmarkdotnet-span-profiling",
       "csharp14-extension-members-field",
-      "dotnet10-ddd-bounded-context-aggregate",
+      "dotnet10-ddd-bounded-context-aggregate"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "csharp-dotnet-10-qua-toi-noi-phan-04",
+    "title": "C# và .NET 10 · Phần 4: Kiến trúc và vận hành",
+    "description": "Bài 31–38 trong lộ trình 38 bài qua Tới Nơi. Kiến trúc và vận hành.",
+    "level": "advanced",
+    "category": "csharp",
+    "articles": [
       "dotnet10-clean-architecture-layers",
       "dotnet10-cqrs-mediator-pipeline",
       "dotnet10-repository-unit-of-work",

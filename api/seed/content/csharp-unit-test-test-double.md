@@ -2,7 +2,7 @@
 slug: csharp-unit-test-test-double
 title: "Unit test và test double: kiểm thử chính sách cước C# bằng xUnit"
 summary: "Bài 14: chuyển kiểm chứng console sang xUnit, chọn ca biên độc lập và dùng test double đúng phạm vi; phân biệt test công thức với test đường điều phối."
-category: csharp
+category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

@@ -2,7 +2,7 @@
 slug: dotnet10-backgroundservice-channel
 title: "BackgroundService và Channel: tác vụ sau đặt chuyến trong .NET 10"
 summary: "Bài 24: bounded queue tạo backpressure, worker mở scope theo job, quan sát FIFO và cancellation; không nhầm hàng trong RAM với một broker bền."
-category: csharp
+category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

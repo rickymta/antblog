@@ -1,7 +1,7 @@
 ---
 slug: condition-coverage
 title: "Condition Coverage: phủ từng atomic condition của điều kiện áp voucher"
-summary: "Condition coverage đòi mỗi atomic condition nhận cả true lẫn false — nhưng vẫn có thể bỏ sót cả một outcome của quyết định. Đo trên quyết định áp voucher Tới Nơi, có short-circuit và ba bộ test chạy thật."
+summary: "Condition coverage đòi mỗi atomic condition nhận cả true lẫn false, nhưng vẫn có thể bỏ sót một outcome của quyết định. Đo trên điều kiện áp voucher Tới Nơi với ba bộ test chạy thật."
 category: testing
 level: advanced
 tags: [testing, istqb, ctal-tta, test-045, white-box, condition-coverage, decision-coverage, short-circuit, voucher]

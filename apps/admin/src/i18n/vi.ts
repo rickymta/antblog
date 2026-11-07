@@ -304,6 +304,7 @@ export const vi = {
     },
   },
   paths: {
+    partLimit: "Mỗi phần tối đa 10 bài. Hãy tạo phần tiếp theo khi cần thêm bài.",
     title: 'Lộ trình học',
     subtitle: 'Chuỗi bài viết theo thứ tự học.',
     newPath: 'Lộ trình mới',

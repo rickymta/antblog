@@ -1,0 +1,117 @@
+[
+  {
+    "baseSlug": "testing-s01-fundamentals",
+    "title": "Series 01 · Fundamentals of Software Testing",
+    "category": "testing",
+    "articleSlugs": [
+      "software-testing-la-gi-testing-khac-debugging",
+      "vi-sao-can-kiem-thu",
+      "bay-nguyen-ly-kiem-thu",
+      "error-defect-failure-root-cause",
+      "verification-va-validation",
+      "muc-tieu-kiem-thu-va-quality-assurance",
+      "quy-trinh-kiem-thu-test-process",
+      "kiem-thu-trong-sdlc-agile-waterfall",
+      "vai-tro-trong-kiem-thu",
+      "testware-san-pham-kiem-thu",
+      "thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe"
+    ],
+    "parts": [
+      {
+        "slug": "testing-s01-fundamentals",
+        "title": "Series 01 · Fundamentals of Software Testing · Phần 1/2",
+        "description": "Nền tảng tư duy kiểm thử theo ISTQB CTFL v4.0.1 qua dự án Tới Nơi: testing là gì, vì sao cần, bảy nguyên lý, error–defect–failure, verification và validation, mục tiêu và QA, quy trình kiểm thử, SDLC, vai trò, testware — kết thúc bằng bài thực hành phân tích tính năng đặt xe.",
+        "level": "beginner",
+        "category": "testing",
+        "status": "published"
+      },
+      {
+        "slug": "testing-s01-fundamentals-phan-02",
+        "title": "Series 01 · Fundamentals of Software Testing · Phần 2/2",
+        "description": "Nền tảng tư duy kiểm thử theo ISTQB CTFL v4.0.1 qua dự án Tới Nơi: testing là gì, vì sao cần, bảy nguyên lý, error–defect–failure, verification và validation, mục tiêu và QA, quy trình kiểm thử, SDLC, vai trò, testware — kết thúc bằng bài thực hành phân tích tính năng đặt xe.",
+        "level": "beginner",
+        "category": "testing",
+        "status": "published"
+      }
+    ]
+  },
+  {
+    "baseSlug": "csharp-dotnet-10-qua-toi-noi",
+    "title": "C# và .NET 10 qua Tới Nơi",
+    "category": "csharp",
+    "articleSlugs": [
+      "csharp-va-dotnet-10-tu-source-code-den-chuong-trinh",
+      "csharp-bien-kieu-du-lieu-decimal",
+      "csharp-dieu-kien-vong-lap-phuong-thuc",
+      "csharp-chuoi-ngay-gio-culture",
+      "csharp-debug-exception-bao-gia",
+      "csharp-class-property-encapsulation",
+      "csharp-record-struct-money-quote",
+      "csharp-interface-composition-di",
+      "csharp-generics-collections",
+      "csharp-linq-deferred-execution",
+      "csharp-nullable-pattern-matching",
+      "csharp-async-await-cancellation",
+      "csharp-concurrency-thread-safety",
+      "csharp-unit-test-test-double",
+      "csharp-integration-test-json-filesystem",
+      "dotnet10-http-minimal-api",
+      "dotnet10-validation-problem-details-openapi",
+      "dotnet10-middleware-di-options-logging",
+      "dotnet10-authentication-authorization",
+      "dotnet10-webapplicationfactory-integration-test",
+      "dotnet10-efcore-postgresql-mapping-migration",
+      "dotnet10-efcore-tracking-projection-n-plus-one",
+      "dotnet10-transaction-concurrency-idempotency",
+      "dotnet10-backgroundservice-channel",
+      "dotnet10-cache-timeout-retry-rate-limit",
+      "dotnet10-outbox-inbox-idempotent-consumer",
+      "dotnet10-allocation-gc-disposal",
+      "dotnet10-benchmarkdotnet-span-profiling",
+      "csharp14-extension-members-field",
+      "dotnet10-ddd-bounded-context-aggregate",
+      "dotnet10-clean-architecture-layers",
+      "dotnet10-cqrs-mediator-pipeline",
+      "dotnet10-repository-unit-of-work",
+      "dotnet10-use-case-dat-chuyen-end-to-end",
+      "dotnet10-container-ci-cd",
+      "dotnet10-aws-azure-deployment",
+      "dotnet10-opentelemetry-traces-metrics-logs",
+      "dotnet10-tong-hop-service-dat-chuyen"
+    ],
+    "parts": [
+      {
+        "slug": "csharp-dotnet-10-qua-toi-noi",
+        "title": "C# và .NET 10 · Phần 1: Nền tảng C#",
+        "description": "Bài 01–10 trong lộ trình 38 bài qua Tới Nơi. Nền tảng C#.",
+        "level": "beginner",
+        "category": "csharp",
+        "status": "published"
+      },
+      {
+        "slug": "csharp-dotnet-10-qua-toi-noi-phan-02",
+        "title": "C# và .NET 10 · Phần 2: Async, kiểm thử và Web API",
+        "description": "Bài 11–20 trong lộ trình 38 bài qua Tới Nơi. Async, kiểm thử và Web API.",
+        "level": "intermediate",
+        "category": "csharp",
+        "status": "published"
+      },
+      {
+        "slug": "csharp-dotnet-10-qua-toi-noi-phan-03",
+        "title": "C# và .NET 10 · Phần 3: Dữ liệu, độ tin cậy và DDD",
+        "description": "Bài 21–30 trong lộ trình 38 bài qua Tới Nơi. Dữ liệu, độ tin cậy và DDD.",
+        "level": "advanced",
+        "category": "csharp",
+        "status": "published"
+      },
+      {
+        "slug": "csharp-dotnet-10-qua-toi-noi-phan-04",
+        "title": "C# và .NET 10 · Phần 4: Kiến trúc và vận hành",
+        "description": "Bài 31–38 trong lộ trình 38 bài qua Tới Nơi. Kiến trúc và vận hành.",
+        "level": "advanced",
+        "category": "csharp",
+        "status": "published"
+      }
+    ]
+  }
+]

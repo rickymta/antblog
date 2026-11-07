@@ -2,7 +2,7 @@
 slug: dotnet10-efcore-postgresql-mapping-migration
 title: "EF Core 10 và PostgreSQL: mapping, migration và truy vấn của Tới Nơi"
 summary: "Bài 21: dùng Npgsql/EF Core 10 với PostgreSQL thật, mapping tiền và UTC, tạo migration có snapshot và kiểm chứng round-trip trong schema lab riêng."
-category: csharp
+category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi, postgresql, ef-core]
 language: vi

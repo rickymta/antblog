@@ -246,5 +246,200 @@
     "icon": "analysis",
     "color": "#EAB308",
     "order": 7
+  },
+  {
+    "slug": "csharp-beginner",
+    "name": {
+      "vi": "C# / .NET · Cơ bản",
+      "en": "C# / .NET · Beginner"
+    },
+    "description": {
+      "vi": "Bài C# / .NET ở cấp độ cơ bản.",
+      "en": "Beginner C# / .NET articles."
+    },
+    "icon": "code",
+    "color": "#7C3AED",
+    "order": 1,
+    "parent": "csharp"
+  },
+  {
+    "slug": "csharp-intermediate",
+    "name": {
+      "vi": "C# / .NET · Trung cấp",
+      "en": "C# / .NET · Intermediate"
+    },
+    "description": {
+      "vi": "Bài C# / .NET ở cấp độ trung cấp.",
+      "en": "Intermediate C# / .NET articles."
+    },
+    "icon": "code",
+    "color": "#7C3AED",
+    "order": 2,
+    "parent": "csharp"
+  },
+  {
+    "slug": "csharp-advanced",
+    "name": {
+      "vi": "C# / .NET · Nâng cao",
+      "en": "C# / .NET · Advanced"
+    },
+    "description": {
+      "vi": "Bài C# / .NET ở cấp độ nâng cao.",
+      "en": "Advanced C# / .NET articles."
+    },
+    "icon": "code",
+    "color": "#7C3AED",
+    "order": 3,
+    "parent": "csharp"
+  },
+  {
+    "slug": "python-beginner",
+    "name": {
+      "vi": "Python · Cơ bản",
+      "en": "Python · Beginner"
+    },
+    "description": {
+      "vi": "Bài Python ở cấp độ cơ bản.",
+      "en": "Beginner Python articles."
+    },
+    "icon": "code",
+    "color": "#2563EB",
+    "order": 1,
+    "parent": "python"
+  },
+  {
+    "slug": "python-intermediate",
+    "name": {
+      "vi": "Python · Trung cấp",
+      "en": "Python · Intermediate"
+    },
+    "description": {
+      "vi": "Bài Python ở cấp độ trung cấp.",
+      "en": "Intermediate Python articles."
+    },
+    "icon": "code",
+    "color": "#2563EB",
+    "order": 2,
+    "parent": "python"
+  },
+  {
+    "slug": "python-advanced",
+    "name": {
+      "vi": "Python · Nâng cao",
+      "en": "Python · Advanced"
+    },
+    "description": {
+      "vi": "Bài Python ở cấp độ nâng cao.",
+      "en": "Advanced Python articles."
+    },
+    "icon": "code",
+    "color": "#2563EB",
+    "order": 3,
+    "parent": "python"
+  },
+  {
+    "slug": "rust-beginner",
+    "name": {
+      "vi": "Rust · Cơ bản",
+      "en": "Rust · Beginner"
+    },
+    "description": {
+      "vi": "Bài Rust ở cấp độ cơ bản.",
+      "en": "Beginner Rust articles."
+    },
+    "icon": "code",
+    "color": "#B45309",
+    "order": 1,
+    "parent": "rust"
+  },
+  {
+    "slug": "rust-intermediate",
+    "name": {
+      "vi": "Rust · Trung cấp",
+      "en": "Rust · Intermediate"
+    },
+    "description": {
+      "vi": "Bài Rust ở cấp độ trung cấp.",
+      "en": "Intermediate Rust articles."
+    },
+    "icon": "code",
+    "color": "#B45309",
+    "order": 2,
+    "parent": "rust"
+  },
+  {
+    "slug": "rust-advanced",
+    "name": {
+      "vi": "Rust · Nâng cao",
+      "en": "Rust · Advanced"
+    },
+    "description": {
+      "vi": "Bài Rust ở cấp độ nâng cao.",
+      "en": "Advanced Rust articles."
+    },
+    "icon": "code",
+    "color": "#B45309",
+    "order": 3,
+    "parent": "rust"
+  },
+  {
+    "slug": "go",
+    "name": {
+      "vi": "Go",
+      "en": "Go"
+    },
+    "description": {
+      "vi": "Các loạt bài Go qua dự án Tới Nơi.",
+      "en": "Go learning series through Toi Noi."
+    },
+    "icon": "code",
+    "color": "#0891B2",
+    "order": 4,
+    "parent": "programming"
+  },
+  {
+    "slug": "go-beginner",
+    "name": {
+      "vi": "Go · Cơ bản",
+      "en": "Go · Beginner"
+    },
+    "description": {
+      "vi": "Bài Go ở cấp độ cơ bản.",
+      "en": "Beginner Go articles."
+    },
+    "icon": "code",
+    "color": "#0891B2",
+    "order": 1,
+    "parent": "go"
+  },
+  {
+    "slug": "go-intermediate",
+    "name": {
+      "vi": "Go · Trung cấp",
+      "en": "Go · Intermediate"
+    },
+    "description": {
+      "vi": "Bài Go ở cấp độ trung cấp.",
+      "en": "Intermediate Go articles."
+    },
+    "icon": "code",
+    "color": "#0891B2",
+    "order": 2,
+    "parent": "go"
+  },
+  {
+    "slug": "go-advanced",
+    "name": {
+      "vi": "Go · Nâng cao",
+      "en": "Go · Advanced"
+    },
+    "description": {
+      "vi": "Bài Go ở cấp độ nâng cao.",
+      "en": "Advanced Go articles."
+    },
+    "icon": "code",
+    "color": "#0891B2",
+    "order": 3,
+    "parent": "go"
   }
 ]

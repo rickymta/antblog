@@ -2,7 +2,7 @@
 slug: csharp-async-await-cancellation
 title: "Task, async/await và CancellationToken: gọi dịch vụ báo giá trong C#"
 summary: "Bài 12: quan sát một lời gọi HttpClient bất đồng bộ, truyền cancellation xuyên các bước và kiểm thử hủy đang chờ bằng tín hiệu thay vì đua với thời gian."
-category: csharp
+category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

@@ -2,7 +2,7 @@
 slug: dotnet10-cache-timeout-retry-rate-limit
 title: "Cache, timeout, retry và rate limiting: giữ API .NET 10 ổn định"
 summary: "Bài 25: cache bảng giá công khai, giới hạn request, retry GET có điều kiện và timeout dependency hợp tác; phân biệt từng cơ chế với đảm bảo giao dịch."
-category: csharp
+category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

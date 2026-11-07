@@ -2,7 +2,7 @@
 slug: dotnet10-ddd-bounded-context-aggregate
 title: "DDD: bounded context, aggregate và invariant của chuyến Tới Nơi"
 summary: "Bài 30: bắt đầu mô hình domain có hành vi, phân biệt bounded context với folder/service, dùng Money value object và phát domain event sau chuyển trạng thái hợp lệ."
-category: csharp
+category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

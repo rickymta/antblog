@@ -2,7 +2,7 @@
 slug: dotnet10-benchmarkdotnet-span-profiling
 title: "BenchmarkDotNet, profiling và Span: tối ưu C# bằng số đo"
 summary: "Bài 28: so parser Split với ReadOnlySpan trên cùng hợp đồng, tách correctness khỏi benchmark, đọc MemoryDiagnoser và giới hạn của lượt đo ngắn."
-category: csharp
+category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

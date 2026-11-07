@@ -2,7 +2,7 @@
 slug: csharp-interface-composition-di
 title: "Interface, composition và dependency injection: thay chính sách cước trong C#"
 summary: "Bài 08: tách hợp đồng tính cước khỏi use case báo giá, inject dependency qua constructor và thay Strategy mà không cần DI container."
-category: csharp
+category: csharp-beginner
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

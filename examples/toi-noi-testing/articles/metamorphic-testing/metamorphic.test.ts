@@ -7,6 +7,8 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { MR1, MR1_BUOC_LON, MR2, MR3, MR4, MR_SAI, MR_YEU, mrProperty, type MR, type Source } from './relations';
 import { BUGS, buggyPrice, srcPrice, type PriceFn } from './variants';
+import { unguidedCase } from '../random-testing/generators';
+import { judge } from '../random-testing/oracle';
 
 const SEED = 42;
 const RUNS = 2_000;
@@ -100,7 +102,14 @@ MT-06 · số seed (trên 50) MR1 phát hiện B2: bước 0,1 km ⇒ ${small}; 
     expect(small).toBeGreaterThan(large);
   });
 
+  it('MT-07 đối chiếu: oracle tính chất O1–O6 của TEST-041 trên cùng bốn bản lỗi (seed 41, 10.000 ca)', () => {
+    const row = BUGS.map((bug) => fc.check(fc.property(unguidedCase, (c) => judge(buggyPrice(bug), c).violations.length === 0), { seed: 41, numRuns: 10_000 }).failed ? 'X' : '·').join('');
+    console.log(`
+MT-07 · oracle tính chất TEST-041 — B1 B2 B3 B4: ${row.split('').join('  ')}`);
+    expect(row).toBe('·XX·');
+  });
+
   it.runIf(process.env.SHOW_RED)('SHOW_RED · báo cáo gốc của fast-check: MR1 trên B2', () => {
-    fc.assert(mrProperty(buggyPrice('B2 minimum-before-voucher'), MR1), { seed: SEED, numRuns: RUNS });
+    fc.assert(mrProperty(buggyPrice('B2 minimum-before-voucher'), MR1), { seed: SEED, numRuns: 10_000 });
   });
 });

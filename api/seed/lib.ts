@@ -50,7 +50,7 @@ const pathFile = z.array(
     description: z.string().default(''),
     level: z.enum(LEVELS),
     category: z.string().optional(),
-    articles: z.array(z.string()).default([]),
+    articles: z.array(z.string()).max(10).default([]),
     status: z.enum(PATH_STATUSES).default('published'),
   }),
 );

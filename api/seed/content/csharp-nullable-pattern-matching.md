@@ -2,7 +2,7 @@
 slug: csharp-nullable-pattern-matching
 title: "Nullable reference types và pattern matching: xử lý trạng thái thiếu trong C#"
 summary: "Bài 11: phân biệt không có chuyến, chưa có tài xế và dữ liệu lỗi; dùng nullable annotations, property pattern và switch expression mà không che null bằng dấu !."
-category: csharp
+category: csharp-beginner
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

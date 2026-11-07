@@ -2,7 +2,7 @@
 slug: dotnet10-authentication-authorization
 title: "Authentication và authorization: khách, tài xế và điều phối trong .NET 10"
 summary: "Bài 19: xác thực JWT bearer bằng handler thật, tách 401/403, role policy và ownership; không tin role hoặc chủ sở hữu do client tự gửi."
-category: csharp
+category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi

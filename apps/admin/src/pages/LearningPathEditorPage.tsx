@@ -145,7 +145,7 @@ function PathEditor({ path: initialPath }: { path: AdminLearningPath | undefined
   };
 
   const addArticle = (a: AdminArticle) => {
-    if (form.articleIds.includes(a.id)) return;
+    if (form.articleIds.includes(a.id) || form.articleIds.length >= 10) return;
     setKnown((k) => ({ ...k, [a.id]: toInfo(a) }));
     set('articleIds', [...form.articleIds, a.id]);
   };
@@ -199,6 +199,7 @@ function PathEditor({ path: initialPath }: { path: AdminLearningPath | undefined
     e?.preventDefault();
     const v: Errors = {};
     const title = form.title.trim();
+    if (form.articleIds.length > 10) v.articleIds = t("paths.partLimit");
     if (title.length < 3 || title.length > 200) v.title = t('paths.errTitle');
     if (!SLUG_RE.test(form.slug.trim())) v.slug = t('paths.errSlug');
     setErrors(v);
@@ -302,6 +303,7 @@ function PathEditor({ path: initialPath }: { path: AdminLearningPath | undefined
             <p className="mt-0.5 text-xs text-muted">{t('paths.articlesHint')}</p>
           </div>
           <div className="space-y-4 p-4">
+            <p className="text-sm text-muted">{form.articleIds.length}/10 · {t("paths.partLimit")}</p>
             <ArticlePicker selected={form.articleIds} onAdd={addArticle} />
             {errors.articleIds && <p className="text-xs font-medium text-red-700 dark:text-red-400">{errors.articleIds}</p>}
             {form.articleIds.length === 0 ? (
@@ -423,7 +425,7 @@ function ArticlePicker({ selected, onAdd }: { selected: string[]; onAdd: (a: Adm
                       {t('paths.alreadyAdded')}
                     </span>
                   ) : (
-                    <Button size="sm" icon={Plus} onClick={() => onAdd(a)} aria-label={`${t('common.add')}: ${a.title}`}>
+                    <Button size="sm" disabled={selected.length >= 10} icon={Plus} onClick={() => onAdd(a)} aria-label={`${t('common.add')}: ${a.title}`}>
                       {t('common.add')}
                     </Button>
                   )}

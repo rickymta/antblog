@@ -110,7 +110,7 @@ const learningPathInputSchema = z.object({
   categoryId: z.preprocess(emptyToUndefined, objectIdSchema.optional()),
   articleIds: z
     .array(objectIdSchema)
-    .max(200)
+    .max(10, { message: "Mỗi phần tối đa 10 bài; hãy chia thành phần tiếp theo." })
     .transform((ids) => [...new Set(ids)]),
   status: z.enum(PATH_STATUSES),
 });

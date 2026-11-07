@@ -2,7 +2,7 @@
 slug: csharp-concurrency-thread-safety
 title: "Concurrency và thread safety: tránh nhận trùng chuyến trong một process C#"
 summary: "Bài 13: tái hiện check-then-act bằng lịch xen kẽ có kiểm soát, bảo vệ vùng tới hạn bằng lock và phân biệt đồng bộ bộ nhớ với xung đột ở database."
-category: csharp
+category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

@@ -2,7 +2,7 @@
 slug: dotnet10-efcore-tracking-projection-n-plus-one
 title: "Tracking, projection và N+1: đọc SQL trước khi tối ưu EF Core"
 summary: "Bài 22: quan sát identity map, AsNoTracking và projection DTO; đếm 4 query ở ví dụ N+1 rồi đưa về một query trên PostgreSQL thật."
-category: csharp
+category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi, postgresql, ef-core]
 language: vi

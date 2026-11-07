@@ -29,17 +29,17 @@ Một chuyến của Tới Nơi được **tạo** ở màn đặt xe, được 
 
 ## 1. Giới thiệu
 
-Các bài trước của Series 04 thiết kế test từ **giá trị đầu vào** (EP, BVA) hoặc **quy tắc** (decision table). [TEST-034](/articles/state-transition-testing-co-ban) chuyển sang **hành vi động**: một chuyến đi qua các trạng thái theo sự kiện. CRUD testing nhìn cùng thực thể đó từ một góc khác: **những chức năng nào chạm vào nó, và chạm bằng thao tác gì** — tạo (Create), đọc (Read), sửa (Update), xoá (Delete).
+[TEST-034](/articles/state-transition-testing-co-ban) mô hình chuyến như một máy trạng thái. CRUD testing nhìn cùng thực thể từ góc khác: **những chức năng nào chạm vào nó, bằng thao tác gì** — tạo (Create), đọc (Read), sửa (Update), xoá (Delete).
 
 Vấn đề kỹ thuật này giải quyết: **vòng đời bị hở** (thực thể được tạo mà không ai đọc, không bao giờ được dọn — không test chức năng nào đỏ vì không có chức năng nào để test), **các chức năng không đồng ý với nhau** (tài xế nhận xong mà danh sách chờ vẫn hiện chuyến; khách huỷ xong mà tài xế vẫn `busy`), và **quyền truy cập sai** (đọc đúng dữ liệu nhưng cho nhầm người).
 
-Khi nào dùng: hệ thống có thực thể nghiệp vụ sống lâu và được nhiều chức năng, nhiều vai trò cùng xử lý (đơn hàng, chuyến, ví, hồ sơ khách). Mức chính là system testing; ở Tới Nơi còn dùng được ở mức component integration (các module Booking, Dispatch, Trip lifecycle cùng ghi một bảng).
+Khi nào dùng: thực thể nghiệp vụ sống lâu, được nhiều chức năng và vai trò cùng xử lý (đơn, chuyến, ví, hồ sơ khách). Mức chính là system; ở Tới Nơi còn dùng ở component integration (Booking, Dispatch, Trip lifecycle cùng ghi một bảng).
 
 ## 2. Lý thuyết theo ISTQB
 
 ### 2.1. Vị trí trong CTAL-TA v4.0
 
-CTAL-TA v4.0 chia kỹ thuật black-box theo thứ mà test condition mô hình hoá: phần tử **dữ liệu** (data-based, mục 3.1), phần tử **hành vi động** (behavior-based, mục 3.2), và **quy tắc tĩnh** (rule-based, mục 3.3). CRUD testing thuộc nhóm behavior-based, cùng state transition testing và scenario-based testing. Learning objective: **TA-3.2.1 (K2) — giải thích CRUD testing**. Mức K2 nghĩa là phải hiểu và giải thích được; bài vẫn đi tới thực hành để thấy kỹ thuật bắt được gì.
+CTAL-TA v4.0 chia kỹ thuật black-box theo thứ test condition mô hình hoá: **dữ liệu** (data-based, 3.1), **hành vi động** (behavior-based, 3.2), **quy tắc tĩnh** (rule-based, 3.3). CRUD testing thuộc behavior-based, cùng state transition và scenario-based testing. Learning objective: **TA-3.2.1 (K2) — giải thích CRUD testing**; bài vẫn làm thực hành để thấy kỹ thuật bắt được gì.
 
 ### 2.2. Ma trận CRUD
 
@@ -49,7 +49,7 @@ Syllabus định nghĩa CRUD testing là kiểm **vòng đời của các thực
 - **Hàng** là chức năng (báo giá, đặt chuyến, nhận chuyến…).
 - **Ô** ghi chữ cái của thao tác mà chức năng đó thực hiện lên thực thể: C, R, U, D (có thể nhiều chữ).
 
-Test analyst dựng ma trận bằng cách đi từng chức năng và hỏi: nó tạo, đọc, sửa, xoá thực thể nào. Syllabus lưu ý riêng thao tác **đọc**: nó thường đi ngầm cùng C, U, D (muốn sửa một chuyến thì phải đọc nó trước), nên rất dễ bị ghi thiếu.
+Test analyst đi từng chức năng và hỏi: nó tạo, đọc, sửa, xoá thực thể nào. Syllabus lưu ý thao tác **đọc** thường đi ngầm cùng C, U, D (muốn sửa chuyến phải đọc nó trước) nên dễ bị ghi thiếu.
 
 ### 2.3. Hai phần của CRUD testing
 
@@ -145,12 +145,12 @@ Kế hoạch series nêu ví dụ «tạo, đọc, sửa, xoá địa chỉ giao
 
 | Mã | Nội dung tóm tắt |
 |---|---|
-| R-API-08, R-QUOTE-03 | Khách tạo chuyến từ báo giá **của chính mình**, mỗi báo giá tối đa một chuyến |
-| R-API-05 | Khách chỉ xem/huỷ chuyến của mình; tài xế xem chuyến mình được gán, hoặc chuyến `searching` đủ điều kiện nhận; không được xem ⇒ 404 như không tồn tại |
-| R-API-04, R-API-10 | Endpoint sai vai trò ⇒ 403; lệnh `/arrive…/complete` của tài xế không được gán ⇒ 404 |
-| R-ACCEPT-02 | Lệnh nhận chỉ trả 404 khi chuyến không tồn tại; khác thành phố ⇒ 422 `CITY_MISMATCH`, khác loại xe ⇒ 422 `VEHICLE_MISMATCH` |
-| R-STATE-02/03/06 | Bảng chuyển trạng thái; chuyển không hợp lệ ⇒ 409; mỗi lần đổi trạng thái ghi một dòng `trip_events` |
-| R-ACCEPT-05, R-STATE-04 | Tài xế `busy` khi và chỉ khi đang giữ một chuyến hoạt động; tài xế huỷ ⇒ chuyến về `searching`, bỏ gán |
+| R-API-08, R-QUOTE-03 | Tạo chuyến từ báo giá **của chính mình**, mỗi báo giá tối đa một chuyến |
+| R-API-05 | Khách chỉ xem/huỷ chuyến của mình; tài xế xem chuyến được gán hoặc chuyến `searching` đủ điều kiện; không được xem ⇒ 404 |
+| R-API-04, R-API-10 | Sai vai trò ⇒ 403; `/arrive…/complete` của tài xế không được gán ⇒ 404 |
+| R-ACCEPT-02 | Lệnh nhận chỉ 404 khi chuyến không tồn tại; khác thành phố/loại xe ⇒ 422 |
+| R-STATE-02/03/06 | Chuyển không hợp lệ ⇒ 409; mỗi lần đổi trạng thái ghi một dòng `trip_events` |
+| R-ACCEPT-05, R-STATE-04 | Tài xế `busy` ⇔ đang giữ chuyến hoạt động; tài xế huỷ ⇒ chuyến về `searching` |
 | R-STATE-05 | Chuyến `searching` quá 5 phút ⇒ hệ thống huỷ (`no_driver`) |
 | R-VOUCHER-07 | Chuyến chưa huỷ tiêu lượt voucher; chuyến bị huỷ trả lại lượt |
 | R-IDEM-02, R-IDEM-05 | Gửi lại cùng khoá ⇒ trả kết quả cũ; phản hồi 5xx không lưu, client được thử lại cùng khoá |
@@ -193,24 +193,24 @@ Ma trận viết **từ đặc tả, trước khi chạy** (`articles/crud-testi
 
 ¹ Đếm lượt voucher trong ngày (R-VOUCHER-07). ² C = giữ chỗ khoá, R = gửi lại, U = lưu kết quả, D = thả khoá khi 5xx (R-IDEM-05). Tổng: **48 coverage item**.
 
-Hai điểm dễ ghi sai: **huỷ chuyến là U, không phải D** — chuyến sang `cancelled` và vẫn còn; và **nhận chuyến là U** dù gọi bằng `POST`. Đừng suy C/R/U/D từ động từ HTTP.
+Dễ ghi sai: **huỷ chuyến là U, không phải D** — chuyến sang `cancelled` và vẫn còn.
 
 ### 4.2. Bước 2 — Completeness: thao tác nào vắng?
 
 | Thực thể | Có | Vắng | Phân loại sau điều tra |
 |---|---|---|---|
-| `trips` | C R U | D | **Cố ý**: không xoá cứng; `cancelled`/`completed` là trạng thái kết thúc. Dữ liệu cũ đi qua lưu trữ ([TEST-020](/articles/maintenance-testing)) |
-| `trip_events` | C | R U D | U, D vắng là **cố ý** (nhật ký chỉ ghi thêm). R vắng là **anomaly thật**: không chức năng nào đọc nhật ký — ai cần nó? Ở hệ thống đích là Support/Dispute và Admin Portal (§11.2, «audit log») ⇒ câu hỏi cho PO |
-| `quotes` | C R U | D | **Anomaly đã biết**: README lab ghi báo giá không bao giờ được dọn; hệ thống đích cần TTL/job dọn |
-| `drivers` | R U | C D | **Ngoài phạm vi lab**: onboarding tài xế thuộc Driver Profile/Admin Portal |
-| `vouchers` | R | C U D | **Ngoài phạm vi lab**: cấu hình khuyến mãi thuộc Promotion/Admin Portal |
-| `idempotency_keys` | C R U D | — | Đủ, nhưng D chỉ xảy ra khi 5xx; hết hạn sau ≥ 24 giờ của hệ thống đích chưa có trong lab |
+| `trips` | C R U | D | **Cố ý**: không xoá cứng; dữ liệu cũ đi qua lưu trữ ([TEST-020](/articles/maintenance-testing)) |
+| `trip_events` | C | R U D | U, D vắng là **cố ý** (chỉ ghi thêm). R vắng là **anomaly thật**: không chức năng nào đọc nhật ký — ở hệ thống đích ai cần (Support, audit log §11.2)? ⇒ hỏi PO |
+| `quotes` | C R U | D | **Anomaly đã biết**: README lab ghi báo giá không bao giờ được dọn |
+| `drivers` | R U | C D | **Ngoài phạm vi lab** (onboarding tài xế) |
+| `vouchers` | R | C U D | **Ngoài phạm vi lab** (quản trị khuyến mãi) |
+| `idempotency_keys` | C R U D | — | Đủ; D chỉ khi 5xx; hết hạn ≥ 24 giờ của hệ thống đích chưa có |
 
 Đây là một **static test**: không chạy dòng code nào. Mỗi ô vắng được xếp vào «cố ý», «ngoài phạm vi» hoặc «cần hỏi» — không ô nào tự động thành defect report.
 
 ### 4.3. Bước 3 — Consistency: test case theo thực thể chuyến
 
-Mỗi test case nối nhiều chức năng để đi hết một nhánh vòng đời (lấy từ state diagram của [TEST-034](/articles/state-transition-testing-co-ban)):
+Mỗi test case nối nhiều chức năng để đi hết một nhánh vòng đời (state diagram ở [TEST-034](/articles/state-transition-testing-co-ban)):
 
 | Ca | Chuỗi chức năng | Kiểm thêm |
 |---|---|---|
@@ -309,7 +309,7 @@ ngoài ma trận: F02|drivers|R, F06|drivers|R, F07|drivers|R, F09|drivers|R
 
 - **CRUD coverage 44/48 ≈ 91,7%.** Bốn ô chưa phủ đều là R và D của khoá idempotency khi huỷ: bộ chính không gửi lại lệnh huỷ và không gây lỗi 5xx lúc huỷ. Bài tập 1 phủ nốt.
 - **Bốn thao tác ngoài ma trận** đều là `drivers R` — bước xác thực (R-API-03) đọc tài xế để kiểm `x-user`. Đúng loại «read ngầm» syllabus cảnh báo, và ma trận viết từ SPEC đã bỏ sót. Cách xử lý: thêm vào ma trận, hoặc ghi rõ «không tính đọc do xác thực».
-- **42/42 ô vai trò đúng kỳ vọng**, mọi «sau mỗi U, mọi R» khớp bảng mục 4.3. RK-2, RK-3, RK-4, RK-5 không xảy ra trên lab.
+- **42/42 ô vai trò đúng kỳ vọng**, mọi «sau mỗi U, mọi R» khớp mục 4.3: RK-2…RK-5 không xảy ra.
 - **L6 bắt được một defect thật** — RK-1.
 
 ### 5.5. Defect report DR-039-01
@@ -329,7 +329,7 @@ ngoài ma trận: F02|drivers|R, F06|drivers|R, F07|drivers|R, F09|drivers|R
 </table>
 </div>
 
-Để so sánh: lời giải bài tập 1 gây lỗi 5xx đúng chỗ ghi khi **huỷ** chuyến, và lần thử lại cùng khoá thành công (200) — vì lệnh huỷ chỉ có một lệnh ghi chuyến trước điểm lỗi. Cùng cơ chế idempotency, khác số thực thể bị ghi trong một chức năng: đó là lý do ma trận CRUD giúp chọn chỗ đặt lỗi.
+Đối chứng: lời giải bài tập 1 gây lỗi 5xx ở lệnh ghi của **huỷ** chuyến, và thử lại cùng khoá thành công — huỷ không ghi thực thể nào trước điểm lỗi. Ma trận CRUD chỉ ra chức năng nào ghi nhiều thực thể, tức là chỗ đáng đặt lỗi.
 
 ## 6. Góc nhìn nâng cao
 
@@ -341,12 +341,7 @@ ngoài ma trận: F02|drivers|R, F06|drivers|R, F07|drivers|R, F09|drivers|R
 
 **So với kỹ thuật lân cận.** State transition ([TEST-034](/articles/state-transition-testing-co-ban)) mô hình một thực thể (trạng thái × sự kiện); scenario-based ([TEST-035](/articles/use-case-testing-scenario-based-testing)) mô hình luồng người dùng; CRUD mô hình nhiều chức năng × nhiều thực thể. L1 cũng là một đường đi trong state diagram, nhưng state transition không hỏi «danh sách chuyến chờ của D102 còn hiện chuyến không».
 
-**Sai lầm thường gặp.**
-
-- Suy C/R/U/D từ động từ HTTP (`POST` = C, `DELETE` = D). Nhận và huỷ chuyến đều là `POST` nhưng là U.
-- Chỉ kiểm phản hồi của chức năng vừa gọi, không đọc lại bằng chức năng khác — bỏ đúng phần «consistency».
-- Ma trận chỉ có thực thể chính, quên thực thể phụ (nhật ký, khoá idempotency, lượt voucher) — nơi DR-039-01 nằm.
-- Đo coverage bằng tên test thay vì thao tác thật; ở đây cách đo thật mới làm lộ bốn lần đọc ngầm.
+**Sai lầm thường gặp.** Suy C/R/U/D từ động từ HTTP (nhận và huỷ đều là `POST` nhưng là U). Chỉ kiểm phản hồi của chức năng vừa gọi, không đọc lại bằng chức năng khác — bỏ đúng phần consistency. Quên thực thể phụ (nhật ký, khoá idempotency) — nơi DR-039-01 nằm. Đo coverage bằng tên test thay vì thao tác thật — sẽ không thấy bốn lần đọc ngầm.
 
 ## 7. Bài tập và câu hỏi ôn tập
 
@@ -404,7 +399,7 @@ Hệ thống đích cho khách lưu «Nhà», «Công ty». Lập ma trận CRUD
 - c) 100%, vì tổng số thao tác thực thi là 48
 - d) 44/52 ≈ 84,6%
 
-<details><summary><b>Đáp án: a</b></summary><ul><li>a) Đúng — mẫu số là thao tác trong ma trận; thao tác ngoài ma trận không được cộng vào tử số.</li><li>b) Sai — tự đổi mẫu số.</li><li>c) Sai — cộng thao tác ngoài ma trận vào tử số.</li><li>d) Sai — mẫu số không gồm thao tác ngoài ma trận; muốn tính chúng thì phải cập nhật ma trận trước.</li></ul></details>
+<details><summary><b>Đáp án: a</b></summary><ul><li>a) Đúng — mẫu số là thao tác trong ma trận; thao tác ngoài ma trận không vào tử số.</li><li>b) Sai — tự đổi mẫu số.</li><li>c) Sai — cộng thao tác ngoài ma trận vào tử số.</li><li>d) Sai — muốn tính chúng phải cập nhật ma trận trước.</li></ul></details>
 
 **Câu 5 (K2).** Ca nào áp dụng tiêu chí phủ chặt «sau mỗi U, phủ mọi R» cho thao tác «tài xế huỷ chuyến»?
 

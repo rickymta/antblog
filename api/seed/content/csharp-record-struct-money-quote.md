@@ -2,7 +2,7 @@
 slug: csharp-record-struct-money-quote
 title: "Record, struct và immutability: thiết kế Money, Quote trong C#"
 summary: "Bài 07: tách entity và value object, hiểu value equality, with và bản sao nông; tạo Money có validation và nhìn rõ lỗ hổng default của struct."
-category: csharp
+category: csharp-beginner
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi

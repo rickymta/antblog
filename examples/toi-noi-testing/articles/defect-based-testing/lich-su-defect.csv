@@ -4,10 +4,10 @@ D-02;Giờ cao điểm lấy giờ máy chủ (UTC): đặt 18:30 giờ VN khôn
 D-03;Bấm Hoàn thành hai lần nhanh thu cước hai lần;Trip;trang-thai;Timing/Serialization;logic;critical;design;system;
 D-04;Tổng làm tròn tới 1.000 đ gần nhất thay vì làm tròn lên (52.400 ⇒ 52.000);Pricing;lam-tron;Algorithm;computation;major;code;component;
 D-05;Voucher hết hạn sớm 7 tiếng: so ngày theo UTC;Voucher;gio-vn;Checking;logic;major;code;production;
-D-06;Tiền giảm 20% làm tròn về nghìn trước khi trừ: lệch 1.000 đ;Voucher;lam-tron;Algorithm;computation;minor;code;uat;
+D-06;Tiền giảm 20% làm tròn tới 1.000 đ gần nhất trước khi trừ (đặt xe): lệch 1.000 đ;Voucher;lam-tron;Algorithm;computation;minor;code;uat;
 D-07;100,05 km được chấp nhận (làm tròn sau khi kiểm biên);Pricing;bien-dau-vao;Checking;input;minor;code;component;
 D-08;Khách huỷ được chuyến đang ở picked_up;Trip;trang-thai;Checking;logic;major;code;system;
-D-09;Sau ×1,25 làm tròn về đồng (17.812,5 ⇒ 17.813) nên tổng lệch 1.000 đ;Pricing;lam-tron;Algorithm;computation;major;code;production;D-06
+D-09;Tiền giảm của bưu kiện vẫn làm tròn tới 1.000 đ (bản sửa D-06 chỉ sửa nhánh đặt xe);Pricing;lam-tron;Algorithm;computation;major;code;production;D-06
 D-10;Tài xế huỷ không xoá acceptedAt: phí huỷ của lần nhận sau tính sai;Trip;trang-thai;Assignment;data;major;code;uat;
 D-11;Lượt voucher mỗi ngày đặt lại lúc 07:00 sáng giờ VN;Voucher;gio-vn;Checking;data;major;code;production;D-05
 D-12;Lý do huỷ 201 ký tự làm máy chủ trả 500;Booking;bien-dau-vao;Checking;input;major;code;system;
@@ -15,7 +15,7 @@ D-13;Bưu kiện 6,0 kg bị tính 4.000 đ (ceil của 1,0000000001);Pricing;la
 D-14;Hai tài xế cùng nhận thành công một chuyến;Dispatch;trang-thai;Timing/Serialization;logic;critical;code;production;
 D-15;validTo không tính ngày cuối (đặc tả viết «đến ngày»);Voucher;gio-vn;Checking;logic;major;requirement;uat;
 D-16;Thông báo lỗi trang tài xế lộ mã "complete" và "accepted";Web;khac;Function;output;minor;code;system;
-D-17;Phí giao đồ ăn làm tròn trước khi cộng phụ phí mưa;Pricing;lam-tron;Algorithm;computation;minor;code;system;D-09
+D-17;Phí giao đồ ăn tính trên quãng đường chưa làm tròn 0,1 km;Pricing;lam-tron;Algorithm;computation;minor;code;system;D-01
 D-18;Chuyến completed quay về searching khi tài xế bấm Huỷ nhận muộn;Trip;trang-thai;Checking;logic;critical;code;production;D-08
 D-19;Hạn báo giá hiện theo múi giờ máy khách, không ghi múi giờ;Web;gio-vn;Interface;output;minor;design;production;
 D-20;Đơn giá 25.500 đ (không bội số 1.000) được nhận;Pricing;bien-dau-vao;Checking;input;minor;code;component;

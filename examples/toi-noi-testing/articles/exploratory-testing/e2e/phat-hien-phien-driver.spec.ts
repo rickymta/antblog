@@ -92,6 +92,15 @@ test('ES-04 · đổi «Mã tài xế» giữa chuyến ⇒ bấm bước kế b
   await expect(page.getByTestId('current-trip-id')).toHaveText(tripId);
 });
 
+test('ES-06 · bấm đúp «Nhận chuyến» ⇒ hai lần tải danh sách chạy chồng nhau, một chuyến hiện HAI dòng', async ({ page, request }) => {
+  const first = await bookBike(request, 'C001', 7.4);
+  const other = await bookBike(request, 'C002', 2);
+  await openDriver(page, 'D101');
+  await page.getByTestId(`accept-${first}`).dblclick();
+  await expect(page.getByTestId('driver-trip-status')).toHaveText('Tài xế đã nhận');
+  await expect(page.getByTestId(`available-${other}`)).toHaveCount(2); // cùng data-testid xuất hiện hai lần
+});
+
 test('ES-05 · ETA 0 hoặc để trống ⇒ thông báo chung, không nói ô nào sai dù ô có min=1 max=60', async ({ page, request }) => {
   const tripId = await bookBike(request, 'C001', 7.4);
   await openDriver(page, 'D101');
@@ -99,6 +108,7 @@ test('ES-05 · ETA 0 hoặc để trống ⇒ thông báo chung, không nói ô 
     await page.getByLabel('ETA tới điểm đón (phút)').fill(eta);
     await page.getByTestId(`accept-${tripId}`).click();
     await expect(page.getByTestId('error')).toHaveText('Dữ liệu gửi lên không hợp lệ.');
+    await expect(page.getByTestId('current-trip')).toBeHidden();
   }
   await expect(page.getByLabel('ETA tới điểm đón (phút)')).toHaveAttribute('min', '1');
 });

@@ -2,7 +2,7 @@
 slug: dotnet10-aws-azure-deployment
 title: "Triển khai AWS và Azure: cấu hình, secrets và health check của service .NET"
 summary: "Bài 36: cùng image tới ECS Fargate hoặc Azure Container Apps, phân biệt workload/user identity và đi qua migration, readiness, rollout có kiểm soát."
-category: csharp
+category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi

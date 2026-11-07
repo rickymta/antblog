@@ -1,0 +1,20 @@
+# Mô hình PICT cho TEST-038 — tham khảo, CHƯA chạy trong bài (lab không cài PICT).
+# pict voucher.pict.txt /o:3      -> 3-wise có ràng buộc
+DichVu:    ride, parcel, food
+Kinds:     Rong, GomDichVu
+CityCodes: Rong, GomSG
+Ngay:      DauHan, GiuaHan, CuoiHan
+Gio:       06h, 10h, 20h
+MinAmount: Khong, Duong
+ASoVoiMin: Bang, LonHon
+Tran:      DuoiTran, ChamTran
+LuotNgay:  Mot, Hai
+LichSu:    ChuaDung, ToiQua, HomNay
+MaNhap:    Chuan, ThuongKhoangTrang
+
+# C1: minAmount = 0 thì A luôn lớn hơn min
+IF [MinAmount] = "Khong" THEN [ASoVoiMin] = "LonHon";
+# C2: 1 lượt/ngày mà đã dùng 1 lượt hôm nay là lỗi VOUCHER_USAGE_LIMIT -> để cho test âm
+IF [LuotNgay] = "Mot" THEN [LichSu] <> "HomNay";
+# C3: hôm qua voucher chưa có hiệu lực thì không thể đã dùng
+IF [LichSu] = "ToiQua" THEN [Ngay] <> "DauHan";

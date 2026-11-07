@@ -306,6 +306,7 @@ export const en: Messages = {
     },
   },
   paths: {
+    partLimit: "Each part allows up to 10 articles. Create the next part to add more.",
     title: 'Learning paths',
     subtitle: 'Ordered series of articles.',
     newPath: 'New learning path',

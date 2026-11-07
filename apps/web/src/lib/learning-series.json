@@ -1,0 +1,36 @@
+[
+  {
+    "title": "Series 01 · Fundamentals of Software Testing",
+    "parts": [
+      {
+        "slug": "testing-s01-fundamentals",
+        "title": "Series 01 · Fundamentals of Software Testing · Phần 1/2"
+      },
+      {
+        "slug": "testing-s01-fundamentals-phan-02",
+        "title": "Series 01 · Fundamentals of Software Testing · Phần 2/2"
+      }
+    ]
+  },
+  {
+    "title": "C# và .NET 10 qua Tới Nơi",
+    "parts": [
+      {
+        "slug": "csharp-dotnet-10-qua-toi-noi",
+        "title": "C# và .NET 10 · Phần 1: Nền tảng C#"
+      },
+      {
+        "slug": "csharp-dotnet-10-qua-toi-noi-phan-02",
+        "title": "C# và .NET 10 · Phần 2: Async, kiểm thử và Web API"
+      },
+      {
+        "slug": "csharp-dotnet-10-qua-toi-noi-phan-03",
+        "title": "C# và .NET 10 · Phần 3: Dữ liệu, độ tin cậy và DDD"
+      },
+      {
+        "slug": "csharp-dotnet-10-qua-toi-noi-phan-04",
+        "title": "C# và .NET 10 · Phần 4: Kiến trúc và vận hành"
+      }
+    ]
+  }
+]
