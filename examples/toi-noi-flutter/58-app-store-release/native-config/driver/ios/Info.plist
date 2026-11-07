@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- App TÀI XẾ. Đoạn cần ghép vào ios/Runner/Info.plist. Có thêm quyền "luôn cho phép"
+     và UIBackgroundModes location: phải giải thích được với App Review (ghi chú reviewer). -->
+<plist version="1.0">
+<dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tới Nơi dùng vị trí của bạn khi đang mở app để biết bạn đang online ở đâu và gợi ý cuốc gần nhất.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Tới Nơi gửi vị trí của bạn cho khách trong lúc có chuyến, kể cả khi bạn chuyển sang app dẫn đường. Hết chuyến, Tới Nơi ngừng gửi.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>remote-notification</string>
+	</array>
+</dict>
+</plist>

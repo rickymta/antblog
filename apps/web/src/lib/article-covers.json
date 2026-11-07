@@ -4818,5 +4818,195 @@
       "EVIDENCE",
       "68 LESSONS"
     ]
+  },
+  "flutter-ban-do-flutter-map-marker-polyline-chon-diem-don": {
+    "title": "MAP / MARKERS",
+    "subtitle": "Flutter 34 · flutter_map, polylines and pickup points",
+    "diagram": "map",
+    "labels": [
+      "PICKUP",
+      "ROUTE",
+      "DROPOFF"
+    ]
+  },
+  "flutter-vi-tri-geolocator-permission-foreground-background": {
+    "title": "GEOLOCATION",
+    "subtitle": "Flutter 35 · Permissions, position streams and battery",
+    "diagram": "target",
+    "labels": [
+      "PERMISSION",
+      "STREAM",
+      "ACCURACY"
+    ]
+  },
+  "flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe": {
+    "title": "REALTIME / WS",
+    "subtitle": "Flutter 36 · Reconnect, backoff, jitter and resume",
+    "diagram": "network",
+    "labels": [
+      "SOCKET",
+      "BACKOFF",
+      "RESUME"
+    ]
+  },
+  "flutter-push-notification-fcm-apns-deep-link": {
+    "title": "PUSH / FCM",
+    "subtitle": "Flutter 37 · APNs, FCM and deep links from messages",
+    "diagram": "flow",
+    "labels": [
+      "TOKEN",
+      "PUSH",
+      "OPEN"
+    ]
+  },
+  "flutter-background-work-workmanager-vi-tri-nen-app-tai-xe": {
+    "title": "BACKGROUND",
+    "subtitle": "Flutter 38 · workmanager, driver location, store rules",
+    "diagram": "cycle",
+    "labels": [
+      "DEFER",
+      "LOCATE",
+      "POLICY"
+    ]
+  },
+  "flutter-thanh-toan-vi-xanh-webview-deep-link-idempotency": {
+    "title": "PAYMENT / WALLET",
+    "subtitle": "Flutter 39 · Hosted checkout, deep link, idempotency",
+    "diagram": "flow",
+    "labels": [
+      "CHECKOUT",
+      "RETURN",
+      "CONFIRM"
+    ]
+  },
+  "flutter-platform-channel-pigeon-ffi-goi-native": {
+    "title": "NATIVE / PIGEON",
+    "subtitle": "Flutter 40 · Platform channels, Pigeon and dart:ffi",
+    "diagram": "split",
+    "labels": [
+      "DART",
+      "PIGEON",
+      "NATIVE"
+    ]
+  },
+  "flutter-hieu-nang-rebuild-isolate-devtools": {
+    "title": "PERFORMANCE",
+    "subtitle": "Flutter 41 · DevTools, const, RepaintBoundary, isolates",
+    "diagram": "target",
+    "labels": [
+      "MEASURE",
+      "REBUILD",
+      "ISOLATE"
+    ]
+  },
+  "flutter-bao-mat-mobile-secure-storage-pinning-obfuscation-masvs": {
+    "title": "SECURITY / MASVS",
+    "subtitle": "Flutter 42 · Threat model, storage, pinning, obfuscation",
+    "diagram": "checklist",
+    "labels": [
+      "STORAGE",
+      "NETWORK",
+      "MASVS"
+    ]
+  },
+  "flutter-flavors-bundle-id-icon-firebase-theo-moi-truong-build": {
+    "title": "BUILD FLAVORS",
+    "subtitle": "Flutter 50 · Bundle IDs, icons, Firebase per flavor",
+    "diagram": "split",
+    "labels": [
+      "DEV",
+      "STAGING",
+      "PROD"
+    ]
+  },
+  "flutter-ky-ung-dung-android-keystore-play-app-signing-aab": {
+    "title": "ANDROID SIGNING",
+    "subtitle": "Flutter 51 · Keystore, Play App Signing, AAB",
+    "diagram": "checklist",
+    "labels": [
+      "KEYSTORE",
+      "AAB",
+      "VERSION"
+    ]
+  },
+  "flutter-ky-ung-dung-ios-certificate-provisioning-profile-capabilities": {
+    "title": "IOS SIGNING",
+    "subtitle": "Flutter 52 · Certificates, profiles and capabilities",
+    "diagram": "checklist",
+    "labels": [
+      "CERT",
+      "PROFILE",
+      "CAPABILITY"
+    ]
+  },
+  "flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build": {
+    "title": "FASTLANE",
+    "subtitle": "Flutter 53 · match, gym, pilot and supply",
+    "diagram": "code",
+    "labels": [
+      "MATCH",
+      "BUILD",
+      "UPLOAD"
+    ]
+  },
+  "flutter-ci-cd-github-actions-macos-build-ios-android-secrets": {
+    "title": "CI / CD BUILD",
+    "subtitle": "Flutter 54 · macOS and ubuntu jobs, secrets, artifacts",
+    "diagram": "flow",
+    "labels": [
+      "SECRETS",
+      "BUILD",
+      "ARTIFACT"
+    ]
+  },
+  "flutter-firebase-app-distribution-phan-phoi-noi-bo-tester": {
+    "title": "APP DISTRIBUTION",
+    "subtitle": "Flutter 55 · Internal builds for iOS and Android testers",
+    "diagram": "network",
+    "labels": [
+      "UPLOAD",
+      "TESTERS",
+      "FEEDBACK"
+    ]
+  },
+  "flutter-testflight-internal-external-testing-beta-review": {
+    "title": "TESTFLIGHT",
+    "subtitle": "Flutter 56 · Internal, external and Beta App Review",
+    "diagram": "flow",
+    "labels": [
+      "UPLOAD",
+      "INTERNAL",
+      "EXTERNAL"
+    ]
+  },
+  "flutter-google-play-internal-closed-open-production-staged-rollout": {
+    "title": "GOOGLE PLAY",
+    "subtitle": "Flutter 57 · Testing tracks and staged rollout",
+    "diagram": "pages",
+    "labels": [
+      "INTERNAL",
+      "CLOSED",
+      "PRODUCTION"
+    ]
+  },
+  "flutter-app-store-production-metadata-privacy-review-phased-release": {
+    "title": "APP STORE",
+    "subtitle": "Flutter 58 · Metadata, privacy, review, phased release",
+    "diagram": "checklist",
+    "labels": [
+      "METADATA",
+      "REVIEW",
+      "PHASED"
+    ]
+  },
+  "flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback": {
+    "title": "AFTER RELEASE",
+    "subtitle": "Flutter 59 · Force update, flags, patches and rollback",
+    "diagram": "cycle",
+    "labels": [
+      "MONITOR",
+      "PATCH",
+      "ROLLBACK"
+    ]
   }
 }

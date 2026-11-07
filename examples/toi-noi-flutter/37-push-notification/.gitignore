@@ -1,0 +1,20 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner sinh bằng `flutter create`, không commit (file cấu hình đang dạy nằm trong native-config/)
+/android/
+/ios/
+.metadata
+
+# Cấu hình Firebase thật và khoá APNs: KHÔNG BAO GIỜ commit (chỉ có bản .example)
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+*.p8
+*.jks
+*.keystore

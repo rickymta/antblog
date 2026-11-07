@@ -1,0 +1,3 @@
+// Cấu hình Release của flavor staging.
+#include "Release.xcconfig"
+#include "Flavors/staging.xcconfig"

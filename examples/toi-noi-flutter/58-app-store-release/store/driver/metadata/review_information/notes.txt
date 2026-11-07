@@ -1,0 +1,20 @@
+HƯỚNG DẪN DUYỆT APP TÀI XẾ TỚI NƠI
+
+1. Đăng nhập
+Nhập số điện thoại của tài khoản demo (ô Username) rồi bấm Tiếp tục. Mã OTP nằm ở ô Password, không gửi SMS. Tài khoản demo nằm trên hệ thống production, cô lập theo tài khoản; hồ sơ tài xế demo đã được duyệt sẵn và cuốc mô phỏng không tới khách thật. Tài khoản không hết hạn; nếu bạn xoá nó (mục 5), hệ thống tự tạo lại.
+
+2. Nhận một cuốc
+- Bấm Online. Với tài khoản demo, hệ thống có khách mô phỏng, tự tạo chuyến sau khoảng 15 giây kể từ lúc bạn Online. Bấm Nhận trong thời gian đếm ngược.
+- Nếu máy duyệt ở ngoài Việt Nam, cuốc mô phỏng vẫn hiện bình thường; không cần ở đúng khu vực.
+- Chuyến mẫu 5 km, cước 25.500 VND. Đi qua các bước tới "Hoàn thành".
+
+3. Vị trí nền (lý do dùng UIBackgroundModes location)
+Chỉ trong lúc có chuyến (từ khi nhận cuốc đến khi hoàn thành hoặc huỷ), app gửi vị trí của tài xế cho khách, kể cả khi tài xế chuyển sang ứng dụng dẫn đường. Khi Offline hoặc hết chuyến, app ngừng thu vị trí ngay. App khai quyền "Luôn cho phép" nhưng chỉ xin sau khi tài xế nhận cuốc đầu tiên, không xin ở màn hình đầu. Video quay màn hình luồng này nằm ở mục Attachment.
+
+4. Thanh toán
+App tài xế không thu tiền của người dùng và không bán nội dung số, nên không có In-App Purchase.
+
+5. Xoá tài khoản
+Hồ sơ > Xoá tài khoản, xác nhận bằng OTP. Dữ liệu mà pháp luật buộc phải giữ được giữ và app báo rõ trước khi xoá.
+
+Cần hỏi thêm, xin liên hệ email ở mục Contact.

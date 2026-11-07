@@ -1,0 +1,19 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner sinh bằng `flutter create`, không commit (file cấu hình đang dạy nằm trong native-config/)
+/android/
+/ios/
+.metadata
+
+# Bí mật không bao giờ vào repo: chỉ có .env.example (giá trị rỗng)
+.env
+*.p8
+*.keystore
+*.jks
+play-service-account*.json

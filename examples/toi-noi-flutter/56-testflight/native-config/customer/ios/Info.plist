@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- App KHÁCH, ios/Runner/Info.plist trước khi tải lên TestFlight.
+     Các khoá CFBundle* là phần template Flutter 3.47 sinh; ở đây chỉ giữ những
+     khoá bài 56 kiểm. Bản thật còn UIApplicationSceneManifest, storyboard... -->
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<!-- Xuất khẩu mã hoá: chỉ HTTPS qua thư viện hệ điều hành, không có thuật toán
+	     tự cài. Khai NO để mỗi lần tải lên không bị hỏi lại; câu trả lời đúng với
+	     app của bạn là việc của bạn, không phải của lab này. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tới Nơi dùng vị trí của bạn khi đang mở app để đặt ghim điểm đón và tìm tài xế gần nhất.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>PickupPrecise</key>
+		<string>Tới Nơi cần vị trí chính xác một lần để đặt ghim điểm đón đúng chỗ bạn đứng.</string>
+	</dict>
+
+	<!-- Push báo trạng thái chuyến (bài 37). Hộp thoại xin quyền thông báo không
+	     có khoá mô tả trong Info.plist; entitlement aps-environment nằm ở
+	     Runner.entitlements. remote-notification chỉ cần để app được đánh thức
+	     xử lý background notification. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+</dict>
+</plist>

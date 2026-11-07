@@ -1,0 +1,17 @@
+.dart_tool/
+build/
+pubspec.lock
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store
+
+# Runner sinh bằng `flutter create`, không commit (file cấu hình đang dạy nằm trong native-config/)
+/android/
+/ios/
+
+# Bí mật ký ứng dụng Android: không bao giờ commit. Mẫu `.example` thì được.
+# Cùng ba mẫu với android/.gitignore của template Flutter (không neo, khớp ở mọi thư mục).
+key.properties
+*.jks
+*.keystore

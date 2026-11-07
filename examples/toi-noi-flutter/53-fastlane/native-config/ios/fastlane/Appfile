@@ -1,0 +1,4 @@
+# Appfile iOS của Tới Nơi.
+# app_identifier không đặt ở đây: mỗi lane chọn theo app và flavor (xem Fastfile).
+# Không có apple_id: đăng nhập bằng App Store Connect API key, không bằng mật khẩu.
+team_id(ENV["APPLE_TEAM_ID"])

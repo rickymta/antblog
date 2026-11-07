@@ -1,0 +1,7 @@
+{
+  "FLAVOR": "prod",
+  "API_BASE_URL": "https://api.toinoi.example",
+  "LOG_HTTP": false,
+  "CONNECT_TIMEOUT_MS": 10000,
+  "RECEIVE_TIMEOUT_MS": 15000
+}

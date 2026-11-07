@@ -1,0 +1,9 @@
+# Mẫu minh hoạ. `shorebird init` sinh file thật, có app_id do dịch vụ cấp.
+# Theo tài liệu Shorebird, app_id không phải bí mật và file được commit; ở đây
+# là UUID giả. Một app_id mỗi flavor, vì một patch chỉ đi tới đúng app_id của nó.
+# Theo tài liệu, app_id cấp trên mặc định là flavor đầu tiên (dev).
+app_id: 00000000-0000-0000-0000-000000000001
+flavors:
+  dev: 00000000-0000-0000-0000-000000000001
+  staging: 00000000-0000-0000-0000-000000000002
+  prod: 00000000-0000-0000-0000-000000000003

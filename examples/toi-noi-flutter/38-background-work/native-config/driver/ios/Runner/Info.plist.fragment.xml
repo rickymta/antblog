@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chỉ gồm các khoá của bài này; dán vào <dict> của ios/Runner/Info.plist. -->
+<plist version="1.0">
+<dict>
+	<!-- Chỉ quyền "khi đang dùng": tài xế bắt đầu chia sẻ lúc app đang mở (nhận
+	     chuyến) rồi chuyển sang app dẫn đường, đúng kịch bản mà Apple mô tả cho
+	     background mode location. Không khai NSLocationAlways... -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tới Nơi dùng vị trí của bạn để ghép chuyến gần nhất. Trong chuyến đang chạy, app tiếp tục gửi vị trí khi bạn chuyển sang app dẫn đường để khách thấy xe đang tới. Ngoài chuyến, app không thu vị trí.</string>
+
+	<!-- location: nhận vị trí khi app ở nền. fetch: cần cho BGAppRefreshTask của workmanager. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+	</array>
+
+	<!-- Mọi identifier của BGTaskScheduler phải khai ở đây, trùng từng ký tự với
+	     uniqueName khi gọi registerPeriodicTask, nếu không iOS từ chối (lỗi
+	     BGTaskSchedulerErrorDomain code 3 theo tài liệu workmanager). -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>vn.toinoi.driver.purge-expired</string>
+	</array>
+</dict>
+</plist>

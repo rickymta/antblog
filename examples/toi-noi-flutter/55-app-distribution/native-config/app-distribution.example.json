@@ -1,0 +1,32 @@
+{
+  "firebaseProjectId": "toi-noi-example",
+  "testerGroups": {
+    "internal": { "alias": "qa-noi-bo", "displayName": "QA nội bộ" }
+  },
+  "apps": {
+    "customer": {
+      "staging": {
+        "android": {
+          "appId": "1:000000000000:android:FAKE-STAGING-REPLACE-ME",
+          "packageName": "vn.toinoi.customer.staging"
+        },
+        "ios": {
+          "appId": "1:000000000000:ios:FAKE-STAGING-REPLACE-ME",
+          "bundleId": "vn.toinoi.customer.staging"
+        }
+      }
+    },
+    "driver": {
+      "staging": {
+        "android": {
+          "appId": "1:000000000000:android:FAKE-DRIVER-STAGING-REPLACE-ME",
+          "packageName": "vn.toinoi.driver.staging"
+        },
+        "ios": {
+          "appId": "1:000000000000:ios:FAKE-DRIVER-STAGING-REPLACE-ME",
+          "bundleId": "vn.toinoi.driver.staging"
+        }
+      }
+    }
+  }
+}

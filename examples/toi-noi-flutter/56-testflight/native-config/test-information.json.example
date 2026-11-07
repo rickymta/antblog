@@ -1,0 +1,12 @@
+{
+  "betaAppDescription": "Tới Nơi Staging: bản thử của ứng dụng đặt xe. Dữ liệu là dữ liệu thử, chuyến đi không chạy thật và không thu tiền.",
+  "feedbackEmail": "<email nhận phản hồi, ví dụ beta@toinoi.example>",
+  "contactFirstName": "<tên người liên hệ cho App Review>",
+  "contactLastName": "<họ người liên hệ>",
+  "contactEmail": "<email liên hệ>",
+  "contactPhone": "<số điện thoại quốc tế, bắt đầu bằng +>",
+  "requiresSignIn": true,
+  "demoAccountName": "<tài khoản demo, tạo riêng cho người review>",
+  "demoAccountPassword": "<điền trực tiếp trong App Store Connect, không commit>",
+  "notes": "Đăng nhập bằng tài khoản demo ở trên. Tài khoản luôn hoạt động, không hết hạn. Đặt một chuyến thử: app khách tìm tài xế, tài khoản tài xế demo nhận chuyến trong app tài xế."
+}

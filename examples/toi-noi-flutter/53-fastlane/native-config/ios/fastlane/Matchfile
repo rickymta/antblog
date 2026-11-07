@@ -1,0 +1,18 @@
+# Matchfile của Tới Nơi: chứng chỉ và profile nằm trong một repo riêng, mã hoá
+# bằng MATCH_PASSWORD. Mặc định chỉ đọc; chỉ lane sync_certs trên máy quản trị
+# mới truyền readonly: false.
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+type("appstore")
+readonly(true)
+
+# Xác thực vào repo match trên CI: HTTPS dùng git_basic_authorization (base64 của
+# "tên:token"), deploy key dùng git_private_key. Một trong hai; máy cá nhân có thể
+# dùng SSH hoặc credential helper sẵn có nên để trống.
+git_basic_authorization(ENV["MATCH_GIT_BASIC_AUTHORIZATION"])
+git_private_key(ENV["MATCH_GIT_PRIVATE_KEY"])
+
+# Lưu trên S3 thay cho git: đổi storage_mode và khai bucket, vẫn mã hoá bằng
+# MATCH_PASSWORD. Thông tin truy cập S3 đưa vào kho secret của CI.
+#   storage_mode("s3")
+#   s3_bucket("toinoi-signing.example")

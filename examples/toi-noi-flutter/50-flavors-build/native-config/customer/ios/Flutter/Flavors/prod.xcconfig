@@ -1,0 +1,5 @@
+// Giá trị riêng của flavor prod. Được #include từ Debug-prod, Profile-prod và Release-prod.
+TN_FLAVOR = prod
+PRODUCT_BUNDLE_IDENTIFIER = vn.toinoi.customer
+APP_DISPLAY_NAME = Tới Nơi
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon

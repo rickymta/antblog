@@ -1,0 +1,59 @@
+{
+  "tracking": false,
+  "dataTypes": [
+    {
+      "type": "NSPrivacyCollectedDataTypeName",
+      "linked": true,
+      "tracking": false,
+      "purposes": [
+        "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+      ],
+      "source": "app"
+    },
+    {
+      "type": "NSPrivacyCollectedDataTypePhoneNumber",
+      "linked": true,
+      "tracking": false,
+      "purposes": [
+        "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+      ],
+      "source": "app"
+    },
+    {
+      "type": "NSPrivacyCollectedDataTypePreciseLocation",
+      "linked": true,
+      "tracking": false,
+      "purposes": [
+        "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+      ],
+      "source": "app"
+    },
+    {
+      "type": "NSPrivacyCollectedDataTypeUserID",
+      "linked": true,
+      "tracking": false,
+      "purposes": [
+        "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+      ],
+      "source": "app"
+    },
+    {
+      "type": "NSPrivacyCollectedDataTypeDeviceID",
+      "linked": true,
+      "tracking": false,
+      "purposes": [
+        "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+      ],
+      "source": "sdk:firebase_messaging"
+    },
+    {
+      "type": "NSPrivacyCollectedDataTypeCrashData",
+      "linked": false,
+      "tracking": false,
+      "purposes": [
+        "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+      ],
+      "source": "sdk:firebase_crashlytics"
+    }
+  ]
+}

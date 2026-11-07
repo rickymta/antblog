@@ -1,0 +1,5 @@
+// Giá trị riêng của flavor staging. Được #include từ Debug-staging, Profile-staging và Release-staging.
+TN_FLAVOR = staging
+PRODUCT_BUNDLE_IDENTIFIER = vn.toinoi.driver.staging
+APP_DISPLAY_NAME = Tài xế Stg
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon-staging

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chỉ gồm các khoá của bài này; dán vào <dict> của ios/Runner/Info.plist.
+     Cố ý không có UIBackgroundModes, BGTaskSchedulerPermittedIdentifiers hay
+     NSLocationAlways...: app khách chỉ cần vị trí khi đang mở. -->
+<plist version="1.0">
+<dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tới Nơi dùng vị trí của bạn để gợi ý điểm đón khi bạn đặt xe.</string>
+</dict>
+</plist>

@@ -1,0 +1,30 @@
+{
+  "source": "docs/flutter-master-curriculum.md, mục 3.2 (ID của ba flavor)",
+  "flavors": ["dev", "staging", "prod"],
+  "apps": {
+    "customer": {
+      "ids": {
+        "dev": "vn.toinoi.customer.dev",
+        "staging": "vn.toinoi.customer.staging",
+        "prod": "vn.toinoi.customer"
+      },
+      "displayNames": {
+        "dev": "Tới Nơi Dev",
+        "staging": "Tới Nơi Stg",
+        "prod": "Tới Nơi"
+      }
+    },
+    "driver": {
+      "ids": {
+        "dev": "vn.toinoi.driver.dev",
+        "staging": "vn.toinoi.driver.staging",
+        "prod": "vn.toinoi.driver"
+      },
+      "displayNames": {
+        "dev": "Tài xế Dev",
+        "staging": "Tài xế Stg",
+        "prod": "Tới Nơi Tài xế"
+      }
+    }
+  }
+}

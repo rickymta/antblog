@@ -1,0 +1,84 @@
+# Lane đẩy metadata và gửi duyệt App Store của Tới Nơi. Ghép vào Fastfile của
+# bài 53 (hoặc dùng làm Fastfile riêng) trong thư mục ios/ của app Flutter.
+#
+#   bundle exec fastlane ios listing app:customer
+#   bundle exec fastlane ios submit app:customer build_number:42 first_release:true confirm:yes
+#
+# Bố cục thư mục (đường dẫn tham số của action tính từ thư mục chứa fastlane/):
+#   <gốc app>/store/<app>/metadata/        metadata cho deliver (vi/, review_information/)
+#   <gốc app>/store/<app>/screenshots/vi/  ảnh chụp, thiết bị suy ra từ cỡ ảnh
+#
+# CHƯA được chạy thật: repository không có tài khoản Apple Developer và máy
+# kiểm không cài fastlane. Bí mật chỉ đọc từ ENV, như bài 53.
+
+default_platform(:ios)
+
+APP_IDS = {
+  "customer" => "vn.toinoi.customer",
+  "driver" => "vn.toinoi.driver",
+}.freeze
+
+def env!(name)
+  value = ENV[name].to_s.strip
+  UI.user_error!("Thiếu biến môi trường #{name}") if value.empty?
+  value
+end
+
+def bundle_id!(options)
+  APP_IDS[options[:app].to_s] || UI.user_error!("app phải là customer hoặc driver")
+end
+
+def asc_api_key
+  app_store_connect_api_key(
+    key_id: env!("ASC_KEY_ID"),
+    issuer_id: env!("ASC_ISSUER_ID"),
+    key_content: env!("ASC_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house: false,
+  )
+end
+
+platform :ios do
+  desc "Đẩy metadata và ảnh chụp lên bản đang soạn. Không tải IPA, không gửi duyệt."
+  lane :listing do |options|
+    app = options[:app].to_s
+    upload_to_app_store(
+      api_key: asc_api_key,
+      app_identifier: bundle_id!(options),
+      metadata_path: "../store/#{app}/metadata",
+      screenshots_path: "../store/#{app}/screenshots",
+      overwrite_screenshots: true,
+      skip_binary_upload: true,
+      submit_for_review: false,
+      # Với api_key, precheck không kiểm được mục In-App Purchase và deliver ném lỗi
+      # nếu giữ mặc định true; app này không có IAP.
+      precheck_include_in_app_purchases: false,
+      force: true,
+    )
+  end
+
+  desc "Chọn build đã có trên App Store Connect và gửi duyệt. Cần confirm:yes."
+  lane :submit do |options|
+    app = options[:app].to_s
+    UI.user_error!("Gửi duyệt là quyết định của người phát hành: thêm confirm:yes") unless options[:confirm].to_s == "yes"
+    build_number = options[:build_number].to_s
+    UI.user_error!("build_number phải là số nguyên dương") unless build_number =~ /\A[1-9][0-9]*\z/
+    # Phased release chỉ áp cho bản cập nhật; lần đầu ta tự bấm phát hành.
+    first_release = options[:first_release].to_s == "true"
+    upload_to_app_store(
+      api_key: asc_api_key,
+      app_identifier: bundle_id!(options),
+      build_number: build_number,
+      # Không bỏ qua metadata (tham số skip_metadata): khi bỏ qua, deliver return
+      # sớm và automatic_release, phased_release bị bỏ qua mà không báo.
+      metadata_path: "../store/#{app}/metadata",
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      automatic_release: !first_release,
+      phased_release: !first_release,
+      precheck_include_in_app_purchases: false,
+      force: true,
+    )
+  end
+end

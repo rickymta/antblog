@@ -1,0 +1,24 @@
+# MẪU: hai bước dán vào job `android` của release-staging.yml (bài 54), ngay
+# sau bước "Build AAB". Workflow bài 54 chỉ dựng AAB cho Google Play (bài 57);
+# App Distribution nhận APK, không cần liên kết Google Play. Cùng keystore,
+# cùng build number, cùng flavor staging.
+- name: Build APK
+  run: |
+    flutter build apk --release --flavor staging \
+      --dart-define-from-file=config/staging.json \
+      --build-number="$BUILD_NUMBER" \
+      --obfuscate --split-debug-info=build/symbols/android-apk
+- name: Upload APK
+  uses: actions/upload-artifact@v7.0.2
+  with:
+    name: toi-noi-customer-staging-apk-${{ needs.prepare.outputs.build_number }}
+    path: apps/customer/build/app/outputs/flutter-apk/app-staging-release.apk
+    if-no-files-found: error
+    retention-days: 14
+- name: Upload Dart symbols (APK)
+  uses: actions/upload-artifact@v7.0.2
+  with:
+    name: toi-noi-customer-staging-apk-symbols-${{ needs.prepare.outputs.build_number }}
+    path: apps/customer/build/symbols/android-apk/
+    if-no-files-found: error
+    retention-days: 14
