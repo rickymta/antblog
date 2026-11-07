@@ -1,0 +1,43 @@
+$ go -C examples/toi-noi-location/go test -race -count=1 -v -run TestBangDiemXau|TestSkew|TestChuoiNhay ./internal/validate
+=== RUN   TestBangDiemXau
+=== RUN   TestBangDiemXau/điểm_tốt
+=== RUN   TestBangDiemXau/toạ_độ_ngoài_miền
+=== RUN   TestBangDiemXau/null_island
+=== RUN   TestBangDiemXau/giờ_ở_tương_lai
+=== RUN   TestBangDiemXau/quá_cũ
+=== RUN   TestBangDiemXau/đến_sau_điểm_mới_hơn
+=== RUN   TestBangDiemXau/trùng_giờ_trùng_seq
+=== RUN   TestBangDiemXau/seq_về_0_nhưng_giờ_mới_(app_khởi_động_lại)
+=== RUN   TestBangDiemXau/đồng_hồ_nhanh_90_s:_hiệu_chỉnh_và_gắn_cờ
+=== RUN   TestBangDiemXau/accuracy_250_m
+=== RUN   TestBangDiemXau/app_khai_báo_giả_lập
+=== RUN   TestBangDiemXau/tốc_độ_khai_báo_80_m/s
+=== RUN   TestBangDiemXau/nhảy_3_km_trong_1_s
+=== RUN   TestBangDiemXau/nhảy_200_m_trong_1_s:_trong_ngưỡng_teleport_nhưng_quá_nhanh
+=== RUN   TestBangDiemXau/nhảy_30_m_trong_1_s_(jitter,_trong_sai_số)
+=== RUN   TestBangDiemXau/khai_báo_đứng_yên_nhưng_đã_đi_100_m_trong_5_s
+--- PASS: TestBangDiemXau (0.00s)
+    --- PASS: TestBangDiemXau/điểm_tốt (0.00s)
+    --- PASS: TestBangDiemXau/toạ_độ_ngoài_miền (0.00s)
+    --- PASS: TestBangDiemXau/null_island (0.00s)
+    --- PASS: TestBangDiemXau/giờ_ở_tương_lai (0.00s)
+    --- PASS: TestBangDiemXau/quá_cũ (0.00s)
+    --- PASS: TestBangDiemXau/đến_sau_điểm_mới_hơn (0.00s)
+    --- PASS: TestBangDiemXau/trùng_giờ_trùng_seq (0.00s)
+    --- PASS: TestBangDiemXau/seq_về_0_nhưng_giờ_mới_(app_khởi_động_lại) (0.00s)
+    --- PASS: TestBangDiemXau/đồng_hồ_nhanh_90_s:_hiệu_chỉnh_và_gắn_cờ (0.00s)
+    --- PASS: TestBangDiemXau/accuracy_250_m (0.00s)
+    --- PASS: TestBangDiemXau/app_khai_báo_giả_lập (0.00s)
+    --- PASS: TestBangDiemXau/tốc_độ_khai_báo_80_m/s (0.00s)
+    --- PASS: TestBangDiemXau/nhảy_3_km_trong_1_s (0.00s)
+    --- PASS: TestBangDiemXau/nhảy_200_m_trong_1_s:_trong_ngưỡng_teleport_nhưng_quá_nhanh (0.00s)
+    --- PASS: TestBangDiemXau/nhảy_30_m_trong_1_s_(jitter,_trong_sai_số) (0.00s)
+    --- PASS: TestBangDiemXau/khai_báo_đứng_yên_nhưng_đã_đi_100_m_trong_5_s (0.00s)
+=== RUN   TestSkewChiHieuChinhKhiVuotNguong
+--- PASS: TestSkewChiHieuChinhKhiVuotNguong (0.00s)
+=== RUN   TestChuoiNhayRoiVeNoiGocGanCoCaHaiLan
+--- PASS: TestChuoiNhayRoiVeNoiGocGanCoCaHaiLan (0.00s)
+PASS
+ok  	toinoi/location/internal/validate	1.281s
+(exit=0)
+

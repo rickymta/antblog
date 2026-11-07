@@ -1,0 +1,86 @@
+$ examples/toi-noi-location/go/bin/history-writer demo --out examples/toi-noi-location/go/out/history --id-level pseudonym
+mức định danh: pseudonym | 2000 tài xế × 30 phút, điểm mỗi 4 giây, seed 1
+đầu vào: 900000 điểm, 53237116 byte protobuf (event)
+không giảm mẫu: 900000 dòng, 11385353 byte Parquet (12.7 byte/dòng)
+giảm mẫu:       239990 dòng (giữ 26.7%), 4071570 byte Parquet (17.0 byte/dòng), nhỏ hơn 2.8 lần so với không giảm mẫu
+lý do giữ: first=2000 heartbeat=1876 move=152655 turn=83459
+sai số vẽ lại quỹ đạo từ điểm đã giữ (khoảng cách điểm bị bỏ tới đoạn nối hai điểm giữ): p50=5.0 m p95=15.3 m p99=20.9 m max=44.7 m (655220 điểm bị bỏ)
+cây thư mục đầu ra:
+  date=2026-11-06/city=CT/part-1793972456393-0001.parquet  329423 byte
+  date=2026-11-06/city=DN/part-1793972456467-0002.parquet  412738 byte
+  date=2026-11-06/city=HCM/part-1793972456743-0003.parquet  1618533 byte
+  date=2026-11-06/city=HN/part-1793972457012-0004.parquet  1236071 byte
+  date=2026-11-06/city=HP/part-1793972457084-0005.parquet  280451 byte
+  date=2026-11-06/city=NT/part-1793972457112-0006.parquet  194354 byte
+
+retention: đã ghi 45 ngày (50 tài xế × 10 phút mỗi ngày) vào examples/toi-noi-location/go/out/history-retention, 86966 dòng
+dry-run, giữ 30 ngày tính tới 2026-11-06: sẽ xoá 15 phân vùng ngày, cũ nhất 2026-09-23, mới nhất bị xoá 2026-10-07
+đã xoá 15 phân vùng, 90 file, 801438 byte; còn 30 phân vùng ngày
+
+$ examples/toi-noi-location/go/bin/history-writer inspect --out examples/toi-noi-location/go/out/history
+schema (file đầu tiên):
+  event_time     NOT NULL TIMESTAMP(isAdjustedToUTC=true,unit=MILLIS)
+  received_time  NOT NULL TIMESTAMP(isAdjustedToUTC=true,unit=MILLIS)
+  driver_ref     NULLABLE STRING
+  id_level       NOT NULL INT(32,true)
+  trip_id        NULLABLE STRING
+  lat_e7         NOT NULL INT(32,true)
+  lng_e7         NOT NULL INT(32,true)
+  accuracy_dm    NULLABLE INT(32,true)
+  speed_dmps     NULLABLE INT(32,true)
+  heading_ddeg   NULLABLE INT(32,true)
+  seq            NOT NULL INT(64,true)
+  flags          NOT NULL INT(32,true)
+  sample_reason  NOT NULL STRING
+metadata: toinoi.schema_version=1 toinoi.id_level=1
+driver_ref của hai dòng đầu: 015e3d6bec00c070, 015e3d6bec00c070 (id_level=1)
+date=2026-11-06/city=CT      rows=19325    bytes=329423
+date=2026-11-06/city=DN      rows=24341    bytes=412738
+date=2026-11-06/city=HCM     rows=95761    bytes=1618533
+date=2026-11-06/city=HN      rows=73077    bytes=1236071
+date=2026-11-06/city=HP      rows=16356    bytes=280451
+date=2026-11-06/city=NT      rows=11130    bytes=194354
+tổng: 239990 dòng trong 6 phân vùng
+
+$ examples/toi-noi-location/go/bin/history-writer demo --out examples/toi-noi-location/go/out/history-raw --id-level raw --drivers 300 --minutes 5 --retention-span-days 0   # chỉ để so sánh mức định danh
+mức định danh: raw | 300 tài xế × 5 phút, điểm mỗi 4 giây, seed 1
+không giảm mẫu: 22500 dòng, 307777 byte Parquet (13.7 byte/dòng)
+giảm mẫu:       6459 dòng (giữ 28.7%), 130226 byte Parquet (20.2 byte/dòng), nhỏ hơn 2.4 lần so với không giảm mẫu
+driver_ref của hai dòng đầu: DR-00009, DR-00009 (id_level=0)
+tổng: 6459 dòng trong 6 phân vùng
+
+$ examples/toi-noi-location/go/bin/history-writer demo --out examples/toi-noi-location/go/out/history-coarse --id-level coarse --drivers 300 --minutes 5 --retention-span-days 0   # chỉ để so sánh mức định danh
+mức định danh: coarse | 300 tài xế × 5 phút, điểm mỗi 4 giây, seed 1
+không giảm mẫu: 22500 dòng, 147434 byte Parquet (6.6 byte/dòng)
+giảm mẫu:       6459 dòng (giữ 28.7%), 80655 byte Parquet (12.5 byte/dòng), nhỏ hơn 1.8 lần so với không giảm mẫu
+driver_ref của hai dòng đầu: NULL, NULL (id_level=2)
+tổng: 6459 dòng trong 6 phân vùng
+
+$ examples/toi-noi-location/go/bin/history-writer retention --out examples/toi-noi-location/go/out/history-retention --days 30 --dry-run --now 2026-11-06T12:00:00+07:00   # sau khi demo đã xoá 15 phân vùng, còn lại 30 ngày: không còn gì để xoá
+tổng: 0 phân vùng, 0 file, 0 byte (giữ 30 ngày tính tới 2026-11-06)
+
+$ examples/toi-noi-location/go/bin/history-writer retention --out examples/toi-noi-location/go/out/history-retention --days 7 --now 2026-11-06T12:00:00+07:00
+ĐÃ XOÁ date=2026-10-08 files=6 bytes=53053
+ĐÃ XOÁ date=2026-10-09 files=6 bytes=54318
+ĐÃ XOÁ date=2026-10-10 files=6 bytes=54619
+ĐÃ XOÁ date=2026-10-11 files=6 bytes=52696
+ĐÃ XOÁ date=2026-10-12 files=6 bytes=53282
+ĐÃ XOÁ date=2026-10-13 files=6 bytes=51902
+ĐÃ XOÁ date=2026-10-14 files=6 bytes=53345
+ĐÃ XOÁ date=2026-10-15 files=6 bytes=53380
+ĐÃ XOÁ date=2026-10-16 files=6 bytes=54693
+ĐÃ XOÁ date=2026-10-17 files=6 bytes=53775
+ĐÃ XOÁ date=2026-10-18 files=6 bytes=53961
+ĐÃ XOÁ date=2026-10-19 files=6 bytes=54448
+ĐÃ XOÁ date=2026-10-20 files=6 bytes=54380
+ĐÃ XOÁ date=2026-10-21 files=6 bytes=52978
+ĐÃ XOÁ date=2026-10-22 files=6 bytes=54469
+ĐÃ XOÁ date=2026-10-23 files=6 bytes=53852
+ĐÃ XOÁ date=2026-10-24 files=6 bytes=52854
+ĐÃ XOÁ date=2026-10-25 files=6 bytes=55401
+ĐÃ XOÁ date=2026-10-26 files=6 bytes=54127
+ĐÃ XOÁ date=2026-10-27 files=6 bytes=52559
+ĐÃ XOÁ date=2026-10-28 files=6 bytes=51813
+ĐÃ XOÁ date=2026-10-29 files=6 bytes=52909
+ĐÃ XOÁ date=2026-10-30 files=6 bytes=52820
+tổng: 23 phân vùng, 138 file, 1231634 byte (giữ 7 ngày tính tới 2026-11-06)

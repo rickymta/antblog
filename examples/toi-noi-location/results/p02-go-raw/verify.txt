@@ -1,0 +1,39 @@
+23:29  up 35 days, 15:12, 1 user, load averages: 137.16 102.17 86.77
+== gofmt
+== go vet
+== go test -race
+?   	toinoi/location/cmd/history-writer	[no test files]
+?   	toinoi/location/cmd/kafka_lab	[no test files]
+?   	toinoi/location/cmd/loadgen	[no test files]
+ok  	toinoi/location/cmd/loc11_nhap_mon	1.318s
+?   	toinoi/location/cmd/loc13_backpressure	[no test files]
+?   	toinoi/location/cmd/location-ingest	[no test files]
+?   	toinoi/location/cmd/tracking-hub	[no test files]
+?   	toinoi/location/gen/location/v1	[no test files]
+ok  	toinoi/location/internal/backpressure	2.323s
+ok  	toinoi/location/internal/geo	1.665s
+ok  	toinoi/location/internal/history	2.595s
+ok  	toinoi/location/internal/hub	2.105s
+ok  	toinoi/location/internal/ingest	3.046s
+ok  	toinoi/location/internal/kafkax	2.181s
+ok  	toinoi/location/internal/labauth	1.865s
+ok  	toinoi/location/internal/sim	3.233s
+?   	toinoi/location/internal/stat	[no test files]
+ok  	toinoi/location/internal/validate	2.716s
+== LOC-11: race detector bắt được lỗi, bản sửa thì sạch
+== LOC-13: thí nghiệm tắt êm và hàng đợi (rút gọn)
+D	1s	1003	1840	18060	100	Closed
+D	5s	5002	9600	10300	100	Closed
+D	15s	10329	20000	0	0	Closed
+S	phase	offered	delivered	lost	stale_delivered	stale_pct	age_p50_ms	age_p99_ms	age_max_ms	max_depth
+S	normal	12562	12500	0	0	0.0	8	13	14	26
+S	slow	37688	5925	7825	300	5.1	1831	4240	4182	24800
+S	recover	18875	32600	9374	300	0.9	665	4036	4014	13400
+== LOC-20: giảm mẫu, Parquet, retention (rút gọn)
+không giảm mẫu: 22500 dòng, 310506 byte Parquet (13.8 byte/dòng)
+giảm mẫu:       6459 dòng (giữ 28.7%), 133185 byte Parquet (20.6 byte/dòng), nhỏ hơn 2.3 lần so với không giảm mẫu
+sai số vẽ lại quỹ đạo từ điểm đã giữ (khoảng cách điểm bị bỏ tới đoạn nối hai điểm giữ): p50=5.0 m p95=15.4 m p99=21.3 m max=37.0 m (15340 điểm bị bỏ)
+đã xoá 10 phân vùng, 60 file, 534064 byte; còn 30 phân vùng ngày
+== LOC-12/14: ingest (sink discard) + loadgen nhỏ, có điểm xấu
+STEP	150	150	50	0.39	6.10	12.80	19.14	0	1	7.1	27.5	307	6	0	0	2	28.2
+PASS

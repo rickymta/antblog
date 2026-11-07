@@ -1,0 +1,26 @@
+[package]
+name = "location-store"
+description = "Kho vị trí mới nhất: tiêu thụ location.updates.v1, bộ nhớ theo ô H3, bản sao Redis, giảm mẫu sang lịch sử"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+geo-core.workspace = true
+prost.workspace = true
+rdkafka.workspace = true
+redis.workspace = true
+rustc-hash.workspace = true
+thiserror.workspace = true
+
+[build-dependencies]
+prost-build.workspace = true
+protox.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+
+[lints]
+workspace = true

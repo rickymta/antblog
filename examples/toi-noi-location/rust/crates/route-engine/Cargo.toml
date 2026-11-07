@@ -1,0 +1,26 @@
+[package]
+name = "route-engine"
+description = "Engine định tuyến đường bộ để học: Dijkstra, A*, ALT, đồ thị theo cạnh, Contraction Hierarchies, ma trận many-to-many, Customizable CH"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+geo-core.workspace = true
+road-graph.workspace = true
+rayon.workspace = true
+rustc-hash.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+postcard.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+petgraph.workspace = true
+fast_paths.workspace = true
+
+[lints]
+workspace = true

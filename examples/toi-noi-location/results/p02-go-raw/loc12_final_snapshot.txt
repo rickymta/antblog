@@ -1,0 +1,26 @@
+# Đối soát bộ đếm sau lần chạy A (LOC-12): 25.000 kết nối, 6.250 điểm/s, lô 3, 60 giây, Kafka thật.
+# Binary ingest là bản dựng của các lần đo LOC-12/13, chưa có khoá `buffered` trong `kafka`.
+$ ingest: location-ingest --sink kafka --listen '127.0.0.1:8081,[::1]:8083'
+$ loadgen: loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 60s --report-every 10s
+$ uptime (trước loadgen / sau khi tắt ingest)
+22:51  up 35 days, 14:34, 1 user, load averages: 34.38 80.82 136.65
+22:52  up 35 days, 14:36, 1 user, load averages: 50.44 71.91 127.18
+
+# dòng STEP của loadgen
+STEP	6250	6252	2084	0.36	8.62	19.48	94.70	0	19	628.7	1016.8	25012	264	0	0	25	706.9
+
+# curl /debug/stats ngay khi loadgen xong, rồi sau 1, 3, 8, 18 giây (mỗi dòng: giờ, rồi queue/kafka rút gọn + taken - delivered - failed)
+# 22:52:39.879
+{"queue": {"depth": 0, "offered": 393870, "coalesced": 0, "dropped": 0, "evicted": 0, "taken": 393870}, "kafka": {"delivered": 390198, "failed": 0}, "taken_minus_delivered_failed": 3672}
+# 22:52:41.012
+{"queue": {"depth": 0, "offered": 394002, "coalesced": 0, "dropped": 0, "evicted": 0, "taken": 394002}, "kafka": {"delivered": 394002, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 22:52:43.099
+{"queue": {"depth": 0, "offered": 394002, "coalesced": 0, "dropped": 0, "evicted": 0, "taken": 394002}, "kafka": {"delivered": 394002, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 22:52:48.186
+{"queue": {"depth": 0, "offered": 394002, "coalesced": 0, "dropped": 0, "evicted": 0, "taken": 394002}, "kafka": {"delivered": 394002, "failed": 0}, "taken_minus_delivered_failed": 0}
+# 22:52:58.338
+{"queue": {"depth": 0, "offered": 394002, "coalesced": 0, "dropped": 0, "evicted": 0, "taken": 394002}, "kafka": {"delivered": 394002, "failed": 0}, "taken_minus_delivered_failed": 0}
+
+# SIGTERM: ingest ngừng nhận kết nối, xả hàng đợi, Flush Kafka rồi in bộ đếm cuối (dòng cuối stdout, queue và kafka)
+{"queue": {"depth": 0, "max_depth": 435, "offered": 394002, "coalesced": 0, "stale_ignored": 0, "dropped": 0, "evicted": 0, "taken": 394002, "shutdown_dropped": 0}, "kafka": {"delivered": 394002, "failed": 0}, "conns_open": 0}
+taken - delivered - failed = 0

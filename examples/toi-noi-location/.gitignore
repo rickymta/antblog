@@ -1,0 +1,15 @@
+data/*.pbf
+data/*.bin
+rust/target/
+python/.venv/
+python/__pycache__/
+python/artifacts/
+**/__pycache__/
+go/bin/
+*.parquet
+*.onnx
+!fixtures/**
+go/out/
+dotnet/**/bin/
+dotnet/**/obj/
+data/ch-cache/

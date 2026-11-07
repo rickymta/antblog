@@ -1,0 +1,105 @@
+// Hợp đồng vị trí của Tới Nơi, dùng chung cho Go, Rust (prost) và C#.
+// Quy ước số:
+//   toạ độ  : độ × 10^7, sint32 (E7). Một đơn vị ≈ 1,1 cm ở xích đạo.
+//   thời gian: epoch mili giây UTC, int64.
+//   độ chính xác: đề-xi-mét (0,1 m). Tốc độ: đề-xi-mét/giây. Hướng: đề-xi-độ (0..3599).
+// Không đổi ý nghĩa hay số thứ tự field đã có; chỉ thêm field mới (kiến trúc §6.6).
+syntax = "proto3";
+
+package toinoi.location.v1;
+
+option go_package = "toinoi/location/gen/location/v1;locationv1";
+option csharp_namespace = "ToiNoi.Location.V1";
+option java_package = "vn.toinoi.location.v1";
+
+// Một điểm GPS do app tài xế lấy mẫu.
+message GpsPoint {
+  sint32 lat_e7 = 1;
+  sint32 lng_e7 = 2;
+  // Giờ của điện thoại lúc lấy mẫu. Có thể lệch so với giờ server (xem validate).
+  int64 device_time_ms = 3;
+  // Số thứ tự tăng dần do app gán, theo từng tài xế. Dùng để phát hiện điểm cũ đến sau.
+  uint32 seq = 4;
+  // Sai số ngang 68% mà hệ điều hành báo. Vắng mặt nghĩa là app không biết.
+  optional uint32 accuracy_dm = 5;
+  optional uint32 speed_dmps = 6;
+  optional uint32 heading_ddeg = 7;
+  // Android isMock / iOS simulated: app tự khai. Chỉ là tín hiệu, không phải kết luận.
+  bool is_mock = 8;
+}
+
+// App gửi theo lô qua WebSocket (binary frame, một GpsBatch mỗi frame).
+message GpsBatch {
+  // Phải khớp với tài xế trong token; server từ chối nếu khác.
+  string driver_id = 1;
+  // Tăng dần theo kết nối/app, server trả lại trong BatchAck để app biết lô nào đã nhận.
+  uint64 batch_seq = 2;
+  // Giờ điện thoại lúc gửi lô. Server so với giờ nhận để ước lượng lệch đồng hồ.
+  int64 sent_at_ms = 3;
+  repeated GpsPoint points = 4;
+}
+
+// Server trả cho mỗi lô, để app xoá khỏi bộ đệm.
+message BatchAck {
+  uint64 batch_seq = 1;
+  uint32 accepted = 2;   // điểm đi tiếp (có thể kèm cờ)
+  uint32 rejected = 3;   // điểm bị loại: sai hình thức, quá cũ, đến sau điểm mới hơn
+  uint32 flagged = 4;    // trong số accepted, bao nhiêu điểm mang cờ
+  int64 server_time_ms = 5;
+}
+
+// Cờ gắn vào điểm. Là bit mask trong DriverLocationUpdated.flags.
+// Cờ chỉ nói «đáng nghi», không kết luận gian lận; Fraud service (Python) quyết định.
+enum PointFlag {
+  POINT_FLAG_UNSPECIFIED = 0;
+  POINT_FLAG_CLOCK_SKEW = 1;        // đồng hồ điện thoại lệch quá ngưỡng, giờ đã được hiệu chỉnh
+  POINT_FLAG_POOR_ACCURACY = 2;     // accuracy lớn hơn ngưỡng: đừng dùng để bám đường
+  POINT_FLAG_SPEED_IMPLAUSIBLE = 4; // tốc độ khai báo hoặc suy ra vượt ngưỡng phương tiện
+  POINT_FLAG_TELEPORT = 8;          // nhảy xa trong thời gian quá ngắn
+  POINT_FLAG_MOCK_REPORTED = 16;    // app khai báo vị trí giả lập
+  POINT_FLAG_SPEED_MISMATCH = 32;   // tốc độ khai báo lệch hẳn tốc độ suy ra từ hai điểm
+}
+
+// Sự kiện trên topic location.updates.v1, key = driver_id, một record mỗi điểm.
+// Telemetry tạm thời: được phép coalesce hoặc bỏ khi quá tải (kiến trúc §10).
+message DriverLocationUpdated {
+  string event_id = 1;
+  int64 occurred_at_ms = 2;   // giờ lấy mẫu, đã quy về đồng hồ server nếu có hiệu chỉnh
+  int64 received_at_ms = 3;   // giờ location-ingest nhận lô
+  string producer = 4;        // ví dụ "location-ingest"
+  uint32 schema_version = 5;  // 1
+  string trace_id = 6;        // có thể rỗng
+
+  string driver_id = 7;
+  string city_code = 8;       // từ token, ví dụ "HCM"
+  string trip_id = 9;         // rỗng khi tài xế chưa có chuyến
+
+  GpsPoint point = 10;        // device_time_ms giữ nguyên giá trị app gửi
+  uint32 flags = 11;          // OR các PointFlag
+  // Độ lệch đồng hồ ước lượng (server − thiết bị), mili giây; 0 nếu nằm trong ngưỡng.
+  int64 clock_skew_ms = 12;
+}
+
+// Hub gửi cho app khách sau khi tài xế đã được gán. Một binary frame mỗi message.
+// Hợp đồng nội suy xem tracking-contract.md.
+message TrackingUpdate {
+  string trip_id = 1;
+  sint32 lat_e7 = 2;
+  sint32 lng_e7 = 3;
+  int64 sample_time_ms = 4;   // thời điểm điểm này đúng với thực tế (giờ server)
+  int64 server_time_ms = 5;   // lúc hub gửi
+  uint32 seq = 6;             // seq của điểm, tăng dần
+  optional uint32 speed_dmps = 7;
+  optional uint32 heading_ddeg = 8;
+  optional uint32 accuracy_dm = 9;
+  // Vị trí dọc tuyến đã bám đường (mét từ đầu route), có khi map matching đã chạy. Lab hiện để trống.
+  optional uint32 route_offset_m = 10;
+  // Số điểm hub đã gộp bỏ cho client này kể từ update trước (client chậm).
+  uint32 skipped_since_last = 11;
+}
+
+// App khách gửi sau mỗi TrackingUpdate đã xử lý xong. Hub chỉ cho tối đa 2 khung chưa ack bay trên đường;
+// client chậm không ack thì hub giữ lại điểm mới nhất và gộp, thay vì để TCP gom khung cũ.
+message TrackingAck {
+  uint32 seq = 1;  // seq của khung vừa xử lý (chỉ để chẩn đoán; hub đếm theo số khung)
+}

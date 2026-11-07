@@ -1,0 +1,23 @@
+[package]
+name = "driver-store"
+description = "Bốn cách tìm tài xế gần nhất: quét toàn bộ, R-tree, ô H3, Redis GEO"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+# Redis GEO cần server; bật bằng feature để crate dùng được khi không có Redis
+redis = ["dep:redis"]
+
+[dependencies]
+geo-core.workspace = true
+redis = { workspace = true, optional = true }
+rstar.workspace = true
+rustc-hash.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

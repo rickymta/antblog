@@ -1,0 +1,6 @@
+[project]
+name = "loc50"
+version = "0.1.0"
+description = "LOC-50: OR-Tools làm mốc chất lượng offline cho nhiều điểm dừng có ràng buộc lấy trước giao sau"
+requires-python = ">=3.13,<3.14"
+dependencies = ["ortools"]

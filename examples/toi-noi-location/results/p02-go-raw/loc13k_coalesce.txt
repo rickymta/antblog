@@ -1,0 +1,28 @@
+$ examples/toi-noi-location/go/bin/location-ingest --sink kafka --listen '127.0.0.1:8081,[::1]:8083' --policy coalesce --queue-cap 30000
+$ examples/toi-noi-location/go/bin/loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 3 --duration 100s --report-every 5s
+$ (sleep 45; docker pause toi-noi-location-kafka; sleep 25; docker unpause toi-noi-location-kafka) &   # chạy song song, 45 s sau khi bắt đầu loadgen
+# loadgen drivers=25000 seed=1 batch=3 urls=2 viewers=0 slow_viewers=0
+# kết nối: 25000/25000 thành công, 0 lỗi, mất 4.0s
+# khởi động 14s ở 6250 điểm/s (không tính)
+STEP	target_pts_s	achieved_pts_s	msgs_s	p50_ms	p95_ms	p99_ms	max_ms	errs	ingest_cpu_pct	ingest_heap_mb	ingest_rss_mb	ingest_goroutines	q_max_depth	q_dropped	q_coalesced	loadgen_cpu_pct	loadgen_rss_mb
+  t=  5s target=6250 acked_pts_s=6271 win_p50=1.1ms win_p99=97.0ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=43590 heap_mb=440
+  t= 10s target=6250 acked_pts_s=6289 win_p50=0.7ms win_p99=44.0ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=74919 heap_mb=491
+  t= 15s target=6250 acked_pts_s=6263 win_p50=0.3ms win_p99=8.8ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=106341 heap_mb=541
+  t= 20s target=6250 acked_pts_s=6212 win_p50=0.6ms win_p99=17.6ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=137304 heap_mb=591
+  t= 25s target=6250 acked_pts_s=6232 win_p50=0.5ms win_p99=13.1ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=168471 heap_mb=641
+  t= 30s target=6250 acked_pts_s=6272 win_p50=0.7ms win_p99=17.6ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=182280 heap_mb=691
+  t= 35s target=6250 acked_pts_s=6277 win_p50=0.6ms win_p99=18.1ms errs=0 q_depth=11672 q_coalesced=17344 q_dropped=0 kafka_delivered=182280 heap_mb=730
+  t= 40s target=6250 acked_pts_s=6250 win_p50=0.5ms win_p99=31.9ms errs=0 q_depth=22089 q_coalesced=38178 q_dropped=0 kafka_delivered=182280 heap_mb=411
+  t= 45s target=6250 acked_pts_s=6257 win_p50=0.7ms win_p99=13.8ms errs=0 q_depth=27000 q_coalesced=64551 q_dropped=0 kafka_delivered=182280 heap_mb=448
+  t= 50s target=6250 acked_pts_s=6227 win_p50=0.5ms win_p99=10.8ms errs=0 q_depth=27000 q_coalesced=95685 q_dropped=0 kafka_delivered=182280 heap_mb=485
+  t= 55s target=6250 acked_pts_s=6233 win_p50=0.6ms win_p99=9.8ms errs=0 q_depth=7284 q_coalesced=125568 q_dropped=0 kafka_delivered=202841 heap_mb=543
+  t= 60s target=6250 acked_pts_s=6272 win_p50=0.6ms win_p99=11.3ms errs=0 q_depth=0 q_coalesced=136126 q_dropped=0 kafka_delivered=231189 heap_mb=591
+  t= 65s target=6250 acked_pts_s=6212 win_p50=0.4ms win_p99=8.6ms errs=0 q_depth=0 q_coalesced=136126 q_dropped=0 kafka_delivered=262392 heap_mb=641
+  t= 70s target=6250 acked_pts_s=6293 win_p50=0.3ms win_p99=7.4ms errs=0 q_depth=9 q_coalesced=136126 q_dropped=0 kafka_delivered=293919 heap_mb=692
+  t= 75s target=6250 acked_pts_s=6262 win_p50=0.7ms win_p99=15.6ms errs=0 q_depth=0 q_coalesced=136126 q_dropped=0 kafka_delivered=325158 heap_mb=742
+  t= 80s target=6250 acked_pts_s=6213 win_p50=0.7ms win_p99=16.8ms errs=0 q_depth=0 q_coalesced=136126 q_dropped=0 kafka_delivered=356244 heap_mb=792
+  t= 85s target=6250 acked_pts_s=6232 win_p50=0.5ms win_p99=34.4ms errs=0 q_depth=0 q_coalesced=136126 q_dropped=0 kafka_delivered=387363 heap_mb=432
+  t= 90s target=6250 acked_pts_s=6271 win_p50=0.4ms win_p99=13.1ms errs=0 q_depth=3 q_coalesced=136126 q_dropped=0 kafka_delivered=418806 heap_mb=482
+  t= 95s target=6250 acked_pts_s=6277 win_p50=0.3ms win_p99=10.0ms errs=0 q_depth=0 q_coalesced=136126 q_dropped=0 kafka_delivered=450078 heap_mb=533
+  t=100s target=6250 acked_pts_s=6242 win_p50=0.4ms win_p99=8.0ms errs=0 q_depth=3 q_coalesced=136126 q_dropped=0 kafka_delivered=481392 heap_mb=583
+STEP	6250	6253	2084	0.52	7.62	19.96	393.41	0	16	583.3	1097.2	25012	27000	0	136126	22	687.3

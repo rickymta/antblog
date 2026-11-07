@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "model_version": "eta-resid-vtest-cls",
+  "output": "residual_s",
+  "features": [
+    "route_eta_s",
+    "route_dist_m",
+    "n_edges",
+    "leg_kind",
+    "tod",
+    "dow",
+    "is_weekend",
+    "o_lat",
+    "o_lng",
+    "d_lat",
+    "d_lng",
+    "crow_m",
+    "detour",
+    "o_dist_centre_m",
+    "d_dist_centre_m",
+    "req_to_depart_s",
+    "hist_speed_o",
+    "hist_speed_d",
+    "hist_resid_o"
+  ],
+  "sha256": "ec800f50ee4eb089088b65db75c7b7c722aeedb34b4e818ab4f0b43142a1d919",
+  "objective": "regression_l1",
+  "trained_on": "dữ liệu giả seed 53",
+  "notes": "cùng cây với eta-resid-vtest, viết lại thành TreeEnsembleClassifier cho tract"
+}

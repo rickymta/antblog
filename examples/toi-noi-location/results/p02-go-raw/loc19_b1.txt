@@ -1,0 +1,49 @@
+$ examples/toi-noi-location/go/bin/location-ingest --sink kafka --listen '127.0.0.1:8081,[::1]:8083'
+$ examples/toi-noi-location/go/bin/tracking-hub
+$ examples/toi-noi-location/go/bin/loadgen --url 'ws://127.0.0.1:8081/ws,ws://[::1]:8083/ws' --drivers 25000 --rate 6250 --batch 1 --duration 60s --report-every 20s --hub http://127.0.0.1:8082 --viewers 200 --slow-viewers 10 --slow-delay 6s
+# loadgen drivers=25000 seed=1 batch=1 urls=2 viewers=200 slow_viewers=10
+# kết nối: 25000/25000 thành công, 0 lỗi, mất 1.8s
+# khởi động 6s ở 6250 điểm/s (không tính)
+STEP	target_pts_s	achieved_pts_s	msgs_s	p50_ms	p95_ms	p99_ms	max_ms	errs	ingest_cpu_pct	ingest_heap_mb	ingest_rss_mb	ingest_goroutines	q_max_depth	q_dropped	q_coalesced	loadgen_cpu_pct	loadgen_rss_mb
+  t= 20s target=6250 acked_pts_s=6265 win_p50=0.8ms win_p99=32.7ms errs=0 q_depth=1 q_coalesced=0 q_dropped=0 kafka_delivered=137795 heap_mb=431
+  t= 40s target=6250 acked_pts_s=6250 win_p50=0.7ms win_p99=17.6ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=262800 heap_mb=423
+  t= 60s target=6250 acked_pts_s=6250 win_p50=0.5ms win_p99=22.0ms errs=0 q_depth=0 q_coalesced=0 q_dropped=0 kafka_delivered=387668 heap_mb=415
+STEP	6250	6257	6256	0.66	10.00	24.32	153.13	0	30	415.7	1087.7	25012	223	0	0	35	683.0
+VIEWERS normal=190 frames=2959 skipped_by_hub=0
+VIEWERS e2e_send_to_recv   p50=10ms p95=34ms p99=62ms max=114ms
+VIEWERS e2e_sample_to_recv p50=10ms p95=34ms p99=62ms max=114ms
+VIEWERS slow=10 frames=104 skipped_by_hub=30 sample_to_recv p50=6141ms p95=8057ms p99=10062ms max=10042ms
+$ curl -s http://127.0.0.1:8082/debug/stats
+{
+    "coalesced": 33,
+    "denied": 0,
+    "dispatched": 3160,
+    "frames_sent": 3072,
+    "held_back_flagged": 13,
+    "ignored_unassigned": 391069,
+    "ingest_to_write": {
+        "count": 3073,
+        "max_ms": 4039,
+        "p50_ms": 8.007,
+        "p95_ms": 34.371,
+        "p99_ms": 2071.842
+    },
+    "proc": {
+        "cpu_user_s": 1.9754209999999999,
+        "cpu_sys_s": 0.880059,
+        "goroutines": 13,
+        "heap_alloc_mb": 1.926116943359375,
+        "go_sys_mb": 23.04907989501953,
+        "max_rss_mb": 32.125
+    },
+    "sample_to_write": {
+        "count": 3073,
+        "max_ms": 4039,
+        "p50_ms": 10,
+        "p95_ms": 38.887,
+        "p99_ms": 2071.842
+    },
+    "slow_kicked": 0,
+    "trips_assigned": 200,
+    "write_errors": 1
+}

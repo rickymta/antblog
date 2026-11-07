@@ -1,0 +1,26 @@
+[package]
+name = "matcher"
+description = "Ghép chuyến và giảm km rỗng (P05): ETA gần nhất, Hungarian theo lô, cửa sổ lô, cắt tỉa H3, chi phí công bằng, chain, gợi ý di chuyển, nhiều điểm dừng"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+geo-core.workspace = true
+road-graph.workspace = true
+route-engine.workspace = true
+simulator.workspace = true
+map-match.workspace = true
+pathfinding.workspace = true
+rustc-hash.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+h3o.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+
+[lints]
+workspace = true

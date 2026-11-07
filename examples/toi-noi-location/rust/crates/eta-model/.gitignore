@@ -1,0 +1,2 @@
+# mô hình thử nghiệm nhỏ của crate được commit (gốc .gitignore của lab bỏ qua *.onnx)
+!tests/data/*.onnx
