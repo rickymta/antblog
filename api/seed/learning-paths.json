@@ -898,5 +898,16 @@
       "dependency-isolation"
     ],
     "status": "published"
+  },
+  {
+    "slug": "da-p01-nen-tang-phan-tich-du-lieu",
+    "title": "DA · Phần 1 · Nền tảng phân tích dữ liệu",
+    "description": "DA qua Tới Nơi: hiểu câu hỏi, vai trò và quy trình phân tích. Đã có DA-001; phần đang được viết tiếp, tối đa 10 bài.",
+    "level": "beginner",
+    "category": "data-analysis",
+    "articles": [
+      "da-la-gi-tu-so-lieu-toi-quyet-dinh"
+    ],
+    "status": "published"
   }
 ]

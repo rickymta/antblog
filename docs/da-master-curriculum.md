@@ -10,7 +10,7 @@ Trục học: **câu hỏi kinh doanh → định nghĩa chỉ số → thu th�
 
 Đối tượng: người mới học DA; BA, developer, tester và vận hành muốn phân tích dữ liệu; DA muốn hiểu lựa chọn database và các đánh đổi của hệ thống. P01 không yêu cầu lập trình; P02 xây nền SQL. Python là công cụ bổ trợ ở các phần sau, không phải điều kiện để bắt đầu.
 
-Đây là **khung kế hoạch**, chưa có 80 bài viết hoặc bộ dữ liệu thực thi. Không thêm bài rỗng vào seed, không tạo URL công khai cho bài chưa viết. Các lựa chọn công nghệ dưới đây là chủ đề cần khảo sát và thực nghiệm, chưa phải quyết định thay kiến trúc Tới Nơi.
+Khung gồm 80 bài dự kiến; **DA-001 đã viết trong source**, các bài còn lại đang ở kế hoạch. Chưa có bộ dữ liệu thực thi. Không thêm bài rỗng vào seed, không tạo URL công khai cho bài chưa viết. Các lựa chọn công nghệ dưới đây là chủ đề cần khảo sát và thực nghiệm, chưa phải quyết định thay kiến trúc Tới Nơi.
 
 ## Cấp độ và lộ trình
 
@@ -211,7 +211,11 @@ Mục tiêu khoảng 10–18 phút đọc; bài thực hành 18–25 phút, đi�
 
 ## Tiến độ và thứ tự triển khai
 
-**Đã dựng khung P01–P08; DA-001–DA-080 đều ở trạng thái kế hoạch, chưa viết bài.**
+**Đã dựng khung P01–P08; DA-001 đã viết trong source, DA-002–DA-080 còn ở kế hoạch. Source chưa đồng nghĩa đã xuất bản.**
+
+| ID | Slug | Trạng thái source |
+|---|---|---|
+| DA-001 | `da-la-gi-tu-so-lieu-toi-quyet-dinh` | Đã viết |
 
 Viết P01 trước để chốt câu hỏi và metric contract. Tiếp đó tạo dataset nhỏ có kết quả đối soát cho P02–P03, rồi mới mở rộng dữ liệu và workload để khảo sát database ở P04. Mỗi phần hoàn thành cùng hồ sơ thực hành và kiểm tra đầu ra trước khi chuyển phần tiếp theo.
 

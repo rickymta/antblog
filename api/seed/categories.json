@@ -441,5 +441,19 @@
     "color": "#0891B2",
     "order": 3,
     "parent": "go"
+  },
+  {
+    "slug": "data-analysis",
+    "name": {
+      "vi": "Phân tích dữ liệu (DA)",
+      "en": "Data Analysis"
+    },
+    "description": {
+      "vi": "Phân tích dữ liệu qua Tới Nơi: câu hỏi nghiệp vụ, SQL, chất lượng dữ liệu, kho phân tích và hỗ trợ quyết định.",
+      "en": "Data analysis through Toi Noi: business questions, SQL, data quality, analytical stores and decisions."
+    },
+    "icon": "analysis",
+    "color": "#0891B2",
+    "order": 8
   }
 ]
