@@ -87,3 +87,22 @@ Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-02`.
 | PG-018 | Phân trang lịch sử chuyến bằng keyset<br>`postgresql-pagination-keyset` | NC | Xử lý khoá sắp xếp trùng và chứng minh điều kiện trang kế tiếp | Kế hoạch |
 | PG-019 | Recursive CTE với cây khu vực<br>`postgresql-recursive-cte-cay-khu-vuc` | NC | Duyệt cây có điều kiện dừng, phát hiện dữ liệu chu trình | Kế hoạch |
 | PG-020 | Thực hành: truy vấn vận hành và đối soát thanh toán<br>`postgresql-thuc-hanh-sql-doi-soat` | NC | Bàn giao SQL, expected output và giải thích chênh lệch | Kế hoạch |
+
+## P03 · Lưu trữ, index và kế hoạch thực thi
+
+Đầu vào: P01–P02; đã biết lọc, nối và tổng hợp. Đầu ra: Báo cáo trước/sau index, dữ liệu đo và giới hạn kết luận.
+
+Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-03`.
+
+| ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
+|---|---|---|---|---|
+| PG-021 | Đọc EXPLAIN từ truy vấn tìm chuyến<br>`postgresql-explain-ke-hoach-thuc-thi` | CB | Nhận diện scan, join, estimate và phân biệt kế hoạch với thực thi | Kế hoạch |
+| PG-022 | Đơn vị đọc ghi nhỏ nhất của cơ sở dữ liệu là gì?<br>`page-don-vi-doc-ghi` | CB | Rà bài hiện có, đối chiếu page, buffer và phạm vi kết luận | Đã có — chờ rà soát |
+| PG-023 | B-tree index giúp tìm chuyến như thế nào?<br>`postgresql-btree-index-co-ban` | CB | So sánh đường tìm dữ liệu khi có và chưa có index | Kế hoạch |
+| PG-024 | Clustered index thật và clustered index nhìn thấy trong PostgreSQL<br>`heap-ctid-va-primary-key` | TB | Rà bài hiện có, làm rõ heap, ctid, primary key và tránh hiểu sai thuật ngữ | Đã có — chờ rà soát |
+| PG-025 | Index nhiều cột, partial và expression<br>`postgresql-index-nhieu-cot-partial-expression` | TB | Chọn index theo điều kiện truy vấn và chi phí ghi | Kế hoạch |
+| PG-026 | Index-only scan, INCLUDE và visibility map<br>`postgresql-index-only-scan-visibility-map` | TB | Quan sát heap fetch và điều kiện hiệu quả của covering index | Kế hoạch |
+| PG-027 | Statistics, ANALYZE và ước lượng cardinality<br>`postgresql-statistics-analyze-cardinality` | TB | Tìm lệch estimate/actual trên dữ liệu phân bố không đều | Kế hoạch |
+| PG-028 | Khi nào cân nhắc GIN, GiST và BRIN?<br>`postgresql-gin-gist-brin-lua-chon` | NC | Lập ma trận workload, operator và giới hạn từng loại index | Kế hoạch |
+| PG-029 | Sort, hash và truy vấn tràn ra đĩa<br>`postgresql-sort-hash-memory-spill` | NC | Đo spill và đánh đổi tài nguyên với tải đồng thời | Kế hoạch |
+| PG-030 | Thực hành: tối ưu truy vấn bằng bằng chứng<br>`postgresql-thuc-hanh-toi-uu-truy-van` | NC | Bàn giao plan, fixture, phép đo lặp và chi phí ghi của index | Kế hoạch |
