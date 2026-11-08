@@ -1,0 +1,1940 @@
+-- [lab] Engine: PostgreSQL 17.5 qua PGlite 0.3.16 (WebAssembly, một kết nối)
+-- [lab] Phiên: TimeZone = Asia/Ho_Chi_Minh, client_min_messages = notice, dữ liệu trong bộ nhớ
+-- [lab] File: 00-reset.sql, 01-schema.sql, 02-fixture-valid.sql, 03-fixture-invalid.sql, 04-lifecycle.sql, 05-select.sql, 06-migration.sql, 07-checks.sql
+
+-- [lab] ===== p01/00-reset.sql =====
+
+-- P01 · 00-reset.sql — dựng lại schema lab `toinoi` từ đầu.
+--
+-- Mọi bảng của lab nằm trong schema riêng `toinoi`, không đụng vào `public`
+-- hay dữ liệu khác trong database. Chạy lại file này bất cứ lúc nào để về
+-- trạng thái trống; sau đó chạy tiếp 01 → 07.
+--
+-- CẢNH BÁO: DROP SCHEMA ... CASCADE xoá MỌI đối tượng trong schema `toinoi`.
+-- Chỉ chạy trên database lab.
+
+DROP SCHEMA IF EXISTS toinoi CASCADE;
+NOTICE:  schema "toinoi" does not exist, skipping
+DROP SCHEMA
+
+CREATE SCHEMA toinoi;
+CREATE SCHEMA
+
+COMMENT ON SCHEMA toinoi IS 'Lab PostgreSQL qua dự án Tới Nơi — dữ liệu hư cấu, có thể xoá và dựng lại';
+COMMENT
+
+-- search_path quyết định tên bảng không ghi schema (vd. `trips`) được tìm ở đâu.
+-- Thiết lập này chỉ sống trong phiên hiện tại, nên mỗi file sau đều đặt lại.
+SET search_path TO toinoi;
+SET
+
+-- Múi giờ phiên: mọi timestamptz được HIỂN THỊ theo giờ Việt Nam (+07).
+-- Giá trị lưu trong bảng không phụ thuộc thiết lập này (xem 05-select.sql).
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+SELECT current_schema() AS schema_hien_tai,
+       current_setting('TimeZone') AS mui_gio_phien,
+       current_setting('server_version') AS phien_ban;
+ schema_hien_tai |  mui_gio_phien   | phien_ban
+-----------------+------------------+-----------
+ toinoi          | Asia/Ho_Chi_Minh | 17.5
+(1 row)
+
+-- [lab] ===== p01/01-schema.sql =====
+
+-- P01 · 01-schema.sql — lược đồ tối thiểu cho thành phố, khách, tài xế, quán,
+-- chuyến và lịch sử trạng thái chuyến (PG-003, PG-004, PG-005).
+--
+-- Bám lược đồ lõi trong hồ sơ `du-an-mau-toi-noi`: cùng tên bảng, tên cột,
+-- kiểu dữ liệu và giá trị mặc định. Khác biệt có chủ đích (xem p01/README.md):
+--   1. Mọi ràng buộc đều được ĐẶT TÊN (pk_…, fk_…, uq_…, ck_…) để thông báo lỗi
+--      chỉ thẳng vào quy tắc bị vi phạm.
+--   2. Thêm các CHECK mã hoá quy tắc nghiệp vụ (định dạng số điện thoại, cước
+--      không âm, thứ tự mốc thời gian, trạng thái ↔ tài xế ↔ mốc hoàn thành…).
+--   3. `trip_events.status` có CHECK cùng danh sách 8 trạng thái với `trips`.
+--   4. Chưa có `driver_locations` (thuộc các phần sau, không cần cho P01).
+--
+-- Quy ước kiểu dữ liệu (PG-004):
+--   * Tiền: số nguyên ĐỒNG (`integer`). VND không dùng đơn vị lẻ, nên không cần
+--     numeric/float. `integer` chứa tới 2.147.483.647 đ cho MỘT chuyến — dư sức;
+--     `sum(integer)` trả về `bigint`, nên cộng hàng triệu chuyến vẫn không tràn.
+--     Không dùng `real`/`double precision` (sai số nhị phân) hay kiểu `money`
+--     (định dạng phụ thuộc lc_monetary của server).
+--   * Thời điểm: `timestamptz` — lưu một khoảnh khắc tuyệt đối, hiển thị theo
+--     TimeZone của phiên. Không dùng `timestamp` (không múi giờ) cho mốc sự kiện.
+--   * Định danh: `uuid` sinh bằng gen_random_uuid() (UUID v4, có sẵn từ PG 13,
+--     không cần extension) + mã số dễ đọc (`code`) cho người vận hành.
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- ---------------------------------------------------------------------------
+-- Thành phố: danh mục nhỏ, id do người quản trị đặt (1 = SG, 2 = HN…).
+CREATE TABLE cities (
+  id    smallint NOT NULL,
+  code  text     NOT NULL,
+  name  text     NOT NULL,
+  CONSTRAINT pk_cities PRIMARY KEY (id),
+  CONSTRAINT uq_cities_code UNIQUE (code),
+  CONSTRAINT ck_cities_code_format CHECK (code ~ '^[A-Z]{2}$'),
+  CONSTRAINT ck_cities_name_not_blank CHECK (btrim(name) <> '')
+);
+CREATE TABLE
+
+-- ---------------------------------------------------------------------------
+-- Khách hàng: đăng nhập bằng số điện thoại ⇒ số điện thoại là duy nhất.
+CREATE TABLE customers (
+  id         uuid        NOT NULL DEFAULT gen_random_uuid(),
+  phone      text        NOT NULL,
+  full_name  text        NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_customers PRIMARY KEY (id),
+  CONSTRAINT uq_customers_phone UNIQUE (phone),
+  -- Lưu MỘT dạng chuẩn: 10 chữ số bắt đầu bằng 0. Nếu cho phép cả '+84…' và
+  -- '0…', UNIQUE không còn chặn được cùng một số viết theo hai cách.
+  CONSTRAINT ck_customers_phone_format CHECK (phone ~ '^0[0-9]{9}$'),
+  CONSTRAINT ck_customers_full_name_not_blank CHECK (btrim(full_name) <> '')
+);
+CREATE TABLE
+
+-- ---------------------------------------------------------------------------
+-- Tài xế: `code` là mã nội bộ do bộ phận tuyển dụng cấp (8001, 8002…).
+CREATE TABLE drivers (
+  id           uuid        NOT NULL DEFAULT gen_random_uuid(),
+  code         integer     NOT NULL,
+  full_name    text        NOT NULL,
+  city_id      smallint    NOT NULL,
+  vehicle_type text        NOT NULL,
+  status       text        NOT NULL DEFAULT 'offline',
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_drivers PRIMARY KEY (id),
+  CONSTRAINT uq_drivers_code UNIQUE (code),
+  CONSTRAINT fk_drivers_city FOREIGN KEY (city_id) REFERENCES cities (id),
+  CONSTRAINT ck_drivers_code_positive CHECK (code > 0),
+  CONSTRAINT ck_drivers_full_name_not_blank CHECK (btrim(full_name) <> ''),
+  CONSTRAINT ck_drivers_vehicle_type CHECK (vehicle_type IN ('bike', 'car')),
+  CONSTRAINT ck_drivers_status CHECK (status IN ('offline', 'online', 'busy'))
+);
+CREATE TABLE
+
+-- ---------------------------------------------------------------------------
+-- Quán: cần cho quy tắc "đơn đồ ăn phải có quán". P01 chỉ giữ các cột lõi.
+CREATE TABLE merchants (
+  id         uuid        NOT NULL DEFAULT gen_random_uuid(),
+  city_id    smallint    NOT NULL,
+  name       text        NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_merchants PRIMARY KEY (id),
+  CONSTRAINT fk_merchants_city FOREIGN KEY (city_id) REFERENCES cities (id),
+  CONSTRAINT ck_merchants_name_not_blank CHECK (btrim(name) <> '')
+);
+CREATE TABLE
+
+-- ---------------------------------------------------------------------------
+-- Chuyến: một yêu cầu đặt xe / giao đồ ăn / giao bưu kiện.
+--
+-- Lưu ý khi đọc các CHECK bên dưới: CHECK chỉ TỪ CHỐI khi biểu thức ra FALSE.
+-- Nếu biểu thức ra NULL (vd. so sánh với accepted_at đang NULL) thì dòng được
+-- CHẤP NHẬN. Vì vậy `accepted_at >= requested_at` tự bỏ qua chuyến chưa có
+-- người nhận, còn các quy tắc "phải có" được viết tường minh bằng IS NULL /
+-- IS NOT NULL.
+CREATE TABLE trips (
+  id           uuid        NOT NULL DEFAULT gen_random_uuid(),
+  code         bigint      GENERATED ALWAYS AS IDENTITY (START WITH 100000),
+  kind         text        NOT NULL,
+  city_id      smallint    NOT NULL,
+  customer_id  uuid        NOT NULL,
+  driver_id    uuid,
+  merchant_id  uuid,
+  status       text        NOT NULL DEFAULT 'requested',
+  fare         integer     NOT NULL,              -- đồng
+  requested_at timestamptz NOT NULL DEFAULT now(),
+  accepted_at  timestamptz,
+  completed_at timestamptz,
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_trips PRIMARY KEY (id),
+  CONSTRAINT uq_trips_code UNIQUE (code),
+  CONSTRAINT fk_trips_city     FOREIGN KEY (city_id)     REFERENCES cities (id),
+  CONSTRAINT fk_trips_customer FOREIGN KEY (customer_id) REFERENCES customers (id),
+  CONSTRAINT fk_trips_driver   FOREIGN KEY (driver_id)   REFERENCES drivers (id),
+  CONSTRAINT fk_trips_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id),
+  CONSTRAINT ck_trips_kind CHECK (kind IN ('ride', 'food', 'parcel')),
+  CONSTRAINT ck_trips_status CHECK (status IN
+    ('requested', 'searching', 'accepted', 'arriving', 'picked_up', 'in_transit', 'completed', 'cancelled')),
+  -- 0 đ hợp lệ (chuyến miễn phí do khuyến mãi); số âm thì không.
+  CONSTRAINT ck_trips_fare_non_negative CHECK (fare >= 0),
+  -- Đơn đồ ăn phải có quán; đặt xe và bưu kiện không gắn quán.
+  CONSTRAINT ck_trips_merchant_only_food CHECK ((kind = 'food') = (merchant_id IS NOT NULL)),
+  -- Có tài xế ⇔ có mốc nhận chuyến (kể cả chuyến đã nhận rồi bị huỷ).
+  CONSTRAINT ck_trips_driver_accepted_together CHECK ((driver_id IS NULL) = (accepted_at IS NULL)),
+  -- Hai quy tắc dạng "nếu A thì B", viết là `NOT A OR B`:
+  --   chưa ai nhận (requested/searching) ⇒ chưa có tài xế;
+  --   từ accepted tới completed ⇒ phải có tài xế.
+  -- Chuyến huỷ có thể có hoặc không có tài xế (huỷ trước hay sau khi được nhận).
+  -- Mỗi CHECK chỉ giữ MỘT quy tắc: trạng thái lạ như 'done' chỉ vi phạm
+  -- ck_trips_status, thông báo lỗi không bị lẫn.
+  CONSTRAINT ck_trips_unassigned_no_driver CHECK (
+    status NOT IN ('requested', 'searching') OR driver_id IS NULL),
+  CONSTRAINT ck_trips_assigned_has_driver CHECK (
+    status NOT IN ('accepted', 'arriving', 'picked_up', 'in_transit', 'completed') OR driver_id IS NOT NULL),
+  -- Có mốc hoàn thành ⇔ trạng thái hoàn thành.
+  CONSTRAINT ck_trips_completed_at_by_status CHECK ((status = 'completed') = (completed_at IS NOT NULL)),
+  CONSTRAINT ck_trips_accepted_after_requested CHECK (accepted_at >= requested_at),
+  CONSTRAINT ck_trips_completed_after_accepted CHECK (completed_at >= accepted_at)
+);
+CREATE TABLE
+
+-- Ba index giống hồ sơ chung. P01 chưa cần chúng; P03 sẽ đo lợi ích và cái giá.
+-- (PRIMARY KEY và UNIQUE tự tạo index riêng: pk_trips, uq_trips_code.)
+CREATE INDEX ix_trips_city_requested     ON trips (city_id, requested_at);
+CREATE INDEX
+
+CREATE INDEX ix_trips_customer_requested ON trips (customer_id, requested_at DESC);
+CREATE INDEX
+
+CREATE INDEX ix_trips_driver_id          ON trips (driver_id);
+CREATE INDEX
+
+-- ---------------------------------------------------------------------------
+-- Lịch sử trạng thái: mỗi lần chuyến đổi trạng thái thêm một dòng, không sửa.
+CREATE TABLE trip_events (
+  id          bigint      GENERATED ALWAYS AS IDENTITY,
+  trip_id     uuid        NOT NULL,
+  status      text        NOT NULL,
+  occurred_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_trip_events PRIMARY KEY (id),
+  CONSTRAINT fk_trip_events_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  CONSTRAINT ck_trip_events_status CHECK (status IN
+    ('requested', 'searching', 'accepted', 'arriving', 'picked_up', 'in_transit', 'completed', 'cancelled'))
+);
+CREATE TABLE
+
+CREATE INDEX ix_trip_events_trip ON trip_events (trip_id, occurred_at);
+CREATE INDEX
+
+-- ---------------------------------------------------------------------------
+-- Chú thích: lưu ngay trong catalog, công cụ quản trị và psql (\d+) đọc được.
+COMMENT ON TABLE cities IS 'Thành phố Tới Nơi hoạt động; id do quản trị đặt';
+COMMENT
+
+COMMENT ON TABLE customers IS 'Khách hàng; đăng nhập bằng số điện thoại';
+COMMENT
+
+COMMENT ON COLUMN customers.phone IS 'Số điện thoại dạng chuẩn 0xxxxxxxxx (10 chữ số), duy nhất';
+COMMENT
+
+COMMENT ON TABLE drivers IS 'Tài xế dùng chung cho ba dịch vụ';
+COMMENT
+
+COMMENT ON COLUMN drivers.code IS 'Mã tài xế nội bộ, dễ đọc cho người vận hành';
+COMMENT
+
+COMMENT ON COLUMN drivers.status IS 'offline / online (rảnh) / busy (đang chạy chuyến)';
+COMMENT
+
+COMMENT ON TABLE merchants IS 'Quán, cửa hàng nhận đơn đồ ăn';
+COMMENT
+
+COMMENT ON TABLE trips IS 'Một chuyến: đặt xe (ride), giao đồ ăn (food) hoặc giao bưu kiện (parcel)';
+COMMENT
+
+COMMENT ON COLUMN trips.id IS 'Định danh kỹ thuật UUID v4; ứng dụng hoặc database sinh';
+COMMENT
+
+COMMENT ON COLUMN trips.code IS 'Mã chuyến tăng dần cho người dùng và CSKH; có thể nhảy cóc';
+COMMENT
+
+COMMENT ON COLUMN trips.fare IS 'Cước tính bằng đồng (VND), số nguyên không âm';
+COMMENT
+
+COMMENT ON COLUMN trips.requested_at IS 'Thời điểm khách đặt (timestamptz)';
+COMMENT
+
+COMMENT ON COLUMN trips.accepted_at IS 'Thời điểm tài xế nhận; NULL khi chưa ai nhận';
+COMMENT
+
+COMMENT ON COLUMN trips.completed_at IS 'Thời điểm hoàn thành; chỉ có khi status = completed';
+COMMENT
+
+COMMENT ON COLUMN trips.updated_at IS 'Lần thay đổi gần nhất của dòng';
+COMMENT
+
+COMMENT ON TABLE trip_events IS 'Lịch sử đổi trạng thái chuyến; chỉ thêm, không sửa';
+COMMENT
+
+-- ---------------------------------------------------------------------------
+-- Xem lại cấu trúc bảng trips bằng catalog chuẩn SQL (thay cho lệnh \d của psql,
+-- vốn là lệnh của công cụ psql chứ không phải SQL).
+SELECT column_name, data_type, is_nullable, column_default, is_identity
+FROM information_schema.columns
+WHERE table_schema = 'toinoi' AND table_name = 'trips'
+ORDER BY ordinal_position;
+ column_name  |        data_type         | is_nullable |  column_default   | is_identity
+--------------+--------------------------+-------------+-------------------+-------------
+ id           | uuid                     | NO          | gen_random_uuid() | NO
+ code         | bigint                   | NO          |                   | YES
+ kind         | text                     | NO          |                   | NO
+ city_id      | smallint                 | NO          |                   | NO
+ customer_id  | uuid                     | NO          |                   | NO
+ driver_id    | uuid                     | YES         |                   | NO
+ merchant_id  | uuid                     | YES         |                   | NO
+ status       | text                     | NO          | 'requested'::text | NO
+ fare         | integer                  | NO          |                   | NO
+ requested_at | timestamp with time zone | NO          | now()             | NO
+ accepted_at  | timestamp with time zone | YES         |                   | NO
+ completed_at | timestamp with time zone | YES         |                   | NO
+ updated_at   | timestamp with time zone | NO          | now()             | NO
+(13 rows)
+
+-- [lab] ===== p01/02-fixture-valid.sql =====
+
+-- P01 · 02-fixture-valid.sql — bộ dữ liệu nhỏ, cố định, hợp lệ (PG-005, PG-010).
+--
+-- Mọi tên, số điện thoại và biển hiệu đều HƯ CẤU. Số điện thoại dạng
+-- 090000000x để nhìn là biết số giả.
+--
+-- Để kết quả in ra giống nhau ở mọi lần chạy:
+--   * khách, tài xế, quán dùng UUID ghi sẵn (mẫu dễ đọc: c… = customer,
+--     d…800x = driver mã 800x, e… = eatery/quán);
+--   * mọi mốc thời gian ghi rõ múi giờ +07;
+--   * chuyến được thêm theo thứ tự giờ đặt ⇒ mã chuyến 100000, 100001… tăng
+--     theo giờ đặt (cột code do IDENTITY cấp, không ghi tay được).
+--   * chuyến cũng ghi sẵn UUID, đuôi trùng mã chuyến (7…100000 ↔ code 100000)
+--     CHỈ để dễ đối chiếu khi đọc kết quả. Trong hệ thật id là UUID ngẫu nhiên,
+--     không liên quan gì tới code — đừng suy code từ id hay ngược lại.
+--
+-- Ảnh chụp dữ liệu lúc 2026-11-03 08:30 (giờ VN): ngày 02/11 đã xong, sáng
+-- 03/11 còn 6 chuyến đang chạy ở 6 trạng thái khác nhau.
+-- Lịch sử trip_events của 15 chuyến này KHÔNG được nạp (giống dữ liệu chuyển
+-- từ hệ cũ chỉ có trạng thái cuối); 04-lifecycle.sql ghi lịch sử đầy đủ cho
+-- chuyến mới.
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- expect-rows: 3
+INSERT INTO cities (id, code, name) VALUES
+  (1, 'SG', 'TP. Hồ Chí Minh'),
+  (2, 'HN', 'Hà Nội'),
+  (3, 'DN', 'Đà Nẵng');
+INSERT 0 3
+-- [lab] PASS: đúng 3 dòng như mong đợi
+
+-- expect-rows: 6
+INSERT INTO customers (id, phone, full_name, created_at) VALUES
+  ('c0000000-0000-4000-8000-000000000001', '0900000001', 'Nguyễn Văn An',   '2026-09-01 08:00:00+07'),
+  ('c0000000-0000-4000-8000-000000000002', '0900000002', 'Trần Thị Bình',   '2026-09-03 19:15:00+07'),
+  ('c0000000-0000-4000-8000-000000000003', '0900000003', 'Lê Hoàng Cường',  '2026-09-10 12:00:00+07'),
+  ('c0000000-0000-4000-8000-000000000004', '0900000004', 'Phạm Thu Dung',   '2026-10-01 07:30:00+07'),
+  ('c0000000-0000-4000-8000-000000000005', '0900000005', 'Võ Minh Đức',     '2026-10-15 21:45:00+07'),
+  ('c0000000-0000-4000-8000-000000000006', '0900000006', 'Đặng Ngọc Hà',    '2026-11-01 10:00:00+07');
+INSERT 0 6
+-- [lab] PASS: đúng 6 dòng như mong đợi
+
+-- Trạng thái tài xế khớp ảnh chụp: ai đang có chuyến chạy thì `busy`.
+-- expect-rows: 6
+INSERT INTO drivers (id, code, full_name, city_id, vehicle_type, status, created_at) VALUES
+  ('d0000000-0000-4000-8000-000000008001', 8001, 'Bùi Văn Khoa',    1, 'bike', 'busy',    '2026-08-01 09:00:00+07'),
+  ('d0000000-0000-4000-8000-000000008002', 8002, 'Hồ Thị Lan',      1, 'bike', 'busy',    '2026-08-02 09:00:00+07'),
+  ('d0000000-0000-4000-8000-000000008003', 8003, 'Ngô Quang Minh',  2, 'bike', 'online',  '2026-08-05 09:00:00+07'),
+  ('d0000000-0000-4000-8000-000000008004', 8004, 'Đỗ Thanh Nam',    2, 'car',  'busy',    '2026-08-20 09:00:00+07'),
+  ('d0000000-0000-4000-8000-000000008005', 8005, 'Lý Thị Oanh',     3, 'bike', 'busy',    '2026-09-01 09:00:00+07'),
+  ('d0000000-0000-4000-8000-000000008006', 8006, 'Trịnh Văn Phúc',  3, 'car',  'offline', '2026-09-15 09:00:00+07');
+INSERT 0 6
+-- [lab] PASS: đúng 6 dòng như mong đợi
+
+-- expect-rows: 3
+INSERT INTO merchants (id, city_id, name, created_at) VALUES
+  ('e0000000-0000-4000-8000-000000000001', 1, 'Cơm Tấm Phố Lab',   '2026-07-01 08:00:00+07'),
+  ('e0000000-0000-4000-8000-000000000002', 2, 'Bún Chả Ngõ Mẫu',   '2026-07-01 08:00:00+07'),
+  ('e0000000-0000-4000-8000-000000000003', 3, 'Mì Quảng Thử Nghiệm', '2026-07-01 08:00:00+07');
+INSERT 0 3
+-- [lab] PASS: đúng 3 dòng như mong đợi
+
+-- 15 chuyến, đủ 8 trạng thái và 3 loại dịch vụ. Cột `code` không có trong
+-- danh sách cột: IDENTITY tự cấp theo thứ tự các dòng dưới đây.
+-- Hai chuyến 100003 và 100004 có CÙNG giờ đặt 12:00 (dùng ở 05-select.sql).
+-- Chuyến 100007 đặt 23:50 ngày 02/11, chuyến 100008 đặt 00:10 ngày 03/11 giờ VN
+-- (vẫn là ngày 02/11 theo UTC) — dùng để thử lọc theo ngày.
+-- expect-rows: 15
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                       requested_at, accepted_at, completed_at, updated_at) VALUES
+  -- 100000: đặt xe hoàn thành
+  ('70000000-0000-4000-8000-000000100000', 'ride',   1, 'c0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000008001', NULL,
+   'completed',  45000, '2026-11-02 07:58:00+07', '2026-11-02 08:00:30+07', '2026-11-02 08:24:10+07', '2026-11-02 08:24:10+07'),
+  -- 100001: bưu kiện hoàn thành
+  ('70000000-0000-4000-8000-000000100001', 'parcel', 2, 'c0000000-0000-4000-8000-000000000003', 'd0000000-0000-4000-8000-000000008003', NULL,
+   'completed',  38000, '2026-11-02 09:15:00+07', '2026-11-02 09:17:00+07', '2026-11-02 10:02:00+07', '2026-11-02 10:02:00+07'),
+  -- 100002: đồ ăn hoàn thành
+  ('70000000-0000-4000-8000-000000100002', 'food',   1, 'c0000000-0000-4000-8000-000000000002', 'd0000000-0000-4000-8000-000000008002', 'e0000000-0000-4000-8000-000000000001',
+   'completed',  62000, '2026-11-02 11:05:00+07', '2026-11-02 11:06:00+07', '2026-11-02 11:41:00+07', '2026-11-02 11:41:00+07'),
+  -- 100003: đồ ăn bị huỷ SAU khi tài xế đã nhận (vẫn giữ tài xế và accepted_at)
+  ('70000000-0000-4000-8000-000000100003', 'food',   2, 'c0000000-0000-4000-8000-000000000003', 'd0000000-0000-4000-8000-000000008003', 'e0000000-0000-4000-8000-000000000002',
+   'cancelled',  71000, '2026-11-02 12:00:00+07', '2026-11-02 12:01:00+07', NULL,                     '2026-11-02 12:04:00+07'),
+  -- 100004: đồ ăn hoàn thành, CÙNG giờ đặt với 100003
+  ('70000000-0000-4000-8000-000000100004', 'food',   3, 'c0000000-0000-4000-8000-000000000005', 'd0000000-0000-4000-8000-000000008005', 'e0000000-0000-4000-8000-000000000003',
+   'completed',  55000, '2026-11-02 12:00:00+07', '2026-11-02 12:02:00+07', '2026-11-02 12:35:00+07', '2026-11-02 12:35:00+07'),
+  -- 100005: đặt xe ô tô hoàn thành
+  ('70000000-0000-4000-8000-000000100005', 'ride',   2, 'c0000000-0000-4000-8000-000000000004', 'd0000000-0000-4000-8000-000000008004', NULL,
+   'completed', 126000, '2026-11-02 17:30:00+07', '2026-11-02 17:31:00+07', '2026-11-02 18:05:00+07', '2026-11-02 18:05:00+07'),
+  -- 100006: đặt xe bị huỷ TRƯỚC khi có người nhận (không tài xế)
+  ('70000000-0000-4000-8000-000000100006', 'ride',   1, 'c0000000-0000-4000-8000-000000000001', NULL, NULL,
+   'cancelled',  52000, '2026-11-02 18:00:00+07', NULL,                     NULL,                     '2026-11-02 18:03:00+07'),
+  -- 100007: bưu kiện đặt 23:50, hoàn thành sau nửa đêm
+  ('70000000-0000-4000-8000-000000100007', 'parcel', 1, 'c0000000-0000-4000-8000-000000000006', 'd0000000-0000-4000-8000-000000008002', NULL,
+   'completed',  30000, '2026-11-02 23:50:00+07', '2026-11-02 23:52:00+07', '2026-11-03 00:20:00+07', '2026-11-03 00:20:00+07'),
+  -- 100008: đặt xe miễn phí (khuyến mãi) — cước 0 đ là hợp lệ
+  ('70000000-0000-4000-8000-000000100008', 'ride',   1, 'c0000000-0000-4000-8000-000000000002', 'd0000000-0000-4000-8000-000000008001', NULL,
+   'completed',      0, '2026-11-03 00:10:00+07', '2026-11-03 00:11:00+07', '2026-11-03 00:30:00+07', '2026-11-03 00:30:00+07'),
+  -- 100009..100014: sáu chuyến đang chạy lúc 08:30 ngày 03/11
+  ('70000000-0000-4000-8000-000000100009', 'food',   1, 'c0000000-0000-4000-8000-000000000002', 'd0000000-0000-4000-8000-000000008002', 'e0000000-0000-4000-8000-000000000001',
+   'picked_up',  64000, '2026-11-03 08:00:00+07', '2026-11-03 08:02:00+07', NULL,                     '2026-11-03 08:15:00+07'),
+  ('70000000-0000-4000-8000-000000100010', 'ride',   2, 'c0000000-0000-4000-8000-000000000003', 'd0000000-0000-4000-8000-000000008004', NULL,
+   'in_transit', 98000, '2026-11-03 08:05:00+07', '2026-11-03 08:06:00+07', NULL,                     '2026-11-03 08:13:00+07'),
+  ('70000000-0000-4000-8000-000000100011', 'parcel', 3, 'c0000000-0000-4000-8000-000000000005', 'd0000000-0000-4000-8000-000000008005', NULL,
+   'arriving',   27000, '2026-11-03 08:10:00+07', '2026-11-03 08:12:00+07', NULL,                     '2026-11-03 08:12:30+07'),
+  ('70000000-0000-4000-8000-000000100012', 'ride',   1, 'c0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000008001', NULL,
+   'accepted',   39000, '2026-11-03 08:20:00+07', '2026-11-03 08:21:00+07', NULL,                     '2026-11-03 08:21:00+07'),
+  ('70000000-0000-4000-8000-000000100013', 'food',   2, 'c0000000-0000-4000-8000-000000000004', NULL, 'e0000000-0000-4000-8000-000000000002',
+   'searching',  85000, '2026-11-03 08:25:00+07', NULL,                     NULL,                     '2026-11-03 08:25:10+07'),
+  ('70000000-0000-4000-8000-000000100014', 'ride',   1, 'c0000000-0000-4000-8000-000000000006', NULL, NULL,
+   'requested',  48000, '2026-11-03 08:29:30+07', NULL,                     NULL,                     '2026-11-03 08:29:30+07');
+INSERT 0 15
+-- [lab] PASS: đúng 15 dòng như mong đợi
+
+-- Kiểm nhanh: số chuyến theo loại và trạng thái (8 trạng thái đều có mặt).
+SELECT status,
+       count(*) FILTER (WHERE kind = 'ride')   AS ride,
+       count(*) FILTER (WHERE kind = 'food')   AS food,
+       count(*) FILTER (WHERE kind = 'parcel') AS parcel,
+       count(*)                                AS tong
+FROM trips
+GROUP BY status
+ORDER BY array_position(
+  ARRAY['requested', 'searching', 'accepted', 'arriving', 'picked_up', 'in_transit', 'completed', 'cancelled'],
+  status);
+   status   | ride | food | parcel | tong
+------------+------+------+--------+------
+ requested  |    1 |    0 |      0 |    1
+ searching  |    0 |    1 |      0 |    1
+ accepted   |    1 |    0 |      0 |    1
+ arriving   |    0 |    0 |      1 |    1
+ picked_up  |    0 |    1 |      0 |    1
+ in_transit |    1 |    0 |      0 |    1
+ completed  |    3 |    2 |      2 |    7
+ cancelled  |    1 |    1 |      0 |    2
+(8 rows)
+
+-- [lab] ===== p01/03-fixture-invalid.sql =====
+
+-- P01 · 03-fixture-invalid.sql — dữ liệu SAI, mỗi câu vi phạm đúng MỘT quy tắc
+-- (PG-004, PG-005, PG-010).
+--
+-- Mỗi câu INSERT/UPDATE có dòng `-- expect-error: <SQLSTATE> <tên>` ngay phía
+-- trên: runner coi lỗi khớp là ĐẠT; nếu câu lệnh lại chạy được thì KHÔNG ĐẠT
+-- (nghĩa là schema đang thiếu một quy tắc). psql thật bỏ qua các dòng này như
+-- chú thích bình thường — khi chạy bằng psql, KHÔNG bật ON_ERROR_STOP cho file này.
+--
+-- SQLSTATE hay gặp:
+--   23502 not_null_violation      23503 foreign_key_violation
+--   23505 unique_violation        23514 check_violation
+--   22P02 invalid_text_representation (sai định dạng số, uuid…)
+--   22007 invalid_datetime_format 22008 datetime_field_overflow
+--   22003 numeric_value_out_of_range
+--   428C9 generated_always (ghi tay vào cột IDENTITY GENERATED ALWAYS)
+--
+-- Các câu lỗi ghi tay mọi cột (kể cả id, thời gian) để phần DETAIL của thông
+-- báo lỗi giống nhau ở mọi lần chạy. UUID dạng f… = dòng dùng để thử lỗi.
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- ---------------------------------------------------------------------------
+-- Đối chứng: dòng chuyến "gốc" dưới đây HỢP LỆ. Các câu thử lỗi về chuyến chỉ
+-- đổi MỘT giá trị so với dòng gốc, nên lỗi chắc chắn do giá trị bị đổi.
+-- Chạy trong giao dịch rồi ROLLBACK để không để lại dữ liệu (P04 nói kỹ về giao dịch).
+BEGIN;
+BEGIN
+
+-- expect-rows: 1
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000000', 'ride', 1, 'c0000000-0000-4000-8000-000000000001', NULL, NULL,
+        'requested', 40000, '2026-11-03 09:00:00+07', NULL, NULL, '2026-11-03 09:00:00+07')
+RETURNING code, kind, status, fare;
+  code  | kind |  status   | fare
+--------+------+-----------+-------
+ 100015 | ride | requested | 40000
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+ROLLBACK;
+ROLLBACK
+
+-- ---------------------------------------------------------------------------
+-- NOT NULL: thiếu giá trị bắt buộc. PG 17 không đặt tên cho ràng buộc NOT NULL,
+-- nên thông báo lỗi chỉ ra TÊN CỘT (và runner so khớp theo tên cột).
+
+-- Khách phải có họ tên.
+-- expect-error: 23502 full_name
+INSERT INTO customers (id, phone, created_at)
+VALUES ('f0000000-0000-4000-8000-000000000001', '0900000011', '2026-11-03 09:00:00+07');
+ERROR:  null value in column "full_name" of relation "customers" violates not-null constraint
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000001, 0900000011, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23502 · table customers · column full_name
+-- [lab] PASS: đúng lỗi mong đợi 23502 full_name
+
+-- Chuyến phải thuộc một thành phố.
+-- expect-error: 23502 city_id
+INSERT INTO trips (id, kind, customer_id, status, fare, requested_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000002', 'ride', 'c0000000-0000-4000-8000-000000000001',
+        'requested', 40000, '2026-11-03 09:00:00+07', '2026-11-03 09:00:00+07');
+ERROR:  null value in column "city_id" of relation "trips" violates not-null constraint
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000002, 100016, ride, null, c0000000-0000-4000-8000-000000000001, null, null, requested, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23502 · table trips · column city_id
+-- [lab] PASS: đúng lỗi mong đợi 23502 city_id
+
+-- Ghi NULL tường minh cũng bị chặn, kể cả khi cột có DEFAULT.
+-- expect-error: 23502 status
+INSERT INTO trips (id, kind, city_id, customer_id, status, fare, requested_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000003', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        NULL, 40000, '2026-11-03 09:00:00+07', '2026-11-03 09:00:00+07');
+ERROR:  null value in column "status" of relation "trips" violates not-null constraint
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000003, 100017, ride, 1, c0000000-0000-4000-8000-000000000001, null, null, null, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23502 · table trips · column status
+-- [lab] PASS: đúng lỗi mong đợi 23502 status
+
+-- ---------------------------------------------------------------------------
+-- UNIQUE: hai dòng không được trùng khoá nghiệp vụ.
+
+-- Số điện thoại 0900000001 đã thuộc khách Nguyễn Văn An.
+-- expect-error: 23505 uq_customers_phone
+INSERT INTO customers (id, phone, full_name, created_at)
+VALUES ('f0000000-0000-4000-8000-000000000004', '0900000001', 'Khách Trùng Số', '2026-11-03 09:00:00+07');
+ERROR:  duplicate key value violates unique constraint "uq_customers_phone"
+DETAIL:  Key (phone)=(0900000001) already exists.
+-- [lab] SQLSTATE 23505 · constraint uq_customers_phone · table customers
+-- [lab] PASS: đúng lỗi mong đợi 23505 uq_customers_phone
+
+-- Mã tài xế 8001 đã được cấp.
+-- expect-error: 23505 uq_drivers_code
+INSERT INTO drivers (id, code, full_name, city_id, vehicle_type, status, created_at)
+VALUES ('f0000000-0000-4000-8000-000000000005', 8001, 'Tài Xế Trùng Mã', 1, 'bike', 'offline', '2026-11-03 09:00:00+07');
+ERROR:  duplicate key value violates unique constraint "uq_drivers_code"
+DETAIL:  Key (code)=(8001) already exists.
+-- [lab] SQLSTATE 23505 · constraint uq_drivers_code · table drivers
+-- [lab] PASS: đúng lỗi mong đợi 23505 uq_drivers_code
+
+-- Mã thành phố là duy nhất.
+-- expect-error: 23505 uq_cities_code
+INSERT INTO cities (id, code, name) VALUES (9, 'SG', 'Sài Gòn (trùng mã)');
+ERROR:  duplicate key value violates unique constraint "uq_cities_code"
+DETAIL:  Key (code)=(SG) already exists.
+-- [lab] SQLSTATE 23505 · constraint uq_cities_code · table cities
+-- [lab] PASS: đúng lỗi mong đợi 23505 uq_cities_code
+
+-- PRIMARY KEY = NOT NULL + UNIQUE: trùng id cũng bị chặn.
+-- expect-error: 23505 pk_cities
+INSERT INTO cities (id, code, name) VALUES (1, 'XX', 'Trùng id 1');
+ERROR:  duplicate key value violates unique constraint "pk_cities"
+DETAIL:  Key (id)=(1) already exists.
+-- [lab] SQLSTATE 23505 · constraint pk_cities · table cities
+-- [lab] PASS: đúng lỗi mong đợi 23505 pk_cities
+
+-- ---------------------------------------------------------------------------
+-- FOREIGN KEY: tham chiếu tới dòng không tồn tại.
+
+-- Không có thành phố id 9.
+-- expect-error: 23503 fk_drivers_city
+INSERT INTO drivers (id, code, full_name, city_id, vehicle_type, status, created_at)
+VALUES ('f0000000-0000-4000-8000-000000000006', 8099, 'Tài Xế Lạc Đường', 9, 'bike', 'offline', '2026-11-03 09:00:00+07');
+ERROR:  insert or update on table "drivers" violates foreign key constraint "fk_drivers_city"
+DETAIL:  Key (city_id)=(9) is not present in table "cities".
+-- [lab] SQLSTATE 23503 · constraint fk_drivers_city · table drivers
+-- [lab] PASS: đúng lỗi mong đợi 23503 fk_drivers_city
+
+-- Không có khách …0099.
+-- expect-error: 23503 fk_trips_customer
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000007', 'ride', 1, 'c0000000-0000-4000-8000-000000000099', NULL, NULL,
+        'requested', 40000, '2026-11-03 09:00:00+07', NULL, NULL, '2026-11-03 09:00:00+07');
+ERROR:  insert or update on table "trips" violates foreign key constraint "fk_trips_customer"
+DETAIL:  Key (customer_id)=(c0000000-0000-4000-8000-000000000099) is not present in table "customers".
+-- [lab] SQLSTATE 23503 · constraint fk_trips_customer · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23503 fk_trips_customer
+
+-- Không xoá được thành phố còn tài xế, quán, chuyến tham chiếu (mặc định NO ACTION).
+-- expect-error: 23503 fk_drivers_city
+DELETE FROM cities WHERE id = 3;
+ERROR:  update or delete on table "cities" violates foreign key constraint "fk_drivers_city" on table "drivers"
+DETAIL:  Key (id)=(3) is still referenced from table "drivers".
+-- [lab] SQLSTATE 23503 · constraint fk_drivers_city · table drivers
+-- [lab] PASS: đúng lỗi mong đợi 23503 fk_drivers_city
+
+-- ---------------------------------------------------------------------------
+-- CHECK: quy tắc nghiệp vụ trên một dòng.
+
+-- Số điện thoại phải ở dạng chuẩn 0xxxxxxxxx; '+84…' bị từ chối để UNIQUE có nghĩa.
+-- expect-error: 23514 ck_customers_phone_format
+INSERT INTO customers (id, phone, full_name, created_at)
+VALUES ('f0000000-0000-4000-8000-000000000008', '+84900000001', 'Nguyễn Văn An', '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "customers" violates check constraint "ck_customers_phone_format"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000008, +84900000001, Nguyễn Văn An, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_customers_phone_format · table customers
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_customers_phone_format
+
+-- Họ tên toàn khoảng trắng: NOT NULL không chặn được, CHECK chặn được.
+-- expect-error: 23514 ck_customers_full_name_not_blank
+INSERT INTO customers (id, phone, full_name, created_at)
+VALUES ('f0000000-0000-4000-8000-000000000009', '0900000019', '   ', '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "customers" violates check constraint "ck_customers_full_name_not_blank"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000009, 0900000019,    , 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_customers_full_name_not_blank · table customers
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_customers_full_name_not_blank
+
+-- Mã thành phố phải là 2 chữ in hoa.
+-- expect-error: 23514 ck_cities_code_format
+INSERT INTO cities (id, code, name) VALUES (4, 'hp', 'Hải Phòng');
+ERROR:  new row for relation "cities" violates check constraint "ck_cities_code_format"
+DETAIL:  Failing row contains (4, hp, Hải Phòng).
+-- [lab] SQLSTATE 23514 · constraint ck_cities_code_format · table cities
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_cities_code_format
+
+-- Loại xe chỉ có bike / car.
+-- expect-error: 23514 ck_drivers_vehicle_type
+INSERT INTO drivers (id, code, full_name, city_id, vehicle_type, status, created_at)
+VALUES ('f0000000-0000-4000-8000-000000000010', 8010, 'Tài Xế Xe Tải', 1, 'truck', 'offline', '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "drivers" violates check constraint "ck_drivers_vehicle_type"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000010, 8010, Tài Xế Xe Tải, 1, truck, offline, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_drivers_vehicle_type · table drivers
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_drivers_vehicle_type
+
+-- Trạng thái tài xế chỉ có offline / online / busy.
+-- expect-error: 23514 ck_drivers_status
+UPDATE drivers SET status = 'sleeping' WHERE code = 8006;
+ERROR:  new row for relation "drivers" violates check constraint "ck_drivers_status"
+DETAIL:  Failing row contains (d0000000-0000-4000-8000-000000008006, 8006, Trịnh Văn Phúc, 3, car, sleeping, 2026-09-15 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_drivers_status · table drivers
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_drivers_status
+
+-- Loại chuyến chỉ có ride / food / parcel.
+-- expect-error: 23514 ck_trips_kind
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000011', 'taxi', 1, 'c0000000-0000-4000-8000-000000000001', NULL, NULL,
+        'requested', 40000, '2026-11-03 09:00:00+07', NULL, NULL, '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_kind"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000011, 100019, taxi, 1, c0000000-0000-4000-8000-000000000001, null, null, requested, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_kind · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_kind
+
+-- Trạng thái chuyến phải thuộc 8 trạng thái của vòng đời.
+-- expect-error: 23514 ck_trips_status
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000012', 'ride', 1, 'c0000000-0000-4000-8000-000000000001', NULL, NULL,
+        'done', 40000, '2026-11-03 09:00:00+07', NULL, NULL, '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_status"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000012, 100020, ride, 1, c0000000-0000-4000-8000-000000000001, null, null, done, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_status · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_status
+
+-- Cước không được âm.
+-- expect-error: 23514 ck_trips_fare_non_negative
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000013', 'ride', 1, 'c0000000-0000-4000-8000-000000000001', NULL, NULL,
+        'requested', -1000, '2026-11-03 09:00:00+07', NULL, NULL, '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_fare_non_negative"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000013, 100021, ride, 1, c0000000-0000-4000-8000-000000000001, null, null, requested, -1000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_fare_non_negative · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_fare_non_negative
+
+-- Đơn đồ ăn phải có quán.
+-- expect-error: 23514 ck_trips_merchant_only_food
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000014', 'food', 1, 'c0000000-0000-4000-8000-000000000001', NULL, NULL,
+        'requested', 40000, '2026-11-03 09:00:00+07', NULL, NULL, '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_merchant_only_food"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000014, 100022, food, 1, c0000000-0000-4000-8000-000000000001, null, null, requested, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_merchant_only_food · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_merchant_only_food
+
+-- Chuyến đặt xe không gắn quán.
+-- expect-error: 23514 ck_trips_merchant_only_food
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000015', 'ride', 1, 'c0000000-0000-4000-8000-000000000001', NULL,
+        'e0000000-0000-4000-8000-000000000001',
+        'requested', 40000, '2026-11-03 09:00:00+07', NULL, NULL, '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_merchant_only_food"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000015, 100023, ride, 1, c0000000-0000-4000-8000-000000000001, null, e0000000-0000-4000-8000-000000000001, requested, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_merchant_only_food · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_merchant_only_food
+
+-- Chuyến đang tìm tài xế không thể đã có tài xế.
+-- expect-error: 23514 ck_trips_unassigned_no_driver
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000016', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'd0000000-0000-4000-8000-000000008003', NULL,
+        'searching', 40000, '2026-11-03 09:00:00+07', '2026-11-03 09:01:00+07', NULL, '2026-11-03 09:01:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_unassigned_no_driver"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000016, 100024, ride, 1, c0000000-0000-4000-8000-000000000001, d0000000-0000-4000-8000-000000008003, null, searching, 40000, 2026-11-03 09:00:00+07, 2026-11-03 09:01:00+07, null, 2026-11-03 09:01:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_unassigned_no_driver · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_unassigned_no_driver
+
+-- Chuyến hoàn thành phải có tài xế.
+-- expect-error: 23514 ck_trips_assigned_has_driver
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000017', 'ride', 1, 'c0000000-0000-4000-8000-000000000001', NULL, NULL,
+        'completed', 40000, '2026-11-03 09:00:00+07', NULL, '2026-11-03 09:30:00+07', '2026-11-03 09:30:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_assigned_has_driver"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000017, 100025, ride, 1, c0000000-0000-4000-8000-000000000001, null, null, completed, 40000, 2026-11-03 09:00:00+07, null, 2026-11-03 09:30:00+07, 2026-11-03 09:30:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_assigned_has_driver · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_assigned_has_driver
+
+-- Có tài xế thì phải có mốc nhận chuyến.
+-- expect-error: 23514 ck_trips_driver_accepted_together
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000018', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'd0000000-0000-4000-8000-000000008003', NULL,
+        'accepted', 40000, '2026-11-03 09:00:00+07', NULL, NULL, '2026-11-03 09:01:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_driver_accepted_together"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000018, 100026, ride, 1, c0000000-0000-4000-8000-000000000001, d0000000-0000-4000-8000-000000008003, null, accepted, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:01:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_driver_accepted_together · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_driver_accepted_together
+
+-- Trạng thái completed phải có completed_at (chuyến 100012 đang `accepted`,
+-- đổi trạng thái mà quên ghi mốc hoàn thành).
+-- expect-error: 23514 ck_trips_completed_at_by_status
+UPDATE trips SET status = 'completed' WHERE code = 100012;
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_completed_at_by_status"
+DETAIL:  Failing row contains (70000000-0000-4000-8000-000000100012, 100012, ride, 1, c0000000-0000-4000-8000-000000000001, d0000000-0000-4000-8000-000000008001, null, completed, 39000, 2026-11-03 08:20:00+07, 2026-11-03 08:21:00+07, null, 2026-11-03 08:21:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_completed_at_by_status · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_completed_at_by_status
+
+-- Không thể nhận chuyến trước khi khách đặt.
+-- expect-error: 23514 ck_trips_accepted_after_requested
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000019', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'd0000000-0000-4000-8000-000000008003', NULL,
+        'accepted', 40000, '2026-11-03 09:00:00+07', '2026-11-03 08:59:00+07', NULL, '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_accepted_after_requested"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000019, 100027, ride, 1, c0000000-0000-4000-8000-000000000001, d0000000-0000-4000-8000-000000008003, null, accepted, 40000, 2026-11-03 09:00:00+07, 2026-11-03 08:59:00+07, null, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_accepted_after_requested · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_accepted_after_requested
+
+-- Không thể hoàn thành trước khi được nhận.
+-- expect-error: 23514 ck_trips_completed_after_accepted
+INSERT INTO trips (id, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000020', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'd0000000-0000-4000-8000-000000008003', NULL,
+        'completed', 40000, '2026-11-03 09:00:00+07', '2026-11-03 09:10:00+07', '2026-11-03 09:05:00+07',
+        '2026-11-03 09:10:00+07');
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_completed_after_accepted"
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000020, 100028, ride, 1, c0000000-0000-4000-8000-000000000001, d0000000-0000-4000-8000-000000008003, null, completed, 40000, 2026-11-03 09:00:00+07, 2026-11-03 09:10:00+07, 2026-11-03 09:05:00+07, 2026-11-03 09:10:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_completed_after_accepted · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_completed_after_accepted
+
+-- Lịch sử chỉ nhận 8 trạng thái hợp lệ ('paid' là chuyện của thanh toán, không phải chuyến).
+-- expect-error: 23514 ck_trip_events_status
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('70000000-0000-4000-8000-000000100000', 'paid', '2026-11-03 09:00:00+07');
+ERROR:  new row for relation "trip_events" violates check constraint "ck_trip_events_status"
+DETAIL:  Failing row contains (1, 70000000-0000-4000-8000-000000100000, paid, 2026-11-03 09:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trip_events_status · table trip_events
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trip_events_status
+
+-- ---------------------------------------------------------------------------
+-- IDENTITY GENERATED ALWAYS: mã chuyến do database cấp, không ghi tay.
+-- expect-error: 428C9
+INSERT INTO trips (id, code, kind, city_id, customer_id, status, fare, requested_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000021', 1, 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'requested', 40000, '2026-11-03 09:00:00+07', '2026-11-03 09:00:00+07');
+ERROR:  cannot insert a non-DEFAULT value into column "code"
+DETAIL:  Column "code" is an identity column defined as GENERATED ALWAYS.
+HINT:  Use OVERRIDING SYSTEM VALUE to override.
+-- [lab] SQLSTATE 428C9
+-- [lab] PASS: đúng lỗi mong đợi 428C9
+
+-- ---------------------------------------------------------------------------
+-- Sai kiểu / sai định dạng: lỗi xảy ra ngay khi đọc giá trị, trước mọi ràng buộc.
+
+-- Cước phải là số nguyên đồng, không kèm dấu chấm nghìn hay ký hiệu tiền.
+-- expect-error: 22P02
+INSERT INTO trips (id, kind, city_id, customer_id, status, fare, requested_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000022', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'requested', '45.000đ', '2026-11-03 09:00:00+07', '2026-11-03 09:00:00+07');
+ERROR:  invalid input syntax for type integer: "45.000đ"
+-- [lab] SQLSTATE 22P02
+-- [lab] PASS: đúng lỗi mong đợi 22P02
+
+-- `integer` tối đa 2.147.483.647; 3 tỷ đồng cho một chuyến là vượt miền giá trị.
+-- expect-error: 22003
+INSERT INTO trips (id, kind, city_id, customer_id, status, fare, requested_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000023', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'requested', 3000000000, '2026-11-03 09:00:00+07', '2026-11-03 09:00:00+07');
+ERROR:  integer out of range
+-- [lab] SQLSTATE 22003
+-- [lab] PASS: đúng lỗi mong đợi 22003
+
+-- UUID sai định dạng.
+-- expect-error: 22P02
+INSERT INTO trips (id, kind, city_id, customer_id, status, fare, requested_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000024', 'ride', 1, 'khach-so-1',
+        'requested', 40000, '2026-11-03 09:00:00+07', '2026-11-03 09:00:00+07');
+ERROR:  invalid input syntax for type uuid: "khach-so-1"
+-- [lab] SQLSTATE 22P02
+-- [lab] PASS: đúng lỗi mong đợi 22P02
+
+-- Ngày không tồn tại (30/02).
+-- expect-error: 22008
+INSERT INTO trips (id, kind, city_id, customer_id, status, fare, requested_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000025', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'requested', 40000, '2026-02-30 09:00:00+07', '2026-11-03 09:00:00+07');
+ERROR:  date/time field value out of range: "2026-02-30 09:00:00+07"
+-- [lab] SQLSTATE 22008
+-- [lab] PASS: đúng lỗi mong đợi 22008
+
+-- Chuỗi không phải thời điểm.
+-- expect-error: 22007
+INSERT INTO trips (id, kind, city_id, customer_id, status, fare, requested_at, updated_at)
+VALUES ('f0000000-0000-4000-8000-000000000026', 'ride', 1, 'c0000000-0000-4000-8000-000000000001',
+        'requested', 40000, 'hôm qua', '2026-11-03 09:00:00+07');
+ERROR:  invalid input syntax for type timestamp with time zone: "hôm qua"
+-- [lab] SQLSTATE 22007
+-- [lab] PASS: đúng lỗi mong đợi 22007
+
+-- ---------------------------------------------------------------------------
+-- Cái bẫy KHÔNG báo lỗi: với DateStyle mặc định 'ISO, MDY', chuỗi '03/11/2026'
+-- được hiểu là THÁNG 3 ngày 11, không phải 3/11 như cách viết ở Việt Nam.
+-- Luôn ghi ngày giờ theo ISO 8601: '2026-11-03 09:00:00+07'.
+SELECT current_setting('DateStyle') AS datestyle,
+       '03/11/2026'::date            AS chuoi_03_11_2026,
+       DATE '2026-11-03'             AS iso_2026_11_03;
+ datestyle | chuoi_03_11_2026 | iso_2026_11_03
+-----------+------------------+----------------
+ ISO, MDY  | 2026-03-11       | 2026-11-03
+(1 row)
+
+-- Sau toàn bộ các câu lỗi, dữ liệu hợp lệ không đổi.
+-- expect-rows: 1
+SELECT (SELECT count(*) FROM cities)    AS cities,
+       (SELECT count(*) FROM customers) AS customers,
+       (SELECT count(*) FROM drivers)   AS drivers,
+       (SELECT count(*) FROM trips)     AS trips;
+ cities | customers | drivers | trips
+--------+-----------+---------+-------
+      3 |         6 |       6 |    15
+(1 row)
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] ===== p01/04-lifecycle.sql =====
+
+-- P01 · 04-lifecycle.sql — vòng đời một chuyến bằng INSERT / UPDATE / DELETE
+-- … RETURNING (PG-006).
+--
+-- Kịch bản: 09:00 ngày 03/11, khách Phạm Thu Dung (Hà Nội) đặt xe máy. Tài xế
+-- Ngô Quang Minh (mã 8003, đang online) nhận chuyến và chở khách tới nơi.
+-- Mỗi lần đổi trạng thái = một UPDATE trips + một dòng trip_events.
+--
+-- Chuyến mới mang UUID do "ứng dụng" sinh sẵn (b…0001) — cách làm phổ biến khi
+-- app cần biết id trước khi gửi xuống database; nhờ đó các câu sau tìm đúng
+-- chuyến mà không cần đoán mã. Mã chuyến (code) vẫn do IDENTITY cấp.
+--
+-- Mốc thời gian ghi tay để kết quả ổn định; ứng dụng thật dùng now().
+-- Mỗi câu ở đây tự commit riêng. Ghi trips và trip_events trong CÙNG một giao
+-- dịch là chủ đề của P04 (PG-031); câu cuối của phần 1 cho thấy cách gộp
+-- bằng một câu lệnh duy nhất.
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- ===========================================================================
+-- Phần 1 · Chuyến đi trọn vòng đời
+-- ===========================================================================
+
+-- 1. Khách đặt: chỉ ghi những gì đã biết; status, accepted_at… dùng DEFAULT/NULL.
+--    RETURNING trả lại các cột database tự điền (code, status) ngay trong câu
+--    INSERT — không cần SELECT thêm lần nữa.
+--    Mã chuyến KHÔNG phải 100015: 03-fixture-invalid.sql đã gọi IDENTITY nhiều
+--    lần trong các câu thất bại, mà số đã cấp thì không được trả lại.
+-- expect-rows: 1
+INSERT INTO trips (id, kind, city_id, customer_id, fare, requested_at, updated_at)
+VALUES ('b0000000-0000-4000-8000-000000000001', 'ride', 2, 'c0000000-0000-4000-8000-000000000004',
+        54000, '2026-11-03 09:00:00+07', '2026-11-03 09:00:00+07')
+RETURNING code, kind, status, driver_id, fare, requested_at;
+  code  | kind |  status   | driver_id | fare  |      requested_at
+--------+------+-----------+-----------+-------+------------------------
+ 100029 | ride | requested |           | 54000 | 2026-11-03 09:00:00+07
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- expect-rows: 1
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('b0000000-0000-4000-8000-000000000001', 'requested', '2026-11-03 09:00:00+07')
+RETURNING id, status, occurred_at;
+ id |  status   |      occurred_at
+----+-----------+------------------------
+  2 | requested | 2026-11-03 09:00:00+07
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- 2. Hệ thống bắt đầu tìm tài xế. Điều kiện `AND status = 'requested'` bảo đảm
+--    chỉ chuyển từ đúng trạng thái trước đó.
+-- expect-rows: 1
+UPDATE trips
+SET status = 'searching', updated_at = '2026-11-03 09:00:05+07'
+WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'requested'
+RETURNING code, status, updated_at;
+  code  |  status   |       updated_at
+--------+-----------+------------------------
+ 100029 | searching | 2026-11-03 09:00:05+07
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('b0000000-0000-4000-8000-000000000001', 'searching', '2026-11-03 09:00:05+07');
+INSERT 0 1
+
+-- 3. Tài xế 8003 bấm nhận. Chỉ thành công khi chuyến vẫn đang `searching`.
+-- expect-rows: 1
+UPDATE trips
+SET status      = 'accepted',
+    driver_id   = 'd0000000-0000-4000-8000-000000008003',
+    accepted_at = '2026-11-03 09:01:00+07',
+    updated_at  = '2026-11-03 09:01:00+07'
+WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'searching'
+RETURNING code, status, driver_id, accepted_at;
+  code  |  status  |              driver_id               |      accepted_at
+--------+----------+--------------------------------------+------------------------
+ 100029 | accepted | d0000000-0000-4000-8000-000000008003 | 2026-11-03 09:01:00+07
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('b0000000-0000-4000-8000-000000000001', 'accepted', '2026-11-03 09:01:00+07');
+INSERT 0 1
+
+-- Tài xế chuyển sang bận — cũng có điều kiện: chỉ từ online.
+-- expect-rows: 1
+UPDATE drivers SET status = 'busy'
+WHERE code = 8003 AND status = 'online'
+RETURNING code, full_name, status;
+ code |   full_name    | status
+------+----------------+--------
+ 8003 | Ngô Quang Minh | busy
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- 4. Một giây sau, tài xế 8001 cũng bấm nhận CÙNG chuyến. Chuyến đã `accepted`
+--    nên điều kiện `status = 'searching'` không còn đúng: UPDATE 0, không dòng
+--    nào bị sửa, tài xế 8003 giữ nguyên chuyến. Ứng dụng đọc "0 dòng" để báo
+--    "chuyến đã có người nhận".
+--    Nếu bỏ điều kiện status, câu này sẽ GHI ĐÈ tài xế 8003 — lỗi "lost update".
+--    (Hai tài xế bấm trong cùng một khoảnh khắc thật sự: xem P04, PG-035/PG-040.)
+-- expect-rows: 0
+UPDATE trips
+SET status      = 'accepted',
+    driver_id   = 'd0000000-0000-4000-8000-000000008001',
+    accepted_at = '2026-11-03 09:01:01+07',
+    updated_at  = '2026-11-03 09:01:01+07'
+WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'searching'
+RETURNING code, status, driver_id;
+ code | status | driver_id
+------+--------+-----------
+(0 rows)
+
+UPDATE 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- 5. Tài xế đang tới đón → đã đón → đang chở.
+-- expect-rows: 1
+UPDATE trips SET status = 'arriving', updated_at = '2026-11-03 09:01:30+07'
+WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'accepted'
+RETURNING code, status, updated_at;
+  code  |  status  |       updated_at
+--------+----------+------------------------
+ 100029 | arriving | 2026-11-03 09:01:30+07
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('b0000000-0000-4000-8000-000000000001', 'arriving', '2026-11-03 09:01:30+07');
+INSERT 0 1
+
+-- expect-rows: 1
+UPDATE trips SET status = 'picked_up', updated_at = '2026-11-03 09:07:00+07'
+WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'arriving'
+RETURNING code, status, updated_at;
+  code  |  status   |       updated_at
+--------+-----------+------------------------
+ 100029 | picked_up | 2026-11-03 09:07:00+07
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('b0000000-0000-4000-8000-000000000001', 'picked_up', '2026-11-03 09:07:00+07');
+INSERT 0 1
+
+-- expect-rows: 1
+UPDATE trips SET status = 'in_transit', updated_at = '2026-11-03 09:07:20+07'
+WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'picked_up'
+RETURNING code, status, updated_at;
+  code  |   status   |       updated_at
+--------+------------+------------------------
+ 100029 | in_transit | 2026-11-03 09:07:20+07
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('b0000000-0000-4000-8000-000000000001', 'in_transit', '2026-11-03 09:07:20+07');
+INSERT 0 1
+
+-- 6. Hoàn thành: thử quên ghi completed_at ⇒ CHECK chặn lại.
+-- expect-error: 23514 ck_trips_completed_at_by_status
+UPDATE trips SET status = 'completed', updated_at = '2026-11-03 09:31:00+07'
+WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'in_transit';
+ERROR:  new row for relation "trips" violates check constraint "ck_trips_completed_at_by_status"
+DETAIL:  Failing row contains (b0000000-0000-4000-8000-000000000001, 100029, ride, 2, c0000000-0000-4000-8000-000000000004, d0000000-0000-4000-8000-000000008003, null, completed, 54000, 2026-11-03 09:00:00+07, 2026-11-03 09:01:00+07, null, 2026-11-03 09:31:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trips_completed_at_by_status · table trips
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trips_completed_at_by_status
+
+-- 7. Hoàn thành đúng cách, GỘP hai việc trong MỘT câu lệnh: UPDATE … RETURNING
+--    nằm trong WITH, kết quả của nó đi thẳng vào INSERT trip_events. Một câu
+--    lệnh luôn thành công hoặc thất bại trọn vẹn, nên không thể có chuyến
+--    `completed` mà thiếu dòng lịch sử. Thẻ lệnh in ra là của câu INSERT ngoài.
+-- expect-rows: 1
+WITH done AS (
+  UPDATE trips
+  SET status       = 'completed',
+      completed_at = '2026-11-03 09:31:00+07',
+      updated_at   = '2026-11-03 09:31:00+07'
+  WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'in_transit'
+  RETURNING id, status, completed_at
+)
+INSERT INTO trip_events (trip_id, status, occurred_at)
+SELECT id, status, completed_at FROM done
+RETURNING id, status, occurred_at;
+ id |  status   |      occurred_at
+----+-----------+------------------------
+  8 | completed | 2026-11-03 09:31:00+07
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- expect-rows: 1
+UPDATE drivers SET status = 'online'
+WHERE code = 8003 AND status = 'busy'
+RETURNING code, status;
+ code | status
+------+--------
+ 8003 | online
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- 8. Đọc lại: trạng thái cuối và lịch sử (sắp theo thời điểm, hoà thì theo id).
+-- expect-rows: 1
+SELECT code, status, fare, requested_at, accepted_at, completed_at,
+       completed_at - requested_at AS tong_thoi_gian
+FROM trips
+WHERE id = 'b0000000-0000-4000-8000-000000000001';
+  code  |  status   | fare  |      requested_at      |      accepted_at       |      completed_at      | tong_thoi_gian
+--------+-----------+-------+------------------------+------------------------+------------------------+----------------
+ 100029 | completed | 54000 | 2026-11-03 09:00:00+07 | 2026-11-03 09:01:00+07 | 2026-11-03 09:31:00+07 | 00:31:00
+(1 row)
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- expect-rows: 7
+SELECT id, status, occurred_at
+FROM trip_events
+WHERE trip_id = 'b0000000-0000-4000-8000-000000000001'
+ORDER BY occurred_at, id;
+ id |   status   |      occurred_at
+----+------------+------------------------
+  2 | requested  | 2026-11-03 09:00:00+07
+  3 | searching  | 2026-11-03 09:00:05+07
+  4 | accepted   | 2026-11-03 09:01:00+07
+  5 | arriving   | 2026-11-03 09:01:30+07
+  6 | picked_up  | 2026-11-03 09:07:00+07
+  7 | in_transit | 2026-11-03 09:07:20+07
+  8 | completed  | 2026-11-03 09:31:00+07
+(7 rows)
+-- [lab] PASS: đúng 7 dòng như mong đợi
+
+-- ===========================================================================
+-- Phần 2 · Bản nháp đặt nhầm: huỷ rồi xoá
+-- ===========================================================================
+-- Tới Nơi KHÔNG xoá chuyến thật (cần cho đối soát, khiếu nại, thống kê):
+-- chuyến bị huỷ giữ trạng thái `cancelled`. DELETE chỉ dành cho dữ liệu tạo
+-- nhầm/thử nghiệm — và ngay cả khi đó, khoá ngoại vẫn bảo vệ lịch sử.
+
+-- expect-rows: 1
+INSERT INTO trips (id, kind, city_id, customer_id, fare, requested_at, updated_at)
+VALUES ('b0000000-0000-4000-8000-000000000002', 'parcel', 1, 'c0000000-0000-4000-8000-000000000006',
+        25000, '2026-11-03 09:10:00+07', '2026-11-03 09:10:00+07')
+RETURNING code, kind, status;
+  code  |  kind  |  status
+--------+--------+-----------
+ 100030 | parcel | requested
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('b0000000-0000-4000-8000-000000000002', 'requested', '2026-11-03 09:10:00+07');
+INSERT 0 1
+
+-- Huỷ được khi chưa ai nhận (requested hoặc searching).
+-- expect-rows: 1
+UPDATE trips SET status = 'cancelled', updated_at = '2026-11-03 09:10:40+07'
+WHERE id = 'b0000000-0000-4000-8000-000000000002' AND status IN ('requested', 'searching')
+RETURNING code, status, updated_at;
+  code  |  status   |       updated_at
+--------+-----------+------------------------
+ 100030 | cancelled | 2026-11-03 09:10:40+07
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('b0000000-0000-4000-8000-000000000002', 'cancelled', '2026-11-03 09:10:40+07');
+INSERT 0 1
+
+-- Xoá chuyến khi còn dòng lịch sử trỏ tới nó ⇒ khoá ngoại chặn (NO ACTION).
+-- expect-error: 23503 fk_trip_events_trip
+DELETE FROM trips
+WHERE id = 'b0000000-0000-4000-8000-000000000002' AND status = 'cancelled';
+ERROR:  update or delete on table "trips" violates foreign key constraint "fk_trip_events_trip" on table "trip_events"
+DETAIL:  Key (id)=(b0000000-0000-4000-8000-000000000002) is still referenced from table "trip_events".
+-- [lab] SQLSTATE 23503 · constraint fk_trip_events_trip · table trip_events
+-- [lab] PASS: đúng lỗi mong đợi 23503 fk_trip_events_trip
+
+-- Xoá lịch sử trước (RETURNING cho biết đã xoá những gì), rồi mới xoá chuyến.
+-- expect-rows: 2
+DELETE FROM trip_events
+WHERE trip_id = 'b0000000-0000-4000-8000-000000000002'
+RETURNING status, occurred_at;
+  status   |      occurred_at
+-----------+------------------------
+ requested | 2026-11-03 09:10:00+07
+ cancelled | 2026-11-03 09:10:40+07
+(2 rows)
+
+DELETE 2
+-- [lab] PASS: đúng 2 dòng như mong đợi
+
+-- expect-rows: 1
+DELETE FROM trips
+WHERE id = 'b0000000-0000-4000-8000-000000000002' AND status = 'cancelled'
+RETURNING code, kind, status, fare;
+  code  |  kind  |  status   | fare
+--------+--------+-----------+-------
+ 100030 | parcel | cancelled | 25000
+(1 row)
+
+DELETE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- Mã của chuyến vừa xoá không được dùng lại: sequence `trips_code_seq` (do
+-- IDENTITY tự tạo) đã cấp tới số đó, chuyến tiếp theo nhận số kế tiếp. Dãy mã
+-- có "lỗ" (từ các câu lỗi ở 03 và chuyến vừa xoá) — mã là để tra cứu, không
+-- phải để đếm số chuyến.
+SELECT max(code) AS ma_lon_nhat,
+       count(*) AS so_chuyen,
+       (SELECT last_value FROM trips_code_seq) AS so_cap_gan_nhat
+FROM trips;
+ ma_lon_nhat | so_chuyen | so_cap_gan_nhat
+-------------+-----------+-----------------
+      100029 |        16 |          100030
+(1 row)
+
+-- [lab] ===== p01/05-select.sql =====
+
+-- P01 · 05-select.sql — SELECT đầu tiên: lọc, sắp xếp, giới hạn (PG-007).
+--
+-- Chạy sau 02 và 04. Dữ liệu: 15 chuyến của fixture + chuyến 100029 ở 04.
+-- File này chỉ ĐỌC (trừ các lệnh SET của phiên).
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- 1. Lọc theo một trạng thái. Chỉ lấy cột cần dùng thay vì SELECT *.
+-- expect-rows: 8
+SELECT code, kind, city_id, fare, completed_at
+FROM trips
+WHERE status = 'completed'
+ORDER BY code;
+  code  |  kind  | city_id |  fare  |      completed_at
+--------+--------+---------+--------+------------------------
+ 100000 | ride   |       1 |  45000 | 2026-11-02 08:24:10+07
+ 100001 | parcel |       2 |  38000 | 2026-11-02 10:02:00+07
+ 100002 | food   |       1 |  62000 | 2026-11-02 11:41:00+07
+ 100004 | food   |       3 |  55000 | 2026-11-02 12:35:00+07
+ 100005 | ride   |       2 | 126000 | 2026-11-02 18:05:00+07
+ 100007 | parcel |       1 |  30000 | 2026-11-03 00:20:00+07
+ 100008 | ride   |       1 |      0 | 2026-11-03 00:30:00+07
+ 100029 | ride   |       2 |  54000 | 2026-11-03 09:31:00+07
+(8 rows)
+-- [lab] PASS: đúng 8 dòng như mong đợi
+
+-- 2. Lọc theo danh sách trạng thái: chuyến đang có tài xế trên đường.
+-- expect-rows: 4
+SELECT code, kind, status, requested_at
+FROM trips
+WHERE status IN ('accepted', 'arriving', 'picked_up', 'in_transit')
+ORDER BY requested_at, code;
+  code  |  kind  |   status   |      requested_at
+--------+--------+------------+------------------------
+ 100009 | food   | picked_up  | 2026-11-03 08:00:00+07
+ 100010 | ride   | in_transit | 2026-11-03 08:05:00+07
+ 100011 | parcel | arriving   | 2026-11-03 08:10:00+07
+ 100012 | ride   | accepted   | 2026-11-03 08:20:00+07
+(4 rows)
+-- [lab] PASS: đúng 4 dòng như mong đợi
+
+-- 3. Chuyến đặt trong NGÀY 02/11 theo giờ Việt Nam: khoảng nửa mở
+--    [00:00 ngày 02/11, 00:00 ngày 03/11) với mốc ghi rõ +07.
+--    Không dùng BETWEEN … '23:59:59' (bỏ sót 23:59:59.5) và không dùng hàm trên
+--    cột (khó dùng index — P03).
+-- expect-rows: 8
+SELECT code, kind, status, requested_at
+FROM trips
+WHERE requested_at >= '2026-11-02 00:00:00+07'
+  AND requested_at <  '2026-11-03 00:00:00+07'
+ORDER BY requested_at, code;
+  code  |  kind  |  status   |      requested_at
+--------+--------+-----------+------------------------
+ 100000 | ride   | completed | 2026-11-02 07:58:00+07
+ 100001 | parcel | completed | 2026-11-02 09:15:00+07
+ 100002 | food   | completed | 2026-11-02 11:05:00+07
+ 100003 | food   | cancelled | 2026-11-02 12:00:00+07
+ 100004 | food   | completed | 2026-11-02 12:00:00+07
+ 100005 | ride   | completed | 2026-11-02 17:30:00+07
+ 100006 | ride   | cancelled | 2026-11-02 18:00:00+07
+ 100007 | parcel | completed | 2026-11-02 23:50:00+07
+(8 rows)
+-- [lab] PASS: đúng 8 dòng như mong đợi
+
+-- 4. timestamptz lưu một KHOẢNH KHẮC; TimeZone của phiên chỉ đổi cách HIỂN THỊ
+--    và cách hiểu chuỗi không ghi múi giờ. Đổi phiên sang UTC để thấy rõ.
+SET TIME ZONE 'UTC';
+SET
+
+-- Cùng hai chuyến, giờ hiển thị đổi sang +00. Chuyến 100008 (00:10 ngày 03/11
+-- giờ VN) giờ hiện là 17:10 ngày 02/11.
+-- expect-rows: 2
+SELECT code, requested_at
+FROM trips
+WHERE code IN (100007, 100008)
+ORDER BY code;
+  code  |      requested_at
+--------+------------------------
+ 100007 | 2026-11-02 16:50:00+00
+ 100008 | 2026-11-02 17:10:00+00
+(2 rows)
+-- [lab] PASS: đúng 2 dòng như mong đợi
+
+-- Cái bẫy: ép kiểu `::date` dùng TimeZone của PHIÊN. Ở phiên UTC, "ngày 02/11"
+-- gom thêm chuyến 100008 ⇒ 9 thay vì 8. Câu thứ hai nói rõ múi giờ nên luôn
+-- đúng bất kể phiên đang đặt gì.
+SELECT count(*) FILTER (WHERE requested_at::date = DATE '2026-11-02') AS theo_mui_gio_phien,
+       count(*) FILTER (WHERE (requested_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date = DATE '2026-11-02')
+         AS theo_gio_viet_nam
+FROM trips;
+ theo_mui_gio_phien | theo_gio_viet_nam
+--------------------+-------------------
+                  9 |                 8
+(1 row)
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- 5. LIMIT: ba chuyến đặt gần nhất. Thứ tự mới → cũ, hoà giờ thì mã lớn trước —
+--    `code` là cột duy nhất nên thứ tự luôn xác định.
+-- expect-rows: 3
+SELECT code, kind, status, requested_at
+FROM trips
+ORDER BY requested_at DESC, code DESC
+LIMIT 3;
+  code  | kind |  status   |      requested_at
+--------+------+-----------+------------------------
+ 100029 | ride | completed | 2026-11-03 09:00:00+07
+ 100014 | ride | requested | 2026-11-03 08:29:30+07
+ 100013 | food | searching | 2026-11-03 08:25:00+07
+(3 rows)
+-- [lab] PASS: đúng 3 dòng như mong đợi
+
+-- 6. Thứ tự KHÔNG xác định. 100003 và 100004 cùng đặt lúc 12:00. Chỉ
+--    ORDER BY requested_at thì PostgreSQL được trả hai dòng hoà theo thứ tự
+--    bất kỳ; thứ tự đang thấy dưới đây là ngẫu nhiên may mắn, không phải cam kết.
+-- expect-rows: 2
+SELECT code, city_id, requested_at
+FROM trips
+WHERE requested_at = '2026-11-02 12:00:00+07'
+ORDER BY requested_at;
+  code  | city_id |      requested_at
+--------+---------+------------------------
+ 100003 |       2 | 2026-11-02 12:00:00+07
+ 100004 |       3 | 2026-11-02 12:00:00+07
+(2 rows)
+-- [lab] PASS: đúng 2 dòng như mong đợi
+
+--    Hậu quả cụ thể: phân trang. Màn hình "chuyến theo loại dịch vụ", mỗi
+--    trang 3 dòng, sắp theo `kind` — cột có rất nhiều giá trị trùng (5 chuyến
+--    food). Với LIMIT nhỏ, PostgreSQL dùng thuật toán "top-N" chỉ giữ N dòng
+--    tốt nhất, nên các dòng hoà ra theo thứ tự khác với khi sắp toàn bộ.
+-- Trang 1:
+-- expect-rows: 3
+SELECT code, kind, status
+FROM trips
+ORDER BY kind
+LIMIT 3;
+  code  | kind |  status
+--------+------+-----------
+ 100003 | food | cancelled
+ 100002 | food | completed
+ 100004 | food | completed
+(3 rows)
+-- [lab] PASS: đúng 3 dòng như mong đợi
+
+-- Trang 2: 100002 và 100004 xuất hiện LẦN NỮA, trong khi 100009 và 100013
+-- (cũng là food) không nằm ở trang nào trong hai trang đầu.
+-- expect-rows: 3
+SELECT code, kind, status
+FROM trips
+ORDER BY kind
+LIMIT 3 OFFSET 3;
+  code  |  kind  |  status
+--------+--------+-----------
+ 100004 | food   | completed
+ 100002 | food   | completed
+ 100007 | parcel | completed
+(3 rows)
+-- [lab] PASS: đúng 3 dòng như mong đợi
+
+-- Cách sửa: thêm cột duy nhất làm tie-breaker ở cuối ORDER BY ⇒ mọi dòng có
+-- một vị trí xác định, hai trang không chồng lên nhau. (Phân trang lịch sử
+-- dài bằng keyset thay cho OFFSET: PG-018.)
+-- expect-rows: 3
+SELECT code, kind, status
+FROM trips
+ORDER BY kind, code
+LIMIT 3;
+  code  | kind |  status
+--------+------+-----------
+ 100002 | food | completed
+ 100003 | food | cancelled
+ 100004 | food | completed
+(3 rows)
+-- [lab] PASS: đúng 3 dòng như mong đợi
+
+-- expect-rows: 3
+SELECT code, kind, status
+FROM trips
+ORDER BY kind, code
+LIMIT 3 OFFSET 3;
+  code  |  kind  |  status
+--------+--------+-----------
+ 100009 | food   | picked_up
+ 100013 | food   | searching
+ 100001 | parcel | completed
+(3 rows)
+-- [lab] PASS: đúng 3 dòng như mong đợi
+
+-- 7. NULL khi sắp xếp: mặc định NULL được coi là LỚN NHẤT — đứng CUỐI khi ASC,
+--    đứng ĐẦU khi DESC. Viết rõ NULLS FIRST / NULLS LAST khi điều đó quan trọng.
+-- expect-rows: 7
+SELECT code, status, accepted_at
+FROM trips
+WHERE requested_at >= '2026-11-03 08:00:00+07'
+ORDER BY accepted_at DESC NULLS LAST, code;
+  code  |   status   |      accepted_at
+--------+------------+------------------------
+ 100029 | completed  | 2026-11-03 09:01:00+07
+ 100012 | accepted   | 2026-11-03 08:21:00+07
+ 100011 | arriving   | 2026-11-03 08:12:00+07
+ 100010 | in_transit | 2026-11-03 08:06:00+07
+ 100009 | picked_up  | 2026-11-03 08:02:00+07
+ 100013 | searching  |
+ 100014 | requested  |
+(7 rows)
+-- [lab] PASS: đúng 7 dòng như mong đợi
+
+-- 8. Sắp xếp chữ tiếng Việt phụ thuộc COLLATION của database. PGlite dùng "C"
+--    (so theo mã byte UTF-8 ⇒ 'Đ' xếp sau 'V'); ảnh postgres:17.5 trong
+--    docker-compose.yml khởi tạo với en_US.utf8 nên thứ tự có thể khác. Ghi rõ
+--    COLLATE "C" để kết quả lab giống nhau trên mọi môi trường; muốn xếp theo
+--    thói quen người Việt cần collation phù hợp (ICU) — ngoài phạm vi P01.
+SELECT full_name
+FROM customers
+ORDER BY full_name COLLATE "C";
+   full_name
+----------------
+ Lê Hoàng Cường
+ Nguyễn Văn An
+ Phạm Thu Dung
+ Trần Thị Bình
+ Võ Minh Đức
+ Đặng Ngọc Hà
+(6 rows)
+
+-- [lab] ===== p01/06-migration.sql =====
+
+-- P01 · 06-migration.sql — thay đổi schema mà dữ liệu cũ và ứng dụng cũ vẫn chạy
+-- (PG-009). Hoàn tác: 06-migration-rollback.sql.
+--
+-- Yêu cầu nghiệp vụ: lưu BIỂN SỐ XE của tài xế, định dạng chuẩn, cuối cùng
+-- phải bắt buộc. Biển số của tài xế hiện có nằm ở một file do bộ phận tuyển
+-- dụng gửi — giá trị phụ thuộc từng dòng, không phải một hằng số chung.
+--
+-- Không làm một phát `ADD COLUMN vehicle_plate text NOT NULL`: bảng đã có dữ
+-- liệu nên câu đó lỗi ngay; và ứng dụng cũ (chưa biết cột mới) sẽ không thêm
+-- được tài xế. Thay vào đó là chuỗi bước "mở rộng → điền dữ liệu → siết lại"
+-- (expand → backfill → contract), mỗi bước giữ hệ thống chạy được:
+--
+--   B1  ADD COLUMN cho phép NULL           (ứng dụng cũ không bị ảnh hưởng)
+--   B2  ứng dụng cũ vẫn ghi được            (kiểm chứng)
+--   B3  backfill từ dữ liệu nguồn           (UPDATE … FROM)
+--   B4  CHECK định dạng NOT VALID           (chặn dữ liệu MỚI sai ngay)
+--   B5  VALIDATE CONSTRAINT                 (rà dữ liệu CŨ; phát hiện dòng sai)
+--   B6  CHECK (… IS NOT NULL) NOT VALID → VALIDATE → SET NOT NULL → bỏ CHECK phụ
+--       — chỉ làm khi MỌI phiên bản ứng dụng đã ghi biển số.
+--
+-- Trên server thật nhiều người dùng: đặt lock_timeout để câu ALTER không đứng
+-- chờ khoá quá lâu và chặn các truy vấn xếp hàng sau nó; backfill bảng lớn chia
+-- lô (vd. theo khoảng `code`). Lab chỉ có vài dòng nên chạy một lần.
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+SET lock_timeout = '5s';
+SET
+
+-- ---------------------------------------------------------------------------
+-- B0. Kiểm tra trước khi đổi: có bao nhiêu tài xế cần biển số.
+SELECT count(*) AS so_tai_xe FROM drivers;
+ so_tai_xe
+-----------
+         6
+(1 row)
+
+-- ---------------------------------------------------------------------------
+-- B1. Thêm cột cho phép NULL, không DEFAULT: chỉ sửa catalog, không viết lại
+--     bảng. Mọi dòng cũ đọc ra NULL.
+ALTER TABLE drivers ADD COLUMN vehicle_plate text;
+ALTER TABLE
+
+COMMENT ON COLUMN drivers.vehicle_plate IS 'Biển số xe dạng chuẩn, vd. 59X1-123.45 (xe máy) hoặc 30F-678.90 (ô tô)';
+COMMENT
+
+-- Truy vấn của ứng dụng cũ (liệt kê cột tường minh) vẫn chạy y như trước.
+-- `SELECT *` thì nhận thêm một cột — lý do ứng dụng không nên phụ thuộc SELECT *.
+SELECT code, full_name, vehicle_type, status
+FROM drivers
+ORDER BY code;
+ code |   full_name    | vehicle_type | status
+------+----------------+--------------+---------
+ 8001 | Bùi Văn Khoa   | bike         | busy
+ 8002 | Hồ Thị Lan     | bike         | busy
+ 8003 | Ngô Quang Minh | bike         | online
+ 8004 | Đỗ Thanh Nam   | car          | busy
+ 8005 | Lý Thị Oanh    | bike         | busy
+ 8006 | Trịnh Văn Phúc | car          | offline
+(6 rows)
+
+-- ---------------------------------------------------------------------------
+-- B2. Ứng dụng cũ đăng ký tài xế mới mà không biết cột biển số: vẫn thành công.
+--     (Viết dạng INSERT … SELECT … WHERE NOT EXISTS để chạy lại file không lỗi.)
+INSERT INTO drivers (id, code, full_name, city_id, vehicle_type, status, created_at)
+SELECT 'd0000000-0000-4000-8000-000000008007', 8007, 'Mai Xuân Quý', 1, 'bike', 'offline',
+       '2026-11-03 10:00:00+07'
+WHERE NOT EXISTS (SELECT 1 FROM drivers WHERE code = 8007);
+INSERT 0 1
+
+-- ---------------------------------------------------------------------------
+-- B3. Nạp file biển số vào bảng tạm (TEMP: chỉ sống trong phiên này), rồi điền
+--     vào drivers. File nguồn có MỘT dòng sai định dạng (tài xế 8006, chữ
+--     thường, thiếu gạch) — để thấy bước B5 bắt được nó.
+CREATE TEMP TABLE driver_plate_imports (
+  driver_code integer PRIMARY KEY,
+  plate       text NOT NULL
+);
+CREATE TABLE
+
+-- expect-rows: 7
+INSERT INTO driver_plate_imports (driver_code, plate) VALUES
+  (8001, '59X1-123.45'),
+  (8002, '59X2-234.56'),
+  (8003, '29B1-345.67'),
+  (8004, '30F-456.78'),
+  (8005, '43C1-567.89'),
+  (8006, '43a 67890'),
+  (8007, '59X3-789.01');
+INSERT 0 7
+-- [lab] PASS: đúng 7 dòng như mong đợi
+
+-- Chỉ điền dòng còn NULL: chạy lại không ghi đè giá trị đã sửa tay.
+-- expect-rows: 7
+UPDATE drivers AS d
+SET vehicle_plate = i.plate
+FROM driver_plate_imports AS i
+WHERE i.driver_code = d.code
+  AND d.vehicle_plate IS NULL;
+UPDATE 7
+-- [lab] PASS: đúng 7 dòng như mong đợi
+
+-- Kiểm chứng backfill: không còn tài xế thiếu biển số.
+-- expect-rows: 0
+SELECT code, full_name FROM drivers WHERE vehicle_plate IS NULL;
+ code | full_name
+------+-----------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- ---------------------------------------------------------------------------
+-- B4. Thêm CHECK định dạng với NOT VALID: KHÔNG quét dữ liệu cũ (nhanh, khoá
+--     ngắn), nhưng mọi INSERT/UPDATE từ giờ phải đúng định dạng.
+--     NULL vẫn qua được CHECK, nên ứng dụng cũ (không ghi biển số) chưa bị chặn.
+--     Định dạng lab: 2 số tỉnh + seri (1 chữ in hoa, có thể thêm 1 chữ/số)
+--     + '-' + 3 số + '.' + 2 số. Không phải quy chuẩn biển số đầy đủ.
+ALTER TABLE drivers
+  ADD CONSTRAINT ck_drivers_vehicle_plate_format
+  CHECK (vehicle_plate ~ '^[0-9]{2}[A-Z][A-Z0-9]?-[0-9]{3}\.[0-9]{2}$') NOT VALID;
+ALTER TABLE
+
+-- Dữ liệu MỚI sai định dạng bị chặn ngay…
+-- expect-error: 23514 ck_drivers_vehicle_plate_format
+UPDATE drivers SET vehicle_plate = '59x1 12345' WHERE code = 8001;
+ERROR:  new row for relation "drivers" violates check constraint "ck_drivers_vehicle_plate_format"
+DETAIL:  Failing row contains (d0000000-0000-4000-8000-000000008001, 8001, Bùi Văn Khoa, 1, bike, busy, 2026-08-01 09:00:00+07, 59x1 12345).
+-- [lab] SQLSTATE 23514 · constraint ck_drivers_vehicle_plate_format · table drivers
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_drivers_vehicle_plate_format
+
+-- …trong khi dòng CŨ sai (8006) vẫn nằm đó, chưa ai phát hiện.
+-- expect-rows: 1
+SELECT code, vehicle_plate
+FROM drivers
+WHERE vehicle_plate !~ '^[0-9]{2}[A-Z][A-Z0-9]?-[0-9]{3}\.[0-9]{2}$';
+ code | vehicle_plate
+------+---------------
+ 8006 | 43a 67890
+(1 row)
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- ---------------------------------------------------------------------------
+-- B5. VALIDATE quét toàn bảng với khoá nhẹ hơn (SHARE UPDATE EXCLUSIVE: đọc
+--     và ghi dữ liệu vẫn chạy song song). Dòng 8006 làm nó thất bại.
+-- expect-error: 23514 ck_drivers_vehicle_plate_format
+ALTER TABLE drivers VALIDATE CONSTRAINT ck_drivers_vehicle_plate_format;
+ERROR:  check constraint "ck_drivers_vehicle_plate_format" of relation "drivers" is violated by some row
+-- [lab] SQLSTATE 23514 · constraint ck_drivers_vehicle_plate_format · table drivers
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_drivers_vehicle_plate_format
+
+-- Sửa dữ liệu gốc (sau khi hỏi lại bộ phận tuyển dụng), rồi VALIDATE lại.
+-- expect-rows: 1
+UPDATE drivers SET vehicle_plate = '43A-678.90'
+WHERE code = 8006
+RETURNING code, vehicle_plate;
+ code | vehicle_plate
+------+---------------
+ 8006 | 43A-678.90
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+ALTER TABLE drivers VALIDATE CONSTRAINT ck_drivers_vehicle_plate_format;
+ALTER TABLE
+
+-- ---------------------------------------------------------------------------
+-- B6. Siết NOT NULL — bước "contract", phá vỡ ứng dụng cũ không ghi biển số.
+--     SET NOT NULL tự nó phải quét toàn bảng dưới khoá ACCESS EXCLUSIVE. Có
+--     sẵn một CHECK (… IS NOT NULL) ĐÃ VALIDATE thì PostgreSQL (từ bản 12)
+--     dùng nó làm bằng chứng và bỏ qua lần quét đó. Bật thông báo DEBUG1 để
+--     thấy chính server xác nhận điều này.
+ALTER TABLE drivers
+  ADD CONSTRAINT ck_drivers_vehicle_plate_not_null
+  CHECK (vehicle_plate IS NOT NULL) NOT VALID;
+ALTER TABLE
+
+ALTER TABLE drivers VALIDATE CONSTRAINT ck_drivers_vehicle_plate_not_null;
+ALTER TABLE
+
+SET client_min_messages = debug1;
+SET
+
+ALTER TABLE drivers ALTER COLUMN vehicle_plate SET NOT NULL;
+DEBUG:  existing constraints on column "drivers.vehicle_plate" are sufficient to prove that it does not contain nulls
+ALTER TABLE
+
+SET client_min_messages = notice;
+SET
+
+-- CHECK phụ đã xong việc; NOT NULL thay thế nó.
+ALTER TABLE drivers DROP CONSTRAINT ck_drivers_vehicle_plate_not_null;
+ALTER TABLE
+
+-- Từ giờ ứng dụng cũ (không gửi biển số) bị từ chối — đúng như dự tính.
+-- expect-error: 23502 vehicle_plate
+INSERT INTO drivers (id, code, full_name, city_id, vehicle_type, status, created_at)
+VALUES ('f0000000-0000-4000-8000-000000000030', 8030, 'Ứng Dụng Cũ', 1, 'bike', 'offline',
+        '2026-11-03 11:00:00+07');
+ERROR:  null value in column "vehicle_plate" of relation "drivers" violates not-null constraint
+DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000030, 8030, Ứng Dụng Cũ, 1, bike, offline, 2026-11-03 11:00:00+07, null).
+-- [lab] SQLSTATE 23502 · table drivers · column vehicle_plate
+-- [lab] PASS: đúng lỗi mong đợi 23502 vehicle_plate
+
+-- ---------------------------------------------------------------------------
+-- Kiểm chứng sau migration.
+-- expect-rows: 7
+SELECT code, full_name, vehicle_type, vehicle_plate
+FROM drivers
+ORDER BY code;
+ code |   full_name    | vehicle_type | vehicle_plate
+------+----------------+--------------+---------------
+ 8001 | Bùi Văn Khoa   | bike         | 59X1-123.45
+ 8002 | Hồ Thị Lan     | bike         | 59X2-234.56
+ 8003 | Ngô Quang Minh | bike         | 29B1-345.67
+ 8004 | Đỗ Thanh Nam   | car          | 30F-456.78
+ 8005 | Lý Thị Oanh    | bike         | 43C1-567.89
+ 8006 | Trịnh Văn Phúc | car          | 43A-678.90
+ 8007 | Mai Xuân Quý   | bike         | 59X3-789.01
+(7 rows)
+-- [lab] PASS: đúng 7 dòng như mong đợi
+
+-- Trạng thái cột và các ràng buộc liên quan (convalidated = đã rà dữ liệu cũ).
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_schema = 'toinoi' AND table_name = 'drivers' AND column_name = 'vehicle_plate';
+  column_name  | data_type | is_nullable
+---------------+-----------+-------------
+ vehicle_plate | text      | NO
+(1 row)
+
+-- expect-rows: 1
+SELECT conname, convalidated, pg_get_constraintdef(oid) AS dinh_nghia
+FROM pg_constraint
+WHERE conrelid = 'drivers'::regclass AND conname LIKE 'ck_drivers_vehicle_plate%'
+ORDER BY conname;
+             conname             | convalidated |                                  dinh_nghia
+---------------------------------+--------------+-------------------------------------------------------------------------------
+ ck_drivers_vehicle_plate_format | t            | CHECK ((vehicle_plate ~ '^[0-9]{2}[A-Z][A-Z0-9]?-[0-9]{3}\.[0-9]{2}$'::text))
+(1 row)
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+DROP TABLE driver_plate_imports;
+DROP TABLE
+
+RESET lock_timeout;
+RESET
+
+-- [lab] ===== p01/07-checks.sql =====
+
+-- P01 · 07-checks.sql — truy vấn kiểm tra bất biến dữ liệu (PG-010).
+--
+-- Mỗi truy vấn tìm các dòng VI PHẠM một quy tắc; kết quả đúng là 0 dòng
+-- (`-- expect-rows: 0`). Có hai nhóm:
+--   A. Quy tắc schema đã chặn (FK, CHECK) — kiểm lại vẫn có ích khi ràng buộc
+--      bị thêm với NOT VALID, bị tắt khi nhập dữ liệu, hoặc để làm bằng chứng
+--      bàn giao.
+--   B. Quy tắc schema hiện KHÔNG chặn được bằng CHECK một dòng (cần so nhiều
+--      dòng hoặc nhiều bảng) — đây là chỗ dữ liệu sai lọt vào thật.
+-- Chạy được bất cứ lúc nào sau 02; trong `node run.mjs p01` nó chạy cuối cùng.
+-- Các truy vấn dùng JOIN / NOT EXISTS / GROUP BY — P02 giải thích kỹ.
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- ===========================================================================
+-- A. Quy tắc đã có ràng buộc
+-- ===========================================================================
+
+-- A1. Chuyến trỏ tới khách / tài xế / quán / thành phố không tồn tại (mồ côi).
+-- expect-rows: 0
+SELECT t.code, 'customer' AS thieu
+FROM trips AS t
+WHERE NOT EXISTS (SELECT 1 FROM customers AS c WHERE c.id = t.customer_id)
+UNION ALL
+SELECT t.code, 'driver'
+FROM trips AS t
+WHERE t.driver_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM drivers AS d WHERE d.id = t.driver_id)
+UNION ALL
+SELECT t.code, 'merchant'
+FROM trips AS t
+WHERE t.merchant_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM merchants AS m WHERE m.id = t.merchant_id)
+UNION ALL
+SELECT t.code, 'city'
+FROM trips AS t
+WHERE NOT EXISTS (SELECT 1 FROM cities AS ci WHERE ci.id = t.city_id);
+ code | thieu
+------+-------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- A2. Dòng lịch sử trỏ tới chuyến không tồn tại.
+-- expect-rows: 0
+SELECT e.id, e.trip_id
+FROM trip_events AS e
+WHERE NOT EXISTS (SELECT 1 FROM trips AS t WHERE t.id = e.trip_id);
+ id | trip_id
+----+---------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- A3. Trạng thái và mốc thời gian lệch nhau (lặp lại logic các CHECK của trips).
+-- expect-rows: 0
+SELECT code, status, driver_id IS NOT NULL AS co_tai_xe, accepted_at, completed_at
+FROM trips
+WHERE (status IN ('requested', 'searching') AND driver_id IS NOT NULL)
+   OR (status IN ('accepted', 'arriving', 'picked_up', 'in_transit', 'completed') AND driver_id IS NULL)
+   OR ((driver_id IS NULL) <> (accepted_at IS NULL))
+   OR ((status = 'completed') <> (completed_at IS NOT NULL))
+   OR accepted_at < requested_at
+   OR completed_at < accepted_at;
+ code | status | co_tai_xe | accepted_at | completed_at
+------+--------+-----------+-------------+--------------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- A4. Trùng khoá nghiệp vụ (UNIQUE đã chặn; truy vấn này dùng khi nhập dữ
+--     liệu từ nguồn chưa có ràng buộc).
+-- expect-rows: 0
+SELECT phone, count(*) FROM customers GROUP BY phone HAVING count(*) > 1
+UNION ALL
+SELECT code::text, count(*) FROM drivers GROUP BY code HAVING count(*) > 1;
+ phone | count
+-------+-------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- ===========================================================================
+-- B. Quy tắc nhiều dòng / nhiều bảng — CHECK một dòng không diễn đạt được
+-- ===========================================================================
+
+-- B1. Tài xế chạy chuyến ở thành phố khác thành phố đăng ký.
+-- expect-rows: 0
+SELECT t.code, t.city_id AS thanh_pho_chuyen, d.code AS tai_xe, d.city_id AS thanh_pho_tai_xe
+FROM trips AS t
+JOIN drivers AS d ON d.id = t.driver_id
+WHERE d.city_id <> t.city_id;
+ code | thanh_pho_chuyen | tai_xe | thanh_pho_tai_xe
+------+------------------+--------+------------------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- B2. Đơn đồ ăn đặt ở quán thuộc thành phố khác.
+-- expect-rows: 0
+SELECT t.code, t.city_id AS thanh_pho_chuyen, m.name, m.city_id AS thanh_pho_quan
+FROM trips AS t
+JOIN merchants AS m ON m.id = t.merchant_id
+WHERE m.city_id <> t.city_id;
+ code | thanh_pho_chuyen | name | thanh_pho_quan
+------+------------------+------+----------------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- B3. Một tài xế cùng lúc có hơn một chuyến đang chạy.
+-- expect-rows: 0
+SELECT d.code, count(*) AS so_chuyen_dang_chay
+FROM trips AS t
+JOIN drivers AS d ON d.id = t.driver_id
+WHERE t.status IN ('accepted', 'arriving', 'picked_up', 'in_transit')
+GROUP BY d.code
+HAVING count(*) > 1;
+ code | so_chuyen_dang_chay
+------+---------------------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- B4. Trạng thái tài xế lệch với chuyến: có chuyến đang chạy mà không `busy`,
+--     hoặc `busy` mà không có chuyến nào đang chạy.
+-- expect-rows: 0
+SELECT d.code, d.status, a.so_chuyen_dang_chay
+FROM drivers AS d
+LEFT JOIN (
+  SELECT driver_id, count(*) AS so_chuyen_dang_chay
+  FROM trips
+  WHERE status IN ('accepted', 'arriving', 'picked_up', 'in_transit')
+  GROUP BY driver_id
+) AS a ON a.driver_id = d.id
+WHERE (a.driver_id IS NOT NULL AND d.status <> 'busy')
+   OR (a.driver_id IS NULL AND d.status = 'busy');
+ code | status | so_chuyen_dang_chay
+------+--------+---------------------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- B5. updated_at phải không sớm hơn mốc mới nhất của chính dòng đó.
+--     (greatest() bỏ qua NULL.)
+-- expect-rows: 0
+SELECT code, status, updated_at, greatest(requested_at, accepted_at, completed_at) AS moc_moi_nhat
+FROM trips
+WHERE updated_at < greatest(requested_at, accepted_at, completed_at);
+ code | status | updated_at | moc_moi_nhat
+------+--------+------------+--------------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- B6. Nghi trùng chuyến: cùng khách, cùng loại, đặt cách nhau dưới 1 phút và cả
+--     hai còn đang chạy — dấu hiệu khách bấm "Đặt" hai lần (P04 · idempotency).
+-- expect-rows: 0
+SELECT a.code AS chuyen_1, b.code AS chuyen_2, a.customer_id
+FROM trips AS a
+JOIN trips AS b
+  ON  b.customer_id = a.customer_id
+  AND b.kind = a.kind
+  AND b.code > a.code
+  AND b.requested_at - a.requested_at < interval '1 minute'
+  AND a.requested_at - b.requested_at < interval '1 minute'
+WHERE a.status NOT IN ('completed', 'cancelled')
+  AND b.status NOT IN ('completed', 'cancelled');
+ chuyen_1 | chuyen_2 | customer_id
+----------+----------+-------------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- B7. Lịch sử không khớp chuyến (chỉ xét chuyến CÓ lịch sử; 15 chuyến fixture
+--     cố ý không nạp lịch sử): dòng lịch sử sớm hơn giờ đặt, dòng đầu không
+--     phải `requested`, hoặc dòng mới nhất khác trạng thái hiện tại.
+-- expect-rows: 0
+SELECT t.code, t.status, f.status AS su_kien_dau, l.status AS su_kien_cuoi
+FROM trips AS t
+JOIN LATERAL (
+  SELECT e.status, e.occurred_at FROM trip_events AS e
+  WHERE e.trip_id = t.id ORDER BY e.occurred_at, e.id LIMIT 1
+) AS f ON true
+JOIN LATERAL (
+  SELECT e.status FROM trip_events AS e
+  WHERE e.trip_id = t.id ORDER BY e.occurred_at DESC, e.id DESC LIMIT 1
+) AS l ON true
+WHERE f.occurred_at < t.requested_at
+   OR f.status <> 'requested'
+   OR l.status <> t.status;
+ code | status | su_kien_dau | su_kien_cuoi
+------+--------+-------------+--------------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- ===========================================================================
+-- C. Bằng chứng về chính schema
+-- ===========================================================================
+
+-- C1. Ràng buộc chưa VALIDATE (thêm bằng NOT VALID rồi bỏ quên).
+-- expect-rows: 0
+SELECT conrelid::regclass AS bang, conname
+FROM pg_constraint
+WHERE connamespace = 'toinoi'::regnamespace AND NOT convalidated;
+ bang | conname
+------+---------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- C2. Ràng buộc đặt tên sai quy ước pk_/fk_/uq_/ck_.
+--     Lưu ý: PG 17 không ghi NOT NULL vào pg_constraint (PG 18 mới ghi), nên
+--     NOT NULL không xuất hiện ở đây.
+-- expect-rows: 0
+SELECT conrelid::regclass AS bang, conname, contype
+FROM pg_constraint
+WHERE connamespace = 'toinoi'::regnamespace
+  AND conname !~ '^(pk|fk|uq|ck)_';
+ bang | conname | contype
+------+---------+---------
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- C3. Kiểm kê ràng buộc theo bảng và loại (p = primary key, f = foreign key,
+--     u = unique, c = check).
+SELECT conrelid::regclass AS bang,
+       count(*) FILTER (WHERE contype = 'p') AS p,
+       count(*) FILTER (WHERE contype = 'f') AS f,
+       count(*) FILTER (WHERE contype = 'u') AS u,
+       count(*) FILTER (WHERE contype = 'c') AS c
+FROM pg_constraint
+WHERE connamespace = 'toinoi'::regnamespace
+GROUP BY conrelid
+ORDER BY conrelid::regclass::text COLLATE "C";
+    bang     | p | f | u | c
+-------------+---+---+---+----
+ cities      | 1 | 0 | 1 |  2
+ customers   | 1 | 0 | 1 |  2
+ drivers     | 1 | 1 | 1 |  5
+ merchants   | 1 | 1 | 0 |  1
+ trip_events | 1 | 1 | 0 |  1
+ trips       | 1 | 4 | 1 | 10
+(6 rows)
+
+-- C4. Số dòng cuối cùng của từng bảng.
+-- expect-rows: 1
+SELECT (SELECT count(*) FROM cities)      AS cities,
+       (SELECT count(*) FROM customers)   AS customers,
+       (SELECT count(*) FROM drivers)     AS drivers,
+       (SELECT count(*) FROM merchants)   AS merchants,
+       (SELECT count(*) FROM trips)       AS trips,
+       (SELECT count(*) FROM trip_events) AS trip_events;
+ cities | customers | drivers | merchants | trips | trip_events
+--------+-----------+---------+-----------+-------+-------------
+      3 |         6 |       7 |         3 |    16 |           7
+(1 row)
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] ===== Tổng kết =====
+-- [lab] Câu lệnh đã chạy: 176
+-- [lab] Lỗi mong đợi (expect-error): 38
+-- [lab] Kiểm số dòng (expect-rows): 56
+-- [lab] FAIL: 0
+-- [lab] KẾT QUẢ: ĐẠT

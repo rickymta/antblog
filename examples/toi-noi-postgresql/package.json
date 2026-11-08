@@ -1,0 +1,17 @@
+{
+  "name": "toi-noi-postgresql-lab",
+  "private": true,
+  "type": "module",
+  "description": "Lab PostgreSQL qua dự án Tới Nơi — chạy SQL bằng PGlite (PostgreSQL 17 trong WASM)",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "p01": "node run.mjs p01",
+    "p01:output": "node run.mjs p01 > p01/OUTPUT.txt",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.3.16"
+  }
+}

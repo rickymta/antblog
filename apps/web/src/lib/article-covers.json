@@ -5208,5 +5208,105 @@
       "USE CASE",
       "WEATHER"
     ]
+  },
+  "postgresql-la-gi-va-vai-tro-trong-toi-noi": {
+    "title": "POSTGRESQL",
+    "subtitle": "PostgreSQL · Nguồn sự thật của Tới Nơi",
+    "diagram": "network",
+    "labels": [
+      "APP",
+      "POSTGRESQL",
+      "DATA"
+    ]
+  },
+  "postgresql-cai-dat-lab-psql-ket-noi": {
+    "title": "LAB · PSQL",
+    "subtitle": "PostgreSQL · Dựng lab và kết nối",
+    "diagram": "code",
+    "labels": [
+      "DOCKER",
+      "PSQL",
+      "PGLITE 17.5"
+    ]
+  },
+  "postgresql-bang-dong-cot-primary-foreign-key": {
+    "title": "PK / FK",
+    "subtitle": "PostgreSQL · Bảng, dòng, cột và khoá",
+    "diagram": "map",
+    "labels": [
+      "CUSTOMERS",
+      "TRIPS",
+      "DRIVERS"
+    ]
+  },
+  "postgresql-kieu-du-lieu-tien-thoi-gian-uuid": {
+    "title": "DATA TYPES",
+    "subtitle": "PostgreSQL · Tiền, thời gian, định danh",
+    "diagram": "blocks",
+    "labels": [
+      "INTEGER ĐỒNG",
+      "TIMESTAMPTZ",
+      "UUID"
+    ]
+  },
+  "postgresql-create-table-constraints": {
+    "title": "CONSTRAINTS",
+    "subtitle": "PostgreSQL · CREATE TABLE và ràng buộc",
+    "diagram": "checklist",
+    "labels": [
+      "NOT NULL",
+      "UNIQUE",
+      "CHECK"
+    ]
+  },
+  "postgresql-insert-update-delete-returning": {
+    "title": "RETURNING",
+    "subtitle": "PostgreSQL · Vòng đời một chuyến",
+    "diagram": "cycle",
+    "labels": [
+      "INSERT",
+      "UPDATE",
+      "DELETE"
+    ]
+  },
+  "postgresql-select-filter-order-limit": {
+    "title": "SELECT",
+    "subtitle": "PostgreSQL · Lọc, sắp xếp, giới hạn",
+    "diagram": "flow",
+    "labels": [
+      "WHERE",
+      "ORDER BY",
+      "LIMIT"
+    ]
+  },
+  "postgresql-mo-hinh-quan-he-chuan-hoa": {
+    "title": "NORMALIZE",
+    "subtitle": "PostgreSQL · Chuẩn hoá và ranh giới",
+    "diagram": "flow",
+    "labels": [
+      "1NF",
+      "2NF",
+      "3NF"
+    ]
+  },
+  "postgresql-schema-migration-tuong-thich": {
+    "title": "MIGRATION",
+    "subtitle": "PostgreSQL · Expand và contract",
+    "diagram": "split",
+    "labels": [
+      "EXPAND",
+      "VALIDATE",
+      "CONTRACT"
+    ]
+  },
+  "postgresql-thuc-hanh-schema-chuyen-xe": {
+    "title": "PHẦN 1 · LAB",
+    "subtitle": "PostgreSQL · Schema chuyến xe",
+    "diagram": "target",
+    "labels": [
+      "DDL",
+      "FIXTURE",
+      "CHECKS"
+    ]
   }
 }

@@ -1,0 +1,36 @@
+# PostgreSQL 17 thật cho lab "PostgreSQL qua dự án Tới Nơi" — cách chạy (B) trong README.md.
+#
+# CHƯA chạy trên máy viết bài (không có Docker); các file SQL chỉ được kiểm bằng
+# PGlite 17.5. Xem README.md › "Khác biệt giữa PGlite và server thật".
+#
+#   docker compose up -d                       # khởi động, chờ healthcheck "healthy"
+#   docker compose exec db psql -U toinoi -d toinoi
+#   docker compose down -v                     # dừng và XOÁ dữ liệu lab (volume)
+#
+# Mật khẩu dưới đây là giá trị giữ chỗ cho lab cục bộ — KHÔNG dùng ở bất kỳ đâu
+# khác. Cổng chỉ mở trên 127.0.0.1 (máy của bạn), không mở ra mạng ngoài.
+name: toinoi-postgresql-lab
+
+services:
+  db:
+    # Ghim đúng bản vá 17.5 (cùng bản với PGlite 0.3.16) trên Debian bookworm.
+    image: postgres:17.5-bookworm
+    environment:
+      POSTGRES_USER: toinoi
+      POSTGRES_PASSWORD: lab-only-doi-mat-khau
+      POSTGRES_DB: toinoi
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - toinoi-pg17-data:/var/lib/postgresql/data
+      # File SQL của từng phần, chỉ đọc: trong container là /lab/p01/*.sql
+      - ./p01:/lab/p01:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U toinoi -d toinoi"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+volumes:
+  toinoi-pg17-data:

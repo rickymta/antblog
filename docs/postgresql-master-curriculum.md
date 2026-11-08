@@ -29,8 +29,10 @@ Series riêng cho PostgreSQL thuộc chuyên mục cha Database, dùng xuyên su
 | Microsoft SQL Server (MSSQL) | `mssql` | `mssql-` | `mssql-master-curriculum.md` | Dự kiến |
 | Oracle Database | `oracle` | `oracle-` | `oracle-master-curriculum.md` | Dự kiến |
 | Apache Cassandra | `cassandra` | `cassandra-` | `cassandra-master-curriculum.md` | Dự kiến |
+| ScyllaDB | `scylladb` | `scylladb-` | `scylladb-master-curriculum.md` | Dự kiến |
+| Redis | `redis` | `redis-` | `redis-master-curriculum.md` | Dự kiến |
 
-Chỉ đăng ký chuyên mục có nội dung; các dòng dự kiến không phải liên kết công khai hay file đã có. Các engine khác cùng dùng nghiệp vụ Tới Nơi nhưng thiết kế theo mô hình và cơ chế riêng, không chỉ thay cú pháp của PostgreSQL. Bài tích hợp ở Rust, Python, .NET, AWS, Azure giữ chuyên mục hiện tại; liên kết tới đây khi cần đào sâu database. Series DA tập trung trả lời câu hỏi phân tích, series này tập trung tính đúng đắn, cơ chế và vận hành PostgreSQL.
+Mọi series engine theo cùng quy ước với PostgreSQL: chia thành nhiều phần, **mỗi phần tối đa 10 bài** và có đủ ba mức cơ bản, trung bình, nâng cao (kể cả bài thực hành cuối phần). Chỉ đăng ký chuyên mục có nội dung; các dòng dự kiến không phải liên kết công khai hay file đã có. Các engine khác cùng dùng nghiệp vụ Tới Nơi nhưng thiết kế theo mô hình và cơ chế riêng, không chỉ thay cú pháp của PostgreSQL. Bài tích hợp ở Rust, Python, .NET, AWS, Azure giữ chuyên mục hiện tại; liên kết tới đây khi cần đào sâu database. Series DA tập trung trả lời câu hỏi phân tích, series này tập trung tính đúng đắn, cơ chế và vận hành PostgreSQL.
 
 ## Giữ nội dung hiện có và quy ước xuất bản
 
@@ -54,20 +56,20 @@ Hoàn thành **nội dung** phần nào: cập nhật trạng thái, seed và RE
 
 Đầu vào: Hồ sơ chung Tới Nơi; chưa cần biết SQL. Đầu ra: Schema tối thiểu cho khách, tài xế và chuyến, fixture nhỏ và kiểm tra dữ liệu sai.
 
-Lộ trình khi hoàn tất: `postgresql-tu-ben-trong`.
+Lộ trình: `postgresql-tu-ben-trong` — **đã cập nhật thành P01 (10 bài) ngày 08/11/2026**; hồ sơ chung là bài đọc trước, hai bài cũ chờ đăng ký vào P03. Lab: `examples/toi-noi-postgresql/p01` (PostgreSQL 17.5 qua PGlite; đường Docker + psql chưa chạy trên máy viết bài).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| PG-001 | PostgreSQL là gì và nằm ở đâu trong Tới Nơi?<br>`postgresql-la-gi-va-vai-tro-trong-toi-noi` | CB | Phân biệt DBMS, database, schema, bảng và trách nhiệm lưu dữ liệu | Kế hoạch |
-| PG-002 | Dựng môi trường lab và kết nối bằng psql<br>`postgresql-cai-dat-lab-psql-ket-noi` | CB | Tạo lab riêng, chạy truy vấn đầu tiên, ghi phiên bản và cách dọn | Kế hoạch |
-| PG-003 | Bảng, dòng, cột và khoá trong nghiệp vụ chuyến xe<br>`postgresql-bang-dong-cot-primary-foreign-key` | CB | Vẽ quan hệ khách–chuyến–tài xế và nhận diện một dòng | Kế hoạch |
-| PG-004 | Chọn kiểu dữ liệu cho tiền, thời gian và định danh<br>`postgresql-kieu-du-lieu-tien-thoi-gian-uuid` | TB | Lập data dictionary có đơn vị, NULL và múi giờ | Kế hoạch |
-| PG-005 | CREATE TABLE và ràng buộc dữ liệu<br>`postgresql-create-table-constraints` | TB | Viết DDL với primary key, foreign key, unique, check và not null | Kế hoạch |
-| PG-006 | Thêm, sửa, xoá và đọc kết quả với RETURNING<br>`postgresql-insert-update-delete-returning` | TB | Thực hiện vòng đời một chuyến trên fixture có thể chạy lại | Kế hoạch |
-| PG-007 | SELECT đầu tiên: lọc, sắp xếp và giới hạn<br>`postgresql-select-filter-order-limit` | TB | Lấy chuyến theo trạng thái, thời gian và thứ tự xác định | Kế hoạch |
-| PG-008 | Chuẩn hoá và ranh giới mô hình dữ liệu<br>`postgresql-mo-hinh-quan-he-chuan-hoa` | NC | Giải thích bất thường cập nhật và đánh đổi khi tách bảng | Kế hoạch |
-| PG-009 | Thay đổi schema mà dữ liệu cũ vẫn đọc được<br>`postgresql-schema-migration-tuong-thich` | NC | Thực hiện migration nhỏ, kiểm dữ liệu và kế hoạch khôi phục | Kế hoạch |
-| PG-010 | Thực hành: schema chuyến xe có kiểm tra ràng buộc<br>`postgresql-thuc-hanh-schema-chuyen-xe` | NC | Bàn giao DDL, fixture hợp lệ/sai và bằng chứng kiểm tra | Kế hoạch |
+| PG-001 | PostgreSQL là gì và nằm ở đâu trong Tới Nơi?<br>`postgresql-la-gi-va-vai-tro-trong-toi-noi` | CB | Phân biệt DBMS, database, schema, bảng và trách nhiệm lưu dữ liệu | Đã viết |
+| PG-002 | Dựng môi trường lab và kết nối bằng psql<br>`postgresql-cai-dat-lab-psql-ket-noi` | CB | Tạo lab riêng, chạy truy vấn đầu tiên, ghi phiên bản và cách dọn | Đã viết |
+| PG-003 | Bảng, dòng, cột và khoá trong nghiệp vụ chuyến xe<br>`postgresql-bang-dong-cot-primary-foreign-key` | CB | Vẽ quan hệ khách–chuyến–tài xế và nhận diện một dòng | Đã viết |
+| PG-004 | Chọn kiểu dữ liệu cho tiền, thời gian và định danh<br>`postgresql-kieu-du-lieu-tien-thoi-gian-uuid` | TB | Lập data dictionary có đơn vị, NULL và múi giờ | Đã viết |
+| PG-005 | CREATE TABLE và ràng buộc dữ liệu<br>`postgresql-create-table-constraints` | TB | Viết DDL với primary key, foreign key, unique, check và not null | Đã viết |
+| PG-006 | Thêm, sửa, xoá và đọc kết quả với RETURNING<br>`postgresql-insert-update-delete-returning` | TB | Thực hiện vòng đời một chuyến trên fixture có thể chạy lại | Đã viết |
+| PG-007 | SELECT đầu tiên: lọc, sắp xếp và giới hạn<br>`postgresql-select-filter-order-limit` | TB | Lấy chuyến theo trạng thái, thời gian và thứ tự xác định | Đã viết |
+| PG-008 | Chuẩn hoá và ranh giới mô hình dữ liệu<br>`postgresql-mo-hinh-quan-he-chuan-hoa` | NC | Giải thích bất thường cập nhật và đánh đổi khi tách bảng | Đã viết |
+| PG-009 | Thay đổi schema mà dữ liệu cũ vẫn đọc được<br>`postgresql-schema-migration-tuong-thich` | NC | Thực hiện migration nhỏ, kiểm dữ liệu và kế hoạch khôi phục | Đã viết |
+| PG-010 | Thực hành: schema chuyến xe có kiểm tra ràng buộc<br>`postgresql-thuc-hanh-schema-chuyen-xe` | NC | Bàn giao DDL, fixture hợp lệ/sai và bằng chứng kiểm tra | Đã viết |
 
 ## P02 · SQL cho nghiệp vụ
 

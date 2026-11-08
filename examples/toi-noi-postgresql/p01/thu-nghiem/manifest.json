@@ -1,0 +1,31 @@
+{
+  "nen": {
+    "doc-lap": [],
+    "00-02": ["p01/00-reset.sql", "p01/01-schema.sql", "p01/02-fixture-valid.sql"],
+    "00-03": ["p01/00-reset.sql", "p01/01-schema.sql", "p01/02-fixture-valid.sql", "p01/03-fixture-invalid.sql"],
+    "00-04": ["p01/00-reset.sql", "p01/01-schema.sql", "p01/02-fixture-valid.sql", "p01/03-fixture-invalid.sql", "p01/04-lifecycle.sql"],
+    "00-04-06-rollback": ["p01/00-reset.sql", "p01/01-schema.sql", "p01/02-fixture-valid.sql", "p01/03-fixture-invalid.sql", "p01/04-lifecycle.sql", "p01/06-migration.sql", "p01/06-migration-rollback.sql"]
+  },
+  "tep": [
+    { "file": "pg001-moi-truong.sql", "bai": "PG-001", "nen": "00-02" },
+    { "file": "pg002-phien-ban-mui-gio.sql", "bai": "PG-002", "nen": "doc-lap" },
+    { "file": "pg002-collation.sql", "bai": "PG-002", "nen": "doc-lap" },
+    { "file": "pg003-khoa-va-quan-he.sql", "bai": "PG-003", "nen": "00-02" },
+    { "file": "pg003-di-theo-khoa.sql", "bai": "PG-003", "nen": "00-02" },
+    { "file": "pg003-bai-tap-2.sql", "bai": "PG-003", "nen": "00-02" },
+    { "file": "pg004-kieu-du-lieu.sql", "bai": "PG-004", "nen": "00-03" },
+    { "file": "pg004-bai-tap-2.sql", "bai": "PG-004", "nen": "doc-lap" },
+    { "file": "pg005-ten-rang-buoc.sql", "bai": "PG-005", "nen": "00-02" },
+    { "file": "pg005-bai-tap.sql", "bai": "PG-005", "nen": "00-02" },
+    { "file": "pg006-update-0-lost-update.sql", "bai": "PG-006", "nen": "00-04" },
+    { "file": "pg006-bai-tap.sql", "bai": "PG-006", "nen": "00-04" },
+    { "file": "pg006-them.sql", "bai": "PG-006", "nen": "00-04" },
+    { "file": "pg007-loi-thuong-gap.sql", "bai": "PG-007", "nen": "00-02" },
+    { "file": "pg008-bang-phang-bat-thuong.sql", "bai": "PG-008", "nen": "00-02" },
+    { "file": "pg008-rang-buoc-lien-bang.sql", "bai": "PG-008", "nen": "00-02" },
+    { "file": "pg008-bai-tap-3.sql", "bai": "PG-008", "nen": "00-02" },
+    { "file": "pg009-bai-tap-1.sql", "bai": "PG-009", "nen": "00-02" },
+    { "file": "pg009-bai-tap-3.sql", "bai": "PG-009", "nen": "00-04-06-rollback" },
+    { "file": "pg010-mo-rong-fk-hai-cot.sql", "bai": "PG-010", "nen": "00-02" }
+  ]
+}

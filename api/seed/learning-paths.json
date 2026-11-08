@@ -1,14 +1,21 @@
 [
   {
     "slug": "postgresql-tu-ben-trong",
-    "title": "PostgreSQL từ bên trong",
-    "description": "Đi từ cách PostgreSQL cất một dòng xuống đĩa tới index, MVCC, giao dịch và partition — mọi ví dụ chạy trên dữ liệu của dự án mẫu Tới Nơi.",
-    "level": "intermediate",
+    "title": "PostgreSQL · Phần 1 · Nền tảng và mô hình dữ liệu",
+    "description": "Bắt đầu PostgreSQL từ dữ liệu chuyến xe của Tới Nơi: PostgreSQL nằm ở đâu, dựng lab và kết nối, bảng – dòng – khoá, kiểu dữ liệu cho tiền và thời gian, ràng buộc, ghi và đọc dữ liệu, chuẩn hoá, migration tương thích — kết thúc bằng bài thực hành bàn giao schema có kiểm tra ràng buộc.",
+    "level": "beginner",
     "category": "postgresql",
     "articles": [
-      "du-an-mau-toi-noi",
-      "heap-ctid-va-primary-key",
-      "page-don-vi-doc-ghi"
+      "postgresql-la-gi-va-vai-tro-trong-toi-noi",
+      "postgresql-cai-dat-lab-psql-ket-noi",
+      "postgresql-bang-dong-cot-primary-foreign-key",
+      "postgresql-kieu-du-lieu-tien-thoi-gian-uuid",
+      "postgresql-create-table-constraints",
+      "postgresql-insert-update-delete-returning",
+      "postgresql-select-filter-order-limit",
+      "postgresql-mo-hinh-quan-he-chuan-hoa",
+      "postgresql-schema-migration-tuong-thich",
+      "postgresql-thuc-hanh-schema-chuyen-xe"
     ],
     "status": "published"
   },
