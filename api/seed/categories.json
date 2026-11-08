@@ -6,8 +6,8 @@
       "en": "Database"
     },
     "description": {
-      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL; lộ trình mở rộng MySQL, MongoDB, Microsoft SQL Server, Oracle và Cassandra.",
-      "en": "Database engines through Toi Noi: PostgreSQL, with future series for MySQL, MongoDB, Microsoft SQL Server, Oracle and Cassandra."
+      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL; lộ trình mở rộng Microsoft SQL Server, MySQL, Oracle, MongoDB, Cassandra, ScyllaDB và Redis.",
+      "en": "Database engines through Toi Noi: PostgreSQL, with future series for Microsoft SQL Server, MySQL, Oracle, MongoDB, Cassandra, ScyllaDB and Redis."
     },
     "icon": "database",
     "color": "#2563EB",

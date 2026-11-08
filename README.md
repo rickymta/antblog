@@ -19,7 +19,7 @@ Blog chia sẻ kiến thức kỹ thuật từ cơ bản tới nâng cao: databa
 
 ## Khung nội dung Database
 
-[PostgreSQL qua Tới Nơi](docs/postgresql-master-curriculum.md): 6 phần, tối đa 10 bài/phần, đủ cấp độ cơ bản, trung bình và nâng cao. Các series MySQL, MongoDB, MSSQL, Oracle và Cassandra sẽ có khung riêng dưới chuyên mục Database.
+[PostgreSQL qua Tới Nơi](docs/postgresql-master-curriculum.md): 6 phần, tối đa 10 bài/phần, đủ cấp độ cơ bản, trung bình và nâng cao. Các series MSSQL, MySQL, Oracle, MongoDB, Cassandra, ScyllaDB và Redis sẽ có khung riêng dưới chuyên mục Database, cùng quy ước nhiều phần, tối đa 10 bài/phần.
 
 ## Chạy trên máy (dev)
 
