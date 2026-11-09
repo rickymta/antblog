@@ -5,13 +5,13 @@ Mã thực hành cho loạt bài **PostgreSQL qua dự án Tới Nơi**. Đọc 
 | Phần | Chủ đề | Thư mục | Trạng thái |
 |---|---|---|---|
 | P01 | Nền tảng và mô hình dữ liệu | [`p01/`](p01/README.md) | Có SQL, kết quả mẫu và test — đã chạy trên PGlite 17.5 |
-| P02 | SQL cho nghiệp vụ | `p02/` | Chưa có |
+| P02 | SQL cho nghiệp vụ | [`p02/`](p02/README.md) | Có SQL, fixture 30 ngày tất định, kết quả mẫu và test — đã chạy trên PGlite 17.5 (chạy trên lược đồ P01) |
 | P03 | Lưu trữ, index và kế hoạch thực thi | `p03/` | Chưa có |
 | P04 | Giao dịch, MVCC và đồng thời | `p04/` | Chưa có |
 | P05 | Bảo mật, bảo trì và phục hồi | `p05/` | Chưa có |
 | P06 | Mở rộng, tích hợp và vận hành đầu cuối | `p06/` | Chưa có |
 
-Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ tự tên, một `README.md`, kết quả chạy thật `OUTPUT.txt` và một file test trong `test/`.
+Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ tự tên, một `README.md`, kết quả chạy thật `OUTPUT.txt` và một file test trong `test/`. Phần sau có thể chạy trên lược đồ của phần trước: P02 = `p01/00-reset.sql` + `p01/01-schema.sql` + `p02/` (không nạp fixture P01).
 
 ## Phiên bản cố định
 
@@ -30,6 +30,7 @@ Không cần cài PostgreSQL hay Docker. PGlite là PostgreSQL thật (mã ngu�
 cd examples/toi-noi-postgresql
 npm ci                 # hoặc npm install — cài đúng PGlite 0.3.16 theo package-lock.json
 npm run p01            # chạy p01/00 → 07 trên một database mới, in kết quả kiểu psql
+npm run p02            # p01/00 + p01/01 (lược đồ) rồi p02/00 → 20
 npm test               # chạy bộ kiểm tra (node:test)
 ```
 
@@ -43,7 +44,20 @@ Kết quả mong đợi của `npm run p01` kết thúc bằng:
 -- [lab] KẾT QUẢ: ĐẠT
 ```
 
-và `npm test` báo `# pass 26`, `# fail 0` (6 test luồng chính + 20 thí nghiệm của bài trong `p01/thu-nghiem`). Toàn bộ kết quả thật nằm ở [`p01/OUTPUT.txt`](p01/OUTPUT.txt).
+`npm run p02` kết thúc bằng:
+
+```text
+-- [lab] Câu lệnh đã chạy: 266
+-- [lab] Lỗi mong đợi (expect-error): 7
+-- [lab] Kiểm số dòng (expect-rows): 37
+-- [lab] Kiểm giá trị (expect-value): 13
+-- [lab] Kiểm nội dung (expect-line): 109
+-- [lab] Kiểm md5 kết quả (expect-md5): 3
+-- [lab] FAIL: 0
+-- [lab] KẾT QUẢ: ĐẠT
+```
+
+và `npm test` báo `# pass 58`, `# fail 0` (P01: 6 test luồng chính + 20 thí nghiệm của bài trong `p01/thu-nghiem`; P02: 6 test trong `test/p02.test.mjs` + 26 thí nghiệm của bài trong `p02/thu-nghiem`). Toàn bộ kết quả thật nằm ở [`p01/OUTPUT.txt`](p01/OUTPUT.txt) và [`p02/OUTPUT.txt`](p02/OUTPUT.txt).
 
 Các cách chạy khác của runner:
 
@@ -54,17 +68,22 @@ node run.mjs p01 --persist .pgdata            # lưu database vào thư mục .p
 node run.mjs p01/05-select.sql --persist .pgdata   # chạy tiếp trên dữ liệu đã lưu
 node run.mjs p01 p01/06-migration-rollback.sql     # thêm file hoàn tác migration
 npm run p01:output                            # ghi lại p01/OUTPUT.txt sau khi sửa SQL
+npm run p02:output                            # ghi lại p02/OUTPUT.txt sau khi sửa SQL
 ```
 
 Chạy cả thư mục thì runner lấy các file `NN-*.sql` theo thứ tự tên và **bỏ qua `*-rollback.sql`**.
 
 ### Đọc kết quả của runner
 
-- Câu lệnh được in lại (kèm chú thích phía trên nó), rồi tới kết quả: bảng căn cột với `(n rows)`, thẻ lệnh như `INSERT 0 3`, `UPDATE 1`, `DELETE 2`, `CREATE TABLE`, thông báo `NOTICE:` / `DEBUG:`, và lỗi `ERROR:` + `DETAIL:` + `HINT:` giống psql.
+- Câu lệnh được in lại (kèm chú thích phía trên nó), rồi tới kết quả: bảng căn cột với `(n rows)`, thẻ lệnh như `INSERT 0 3`, `UPDATE 1`, `DELETE 2`, `CREATE TABLE`, `SELECT 3174` (của `CREATE TABLE … AS`), thông báo `NOTICE:` / `DEBUG:`, và lỗi `ERROR:` + `DETAIL:` + `HINT:` giống psql.
 - Dòng bắt đầu bằng `-- [lab]` là chú thích của runner (psql thật không in): SQLSTATE, tên ràng buộc, bảng, cột của lỗi; kết quả `PASS`/`FAIL` của các kỳ vọng; tổng kết.
 - Kỳ vọng được ghi bằng dòng chú thích **ngay trước** câu lệnh:
   - `-- expect-error: 23505 uq_customers_phone` — câu lệnh phải lỗi đúng SQLSTATE và đúng tên ràng buộc. Lỗi NOT NULL (`23502`) ở PostgreSQL 17 không có tên ràng buộc, nên ghi tên cột: `-- expect-error: 23502 full_name`. Lỗi không gắn ràng buộc/cột (sai định dạng `22P02`…) chỉ ghi mã.
-  - `-- expect-rows: 0` — câu lệnh phải trả đúng số dòng (SELECT, RETURNING) hoặc đổi đúng số dòng (UPDATE/DELETE/INSERT theo thẻ lệnh).
+  - `-- expect-rows: 0` — câu lệnh phải trả đúng số dòng (SELECT, RETURNING) hoặc đổi đúng số dòng (UPDATE/DELETE/INSERT, `CREATE TABLE … AS` theo thẻ lệnh).
+  - `-- expect-value: 182287000` — kết quả phải đúng 1 dòng × 1 cột với giá trị (dạng chữ) đó.
+  - `-- expect-line: 100724 | completed | 76000` — lặp mỗi dòng kết quả một chỉ thị; TOÀN BỘ kết quả phải khớp đúng thứ tự và đúng số dòng. Ô cách nhau bằng `|`, khoảng trắng hai đầu mỗi ô được bỏ qua, NULL viết `NULL` (như psql sau `\pset null NULL`).
+  - `-- expect-md5: <32 ký tự hex>` — md5 của toàn bộ kết quả ở dạng chuẩn (ô nối `" | "`, dòng nối bằng xuống dòng, không tiêu đề); dùng cho kết quả dài. Sai thì runner in md5 thật.
+  - Ba chỉ thị sau có từ P02; tổng kết chỉ in dòng đếm của chúng khi có dùng, nên kết quả P01 giữ nguyên từng byte.
 - Lỗi khớp kỳ vọng là `PASS`, runner chạy tiếp. Lỗi ngoài kỳ vọng, câu lẽ ra phải lỗi mà chạy được, hoặc sai số dòng là `FAIL`; runner vẫn chạy hết rồi trả **exit code 1**.
 - Trước file đầu tiên, runner đặt cho phiên `SET TIME ZONE 'Asia/Ho_Chi_Minh'` (giờ hiển thị khớp hồ sơ Tới Nơi) và `SET client_min_messages = notice` (mức mặc định của server thật; PGlite mặc định `debug3` nên sẽ in cả thông báo DEBUG nội bộ). Mỗi file SQL cũng tự đặt `search_path` và `TimeZone` ở đầu để chạy riêng lẻ bằng psql vẫn ra cùng kết quả.
 
@@ -92,6 +111,18 @@ Trong psql, chạy từng file bằng `\i` (một phiên duy nhất, giống run
 \i /lab/p01/05-select.sql
 \i /lab/p01/06-migration.sql
 \i /lab/p01/07-checks.sql
+```
+
+P02 dùng lược đồ P01 nhưng dữ liệu riêng — trong một phiên mới (hoặc sau `\i /lab/p01/00-reset.sql`):
+
+```text
+\i /lab/p01/00-reset.sql
+\i /lab/p01/01-schema.sql
+\i /lab/p02/00-mo-rong-schema.sql
+\i /lab/p02/01-fixture.sql
+\i /lab/p02/02-kiem-tra-fixture.sql
+\i /lab/p02/11-null-case-coalesce.sql
+-- … 12 → 18, rồi 19-cay-khu-vuc.sql, 19-chu-trinh.sql, 20-doi-soat-thanh-toan.sql
 ```
 
 Hoặc chạy không tương tác, mỗi lệnh `psql` là một phiên riêng:
@@ -133,6 +164,8 @@ docker compose exec db psql -X -a -U toinoi -d toinoi -v ON_ERROR_STOP=1 -f /lab
 | Bền vững dữ liệu | Mặc định trong bộ nhớ, mất khi tiến trình kết thúc; `--persist <thư mục>` để lưu | Volume Docker | Mỗi `npm run p01` bắt đầu từ database trống |
 | Thông báo lỗi | Cùng mã nguồn ⇒ cùng nội dung, SQLSTATE, `DETAIL`, `HINT` (`lc_messages` rỗng ⇒ tiếng Anh) | Tiếng Anh với locale en_US | Bài viết có thể trích nguyên văn từ `OUTPUT.txt` |
 
+P02 thêm hai điểm cần biết: (1) `01-fixture.sql` chạy `ANALYZE` sau khi nạp — trên PGlite, thiếu thống kê làm cả bộ P02 chậm từ ~3 giây lên ~30 giây (kết quả không đổi); server thật có autovacuum nhưng vẫn nên ANALYZE sau khi nạp lô lớn. (2) P02 dùng `MERGE … RETURNING merge_action()` và `MERGE` trong `WITH` — cần PostgreSQL **17** trở lên.
+
 Thứ tự đọc các dòng trùng giá trị sắp xếp (05, mục 6) phụ thuộc vị trí vật lý của dòng và thuật toán sắp xếp; cùng mã nguồn và cùng chuỗi câu lệnh thì kết quả dự kiến giống nhau, nhưng **chưa đối chiếu trên server thật** — bài viết nên trình bày đó là ví dụ minh hoạ, không phải hành vi được bảo đảm.
 
 ## Dọn môi trường
@@ -145,14 +178,23 @@ Thứ tự đọc các dòng trùng giá trị sắp xếp (05, mục 6) phụ t
 ```text
 toi-noi-postgresql/
 ├── README.md              ← tệp này
-├── package.json           ← ghim @electric-sql/pglite 0.3.16; scripts p01, p01:output, test
+├── package.json           ← ghim @electric-sql/pglite 0.3.16; scripts p01, p01:output, p02, p02:output, test
 ├── package-lock.json
 ├── run.mjs                ← runner: tách câu lệnh, chạy trên PGlite, in kiểu psql, chấm expect-*
 ├── docker-compose.yml     ← PostgreSQL 17.5 thật cho cách B (chưa chạy thử)
 ├── test/
-│   └── p01.test.mjs       ← node:test cho P01 và cho chính runner
-└── p01/                   ← Nền tảng và mô hình dữ liệu (PG-001 … PG-010)
+│   ├── p01.test.mjs       ← node:test cho P01 và cho chính runner
+│   ├── thu-nghiem.test.mjs← thí nghiệm của bài P01
+│   ├── p02.test.mjs       ← node:test cho P02 và các chỉ thị expect-value/line/md5
+│   └── p02-thu-nghiem.test.mjs ← thí nghiệm của bài P02
+├── p01/                   ← Nền tảng và mô hình dữ liệu (PG-001 … PG-010)
+│   ├── README.md
+│   ├── 00-reset.sql … 07-checks.sql, 06-migration-rollback.sql, thu-nghiem/
+│   └── OUTPUT.txt         ← kết quả thật của `npm run p01`
+└── p02/                   ← SQL cho nghiệp vụ (PG-011 … PG-020), chạy trên lược đồ p01/00 + 01
     ├── README.md
-    ├── 00-reset.sql … 07-checks.sql, 06-migration-rollback.sql
-    └── OUTPUT.txt         ← kết quả thật của `npm run p01`
+    ├── 00-mo-rong-schema.sql, 01-fixture.sql, 02-kiem-tra-fixture.sql
+    ├── 11-…sql … 20-…sql  ← mỗi file một bài, số file = số bài (19 có hai file)
+    ├── thu-nghiem/        ← thí nghiệm và lời giải bài tập của PG-011 … PG-020 (manifest.json)
+    └── OUTPUT.txt         ← kết quả thật của `npm run p02`
 ```

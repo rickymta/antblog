@@ -5308,5 +5308,105 @@
       "FIXTURE",
       "CHECKS"
     ]
+  },
+  "postgresql-null-case-coalesce": {
+    "title": "NULL",
+    "subtitle": "PostgreSQL · NULL, CASE, COALESCE",
+    "diagram": "flow",
+    "labels": [
+      "THIẾU",
+      "KHÔNG ÁP DỤNG",
+      "0"
+    ]
+  },
+  "postgresql-aggregate-group-by-having": {
+    "title": "GROUP BY",
+    "subtitle": "PostgreSQL · Tổng hợp có mẫu số rõ",
+    "diagram": "blocks",
+    "labels": [
+      "COUNT",
+      "SUM",
+      "HAVING"
+    ]
+  },
+  "postgresql-join-quan-he-cardinality": {
+    "title": "JOIN",
+    "subtitle": "PostgreSQL · Nối bảng không nhân đôi tiền",
+    "diagram": "map",
+    "labels": [
+      "TRIPS",
+      "1 : N",
+      "PAYMENTS"
+    ]
+  },
+  "postgresql-subquery-exists-cte": {
+    "title": "CTE",
+    "subtitle": "PostgreSQL · Subquery, EXISTS, CTE",
+    "diagram": "flow",
+    "labels": [
+      "EXISTS",
+      "NOT IN",
+      "WITH"
+    ]
+  },
+  "postgresql-window-function-frame": {
+    "title": "WINDOW",
+    "subtitle": "PostgreSQL · Cửa sổ tính toán",
+    "diagram": "code",
+    "labels": [
+      "OVER",
+      "LUỸ KẾ",
+      "FRAME"
+    ]
+  },
+  "postgresql-date-time-timezone": {
+    "title": "TIME ZONE",
+    "subtitle": "PostgreSQL · Ngày nghiệp vụ giờ Việt Nam",
+    "diagram": "split",
+    "labels": [
+      "UTC",
+      "↔",
+      "ASIA/HO_CHI_MINH"
+    ]
+  },
+  "postgresql-upsert-on-conflict": {
+    "title": "UPSERT",
+    "subtitle": "PostgreSQL · ON CONFLICT",
+    "diagram": "checklist",
+    "labels": [
+      "DO NOTHING",
+      "DO UPDATE",
+      "EXCLUDED"
+    ]
+  },
+  "postgresql-pagination-keyset": {
+    "title": "KEYSET",
+    "subtitle": "PostgreSQL · Phân trang lịch sử chuyến",
+    "diagram": "cycle",
+    "labels": [
+      "TRANG 1",
+      "CON TRỎ",
+      "TRANG 2"
+    ]
+  },
+  "postgresql-recursive-cte-cay-khu-vuc": {
+    "title": "RECURSIVE",
+    "subtitle": "PostgreSQL · Cây khu vực",
+    "diagram": "network",
+    "labels": [
+      "THÀNH PHỐ",
+      "KHU VỰC",
+      "QUẬN"
+    ]
+  },
+  "postgresql-thuc-hanh-sql-doi-soat": {
+    "title": "PHẦN 2 · LAB",
+    "subtitle": "PostgreSQL · Đối soát thanh toán",
+    "diagram": "target",
+    "labels": [
+      "CHUYẾN",
+      "THANH TOÁN",
+      "LỆCH"
+    ]
   }
 }

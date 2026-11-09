@@ -9,6 +9,8 @@
   "scripts": {
     "p01": "node run.mjs p01",
     "p01:output": "node run.mjs p01 > p01/OUTPUT.txt",
+    "p02": "node run.mjs p01/00-reset.sql p01/01-schema.sql p02",
+    "p02:output": "node run.mjs p01/00-reset.sql p01/01-schema.sql p02 > p02/OUTPUT.txt",
     "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {

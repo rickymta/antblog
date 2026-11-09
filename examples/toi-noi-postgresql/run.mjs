@@ -22,9 +22,19 @@
 //   -- expect-rows: 0                           câu lệnh PHẢI trả đúng n dòng
 //                                               (SELECT/RETURNING) hoặc đổi đúng
 //                                               n dòng (UPDATE/DELETE/INSERT)
+//   -- expect-value: 12345                      kết quả PHẢI là đúng 1 dòng × 1 cột
+//                                               với giá trị (dạng chữ) như ghi
+//   -- expect-line: 100123 | SG | 45000         (lặp nhiều dòng) TOÀN BỘ kết quả,
+//                                               đúng thứ tự, mỗi chỉ thị một dòng;
+//                                               các ô cách nhau bằng `|`
+//   -- expect-md5: 0123…cdef                    md5 của toàn bộ kết quả (dùng cho
+//                                               kết quả dài; xem canonicalResult)
+// Trong expect-value / expect-line / expect-md5, NULL được viết là `NULL`
+// (giống psql sau `\pset null NULL`), khoảng trắng hai đầu mỗi ô được bỏ qua.
 // Lỗi khớp kỳ vọng được tính là PASS và runner chạy tiếp. Lỗi ngoài kỳ vọng
 // hoặc kỳ vọng không đạt ⇒ FAIL, runner vẫn chạy hết rồi trả exit code 1.
 
+import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -52,7 +62,7 @@ export function splitSql(text) {
   const push = (end) => {
     const chunk = text.slice(start, end);
     if (hasCode(chunk)) statements.push({ text: chunk.trim(), line: startLine + leadingNewlines(chunk) });
-    else if (/--\s*expect-(error|rows)\s*:/i.test(chunk)) {
+    else if (/--\s*expect-[a-z0-9]+\s*:/i.test(chunk)) {
       throw new Error(`Dòng ${startLine}: chỉ thị expect-* không đứng trước câu lệnh nào`);
     }
   };
@@ -164,9 +174,38 @@ export function parseExpectations(statementText) {
     if (m) { exp.error = { code: m[1], name: m[2] ?? null }; continue; }
     m = /^--\s*expect-rows\s*:\s*(\d+)\s*$/.exec(lineText);
     if (m) { exp.rows = Number(m[1]); continue; }
+    m = /^--\s*expect-value\s*:\s?(.*)$/.exec(lineText);
+    if (m) { exp.value = m[1].trim(); continue; }
+    m = /^--\s*expect-line\s*:\s?(.*)$/.exec(lineText);
+    if (m) { (exp.lines ??= []).push(normalizeLine(m[1])); continue; }
+    m = /^--\s*expect-md5\s*:\s*([0-9a-f]{32})\s*$/.exec(lineText);
+    if (m) { exp.md5 = m[1]; continue; }
     if (/^--\s*expect-/i.test(lineText)) throw new Error(`Chỉ thị không hiểu: ${lineText}`);
   }
   return exp;
+}
+
+/** Chuẩn hoá một dòng kỳ vọng `a |  b|c` → `a | b | c`. */
+function normalizeLine(text) {
+  return text.split('|').map((c) => c.trim()).join(' | ');
+}
+
+/** Giá trị một ô dạng chữ để so kỳ vọng: NULL → `NULL`, bỏ khoảng trắng hai đầu. */
+export function cellText(v) {
+  return v === null || v === undefined ? 'NULL' : String(v).trim();
+}
+
+/**
+ * Dạng chuẩn của cả kết quả để tính md5: mỗi dòng là các ô (cellText) nối bằng
+ * ` | `, các dòng nối bằng ký tự xuống dòng, không có tiêu đề cột, không có
+ * dòng cuối trống.
+ */
+export function canonicalResult(rows) {
+  return rows.map((r) => r.map(cellText).join(' | ')).join('\n');
+}
+
+export function resultMd5(rows) {
+  return createHash('md5').update(canonicalResult(rows), 'utf8').digest('hex');
 }
 
 // ---------------------------------------------------------------------------
@@ -270,8 +309,10 @@ function tagCount(tag) {
   return m ? Number(m[1]) : null;
 }
 
-// Thẻ lệnh psql KHÔNG in: SELECT (đã có "(n rows)").
+// Thẻ lệnh psql KHÔNG in: SELECT (đã có "(n rows)"). Ngoại lệ: câu không trả
+// bảng mà vẫn có thẻ SELECT n (CREATE TABLE … AS, SELECT … INTO) — psql in thẻ đó.
 const SILENT_TAGS = /^(SELECT|FETCH|SHOW)\b/;
+const isSilentTag = (r) => SILENT_TAGS.test(r.tag) && r.fields !== null;
 
 // ---------------------------------------------------------------------------
 /** Chuẩn bị phiên: múi giờ và mức thông báo giống server PostgreSQL thường gặp. */
@@ -296,6 +337,9 @@ export async function runFiles(db, files, { write = (s) => process.stdout.write(
     statements: 0,
     expectedErrors: 0,
     rowChecks: 0,
+    valueChecks: 0,
+    lineChecks: 0,
+    md5Checks: 0,
     failures: [],
     results: [],
   };
@@ -328,7 +372,7 @@ export async function runFiles(db, files, { write = (s) => process.stdout.write(
       if (r.error) shown.push(formatError(r.error));
       else {
         if (r.fields) shown.push(formatTable(r.fields, r.rows) + (r.tag && !SILENT_TAGS.test(r.tag) ? '\n' : ''));
-        if (r.tag && !SILENT_TAGS.test(r.tag)) shown.push(r.tag);
+        if (r.tag && !isSilentTag(r)) shown.push(r.tag);
       }
       if (shown.length) write(shown.join('\n') + '\n');
 
@@ -362,6 +406,37 @@ export async function runFiles(db, files, { write = (s) => process.stdout.write(
         } else {
           write(`-- [lab] PASS: đúng ${exp.rows} dòng như mong đợi\n`);
         }
+      }
+      const fail = (reason) => {
+        record.ok = false;
+        record.reason = record.reason ? `${record.reason}; ${reason}` : reason;
+      };
+      if (exp.value !== undefined && !r.error) {
+        summary.valueChecks++;
+        if (!r.fields || r.rows.length !== 1 || r.fields.length !== 1) {
+          fail(`expect-value cần đúng 1 dòng × 1 cột, nhận ${r.fields ? `${r.rows.length} dòng × ${r.fields.length} cột` : 'không có bảng kết quả'}`);
+        } else if (cellText(r.rows[0][0]) !== exp.value) {
+          fail(`mong đợi giá trị «${exp.value}», nhận «${cellText(r.rows[0][0])}»`);
+        } else {
+          write(`-- [lab] PASS: đúng giá trị mong đợi ${exp.value}\n`);
+        }
+      }
+      if (exp.lines && !r.error) {
+        summary.lineChecks++;
+        const got = r.fields ? r.rows.map((row) => row.map(cellText).join(' | ')) : [];
+        const k = exp.lines.findIndex((l, j) => got[j] !== l);
+        if (got.length !== exp.lines.length || k !== -1) {
+          const j = k === -1 ? Math.min(got.length, exp.lines.length) : k;
+          fail(`expect-line: mong đợi ${exp.lines.length} dòng, nhận ${got.length}; khác ở dòng ${j + 1}: mong đợi «${exp.lines[j] ?? '(hết)'}», nhận «${got[j] ?? '(hết)'}»`);
+        } else {
+          write(`-- [lab] PASS: đúng nội dung ${exp.lines.length} dòng như mong đợi (expect-line)\n`);
+        }
+      }
+      if (exp.md5 && !r.error) {
+        summary.md5Checks++;
+        const got = r.fields ? resultMd5(r.rows) : '(không có bảng kết quả)';
+        if (got !== exp.md5) fail(`mong đợi md5 ${exp.md5}, nhận ${got}`);
+        else write(`-- [lab] PASS: đúng md5 kết quả ${exp.md5}\n`);
       }
       if (!record.ok) {
         summary.failures.push({ file: rel, line: st.line, reason: record.reason });
@@ -404,8 +479,12 @@ function formatSummary(s) {
     `-- [lab] Câu lệnh đã chạy: ${s.statements}`,
     `-- [lab] Lỗi mong đợi (expect-error): ${s.expectedErrors}`,
     `-- [lab] Kiểm số dòng (expect-rows): ${s.rowChecks}`,
-    `-- [lab] FAIL: ${s.failures.length}`,
   ];
+  // Chỉ in khi có dùng — giữ nguyên từng byte kết quả của các phần cũ (P01).
+  if (s.valueChecks) lines.push(`-- [lab] Kiểm giá trị (expect-value): ${s.valueChecks}`);
+  if (s.lineChecks) lines.push(`-- [lab] Kiểm nội dung (expect-line): ${s.lineChecks}`);
+  if (s.md5Checks) lines.push(`-- [lab] Kiểm md5 kết quả (expect-md5): ${s.md5Checks}`);
+  lines.push(`-- [lab] FAIL: ${s.failures.length}`);
   for (const f of s.failures) lines.push(`-- [lab]   ${f.file}:${f.line} — ${f.reason}`);
   lines.push(s.failures.length === 0 ? '-- [lab] KẾT QUẢ: ĐẠT' : '-- [lab] KẾT QUẢ: KHÔNG ĐẠT');
   return lines.join('\n') + '\n';

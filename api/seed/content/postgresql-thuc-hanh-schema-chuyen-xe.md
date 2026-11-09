@@ -265,4 +265,4 @@ DETAIL:  Key (merchant_id, city_id)=(e0000000-0000-4000-8000-000000000001, 2) is
 - [Tài liệu PostgreSQL 17 — PostgreSQL Error Codes](https://www.postgresql.org/docs/17/errcodes-appendix.html): bảng SQLSTATE dùng trong D3.
 - Lab: `examples/toi-noi-postgresql/p01` — `README.md`, các tệp `00`…`07`, `OUTPUT.txt`, `test/p01.test.mjs`.
 
-Phần 2 · SQL cho nghiệp vụ sắp ra mắt. Quay lại đầu phần: [PG-001: PostgreSQL là gì và nằm ở đâu trong Tới Nơi?](/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi)
+Bài tiếp theo — mở đầu Phần 2 · SQL cho nghiệp vụ: [PG-011: NULL, CASE và COALESCE trong dữ liệu chuyến](/articles/postgresql-null-case-coalesce)

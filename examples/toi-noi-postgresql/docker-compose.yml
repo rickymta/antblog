@@ -23,8 +23,9 @@ services:
       - "127.0.0.1:5433:5432"
     volumes:
       - toinoi-pg17-data:/var/lib/postgresql/data
-      # File SQL của từng phần, chỉ đọc: trong container là /lab/p01/*.sql
+      # File SQL của từng phần, chỉ đọc: trong container là /lab/p01/*.sql, /lab/p02/*.sql
       - ./p01:/lab/p01:ro
+      - ./p02:/lab/p02:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U toinoi -d toinoi"]
       interval: 3s

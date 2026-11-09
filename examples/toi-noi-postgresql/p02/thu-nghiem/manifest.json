@@ -1,0 +1,34 @@
+{
+  "nen": {
+    "00-02": ["p01/00-reset.sql", "p01/01-schema.sql", "p02/00-mo-rong-schema.sql", "p02/01-fixture.sql", "p02/02-kiem-tra-fixture.sql"],
+    "00-02-17": ["p01/00-reset.sql", "p01/01-schema.sql", "p02/00-mo-rong-schema.sql", "p02/01-fixture.sql", "p02/02-kiem-tra-fixture.sql", "p02/17-upsert-on-conflict.sql"]
+  },
+  "tep": [
+    { "file": "pg011-bai-tap.sql", "bai": "PG-011", "nen": "00-02" },
+    { "file": "pg011-logic-ba-gia-tri.sql", "bai": "PG-011", "nen": "00-02" },
+    { "file": "pg012-bai-tap.sql", "bai": "PG-012", "nen": "00-02" },
+    { "file": "pg012-thu-nghiem.sql", "bai": "PG-012", "nen": "00-02" },
+    { "file": "pg013-bai-tap.sql", "bai": "PG-013", "nen": "00-02" },
+    { "file": "pg013-bon-chuyen-no-dong.sql", "bai": "PG-013", "nen": "00-02" },
+    { "file": "pg014-bai-tap.sql", "bai": "PG-014", "nen": "00-02" },
+    { "file": "pg014-kiem-ke-bat-loi.sql", "bai": "PG-014", "nen": "00-02" },
+    { "file": "pg015-bai-tap.sql", "bai": "PG-015", "nen": "00-02" },
+    { "file": "pg015-khung-cua-so.sql", "bai": "PG-015", "nen": "00-02" },
+    { "file": "pg016-bai-tap.sql", "bai": "PG-016", "nen": "00-02" },
+    { "file": "pg016-mui-gio.sql", "bai": "PG-016", "nen": "00-02" },
+    { "file": "pg017-bai-tap-1-gia-0.sql", "bai": "PG-017", "nen": "00-02-17" },
+    { "file": "pg017-bai-tap-2-bo-r3.sql", "bai": "PG-017", "nen": "00-02-17" },
+    { "file": "pg017-do-nothing-khong-target.sql", "bai": "PG-017", "nen": "00-02-17" },
+    { "file": "pg018-bai-tap-1-theo-cuoc.sql", "bai": "PG-018", "nen": "00-02" },
+    { "file": "pg018-con-tro-mot-cot-ket-trang.sql", "bai": "PG-018", "nen": "00-02" },
+    { "file": "pg018-nguoc-chieu-doi-dau.sql", "bai": "PG-018", "nen": "00-02" },
+    { "file": "pg018-trang-truoc-con-trang-sau.sql", "bai": "PG-018", "nen": "00-02" },
+    { "file": "pg019-bai-tap-1.sql", "bai": "PG-019", "nen": "00-02" },
+    { "file": "pg019-bai-tap-2.sql", "bai": "PG-019", "nen": "00-02" },
+    { "file": "pg019-bai-tap-3.sql", "bai": "PG-019", "nen": "00-02" },
+    { "file": "pg019-chu-trinh-them.sql", "bai": "PG-019", "nen": "00-02" },
+    { "file": "pg019-vong-lap-va-loi.sql", "bai": "PG-019", "nen": "00-02" },
+    { "file": "pg020-bai-tap.sql", "bai": "PG-020", "nen": "00-02" },
+    { "file": "pg020-cau-noi.sql", "bai": "PG-020", "nen": "00-02" }
+  ]
+}

@@ -20,6 +20,26 @@
     "status": "published"
   },
   {
+    "slug": "postgresql-tu-ben-trong-phan-02",
+    "title": "PostgreSQL · Phần 2 · SQL cho nghiệp vụ",
+    "description": "Truy vấn dữ liệu chuyến và thanh toán của Tới Nơi cho đúng nghiệp vụ: NULL và logic ba giá trị, tổng hợp có mẫu số rõ ràng, JOIN không nhân đôi tiền, subquery/EXISTS/CTE có bước kiểm, window function với frame tường minh, ngày giờ và múi giờ, UPSERT, phân trang keyset, recursive CTE trên cây khu vực — kết thúc bằng bài thực hành đối soát thanh toán có expected output.",
+    "level": "intermediate",
+    "category": "postgresql",
+    "articles": [
+      "postgresql-null-case-coalesce",
+      "postgresql-aggregate-group-by-having",
+      "postgresql-join-quan-he-cardinality",
+      "postgresql-subquery-exists-cte",
+      "postgresql-window-function-frame",
+      "postgresql-date-time-timezone",
+      "postgresql-upsert-on-conflict",
+      "postgresql-pagination-keyset",
+      "postgresql-recursive-cte-cay-khu-vuc",
+      "postgresql-thuc-hanh-sql-doi-soat"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "design-pattern-qua-toi-noi",
     "title": "Design Pattern qua dự án Tới Nơi",
     "description": "23 design pattern kinh điển chia theo ba nhóm Khởi tạo, Cấu trúc, Hành vi — mỗi pattern gắn với một bài toán thật của hệ thống đặt xe và giao hàng Tới Nơi, có so sánh các pattern trong cùng nhóm và khi nào không nên dùng.",
