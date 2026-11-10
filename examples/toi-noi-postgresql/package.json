@@ -2,7 +2,7 @@
   "name": "toi-noi-postgresql-lab",
   "private": true,
   "type": "module",
-  "description": "Lab PostgreSQL qua dự án Tới Nơi — chạy SQL bằng PGlite (PostgreSQL 17 trong WASM)",
+  "description": "Lab PostgreSQL qua dự án Tới Nơi — P01–P02 chạy bằng PGlite (PostgreSQL 17.5 trong WASM), P03+ chạy trên PostgreSQL 18 thật (cluster tạm do pg/run-pg.mjs dựng)",
   "engines": {
     "node": ">=22"
   },
@@ -11,6 +11,10 @@
     "p01:output": "node run.mjs p01 > p01/OUTPUT.txt",
     "p02": "node run.mjs p01/00-reset.sql p01/01-schema.sql p02",
     "p02:output": "node run.mjs p01/00-reset.sql p01/01-schema.sql p02 > p02/OUTPUT.txt",
+    "p03": "node pg/run-pg.mjs p03",
+    "p03:output": "node pg/run-pg.mjs p03 > p03/OUTPUT.txt",
+    "p03:thu-nghiem": "node pg/run-pg.mjs p03/thu-nghiem/manifest.json",
+    "p03:measure": "node pg/run-measure.mjs p03/do-dac.mjs",
     "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {

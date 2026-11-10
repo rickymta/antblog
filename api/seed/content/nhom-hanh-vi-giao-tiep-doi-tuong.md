@@ -402,7 +402,7 @@ async function exportHistory(db: Db, customerId: string, write: (r: TripRow) => 
 }
 ```
 
-Nơi gọi biết quá nhiều, và `OFFSET` ngày càng đắt: trang thứ n đi qua 50 × (n − 1) mục index rồi vứt đi, mỗi mục bị vứt cũng đã làm một lần ghé heap. Hệ số `correlation` của `customer_id` là 0,000 ([bài về heap](/articles/heap-ctid-va-primary-key)) — chuyến của một khách rải khắp bảng, nên mỗi lần ghé heap gần như là một page khác ([bài về page](/articles/page-don-vi-doc-ghi)). Thêm nữa, chuyến mới chèn vào đầu danh sách giữa chừng sẽ đẩy mọi trang lùi một dòng: dòng cuối trang trước lặp lại ở đầu trang sau.
+Nơi gọi biết quá nhiều, và `OFFSET` ngày càng đắt: trang thứ n đi qua 50 × (n − 1) mục index rồi vứt đi, mỗi mục bị vứt cũng đã làm một lần ghé heap. Hệ số `correlation` của `customer_id` gần như bằng 0 (−0,007 trong [bài về heap](/articles/heap-ctid-va-primary-key)) — chuyến của một khách rải khắp bảng, nên mỗi lần ghé heap gần như là một page khác ([bài về page](/articles/page-don-vi-doc-ghi)). Thêm nữa, chuyến mới chèn vào đầu danh sách giữa chừng sẽ đẩy mọi trang lùi một dòng: dòng cuối trang trước lặp lại ở đầu trang sau.
 
 ### Keyset: con trỏ là một giá trị, không phải vị trí
 

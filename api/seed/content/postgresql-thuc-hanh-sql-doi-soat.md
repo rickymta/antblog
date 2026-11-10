@@ -272,4 +272,4 @@ ORDER BY grouping(c.code), c.code COLLATE "C";</code></pre>
 - [Tài liệu PostgreSQL 17 — CREATE VIEW](https://www.postgresql.org/docs/17/sql-createview.html): view `TEMP` sống trong phiên.
 - Lab: `examples/toi-noi-postgresql/p02/README.md` (bảng ca khó và đáp án), `20-doi-soat-thanh-toan.sql`, `OUTPUT.txt`, `test/p02.test.mjs`.
 
-Phần 3 · Lưu trữ, index và kế hoạch thực thi sắp ra mắt. Quay lại đầu phần: [PG-011: NULL, CASE và COALESCE trong dữ liệu chuyến](/articles/postgresql-null-case-coalesce).
+Bài tiếp theo — mở đầu Phần 3 · Lưu trữ, index và kế hoạch thực thi: [PG-021: Đọc EXPLAIN từ truy vấn tìm chuyến](/articles/postgresql-explain-ke-hoach-thuc-thi)

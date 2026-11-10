@@ -6,12 +6,14 @@ Mã thực hành cho loạt bài **PostgreSQL qua dự án Tới Nơi**. Đọc 
 |---|---|---|---|
 | P01 | Nền tảng và mô hình dữ liệu | [`p01/`](p01/README.md) | Có SQL, kết quả mẫu và test — đã chạy trên PGlite 17.5 |
 | P02 | SQL cho nghiệp vụ | [`p02/`](p02/README.md) | Có SQL, fixture 30 ngày tất định, kết quả mẫu và test — đã chạy trên PGlite 17.5 (chạy trên lược đồ P01) |
-| P03 | Lưu trữ, index và kế hoạch thực thi | `p03/` | Chưa có |
-| P04 | Giao dịch, MVCC và đồng thời | `p04/` | Chưa có |
+| P03 | Lưu trữ, index và kế hoạch thực thi | [`p03/`](p03/README.md) | Có SQL, fixture 1 triệu chuyến tất định, kết quả mẫu, thí nghiệm, phép đo và test — **đã chạy trên PostgreSQL 18.1 thật** (cluster tạm, xem [P03+](#p03-postgresql-18-that)) |
+| P04 | Giao dịch, MVCC và đồng thời | `p04/` | Chưa có — hạ tầng nhiều phiên đã có sẵn trong runner P03+ |
 | P05 | Bảo mật, bảo trì và phục hồi | `p05/` | Chưa có |
 | P06 | Mở rộng, tích hợp và vận hành đầu cuối | `p06/` | Chưa có |
 
-Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ tự tên, một `README.md`, kết quả chạy thật `OUTPUT.txt` và một file test trong `test/`. Phần sau có thể chạy trên lược đồ của phần trước: P02 = `p01/00-reset.sql` + `p01/01-schema.sql` + `p02/` (không nạp fixture P01).
+Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ tự tên, một `README.md`, kết quả chạy thật `OUTPUT.txt` và một file test trong `test/`. Phần sau có thể chạy trên lược đồ của phần trước: P02 = `p01/00-reset.sql` + `p01/01-schema.sql` + `p02/` (không nạp fixture P01); P03 = lược đồ P01 + `p02/00-mo-rong-schema.sql` + `p03/00`–`03` (dữ liệu riêng của P03).
+
+**Hai engine, hai runner.** P01–P02 chạy bằng **PGlite 0.3.16 = PostgreSQL 17.5** trong tiến trình Node (`run.mjs`, một kết nối, không cần cài gì). Từ **P03 trở đi** lab chạy trên **PostgreSQL 18 thật** (đã kiểm 18.1) qua `pg/run-pg.mjs`: runner tự `initdb` một cluster TẠM, chạy SQL bằng `psql`, rồi dừng và xoá cluster. Lý do: P03+ cần thứ PGlite không có — extension contrib (pageinspect, pg_buffercache, pg_trgm…), nhiều phiên đồng thời, file tạm, WAL, khởi động lại server, pgbench.
 
 ## Phiên bản cố định
 
@@ -20,7 +22,8 @@ Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ t
 | Node.js | ≥ 22 (đã kiểm 22.18.0) | `node --test` với mẫu glob cần Node 22 |
 | `@electric-sql/pglite` | **0.3.16** (ghim chính xác trong `package.json` + `package-lock.json`) | Chạy **PostgreSQL 17.5** biên dịch sang WebAssembly |
 | Ảnh Docker (cách B) | `postgres:17.5-bookworm` | Cùng bản vá 17.5; **chưa chạy thử** trên máy viết bài |
-| Extension | Không dùng | `gen_random_uuid()` có sẵn trong lõi từ PostgreSQL 13 |
+| Extension (P01–P02) | Không dùng | `gen_random_uuid()` có sẵn trong lõi từ PostgreSQL 13 |
+| PostgreSQL (P03+) | **18.1** (initdb, pg_ctl, psql, pgbench của bản cài Windows `C:\Program Files\PostgreSQL\18`) | Bắt buộc ≥ 18 (runner kiểm). Extension contrib dùng: pageinspect, pg_buffercache, pg_visibility, pgstattuple, pg_walinspect, pg_trgm, btree_gist, unaccent, pg_stat_statements — đều có trong bản cài chuẩn. Không cần PostGIS, pgvector |
 
 ## Cách A · Node + PGlite (đã kiểm chứng)
 
@@ -57,7 +60,9 @@ Kết quả mong đợi của `npm run p01` kết thúc bằng:
 -- [lab] KẾT QUẢ: ĐẠT
 ```
 
-và `npm test` báo `# pass 58`, `# fail 0` (P01: 6 test luồng chính + 20 thí nghiệm của bài trong `p01/thu-nghiem`; P02: 6 test trong `test/p02.test.mjs` + 26 thí nghiệm của bài trong `p02/thu-nghiem`). Toàn bộ kết quả thật nằm ở [`p01/OUTPUT.txt`](p01/OUTPUT.txt) và [`p02/OUTPUT.txt`](p02/OUTPUT.txt).
+và phần P01–P02 của `npm test` gồm 58 test (P01: 6 test luồng chính + 20 thí nghiệm của bài trong `p01/thu-nghiem`; P02: 6 test trong `test/p02.test.mjs` + 26 thí nghiệm của bài trong `p02/thu-nghiem`). Toàn bộ kết quả thật nằm ở [`p01/OUTPUT.txt`](p01/OUTPUT.txt) và [`p02/OUTPUT.txt`](p02/OUTPUT.txt).
+
+Từ P03, `test/p03.test.mjs` thêm 6 test runner (luôn chạy) và một nhóm 26 test trên PostgreSQL thật (nền, 10 tệp bài, 12 thí nghiệm của bài, so OUTPUT.txt, kiểm đã dọn cluster). Kết quả đã chạy: **máy có PostgreSQL 18.1** ⇒ `# tests 90`, `# pass 90`, `# fail 0` (~3,6 phút, phần lớn là dựng nền P03); **giả lập máy chỉ có Node** (`PG_BIN=<thư mục không tồn tại> npm test`) ⇒ `# tests 64`, `# pass 64`, nhóm P03 hiện `# SKIP bỏ qua — PG_BIN=… không chứa psql/initdb/pg_ctl`.
 
 Các cách chạy khác của runner:
 
@@ -168,33 +173,154 @@ P02 thêm hai điểm cần biết: (1) `01-fixture.sql` chạy `ANALYZE` sau kh
 
 Thứ tự đọc các dòng trùng giá trị sắp xếp (05, mục 6) phụ thuộc vị trí vật lý của dòng và thuật toán sắp xếp; cùng mã nguồn và cùng chuỗi câu lệnh thì kết quả dự kiến giống nhau, nhưng **chưa đối chiếu trên server thật** — bài viết nên trình bày đó là ví dụ minh hoạ, không phải hành vi được bảo đảm.
 
+<a id="p03-postgresql-18-that"></a>
+
+## P03+ · PostgreSQL 18 thật (`pg/run-pg.mjs`)
+
+Hạ tầng dùng chung cho P03 → P06. **Không thêm dependency npm**: runner chỉ dùng `child_process` gọi `initdb`, `pg_ctl`, `psql`, `pgbench` của bản PostgreSQL đã cài. Đã chạy thật trên Windows 11 + PostgreSQL 18.1; trên Linux/macOS **chưa chạy thử** (mã đã tính tới: chọn `LC_CTYPE=C.UTF-8`, bỏ đo bộ nhớ Windows).
+
+### Yêu cầu
+
+- Node ≥ 22. PostgreSQL **≥ 18** đã cài (không cần chạy service nào; runner tự dựng cluster riêng).
+- Runner tìm binary theo thứ tự: biến môi trường `PG_BIN` › `pg_config --bindir` (nếu `pg_config` nằm trong `PATH`) › `C:\Program Files\PostgreSQL\18\bin`. Đặt `PG_BIN` mà thư mục không có `psql`/`initdb`/`pg_ctl` ⇒ coi như **không có PostgreSQL** (không dò tiếp): runner in lý do và thoát **mã 3**; test P03 bị **skip** (không FAIL) — `PG_BIN=/khong-co npm test` giả lập máy chỉ có Node.
+- Chỗ trống ở thư mục tạm: ~2 GB khi chạy P03 (nền ~500 MB + bản sao cho từng bài, mỗi bản xoá ngay khi bài xong).
+
+### Chạy
+
+```sh
+npm run p03                    # = node pg/run-pg.mjs p03 — nền + 10 tệp bài, ~2–3 phút, in kết quả như p03/OUTPUT.txt
+npm run p03:output             # ghi lại p03/OUTPUT.txt
+npm run p03:thu-nghiem         # các thí nghiệm của bài (p03/thu-nghiem/manifest.json)
+npm run p03:measure            # PHÉP ĐO (không thuộc npm test, ~4 phút) → ghi p03/DO-DAC.md
+
+node pg/run-pg.mjs p03 --only 23                     # chỉ tệp bài có tên chứa "23" (nền vẫn dựng)
+node pg/run-pg.mjs p03/thu-nghiem/manifest.json --only pg024
+node pg/run-pg.mjs --nen p03/lab.json:p03 tam.sql    # chạy tệp lẻ (chưa khai manifest) trên bản sao nền p03
+node pg/run-pg.mjs a.sql b.sql                       # tệp lẻ trên MỘT database trống, chung phiên (như run.mjs)
+node pg/run-pg.mjs p03 p03/thu-nghiem/manifest.json --json kq.json   # nhiều đích một lần: nền chung chỉ dựng một lần
+```
+
+Tùy chọn: `--no-echo` (không in lại câu lệnh), `--an-nen` (không in đầu ra tệp nền), `--json <tệp>` (kết quả từng mục), `--keep` (giữ cluster CHẠY sau khi xong để gỡ lỗi — runner in lệnh `psql` để kết nối và lệnh dừng/xoá), `--attach <thư-mục-toinoi-pg-…>` (gỡ lỗi: chạy trên cluster đã `--keep`, dùng lại database nền có sẵn — vòng sửa tệp bài chỉ còn vài giây). Biến môi trường gỡ lỗi: `PG_LAB_TIMING=1` (in thời gian từng bước ra stderr), `PG_LAB_RAW=1` (không che thời gian đo — đừng dùng khi ghi OUTPUT). Mã thoát: 0 ĐẠT · 1 có FAIL · 2 lỗi dùng/runner · 3 không có PostgreSQL.
+
+### Cluster tạm
+
+Mỗi lần chạy: `initdb` vào `os.tmpdir()/toinoi-pg-<ngẫu nhiên>/data` với `-U postgres --auth=trust -E UTF8 --no-sync --locale=C --lc-ctype=<xem dưới> --locale-provider=builtin --builtin-locale=C.UTF-8` (checksum dữ liệu BẬT — mặc định của initdb 18), khởi động bằng `pg_ctl` ở **cổng trống ngẫu nhiên chỉ trên localhost**, xong thì `pg_ctl stop` và xoá cả thư mục — kể cả khi lỗi, Ctrl-C (SIGINT/SIGTERM/SIGBREAK) hay ngoại lệ (dọn đồng bộ trong `process.on('exit')`). Trên Windows tiến trình con của postgres có thể giữ thư mục vài giây sau khi dừng; runner thử xoá lại tới ~60 giây, không được thì in CẢNH BÁO kèm đường dẫn. Runner **không bao giờ** kết nối tới service PostgreSQL sẵn có của máy (vd. `postgresql-x64-18` ở cổng 5432) và gỡ mọi biến `PG*` của người dùng (PGHOST, PGPORT, PGPASSWORD…) khỏi môi trường của tiến trình con.
+
+- **Collation** do provider `builtin` (C.UTF-8) quyết định ⇒ thứ tự sắp chữ giống nhau trên mọi hệ điều hành. **LC_CTYPE** là `en-US` (Windows) / `C.UTF-8` (nơi khác), ghi đè bằng `PG_LAB_LC_CTYPE`. Lý do: pg_trgm (và full-text search) phân loại "ký tự chữ" theo LC_CTYPE của database; với `LC_CTYPE=C`, `show_trgm('Cơm Tấm')` chỉ còn trigram của `c`, `m`, `t` — mọi chữ có dấu bị coi là dấu cách (đã thử: PG-028 sẽ sai hoàn toàn).
+- Cấu hình ghi đè, GHI TƯỜNG MINH dù nhiều dòng trùng mặc định (nguồn: `LAB_SETTINGS` trong `pg/lib/cluster.mjs`):
+
+| Tham số | Giá trị | Vì sao |
+|---|---|---|
+| `listen_addresses` / `port` | `localhost` / ngẫu nhiên | Không mở ra mạng, không đụng cổng 5432 |
+| `shared_buffers` | 128MB (mặc định) | Bảng `trips` P03 (152 MB) LỚN HƠN shared_buffers — có hiện tượng vòng đệm Seq Scan, đẩy page ra |
+| `work_mem` / `hash_mem_multiplier` | 4MB / 2 (mặc định) | PG-029 đo tràn đĩa so với mức mặc định |
+| `maintenance_work_mem` | 64MB (mặc định) | Thời gian CREATE INDEX như cấu hình mặc định (fixture tự `SET` 512MB trong phiên nạp) |
+| `effective_cache_size`, `random_page_cost`, `seq_page_cost`, `effective_io_concurrency` | 4GB, 4, 1, 16 (mặc định 18) | Cost model mặc định — kế hoạch giống máy người đọc chưa tinh chỉnh |
+| `jit` | off | Bỏ thời gian biên dịch JIT dao động; kế hoạch không có khối "JIT:" |
+| `max_parallel_workers_per_gather`, `max_parallel_maintenance_workers` | 0 | Không song song ⇒ kế hoạch và số buffer tất định, dễ đọc (bài nào cần thì `SET` lại) |
+| `default_statistics_target` | 100 (mặc định) | ANALYZE lấy mẫu 30.000 dòng — PG-027 dựa vào đúng giới hạn này |
+| `autovacuum` | **off** | Tái lập: không có VACUUM/ANALYZE chen vào giữa chừng làm đổi visibility map, thống kê, số buffer. Tệp lab tự chạy VACUUM/ANALYZE khi cần — trên server thật autovacuum làm việc đó |
+| `track_io_timing` | off (mặc định) | Không có dòng "I/O Timings" dao động |
+| `max_wal_size` / `checkpoint_timeout` | 4GB / 30min | Không có checkpoint tự động chen giữa phép đo WAL (PG-022, PG-025, PG-030 tự `CHECKPOINT`) |
+| `log_checkpoints` | off | Nhật ký server gọn (mặc định của 18 là on) |
+| `log_line_prefix` / `log_temp_files` | `'%m [%p] '` / -1 | Bài tự `SET log_temp_files = 0` khi cần (PG-029) |
+| `shared_preload_libraries` | `pg_stat_statements` | Sẵn cho bài cần thống kê truy vấn (nạp lúc khởi động) |
+| `timezone` / `log_timezone` | `Asia/Ho_Chi_Minh` | Giờ VN như hồ sơ Tới Nơi — kể cả khi người đọc tự mở psql vào cluster (`--keep`) |
+| `datestyle`, `lc_messages` | `iso, mdy`, `C` | Định dạng ngày ISO, thông báo lỗi tiếng Anh như OUTPUT.txt |
+| `max_connections` | 40 | Đủ cho kịch bản nhiều phiên + pgbench 8 phiên |
+
+### Mỗi bài một database chép từ nền
+
+Thư mục phần có `lab.json` (vd. `p03/lab.json`): `"nen"` khai các NỀN (danh sách tệp, đường dẫn tính từ thư mục lab), `"tep"` khai tệp bài (đường dẫn tính từ thư mục chứa manifest) và nền của nó. Runner dựng mỗi nền MỘT lần vào database `nen_<khoá>`, rồi với mỗi tệp: `CREATE DATABASE bai_NN TEMPLATE nen_<khoá> STRATEGY = FILE_COPY` → chạy tệp trong phiên mới → `DROP DATABASE`. Hệ quả: các bài độc lập (bài này tạo/xoá index không ảnh hưởng bài kia), mỗi bài bắt đầu với **shared_buffers không có page nào của database đó** (cache "lạnh" với PostgreSQL, nhưng page cache của hệ điều hành vẫn nóng), và thống kê ANALYZE giống nhau giữa các bài trong cùng một lần chạy. Manifest thí nghiệm (`p0N/thu-nghiem/manifest.json`) dùng cùng định dạng (`"tep"` = mảng `{ "file", "bai", "nen" }`); hai đích có cùng danh sách tệp nền thì dùng chung một nền.
+
+### Đọc kết quả
+
+Gần giống P01–P02 nhưng là **đầu ra thật của psql** (`-X`, `ON_ERROR_STOP=0`, không `-q` nên có thẻ lệnh `INSERT 0 3`, `CREATE INDEX`…): bảng aligned của psql (khoảng trắng cuối dòng bị cắt), `\pset null NULL` (NULL hiện chữ `NULL`), NOTICE/ERROR ở dạng ngắn kèm dòng `-- [lab] SQLSTATE … · constraint … · table … · column …` (runner bật `VERBOSITY verbose` để đọc tên ràng buộc rồi in lại gọn). Lệnh meta của psql DÙNG ĐƯỢC (`\gset`, `\timing`, `\d+`, `\x`…) — khác `run.mjs`. Chuẩn hoá khi in: `actual time=T..T`, `Planning/Execution Time: T ms`, `Time: T ms`, `Query Identifier: Q`, tên file tạm `pgsql_tmpPID.N`, đường dẫn cluster `<TMP>`, cổng `<PORT>`. Dòng `-- [lab] >>> kết quả biến động…` / `<<< hết phần biến động` bao phần kết quả THAY ĐỔI giữa các lần chạy (thống kê ANALYZE lấy mẫu): test so khớp OUTPUT.txt bỏ qua phần đó; khi so, test còn che `cost=… rows=… width=…` (ước lượng), nội dung dòng `Buffers:` (cách chia hit/read/written lệch nhẹ giữa các lần), `buffers full=` của WAL và số kB ở `Memory Usage/Disk Usage/Memory/Disk` — các con số quan trọng trong đó đã có chỉ thị `expect-match` kiểm riêng. Đã kiểm: hai lần chạy độc lập cho đầu ra giống hệt nhau sau chuẩn hoá này.
+
+### Chỉ thị (dòng chú thích NGAY TRƯỚC bước)
+
+| Chỉ thị | Ý nghĩa |
+|---|---|
+| `-- expect-error: SQLSTATE [tên]` | Bước PHẢI lỗi đúng mã (và đúng tên ràng buộc, hoặc tên cột với 23502) — như `run.mjs` |
+| `-- expect-rows: n` | Biến `ROW_COUNT` của psql sau câu = n (số dòng trả về hoặc bị đổi) |
+| `-- expect-value: v` · `-- expect-line: a \| b` · `-- expect-md5: hex` | Như `run.mjs` (đọc từ bảng aligned của psql; ô chứa chính ký tự `\|` thì dùng md5 hoặc đổi cột) |
+| `-- expect-match: regex` (lặp được) | MỖI regex khớp ít nhất một dòng đầu ra (dùng cho kế hoạch: `Index Scan using … on trips`, `Heap Fetches: 0$`, `Sort Method: external merge`) |
+| `-- expect-no-match: regex` | Không dòng nào khớp |
+| `-- expect-range: lo hi` | Kết quả là 1 ô số trong [lo, hi] — cho giá trị phụ thuộc lấy mẫu; đầu ra bước tự được đánh dấu biến động |
+| `-- expect-blocked` | (nhiều phiên) bước PHẢI rơi vào trạng thái chờ khoá |
+| `-- lab: bien-dong` | Đánh dấu đầu ra bước là biến động (test không so) |
+| `-- lab: nhat-ky` | Sau bước, in các dòng MỚI của nhật ký server (bỏ tiền tố giờ/PID) — vd. `LOG:  temporary file: …` |
+| `-- lab: restart` | `pg_ctl restart` TRƯỚC bước này (shared_buffers trống; mọi phiên mở lại — đặt lại `search_path` sau đó) |
+| `-- lab: cho-ms n` | (nhiều phiên) chờ tối đa n ms (mặc định 3000) trước khi coi bước "vẫn đang chạy" |
+| `-- @TEN` | Chạy bước trên phiên TEN (mỗi phiên = một tiến trình psql = một kết nối, `application_name = lab-TEN`) |
+
+### Nhiều phiên
+
+Tệp có bất kỳ `-- @TEN` nào là kịch bản nhiều phiên; bước không ghi phiên chạy trên phiên của bước trước. Runner gửi từng bước **theo thứ tự trong tệp**. Sau khi gửi, runner chờ bước xong; đồng thời một phiên quan sát ẩn hỏi `pg_stat_activity` mỗi 40 ms — nếu backend của bước đang `wait_event_type = 'Lock'` (3 lần liên tiếp) thì bước được ghi là **đang chờ**, kèm phiên đang chặn (`pg_blocking_pids` → nhãn phiên), và runner chạy tiếp bước sau. Sau mỗi bước xong, runner cho các bước đang chờ tối đa 2 giây để chạy nốt; bước nào xong thì in kết quả **ngay tại đó** ("✔ bước dòng N đã chạy xong (sau khi hết bị chặn)"). Nhờ vậy lịch chạy in ra tất định. Hết tệp mà còn bước chờ ⇒ chờ thêm 10 giây rồi FAIL. Ví dụ (trích `p03/thu-nghiem/pg024-cluster-hang-doi-khoa.sql`):
+
+```text
+-- [lab] [B]
+-- expect-blocked
+CLUSTER bai_cu.trips USING trips_pkey;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: relation) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+…
+-- [lab] [A]
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 15 đã chạy xong (sau khi hết bị chặn):
+CLUSTER
+```
+
+Giới hạn hiện tại (cho người dựng P04): phát hiện "bị chặn" chỉ theo `wait_event_type = 'Lock'` (khoá dòng/bảng/advisory/transactionid); chờ kiểu khác (IO, LWLock, `pg_sleep`) được báo là "vẫn đang chạy" sau `cho-ms`. Deadlock: PostgreSQL tự huỷ một bên sau `deadlock_timeout` (1 s) — phiên bị huỷ nhận lỗi `40P01`, ghi `-- expect-error: 40P01` ở bước của nó.
+
+### Đo (`pg/run-measure.mjs`)
+
+`npm run p03:measure` đọc đặc tả `p03/do-dac.mjs` (các NHÓM đo, mỗi nhóm một database chép từ nền: `chuan_bi` → mỗi phép đo `thiet_lap` → lặp [`truoc_moi_lan` → đo → `sau_moi_lan`] × (1 khởi động + 7 lần, trừ khi ghi khác) → `go_bo`), in trung vị/min/max và ghi `p03/DO-DAC.md` kèm cấu hình máy (CPU, RAM, hệ điều hành, ổ đĩa), phiên bản PostgreSQL, cấu hình cluster, cách đo và giới hạn. Hai cách đo: `explain` (Execution Time của `EXPLAIN (ANALYZE, TIMING OFF, BUFFERS, FORMAT JSON)`) và `client` (`\timing` của psql, gồm commit). Nhóm `pgbench` chạy pgbench với script tuỳ chỉnh ở nhiều mức phiên × `PGOPTIONS`, ghi tps, độ trễ, số file tạm và đỉnh bộ nhớ riêng của các backend (Windows: PowerShell `Get-Process`; nơi khác ghi "chưa đo"). Tùy chọn: `--only <chuỗi>`, `--lap n`, `--ra <tệp.md>`.
+
 ## Dọn môi trường
 
 - **Cách A:** không có gì để dọn khi chạy trong bộ nhớ. Nếu đã dùng `--persist .pgdata` thì xoá thư mục đó (`rm -rf .pgdata`). Gỡ hẳn: xoá `node_modules/`.
 - **Cách B:** chỉ xoá dữ liệu lab mà giữ container: trong psql chạy `\i /lab/p01/00-reset.sql` (hoặc `DROP SCHEMA toinoi CASCADE;`). Dừng và xoá toàn bộ, kể cả volume: `docker compose down -v`. Xoá ảnh đã tải: `docker image rm postgres:17.5-bookworm`.
+- **P03+:** runner tự dừng và xoá cluster tạm. Nếu tiến trình bị giết thô (kill -9, tắt máy) hoặc đã dùng `--keep`: dừng bằng `pg_ctl stop -D <thư-mục>/data -m fast` rồi xoá thư mục `toinoi-pg-*` trong thư mục tạm của hệ điều hành (`%TEMP%` trên Windows). Kiểm không còn tiến trình: `tasklist /FI "IMAGENAME eq postgres.exe"` chỉ còn các tiến trình của service (Session Name `Services`).
 
 ## Cấu trúc
 
 ```text
 toi-noi-postgresql/
 ├── README.md              ← tệp này
-├── package.json           ← ghim @electric-sql/pglite 0.3.16; scripts p01, p01:output, p02, p02:output, test
+├── package.json           ← ghim @electric-sql/pglite 0.3.16; scripts p01, p02, p03 (+ :output), p03:thu-nghiem, p03:measure, test
 ├── package-lock.json
-├── run.mjs                ← runner: tách câu lệnh, chạy trên PGlite, in kiểu psql, chấm expect-*
+├── run.mjs                ← runner P01–P02: tách câu lệnh, chạy trên PGlite, in kiểu psql, chấm expect-*
+├── pg/                    ← runner P03+ trên PostgreSQL thật (không dependency npm)
+│   ├── run-pg.mjs         ← CLI: cluster tạm, nền + bản sao từng bài, manifest, --json/--keep/--attach
+│   ├── run-measure.mjs    ← CLI đo: đặc tả p0N/do-dac.mjs → p0N/DO-DAC.md
+│   └── lib/               ← bin.mjs (tìm binary) · cluster.mjs (initdb/pg_ctl/dọn) · session.mjs (phiên psql)
+│                            sqlsplit.mjs (tách bước + chỉ thị) · output.mjs (đọc/chuẩn hoá đầu ra) ·
+│                            runner.mjs (chạy bước, nhiều phiên, chấm) · measure.mjs · machine.mjs
 ├── docker-compose.yml     ← PostgreSQL 17.5 thật cho cách B (chưa chạy thử)
 ├── test/
 │   ├── p01.test.mjs       ← node:test cho P01 và cho chính runner
 │   ├── thu-nghiem.test.mjs← thí nghiệm của bài P01
 │   ├── p02.test.mjs       ← node:test cho P02 và các chỉ thị expect-value/line/md5
-│   └── p02-thu-nghiem.test.mjs ← thí nghiệm của bài P02
+│   ├── p02-thu-nghiem.test.mjs ← thí nghiệm của bài P02
+│   └── p03.test.mjs       ← mảnh runner P03+ (luôn chạy) + P03 trên PostgreSQL thật (skip khi không có)
 ├── p01/                   ← Nền tảng và mô hình dữ liệu (PG-001 … PG-010)
 │   ├── README.md
 │   ├── 00-reset.sql … 07-checks.sql, 06-migration-rollback.sql, thu-nghiem/
 │   └── OUTPUT.txt         ← kết quả thật của `npm run p01`
-└── p02/                   ← SQL cho nghiệp vụ (PG-011 … PG-020), chạy trên lược đồ p01/00 + 01
-    ├── README.md
-    ├── 00-mo-rong-schema.sql, 01-fixture.sql, 02-kiem-tra-fixture.sql
-    ├── 11-…sql … 20-…sql  ← mỗi file một bài, số file = số bài (19 có hai file)
-    ├── thu-nghiem/        ← thí nghiệm và lời giải bài tập của PG-011 … PG-020 (manifest.json)
-    └── OUTPUT.txt         ← kết quả thật của `npm run p02`
+├── p02/                   ← SQL cho nghiệp vụ (PG-011 … PG-020), chạy trên lược đồ p01/00 + 01
+│   ├── README.md
+│   ├── 00-mo-rong-schema.sql, 01-fixture.sql, 02-kiem-tra-fixture.sql
+│   ├── 11-…sql … 20-…sql  ← mỗi file một bài, số file = số bài (19 có hai file)
+│   ├── thu-nghiem/        ← thí nghiệm và lời giải bài tập của PG-011 … PG-020 (manifest.json)
+│   └── OUTPUT.txt         ← kết quả thật của `npm run p02`
+└── p03/                   ← Lưu trữ, index và kế hoạch thực thi (PG-021 … PG-030), PostgreSQL 18 thật
+    ├── README.md, lab.json (nền + tệp bài)
+    ├── 00-mo-rong-schema.sql, 01-fixture.sql, 02-kiem-tra-fixture.sql, 03-bai-cu-20k.sql   ← nền
+    ├── 21-…sql … 30-…sql  ← mỗi file một bài
+    ├── thu-nghiem/        ← thí nghiệm (manifest.json), gồm kịch bản nhiều phiên
+    ├── do-dac.mjs → DO-DAC.md  ← đặc tả phép đo → kết quả đo thật kèm cấu hình máy
+    └── OUTPUT.txt         ← kết quả thật của `npm run p03`
 ```

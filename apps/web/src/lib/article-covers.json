@@ -5408,5 +5408,85 @@
       "THANH TOÁN",
       "LỆCH"
     ]
+  },
+  "postgresql-explain-ke-hoach-thuc-thi": {
+    "title": "EXPLAIN",
+    "subtitle": "PostgreSQL · Đọc kế hoạch thực thi",
+    "diagram": "flow",
+    "labels": [
+      "SCAN",
+      "JOIN",
+      "ACTUAL"
+    ]
+  },
+  "postgresql-btree-index-co-ban": {
+    "title": "B-TREE",
+    "subtitle": "PostgreSQL · Index tìm chuyến",
+    "diagram": "network",
+    "labels": [
+      "ROOT",
+      "BRANCH",
+      "LEAF"
+    ]
+  },
+  "postgresql-index-nhieu-cot-partial-expression": {
+    "title": "INDEX",
+    "subtitle": "PostgreSQL · Nhiều cột, partial, expression",
+    "diagram": "checklist",
+    "labels": [
+      "(CITY, TIME)",
+      "WHERE …",
+      "LOWER(…)"
+    ]
+  },
+  "postgresql-index-only-scan-visibility-map": {
+    "title": "INDEX ONLY",
+    "subtitle": "PostgreSQL · INCLUDE và visibility map",
+    "diagram": "pages",
+    "labels": [
+      "INDEX",
+      "VISIBILITY MAP",
+      "HEAP FETCHES"
+    ]
+  },
+  "postgresql-statistics-analyze-cardinality": {
+    "title": "ANALYZE",
+    "subtitle": "PostgreSQL · Ước lượng cardinality",
+    "diagram": "split",
+    "labels": [
+      "ƯỚC LƯỢNG",
+      "≠",
+      "THỰC TẾ"
+    ]
+  },
+  "postgresql-gin-gist-brin-lua-chon": {
+    "title": "GIN · GIST · BRIN",
+    "subtitle": "PostgreSQL · Chọn loại index",
+    "diagram": "blocks",
+    "labels": [
+      "GIN",
+      "GIST",
+      "BRIN"
+    ]
+  },
+  "postgresql-sort-hash-memory-spill": {
+    "title": "WORK_MEM",
+    "subtitle": "PostgreSQL · Sort, hash và tràn đĩa",
+    "diagram": "storage",
+    "labels": [
+      "SORT",
+      "HASH",
+      "DISK"
+    ]
+  },
+  "postgresql-thuc-hanh-toi-uu-truy-van": {
+    "title": "PHẦN 3 · LAB",
+    "subtitle": "PostgreSQL · Tối ưu bằng bằng chứng",
+    "diagram": "target",
+    "labels": [
+      "PLAN",
+      "ĐO LẶP",
+      "MD5"
+    ]
   }
 }

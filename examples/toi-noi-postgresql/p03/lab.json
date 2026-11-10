@@ -1,0 +1,18 @@
+{
+  "mo_ta": "Lab P03 · Lưu trữ, index và kế hoạch thực thi (PG-021 … PG-030) — PostgreSQL 18 thật. Nền dựng một lần; mỗi tệp bài chạy trên một database MỚI chép từ nền (CREATE DATABASE … TEMPLATE … STRATEGY FILE_COPY) nên các bài độc lập và bắt đầu với shared_buffers trống đối với database đó.",
+  "nen": {
+    "p03": ["p01/00-reset.sql", "p01/01-schema.sql", "p02/00-mo-rong-schema.sql", "p03/00-mo-rong-schema.sql", "p03/01-fixture.sql", "p03/02-kiem-tra-fixture.sql", "p03/03-bai-cu-20k.sql"]
+  },
+  "tep": [
+    { "file": "21-explain-tim-chuyen.sql", "bai": "PG-021", "nen": "p03" },
+    { "file": "22-page-buffer.sql", "bai": "PG-022", "nen": "p03" },
+    { "file": "23-btree.sql", "bai": "PG-023", "nen": "p03" },
+    { "file": "24-heap-ctid-hot.sql", "bai": "PG-024", "nen": "p03" },
+    { "file": "25-index-nhieu-cot-partial-expression.sql", "bai": "PG-025", "nen": "p03" },
+    { "file": "26-index-only-scan.sql", "bai": "PG-026", "nen": "p03" },
+    { "file": "27-statistics.sql", "bai": "PG-027", "nen": "p03" },
+    { "file": "28-gin-gist-brin.sql", "bai": "PG-028", "nen": "p03" },
+    { "file": "29-sort-hash-spill.sql", "bai": "PG-029", "nen": "p03" },
+    { "file": "30-toi-uu-truy-van.sql", "bai": "PG-030", "nen": "p03" }
+  ]
+}

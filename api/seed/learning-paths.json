@@ -40,6 +40,25 @@
     "status": "published"
   },
   {
+    "slug": "postgresql-tu-ben-trong-phan-03",
+    "title": "PostgreSQL · Phần 3 · Lưu trữ, index và kế hoạch thực thi",
+    "description": "Đo trước khi tin: đọc EXPLAIN trên 1 triệu chuyến của Tới Nơi (PostgreSQL 18), page và buffer, B-tree, heap và ctid, index nhiều cột/partial/expression, index-only scan và visibility map, statistics và ước lượng cardinality, chọn GIN/GiST/BRIN, sort/hash tràn đĩa — kết thúc bằng bài thực hành tối ưu truy vấn có đối chiếu kết quả, đo lặp và chi phí ghi của index.",
+    "level": "advanced",
+    "category": "postgresql",
+    "articles": [
+      "postgresql-explain-ke-hoach-thuc-thi",
+      "page-don-vi-doc-ghi",
+      "postgresql-btree-index-co-ban",
+      "heap-ctid-va-primary-key",
+      "postgresql-index-nhieu-cot-partial-expression",
+      "postgresql-index-only-scan-visibility-map",
+      "postgresql-statistics-analyze-cardinality",
+      "postgresql-gin-gist-brin-lua-chon",
+      "postgresql-sort-hash-memory-spill",
+      "postgresql-thuc-hanh-toi-uu-truy-van"
+    ]
+  },
+  {
     "slug": "design-pattern-qua-toi-noi",
     "title": "Design Pattern qua dự án Tới Nơi",
     "description": "23 design pattern kinh điển chia theo ba nhóm Khởi tạo, Cấu trúc, Hành vi — mỗi pattern gắn với một bài toán thật của hệ thống đặt xe và giao hàng Tới Nơi, có so sánh các pattern trong cùng nhóm và khi nào không nên dùng.",

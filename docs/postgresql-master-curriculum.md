@@ -56,7 +56,7 @@ Hoàn thành **nội dung** phần nào: cập nhật trạng thái, seed và RE
 
 Đầu vào: Hồ sơ chung Tới Nơi; chưa cần biết SQL. Đầu ra: Schema tối thiểu cho khách, tài xế và chuyến, fixture nhỏ và kiểm tra dữ liệu sai.
 
-Lộ trình: `postgresql-tu-ben-trong` — **đã cập nhật thành P01 (10 bài) ngày 08/11/2026**; hồ sơ chung là bài đọc trước, hai bài cũ chờ đăng ký vào P03. Lab: `examples/toi-noi-postgresql/p01` (PostgreSQL 17.5 qua PGlite; đường Docker + psql chưa chạy trên máy viết bài).
+Lộ trình: `postgresql-tu-ben-trong` — **đã cập nhật thành P01 (10 bài) ngày 08/11/2026**; hồ sơ chung là bài đọc trước, hai bài cũ đã đăng ký vào P03 ngày 10/11/2026. Lab: `examples/toi-noi-postgresql/p01` (PostgreSQL 17.5 qua PGlite; đường Docker + psql chưa chạy trên máy viết bài).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
@@ -94,20 +94,20 @@ Lộ trình: `postgresql-tu-ben-trong-phan-02` — **đã tạo (10 bài) ngày 
 
 Đầu vào: P01–P02; đã biết lọc, nối và tổng hợp. Đầu ra: Báo cáo trước/sau index, dữ liệu đo và giới hạn kết luận.
 
-Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-03`.
+Lộ trình: `postgresql-tu-ben-trong-phan-03` — **đã tạo (10 bài) ngày 10/11/2026**, gồm hai bài kế thừa PG-022 và PG-024 đã rà soát lại theo lab. Lab: `examples/toi-noi-postgresql/p03` (PostgreSQL **18.1 thật**, cluster tạm dựng và dọn tự động; 1 triệu chuyến tất định; kết quả `p03/OUTPUT.txt`, số đo `p03/DO-DAC.md`; thí nghiệm và lời giải bài tập ở `p03/thu-nghiem/`).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| PG-021 | Đọc EXPLAIN từ truy vấn tìm chuyến<br>`postgresql-explain-ke-hoach-thuc-thi` | CB | Nhận diện scan, join, estimate và phân biệt kế hoạch với thực thi | Kế hoạch |
-| PG-022 | Đơn vị đọc ghi nhỏ nhất của cơ sở dữ liệu là gì?<br>`page-don-vi-doc-ghi` | CB | Rà bài hiện có, đối chiếu page, buffer và phạm vi kết luận | Đã có — chờ rà soát |
-| PG-023 | B-tree index giúp tìm chuyến như thế nào?<br>`postgresql-btree-index-co-ban` | CB | So sánh đường tìm dữ liệu khi có và chưa có index | Kế hoạch |
-| PG-024 | Clustered index thật và clustered index nhìn thấy trong PostgreSQL<br>`heap-ctid-va-primary-key` | TB | Rà bài hiện có, làm rõ heap, ctid, primary key và tránh hiểu sai thuật ngữ | Đã có — chờ rà soát |
-| PG-025 | Index nhiều cột, partial và expression<br>`postgresql-index-nhieu-cot-partial-expression` | TB | Chọn index theo điều kiện truy vấn và chi phí ghi | Kế hoạch |
-| PG-026 | Index-only scan, INCLUDE và visibility map<br>`postgresql-index-only-scan-visibility-map` | TB | Quan sát heap fetch và điều kiện hiệu quả của covering index | Kế hoạch |
-| PG-027 | Statistics, ANALYZE và ước lượng cardinality<br>`postgresql-statistics-analyze-cardinality` | TB | Tìm lệch estimate/actual trên dữ liệu phân bố không đều | Kế hoạch |
-| PG-028 | Khi nào cân nhắc GIN, GiST và BRIN?<br>`postgresql-gin-gist-brin-lua-chon` | NC | Lập ma trận workload, operator và giới hạn từng loại index | Kế hoạch |
-| PG-029 | Sort, hash và truy vấn tràn ra đĩa<br>`postgresql-sort-hash-memory-spill` | NC | Đo spill và đánh đổi tài nguyên với tải đồng thời | Kế hoạch |
-| PG-030 | Thực hành: tối ưu truy vấn bằng bằng chứng<br>`postgresql-thuc-hanh-toi-uu-truy-van` | NC | Bàn giao plan, fixture, phép đo lặp và chi phí ghi của index | Kế hoạch |
+| PG-021 | Đọc EXPLAIN từ truy vấn tìm chuyến<br>`postgresql-explain-ke-hoach-thuc-thi` | CB | Nhận diện scan, join, estimate và phân biệt kế hoạch với thực thi | Đã viết |
+| PG-022 | Đơn vị đọc ghi nhỏ nhất của cơ sở dữ liệu là gì?<br>`page-don-vi-doc-ghi` | CB | Rà bài hiện có, đối chiếu page, buffer và phạm vi kết luận | Đã rà soát |
+| PG-023 | B-tree index giúp tìm chuyến như thế nào?<br>`postgresql-btree-index-co-ban` | CB | So sánh đường tìm dữ liệu khi có và chưa có index | Đã viết |
+| PG-024 | Clustered index thật và clustered index nhìn thấy trong PostgreSQL<br>`heap-ctid-va-primary-key` | TB | Rà bài hiện có, làm rõ heap, ctid, primary key và tránh hiểu sai thuật ngữ | Đã rà soát |
+| PG-025 | Index nhiều cột, partial và expression<br>`postgresql-index-nhieu-cot-partial-expression` | TB | Chọn index theo điều kiện truy vấn và chi phí ghi | Đã viết |
+| PG-026 | Index-only scan, INCLUDE và visibility map<br>`postgresql-index-only-scan-visibility-map` | TB | Quan sát heap fetch và điều kiện hiệu quả của covering index | Đã viết |
+| PG-027 | Statistics, ANALYZE và ước lượng cardinality<br>`postgresql-statistics-analyze-cardinality` | TB | Tìm lệch estimate/actual trên dữ liệu phân bố không đều | Đã viết |
+| PG-028 | Khi nào cân nhắc GIN, GiST và BRIN?<br>`postgresql-gin-gist-brin-lua-chon` | NC | Lập ma trận workload, operator và giới hạn từng loại index | Đã viết |
+| PG-029 | Sort, hash và truy vấn tràn ra đĩa<br>`postgresql-sort-hash-memory-spill` | NC | Đo spill và đánh đổi tài nguyên với tải đồng thời | Đã viết |
+| PG-030 | Thực hành: tối ưu truy vấn bằng bằng chứng<br>`postgresql-thuc-hanh-toi-uu-truy-van` | NC | Bàn giao plan, fixture, phép đo lặp và chi phí ghi của index | Đã viết |
 
 ## P04 · Giao dịch, MVCC và đồng thời
 
