@@ -2,7 +2,7 @@
   "name": "toi-noi-postgresql-lab",
   "private": true,
   "type": "module",
-  "description": "Lab PostgreSQL qua dự án Tới Nơi — P01–P02 chạy bằng PGlite (PostgreSQL 17.5 trong WASM), P03+ chạy trên PostgreSQL 18 thật (cluster tạm do pg/run-pg.mjs dựng)",
+  "description": "Lab PostgreSQL qua dự án Tới Nơi — P01–P02 chạy bằng PGlite (PostgreSQL 17.5 trong WASM), P03+ chạy trên PostgreSQL 18 thật (cluster tạm do pg/run-pg.mjs dựng; phép thử đồng thời P04: pg/run-dong-thoi.mjs)",
   "engines": {
     "node": ">=22"
   },
@@ -15,6 +15,11 @@
     "p03:output": "node pg/run-pg.mjs p03 > p03/OUTPUT.txt",
     "p03:thu-nghiem": "node pg/run-pg.mjs p03/thu-nghiem/manifest.json",
     "p03:measure": "node pg/run-measure.mjs p03/do-dac.mjs",
+    "p04": "node pg/run-pg.mjs p04",
+    "p04:output": "node pg/run-pg.mjs p04 > p04/OUTPUT.txt",
+    "p04:thu-nghiem": "node pg/run-pg.mjs p04/thu-nghiem/manifest.json",
+    "p04:measure": "node pg/run-dong-thoi.mjs p04/dong-thoi.mjs",
+    "p04:dong-thoi-nho": "node pg/run-dong-thoi.mjs p04/dong-thoi.mjs --nho",
     "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {

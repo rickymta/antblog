@@ -59,6 +59,25 @@
     ]
   },
   {
+    "slug": "postgresql-tu-ben-trong-phan-04",
+    "title": "PostgreSQL · Phần 4 · Giao dịch, MVCC và đồng thời",
+    "description": "Khi nhiều người cùng chạm vào một chuyến của Tới Nơi: transaction và ROLLBACK, MVCC và snapshot, khoá dòng/khoá bảng và thời gian chờ, Read Committed so với Repeatable Read, cập nhật có điều kiện theo version, hàng đợi worker với SKIP LOCKED, deadlock và thứ tự lấy khoá, Serializable và retry toàn giao dịch, idempotency và outbox — kết thúc bằng bài thực hành hai tài xế cùng nhận một chuyến có lịch chạy, bất biến và phép thử đồng thời trên PostgreSQL 18.",
+    "level": "advanced",
+    "category": "postgresql",
+    "articles": [
+      "postgresql-transaction-commit-rollback",
+      "postgresql-mvcc-snapshot",
+      "postgresql-lock-row-table",
+      "postgresql-isolation-read-committed-repeatable-read",
+      "postgresql-optimistic-version-conditional-update",
+      "postgresql-for-update-skip-locked",
+      "postgresql-deadlock-lock-order-timeout",
+      "postgresql-serializable-retry",
+      "postgresql-idempotency-outbox-transaction",
+      "postgresql-thuc-hanh-tranh-chap-nhan-chuyen"
+    ]
+  },
+  {
     "slug": "design-pattern-qua-toi-noi",
     "title": "Design Pattern qua dự án Tới Nơi",
     "description": "23 design pattern kinh điển chia theo ba nhóm Khởi tạo, Cấu trúc, Hành vi — mỗi pattern gắn với một bài toán thật của hệ thống đặt xe và giao hàng Tới Nơi, có so sánh các pattern trong cùng nhóm và khi nào không nên dùng.",

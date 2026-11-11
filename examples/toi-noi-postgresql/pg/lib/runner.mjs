@@ -9,6 +9,16 @@
 // phiên đang chặn (pg_blocking_pids), runner chạy tiếp bước sau. Sau mỗi bước
 // xong, runner kiểm các bước đang chờ: bước nào đã xong thì in kết quả tại đó.
 // Lịch chạy in ra vì thế tất định.
+//
+// Bổ sung cho P04 (tương thích ngược — tệp P03 cho đầu ra y hệt):
+//   * `-- lab: cho-xong`: chờ bước chạy XONG (kể cả khi nó đang chờ khoá) — cho bước sẽ tự
+//     kết thúc bằng lỗi sau một khoảng (lock_timeout 55P03, statement_timeout 57014,
+//     deadlock 40P01). Nếu đã thấy bước chờ khoá, in "⏳ đã chờ khoá … trước khi xong".
+//   * Phiên MẤT KẾT NỐI (psql thoát giữa bước: pg_terminate_backend, idle timeout…) là
+//     một kết quả, chấm bằng `-- expect-mat-ket-noi`; bước sau của phiên đó mở kết nối mới.
+//   * Tệp nhiều phiên: trong thông báo lỗi và nhật ký server, PID của backend được thay bằng
+//     nhãn phiên ([A], [B]…), số giao dịch (xid) bằng <XID>, "after 201.681 ms" bằng
+//     "after T ms" — để đầu ra tất định; dòng nhật ký server mang nhãn phiên ghi ra nó.
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 import { splitPsql, parseDirectives } from './sqlsplit.mjs';
@@ -41,6 +51,8 @@ export class Unit {
     this.multi = false;
     this.pendingSteps = []; // { label, step, rel, promise, done, result }
     this.failures = [];
+    this.pidLabels = new Map(); // pid backend → nhãn phiên (kể cả phiên đã mất kết nối)
+    this.lostLabels = new Set(); // phiên vừa mất kết nối: bước sau sẽ mở kết nối mới
   }
 
   async session(label) {
@@ -48,6 +60,7 @@ export class Unit {
     if (!s || s.closed) {
       s = await new PsqlSession(this.ctx.cluster, this.db, label).open();
       this.sessions.set(label, s);
+      this.pidLabels.set(s.pid, label);
     }
     return s;
   }
@@ -125,7 +138,11 @@ export class Unit {
     }
     const label = lab.session ?? this.currentLabel;
     this.currentLabel = label;
+    const reopened = this.lostLabels.delete(label);
     let sess = await this.session(label);
+    if (reopened) {
+      this.write(`\n-- [lab] [${label}] mở kết nối MỚI (kết nối cũ đã mất): phiên mới — SET, biến psql, giao dịch cũ đều không còn\n`);
+    }
     if (sess.busy) {
       // Tác giả kịch bản gửi bước mới cho phiên còn đang chờ: đợi nó xong trước.
       const p = this.pendingSteps.find((x) => x.label === label);
@@ -147,6 +164,27 @@ export class Unit {
     const rec = { label, step, rel, exp, lab, promise, done: false, result: null, logOffset };
     promise.then((r) => { rec.done = true; rec.result = r; }, (e) => { rec.done = true; rec.result = { crash: e }; });
 
+    if (this.multi && lab.waitDone) {
+      const state = await this.waitUntilDone(rec, sess, 60000);
+      if (!rec.done) {
+        this.fail(where, `lab: cho-xong — bước của phiên [${label}] chưa xong sau 60 s`);
+        sess.kill();
+        this.sessions.delete(label);
+        return;
+      }
+      if (state.seen) {
+        const by = state.blockers.length ? ` — bị chặn bởi ${state.blockers.map((pid) => this.labelOfPid(pid)).join(', ')}` : '';
+        this.write(`-- [lab] [${label}] ⏳ đã chờ khoá (${state.waitEvent})${by} trước khi xong\n`);
+      }
+      if (exp.blocked) {
+        ctx.summary.blockedChecks++;
+        if (state.seen) this.write('-- [lab] PASS: bước đã phải chờ khoá như mong đợi (expect-blocked)\n');
+        else this.fail(where, 'expect-blocked: bước xong mà không thấy chờ khoá');
+      }
+      this.report(rec);
+      await this.settlePending();
+      return;
+    }
     if (this.multi) {
       const state = await this.waitOrBlocked(rec, sess, lab.waitMs ?? 3000);
       if (state.kind !== 'done') {
@@ -194,6 +232,37 @@ export class Unit {
       if (Date.now() - t0 > waitMs) return { kind: 'running', blockers: last?.blockers ?? [] };
     }
     return { kind: 'done' };
+  }
+
+  /** `lab: cho-xong`: chờ tới khi bước xong; ghi lại nếu đã thấy nó chờ khoá. */
+  async waitUntilDone(rec, sess, maxMs) {
+    const t0 = Date.now();
+    let seen = null;
+    while (!rec.done && Date.now() - t0 < maxMs) {
+      await sleep(POLL_MS);
+      if (rec.done) break;
+      const st = await this.lockState(sess.pid);
+      if (st && st.waitType === 'Lock') seen = st;
+    }
+    return seen
+      ? { seen: true, waitEvent: `${seen.waitType}: ${seen.waitEvent}`, blockers: seen.blockers }
+      : { seen: false, blockers: [] };
+  }
+
+  /** Tên hiển thị của một PID backend: nhãn phiên của tệp, hoặc "[pid khác]". */
+  pidName(pid) {
+    const l = this.pidLabels.get(pid);
+    return l ? `[${l}]` : '[pid khác]';
+  }
+
+  /** Che phần không tất định trong thông báo lỗi / nhật ký server của tệp nhiều phiên. */
+  maskMulti(text) {
+    if (!this.multi || !text) return text;
+    return text
+      .replace(/(\b[Pp]rocess(?: holding the lock:)? |Wait queue: )(\d+(?:, \d+)*)/g,
+        (m, pre, list) => pre + list.split(', ').map((x) => this.pidName(Number(x))).join(', '))
+      .replace(/\btransaction \d+/g, 'transaction <XID>')
+      .replace(/\bafter \d+(?:\.\d+)? ms\b/g, 'after T ms');
   }
 
   async lockState(pid) {
@@ -247,7 +316,12 @@ export class Unit {
       return;
     }
     if (process.env.PG_LAB_TIMING) process.stderr.write(`-- [lab] thời gian ${rec.rel}:${step.line} ${r.ms} ms${'\n'}`);
+    if (r.connLost) {
+      this.reportLost(rec);
+      return;
+    }
     const st = transformStderr(r.stderr);
+    st.text = this.maskMulti(st.text);
     const parts = [];
     if (lab.volatile || exp.range) parts.push(VOLATILE_BEGIN);
     if (st.text.trim()) parts.push(st.text);
@@ -255,15 +329,16 @@ export class Unit {
     if (so.trim()) parts.push(so);
     if (lab.volatile || exp.range) parts.push(VOLATILE_END);
     if (lab.serverLog) {
-      const added = ctx.cluster.readLogFrom(rec.logOffset);
-      const logLines = added.split('\n').map((l) => l.replace(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)? [+-]\d\d(:?\d\d)? \[\d+\] /, '')).filter((l) => l.trim());
-      if (logLines.length) parts.push(logLines.map((l) => `-- [lab] nhật ký server: ${l}`).join('\n'));
-      else parts.push('-- [lab] nhật ký server: (không có dòng mới)');
+      parts.push(this.logLines(rec));
     }
     // PG_LAB_RAW=1: in nguyên văn (giữ thời gian đo) — chỉ để gỡ lỗi, không dùng cho OUTPUT.txt.
     const shown = process.env.PG_LAB_RAW ? parts.join('\n') : normalizeOutput(parts.join('\n'), { root: ctx.cluster.root, port: ctx.cluster.port });
     if (shown) this.write(shown + '\n');
 
+    if (exp.lost) {
+      ctx.summary.lostChecks = (ctx.summary.lostChecks ?? 0) + 1;
+      this.fail(where, 'expect-mat-ket-noi: bước chạy xong, kết nối không mất');
+    }
     const isMeta = step.kind === 'meta';
     const errored = !isMeta && (r.error || !!st.error);
     // --- chấm kỳ vọng
@@ -338,6 +413,39 @@ export class Unit {
   }
 }
 
+Unit.prototype.logLines = function logLines(rec) {
+  const added = this.ctx.cluster.readLogFrom(rec.logOffset);
+  const lines = added.split('\n')
+    .map((l) => l.replace(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)? [+-]\d\d(:?\d\d)? \[(\d+)\] /,
+      (m, f, z, pid) => (this.multi ? `${this.pidName(Number(pid))} ` : '')))
+    .map((l) => this.maskMulti(l))
+    .filter((l) => l.trim());
+  if (!lines.length) return '-- [lab] nhật ký server: (không có dòng mới)';
+  return lines.map((l) => `-- [lab] nhật ký server: ${l}`).join('\n');
+};
+
+/** Phiên mất kết nối giữa bước: in dạng chuẩn (thông báo của libpq/psql không tất định). */
+Unit.prototype.reportLost = function reportLost(rec) {
+  const ctx = this.ctx;
+  const { exp, lab, step } = rec;
+  const where = { file: rec.rel, line: step.line };
+  const r = rec.result;
+  this.lostLabels.add(rec.label);
+  this.sessions.delete(rec.label);
+  const parts = [];
+  const so = r.stdout.replace(/\n+$/, '');
+  if (so.trim()) parts.push(normalizeOutput(so, { root: ctx.cluster.root, port: ctx.cluster.port }));
+  parts.push(`-- [lab] [${rec.label}] ✖ MẤT KẾT NỐI: psql thoát (mã ${r.exitCode}) — "server closed the connection unexpectedly"; giao dịch đang mở của phiên bị server huỷ (ROLLBACK)`);
+  if (lab.serverLog) parts.push(this.logLines(rec));
+  this.write(parts.join('\n') + '\n');
+  if (exp.lost) {
+    ctx.summary.lostChecks = (ctx.summary.lostChecks ?? 0) + 1;
+    this.write('-- [lab] PASS: mất kết nối như mong đợi (expect-mat-ket-noi)\n');
+  } else {
+    this.fail(where, `phiên [${rec.label}] mất kết nối ngoài kỳ vọng (psql thoát mã ${r.exitCode})`);
+  }
+};
+
 export function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -356,6 +464,7 @@ export function formatSummary(s) {
   if (s.md5Checks) lines.push(`-- [lab] Kiểm md5 kết quả (expect-md5): ${s.md5Checks}`);
   if (s.matchChecks) lines.push(`-- [lab] Kiểm dòng đầu ra (expect-match/no-match): ${s.matchChecks}`);
   if (s.blockedChecks) lines.push(`-- [lab] Kiểm bị chặn (expect-blocked): ${s.blockedChecks}`);
+  if (s.lostChecks) lines.push(`-- [lab] Kiểm mất kết nối (expect-mat-ket-noi): ${s.lostChecks}`);
   lines.push(`-- [lab] FAIL: ${s.failures.length}`);
   for (const f of s.failures) lines.push(`-- [lab]   ${f.file}:${f.line} — ${f.reason}`);
   lines.push(s.failures.length === 0 ? '-- [lab] KẾT QUẢ: ĐẠT' : '-- [lab] KẾT QUẢ: KHÔNG ĐẠT');

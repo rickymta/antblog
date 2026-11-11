@@ -1,0 +1,18 @@
+{
+  "mo_ta": "Lab P04 · Giao dịch, MVCC và đồng thời (PG-031 … PG-040) — PostgreSQL 18 thật. Nền NHỎ (lược đồ P01 + P02 + p04/00, fixture vài chục dòng, < 2 s); mỗi tệp bài chạy trên một database MỚI chép từ nền, phần lớn là kịch bản NHIỀU PHIÊN (-- @A, -- @B …) với lịch chạy tất định. Phép thử đồng thời lặp nhiều lần: p04/dong-thoi.mjs (npm run p04:measure).",
+  "nen": {
+    "p04": ["p01/00-reset.sql", "p01/01-schema.sql", "p02/00-mo-rong-schema.sql", "p04/00-mo-rong-schema.sql", "p04/01-fixture.sql", "p04/02-kiem-tra-fixture.sql"]
+  },
+  "tep": [
+    { "file": "31-transaction-commit-rollback.sql", "bai": "PG-031", "nen": "p04" },
+    { "file": "32-mvcc-snapshot.sql", "bai": "PG-032", "nen": "p04" },
+    { "file": "33-khoa-dong-khoa-bang.sql", "bai": "PG-033", "nen": "p04" },
+    { "file": "34-read-committed-repeatable-read.sql", "bai": "PG-034", "nen": "p04" },
+    { "file": "35-optimistic-version.sql", "bai": "PG-035", "nen": "p04" },
+    { "file": "36-for-update-skip-locked.sql", "bai": "PG-036", "nen": "p04" },
+    { "file": "37-deadlock-thu-tu-khoa.sql", "bai": "PG-037", "nen": "p04" },
+    { "file": "38-serializable-retry.sql", "bai": "PG-038", "nen": "p04" },
+    { "file": "39-idempotency-outbox.sql", "bai": "PG-039", "nen": "p04" },
+    { "file": "40-thuc-hanh-nhan-chuyen.sql", "bai": "PG-040", "nen": "p04" }
+  ]
+}

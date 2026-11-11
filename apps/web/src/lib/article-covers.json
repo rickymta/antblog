@@ -5488,5 +5488,105 @@
       "ĐO LẶP",
       "MD5"
     ]
+  },
+  "postgresql-transaction-commit-rollback": {
+    "title": "TRANSACTION",
+    "subtitle": "PostgreSQL · COMMIT và ROLLBACK",
+    "diagram": "split",
+    "labels": [
+      "COMMIT",
+      "↔",
+      "ROLLBACK"
+    ]
+  },
+  "postgresql-mvcc-snapshot": {
+    "title": "MVCC",
+    "subtitle": "PostgreSQL · Mỗi phiên một snapshot",
+    "diagram": "pages",
+    "labels": [
+      "XMIN",
+      "SNAPSHOT",
+      "XMAX"
+    ]
+  },
+  "postgresql-lock-row-table": {
+    "title": "LOCK",
+    "subtitle": "PostgreSQL · Khoá dòng, khoá bảng",
+    "diagram": "flow",
+    "labels": [
+      "GIỮ KHOÁ",
+      "CHỜ",
+      "TIMEOUT"
+    ]
+  },
+  "postgresql-isolation-read-committed-repeatable-read": {
+    "title": "ISOLATION",
+    "subtitle": "PostgreSQL · Read Committed và Repeatable Read",
+    "diagram": "split",
+    "labels": [
+      "READ COMMITTED",
+      "↔",
+      "REPEATABLE READ"
+    ]
+  },
+  "postgresql-optimistic-version-conditional-update": {
+    "title": "VERSION",
+    "subtitle": "PostgreSQL · Cập nhật có điều kiện",
+    "diagram": "checklist",
+    "labels": [
+      "ĐỌC VERSION",
+      "WHERE VERSION",
+      "0 DÒNG ⇒ XUNG ĐỘT"
+    ]
+  },
+  "postgresql-for-update-skip-locked": {
+    "title": "SKIP LOCKED",
+    "subtitle": "PostgreSQL · Hàng đợi worker",
+    "diagram": "blocks",
+    "labels": [
+      "FOR UPDATE",
+      "NOWAIT",
+      "SKIP LOCKED"
+    ]
+  },
+  "postgresql-deadlock-lock-order-timeout": {
+    "title": "DEADLOCK",
+    "subtitle": "PostgreSQL · Thứ tự lấy khoá",
+    "diagram": "cycle",
+    "labels": [
+      "PHIÊN A",
+      "CHỜ NHAU",
+      "PHIÊN B"
+    ]
+  },
+  "postgresql-serializable-retry": {
+    "title": "SERIALIZABLE",
+    "subtitle": "PostgreSQL · Retry toàn giao dịch",
+    "diagram": "cycle",
+    "labels": [
+      "BEGIN",
+      "40001",
+      "RETRY"
+    ]
+  },
+  "postgresql-idempotency-outbox-transaction": {
+    "title": "OUTBOX",
+    "subtitle": "PostgreSQL · Idempotency và outbox",
+    "diagram": "flow",
+    "labels": [
+      "REQUEST KEY",
+      "CÙNG GIAO DỊCH",
+      "OUTBOX"
+    ]
+  },
+  "postgresql-thuc-hanh-tranh-chap-nhan-chuyen": {
+    "title": "PHẦN 4 · LAB",
+    "subtitle": "PostgreSQL · Hai tài xế, một chuyến",
+    "diagram": "target",
+    "labels": [
+      "MỘT NGƯỜI THẮNG",
+      "BẤT BIẾN",
+      "LỊCH CHẠY"
+    ]
   }
 }

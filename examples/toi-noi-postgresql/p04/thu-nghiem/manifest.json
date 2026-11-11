@@ -1,0 +1,20 @@
+{
+  "mo_ta": "Thí nghiệm và lời giải bài tập của PG-031 … PG-040. Mỗi tệp chạy trên một database MỚI chép từ nền khai báo ở đây (cùng danh sách tệp với p04/lab.json ⇒ khi chạy chung một lệnh, nền chỉ dựng một lần). Thêm tệp: đặt vào thư mục này rồi thêm một dòng vào \"tep\".",
+  "nen": {
+    "p04": ["p01/00-reset.sql", "p01/01-schema.sql", "p02/00-mo-rong-schema.sql", "p04/00-mo-rong-schema.sql", "p04/01-fixture.sql", "p04/02-kiem-tra-fixture.sql"]
+  },
+  "tep": [
+    { "file": "pg031-nhan-chuyen-nguyen-tu-now.sql", "bai": "PG-031", "nen": "p04" },
+    { "file": "pg032-snapshot-dang-chay-rr-delete.sql", "bai": "PG-032", "nen": "p04" },
+    { "file": "pg033-go-roi-phien-giu-khoa.sql", "bai": "PG-033", "nen": "p04" },
+    { "file": "pg033-transaction-timeout.sql", "bai": "PG-033", "nen": "p04" },
+    { "file": "pg034-rc-update-khong-thay-dong-moi-khop.sql", "bai": "PG-034", "nen": "p04" },
+    { "file": "pg034-snapshot-cau-dau-va-bai-tap.sql", "bai": "PG-034", "nen": "p04" },
+    { "file": "pg035-version-rr-ham-luu-updated-at-xmin.sql", "bai": "PG-035", "nen": "p04" },
+    { "file": "pg036-lease-fencing-lo-viec-idle-timeout.sql", "bai": "PG-036", "nen": "p04" },
+    { "file": "pg037-vong-ba-phien-lock-timeout.sql", "bai": "PG-037", "nen": "p04" },
+    { "file": "pg038-siread-retry-sai-muc-tron.sql", "bai": "PG-038", "nen": "p04" },
+    { "file": "pg039-idempotency-outbox-bai-tap.sql", "bai": "PG-039", "nen": "p04" },
+    { "file": "pg040-nhan-chuyen-bai-tap.sql", "bai": "PG-040", "nen": "p04" }
+  ]
+}

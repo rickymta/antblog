@@ -113,20 +113,20 @@ Lộ trình: `postgresql-tu-ben-trong-phan-03` — **đã tạo (10 bài) ngày 
 
 Đầu vào: P01–P03; lab có ít nhất hai phiên kết nối. Đầu ra: Kịch bản tranh chấp nhận chuyến với kiểm tra bất biến và retry.
 
-Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-04`.
+Lộ trình: `postgresql-tu-ben-trong-phan-04` — **đã tạo (10 bài) ngày 11/11/2026**. Lab: `examples/toi-noi-postgresql/p04` (PostgreSQL **18.1 thật**; kịch bản nhiều phiên tất định cho mọi bài, kết quả `p04/OUTPUT.txt`; phép thử đồng thời 8 phiên × 3 lần ở `p04/DO-DAC.md`; thí nghiệm và lời giải bài tập ở `p04/thu-nghiem/`).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| PG-031 | Transaction, COMMIT và ROLLBACK<br>`postgresql-transaction-commit-rollback` | CB | Chứng minh ghi chuyến và sự kiện cùng thành công hoặc cùng huỷ | Kế hoạch |
-| PG-032 | MVCC và snapshot: mỗi phiên nhìn thấy gì?<br>`postgresql-mvcc-snapshot` | CB | Chạy hai phiên để quan sát phiên bản dữ liệu | Kế hoạch |
-| PG-033 | Khoá dòng, khoá bảng và thời gian chờ<br>`postgresql-lock-row-table` | CB | Nhận diện phiên giữ khoá và phiên bị chặn | Kế hoạch |
-| PG-034 | Read Committed và Repeatable Read<br>`postgresql-isolation-read-committed-repeatable-read` | TB | So sánh cùng lịch thực thi dưới hai mức cô lập | Kế hoạch |
-| PG-035 | Optimistic concurrency và cập nhật có điều kiện<br>`postgresql-optimistic-version-conditional-update` | TB | Ngăn ghi đè trạng thái với version và kiểm số dòng đổi | Kế hoạch |
-| PG-036 | FOR UPDATE, NOWAIT và SKIP LOCKED<br>`postgresql-for-update-skip-locked` | TB | Thử hàng đợi worker và ghi rõ trường hợp bỏ qua dòng | Kế hoạch |
-| PG-037 | Deadlock, thứ tự lấy khoá và timeout<br>`postgresql-deadlock-lock-order-timeout` | TB | Tái hiện vòng chờ và sửa thứ tự truy cập | Kế hoạch |
-| PG-038 | Serializable và retry toàn giao dịch<br>`postgresql-serializable-retry` | NC | Tái hiện xung đột, kiểm retry giới hạn và tính đúng đắn | Kế hoạch |
-| PG-039 | Idempotency và transactional outbox<br>`postgresql-idempotency-outbox-transaction` | NC | Kiểm request lặp, lỗi giữa chừng và xử lý sự kiện trùng | Kế hoạch |
-| PG-040 | Thực hành: hai tài xế cùng nhận một chuyến<br>`postgresql-thuc-hanh-tranh-chap-nhan-chuyen` | NC | Bàn giao lịch chạy, invariant và bằng chứng chỉ một người thắng | Kế hoạch |
+| PG-031 | Transaction, COMMIT và ROLLBACK<br>`postgresql-transaction-commit-rollback` | CB | Chứng minh ghi chuyến và sự kiện cùng thành công hoặc cùng huỷ | Đã viết |
+| PG-032 | MVCC và snapshot: mỗi phiên nhìn thấy gì?<br>`postgresql-mvcc-snapshot` | CB | Chạy hai phiên để quan sát phiên bản dữ liệu | Đã viết |
+| PG-033 | Khoá dòng, khoá bảng và thời gian chờ<br>`postgresql-lock-row-table` | CB | Nhận diện phiên giữ khoá và phiên bị chặn | Đã viết |
+| PG-034 | Read Committed và Repeatable Read<br>`postgresql-isolation-read-committed-repeatable-read` | TB | So sánh cùng lịch thực thi dưới hai mức cô lập | Đã viết |
+| PG-035 | Optimistic concurrency và cập nhật có điều kiện<br>`postgresql-optimistic-version-conditional-update` | TB | Ngăn ghi đè trạng thái với version và kiểm số dòng đổi | Đã viết |
+| PG-036 | FOR UPDATE, NOWAIT và SKIP LOCKED<br>`postgresql-for-update-skip-locked` | TB | Thử hàng đợi worker và ghi rõ trường hợp bỏ qua dòng | Đã viết |
+| PG-037 | Deadlock, thứ tự lấy khoá và timeout<br>`postgresql-deadlock-lock-order-timeout` | TB | Tái hiện vòng chờ và sửa thứ tự truy cập | Đã viết |
+| PG-038 | Serializable và retry toàn giao dịch<br>`postgresql-serializable-retry` | NC | Tái hiện xung đột, kiểm retry giới hạn và tính đúng đắn | Đã viết |
+| PG-039 | Idempotency và transactional outbox<br>`postgresql-idempotency-outbox-transaction` | NC | Kiểm request lặp, lỗi giữa chừng và xử lý sự kiện trùng | Đã viết |
+| PG-040 | Thực hành: hai tài xế cùng nhận một chuyến<br>`postgresql-thuc-hanh-tranh-chap-nhan-chuyen` | NC | Bàn giao lịch chạy, invariant và bằng chứng chỉ một người thắng | Đã viết |
 
 ## P05 · Bảo mật, bảo trì và phục hồi
 

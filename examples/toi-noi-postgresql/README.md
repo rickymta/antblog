@@ -7,11 +7,11 @@ Mã thực hành cho loạt bài **PostgreSQL qua dự án Tới Nơi**. Đọc 
 | P01 | Nền tảng và mô hình dữ liệu | [`p01/`](p01/README.md) | Có SQL, kết quả mẫu và test — đã chạy trên PGlite 17.5 |
 | P02 | SQL cho nghiệp vụ | [`p02/`](p02/README.md) | Có SQL, fixture 30 ngày tất định, kết quả mẫu và test — đã chạy trên PGlite 17.5 (chạy trên lược đồ P01) |
 | P03 | Lưu trữ, index và kế hoạch thực thi | [`p03/`](p03/README.md) | Có SQL, fixture 1 triệu chuyến tất định, kết quả mẫu, thí nghiệm, phép đo và test — **đã chạy trên PostgreSQL 18.1 thật** (cluster tạm, xem [P03+](#p03-postgresql-18-that)) |
-| P04 | Giao dịch, MVCC và đồng thời | `p04/` | Chưa có — hạ tầng nhiều phiên đã có sẵn trong runner P03+ |
+| P04 | Giao dịch, MVCC và đồng thời | [`p04/`](p04/README.md) | Có SQL (10 kịch bản phần lớn NHIỀU PHIÊN, lịch chạy tất định), fixture nhỏ, kết quả mẫu, thí nghiệm, **phép thử đồng thời** (8 phiên chạy đua, kiểm bất biến) và test — **đã chạy trên PostgreSQL 18.1 thật** |
 | P05 | Bảo mật, bảo trì và phục hồi | `p05/` | Chưa có |
 | P06 | Mở rộng, tích hợp và vận hành đầu cuối | `p06/` | Chưa có |
 
-Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ tự tên, một `README.md`, kết quả chạy thật `OUTPUT.txt` và một file test trong `test/`. Phần sau có thể chạy trên lược đồ của phần trước: P02 = `p01/00-reset.sql` + `p01/01-schema.sql` + `p02/` (không nạp fixture P01); P03 = lược đồ P01 + `p02/00-mo-rong-schema.sql` + `p03/00`–`03` (dữ liệu riêng của P03).
+Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ tự tên, một `README.md`, kết quả chạy thật `OUTPUT.txt` và một file test trong `test/`. Phần sau có thể chạy trên lược đồ của phần trước: P02 = `p01/00-reset.sql` + `p01/01-schema.sql` + `p02/` (không nạp fixture P01); P03 = lược đồ P01 + `p02/00-mo-rong-schema.sql` + `p03/00`–`03` (dữ liệu riêng của P03); P04 = lược đồ P01 + `p02/00-mo-rong-schema.sql` + `p04/00`–`02` (fixture nhỏ riêng của P04).
 
 **Hai engine, hai runner.** P01–P02 chạy bằng **PGlite 0.3.16 = PostgreSQL 17.5** trong tiến trình Node (`run.mjs`, một kết nối, không cần cài gì). Từ **P03 trở đi** lab chạy trên **PostgreSQL 18 thật** (đã kiểm 18.1) qua `pg/run-pg.mjs`: runner tự `initdb` một cluster TẠM, chạy SQL bằng `psql`, rồi dừng và xoá cluster. Lý do: P03+ cần thứ PGlite không có — extension contrib (pageinspect, pg_buffercache, pg_trgm…), nhiều phiên đồng thời, file tạm, WAL, khởi động lại server, pgbench.
 
@@ -23,7 +23,7 @@ Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ t
 | `@electric-sql/pglite` | **0.3.16** (ghim chính xác trong `package.json` + `package-lock.json`) | Chạy **PostgreSQL 17.5** biên dịch sang WebAssembly |
 | Ảnh Docker (cách B) | `postgres:17.5-bookworm` | Cùng bản vá 17.5; **chưa chạy thử** trên máy viết bài |
 | Extension (P01–P02) | Không dùng | `gen_random_uuid()` có sẵn trong lõi từ PostgreSQL 13 |
-| PostgreSQL (P03+) | **18.1** (initdb, pg_ctl, psql, pgbench của bản cài Windows `C:\Program Files\PostgreSQL\18`) | Bắt buộc ≥ 18 (runner kiểm). Extension contrib dùng: pageinspect, pg_buffercache, pg_visibility, pgstattuple, pg_walinspect, pg_trgm, btree_gist, unaccent, pg_stat_statements — đều có trong bản cài chuẩn. Không cần PostGIS, pgvector |
+| PostgreSQL (P03+) | **18.1** (initdb, pg_ctl, psql, pgbench của bản cài Windows `C:\Program Files\PostgreSQL\18`) | Bắt buộc ≥ 18 (runner kiểm). Extension contrib dùng: pageinspect, pg_buffercache, pg_visibility, pgstattuple, pg_walinspect, pg_trgm, btree_gist, unaccent, pg_stat_statements — đều có trong bản cài chuẩn. Không cần PostGIS, pgvector. P04 dùng thêm `transaction_timeout` (có từ PostgreSQL 17) |
 
 ## Cách A · Node + PGlite (đã kiểm chứng)
 
@@ -63,6 +63,8 @@ Kết quả mong đợi của `npm run p01` kết thúc bằng:
 và phần P01–P02 của `npm test` gồm 58 test (P01: 6 test luồng chính + 20 thí nghiệm của bài trong `p01/thu-nghiem`; P02: 6 test trong `test/p02.test.mjs` + 26 thí nghiệm của bài trong `p02/thu-nghiem`). Toàn bộ kết quả thật nằm ở [`p01/OUTPUT.txt`](p01/OUTPUT.txt) và [`p02/OUTPUT.txt`](p02/OUTPUT.txt).
 
 Từ P03, `test/p03.test.mjs` thêm 6 test runner (luôn chạy) và một nhóm 26 test trên PostgreSQL thật (nền, 10 tệp bài, 12 thí nghiệm của bài, so OUTPUT.txt, kiểm đã dọn cluster). Kết quả đã chạy: **máy có PostgreSQL 18.1** ⇒ `# tests 90`, `# pass 90`, `# fail 0` (~3,6 phút, phần lớn là dựng nền P03); **giả lập máy chỉ có Node** (`PG_BIN=<thư mục không tồn tại> npm test`) ⇒ `# tests 64`, `# pass 64`, nhóm P03 hiện `# SKIP bỏ qua — PG_BIN=… không chứa psql/initdb/pg_ctl`.
+
+Từ P04, `test/p04.test.mjs` thêm 5 test luôn chạy (chỉ thị mới, che PID/xid, bộ thử lại `giaoDich()`, mã thoát 3 của hai CLI khi không có PostgreSQL) và hai nhóm trên PostgreSQL thật: 26 test cho tệp bài/thí nghiệm (nền, 10 tệp bài, 12 thí nghiệm của bài, so OUTPUT.txt, dọn cluster) và 16 test cho **phép thử đồng thời cỡ nhỏ** (`--nho`: 14 kịch bản, chỉ kiểm bất biến "phải đúng", dọn cluster). Kết quả đã chạy (11/11/2026): **máy có PostgreSQL 18.1** ⇒ `# tests 137`, `# pass 137`, `# fail 0` (~3,2 phút — các tệp test chạy song song); **giả lập máy chỉ có Node** (`PG_BIN=<thư mục không tồn tại> npm test`) ⇒ `# tests 69`, `# pass 69`, ba nhóm P03/P04 hiện `# SKIP bỏ qua — PG_BIN=… không chứa psql/initdb/pg_ctl`.
 
 Các cách chạy khác của runner:
 
@@ -192,6 +194,10 @@ npm run p03                    # = node pg/run-pg.mjs p03 — nền + 10 tệp b
 npm run p03:output             # ghi lại p03/OUTPUT.txt
 npm run p03:thu-nghiem         # các thí nghiệm của bài (p03/thu-nghiem/manifest.json)
 npm run p03:measure            # PHÉP ĐO (không thuộc npm test, ~4 phút) → ghi p03/DO-DAC.md
+npm run p04                    # = node pg/run-pg.mjs p04 — nền nhỏ + 10 kịch bản (phần lớn nhiều phiên), ~45 s
+npm run p04:output | p04:thu-nghiem
+npm run p04:measure            # PHÉP THỬ ĐỒNG THỜI (pg/run-dong-thoi.mjs, không thuộc npm test) → ghi p04/DO-DAC.md
+npm run p04:dong-thoi-nho      # cùng phép thử, cỡ nhỏ (~35 s, không ghi tệp) — npm test chạy bản này
 
 node pg/run-pg.mjs p03 --only 23                     # chỉ tệp bài có tên chứa "23" (nền vẫn dựng)
 node pg/run-pg.mjs p03/thu-nghiem/manifest.json --only pg024
@@ -247,11 +253,13 @@ Gần giống P01–P02 nhưng là **đầu ra thật của psql** (`-X`, `ON_ER
 | `-- expect-match: regex` (lặp được) | MỖI regex khớp ít nhất một dòng đầu ra (dùng cho kế hoạch: `Index Scan using … on trips`, `Heap Fetches: 0$`, `Sort Method: external merge`) |
 | `-- expect-no-match: regex` | Không dòng nào khớp |
 | `-- expect-range: lo hi` | Kết quả là 1 ô số trong [lo, hi] — cho giá trị phụ thuộc lấy mẫu; đầu ra bước tự được đánh dấu biến động |
-| `-- expect-blocked` | (nhiều phiên) bước PHẢI rơi vào trạng thái chờ khoá |
+| `-- expect-blocked` | (nhiều phiên) bước PHẢI rơi vào trạng thái chờ khoá (kèm `lab: cho-xong`: phải đã từng chờ khoá trước khi xong) |
+| `-- expect-mat-ket-noi` | Bước làm phiên MẤT KẾT NỐI (psql thoát giữa bước: `pg_terminate_backend`, `idle_in_transaction_session_timeout`, `transaction_timeout`…). Runner in một dòng chuẩn hoá `✖ MẤT KẾT NỐI`; bước sau của phiên đó mở kết nối MỚI (in `mở kết nối MỚI`) — nhớ `SET` lại. Không có chỉ thị này mà mất kết nối ⇒ FAIL |
 | `-- lab: bien-dong` | Đánh dấu đầu ra bước là biến động (test không so) |
 | `-- lab: nhat-ky` | Sau bước, in các dòng MỚI của nhật ký server (bỏ tiền tố giờ/PID) — vd. `LOG:  temporary file: …` |
 | `-- lab: restart` | `pg_ctl restart` TRƯỚC bước này (shared_buffers trống; mọi phiên mở lại — đặt lại `search_path` sau đó) |
 | `-- lab: cho-ms n` | (nhiều phiên) chờ tối đa n ms (mặc định 3000) trước khi coi bước "vẫn đang chạy" |
+| `-- lab: cho-xong` | (nhiều phiên) CHỜ bước chạy xong (tối đa 60 s) dù nó đang chờ khoá — cho bước tự kết thúc bằng lỗi sau một khoảng (`lock_timeout` 55P03, `statement_timeout` 57014, deadlock 40P01, `transaction_timeout`). Đã thấy nó chờ khoá thì in `⏳ đã chờ khoá (…) — bị chặn bởi [X] trước khi xong` |
 | `-- @TEN` | Chạy bước trên phiên TEN (mỗi phiên = một tiến trình psql = một kết nối, `application_name = lab-TEN`) |
 
 ### Nhiều phiên
@@ -273,7 +281,17 @@ COMMIT
 CLUSTER
 ```
 
-Giới hạn hiện tại (cho người dựng P04): phát hiện "bị chặn" chỉ theo `wait_event_type = 'Lock'` (khoá dòng/bảng/advisory/transactionid); chờ kiểu khác (IO, LWLock, `pg_sleep`) được báo là "vẫn đang chạy" sau `cho-ms`. Deadlock: PostgreSQL tự huỷ một bên sau `deadlock_timeout` (1 s) — phiên bị huỷ nhận lỗi `40P01`, ghi `-- expect-error: 40P01` ở bước của nó.
+Phát hiện "bị chặn" theo `wait_event_type = 'Lock'` (khoá dòng/bảng/tuple/transactionid/**advisory**); chờ kiểu khác (IO, LWLock, `pg_sleep`) được báo là "vẫn đang chạy" sau `cho-ms`. SERIALIZABLE không chờ mà báo lỗi `40001` (thường ở COMMIT) — chấm bằng `expect-error` ở bước đó. Bổ sung từ P04 (tương thích ngược — đầu ra P03 không đổi):
+
+- **Lỗi của phiên bị chặn** chấm ở chính bước đó: `expect-blocked` + `expect-error: 40001` (hoặc 23505, 40P01…) — kết quả/lỗi in ở dòng `✔` khi nó chạy xong.
+- **Bước tự hết giờ** (`lock_timeout`, `statement_timeout`, deadlock): dùng `-- lab: cho-xong` để runner đợi bước xong ngay tại chỗ (lịch chạy không đổi theo tốc độ máy). Deadlock tất định: đặt `SET deadlock_timeout` khác nhau cho hai phiên (vd. 10s và 200ms — phiên ngắn hơn chạy bộ dò, thấy vòng và bị huỷ).
+- **Mất kết nối**: `-- expect-mat-ket-noi` (xem bảng chỉ thị). Hiện tượng: psql chạy không tương tác tự thoát mã 2 khi kết nối mất; thông điệp libpq không tất định (có lúc kèm `FATAL 57P01`, có lúc không) nên runner in dạng chuẩn hoá.
+- **Che phần không tất định trong tệp nhiều phiên**: trong thông báo lỗi và nhật ký server, PID backend → nhãn phiên (`Process [B] waits for ShareLock on transaction <XID>; blocked by process [A].`, `Process holding the lock: [A]`), xid → `<XID>`, `after 201.681 ms` → `after T ms`; mỗi dòng nhật ký server (`lab: nhat-ky`) mang nhãn phiên đã ghi ra nó (`[B] ERROR:  deadlock detected`). Tệp một phiên (P03) không đổi.
+- **xid tương đối và tên phiên trong SQL**: các tệp P04 dùng hàm `xid_td()`, `snap_td()`, `lab_khoa()`, `lab_cho()` của `p04/00-mo-rong-schema.sql` để in `X+1`, nhãn `A`/`B` thay số tuyệt đối (runner đặt `application_name = lab-<NHÃN>`).
+
+### Phép thử đồng thời (`pg/run-dong-thoi.mjs`, từ P04)
+
+Lịch chạy tất định chứng minh CƠ CHẾ; còn "đúng một người thắng" cần bằng chứng khi các phiên chạy ĐUA thật. `node pg/run-dong-thoi.mjs <đặc-tả.mjs>` (vd. `p04/dong-thoi.mjs`) dựng cluster tạm + nền như `run-pg.mjs`, rồi với mỗi kịch bản × mỗi lần: database mới chép từ nền → `chuan_bi` (SQL) → mở N phiên psql (`pg/lib/dong-thoi.mjs` · `Worker`: chế độ gọn QUIET/unaligned, `q()`/`qx()`/`v()`, `crash()` = giết tiến trình psql để giả lập ứng dụng chết, `reopen()`) → hàm `chay()` của đặc tả điều khiển các phiên chạy song song (`Promise.all`) → kiểm **bất biến** (SQL, hoặc từ bộ đếm phía client `tu_dem`). `giaoDich(w, fn, { muc, toi_da, thu_lai_khi })` chạy `fn` trong một giao dịch và **thử lại TOÀN BỘ** khi `40001`/`40P01` với backoff "full jitter", đếm `loi_<SQLSTATE>`, `thu_lai`, `het_luot_thu`. Bất biến `phai_dung: true` vi phạm ⇒ mã thoát 1; bất biến có `mong_doi` mà không `phai_dung` là MINH HOẠ cách làm sai (chỉ đếm). Tùy chọn: `--nho` (cỡ nhỏ, không ghi tệp), `--only <chuỗi>`, `--lap n`, `--ra <tệp.md>`, `--json <tệp>`. Số đếm DAO ĐỘNG giữa các lần ⇒ test chỉ kiểm bất biến; số đếm ghi vào `p0N/DO-DAC.md` kèm cấu hình máy và min–max.
 
 ### Đo (`pg/run-measure.mjs`)
 
@@ -290,22 +308,25 @@ Giới hạn hiện tại (cho người dựng P04): phát hiện "bị chặn" 
 ```text
 toi-noi-postgresql/
 ├── README.md              ← tệp này
-├── package.json           ← ghim @electric-sql/pglite 0.3.16; scripts p01, p02, p03 (+ :output), p03:thu-nghiem, p03:measure, test
+├── package.json           ← ghim @electric-sql/pglite 0.3.16; scripts p01, p02, p03, p04 (+ :output), p03/p04:thu-nghiem, p03/p04:measure, p04:dong-thoi-nho, test
 ├── package-lock.json
 ├── run.mjs                ← runner P01–P02: tách câu lệnh, chạy trên PGlite, in kiểu psql, chấm expect-*
 ├── pg/                    ← runner P03+ trên PostgreSQL thật (không dependency npm)
 │   ├── run-pg.mjs         ← CLI: cluster tạm, nền + bản sao từng bài, manifest, --json/--keep/--attach
 │   ├── run-measure.mjs    ← CLI đo: đặc tả p0N/do-dac.mjs → p0N/DO-DAC.md
+│   ├── run-dong-thoi.mjs  ← CLI phép thử đồng thời (P04+): đặc tả p0N/dong-thoi.mjs → p0N/DO-DAC.md
 │   └── lib/               ← bin.mjs (tìm binary) · cluster.mjs (initdb/pg_ctl/dọn) · session.mjs (phiên psql)
 │                            sqlsplit.mjs (tách bước + chỉ thị) · output.mjs (đọc/chuẩn hoá đầu ra) ·
-│                            runner.mjs (chạy bước, nhiều phiên, chấm) · measure.mjs · machine.mjs
+│                            runner.mjs (chạy bước, nhiều phiên, chấm) · measure.mjs · machine.mjs ·
+│                            dong-thoi.mjs (Worker, giaoDich có thử lại, bộ đếm)
 ├── docker-compose.yml     ← PostgreSQL 17.5 thật cho cách B (chưa chạy thử)
 ├── test/
 │   ├── p01.test.mjs       ← node:test cho P01 và cho chính runner
 │   ├── thu-nghiem.test.mjs← thí nghiệm của bài P01
 │   ├── p02.test.mjs       ← node:test cho P02 và các chỉ thị expect-value/line/md5
 │   ├── p02-thu-nghiem.test.mjs ← thí nghiệm của bài P02
-│   └── p03.test.mjs       ← mảnh runner P03+ (luôn chạy) + P03 trên PostgreSQL thật (skip khi không có)
+│   ├── p03.test.mjs       ← mảnh runner P03+ (luôn chạy) + P03 trên PostgreSQL thật (skip khi không có)
+│   └── p04.test.mjs       ← mảnh runner P04 (luôn chạy) + P04 + phép thử đồng thời nhỏ (skip khi không có)
 ├── p01/                   ← Nền tảng và mô hình dữ liệu (PG-001 … PG-010)
 │   ├── README.md
 │   ├── 00-reset.sql … 07-checks.sql, 06-migration-rollback.sql, thu-nghiem/
@@ -323,4 +344,11 @@ toi-noi-postgresql/
     ├── thu-nghiem/        ← thí nghiệm (manifest.json), gồm kịch bản nhiều phiên
     ├── do-dac.mjs → DO-DAC.md  ← đặc tả phép đo → kết quả đo thật kèm cấu hình máy
     └── OUTPUT.txt         ← kết quả thật của `npm run p03`
+└── p04/                   ← Giao dịch, MVCC và đồng thời (PG-031 … PG-040), PostgreSQL 18 thật
+    ├── README.md, lab.json (nền + tệp bài)
+    ├── 00-mo-rong-schema.sql, 01-fixture.sql, 02-kiem-tra-fixture.sql   ← nền nhỏ (~1 s)
+    ├── 31-…sql … 40-…sql  ← mỗi file một bài, phần lớn kịch bản nhiều phiên
+    ├── thu-nghiem/        ← thí nghiệm (manifest.json)
+    ├── dong-thoi.mjs → DO-DAC.md  ← đặc tả phép thử đồng thời → số đếm thật + bất biến, kèm cấu hình máy
+    └── OUTPUT.txt         ← kết quả thật của `npm run p04`
 ```

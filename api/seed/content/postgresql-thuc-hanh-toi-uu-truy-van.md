@@ -295,4 +295,4 @@ ORDER BY completed_at DESC, code DESC LIMIT 20;</code></pre>
 - [PostgreSQL 18 · Heap-Only Tuples (HOT)](https://www.postgresql.org/docs/18/storage-hot.html).
 - Lab: `p03/30-toi-uu-truy-van.sql`, `p03/OUTPUT.txt`, `p03/DO-DAC.md` (G8), `p03/README.md` (ghi chú về kế hoạch biến động), `p03/thu-nghiem/pg030-toi-uu-bai-tap.sql`.
 
-Phần 4 · Giao dịch, MVCC và đồng thời sắp ra mắt. Quay lại đầu phần: [PG-021: Đọc EXPLAIN từ truy vấn tìm chuyến](/articles/postgresql-explain-ke-hoach-thuc-thi).
+Bài tiếp theo — mở đầu Phần 4 · Giao dịch, MVCC và đồng thời: [PG-031: Transaction, COMMIT và ROLLBACK](/articles/postgresql-transaction-commit-rollback)

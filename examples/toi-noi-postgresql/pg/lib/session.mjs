@@ -40,13 +40,24 @@ export class PsqlSession {
     this.proc.stdout.on('data', (d) => { this.out += d.replace(/\r\n/g, '\n'); this.#scan(); });
     this.proc.stderr.on('data', (d) => { this.err += d.replace(/\r\n/g, '\n'); this.#scan(); });
     this.proc.stdin.on('error', () => { /* phiên đã đóng */ });
+    // 'close' (không phải 'exit'): chờ cả hai ống đọc xong để không mất dòng stderr cuối.
     this.exited = new Promise((resolve) => {
-      this.proc.on('exit', (code) => {
+      this.proc.on('close', (code) => {
         this.closed = true;
+        this.exitCode = code;
         if (this.pending) {
+          // psql thoát giữa bước = MẤT KẾT NỐI (vd. backend bị pg_terminate_backend, server
+          // dừng, idle_in_transaction_session_timeout). Ở chế độ không tương tác psql tự thoát
+          // mã 2 ("connection to server was lost"). Trả về như một kết quả (connLost) để
+          // runner chấm bằng chỉ thị expect-mat-ket-noi thay vì coi là lỗi runner.
           const p = this.pending;
           this.pending = null;
-          p.reject(new Error(`psql phiên ${this.label} thoát (mã ${code}) khi đang chạy bước — ${this.err.slice(-500)}`));
+          p.resolve({
+            stdout: this.out, stderr: this.err, error: true, sqlstate: null, rowCount: null,
+            connLost: true, exitCode: code, ms: Date.now() - p.t0,
+          });
+          this.out = '';
+          this.err = '';
         }
         resolve(code);
       });

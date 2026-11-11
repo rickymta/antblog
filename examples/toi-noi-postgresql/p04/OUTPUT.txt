@@ -1,0 +1,5971 @@
+-- [lab] Engine: PostgreSQL 18.1 (server thật, cluster tạm do pg/run-pg.mjs tạo), client psql 18.1
+-- [lab] Cluster: UTF8, locale provider builtin C.UTF-8, TimeZone Asia/Ho_Chi_Minh, autovacuum off, jit off, không song song — cấu hình đầy đủ ở pg/lib/cluster.mjs
+-- [lab] Phiên psql: -X, ON_ERROR_STOP=0, VERBOSITY=verbose (in lại dạng ngắn), \pset null NULL
+
+-- [lab] ===== p01/00-reset.sql · nền p04 (database nen_p04) =====
+
+-- P01 · 00-reset.sql — dựng lại schema lab `toinoi` từ đầu.
+--
+-- Mọi bảng của lab nằm trong schema riêng `toinoi`, không đụng vào `public`
+-- hay dữ liệu khác trong database. Chạy lại file này bất cứ lúc nào để về
+-- trạng thái trống; sau đó chạy tiếp 01 → 07.
+--
+-- CẢNH BÁO: DROP SCHEMA ... CASCADE xoá MỌI đối tượng trong schema `toinoi`.
+-- Chỉ chạy trên database lab.
+
+DROP SCHEMA IF EXISTS toinoi CASCADE;
+NOTICE:  schema "toinoi" does not exist, skipping
+DROP SCHEMA
+
+CREATE SCHEMA toinoi;
+CREATE SCHEMA
+
+COMMENT ON SCHEMA toinoi IS 'Lab PostgreSQL qua dự án Tới Nơi — dữ liệu hư cấu, có thể xoá và dựng lại';
+COMMENT
+
+-- search_path quyết định tên bảng không ghi schema (vd. `trips`) được tìm ở đâu.
+-- Thiết lập này chỉ sống trong phiên hiện tại, nên mỗi file sau đều đặt lại.
+SET search_path TO toinoi;
+SET
+
+-- Múi giờ phiên: mọi timestamptz được HIỂN THỊ theo giờ Việt Nam (+07).
+-- Giá trị lưu trong bảng không phụ thuộc thiết lập này (xem 05-select.sql).
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+SELECT current_schema() AS schema_hien_tai,
+       current_setting('TimeZone') AS mui_gio_phien,
+       current_setting('server_version') AS phien_ban;
+ schema_hien_tai |  mui_gio_phien   | phien_ban
+-----------------+------------------+-----------
+ toinoi          | Asia/Ho_Chi_Minh | 18.1
+(1 row)
+
+-- [lab] ===== p01/01-schema.sql · nền p04 (database nen_p04) =====
+
+-- P01 · 01-schema.sql — lược đồ tối thiểu cho thành phố, khách, tài xế, quán,
+-- chuyến và lịch sử trạng thái chuyến (PG-003, PG-004, PG-005).
+--
+-- Bám lược đồ lõi trong hồ sơ `du-an-mau-toi-noi`: cùng tên bảng, tên cột,
+-- kiểu dữ liệu và giá trị mặc định. Khác biệt có chủ đích (xem p01/README.md):
+--   1. Mọi ràng buộc đều được ĐẶT TÊN (pk_…, fk_…, uq_…, ck_…) để thông báo lỗi
+--      chỉ thẳng vào quy tắc bị vi phạm.
+--   2. Thêm các CHECK mã hoá quy tắc nghiệp vụ (định dạng số điện thoại, cước
+--      không âm, thứ tự mốc thời gian, trạng thái ↔ tài xế ↔ mốc hoàn thành…).
+--   3. `trip_events.status` có CHECK cùng danh sách 8 trạng thái với `trips`.
+--   4. Chưa có `driver_locations` (thuộc các phần sau, không cần cho P01).
+--
+-- Quy ước kiểu dữ liệu (PG-004):
+--   * Tiền: số nguyên ĐỒNG (`integer`). VND không dùng đơn vị lẻ, nên không cần
+--     numeric/float. `integer` chứa tới 2.147.483.647 đ cho MỘT chuyến — dư sức;
+--     `sum(integer)` trả về `bigint`, nên cộng hàng triệu chuyến vẫn không tràn.
+--     Không dùng `real`/`double precision` (sai số nhị phân) hay kiểu `money`
+--     (định dạng phụ thuộc lc_monetary của server).
+--   * Thời điểm: `timestamptz` — lưu một khoảnh khắc tuyệt đối, hiển thị theo
+--     TimeZone của phiên. Không dùng `timestamp` (không múi giờ) cho mốc sự kiện.
+--   * Định danh: `uuid` sinh bằng gen_random_uuid() (UUID v4, có sẵn từ PG 13,
+--     không cần extension) + mã số dễ đọc (`code`) cho người vận hành.
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- ---------------------------------------------------------------------------
+-- Thành phố: danh mục nhỏ, id do người quản trị đặt (1 = SG, 2 = HN…).
+CREATE TABLE cities (
+  id    smallint NOT NULL,
+  code  text     NOT NULL,
+  name  text     NOT NULL,
+  CONSTRAINT pk_cities PRIMARY KEY (id),
+  CONSTRAINT uq_cities_code UNIQUE (code),
+  CONSTRAINT ck_cities_code_format CHECK (code ~ '^[A-Z]{2}$'),
+  CONSTRAINT ck_cities_name_not_blank CHECK (btrim(name) <> '')
+);
+CREATE TABLE
+
+-- ---------------------------------------------------------------------------
+-- Khách hàng: đăng nhập bằng số điện thoại ⇒ số điện thoại là duy nhất.
+CREATE TABLE customers (
+  id         uuid        NOT NULL DEFAULT gen_random_uuid(),
+  phone      text        NOT NULL,
+  full_name  text        NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_customers PRIMARY KEY (id),
+  CONSTRAINT uq_customers_phone UNIQUE (phone),
+  -- Lưu MỘT dạng chuẩn: 10 chữ số bắt đầu bằng 0. Nếu cho phép cả '+84…' và
+  -- '0…', UNIQUE không còn chặn được cùng một số viết theo hai cách.
+  CONSTRAINT ck_customers_phone_format CHECK (phone ~ '^0[0-9]{9}$'),
+  CONSTRAINT ck_customers_full_name_not_blank CHECK (btrim(full_name) <> '')
+);
+CREATE TABLE
+
+-- ---------------------------------------------------------------------------
+-- Tài xế: `code` là mã nội bộ do bộ phận tuyển dụng cấp (8001, 8002…).
+CREATE TABLE drivers (
+  id           uuid        NOT NULL DEFAULT gen_random_uuid(),
+  code         integer     NOT NULL,
+  full_name    text        NOT NULL,
+  city_id      smallint    NOT NULL,
+  vehicle_type text        NOT NULL,
+  status       text        NOT NULL DEFAULT 'offline',
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_drivers PRIMARY KEY (id),
+  CONSTRAINT uq_drivers_code UNIQUE (code),
+  CONSTRAINT fk_drivers_city FOREIGN KEY (city_id) REFERENCES cities (id),
+  CONSTRAINT ck_drivers_code_positive CHECK (code > 0),
+  CONSTRAINT ck_drivers_full_name_not_blank CHECK (btrim(full_name) <> ''),
+  CONSTRAINT ck_drivers_vehicle_type CHECK (vehicle_type IN ('bike', 'car')),
+  CONSTRAINT ck_drivers_status CHECK (status IN ('offline', 'online', 'busy'))
+);
+CREATE TABLE
+
+-- ---------------------------------------------------------------------------
+-- Quán: cần cho quy tắc "đơn đồ ăn phải có quán". P01 chỉ giữ các cột lõi.
+CREATE TABLE merchants (
+  id         uuid        NOT NULL DEFAULT gen_random_uuid(),
+  city_id    smallint    NOT NULL,
+  name       text        NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_merchants PRIMARY KEY (id),
+  CONSTRAINT fk_merchants_city FOREIGN KEY (city_id) REFERENCES cities (id),
+  CONSTRAINT ck_merchants_name_not_blank CHECK (btrim(name) <> '')
+);
+CREATE TABLE
+
+-- ---------------------------------------------------------------------------
+-- Chuyến: một yêu cầu đặt xe / giao đồ ăn / giao bưu kiện.
+--
+-- Lưu ý khi đọc các CHECK bên dưới: CHECK chỉ TỪ CHỐI khi biểu thức ra FALSE.
+-- Nếu biểu thức ra NULL (vd. so sánh với accepted_at đang NULL) thì dòng được
+-- CHẤP NHẬN. Vì vậy `accepted_at >= requested_at` tự bỏ qua chuyến chưa có
+-- người nhận, còn các quy tắc "phải có" được viết tường minh bằng IS NULL /
+-- IS NOT NULL.
+CREATE TABLE trips (
+  id           uuid        NOT NULL DEFAULT gen_random_uuid(),
+  code         bigint      GENERATED ALWAYS AS IDENTITY (START WITH 100000),
+  kind         text        NOT NULL,
+  city_id      smallint    NOT NULL,
+  customer_id  uuid        NOT NULL,
+  driver_id    uuid,
+  merchant_id  uuid,
+  status       text        NOT NULL DEFAULT 'requested',
+  fare         integer     NOT NULL,              -- đồng
+  requested_at timestamptz NOT NULL DEFAULT now(),
+  accepted_at  timestamptz,
+  completed_at timestamptz,
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_trips PRIMARY KEY (id),
+  CONSTRAINT uq_trips_code UNIQUE (code),
+  CONSTRAINT fk_trips_city     FOREIGN KEY (city_id)     REFERENCES cities (id),
+  CONSTRAINT fk_trips_customer FOREIGN KEY (customer_id) REFERENCES customers (id),
+  CONSTRAINT fk_trips_driver   FOREIGN KEY (driver_id)   REFERENCES drivers (id),
+  CONSTRAINT fk_trips_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id),
+  CONSTRAINT ck_trips_kind CHECK (kind IN ('ride', 'food', 'parcel')),
+  CONSTRAINT ck_trips_status CHECK (status IN
+    ('requested', 'searching', 'accepted', 'arriving', 'picked_up', 'in_transit', 'completed', 'cancelled')),
+  -- 0 đ hợp lệ (chuyến miễn phí do khuyến mãi); số âm thì không.
+  CONSTRAINT ck_trips_fare_non_negative CHECK (fare >= 0),
+  -- Đơn đồ ăn phải có quán; đặt xe và bưu kiện không gắn quán.
+  CONSTRAINT ck_trips_merchant_only_food CHECK ((kind = 'food') = (merchant_id IS NOT NULL)),
+  -- Có tài xế ⇔ có mốc nhận chuyến (kể cả chuyến đã nhận rồi bị huỷ).
+  CONSTRAINT ck_trips_driver_accepted_together CHECK ((driver_id IS NULL) = (accepted_at IS NULL)),
+  -- Hai quy tắc dạng "nếu A thì B", viết là `NOT A OR B`:
+  --   chưa ai nhận (requested/searching) ⇒ chưa có tài xế;
+  --   từ accepted tới completed ⇒ phải có tài xế.
+  -- Chuyến huỷ có thể có hoặc không có tài xế (huỷ trước hay sau khi được nhận).
+  -- Mỗi CHECK chỉ giữ MỘT quy tắc: trạng thái lạ như 'done' chỉ vi phạm
+  -- ck_trips_status, thông báo lỗi không bị lẫn.
+  CONSTRAINT ck_trips_unassigned_no_driver CHECK (
+    status NOT IN ('requested', 'searching') OR driver_id IS NULL),
+  CONSTRAINT ck_trips_assigned_has_driver CHECK (
+    status NOT IN ('accepted', 'arriving', 'picked_up', 'in_transit', 'completed') OR driver_id IS NOT NULL),
+  -- Có mốc hoàn thành ⇔ trạng thái hoàn thành.
+  CONSTRAINT ck_trips_completed_at_by_status CHECK ((status = 'completed') = (completed_at IS NOT NULL)),
+  CONSTRAINT ck_trips_accepted_after_requested CHECK (accepted_at >= requested_at),
+  CONSTRAINT ck_trips_completed_after_accepted CHECK (completed_at >= accepted_at)
+);
+CREATE TABLE
+
+-- Ba index giống hồ sơ chung. P01 chưa cần chúng; P03 sẽ đo lợi ích và cái giá.
+-- (PRIMARY KEY và UNIQUE tự tạo index riêng: pk_trips, uq_trips_code.)
+CREATE INDEX ix_trips_city_requested     ON trips (city_id, requested_at);
+CREATE INDEX
+
+CREATE INDEX ix_trips_customer_requested ON trips (customer_id, requested_at DESC);
+CREATE INDEX
+
+CREATE INDEX ix_trips_driver_id          ON trips (driver_id);
+CREATE INDEX
+
+-- ---------------------------------------------------------------------------
+-- Lịch sử trạng thái: mỗi lần chuyến đổi trạng thái thêm một dòng, không sửa.
+CREATE TABLE trip_events (
+  id          bigint      GENERATED ALWAYS AS IDENTITY,
+  trip_id     uuid        NOT NULL,
+  status      text        NOT NULL,
+  occurred_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_trip_events PRIMARY KEY (id),
+  CONSTRAINT fk_trip_events_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  CONSTRAINT ck_trip_events_status CHECK (status IN
+    ('requested', 'searching', 'accepted', 'arriving', 'picked_up', 'in_transit', 'completed', 'cancelled'))
+);
+CREATE TABLE
+
+CREATE INDEX ix_trip_events_trip ON trip_events (trip_id, occurred_at);
+CREATE INDEX
+
+-- ---------------------------------------------------------------------------
+-- Chú thích: lưu ngay trong catalog, công cụ quản trị và psql (\d+) đọc được.
+COMMENT ON TABLE cities IS 'Thành phố Tới Nơi hoạt động; id do quản trị đặt';
+COMMENT
+
+COMMENT ON TABLE customers IS 'Khách hàng; đăng nhập bằng số điện thoại';
+COMMENT
+
+COMMENT ON COLUMN customers.phone IS 'Số điện thoại dạng chuẩn 0xxxxxxxxx (10 chữ số), duy nhất';
+COMMENT
+
+COMMENT ON TABLE drivers IS 'Tài xế dùng chung cho ba dịch vụ';
+COMMENT
+
+COMMENT ON COLUMN drivers.code IS 'Mã tài xế nội bộ, dễ đọc cho người vận hành';
+COMMENT
+
+COMMENT ON COLUMN drivers.status IS 'offline / online (rảnh) / busy (đang chạy chuyến)';
+COMMENT
+
+COMMENT ON TABLE merchants IS 'Quán, cửa hàng nhận đơn đồ ăn';
+COMMENT
+
+COMMENT ON TABLE trips IS 'Một chuyến: đặt xe (ride), giao đồ ăn (food) hoặc giao bưu kiện (parcel)';
+COMMENT
+
+COMMENT ON COLUMN trips.id IS 'Định danh kỹ thuật UUID v4; ứng dụng hoặc database sinh';
+COMMENT
+
+COMMENT ON COLUMN trips.code IS 'Mã chuyến tăng dần cho người dùng và CSKH; có thể nhảy cóc';
+COMMENT
+
+COMMENT ON COLUMN trips.fare IS 'Cước tính bằng đồng (VND), số nguyên không âm';
+COMMENT
+
+COMMENT ON COLUMN trips.requested_at IS 'Thời điểm khách đặt (timestamptz)';
+COMMENT
+
+COMMENT ON COLUMN trips.accepted_at IS 'Thời điểm tài xế nhận; NULL khi chưa ai nhận';
+COMMENT
+
+COMMENT ON COLUMN trips.completed_at IS 'Thời điểm hoàn thành; chỉ có khi status = completed';
+COMMENT
+
+COMMENT ON COLUMN trips.updated_at IS 'Lần thay đổi gần nhất của dòng';
+COMMENT
+
+COMMENT ON TABLE trip_events IS 'Lịch sử đổi trạng thái chuyến; chỉ thêm, không sửa';
+COMMENT
+
+-- ---------------------------------------------------------------------------
+-- Xem lại cấu trúc bảng trips bằng catalog chuẩn SQL (thay cho lệnh \d của psql,
+-- vốn là lệnh của công cụ psql chứ không phải SQL).
+SELECT column_name, data_type, is_nullable, column_default, is_identity
+FROM information_schema.columns
+WHERE table_schema = 'toinoi' AND table_name = 'trips'
+ORDER BY ordinal_position;
+ column_name  |        data_type         | is_nullable |  column_default   | is_identity
+--------------+--------------------------+-------------+-------------------+-------------
+ id           | uuid                     | NO          | gen_random_uuid() | NO
+ code         | bigint                   | NO          | NULL              | YES
+ kind         | text                     | NO          | NULL              | NO
+ city_id      | smallint                 | NO          | NULL              | NO
+ customer_id  | uuid                     | NO          | NULL              | NO
+ driver_id    | uuid                     | YES         | NULL              | NO
+ merchant_id  | uuid                     | YES         | NULL              | NO
+ status       | text                     | NO          | 'requested'::text | NO
+ fare         | integer                  | NO          | NULL              | NO
+ requested_at | timestamp with time zone | NO          | now()             | NO
+ accepted_at  | timestamp with time zone | YES         | NULL              | NO
+ completed_at | timestamp with time zone | YES         | NULL              | NO
+ updated_at   | timestamp with time zone | NO          | now()             | NO
+(13 rows)
+
+-- [lab] ===== p02/00-mo-rong-schema.sql · nền p04 (database nen_p04) =====
+
+-- P02 · 00-mo-rong-schema.sql — mở rộng lược đồ P01 cho phần "SQL cho nghiệp vụ".
+--
+-- Chạy SAU p01/00-reset.sql và p01/01-schema.sql (không chạy fixture P01):
+--
+--   node run.mjs p01/00-reset.sql p01/01-schema.sql p02      (= npm run p02)
+--
+-- P02 KHÔNG nạp 15 chuyến của p01/02-fixture-valid.sql mà sinh một bộ dữ liệu
+-- 30 ngày riêng (01-fixture.sql). Lý do và hình dạng dữ liệu: p02/README.md.
+-- Lược đồ P01 giữ nguyên; file này chỉ THÊM:
+--   * areas            — cây khu vực điều phối: thành phố → vùng → khu (PG-019)
+--   * trips.pickup_area_id — khu đón khách; NULL khi mất GPS (PG-011, PG-019)
+--   * trip_ratings     — đánh giá sau chuyến, 0..1 dòng mỗi chuyến (PG-011, PG-012)
+--   * payments         — giao dịch thanh toán, 0..n dòng mỗi chuyến (PG-013, PG-020)
+-- Bảng nhập danh mục món cho PG-017 được tạo ngay trong 17-upsert.sql.
+-- Không thêm drivers.vehicle_plate của P01 · 06 (P02 không cần; xem p01/README).
+
+SET search_path TO toinoi;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- Chặn chạy nhầm khi chưa có lược đồ P01: báo lỗi rõ ràng thay vì một loạt
+-- lỗi "relation does not exist" ở các câu sau.
+DO $$
+BEGIN
+  IF to_regclass('toinoi.trips') IS NULL THEN
+    RAISE EXCEPTION 'Chưa có lược đồ P01 trong schema toinoi'
+      USING HINT = 'Chạy p01/00-reset.sql và p01/01-schema.sql trước (npm run p02 làm sẵn việc này).';
+  END IF;
+END
+$$;
+DO
+
+-- ---------------------------------------------------------------------------
+-- Cây khu vực điều phối của Tới Nơi (hư cấu, KHÔNG phải đơn vị hành chính):
+-- thành phố (gốc, parent_id NULL) → vùng → khu. Chuyến được gắn vào KHU.
+-- id đặt tay theo quy ước dễ đọc: thành phố 1..3, vùng 11..34, khu 111..322.
+CREATE TABLE areas (
+  id        integer  NOT NULL,
+  parent_id integer,
+  code      text     NOT NULL,
+  name      text     NOT NULL,
+  level     text     NOT NULL,
+  city_id   smallint,
+  CONSTRAINT pk_areas PRIMARY KEY (id),
+  CONSTRAINT uq_areas_code UNIQUE (code),
+  CONSTRAINT fk_areas_parent FOREIGN KEY (parent_id) REFERENCES areas (id),
+  CONSTRAINT fk_areas_city FOREIGN KEY (city_id) REFERENCES cities (id),
+  CONSTRAINT ck_areas_level CHECK (level IN ('city', 'district', 'zone')),
+  -- Chỉ nút gốc (thành phố) không có cha, và chỉ nút gốc gắn với cities.
+  CONSTRAINT ck_areas_root_no_parent CHECK ((level = 'city') = (parent_id IS NULL)),
+  CONSTRAINT ck_areas_root_has_city CHECK ((level = 'city') = (city_id IS NOT NULL)),
+  -- Chặn được vòng 1 nút (tự làm cha mình)… nhưng KHÔNG chặn được vòng 2+ nút:
+  -- CHECK chỉ nhìn một dòng. 19-chu-trinh.sql cho thấy hệ quả.
+  CONSTRAINT ck_areas_not_own_parent CHECK (parent_id <> id)
+);
+CREATE TABLE
+
+CREATE INDEX ix_areas_parent ON areas (parent_id);
+CREATE INDEX
+
+COMMENT ON TABLE areas IS 'Cây khu vực điều phối: city → district (vùng) → zone (khu); dữ liệu hư cấu';
+COMMENT
+
+-- ---------------------------------------------------------------------------
+-- Khu đón khách của chuyến. Cho phép NULL: app tài xế mất GPS lúc đón ⇒ không
+-- biết khu (thiếu dữ liệu). FK chỉ bảo đảm khu tồn tại, KHÔNG bảo đảm đó là nút
+-- cấp "zone" hay cùng thành phố với chuyến (19-cay-khu-vuc.sql kiểm).
+ALTER TABLE trips ADD COLUMN pickup_area_id integer;
+ALTER TABLE
+
+ALTER TABLE trips
+  ADD CONSTRAINT fk_trips_pickup_area FOREIGN KEY (pickup_area_id) REFERENCES areas (id);
+ALTER TABLE
+
+COMMENT ON COLUMN trips.pickup_area_id IS 'Khu đón (areas.level = zone); NULL = không xác định được (mất GPS)';
+COMMENT
+
+-- ---------------------------------------------------------------------------
+-- Đánh giá sau chuyến: tối đa MỘT dòng mỗi chuyến (khoá chính là trip_id).
+--   * không có dòng          = khách chưa mở màn đánh giá
+--   * stars NULL             = khách mở màn đánh giá nhưng bỏ trống phần sao
+--   * tip NULL / tip = 0     = bỏ qua bước tip  /  chủ động chọn "không tip"
+-- Chuyến huỷ không được đánh giá (không áp dụng) — quy tắc nhiều bảng, CHECK
+-- một dòng không diễn đạt được; 02-kiem-tra-fixture.sql kiểm.
+CREATE TABLE trip_ratings (
+  trip_id  uuid        NOT NULL,
+  stars    smallint,
+  tip      integer,                       -- đồng
+  rated_at timestamptz NOT NULL,
+  CONSTRAINT pk_trip_ratings PRIMARY KEY (trip_id),
+  CONSTRAINT fk_trip_ratings_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  CONSTRAINT ck_trip_ratings_stars CHECK (stars BETWEEN 1 AND 5),
+  CONSTRAINT ck_trip_ratings_tip_non_negative CHECK (tip >= 0)
+);
+CREATE TABLE
+
+COMMENT ON TABLE trip_ratings IS 'Đánh giá sau chuyến; 0..1 dòng mỗi chuyến';
+COMMENT
+
+COMMENT ON COLUMN trip_ratings.stars IS '1..5 sao; NULL = khách bỏ trống phần sao';
+COMMENT
+
+COMMENT ON COLUMN trip_ratings.tip IS 'Tiền tip (đồng); NULL = bỏ qua bước tip, 0 = chọn không tip';
+COMMENT
+
+-- ---------------------------------------------------------------------------
+-- Giao dịch thanh toán: 0..n dòng mỗi chuyến.
+--   kind   charge (thu) · refund (hoàn) · adjustment (điều chỉnh của CSKH, CÓ DẤU)
+--   method cash (tiền mặt, tài xế ghi nhận) · wallet (ví VíXanh) · card (thẻ)
+--   status pending · succeeded · failed — chỉ succeeded làm đổi tiền thật
+-- Số tiền luôn là số nguyên đồng. charge/refund ghi số DƯƠNG, chiều tiền do
+-- kind quyết định; adjustment ghi số có dấu (+ thu thêm, − giảm trừ).
+-- Tiền thực thu của một chuyến = Σ charge − Σ refund + Σ adjustment (succeeded).
+CREATE TABLE payments (
+  id           bigint      GENERATED ALWAYS AS IDENTITY,
+  trip_id      uuid        NOT NULL,
+  kind         text        NOT NULL,
+  method       text        NOT NULL,
+  status       text        NOT NULL,
+  amount       integer     NOT NULL,       -- đồng
+  provider_ref text,                       -- mã giao dịch phía ví/cổng thẻ
+  paid_at      timestamptz NOT NULL,       -- thời điểm phát sinh giao dịch
+  CONSTRAINT pk_payments PRIMARY KEY (id),
+  CONSTRAINT fk_payments_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  -- Cổng thanh toán không cấp trùng mã; NULL (tiền mặt) không bị UNIQUE chặn.
+  CONSTRAINT uq_payments_provider_ref UNIQUE (provider_ref),
+  CONSTRAINT ck_payments_kind CHECK (kind IN ('charge', 'refund', 'adjustment')),
+  CONSTRAINT ck_payments_method CHECK (method IN ('cash', 'wallet', 'card')),
+  CONSTRAINT ck_payments_status CHECK (status IN ('pending', 'succeeded', 'failed')),
+  CONSTRAINT ck_payments_amount_sign CHECK (
+    (kind = 'adjustment' AND amount <> 0) OR (kind <> 'adjustment' AND amount > 0)),
+  -- Tiền mặt không qua cổng ⇒ không có mã cổng; ví/thẻ luôn có.
+  CONSTRAINT ck_payments_ref_by_method CHECK ((method = 'cash') = (provider_ref IS NULL))
+);
+CREATE TABLE
+
+CREATE INDEX ix_payments_trip ON payments (trip_id);
+CREATE INDEX
+
+COMMENT ON TABLE payments IS 'Giao dịch thanh toán của chuyến; 0..n dòng mỗi chuyến';
+COMMENT
+
+COMMENT ON COLUMN payments.amount IS 'Đồng; charge/refund > 0, adjustment có dấu';
+COMMENT
+
+-- Danh sách bảng sau khi mở rộng (thay cho \dt của psql).
+-- expect-line: areas
+-- expect-line: cities
+-- expect-line: customers
+-- expect-line: drivers
+-- expect-line: merchants
+-- expect-line: payments
+-- expect-line: trip_events
+-- expect-line: trip_ratings
+-- expect-line: trips
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'toinoi' AND table_type = 'BASE TABLE'
+ORDER BY table_name COLLATE "C";
+  table_name
+--------------
+ areas
+ cities
+ customers
+ drivers
+ merchants
+ payments
+ trip_events
+ trip_ratings
+ trips
+(9 rows)
+-- [lab] PASS: đúng nội dung 9 dòng như mong đợi (expect-line)
+
+-- [lab] ===== p04/00-mo-rong-schema.sql · nền p04 (database nen_p04) =====
+
+-- P04 · 00-mo-rong-schema.sql — mở rộng lược đồ P01/P02 cho phần "Giao dịch, MVCC và đồng thời".
+--
+-- Nền P04 (p04/lab.json): p01/00-reset.sql → p01/01-schema.sql → p02/00-mo-rong-schema.sql
+-- (chỉ LƯỢC ĐỒ, không fixture P01/P02) → tệp này → 01-fixture.sql → 02-kiem-tra-fixture.sql.
+-- P04 không cần bảng lớn: mọi hiện tượng của phần này (khoá, snapshot, xung đột) xảy ra trên
+-- VÀI dòng; phép thử đồng thời (p04/dong-thoi.mjs) tự sinh dữ liệu của nó.
+--
+-- Tệp này chỉ THÊM (không sửa cột P01/P02):
+--   * trips.version           — số phiên bản dòng cho optimistic concurrency (PG-035)
+--   * wallets                 — ví VíXanh của khách và tài xế (lost update PG-034, deadlock PG-037)
+--   * trip_offers             — lời mời nhận chuyến gửi tới từng tài xế (PG-040)
+--   * trip_assignments        — phân công: MỘT chuyến MỘT tài xế bằng khoá chính (PG-040)
+--   * trip_claims             — nhật ký "ứng dụng đã báo tài xế: bạn nhận được chuyến" (PG-040)
+--   * driver_duty             — tài xế trực khu: quy tắc "mỗi khu luôn còn ≥ 1 người trực" (PG-038)
+--   * jobs, job_runs          — hàng đợi việc cho worker + nhật ký mỗi lần xử lý (PG-036)
+--   * idempotency_keys        — khoá chống lặp request (PG-039)
+--   * outbox, broker_messages, processed_messages, notifications — transactional outbox (PG-039)
+--   * lab_moc_xid + hàm xid_td()/snap_td() — in xid TƯƠNG ĐỐI (X+1, X+2…) cho đầu ra tất định
+--   * lab_khoa(), lab_cho()   — đọc pg_locks / pg_stat_activity theo NHÃN PHIÊN (A, B…) thay PID
+
+SET search_path TO toinoi, public;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+DO $$
+BEGIN
+  IF to_regclass('toinoi.trips') IS NULL OR to_regclass('toinoi.areas') IS NULL THEN
+    RAISE EXCEPTION 'Chưa có lược đồ P01 + P02 trong schema toinoi'
+      USING HINT = 'Nền P04 = p01/00-reset.sql, p01/01-schema.sql, p02/00-mo-rong-schema.sql rồi p04/00…02 (npm run p04 làm sẵn).';
+  END IF;
+  IF current_setting('server_version_num')::int < 180000 THEN
+    RAISE EXCEPTION 'Lab P04 đã kiểm trên PostgreSQL 18; server này là %', current_setting('server_version');
+  END IF;
+END
+$$;
+DO
+
+-- pageinspect: xem các phiên bản dòng trong page (PG-032); pgstattuple: đếm dòng chết.
+CREATE EXTENSION IF NOT EXISTS pageinspect SCHEMA public;
+CREATE EXTENSION
+
+CREATE EXTENSION IF NOT EXISTS pgstattuple SCHEMA public;
+CREATE EXTENSION
+
+-- ---------------------------------------------------------------------------
+-- Phiên bản dòng cho optimistic concurrency: mỗi lần SỬA chuyến, ứng dụng tăng version
+-- và chỉ sửa khi version còn đúng như lúc đọc (UPDATE … WHERE id = … AND version = …).
+ALTER TABLE trips ADD COLUMN version integer NOT NULL DEFAULT 1;
+ALTER TABLE
+
+ALTER TABLE trips ADD CONSTRAINT ck_trips_version_positive CHECK (version > 0);
+ALTER TABLE
+
+COMMENT ON COLUMN trips.version IS 'Phiên bản dòng (optimistic concurrency): +1 mỗi lần sửa';
+COMMENT
+
+-- ---------------------------------------------------------------------------
+-- Ví VíXanh. id là số nhỏ, đặt tay (khách 1001…, tài xế 2001…) để "khoá theo thứ tự id"
+-- ở PG-037 dễ đọc. Số dư là số nguyên đồng, KHÔNG âm.
+CREATE TABLE wallets (
+  id          integer     NOT NULL,
+  owner_kind  text        NOT NULL,
+  customer_id uuid,
+  driver_id   uuid,
+  balance     integer     NOT NULL,
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_wallets PRIMARY KEY (id),
+  CONSTRAINT uq_wallets_customer UNIQUE (customer_id),
+  CONSTRAINT uq_wallets_driver UNIQUE (driver_id),
+  CONSTRAINT fk_wallets_customer FOREIGN KEY (customer_id) REFERENCES customers (id),
+  CONSTRAINT fk_wallets_driver FOREIGN KEY (driver_id) REFERENCES drivers (id),
+  CONSTRAINT ck_wallets_owner_kind CHECK (owner_kind IN ('customer', 'driver')),
+  CONSTRAINT ck_wallets_one_owner CHECK (
+    (owner_kind = 'customer' AND customer_id IS NOT NULL AND driver_id IS NULL)
+    OR (owner_kind = 'driver' AND driver_id IS NOT NULL AND customer_id IS NULL)),
+  CONSTRAINT ck_wallets_balance_non_negative CHECK (balance >= 0)
+);
+CREATE TABLE
+
+COMMENT ON TABLE wallets IS 'Ví VíXanh của khách/tài xế (đồng, không âm) — dữ liệu hư cấu';
+COMMENT
+
+-- ---------------------------------------------------------------------------
+-- Lời mời nhận chuyến: hệ thống gửi chuyến cho vài tài xế gần nhất cùng lúc.
+CREATE TABLE trip_offers (
+  trip_id      uuid        NOT NULL,
+  driver_id    uuid        NOT NULL,
+  offered_at   timestamptz NOT NULL DEFAULT now(),
+  status       text        NOT NULL DEFAULT 'offered',
+  responded_at timestamptz,
+  CONSTRAINT pk_trip_offers PRIMARY KEY (trip_id, driver_id),
+  CONSTRAINT fk_trip_offers_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  CONSTRAINT fk_trip_offers_driver FOREIGN KEY (driver_id) REFERENCES drivers (id),
+  CONSTRAINT ck_trip_offers_status CHECK (status IN ('offered', 'accepted', 'lost', 'rejected', 'expired')),
+  CONSTRAINT ck_trip_offers_responded CHECK ((status = 'offered') = (responded_at IS NULL))
+);
+CREATE TABLE
+
+-- Phân công: KHOÁ CHÍNH trip_id ⇒ một chuyến tối đa MỘT tài xế, do database bảo đảm
+-- (cách (d) của PG-040). Bảng riêng để so sánh với cách cập nhật trips có điều kiện.
+CREATE TABLE trip_assignments (
+  trip_id     uuid        NOT NULL,
+  driver_id   uuid        NOT NULL,
+  assigned_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_trip_assignments PRIMARY KEY (trip_id),
+  CONSTRAINT fk_trip_assignments_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  CONSTRAINT fk_trip_assignments_driver FOREIGN KEY (driver_id) REFERENCES drivers (id)
+);
+CREATE TABLE
+
+-- Nhật ký "ứng dụng đã báo tài xế: BẠN NHẬN ĐƯỢC CHUYẾN" — ghi trong CÙNG giao dịch với lệnh
+-- nhận. Đây là thước đo của bất biến PG-040: mỗi chuyến đúng MỘT dòng. KHÔNG có UNIQUE
+-- (trip_id) — cố ý, để cách làm sai lộ ra thành hai dòng thay vì bị chặn.
+CREATE TABLE trip_claims (
+  id         bigint      GENERATED ALWAYS AS IDENTITY,
+  trip_id    uuid        NOT NULL,
+  driver_id  uuid        NOT NULL,
+  method     text        NOT NULL,
+  claimed_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  CONSTRAINT pk_trip_claims PRIMARY KEY (id),
+  CONSTRAINT fk_trip_claims_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  CONSTRAINT fk_trip_claims_driver FOREIGN KEY (driver_id) REFERENCES drivers (id)
+);
+CREATE TABLE
+
+CREATE INDEX ix_trip_claims_trip ON trip_claims (trip_id);
+CREATE INDEX
+
+-- ---------------------------------------------------------------------------
+-- Tài xế trực khu (PG-038): quy tắc nghiệp vụ "mỗi khu đang mở luôn còn ít nhất MỘT tài
+-- xế trực" — quy tắc trên NHIỀU dòng, không CHECK/UNIQUE nào diễn đạt được.
+CREATE TABLE driver_duty (
+  driver_id  uuid        NOT NULL,
+  area_id    integer     NOT NULL,
+  on_duty    boolean     NOT NULL,
+  changed_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_driver_duty PRIMARY KEY (driver_id),
+  CONSTRAINT fk_driver_duty_driver FOREIGN KEY (driver_id) REFERENCES drivers (id),
+  CONSTRAINT fk_driver_duty_area FOREIGN KEY (area_id) REFERENCES areas (id)
+);
+CREATE TABLE
+
+CREATE INDEX ix_driver_duty_area ON driver_duty (area_id);
+CREATE INDEX
+
+-- ---------------------------------------------------------------------------
+-- Hàng đợi việc nền (PG-036): gửi thông báo, tính cước, đối soát…
+CREATE TABLE jobs (
+  id         bigint      GENERATED ALWAYS AS IDENTITY,
+  kind       text        NOT NULL,
+  trip_id    uuid,
+  priority   smallint    NOT NULL DEFAULT 5,       -- 1 = gấp nhất
+  status     text        NOT NULL DEFAULT 'queued',
+  attempts   integer     NOT NULL DEFAULT 0,
+  run_after  timestamptz NOT NULL DEFAULT now(),
+  locked_by  text,
+  locked_at  timestamptz,
+  done_at    timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_jobs PRIMARY KEY (id),
+  CONSTRAINT fk_jobs_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  CONSTRAINT ck_jobs_kind CHECK (kind IN ('gui_thong_bao', 'tinh_cuoc', 'doi_soat')),
+  CONSTRAINT ck_jobs_status CHECK (status IN ('queued', 'running', 'done', 'failed')),
+  CONSTRAINT ck_jobs_priority CHECK (priority BETWEEN 1 AND 9),
+  CONSTRAINT ck_jobs_running_locked CHECK ((status = 'running') = (locked_by IS NOT NULL)),
+  CONSTRAINT ck_jobs_done_at CHECK ((status = 'done') = (done_at IS NOT NULL))
+);
+CREATE TABLE
+
+-- Index phục vụ câu "lấy việc kế tiếp": chỉ việc đang chờ, theo thứ tự ưu tiên.
+CREATE INDEX ix_jobs_queued ON jobs (priority, id) WHERE status = 'queued';
+CREATE INDEX
+
+-- Mỗi lần một worker THỰC SỰ xử lý một việc (tác dụng phụ) ghi một dòng. Bất biến của
+-- PG-036: mỗi việc đúng một dòng. Không UNIQUE (job_id) — cố ý, để lộ việc bị xử lý hai lần.
+CREATE TABLE job_runs (
+  id      bigint      GENERATED ALWAYS AS IDENTITY,
+  job_id  bigint      NOT NULL,
+  worker  text        NOT NULL,
+  ran_at  timestamptz NOT NULL DEFAULT clock_timestamp(),
+  CONSTRAINT pk_job_runs PRIMARY KEY (id),
+  CONSTRAINT fk_job_runs_job FOREIGN KEY (job_id) REFERENCES jobs (id)
+);
+CREATE TABLE
+
+CREATE INDEX ix_job_runs_job ON job_runs (job_id);
+CREATE INDEX
+
+-- ---------------------------------------------------------------------------
+-- Idempotency key (PG-039): app khách gửi kèm mỗi request "đặt chuyến" một khoá ngẫu nhiên;
+-- gửi lại (mạng chập chờn, bấm hai lần) dùng LẠI khoá cũ ⇒ server trả lại kết quả lần đầu.
+CREATE TABLE idempotency_keys (
+  key          text        NOT NULL,
+  customer_id  uuid        NOT NULL,
+  request_hash text        NOT NULL,           -- md5 nội dung request, để phát hiện khoá dùng lại cho request KHÁC
+  trip_id      uuid,
+  response     jsonb,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  completed_at timestamptz,
+  CONSTRAINT pk_idempotency_keys PRIMARY KEY (key),
+  CONSTRAINT fk_idempotency_keys_customer FOREIGN KEY (customer_id) REFERENCES customers (id),
+  CONSTRAINT fk_idempotency_keys_trip FOREIGN KEY (trip_id) REFERENCES trips (id),
+  CONSTRAINT ck_idempotency_keys_format CHECK (key ~ '^[A-Za-z0-9-]{8,64}$'),
+  CONSTRAINT ck_idempotency_keys_done CHECK ((completed_at IS NULL) = (response IS NULL))
+);
+CREATE TABLE
+
+-- Transactional outbox: sự kiện ghi CÙNG giao dịch với dữ liệu nghiệp vụ.
+CREATE TABLE outbox (
+  id               bigint      GENERATED ALWAYS AS IDENTITY,
+  aggregate_type   text        NOT NULL,
+  aggregate_id     uuid        NOT NULL,
+  event_type       text        NOT NULL,
+  payload          jsonb       NOT NULL,
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  published_at     timestamptz,
+  publish_attempts integer     NOT NULL DEFAULT 0,
+  CONSTRAINT pk_outbox PRIMARY KEY (id),
+  CONSTRAINT ck_outbox_payload_object CHECK (jsonb_typeof(payload) = 'object')
+);
+CREATE TABLE
+
+CREATE INDEX ix_outbox_unpublished ON outbox (id) WHERE published_at IS NULL;
+CREATE INDEX
+
+-- GIẢ LẬP message broker (một hệ thống KHÁC — Kafka, RabbitMQ…): "gửi" = chèn một dòng.
+-- Trong lab broker nằm cùng database nhưng publisher ghi vào nó bằng KẾT NỐI RIÊNG, ngoài
+-- giao dịch đánh dấu outbox — đúng như gửi qua mạng: không có commit chung hai hệ.
+-- KHÔNG UNIQUE (outbox_id): broker nhận trùng được (giao hàng ít nhất một lần).
+CREATE TABLE broker_messages (
+  seq        bigint      GENERATED ALWAYS AS IDENTITY,
+  outbox_id  bigint      NOT NULL,
+  event_type text        NOT NULL,
+  payload    jsonb       NOT NULL,
+  sent_by    text        NOT NULL,
+  sent_at    timestamptz NOT NULL DEFAULT clock_timestamp(),
+  CONSTRAINT pk_broker_messages PRIMARY KEY (seq)
+);
+CREATE TABLE
+
+-- Consumer chống trùng: đã xử lý (consumer, outbox_id) thì bỏ qua lần nhận sau.
+CREATE TABLE processed_messages (
+  consumer     text        NOT NULL,
+  outbox_id    bigint      NOT NULL,
+  processed_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  CONSTRAINT pk_processed_messages PRIMARY KEY (consumer, outbox_id)
+);
+CREATE TABLE
+
+-- Tác dụng của consumer "gửi thông báo cho khách": mỗi sự kiện ⇒ đúng một thông báo.
+CREATE TABLE notifications (
+  id          bigint      GENERATED ALWAYS AS IDENTITY,
+  outbox_id   bigint      NOT NULL,
+  customer_id uuid        NOT NULL,
+  body        text        NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT clock_timestamp(),
+  CONSTRAINT pk_notifications PRIMARY KEY (id),
+  CONSTRAINT fk_notifications_customer FOREIGN KEY (customer_id) REFERENCES customers (id)
+);
+CREATE TABLE
+
+CREATE INDEX ix_notifications_outbox ON notifications (outbox_id);
+CREATE INDEX
+
+-- ---------------------------------------------------------------------------
+-- Tiện ích cho đầu ra TẤT ĐỊNH của lab (không phải mẫu cho production).
+--
+-- Số giao dịch (xid) tăng dần trên CẢ cluster, nên số tuyệt đối đổi giữa các lần chạy.
+-- Mỗi tệp bài gọi lab_dat_moc_xid() ở đầu: lưu xid của chính lệnh đó làm mốc X; sau đó
+-- xid_td(x) in "X+1", "X+2"… — giao dịch ghi đầu tiên sau mốc là X+1. Giao dịch CHỈ ĐỌC
+-- không được cấp xid nên không làm lệch thứ tự.
+CREATE TABLE lab_moc_xid (
+  id boolean NOT NULL DEFAULT true,
+  x0 xid8    NOT NULL,
+  CONSTRAINT pk_lab_moc_xid PRIMARY KEY (id),
+  CONSTRAINT ck_lab_moc_xid_one CHECK (id)
+);
+CREATE TABLE
+
+CREATE FUNCTION lab_dat_moc_xid() RETURNS text
+LANGUAGE sql VOLATILE
+AS $$
+  INSERT INTO toinoi.lab_moc_xid (id, x0) VALUES (true, pg_current_xact_id())
+  ON CONFLICT (id) DO UPDATE SET x0 = excluded.x0
+  RETURNING 'mốc X = xid của lệnh này'
+$$;
+CREATE FUNCTION
+
+-- xid8 (64 bit, có epoch) → "X+n". Cluster tạm mới ⇒ epoch 0. xid NHỎ HƠN mốc (dữ liệu nạp
+-- từ fixture, giao dịch của tệp khác) in là "<X" — số tuyệt đối của chúng phụ thuộc thứ tự
+-- chạy các tệp nên không in.
+CREATE FUNCTION xid_td(x xid8) RETURNS text
+LANGUAGE sql STABLE
+AS $$
+  SELECT CASE
+    WHEN x IS NULL THEN NULL
+    WHEN x::text::bigint = 0 THEN '0'
+    ELSE (SELECT CASE WHEN d > 0 THEN 'X+' || d WHEN d = 0 THEN 'X' ELSE '<X' END
+          FROM (SELECT x::text::bigint - (SELECT x0::text::bigint FROM toinoi.lab_moc_xid) AS d) AS t)
+  END
+$$;
+CREATE FUNCTION
+
+-- Ngược lại: xid8 của "X+n" (để hỏi pg_xact_status của giao dịch phiên khác).
+CREATE FUNCTION xid_x(n integer) RETURNS xid8
+LANGUAGE sql STABLE
+AS $$
+  SELECT ((SELECT x0::text::bigint FROM toinoi.lab_moc_xid) + n)::text::xid8
+$$;
+CREATE FUNCTION
+
+-- xid (32 bit, cột hệ thống xmin/xmax) → "X+n". 0 = "không có" (vd. xmax = 0: chưa ai xoá/sửa).
+CREATE FUNCTION xid_td(x xid) RETURNS text
+LANGUAGE sql STABLE
+AS $$
+  SELECT CASE
+    WHEN x IS NULL THEN NULL
+    WHEN x::text::bigint = 0 THEN '0'
+    ELSE (SELECT CASE WHEN d > 0 THEN 'X+' || d WHEN d = 0 THEN 'X' ELSE '<X' END
+          FROM (SELECT x::text::bigint - (SELECT x0::text::bigint % 4294967296 FROM toinoi.lab_moc_xid) AS d) AS t)
+  END
+$$;
+CREATE FUNCTION
+
+-- Snapshot dạng tương đối: xmin (mọi xid < xmin đã kết thúc), xmax (= xid lớn nhất đã kết thúc + 1;
+-- mọi xid ≥ xmax coi như CHƯA kết thúc khi chụp), danh sách đang chạy lúc chụp (xip).
+CREATE FUNCTION snap_td(s pg_snapshot) RETURNS text
+LANGUAGE sql STABLE
+AS $$
+  SELECT 'xmin=' || toinoi.xid_td(pg_snapshot_xmin(s))
+      || ' xmax=' || toinoi.xid_td(pg_snapshot_xmax(s))
+      || ' đang chạy={' || coalesce((SELECT string_agg(toinoi.xid_td(x), ',' ORDER BY x::text::bigint)
+                                       FROM pg_snapshot_xip(s) AS x), '') || '}'
+$$;
+CREATE FUNCTION
+
+-- Nhãn phiên của một backend: runner đặt application_name = 'lab-<NHÃN>' cho mỗi phiên.
+CREATE FUNCTION lab_nhan(p integer) RETURNS text
+LANGUAGE sql STABLE
+AS $$
+  SELECT coalesce((SELECT CASE WHEN application_name LIKE 'lab-%' THEN substr(application_name, 5)
+                               ELSE '?' END
+                   FROM pg_stat_activity WHERE pid = p), '?')
+$$;
+CREATE FUNCTION
+
+-- Khoá đang giữ / đang chờ của các phiên lab (trừ phiên đang hỏi), dạng đọc được:
+-- relation (chỉ BẢNG trong schema toinoi — bỏ khoá trên index để bảng kết quả gọn), tuple,
+-- transactionid (kèm "xid của phiên nào"), advisory. Bỏ virtualxid (mỗi phiên luôn giữ khoá
+-- trên chính mã giao dịch ảo của mình) và khoá trên catalog hệ thống. Sắp cố định.
+CREATE FUNCTION lab_khoa()
+RETURNS TABLE (phien text, loai text, doi_tuong text, che_do text, da_cap boolean)
+LANGUAGE sql STABLE
+AS $$
+  SELECT toinoi.lab_nhan(l.pid),
+         l.locktype,
+         CASE l.locktype
+           WHEN 'relation' THEN c.relname
+           WHEN 'tuple' THEN c.relname || ' (' || l.page || ',' || l.tuple || ')'
+           WHEN 'transactionid' THEN 'xid của ' || coalesce(
+             (SELECT string_agg(toinoi.lab_nhan(a.pid), ',') FROM pg_stat_activity AS a
+              WHERE a.backend_xid = l.transactionid), '?')
+           WHEN 'advisory' THEN 'advisory ' || l.objid
+           ELSE l.locktype
+         END,
+         l.mode,
+         l.granted
+  FROM pg_locks AS l
+  LEFT JOIN pg_class AS c ON c.oid = l.relation
+  LEFT JOIN pg_namespace AS n ON n.oid = c.relnamespace
+  WHERE l.pid <> pg_backend_pid()
+    AND l.locktype IN ('relation', 'tuple', 'transactionid', 'advisory')
+    AND (l.locktype NOT IN ('relation', 'tuple') OR (n.nspname = 'toinoi' AND c.relkind IN ('r', 'p')))
+    AND toinoi.lab_nhan(l.pid) NOT IN ('?', 'quan-sat')
+  ORDER BY 1, 2, 3, 4
+$$;
+CREATE FUNCTION
+
+-- Ai đang chờ ai: trạng thái từng phiên lab và các phiên đang chặn nó (pg_blocking_pids).
+CREATE FUNCTION lab_cho()
+RETURNS TABLE (phien text, trang_thai text, cho text, bi_chan_boi text, cau_lenh text)
+LANGUAGE sql STABLE
+AS $$
+  SELECT toinoi.lab_nhan(a.pid),
+         a.state,
+         coalesce(a.wait_event_type || ': ' || a.wait_event, ''),
+         coalesce((SELECT string_agg(toinoi.lab_nhan(b), ',' ORDER BY toinoi.lab_nhan(b))
+                   FROM unnest(pg_blocking_pids(a.pid)) AS b), ''),
+         left(regexp_replace(a.query, '\s+', ' ', 'g'), 60)
+  FROM pg_stat_activity AS a
+  WHERE a.application_name LIKE 'lab-%'
+    AND a.application_name NOT IN ('lab-quan-sat', 'lab-admin')
+    AND a.pid <> pg_backend_pid()
+    AND a.datname = current_database()
+  ORDER BY 1
+$$;
+CREATE FUNCTION
+
+-- Danh sách bảng thêm ở P04.
+-- expect-line: broker_messages
+-- expect-line: driver_duty
+-- expect-line: idempotency_keys
+-- expect-line: job_runs
+-- expect-line: jobs
+-- expect-line: lab_moc_xid
+-- expect-line: notifications
+-- expect-line: outbox
+-- expect-line: processed_messages
+-- expect-line: trip_assignments
+-- expect-line: trip_claims
+-- expect-line: trip_offers
+-- expect-line: wallets
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'toinoi' AND table_type = 'BASE TABLE'
+  AND table_name NOT IN ('areas', 'cities', 'customers', 'drivers', 'merchants', 'payments', 'trip_events', 'trip_ratings', 'trips')
+ORDER BY table_name COLLATE "C";
+     table_name
+--------------------
+ broker_messages
+ driver_duty
+ idempotency_keys
+ job_runs
+ jobs
+ lab_moc_xid
+ notifications
+ outbox
+ processed_messages
+ trip_assignments
+ trip_claims
+ trip_offers
+ wallets
+(13 rows)
+-- [lab] PASS: đúng nội dung 13 dòng như mong đợi (expect-line)
+
+-- [lab] ===== p04/01-fixture.sql · nền p04 (database nen_p04) =====
+
+-- P04 · 01-fixture.sql — bộ dữ liệu NHỎ, tất định (nạp < 1 giây).
+--
+-- P04 nói về giao dịch và tranh chấp: mọi hiện tượng xảy ra trên vài dòng, nên fixture chỉ
+-- có vài chục dòng mỗi bảng, ĐẶT TÊN DỄ NHỚ để lịch chạy trong bài đọc được:
+--   * chuyến đang chờ nhận   : mã 400101 … 400110 (status 'requested', version 1)
+--   * khách                  : 0940000001 … 0940000020 (ví 1001 … 1020, mỗi ví 500.000 đ)
+--   * tài xế                 : SG 9101–9112, HN 9201–9208, DN 9301–9304 (ví 2001 … 2024, 200.000 đ)
+--   * tài xế trực khu        : mỗi khu 2 người, ví dụ khu SG-TT-01 (111) có 9101 và 9102
+--   * hàng đợi việc          : việc 1 … 10 'gui_thong_bao' (việc 1 ưu tiên 1, còn lại 5)
+-- Mốc chụp: 2026-10-31 01:00 +07 (như P02/P03). Không dùng random()/now() cho dữ liệu nền.
+-- Mọi tên, số điện thoại đều HƯ CẤU.
+
+SET search_path TO toinoi, public;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- expect-rows: 3
+INSERT INTO cities (id, code, name) VALUES
+  (1, 'SG', 'TP. Hồ Chí Minh'),
+  (2, 'HN', 'Hà Nội'),
+  (3, 'DN', 'Đà Nẵng');
+INSERT 0 3
+-- [lab] PASS: đúng 3 dòng như mong đợi
+
+-- Cây khu vực điều phối — y hệt P02 (hư cấu, KHÔNG phải đơn vị hành chính).
+-- expect-rows: 34
+INSERT INTO areas (id, parent_id, code, name, level, city_id) VALUES
+  (1,   NULL, 'SG',       'TP. Hồ Chí Minh', 'city',     1),
+  (2,   NULL, 'HN',       'Hà Nội',          'city',     2),
+  (3,   NULL, 'DN',       'Đà Nẵng',         'city',     3),
+  (11,  1,    'SG-TT',    'Trung tâm',       'district', NULL),
+  (12,  1,    'SG-DO',    'Phía Đông',       'district', NULL),
+  (13,  1,    'SG-TA',    'Phía Tây',        'district', NULL),
+  (14,  1,    'SG-NA',    'Phía Nam',        'district', NULL),
+  (21,  2,    'HN-TT',    'Trung tâm',       'district', NULL),
+  (22,  2,    'HN-TA',    'Phía Tây',        'district', NULL),
+  (23,  2,    'HN-BA',    'Phía Bắc',        'district', NULL),
+  (24,  2,    'HN-NA',    'Phía Nam (mở 11/2026)', 'district', NULL),
+  (31,  3,    'DN-TT',    'Trung tâm',       'district', NULL),
+  (32,  3,    'DN-BI',    'Ven biển',        'district', NULL),
+  (111, 11,   'SG-TT-01', 'Khu 01', 'zone', NULL),
+  (112, 11,   'SG-TT-02', 'Khu 02', 'zone', NULL),
+  (113, 11,   'SG-TT-03', 'Khu 03', 'zone', NULL),
+  (121, 12,   'SG-DO-01', 'Khu 01', 'zone', NULL),
+  (122, 12,   'SG-DO-02', 'Khu 02', 'zone', NULL),
+  (123, 12,   'SG-DO-03', 'Khu 03', 'zone', NULL),
+  (131, 13,   'SG-TA-01', 'Khu 01', 'zone', NULL),
+  (132, 13,   'SG-TA-02', 'Khu 02', 'zone', NULL),
+  (141, 14,   'SG-NA-01', 'Khu 01', 'zone', NULL),
+  (142, 14,   'SG-NA-02', 'Khu 02', 'zone', NULL),
+  (211, 21,   'HN-TT-01', 'Khu 01', 'zone', NULL),
+  (212, 21,   'HN-TT-02', 'Khu 02', 'zone', NULL),
+  (213, 21,   'HN-TT-03', 'Khu 03', 'zone', NULL),
+  (221, 22,   'HN-TA-01', 'Khu 01', 'zone', NULL),
+  (222, 22,   'HN-TA-02', 'Khu 02', 'zone', NULL),
+  (231, 23,   'HN-BA-01', 'Khu 01', 'zone', NULL),
+  (232, 23,   'HN-BA-02', 'Khu 02', 'zone', NULL),
+  (311, 31,   'DN-TT-01', 'Khu 01', 'zone', NULL),
+  (312, 31,   'DN-TT-02', 'Khu 02', 'zone', NULL),
+  (321, 32,   'DN-BI-01', 'Khu 01', 'zone', NULL),
+  (322, 32,   'DN-BI-02', 'Khu 02', 'zone', NULL);
+INSERT 0 34
+-- [lab] PASS: đúng 34 dòng như mong đợi
+
+-- 20 khách SG. id = c4000000-…-<số thứ tự> để dễ đối chiếu (đừng suy id từ số trong hệ thật).
+-- expect-rows: 20
+INSERT INTO customers (id, phone, full_name, created_at)
+SELECT ('c4000000-0000-4000-8000-' || lpad(n::text, 12, '0'))::uuid,
+       '094' || lpad(n::text, 7, '0'),
+       (ARRAY['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Võ', 'Đặng', 'Bùi'])[1 + n % 8]
+         || ' ' || (ARRAY['Văn', 'Thị', 'Minh', 'Thu', 'Quốc'])[1 + n % 5]
+         || ' ' || (ARRAY['An', 'Bình', 'Châu', 'Dũng', 'Giang', 'Hải', 'Khánh', 'Linh', 'Mai', 'Nam', 'Oanh'])[1 + n % 11],
+       TIMESTAMPTZ '2026-03-01 08:00:00+07' + n * interval '1 day'
+FROM generate_series(1, 20) AS n;
+INSERT 0 20
+-- [lab] PASS: đúng 20 dòng như mong đợi
+
+-- 24 tài xế: SG 9101–9112, HN 9201–9208, DN 9301–9304; tất cả đang online.
+-- expect-rows: 24
+INSERT INTO drivers (id, code, full_name, city_id, vehicle_type, status, created_at)
+SELECT ('d4000000-0000-4000-8000-' || lpad(code::text, 12, '0'))::uuid,
+       code,
+       (ARRAY['Bùi', 'Hồ', 'Ngô', 'Đỗ', 'Lý', 'Trịnh', 'Mai', 'Tạ'])[1 + code % 8]
+         || ' ' || (ARRAY['Văn', 'Thị', 'Quang', 'Đức'])[1 + code % 4]
+         || ' ' || (ARRAY['Khoa', 'Lan', 'Minh', 'Nam', 'Phúc', 'Quý', 'Sang', 'Tú', 'Vinh'])[1 + code % 9],
+       (code / 100 - 90)::smallint,
+       CASE WHEN code % 4 = 0 THEN 'car' ELSE 'bike' END,
+       'online',
+       TIMESTAMPTZ '2026-06-01 09:00:00+07'
+FROM (SELECT 9100 + g AS code FROM generate_series(1, 12) AS g
+      UNION ALL SELECT 9200 + g FROM generate_series(1, 8) AS g
+      UNION ALL SELECT 9300 + g FROM generate_series(1, 4) AS g) AS d
+ORDER BY code;
+INSERT 0 24
+-- [lab] PASS: đúng 24 dòng như mong đợi
+
+-- expect-rows: 2
+INSERT INTO merchants (id, city_id, name, created_at) VALUES
+  ('e4000000-0000-4000-8000-000000000001', 1, 'Cơm Tấm Lab 1', TIMESTAMPTZ '2026-05-01 08:00:00+07'),
+  ('e4000000-0000-4000-8000-000000000002', 1, 'Bún Bò Lab 2',  TIMESTAMPTZ '2026-05-01 08:00:00+07');
+INSERT 0 2
+-- [lab] PASS: đúng 2 dòng như mong đợi
+
+-- 30 chuyến đã xong ngày 30/10 (mã 400001–400030): 27 hoàn thành, 3 huỷ sau khi nhận (mã 400008, 400016, 400024).
+-- Mã ghi thẳng (OVERRIDING SYSTEM VALUE) như nạp lịch sử, id = a4000000-…-<mã>.
+-- expect-rows: 30
+INSERT INTO trips (id, code, kind, city_id, customer_id, driver_id, merchant_id, status, fare,
+                   requested_at, accepted_at, completed_at, updated_at, pickup_area_id)
+OVERRIDING SYSTEM VALUE
+SELECT ('a4000000-0000-4000-8000-' || lpad((400000 + n)::text, 12, '0'))::uuid,
+       400000 + n,
+       k.kind,
+       1,
+       ('c4000000-0000-4000-8000-' || lpad((1 + (n - 1) % 20)::text, 12, '0'))::uuid,
+       ('d4000000-0000-4000-8000-' || lpad((9101 + (n - 1) % 12)::text, 12, '0'))::uuid,
+       CASE WHEN k.kind = 'food' THEN 'e4000000-0000-4000-8000-00000000000' || (1 + n % 2) END::uuid,
+       CASE WHEN n % 8 = 0 THEN 'cancelled' ELSE 'completed' END,
+       20000 + (n * 3700) % 60000 / 1000 * 1000,
+       r.t,
+       r.t + interval '2 minutes',
+       CASE WHEN n % 8 = 0 THEN NULL ELSE r.t + interval '25 minutes' END,
+       r.t + interval '25 minutes',
+       (ARRAY[111, 112, 113, 121, 122, 123])[1 + n % 6]
+FROM generate_series(1, 30) AS n
+CROSS JOIN LATERAL (SELECT (ARRAY['ride', 'food', 'parcel'])[1 + n % 3] AS kind) AS k
+CROSS JOIN LATERAL (SELECT TIMESTAMPTZ '2026-10-30 07:00:00+07' + n * interval '23 minutes' AS t) AS r;
+INSERT 0 30
+-- [lab] PASS: đúng 30 dòng như mong đợi
+
+-- 10 chuyến ĐANG CHỜ tài xế nhận (mã 400101–400110), đặt lúc 00:50–00:59 ngày 31/10.
+-- Đây là các chuyến các bài tranh nhau nhận / sửa / huỷ.
+-- expect-rows: 10
+INSERT INTO trips (id, code, kind, city_id, customer_id, status, fare, requested_at, updated_at, pickup_area_id)
+OVERRIDING SYSTEM VALUE
+SELECT ('a4000000-0000-4000-8000-' || lpad((400100 + n)::text, 12, '0'))::uuid,
+       400100 + n,
+       CASE WHEN n % 2 = 0 THEN 'parcel' ELSE 'ride' END,
+       1,
+       ('c4000000-0000-4000-8000-' || lpad(n::text, 12, '0'))::uuid,
+       'requested',
+       30000 + n * 1000,
+       TIMESTAMPTZ '2026-10-31 00:49:00+07' + n * interval '1 minute',
+       TIMESTAMPTZ '2026-10-31 00:49:00+07' + n * interval '1 minute',
+       (ARRAY[111, 112, 113])[1 + n % 3]
+FROM generate_series(1, 10) AS n;
+INSERT 0 10
+-- [lab] PASS: đúng 10 dòng như mong đợi
+
+-- Chuyến tạo mới trong bài tiếp tục từ mã 400200.
+SELECT setval(pg_get_serial_sequence('toinoi.trips', 'code'), 400200, false) AS ma_chuyen_ke_tiep;
+ ma_chuyen_ke_tiep
+-------------------
+            400200
+(1 row)
+
+-- Lịch sử trạng thái: requested → accepted → completed/cancelled; chuyến đang chờ chỉ có requested.
+-- expect-rows: 100
+INSERT INTO trip_events (trip_id, status, occurred_at)
+SELECT t.id, e.status, e.at
+FROM trips AS t
+CROSS JOIN LATERAL (VALUES
+  ('requested', t.requested_at, true),
+  ('accepted', t.accepted_at, t.accepted_at IS NOT NULL),
+  (t.status, t.updated_at, t.status IN ('completed', 'cancelled'))
+) AS e(status, at, co)
+WHERE e.co
+ORDER BY t.code, e.at;
+INSERT 0 100
+-- [lab] PASS: đúng 100 dòng như mong đợi
+
+-- Ví: khách 1001–1020 (500.000 đ), tài xế 2001–2024 (200.000 đ).
+-- expect-rows: 44
+INSERT INTO wallets (id, owner_kind, customer_id, driver_id, balance, updated_at)
+SELECT 1000 + n, 'customer', ('c4000000-0000-4000-8000-' || lpad(n::text, 12, '0'))::uuid, NULL, 500000,
+       TIMESTAMPTZ '2026-10-31 00:00:00+07'
+FROM generate_series(1, 20) AS n
+UNION ALL
+SELECT 2000 + row_number() OVER (ORDER BY code), 'driver', NULL, id, 200000, TIMESTAMPTZ '2026-10-31 00:00:00+07'
+FROM drivers;
+INSERT 0 44
+-- [lab] PASS: đúng 44 dòng như mong đợi
+
+-- Tài xế trực khu: mỗi khu 2 người, tất cả đang trực.
+--   SG: 111 (9101, 9102), 112 (9103, 9104), 113 (9105, 9106), 121, 122, 123 …
+--   HN: 211 (9201, 9202), 212, 213, 221 · DN: 311 (9301, 9302), 312 (9303, 9304)
+-- expect-rows: 24
+INSERT INTO driver_duty (driver_id, area_id, on_duty, changed_at)
+SELECT d.id,
+       CASE d.city_id
+         WHEN 1 THEN (ARRAY[111, 112, 113, 121, 122, 123])[1 + (d.code - 9101) / 2]
+         WHEN 2 THEN (ARRAY[211, 212, 213, 221])[1 + (d.code - 9201) / 2]
+         ELSE (ARRAY[311, 312])[1 + (d.code - 9301) / 2]
+       END,
+       true,
+       TIMESTAMPTZ '2026-10-31 00:00:00+07'
+FROM drivers AS d;
+INSERT 0 24
+-- [lab] PASS: đúng 24 dòng như mong đợi
+
+-- Hàng đợi: 10 việc gửi thông báo cho 10 chuyến đang chờ. Việc 1 ưu tiên 1 (gấp), còn lại 5.
+-- expect-rows: 10
+INSERT INTO jobs (kind, trip_id, priority, run_after, created_at)
+SELECT 'gui_thong_bao', t.id, CASE WHEN t.code = 400101 THEN 1 ELSE 5 END,
+       TIMESTAMPTZ '2026-10-31 01:00:00+07', TIMESTAMPTZ '2026-10-31 01:00:00+07'
+FROM trips AS t
+WHERE t.status = 'requested'
+ORDER BY t.code;
+INSERT 0 10
+-- [lab] PASS: đúng 10 dòng như mong đợi
+
+-- Bảng nhỏ ⇒ ANALYZE đọc HẾT (không lấy mẫu) ⇒ thống kê tất định. Cluster tắt autovacuum.
+VACUUM (ANALYZE);
+VACUUM
+
+-- [lab] ===== p04/02-kiem-tra-fixture.sql · nền p04 (database nen_p04) =====
+
+-- P04 · 02-kiem-tra-fixture.sql — kiểm số dòng và các BẤT BIẾN mà bài sẽ phá/giữ.
+-- Mỗi bài chạy trên một bản sao của nền này, nên các số dưới đây là điểm xuất phát của MỌI bài.
+
+SET search_path TO toinoi, public;
+SET
+
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+SET
+
+-- Số dòng từng bảng.
+-- expect-line: areas | 34
+-- expect-line: customers | 20
+-- expect-line: driver_duty | 24
+-- expect-line: drivers | 24
+-- expect-line: jobs | 10
+-- expect-line: trip_events | 100
+-- expect-line: trips | 40
+-- expect-line: wallets | 44
+SELECT 'areas' AS bang, count(*) FROM areas
+UNION ALL SELECT 'customers', count(*) FROM customers
+UNION ALL SELECT 'driver_duty', count(*) FROM driver_duty
+UNION ALL SELECT 'drivers', count(*) FROM drivers
+UNION ALL SELECT 'jobs', count(*) FROM jobs
+UNION ALL SELECT 'trip_events', count(*) FROM trip_events
+UNION ALL SELECT 'trips', count(*) FROM trips
+UNION ALL SELECT 'wallets', count(*) FROM wallets
+ORDER BY 1;
+    bang     | count
+-------------+-------
+ areas       |    34
+ customers   |    20
+ driver_duty |    24
+ drivers     |    24
+ jobs        |    10
+ trip_events |   100
+ trips       |    40
+ wallets     |    44
+(8 rows)
+-- [lab] PASS: đúng nội dung 8 dòng như mong đợi (expect-line)
+
+-- Chuyến theo trạng thái.
+-- expect-line: cancelled | 3
+-- expect-line: completed | 27
+-- expect-line: requested | 10
+SELECT status, count(*) FROM trips GROUP BY status ORDER BY status;
+  status   | count
+-----------+-------
+ cancelled |     3
+ completed |    27
+ requested |    10
+(3 rows)
+-- [lab] PASS: đúng nội dung 3 dòng như mong đợi (expect-line)
+
+-- 10 chuyến đang chờ nhận: mã, khu đón, cước, version.
+-- expect-md5: 464a6b63a43f77922dcc1312aa281141
+SELECT code, kind, pickup_area_id, fare, version, driver_id IS NULL AS chua_co_tai_xe
+FROM trips WHERE status = 'requested' ORDER BY code;
+  code  |  kind  | pickup_area_id | fare  | version | chua_co_tai_xe
+--------+--------+----------------+-------+---------+----------------
+ 400101 | ride   |            112 | 31000 |       1 | t
+ 400102 | parcel |            113 | 32000 |       1 | t
+ 400103 | ride   |            111 | 33000 |       1 | t
+ 400104 | parcel |            112 | 34000 |       1 | t
+ 400105 | ride   |            113 | 35000 |       1 | t
+ 400106 | parcel |            111 | 36000 |       1 | t
+ 400107 | ride   |            112 | 37000 |       1 | t
+ 400108 | parcel |            113 | 38000 |       1 | t
+ 400109 | ride   |            111 | 39000 |       1 | t
+ 400110 | parcel |            112 | 40000 |       1 | t
+(10 rows)
+-- [lab] PASS: đúng md5 kết quả 464a6b63a43f77922dcc1312aa281141
+
+-- Tổng tiền trong các ví (bất biến của PG-037: chuyển tiền giữa ví không làm đổi tổng).
+-- expect-line: customer | 20 | 10000000
+-- expect-line: driver | 24 | 4800000
+SELECT owner_kind, count(*), sum(balance) FROM wallets GROUP BY owner_kind ORDER BY 1;
+ owner_kind | count |   sum
+------------+-------+----------
+ customer   |    20 | 10000000
+ driver     |    24 |  4800000
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- Bất biến PG-038: mỗi khu có tài xế trực còn ít nhất 1 người trực (ở đây: đúng 2).
+-- expect-value: 12
+SELECT count(*) FROM (
+  SELECT area_id FROM driver_duty GROUP BY area_id HAVING count(*) FILTER (WHERE on_duty) = 2
+) AS k;
+ count
+-------
+    12
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 12
+
+-- Ví dụ khu SG-TT-01 (111): hai tài xế 9101, 9102.
+-- expect-line: 111 | 9101 | t
+-- expect-line: 111 | 9102 | t
+SELECT dd.area_id, d.code, dd.on_duty
+FROM driver_duty AS dd JOIN drivers AS d ON d.id = dd.driver_id
+WHERE dd.area_id = 111 ORDER BY d.code;
+ area_id | code | on_duty
+---------+------+---------
+     111 | 9101 | t
+     111 | 9102 | t
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- Hàng đợi: 10 việc 'queued', việc 1 ưu tiên 1.
+-- expect-line: 1 | 1 | queued | 400101
+-- expect-line: 2 | 5 | queued | 400102
+-- expect-line: 10 | 5 | queued | 400110
+SELECT j.id, j.priority, j.status, t.code
+FROM jobs AS j JOIN trips AS t ON t.id = j.trip_id
+WHERE j.id IN (1, 2, 10) ORDER BY j.id;
+ id | priority | status |  code
+----+----------+--------+--------
+  1 |        1 | queued | 400101
+  2 |        5 | queued | 400102
+ 10 |        5 | queued | 400110
+(3 rows)
+-- [lab] PASS: đúng nội dung 3 dòng như mong đợi (expect-line)
+
+-- [lab] ===== p04/31-transaction-commit-rollback.sql · PG-031 · bản sao nền p04 (database bai_01) =====
+
+-- [lab] [A]
+-- PG-031 · Transaction, COMMIT và ROLLBACK — `postgresql-transaction-commit-rollback`
+--
+-- Bài toán Tới Nơi: khi khách đặt chuyến, server ghi HAI thứ — dòng `trips` và sự kiện
+-- 'requested' trong `trip_events`. Không bao giờ được có chuyến mà không có sự kiện (màn
+-- lịch sử của CSKH trống) hay sự kiện trỏ tới chuyến không tồn tại. Giao dịch (transaction)
+-- gom nhiều câu lệnh thành MỘT đơn vị: cùng thành công (COMMIT) hoặc cùng bị huỷ (ROLLBACK).
+--
+-- Hai phiên: [A] = server API đặt chuyến, [B] = người quan sát (CSKH / một request khác).
+-- Mỗi phiên là một kết nối riêng (một tiến trình psql). Runner gửi từng bước theo thứ tự
+-- trong tệp và in nhãn phiên trước mỗi bước — đó là LỊCH CHẠY của bài.
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- ===========================================================================
+-- §1. Chuyến + sự kiện trong MỘT giao dịch: B không thấy gì cho tới khi A COMMIT.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Mã chuyến (code) do IDENTITY cấp: lấy giá trị kế tiếp của sequence (đang ở 400200).
+-- expect-value: 400200
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400201', 'ride', 1, 'c4000000-0000-4000-8000-000000000011', 45000, 111)
+RETURNING code;
+  code
+--------
+ 400200
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 400200
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+INSERT INTO trip_events (trip_id, status)
+VALUES ('a4000000-0000-4000-8000-000000400201', 'requested');
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- B (một kết nối khác) chưa thấy dòng nào: dữ liệu chưa COMMIT chỉ giao dịch A thấy.
+-- @B
+-- expect-line: 0 | 0
+SELECT (SELECT count(*) FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400201') AS chuyen,
+       (SELECT count(*) FROM trip_events WHERE trip_id = 'a4000000-0000-4000-8000-000000400201') AS su_kien;
+ chuyen | su_kien
+--------+---------
+      0 |       0
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- Trong giao dịch, now() là thời điểm BẮT ĐẦU giao dịch — giống nhau ở mọi câu, nên
+-- requested_at của chuyến = occurred_at của sự kiện (cả hai lấy mặc định now()).
+-- @A
+-- expect-value: t
+SELECT t.requested_at = e.occurred_at AS cung_moc_now
+FROM trips AS t JOIN trip_events AS e ON e.trip_id = t.id
+WHERE t.id = 'a4000000-0000-4000-8000-000000400201';
+ cung_moc_now
+--------------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+-- expect-line: 1 | 1
+SELECT (SELECT count(*) FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400201') AS chuyen,
+       (SELECT count(*) FROM trip_events WHERE trip_id = 'a4000000-0000-4000-8000-000000400201') AS su_kien;
+ chuyen | su_kien
+--------+---------
+      1 |       1
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- ===========================================================================
+-- §2. Lỗi giữa giao dịch: mọi câu sau bị từ chối (25P02) và COMMIT thực chất là ROLLBACK.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Câu này thành công và lấy mã 400201 từ sequence…
+-- expect-value: 400201
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400202', 'ride', 1, 'c4000000-0000-4000-8000-000000000012', 52000, 112)
+RETURNING code;
+  code
+--------
+ 400201
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 400201
+
+-- [lab] [A]
+-- @A
+-- …câu này vi phạm CHECK (trạng thái không có trong danh sách) ⇒ lỗi ⇒ giao dịch HỎNG.
+-- expect-error: 23514 ck_trip_events_status
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('a4000000-0000-4000-8000-000000400202', 'dang_tim', TIMESTAMPTZ '2026-10-31 01:00:00+07');
+ERROR:  new row for relation "trip_events" violates check constraint "ck_trip_events_status"
+DETAIL:  Failing row contains (102, a4000000-0000-4000-8000-000000400202, dang_tim, 2026-10-31 01:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trip_events_status · table trip_events
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trip_events_status
+
+-- [lab] [A]
+-- @A
+-- Giao dịch hỏng từ chối MỌI câu (kể cả SELECT) cho tới khi kết thúc giao dịch.
+-- expect-error: 25P02
+SELECT 1;
+ERROR:  current transaction is aborted, commands ignored until end of transaction block
+-- [lab] SQLSTATE 25P02
+-- [lab] PASS: đúng lỗi mong đợi 25P02
+
+-- [lab] [A]
+-- @A
+-- COMMIT trên giao dịch hỏng không báo lỗi — server trả thẻ ROLLBACK. Ứng dụng phải đọc
+-- kết quả của COMMIT, đừng mặc định "đã lưu".
+-- expect-match: ^ROLLBACK$
+COMMIT;
+ROLLBACK
+-- [lab] PASS: có dòng khớp /^ROLLBACK$/
+
+-- [lab] [B]
+-- @B
+-- expect-value: 0
+SELECT count(*) FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400202';
+ count
+-------
+     0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] [A]
+-- ===========================================================================
+-- §3. SAVEPOINT: huỷ MỘT PHẦN giao dịch, giữ phần trước điểm lưu.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Mã 400201 đã bị giao dịch hỏng ở §2 lấy mất: sequence KHÔNG quay lui khi ROLLBACK
+-- (để các giao dịch song song không phải chờ nhau) ⇒ mã chuyến có thể nhảy cóc.
+-- expect-value: 400202
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400203', 'parcel', 1, 'c4000000-0000-4000-8000-000000000013', 38000, 113)
+RETURNING code;
+  code
+--------
+ 400202
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 400202
+
+-- [lab] [A]
+-- @A
+SAVEPOINT truoc_su_kien;
+SAVEPOINT
+
+-- [lab] [A]
+-- @A
+-- expect-error: 23514 ck_trip_events_status
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('a4000000-0000-4000-8000-000000400203', 'dang_tim', TIMESTAMPTZ '2026-10-31 01:00:00+07');
+ERROR:  new row for relation "trip_events" violates check constraint "ck_trip_events_status"
+DETAIL:  Failing row contains (103, a4000000-0000-4000-8000-000000400203, dang_tim, 2026-10-31 01:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trip_events_status · table trip_events
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trip_events_status
+
+-- [lab] [A]
+-- @A
+ROLLBACK TO SAVEPOINT truoc_su_kien;
+ROLLBACK
+
+-- [lab] [A]
+-- @A
+-- Sau ROLLBACK TO, giao dịch dùng tiếp được; chuyến chèn trước điểm lưu vẫn còn.
+-- expect-rows: 1
+INSERT INTO trip_events (trip_id, status)
+VALUES ('a4000000-0000-4000-8000-000000400203', 'requested');
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+-- expect-match: ^COMMIT$
+COMMIT;
+COMMIT
+-- [lab] PASS: có dòng khớp /^COMMIT$/
+
+-- [lab] [B]
+-- @B
+-- expect-line: 400202 | 1
+SELECT t.code, count(e.id) AS su_kien
+FROM trips AS t LEFT JOIN trip_events AS e ON e.trip_id = t.id
+WHERE t.id = 'a4000000-0000-4000-8000-000000400203'
+GROUP BY t.code;
+  code  | su_kien
+--------+---------
+ 400202 |       1
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- psql có biến ON_ERROR_ROLLBACK: bật lên thì psql TỰ đặt SAVEPOINT trước mỗi câu trong
+-- giao dịch và tự ROLLBACK TO khi câu đó lỗi — tiện khi gõ tay, nhưng ứng dụng thật (driver
+-- JDBC/Npgsql/psycopg…) không làm vậy; mỗi savepoint là một giao dịch con có chi phí.
+-- @A
+\set ON_ERROR_ROLLBACK on
+
+-- [lab] [A]
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 400203
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400204', 'ride', 1, 'c4000000-0000-4000-8000-000000000014', 41000, 111)
+RETURNING code;
+  code
+--------
+ 400203
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 400203
+
+-- [lab] [A]
+-- @A
+-- expect-error: 23514 ck_trip_events_status
+INSERT INTO trip_events (trip_id, status, occurred_at)
+VALUES ('a4000000-0000-4000-8000-000000400204', 'dang_tim', TIMESTAMPTZ '2026-10-31 01:00:00+07');
+ERROR:  new row for relation "trip_events" violates check constraint "ck_trip_events_status"
+DETAIL:  Failing row contains (105, a4000000-0000-4000-8000-000000400204, dang_tim, 2026-10-31 01:00:00+07).
+-- [lab] SQLSTATE 23514 · constraint ck_trip_events_status · table trip_events
+-- [lab] PASS: đúng lỗi mong đợi 23514 ck_trip_events_status
+
+-- [lab] [A]
+-- @A
+-- Không còn 25P02: psql đã lùi về savepoint ngầm của câu lỗi.
+-- expect-rows: 1
+INSERT INTO trip_events (trip_id, status)
+VALUES ('a4000000-0000-4000-8000-000000400204', 'requested');
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+-- expect-match: ^COMMIT$
+COMMIT;
+COMMIT
+-- [lab] PASS: có dòng khớp /^COMMIT$/
+
+-- [lab] [A]
+-- @A
+\set ON_ERROR_ROLLBACK off
+
+-- [lab] [A]
+-- ===========================================================================
+-- §4. Autocommit của psql: mặc định BẬT — mỗi câu ngoài BEGIN là một giao dịch riêng.
+-- Tắt đi (\set AUTOCOMMIT off) thì psql tự gửi BEGIN trước câu đầu tiên và CHỜ bạn COMMIT.
+
+-- @A
+\set AUTOCOMMIT off
+
+-- [lab] [A]
+-- @A
+-- expect-value: 400204
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400205', 'ride', 1, 'c4000000-0000-4000-8000-000000000015', 47000, 112)
+RETURNING code;
+  code
+--------
+ 400204
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 400204
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+INSERT INTO trip_events (trip_id, status)
+VALUES ('a4000000-0000-4000-8000-000000400205', 'requested');
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+-- Đang ở trong giao dịch (đã được cấp xid vì vừa ghi) dù không gõ BEGIN.
+-- expect-value: t
+SELECT pg_current_xact_id_if_assigned() IS NOT NULL AS dang_trong_giao_dich;
+ dang_trong_giao_dich
+----------------------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [B]
+-- @B
+-- expect-value: 0
+SELECT count(*) FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400205';
+ count
+-------
+     0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- @A
+\set AUTOCOMMIT on
+
+-- [lab] [B]
+-- @B
+-- expect-value: 1
+SELECT count(*) FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400205';
+ count
+-------
+     1
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 1
+
+-- [lab] [A]
+-- Ngược lại, với autocommit BẬT, câu lẻ tự COMMIT: không còn giao dịch nào mở sau câu.
+-- @A
+-- expect-value: t
+SELECT pg_current_xact_id_if_assigned() IS NULL AS khong_con_giao_dich_mo;
+ khong_con_giao_dich_mo
+------------------------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [A]
+-- ===========================================================================
+-- §5. Mất kết nối GIỮA giao dịch: server huỷ giao dịch, không để lại nửa vời.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 400205
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400206', 'ride', 1, 'c4000000-0000-4000-8000-000000000016', 39000, 113)
+RETURNING code;
+  code
+--------
+ 400205
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 400205
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+INSERT INTO trip_events (trip_id, status)
+VALUES ('a4000000-0000-4000-8000-000000400206', 'requested');
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- B "rút dây" của A: pg_terminate_backend(pid, 5000) gửi tín hiệu huỷ backend của A và CHỜ
+-- tối đa 5 giây tới khi backend đó thoát hẳn (trả true). Cùng hậu quả với mất mạng, app chết,
+-- server restart: kết nối mất trước COMMIT.
+-- @B
+-- lab: nhat-ky
+-- expect-value: t
+SELECT pg_terminate_backend(pid, 5000) FROM pg_stat_activity WHERE application_name = 'lab-A';
+ pg_terminate_backend
+----------------------
+ t
+(1 row)
+-- [lab] nhật ký server: [A] FATAL:  terminating connection due to administrator command
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [A]
+-- @A
+-- A không hề biết, gửi COMMIT ⇒ psql phát hiện kết nối đã mất và thoát.
+-- expect-mat-ket-noi
+COMMIT;
+-- [lab] [A] ✖ MẤT KẾT NỐI: psql thoát (mã 2) — "server closed the connection unexpectedly"; giao dịch đang mở của phiên bị server huỷ (ROLLBACK)
+-- [lab] PASS: mất kết nối như mong đợi (expect-mat-ket-noi)
+
+-- [lab] [B]
+-- @B
+-- Không chuyến, không sự kiện: phần đã ghi của giao dịch dở bị huỷ.
+-- expect-line: 0 | 0
+SELECT (SELECT count(*) FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400206') AS chuyen,
+       (SELECT count(*) FROM trip_events WHERE trip_id = 'a4000000-0000-4000-8000-000000400206') AS su_kien;
+ chuyen | su_kien
+--------+---------
+      0 |       0
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A] mở kết nối MỚI (kết nối cũ đã mất): phiên mới — SET, biến psql, giao dịch cũ đều không còn
+
+-- [lab] [A]
+-- Ứng dụng KHÔNG biết COMMIT đã tới server hay chưa ("lỗi kết nối" sau khi gửi COMMIT có
+-- thể là commit xong rồi mới mất mạng). Cách an toàn: kết nối lại và ĐỌC trạng thái — hoặc
+-- dùng idempotency key để gửi lại không sợ trùng (PG-039).
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- @A
+-- expect-value: f
+SELECT EXISTS (SELECT 1 FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400206') AS da_luu;
+ da_luu
+--------
+ f
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi f
+
+-- [lab] [A]
+-- Phiên "quên COMMIT": idle_in_transaction_session_timeout tự cắt kết nối giữ giao dịch mở
+-- mà không làm gì quá lâu (giao dịch mở lâu giữ khoá và chặn VACUUM — P03 PG-026).
+-- @A
+SET idle_in_transaction_session_timeout = '200ms';
+SET
+
+-- [lab] [A]
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 400206
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400207', 'ride', 1, 'c4000000-0000-4000-8000-000000000017', 43000, 111)
+RETURNING code;
+  code
+--------
+ 400206
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 400206
+
+-- [lab] [B]
+-- @B
+-- B chờ 0,5 giây; trong lúc đó A ngồi yên trong giao dịch quá 200 ms ⇒ server cắt A.
+-- lab: nhat-ky
+SELECT pg_sleep(0.5);
+ pg_sleep
+----------
+
+(1 row)
+-- [lab] nhật ký server: [A] FATAL:  terminating connection due to idle-in-transaction timeout
+
+-- [lab] [A]
+-- @A
+-- expect-mat-ket-noi
+COMMIT;
+-- [lab] [A] ✖ MẤT KẾT NỐI: psql thoát (mã 2) — "server closed the connection unexpectedly"; giao dịch đang mở của phiên bị server huỷ (ROLLBACK)
+-- [lab] PASS: mất kết nối như mong đợi (expect-mat-ket-noi)
+
+-- [lab] [B]
+-- @B
+-- expect-value: 0
+SELECT count(*) FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400207';
+ count
+-------
+     0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] [B]
+-- ===========================================================================
+-- §6. Bất biến cuối bài: mọi chuyến đều có sự kiện 'requested', không chuyến nửa vời.
+-- Chuyến mới của bài: 400200, 400202, 400203, 400204 (400201, 400205, 400206 bị "đốt" bởi
+-- các giao dịch đã huỷ).
+-- @B
+-- expect-line: 400200 | 1
+-- expect-line: 400202 | 1
+-- expect-line: 400203 | 1
+-- expect-line: 400204 | 1
+SELECT t.code, count(e.id) FILTER (WHERE e.status = 'requested') AS su_kien_requested
+FROM trips AS t LEFT JOIN trip_events AS e ON e.trip_id = t.id
+WHERE t.code >= 400200
+GROUP BY t.code ORDER BY t.code;
+  code  | su_kien_requested
+--------+-------------------
+ 400200 |                 1
+ 400202 |                 1
+ 400203 |                 1
+ 400204 |                 1
+(4 rows)
+-- [lab] PASS: đúng nội dung 4 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- expect-value: 0
+SELECT count(*) FROM trips AS t
+WHERE NOT EXISTS (SELECT 1 FROM trip_events AS e WHERE e.trip_id = t.id AND e.status = 'requested');
+ count
+-------
+     0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] ===== p04/32-mvcc-snapshot.sql · PG-032 · bản sao nền p04 (database bai_02) =====
+
+-- [lab] [A]
+-- PG-032 · MVCC và snapshot: mỗi phiên nhìn thấy gì? — `postgresql-mvcc-snapshot`
+--
+-- Bài toán Tới Nơi: tổng đài viên [B] mở màn chi tiết chuyến 400101 đúng lúc server [A] đang
+-- sửa cước chuyến đó. B thấy cước cũ hay mới? B có phải CHỜ A không? PostgreSQL trả lời bằng
+-- MVCC (multi-version concurrency control): UPDATE không ghi đè dòng mà tạo PHIÊN BẢN MỚI;
+-- mỗi câu lệnh đọc theo một SNAPSHOT — "ảnh chụp" danh sách giao dịch đã/chưa commit — và
+-- chỉ thấy phiên bản hợp lệ với snapshot đó. Người đọc không chặn người ghi và ngược lại.
+--
+-- Mỗi phiên bản dòng mang hai cột hệ thống: xmin = xid của giao dịch TẠO ra phiên bản,
+-- xmax = xid của giao dịch XOÁ/THAY nó (hoặc đang khoá nó); 0 = chưa ai đụng tới.
+-- xid (transaction id) tăng dần trên cả cluster nên lab in TƯƠNG ĐỐI: lab_dat_moc_xid() lấy
+-- xid của chính nó làm mốc X; giao dịch ghi kế tiếp là X+1, X+2…; "<X" = commit từ trước mốc
+-- (dữ liệu fixture). Hàm tiện ích: p04/00-mo-rong-schema.sql.
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- @A
+SELECT lab_dat_moc_xid();
+     lab_dat_moc_xid
+--------------------------
+ mốc X = xid của lệnh này
+(1 row)
+
+-- [lab] [A]
+-- ===========================================================================
+-- §1. Giao dịch chỉ ĐỌC không được cấp xid; xid chỉ cấp ở câu GHI đầu tiên.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 31000
+SELECT fare FROM trips WHERE code = 400101;
+ fare
+-------
+ 31000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 31000
+
+-- [lab] [A]
+-- @A
+-- expect-value: NULL
+SELECT pg_current_xact_id_if_assigned();
+ pg_current_xact_id_if_assigned
+--------------------------------
+                           NULL
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi NULL
+
+-- [lab] [A]
+-- @A
+-- UPDATE tạo phiên bản MỚI (xmin = X+1, xmax = 0). RETURNING đọc chính phiên bản mới.
+-- expect-line: 35000 | 2 | X+1 | 0
+UPDATE trips SET fare = 35000, version = version + 1, updated_at = now()
+WHERE code = 400101
+RETURNING fare, version, xid_td(xmin) AS xmin, xid_td(xmax) AS xmax;
+ fare  | version | xmin | xmax
+-------+---------+------+------
+ 35000 |       2 | X+1  | 0
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+-- expect-value: X+1
+SELECT xid_td(pg_current_xact_id_if_assigned());
+ xid_td
+--------
+ X+1
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi X+1
+
+-- [lab] [B]
+-- ===========================================================================
+-- §2. B đọc khi A CHƯA commit: thấy phiên bản CŨ, không phải chờ.
+
+-- @B
+-- Phiên bản cũ: xmin "<X" (nạp từ fixture), xmax = X+1 — A đã "đánh dấu thay thế" nó
+-- nhưng chưa commit, nên với B phiên bản cũ VẪN là bản đúng.
+-- expect-line: 31000 | 1 | <X | X+1
+SELECT fare, version, xid_td(xmin) AS xmin, xid_td(xmax) AS xmax
+FROM trips WHERE code = 400101;
+ fare  | version | xmin | xmax
+-------+---------+------+------
+ 31000 |       1 | <X   | X+1
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- Snapshot của câu này gồm ba phần: xmax = (xid lớn nhất ĐÃ KẾT THÚC) + 1 — mọi xid ≥ xmax
+-- coi như chưa commit; xmin = xid nhỏ nhất còn chạy — mọi xid < xmin đã kết thúc; "đang
+-- chạy" = các xid trong [xmin, xmax) chưa kết thúc lúc chụp. Ở đây A (X+1) là giao dịch mới
+-- nhất, chưa kết thúc ⇒ X+1 ≥ xmax: vô hình với B mà không cần nằm trong danh sách.
+-- expect-value: xmin=X+1 xmax=X+1 đang chạy={}
+SELECT snap_td(pg_current_snapshot());
+            snap_td
+--------------------------------
+ xmin=X+1 xmax=X+1 đang chạy={}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi xmin=X+1 xmax=X+1 đang chạy={}
+
+-- [lab] [B]
+-- @B
+-- expect-value: in progress
+SELECT pg_xact_status(xid_x(1));
+ pg_xact_status
+----------------
+ in progress
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi in progress
+
+-- [lab] [B]
+-- Trong page heap lúc này có HAI phiên bản của chuyến 400101 (pageinspect): bản cũ ở ô 31
+-- trỏ (t_ctid) sang bản mới ở ô 41. Cột hot/heap_only: bản mới nằm cùng page và không đổi cột có
+-- index ⇒ HOT update (P03 PG-024 giải thích kỹ).
+-- @B
+-- expect-line: 31 | <X | X+1 | (0,41) | t | f
+-- expect-line: 41 | X+1 | 0 | (0,41) | f | t
+SELECT lp, xid_td(t_xmin) AS t_xmin, xid_td(t_xmax) AS t_xmax, t_ctid,
+       (t_infomask2 & 16384) <> 0 AS hot_updated, (t_infomask2 & 32768) <> 0 AS heap_only
+FROM heap_page_items(get_raw_page('toinoi.trips', 0))
+WHERE lp IN (31, 41)
+ORDER BY lp;
+ lp | t_xmin | t_xmax | t_ctid | hot_updated | heap_only
+----+--------+--------+--------+-------------+-----------
+ 31 | <X     | X+1    | (0,41) | t           | f
+ 41 | X+1    | 0      | (0,41) | f           | t
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+-- Read Committed (mặc định): MỖI CÂU chụp snapshot mới ⇒ câu sau COMMIT thấy bản mới.
+-- expect-line: 35000 | 2 | X+1 | 0
+SELECT fare, version, xid_td(xmin) AS xmin, xid_td(xmax) AS xmax
+FROM trips WHERE code = 400101;
+ fare  | version | xmin | xmax
+-------+---------+------+------
+ 35000 |       2 | X+1  | 0
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- expect-value: committed
+SELECT pg_xact_status(xid_x(1));
+ pg_xact_status
+----------------
+ committed
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi committed
+
+-- [lab] [B]
+-- @B
+-- Không còn giao dịch nào chạy: xmin = xmax = xid kế tiếp.
+-- expect-value: xmin=X+2 xmax=X+2 đang chạy={}
+SELECT snap_td(pg_current_snapshot());
+            snap_td
+--------------------------------
+ xmin=X+2 xmax=X+2 đang chạy={}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi xmin=X+2 xmax=X+2 đang chạy={}
+
+-- [lab] [B]
+-- ===========================================================================
+-- §3. Snapshot của CẢ GIAO DỊCH (REPEATABLE READ): chụp ở câu đầu tiên, giữ tới hết.
+
+-- @B
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-value: 32000
+SELECT fare FROM trips WHERE code = 400102;
+ fare
+-------
+ 32000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 32000
+
+-- [lab] [A]
+-- @A
+-- Câu lẻ (autocommit) = một giao dịch X+2, commit ngay.
+-- expect-line: 36000 | X+2
+UPDATE trips SET fare = 36000, version = version + 1, updated_at = now()
+WHERE code = 400102
+RETURNING fare, xid_td(xmin);
+ fare  | xid_td
+-------+--------
+ 36000 | X+2
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- B vẫn thấy 32000: X+2 commit SAU khi B chụp snapshot (snapshot của B có xmax = X+2).
+-- expect-line: 32000 | <X | X+2
+SELECT fare, xid_td(xmin) AS xmin, xid_td(xmax) AS xmax FROM trips WHERE code = 400102;
+ fare  | xmin | xmax
+-------+------+------
+ 32000 | <X   | X+2
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- expect-value: xmin=X+2 xmax=X+2 đang chạy={}
+SELECT snap_td(pg_current_snapshot());
+            snap_td
+--------------------------------
+ xmin=X+2 xmax=X+2 đang chạy={}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi xmin=X+2 xmax=X+2 đang chạy={}
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+-- expect-value: 36000
+SELECT fare FROM trips WHERE code = 400102;
+ fare
+-------
+ 36000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 36000
+
+-- [lab] [A]
+-- ===========================================================================
+-- §4. ROLLBACK cũng để lại dấu vết: phiên bản do giao dịch bị huỷ tạo ra là dòng CHẾT,
+-- và bản cũ còn sống vẫn mang xmax của giao dịch đã huỷ.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: X+3
+UPDATE trips SET fare = 99000 WHERE code = 400103 RETURNING xid_td(xmin);
+ xid_td
+--------
+ X+3
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi X+3
+
+-- [lab] [A]
+-- @A
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [B]
+-- @B
+-- xmax = X+3 nhưng dòng VẪN SỐNG: X+3 đã abort ⇒ "xmax khác 0" không có nghĩa "đã bị xoá".
+-- Người đọc phải tra trạng thái giao dịch (pg_xact) — hoặc đọc hint bit đã ghi lên dòng.
+-- expect-line: 33000 | <X | X+3 | aborted
+SELECT fare, xid_td(xmin) AS xmin, xid_td(xmax) AS xmax, pg_xact_status(xid_x(3)) AS trang_thai_x3
+FROM trips WHERE code = 400103;
+ fare  | xmin | xmax | trang_thai_x3
+-------+------+------+---------------
+ 33000 | <X   | X+3  | aborted
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- Dòng chết của bảng trips lúc này: bản cũ của 400101 (thay bởi X+1), bản cũ của 400102
+-- (thay bởi X+2) và bản mới của 400103 do X+3 tạo rồi huỷ — 3 phiên bản không ai còn thấy.
+-- @B
+-- expect-line: 40 | 3
+SELECT tuple_count, dead_tuple_count FROM pgstattuple('toinoi.trips');
+ tuple_count | dead_tuple_count
+-------------+------------------
+          40 |                3
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- VACUUM dọn phiên bản chết khi KHÔNG CÒN snapshot nào có thể cần chúng (giao dịch mở lâu
+-- giữ VACUUM lại — thí nghiệm p03/thu-nghiem/pg026-snapshot-cu-chan-vacuum.sql).
+-- @B
+VACUUM toinoi.trips;
+VACUUM
+
+-- [lab] [B]
+-- @B
+-- expect-line: 40 | 0
+SELECT tuple_count, dead_tuple_count FROM pgstattuple('toinoi.trips');
+ tuple_count | dead_tuple_count
+-------------+------------------
+          40 |                0
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- ===========================================================================
+-- §5. xid 32 bit (cột xmin/xmax, kiểu xid) và xid8 64 bit (pg_current_xact_id(), có
+-- "epoch" — không bao giờ quay vòng). txid_current() là tên cũ, trả bigint.
+
+-- @A
+-- expect-line: xid8 | bigint | xid | t
+SELECT pg_typeof(pg_current_xact_id()) AS kieu_moi,
+       pg_typeof(txid_current()) AS kieu_cu,
+       pg_typeof(xmin) AS kieu_cot_he_thong,
+       pg_current_xact_id()::text::bigint = txid_current() AS cung_mot_so
+FROM trips WHERE code = 400101;
+ kieu_moi | kieu_cu | kieu_cot_he_thong | cung_mot_so
+----------+---------+-------------------+-------------
+ xid8     | bigint  | xid               | t
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] ===== p04/33-khoa-dong-khoa-bang.sql · PG-033 · bản sao nền p04 (database bai_03) =====
+
+-- [lab] [A]
+-- PG-033 · Khoá dòng, khoá bảng và thời gian chờ — `postgresql-lock-row-table`
+--
+-- Bài toán Tới Nơi: lúc 01:00 tổng đài báo "màn sửa cước bị treo". MVCC (PG-032) cho người
+-- ĐỌC không phải chờ, nhưng hai người cùng GHI một dòng thì người sau PHẢI chờ người trước
+-- kết thúc giao dịch. Bài này tạo đúng tình huống đó rồi đọc ba nguồn để biết ai chặn ai:
+-- pg_stat_activity (phiên đang làm gì, chờ gì), pg_locks (khoá giữ/chờ), pg_blocking_pids().
+-- Hai hàm lab_cho() và lab_khoa() (p04/00) đọc các nguồn này và in NHÃN PHIÊN thay cho PID.
+--
+-- Ba phiên: [A], [B] ghi; [C] chỉ quan sát. "⏳ đang chờ khoá" là runner thấy backend của
+-- bước đó có wait_event_type = 'Lock' (xem README gốc, mục «Nhiều phiên»).
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- @C
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- ===========================================================================
+-- §1. Khoá DÒNG do UPDATE: người ghi thứ hai chờ, người đọc không chờ.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 35000
+UPDATE trips SET fare = fare + 1000, version = version + 1, updated_at = now()
+WHERE code = 400104 RETURNING fare;
+ fare
+-------
+ 35000
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 35000
+
+-- [lab] [B]
+-- @B
+-- Đọc: không chờ, thấy bản đã commit (34000).
+-- expect-value: 34000
+SELECT fare FROM trips WHERE code = 400104;
+ fare
+-------
+ 34000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 34000
+
+-- [lab] [B]
+-- @B
+-- Ghi cùng dòng: phải chờ A kết thúc giao dịch.
+-- expect-blocked
+UPDATE trips SET fare = fare + 500, version = version + 1, updated_at = now()
+WHERE code = 400104 RETURNING fare;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [C]
+-- @C
+-- A "idle in transaction" (giữ khoá mà không làm gì — chính là "màn sửa cước" chưa bấm Lưu;
+-- Client: ClientRead = backend đang chờ câu lệnh tiếp theo từ ứng dụng); B "active", chờ
+-- Lock: transactionid — chờ GIAO DỊCH của A kết thúc, bị chặn bởi A. Cột câu lệnh là câu
+-- CUỐI CÙNG mỗi phiên gửi (cắt 60 ký tự).
+-- expect-line: A | idle in transaction | Client: ClientRead |  | UPDATE trips SET fare = fare + 1000, version = version + 1,
+-- expect-line: B | active | Lock: transactionid | A | UPDATE trips SET fare = fare + 500, version = version + 1, u
+SELECT * FROM lab_cho();
+ phien |     trang_thai      |         cho         | bi_chan_boi |                           cau_lenh
+-------+---------------------+---------------------+-------------+--------------------------------------------------------------
+ A     | idle in transaction | Client: ClientRead  |             | UPDATE trips SET fare = fare + 1000, version = version + 1,
+ B     | active              | Lock: transactionid | A           | UPDATE trips SET fare = fare + 500, version = version + 1, u
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- Khoá DÒNG không nằm trong pg_locks: A giữ dòng bằng cách ghi xid của mình vào xmax của
+-- dòng; pg_locks chỉ có khoá trên XID của A. Người chờ (B) xếp hàng bằng khoá 'tuple' rồi
+-- chờ ShareLock trên xid của A (granted = f) — "chờ A commit hoặc rollback".
+-- expect-line: A | relation | trips | RowExclusiveLock | t
+-- expect-line: A | transactionid | xid của A | ExclusiveLock | t
+-- expect-line: B | relation | trips | RowExclusiveLock | t
+-- expect-line: B | transactionid | xid của A | ShareLock | f
+-- expect-line: B | transactionid | xid của B | ExclusiveLock | t
+-- expect-line: B | tuple | trips (0,34) | ExclusiveLock | t
+SELECT * FROM lab_khoa();
+ phien |     loai      |  doi_tuong   |      che_do      | da_cap
+-------+---------------+--------------+------------------+--------
+ A     | relation      | trips        | RowExclusiveLock | t
+ A     | transactionid | xid của A    | ExclusiveLock    | t
+ B     | relation      | trips        | RowExclusiveLock | t
+ B     | transactionid | xid của A    | ShareLock        | f
+ B     | transactionid | xid của B    | ExclusiveLock    | t
+ B     | tuple         | trips (0,34) | ExclusiveLock    | t
+(6 rows)
+-- [lab] PASS: đúng nội dung 6 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 37 đã chạy xong (sau khi hết bị chặn):
+ fare
+-------
+ 35500
+(1 row)
+
+UPDATE 1
+
+-- [lab] [C]
+-- @C
+-- B chạy tiếp ngay khi A commit (dòng "✔ … đã chạy xong" ở trên) và áp +500 lên bản MỚI
+-- (35000): ở Read Committed, người chờ ĐỌC LẠI dòng sau khi được khoá — không mất +1000 của A.
+-- expect-line: 35500 | 3
+SELECT fare, version FROM trips WHERE code = 400104;
+ fare  | version
+-------+---------
+ 35500 |       3
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- ===========================================================================
+-- §2. SELECT … FOR UPDATE: khoá dòng ĐỂ ĐỌC RỒI GHI. Bốn mức khoá dòng, mạnh dần:
+-- FOR KEY SHARE (kiểm khoá ngoại dùng) · FOR SHARE · FOR NO KEY UPDATE (UPDATE không đổi
+-- cột khoá dùng) · FOR UPDATE (DELETE, UPDATE đổi khoá). FOR UPDATE xung đột với CẢ FOR KEY
+-- SHARE ⇒ chặn việc chèn dòng con tham chiếu tới dòng đang khoá.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-line: 400105 | requested
+SELECT code, status FROM trips WHERE code = 400105 FOR UPDATE;
+  code  |  status
+--------+-----------
+ 400105 | requested
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- Dấu khoá dòng nằm NGAY TRÊN dòng: xmax = xid của A dù dòng không bị sửa.
+-- expect-value: t
+SELECT xmax::text::bigint = (SELECT backend_xid::text::bigint FROM pg_stat_activity WHERE application_name = 'lab-A')
+FROM trips WHERE code = 400105;
+ ?column?
+----------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [B]
+-- @B
+-- Thêm sự kiện cho chuyến đang bị FOR UPDATE: kiểm khoá ngoại cần FOR KEY SHARE trên dòng
+-- trips ⇒ xung đột ⇒ CHỜ.
+-- expect-blocked
+-- expect-rows: 1
+INSERT INTO trip_events (trip_id, status)
+SELECT id, 'searching' FROM trips WHERE code = 400105;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 92 đã chạy xong (sau khi hết bị chặn):
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- FOR NO KEY UPDATE: đủ để "đọc rồi sửa" một dòng mà không đổi khoá chính.
+-- expect-line: 400105 | requested
+SELECT code, status FROM trips WHERE code = 400105 FOR NO KEY UPDATE;
+  code  |  status
+--------+-----------
+ 400105 | requested
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- Không xung đột với FOR KEY SHARE ⇒ chèn sự kiện KHÔNG phải chờ.
+-- expect-rows: 1
+INSERT INTO trip_events (trip_id, status)
+SELECT id, 'searching' FROM trips WHERE code = 400105;
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- Nhưng một phiên khác cũng muốn khoá để sửa ⇒ chờ.
+-- expect-blocked
+-- expect-line: 400105 | cancelled
+SELECT code, status FROM trips WHERE code = 400105 FOR NO KEY UPDATE;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+UPDATE trips SET status = 'cancelled', updated_at = now(), version = version + 1 WHERE code = 400105;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 117 đã chạy xong (sau khi hết bị chặn):
+  code  |  status
+--------+-----------
+ 400105 | cancelled
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- (B nhận dòng sau khi A commit và đọc lại bản mới: status = cancelled.)
+
+-- ===========================================================================
+-- §3. Khoá BẢNG: DDL lấy ACCESS EXCLUSIVE ⇒ chặn cả SELECT. lock_timeout ⇒ 55P03.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+ALTER TABLE trips ADD COLUMN ghi_chu text;
+ALTER TABLE
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+SELECT count(*) FROM trips;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: relation) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [C]
+-- @C
+-- expect-line: A | relation | trips | AccessExclusiveLock | t
+-- expect-line: A | transactionid | xid của A | ExclusiveLock | t
+-- expect-line: B | relation | trips | AccessShareLock | f
+SELECT * FROM lab_khoa();
+ phien |     loai      | doi_tuong |       che_do        | da_cap
+-------+---------------+-----------+---------------------+--------
+ A     | relation      | trips     | AccessExclusiveLock | t
+ A     | transactionid | xid của A | ExclusiveLock       | t
+ B     | relation      | trips     | AccessShareLock     | f
+(3 rows)
+-- [lab] PASS: đúng nội dung 3 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [B] ✔ bước dòng 141 đã chạy xong (sau khi hết bị chặn):
+ count
+-------
+    40
+(1 row)
+
+-- [lab] [A]
+-- (B đếm xong: 40 chuyến — cột ghi_chu không còn vì A đã ROLLBACK: DDL của PostgreSQL nằm
+--  trong giao dịch như dữ liệu.)
+
+-- Chiều ngược lại — DDL phải chờ người đọc, và trong lúc DDL chờ, MỌI người đến sau (kể cả
+-- SELECT) xếp hàng sau nó: thí nghiệm p03/thu-nghiem/pg024-cluster-hang-doi-khoa.sql.
+-- Cách an toàn khi đổi schema trên bảng đang chạy: đặt lock_timeout NGẮN cho câu DDL — chờ
+-- không được thì bỏ cuộc sớm (rồi thử lại), thay vì đứng chặn cả hàng đợi.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Một báo cáo dài đang đọc bảng (giữ AccessShareLock tới hết giao dịch).
+-- expect-value: 40
+SELECT count(*) FROM trips;
+ count
+-------
+    40
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 40
+
+-- [lab] [B]
+-- @B
+SET lock_timeout = '300ms';
+SET
+
+-- [lab] [B]
+-- @B
+-- lab: cho-xong
+-- expect-blocked
+-- expect-error: 55P03
+ALTER TABLE trips ADD COLUMN ghi_chu text;
+-- [lab] [B] ⏳ đã chờ khoá (Lock: relation) — bị chặn bởi [A] trước khi xong
+-- [lab] PASS: bước đã phải chờ khoá như mong đợi (expect-blocked)
+ERROR:  canceling statement due to lock timeout
+-- [lab] SQLSTATE 55P03
+-- [lab] PASS: đúng lỗi mong đợi 55P03
+
+-- [lab] [C]
+-- @C
+-- B đã bỏ cuộc ⇒ không còn ai xếp hàng ⇒ C đọc bình thường dù A vẫn mở giao dịch.
+-- expect-value: 40
+SELECT count(*) FROM trips;
+ count
+-------
+    40
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 40
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+RESET lock_timeout;
+RESET
+
+-- [lab] [A]
+-- ===========================================================================
+-- §4. statement_timeout ⇒ 57014: giới hạn TỔNG thời gian một câu (chờ khoá + chạy).
+-- lock_timeout chỉ giới hạn MỖI lần chờ một khoá. Cả hai huỷ CÂU LỆNH (giao dịch hỏng —
+-- phải ROLLBACK), không cắt kết nối.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+UPDATE trips SET fare = fare + 1000 WHERE code = 400106;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+SET statement_timeout = '300ms';
+SET
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- lab: cho-xong
+-- expect-blocked
+-- expect-error: 57014
+UPDATE trips SET fare = fare + 500 WHERE code = 400106;
+-- [lab] [B] ⏳ đã chờ khoá (Lock: transactionid) — bị chặn bởi [A] trước khi xong
+-- [lab] PASS: bước đã phải chờ khoá như mong đợi (expect-blocked)
+ERROR:  canceling statement due to statement timeout
+CONTEXT:  while updating tuple (0,36) in relation "trips"
+-- [lab] SQLSTATE 57014
+-- [lab] PASS: đúng lỗi mong đợi 57014
+
+-- [lab] [B]
+-- @B
+-- expect-error: 25P02
+SELECT 1;
+ERROR:  current transaction is aborted, commands ignored until end of transaction block
+-- [lab] SQLSTATE 25P02
+-- [lab] PASS: đúng lỗi mong đợi 25P02
+
+-- [lab] [B]
+-- @B
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [B]
+-- @B
+-- Không cần khoá vẫn bị huỷ nếu câu chạy quá lâu.
+-- lab: cho-xong
+-- expect-error: 57014
+SELECT pg_sleep(1);
+ERROR:  canceling statement due to statement timeout
+-- [lab] SQLSTATE 57014
+-- [lab] PASS: đúng lỗi mong đợi 57014
+
+-- [lab] [B]
+-- @B
+RESET statement_timeout;
+RESET
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- Chỉ phần +1000 của A được ghi: 36000 + 1000.
+-- expect-value: 37000
+SELECT fare FROM trips WHERE code = 400106;
+ fare
+-------
+ 37000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 37000
+
+-- [lab] [A]
+-- ===========================================================================
+-- §5. Advisory lock: khoá theo một CON SỐ do ứng dụng tự đặt nghĩa (ở đây: mã chuyến).
+-- pg_locks ghi locktype 'advisory', người chờ cũng là wait_event_type 'Lock'.
+
+-- @A
+-- Khoá mức PHIÊN: giữ qua COMMIT, tới khi unlock hoặc phiên đóng (dễ quên nhả!).
+SELECT pg_advisory_lock(400107);
+ pg_advisory_lock
+------------------
+
+(1 row)
+
+-- [lab] [B]
+-- @B
+-- expect-value: f
+SELECT pg_try_advisory_lock(400107);
+ pg_try_advisory_lock
+----------------------
+ f
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi f
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+SELECT pg_advisory_lock(400107);
+-- [lab] [B] ⏳ đang chờ khoá (Lock: advisory) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [C]
+-- @C
+-- expect-line: A | advisory | advisory 400107 | ExclusiveLock | t
+-- expect-line: B | advisory | advisory 400107 | ExclusiveLock | f
+SELECT * FROM lab_khoa();
+ phien |   loai   |    doi_tuong    |    che_do     | da_cap
+-------+----------+-----------------+---------------+--------
+ A     | advisory | advisory 400107 | ExclusiveLock | t
+ B     | advisory | advisory 400107 | ExclusiveLock | f
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+-- expect-value: t
+SELECT pg_advisory_unlock(400107);
+ pg_advisory_unlock
+--------------------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [B] ✔ bước dòng 250 đã chạy xong (sau khi hết bị chặn):
+ pg_advisory_lock
+------------------
+
+(1 row)
+
+-- [lab] [B]
+-- @B
+-- expect-value: t
+SELECT pg_advisory_unlock(400107);
+ pg_advisory_unlock
+--------------------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [B]
+-- @B
+-- pg_advisory_xact_lock: khoá mức GIAO DỊCH — tự nhả khi COMMIT/ROLLBACK (nên dùng loại này).
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+SELECT pg_advisory_xact_lock(400107);
+ pg_advisory_xact_lock
+-----------------------
+
+(1 row)
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- expect-value: 0
+SELECT count(*) FROM pg_locks WHERE locktype = 'advisory';
+ count
+-------
+     0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] ===== p04/34-read-committed-repeatable-read.sql · PG-034 · bản sao nền p04 (database bai_04) =====
+
+-- [lab] [A]
+-- PG-034 · Read Committed và Repeatable Read — `postgresql-isolation-read-committed-repeatable-read`
+--
+-- Bài toán Tới Nơi: báo cáo đọc cước một chuyến hai lần trong cùng giao dịch ra hai số khác
+-- nhau; hai nhân viên cùng nạp tiền vào một ví thì mất một khoản. Mức cô lập (isolation
+-- level) quyết định giao dịch thấy thay đổi của giao dịch khác ra sao:
+--   * READ COMMITTED (mặc định): MỖI CÂU chụp snapshot mới — thấy mọi thứ đã commit trước câu.
+--   * REPEATABLE READ: chụp snapshot MỘT lần ở câu đầu tiên của giao dịch, giữ tới hết.
+-- Bài chạy CÙNG bốn lịch S1–S4 dưới hai mức, cùng dữ liệu (phiên [C] đặt lại trước mỗi lịch),
+-- rồi so kết quả. [A], [B] là hai giao dịch tranh chấp; câu lẻ của [B] (không BEGIN) tự commit.
+--
+-- Bảng so sánh (đúng như đầu ra bên dưới):
+--   lịch                               READ COMMITTED            REPEATABLE READ
+--   S1 đọc lại một dòng                 37000 → 40000 (đổi)       37000 → 37000
+--   S2 đếm lại theo điều kiện           3 → 4 (phantom)           3 → 3 (PostgreSQL: không phantom)
+--   S3 đọc–tính–ghi (app cộng tiền)     550000: MẤT +20000 của A  B lỗi 40001 ⇒ thử lại ⇒ 570000
+--   S4 ghi tương đối balance + x        570000 đúng (B chờ rồi    B lỗi 40001 ⇒ phải thử lại
+--                                       đọc lại bản mới)
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- @C
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- ###########################################################################
+-- PHẦN 1 · READ COMMITTED
+-- ###########################################################################
+
+-- S1 · Đọc lại một dòng (non-repeatable read) ------------------------------
+-- @C
+UPDATE trips SET fare = 37000 WHERE code = 400107;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+BEGIN ISOLATION LEVEL READ COMMITTED;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 37000
+SELECT fare FROM trips WHERE code = 400107;
+ fare
+-------
+ 37000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 37000
+
+-- [lab] [B]
+-- @B
+UPDATE trips SET fare = 40000, version = version + 1 WHERE code = 400107;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+-- Câu mới, snapshot mới ⇒ thấy 40000: cùng giao dịch, cùng câu, khác kết quả.
+-- expect-value: 40000
+SELECT fare FROM trips WHERE code = 400107;
+ fare
+-------
+ 40000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 40000
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- S2 · Đếm lại (phantom) ----------------------------------------------------
+-- Khu 113 (SG-TT-03) có 3 chuyến đang chờ: 400102, 400105, 400108.
+-- @A
+BEGIN ISOLATION LEVEL READ COMMITTED;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 3
+SELECT count(*) FROM trips WHERE pickup_area_id = 113 AND status = 'requested';
+ count
+-------
+     3
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 3
+
+-- [lab] [B]
+-- @B
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400211', 'ride', 1, 'c4000000-0000-4000-8000-000000000011', 44000, 113);
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+-- Dòng "ma" (phantom) xuất hiện: cùng điều kiện, thêm một dòng.
+-- expect-value: 4
+SELECT count(*) FROM trips WHERE pickup_area_id = 113 AND status = 'requested';
+ count
+-------
+     4
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 4
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+DELETE FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400211';
+DELETE 1
+
+-- [lab] [C]
+-- S3 · Đọc – tính trong ứng dụng – ghi (lost update) ---------------------------
+-- Hai nhân viên cùng nạp tiền vào ví 1001: A +20.000, B +50.000. Ứng dụng đọc số dư, cộng
+-- trong code, rồi GHI ĐÈ con số đã tính (\gset lưu kết quả vào biến psql :so_du của phiên).
+-- @C
+UPDATE wallets SET balance = 500000 WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+BEGIN ISOLATION LEVEL READ COMMITTED;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Đọc số dư vào biến psql :so_du của phiên (\gset không in kết quả).
+SELECT balance AS so_du FROM wallets WHERE id = 1001 \gset
+
+-- [lab] [A]
+-- @A
+-- expect-value: 500000
+SELECT :so_du AS so_du_da_doc;
+ so_du_da_doc
+--------------
+       500000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 500000
+
+-- [lab] [B]
+-- @B
+BEGIN ISOLATION LEVEL READ COMMITTED;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- Đọc số dư vào biến psql :so_du của phiên (\gset không in kết quả).
+SELECT balance AS so_du FROM wallets WHERE id = 1001 \gset
+
+-- [lab] [B]
+-- @B
+-- expect-value: 500000
+SELECT :so_du AS so_du_da_doc;
+ so_du_da_doc
+--------------
+       500000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 500000
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+UPDATE wallets SET balance = :so_du + 20000 WHERE id = 1001;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- Ghi cùng dòng ⇒ chờ A.
+-- expect-blocked
+-- expect-rows: 1
+UPDATE wallets SET balance = :so_du + 50000 WHERE id = 1001;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 110 đã chạy xong (sau khi hết bị chặn):
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- (B được chạy tiếp và GHI ĐÈ 550000 — con số tính từ 500000 nó đã đọc trước khi A commit.)
+
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- Đúng ra phải là 570000: khoản +20000 của A đã MẤT (lost update) — không lỗi nào báo.
+-- expect-value: 550000
+SELECT balance FROM wallets WHERE id = 1001;
+ balance
+---------
+  550000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 550000
+
+-- [lab] [C]
+-- S4 · Ghi tương đối (balance = balance + x) --------------------------------
+-- @C
+UPDATE wallets SET balance = 500000 WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+BEGIN ISOLATION LEVEL READ COMMITTED;
+BEGIN
+
+-- [lab] [A]
+-- @A
+UPDATE wallets SET balance = balance + 20000 WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+BEGIN ISOLATION LEVEL READ COMMITTED;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+-- expect-rows: 1
+UPDATE wallets SET balance = balance + 50000 WHERE id = 1001 RETURNING balance;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 142 đã chạy xong (sau khi hết bị chặn):
+ balance
+---------
+  570000
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- (B được khoá dòng, ĐỌC LẠI bản mới 520000 rồi mới cộng — "EvalPlanQual" của Read Committed.)
+
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- expect-value: 570000
+SELECT balance FROM wallets WHERE id = 1001;
+ balance
+---------
+  570000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 570000
+
+-- [lab] [C]
+-- ###########################################################################
+-- PHẦN 2 · REPEATABLE READ — y nguyên bốn lịch, chỉ đổi mức cô lập
+-- ###########################################################################
+
+-- S1 ---------------------------------------------------------------------------
+-- @C
+UPDATE trips SET fare = 37000 WHERE code = 400107;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 37000
+SELECT fare FROM trips WHERE code = 400107;
+ fare
+-------
+ 37000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 37000
+
+-- [lab] [B]
+-- @B
+UPDATE trips SET fare = 40000, version = version + 1 WHERE code = 400107;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+-- Snapshot của giao dịch chụp ở câu đầu ⇒ vẫn 37000.
+-- expect-value: 37000
+SELECT fare FROM trips WHERE code = 400107;
+ fare
+-------
+ 37000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 37000
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- @A
+-- Giao dịch mới ⇒ thấy 40000.
+-- expect-value: 40000
+SELECT fare FROM trips WHERE code = 400107;
+ fare
+-------
+ 40000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 40000
+
+-- [lab] [A]
+-- S2 ---------------------------------------------------------------------------
+-- @A
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 3
+SELECT count(*) FROM trips WHERE pickup_area_id = 113 AND status = 'requested';
+ count
+-------
+     3
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 3
+
+-- [lab] [B]
+-- @B
+INSERT INTO trips (id, kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('a4000000-0000-4000-8000-000000400212', 'ride', 1, 'c4000000-0000-4000-8000-000000000012', 44000, 113);
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+-- Chuẩn SQL CHO PHÉP phantom ở Repeatable Read; PostgreSQL thì không (snapshot cả giao dịch).
+-- expect-value: 3
+SELECT count(*) FROM trips WHERE pickup_area_id = 113 AND status = 'requested';
+ count
+-------
+     3
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 3
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+DELETE FROM trips WHERE id = 'a4000000-0000-4000-8000-000000400212';
+DELETE 1
+
+-- [lab] [C]
+-- S3 ---------------------------------------------------------------------------
+-- @C
+UPDATE wallets SET balance = 500000 WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Đọc số dư vào biến psql :so_du của phiên (\gset không in kết quả).
+SELECT balance AS so_du FROM wallets WHERE id = 1001 \gset
+
+-- [lab] [A]
+-- @A
+-- expect-value: 500000
+SELECT :so_du AS so_du_da_doc;
+ so_du_da_doc
+--------------
+       500000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 500000
+
+-- [lab] [B]
+-- @B
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- Đọc số dư vào biến psql :so_du của phiên (\gset không in kết quả).
+SELECT balance AS so_du FROM wallets WHERE id = 1001 \gset
+
+-- [lab] [B]
+-- @B
+-- expect-value: 500000
+SELECT :so_du AS so_du_da_doc;
+ so_du_da_doc
+--------------
+       500000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 500000
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+UPDATE wallets SET balance = :so_du + 20000 WHERE id = 1001;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+-- expect-error: 40001
+UPDATE wallets SET balance = :so_du + 50000 WHERE id = 1001;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 243 đã chạy xong (sau khi hết bị chặn):
+ERROR:  could not serialize access due to concurrent update
+-- [lab] SQLSTATE 40001
+-- [lab] PASS: đúng lỗi mong đợi 40001
+
+-- [lab] [B]
+-- (Khi A commit, B nhận lỗi 40001: dòng B định sửa đã bị một giao dịch commit SAU snapshot
+--  của B sửa trước — B không được ghi đè lên thứ nó chưa từng thấy.)
+
+-- @B
+-- Giao dịch đã hỏng: COMMIT trả ROLLBACK.
+-- expect-match: ^ROLLBACK$
+COMMIT;
+ROLLBACK
+-- [lab] PASS: có dòng khớp /^ROLLBACK$/
+
+-- [lab] [C]
+-- @C
+-- expect-value: 520000
+SELECT balance FROM wallets WHERE id = 1001;
+ balance
+---------
+  520000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 520000
+
+-- [lab] [B]
+-- Ứng dụng THỬ LẠI TOÀN BỘ giao dịch (đọc lại từ đầu) — đúng cách xử lý 40001 (PG-038).
+-- @B
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- Đọc số dư vào biến psql :so_du của phiên (\gset không in kết quả).
+SELECT balance AS so_du FROM wallets WHERE id = 1001 \gset
+
+-- [lab] [B]
+-- @B
+-- expect-value: 520000
+SELECT :so_du AS so_du_da_doc;
+ so_du_da_doc
+--------------
+       520000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 520000
+
+-- [lab] [B]
+-- @B
+-- expect-rows: 1
+UPDATE wallets SET balance = :so_du + 50000 WHERE id = 1001;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- expect-value: 570000
+SELECT balance FROM wallets WHERE id = 1001;
+ balance
+---------
+  570000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 570000
+
+-- [lab] [C]
+-- S4 ---------------------------------------------------------------------------
+-- @C
+UPDATE wallets SET balance = 500000 WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [A]
+-- @A
+UPDATE wallets SET balance = balance + 20000 WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- Kể cả ghi tương đối, Repeatable Read cũng không "đọc lại bản mới" như Read Committed: lỗi.
+-- expect-blocked
+-- expect-error: 40001
+UPDATE wallets SET balance = balance + 50000 WHERE id = 1001;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 299 đã chạy xong (sau khi hết bị chặn):
+ERROR:  could not serialize access due to concurrent update
+-- [lab] SQLSTATE 40001
+-- [lab] PASS: đúng lỗi mong đợi 40001
+
+-- [lab] [B]
+-- @B
+-- expect-match: ^ROLLBACK$
+COMMIT;
+ROLLBACK
+-- [lab] PASS: có dòng khớp /^ROLLBACK$/
+
+-- [lab] [C]
+-- @C
+-- Chỉ có +20000 của A; B phải thử lại (chưa thử ở đây).
+-- expect-value: 520000
+SELECT balance FROM wallets WHERE id = 1001;
+ balance
+---------
+  520000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 520000
+
+-- [lab] [A]
+-- ###########################################################################
+-- Đặt mức cô lập: BEGIN ISOLATION LEVEL …, SET TRANSACTION ISOLATION LEVEL … (câu đầu
+-- giao dịch), hoặc mặc định của phiên/database: default_transaction_isolation.
+-- ###########################################################################
+
+-- @A
+SET default_transaction_isolation = 'repeatable read';
+SET
+
+-- [lab] [A]
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: repeatable read
+SHOW transaction_isolation;
+ transaction_isolation
+-----------------------
+ repeatable read
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi repeatable read
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- @A
+-- READ UNCOMMITTED được chấp nhận về cú pháp nhưng PostgreSQL chạy như READ COMMITTED:
+-- không bao giờ đọc được dữ liệu chưa commit (không có "dirty read").
+BEGIN ISOLATION LEVEL READ UNCOMMITTED;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: read uncommitted
+SHOW transaction_isolation;
+ transaction_isolation
+-----------------------
+ read uncommitted
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi read uncommitted
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] ===== p04/35-optimistic-version.sql · PG-035 · bản sao nền p04 (database bai_05) =====
+
+-- [lab] [A]
+-- PG-035 · Optimistic concurrency và cập nhật có điều kiện — `postgresql-optimistic-version-conditional-update`
+--
+-- Bài toán Tới Nơi: tổng đài viên [A] mở màn sửa chuyến 400108 (đọc), gõ cước mới trong một
+-- phút rồi bấm Lưu. Trong phút đó khách [B] đã HUỶ chuyến. Màn sửa ghi lại MỌI trường của
+-- form ⇒ chuyến "sống lại". Giữa lúc đọc và lúc ghi có khoảng hở rất dài (người gõ), không
+-- thể giữ khoá dòng suốt khoảng đó. Cách lạc quan (optimistic): không khoá khi đọc, nhưng
+-- lúc ghi chỉ ghi nếu dòng CHƯA ĐỔI kể từ khi đọc — kiểm bằng cột version (hoặc trạng thái),
+-- và đọc SỐ DÒNG ĐÃ ĐỔI: 0 ⇒ có người sửa trước ⇒ báo xung đột, tải lại.
+--
+-- Biến psql: `SELECT … \gset` lưu kết quả vào biến của PHIÊN (:v, :'trang_thai'), giả lập
+-- giá trị form giữ ở phía ứng dụng. `:ROW_COUNT` = số dòng câu trước đã đổi.
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- ===========================================================================
+-- §1. KHÔNG kiểm gì: ghi đè trạng thái (lost update).
+
+-- @A
+-- A mở form: đọc cước, trạng thái, version.
+SELECT fare AS cuoc, status AS trang_thai, version AS v FROM trips WHERE code = 400108 \gset
+
+-- [lab] [A]
+-- @A
+-- expect-line: 38000 | requested | 1
+SELECT :cuoc AS cuoc, :'trang_thai' AS trang_thai, :v AS v;
+ cuoc  | trang_thai | v
+-------+------------+---
+ 38000 | requested  | 1
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- Khách huỷ chuyến.
+-- expect-rows: 1
+UPDATE trips SET status = 'cancelled', updated_at = now() WHERE code = 400108;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+-- A bấm Lưu: form gửi lại mọi trường, kể cả trạng thái đã đọc từ một phút trước.
+-- expect-rows: 1
+UPDATE trips SET fare = 45000, status = :'trang_thai', updated_at = now() WHERE code = 400108;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- Chuyến đã huỷ "sống lại" với trạng thái requested: lệnh huỷ của khách bị MẤT, không lỗi nào.
+-- expect-line: 45000 | requested
+SELECT fare, status FROM trips WHERE code = 400108;
+ fare  |  status
+-------+-----------
+ 45000 | requested
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- Đặt lại để chạy lại cùng lịch với version.
+-- @B
+UPDATE trips SET fare = 38000, status = 'requested', version = 1 WHERE code = 400108;
+UPDATE 1
+
+-- [lab] [A]
+-- ===========================================================================
+-- §2. Optimistic: ghi kèm điều kiện version = <giá trị đã đọc>, rồi đọc số dòng đã đổi.
+
+-- @A
+SELECT fare AS cuoc, status AS trang_thai, version AS v FROM trips WHERE code = 400108 \gset
+
+-- [lab] [B]
+-- @B
+-- Khách huỷ — cũng theo quy ước: tăng version mỗi lần sửa.
+-- expect-line: cancelled | 2
+UPDATE trips SET status = 'cancelled', updated_at = now(), version = version + 1
+WHERE code = 400108 AND version = 1
+RETURNING status, version;
+  status   | version
+-----------+---------
+ cancelled |       2
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+-- A lưu với version 1 đã đọc ⇒ không dòng nào khớp ⇒ 0 dòng đổi.
+-- expect-rows: 0
+UPDATE trips SET fare = 45000, updated_at = now(), version = version + 1
+WHERE code = 400108 AND version = :v;
+UPDATE 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+-- Ứng dụng đọc số dòng đã đổi (JDBC: executeUpdate() trả số; PL/pgSQL: GET DIAGNOSTICS / FOUND).
+-- 0 ⇒ báo "Chuyến đã được người khác sửa — tải lại" và đọc lại bản mới.
+-- expect-value: 0
+SELECT :ROW_COUNT AS so_dong_doi;
+ so_dong_doi
+-------------
+           0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] [A]
+-- @A
+-- expect-line: 38000 | cancelled | 2
+SELECT fare, status, version FROM trips WHERE code = 400108;
+ fare  |  status   | version
+-------+-----------+---------
+ 38000 | cancelled |       2
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- ===========================================================================
+-- §3. Hai lần lưu CHỒNG NHAU về thời gian (cùng đọc version 2): người sau phải chờ người
+-- trước, rồi Read Committed ĐỌC LẠI dòng (version đã thành 3) ⇒ điều kiện sai ⇒ 0 dòng.
+-- Kiểm version vẫn đúng khi hai câu UPDATE chạy đồng thời thật.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-line: 3
+UPDATE trips SET fare = 41000, version = version + 1 WHERE code = 400108 AND version = 2
+RETURNING version;
+ version
+---------
+       3
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+-- expect-rows: 0
+UPDATE trips SET fare = 47000, version = version + 1 WHERE code = 400108 AND version = 2;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 91 đã chạy xong (sau khi hết bị chặn):
+UPDATE 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- expect-line: 41000 | 3
+SELECT fare, version FROM trips WHERE code = 400108;
+ fare  | version
+-------+---------
+ 41000 |       3
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- ===========================================================================
+-- §4. Cập nhật có điều kiện theo TRẠNG THÁI: chuyển trạng thái chỉ từ trạng thái hợp lệ.
+-- Hai tài xế 9101 [A] và 9102 [B] cùng bấm "Nhận" chuyến 400109.
+
+-- @A
+-- expect-line: 400109 | accepted
+UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009101',
+                 accepted_at = now(), updated_at = now(), version = version + 1
+WHERE code = 400109 AND status = 'requested'
+RETURNING code, status;
+  code  |  status
+--------+----------
+ 400109 | accepted
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- expect-rows: 0
+UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009102',
+                 accepted_at = now(), updated_at = now(), version = version + 1
+WHERE code = 400109 AND status = 'requested'
+RETURNING code, status;
+ code | status
+------+--------
+(0 rows)
+
+UPDATE 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- 0 dòng ⇒ ứng dụng báo B "chuyến đã có người nhận".
+-- expect-value: 0
+SELECT :ROW_COUNT AS so_dong_doi;
+ so_dong_doi
+-------------
+           0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] [B]
+-- Khách chỉ được huỷ khi chưa đón: tập trạng thái hợp lệ nằm NGAY trong WHERE.
+-- @B
+-- expect-line: cancelled
+UPDATE trips SET status = 'cancelled', updated_at = now(), version = version + 1
+WHERE code = 400109 AND status IN ('requested', 'searching', 'accepted', 'arriving')
+RETURNING status;
+  status
+-----------
+ cancelled
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+-- Tài xế bấm "Đã đón" sau khi khách huỷ ⇒ 0 dòng (không chuyển từ cancelled sang picked_up).
+-- expect-rows: 0
+UPDATE trips SET status = 'picked_up', updated_at = now(), version = version + 1
+WHERE code = 400109 AND status IN ('accepted', 'arriving');
+UPDATE 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [A]
+-- ===========================================================================
+-- §5. Quên tăng version ở MỘT đường ghi là đủ làm hỏng cơ chế. Trigger BEFORE UPDATE tự
+-- tăng version cho MỌI câu UPDATE — kể cả câu không nhắc tới cột version.
+
+-- @A
+CREATE FUNCTION tang_version() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.version := OLD.version + 1;
+  RETURN NEW;
+END
+$$;
+CREATE FUNCTION
+
+-- [lab] [A]
+-- @A
+CREATE TRIGGER trg_trips_tang_version BEFORE UPDATE ON trips
+FOR EACH ROW EXECUTE FUNCTION tang_version();
+CREATE TRIGGER
+
+-- [lab] [B]
+-- @B
+-- expect-value: 1
+SELECT version FROM trips WHERE code = 400110;
+ version
+---------
+       1
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 1
+
+-- [lab] [B]
+-- @B
+-- Câu ghi "quên" version vẫn làm version tăng (1 → 2).
+-- expect-value: 2
+UPDATE trips SET fare = fare + 1000 WHERE code = 400110 RETURNING version;
+ version
+---------
+       2
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [B]
+-- @B
+-- Câu ghi đúng quy ước (version = version + 1) cũng chỉ tăng 1, không phải 2.
+-- expect-value: 3
+UPDATE trips SET fare = fare + 1000, version = version + 1 WHERE code = 400110 AND version = 2
+RETURNING version;
+ version
+---------
+       3
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 3
+
+-- [lab] ===== p04/36-for-update-skip-locked.sql · PG-036 · bản sao nền p04 (database bai_06) =====
+
+-- [lab] [A]
+-- PG-036 · FOR UPDATE, NOWAIT và SKIP LOCKED — `postgresql-for-update-skip-locked`
+--
+-- Bài toán Tới Nơi: bảng `jobs` là hàng đợi việc nền (gửi thông báo cho chuyến mới…). Nhiều
+-- worker cùng lấy việc. Yêu cầu: (1) không việc nào bị HAI worker xử lý, (2) mọi việc đều
+-- được xử lý, (3) worker không đứng chờ nhau vô ích. Câu "lấy việc kế tiếp":
+--     SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE …
+-- và ba biến thể của mệnh đề khoá: chờ (mặc định), NOWAIT (lỗi ngay), SKIP LOCKED (bỏ qua
+-- dòng đang bị khoá). Hàng đợi ban đầu: việc 1 (ưu tiên 1) và 2…10 (ưu tiên 5), xem p04/01.
+-- Mỗi lần xử lý THẬT ghi một dòng `job_runs` — bất biến: mỗi việc đúng một dòng.
+--
+-- Ba worker [A], [B], [C]. Phép thử ĐỒNG THỜI nhiều worker × nhiều việc (không tất định,
+-- đếm và kiểm bất biến): p04/dong-thoi.mjs, kịch bản K036 (npm run p04:measure).
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- @C
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- ===========================================================================
+-- §1. FOR UPDATE (chờ): an toàn nhưng các worker XẾP HÀNG nối đuôi nhau.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 1
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE;
+ id
+----
+  1
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 1
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- B cũng muốn việc 1 (dòng đầu theo thứ tự) ⇒ chờ A.
+-- expect-blocked
+-- expect-value: 2
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+-- Xử lý việc 1 (tác dụng + đánh dấu xong) TRONG CÙNG giao dịch rồi commit.
+INSERT INTO job_runs (job_id, worker) VALUES (1, 'A');
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 WHERE id = 1;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 36 đã chạy xong (sau khi hết bị chặn):
+ id
+----
+  2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [B]
+-- (B được khoá dòng 1, kiểm lại điều kiện: việc 1 đã 'done' ⇒ loại, lấy tiếp ⇒ việc 2. B
+--  không nhận nhầm việc đã xong, nhưng đã phải đứng chờ suốt thời gian A xử lý.)
+
+-- @B
+INSERT INTO job_runs (job_id, worker) VALUES (2, 'B');
+INSERT 0 1
+
+-- [lab] [B]
+-- @B
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 WHERE id = 2;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- ===========================================================================
+-- §2. NOWAIT: không chờ — báo lỗi 55P03 ngay nếu dòng đang bị khoá.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 3
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE;
+ id
+----
+  3
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 3
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-error: 55P03
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE NOWAIT;
+ERROR:  could not obtain lock on row in relation "jobs"
+-- [lab] SQLSTATE 55P03
+-- [lab] PASS: đúng lỗi mong đợi 55P03
+
+-- [lab] [B]
+-- @B
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [A]
+-- @A
+INSERT INTO job_runs (job_id, worker) VALUES (3, 'A');
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 WHERE id = 3;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- ===========================================================================
+-- §3. SKIP LOCKED: mỗi worker lấy NGAY dòng chưa bị ai khoá — không chờ, không trùng.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 4
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED;
+ id
+----
+  4
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 4
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-value: 5
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED;
+ id
+----
+  5
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 5
+
+-- [lab] [C]
+-- @C
+BEGIN;
+BEGIN
+
+-- [lab] [C]
+-- @C
+-- expect-value: 6
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED;
+ id
+----
+  6
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 6
+
+-- [lab] [C]
+-- @C
+INSERT INTO job_runs (job_id, worker) VALUES (6, 'C');
+INSERT 0 1
+
+-- [lab] [C]
+-- @C
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 WHERE id = 6;
+UPDATE 1
+
+-- [lab] [C]
+-- @C
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+INSERT INTO job_runs (job_id, worker) VALUES (5, 'B');
+INSERT 0 1
+
+-- [lab] [B]
+-- @B
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 WHERE id = 5;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- @A
+INSERT INTO job_runs (job_id, worker) VALUES (4, 'A');
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 WHERE id = 4;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- ===========================================================================
+-- §4. Việc có tác dụng NGOÀI database (gọi API gửi SMS, mất vài giây): không nên giữ giao
+-- dịch + khoá trong lúc chờ mạng. Mẫu "nhận việc ngắn": MỘT câu đánh dấu running (commit
+-- ngay) ⇒ xử lý ngoài giao dịch ⇒ câu thứ hai đánh dấu done. Worker chết giữa chừng để lại
+-- việc 'running' mãi ⇒ cần "thời hạn thuê" (lease): việc running quá hạn được trả về hàng đợi.
+
+-- @A
+-- expect-line: 7 | running | 1
+UPDATE jobs SET status = 'running', locked_by = 'A', locked_at = clock_timestamp(), attempts = attempts + 1
+WHERE id = (SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED)
+RETURNING id, status, attempts;
+ id | status  | attempts
+----+---------+----------
+  7 | running |        1
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+-- A đã GỬI SMS (tác dụng bên ngoài — ở đây giả lập bằng một dòng job_runs)…
+INSERT INTO job_runs (job_id, worker) VALUES (7, 'A');
+INSERT 0 1
+
+-- [lab] [C]
+-- (…rồi A "chết" trước khi kịp đánh dấu done.)
+
+-- @C
+-- Tiến trình dọn dẹp: việc running quá hạn thuê (ở đây 200 ms cho nhanh) về lại hàng đợi.
+SELECT pg_sleep(0.3);
+ pg_sleep
+----------
+
+(1 row)
+
+-- [lab] [C]
+-- @C
+-- expect-line: 7 | 1
+UPDATE jobs SET status = 'queued', locked_by = NULL, locked_at = NULL
+WHERE status = 'running' AND locked_at < clock_timestamp() - interval '200 milliseconds'
+RETURNING id, attempts;
+ id | attempts
+----+----------
+  7 |        1
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- expect-line: 7 | 2
+UPDATE jobs SET status = 'running', locked_by = 'B', locked_at = clock_timestamp(), attempts = attempts + 1
+WHERE id = (SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED)
+RETURNING id, attempts;
+ id | attempts
+----+----------
+  7 |        2
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+INSERT INTO job_runs (job_id, worker) VALUES (7, 'B');
+INSERT 0 1
+
+-- [lab] [B]
+-- @B
+UPDATE jobs SET status = 'done', done_at = now(), locked_by = NULL, locked_at = NULL WHERE id = 7 AND locked_by = 'B';
+UPDATE 1
+
+-- [lab] [C]
+-- @C
+-- Việc 7 đã chạy HAI lần (khách nhận 2 SMS): tác dụng ngoài database chỉ đạt "ÍT NHẤT MỘT
+-- lần" (at-least-once); bên nhận phải chống trùng (PG-039). Tác dụng TRONG database thì làm
+-- cùng giao dịch với đánh dấu done (như §1–§3) ⇒ đúng một lần.
+-- expect-line: 7 | A,B
+SELECT job_id, string_agg(worker, ',' ORDER BY id) FROM job_runs WHERE job_id = 7 GROUP BY job_id;
+ job_id | string_agg
+--------+------------
+      7 | A,B
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- ===========================================================================
+-- §5. SKIP LOCKED KHÔNG công bằng: việc bị một worker "treo" giữ khoá thì những worker khác
+-- cứ bỏ qua nó — kể cả việc ƯU TIÊN CAO NHẤT — và hàng đợi trông như rỗng.
+
+-- @C
+-- Việc gấp mới: id 11, ưu tiên 1. Còn trong hàng: 8, 9, 10 (ưu tiên 5).
+-- expect-value: 11
+INSERT INTO jobs (kind, priority) VALUES ('doi_soat', 1) RETURNING id;
+ id
+----
+ 11
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 11
+
+-- [lab] [A]
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- A nhận việc 11 rồi TREO (vd. chờ một API không trả lời), giao dịch vẫn mở.
+-- expect-value: 11
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED;
+ id
+----
+ 11
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 11
+
+-- [lab] [B]
+-- @B
+-- B và C làm hết việc ưu tiên 5 — việc gấp 11 bị vượt mặt.
+-- expect-value: 8
+WITH v AS (SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED),
+     r AS (INSERT INTO job_runs (job_id, worker) SELECT id, 'B' FROM v)
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 FROM v WHERE jobs.id = v.id
+RETURNING jobs.id;
+ id
+----
+  8
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 8
+
+-- [lab] [C]
+-- @C
+-- expect-value: 9
+WITH v AS (SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED),
+     r AS (INSERT INTO job_runs (job_id, worker) SELECT id, 'C' FROM v)
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 FROM v WHERE jobs.id = v.id
+RETURNING jobs.id;
+ id
+----
+  9
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 9
+
+-- [lab] [B]
+-- @B
+-- expect-value: 10
+WITH v AS (SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED),
+     r AS (INSERT INTO job_runs (job_id, worker) SELECT id, 'B' FROM v)
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 FROM v WHERE jobs.id = v.id
+RETURNING jobs.id;
+ id
+----
+ 10
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 10
+
+-- [lab] [B]
+-- @B
+-- Với B, hàng đợi "rỗng" (0 dòng) — dù việc 11 vẫn 'queued'.
+-- expect-rows: 0
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED;
+ id
+----
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- Đếm việc tồn bằng SKIP LOCKED cũng sai (0 thay vì 1): SKIP LOCKED cho một tập KHÔNG nhất
+-- quán — chỉ dùng để lấy việc, đừng dùng để đếm/giám sát.
+-- expect-line: 1 | 0
+SELECT (SELECT count(*) FROM jobs WHERE status = 'queued') AS dem_thuong,
+       (SELECT count(*) FROM (SELECT id FROM jobs WHERE status = 'queued' FOR UPDATE SKIP LOCKED) AS s) AS dem_skip_locked;
+ dem_thuong | dem_skip_locked
+------------+-----------------
+          1 |               0
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- Giám sát: việc queued đang bị khoá quá lâu = có worker treo. Huỷ phiên treo (pg_terminate)
+-- ⇒ giao dịch của A rollback ⇒ khoá nhả.
+-- expect-value: t
+SELECT pg_terminate_backend(pid, 5000) FROM pg_stat_activity WHERE application_name = 'lab-A';
+ pg_terminate_backend
+----------------------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [B]
+-- @B
+-- expect-value: 11
+WITH v AS (SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED),
+     r AS (INSERT INTO job_runs (job_id, worker) SELECT id, 'B' FROM v)
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 FROM v WHERE jobs.id = v.id
+RETURNING jobs.id;
+ id
+----
+ 11
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 11
+
+-- [lab] [C]
+-- ===========================================================================
+-- §5b. Bẫy khoá ngoại: FOR UPDATE SKIP LOCKED bỏ qua cả dòng chỉ đang bị FOR KEY SHARE
+-- (khoá do kiểm khoá ngoại khi bảng con chèn dòng trỏ tới nó). Dùng FOR NO KEY UPDATE.
+
+-- @C
+-- expect-value: 12
+INSERT INTO jobs (kind, priority) VALUES ('tinh_cuoc', 5) RETURNING id;
+ id
+----
+ 12
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 12
+
+-- [lab] [C]
+-- @C
+BEGIN;
+BEGIN
+
+-- [lab] [C]
+-- @C
+-- Một giao dịch khác chèn job_runs trỏ tới việc 12 (vd. ghi nhật ký) ⇒ FOR KEY SHARE trên 12.
+INSERT INTO job_runs (job_id, worker) VALUES (12, 'kiem-tra');
+INSERT 0 1
+
+-- [lab] [B]
+-- @B
+-- expect-rows: 0
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED;
+ id
+----
+(0 rows)
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- expect-value: 12
+SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR NO KEY UPDATE SKIP LOCKED;
+ id
+----
+ 12
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 12
+
+-- [lab] [C]
+-- @C
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [B]
+-- @B
+-- expect-value: 12
+WITH v AS (SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR NO KEY UPDATE SKIP LOCKED),
+     r AS (INSERT INTO job_runs (job_id, worker) SELECT id, 'B' FROM v)
+UPDATE jobs SET status = 'done', done_at = now(), attempts = attempts + 1 FROM v WHERE jobs.id = v.id
+RETURNING jobs.id;
+ id
+----
+ 12
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 12
+
+-- [lab] [C]
+-- ===========================================================================
+-- §6. Bất biến: mọi việc xong; mỗi việc đúng MỘT lần xử lý — trừ việc 7 (tác dụng ngoài DB,
+-- at-least-once, đã giải thích ở §4).
+
+-- @C
+-- expect-line: done | 12
+SELECT status, count(*) FROM jobs GROUP BY status ORDER BY status;
+ status | count
+--------+-------
+ done   |    12
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- expect-line: 7 | 2
+SELECT job_id, count(*) FROM job_runs GROUP BY job_id HAVING count(*) <> 1 ORDER BY job_id;
+ job_id | count
+--------+-------
+      7 |     2
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- expect-line: 1 | A
+-- expect-line: 2 | B
+-- expect-line: 3 | A
+-- expect-line: 4 | A
+-- expect-line: 5 | B
+-- expect-line: 6 | C
+-- expect-line: 7 | A,B
+-- expect-line: 8 | B
+-- expect-line: 9 | C
+-- expect-line: 10 | B
+-- expect-line: 11 | B
+-- expect-line: 12 | B
+SELECT job_id, string_agg(worker, ',' ORDER BY id) AS worker FROM job_runs GROUP BY job_id ORDER BY job_id;
+ job_id | worker
+--------+--------
+      1 | A
+      2 | B
+      3 | A
+      4 | A
+      5 | B
+      6 | C
+      7 | A,B
+      8 | B
+      9 | C
+     10 | B
+     11 | B
+     12 | B
+(12 rows)
+-- [lab] PASS: đúng nội dung 12 dòng như mong đợi (expect-line)
+
+-- [lab] ===== p04/37-deadlock-thu-tu-khoa.sql · PG-037 · bản sao nền p04 (database bai_07) =====
+
+-- [lab] [A]
+-- PG-037 · Deadlock, thứ tự lấy khoá và timeout — `postgresql-deadlock-lock-order-timeout`
+--
+-- Bài toán Tới Nơi: hai nghiệp vụ chuyển tiền giữa ví VíXanh chạy cùng lúc trên CÙNG một cặp
+-- ví nhưng theo HAI CHIỀU:
+--   [A] thanh toán chuyến : trừ ví khách 1001 → cộng ví tài xế 2001 (30.000 đ)
+--   [B] hoàn tiền         : trừ ví tài xế 2001 → cộng ví khách 1001 (10.000 đ)
+-- Mỗi bên khoá ví thứ nhất rồi chờ ví thứ hai đang bị bên kia khoá ⇒ VÒNG CHỜ (deadlock):
+-- không bên nào tự thoát được. PostgreSQL phát hiện vòng chờ và huỷ MỘT giao dịch (40P01).
+--
+-- Ai bị huỷ? Phiên nào chờ đủ deadlock_timeout (mặc định 1 s) sẽ chạy bộ dò vòng chờ; thấy
+-- vòng thì nó TỰ huỷ chính mình. Để lịch chạy tất định, bài đặt deadlock_timeout của A = 10 s,
+-- của B = 200 ms ⇒ B luôn là bên dò ra và bị huỷ (đặt được vì lab chạy bằng superuser).
+-- Bất biến: tổng tiền trong mọi ví không đổi (p04/02: 14.800.000 đ).
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- @C
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- @A
+SET deadlock_timeout = '10s';
+SET
+
+-- [lab] [B]
+-- @B
+SET deadlock_timeout = '200ms';
+SET
+
+-- [lab] [B]
+-- @B
+-- log_lock_waits: ghi nhật ký server khi một lần chờ khoá kéo dài quá deadlock_timeout.
+SET log_lock_waits = on;
+SET
+
+-- [lab] [A]
+-- ===========================================================================
+-- §1. Tái hiện vòng chờ.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 470000
+UPDATE wallets SET balance = balance - 30000, updated_at = now() WHERE id = 1001 RETURNING balance;
+ balance
+---------
+  470000
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 470000
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-value: 190000
+UPDATE wallets SET balance = balance - 10000, updated_at = now() WHERE id = 2001 RETURNING balance;
+ balance
+---------
+  190000
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 190000
+
+-- [lab] [A]
+-- @A
+-- A cần ví 2001 — B đang giữ ⇒ A chờ B. (Khi được chạy tiếp, A thấy 230000: khoản trừ của B đã bị huỷ.)
+-- expect-blocked
+-- expect-value: 230000
+UPDATE wallets SET balance = balance + 30000, updated_at = now() WHERE id = 2001 RETURNING balance;
+-- [lab] [A] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [B]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [C]
+-- @C
+-- expect-line: A | active | Lock: transactionid | B | UPDATE wallets SET balance = balance + 30000, updated_at = n
+-- expect-line: B | idle in transaction | Client: ClientRead |  | UPDATE wallets SET balance = balance - 10000, updated_at = n
+SELECT * FROM lab_cho();
+ phien |     trang_thai      |         cho         | bi_chan_boi |                           cau_lenh
+-------+---------------------+---------------------+-------------+--------------------------------------------------------------
+ A     | active              | Lock: transactionid | B           | UPDATE wallets SET balance = balance + 30000, updated_at = n
+ B     | idle in transaction | Client: ClientRead  |             | UPDATE wallets SET balance = balance - 10000, updated_at = n
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+-- B cần ví 1001 — A đang giữ ⇒ B chờ A ⇒ vòng A → B → A. Sau 200 ms B chạy bộ dò, thấy vòng
+-- và bị huỷ với 40P01. Thông báo lỗi chỉ nói "process … waits for … blocked by process …";
+-- câu lệnh của hai phiên chỉ có trong nhật ký server.
+-- lab: cho-xong
+-- lab: nhat-ky
+-- expect-blocked
+-- expect-error: 40P01
+UPDATE wallets SET balance = balance + 10000, updated_at = now() WHERE id = 1001 RETURNING balance;
+-- [lab] [B] ⏳ đã chờ khoá (Lock: transactionid) — bị chặn bởi [A] trước khi xong
+-- [lab] PASS: bước đã phải chờ khoá như mong đợi (expect-blocked)
+ERROR:  deadlock detected
+DETAIL:  Process [B] waits for ShareLock on transaction <XID>; blocked by process [A].
+Process [A] waits for ShareLock on transaction <XID>; blocked by process [B].
+HINT:  See server log for query details.
+CONTEXT:  while updating tuple (0,1) in relation "wallets"
+-- [lab] SQLSTATE 40P01
+-- [lab] nhật ký server: [B] LOG:  process [B] detected deadlock while waiting for ShareLock on transaction <XID> after T ms
+-- [lab] nhật ký server: [B] DETAIL:  Process holding the lock: [A]. Wait queue: .
+-- [lab] nhật ký server: [B] CONTEXT:  while updating tuple (0,1) in relation "wallets"
+-- [lab] nhật ký server: [B] STATEMENT:  UPDATE wallets SET balance = balance + 10000, updated_at = now() WHERE id = 1001 RETURNING balance;
+-- [lab] nhật ký server: [B] ERROR:  deadlock detected
+-- [lab] nhật ký server: [B] DETAIL:  Process [B] waits for ShareLock on transaction <XID>; blocked by process [A].
+-- [lab] nhật ký server: 	Process [A] waits for ShareLock on transaction <XID>; blocked by process [B].
+-- [lab] nhật ký server: 	Process [B]: UPDATE wallets SET balance = balance + 10000, updated_at = now() WHERE id = 1001 RETURNING balance;
+-- [lab] nhật ký server: 	Process [A]: UPDATE wallets SET balance = balance + 30000, updated_at = now() WHERE id = 2001 RETURNING balance;
+-- [lab] nhật ký server: [B] HINT:  See server log for query details.
+-- [lab] nhật ký server: [B] CONTEXT:  while updating tuple (0,1) in relation "wallets"
+-- [lab] nhật ký server: [B] STATEMENT:  UPDATE wallets SET balance = balance + 10000, updated_at = now() WHERE id = 1001 RETURNING balance;
+-- [lab] PASS: đúng lỗi mong đợi 40P01
+
+-- [lab] [A] ✔ bước dòng 51 đã chạy xong (sau khi hết bị chặn):
+ balance
+---------
+  230000
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng giá trị mong đợi 230000
+
+-- [lab] [A]
+-- (B bị huỷ ⇒ khoá của B nhả ngay ⇒ A — đang chờ ví 2001 — chạy tiếp, xem dòng "✔" ở trên.)
+
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+-- Giao dịch của B đã hỏng: COMMIT trả ROLLBACK, khoản trừ 10.000 ở ví 2001 cũng bị huỷ.
+-- expect-match: ^ROLLBACK$
+COMMIT;
+ROLLBACK
+-- [lab] PASS: có dòng khớp /^ROLLBACK$/
+
+-- [lab] [C]
+-- @C
+-- Chỉ thanh toán của A có hiệu lực; tổng tiền không đổi.
+-- expect-line: 1001 | 470000
+-- expect-line: 2001 | 230000
+SELECT id, balance FROM wallets WHERE id IN (1001, 2001) ORDER BY id;
+  id  | balance
+------+---------
+ 1001 |  470000
+ 2001 |  230000
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- expect-value: 14800000
+SELECT sum(balance) FROM wallets;
+   sum
+----------
+ 14800000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 14800000
+
+-- [lab] [B]
+-- Ứng dụng nhận 40P01 ⇒ THỬ LẠI cả giao dịch hoàn tiền (giống 40001 — PG-038).
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+UPDATE wallets SET balance = balance - 10000, updated_at = now() WHERE id = 2001;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+UPDATE wallets SET balance = balance + 10000, updated_at = now() WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- expect-line: 1001 | 480000
+-- expect-line: 2001 | 220000
+SELECT id, balance FROM wallets WHERE id IN (1001, 2001) ORDER BY id;
+  id  | balance
+------+---------
+ 1001 |  480000
+ 2001 |  220000
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- ===========================================================================
+-- §2. Sửa tận gốc: MỌI giao dịch lấy khoá theo CÙNG một thứ tự (ở đây: id ví tăng dần),
+-- bằng một câu khoá trước tất cả ví sẽ đụng tới. Bên đến sau chờ ngay ở ví ĐẦU TIÊN, chưa
+-- giữ gì ⇒ không thể thành vòng. (Một câu UPDATE … WHERE id IN (…) KHÔNG đủ: nó khoá dòng
+-- theo thứ tự quét — không bảo đảm.) FOR NO KEY UPDATE: đủ để sửa số dư, không chặn khoá ngoại.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Thanh toán: khoá 1001 rồi 2001 (thứ tự id), rồi mới trừ/cộng.
+-- expect-line: 1001
+-- expect-line: 2001
+SELECT id FROM wallets WHERE id IN (1001, 2001) ORDER BY id FOR NO KEY UPDATE;
+  id
+------
+ 1001
+ 2001
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- Hoàn tiền: CŨNG khoá 1001 trước (dù nghiệp vụ trừ 2001 trước) ⇒ chờ A ở 1001, chưa giữ 2001.
+-- expect-blocked
+-- expect-line: 1001
+-- expect-line: 2001
+SELECT id FROM wallets WHERE id IN (1001, 2001) ORDER BY id FOR NO KEY UPDATE;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+UPDATE wallets SET balance = balance - 30000, updated_at = now() WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+-- A đi tiếp được vì đã giữ sẵn 2001.
+UPDATE wallets SET balance = balance + 30000, updated_at = now() WHERE id = 2001;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 128 đã chạy xong (sau khi hết bị chặn):
+  id
+------
+ 1001
+ 2001
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- (B nhận khoá cả hai ví — dòng "✔" ở trên.)
+
+-- @B
+UPDATE wallets SET balance = balance - 10000, updated_at = now() WHERE id = 2001;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+UPDATE wallets SET balance = balance + 10000, updated_at = now() WHERE id = 1001;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- expect-line: 1001 | 460000
+-- expect-line: 2001 | 240000
+SELECT id, balance FROM wallets WHERE id IN (1001, 2001) ORDER BY id;
+  id  | balance
+------+---------
+ 1001 |  460000
+ 2001 |  240000
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- ===========================================================================
+-- §3. lock_timeout làm lưới an toàn: thay vì đứng chờ lâu (hoặc chờ deadlock_timeout mới bị
+-- huỷ), câu lệnh bỏ cuộc sau một khoảng ⇒ 55P03 ⇒ ứng dụng rollback và thử lại / báo lỗi.
+-- Nó KHÔNG thay cho thứ tự khoá: deadlock chỉ biến thành lỗi timeout sớm hơn.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+UPDATE wallets SET balance = balance - 5000, updated_at = now() WHERE id = 1002;
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+SET LOCAL lock_timeout = '300ms';
+SET
+
+-- [lab] [B]
+-- @B
+-- lab: cho-xong
+-- expect-blocked
+-- expect-error: 55P03
+UPDATE wallets SET balance = balance + 5000, updated_at = now() WHERE id = 1002;
+-- [lab] [B] ⏳ đã chờ khoá (Lock: transactionid) — bị chặn bởi [A] trước khi xong
+-- [lab] PASS: bước đã phải chờ khoá như mong đợi (expect-blocked)
+ERROR:  canceling statement due to lock timeout
+CONTEXT:  while updating tuple (0,2) in relation "wallets"
+-- [lab] SQLSTATE 55P03
+-- [lab] PASS: đúng lỗi mong đợi 55P03
+
+-- [lab] [B]
+-- @B
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [A]
+-- @A
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [C]
+-- @C
+-- Bất biến cuối bài: tổng tiền không đổi qua mọi lịch.
+-- expect-value: 14800000
+SELECT sum(balance) FROM wallets;
+   sum
+----------
+ 14800000
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 14800000
+
+-- [lab] ===== p04/38-serializable-retry.sql · PG-038 · bản sao nền p04 (database bai_08) =====
+
+-- [lab] [A]
+-- PG-038 · Serializable và retry toàn giao dịch — `postgresql-serializable-retry`
+--
+-- Bài toán Tới Nơi: quy tắc điều phối "mỗi khu luôn còn ÍT NHẤT MỘT tài xế trực". Ứng dụng
+-- cho tài xế xin nghỉ nếu khu còn ≥ 2 người trực (đếm, rồi mới tắt trực). Khu SG-TT-01 (111)
+-- có hai người trực: 9101 [A] và 9102 [B]. Hai người cùng bấm "Xin nghỉ" cùng lúc:
+-- mỗi giao dịch ĐỌC thấy 2 người, rồi GHI dòng CỦA MÌNH — hai dòng khác nhau, không ai khoá
+-- ai. Kết quả: khu không còn ai trực. Đây là WRITE SKEW: mỗi giao dịch đúng khi chạy một mình,
+-- chạy xen kẽ thì phá bất biến. Repeatable Read không chặn được; SERIALIZABLE thì có — bằng
+-- cách huỷ một giao dịch (40001), và ỨNG DỤNG phải chạy lại TOÀN BỘ giao dịch đó.
+--
+-- Phép thử ĐỒNG THỜI có retry tự động phía client (giới hạn số lần + backoff), đếm số lần
+-- thử lại và kiểm bất biến sau nhiều lượt: p04/dong-thoi.mjs, kịch bản K038.
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- @C
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- @C
+-- Hàm đếm số khu VI PHẠM bất biến (khu có tài xế trực mà không ai đang trực).
+CREATE FUNCTION khu_vi_pham() RETURNS bigint LANGUAGE sql STABLE AS $$
+  SELECT count(*) FROM (SELECT area_id FROM driver_duty GROUP BY area_id
+                        HAVING count(*) FILTER (WHERE on_duty) = 0) AS k
+$$;
+CREATE FUNCTION
+
+-- [lab] [A]
+-- ###########################################################################
+-- §1. REPEATABLE READ: write skew lọt qua.
+-- ###########################################################################
+
+-- @A
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [B]
+-- @B
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [A]
+-- @A
+-- 2 ≥ 2 ⇒ được nghỉ.
+-- expect-rows: 1
+UPDATE driver_duty SET on_duty = false, changed_at = now()
+WHERE driver_id = 'd4000000-0000-4000-8000-000000009101';
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- Dòng của B khác dòng của A ⇒ không chờ, không xung đột cập nhật.
+-- expect-rows: 1
+UPDATE driver_duty SET on_duty = false, changed_at = now()
+WHERE driver_id = 'd4000000-0000-4000-8000-000000009102';
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+-- expect-match: ^COMMIT$
+COMMIT;
+COMMIT
+-- [lab] PASS: có dòng khớp /^COMMIT$/
+
+-- [lab] [C]
+-- @C
+-- Khu 111 không còn ai trực: bất biến bị phá, không lỗi nào báo.
+-- expect-line: 0 | 1
+SELECT (SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty) AS dang_truc_khu_111,
+       khu_vi_pham() AS so_khu_vi_pham;
+ dang_truc_khu_111 | so_khu_vi_pham
+-------------------+----------------
+                 0 |              1
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+UPDATE driver_duty SET on_duty = true WHERE area_id = 111;
+UPDATE 2
+
+-- [lab] [A]
+-- ###########################################################################
+-- §2. SERIALIZABLE: cùng lịch ⇒ giao dịch commit sau bị huỷ (40001).
+-- ###########################################################################
+
+-- @A
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [B]
+-- @B
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [C]
+-- @C
+-- SSI (Serializable Snapshot Isolation) ghi lại MỌI THỨ mỗi giao dịch đã ĐỌC bằng khoá vị
+-- từ SIReadLock — không chặn ai, chỉ để phát hiện xung đột đọc–ghi. Bảng nhỏ ⇒ planner chọn
+-- Seq Scan ⇒ khoá cả BẢNG (locktype relation).
+-- expect-line: A | relation | driver_duty | SIReadLock | t
+-- expect-line: B | relation | driver_duty | SIReadLock | t
+SELECT * FROM lab_khoa() WHERE che_do = 'SIReadLock';
+ phien |   loai   |  doi_tuong  |   che_do   | da_cap
+-------+----------+-------------+------------+--------
+ A     | relation | driver_duty | SIReadLock | t
+ B     | relation | driver_duty | SIReadLock | t
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+UPDATE driver_duty SET on_duty = false, changed_at = now()
+WHERE driver_id = 'd4000000-0000-4000-8000-000000009101';
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- SERIALIZABLE không CHỜ ai: B ghi xong ngay…
+-- expect-rows: 1
+UPDATE driver_duty SET on_duty = false, changed_at = now()
+WHERE driver_id = 'd4000000-0000-4000-8000-000000009102';
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+-- expect-match: ^COMMIT$
+COMMIT;
+COMMIT
+-- [lab] PASS: có dòng khớp /^COMMIT$/
+
+-- [lab] [B]
+-- @B
+-- …nhưng lúc COMMIT thì bị từ chối: A đã đọc thứ B ghi, B đã đọc thứ A ghi, và A commit
+-- trước ⇒ không có thứ tự chạy LẦN LƯỢT nào cho ra kết quả này ⇒ huỷ B.
+-- expect-error: 40001
+COMMIT;
+ERROR:  could not serialize access due to read/write dependencies among transactions
+DETAIL:  Reason code: Canceled on identification as a pivot, during commit attempt.
+HINT:  The transaction might succeed if retried.
+-- [lab] SQLSTATE 40001
+-- [lab] PASS: đúng lỗi mong đợi 40001
+
+-- [lab] [C]
+-- @C
+-- expect-line: 1 | 0
+SELECT (SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty) AS dang_truc_khu_111,
+       khu_vi_pham() AS so_khu_vi_pham;
+ dang_truc_khu_111 | so_khu_vi_pham
+-------------------+----------------
+                 1 |              0
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [B]
+-- Retry: ứng dụng chạy lại TOÀN BỘ giao dịch của B từ đầu — đọc lại, quyết định lại. Không
+-- được chỉ gửi lại câu UPDATE (quyết định "được nghỉ" dựa trên lần đọc cũ, giờ đã sai).
+-- @B
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- Lần thử 2: chỉ còn 1 người trực ⇒ ứng dụng TỪ CHỐI cho nghỉ ⇒ ROLLBACK (không ghi gì).
+-- expect-value: 1
+SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty;
+ count
+-------
+     1
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 1
+
+-- [lab] [B]
+-- @B
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [C]
+-- @C
+UPDATE driver_duty SET on_duty = true WHERE area_id = 111;
+UPDATE 2
+
+-- [lab] [A]
+-- ###########################################################################
+-- §3. Báo động GIẢ: hai tài xế ở HAI KHU KHÁC NHAU (112: 9103, 113: 9105) — không hề
+-- xung đột về nghiệp vụ — nhưng khoá vị từ mức cả bảng (Seq Scan) vẫn làm B bị huỷ.
+-- ###########################################################################
+
+-- @A
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 112 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [A]
+-- @A
+UPDATE driver_duty SET on_duty = false WHERE driver_id = 'd4000000-0000-4000-8000-000000009103';
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 113 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [B]
+-- @B
+UPDATE driver_duty SET on_duty = false WHERE driver_id = 'd4000000-0000-4000-8000-000000009105';
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+-- expect-error: 40001
+COMMIT;
+ERROR:  could not serialize access due to read/write dependencies among transactions
+DETAIL:  Reason code: Canceled on identification as a pivot, during commit attempt.
+HINT:  The transaction might succeed if retried.
+-- [lab] SQLSTATE 40001
+-- [lab] PASS: đúng lỗi mong đợi 40001
+
+-- [lab] [C]
+-- @C
+UPDATE driver_duty SET on_duty = true WHERE area_id IN (112, 113);
+UPDATE 4
+
+-- [lab] [A]
+-- Cùng lịch, nhưng truy vấn đi qua index ix_driver_duty_area ⇒ khoá vị từ chỉ phủ page
+-- index + các dòng đã đọc ⇒ hai khu không còn "chạm" nhau ⇒ cả hai commit. (Trên bảng lớn
+-- planner tự chọn index; ở đây ép bằng enable_seqscan = off cho bảng 24 dòng.)
+
+-- @A
+SET enable_seqscan = off;
+SET
+
+-- [lab] [B]
+-- @B
+SET enable_seqscan = off;
+SET
+
+-- [lab] [A]
+-- @A
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 112 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [A]
+-- @A
+UPDATE driver_duty SET on_duty = false WHERE driver_id = 'd4000000-0000-4000-8000-000000009103';
+UPDATE 1
+
+-- [lab] [B]
+-- @B
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 113 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [B]
+-- @B
+UPDATE driver_duty SET on_duty = false WHERE driver_id = 'd4000000-0000-4000-8000-000000009105';
+UPDATE 1
+
+-- [lab] [C]
+-- @C
+-- Không còn khoá cả bảng: khoá trên page index và trên từng dòng đã đọc.
+-- expect-no-match: \|\s+relation\s+\|\s+driver_duty\s+\|
+SELECT * FROM lab_khoa() WHERE che_do = 'SIReadLock';
+ phien | loai  |     doi_tuong      |   che_do   | da_cap
+-------+-------+--------------------+------------+--------
+ A     | tuple | driver_duty (0,35) | SIReadLock | t
+ B     | tuple | driver_duty (0,37) | SIReadLock | t
+(2 rows)
+-- [lab] PASS: không dòng nào khớp /\|\s+relation\s+\|\s+driver_duty\s+\|/
+
+-- [lab] [A]
+-- @A
+-- expect-match: ^COMMIT$
+COMMIT;
+COMMIT
+-- [lab] PASS: có dòng khớp /^COMMIT$/
+
+-- [lab] [B]
+-- @B
+-- expect-match: ^COMMIT$
+COMMIT;
+COMMIT
+-- [lab] PASS: có dòng khớp /^COMMIT$/
+
+-- [lab] [A]
+-- @A
+RESET enable_seqscan;
+RESET
+
+-- [lab] [B]
+-- @B
+RESET enable_seqscan;
+RESET
+
+-- [lab] [C]
+-- @C
+-- expect-line: 112 | 1
+-- expect-line: 113 | 1
+SELECT area_id, count(*) FILTER (WHERE on_duty) FROM driver_duty WHERE area_id IN (112, 113)
+GROUP BY area_id ORDER BY area_id;
+ area_id | count
+---------+-------
+     112 |     1
+     113 |     1
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+UPDATE driver_duty SET on_duty = true WHERE area_id IN (112, 113);
+UPDATE 4
+
+-- [lab] [A]
+-- ###########################################################################
+-- §4. Cách khác không cần SERIALIZABLE: "vật chất hoá xung đột" — mọi giao dịch đổi người
+-- trực của một khu đều KHOÁ DÒNG KHU (areas) trước khi đếm ⇒ hai yêu cầu cùng khu xếp hàng.
+-- Đúng ở Read Committed, không cần retry; đổi lại phải nhớ khoá ở MỌI đường ghi.
+-- ###########################################################################
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 111
+SELECT id FROM areas WHERE id = 111 FOR NO KEY UPDATE;
+ id
+-----
+ 111
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 111
+
+-- [lab] [A]
+-- @A
+-- expect-value: 2
+SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty;
+ count
+-------
+     2
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 2
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+-- expect-value: 111
+SELECT id FROM areas WHERE id = 111 FOR NO KEY UPDATE;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+UPDATE driver_duty SET on_duty = false WHERE driver_id = 'd4000000-0000-4000-8000-000000009101';
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 257 đã chạy xong (sau khi hết bị chặn):
+ id
+-----
+ 111
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 111
+
+-- [lab] [B]
+-- @B
+-- B đếm SAU khi A commit (câu mới ở Read Committed ⇒ snapshot mới) ⇒ 1 ⇒ từ chối.
+-- expect-value: 1
+SELECT count(*) FROM driver_duty WHERE area_id = 111 AND on_duty;
+ count
+-------
+     1
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 1
+
+-- [lab] [B]
+-- @B
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [C]
+-- @C
+-- Bất biến cuối bài.
+-- expect-value: 0
+SELECT khu_vi_pham();
+ khu_vi_pham
+-------------
+           0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] ===== p04/39-idempotency-outbox.sql · PG-039 · bản sao nền p04 (database bai_09) =====
+
+-- [lab] [A]
+-- PG-039 · Idempotency và transactional outbox — `postgresql-idempotency-outbox-transaction`
+--
+-- Bài toán Tới Nơi (1): app khách bấm "Đặt chuyến", mạng chập chờn ⇒ app GỬI LẠI request.
+-- Không được tạo hai chuyến. App gửi kèm một khoá ngẫu nhiên (idempotency key) — gửi lại thì
+-- dùng LẠI khoá cũ; server ghi khoá vào bảng có khoá chính, cùng giao dịch với chuyến:
+--   * lần đầu: INSERT khoá thành công ⇒ tạo chuyến, lưu kết quả vào khoá, COMMIT;
+--   * lần lặp: INSERT … ON CONFLICT DO NOTHING không chèn được ⇒ trả lại kết quả đã lưu;
+--   * hai request cùng khoá ĐỒNG THỜI: request sau chờ ở index duy nhất tới khi request trước
+--     commit (⇒ trả kết quả đã lưu) hoặc huỷ (⇒ tự làm).
+-- Bài toán (2): tạo chuyến xong phải báo cho dịch vụ thông báo qua message broker. Gửi broker
+-- trong giao dịch thì broker nhận tin của giao dịch sau đó bị huỷ; gửi sau COMMIT thì app chết
+-- giữa chừng là mất tin. Outbox: ghi sự kiện vào bảng `outbox` CÙNG giao dịch với chuyến; một
+-- publisher đọc outbox, gửi broker rồi đánh dấu đã gửi. Publisher chết giữa "gửi" và "đánh
+-- dấu" ⇒ gửi lại ⇒ broker có TIN TRÙNG (ít nhất một lần) ⇒ consumer phải chống trùng.
+--
+-- Phiên: [A], [B] = hai request / hai publisher; [C] = quan sát, dọn dẹp, consumer;
+-- [D] = kết nối RIÊNG tới "broker" (bảng broker_messages, giả lập hệ thống khác).
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- @C
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [D]
+-- @D
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- ===========================================================================
+-- §1. Từng bước, một phiên: lần đầu và lần lặp của cùng một khoá.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Lần đầu: khoá chưa có ⇒ chèn được (1 dòng trả về).
+-- expect-value: dat-0001-aaaa
+INSERT INTO idempotency_keys (key, customer_id, request_hash)
+VALUES ('dat-0001-aaaa', 'c4000000-0000-4000-8000-000000000001',
+        md5('{"fare": 42000, "kind": "ride", "pickup_area_id": 111}'::jsonb::text))
+ON CONFLICT (key) DO NOTHING
+RETURNING key;
+      key
+---------------
+ dat-0001-aaaa
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi dat-0001-aaaa
+
+-- [lab] [A]
+-- @A
+INSERT INTO trips (kind, city_id, customer_id, fare, pickup_area_id)
+VALUES ('ride', 1, 'c4000000-0000-4000-8000-000000000001', 42000, 111)
+RETURNING id AS trip_id, code AS trip_code \gset
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+INSERT INTO trip_events (trip_id, status) VALUES (:'trip_id', 'requested');
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+-- Sự kiện cho hệ thống khác: CÙNG giao dịch ⇒ có chuyến thì có sự kiện, và ngược lại.
+-- expect-value: 1
+INSERT INTO outbox (aggregate_type, aggregate_id, event_type, payload)
+VALUES ('trip', :'trip_id', 'trip_requested',
+        jsonb_build_object('code', :trip_code, 'customer_id', 'c4000000-0000-4000-8000-000000000001'))
+RETURNING id;
+ id
+----
+  1
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 1
+
+-- [lab] [A]
+-- @A
+-- Lưu KẾT QUẢ trả cho client vào khoá — lần lặp sẽ trả lại đúng nội dung này.
+-- expect-line: {"status": "requested", "trip_code": 400200}
+UPDATE idempotency_keys
+SET trip_id = :'trip_id', completed_at = now(),
+    response = jsonb_build_object('trip_code', :trip_code, 'status', 'requested')
+WHERE key = 'dat-0001-aaaa'
+RETURNING response;
+                   response
+----------------------------------------------
+ {"status": "requested", "trip_code": 400200}
+(1 row)
+
+UPDATE 1
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [A]
+-- App không nhận được phản hồi (mạng rớt) ⇒ gửi LẠI, cùng khoá.
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Khoá đã có ⇒ không chèn ⇒ 0 dòng.
+-- expect-rows: 0
+INSERT INTO idempotency_keys (key, customer_id, request_hash)
+VALUES ('dat-0001-aaaa', 'c4000000-0000-4000-8000-000000000001',
+        md5('{"fare": 42000, "kind": "ride", "pickup_area_id": 111}'::jsonb::text))
+ON CONFLICT (key) DO NOTHING
+RETURNING key;
+ key
+-----
+(0 rows)
+
+INSERT 0 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+-- ⇒ trả lại kết quả lần đầu. Kiểm cùng nội dung request (hash) để phát hiện khoá bị dùng lại
+-- cho một request KHÁC (lỗi phía client ⇒ trả 422, không âm thầm trả kết quả cũ).
+-- expect-line: {"status": "requested", "trip_code": 400200} | t
+SELECT response, request_hash = md5('{"fare": 42000, "kind": "ride", "pickup_area_id": 111}'::jsonb::text) AS cung_noi_dung
+FROM idempotency_keys WHERE key = 'dat-0001-aaaa';
+                   response                   | cung_noi_dung
+----------------------------------------------+---------------
+ {"status": "requested", "trip_code": 400200} | t
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- ===========================================================================
+-- §2. Gói thành một hàm (server API gọi một lần mỗi request).
+
+-- @C
+CREATE FUNCTION dat_chuyen(p_key text, p_customer uuid, p_req jsonb) RETURNS jsonb
+LANGUAGE plpgsql AS $$
+DECLARE
+  v_hash text := md5(p_req::text);
+  v_key  idempotency_keys%ROWTYPE;
+  v_trip trips%ROWTYPE;
+BEGIN
+  INSERT INTO idempotency_keys (key, customer_id, request_hash)
+  VALUES (p_key, p_customer, v_hash)
+  ON CONFLICT (key) DO NOTHING;
+  IF NOT FOUND THEN
+    -- Khoá đã có (và đã commit — nếu đang có giao dịch khác giữ khoá, INSERT ở trên đã CHỜ nó).
+    SELECT * INTO v_key FROM idempotency_keys WHERE key = p_key;
+    IF v_key.request_hash <> v_hash OR v_key.customer_id <> p_customer THEN
+      RAISE EXCEPTION 'idempotency key % đã dùng cho một request khác', p_key
+        USING HINT = 'Client phải sinh khoá MỚI cho request mới (HTTP 422)';
+    END IF;
+    RETURN v_key.response || jsonb_build_object('lap_lai', true);
+  END IF;
+  INSERT INTO trips (kind, city_id, customer_id, fare, pickup_area_id)
+  VALUES (p_req->>'kind', 1, p_customer, (p_req->>'fare')::integer, (p_req->>'pickup_area_id')::integer)
+  RETURNING * INTO v_trip;
+  INSERT INTO trip_events (trip_id, status) VALUES (v_trip.id, 'requested');
+  INSERT INTO outbox (aggregate_type, aggregate_id, event_type, payload)
+  VALUES ('trip', v_trip.id, 'trip_requested',
+          jsonb_build_object('code', v_trip.code, 'customer_id', p_customer));
+  UPDATE idempotency_keys
+  SET trip_id = v_trip.id, completed_at = now(),
+      response = jsonb_build_object('trip_code', v_trip.code, 'status', v_trip.status)
+  WHERE key = p_key;
+  RETURN jsonb_build_object('trip_code', v_trip.code, 'status', v_trip.status, 'lap_lai', false);
+END
+$$;
+CREATE FUNCTION
+
+-- [lab] [A]
+-- @A
+-- expect-value: {"status": "requested", "lap_lai": false, "trip_code": 400201}
+SELECT dat_chuyen('dat-0002-bbbb', 'c4000000-0000-4000-8000-000000000002',
+                  '{"kind": "parcel", "fare": 35000, "pickup_area_id": 112}');
+                           dat_chuyen
+----------------------------------------------------------------
+ {"status": "requested", "lap_lai": false, "trip_code": 400201}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi {"status": "requested", "lap_lai": false, "trip_code": 400201}
+
+-- [lab] [A]
+-- @A
+-- Gửi lại: cùng kết quả, đánh dấu lap_lai.
+-- expect-value: {"status": "requested", "lap_lai": true, "trip_code": 400201}
+SELECT dat_chuyen('dat-0002-bbbb', 'c4000000-0000-4000-8000-000000000002',
+                  '{"kind": "parcel", "fare": 35000, "pickup_area_id": 112}');
+                          dat_chuyen
+---------------------------------------------------------------
+ {"status": "requested", "lap_lai": true, "trip_code": 400201}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi {"status": "requested", "lap_lai": true, "trip_code": 400201}
+
+-- [lab] [A]
+-- @A
+-- Cùng khoá, KHÁC nội dung ⇒ lỗi (P0001 = RAISE EXCEPTION của PL/pgSQL).
+-- expect-error: P0001
+SELECT dat_chuyen('dat-0002-bbbb', 'c4000000-0000-4000-8000-000000000002',
+                  '{"kind": "parcel", "fare": 99000, "pickup_area_id": 112}');
+ERROR:  idempotency key dat-0002-bbbb đã dùng cho một request khác
+HINT:  Client phải sinh khoá MỚI cho request mới (HTTP 422)
+CONTEXT:  PL/pgSQL function dat_chuyen(text,uuid,jsonb) line 14 at RAISE
+-- [lab] SQLSTATE P0001
+-- [lab] PASS: đúng lỗi mong đợi P0001
+
+-- [lab] [A]
+-- ===========================================================================
+-- §3. Hai request CÙNG KHOÁ đồng thời (bấm hai lần thật nhanh, hai server khác nhau xử lý).
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: {"status": "requested", "lap_lai": false, "trip_code": 400202}
+SELECT dat_chuyen('dat-0003-cccc', 'c4000000-0000-4000-8000-000000000003',
+                  '{"kind": "ride", "fare": 51000, "pickup_area_id": 113}');
+                           dat_chuyen
+----------------------------------------------------------------
+ {"status": "requested", "lap_lai": false, "trip_code": 400202}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi {"status": "requested", "lap_lai": false, "trip_code": 400202}
+
+-- [lab] [B]
+-- @B
+-- B chèn cùng khoá ⇒ CHỜ ở index duy nhất pk_idempotency_keys tới khi A kết thúc.
+-- expect-blocked
+-- expect-value: {"status": "requested", "lap_lai": true, "trip_code": 400202}
+SELECT dat_chuyen('dat-0003-cccc', 'c4000000-0000-4000-8000-000000000003',
+                  '{"kind": "ride", "fare": 51000, "pickup_area_id": 113}');
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 163 đã chạy xong (sau khi hết bị chặn):
+                          dat_chuyen
+---------------------------------------------------------------
+ {"status": "requested", "lap_lai": true, "trip_code": 400202}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi {"status": "requested", "lap_lai": true, "trip_code": 400202}
+
+-- [lab] [A]
+-- (A commit ⇒ B thấy khoá đã có ⇒ trả kết quả của A, lap_lai = true — dòng "✔" ở trên.)
+
+-- ===========================================================================
+-- §4. Request đầu CHẾT giữa chừng (huỷ phiên trước COMMIT) trong lúc request lặp đang chờ.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- A đã tạo chuyến (mã 400203), sự kiện, outbox — tất cả CHƯA commit.
+-- expect-value: {"status": "requested", "lap_lai": false, "trip_code": 400203}
+SELECT dat_chuyen('dat-0004-dddd', 'c4000000-0000-4000-8000-000000000004',
+                  '{"kind": "ride", "fare": 47000, "pickup_area_id": 111}');
+                           dat_chuyen
+----------------------------------------------------------------
+ {"status": "requested", "lap_lai": false, "trip_code": 400203}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi {"status": "requested", "lap_lai": false, "trip_code": 400203}
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+-- expect-value: {"status": "requested", "lap_lai": false, "trip_code": 400204}
+SELECT dat_chuyen('dat-0004-dddd', 'c4000000-0000-4000-8000-000000000004',
+                  '{"kind": "ride", "fare": 47000, "pickup_area_id": 111}');
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [C]
+-- @C
+-- Server của A sập (ở đây: huỷ backend của A).
+-- expect-value: t
+SELECT pg_terminate_backend(pid, 5000) FROM pg_stat_activity WHERE application_name = 'lab-A';
+ pg_terminate_backend
+----------------------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [B] ✔ bước dòng 187 đã chạy xong (sau khi hết bị chặn):
+                           dat_chuyen
+----------------------------------------------------------------
+ {"status": "requested", "lap_lai": false, "trip_code": 400204}
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi {"status": "requested", "lap_lai": false, "trip_code": 400204}
+
+-- [lab] [A]
+-- (Giao dịch của A bị huỷ ⇒ khoá idempotency của A biến mất ⇒ B chèn được và TỰ tạo chuyến
+--  400204 — dòng "✔" ở trên. Mã 400203 bị đốt; chuyến/sự kiện/outbox của A không còn gì.)
+
+-- @A
+-- expect-mat-ket-noi
+COMMIT;
+-- [lab] [A] ✖ MẤT KẾT NỐI: psql thoát (mã 2) — "server closed the connection unexpectedly"; giao dịch đang mở của phiên bị server huỷ (ROLLBACK)
+-- [lab] PASS: mất kết nối như mong đợi (expect-mat-ket-noi)
+
+-- [lab] [C]
+-- @C
+-- Mỗi khoá đúng một chuyến; mọi chuyến của bài có đúng một sự kiện và một tin outbox.
+-- expect-line: dat-0001-aaaa | 400200 | 1 | 1
+-- expect-line: dat-0002-bbbb | 400201 | 1 | 1
+-- expect-line: dat-0003-cccc | 400202 | 1 | 1
+-- expect-line: dat-0004-dddd | 400204 | 1 | 1
+SELECT k.key, t.code,
+       (SELECT count(*) FROM trip_events AS e WHERE e.trip_id = t.id) AS su_kien,
+       (SELECT count(*) FROM outbox AS o WHERE o.aggregate_id = t.id) AS outbox
+FROM idempotency_keys AS k JOIN trips AS t ON t.id = k.trip_id
+ORDER BY k.key;
+      key      |  code  | su_kien | outbox
+---------------+--------+---------+--------
+ dat-0001-aaaa | 400200 |       1 |      1
+ dat-0002-bbbb | 400201 |       1 |      1
+ dat-0003-cccc | 400202 |       1 |      1
+ dat-0004-dddd | 400204 |       1 |      1
+(4 rows)
+-- [lab] PASS: đúng nội dung 4 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- Không có chuyến "nửa vời" của A (mã 400203).
+-- expect-value: 0
+SELECT count(*) FROM trips WHERE code = 400203;
+ count
+-------
+     0
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi 0
+
+-- [lab] [A] mở kết nối MỚI (kết nối cũ đã mất): phiên mới — SET, biến psql, giao dịch cũ đều không còn
+
+-- [lab] [A]
+-- ===========================================================================
+-- §5. Publisher đọc outbox (SKIP LOCKED — nhiều publisher song song không lấy trùng), gửi
+-- broker bằng kết nối riêng [D], rồi đánh dấu đã gửi. Giao hàng "ít nhất một lần".
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- Publisher A lấy 2 tin đầu (id outbox 1, 2, 3, 5 — id 4 là của giao dịch đã huỷ ở §4).
+-- expect-line: 1
+-- expect-line: 2
+SELECT id FROM outbox WHERE published_at IS NULL ORDER BY id LIMIT 2 FOR UPDATE SKIP LOCKED;
+ id
+----
+  1
+  2
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [D]
+-- @D
+-- "Gửi" 2 tin sang broker — broker là hệ thống khác, đã nhận là nhận (không rollback được).
+-- expect-rows: 2
+INSERT INTO broker_messages (outbox_id, event_type, payload, sent_by)
+SELECT id, event_type, payload, 'publisher-A' FROM outbox WHERE id IN (1, 2) ORDER BY id;
+INSERT 0 2
+-- [lab] PASS: đúng 2 dòng như mong đợi
+
+-- [lab] [C]
+-- @C
+-- Publisher A chết TRƯỚC khi kịp đánh dấu published_at.
+-- expect-value: t
+SELECT pg_terminate_backend(pid, 5000) FROM pg_stat_activity WHERE application_name = 'lab-A';
+ pg_terminate_backend
+----------------------
+ t
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi t
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- Publisher B: tin 1, 2 vẫn "chưa gửi" (giao dịch đánh dấu của A chưa từng commit).
+-- expect-line: 1
+-- expect-line: 2
+-- expect-line: 3
+-- expect-line: 5
+SELECT id FROM outbox WHERE published_at IS NULL ORDER BY id LIMIT 10 FOR UPDATE SKIP LOCKED;
+ id
+----
+  1
+  2
+  3
+  5
+(4 rows)
+-- [lab] PASS: đúng nội dung 4 dòng như mong đợi (expect-line)
+
+-- [lab] [D]
+-- @D
+-- expect-rows: 4
+INSERT INTO broker_messages (outbox_id, event_type, payload, sent_by)
+SELECT id, event_type, payload, 'publisher-B' FROM outbox WHERE id IN (1, 2, 3, 5) ORDER BY id;
+INSERT 0 4
+-- [lab] PASS: đúng 4 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- expect-rows: 4
+UPDATE outbox SET published_at = now(), publish_attempts = publish_attempts + 1
+WHERE id IN (1, 2, 3, 5);
+UPDATE 4
+-- [lab] PASS: đúng 4 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- Broker nhận 6 tin cho 4 sự kiện: tin 1 và 2 bị gửi HAI lần.
+-- expect-line: 1 | 2 | publisher-A,publisher-B
+-- expect-line: 2 | 2 | publisher-A,publisher-B
+-- expect-line: 3 | 1 | publisher-B
+-- expect-line: 5 | 1 | publisher-B
+SELECT outbox_id, count(*), string_agg(sent_by, ',' ORDER BY seq)
+FROM broker_messages GROUP BY outbox_id ORDER BY outbox_id;
+ outbox_id | count |       string_agg
+-----------+-------+-------------------------
+         1 |     2 | publisher-A,publisher-B
+         2 |     2 | publisher-A,publisher-B
+         3 |     1 | publisher-B
+         5 |     1 | publisher-B
+(4 rows)
+-- [lab] PASS: đúng nội dung 4 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- ===========================================================================
+-- §6. Consumer "gửi thông báo cho khách" chống trùng: ghi (consumer, outbox_id) vào bảng
+-- processed_messages (khoá chính) CÙNG giao dịch với tác dụng; chèn không được ⇒ đã xử lý
+-- ⇒ bỏ qua. (Ở đây xử lý 6 tin trong một câu cho gọn; consumer thật commit từng tin.)
+
+-- @C
+CREATE FUNCTION xu_ly_tin(p_seq bigint) RETURNS text
+LANGUAGE plpgsql AS $$
+DECLARE
+  m broker_messages%ROWTYPE;
+BEGIN
+  SELECT * INTO m FROM broker_messages WHERE seq = p_seq;
+  INSERT INTO processed_messages (consumer, outbox_id) VALUES ('thong-bao', m.outbox_id)
+  ON CONFLICT DO NOTHING;
+  IF NOT FOUND THEN
+    RETURN 'bỏ qua (đã xử lý)';
+  END IF;
+  INSERT INTO notifications (outbox_id, customer_id, body)
+  VALUES (m.outbox_id, (m.payload->>'customer_id')::uuid, 'Đã nhận yêu cầu chuyến ' || (m.payload->>'code'));
+  RETURN 'đã gửi thông báo';
+END
+$$;
+CREATE FUNCTION
+
+-- [lab] [C]
+-- @C
+-- expect-line: 1 | 1 | đã gửi thông báo
+-- expect-line: 2 | 2 | đã gửi thông báo
+-- expect-line: 3 | 1 | bỏ qua (đã xử lý)
+-- expect-line: 4 | 2 | bỏ qua (đã xử lý)
+-- expect-line: 5 | 3 | đã gửi thông báo
+-- expect-line: 6 | 5 | đã gửi thông báo
+SELECT seq, outbox_id, xu_ly_tin(seq) FROM broker_messages ORDER BY seq;
+ seq | outbox_id |     xu_ly_tin
+-----+-----------+-------------------
+   1 |         1 | đã gửi thông báo
+   2 |         2 | đã gửi thông báo
+   3 |         1 | bỏ qua (đã xử lý)
+   4 |         2 | bỏ qua (đã xử lý)
+   5 |         3 | đã gửi thông báo
+   6 |         5 | đã gửi thông báo
+(6 rows)
+-- [lab] PASS: đúng nội dung 6 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- Bất biến: mỗi sự kiện đúng MỘT thông báo dù broker giao trùng.
+-- expect-line: 1 | 1
+-- expect-line: 2 | 1
+-- expect-line: 3 | 1
+-- expect-line: 5 | 1
+SELECT outbox_id, count(*) FROM notifications GROUP BY outbox_id ORDER BY outbox_id;
+ outbox_id | count
+-----------+-------
+         1 |     1
+         2 |     1
+         3 |     1
+         5 |     1
+(4 rows)
+-- [lab] PASS: đúng nội dung 4 dòng như mong đợi (expect-line)
+
+-- [lab] ===== p04/40-thuc-hanh-nhan-chuyen.sql · PG-040 · bản sao nền p04 (database bai_10) =====
+
+-- [lab] [A]
+-- PG-040 · Thực hành: hai tài xế cùng nhận một chuyến — `postgresql-thuc-hanh-tranh-chap-nhan-chuyen`
+--
+-- Đề: chuyến mới được gửi cho vài tài xế gần nhất CÙNG LÚC; ai bấm "Nhận" trước thì được.
+-- BẤT BIẾN cần bàn giao: mỗi chuyến có ĐÚNG MỘT người thắng — đúng một tài xế được ứng dụng
+-- báo "bạn đã nhận chuyến" (một dòng trip_claims), và đó chính là trips.driver_id.
+-- Bốn cách làm, mỗi cách trên một chuyến riêng, cùng các tài xế 9101 [A], 9102 [B], 9103 [C]:
+--   (a) 400101 — đọc trạng thái rồi ghi, KHÔNG khoá, không điều kiện       ⇒ HAI người thắng
+--   (b) 400102 — UPDATE có điều kiện WHERE status = 'requested'           ⇒ một người thắng
+--   (c) 400103 — SELECT … FOR UPDATE rồi kiểm rồi ghi                     ⇒ một người thắng
+--   (d) 400104 — ràng buộc duy nhất: trip_assignments PRIMARY KEY (trip_id) ⇒ một người thắng
+-- Lịch chạy tất định ở đây chỉ ra CƠ CHẾ. Bằng chứng ở quy mô (1.000 chuyến × 8 phiên đồng
+-- thời, lặp nhiều lần, đếm số người thắng mỗi chuyến): p04/dong-thoi.mjs, kịch bản K040-* —
+-- `npm run p04:measure` ghi p04/DO-DAC.md; `npm test` chạy bản nhỏ và kiểm bất biến.
+
+-- @A
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [B]
+-- @B
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [C]
+-- @C
+SET search_path TO toinoi, public;
+SET
+
+-- [lab] [A]
+-- ===========================================================================
+-- (a) Đọc rồi ghi, không khoá. Lịch: A đọc · B đọc · A ghi + commit · B ghi + commit.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: requested
+SELECT status FROM trips WHERE code = 400101;
+  status
+-----------
+ requested
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi requested
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-value: requested
+SELECT status FROM trips WHERE code = 400101;
+  status
+-----------
+ requested
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi requested
+
+-- [lab] [A]
+-- @A
+-- "Còn trống" ⇒ A ghi mình là tài xế và báo A đã nhận.
+-- expect-rows: 1
+UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009101',
+                 accepted_at = now(), updated_at = now(), version = version + 1
+WHERE code = 400101;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [A]
+-- @A
+INSERT INTO trip_claims (trip_id, driver_id, method)
+SELECT id, 'd4000000-0000-4000-8000-000000009101', 'a_khong_khoa' FROM trips WHERE code = 400101;
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B]
+-- @B
+-- B cũng đã thấy "còn trống" ⇒ cũng ghi (không điều kiện) — ghi đè A, không lỗi, không chờ.
+-- expect-rows: 1
+UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009102',
+                 accepted_at = now(), updated_at = now(), version = version + 1
+WHERE code = 400101;
+UPDATE 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+INSERT INTO trip_claims (trip_id, driver_id, method)
+SELECT id, 'd4000000-0000-4000-8000-000000009102', 'a_khong_khoa' FROM trips WHERE code = 400101;
+INSERT 0 1
+
+-- [lab] [B]
+-- @B
+COMMIT;
+COMMIT
+
+-- [lab] [C]
+-- @C
+-- Hai tài xế cùng được báo "đã nhận"; trong DB chỉ còn B. A chạy tới điểm đón vô ích.
+-- expect-line: 9101 | 9102
+-- expect-line: 9102 | 9102
+SELECT d.code AS duoc_bao_nhan, (SELECT dt.code FROM drivers AS dt WHERE dt.id = t.driver_id) AS driver_trong_db
+FROM trip_claims AS c JOIN drivers AS d ON d.id = c.driver_id JOIN trips AS t ON t.id = c.trip_id
+WHERE t.code = 400101 ORDER BY c.id;
+ duoc_bao_nhan | driver_trong_db
+---------------+-----------------
+          9101 |            9102
+          9102 |            9102
+(2 rows)
+-- [lab] PASS: đúng nội dung 2 dòng như mong đợi (expect-line)
+
+-- [lab] [A]
+-- ===========================================================================
+-- (b) Một câu UPDATE có điều kiện + ghi claim trong CÙNG câu (CTE). Ba tài xế cùng lúc:
+-- A ghi trước (chưa commit) ⇒ B, C chờ khoá dòng ⇒ A commit ⇒ B, C đọc lại dòng: status
+-- không còn 'requested' ⇒ 0 dòng ⇒ không claim.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: 9101
+WITH nhan AS (
+  UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009101',
+                   accepted_at = now(), updated_at = now(), version = version + 1
+  WHERE code = 400102 AND status = 'requested'
+  RETURNING id, driver_id)
+INSERT INTO trip_claims (trip_id, driver_id, method)
+SELECT id, driver_id, 'b_co_dieu_kien' FROM nhan
+RETURNING (SELECT code FROM drivers WHERE id = driver_id);
+ code
+------
+ 9101
+(1 row)
+
+INSERT 0 1
+-- [lab] PASS: đúng giá trị mong đợi 9101
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+-- expect-rows: 0
+WITH nhan AS (
+  UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009102',
+                   accepted_at = now(), updated_at = now(), version = version + 1
+  WHERE code = 400102 AND status = 'requested'
+  RETURNING id, driver_id)
+INSERT INTO trip_claims (trip_id, driver_id, method)
+SELECT id, driver_id, 'b_co_dieu_kien' FROM nhan
+RETURNING (SELECT code FROM drivers WHERE id = driver_id);
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [C]
+-- @C
+-- C xếp hàng SAU B: B đang giữ khoá 'tuple' (chỗ đầu hàng chờ dòng này) ⇒ C chờ B, không chờ A.
+-- expect-blocked
+-- expect-rows: 0
+WITH nhan AS (
+  UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009103',
+                   accepted_at = now(), updated_at = now(), version = version + 1
+  WHERE code = 400102 AND status = 'requested'
+  RETURNING id, driver_id)
+INSERT INTO trip_claims (trip_id, driver_id, method)
+SELECT id, driver_id, 'b_co_dieu_kien' FROM nhan
+RETURNING (SELECT code FROM drivers WHERE id = driver_id);
+-- [lab] [C] ⏳ đang chờ khoá (Lock: tuple) — bị chặn bởi [B]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 96 đã chạy xong (sau khi hết bị chặn):
+ code
+------
+(0 rows)
+
+INSERT 0 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [C] ✔ bước dòng 108 đã chạy xong (sau khi hết bị chặn):
+ code
+------
+(0 rows)
+
+INSERT 0 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [A]
+-- (B và C chạy tiếp lần lượt — dòng "✔" ở trên — mỗi người 0 dòng ⇒ app báo "đã có người nhận".)
+
+-- ===========================================================================
+-- (c) Khoá dòng trước (FOR UPDATE), kiểm trạng thái trong ứng dụng, rồi ghi.
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-value: requested
+SELECT status FROM trips WHERE code = 400103 FOR UPDATE;
+  status
+-----------
+ requested
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi requested
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- expect-blocked
+-- expect-value: accepted
+SELECT status FROM trips WHERE code = 400103 FOR UPDATE;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009101',
+                 accepted_at = now(), updated_at = now(), version = version + 1
+WHERE code = 400103;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+INSERT INTO trip_claims (trip_id, driver_id, method)
+SELECT id, 'd4000000-0000-4000-8000-000000009101', 'c_for_update' FROM trips WHERE code = 400103;
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 139 đã chạy xong (sau khi hết bị chặn):
+  status
+----------
+ accepted
+(1 row)
+-- [lab] PASS: đúng giá trị mong đợi accepted
+
+-- [lab] [B]
+-- (B nhận khoá và đọc ĐÚNG bản mới — 'accepted' — dòng "✔" ở trên ⇒ app không ghi.)
+
+-- @B
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [A]
+-- ===========================================================================
+-- (d) Ràng buộc duy nhất làm trọng tài: mỗi người chèn một dòng phân công; khoá chính
+-- trip_id chỉ cho MỘT dòng tồn tại. Đúng kể cả khi logic ứng dụng có lỗi (lưới an toàn cuối).
+
+-- @A
+BEGIN;
+BEGIN
+
+-- [lab] [A]
+-- @A
+-- expect-rows: 1
+INSERT INTO trip_assignments (trip_id, driver_id)
+SELECT id, 'd4000000-0000-4000-8000-000000009101' FROM trips WHERE code = 400104;
+INSERT 0 1
+-- [lab] PASS: đúng 1 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+BEGIN;
+BEGIN
+
+-- [lab] [B]
+-- @B
+-- Cùng giá trị khoá đang được A chèn (chưa commit) ⇒ chờ xem A commit hay huỷ.
+-- expect-blocked
+-- expect-error: 23505 pk_trip_assignments
+INSERT INTO trip_assignments (trip_id, driver_id)
+SELECT id, 'd4000000-0000-4000-8000-000000009102' FROM trips WHERE code = 400104;
+-- [lab] [B] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [C]
+-- @C
+-- Biến thể không ném lỗi: ON CONFLICT DO NOTHING ⇒ 0 dòng.
+-- expect-blocked
+-- expect-rows: 0
+INSERT INTO trip_assignments (trip_id, driver_id)
+SELECT id, 'd4000000-0000-4000-8000-000000009103' FROM trips WHERE code = 400104
+ON CONFLICT (trip_id) DO NOTHING;
+-- [lab] [C] ⏳ đang chờ khoá (Lock: transactionid) — bị chặn bởi [A]
+-- [lab] PASS: bước bị chặn như mong đợi (expect-blocked)
+
+-- [lab] [A]
+-- @A
+UPDATE trips SET status = 'accepted', driver_id = 'd4000000-0000-4000-8000-000000009101',
+                 accepted_at = now(), updated_at = now(), version = version + 1
+WHERE code = 400104;
+UPDATE 1
+
+-- [lab] [A]
+-- @A
+INSERT INTO trip_claims (trip_id, driver_id, method)
+SELECT id, 'd4000000-0000-4000-8000-000000009101', 'd_unique' FROM trips WHERE code = 400104;
+INSERT 0 1
+
+-- [lab] [A]
+-- @A
+COMMIT;
+COMMIT
+
+-- [lab] [B] ✔ bước dòng 176 đã chạy xong (sau khi hết bị chặn):
+ERROR:  duplicate key value violates unique constraint "pk_trip_assignments"
+DETAIL:  Key (trip_id)=(a4000000-0000-4000-8000-000000400104) already exists.
+-- [lab] SQLSTATE 23505 · constraint pk_trip_assignments · table trip_assignments
+-- [lab] PASS: đúng lỗi mong đợi 23505 pk_trip_assignments
+
+-- [lab] [C] ✔ bước dòng 183 đã chạy xong (sau khi hết bị chặn):
+INSERT 0 0
+-- [lab] PASS: đúng 0 dòng như mong đợi
+
+-- [lab] [B]
+-- @B
+-- (B nhận 23505 — dòng "✔" ở trên; giao dịch hỏng ⇒ ROLLBACK.)
+ROLLBACK;
+ROLLBACK
+
+-- [lab] [C]
+-- ===========================================================================
+-- Bàn giao: kiểm bất biến trên cả bốn chuyến.
+
+-- @C
+-- Số người được báo "đã nhận" mỗi chuyến, và claim có khớp trips.driver_id không.
+-- expect-line: 400101 | a_khong_khoa | 2 | 1 | VI PHẠM
+-- expect-line: 400102 | b_co_dieu_kien | 1 | 1 | đạt
+-- expect-line: 400103 | c_for_update | 1 | 1 | đạt
+-- expect-line: 400104 | d_unique | 1 | 1 | đạt
+SELECT t.code, c.method, count(*) AS so_nguoi_thang,
+       count(*) FILTER (WHERE c.driver_id = t.driver_id) AS khop_driver_id,
+       CASE WHEN count(*) = 1 AND count(*) FILTER (WHERE c.driver_id = t.driver_id) = 1
+            THEN 'đạt' ELSE 'VI PHẠM' END AS bat_bien
+FROM trip_claims AS c JOIN trips AS t ON t.id = c.trip_id
+GROUP BY t.code, c.method ORDER BY t.code;
+  code  |     method     | so_nguoi_thang | khop_driver_id | bat_bien
+--------+----------------+----------------+----------------+----------
+ 400101 | a_khong_khoa   |              2 |              1 | VI PHẠM
+ 400102 | b_co_dieu_kien |              1 |              1 | đạt
+ 400103 | c_for_update   |              1 |              1 | đạt
+ 400104 | d_unique       |              1 |              1 | đạt
+(4 rows)
+-- [lab] PASS: đúng nội dung 4 dòng như mong đợi (expect-line)
+
+-- [lab] [C]
+-- @C
+-- Phân công khớp trips cho cách (d).
+-- expect-line: 400104 | 9101 | 9101
+SELECT t.code, da.code AS phan_cong, dt.code AS trips_driver
+FROM trip_assignments AS a JOIN trips AS t ON t.id = a.trip_id
+JOIN drivers AS da ON da.id = a.driver_id JOIN drivers AS dt ON dt.id = t.driver_id;
+  code  | phan_cong | trips_driver
+--------+-----------+--------------
+ 400104 |      9101 |         9101
+(1 row)
+-- [lab] PASS: đúng nội dung 1 dòng như mong đợi (expect-line)
+
+-- [lab] ===== Tổng kết =====
+-- [lab] Bước đã chạy: 613
+-- [lab] Lỗi mong đợi (expect-error): 17
+-- [lab] Kiểm số dòng (expect-rows): 47
+-- [lab] Kiểm giá trị (expect-value): 116
+-- [lab] Kiểm nội dung (expect-line): 67
+-- [lab] Kiểm md5 kết quả (expect-md5): 1
+-- [lab] Kiểm dòng đầu ra (expect-match/no-match): 11
+-- [lab] Kiểm bị chặn (expect-blocked): 25
+-- [lab] Kiểm mất kết nối (expect-mat-ket-noi): 3
+-- [lab] FAIL: 0
+-- [lab] KẾT QUẢ: ĐẠT

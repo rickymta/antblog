@@ -152,13 +152,18 @@ export function codeOf(stepText) {
  *   expect-match: regex     — (lặp) MỖI regex khớp ít nhất một dòng đầu ra
  *   expect-no-match: regex  — (lặp) không dòng đầu ra nào khớp
  *   expect-range: lo hi     — đúng 1 ô, là số trong [lo, hi]
- *   expect-blocked          — (nhiều phiên) bước phải bị CHẶN chờ khoá
+ *   expect-blocked          — (nhiều phiên) bước phải bị CHẶN chờ khoá (kèm lab: cho-xong:
+ *                             phải từng chờ khoá trước khi xong)
+ *   expect-mat-ket-noi      — bước làm psql MẤT KẾT NỐI (backend bị huỷ, server đóng kết nối)
  * Chỉ thị runner:
  *   lab: restart            — khởi động lại server trước bước này
  *   lab: bien-dong          — kết quả đổi giữa các lần chạy (vd. thống kê lấy mẫu):
  *                             test so OUTPUT.txt bỏ qua phần kết quả của bước
  *   lab: nhat-ky            — sau bước, in các dòng mới của nhật ký server
  *   lab: cho-ms n           — (nhiều phiên) chờ tối đa n ms trước khi coi bước "đang chạy"
+ *   lab: cho-xong           — (nhiều phiên) CHỜ bước chạy xong (tối đa 60 s), không chuyển sang
+ *                             bước sau dù bước đang chờ khoá — cho bước sẽ tự kết thúc bằng lỗi
+ *                             sau một thời gian (lock_timeout, statement_timeout, deadlock)
  *   @TEN                    — (nhiều phiên) chạy bước trên phiên TEN
  */
 export function parseDirectives(stepText) {
@@ -178,6 +183,7 @@ export function parseDirectives(stepText) {
     if ((m = /^--\s*expect-no-match\s*:\s?(.*)$/.exec(t))) { (exp.noMatch ??= []).push(compile(m[1].trim(), t)); continue; }
     if ((m = /^--\s*expect-range\s*:\s*(-?[0-9.]+)\s+(-?[0-9.]+)\s*$/.exec(t))) { exp.range = [Number(m[1]), Number(m[2])]; continue; }
     if (/^--\s*expect-blocked\s*$/.test(t)) { exp.blocked = true; continue; }
+    if (/^--\s*expect-mat-ket-noi\s*$/.test(t)) { exp.lost = true; continue; }
     if (/^--\s*expect-/i.test(t)) throw new Error(`Chỉ thị không hiểu: ${t}`);
     if ((m = /^--\s*lab\s*:\s*(.+)$/.exec(t))) {
       const v = m[1].trim();
@@ -186,6 +192,7 @@ export function parseDirectives(stepText) {
       else if (v === 'bien-dong') lab.volatile = true;
       else if (v === 'nhat-ky') lab.serverLog = true;
       else if ((k = /^cho-ms\s+(\d+)$/.exec(v))) lab.waitMs = Number(k[1]);
+      else if (v === 'cho-xong') lab.waitDone = true;
       else throw new Error(`Chỉ thị lab: không hiểu: ${t}`);
       continue;
     }
