@@ -30,3 +30,12 @@
   .tkh-reader-grid { grid-template-columns: 18.5rem minmax(0, 1fr) 18.5rem; }
   .tkh-reader-left { display: block; }
 }
+
+/* A bounded reading column keeps line length stable on tablets and wide screens. */
+.tkh-reader-grid > article { max-width: 48rem; }
+.tkh-reader-grid > article > header > h1 { line-height: 1.3; letter-spacing: -0.025em; }
+.tkh-reader-grid > article > header > p { line-height: 1.75; }
+.tkh-reader-scroll nav a { line-height: 1.6; padding-block: 0.5rem; }
+@media (max-width: 639px) {
+  .tkh-reader-grid { padding-block: 1.5rem; }
+}

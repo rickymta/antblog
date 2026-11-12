@@ -74,3 +74,22 @@
   .mobile-bottom-nav { display: none; }
   .site-shell { padding-bottom: 0; }
 }
+
+/* Softer neutral surfaces for prolonged reading; blue identity is unchanged. */
+:root {
+  --tkh-page: #F6F7F9;
+  --tkh-surface: #FDFDFE;
+  --tkh-ink: #243247;
+  --tkh-muted: #566277;
+}
+.dark {
+  --tkh-page: #131C2B;
+  --tkh-surface: #1C283A;
+  --tkh-surface-2: #172234;
+  --tkh-ink: #DFE5EF;
+  --tkh-muted: #A5B2C6;
+}
+::selection { background: var(--tkh-primary-soft); color: var(--tkh-ink); }
+@layer base {
+  body { line-height: 1.6; }
+}

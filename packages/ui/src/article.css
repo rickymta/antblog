@@ -20,8 +20,9 @@
   --fig-dead: #94A3B8;
   --code-inline-bg: #F1F5F9;
 
-  font-size: 1.0625rem;
-  line-height: 1.75;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
   color: var(--tkh-ink);
   min-width: 0;
 }
@@ -46,7 +47,7 @@
 .tkh-prose h2 { font-size: 1.6rem; margin-top: 2.2em; letter-spacing: -0.01em; }
 .tkh-prose h3 { font-size: 1.25rem; margin-top: 1.8em; }
 .tkh-prose h4 { font-size: 1.05rem; margin-top: 1.5em; }
-.tkh-prose p, .tkh-prose ul, .tkh-prose ol, .tkh-prose blockquote { max-width: 72ch; }
+.tkh-prose p, .tkh-prose ul, .tkh-prose ol, .tkh-prose blockquote { max-width: 68ch; }
 .tkh-prose a { color: var(--tkh-link); text-decoration: underline; text-underline-offset: 3px; }
 .tkh-prose strong { font-weight: 650; }
 .tkh-prose ul, .tkh-prose ol { padding-left: 1.4em; }
@@ -76,9 +77,9 @@
   border-radius: var(--radius-card);
   padding: 1rem 1.15rem;
   overflow-x: auto;
-  font-size: 0.86rem;
-  line-height: 1.6;
-  border: 1px solid #1E293B;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  border: 1px solid #334155;
 }
 
 /* Bài dài (vài chục khối code, hình, bảng): khối ngoài màn hình chưa cần dựng bố cục — trình duyệt bỏ qua tới khi cuộn
@@ -166,3 +167,15 @@
 .tkh-prose a:visited { color: var(--tkh-link-visited); }
 .tkh-prose a:hover, .tkh-prose a:focus-visible { color: var(--tkh-link-hover); }
 .tkh-prose a code { color: inherit; }
+
+/* Reading rhythm also applies inside list items and Markdown containers. */
+.tkh-prose li > :where(p, ul, ol) { margin-block: 0.6em; }
+.tkh-prose :where(img, video) { display: block; max-width: 100%; height: auto; border-radius: var(--radius-card); margin-block: 1.5em; }
+.tkh-prose th { line-height: 1.5; }
+.tkh-prose td { line-height: 1.7; }
+.tkh-prose :where(h2, h3, h4) + :where(p, ul, ol) { margin-top: 0.75em; }
+@media (max-width: 639px) {
+  .tkh-prose { font-size: 1.0625rem; line-height: 1.8; }
+  .tkh-prose h2 { font-size: 1.45rem; }
+  .tkh-prose pre { font-size: 0.875rem; padding-inline: 1rem; }
+}
