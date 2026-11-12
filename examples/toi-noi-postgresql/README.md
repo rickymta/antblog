@@ -352,3 +352,8 @@ toi-noi-postgresql/
     ├── dong-thoi.mjs → DO-DAC.md  ← đặc tả phép thử đồng thời → số đếm thật + bất biến, kèm cấu hình máy
     └── OUTPUT.txt         ← kết quả thật của `npm run p04`
 ```
+
+
+## P05 · Bảo mật, bảo trì và phục hồi
+
+Đã bổ sung PG-041–050. Chạy `npm run p05` trên PostgreSQL thật; cần thêm OpenSSL. Xem [hướng dẫn và giới hạn phép đo](p05/README.md), [runbook](p05/RUNBOOK.md) và [kết quả thực](p05/OUTPUT.txt). Lab dựng hai cluster tạm, kiểm TLS/SCRAM, quyền, lock, vacuum, backup logic, pool, RLS và PITR. Không chạy seed/deploy.

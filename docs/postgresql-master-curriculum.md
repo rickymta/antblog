@@ -23,7 +23,7 @@ Series riêng cho PostgreSQL thuộc chuyên mục cha Database, dùng xuyên su
 
 | Engine | Slug chuyên mục | Tiền tố bài mới | Curriculum dự kiến | Trạng thái |
 |---|---|---|---|---|
-| PostgreSQL | `postgresql` | `postgresql-` | `postgresql-master-curriculum.md` | Dựng khung trong đợt này |
+| PostgreSQL | `postgresql` | `postgresql-` | `postgresql-master-curriculum.md` | P01–P05 đã viết; P06 kế hoạch |
 | MySQL | `mysql` | `mysql-` | `mysql-master-curriculum.md` | Dự kiến |
 | MongoDB | `mongodb` | `mongodb-` | `mongodb-master-curriculum.md` | Dự kiến |
 | Microsoft SQL Server (MSSQL) | `mssql` | `mssql-` | `mssql-master-curriculum.md` | Dự kiến |
@@ -36,11 +36,11 @@ Mọi series engine theo cùng quy ước với PostgreSQL: chia thành nhiều 
 
 ## Giữ nội dung hiện có và quy ước xuất bản
 
-- Giữ URL lộ trình `postgresql-tu-ben-trong` và ba liên kết hiện có; đổi chuyên mục lộ trình sang `postgresql`. Đây là lộ trình đang đọc được, không phải P01 đã hoàn tất.
+- Giữ URL lộ trình `postgresql-tu-ben-trong`; hiện là P01 đã hoàn tất. Hồ sơ chung là tài liệu đọc trước, hai bài kế thừa đã chuyển vào P03, giữ nguyên URL bài.
 - Giữ nguyên slug hai bài đã có: `page-don-vi-doc-ghi` → PG-022, `heap-ctid-va-primary-key` → PG-024. Chuyển chuyên mục sang `postgresql`, không viết bản sao. Khi làm P03 phải rà lại nội dung, phép đo và thứ tự đọc trước khi đánh dấu hoàn tất phần.
 - Khi P01 hoàn tất, cập nhật lộ trình gốc thành P01 với 10 bài PG-001–010; hồ sơ chung trở thành tài liệu đọc trước. Hai bài cũ giữ URL và đăng ký vào P03 khi phần đó sẵn sàng. Các phần tiếp theo dùng `postgresql-tu-ben-trong-phan-02` … `-phan-06`.
 - Chỉ thêm các bài đã viết và kiểm tra vào `api/seed/learning-paths.json`; tối đa 10 bài/phần. Không thêm slug kế hoạch vào seed, không tạo Markdown rỗng. Level lộ trình dự kiến: P01 beginner, P02 intermediate, P03–P06 advanced; level từng bài theo bảng.
-- Danh sách chi tiết dưới đây là nguồn quản lý ID, slug và đầu ra. Trạng thái mặc định **Kế hoạch**; chỉ PG-022 và PG-024 là **Đã có — chờ rà soát**. Có 58 bài mới dự kiến và 2 bài kế thừa.
+- Danh sách dưới đây quản lý ID, slug và đầu ra. P01–P05 đã viết (50 bài, gồm 2 bài kế thừa đã rà soát); P06 còn 10 bài kế hoạch. Trạng thái source không đồng nghĩa đã seed/deploy.
 
 ## Tiêu chuẩn viết và hoàn tất một phần
 
@@ -132,20 +132,20 @@ Lộ trình: `postgresql-tu-ben-trong-phan-04` — **đã tạo (10 bài) ngày 
 
 Đầu vào: P01–P04; môi trường lab có thể huỷ và dựng lại. Đầu ra: Runbook phân quyền, giám sát, bảo trì và restore đã đối soát.
 
-Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-05`.
+Lộ trình: `postgresql-tu-ben-trong-phan-05` — **đã viết đủ 10 bài ngày 12/11/2026**. Lab: `examples/toi-noi-postgresql/p05` (PostgreSQL **18.1 thật**; phân quyền, TLS, quan sát, VACUUM, dump/restore, pool, RLS và PITR trên hai cluster tạm; kết quả `OUTPUT.txt`, giới hạn phép đo trong README, bàn giao `RUNBOOK.md`). Chưa seed/deploy lên website.
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| PG-041 | Role, GRANT và quyền tối thiểu<br>`postgresql-role-grant-least-privilege` | CB | Tách tài khoản ứng dụng, migration và đọc báo cáo | Kế hoạch |
-| PG-042 | Xác thực và bảo vệ kết nối PostgreSQL<br>`postgresql-ket-noi-auth-tls` | CB | Kiểm kết nối hợp lệ/bị từ chối và cấu hình TLS trong lab | Kế hoạch |
-| PG-043 | Quan sát phiên làm việc và truy vấn chậm<br>`postgresql-pg-stat-activity-quan-sat` | CB | Đọc hoạt động, thời gian chờ và thông tin chẩn đoán | Kế hoạch |
-| PG-044 | VACUUM, autovacuum và bloat<br>`postgresql-vacuum-autovacuum-bloat` | TB | Quan sát vòng đời tuple và lập lịch bảo trì dựa trên bằng chứng | Kế hoạch |
-| PG-045 | WAL, checkpoint và độ bền dữ liệu<br>`postgresql-wal-checkpoint-durability` | TB | Mô tả đường ghi và đo ảnh hưởng checkpoint trong lab | Kế hoạch |
-| PG-046 | Backup logic và khôi phục với pg_dump<br>`postgresql-pg-dump-restore` | TB | Restore vào database riêng và đối soát schema, số dòng, quyền | Kế hoạch |
-| PG-047 | Connection pool, giới hạn kết nối và timeout<br>`postgresql-connection-pool-timeout` | TB | Đo tải chờ kết nối, lập ngân sách và kiểm tương thích pool | Kế hoạch |
-| PG-048 | Khôi phục theo thời điểm với base backup và WAL<br>`postgresql-pitr-base-backup-wal` | NC | Diễn tập lỗi thao tác, restore và đối chiếu mục tiêu RPO/RTO | Kế hoạch |
-| PG-049 | Row-level security và cách ly tenant<br>`postgresql-rls-tenant-security` | NC | Kiểm ma trận quyền, ngữ cảnh tenant và trường hợp đặc quyền | Kế hoạch |
-| PG-050 | Thực hành: bàn giao runbook vận hành và phục hồi<br>`postgresql-thuc-hanh-runbook-phuc-hoi` | NC | Bàn giao bằng chứng restore, cảnh báo và quy trình xử lý lỗi | Kế hoạch |
+| PG-041 | Role, GRANT và quyền tối thiểu<br>`postgresql-role-grant-least-privilege` | CB | Tách tài khoản ứng dụng, migration và đọc báo cáo | Đã viết |
+| PG-042 | Xác thực và bảo vệ kết nối PostgreSQL<br>`postgresql-ket-noi-auth-tls` | CB | Kiểm kết nối hợp lệ/bị từ chối và cấu hình TLS trong lab | Đã viết |
+| PG-043 | Quan sát phiên làm việc và truy vấn chậm<br>`postgresql-pg-stat-activity-quan-sat` | CB | Đọc hoạt động, thời gian chờ và thông tin chẩn đoán | Đã viết |
+| PG-044 | VACUUM, autovacuum và bloat<br>`postgresql-vacuum-autovacuum-bloat` | TB | Quan sát vòng đời tuple và lập lịch bảo trì dựa trên bằng chứng | Đã viết |
+| PG-045 | WAL, checkpoint và độ bền dữ liệu<br>`postgresql-wal-checkpoint-durability` | TB | Mô tả đường ghi và đo ảnh hưởng checkpoint trong lab | Đã viết |
+| PG-046 | Backup logic và khôi phục với pg_dump<br>`postgresql-pg-dump-restore` | TB | Restore vào database riêng và đối soát schema, số dòng, quyền | Đã viết |
+| PG-047 | Connection pool, giới hạn kết nối và timeout<br>`postgresql-connection-pool-timeout` | TB | Đo tải chờ kết nối, lập ngân sách và kiểm tương thích pool | Đã viết |
+| PG-048 | Khôi phục theo thời điểm với base backup và WAL<br>`postgresql-pitr-base-backup-wal` | NC | Diễn tập lỗi thao tác, restore và đối chiếu mục tiêu RPO/RTO | Đã viết |
+| PG-049 | Row-level security và cách ly tenant<br>`postgresql-rls-tenant-security` | NC | Kiểm ma trận quyền, ngữ cảnh tenant và trường hợp đặc quyền | Đã viết |
+| PG-050 | Thực hành: bàn giao runbook vận hành và phục hồi<br>`postgresql-thuc-hanh-runbook-phuc-hoi` | NC | Bàn giao bằng chứng restore, cảnh báo và quy trình xử lý lỗi | Đã viết |
 
 ## P06 · Mở rộng, tích hợp và vận hành đầu cuối
 

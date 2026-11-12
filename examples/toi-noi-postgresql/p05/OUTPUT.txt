@@ -1,0 +1,31 @@
+P05 operations lab · PostgreSQL 18.1
+Node v22.18.0 · win32/x64
+Fixture: 100 trips, 2 tenants, total fare 3000000 VND.
+PASS 041 report reads: 100
+PASS 041 application is not owner: tn_owner
+PASS 041 future table default privileges: t
+PASS 042 TLS verify-full: t
+PASS 042 rejects plaintext
+PASS 042 rejects wrong password
+PASS 042 rejects wrong hostname
+PASS 043 identifies lock wait: Lock
+PASS 044 dead tuples after vacuum: 0
+PASS 044 dead tuples before vacuum: 2500; cluster autovacuum remains on
+PASS 045 durability settings: on/on/on
+MEASURE 045 warm local 100-row updates, includes psql startup: [{"updateMs":268.9,"checkpointMs":242.3,"walBytes":22488},{"updateMs":137.3,"checkpointMs":137,"walBytes":32312},{"updateMs":115.3,"checkpointMs":109.1,"walBytes":21848}]
+PASS 046 restored data digest: 100/3000000/1d3675e3781bc03c33795a02bb3323e7
+PASS 046 restored owner: tn_owner
+PASS 046 restored report ACL: t
+MEASURE 047 6 jobs / 2 existing connections / 50ms service; queue waits ms: [0.1,0.2,53.2,53.4,104,104.9]
+PASS 047 statement timeout SQLSTATE: 57014
+PASS 049 no tenant denies rows: 0
+PASS 049 tenant 1: 50
+PASS 049 owner bypass: 100
+PASS 049 forced owner without policy: 0
+PASS 049 superuser still bypasses FORCE: 100
+PASS 048 source damaged deliberately: 0
+PASS 048 recovered data including post-backup insert: 101/3045000/817b908d149b86ec12f316ce544dc676
+PASS 048 RLS survives PITR: 51
+MEASURE 048 start-to-verified-paused-recovery ms: 4175.1 (excludes base-copy and incident detection)
+PASS 050 writable restored cluster: 102
+PASS P05: all assertions passed; both temporary clusters cleaned up.

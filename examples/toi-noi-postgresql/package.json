@@ -20,7 +20,8 @@
     "p04:thu-nghiem": "node pg/run-pg.mjs p04/thu-nghiem/manifest.json",
     "p04:measure": "node pg/run-dong-thoi.mjs p04/dong-thoi.mjs",
     "p04:dong-thoi-nho": "node pg/run-dong-thoi.mjs p04/dong-thoi.mjs --nho",
-    "test": "node --test \"test/*.test.mjs\""
+    "test": "node --test \"test/*.test.mjs\"",
+    "p05": "node p05/run.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.3.16"

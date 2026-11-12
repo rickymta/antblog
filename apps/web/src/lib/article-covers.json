@@ -5588,5 +5588,105 @@
       "BẤT BIẾN",
       "LỊCH CHẠY"
     ]
+  },
+  "postgresql-role-grant-least-privilege": {
+    "title": "ROLE / GRANT",
+    "subtitle": "PostgreSQL · PG-041 · Operations through Toi Noi",
+    "diagram": "matrix",
+    "labels": [
+      "OWNER",
+      "APP",
+      "REPORT"
+    ]
+  },
+  "postgresql-ket-noi-auth-tls": {
+    "title": "TLS / SCRAM",
+    "subtitle": "PostgreSQL · PG-042 · Operations through Toi Noi",
+    "diagram": "network",
+    "labels": [
+      "CLIENT",
+      "VERIFY FULL",
+      "SERVER"
+    ]
+  },
+  "postgresql-pg-stat-activity-quan-sat": {
+    "title": "WHO IS WAITING?",
+    "subtitle": "PostgreSQL · PG-043 · Operations through Toi Noi",
+    "diagram": "flow",
+    "labels": [
+      "REQUEST",
+      "LOCK WAIT",
+      "BLOCKER"
+    ]
+  },
+  "postgresql-vacuum-autovacuum-bloat": {
+    "title": "VACUUM",
+    "subtitle": "PostgreSQL · PG-044 · Operations through Toi Noi",
+    "diagram": "cycle",
+    "labels": [
+      "LIVE TUPLES",
+      "DEAD TUPLES",
+      "REUSE"
+    ]
+  },
+  "postgresql-wal-checkpoint-durability": {
+    "title": "WAL / CHECKPOINT",
+    "subtitle": "PostgreSQL · PG-045 · Operations through Toi Noi",
+    "diagram": "storage",
+    "labels": [
+      "COMMIT",
+      "WAL",
+      "DATA PAGE"
+    ]
+  },
+  "postgresql-pg-dump-restore": {
+    "title": "DUMP / RESTORE",
+    "subtitle": "PostgreSQL · PG-046 · Operations through Toi Noi",
+    "diagram": "split",
+    "labels": [
+      "SOURCE",
+      "ARCHIVE",
+      "RESTORE"
+    ]
+  },
+  "postgresql-connection-pool-timeout": {
+    "title": "CONNECTION POOL",
+    "subtitle": "PostgreSQL · PG-047 · Operations through Toi Noi",
+    "diagram": "network",
+    "labels": [
+      "6 JOBS",
+      "2 CONNECTIONS",
+      "QUEUE"
+    ]
+  },
+  "postgresql-pitr-base-backup-wal": {
+    "title": "POINT IN TIME",
+    "subtitle": "PostgreSQL · PG-048 · Operations through Toi Noi",
+    "diagram": "flow",
+    "labels": [
+      "BASE BACKUP",
+      "WAL ARCHIVE",
+      "RESTORE POINT"
+    ]
+  },
+  "postgresql-rls-tenant-security": {
+    "title": "TENANT / RLS",
+    "subtitle": "PostgreSQL · PG-049 · Operations through Toi Noi",
+    "diagram": "layers",
+    "labels": [
+      "TENANT 1",
+      "POLICY",
+      "TENANT 2"
+    ]
+  },
+  "postgresql-thuc-hanh-runbook-phuc-hoi": {
+    "title": "RECOVERY RUNBOOK",
+    "subtitle": "PostgreSQL · PG-050 · Operations through Toi Noi",
+    "diagram": "checklist",
+    "labels": [
+      "OBSERVE",
+      "RESTORE",
+      "VERIFY"
+    ]
   }
 }

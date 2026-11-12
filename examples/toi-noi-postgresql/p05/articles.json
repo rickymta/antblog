@@ -1,0 +1,62 @@
+[
+  {
+    "id": 41,
+    "title": "Role, GRANT và quyền tối thiểu",
+    "slug": "postgresql-role-grant-least-privilege",
+    "level": "beginner"
+  },
+  {
+    "id": 42,
+    "title": "Xác thực và bảo vệ kết nối PostgreSQL",
+    "slug": "postgresql-ket-noi-auth-tls",
+    "level": "beginner"
+  },
+  {
+    "id": 43,
+    "title": "Quan sát phiên làm việc và truy vấn chậm",
+    "slug": "postgresql-pg-stat-activity-quan-sat",
+    "level": "beginner"
+  },
+  {
+    "id": 44,
+    "title": "VACUUM, autovacuum và bloat",
+    "slug": "postgresql-vacuum-autovacuum-bloat",
+    "level": "intermediate"
+  },
+  {
+    "id": 45,
+    "title": "WAL, checkpoint và độ bền dữ liệu",
+    "slug": "postgresql-wal-checkpoint-durability",
+    "level": "intermediate"
+  },
+  {
+    "id": 46,
+    "title": "Backup logic và khôi phục với pg_dump",
+    "slug": "postgresql-pg-dump-restore",
+    "level": "intermediate"
+  },
+  {
+    "id": 47,
+    "title": "Connection pool, giới hạn kết nối và timeout",
+    "slug": "postgresql-connection-pool-timeout",
+    "level": "intermediate"
+  },
+  {
+    "id": 48,
+    "title": "Khôi phục theo thời điểm với base backup và WAL",
+    "slug": "postgresql-pitr-base-backup-wal",
+    "level": "advanced"
+  },
+  {
+    "id": 49,
+    "title": "Row-level security và cách ly tenant",
+    "slug": "postgresql-rls-tenant-security",
+    "level": "advanced"
+  },
+  {
+    "id": 50,
+    "title": "Thực hành: bàn giao runbook vận hành và phục hồi",
+    "slug": "postgresql-thuc-hanh-runbook-phuc-hoi",
+    "level": "advanced"
+  }
+]
