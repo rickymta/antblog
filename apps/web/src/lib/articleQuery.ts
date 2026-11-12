@@ -2,8 +2,10 @@ import { LEVELS, type ArticleSort, type Level } from '@tkh/shared';
 
 // Đọc bộ lọc danh sách bài/lộ trình từ query string — dùng chung ở máy chủ (trang) và trình duyệt (thanh lọc).
 
-export const ARTICLES_PAGE_SIZE = 12;
-export const ARTICLE_SORTS: readonly ArticleSort[] = ['latest', 'popular', 'trending'];
+export const ARTICLES_PAGE_SIZE = 24;
+export const ARTICLE_SORTS: readonly ArticleSort[] = ['path', 'latest', 'popular', 'trending'];
+/** Mặc định xếp theo thứ tự học (chủ đề → phần → bài): URL không có `sort` nghĩa là `path`. */
+export const DEFAULT_ARTICLE_SORT: ArticleSort = 'path';
 
 export type SearchParamsRecord = Record<string, string | string[] | undefined>;
 
@@ -28,7 +30,7 @@ export function parseArticleQuery(sp: SearchParamsRecord, fixedCategory?: string
   const sort = firstParam(sp.sort);
   const page = Number.parseInt(firstParam(sp.page) ?? '1', 10);
   const out: ParsedArticleQuery = {
-    sort: ARTICLE_SORTS.includes(sort as ArticleSort) ? (sort as ArticleSort) : 'latest',
+    sort: ARTICLE_SORTS.includes(sort as ArticleSort) ? (sort as ArticleSort) : DEFAULT_ARTICLE_SORT,
     page: Number.isFinite(page) && page > 0 ? Math.min(page, 10_000) : 1,
   };
   const category = fixedCategory ?? (firstParam(sp.category)?.trim() || undefined);
@@ -49,7 +51,7 @@ export function articleFilterParams(query: ParsedArticleQuery, fixedCategory?: s
   if (query.level) p.level = query.level;
   if (query.tag) p.tag = query.tag;
   if (query.q) p.q = query.q;
-  if (query.sort !== 'latest') p.sort = query.sort;
+  if (query.sort !== DEFAULT_ARTICLE_SORT) p.sort = query.sort;
   return p;
 }
 

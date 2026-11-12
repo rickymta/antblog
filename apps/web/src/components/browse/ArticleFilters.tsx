@@ -6,8 +6,8 @@ import { Search, X } from 'lucide-react';
 import { LEVELS, categoryOptions, pickLocalized, type Category } from '@tkh/shared';
 import { useLocale } from '../../i18n';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
-import { articleFilterParams, hasArticleFilters, parseLevel, type ParsedArticleQuery } from '../../lib/articleQuery';
-import { btnSecondary, inputClass, selectClass } from '../../lib/ui';
+import { ARTICLE_SORTS, DEFAULT_ARTICLE_SORT, articleFilterParams, hasArticleFilters, parseLevel, type ParsedArticleQuery } from '../../lib/articleQuery';
+import { btnGhost, inputClass, selectClass } from '../../lib/ui';
 import { useBrowse } from './BrowseContext';
 
 function Field({ label, children }: { label: string; children: (id: string) => ReactNode }) {
@@ -24,7 +24,8 @@ function Field({ label, children }: { label: string; children: (id: string) => R
 
 /**
  * Thanh lọc danh sách bài — mọi bộ lọc nằm trên URL (chia sẻ/đánh dấu được, nút Back hoạt động), kết quả do máy chủ render.
- * Dùng cho /articles và /topics/[slug] (truyền `fixedCategory` thì ẩn ô chủ đề).
+ * Dùng cho /articles và /topics/[slug] (truyền `fixedCategory` thì ẩn ô chủ đề). Một hàng: tìm kiếm · chủ đề · sắp xếp;
+ * cấp độ là dãy nút bấm nhanh. Thẻ (`tag`) chỉ đến từ liên kết trong bài — hiện thành điều kiện đang lọc, không có ô chọn.
  * Giá trị trên ô đổi ngay (useOptimistic) trong lúc chờ máy chủ trả danh sách mới.
  */
 export function ArticleFilters({
@@ -32,13 +33,11 @@ export function ArticleFilters({
   query,
   fixedCategory,
   categories,
-  tags,
 }: {
   basePath: string;
   query: ParsedArticleQuery;
   fixedCategory?: string;
   categories: Category[] | null;
-  tags: string[];
 }) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -55,7 +54,7 @@ export function ArticleFilters({
   const update = (changes: Partial<Record<'category' | 'level' | 'tag' | 'q' | 'sort', string | undefined>>) => {
     const next: ParsedArticleQuery = { ...current, ...changes, page: 1 } as ParsedArticleQuery;
     for (const [k, v] of Object.entries(changes)) if (!v) delete (next as unknown as Record<string, unknown>)[k];
-    if (!next.sort) next.sort = 'latest';
+    if (!next.sort) next.sort = DEFAULT_ARTICLE_SORT;
     next.level = parseLevel(next.level);
     if (!next.level) delete next.level;
     const s = new URLSearchParams(articleFilterParams(next, fixedCategory)).toString();
@@ -76,45 +75,44 @@ export function ArticleFilters({
   const filtered = hasArticleFilters(current, fixedCategory);
   const clearFilters = () => {
     setSearch('');
-    navigate(basePath, () => setCurrent({ sort: 'latest', page: 1, ...(fixedCategory ? { category: fixedCategory } : {}) }));
+    navigate(basePath, () => setCurrent({ sort: DEFAULT_ARTICLE_SORT, page: 1, ...(fixedCategory ? { category: fixedCategory } : {}) }));
   };
 
   const selectedCategory = categories?.find(c => c.slug === current.category);
+  const sortLabel = (sort: (typeof ARTICLE_SORTS)[number]) =>
+    t(sort === 'path' ? 'articles.sortPath' : sort === 'popular' ? 'articles.sortPopular' : sort === 'trending' ? 'articles.sortTrending' : 'articles.sortLatest');
+  // Cấp độ đã hiện trạng thái ngay trên dãy nút nên không lặp lại ở đây.
   const activeFilters = [
     ...(current.q ? [{ key: 'q' as const, label: current.q }] : []),
     ...(!fixedCategory && current.category ? [{ key: 'category' as const, label: selectedCategory ? pickLocalized(selectedCategory.name, locale) : current.category }] : []),
-    ...(current.level ? [{ key: 'level' as const, label: t(`common.levels.${current.level}`) }] : []),
     ...(current.tag ? [{ key: 'tag' as const, label: `#${current.tag}` }] : []),
-    ...(current.sort !== 'latest' ? [{ key: 'sort' as const, label: t(current.sort === 'popular' ? 'articles.sortPopular' : 'articles.sortTrending') }] : []),
+    ...(current.sort !== DEFAULT_ARTICLE_SORT ? [{ key: 'sort' as const, label: sortLabel(current.sort) }] : []),
   ];
-  const tagOptions = [...tags];
-  if (current.tag && !tagOptions.includes(current.tag)) tagOptions.unshift(current.tag);
+  const levelChip = (active: boolean) =>
+    `inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors ${active ? 'border-primary bg-primary text-white' : 'border-line bg-surface text-ink hover:bg-surface-2'}`;
 
   return (
-    <div className="space-y-5 rounded-card border border-line bg-surface p-4 sm:p-5">
-      <form role="search" action={basePath} method="get" onSubmit={submitSearch} className="space-y-2">
-        <label htmlFor="articles-search" className="block text-sm font-semibold text-ink">
-          {t('articles.searchLabel')}
-        </label>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="relative min-w-0 flex-1">
-          <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-muted" />
-          <input
-            id="articles-search"
-            name="q"
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('articles.searchPlaceholder')}
-            enterKeyHint="search"
-            className={`${inputClass} h-12 rounded-card pl-12 text-base`}
-          />
+    <div className="space-y-4 rounded-card border border-line bg-surface p-4 sm:p-5">
+      <div className={`grid gap-4 ${fixedCategory ? 'lg:grid-cols-[minmax(0,1fr)_14rem]' : 'grid-cols-2 lg:grid-cols-[minmax(0,1fr)_15rem_13rem]'}`}>
+        <form role="search" action={basePath} method="get" onSubmit={submitSearch} className={`min-w-0 ${fixedCategory ? '' : 'col-span-2 lg:col-span-1'}`}>
+          <label htmlFor="articles-search" className="mb-2 block text-sm font-semibold text-ink">
+            {t('articles.searchLabel')}
+          </label>
+          <div className="relative">
+            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-muted" />
+            <input
+              id="articles-search"
+              name="q"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('articles.searchPlaceholder')}
+              enterKeyHint="search"
+              className={`${inputClass} min-h-11 pl-11 text-base`}
+            />
           </div>
-          <button type="submit" className={`${btnSecondary} min-h-12`}>{t('articles.searchSubmit')}</button>
-        </div>
-      </form>
-
-      <div role="group" aria-label={t('articles.filtersLabel')} className={`grid gap-4 sm:grid-cols-2 ${fixedCategory ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
+          <button type="submit" className="sr-only">{t('articles.searchSubmit')}</button>
+        </form>
         {!fixedCategory && (
           <Field label={t('articles.category')}>
             {(id) => (
@@ -132,49 +130,33 @@ export function ArticleFilters({
             )}
           </Field>
         )}
-        <Field label={t('articles.level')}>
-          {(id) => (
-            <select id={id} className={`${selectClass} min-h-11 text-base`} value={current.level ?? ''} onChange={(e) => update({ level: e.target.value || undefined })}>
-              <option value="">{t('common.allLevels')}</option>
-              {LEVELS.map((l) => (
-                <option key={l} value={l}>
-                  {t(`common.levels.${l}`)}
-                </option>
-              ))}
-            </select>
-          )}
-        </Field>
-        <Field label={t('articles.tag')}>
-          {(id) => (
-            <select id={id} className={`${selectClass} min-h-11 text-base`} value={current.tag ?? ''} onChange={(e) => update({ tag: e.target.value || undefined })}>
-              <option value="">{t('articles.allTags')}</option>
-              {tagOptions.map((tag) => (
-                <option key={tag} value={tag}>
-                  #{tag}
-                </option>
-              ))}
-            </select>
-          )}
-        </Field>
         <Field label={t('articles.sort')}>
           {(id) => (
-            <select id={id} className={`${selectClass} min-h-11 text-base`} value={current.sort} onChange={(e) => update({ sort: e.target.value === 'latest' ? undefined : e.target.value })}>
-              <option value="latest">{t('articles.sortLatest')}</option>
-              <option value="popular">{t('articles.sortPopular')}</option>
-              <option value="trending">{t('articles.sortTrending')}</option>
+            <select id={id} className={`${selectClass} min-h-11 text-base`} value={current.sort} onChange={(e) => update({ sort: e.target.value === DEFAULT_ARTICLE_SORT ? undefined : e.target.value })}>
+              {ARTICLE_SORTS.map((sort) => <option key={sort} value={sort}>{sortLabel(sort)}</option>)}
             </select>
           )}
         </Field>
       </div>
+
+      <div role="group" aria-label={t('articles.level')} className="flex flex-wrap items-center gap-2">
+        <button type="button" aria-pressed={!current.level} onClick={() => update({ level: undefined })} className={levelChip(!current.level)}>{t('common.allLevels')}</button>
+        {LEVELS.map((l) => (
+          <button key={l} type="button" aria-pressed={current.level === l} onClick={() => update({ level: current.level === l ? undefined : l })} className={levelChip(current.level === l)}>
+            {t(`common.levels.${l}`)}
+          </button>
+        ))}
+      </div>
+
       {filtered && <div className="flex flex-wrap items-center gap-2 border-t border-line pt-4">
-        <span className="w-full text-sm font-semibold text-ink">{t('articles.activeFilters')}</span>
+        {activeFilters.length > 0 && <span className="text-sm font-semibold text-ink">{t('articles.activeFilters')}</span>}
         {activeFilters.map(({ key, label }) => <button key={key} type="button" aria-label={t('articles.removeFilter', { label })} onClick={() => { if (key === 'q') setSearch(''); update({ [key]: undefined }); }} className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-ui bg-primary-soft px-3 py-2 text-left text-sm text-primary-ink">
           <span className="[overflow-wrap:anywhere]">{label}</span><X aria-hidden="true" className="h-4 w-4 shrink-0" />
         </button>)}
-          <button type="button" onClick={clearFilters} className={`${btnSecondary} min-h-11`}>
-            <X aria-hidden="true" className="h-4 w-4" />
-            {t('articles.clearFilters')}
-          </button>
+        <button type="button" onClick={clearFilters} className={`${btnGhost} min-h-11`}>
+          <X aria-hidden="true" className="h-4 w-4" />
+          {t('articles.clearFilters')}
+        </button>
       </div>}
     </div>
   );

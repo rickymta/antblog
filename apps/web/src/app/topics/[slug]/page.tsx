@@ -61,13 +61,13 @@ export default async function TopicPage({ params, searchParams }: Props) {
   const availableChildren = children.filter(c => c.articleCount > 0);
   const upcomingChildren = children.filter(c => c.articleCount === 0);
   const isParent = children.length > 0;
-  const [articles, tags] = isParent
-    ? [null, null]
-    : await Promise.all([settle(serverApi.articles({ ...query, pageSize: ARTICLES_PAGE_SIZE })), settle(serverApi.popularTags(30))]);
+  const articles = isParent ? null : await settle(serverApi.articles({ ...query, pageSize: ARTICLES_PAGE_SIZE }));
   // Các phần (lộ trình) của chính chủ đề này, theo thứ tự học. Ẩn khi đang tìm/lọc/sang trang để kết quả nằm ngay đầu trang.
   const browsing = !isParent && (hasArticleFilters(query, category.slug) || query.page > 1);
   const partCards = browsing ? [] : orderTopicParts(((await settle(serverApi.learningPaths())) ?? []).filter(p => p.category?.slug === category.slug && p.articleCount > 0));
   const parts = (await Promise.all(partCards.map(p => settle(serverApi.learningPath(p.slug))))).filter(p => p !== null && p.articles.length > 0).map(p => p!);
+  // Mọi bài của chủ đề đã nằm trong các phần ở trên ⇒ không lặp lại cùng danh sách bên dưới (ô tìm/lọc vẫn còn).
+  const coveredByParts = parts.length > 0 && articles !== null && parts.reduce((n, p) => n + p.articles.length, 0) >= articles.total;
   const name = pickLocalized(category.name, locale);
   const basePath = topicPath(category.slug);
   const articleCountLabel = t('common.articleCount', { count: category.articleCount, n: formatNumber(category.articleCount, locale) });
@@ -126,13 +126,14 @@ export default async function TopicPage({ params, searchParams }: Props) {
             <p className="text-base leading-relaxed text-muted">{t(parts.length > 0 ? 'topic.searchGuide' : 'topic.articlesGuide')}</p>
             <Link href="/learning-paths" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary-ink hover:underline">{t('topic.viewPaths')} <span aria-hidden="true">→</span></Link>
           </div>
-          <ArticleFilters basePath={basePath} query={query} fixedCategory={category.slug} categories={null} tags={tags?.map((x) => x.tag) ?? []} />
-          <ArticleResults
+          <ArticleFilters basePath={basePath} query={query} fixedCategory={category.slug} categories={null} />
+          {!coveredByParts && <ArticleResults
             data={articles}
             basePath={basePath}
             params={articleFilterParams(query, category.slug)}
             filtered={hasArticleFilters(query, category.slug)}
-          />
+            byPath={query.sort === 'path'}
+          />}
         </div>
       </BrowseProvider>}
     </div>

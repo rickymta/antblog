@@ -7,22 +7,24 @@ const themes = {
 };
 
 /** Decorative vector artwork stays separate from the localized, accessible heading. */
-export function PageBanner({ variant, title, subtitle }: {
+export function PageBanner({ variant, title, subtitle, compact = false }: {
   variant: keyof typeof themes;
   title: string;
   subtitle: string;
+  /** Trang danh sách dài: banner thấp, bỏ ô biểu tượng và ẩn hình minh hoạ trên màn hẹp để nội dung lên sớm. */
+  compact?: boolean;
 }) {
   const { icon: Icon, background, accent } = themes[variant];
   return (
-    <header className="relative isolate my-6 overflow-hidden rounded-card bg-slate-900 text-white sm:mb-8" style={{ background }}>
-      <div className="relative z-10 max-w-2xl px-6 pt-8 sm:px-8 sm:pt-10 lg:max-w-[58%] lg:py-10">
-        <span className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20">
+    <header className={`relative isolate overflow-hidden rounded-card bg-slate-900 text-white ${compact ? 'my-4 sm:mb-6' : 'my-6 sm:mb-8'}`} style={{ background }}>
+      <div className={`relative z-10 max-w-2xl px-6 sm:px-8 lg:max-w-[58%] ${compact ? 'py-6 sm:py-7' : 'pt-8 sm:pt-10 lg:py-10'}`}>
+        {!compact && <span className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20">
           <Icon aria-hidden="true" className="h-6 w-6" style={{ color: accent }} />
-        </span>
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
-        <p className="mt-3 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{subtitle}</p>
+        </span>}
+        <h1 className={`font-extrabold tracking-tight ${compact ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'}`}>{title}</h1>
+        <p className={`max-w-xl leading-relaxed text-white/85 ${compact ? 'mt-2 text-base' : 'mt-3 text-base sm:text-lg'}`}>{subtitle}</p>
       </div>
-      <svg aria-hidden="true" focusable="false" viewBox="0 0 480 280" className="ml-auto h-40 w-full max-w-lg sm:h-48 lg:absolute lg:inset-y-0 lg:right-0 lg:h-full lg:w-[42%]" fill="none">
+      <svg aria-hidden="true" focusable="false" viewBox="0 0 480 280" className={compact ? 'hidden lg:absolute lg:inset-y-0 lg:right-0 lg:block lg:h-full lg:w-[36%]' : 'ml-auto h-40 w-full max-w-lg sm:h-48 lg:absolute lg:inset-y-0 lg:right-0 lg:h-full lg:w-[42%]'} fill="none">
         <circle cx="260" cy="140" r="118" fill={accent} opacity=".05" />
         <circle cx="260" cy="140" r="92" stroke={accent} strokeOpacity=".15" strokeDasharray="4 8" />
         {variant === 'articles' && <g stroke={accent} strokeWidth="2">
