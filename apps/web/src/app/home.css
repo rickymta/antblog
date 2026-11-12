@@ -44,7 +44,7 @@
 .article-card { border-radius:12px; transition:transform .2s,box-shadow .2s; }.article-card:hover { transform:translateY(-3px); }
 .article-card .article-card-body { padding:20px; gap:13px; }.article-card h3,.article-card h2 { font-size:17px; line-height:1.55; letter-spacing:-.015em; }
 .featured-lead .article-card h3 { font-size:23px; line-height:1.4; }.featured-lead .article-card-body { padding:23px; }.featured-lead .article-card > div:first-child { aspect-ratio:16/9; }
-.featured-reading-list { display:flex; flex-direction:column; padding-top:3px; }.featured-reading-list ol { margin-top:16px; }.featured-reading-list li { display:flex; gap:13px; padding:22px 0; border-top:1px solid var(--tkh-line); }.reading-index { font:12px ui-monospace,monospace; color:var(--tkh-muted); padding-top:4px; }.featured-reading-list article { flex:1; flex-direction:row-reverse; }.featured-reading-list article > div:first-child { width:100px; height:78px; }.featured-reading-list article h3 { font-size:15px; line-height:1.6; }.featured-reading-list article .line-clamp-2 { -webkit-line-clamp:3; }.reading-all { display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding:17px 0 0; border-top:1px solid var(--tkh-line); font-size:12px; font-weight:600; color:var(--tkh-primary-ink); }
+.featured-reading-list { display:flex; flex-direction:column; padding-top:3px; }.featured-reading-list ul { margin-top:16px; }.featured-reading-list li { display:flex; gap:13px; padding:22px 0; border-top:1px solid var(--tkh-line); }.reading-index { font:12px ui-monospace,monospace; color:var(--tkh-muted); padding-top:4px; }.featured-reading-list article { flex:1; flex-direction:row-reverse; }.featured-reading-list article > div:first-child { width:100px; height:78px; }.featured-reading-list article h3 { font-size:15px; line-height:1.6; }.featured-reading-list article .line-clamp-2 { -webkit-line-clamp:3; }.reading-all { display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding:17px 0 0; border-top:1px solid var(--tkh-line); font-size:12px; font-weight:600; color:var(--tkh-primary-ink); }
 .paths-band { margin-top:66px; padding:42px 0 44px; border-block:1px solid var(--tkh-line); background:var(--tkh-surface-2); }
 .path-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:23px; }.path-grid > li { min-width:0; display:flex; flex-direction:column; }.path-number { display:flex; align-items:center; gap:12px; padding:0 0 16px; font:25px ui-monospace,monospace; color:var(--tkh-primary-ink); }.path-number span { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--tkh-muted); }.path-grid article { border-top:3px solid #2563eb; padding:23px; }.path-grid li:nth-child(2) article { border-top-color:#6366f1; }.path-grid li:nth-child(3) article { border-top-color:#059669; }.path-grid article > div:last-child > a { background:var(--tkh-surface); color:var(--tkh-primary-ink); border:1px solid var(--tkh-line); }.path-grid article > div:last-child > a:hover { background:var(--tkh-primary-soft); }
 .latest-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
@@ -90,4 +90,26 @@
 @media (prefers-reduced-motion:reduce) {
   .article-card,.topic-tile,.workbench-topic { transition:none; }
   .article-card:hover,.topic-tile:hover,.workbench-topic:hover { transform:none; }
+}
+
+/* Reader navigation and comfortable scanning on the homepage. */
+.hero-quick-nav { display:flex; flex-wrap:wrap; gap:4px 20px; margin-top:20px; }
+.hero-quick-nav a { display:inline-flex; min-height:44px; align-items:center; color:#e0ecff; font-size:14px; text-decoration:underline; text-underline-offset:4px; }
+.hero-quick-nav a:hover { color:#fff; }
+.hero-quick-nav a:focus-visible,.hero-primary:focus-visible,.hero-secondary:focus-visible { outline:2px solid #fff; outline-offset:4px; }
+:is(#home-topics,#home-paths,#home-trending,#home-latest) { scroll-margin-top:7rem; }
+/* Tiles now carry a description: three columns keep ~35 characters per line instead of 2–3 words. */
+@media (min-width:1024px) { .topic-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; } }
+.topic-tile { align-items:flex-start; }
+.topic-tile > svg { flex-shrink:0; margin-top:4px; }
+.topic-tile:focus-visible,.reading-all:focus-visible { outline:2px solid var(--tkh-primary-ink); outline-offset:4px; }
+.reading-all { min-height:44px; font-size:14px; }
+.hero-stats { flex-wrap:wrap; }
+.workbench-bar { font-family:var(--font-sans); font-size:14px; line-height:1.5; }
+.workbench-terminal { font-family:var(--font-sans); line-height:1.6; }
+.community-layout > section:first-child a:focus-visible { outline:2px solid var(--tkh-primary-ink); outline-offset:4px; }
+@media (max-width:479px) {
+  .hero-primary,.hero-secondary { width:100%; }
+  .featured-reading-list article { flex-direction:column; }
+  .featured-reading-list article > div:first-child { display:none; }
 }

@@ -31,11 +31,16 @@ export function Hero({ summary }: { summary: SiteSummary | null }) {
             <Link href="/learning-paths" className="hero-primary">{t('home.ctaStart')}<ArrowRight size={17} aria-hidden="true" /></Link>
             <Link href="/articles" className="hero-secondary"><BookOpen size={17} aria-hidden="true" />{t('home.ctaArticles')}</Link>
           </div>
+          <nav aria-label={t('home.quickNav')} className="hero-quick-nav">
+            <a href="#home-topics">{t('home.jumpTopics')}</a>
+            <a href="#home-paths">{t('home.jumpPaths')}</a>
+            <a href="#home-latest">{t('home.jumpLatest')}</a>
+          </nav>
           <div className="hero-stats" aria-busy={refreshing}>
             <dl aria-label={t('home.statsLabel')}>
               {stats.map(({ value, label }) => <div key={label}><dt>{t(label)}</dt><dd>{value === undefined ? '—' : formatNumber(value, locale)}</dd></div>)}
             </dl>
-            {!summary && <button type="button" onClick={() => startTransition(() => router.refresh())} className="inline-flex items-center gap-2 text-sm text-primary-ink"><RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} aria-hidden="true" />{t('common.retry')}</button>}
+            {!summary && <button type="button" onClick={() => startTransition(() => router.refresh())} disabled={refreshing} className="inline-flex min-h-11 items-center gap-2 text-sm text-primary-ink disabled:opacity-60"><RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} aria-hidden="true" />{t('common.retry')}</button>}
           </div>
         </div>
         <HeroWorkbench />

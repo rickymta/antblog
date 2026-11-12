@@ -33,6 +33,7 @@ function Newsletter() {
       return;
     }
     setLocalError(null);
+    if (subscribe.isPending) return;
     subscribe.mutate(value, { onSuccess: () => setEmail('') });
   };
 
@@ -47,36 +48,38 @@ function Newsletter() {
         <h2 id="home-newsletter" className="mt-4 text-2xl font-bold">
           {t('home.newsletterTitle')}
         </h2>
-        <p className="mt-2 max-w-md text-sm text-blue-100">{t('home.newsletterBody')}</p>
+        <p className="mt-2 max-w-md text-base leading-relaxed text-blue-100">{t('home.newsletterBody')}</p>
         {subscribe.isSuccess ? (
           <p role="status" className="mt-6 inline-flex items-center gap-2 rounded-ui bg-white/10 px-4 py-3 text-sm font-semibold">
             <CircleCheck aria-hidden="true" className="h-5 w-5 text-emerald-300" />
             {t('home.newsletterSuccess')}
           </p>
         ) : (
-          <form onSubmit={submit} noValidate className="mt-6 flex flex-col gap-2 sm:flex-row">
-            <label htmlFor={inputId} className="sr-only">
+          <form onSubmit={submit} noValidate aria-busy={subscribe.isPending} className="mt-6 space-y-2">
+            <label htmlFor={inputId} className="block text-sm font-semibold">
               {t('home.newsletterEmail')}
             </label>
-            <input
-              id={inputId}
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={t('home.newsletterPlaceholder')}
-              aria-invalid={Boolean(error)}
-              aria-describedby={error ? msgId : undefined}
-              className="min-w-0 flex-1 rounded-ui border border-white/25 bg-white/10 px-3 py-2.5 text-sm text-white placeholder:text-blue-200 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/40"
-            />
-            <button
-              type="submit"
-              disabled={subscribe.isPending}
-              className="inline-flex items-center justify-center rounded-ui bg-white px-5 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-50 disabled:opacity-60 focus-visible:outline-white"
-            >
-              {subscribe.isPending ? t('home.newsletterSending') : t('home.newsletterSubmit')}
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+              <input
+                id={inputId}
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t('home.newsletterPlaceholder')}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? msgId : undefined}
+                className="min-h-11 min-w-0 flex-1 rounded-ui border border-white/25 bg-white/10 px-3 py-2.5 text-base text-white placeholder:text-blue-200 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/40"
+              />
+              <button
+                type="submit"
+                disabled={subscribe.isPending}
+                className="inline-flex min-h-11 items-center justify-center rounded-ui bg-white px-5 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-50 disabled:opacity-60 focus-visible:outline-white"
+              >
+                {subscribe.isPending ? t('home.newsletterSending') : t('home.newsletterSubmit')}
+              </button>
+            </div>
           </form>
         )}
         {error && (
@@ -102,7 +105,7 @@ function Community({ memberCount }: { memberCount: number | undefined }) {
         <h2 id="home-community" className="mt-4 text-2xl font-bold">
           {t('home.communityTitle')}
         </h2>
-        <p className="mt-2 max-w-md text-sm text-blue-100">{t('home.communityBody')}</p>
+        <p className="mt-2 max-w-md text-base leading-relaxed text-blue-100">{t('home.communityBody')}</p>
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <div className="flex -space-x-2" aria-hidden="true">
             {BUBBLES.map((bg) => (
@@ -116,12 +119,12 @@ function Community({ memberCount }: { memberCount: number | undefined }) {
           )}
         </div>
         {user ? (
-          <p className="mt-6 text-sm text-blue-100">{t('home.communityJoined')}</p>
+          <p className="mt-6 text-base leading-relaxed text-blue-100">{t('home.communityJoined')}</p>
         ) : (
           <Link
             href="/register"
             rel="nofollow"
-            className="mt-6 inline-flex items-center justify-center rounded-ui bg-white px-5 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-50 focus-visible:outline-white"
+            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-ui bg-white px-5 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-50 focus-visible:outline-white"
           >
             {t('home.communityCta')}
           </Link>
