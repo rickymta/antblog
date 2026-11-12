@@ -98,8 +98,27 @@
 .hero-quick-nav a:hover { color:#fff; }
 .hero-quick-nav a:focus-visible,.hero-primary:focus-visible,.hero-secondary:focus-visible { outline:2px solid #fff; outline-offset:4px; }
 :is(#home-topics,#home-paths,#home-trending,#home-latest) { scroll-margin-top:7rem; }
-/* Tiles now carry a description: three columns keep ~35 characters per line instead of 2–3 words. */
-@media (min-width:1024px) { .topic-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; } }
+/*
+ * Topic tiles: every row is as tall as the tallest tile, the article count sits on the bottom edge, and a closing
+ * "all topics" tile spans whatever is left of the last row — the grid stays a full rectangle for any topic count.
+ */
+.topic-grid { grid-template-columns:1fr; gap:12px; }
+.topic-grid > li { min-width:0; }
+.topic-body { display:flex; flex:1; min-width:0; flex-direction:column; gap:8px; align-self:stretch; }
+.topic-count { margin-top:auto; padding-top:4px; font-size:14px; color:var(--tkh-muted); }
+.topic-tile-all { align-items:center; border-style:dashed; background:transparent; }
+.topic-tile-all:hover { background:var(--tkh-primary-soft); }
+.topic-tile-all > svg { display:block; margin-top:0; }
+@media (min-width:640px) {
+  .topic-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:1fr; gap:16px; }
+  .topic-all:nth-child(2n+1) { grid-column:span 2; }
+}
+@media (min-width:1024px) {
+  .topic-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .topic-all:nth-child(n) { grid-column:auto; }
+  .topic-all:nth-child(3n+2) { grid-column:span 2; }
+  .topic-all:nth-child(3n+1) { grid-column:span 3; }
+}
 .topic-tile { align-items:flex-start; }
 .topic-tile > svg { flex-shrink:0; margin-top:4px; }
 .topic-tile:focus-visible,.reading-all:focus-visible { outline:2px solid var(--tkh-primary-ink); outline-offset:4px; }

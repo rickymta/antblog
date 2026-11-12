@@ -26,10 +26,15 @@ export function TopicTiles({ categories }: { categories: Category[] | null }) {
           const color = safeColor(c.color);
           return <li key={c.id}><Link href={'/topics/' + encodeURIComponent(c.slug)} className="topic-tile group">
             <span className="topic-icon" style={{ backgroundColor: withAlpha(color, 0.12) }}><CategoryGlyph icon={c.icon} className="h-6 w-6" style={{ color }} /></span>
-            <span className="min-w-0 flex-1"><span className="block font-semibold text-ink">{pickLocalized(c.name, locale)}</span><span className="mt-2 block text-sm leading-relaxed text-muted">{pickLocalized(c.description, locale)}</span><span className="mt-2 block text-sm text-muted">{t('common.articleCount', { count: c.articleCount, n: formatNumber(c.articleCount, locale) })}</span></span>
+            <span className="topic-body"><span className="block font-semibold text-ink">{pickLocalized(c.name, locale)}</span><span className="line-clamp-4 text-sm leading-relaxed text-muted">{pickLocalized(c.description, locale)}</span><span className="topic-count">{t('common.articleCount', { count: c.articleCount, n: formatNumber(c.articleCount, locale) })}</span></span>
             <ArrowUpRight size={18} className="text-muted group-hover:text-primary-ink" aria-hidden="true" />
           </Link></li>;
-        })}</ul>
+        })}
+          <li className="topic-all"><Link href="/articles" className="topic-tile topic-tile-all group">
+            <span className="topic-body"><span className="block font-semibold text-primary-ink">{t('nav.allTopics')}</span><span className="text-sm leading-relaxed text-muted">{t('home.exploreLibrary')}</span></span>
+            <ArrowRight size={18} className="text-primary-ink" aria-hidden="true" />
+          </Link></li>
+        </ul>
       )}
     </section>
   );
