@@ -18,7 +18,7 @@ const bySlug = new Map(categories.map((c) => [c.slug, c]));
 const parentSlugs = new Set(categories.flatMap((c) => (c.parent ? [c.parent] : [])));
 const contentDir = path.join(seedDir, 'content');
 const files = readdirSync(contentDir).filter((f) => f.endsWith('.md')).sort();
-const paths = JSON.parse(readFileSync(path.join(seedDir, 'learning-paths.json'), 'utf8')) as Array<{ slug: string; category?: string }>;
+const paths = JSON.parse(readFileSync(path.join(seedDir, 'learning-paths.json'), 'utf8')) as Array<{ slug: string; category?: string; articles?: string[] }>;
 
 function depth(slug: string): number {
   let d = 1;
@@ -61,5 +61,10 @@ describe('dữ liệu seed thật', () => {
   it('mọi lộ trình học có category tồn tại (được phép trỏ tới chủ đề cha)', () => {
     const bad = paths.filter((p) => p.category && !bySlug.has(p.category)).map((p) => `${p.slug} (category: ${p.category})`);
     expect(bad, `Lộ trình trỏ tới chủ đề không tồn tại:\n${bad.join('\n')}`).toEqual([]);
+  });
+
+  it('mỗi lộ trình học có tối đa 10 bài (seed từ chối cả tệp nếu vượt)', () => {
+    const bad = paths.filter((p) => (p.articles?.length ?? 0) > 10).map((p) => `${p.slug} (${p.articles?.length} bài)`);
+    expect(bad, `Lộ trình vượt 10 bài — tách thành các phần:\n${bad.join('\n')}`).toEqual([]);
   });
 });

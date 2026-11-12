@@ -538,7 +538,7 @@
   },
   {
     "slug": "rust-co-ban-qua-toi-noi",
-    "title": "Rust cơ bản qua Tới Nơi",
+    "title": "Rust cơ bản qua Tới Nơi · Phần 1/2",
     "description": "Lộ trình 20 bài cấp cơ bản: vì sao service sổ cái Tới Nơi chọn Rust khi backend chính là C#, rồi cargo, kiểu số và tiền VND, ownership, struct/enum/match, iterator, Result/Option, String và thời gian, collections, module và cargo test; tiếp theo là trait, newtype, double-entry, typestate, serde và property test để có thư viện ledger-core.",
     "level": "beginner",
     "category": "rust",
@@ -552,7 +552,17 @@
       "rust-result-option-toan-tu-hoi-loi-la-gia-tri",
       "rust-string-str-ngay-gio-dinh-dang-tien",
       "rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho",
-      "rust-module-crate-cargo-test-clippy",
+      "rust-module-crate-cargo-test-clippy"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "rust-co-ban-qua-toi-noi-phan-02",
+    "title": "Rust cơ bản qua Tới Nơi · Phần 2/2",
+    "description": "Lộ trình 20 bài cấp cơ bản: vì sao service sổ cái Tới Nơi chọn Rust khi backend chính là C#, rồi cargo, kiểu số và tiền VND, ownership, struct/enum/match, iterator, Result/Option, String và thời gian, collections, module và cargo test; tiếp theo là trait, newtype, double-entry, typestate, serde và property test để có thư viện ledger-core.",
+    "level": "beginner",
+    "category": "rust",
+    "articles": [
       "rust-trait-generics-chinh-sach-phi-lam-tron",
       "rust-newtype-value-object-money-account-id",
       "rust-double-entry-journal-entry-posting",
@@ -568,7 +578,7 @@
   },
   {
     "slug": "rust-trung-binh-qua-toi-noi",
-    "title": "Rust trung bình qua Tới Nơi",
+    "title": "Rust trung bình qua Tới Nơi · Phần 1/2",
     "description": "Lộ trình 20 bài cấp trung bình: đưa thư viện ledger-core thành service sổ cái thật. Async với tokio, concurrency, PostgreSQL qua sqlx, transaction và idempotency, schema sổ cái, Redis, tracing, đo hiệu năng; tiếp theo là HTTP với axum, gRPC với tonic, Kafka, outbox, webhook VíXanh và graceful shutdown.",
     "level": "intermediate",
     "category": "rust",
@@ -582,7 +592,17 @@
       "rust-integration-test-postgresql-schema-rieng-ci",
       "rust-redis-cache-so-du-rate-limit-lock-ttl",
       "rust-config-secrets-tracing-structured-logging",
-      "rust-criterion-benchmark-do-bo-nho-10k-but-toan",
+      "rust-criterion-benchmark-do-bo-nho-10k-but-toan"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "rust-trung-binh-qua-toi-noi-phan-02",
+    "title": "Rust trung bình qua Tới Nơi · Phần 2/2",
+    "description": "Lộ trình 20 bài cấp trung bình: đưa thư viện ledger-core thành service sổ cái thật. Async với tokio, concurrency, PostgreSQL qua sqlx, transaction và idempotency, schema sổ cái, Redis, tracing, đo hiệu năng; tiếp theo là HTTP với axum, gRPC với tonic, Kafka, outbox, webhook VíXanh và graceful shutdown.",
+    "level": "intermediate",
+    "category": "rust",
+    "articles": [
       "rust-axum-http-endpoint-ghi-but-toan-tra-so-du",
       "rust-validation-problem-details-openapi-utoipa",
       "rust-tower-middleware-timeout-request-id-jwt-rate-limit",
@@ -598,7 +618,7 @@
   },
   {
     "slug": "flutter-toi-noi-ios-android",
-    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android",
+    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android · Phần 1/6",
     "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có 52 bài.",
     "level": "beginner",
     "category": "flutter",
@@ -612,7 +632,17 @@
       "flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia",
       "flutter-layout-constraints-row-column-the-chuyen",
       "flutter-listview-sliver-scroll-lich-su-chuyen",
-      "flutter-statefulwidget-lifecycle-setstate-chon-dich-vu",
+      "flutter-statefulwidget-lifecycle-setstate-chon-dich-vu"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "flutter-toi-noi-ios-android-phan-02",
+    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android · Phần 2/6",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có 52 bài.",
+    "level": "beginner",
+    "category": "flutter",
+    "articles": [
       "flutter-form-validation-focus-nhap-diem-don-diem-den",
       "flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen",
       "flutter-theme-material-3-dark-mode-design-system-toi-noi",
@@ -622,7 +652,17 @@
       "flutter-state-inheritedwidget-changenotifier-bao-gia",
       "flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen",
       "flutter-http-dio-json-dto-goi-api-bao-gia",
-      "flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong",
+      "flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "flutter-toi-noi-ios-android-phan-03",
+    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android · Phần 3/6",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có 52 bài.",
+    "level": "beginner",
+    "category": "flutter",
+    "articles": [
       "flutter-clean-architecture-domain-data-presentation-mobile",
       "flutter-local-persistence-drift-secure-storage-lich-su-offline",
       "flutter-go-router-deep-link-shellroute-guard",
@@ -632,7 +672,17 @@
       "flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case",
       "flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia",
       "flutter-golden-test-semantics-test-giao-dien-on-dinh",
-      "flutter-test-riverpod-async-stream-fake-async-providercontainer",
+      "flutter-test-riverpod-async-stream-fake-async-providercontainer"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "flutter-toi-noi-ios-android-phan-04",
+    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android · Phần 4/6",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có 52 bài.",
+    "level": "beginner",
+    "category": "flutter",
+    "articles": [
       "flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi",
       "flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code",
       "flutter-ci-github-actions-analyze-test-golden-cache",
@@ -642,7 +692,17 @@
       "flutter-push-notification-fcm-apns-deep-link",
       "flutter-background-work-workmanager-vi-tri-nen-app-tai-xe",
       "flutter-thanh-toan-vi-xanh-webview-deep-link-idempotency",
-      "flutter-platform-channel-pigeon-ffi-goi-native",
+      "flutter-platform-channel-pigeon-ffi-goi-native"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "flutter-toi-noi-ios-android-phan-05",
+    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android · Phần 5/6",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có 52 bài.",
+    "level": "beginner",
+    "category": "flutter",
+    "articles": [
       "flutter-hieu-nang-rebuild-isolate-devtools",
       "flutter-bao-mat-mobile-secure-storage-pinning-obfuscation-masvs",
       "flutter-flavors-bundle-id-icon-firebase-theo-moi-truong-build",
@@ -652,7 +712,17 @@
       "flutter-ci-cd-github-actions-macos-build-ios-android-secrets",
       "flutter-firebase-app-distribution-phan-phoi-noi-bo-tester",
       "flutter-testflight-internal-external-testing-beta-review",
-      "flutter-google-play-internal-closed-open-production-staged-rollout",
+      "flutter-google-play-internal-closed-open-production-staged-rollout"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "flutter-toi-noi-ios-android-phan-06",
+    "title": "Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android · Phần 6/6",
+    "description": "Lộ trình 64 bài dựng app khách và app tài xế Tới Nơi bằng Flutter: Dart, widget, Riverpod, API, kiểm thử, bản đồ, realtime, push, rồi ký, phân phối nội bộ, TestFlight, Google Play và phát hành production. Đang biên soạn, hiện có 52 bài.",
+    "level": "beginner",
+    "category": "flutter",
+    "articles": [
       "flutter-app-store-production-metadata-privacy-review-phased-release",
       "flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback"
     ],
@@ -696,7 +766,7 @@
   },
   {
     "slug": "python-co-ban-qua-toi-noi",
-    "title": "Python cơ bản qua Tới Nơi",
+    "title": "Python cơ bản qua Tới Nơi · Phần 1/2",
     "description": "Lộ trình 20 bài cấp cơ bản: Python 3.14 với uv, kiểu dữ liệu và Decimal, hàm, cấu trúc dữ liệu, generator, module, exception, file và pytest, rồi mô hình hóa nghiệp vụ bằng dataclass, type hints, Protocol, pydantic và pattern matching. Mọi ví dụ là chuyến xe và hồ sơ tài xế của Tới Nơi.",
     "level": "beginner",
     "category": "python",
@@ -710,7 +780,17 @@
       "python-module-package-import",
       "python-exception-debug-logging",
       "python-file-json-csv-pathlib",
-      "python-pytest-kiem-thu-chinh-sach-cuoc",
+      "python-pytest-kiem-thu-chinh-sach-cuoc"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "python-co-ban-qua-toi-noi-phan-02",
+    "title": "Python cơ bản qua Tới Nơi · Phần 2/2",
+    "description": "Lộ trình 20 bài cấp cơ bản: Python 3.14 với uv, kiểu dữ liệu và Decimal, hàm, cấu trúc dữ liệu, generator, module, exception, file và pytest, rồi mô hình hóa nghiệp vụ bằng dataclass, type hints, Protocol, pydantic và pattern matching. Mọi ví dụ là chuyến xe và hồ sơ tài xế của Tới Nơi.",
+    "level": "beginner",
+    "category": "python",
+    "articles": [
       "python-class-dataclass-property-encapsulation",
       "python-type-hints-mypy-protocol-generics",
       "python-frozen-dataclass-enum-immutability",
@@ -726,7 +806,7 @@
   },
   {
     "slug": "python-trung-binh-qua-toi-noi",
-    "title": "Python trung bình qua Tới Nơi",
+    "title": "Python trung bình qua Tới Nơi · Phần 1/2",
     "description": "Lộ trình 20 bài cấp trung bình: asyncio, GIL và free-threaded, đồng thời, SQLAlchemy với PostgreSQL, transaction và idempotency, MongoDB, Redis, integration test, polars và xử lý ảnh, rồi service FastAPI, xác thực, gRPC, Kafka, outbox và worker nền. Mọi lab chạy với hạ tầng thật trong Docker.",
     "level": "intermediate",
     "category": "python",
@@ -740,7 +820,17 @@
       "python-redis-cache-rate-limit-geo",
       "python-integration-test-testcontainers-fixture",
       "python-polars-pandas-parquet-phan-tich-chuyen",
-      "python-numpy-pillow-opencv-tien-xu-ly-anh",
+      "python-numpy-pillow-opencv-tien-xu-ly-anh"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "python-trung-binh-qua-toi-noi-phan-02",
+    "title": "Python trung bình qua Tới Nơi · Phần 2/2",
+    "description": "Lộ trình 20 bài cấp trung bình: asyncio, GIL và free-threaded, đồng thời, SQLAlchemy với PostgreSQL, transaction và idempotency, MongoDB, Redis, integration test, polars và xử lý ảnh, rồi service FastAPI, xác thực, gRPC, Kafka, outbox và worker nền. Mọi lab chạy với hạ tầng thật trong Docker.",
+    "level": "intermediate",
+    "category": "python",
+    "articles": [
       "python-fastapi-http-endpoint-bao-gia",
       "python-fastapi-validation-problem-details-openapi",
       "python-fastapi-dependency-middleware-settings-logging",
@@ -756,7 +846,7 @@
   },
   {
     "slug": "python-nang-cao-qua-toi-noi",
-    "title": "Python nâng cao qua Tới Nơi",
+    "title": "Python nâng cao qua Tới Nơi · Phần 1/3",
     "description": "Lộ trình 39 bài cấp nâng cao: OCR giấy tờ định danh, so khớp khuôn mặt, chấm điểm gian lận, dự đoán ETA và nhu cầu, Clean Architecture cho service Python, profiling, container, CI/CD, triển khai AWS và Azure, OpenTelemetry, kết thúc bằng pipeline KYC và fraud từ code tới vận hành. Dữ liệu trong lab đều là dữ liệu tổng hợp.",
     "level": "advanced",
     "category": "python",
@@ -770,7 +860,17 @@
       "python-luu-ket-qua-ocr-mongodb-pii-retention",
       "python-face-detection-landmarks-mediapipe-opencv",
       "python-face-embedding-cosine-threshold-far-frr",
-      "python-liveness-anti-spoofing-chat-luong-anh",
+      "python-liveness-anti-spoofing-chat-luong-anh"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "python-nang-cao-qua-toi-noi-phan-02",
+    "title": "Python nâng cao qua Tới Nơi · Phần 2/3",
+    "description": "Lộ trình 39 bài cấp nâng cao: OCR giấy tờ định danh, so khớp khuôn mặt, chấm điểm gian lận, dự đoán ETA và nhu cầu, Clean Architecture cho service Python, profiling, container, CI/CD, triển khai AWS và Azure, OpenTelemetry, kết thúc bằng pipeline KYC và fraud từ code tới vận hành. Dữ liệu trong lab đều là dữ liệu tổng hợp.",
+    "level": "advanced",
+    "category": "python",
+    "articles": [
       "python-vector-search-pgvector-faiss-trung-tai-xe",
       "python-face-match-grpc-service-batching-model-loading",
       "python-face-matching-danh-gia-bias-privacy-consent",
@@ -780,7 +880,17 @@
       "python-scikit-learn-lightgbm-imbalanced-cross-validation",
       "python-networkx-graph-cau-ket-tai-xe-khach",
       "python-real-time-scoring-feature-store-redis-latency",
-      "python-model-registry-ab-drift-retraining",
+      "python-model-registry-ab-drift-retraining"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "python-nang-cao-qua-toi-noi-phan-03",
+    "title": "Python nâng cao qua Tới Nơi · Phần 3/3",
+    "description": "Lộ trình 39 bài cấp nâng cao: OCR giấy tờ định danh, so khớp khuôn mặt, chấm điểm gian lận, dự đoán ETA và nhu cầu, Clean Architecture cho service Python, profiling, container, CI/CD, triển khai AWS và Azure, OpenTelemetry, kết thúc bằng pipeline KYC và fraud từ code tới vận hành. Dữ liệu trong lab đều là dữ liệu tổng hợp.",
+    "level": "advanced",
+    "category": "python",
+    "articles": [
       "python-shap-explainability-audit-human-review",
       "python-clean-architecture-domain-application-infrastructure",
       "python-cqrs-command-query-handler-mediator",
@@ -828,7 +938,7 @@
   },
   {
     "slug": "location-nen-tang-qua-toi-noi",
-    "title": "Service định vị · Nền tảng định vị",
+    "title": "Service định vị · Nền tảng định vị · Phần 1/3",
     "description": "Từ tọa độ tới engine định tuyến đường bộ bằng Rust, nhận và làm sạch GPS bằng Go và Rust, có bộ mô phỏng làm thước đo cho mọi tối ưu.",
     "level": "intermediate",
     "category": "system-design",
@@ -842,7 +952,17 @@
       "location-rstar-r-tree-snap-diem-ve-duong",
       "location-h3-geohash-chi-muc-luoi-k-ring",
       "location-tim-tai-xe-gan-nhat-bon-cach-co-so-do",
-      "location-tong-hop-geo-core-kiem-thu-hinh-hoc",
+      "location-tong-hop-geo-core-kiem-thu-hinh-hoc"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "location-nen-tang-qua-toi-noi-phan-02",
+    "title": "Service định vị · Nền tảng định vị · Phần 2/3",
+    "description": "Từ tọa độ tới engine định tuyến đường bộ bằng Rust, nhận và làm sạch GPS bằng Go và Rust, có bộ mô phỏng làm thước đo cho mọi tối ưu.",
+    "level": "intermediate",
+    "category": "system-design",
+    "articles": [
       "location-go-goroutine-channel-nhap-mon-cho-ingest",
       "location-go-ingest-websocket-batch-gps-tai-xe",
       "location-go-backpressure-coalesce-drop-race-detector",
@@ -852,7 +972,17 @@
       "location-map-matching-online-cua-so-cau-vuot-duong-song-song",
       "location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka",
       "location-go-fan-out-tracking-khach-noi-suy-marker",
-      "location-lich-su-gps-parquet-retention-quyen-rieng-tu",
+      "location-lich-su-gps-parquet-retention-quyen-rieng-tu"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "location-nen-tang-qua-toi-noi-phan-03",
+    "title": "Service định vị · Nền tảng định vị · Phần 3/3",
+    "description": "Từ tọa độ tới engine định tuyến đường bộ bằng Rust, nhận và làm sạch GPS bằng Go và Rust, có bộ mô phỏng làm thước đo cho mọi tối ưu.",
+    "level": "intermediate",
+    "category": "system-design",
+    "articles": [
       "location-dijkstra-a-star-rust-do-thi-csr",
       "location-bidirectional-alt-landmark-tang-toc-truy-van",
       "location-chi-phi-re-u-turn-do-thi-theo-canh",
@@ -868,7 +998,7 @@
   },
   {
     "slug": "location-toi-uu-quang-duong-qua-toi-noi",
-    "title": "Service định vị · Tối ưu quãng đường hai phía",
+    "title": "Service định vị · Tối ưu quãng đường hai phía · Phần 1/2",
     "description": "Trọng tâm của loạt: chọn điểm đón, điểm trả, ghép chuyến và giảm km rỗng cho cả khách lẫn tài xế, mọi cải thiện có số đo trên dữ liệu mô phỏng.",
     "level": "advanced",
     "category": "system-design",
@@ -882,7 +1012,17 @@
       "location-hem-chung-cu-tttm-san-bay-cong-sanh",
       "location-toi-uu-diem-tra-cong-vao-chuyen-ke-tiep",
       "location-hoc-diem-don-tu-lich-su-dbscan-python",
-      "location-cuoc-quote-giai-thich-doi-diem-don-cho-khach",
+      "location-cuoc-quote-giai-thich-doi-diem-don-cho-khach"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "location-toi-uu-quang-duong-qua-toi-noi-phan-02",
+    "title": "Service định vị · Tối ưu quãng đường hai phía · Phần 2/2",
+    "description": "Trọng tâm của loạt: chọn điểm đón, điểm trả, ghép chuyến và giảm km rỗng cho cả khách lẫn tài xế, mọi cải thiện có số đo trên dữ liệu mô phỏng.",
+    "level": "advanced",
+    "category": "system-design",
+    "articles": [
       "location-gan-nhat-sai-o-dau-do-bang-mo-phong",
       "location-ghep-theo-lo-hungarian-kuhn-munkres-rust",
       "location-cua-so-lo-do-tre-doi-chat-luong-ghep",
@@ -898,7 +1038,7 @@
   },
   {
     "slug": "rust-nang-cao-qua-toi-noi",
-    "title": "Rust nâng cao qua Tới Nơi",
+    "title": "Rust nâng cao qua Tới Nơi · Phần 1/3",
     "description": "Lộ trình 28 bài cấp nâng cao: nghiệp vụ sổ cái (chart of accounts, hold và capture, hoàn tiền, ví tài xế, khuyến mãi, làm tròn, đối soát, đóng kỳ, projection, audit), kiến trúc service theo workspace, rồi hiệu năng, FFI, container, CI/CD, OpenTelemetry và vận hành, kết thúc bằng việc quay lại quyết định chọn Rust với bằng chứng đo được.",
     "level": "advanced",
     "category": "rust",
@@ -912,7 +1052,17 @@
       "rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao",
       "rust-so-du-theo-thoi-diem-snapshot-dong-ky",
       "rust-event-sourcing-co-chung-muc-projection-replay",
-      "rust-audit-append-only-hash-chain-phan-quyen-pii",
+      "rust-audit-append-only-hash-chain-phan-quyen-pii"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "rust-nang-cao-qua-toi-noi-phan-02",
+    "title": "Rust nâng cao qua Tới Nơi · Phần 2/3",
+    "description": "Lộ trình 28 bài cấp nâng cao: nghiệp vụ sổ cái (chart of accounts, hold và capture, hoàn tiền, ví tài xế, khuyến mãi, làm tròn, đối soát, đóng kỳ, projection, audit), kiến trúc service theo workspace, rồi hiệu năng, FFI, container, CI/CD, OpenTelemetry và vận hành, kết thúc bằng việc quay lại quyết định chọn Rust với bằng chứng đo được.",
+    "level": "advanced",
+    "category": "rust",
+    "articles": [
       "rust-hexagonal-clean-workspace-crates-port-adapter",
       "rust-command-handler-pipeline-domain-event-khong-framework",
       "rust-aggregate-invariant-optimistic-locking-for-update",
@@ -922,7 +1072,17 @@
       "rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao",
       "rust-tong-hop-kien-truc-ledger-service-workspace",
       "rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet",
-      "rust-profiling-flamegraph-tokio-console-dhat",
+      "rust-profiling-flamegraph-tokio-console-dhat"
+    ],
+    "status": "published"
+  },
+  {
+    "slug": "rust-nang-cao-qua-toi-noi-phan-03",
+    "title": "Rust nâng cao qua Tới Nơi · Phần 3/3",
+    "description": "Lộ trình 28 bài cấp nâng cao: nghiệp vụ sổ cái (chart of accounts, hold và capture, hoàn tiền, ví tài xế, khuyến mãi, làm tròn, đối soát, đóng kỳ, projection, audit), kiến trúc service theo workspace, rồi hiệu năng, FFI, container, CI/CD, OpenTelemetry và vận hành, kết thúc bằng việc quay lại quyết định chọn Rust với bằng chứng đo được.",
+    "level": "advanced",
+    "category": "rust",
+    "articles": [
       "rust-toi-uu-co-so-do-clone-cow-batching-copy-p99",
       "rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3",
       "rust-container-dockerfile-da-stage-cargo-chef-distroless",
