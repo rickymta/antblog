@@ -5,6 +5,7 @@ import { getServerI18n } from '../../i18n/server';
 import { btnSecondary } from '../../lib/ui';
 import { ArticleCard } from '../common/ArticleCard';
 import { Pagination } from '../common/Pagination';
+import { pageHref } from '../../lib/navigation';
 import { EmptyState, RefreshErrorState } from '../common/States';
 import { BrowseResults } from './BrowseContext';
 
@@ -14,7 +15,7 @@ export async function ArticleResults({
   basePath,
   params,
   filtered,
-  headingLevel = 2,
+  headingLevel = 3,
 }: {
   data: Page<ArticleCardData> | null;
   basePath: string;
@@ -28,16 +29,19 @@ export async function ArticleResults({
 
   return (
     <BrowseResults className="space-y-6">
-      <p className="text-sm text-muted" role="status">
-        {t('articles.resultCount', { count: data.total, n: formatNumber(data.total, locale) })}
-      </p>
+      <div className="space-y-2">
+        <h2 className="text-xl font-bold text-ink">{t('articles.resultsTitle')}</h2>
+        <p className="text-sm text-muted" role="status">
+          {data.items.length > 0 ? t('articles.resultRange', { from: formatNumber((data.page - 1) * data.pageSize + 1, locale), to: formatNumber((data.page - 1) * data.pageSize + data.items.length, locale), total: formatNumber(data.total, locale) }) : t('articles.resultCount', { count: data.total, n: formatNumber(data.total, locale) })}
+        </p>
+      </div>
       {data.items.length === 0 ? (
         <EmptyState
           icon={<SearchX aria-hidden="true" className="h-7 w-7 text-muted" />}
-          title={t('articles.empty')}
+          title={t(data.page > 1 ? 'articles.pageUnavailable' : filtered ? 'articles.empty' : 'articles.noArticles')}
           hint={filtered ? t('articles.emptyHint') : undefined}
           action={
-            filtered ? (
+            data.page > 1 ? <Link href={pageHref(basePath, params, 1)} className={btnSecondary}>{t('articles.firstPage')}</Link> : filtered ? (
               <Link href={basePath} scroll={false} className={btnSecondary}>
                 {t('articles.clearFilters')}
               </Link>

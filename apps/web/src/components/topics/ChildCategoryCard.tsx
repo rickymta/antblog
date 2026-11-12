@@ -23,7 +23,7 @@ export function ChildCategoryCard({ category, locale, t }: { category: Category;
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <h2 className="text-base leading-snug font-semibold text-ink group-hover:text-primary-ink">{name}</h2>
+        <h3 className="text-base leading-snug font-semibold text-ink group-hover:text-primary-ink">{name}</h3>
         {description && <p className="text-sm leading-relaxed text-muted">{description}</p>}
         <p className="mt-auto pt-2 text-sm">
           {category.articleCount > 0 ? (
@@ -32,6 +32,7 @@ export function ChildCategoryCard({ category, locale, t }: { category: Category;
             <span className="inline-flex rounded-full border border-line bg-surface-2 px-2.5 py-0.5 text-xs font-semibold text-muted">{t('topic.comingSoon')}</span>
           )}
         </p>
+        {category.articleCount > 0 && <span className="mt-1 text-sm font-semibold text-primary-ink">{t('topic.viewTopic')} <span aria-hidden="true">→</span></span>}
       </div>
     </Link>
   );

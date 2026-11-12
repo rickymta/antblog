@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { pageHref } from '../../lib/navigation';
 
 /** Dãy số trang có dấu "…": luôn hiện trang đầu, cuối và hai trang quanh trang hiện tại. */
 function pageItems(page: number, pageCount: number): (number | 'gap')[] {
@@ -15,15 +16,6 @@ function pageItems(page: number, pageCount: number): (number | 'gap')[] {
     out.push(p);
   }
   return out;
-}
-
-/** Liên kết trang N giữ nguyên các tham số lọc khác; trang 1 bỏ `page`. */
-export function pageHref(basePath: string, params: Record<string, string>, page: number): string {
-  const next = new URLSearchParams(params);
-  if (page > 1) next.set('page', String(page));
-  else next.delete('page');
-  const s = next.toString();
-  return s ? `${basePath}?${s}` : basePath;
 }
 
 /** Phân trang bằng liên kết thật (`<a href>`) — trình thu thập đi được qua mọi trang. */
@@ -46,12 +38,13 @@ export function Pagination({
   if (pageCount <= 1) return null;
   const hrefFor = (p: number) => pageHref(basePath, params, p);
 
-  const cell = 'inline-flex h-9 min-w-9 items-center justify-center rounded-ui px-2 text-sm font-medium';
+  const cell = 'inline-flex h-11 min-w-11 items-center justify-center rounded-ui px-2 text-sm font-medium';
   const arrow = `${cell} gap-1 border border-line bg-surface text-ink hover:bg-surface-2`;
   const disabled = `${cell} gap-1 border border-line bg-surface text-muted opacity-50`;
 
   return (
     <nav aria-label={t('articles.pagination')} className="flex flex-wrap items-center justify-center gap-1.5">
+      <p className="mb-2 w-full text-center text-sm text-muted">{t('articles.pageSummary', { page, total: pageCount })}</p>
       {page > 1 ? (
         <Link href={hrefFor(page - 1)} rel="prev" className={arrow} aria-label={t('articles.prevPage')}>
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />

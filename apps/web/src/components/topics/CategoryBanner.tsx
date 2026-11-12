@@ -33,7 +33,7 @@ export function CategoryBanner({
         <div className="min-w-0 max-w-xl space-y-2 lg:max-w-md">
           <p className="text-xs font-bold tracking-wide text-white/85 uppercase">{eyebrow}</p>
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">{pickLocalized(category.name, locale)}</h1>
-          {description && <p className="text-white/90">{description}</p>}
+          {description && <p className="text-base leading-relaxed text-white/90">{description}</p>}
           <p className="text-sm font-semibold text-white">{meta}</p>
         </div>
       </div>

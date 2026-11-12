@@ -12,3 +12,12 @@ export function loginHref(next: string): string {
 export function registerHref(next: string): string {
   return `/register?next=${encodeURIComponent(next)}`;
 }
+
+/** Liên kết trang N giữ nguyên các tham số lọc khác; trang 1 bỏ `page`. */
+export function pageHref(basePath: string, params: Record<string, string>, page: number): string {
+  const next = new URLSearchParams(params);
+  if (page > 1) next.set('page', String(page));
+  else next.delete('page');
+  const s = next.toString();
+  return s ? `${basePath}?${s}` : basePath;
+}

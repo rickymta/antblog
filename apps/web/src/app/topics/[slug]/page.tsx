@@ -56,6 +56,8 @@ export default async function TopicPage({ params, searchParams }: Props) {
   // Cây chủ đề phải tải thành công trước khi quyết định có hiển thị bài viết.
   const [category, categories] = await Promise.all([orNotFound(serverApi.category(slug)), serverApi.categories()]);
   const children = (categories ?? []).filter(c => c.parentId === category.id); // API đã sắp theo `order`, giữ nguyên thứ tự.
+  const availableChildren = children.filter(c => c.articleCount > 0);
+  const upcomingChildren = children.filter(c => c.articleCount === 0);
   const isParent = children.length > 0;
   const [articles, tags] = isParent
     ? [null, null]
@@ -83,20 +85,40 @@ export default async function TopicPage({ params, searchParams }: Props) {
           { name, url: absoluteUrl(basePath) },
         ])}
       />
-      {!!ancestors.length && <nav aria-label={t('article.breadcrumb')} className="flex flex-wrap items-center gap-2 pt-6 text-sm text-muted"><Link href="/articles">{t('nav.articles')}</Link>{ancestors.map(c => <span key={c.id} className="inline-flex items-center gap-2"><span aria-hidden="true">/</span><Link href={topicPath(c.slug)} className="hover:text-primary-ink">{pickLocalized(c.name,locale)}</Link></span>)}<span aria-hidden="true">/</span><span aria-current="page" className="text-ink">{name}</span></nav>}
-      <div className={`${ancestors.length ? 'pt-4' : 'pt-6'} pb-8`}>
+      <nav aria-label={t('article.breadcrumb')} className="pt-4 text-sm text-muted">
+        <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <li><Link href="/" className="inline-flex min-h-11 items-center hover:text-primary-ink hover:underline">{t('nav.home')}</Link></li>
+          <li className="flex items-center gap-2"><span aria-hidden="true">/</span><Link href="/articles" className="inline-flex min-h-11 items-center hover:text-primary-ink hover:underline">{t('nav.articles')}</Link></li>
+          {ancestors.map(c => <li key={c.id} className="flex items-center gap-2"><span aria-hidden="true">/</span><Link href={topicPath(c.slug)} className="inline-flex min-h-11 items-center hover:text-primary-ink hover:underline">{pickLocalized(c.name, locale)}</Link></li>)}
+          <li className="flex items-center gap-2"><span aria-hidden="true">/</span><span aria-current="page" className="text-ink">{name}</span></li>
+        </ol>
+      </nav>
+      <div className="pt-4 pb-8">
         <CategoryBanner category={category} locale={locale} eyebrow={t('topic.eyebrow')} meta={meta} />
       </div>
       {isParent && (
-        <section aria-labelledby="topic-children" className="pb-10">
-          <h2 id="topic-children" className="sr-only">{t('topic.children')}</h2>
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {children.map(c => <li key={c.id}><ChildCategoryCard category={c} locale={locale} t={t} /></li>)}
-          </ul>
-        </section>
+        <div className="space-y-10 pb-10">
+          <p className="max-w-3xl text-base leading-relaxed text-muted">{t('topic.chooseGuide')}</p>
+          {availableChildren.length > 0 && <section aria-labelledby="topic-children">
+            <h2 id="topic-children" className="mb-5 text-xl font-bold text-ink">{t('topic.children')}</h2>
+            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {availableChildren.map(c => <li key={c.id}><ChildCategoryCard category={c} locale={locale} t={t} /></li>)}
+            </ul>
+          </section>}
+          {upcomingChildren.length > 0 && <section aria-labelledby="topic-upcoming">
+            <h2 id="topic-upcoming" className="mb-5 text-xl font-bold text-ink">{t('topic.upcoming')}</h2>
+            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {upcomingChildren.map(c => <li key={c.id}><ChildCategoryCard category={c} locale={locale} t={t} /></li>)}
+            </ul>
+          </section>}
+        </div>
       )}
       {!isParent && <BrowseProvider>
         <div className="space-y-6">
+          <div className="max-w-3xl space-y-2">
+            <p className="text-base leading-relaxed text-muted">{t('topic.articlesGuide')}</p>
+            <Link href="/learning-paths" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary-ink hover:underline">{t('topic.viewPaths')} <span aria-hidden="true">→</span></Link>
+          </div>
           <ArticleFilters basePath={basePath} query={query} fixedCategory={category.slug} categories={null} tags={tags?.map((x) => x.tag) ?? []} />
           <ArticleResults
             data={articles}
