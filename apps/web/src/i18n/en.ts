@@ -211,6 +211,12 @@ export const en: Messages = {
     articlesGuide: 'Search within this subject or filter by level. For a guided reading order, choose a learning path.',
     viewPaths: 'Explore learning paths',
     upcoming: 'Upcoming subjects',
+    partsTitle: 'Learn part by part',
+    partsGuide: 'Parts are listed in learning order, from fundamentals to advanced. Within each part, read from the first article down.',
+    partsNav: 'Parts of this topic',
+    partLabel: 'Part {{n}}',
+    read: 'Read',
+    searchGuide: 'Looking for a specific article? Search by keyword or filter by level across every article in this topic.',
     viewTopic: 'Explore subject',
 
     children: "Subcategories",

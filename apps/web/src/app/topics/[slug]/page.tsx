@@ -6,6 +6,7 @@ import { ArticleResults } from '../../../components/browse/ArticleResults';
 import { BrowseProvider } from '../../../components/browse/BrowseContext';
 import { CategoryBanner } from '../../../components/topics/CategoryBanner';
 import { ChildCategoryCard } from '../../../components/topics/ChildCategoryCard';
+import { TopicParts } from '../../../components/topics/TopicParts';
 import { getServerI18n } from '../../../i18n/server';
 import {
   ARTICLES_PAGE_SIZE,
@@ -16,6 +17,7 @@ import {
   type SearchParamsRecord,
 } from '../../../lib/articleQuery';
 import { breadcrumbList, JsonLd } from '../../../lib/jsonld';
+import { orderTopicParts } from '../../../lib/learning-paths';
 import { clampDescription, notFoundMetadata, pageMetadata } from '../../../lib/metadata';
 import { orNotFound, orNull, serverApi, settle } from '../../../lib/server-api';
 import { absoluteUrl, SITE_URL } from '../../../lib/site';
@@ -62,6 +64,10 @@ export default async function TopicPage({ params, searchParams }: Props) {
   const [articles, tags] = isParent
     ? [null, null]
     : await Promise.all([settle(serverApi.articles({ ...query, pageSize: ARTICLES_PAGE_SIZE })), settle(serverApi.popularTags(30))]);
+  // Các phần (lộ trình) của chính chủ đề này, theo thứ tự học. Ẩn khi đang tìm/lọc/sang trang để kết quả nằm ngay đầu trang.
+  const browsing = !isParent && (hasArticleFilters(query, category.slug) || query.page > 1);
+  const partCards = browsing ? [] : orderTopicParts(((await settle(serverApi.learningPaths())) ?? []).filter(p => p.category?.slug === category.slug && p.articleCount > 0));
+  const parts = (await Promise.all(partCards.map(p => settle(serverApi.learningPath(p.slug))))).filter(p => p !== null && p.articles.length > 0).map(p => p!);
   const name = pickLocalized(category.name, locale);
   const basePath = topicPath(category.slug);
   const articleCountLabel = t('common.articleCount', { count: category.articleCount, n: formatNumber(category.articleCount, locale) });
@@ -96,6 +102,7 @@ export default async function TopicPage({ params, searchParams }: Props) {
       <div className="pt-4 pb-8">
         <CategoryBanner category={category} locale={locale} eyebrow={t('topic.eyebrow')} meta={meta} />
       </div>
+      {parts.length > 0 && <TopicParts parts={parts} />}
       {isParent && (
         <div className="space-y-10 pb-10">
           <p className="max-w-3xl text-base leading-relaxed text-muted">{t('topic.chooseGuide')}</p>
@@ -116,7 +123,7 @@ export default async function TopicPage({ params, searchParams }: Props) {
       {!isParent && <BrowseProvider>
         <div className="space-y-6">
           <div className="max-w-3xl space-y-2">
-            <p className="text-base leading-relaxed text-muted">{t('topic.articlesGuide')}</p>
+            <p className="text-base leading-relaxed text-muted">{t(parts.length > 0 ? 'topic.searchGuide' : 'topic.articlesGuide')}</p>
             <Link href="/learning-paths" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary-ink hover:underline">{t('topic.viewPaths')} <span aria-hidden="true">→</span></Link>
           </div>
           <ArticleFilters basePath={basePath} query={query} fixedCategory={category.slug} categories={null} tags={tags?.map((x) => x.tag) ?? []} />

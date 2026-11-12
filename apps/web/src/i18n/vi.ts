@@ -212,6 +212,12 @@ export const vi = {
     viewPaths: 'Khám phá lộ trình học',
     upcoming: 'Chủ đề sắp ra mắt',
     viewTopic: 'Khám phá chủ đề',
+    partsTitle: 'Học theo từng phần',
+    partsGuide: 'Các phần được xếp theo thứ tự học, từ nền tảng đến nâng cao. Trong mỗi phần, hãy đọc lần lượt từ bài đầu tiên.',
+    partsNav: 'Các phần của chủ đề',
+    partLabel: 'Phần {{n}}',
+    read: 'Đã đọc',
+    searchGuide: 'Cần tìm một bài cụ thể? Tìm theo từ khoá hoặc lọc theo cấp độ trong toàn bộ bài viết của chủ đề.',
 
     children: "Chọn chủ đề để đọc",
     eyebrow: 'Chủ đề',
