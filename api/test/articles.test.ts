@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { vnDate } from '../src/lib/dates.js';
 import { ArticleView, DailyArticleStat, DailySiteStat, LearningPath } from '../src/models/index.js';
+import { syncLearningPathArticles } from '../src/services/articles.js';
 import {
   assertCleanJson,
   createArticle,
@@ -77,6 +78,30 @@ describe('nội dung công khai', () => {
     await request(app).get(`/api/v1/articles/${draft.slug}`).expect(404);
     const again = await request(app).get(`/api/v1/articles/${pub.slug}`).expect(200);
     expect(again.body.stats.views).toBe(0);
+  });
+
+  it('sort=path: theo thứ tự chủ đề → phần → vị trí bài, bài ngoài lộ trình xếp cuối; thẻ kèm pathRef', async () => {
+    const admin = await createUser('admin');
+    const first = await createCategory({ slug: 'alpha', order: 1 });
+    const second = await createCategory({ slug: 'beta', order: 2 });
+    const [b2, a2, a1, loose, b1] = await Promise.all([
+      createArticle(second, admin), createArticle(first, admin), createArticle(first, admin), createArticle(first, admin), createArticle(second, admin),
+    ]);
+    const mk = async (slug: string, level: 'beginner' | 'advanced', categoryId: unknown, ids: (typeof a1)['_id'][]) => {
+      const p = await LearningPath.create({ slug, title: slug, level, categoryId, articleIds: ids, status: 'published' });
+      await syncLearningPathArticles(p._id, ids, []);
+    };
+    await mk('beta-co-ban', 'beginner', second._id, [b1._id, b2._id]);
+    await mk('alpha-nang-cao', 'advanced', first._id, [a2._id]);
+    await mk('alpha-co-ban', 'beginner', first._id, [a1._id]);
+
+    const res = await request(app).get('/api/v1/articles?sort=path').expect(200);
+    expect(res.body.items.map((x: { id: string }) => x.id)).toEqual([a1, a2, b1, b2, loose].map((x) => x._id.toString()));
+    expect(res.body.total).toBe(5);
+    expect(res.body.items[3].pathRef).toEqual({ slug: 'beta-co-ban', title: 'beta-co-ban', position: 2, total: 2 });
+    expect(res.body.items[4]).not.toHaveProperty('pathRef');
+    const page2 = await request(app).get('/api/v1/articles?sort=path&pageSize=2&page=2').expect(200);
+    expect(page2.body.items.map((x: { id: string }) => x.id)).toEqual([b1, b2].map((x) => x._id.toString()));
   });
 
   it('chi tiết kèm lộ trình (chỉ bài đã xuất bản, đúng thứ tự)', async () => {

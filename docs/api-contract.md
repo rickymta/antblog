@@ -55,7 +55,7 @@ POST/PUT `/admin/categories` nhận thêm `parentId?: string | null`: bỏ trư�
 
 `ArticleStats = { views: number, comments: number, reactions: ReactionCounts }`
 
-`ArticleCard = { id, slug, title, summary, coverImageUrl?, language: 'vi'|'en', category: { id, slug, name: Localized, icon, color }, level, tags: string[], author: AuthorRef, readingMinutes, publishedAt, updatedAt, stats: ArticleStats }`
+`ArticleCard = { id, slug, title, summary, coverImageUrl?, language: 'vi'|'en', category: { id, slug, name: Localized, icon, color }, level, tags: string[], author: AuthorRef, readingMinutes, publishedAt, updatedAt, stats: ArticleStats, pathRef?: { slug, title, position, total } (lộ trình đã xuất bản chứa bài và vị trí của bài trong đó) }`
 
 `ArticleDetail = ArticleCard & { content: string (Markdown, có thể chứa HTML/SVG do tác giả viết), learningPath?: { id, slug, title, level, articles: { id, slug, title, readingMinutes }[] } , myReactions: ReactionType[] (rỗng khi chưa đăng nhập) }`
 
@@ -64,7 +64,7 @@ POST/PUT `/admin/categories` nhận thêm `parentId?: string | null`: bỏ trư�
 | GET | `/site/summary` | `{ articleCount, categoryCount, learningPathCount, memberCount, totalViews }` |
 | GET | `/categories` | `Category[]` sắp theo `order` |
 | GET | `/categories/:slug` | `Category` hoặc 404 |
-| GET | `/articles` | query: `category` (slug), `level`, `tag`, `q` (tìm toàn văn tiêu đề/tóm tắt/tag), `sort` = `latest` (mặc định, `publishedAt` giảm) \| `popular` (views giảm) \| `trending` (lượt xem 7 ngày qua giảm), `page`, `pageSize` ⇒ trang `ArticleCard` |
+| GET | `/articles` | query: `category` (slug), `level`, `tag`, `q` (tìm toàn văn tiêu đề/tóm tắt/tag), `sort` = `latest` (mặc định, `publishedAt` giảm) \| `popular` (views giảm) \| `trending` (lượt xem 7 ngày qua giảm) \| `path` (thứ tự học: chủ đề theo cây → lộ trình theo cấp độ rồi slug → vị trí bài trong lộ trình; bài ngoài lộ trình xếp cuối theo `publishedAt` giảm), `page`, `pageSize` ⇒ trang `ArticleCard` |
 | GET | `/articles/trending?limit=4` | `ArticleCard[]` (lượt xem 7 ngày; thiếu dữ liệu thì bù bằng `popular`), `limit` 1–12 |
 | GET | `/articles/:slug` | `ArticleDetail`; KHÔNG tự tăng lượt xem |
 | GET | `/articles/:slug/related?limit=3` | `ArticleCard[]`: cùng chủ đề, ưu tiên trùng tag, bỏ chính nó |

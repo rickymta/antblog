@@ -102,7 +102,23 @@ function statsOf(a: IArticle) {
   };
 }
 
-function cardFrom(a: IArticle, cats: Map<string, ICategory>, users: Map<string, IUser>) {
+/** Vị trí của bài trong lộ trình đã xuất bản chứa nó (thẻ bài hiển thị "Phần … · Bài 3/10"). */
+export type PathRef = { slug: string; title: string; position: number; total: number };
+
+async function pathRefsByArticle(articles: IArticle[]): Promise<Map<string, PathRef>> {
+  const pathIds = [...new Set(articles.map((a) => a.learningPathId).filter((x): x is Types.ObjectId => !!x).map(idOf))];
+  const out = new Map<string, PathRef>();
+  if (!pathIds.length) return out;
+  const paths = await LearningPath.find({ _id: { $in: pathIds }, status: 'published' })
+    .select({ slug: 1, title: 1, articleIds: 1 })
+    .lean<Pick<ILearningPath, '_id' | 'slug' | 'title' | 'articleIds'>[]>();
+  for (const p of paths) {
+    p.articleIds.forEach((id, i) => out.set(idOf(id), { slug: p.slug, title: p.title, position: i + 1, total: p.articleIds.length }));
+  }
+  return out;
+}
+
+function cardFrom(a: IArticle, cats: Map<string, ICategory>, users: Map<string, IUser>, pathRefs?: Map<string, PathRef>) {
   return compact({
     id: idOf(a._id),
     slug: a.slug,
@@ -118,6 +134,7 @@ function cardFrom(a: IArticle, cats: Map<string, ICategory>, users: Map<string, 
     publishedAt: iso(a.publishedAt),
     updatedAt: iso(a.updatedAt)!,
     stats: statsOf(a),
+    pathRef: pathRefs?.get(idOf(a._id)),
   });
 }
 
@@ -125,11 +142,12 @@ export type ArticleCardOut = ReturnType<typeof cardFrom>;
 
 /** Dựng `ArticleCard[]` (giữ nguyên thứ tự đầu vào), tải chủ đề + tác giả theo lô. */
 export async function toArticleCards(articles: IArticle[]): Promise<ArticleCardOut[]> {
-  const [cats, users] = await Promise.all([
+  const [cats, users, pathRefs] = await Promise.all([
     categoriesById(articles.map((a) => a.categoryId)),
     usersById(articles.map((a) => a.authorId)),
+    pathRefsByArticle(articles),
   ]);
-  return articles.map((a) => cardFrom(a, cats, users));
+  return articles.map((a) => cardFrom(a, cats, users, pathRefs));
 }
 
 /** Lộ trình (đã xuất bản) chứa bài — dùng cho `ArticleDetail.learningPath`. */

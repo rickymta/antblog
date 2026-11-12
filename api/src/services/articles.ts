@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { conflict } from '../lib/errors.js';
 import { slugify } from '../lib/text.js';
-import { Article, LearningPath } from '../models/index.js';
+import { Article, Category, LearningPath, LEVELS } from '../models/index.js';
 
 /**
  * Slug cho bài viết. `explicit` (người dùng nhập) trùng ⇒ 409 SLUG_TAKEN.
@@ -41,4 +41,36 @@ export async function syncLearningPathArticles(
   if (removed.length) {
     await Article.updateMany({ _id: { $in: removed }, learningPathId: pathId }, { $unset: { learningPathId: 1 } });
   }
+}
+
+/**
+ * Thứ hạng đọc của từng bài theo lộ trình (`sort=path`): chủ đề theo thứ tự cây (order, slug) → phần theo cấp độ rồi slug
+ * (để "-phan-02" đứng sau phần gốc) → vị trí bài trong phần. Bài không thuộc lộ trình đã xuất bản nào thì không có hạng.
+ */
+export async function learningOrderRank(): Promise<Map<string, number>> {
+  const [paths, cats] = await Promise.all([
+    LearningPath.find({ status: 'published' }).select({ slug: 1, level: 1, categoryId: 1, articleIds: 1 }).lean(),
+    Category.find({}).select({ parentId: 1, order: 1, slug: 1 }).lean(),
+  ]);
+  const children = new Map<string, typeof cats>();
+  for (const c of cats) {
+    const key = c.parentId ? String(c.parentId) : '';
+    children.set(key, [...(children.get(key) ?? []), c]);
+  }
+  const catRank = new Map<string, number>();
+  const walk = (parent: string) => {
+    for (const c of (children.get(parent) ?? []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.slug.localeCompare(b.slug))) {
+      if (catRank.has(String(c._id))) continue;
+      catRank.set(String(c._id), catRank.size);
+      walk(String(c._id));
+    }
+  };
+  walk('');
+  const rankOf = (p: (typeof paths)[number]) => (p.categoryId ? catRank.get(String(p.categoryId)) : undefined) ?? Number.MAX_SAFE_INTEGER;
+  paths.sort((a, b) =>
+    rankOf(a) - rankOf(b) || LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level) || a.slug.localeCompare(b.slug, 'en', { numeric: true }),
+  );
+  const rank = new Map<string, number>();
+  for (const p of paths) for (const id of p.articleIds) if (!rank.has(String(id))) rank.set(String(id), rank.size);
+  return rank;
 }

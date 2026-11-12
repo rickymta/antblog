@@ -70,6 +70,8 @@ export interface ArticleCard {
   publishedAt: string;
   updatedAt: string;
   stats: ArticleStats;
+  /** Lộ trình (đã xuất bản) chứa bài và vị trí của bài trong đó. Vắng nếu bài không thuộc lộ trình nào. */
+  pathRef?: { slug: string; title: string; position: number; total: number };
 }
 
 export interface ArticleLearningPathRef {
@@ -123,7 +125,8 @@ export interface Page<T> {
   pageSize: number;
 }
 
-export type ArticleSort = 'latest' | 'popular' | 'trending';
+/** `path` = thứ tự học: chủ đề → phần (lộ trình) → vị trí bài trong phần; bài ngoài lộ trình xếp cuối. */
+export type ArticleSort = 'latest' | 'popular' | 'trending' | 'path';
 
 export interface ArticleQuery {
   category?: string;

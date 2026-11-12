@@ -17,6 +17,7 @@ import {
   type ICategory,
   type ReactionType,
 } from '../models/index.js';
+import { learningOrderRank } from '../services/articles.js';
 import { recentViewsByArticle, recordView } from '../services/stats.js';
 import { publicArticleFilter, reactionCounts, toArticleCards, toArticleDetail } from '../services/serializers.js';
 import { addDays, vnDate } from '../lib/dates.js';
@@ -28,7 +29,7 @@ const listSchema = z.object({
   level: z.preprocess(emptyToUndefined, z.enum(LEVELS).optional()),
   tag: optionalQueryString(60),
   q: optionalQueryString(200),
-  sort: z.preprocess(emptyToUndefined, z.enum(['latest', 'popular', 'trending']).default('latest')),
+  sort: z.preprocess(emptyToUndefined, z.enum(['latest', 'popular', 'trending', 'path']).default('latest')),
   ...pagingSchema(12),
 });
 
@@ -89,6 +90,23 @@ export function articlesRouter(): Router {
       ]);
       articles = result?.items ?? [];
       total = result?.total[0]?.n ?? 0;
+    } else if (q.sort === 'path') {
+      // Thứ tự học không nằm trong một trường của bài ⇒ xếp id trong bộ nhớ (vài trăm bài), rồi chỉ tải đủ một trang.
+      const [refs, rank] = await Promise.all([
+        Article.find(filter).select({ publishedAt: 1 }).lean<Pick<IArticle, '_id' | 'publishedAt'>[]>(),
+        learningOrderRank(),
+      ]);
+      const rankOf = (id: Types.ObjectId) => rank.get(id.toString()) ?? Number.MAX_SAFE_INTEGER;
+      refs.sort((a, b) =>
+        rankOf(a._id) - rankOf(b._id) ||
+        (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0) ||
+        b._id.toString().localeCompare(a._id.toString()),
+      );
+      total = refs.length;
+      const pageIds = refs.slice(skip, skip + q.pageSize).map((x) => x._id);
+      const found = await Article.find({ _id: { $in: pageIds } }).lean<IArticle[]>();
+      const byId = new Map(found.map((a) => [a._id.toString(), a]));
+      articles = pageIds.map((id) => byId.get(id.toString())).filter((a): a is IArticle => !!a);
     } else {
       const sort: Record<string, 1 | -1> =
         q.sort === 'popular' ? { 'stats.views': -1, publishedAt: -1, _id: -1 } : { publishedAt: -1, _id: -1 };
