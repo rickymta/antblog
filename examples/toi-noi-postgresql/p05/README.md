@@ -25,16 +25,18 @@ Không truyền URL của database khác cho script. Không có chế độ atta
 
 | Bài | Phép kiểm trong run.mjs |
 |---|---|
-| 041 | Report SELECT được, DELETE bị chặn; app DDL bị chặn; owner và default privileges đúng |
-| 042 | TLS verify-full; từ chối plaintext, sai password, sai hostname |
-| 043 | Hai phiên thực: quan hệ blocker đúng trước khi kiểm Lock wait; giải phóng rồi query chạy tiếp |
-| 044 | 5.000 tuple, xoá một nửa; pgstattuple thấy 2.500 chết → vacuum → 0; reset tuỳ chọn bảng |
-| 045 | Ba lượt UPDATE 100 dòng + CHECKPOINT; WAL bytes và thời gian; trả fare về baseline |
-| 046 | Dump ops sang custom archive; restore database riêng; digest, owner, ACL và quyền ghi bị cấm |
-| 047 | 6 job / 2 kết nối với service 50 ms; queue wait; statement timeout trả 57014 |
-| 049 | Thiết lập RLS trước physical backup: thiếu tenant, tenant 1, INSERT sai tenant, owner, FORCE, superuser |
-| 048 | Base backup rồi thêm chuyến 101; restore point; DELETE; đợi archive; copy sang cluster riêng và replay tới pause |
-| 050 | Khớp 101 chuyến / 3.045.000 VND và tenant 1 có 51; kết thúc recovery, INSERT chuyến 102 |
+| 041 | Report SELECT được, DELETE bị chặn; app DDL bị chặn; app không CREATE được trong schema public; owner đúng; bảng mới có SELECT cho report nhờ default privileges nhưng **không** cho app |
+| 042 | Verifier SCRAM; TLS verify-full (TLSv1.3); từ chối plaintext, sai password, sai hostname; verify-ca vẫn nhận hostname sai; log server cho biết dòng HBA khớp |
+| 043 | Phiên psql thực (blocker, waiter, phiên lock_timeout, phiên idle): quan hệ blocker đúng trước khi kiểm Lock wait; pg_stat_activity/pg_locks; tn_monitor thấy query, tn_report thấy `<insufficient privilege>`; lock_timeout 55P03; idle_in_transaction_session_timeout kết thúc phiên |
+| 044 | 5.000 tuple, xoá một nửa; pgstattuple thấy 2.500 chết → vacuum → 0, kích thước file giữ nguyên; snapshot REPEATABLE READ đang mở giữ 500 tuple chết đến khi COMMIT; reset tuỳ chọn bảng |
+| 045 | Ba lượt UPDATE 100 dòng + CHECKPOINT; WAL bytes và thời gian; pg_stat_checkpointer đếm +3; full-page image: cùng UPDATE ngay sau checkpoint ghi nhiều WAL hơn lần lặp lại; trả fare về baseline |
+| 046 | Dump ops sang custom archive; TOC không chứa role, globals qua pg_dumpall; restore database riêng: digest, owner, ACL, quyền ghi bị cấm; restore `--no-owner --no-acl` cùng digest nhưng mất owner/ACL |
+| 047 | 6 job / 2 kết nối với service 50 ms; queue wait; statement timeout trả 57014; CONNECTION LIMIT 1 của role từ chối kết nối thứ hai |
+| 049 | Thiết lập RLS trước physical backup: thiếu tenant, tenant 1, INSERT/UPDATE sai tenant, UPDATE dòng tenant khác đổi 0 dòng, phạm vi SET LOCAL, report không có policy, owner, FORCE, superuser |
+| 048 | Base backup (backup_label) rồi thêm chuyến 101; restore point; DELETE; đợi archive (pg_stat_archiver); copy sang cluster riêng và replay tới pause; đích đang pause từ chối ghi |
+| 050 | Khớp 101 chuyến / 3.045.000 VND và tenant 1 có 51; kết thúc recovery sang timeline 2 (file 00000002.history), INSERT chuyến 102 |
+
+`OUTPUT.txt` có hai loại dòng: `PASS`/`MEASURE` là cổng kiểm và số quan sát; khối `--- 0xx …` là output psql hoặc trích log server thật mà các bài dẫn lại. Port, PID, thời điểm và mật khẩu được che; LSN và tên file WAL là của lần chạy đó, lần chạy khác có thể khác.
 
 049 chạy trước 048 để physical backup bao gồm policy. Mỗi assertion thất bại làm exit khác 0 và không ghi đè OUTPUT.txt. Dữ liệu và ACL của logical restore được kiểm trước RLS để không lẫn hai loại quyền. Roles có sẵn vì đích logic cùng cluster; bài không tuyên bố đã thử logical restore sang cluster mới có role mapping khác.
 
