@@ -24,7 +24,7 @@ export function ChildCategoryCard({ category, locale, t }: { category: Category;
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h2 className="text-base leading-snug font-semibold text-ink group-hover:text-primary-ink">{name}</h2>
-        {description && <p className="line-clamp-2 text-sm text-muted">{description}</p>}
+        {description && <p className="text-sm leading-relaxed text-muted">{description}</p>}
         <p className="mt-auto pt-2 text-sm">
           {category.articleCount > 0 ? (
             <span className="font-semibold text-ink">{t('common.articleCount', { count: category.articleCount, n: formatNumber(category.articleCount, locale) })}</span>

@@ -193,6 +193,13 @@ export const vi = {
     notFound: 'Không tìm thấy chủ đề này.',
   },
   paths: {
+    byTopic: 'Chọn nhanh chủ đề',
+    chooseGuide: 'Chọn chủ đề bạn cần, rồi chọn cấp độ phù hợp. Danh sách ưu tiên lộ trình có bài học, từ cơ bản đến nâng cao.',
+    readGuide: 'Đọc theo thứ tự bên dưới để nối tiếp kiến thức. Nếu đã quen một nội dung, bạn có thể mở thẳng bài cần đọc.',
+    savedLocally: 'Tiến độ đọc được ghi tự động và chỉ lưu trên trình duyệt này.',
+    nextLesson: 'Bài tiếp theo',
+    backToPaths: 'Tất cả lộ trình',
+
     title: 'Khám phá lộ trình học',
     subtitle: 'Mỗi lộ trình là chuỗi bài viết sắp theo thứ tự học, giúp bạn đi từ nền tảng tới làm chủ một mảng kiến thức.',
     searchLabel: 'Tìm lộ trình',

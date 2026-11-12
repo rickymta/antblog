@@ -7,6 +7,7 @@ import { CategoryGlyph } from '@tkh/ui';
 import { formatNumber, pickLocalized, type ArticleCard as ArticleCardData, type Category, type LearningPathCard } from '@tkh/shared';
 import { useLocale } from '../../i18n';
 import { safeColor, withAlpha } from '../../lib/format';
+import { orderLearningPaths } from '../../lib/learning-paths';
 import { container } from '../../lib/ui';
 import { ArticleCard, ArticleRow } from '../common/ArticleCard';
 import { SectionHeader } from '../common/PageHeader';
@@ -16,7 +17,7 @@ import { EmptyState, RefreshErrorState } from '../common/States';
 export function TopicTiles({ categories }: { categories: Category[] | null }) {
   const { t } = useTranslation();
   const locale = useLocale();
-  const available = categories?.filter(c => !c.parentId && c.articleCount > 0).sort((a, b) => b.articleCount - a.articleCount);
+  const available = categories?.filter(c => !c.parentId && c.articleCount > 0).sort((a, b) => a.order - b.order);
   const upcoming = categories?.filter(c => !c.parentId && c.articleCount === 0);
   return (
     <section aria-labelledby="home-topics" className={container + ' home-section topic-section'}>
@@ -40,7 +41,7 @@ export function TrendingSection({ articles }: { articles: ArticleCardData[] | nu
   const { t } = useTranslation();
   return (
     <section aria-labelledby="home-trending" className={container + ' home-section'}>
-      <p className="section-kicker">01 / {t('home.readingLabel')}</p>
+      <p className="section-kicker">02 / {t('home.readingLabel')}</p>
       <SectionHeader id="home-trending" title={t('home.trendingTitle')} subtitle={t('home.trendingSubtitle')} link={{ to: '/articles?sort=trending', label: t('common.seeAll') }} />
       {!articles ? <RefreshErrorState /> : articles.length === 0 ? <EmptyState title={t('home.trendingEmpty')} /> : (
         <div className="featured-layout">
@@ -54,7 +55,7 @@ export function TrendingSection({ articles }: { articles: ArticleCardData[] | nu
 
 /** Prioritize populated paths from distinct topics, then fill remaining slots. */
 function featuredPaths(paths: LearningPathCard[]) {
-  const populated = paths.filter(p => p.articleCount > 0);
+  const populated = orderLearningPaths(paths).filter(p => p.articleCount > 0);
   const selected: LearningPathCard[] = [];
   const topics = new Set<string>();
   for (const path of populated) {
@@ -71,9 +72,9 @@ export function PathsSection({ paths }: { paths: LearningPathCard[] | null }) {
   return (
     <section aria-labelledby="home-paths" className="paths-band">
       <div className={container}>
-        <p className="section-kicker">02 / {t('home.learningLabel')}</p>
+        <p className="section-kicker">01 / {t('home.learningLabel')}</p>
         <SectionHeader id="home-paths" title={t('home.pathsTitle')} subtitle={t('home.pathsSubtitle')} link={{ to: '/learning-paths', label: t('home.pathsAll') }} />
-        {!paths ? <RefreshErrorState /> : featured.length === 0 ? <EmptyState title={t('home.pathsEmpty')} /> : <ol className="path-grid">{featured.map((p, i) => <li key={p.id}><div className="path-number" aria-hidden="true">0{i + 1}<span> / {p.category ? pickLocalized(p.category.name, 'en') : 'LEARNING PATH'}</span></div><PathCard path={p} /></li>)}</ol>}
+        {!paths ? <RefreshErrorState /> : featured.length === 0 ? <EmptyState title={t('home.pathsEmpty')} /> : <ul className="path-grid">{featured.map(p => <li key={p.id}><PathCard path={p} /></li>)}</ul>}
       </div>
     </section>
   );

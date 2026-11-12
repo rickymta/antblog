@@ -51,8 +51,8 @@ export default async function HomePage() {
       <JsonLd data={{ '@context': 'https://schema.org', '@graph': [website, organization] }} />
       <Hero summary={summary} />
       <TopicTiles categories={categories} />
-      <TrendingSection articles={trending} />
       <PathsSection paths={paths} />
+      <TrendingSection articles={trending} />
       <LatestSection articles={latest?.items ?? null} />
       <CommunitySection memberCount={summary?.memberCount} />
     </>

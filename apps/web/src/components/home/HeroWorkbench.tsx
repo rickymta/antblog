@@ -5,10 +5,10 @@ import { ArrowUpRight, Braces, Check, Cloud, Database, ListTree, MapPin, ShieldC
 import { useTranslation } from 'react-i18next';
 
 const TOPICS = [
-  { key: 'programming', href: '/topics/programming', icon: Braces, detail: 'C# · Rust · Python', tone: 'sky' },
-  { key: 'testing', href: '/topics/testing', icon: ShieldCheck, detail: 'Manual · Automation', tone: 'green' },
   { key: 'ba', href: '/topics/business-analysis', icon: ListTree, detail: 'Requirements · BPMN', tone: 'amber' },
+  { key: 'programming', href: '/topics/programming', icon: Braces, detail: 'C# · Rust · Python', tone: 'sky' },
   { key: 'database', href: '/topics/database', icon: Database, detail: 'PostgreSQL · MongoDB', tone: 'violet' },
+  { key: 'testing', href: '/topics/testing', icon: ShieldCheck, detail: 'Manual · Automation', tone: 'green' },
   { key: 'aws', href: '/topics/devops-aws', icon: Cloud, detail: 'AWS · CI/CD · Cloud', tone: 'amber' },
   { key: 'azure', href: '/topics/devops-azure', icon: Cloud, detail: 'Azure · CI/CD · Cloud', tone: 'sky' },
 ] as const;

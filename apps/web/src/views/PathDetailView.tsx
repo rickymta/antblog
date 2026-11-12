@@ -27,23 +27,24 @@ export function PathDetailView({ path: p }: { path: LearningPathDetail }) {
 
   return (
     <div className={`${container} max-w-4xl`}>
-      <header className="space-y-4 py-10">
+      <nav aria-label={t('article.breadcrumb')} className="pt-6 text-sm"><Link href="/learning-paths" className="inline-flex min-h-11 items-center text-primary-ink hover:underline">← {t('paths.backToPaths')}</Link></nav>
+      <header className="space-y-4 pt-4 pb-8">
         <div className="flex flex-wrap items-center gap-2">
           <LevelTag level={p.level} />
           {p.category && <CategoryChip category={p.category} />}
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{p.title}</h1>
-        <p className="max-w-3xl text-muted sm:text-lg">{p.description}</p>
+        <p className="max-w-3xl text-base leading-relaxed text-muted sm:text-lg">{p.description}</p>
         <dl className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <div className="flex items-center gap-1.5">
             <dt className="sr-only">{t('paths.articles')}</dt>
             <BookOpen aria-hidden="true" className="h-4 w-4 text-muted" />
-            <dd className="font-semibold text-ink">{t('common.lessonCount', { count: p.articles.length, n: p.articles.length })}</dd>
+            <dd className="font-semibold leading-relaxed text-ink">{t('common.lessonCount', { count: p.articles.length, n: p.articles.length })}</dd>
           </div>
           <div className="flex items-center gap-1.5">
             <dt className="sr-only">{t('paths.totalTime')}</dt>
             <Clock aria-hidden="true" className="h-4 w-4 text-muted" />
-            <dd className="font-semibold text-ink">{formatDuration(p.totalMinutes, t)}</dd>
+            <dd className="font-semibold leading-relaxed text-ink">{formatDuration(p.totalMinutes, t)}</dd>
           </div>
         </dl>
         <p className="text-sm text-muted">{t('common.updatedOn', { date: formatDay(p.updatedAt, locale) })}</p>
@@ -52,6 +53,8 @@ export function PathDetailView({ path: p }: { path: LearningPathDetail }) {
             <div className="min-w-0 flex-1 space-y-2">
               <ProgressBar value={doneCount} max={p.articles.length} label={t('paths.progressLabel', { title: p.title })} />
               <p className="text-sm text-muted">{t('paths.progress', { read: doneCount, total: p.articles.length })}</p>
+              <p className="text-sm leading-relaxed text-muted">{t('paths.savedLocally')}</p>
+              {nextArticle && <p className="text-sm leading-relaxed text-ink">{t('paths.nextLesson')}: <span className="font-semibold">{nextArticle.title}</span></p>}
             </div>
             {cta && (
               <Link href={articleHref(cta.slug)} className={btnPrimary}>
@@ -67,6 +70,7 @@ export function PathDetailView({ path: p }: { path: LearningPathDetail }) {
         <h2 id="path-articles" className="mb-4 text-xl font-bold text-ink">
           {t('paths.articles')}
         </h2>
+        <p className="mb-6 max-w-3xl leading-relaxed text-muted">{t('paths.readGuide')}</p>
         {p.articles.length === 0 ? (
           <EmptyState title={t('paths.emptyArticles')} />
         ) : (
@@ -83,7 +87,7 @@ export function PathDetailView({ path: p }: { path: LearningPathDetail }) {
                     {done ? <Check aria-hidden="true" className="h-4 w-4" /> : i + 1}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-ink">
+                    <h3 className="font-semibold leading-relaxed text-ink">
                       <Link
                         href={articleHref(a.slug)}
                         lang={a.language}
@@ -93,11 +97,12 @@ export function PathDetailView({ path: p }: { path: LearningPathDetail }) {
                         {a.title}
                       </Link>
                     </h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted" lang={a.language}>
+                    <p className="mt-1 text-sm leading-relaxed text-muted" lang={a.language}>
                       {a.summary}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-3">
                       <ArticleMeta article={a} />
+                      {a.id === nextArticle?.id && <span className="text-sm font-semibold text-primary-ink">{t('paths.nextLesson')}</span>}
                       {done && <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">✓ {t('paths.done')}</span>}
                     </div>
                   </div>

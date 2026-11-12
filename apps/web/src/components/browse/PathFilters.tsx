@@ -45,7 +45,7 @@ export function PathFilters({ query }: { query: PathQuery }) {
   }, [debounced]);
 
   const pill = (active: boolean) =>
-    `rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${active ? 'bg-primary text-white' : 'border border-line bg-surface text-ink hover:bg-surface-2'}`;
+    `min-h-11 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${active ? 'bg-primary text-white' : 'border border-line bg-surface text-ink hover:bg-surface-2'}`;
 
   return (
     <div className="space-y-4">

@@ -193,6 +193,13 @@ export const en: Messages = {
     notFound: 'This topic could not be found.',
   },
   paths: {
+    byTopic: 'Jump to a subject',
+    chooseGuide: 'Choose a subject, then a level that fits. Available paths appear first, from beginner to advanced.',
+    readGuide: 'Follow the order below to build on each lesson. If you already know a topic, jump to the article you need.',
+    savedLocally: 'Reading progress is recorded automatically and saved only in this browser.',
+    nextLesson: 'Next article',
+    backToPaths: 'All learning paths',
+
     title: 'Explore learning paths',
     subtitle: 'Each path is a sequence of articles in learning order, taking you from the fundamentals to mastering an area.',
     searchLabel: 'Search learning paths',

@@ -34,23 +34,24 @@ export function ProgressBar({ value, max, label }: { value: number; max: number;
  * Thẻ lộ trình (A6): nhãn chủ đề chữ hoa + nhãn cấp độ, tiêu đề lớn, mô tả, số bài + thời lượng / ngày,
  * thanh tiến độ (đã đọc trên máy này) và nút rộng hết thẻ dính đáy.
  */
-export function PathCard({ path, showDate = false }: { path: LearningPathCard; showDate?: boolean }) {
+export function PathCard({ path, showDate = false, headingLevel = 3 }: { path: LearningPathCard; showDate?: boolean; headingLevel?: 2 | 3 }) {
   const { t } = useTranslation();
   const locale = useLocale();
+  const Heading = headingLevel === 2 ? 'h2' : 'h3';
   const read = countReadInPath(useReadArticles(), path.slug, path.articleCount);
 
   return (
     <article className={`flex h-full flex-col gap-4 p-5 ${card}`}>
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex flex-wrap items-start justify-between gap-2">
         {path.category ? <CategoryChip category={path.category} uppercase /> : <span />}
         <LevelTag level={path.level} />
       </div>
       <div className="space-y-2">
-        <h3 className="text-lg leading-snug font-bold text-ink">{path.title}</h3>
-        <p className="line-clamp-3 text-sm text-muted">{path.description}</p>
+        <Heading className="text-lg leading-snug font-bold text-ink"><Link href={pathHref(path.slug)} className="hover:text-primary-ink hover:underline">{path.title}</Link></Heading>
+        <p className="text-base leading-relaxed text-muted">{path.description}</p>
       </div>
       <div className="mt-auto space-y-3">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
           <span className="inline-flex items-center gap-1">
             <BookOpen aria-hidden="true" className="h-3.5 w-3.5" />
             {t('common.lessonCount', { count: path.articleCount, n: path.articleCount })}
@@ -66,10 +67,10 @@ export function PathCard({ path, showDate = false }: { path: LearningPathCard; s
             </span>
           )}
         </div>
-        <div className="space-y-1.5">
+        {path.articleCount > 0 ? <div className="space-y-1.5">
           <ProgressBar value={read} max={path.articleCount} label={t('paths.progressLabel', { title: path.title })} />
-          <p className="text-xs text-muted">{t('paths.progress', { read, total: path.articleCount })}</p>
-        </div>
+          <p className="text-sm text-muted">{t('paths.progress', { read, total: path.articleCount })}</p>
+        </div> : <p className="text-sm text-muted">{t('paths.emptyArticles')}</p>}
         <Link href={pathHref(path.slug)} className={`${btnPrimary} w-full`}>
           {t('paths.view')}
           <span className="sr-only">: {path.title}</span>

@@ -35,7 +35,7 @@ export function SectionHeader({
           {icon}
           {title}
         </h2>
-        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+        {subtitle && <p className="mt-2 max-w-3xl text-base leading-relaxed text-muted">{subtitle}</p>}
       </div>
       {link && (
         <Link href={link.to} className={btnLink}>

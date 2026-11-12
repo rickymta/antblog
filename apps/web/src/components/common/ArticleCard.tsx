@@ -66,7 +66,7 @@ export function ArticleCard({
           <CategoryChip category={article.category} />
           <LevelTag level={article.level} />
         </div>
-        <Heading className="line-clamp-2 text-base leading-snug font-semibold text-ink">
+        <Heading className="text-base leading-relaxed font-semibold text-ink">
           <Link
             href={articleHref(article.slug)}
             lang={article.language}
@@ -76,7 +76,7 @@ export function ArticleCard({
           </Link>
         </Heading>
         {showSummary && (
-          <p className="line-clamp-2 text-sm text-muted" lang={article.language}>
+          <p className="line-clamp-3 text-sm leading-relaxed text-muted" lang={article.language}>
             {article.summary}
           </p>
         )}
@@ -129,7 +129,7 @@ export function ArticleRow({ article, showMeta = true, compact = false }: { arti
             <LevelTag level={article.level} />
           </div>
         )}
-        <h3 className={`line-clamp-2 leading-snug font-semibold text-ink ${compact ? 'text-sm' : 'text-base'}`}>
+        <h3 className={`leading-relaxed font-semibold text-ink ${compact ? 'text-sm' : 'text-base'}`}>
           <Link
             href={articleHref(article.slug)}
             lang={article.language}

@@ -30,7 +30,7 @@ export function PathNav({ path, currentSlug, defaultOpen = true }: { path: Artic
           aria-expanded={open}
           aria-controls={listId}
           aria-label={t('article.pathNav')}
-          className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted hover:bg-surface-2 hover:text-ink"
+          className="mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded text-muted hover:bg-surface-2 hover:text-ink"
         >
           <ChevronRight aria-hidden="true" className={`h-4 w-4 transition-transform ${open ? 'rotate-90' : ''}`} />
         </button>
@@ -53,7 +53,7 @@ export function PathNav({ path, currentSlug, defaultOpen = true }: { path: Artic
                 <Link
                   href={articleHref(a.slug)}
                   aria-current={current ? 'page' : undefined}
-                  className={`flex items-start gap-2.5 rounded-ui px-2 py-2 text-sm leading-snug transition-colors ${
+                  className={`flex min-h-11 items-start gap-2.5 rounded-ui px-2 py-2 text-sm leading-snug transition-colors ${
                     current ? 'bg-primary-soft font-semibold text-primary-ink' : 'text-ink hover:bg-surface-2'
                   }`}
                 >

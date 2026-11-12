@@ -881,7 +881,7 @@
     "title": "Rust nâng cao qua Tới Nơi",
     "description": "Lộ trình 28 bài cấp nâng cao: nghiệp vụ sổ cái (chart of accounts, hold và capture, hoàn tiền, ví tài xế, khuyến mãi, làm tròn, đối soát, đóng kỳ, projection, audit), kiến trúc service theo workspace, rồi hiệu năng, FFI, container, CI/CD, OpenTelemetry và vận hành, kết thúc bằng việc quay lại quyết định chọn Rust với bằng chứng đo được.",
     "level": "advanced",
-    "category": "programming",
+    "category": "rust",
     "articles": [
       "rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen",
       "rust-hold-capture-void-so-du-kha-dung",
