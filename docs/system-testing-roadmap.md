@@ -1,6 +1,6 @@
 # Kiểm thử hệ thống Tới Nơi — từ khái niệm tới thực hành nâng cao
 
-Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01–SYS-14 đã có bản nháp hoàn chỉnh, tài liệu thực hành và báo cáo. SYS-12 có study kit và supporting checks, chưa chạy user study. Đây là nhánh thực hành bổ sung cho curriculum TEST-001…162, dùng mã SYS để không thay đổi mã cũ.
+Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01–SYS-15 đã có bản nháp hoàn chỉnh, tài liệu thực hành và báo cáo. SYS-12 chưa chạy user study; SYS-15 có acceptance kit và supporting checks, chưa có phiên UAT/sign-off. Đây là nhánh thực hành bổ sung cho curriculum TEST-001…162, dùng mã SYS để không thay đổi mã cũ.
 
 ## Nội dung đã viết
 
@@ -18,6 +18,7 @@ Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01
 - [SYS-12 — Usability Test](system-testing/12-usability-test.md) · [Study kit](system-testing/12-study-kit.md) · [Báo cáo](system-testing/12-test-report.md).
 - [SYS-13 — Data Integrity Test](system-testing/13-data-integrity-test.md) · [Báo cáo](system-testing/13-test-report.md).
 - [SYS-14 — Recovery Test](system-testing/14-recovery-test.md) · [Báo cáo](system-testing/14-test-report.md).
+- [SYS-15 — UAT](system-testing/15-uat.md) · [Acceptance kit](system-testing/15-acceptance-kit.md) · [Báo cáo](system-testing/15-test-report.md).
 
 Quy trình: viết lần lượt theo số bài; hoàn tất nội dung, kiểm chứng lab, cập nhật báo cáo rồi commit riêng từng bài. Bản nháp đã viết chưa đồng nghĩa đã xuất bản CMS.
 
@@ -84,4 +85,4 @@ Nguồn nội bộ: `examples/toi-noi-testing/SPEC.md`, README lab, `docs/testin
 - Đợt 4: 11–14. Browser matrix, nghiên cứu người dùng, dữ liệu và recovery; tách phần tự động với phần cần con người/môi trường thật.
 - Đợt 5: 15–16. Hồ sơ nghiệm thu và rehearsal triển khai; liên kết kết quả các bài thành release dossier.
 
-Mỗi đợt hoàn thành khi nội dung đủ 10 tiêu chí, lệnh lab chạy lại thành công, kết quả được lưu, nguồn được đối chiếu và giới hạn được công bố. Chưa có lịch xuất bản cố định. Các bài 15–16 đang ở trạng thái kế hoạch, không phải nội dung đã hoàn tất. User study SYS-12 cần phiên với participant thật trước khi có kết luận nghiên cứu.
+Mỗi đợt hoàn thành khi nội dung đủ 10 tiêu chí, lệnh lab chạy lại thành công, kết quả được lưu, nguồn được đối chiếu và giới hạn được công bố. Chưa có lịch xuất bản cố định. Bài 16 đang ở trạng thái kế hoạch, không phải nội dung đã hoàn tất. User study SYS-12 cần participant thật; SYS-15 cần phiên UAT và quyết định của đại diện nghiệp vụ, không thay bằng supporting checks.
