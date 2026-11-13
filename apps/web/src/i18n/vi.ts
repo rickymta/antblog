@@ -226,6 +226,9 @@ export const vi = {
     notFound: 'Không tìm thấy chủ đề này.',
   },
   paths: {
+    topicGuide: 'Chọn một lộ trình bên dưới và học từng bước theo thứ tự bài viết.',
+    count_one: '{{n}} lộ trình',
+    count_other: '{{n}} lộ trình',
     byTopic: 'Chọn nhanh chủ đề',
     chooseGuide: 'Chọn chủ đề bạn cần, rồi chọn cấp độ phù hợp. Danh sách ưu tiên lộ trình có bài học, từ cơ bản đến nâng cao.',
     readGuide: 'Đọc theo thứ tự bên dưới để nối tiếp kiến thức. Nếu đã quen một nội dung, bạn có thể mở thẳng bài cần đọc.',

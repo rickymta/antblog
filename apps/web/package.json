@@ -9,6 +9,8 @@
     "start": "next start -H 0.0.0.0 -p 3000",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "covers:generate": "node scripts/generate-covers.mjs",
+    "paths:generate": "node scripts/generate-path-covers.mjs",
+    "paths:check": "node scripts/check-path-covers.mjs",
     "covers:check": "node scripts/check-covers.mjs",
     "banners:generate": "node scripts/generate-category-banners.mjs",
     "banners:check": "node scripts/check-category-banners.mjs"

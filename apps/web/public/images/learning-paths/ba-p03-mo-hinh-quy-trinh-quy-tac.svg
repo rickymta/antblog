@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+    <title>BA · Phần 3 · Mô hình hoá quy trình và quy tắc</title><desc>Tám bài qua luồng đặt xe và huỷ chuyến Tới Nơi: as-is/to-be, BPMN, business rule, decision table, state model, timer và ngoại lệ, review liên mô hình và phân tích thay đổi chính sách. Gồm 3 bài cơ bản, 3 trung bình và 2 nâng cao; có sơ đồ, case biên và hồ sơ thực hành.</desc>
+    <rect width="1200" height="675" fill="#edf2f7"/>
+    <svg x="0" y="115" width="1200" height="420" viewBox="0 85 1200 420"><title>AS-IS / TO-BE</title><desc>Understand the present. Design the change.</desc>
+    <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#4c65a0" opacity=".15"/></pattern></defs>
+    <rect x="0" y="0" width="1200" height="675" rx="0" fill="#e3eafa" stroke="none" stroke-width="2"/><rect width="1200" height="675" fill="url(#grid)"/>
+    <text x="54" y="51" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#283952">ANTBLOG / ENGINEERING NOTES</text><text x="1080" y="51" font-family="Arial, sans-serif" font-size="16" font-weight="500" fill="#283952">307</text>
+    <path d="M54 73L1146 73" stroke="#4c65a033" stroke-width="3" fill="none" />
+    <rect x="135" y="200" width="380" height="240" rx="12" fill="#ffffff" stroke="#4c65a044" stroke-width="2"/><rect x="660" y="200" width="380" height="240" rx="12" fill="#283952" stroke="none" stroke-width="2"/><text x="163" y="244" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#283952">CURRENT STATE</text><text x="690" y="244" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#ffffff">FUTURE STATE</text><rect x="165" y="277" width="170" height="11" rx="4" fill="#e3eafa" stroke="none" stroke-width="2"/><rect x="690" y="277" width="170" height="11" rx="4" fill="#4c65a0aa" stroke="none" stroke-width="2"/><rect x="165" y="309" width="270" height="11" rx="4" fill="#e3eafa" stroke="none" stroke-width="2"/><rect x="690" y="309" width="270" height="11" rx="4" fill="#4c65a0aa" stroke="none" stroke-width="2"/><rect x="165" y="341" width="170" height="11" rx="4" fill="#e3eafa" stroke="none" stroke-width="2"/><rect x="690" y="341" width="170" height="11" rx="4" fill="#4c65a0aa" stroke="none" stroke-width="2"/><rect x="165" y="373" width="270" height="11" rx="4" fill="#e3eafa" stroke="none" stroke-width="2"/><rect x="690" y="373" width="270" height="11" rx="4" fill="#4c65a0aa" stroke="none" stroke-width="2"/><circle cx="588" cy="321" r="43" fill="#4c65a0" stroke="none" stroke-width="3"/><text x="561" y="333" font-family="Arial, sans-serif" font-size="38" font-weight="500" fill="#ffffff">↔</text>
+    <rect x="0" y="507" width="1200" height="168" rx="0" fill="#283952" stroke="none" stroke-width="2"/><rect x="54" y="539" width="5" height="81" rx="0" fill="#4c65a0" stroke="none" stroke-width="2"/>
+    <text x="78" y="578" font-family="Arial, sans-serif" font-size="60" font-weight="700" fill="#ffffff">AS-IS / TO-BE</text><text x="80" y="620" font-family="Arial, sans-serif" font-size="20" font-weight="500" fill="#cbd5e1">Understand the present. Design the change.</text>
+  </svg>
+    <rect width="1200" height="115" fill="#0f172a"/>
+    <rect x="40" y="37" width="5" height="40" rx="2" fill="#EAB308"/>
+    <text x="65" y="65" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="white">BUSINESS ANALYSIS</text>
+    <text x="1110" y="79" text-anchor="middle" font-family="Arial,sans-serif" font-size="62" font-weight="700" fill="#99f6e4">03</text>
+    <rect y="535" width="1200" height="140" fill="#0f172a"/>
+    <path d="M75 610h900" stroke="#334155" stroke-width="3" stroke-dasharray="6 10"/>
+    <circle cx="75" cy="610" r="8" fill="#64748b"/><circle cx="165" cy="610" r="8" fill="#64748b"/><circle cx="255" cy="610" r="15" fill="#5eead4"/><circle cx="345" cy="610" r="8" fill="#64748b"/><circle cx="435" cy="610" r="8" fill="#64748b"/><circle cx="525" cy="610" r="8" fill="#64748b"/><circle cx="615" cy="610" r="8" fill="#64748b"/><circle cx="705" cy="610" r="8" fill="#64748b"/>
+    <path d="m1080 590 20 20-20 20m-24-20h44" fill="none" stroke="#5eead4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>

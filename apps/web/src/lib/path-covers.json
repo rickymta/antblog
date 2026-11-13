@@ -1,0 +1,307 @@
+{
+  "postgresql-tu-ben-trong": {
+    "source": "postgresql-la-gi-va-vai-tro-trong-toi-noi",
+    "topic": "postgresql",
+    "number": 1
+  },
+  "postgresql-tu-ben-trong-phan-02": {
+    "source": "postgresql-null-case-coalesce",
+    "topic": "postgresql",
+    "number": 2
+  },
+  "postgresql-tu-ben-trong-phan-03": {
+    "source": "postgresql-explain-ke-hoach-thuc-thi",
+    "topic": "postgresql",
+    "number": 3
+  },
+  "postgresql-tu-ben-trong-phan-04": {
+    "source": "postgresql-transaction-commit-rollback",
+    "topic": "postgresql",
+    "number": 4
+  },
+  "postgresql-tu-ben-trong-phan-05": {
+    "source": "postgresql-role-grant-least-privilege",
+    "topic": "postgresql",
+    "number": 5
+  },
+  "design-pattern-qua-toi-noi": {
+    "source": "du-an-mau-toi-noi",
+    "topic": "design-pattern",
+    "number": 1
+  },
+  "testing-s01-fundamentals": {
+    "source": "software-testing-la-gi-testing-khac-debugging",
+    "topic": "testing",
+    "number": 1
+  },
+  "testing-s01-fundamentals-phan-02": {
+    "source": "thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe",
+    "topic": "testing",
+    "number": 2
+  },
+  "testing-s02-test-levels-test-types": {
+    "source": "tong-quan-5-test-level-istqb",
+    "topic": "testing",
+    "number": 3
+  },
+  "testing-s03-static-testing-review": {
+    "source": "static-testing-la-gi",
+    "topic": "testing",
+    "number": 4
+  },
+  "csharp-dotnet-10-qua-toi-noi": {
+    "source": "csharp-va-dotnet-10-tu-source-code-den-chuong-trinh",
+    "topic": "csharp",
+    "number": 1
+  },
+  "csharp-dotnet-10-qua-toi-noi-phan-02": {
+    "source": "csharp-nullable-pattern-matching",
+    "topic": "csharp",
+    "number": 2
+  },
+  "csharp-dotnet-10-qua-toi-noi-phan-03": {
+    "source": "dotnet10-efcore-postgresql-mapping-migration",
+    "topic": "csharp",
+    "number": 3
+  },
+  "csharp-dotnet-10-qua-toi-noi-phan-04": {
+    "source": "dotnet10-clean-architecture-layers",
+    "topic": "csharp",
+    "number": 4
+  },
+  "aws-p01-nen-tang-aws": {
+    "source": "aws-la-gi-region-az-shared-responsibility",
+    "topic": "devops-aws",
+    "number": 1
+  },
+  "aws-p02-container-serverless": {
+    "source": "aws-ecr-image-scan-lifecycle",
+    "topic": "devops-aws",
+    "number": 2
+  },
+  "aws-p03-iac-ci-cd": {
+    "source": "aws-cloudformation-stack-change-set-drift",
+    "topic": "devops-aws",
+    "number": 3
+  },
+  "aws-p04-du-lieu-messaging": {
+    "source": "aws-aurora-postgresql-rds-proxy-failover",
+    "topic": "devops-aws",
+    "number": 4
+  },
+  "aws-p05-eks": {
+    "source": "aws-eks-tong-quan-control-plane-node-group",
+    "topic": "devops-aws",
+    "number": 5
+  },
+  "aws-p06-bao-mat-van-hanh": {
+    "source": "aws-iam-nang-cao-permission-boundary-abac-access-analyzer",
+    "topic": "devops-aws",
+    "number": 6
+  },
+  "azure-p1-nen-tang-azure": {
+    "source": "azure-la-gi-cloud-region-trach-nhiem-chia-se",
+    "topic": "devops-azure",
+    "number": 1
+  },
+  "azure-p2-danh-tinh-bao-mat": {
+    "source": "azure-entra-id-tenant-user-group-app-registration",
+    "topic": "devops-azure",
+    "number": 2
+  },
+  "azure-p3-compute-ung-dung": {
+    "source": "azure-app-service-deploy-slot-scale",
+    "topic": "devops-azure",
+    "number": 3
+  },
+  "azure-p4-du-lieu-tich-hop": {
+    "source": "azure-postgresql-ha-read-replica-pitr-entra-auth",
+    "topic": "devops-azure",
+    "number": 4
+  },
+  "azure-p5-devops-tren-azure": {
+    "source": "azure-bicep-co-ban-module-parameter-what-if",
+    "topic": "devops-azure",
+    "number": 5
+  },
+  "azure-p6-kien-truc-nang-cao": {
+    "source": "azure-well-architected-framework-5-tru-cot",
+    "topic": "devops-azure",
+    "number": 6
+  },
+  "ba-p01-tu-duy-phan-tich-nghiep-vu": {
+    "source": "ba-la-gi-tu-tinh-nang-den-bai-toan",
+    "topic": "business-analysis",
+    "number": 1
+  },
+  "ba-p02-discovery-khai-thac-thong-tin": {
+    "source": "ba-stakeholder-map-quyen-quyet-dinh",
+    "topic": "business-analysis",
+    "number": 2
+  },
+  "rust-co-ban-qua-toi-noi": {
+    "source": "rust-vi-sao-so-cai-toi-noi-chon-rust",
+    "topic": "rust",
+    "number": 1
+  },
+  "rust-co-ban-qua-toi-noi-phan-02": {
+    "source": "rust-trait-generics-chinh-sach-phi-lam-tron",
+    "topic": "rust",
+    "number": 2
+  },
+  "rust-trung-binh-qua-toi-noi": {
+    "source": "rust-async-await-tokio-task-timeout-cancellation",
+    "topic": "rust",
+    "number": 3
+  },
+  "rust-trung-binh-qua-toi-noi-phan-02": {
+    "source": "rust-axum-http-endpoint-ghi-but-toan-tra-so-du",
+    "topic": "rust",
+    "number": 4
+  },
+  "flutter-toi-noi-ios-android": {
+    "source": "flutter-va-dart-tu-source-code-den-ung-dung-toi-noi",
+    "topic": "flutter",
+    "number": 1
+  },
+  "flutter-toi-noi-ios-android-phan-02": {
+    "source": "flutter-form-validation-focus-nhap-diem-don-diem-den",
+    "topic": "flutter",
+    "number": 2
+  },
+  "flutter-toi-noi-ios-android-phan-03": {
+    "source": "flutter-clean-architecture-domain-data-presentation-mobile",
+    "topic": "flutter",
+    "number": 3
+  },
+  "flutter-toi-noi-ios-android-phan-04": {
+    "source": "flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi",
+    "topic": "flutter",
+    "number": 4
+  },
+  "flutter-toi-noi-ios-android-phan-05": {
+    "source": "flutter-hieu-nang-rebuild-isolate-devtools",
+    "topic": "flutter",
+    "number": 5
+  },
+  "flutter-toi-noi-ios-android-phan-06": {
+    "source": "flutter-app-store-production-metadata-privacy-review-phased-release",
+    "topic": "flutter",
+    "number": 6
+  },
+  "ba-p03-mo-hinh-quy-trinh-quy-tac": {
+    "source": "ba-as-is-to-be-quy-trinh",
+    "topic": "business-analysis",
+    "number": 3
+  },
+  "ba-p04-dac-ta-yeu-cau": {
+    "source": "ba-user-story-vai-tro-nhu-cau-gia-tri",
+    "topic": "business-analysis",
+    "number": 4
+  },
+  "python-co-ban-qua-toi-noi": {
+    "source": "python-va-uv-tu-source-code-den-chuong-trinh",
+    "topic": "python",
+    "number": 1
+  },
+  "python-co-ban-qua-toi-noi-phan-02": {
+    "source": "python-class-dataclass-property-encapsulation",
+    "topic": "python",
+    "number": 2
+  },
+  "python-trung-binh-qua-toi-noi": {
+    "source": "python-asyncio-coroutine-task-timeout-cancellation",
+    "topic": "python",
+    "number": 3
+  },
+  "python-trung-binh-qua-toi-noi-phan-02": {
+    "source": "python-fastapi-http-endpoint-bao-gia",
+    "topic": "python",
+    "number": 4
+  },
+  "python-nang-cao-qua-toi-noi": {
+    "source": "python-kyc-tai-xe-bai-toan-du-lieu-metric",
+    "topic": "python",
+    "number": 5
+  },
+  "python-nang-cao-qua-toi-noi-phan-02": {
+    "source": "python-vector-search-pgvector-faiss-trung-tai-xe",
+    "topic": "python",
+    "number": 6
+  },
+  "python-nang-cao-qua-toi-noi-phan-03": {
+    "source": "python-shap-explainability-audit-human-review",
+    "topic": "python",
+    "number": 7
+  },
+  "ba-p05-du-lieu-api-tich-hop": {
+    "source": "ba-domain-glossary-mo-hinh-du-lieu",
+    "topic": "business-analysis",
+    "number": 5
+  },
+  "ba-p06-quan-ly-backlog-thay-doi": {
+    "source": "ba-backlog-refinement-cau-hoi-mo",
+    "topic": "business-analysis",
+    "number": 6
+  },
+  "location-nen-tang-qua-toi-noi": {
+    "source": "location-bai-toan-quang-duong-khach-va-tai-xe",
+    "topic": "system-design",
+    "number": 1
+  },
+  "location-nen-tang-qua-toi-noi-phan-02": {
+    "source": "location-go-goroutine-channel-nhap-mon-cho-ingest",
+    "topic": "system-design",
+    "number": 2
+  },
+  "location-nen-tang-qua-toi-noi-phan-03": {
+    "source": "location-dijkstra-a-star-rust-do-thi-csr",
+    "topic": "system-design",
+    "number": 3
+  },
+  "location-toi-uu-quang-duong-qua-toi-noi": {
+    "source": "location-geocoding-dia-chi-viet-nam-autocomplete",
+    "topic": "system-design",
+    "number": 4
+  },
+  "location-toi-uu-quang-duong-qua-toi-noi-phan-02": {
+    "source": "location-gan-nhat-sai-o-dau-do-bang-mo-phong",
+    "topic": "system-design",
+    "number": 5
+  },
+  "rust-nang-cao-qua-toi-noi": {
+    "source": "rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen",
+    "topic": "rust",
+    "number": 5
+  },
+  "rust-nang-cao-qua-toi-noi-phan-02": {
+    "source": "rust-hexagonal-clean-workspace-crates-port-adapter",
+    "topic": "rust",
+    "number": 6
+  },
+  "rust-nang-cao-qua-toi-noi-phan-03": {
+    "source": "rust-toi-uu-co-so-do-clone-cow-batching-copy-p99",
+    "topic": "rust",
+    "number": 7
+  },
+  "ba-p07-uat-trien-khai-danh-gia": {
+    "source": "ba-uat-vai-tro-nguoi-dung-nghiep-vu",
+    "topic": "business-analysis",
+    "number": 7
+  },
+  "ba-p08-chien-luoc-capstone": {
+    "source": "ba-business-case-quyet-dinh-dau-tu",
+    "topic": "business-analysis",
+    "number": 8
+  },
+  "testing-s06-unit-component-testing": {
+    "source": "unit-testing-fundamentals",
+    "topic": "testing",
+    "number": 5
+  },
+  "da-p01-nen-tang-phan-tich-du-lieu": {
+    "source": null,
+    "topic": "data-analysis",
+    "number": 1
+  }
+}

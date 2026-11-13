@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+    <title>DA · Phần 1 · Nền tảng phân tích dữ liệu</title><desc>Đủ 10 bài DA-001–DA-010 qua Tới Nơi: câu hỏi, vai trò, quy trình, chỉ số, nguồn dữ liệu, giả thuyết và bất định; kết thúc bằng kế hoạch phân tích huỷ chuyến. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.</desc>
+    <rect width="1200" height="675" fill="#edf2f7"/>
+    <g fill="none" stroke="#0891B2" stroke-width="4">
+      <rect x="90" y="165" width="250" height="300" rx="22" fill="white"/>
+      <path d="M130 230h165m-165 40h120m-120 40h145" stroke-opacity=".35"/>
+      <circle cx="215" cy="385" r="35"/><path d="m200 385 12 12 22-27"/>
+      <path d="M360 320h90m-15-12 15 12-15 12"/>
+      <rect x="470" y="165" width="630" height="300" rx="22" fill="white"/>
+      <path d="M520 215v200h520" stroke-opacity=".3"/>
+      <rect x="560" y="325" width="70" height="90" rx="6" fill="#0891B2" fill-opacity=".3"/>
+      <rect x="670" y="280" width="70" height="135" rx="6" fill="#0891B2" fill-opacity=".5"/>
+      <rect x="780" y="300" width="70" height="115" rx="6" fill="#0891B2" fill-opacity=".7"/>
+      <rect x="890" y="225" width="70" height="190" rx="6" fill="#0891B2"/>
+      <path d="m570 280 130-45 125 20 130-65" stroke="#0f172a" stroke-dasharray="7 9"/>
+    </g>
+    <rect width="1200" height="115" fill="#0f172a"/>
+    <rect x="40" y="37" width="5" height="40" rx="2" fill="#0891B2"/>
+    <text x="65" y="65" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="white">DATA ANALYSIS</text>
+    <text x="1110" y="79" text-anchor="middle" font-family="Arial,sans-serif" font-size="62" font-weight="700" fill="#99f6e4">01</text>
+    <rect y="535" width="1200" height="140" fill="#0f172a"/>
+    <path d="M75 610h900" stroke="#334155" stroke-width="3" stroke-dasharray="6 10"/>
+    <circle cx="75" cy="610" r="15" fill="#5eead4"/>
+    <path d="m1080 590 20 20-20 20m-24-20h44" fill="none" stroke="#5eead4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>

@@ -62,13 +62,19 @@ export default async function LearningPathsPage({ searchParams }: Props) {
                 </nav>
                 {Array.from(groups, ([key, group]) => (
                   <section key={key} aria-labelledby={`paths-${key}`}>
-                    <div className="mb-5 overflow-hidden rounded-card border border-line bg-surface">
-                      {group.paths[0]?.category && <div className="aspect-[4/1] overflow-hidden">
+                    <div className="relative isolate mb-5 overflow-hidden rounded-card border border-line bg-slate-950 text-white">
+                      {group.paths[0]?.category && <div className="absolute inset-0 -z-10">
                         <Cover src={pathCover(key)} category={group.paths[0].category} className="object-right" />
                       </div>}
-                      <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
-                        <h2 id={`paths-${key}`} className="scroll-mt-28 text-xl font-bold text-ink sm:text-2xl">{group.title}</h2>
-                        <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary-ink">{group.paths.length}</span>
+                      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-transparent" />
+                      <div className="flex min-h-44 flex-col justify-center gap-3 p-6 sm:min-h-52 sm:p-8 lg:min-h-60 lg:p-10">
+                        <p className="text-xs font-semibold tracking-widest text-teal-200 uppercase">{t('topic.eyebrow')}</p>
+                        <h2 id={`paths-${key}`} className="max-w-[75%] scroll-mt-28 text-2xl font-bold sm:max-w-[55%] sm:text-3xl">{group.title}</h2>
+                        <p className="max-w-[75%] text-sm leading-relaxed text-slate-200 sm:max-w-[48%]">{t('paths.topicGuide')}</p>
+                        <div className="flex flex-wrap gap-2 text-sm font-medium">
+                          <span className="rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/20">{t('paths.count', { count: group.paths.length, n: group.paths.length })}</span>
+                          <span className="rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/20">{t('common.lessonCount', { count: group.paths.reduce((sum, p) => sum + p.articleCount, 0), n: group.paths.reduce((sum, p) => sum + p.articleCount, 0) })}</span>
+                        </div>
                       </div>
                     </div>
                     <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

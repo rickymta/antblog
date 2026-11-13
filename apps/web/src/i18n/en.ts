@@ -226,6 +226,9 @@ export const en: Messages = {
     notFound: 'This topic could not be found.',
   },
   paths: {
+    topicGuide: 'Choose a path below and build your knowledge one lesson at a time.',
+    count_one: '{{n}} learning path',
+    count_other: '{{n}} learning paths',
     byTopic: 'Jump to a subject',
     chooseGuide: 'Choose a subject, then a level that fits. Available paths appear first, from beginner to advanced.',
     readGuide: 'Follow the order below to build on each lesson. If you already know a topic, jump to the article you need.',

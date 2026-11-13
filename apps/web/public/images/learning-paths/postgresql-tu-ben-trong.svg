@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+    <title>PostgreSQL · Phần 1 · Nền tảng và mô hình dữ liệu</title><desc>Bắt đầu PostgreSQL từ dữ liệu chuyến xe của Tới Nơi: PostgreSQL nằm ở đâu, dựng lab và kết nối, bảng – dòng – khoá, kiểu dữ liệu cho tiền và thời gian, ràng buộc, ghi và đọc dữ liệu, chuẩn hoá, migration tương thích — kết thúc bằng bài thực hành bàn giao schema có kiểm tra ràng buộc.</desc>
+    <rect width="1200" height="675" fill="#edf2f7"/>
+    <svg x="0" y="115" width="1200" height="420" viewBox="0 85 1200 420"><title>POSTGRESQL</title><desc>PostgreSQL · Nguồn sự thật của Tới Nơi</desc>
+    <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#087f73" opacity=".15"/></pattern></defs>
+    <rect x="0" y="0" width="1200" height="675" rx="0" fill="#dcefe9" stroke="none" stroke-width="2"/><rect width="1200" height="675" fill="url(#grid)"/>
+    <text x="54" y="51" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#153f42">ANTBLOG / ENGINEERING NOTES</text><text x="1080" y="51" font-family="Arial, sans-serif" font-size="16" font-weight="500" fill="#153f42">522</text>
+    <path d="M54 73L1146 73" stroke="#087f7333" stroke-width="3" fill="none" />
+    <path d="M600 315L260 224" stroke="#087f73" stroke-width="3" fill="none" stroke-dasharray="7 7"/><circle cx="260" cy="224" r="42" fill="#ffffff" stroke="#087f7377" stroke-width="3"/><rect x="247" y="211" width="26" height="26" rx="6" fill="#dcefe9" stroke="#087f73" stroke-width="2"/><path d="M600 315L870 224" stroke="#087f73" stroke-width="3" fill="none" stroke-dasharray="7 7"/><circle cx="870" cy="224" r="42" fill="#ffffff" stroke="#087f7377" stroke-width="3"/><rect x="857" y="211" width="26" height="26" rx="6" fill="#dcefe9" stroke="#087f73" stroke-width="2"/><path d="M600 315L260 410" stroke="#087f73" stroke-width="3" fill="none" stroke-dasharray="7 7"/><circle cx="260" cy="410" r="42" fill="#ffffff" stroke="#087f7377" stroke-width="3"/><rect x="247" y="397" width="26" height="26" rx="6" fill="#dcefe9" stroke="#087f73" stroke-width="2"/><path d="M600 315L870 410" stroke="#087f73" stroke-width="3" fill="none" stroke-dasharray="7 7"/><circle cx="870" cy="410" r="42" fill="#ffffff" stroke="#087f7377" stroke-width="3"/><rect x="857" y="397" width="26" height="26" rx="6" fill="#dcefe9" stroke="#087f73" stroke-width="2"/><rect x="465" y="260" width="270" height="110" rx="12" fill="#153f42" stroke="none" stroke-width="2"/><text x="489" y="324" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#ffffff">POSTGRESQL</text><text x="162" y="159" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#153f42">APP</text><text x="800" y="484" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#153f42">DATA</text>
+    <rect x="0" y="507" width="1200" height="168" rx="0" fill="#153f42" stroke="none" stroke-width="2"/><rect x="54" y="539" width="5" height="81" rx="0" fill="#087f73" stroke="none" stroke-width="2"/>
+    <text x="78" y="578" font-family="Arial, sans-serif" font-size="60" font-weight="700" fill="#ffffff">POSTGRESQL</text><text x="80" y="620" font-family="Arial, sans-serif" font-size="20" font-weight="500" fill="#cbd5e1">PostgreSQL · Nguồn sự thật của Tới Nơi</text>
+  </svg>
+    <rect width="1200" height="115" fill="#0f172a"/>
+    <rect x="40" y="37" width="5" height="40" rx="2" fill="#336791"/>
+    <text x="65" y="65" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="white">POSTGRESQL</text>
+    <text x="1110" y="79" text-anchor="middle" font-family="Arial,sans-serif" font-size="62" font-weight="700" fill="#99f6e4">01</text>
+    <rect y="535" width="1200" height="140" fill="#0f172a"/>
+    <path d="M75 610h900" stroke="#334155" stroke-width="3" stroke-dasharray="6 10"/>
+    <circle cx="75" cy="610" r="15" fill="#5eead4"/><circle cx="165" cy="610" r="8" fill="#64748b"/><circle cx="255" cy="610" r="8" fill="#64748b"/><circle cx="345" cy="610" r="8" fill="#64748b"/><circle cx="435" cy="610" r="8" fill="#64748b"/>
+    <path d="m1080 590 20 20-20 20m-24-20h44" fill="none" stroke="#5eead4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
