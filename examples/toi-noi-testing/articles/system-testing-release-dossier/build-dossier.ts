@@ -8,7 +8,7 @@
  * Script không ký thay ai: không có sign-off thì quyết định cao nhất là READY_FOR_SIGN_OFF.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { REGISTRY } from './registry';
 import { assess, type Candidate, type EvidenceItem } from './rules';
@@ -26,25 +26,30 @@ const dirty = gitRoot('status', '--porcelain', '--', 'examples/toi-noi-testing')
 const vitestDirs = REGISTRY.filter((r) => r.source === 'vitest').map((r) => `articles/${r.labDir}`);
 mkdirSync(new URL('../../reports/', import.meta.url), { recursive: true });
 const jsonOut = 'reports/sys17-vitest.json';
+const jsonUrl = new URL(`../../${jsonOut}`, import.meta.url);
+// Xoá kết quả lần trước: nếu Vitest hỏng trước khi ghi, không được đọc nhầm JSON cũ.
+rmSync(jsonUrl, { force: true });
 const run = spawnSync(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', ...vitestDirs, '--reporter=json', `--outputFile=${jsonOut}`],
   { cwd: LAB_ROOT, encoding: 'utf8' });
-const vitest = JSON.parse(readFileSync(new URL(`../../${jsonOut}`, import.meta.url), 'utf8')) as {
-  testResults: { name: string; assertionResults: { status: string }[] }[];
-};
+type VitestJson = { testResults: { name: string; assertionResults: { status: string }[] }[] };
+const vitest: VitestJson | null = existsSync(jsonUrl) ? (JSON.parse(readFileSync(jsonUrl, 'utf8')) as VitestJson) : null;
+const anyFailed = vitest?.testResults.some((f) => f.assertionResults.some((a) => a.status === 'failed')) ?? false;
+// Không có JSON, hoặc Vitest thoát lỗi mà không có ca failed (lỗi cấu hình, import…) ⇒ không có bằng chứng: blocked.
+const runBroken = vitest === null || (run.status !== 0 && !anyFailed);
 const runAt = new Date().toISOString();
 
 const evidence: EvidenceItem[] = [];
 const counts: Record<string, string> = {};
 for (const r of REGISTRY) {
   if (r.source === 'vitest') {
-    const files = vitest.testResults.filter((f) => f.name.replace(/\\/g, '/').includes(`/articles/${r.labDir}/`));
+    const files = (vitest?.testResults ?? []).filter((f) => f.name.replace(/\\/g, '/').includes(`/articles/${r.labDir}/`));
     const statuses = files.flatMap((f) => f.assertionResults.map((a) => a.status));
     const passed = statuses.filter((s) => s === 'passed').length;
     const failed = statuses.filter((s) => s === 'failed').length;
     counts[r.id] = `${passed}/${statuses.length} pass`;
     evidence.push({
       id: r.id, title: r.title, kind: r.kind, critical: r.critical, baselineOnly: r.baselineOnly,
-      result: failed > 0 ? 'fail' : passed === 0 ? 'not_run' : 'pass',
+      result: runBroken ? 'blocked' : failed > 0 ? 'fail' : passed === 0 ? 'not_run' : 'pass',
       commit: dirty ? null : head, recordedAt: runAt, environment: `${process.platform}, Node ${process.version}, chạy lại bởi build-dossier`,
       watchPaths: r.watchPaths, note: counts[r.id],
     });
