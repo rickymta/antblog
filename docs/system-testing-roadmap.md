@@ -1,6 +1,6 @@
 # Kiểm thử hệ thống Tới Nơi — từ khái niệm tới thực hành nâng cao
 
-Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01–SYS-05 đã có bản nháp hoàn chỉnh, lab và báo cáo kiểm thử. Đây là nhánh thực hành bổ sung cho curriculum TEST-001…162, dùng mã SYS để không thay đổi mã cũ.
+Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01–SYS-06 đã có bản nháp hoàn chỉnh, lab và báo cáo kiểm thử. Đây là nhánh thực hành bổ sung cho curriculum TEST-001…162, dùng mã SYS để không thay đổi mã cũ.
 
 ## Nội dung đã viết
 
@@ -9,6 +9,7 @@ Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01
 - [SYS-03 — Functional Test](system-testing/03-functional-test.md) · [Báo cáo](system-testing/03-test-report.md).
 - [SYS-04 — Integration Test](system-testing/04-integration-test.md) · [Báo cáo](system-testing/04-test-report.md).
 - [SYS-05 — System Test](system-testing/05-system-test.md) · [Báo cáo](system-testing/05-test-report.md).
+- [SYS-06 — Regression Test](system-testing/06-regression-test.md) · [Báo cáo](system-testing/06-test-report.md).
 
 Quy trình: viết lần lượt theo số bài; hoàn tất nội dung, kiểm chứng lab, cập nhật báo cáo rồi commit riêng từng bài. Bản nháp đã viết chưa đồng nghĩa đã xuất bản CMS.
 
@@ -75,4 +76,4 @@ Nguồn nội bộ: `examples/toi-noi-testing/SPEC.md`, README lab, `docs/testin
 - Đợt 4: 11–14. Browser matrix, nghiên cứu người dùng, dữ liệu và recovery; tách phần tự động với phần cần con người/môi trường thật.
 - Đợt 5: 15–16. Hồ sơ nghiệm thu và rehearsal triển khai; liên kết kết quả các bài thành release dossier.
 
-Mỗi đợt hoàn thành khi nội dung đủ 10 tiêu chí, lệnh lab chạy lại thành công, kết quả được lưu, nguồn được đối chiếu và giới hạn được công bố. Chưa có lịch xuất bản cố định. Các bài 06–16 đang ở trạng thái kế hoạch, không phải nội dung đã hoàn tất.
+Mỗi đợt hoàn thành khi nội dung đủ 10 tiêu chí, lệnh lab chạy lại thành công, kết quả được lưu, nguồn được đối chiếu và giới hạn được công bố. Chưa có lịch xuất bản cố định. Các bài 07–16 đang ở trạng thái kế hoạch, không phải nội dung đã hoàn tất.
