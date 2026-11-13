@@ -44,12 +44,27 @@ export async function syncLearningPathArticles(
 }
 
 /**
- * Thứ hạng đọc của từng bài theo lộ trình (`sort=path`): chủ đề theo thứ tự cây (order, slug) → phần theo cấp độ rồi slug
- * (để "-phan-02" đứng sau phần gốc) → vị trí bài trong phần. Bài không thuộc lộ trình đã xuất bản nào thì không có hạng.
+ * Thứ tự các phần (lộ trình) trong cùng một chủ đề: `priority` tăng dần (vắng ⇒ sau mọi phần có số) → cấp độ → slug
+ * (để "-phan-02" đứng sau phần gốc). Phải khớp `orderTopicParts` ở apps/web.
+ */
+export function comparePathOrder(
+  a: { priority?: number | null; level: (typeof LEVELS)[number]; slug: string },
+  b: { priority?: number | null; level: (typeof LEVELS)[number]; slug: string },
+): number {
+  const pa = a.priority ?? Number.POSITIVE_INFINITY;
+  const pb = b.priority ?? Number.POSITIVE_INFINITY;
+  return (pa === pb ? 0 : pa < pb ? -1 : 1)
+    || LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level)
+    || a.slug.localeCompare(b.slug, 'en', { numeric: true });
+}
+
+/**
+ * Thứ hạng đọc của từng bài theo lộ trình (`sort=path`): chủ đề theo thứ tự cây (order, slug) → phần theo `comparePathOrder`
+ * → vị trí bài trong phần. Bài không thuộc lộ trình đã xuất bản nào thì không có hạng.
  */
 export async function learningOrderRank(): Promise<Map<string, number>> {
   const [paths, cats] = await Promise.all([
-    LearningPath.find({ status: 'published' }).select({ slug: 1, level: 1, categoryId: 1, articleIds: 1 }).lean(),
+    LearningPath.find({ status: 'published' }).select({ slug: 1, level: 1, priority: 1, categoryId: 1, articleIds: 1 }).lean(),
     Category.find({}).select({ parentId: 1, order: 1, slug: 1 }).lean(),
   ]);
   const children = new Map<string, typeof cats>();
@@ -67,9 +82,7 @@ export async function learningOrderRank(): Promise<Map<string, number>> {
   };
   walk('');
   const rankOf = (p: (typeof paths)[number]) => (p.categoryId ? catRank.get(String(p.categoryId)) : undefined) ?? Number.MAX_SAFE_INTEGER;
-  paths.sort((a, b) =>
-    rankOf(a) - rankOf(b) || LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level) || a.slug.localeCompare(b.slug, 'en', { numeric: true }),
-  );
+  paths.sort((a, b) => rankOf(a) - rankOf(b) || comparePathOrder(a, b));
   const rank = new Map<string, number>();
   for (const p of paths) for (const id of p.articleIds) if (!rank.has(String(id))) rank.set(String(id), rank.size);
   return rank;

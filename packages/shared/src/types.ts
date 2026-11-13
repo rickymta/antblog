@@ -157,6 +157,8 @@ export interface LearningPathCard {
   title: string;
   description: string;
   level: Level;
+  /** Thứ tự trong chủ đề: số nhỏ đứng trước; vắng ⇒ sau các phần có số, rồi theo cấp độ và slug. */
+  priority?: number;
   category?: Pick<Category, 'slug' | 'name' | 'color' | 'icon'>;
   articleCount: number;
   totalMinutes: number;
@@ -257,6 +259,8 @@ export interface LearningPathInput {
   title: string;
   description: string;
   level: Level;
+  /** Vắng ⇒ xoá thứ tự ưu tiên của lộ trình. */
+  priority?: number;
   categoryId?: string;
   articleIds: string[];
   status: 'draft' | 'published';

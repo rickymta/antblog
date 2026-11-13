@@ -49,6 +49,8 @@ const pathFile = z.array(
     title: z.string().min(1),
     description: z.string().default(''),
     level: z.enum(LEVELS),
+    /** Thứ tự trong chủ đề, số nhỏ đứng trước; vắng ⇒ sau các phần có số. */
+    priority: z.number().int().min(0).max(100000).optional(),
     category: z.string().optional(),
     articles: z.array(z.string()).max(10).default([]),
     status: z.enum(PATH_STATUSES).default('published'),
@@ -256,12 +258,18 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
         if (!categoryId) log(`[seed] Lộ trình "${p.slug}": chủ đề "${p.category}" không tồn tại — bỏ liên kết chủ đề.`);
       }
       const existing = await LearningPath.findOne({ slug: p.slug }).lean();
-      const set = { title: p.title, description: p.description, level: p.level, articleIds, status: p.status };
+      const set = {
+        title: p.title, description: p.description, level: p.level, articleIds, status: p.status,
+        ...(p.priority !== undefined ? { priority: p.priority } : {}),
+      };
       let pathId: Types.ObjectId;
       if (existing) {
+        const unset: Record<string, 1> = {};
+        if (!categoryId) unset.categoryId = 1;
+        if (p.priority === undefined) unset.priority = 1;
         await LearningPath.updateOne(
           { _id: existing._id },
-          categoryId ? { $set: { ...set, categoryId } } : { $set: set, $unset: { categoryId: 1 } },
+          { $set: categoryId ? { ...set, categoryId } : set, ...(Object.keys(unset).length ? { $unset: unset } : {}) },
         );
         pathId = existing._id;
       } else {

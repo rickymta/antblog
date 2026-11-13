@@ -37,6 +37,8 @@ interface FormState {
   title: string;
   description: string;
   level: Level;
+  /** Chuỗi để ô số để trống được; rỗng ⇒ không đặt thứ tự ưu tiên. */
+  priority: string;
   categoryId: string;
   status: 'draft' | 'published';
   articleIds: string[];
@@ -49,6 +51,7 @@ function fromPath(p?: AdminLearningPath): FormState {
     title: p?.title ?? '',
     description: p?.description ?? '',
     level: p?.level ?? 'beginner',
+    priority: p?.priority === undefined ? '' : String(p.priority),
     categoryId: p?.categoryId ?? '',
     status: p?.status ?? 'draft',
     articleIds: p?.articleIds ?? [],
@@ -202,6 +205,9 @@ function PathEditor({ path: initialPath }: { path: AdminLearningPath | undefined
     if (form.articleIds.length > 10) v.articleIds = t("paths.partLimit");
     if (title.length < 3 || title.length > 200) v.title = t('paths.errTitle');
     if (!SLUG_RE.test(form.slug.trim())) v.slug = t('paths.errSlug');
+    const priorityText = form.priority.trim();
+    if (priorityText !== '' && !/^\d{1,6}$/.test(priorityText)) v.priority = t('paths.errPriority');
+    else if (priorityText !== '' && Number(priorityText) > 100000) v.priority = t('paths.errPriority');
     setErrors(v);
     if (Object.keys(v).length > 0) {
       toast.error(t('errors.validation'));
@@ -212,6 +218,8 @@ function PathEditor({ path: initialPath }: { path: AdminLearningPath | undefined
       title: form.title.trim(),
       description: form.description.trim(),
       level: form.level,
+      // Vắng ⇒ API xoá thứ tự ưu tiên của lộ trình.
+      priority: priorityText === '' ? undefined : Number(priorityText),
       categoryId: form.categoryId || undefined,
       articleIds: form.articleIds,
       status: form.status,
@@ -290,6 +298,21 @@ function PathEditor({ path: initialPath }: { path: AdminLearningPath | undefined
                     </option>
                   ))}
                 </select>
+              )}
+            </Field>
+            <Field label={t('paths.fieldPriority')} error={errors.priority} hint={t('paths.priorityHint')}>
+              {(a) => (
+                <input
+                  {...a}
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={100000}
+                  step={1}
+                  className={inputClass}
+                  value={form.priority}
+                  onChange={(e) => set('priority', e.target.value)}
+                />
               )}
             </Field>
             {/* Enter trong form ⇒ lưu */}

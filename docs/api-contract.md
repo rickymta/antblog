@@ -72,7 +72,8 @@ POST/PUT `/admin/categories` nhận thêm `parentId?: string | null`: bỏ trư�
 | GET | `/learning-paths` | query `level`, `q` ⇒ `LearningPathCard[]` (chỉ `published`) |
 | GET | `/learning-paths/:slug` | `LearningPathDetail` |
 
-`LearningPathCard = { id, slug, title, description, level, category?: { slug, name: Localized, color, icon }, articleCount, totalMinutes, updatedAt }`
+`LearningPathCard = { id, slug, title, description, level, priority?: number, category?: { slug, name: Localized, color, icon }, articleCount, totalMinutes, updatedAt }`
+Thứ tự các phần trong cùng một chủ đề (trang chủ đề, `sort=path`, ảnh bìa lộ trình): `priority` tăng dần — vắng ⇒ sau mọi phần có số — rồi cấp độ, rồi slug (so số tự nhiên để `-phan-02` sau phần gốc).
 `LearningPathDetail = LearningPathCard & { articles: ArticleCard[] (đúng thứ tự học, bỏ bài chưa xuất bản) }`
 
 ## 3. Thống kê lượt xem / truy cập
@@ -156,7 +157,7 @@ Cần đăng nhập với vai trò `admin` hoặc `author` (`reader` ⇒ 403). `
 ### 7.4 Lộ trình học
 
 `GET/POST /admin/learning-paths`, `GET/PUT/DELETE /admin/learning-paths/:id`.
-`LearningPathInput = { slug, title, description, level, categoryId?, articleIds: string[] (thứ tự học), status: 'draft'|'published' }`. Một bài thuộc tối đa một lộ trình (gán vào lộ trình mới ⇒ gỡ khỏi lộ trình cũ). `totalMinutes` = tổng `readingMinutes` bài đã xuất bản.
+`LearningPathInput = { slug, title, description, level, priority?: integer 0–100000 (vắng hoặc null ⇒ xoá thứ tự ưu tiên), categoryId?, articleIds: string[] (thứ tự học), status: 'draft'|'published' }`. Một bài thuộc tối đa một lộ trình (gán vào lộ trình mới ⇒ gỡ khỏi lộ trình cũ). `totalMinutes` = tổng `readingMinutes` bài đã xuất bản.
 
 ### 7.5 Bình luận
 

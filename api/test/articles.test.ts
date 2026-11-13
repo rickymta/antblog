@@ -104,6 +104,28 @@ describe('nội dung công khai', () => {
     expect(page2.body.items.map((x: { id: string }) => x.id)).toEqual([b1, b2].map((x) => x._id.toString()));
   });
 
+  it('sort=path: priority trong chủ đề thắng cấp độ; phần không có priority xếp sau, giữa chúng theo cấp độ rồi slug', async () => {
+    const admin = await createUser('admin');
+    const cat = await createCategory({ slug: 'testing', order: 1 });
+    const [x, y, z, w] = await Promise.all([1, 2, 3, 4].map(() => createArticle(cat, admin)));
+    const mk = async (slug: string, level: 'beginner' | 'intermediate' | 'advanced', ids: (typeof x)['_id'][], priority?: number) => {
+      const p = await LearningPath.create({ slug, title: slug, level, priority, categoryId: cat._id, articleIds: ids, status: 'published' });
+      await syncLearningPathArticles(p._id, ids, []);
+    };
+    // Không có priority, phần intermediate sẽ đứng trước phần advanced; priority đảo lại đúng thứ tự học.
+    await mk('he-thong-phan-1', 'intermediate', [z._id], 70);
+    await mk('unit-component', 'advanced', [y._id], 60);
+    await mk('nen-tang', 'beginner', [x._id], 10);
+    await mk('chua-xep', 'beginner', [w._id]);
+
+    const res = await request(app).get('/api/v1/articles?sort=path').expect(200);
+    expect(res.body.items.map((i: { id: string }) => i.id)).toEqual([x, y, z, w].map((a) => a._id.toString()));
+    const paths = await request(app).get('/api/v1/learning-paths').expect(200);
+    const bySlug = Object.fromEntries(paths.body.map((p: { slug: string; priority?: number }) => [p.slug, p]));
+    expect(bySlug['unit-component'].priority).toBe(60);
+    expect(bySlug['chua-xep']).not.toHaveProperty('priority');
+  });
+
   it('chi tiết kèm lộ trình (chỉ bài đã xuất bản, đúng thứ tự)', async () => {
     const admin = await createUser('admin');
     const cat = await createCategory();

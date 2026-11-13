@@ -229,6 +229,7 @@ export async function toLearningPathCards(paths: ILearningPath[]) {
       title: p.title,
       description: p.description ?? '',
       level: p.level,
+      priority: p.priority,
       category: cat
         ? { slug: cat.slug, name: { vi: cat.name?.vi ?? '', en: cat.name?.en ?? '' }, color: cat.color, icon: cat.icon }
         : undefined,

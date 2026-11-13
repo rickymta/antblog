@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { addDays, vnDate } from '../src/lib/dates.js';
-import { Article, Category, Comment, DailyArticleStat, DailySiteStat, Reaction } from '../src/models/index.js';
+import { Article, Category, Comment, DailyArticleStat, DailySiteStat, LearningPath, Reaction } from '../src/models/index.js';
 import { assertCleanJson, createArticle, createCategory, createUser, makeApp, resetDb, sessionCookie, useTestDb } from './helpers.js';
 
 useTestDb();
@@ -194,6 +194,24 @@ describe('quản trị — bài viết', () => {
     expect((await Article.findById(b._id).lean())!.learningPathId).toBeUndefined();
     const list = await request(app).get('/api/v1/admin/learning-paths').set('Cookie', c).expect(200);
     expect(list.body).toHaveLength(1);
+  });
+
+  it('lộ trình: đặt, đổi và xoá priority; từ chối giá trị không phải số nguyên 0–100000', async () => {
+    const admin = await createUser('admin');
+    const c = sessionCookie(admin);
+    const base = { slug: 'lo-trinh-uu-tien', title: 'Lộ trình ưu tiên', description: '', level: 'intermediate', status: 'published', articleIds: [] };
+    const created = await request(app).post('/api/v1/admin/learning-paths').set('Cookie', c).send({ ...base, priority: 70 }).expect(201);
+    expect(created.body.priority).toBe(70);
+
+    const changed = await request(app).put(`/api/v1/admin/learning-paths/${created.body.id}`).set('Cookie', c).send({ ...base, priority: 0 }).expect(200);
+    expect(changed.body.priority).toBe(0);
+    const cleared = await request(app).put(`/api/v1/admin/learning-paths/${created.body.id}`).set('Cookie', c).send({ ...base, priority: null }).expect(200);
+    expect(cleared.body).not.toHaveProperty('priority');
+    expect((await LearningPath.findById(created.body.id).lean())!).not.toHaveProperty('priority');
+
+    for (const priority of [-1, 1.5, 100001, 'mười']) {
+      await request(app).post('/api/v1/admin/learning-paths').set('Cookie', c).send({ ...base, slug: 'lo-trinh-sai', priority }).expect(400);
+    }
   });
 
   it('người dùng: lọc, đổi vai trò/khoá; admin không tự hạ/khoá mình', async () => {

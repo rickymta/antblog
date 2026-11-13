@@ -107,6 +107,7 @@ const learningPathInputSchema = z.object({
   title: z.string().trim().min(3).max(200),
   description: z.string().trim().max(2000),
   level: z.enum(LEVELS),
+  priority: z.preprocess((v) => (v === null || v === '' ? undefined : v), z.number().int().min(0).max(100000).optional()),
   categoryId: z.preprocess(emptyToUndefined, objectIdSchema.optional()),
   articleIds: z
     .array(objectIdSchema)
@@ -407,6 +408,7 @@ export function adminRouter(): Router {
         title: input.title,
         description: input.description,
         level: input.level,
+        priority: input.priority,
         categoryId: input.categoryId ? oid(input.categoryId) : undefined,
         articleIds,
         status: input.status,
@@ -439,9 +441,13 @@ export function adminRouter(): Router {
         articleIds,
         status: input.status,
         ...(input.categoryId ? { categoryId: oid(input.categoryId) } : {}),
+        ...(input.priority !== undefined ? { priority: input.priority } : {}),
       },
     };
-    if (!input.categoryId) update.$unset = { categoryId: 1 };
+    const unset: Record<string, 1> = {};
+    if (!input.categoryId) unset.categoryId = 1;
+    if (input.priority === undefined) unset.priority = 1;
+    if (Object.keys(unset).length) update.$unset = unset;
     try {
       await LearningPath.updateOne({ _id: id }, update);
     } catch (err) {

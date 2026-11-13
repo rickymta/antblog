@@ -12,11 +12,21 @@ const output = path.join(root, 'public/images/learning-paths');
 await mkdir(output, { recursive: true });
 const escape = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
 const manifest = {};
+// Same order as the reader site (comparePathOrder in @tkh/shared): priority → level → slug.
+const LEVELS = ['beginner', 'intermediate', 'advanced'];
+const rankPriority = p => (Number.isInteger(p.priority) ? p.priority : Number.POSITIVE_INFINITY);
+const comparePathOrder = (a, b) => {
+  const pa = rankPriority(a);
+  const pb = rankPriority(b);
+  return (pa === pb ? 0 : pa < pb ? -1 : 1)
+    || LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level)
+    || a.slug.localeCompare(b.slug, 'en', { numeric: true });
+};
 
 for (const p of paths) {
   if (!/^[a-z0-9-]+$/.test(p.slug)) throw new Error('Invalid path slug: ' + p.slug);
   const category = categories.find(c => c.slug === p.category);
-  const siblings = paths.filter(x => x.category === p.category);
+  const siblings = paths.filter(x => x.category === p.category).sort(comparePathOrder);
   const number = siblings.indexOf(p) + 1;
   const color = category?.color ?? '#2563EB';
   const source = p.articles.find(slug => briefs[slug]);

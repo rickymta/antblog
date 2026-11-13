@@ -1,3 +1,5 @@
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import bcrypt from 'bcryptjs';
@@ -66,6 +68,27 @@ describe('seed', () => {
     const app = makeApp();
     const summary = await request(app).get('/api/v1/site/summary').expect(200);
     expect(summary.body).toMatchObject({ articleCount: 2, categoryCount: 2, learningPathCount: 1 });
+  });
+
+  it('priority của lộ trình: seed ghi giá trị từ tệp, bỏ trường trong tệp thì xoá priority cũ; giá trị sai bị từ chối', async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'tkh-seed-priority-'));
+    try {
+      cpSync(dataDir, dir, { recursive: true });
+      const file = path.join(dir, 'learning-paths.json');
+      const original = JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>[];
+      writeFileSync(file, JSON.stringify(original.map((p) => ({ ...p, priority: 30 }))));
+      await runSeed({ dataDir: dir, admin, log: quiet });
+      expect((await LearningPath.findOne({ slug: 'nhap-mon-csdl' }).lean())!.priority).toBe(30);
+
+      writeFileSync(file, JSON.stringify(original));
+      await runSeed({ dataDir: dir, admin, log: quiet });
+      expect(await LearningPath.findOne({ slug: 'nhap-mon-csdl' }).lean()).not.toHaveProperty('priority');
+
+      writeFileSync(file, JSON.stringify(original.map((p) => ({ ...p, priority: -1 }))));
+      await expect(runSeed({ dataDir: dir, admin, log: quiet })).rejects.toThrow('learning-paths.json không hợp lệ');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('bài đã sửa trong CMS: seed giữ nguyên + log, --force-content ghi đè lại; bài chưa sửa vẫn cập nhật', async () => {

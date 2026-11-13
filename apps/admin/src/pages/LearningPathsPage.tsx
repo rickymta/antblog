@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { api, formatDate, formatNumber, pickLocalized, type AdminLearningPath } from '@tkh/shared';
+import { api, comparePathOrder, formatDate, formatNumber, pickLocalized, type AdminLearningPath } from '@tkh/shared';
 import {
   Card,
   ConfirmDialog,
@@ -31,6 +31,12 @@ export function LearningPathsPage() {
   const client = useQueryClient();
   const toast = useToast();
   const list = useQuery({ queryKey: [...PATHS_KEY, 'list'], queryFn: () => api.admin.learningPaths.list() });
+  // Nhóm theo chủ đề, trong mỗi chủ đề theo đúng thứ tự trang đọc hiển thị (ưu tiên → cấp độ → slug); lộ trình không chủ đề xếp cuối.
+  const rows = [...(list.data ?? [])].sort((a, b) =>
+    Number(!a.category) - Number(!b.category) ||
+    (a.category?.slug ?? '').localeCompare(b.category?.slug ?? '') ||
+    comparePathOrder(a, b),
+  );
   const [deleting, setDeleting] = useState<AdminLearningPath | null>(null);
   const [deleteError, setDeleteError] = useState<string | undefined>();
 
@@ -67,6 +73,7 @@ export function LearningPathsPage() {
               <tr>
                 <Th>{t('paths.colTitle')}</Th>
                 <Th>{t('paths.colLevel')}</Th>
+                <Th className="text-right">{t('paths.colPriority')}</Th>
                 <Th>{t('paths.colCategory')}</Th>
                 <Th className="text-right">{t('paths.colArticles')}</Th>
                 <Th className="text-right">{t('paths.colMinutes')}</Th>
@@ -76,7 +83,7 @@ export function LearningPathsPage() {
               </tr>
             </thead>
             <tbody>
-              {list.data.map((p) => (
+              {rows.map((p) => (
                 <tr key={p.id} className="hover:bg-surface-2/60">
                   <Td className="max-w-[22rem]">
                     <Link to={`/learning-paths/${p.id}`} className="font-medium text-primary-ink hover:underline">
@@ -87,6 +94,7 @@ export function LearningPathsPage() {
                   <Td>
                     <LevelBadge level={p.level} />
                   </Td>
+                  <Td className="text-right tabular-nums">{p.priority ?? t('common.none')}</Td>
                   <Td>{p.category ? <CategoryChip name={pickLocalized(p.category.name, locale)} color={p.category.color} /> : t('common.none')}</Td>
                   <Td className="text-right tabular-nums">{formatNumber(p.articleCount ?? p.articleIds?.length ?? 0, locale)}</Td>
                   <Td className="text-right whitespace-nowrap tabular-nums">{formatMinutes(p.totalMinutes ?? 0, t)}</Td>
