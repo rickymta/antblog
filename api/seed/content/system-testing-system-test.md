@@ -464,4 +464,4 @@ Các nguồn ngoài được tra cứu 13/11/2026.
 - Lab Tới Nơi: `SPEC.md` (R-UI, R-STATE, R-FARE, R-PAY, R-CANCEL, R-API, R-TEST, R-NFR), `src/server.ts`, `src/web/customer.js`, `src/web/driver.js` và bộ test của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-system-test
 - Bài liên quan: [TEST-014 System Testing](/articles/system-testing) · [TEST-015 System Integration Testing](/articles/system-integration-testing) · [TEST-016 Acceptance Testing](/articles/acceptance-testing-tong-quan) · [SYS-01 Smoke Test](/articles/system-testing-smoke-test) · [SYS-03 Functional Test](/articles/system-testing-functional-test) · [SYS-04 Integration Test](/articles/system-testing-integration-test)
 
-Bài tiếp theo: SYS-06 · Regression Test (đang biên tập).
+Bài tiếp theo: [SYS-06 · Regression Test](/articles/system-testing-regression-test).

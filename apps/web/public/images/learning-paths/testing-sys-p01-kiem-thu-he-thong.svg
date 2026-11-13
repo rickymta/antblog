@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
-    <title>Kiểm thử hệ thống Tới Nơi · Phần 1/2</title><desc>Thực hành kiểm thử hệ thống trên lab Tới Nơi: smoke để quyết định có kiểm sâu tiếp, sanity theo phạm vi thay đổi, functional với oracle tiền độc lập, integration qua repository PGlite và ví giả, rồi system test qua hành trình khách và tài xế — mỗi bài có lab chạy lại được và báo cáo thực đo.</desc>
+    <title>Kiểm thử hệ thống Tới Nơi · Phần 1/2</title><desc>Thực hành kiểm thử hệ thống trên lab Tới Nơi: smoke để quyết định có kiểm sâu tiếp, sanity theo phạm vi thay đổi, functional với oracle tiền độc lập, integration qua PGlite và ví giả, system test qua hành trình khách và tài xế, regression theo rủi ro, rồi đo performance và load với workload, offered/achieved load rõ ràng — mỗi bài có lab chạy lại được và báo cáo thực đo.</desc>
     <rect width="1200" height="675" fill="#edf2f7"/>
     <svg x="0" y="115" width="1200" height="420" viewBox="0 85 1200 420"><title>SMOKE TEST</title><desc>Is this build worth testing deeper?</desc>
     <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#19826b" opacity=".15"/></pattern></defs>
@@ -16,6 +16,6 @@
     <text x="1110" y="79" text-anchor="middle" font-family="Arial,sans-serif" font-size="62" font-weight="700" fill="#99f6e4">06</text>
     <rect y="535" width="1200" height="140" fill="#0f172a"/>
     <path d="M75 610h900" stroke="#334155" stroke-width="3" stroke-dasharray="6 10"/>
-    <circle cx="75" cy="610" r="8" fill="#64748b"/><circle cx="165" cy="610" r="8" fill="#64748b"/><circle cx="255" cy="610" r="8" fill="#64748b"/><circle cx="345" cy="610" r="8" fill="#64748b"/><circle cx="435" cy="610" r="8" fill="#64748b"/><circle cx="525" cy="610" r="15" fill="#5eead4"/>
+    <circle cx="75" cy="610" r="8" fill="#64748b"/><circle cx="165" cy="610" r="8" fill="#64748b"/><circle cx="255" cy="610" r="8" fill="#64748b"/><circle cx="345" cy="610" r="8" fill="#64748b"/><circle cx="435" cy="610" r="8" fill="#64748b"/><circle cx="525" cy="610" r="15" fill="#5eead4"/><circle cx="615" cy="610" r="8" fill="#64748b"/>
     <path d="m1080 590 20 20-20 20m-24-20h44" fill="none" stroke="#5eead4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>

@@ -20,7 +20,7 @@ Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01
 - [SYS-14 — Recovery Test](system-testing/14-recovery-test.md) · [Báo cáo](system-testing/14-test-report.md).
 - [SYS-15 — UAT](system-testing/15-uat.md) · [Acceptance kit](system-testing/15-acceptance-kit.md) · [Báo cáo](system-testing/15-test-report.md).
 
-Đã chuyển vào seed (13/11/2026): SYS-01…SYS-05 thành bài blog `api/seed/content/system-testing-{smoke,sanity,functional,integration,system}-test.md`, lab chạy lại pass cùng ngày, learning path `testing-sys-p01-kiem-thu-he-thong` (Phần 1/2, sẽ bổ sung SYS-06…08). SYS-06 trở đi vẫn là bản nháp trong `docs/`.
+Đã chuyển vào seed (13/11/2026): SYS-01…SYS-15 thành bài blog `api/seed/content/system-testing-*.md`. Learning path `testing-sys-p01-kiem-thu-he-thong` (Phần 1/2: SYS-01…08) và `testing-sys-p02-kiem-thu-he-thong` (Phần 2/2: SYS-09…15; bổ sung SYS-16 khi viết xong). Số đo hiệu năng/tải/stress và restore drill trong bài lấy từ báo cáo đã đo, không đo lại khi biên tập. SYS-12 vẫn chưa chạy user study; SYS-15 chưa có phiên UAT/sign-off.
 
 Quy trình: viết lần lượt theo số bài; hoàn tất nội dung, kiểm chứng lab, cập nhật báo cáo rồi commit riêng từng bài. Bản nháp đã viết chưa đồng nghĩa đã xuất bản CMS.
 

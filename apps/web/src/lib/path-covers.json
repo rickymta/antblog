@@ -304,6 +304,11 @@
     "topic": "testing",
     "number": 6
   },
+  "testing-sys-p02-kiem-thu-he-thong": {
+    "source": "system-testing-stress-test",
+    "topic": "testing",
+    "number": 7
+  },
   "da-p01-nen-tang-phan-tich-du-lieu": {
     "source": null,
     "topic": "data-analysis",

@@ -5738,5 +5738,105 @@
       "TRIP",
       "DRIVER"
     ]
+  },
+  "system-testing-regression-test": {
+    "title": "REGRESSION TEST",
+    "subtitle": "Did the change break what worked?",
+    "diagram": "cycle",
+    "labels": [
+      "CHANGE",
+      "RE-RUN",
+      "IMPACT"
+    ]
+  },
+  "system-testing-performance-test": {
+    "title": "PERFORMANCE",
+    "subtitle": "Latency, throughput and p95 baselines",
+    "diagram": "target",
+    "labels": [
+      "WORKLOAD",
+      "p95 / p99",
+      "BOTTLENECK"
+    ]
+  },
+  "system-testing-load-test": {
+    "title": "LOAD TEST",
+    "subtitle": "Expected traffic, measured arrival rate",
+    "diagram": "flow",
+    "labels": [
+      "RAMP-UP",
+      "STEADY",
+      "COOL-DOWN"
+    ]
+  },
+  "system-testing-stress-test": {
+    "title": "STRESS TEST",
+    "subtitle": "Beyond normal load, then recovery",
+    "diagram": "layers",
+    "labels": [
+      "SPIKE",
+      "BREAKPOINT",
+      "RECOVER"
+    ]
+  },
+  "system-testing-security-pentest": {
+    "title": "SECURITY / PENTEST",
+    "subtitle": "Threat model, scope and evidence",
+    "diagram": "network",
+    "labels": [
+      "THREAT MODEL",
+      "AUTHZ",
+      "RETEST"
+    ]
+  },
+  "system-testing-compatibility-test": {
+    "title": "COMPATIBILITY",
+    "subtitle": "Browsers, viewports, versions",
+    "diagram": "matrix",
+    "labels": [
+      "CHROMIUM",
+      "WEBKIT",
+      "BROWSER MATRIX"
+    ]
+  },
+  "system-testing-usability-test": {
+    "title": "USABILITY TEST",
+    "subtitle": "Real tasks, observed by people",
+    "diagram": "checklist",
+    "labels": [
+      "TASK SUCCESS",
+      "TIME ON TASK",
+      "ERRORS"
+    ]
+  },
+  "system-testing-data-integrity-test": {
+    "title": "DATA INTEGRITY",
+    "subtitle": "Trips, ledgers and money agree",
+    "diagram": "storage",
+    "labels": [
+      "CONSTRAINT",
+      "TRANSACTION",
+      "RECONCILE"
+    ]
+  },
+  "system-testing-recovery-test": {
+    "title": "RECOVERY TEST",
+    "subtitle": "Backups only count once restored",
+    "diagram": "cycle",
+    "labels": [
+      "FAILURE",
+      "RESTORE",
+      "VERIFY RTO/RPO"
+    ]
+  },
+  "system-testing-uat": {
+    "title": "UAT",
+    "subtitle": "Acceptance with evidence and sign-off",
+    "diagram": "split",
+    "labels": [
+      "SCENARIOS",
+      "↔",
+      "SIGN-OFF"
+    ]
   }
 }
