@@ -1145,6 +1145,21 @@
     "status": "published"
   },
   {
+    "slug": "testing-sys-p01-kiem-thu-he-thong",
+    "title": "Kiểm thử hệ thống Tới Nơi · Phần 1/2",
+    "description": "Thực hành kiểm thử hệ thống trên lab Tới Nơi: smoke để quyết định có kiểm sâu tiếp, sanity theo phạm vi thay đổi, functional với oracle tiền độc lập, integration qua repository PGlite và ví giả, rồi system test qua hành trình khách và tài xế — mỗi bài có lab chạy lại được và báo cáo thực đo.",
+    "level": "intermediate",
+    "category": "testing",
+    "articles": [
+      "system-testing-smoke-test",
+      "system-testing-sanity-test",
+      "system-testing-functional-test",
+      "system-testing-integration-test",
+      "system-testing-system-test"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "da-p01-nen-tang-phan-tich-du-lieu",
     "title": "DA · Phần 1 · Nền tảng phân tích dữ liệu",
     "description": "Đủ 10 bài DA-001–DA-010 qua Tới Nơi: câu hỏi, vai trò, quy trình, chỉ số, nguồn dữ liệu, giả thuyết và bất định; kết thúc bằng kế hoạch phân tích huỷ chuyến. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.",

@@ -5688,5 +5688,55 @@
       "RESTORE",
       "VERIFY"
     ]
+  },
+  "system-testing-smoke-test": {
+    "title": "SMOKE TEST",
+    "subtitle": "Is this build worth testing deeper?",
+    "diagram": "checklist",
+    "labels": [
+      "HEALTH",
+      "AUTH",
+      "BOOK → PAY"
+    ]
+  },
+  "system-testing-sanity-test": {
+    "title": "SANITY TEST",
+    "subtitle": "Check the change and its blast radius",
+    "diagram": "target",
+    "labels": [
+      "CHANGE",
+      "IMPACT",
+      "VOUCHER"
+    ]
+  },
+  "system-testing-functional-test": {
+    "title": "FUNCTIONAL TEST",
+    "subtitle": "Requirements, boundaries, money oracles",
+    "diagram": "matrix",
+    "labels": [
+      "FARE",
+      "VOUCHER",
+      "DECISION TABLE"
+    ]
+  },
+  "system-testing-integration-test": {
+    "title": "INTEGRATION TEST",
+    "subtitle": "Ports, contracts and test doubles",
+    "diagram": "split",
+    "labels": [
+      "API + REPOSITORY",
+      "↔",
+      "WALLET DOUBLE"
+    ]
+  },
+  "system-testing-system-test": {
+    "title": "SYSTEM TEST",
+    "subtitle": "Customer and driver, end to end",
+    "diagram": "flow",
+    "labels": [
+      "CUSTOMER",
+      "TRIP",
+      "DRIVER"
+    ]
   }
 }

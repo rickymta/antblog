@@ -299,6 +299,11 @@
     "topic": "testing",
     "number": 5
   },
+  "testing-sys-p01-kiem-thu-he-thong": {
+    "source": "system-testing-smoke-test",
+    "topic": "testing",
+    "number": 6
+  },
   "da-p01-nen-tang-phan-tich-du-lieu": {
     "source": null,
     "topic": "data-analysis",
