@@ -1148,7 +1148,7 @@
     "slug": "testing-sys-p01-kiem-thu-he-thong",
     "title": "Kiểm thử hệ thống Tới Nơi · Phần 1/2",
     "description": "Thực hành kiểm thử hệ thống trên lab Tới Nơi: smoke để quyết định có kiểm sâu tiếp, sanity theo phạm vi thay đổi, functional với oracle tiền độc lập, integration qua PGlite và ví giả, system test qua hành trình khách và tài xế, regression theo rủi ro, rồi đo performance và load với workload, offered/achieved load rõ ràng — mỗi bài có lab chạy lại được và báo cáo thực đo.",
-    "level": "intermediate",
+    "level": "advanced",
     "category": "testing",
     "articles": [
       "system-testing-smoke-test",
@@ -1165,7 +1165,7 @@
   {
     "slug": "testing-sys-p02-kiem-thu-he-thong",
     "title": "Kiểm thử hệ thống Tới Nơi · Phần 2/2",
-    "description": "Phần nâng cao của kiểm thử hệ thống Tới Nơi: stress và hồi phục sau quá tải, security test và pentest trong phạm vi được chỉ định, compatibility theo ma trận trình duyệt, usability với kịch bản và worksheet quan sát, data integrity cho tiền và trạng thái chuyến, recovery với restore drill PostgreSQL, UAT với acceptance kit, và deployment test với readiness, cấu hình an toàn và migration tương thích rollback — tách rõ phần tự động với phần cần con người và môi trường thật.",
+    "description": "Phần nâng cao của kiểm thử hệ thống Tới Nơi: stress và hồi phục sau quá tải, security test và pentest trong phạm vi được chỉ định, compatibility theo ma trận trình duyệt, usability với kịch bản và worksheet quan sát, data integrity cho tiền và trạng thái chuyến, recovery với restore drill PostgreSQL, UAT với acceptance kit, deployment test với readiness, cấu hình an toàn và migration tương thích rollback, và capstone release dossier gom bằng chứng thành đề xuất release có người ký — tách rõ phần tự động với phần cần con người và môi trường thật.",
     "level": "advanced",
     "category": "testing",
     "articles": [
@@ -1176,7 +1176,8 @@
       "system-testing-data-integrity-test",
       "system-testing-recovery-test",
       "system-testing-uat",
-      "system-testing-deployment-test"
+      "system-testing-deployment-test",
+      "system-testing-release-dossier"
     ],
     "status": "published"
   },

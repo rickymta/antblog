@@ -553,6 +553,4 @@ Tra cứu và đối chiếu ngày 13/11/2026.
 - Lab Tới Nơi: `SPEC.md` (R-API-15, R-TEST-01, R-NFR-06, R-FARE-01/04/08, R-STATE-02, R-PAY-03), `src/server.ts`, `src/infra/pglite/pg-trip-repository.ts`, `articles/system-testing-deployment-test/` (`deployment.test.ts`, `migration-compat.test.ts`) — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing
 - Bài liên quan: [SYS-01 Smoke Test](/articles/system-testing-smoke-test) · [SYS-13 Data Integrity Test](/articles/system-testing-data-integrity-test) · [SYS-14 Recovery Test](/articles/system-testing-recovery-test) · [SYS-15 UAT](/articles/system-testing-uat) · [Schema migration tương thích](/articles/postgresql-schema-migration-tuong-thich) · [Lock hàng và bảng](/articles/postgresql-lock-row-table)
 
-## Khép lại series
-
-Mười sáu bài đi từ câu hỏi nhỏ nhất — "build này có đáng kiểm tiếp không" ở [SYS-01 · Smoke Test](/articles/system-testing-smoke-test) — tới câu hỏi cuối cùng: "bản đang chạy có đúng là thứ ta đã kiểm, và có quay lui được không". Mỗi bài có cùng một kỷ luật: chọn phép kiểm theo rủi ro, oracle độc lập với mã đang kiểm, tách mong đợi khỏi thực tế, và nói rõ bằng chứng dừng ở đâu. Nếu chỉ giữ lại một điều, hãy giữ điều đó — tên các loại test sẽ thay đổi theo đội và công cụ, còn câu hỏi "phép kiểm này chứng minh được gì" thì không.
+Bài tiếp theo: [SYS-17 · Release Dossier](/articles/system-testing-release-dossier) — gom bằng chứng của cả mười sáu bài thành một đề xuất release có người chịu trách nhiệm.

@@ -5848,5 +5848,15 @@
       "DEPLOY",
       "CONTRACT"
     ]
+  },
+  "system-testing-release-dossier": {
+    "title": "RELEASE DOSSIER",
+    "subtitle": "Evidence in, a signed decision out",
+    "diagram": "checklist",
+    "labels": [
+      "FRESH EVIDENCE",
+      "OPEN RISKS",
+      "SIGN-OFF"
+    ]
   }
 }

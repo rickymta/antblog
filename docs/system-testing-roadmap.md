@@ -1,6 +1,6 @@
 # Kiểm thử hệ thống Tới Nơi — từ khái niệm tới thực hành nâng cao
 
-Ngày lập: 13/11/2026. Trạng thái: đủ 16 bài; SYS-01–SYS-16 đã có bản nháp hoàn chỉnh, tài liệu thực hành và báo cáo. SYS-12 chưa chạy user study; SYS-15 có acceptance kit và supporting checks, chưa có phiên UAT/sign-off. Đây là nhánh thực hành bổ sung cho curriculum TEST-001…162, dùng mã SYS để không thay đổi mã cũ.
+Ngày lập: 13/11/2026. Trạng thái: 17 bài (16 chủ đề theo yêu cầu + SYS-17 capstone); SYS-01–SYS-17 đã có bản nháp hoàn chỉnh, tài liệu thực hành và báo cáo. SYS-12 chưa chạy user study; SYS-15 có acceptance kit và supporting checks, chưa có phiên UAT/sign-off. Đây là nhánh thực hành bổ sung cho curriculum TEST-001…162, dùng mã SYS để không thay đổi mã cũ.
 
 ## Nội dung đã viết
 
@@ -20,8 +20,9 @@ Ngày lập: 13/11/2026. Trạng thái: đủ 16 bài; SYS-01–SYS-16 đã có 
 - [SYS-14 — Recovery Test](system-testing/14-recovery-test.md) · [Báo cáo](system-testing/14-test-report.md).
 - [SYS-15 — UAT](system-testing/15-uat.md) · [Acceptance kit](system-testing/15-acceptance-kit.md) · [Báo cáo](system-testing/15-test-report.md).
 - [SYS-16 — Deployment Test](system-testing/16-deployment-test.md) · [Báo cáo](system-testing/16-test-report.md).
+- [SYS-17 — Release Dossier (capstone)](system-testing/17-release-dossier.md) · [Báo cáo](system-testing/17-test-report.md).
 
-Đã chuyển vào seed (13/11/2026): SYS-01…SYS-16 thành bài blog `api/seed/content/system-testing-*.md`. Learning path `testing-sys-p01-kiem-thu-he-thong` (Phần 1/2: SYS-01…08) và `testing-sys-p02-kiem-thu-he-thong` (Phần 2/2: SYS-09…16). Số đo hiệu năng/tải/stress và restore drill trong bài lấy từ báo cáo đã đo, không đo lại khi biên tập. SYS-12 vẫn chưa chạy user study; SYS-15 chưa có phiên UAT/sign-off.
+Đã chuyển vào seed (13/11/2026): SYS-01…SYS-17 thành bài blog `api/seed/content/system-testing-*.md`. Learning path `testing-sys-p01-kiem-thu-he-thong` (Phần 1/2: SYS-01…08) và `testing-sys-p02-kiem-thu-he-thong` (Phần 2/2: SYS-09…17). Số đo hiệu năng/tải/stress và restore drill trong bài lấy từ báo cáo đã đo, không đo lại khi biên tập. SYS-12 vẫn chưa chạy user study; SYS-15 chưa có phiên UAT/sign-off.
 
 Quy trình: viết lần lượt theo số bài; hoàn tất nội dung, kiểm chứng lab, cập nhật báo cáo rồi commit riêng từng bài. Bản nháp đã viết chưa đồng nghĩa đã xuất bản CMS.
 
@@ -31,7 +32,7 @@ Người học biết chọn phép kiểm theo rủi ro, thiết kế oracle đ�
 
 Integration, System, Acceptance là các cấp kiểm thử; Functional và các đặc tính phi chức năng là hướng kiểm tra; Smoke/Sanity là cách chọn phạm vi suite trong thực tiễn. Regression phục vụ đánh giá ảnh hưởng của thay đổi. Performance bao trùm nhiều mô hình tải, trong đó có Load và Stress. Pentest là một hoạt động trong security testing, không đại diện toàn bộ bảo mật.
 
-Blog giới hạn tối đa 10 bài trong một learning path (`api/seed/lib.ts`): khi đưa vào CMS, chia Phần 1 (01–08) và Phần 2 (09–16). Chỉ đưa slug đã có nội dung vào path; chưa tạo liên kết tới bài chưa viết. Bản nháp ở `docs/system-testing/`; chỉ chuyển vào seed sau khi hoàn tất review và kiểm chứng lab.
+Thứ tự path trên site không lấy theo thứ tự trong `learning-paths.json`: trang chủ đề và thứ hạng đọc của API xếp theo cấp độ rồi slug. Vì vậy cả hai phần SYS đặt cấp `advanced` để đứng sau S06 Unit & Component Testing và không bị S06 chen giữa: S01 → S02 → S03 → S06 → SYS Phần 1 → SYS Phần 2. Blog giới hạn tối đa 10 bài trong một learning path (`api/seed/lib.ts`): khi đưa vào CMS, chia Phần 1 (01–08) và Phần 2 (09–16). Chỉ đưa slug đã có nội dung vào path; chưa tạo liên kết tới bài chưa viết. Bản nháp ở `docs/system-testing/`; chỉ chuyển vào seed sau khi hoàn tất review và kiểm chứng lab.
 
 ## Tiêu chuẩn bắt buộc cho từng bài
 
@@ -48,7 +49,7 @@ Blog giới hạn tối đa 10 bài trong một learning path (`api/seed/lib.ts`
 
 Không đạt bằng cách chỉ có đề mục hoặc checklist. Mỗi phần cần giải thích vì sao, ví dụ Tới Nơi cụ thể và tiêu chí đánh giá. Những bài thiết kế/human testing phải có worksheet, kịch bản và mẫu báo cáo thay cho việc ép mọi thứ thành automation.
 
-## Lộ trình 16 bài
+## Lộ trình 16 bài và capstone
 
 | ID / chủ đề / slug dự kiến | Từ nền tảng đến nâng cao | Thực hành và bằng chứng hoàn thành | Nguồn |
 |---|---|---|---|
@@ -68,6 +69,7 @@ Không đạt bằng cách chỉ có đề mục hoặc checklist. Mỗi phần 
 | SYS-14 Recovery Test / `system-testing-recovery-test` | Failure modes, RTO/RPO; backup vs restore; failover, replay và retry | Inject lỗi ví trong lab; restore drill PostgreSQL riêng, đo thời gian và điểm mất dữ liệu; kiểm nghiệp vụ sau restore | D |
 | SYS-15 UAT / `system-testing-uat` | Acceptance criteria; vai trò nghiệp vụ; scenario, evidence, sign-off, rủi ro tồn | Bộ acceptance scenarios khách/tài xế/operator; mẫu quyết định chấp nhận có người chịu trách nhiệm; automation không thay sign-off | A |
 | SYS-16 Deployment Test / `system-testing-deployment-test` | Config/secrets, migration, readiness; canary, rollback/roll-forward | Checklist triển khai môi trường local/staging, version và post-deploy smoke; kiểm khả năng đọc dữ liệu sau rollback | A, D |
+| SYS-17 Release Dossier (capstone) / `system-testing-release-dossier` | Exit criteria, test completion report; độ mới bằng chứng theo commit; rủi ro tồn và sign-off | Luật gom bằng chứng có unit test; script chạy lại suite Vitest, ghép báo cáo, kiểm diff theo watchPaths, xuất dossier; không tự ký GO | A |
 
 ## Nguồn tham khảo đã tra cứu ngày 13/11/2026
 
@@ -86,6 +88,6 @@ Nguồn nội bộ: `examples/toi-noi-testing/SPEC.md`, README lab, `docs/testin
 - Đợt 2: 04–06. Tích hợp, hành trình toàn hệ thống và regression; có bản đồ coverage và bằng chứng tái hiện lỗi.
 - Đợt 3: 07–10. Chuẩn bị môi trường hiệu năng/bảo mật riêng; chốt workload, điều kiện dừng và phạm vi trước khi chạy.
 - Đợt 4: 11–14. Browser matrix, nghiên cứu người dùng, dữ liệu và recovery; tách phần tự động với phần cần con người/môi trường thật.
-- Đợt 5: 15–16. Hồ sơ nghiệm thu và rehearsal triển khai; liên kết kết quả các bài thành release dossier.
+- Đợt 5: 15–17. Hồ sơ nghiệm thu và rehearsal triển khai; SYS-17 liên kết kết quả các bài thành release dossier (đề xuất hiện tại của lab: NOT_READY, chờ UAT).
 
 Mỗi đợt hoàn thành khi nội dung đủ 10 tiêu chí, lệnh lab chạy lại thành công, kết quả được lưu, nguồn được đối chiếu và giới hạn được công bố. Chưa có lịch xuất bản cố định. User study SYS-12 cần participant thật; SYS-15 cần phiên UAT và quyết định của đại diện nghiệp vụ, không thay bằng supporting checks.
