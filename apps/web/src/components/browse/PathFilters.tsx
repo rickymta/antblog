@@ -59,6 +59,7 @@ export function PathFilters({ query }: { query: PathQuery }) {
           update({ q: search.trim() || undefined });
         }}
       >
+        {current.level && <input type="hidden" name="level" value={current.level} />}
         <label htmlFor="paths-search" className="sr-only">
           {t('paths.searchLabel')}
         </label>

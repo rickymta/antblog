@@ -41,7 +41,7 @@ export function PathCard({ path, showDate = false, headingLevel = 3 }: { path: L
   const read = countReadInPath(useReadArticles(), path.slug, path.articleCount);
 
   return (
-    <article className={`flex h-full flex-col gap-4 p-5 ${card}`}>
+    <article className={`flex h-full flex-col gap-4 p-5 ${card} transition-shadow hover:shadow-lg hover:shadow-slate-900/5 dark:hover:shadow-black/30`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         {path.category ? <CategoryChip category={path.category} uppercase /> : <span />}
         <LevelTag level={path.level} />
@@ -71,7 +71,7 @@ export function PathCard({ path, showDate = false, headingLevel = 3 }: { path: L
           <ProgressBar value={read} max={path.articleCount} label={t('paths.progressLabel', { title: path.title })} />
           <p className="text-sm text-muted">{t('paths.progress', { read, total: path.articleCount })}</p>
         </div> : <p className="text-sm text-muted">{t('paths.emptyArticles')}</p>}
-        <Link href={pathHref(path.slug)} className={`${btnPrimary} w-full`}>
+        <Link href={pathHref(path.slug)} className={`${btnPrimary} min-h-11 w-full`}>
           {t('paths.view')}
           <span className="sr-only">: {path.title}</span>
         </Link>

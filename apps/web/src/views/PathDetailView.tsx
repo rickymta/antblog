@@ -8,11 +8,13 @@ import { useLocale } from '../i18n';
 import { ArticleMeta, articleHref } from '../components/common/ArticleCard';
 import { CategoryChip, LevelTag } from '../components/common/Badges';
 import { ProgressBar } from '../components/common/PathCard';
+import { Cover } from '../components/common/Cover';
 import { EmptyState } from '../components/common/States';
 import { formatDay } from '../lib/dates';
 import { formatDuration } from '../lib/format';
 import { useReadArticles } from '../lib/reading';
 import { btnPrimary, card, container } from '../lib/ui';
+import { pathCover } from '../lib/path-cover';
 
 /** Chi tiết lộ trình: dữ liệu do máy chủ tải; tiến độ đọc (localStorage) hiện sau khi hydrate. */
 export function PathDetailView({ path: p }: { path: LearningPathDetail }) {
@@ -29,6 +31,9 @@ export function PathDetailView({ path: p }: { path: LearningPathDetail }) {
     <div className={`${container} max-w-4xl`}>
       <nav aria-label={t('article.breadcrumb')} className="pt-6 text-sm"><Link href="/learning-paths" className="inline-flex min-h-11 items-center text-primary-ink hover:underline">← {t('paths.backToPaths')}</Link></nav>
       <header className="space-y-4 pt-4 pb-8">
+        {p.category && <div className="aspect-[4/1] overflow-hidden rounded-card border border-line">
+          <Cover src={pathCover(p.category.slug)} category={p.category} eager className="object-right" />
+        </div>}
         <div className="flex flex-wrap items-center gap-2">
           <LevelTag level={p.level} />
           {p.category && <CategoryChip category={p.category} />}
