@@ -36,6 +36,6 @@ Bằng chứng cho thấy: máy chủ khởi động được từ mã nguồn v
 
 Không chạy: build artifact/container, triển khai lên staging, rolling/blue-green/canary, secret manager, TLS, nhiều instance, migration trên PostgreSQL nhiều kết nối hoặc dữ liệu lớn, đo thời gian khoá bảng, graceful shutdown, rollback thật giữa hai phiên bản mã khác nhau. Lab không có endpoint version nên không kiểm build ID qua HTTP.
 
-Khi chạy toàn bộ `npm test` của lab: 85/86 file pass; 3 test của `articles/data-based-test-techniques-domain-testing` (TEST-040) đỏ cả khi chạy riêng, theo cùng một kiểu mỗi lần. File đó và `src/` không bị thay đổi trong đợt này, nên đây là lỗi sẵn có cần điều tra riêng, không thuộc SYS-16.
+Khi chạy toàn bộ `npm test` của lab: 85/86 file pass; 3 test của `articles/data-based-test-techniques-domain-testing` (TEST-040) đỏ cả khi chạy riêng, theo cùng một kiểu mỗi lần. File đó và `src/` không bị thay đổi trong đợt này, nên đây là lỗi sẵn có cần điều tra riêng, không thuộc SYS-16. Cập nhật cùng ngày: nguyên nhân là `bang-10000.csv` được checkout thành CRLF (`core.autocrlf=true`) trong khi `loadTable()` tách dòng bằng `'\n'`, để lại `'bike\r'`. Đã sửa parser thành `/\r?\n/`; chạy lại toàn bộ lab: 86/86 file, 1058 test pass.
 
 Kết luận: đạt tiêu chí bài tập SYS-16 trong lab một tiến trình; không suy ra quy trình triển khai production đã được kiểm.

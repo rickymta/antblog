@@ -8,7 +8,8 @@ import { makeImpl, MUTANTS, type Impl } from './trien-khai';
 
 export function loadTable(): Point[] {
   const text = readFileSync(new URL('./bang-10000.csv', import.meta.url), 'utf8');
-  return text.trim().split('\n').slice(1).map((line) => {
+  // \r?\n: checkout trên Windows với core.autocrlf=true biến tệp thành CRLF; tách bằng '\n' sẽ để lại 'bike\r'.
+  return text.trim().split(/\r?\n/).slice(1).map((line) => {
     const [ma, d, w, v] = line.split(',');
     return { d: Number(d), w: Number(w), v: v as Vehicle, kind: ma! };
   });
