@@ -1,5 +1,7 @@
 # Phòng thí nghiệm kiểm thử Tới Nơi
 
+Nhóm bài mới: [Kiểm thử hệ thống — 16 chủ đề](../../docs/system-testing-roadmap.md). Lab đầu tiên: [SYS-01 Smoke Test](articles/system-testing-smoke-test/README.md), kiểm đường nghiệp vụ quan trọng qua API và PGlite.
+
 Bản thu nhỏ của **Tới Nơi** — ứng dụng đặt xe và giao hàng hư cấu của blog — viết bằng TypeScript (Node 22), dùng chung cho loạt bài «Kiểm thử phần mềm theo ISTQB qua dự án Tới Nơi». Mọi test và script trong các bài đều chạy trên mã nguồn ở đây.
 
 - **Đặc tả (test basis):** [`SPEC.md`](SPEC.md) — mọi quy tắc có mã cố định `R-…` để bài viết và ca kiểm thử trích dẫn.
