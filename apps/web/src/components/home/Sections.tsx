@@ -89,7 +89,7 @@ export function LatestSection({ articles }: { articles: ArticleCardData[] | null
     <section aria-labelledby="home-latest" className={container + ' home-section'}>
       <p className="section-kicker">{t('home.latestLabel')}</p>
       <SectionHeader id="home-latest" title={t('home.latestTitle')} subtitle={t('home.latestSubtitle')} link={{ to: '/articles?sort=latest', label: t('common.seeAll') }} />
-      {!articles ? <RefreshErrorState /> : articles.length === 0 ? <EmptyState title={t('home.latestEmpty')} /> : <ul className="latest-grid">{articles.map(a => <li key={a.id}><ArticleCard article={a} showSummary /></li>)}</ul>}
+      {!articles ? <RefreshErrorState /> : articles.length === 0 ? <EmptyState title={t('home.latestEmpty')} /> : <ul className="latest-grid">{articles.map(a => <li key={a.id}><ArticleRow article={a} /></li>)}</ul>}
     </section>
   );
 }

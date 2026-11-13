@@ -13,6 +13,18 @@ Bản tổng hợp từ 9 ảnh mẫu người dùng gửi (03/11/2026). Mỗi m
 - **A8** Bình luận 2 cấp — `Bình luận (42)` + "Mới nhất trước", 👍 số + Reply, phản hồi thụt vào có **vạch dọc xanh**, ghi chú "Comment → Reply. Không hỗ trợ Reply tiếp vào Reply".
 - **A9** Bảng màu (người dùng chốt).
 
+## Cập nhật giao diện blog — 13/11/2026
+
+Quyết định mới sau đánh giá giao diện (ưu tiên hơn các bố cục tham chiếu bên dưới):
+
+- Giữ Inter, JetBrains Mono và hai theme sáng/tối. Các khối mới dùng token ngữ nghĩa `page`, `surface`, `ink`, `muted`, `primary-ink`; không áp chữ trắng cố định lên nền đổi theme.
+- Trang chủ: giới thiệu ngắn → bài mới dạng danh sách hai cột (một cột mobile) → bài nổi bật → chủ đề → lộ trình → cộng đồng/bản tin. Bỏ sơ đồ và thống kê khỏi hero để bài viết xuất hiện sớm.
+- Danh sách bài mặc định `latest`; `?sort=path` vẫn hỗ trợ học theo thứ tự, giữ tham số khi phân trang.
+- Banner trang bài/lộ trình/giới thiệu dùng tiêu đề gọn trên nền theo theme. Thẻ chủ đề con dùng icon và nội dung thay ảnh lớn. Các nhóm lộ trình dùng tiêu đề và số bài thay banner ảnh lặp lại.
+- Trang đọc giữ cột 768px, chữ 18px desktop / 17px mobile. H1 tối đa 40px, độ đậm 700. Bỏ ảnh bìa trang trí và reaction khỏi đầu bài; giữ ảnh chia sẻ SEO và ảnh/sơ đồ trong nội dung.
+- Mục lục vẫn bám cuộn. Lộ trình ở cột phải mặc định thu gọn; bài liên quan và tags đặt cuối nội dung ở mọi kích thước. Reaction/bình luận vẫn ở cuối bài.
+- Metadata thẻ bài dùng 14px, nhãn điều hướng mobile 12px. Thanh điều hướng mobile giữ hành vi hiện tại, không thêm tự ẩn khi cuộn.
+
 ## 1. Nền tảng thị giác (A9 — bắt buộc)
 
 | Token | Giá trị | Dùng cho |

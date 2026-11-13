@@ -49,11 +49,11 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={{ '@context': 'https://schema.org', '@graph': [website, organization] }} />
-      <Hero summary={summary} />
+      <Hero />
+      <LatestSection articles={latest?.items ?? null} />
+      <TrendingSection articles={trending} />
       <TopicTiles categories={categories} />
       <PathsSection paths={paths} />
-      <TrendingSection articles={trending} />
-      <LatestSection articles={latest?.items ?? null} />
       <CommunitySection memberCount={summary?.memberCount} />
     </>
   );

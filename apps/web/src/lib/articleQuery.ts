@@ -3,9 +3,9 @@ import { LEVELS, type ArticleSort, type Level } from '@tkh/shared';
 // Đọc bộ lọc danh sách bài/lộ trình từ query string — dùng chung ở máy chủ (trang) và trình duyệt (thanh lọc).
 
 export const ARTICLES_PAGE_SIZE = 24;
-export const ARTICLE_SORTS: readonly ArticleSort[] = ['path', 'latest', 'popular', 'trending'];
-/** Mặc định xếp theo thứ tự học (chủ đề → phần → bài): URL không có `sort` nghĩa là `path`. */
-export const DEFAULT_ARTICLE_SORT: ArticleSort = 'path';
+export const ARTICLE_SORTS: readonly ArticleSort[] = ['latest', 'path', 'popular', 'trending'];
+/** The blog opens with recent posts; ordered series remain available through sort=path. */
+export const DEFAULT_ARTICLE_SORT: ArticleSort = 'latest';
 
 export type SearchParamsRecord = Record<string, string | string[] | undefined>;
 

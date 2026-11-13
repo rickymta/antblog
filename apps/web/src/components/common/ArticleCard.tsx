@@ -21,7 +21,7 @@ export function ArticleMeta({ article, className = '' }: { article: ArticleCardD
   const { t } = useTranslation();
   const locale = useLocale();
   return (
-    <span className={`inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted ${className}`}>
+    <span className={`inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted ${className}`}>
       <span className="inline-flex items-center gap-1">
         <Clock aria-hidden="true" className="h-3.5 w-3.5" />
         {t('common.minRead', { count: article.readingMinutes })}
@@ -83,7 +83,7 @@ export function ArticleCard({
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
           <ArticleMeta article={article} />
           <div className="relative z-10 flex items-center gap-1">
-            <span className="inline-flex items-center gap-1 text-xs text-muted" title={t('common.reactionsTotal', { n: formatCompact(reactions, locale) })}>
+            <span className="inline-flex items-center gap-1 text-sm text-muted" title={t('common.reactionsTotal', { n: formatCompact(reactions, locale) })}>
               <Heart aria-hidden="true" className="h-3.5 w-3.5 text-rose-500" />
               <span aria-hidden="true">{formatCompact(reactions, locale)}</span>
               <span className="sr-only">{t('common.reactionsTotal', { n: formatCompact(reactions, locale) })}</span>
@@ -139,7 +139,7 @@ export function ArticleRow({ article, showMeta = true, compact = false }: { arti
           </Link>
         </h3>
         {showMeta && (
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 text-xs text-muted">
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-muted">
             <ArticleMeta article={article} />
             {!compact && <span>{formatDay(article.publishedAt, locale)}</span>}
           </div>

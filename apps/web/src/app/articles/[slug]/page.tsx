@@ -6,7 +6,7 @@ import { pickLocalized, type ArticleDetail } from '@tkh/shared';
 import { ArticleBody } from '../../../components/article/ArticleBody';
 import { ArticleProvider } from '../../../components/article/ArticleContext';
 import { ArticleHeader } from '../../../components/article/ArticleHeader';
-import { PrevNext, RelatedArticles, ShareBlock, TagsBlock } from '../../../components/article/Aside';
+import { PrevNext, RelatedArticles, TagsBlock } from '../../../components/article/Aside';
 import { PathNav } from '../../../components/article/PathNav';
 import { ReactionCards } from '../../../components/article/ReactionCards';
 import { TocCollapsible, TocPanel } from '../../../components/article/Toc';
@@ -19,7 +19,6 @@ import { orNotFound, orNull, serverApi, settle } from '../../../lib/server-api';
 import { absoluteUrl, LOGO_PATH, SITE_NAME, SITE_URL } from '../../../lib/site';
 import { card } from '../../../lib/ui';
 import { articleCover } from '../../../lib/article-cover';
-import { Cover } from '../../../components/common/Cover';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -161,25 +160,18 @@ export default async function ArticlePage({ params }: Props) {
             </div>
           )}
 
-          {articleCover(article) && (
-            <div className="mt-8 aspect-[16/9] overflow-hidden rounded-card border border-line bg-surface-2">
-              {/* eslint-disable-next-line @next/next/no-img-element -- ảnh bìa có thể là URL ngoài hoặc /uploads; khung tỉ lệ cố định chống nhảy trang */}
-              <Cover src={articleCover(article)} category={article.category} eager />
-            </div>
-          )}
-
           <ArticleBody>
             <ArticleContent markdown={article.content} />
           </ArticleBody>
 
-          <div className="mt-10 min-[1280px]:hidden">
+          <div className="mt-10">
             <TagsBlock tags={article.tags} headingId="tags-title-inline" />
           </div>
 
           <div className="mt-12 space-y-10">
             <ReactionCards />
             <PrevNext article={article} />
-            <div className="min-[1280px]:hidden">
+            <div>
               <RelatedArticles articles={relatedArticles} headingId="related-title-inline" />
             </div>
             <LazyComments slug={article.slug} />
@@ -195,12 +187,9 @@ export default async function ArticlePage({ params }: Props) {
             )}
             {path && (
               <div className="min-[1600px]:hidden">
-                <PathNav path={path} currentSlug={article.slug} />
+                <PathNav path={path} currentSlug={article.slug} defaultOpen={false} />
               </div>
             )}
-            <RelatedArticles articles={relatedArticles} />
-            <TagsBlock tags={article.tags} />
-            <ShareBlock />
           </div>
         </aside>
       </div>

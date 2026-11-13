@@ -5,7 +5,6 @@ import { BrowseProvider, BrowseResults } from '../../components/browse/BrowseCon
 import { PathFilters } from '../../components/browse/PathFilters';
 import { PageBanner } from '../../components/common/PageBanner';
 import { PathCard } from '../../components/common/PathCard';
-import { Cover } from '../../components/common/Cover';
 import { EmptyState, RefreshErrorState } from '../../components/common/States';
 import { getServerI18n } from '../../i18n/server';
 import { firstParam, parseLevel, type SearchParamsRecord } from '../../lib/articleQuery';
@@ -13,7 +12,6 @@ import { pageMetadata } from '../../lib/metadata';
 import { serverApi, settle } from '../../lib/server-api';
 import { orderLearningPaths, orderTopicParts } from '../../lib/learning-paths';
 import { container } from '../../lib/ui';
-import { pathCover } from '../../lib/path-cover';
 
 type Props = { searchParams: Promise<SearchParamsRecord> };
 
@@ -45,7 +43,7 @@ export default async function LearningPathsPage({ searchParams }: Props) {
 
   return (
     <div className={container}>
-      <PageBanner variant="paths" title={t('paths.title')} subtitle={t('paths.subtitle')} />
+      <PageBanner variant="paths" title={t('paths.title')} subtitle={t('paths.subtitle')} compact />
       <BrowseProvider>
         <p className="mb-5 max-w-3xl text-base leading-relaxed text-muted">{t('paths.chooseGuide')}</p>
         <PathFilters query={query} />
@@ -62,21 +60,10 @@ export default async function LearningPathsPage({ searchParams }: Props) {
                 </nav>
                 {Array.from(groups, ([key, group]) => (
                   <section key={key} aria-labelledby={`paths-${key}`}>
-                    <div className="relative isolate mb-5 overflow-hidden rounded-card border border-line bg-slate-950 text-white">
-                      {group.paths[0]?.category && <div className="absolute inset-0 -z-10">
-                        <Cover src={pathCover(key)} category={group.paths[0].category} className="object-right" />
-                      </div>}
-                      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-transparent" />
-                      <div className="flex min-h-44 flex-col justify-center gap-3 p-6 sm:min-h-52 sm:p-8 lg:min-h-60 lg:p-10">
-                        <p className="text-xs font-semibold tracking-widest text-teal-200 uppercase">{t('topic.eyebrow')}</p>
-                        <h2 id={`paths-${key}`} className="max-w-[75%] scroll-mt-28 text-2xl font-bold sm:max-w-[55%] sm:text-3xl">{group.title}</h2>
-                        <p className="max-w-[75%] text-sm leading-relaxed text-slate-200 sm:max-w-[48%]">{t('paths.topicGuide')}</p>
-                        <div className="flex flex-wrap gap-2 text-sm font-medium">
-                          <span className="rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/20">{t('paths.count', { count: group.paths.length, n: group.paths.length })}</span>
-                          <span className="rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/20">{t('common.lessonCount', { count: group.paths.reduce((sum, p) => sum + p.articleCount, 0), n: group.paths.reduce((sum, p) => sum + p.articleCount, 0) })}</span>
-                        </div>
-                      </div>
-                    </div>
+                    <header className="mb-5 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
+                      <h2 id={`paths-${key}`} className="scroll-mt-28 text-2xl font-bold text-ink">{group.title}</h2>
+                      <p className="text-sm text-muted">{t('paths.count', { count: group.paths.length, n: group.paths.length })} · {t('common.lessonCount', { count: group.paths.reduce((sum, p) => sum + p.articleCount, 0), n: group.paths.reduce((sum, p) => sum + p.articleCount, 0) })}</p>
+                    </header>
                     <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                       {orderTopicParts(group.paths).map(p => <li key={p.id}><PathCard path={p} showDate /></li>)}
                     </ul>
