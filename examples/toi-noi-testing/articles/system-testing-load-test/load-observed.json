@@ -1,0 +1,3100 @@
+{
+  "measuredAtUtc": "2026-11-13T14:09:09.307Z",
+  "environment": {
+    "node": "v24.15.0",
+    "os": "win32",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) i7-10700K CPU @ 3.80GHz",
+    "logicalCpus": 16,
+    "totalMemoryBytes": 34245918720
+  },
+  "design": {
+    "endpoint": "POST /api/quotes",
+    "store": "PGlite",
+    "model": "open scheduled slots",
+    "warmup": 20,
+    "maxInFlight": 20,
+    "maxSchedulerLagMs": 100,
+    "requestTimeoutMs": 2000,
+    "stopSendingAfterFailures": 10,
+    "gate": "illustrative: every stage zero drops, zero errors, p95 < 500 ms",
+    "limitations": "client/server/PGlite same process; steps drain before next step; short educational workload, not production capacity"
+  },
+  "results": [
+    {
+      "name": "low",
+      "rps": 10,
+      "seconds": 3,
+      "planned": 30,
+      "sent": 30,
+      "dropped": 0,
+      "errors": 0,
+      "errorRateSent": 0,
+      "droppedRatePlanned": 0,
+      "peakInFlight": 1,
+      "scheduledWindowSeconds": 3,
+      "elapsedMsIncludingDrain": 3002.5159000000003,
+      "sentPerScheduledSecond": 10,
+      "completedInWindow": 30,
+      "validRpsIncludingDrain": 9.991620693832129,
+      "p50Ms": 3.03860000000077,
+      "p95Ms": 11.228999999999814,
+      "p99Ms": 13.231000000000222,
+      "maxSchedulerLagMs": 15.516200000000026,
+      "illustrativeGatePassed": true,
+      "samples": [
+        {
+          "slot": 0,
+          "lagMs": 0.003500000000030923,
+          "startOffsetMs": 0.005099999999856664,
+          "endOffsetMs": 2.9500000000000455,
+          "latencyMs": 2.8955000000000837,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 1,
+          "lagMs": 7.775300000000016,
+          "startOffsetMs": 107.77689999999984,
+          "endOffsetMs": 111.14239999999995,
+          "latencyMs": 3.353399999999965,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 2,
+          "lagMs": 0.9246000000000549,
+          "startOffsetMs": 200.92740000000003,
+          "endOffsetMs": 203.8047999999999,
+          "latencyMs": 2.8688999999999396,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 3,
+          "lagMs": 12.038400000000365,
+          "startOffsetMs": 312.04139999999984,
+          "endOffsetMs": 315.6321999999998,
+          "latencyMs": 3.5792999999998756,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 4,
+          "lagMs": 6.472000000000207,
+          "startOffsetMs": 406.4765,
+          "endOffsetMs": 409.47939999999994,
+          "latencyMs": 2.992200000000139,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 5,
+          "lagMs": 15.26130000000012,
+          "startOffsetMs": 515.2638,
+          "endOffsetMs": 518.7180000000001,
+          "latencyMs": 3.4458999999997104,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 6,
+          "lagMs": 9.14200000000028,
+          "startOffsetMs": 609.1445999999999,
+          "endOffsetMs": 612.0512000000001,
+          "latencyMs": 2.897599999999784,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 7,
+          "lagMs": 2.8979000000003907,
+          "startOffsetMs": 702.9026000000001,
+          "endOffsetMs": 707.0193000000002,
+          "latencyMs": 4.103700000000117,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 8,
+          "lagMs": 10.56710000000021,
+          "startOffsetMs": 810.5689,
+          "endOffsetMs": 813.9489999999998,
+          "latencyMs": 3.371100000000297,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 9,
+          "lagMs": 4.707800000000134,
+          "startOffsetMs": 904.7122000000002,
+          "endOffsetMs": 908.1431999999998,
+          "latencyMs": 3.4135000000001128,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 10,
+          "lagMs": 14.09860000000026,
+          "startOffsetMs": 1014.1040999999998,
+          "endOffsetMs": 1025.3542,
+          "latencyMs": 11.228999999999814,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 11,
+          "lagMs": 7.759100000000217,
+          "startOffsetMs": 1107.7670999999998,
+          "endOffsetMs": 1121.0116,
+          "latencyMs": 13.231000000000222,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 12,
+          "lagMs": 0.5763000000001739,
+          "startOffsetMs": 1200.581,
+          "endOffsetMs": 1203.992,
+          "latencyMs": 3.4050999999999476,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 13,
+          "lagMs": 9.352800000000116,
+          "startOffsetMs": 1309.3585,
+          "endOffsetMs": 1313.9637999999998,
+          "latencyMs": 4.598200000000361,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 14,
+          "lagMs": 1.5991000000003623,
+          "startOffsetMs": 1401.6017,
+          "endOffsetMs": 1404.3686999999998,
+          "latencyMs": 2.7631999999998698,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 15,
+          "lagMs": 12.161200000000008,
+          "startOffsetMs": 1512.1658999999997,
+          "endOffsetMs": 1516.6155,
+          "latencyMs": 4.442000000000007,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 16,
+          "lagMs": 4.0955000000003565,
+          "startOffsetMs": 1604.0981,
+          "endOffsetMs": 1606.6368,
+          "latencyMs": 2.533300000000054,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 17,
+          "lagMs": 13.114400000000387,
+          "startOffsetMs": 1713.1168999999998,
+          "endOffsetMs": 1715.5417999999997,
+          "latencyMs": 2.421299999999974,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 18,
+          "lagMs": 7.05619999999999,
+          "startOffsetMs": 1807.0599,
+          "endOffsetMs": 1809.39,
+          "latencyMs": 2.324899999999616,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 19,
+          "lagMs": 14.343200000000252,
+          "startOffsetMs": 1914.3457,
+          "endOffsetMs": 1917.0509,
+          "latencyMs": 2.7009000000002743,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 20,
+          "lagMs": 6.771500000000287,
+          "startOffsetMs": 2006.7744999999998,
+          "endOffsetMs": 2009.5683000000001,
+          "latencyMs": 2.7891999999997097,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 21,
+          "lagMs": 1.2173999999999978,
+          "startOffsetMs": 2101.2304000000004,
+          "endOffsetMs": 2103.9509,
+          "latencyMs": 2.716399999999794,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 22,
+          "lagMs": 9.06650000000036,
+          "startOffsetMs": 2209.0681999999997,
+          "endOffsetMs": 2212.5116,
+          "latencyMs": 3.4385999999999513,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 23,
+          "lagMs": 3.6246000000001004,
+          "startOffsetMs": 2303.6276,
+          "endOffsetMs": 2307.5553,
+          "latencyMs": 3.9203999999999724,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 24,
+          "lagMs": 11.95390000000043,
+          "startOffsetMs": 2411.9562000000005,
+          "endOffsetMs": 2414.9956,
+          "latencyMs": 3.0346999999992477,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 25,
+          "lagMs": 5.114300000000185,
+          "startOffsetMs": 2505.1183,
+          "endOffsetMs": 2511.9312,
+          "latencyMs": 6.804299999999785,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 26,
+          "lagMs": 13.083300000000236,
+          "startOffsetMs": 2613.085,
+          "endOffsetMs": 2615.5976,
+          "latencyMs": 2.5075999999999112,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 27,
+          "lagMs": 7.342200000000048,
+          "startOffsetMs": 2707.3437000000004,
+          "endOffsetMs": 2712.0778,
+          "latencyMs": 4.726999999999862,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 28,
+          "lagMs": 15.516200000000026,
+          "startOffsetMs": 2815.5172000000002,
+          "endOffsetMs": 2817.9452,
+          "latencyMs": 2.4242999999996755,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 29,
+          "lagMs": 8.753200000000106,
+          "startOffsetMs": 2908.7552000000005,
+          "endOffsetMs": 2911.7985,
+          "latencyMs": 3.03860000000077,
+          "status": 200,
+          "valid": true,
+          "error": null
+        }
+      ],
+      "droppedSlots": []
+    },
+    {
+      "name": "target",
+      "rps": 30,
+      "seconds": 8,
+      "planned": 240,
+      "sent": 240,
+      "dropped": 0,
+      "errors": 0,
+      "errorRateSent": 0,
+      "droppedRatePlanned": 0,
+      "peakInFlight": 1,
+      "scheduledWindowSeconds": 8,
+      "elapsedMsIncludingDrain": 8012.705599999999,
+      "sentPerScheduledSecond": 30,
+      "completedInWindow": 240,
+      "validRpsIncludingDrain": 29.952429551386494,
+      "p50Ms": 2.959100000000035,
+      "p95Ms": 6.309400000000096,
+      "p99Ms": 10.366400000000795,
+      "maxSchedulerLagMs": 16.482866666667178,
+      "illustrativeGatePassed": true,
+      "samples": [
+        {
+          "slot": 0,
+          "lagMs": 0.0024999999995998223,
+          "startOffsetMs": 0.0029999999997016857,
+          "endOffsetMs": 2.632499999999709,
+          "latencyMs": 2.623700000000099,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 1,
+          "lagMs": 10.246666666666897,
+          "startOffsetMs": 43.58399999999983,
+          "endOffsetMs": 47.51339999999982,
+          "latencyMs": 3.920600000000377,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 2,
+          "lagMs": 9.215733333333446,
+          "startOffsetMs": 75.88389999999981,
+          "endOffsetMs": 79.04010000000017,
+          "latencyMs": 3.15099999999984,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 3,
+          "lagMs": 7.0374000000001615,
+          "startOffsetMs": 107.04150000000027,
+          "endOffsetMs": 110.13280000000032,
+          "latencyMs": 3.0833000000002357,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 4,
+          "lagMs": 4.838166666667348,
+          "startOffsetMs": 138.17339999999967,
+          "endOffsetMs": 142.08169999999973,
+          "latencyMs": 3.902799999999843,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 5,
+          "lagMs": 2.9797333333326605,
+          "startOffsetMs": 169.64900000000034,
+          "endOffsetMs": 172.10599999999977,
+          "latencyMs": 2.451799999999821,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 6,
+          "lagMs": 1.022399999999834,
+          "startOffsetMs": 201.02360000000044,
+          "endOffsetMs": 203.91749999999956,
+          "latencyMs": 2.8894000000000233,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 7,
+          "lagMs": 14.084166666666533,
+          "startOffsetMs": 247.42169999999987,
+          "endOffsetMs": 250.7555000000002,
+          "latencyMs": 3.3244000000004235,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 8,
+          "lagMs": 11.453333333332921,
+          "startOffsetMs": 278.1220000000003,
+          "endOffsetMs": 281.53809999999976,
+          "latencyMs": 3.4111999999995533,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 9,
+          "lagMs": 8.305099999999584,
+          "startOffsetMs": 308.3092999999999,
+          "endOffsetMs": 315.5487000000003,
+          "latencyMs": 7.231200000000172,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 10,
+          "lagMs": 4.389566666666724,
+          "startOffsetMs": 337.72609999999986,
+          "endOffsetMs": 340.4831000000004,
+          "latencyMs": 2.75,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 11,
+          "lagMs": 1.855433333333167,
+          "startOffsetMs": 368.52610000000004,
+          "endOffsetMs": 371.4549999999999,
+          "latencyMs": 2.921299999999974,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 12,
+          "lagMs": 14.623599999999897,
+          "startOffsetMs": 414.6268,
+          "endOffsetMs": 419.6189999999997,
+          "latencyMs": 4.987100000000282,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 13,
+          "lagMs": 12.484366666666574,
+          "startOffsetMs": 445.8194000000003,
+          "endOffsetMs": 448.8756999999996,
+          "latencyMs": 3.0527000000001863,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 14,
+          "lagMs": 10.975633333333462,
+          "startOffsetMs": 477.64490000000023,
+          "endOffsetMs": 483.33410000000003,
+          "latencyMs": 5.681599999999889,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 15,
+          "lagMs": 8.423799999999574,
+          "startOffsetMs": 508.4249,
+          "endOffsetMs": 511.7331000000004,
+          "latencyMs": 3.3024999999997817,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 16,
+          "lagMs": 6.665466666667271,
+          "startOffsetMs": 540.0019000000002,
+          "endOffsetMs": 542.9417000000003,
+          "latencyMs": 2.932600000000093,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 17,
+          "lagMs": 4.523933333332934,
+          "startOffsetMs": 571.1930000000002,
+          "endOffsetMs": 574.9390999999996,
+          "latencyMs": 3.740799999999581,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 18,
+          "lagMs": 1.795600000000377,
+          "startOffsetMs": 601.7974999999997,
+          "endOffsetMs": 604.5599000000002,
+          "latencyMs": 2.7583000000004176,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 19,
+          "lagMs": 14.156466666667257,
+          "startOffsetMs": 647.4920000000002,
+          "endOffsetMs": 650.0284000000001,
+          "latencyMs": 2.531199999999444,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 20,
+          "lagMs": 11.048733333333075,
+          "startOffsetMs": 677.7174999999997,
+          "endOffsetMs": 680.2862000000005,
+          "latencyMs": 2.563299999999799,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 21,
+          "lagMs": 9.552999999999884,
+          "startOffsetMs": 709.5554000000002,
+          "endOffsetMs": 712.2546000000002,
+          "latencyMs": 2.69380000000001,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 22,
+          "lagMs": 6.566066666667211,
+          "startOffsetMs": 739.9012000000002,
+          "endOffsetMs": 743.3598000000002,
+          "latencyMs": 3.4538000000002285,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 23,
+          "lagMs": 5.045933333332869,
+          "startOffsetMs": 771.7142999999996,
+          "endOffsetMs": 774.1616000000004,
+          "latencyMs": 2.443000000000211,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 24,
+          "lagMs": 3.596099999999751,
+          "startOffsetMs": 803.5987999999998,
+          "endOffsetMs": 807.7380999999996,
+          "latencyMs": 4.130799999999908,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 25,
+          "lagMs": 1.4294666666673947,
+          "startOffsetMs": 834.7659000000003,
+          "endOffsetMs": 837.7362999999996,
+          "latencyMs": 2.966400000000249,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 26,
+          "lagMs": 14.767633333332924,
+          "startOffsetMs": 881.4366,
+          "endOffsetMs": 884.3197,
+          "latencyMs": 2.8765999999995984,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 27,
+          "lagMs": 12.635800000000017,
+          "startOffsetMs": 912.6368000000002,
+          "endOffsetMs": 915.1446999999998,
+          "latencyMs": 2.5046999999995023,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 28,
+          "lagMs": 10.345566666666855,
+          "startOffsetMs": 943.6824999999999,
+          "endOffsetMs": 946.3280999999997,
+          "latencyMs": 2.638699999999517,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 29,
+          "lagMs": 9.730333333332965,
+          "startOffsetMs": 976.3994000000002,
+          "endOffsetMs": 979.0097999999998,
+          "latencyMs": 2.6031000000002678,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 30,
+          "lagMs": 7.57340000000022,
+          "startOffsetMs": 1007.5775999999996,
+          "endOffsetMs": 1015.3723,
+          "latencyMs": 7.786799999999857,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 31,
+          "lagMs": 4.145766666666532,
+          "startOffsetMs": 1037.4811,
+          "endOffsetMs": 1039.6938,
+          "latencyMs": 2.208599999999933,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 32,
+          "lagMs": 3.0493333333333794,
+          "startOffsetMs": 1069.7177000000001,
+          "endOffsetMs": 1072.3850000000002,
+          "latencyMs": 2.663900000000467,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 33,
+          "lagMs": 15.127999999999702,
+          "startOffsetMs": 1115.1319999999996,
+          "endOffsetMs": 1117.7401,
+          "latencyMs": 2.6010999999998603,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 34,
+          "lagMs": 12.739366666666683,
+          "startOffsetMs": 1146.0756000000001,
+          "endOffsetMs": 1150.1459999999997,
+          "latencyMs": 4.063900000000103,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 35,
+          "lagMs": 9.398933333332934,
+          "startOffsetMs": 1176.0683,
+          "endOffsetMs": 1179.1715000000004,
+          "latencyMs": 3.0963000000001557,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 36,
+          "lagMs": 7.8060999999997875,
+          "startOffsetMs": 1207.8075,
+          "endOffsetMs": 1210.3943,
+          "latencyMs": 2.5827999999992244,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 37,
+          "lagMs": 5.919866666667076,
+          "startOffsetMs": 1239.2549,
+          "endOffsetMs": 1242.3635000000004,
+          "latencyMs": 3.102299999999559,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 38,
+          "lagMs": 5.024833333332936,
+          "startOffsetMs": 1271.6944000000003,
+          "endOffsetMs": 1279.3953000000001,
+          "latencyMs": 7.6919000000007145,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 39,
+          "lagMs": 2.038300000000163,
+          "startOffsetMs": 1302.0409,
+          "endOffsetMs": 1305.0861000000004,
+          "latencyMs": 3.039400000000569,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 40,
+          "lagMs": 16.482866666667178,
+          "startOffsetMs": 1349.8172999999997,
+          "endOffsetMs": 1352.3995000000004,
+          "latencyMs": 2.578400000000329,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 41,
+          "lagMs": 15.229333333332761,
+          "startOffsetMs": 1381.8980000000001,
+          "endOffsetMs": 1384.4279999999999,
+          "latencyMs": 2.5262999999995372,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 42,
+          "lagMs": 13.303600000000188,
+          "startOffsetMs": 1413.3055000000004,
+          "endOffsetMs": 1415.8185999999996,
+          "latencyMs": 2.5087000000003172,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 43,
+          "lagMs": 11.50856666666732,
+          "startOffsetMs": 1444.8436000000002,
+          "endOffsetMs": 1447.4404999999997,
+          "latencyMs": 2.592999999999847,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 44,
+          "lagMs": 8.943033333333005,
+          "startOffsetMs": 1475.6122999999998,
+          "endOffsetMs": 1477.9637000000002,
+          "latencyMs": 2.3461999999999534,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 45,
+          "lagMs": 6.522799999999734,
+          "startOffsetMs": 1506.5261,
+          "endOffsetMs": 1509.0805,
+          "latencyMs": 2.5483000000003813,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 46,
+          "lagMs": 4.627566666667008,
+          "startOffsetMs": 1537.9654,
+          "endOffsetMs": 1540.9314000000004,
+          "latencyMs": 2.958099999999831,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 47,
+          "lagMs": 2.7068333333327246,
+          "startOffsetMs": 1569.3755,
+          "endOffsetMs": 1572.1351000000004,
+          "latencyMs": 2.756000000000313,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 48,
+          "lagMs": 0.5244000000002416,
+          "startOffsetMs": 1600.5257000000001,
+          "endOffsetMs": 1602.7813999999998,
+          "latencyMs": 2.2525000000005093,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 49,
+          "lagMs": 13.580866666667134,
+          "startOffsetMs": 1646.9171999999999,
+          "endOffsetMs": 1650.96,
+          "latencyMs": 4.037299999999959,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 50,
+          "lagMs": 11.169433333333473,
+          "startOffsetMs": 1677.8383999999996,
+          "endOffsetMs": 1680.5879999999997,
+          "latencyMs": 2.743800000000192,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 51,
+          "lagMs": 8.189300000000003,
+          "startOffsetMs": 1708.1922000000004,
+          "endOffsetMs": 1713.9925999999996,
+          "latencyMs": 5.7916000000004715,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 52,
+          "lagMs": 5.936066666667102,
+          "startOffsetMs": 1739.2713000000003,
+          "endOffsetMs": 1743.1777000000002,
+          "latencyMs": 3.9012000000002445,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 53,
+          "lagMs": 4.01243333333332,
+          "startOffsetMs": 1770.6807,
+          "endOffsetMs": 1773.5141999999996,
+          "latencyMs": 2.8276999999998225,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 54,
+          "lagMs": 1.6797999999998865,
+          "startOffsetMs": 1801.6817,
+          "endOffsetMs": 1804.0729000000001,
+          "latencyMs": 2.3870000000006257,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 55,
+          "lagMs": 13.097766666666757,
+          "startOffsetMs": 1846.4345999999996,
+          "endOffsetMs": 1848.8582999999999,
+          "latencyMs": 2.4171000000005733,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 56,
+          "lagMs": 10.096633333332647,
+          "startOffsetMs": 1876.7650000000003,
+          "endOffsetMs": 1879.1445999999996,
+          "latencyMs": 2.3752000000004045,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 57,
+          "lagMs": 7.6643999999996595,
+          "startOffsetMs": 1907.6666999999998,
+          "endOffsetMs": 1910.9672,
+          "latencyMs": 3.285899999999856,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 58,
+          "lagMs": 6.405466666667053,
+          "startOffsetMs": 1939.7421999999997,
+          "endOffsetMs": 1944.3429999999998,
+          "latencyMs": 4.591300000000047,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 59,
+          "lagMs": 3.237433333332774,
+          "startOffsetMs": 1969.9066000000003,
+          "endOffsetMs": 1972.8274000000001,
+          "latencyMs": 2.915799999999763,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 60,
+          "lagMs": 1.1373999999996158,
+          "startOffsetMs": 2001.1382000000003,
+          "endOffsetMs": 2003.7276000000002,
+          "latencyMs": 2.586699999999837,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 61,
+          "lagMs": 14.527466666667351,
+          "startOffsetMs": 2047.8627999999999,
+          "endOffsetMs": 2050.3028999999997,
+          "latencyMs": 2.4354999999995925,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 62,
+          "lagMs": 11.415233333334072,
+          "startOffsetMs": 2078.0859,
+          "endOffsetMs": 2080.5981,
+          "latencyMs": 2.5034999999998035,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 63,
+          "lagMs": 9.45759999999973,
+          "startOffsetMs": 2109.4593999999997,
+          "endOffsetMs": 2112.4127,
+          "latencyMs": 2.9489000000003216,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 64,
+          "lagMs": 7.283366666665643,
+          "startOffsetMs": 2140.6202999999996,
+          "endOffsetMs": 2151.6534,
+          "latencyMs": 11.022600000000239,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 65,
+          "lagMs": 5.084733333334043,
+          "startOffsetMs": 2171.7538000000004,
+          "endOffsetMs": 2175.4970999999996,
+          "latencyMs": 3.7361000000000786,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 66,
+          "lagMs": 2.4872999999997774,
+          "startOffsetMs": 2202.4898000000003,
+          "endOffsetMs": 2205.8246,
+          "latencyMs": 3.3288000000002285,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 67,
+          "lagMs": 1.120566666666491,
+          "startOffsetMs": 2234.4555,
+          "endOffsetMs": 2236.9444000000003,
+          "latencyMs": 2.48529999999937,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 68,
+          "lagMs": 13.6240333333335,
+          "startOffsetMs": 2280.2954,
+          "endOffsetMs": 2283.6829,
+          "latencyMs": 3.379399999999805,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 69,
+          "lagMs": 11.881000000000313,
+          "startOffsetMs": 2311.883,
+          "endOffsetMs": 2314.4516999999996,
+          "latencyMs": 2.5643999999992957,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 70,
+          "lagMs": 9.69476666666651,
+          "startOffsetMs": 2343.0312000000004,
+          "endOffsetMs": 2345.8616,
+          "latencyMs": 2.8234999999995125,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 71,
+          "lagMs": 6.379933333333611,
+          "startOffsetMs": 2373.0478999999996,
+          "endOffsetMs": 2376.4026999999996,
+          "latencyMs": 3.3491000000003623,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 72,
+          "lagMs": 5.971999999999753,
+          "startOffsetMs": 2405.9746000000005,
+          "endOffsetMs": 2410.3846999999996,
+          "latencyMs": 4.404599999999846,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 73,
+          "lagMs": 3.446166666665704,
+          "startOffsetMs": 2436.782,
+          "endOffsetMs": 2439.8307999999997,
+          "latencyMs": 3.042699999999968,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 74,
+          "lagMs": 0.6020333333335657,
+          "startOffsetMs": 2467.2733,
+          "endOffsetMs": 2470.0166,
+          "latencyMs": 2.73529999999937,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 75,
+          "lagMs": 14.143200000000434,
+          "startOffsetMs": 2514.1450000000004,
+          "endOffsetMs": 2516.5288,
+          "latencyMs": 2.3802000000005137,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 76,
+          "lagMs": 12.941566666666404,
+          "startOffsetMs": 2546.2769,
+          "endOffsetMs": 2550.8423000000003,
+          "latencyMs": 4.559299999999894,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 77,
+          "lagMs": 9.50573333333432,
+          "startOffsetMs": 2576.1744,
+          "endOffsetMs": 2579.9677,
+          "latencyMs": 3.7763999999997395,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 78,
+          "lagMs": 6.837800000000243,
+          "startOffsetMs": 2606.8388000000004,
+          "endOffsetMs": 2609.7208,
+          "latencyMs": 2.8783000000003085,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 79,
+          "lagMs": 4.270866666665825,
+          "startOffsetMs": 2637.6065,
+          "endOffsetMs": 2641.0949,
+          "latencyMs": 3.483900000000176,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 80,
+          "lagMs": 1.6222333333334973,
+          "startOffsetMs": 2668.2923,
+          "endOffsetMs": 2670.7419,
+          "latencyMs": 2.442200000000412,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 81,
+          "lagMs": 0.4452000000001135,
+          "startOffsetMs": 2700.4466,
+          "endOffsetMs": 2703.2794999999996,
+          "latencyMs": 2.82759999999962,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 82,
+          "lagMs": 13.886566666666113,
+          "startOffsetMs": 2747.223,
+          "endOffsetMs": 2751.0437,
+          "latencyMs": 3.8148000000001048,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 83,
+          "lagMs": 12.03593333333356,
+          "startOffsetMs": 2778.7074000000002,
+          "endOffsetMs": 2782.0168000000003,
+          "latencyMs": 3.3029999999998836,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 84,
+          "lagMs": 9.257400000000416,
+          "startOffsetMs": 2809.26,
+          "endOffsetMs": 2812.4211999999998,
+          "latencyMs": 3.15520000000015,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 85,
+          "lagMs": 6.448366666666516,
+          "startOffsetMs": 2839.7848000000004,
+          "endOffsetMs": 2844.2965999999997,
+          "latencyMs": 4.502600000000712,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 86,
+          "lagMs": 4.0486333333337825,
+          "startOffsetMs": 2870.7178000000004,
+          "endOffsetMs": 2874.0489,
+          "latencyMs": 3.3257000000003245,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 87,
+          "lagMs": 1.1814000000003944,
+          "startOffsetMs": 2901.1872999999996,
+          "endOffsetMs": 2904.2147999999997,
+          "latencyMs": 3.0196999999998297,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 88,
+          "lagMs": 13.812466666666296,
+          "startOffsetMs": 2947.1481999999996,
+          "endOffsetMs": 2950.5473,
+          "latencyMs": 3.391599999999926,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 89,
+          "lagMs": 11.204933333334338,
+          "startOffsetMs": 2977.8741,
+          "endOffsetMs": 2980.8319,
+          "latencyMs": 2.952400000000125,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 90,
+          "lagMs": 9.582500000000437,
+          "startOffsetMs": 3009.5838999999996,
+          "endOffsetMs": 3011.9584999999997,
+          "latencyMs": 2.3690999999998894,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 91,
+          "lagMs": 6.59826666666595,
+          "startOffsetMs": 3039.9358,
+          "endOffsetMs": 3049.6043,
+          "latencyMs": 9.65689999999995,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 92,
+          "lagMs": 4.187533333333704,
+          "startOffsetMs": 3070.8565,
+          "endOffsetMs": 3073.2888000000003,
+          "latencyMs": 2.427099999999882,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 93,
+          "lagMs": 2.038800000000265,
+          "startOffsetMs": 3102.041,
+          "endOffsetMs": 3104.9812,
+          "latencyMs": 2.9351999999998952,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 94,
+          "lagMs": 0.2859666666663543,
+          "startOffsetMs": 3133.6229000000003,
+          "endOffsetMs": 3136.5942000000005,
+          "latencyMs": 2.9648999999999432,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 95,
+          "lagMs": 13.55063333333419,
+          "startOffsetMs": 3180.2203,
+          "endOffsetMs": 3182.7758000000003,
+          "latencyMs": 2.5510999999996784,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 96,
+          "lagMs": 11.637700000000223,
+          "startOffsetMs": 3211.6403,
+          "endOffsetMs": 3214.1201,
+          "latencyMs": 2.4755000000004657,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 97,
+          "lagMs": 9.487366666666276,
+          "startOffsetMs": 3242.8226000000004,
+          "endOffsetMs": 3245.4752,
+          "latencyMs": 2.6493000000000393,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 98,
+          "lagMs": 7.8853333333336195,
+          "startOffsetMs": 3274.5546999999997,
+          "endOffsetMs": 3277.3057,
+          "latencyMs": 2.7452000000002954,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 99,
+          "lagMs": 5.033699999999953,
+          "startOffsetMs": 3305.0365,
+          "endOffsetMs": 3308.1976999999997,
+          "latencyMs": 3.154099999999744,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 100,
+          "lagMs": 2.980166666666264,
+          "startOffsetMs": 3336.3171,
+          "endOffsetMs": 3338.9611999999997,
+          "latencyMs": 2.63379999999961,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 101,
+          "lagMs": 0.49433333333399787,
+          "startOffsetMs": 3367.1639999999998,
+          "endOffsetMs": 3370.697,
+          "latencyMs": 3.527299999999741,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 102,
+          "lagMs": 13.661700000000565,
+          "startOffsetMs": 3413.6664,
+          "endOffsetMs": 3417.2577999999994,
+          "latencyMs": 3.582300000000032,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 103,
+          "lagMs": 11.09536666666645,
+          "startOffsetMs": 3444.429899999999,
+          "endOffsetMs": 3447.324699999999,
+          "latencyMs": 2.8905000000013388,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 104,
+          "lagMs": 8.049733333333279,
+          "startOffsetMs": 3474.7175000000007,
+          "endOffsetMs": 3478.0437999999995,
+          "latencyMs": 3.3222999999998137,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 105,
+          "lagMs": 5.861399999999776,
+          "startOffsetMs": 3505.8639999999996,
+          "endOffsetMs": 3509.0669,
+          "latencyMs": 3.1972999999998137,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 106,
+          "lagMs": 4.250066666665589,
+          "startOffsetMs": 3537.586300000001,
+          "endOffsetMs": 3540.5985,
+          "latencyMs": 3.006199999999808,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 107,
+          "lagMs": 2.8430333333344606,
+          "startOffsetMs": 3569.5133000000005,
+          "endOffsetMs": 3579.6458999999995,
+          "latencyMs": 10.120899999999892,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 108,
+          "lagMs": 0.5899000000008527,
+          "startOffsetMs": 3600.5926,
+          "endOffsetMs": 3603.8050999999996,
+          "latencyMs": 3.2066000000013446,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 109,
+          "lagMs": 14.460366666666232,
+          "startOffsetMs": 3647.7947000000004,
+          "endOffsetMs": 3650.0548,
+          "latencyMs": 2.25669999999991,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 110,
+          "lagMs": 12.774833333334755,
+          "startOffsetMs": 3679.4426999999996,
+          "endOffsetMs": 3682.2510999999995,
+          "latencyMs": 2.805099999999584,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 111,
+          "lagMs": 11.549600000000282,
+          "startOffsetMs": 3711.5534000000007,
+          "endOffsetMs": 3714.4743,
+          "latencyMs": 2.913199999999051,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 112,
+          "lagMs": 8.929866666665475,
+          "startOffsetMs": 3742.2662999999993,
+          "endOffsetMs": 3745.9889000000003,
+          "latencyMs": 3.7153999999991356,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 113,
+          "lagMs": 7.050133333334088,
+          "startOffsetMs": 3773.7186,
+          "endOffsetMs": 3776.1839999999993,
+          "latencyMs": 2.4600999999984197,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 114,
+          "lagMs": 4.286700000000565,
+          "startOffsetMs": 3804.2888000000003,
+          "endOffsetMs": 3807.2518999999993,
+          "latencyMs": 2.959100000000035,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 115,
+          "lagMs": 1.182666666665682,
+          "startOffsetMs": 3834.5180999999993,
+          "endOffsetMs": 3837.920899999999,
+          "latencyMs": 3.3986000000004424,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 116,
+          "lagMs": 15.132933333334222,
+          "startOffsetMs": 3881.8019999999997,
+          "endOffsetMs": 3884.5815999999995,
+          "latencyMs": 2.7515999999995984,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 117,
+          "lagMs": 13.07929999999942,
+          "startOffsetMs": 3913.0833999999995,
+          "endOffsetMs": 3916.3209000000006,
+          "latencyMs": 3.231600000000981,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 118,
+          "lagMs": 10.98546666666698,
+          "startOffsetMs": 3944.3248999999996,
+          "endOffsetMs": 3948.3793000000005,
+          "latencyMs": 4.046699999998964,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 119,
+          "lagMs": 7.983833333333678,
+          "startOffsetMs": 3974.6551999999992,
+          "endOffsetMs": 3979.5123999999996,
+          "latencyMs": 4.849099999999453,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 120,
+          "lagMs": 5.264600000000428,
+          "startOffsetMs": 4005.2688,
+          "endOffsetMs": 4009.5943000000007,
+          "latencyMs": 4.3158000000003085,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 121,
+          "lagMs": 2.612766666665266,
+          "startOffsetMs": 4035.9477000000006,
+          "endOffsetMs": 4039.172699999999,
+          "latencyMs": 3.2201999999997497,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 122,
+          "lagMs": 1.2111333333341463,
+          "startOffsetMs": 4067.8827999999994,
+          "endOffsetMs": 4073.3356999999996,
+          "latencyMs": 5.4465000000000146,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 123,
+          "lagMs": 14.734399999999368,
+          "startOffsetMs": 4114.7392,
+          "endOffsetMs": 4117.43,
+          "latencyMs": 2.6682999999993626,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 124,
+          "lagMs": 13.186366666668619,
+          "startOffsetMs": 4146.522999999999,
+          "endOffsetMs": 4149.8573,
+          "latencyMs": 3.326499999999214,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 125,
+          "lagMs": 9.751333333331786,
+          "startOffsetMs": 4176.421200000001,
+          "endOffsetMs": 4179.6834,
+          "latencyMs": 3.2559000000001106,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 126,
+          "lagMs": 7.7796999999991385,
+          "startOffsetMs": 4207.7816,
+          "endOffsetMs": 4210.732099999999,
+          "latencyMs": 2.9462000000003172,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 127,
+          "lagMs": 6.253866666667818,
+          "startOffsetMs": 4239.5921,
+          "endOffsetMs": 4243.267599999999,
+          "latencyMs": 3.66859999999906,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 128,
+          "lagMs": 4.837233333331824,
+          "startOffsetMs": 4271.507100000001,
+          "endOffsetMs": 4276.2219000000005,
+          "latencyMs": 4.708200000000943,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 129,
+          "lagMs": 2.168100000000777,
+          "startOffsetMs": 4302.1747,
+          "endOffsetMs": 4305.4187999999995,
+          "latencyMs": 3.2348000000001775,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 130,
+          "lagMs": 15.204066666667131,
+          "startOffsetMs": 4348.544400000001,
+          "endOffsetMs": 4351.4488,
+          "latencyMs": 2.894899999999325,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 131,
+          "lagMs": 12.511033333332307,
+          "startOffsetMs": 4379.1823,
+          "endOffsetMs": 4382.054899999999,
+          "latencyMs": 2.8655999999991764,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 132,
+          "lagMs": 9.943600000000515,
+          "startOffsetMs": 4409.946,
+          "endOffsetMs": 4412.405199999999,
+          "latencyMs": 2.45470000000023,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 133,
+          "lagMs": 8.293966666667984,
+          "startOffsetMs": 4441.633400000001,
+          "endOffsetMs": 4444.686299999999,
+          "latencyMs": 3.0437000000001717,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 134,
+          "lagMs": 5.852533333332758,
+          "startOffsetMs": 4472.5223000000005,
+          "endOffsetMs": 4474.9707,
+          "latencyMs": 2.4439999999995052,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 135,
+          "lagMs": 3.8281999999999243,
+          "startOffsetMs": 4503.829900000001,
+          "endOffsetMs": 4507.3212,
+          "latencyMs": 3.4847000000008848,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 136,
+          "lagMs": 1.7549666666673147,
+          "startOffsetMs": 4535.0897,
+          "endOffsetMs": 4537.5052,
+          "latencyMs": 2.411600000001272,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 137,
+          "lagMs": 0.4094333333323448,
+          "startOffsetMs": 4567.0784,
+          "endOffsetMs": 4570.130499999999,
+          "latencyMs": 3.0463999999992666,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 138,
+          "lagMs": 13.639199999999619,
+          "startOffsetMs": 4613.6415,
+          "endOffsetMs": 4616.973400000001,
+          "latencyMs": 3.326600000000326,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 139,
+          "lagMs": 11.34666666666817,
+          "startOffsetMs": 4644.6821,
+          "endOffsetMs": 4647.8361,
+          "latencyMs": 3.1486000000004424,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 140,
+          "lagMs": 9.320933333332505,
+          "startOffsetMs": 4675.9895,
+          "endOffsetMs": 4679.0596000000005,
+          "latencyMs": 3.0661999999992986,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 141,
+          "lagMs": 7.786599999999453,
+          "startOffsetMs": 4707.788500000001,
+          "endOffsetMs": 4711.6432,
+          "latencyMs": 3.8487999999997555,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 142,
+          "lagMs": 6.414066666668077,
+          "startOffsetMs": 4739.7492999999995,
+          "endOffsetMs": 4742.519700000001,
+          "latencyMs": 2.7620999999999185,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 143,
+          "lagMs": 4.290033333332758,
+          "startOffsetMs": 4770.9607,
+          "endOffsetMs": 4774.190699999999,
+          "latencyMs": 3.2238000000015745,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 144,
+          "lagMs": 2.3003000000007887,
+          "startOffsetMs": 4802.302900000001,
+          "endOffsetMs": 4804.5059,
+          "latencyMs": 2.1988000000001193,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 145,
+          "lagMs": 1.4063666666679637,
+          "startOffsetMs": 4834.744199999999,
+          "endOffsetMs": 4845.143899999999,
+          "latencyMs": 10.366400000000795,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 146,
+          "lagMs": 15.517233333332115,
+          "startOffsetMs": 4882.187,
+          "endOffsetMs": 4884.9527,
+          "latencyMs": 2.760199999998804,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 147,
+          "lagMs": 14.721799999999348,
+          "startOffsetMs": 4914.7281,
+          "endOffsetMs": 4917.561900000001,
+          "latencyMs": 2.8269000000000233,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 148,
+          "lagMs": 12.80726666666851,
+          "startOffsetMs": 4946.142400000001,
+          "endOffsetMs": 4948.8114000000005,
+          "latencyMs": 2.6622000000006665,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 149,
+          "lagMs": 10.682433333331574,
+          "startOffsetMs": 4977.3514,
+          "endOffsetMs": 4981.050300000001,
+          "latencyMs": 3.693699999999808,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 150,
+          "lagMs": 9.351699999999255,
+          "startOffsetMs": 5009.3557,
+          "endOffsetMs": 5012.097900000001,
+          "latencyMs": 2.7365000000008877,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 151,
+          "lagMs": 7.684766666667201,
+          "startOffsetMs": 5041.0196,
+          "endOffsetMs": 5043.847599999999,
+          "latencyMs": 2.8232000000007247,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 152,
+          "lagMs": 4.711133333332327,
+          "startOffsetMs": 5071.3799,
+          "endOffsetMs": 5074.359200000001,
+          "latencyMs": 2.9742999999998574,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 153,
+          "lagMs": 3.175199999999677,
+          "startOffsetMs": 5103.1816,
+          "endOffsetMs": 5106.3686,
+          "latencyMs": 3.1789999999982683,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 154,
+          "lagMs": 0.2862666666678706,
+          "startOffsetMs": 5133.623100000001,
+          "endOffsetMs": 5136.0494,
+          "latencyMs": 2.42200000000048,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 155,
+          "lagMs": 14.638133333332007,
+          "startOffsetMs": 5181.3087,
+          "endOffsetMs": 5183.948,
+          "latencyMs": 2.634299999999712,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 156,
+          "lagMs": 11.597100000000864,
+          "startOffsetMs": 5211.599399999999,
+          "endOffsetMs": 5214.2688,
+          "latencyMs": 2.664600000000064,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 157,
+          "lagMs": 9.333466666668755,
+          "startOffsetMs": 5242.671200000001,
+          "endOffsetMs": 5245.704900000001,
+          "latencyMs": 3.0257999999994354,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 158,
+          "lagMs": 6.539633333331949,
+          "startOffsetMs": 5273.2091,
+          "endOffsetMs": 5276.6453,
+          "latencyMs": 3.432200000001103,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 159,
+          "lagMs": 5.123400000000402,
+          "startOffsetMs": 5305.126399999999,
+          "endOffsetMs": 5308.0064,
+          "latencyMs": 2.8734999999996944,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 160,
+          "lagMs": 2.5200666666678444,
+          "startOffsetMs": 5335.858200000001,
+          "endOffsetMs": 5338.685100000001,
+          "latencyMs": 2.817800000000716,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 161,
+          "lagMs": 1.0034333333314862,
+          "startOffsetMs": 5367.675499999999,
+          "endOffsetMs": 5376.7729,
+          "latencyMs": 9.08599999999933,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 162,
+          "lagMs": 14.275700000000143,
+          "startOffsetMs": 5414.2783,
+          "endOffsetMs": 5417.0841,
+          "latencyMs": 2.7998999999999796,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 163,
+          "lagMs": 11.349366666667265,
+          "startOffsetMs": 5444.6849999999995,
+          "endOffsetMs": 5447.173699999999,
+          "latencyMs": 2.4844999999986612,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 164,
+          "lagMs": 9.52333333333263,
+          "startOffsetMs": 5476.192800000001,
+          "endOffsetMs": 5479.0347,
+          "latencyMs": 2.8354999999992287,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 165,
+          "lagMs": 7.83389999999963,
+          "startOffsetMs": 5507.836799999999,
+          "endOffsetMs": 5511.0355,
+          "latencyMs": 3.1947000000000116,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 166,
+          "lagMs": 5.078166666668039,
+          "startOffsetMs": 5538.416499999999,
+          "endOffsetMs": 5541.3279999999995,
+          "latencyMs": 2.904399999999441,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 167,
+          "lagMs": 2.477533333332758,
+          "startOffsetMs": 5569.1473000000005,
+          "endOffsetMs": 5572.3644,
+          "latencyMs": 3.211699999999837,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 168,
+          "lagMs": 1.0442999999995664,
+          "startOffsetMs": 5601.047500000001,
+          "endOffsetMs": 5604.148499999999,
+          "latencyMs": 3.0954000000001543,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 169,
+          "lagMs": 13.940466666668726,
+          "startOffsetMs": 5647.2775,
+          "endOffsetMs": 5657.134099999999,
+          "latencyMs": 9.845499999999447,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 170,
+          "lagMs": 11.75863333333291,
+          "startOffsetMs": 5678.429400000001,
+          "endOffsetMs": 5681.2572,
+          "latencyMs": 2.821399999998903,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 171,
+          "lagMs": 9.649900000000343,
+          "startOffsetMs": 5709.652700000001,
+          "endOffsetMs": 5712.912200000001,
+          "latencyMs": 3.253999999998996,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 172,
+          "lagMs": 6.9359666666678095,
+          "startOffsetMs": 5740.2749,
+          "endOffsetMs": 5743.592500000001,
+          "latencyMs": 3.310699999999997,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 173,
+          "lagMs": 4.265833333332921,
+          "startOffsetMs": 5770.935299999999,
+          "endOffsetMs": 5773.213599999999,
+          "latencyMs": 2.274199999999837,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 174,
+          "lagMs": 2.7057000000004336,
+          "startOffsetMs": 5802.7083,
+          "endOffsetMs": 5805.6497,
+          "latencyMs": 2.937099999999191,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 175,
+          "lagMs": 0.7524666666686244,
+          "startOffsetMs": 5834.0911,
+          "endOffsetMs": 5837.116900000001,
+          "latencyMs": 3.0182000000004336,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 176,
+          "lagMs": 13.867133333331367,
+          "startOffsetMs": 5880.539699999999,
+          "endOffsetMs": 5883.7677,
+          "latencyMs": 3.220100000000457,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 177,
+          "lagMs": 11.945999999999913,
+          "startOffsetMs": 5911.9481,
+          "endOffsetMs": 5914.534100000001,
+          "latencyMs": 2.582399999999325,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 178,
+          "lagMs": 9.52576666666755,
+          "startOffsetMs": 5942.862300000001,
+          "endOffsetMs": 5945.5478,
+          "latencyMs": 2.680000000000291,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 179,
+          "lagMs": 7.363733333331766,
+          "startOffsetMs": 5974.031999999999,
+          "endOffsetMs": 5976.9226,
+          "latencyMs": 2.8869999999988067,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 180,
+          "lagMs": 6.265999999999622,
+          "startOffsetMs": 6006.2687000000005,
+          "endOffsetMs": 6009.143,
+          "latencyMs": 2.8681999999989785,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 181,
+          "lagMs": 3.8382666666675505,
+          "startOffsetMs": 6037.173699999999,
+          "endOffsetMs": 6040.537899999999,
+          "latencyMs": 3.359199999998964,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 182,
+          "lagMs": 0.8158333333321934,
+          "startOffsetMs": 6067.4848999999995,
+          "endOffsetMs": 6070.116099999999,
+          "latencyMs": 2.6273000000001048,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 183,
+          "lagMs": 12.839099999999235,
+          "startOffsetMs": 6112.8436,
+          "endOffsetMs": 6116.4956,
+          "latencyMs": 3.643000000000029,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 184,
+          "lagMs": 10.76696666666794,
+          "startOffsetMs": 6144.105100000001,
+          "endOffsetMs": 6149.9606,
+          "latencyMs": 5.8487999999997555,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 185,
+          "lagMs": 8.353533333332962,
+          "startOffsetMs": 6175.022000000001,
+          "endOffsetMs": 6178.799000000001,
+          "latencyMs": 3.7726000000002387,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 186,
+          "lagMs": 5.775900000000547,
+          "startOffsetMs": 6205.781000000001,
+          "endOffsetMs": 6208.795400000001,
+          "latencyMs": 3.005699999999706,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 187,
+          "lagMs": 2.9064666666672565,
+          "startOffsetMs": 6236.242899999999,
+          "endOffsetMs": 6239.0653,
+          "latencyMs": 2.81420000000071,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 188,
+          "lagMs": 0.7527333333327988,
+          "startOffsetMs": 6267.428400000001,
+          "endOffsetMs": 6270.9583,
+          "latencyMs": 3.5190999999995256,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 189,
+          "lagMs": 13.59269999999924,
+          "startOffsetMs": 6313.5978,
+          "endOffsetMs": 6316.2773,
+          "latencyMs": 2.671599999999671,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 190,
+          "lagMs": 12.615566666667291,
+          "startOffsetMs": 6345.953600000001,
+          "endOffsetMs": 6349.0118999999995,
+          "latencyMs": 3.050999999999476,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 191,
+          "lagMs": 9.549833333332572,
+          "startOffsetMs": 6376.222,
+          "endOffsetMs": 6380.6569,
+          "latencyMs": 4.427400000000489,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 192,
+          "lagMs": 7.198899999999412,
+          "startOffsetMs": 6407.2035,
+          "endOffsetMs": 6417.589400000001,
+          "latencyMs": 10.372800000001007,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 193,
+          "lagMs": 4.970766666667259,
+          "startOffsetMs": 6438.306200000001,
+          "endOffsetMs": 6440.8706,
+          "latencyMs": 2.5601000000006024,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 194,
+          "lagMs": 2.8150333333323942,
+          "startOffsetMs": 6469.4856,
+          "endOffsetMs": 6472.609399999999,
+          "latencyMs": 3.1151000000008935,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 195,
+          "lagMs": 1.4509999999991123,
+          "startOffsetMs": 6501.4539,
+          "endOffsetMs": 6504.0095,
+          "latencyMs": 2.5517999999992753,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 196,
+          "lagMs": 0.2454666666671983,
+          "startOffsetMs": 6533.581,
+          "endOffsetMs": 6536.204100000001,
+          "latencyMs": 2.6177000000006956,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 197,
+          "lagMs": 14.245733333331373,
+          "startOffsetMs": 6580.915999999999,
+          "endOffsetMs": 6590.892599999999,
+          "latencyMs": 9.966400000001158,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 198,
+          "lagMs": 11.30789999999979,
+          "startOffsetMs": 6611.3099,
+          "endOffsetMs": 6614.4025,
+          "latencyMs": 3.0872999999992317,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 199,
+          "lagMs": 9.365366666668706,
+          "startOffsetMs": 6642.7024,
+          "endOffsetMs": 6646.0229,
+          "latencyMs": 3.313799999999901,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 200,
+          "lagMs": 7.336733333331722,
+          "startOffsetMs": 6674.0057,
+          "endOffsetMs": 6677.23,
+          "latencyMs": 3.218299999998635,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 201,
+          "lagMs": 5.89259999999922,
+          "startOffsetMs": 6705.895,
+          "endOffsetMs": 6709.769,
+          "latencyMs": 3.86699999999837,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 202,
+          "lagMs": 3.677466666667897,
+          "startOffsetMs": 6737.0154999999995,
+          "endOffsetMs": 6739.7420999999995,
+          "latencyMs": 2.718800000000556,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 203,
+          "lagMs": 1.8664333333326795,
+          "startOffsetMs": 6768.5389,
+          "endOffsetMs": 6771.900799999999,
+          "latencyMs": 3.3554000000003725,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 204,
+          "lagMs": 14.917199999999866,
+          "startOffsetMs": 6814.9216,
+          "endOffsetMs": 6818.386200000001,
+          "latencyMs": 3.456899999999223,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 205,
+          "lagMs": 12.43386666666811,
+          "startOffsetMs": 6845.7731,
+          "endOffsetMs": 6851.866900000001,
+          "latencyMs": 6.085999999999331,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 206,
+          "lagMs": 10.474033333332045,
+          "startOffsetMs": 6877.1422,
+          "endOffsetMs": 6879.4524,
+          "latencyMs": 2.307200000001103,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 207,
+          "lagMs": 8.677200000000084,
+          "startOffsetMs": 6908.680200000001,
+          "endOffsetMs": 6911.828100000001,
+          "latencyMs": 3.143099999999322,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 208,
+          "lagMs": 6.416466666667475,
+          "startOffsetMs": 6939.7528999999995,
+          "endOffsetMs": 6943.0021,
+          "latencyMs": 3.2431999999989785,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 209,
+          "lagMs": 4.712233333331824,
+          "startOffsetMs": 6971.3832,
+          "endOffsetMs": 6973.9642,
+          "latencyMs": 2.5747000000010303,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 210,
+          "lagMs": 2.8073999999996886,
+          "startOffsetMs": 7002.810100000001,
+          "endOffsetMs": 7005.8344,
+          "latencyMs": 3.01720000000023,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 211,
+          "lagMs": 0.5102666666680307,
+          "startOffsetMs": 7033.847,
+          "endOffsetMs": 7043.1577,
+          "latencyMs": 9.300600000000486,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 212,
+          "lagMs": 13.71163333333243,
+          "startOffsetMs": 7080.379800000001,
+          "endOffsetMs": 7082.9782,
+          "latencyMs": 2.592399999999543,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 213,
+          "lagMs": 10.810999999999694,
+          "startOffsetMs": 7110.812,
+          "endOffsetMs": 7113.053900000001,
+          "latencyMs": 2.2384000000001834,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 214,
+          "lagMs": 9.018366666667134,
+          "startOffsetMs": 7142.355600000001,
+          "endOffsetMs": 7145.2968,
+          "latencyMs": 2.9346000000005006,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 215,
+          "lagMs": 6.311333333331277,
+          "startOffsetMs": 7172.982,
+          "endOffsetMs": 7176.6358,
+          "latencyMs": 3.6458999999995285,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 216,
+          "lagMs": 4.596999999999753,
+          "startOffsetMs": 7204.598400000001,
+          "endOffsetMs": 7206.7772,
+          "latencyMs": 2.175699999999779,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 217,
+          "lagMs": 2.227966666667271,
+          "startOffsetMs": 7235.5628,
+          "endOffsetMs": 7237.828100000001,
+          "latencyMs": 2.2620999999999185,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 218,
+          "lagMs": 0.3770333333322924,
+          "startOffsetMs": 7267.048699999999,
+          "endOffsetMs": 7269.789500000001,
+          "latencyMs": 2.7343999999993684,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 219,
+          "lagMs": 13.635800000000017,
+          "startOffsetMs": 7313.641,
+          "endOffsetMs": 7317.4184000000005,
+          "latencyMs": 3.769900000001144,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 220,
+          "lagMs": 11.489766666667492,
+          "startOffsetMs": 7344.8259,
+          "endOffsetMs": 7347.2597000000005,
+          "latencyMs": 2.4283999999988737,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 221,
+          "lagMs": 9.415233333331344,
+          "startOffsetMs": 7376.0856,
+          "endOffsetMs": 7378.9509,
+          "latencyMs": 2.858700000000681,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 222,
+          "lagMs": 6.752899999999499,
+          "startOffsetMs": 7406.7546999999995,
+          "endOffsetMs": 7408.961300000001,
+          "latencyMs": 2.2005000000008295,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 223,
+          "lagMs": 4.165066666668281,
+          "startOffsetMs": 7437.502200000001,
+          "endOffsetMs": 7439.7498,
+          "latencyMs": 2.242599999999584,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 224,
+          "lagMs": 2.1327333333319984,
+          "startOffsetMs": 7468.8032,
+          "endOffsetMs": 7471.795400000001,
+          "latencyMs": 2.9855999999999767,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 225,
+          "lagMs": 0.6044999999994616,
+          "startOffsetMs": 7500.611999999999,
+          "endOffsetMs": 7504.765299999999,
+          "latencyMs": 4.14259999999922,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 226,
+          "lagMs": 14.053066666667291,
+          "startOffsetMs": 7547.388199999999,
+          "endOffsetMs": 7549.741,
+          "latencyMs": 2.3496999999988475,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 227,
+          "lagMs": 11.404933333331428,
+          "startOffsetMs": 7578.0753,
+          "endOffsetMs": 7584.391600000001,
+          "latencyMs": 6.309400000000096,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 228,
+          "lagMs": 9.405800000000454,
+          "startOffsetMs": 7609.408299999999,
+          "endOffsetMs": 7612.317499999999,
+          "latencyMs": 2.9033999999992375,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 229,
+          "lagMs": 8.219866666668167,
+          "startOffsetMs": 7641.5589,
+          "endOffsetMs": 7644.1657,
+          "latencyMs": 2.598100000001068,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 230,
+          "lagMs": 5.862933333331966,
+          "startOffsetMs": 7672.5334,
+          "endOffsetMs": 7678.5527,
+          "latencyMs": 6.012899999999718,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 231,
+          "lagMs": 2.9981000000007043,
+          "startOffsetMs": 7703.0034,
+          "endOffsetMs": 7707.6813,
+          "latencyMs": 4.667299999999159,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 232,
+          "lagMs": 1.3363666666682548,
+          "startOffsetMs": 7734.6723999999995,
+          "endOffsetMs": 7737.272000000001,
+          "latencyMs": 2.594699999999648,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 233,
+          "lagMs": 14.55893333333188,
+          "startOffsetMs": 7781.2279,
+          "endOffsetMs": 7783.474,
+          "latencyMs": 2.2415000000000873,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 234,
+          "lagMs": 12.826999999999316,
+          "startOffsetMs": 7812.8289,
+          "endOffsetMs": 7815.259099999999,
+          "latencyMs": 2.4254999999993743,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 235,
+          "lagMs": 10.585066666668354,
+          "startOffsetMs": 7843.923699999999,
+          "endOffsetMs": 7847.152700000001,
+          "latencyMs": 3.223200000000361,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 236,
+          "lagMs": 7.949133333331702,
+          "startOffsetMs": 7874.6188999999995,
+          "endOffsetMs": 7877.200999999999,
+          "latencyMs": 2.5781999999999243,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 237,
+          "lagMs": 6.472599999999147,
+          "startOffsetMs": 7906.4766,
+          "endOffsetMs": 7910.4053,
+          "latencyMs": 3.92200000000048,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 238,
+          "lagMs": 3.1947666666674195,
+          "startOffsetMs": 7936.5316,
+          "endOffsetMs": 7938.9393,
+          "latencyMs": 2.4016999999985273,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 239,
+          "lagMs": 0.7853333333314367,
+          "startOffsetMs": 7967.455599999999,
+          "endOffsetMs": 7969.8207,
+          "latencyMs": 2.35950000000048,
+          "status": 200,
+          "valid": true,
+          "error": null
+        }
+      ],
+      "droppedSlots": []
+    },
+    {
+      "name": "return-low",
+      "rps": 10,
+      "seconds": 3,
+      "planned": 30,
+      "sent": 30,
+      "dropped": 0,
+      "errors": 0,
+      "errorRateSent": 0,
+      "droppedRatePlanned": 0,
+      "peakInFlight": 1,
+      "scheduledWindowSeconds": 3,
+      "elapsedMsIncludingDrain": 3008.9637000000002,
+      "sentPerScheduledSecond": 10,
+      "completedInWindow": 30,
+      "validRpsIncludingDrain": 9.970210009512577,
+      "p50Ms": 2.6262000000006083,
+      "p95Ms": 10.087400000000343,
+      "p99Ms": 10.208300000000236,
+      "maxSchedulerLagMs": 15.241699999998673,
+      "illustrativeGatePassed": true,
+      "samples": [
+        {
+          "slot": 0,
+          "lagMs": 0.0030999999999039574,
+          "startOffsetMs": 0.004299999998693238,
+          "endOffsetMs": 3.6265999999995984,
+          "latencyMs": 3.6193999999995867,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 1,
+          "lagMs": 8.477199999999357,
+          "startOffsetMs": 108.48059999999896,
+          "endOffsetMs": 110.88979999999901,
+          "latencyMs": 2.402799999999843,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 2,
+          "lagMs": 2.188899999999194,
+          "startOffsetMs": 202.1903999999995,
+          "endOffsetMs": 205.65899999999965,
+          "latencyMs": 3.4637999999995372,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 3,
+          "lagMs": 10.776899999998932,
+          "startOffsetMs": 310.77930000000015,
+          "endOffsetMs": 313.3850000000002,
+          "latencyMs": 2.6001999999989494,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 4,
+          "lagMs": 5.629799999998795,
+          "startOffsetMs": 405.6310999999987,
+          "endOffsetMs": 407.9545999999991,
+          "latencyMs": 2.3193999999984953,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 5,
+          "lagMs": 14.252199999998993,
+          "startOffsetMs": 514.2559999999994,
+          "endOffsetMs": 516.6498999999985,
+          "latencyMs": 2.387700000001132,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 6,
+          "lagMs": 6.242699999998877,
+          "startOffsetMs": 606.2439999999988,
+          "endOffsetMs": 608.468499999999,
+          "latencyMs": 2.2219999999997526,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 7,
+          "lagMs": 15.241699999998673,
+          "startOffsetMs": 715.2452999999987,
+          "endOffsetMs": 718.6342999999997,
+          "latencyMs": 3.378999999998996,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 8,
+          "lagMs": 9.786599999999453,
+          "startOffsetMs": 809.7910999999986,
+          "endOffsetMs": 820.0126,
+          "latencyMs": 10.208300000000236,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 9,
+          "lagMs": 2.01549999999952,
+          "startOffsetMs": 902.0163999999986,
+          "endOffsetMs": 904.2853999999988,
+          "latencyMs": 2.266299999999319,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 10,
+          "lagMs": 10.342499999998836,
+          "startOffsetMs": 1010.3441000000003,
+          "endOffsetMs": 1013.7158999999992,
+          "latencyMs": 3.3637999999991735,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 11,
+          "lagMs": 4.354499999999462,
+          "startOffsetMs": 1104.3557,
+          "endOffsetMs": 1106.7002999999986,
+          "latencyMs": 2.3407999999999447,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 12,
+          "lagMs": 13.731399999998757,
+          "startOffsetMs": 1213.7350999999999,
+          "endOffsetMs": 1218.1779999999999,
+          "latencyMs": 4.434400000000096,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 13,
+          "lagMs": 7.513499999999112,
+          "startOffsetMs": 1307.514799999999,
+          "endOffsetMs": 1310.1455999999998,
+          "latencyMs": 2.6262000000006083,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 14,
+          "lagMs": 1.4562999999998283,
+          "startOffsetMs": 1401.457699999999,
+          "endOffsetMs": 1403.6291,
+          "latencyMs": 2.16820000000007,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 15,
+          "lagMs": 9.614999999999782,
+          "startOffsetMs": 1509.616399999999,
+          "endOffsetMs": 1511.7986999999994,
+          "latencyMs": 2.1784999999999854,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 16,
+          "lagMs": 5.364399999998568,
+          "startOffsetMs": 1605.366899999999,
+          "endOffsetMs": 1608.5794999999998,
+          "latencyMs": 3.2072000000007392,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 17,
+          "lagMs": 13.033899999998539,
+          "startOffsetMs": 1713.0384999999987,
+          "endOffsetMs": 1723.1371,
+          "latencyMs": 10.087400000000343,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 18,
+          "lagMs": 5.379499999999098,
+          "startOffsetMs": 1805.3841999999986,
+          "endOffsetMs": 1808.1197999999986,
+          "latencyMs": 2.7258999999994558,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 19,
+          "lagMs": 14.082300000000032,
+          "startOffsetMs": 1914.0861999999997,
+          "endOffsetMs": 1916.8986999999997,
+          "latencyMs": 2.8046999999987747,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 20,
+          "lagMs": 8.009099999999307,
+          "startOffsetMs": 2008.011699999999,
+          "endOffsetMs": 2010.3904000000002,
+          "latencyMs": 2.3739000000005035,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 21,
+          "lagMs": 1.971799999999348,
+          "startOffsetMs": 2101.9736999999986,
+          "endOffsetMs": 2104.1453,
+          "latencyMs": 2.1665000000011787,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 22,
+          "lagMs": 10.039099999999962,
+          "startOffsetMs": 2210.0420999999988,
+          "endOffsetMs": 2214.3428999999996,
+          "latencyMs": 4.29030000000057,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 23,
+          "lagMs": 5.087099999998827,
+          "startOffsetMs": 2305.0896999999986,
+          "endOffsetMs": 2308.2302,
+          "latencyMs": 3.133800000001429,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 24,
+          "lagMs": 13.945299999999406,
+          "startOffsetMs": 2413.9480000000003,
+          "endOffsetMs": 2416.779199999999,
+          "latencyMs": 2.825300000000425,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 25,
+          "lagMs": 7.445499999999811,
+          "startOffsetMs": 2507.448199999999,
+          "endOffsetMs": 2509.591199999999,
+          "latencyMs": 2.1378999999997177,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 26,
+          "lagMs": 3.0187999999998283,
+          "startOffsetMs": 2603.0204999999987,
+          "endOffsetMs": 2605.2986999999994,
+          "latencyMs": 2.2729999999992287,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 27,
+          "lagMs": 10.687200000000303,
+          "startOffsetMs": 2710.6888,
+          "endOffsetMs": 2715.1286,
+          "latencyMs": 4.433899999999994,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 28,
+          "lagMs": 4.586699999999837,
+          "startOffsetMs": 2804.5918,
+          "endOffsetMs": 2808.5380999999998,
+          "latencyMs": 3.934400000000096,
+          "status": 200,
+          "valid": true,
+          "error": null
+        },
+        {
+          "slot": 29,
+          "lagMs": 15.159099999998944,
+          "startOffsetMs": 2915.1607999999997,
+          "endOffsetMs": 2917.4965999999986,
+          "latencyMs": 2.332300000000032,
+          "status": 200,
+          "valid": true,
+          "error": null
+        }
+      ],
+      "droppedSlots": []
+    }
+  ]
+}
