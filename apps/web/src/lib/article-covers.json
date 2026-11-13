@@ -5838,5 +5838,15 @@
       "↔",
       "SIGN-OFF"
     ]
+  },
+  "system-testing-deployment-test": {
+    "title": "DEPLOYMENT TEST",
+    "subtitle": "Ready, safely configured, rollback-safe",
+    "diagram": "flow",
+    "labels": [
+      "EXPAND",
+      "DEPLOY",
+      "CONTRACT"
+    ]
   }
 }

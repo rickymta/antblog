@@ -1165,7 +1165,7 @@
   {
     "slug": "testing-sys-p02-kiem-thu-he-thong",
     "title": "Kiểm thử hệ thống Tới Nơi · Phần 2/2",
-    "description": "Phần nâng cao của kiểm thử hệ thống Tới Nơi: stress và hồi phục sau quá tải, security test và pentest trong phạm vi được chỉ định, compatibility theo ma trận trình duyệt, usability với kịch bản và worksheet quan sát, data integrity cho tiền và trạng thái chuyến, recovery với restore drill PostgreSQL, và UAT với acceptance kit — tách rõ phần tự động với phần cần con người và môi trường thật.",
+    "description": "Phần nâng cao của kiểm thử hệ thống Tới Nơi: stress và hồi phục sau quá tải, security test và pentest trong phạm vi được chỉ định, compatibility theo ma trận trình duyệt, usability với kịch bản và worksheet quan sát, data integrity cho tiền và trạng thái chuyến, recovery với restore drill PostgreSQL, UAT với acceptance kit, và deployment test với readiness, cấu hình an toàn và migration tương thích rollback — tách rõ phần tự động với phần cần con người và môi trường thật.",
     "level": "advanced",
     "category": "testing",
     "articles": [
@@ -1175,7 +1175,8 @@
       "system-testing-usability-test",
       "system-testing-data-integrity-test",
       "system-testing-recovery-test",
-      "system-testing-uat"
+      "system-testing-uat",
+      "system-testing-deployment-test"
     ],
     "status": "published"
   },

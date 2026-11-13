@@ -382,7 +382,7 @@ Hiện trạng đọc theo các chỉ số này: 6 scenario, 0 PASS từ phiên 
 
 **Continuous delivery.** Pipeline có thể tự thu evidence và áp dụng cơ chế phê duyệt đã được tổ chức ủy quyền (ví dụ: owner phê duyệt trên một change request gắn build ID). Vẫn phải truy được build → tiêu chí → evidence → quyết định. Pipeline xanh không tự sinh ra thẩm quyền nghiệm thu.
 
-**Release dossier.** Nối bằng chứng [security](/articles/system-testing-security-pentest), [performance](/articles/system-testing-performance-test), [compatibility](/articles/system-testing-compatibility-test), [usability](/articles/system-testing-usability-test), [integrity](/articles/system-testing-data-integrity-test) và [recovery](/articles/system-testing-recovery-test) với phạm vi UAT. Không gom mọi kết quả lịch sử thành một "chứng nhận hiện tại": mỗi dòng ghi build, ngày, môi trường, và thay đổi nào làm evidence phải chạy lại. SYS-16 sẽ kiểm chính bản triển khai đó.
+**Release dossier.** Nối bằng chứng [security](/articles/system-testing-security-pentest), [performance](/articles/system-testing-performance-test), [compatibility](/articles/system-testing-compatibility-test), [usability](/articles/system-testing-usability-test), [integrity](/articles/system-testing-data-integrity-test) và [recovery](/articles/system-testing-recovery-test) với phạm vi UAT. Không gom mọi kết quả lịch sử thành một "chứng nhận hiện tại": mỗi dòng ghi build, ngày, môi trường, và thay đổi nào làm evidence phải chạy lại. [SYS-16](/articles/system-testing-deployment-test) kiểm chính bản triển khai đó.
 
 ## 11. Anti-pattern và giới hạn bằng chứng
 
@@ -494,4 +494,4 @@ Tra cứu ngày 13/11/2026.
 - Các mẫu worksheet, risk register, gate và biên bản trong bài là thiết kế thực hành cho lab, không phải biểu mẫu bắt buộc của ISTQB.
 - Bài liên quan: [Acceptance Testing tổng quan](/articles/acceptance-testing-tong-quan) · [Acceptance criteria Given–When–Then](/articles/ba-acceptance-criteria-given-when-then) · [Thiết kế UAT scenario](/articles/ba-thiet-ke-uat-scenario) · [UAT: vai trò người dùng nghiệp vụ](/articles/ba-uat-vai-tro-nguoi-dung-nghiep-vu) · [SYS-14 · Recovery Test](/articles/system-testing-recovery-test)
 
-Bài tiếp theo: SYS-16 · Deployment Test (đang lập kế hoạch).
+Bài tiếp theo: [SYS-16 · Deployment Test](/articles/system-testing-deployment-test).

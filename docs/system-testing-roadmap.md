@@ -1,6 +1,6 @@
 # Kiểm thử hệ thống Tới Nơi — từ khái niệm tới thực hành nâng cao
 
-Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01–SYS-15 đã có bản nháp hoàn chỉnh, tài liệu thực hành và báo cáo. SYS-12 chưa chạy user study; SYS-15 có acceptance kit và supporting checks, chưa có phiên UAT/sign-off. Đây là nhánh thực hành bổ sung cho curriculum TEST-001…162, dùng mã SYS để không thay đổi mã cũ.
+Ngày lập: 13/11/2026. Trạng thái: đủ 16 bài; SYS-01–SYS-16 đã có bản nháp hoàn chỉnh, tài liệu thực hành và báo cáo. SYS-12 chưa chạy user study; SYS-15 có acceptance kit và supporting checks, chưa có phiên UAT/sign-off. Đây là nhánh thực hành bổ sung cho curriculum TEST-001…162, dùng mã SYS để không thay đổi mã cũ.
 
 ## Nội dung đã viết
 
@@ -19,8 +19,9 @@ Ngày lập: 13/11/2026. Trạng thái: lập kế hoạch đủ 16 bài; SYS-01
 - [SYS-13 — Data Integrity Test](system-testing/13-data-integrity-test.md) · [Báo cáo](system-testing/13-test-report.md).
 - [SYS-14 — Recovery Test](system-testing/14-recovery-test.md) · [Báo cáo](system-testing/14-test-report.md).
 - [SYS-15 — UAT](system-testing/15-uat.md) · [Acceptance kit](system-testing/15-acceptance-kit.md) · [Báo cáo](system-testing/15-test-report.md).
+- [SYS-16 — Deployment Test](system-testing/16-deployment-test.md) · [Báo cáo](system-testing/16-test-report.md).
 
-Đã chuyển vào seed (13/11/2026): SYS-01…SYS-15 thành bài blog `api/seed/content/system-testing-*.md`. Learning path `testing-sys-p01-kiem-thu-he-thong` (Phần 1/2: SYS-01…08) và `testing-sys-p02-kiem-thu-he-thong` (Phần 2/2: SYS-09…15; bổ sung SYS-16 khi viết xong). Số đo hiệu năng/tải/stress và restore drill trong bài lấy từ báo cáo đã đo, không đo lại khi biên tập. SYS-12 vẫn chưa chạy user study; SYS-15 chưa có phiên UAT/sign-off.
+Đã chuyển vào seed (13/11/2026): SYS-01…SYS-16 thành bài blog `api/seed/content/system-testing-*.md`. Learning path `testing-sys-p01-kiem-thu-he-thong` (Phần 1/2: SYS-01…08) và `testing-sys-p02-kiem-thu-he-thong` (Phần 2/2: SYS-09…16). Số đo hiệu năng/tải/stress và restore drill trong bài lấy từ báo cáo đã đo, không đo lại khi biên tập. SYS-12 vẫn chưa chạy user study; SYS-15 chưa có phiên UAT/sign-off.
 
 Quy trình: viết lần lượt theo số bài; hoàn tất nội dung, kiểm chứng lab, cập nhật báo cáo rồi commit riêng từng bài. Bản nháp đã viết chưa đồng nghĩa đã xuất bản CMS.
 
@@ -87,4 +88,4 @@ Nguồn nội bộ: `examples/toi-noi-testing/SPEC.md`, README lab, `docs/testin
 - Đợt 4: 11–14. Browser matrix, nghiên cứu người dùng, dữ liệu và recovery; tách phần tự động với phần cần con người/môi trường thật.
 - Đợt 5: 15–16. Hồ sơ nghiệm thu và rehearsal triển khai; liên kết kết quả các bài thành release dossier.
 
-Mỗi đợt hoàn thành khi nội dung đủ 10 tiêu chí, lệnh lab chạy lại thành công, kết quả được lưu, nguồn được đối chiếu và giới hạn được công bố. Chưa có lịch xuất bản cố định. Bài 16 đang ở trạng thái kế hoạch, không phải nội dung đã hoàn tất. User study SYS-12 cần participant thật; SYS-15 cần phiên UAT và quyết định của đại diện nghiệp vụ, không thay bằng supporting checks.
+Mỗi đợt hoàn thành khi nội dung đủ 10 tiêu chí, lệnh lab chạy lại thành công, kết quả được lưu, nguồn được đối chiếu và giới hạn được công bố. Chưa có lịch xuất bản cố định. User study SYS-12 cần participant thật; SYS-15 cần phiên UAT và quyết định của đại diện nghiệp vụ, không thay bằng supporting checks.
