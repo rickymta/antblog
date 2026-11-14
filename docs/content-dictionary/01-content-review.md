@@ -61,7 +61,7 @@ Khối lượng khoảng 15 MB Markdown, quá lớn để rà hoàn toàn bằng
   - Inline code, thẻ HTML, liên kết và URL phải giữ nguyên.
   - Sau khi sửa, kiểm tra lại toàn tệp: các khối code giữ nguyên, số dòng không đổi, frontmatter vẫn đọc được. Nếu không đạt thì huỷ toàn bộ thay đổi của tệp đó.
 - Agent tự chạy `--dry-run` để sửa các đề xuất bị từ chối trước khi bàn giao.
-- Model nhỏ (Haiku) dùng cho khảo sát và dò lỗi. Việc viết lại câu nên dùng model mạnh hơn, vì đó là phần cần cảm nhận ngôn ngữ.
+- Model nhỏ (Haiku) dùng cho khảo sát và dò lỗi. Việc viết lại câu nên dùng model mạnh hơn, vì đó là phần cần cảm nhận ngôn ngữ. Từ vòng 2, mỗi lô đi qua ba tầng: Haiku đối chiếu code, output và hình với văn xuôi để lập danh sách cụm phải giữ; Sonnet soạn đề xuất; Opus duyệt mọi đề xuất (xem [review-prompt.md](review-prompt.md)).
 
 ## Đo tiến độ
 

@@ -1,0 +1,11 @@
+{
+  "file": "python-transaction-optimistic-concurrency-idempotency.md",
+  "edits": [
+    {
+      "old": "Ta kiểm bằng các test case sau",
+      "new": "Ta kiểm tra bằng các test case sau",
+      "reason": "Vòng 2 thống nhất «kiểm» đứng một mình thành «kiểm tra»; chữ «kiểm» này do chính đề xuất vòng 2 đưa vào.",
+      "severity": "low"
+    }
+  ]
+}

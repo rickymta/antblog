@@ -1,0 +1,11 @@
+{
+  "file": "python-opencv-phat-hien-canh-perspective-deskew.md",
+  "edits": [
+    {
+      "old": "những bất biến và thứ bậc lớn",
+      "new": "những bất biến và bậc độ lớn",
+      "reason": "Thống nhất với lựa chọn của python-r2, python-r4: «thứ bậc lớn» thành «bậc độ lớn» (order of magnitude); bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    }
+  ]
+}

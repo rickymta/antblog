@@ -1,0 +1,11 @@
+{
+  "file": "python-outbox-inbox-idempotent-consumer.md",
+  "edits": [
+    {
+      "old": "lab không dựng cuộc đua đó",
+      "new": "lab không dựng race condition đó",
+      "reason": "Theo terminology.json (race-condition) và lựa chọn của rust-r3, rust-r4: «cuộc đua» thành «race condition»; các chỗ này còn sót sau vòng 2.",
+      "severity": "low"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "file": "python-face-detection-landmarks-mediapipe-opencv.md",
+  "edits": [
+    {
+      "old": "chỉ đọc thứ bậc lớn",
+      "new": "chỉ đọc bậc độ lớn",
+      "reason": "Thống nhất với lựa chọn của python-r2, python-r4: «thứ bậc lớn» thành «bậc độ lớn» (order of magnitude); bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    },
+    {
+      "old": "chỉ cho biết thứ bậc lớn",
+      "new": "chỉ cho biết bậc độ lớn",
+      "reason": "Thống nhất với lựa chọn của python-r2, python-r4: «thứ bậc lớn» thành «bậc độ lớn» (order of magnitude); bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    }
+  ]
+}

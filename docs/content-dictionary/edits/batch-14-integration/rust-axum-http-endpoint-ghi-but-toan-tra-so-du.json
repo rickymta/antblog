@@ -1,0 +1,11 @@
+{
+  "file": "rust-axum-http-endpoint-ghi-but-toan-tra-so-du.md",
+  "edits": [
+    {
+      "old": "Ngưỡng 2 MB được kiểm ở",
+      "new": "Ngưỡng 2 MB được kiểm tra ở",
+      "reason": "Vòng 2 thống nhất «kiểm» đứng một mình thành «kiểm tra»; chữ «kiểm» này do chính đề xuất vòng 2 đưa vào.",
+      "severity": "low"
+    }
+  ]
+}

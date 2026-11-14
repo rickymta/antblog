@@ -1,0 +1,11 @@
+{
+  "file": "rust-repository-unit-of-work-trait-transaction.md",
+  "edits": [
+    {
+      "old": "cùng hiện thực cổng trong",
+      "new": "cùng cài đặt cổng trong",
+      "reason": "Loạt Rust dịch implement là «cài đặt» (rust-r1, rust-r3); «hiện thực» là cách dịch thứ ba trong cùng loạt.",
+      "severity": "low"
+    }
+  ]
+}

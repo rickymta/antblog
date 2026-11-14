@@ -1,0 +1,35 @@
+{
+  "file": "python-tesseract-easyocr-paddleocr-so-sanh.md",
+  "edits": [
+    {
+      "old": "ảnh. Output thật,",
+      "new": "ảnh. Kết quả chạy thật,",
+      "reason": "Thống nhất với lựa chọn của các phần rust-r1, rust-r2, location-r4, python-r1: «Output thật» thành «Kết quả chạy thật»; bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    },
+    {
+      "old": "Output thật",
+      "new": "Kết quả chạy thật",
+      "reason": "Thống nhất với lựa chọn của các phần rust-r1, rust-r2, location-r4, python-r1: «Output thật» thành «Kết quả chạy thật»; bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    },
+    {
+      "old": "output thật",
+      "new": "kết quả chạy thật",
+      "reason": "Thống nhất với lựa chọn của các phần rust-r1, rust-r2, location-r4, python-r1: «Output thật» thành «Kết quả chạy thật»; bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    },
+    {
+      "old": "chỉ khẳng định thứ bậc lớn",
+      "new": "chỉ khẳng định bậc độ lớn",
+      "reason": "Thống nhất với lựa chọn của python-r2, python-r4: «thứ bậc lớn» thành «bậc độ lớn» (order of magnitude); bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    },
+    {
+      "old": "ở mức thứ bậc lớn",
+      "new": "ở mức bậc độ lớn",
+      "reason": "Thống nhất với lựa chọn của python-r2, python-r4: «thứ bậc lớn» thành «bậc độ lớn» (order of magnitude); bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    }
+  ]
+}

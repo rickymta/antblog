@@ -145,7 +145,8 @@
       "definition": "Lỗi xảy ra khi kết quả phụ thuộc vào thứ tự chạy của các thao tác đồng thời, ví dụ hai yêu cầu cùng nhận một chuyến và cả hai đều tưởng mình thành công.",
       "note": "Chỉ sửa khi \"cuộc đua\" mang nghĩa race condition; giữ các cách nói tự nhiên như \"thua cuộc đua\"",
       "avoid": [
-        { "text": "cuộc đua", "severity": "low" }
+        { "text": "cuộc đua", "severity": "low" },
+        { "text": "lỗi đua", "severity": "low" }
       ]
     },
     {
@@ -204,6 +205,22 @@
       "flags": "i",
       "suggest": "kết quả chạy thật",
       "severity": "low"
+    },
+    {
+      "id": "thu-bac-lon",
+      "pattern": "thứ bậc lớn",
+      "flags": "i",
+      "suggest": "bậc độ lớn",
+      "severity": "low",
+      "note": "calque của \"order of magnitude\"; loạt python đã chốt \"bậc độ lớn\" (vòng 2, 11/2026)"
+    },
+    {
+      "id": "thoi-gian-tuong",
+      "pattern": "thời gian tường(?! minh)",
+      "flags": "i",
+      "suggest": "thời gian thực tế (wall-clock)",
+      "severity": "low",
+      "note": "dịch từng chữ của wall-clock time; giữ \"thời gian tường minh\""
     },
     {
       "id": "tai-tay",

@@ -1,0 +1,23 @@
+{
+  "file": "rust-command-handler-pipeline-domain-event-khong-framework.md",
+  "edits": [
+    {
+      "old": "hiện thực nó cho nhiều command",
+      "new": "cài đặt nó cho nhiều command",
+      "reason": "Loạt Rust dịch implement là «cài đặt» (rust-r1, rust-r3); «hiện thực» là cách dịch thứ ba trong cùng loạt.",
+      "severity": "low"
+    },
+    {
+      "old": "đã hiện thực.",
+      "new": "đã cài đặt.",
+      "reason": "Loạt Rust dịch implement là «cài đặt» (rust-r1, rust-r3); «hiện thực» là cách dịch thứ ba trong cùng loạt.",
+      "severity": "low"
+    },
+    {
+      "old": "generic hiện thực chính",
+      "new": "generic cài đặt chính",
+      "reason": "Loạt Rust dịch implement là «cài đặt» (rust-r1, rust-r3); «hiện thực» là cách dịch thứ ba trong cùng loạt.",
+      "severity": "low"
+    }
+  ]
+}

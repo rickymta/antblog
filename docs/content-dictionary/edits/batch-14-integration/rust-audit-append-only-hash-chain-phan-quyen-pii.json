@@ -1,0 +1,11 @@
+{
+  "file": "rust-audit-append-only-hash-chain-phan-quyen-pii.md",
+  "edits": [
+    {
+      "old": "Finance/CS/Admin kiểm bằng role thật",
+      "new": "Finance/CS/Admin được kiểm tra bằng role thật",
+      "reason": "Vòng 2 thống nhất «kiểm» đứng một mình thành «kiểm tra»; chữ «kiểm» này do chính đề xuất vòng 2 đưa vào.",
+      "severity": "low"
+    }
+  ]
+}
