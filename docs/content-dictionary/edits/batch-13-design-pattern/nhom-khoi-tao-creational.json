@@ -1,0 +1,131 @@
+{
+  "file": "nhom-khoi-tao-creational.md",
+  "edits": [
+    {
+      "old": "không trói code vào new:",
+      "new": "không trói code vào từ khoá new:",
+      "reason": "Thiếu danh từ",
+      "severity": "low"
+    },
+    {
+      "old": "rải rác thành nơi sinh lỗi",
+      "new": "rải rác trở thành chỗ sinh lỗi",
+      "reason": "Cụm gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "yêu cầu đặt chuyến: đón, điểm dừng, đến, voucher",
+      "new": "yêu cầu đặt chuyến: điểm đón, điểm dừng, điểm đến, voucher",
+      "reason": "Lược mất danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "thêm dịch vụ thứ tư là đi lùng từng bản",
+      "new": "thêm dịch vụ thứ tư là phải đi lùng từng bản sao",
+      "reason": "'bản' dễ nhầm với phiên bản",
+      "severity": "medium"
+    },
+    {
+      "old": "nên trình biên dịch im lặng",
+      "new": "nên trình biên dịch không báo gì",
+      "reason": "Theo quy ước 'im lặng' -> 'không báo gì'",
+      "severity": "medium"
+    },
+    {
+      "old": "trình biên dịch nhắc khi thiếu loại",
+      "new": "trình biên dịch nhắc khi thiếu một loại chuyến",
+      "reason": "Lược mất danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "từ hai sản phẩm phải đi cùng nhau",
+      "new": "từ hai sản phẩm trở lên phải đi cùng nhau",
+      "reason": "Thiếu 'trở lên'",
+      "severity": "medium"
+    },
+    {
+      "old": "Phần lớn tuỳ chọn, và có",
+      "new": "Phần lớn là tuỳ chọn, và có",
+      "reason": "Thiếu động từ 'là'",
+      "severity": "medium"
+    },
+    {
+      "old": "hẹn giờ ít nhất 15 phút tới",
+      "new": "hẹn giờ phải cách hiện tại ít nhất 15 phút",
+      "reason": "Cụm mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "có thể đẩy lên kiểu bằng union phân biệt",
+      "new": "có thể chuyển vào hệ thống kiểu bằng union phân biệt",
+      "reason": "Calque 'đẩy lên'",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó chép object thường",
+      "new": "Hàm này chép object thường",
+      "reason": "Tránh 'Nó' đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "còn hàm làm nó ném lỗi",
+      "new": "còn gặp hàm thì nó ném lỗi",
+      "reason": "Câu thiếu chủ ngữ rõ ràng",
+      "severity": "high"
+    },
+    {
+      "old": "Nó chạy, và đúng là chỉ có một",
+      "new": "Đoạn code này chạy, và đúng là chỉ có một",
+      "reason": "Tránh 'Nó' đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "\"Duy nhất\" sai phạm vi:",
+      "new": "Phạm vi của \"duy nhất\" bị hiểu sai:",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Tới Nơi chạy nhiều bản dịch vụ, mỗi bản một pool",
+      "new": "Tới Nơi chạy nhiều bản sao của dịch vụ, mỗi bản một pool",
+      "reason": "'bản dịch vụ' dễ nhầm với phiên bản",
+      "severity": "medium"
+    },
+    {
+      "old": "quen thuộc có lỗi tranh chấp",
+      "new": "quen thuộc có lỗi race condition",
+      "reason": "Theo bảng thuật ngữ: race condition",
+      "severity": "medium"
+    },
+    {
+      "old": "vài bản dịch vụ khởi động cùng lúc",
+      "new": "vài bản sao dịch vụ khởi động cùng lúc",
+      "reason": "'bản dịch vụ' dễ nhầm với phiên bản",
+      "severity": "medium"
+    },
+    {
+      "old": "chọn nhà cung cấp một lần là không trộn được",
+      "new": "chọn nhà cung cấp một lần thì không trộn lẫn được",
+      "reason": "Câu cụt, thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "còn đưa ràng buộc lên kiểu",
+      "new": "còn chuyển ràng buộc vào hệ thống kiểu",
+      "reason": "Calque 'đưa lên'",
+      "severity": "medium"
+    },
+    {
+      "old": "luôn trả lời: nông hay sâu",
+      "new": "luôn phải trả lời: nông hay sâu",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "cổ điển đổi một thể hiện lấy phụ thuộc ẩn và test khó",
+      "new": "cổ điển đánh đổi bằng phụ thuộc ẩn và khó test để có một thể hiện duy nhất",
+      "reason": "'đổi ... lấy' sai nghĩa",
+      "severity": "high"
+    }
+  ]
+}

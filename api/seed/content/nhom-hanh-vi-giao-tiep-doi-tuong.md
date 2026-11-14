@@ -19,13 +19,13 @@ language: vi
 <p><b>D.</b> Cho <code>Restaurant</code> gọi thẳng <code>DriverApp</code> và <code>CustomerApp</code>.</p>
 <details>
 <summary><b>Xem đáp án</b></summary>
-<p><b>B.</b> Luật đọc tin của nhiều bên và cần <b>trạng thái chung</b> («đã gọi tài xế chưa?»). Với A, luật rải vào từng người nghe và không ai giữ trạng thái chung. C sai vì cả ba bên đều phải được báo, không có chuyện «một người xử lý rồi dừng». D chạy được ở bản đầu, nhưng quán phải biết tài xế, tài xế phải biết khách. Observer vẫn có chỗ: làm đường chở tin <i>tới</i> coordinator.</p>
+<p><b>B.</b> Luật đọc tin của nhiều bên và cần <b>trạng thái chung</b> («đã gọi tài xế chưa?»). Với A, luật rải vào từng người nghe và không ai giữ trạng thái chung. C sai vì cả ba bên đều phải được báo, không có chuyện «một người xử lý rồi dừng». D chạy được ở bản đầu, nhưng quán phải biết tài xế, tài xế phải biết khách. Observer vẫn có chỗ: làm đường truyền tin <i>tới</i> coordinator.</p>
 </details>
 </div>
 
 ## Nhóm này giải quyết vấn đề gì
 
-Phần 1 lo **làm gì**; phần 2 lo **tin đi đường nào**. Ba câu hỏi tách các pattern ở đây: người gửi **biết ai** (người nhận cụ thể, một interface, một hub, hay khâu kế tiếp)? Một tin tới **bao nhiêu người nhận**? Luật phối hợp **nằm ở đâu**? Ba pattern còn lại nói chuyện với **một cấu trúc**: Iterator duyệt tập hợp mà không lộ cách lưu, Visitor thêm phép tính lên một họ lớp mà không sửa họ lớp, Interpreter biến câu của một ngôn ngữ nhỏ thành cây rồi tính giá trị cây.
+Phần 1 lo **làm gì**; phần 2 lo **tin đi đường nào**. Ba câu hỏi tách các pattern ở đây: người gửi **biết ai** (người nhận cụ thể, một interface, một hub, hay khâu kế tiếp)? Một tin tới **bao nhiêu người nhận**? Luật phối hợp **nằm ở đâu**? Ba pattern còn lại thao tác trên **một cấu trúc**: Iterator duyệt tập hợp mà không lộ cách lưu, Visitor thêm phép tính lên một họ lớp mà không sửa họ lớp, Interpreter biến câu của một ngôn ngữ nhỏ thành cây rồi tính giá trị cây.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -111,7 +111,7 @@ class TripService {
 }
 ```
 
-Lớp lõi nhất phải import mọi dịch vụ phụ; dịch vụ điểm thưởng ném lỗi là đổi trạng thái hỏng theo; tính năng mới nào cũng sửa lớp này. Với ~560 lần đổi trạng thái mỗi giây lúc cao điểm, đây là đoạn code bạn muốn ít người chạm nhất.
+Lớp lõi nhất phải import mọi dịch vụ phụ; dịch vụ điểm thưởng ném lỗi thì việc đổi trạng thái cũng hỏng theo; tính năng mới nào cũng sửa lớp này. Với ~560 lần đổi trạng thái mỗi giây lúc cao điểm, đây là đoạn code bạn muốn ít người chạm nhất.
 
 ### Lời giải
 
@@ -154,7 +154,7 @@ const errors = tripEvents.emit({ tripCode: 119980, from: 'in_transit', to: 'comp
 lỗi observer: dịch vụ điểm thưởng không phản hồi
 ```
 
-Observer thứ hai hỏng, thứ ba vẫn chạy, lỗi trả về cho người phát quyết định. Thêm tính năng là thêm một `subscribe`, không sửa lớp lõi.
+Observer thứ hai hỏng, thứ ba vẫn chạy, lỗi được trả về để người phát quyết định. Thêm tính năng là thêm một `subscribe`, không sửa lớp lõi.
 
 **Các vai:** Subject ↔ `Subject<TripStatusChanged>`; Observer ↔ kiểu `Listener<E>` (một hàm); ConcreteObserver ↔ ba hàm thông báo, thống kê, điểm thưởng.
 
@@ -184,7 +184,7 @@ Quên `close()`: 1.000 màn hình đã đóng vẫn sống và vẫn vẽ lại 
 
 ### Cách viết gọn ở TypeScript hiện đại
 
-Observer có sẵn trong nền tảng: `EventTarget` (trình duyệt và Node), `EventEmitter` của Node. Gắn listener với `{ signal: ac.signal }` rồi gọi `ac.abort()` là gỡ cả nhóm một lúc — trong tệp kiểm tra, lần `dispatchEvent` sau `abort()` không còn ai nhận. Cái giá: `CustomEvent.detail` không có kiểu, phải ép kiểu ở mỗi listener; `Subject<E>` tự viết ở trên đổi vài dòng code lấy kiểu chặt.
+Observer có sẵn trong nền tảng: `EventTarget` (trình duyệt và Node), `EventEmitter` của Node. Gắn listener với `{ signal: ac.signal }` rồi gọi `ac.abort()` là gỡ cả nhóm một lúc — trong tệp kiểm tra, lần `dispatchEvent` sau `abort()` không còn ai nhận. Cái giá: `CustomEvent.detail` không có kiểu, phải ép kiểu ở mỗi listener; `Subject<E>` tự viết ở trên đánh đổi vài dòng code để có kiểu chặt.
 
 ### Khi nào dùng, khi nào không
 
@@ -276,13 +276,13 @@ Một đơn: thanh toán, quán báo còn 15 rồi 7 rồi 3 phút, tài xế b�
 
 ### Khi nào dùng, khi nào không
 
-Dùng khi nhiều đối tượng phối hợp theo luật **nhiều chiều** cần trạng thái chung: màn hình nhiều ô ràng buộc nhau, phòng chat, quy trình một đơn hàng. Không dùng khi chỉ có hai bên, hoặc tin chỉ đi một chiều tới nhiều người nghe (Observer đủ). Cái giá: hub dễ phình thành «god object». Giữ mỗi mediator cho **một quy trình** (đơn đồ ăn một cái, bưu kiện một cái); khi `switch` bắt đầu phụ thuộc «đang ở bước nào», tách phần đó thành State. Khi ba bên là ba ứng dụng qua mạng, ý tưởng giữ nguyên (thường gọi là *orchestrator*), chỉ khác là `driverCalled` phải nằm trong database và mỗi lệnh phải chịu được việc bị giao hai lần.
+Dùng khi nhiều đối tượng phối hợp theo luật **nhiều chiều** cần trạng thái chung: màn hình nhiều ô ràng buộc nhau, phòng chat, quy trình một đơn hàng. Không dùng khi chỉ có hai bên, hoặc tin chỉ đi một chiều tới nhiều người nghe (Observer đủ). Cái giá: hub dễ phình thành «god object», ôm hết mọi việc. Giữ mỗi mediator cho **một quy trình** (đơn đồ ăn một cái, bưu kiện một cái); khi `switch` bắt đầu phụ thuộc «đang ở bước nào», tách phần đó thành State. Khi ba bên là ba ứng dụng qua mạng, ý tưởng giữ nguyên (thường gọi là *orchestrator*), chỉ khác là `driverCalled` phải nằm trong database và mỗi lệnh phải chịu được việc bị giao hai lần.
 
 ## Chain of Responsibility — chuỗi kiểm tra trước khi tạo chuyến
 
 ### Vấn đề ở Tới Nơi
 
-Trước khi tạo chuyến (~70 lần/giây lúc cao điểm) phải kiểm: phiên còn hạn, thành phố có phục vụ, điểm gian lận thấp, nợ cước chưa vượt hạn mức, đơn đồ ăn thì quán đang mở. Một hàm:
+Trước khi tạo chuyến (~70 lần/giây lúc cao điểm) phải kiểm tra: phiên còn hạn, thành phố có phục vụ, điểm gian lận thấp, nợ cước chưa vượt hạn mức, đơn đồ ăn thì quán đang mở. Một hàm:
 
 ```ts
 function validatePlaceTrip(r: PlaceTripRequest): string | null {
@@ -348,7 +348,7 @@ quán đóng (15 giờ)   | 5 khâu | chặn tại OpeningHoursCheck: quán đó
 ride lúc 15 giờ      | 5 khâu | cho tạo chuyến
 ```
 
-Token hết hạn dừng ở khâu 1, bốn khâu sau không tốn gì. Chuyến đặt xe đi qua khâu giờ mở quán mà không bị chặn — mỗi khâu tự biết mình có liên quan không. **Thứ tự là quyết định thiết kế:** khâu rẻ, hay chặn đặt trước; khâu chống gian lận thường gọi dịch vụ chấm điểm qua mạng nên đặt sau xác thực và vùng phục vụ để yêu cầu rác không tới được đó. Tắt chống gian lận ở Nha Trang = dựng chuỗi khác cho thành phố đó, không thêm `if`.
+Token hết hạn dừng ở khâu 1, bốn khâu sau không tốn gì. Chuyến đặt xe đi qua khâu giờ mở quán mà không bị chặn — mỗi khâu tự biết mình có liên quan không. **Thứ tự là quyết định thiết kế:** khâu rẻ và hay chặn thì đặt trước; khâu chống gian lận thường gọi dịch vụ chấm điểm qua mạng nên đặt sau xác thực và vùng phục vụ để yêu cầu rác không tới được đó. Tắt chống gian lận ở Nha Trang nghĩa là dựng chuỗi khác cho thành phố đó, không thêm `if`.
 
 **Các vai:** Handler ↔ `Check`; ConcreteHandler ↔ năm lớp kiểm tra; Client ↔ đoạn dựng chuỗi và gọi `head.handle(req, trace)`.
 
@@ -382,13 +382,13 @@ Middleware bọc quanh `next()` nên còn làm được việc **sau** khi các 
 
 ### Khi nào dùng, khi nào không
 
-Dùng khi yêu cầu phải qua nhiều khâu độc lập, khâu nào cũng có thể chặn, và cần thêm/bớt/đổi thứ tự theo cấu hình. Không dùng khi cần **mọi** lỗi cùng lúc (form báo cả «thiếu số điện thoại» lẫn «mật khẩu ngắn») — đó là chạy hết danh sách luật rồi gom lỗi. Cái giá: có thể không khâu nào xử lý, nên kết quả mặc định cuối chuỗi phải chọn có chủ đích; và cần dấu vết như `trace` để trả lời «bị chặn ở đâu?».
+Dùng khi yêu cầu phải qua nhiều khâu độc lập, khâu nào cũng có thể chặn, và cần thêm/bớt/đổi thứ tự theo cấu hình. Không dùng khi cần **mọi** lỗi cùng lúc (form báo cả «thiếu số điện thoại» lẫn «mật khẩu ngắn») — đó là chạy hết danh sách luật rồi gom lỗi. Cái giá: có thể không khâu nào nhận xử lý, nên kết quả mặc định cuối chuỗi phải chọn có chủ đích; và cần dấu vết như `trace` để trả lời «bị chặn ở đâu?».
 
 ## Iterator — duyệt lịch sử chuyến theo keyset
 
 ### Vấn đề ở Tới Nơi
 
-Màn «Lịch sử chuyến» và job xuất dữ liệu kế toán đều đọc **mọi chuyến của một khách**, mới nhất trước — có khi vài nghìn chuyến. Bản đầu chia trang bằng `OFFSET`, và vòng lặp chia trang bị chép vào mọi nơi gọi:
+Màn «Lịch sử chuyến» và tác vụ xuất dữ liệu kế toán đều đọc **mọi chuyến của một khách**, mới nhất trước — có khi vài nghìn chuyến. Bản đầu chia trang bằng `OFFSET`, và vòng lặp chia trang bị chép vào mọi nơi gọi:
 
 ```ts
 async function exportHistory(db: Db, customerId: string, write: (r: TripRow) => void) {
@@ -402,7 +402,7 @@ async function exportHistory(db: Db, customerId: string, write: (r: TripRow) => 
 }
 ```
 
-Nơi gọi biết quá nhiều, và `OFFSET` ngày càng đắt: trang thứ n đi qua 50 × (n − 1) mục index rồi vứt đi, mỗi mục bị vứt cũng đã làm một lần ghé heap. Hệ số `correlation` của `customer_id` gần như bằng 0 (−0,007 trong [bài về heap](/articles/heap-ctid-va-primary-key)) — chuyến của một khách rải khắp bảng, nên mỗi lần ghé heap gần như là một page khác ([bài về page](/articles/page-don-vi-doc-ghi)). Thêm nữa, chuyến mới chèn vào đầu danh sách giữa chừng sẽ đẩy mọi trang lùi một dòng: dòng cuối trang trước lặp lại ở đầu trang sau.
+Nơi gọi biết quá nhiều, và `OFFSET` ngày càng đắt: trang thứ n đi qua 50 × (n − 1) mục index rồi bỏ đi, mỗi mục bị bỏ cũng tốn một lần ghé heap. Hệ số tương quan (`correlation`) của `customer_id` gần như bằng 0 (−0,007 trong [bài về heap](/articles/heap-ctid-va-primary-key)) — chuyến của một khách rải khắp bảng, nên mỗi lần ghé heap gần như là một page khác ([bài về page](/articles/page-don-vi-doc-ghi)). Thêm nữa, chuyến mới chèn vào đầu danh sách giữa chừng sẽ đẩy mọi trang lùi một dòng: dòng cuối trang trước lặp lại ở đầu trang sau.
 
 ### Keyset: con trỏ là một giá trị, không phải vị trí
 
@@ -418,7 +418,7 @@ ORDER BY requested_at DESC, code DESC
 LIMIT 50;
 ```
 
-`customer_id = $1 AND requested_at <= $2` đúng là tiền tố của index, nên mỗi câu nhảy thẳng vào index tại con trỏ — trang thứ 100 tốn như trang đầu. `code` chỉ để phân định khi hai chuyến trùng `requested_at`; muốn index trả thẳng đúng thứ tự cả hai cột thì mở rộng thành `(customer_id, requested_at DESC, code DESC)`. Bài này không đo kế hoạch truy vấn — việc đó thuộc loạt bài database.
+`customer_id = $1 AND requested_at <= $2` đúng là tiền tố của index, nên mỗi câu truy vấn nhảy thẳng vào index tại con trỏ — trang thứ 100 tốn như trang đầu. `code` chỉ để phân định khi hai chuyến trùng `requested_at`; muốn index trả thẳng đúng thứ tự cả hai cột thì mở rộng thành `(customer_id, requested_at DESC, code DESC)`. Bài này không đo kế hoạch truy vấn — việc đó thuộc loạt bài database.
 
 ### Lời giải: async iterator che chuyện chia trang
 
@@ -503,9 +503,9 @@ Nơi gọi chỉ còn `for await`, không biết trang, con trỏ hay SQL. Itera
 
 **Các vai:** Aggregate ↔ `TripHistoryPort` (đằng sau là `trips` và index); Iterator ↔ đối tượng `AsyncGenerator<TripRow>` do `tripHistory` trả về, giữ con trỏ `after`; Client ↔ vòng `for await`.
 
-**TypeScript hiện đại:** Iterator đã tan vào ngôn ngữ (`async function*`, `for await…of`); generator sinh đúng giao thức, kể cả `return()` cho `break`, nên không còn lớp `hasNext()`/`next()` viết tay. Iterator helpers của ES2025 (`map`, `filter`, `take`) mới có cho iterator đồng bộ; bản async vẫn là đề xuất.
+**TypeScript hiện đại:** Iterator đã trở thành tính năng có sẵn của ngôn ngữ (`async function*`, `for await…of`); generator sinh đúng giao thức, kể cả `return()` cho `break`, nên không còn lớp `hasNext()`/`next()` viết tay. Iterator helpers của ES2025 (`map`, `filter`, `take`) mới có cho iterator đồng bộ; bản async vẫn là đề xuất.
 
-**Khi nào dùng, khi nào không:** dùng khi nguồn lớn hơn bộ nhớ hoặc tới theo đợt (database, API phân trang, tệp lớn); dữ liệu đã là mảng nhỏ thì trả mảng. Cái giá của keyset: không «nhảy tới trang 37», chỉ «trang kế»; con trỏ gửi cho app nên mã hoá mờ (base64 của `requestedAt|code`). Đổi lại, mỗi trang là một câu riêng, không giữ giao dịch mở khi client đọc chậm, và chuyến mới chèn vào không làm lặp hay sót dòng.
+**Khi nào dùng, khi nào không:** dùng khi nguồn lớn hơn bộ nhớ hoặc tới theo đợt (database, API phân trang, tệp lớn); dữ liệu đã là mảng nhỏ thì trả mảng. Cái giá của keyset: không «nhảy tới trang 37», chỉ «trang kế»; con trỏ gửi cho app nên mã hoá thành chuỗi opaque (base64 của `requestedAt|code`). Đổi lại, mỗi trang là một câu truy vấn riêng, không giữ giao dịch mở khi client đọc chậm, và chuyến mới chèn vào không làm lặp hay sót dòng.
 
 ## Visitor — hoa hồng, hoá đơn, kế toán mà không sửa lớp chuyến
 
@@ -559,7 +559,7 @@ Xe máy 85.000đ; đồ ăn 150.000đ tiền món + 25.000đ phí giao; bưu ki�
 tổng hoa hồng: 70500
 ```
 
-Kiểm tay: 85.000 × 20% = 17.000; 150.000 × 25% + 25.000 × 20% = 42.500; 40.000 × 15% + 5.000 phụ thu trên 5 kg = 11.000.
+Tính tay: 85.000 × 20% = 17.000; 150.000 × 25% + 25.000 × 20% = 42.500; 40.000 × 15% + 5.000 phụ thu trên 5 kg = 11.000.
 
 Cơ chế là **double dispatch**: `t.accept(v)` chọn theo kiểu thật của chuyến, `v.visitRide(this)` chọn theo kiểu thật của visitor — hai lần chọn ra đúng một ô trong bảng «loại chuyến × phép tính». Visitor nào thiếu `visitParcel` thì không biên dịch được, nên lỗi ở đoạn «trước» không thể xảy ra.
 
@@ -584,7 +584,7 @@ Cơ chế là **double dispatch**: `t.accept(v)` chọn theo kiểu thật của
 <text x="40" y="240" class="t-small">Thêm một phép tính = thêm một cột (rẻ). Thêm một loại chuyến = thêm một hàng chạm mọi cột (đắt).</text>
 </svg>
 </div>
-<figcaption><b>Hình 3 · Visitor làm phép tính rẻ, làm loại mới đắt.</b> Mỗi ô là một phương thức <code>visitXxx()</code> đang có. Giả sử Tới Nơi mở thêm dịch vụ «đi chợ hộ» (<code>MartTrip</code>): hàng mới chạm mọi visitor; thêm báo cáo KPI chỉ là một lớp mới.</figcaption>
+<figcaption><b>Hình 3 · Với Visitor, thêm phép tính thì rẻ, thêm loại chuyến mới thì đắt.</b> Mỗi ô là một phương thức <code>visitXxx()</code> đang có. Giả sử Tới Nơi mở thêm dịch vụ «đi chợ hộ» (<code>MartTrip</code>): hàng mới chạm mọi visitor; thêm báo cáo KPI chỉ là một lớp mới.</figcaption>
 </figure>
 
 **Các vai:** Visitor ↔ `TripVisitor<R>`; ConcreteVisitor ↔ `CommissionVisitor`, `InvoiceLinesVisitor`, `AccountingCsvVisitor`; Element ↔ `Trip`; ConcreteElement ↔ `RideTrip`, `FoodTrip`, `ParcelTrip`.
@@ -619,13 +619,13 @@ Thêm `{ kind: 'mart', … }` vào union thì `t` ở `default` không còn là 
 
 ### Khi nào dùng, khi nào không
 
-Dùng khi họ lớp **ổn định** mà phép tính **mọc thêm liên tục** (báo cáo, xuất dữ liệu), nhất là khi đi qua một cây và cần mang trạng thái theo đường đi. Không dùng khi họ lớp còn hay đổi. Ở TypeScript, phần tử là dữ liệu thuần thì union + `switch` là mặc định tốt hơn. Cái giá: phần tử phải mở dữ liệu cho visitor đọc, và luồng `accept` → `visitXxx` khó theo với người chưa quen.
+Dùng khi họ lớp **ổn định** mà phép tính **mọc thêm liên tục** (báo cáo, xuất dữ liệu), nhất là khi đi qua một cây và cần mang trạng thái theo đường đi. Không dùng khi họ lớp còn thay đổi thường xuyên. Ở TypeScript, phần tử là dữ liệu thuần thì union + `switch` là mặc định tốt hơn. Cái giá: phần tử phải mở dữ liệu cho visitor đọc, và luồng `accept` → `visitXxx` khó theo với người chưa quen.
 
 ## Interpreter — điều kiện voucher dạng biểu thức
 
 ### Vấn đề ở Tới Nơi
 
-Marketing tạo vài chục chiến dịch voucher mỗi tháng, mỗi cái một điều kiện. Viết thành code thì:
+Marketing tạo vài chục chiến dịch voucher mỗi tháng, mỗi cái một điều kiện. Nếu viết thành code thì:
 
 ```ts
 function isEligible(voucherCode: string, ctx: VoucherContext): boolean {
@@ -684,7 +684,7 @@ const v1 = new And(new And(new Compare('kind', '=', 'food'), new Compare('city',
                    new Compare('fare', '>=', 100_000));
 ```
 
-Biến chuỗi thành cây là việc của **parser** — đi kèm nhưng không thuộc pattern. Với ngữ pháp bốn dòng, parser đệ quy xuống viết tay khoảng 30 dòng, mỗi luật một hàm:
+Biến chuỗi thành cây là việc của **parser** — đi kèm nhưng không thuộc pattern. Với ngữ pháp bốn dòng, parser recursive descent viết tay khoảng 30 dòng, mỗi luật một hàm:
 
 ```ts
 const FIELDS: Record<string, 'text' | 'number'> = { kind: 'text', city: 'text', fare: 'number', hour: 'number' };
@@ -725,11 +725,11 @@ lỗi «fare >= 100000; DROP»: ký tự lạ ở vị trí 14
 lỗi «driver_rating > 4»: trường không cho phép: driver_rating
 ```
 
-`toString()` in lại cây cho thấy dấu ngoặc đúng thứ tự ưu tiên (`AND` chặt hơn `OR`). Đơn đồ ăn 90.000đ trượt V1 đúng ở ngưỡng `fare >= 100000`. Chuỗi có `;` bị chặn từ bước tách token, trường lạ bị từ chối — ngôn ngữ nhỏ chỉ làm được đúng những gì bạn cho phép.
+`toString()` in lại cây cho thấy dấu ngoặc đúng thứ tự ưu tiên (`AND` chặt hơn `OR`). Đơn đồ ăn 90.000đ không đạt V1 đúng ở ngưỡng `fare >= 100000`. Chuỗi có `;` bị chặn từ bước tách token, trường lạ bị từ chối — ngôn ngữ nhỏ chỉ làm được đúng những gì bạn cho phép.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Đừng dùng eval cho điều kiện do người dùng gõ</span>
-<p>Biến điều kiện thành JavaScript rồi chạy bằng <code>eval</code> hay <code>new Function</code> «nhanh hơn viết parser» — và cho bất kỳ ai có quyền tạo voucher chạy code tuỳ ý trên máy chủ. Giá trị lớn nhất của Interpreter ở đây là <b>ranh giới</b>: bốn trường, sáu toán tử, ba phép logic. Giới hạn thêm độ dài chuỗi và độ sâu cây.</p>
+<p>Biến điều kiện thành JavaScript rồi chạy bằng <code>eval</code> hay <code>new Function</code> «nhanh hơn viết parser» — và cho phép bất kỳ ai có quyền tạo voucher chạy code tuỳ ý trên máy chủ. Giá trị lớn nhất của Interpreter ở đây là <b>ranh giới</b>: bốn trường, sáu toán tử, ba phép logic. Giới hạn thêm độ dài chuỗi và độ sâu cây.</p>
 </div>
 
 Hiệu năng không phải vấn đề: parse một lần lúc lưu voucher, cache cây. Ước lượng: 70 chuyến mới/giây × giả sử 30 voucher đang chạy = 2.100 lần `evaluate`/giây trên cây vài nút — không đáng kể so với một câu truy vấn.
@@ -746,7 +746,7 @@ Tự viết khi ngữ pháp nhỏ, ổn định, cần kiểm soát chặt: vài
 |---|---|---|---|---|
 | Observer | Báo một thay đổi cho nhiều người nghe mà không biết họ | Chuyến đổi trạng thái ⇒ thông báo, thống kê, điểm thưởng | Danh sách listener, `subscribe` trả hàm huỷ | Luồng ẩn; rò rỉ nếu quên huỷ; thứ tự, lỗi tự quyết |
 | Mediator | Gom luật phối hợp nhiều bên vào một trung gian | Quán – tài xế – khách của đơn đồ ăn | Các bên chỉ gọi `hub.notify`; hub giữ trạng thái chung | Hub phình thành god object |
-| Chain of Responsibility | Đưa yêu cầu qua lần lượt các khâu, khâu nào quyết thì dừng | Kiểm tra trước khi tạo chuyến | Mỗi khâu giữ `next` (hoặc middleware nhận `next()`) | Có thể không ai xử lý; khó thấy dừng ở đâu |
+| Chain of Responsibility | Đưa yêu cầu qua lần lượt các khâu, khâu nào quyết định thì dừng | Kiểm tra trước khi tạo chuyến | Mỗi khâu giữ `next` (hoặc middleware nhận `next()`) | Có thể không ai xử lý; khó thấy dừng ở đâu |
 | Iterator | Duyệt tập hợp mà không lộ cách lưu | Lịch sử chuyến theo keyset | `async function*` + `for await`, con trỏ là trạng thái | Không nhảy trang tuỳ ý; phải đóng tài nguyên |
 | Visitor | Thêm phép tính lên họ lớp mà không sửa họ lớp | Hoa hồng, hoá đơn, kế toán cho 3 loại chuyến | Double dispatch `accept` → `visitXxx` | Thêm loại phần tử sửa mọi visitor |
 | Interpreter | Biểu diễn câu của ngôn ngữ nhỏ thành cây và tính giá trị | Điều kiện voucher marketing tự gõ | Mỗi luật ngữ pháp một lớp, `evaluate` đệ quy | Ngữ pháp lớn ⇒ bùng nổ lớp; parser là việc riêng |
@@ -760,7 +760,7 @@ Tự viết khi ngữ pháp nhỏ, ổn định, cần kiểm soát chặt: vài
 | Luật nằm ở | từng listener | hub | thứ tự khâu + từng khâu |
 | Ở Tới Nơi | trạng thái chuyến | đơn đồ ăn ba bên | kiểm tra trước khi tạo chuyến |
 
-Cả ba đều tách người gửi khỏi người nhận và người nhận không biết nhau (Hình 1). Chúng còn hay đi cùng: Mediator thường dùng Observer làm đường chở tin. **Câu hỏi nhanh:** *Tin cần tới tất cả, tới một người phối hợp, hay tới người đầu tiên nhận việc?* ⇒ Observer, Mediator, Chain of Responsibility.
+Cả ba đều tách người gửi khỏi người nhận và người nhận không biết nhau (Hình 1). Chúng còn hay đi cùng: Mediator thường dùng Observer làm đường truyền tin. **Câu hỏi nhanh:** *Tin cần tới tất cả, tới một người phối hợp, hay tới người đầu tiên nhận việc?* ⇒ Observer, Mediator, Chain of Responsibility.
 
 ### Visitor vs Iterator
 
@@ -768,7 +768,7 @@ Cả hai «đi qua một tập đối tượng». Iterator lo **đi theo thứ t
 
 ### Visitor vs `switch` vét cạn
 
-Cùng một bảng «loại × phép tính» có trình biên dịch gác ô thiếu, cùng đắt khi thêm loại (Hình 3). Visitor cần **họ lớp** có `accept` — hợp khi phần tử là đối tượng có hành vi hoặc ngôn ngữ không có union. `switch` vét cạn cần **union có trường phân biệt** — hợp khi phần tử là dữ liệu thuần (dòng database, JSON). **Câu hỏi nhanh:** *Phần tử là lớp có hành vi, hay dữ liệu có trường `kind`?* Dữ liệu ⇒ `switch` trước.
+Hai cách này cùng biểu diễn một bảng «loại × phép tính», cùng có trình biên dịch gác ô thiếu, cùng đắt khi thêm loại (Hình 3). Visitor cần **họ lớp** có `accept` — hợp khi phần tử là đối tượng có hành vi hoặc ngôn ngữ không có union. `switch` vét cạn cần **union có trường phân biệt** — hợp khi phần tử là dữ liệu thuần (dòng database, JSON). **Câu hỏi nhanh:** *Phần tử là lớp có hành vi, hay dữ liệu có trường `kind`?* Dữ liệu ⇒ `switch` trước.
 
 ### Interpreter vs Composite
 
@@ -806,9 +806,9 @@ Theo cột «câu hỏi», 11 pattern chia ba cụm: **đóng gói hành vi** (S
 
 ## Tóm tắt
 
-- **Observer** cho người phát quên người nghe — đổi lại tự quyết thứ tự, lỗi, và luôn trả hàm huỷ đăng ký; ra khỏi tiến trình thì thành sự kiện ghi cùng giao dịch + hàng đợi.
+- **Observer** cho người phát quên người nghe — đổi lại phải tự quyết thứ tự, cách xử lý lỗi, và luôn trả hàm huỷ đăng ký; ra khỏi tiến trình thì thành sự kiện ghi cùng giao dịch + hàng đợi.
 - **Mediator** gom luật nhiều chiều và trạng thái chung vào một hub; mỗi hub một quy trình.
-- **Chain of Responsibility** là middleware: khâu rẻ, hay chặn đặt trước; luôn có dấu vết «dừng ở đâu».
+- **Chain of Responsibility** là middleware: khâu rẻ và hay chặn thì đặt trước; luôn có dấu vết «dừng ở đâu».
 - **Iterator** ở TypeScript là `async function*` + `for await`; với keyset trên `(customer_id, requested_at DESC)`, trang nào cũng rẻ như trang đầu và dừng sớm không truy vấn thừa.
 - **Visitor** và `switch` vét cạn là hai cách viết cùng một bảng «loại × phép tính»: thêm phép tính rẻ, thêm loại đắt.
 - **Interpreter** là cây + `evaluate`; giá trị lớn nhất là ranh giới an toàn cho luật người dùng tự viết.

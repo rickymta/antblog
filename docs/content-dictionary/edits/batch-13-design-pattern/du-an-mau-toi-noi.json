@@ -1,0 +1,125 @@
+{
+  "file": "du-an-mau-toi-noi.md",
+  "edits": [
+    {
+      "old": "Query có thể projection trực tiếp ra DTO",
+      "new": "Query có thể thực hiện projection trực tiếp ra DTO",
+      "reason": "Thiếu động từ, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "tránh một generic CRUD repository che mất ý nghĩa nghiệp vụ",
+      "new": "nhằm tránh việc một generic CRUD repository che mất ý nghĩa nghiệp vụ",
+      "reason": "Nối vế câu cho tự nhiên",
+      "severity": "low"
+    },
+    {
+      "old": "không phải kết luận một ngôn ngữ độc quyền một loại bài toán",
+      "new": "không có nghĩa là một ngôn ngữ độc quyền một loại bài toán",
+      "reason": "Câu thiếu động từ, giọng dịch máy",
+      "severity": "high"
+    },
+    {
+      "old": "cách hiện thực abstraction cần phù hợp hệ sinh thái",
+      "new": "cách hiện thực abstraction cần phù hợp với hệ sinh thái",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "không tự động đồng nhất với quyết định xác minh",
+      "new": "không tự động đồng nghĩa với quyết định xác minh",
+      "reason": "Dùng sai nghĩa: đồng nhất với",
+      "severity": "high"
+    },
+    {
+      "old": "Giao tiếp qua hợp đồng API/event có version, timeout",
+      "new": "Các service giao tiếp qua hợp đồng API/event có phiên bản, timeout",
+      "reason": "Thiếu chủ ngữ; thống nhất dùng phiên bản",
+      "severity": "medium"
+    },
+    {
+      "old": "Khi workload tăng",
+      "new": "Khi tải tăng",
+      "reason": "Từ tiếng Anh lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "Nội dung chia sẻ",
+      "new": "Nội dung chính",
+      "reason": "Tiêu đề cột dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Tải tái lập, cấu hình/hardware",
+      "new": "Tải có thể tái lập, cấu hình/phần cứng",
+      "reason": "Cụm cụt, từ tiếng Anh thông thường",
+      "severity": "medium"
+    },
+    {
+      "old": "So sánh cùng workload và yêu cầu durability",
+      "new": "So sánh trên cùng tải và yêu cầu durability",
+      "reason": "Từ tiếng Anh lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó khác `VACUUM FULL`, vốn cần khoá độc quyền.",
+      "new": "Vacuum thông thường khác `VACUUM FULL`, vốn cần khoá độc quyền.",
+      "reason": "Tránh 'Nó' chỉ sự vật trừu tượng đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "khỏi số đo của Tới Nơi",
+      "new": "khỏi số liệu đo của Tới Nơi",
+      "reason": "'số đo' nghĩa là metric",
+      "severity": "low"
+    },
+    {
+      "old": "không phải thuốc chữa chung cho vacuum",
+      "new": "không phải thuốc chữa bách bệnh cho vacuum",
+      "reason": "Cụm dịch gượng",
+      "severity": "low"
+    },
+    {
+      "old": "phải nêu cùng tiêu chí tính đúng, durability",
+      "new": "phải nêu cùng tiêu chí về tính đúng, durability",
+      "reason": "Cụm ghép cụt, thiếu giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Tách command thay đổi trạng thái với query đọc dữ liệu",
+      "new": "Tách command thay đổi trạng thái khỏi query đọc dữ liệu",
+      "reason": "Dùng 'khỏi' cho đúng nghĩa tách",
+      "severity": "medium"
+    },
+    {
+      "old": "pipeline xử lý các mối quan tâm chung phù hợp",
+      "new": "pipeline xử lý các phần việc dùng chung phù hợp",
+      "reason": "Dịch từng chữ 'concerns'",
+      "severity": "medium"
+    },
+    {
+      "old": "Cung cấp truy cập aggregate ở phía ghi",
+      "new": "Cung cấp cách truy cập aggregate ở phía ghi",
+      "reason": "Thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Quản lý commit thay đổi trong một transaction cục bộ",
+      "new": "Quản lý việc commit các thay đổi trong một transaction cục bộ",
+      "reason": "Trật tự từ kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Mũi tên trên biểu diễn luồng xử lý",
+      "new": "Các mũi tên ở hình biểu diễn luồng xử lý",
+      "reason": "Câu cụt, chỉ rõ vị trí",
+      "severity": "low"
+    },
+    {
+      "old": "2 khung 11:00–13:00 và 17:00–19:00",
+      "new": "2 khung giờ 11:00–13:00 và 17:00–19:00",
+      "reason": "Lược mất danh từ",
+      "severity": "medium"
+    }
+  ]
+}

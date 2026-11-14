@@ -8,17 +8,17 @@ tags: [design-pattern, typescript, gof, oop, kien-truc-phan-mem]
 language: vi
 ---
 
-Đây là bài mở đầu của loạt bài về design pattern. Cả loạt dùng chung hệ thống [Tới Nơi](/articles/du-an-mau-toi-noi) — đặt xe, giao đồ ăn, giao bưu kiện với một đội tài xế — để mỗi pattern đều gắn với một chỗ đau có thật trong dự án, không phải ví dụ «con mèo kế thừa con vật». Trước khi vào bản đồ, thử một câu.
+Đây là bài mở đầu của loạt bài về design pattern. Cả loạt dùng chung hệ thống [Tới Nơi](/articles/du-an-mau-toi-noi) — đặt xe, giao đồ ăn, giao bưu kiện với một đội tài xế — để mỗi pattern đều gắn với một chỗ đau có thật trong dự án, không phải ví dụ «con mèo kế thừa con vật». Trước khi vào bản đồ, hãy thử trả lời một câu hỏi.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Câu nào mô tả đúng nhất một design pattern?</span>
 <p><b>A.</b> Một đoạn code mẫu, chép vào dự án là chạy.</p>
 <p><b>B.</b> Một tính năng của ngôn ngữ lập trình hướng đối tượng.</p>
-<p><b>C.</b> Tên gọi chung cho một cách giải lặp đi lặp lại của một loại vấn đề, kèm cái giá phải trả khi dùng nó.</p>
+<p><b>C.</b> Tên gọi chung cho một cách giải lặp đi lặp lại cho một loại vấn đề, kèm cái giá phải trả khi dùng nó.</p>
 <p><b>D.</b> Quy tắc bắt buộc: code «chuẩn» thì phải dùng pattern.</p>
 <details>
 <summary><b>Xem đáp án</b></summary>
-<p><b>C.</b> Pattern không phải code để chép (A) — cùng một pattern có thể viết ra rất nhiều hình dạng. Nó cũng không gắn với một ngôn ngữ (B), dù có những pattern về sau đã thành tính năng ngôn ngữ. D thì nguy hiểm nhất: dùng pattern khi chưa có vấn đề là cách nhanh nhất để làm code khó đọc hơn.</p>
+<p><b>C.</b> Pattern không phải code để chép (A) — cùng một pattern có thể viết ra rất nhiều hình dạng. Pattern cũng không gắn với một ngôn ngữ (B), dù có những pattern về sau đã thành tính năng ngôn ngữ. D thì nguy hiểm nhất: dùng pattern khi chưa có vấn đề là cách nhanh nhất để làm code khó đọc hơn.</p>
 </details>
 </div>
 
@@ -42,7 +42,7 @@ Những thứ pattern **không** phải:
 
 Ý tưởng «ngôn ngữ pattern» đến từ ngành kiến trúc: cuối thập niên 1970, kiến trúc sư Christopher Alexander mô tả các cách bố trí nhà cửa, phố xá lặp đi lặp lại và đặt tên cho chúng. Giới phần mềm mượn ý tưởng này vào cuối thập niên 1980.
 
-Năm 1994, Erich Gamma, Richard Helm, Ralph Johnson và John Vlissides xuất bản cuốn *Design Patterns: Elements of Reusable Object-Oriented Software*. Bốn tác giả được gọi tắt là **Gang of Four (GoF)**, và 23 pattern trong sách là «pattern GoF». Mỗi pattern được mô tả theo cùng một khung — ý đồ, động cơ, các vai, cấu trúc, hệ quả — với ví dụ bằng C++ và Smalltalk. Chi tiết ngôn ngữ này quan trọng; ta sẽ quay lại ở mục TypeScript hiện đại. Loạt bài giữ khung đó nhưng đổi ví dụ sang Tới Nơi.
+Năm 1994, Erich Gamma, Richard Helm, Ralph Johnson và John Vlissides xuất bản cuốn *Design Patterns: Elements of Reusable Object-Oriented Software*. Bốn tác giả được gọi tắt là **Gang of Four (GoF)**, và 23 pattern trong sách là «pattern GoF». Mỗi pattern được mô tả theo cùng một khung — ý đồ, động cơ, các vai, cấu trúc, hệ quả — với ví dụ bằng C++ và Smalltalk. Chi tiết về ngôn ngữ ví dụ này quan trọng; ta sẽ quay lại ở mục TypeScript hiện đại. Loạt bài giữ khung đó nhưng đổi ví dụ sang Tới Nơi.
 
 ## Ba nhóm, ba câu hỏi
 
@@ -50,7 +50,7 @@ GoF chia 23 pattern thành ba nhóm. Cách nhớ dễ nhất là mỗi nhóm tr�
 
 - **Khởi tạo (Creational)** — *ai tạo đối tượng, tạo lúc nào, với cấu hình gì?* Nhóm này giấu chữ `new` sau một lớp hay một hàm, để code dùng đối tượng không phải biết lớp cụ thể.
 - **Cấu trúc (Structural)** — *ghép các đối tượng, lớp có sẵn thành khối lớn hơn ra sao?* Bọc, nối, gom, dùng chung: làm hai interface khớp nhau, làm một cây nhiều tầng trông như một phần tử.
-- **Hành vi (Behavioral)** — *ai làm phần việc nào, và các đối tượng nói chuyện với nhau qua đâu?* Nhóm lớn nhất (11 pattern) nên loạt bài chia hai: phần 1 về **đóng gói một thuật toán hay hành động** thành đối tượng, phần 2 về **ai nói với ai**.
+- **Hành vi (Behavioral)** — *ai làm phần việc nào, và các đối tượng nói chuyện với nhau qua đâu?* Nhóm lớn nhất (11 pattern) nên loạt bài chia thành hai phần: phần 1 về **đóng gói một thuật toán hay hành động** thành đối tượng, phần 2 về **ai nói với ai**.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -166,10 +166,10 @@ Bảng dưới là bản đồ cố định của cả loạt: mỗi pattern g�
 |---|---|---|---|---|
 | 1 | Factory Method | Để lớp con quyết định tạo đối tượng cụ thể nào | `RideBooking` / `FoodBooking` / `ParcelBooking` ghi đè `createTrip()` để tạo `RideTrip` / `FoodTrip` / `ParcelTrip` | [2 · Khởi tạo](/articles/nhom-khoi-tao-creational) |
 | 2 | Abstract Factory | Tạo cả một họ đối tượng đi cùng nhau, không trộn họ | Mỗi nhà thanh toán («VíXanh», «ThẻNội Địa», «Tiền mặt») cho một bộ `Charger` + `Refunder` + `WebhookVerifier` | [2 · Khởi tạo](/articles/nhom-khoi-tao-creational) |
-| 3 | Builder | Dựng đối tượng nhiều tuỳ chọn từng bước, kiểm hợp lệ ở một chỗ | Yêu cầu đặt chuyến: điểm đón, điểm dừng, loại xe, voucher, hẹn giờ…; `build()` bắt đơn đồ ăn phải có quán, bưu kiện phải có khối lượng | [2 · Khởi tạo](/articles/nhom-khoi-tao-creational) |
-| 4 | Prototype | Tạo đối tượng mới bằng cách sao chép một mẫu | «Đặt lại chuyến cũ»; mẫu khuyến mãi nhân cho 6 thành phố — sao chép nông hay sâu | [2 · Khởi tạo](/articles/nhom-khoi-tao-creational) |
+| 3 | Builder | Dựng đối tượng nhiều tuỳ chọn từng bước, kiểm tra tính hợp lệ ở một chỗ | Yêu cầu đặt chuyến: điểm đón, điểm dừng, loại xe, voucher, hẹn giờ…; `build()` bắt đơn đồ ăn phải có quán, bưu kiện phải có khối lượng | [2 · Khởi tạo](/articles/nhom-khoi-tao-creational) |
+| 4 | Prototype | Tạo đối tượng mới bằng cách sao chép một mẫu | «Đặt lại chuyến cũ»; mẫu khuyến mãi nhân bản cho 6 thành phố — sao chép nông hay sâu | [2 · Khởi tạo](/articles/nhom-khoi-tao-creational) |
 | 5 | Singleton | Chỉ có một thể hiện, ai cũng lấy được | Cấu hình, connection pool, client feature-flag — và vì sao nên để DI giữ «một thể hiện» | [2 · Khởi tạo](/articles/nhom-khoi-tao-creational) |
-| 6 | Adapter | Đổi một interface có sẵn thành interface mình cần | «MapViet», «RouteX» và OSRM tự host cùng về `RoutingService { eta(), distance() }` | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
+| 6 | Adapter | Đổi một interface có sẵn thành interface mình cần | «MapViet», «RouteX» và OSRM tự host đều quy về `RoutingService { eta(), distance() }` | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
 | 7 | Bridge | Tách hai trục thay đổi để ghép tự do | Loại thông báo (trạng thái chuyến, khuyến mãi, cảnh báo an toàn) × kênh (push, SMS, «OA chat») — 3 + 3 lớp thay vì 3 × 3 | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
 | 8 | Composite | Đối xử với một nhóm như với một phần tử | Combo chứa món, món chứa topping; giá và thời gian chuẩn bị tính đệ quy qua `MenuItem` | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
 | 9 | Decorator | Bọc thêm hành vi quanh đối tượng mà không sửa nó | `FareCalculator` gốc bọc phụ phí cao điểm, phụ phí trời mưa, voucher, làm tròn — thứ tự bọc đổi kết quả | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
@@ -180,11 +180,11 @@ Bảng dưới là bản đồ cố định của cả loạt: mỗi pattern g�
 | 14 | State | Hành vi đổi theo trạng thái, mỗi trạng thái một lớp | 8 trạng thái của chuyến quyết định `accept`, `cancel`, `pickUp`… nào hợp lệ | [4 · Hành vi 1](/articles/nhom-hanh-vi-dong-goi-hanh-vi) |
 | 15 | Template Method | Khung các bước cố định, lớp con điền bước riêng | Hoàn tất chuyến: khoá → tính cước cuối → thu tiền → chia tiền → phát sự kiện, khác nhau theo ride/food/parcel | [4 · Hành vi 1](/articles/nhom-hanh-vi-dong-goi-hanh-vi) |
 | 16 | Command | Biến một thao tác thành đối tượng | Tổng đài huỷ chuyến, đổi tài xế, hoàn tiền một phần — `execute`/`undo`, xếp hàng, nhật ký, thử lại | [4 · Hành vi 1](/articles/nhom-hanh-vi-dong-goi-hanh-vi) |
-| 17 | Memento | Chụp và khôi phục trạng thái mà không lộ bên trong | «Hoàn tác» khi sửa giỏ hàng, lộ trình trên app khách | [4 · Hành vi 1](/articles/nhom-hanh-vi-dong-goi-hanh-vi) |
+| 17 | Memento | Chụp và khôi phục trạng thái mà không để lộ phần bên trong | «Hoàn tác» khi sửa giỏ hàng, lộ trình trên app khách | [4 · Hành vi 1](/articles/nhom-hanh-vi-dong-goi-hanh-vi) |
 | 18 | Observer | Một nguồn đổi, nhiều bên được báo | Chuyến đổi trạng thái ⇒ báo khách, cập nhật thống kê, cộng điểm thưởng tài xế | [5 · Hành vi 2](/articles/nhom-hanh-vi-giao-tiep-doi-tuong) |
 | 19 | Mediator | Các bên chỉ nói chuyện qua một điều phối viên | Khách, quán, tài xế của đơn đồ ăn chỉ nói với `FoodOrderCoordinator` | [5 · Hành vi 2](/articles/nhom-hanh-vi-giao-tiep-doi-tuong) |
 | 20 | Chain of Responsibility | Chuyền yêu cầu qua chuỗi khâu, khâu nào cũng chặn được | Trước khi tạo chuyến: xác thực → vùng phục vụ → chặn gian lận → hạn mức nợ cước → giờ quán mở | [5 · Hành vi 2](/articles/nhom-hanh-vi-giao-tiep-doi-tuong) |
-| 21 | Iterator | Duyệt tuần tự mà không lộ cấu trúc bên dưới | Lịch sử chuyến của khách theo keyset pagination, `for await` trên index `(customer_id, requested_at DESC)` | [5 · Hành vi 2](/articles/nhom-hanh-vi-giao-tiep-doi-tuong) |
+| 21 | Iterator | Duyệt tuần tự mà không để lộ cấu trúc bên dưới | Lịch sử chuyến của khách theo keyset pagination, `for await` trên index `(customer_id, requested_at DESC)` | [5 · Hành vi 2](/articles/nhom-hanh-vi-giao-tiep-doi-tuong) |
 | 22 | Visitor | Thêm phép tính trên một họ lớp mà không sửa họ lớp đó | Tính hoa hồng, xuất hoá đơn, xuất kế toán trên 3 loại chuyến | [5 · Hành vi 2](/articles/nhom-hanh-vi-giao-tiep-doi-tuong) |
 | 23 | Interpreter | Biểu diễn và chạy một ngôn ngữ nhỏ | Điều kiện voucher `kind = food AND city = HN AND fare >= 100000` | [5 · Hành vi 2](/articles/nhom-hanh-vi-giao-tiep-doi-tuong) |
 
@@ -251,7 +251,7 @@ Hầu hết pattern hành vi là biến thể của ý này: đóng gói thứ h
 
 ## Dấu hiệu lạm dụng
 
-Pattern bị dùng sai nhiều hơn bị thiếu. Đoạn dưới không sai, chỉ thừa — ba tầng cho một phép chia:
+Pattern bị dùng sai nhiều hơn bị thiếu. Đoạn code dưới đây không sai, chỉ thừa — ba tầng cho một phép chia:
 
 ```ts
 interface LoyaltyPointsCalculator { calculate(fare: number): number; }
@@ -277,7 +277,7 @@ const p2 = pointsOf(56_000); // 5
 <p><b>Đọc một luồng phải nhảy qua năm, sáu tệp</b> và không ai trong nhóm trả lời được tầng gián tiếp này chống đỡ thay đổi nào.</p>
 </div>
 
-Một luật thực dụng: lần đầu gặp một biến thể, viết thẳng. Lần thứ hai, chấp nhận lặp. Lần thứ ba thấy cùng một kiểu thay đổi, lúc đó mới tách — và khi tách, bạn đã biết chính xác phần nào hay đổi. Đi từ code chạy được tới pattern bằng refactor an toàn hơn nhiều so với dựng pattern từ đầu.
+Một luật thực dụng: lần đầu gặp một biến thể, viết thẳng. Lần thứ hai, chấp nhận lặp. Lần thứ ba thấy cùng một kiểu thay đổi, lúc đó mới tách — và khi tách, bạn đã biết chính xác phần nào hay đổi. Đi từ code chạy được tới pattern bằng cách refactor an toàn hơn nhiều so với dựng pattern từ đầu.
 
 ## Pattern trong TypeScript hiện đại
 
@@ -311,15 +311,15 @@ pending.push(() => cancelTrip(100231, "khách đổi ý"));
 | Singleton | Một module ES (mỗi module chỉ nạp một lần) | — nên để composition root tạo một thể hiện duy nhất |
 | Visitor | Discriminated union + `switch` vét cạn | Cây lớp mở, nhiều phép tính, cần double dispatch thật |
 
-Hai lưu ý. Thứ nhất, pattern **chìm vào ngôn ngữ chứ không biến mất**: viết `function*` vẫn là Iterator, và gọi đúng tên vẫn giúp cả nhóm hiểu nhau. Thứ hai, cú pháp `@decorator` của TypeScript/ECMAScript là cơ chế gắn siêu dữ liệu hay bọc lớp, phương thức lúc định nghĩa — trùng tên nhưng không đồng nghĩa với pattern Decorator, thứ bọc **đối tượng** lúc chạy.
+Hai lưu ý. Thứ nhất, pattern **chìm vào ngôn ngữ chứ không biến mất**: viết `function*` vẫn là Iterator, và gọi đúng tên vẫn giúp cả nhóm hiểu nhau. Thứ hai, cú pháp `@decorator` của TypeScript/ECMAScript là cơ chế gắn siêu dữ liệu, hoặc bọc lớp và phương thức, ngay lúc định nghĩa — trùng tên nhưng không đồng nghĩa với pattern Decorator, thứ bọc **đối tượng** lúc chạy.
 
 ## Cách đọc loạt bài
 
 - **Đọc theo nhóm, không cần theo thứ tự.** Bài này là bản đồ; bài [2](/articles/nhom-khoi-tao-creational), [3](/articles/nhom-cau-truc-structural), [4](/articles/nhom-hanh-vi-dong-goi-hanh-vi), [5](/articles/nhom-hanh-vi-giao-tiep-doi-tuong) đọc độc lập được. Bài 4 và 5 là hai nửa của nhóm Hành vi; bài 5 có bảng tổng kết cả 11 pattern hành vi.
-- **Mỗi pattern cùng một khung:** vấn đề ở Tới Nơi (thường kèm code «trước» cố ý chưa tốt) → lời giải bằng TypeScript → các vai GoF ứng với lớp nào → khi nào dùng, khi nào không → cách viết gọn ở TypeScript hiện đại nếu có.
-- **Đọc chậm ở phần vấn đề**: tự nghĩ cách giải rồi mới đọc lời giải — nhận ra vấn đề quan trọng hơn thuộc lời giải.
+- **Mỗi pattern cùng một khung:** vấn đề ở Tới Nơi (thường kèm code «trước» cố ý chưa tốt) → lời giải bằng TypeScript → các vai GoF ứng với lớp nào → khi nào dùng, khi nào không → cách viết gọn trong TypeScript hiện đại, nếu có.
+- **Đọc chậm ở phần vấn đề**: tự nghĩ cách giải rồi mới đọc lời giải — nhận ra vấn đề quan trọng hơn là thuộc lòng lời giải.
 - **Cuối mỗi bài** có bảng so sánh trong nhóm, các cặp hay nhầm kèm câu hỏi phân biệt nhanh, và cây quyết định «chọn pattern nào».
-- **Code chạy được**: TypeScript 5 `strict`, không framework, đã biên dịch kiểm; ví dụ có số là kết quả chạy thật.
+- **Code chạy được**: TypeScript 5 `strict`, không framework, đã biên dịch để kiểm tra; ví dụ có số là kết quả chạy thật.
 - **Nối với các bài khác.** Tới Nơi là hệ thống chung của blog: Iterator ở bài 5 dùng lại đúng index `(customer_id, requested_at DESC)` của bảng `trips` trong [hồ sơ dự án](/articles/du-an-mau-toi-noi).
 
 ## Tóm tắt

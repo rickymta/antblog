@@ -1,0 +1,101 @@
+{
+  "file": "design-pattern-la-gi.md",
+  "edits": [
+    {
+      "old": "Trước khi vào bản đồ, thử một câu.",
+      "new": "Trước khi vào bản đồ, hãy thử trả lời một câu hỏi.",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "một cách giải lặp đi lặp lại của một loại vấn đề",
+      "new": "một cách giải lặp đi lặp lại cho một loại vấn đề",
+      "reason": "Giới từ sai",
+      "severity": "low"
+    },
+    {
+      "old": "Nó cũng không gắn với một ngôn ngữ (B)",
+      "new": "Pattern cũng không gắn với một ngôn ngữ (B)",
+      "reason": "Tránh 'Nó' chỉ sự vật trừu tượng đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Chi tiết ngôn ngữ này quan trọng",
+      "new": "Chi tiết về ngôn ngữ ví dụ này quan trọng",
+      "reason": "Cụm cụt, thiếu ý",
+      "severity": "medium"
+    },
+    {
+      "old": "nên loạt bài chia hai: phần 1",
+      "new": "nên loạt bài chia thành hai phần: phần 1",
+      "reason": "Thiếu danh từ",
+      "severity": "low"
+    },
+    {
+      "old": "kiểm hợp lệ ở một chỗ",
+      "new": "kiểm tra tính hợp lệ ở một chỗ",
+      "reason": "Cụm cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "mẫu khuyến mãi nhân cho 6 thành phố",
+      "new": "mẫu khuyến mãi nhân bản cho 6 thành phố",
+      "reason": "Thiếu chữ, dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "«MapViet», «RouteX» và OSRM tự host cùng về",
+      "new": "«MapViet», «RouteX» và OSRM tự host đều quy về",
+      "reason": "'cùng về' nghe cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Chụp và khôi phục trạng thái mà không lộ bên trong",
+      "new": "Chụp và khôi phục trạng thái mà không để lộ phần bên trong",
+      "reason": "Thiếu động từ/danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Duyệt tuần tự mà không lộ cấu trúc bên dưới",
+      "new": "Duyệt tuần tự mà không để lộ cấu trúc bên dưới",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Đoạn dưới không sai, chỉ thừa",
+      "new": "Đoạn code dưới đây không sai, chỉ thừa",
+      "reason": "Thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "tới pattern bằng refactor an toàn hơn nhiều",
+      "new": "tới pattern bằng cách refactor an toàn hơn nhiều",
+      "reason": "Thiếu 'cách'",
+      "severity": "medium"
+    },
+    {
+      "old": "là cơ chế gắn siêu dữ liệu hay bọc lớp, phương thức lúc định nghĩa",
+      "new": "là cơ chế gắn siêu dữ liệu, hoặc bọc lớp và phương thức, ngay lúc định nghĩa",
+      "reason": "Câu mơ hồ về đối tượng được bọc",
+      "severity": "medium"
+    },
+    {
+      "old": "cách viết gọn ở TypeScript hiện đại nếu có",
+      "new": "cách viết gọn trong TypeScript hiện đại, nếu có",
+      "reason": "Giới từ, ngắt ý",
+      "severity": "low"
+    },
+    {
+      "old": "nhận ra vấn đề quan trọng hơn thuộc lời giải",
+      "new": "nhận ra vấn đề quan trọng hơn là thuộc lòng lời giải",
+      "reason": "Thiếu từ, dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "đã biên dịch kiểm;",
+      "new": "đã biên dịch để kiểm tra;",
+      "reason": "Cụm tự ghép, thiếu từ",
+      "severity": "medium"
+    }
+  ]
+}
