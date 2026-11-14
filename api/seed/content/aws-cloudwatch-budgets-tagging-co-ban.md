@@ -1,7 +1,7 @@
 ---
 slug: aws-cloudwatch-budgets-tagging-co-ban
 title: "CloudWatch, Budgets và tagging: nhìn thấy hệ thống và chi phí trước khi mở rộng"
-summary: "Bài 10: metric, log group, metric filter, alarm và dashboard CloudWatch cho hạ tầng đã dựng ở phần 01; chiến lược tag Project/Env/Service, cost allocation tag, Cost Explorer và Budgets; checklist dọn tài nguyên để không mất tiền."
+summary: "Bài 10: metric, log group, metric filter, alarm và dashboard CloudWatch cho hạ tầng đã dựng ở phần 01; chiến lược tag Project/Env/Service, cost allocation tag, Cost Explorer và Budgets; checklist dọn tài nguyên để tránh phát sinh chi phí."
 category: devops-aws
 level: beginner
 tags: [aws, toi-noi, devops, cloudwatch, alarm, logs, tagging, cost-explorer, budgets]
@@ -15,7 +15,7 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một alarm đang ở trạng thái <code>INSUFFICIENT_DATA</code>. Có nghĩa là hệ thống đang hỏng không?</p>
-<details><summary>Xem đáp án</summary><p>Không nhất thiết. Nó nghĩa là CloudWatch chưa đủ dữ liệu để kết luận, ví dụ metric chưa có điểm nào vì ALB không có request. Cách xử lý là chọn <code>treat-missing-data</code> phù hợp với từng metric, không phải coi mọi lần thiếu dữ liệu là sự cố.</p></details>
+<details><summary>Xem đáp án</summary><p>Không nhất thiết. Trạng thái này nghĩa là CloudWatch chưa đủ dữ liệu để kết luận, ví dụ metric chưa có điểm nào vì ALB không có request. Cách xử lý là chọn <code>treat-missing-data</code> phù hợp với từng metric, không phải coi mọi lần thiếu dữ liệu là sự cố.</p></details>
 </div>
 
 ## Metric: namespace, dimension, period và statistic
@@ -60,9 +60,9 @@ Alarm trên báo ALARM khi trong 5 phút có ít nhất 3 phút mà số lỗi 5
 
 ## Logs: agent, retention và metric filter
 
-Metric cho biết **có** vấn đề, log cho biết **vì sao**. **CloudWatch Logs** gom log theo **log group** (một nhóm, ví dụ `/toinoi/lab/quote`) và **log stream** (một nguồn, ví dụ một instance). Log của ứng dụng trên EC2 không tự lên đây: cài **CloudWatch agent**, cấp cho role của instance policy `CloudWatchAgentServerPolicy`, rồi khai báo file log cần đẩy trong file cấu hình JSON. Lab lưu cấu hình vào Parameter Store và cài lên máy bằng SSM Run Command; instance mới của ASG phải có agent ngay từ launch template hoặc AMI, nếu không chúng lặng lẽ không có log.
+Metric cho biết **có** vấn đề, log cho biết **vì sao**. **CloudWatch Logs** gom log theo **log group** (một nhóm, ví dụ `/toinoi/lab/quote`) và **log stream** (một nguồn, ví dụ một instance). Log của ứng dụng trên EC2 không tự đẩy lên đây: hãy cài **CloudWatch agent**, cấp cho role của instance policy `CloudWatchAgentServerPolicy`, rồi khai báo file log cần đẩy trong file cấu hình JSON. Lab lưu cấu hình vào Parameter Store và cài lên máy bằng SSM Run Command; instance mới của ASG phải có agent ngay từ launch template hoặc AMI, nếu không chúng sẽ không có log mà không báo lỗi nào.
 
-Điều chỉnh quan trọng nhất: **retention**. Log group mặc định giữ log **mãi mãi** và tính tiền lưu trữ; lab đặt 14 ngày. Chi phí còn gồm dung lượng log nhận vào và dung lượng mỗi truy vấn Logs Insights quét.
+Thiết lập quan trọng nhất là **retention**. Log group mặc định giữ log **mãi mãi** và tính tiền lưu trữ; lab đặt 14 ngày. Chi phí còn gồm dung lượng log được nạp vào và dung lượng dữ liệu mà mỗi truy vấn Logs Insights quét.
 
 **Metric filter** biến log thành metric: mỗi dòng khớp mẫu cộng vào một metric tuỳ chỉnh. Lab đếm dòng chứa `ERROR` thành `ToiNoi/Quote` / `QuoteErrorCount`, rồi đặt alarm trên metric đó như mọi metric khác.
 
@@ -98,7 +98,7 @@ Log dạng JSON (mỗi dòng một object có `level`, `traceId`, `tripId`) cho 
 }
 ```
 
-Dashboard tính tiền theo tháng (có hạn mức miễn phí, xem pricing). Giá trị của nó là đặt số liệu cạnh nhau: nếu request tăng mà latency không đổi, ASG đang làm đúng việc; nếu `DatabaseConnections` tăng theo số instance, đã đến lúc xem connection pool.
+Dashboard tính tiền theo tháng (có hạn mức miễn phí, xem pricing). Giá trị của dashboard nằm ở chỗ đặt các số liệu cạnh nhau: nếu request tăng mà latency không đổi, ASG đang làm đúng việc; nếu `DatabaseConnections` tăng theo số instance, đã đến lúc xem connection pool.
 
 ## Tag và chi phí: ai tiêu tiền vào việc gì
 
@@ -112,7 +112,7 @@ Dashboard tính tiền theo tháng (có hạn mức miễn phí, xem pricing). G
 | `Owner` | `platform` | Ai chịu trách nhiệm khi cần dọn |
 | `CostCenter` | `CC-100` | Gắn với đơn vị chịu chi phí (giá trị giả định của bài) |
 
-Một tag chỉ xuất hiện trong báo cáo chi phí sau khi bạn **kích hoạt cost allocation tag** trong Billing, thường mất tới khoảng một ngày, và **không áp ngược** cho chi phí đã phát sinh trước đó. Kích hoạt chỉ làm được ở tài khoản quản lý (hoặc tài khoản đơn lẻ). Sau khi kích hoạt, **Cost Explorer** cho nhóm chi phí theo tag (`group by Tag: Project`). Mỗi lần gọi API Cost Explorer có thể bị tính phí nhỏ, nên đừng đặt vào vòng lặp.
+Một tag chỉ xuất hiện trong báo cáo chi phí sau khi bạn **kích hoạt cost allocation tag** trong Billing, thường mất tới khoảng một ngày, và **không áp ngược** cho chi phí đã phát sinh trước đó. Kích hoạt chỉ làm được ở tài khoản quản lý (hoặc tài khoản đơn lẻ). Sau khi kích hoạt, **Cost Explorer** cho phép nhóm chi phí theo tag (`group by Tag: Project`). Mỗi lần gọi API Cost Explorer có thể bị tính phí nhỏ, nên đừng đặt vào vòng lặp.
 
 **AWS Budgets** đặt hạn mức theo tháng và gửi cảnh báo khi chi phí thực tế hoặc dự báo vượt phần trăm đã chọn. Lab dùng lại budget `toinoi-lab-monthly` của bài 02 nếu đã có, chưa có thì tạo với hạn mức do bạn chọn, cảnh báo qua email ở 80% thực tế và 100% dự báo. Budget có thể lọc theo tag. API Budgets hiện khuyên dùng `FilterExpression` cùng `Metrics` thay cho `CostFilters` đã deprecated; lọc theo tag `Project` trông như sau (cách ghi khoá tag chưa kiểm trên tài khoản thật):
 
@@ -121,7 +121,7 @@ Một tag chỉ xuất hiện trong báo cáo chi phí sau khi bạn **kích ho�
 "Metrics": ["UNBLENDED_COST"]
 ```
 
-Budgets còn có **action**: khi vượt ngưỡng, tự gắn một IAM policy chặn tạo thêm tài nguyên, hoặc dừng EC2/RDS chỉ định. Nó cần role riêng và quyền thao tác, nên bài này chỉ mô tả, chưa chạy. Điều cần nhớ: dữ liệu chi phí cập nhật chậm hơn thực tế vài giờ tới cả ngày, nên Budgets là lưới báo động trễ, không phải cầu dao tức thì.
+Budgets còn có **action**: khi vượt ngưỡng, tự gắn một IAM policy chặn tạo thêm tài nguyên, hoặc dừng EC2/RDS chỉ định. Action cần role riêng và quyền thao tác, nên bài này chỉ mô tả, chưa chạy. Điều cần nhớ: dữ liệu chi phí cập nhật chậm hơn thực tế vài giờ tới cả ngày, nên Budgets là lưới báo động trễ, không phải cầu dao tức thì.
 
 ## Dọn tài nguyên: checklist toàn Phần 01
 
@@ -132,7 +132,7 @@ Budgets còn có **action**: khi vượt ngưỡng, tự gắn một IAM policy 
 <figcaption>Hình 2. Dọn theo thứ tự ngược với lúc dựng, vì tài nguyên phụ thuộc nhau: security group chưa xoá được khi còn instance, Elastic IP chưa release được khi còn gắn vào NAT, VPC chưa xoá được khi còn subnet.</figcaption>
 </figure>
 
-Những thứ tính tiền theo giờ hoặc tồn tại âm thầm, theo thứ tự nên kiểm:
+Những thứ tính tiền theo giờ hoặc tồn tại mà không ai để ý, theo thứ tự nên kiểm tra:
 
 - **NAT Gateway**: tính theo giờ tồn tại và theo dữ liệu đi qua, kể cả khi không có traffic. Xoá NAT rồi mới release Elastic IP của nó.
 - **ALB** (bài 08): tính theo giờ. **RDS instance** (bài 07): tính theo giờ, kể cả khi bạn không truy vấn.
@@ -140,7 +140,7 @@ Những thứ tính tiền theo giờ hoặc tồn tại âm thầm, theo thứ 
 - **Snapshot** (RDS thủ công, EBS) và **version cũ trong S3**: không tự hết hạn.
 - **Log group**, VPC endpoint loại Interface, và hosted zone Route 53 nếu bạn đã tạo ở bài 09.
 
-Lab bài này có hai script cho việc đó. `90-audit-leftovers.sh` **chỉ đọc**, liệt kê những gì còn sót ở region hiện tại; `99-cleanup-all.sh` xoá alarm, dashboard, log, SNS, budget rồi gọi script dọn của lab 08, 07, 06 theo đúng thứ tự trên, và in sẵn lệnh dọn của lab 05, 04, 03 cùng các bước tay cho bài 09. Mọi thao tác xoá hỏi xác nhận tài khoản trước.
+Lab bài này có hai script cho việc đó. `90-audit-leftovers.sh` **chỉ đọc**, liệt kê những gì còn sót ở region hiện tại; `99-cleanup-all.sh` xoá alarm, dashboard, log, SNS, budget rồi gọi script dọn của lab 08, 07, 06 theo đúng thứ tự trên, và in sẵn lệnh dọn của lab 05, 04, 03 cùng các bước tay cho bài 09. Mọi thao tác xoá đều hỏi bạn xác nhận tài khoản trước.
 
 ```bash
 cd examples/toi-noi-aws/p01-10-cloudwatch-cleanup
@@ -149,13 +149,13 @@ cp env.sh.example env.sh && ./01-alarms-logs.sh && ./02-dashboard.sh
 ./99-cleanup-all.sh          # xoá thật, chỉ chạy trong tài khoản lab
 ```
 
-Script đã qua kiểm tra cú pháp bash, shellcheck và kiểm tên tham số ở chế độ không mạng; chưa chạy trên tài khoản thật. Cách ghi khoá tag trong `FilterExpression` của Budgets và cú pháp cấu hình agent cần bạn xác nhận khi chạy. Audit chỉ nhìn một region; nếu từng thử ở region khác, đặt `AWS_REGION` rồi chạy lại.
+Script đã qua kiểm tra cú pháp bash, shellcheck và kiểm tra tên tham số ở chế độ không có mạng; chưa chạy trên tài khoản thật. Cách ghi khoá tag trong `FilterExpression` của Budgets và cú pháp cấu hình agent cần bạn xác nhận khi chạy. Audit chỉ nhìn một region; nếu từng thử ở region khác, đặt `AWS_REGION` rồi chạy lại.
 
 ## Cái giá phải trả
 
 - **Metric tuỳ chỉnh tính tiền theo từng tổ hợp dimension.** Đặt dimension có số giá trị lớn (như `tripId`) sẽ tạo hàng triệu metric; dùng log và Logs Insights cho dữ liệu chi tiết.
-- **Log mặc định giữ mãi.** Quên retention là khoản phí lưu trữ tăng đều mỗi tháng.
-- **Alarm quá nhạy tạo mệt mỏi.** Đội bắt đầu bỏ qua email; ưu tiên ít alarm có ý nghĩa, mỗi alarm có người chịu trách nhiệm và hướng xử lý.
+- **Log mặc định giữ mãi.** Quên retention thì phí lưu trữ sẽ tăng đều mỗi tháng.
+- **Alarm quá nhạy gây mệt mỏi.** Đội bắt đầu bỏ qua email; ưu tiên ít alarm có ý nghĩa, mỗi alarm có người chịu trách nhiệm và hướng xử lý.
 - **Tag không áp ngược.** Tài nguyên tạo trước khi có chiến lược tag không xuất hiện đúng trong báo cáo; gắn tag ngay từ launch template và IaC.
 - **Budgets báo trễ.** Hạn mức thấp cùng với cảnh báo dự báo giúp bắt sớm, nhưng không thay cho việc dọn tài nguyên ngay khi học xong.
 

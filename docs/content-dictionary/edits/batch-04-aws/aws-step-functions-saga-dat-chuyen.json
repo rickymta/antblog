@@ -1,0 +1,12 @@
+{"file":"aws-step-functions-saga-dat-chuyen.md","edits":[
+{"old":"không ai nhớ phải trả.","new":"không ai nhớ phải trả lại.","reason":"Thiếu 'lại', dễ hiểu thành 'trả tiền'","severity":"low"},
+{"old":"Nên mỗi lần gọi mang một khoá bắt nguồn từ","new":"Vì vậy mỗi lần gọi mang một khoá suy ra từ","reason":"'Nên' đầu câu và 'bắt nguồn từ' gượng","severity":"low"},
+{"old":"bớt một Lambda keo dán","new":"bớt một Lambda trung gian","reason":"'keo dán' là calque của glue","severity":"medium"},
+{"old":"rồi dùng ở bất kỳ state sau, không cần chuyền qua từng input và output như JSONPath","new":"rồi dùng ở bất kỳ state nào phía sau, không cần chuyền qua input và output của từng state như JSONPath","reason":"Thiếu 'nào', 'phía'; 'từng input và output' mơ hồ","severity":"medium"},
+{"old":"chỉ role của dispatch được","new":"chỉ role của dispatch mới được gọi","reason":"Câu thiếu động từ 'gọi'","severity":"low"},
+{"old":"| Theo số lượt và thời lượng, bộ nhớ |","new":"| Theo số lượt gọi, thời lượng và bộ nhớ |","reason":"Liệt kê thiếu liên từ, cụt","severity":"medium"},
+{"old":"`publish` tạo **version** bất biến, **alias** `live` trỏ vào version và có thể chia trọng số giữa hai version để canary","new":"`publish` tạo **phiên bản** bất biến, **alias** `live` trỏ vào một phiên bản và có thể chia trọng số giữa hai phiên bản để canary","reason":"Thống nhất 'phiên bản' trong văn xuôi","severity":"medium"},
+{"old":"Execution đã bắt đầu giữ nguyên version của nó","new":"Execution đã bắt đầu giữ nguyên phiên bản của nó","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"Một Lambda một mình sẽ hết giờ.","new":"Một Lambda đơn lẻ sẽ bị timeout.","reason":"'một mình' và 'hết giờ' gượng","severity":"medium"},
+{"old":"cần review, version, test.","new":"cần review, quản lý phiên bản, test.","reason":"'version' dùng như động từ, tối nghĩa","severity":"medium"}
+]}

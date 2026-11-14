@@ -48,7 +48,7 @@ Dòng đầu tạo parameter thường. Dòng sau tạo SecureString mã hoá b�
 aws ssm get-parameters-by-path --path /toinoi/lab/booking --recursive --with-decryption
 ```
 
-Lệnh này trả mọi parameter dưới nhánh; `--with-decryption` mới giải mã SecureString. Loại Advanced thêm dung lượng lớn hơn và policy như hết hạn (expiration), đổi lại tính phí theo parameter.
+Lệnh này trả về mọi parameter dưới nhánh đó; `--with-decryption` mới giải mã SecureString. Loại Advanced thêm dung lượng lớn hơn và policy như hết hạn (expiration), đổi lại tính phí theo parameter.
 
 ## Secrets Manager: secret JSON và nhãn phiên bản
 
@@ -60,7 +60,7 @@ aws secretsmanager create-secret --name toinoi/lab/booking/db \
 
 Lệnh tạo secret mã hoá bằng key riêng; `db-secret.json` là tệp tạm không commit. Dạng JSON chuẩn `{"username","password","engine","host","port","dbname"}` đáng theo vì hàm rotation mẫu của AWS đọc đúng cấu trúc này. Mỗi lần ghi giá trị mới tạo một phiên bản; nhãn `AWSCURRENT` trỏ vào bản đang dùng, `AWSPREVIOUS` giữ bản liền trước. Rotation dùng thêm `AWSPENDING` cho bản đang được chuẩn bị.
 
-Có một điểm lệch với bài 36 loạt .NET và task definition ở bài 12, nơi secret là *một chuỗi connection string đầy đủ* được inject nguyên vào `ConnectionStrings__Trips`. Chuỗi phẳng thì rotation mẫu không biết sửa chỗ nào; ngược lại, inject nguyên secret JSON vào biến đó thì Npgsql nhận một chuỗi JSON và không kết nối được. Lab bài này giữ secret JSON để còn bật rotation. Ba cách dung hoà: ECS inject từng trường qua hậu tố `:password::`, `:host::`… rồi app tự ghép chuỗi kết nối lúc khởi động; app tự đọc secret JSON bằng SDK lúc chạy; hoặc giữ một secret riêng chứa connection string và tự viết hàm rotation cho nó. Cách thứ nhất ít đổi code nhất.
+Có một điểm không khớp với bài 36 của loạt .NET và task definition ở bài 12, nơi secret là *một chuỗi connection string đầy đủ* được inject nguyên vào `ConnectionStrings__Trips`. Chuỗi phẳng thì rotation mẫu không biết sửa chỗ nào; ngược lại, inject nguyên secret JSON vào biến đó thì Npgsql nhận một chuỗi JSON và không kết nối được. Lab bài này giữ secret JSON để còn bật rotation. Ba cách dung hoà: ECS inject từng trường qua hậu tố `:password::`, `:host::`… rồi app tự ghép chuỗi kết nối lúc khởi động; app tự đọc secret JSON bằng SDK lúc chạy; hoặc giữ một secret riêng chứa connection string và tự viết hàm rotation cho nó. Cách thứ nhất ít đổi code nhất.
 
 ## Ai đọc được gì
 
@@ -103,7 +103,7 @@ CloudTrail ghi lại các lời gọi đọc như `GetSecretValue` và `Decrypt`
 
 ## Ứng dụng đọc và cache secret
 
-ECS đọc secret **một lần lúc task khởi động** (bài 12). Rất đơn giản, nhưng giá trị bị đóng băng. Có hai lựa chọn:
+ECS đọc secret **một lần lúc task khởi động** (bài 12). Cách này rất đơn giản, nhưng giá trị bị cố định từ lúc đó. Có hai lựa chọn:
 
 | Cách đọc | Khi giá trị đổi | Ghi chú |
 |---|---|---|
@@ -142,7 +142,7 @@ Rotation chạy bốn bước qua Lambda: `createSecret` (sinh mật khẩu mớ
 <figcaption>Hình 2. Hai chiến lược rotation. Chiến lược hai user luân phiên không có cửa sổ lỗi, đổi lại cần hai user database và quyền tương ứng.</figcaption>
 </figure>
 
-Với một user, sau `setSecret` mật khẩu cũ ngừng hợp lệ trong khi ứng dụng có thể chưa đọc secret mới. Kết nối đang mở vẫn sống, nhưng kết nối mở mới sẽ bị từ chối cho tới khi app lấy bản mới. Với hai user luân phiên, ta có chính xác "cửa sổ hai mật khẩu": hai user cùng hợp lệ trong lúc chuyển. Phía Tới Nơi, service nên bắt lỗi xác thực khi mở kết nối, đọc lại secret, dựng lại connection pool rồi thử lại một lần. Giới hạn tuổi kết nối trong pool (ví dụ `Connection Lifetime` của Npgsql) để kết nối cũ tự được thay.
+Với một user, sau `setSecret` mật khẩu cũ ngừng hợp lệ trong khi ứng dụng có thể chưa đọc secret mới. Kết nối đang mở vẫn sống, nhưng kết nối mở mới sẽ bị từ chối cho tới khi app lấy bản mới. Với hai user luân phiên, ta có đúng "cửa sổ hai mật khẩu": hai user cùng hợp lệ trong lúc chuyển. Phía Tới Nơi, service nên bắt lỗi xác thực khi mở kết nối, đọc lại secret, dựng lại connection pool rồi thử lại một lần. Giới hạn tuổi kết nối trong pool (ví dụ `Connection Lifetime` của Npgsql) để pool tự thay kết nối cũ.
 
 ```bash
 aws secretsmanager rotate-secret --secret-id toinoi/lab/booking/db \
@@ -158,7 +158,7 @@ Lệnh bật rotation mỗi 30 ngày và chạy một lần ngay. Hàm Lambda v�
 - **Gọi `GetSecretValue` mỗi request.** Tốn phí, chạm throttle. Cache trong tiến trình.
 - **Quên rằng ECS inject chỉ một lần.** Rotation xong mà task cũ giữ mật khẩu cũ. Dùng SDK kèm cache hoặc deploy lại sau rotation.
 - **Xoá secret rồi tạo lại cùng tên.** Secret nằm trong khoảng chờ xoá 7–30 ngày nên tên bị giữ. Chỉ bỏ khoảng chờ trong lab.
-- **Cấp `secretsmanager:*` trên `*`.** Một service bị lộ kéo theo mọi secret. Giới hạn theo ARN, tag và KMS key.
+- **Cấp `secretsmanager:*` trên `*`.** Một service bị xâm phạm sẽ làm lộ mọi secret. Giới hạn theo ARN, tag và KMS key.
 
 **Bài tập:** vì sao không đặt mật khẩu vào `environment` của task definition dạng plain?
 
@@ -166,7 +166,7 @@ Lệnh bật rotation mỗi 30 ngày và chạy một lần ngay. Hàm Lambda v�
 
 ## Lab: tạo parameter và secret, đọc bằng role
 
-Mã ở `examples/toi-noi-aws/p02-14-secrets-parameters`: Terraform tạo KMS key, bốn parameter, "vỏ" secret DB, policy đọc theo ARN, tag và KMS cùng một role chỉ đọc; script `seed-values.sh` đặt giá trị thật bằng CLI để không nằm trong state, `read-as-role.sh` đọc lại bằng role và `versions-demo.sh` mô phỏng hai nhãn phiên bản. README ghi tài nguyên tính tiền (mỗi secret, mỗi KMS key, mỗi lần gọi API) và lệnh dọn.
+Mã ở `examples/toi-noi-aws/p02-14-secrets-parameters`: Terraform tạo KMS key, bốn parameter, "vỏ" secret DB, policy đọc theo ARN, tag và KMS, cùng một role chỉ đọc; script `seed-values.sh` đặt giá trị thật bằng CLI để không nằm trong state, `read-as-role.sh` đọc lại bằng role và `versions-demo.sh` mô phỏng hai nhãn phiên bản. README ghi tài nguyên tính tiền (mỗi secret, mỗi KMS key, mỗi lần gọi API) và lệnh dọn.
 
 Kiểm trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker; parse JSON của policy; `bash -n` cho script. **Chưa kiểm chứng trên tài khoản thật:** điều kiện tag và `kms:ViaService` trong policy, việc ECS inject đúng khoá JSON, và toàn bộ rotation.
 

@@ -1,0 +1,13 @@
+{"file":"aws-cdk-construct-synth-diff.md","edits":[
+{"old":"aspects và cdk-nag để kiểm tuân thủ;","new":"aspects và cdk-nag để kiểm tra tuân thủ;","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"Người dùng construct không phải nhớ từng chi tiết,","new":"Người dùng construct không cần nhớ từng chi tiết,","reason":"'không phải' dễ gây hiểu nhầm; dùng 'không cần'","severity":"low"},
+{"old":"kiểm theo best practice của AWS Solutions.","new":"kiểm tra theo best practice của AWS Solutions.","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"Suppress không lý do biến công cụ thành chỗ tô màu.","new":"Suppress không lý do biến công cụ thành thủ tục hình thức.","reason":"'chỗ tô màu' là hình ảnh tự ghép, khó hiểu","severity":"medium"},
+{"old":"Lab kiểm bucket được mã hoá và chặn public, bucket giữ lại khi xoá stack, circuit breaker có rollback, log group prod giữ còn dev thì không.","new":"Lab kiểm tra bucket có mã hoá và chặn public, bucket được giữ lại khi xoá stack, circuit breaker có bật rollback, log group prod được giữ còn dev thì không.","reason":"'kiểm' cụt; các vế thiếu động từ","severity":"medium"},
+{"old":"bắt mọi thay đổi nhưng ồn;","new":"bắt được mọi thay đổi nhưng gây nhiễu;","reason":"'ồn' là calque của noisy","severity":"medium"},
+{"old":"| Backend do bạn quản |","new":"| Backend do bạn tự quản lý |","reason":"Động từ 'quản' cụt","severity":"low"},
+{"old":"- **Code là mã thật:**","new":"- **Đây là code thật:**","reason":"'Code là mã thật' lặp nghĩa, gượng","severity":"low"},
+{"old":"- **Nâng phiên bản:**","new":"- **Nâng version:**","reason":"Thống nhất 'version' trong văn xuôi","severity":"low"},
+{"old":"Kiểm trên máy, không cần tài khoản AWS:","new":"Kiểm tra trên máy, không cần tài khoản AWS:","reason":"'kiểm' cụt","severity":"low"},
+{"old":"kiểu TypeScript sạch, bốn assertion qua,","new":"kiểm tra kiểu TypeScript không lỗi, bốn assertion đều qua,","reason":"Câu cụt, 'kiểu TypeScript sạch' mơ hồ","severity":"medium"}
+]}

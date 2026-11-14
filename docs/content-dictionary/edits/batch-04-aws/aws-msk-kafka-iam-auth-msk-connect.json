@@ -1,0 +1,10 @@
+{"file":"aws-msk-kafka-iam-auth-msk-connect.md","edits":[
+{"old":"Hãy thành thật về quy mô:","new":"Hãy nhìn đúng quy mô thực tế:","reason":"'thành thật về' là calque của 'be honest about'","severity":"low"},
+{"old":"Số partition cho trần song song của consumer group:","new":"Số partition quyết định trần song song của consumer group:","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"**`enable.idempotence=true`** để producer thử lại không tạo bản ghi trùng trong một partition.","new":"**`enable.idempotence=true`** giúp producer thử lại mà không tạo bản ghi trùng trong một partition.","reason":"Câu thiếu động từ chính","severity":"medium"},
+{"old":"Retention là cái giá lưu trữ.","new":"Retention quyết định chi phí lưu trữ.","reason":"'cái giá lưu trữ' gượng, mơ hồ","severity":"medium"},
+{"old":"Đặt `heartbeat.interval.ms` để slot tiến lên cả khi bảng outbox im lặng,","new":"Đặt `heartbeat.interval.ms` để slot tiến lên cả khi bảng outbox không có thay đổi nào,","reason":"'im lặng' là calque","severity":"medium"},
+{"old":"Đổi ánh xạ khoá và có thể phá thứ tự đang dựa vào.","new":"Việc này đổi ánh xạ khoá và có thể phá thứ tự mà hệ thống đang dựa vào.","reason":"Câu thiếu chủ ngữ, 'dựa vào' thiếu tân ngữ","severity":"medium"},
+{"old":"Phân phối lệch theo sức lớn của từng thành phố","new":"Phân phối bị lệch theo quy mô của từng thành phố","reason":"'sức lớn' là cụm tự ghép","severity":"medium"},
+{"old":"Đoạn rút gọn này đặt mặc định bền cho broker; bản đầy đủ trong lab.","new":"Đoạn rút gọn này đặt các giá trị mặc định đảm bảo độ bền cho broker; bản đầy đủ có trong lab.","reason":"'mặc định bền' cụt, câu sau thiếu động từ","severity":"medium"}
+]}

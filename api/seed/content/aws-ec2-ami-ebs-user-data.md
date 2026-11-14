@@ -31,9 +31,9 @@ Tên instance type có dạng `t3.micro`: chữ cái đầu là **họ**, số l
 | `c` | Tính toán nặng | `c7g` | Nhiều CPU trên mỗi GB RAM |
 | `r` | Cần nhiều RAM | `r7g` | Cache, phân tích trong bộ nhớ |
 
-Chữ `g` ở cuối họ (như `t4g`, `m7g`) nghĩa là chip **Graviton** do AWS thiết kế, kiến trúc ARM. Graviton thường cho hiệu năng trên mỗi đồng tốt hơn, nhưng phần mềm và container image phải có bản **arm64**; image chỉ có bản x86_64 sẽ không chạy. Thế hệ mới ra thường xuyên, nên hãy kiểm danh sách hiện hành trước khi chọn.
+Chữ `g` ở cuối họ (như `t4g`, `m7g`) nghĩa là chip **Graviton** do AWS thiết kế, kiến trúc ARM. Graviton thường cho hiệu năng trên mỗi đồng tốt hơn, nhưng phần mềm và container image phải có bản **arm64**; image chỉ có bản x86_64 sẽ không chạy. Thế hệ mới ra thường xuyên, nên hãy kiểm tra danh sách hiện hành trước khi chọn.
 
-Họ `t` đáng nói riêng với Tới Nơi. Service `quote` thường rảnh rồi bị dồn tải lúc 11:00 và 17:00. Máy `t` tích credit lúc rảnh và tiêu lúc đột biến, rất hợp cho lab. Nhưng khi hết credit, máy hoặc bị giảm tốc về mức nền, hoặc (ở chế độ *unlimited*, mặc định của thế hệ `t3` trở đi) tiếp tục chạy nhanh và bạn trả thêm cho phần vượt. Tải ổn định cao cả ngày thì nên chọn họ `m` hoặc `c`. Số lượng và kích cỡ thật cho Tới Nơi phải do load test quyết định, không đoán.
+Họ `t` đáng nói riêng với Tới Nơi. Service `quote` thường rảnh rồi bị dồn tải lúc 11:00 và 17:00. Máy `t` tích credit lúc rảnh và tiêu lúc đột biến, rất hợp cho lab. Nhưng khi hết credit, máy hoặc bị giảm tốc về mức nền, hoặc (ở chế độ *unlimited*, mặc định của thế hệ `t3` trở đi) tiếp tục chạy nhanh và bạn trả thêm cho phần vượt. Tải ổn định cao cả ngày thì nên chọn họ `m` hoặc `c`. Số lượng và kích cỡ thật cho Tới Nơi phải dựa trên kết quả load test, không phải suy đoán.
 
 Có ba cách trả tiền chính, bài này chỉ giới thiệu:
 
@@ -45,16 +45,16 @@ Có ba cách trả tiền chính, bài này chỉ giới thiệu:
 
 ## AMI và EBS: ảnh máy và ổ đĩa
 
-**AMI (Amazon Machine Image)** là khuôn để tạo instance: hệ điều hành, phần mềm cài sẵn và cách gắn ổ đĩa. Cả loạt dùng **Amazon Linux 2023** (AL2023), bản Linux do AWS duy trì. Thay vì dán ID AMI (đổi theo region và theo thời gian), ta tham chiếu **tham số công khai** của AWS luôn trỏ tới bản mới nhất, trong Terraform hoặc CLI qua `resolve:ssm:`.
+**AMI (Amazon Machine Image)** là khuôn để tạo instance: hệ điều hành, phần mềm cài sẵn và cách gắn ổ đĩa. Cả loạt bài dùng **Amazon Linux 2023** (AL2023), bản Linux do AWS duy trì. Thay vì dán ID AMI (đổi theo region và theo thời gian), ta tham chiếu **tham số công khai** của AWS luôn trỏ tới bản mới nhất, trong Terraform hoặc CLI qua `resolve:ssm:`.
 
 Ổ đĩa của instance là **EBS (Elastic Block Store)**, một volume mạng gắn vào instance:
 
 - **gp3** là loại SSD đa dụng nên chọn mặc định: có mức IOPS và thông lượng nền không phụ thuộc dung lượng, và bạn nâng thêm được riêng từng thứ. gp2 là loại cũ hơn.
 - Ổ **root** (chứa hệ điều hành) mặc định bị **xoá khi instance bị terminate**. Ổ dữ liệu gắn thêm thì mặc định *không* bị xoá.
-- **Snapshot** là bản chụp volume tại một thời điểm, lưu bởi AWS (tăng dần: chỉ lưu phần thay đổi sau lần chụp đầu). Từ snapshot tạo được volume mới hoặc AMI mới. Snapshot tính tiền theo dung lượng lưu.
+- **Snapshot** là bản chụp volume tại một thời điểm, do AWS lưu (theo kiểu tăng dần: chỉ lưu phần thay đổi sau lần chụp đầu). Từ snapshot tạo được volume mới hoặc AMI mới. Snapshot tính tiền theo dung lượng lưu.
 - Bật **mã hoá** cho volume (script lab bật sẵn); phần chi tiết về khoá ở bài 52.
 
-Máy đã cài sẵn phần mềm rồi chụp thành AMI gọi là *golden AMI*: khởi động nhanh nhưng phải xây lại khi muốn đổi. Cách còn lại là dùng AMI sạch cộng **user data**.
+AMI chụp từ máy đã cài sẵn phần mềm gọi là *golden AMI*: khởi động nhanh nhưng phải dựng lại AMI mỗi khi muốn thay đổi. Cách còn lại là dùng AMI sạch kết hợp với **user data**.
 
 ## User data: script chạy một lần lúc khởi động
 
@@ -81,7 +81,7 @@ TOKEN=$(curl -s -X PUT http://169.254.169.254/latest/api/token \
 curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id
 ```
 
-Lab đặt `HttpTokens=required` tường minh (bắt buộc IMDSv2), kèm `HttpPutResponseHopLimit=1`. Gói trả lời token chỉ đi được một bước mạng, còn container ở mạng bridge mặc định của Docker cách máy thêm một bước, nên không lấy được token và credential của máy không lọt vào container (trừ khi chạy `--network host`). Nếu container thật sự cần quyền AWS, ta cho nó cơ chế riêng ở các bài ECS và EKS, thay vì nới giới hạn này.
+Lab đặt `HttpTokens=required` tường minh (bắt buộc IMDSv2), kèm `HttpPutResponseHopLimit=1`. Gói trả lời token chỉ đi được một bước mạng, còn container ở mạng bridge mặc định của Docker cách máy thêm một bước, nên không lấy được token và credential của máy không lọt vào container (trừ khi chạy `--network host`). Nếu container thật sự cần quyền AWS, ta cấp cho nó cơ chế riêng ở các bài ECS và EKS, thay vì nới giới hạn này.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -139,7 +139,7 @@ Hai lợi ích thực dụng: không có cổng 22 để bị dò quét, và có
 <text x="34" y="104" class="t-small t-mono">aws ssm start-session</text>
 <rect x="340" y="50" width="200" height="80" rx="10" class="f-pk-soft s-pk"/>
 <text x="354" y="82" class="t-b">Systems Manager</text>
-<text x="354" y="104" class="t-small">kiểm IAM, ghi lại phiên</text>
+<text x="354" y="104" class="t-small">kiểm tra IAM, ghi lại phiên</text>
 <rect x="670" y="50" width="190" height="80" rx="10" class="f-phys-soft s-phys"/>
 <text x="684" y="82" class="t-b">Instance</text>
 <text x="684" y="104" class="t-small">SSM Agent, không mở 22</text>
@@ -160,8 +160,8 @@ Hai lợi ích thực dụng: không có cổng 22 để bị dò quét, và có
 - **Instance "online" mà SSM không thấy**: thường do thiếu policy `AmazonSSMManagedInstanceCore` trên role, hoặc máy không có đường ra tới endpoint (không NAT, không public IP, không VPC endpoint).
 - **Stop khác terminate**: máy `stopped` hết tính phí giờ chạy nhưng ổ EBS vẫn tính tiền; `terminated` thì máy biến mất và ổ root bị xoá, nhưng snapshot và AMI bạn tạo vẫn còn và vẫn tính tiền.
 - **Public IPv4 cũng tính tiền theo giờ**: máy lab ở subnet public có địa chỉ công khai thì phải tính cả khoản đó.
-- **User data lỗi âm thầm**: dùng `set -euxo pipefail` ở đầu script và đọc `/var/log/cloud-init-output.log`.
-- **Image chỉ có x86_64 trên máy Graviton**: container không khởi động; kiểm kiến trúc image trước.
+- **User data lỗi mà không có cảnh báo**: dùng `set -euxo pipefail` ở đầu script và đọc `/var/log/cloud-init-output.log`.
+- **Image chỉ có x86_64 trên máy Graviton**: container không khởi động; hãy kiểm tra kiến trúc image trước.
 - **Chỉ sửa user data rồi tưởng máy tự đổi**: user data chạy một lần; để áp dụng phải dựng máy mới.
 
 ## Bài tập
@@ -172,7 +172,7 @@ Hai lợi ích thực dụng: không có cổng 22 để bị dò quét, và có
 
 ## Lab: một instance `quote` truy cập qua Session Manager
 
-Lab ở `examples/toi-noi-aws/p01-05-ec2` tạo role và instance profile, security group không có luật inbound, một instance AL2023 (IMDSv2 bắt buộc, ổ root gp3 mã hoá) chạy placeholder `quote` qua user data, và script kiểm bằng Session Manager `send-command` (không cần plugin). Có cả bản **Terraform tương đương**. Mặc định các script chỉ in lệnh; thêm `--apply` để tạo thật. Chi phí gồm giờ chạy instance, dung lượng EBS, địa chỉ IPv4 công khai và (nếu dùng VPC bài 04 với NAT) NAT Gateway; xem trang giá của từng dịch vụ. `cleanup.sh` xoá instance, role, instance profile, security group và snapshot của lab.
+Lab ở `examples/toi-noi-aws/p01-05-ec2` tạo role và instance profile, security group không có luật inbound, một instance AL2023 (IMDSv2 bắt buộc, ổ root gp3 mã hoá) chạy placeholder `quote` qua user data, và script kiểm tra bằng Session Manager `send-command` (không cần plugin). Có cả bản **Terraform tương đương**. Mặc định các script chỉ in lệnh; thêm `--apply` để tạo thật. Chi phí gồm giờ chạy instance, dung lượng EBS, địa chỉ IPv4 công khai và (nếu dùng VPC bài 04 với NAT) NAT Gateway; xem trang giá của từng dịch vụ. `cleanup.sh` xoá instance, role, instance profile, security group và snapshot của lab.
 
 ```bash
 cd examples/toi-noi-aws/p01-05-ec2
@@ -182,7 +182,7 @@ cd examples/toi-noi-aws/p01-05-ec2
 ./cleanup.sh toinoi-lab --apply              # dọn
 ```
 
-Script đã qua shellcheck, tham số lệnh được kiểm bằng bộ mô hình dịch vụ của AWS CLI, và Terraform đã qua `fmt` và `validate`. **Chưa chạy trên tài khoản AWS thật**: thời gian SSM Agent báo online, việc tải image nginx và phản hồi của `send-command` chưa được kiểm chứng.
+Script đã qua shellcheck, tham số lệnh đã được kiểm tra bằng bộ mô hình dịch vụ của AWS CLI, và Terraform đã qua `fmt` và `validate`. **Chưa chạy trên tài khoản AWS thật**: thời gian SSM Agent báo online, việc tải image nginx và phản hồi của `send-command` chưa được kiểm chứng.
 
 Bài trước: [bài 04](/articles/aws-vpc-subnet-route-security-group). Bài tiếp: [bài 06](/articles/aws-s3-bucket-versioning-presigned-url).
 

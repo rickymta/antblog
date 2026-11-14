@@ -29,13 +29,13 @@ Một kỹ sư chạy nhầm lệnh xoá trên bảng `trips` của môi trườ
 <figcaption>Hình 1. RPO đo ngược về quá khứ, RTO đo tiến về tương lai. Cả hai phải thấp hơn mức nghiệp vụ chấp nhận, và phải đo được bằng diễn tập chứ không chỉ khai báo.</figcaption>
 </figure>
 
-Mỗi dữ liệu có giá trị khác nhau, nên mức bảo vệ cũng khác. Các mục tiêu dưới đây là đề xuất để thảo luận với nghiệp vụ, không phải số liệu của Tới Nơi.
+Mỗi loại dữ liệu có giá trị khác nhau, nên mức bảo vệ cũng khác. Các mục tiêu dưới đây là đề xuất để thảo luận với nghiệp vụ, không phải số liệu của Tới Nơi.
 
 | Dữ liệu | RPO | RTO | Hướng bảo vệ |
 | --- | --- | --- | --- |
 | Ví và giao dịch (cổng giả lập VíXanh) | Gần 0 | Vài phút | Multi-AZ, replica hoặc Aurora Global ở region thứ hai |
 | Bảng `trips` | Vài phút | Dưới 1 giờ | Continuous backup, point-in-time restore, copy sang region khác |
-| Vị trí tài xế (6.250 toạ độ/giây) | Mất được | Vài phút | Tái tạo sau 4 giây nên không backup |
+| Vị trí tài xế (6.250 toạ độ/giây) | Chấp nhận mất | Vài phút | Tái tạo sau 4 giây nên không backup |
 | Ảnh chứng từ, hoá đơn | Vài phút | Vài giờ | Replication S3 (bài 36) và Object Lock |
 
 Chi phí tăng gần như theo cấp số nhân khi RPO và RTO tiến về 0, vì phải giữ nhiều hạ tầng chạy sẵn. Vì vậy ta dành mức cao cho ví, không phải cho vị trí tài xế.
@@ -47,7 +47,7 @@ Chi phí tăng gần như theo cấp số nhân khi RPO và RTO tiến về 0, v
 - **Backup plan** chứa các **rule**: lịch (cron), cửa sổ chạy, vault đích, vòng đời (khi nào chuyển lớp lạnh, khi nào xoá).
 - **Backup vault** là nơi chứa recovery point, có khoá mã hoá và policy riêng.
 - **Selection** chọn tài nguyên, tốt nhất theo **tag**: thêm `Backup=daily` vào một database là nó tự vào kế hoạch, không phải sửa plan.
-- **Copy action** sao chép recovery point sang vault khác: region khác (chống mất region) hoặc **tài khoản khác** (chống tài khoản chính bị xâm nhập). Copy cross-account cần hai tài khoản cùng AWS Organizations, bật tính năng ở management account và cho phép `backup:CopyIntoBackupVault` trên vault đích; với tài nguyên AWS Backup không quản lý trọn (như RDS, EBS), vault đích phải dùng khoá KMS customer managed và khoá của nguồn cũng phải là customer managed để chia sẻ được.
+- **Copy action** sao chép recovery point sang vault khác: region khác (chống mất region) hoặc **tài khoản khác** (chống tài khoản chính bị xâm nhập). Copy cross-account cần hai tài khoản cùng AWS Organizations, bật tính năng ở management account và cho phép `backup:CopyIntoBackupVault` trên vault đích; với tài nguyên AWS Backup không quản lý hoàn toàn (như RDS, EBS), vault đích phải dùng khoá KMS customer managed và khoá của nguồn cũng phải là customer managed để chia sẻ được.
 - **Continuous backup** (RDS, Aurora, S3...) cho phép point-in-time restore tới từng giây trong cửa sổ tối đa 35 ngày.
 
 ```hcl
@@ -72,7 +72,7 @@ rule {
 
 Rule này backup mỗi đêm lúc 17:00 UTC (00:00 giờ Việt Nam), giữ 35 ngày ở vault chính và copy sang vault ở `ap-northeast-1`, giữ 90 ngày. Cái giá là dung lượng lưu ở hai region cộng phí truyền dữ liệu giữa region.
 
-**Vault Lock** biến vault thành WORM, có hai chế độ: governance (người có quyền đặc biệt vẫn gỡ được) và compliance. Ở compliance, bạn khai báo một thời gian **cooling-off** (tối thiểu 3 ngày) để còn sửa; hết thời gian này không ai, kể cả root, xoá được recovery point hay rút ngắn thời hạn giữ. Lab vì thế để Vault Lock tắt mặc định. Ngoài ra còn **logically air-gapped vault** là loại vault riêng có thể chia sẻ khi cần phục hồi; xem tài liệu để biết khác biệt và hỗ trợ.
+**Vault Lock** biến vault thành WORM, có hai chế độ: governance (người có quyền đặc biệt vẫn gỡ được) và compliance. Ở compliance, bạn khai báo một thời gian **cooling-off** (tối thiểu 3 ngày) để còn sửa; hết thời gian này không ai, kể cả root, xoá được recovery point hay rút ngắn thời hạn giữ. Lab vì thế để Vault Lock tắt mặc định. Ngoài ra còn có **logically air-gapped vault**, một loại vault riêng có thể chia sẻ khi cần phục hồi; xem tài liệu để biết khác biệt và hỗ trợ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -83,7 +83,7 @@ Rule này backup mỗi đêm lúc 17:00 UTC (00:00 giờ Việt Nam), giữ 35 n
 
 ## Bốn chiến lược DR
 
-Backup bảo vệ dữ liệu; **disaster recovery** còn phải dựng lại cả hệ thống ở nơi khác. Bốn chiến lược theo mức tăng dần của chi phí và giảm dần của RTO:
+Backup bảo vệ dữ liệu; **disaster recovery** còn phải dựng lại cả hệ thống ở nơi khác. Bốn chiến lược tăng dần theo chi phí và giảm dần theo RTO:
 
 | Chiến lược | Ở region thứ hai | RPO và RTO cỡ | Cái giá |
 | --- | --- | --- | --- |
@@ -94,26 +94,26 @@ Backup bảo vệ dữ liệu; **disaster recovery** còn phải dựng lại c�
 
 Region thứ hai không chỉ cần dữ liệu. Danh sách tối thiểu: hạ tầng dưới dạng code để dựng lại trong vài chục phút (bài 22 và 23), image trong ECR có replication, secret được nhân bản (Secrets Manager có replica theo region), khoá KMS dùng được ở region đó (bài 52), DNS trỏ được bằng Route 53 (failover và ARC ở bài 56), và quota đủ cho số instance cần bật. Thiếu một món là RTO thực tế dài hơn kế hoạch.
 
-Với Tới Nơi, giả định hợp lý: ví và `trips` dùng pilot light hoặc warm standby, còn phần còn lại backup and restore. Vị trí tài xế tự lên lại khi tài xế gửi toạ độ mới nên không đáng giữ ở region thứ hai.
+Với Tới Nơi, giả định hợp lý: ví và `trips` dùng pilot light hoặc warm standby, còn phần còn lại backup and restore. Vị trí tài xế tự khôi phục khi tài xế gửi toạ độ mới nên không đáng giữ ở region thứ hai.
 
 ## Elastic Disaster Recovery và diễn tập restore
 
-Nếu còn máy EC2 hoặc server on-premises (như PostgreSQL tự vận hành trước khi chuyển sang Aurora ở [bài 40](/articles/aws-dms-migration-postgresql-zero-downtime)), **AWS Elastic Disaster Recovery** nhân bản liên tục ở mức block sang một vùng staging dùng instance nhỏ và ổ đĩa rẻ; khi sự cố, nó bật các máy đầy đủ từ bản sao. Đổi lại ta trả tiền cho vùng staging và cho các bước cấu hình agent và mạng.
+Nếu còn máy EC2 hoặc server on-premises (như PostgreSQL tự vận hành trước khi chuyển sang Aurora ở [bài 40](/articles/aws-dms-migration-postgresql-zero-downtime)), **AWS Elastic Disaster Recovery** nhân bản liên tục ở mức block sang một vùng staging dùng instance nhỏ và ổ đĩa rẻ; khi sự cố, dịch vụ này bật các máy đầy đủ từ bản sao. Đổi lại ta trả tiền cho vùng staging và cho các bước cấu hình agent và mạng.
 
-Bước quan trọng nhất là **diễn tập**. Backup chưa restore thử thì chưa biết nó có dùng được hay không. **Restore testing plan** của AWS Backup tự restore thử một recovery point theo lịch, đo thời gian rồi xoá. Ngoài ra, mỗi quý nên chạy một **game day**: một người chỉ huy, một người restore, một người kiểm dữ liệu, đồng hồ bấm giờ.
+Bước quan trọng nhất là **diễn tập**. Backup chưa restore thử thì chưa biết nó có dùng được hay không. **Restore testing plan** của AWS Backup tự restore thử một recovery point theo lịch, đo thời gian rồi xoá. Ngoài ra, mỗi quý nên chạy một **game day**: một người chỉ huy, một người restore, một người kiểm tra dữ liệu, có đồng hồ bấm giờ.
 
 | Việc đo | Cách làm | Ghi lại |
 | --- | --- | --- |
 | Thời gian restore | Script đo từ lúc `start-restore-job` tới trạng thái `COMPLETED` | Giây, kèm kích thước DB |
 | Toàn vẹn | Đếm dòng, đối soát theo ngày và thành phố, checksum | Khớp hay lệch |
-| Mốc dữ liệu | `max(updated_at)` trên DB restore | Thời gian mất thực tế, so với RPO |
+| Mốc dữ liệu | `max(updated_at)` trên DB restore | Khoảng thời gian dữ liệu bị mất thực tế, so với RPO |
 | Bước thủ công | Runbook cho từng việc: đổi secret, đổi DNS | Ai làm, mất bao lâu |
 
 Kết quả đo là RTO thật; nếu nó vượt mục tiêu thì phải đổi chiến lược hoặc kiến trúc, không phải đổi con số trên giấy.
 
 ## Cái giá phải trả
 
-- **Backup không kiểm là chưa có backup.** Recovery point lỗi quyền hoặc khoá KMS chỉ lộ ra lúc cần.
+- **Backup chưa kiểm tra là chưa có backup.** Recovery point lỗi quyền hoặc khoá KMS chỉ lộ ra lúc cần.
 - **Copy cross-region tốn tiền hai lần**: lưu ở hai nơi và truyền dữ liệu giữa region.
 - **Vault Lock là quyết định một chiều.** Sau cooling-off không rút ngắn được, nên thử bằng retention ngắn trong tài khoản lab.
 - **Backup không bảo vệ khỏi lỗi logic đã được backup.** Dữ liệu hỏng từ tuần trước nằm trong cả 35 bản; point-in-time restore giúp tìm mốc trước khi hỏng.
@@ -125,7 +125,7 @@ Kết quả đo là RTO thật; nếu nó vượt mục tiêu thì phải đổi
 
 ## Lab: backup plan và diễn tập
 
-Thư mục `examples/toi-noi-aws/p04-37-backup` có Terraform dựng hai vault, backup plan với copy sang `ap-northeast-1`, continuous backup, chọn theo tag, cảnh báo SNS, restore testing plan và tuỳ chọn Vault Lock (tắt mặc định), cùng `scripts/restore-drill.sh` đo thời gian restore và `scripts/verify-restore.sql` kiểm toàn vẹn.
+Thư mục `examples/toi-noi-aws/p04-37-backup` có Terraform dựng hai vault, backup plan với copy sang `ap-northeast-1`, continuous backup, chọn theo tag, cảnh báo SNS, restore testing plan và tuỳ chọn Vault Lock (tắt mặc định), cùng `scripts/restore-drill.sh` đo thời gian restore và `scripts/verify-restore.sql` kiểm tra tính toàn vẹn.
 
 ```bash
 cd examples/toi-noi-aws/p04-37-backup
@@ -133,7 +133,7 @@ docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 init -backend=false 
 docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 validate
 ```
 
-Terraform đã qua `fmt` và `validate` nhưng chưa `apply` hay restore trên tài khoản thật. Cần kiểm khi chạy: metadata restore của RDS, định dạng điều kiện tag của restore testing và hành vi copy với khoá KMS riêng. Tiền lab đến từ dung lượng recovery point ở hai region, truyền dữ liệu và DB instance restore thử; bước dọn nằm trong README.
+Terraform đã qua `fmt` và `validate` nhưng chưa `apply` hay restore trên tài khoản thật. Cần kiểm tra khi chạy: metadata restore của RDS, định dạng điều kiện tag của restore testing và hành vi copy với khoá KMS riêng. Tiền lab đến từ dung lượng recovery point ở hai region, truyền dữ liệu và DB instance restore thử; bước dọn nằm trong README.
 
 Bài trước: [bài 36](/articles/aws-s3-nang-cao-storage-class-replication-object-lock). Bài tiếp: [bài 38](/articles/aws-glue-athena-redshift-lakehouse).
 

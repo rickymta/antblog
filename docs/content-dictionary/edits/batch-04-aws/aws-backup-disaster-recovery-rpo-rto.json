@@ -1,0 +1,14 @@
+{"file":"aws-backup-disaster-recovery-rpo-rto.md","edits":[
+{"old":"Mỗi dữ liệu có giá trị khác nhau,","new":"Mỗi loại dữ liệu có giá trị khác nhau,","reason":"Thiếu danh từ 'loại'","severity":"medium"},
+{"old":"| Vị trí tài xế (6.250 toạ độ/giây) | Mất được |","new":"| Vị trí tài xế (6.250 toạ độ/giây) | Chấp nhận mất |","reason":"'Mất được' gượng, lược chữ","severity":"medium"},
+{"old":"theo mức tăng dần của chi phí và giảm dần của RTO:","new":"tăng dần theo chi phí và giảm dần theo RTO:","reason":"Trật tự kiểu Anh","severity":"low"},
+{"old":"Ngoài ra còn **logically air-gapped vault** là loại vault riêng có thể chia sẻ khi cần phục hồi;","new":"Ngoài ra còn có **logically air-gapped vault**, một loại vault riêng có thể chia sẻ khi cần phục hồi;","reason":"Câu thiếu chủ ngữ/động từ rõ ràng","severity":"medium"},
+{"old":"với tài nguyên AWS Backup không quản lý trọn (như RDS, EBS),","new":"với tài nguyên AWS Backup không quản lý hoàn toàn (như RDS, EBS),","reason":"'quản lý trọn' tự ghép","severity":"low"},
+{"old":"khi sự cố, nó bật các máy đầy đủ từ bản sao.","new":"khi sự cố, dịch vụ này bật các máy đầy đủ từ bản sao.","reason":"Tránh 'nó' chỉ khái niệm","severity":"low"},
+{"old":"một người kiểm dữ liệu, đồng hồ bấm giờ.","new":"một người kiểm tra dữ liệu, có đồng hồ bấm giờ.","reason":"'kiểm' cụt; câu thiếu động từ ở vế cuối","severity":"medium"},
+{"old":"| Thời gian mất thực tế, so với RPO |","new":"| Khoảng thời gian dữ liệu bị mất thực tế, so với RPO |","reason":"Cụm 'thời gian mất' mơ hồ","severity":"low"},
+{"old":"- **Backup không kiểm là chưa có backup.**","new":"- **Backup chưa kiểm tra là chưa có backup.**","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"Vị trí tài xế tự lên lại khi tài xế gửi toạ độ mới","new":"Vị trí tài xế tự khôi phục khi tài xế gửi toạ độ mới","reason":"'tự lên lại' khẩu ngữ","severity":"low"},
+{"old":"`scripts/verify-restore.sql` kiểm toàn vẹn.","new":"`scripts/verify-restore.sql` kiểm tra tính toàn vẹn.","reason":"'kiểm' cụt","severity":"low"},
+{"old":"Cần kiểm khi chạy:","new":"Cần kiểm tra khi chạy:","reason":"'kiểm' cụt","severity":"low"}
+]}

@@ -28,7 +28,7 @@ Bảng `trips` đổi trạng thái tám lần mỗi chuyến, và mỗi lần �
 | Thứ tự | FIFO queue theo message group | Không bảo đảm | Theo partition |
 | Vận hành | Không có server | Không có server | Cluster chạy liên tục, bạn lo partition và lag |
 
-Hãy thành thật về quy mô: giả định mỗi lần đổi trạng thái là một sự kiện thì Tới Nơi chỉ có khoảng 70 × 8 = 560 sự kiện mỗi giây, mức SQS cũng làm được. Kafka đáng tiền ở **replay, nhiều consumer group độc lập và thứ tự theo khoá**, không phải ở thông lượng. Nếu chỉ cần "giao tin cho một worker", SQS rẻ và dễ hơn nhiều. Luồng GPS 6.250 bản ghi mỗi giây là một bài toán khác: bản ghi nhỏ, chỉ có giá trị vài phút, một consumer chính và cần đổ thẳng xuống S3. Bài 35 giải nó bằng Kinesis Data Streams; đưa GPS vào một topic MSK riêng cũng là phương án hợp lệ nếu đội đã vận hành Kafka tốt, và bài 35 so sánh hai cách.
+Hãy nhìn đúng quy mô thực tế: giả định mỗi lần đổi trạng thái là một sự kiện thì Tới Nơi chỉ có khoảng 70 × 8 = 560 sự kiện mỗi giây, mức SQS cũng làm được. Kafka đáng tiền ở **replay, nhiều consumer group độc lập và thứ tự theo khoá**, không phải ở thông lượng. Nếu chỉ cần "giao tin cho một worker", SQS rẻ và dễ hơn nhiều. Luồng GPS 6.250 bản ghi mỗi giây là một bài toán khác: bản ghi nhỏ, chỉ có giá trị vài phút, một consumer chính và cần đổ thẳng xuống S3. Bài 35 giải nó bằng Kinesis Data Streams; đưa GPS vào một topic MSK riêng cũng là phương án hợp lệ nếu đội đã vận hành Kafka tốt, và bài 35 so sánh hai cách.
 
 ## Ba kiểu MSK
 
@@ -57,9 +57,9 @@ acks=all
 enable.idempotence=true
 ```
 
-**RF=3** giữ ba bản mỗi partition ở ba broker. **`min.insync.replicas=2`** với `acks=all` nghĩa là producer chỉ nhận xác nhận khi ít nhất hai bản đã có dữ liệu: mất một broker hay một AZ vẫn ghi được; mất hai thì producer nhận lỗi thay vì nhận xác nhận giả. **`enable.idempotence=true`** để producer thử lại không tạo bản ghi trùng trong một partition. Số partition cho trần song song của consumer group: 12 partition cho tối đa 12 consumer đọc song song. Tăng số partition về sau làm đổi ánh xạ khoá sang partition, nên chọn dư ngay từ đầu.
+**RF=3** giữ ba bản mỗi partition ở ba broker. **`min.insync.replicas=2`** với `acks=all` nghĩa là producer chỉ nhận xác nhận khi ít nhất hai bản đã có dữ liệu: mất một broker hay một AZ vẫn ghi được; mất hai thì producer nhận lỗi thay vì nhận xác nhận giả. **`enable.idempotence=true`** giúp producer thử lại mà không tạo bản ghi trùng trong một partition. Số partition quyết định trần song song của consumer group: 12 partition cho tối đa 12 consumer đọc song song. Tăng số partition về sau làm đổi ánh xạ khoá sang partition, nên chọn dư ngay từ đầu.
 
-Retention là cái giá lưu trữ. Với giả định 1 KB mỗi sự kiện và tải cao điểm kéo dài cả ngày (cận trên), 560 sự kiện mỗi giây là khoảng 48 GB mỗi ngày; giữ 7 ngày với RF=3 cỡ 1 TB đĩa broker. Đó là phép tính từ giả định, không phải đo đạc.
+Retention quyết định chi phí lưu trữ. Với giả định 1 KB mỗi sự kiện và tải cao điểm kéo dài cả ngày (cận trên), 560 sự kiện mỗi giây là khoảng 48 GB mỗi ngày; giữ 7 ngày với RF=3 cỡ 1 TB đĩa broker. Đó là phép tính từ giả định, không phải đo đạc.
 
 ## Bảo mật: IAM, TLS và mạng riêng
 
@@ -103,7 +103,7 @@ Trước đây dispatcher của loạt .NET định kỳ đọc bảng outbox r�
 <figcaption>Hình 1. Outbox qua CDC. Dữ liệu và sự kiện cùng commit ở Aurora; Debezium đọc WAL và đẩy vào Kafka; mỗi consumer group giữ offset riêng và chống trùng bằng inbox.</figcaption>
 </figure>
 
-Cái bẫy lớn nhất là **replication slot**: slot giữ lại WAL cho tới khi connector đọc xong, nên connector dừng vài ngày là đĩa database đầy. Đặt `heartbeat.interval.ms` để slot tiến lên cả khi bảng outbox im lặng, và đặt alarm theo độ trễ slot (kiểm tra metric hiện có cho phiên bản Aurora của bạn). Hành vi của slot khi Aurora failover phụ thuộc phiên bản; đọc tài liệu trước khi chạy production. Về schema, **Glue Schema Registry** (Avro, JSON Schema hay Protobuf) giữ hợp đồng sự kiện và kiểm tính tương thích; consumer chạy trên ECS, EKS hoặc Lambda qua event source mapping của MSK. Kafka là at-least-once, nên consumer vẫn cần inbox như bài .NET.
+Cái bẫy lớn nhất là **replication slot**: slot giữ lại WAL cho tới khi connector đọc xong, nên connector dừng vài ngày là đĩa database đầy. Đặt `heartbeat.interval.ms` để slot tiến lên cả khi bảng outbox không có thay đổi nào, và đặt alarm theo độ trễ slot (kiểm tra metric hiện có cho phiên bản Aurora của bạn). Hành vi của slot khi Aurora failover phụ thuộc phiên bản; đọc tài liệu trước khi chạy production. Về schema, **Glue Schema Registry** (Avro, JSON Schema hay Protobuf) giữ hợp đồng sự kiện và kiểm tính tương thích; consumer chạy trên ECS, EKS hoặc Lambda qua event source mapping của MSK. Kafka là at-least-once, nên consumer vẫn cần inbox như bài .NET.
 
 ## Giám sát
 
@@ -114,12 +114,12 @@ Bốn tín hiệu cần alarm: **consumer lag** (`MaxOffsetLag`, `SumOffsetLag`,
 - **Cluster chạy liên tục.** Broker tính tiền cả khi không có tin nào; dev nên cân nhắc Serverless hoặc dùng chung.
 - **Khoá partition sai.** Khoá lệch gây hot partition và trần song song thấp.
 - **Slot bị bỏ rơi.** Connector chết mà không ai thấy thì đĩa database đầy.
-- **Tăng partition muộn.** Đổi ánh xạ khoá và có thể phá thứ tự đang dựa vào.
+- **Tăng partition muộn.** Việc này đổi ánh xạ khoá và có thể phá thứ tự mà hệ thống đang dựa vào.
 - **Quyền rộng.** `kafka-cluster:*` trên mọi topic xoá mất lợi ích của IAM theo topic.
 
 **Bài tập:** Nhóm đề xuất khoá partition là `cityId` thay vì `tripId` "cho dễ gom theo thành phố". Điều gì xảy ra?
 
-<details><summary>Xem đáp án</summary><p>Tới Nơi chỉ có 6 thành phố nên nhiều nhất 6 partition nhận dữ liệu dù topic có 12, và consumer group không thể dùng quá 6 consumer. Phân phối lệch theo sức lớn của từng thành phố (TP.HCM nặng nhất) tạo hot partition. Một sự kiện xử lý chậm làm nghẽn mọi chuyến cùng thành phố đứng sau nó. Thứ tự theo thành phố cũng không cần: ràng buộc thứ tự đúng là theo từng chuyến, nên <code>tripId</code> vừa đủ vừa cân bằng.</p></details>
+<details><summary>Xem đáp án</summary><p>Tới Nơi chỉ có 6 thành phố nên nhiều nhất 6 partition nhận dữ liệu dù topic có 12, và consumer group không thể dùng quá 6 consumer. Phân phối bị lệch theo quy mô của từng thành phố (TP.HCM nặng nhất) tạo hot partition. Một sự kiện xử lý chậm làm nghẽn mọi chuyến cùng thành phố đứng sau nó. Thứ tự theo thành phố cũng không cần: ràng buộc thứ tự đúng là theo từng chuyến, nên <code>tripId</code> vừa đủ vừa cân bằng.</p></details>
 
 ## Lab: cluster, IAM và connector
 
@@ -133,7 +133,7 @@ resource "aws_msk_configuration" "main" {
 }
 ```
 
-Đoạn rút gọn này đặt mặc định bền cho broker; bản đầy đủ trong lab. Ba broker tính tiền theo giờ ngay khi cluster `ACTIVE`.
+Đoạn rút gọn này đặt các giá trị mặc định đảm bảo độ bền cho broker; bản đầy đủ có trong lab. Ba broker tính tiền theo giờ ngay khi cluster `ACTIVE`.
 
 Kiểm trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker; `bash -n` và shellcheck; JSON của connector parse được. **Chưa kiểm chứng trên tài khoản thật:** `apply` với `kafka_version = 3.9.x` và broker `kafka.t3.small`, broker Express và Serverless, toàn bộ phần MSK Connect (`kafkaconnect_version`, config provider cho mật khẩu, quyền topic nội bộ, định tuyến của EventRouter), và các lệnh công cụ Kafka với IAM.
 

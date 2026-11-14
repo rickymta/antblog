@@ -1,0 +1,12 @@
+{"file":"aws-la-gi-region-az-shared-responsibility.md","edits":[
+{"old":"rồi để máy nằm không phần lớn thời gian.","new":"rồi để máy nhàn rỗi phần lớn thời gian.","reason":"'nằm không' là calque của idle","severity":"medium"},
+{"old":"Ranh giới giữa ba hàng không cứng.","new":"Ranh giới giữa ba mô hình này không cứng nhắc.","reason":"'ba hàng' gượng, nên gọi đúng tên khái niệm","severity":"low"},
+{"old":"Zone nào ở đâu thay đổi theo thời gian,","new":"Vị trí các zone thay đổi theo thời gian,","reason":"'Zone nào ở đâu' như câu hỏi, thiếu chủ ngữ","severity":"medium"},
+{"old":"Nó không chạy EC2 hay database của bạn; nó giữ bản sao nội dung (cache), đón kết nối rồi chuyển về region khi cần.","new":"Edge location không chạy EC2 hay database của bạn; nơi này giữ bản sao nội dung (cache), tiếp nhận kết nối rồi chuyển về region khi cần.","reason":"Tránh 'Nó' chỉ sự vật; 'đón kết nối' gượng","severity":"medium"},
+{"old":"Giá có khác region khác không?","new":"Giá có khác so với các region khác không?","reason":"Câu thiếu giới từ so sánh","severity":"low"},
+{"old":"ở các mạng khác nhau (Wi-Fi, 4G); nó chỉ đo đường mạng,","new":"ở các mạng khác nhau (Wi-Fi, 4G); phép đo này chỉ phản ánh đường mạng,","reason":"Tránh 'nó' mơ hồ","severity":"medium"},
+{"old":"làm region mặc định: nó không cần opt-in","new":"làm region mặc định: region này không cần opt-in","reason":"'nó' mơ hồ, nhắc lại danh từ","severity":"medium"},
+{"old":"**Quên rằng truyền dữ liệu có giá.**","new":"**Quên rằng truyền dữ liệu bị tính phí.**","reason":"'có giá' là calque","severity":"low"},
+{"old":"**Nghĩ \"AWS lo bảo mật\" nên bucket để public.**","new":"**Để bucket public vì nghĩ \"AWS lo bảo mật\".**","reason":"Câu thiếu chủ ngữ và sai trật tự nhân quả","severity":"medium"},
+{"old":"Dịch vụ có ở region nào thay đổi theo thời gian;","new":"Danh sách region có dịch vụ thay đổi theo thời gian;","reason":"Câu khó hiểu, thiếu danh từ chính","severity":"medium"}
+]}

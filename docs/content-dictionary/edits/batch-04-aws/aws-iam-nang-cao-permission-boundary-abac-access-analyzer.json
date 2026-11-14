@@ -1,0 +1,17 @@
+{"file":"aws-iam-nang-cao-permission-boundary-abac-access-analyzer.md","edits":[
+{"old":"Access Analyzer tìm quyền ra ngoài, quyền thừa","new":"Access Analyzer tìm quyền truy cập từ bên ngoài, quyền thừa","reason":"'quyền ra ngoài' là dịch từng chữ của external access","severity":"medium"},
+{"old":"## Access Analyzer: quyền ra ngoài và quyền thừa","new":"## Access Analyzer: quyền truy cập từ bên ngoài và quyền thừa","reason":"'quyền ra ngoài' là dịch từng chữ của external access","severity":"medium"},
+{"old":"mà đặt vào bức tranh đầy đủ.","new":"mà đặt chúng vào bức tranh đầy đủ.","reason":"Thiếu tân ngữ","severity":"medium"},
+{"old":"không tag, không quyền**, một hướng thất bại an toàn.","new":"không tag, không quyền**, đây là cách thất bại an toàn.","reason":"'hướng thất bại' dịch từng chữ","severity":"medium"},
+{"old":"2. **Quyền của dev**: tạo role khi, và chỉ khi, gắn đúng boundary đó.","new":"2. **Quyền của dev**: dev chỉ được tạo role khi role đó gắn đúng boundary này.","reason":"Câu thiếu chủ ngữ, khó hiểu","severity":"high"},
+{"old":"Đứng một mình nó thiếu hai thứ","new":"Đứng một mình, statement này thiếu hai thứ","reason":"'nó' mơ hồ, trật tự từ kiểu Anh","severity":"medium"},
+{"old":"boundary đảm bảo dev viết identity policy rộng cũng không vượt trần.","new":"còn boundary bảo đảm identity policy dù dev viết rộng cũng không vượt trần.","reason":"Lặp 'bảo đảm/đảm bảo', câu thiếu mạch lạc","severity":"low"},
+{"old":"giới hạn phiên của chuỗi tối đa một giờ.","new":"giới hạn thời gian của phiên trong chuỗi tối đa một giờ.","reason":"Thiếu danh từ 'thời gian'","severity":"medium"},
+{"old":"chỉ kiểm account, khách A","new":"chỉ kiểm tra account, khách A","reason":"Lược động từ 'kiểm tra'","severity":"low"},
+{"old":"khoá request về một VPC endpoint","new":"giới hạn request chỉ đi qua một VPC endpoint","reason":"'khoá về' gượng, dịch từng chữ","severity":"medium"},
+{"old":"Để hỏi \"ai làm gì\", CloudTrail","new":"Để biết \"ai làm gì\", CloudTrail","reason":"'hỏi' dịch từng chữ","severity":"low"},
+{"old":"- **Nhầm boundary là hợp**: nó là giao với identity policy.","new":"- **Nhầm boundary là phép hợp**: boundary giao với identity policy, không hợp với nó.","reason":"Tránh 'nó', diễn đạt rõ phép giao/hợp","severity":"medium"},
+{"old":"quyền thành thứ đổi bằng một lệnh `tag-resource`.","new":"quyền trở thành thứ đổi được chỉ bằng một lệnh `tag-resource`.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"cùng `simulate.sh` chạy 13 ca (ABAC","new":"cùng `simulate.sh` chạy 13 test case (ABAC","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"và ca gỡ tag ra `explicitDeny`","new":"và test case gỡ tag ra `explicitDeny`","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

@@ -1,0 +1,17 @@
+{"file":"aws-codepipeline-codebuild-codedeploy-blue-green.md","edits":[
+{"old":"và đã thấy một pipeline CI bằng GitHub Actions ở","new":"và đã làm quen với một pipeline CI bằng GitHub Actions ở","reason":"'đã thấy' calque (have seen)","severity":"low"},
+{"old":"chi phí tính theo từng loại, xem trang Pricing","new":"chi phí tính theo từng loại pipeline, xem trang Pricing","reason":"'từng loại' lược danh từ","severity":"low"},
+{"old":"nên project này chỉ được dùng cho repository tin cậy và role của nó chỉ được đẩy một repository ECR.","new":"nên project này chỉ dùng cho repository tin cậy và role của nó chỉ có quyền đẩy vào một repository ECR.","reason":"Bỏ bị động kiểu Anh","severity":"medium"},
+{"old":"khi build chậm vì tải layer, thử bật cache layer cục bộ (","new":"khi build chậm vì tải layer, hãy thử bật cache layer cục bộ (","reason":"Câu thiếu chủ ngữ","severity":"low"},
+{"old":"đưa cùng artifact đi qua các môi trường như ở loạt .NET (","new":"đưa cùng một artifact đi qua các môi trường như ở loạt bài .NET (","reason":"'loạt .NET' thiếu danh từ","severity":"low"},
+{"old":"nói task definition nào, container nào nhận traffic và hook nào chạy:","new":"cho biết task definition nào, container nào nhận traffic và hook nào chạy:","reason":"'nói' là giọng dịch máy (says)","severity":"medium"},
+{"old":"Hook không báo kịp thì deployment thất bại.","new":"Nếu hook không báo kết quả kịp thời thì deployment thất bại.","reason":"Câu lược danh từ, mơ hồ","severity":"medium"},
+{"old":"không cần ứng dụng CodeDeploy hay","new":"không cần dùng CodeDeploy hay","reason":"'ứng dụng' là calque (apply) gây hiểu nhầm với 'application'","severity":"high"},
+{"old":"hãy đối chiếu Developer Guide của ECS về load balancer và tuỳ chọn được hỗ trợ trước khi quyết định.","new":"hãy xem lại Developer Guide của ECS để biết load balancer và tuỳ chọn nào được hỗ trợ trước khi quyết định.","reason":"Câu lược động từ, bị động kiểu Anh","severity":"medium"},
+{"old":"Nếu muốn duyệt sau khi đã thử test listener, đặt","new":"Nếu muốn duyệt sau khi đã thử test listener, hãy đặt","reason":"Thiếu 'hãy'","severity":"low"},
+{"old":"mỗi service một pipeline là mặc định dễ hiểu:","new":"mỗi service một pipeline là lựa chọn mặc định dễ hiểu:","reason":"Câu cụt thiếu danh từ","severity":"low"},
+{"old":"Cần expand/contract ở bài 27.","new":"Cần dùng expand/contract, xem bài 27.","reason":"Câu cụt thiếu động từ","severity":"medium"},
+{"old":"và canary 5 phút cộng thời gian chờ làm một lần deploy chậm hơn rolling.","new":"và canary 5 phút cộng với thời gian chờ khiến một lần deploy chậm hơn rolling.","reason":"Câu khó đọc, 'làm' gượng","severity":"medium"},
+{"old":"cần có cách nhận diện cùng sửa các dòng do bản lỗi ghi (ví dụ cột phiên bản hoặc","new":"cần có cách nhận diện và sửa các dòng do bản lỗi ghi (ví dụ cột phiên bản hoặc","reason":"Lỗi gõ: 'cùng' phải là 'và'","severity":"high"},
+{"old":"Trên máy chỉ kiểm cú pháp, không tạo tài nguyên:","new":"Trên máy chỉ kiểm tra cú pháp, không tạo tài nguyên:","reason":"'kiểm' cụt","severity":"low"}
+]}

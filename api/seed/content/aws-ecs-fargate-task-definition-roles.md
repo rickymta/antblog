@@ -1,7 +1,7 @@
 ---
 slug: aws-ecs-fargate-task-definition-roles
 title: "ECS Fargate: cluster, task definition, service, execution role và task role"
-summary: "Bài 12: đưa service đặt chuyến lên ECS Fargate: task definition với CPU/memory, port, log awslogs và secret từ Secrets Manager; phân biệt execution role với task role; service giữ số task mong muốn trong private subnet và kết nối RDS. Có task definition JSON, lệnh AWS CLI và Terraform."
+summary: "Bài 12: đưa service đặt chuyến lên ECS Fargate: task definition với CPU/memory, port, log awslogs và secret từ Secrets Manager; phân biệt execution role với task role; service giữ đúng số lượng task mong muốn trong private subnet và kết nối RDS. Có task definition JSON, lệnh AWS CLI và Terraform."
 category: devops-aws
 level: intermediate
 tags: [aws, toi-noi, devops, ecs, fargate, task-definition, execution-role, task-role, container]
@@ -30,7 +30,7 @@ ECS có bốn khái niệm cần phân biệt, từ khuôn tới thứ đang ch�
 | Task | Một lần chạy của task definition | một container `booking` |
 | Service | Giữ N task luôn chạy, thay task chết, nối load balancer | `toinoi-lab-booking`, 4 task |
 
-Task definition không sửa được tại chỗ: muốn đổi image hay biến môi trường, ta đăng ký revision mới rồi cho service trỏ tới nó. Tính chất này làm rollback đơn giản: trỏ lại revision cũ.
+Task definition không sửa được tại chỗ: muốn đổi image hay biến môi trường, ta đăng ký revision mới rồi cho service trỏ tới nó. Nhờ vậy rollback rất đơn giản: chỉ cần trỏ lại revision cũ.
 
 ECS chạy task trên hai kiểu hạ tầng:
 
@@ -43,7 +43,7 @@ ECS chạy task trên hai kiểu hạ tầng:
 
 Tới Nơi chọn Fargate vì đội nhỏ, muốn giảm việc vận hành. Fargate chỉ nhận một số tổ hợp, ví dụ 512 CPU units (0,5 vCPU) đi với bộ nhớ từ 1 tới 4 GB. Hãy bắt đầu nhỏ rồi đo.
 
-Fargate chỉ dùng network mode `awsvpc`: mỗi task có một ENI riêng, một IP riêng trong subnet và gắn security group riêng. Điều này tiện cho kiểm soát mạng (security group của RDS có thể cho đúng security group của task vào cổng 5432) nhưng mỗi task tiêu một IP của subnet. Subnet quá nhỏ sẽ hết IP khi scale out.
+Fargate chỉ dùng network mode `awsvpc`: mỗi task có một ENI riêng, một IP riêng trong subnet và gắn security group riêng. Điều này tiện cho kiểm soát mạng (security group của RDS có thể cho đúng security group của task vào cổng 5432) nhưng mỗi task chiếm một IP của subnet. Subnet quá nhỏ sẽ hết IP khi scale out.
 
 ## Task definition cho service đặt chuyến
 
@@ -75,13 +75,13 @@ Fargate chỉ dùng network mode `awsvpc`: mỗi task có một ENI riêng, mộ
 }
 ```
 
-Image là digest chứ không phải tag, theo bài 11. Tên biến `ConnectionStrings__Trips` và đường dẫn `/health/ready` trùng với service .NET ở bài 36, nên cùng image chạy được ở cả hai nơi. Riêng tên thì khác: template của bài 36 dùng family `toi-noi-trips`, container `trips` và 0,25 vCPU; lộ trình AWS đặt tên theo quy ước `toinoi-<env>-<service>` nên family ở đây là `toinoi-lab-booking`, container `booking`. Đây là hai bản độc lập, đừng đăng ký chung một family.
+Image dùng digest chứ không dùng tag, theo bài 11. Tên biến `ConnectionStrings__Trips` và đường dẫn `/health/ready` trùng với service .NET ở bài 36, nên cùng image chạy được ở cả hai nơi. Riêng tên thì khác: template của bài 36 dùng family `toi-noi-trips`, container `trips` và 0,25 vCPU; lộ trình AWS đặt tên theo quy ước `toinoi-<env>-<service>` nên family ở đây là `toinoi-lab-booking`, container `booking`. Đây là hai bản độc lập, đừng đăng ký chung một family.
 
 Hai chi tiết dễ vấp. Thứ nhất, `awslogs` cần nhóm log đã tồn tại (hoặc execution role có quyền tạo nhóm log nếu bật `awslogs-create-group`). Lab tạo sẵn nhóm log bằng Terraform. Thứ hai, `healthCheck` ở cấp container chạy lệnh *bên trong* container, nên image phải có sẵn `curl` hoặc `wget`. Image `aspnet` mặc định và image chiseled thường không có công cụ này; khi đó container sẽ bị đánh dấu unhealthy và ECS dừng task. Hoặc thêm công cụ vào Dockerfile, hoặc bỏ khối này và để health check của ALB (bài 13) quyết định.
 
 ## Execution role khác task role
 
-Cả hai đều là IAM role mà `ecs-tasks.amazonaws.com` được phép assume, nhưng người dùng chúng khác nhau.
+Cả hai đều là IAM role mà `ecs-tasks.amazonaws.com` được phép assume, nhưng đối tượng sử dụng chúng khác nhau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -93,13 +93,13 @@ Cả hai đều là IAM role mà `ecs-tasks.amazonaws.com` được phép assume
 <line x1="420" y1="45" x2="458" y2="45" class="f-none s-phys" stroke-width="2" marker-end="url(#aws12-1-a)"/>
 <rect x="460" y="20" width="400" height="50" rx="10" class="f-surface s-line"/><text x="476" y="50" class="t-b">2 · Container đang chạy</text>
 <rect x="20" y="95" width="400" height="150" rx="10" class="f-pk-soft s-pk"/>
-<text x="36" y="122" class="t-b t-pk">Execution role</text><text x="36" y="142" class="t-small">Người dùng: ECS agent / Fargate</text>
+<text x="36" y="122" class="t-b t-pk">Execution role</text><text x="36" y="142" class="t-small">Bên dùng: ECS agent / Fargate</text>
 <text x="36" y="170" class="t-mono">· kéo image từ ECR</text>
 <text x="36" y="190" class="t-mono">· tạo log stream, ghi awslogs</text>
 <text x="36" y="210" class="t-mono">· đọc secret rồi inject thành biến môi trường</text>
 <text x="36" y="230" class="t-small">Trust: ecs-tasks.amazonaws.com</text>
 <rect x="460" y="95" width="400" height="150" rx="10" class="f-phys-soft s-phys"/>
-<text x="476" y="122" class="t-b t-phys">Task role</text><text x="476" y="142" class="t-small">Người dùng: code ứng dụng qua AWS SDK</text>
+<text x="476" y="122" class="t-b t-phys">Task role</text><text x="476" y="142" class="t-small">Bên dùng: code ứng dụng qua AWS SDK</text>
 <text x="476" y="170" class="t-mono">· s3:PutObject trên proof/*</text>
 <text x="476" y="190" class="t-mono">· ssmmessages:* cho ECS Exec</text>
 <text x="476" y="210" class="t-mono">· quyền đọc secret nếu app tự đọc lúc chạy</text>
@@ -122,17 +122,17 @@ Execution role thường gắn policy do AWS quản lý `AmazonECSTaskExecutionR
 }
 ```
 
-Task role chỉ nên có đúng việc app làm. Với service đặt chuyến: `s3:PutObject` và `s3:GetObject` trên `arn:aws:s3:::toinoi-lab-delivery-photos/proof/*`, như bài 03. Với task role, AWS khuyên thêm điều kiện `aws:SourceAccount` và `aws:SourceArn` (dạng `arn:aws:ecs:ap-southeast-1:123456789012:*`, chưa hỗ trợ khoá theo từng cluster) vào trust policy để chặn kiểu tấn công confused deputy. Execution role dùng trust policy chuẩn trong tài liệu ECS, chỉ cần principal `ecs-tasks.amazonaws.com`. Terraform trong lab viết đúng như vậy.
+Task role chỉ nên có đúng những quyền mà app cần. Với service đặt chuyến: `s3:PutObject` và `s3:GetObject` trên `arn:aws:s3:::toinoi-lab-delivery-photos/proof/*`, như bài 03. Với task role, AWS khuyên thêm điều kiện `aws:SourceAccount` và `aws:SourceArn` (dạng `arn:aws:ecs:ap-southeast-1:123456789012:*`, chưa hỗ trợ khoá theo từng cluster) vào trust policy để chặn kiểu tấn công confused deputy. Execution role dùng trust policy chuẩn trong tài liệu ECS, chỉ cần principal `ecs-tasks.amazonaws.com`. Terraform trong lab viết đúng như vậy.
 
 ## Secret, cấu hình và health check
 
 Mật khẩu không bao giờ nằm trong `environment`. Dùng `secrets` với `valueFrom` trỏ tới ARN Secrets Manager hoặc tên/ARN của Parameter Store. ECS lấy giá trị lúc khởi động và đặt thành biến môi trường trong container. Với secret dạng JSON, thêm khoá vào cuối ARN theo mẫu `…:secret:tên-AbCdEf:password::` để lấy một trường. Tính năng này cần Fargate platform version 1.4.0 trở lên. Hai hệ quả: giá trị được cố định khi task khởi động (đổi secret xong phải chạy task mới), và execution role, không phải task role, cần quyền đọc. Secret `toinoi/lab/booking/db-connection-string` ở đây chứa nguyên connection string như bài 36; bài 14 giải thích vì sao dạng nguyên khối này khó xoay vòng và cách chuyển sang secret JSON.
 
-Hai loại kiểm tra sức khoẻ không thay thế nhau. Health check của container do ECS chạy và quyết định task có bị thay không; health check của ALB (bài 13) quyết định task có nhận traffic không. Dùng `/health/ready` để kiểm khả năng phục vụ như đã nói ở bài 36, và đừng đưa kiểm tra database vào kiểm tra liveness.
+Hai loại kiểm tra sức khoẻ không thay thế nhau. Health check của container do ECS chạy và quyết định task có bị thay không; health check của ALB (bài 13) quyết định task có nhận traffic không. Dùng `/health/ready` để kiểm tra khả năng phục vụ như đã nói ở bài 36, và đừng đưa kiểm tra database vào kiểm tra liveness.
 
 ## Service trong private subnet
 
-Service giữ số task mong muốn, thay task chết và đặt chúng vào subnet bạn chọn. Cho Tới Nơi, task nằm ở private subnet, không có IP public, security group của task là nguồn duy nhất RDS chấp nhận:
+Service giữ số task mong muốn, thay task chết và đặt chúng vào subnet bạn chọn. Với Tới Nơi, task nằm ở private subnet, không có IP public, security group của task là nguồn duy nhất RDS chấp nhận:
 
 ```bash
 aws ecs create-service \
@@ -150,14 +150,14 @@ Lệnh tạo hai task Fargate và bắt đầu tính tiền theo giây. `--task-
 
 Không có IP public thì task cần đường ra: NAT gateway, hoặc VPC endpoint cho ECR (`ecr.api`, `ecr.dkr`), S3, CloudWatch Logs và Secrets Manager, như bài 11. Thiếu một đường, lỗi sẽ xuất hiện đúng lúc khởi động.
 
-Muốn vào container để gỡ lỗi dùng ECS Exec, chạy trên nền Session Manager:
+Muốn vào container để gỡ lỗi, hãy dùng ECS Exec, chạy trên nền Session Manager:
 
 ```bash
 aws ecs execute-command --cluster toinoi-lab --task <task-id> \
   --container booking --interactive --command "/bin/sh"
 ```
 
-Điều kiện: service bật `--enable-execute-command`, task role có quyền `ssmmessages:*` (như Hình 1), máy bạn cài Session Manager plugin, và image có `/bin/sh`. Image chiseled không có shell thì lệnh này không dùng được. Mọi phiên Exec nên được ghi log để audit. Khi nhiều service cần gọi nhau (như `dispatch` gọi `booking`), ECS Service Connect hoặc Cloud Map cho phép gọi theo tên; bài này chỉ nhắc, chưa dựng.
+Điều kiện: service bật `--enable-execute-command`, task role có quyền `ssmmessages:*` (như Hình 1), máy bạn cài Session Manager plugin, và image có `/bin/sh`. Image chiseled không có shell thì lệnh này không dùng được. Nên ghi log mọi phiên Exec để audit. Khi nhiều service cần gọi nhau (như `dispatch` gọi `booking`), ECS Service Connect hoặc Cloud Map cho phép gọi theo tên; bài này chỉ nhắc, chưa dựng.
 
 ## Lỗi thường gặp
 
@@ -175,7 +175,7 @@ aws ecs execute-command --cluster toinoi-lab --task <task-id> \
 
 Mã ở `examples/toi-noi-aws/p02-12-ecs-fargate`: `task-definition.json` cho `register-task-definition`, các script `register-and-create.sh`, `debug.sh`, `cleanup.sh`, và Terraform tạo cluster, nhóm log, hai role, security group, task definition và service. README ghi tài nguyên nào tính tiền (chủ yếu là task Fargate theo giây) và lệnh dọn.
 
-Kiểm trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker, parse JSON và `bash -n` cho script. Các bước này chỉ chứng minh cấu hình đúng cú pháp. **Chưa kiểm chứng trên tài khoản thật:** quyền thực tế của hai role, việc task pull được image và đọc được secret trong mạng của bạn, và `healthCheck` với image cụ thể. CPU, memory và số task chỉ là điểm bắt đầu, hãy load test trước khi chốt.
+Đã kiểm tra trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker, parse JSON và `bash -n` cho script. Các bước này chỉ chứng minh cấu hình đúng cú pháp. **Chưa kiểm chứng trên tài khoản thật:** quyền thực tế của hai role, việc task pull được image và đọc được secret trong mạng của bạn, và `healthCheck` với image cụ thể. CPU, memory và số task chỉ là điểm bắt đầu, hãy load test trước khi chốt.
 
 Bài trước: [bài 11](/articles/aws-ecr-image-scan-lifecycle). Bài tiếp: [bài 13](/articles/aws-ecs-alb-rolling-deploy-autoscaling).
 

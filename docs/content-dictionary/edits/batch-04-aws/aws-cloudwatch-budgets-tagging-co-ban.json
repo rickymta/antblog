@@ -1,0 +1,16 @@
+{"file":"aws-cloudwatch-budgets-tagging-co-ban.md","edits":[
+{"old":"checklist dọn tài nguyên để không mất tiền.","new":"checklist dọn tài nguyên để tránh phát sinh chi phí.","reason":"'không mất tiền' gượng","severity":"low"},
+{"old":"Không nhất thiết. Nó nghĩa là CloudWatch chưa đủ dữ liệu","new":"Không nhất thiết. Trạng thái này nghĩa là CloudWatch chưa đủ dữ liệu","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"Log của ứng dụng trên EC2 không tự lên đây: cài **CloudWatch agent**, cấp cho role của instance policy","new":"Log của ứng dụng trên EC2 không tự đẩy lên đây: hãy cài **CloudWatch agent**, cấp cho role của instance policy","reason":"Câu cụt thiếu động từ/chủ ngữ","severity":"medium"},
+{"old":"nếu không chúng lặng lẽ không có log.","new":"nếu không chúng sẽ không có log mà không báo lỗi nào.","reason":"'lặng lẽ' là calque (silently)","severity":"high"},
+{"old":"Điều chỉnh quan trọng nhất: **retention**.","new":"Thiết lập quan trọng nhất là **retention**.","reason":"Câu thiếu động từ","severity":"low"},
+{"old":"Chi phí còn gồm dung lượng log nhận vào và dung lượng mỗi truy vấn Logs Insights quét.","new":"Chi phí còn gồm dung lượng log được nạp vào và dung lượng dữ liệu mà mỗi truy vấn Logs Insights quét.","reason":"Câu lược danh từ/động từ","severity":"medium"},
+{"old":"Giá trị của nó là đặt số liệu cạnh nhau:","new":"Giá trị của dashboard nằm ở chỗ đặt các số liệu cạnh nhau:","reason":"Tránh 'nó'; câu thiếu quan hệ từ","severity":"medium"},
+{"old":"cho nhóm chi phí theo tag","new":"cho phép nhóm chi phí theo tag","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Nó cần role riêng và quyền thao tác, nên bài này chỉ mô tả, chưa chạy.","new":"Action cần role riêng và quyền thao tác, nên bài này chỉ mô tả, chưa chạy.","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"Những thứ tính tiền theo giờ hoặc tồn tại âm thầm, theo thứ tự nên kiểm:","new":"Những thứ tính tiền theo giờ hoặc tồn tại mà không ai để ý, theo thứ tự nên kiểm tra:","reason":"'âm thầm' là calque; 'kiểm' cụt","severity":"medium"},
+{"old":"Mọi thao tác xoá hỏi xác nhận tài khoản trước.","new":"Mọi thao tác xoá đều hỏi bạn xác nhận tài khoản trước.","reason":"Câu thiếu chủ thể","severity":"low"},
+{"old":"và kiểm tên tham số ở chế độ không mạng;","new":"và kiểm tra tên tham số ở chế độ không có mạng;","reason":"'kiểm' cụt; 'không mạng' gượng","severity":"medium"},
+{"old":"**Alarm quá nhạy tạo mệt mỏi.**","new":"**Alarm quá nhạy gây mệt mỏi.**","reason":"'tạo mệt mỏi' calque","severity":"low"},
+{"old":"Quên retention là khoản phí lưu trữ tăng đều mỗi tháng.","new":"Quên retention thì phí lưu trữ sẽ tăng đều mỗi tháng.","reason":"Câu gượng, so sánh sai chủ ngữ","severity":"medium"}
+]}

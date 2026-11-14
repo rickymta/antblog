@@ -1,0 +1,12 @@
+{"file":"aws-appconfig-feature-flag-cau-hinh-dong.md","edits":[
+{"old":"và bạn muốn đối xử với nó như một lần release nhỏ.","new":"và bạn muốn xem nó như một lần release nhỏ.","reason":"'đối xử với' là calque của 'treat'","severity":"low"},
+{"old":"AppConfig tự kiểm cấu trúc và ràng buộc của attribute;","new":"AppConfig tự kiểm tra cấu trúc và ràng buộc của attribute;","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"Cách thứ hai, dễ kiểm hơn và là cách lab dùng:","new":"Cách thứ hai, dễ kiểm thử hơn và là cách lab dùng:","reason":"'kiểm' cụt; ý là kiểm thử","severity":"medium"},
+{"old":"nên không bị giá nhảy qua lại giữa hai lần xem.","new":"nên giá không nhảy qua lại giữa hai lần xem.","reason":"Câu bị động kiểu Anh","severity":"medium"},
+{"old":"là khoảng AppConfig tiếp tục theo dõi alarm","new":"là khoảng thời gian AppConfig tiếp tục theo dõi alarm","reason":"Thiếu danh từ 'thời gian'","severity":"medium"},
+{"old":"gắn với một metric có nghĩa,","new":"gắn với một chỉ số có ý nghĩa,","reason":"'có nghĩa' là calque của meaningful; metric → chỉ số","severity":"medium"},
+{"old":"nên đổi cấu hình có độ trễ tới client cỡ chu kỳ đó,","new":"nên cấu hình mới tới client chậm cỡ chu kỳ đó,","reason":"Câu mơ hồ, trật tự kiểu Anh","severity":"medium"},
+{"old":"với bảng giá nội trang khi chưa đọc được cấu hình.","new":"với bảng giá dựng sẵn trong code khi chưa đọc được cấu hình.","reason":"'nội trang' là từ tự ghép","severity":"medium"},
+{"old":"chỉ được kiểm trên máy, cần xác nhận trong tài khoản lab.","new":"chỉ được kiểm tra trên máy cục bộ, cần xác nhận trong tài khoản lab.","reason":"'kiểm' cụt","severity":"low"},
+{"old":"Trên máy, kiểm cú pháp Terraform","new":"Trên máy, kiểm tra cú pháp Terraform","reason":"'kiểm' cụt","severity":"low"}
+]}

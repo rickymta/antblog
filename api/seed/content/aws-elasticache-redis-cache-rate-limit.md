@@ -1,7 +1,7 @@
 ---
 slug: aws-elasticache-redis-cache-rate-limit
 title: "ElastiCache: cache báo giá, session và rate limit bằng Redis hoặc Valkey"
-summary: "Bài 15: dựng ElastiCache (Redis OSS hoặc Valkey) trong private subnet cho ba việc của Tới Nơi: cache báo giá theo thành phố và km, lưu session tài xế, rate limit API. So sánh node-based với Serverless, TLS và AUTH, TTL ngẫu nhiên hoá và cache stampede. Có Terraform và script Lua đã chạy thử."
+summary: "Bài 15: dựng ElastiCache (Redis OSS hoặc Valkey) trong private subnet cho ba việc của Tới Nơi: cache báo giá theo thành phố và km, lưu session tài xế, rate limit API. So sánh node-based với Serverless, TLS và AUTH, TTL cộng độ lệch ngẫu nhiên và cache stampede. Có Terraform và script Lua đã chạy thử."
 category: devops-aws
 level: intermediate
 tags: [aws, toi-noi, devops, elasticache, redis, valkey, cache, rate-limit, ttl]
@@ -50,7 +50,7 @@ Tới Nơi cần sorted set cho rate limit cửa sổ trượt và script Lua n�
 | Failover | Replica ở AZ khác, bật `multi_az_enabled` | AWS lo |
 | Phù hợp | Tải ổn định, muốn kiểm soát chi phí và tham số | Tải biến động mạnh, ít việc vận hành |
 
-Tải của Tới Nơi lên đột biến hai lần mỗi ngày, nhưng khoảng đó hoàn toàn dự đoán được. Lab hỗ trợ cả hai chế độ qua biến `mode`; bắt đầu bằng node nhỏ để thấy các tham số, rồi so sánh hoá đơn với Serverless sau một tuần.
+Tải của Tới Nơi tăng đột biến hai lần mỗi ngày, nhưng khung giờ đó hoàn toàn dự đoán được. Lab hỗ trợ cả hai chế độ qua biến `mode`; bắt đầu bằng node nhỏ để thấy các tham số, rồi so sánh hoá đơn với Serverless sau một tuần.
 
 ## Dựng cho Tới Nơi: mạng và bảo mật
 
@@ -76,7 +76,7 @@ resource "aws_elasticache_replication_group" "node" {
 
 Khối này tạo hai node ở hai AZ (primary và replica) và tính tiền theo giờ cho cả hai. `snapshot_retention_limit = 0` vì cache không phải nguồn sự thật. Với `transit_encryption_enabled`, client bắt buộc dùng TLS (`redis-cli --tls`).
 
-Về xác thực có ba tầng. Security group quyết định *ai tới được* cổng. AUTH token là một mật khẩu chung cho cả cluster, đơn giản nhưng khó xoay vòng; token cất ở Secrets Manager và truyền cho service như bài 14. RBAC cho phép tạo từng user với quyền riêng, và các phiên bản mới còn hỗ trợ xác thực bằng IAM. Với Tới Nơi, service `quote` nên có user chỉ đọc/ghi khoá `quote:*`, còn service rate limit dùng user khác. Lab để mặc định bảo vệ bằng security group cùng TLS; **chưa kiểm chứng** cấu hình RBAC và IAM auth trên tài khoản thật.
+Về xác thực có ba tầng. Security group quyết định *ai tới được* cổng. AUTH token là một mật khẩu chung cho cả cluster, đơn giản nhưng khó xoay vòng; token cất ở Secrets Manager và truyền cho service như bài 14. RBAC cho phép tạo từng user với quyền riêng, và các phiên bản mới còn hỗ trợ xác thực bằng IAM. Với Tới Nơi, service `quote` nên có user chỉ đọc/ghi khoá `quote:*`, còn service rate limit dùng user khác. Lab giữ cấu hình mặc định, chỉ bảo vệ bằng security group và TLS; **chưa kiểm chứng** cấu hình RBAC và IAM auth trên tài khoản thật.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -116,7 +116,7 @@ end
 return {1, current}
 ```
 
-Gọi bằng `EVAL` với `KEYS[1] = rl:<client>:<số cửa sổ>`, TTL bằng độ dài cửa sổ, giới hạn do ta chọn. Script này đã được chạy thử với Redis 7 cục bộ: gọi sáu, bảy lần với giới hạn năm cho kết quả bị chặn từ lần thứ sáu. Cửa sổ cố định cho phép dồn gấp đôi lượt gọi ở ranh giới hai cửa sổ; cửa sổ trượt dùng sorted set (`ZREMRANGEBYSCORE`, `ZCARD`, `ZADD`) chính xác hơn với giá tăng bộ nhớ. Cả hai script nằm trong lab và chỉ dùng một khoá nên không vướng quy tắc cùng slot của cluster mode.
+Gọi bằng `EVAL` với `KEYS[1] = rl:<client>:<số cửa sổ>`, TTL bằng độ dài cửa sổ, giới hạn do ta chọn. Script này đã được chạy thử với Redis 7 cục bộ: gọi sáu, bảy lần với giới hạn năm cho kết quả bị chặn từ lần thứ sáu. Cửa sổ cố định cho phép dồn gấp đôi lượt gọi ở ranh giới hai cửa sổ; cửa sổ trượt dùng sorted set (`ZREMRANGEBYSCORE`, `ZCARD`, `ZADD`) chính xác hơn nhưng tốn thêm bộ nhớ. Cả hai script nằm trong lab và chỉ dùng một khoá nên không vướng quy tắc cùng slot của cluster mode.
 
 Session tài xế đơn giản hơn: `SET driver:session:<id> <json> EX 1800`. Tài xế gửi vị trí mỗi 4 giây nên mỗi lần có thể làm mới TTL; tài xế biến mất thì khoá tự hết hạn.
 
@@ -152,14 +152,14 @@ Theo dõi bốn chỉ số trên CloudWatch: `CurrConnections` (số kết nối
 
 ## Cái giá phải trả
 
-- **Coi cache là nguồn sự thật.** Replication không đồng bộ: failover có thể mất những ghi gần nhất. Thứ không được mất phải nằm ở PostgreSQL (hoặc MemoryDB, bài 33).
+- **Coi cache là nguồn sự thật.** Replication bất đồng bộ: failover có thể mất những ghi gần nhất. Thứ không được mất phải nằm ở PostgreSQL (hoặc MemoryDB, bài 33).
 - **Quên TTL.** Khoá không TTL phình bộ nhớ và không bị evict; với policy `volatile-*` bộ nhớ đầy sẽ làm ghi thất bại.
-- **Số kết nối nhân theo số task.** Mỗi task mở pool tới cache; hãy cộng dồn theo tình huống deploy `maximumPercent` ở bài 13.
+- **Số kết nối nhân theo số task.** Mỗi task mở pool tới cache; hãy tính số kết nối tối đa trong tình huống deploy với `maximumPercent` ở bài 13.
 - **Invalidation bằng xoá hàng loạt.** Một lệnh xoá cả nhóm khoá gây stampede. Đổi phiên bản trong khoá.
 
-**Bài tập:** TTL ngẫu nhiên hoá để làm gì? Với 1.800 khoá báo giá nạp cùng lúc sau khi đổi bảng giá và TTL 60 giây, điều gì xảy ra vào giây thứ 61 nếu không ngẫu nhiên hoá?
+**Bài tập:** Vì sao cần thêm độ lệch ngẫu nhiên vào TTL? Với 1.800 khoá báo giá nạp cùng lúc sau khi đổi bảng giá và TTL 60 giây, điều gì xảy ra vào giây thứ 61 nếu không thêm độ lệch ngẫu nhiên?
 
-<details><summary>Xem đáp án</summary><p>Ngẫu nhiên hoá làm các khoá hết hạn ở những thời điểm khác nhau. Không có nó, cả 1.800 khoá hết hạn trong cùng một giây; nếu 12.000 lượt đọc báo giá mỗi giây đều trượt, database nhận gần như toàn bộ lượt đọc đó cùng lúc thay vì 5% (600 lượt) như bình thường: một đỉnh tải tự gây ra. Thêm độ lệch 0–14 giây rải việc tính lại ra nhiều giây. Cùng với khoá đơn luồng (chỉ một request tính lại mỗi khoá), đỉnh này gần như biến mất.</p></details>
+<details><summary>Xem đáp án</summary><p>Độ lệch ngẫu nhiên làm các khoá hết hạn ở những thời điểm khác nhau. Không có nó, cả 1.800 khoá hết hạn trong cùng một giây; nếu 12.000 lượt đọc báo giá mỗi giây đều trượt, database nhận gần như toàn bộ lượt đọc đó cùng lúc thay vì 5% (600 lượt) như bình thường: một đỉnh tải tự gây ra. Thêm độ lệch 0–14 giây rải việc tính lại ra nhiều giây. Cùng với khoá đơn luồng (chỉ một request tính lại mỗi khoá), đỉnh này gần như biến mất.</p></details>
 
 ## Lab: tạo cache nhỏ và thử bằng redis-cli
 

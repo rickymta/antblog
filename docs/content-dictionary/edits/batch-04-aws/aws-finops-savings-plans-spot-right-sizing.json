@@ -1,0 +1,15 @@
+{"file":"aws-finops-savings-plans-spot-right-sizing.md","edits":[
+{"old":"không cộng dồn với Reserved cho cùng tải","new":"không kết hợp được với Reserved cho cùng tải","reason":"'cộng dồn' sai nghĩa (stack) và dễ nhầm với phép cộng","severity":"medium"},
+{"old":"worker chịu gián đoạn","new":"worker chịu được gián đoạn","reason":"Lược 'được', 'chịu' đứng cụt","severity":"medium"},
+{"old":"Giảm rất lớn nhưng có thể","new":"Giảm rất mạnh nhưng có thể","reason":"'giảm lớn' gượng","severity":"low"},
+{"old":"phần chi tiêu đủ điều kiện được cam kết chi trả.","new":"phần chi tiêu đủ điều kiện được cam kết phủ.","reason":"'cam kết chi trả' sai nghĩa: Coverage đo phần được phủ","severity":"medium"},
+{"old":"Gom thành phần hay nói chuyện cùng AZ khi chịu được, cache","new":"Đặt các thành phần hay gọi nhau vào cùng AZ khi chịu được, cache","reason":"'nói chuyện' và 'gom' dịch từng chữ","severity":"medium"},
+{"old":"**Owner theo service**: con số không có người nhận sẽ không giảm.","new":"**Owner theo service**: con số không có người chịu trách nhiệm thì sẽ không giảm.","reason":"'người nhận' mơ hồ","severity":"medium"},
+{"old":"ước tính tiết kiệm sau giảm giá của bạn","new":"ước tính mức tiết kiệm đã tính cả giảm giá áp dụng cho tài khoản của bạn","reason":"Câu cụt, thiếu danh từ","severity":"medium"},
+{"old":"Cost Anomaly Detection** dùng học máy báo chi tiêu","new":"Cost Anomaly Detection** dùng học máy để báo chi tiêu","reason":"Thiếu liên từ","severity":"low"},
+{"old":"lưới bắt lỗi cấu hình","new":"lớp phát hiện lỗi cấu hình","reason":"'lưới bắt' là calque (safety net)","severity":"medium"},
+{"old":"kèm giả định (nền tải, thời hạn)","new":"kèm giả định (mức tải nền, thời hạn)","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"bỏ dư thừa của bài 56 để","new":"bỏ phần dự phòng của bài 56 để","reason":"'dư thừa' ở đây là redundancy, dễ hiểu thành lãng phí","severity":"medium"},
+{"old":"**Tag thiếu nghĩa là báo cáo sai**","new":"**Thiếu tag nghĩa là báo cáo sai**","reason":"Trật tự từ kiểu Anh","severity":"low"},
+{"old":"worker phải chịu bị ngắt giữa chừng và xử lý idempotent","new":"worker phải chịu được việc bị ngắt giữa chừng và xử lý idempotent","reason":"Câu cụt","severity":"medium"}
+]}

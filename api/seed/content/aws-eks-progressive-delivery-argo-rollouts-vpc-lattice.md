@@ -1,16 +1,16 @@
 ---
 slug: aws-eks-progressive-delivery-argo-rollouts-vpc-lattice
 title: "Progressive delivery trên EKS: Argo Rollouts, canary theo metric, VPC Lattice và giao tiếp giữa service"
-summary: "Bài 49: thay Deployment bằng Argo Rollouts canary 5/25/50%, AnalysisTemplate đọc Prometheus hoặc CloudWatch để tự promote hoặc abort, chia traffic qua ALB hay Gateway API; VPC Lattice cho service-to-service có auth IAM giữa EKS, ECS và Lambda; App Mesh đã ngừng, khi nào cần Istio."
+summary: "Bài 49: thay Deployment bằng Argo Rollouts canary 5/25/50%, AnalysisTemplate đọc Prometheus hoặc CloudWatch để tự promote hoặc abort, chia traffic qua ALB hay Gateway API; VPC Lattice cho service-to-service có auth IAM giữa EKS, ECS và Lambda; App Mesh đã ngừng hỗ trợ, khi nào cần Istio."
 category: devops-aws
 level: advanced
 tags: [aws, toi-noi, devops, eks, argo-rollouts, canary, vpc-lattice, service-mesh, progressive-delivery]
 language: vi
 ---
 
-Bản `booking` mới của Tới Nơi sửa thuật toán ghép tài xế. Ở staging mọi thứ đều đẹp, nhưng trong 11:00 ngày đầu lên prod, một nhánh code chỉ chạy khi có nhiều tài xế cùng khu vực làm tỷ lệ 5xx lên 8%. Deployment cuốn chiếu đã thay hết 6 pod trong vài phút, và người trực mất 12 phút để nhận ra rồi rollback thủ công, trong lúc 70 chuyến mỗi giây đang đổ vào. Điều cần có không phải deploy nhanh hơn, mà là cho **5% khách** thử bản mới, để máy tự đo, rồi tự quay lại nếu xấu.
+Bản `booking` mới của Tới Nơi sửa thuật toán ghép tài xế. Ở staging mọi thứ đều đẹp, nhưng trong khung 11:00 của ngày đầu lên prod, một nhánh code chỉ chạy khi có nhiều tài xế cùng khu vực làm tỷ lệ 5xx lên 8%. Deployment cuốn chiếu đã thay hết 6 pod trong vài phút, và người trực mất 12 phút để nhận ra rồi rollback thủ công, trong lúc 70 chuyến mỗi giây đang đổ vào. Điều cần có không phải deploy nhanh hơn, mà là cho **5% khách** thử bản mới, để máy tự đo, rồi tự quay lại nếu kết quả xấu.
 
-Đây là **bài 49** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bạn cần Ingress trên EKS ([bài 43](/articles/aws-eks-vpc-cni-load-balancer-controller-ingress)), GitOps ([bài 46](/articles/aws-eks-gitops-argocd-helm-kustomize)) và metric Prometheus ([bài 47](/articles/aws-eks-observability-container-insights-adot-prometheus)). Về khái niệm rolling, blue/green, canary xem [bài 27](/articles/aws-chien-luoc-deploy-rolling-canary-rollback); ở ECS cùng ý tưởng đã làm bằng CodeDeploy ở [bài 26](/articles/aws-codepipeline-codebuild-codedeploy-blue-green).
+Đây là **bài 49** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bạn cần Ingress trên EKS ([bài 43](/articles/aws-eks-vpc-cni-load-balancer-controller-ingress)), GitOps ([bài 46](/articles/aws-eks-gitops-argocd-helm-kustomize)) và metric Prometheus ([bài 47](/articles/aws-eks-observability-container-insights-adot-prometheus)). Về khái niệm rolling, blue/green, canary thì xem [bài 27](/articles/aws-chien-luoc-deploy-rolling-canary-rollback); ở ECS cùng ý tưởng đã làm bằng CodeDeploy ở [bài 26](/articles/aws-codepipeline-codebuild-codedeploy-blue-green).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -28,7 +28,7 @@ Bản `booking` mới của Tới Nơi sửa thuật toán ghép tài xế. Ở 
 | Tự đọc metric | Không | Có (AnalysisTemplate) | Có, trước khi chuyển |
 | Chi phí tài nguyên | Thêm `maxSurge` | Thêm pod canary | Gấp đôi pod lúc chuyển |
 | Rollback | `rollout undo`, thủ công | Abort tự động hoặc thủ công | Quay service về bản cũ |
-| Hợp với | Service ít rủi ro | Service nhiều khách như `booking` | Cần kiểm hoàn chỉnh trước khi chuyển |
+| Hợp với | Service ít rủi ro | Service nhiều khách như `booking` | Cần kiểm tra đầy đủ trước khi chuyển |
 
 **Flagger** là lựa chọn cùng mục đích, theo hướng "controller đọc Deployment có sẵn" thay vì thay bằng CRD mới và thường gắn với mesh hoặc Gateway API. Rollouts gọn hơn khi bạn muốn mô tả các bước ngay trong manifest và dùng được với ALB.
 
@@ -60,7 +60,7 @@ strategy:
       - setWeight: 25
 ```
 
-Hai bước đầu dựng một pod canary rồi mở route cho **tester nội bộ** gọi bản mới bằng header `X-Toinoi-Tester: qa`, khi khách thật chưa nhận request nào. `matchTrafficWeight: true` trả số pod canary về theo trọng số; thiếu nó, canary giữ đúng 1 pod cho cả bước 25% và 50%. Tài liệu Argo Rollouts liệt kê ALB trong các traffic router hỗ trợ `setHeaderRoute`, và route header phải khai trong `managedRoutes`. Khi canary chạy, pod bản mới nằm sau `booking-canary`, pod cũ sau `booking-stable`; Rollouts tự thêm selector `rollouts-pod-template-hash` để hai Service trỏ đúng ReplicaSet.
+Hai bước đầu dựng một pod canary rồi mở route cho **tester nội bộ** gọi bản mới bằng header `X-Toinoi-Tester: qa`, trong lúc khách thật chưa nhận request nào. `matchTrafficWeight: true` đưa số pod canary về khớp với trọng số; thiếu nó, canary giữ đúng 1 pod cho cả bước 25% và 50%. Tài liệu Argo Rollouts liệt kê ALB trong các traffic router hỗ trợ `setHeaderRoute`, và route header phải khai trong `managedRoutes`. Khi canary chạy, pod bản mới nằm sau `booking-canary`, pod cũ sau `booking-stable`; Rollouts tự thêm selector `rollouts-pod-template-hash` để hai Service trỏ đúng ReplicaSet.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -106,7 +106,7 @@ Với GitOps, có một điểm lệch phải biết. Sau khi abort, cluster ch�
 | Target group | Đích thật: instance, IP, Lambda, ALB hoặc pod Kubernetes |
 | Auth policy | Policy IAM ở cấp service network hoặc service, yêu cầu client ký SigV4 |
 
-Với EKS, **AWS Gateway API Controller** biến `Gateway` thành service network và mỗi `HTTPRoute` thành một Lattice service; pod là target. Với Lambda và ECS, bạn tạo target group tương ứng bằng Terraform (lab có service `fraud` với target group Lambda). **Auth policy** cho phép nói rõ "chỉ task role `toinoi-lab-pricing-task` của ECS được `vpc-lattice-svcs:Invoke` vào `fraud`", khác với security group chỉ biết IP: danh tính là role, không phải địa chỉ.
+Với EKS, **AWS Gateway API Controller** biến `Gateway` thành service network và mỗi `HTTPRoute` thành một Lattice service; pod là target. Với Lambda và ECS, bạn tạo target group tương ứng bằng Terraform (lab có service `fraud` với target group Lambda). **Auth policy** cho phép quy định rõ "chỉ task role `toinoi-lab-pricing-task` của ECS được `vpc-lattice-svcs:Invoke` vào `fraud`", khác với security group chỉ biết IP: danh tính là role, không phải địa chỉ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -115,7 +115,7 @@ Với EKS, **AWS Gateway API Controller** biến `Gateway` thành service networ
 <figcaption>Hình 2. Service-to-service qua Lattice: định tuyến và xác thực nằm ở service network thay vì rải ở từng cặp client và server.</figcaption>
 </figure>
 
-Cái giá: Lattice chủ yếu là lớp 7, tính tiền theo giờ của service, dữ liệu xử lý và số request; client phải ký SigV4 khi dùng auth IAM, tức là cần thêm code hoặc proxy. Chia sẻ service network giữa tài khoản dùng AWS RAM.
+Cái giá: Lattice chủ yếu là lớp 7, tính tiền theo giờ chạy của service, lượng dữ liệu xử lý và số request; client phải ký SigV4 khi dùng auth IAM, tức là cần thêm code hoặc proxy. Muốn chia sẻ service network giữa các tài khoản thì dùng AWS RAM.
 
 ## App Mesh đã hết hỗ trợ, và khi nào cần Istio
 
@@ -129,14 +129,14 @@ Cái giá: Lattice chủ yếu là lớp 7, tính tiền theo giờ của servic
 | Chi phí tài nguyên | Phí dịch vụ | CPU, RAM của sidecar (hoặc agent) trên mỗi pod hay node |
 | Hợp khi | Gọi chéo nền tảng, auth bằng IAM | Cần mTLS, retry, traffic mirroring ngay trong cluster |
 
-Sidecar là chi phí vận hành đáng kể: mỗi pod thêm một container, mỗi lần nâng cấp mesh phải khởi động lại workload, và debug có thêm một lớp. Chỉ vào mesh khi có yêu cầu cụ thể mà Lattice và NetworkPolicy không đáp ứng.
+Sidecar là chi phí vận hành đáng kể: mỗi pod thêm một container, mỗi lần nâng cấp mesh phải khởi động lại workload, và debug có thêm một lớp. Chỉ dùng mesh khi có yêu cầu cụ thể mà Lattice và NetworkPolicy không đáp ứng.
 
 ## Lỗi thường gặp
 
 - **Đo lẫn stable và canary:** lỗi bị pha loãng. Lọc theo hash của canary.
-- **Quên Argo CD sau abort:** cluster đã quay lại nhưng Git vẫn ghi bản mới. Tạo PR revert.
-- **Phân tích không có dữ liệu:** `0/0` ra `NaN`, điều kiện sai lập tức hoặc rollout kẹt. Dùng `isNaN`, thêm metric volume và để kết quả inconclusive.
-- **Auth Lattice không ký request:** client gọi không SigV4 nhận 403 dù mạng thông. Kiểm danh tính và policy trước khi nghi mạng.
+- **Quên xử lý lệch Git sau abort:** cluster đã quay lại nhưng Git vẫn ghi bản mới. Tạo PR revert.
+- **Phân tích không có dữ liệu:** `0/0` ra `NaN`, khiến điều kiện bị đánh giá sai ngay hoặc rollout bị kẹt. Dùng `isNaN`, thêm metric volume và để kết quả inconclusive.
+- **Auth Lattice không ký request:** client gọi mà không ký SigV4 sẽ nhận 403 dù mạng thông. Hãy kiểm tra danh tính và policy trước khi nghi ngờ mạng.
 
 **Bài tập:** canary 5% của `booking` chỉ nhận vài request mỗi phút vào lúc 03:00, nên tỷ lệ 5xx luôn là 0 hoặc 100%. Làm gì để phép đo có ý nghĩa?
 
@@ -144,7 +144,7 @@ Sidecar là chi phí vận hành đáng kể: mỗi pod thêm một container, m
 
 ## Lab và kiểm chứng
 
-Mã ở `examples/toi-noi-aws/p05-49-eks-rollouts`: Rollout canary với Service, Ingress ALB và PodMonitor; hai AnalysisTemplate (Prometheus và CloudWatch); `Gateway`, `HTTPRoute` và `IAMAuthPolicy` cho VPC Lattice; Terraform cho service network, service `fraud` qua Lambda và role Pod Identity của controller. README ghi tiền tính thế nào và lệnh dọn.
+Mã ở `examples/toi-noi-aws/p05-49-eks-rollouts`: Rollout canary với Service, Ingress ALB và PodMonitor; hai AnalysisTemplate (Prometheus và CloudWatch); `Gateway`, `HTTPRoute` và `IAMAuthPolicy` cho VPC Lattice; Terraform cho service network, service `fraud` qua Lambda và role Pod Identity của controller. README ghi cách tính chi phí và lệnh dọn.
 
 `terraform validate` đã chạy trong Docker và YAML đã parse được. **Chưa kiểm chứng trên cluster và tài khoản thật**: manifest Rollout (đặc biệt `setHeaderRoute` với ALB), SigV4 của provider Prometheus tới AMP, cấu trúc provider CloudWatch, các CRD của Gateway API Controller (`IAMAuthPolicy`) và hành vi Lambda trong Lattice.
 

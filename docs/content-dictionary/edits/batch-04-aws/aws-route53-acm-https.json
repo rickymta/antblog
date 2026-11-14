@@ -1,0 +1,11 @@
+{"file":"aws-route53-acm-https.md","edits":[
+{"old":"không được đi trần qua Internet","new":"không được truyền không mã hoá qua Internet","reason":"'đi trần' là calque, khó hiểu","severity":"medium"},
+{"old":"qua HTTP thường.","new":"qua HTTP không mã hoá.","reason":"'HTTP thường' gượng; nói rõ nghĩa","severity":"low"},
+{"old":"có hạn dùng hữu hạn và thời hạn tối đa","new":"có thời hạn, và thời hạn tối đa","reason":"Lặp nghĩa 'hạn dùng hữu hạn', tự ghép","severity":"medium"},
+{"old":"là số giây trình phân giải được cache câu trả lời","new":"là số giây mà trình phân giải giữ câu trả lời trong cache","reason":"Câu thiếu động từ chính ('được cache' kiểu bị động Anh)","severity":"medium"},
+{"old":"ACM thấy bản ghi, đổi trạng thái sang","new":"ACM phát hiện bản ghi, chuyển trạng thái sang","reason":"'thấy' và 'đổi trạng thái' gượng","severity":"low"},
+{"old":"và ALB chọn chứng chỉ theo tên khách yêu cầu","new":"và ALB chọn chứng chỉ theo tên miền mà khách yêu cầu","reason":"Thiếu danh từ 'tên miền', câu mơ hồ","severity":"medium"},
+{"old":"luật cổng 80 chỉ cho IP của bạn ở bài 08 giờ chỉ còn để chuyển hướng","new":"quy tắc cổng 80 chỉ cho phép IP của bạn ở bài 08 giờ chỉ còn dùng để chuyển hướng","reason":"'luật' → 'quy tắc'; thiếu động từ 'cho phép'","severity":"low"},
+{"old":"thay vì copy mù","new":"thay vì sao chép nguyên xi","reason":"'copy mù' là cụm tự ghép","severity":"low"},
+{"old":"Điều này va chạm với lab bài 08","new":"Điều này mâu thuẫn với lab bài 08","reason":"'va chạm' là calque của 'conflict'","severity":"medium"}
+]}

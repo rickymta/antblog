@@ -15,7 +15,7 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Aurora có tới 15 reader. Nếu writer hỏng, có phải mất dữ liệu chưa kịp sao chép sang reader không?</p>
-<details><summary>Xem đáp án</summary><p>Không theo kiểu đó. Reader không giữ bản sao dữ liệu riêng: mọi instance trong cluster dùng chung một volume lưu trữ, nên dữ liệu đã được ghi nhận không nằm trong writer. Reader chỉ có thể thấy dữ liệu mới chậm vài chục mili giây (replica lag), và khi failover, reader được nâng lên writer đọc đúng volume đó.</p></details>
+<details><summary>Xem đáp án</summary><p>Không theo kiểu đó. Reader không giữ bản sao dữ liệu riêng: mọi instance trong cluster dùng chung một volume lưu trữ, nên dữ liệu đã được ghi nhận không nằm riêng trong writer. Reader chỉ có thể thấy dữ liệu mới chậm vài chục mili giây (replica lag), và khi failover, reader được nâng lên writer đọc đúng volume đó.</p></details>
 </div>
 
 ## Aurora khác RDS ở lớp lưu trữ
@@ -42,7 +42,7 @@ Aurora cho bạn nhiều tên DNS cho cùng một cluster:
 | Custom endpoint | Tập instance bạn chọn | `reporting`: chỉ phục vụ báo cáo |
 | Instance endpoint | Đúng một instance | Gỡ lỗi; không đưa vào cấu hình app |
 
-Hai điều cần nhớ về reader endpoint. Nó cân bằng ở **mức kết nối**, không phải từng câu query: một pool giữ kết nối lâu có thể dồn hết vào một reader. Và nếu cluster không còn reader nào, nó trỏ về writer, nên tải đọc âm thầm đổ lên writer; hãy đặt alarm theo số reader.
+Hai điều cần nhớ về reader endpoint. Reader endpoint cân bằng ở **mức kết nối**, không phải từng câu query: một pool giữ kết nối lâu có thể dồn hết vào một reader. Và nếu cluster không còn reader nào, nó trỏ về writer, nên tải đọc đổ lên writer mà không báo lỗi; hãy đặt alarm theo số reader.
 
 Đây chính là chỗ CQRS ở [bài CQRS và Mediator](/articles/dotnet10-cqrs-mediator-pipeline) có giá trị hạ tầng: command handler dùng connection string tới writer, query handler dùng connection string tới reader, mỗi use case biết mình thuộc đường nào. Cái giá là **replica lag**: độ trễ thường chỉ vài chục mili giây nhưng không bằng 0, nên màn hình chi tiết đọc ngay từ reader sau khi khách đặt chuyến có thể chưa thấy chuyến. Cách xử lý: command trả luôn dữ liệu vừa tạo, hoặc đọc-sau-ghi trong cùng request thì dùng writer.
 
@@ -64,7 +64,7 @@ Trong lúc failover, connection đang mở tới writer bị ngắt và cluster 
 <rect x="480" y="40" width="190" height="56" rx="10" class="f-pk-soft s-pk"/><text x="494" y="64" class="t-b">Writer · tier 0</text><text x="494" y="82" class="t-small">cluster endpoint</text>
 <rect x="480" y="130" width="190" height="56" rx="10" class="f-pk-soft s-pk"/><text x="494" y="154" class="t-b">Reader · tier 1</text><text x="494" y="172" class="t-small">reader endpoint</text>
 <rect x="480" y="220" width="190" height="56" rx="10" class="f-pk-soft s-pk"/><text x="494" y="244" class="t-b">Reporting · tier 15</text><text x="494" y="262" class="t-small">custom endpoint reporting</text>
-<rect x="725" y="40" width="140" height="236" rx="10" class="f-phys-soft s-phys"/><text x="739" y="66" class="t-b">Volume cluster</text><text x="739" y="90" class="t-small">6 bản sao</text><text x="739" y="108" class="t-small">3 AZ, 2 bản mỗi AZ</text><text x="739" y="132" class="t-small">ghi: đủ 4 trên 6</text><text x="739" y="156" class="t-small">tự lớn theo dữ liệu</text><text x="739" y="188" class="t-small">writer ghi,</text><text x="739" y="206" class="t-small">reader chỉ đọc</text>
+<rect x="725" y="40" width="140" height="236" rx="10" class="f-phys-soft s-phys"/><text x="739" y="66" class="t-b">Volume cluster</text><text x="739" y="90" class="t-small">6 bản sao</text><text x="739" y="108" class="t-small">3 AZ, 2 bản mỗi AZ</text><text x="739" y="132" class="t-small">ghi: đủ 4 trên 6</text><text x="739" y="156" class="t-small">tự mở rộng theo dữ liệu</text><text x="739" y="188" class="t-small">writer ghi,</text><text x="739" y="206" class="t-small">reader chỉ đọc</text>
 <path d="M170 76 H238" class="f-none s-pk" stroke-width="2" marker-end="url(#aws31-1-a)"/><path d="M170 158 H238" class="f-none s-pk" stroke-width="2" marker-end="url(#aws31-1-a)"/><path d="M170 248 H478" class="f-none s-pk" stroke-width="2" marker-end="url(#aws31-1-a)"/>
 <path d="M395 76 H478" class="f-none s-pk" stroke-width="2" marker-end="url(#aws31-1-a)"/><path d="M395 156 H478" class="f-none s-pk" stroke-width="2" marker-end="url(#aws31-1-a)"/>
 <path d="M670 68 H723" class="f-none s-phys" stroke-width="2" marker-end="url(#aws31-1-a)"/><path d="M670 158 H723" class="f-none s-phys" stroke-width="2" marker-end="url(#aws31-1-a)"/><path d="M670 248 H723" class="f-none s-phys" stroke-width="2" marker-end="url(#aws31-1-a)"/>
@@ -76,7 +76,7 @@ Trong lúc failover, connection đang mở tới writer bị ngắt và cluster 
 
 ## RDS Proxy: gom kết nối
 
-Mỗi connection PostgreSQL là một tiến trình tốn bộ nhớ; `max_connections` suy ra từ kích thước instance (Serverless v2: từ ACU tối đa). Hai nguồn làm cạn nó: nhiều task ECS mỗi task một pool, và Lambda bùng lên hàng trăm bản chạy song song, mỗi bản một connection ([bài 18](/articles/aws-lambda-webhook-thanh-toan-cold-start)). **RDS Proxy** đứng giữa: ứng dụng mở rất nhiều connection tới proxy, proxy giữ một hồ nhỏ connection tới database và **multiplex** nhiều client lên ít connection.
+Mỗi connection PostgreSQL là một tiến trình tốn bộ nhớ; `max_connections` suy ra từ kích thước instance (Serverless v2: từ ACU tối đa). Hai nguồn làm cạn nó: nhiều task ECS mỗi task một pool, và Lambda bùng lên hàng trăm bản chạy song song, mỗi bản một connection ([bài 18](/articles/aws-lambda-webhook-thanh-toan-cold-start)). **RDS Proxy** đứng giữa: ứng dụng mở rất nhiều connection tới proxy, proxy giữ một pool nhỏ connection tới database và **multiplex** nhiều client lên ít connection.
 
 Multiplex có điều kiện. Khi một session làm điều gì đó gắn trạng thái vào connection (một số lệnh `SET`, prepared statement dạng có tên, bảng tạm, advisory lock), proxy phải **pin** connection đó cho riêng client, mất lợi ích gom. Theo dõi `DatabaseConnectionsCurrentlySessionPinned`: tỷ lệ pin cao nghĩa là proxy gần như vô dụng và cần sửa code hoặc driver.
 
@@ -95,9 +95,9 @@ Cái giá: proxy là một hop nữa (thêm độ trễ nhỏ) và tính tiền 
 ## Cái giá phải trả
 
 - **Replica lag bị bỏ qua.** Đọc-sau-ghi trên reader cho thấy dữ liệu cũ; chọn đường đọc theo từng use case.
-- **Không có reader.** Reader endpoint âm thầm trỏ về writer, tải đọc đè lên writer.
+- **Không có reader.** Reader endpoint tự trỏ về writer mà không báo lỗi, tải đọc đè lên writer.
 - **Pinning.** Proxy chỉ có ích khi session không bị pin; kiểm tra metric sau khi đổi driver hoặc thêm `SET`.
-- **Tiền I/O của Standard.** Cluster ghi nhiều dễ bị tính I/O bất ngờ; so với I/O-Optimized bằng số đo thật.
+- **Tiền I/O của Standard.** Cluster ghi nhiều dễ bị tính I/O bất ngờ; hãy so sánh với I/O-Optimized bằng số đo thật.
 - **Restore chưa diễn tập.** Chưa từng restore thì RTO chỉ là phỏng đoán.
 
 **Bài tập:** Query báo cáo tháng (quét hàng chục triệu dòng `trips`) nên chạy ở endpoint nào, và vì sao không dùng reader endpoint mặc định?
@@ -117,7 +117,7 @@ resource "aws_rds_cluster_endpoint" "reporting" {
 }
 ```
 
-Kiểm trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker; `bash -n` cho script. **Chưa kiểm chứng trên tài khoản thật:** `apply` với bản engine mặc định, RDS Proxy dùng secret master do RDS quản lý (production nên dùng user riêng), Blue/Green, thời gian failover và restore. Các con số về lag và thời gian lấy từ tài liệu, chưa đo.
+Kiểm tra trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker; `bash -n` cho script. **Chưa kiểm chứng trên tài khoản thật:** `apply` với bản engine mặc định, RDS Proxy dùng secret master do RDS quản lý (production nên dùng user riêng), Blue/Green, thời gian failover và restore. Các con số về lag và thời gian lấy từ tài liệu, chưa đo.
 
 Bài trước: [bài 30](/articles/aws-policy-as-code-checkov-infracost-drift). Bài tiếp: [bài 32](/articles/aws-dynamodb-single-table-gsi-ttl-streams).
 

@@ -1,0 +1,14 @@
+{"file":"aws-eks-terraform-eksctl-kubectl-namespace.md","edits":[
+{"old":"quyền không đến từ việc \"ai tạo\". Nó chỉ đến từ một access entry","new":"quyền không đến từ việc \"ai tạo\". Quyền chỉ đến từ một access entry","reason":"Tránh 'Nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Resource thuần cần khoảng chục thành phần chỉ để có một cluster chạy được","new":"Nếu viết bằng resource thuần, bạn cần khoảng chục thành phần chỉ để có một cluster chạy được","reason":"Câu thiếu chủ ngữ, giọng dịch","severity":"low"},
+{"old":"mặc định không có node nào được bảo đảm, và gắn taint","new":"không bảo đảm node nào được giữ lại, và gắn taint","reason":"'mặc định không có node nào được bảo đảm' mơ hồ, kiểu dịch máy","severity":"medium"},
+{"old":"Cụm Spot liệt kê nhiều loại instance cùng cỡ","new":"Node group Spot liệt kê nhiều loại instance cùng cỡ","reason":"'Cụm' dễ lẫn với cluster; đã gọi là node group","severity":"medium"},
+{"old":"một danh sách chỉ một loại làm Spot rất dễ cạn.","new":"danh sách chỉ có một loại khiến Spot rất dễ hết capacity.","reason":"'cạn' gượng","severity":"low"},
+{"old":"access entry nhận ARN có path, khác `aws-auth` buộc bỏ path.","new":"access entry nhận ARN có path, khác với `aws-auth` là nơi buộc phải bỏ path.","reason":"Câu cụt, thiếu liên kết","severity":"medium"},
+{"old":"Có lệnh cho từng việc, ít cái nhìn tổng thể","new":"Có lệnh riêng cho từng việc, khó nhìn tổng thể","reason":"'ít cái nhìn' là cụm tự ghép","severity":"low"},
+{"old":"Chủ yếu cluster và phụ kiện","new":"Chủ yếu cluster và add-on","reason":"'phụ kiện' không phải thuật ngữ; bài dùng 'add-on'","severity":"medium"},
+{"old":"Spot không phải on-demand rẻ hơn.","new":"Spot không đơn giản là on-demand với giá rẻ hơn.","reason":"Câu gượng, dễ hiểu sai","severity":"medium"},
+{"old":"Để dư chỗ cho ít nhất một pod nghỉ.","new":"Hãy để dư chỗ cho ít nhất một pod được phép ngừng hoạt động.","reason":"'pod nghỉ' gượng","severity":"medium"},
+{"old":"Managed node group nhận khuyến nghị cân bằng hoặc thông báo thu hồi","new":"Managed node group nhận khuyến nghị rebalance hoặc thông báo thu hồi","reason":"'khuyến nghị cân bằng' là calque của rebalance recommendation","severity":"medium"},
+{"old":"Một lệnh `delete` trên nhầm cluster là sự cố kinh điển.","new":"Chạy lệnh `delete` nhầm cluster là sự cố kinh điển.","reason":"Trật tự từ kiểu Anh","severity":"low"}
+]}

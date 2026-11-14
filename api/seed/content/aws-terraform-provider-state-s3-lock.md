@@ -15,7 +15,7 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Bạn xoá nhầm tệp <code>terraform.tfstate</code> trên laptop. Các tài nguyên đã tạo trên AWS có biến mất theo không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Tài nguyên vẫn chạy trên AWS. Nhưng Terraform mất bản đồ giữa tên trong code và ID thật, nên lần <code>plan</code> sau nó thấy mọi thứ là "chưa có" và định tạo lại từ đầu, dẫn đến trùng tên hoặc tài nguyên mồ côi. Vì vậy state phải nằm ở nơi bền, có version và có khoá.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Tài nguyên vẫn chạy trên AWS. Nhưng Terraform mất bản đồ giữa tên trong code và ID thật, nên lần <code>plan</code> sau nó thấy mọi thứ là "chưa có" và định tạo lại từ đầu, dẫn đến trùng tên hoặc tài nguyên mồ côi. Vì vậy state phải nằm ở nơi bền, lưu được các phiên bản cũ và có khoá.</p></details>
 </div>
 
 ## HCL, provider và vòng lệnh cơ bản
@@ -65,7 +65,7 @@ Provider đăng nhập qua chuỗi credential của AWS SDK, nên chỉ cần `a
 
 ## State: bản đồ giữa code và tài nguyên thật
 
-State là tệp JSON ánh xạ địa chỉ trong code (`aws_vpc.main`) tới ID thật (`vpc-0abc...`) cùng toàn bộ thuộc tính Terraform biết. Nó cũng là bộ nhớ để tính phần khác biệt khi bạn đổi code.
+State là tệp JSON ánh xạ địa chỉ trong code (`aws_vpc.main`) tới ID thật (`vpc-0abc...`) cùng toàn bộ thuộc tính Terraform biết. State cũng là bộ nhớ để Terraform tính phần khác biệt khi bạn đổi code.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -74,11 +74,11 @@ State là tệp JSON ánh xạ địa chỉ trong code (`aws_vpc.main`) tới ID
 <figcaption>Hình 1. <code>plan</code> so code với state, <code>refresh</code> so state với thực tế. State lưu trong S3 để cả đội và CI cùng nhìn một bản đồ.</figcaption>
 </figure>
 
-Hai hệ quả thực tế. Thứ nhất, state có thể chứa dữ liệu nhạy cảm dưới dạng văn bản rõ (mật khẩu database do Terraform sinh, giá trị `sensitive` vẫn nằm trong state); coi nó như secret: mã hoá, giới hạn người đọc, không đưa lên Git. Thứ hai, state tách theo môi trường và theo vòng đời (mạng, dữ liệu, service), để một lệnh sai không chạm tới mọi thứ.
+Hai hệ quả thực tế. Thứ nhất, state có thể chứa dữ liệu nhạy cảm dưới dạng plaintext (mật khẩu database do Terraform sinh, giá trị `sensitive` vẫn nằm trong state); coi nó như secret: mã hoá, giới hạn người đọc, không đưa lên Git. Thứ hai, state tách theo môi trường và theo vòng đời (mạng, dữ liệu, service), để một lệnh sai không chạm tới mọi thứ.
 
 ## Remote state trên S3 với use_lockfile
 
-Từ Terraform 1.10, backend S3 có thể tự khoá bằng `use_lockfile = true`: Terraform ghi một object `<key>.tflock` cạnh tệp state bằng ghi có điều kiện (conditional write) của S3, và xoá nó khi xong. Tính năng ra mắt ở 1.10 dưới dạng thử nghiệm, thành GA ở 1.11; cũng từ 1.11, `dynamodb_table` và các tham số DynamoDB khác bị đánh dấu deprecated. Vì vậy Tới Nơi không dựng bảng DynamoDB, và khi vận hành thật nên dùng Terraform 1.11 trở lên.
+Từ Terraform 1.10, backend S3 có thể tự khoá bằng `use_lockfile = true`: Terraform ghi một object `<key>.tflock` cạnh tệp state bằng cơ chế ghi có điều kiện (conditional write) của S3, và xoá nó khi xong. Tính năng ra mắt ở 1.10 dưới dạng thử nghiệm, thành GA ở 1.11; cũng từ 1.11, `dynamodb_table` và các tham số DynamoDB khác bị đánh dấu deprecated. Vì vậy Tới Nơi không dựng bảng DynamoDB, và khi vận hành thật nên dùng Terraform 1.11 trở lên.
 
 ```hcl
 terraform {
@@ -95,7 +95,7 @@ terraform {
 Backend không nhận biến, nên giá trị được ghi cứng hoặc truyền bằng `-backend-config`. Trong repo, lab để cấu hình này ở `backend.tf.example` và **không bật**: bạn tạo bucket bằng `bootstrap/` rồi mới đổi tên tệp. Bucket state cần:
 
 - **Versioning bật:** khôi phục được bản state cũ khi apply hỏng.
-- **Mã hoá và chặn public access:** AES256 hoặc KMS; thêm policy từ chối truyền không TLS.
+- **Mã hoá và chặn public access:** AES256 hoặc KMS; thêm policy từ chối kết nối không dùng TLS.
 - **Chỉ role pipeline và vài người vận hành truy cập:** bucket policy hoặc IAM giới hạn principal. Cẩn thận: một `Deny` theo `aws:PrincipalArn` thiếu role của bạn sẽ khoá cả bạn, kể cả quyền sửa lại policy. Role của Identity Center có path, nên mẫu phải là `arn:aws:iam::123456789012:role/aws-reserved/sso.amazonaws.com/*/AWSReservedSSO_*`. Lối thoát khi lỡ khoá: root user của tài khoản vẫn xoá được bucket policy, hoặc tài khoản quản lý dùng centralized root access với tác vụ `S3UnlockBucketPolicy`.
 - **Quyền tối thiểu:** `s3:ListBucket` trên bucket, `s3:GetObject` và `s3:PutObject` trên key state, và `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject` trên `<key>.tflock`.
 - **Key theo môi trường:** `toinoi/dev/network/terraform.tfstate`, `toinoi/prod/network/terraform.tfstate`.
@@ -130,7 +130,7 @@ import {
 }
 ```
 
-`prevent_destroy` chỉ chặn khi khối còn trong code; xoá cả resource khỏi code vẫn xoá tài nguyên. `moved` ghi vào state phép đổi địa chỉ lúc apply, là cách đúng để refactor (đối lập với CloudFormation đổi logical ID ở bài 21). Khối `import` đưa tài nguyên có sẵn vào state; với `terraform plan -generate-config-out=generated.tf` Terraform có thể sinh cấu hình khởi đầu, bạn vẫn phải đọc và sửa.
+`prevent_destroy` chỉ chặn khi khối còn trong code; xoá cả resource khỏi code vẫn xoá tài nguyên. `moved` ghi vào state phép đổi địa chỉ lúc apply, là cách đúng để refactor (khác với việc đổi logical ID trong CloudFormation ở bài 21). Khối `import` đưa tài nguyên có sẵn vào state; với `terraform plan -generate-config-out=generated.tf` Terraform có thể sinh cấu hình khởi đầu, bạn vẫn phải đọc và sửa.
 
 ## Chọn công cụ IaC cho Tới Nơi
 
@@ -153,7 +153,7 @@ Tới Nơi chọn Terraform theo tài liệu kiến trúc (mục "Hạ tầng tr
 
 ## Lab và kiểm chứng
 
-Lab ở `examples/toi-noi-aws/p03-22-terraform-basics`: `main.tf` dựng VPC hai AZ (subnet tạo bằng `for_each`) và bucket ảnh chứng từ có versioning, mã hoá và chặn public; `bootstrap/` tạo bucket state; `backend.tf.example` là cấu hình backend, chưa bật. Kiểm trên máy mà không cần tài khoản AWS bằng Docker:
+Lab ở `examples/toi-noi-aws/p03-22-terraform-basics`: `main.tf` dựng VPC hai AZ (subnet tạo bằng `for_each`) và bucket ảnh chứng từ có versioning, mã hoá và chặn public; `bootstrap/` tạo bucket state; `backend.tf.example` là cấu hình backend, chưa bật. Kiểm tra trên máy bằng Docker, không cần tài khoản AWS:
 
 ```bash
 docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 fmt -check -recursive
@@ -167,10 +167,10 @@ docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 validate
 
 Những điều bạn đánh đổi khi dùng Terraform:
 
-- **State là điểm đơn lẻ:** mất hoặc hỏng state là mất bản đồ. Versioning S3 và phân quyền chặt là bắt buộc, không phải tuỳ chọn.
+- **State là single point of failure:** mất hoặc hỏng state là mất bản đồ. Versioning S3 và phân quyền chặt là bắt buộc, không phải tuỳ chọn.
 - **Không rollback tự động:** apply lỗi giữa chừng để lại trạng thái nửa vời; bạn sửa code rồi apply tiếp hoặc dùng `terraform state` để chỉnh.
-- **Drift im lặng:** sửa tay trên console chỉ lộ ra ở lần `plan` sau. Kiểm định kỳ ở bài 30.
-- **Provider và Terraform đều nâng phiên bản:** ghim bằng lockfile và `required_version`, nâng trong pull request riêng.
+- **Drift không báo trước:** sửa tay trên console chỉ lộ ra ở lần `plan` sau. Kiểm tra định kỳ ở bài 30.
+- **Provider và Terraform đều liên tục ra phiên bản mới:** ghim bằng lockfile và `required_version`, nâng trong pull request riêng.
 - **Secret nằm trong state:** ưu tiên để dịch vụ quản lý secret (bài 23 dùng RDS-managed password).
 
 **Bài tập:** hai kỹ sư cùng chạy `terraform apply` vào cùng một state trên S3 nhưng backend **không** bật `use_lockfile`. Chuyện gì có thể xảy ra, và S3 versioning giúp được gì?

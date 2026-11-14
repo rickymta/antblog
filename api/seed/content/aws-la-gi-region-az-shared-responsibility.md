@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, region, availability-zone, shared-responsibility, c
 language: vi
 ---
 
-Lúc 11:55, lượng đặt chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) tăng lên gần 70 chuyến mỗi giây. Nếu phải tự mua máy chủ, đội kỹ thuật đặt hàng từ nhiều tuần trước rồi để máy nằm không phần lớn thời gian. Trên AWS, ta thuê thêm máy trong vài phút và trả tiền theo thời gian dùng. Đổi lại, ta phải hiểu máy nằm ở đâu, chịu được sự cố nào và việc nào vẫn là của mình.
+Lúc 11:55, lượng đặt chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) tăng lên gần 70 chuyến mỗi giây. Nếu phải tự mua máy chủ, đội kỹ thuật đặt hàng từ nhiều tuần trước rồi để máy nhàn rỗi phần lớn thời gian. Trên AWS, ta thuê thêm máy trong vài phút và trả tiền theo thời gian dùng. Đổi lại, ta phải hiểu máy nằm ở đâu, chịu được sự cố nào và việc nào vẫn là của mình.
 
 Đây là **bài 01** của lộ trình **AWS qua Tới Nơi · Phần 01: Nền tảng AWS**. Bạn chưa cần tài khoản AWS hay biết Docker, Kubernetes. Bài này không có lab tốn tiền.
 
@@ -30,7 +30,7 @@ Cloud thường được chia theo mức độ bạn phải tự quản lý:
 | PaaS (nền tảng) | Môi trường chạy mã hoặc database sẵn | Mã ứng dụng, cấu hình, dữ liệu | RDS, Elastic Beanstalk, Lambda |
 | SaaS (phần mềm) | Ứng dụng hoàn chỉnh | Dùng và phân quyền người dùng | Amazon Connect (tổng đài trên cloud) |
 
-Ranh giới giữa ba hàng không cứng. Điều cần nhớ: càng lên cao, AWS làm giúp càng nhiều, nhưng bạn càng bị bó vào cách làm của dịch vụ đó.
+Ranh giới giữa ba mô hình này không cứng nhắc. Điều cần nhớ: càng lên cao, AWS làm giúp càng nhiều, nhưng bạn càng bị bó vào cách làm của dịch vụ đó.
 
 ## Hạ tầng toàn cầu: region, AZ, Local Zone và edge location
 
@@ -42,8 +42,8 @@ Hai điểm dễ nhầm. Tên `ap-southeast-1a` chỉ là nhãn trong tài kho�
 
 Thêm hai khái niệm:
 
-- **Local Zone**: phần mở rộng của một region đặt gần một thành phố lớn để giảm độ trễ, chỉ có một số dịch vụ. Zone nào ở đâu thay đổi theo thời gian, nên kiểm tra trang chính thức thay vì giả định có Local Zone gần Việt Nam.
-- **Edge location** (POP, point of presence): điểm mạng gần người dùng, chạy CloudFront (CDN) và vài dịch vụ biên. Nó không chạy EC2 hay database của bạn; nó giữ bản sao nội dung (cache), đón kết nối rồi chuyển về region khi cần.
+- **Local Zone**: phần mở rộng của một region đặt gần một thành phố lớn để giảm độ trễ, chỉ có một số dịch vụ. Vị trí các zone thay đổi theo thời gian, nên kiểm tra trang chính thức thay vì giả định có Local Zone gần Việt Nam.
+- **Edge location** (POP, point of presence): điểm mạng gần người dùng, chạy CloudFront (CDN) và vài dịch vụ biên. Edge location không chạy EC2 hay database của bạn; nơi này giữ bản sao nội dung (cache), tiếp nhận kết nối rồi chuyển về region khi cần.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -87,7 +87,7 @@ Tới Nơi phục vụ khách ở Việt Nam, vậy region nào? Bốn tiêu ch�
 |---|---|---|
 | Độ trễ | Region nào gần người dùng nhất? | Đo từ mạng của khách |
 | Dịch vụ sẵn có | Dịch vụ cần dùng đã có ở đó chưa? | Tra danh sách theo region |
-| Chi phí | Giá có khác region khác không? | Giá khác nhau; xem Pricing Calculator |
+| Chi phí | Giá có khác so với các region khác không? | Giá khác nhau; xem Pricing Calculator |
 | Quy định dữ liệu | Dữ liệu có phải lưu trong nước không? | Cần pháp chế xác nhận |
 
 Độ trễ đo được ngay mà không cần tài khoản AWS. Lệnh dưới đo thời gian thiết lập kết nối TCP tới endpoint công khai của DynamoDB ở ba region, xấp xỉ một lượt đi-về mạng từ máy bạn.
@@ -99,11 +99,11 @@ for r in ap-southeast-1 ap-northeast-1 ap-southeast-2; do
 done
 ```
 
-Kết quả phụ thuộc nhà mạng và thời điểm, nên chạy vài lần ở các mạng khác nhau (Wi-Fi, 4G); nó chỉ đo đường mạng, không đo thời gian xử lý.
+Kết quả phụ thuộc nhà mạng và thời điểm, nên chạy vài lần ở các mạng khác nhau (Wi-Fi, 4G); phép đo này chỉ phản ánh đường mạng, không đo thời gian xử lý.
 
 Về quy định, Việt Nam có các văn bản về an ninh mạng, bảo vệ dữ liệu cá nhân và lưu trữ dữ liệu trong nước, ví dụ Nghị định 53/2022/NĐ-CP (hướng dẫn Luật An ninh mạng, có điều khoản về lưu trữ dữ liệu tại Việt Nam) và Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân. Khung pháp lý này đang thay đổi (bảo vệ dữ liệu cá nhân đã có luật riêng từ 2026), nên hãy đọc văn bản hiện hành. Bài này không phải tư vấn pháp lý; doanh nghiệp thật cần hỏi pháp chế trước khi chọn region.
 
-**Cả loạt bài dùng `ap-southeast-1` (Singapore)** làm region mặc định: nó không cần opt-in và gần Việt Nam hơn nhiều region lớn khác. Khi cần region thứ hai ta dùng `ap-northeast-1`; chứng chỉ ACM cho CloudFront phải ở `us-east-1`. Nếu AWS đã mở region hoặc Local Zone mới gần hơn, hãy đo lại thay vì tin vào lựa chọn của bài.
+**Cả loạt bài dùng `ap-southeast-1` (Singapore)** làm region mặc định: region này không cần opt-in và gần Việt Nam hơn nhiều region lớn khác. Khi cần region thứ hai ta dùng `ap-northeast-1`; chứng chỉ ACM cho CloudFront phải ở `us-east-1`. Nếu AWS đã mở region hoặc Local Zone mới gần hơn, hãy đo lại thay vì tin vào lựa chọn của bài.
 
 ## Shared responsibility: ai lo việc gì
 
@@ -172,9 +172,9 @@ Tới Nơi đi qua chúng theo thứ tự: mạng và danh tính, service báo g
 ## Cái giá phải trả và lỗi thường gặp
 
 - **Nhầm AZ với region.** Nhiều AZ bảo vệ khỏi sự cố một data center, không bảo vệ khỏi sự cố cả region. Multi-region đắt và phức tạp hơn nhiều.
-- **Quên rằng truyền dữ liệu có giá.** Traffic giữa các AZ và ra Internet thường tính tiền theo GB; kiến trúc nhiều AZ phải tính khoản này.
-- **Nghĩ "AWS lo bảo mật" nên bucket để public.** Phần lớn sự cố lộ dữ liệu trên cloud đến từ cấu hình của khách.
-- **Chọn region theo thói quen.** Dịch vụ có ở region nào thay đổi theo thời gian; kiểm lại trước khi thiết kế.
+- **Quên rằng truyền dữ liệu bị tính phí.** Traffic giữa các AZ và ra Internet thường tính tiền theo GB; kiến trúc nhiều AZ phải tính khoản này.
+- **Để bucket public vì nghĩ "AWS lo bảo mật".** Phần lớn sự cố lộ dữ liệu trên cloud đến từ cấu hình của khách.
+- **Chọn region theo thói quen.** Danh sách region có dịch vụ thay đổi theo thời gian; kiểm lại trước khi thiết kế.
 
 ## Bài tập
 

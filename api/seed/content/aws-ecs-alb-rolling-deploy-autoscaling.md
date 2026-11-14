@@ -45,7 +45,7 @@ Ba thời gian dưới đây quyết định deploy êm hay giật:
 | Tham số | Mặc định | Chọn cho Tới Nơi | Tác dụng |
 |---|---|---|---|
 | `healthCheckGracePeriodSeconds` (service) | 0 | 60 | ECS bỏ qua health check unhealthy của ELB trong khoảng này, cho app kịp khởi động |
-| `deregistration_delay` (target group) | 300 giây | 30 giây | Thời gian ALB chờ request đang bay hoàn tất trước khi gỡ task |
+| `deregistration_delay` (target group) | 300 giây | 30 giây | Thời gian ALB chờ các request đang xử lý hoàn tất trước khi gỡ task |
 | `stopTimeout` (container) | 30 giây | 30 giây | Thời gian từ SIGTERM tới SIGKILL |
 
 `deregistration_delay` mặc định 300 giây hợp với request dài. Request của Tới Nơi chỉ vài trăm mili giây (WebSocket theo dõi chuyến sẽ thuộc bài 19), nên 30 giây là đủ và giữ mỗi bước deploy ngắn. Theo vòng đời task, ECS chờ target được gỡ xong rồi mới gửi SIGTERM, vì thế giá trị mặc định có thể kéo mỗi đợt thay task thêm vài phút. Service .NET nên bắt SIGTERM để ngừng nhận request mới và hoàn tất request đang xử lý.
@@ -59,12 +59,12 @@ Rolling update là cách mặc định của ECS: tạo task theo revision mới
 
 | Desired | Min | Max | Healthy tối thiểu | Tối đa đồng thời | Hệ quả |
 |---|---|---|---:|---:|---|
-| 4 | 100 | 200 | 4 | 8 | An toàn năng lực, gấp đôi task trong lúc chuyển |
-| 4 | 50 | 200 | 2 | 8 | Nhanh nhưng năng lực rơi còn nửa |
-| 4 | 100 | 125 | 4 | 5 | Chậm, đổi gần như từng task một |
+| 4 | 100 | 200 | 4 | 8 | An toàn về năng lực, nhưng gấp đôi số task trong lúc chuyển |
+| 4 | 50 | 200 | 2 | 8 | Nhanh nhưng năng lực giảm còn một nửa |
+| 4 | 100 | 125 | 4 | 5 | Chậm, gần như thay từng task một |
 | 6 | 50 | 150 | 3 | 9 | Cân bằng, tối đa 9 task |
 
-Với Tới Nơi, cấu hình `100/200` là lựa chọn khi deploy gần giờ cao điểm: năng lực không giảm, đổi lại số task, số ENI và số kết nối tới RDS có thể tăng gấp đôi trong vài phút. Nếu mỗi task giữ tối đa 20 kết nối PostgreSQL, tám task có thể mở 160 kết nối. Hãy kiểm tra giới hạn kết nối của RDS (bài 07) trước khi chọn `maximumPercent`. Thứ tự chính xác ECS dừng và khởi động task do scheduler quyết định, không phải hợp đồng nên đừng viết logic phụ thuộc vào nó.
+Với Tới Nơi, cấu hình `100/200` là lựa chọn khi deploy gần giờ cao điểm: năng lực không giảm, đổi lại số task, số ENI và số kết nối tới RDS có thể tăng gấp đôi trong vài phút. Nếu mỗi task giữ tối đa 20 kết nối PostgreSQL, tám task có thể mở 160 kết nối. Hãy kiểm tra giới hạn kết nối của RDS (bài 07) trước khi chọn `maximumPercent`. Thứ tự chính xác mà ECS dừng và khởi động task do scheduler quyết định và không được cam kết, nên đừng viết logic phụ thuộc vào nó.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -102,7 +102,7 @@ Với Tới Nơi, cấu hình `100/200` là lựa chọn khi deploy gần giờ 
 
 ## Deployment circuit breaker và alarm
 
-Không có gì dừng một deploy hỏng nếu ta không bật. Circuit breaker theo dõi số lần task mới thất bại khi khởi động hoặc không qua health check; vượt ngưỡng, deployment chuyển sang `FAILED`. Nếu bật `rollback`, ECS quay về deployment đã hoàn tất gần nhất. Ngưỡng mặc định là 50% desired count, kẹp trong khoảng 3 tới 200 task lỗi (desired 4 thì ngưỡng là 3); có thể chỉnh bằng `thresholdConfiguration`. Mặc định bộ đếm về 0 mỗi khi có một task healthy, nên chỉ lỗi liên tiếp mới tính. Circuit breaker chỉ dùng được với deployment controller `ECS`, không dùng với CodeDeploy.
+Nếu ta không bật circuit breaker, không có gì dừng một deploy hỏng. Circuit breaker theo dõi số lần task mới thất bại khi khởi động hoặc không qua health check; vượt ngưỡng, deployment chuyển sang `FAILED`. Nếu bật `rollback`, ECS quay về deployment đã hoàn tất gần nhất. Ngưỡng mặc định là 50% desired count, giới hạn trong khoảng từ 3 đến 200 task lỗi (desired 4 thì ngưỡng là 3); có thể chỉnh bằng `thresholdConfiguration`. Mặc định bộ đếm về 0 mỗi khi có một task healthy, nên chỉ lỗi liên tiếp mới tính. Circuit breaker chỉ dùng được với deployment controller `ECS`, không dùng với CodeDeploy.
 
 ```bash
 aws ecs update-service --cluster toinoi-lab --service toinoi-lab-booking-alb \
@@ -124,7 +124,7 @@ aws application-autoscaling register-scalable-target \
   --min-capacity 2 --max-capacity 20
 ```
 
-Target tracking giữ một số đo quanh mục tiêu, giống bộ điều nhiệt. Số đo hợp với service web sau ALB là `ALBRequestCountPerTarget` (request mỗi task mỗi phút); phương án khác là `ECSServiceAverageCPUUtilization`. Cấu hình truyền vào `put-scaling-policy`:
+Target tracking giữ một chỉ số quanh mức mục tiêu, giống bộ điều nhiệt. Chỉ số hợp với service web sau ALB là `ALBRequestCountPerTarget` (request mỗi task mỗi phút); phương án khác là `ECSServiceAverageCPUUtilization`. Cấu hình truyền vào `put-scaling-policy`:
 
 ```json
 {
@@ -138,7 +138,7 @@ Target tracking giữ một số đo quanh mục tiêu, giống bộ điều nhi
 }
 ```
 
-Số 12.000 là giả định: nếu service nhận khoảng 2.000 request/giây lúc cao điểm (120.000 request/phút) và mỗi task chịu được 200 request/giây, ta cần chừng 10 task. Hãy load test trước khi tin con số này. Cooldown ngắn khi scale out để theo kịp tải, dài khi scale in để không vừa hạ task đã phải thêm lại. Với nhiều policy cùng chạy, Application Auto Scaling scale out khi *một* policy muốn, nhưng chỉ scale in khi *tất cả* đồng ý.
+Số 12.000 là giả định: nếu service nhận khoảng 2.000 request/giây lúc cao điểm (120.000 request/phút) và mỗi task chịu được 200 request/giây, ta cần chừng 10 task. Hãy load test trước khi tin con số này. Hãy đặt cooldown ngắn khi scale out để theo kịp tải, và dài khi scale in để tránh vừa hạ task xong đã phải thêm lại. Với nhiều policy cùng chạy, Application Auto Scaling scale out khi *một* policy yêu cầu, nhưng chỉ scale in khi *tất cả* đồng ý.
 
 Tải của Tới Nơi dự đoán được: 11:00–13:00 và 17:00–19:00 theo giờ Việt Nam. Target tracking phản ứng sau khi tải đã tăng nên ta thêm **scheduled action** nâng sẵn mức tối thiểu trước giờ cao điểm:
 
@@ -151,11 +151,11 @@ aws application-autoscaling put-scheduled-action \
   --scalable-target-action MinCapacity=6,MaxCapacity=20
 ```
 
-Lệnh này đặt mức tối thiểu 6 task lúc 10:45, sớm 15 phút để task kịp khởi động, rồi một action khác trả về 2 lúc 13:15. Lặp lại cho 16:45 và 19:15. Scheduled action chỉ đổi min/max; target tracking vẫn tự chạy trong khoảng đó.
+Lệnh này đặt mức tối thiểu 6 task lúc 10:45, sớm 15 phút để task kịp khởi động, rồi một action khác đặt lại về 2 lúc 13:15. Lặp lại cho 16:45 và 19:15. Scheduled action chỉ đổi min/max; target tracking vẫn tự chạy trong khoảng đó.
 
 ## Rolling, blue/green và CodeDeploy
 
-Rolling không phải lựa chọn duy nhất. Bảng dưới là bản đồ ngắn để sang bài 26:
+Rolling không phải lựa chọn duy nhất. Bảng dưới là tóm tắt ngắn để chuyển sang bài 26:
 
 | | Rolling của ECS | Blue/green của ECS | CodeDeploy blue/green |
 |---|---|---|---|
@@ -164,15 +164,15 @@ Rolling không phải lựa chọn duy nhất. Bảng dưới là bản đồ ng
 | Chi phí khi deploy | Tăng theo `maximumPercent` | Gấp đôi task trong thời gian bake | Gấp đôi task |
 | Thành phần thêm | Không | Cấu hình target group và listener | Ứng dụng và deployment group CodeDeploy |
 
-ECS đã có blue/green dựng sẵn từ năm 2025 (vẫn là deployment controller `ECS`, chỉ đổi chiến lược), bên cạnh CodeDeploy. Các chiến lược chuyển traffic của nó vẫn đang được bổ sung, nên bài này chỉ định vị; bài 26 đi vào chi tiết, và hãy đọc user guide hiện hành trước khi dùng.
+ECS đã có blue/green dựng sẵn từ năm 2025 (vẫn là deployment controller `ECS`, chỉ đổi chiến lược), bên cạnh CodeDeploy. AWS vẫn đang bổ sung các chiến lược chuyển traffic cho tính năng này, nên bài này chỉ giới thiệu tổng quan; bài 26 đi vào chi tiết, và hãy đọc user guide hiện hành trước khi dùng.
 
 ## Cái giá phải trả
 
 - **`100/200` nhân đôi mọi thứ.** Gấp đôi ENI, IP trong subnet và kết nối database. Kiểm tra giới hạn từng thứ.
 - **Hạ `minimumHealthyPercent` để deploy nhanh.** Tiết kiệm ít, nhưng nếu deploy rơi vào lúc cao điểm, năng lực mất ngay. Chỉ làm ở môi trường dev.
-- **Grace period quá ngắn.** App chưa kịp khởi động mà ELB đã coi là unhealthy, ECS thay task liên tục và circuit breaker trip oan.
+- **Grace period quá ngắn.** App chưa kịp khởi động mà ELB đã coi là unhealthy, ECS thay task liên tục và circuit breaker kích hoạt oan.
 - **Scheduled action quên múi giờ.** Không có `--timezone`, biểu thức cron hiểu theo UTC: `10:45` sẽ chạy lúc 17:45 giờ Việt Nam, trễ cả bữa trưa.
-- **Tin con số mục tiêu mặc định.** `TargetValue` phải đến từ load test; đoán sai thì hoặc tốn tiền hoặc chậm.
+- **Tin con số mục tiêu mặc định.** `TargetValue` phải đến từ load test; đoán sai thì hoặc tốn tiền, hoặc phản hồi chậm.
 
 **Bài tập:** service có desired 10, `minimumHealthyPercent` 80, `maximumPercent` 130. Trong lúc deploy ECS giữ ít nhất và nhiều nhất bao nhiêu task? Nếu mỗi task mở tối đa 20 kết nối tới PostgreSQL thì tổng kết nối tối đa là bao nhiêu?
 
@@ -182,7 +182,7 @@ ECS đã có blue/green dựng sẵn từ năm 2025 (vẫn là deployment contro
 
 Mã ở `examples/toi-noi-aws/p02-13-ecs-deploy-scaling`: Terraform dựng ALB, target group `ip`, listener, alarm 5xx, service có circuit breaker và alarm rollback, cùng target tracking và bốn scheduled action; script `deploy-digest.sh` để update service bằng digest mới và `autoscaling-cli.sh` làm phần scaling bằng CLI. README ghi tài nguyên tính tiền (ALB chạy theo giờ, task Fargate theo giây) và lệnh dọn.
 
-Kiểm trên máy: `terraform fmt`, `init -backend=false`, `validate` chạy qua Docker; parse JSON; `bash -n` cho script. **Chưa kiểm chứng trên tài khoản thật:** thứ tự thay task, việc alarm kích hoạt rollback, ngưỡng `TargetValue` và hành vi của lịch.
+Đã kiểm tra trên máy: `terraform fmt`, `init -backend=false`, `validate` chạy qua Docker; parse JSON; `bash -n` cho script. **Chưa kiểm chứng trên tài khoản thật:** thứ tự thay task, việc alarm kích hoạt rollback, ngưỡng `TargetValue` và hành vi của lịch.
 
 Bài trước: [bài 12](/articles/aws-ecs-fargate-task-definition-roles). Bài tiếp: [bài 14](/articles/aws-secrets-manager-parameter-store).
 

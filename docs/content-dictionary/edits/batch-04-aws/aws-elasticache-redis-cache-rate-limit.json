@@ -1,0 +1,11 @@
+{"file":"aws-elasticache-redis-cache-rate-limit.md","edits":[
+{"old":"So sánh node-based với Serverless, TLS và AUTH, TTL ngẫu nhiên hoá và cache stampede.","new":"So sánh node-based với Serverless, TLS và AUTH, TTL cộng độ lệch ngẫu nhiên và cache stampede.","reason":"'ngẫu nhiên hoá' là cụm tự ghép","severity":"medium"},
+{"old":"Tải của Tới Nơi lên đột biến hai lần mỗi ngày, nhưng khoảng đó hoàn toàn dự đoán được.","new":"Tải của Tới Nơi tăng đột biến hai lần mỗi ngày, nhưng khung giờ đó hoàn toàn dự đoán được.","reason":"'lên đột biến' và 'khoảng đó' gượng","severity":"medium"},
+{"old":"Lab để mặc định bảo vệ bằng security group cùng TLS;","new":"Lab giữ cấu hình mặc định, chỉ bảo vệ bằng security group và TLS;","reason":"Câu mơ hồ, thiếu chủ ngữ","severity":"medium"},
+{"old":"chính xác hơn với giá tăng bộ nhớ.","new":"chính xác hơn nhưng tốn thêm bộ nhớ.","reason":"'với giá' là calque (at the cost of)","severity":"medium"},
+{"old":"**Coi cache là nguồn sự thật.** Replication không đồng bộ:","new":"**Coi cache là nguồn sự thật.** Replication bất đồng bộ:","reason":"Thống nhất thuật ngữ 'bất đồng bộ' với bài 33","severity":"low"},
+{"old":"hãy cộng dồn theo tình huống deploy `maximumPercent` ở bài 13.","new":"hãy tính số kết nối tối đa trong tình huống deploy với `maximumPercent` ở bài 13.","reason":"'cộng dồn' dùng sai nghĩa (phép tính là nhân)","severity":"medium"},
+{"old":"**Bài tập:** TTL ngẫu nhiên hoá để làm gì?","new":"**Bài tập:** Vì sao cần thêm độ lệch ngẫu nhiên vào TTL?","reason":"'ngẫu nhiên hoá' là cụm tự ghép","severity":"medium"},
+{"old":"vào giây thứ 61 nếu không ngẫu nhiên hoá?","new":"vào giây thứ 61 nếu không thêm độ lệch ngẫu nhiên?","reason":"'ngẫu nhiên hoá' là cụm tự ghép","severity":"medium"},
+{"old":"Ngẫu nhiên hoá làm các khoá hết hạn ở những thời điểm khác nhau.","new":"Độ lệch ngẫu nhiên làm các khoá hết hạn ở những thời điểm khác nhau.","reason":"Thống nhất cách gọi","severity":"medium"}
+]}

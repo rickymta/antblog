@@ -1,7 +1,7 @@
 ---
 slug: aws-chien-luoc-deploy-rolling-canary-rollback
 title: "Chiến lược triển khai: rolling, blue/green, canary, rollback và cổng migration database"
-summary: "Bài 27: so sánh rolling, blue/green, canary và feature flag theo rủi ro, chi phí và thời gian rollback; expand/contract migration để schema tương thích hai bản; cổng kiểm trước khi chuyển traffic; runbook rollback cho service đặt chuyến khi 5xx tăng sau deploy."
+summary: "Bài 27: so sánh rolling, blue/green, canary và feature flag theo rủi ro, chi phí và thời gian rollback; migration theo kiểu expand/contract để schema tương thích với cả hai bản; cổng kiểm tra trước khi chuyển traffic; runbook rollback cho service đặt chuyến khi 5xx tăng sau deploy."
 category: devops-aws
 level: intermediate
 tags: [aws, toi-noi, devops, deployment-strategy, canary, blue-green, rollback, database-migration, release]
@@ -10,12 +10,12 @@ language: vi
 
 10:58, năm phút sau khi bản mới của `booking` lên production, biểu đồ 5xx nhích từ gần 0 lên 3%. Đội trực biết lệnh rollback image nằm ở đâu, nhưng bản mới đã chạy một migration đổi schema bảng `trips`, và bảng này nhận khoảng 560 `UPDATE` mỗi giây lúc cao điểm. Quay image về bản cũ có chạy được với schema mới không? Câu trả lời đã được quyết định từ trước khi deploy, bằng cách ta chọn chiến lược và viết migration.
 
-Đây là **bài 27** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bài này thuần khái niệm và quy trình, không có lab. Bạn nên đã đọc [bài 26](/articles/aws-codepipeline-codebuild-codedeploy-blue-green) về blue/green với CodeDeploy.
+Đây là **bài 27** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bài này thuần khái niệm và quy trình, không có lab. Bạn nên đọc trước [bài 26](/articles/aws-codepipeline-codebuild-codedeploy-blue-green) về blue/green với CodeDeploy.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Deploy blue/green giúp rollback nhanh. Vậy nếu bản green đã thêm cột mới vào bảng <code>trips</code>, rollback về blue có an toàn không?</p>
-<details><summary>Xem đáp án</summary><p>Chỉ an toàn nếu bản blue vẫn chạy đúng với schema mới. Blue/green nhân đôi tầng ứng dụng nhưng database vẫn là một; khả năng quay lại do cách ta viết migration (expand/contract), không do chiến lược deploy.</p></details>
+<details><summary>Xem đáp án</summary><p>Chỉ an toàn nếu bản blue vẫn chạy đúng với schema mới. Blue/green nhân đôi tầng ứng dụng nhưng database vẫn là một; khả năng quay lại phụ thuộc vào cách ta viết migration (expand/contract), không phụ thuộc vào chiến lược deploy.</p></details>
 </div>
 
 ## Bốn chiến lược và điều chúng đánh đổi
@@ -24,16 +24,16 @@ Mỗi chiến lược trả lời cùng một câu hỏi theo cách khác nhau: 
 
 | Chiến lược | Số bản cùng chạy | Chi phí hạ tầng | Thời gian rollback | Yêu cầu tương thích | Hợp với service nào của Tới Nơi |
 |---|---|---|---|---|---|
-| Rolling (bài 13) | Hai bản trộn trong một target group, vài phút | Thấp, chỉ thêm vài task | Chậm: lại rolling về bản cũ; circuit breaker tự quay khi task không khoẻ | API và DB tương thích hai chiều | `dispatch` worker, `tracking` (cần drain kết nối) |
+| Rolling (bài 13) | Hai bản trộn trong một target group, vài phút | Thấp, chỉ thêm vài task | Chậm: phải rolling lại về bản cũ; circuit breaker tự quay khi task không khoẻ | API và DB tương thích hai chiều | `dispatch` worker, `tracking` (cần drain kết nối) |
 | Blue/green | Hai bộ đầy đủ, bản mới chưa có khách thật | Cao nhất lúc deploy, gần gấp đôi task | Nhanh: đổi trọng số listener | Như rolling, vì DB dùng chung | `booking`, sổ cái thanh toán |
-| Canary | Bản mới nhận một phần nhỏ traffic (ví dụ 10%) | Như blue/green (CodeDeploy hoặc canary tích hợp của ECS) | Nhanh khi còn giữ bản cũ | Như trên; lỗi chỉ lộ ra ở phần nhỏ khách | `booking`, `quote` |
+| Canary | Bản mới nhận một phần nhỏ traffic (ví dụ 10%) | Như blue/green (CodeDeploy hoặc canary tích hợp của ECS) | Nhanh khi còn giữ bản cũ | Như trên; lỗi chỉ lộ ra với một nhóm nhỏ khách | `booking`, `quote` |
 | Feature flag | Một bản code, hai hành vi | Gần như không | Tắt flag, không cần deploy (bài 29) | Code chứa cả hai nhánh, phải dọn flag | Đổi bảng giá của `quote` |
 
-Chúng không loại trừ nhau. Cách làm phổ biến: deploy bằng blue/green canary, nhưng logic mới nằm sau một flag tắt sẵn; khi bản đã ổn định mới bật flag dần cho 5% khách ở một thành phố. Cách này tách hai rủi ro: rủi ro **mã chạy được hay không** và rủi ro **hành vi có đúng nghiệp vụ không**. Con số chi phí tuyệt đối phụ thuộc cấu hình và region, hãy ước tính bằng Pricing Calculator.
+Bốn chiến lược này không loại trừ nhau. Cách làm phổ biến: deploy bằng blue/green canary, nhưng logic mới nằm sau một flag tắt sẵn; khi bản đã ổn định mới bật flag dần cho 5% khách ở một thành phố. Cách này tách hai rủi ro: rủi ro **mã chạy được hay không** và rủi ro **hành vi có đúng nghiệp vụ không**. Con số chi phí tuyệt đối phụ thuộc cấu hình và region, hãy ước tính bằng Pricing Calculator.
 
 ## Expand/contract: schema phải sống được với hai bản
 
-Cả bốn chiến lược đều có một khoảng thời gian bản cũ và bản mới cùng nói chuyện với một database. Nên mọi migration phải theo quy tắc **expand/contract**: không bao giờ sửa schema theo cách bản cũ không còn chạy được. Ví dụ đổi tên cột `trips.note` thành `trips.customer_note`:
+Cả bốn chiến lược đều có một khoảng thời gian mà bản cũ và bản mới cùng làm việc với một database. Vì vậy mọi migration phải theo quy tắc **expand/contract**: không bao giờ sửa schema theo cách bản cũ không còn chạy được. Ví dụ đổi tên cột `trips.note` thành `trips.customer_note`:
 
 1. **Expand**: thêm cột mới nullable. Trên PostgreSQL, `ADD COLUMN` nullable không có default chỉ đổi metadata, không viết lại 730 triệu dòng.
 2. **Deploy code ghi cả hai**: bản mới ghi `note` và `customer_note`, vẫn đọc `note`. Bản cũ vẫn chạy được.
@@ -50,7 +50,7 @@ UPDATE trips SET customer_note = note
 WHERE id >= :from_id AND id < :to_id AND customer_note IS NULL;
 ```
 
-`lock_timeout` rất quan trọng: câu `ALTER TABLE` cần khoá mạnh trong chốc lát, và nếu nó phải đợi một transaction dài thì mọi câu `UPDATE` phía sau xếp hàng sau nó. Đặt timeout ngắn và thử lại tốt hơn là làm đứng cả bảng `trips`. Backfill theo lô tránh transaction dài, bloat và độ trễ replica.
+`lock_timeout` rất quan trọng: câu `ALTER TABLE` cần khoá mạnh trong chốc lát, và nếu câu này phải đợi một transaction dài thì mọi câu `UPDATE` phía sau xếp hàng sau nó. Đặt timeout ngắn và thử lại tốt hơn là làm đứng cả bảng `trips`. Backfill theo lô tránh transaction dài, bloat và độ trễ replica.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -59,7 +59,7 @@ WHERE id >= :from_id AND id < :to_id AND customer_note IS NULL;
 <figcaption>Hình 1. Expand/contract tách một thay đổi schema thành nhiều release nhỏ, mỗi release đều chạy được với bản đứng ngay trước nó.</figcaption>
 </figure>
 
-Hệ quả: **không rollback một migration phá dữ liệu**. Đó là lý do loạt .NET để migrator thành bước release riêng với role riêng và không tự gọi migrate lúc startup, xem [bài 35](/articles/dotnet10-container-ci-cd) và phần probe, rollout ở [bài 36](/articles/dotnet10-aws-azure-deployment). Trên AWS, bước này thường là một `aws ecs run-task` chạy một lần, có review SQL, nằm trước stage Deploy trong pipeline.
+Hệ quả: **không thể rollback một migration làm mất dữ liệu**. Đó là lý do loạt bài .NET tách migrator thành một bước release riêng với role riêng và không tự gọi migrate lúc startup, xem [bài 35](/articles/dotnet10-container-ci-cd) và phần probe, rollout ở [bài 36](/articles/dotnet10-aws-azure-deployment). Trên AWS, bước này thường là một `aws ecs run-task` chạy một lần, có review SQL, nằm trước stage Deploy trong pipeline.
 
 ## Cổng kiểm trước khi chuyển traffic
 
@@ -74,7 +74,7 @@ Chuyển traffic là chỗ đắt nhất để phát hiện lỗi. Mỗi cổng 
 | Alarm database | Bản mới làm DB quá tải | Số kết nối, deadlock, độ trễ replica |
 | Bake time | Lỗi chậm: rò bộ nhớ, hết pool | Giữ bản cũ thêm một khoảng sau khi xong |
 
-Một synthetic canary tên giống canary deployment nhưng khác bản chất: nó là một script giả lập khách chạy theo lịch, không chia traffic. Với `booking`, nên dùng cả hai.
+Synthetic canary có tên giống canary deployment nhưng khác bản chất: đó là một script giả lập khách chạy theo lịch, không chia traffic. Với `booking`, nên dùng cả hai.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -85,21 +85,21 @@ Một synthetic canary tên giống canary deployment nhưng khác bản chất:
 
 ## Rollback là quyết định có điều kiện
 
-Rollback không phải nút bấm vô điều kiện. Nó chỉ an toàn khi **image cũ vẫn chạy được với schema mới**, điều mà expand/contract bảo đảm cho tới hết bước 4. Từ lúc contract trở đi, đường lùi duy nhất là sửa tiến (roll forward) bằng một bản vá.
+Rollback không phải nút bấm vô điều kiện. Rollback chỉ an toàn khi **image cũ vẫn chạy được với schema mới**, điều mà expand/contract bảo đảm cho tới hết bước 4. Từ lúc contract trở đi, đường lùi duy nhất là sửa tiến (roll forward) bằng một bản vá.
 
-Quyền quyết định cũng cần ghi trước, không bàn lúc 10:58. Đề xuất: tiêu chí tự động (5xx vượt ngưỡng trong cửa sổ cố định) do alarm xử lý; còn khi tiêu chí nhập nhằng thì **người trực (incident commander)** quyết định, không phải người viết bản vá. Runbook cho `booking` khi 5xx tăng sau deploy:
+Quyền quyết định cũng cần ghi rõ từ trước, không bàn lúc 10:58. Đề xuất: tiêu chí tự động (5xx vượt ngưỡng trong cửa sổ cố định) do alarm xử lý; còn khi tiêu chí không rõ ràng thì **người trực (incident commander)** quyết định, không phải người viết bản vá. Runbook cho `booking` khi 5xx tăng sau deploy:
 
 1. Đóng băng pipeline để không có bản mới chồng lên: `aws codepipeline disable-stage-transition --pipeline-name toinoi-prod-booking --stage-name Deploy --transition-type Inbound --reason "5xx sau deploy"`.
 2. Dừng deployment đang chạy: `aws deploy stop-deployment --deployment-id <id> --auto-rollback-enabled`. Với ECS rolling, trỏ service về revision cũ: `aws ecs update-service --cluster toinoi-prod --service toinoi-prod-booking --task-definition toinoi-prod-booking:41`.
 3. Nếu lỗi nằm ở hành vi mới sau flag: deploy lại phiên bản AppConfig trước đó (bài 29), không cần đụng tới image.
 4. Xác nhận 5xx và p99 về bình thường, kiểm lại độ trễ DB.
-5. Đối chiếu dữ liệu: những dòng `trips` hay `trip_events` do bản lỗi ghi trong cửa sổ canary cần được liệt kê và sửa tiến, vì không có gì tự hoàn tác chúng.
+5. Đối chiếu dữ liệu: những dòng `trips` hay `trip_events` do bản lỗi ghi trong cửa sổ canary cần liệt kê và sửa tiến, vì không có cơ chế nào tự hoàn tác chúng.
 
 ## Lỗi thường gặp
 
 - **Migration và deploy chung một bước**: migration lỗi giữa chừng làm cả release dừng ở trạng thái lưng chừng. Tách bước, chạy migration trước, kiểm tra rồi mới deploy.
 - **Contract quá sớm**: xoá cột cũ ngay release kế tiếp, mất luôn đường rollback.
-- **Chỉ canary theo metric hạ tầng**: CPU bình thường nhưng báo giá sai. Cần metric nghiệp vụ như tỉ lệ báo giá bị từ chối.
+- **Chỉ canary dựa trên metric hạ tầng**: CPU bình thường nhưng báo giá sai. Cần metric nghiệp vụ như tỉ lệ báo giá bị từ chối.
 - **Bake time bằng không**: lỗi rò kết nối chỉ lộ sau vài chục phút.
 - **Không ghi ai được quyết rollback**: mất thời gian tranh luận giữa lúc khách đang gặp lỗi.
 

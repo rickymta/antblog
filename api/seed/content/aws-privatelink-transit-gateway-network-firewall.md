@@ -1,7 +1,7 @@
 ---
 slug: aws-privatelink-transit-gateway-network-firewall
 title: "PrivateLink, VPC endpoint, Transit Gateway, Network Firewall và kết nối hybrid"
-summary: "Bài 53: giữ lưu lượng Tới Nơi trong mạng riêng: gateway và interface endpoint với endpoint policy, PrivateLink xuất API đối soát cho đối tác, Transit Gateway nối dev, prod và VPC inspection có Network Firewall, Site-to-Site VPN, Direct Connect và Route 53 Resolver cho hybrid, cùng chi phí data transfer."
+summary: "Bài 53: giữ lưu lượng Tới Nơi trong mạng riêng: gateway và interface endpoint với endpoint policy, PrivateLink đưa API đối soát ra cho đối tác, Transit Gateway nối dev, prod và VPC inspection có Network Firewall, Site-to-Site VPN, Direct Connect và Route 53 Resolver cho hybrid, cùng chi phí data transfer."
 category: devops-aws
 level: advanced
 tags: [aws, toi-noi, devops, privatelink, vpc-endpoint, transit-gateway, network-firewall, direct-connect, networking]
@@ -10,12 +10,12 @@ language: vi
 
 Hoá đơn tháng này của Tới Nơi có một dòng lạ: NAT Gateway xử lý nhiều terabyte, phần lớn là ECS task kéo image từ ECR và đẩy ảnh chứng từ lên S3, tức là lưu lượng đi từ AWS tới AWS nhưng vẫn vòng ra cổng NAT. Cùng lúc, đối tác thanh toán VíXanh xin gọi API đối soát của Tới Nơi và đề nghị "peering hai VPC cho tiện", dù VPC của họ dùng đúng dải `10.20.0.0/16` của VPC prod Tới Nơi (bài 04). Bài này gỡ cả hai chuyện bằng cách giữ lưu lượng trong mạng riêng.
 
-Đây là **bài 53** của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn cần xong [bài 04](/articles/aws-vpc-subnet-route-security-group) (VPC, route table, NAT) và nên đọc [bài 52](/articles/aws-kms-envelope-encryption-key-policy) cho phần mã hoá. Bài này dùng nhiều thuật ngữ mạng; mỗi thuật ngữ được giải thích ở lần đầu xuất hiện.
+Đây là **bài 53** của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn cần xong [bài 04](/articles/aws-vpc-subnet-route-security-group) (VPC, route table, NAT) và nên đọc [bài 52](/articles/aws-kms-envelope-encryption-key-policy) cho phần mã hoá. Bài này dùng nhiều thuật ngữ mạng; bài giải thích từng thuật ngữ ở lần đầu xuất hiện.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Hai VPC cùng peering với VPC thứ ba. Instance ở VPC thứ nhất có gọi được instance ở VPC thứ hai qua VPC thứ ba không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> VPC peering không có tính bắc cầu (non-transitive), và cũng không dùng được khi CIDR chồng lấn. Muốn nhiều VPC nói chuyện với nhau cần Transit Gateway, hoặc dùng PrivateLink nếu chỉ xuất một service.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> VPC peering không có tính bắc cầu (non-transitive), và cũng không dùng được khi CIDR chồng lấn. Muốn nhiều VPC nói chuyện với nhau thì cần Transit Gateway, hoặc dùng PrivateLink nếu chỉ cần đưa một service ra ngoài.</p></details>
 </div>
 
 ## Endpoint: đi thẳng tới dịch vụ AWS không qua Internet
@@ -25,12 +25,12 @@ Mặc định một task trong subnet private gọi `ecr.ap-southeast-1.amazonaw
 | | Gateway endpoint | Interface endpoint |
 |---|---|---|
 | Dịch vụ | Chỉ S3 và DynamoDB | Phần lớn dịch vụ AWS, và service của bên khác qua PrivateLink |
-| Cơ chế | Một dòng trong route table trỏ prefix list tới endpoint | ENI có IP private trong subnet của bạn, DNS private đè tên công khai |
-| Tiền | Không tính | Theo giờ cho mỗi endpoint ở mỗi AZ, cộng GB xử lý |
+| Cơ chế | Một dòng trong route table trỏ prefix list tới endpoint | ENI có IP private trong subnet của bạn, DNS private ghi đè tên công khai |
+| Chi phí | Không tính | Theo giờ cho mỗi endpoint ở mỗi AZ, cộng GB xử lý |
 | Kiểm soát | Endpoint policy, route table | Endpoint policy, security group |
 | Dùng từ ngoài VPC | Không (không qua được peering hay TGW) | Có thể, qua TGW nếu định tuyến và DNS cho phép |
 
-**Endpoint policy** là một resource policy gắn vào endpoint, giới hạn *cái gì* đi qua nó, bất kể IAM của người gọi. Với Tới Nơi, S3 endpoint chỉ cho bucket `toinoi-prod-*` và Secrets Manager endpoint chỉ cho secret `toinoi/prod/*`; một task bị chiếm quyền không dùng được endpoint đó để chép dữ liệu sang bucket của kẻ tấn công. Chiều ngược lại là `aws:SourceVpce` trong **bucket policy**: chỉ cho request tới từ đúng một endpoint.
+**Endpoint policy** là một resource policy gắn vào endpoint, giới hạn *cái gì* đi qua nó, bất kể IAM của người gọi. Với Tới Nơi, S3 endpoint chỉ cho phép truy cập bucket `toinoi-prod-*` và Secrets Manager endpoint chỉ cho phép truy cập secret `toinoi/prod/*`; một task bị chiếm quyền không dùng được endpoint đó để chép dữ liệu sang bucket của kẻ tấn công. Chiều ngược lại là `aws:SourceVpce` trong **bucket policy**: chỉ cho phép request đến từ đúng một endpoint.
 
 ```json
 {
@@ -46,7 +46,7 @@ Mặc định một task trong subnet private gọi `ecr.ap-southeast-1.amazonaw
 }
 ```
 
-Statement này chặn mọi truy cập vào bucket ảnh không đi qua endpoint, trừ lời gọi của dịch vụ AWS. Nó cũng chặn luôn bạn trên console và các job CI chạy ngoài VPC, nên hãy thử ở bucket phụ trước và chừa một role break-glass. Điểm hay bị quên: image layer của ECR nằm trong một bucket S3 do AWS quản lý, nên endpoint policy của S3 phải cho thêm `s3:GetObject` trên bucket layer (lab có sẵn statement đó), nếu không `docker pull` sẽ lỗi dù ECR endpoint đã đủ.
+Statement này chặn mọi truy cập vào bucket ảnh không đi qua endpoint, trừ lời gọi của dịch vụ AWS. Statement đó cũng chặn luôn cả bạn trên console và các job CI chạy ngoài VPC, nên hãy thử ở bucket phụ trước và chừa một role break-glass. Điểm hay bị quên: image layer của ECR nằm trong một bucket S3 do AWS quản lý, nên endpoint policy của S3 phải cho thêm `s3:GetObject` trên bucket layer (lab có sẵn statement đó), nếu không `docker pull` sẽ lỗi dù ECR endpoint đã đủ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -67,7 +67,7 @@ Statement này chặn mọi truy cập vào bucket ảnh không đi qua endpoint
 <figcaption>Hình 1. Bỏ NAT thì task cần đủ endpoint cho từng dịch vụ nó gọi; thiếu một cái là thao tác đó treo hoặc hết thời gian chờ.</figcaption>
 </figure>
 
-## PrivateLink: xuất service cho đối tác
+## PrivateLink: đưa service ra cho đối tác
 
 **PrivateLink** (VPC endpoint service) cho phép bạn đặt một service sau Network Load Balancer và để tài khoản khác tạo interface endpoint tới nó. Với API đối soát của Tới Nơi: NLB nội bộ trỏ vào service `reconcile`, tạo endpoint service với `acceptance_required = true`, liệt kê principal của VíXanh trong `allowed_principals`. Phía VíXanh tạo interface endpoint trong VPC của họ và gọi bằng tên DNS của endpoint.
 
@@ -77,13 +77,13 @@ Statement này chặn mọi truy cập vào bucket ảnh không đi qua endpoint
 | CIDR chồng lấn | Không dùng được | Không dùng được | Dùng được |
 | Hướng kết nối | Hai chiều | Hai chiều | Một chiều, từ khách tới service |
 | Bắc cầu | Không | Có | Không áp dụng |
-| Hợp với | Hai VPC nội bộ, ít | Nhiều VPC nội bộ | Đối tác, hoặc xuất một API |
+| Hợp với | Hai VPC nội bộ, ít | Nhiều VPC nội bộ | Đối tác, hoặc đưa một API ra ngoài |
 
-CIDR của VíXanh trùng VPC prod `10.20.0.0/16` nên chỉ PrivateLink khả thi, và nó cũng đúng nguyên tắc tối thiểu: đối tác thấy một cổng, không thấy mạng.
+CIDR của VíXanh trùng VPC prod `10.20.0.0/16` nên chỉ PrivateLink là khả thi, và cách này cũng đúng nguyên tắc đặc quyền tối thiểu: đối tác thấy một cổng, không thấy mạng.
 
 ## Transit Gateway: hub nối nhiều VPC
 
-**Transit Gateway (TGW)** là bộ định tuyến cấp khu vực. Mỗi VPC nối vào bằng một **attachment**; quy tắc định tuyến nằm ở **TGW route table**, chứ không ở route table của VPC. Hai khái niệm cần nhớ: **association** (attachment này tra route table nào khi gửi đi) và **propagation** (attachment này tự quảng bá CIDR của nó vào route table nào).
+**Transit Gateway (TGW)** là bộ định tuyến cấp region. Mỗi VPC nối vào bằng một **attachment**; quy tắc định tuyến nằm ở **TGW route table**, chứ không ở route table của VPC. Hai khái niệm cần nhớ: **association** (attachment này tra route table nào khi gửi đi) và **propagation** (attachment này tự quảng bá CIDR của nó vào route table nào).
 
 Tới Nơi dùng ba route table. VPC `dev` và `prod` mỗi bên một route table chỉ chứa `0.0.0.0/0` trỏ sang attachment của VPC `inspection`, tuyệt đối không có CIDR của nhau: dev và prod **không thấy nhau**. Route table của inspection nhận propagation từ cả hai để biết đường về. Trong VPC inspection, subnet của TGW attachment có route `0.0.0.0/0` tới **firewall endpoint** của **AWS Network Firewall**; traffic ra Internet đi tiếp qua NAT.
 
@@ -105,14 +105,14 @@ Tới Nơi dùng ba route table. VPC `dev` và `prod` mỗi bên một route tab
 <text x="124" y="136" class="t-small t-warn">dev ↔ prod bị chặn</text>
 </svg>
 </div>
-<figcaption>Hình 2. Segment bằng route table TGW, kiểm soát bằng firewall ở giữa; hai lớp cùng ngăn dev chạm prod.</figcaption>
+<figcaption>Hình 2. Phân đoạn mạng bằng route table TGW và kiểm soát bằng firewall ở giữa; hai lớp cùng ngăn dev chạm prod.</figcaption>
 </figure>
 
 Network Firewall có ba khối: stateless rule (xét từng gói), stateful rule group (theo flow, hỗ trợ 5-tuple, danh sách tên miền và Suricata) và policy gom chúng lại. Lab dùng **strict order** với hành động mặc định `aws:drop_established`: cái gì không được cho phép rõ ràng thì bị chặn; rule chặn dev ↔ prod có ưu tiên 10, allowlist tên miền (`.amazonaws.com`, `api.vixanh.example`) ưu tiên 20, cùng bật log cảnh báo. Với strict order, allowlist tên miền chỉ sinh rule pass; chặn phần còn lại là việc của `aws:drop_established`, và vì nó chỉ chặn gói thuộc kết nối đã thiết lập nên bắt tay TCP vẫn qua, firewall kịp đọc SNI trong TLS ClientHello. Firewall ở VPC trung tâm còn phải khai báo biến `HOME_NET` gồm CIDR của các spoke, vì domain list mặc định chỉ xét traffic xuất phát từ chính VPC chứa firewall. Hai chi tiết vận hành nữa: bật `appliance_mode_support` trên attachment của VPC inspection để hai chiều của một flow qua cùng firewall endpoint, và định tuyến phải đối xứng theo từng AZ. **Gateway Load Balancer** là cách đưa appliance của hãng thứ ba vào cùng vị trí này; **VPC Lattice** (bài 49) giải bài toán giao tiếp giữa service ở tầng ứng dụng thay vì tầng mạng.
 
 ## Hybrid: văn phòng và trung tâm dữ liệu
 
-Văn phòng Tới Nơi cần gọi service nội bộ và ngược lại. **Site-to-Site VPN** dựng đường hầm IPsec qua Internet, mỗi kết nối có hai đường hầm, nối thẳng vào TGW; dựng trong vài phút, băng thông và độ trễ phụ thuộc Internet. **Direct Connect** là đường riêng tới AWS qua đối tác viễn thông, cần thời gian đặt, độ trễ ổn định hơn, thường đi kèm một VPN dự phòng. DNS hai chiều dùng **Route 53 Resolver**: *inbound endpoint* để mạng văn phòng phân giải tên private của AWS, *outbound endpoint* và forwarding rule để VPC phân giải tên miền nội bộ của văn phòng. Khi có nhiều region, **Cloud WAN** quản lý mạng lõi bằng một policy thay cho nhiều TGW peering viết tay; Tới Nơi chưa cần cho tới khi có region thứ hai ở bài 56.
+Văn phòng Tới Nơi cần gọi service nội bộ và ngược lại. **Site-to-Site VPN** dựng đường hầm IPsec qua Internet, mỗi kết nối có hai đường hầm, nối thẳng vào TGW; dựng trong vài phút, băng thông và độ trễ phụ thuộc Internet. **Direct Connect** là đường riêng tới AWS qua đối tác viễn thông, cần thời gian đặt kết nối và có độ trễ ổn định hơn, thường đi kèm một VPN dự phòng. DNS hai chiều dùng **Route 53 Resolver**: *inbound endpoint* để mạng văn phòng phân giải tên private của AWS, *outbound endpoint* và forwarding rule để VPC phân giải tên miền nội bộ của văn phòng. Khi có nhiều region, **Cloud WAN** quản lý mạng lõi bằng một policy thay cho nhiều TGW peering viết tay; Tới Nơi chưa cần cho tới khi có region thứ hai ở bài 56.
 
 ## Cái giá phải trả: chi phí và lỗi thường gặp
 
@@ -127,20 +127,20 @@ Văn phòng Tới Nơi cần gọi service nội bộ và ngược lại. **Site
 | Qua interface endpoint, Network Firewall | Theo giờ mỗi endpoint mỗi AZ cộng GB xử lý |
 
 - **Một NAT cho cả region**: tiết kiệm giờ nhưng mọi AZ khác trả phí cross-AZ và mất khả năng chịu lỗi AZ.
-- **Quên bật private DNS** cho interface endpoint: task vẫn phân giải ra IP công khai và đi qua NAT, nghĩ là đã có endpoint.
+- **Quên bật private DNS** cho interface endpoint: task vẫn phân giải ra IP công khai và đi qua NAT, trong khi bạn tưởng đã có endpoint.
 - **Thiếu appliance mode hoặc route bất đối xứng**: firewall thấy nửa flow và chặn nhầm.
 - **Gắn bucket policy `aws:SourceVpce` quá sớm**: khoá luôn console, CI và replication.
-- **Dùng CIDR tuỳ tiện**: CIDR chồng lấn chặn peering và TGW sau này; quy hoạch trước một bảng CIDR cho mọi VPC.
+- **Dùng CIDR tuỳ tiện**: CIDR chồng lấn khiến peering và TGW sau này không dùng được; quy hoạch trước một bảng CIDR cho mọi VPC.
 
 ## Bài tập
 
-**Bài tập:** ECS task trong subnet private bị `CannotPullContainerError` sau khi bạn xoá NAT Gateway. Tối thiểu thiếu những endpoint nào?
+**Bài tập:** ECS task trong subnet private bị `CannotPullContainerError` sau khi bạn xoá NAT Gateway. Ít nhất đang thiếu những endpoint nào?
 
-<details><summary>Xem đáp án</summary><p>Task Fargate cần <code>com.amazonaws.&lt;region&gt;.ecr.api</code> và <code>ecr.dkr</code> (interface) để xác thực và lấy manifest, <b>gateway endpoint S3</b> vì image layer nằm ở S3 (và endpoint policy S3 phải cho bucket layer của ECR), và <code>logs</code> (interface) nếu dùng log driver <code>awslogs</code>. Nếu task lấy secret khi khởi động thì thêm <code>secretsmanager</code> (hoặc <code>ssm</code>). Interface endpoint phải bật private DNS và security group phải cho HTTPS từ subnet của task. Kiểm bằng CloudTrail hoặc VPC Flow Logs xem task đang cố tới địa chỉ nào.</p></details>
+<details><summary>Xem đáp án</summary><p>Task Fargate cần <code>com.amazonaws.&lt;region&gt;.ecr.api</code> và <code>ecr.dkr</code> (interface) để xác thực và lấy manifest, <b>gateway endpoint S3</b> vì image layer nằm ở S3 (và endpoint policy S3 phải cho bucket layer của ECR), và <code>logs</code> (interface) nếu dùng log driver <code>awslogs</code>. Nếu task lấy secret khi khởi động thì thêm <code>secretsmanager</code> (hoặc <code>ssm</code>). Interface endpoint phải bật private DNS và security group phải cho HTTPS từ subnet của task. Dùng CloudTrail hoặc VPC Flow Logs để xem task đang cố kết nối tới địa chỉ nào.</p></details>
 
 ## Lab: endpoint, TGW và firewall
 
-Lab ở `examples/toi-noi-aws/p06-53-private-network` dựng hai VPC spoke, VPC inspection với Network Firewall, TGW và ba route table, gateway và interface endpoint kèm endpoint policy, và endpoint service sau NLB; `check-network.sh` kiểm chỉ đọc. Lab có nhiều khoản tính theo giờ (endpoint, TGW attachment, firewall, NLB; NAT tắt mặc định), nên dựng, thử rồi `terraform destroy` ngay.
+Lab ở `examples/toi-noi-aws/p06-53-private-network` dựng hai VPC spoke, VPC inspection với Network Firewall, TGW và ba route table, gateway và interface endpoint kèm endpoint policy, và endpoint service sau NLB; `check-network.sh` kiểm tra ở chế độ chỉ đọc. Lab có nhiều khoản tính theo giờ (endpoint, TGW attachment, firewall, NLB; NAT tắt mặc định), nên dựng, thử rồi `terraform destroy` ngay.
 
 ```bash
 cd examples/toi-noi-aws/p06-53-private-network

@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, dynamodb, nosql, single-table, gsi, ttl, streams]
 language: vi
 ---
 
-Mỗi 4 giây, 25.000 tài xế đang trực tuyến gửi về một toạ độ: khoảng 6.250 dòng mỗi giây. Giữ nguyên tốc độ đó trong một giờ cao điểm là 22,5 triệu dòng, và gần như không dòng nào còn giá trị sau vài phút. Đưa chúng vào bảng `trips` của PostgreSQL (vốn đã gánh 560 `UPDATE` mỗi giây) là lấy dữ liệu rẻ nhất của hệ thống đè lên bảng quan trọng nhất. Bài này dựng chỗ ở riêng cho dữ liệu nóng của dispatch trên **Amazon DynamoDB**.
+Mỗi 4 giây, 25.000 tài xế đang trực tuyến gửi về một toạ độ: khoảng 6.250 dòng mỗi giây. Giữ nguyên tốc độ đó trong một giờ cao điểm là 22,5 triệu dòng, và gần như không dòng nào còn giá trị sau vài phút. Đưa chúng vào bảng `trips` của PostgreSQL (vốn đã gánh 560 `UPDATE` mỗi giây) là lấy dữ liệu rẻ nhất của hệ thống đè lên bảng quan trọng nhất. Bài này dựng nơi lưu trữ riêng cho dữ liệu nóng của dispatch trên **Amazon DynamoDB**.
 
 Đây là **bài 32** của lộ trình **AWS qua Tới Nơi · Phần 04: Dữ liệu, lưu trữ và messaging**. Bạn cần xong [bài 31](/articles/aws-aurora-postgresql-rds-proxy-failover) (vì sao `trips` vẫn ở Aurora) và biết dùng Lambda ở mức [bài 18](/articles/aws-lambda-webhook-thanh-toan-cold-start).
 
@@ -34,8 +34,8 @@ Dispatch của Tới Nơi cần bốn việc, và chỉ bốn việc, từ kho d
 Mỗi item có **partition key** (`pk`) và tuỳ chọn **sort key** (`sk`). DynamoDB băm `pk` để chọn partition lưu item; các item cùng `pk` nằm cạnh nhau và xếp theo `sk`, nên query trong một `pk` rất rẻ, còn query xuyên `pk` phải có index. Vài giới hạn định hình thiết kế:
 
 - Một item tối đa **400 KB**; toạ độ chỉ vài trăm byte.
-- Mỗi partition vật lý chịu tối đa **1.000 WCU và 3.000 RCU mỗi giây** (theo Developer Guide). Đây là nguyên nhân của **hot partition**: dồn nhiều ghi vào một giá trị `pk` thì bị throttle dù cả bảng còn dư capacity. DynamoDB có thể tự tách partition nóng theo sort key, nhưng không cứu được khi sort key tăng dần như timestamp, vì mọi lượt ghi vẫn rơi vào đầu mới nhất.
-- Đọc mặc định là **eventually consistent**; có thể xin đọc strongly consistent trên bảng gốc (tốn gấp đôi), nhưng **GSI luôn eventually consistent**.
+- Mỗi partition vật lý chịu tối đa **1.000 WCU và 3.000 RCU mỗi giây** (theo Developer Guide). Đây là nguyên nhân của **hot partition**: dồn nhiều lượt ghi vào một giá trị `pk` thì bị throttle dù cả bảng còn dư capacity. DynamoDB có thể tự tách partition nóng theo sort key, nhưng không cứu được khi sort key tăng dần như timestamp, vì mọi lượt ghi vẫn rơi vào đầu mới nhất.
+- Đọc mặc định là **eventually consistent**; có thể yêu cầu đọc strongly consistent trên bảng gốc (tốn gấp đôi), nhưng **GSI luôn eventually consistent**.
 - Một lần `Query` trả tối đa 1 MB dữ liệu rồi phân trang.
 
 Về capacity có hai chế độ. **On-demand** trả theo số request thực tế, không phải đoán trước, và vẫn có thể đặt **trần** (max throughput) để lỗi code không đổ hoá đơn. **Provisioned** khai báo RCU/WCU và hợp với tải ổn định, rẻ hơn khi dự đoán đúng. Tới Nơi có đỉnh 11:00 và 17:00 dự đoán được: bắt đầu bằng on-demand và dùng **warm throughput** để làm nóng bảng trước đỉnh, rồi so hoá đơn với provisioned có auto scaling sau vài tuần.
@@ -71,28 +71,28 @@ Query "vị trí mới nhất" là `pk = DRIVER#d001 AND begins_with(sk, LOC#)`,
 <figcaption>Hình 1. Một bảng, nhiều loại item. Chỉ trạng thái tài xế đang rảnh mới có khoá index; lịch sử vị trí cố ý không có.</figcaption>
 </figure>
 
-**GSI1** trả lời câu hỏi thứ ba. Khoá gốc `CITY#hcm#AVAILABLE` dễ nghĩ ra nhưng sai: toàn bộ tài xế rảnh của một thành phố cùng một khoá. Cả thành phố dùng chung một khoá index nghĩa là mọi lượt đổi trạng thái, đổi ô và mọi lượt ghép chuyến của thành phố (giả định HCM có 10.000 trong 25.000 tài xế) cùng dồn vào một partition của index, dễ chạm trần 1.000 WCU và 3.000 RCU. Lab chia khoá theo **ô địa lý**: `gsi1pk = CITY#hcm#AVAILABLE#<geohash 5 ký tự>`, `gsi1sk = <driverId>`. Ghép chuyến query ô của khách và các ô lân cận. Hai chi tiết quan trọng: index **chỉ có khoá** (KEYS_ONLY) nên cập nhật toạ độ trong cùng ô không ghi vào index; và khi tài xế sang `BUSY`, ta `REMOVE` hai thuộc tính `gsi1*` để item rời index (index thưa). Cái giá là sau query index cần `BatchGetItem` lấy chi tiết từ bảng gốc.
+**GSI1** trả lời câu hỏi thứ ba. Khoá gốc `CITY#hcm#AVAILABLE` dễ nghĩ ra nhưng sai: toàn bộ tài xế rảnh của một thành phố dùng chung một khoá. Việc cả thành phố dùng chung một khoá index nghĩa là mọi lượt đổi trạng thái, đổi ô và mọi lượt ghép chuyến của thành phố (giả định HCM có 10.000 trong 25.000 tài xế) cùng dồn vào một partition của index, dễ chạm trần 1.000 WCU và 3.000 RCU. Lab chia khoá theo **ô địa lý**: `gsi1pk = CITY#hcm#AVAILABLE#<geohash 5 ký tự>`, `gsi1sk = <driverId>`. Ghép chuyến query ô của khách và các ô lân cận. Hai chi tiết quan trọng: index **chỉ có khoá** (KEYS_ONLY) nên cập nhật toạ độ trong cùng ô không ghi vào index; và khi tài xế sang `BUSY`, ta `REMOVE` hai thuộc tính `gsi1*` để item rời index (index thưa). Cái giá là sau khi query index, ta cần `BatchGetItem` lấy chi tiết từ bảng gốc.
 
-**TTL** đặt trên thuộc tính `expires_at` (epoch giây). DynamoDB xoá nền và không tính WCU cho việc xoá, nhưng thời điểm xoá có thể trễ nhiều giờ, thậm chí vài ngày, sau hạn. Vì vậy TTL là công cụ dọn dẹp, không phải điều kiện logic: query lịch sử luôn lọc `expires_at > now`, và "tài xế rảnh" kiểm `updated_at` còn mới.
+**TTL** đặt trên thuộc tính `expires_at` (epoch giây). DynamoDB xoá nền và không tính WCU cho việc xoá, nhưng thời điểm xoá có thể trễ nhiều giờ, thậm chí vài ngày, sau hạn. Vì vậy TTL là công cụ dọn dẹp, không phải điều kiện logic: query lịch sử luôn lọc `expires_at > now`, và với "tài xế rảnh" thì phải kiểm tra `updated_at` còn mới.
 
 ## Nhận chuyến: chỉ một tài xế thắng
 
-Khi chuyến `t9001` được chào cho nhiều tài xế, hai người có thể bấm nhận gần như cùng lúc. **Conditional write** giải quyết bằng một điều kiện kiểm tra và ghi nguyên tử:
+Khi chuyến `t9001` được chào cho nhiều tài xế, hai người có thể bấm nhận gần như cùng lúc. **Conditional write** giải quyết việc này bằng một thao tác kiểm tra điều kiện và ghi nguyên tử:
 
 ```text
 ConditionExpression: #s = :searching AND attribute_not_exists(driver_id)
 UpdateExpression:    SET #s = :accepted, driver_id = :d, accepted_at = :now
 ```
 
-Người thứ hai nhận `ConditionalCheckFailedException` và app báo "chuyến đã có người nhận". Nhưng nhận chuyến đổi cả hai item: chuyến sang `ACCEPTED` và tài xế sang `BUSY`. **TransactWriteItems** gom tối đa 100 thao tác thành một transaction tất cả hoặc không: điều kiện chuyến còn `SEARCHING`, điều kiện tài xế còn `AVAILABLE`, và `Put` khoá `IDEMP#...` với `attribute_not_exists`. Transaction tốn gấp đôi capacity của thao tác thường, nên chỉ dùng cho đường nhận chuyến.
+Người thứ hai nhận `ConditionalCheckFailedException` và app báo "chuyến đã có người nhận". Nhưng nhận chuyến làm thay đổi cả hai item: chuyến sang `ACCEPTED` và tài xế sang `BUSY`. **TransactWriteItems** gom tối đa 100 thao tác thành một transaction được thực hiện trọn vẹn hoặc không thực hiện gì: điều kiện chuyến còn `SEARCHING`, điều kiện tài xế còn `AVAILABLE`, và `Put` khoá `IDEMP#...` với `attribute_not_exists`. Transaction tốn gấp đôi capacity của thao tác thường, nên chỉ dùng cho đường nhận chuyến.
 
-Mạng lỗi thì client gọi lại, nên lệnh phải **idempotent**. Tham số `ClientRequestToken` làm việc này trong 10 phút sau request đầu; retry muộn hơn được chặn bởi item `IDEMP#` sống 24 giờ. Ranh giới cần nhớ: bản ghi gốc của chuyến vẫn ở PostgreSQL, DynamoDB chỉ giữ "ai thắng". Đưa kết quả về `trips` là một dual-write, nên cần Outbox hoặc Streams chứ đừng ghi hai nơi trong cùng request rồi hy vọng.
+Mạng lỗi thì client gọi lại, nên lệnh phải **idempotent**. Tham số `ClientRequestToken` làm việc này trong 10 phút sau request đầu; item `IDEMP#` sống 24 giờ sẽ chặn retry muộn hơn. Ranh giới cần nhớ: bản ghi gốc của chuyến vẫn ở PostgreSQL, DynamoDB chỉ giữ "ai thắng". Đưa kết quả về `trips` là một dual-write, nên cần Outbox hoặc Streams chứ đừng ghi hai nơi trong cùng request rồi hy vọng.
 
 ## Streams, DAX và Global Tables
 
-**DynamoDB Streams** ghi mỗi thay đổi item thành một bản ghi (lab chọn `NEW_AND_OLD_IMAGES`), giữ 24 giờ, đúng thứ tự theo từng item. Lambda đọc qua event source mapping; lab có sẵn mapping với `filter_criteria` để chỉ gọi Lambda khi `META` chuyển sang `ACCEPTED`, `bisect_batch_on_function_error`, giới hạn số lần thử và đích lỗi (SQS hoặc SNS). Không có đích lỗi thì một bản ghi "độc" làm kẹt cả shard tới khi hết hạn. Việc xoá của TTL cũng hiện trong Streams; filter theo `userIdentity` nếu không muốn Lambda xử lý chúng.
+**DynamoDB Streams** ghi mỗi thay đổi item thành một bản ghi (lab chọn `NEW_AND_OLD_IMAGES`), giữ 24 giờ và giữ đúng thứ tự theo từng item. Lambda đọc qua event source mapping; lab có sẵn mapping với `filter_criteria` để chỉ gọi Lambda khi `META` chuyển sang `ACCEPTED`, `bisect_batch_on_function_error`, giới hạn số lần thử lại và đích lỗi (SQS hoặc SNS). Không có đích lỗi thì một bản ghi "độc" làm kẹt cả shard tới khi hết hạn. Việc xoá của TTL cũng hiện trong Streams; filter theo `userIdentity` nếu không muốn Lambda xử lý chúng.
 
-**DAX** là cache nằm trước DynamoDB cho tải đọc nặng và lặp; vị trí đổi mỗi 4 giây nên không hợp. **Global Tables** nhân bảng sang region khác, thuộc bài 56. Tới Nơi chưa cần cả hai.
+**DAX** là cache nằm trước DynamoDB cho tải đọc nặng và lặp; vị trí đổi mỗi 4 giây nên DAX không phù hợp. **Global Tables** nhân bảng sang region khác, thuộc bài 56. Tới Nơi chưa cần cả hai.
 
 ## Chi phí và khi nào không dùng DynamoDB
 
@@ -105,7 +105,7 @@ DynamoDB không có join và không thân thiện với báo cáo ad hoc. Muốn
 - **Hot partition do chọn sai `pk`.** Một `pk` dùng chung (thành phố, ngày) chạm trần 1.000 WCU dù on-demand.
 - **Đưa thuộc tính index lên mọi item.** Mỗi lần ghi đổi khoá index đều tốn WCU kép; chỉ item cần tìm theo index mới mang `gsi1*`.
 - **Coi TTL là chính xác.** Item hết hạn vẫn đọc được tới khi bị xoá.
-- **Scan.** Scan đọc cả bảng và tốn RCU cho từng item; nếu cần Scan, access pattern còn thiếu.
+- **Scan.** Scan đọc cả bảng và tốn RCU cho từng item; nếu phải dùng Scan thì access pattern còn thiếu.
 - **Transaction khắp nơi.** Gấp đôi chi phí và dễ gây xung đột; giữ cho đường nhận chuyến.
 
 **Bài tập:** Nhóm khác đề xuất `pk = CITY#hcm` cho mọi toạ độ để query "mọi tài xế ở HCM" bằng một lệnh. Vì sao đây là hot partition, và sửa thế nào?
@@ -124,7 +124,7 @@ scripts/claim-trip.sh t9001 d001 claim-t9001-d001
 
 Trên AWS thật, bảng on-demand tính tiền theo request; PITR và Streams tính riêng.
 
-Kiểm trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker; `bash -n` và shellcheck cho script; JSON parse được. Các script CLI đã chạy trọn vòng (tạo bảng, nạp dữ liệu, ba query, nhận chuyến lần một thành công, lần hai bị từ chối) trên **moto**, một bộ mô phỏng DynamoDB chạy cục bộ. Moto không phải dịch vụ thật nên không chứng minh gì về throughput, TTL hay Streams. **Chưa kiểm chứng trên tài khoản thật:** `apply` (nhất là `on_demand_throughput` và `warm_throughput`), hành vi TTL, event source mapping với filter, và các con số WCU trong bài, vốn là phép tính từ giả định.
+Đã kiểm tra trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker; `bash -n` và shellcheck cho script; JSON parse được. Các script CLI đã chạy trọn vòng (tạo bảng, nạp dữ liệu, ba query, nhận chuyến lần một thành công, lần hai bị từ chối) trên **moto**, một bộ mô phỏng DynamoDB chạy cục bộ. Moto không phải dịch vụ thật nên không chứng minh gì về throughput, TTL hay Streams. **Chưa kiểm chứng trên tài khoản thật:** `apply` (nhất là `on_demand_throughput` và `warm_throughput`), hành vi TTL, event source mapping với filter, và các con số WCU trong bài, vốn là phép tính từ giả định.
 
 Bài trước: [bài 31](/articles/aws-aurora-postgresql-rds-proxy-failover). Bài tiếp: [bài 33](/articles/aws-elasticache-nang-cao-memorydb-ha).
 

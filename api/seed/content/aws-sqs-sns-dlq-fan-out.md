@@ -15,7 +15,7 @@ Lúc 11:30, Tới Nơi nhận khoảng 70 chuyến mới mỗi giây. Với mỗ
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Consumer đọc một message từ SQS rồi bị crash trước khi xoá. Điều gì xảy ra với message đó?</p>
-<details><summary>Xem đáp án</summary><p>Message không mất. Nó chỉ ẩn trong visibility timeout; hết hạn mà chưa bị xoá thì hiện lại cho lần nhận sau. Đó là lý do SQS là at-least-once và consumer phải chịu được việc nhận trùng.</p></details>
+<details><summary>Xem đáp án</summary><p>Message không mất. Message chỉ ẩn trong visibility timeout; hết hạn mà chưa bị xoá thì hiện lại cho lần nhận sau. Đó là lý do SQS là at-least-once và consumer phải xử lý được message trùng lặp.</p></details>
 </div>
 
 ## SQS: hàng đợi tách người gửi khỏi người nhận
@@ -32,23 +32,23 @@ Lúc 11:30, Tới Nơi nhận khoảng 70 chuyến mới mỗi giây. Với mỗ
 
 Quy tắc chọn: mặc định dùng standard. Chỉ dùng FIFO khi thứ tự trong một nhóm có nghĩa nghiệp vụ, và chọn group id đủ nhỏ, ví dụ `tripId`, để các chuyến khác nhau vẫn xử lý song song. Group id là `city` sẽ ép toàn thành phố vào một dòng chảy tuần tự và biến FIFO thành nút cổ chai.
 
-Deduplication của FIFO chỉ che cửa sổ 5 phút ở phía broker. Nó không thay cho idempotency ở consumer, vì consumer có thể xử lý lại ngoài cửa sổ đó, hoặc xử lý hai lần cùng một message do lỗi giữa chừng. Với loạt .NET, bài [Outbox và Inbox](/articles/dotnet10-outbox-inbox-idempotent-consumer) đã dựng đúng cơ chế này: dispatcher có thể gửi một sự kiện nhiều lần, Inbox ghi `eventId` đã xử lý để hiệu ứng nghiệp vụ chỉ xảy ra một lần. Cùng nguyên tắc áp cho consumer SQS, và `eventId` nên đi trong message attribute để consumer đọc mà không phải parse body.
+Deduplication của FIFO chỉ có tác dụng trong cửa sổ 5 phút ở phía broker. Cơ chế này không thay cho idempotency ở consumer, vì consumer có thể xử lý lại ngoài cửa sổ đó, hoặc xử lý hai lần cùng một message do lỗi giữa chừng. Với loạt .NET, bài [Outbox và Inbox](/articles/dotnet10-outbox-inbox-idempotent-consumer) đã dựng đúng cơ chế này: dispatcher có thể gửi một sự kiện nhiều lần, Inbox ghi `eventId` đã xử lý để hiệu ứng nghiệp vụ chỉ xảy ra một lần. Cùng nguyên tắc đó áp dụng cho consumer SQS, và `eventId` nên đi trong message attribute để consumer đọc mà không phải parse body.
 
 ## Visibility timeout, long polling và batch
 
 Khi consumer nhận message, SQS không xoá mà làm nó **vô hình** trong **visibility timeout** (mặc định 30 giây, tối đa 12 giờ). Xoá kịp thì xong; không kịp thì message hiện lại và bị xử lý lần nữa. Hai sai lầm đối xứng: đặt quá ngắn thì xử lý trùng khi consumer chỉ chậm; đặt quá dài thì consumer chết rồi message vẫn treo rất lâu. Đặt bằng vài lần thời gian xử lý p99, và gia hạn bằng `ChangeMessageVisibility` nếu việc dài bất thường.
 
-**Long polling** là `WaitTimeSeconds=20`: yêu cầu receive chờ tới 20 giây cho tới khi có message thay vì trả rỗng ngay. Short polling (mặc định nếu không đặt) gây hàng loạt request rỗng, vừa tốn tiền vì SQS tính theo request, vừa có thể trả rỗng dù queue vẫn còn message, vì short polling chỉ hỏi một phần các máy chủ của SQS. Trong Terraform, đặt `receive_wait_time_seconds = 20` ngay trên queue để mọi consumer được hưởng.
+**Long polling** là `WaitTimeSeconds=20`: yêu cầu receive chờ tối đa 20 giây cho đến khi có message thay vì trả rỗng ngay. Short polling (mặc định nếu không đặt) gây hàng loạt request rỗng, vừa tốn tiền vì SQS tính theo request, vừa có thể trả rỗng dù queue vẫn còn message, vì short polling chỉ hỏi một phần các máy chủ của SQS. Trong Terraform, đặt `receive_wait_time_seconds = 20` ngay trên queue để mọi consumer đều áp dụng.
 
-**Batch** cho phép nhận và gửi tối đa 10 message mỗi request. Ở 70 chuyến/giây, mỗi queue chỉ cần cỡ 7 request nhận mỗi giây nếu batch đầy, nhưng cần nhớ: batch 10 thì một message lỗi phải được xử lý riêng, không kéo cả mẻ xoá nhầm hoặc retry nhầm. **Message retention** mặc định 4 ngày, tối đa 14 ngày; quá hạn là bị xoá, không có bản sao.
+**Batch** cho phép nhận và gửi tối đa 10 message mỗi request. Ở 70 chuyến/giây, mỗi queue chỉ cần cỡ 7 request nhận mỗi giây nếu batch đầy, nhưng cần nhớ: batch 10 thì một message lỗi phải được xử lý riêng, để cả lô không bị xoá nhầm hoặc retry nhầm. **Message retention** mặc định 4 ngày, tối đa 14 ngày; quá hạn là bị xoá, không có bản sao.
 
 ## Dead-letter queue và redrive
 
-Message độc, ví dụ JSON hỏng hoặc chuyến tham chiếu một thành phố không tồn tại, sẽ lặp vô tận nếu không có lối thoát. **Dead-letter queue (DLQ)** là queue thường hứng các message đã bị nhận quá `maxReceiveCount` lần. Cấu hình bằng `RedrivePolicy` trên **queue nguồn**.
+Poison message (message không bao giờ xử lý thành công), ví dụ JSON hỏng hoặc chuyến tham chiếu một thành phố không tồn tại, sẽ lặp vô tận nếu không có lối thoát. **Dead-letter queue (DLQ)** là queue thường hứng các message đã bị nhận quá `maxReceiveCount` lần. Cấu hình bằng `RedrivePolicy` trên **queue nguồn**.
 
-Ba điều cần nhớ. Thứ nhất, DLQ của FIFO phải là FIFO, DLQ của standard phải là standard. Thứ hai, với standard queue, thời gian giữ của message trong DLQ tính từ lúc nó vào queue gốc (FIFO thì tính lại từ lúc vào DLQ), nên retention của DLQ cần dài hơn queue nguồn, thường đặt 14 ngày. Thứ ba, DLQ chỉ có ích khi có **alarm** trên số message hiển thị (`ApproximateNumberOfMessagesVisible` lớn hơn 0), nếu không nó thành bãi rác im lặng.
+Ba điều cần nhớ. Thứ nhất, DLQ của FIFO phải là FIFO, DLQ của standard phải là standard. Thứ hai, với standard queue, thời gian giữ của message trong DLQ tính từ lúc message vào queue gốc (FIFO thì tính lại từ lúc vào DLQ), nên retention của DLQ cần dài hơn queue nguồn, thường đặt 14 ngày. Thứ ba, DLQ chỉ có ích khi có **alarm** trên số message hiển thị (`ApproximateNumberOfMessagesVisible` lớn hơn 0), nếu không DLQ thành nơi chứa message hỏng mà không ai hay.
 
-Sau khi sửa lỗi consumer, **redrive** đưa message về queue nguồn: `aws sqs start-message-move-task --source-arn <arn-của-DLQ>` (mặc định về queue gốc, có thể chỉ định `--destination-arn` và tốc độ). Redrive là xử lý lại, nên nó chỉ an toàn khi consumer idempotent.
+Sau khi sửa lỗi consumer, **redrive** đưa message về queue nguồn: `aws sqs start-message-move-task --source-arn <arn-của-DLQ>` (mặc định về queue gốc, có thể chỉ định `--destination-arn` và tốc độ). Redrive là xử lý lại, nên chỉ an toàn khi consumer idempotent.
 
 ## SNS: một lần publish, nhiều hàng đợi
 

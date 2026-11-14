@@ -1,0 +1,13 @@
+{"file":"aws-terraform-module-vpc-ecs-rds.md","edits":[
+{"old":"Copy-paste hạ tầng cho cùng loại lỗi như copy-paste code","new":"Copy-paste hạ tầng gây ra cùng loại lỗi như copy-paste code","reason":"Câu thiếu động từ","severity":"high"},
+{"old":"Output chỉ phơi ra thứ module khác cần","new":"Output chỉ nên công khai những gì module khác cần","reason":"'phơi ra' calque của expose","severity":"medium"},
+{"old":"vì nó biến cấu trúc nội bộ thành hợp đồng","new":"vì làm vậy biến cấu trúc nội bộ thành hợp đồng","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"những giá trị có luật thì kiểm bằng `validation` để lỗi hiện ngay","new":"những giá trị có ràng buộc thì kiểm tra bằng `validation` để lỗi hiện ngay","reason":"'có luật', 'kiểm' gượng/cụt","severity":"medium"},
+{"old":"Ghim version, đọc changelog","new":"Ghim phiên bản, đọc changelog","reason":"Thống nhất 'phiên bản' (bài đã dùng 'ghim phiên bản')","severity":"low"},
+{"old":"Chỉ phơi ra những gì thật sự khác giữa các môi trường.","new":"Chỉ đưa ra thành biến những gì thật sự khác giữa các môi trường.","reason":"'phơi ra' calque của expose","severity":"medium"},
+{"old":"**Data source** `aws_caller_identity` và `aws_region` cho account ID và region","new":"**Data source** `aws_caller_identity` và `aws_region` cung cấp account ID và region","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"vì tham chiếu thuộc tính đã tạo phụ thuộc; chỉ dùng khi phụ thuộc không biểu hiện qua giá trị","new":"vì việc tham chiếu thuộc tính đã tự tạo ra phụ thuộc; chỉ dùng khi phụ thuộc không thể hiện qua giá trị","reason":"Câu cụt, 'biểu hiện' gượng","severity":"medium"},
+{"old":"Luồng ghép của `envs/dev`: `network` cho subnet;","new":"Luồng ghép của `envs/dev`: `network` cung cấp subnet;","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"**Tag và task definition do CI quản:**","new":"**Tag và task definition do CI quản lý:**","reason":"Thiếu chữ 'lý'","severity":"medium"},
+{"old":"Kiểm trên máy bằng Docker, từ thư mục lab:","new":"Kiểm tra trên máy bằng Docker, từ thư mục lab:","reason":"'Kiểm' cụt","severity":"low"}
+]}

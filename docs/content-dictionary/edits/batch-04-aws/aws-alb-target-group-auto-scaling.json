@@ -1,0 +1,12 @@
+{"file":"aws-alb-target-group-auto-scaling.md","edits":[
+{"old":"thẻ tag, và","new":"tag, và","reason":"'thẻ tag' lặp nghĩa, giữ 'tag'","severity":"low"},
+{"old":"Nó thay thế **launch configuration**:","new":"Launch template thay thế **launch configuration**:","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"## Scaling policy: ba cách giãn","new":"## Scaling policy: ba cách co giãn","reason":"'giãn' đứng một mình gượng; dùng 'co giãn'","severity":"low"},
+{"old":"Giữ một số liệu (CPU, request mỗi target) quanh giá trị đích","new":"Giữ một chỉ số (CPU, request mỗi target) quanh giá trị đích","reason":"metric → chỉ số","severity":"medium"},
+{"old":"số liệu hợp lý nhất là","new":"chỉ số hợp lý nhất là","reason":"metric → chỉ số","severity":"medium"},
+{"old":"chưa được kiểm trong lab này","new":"chưa được kiểm tra trong lab này","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"Script đã qua kiểm tra cú pháp và kiểm tên tham số ở chế độ không mạng,","new":"Script đã qua kiểm tra cú pháp và kiểm tra tên tham số khi chạy mà không cần kết nối mạng,","reason":"'kiểm' cụt; 'chế độ không mạng' tự ghép","severity":"medium"},
+{"old":"**Health check kiểm phụ thuộc ngoài gây dây chuyền.**","new":"**Health check kiểm tra dịch vụ phụ thuộc bên ngoài có thể gây lỗi dây chuyền.**","reason":"'kiểm' cụt; 'phụ thuộc ngoài' tự ghép, thiếu danh từ","severity":"high"},
+{"old":"chỉ kiểm điều kiện cục bộ, còn tình trạng database thì cảnh báo riêng.","new":"chỉ kiểm tra điều kiện cục bộ, còn tình trạng database thì đặt cảnh báo riêng.","reason":"'kiểm' cụt; câu thiếu động từ","severity":"medium"},
+{"old":"khiến ASG giết máy còn đang boot rồi tạo lại, lặp vô hạn.","new":"khiến ASG dừng máy còn đang boot rồi tạo lại, cứ lặp lại như vậy mãi.","reason":"'giết' (kill) → 'dừng'; 'lặp vô hạn' trần trụi","severity":"medium"}
+]}

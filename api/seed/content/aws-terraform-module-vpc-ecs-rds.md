@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, terraform, module, ecs, rds, vpc, environments]
 language: vi
 ---
 
-Tới Nơi vừa có thêm service `tracking`. Người viết hạ tầng mở thư mục của `booking`, copy nguyên khối, đổi vài chữ rồi quên đổi tên log group. Hai service ghi chung một nơi, và ba tuần sau không ai hiểu vì sao log của `booking` có dòng của `tracking`. Copy-paste hạ tầng cho cùng loại lỗi như copy-paste code, chỉ khác là lỗi đi thẳng lên production.
+Tới Nơi vừa có thêm service `tracking`. Người viết hạ tầng mở thư mục của `booking`, copy nguyên khối, đổi vài chữ rồi quên đổi tên log group. Hai service ghi chung một nơi, và ba tuần sau không ai hiểu vì sao log của `booking` có dòng của `tracking`. Copy-paste hạ tầng gây ra cùng loại lỗi như copy-paste code, chỉ khác là lỗi đi thẳng lên production.
 
 Đây là **bài 23** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bạn cần nắm [bài 22](/articles/aws-terraform-provider-state-s3-lock) (provider, state, backend S3) và đã thấy ECS Fargate ở Phần 02 ([bài 12](/articles/aws-ecs-fargate-task-definition-roles)). Bài này gói VPC, RDS và ECS thành module để thêm một service chỉ cần thêm một khối cấu hình.
 
@@ -41,7 +41,7 @@ Tới Nơi dùng thư mục riêng, đặt `staging` và `prod` ở tài khoản
 
 ## Giao diện module: input có kiểm tra, output rõ ràng
 
-Module tốt có giao diện nhỏ và khó dùng sai. Hai thói quen đáng giữ: mọi `variable` đều có `description`, và những giá trị có luật thì kiểm bằng `validation` để lỗi hiện ngay lúc `plan`, không đợi AWS từ chối.
+Module tốt có giao diện nhỏ và khó dùng sai. Hai thói quen đáng giữ: mọi `variable` đều có `description`, và những giá trị có ràng buộc thì kiểm tra bằng `validation` để lỗi hiện ngay lúc `plan`, không đợi AWS từ chối.
 
 ```hcl
 variable "service_name" {
@@ -55,7 +55,7 @@ variable "service_name" {
 }
 ```
 
-Output chỉ phơi ra thứ module khác cần: `vpc_id`, `private_subnet_ids`, `security_group_id`, ARN của role và secret. Đừng output cả resource, vì nó biến cấu trúc nội bộ thành hợp đồng. Khi module nằm ở repo riêng, ghim phiên bản bằng git tag (`?ref=v1.2.0`) để môi trường nâng cấp chủ động; module cục bộ trong lab dùng đường dẫn tương đối cho dễ đọc.
+Output chỉ nên công khai những gì module khác cần: `vpc_id`, `private_subnet_ids`, `security_group_id`, ARN của role và secret. Đừng output cả resource, vì làm vậy biến cấu trúc nội bộ thành hợp đồng. Khi module nằm ở repo riêng, ghim phiên bản bằng git tag (`?ref=v1.2.0`) để môi trường nâng cấp chủ động; module cục bộ trong lab dùng đường dẫn tương đối cho dễ đọc.
 
 Có nên dùng module công khai như `terraform-aws-modules/vpc/aws` (của cộng đồng, phổ biến nhất, không do AWS duy trì) hay tự viết?
 
@@ -64,7 +64,7 @@ Có nên dùng module công khai như `terraform-aws-modules/vpc/aws` (của c�
 | Phạm vi | Rất nhiều tuỳ chọn, bao phủ nhiều trường hợp | Chỉ những gì Tới Nơi cần |
 | Bảo trì | Có người theo dõi API AWS mới | Đội mình chịu trách nhiệm |
 | Độ phức tạp đọc code | Cao: hàng trăm biến, nhiều nhánh `count` | Thấp, đọc hết trong một buổi |
-| Nâng cấp | Ghim version, đọc changelog, có thể có breaking change | Do mình quyết |
+| Nâng cấp | Ghim phiên bản, đọc changelog, có thể có breaking change | Do mình quyết |
 
 VPC là phần chuẩn hoá nhất, nên dùng module registry là hợp lý khi bạn cần nhiều tính năng (NAT theo AZ, endpoint, flow log). Lab tự viết `network` chỉ để bạn thấy mọi viên gạch; module ECS và RDS thường nên tự viết vì chúng mang quy ước riêng của Tới Nơi (tên, tag, quyền).
 
@@ -102,11 +102,11 @@ dynamic "load_balancer" {
 }
 ```
 
-Đừng lạm dụng: một `dynamic` lồng trong `dynamic` khó review hơn vài khối viết tay. **Data source** `aws_caller_identity` và `aws_region` cho account ID và region để ghép địa chỉ ECR mà không ghi cứng. `depends_on` hiếm khi cần, vì tham chiếu thuộc tính đã tạo phụ thuộc; chỉ dùng khi phụ thuộc không biểu hiện qua giá trị (ví dụ NAT Gateway cần Internet Gateway tồn tại trước).
+Đừng lạm dụng: một `dynamic` lồng trong `dynamic` khó review hơn vài khối viết tay. **Data source** `aws_caller_identity` và `aws_region` cung cấp account ID và region để ghép địa chỉ ECR mà không ghi cứng. `depends_on` hiếm khi cần, vì việc tham chiếu thuộc tính đã tự tạo ra phụ thuộc; chỉ dùng khi phụ thuộc không thể hiện qua giá trị (ví dụ NAT Gateway cần Internet Gateway tồn tại trước).
 
 ## Ghép network, RDS và service, và vòng phụ thuộc
 
-Luồng ghép của `envs/dev`: `network` cho subnet; `rds-postgres` đặt instance vào private subnet; `ecs-service` nhận địa chỉ DB và ARN secret. Mật khẩu master không bao giờ viết vào tfvars: `manage_master_user_password = true` để RDS tự sinh và lưu secret trong Secrets Manager (không nằm trong state). Task definition tham chiếu từng khoá JSON của secret, và execution role được cấp `secretsmanager:GetSecretValue` đúng ARN đó:
+Luồng ghép của `envs/dev`: `network` cung cấp subnet; `rds-postgres` đặt instance vào private subnet; `ecs-service` nhận địa chỉ DB và ARN secret. Mật khẩu master không bao giờ viết vào tfvars: `manage_master_user_password = true` để RDS tự sinh và lưu secret trong Secrets Manager (không nằm trong state). Task definition tham chiếu từng khoá JSON của secret, và execution role được cấp `secretsmanager:GetSecretValue` đúng ARN đó:
 
 ```hcl
 secrets = [
@@ -128,9 +128,9 @@ Chỗ dễ vấp là security group. Database chỉ nên nhận kết nối từ
 
 ## Cái giá phải trả
 
-- **Module quá linh hoạt:** thêm biến cho mọi trường hợp biến module thành bản sao thu nhỏ của provider. Chỉ phơi ra những gì thật sự khác giữa các môi trường.
+- **Module quá linh hoạt:** thêm biến cho mọi trường hợp biến module thành bản sao thu nhỏ của provider. Chỉ đưa ra thành biến những gì thật sự khác giữa các môi trường.
 - **Thay đổi module lan ra mọi môi trường:** đổi một dòng trong `ecs-service` ảnh hưởng ba service ở ba môi trường. Ghim module theo tag và nâng từng môi trường một, bắt đầu từ `dev`.
-- **Tag và task definition do CI quản:** nếu pipeline (bài 25) cập nhật task definition, Terraform sẽ thấy khác biệt. Chọn một bên sở hữu image: hoặc Terraform ghim digest, hoặc `ignore_changes` cho trường đó.
+- **Tag và task definition do CI quản lý:** nếu pipeline (bài 25) cập nhật task definition, Terraform sẽ thấy khác biệt. Chọn một bên sở hữu image: hoặc Terraform ghim digest, hoặc `ignore_changes` cho trường đó.
 - **Mặc định nguy hiểm:** `skip_final_snapshot = true` và `deletion_protection = false` chỉ hợp với dev. Module nên đặt mặc định an toàn, để môi trường nới lỏng một cách tường minh.
 - **Chi phí ẩn:** NAT Gateway, Multi-AZ và số task đều tính theo thời gian chạy; mỗi môi trường nhân chi phí lên.
 
@@ -140,7 +140,7 @@ Chỗ dễ vấp là security group. Database chỉ nên nhận kết nối từ
 
 ## Lab và kiểm chứng
 
-Mã ở `examples/toi-noi-aws/p03-23-terraform-modules`: `modules/{network,rds-postgres,ecs-service}` và `envs/dev` với `dev.tfvars` và `backend.tf.example` (chưa bật). Kiểm trên máy bằng Docker, từ thư mục lab:
+Mã ở `examples/toi-noi-aws/p03-23-terraform-modules`: `modules/{network,rds-postgres,ecs-service}` và `envs/dev` với `dev.tfvars` và `backend.tf.example` (chưa bật). Kiểm tra trên máy bằng Docker, từ thư mục lab:
 
 ```bash
 docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 fmt -check -recursive

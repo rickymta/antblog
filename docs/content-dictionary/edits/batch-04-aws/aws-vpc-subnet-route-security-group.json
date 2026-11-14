@@ -1,0 +1,9 @@
+{"file":"aws-vpc-subnet-route-security-group.md","edits":[
+{"old":"một mạng mặc định với subnet đều ra được Internet","new":"một mạng mặc định mà mọi subnet đều ra được Internet","reason":"Câu cụt, 'với subnet đều' khó hiểu","severity":"medium"},
+{"old":"Bạn cần xong [bài 03]","new":"Bạn cần đọc xong [bài 03]","reason":"'cần xong' thiếu động từ","severity":"medium"},
+{"old":"Muốn chịu được mất một AZ,","new":"Muốn chịu được khi mất một AZ,","reason":"Cấu trúc kiểu Anh","severity":"low"},
+{"old":"Bảng này cho 6 subnet.","new":"Bảng này gồm 6 subnet.","reason":"'cho' kiểu dịch máy","severity":"medium"},
+{"old":"(loại *gateway* không tính tiền), được trình bày kỹ hơn ở bài 53","new":"(loại *gateway* không tính tiền); bài 53 trình bày kỹ hơn","reason":"Bỏ bị động kiểu Anh","severity":"low"},
+{"old":"Ghi log tốn tiền theo dung lượng","new":"Việc ghi log tốn tiền theo dung lượng","reason":"Câu thiếu chủ ngữ rõ","severity":"low"},
+{"old":"nếu thêm security group mở rộng, database tiếp xúc Internet","new":"nếu lại gắn security group mở rộng thì database bị lộ ra Internet","reason":"'tiếp xúc Internet' gượng, câu thiếu liên kết","severity":"medium"}
+]}

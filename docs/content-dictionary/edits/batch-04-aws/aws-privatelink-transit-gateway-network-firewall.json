@@ -1,0 +1,21 @@
+{"file":"aws-privatelink-transit-gateway-network-firewall.md","edits":[
+{"old":"PrivateLink xuất API đối soát cho đối tác","new":"PrivateLink đưa API đối soát ra cho đối tác","reason":"'xuất' là calque của export","severity":"medium"},
+{"old":"mỗi thuật ngữ được giải thích ở lần đầu xuất hiện.","new":"bài giải thích từng thuật ngữ ở lần đầu xuất hiện.","reason":"Bỏ bị động kiểu Anh","severity":"low"},
+{"old":"Muốn nhiều VPC nói chuyện với nhau cần Transit Gateway, hoặc dùng PrivateLink nếu chỉ xuất một service.","new":"Muốn nhiều VPC nói chuyện với nhau thì cần Transit Gateway, hoặc dùng PrivateLink nếu chỉ cần đưa một service ra ngoài.","reason":"'xuất' là calque; câu thiếu từ nối","severity":"medium"},
+{"old":"## PrivateLink: xuất service cho đối tác","new":"## PrivateLink: đưa service ra cho đối tác","reason":"'xuất' là calque của export","severity":"medium"},
+{"old":"DNS private đè tên công khai","new":"DNS private ghi đè tên công khai","reason":"'đè' cụt","severity":"low"},
+{"old":"| Tiền | Không tính |","new":"| Chi phí | Không tính |","reason":"Thống nhất thuật ngữ với phần còn lại của bài","severity":"low"},
+{"old":"S3 endpoint chỉ cho bucket `toinoi-prod-*` và Secrets Manager endpoint chỉ cho secret `toinoi/prod/*`","new":"S3 endpoint chỉ cho phép truy cập bucket `toinoi-prod-*` và Secrets Manager endpoint chỉ cho phép truy cập secret `toinoi/prod/*`","reason":"Câu lược động từ","severity":"medium"},
+{"old":"chỉ cho request tới từ đúng một endpoint.","new":"chỉ cho phép request đến từ đúng một endpoint.","reason":"Câu lược động từ","severity":"low"},
+{"old":"Nó cũng chặn luôn bạn trên console","new":"Statement đó cũng chặn luôn cả bạn trên console","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"Đối tác, hoặc xuất một API","new":"Đối tác, hoặc đưa một API ra ngoài","reason":"'xuất' là calque","severity":"low"},
+{"old":"nên chỉ PrivateLink khả thi, và nó cũng đúng nguyên tắc tối thiểu","new":"nên chỉ PrivateLink là khả thi, và cách này cũng đúng nguyên tắc đặc quyền tối thiểu","reason":"Tránh 'nó'; nguyên tắc bị lược danh từ (least privilege)","severity":"medium"},
+{"old":"là bộ định tuyến cấp khu vực.","new":"là bộ định tuyến cấp region.","reason":"Thống nhất 'region'","severity":"medium"},
+{"old":"Segment bằng route table TGW, kiểm soát bằng firewall ở giữa","new":"Phân đoạn mạng bằng route table TGW và kiểm soát bằng firewall ở giữa","reason":"Câu thiếu chủ ngữ, giọng dịch máy","severity":"medium"},
+{"old":"cần thời gian đặt, độ trễ ổn định hơn","new":"cần thời gian đặt kết nối và có độ trễ ổn định hơn","reason":"Câu lược động từ","severity":"low"},
+{"old":"và đi qua NAT, nghĩ là đã có endpoint.","new":"và đi qua NAT, trong khi bạn tưởng đã có endpoint.","reason":"Câu cụt, thiếu chủ ngữ","severity":"medium"},
+{"old":"CIDR chồng lấn chặn peering và TGW sau này","new":"CIDR chồng lấn khiến peering và TGW sau này không dùng được","reason":"Câu lược vị ngữ","severity":"low"},
+{"old":"Tối thiểu thiếu những endpoint nào?","new":"Ít nhất đang thiếu những endpoint nào?","reason":"'Tối thiểu' calque của at minimum","severity":"low"},
+{"old":"Kiểm bằng CloudTrail hoặc VPC Flow Logs xem task đang cố tới địa chỉ nào.","new":"Dùng CloudTrail hoặc VPC Flow Logs để xem task đang cố kết nối tới địa chỉ nào.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"`check-network.sh` kiểm chỉ đọc.","new":"`check-network.sh` kiểm tra ở chế độ chỉ đọc.","reason":"Câu cụt, thiếu động từ","severity":"medium"}
+]}

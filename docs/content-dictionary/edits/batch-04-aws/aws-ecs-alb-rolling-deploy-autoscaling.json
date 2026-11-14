@@ -1,0 +1,19 @@
+{"file":"aws-ecs-alb-rolling-deploy-autoscaling.md","edits":[
+{"old":"Thời gian ALB chờ request đang bay hoàn tất trước khi gỡ task","new":"Thời gian ALB chờ các request đang xử lý hoàn tất trước khi gỡ task","reason":"'đang bay' là calque của in-flight","severity":"medium"},
+{"old":"Thứ tự chính xác ECS dừng và khởi động task do scheduler quyết định, không phải hợp đồng nên đừng viết","new":"Thứ tự chính xác mà ECS dừng và khởi động task do scheduler quyết định và không được cam kết, nên đừng viết","reason":"'hợp đồng' là calque của contract; câu thiếu quan hệ từ","severity":"high"},
+{"old":"| An toàn năng lực, gấp đôi task trong lúc chuyển |","new":"| An toàn về năng lực, nhưng gấp đôi số task trong lúc chuyển |","reason":"Câu lược giới từ và danh từ","severity":"low"},
+{"old":"Nhanh nhưng năng lực rơi còn nửa","new":"Nhanh nhưng năng lực giảm còn một nửa","reason":"'rơi còn nửa' gượng","severity":"low"},
+{"old":"Chậm, đổi gần như từng task một","new":"Chậm, gần như thay từng task một","reason":"'đổi' dùng sai nghĩa (replace)","severity":"low"},
+{"old":"Không có gì dừng một deploy hỏng nếu ta không bật.","new":"Nếu ta không bật circuit breaker, không có gì dừng một deploy hỏng.","reason":"Câu thiếu tân ngữ, mơ hồ","severity":"medium"},
+{"old":"kẹp trong khoảng 3 tới 200 task lỗi","new":"giới hạn trong khoảng từ 3 đến 200 task lỗi","reason":"'kẹp' là calque của clamp","severity":"medium"},
+{"old":"Target tracking giữ một số đo quanh mục tiêu","new":"Target tracking giữ một chỉ số quanh mức mục tiêu","reason":"'số đo' → 'chỉ số' (metric)","severity":"medium"},
+{"old":"Số đo hợp với service web sau ALB là","new":"Chỉ số hợp với service web sau ALB là","reason":"'số đo' → 'chỉ số' (metric)","severity":"medium"},
+{"old":"Cooldown ngắn khi scale out để theo kịp tải, dài khi scale in để không vừa hạ task đã phải thêm lại.","new":"Hãy đặt cooldown ngắn khi scale out để theo kịp tải, và dài khi scale in để tránh vừa hạ task xong đã phải thêm lại.","reason":"Câu lược động từ","severity":"medium"},
+{"old":"scale out khi *một* policy muốn, nhưng","new":"scale out khi *một* policy yêu cầu, nhưng","reason":"'muốn' gán ý chí cho policy, gượng","severity":"low"},
+{"old":"rồi một action khác trả về 2 lúc 13:15.","new":"rồi một action khác đặt lại về 2 lúc 13:15.","reason":"'trả về' là calque","severity":"low"},
+{"old":"Bảng dưới là bản đồ ngắn để sang bài 26:","new":"Bảng dưới là tóm tắt ngắn để chuyển sang bài 26:","reason":"'bản đồ' là calque của map","severity":"medium"},
+{"old":"Các chiến lược chuyển traffic của nó vẫn đang được bổ sung, nên bài này chỉ định vị;","new":"AWS vẫn đang bổ sung các chiến lược chuyển traffic cho tính năng này, nên bài này chỉ giới thiệu tổng quan;","reason":"Bỏ bị động và 'nó' mơ hồ; 'định vị' là calque","severity":"medium"},
+{"old":"circuit breaker trip oan.","new":"circuit breaker kích hoạt oan.","reason":"'trip' dùng như động từ tiếng Anh trong văn xuôi","severity":"low"},
+{"old":"đoán sai thì hoặc tốn tiền hoặc chậm.","new":"đoán sai thì hoặc tốn tiền, hoặc phản hồi chậm.","reason":"Câu lược danh từ/động từ","severity":"low"},
+{"old":"Kiểm trên máy: `terraform fmt`","new":"Đã kiểm tra trên máy: `terraform fmt`","reason":"'Kiểm' cụt, thiếu thì","severity":"medium"}
+]}

@@ -1,0 +1,14 @@
+{"file":"aws-github-actions-oidc-ecr-deploy.md","edits":[
+{"old":"chưa từng được xoay, và ít nhất","new":"chưa từng được xoay vòng, và ít nhất","reason":"'xoay' cụt, dịch từng chữ từ rotate","severity":"medium"},
+{"old":"sống vô thời hạn nếu không xoay,","new":"tồn tại vô thời hạn nếu không xoay vòng,","reason":"'sống' và 'xoay' dịch từng chữ","severity":"medium"},
+{"old":"Các action `aws-actions/configure-aws-credentials` làm toàn bộ việc này","new":"Action `aws-actions/configure-aws-credentials` làm toàn bộ việc này","reason":"Sai số: chỉ có một action","severity":"low"},
+{"old":"STS đối chiếu với **IAM OIDC identity provider** `token.actions.githubusercontent.com`, kiểm trust policy của role,","new":"STS đối chiếu với **IAM OIDC identity provider** `token.actions.githubusercontent.com`, kiểm tra trust policy của role,","reason":"Lược động từ 'kiểm tra'","severity":"low"},
+{"old":"nếu console hoặc CLI vẫn hỏi, theo tài liệu IAM.","new":"nếu console hoặc CLI vẫn hỏi, hãy làm theo tài liệu IAM.","reason":"Câu thiếu động từ","severity":"high"},
+{"old":"chọn một bên sở hữu image.","new":"chỉ để một bên quản lý image.","reason":"'sở hữu' là calque (own)","severity":"medium"},
+{"old":"Cùng cơ chế cho phép giới hạn nhánh được deploy.","new":"Cơ chế này cũng cho phép giới hạn nhánh được phép deploy.","reason":"Câu cụt, thiếu chủ ngữ","severity":"medium"},
+{"old":"là lý do số một khiến bước assume role","new":"là nguyên nhân hàng đầu khiến bước assume role","reason":"'lý do số một' calque","severity":"low"},
+{"old":"Kiểm major hiện hành của mỗi action trước khi dùng,","new":"Hãy kiểm tra major hiện hành của mỗi action trước khi dùng,","reason":"Lược động từ 'kiểm tra'","severity":"medium"},
+{"old":"biến role CI thành bước leo thang đặc quyền.","new":"biến role CI thành đường leo thang đặc quyền.","reason":"'bước' dùng sai nghĩa","severity":"medium"},
+{"old":"Kiểm trên máy là parse JSON và YAML cùng `bash -n`;","new":"Việc kiểm tra trên máy gồm parse JSON và YAML cùng `bash -n`;","reason":"Câu lược danh từ, thiếu chủ ngữ rõ","severity":"medium"},
+{"old":"Thành thật về phạm vi: workflow","new":"Nói rõ về phạm vi kiểm chứng: workflow","reason":"'Thành thật về' là calque (honest about)","severity":"medium"}
+]}

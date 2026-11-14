@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, kms, encryption, key-policy, envelope-encryption, s
 language: vi
 ---
 
-Kiểm toán viên của đối tác thanh toán hỏi Tới Nơi ba câu: ảnh chứng từ và hoá đơn của khách được mã hoá bằng khoá của ai, ai xem được dữ liệu thô, và nếu một tài xế bị lộ tài khoản thì có biết nó đã giải mã những gì không. Mã hoá mặc định của S3 trả lời được câu đầu một nửa, còn hai câu sau cần khoá do chính Tới Nơi kiểm soát: tách người quản trị khoá khỏi người dùng khoá, ghi từng lần giải mã vào CloudTrail, và có nút thu hồi.
+Kiểm toán viên của đối tác thanh toán hỏi Tới Nơi ba câu: ảnh chứng từ và hoá đơn của khách được mã hoá bằng khoá của ai, ai xem được dữ liệu thô, và nếu một tài xế bị lộ tài khoản thì có biết nó đã giải mã những gì không. Mã hoá mặc định của S3 chỉ trả lời được một nửa câu đầu, còn hai câu sau cần khoá do chính Tới Nơi kiểm soát: tách người quản trị khoá khỏi người dùng khoá, ghi từng lần giải mã vào CloudTrail, và có thể thu hồi quyền dùng khoá.
 
 Đây là **bài 52** của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn cần xong [bài 51](/articles/aws-iam-nang-cao-permission-boundary-abac-access-analyzer) và đã gặp KMS key ở [bài 14](/articles/aws-secrets-manager-parameter-store). Bài này giải thích cơ chế của **AWS KMS (Key Management Service)** rồi bật mã hoá cho S3, RDS, EBS, Secrets Manager và CloudWatch Logs.
 
@@ -30,7 +30,7 @@ Tới Nơi dùng customer managed key (CMK) cho dữ liệu khách vì chỉ lo�
 
 ## Key policy là gốc, IAM là phụ
 
-Mọi KMS key đều có **key policy**, một resource policy gắn thẳng vào key. Quyền dùng key đến theo ba đường:
+Mọi KMS key đều có **key policy**, một resource policy gắn thẳng vào key. Quyền dùng key có thể đến từ ba đường:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -113,7 +113,7 @@ KMS `Encrypt` chỉ nhận tối đa 4 KB plaintext, và gửi cả ảnh 3 MB q
 
 **Multi-region key** là một họ key có cùng ID (bắt đầu bằng `mrk-`) và cùng material ở nhiều region. Ciphertext mã hoá ở `ap-southeast-1` giải mã được bằng bản replica ở `ap-northeast-1` mà không cần gọi chéo region, hữu ích cho mã hoá phía client và dịch vụ hỗ trợ (secret DR của [bài 37](/articles/aws-backup-disaster-recovery-rpo-rto)). Mỗi replica có key policy, alias và grant riêng, nên phải chỉnh lại policy cho region đích. Với S3 replication, S3 tự mã hoá lại bằng key đích bạn chỉ định, nên multi-region key tiện nhưng không bắt buộc. Cờ `multi_region` đặt lúc tạo và không đổi sau đó.
 
-**Alias** (`alias/toinoi-prod-trips`) là tên ổn định để code và policy tham chiếu; đổi key phía sau mà không sửa code. Policy IAM theo alias không thay cho quyền trên key policy.
+**Alias** (`alias/toinoi-prod-trips`) là tên ổn định để code và policy tham chiếu, nên bạn đổi key phía sau mà không phải sửa code. Policy IAM theo alias không thay cho quyền trên key policy.
 
 ## Bật mã hoá cho từng dịch vụ
 
@@ -125,13 +125,13 @@ KMS `Encrypt` chỉ nhận tối đa 4 KB plaintext, và gửi cả ảnh 3 MB q
 | Secrets Manager | `--kms-key-id` khi tạo secret | Muốn chia sẻ chéo tài khoản phải dùng CMK, không dùng `aws/secretsmanager` |
 | CloudWatch Logs | `kms_key_id` của log group | Key policy phải cho service `logs.<region>.amazonaws.com`, giới hạn bằng context ARN log group |
 
-RDS và EBS dùng **grant**: khi bạn tạo volume mã hoá, EC2 tạo một grant tạm thời cho phép nó giải mã data key cho volume đó, và thu hồi khi volume xoá. Vì thế key policy phải cho `kms:CreateGrant` với điều kiện `kms:GrantIsForAWSResource`. Chia sẻ snapshot RDS hay EBS mã hoá sang tài khoản khác chỉ làm được khi nó dùng CMK (không phải key AWS managed); phải chia sẻ cả quyền dùng key cho tài khoản kia, tài khoản đích nên copy snapshot và mã hoá lại bằng key của chính nó.
+RDS và EBS dùng **grant**: khi bạn tạo volume mã hoá, EC2 tạo một grant tạm thời cho phép nó giải mã data key cho volume đó, và thu hồi khi volume xoá. Vì thế key policy phải cho `kms:CreateGrant` với điều kiện `kms:GrantIsForAWSResource`. Chia sẻ snapshot RDS hay EBS mã hoá sang tài khoản khác chỉ làm được khi snapshot đó dùng CMK (không phải key AWS managed); phải chia sẻ cả quyền dùng key cho tài khoản kia, tài khoản đích nên copy snapshot và mã hoá lại bằng key của chính nó.
 
 ## Cái giá phải trả
 
 - **Phí và request**: mỗi key tính phí theo tháng, mỗi request tính theo số lượng, và request tới KMS dùng chung hạn mức mỗi region cho cả tài khoản (xem Service Quotas). Tracking nhận 6.250 toạ độ mỗi giây: gọi KMS một lần cho mỗi toạ độ sẽ chiếm phần lớn hạn mức bạn không kiểm soát. Lấy một data key cho cả lô, cache data key trong Encryption SDK, hoặc để S3 và Firehose lo.
-- **Khoá nhầm thì không mở lại**: bỏ statement uỷ quyền IAM mà quên nêu admin khiến key khó quản trị.
-- **Tách quyền chưa đủ**: nếu admin tự sửa được key policy, họ tự cấp quyền dùng cho mình. Giới hạn ai sửa policy qua SCP hoặc bài 51.
+- **Tự khoá mình ngoài key**: bỏ statement uỷ quyền IAM mà quên nêu admin khiến key khó quản trị.
+- **Tách quyền chưa đủ**: nếu admin tự sửa được key policy, họ tự cấp quyền dùng cho mình. Giới hạn người được sửa policy bằng SCP hoặc theo cách ở bài 51.
 - **Xoá key = mất dữ liệu**: không có đường quay lại sau cửa sổ chờ. Tắt key trước, xoá sau.
 - **Quên region**: key ở `ap-southeast-1` không dùng được ở region khác, trừ multi-region key đã replicate.
 
@@ -143,7 +143,7 @@ RDS và EBS dùng **grant**: khi bạn tạo volume mã hoá, EC2 tạo một gr
 
 ## Lab: key, S3 SSE-KMS và envelope encryption
 
-Lab ở `examples/toi-noi-aws/p06-52-kms` có Terraform dựng một CMK đối xứng (rotation 365 ngày, multi-region), replica ở `ap-northeast-1` với key policy riêng ghi đúng region DR, alias, key policy tách admin và user, bucket SSE-KMS với bucket key kèm bucket policy chặn upload chọn thuật toán hoặc key khác, một log group mã hoá, và `envelope-demo.sh`. Bẫy đáng nhớ: Deny với điều kiện phủ định, kể cả `StringNotEqualsIfExists`, vẫn khớp khi header vắng mặt, nên mỗi statement phải kèm `Null = false` để upload không gửi header vẫn dùng mã hoá mặc định của bucket. Key tính phí theo tháng (primary và replica) và vào trạng thái chờ xoá sau `terraform destroy` (key đang chờ xoá không bị tính phí lưu trữ); README liệt kê từng khoản.
+Lab ở `examples/toi-noi-aws/p06-52-kms` có Terraform dựng một CMK đối xứng (rotation 365 ngày, multi-region), replica ở `ap-northeast-1` với key policy riêng ghi đúng region DR, alias, key policy tách admin và user, bucket SSE-KMS với bucket key kèm bucket policy chặn upload chỉ định thuật toán hoặc key khác, một log group mã hoá, và `envelope-demo.sh`. Bẫy đáng nhớ: Deny với điều kiện phủ định, kể cả `StringNotEqualsIfExists`, vẫn khớp khi header vắng mặt, nên mỗi statement phải kèm `Null = false` để upload không gửi header vẫn dùng mã hoá mặc định của bucket. Key tính phí theo tháng (primary và replica) và vào trạng thái chờ xoá sau `terraform destroy` (key đang chờ xoá không bị tính phí lưu trữ); README liệt kê từng khoản.
 
 ```bash
 cd examples/toi-noi-aws/p06-52-kms

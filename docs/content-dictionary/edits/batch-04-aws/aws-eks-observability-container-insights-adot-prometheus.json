@@ -1,0 +1,15 @@
+{"file":"aws-eks-observability-container-insights-adot-prometheus.md","edits":[
+{"old":"Khách phản ánh đặt chuyến chậm,","new":"Khách phản ánh việc đặt chuyến bị chậm,","reason":"Câu thiếu danh từ hoá động từ","severity":"medium"},
+{"old":"loạt .NET đã giải thích","new":"loạt bài .NET đã giải thích","reason":"Lược danh từ 'bài'","severity":"medium"},
+{"old":"chỉ có khi service tự phát (OpenTelemetry) và có chỗ thu về.","new":"chỉ có khi service tự phát (OpenTelemetry) và có nơi thu thập chúng.","reason":"'chỗ thu về' gượng","severity":"medium"},
+{"old":"Bất kỳ metric Prometheus: hạ tầng và ứng dụng","new":"Mọi metric Prometheus, từ hạ tầng đến ứng dụng","reason":"Câu lược động từ, dùng dấu hai chấm sai","severity":"low"},
+{"old":"hai thành phần này phải được cài nếu muốn đường Prometheus thay hẳn Container Insights.","new":"hai thành phần này cần cài nếu muốn đường Prometheus thay thế hoàn toàn Container Insights.","reason":"Bị động kiểu Anh","severity":"low"},
+{"old":"Yêu cầu quyền là `aps:RemoteWrite` trên workspace,","new":"Quyền cần có là `aps:RemoteWrite` trên workspace,","reason":"'Yêu cầu quyền' dịch từ 'permission required'","severity":"medium"},
+{"old":"Cái giá là tính tiền theo người dùng đang hoạt động mỗi tháng, và vẫn phải tự lo quyền:","new":"Cái giá là phí tính theo số người dùng hoạt động mỗi tháng, và bạn vẫn phải tự lo phần phân quyền:","reason":"Câu cụt, khẩu ngữ","severity":"medium"},
+{"old":"SLO và Application Signals sẽ nói ở [bài 55](/articles/aws-observability-nang-cao-xray-adot-logs-insights-slo).","new":"SLO và Application Signals sẽ bàn ở [bài 55](/articles/aws-observability-nang-cao-xray-adot-logs-insights-slo).","reason":"'sẽ nói ở' khẩu ngữ","severity":"low"},
+{"old":"ở thu thập,","new":"ở khâu thu thập,","reason":"'ở thu thập' thiếu danh từ","severity":"medium"},
+{"old":"**Quyền ADOT bằng quyền node:**","new":"**Cấp quyền cho ADOT bằng role của node:**","reason":"Cụm tự ghép, lược động từ","severity":"medium"},
+{"old":"Kiểm bằng cảnh báo thử.","new":"Kiểm tra bằng cách gửi cảnh báo thử.","reason":"'Kiểm' đứng một mình, thiếu động từ","severity":"medium"},
+{"old":"AMP tính tiền nhiều mẫu hơn,","new":"AMP tính tiền cho nhiều mẫu hơn,","reason":"Thiếu giới từ","severity":"low"},
+{"old":"README ghi cách tính tiền và lệnh dọn.","new":"README ghi cách tính chi phí và lệnh dọn.","reason":"Khẩu ngữ","severity":"low"}
+]}

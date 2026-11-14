@@ -8,14 +8,14 @@ tags: [aws, toi-noi, devops, eks, observability, prometheus, grafana, adot, open
 language: vi
 ---
 
-11:05, giờ cao điểm trưa. Khách phản ánh đặt chuyến chậm, nhưng dashboard Container Insights của cluster vẫn xanh: CPU pod `booking` 40%, không pod nào restart. Người trực mở log của 14 pod `booking` từng cái một, rồi mất 20 phút để nhận ra chỉ một nhánh gọi sang service báo giá bị chậm. Hôm sau, đội thêm label `user_id` vào một metric để "debug cho dễ", và hoá đơn quan sát tăng vọt trong một tuần. Quan sát thiếu thì mù, quan sát thừa thì đắt.
+11:05, giờ cao điểm trưa. Khách phản ánh việc đặt chuyến bị chậm, nhưng dashboard Container Insights của cluster vẫn xanh: CPU pod `booking` 40%, không pod nào restart. Người trực mở log của 14 pod `booking` từng cái một, rồi mất 20 phút để nhận ra chỉ một nhánh gọi sang service báo giá bị chậm. Hôm sau, đội thêm label `user_id` vào một metric để "debug cho dễ", và hoá đơn quan sát tăng vọt trong một tuần. Quan sát thiếu thì mù, quan sát thừa thì đắt.
 
-Đây là **bài 47** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bạn cần có cluster và service chạy bằng GitOps ([bài 46](/articles/aws-eks-gitops-argocd-helm-kustomize)); phía ứng dụng, loạt .NET đã giải thích cách phát metric, trace và log ở [bài 37](/articles/dotnet10-opentelemetry-traces-metrics-logs). Bài này nối chúng với hạ tầng AWS: thu ở đâu, lưu ở đâu, xem bằng gì, và giữ chi phí thế nào.
+Đây là **bài 47** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bạn cần có cluster và service chạy bằng GitOps ([bài 46](/articles/aws-eks-gitops-argocd-helm-kustomize)); phía ứng dụng, loạt bài .NET đã giải thích cách phát metric, trace và log ở [bài 37](/articles/dotnet10-opentelemetry-traces-metrics-logs). Bài này nối chúng với hạ tầng AWS: thu ở đâu, lưu ở đâu, xem bằng gì, và giữ chi phí thế nào.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Container Insights cho thấy CPU pod <code>booking</code> chỉ 40%. Có kết luận được p95 latency của API tạo chuyến vẫn tốt không?</p>
-<details><summary>Xem đáp án</summary><p>Không. CPU, memory, network và số lần restart là metric hạ tầng. Latency theo route là metric ứng dụng, chỉ có khi service tự phát (OpenTelemetry) và có chỗ thu về. Một pod có thể chậm vì chờ service khác mà CPU vẫn thấp.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. CPU, memory, network và số lần restart là metric hạ tầng. Latency theo route là metric ứng dụng, chỉ có khi service tự phát (OpenTelemetry) và có nơi thu thập chúng. Một pod có thể chậm vì chờ service khác mà CPU vẫn thấp.</p></details>
 </div>
 
 ## Ba tín hiệu và hai đường cho metric
@@ -25,19 +25,19 @@ Metric cho biết **có chuyện** (p95 tăng), log cho biết **chuyện gì** 
 | | Container Insights (enhanced) | Managed Prometheus + ADOT |
 |---|---|---|
 | Triển khai | Add-on `amazon-cloudwatch-observability` (CloudWatch agent, kèm Fluent Bit) | ADOT collector đọc ServiceMonitor, remote write vào workspace |
-| Metric có sẵn | Node, pod, container, cluster; dashboard dựng sẵn trong CloudWatch | Bất kỳ metric Prometheus: hạ tầng và ứng dụng |
+| Metric có sẵn | Node, pod, container, cluster; dashboard dựng sẵn trong CloudWatch | Mọi metric Prometheus, từ hạ tầng đến ứng dụng |
 | Truy vấn | CloudWatch Metrics, Logs Insights | PromQL |
 | Cảnh báo | CloudWatch alarm | Rule và Alertmanager của AMP, ra SNS |
 | Tính tiền theo | Metric và log của CloudWatch | Mẫu metric nạp, lưu trữ, truy vấn |
 | Hợp với | Vận hành hạ tầng, bắt đầu nhanh | Metric nghiệp vụ, SLO, đội đã quen Prometheus |
 
-Tới Nơi dùng cả hai theo phân công: Container Insights để xem sức khoẻ node và pod, Prometheus cho metric của service. Lưu ý metric trạng thái Kubernetes (số replica mong muốn, pod Pending) do **kube-state-metrics** phát, còn metric node do node exporter; hai thành phần này phải được cài nếu muốn đường Prometheus thay hẳn Container Insights.
+Tới Nơi dùng cả hai theo phân công: Container Insights để xem sức khoẻ node và pod, Prometheus cho metric của service. Lưu ý metric trạng thái Kubernetes (số replica mong muốn, pod Pending) do **kube-state-metrics** phát, còn metric node do node exporter; hai thành phần này cần cài nếu muốn đường Prometheus thay thế hoàn toàn Container Insights.
 
 ## Metric ứng dụng: ADOT, remote write, PromQL
 
 **ADOT** là bản phân phối OpenTelemetry Collector của AWS, cài bằng EKS add-on `adot` (cần cert-manager cài trước) và được khai báo bằng custom resource `OpenTelemetryCollector`. Collector chạy dạng StatefulSet kèm **Target Allocator**: thành phần này đọc các `ServiceMonitor` (CRD của prometheus-operator, chỉ cần cài CRD, không cần cài Prometheus) và chia danh sách target cho các replica collector. Mỗi service khai báo ServiceMonitor riêng; thêm service mới không phải sửa cấu hình collector.
 
-Collector gom mẫu rồi **remote write** vào workspace Amazon Managed Prometheus (AMP). Yêu cầu quyền là `aps:RemoteWrite` trên workspace, request được ký SigV4 bằng extension `sigv4auth`. Quyền đi qua Pod Identity: ServiceAccount `adot-collector` trong namespace `observability` gắn với role `toinoi-lab-adot-collector` bằng `aws_eks_pod_identity_association`, không có access key trong cluster. Không có server Prometheus nào để bạn vá lỗi hay mở rộng, nhưng AMP vẫn là dịch vụ bạn trả tiền theo lượng mẫu.
+Collector gom mẫu rồi **remote write** vào workspace Amazon Managed Prometheus (AMP). Quyền cần có là `aps:RemoteWrite` trên workspace, request được ký SigV4 bằng extension `sigv4auth`. Quyền đi qua Pod Identity: ServiceAccount `adot-collector` trong namespace `observability` gắn với role `toinoi-lab-adot-collector` bằng `aws_eks_pod_identity_association`, không có access key trong cluster. Không có server Prometheus nào để bạn vá lỗi hay mở rộng, nhưng AMP vẫn là dịch vụ bạn trả tiền theo lượng mẫu.
 
 Histogram `http.server.request.duration` (giây) của ASP.NET Core lên Prometheus thành `http_server_request_duration_seconds`; p95 latency của booking là:
 
@@ -62,7 +62,7 @@ histogram_quantile(0.95,
 
 ## Managed Grafana: dashboard dùng chung, đăng nhập bằng Identity Center
 
-Amazon Managed Grafana (AMG) là Grafana do AWS vận hành, đọc AMP, CloudWatch và X-Ray làm data source. Điểm đáng giá với Tới Nơi: đăng nhập bằng IAM Identity Center nên người rời đội mất quyền cùng lúc với mọi hệ thống khác, và không phải tự vá Grafana. Cái giá là tính tiền theo người dùng đang hoạt động mỗi tháng, và vẫn phải tự lo quyền: workspace dùng một role để gọi các nguồn dữ liệu, role đó nên chỉ đọc.
+Amazon Managed Grafana (AMG) là Grafana do AWS vận hành, đọc AMP, CloudWatch và X-Ray làm data source. Điểm đáng giá với Tới Nơi: đăng nhập bằng IAM Identity Center nên người rời đội mất quyền cùng lúc với mọi hệ thống khác, và không phải tự vá Grafana. Cái giá là phí tính theo số người dùng hoạt động mỗi tháng, và bạn vẫn phải tự lo phần phân quyền: workspace dùng một role để gọi các nguồn dữ liệu, role đó nên chỉ đọc.
 
 **Dashboard as code:** dashboard là JSON, đặt trong repo deploy (lab có `grafana/dashboard-booking.json` với hai panel p95 và 5xx) và nạp qua API của Grafana hoặc provider Terraform của Grafana. Dashboard dựng tay trên UI sẽ biến mất khi workspace dựng lại, và không có ai review. Phần nạp dashboard tự động trong lab chỉ là tệp JSON; việc đẩy vào AMG **chưa được kiểm chứng**.
 
@@ -74,7 +74,7 @@ Log phải là JSON một dòng, có `trace_id` và `span_id`. Khi p95 tăng, b�
 
 ## Trace: OTLP từ service .NET tới X-Ray qua ADOT
 
-Service .NET (bài 37) xuất trace bằng OTLP tới `adot-collector.observability:4317`; chart bài 46 nhận các biến `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME` qua `extraEnv`. Collector chuyển sang X-Ray bằng exporter `awsxray`. Sampler `parentbased_traceidratio` ở 10% giữ nguyên quyết định của service cha, nên một chuyến đi qua `booking`, `dispatch`, `tracking` không bị cắt giữa chừng. X-Ray tính tiền theo số trace ghi và đọc, và 10% là giả định để lab nhẹ, không phải khuyến nghị; hãy tăng lên với endpoint hiếm và giảm với endpoint nóng. SLO và Application Signals sẽ nói ở [bài 55](/articles/aws-observability-nang-cao-xray-adot-logs-insights-slo).
+Service .NET (bài 37) xuất trace bằng OTLP tới `adot-collector.observability:4317`; chart bài 46 nhận các biến `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME` qua `extraEnv`. Collector chuyển sang X-Ray bằng exporter `awsxray`. Sampler `parentbased_traceidratio` ở 10% giữ nguyên quyết định của service cha, nên một chuyến đi qua `booking`, `dispatch`, `tracking` không bị cắt giữa chừng. X-Ray tính tiền theo số trace ghi và đọc, và 10% là giả định để lab nhẹ, không phải khuyến nghị; hãy tăng lên với endpoint hiếm và giảm với endpoint nóng. SLO và Application Signals sẽ bàn ở [bài 55](/articles/aws-observability-nang-cao-xray-adot-logs-insights-slo).
 
 ## Cardinality: chi phí ẩn của metric
 
@@ -87,23 +87,23 @@ Số series bằng tích số giá trị của mọi nhãn, nhân với số buc
 <figcaption>Hình 2. Con số là giả định minh hoạ: chính phép nhân, không phải giá trị tuyệt đối, là điều cần nhớ.</figcaption>
 </figure>
 
-Phòng thủ hai lớp: ở code, chỉ gắn nhãn có tập giá trị nhỏ và biết trước; ở thu thập, `metricRelabelings` trong ServiceMonitor với `labeldrop` bỏ `user_id`, `trip_id`, `driver_id` trước khi vào AMP. Thông tin định danh một request thuộc về trace và log, không thuộc metric.
+Phòng thủ hai lớp: ở code, chỉ gắn nhãn có tập giá trị nhỏ và biết trước; ở khâu thu thập, `metricRelabelings` trong ServiceMonitor với `labeldrop` bỏ `user_id`, `trip_id`, `driver_id` trước khi vào AMP. Thông tin định danh một request thuộc về trace và log, không thuộc metric.
 
 ## Lỗi thường gặp
 
 - **Log group không retention:** dung lượng và tiền lưu trữ tăng mãi. Đặt retention ngay khi tạo log group.
 - **Hai đường thu cùng một loại log:** Container Insights add-on và Fluent Bit riêng gửi log hai lần. Chọn một.
-- **Quyền ADOT bằng quyền node:** dùng Pod Identity theo ServiceAccount, không mở rộng role của node.
-- **Alert không có kênh nhận:** rule chạy, SNS không có subscription hoặc topic policy thiếu `aps.amazonaws.com`, cảnh báo biến mất không dấu vết. Kiểm bằng cảnh báo thử.
+- **Cấp quyền cho ADOT bằng role của node:** dùng Pod Identity theo ServiceAccount, không mở rộng role của node.
+- **Alert không có kênh nhận:** rule chạy, SNS không có subscription hoặc topic policy thiếu `aps.amazonaws.com`, cảnh báo biến mất không dấu vết. Kiểm tra bằng cách gửi cảnh báo thử.
 - **Dashboard dựng tay:** mất khi workspace dựng lại, không ai review. Giữ JSON trong Git.
 
 **Bài tập:** một metric đếm request bị gắn label `userId` (giá trị là ID khách). Chuyện gì xảy ra với chi phí và hệ thống, và sửa ở đâu?
 
-<details><summary>Xem đáp án</summary><p>Số series bằng số khách duy nhất nhân với các nhãn khác. Với hàng triệu khách, số series nổ, AMP tính tiền nhiều mẫu hơn, truy vấn chậm hoặc chạm giới hạn series của workspace, và collector dùng nhiều bộ nhớ hơn. Cách sửa: bỏ nhãn trong code, và chặn thêm ở ServiceMonitor bằng <code>labeldrop</code>. Muốn tra cứu theo khách thì dùng log hoặc trace có <code>user.id</code> (cân nhắc dữ liệu cá nhân), không dùng metric.</p></details>
+<details><summary>Xem đáp án</summary><p>Số series bằng số khách duy nhất nhân với các nhãn khác. Với hàng triệu khách, số series nổ, AMP tính tiền cho nhiều mẫu hơn, truy vấn chậm hoặc chạm giới hạn series của workspace, và collector dùng nhiều bộ nhớ hơn. Cách sửa: bỏ nhãn trong code, và chặn thêm ở ServiceMonitor bằng <code>labeldrop</code>. Muốn tra cứu theo khách thì dùng log hoặc trace có <code>user.id</code> (cân nhắc dữ liệu cá nhân), không dùng metric.</p></details>
 
 ## Lab và kiểm chứng
 
-Mã ở `examples/toi-noi-aws/p05-47-eks-observability`: Terraform (AMP workspace, rule group, Alertmanager và SNS, role Pod Identity cho ADOT và Fluent Bit, log group theo namespace; tuỳ chọn Container Insights và Managed Grafana), manifest `OpenTelemetryCollector` kèm RBAC, ServiceMonitor của booking, values Fluent Bit, biến môi trường OTLP và dashboard JSON. README ghi cách tính tiền và lệnh dọn.
+Mã ở `examples/toi-noi-aws/p05-47-eks-observability`: Terraform (AMP workspace, rule group, Alertmanager và SNS, role Pod Identity cho ADOT và Fluent Bit, log group theo namespace; tuỳ chọn Container Insights và Managed Grafana), manifest `OpenTelemetryCollector` kèm RBAC, ServiceMonitor của booking, values Fluent Bit, biến môi trường OTLP và dashboard JSON. README ghi cách tính chi phí và lệnh dọn.
 
 `terraform fmt` và `terraform validate` đã chạy qua trong Docker, YAML và JSON đã parse được. **Chưa kiểm chứng trên cluster hay tài khoản thật**: API version của `OpenTelemetryCollector` (lab dùng `v1beta1` của operator mới, trong khi ví dụ trong tài liệu ADOT vẫn là `v1alpha1`), Target Allocator, tên metric và nhãn trong PromQL, khoá `logGroupTemplate` của chart Fluent Bit, và Grafana với Identity Center.
 

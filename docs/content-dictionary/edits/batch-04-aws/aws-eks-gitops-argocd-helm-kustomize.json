@@ -1,0 +1,77 @@
+{
+"file": "aws-eks-gitops-argocd-helm-kustomize.md",
+"edits": [
+{
+"old": "## GitOps: Git là nguồn sự thật, controller kéo về",
+"new": "## GitOps: Git là nguồn dữ liệu gốc, controller kéo về",
+"reason": "Theo bảng thuật ngữ: 'nguồn sự thật' là calque của source of truth",
+"severity": "high"
+},
+{
+"old": "còn region và giới hạn của bản managed hãy kiểm trên tài liệu EKS.",
+"new": "còn region và giới hạn của bản managed hãy kiểm tra trong tài liệu EKS.",
+"reason": "'kiểm' đứng một mình là từ cụt",
+"severity": "low"
+},
+{
+"old": "Tách hai repo giữ lịch sử deploy sạch và cho phép quyền ghi khác nhau.",
+"new": "Tách hai repo giúp lịch sử deploy gọn gàng và cho phép phân quyền ghi khác nhau.",
+"reason": "Câu cụt, 'quyền ghi khác nhau' gượng",
+"severity": "medium"
+},
+{
+"old": "cho một ApplicationSet tự sinh Application",
+"new": "giúp một ApplicationSet tự sinh Application",
+"reason": "'cho' dịch sát tiếng Anh, thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "để Argo CD và các controller khác (như HPA) cùng giữ những trường khác nhau của một tài nguyên mà ít xung đột.",
+"new": "để Argo CD và các controller khác (như HPA) cùng quản lý các trường khác nhau của một tài nguyên mà ít xung đột.",
+"reason": "'giữ' trường là cách dùng gượng",
+"severity": "low"
+},
+{
+"old": "Merge là dev tự đồng bộ;",
+"new": "Merge xong thì dev tự đồng bộ;",
+"reason": "Câu cộc, thiếu liên từ",
+"severity": "low"
+},
+{
+"old": "nên đọc tài liệu bản bạn dùng.",
+"new": "nên đọc tài liệu đúng phiên bản bạn dùng.",
+"reason": "Cụm 'bản bạn dùng' thiếu danh từ",
+"severity": "medium"
+},
+{
+"old": "Hình 1. Hướng của quyền đảo ngược: CI chỉ ghi vào Git,",
+"new": "Hình 1. Chiều truy cập bị đảo ngược: CI chỉ ghi vào Git,",
+"reason": "'hướng của quyền đảo ngược' mơ hồ, trật tự từ kiểu Anh",
+"severity": "medium"
+},
+{
+"old": "Tài liệu đó map nhóm Identity Center (theo group ID) qua thuộc tính `groups` nhưng ghi rõ AWS chưa hỗ trợ chính thức cách này, nên lab map quyền theo email;",
+"new": "Tài liệu đó ánh xạ nhóm Identity Center (theo group ID) qua thuộc tính `groups` nhưng ghi rõ AWS chưa hỗ trợ chính thức cách này, nên lab ánh xạ quyền theo email;",
+"reason": "'map' dùng như động từ Việt hoá, thay bằng 'ánh xạ'",
+"severity": "low"
+},
+{
+"old": "**Flux** cùng triết lý nhưng là bộ controller và CRD",
+"new": "**Flux** theo cùng triết lý nhưng là một bộ controller và CRD",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "Flux nhẹ hơn, hợp đội thích mọi thứ là CRD.",
+"new": "Flux nhẹ hơn, hợp với đội thích mọi thứ đều là CRD.",
+"reason": "Thiếu giới từ",
+"severity": "low"
+},
+{
+"old": "**Argo CD thành điểm chết:**",
+"new": "**Argo CD thành điểm lỗi duy nhất:**",
+"reason": "'điểm chết' là calque của single point of failure",
+"severity": "medium"
+}
+]
+}

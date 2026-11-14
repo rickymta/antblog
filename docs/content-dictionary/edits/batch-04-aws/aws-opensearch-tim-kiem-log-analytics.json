@@ -1,0 +1,15 @@
+{"file":"aws-opensearch-tim-kiem-log-analytics.md","edits":[
+{"old":"OpenSearch không phải nguồn sự thật: dữ liệu gốc vẫn ở Aurora","new":"OpenSearch không phải nguồn dữ liệu gốc: bản gốc vẫn ở Aurora","reason":"'nguồn sự thật' là calque của source of truth","severity":"medium"},
+{"old":"nguồn sự thật của quán","new":"nguồn dữ liệu gốc của quán","reason":"Thống nhất theo bảng thuật ngữ","severity":"medium"},
+{"old":"Aurora là nguồn sự thật, nên cần","new":"Aurora là nguồn dữ liệu gốc, nên cần","reason":"Thống nhất theo bảng thuật ngữ","severity":"medium"},
+{"old":"hãy kiểm plugin ICU có sẵn trên phiên bản của bạn.","new":"hãy kiểm tra xem phiên bản bạn dùng có sẵn plugin ICU không.","reason":"Câu thiếu động từ, trật tự kiểu Anh","severity":"medium"},
+{"old":"Ghi xong, document chỉ tìm thấy sau một lần","new":"Sau khi ghi, document chỉ tìm thấy được sau một lần","reason":"Câu cụt, gượng","severity":"medium"},
+{"old":"để ghi lại là ghi đè, và","new":"để lần ghi lại sau đó ghi đè lên bản cũ, và","reason":"Câu khó hiểu, thiếu chủ thể","severity":"medium"},
+{"old":"(thực hiện nguyên tử)","new":"(thực hiện atomic)","reason":"'nguyên tử' dịch từng chữ của atomic, dễ hiểu nhầm","severity":"low"},
+{"old":"| Dựng thêm | Không |","new":"| Phải dựng thêm | Không |","reason":"Cụm cụt, thiếu động từ","severity":"low"},
+{"old":"Cho phép trường động trong log khiến số trường nổ tung; khai báo mapping tường minh hoặc đặt giới hạn trường.","new":"Để trường động trong log tự sinh khiến số trường tăng vọt; hãy khai báo mapping rõ ràng hoặc đặt giới hạn số trường.","reason":"'nổ tung', 'tường minh' gượng; câu thiếu chủ thể","severity":"medium"},
+{"old":"quyền data access policy và kết quả tìm với dữ liệu thật cần kiểm khi chạy.","new":"quyền của data access policy và kết quả tìm với dữ liệu thật thì cần kiểm tra khi chạy.","reason":"Câu lược động từ, gượng","severity":"medium"},
+{"old":"lab có thêm bản `hot` rồi `delete` cho domain nhỏ","new":"lab có thêm một chính sách chỉ gồm `hot` rồi `delete` cho domain nhỏ","reason":"'bản' mơ hồ, thiếu danh từ chính","severity":"medium"},
+{"old":"để bớt phải chọn kích thước","new":"để khỏi phải chọn kích thước","reason":"'bớt phải' gượng","severity":"low"},
+{"old":"| Năng lực |","new":"| Công suất |","reason":"'Năng lực' là calque của capacity","severity":"low"}
+]}

@@ -28,11 +28,11 @@ Ba dịch vụ cùng chứa "cấu hình" nhưng giải quyết ba bài toán kh
 | Secrets Manager | Bí mật: mật khẩu DB, khoá cổng VíXanh | Mã hoá, rotation, kiểm soát truy cập | Không dành cho cấu hình thường |
 | AppConfig | Cấu hình có vòng đời: validate, deploy dần, rollback | Strategy, bake time, alarm, flag | Không thay thế kho bí mật |
 
-Cần AppConfig khi một thay đổi cấu hình có thể làm hỏng hành vi của hệ thống (bảng giá, ngưỡng rate limit, flag bật tính năng) và bạn muốn đối xử với nó như một lần release nhỏ. Nguồn của AppConfig có thể là kho hosted trong chính AppConfig, hoặc Parameter Store, Secrets Manager, S3 mà AppConfig đọc rồi phát hành. Bài này dùng hosted cho đơn giản.
+Cần AppConfig khi một thay đổi cấu hình có thể làm hỏng hành vi của hệ thống (bảng giá, ngưỡng rate limit, flag bật tính năng) và bạn muốn xem nó như một lần release nhỏ. Nguồn của AppConfig có thể là kho hosted trong chính AppConfig, hoặc Parameter Store, Secrets Manager, S3 mà AppConfig đọc rồi phát hành. Bài này dùng hosted cho đơn giản.
 
 ## Feature flag và cấu hình tự do
 
-AppConfig tổ chức theo **application** (trong lab là `toinoi-lab-quote`), **environment** (trong lab là `lab`) và **configuration profile**. Profile có hai loại chính. **Feature flag** có cấu trúc cố định: mỗi flag có `name`, các `attributes` kèm ràng buộc và phần `values` cho từng flag. **Freeform** là JSON hoặc YAML tuỳ ý, thích hợp cho bảng giá. Với flag, AppConfig tự kiểm cấu trúc và ràng buộc của attribute; với freeform, bạn gắn validator JSON Schema (AppConfig hỗ trợ draft-04) hoặc một hàm Lambda cho luật nghiệp vụ phức tạp hơn, ví dụ so sánh chéo hai trường. Validator chạy khi bạn bắt đầu deployment: một phiên bản sai có thể đã được lưu, nhưng `StartDeployment` bị từ chối nên nó không tới được client.
+AppConfig tổ chức theo **application** (trong lab là `toinoi-lab-quote`), **environment** (trong lab là `lab`) và **configuration profile**. Profile có hai loại chính. **Feature flag** có cấu trúc cố định: mỗi flag có `name`, các `attributes` kèm ràng buộc và phần `values` cho từng flag. **Freeform** là JSON hoặc YAML tuỳ ý, thích hợp cho bảng giá. Với flag, AppConfig tự kiểm tra cấu trúc và ràng buộc của attribute; với freeform, bạn gắn validator JSON Schema (AppConfig hỗ trợ draft-04) hoặc một hàm Lambda cho luật nghiệp vụ phức tạp hơn, ví dụ so sánh chéo hai trường. Validator chạy khi bạn bắt đầu deployment: một phiên bản sai có thể đã được lưu, nhưng `StartDeployment` bị từ chối nên nó không tới được client.
 
 ```json
 {
@@ -59,7 +59,7 @@ Flag trên có hệ số từ 1 đến 3, nên một lần gõ nhầm 12 sẽ b�
 { "baseFare": { "type": "number", "minimum": 1000 } }
 ```
 
-Về **targeting**, có hai cách. Cách thứ nhất, từ 2024 AppConfig có **multi-variant feature flag**: một flag có nhiều variant, mỗi variant gắn một luật đánh giá trên ngữ cảnh (context) mà service gửi cho agent, ví dụ thành phố và mã khách. Bài này chỉ nhắc tới; cú pháp luật xem trong user guide. Cách thứ hai, dễ kiểm hơn và là cách lab dùng: cấu hình mang `city` và `rolloutPercent`, còn **service tự quyết định** bằng cách băm `customerId` vào bucket 0 đến 99. Cùng một khách luôn rơi vào cùng bucket, nên không bị giá nhảy qua lại giữa hai lần xem. Chi phí của cách này là logic targeting nằm trong code của bạn và phải được kiểm thử.
+Về **targeting**, có hai cách. Cách thứ nhất, từ 2024 AppConfig có **multi-variant feature flag**: một flag có nhiều variant, mỗi variant gắn một luật đánh giá trên ngữ cảnh (context) mà service gửi cho agent, ví dụ thành phố và mã khách. Bài này chỉ nhắc tới; cú pháp luật xem trong user guide. Cách thứ hai, dễ kiểm thử hơn và là cách lab dùng: cấu hình mang `city` và `rolloutPercent`, còn **service tự quyết định** bằng cách băm `customerId` vào bucket 0 đến 99. Cùng một khách luôn rơi vào cùng bucket, nên giá không nhảy qua lại giữa hai lần xem. Chi phí của cách này là logic targeting nằm trong code của bạn và phải được kiểm thử.
 
 ## Deployment strategy: phát hành cấu hình như phát hành code
 
@@ -73,7 +73,7 @@ Tạo một phiên bản cấu hình không làm gì cả; chỉ **deployment** 
 | `AppConfig.Linear20PercentEvery6Minutes` | 20% mỗi 6 phút, AWS khuyến nghị cho production | 30 phút |
 | Tự tạo | Chọn duration, growth type (`LINEAR` hoặc `EXPONENTIAL`), growth factor, final bake time | Tuỳ chọn |
 
-Phần trăm ở đây áp lên **client** (phiên cấu hình đang poll), không phải khách hàng cuối. **Final bake time** là khoảng AppConfig tiếp tục theo dõi alarm sau khi mọi client đã nhận. Gắn một CloudWatch alarm làm **monitor** của environment: nếu alarm vào trạng thái ALARM trong lúc deploy hoặc bake, AppConfig tự rollback về phiên bản trước. Mỗi environment chỉ chạy một deployment tại một thời điểm, nên bake time dài cũng là thời gian chờ trước khi đẩy được cấu hình tiếp theo.
+Phần trăm ở đây áp lên **client** (phiên cấu hình đang poll), không phải khách hàng cuối. **Final bake time** là khoảng thời gian AppConfig tiếp tục theo dõi alarm sau khi mọi client đã nhận. Gắn một CloudWatch alarm làm **monitor** của environment: nếu alarm vào trạng thái ALARM trong lúc deploy hoặc bake, AppConfig tự rollback về phiên bản trước. Mỗi environment chỉ chạy một deployment tại một thời điểm, nên bake time dài cũng là thời gian chờ trước khi đẩy được cấu hình tiếp theo.
 
 ```bash
 aws appconfig create-deployment-strategy --name toinoi-linear20-bake10 \
@@ -84,7 +84,7 @@ aws appconfig start-deployment --application-id "$APP_ID" --environment-id "$ENV
   --configuration-version 2
 ```
 
-Lệnh đầu tạo chiến lược 20 phút, bake 10 phút; lệnh sau bắt đầu deploy phiên bản 2. Trên môi trường dev dùng `AppConfig.AllAtOnce` cho nhanh, còn prod dùng chiến lược có bake time. Alarm phải gắn với một metric có nghĩa, ví dụ tỉ lệ 5xx của `quote` hay tỉ lệ báo giá bị từ chối, chứ không phải CPU.
+Lệnh đầu tạo chiến lược 20 phút, bake 10 phút; lệnh sau bắt đầu deploy phiên bản 2. Trên môi trường dev dùng `AppConfig.AllAtOnce` cho nhanh, còn prod dùng chiến lược có bake time. Alarm phải gắn với một chỉ số có ý nghĩa, ví dụ tỉ lệ 5xx của `quote` hay tỉ lệ báo giá bị từ chối, chứ không phải CPU.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -95,7 +95,7 @@ Lệnh đầu tạo chiến lược 20 phút, bake 10 phút; lệnh sau bắt đ
 
 ## Lấy cấu hình trong service: dùng Agent, đừng gọi API mỗi request
 
-Service không nên gọi API AppConfig trong luồng xử lý mỗi báo giá. Với 30.000 lượt đọc mỗi giây lúc cao điểm, đó vừa là độ trễ, vừa là chi phí theo từng lượt yêu cầu. Thay vào đó dùng **AppConfig Agent**: một tiến trình chạy cạnh ứng dụng, poll AppConfig theo chu kỳ, giữ cấu hình trong bộ nhớ và phục vụ qua HTTP trên `localhost:2772`. Với Lambda, agent là extension (một layer); với ECS, agent là container sidecar trong cùng task. Chu kỳ poll mặc định của extension khoảng 45 giây, nên đổi cấu hình có độ trễ tới client cỡ chu kỳ đó, cộng thêm thời gian của strategy.
+Service không nên gọi API AppConfig trong luồng xử lý mỗi báo giá. Với 30.000 lượt đọc mỗi giây lúc cao điểm, đó vừa là độ trễ, vừa là chi phí theo từng lượt yêu cầu. Thay vào đó dùng **AppConfig Agent**: một tiến trình chạy cạnh ứng dụng, poll AppConfig theo chu kỳ, giữ cấu hình trong bộ nhớ và phục vụ qua HTTP trên `localhost:2772`. Với Lambda, agent là extension (một layer); với ECS, agent là container sidecar trong cùng task. Chu kỳ poll mặc định của extension khoảng 45 giây, nên cấu hình mới tới client chậm cỡ chu kỳ đó, cộng thêm thời gian của strategy.
 
 ```python
 def fetch(profile: str) -> dict:
@@ -119,8 +119,8 @@ def fetch(profile: str) -> dict:
 - **Alarm vô nghĩa**: gắn alarm CPU thì deployment vẫn "xanh" dù giá sai. Dùng metric nghiệp vụ.
 - **Gọi API mỗi request**: tốn chi phí theo lượt và làm chậm báo giá; dùng Agent.
 - **Quên độ trễ của poll**: tắt flag không có hiệu lực tức thì; chu kỳ poll cộng thời gian strategy là độ trễ thật của "nút tắt khẩn cấp".
-- **Không có giá trị mặc định**: service phải chạy được với bảng giá nội trang khi chưa đọc được cấu hình.
-- **Chưa thử trên tài khoản thật**: validator, rollback theo alarm và targeting trong lab chỉ được kiểm trên máy, cần xác nhận trong tài khoản lab.
+- **Không có giá trị mặc định**: service phải chạy được với bảng giá dựng sẵn trong code khi chưa đọc được cấu hình.
+- **Chưa thử trên tài khoản thật**: validator, rollback theo alarm và targeting trong lab chỉ được kiểm tra trên máy cục bộ, cần xác nhận trong tài khoản lab.
 
 **Bài tập:** feature flag bật cho 5% khách khác một thử nghiệm A/B ở điểm nào?
 
@@ -128,7 +128,7 @@ def fetch(profile: str) -> dict:
 
 ## Lab và kiểm chứng
 
-Mã nằm ở `examples/toi-noi-aws/p03-29-appconfig`: Terraform dựng application, environment, hai profile, strategy, alarm monitor và một Lambda đọc cấu hình tuỳ chọn; ngoài ra có script AWS CLI làm cùng việc. Trên máy, kiểm cú pháp Terraform và chạy unit test logic báo giá:
+Mã nằm ở `examples/toi-noi-aws/p03-29-appconfig`: Terraform dựng application, environment, hai profile, strategy, alarm monitor và một Lambda đọc cấu hình tuỳ chọn; ngoài ra có script AWS CLI làm cùng việc. Trên máy, kiểm tra cú pháp Terraform và chạy unit test logic báo giá:
 
 ```bash
 cd examples/toi-noi-aws/p03-29-appconfig

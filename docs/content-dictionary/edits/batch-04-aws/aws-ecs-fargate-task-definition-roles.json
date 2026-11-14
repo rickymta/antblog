@@ -1,0 +1,15 @@
+{"file":"aws-ecs-fargate-task-definition-roles.md","edits":[
+{"old":"service giữ số task mong muốn trong private subnet","new":"service giữ đúng số lượng task mong muốn trong private subnet","reason":"'số task' lược danh từ; theo gợi ý khảo sát","severity":"low"},
+{"old":"Tính chất này làm rollback đơn giản: trỏ lại revision cũ.","new":"Nhờ vậy rollback rất đơn giản: chỉ cần trỏ lại revision cũ.","reason":"'làm rollback đơn giản' giọng dịch máy","severity":"low"},
+{"old":"nhưng mỗi task tiêu một IP của subnet.","new":"nhưng mỗi task chiếm một IP của subnet.","reason":"'tiêu' gượng (consume)","severity":"low"},
+{"old":"Image là digest chứ không phải tag, theo bài 11.","new":"Image dùng digest chứ không dùng tag, theo bài 11.","reason":"Câu thiếu động từ đúng nghĩa","severity":"medium"},
+{"old":"nhưng người dùng chúng khác nhau.","new":"nhưng đối tượng sử dụng chúng khác nhau.","reason":"'người dùng' dễ hiểu nhầm là user","severity":"medium"},
+{"old":"Người dùng: ECS agent / Fargate","new":"Bên dùng: ECS agent / Fargate","reason":"'Người dùng' sai nghĩa với ECS agent","severity":"low"},
+{"old":"Người dùng: code ứng dụng qua AWS SDK","new":"Bên dùng: code ứng dụng qua AWS SDK","reason":"'Người dùng' sai nghĩa với code ứng dụng","severity":"low"},
+{"old":"Task role chỉ nên có đúng việc app làm.","new":"Task role chỉ nên có đúng những quyền mà app cần.","reason":"Câu lược danh từ chính (quyền)","severity":"medium"},
+{"old":"để kiểm khả năng phục vụ như đã nói ở bài 36","new":"để kiểm tra khả năng phục vụ như đã nói ở bài 36","reason":"'kiểm' cụt","severity":"low"},
+{"old":"Cho Tới Nơi, task nằm ở private subnet","new":"Với Tới Nơi, task nằm ở private subnet","reason":"'Cho' calque của for","severity":"low"},
+{"old":"Muốn vào container để gỡ lỗi dùng ECS Exec, chạy trên nền Session Manager:","new":"Muốn vào container để gỡ lỗi, hãy dùng ECS Exec, chạy trên nền Session Manager:","reason":"Câu thiếu ngắt và động từ mệnh lệnh","severity":"medium"},
+{"old":"Mọi phiên Exec nên được ghi log để audit.","new":"Nên ghi log mọi phiên Exec để audit.","reason":"Bỏ bị động kiểu Anh","severity":"low"},
+{"old":"Kiểm trên máy: `terraform fmt`","new":"Đã kiểm tra trên máy: `terraform fmt`","reason":"'Kiểm' cụt, thiếu thì","severity":"medium"}
+]}

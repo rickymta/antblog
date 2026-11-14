@@ -1,7 +1,7 @@
 ---
 slug: aws-cdk-construct-synth-diff
 title: "AWS CDK: construct, stack, synth và diff bằng TypeScript cho service báo giá"
-summary: "Bài 24: viết CDK app TypeScript dựng ECS Fargate service với ALB bằng L2/L3 construct, cdk synth ra CloudFormation, cdk diff trước deploy, bootstrap và quyền của role CDK, aspects và cdk-nag để kiểm tuân thủ; khi nào CDK hợp hơn Terraform."
+summary: "Bài 24: viết CDK app TypeScript dựng ECS Fargate service với ALB bằng L2/L3 construct, cdk synth ra CloudFormation, cdk diff trước deploy, bootstrap và quyền của role CDK, aspects và cdk-nag để kiểm tra tuân thủ; khi nào CDK hợp hơn Terraform."
 category: devops-aws
 level: intermediate
 tags: [aws, toi-noi, devops, cdk, typescript, iac, construct, cloudformation]
@@ -28,7 +28,7 @@ CDK v2 tổ chức code thành một cây: **App** chứa các **Stack**, mỗi 
 | L2 | Có mặc định hợp lý và hàm tiện ích như `grantWrite` | `s3.Bucket`, `ec2.Vpc`, `ecs.Cluster` |
 | L3 (pattern) | Ghép nhiều tài nguyên thành một giải pháp | `ApplicationLoadBalancedFargateService` |
 
-Bạn cũng tự viết L3 cho đội: `QuoteService` trong lab bọc pattern ALB + Fargate và ép các mặc định mà Tới Nơi muốn (circuit breaker, giữ log, secret vào task). Người dùng construct không phải nhớ từng chi tiết, và một thay đổi ở construct lan ra mọi môi trường dùng nó.
+Bạn cũng tự viết L3 cho đội: `QuoteService` trong lab bọc pattern ALB + Fargate và ép các mặc định mà Tới Nơi muốn (circuit breaker, giữ log, secret vào task). Người dùng construct không cần nhớ từng chi tiết, và một thay đổi ở construct lan ra mọi môi trường dùng nó.
 
 Đoạn rút gọn từ `lib/quote-service.ts`: image lấy từ ECR, secret do Secrets Manager sinh, task nhận secret qua biến môi trường, circuit breaker bật rollback.
 
@@ -88,22 +88,22 @@ Nhờ tách vai, người chạy CDK chỉ cần quyền *assume* các role đó
 
 **Aspect** là một visitor chạy qua mọi construct trong cây lúc synth, để đọc hoặc sửa chúng. Tag là ví dụ quen thuộc: `Tags.of(stack).add('Project', 'ToiNoi')` lan xuống mọi tài nguyên hỗ trợ tag. Một aspect khác có thể bắt buộc mọi bucket phải mã hoá.
 
-**cdk-nag** là thư viện aspect có sẵn các bộ luật; `AwsSolutionsChecks` kiểm theo best practice của AWS Solutions. Khi gặp lỗi như bucket cho phép public hoặc database không mã hoá, synth thất bại. Bật nó chỉ cần một dòng:
+**cdk-nag** là thư viện aspect có sẵn các bộ luật; `AwsSolutionsChecks` kiểm tra theo best practice của AWS Solutions. Khi gặp lỗi như bucket cho phép public hoặc database không mã hoá, synth thất bại. Bật nó chỉ cần một dòng:
 
 ```ts
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 ```
 
-Chạy trên stack của lab bằng `npx cdk synth -c nag=true`, bạn sẽ thấy finding thật: `ELB2` (ALB chưa bật access log), `ECS4` (cluster chưa bật Container Insights), `EC23` (security group của ALB mở 0.0.0.0/0, đúng với một ALB công khai nhưng phải nói rõ lý do) và `IAM5` (wildcard quyền sinh ra từ `grantWrite`), cùng vài finding khác như `ECS2`, `S1`, `SMG4`, `VPC7`. Mỗi finding chỉ có hai cách xử lý: sửa, hoặc `NagSuppressions` kèm lý do viết bằng lời để người review biết. Suppress không lý do biến công cụ thành chỗ tô màu.
+Chạy trên stack của lab bằng `npx cdk synth -c nag=true`, bạn sẽ thấy finding thật: `ELB2` (ALB chưa bật access log), `ECS4` (cluster chưa bật Container Insights), `EC23` (security group của ALB mở 0.0.0.0/0, đúng với một ALB công khai nhưng phải nói rõ lý do) và `IAM5` (wildcard quyền sinh ra từ `grantWrite`), cùng vài finding khác như `ECS2`, `S1`, `SMG4`, `VPC7`. Mỗi finding chỉ có hai cách xử lý: sửa, hoặc `NagSuppressions` kèm lý do viết bằng lời để người review biết. Suppress không lý do biến công cụ thành thủ tục hình thức.
 
-Test bằng `aws-cdk-lib/assertions`: `Template.fromStack(stack)` rồi `hasResourceProperties` hoặc `hasResource`. Lab kiểm bucket được mã hoá và chặn public, bucket giữ lại khi xoá stack, circuit breaker có rollback, log group prod giữ còn dev thì không. Snapshot test (`toMatchSnapshot`) bắt mọi thay đổi nhưng ồn; assertion cụ thể cho các tính chất an toàn đáng giá hơn.
+Test bằng `aws-cdk-lib/assertions`: `Template.fromStack(stack)` rồi `hasResourceProperties` hoặc `hasResource`. Lab kiểm tra bucket có mã hoá và chặn public, bucket được giữ lại khi xoá stack, circuit breaker có bật rollback, log group prod được giữ còn dev thì không. Snapshot test (`toMatchSnapshot`) bắt được mọi thay đổi nhưng gây nhiễu; assertion cụ thể cho các tính chất an toàn đáng giá hơn.
 
 ## So với Terraform, CDKTF và Pulumi
 
 | Tiêu chí | CDK | Terraform | CDKTF | Pulumi |
 |---|---|---|---|---|
 | Ngôn ngữ | TypeScript, Python, C#... | HCL | Ngôn ngữ lập trình, ra cấu hình Terraform | Ngôn ngữ lập trình |
-| State | CloudFormation stack | Backend do bạn quản | Như Terraform | Pulumi Cloud hoặc backend tự chọn |
+| State | CloudFormation stack | Backend do bạn tự quản lý | Như Terraform | Pulumi Cloud hoặc backend tự chọn |
 | Phạm vi | Chủ yếu AWS | Rất nhiều nhà cung cấp | Như Terraform | Rất nhiều nhà cung cấp |
 | Test hạ tầng | Unit test trên template | Test framework riêng, plan | Như Terraform | Unit test trên chương trình |
 
@@ -112,9 +112,9 @@ CDK hợp khi đội quen một ngôn ngữ lập trình, chỉ làm AWS, muốn
 ## Cái giá phải trả
 
 - **Logical ID đổi theo cây construct:** đổi `id` hoặc chuyển construct sang cha khác làm logical ID đổi, nên CloudFormation tạo mới và xoá cũ. Đọc `cdk diff`.
-- **Code là mã thật:** vòng lặp và điều kiện làm hạ tầng khó đoán; ưu tiên khai báo thẳng.
+- **Đây là code thật:** vòng lặp và điều kiện làm hạ tầng khó đoán; ưu tiên khai báo thẳng.
 - **L3 che chi tiết:** bạn chịu trách nhiệm cho tài nguyên mà bạn không viết. Đọc template đã synth sau mỗi lần nâng `aws-cdk-lib`.
-- **Nâng phiên bản:** `aws-cdk-lib`, CLI và stack bootstrap tách nhau; cập nhật bootstrap khi CLI báo cần.
+- **Nâng version:** `aws-cdk-lib`, CLI và stack bootstrap tách nhau; cập nhật bootstrap khi CLI báo cần.
 - **Giới hạn CloudFormation:** số tài nguyên mỗi stack, tốc độ deploy và `UPDATE_ROLLBACK_FAILED` vẫn áp dụng.
 
 **Bài tập:** bạn refactor: chuyển bucket `TariffExports` vào một construct mới tên `ExportStorage`. Code gần như không đổi. `cdk diff` sẽ hiện gì, và bạn tránh mất dữ liệu thế nào?
@@ -123,7 +123,7 @@ CDK hợp khi đội quen một ngôn ngữ lập trình, chỉ làm AWS, muốn
 
 ## Lab và kiểm chứng
 
-Mã ở `examples/toi-noi-aws/p03-24-cdk`: `bin/`, `lib/` (`QuoteService` và `QuoteStack`), `test/`, `package.json` và `cdk.json`. Kiểm trên máy, không cần tài khoản AWS:
+Mã ở `examples/toi-noi-aws/p03-24-cdk`: `bin/`, `lib/` (`QuoteService` và `QuoteStack`), `test/`, `package.json` và `cdk.json`. Kiểm tra trên máy, không cần tài khoản AWS:
 
 ```bash
 npm install
@@ -132,7 +132,7 @@ npx jest
 npx cdk synth
 ```
 
-Bốn lệnh trên đã được chạy trong container `node:22-slim` (với `aws-cdk-lib` 2.275, `cdk-nag` 2.38): kiểu TypeScript sạch, bốn assertion qua, `synth` thành công. `synth` chỉ chứng minh template sinh được; template **chưa được deploy** lên tài khoản thật nên các điểm như quyền role, sức chứa ALB và hành vi circuit breaker với image có thật chưa kiểm chứng. README ghi tài nguyên tính tiền (NAT Gateway, ALB, Fargate) và lệnh dọn (`cdk destroy`, bucket Retain phải xoá thủ công).
+Bốn lệnh trên đã được chạy trong container `node:22-slim` (với `aws-cdk-lib` 2.275, `cdk-nag` 2.38): kiểm tra kiểu TypeScript không lỗi, bốn assertion đều qua, `synth` thành công. `synth` chỉ chứng minh template sinh được; template **chưa được deploy** lên tài khoản thật nên các điểm như quyền role, sức chứa ALB và hành vi circuit breaker với image có thật chưa kiểm chứng. README ghi tài nguyên tính tiền (NAT Gateway, ALB, Fargate) và lệnh dọn (`cdk destroy`, bucket Retain phải xoá thủ công).
 
 Bài trước: [bài 23](/articles/aws-terraform-module-vpc-ecs-rds). Bài tiếp: [bài 25](/articles/aws-github-actions-oidc-ecr-deploy).
 

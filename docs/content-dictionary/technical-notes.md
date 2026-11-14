@@ -44,3 +44,27 @@ Các câu dưới đây có nghĩa mơ hồ mà agent không chắc ý tác gi�
   - `ba-pilot-ab-test-tuong-quan-tac-dong.md:19`;
   - `ba-phu-thuoc-yeu-cau-xuyen-doi.md:43`;
   - `ba-la-gi-tu-tinh-nang-den-bai-toan.md:107`.
+
+## Đợt 4 — nhóm devops-aws (11/2026)
+
+Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứng.
+
+- [ ] `aws-eks-progressive-delivery-argo-rollouts-vpc-lattice.md:18`: bài viết "readiness probe (pod có sống không)". Readiness probe kiểm tra pod **sẵn sàng nhận traffic**; kiểm tra pod còn sống là việc của liveness probe. Rất có thể đây là lỗi thật.
+- [ ] `aws-eks-bao-mat-pod-identity-external-secrets.md:103`: bài nói security group for pods "không áp dụng cho Fargate". Cần đối chiếu với tài liệu AWS hiện hành.
+- [ ] `aws-ecs-fargate-task-definition-roles.md:23`: bài ghi "bốn khái niệm" nhưng bảng có năm hàng (Cluster, Task definition, Revision, Task, Service).
+- [ ] `aws-glue-athena-redshift-lakehouse.md`, mục "Tách OLTP khỏi OLAP": bài ghi "ba chỗ để chạy báo cáo" nhưng bảng liệt kê bốn.
+- [ ] `aws-iam-user-role-policy.md`, đáp án bài tập: "cho phép xoá mọi bucket" với policy `s3:*` trên `*`. Có lẽ nên nói rõ là xoá cả bucket lẫn object.
+- [ ] `aws-la-gi-region-az-shared-responsibility.md:18`: đáp án "Không chắc chắn" cho câu hỏi mất điện cả zone. Có thể nên là "Không".
+- [ ] `aws-cloudtrail-config-security-hub-guardduty.md:61`: mốc CloudTrail Lake "đóng với khách mới từ 31/05/2026". Cần kiểm tra lại nguồn.
+- [ ] Các câu mơ hồ agent không dám sửa:
+  - `aws-kms-envelope-encryption-key-policy.md:114` và `:132`;
+  - `aws-step-functions-saga-dat-chuyen.md:116` ("Orchestrator là điểm phụ thuộc") và `:120` ("at-least-once ở rìa");
+  - `aws-tong-hop-kien-truc-production-toi-noi.md:71` và `:87`;
+  - `aws-vpc-subnet-route-security-group.md:156`; trong bài này "tuyến" và "luật" cùng được dùng để chỉ route;
+  - `aws-eventbridge-event-bus-rule-schedule.md` ("Mọi thay đổi pattern không hồi tố");
+  - `aws-chien-luoc-deploy-rolling-canary-rollback.md:75`;
+  - `aws-codepipeline-codebuild-codedeploy-blue-green.md:117`;
+  - `aws-eks-hpa-karpenter-spot.md:109` ("nhiều vùng giá").
+- [ ] Câu agent viết lại theo nghĩa suy đoán, tác giả nên xác nhận:
+  - `aws-resilience-multi-region-route53-failover-fis.md:133` ("FIS tác động lên hệ thống thật");
+  - `aws-aurora-postgresql-rds-proxy-failover.md:18` ("không nằm riêng trong writer").

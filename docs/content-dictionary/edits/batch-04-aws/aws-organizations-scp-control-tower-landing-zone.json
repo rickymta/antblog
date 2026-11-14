@@ -1,0 +1,15 @@
+{"file":"aws-organizations-scp-control-tower-landing-zone.md","edits":[
+{"old":"Bài này không có lab vì cần nhiều tài khoản, và đưa ra chính sách ở cấp tổ chức, nên","new":"Bài này không có lab vì cần nhiều tài khoản và các chính sách áp ở cấp tổ chức, nên","reason":"Câu lủng củng, thừa dấu phẩy","severity":"medium"},
+{"old":"Log archive nằm ở tài khoản người vận hành không sửa được","new":"Log archive nằm ở tài khoản mà người vận hành không sửa được","reason":"Câu mơ hồ, thiếu từ nối","severity":"medium"},
+{"old":"Điều kiện để dùng là tổ chức bật đủ tính năng (all features).","new":"Điều kiện là tổ chức phải bật đủ tính năng (all features).","reason":"Gượng","severity":"low"},
+{"old":"Dịch vụ toàn cầu được loại bằng `NotAction`; danh sách bên dưới là ví dụ cần đối chiếu với các dịch vụ bạn dùng.","new":"Ta loại trừ dịch vụ toàn cầu bằng `NotAction`; danh sách bên dưới chỉ là ví dụ, bạn cần đối chiếu với các dịch vụ mình dùng.","reason":"Bị động kiểu Anh, câu khó hiểu","severity":"medium"},
+{"old":"Nó phải loại trừ role mà Control Tower dùng để quản lý","new":"SCP này phải loại trừ role mà Control Tower dùng để quản lý","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"Tạo, bật và gắn bằng CLI","new":"Tạo, bật và gắn SCP bằng CLI","reason":"Câu thiếu tân ngữ","severity":"medium"},
+{"old":"kiểm bằng IAM policy simulator","new":"kiểm tra bằng IAM policy simulator","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"RCP cần được bật bằng `enable-policy-type` với `RESOURCE_CONTROL_POLICY`.","new":"Bạn cần bật RCP bằng `enable-policy-type` với `RESOURCE_CONTROL_POLICY`.","reason":"Bỏ bị động kiểu Anh","severity":"medium"},
+{"old":"hãy kiểm trang user guide trước khi dựa vào.","new":"hãy kiểm tra trang user guide trước khi dựa vào danh sách này.","reason":"Câu thiếu động từ và tân ngữ","severity":"medium"},
+{"old":"RCP đòi `Principal` là `*`","new":"RCP yêu cầu `Principal` là `*`","reason":"'đòi' không hợp văn kỹ thuật","severity":"low"},
+{"old":"mỗi permission set gán cho nhóm với từng tài khoản","new":"mỗi permission set được gán cho một nhóm trên từng tài khoản","reason":"Câu cụt, giới từ sai","severity":"medium"},
+{"old":"tag phân bổ chi phí phải được kích hoạt ở đó","new":"phải kích hoạt tag phân bổ chi phí ở đó","reason":"Bỏ bị động","severity":"low"},
+{"old":"thì gắn SCP đó ở OU nào, và nó có gì cần thận trọng?","new":"thì gắn SCP đó ở OU nào, và cần thận trọng điều gì?","reason":"Tránh 'nó' chỉ sự vật","severity":"medium"}
+]}

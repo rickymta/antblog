@@ -1,0 +1,23 @@
+{"file":"aws-well-architected-review-toi-noi.md","edits":[
+{"old":"biến thành backlog có owner, ước lượng, chỉ số;","new":"biến thành backlog có người phụ trách, ước lượng, chỉ số;","reason":"'owner' có từ Việt tự nhiên (style guide)","severity":"low"},
+{"old":"buộc đội nhìn lại bằng chứng và ra danh sách việc có thứ tự","new":"buộc đội nhìn lại bằng chứng và lập danh sách việc có thứ tự","reason":"'ra danh sách' calque","severity":"medium"},
+{"old":"Bạn nên đã đọc các bài 51 đến 57","new":"Bạn nên đọc các bài 51 đến 57 trước","reason":"'nên đã đọc' kiểu dịch máy","severity":"medium"},
+{"old":"Có dịch vụ khác với dùng đúng:","new":"Có dịch vụ chưa chắc là dùng đúng:","reason":"Câu cụt, khó hiểu","severity":"medium"},
+{"old":"log không có retention âm thầm tăng hoá đơn","new":"log không có retention làm hoá đơn tăng dần mà không ai để ý","reason":"'âm thầm' calque (khảo sát)","severity":"high"},
+{"old":"| Chịu và phục hồi từ lỗi |","new":"| Chịu lỗi và phục hồi sau lỗi |","reason":"'Chịu' thiếu tân ngữ","severity":"medium"},
+{"old":"Security thêm lớp kiểm, Performance","new":"Security thêm lớp kiểm tra, Performance","reason":"'lớp kiểm' cụt","severity":"medium"},
+{"old":"Thấy chi phí theo service và owner?","new":"Thấy chi phí theo service và người phụ trách?","reason":"'owner' có từ Việt tự nhiên","severity":"low"},
+{"old":"Từ lựa chọn đó nó gán mức rủi ro cho từng câu","new":"Từ các lựa chọn đó, Tool gán mức rủi ro cho từng câu","reason":"Tránh 'nó' chỉ sự vật","severity":"medium"},
+{"old":"Với Tới Nơi hợp nhất là **Serverless Applications Lens**","new":"Với Tới Nơi phù hợp nhất là **Serverless Applications Lens**","reason":"'hợp nhất' sai nghĩa (merge), ý là 'phù hợp nhất'","severity":"high"},
+{"old":"(kiểm chi phí, bảo mật, khả năng chịu lỗi","new":"(kiểm tra chi phí, bảo mật, khả năng chịu lỗi","reason":"'kiểm' cụt","severity":"low"},
+{"old":"**tác động** nếu xảy ra và **công sửa**.","new":"**tác động** nếu xảy ra và **công sức sửa**.","reason":"'công sửa' lược danh từ (khảo sát)","severity":"medium"},
+{"old":"NAT một AZ tác động lớn, công vừa,","new":"NAT một AZ tác động lớn, công sức vừa phải,","reason":"'công vừa' lược danh từ","severity":"medium"},
+{"old":"nhưng công lớn hơn (thư viện native","new":"nhưng công sức lớn hơn (thư viện native","reason":"'công lớn' lược danh từ","severity":"medium"},
+{"old":"## Biến finding thành backlog có đo được","new":"## Biến finding thành backlog có thể đo được","reason":"'có đo được' cụt","severity":"medium"},
+{"old":"với năm thứ:","new":"với năm trường thông tin:","reason":"'năm thứ' mơ hồ, khớp tiêu đề bảng 'Trường'","severity":"medium"},
+{"old":"| Owner | Một người, không phải","new":"| Người phụ trách | Một người, không phải","reason":"'owner' có từ Việt tự nhiên","severity":"low"},
+{"old":"Review thành \"checkbox\" theo ba cách","new":"Review biến thành \"checkbox\" theo ba cách","reason":"'thành' thiếu động từ","severity":"low"},
+{"old":"để phát hiện khi còn rẻ.","new":"để phát hiện vấn đề khi sửa còn rẻ.","reason":"Câu cụt, thiếu tân ngữ","severity":"medium"},
+{"old":"nó không nói chuyến đặt xe cần bao nhiêu nine.","new":"Framework không cho biết dịch vụ đặt xe cần bao nhiêu số 9 khả dụng.","reason":"'nine' chưa Việt hoá, 'nó không nói' gượng","severity":"medium"},
+{"old":"nếu mọi MRI đều thành việc, đội ngập.","new":"nếu mọi MRI đều thành việc, đội sẽ ngập việc.","reason":"'ngập' thiếu bổ ngữ","severity":"medium"}
+]}

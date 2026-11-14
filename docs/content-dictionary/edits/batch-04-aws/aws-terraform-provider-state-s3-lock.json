@@ -1,0 +1,13 @@
+{"file":"aws-terraform-provider-state-s3-lock.md","edits":[
+{"old":"Vì vậy state phải nằm ở nơi bền, có version và có khoá.","new":"Vì vậy state phải nằm ở nơi bền, lưu được các phiên bản cũ và có khoá.","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"Nó cũng là bộ nhớ để tính phần khác biệt khi bạn đổi code.","new":"State cũng là bộ nhớ để Terraform tính phần khác biệt khi bạn đổi code.","reason":"Tránh 'Nó' đầu câu; thiếu chủ thể của 'tính'","severity":"medium"},
+{"old":"dưới dạng văn bản rõ (mật khẩu","new":"dưới dạng plaintext (mật khẩu","reason":"'văn bản rõ' là calque của plaintext","severity":"medium"},
+{"old":"cạnh tệp state bằng ghi có điều kiện (conditional write) của S3","new":"cạnh tệp state bằng cơ chế ghi có điều kiện (conditional write) của S3","reason":"Câu cụt danh từ","severity":"low"},
+{"old":"thêm policy từ chối truyền không TLS","new":"thêm policy từ chối kết nối không dùng TLS","reason":"'truyền không TLS' cụt, khó hiểu","severity":"medium"},
+{"old":"là cách đúng để refactor (đối lập với CloudFormation đổi logical ID ở bài 21)","new":"là cách đúng để refactor (khác với việc đổi logical ID trong CloudFormation ở bài 21)","reason":"'đối lập với' sai sắc thái, câu cụt","severity":"medium"},
+{"old":"Kiểm trên máy mà không cần tài khoản AWS bằng Docker:","new":"Kiểm tra trên máy bằng Docker, không cần tài khoản AWS:","reason":"Trật tự từ khó hiểu, 'Kiểm' cụt","severity":"medium"},
+{"old":"- **State là điểm đơn lẻ:**","new":"- **State là single point of failure:**","reason":"'điểm đơn lẻ' tự ghép","severity":"medium"},
+{"old":"**Drift im lặng:**","new":"**Drift không báo trước:**","reason":"'im lặng' calque của silent","severity":"medium"},
+{"old":"Kiểm định kỳ ở bài 30.","new":"Kiểm tra định kỳ ở bài 30.","reason":"'Kiểm định kỳ' dễ đọc nhầm, thiếu 'tra'","severity":"medium"},
+{"old":"**Provider và Terraform đều nâng phiên bản:**","new":"**Provider và Terraform đều liên tục ra phiên bản mới:**","reason":"'nâng phiên bản' sai chủ thể","severity":"medium"}
+]}
