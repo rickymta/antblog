@@ -42,7 +42,8 @@ function selectedLines(view: EditorView) {
   const seen = new Set<number>();
   const lines = [];
   for (const r of state.selection.ranges) {
-    for (let n = state.doc.lineAt(r.from).number; n <= state.doc.lineAt(r.to).number; n++) {
+    const last = state.doc.lineAt(r.empty ? r.to : r.to - 1).number;
+    for (let n = state.doc.lineAt(r.from).number; n <= last; n++) {
       if (seen.has(n)) continue;
       seen.add(n);
       lines.push(state.doc.line(n));
@@ -52,7 +53,7 @@ function selectedLines(view: EditorView) {
 }
 
 /** Tiêu đề `## ` / `### `: đặt cấp cho các dòng đang chọn; đã đúng cấp ⇒ bỏ tiêu đề. */
-export function toggleHeading(view: EditorView, level: 2 | 3): void {
+export function toggleHeading(view: EditorView, level: 1 | 2 | 3 | 4 | 5 | 6): void {
   const prefix = `${'#'.repeat(level)} `;
   const lines = selectedLines(view);
   const allSame = lines.every((l) => l.text.startsWith(prefix) && !l.text.startsWith(prefix + '#'));
@@ -65,20 +66,28 @@ export function toggleHeading(view: EditorView, level: 2 | 3): void {
 }
 
 /** Tiền tố dòng (`> `, `- `, `1. `): bật/tắt cho mọi dòng đang chọn. `numbered` ⇒ đánh số 1., 2., … */
-export function toggleLinePrefix(view: EditorView, kind: 'quote' | 'bullet' | 'numbered'): void {
+export function toggleLinePrefix(view: EditorView, kind: 'quote' | 'bullet' | 'numbered' | 'task'): void {
   const lines = selectedLines(view);
-  const re = kind === 'quote' ? /^>\s?/ : kind === 'bullet' ? /^[-*+]\s+/ : /^\d+[.)]\s+/;
-  const allHave = lines.filter((l) => l.text.trim()).every((l) => re.test(l.text));
+  const markers = {
+    quote: /^>\s?/,
+    task: /^[-*+]\s+\[[ xX]\]\s+/,
+    bullet: /^[-*+]\s+(?!\[[ xX]\]\s)/,
+    numbered: /^\d+[.)]\s+/,
+  };
+  const re = markers[kind];
+  const nonempty = lines.filter((l) => l.text.trim());
+  const allHave = nonempty.length > 0 && nonempty.every((l) => re.test(l.text));
   let n = 0;
   const changes = lines
     .filter((l) => allHave || l.text.trim() || lines.length === 1)
     .map((l) => {
       const existing = re.exec(l.text)?.[0] ?? '';
       if (allHave) return { from: l.from, to: l.from + existing.length, insert: '' };
+      if (kind === 'task' && existing) return { from: l.from, to: l.from, insert: '' };
       n++;
-      const prefix = kind === 'quote' ? '> ' : kind === 'bullet' ? '- ' : `${n}. `;
+      const prefix = kind === 'quote' ? '> ' : kind === 'task' ? '- [ ] ' : kind === 'bullet' ? '- ' : `${n}. `;
       // Đổi kiểu danh sách: bỏ tiền tố kiểu khác trước.
-      const other = /^([-*+]|\d+[.)])\s+/.exec(l.text)?.[0] ?? '';
+      const other = /^(?:[-*+]\s+\[[ xX]\]|[-*+]|\d+[.)])\s+/.exec(l.text)?.[0] ?? '';
       return { from: l.from, to: l.from + (existing || (kind !== 'quote' ? other : '')).length, insert: prefix };
     });
   view.dispatch({ changes, scrollIntoView: true, userEvent: 'input' });

@@ -5,13 +5,17 @@ import CodeMirror, { EditorView, Prec, keymap, type Extension } from '@uiw/react
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 // @codemirror/commands là phụ thuộc của @uiw/react-codemirror (basicSetup) — cùng bản với lịch sử hoàn tác đang chạy.
+import { openSearchPanel } from '@codemirror/search';
 import { redo, undo } from '@codemirror/commands';
 import { useTranslation } from 'react-i18next';
 import {
   ChevronDown,
   Code,
-  Heading2,
-  Heading3,
+  Heading,
+  SlidersHorizontal,
+  Search,
+  ListChecks,
+  Type,
   ImagePlus,
   Italic,
   Link as LinkIcon,
@@ -59,6 +63,20 @@ const editorTheme = EditorView.theme({
 
 type ImageUploader = (view: EditorView, files: File[], pos?: number) => void;
 
+const toolbarGroups = ['format', 'blocks', 'insert', 'editing'] as const;
+type ToolbarGroup = typeof toolbarGroups[number];
+const toolbarKey = 'cms.article.toolbar.v1';
+
+function readToolbar(): ToolbarGroup[] {
+  try {
+    const saved: unknown = JSON.parse(localStorage.getItem(toolbarKey) ?? 'null');
+    if (Array.isArray(saved)) return toolbarGroups.filter((group) => saved.includes(group));
+  } catch {
+    // Browser storage may be unavailable.
+  }
+  return [...toolbarGroups];
+}
+
 /** Thanh công cụ định dạng — nhận view của CodeMirror (null khi chưa dựng xong). */
 export function MarkdownToolbar({ view, onImage, extra }: { view: EditorView | null; onImage: () => void; extra?: ReactNode }) {
   const { t } = useTranslation();
@@ -66,18 +84,38 @@ export function MarkdownToolbar({ view, onImage, extra }: { view: EditorView | n
     if (view) fn(view);
   };
   const disabled = !view;
-  const sep = <span className="mx-1 h-5 w-px shrink-0 bg-line" aria-hidden />;
+  const [groups, setGroups] = useState(readToolbar);
+  const [settings, setSettings] = useState(false);
+  function configure(next: ToolbarGroup[]) {
+    setGroups(next);
+    try {
+      localStorage.setItem(toolbarKey, JSON.stringify(next));
+    } catch {
+      // Keep the preference for this session.
+    }
+  }
 
   return (
+    <div className="min-w-0">
     <div role="toolbar" aria-label={t('cms.toolbar')} className="flex flex-wrap items-center gap-0.5">
-      <ToolButton icon={Heading2} label={t('cms.tbH2')} disabled={disabled} onClick={run((v) => toggleHeading(v, 2))} />
-      <ToolButton icon={Heading3} label={t('cms.tbH3')} disabled={disabled} onClick={run((v) => toggleHeading(v, 3))} />
-      {sep}
+      {groups.includes('format') && <>
+      <ToolMenu icon={Heading} label={t('cms.headings')} menuLabel={t('cms.headings')} disabled={disabled}
+        items={([1, 2, 3, 4, 5, 6] as const).map(level => ({
+          key: String(level), label: `H${level}`, onSelect: run(v => toggleHeading(v, level)),
+        }))} />
       <ToolButton glyph={<span className="font-bold">B</span>} label={t('cms.tbBold')} disabled={disabled} onClick={run((v) => toggleWrap(v, '**', '**', t('cms.snipBold')))} />
       <ToolButton icon={Italic} label={t('cms.tbItalic')} disabled={disabled} onClick={run((v) => toggleWrap(v, '*', '*', t('cms.snipItalic')))} />
       <ToolButton icon={Code} label={t('cms.tbCode')} disabled={disabled} onClick={run((v) => toggleWrap(v, '`', '`', t('cms.snipCode')))} />
+      <ToolMenu icon={Type} label={t('cms.moreFormats')} menuLabel={t('cms.moreFormats')} disabled={disabled}
+        items={([
+          ['underline', '<u>', '</u>'], ['strike', '~~', '~~'], ['highlight', '<mark>', '</mark>'],
+          ['superscript', '<sup>', '</sup>'], ['subscript', '<sub>', '</sub>'],
+        ] as const).map(([key, start, end]) => ({
+          key, label: t(`cms.${key}`), onSelect: run(v => toggleWrap(v, start, end, t('cms.sampleText'))),
+        }))} />
       <ToolButton icon={LinkIcon} label={t('cms.tbLink')} disabled={disabled} onClick={run((v) => insertLink(v, t('cms.snipLink')))} />
-      {sep}
+      </>}
+      {groups.includes('blocks') && <>
       <ToolMenu
         icon={SquareCode}
         label={t('cms.tbCodeBlock')}
@@ -93,6 +131,7 @@ export function MarkdownToolbar({ view, onImage, extra }: { view: EditorView | n
       <ToolButton icon={TextQuote} label={t('cms.tbQuote')} disabled={disabled} onClick={run((v) => toggleLinePrefix(v, 'quote'))} />
       <ToolButton icon={List} label={t('cms.tbBullet')} disabled={disabled} onClick={run((v) => toggleLinePrefix(v, 'bullet'))} />
       <ToolButton icon={ListOrdered} label={t('cms.tbNumbered')} disabled={disabled} onClick={run((v) => toggleLinePrefix(v, 'numbered'))} />
+      <ToolButton icon={ListChecks} label={t('cms.checklist')} disabled={disabled} onClick={run(v => toggleLinePrefix(v, 'task'))} />
       <ToolButton
         icon={Table}
         label={t('cms.tbTable')}
@@ -105,7 +144,8 @@ export function MarkdownToolbar({ view, onImage, extra }: { view: EditorView | n
         })}
       />
       <ToolButton icon={Minus} label={t('cms.tbHr')} disabled={disabled} onClick={run((v) => insertBlock(v, '---'))} />
-      {sep}
+      </>}
+      {groups.includes('insert') && <>
       <ToolMenu
         icon={MessageSquareWarning}
         label={t('cms.tbCallout')}
@@ -142,10 +182,27 @@ export function MarkdownToolbar({ view, onImage, extra }: { view: EditorView | n
         })}
       />
       <ToolButton icon={ImagePlus} label={t('cms.tbImage')} disabled={disabled} onClick={onImage} />
-      {sep}
+      </>}
+      {groups.includes('editing') && <>
       <ToolButton icon={Undo2} label={t('cms.tbUndo')} disabled={disabled} onClick={run((v) => { undo(v); v.focus(); })} />
       <ToolButton icon={Redo2} label={t('cms.tbRedo')} disabled={disabled} onClick={run((v) => { redo(v); v.focus(); })} />
+      <ToolButton icon={Search} label={t('cms.findReplace')} disabled={disabled} onClick={run(openSearchPanel)} />
+      </>}
+      <button type="button" aria-expanded={settings} title={t('cms.toolbarSettings')} aria-label={t('cms.toolbarSettings')}
+        className="inline-flex size-8 items-center justify-center rounded-ui hover:bg-surface-2"
+        onClick={() => setSettings(!settings)}><SlidersHorizontal className="size-4" /></button>
       {extra}
+    </div>
+    {settings && <fieldset className="my-2 flex flex-wrap items-center gap-3 rounded-ui border border-line px-3 py-2 text-sm">
+      <legend className="px-1 font-semibold">{t('cms.toolbarSettings')}</legend>
+      {toolbarGroups.map(group => <label key={group} className="flex items-center gap-1">
+        <input type="checkbox" checked={groups.includes(group)}
+          onChange={e => configure(e.target.checked ? [...groups, group] : groups.filter(item => item !== group))} />
+        {t(`cms.group_${group}`)}
+      </label>)}
+      <button type="button" className="text-primary" onClick={() => configure(['format', 'editing'])}>{t('cms.basicTools')}</button>
+      <button type="button" className="text-primary" onClick={() => configure([...toolbarGroups])}>{t('cms.allTools')}</button>
+    </fieldset>}
     </div>
   );
 }
