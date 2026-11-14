@@ -39,7 +39,7 @@ Mỗi công cụ chỉ thấy một phần sự thật (Hình 1).
 <rect x="620" y="30" width="240" height="150" rx="10" class="f-phys-soft s-phys"/><text x="636" y="62" class="t-b">3. Giám sát bản release</text><text x="636" y="92" class="t-small">FrameTiming qua</text><text x="636" y="114" class="t-mono">addTimingsCallback</text><text x="636" y="144" class="t-small">Thấy: khung hụt trên</text><text x="636" y="164" class="t-small">máy người dùng.</text>
 <path d="M272 105 L318 105" class="f-none s-pk" stroke-width="2" marker-end="url(#fl41-1-a)"/>
 <path d="M572 105 L618 105" class="f-none s-pk" stroke-width="2" marker-end="url(#fl41-1-a)"/>
-<text x="20" y="224" class="t-small">Kết luận về tốc độ chỉ rút ra ở bước 1 và 3; bước 2 chứng minh sửa đúng chỗ và chặn hồi quy.</text>
+<text x="20" y="224" class="t-small">Kết luận về tốc độ chỉ rút ra ở bước 1 và 3; bước 2 chứng minh sửa đúng chỗ và chặn regression.</text>
 </svg>
 </div>
 <figcaption>Hình 1. Ba công cụ, ba câu hỏi. Test đếm không thay được đo trên thiết bị; nó giữ cho điều đã sửa không hỏng lại.</figcaption>
@@ -80,7 +80,7 @@ Duration frameBudget(int refreshHz) {
   }
 ```
 
-Test dùng `FrameTiming` tổng hợp: cùng một khung, ổn ở 60 Hz và hụt ở 120 Hz.
+Test dùng `FrameTiming` tự dựng: cùng một khung, ổn ở 60 Hz và hụt ở 120 Hz.
 
 ### frame_budget_test.dart · 41-performance/test/frame_budget_test.dart (trích)
 
@@ -166,7 +166,7 @@ Footer `const` build 0 lần, footer thường 5 lần. Hình 2 đặt bản nà
 <figcaption>Hình 2. Phạm vi rebuild trước và sau khi tách. Mũi tên đi từ cha xuống con; tô màu cảnh báo là widget bị build lại mỗi nhịp.</figcaption>
 </figure>
 
-**Tách widget** là cách đáng dùng nhất: phần đổi nằm trong `EtaText` tự nghe `ticker`, cha thành `StatelessWidget` không nghe gì.
+**Tách widget** là cách đáng dùng nhất: phần đổi nằm trong `EtaText` tự nghe `ticker`, cha trở thành `StatelessWidget` không nghe gì.
 
 ### rebuild_screens.dart · 41-performance/lib/rebuild_screens.dart (trích)
 
@@ -198,9 +198,9 @@ Footer `const` build 0 lần, footer thường 5 lần. Hình 2 đặt bản nà
 }
 ```
 
-**`const`** chỉ có tác dụng khi cả đối số là hằng. `const QuoteCard(fare: Money(25500))` là một instance dùng chung nên build 0 lần; `QuoteCard(fare: fare)` với `fare` là biến, dù cùng giá trị, là instance mới và build 1 lần (hai test cặp đôi trong `rebuild_test.dart`). Với dữ liệu chỉ biết lúc chạy, ta quay về tách widget.
+**`const`** chỉ có tác dụng khi cả đối số là hằng. `const QuoteCard(fare: Money(25500))` là một instance dùng chung nên build 0 lần; `QuoteCard(fare: fare)` với `fare` là biến, dù cùng giá trị, là instance mới và build 1 lần (hai test đối chiếu nhau trong `rebuild_test.dart`). Với dữ liệu chỉ biết lúc chạy, ta quay về tách widget.
 
-Để biết widget nào bị build mà không gắn nhãn tay, ta dùng `debugOnRebuildDirtyWidget`:
+Để biết widget nào bị build mà không gắn nhãn thủ công, ta dùng `debugOnRebuildDirtyWidget`:
 
 ### build_log.dart · 41-performance/lib/build_log.dart (trích)
 
@@ -214,7 +214,7 @@ Footer `const` build 0 lần, footer thường 5 lần. Hình 2 đặt bản nà
   }
 ```
 
-Callback nằm trong `assert` nên chỉ chạy ở debug. Tham số `builtOnce` chỉ được cập nhật khi `debugPrintRebuildDirtyWidgets` bật (đọc `Element.rebuild`), nên ta bỏ qua nó. Đây là biến toàn cục, nên `stop()` gỡ nó cho test sau. Sau 2 nhịp, test ghi được `NaiveTripScreen`, `QuoteCard`, `MoneyText` mỗi loại 2 lần, và `BuildProbe` chỉ 2 (footer thường).
+Callback nằm trong `assert` nên chỉ chạy ở debug. Tham số `builtOnce` chỉ được cập nhật khi `debugPrintRebuildDirtyWidgets` bật (đọc `Element.rebuild`), nên ta bỏ qua nó. Đây là biến toàn cục, nên `stop()` gỡ nó để test sau không bị ảnh hưởng. Sau 2 nhịp, test ghi được `NaiveTripScreen`, `QuoteCard`, `MoneyText` mỗi loại 2 lần, và `BuildProbe` chỉ 2 (footer thường).
 
 Cờ `debugProfileBuildsEnabled` thêm Timeline event cho mỗi widget được build. Nếu test để cờ này bật, `flutter_test` báo lỗi khi thân test kết thúc, trước cả `addTearDown`; lab trả cờ về `false` bằng `try`/`finally`.
 
@@ -249,7 +249,7 @@ class FareLabelSelect extends ConsumerWidget {
     });
 ```
 
-Tài xế di chuyển 5 lần: nhãn xem cả state build 5 lần, nhãn dùng `select` build 0 lần. Cước đổi thật (`reroute(100)`, 453.000 VND) thì cả hai build đúng 1 lần. Kiểu trả về của `select` quan trọng: `Money` có `==` theo giá trị nên im lặng đúng lúc, còn `[s.trip.fare]` là `List` mới mỗi lần, không có `==` theo giá trị, nên `FareLabelSelectList` vẫn build 5 lần. Muốn chọn nhiều giá trị, trả về một record.
+Tài xế di chuyển 5 lần: nhãn xem cả state build 5 lần, nhãn dùng `select` build 0 lần. Cước đổi thật (`reroute(100)`, 453.000 VND) thì cả hai build đúng 1 lần. Kiểu trả về của `select` quan trọng: `Money` có `==` theo giá trị nên không kích hoạt build lại khi giá trị không đổi, còn `[s.trip.fare]` là `List` mới mỗi lần, không có `==` theo giá trị, nên `FareLabelSelectList` vẫn build 5 lần. Muốn chọn nhiều giá trị, trả về một record.
 
 ## Paint: RepaintBoundary
 
@@ -334,7 +334,7 @@ class CountingPainter extends CustomPainter {
   });
 ```
 
-Sau 10 khung hình (Hình 3): không có boundary, `route` bị vẽ 10 lần dù không đổi gì; có boundary quanh chấm, `route` vẽ 0 lần. `shouldRepaint` luôn `false` mà `route` vẫn bị vẽ, vì nó chỉ quyết định có đánh dấu vẽ lại khi widget được cập nhật; khi layer chứa nó vẽ lại, `paint` vẫn chạy. Bọc phần tĩnh thay vì phần động cũng giữ bản đồ nguyên (một test riêng).
+Sau 10 khung hình (Hình 3): không có boundary, `route` bị vẽ 10 lần dù không đổi gì; có boundary quanh chấm, `route` vẽ 0 lần. `shouldRepaint` luôn `false` mà `route` vẫn bị vẽ, vì nó chỉ quyết định có đánh dấu vẽ lại khi widget được cập nhật; khi layer chứa nó vẽ lại, `paint` vẫn chạy. Bọc phần tĩnh thay vì phần động cũng khiến bản đồ không bị vẽ lại (một test riêng).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -384,7 +384,7 @@ Lab so ba cách dựng 1.000 dòng lịch sử, mỗi dòng cao 72 dp, trong khu
 | `ListView(children:)` | 1.000 | 12 |
 | `ListView.builder` | 12 | 12 |
 
-Hàng giữa tinh hơn lời khuyên thường nghe: `ListView(children:)` **không** build cả 1.000 dòng, vì `ListView` lười ở bước build. Nhưng 1.000 widget vẫn được tạo, và tạo lại mỗi khi cha dựng lại (một test riêng). `Column` trong `SingleChildScrollView` mất cả hai. Cách `builder` còn đặt `itemExtent`; tài liệu nói chiều cao biết trước giúp cơ chế cuộn bớt việc.
+Hàng giữa tinh tế hơn lời khuyên thường nghe: `ListView(children:)` **không** build cả 1.000 dòng, vì `ListView` lười ở bước build. Nhưng 1.000 widget vẫn được tạo, và tạo lại mỗi khi cha dựng lại (một test riêng). `Column` trong `SingleChildScrollView` chịu cả hai chi phí. Cách `builder` còn đặt `itemExtent`; tài liệu nói chiều cao biết trước giúp cơ chế cuộn bớt việc.
 
 Số 12 đến từ vùng đệm: mặc định framework dựng thêm 250 dp ngoài khung nhìn (`RenderAbstractViewport.defaultCacheExtent`), và (600 + 250) / 72 làm tròn lên là 12. Ở Flutter 3.47, `cacheExtent` đã deprecated, ta dùng `scrollCacheExtent`:
 
@@ -461,7 +461,7 @@ Future<List<Trip>> parseTripsInIsolate(String json) =>
     Isolate.run(() => parseTrips(json), debugName: 'parse-trips');
 ```
 
-`parseTrips` là hàm top-level thuần, không đụng `dart:ui`; closure chỉ bắt `json`, một `String` bất biến. Theo tài liệu, `Isolate.run` gửi **kết quả** về bằng `Isolate.exit` nên không sao chép; dữ liệu **mutable** qua ranh giới thì bị sao chép, còn chuỗi và đối tượng bất biến đi bằng tham chiếu. Sao chép chạy ở isolate đang gọi, tức main isolate. Test chứng minh ngữ nghĩa copy:
+`parseTrips` là hàm top-level thuần, không đụng `dart:ui`; closure chỉ bắt `json`, một `String` bất biến. Theo tài liệu, `Isolate.run` gửi **kết quả** về bằng `Isolate.exit` nên không sao chép; dữ liệu **mutable** qua ranh giới thì bị sao chép, còn chuỗi và đối tượng bất biến đi bằng tham chiếu. Sao chép chạy ở isolate đang gọi, tức main isolate. Test chứng minh ngữ nghĩa sao chép:
 
 ### isolate_test.dart · 41-performance/test/isolate_test.dart (trích)
 
@@ -482,7 +482,7 @@ Future<List<Trip>> parseTripsInIsolate(String json) =>
     );
 ```
 
-Kết quả bằng bản parse đồng bộ, và `FormatException` ném trong isolate được ném lại cùng kiểu. Cạm bẫy lớn nhất là closure bắt thêm thứ không ngờ. Ví dụ: class dưới đây giữ một `ReceivePort`, và closure nhắc tới `port` nên kéo cả `this` đi:
+Kết quả giống bản parse đồng bộ, và `FormatException` ném trong isolate được ném lại cùng kiểu. Cạm bẫy lớn nhất là closure bắt thêm thứ ta không ngờ tới. Ví dụ: class dưới đây giữ một `ReceivePort`, và closure nhắc tới `port` nên kéo cả `this` đi:
 
 ### isolate_test.dart · 41-performance/test/isolate_test.dart (trích)
 
@@ -502,7 +502,7 @@ Kết quả là `ArgumentError` với thông báo `object is unsendable`. Cách 
 
 `compute` của Flutter là lớp vỏ mỏng: trên native, `compute(fun, message)` tương đương `Isolate.run(() => fun(message))`; trên web nó chạy ngay trên main isolate (theo source và tài liệu).
 
-Test cuối không đo mili giây, chỉ hỏi thứ tự của event loop: một `Timer` đã tới hạn chạy trước hay sau khi parse xong. Nó chỉ cho thấy `Isolate.run` trả quyền cho event loop trước khi có kết quả, không chứng minh main isolate hoàn toàn không bị chặn.
+Test cuối không đo mili giây, chỉ hỏi thứ tự của event loop: một `Timer` đã tới hạn chạy trước hay sau khi parse xong. Test này chỉ cho thấy `Isolate.run` trả quyền cho event loop trước khi có kết quả, không chứng minh main isolate hoàn toàn không bị chặn.
 
 ### isolate_test.dart · 41-performance/test/isolate_test.dart (trích)
 
@@ -546,9 +546,9 @@ Test cuối không đo mili giây, chỉ hỏi thứ tự của event loop: mộ
 <figcaption>Hình 4. Việc nặng chạy ở isolate worker. Mũi tên đi từ main isolate sang worker lúc giao việc và từ worker về main isolate lúc trả kết quả.</figcaption>
 </figure>
 
-Lab có hai script Dart thuần, mỗi script in khoảng giá trị của nhiều lần chạy cùng mốc "không làm gì" (nhiễu của chính `Timer`). Số dưới đây chạy trên laptop của tác giả, Dart VM JIT, khi máy đang tải nặng (load average 60 đến 97); chúng là **số minh hoạ, không phải số đo trên điện thoại**.
+Lab có hai script Dart thuần, mỗi script in khoảng giá trị của nhiều lần chạy, kèm mốc "không làm gì" (nhiễu của chính `Timer`). Số dưới đây chạy trên laptop của tác giả, Dart VM JIT, khi máy đang tải nặng (load average 60 đến 97); chúng là **số minh hoạ, không phải số đo trên điện thoại**.
 
-Khoảng cách lớn nhất giữa hai nhịp `Timer` 2 ms khi parse 50.000 chuyến (7,6 MB), 7 lần chạy: không làm gì 3 đến 14 ms, parse đồng bộ 117 đến 159 ms, `Isolate.run` 8 đến 21 ms. Đồng bộ chặn lâu gấp nhiều lần nhiễu nền; `Isolate.run` nằm sát vùng nhiễu, nên ta không kết luận nó đưa độ chặn về 0.
+Khoảng cách lớn nhất giữa hai nhịp `Timer` 2 ms khi parse 50.000 chuyến (7,6 MB), 7 lần chạy: không làm gì 3 đến 14 ms, parse đồng bộ 117 đến 159 ms, `Isolate.run` 8 đến 21 ms. Parse đồng bộ chặn lâu gấp nhiều lần nhiễu nền; `Isolate.run` nằm sát vùng nhiễu, nên ta không kết luận nó đưa độ chặn về 0.
 
 Chi phí sao chép nhìn từ main isolate (7 lần chạy, nền 5 đến 12 ms): đối số `List<Map>` một triệu phần tử làm main dừng 852 đến 2.570 ms; đối số `String` 50 MB chỉ 2 đến 7 ms. Cạm bẫy không chỉ là `this`: closure chỉ dùng `String` nhưng cùng scope với closure khác bắt `List` lớn vẫn dừng 1.025 đến 2.163 ms. Cách tránh: mỗi `Isolate.run` nằm trong hàm riêng chỉ thấy đối số của nó. Chiều ngược lại, trả một triệu `Map` bằng `Isolate.exit` không sao chép, nhưng main vẫn dừng 50 đến 91 ms; ta chưa xác định nguyên nhân.
 

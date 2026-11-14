@@ -1,0 +1,14 @@
+{"file":"flutter-bao-mat-mobile-secure-storage-pinning-obfuscation-masvs.md","edits":[
+{"old":"`--dart-define` thành hằng trong binary","new":"`--dart-define` trở thành hằng trong binary","reason":"Câu lược động từ 'trở thành'","severity":"medium"},
+{"old":"không ghi body và chỉ cho vài header","new":"không ghi body và chỉ cho phép ghi vài header","reason":"Thiếu động từ sau 'chỉ cho'","severity":"medium"},
+{"old":"Ta cấu hình cả hai đường, loại cả hai tệp","new":"Ta cấu hình cả hai đường và loại trừ cả hai tệp","reason":"'loại' đứng trơ, mơ hồ; thêm quan hệ từ","severity":"low"},
+{"old":"Máy kiểm không có Android SDK","new":"Máy chạy kiểm chứng không có Android SDK","reason":"'Máy kiểm' là cụm tự ghép, thiếu động từ","severity":"medium"},
+{"old":"Khi chưa có quy trình giữ khoá dự phòng và phát hành app kịp; khi ta không kiểm soát khoá server (CDN bên thứ ba tự đổi chứng chỉ); MASVS-NETWORK-2 chỉ yêu cầu ghim cho endpoint","new":"Khi chưa có quy trình giữ khoá dự phòng và phát hành app kịp, hoặc khi ta không kiểm soát khoá server (CDN bên thứ ba tự đổi chứng chỉ). MASVS-NETWORK-2 chỉ yêu cầu ghim cho endpoint","reason":"Ba vế dùng dấu chấm phẩy lẫn lộn hai ý khác nhau; tách rõ","severity":"medium"},
+{"old":"**do ta quản lý**; còn lại HTTPS đúng cách","new":"**do ta quản lý**. Với phần còn lại, HTTPS đúng cách","reason":"Tách câu, 'còn lại' thiếu chủ thể","severity":"low"},
+{"old":"Hàng ba quan trọng nhất: ai có file app chạy","new":"Hàng thứ ba quan trọng nhất: ai có file app chỉ cần chạy","reason":"Trật tự từ kiểu tiếng Anh, thiếu 'thứ'","severity":"low"},
+{"old":"stack trace bản phát hành thành tên vô nghĩa","new":"stack trace của bản phát hành chỉ còn tên vô nghĩa","reason":"Thiếu 'trở thành'/động từ, câu cụt","severity":"medium"},
+{"old":"máy người dùng thường đôi khi bị báo nhầm. Lab không có bộ phát hiện; nó mô hình hoá","new":"máy người dùng bình thường đôi khi bị báo nhầm. Lab không có bộ phát hiện mà chỉ mô hình hoá","reason":"'thường đôi khi' mâu thuẫn; tránh 'nó'","severity":"medium"},
+{"old":"ngày server đổi chứng chỉ, người dùng chưa cập nhật đều lỗi mạng","new":"ngày server đổi chứng chỉ, người dùng chưa cập nhật đều bị lỗi mạng","reason":"Thiếu 'bị'","severity":"low"},
+{"old":"(đối chiếu mas.owasp.org tại 11/2026)","new":"(đối chiếu mas.owasp.org vào 11/2026)","reason":"'tại' kiểu tiếng Anh 'at'","severity":"low"},
+{"old":"Phản bác, và nói khoá nên nằm ở đâu.","new":"Hãy phản bác và nói khoá nên nằm ở đâu.","reason":"Câu mệnh lệnh cụt","severity":"low"}
+]}

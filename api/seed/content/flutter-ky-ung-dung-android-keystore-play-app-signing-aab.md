@@ -25,7 +25,7 @@ Bài này dựng chuỗi ký của Android: upload keystore, `key.properties` ng
 
 ## Hai khoá và vai trò của Play App Signing
 
-Android chỉ cài bản cập nhật nếu chứng chỉ ký khớp bản đang cài, nên khoá ký phải sống suốt đời app. Play App Signing tách nó làm hai (Hình 1). **App signing key** do Google giữ và ký APK gửi tới người dùng; ta không lấy lại được bản sao. **Upload key** do ta giữ và ký AAB trước khi tải lên; Google dùng chứng chỉ của nó để biết ai đang tải lên. Hai khoá nên khác nhau.
+Android chỉ cài bản cập nhật nếu chứng chỉ ký khớp bản đang cài, nên khoá ký phải dùng được suốt vòng đời của app. Play App Signing tách khoá này thành hai (Hình 1). **App signing key** do Google giữ và ký APK gửi tới người dùng; ta không lấy lại được bản sao. **Upload key** do ta giữ và ký AAB trước khi tải lên; Google dùng chứng chỉ của nó để biết ai đang tải lên. Hai khoá nên khác nhau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -89,7 +89,7 @@ Lab sinh keystore **thử** bằng cùng các cờ, nhưng truyền mật khẩu
     ], password: password);
 ```
 
-Các ràng buộc (kiểm tại 11/2026): upload key là RSA từ 2048 bit (trang hỗ trợ Play); chứng chỉ phải hết hạn sau 22/10/2033 và nên có hiệu lực từ 25 năm (developer.android.com), nên `-validity 10000` ngày, khoảng 27 năm, là hợp lý. Tài liệu Flutter nói `-storetype JKS` chỉ cần từ Java 9 vì mặc định đổi sang PKCS12; JDK 21 chấp nhận JKS nhưng có cảnh báo. Ba test của lab kiểm cỡ khoá, năm hết hạn và dạng vân tay SHA-256 mà `keytool -list -v -keystore upload-keystore.jks -alias upload` in ra.
+Các ràng buộc (kiểm tại 11/2026): upload key là RSA từ 2048 bit (trang hỗ trợ Play); chứng chỉ phải hết hạn sau 22/10/2033 và nên có hiệu lực từ 25 năm trở lên (developer.android.com), nên `-validity 10000` ngày, khoảng 27 năm, là hợp lý. Tài liệu Flutter nói `-storetype JKS` chỉ cần từ Java 9 vì mặc định đổi sang PKCS12; JDK 21 chấp nhận JKS nhưng có cảnh báo. Ba test của lab kiểm cỡ khoá, năm hết hạn và dạng vân tay SHA-256 mà `keytool -list -v -keystore upload-keystore.jks -alias upload` in ra.
 
 Keystore sống **ngoài repository**, kèm ít nhất một bản sao ở kho bí mật của đội; [bài CI/CD](/articles/flutter-ci-cd-github-actions-macos-build-ios-android-secrets) đưa nó lên CI qua secrets. Lưu ý: vân tay SHA-256 đăng ký cho Firebase hay Google Sign-In phải lấy ở trang App signing của Play Console, vì bản người dùng cài ký bằng app signing key.
 
@@ -182,10 +182,10 @@ Hình 2 vẽ luồng này. Bảo đảm của lab là test đọc văn bản: `a
 <text x="20" y="346" class="t-small t-warn">Không có nhánh lui sang khoá debug: không ký được thì build hỏng.</text>
 </svg>
 </div>
-<figcaption>Hình 2. Build release đi qua cổng verifyReleaseSigning, chạy trước preReleaseBuild. Thiếu key.properties thì dừng với thông báo rõ thay vì âm thầm ký bằng khoá debug.</figcaption>
+<figcaption>Hình 2. Build release đi qua cổng verifyReleaseSigning, chạy trước preReleaseBuild. Thiếu key.properties thì dừng với thông báo rõ thay vì tự ký bằng khoá debug mà không báo gì.</figcaption>
 </figure>
 
-Hai chi tiết về `storeFile`. Đường dẫn tương đối được `file(it)` hiểu từ thư mục của module, tức `android/app`. Và `key.properties` được đọc bằng `java.util.Properties`, nơi `\` là ký tự thoát: tài liệu Flutter dặn viết `\\` trên Windows. Đường dẫn `C:\Users\quan\up.jks` làm lớp này ném `Malformed \uxxxx encoding`, vì `\u` (trong `\up`) mở đầu một ký tự Unicode; còn `\` trước chữ khác thì bị bỏ, nên `C:\Users\quan\keys.jks` thành `C:Usersquankeys.jks` mà không có lỗi nào. Ta chạy `java.util.Properties` của JDK 21 trên các mẫu này và đối chiếu vào `KeyProperties`; test dưới đây mô phỏng lỗi mà không cần Gradle:
+Hai chi tiết về `storeFile`. Đường dẫn tương đối được `file(it)` hiểu từ thư mục của module, tức `android/app`. Và `key.properties` được đọc bằng `java.util.Properties`, nơi `\` là ký tự thoát: tài liệu Flutter dặn viết `\\` trên Windows. Đường dẫn `C:\Users\quan\up.jks` làm lớp này ném `Malformed \uxxxx encoding`, vì `\u` (trong `\up`) mở đầu một ký tự Unicode; còn `\` trước chữ khác thì bị bỏ, nên `C:\Users\quan\keys.jks` trở thành `C:Usersquankeys.jks` mà không có lỗi nào. Ta chạy `java.util.Properties` của JDK 21 trên các mẫu này và đối chiếu vào `KeyProperties`; test dưới đây mô phỏng lỗi mà không cần Gradle:
 
 ### key_properties_test.dart · 51-android-signing/test/key_properties_test.dart (trích)
 
@@ -236,13 +236,13 @@ Future<BundleVerification> verifyBundle(File bundle) async {
 }
 ```
 
-Ba điều quan sát trên JDK 21, đều có test. Bundle **chưa ký** vẫn cho `jarsigner -verify` thoát mã 0 và in `jar is unsigned.`, nên CI chỉ đọc mã thoát sẽ cho qua AAB chưa ký; hàm trên đọc nội dung. Sửa một file sau khi ký thì `jarsigner` báo `SHA-256 digest error` và thoát mã 1. Và `-strict` thoát mã 4 vì chứng chỉ upload tự ký (trang man xếp `signerSelfSigned` vào mã 4), nên đừng bật nó cho upload key. Để biết ai đã ký, `keytool -printcert -jarfile app.aab` in chứng chỉ người ký cùng vân tay SHA-256, vai trò của `apksigner --print-certs` cho AAB; test so nó với vân tay keystore.
+Ba điều quan sát trên JDK 21, đều có test. Bundle **chưa ký** vẫn cho `jarsigner -verify` thoát mã 0 và in `jar is unsigned.`, nên CI chỉ đọc mã thoát sẽ cho qua AAB chưa ký; hàm trên đọc nội dung. Sửa một file sau khi ký thì `jarsigner` báo `SHA-256 digest error` và thoát mã 1. Và `-strict` thoát mã 4 vì chứng chỉ upload tự ký (trang man xếp `signerSelfSigned` vào mã 4), nên đừng bật nó cho upload key. Để biết ai đã ký, `keytool -printcert -jarfile app.aab` in chứng chỉ người ký cùng vân tay SHA-256, đóng vai trò như `apksigner --print-certs` cho AAB; test so kết quả này với vân tay keystore.
 
 Với APK tách theo ABI (`flutter build apk --split-per-abi`), Flutter cộng `hệ số ABI * 1000` vào `versionCode`: armeabi-v7a là 1, arm64-v8a là 2, x86_64 là 4 (đọc từ `FlutterPluginConstants.kt` của Flutter 3.47.4; x86 đã bị gỡ). AAB không bị ảnh hưởng.
 
 ## versionCode luôn tăng
 
-Flutter đọc `version: x.y.z+build` trong `pubspec.yaml`: `x.y.z` thành `versionName`, số sau dấu `+` thành `versionCode`; `--build-name` và `--build-number` ghi đè (docs.flutter.dev). Play đòi mỗi bản tải lên có `versionCode` lớn hơn bản trước, tối đa 2.100.000.000 (kiểm tại 11/2026). Play chỉ nhìn `versionCode`: `9.0.0+5` sau `1.4.2+37` vẫn bị từ chối dù phiên bản hiển thị tăng.
+Flutter đọc `version: x.y.z+build` trong `pubspec.yaml`: `x.y.z` trở thành `versionName`, số sau dấu `+` trở thành `versionCode`; `--build-name` và `--build-number` ghi đè (docs.flutter.dev). Play đòi mỗi bản tải lên có `versionCode` lớn hơn bản trước, tối đa 2.100.000.000 (kiểm tại 11/2026). Play chỉ nhìn `versionCode`: `9.0.0+5` sau `1.4.2+37` vẫn bị từ chối dù phiên bản hiển thị tăng.
 
 Lab gói quy tắc đó vào `AppVersion`:
 
@@ -305,7 +305,7 @@ Flutter 3.47.4 đặt `targetSdkVersion = 36` trong `FlutterExtension.kt` của 
 <ul>
 <li><strong>Bản release ký bằng khoá debug.</strong> Dấu hiệu: Play từ chối, hoặc vân tay SHA-256 của bản build không khớp upload key đã đăng ký. Nguyên nhân: giữ dòng <code>getByName("debug")</code> của template. Cách sửa: dùng <code>signingConfigs.getByName("release")</code> và cổng <code>verifyReleaseSigning</code>; <code>auditGradleSigning</code> bắt lỗi này trong test.</li>
 <li><strong>Commit nhầm keystore hoặc key.properties.</strong> Dấu hiệu: file nằm trong lịch sử git. Cách sửa: coi upload key là đã lộ, tạo khoá mới và xin reset, đổi mật khẩu trên CI, rồi mới dọn lịch sử. Phòng ngừa: <code>.gitignore</code> có <code>key.properties</code>, <code>*.jks</code>, <code>*.keystore</code>; <code>android/.gitignore</code> của template Flutter 3.47.4 đã có cả ba.</li>
-<li><strong>Đường dẫn Windows một dấu \.</strong> Dấu hiệu: chỉ <code>\u</code> mới gây lỗi <code>Malformed \uxxxx encoding</code>; các <code>\</code> khác bị nuốt âm thầm (<code>C:\Users\quan\keys.jks</code> thành <code>C:Usersquankeys.jks</code>) và task báo <code>Không thấy upload keystore</code>. Cách sửa: viết <code>C:\\Users\\quan\\upload-keystore.jks</code>.</li>
+<li><strong>Đường dẫn Windows một dấu \.</strong> Dấu hiệu: chỉ <code>\u</code> mới gây lỗi <code>Malformed \uxxxx encoding</code>; các <code>\</code> khác bị bỏ mất mà không báo lỗi (<code>C:\Users\quan\keys.jks</code> trở thành <code>C:Usersquankeys.jks</code>) và task báo <code>Không thấy upload keystore</code>. Cách sửa: viết <code>C:\\Users\\quan\\upload-keystore.jks</code>.</li>
 <li><strong>versionCode giảm hoặc trùng.</strong> Dấu hiệu: Play từ chối khi tải lên. Cách sửa: tăng số sau dấu <code>+</code>; chạy <code>check_version_code</code> trước khi build.</li>
 <li><strong>Tin mã thoát của <code>jarsigner -verify</code>.</strong> Dấu hiệu: CI xanh với AAB chưa ký. Cách sửa: đọc nội dung đầu ra như <code>verifyBundle</code>, và kiểm người ký bằng <code>keytool -printcert -jarfile</code>.</li>
 </ul>
@@ -327,7 +327,7 @@ dart run bin/check_version_code.dart pubspec.yaml --previous 0
 Đã kiểm với Dart 3.13.3 (Flutter 3.47.4) và JDK 21: `dart analyze` 0 issue, `dart test` 70 test xanh. Không có JDK thì 12 test chạy `keytool` bị bỏ qua kèm lý do, 57 test còn lại vẫn chạy. Các test chứng minh:
 
 - **Logic `versionCode`**: tách `x.y.z+build`, từ chối thiếu `+build` hoặc build ngoài miền, giảm và trùng bị chặn, hệ số ABI, mã thoát của lệnh kiểm.
-- **`key.properties`**: đọc đúng luật `java.util.Properties` (đối chiếu tay với JDK 21), đủ bốn khoá, file mẫu chỉ có chỗ giữ chỗ.
+- **`key.properties`**: đọc đúng luật `java.util.Properties` (đối chiếu tay với JDK 21), đủ bốn khoá, file mẫu chỉ chứa giá trị giữ chỗ.
 - **Gradle và `.gitignore`**: file của lab qua `auditGradleSigning`, mẫu hỏng bị báo; `git check-ignore` xác nhận ba mẫu chặn bí mật còn `key.properties.example` không bị chặn.
 - **JDK thật**: keystore thử RSA 2048 hết hạn sau 2033, PEM không chứa khoá riêng, AAB giả chưa ký, đã ký, bị sửa, và người ký khớp vân tay keystore. Keystore thử nằm trong thư mục tạm, mật khẩu ngẫu nhiên, bị xoá khi xong; `bin/demo_signing.dart` in vân tay SHA-256 của nó.
 

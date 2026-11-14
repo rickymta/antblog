@@ -1,0 +1,77 @@
+{
+ "file": "flutter-widget-cay-widget-hot-reload-man-hinh-bao-gia.md",
+ "edits": [
+  {
+   "old": "Cảm giác đó là thứ Flutter bán",
+   "new": "Cảm giác đó chính là điểm bán hàng của Flutter",
+   "reason": "'thứ Flutter bán' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "Bạn nên đã đọc",
+   "new": "Bạn nên đọc trước",
+   "reason": "'nên đã đọc' sai ngữ pháp",
+   "severity": "medium"
+  },
+  {
+   "old": "Một thứ trên màn hình Flutter do ba loại đối tượng phối hợp, mỗi loại một việc",
+   "new": "Mỗi thành phần trên màn hình Flutter do ba loại đối tượng phối hợp tạo nên, mỗi loại một việc",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "đều khác null, nó có ba nhánh",
+   "new": "đều khác null, hàm này có ba nhánh",
+   "reason": "Đại từ mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Cùng test file còn một ca đảo lại:",
+   "new": "Cùng file test còn một test case ngược lại:",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "có những thay đổi nó không thấy.",
+   "new": "có những thay đổi hot reload không thấy.",
+   "reason": "Đại từ mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Test của ca chính:",
+   "new": "Test case chính:",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "qua một bảng ca biên của chính công thức",
+   "new": "qua một bảng test case biên của chính công thức",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Một ca nữa chứng minh nhánh",
+   "new": "Một test case nữa chứng minh nhánh",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "`quote_screen_test.dart`, ca chính",
+   "new": "`quote_screen_test.dart`, test case chính",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "`quote_screen_test.dart`, bảng ca biên",
+   "new": "`quote_screen_test.dart`, bảng test case biên",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "trần. Nguyên nhân",
+   "new": "không bọc gì. Nguyên nhân",
+   "reason": "'trần' gượng",
+   "severity": "medium"
+  }
+ ]
+}

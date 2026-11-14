@@ -1,0 +1,16 @@
+{"file":"flutter-app-store-production-metadata-privacy-review-phased-release.md","edits":[
+{"old":"Lab có test cho đúng ca này.","new":"Lab có test cho đúng trường hợp này.","reason":"'ca' gượng; dùng từ tự nhiên","severity":"medium"},
+{"old":"Test dựng đúng ca của câu hỏi đầu bài.","new":"Test dựng đúng tình huống của câu hỏi đầu bài.","reason":"'ca' gượng","severity":"medium"},
+{"old":"Chunk `tRNS` cũng là trong suốt nên vòng lặp tìm nó.","new":"Chunk `tRNS` cũng cho biết ảnh có độ trong suốt nên vòng lặp tìm nó.","reason":"Câu lược động từ 'X là trong suốt'","severity":"medium"},
+{"old":"Lab mã hoá bảng của Apple và kiểm từng lý do:","new":"Lab viết bảng của Apple thành code và kiểm từng lý do:","reason":"'mã hoá' dễ hiểu thành encryption","severity":"medium"},
+{"old":"Precise hay Coarse Location thì `label-missing-location`; chiều ngược lại là `location-without-usage-description`.","new":"Precise hay Coarse Location thì checklist báo `label-missing-location`; chiều ngược lại báo `location-without-usage-description`.","reason":"Câu lược động từ","severity":"medium"},
+{"old":"dòng nguồn `app` mà manifest không có là `label-app-type-not-in-manifest`.","new":"dòng nguồn `app` mà manifest không có thì báo `label-app-type-not-in-manifest`.","reason":"Câu lược động từ","severity":"medium"},
+{"old":"và demo mode chỉ thay được khi Apple đồng ý trước.","new":"và chỉ được dùng demo mode thay cho máy chủ thật khi Apple đồng ý trước.","reason":"'chỉ thay được' thiếu tân ngữ, khó hiểu","severity":"medium"},
+{"old":"Reviewer có thể bấm xoá tài khoản (5.1.1(v)), nên server tự tạo lại tài khoản demo và notes nói điều đó.","new":"Người duyệt có thể bấm xoá tài khoản (5.1.1(v)), nên máy chủ tự tạo lại tài khoản demo và ghi chú nói rõ điều đó.","reason":"Thống nhất 'người duyệt', 'máy chủ', 'ghi chú' như phần còn lại của bài","severity":"medium"},
+{"old":"Apple nêu hai ca, sửa lỗi nghiêm trọng","new":"Apple nêu hai trường hợp: sửa lỗi nghiêm trọng","reason":"'ca' gượng; thêm dấu hai chấm cho rõ liệt kê","severity":"medium"},
+{"old":"Tuỳ chọn được viết cho bản cập nhật (bản đầu","new":"Tuỳ chọn này dành cho bản cập nhật (bản đầu","reason":"'được viết cho' là calque","severity":"medium"},
+{"old":"và khi app trở lại nó tới mọi người ngay.","new":"và khi app được bán lại thì bản cập nhật tới mọi người ngay.","reason":"Đại từ 'nó' mơ hồ","severity":"medium"},
+{"old":"nó không đưa ai về bản cũ.","new":"thao tác này không đưa ai về bản cũ.","reason":"Đại từ 'nó' mơ hồ","severity":"medium"},
+{"old":"rồi đòi checklist đỏ đúng mã lỗi:","new":"rồi đòi checklist báo đúng mã lỗi:","reason":"'đỏ' mơ hồ, dùng cách nói rõ nghĩa","severity":"low"},
+{"old":"reviewer hỏi vì sao dùng vị trí","new":"người duyệt hỏi vì sao dùng vị trí","reason":"Thống nhất 'người duyệt'","severity":"low"}
+]}

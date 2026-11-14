@@ -1,0 +1,17 @@
+{"file":"flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi.md","edits":[
+{"old":"lỗi ở chỗ app gặp hệ điều hành chỉ lộ ra trên thiết bị.","new":"lỗi ở chỗ app tương tác với hệ điều hành chỉ lộ ra trên thiết bị.","reason":"'app gặp hệ điều hành' gượng, thiếu nghĩa","severity":"medium"},
+{"old":"test hết giờ ở bước chờ trạng thái","new":"test hết thời gian chờ ở bước chờ trạng thái","reason":"'hết giờ' cho timeout","severity":"medium"},
+{"old":"Mục 5 bấm hộp thoại bằng Patrol.","new":"Mục 5 dùng Patrol để bấm hộp thoại.","reason":"Câu cụt, thiếu chủ thể","severity":"low"},
+{"old":"Nó đắt nhất nên chỉ giữ ở đó những gì tầng dưới không thấy được.","new":"Integration test đắt nhất nên chỉ giữ ở tầng này những gì tầng dưới không thấy được.","reason":"Tránh 'Nó' đầu câu; 'giữ ở đó' mơ hồ","severity":"medium"},
+{"old":"là tổng các `step` đã bơm, không phải đồng hồ treo tường.","new":"là tổng các `step` đã pump, không phải đồng hồ treo tường.","reason":"'bơm' là dịch từng chữ của pump","severity":"medium"},
+{"old":"Lab vẫn giữ cấu hình dưới đây như lớp phòng khi đổi adapter","new":"Lab vẫn giữ cấu hình dưới đây như lớp phòng thủ khi đổi adapter","reason":"'lớp phòng' cụt, tự ghép","severity":"medium"},
+{"old":"để lớp phòng không vô tình rộng ra:","new":"để lớp phòng thủ không vô tình rộng ra:","reason":"'lớp phòng' cụt, tự ghép","severity":"medium"},
+{"old":"plist đó trong `native-config/ios/` như lớp phòng.","new":"plist đó trong `native-config/ios/` như lớp phòng thủ.","reason":"'lớp phòng' cụt, tự ghép","severity":"medium"},
+{"old":"lớp phòng, tầng nền tảng","new":"lớp phòng thủ, tầng nền tảng","reason":"'lớp phòng' cụt, tự ghép","severity":"low"},
+{"old":"Mũi tên chỉ chiều của việc làm:","new":"Mũi tên chỉ chiều tác động:","reason":"'chiều của việc làm' là calque","severity":"medium"},
+{"old":"mọi ca biên (150 km, 503, mất kết nối)","new":"mọi trường hợp biên (150 km, 503, mất kết nối)","reason":"'ca' dễ nhầm với test case","severity":"medium"},
+{"old":"Chạy mọi commit thường quá đắt; hay chọn lịch đêm,","new":"Chạy ở mọi commit thường quá đắt; nên chọn lịch chạy ban đêm,","reason":"'hay chọn' mơ hồ, kiểu dịch máy (suy đoán ý: nên chọn)","severity":"medium"},
+{"old":"`pumpAndSettle` hết giờ; rời màn hình","new":"`pumpAndSettle` hết thời gian chờ; rời màn hình","reason":"'hết giờ' cho timeout","severity":"medium"},
+{"old":"đồng nghiệp muốn thêm test trên thiết bị cho ca \"nhập 150 km thì báo lỗi\"","new":"đồng nghiệp muốn thêm test trên thiết bị cho trường hợp \"nhập 150 km thì báo lỗi\"","reason":"'ca' dễ nhầm với test case","severity":"low"},
+{"old":"Ca đó kiểm tra đầu vào,","new":"Trường hợp đó kiểm tra đầu vào,","reason":"'ca' dễ nhầm với test case","severity":"low"}
+]}

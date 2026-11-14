@@ -63,6 +63,22 @@ describe('content:apply', () => {
     expect(bad.applied).toEqual([]);
   });
 
+  it('cho sửa câu chứa <code>…</code> nếu giữ nguyên cụm code, chặn nếu đổi chữ trong code', () => {
+    const html = '<p>Ta chạy <code>flutter analyze</code>. Nó báo gì?</p>';
+    const ok = applyEdits(html, [{ old: 'Ta chạy <code>flutter analyze</code>. Nó báo gì?', new: 'Ta chạy <code>flutter analyze</code>. Lệnh này báo gì?' }]);
+    expect(ok.rejected).toEqual([]);
+    expect(ok.output).toBe('<p>Ta chạy <code>flutter analyze</code>. Lệnh này báo gì?</p>');
+    const bad = applyEdits(html, [{ old: '<code>flutter analyze</code>', new: '<code>dart analyze</code>' }]);
+    expect(bad.applied).toEqual([]);
+  });
+
+  it('cho sửa văn xuôi nằm giữa hai khối code', () => {
+    const md = ['```dart', 'final a = 1;', '```', '', 'Thân hàm async thành lỗi của Future.', '', '```dart', 'final b = 2;', '```'].join('\n');
+    const r = applyEdits(md, [{ old: 'Thân hàm async thành lỗi', new: 'Thân hàm async trở thành lỗi' }]);
+    expect(r.fileError).toBeUndefined();
+    expect(r.output).toContain('Thân hàm async trở thành lỗi của Future.');
+  });
+
   it('huỷ cả tệp nếu title bị làm rỗng; giữ CRLF khi áp', () => {
     expect(applyEdits(md, [{ old: '"Năm test đầu tiên cho cước"', new: '""' }]).fileError).toBe('frontmatter title không hợp lệ');
     const crlf = md.replace(/\n/g, '\r\n');

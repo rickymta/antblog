@@ -120,9 +120,9 @@ Future<ProviderContainer> pumpApp(
 }
 ```
 
-Test không cần widget dùng `ProviderContainer.test(overrides: [...])`, tự `dispose` cuối mỗi test.
+Test không cần widget thì dùng `ProviderContainer.test(overrides: [...])`; container tự `dispose` cuối mỗi test.
 
-Một vài điều khác tài liệu cũ, đã đối chiếu với `CHANGELOG.md` và mã nguồn của `riverpod` 3.5.0:
+Một vài điểm khác so với tài liệu cũ, đã đối chiếu với `CHANGELOG.md` và mã nguồn của `riverpod` 3.5.0:
 
 | Cách viết cũ (Riverpod 2) | Riverpod 3.5.0 |
 |---|---|
@@ -235,7 +235,7 @@ Ba cách đọc provider khác nhau ở việc có đăng ký theo dõi hay khô
     final placing = ref.watch(placeTripProvider).isLoading;
 ```
 
-Hai `ref.listen` làm việc phụ: SnackBar khi báo giá lỗi, mở màn hình chuyến khi đặt xong. Đừng gọi `showSnackBar` thẳng trong `build`, vì `build` có thể chạy lại nhiều lần. Callback của `listen` chỉ chạy khi state đổi, không chạy ở lần dựng đầu (test `ref.listen không chạy ở lần build đầu, chỉ khi state đổi`).
+Hai `ref.listen` xử lý side effect: SnackBar khi báo giá lỗi, mở màn hình chuyến khi đặt xong. Đừng gọi `showSnackBar` thẳng trong `build`, vì `build` có thể chạy lại nhiều lần. Callback của `listen` chỉ chạy khi state đổi, không chạy ở lần dựng đầu (test `ref.listen không chạy ở lần build đầu, chỉ khi state đổi`).
 
 `ref.watch` ở gốc `build` đăng ký theo dõi: state đổi là widget dựng lại. `select` thu hẹp phạm vi đó:
 
@@ -412,7 +412,7 @@ final tripByIdProvider = FutureProvider.autoDispose.family<Trip, String>((
 
 Provider thường giữ state sau khi hết người nghe. `ref.keepAlive()` giữ state của provider auto-dispose. `ref.onDispose` chạy mỗi lần state bị bỏ, kể cả khi provider tính lại vì nguồn đổi, nên dùng được để huỷ request đang dở hoặc đóng stream. Rời `TripScreen` làm `tripByIdProvider('T-0001')` biến mất (test `rời màn hình chuyến...`).
 
-Disposal gài một bẫy cho code sau `await`. Khách bấm Đặt chuyến rồi rời màn hình: `placeTripProvider` bị bỏ khi `placeTrip` còn chạy, và gán `state` lúc đó ném lỗi. `ref.mounted` cho biết provider còn sống, nên `place` có dòng `if (!ref.mounted) return;` sau `await`. Trong method của `Notifier`, `ref` luôn là của lần dựng hiện tại nên chỉ dispose mới làm nó `false`; `ref` bắt trong thân provider dạng hàm thì là của lần dựng cũ và trả `false` sau khi tính lại (test `ref của provider dạng hàm...`). Test dựng bản `_UnsafePlaceTripNotifier` bỏ dòng ấy: nó ném một `Exception` có thông điệp `after it has been disposed`, còn bản thật kết thúc êm.
+Việc dispose gài một cái bẫy cho code sau `await`. Khách bấm Đặt chuyến rồi rời màn hình: `placeTripProvider` bị bỏ khi `placeTrip` còn chạy, và gán `state` lúc đó ném lỗi. `ref.mounted` cho biết provider còn sống, nên `place` có dòng `if (!ref.mounted) return;` sau `await`. Trong method của `Notifier`, `ref` luôn là của lần dựng hiện tại nên chỉ dispose mới đổi nó thành `false`; `ref` bắt trong thân provider dạng hàm thì là của lần dựng cũ và trả `false` sau khi tính lại (test `ref của provider dạng hàm...`). Test dựng bản `_UnsafePlaceTripNotifier` bỏ dòng ấy: nó ném một `Exception` có thông điệp `after it has been disposed`, còn bản thật kết thúc êm.
 
 ## 6. Retry mặc định của Riverpod 3
 
@@ -420,7 +420,7 @@ Hàm `ProviderContainer.defaultRetry` quyết định mọi provider lỗi sẽ 
 
 - Tối đa 10 lần thử lại, mỗi lần chờ `200 ms × 2^lần`, trần 6400 ms. Tổng 11 lần gọi, 38,2 giây.
 - Thử lại mọi lỗi trừ `Error` (như `StateError`, `ArgumentError`) và `ProviderException`: hai loại này không bao giờ được thử lại, còn một lỗi bất kỳ khác, kể cả `throw 'boom'`, thì có. Theo quy ước của Dart, `Error` dành cho lỗi lập trình.
-- Trong lúc chờ, state là `AsyncLoading` mang lỗi cũ và `retrying` bằng `true`; hết lượt mới thành `AsyncError`.
+- Trong lúc chờ, state là `AsyncLoading` mang lỗi cũ và `retrying` bằng `true`; hết lượt mới chuyển thành `AsyncError`.
 
 Test đo từng mốc bằng đồng hồ giả, nên 38 giây chạy trong vài mili giây:
 

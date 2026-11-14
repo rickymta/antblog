@@ -1,0 +1,21 @@
+{"file":"dart-bien-kieu-du-lieu-null-safety-tinh-cuoc.md","edits":[
+{"old":"Có bộ test ca biên chạy bằng dart test.","new":"Có bộ test case biên chạy bằng dart test.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Nó nhờ compiler suy ra kiểu từ giá trị khởi tạo, rồi kiểu đó cố định.","new":"Từ khoá này nhờ compiler suy ra kiểu từ giá trị khởi tạo, rồi kiểu đó cố định.","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"như `Quote` có toàn trường `final` và `withDriver` trả bản sao.","new":"như `Quote` có tất cả trường là `final` và `withDriver` trả về bản sao.","reason":"'toàn trường' tự ghép, gượng","severity":"medium"},
+{"old":"các hằng giá ở đầu `fare.dart`","new":"các hằng giá khai báo ở đầu `fare.dart`","reason":"Làm rõ cụm danh từ","severity":"low"},
+{"old":"là danh sách bất biến sâu;","new":"là danh sách bất biến tới từng phần tử;","reason":"'bất biến sâu' là calque của deeply immutable","severity":"medium"},
+{"old":"khi biến không bị gán lại; nó không kiểm `const`.","new":"khi biến không bị gán lại; lint này không kiểm `const`.","reason":"Tránh đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"Compiler từ chối cho bạn gọi `.length` trên `String?` cho tới khi chắc chắn nó không null.","new":"Compiler không cho bạn gọi `.length` trên `String?` cho tới khi nó chắc chắn giá trị đó không null.","reason":"'từ chối cho' gượng; 'nó' mơ hồ về chủ thể","severity":"medium"},
+{"old":"Làm tròn riêng phần vượt bằng `double` cho 4, và cước thành 12.004 thay vì 12.005:","new":"Làm tròn riêng phần vượt bằng `double` ra 4, nên cước thành 12.004 thay vì 12.005:","reason":"Câu thiếu quan hệ nhân quả, 'cho 4' lược động từ","severity":"low"},
+{"old":"Hàm nhỏ sau trong test minh hoạ promotion:","new":"Hàm nhỏ dưới đây trong test minh hoạ promotion:","reason":"Trật tự từ kiểu tiếng Anh, thiếu 'đây'","severity":"low"},
+{"old":"## Hàm tính cước và các ca biên","new":"## Hàm tính cước và các test case biên","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"(nửa làm tròn ra xa số 0)","new":"(điểm giữa làm tròn ra xa số 0)","reason":"Câu lược động từ, thống nhất với phần trên","severity":"medium"},
+{"old":"Mỗi mét vượt giá 4,5 đồng;","new":"Mỗi mét vượt tính 4,5 đồng;","reason":"'giá' làm động từ gượng","severity":"low"},
+{"old":"bảo đảm đi 1 km thì phần vượt bằng 0 thay vì âm.","new":"bảo đảm với quãng đường 1 km thì phần vượt bằng 0 thay vì số âm.","reason":"'đi 1 km' khó hiểu","severity":"medium"},
+{"old":"dấu chấm được viết trước chữ số nào còn lại số chữ số chia hết cho 3. Đếm từ đầu sẽ đặt sai chỗ với số 4, 5 chữ số.","new":"dấu chấm được viết trước chữ số mà số chữ số còn lại chia hết cho 3. Đếm từ đầu sẽ đặt sai chỗ với số có 4 hoặc 5 chữ số.","reason":"Câu thiếu quan hệ từ, khó đọc","severity":"medium"},
+{"old":"Các ca biên trong `test/fare_test.dart`:","new":"Các test case biên trong `test/fare_test.dart`:","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"| Ca thông thường, khớp Hình 1 |","new":"| Test case thông thường, khớp Hình 1 |","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Để chắc test NaN có giá trị,","new":"Để chắc chắn test NaN có tác dụng,","reason":"'có giá trị' dịch sát từ valuable","severity":"medium"},
+{"old":"Gặp kiểu khó, người mới hay thả `dynamic` cho hết lỗi.","new":"Khi vướng lỗi về kiểu, người mới hay thả `dynamic` để compiler hết báo lỗi.","reason":"Câu cụt, 'gặp kiểu khó' mơ hồ","severity":"medium"},
+{"old":"| Ca biên của cước (0,","new":"| Test case biên của cước (0,","reason":"Thống nhất 'test case'","severity":"low"}
+]}

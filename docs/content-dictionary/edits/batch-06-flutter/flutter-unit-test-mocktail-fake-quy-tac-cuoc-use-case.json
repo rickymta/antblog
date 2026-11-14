@@ -1,0 +1,137 @@
+{
+"file": "flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case.md",
+"edits": [
+{
+"old": "Chọn ca cho quy tắc cước.",
+"new": "Chọn test case cho quy tắc cước.",
+"reason": "Thống nhất 'test case', bỏ 'ca'",
+"severity": "medium"
+},
+{
+"old": "Bộ test cước chỉ có sáu ca:",
+"new": "Bộ test cước chỉ có sáu test case:",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "lọt qua bộ ca biên.",
+"new": "lọt qua bộ test case biên.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Việc khó duy nhất là chọn ca, vì",
+"new": "Việc khó duy nhất là chọn test case, vì",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "ba đường ranh với hai ca biên mỗi đường",
+"new": "ba đường ranh với hai test case biên mỗi đường",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Mỗi ca là một dòng dữ liệu kèm loại ca và kết quả kỳ vọng.",
+"new": "Mỗi test case là một dòng dữ liệu kèm loại test case và kết quả kỳ vọng.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Ca nào bắt được lỗi nào?",
+"new": "Test case nào bắt được lỗi nào?",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Ca kiểm yêu cầu đúng `ArgumentError` nên vẫn đỏ;",
+"new": "Test case kiểm yêu cầu đúng `ArgumentError` nên vẫn đỏ;",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Còn một cách chọn ca nữa: không chọn.",
+"new": "Còn một cách chọn test case nữa: không chọn.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Oracle không thay được ca biên:",
+"new": "Oracle không thay được test case biên:",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Vì thế các ca biên có kỳ vọng tính tay.",
+"new": "Vì thế các test case biên có kỳ vọng tính tay.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Viết tay từng ca thì thế nào cũng quên",
+"new": "Viết tay từng test case thì thế nào cũng quên",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "nên ca \"ngoài miền không chạm repository\" xanh thật",
+"new": "nên test case \"ngoài miền không chạm repository\" xanh thật",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Một `Mock` trống dùng làm dummy sẽ im lặng cho qua với phương thức `void` như `booked`,",
+"new": "Một `Mock` trống dùng làm dummy sẽ cho qua mà không báo gì với phương thức `void` như `booked`,",
+"reason": "'im lặng' là calque của 'silently'",
+"severity": "medium"
+},
+{
+"old": "Với phương thức `void` thì im lặng.",
+"new": "Với phương thức `void` thì không báo gì.",
+"reason": "Calque của 'silently'",
+"severity": "low"
+},
+{
+"old": "Ta viết đúng ca thiếu.",
+"new": "Ta viết đúng test case thiếu khai báo đó.",
+"reason": "Thống nhất 'test case'; câu cụt",
+"severity": "medium"
+},
+{
+"old": "fake không luôn thắng:",
+"new": "fake không phải lúc nào cũng thắng:",
+"reason": "Calque của 'not always'",
+"severity": "medium"
+},
+{
+"old": "tính tay từ bảng giá cho ca biên,",
+"new": "tính tay từ bảng giá cho test case biên,",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Chỉ có ca giữa phân vùng.",
+"new": "Chỉ có test case nằm giữa phân vùng.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "và một ca NaN, vì NaN",
+"new": "và một test case NaN, vì NaN",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "kiểm cước ở mọi ca đại diện, ca biên và từng mét",
+"new": "kiểm cước ở mọi test case đại diện, test case biên và từng mét",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "thân hàm <code>async</code> thành lỗi của <code>Future</code>",
+"new": "thân hàm <code>async</code> trở thành lỗi của <code>Future</code>",
+"reason": "Thiếu 'trở' trong 'X thành Y'",
+"severity": "low"
+}
+]
+}

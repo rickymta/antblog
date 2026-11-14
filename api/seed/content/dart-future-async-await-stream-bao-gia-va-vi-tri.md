@@ -114,9 +114,9 @@ So với C#: .NET có thread pool nên phần sau `await` có thể chạy ở l
 `Future<T>` là **giá trị chưa có**. Nó bắt đầu ở trạng thái *pending* và kết thúc đúng một lần, với một giá trị hoặc một lỗi. Có hai cách chờ:
 
 - `then` đăng ký callback chạy khi có kết quả, nối chuỗi được.
-- `await` (trong hàm `async`) viết cùng việc đó như mã tuần tự. Lỗi của Future thành exception ngay tại dòng `await`, nên `try/catch/finally` dùng như mã đồng bộ.
+- `await` (trong hàm `async`) viết cùng việc đó như mã tuần tự. Lỗi của Future trở thành exception ngay tại dòng `await`, nên `try/catch/finally` dùng như mã đồng bộ.
 
-`QuoteService` của lab trả lời sau một độ trễ do constructor tiêm vào, mặc định 300 ms, để test chỉnh nó mà không cần chờ thật.
+`QuoteService` của lab trả lời sau một độ trễ được inject qua constructor, mặc định 300 ms, để test chỉnh độ trễ đó mà không cần chờ thật.
 
 ### quote_service.dart · 05-async-stream/lib/quote_service.dart (dòng 1 đến 48)
 
@@ -173,7 +173,7 @@ class QuoteService {
 
 Điểm cần để ý:
 
-- Hàm `async` **luôn trả Future**. `return` thành Future có giá trị; `throw` thành Future lỗi, không ném ra ngay ở chỗ gọi.
+- Hàm `async` **luôn trả Future**. `return` cho ra Future có giá trị; `throw` cho ra Future lỗi, không ném ra ngay ở chỗ gọi.
 - `calculateFareVnd` ném `ArgumentError` khi ngoài miền 0 đến 100 km (lỗi lập trình). `fetchFareVnd` đổi nó thành `QuoteException`, lỗi nghiệp vụ mà màn hình biết hiển thị.
 - Cước tính theo số nguyên mét để 2,001 km luôn ra 12.005 đồng; dùng thẳng `double` sẽ ra 12.004 vì sai số dấu phẩy động.
 
@@ -196,11 +196,11 @@ Phía gọi dùng `then` hoặc `await`, và bắt lỗi đúng kiểu:
 
 Có cả `await` trong biểu thức lẫn chuỗi `then`. Khối `try` chỉ bắt `QuoteException`, đúng kiểu ta biết xử lý.
 
-Nếu một Future lỗi mà **không ai lắng nghe** (quên `await`), lỗi rơi xuống zone gốc như lỗi không bắt: chương trình console dừng, còn app Flutter chuyển nó tới handler lỗi toàn cục (`PlatformDispatcher.onError`), thường chỉ thành một dòng log dễ bị bỏ qua.
+Nếu một Future lỗi mà **không ai lắng nghe** (quên `await`), lỗi rơi xuống zone gốc như lỗi không bắt: chương trình console dừng, còn app Flutter chuyển nó tới handler lỗi toàn cục (`PlatformDispatcher.onError`), thường chỉ để lại một dòng log dễ bị bỏ qua.
 
 ## Timeout và gọi song song
 
-Mạng di động hay chậm, ta không muốn khách nhìn vòng quay vô hạn nên đặt hạn chờ:
+Mạng di động hay chậm, ta không muốn khách nhìn vòng quay vô hạn nên đặt thời gian chờ tối đa:
 
 ### quote_service.dart · 05-async-stream/lib/quote_service.dart (dòng 50 đến 79)
 
@@ -239,11 +239,11 @@ Future<int> fetchFromFastest(List<QuoteService> services, double distanceKm) {
 
 Ba hàm, ba hành vi:
 
-- `fetchWithTimeout`: `.timeout(timeout, onTimeout: ...)` trả một Future **mới**. Nếu Future gốc chưa xong khi hết hạn, Future mới hoàn tất bằng kết quả của `onTimeout`, ở đây là ném `TimeoutException`.
-- `fetchFaresInParallel`: `Future.wait` trả kết quả **đúng thứ tự đầu vào**, bất kể cái nào xong trước. Ba quãng đường tốn khoảng 300 ms thay vì 900 ms. Nếu có Future lỗi, mặc định nó chờ các cái còn lại xong rồi báo lỗi xảy ra sớm nhất theo thời gian (không theo thứ tự danh sách); `eagerError: true` báo ngay khi có lỗi.
+- `fetchWithTimeout`: `.timeout(timeout, onTimeout: ...)` trả một Future **mới**. Nếu Future gốc chưa xong khi hết thời gian chờ, Future mới hoàn tất bằng kết quả của `onTimeout`, ở đây là ném `TimeoutException`.
+- `fetchFaresInParallel`: `Future.wait` trả kết quả **đúng thứ tự đầu vào**, bất kể cái nào xong trước. Ba quãng đường tốn khoảng 300 ms thay vì 900 ms. Nếu có Future lỗi, mặc định hàm này chờ các Future còn lại xong rồi báo lỗi xảy ra sớm nhất theo thời gian (không theo thứ tự danh sách); `eagerError: true` báo ngay khi có lỗi.
 - `fetchFromFastest`: `Future.any` lấy Future **hoàn tất đầu tiên**, thành công hay lỗi.
 
-Điểm quan trọng nhất: **timeout không huỷ việc đang chạy**. Future không có khái niệm huỷ. Hết hạn nghĩa là *ta thôi chờ*; dịch vụ vẫn xử lý tiếp và kết quả bị bỏ. Với báo giá thì vô hại, còn với lệnh tạo chuyến hay thanh toán, server có thể đã thực hiện thật (idempotency key và tra lại trạng thái sẽ học ở bài 20 và 46). Hình 2 là dòng thời gian của ca này.
+Điểm quan trọng nhất: **timeout không huỷ việc đang chạy**. Future không có khái niệm huỷ. Hết thời gian chờ nghĩa là *ta thôi chờ*; dịch vụ vẫn xử lý tiếp và kết quả bị bỏ. Với báo giá thì vô hại, còn với lệnh tạo chuyến hay thanh toán, server có thể đã thực hiện thật (idempotency key và tra lại trạng thái sẽ học ở bài 20 và 46). Hình 2 là dòng thời gian của trường hợp này.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -258,13 +258,13 @@ Ba hàm, ba hành vi:
 <text x="560" y="166" class="t-small">25500 bị bỏ</text>
 <path d="M60 230 L840 230" class="f-none s-line" stroke-width="2" marker-end="url(#fl05-1-a)"/>
 <text x="110" y="256" class="t-mono">0 ms</text><text x="283" y="256" class="t-mono">100 ms</text><text x="670" y="256" class="t-mono">300 ms</text>
-<text x="60" y="284" class="t-small">Hết hạn nghĩa là thôi chờ, không phải huỷ việc đang chạy.</text>
+<text x="60" y="284" class="t-small">Hết thời gian chờ nghĩa là thôi chờ, không phải huỷ việc đang chạy.</text>
 </svg>
 </div>
 <figcaption>Hình 2. Timeout 100 ms trên một lời gọi mất 300 ms: nhánh timeout (cam) xảy ra tại 100 ms, còn dịch vụ vẫn chạy tới 300 ms.</figcaption>
 </figure>
 
-Test mà không ngồi chờ bằng `package:fake_async`: trong `fakeAsync((async) { ... })`, `Timer` và `Future.delayed` chạy theo **đồng hồ ảo**, còn `async.elapse(...)` tua đồng hồ đó.
+Ta test mà không phải ngồi chờ nhờ `package:fake_async`: trong `fakeAsync((async) { ... })`, `Timer` và `Future.delayed` chạy theo **đồng hồ ảo**, còn `async.elapse(...)` tua đồng hồ đó.
 
 `Outcome` gom kết quả hoặc lỗi của một Future để kiểm tra sau mỗi lần tua:
 
@@ -332,11 +332,11 @@ class Outcome<T> {
     });
 ```
 
-Test đầu: tại 299 ms chưa có kết quả, tại 300 ms có 25.500. Test sau: hết hạn 100 ms thì có `TimeoutException`, `completedCalls` vẫn 0, rồi thành 1 sau 200 ms ảo, tức việc vẫn chạy. Cả hai chỉ tốn vài mili giây thật.
+Test đầu: tại 299 ms chưa có kết quả, tại 300 ms có 25.500. Test sau: hết thời gian chờ 100 ms thì có `TimeoutException`, `completedCalls` vẫn 0, rồi thành 1 sau 200 ms ảo, tức việc vẫn chạy. Cả hai chỉ tốn vài mili giây thật.
 
 ## Stream: lắng nghe vị trí tài xế
 
-Báo giá là một giá trị, một lần. Vị trí tài xế là **một dãy giá trị theo thời gian**, việc của `Stream<T>`. Ta đăng ký bằng `listen` và nhận lại `StreamSubscription` để `pause`, `resume` hay `cancel`. Có hai loại:
+Báo giá là một giá trị, một lần. Vị trí tài xế là **một dãy giá trị theo thời gian**, và đó là việc của `Stream<T>`. Ta đăng ký bằng `listen` và nhận lại `StreamSubscription` để `pause`, `resume` hay `cancel`. Có hai loại:
 
 - **Single-subscription** (mặc định): chỉ một người nghe, nghe lần hai ném `StateError`. Hợp với dữ liệu "của một chủ", như vị trí tài xế trên một màn hình.
 - **Broadcast**: nhiều người nghe cùng lúc, nhưng ai nghe muộn **bỏ lỡ** các sự kiện đã phát.
@@ -400,7 +400,7 @@ class DriverLocationFeed {
 }
 ```
 
-Timer **chỉ bắt đầu khi có người nghe** và **dừng khi huỷ** (`onCancel`); nguồn không biết người nghe đã đi sẽ chạy mãi và rò rỉ. Với stream mặc định, `onPause` dừng timer và `onResume` cho chạy lại: đây là **backpressure** sơ lược, người nghe bận thì nguồn ngừng đẩy thay vì dồn sự kiện vào bộ nhớ (broadcast không có cơ chế này). Đẩy xong điểm cuối ta `close()` để người nghe biết dãy đã hết.
+Timer **chỉ bắt đầu khi có người nghe** và **dừng khi huỷ** (`onCancel`); nguồn không biết người nghe đã rời đi sẽ chạy mãi và rò rỉ. Với stream mặc định, `onPause` dừng timer và `onResume` cho chạy lại: đây là **backpressure** sơ lược, người nghe bận thì nguồn ngừng đẩy thay vì dồn sự kiện vào bộ nhớ (broadcast không có cơ chế này). Đẩy xong điểm cuối ta `close()` để người nghe biết dãy đã hết.
 
 Để chỉ cập nhật bản đồ khi tài xế dịch chuyển đủ xa, `movedMoreThan` biến đổi stream. Phần lõi là `onlyMoved`, một **generator `async*`** dùng `await for`:
 
@@ -420,9 +420,9 @@ Stream<Position> onlyMoved(Stream<Position> source, double meters) async* {
 }
 ```
 
-`await for` chờ lần lượt từng sự kiện của `source`. Biến `last` nằm trong thân hàm nên **mỗi lần listen có trạng thái riêng**; đặt nó ngoài hàm và dùng `where` thì hai người nghe giẫm lên nhau. Khoảng cách tính bằng `distanceMeters` (equirectangular xấp xỉ, đủ cho quãng ngắn). Test kiểm bằng `expectLater(stream, emitsInOrder([p0, p3, p5, emitsDone]))`: với ngưỡng 50 m, ba trong sáu điểm đi qua.
+`await for` chờ lần lượt từng sự kiện của `source`. Biến `last` nằm trong thân hàm nên **mỗi lần listen có trạng thái riêng**; đặt nó ngoài hàm và dùng `where` thì hai người nghe giẫm lên nhau. Khoảng cách tính bằng `distanceMeters` (công thức xấp xỉ equirectangular, đủ cho quãng ngắn). Test kiểm bằng `expectLater(stream, emitsInOrder([p0, p3, p5, emitsDone]))`: với ngưỡng 50 m, ba trong sáu điểm đi qua.
 
-Phía gọi, và chu kỳ sống của subscription ở Hình 3:
+Phía gọi như sau, còn chu kỳ sống của subscription nằm ở Hình 3:
 
 ### main.dart · 05-async-stream/bin/main.dart (dòng 43 đến 67)
 
@@ -554,7 +554,7 @@ Future<({int result, int ticks})> measureTicks(
 
 Điều cần nhớ:
 
-- Isolate mới **không chia sẻ bộ nhớ** với isolate gọi. Closure và dữ liệu nó bắt được **copy** sang isolate mới; kết quả trả về qua `Isolate.exit` nên được chuyển sang isolate gọi **không copy**. Không có data race, nhưng gửi đối tượng lớn vào có giá, và closure có thể vô tình bắt nhiều trạng thái hơn ta tưởng. Nên chỉ bắt giá trị đơn giản (số, chuỗi, danh sách), không bắt đối tượng giữ tài nguyên UI như `BuildContext`.
+- Isolate mới **không chia sẻ bộ nhớ** với isolate gọi. Closure và dữ liệu nó bắt được **copy** sang isolate mới; kết quả trả về qua `Isolate.exit` nên được chuyển sang isolate gọi **không copy**. Không có data race, nhưng gửi đối tượng lớn vào isolate cũng tốn chi phí, và closure có thể vô tình bắt nhiều trạng thái hơn ta tưởng. Nên chỉ bắt giá trị đơn giản (số, chuỗi, danh sách), không bắt đối tượng giữ tài nguyên UI như `BuildContext`.
 - Lỗi ném trong isolate được **ném lại ở phía gọi**: `sumInIsolate(-1)` nhận `ArgumentError` như lời gọi thường.
 - Tạo isolate có chi phí cố định cỡ mili giây, nên đừng dùng cho việc nhỏ.
 
@@ -566,7 +566,7 @@ Khi chạy `bin/main.dart`, `measureTicks` đếm số lần timer 20 ms kịp c
 <span class="tkh-callout-title">Năm lỗi hay gặp với Future và Stream</span>
 <p><strong>1. Quên <code>await</code>.</strong> Dấu hiệu: log in <code>Instance of 'Future&lt;int&gt;'</code>, test kiểm tra trước khi dữ liệu về, lỗi biến mất vào zone gốc. Sửa: thêm <code>await</code>; cố ý không chờ thì bọc <code>unawaited(...)</code>, và bật lint <code>unawaited_futures</code>.</p>
 <p><strong>2. Quên <code>cancel</code> subscription.</strong> Dấu hiệu: màn hình đã đóng vẫn nhận vị trí, lỗi <code>setState</code> sau khi widget bị huỷ, pin tụt vì timer chạy mãi. Sửa: lưu <code>StreamSubscription</code> và <code>cancel</code> khi xong (ở bài 10 là trong <code>dispose</code>), hoặc dùng <code>await for</code> kèm <code>take</code>; test bằng <code>pendingTimers</code>.</p>
-<p><strong>3. Dùng broadcast khi không cần.</strong> Dấu hiệu: thêm <code>asBroadcastStream()</code> chỉ để hết <code>StateError</code> "already been listened to", rồi người nghe muộn lặng lẽ mất sự kiện đầu. Sửa: giữ single-subscription và tìm xem vì sao lại nghe hai lần.</p>
+<p><strong>3. Dùng broadcast khi không cần.</strong> Dấu hiệu: thêm <code>asBroadcastStream()</code> chỉ để hết <code>StateError</code> "already been listened to", rồi người nghe muộn mất sự kiện đầu mà không có thông báo nào. Sửa: giữ single-subscription và tìm xem vì sao lại nghe hai lần.</p>
 <p><strong>4. <code>catch (e)</code> hoặc <code>on Exception</code> nuốt lỗi.</strong> <code>ArgumentError</code> là <code>Error</code>, không phải <code>Exception</code>, nên <code>on Exception</code> bỏ lọt nó; <code>catch (_) {}</code> rỗng thì nuốt tất cả và có thể trả cước 0 đồng như chuyến miễn phí. Sửa: bắt đúng kiểu (<code>on QuoteException</code>) và xử lý có nghĩa, không thì để lỗi đi tiếp.</p>
 <p><strong>5. <code>async</code> trong constructor.</strong> Constructor không thể <code>async</code>, nên người ta gọi hàm bất đồng bộ không <code>await</code> trong thân nó. Dấu hiệu: đối tượng được dùng khi dữ liệu chưa sẵn sàng, lỗi lúc có lúc không. Sửa: hàm static trả Future (<code>static Future&lt;Foo&gt; create()</code>) hoặc bước <code>load()</code> mà người gọi phải <code>await</code>.</p>
 </div>
@@ -583,7 +583,7 @@ dart test
 dart run bin/main.dart
 ```
 
-Hoặc chạy cả bài 01 đến 06 bằng `node examples/toi-noi-flutter/verify-01-06.mjs`. Đã kiểm với Dart 3.13.3 (Flutter 3.47.4): `dart analyze` không issue, `dart test` 34 test xanh, `dart run` xong trong vài giây. Mức: **Kiểm chứng tự động**, không cần thiết bị.
+Hoặc chạy cả bài 01 đến 06 bằng `node examples/toi-noi-flutter/verify-01-06.mjs`. Đã kiểm với Dart 3.13.3 (Flutter 3.47.4): `dart analyze` không issue, `dart test` 34 test xanh, `dart run` xong trong vài giây. Mức kiểm chứng: **kiểm chứng tự động**, không cần thiết bị.
 
 | Nhóm test | Chứng minh điều gì |
 | --- | --- |
@@ -605,7 +605,7 @@ Hoặc chạy cả bài 01 đến 06 bằng `node examples/toi-noi-flutter/verif
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Khoảng 900 ms ảo: mỗi <code>await</code> chờ xong rồi mới gọi lời gọi kế, nên ba độ trễ cộng dồn. <code>Future.wait</code> khởi động cả ba ngay nên chỉ tốn bằng độ trễ dài nhất.</p>
 <p><strong>2.</strong> Số sự kiện đứng yên vẫn đúng khi timer còn chạy ngầm mà controller bỏ qua sự kiện, tức vẫn rò rỉ. <code>pendingTimers</code> rỗng chứng minh <code>onCancel</code> thực sự dừng nguồn.</p>
-<p><strong>3.</strong> Không. Lời gọi báo giá chủ yếu chờ I/O, không tốn CPU, và <code>await</code> đã không chặn luồng. Isolate chỉ thêm chi phí tạo isolate và gửi dữ liệu; nó dành cho việc tốn CPU.</p>
+<p><strong>3.</strong> Không. Lời gọi báo giá chủ yếu chờ I/O, không tốn CPU, và <code>await</code> đã không chặn luồng. Isolate chỉ thêm chi phí khởi tạo và gửi dữ liệu; nó dành cho việc tốn CPU.</p>
 </details>
 
 Bài trước: [Collections, generics và extension](/articles/dart-collections-generics-extension-danh-sach-chuyen). Bài tiếp: [Package, pubspec, lint và test](/articles/dart-package-pubspec-lint-test-toi-noi-core).

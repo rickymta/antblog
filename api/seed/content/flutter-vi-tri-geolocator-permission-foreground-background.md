@@ -12,11 +12,11 @@ Một khách mở Tới Nơi lần đầu, chạm vào ô điểm đón, và app
 
 App tài xế còn khó hơn: vị trí phải tiếp tục được gửi khi tài xế chuyển sang app dẫn đường. Bài này dựng lớp vị trí cho cả hai app: khai báo native, lớp bọc `LocationSource`, máy trạng thái quyền, xin quyền sau khi giải thích và `getPositionStream` theo vai trò.
 
-Đây là bài 35 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 34 về bản đồ flutter_map](/articles/flutter-ban-do-flutter-map-marker-polyline-chon-diem-don) trước: ghim điểm đón ở đó là nơi vị trí hiện tại đổ vào. Lab dùng Flutter 3.47.4, `geolocator` 14.1.2 và `permission_handler` 13.0.2.
+Đây là bài 35 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 34 về bản đồ flutter_map](/articles/flutter-ban-do-flutter-map-marker-polyline-chon-diem-don) trước: ghim điểm đón ở đó là nơi nhận vị trí hiện tại. Lab dùng Flutter 3.47.4, `geolocator` 14.1.2 và `permission_handler` 13.0.2.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Điều bài này chưa kiểm chứng</span>
-<p>Máy viết bài không có Android SDK, Xcode đầy đủ, <code>adb</code> hay <code>simctl</code>. Hộp thoại quyền thật, Cài đặt, foreground service và vị trí giả lập <strong>chưa chạy ở đâu cả</strong>; chỉ có <code>flutter test</code> chạy được. Nhận định về plugin lấy từ mã nguồn, về hệ điều hành từ developer.android.com và developer.apple.com (kiểm tại 11/2026).</p>
+<p>Máy viết bài không có Android SDK, Xcode đầy đủ, <code>adb</code> hay <code>simctl</code>. Hộp thoại quyền thật, Cài đặt, foreground service và vị trí giả lập <strong>chưa chạy ở đâu cả</strong>; chỉ có <code>flutter test</code> chạy được. Nhận định về plugin dựa trên mã nguồn, còn về hệ điều hành dựa trên developer.android.com và developer.apple.com (kiểm tại 11/2026).</p>
 </div>
 
 <div class="tkh-callout tkh-callout--example">
@@ -31,7 +31,7 @@ Quyền vị trí có hai tầng: khai báo trong file native (thiếu nó, plug
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 390" role="img" aria-label="Hình 1. Hai hộp cạnh nhau. App khách chỉ khai quyền khi dùng app: trên iOS khoá WhenInUse và từ điển mục đích chính xác tạm thời, trên Android ACCESS_COARSE_LOCATION và ACCESS_FINE_LOCATION. App tài xế có tất cả những thứ đó và thêm: trên iOS khoá AlwaysAndWhenInUse và UIBackgroundModes location, trên Android FOREGROUND_SERVICE và FOREGROUND_SERVICE_LOCATION. Mũi tên từ app khách sang app tài xế nghĩa là tài xế bằng khách cộng phần thêm."><defs><marker id="fl35-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker></defs>
+<svg viewBox="0 0 880 390" role="img" aria-label="Hình 1. Hai hộp cạnh nhau. App khách chỉ khai quyền khi dùng app: trên iOS khoá WhenInUse và từ điển mục đích chính xác tạm thời, trên Android ACCESS_COARSE_LOCATION và ACCESS_FINE_LOCATION. App tài xế có tất cả những thứ đó và thêm: trên iOS khoá AlwaysAndWhenInUse và UIBackgroundModes location, trên Android FOREGROUND_SERVICE và FOREGROUND_SERVICE_LOCATION. Mũi tên từ app khách sang app tài xế nghĩa là khai báo của app tài xế bằng khai báo của app khách cộng phần thêm."><defs><marker id="fl35-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker></defs>
 <rect x="16" y="16" width="420" height="300" rx="10" class="f-phys-soft s-phys"/>
 <text x="32" y="46" class="t-b">App khách</text>
 <text x="32" y="78" class="t-b">iOS · Info.plist</text>
@@ -96,7 +96,7 @@ Trên Android, `ACCESS_COARSE_LOCATION` và `ACCESS_FINE_LOCATION` luôn đi c�
 
 Tài liệu và mã của plugin mâu thuẫn. README của `geolocator` 14.1.2 nói plugin tự khai `FOREGROUND_SERVICE_LOCATION`, nhưng `CHANGELOG` của `geolocator_android` ghi ở bản 5.1.1+1 rằng khai báo này đã bị rút lại vì khiến Google tự động từ chối app không cần vị trí nền, và manifest bản 5.2.1 ta dùng cũng không có dòng đó. Vậy app tài xế tự khai, app khách không khai.
 
-Ta cố ý không khai `ACCESS_BACKGROUND_LOCATION`. Tài liệu Android coi foreground service đang chạy là truy cập vị trí foreground; chỉ lấy vị trí ngoài "có màn hình mở" và "có foreground service" mới cần quyền nền. Tài xế bấm Online lúc app đang mở rồi chạy foreground service thì không cần nó. Khai thừa còn gây hại: `geolocator_android` thêm quyền này vào mọi yêu cầu xin quyền, kể cả nâng lên vị trí chính xác, mà Android 11 trở lên bỏ qua yêu cầu gộp foreground với nền, nên nút "chính xác" vô tác dụng. Chính sách Google Play cũng giới hạn vị trí nền cho tính năng cốt lõi.
+Ta cố ý không khai `ACCESS_BACKGROUND_LOCATION`. Tài liệu Android coi foreground service đang chạy là truy cập vị trí foreground; chỉ khi lấy vị trí lúc không có màn hình mở và cũng không có foreground service thì mới cần quyền nền. Tài xế bấm Online lúc app đang mở rồi chạy foreground service thì không cần nó. Khai thừa còn gây hại: `geolocator_android` thêm quyền này vào mọi yêu cầu xin quyền, kể cả nâng lên vị trí chính xác, mà Android 11 trở lên bỏ qua yêu cầu gộp foreground với nền, nên nút "chính xác" vô tác dụng. Chính sách Google Play cũng giới hạn vị trí nền cho tính năng cốt lõi.
 
 Trên iOS, Flutter 3.47 stable dùng Swift Package Manager mặc định và `flutter create` không sinh Podfile; cả hai plugin đều có `Package.swift`. Với app khách, README của `geolocator` khuyên bỏ phần xin quyền Always, để khỏi cần khoá Always và tránh bị Apple hỏi khi nộp. Bản SPM của cờ đó là biến môi trường lúc build:
 
@@ -148,7 +148,7 @@ abstract interface class LocationSource {
 }
 ```
 
-`GeolocatorLocationSource` cài interface đó. Nó đổi exception của plugin thành exception của ta, gộp enum quyền về bốn giá trị, và đưa bước xin nền, chỉ có trên iOS, đi đường khác:
+`GeolocatorLocationSource` cài interface đó. Lớp này đổi exception của plugin thành exception của ta, gộp enum quyền về bốn giá trị, và chuyển bước xin nền, chỉ có trên iOS, sang một đường khác:
 
 ### geolocator_location_source.dart · 35-location-permission/lib/geolocator_location_source.dart (trích, requestForeground)
 
@@ -182,7 +182,7 @@ Future<SystemPermission> requestBackground() async {
 
 Lý do nằm trong `geolocator_apple`: hàm xin quyền của nó chỉ gọi `requestWhenInUseAuthorization` khi `Info.plist` có khoá WhenInUse, và trả về ngay nếu trạng thái đã quyết định. Sau khi tài xế cho phép "khi dùng app", `Geolocator.requestPermission()` không nâng lên Always được. `permission_handler` gọi `requestAlwaysAuthorization` cho `Permission.locationAlways`. Android thì không có bước này: `canRequestBackground` trả `false` và giao diện không mời.
 
-Lớp bọc này test được không cần thiết bị, vì `GeolocatorPlatform.instance` và `PermissionHandlerPlatform.instance` cho gán bản giả.
+Lớp bọc này test được không cần thiết bị, vì `GeolocatorPlatform.instance` và `PermissionHandlerPlatform.instance` cho phép gán bản giả.
 
 ## Bảy trạng thái bằng một hàm thuần
 
@@ -190,7 +190,7 @@ Với giao diện, quyền vị trí có bảy trạng thái: **chưa hỏi** (`
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 330" role="img" aria-label="Hình 2. Sơ đồ trạng thái. NotAsked sang Asking foreground khi người dùng bấm Tiếp tục. Asking foreground sang WhileInUse khi đồng ý, sang Denied khi từ chối, và Denied quay lại Asking foreground khi hỏi lại. Trên iOS lần từ chối đầu đi thẳng tới DeniedForever. Trên Android, lần từ chối thứ hai làm Denied sang DeniedForever. WhileInUse sang Asking background khi tài xế iOS có chuyến, rồi sang Always khi đồng ý. Mọi trạng thái đều có thể chuyển sang ServiceOff khi dịch vụ vị trí của máy tắt."><defs><marker id="fl35-2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl35-2-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs>
+<svg viewBox="0 0 880 330" role="img" aria-label="Hình 2. Sơ đồ trạng thái. NotAsked sang Asking foreground khi người dùng bấm Tiếp tục. Asking foreground sang WhileInUse khi đồng ý, sang Denied khi từ chối, và Denied quay lại Asking foreground khi hỏi lại. Trên iOS lần từ chối đầu đi thẳng tới DeniedForever. Trên Android, lần từ chối thứ hai chuyển Denied sang DeniedForever. WhileInUse sang Asking background khi tài xế iOS có chuyến, rồi sang Always khi đồng ý. Mọi trạng thái đều có thể chuyển sang ServiceOff khi dịch vụ vị trí của máy tắt."><defs><marker id="fl35-2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl35-2-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs>
 <rect x="30" y="60" width="150" height="50" rx="10" class="f-pk-soft s-pk"/><text x="48" y="90" class="t-b">NotAsked</text>
 <rect x="260" y="60" width="170" height="50" rx="10" class="f-pk-soft s-pk"/><text x="272" y="90" class="t-b">Asking · foreground</text>
 <rect x="530" y="60" width="150" height="50" rx="10" class="f-phys-soft s-phys"/><text x="546" y="90" class="t-b">WhileInUse</text>
@@ -212,7 +212,7 @@ Với giao diện, quyền vị trí có bảy trạng thái: **chưa hỏi** (`
 <figcaption>Hình 2. Bảy trạng thái truy cập vị trí. Mũi tên đi theo hướng chuyển trạng thái; nét đứt là đường chỉ iOS có.</figcaption>
 </figure>
 
-Trạng thái là sealed class nên `switch` phải vét cạn cả bảy. Máy trạng thái là hàm thuần `reduce(state, event)`. Sự kiện `Observed` mang ảnh chụp những gì hệ điều hành báo và bỏ qua trạng thái cũ, vì hệ điều hành là nguồn sự thật. Sự kiện `RequestStarted` cần trạng thái cũ: nó chỉ mở hộp thoại ở trạng thái cho phép.
+Trạng thái là sealed class nên `switch` phải vét cạn cả bảy. Máy trạng thái là hàm thuần `reduce(state, event)`. Sự kiện `Observed` mang ảnh chụp những gì hệ điều hành báo và bỏ qua trạng thái cũ, vì hệ điều hành là nguồn dữ liệu gốc. Sự kiện `RequestStarted` cần trạng thái cũ: nó chỉ mở hộp thoại ở trạng thái cho phép.
 
 ### location_access.dart · 35-location-permission/lib/location_access.dart (reduce)
 
@@ -268,7 +268,7 @@ LocationAccessState _fromSnapshot(LocationSnapshot s) {
 }
 ```
 
-Dịch vụ vị trí tắt thắng mọi quyền khác, vì xin quyền lúc đó vô ích. Còn `denied` cần hai cờ do app tự nhớ qua `AskedStore`: `askedForeground` phân biệt `NotAsked` với `Denied` (đáp án câu hỏi đầu bài), và `blockedByRequest` biến `Denied` thành `DeniedForever`, vì `checkPermission` của Android (`PermissionManager.java`) không bao giờ trả `deniedForever`; chỉ kết quả của chính lần xin mới trả. Lab lưu cờ trong bộ nhớ; bản thật dùng `shared_preferences` ([bài 22](/articles/flutter-local-persistence-drift-secure-storage-lich-su-offline)).
+Dịch vụ vị trí tắt được ưu tiên hơn mọi quyền khác, vì xin quyền lúc đó vô ích. Còn `denied` cần hai cờ do app tự nhớ qua `AskedStore`: `askedForeground` phân biệt `NotAsked` với `Denied` (đáp án câu hỏi đầu bài), và `blockedByRequest` biến `Denied` thành `DeniedForever`, vì `checkPermission` của Android (`PermissionManager.java`) không bao giờ trả `deniedForever`; chỉ kết quả của chính lần xin mới cho giá trị đó. Lab lưu cờ trong bộ nhớ; bản thật dùng `shared_preferences` ([bài 22](/articles/flutter-local-persistence-drift-secure-storage-lich-su-offline)).
 
 `LocationAccessController` nối hàm thuần với `LocationSource`: chỉ gọi hệ điều hành khi `reduce` cho phép, giữ kết quả lần xin, rồi đọc lại trạng thái:
 
@@ -294,13 +294,13 @@ Future<void> requestForeground() async {
 }
 ```
 
-Bản đầu của controller có hai lỗi. Nó bỏ kết quả lần xin rồi đọc lại bằng `checkPermission`, nên trên Android `DeniedForever` không bao giờ tới được và nút "Tiếp tục" bấm không có gì; fake đầu che lỗi vì cho `checkPermission` trả `deniedForever` như iOS, nên ta thêm fake mô phỏng Android. Nó cũng chỉ kiểm `next is! Asking`, và test "hai lần bấm chỉ mở một hộp thoại" bị timeout: `reduce` trả chính `Asking` cho `Asking`.
+Bản đầu của controller có hai lỗi. Một, bản đầu bỏ kết quả lần xin rồi đọc lại bằng `checkPermission`, nên trên Android `DeniedForever` không bao giờ tới được và nút "Tiếp tục" bấm vào không có phản ứng nào; fake đầu che lỗi vì cho `checkPermission` trả `deniedForever` như iOS, nên ta thêm fake mô phỏng Android. Hai, bản đầu cũng chỉ kiểm `next is! Asking`, và test "hai lần bấm chỉ mở một hộp thoại" bị timeout: với trạng thái `Asking`, `reduce` lại trả về chính `Asking`.
 
 ## Xin đúng lúc, sau khi giải thích
 
-Tài liệu Android dặn chờ người dùng chạm vào tính năng cần vị trí rồi mới xin, và xin tăng dần, foreground trước, nền sau. Với app nhắm Android 11 trở lên, xin cả hai cùng lúc thì hệ thống bỏ qua yêu cầu; hộp thoại cũng không có "Allow all the time", người dùng phải bật trong Cài đặt. Tới Nơi vì vậy bỏ hẳn bước nền trên Android. Trên iOS, Apple mô tả: khi người dùng đã cho "When In Use", `requestAlwaysAuthorization()` hiện ngay hộp thoại nâng quyền; nếu họ đã chọn Allow Once thì các lần gọi sau bị bỏ qua.
+Tài liệu Android dặn chờ người dùng chạm vào tính năng cần vị trí rồi mới xin, và xin tăng dần, foreground trước, nền sau. Với app nhắm Android 11 trở lên, xin cả hai cùng lúc thì hệ thống bỏ qua yêu cầu; hộp thoại cũng không có "Allow all the time", người dùng phải bật trong Cài đặt. Tới Nơi vì vậy bỏ hẳn bước nền trên Android. Trên iOS, Apple mô tả: khi người dùng đã cho "When In Use", `requestAlwaysAuthorization()` hiện ngay hộp thoại nâng quyền; nếu người dùng đã chọn Allow Once thì các lần gọi sau bị bỏ qua.
 
-`PickupLocationPanel` theo đúng thứ tự đó. Dựng màn hình không xin gì; nút "Dùng vị trí hiện tại" chỉ mở lời giải thích; chỉ nút "Tiếp tục" mới gọi hệ điều hành:
+`PickupLocationPanel` theo đúng thứ tự đó. Khi dựng màn hình, app không xin gì; nút "Dùng vị trí hiện tại" chỉ mở lời giải thích; chỉ nút "Tiếp tục" mới gọi hệ điều hành:
 
 ### pickup_location_panel.dart · 35-location-permission/lib/pickup_location_panel.dart (trích)
 
@@ -330,9 +330,9 @@ case LocationAdvice.offerBackground:
   }
 ```
 
-Phần còn lại nằm trong `adviceFor`. `DeniedForever` chỉ có nút mở Cài đặt, vì hệ điều hành không hiện hộp thoại nữa. Lời mời gửi vị trí nền chỉ có với app tài xế trên iOS, khi có chuyến, và một lần nhờ `backgroundAsked`; app khách không bao giờ thấy nó.
+Phần còn lại nằm trong `adviceFor`. `DeniedForever` chỉ có nút mở Cài đặt, vì hệ điều hành không hiện hộp thoại nữa. Lời mời gửi vị trí nền chỉ có với app tài xế trên iOS, khi có chuyến, và hiện một lần nhờ cờ `backgroundAsked`; app khách không bao giờ thấy nó.
 
-**Chính xác hay gần đúng.** Android 12 và iOS 14 trở lên cho người dùng chỉ cấp vị trí gần đúng, và tài liệu Android dặn app vẫn phải chạy được khi đó. Panel báo "Vị trí gần đúng" và gợi ý kéo ghim, vì bản đồ bài 34 cho sửa tay. Nút "Cho phép vị trí chính xác" gọi `requestPrecise`: trên iOS là `requestTemporaryFullAccuracy` với `purposeKey` khớp một khoá trong `NSLocationTemporaryUsageDescriptionDictionary`, trên Android là hỏi lại cặp COARSE và FINE (đúng vì manifest không khai quyền nền). Độ chính xác lấy từ `getLocationAccuracy()`, hàm ném `PlatformException` trên Android khi chưa có quyền nào (changelog 14.1.2); lớp bọc coi đó là gần đúng.
+**Chính xác hay gần đúng.** Android 12 và iOS 14 trở lên cho người dùng chỉ cấp vị trí gần đúng, và tài liệu Android dặn app vẫn phải chạy được khi đó. Panel báo "Vị trí gần đúng" và gợi ý kéo ghim, vì bản đồ bài 34 cho phép sửa tay. Nút "Cho phép vị trí chính xác" gọi `requestPrecise`: trên iOS là `requestTemporaryFullAccuracy` với `purposeKey` khớp một khoá trong `NSLocationTemporaryUsageDescriptionDictionary`, trên Android là hỏi lại cặp COARSE và FINE (đúng vì manifest không khai quyền nền). Độ chính xác lấy từ `getLocationAccuracy()`, hàm ném `PlatformException` trên Android khi chưa có quyền nào (changelog 14.1.2); lớp bọc coi đó là gần đúng.
 
 ## getPositionStream: độ chính xác, distanceFilter và pin
 
@@ -395,7 +395,7 @@ LocationSettings buildLocationSettings(
 
 Ba chi tiết. Một, `foregroundNotificationConfig` biến luồng Android thành foreground service; comment của plugin cảnh báo nó chỉ tăng độ ưu tiên, không giữ app sống nếu hệ thống giết Activity. Hai, `allowBackgroundLocationUpdates` của `AppleSettings` mặc định là `true`; `geolocator_apple` có kiểm `UIBackgroundModes` trước khi bật, nhưng ta vẫn đặt rõ `false` cho app khách. Ba, theo comment của `LocationAccuracy`, `high` là khoảng 10 m trên iOS và 0 đến 100 m trên Android.
 
-Ta không có số đo pin, chỉ có phép tính minh hoạ. Xe chạy 36 km/h là 10 m/s; trên iOS, `distanceFilter` 25 m cho tối đa một bản mỗi 2,5 giây, khoảng 24 bản mỗi phút. Khi plugin dùng `FusedLocationClient` trên Android 13 trở lên, nó đặt cả khoảng thời gian tối thiểu (mặc định 5 giây) lẫn khoảng cách tối thiểu, nên chu kỳ 5 giây mới là giới hạn: tối đa 12 bản mỗi phút. Nhánh Android cũ hơn đặt khoảng nhanh nhất bằng nửa chu kỳ, và máy không có Google Play Services dùng `LocationManagerClient`, nên con số không áp dụng ở đó. Pin thật phải đo trên máy thật; chiều giảm là độ chính xác thấp hơn, `distanceFilter` lớn hơn và dừng luồng khi không cần.
+Ta không có số đo pin, chỉ có phép tính minh hoạ. Xe chạy 36 km/h là 10 m/s; trên iOS, `distanceFilter` 25 m cho tối đa một bản mỗi 2,5 giây, khoảng 24 bản mỗi phút. Khi plugin dùng `FusedLocationClient` trên Android 13 trở lên, nó đặt cả khoảng thời gian tối thiểu (mặc định 5 giây) lẫn khoảng cách tối thiểu, nên chu kỳ 5 giây mới là giới hạn: tối đa 12 bản mỗi phút. Nhánh Android cũ hơn đặt khoảng nhanh nhất bằng nửa chu kỳ, và máy không có Google Play Services dùng `LocationManagerClient`, nên con số không áp dụng ở đó. Pin thật phải đo trên máy thật; muốn giảm thì hạ độ chính xác, tăng `distanceFilter` và dừng luồng khi không cần.
 
 Dừng đúng lúc là việc của `PositionTracker`. Tài liệu `getPositionStream` nói cảm biến chạy tới khi ta huỷ subscription, nên tracker đóng luồng ngay khi quyền mất, dịch vụ tắt hoặc profile đổi:
 
@@ -435,7 +435,7 @@ void _sync() {
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Bốn lỗi hay gặp với vị trí</span>
 <ul>
-<li><strong>Xin quyền ngay khi mở app.</strong> Dấu hiệu: nhiều người từ chối vì chưa hiểu vì sao. Cách sửa: chỉ xin sau khi họ chạm vào tính năng và đọc lời giải thích.</li>
+<li><strong>Xin quyền ngay khi mở app.</strong> Dấu hiệu: nhiều người từ chối vì chưa hiểu vì sao. Cách sửa: chỉ xin sau khi người dùng chạm vào tính năng và đọc lời giải thích.</li>
 <li><strong>Coi <code>denied</code> là "chưa hỏi".</strong> Dấu hiệu: nút bấm mà không có gì hiện ra, hoặc app hỏi đi hỏi lại. Nguyên nhân: plugin gộp hai trường hợp, và <code>deniedForever</code> không còn hộp thoại (Android chỉ báo nó qua kết quả lần xin). Cách sửa: tự nhớ đã hỏi và giữ kết quả; với <code>deniedForever</code>, dẫn người dùng tới Cài đặt.</li>
 <li><strong>Xin FINE đứng riêng, hoặc xin foreground cùng nền.</strong> Dấu hiệu: không hộp thoại nào hiện, hoặc không quyền nào được cấp. Nguyên nhân: theo tài liệu Android, FINE đứng riêng bị bỏ qua trên một số bản Android 12, và từ Android 11 yêu cầu gộp foreground với nền bị bỏ qua. Cách sửa: xin cặp COARSE và FINE, nền ở bước sau.</li>
 <li><strong>Khai quyền nền thừa.</strong> Dấu hiệu: bị hỏi khi nộp App Store hoặc Google Play, hoặc nút xin chính xác trên Android không làm gì. Nguyên nhân: app khách không cần vị trí nền, và trên Android foreground service đã đủ cho tài xế. Cách sửa: chỉ app tài xế khai <code>UIBackgroundModes</code>, app khách build với <code>BYPASS_PERMISSION_LOCATION_ALWAYS=1</code>, và để test giữ cấu hình khác nhau.</li>
@@ -444,7 +444,7 @@ void _sync() {
 
 ## Chạy ví dụ và kiểm chứng
 
-**Mức kiểm chứng: trên thiết bị (TB), và máy viết bài không có thiết bị.** Chạy được là phần logic. Từ thư mục gốc repository:
+**Mức kiểm chứng: trên thiết bị (TB), và máy viết bài không có thiết bị.** Phần chạy được là phần logic. Từ thư mục gốc repository:
 
 ```bash
 cd examples/toi-noi-flutter/35-location-permission
@@ -471,7 +471,7 @@ flutter test
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> <code>Geolocator.requestTemporaryFullAccuracy(purposeKey: ...)</code>, và <code>Info.plist</code> phải có <code>NSLocationTemporaryUsageDescriptionDictionary</code> chứa đúng khoá đó (lab dùng <code>PickupPrecise</code>, có test kiểm).</p>
 <p><strong>2.</strong> Từ 2,5 giây lên 5 giây ở iOS (25 m và 50 m chia cho 10 m/s). Với <code>FusedLocationClient</code> trên Android 13 trở lên, 50 m cũng là 5 giây nên hai giới hạn trùng nhau; với 25 m, chu kỳ 5 giây đã là giới hạn. Vậy đổi sang 50 m không làm thưa thêm.</p>
-<p><strong>3.</strong> Khi <code>refresh</code> chạy, <code>reduce</code> ra <code>ServiceOff</code>, <code>canTrack</code> thành <code>false</code>, tracker huỷ subscription và xoá <code>lastFix</code>. Nếu plugin ném <code>LocationServiceDisabledException</code> trước đó, lớp bọc đổi thành <code>LocationServiceOffException</code> và tracker ghi vào <code>lastError</code>. Panel hiện nút "Bật dịch vụ vị trí".</p>
+<p><strong>3.</strong> Khi <code>refresh</code> chạy, <code>reduce</code> ra <code>ServiceOff</code>, <code>canTrack</code> chuyển thành <code>false</code>, tracker huỷ subscription và xoá <code>lastFix</code>. Nếu plugin ném <code>LocationServiceDisabledException</code> trước đó, lớp bọc đổi nó thành <code>LocationServiceOffException</code> và tracker ghi vào <code>lastError</code>. Panel hiện nút "Bật dịch vụ vị trí".</p>
 </details>
 
 Bài trước: [Bản đồ với flutter_map](/articles/flutter-ban-do-flutter-map-marker-polyline-chon-diem-don). Bài tiếp: [Realtime WebSocket: reconnect, backoff và theo dõi tài xế](/articles/flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe).

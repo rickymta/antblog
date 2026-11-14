@@ -12,7 +12,7 @@ Người phát hành của Tới Nơi mất khoảng 25 phút (con số minh ho�
 
 **fastlane** gom các bước đó vào một file `Fastfile` chạy lại được: một lệnh cho iOS, một lệnh cho Android, cùng một cách chọn app, flavor và build number. Bài này viết bộ file đó cho hai app Tới Nơi: `match` giữ chứng chỉ mã hoá, `gym` xuất IPA, `pilot` lên TestFlight, `supply` lên Google Play. Đây là bài 53 của lộ trình **Flutter qua Tới Nơi**. Bạn cần biết cách ký iOS ở [bài 52](/articles/flutter-ky-ung-dung-ios-certificate-provisioning-profile-capabilities), ký Android ở [bài 51](/articles/flutter-ky-ung-dung-android-keystore-play-app-signing-aab), flavor khi build ở [bài 50](/articles/flutter-flavors-bundle-id-icon-firebase-theo-moi-truong-build) và `--dart-define-from-file` ở [bài 25](/articles/flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod).
 
-Một lời nói trước: repository này không có tài khoản Apple Developer hay Google Play Console, và máy kiểm không cài fastlane. Vì vậy **chưa lane nào được chạy thật**. Ta kiểm được cú pháp Ruby và nội dung file cấu hình bằng test Dart, không kiểm được việc store chấp nhận bản tải lên.
+Một lời nói trước: repository này không có tài khoản Apple Developer hay Google Play Console, và máy chạy kiểm chứng không cài fastlane. Vì vậy **chưa có lane nào được chạy thật**. Ta kiểm được cú pháp Ruby và nội dung file cấu hình bằng test Dart, không kiểm được việc store chấp nhận bản tải lên.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,7 +22,7 @@ Một lời nói trước: repository này không có tài khoản Apple Develop
 
 ## fastlane đứng ở đâu trong chuỗi build
 
-fastlane là công cụ Ruby. Nó không thay `flutter build` mà gọi Flutter, rồi nối kết quả với store. Một `Fastfile` gồm các **lane**; mỗi lane là một chuỗi **action**. Tên ta dùng trong bài là bí danh: `gym` là `build_app`, `pilot` là `upload_to_testflight`, `supply` là `upload_to_play_store` (docs.fastlane.tools). Hình 1 vẽ hai lane của Tới Nơi.
+fastlane là công cụ Ruby. Công cụ này không thay `flutter build` mà gọi Flutter, rồi nối kết quả với store. Một `Fastfile` gồm các **lane**; mỗi lane là một chuỗi **action**. Tên ta dùng trong bài là bí danh: `gym` là `build_app`, `pilot` là `upload_to_testflight`, `supply` là `upload_to_play_store` (docs.fastlane.tools). Hình 1 vẽ hai lane của Tới Nơi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -168,7 +168,7 @@ const LaneSpec androidInternal = LaneSpec(
 ///
 ```
 
-`dev` trả danh sách rỗng chứ không ném lỗi: một flavor không phân phối là trạng thái hợp lệ, và bài 55 sẽ cho nó một kênh riêng. Với `staging` và `prod`, bước đẩy đầu tiên giống nhau, vì bản gửi App Review hay promote lên track Play đều xuất phát từ một bản đã nằm trên store (bài 56 đến 58). Hai flavor khác nhau ở Bundle ID, file `config/<flavor>.json` và số build. Đây là quyết định thiết kế của lab, không phải luật của store: muốn `prod` đi đường khác, hãy sửa đúng hàm này và test sẽ chỉ ra Fastfile nào lệch.
+`dev` trả danh sách rỗng chứ không ném lỗi: một flavor không phân phối là trạng thái hợp lệ, và bài 55 sẽ cho nó một kênh riêng. Với `staging` và `prod`, bước đẩy đầu tiên giống nhau, vì bản gửi App Review hay promote lên track Play đều xuất phát từ một bản đã nằm trên store (bài 56 đến 58). Hai flavor khác nhau ở Bundle ID, file `config/<flavor>.json` và build number. Đây là quyết định thiết kế của lab, không phải luật của store: muốn `prod` đi đường khác, hãy sửa đúng hàm này và test sẽ chỉ ra Fastfile nào lệch.
 
 `planRelease` biến kế hoạch thành lệnh, và từ chối build number không dương ngay cả với `dev`:
 
@@ -256,7 +256,7 @@ ASC_ISSUER_ID=
 ASC_KEY_CONTENT=
 ```
 
-Trên máy cá nhân, chép thành `ios/.env` và `android/.env`: fastlane chỉ tìm `.env` trong `fastlane/` và thư mục cha của nó, nên `.env` ở gốc app không được nạp. Hai file `gitignore.fragment.example` có các dòng cần thêm vào `ios/.gitignore` và `android/.gitignore` để `.env` không vào repo. Trên CI, đặt vào kho secret của nhà cung cấp, không tạo file. Lệnh `base64 -i` chỉ dành cho macOS; Linux dùng `base64 -w0`. Test giữ ba lớp: không chuỗi nào giống khoá PEM hay token; tham số bí mật chỉ nhận giá trị bắt đầu bằng `env!(` hoặc `ENV[`; tập biến mã đọc bằng đúng tập khai trong `.env.example`.
+Trên máy cá nhân, chép thành `ios/.env` và `android/.env`: fastlane chỉ tìm `.env` trong `fastlane/` và thư mục cha của nó, nên `.env` ở gốc app không được nạp. Hai file `gitignore.fragment.example` có các dòng cần thêm vào `ios/.gitignore` và `android/.gitignore` để `.env` không vào repo. Trên CI, đặt vào kho secret của nhà cung cấp, không tạo file. Lệnh `base64 -i` chỉ dành cho macOS; Linux dùng `base64 -w0`. Test giữ ba lớp: không chuỗi nào giống khoá PEM hay token; tham số bí mật chỉ nhận giá trị bắt đầu bằng `env!(` hoặc `ENV[`; tập biến mà mã đọc phải trùng đúng với tập khai báo trong `.env.example`.
 
 ## match: chứng chỉ mã hoá trong repo riêng
 
@@ -298,7 +298,7 @@ git_private_key(ENV["MATCH_GIT_PRIVATE_KEY"])
 
 ```
 
-`readonly` mặc định của match là `false`, tức match được phép tạo chứng chỉ mới; tài liệu khuyên luôn bật `readonly` trên CI. Ta bật ở `Matchfile`, và `setup_ci` trong `before_all` cũng chuyển match sang chỉ đọc, tạo keychain tạm cho CI và chỉ tác dụng khi chạy trên CI (docs.fastlane.tools, `setup_ci`). Trên CI, match còn cần quyền vào chính repo chứng chỉ: `MATCH_GIT_BASIC_AUTHORIZATION` (base64 của `tên:token`, cho HTTPS) hoặc `MATCH_GIT_PRIVATE_KEY` (deploy key). Cả hai có trong `.env.example` và `Matchfile`, không bắt buộc ở máy đã có SSH. Việc ghi chỉ có ở một lane, và lane đó từ chối chạy trên CI:
+`readonly` mặc định của match là `false`, tức match được phép tạo chứng chỉ mới; tài liệu khuyên luôn bật `readonly` trên CI. Ta bật ở `Matchfile`, và `setup_ci` trong `before_all` cũng chuyển match sang chỉ đọc, tạo keychain tạm cho CI và chỉ có tác dụng khi chạy trên CI (docs.fastlane.tools, `setup_ci`). Trên CI, match còn cần quyền vào chính repo chứng chỉ: `MATCH_GIT_BASIC_AUTHORIZATION` (base64 của `tên:token`, cho HTTPS) hoặc `MATCH_GIT_PRIVATE_KEY` (deploy key). Cả hai có trong `.env.example` và `Matchfile`, không bắt buộc ở máy đã có SSH. Việc ghi chỉ có ở một lane, và lane đó từ chối chạy trên CI:
 
 ### Fastfile · 53-fastlane/native-config/ios/fastlane/Fastfile (trích)
 
@@ -313,7 +313,7 @@ git_private_key(ENV["MATCH_GIT_PRIVATE_KEY"])
   end
 ```
 
-Audit đòi đúng một `readonly: false` trong `Fastfile` iOS; thêm lệnh ghi thứ hai vào `beta` là test đỏ. Nơi lưu có thể là git hoặc S3 (`storage_mode`); `Matchfile` có ví dụ S3 ở dạng chú thích.
+Audit đòi đúng một `readonly: false` trong `Fastfile` iOS; thêm lệnh ghi thứ hai vào `beta` thì test đỏ. Nơi lưu có thể là git hoặc S3 (`storage_mode`); `Matchfile` có ví dụ S3 ở dạng chú thích.
 
 ## Lane iOS beta: build, gym, pilot
 
@@ -375,9 +375,9 @@ Lane `beta` kiểm tham số, đăng nhập, lấy profile bằng `match`, ép k
   end
 ```
 
-Có bốn chi tiết đáng đọc. Một, chữ ký. Xcconfig của bài 52 cho staging trỏ profile ad-hoc, loại dành cho thiết bị đã đăng ký và không dùng để tải lên App Store Connect; lên TestFlight cần profile loại App Store, đúng loại `match(type: "appstore")` lấy về. Vì vậy `update_code_signing_settings` ép cấu hình `Release-<flavor>` ký thủ công bằng profile trong `MATCH_PROVISIONING_PROFILE_MAPPING`, biến lane mà match điền sau khi chạy, không gõ tên profile bằng tay. Lệnh này sửa `Runner.xcodeproj` trong thư mục làm việc; trên máy cá nhân hãy `git checkout` file đó sau khi chạy.
+Có bốn chi tiết đáng đọc. Một là chữ ký. Xcconfig của bài 52 cho staging trỏ profile ad-hoc, loại dành cho thiết bị đã đăng ký và không dùng để tải lên App Store Connect; lên TestFlight cần profile loại App Store, đúng loại `match(type: "appstore")` lấy về. Vì vậy `update_code_signing_settings` ép cấu hình `Release-<flavor>` ký thủ công bằng profile trong `MATCH_PROVISIONING_PROFILE_MAPPING`, biến lane mà match điền sau khi chạy, không gõ tên profile bằng tay. Lệnh này sửa `Runner.xcodeproj` trong thư mục làm việc; trên máy cá nhân hãy `git checkout` file đó sau khi chạy.
 
-Hai, `flutter build ipa` tạo `build/ios/archive/Runner.xcarchive` (tài liệu Flutter) và còn tự thử xuất IPA theo cách của nó. Ta không dựa vào kết quả đó: lane kiểm archive rồi để `gym` xuất lại với `skip_build_archive: true`. `gym` phải nhận `scheme: flavor`: bài 50 tạo ba scheme, và khi project có nhiều scheme mà không chỉ định, `gym` không biết chọn cái nào. Ba, tuỳ chọn `ipa:` bỏ qua match và build để tải lên một IPA có sẵn; các biến `MATCH_*` và `build_number` chỉ bị đòi trong nhánh build. Bốn, `skip_waiting_for_build_processing: true` không chờ App Store Connect xử lý; tài liệu ghi rõ khi đó việc phân phối cho tester sẽ không diễn ra. Lane chỉ tải lên; nhóm tester, export compliance và Beta App Review thuộc [bài 56](/articles/flutter-testflight-internal-external-testing-beta-review). Audit cấm `distribute_external` trong lane này.
+Hai là `flutter build ipa` tạo `build/ios/archive/Runner.xcarchive` (tài liệu Flutter) và còn tự thử xuất IPA theo cách của nó. Ta không dựa vào kết quả đó: lane kiểm archive rồi để `gym` xuất lại với `skip_build_archive: true`. `gym` phải nhận `scheme: flavor`: bài 50 tạo ba scheme, và khi project có nhiều scheme mà không chỉ định, `gym` không biết chọn cái nào. Ba là tuỳ chọn `ipa:` bỏ qua match và build để tải lên một IPA có sẵn; các biến `MATCH_*` và `build_number` chỉ bị đòi trong nhánh build. Bốn là `skip_waiting_for_build_processing: true` không chờ App Store Connect xử lý; tài liệu ghi rõ khi đó việc phân phối cho tester sẽ không diễn ra. Lane chỉ tải lên; nhóm tester, export compliance và Beta App Review thuộc [bài 56](/articles/flutter-testflight-internal-external-testing-beta-review). Audit cấm `distribute_external` trong lane này.
 
 ## Lane Android internal: supply
 
@@ -410,9 +410,9 @@ platform :android do
   end
 ```
 
-`track: "internal"` được viết tường minh vì `upload_to_play_store` mặc định là `production` (bảng tham số trong docs.fastlane.tools). Quên dòng này là đẩy thẳng lên người dùng thật. Audit đòi `track: "internal"`, cấm `track_promote_to` và cấm các chuỗi `"production"`, `"beta"`, `"alpha"`; việc promote giữa track thuộc [bài 57](/articles/flutter-google-play-internal-closed-open-production-staged-rollout).
+`track: "internal"` được viết tường minh vì `upload_to_play_store` mặc định là `production` (bảng tham số trong docs.fastlane.tools). Quên dòng này thì bản build bị đẩy thẳng lên người dùng thật. Audit đòi `track: "internal"`, cấm `track_promote_to` và cấm các chuỗi `"production"`, `"beta"`, `"alpha"`; việc promote giữa track thuộc [bài 57](/articles/flutter-google-play-internal-closed-open-production-staged-rollout).
 
-Đường dẫn AAB có flavor theo đúng cách `flutter_tools` 3.47.4 tìm file: `build/app/outputs/bundle/<flavor>Release/app-<flavor>-release.aab`. Lane kiểm file tồn tại trước khi gọi `supply`. `json_key_data` nhận nội dung JSON của service account từ ENV, không phải đường dẫn file; tài liệu Flutter cũng làm vậy cho CI. Bốn cờ `skip_upload_*` giữ lane chỉ đẩy bản nhị phân; mô tả và ảnh cửa hàng để bài 58. Tài liệu fastlane nêu một điều kiện: ứng dụng phải có ít nhất một bản tải lên thành công qua Play Console trước khi `supply` dùng được, nên lần đầu của mỗi app vẫn làm tay. Giới hạn tester của internal testing do Google quy định và đổi theo thời gian; kiểm tại trang trợ giúp Play Console khi phát hành.
+Đường dẫn AAB có flavor theo đúng cách `flutter_tools` 3.47.4 tìm file: `build/app/outputs/bundle/<flavor>Release/app-<flavor>-release.aab`. Lane kiểm file tồn tại trước khi gọi `supply`. `json_key_data` nhận nội dung JSON của service account từ ENV, không phải đường dẫn file; tài liệu Flutter cũng làm vậy cho CI. Bốn cờ `skip_upload_*` giữ lane chỉ đẩy bản nhị phân; mô tả và ảnh cửa hàng dành cho bài 58. Tài liệu fastlane nêu một điều kiện: ứng dụng phải có ít nhất một bản tải lên thành công qua Play Console trước khi `supply` dùng được, nên lần đầu của mỗi app vẫn làm tay. Giới hạn tester của internal testing do Google quy định và đổi theo thời gian; hãy xem trang trợ giúp Play Console khi phát hành.
 
 ## Lỗi thường gặp
 
@@ -422,8 +422,8 @@ platform :android do
 <li><strong>Tin mã thoát 0 của <code>flutter build ipa</code>.</strong> Dấu hiệu: bước sau báo không thấy IPA dù bước build xanh. Nguyên nhân: Flutter trả thành công khi archive xong nhưng xuất IPA lỗi. Cách sửa: kiểm file trong lane, như lane <code>beta</code>.</li>
 <li><strong>Chạy <code>match</code> không chỉ đọc trên CI.</strong> Dấu hiệu: CI tạo thêm chứng chỉ hoặc profile, nhiều máy ghi vào cùng kho. Nguyên nhân: <code>readonly</code> mặc định là <code>false</code>. Cách sửa: <code>readonly(true)</code> trong <code>Matchfile</code>, <code>setup_ci</code>, một lane quản trị duy nhất được ghi.</li>
 <li><strong>Quên <code>track</code> khi gọi <code>supply</code>.</strong> Dấu hiệu: bản build xuất hiện ở production thay vì internal. Nguyên nhân: mặc định là <code>production</code>. Cách sửa: luôn truyền <code>track</code>, có test cấm track khác.</li>
-<li><strong>Build number hoặc <code>versionCode</code> trùng.</strong> Dấu hiệu: store từ chối bản tải lên. Nguyên nhân: số build lấy tay hoặc từ nguồn không tăng. Cách sửa: <code>build_number</code> là tham số bắt buộc, CI truyền số tăng đơn điệu (bài 54).</li>
-<li><strong>Đường dẫn tương đối sai thư mục.</strong> Dấu hiệu: <code>File.exist?</code> hay <code>aab:</code> báo không thấy file dù build xong. Nguyên nhân: mã Fastfile chạy trong <code>fastlane/</code>, action chạy ở thư mục chứa nó. Cách sửa: <code>../..</code> cho mã Fastfile, <code>..</code> cho tham số action.</li>
+<li><strong>Build number hoặc <code>versionCode</code> trùng.</strong> Dấu hiệu: store từ chối bản tải lên. Nguyên nhân: build number nhập thủ công hoặc lấy từ nguồn không tăng. Cách sửa: <code>build_number</code> là tham số bắt buộc, CI truyền số tăng dần (bài 54).</li>
+<li><strong>Đường dẫn tương đối sai thư mục.</strong> Dấu hiệu: <code>File.exist?</code> hay <code>aab:</code> báo không thấy file dù build xong. Nguyên nhân: mã Fastfile chạy trong <code>fastlane/</code>, action chạy ở gốc dự án, tức thư mục cha của nó. Cách sửa: <code>../..</code> cho mã Fastfile, <code>..</code> cho tham số action.</li>
 </ul>
 </div>
 
@@ -443,7 +443,7 @@ dart run bin/plan.dart staging customer 42
 
 `release_plan_test.dart` (15 test) chứng minh logic chọn lane: Bundle ID khớp §3.2, `dev` không có lane, `staging` và `prod` cùng đi `ios beta` rồi `android internal`, biến rỗng tính là thiếu, build number 0 và âm bị từ chối. `native_config_test.dart` (28 test) đọc file thật: đủ lane, bí mật chỉ từ ENV, `match` chỉ đọc, ký bằng profile của match trước khi build, `gym` có `scheme`, `supply` đẩy AAB lên `internal`, và `ruby -c` báo `Syntax OK` cho sáu file bằng Ruby 2.6.10 của hệ thống (tự bỏ qua nếu máy không có `ruby`). `audit_rules_test.dart` (32 test) sửa đúng một chỗ của file thật và đòi audit đỏ đúng mã lỗi, ví dụ khoá PEM giả, `gym` thiếu `scheme`, Gemfile `~> 2.241`.
 
-**Chưa làm**, nói thẳng: không cài fastlane và không chạy `bundle install` (Ruby hệ thống 2.6.10 thấp hơn yêu cầu của fastlane 2.241.2), nên tên action và tham số chỉ được đối chiếu với docs.fastlane.tools (11/2026), chưa với bản cài thật. Không chạy `match`, `update_code_signing_settings`, `flutter build ipa`, `gym` hay `flutter build appbundle` với flavor; không tải gì lên TestFlight hay Google Play; chưa kiểm `Release-<flavor>` trong Xcode project thật có nhận profile của match. Test chứng minh file có các tính chất trên, không chứng minh lane chạy được. Hãy chạy lần đầu từng lane một trên máy bạn, trước khi đưa lên CI.
+**Chưa làm**, nói thẳng: không cài fastlane và không chạy `bundle install` (Ruby hệ thống 2.6.10 thấp hơn yêu cầu của fastlane 2.241.2), nên tên action và tham số chỉ được đối chiếu với docs.fastlane.tools (11/2026), chưa với bản cài thật. Không chạy `match`, `update_code_signing_settings`, `flutter build ipa`, `gym` hay `flutter build appbundle` với flavor; không tải gì lên TestFlight hay Google Play; chưa kiểm `Release-<flavor>` trong Xcode project thật có nhận profile của match hay không. Test chứng minh file có các tính chất trên, không chứng minh lane chạy được. Hãy chạy lần đầu từng lane một trên máy bạn, trước khi đưa lên CI.
 
 ## Bài tập
 
@@ -453,7 +453,7 @@ dart run bin/plan.dart staging customer 42
 
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Lane dừng ngay với lỗi "flavor phải là một trong: staging, prod". <code>pick_target</code> là dòng đầu tiên và <code>dev</code> không nằm trong <code>STORE_FLAVORS</code>, nên chưa lệnh nào chạm tới Apple hay Flutter.</p>
-<p><strong>2.</strong> Build thường xuyên chỉ cần lấy chứng chỉ có sẵn, nên chỉ đọc là đủ và an toàn. Tạo hoặc làm mới cần quyền cao hơn, do một người làm, nên nằm ở lane riêng. Lane đó kiểm <code>is_ci</code> để job CI lỡ gọi nó cũng không ghi được vào kho.</p>
+<p><strong>2.</strong> Các lần build thường ngày chỉ cần lấy chứng chỉ có sẵn, nên chỉ đọc là đủ và an toàn. Tạo hoặc làm mới cần quyền cao hơn, do một người làm, nên nằm ở lane riêng. Lane đó kiểm <code>is_ci</code> để job CI lỡ gọi nó cũng không ghi được vào kho.</p>
 <p><strong>3.</strong> Trong <code>native_config_test.dart</code>, nhóm <code>supply</code> đòi <code>track: "internal"</code> và cấm chuỗi <code>beta</code>; trong <code>audit_rules_test.dart</code>, mã <code>android-track</code> báo cùng lỗi. Cú pháp Ruby vẫn hợp lệ nên <code>ruby -c</code> không bắt được; chỉ test đọc nội dung mới bắt được.</p>
 </details>
 

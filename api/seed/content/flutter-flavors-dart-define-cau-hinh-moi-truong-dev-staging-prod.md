@@ -32,7 +32,7 @@ Bảng dưới là các môi trường theo hồ sơ loạt bài (địa chỉ l
 
 Hai nhóm thông tin đi theo hai đường. Địa chỉ API, log và timeout là thứ **code Dart đọc**: ta đưa vào bằng `--dart-define-from-file`. ID ứng dụng, tên, icon và file Firebase là thứ **bộ công cụ native đọc**: chúng thuộc flavor của Gradle (`productFlavors`, mỗi flavor có `applicationIdSuffix`) và của Xcode (scheme, build configuration, bundle identifier), chọn bằng cờ `--flavor`. ID khác nhau nên ba bản cài cạnh nhau được. Bài 50 làm phần này; lab của bài không có thư mục `android/` hay `ios/`.
 
-Hình 1 cho thấy hai đường gặp nhau ở một lệnh build. Vì độc lập nên chúng có thể lệch: chạy `--flavor prod` nhưng quên đổi file, bản mang ID thật sẽ trỏ vào backend dev. Mục 4 bắt lỗi này.
+Hình 1 cho thấy hai đường gặp nhau ở một lệnh build. Vì hai đường độc lập nên chúng có thể lệch nhau: chạy `--flavor prod` nhưng quên đổi file, bản mang ID thật sẽ trỏ vào backend dev. Mục 4 bắt lỗi này.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -89,9 +89,9 @@ flutter test --dart-define-from-file=config/staging.json
 
 Công cụ Flutter biến mỗi cặp trong JSON thành define `KEY=value` bằng nội suy chuỗi (hàm `extractDartDefines` trong `flutter_tools`). Hệ quả, đã chạy thử:
 
-- Mọi giá trị thành chuỗi: `15000` thành `"15000"`, `true` thành `"true"`.
-- `null` trong JSON thành chuỗi `"null"`, không phải "không có giá trị". Một đối tượng lồng nhau thành `"{x: 1}"`.
-- `bool.fromEnvironment` chỉ nhận đúng chữ `true`: `True` cho `false`.
+- Mọi giá trị đều trở thành chuỗi: `15000` thành `"15000"`, `true` thành `"true"`.
+- `null` trong JSON trở thành chuỗi `"null"`, không phải "không có giá trị". Một đối tượng lồng nhau trở thành `"{x: 1}"`.
+- `bool.fromEnvironment` chỉ nhận đúng chữ `true`: `True` cho ra `false`.
 - `int.fromEnvironment('X', defaultValue: -1)` với `X=abc` trả `-1` mà không báo gì.
 - `--dart-define` luôn thắng file, đứng trước hay sau trong dòng lệnh cũng vậy, vì `extractDartDefines` thêm chúng sau các khoá của file. Giữa nhiều file, file sau thắng. Mục 6 dùng điều này.
 
@@ -131,7 +131,7 @@ Khoá không có define cũng cho chuỗi rỗng, nên `String.fromEnvironment` 
 
 ## 3. Giá trị nằm trong binary: không phải chỗ cho bí mật
 
-Vì lời gọi là `const`, trình biên dịch tính nó lúc dịch và thay bằng chuỗi cố định. Chuỗi đó nằm trong file app, không còn gắn với file JSON hay dòng lệnh nào (Hình 2). Lab có chương trình ba dòng để tự thấy:
+Vì lời gọi là `const`, trình biên dịch tính giá trị đó ngay lúc biên dịch và thay bằng chuỗi cố định. Chuỗi đó nằm trong file app, không còn gắn với file JSON hay dòng lệnh nào (Hình 2). Lab có chương trình ba dòng để tự thấy:
 
 ### embed_demo.dart · 25-flavors-config/tool/embed_demo.dart
 
@@ -174,7 +174,7 @@ grep -a -c gia-tri-thu /tmp/embed_demo  # 1: chuỗi nằm trong chính file bin
 <figcaption>Hình 2. Một giá trị define đi từ file JSON vào binary. Mũi tên chỉ chiều của quá trình build; mũi tên đứt chỉ điều xảy ra sau khi app được phát hành. Khung dưới trái không nằm trên đường đó: bí mật thật không bao giờ vào file cấu hình.</figcaption>
 </figure>
 
-Quy tắc suy ra: file JSON và `--dart-define` chỉ chứa thứ ai cũng được phép biết (địa chỉ công khai, cờ, thời gian chờ). Khoá API của bên thứ ba, `client_secret`, mật khẩu ở server; app chỉ gọi BFF bằng token ngắn hạn như bài 24. Obfuscation không biến chuỗi thành bí mật (bài 42). Keystore và chứng chỉ ký nằm trong kho bí mật của CI (bài 51 đến 54).
+Quy tắc suy ra: file JSON và `--dart-define` chỉ chứa thứ ai cũng được phép biết (địa chỉ công khai, cờ, thời gian chờ). Khoá API của bên thứ ba, `client_secret` và mật khẩu phải nằm ở server; app chỉ gọi BFF bằng token ngắn hạn như bài 24. Obfuscation không biến chuỗi thành bí mật (bài 42). Keystore và chứng chỉ ký nằm trong kho bí mật của CI (bài 51 đến 54).
 
 File JSON nằm trong Git, nên bí mật lỡ commit còn nằm lại trong lịch sử. Lab thêm một lưới an toàn: bộ quét tìm khoá có tên gợi ý bí mật và giá trị có dạng khoá phổ biến, chạy trên cả ba file.
 
@@ -197,7 +197,7 @@ Bộ quét chỉ báo **tên khoá**, không bao giờ in giá trị, vì kết 
 
 ## 4. AppConfig: kiểm tra khi khởi động và fail sớm
 
-Thiếu một define thì app vẫn chạy với chuỗi rỗng và lỗi nổ ở request đầu tiên, xa chỗ gây ra. Ta muốn sai cấu hình là dừng ngay lúc khởi động và nói rõ khoá nào sai. `AppConfig.fromMap` nhận một bảng chuỗi (cùng dạng công cụ gửi cho compiler), nên là hàm thuần, test được mọi ca mà không cần build lại:
+Thiếu một define thì app vẫn chạy với chuỗi rỗng và lỗi nổ ở request đầu tiên, xa chỗ gây ra. Ta muốn sai cấu hình là dừng ngay lúc khởi động và nói rõ khoá nào sai. `AppConfig.fromMap` nhận một bảng chuỗi (cùng dạng công cụ gửi cho compiler), nên là hàm thuần, test được mọi trường hợp mà không cần build lại:
 
 ### app_config.dart · 25-flavors-config/lib/config/app_config.dart (trích)
 
@@ -294,7 +294,7 @@ static Uri? _baseUrl(String? raw, Flavor? flavor, List<String> problems) {
 
 Thông báo lỗi không in lại giá trị URL, vì URL sai có thể mang `user:password@` hay `?key=...` và thông báo sẽ lên màn hình (test `không chứa user:password, query hay fragment; thông báo không lộ giá trị`). Bắt buộc `https` cho `staging` và `prod`, hay cấm log HTTP ở `prod`, là chính sách của lab, không phải luật của Flutter.
 
-### appFlavor khác dart-define chỗ nào
+### appFlavor khác dart-define ở chỗ nào
 
 `appFlavor` nằm trong `package:flutter/services.dart`. Theo mã nguồn, nó chỉ là `String.fromEnvironment('FLUTTER_APP_FLAVOR')`, trả `null` khi chuỗi rỗng. Công cụ Flutter đặt define đó từ cờ `--flavor` (hoặc `default-flavor` trong `pubspec.yaml`). Hai nguồn so với nhau như sau:
 
@@ -335,7 +335,7 @@ static Flavor? _flavor(
 
 Chạy `flutter test --flavor prod --dart-define-from-file=config/dev.json` cho ra `build bằng --flavor prod nhưng FLAVOR trong file cấu hình là dev: hai nguồn này không khớp`. Không có `--flavor` thì `appFlavor` là `null` và phép so bị bỏ qua.
 
-Ném ngoại lệ trước `runApp` không giúp tester cầm bản TestFlight vì họ không có console. Lab dựng widget gốc trong một hàm: cấu hình đúng thì chạy app, sai thì chạy màn hình liệt kê từng lỗi.
+Ném ngoại lệ trước `runApp` không giúp được tester cầm bản TestFlight vì tester không có console. Lab dựng widget gốc trong một hàm: cấu hình đúng thì chạy app, sai thì chạy màn hình liệt kê từng lỗi.
 
 ### bootstrap.dart · 25-flavors-config/lib/bootstrap.dart (trích)
 
@@ -423,7 +423,7 @@ Không có `if (kDebugMode)` rải rác: `kDebugMode` phản ánh chế độ bu
 <path d="M480 334 L640 280" class="f-none s-warn" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#fl25-3-w)"/>
 </svg>
 </div>
-<figcaption>Hình 3. Mũi tên liền đi từ bên dùng tới bên được dùng; mũi tên đứt là ghi đè. Chỉ <code>appConfigProvider</code> cần ghi đè theo môi trường. <code>apiClientProvider</code> đọc nó trực tiếp nên tự đổi hành vi theo flavor; <code>httpAdapterProvider</code> và <code>logSinkProvider</code> không đọc nó, chúng chỉ là chỗ để test chen vào.</figcaption>
+<figcaption>Hình 3. Mũi tên liền đi từ bên dùng tới bên được dùng; mũi tên đứt là ghi đè. Chỉ <code>appConfigProvider</code> cần ghi đè theo môi trường. <code>apiClientProvider</code> đọc nó trực tiếp nên tự đổi hành vi theo flavor; <code>httpAdapterProvider</code> và <code>logSinkProvider</code> không đọc nó, chúng chỉ là điểm để test inject bản thay thế vào.</figcaption>
 </figure>
 
 Lợi ích thấy ngay trong test: cùng một đoạn code báo giá, chạy với cấu hình của cả ba file, đi tới đúng host của từng flavor. Request đi qua `InProcessAdapter` vào fake API trong tiến trình nên không cần mạng:
@@ -465,8 +465,8 @@ flutter run --dart-define-from-file=config/prod.json
 
 Vướng mắc thực tế đều xoay quanh địa chỉ `dev`:
 
-- Android emulator: `localhost` là chính emulator, và tài liệu về mạng của emulator dành `10.0.2.2` cho máy dev. Ta không sửa `dev.json` mà chồng một define nhờ quy tắc "`--dart-define` thắng file": `flutter run --dart-define-from-file=config/dev.json --dart-define=API_BASE_URL=http://10.0.2.2:8787`.
-- Điện thoại thật: `localhost` là chính điện thoại. Lab có `config/local.json.example`; sao thành `config/local.json` (đã nằm trong `.gitignore`) và điền địa chỉ LAN của máy dev.
+- Android emulator: `localhost` là chính emulator, và tài liệu về mạng của emulator dành `10.0.2.2` cho máy dev. Ta không sửa `dev.json` mà thêm một define ghi đè nhờ quy tắc "`--dart-define` thắng file": `flutter run --dart-define-from-file=config/dev.json --dart-define=API_BASE_URL=http://10.0.2.2:8787`.
+- Điện thoại thật: `localhost` là chính điện thoại. Lab có `config/local.json.example`; sao chép thành `config/local.json` (đã nằm trong `.gitignore`) và điền địa chỉ LAN của máy dev.
 
 Lệnh build (`flutter build apk`, `appbundle`, `ipa`) nhận đúng hai cờ đó, cộng `--flavor` khi bài 50 đã có flavor native. Ta chưa chạy chúng vì máy kiểm không có Android SDK.
 
@@ -477,7 +477,7 @@ Lệnh build (`flutter build apk`, `appbundle`, `ipa`) nhận đúng hai cờ đ
 <ul>
 <li><strong>Gọi <code>String.fromEnvironment</code> không có <code>const</code>.</strong> Dấu hiệu: địa chỉ API rỗng dù có define, không báo lỗi (tuỳ nền tảng). Nguyên nhân: tài liệu chỉ đảm bảo hoạt động khi gọi bằng <code>const</code>. Cách sửa: <code>const</code> ở mọi lời gọi và để <code>AppConfig</code> từ chối giá trị rỗng.</li>
 <li><strong>File cấu hình và <code>--flavor</code> lệch nhau.</strong> Dấu hiệu: bản mang ID <code>vn.toinoi.customer</code> nhưng gọi API dev. Nguyên nhân: hai đường độc lập. Cách sửa: so <code>FLAVOR</code> với <code>appFlavor</code> lúc khởi động, và đưa cả hai cờ vào một script.</li>
-<li><strong>Đặt bí mật vào JSON hoặc <code>--dart-define</code>.</strong> Dấu hiệu: khoá tên <code>*_SECRET</code> hay <code>*_KEY</code> trong <code>config/</code>, hoặc <code>grep -a</code> thấy chuỗi đó trong binary. Nguyên nhân: giá trị define thành hằng nằm trong app. Cách sửa: chuyển về server, thu hồi khoá đã lộ.</li>
+<li><strong>Đặt bí mật vào JSON hoặc <code>--dart-define</code>.</strong> Dấu hiệu: khoá tên <code>*_SECRET</code> hay <code>*_KEY</code> trong <code>config/</code>, hoặc <code>grep -a</code> thấy chuỗi đó trong binary. Nguyên nhân: giá trị define trở thành hằng nằm trong app. Cách sửa: chuyển về server, thu hồi khoá đã lộ.</li>
 <li><strong>Dùng <code>int.fromEnvironment</code> hay <code>bool.fromEnvironment</code> trực tiếp.</strong> Dấu hiệu: timeout luôn bằng mặc định, hoặc <code>LOG_HTTP</code> không bật dù file ghi <code>True</code>. Nguyên nhân: giá trị sai bị nuốt và thay bằng mặc định. Cách sửa: đọc chuỗi, tự <code>int.tryParse</code> và báo lỗi nêu tên khoá.</li>
 <li><strong><code>null</code> trong JSON.</strong> Dấu hiệu: <code>API_BASE_URL</code> là chuỗi <code>"null"</code>. Nguyên nhân: công cụ nội suy mọi giá trị thành chuỗi. Cách sửa: không dùng <code>null</code>; test <code>kiểu JSON đúng ý</code> chặn nó.</li>
 </ul>
@@ -499,10 +499,10 @@ node tool/verify-flavors.mjs
 
 | Test | Chứng minh điều gì |
 |---|---|
-| `app_config_test.dart` (25) | Mọi quy tắc của mục 4: thiếu khoá, biên timeout, https, host cục bộ và host công cộng không bị nhầm, không lộ giá trị trong thông báo, lệch `appFlavor` |
+| `app_config_test.dart` (25) | Mọi quy tắc của mục 4: thiếu khoá, giá trị biên của timeout, https, host cục bộ và host công cộng không bị nhầm, không lộ giá trị trong thông báo, lệch `appFlavor` |
 | `config_files_test.dart` (22) | Mỗi JSON đúng bộ khoá và kiểu, qua `AppConfig`, không giống bí mật; prod không có localhost, staging khác host prod, `local.json` bị `.gitignore` chặn |
 | `secret_scan_test.dart` (12) | Bộ quét bắt tám dạng mẫu và tên khoá gợi ý, không báo nhầm cấu hình thật, không in giá trị |
-| `environment_test.dart` (3 + 5 bỏ qua) | Không define thì `fromEnvironment` báo đủ năm khoá; có define thì khớp file, lời gọi không `const` cho rỗng trong `flutter test` |
+| `environment_test.dart` (3 + 5 bỏ qua) | Không define thì `fromEnvironment` báo đủ năm khoá; có define thì khớp file, lời gọi không `const` cho ra chuỗi rỗng trong `flutter test` |
 | `providers_test.dart` (13) | `appConfigProvider` chưa ghi đè; client, log và host theo từng flavor; dev có log, prod không |
 | `app_test.dart` (11) | `buildRoot`: màn hình đúng cấu hình, ruy-băng, báo giá thử 25.500 VND, màn hình lỗi cấu hình |
 

@@ -1,0 +1,59 @@
+{
+"file": "flutter-statefulwidget-lifecycle-setstate-chon-dich-vu.md",
+"edits": [
+{
+"old": "`didUpdateWidget` chỉ làm gì khi `seconds` thực sự đổi:",
+"new": "`didUpdateWidget` chỉ làm việc khi `seconds` thực sự đổi:",
+"reason": "'chỉ làm gì khi' sai cấu trúc, khó hiểu",
+"severity": "high"
+},
+{
+"old": "`didUpdateWidget` luôn được theo sau bởi `build`;",
+"new": "sau `didUpdateWidget` luôn là `build`;",
+"reason": "Bị động kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "(đã đọc source)",
+"new": "(đã đọc mã nguồn)",
+"reason": "'source' tiếng Anh thừa trong văn xuôi",
+"severity": "low"
+},
+{
+"old": "Ta đã đọc source framework để chắc thứ tự:",
+"new": "Ta đã đọc mã nguồn framework để chắc về thứ tự:",
+"reason": "'source' thừa; câu cụt",
+"severity": "low"
+},
+{
+"old": "còn `Probe` anh em vẫn chỉ một.",
+"new": "còn `Probe` anh em vẫn chỉ chạy một lần.",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "`setState` thiếu `mounted` thì lint im lặng,",
+"new": "`setState` thiếu `mounted` thì lint không báo gì,",
+"reason": "'im lặng' là calque của silent",
+"severity": "low"
+},
+{
+"old": "Test `thoát màn hình khi đang huỷ` chứng minh.",
+"new": "Test `thoát màn hình khi đang huỷ` chứng minh điều đó.",
+"reason": "Thiếu tân ngữ của 'chứng minh'",
+"severity": "medium"
+},
+{
+"old": "tham số cộng `didUpdateWidget` dễ đọc",
+"new": "tham số cùng với `didUpdateWidget` dễ đọc",
+"reason": "'cộng' là calque của 'plus'",
+"severity": "medium"
+},
+{
+"old": "<code>GlobalKey</code> cộng <code>currentState?.restart()</code> cũng chạy",
+"new": "<code>GlobalKey</code> cùng với <code>currentState?.restart()</code> cũng chạy",
+"reason": "'cộng' là calque của 'plus'",
+"severity": "medium"
+}
+]
+}

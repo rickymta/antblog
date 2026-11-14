@@ -1,0 +1,83 @@
+{
+"file": "dart-ham-class-enum-sealed-pattern-matching-trang-thai-chuyen.md",
+"edits": [
+{
+"old": "Cách phòng thủ rẻ nhất là chuyển trạng thái sai **bị từ chối ngay tại chỗ**.",
+"new": "Cách phòng thủ ít tốn kém nhất là để việc chuyển trạng thái sai **bị từ chối ngay tại chỗ**.",
+"reason": "Câu thiếu động từ; 'rẻ nhất' là calque của cheapest",
+"severity": "medium"
+},
+{
+"old": "lớp con mới rơi vào nhánh đó mà không ai hay.",
+"new": "lớp con mới rơi vào nhánh đó mà không ai biết.",
+"reason": "'không ai hay' khẩu ngữ",
+"severity": "low"
+},
+{
+"old": "Quên là lỗi biên dịch, không phải lỗi lúc chạy.",
+"new": "Quên truyền là lỗi biên dịch, không phải lỗi lúc chạy.",
+"reason": "Câu lược động từ",
+"severity": "low"
+},
+{
+"old": "cho một cách tạo riêng: chuyến mới luôn ở `requested`",
+"new": "cung cấp một cách tạo riêng: chuyến mới luôn ở `requested`",
+"reason": "'cho' dùng sai nghĩa (dịch từ gives)",
+"severity": "medium"
+},
+{
+"old": "Nó **chuyển tiếp** sang constructor chính",
+"new": "Constructor này **chuyển tiếp** sang constructor chính",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "low"
+},
+{
+"old": "nên cả đối tượng bất biến thật sự.",
+"new": "nên cả đối tượng là bất biến thật sự.",
+"reason": "Câu thiếu động từ",
+"severity": "low"
+},
+{
+"old": "Một nhánh `_ => false` sẽ lặng lẽ trả lời thay ta.",
+"new": "Một nhánh `_ => false` sẽ tự trả lời thay ta mà không báo gì.",
+"reason": "'lặng lẽ' là calque của silently",
+"severity": "medium"
+},
+{
+"old": "Nó không có `_`. Thử thêm `final class Rated extends TripEvent` mà chưa sửa hàm, `dart analyze` báo:",
+"new": "Hàm này không có `_`. Nếu thử thêm `final class Rated extends TripEvent` mà chưa sửa hàm, `dart analyze` sẽ báo:",
+"reason": "Tránh 'Nó' đầu câu; câu điều kiện thiếu 'nếu'",
+"severity": "medium"
+},
+{
+"old": "khác với lỗi nuốt nhánh: mặc định ở đây",
+"new": "khác với lỗi nhánh nuốt biến thể mới: mặc định ở đây",
+"reason": "'lỗi nuốt nhánh' mơ hồ, tự ghép",
+"severity": "medium"
+},
+{
+"old": "chỉ có việc dựng bản sao:",
+"new": "chỉ làm một việc là dựng bản sao:",
+"reason": "'chỉ có việc' gượng",
+"severity": "low"
+},
+{
+"old": "Công dụng đầu tiên của nó là để hàm",
+"new": "Công dụng đầu tiên của record là để hàm",
+"reason": "'nó' mơ hồ",
+"severity": "low"
+},
+{
+"old": "rồi chia nguyên, tránh sai số số thực; đây là dạng",
+"new": "rồi chia nguyên để tránh sai số số thực; đây là dạng",
+"reason": "Thiếu quan hệ từ",
+"severity": "low"
+},
+{
+"old": "record; ca biên 0, 1,999",
+"new": "record; các giá trị biên 0, 1,999",
+"reason": "'ca biên' không rõ nghĩa",
+"severity": "medium"
+}
+]
+}

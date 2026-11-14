@@ -1,0 +1,47 @@
+{
+  "file": "flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe.md",
+  "edits": [
+    {
+      "old": "Test kiểm chỉ một lần gọi transport sau một giờ giả.",
+      "new": "Test kiểm tra transport chỉ bị gọi một lần sau một giờ thời gian giả.",
+      "reason": "Câu cụt, 'một giờ giả' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "`connected` chỉ đến khi gateway gửi `welcome`",
+      "new": "`connected` chỉ xuất hiện sau khi gateway gửi `welcome`",
+      "reason": "'chỉ đến khi' dễ hiểu nhầm thành 'chỉ cho tới lúc'",
+      "severity": "medium"
+    },
+    {
+      "old": "chọn thời gian chờ đều ngẫu nhiên từ 0 tới trần",
+      "new": "chọn thời gian chờ ngẫu nhiên, phân bố đều từ 0 tới trần",
+      "reason": "'đều ngẫu nhiên' trật tự từ gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai kiểu thất bại phải được tách.",
+      "new": "Phải tách hai kiểu thất bại.",
+      "reason": "Bị động kiểu tiếng Anh",
+      "severity": "low"
+    },
+    {
+      "old": "và nguy hiểm nhất là chuyện giữa chừng:",
+      "new": "và nguy hiểm nhất là trường hợp huỷ giữa chừng:",
+      "reason": "'chuyện giữa chừng' mơ hồ, thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "coi im lặng quá hạn là chết.",
+      "new": "coi việc không có tin nào quá hạn là kết nối đã chết.",
+      "reason": "'im lặng quá hạn' tự ghép, mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ vai trò `driver`, và không phát lại.",
+      "new": "chỉ dành cho vai trò `driver`, và không phát lại.",
+      "reason": "Câu thiếu động từ (đã chỉnh khi duyệt: \"mới đăng ký được\" là thông tin agent tự thêm)",
+      "severity": "medium"
+    }
+  ]
+}

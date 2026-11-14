@@ -64,7 +64,7 @@ Nếu thao tác "đã có chưa" chạy nhiều lần trên danh sách lớn, h�
 
 ## Iterable lười: where và map chưa chạy cho tới khi duyệt
 
-`List`, `Set` và kết quả của `where`, `map`, `take`, `skip` đều là `Iterable`. Khác biệt: List và Set giữ dữ liệu thật, còn kết quả của `where` hay `map` chỉ là **công thức** "lấy từ nguồn, lọc, rồi biến đổi". Công thức chỉ chạy khi có ai duyệt: `for`, `toList()`, `length`, `first`, `join`...
+`List`, `Set` và kết quả của `where`, `map`, `take`, `skip` đều là `Iterable`. Điểm khác nhau là List và Set giữ dữ liệu thật, còn kết quả của `where` hay `map` chỉ là **công thức** "lấy từ nguồn, lọc, rồi biến đổi". Công thức chỉ chạy khi có ai duyệt: `for`, `toList()`, `length`, `first`, `join`...
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -141,16 +141,16 @@ Bốn điều rút ra từ các test này:
 
 1. **Dựng chưa chạy.** Ngay sau `activeIds(...)`, cả hai bộ đếm bằng 0, và kết quả là `Iterable`, không phải `List`.
 2. **`toList()` là snapshot.** `where` chạy năm lần, `map` chỉ chạy hai lần vì chỉ hai chuyến qua được bộ lọc. Sau đó thêm chuyến vào danh sách nguồn thì snapshot không đổi, còn pipeline lười nhìn thấy chuyến mới ở lần duyệt kế tiếp.
-3. **Duyệt hai lần là chạy hai lần.** Bẫy kinh điển: lưu `Iterable` vào biến rồi vừa gọi `length` vừa gọi `toList()`. Nếu hàm lọc đắt, hoặc có side effect như ghi log, nó chạy gấp đôi. Cần dùng nhiều lần thì gọi `toList()` một lần rồi dùng List.
+3. **Duyệt hai lần là chạy hai lần.** Bẫy kinh điển: lưu `Iterable` vào biến rồi vừa gọi `length` vừa gọi `toList()`. Nếu hàm lọc tốn kém, hoặc có side effect như ghi log, hàm đó chạy gấp đôi. Cần dùng nhiều lần thì gọi `toList()` một lần rồi dùng List.
 4. **Duyệt dừng sớm được.** `first` chỉ kiểm tra tới chuyến đầu tiên thoả điều kiện, ở ví dụ là hai lần gọi `where` chứ không phải năm.
 
-Điều này ảnh hưởng thiết kế chữ ký hàm. **Nhận** `Iterable<Trip>` khi hàm chỉ cần duyệt: List, Set hay pipeline lười đều truyền được, như `countCancellable` ở trên. **Trả** `List<Trip>` khi người gọi cần chỉ số, cần giữ kết quả, hoặc khi nguồn có thể đổi sau đó. Trả `Iterable` lười từ một getter chỉ nên làm khi bạn muốn người gọi tiếp tục nối thêm `where` hay `take` và hiểu rằng nó chưa chạy. Cơ chế này tương tự LINQ deferred execution của C#; bài [Deferred execution trong LINQ](/articles/csharp-linq-deferred-execution) giải thích phiên bản .NET, bẫy duyệt hai lần cũng hệt như vậy.
+Điều này ảnh hưởng tới cách thiết kế chữ ký hàm. **Nhận** `Iterable<Trip>` khi hàm chỉ cần duyệt: List, Set hay pipeline lười đều truyền được, như `countCancellable` ở trên. **Trả** `List<Trip>` khi người gọi cần chỉ số, cần giữ kết quả, hoặc khi nguồn có thể đổi sau đó. Trả `Iterable` lười từ một getter chỉ nên làm khi bạn muốn người gọi tiếp tục nối thêm `where` hay `take` và hiểu rằng pipeline đó chưa chạy. Cơ chế này tương tự LINQ deferred execution của C#; bài [Deferred execution trong LINQ](/articles/csharp-linq-deferred-execution) giải thích phiên bản .NET, bẫy duyệt hai lần cũng giống hệt.
 
 ## fold, reduce, any, every, firstWhere và nhóm theo khoá
 
 Sau khi có pipeline, ta cần gom nó thành một kết quả.
 
-- **`fold(initial, combine)`** cộng dồn từ giá trị khởi đầu; kiểu kết quả có thể khác kiểu phần tử. Rỗng thì trả `initial`: tổng cước của danh sách rỗng là 0.
+- **`fold(initial, combine)`** cộng dồn từ giá trị khởi đầu; kiểu kết quả có thể khác kiểu phần tử. Danh sách rỗng thì trả `initial`: tổng cước của danh sách rỗng là 0.
 - **`reduce(combine)`** không có giá trị khởi đầu, nên danh sách rỗng ném `StateError`. Chỉ dùng khi chắc không rỗng, hoặc chặn trước như `priciest` bên dưới.
 - **`any`** và **`every`** trả `bool`. `every` trên danh sách rỗng là `true`.
 - **`firstWhere`** ném `StateError` khi không có phần tử nào, trừ khi có `orElse`.
@@ -219,11 +219,11 @@ Map<TripStatus, List<Trip>> groupByStatusManually(Iterable<Trip> trips) {
 
 `putIfAbsent` tạo List rỗng cho khoá mới, rồi `add` chuyến vào. `groupBy` của `package:collection` làm đúng việc đó; test `groupBy của package:collection khớp bản viết tay` kiểm hai bản cho cùng kết quả.
 
-**Sắp xếp** cần nói riêng vì có bẫy ổn định. Sắp xếp **ổn định** nghĩa là hai phần tử bằng khoá giữ nguyên thứ tự ban đầu. Với cước, hai chuyến cùng 12.000 VND nên giữ thứ tự theo lúc đặt. `sortedByCompare` (và `sortedBy`) của `package:collection` được cài đặt bằng `mergeSortBy` (merge sort, ổn định); lab có test 200 chuyến cước trùng để giữ hành vi này. `sorted` của cùng package chỉ sao chép rồi gọi `List.sort`, mà `List.sort` của Dart không cam kết ổn định. Vì vậy `sortedByFareDesc` dùng `sortedByCompare` với bộ so sánh ngược `b.compareTo(a)`. Đảo bằng `.reversed` sẽ đảo luôn thứ tự các phần tử bằng nhau.
+**Sắp xếp** cần nói riêng vì có bẫy về tính ổn định. Sắp xếp **ổn định** nghĩa là hai phần tử có khoá bằng nhau giữ nguyên thứ tự ban đầu. Với cước, hai chuyến cùng 12.000 VND nên giữ thứ tự theo lúc đặt. `sortedByCompare` (và `sortedBy`) của `package:collection` được cài đặt bằng `mergeSortBy` (merge sort, ổn định); lab có test 200 chuyến cước trùng để giữ hành vi này. `sorted` của cùng package chỉ sao chép rồi gọi `List.sort`, mà `List.sort` của Dart không cam kết ổn định. Vì vậy `sortedByFareDesc` dùng `sortedByCompare` với bộ so sánh ngược `b.compareTo(a)`. Đảo bằng `.reversed` sẽ đảo luôn thứ tự các phần tử bằng nhau.
 
 ## Generics: viết một lần, đúng kiểu cho mọi phần tử
 
-Cần phân trang cho chuyến, cho tài xế, rồi cho ưu đãi. Viết ba lớp riêng thì lặp code; viết một lớp chứa `List<Object>` hoặc `dynamic` thì mất kiểu, và `page.items[0].fareVnd` thành lỗi chỉ bắt được lúc chạy. **Generics** cho tham số kiểu `T`: mỗi nơi dùng chọn `T` và trình biên dịch kiểm tra đúng kiểu.
+Cần phân trang cho chuyến, cho tài xế, rồi cho ưu đãi. Viết ba lớp riêng thì lặp code; viết một lớp chứa `List<Object>` hoặc `dynamic` thì mất kiểu, và `page.items[0].fareVnd` trở thành lỗi chỉ bắt được lúc chạy. **Generics** cho tham số kiểu `T`: mỗi nơi dùng chọn `T` và trình biên dịch kiểm tra đúng kiểu.
 
 ### paged.dart · 04-collections-generics/lib/paged.dart
 
@@ -296,9 +296,9 @@ T? highestBy<T, K extends Comparable<K>>(
 ```
 
 - `Paged<T>` mang `List<T>` và thông tin trang. `page` đếm từ 1; `hasNext` là `page * pageSize < total`, nên trang cuối vừa khít (8 phần tử, cỡ 4, trang 2) cho `false`, không sinh trang rỗng.
-- `map<R>` có **tham số kiểu riêng** của phương thức: `Paged<Trip>` thành `Paged<String>` mà giữ `page`, `pageSize`, `total`. Dart suy luận `R` từ hàm truyền vào, không cần viết `map<String>(...)`.
+- `map<R>` có **tham số kiểu riêng** của phương thức: đổi `Paged<Trip>` thành `Paged<String>` mà giữ `page`, `pageSize`, `total`. Dart suy luận `R` từ hàm truyền vào, không cần viết `map<String>(...)`.
 - `paginate<T>` là hàm generic: `paginate(trips, ...)` suy ra `T = Trip` từ đối số. Trang vượt cuối cho `items` rỗng thay vì ném lỗi, còn `page < 1` hoặc `pageSize < 1` là lỗi lập trình nên ném `ArgumentError`.
-- `highestBy<T, K extends Comparable<K>>` dùng **ràng buộc** `extends`: khoá `K` phải so sánh được với chính nó, nên gọi `key.compareTo(bestKey)` an toàn. Truyền khoá là `Driver` (không so sánh được) sẽ lỗi ngay khi biên dịch. Lưu ý `int` là `Comparable<num>`, không phải `Comparable<int>`: viết tường minh `K = int` bị từ chối; để Dart suy luận (`K = num`) hoặc dùng khoá `String`, `DateTime` thì chạy.
+- `highestBy<T, K extends Comparable<K>>` dùng **ràng buộc** `extends`: khoá `K` phải so sánh được với chính nó, nên gọi `key.compareTo(bestKey)` an toàn. Truyền khoá là `Driver` (không so sánh được) sẽ báo lỗi ngay khi biên dịch. Lưu ý `int` là `Comparable<num>`, không phải `Comparable<int>`: viết tường minh `K = int` bị từ chối; để Dart suy luận (`K = num`) hoặc dùng khoá `String`, `DateTime` thì chạy.
 
 Hai kiểu "rộng" này hỏng theo hai cách khác nhau. Với `dynamic`, trình biên dịch ngừng kiểm tra: gõ nhầm `fareVND` vẫn biên dịch, chỉ hỏng khi người dùng mở màn hình. Với `Object`, trình biên dịch vẫn kiểm tra, nhưng phải ép kiểu (`as Trip`) mới đọc được `fareVnd`, và ép sai mới hỏng lúc chạy. List của Dart còn **covariant**: `List<Trip>` gán được cho `List<Object>`, nhưng thêm một `int` vào đó thì ném lỗi lúc chạy. Kiểu cụ thể hoặc tham số kiểu an toàn hơn cả hai.
 
@@ -347,7 +347,7 @@ Hàm `groupByStatusManually` ở cuối file đã in ở mục trước nên kh�
 
 Vì extension nhắm vào `Iterable<Trip>`, nó dùng được cho `List<Trip>`, `Set<Trip>` và cả pipeline lười (test `extension chạy trên Set và trên pipeline lười` kiểm điều này). Có hai điều phải nhớ. Thứ nhất, extension được chọn theo **kiểu tĩnh** lúc biên dịch: gọi trên giá trị kiểu `dynamic` thì không tìm thấy. Thứ hai, extension không ghi đè được member có sẵn của kiểu: nếu `Iterable` có `length`, ta không thay nó được.
 
-`active` trả `Iterable<Trip>` lười, nên `trips.active.totalFareVnd` nối được hai extension với nhau mà không tạo List trung gian. Còn `sortedByFareDesc` trả `List` vì sắp xếp phải duyệt hết và người dùng thường cần chỉ số.
+`active` trả `Iterable<Trip>` lười, nên `trips.active.totalFareVnd` nối được hai extension với nhau mà không tạo List trung gian. Còn `sortedByFareDesc` trả `List` vì sắp xếp phải duyệt hết và người gọi thường cần chỉ số.
 
 Dòng import đầu file chỉ lấy hai tên bằng `show`. `show` và `hide` cũng là công cụ để xử lý khi hai extension trùng tên member. Lab có hai extension, `TripSummaryShort` và `TripSummaryLong`, đều có getter `summary` trên `Iterable<Trip>`:
 
@@ -377,7 +377,7 @@ extension TripSummaryLong on Iterable<Trip> {
 }
 ```
 
-Nếu file nào import cả hai rồi viết `trips.summary`, analyzer báo `ambiguous_extension_member_access`: không có extension nào cụ thể hơn. Có hai cách gỡ, và cả hai đều có test:
+Nếu một file import cả hai rồi viết `trips.summary`, analyzer báo `ambiguous_extension_member_access`: không có extension nào cụ thể hơn. Có hai cách gỡ, và cả hai đều có test:
 
 ### extension_conflict_test.dart · 04-collections-generics/test/extension_conflict_test.dart
 
@@ -451,7 +451,7 @@ void removeCompleted(List<Trip> trips) =>
     trips.removeWhere((trip) => trip.status == TripStatus.completed);
 ```
 
-Lưu pipeline lười trên một List còn đổi để dùng sau cũng nguy hiểm: kết quả đổi theo nguồn mà không ai hay. Cần giá trị tại một thời điểm thì chốt bằng `toList()`.
+Lưu pipeline lười trên một List còn đổi để dùng sau cũng nguy hiểm: kết quả đổi theo nguồn mà không ai nhận ra. Cần giá trị tại một thời điểm thì chốt bằng `toList()`.
 
 ## Chạy ví dụ và kiểm chứng
 

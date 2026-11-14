@@ -1,0 +1,149 @@
+{
+ "file": "flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong.md",
+ "edits": [
+  {
+   "old": "dựng đúng ca này.",
+   "new": "dựng đúng trường hợp này.",
+   "reason": "'ca' lẫn thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài 19 để lỗi thành ba kiểu:",
+   "new": "Bài 19 để lỗi rơi vào ba kiểu:",
+   "reason": "'để lỗi thành' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Hình 1 là bảng đổi.",
+   "new": "Hình 1 là bảng chuyển đổi.",
+   "reason": "'bảng đổi' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Thử lại tay kèm gợi ý Wi-Fi",
+   "new": "Thử lại thủ công kèm gợi ý Wi-Fi",
+   "reason": "'tay' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Package import `dart:io` trực tiếp",
+   "new": "Package này import `dart:io` trực tiếp",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "để đổi lỗi nhận ra được thành `ApiFailure`",
+   "new": "để đổi những lỗi nhận diện được thành `ApiFailure`",
+   "reason": "'nhận ra được' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "ca server im lặng dừng đúng ở 30 giây",
+   "new": "trường hợp server im lặng dừng đúng ở 30 giây",
+   "reason": "'ca' lẫn thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "test dựng ca mất response",
+   "new": "test dựng trường hợp mất response",
+   "reason": "'ca' lẫn thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "sẽ gõ server cùng một giây",
+   "new": "sẽ dồn request vào server trong cùng một giây",
+   "reason": "'gõ server' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "chờ một số ngẫu nhiên đều trong `[0, trần]`",
+   "new": "chờ một khoảng thời gian ngẫu nhiên, phân bố đều trong `[0, trần]`",
+   "reason": "'số ngẫu nhiên đều' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "được tiêm vào để test đọc ra con số chính xác",
+   "new": "được inject vào để test biết chính xác con số",
+   "reason": "'tiêm vào' calque",
+   "severity": "medium"
+  },
+  {
+   "old": "bị tiêm lỗi 500",
+   "new": "bị inject lỗi 500",
+   "reason": "'tiêm lỗi' calque",
+   "severity": "medium"
+  },
+  {
+   "old": "Fake API chỉ tiêm lỗi 500",
+   "new": "Fake API chỉ inject lỗi 500",
+   "reason": "'tiêm lỗi' calque",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca `loseResponse` là ca xấu nhất của câu hỏi mở đầu.",
+   "new": "Trường hợp `loseResponse` là trường hợp xấu nhất của câu hỏi mở đầu.",
+   "reason": "'ca' lẫn thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "ca không khoá có test riêng",
+   "new": "trường hợp không khoá có test riêng",
+   "reason": "'ca' lẫn thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "để quyết định có gọi được request",
+   "new": "để quyết định request có gọi được hay không",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "lên giao diện, chỉ `traceId`.",
+   "new": "lên giao diện, chỉ đưa `traceId`.",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "nút bấm tay vẫn hiện",
+   "new": "nút bấm thủ công vẫn hiện",
+   "reason": "'tay' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Ta chỉ đọc source, chưa chạy thiết bị.",
+   "new": "Ta chỉ đọc source, chưa chạy trên thiết bị.",
+   "reason": "Thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "Hình 3 đếm.",
+   "new": "Hình 3 đếm số request.",
+   "reason": "Thiếu tân ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ đổi loại nhận ra được",
+   "new": "chỉ đổi loại lỗi nhận diện được",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Bản dùng: `connectivity_plus`",
+   "new": "Phiên bản dùng: `connectivity_plus`",
+   "reason": "Thống nhất 'phiên bản'",
+   "severity": "low"
+  },
+  {
+   "old": "Tổng 57,5 giây, lý do ta có",
+   "new": "Tổng 57,5 giây, đó là lý do ta có",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "với HTTPS, theo cơ chế TLS lỗi rơi vào bắt tay (",
+   "new": "với HTTPS, theo cơ chế TLS, lỗi sẽ nằm ở bước bắt tay (",
+   "reason": "Câu dính",
+   "severity": "medium"
+  }
+ ]
+}

@@ -15,7 +15,7 @@ Bài 23 đã có guard đăng nhập nhưng đăng nhập vẫn là giả. Bài 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Năm request cùng nhận 401. Mỗi request chạy <code>onError</code> riêng: đọc refresh token trong kho, gọi <code>POST /auth/refresh</code>, lưu cặp mới, rồi gửi lại. Server dùng rotation. Mọi thứ có chạy đúng không?</p>
-<details><summary>Xem đáp án</summary><p><strong>Không.</strong> Khi mạng chậm, cả năm request cùng đưa một refresh token cũ. Lần đầu thành công, bốn lần sau bị coi là dùng lại, server thu hồi cả họ, và code ngây thơ xoá kho. Test <code>refresh riêng từng request + rotation</code>: <code>refreshCalls</code> là 5, <code>revokedFamilies</code> là 1, kho rỗng. Mục 4 cho cách sửa.</p></details>
+<details><summary>Xem đáp án</summary><p><strong>Không.</strong> Khi mạng chậm, cả năm request cùng đưa một refresh token cũ. Lần đầu thành công, bốn lần sau bị coi là dùng lại, server thu hồi cả họ token, và code ngây thơ xoá kho. Test <code>refresh riêng từng request + rotation</code>: <code>refreshCalls</code> là 5, <code>revokedFamilies</code> là 1, kho rỗng. Mục 4 cho cách sửa.</p></details>
 </div>
 
 ## 1. Luồng OTP và hai loại token
@@ -72,7 +72,7 @@ Future<AuthTokens> refresh(String refreshToken) => guardApi(
 | Token | Dạng | Hạn (minh hoạ) | Server kiểm bằng |
 |---|---|---|---|
 | Access | JWT, gắn vào mọi request | 15 phút | chữ ký và `exp` (fake tra bảng đã phát) |
-| Refresh | chuỗi đục, chỉ gửi tới `/auth/refresh` | 30 ngày | bảng token và họ token của server |
+| Refresh | chuỗi opaque, chỉ gửi tới `/auth/refresh` | 30 ngày | bảng token và họ token của server |
 
 ## 2. JWT: đọc được, nhưng không tin được
 
@@ -105,7 +105,7 @@ Test `payload bị sửa (role thành driver) vẫn đọc ra bình thường` c
 
 ## 3. Refresh token rotation: dùng lại là báo động
 
-Refresh token sống 30 ngày mà không đổi thì kẻ trộm có 30 ngày. **Rotation** thu hẹp cửa sổ đó: mỗi lần refresh thành công, server phát cặp mới và đánh dấu token vừa dùng là "đã dùng". Mọi token sinh ra từ một lần đăng nhập OTP thuộc một **họ**. Token đã dùng mà xuất hiện lại nghĩa là hai bên cùng cầm nó; server không biết ai là ai nên thu hồi cả họ (Hình 2).
+Refresh token sống 30 ngày mà không đổi thì kẻ trộm có 30 ngày. **Rotation** thu hẹp cửa sổ đó: mỗi lần refresh thành công, server phát cặp mới và đánh dấu token vừa dùng là "đã dùng". Mọi token sinh ra từ một lần đăng nhập OTP thuộc một **họ**. Token đã dùng mà xuất hiện lại thì có nghĩa là hai bên cùng cầm nó; server không biết ai là ai nên thu hồi cả họ (Hình 2).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -149,7 +149,7 @@ Hai điểm cần nhớ. Access token **không** bị thu hồi khi họ bị th
 
 ## 4. SessionManager: một lần refresh cho mọi request
 
-Lỗi ở đầu bài sinh ra từ việc mỗi request tự quyết định refresh. Ta dồn quyết định đó vào `SessionManager`, nơi giữ cặp token trong bộ nhớ sau lần đọc kho đầu và là nơi duy nhất được đổi nó. Request bị 401 gọi vào đây và nhận một `Future` chung (Hình 3).
+Lỗi ở đầu bài sinh ra từ việc mỗi request tự quyết định refresh. Ta dồn quyết định đó vào `SessionManager`, nơi giữ cặp token trong bộ nhớ sau lần đọc kho đầu tiên và là nơi duy nhất thay đổi cặp token đó. Request bị 401 gọi vào đây và nhận một `Future` chung (Hình 3).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -206,7 +206,7 @@ Future<AuthTokens> refreshAfterUnauthorized(
 }
 ```
 
-Từ `final pending` tới phép gán `_inFlight` không có `await`, nên không ai chen vào được; vì thế token nằm trong bộ nhớ, còn đọc kho (bất đồng bộ) thì hai request có thể cùng qua kiểm tra. Nhánh `current.accessToken != rejectedAccessToken` cứu ca 401 bay về chậm, sau khi người khác đã refresh xong (test `401 về muộn khi token đã đổi`). Nhưng nhánh này không biết 401 thuộc phiên nào: request của phiên A về muộn sau khi khách đăng nhập lại thành B cũng mang token khác, và phát lại nó bằng token B là làm việc của A dưới danh nghĩa B. Vì vậy `AuthInterceptor` ghi `epoch` vào từng request (mục 5).
+Từ `final pending` tới phép gán `_inFlight` không có `await`, nên không ai chen vào được; vì thế token được giữ trong bộ nhớ: nếu phải đọc kho (bất đồng bộ) thì hai request có thể cùng qua kiểm tra. Nhánh `current.accessToken != rejectedAccessToken` cứu trường hợp 401 về chậm, sau khi người khác đã refresh xong (test `401 về muộn khi token đã đổi`). Nhưng nhánh này không biết 401 thuộc phiên nào: request của phiên A về muộn sau khi khách đăng nhập lại thành B cũng mang token khác, và phát lại nó bằng token B là làm việc của A dưới danh nghĩa B. Vì vậy `AuthInterceptor` ghi `epoch` vào từng request (mục 5).
 
 ### session_manager.dart · 24-auth-jwt-refresh/lib/auth/session_manager.dart (trích)
 
@@ -237,9 +237,9 @@ if (epoch != _epoch) {
 return next;
 ```
 
-"Refresh thất bại thì đăng xuất" cần nói chính xác. 401 hoặc 403 từ `/auth/refresh` nghĩa là phiên đã chết: ta xoá kho và phát `signedOut`. Đó là hợp đồng của Tới Nơi; server theo RFC 6749 §5.2 trả 400 `invalid_grant`, và đổi server thì phải đổi nhánh này. Mất sóng, quá hạn hay 5xx của chính lời gọi refresh không nói gì về phiên, nên ta giữ phiên và để request nhận lỗi thật. Giới hạn: nếu server đã xoay mà response bị mất, phiên "còn" nhưng lần Thử lại đưa token đã xoay và bị đăng xuất (test `mất response của lần refresh`). Chỉ server sửa được, bằng khoảng ân hạn ngắn mà một số server có; fake không có.
+"Refresh thất bại thì đăng xuất" cần nói chính xác. 401 hoặc 403 từ `/auth/refresh` nghĩa là phiên đã chết: ta xoá kho và phát `signedOut`. Đó là hợp đồng của Tới Nơi; server theo RFC 6749 §5.2 trả 400 `invalid_grant`, và đổi server thì phải đổi nhánh này. Mất sóng, timeout hay 5xx của chính lời gọi refresh không nói gì về phiên, nên ta giữ phiên và để request nhận lỗi thật. Giới hạn: nếu server đã xoay mà response bị mất, phiên "còn" nhưng lần Thử lại đưa token đã xoay và bị đăng xuất (test `mất response của lần refresh`). Chỉ server sửa được, bằng khoảng ân hạn ngắn mà một số server có; fake không có.
 
-Hai nơi có thể làm sống lại phiên đã đăng xuất, và `epoch` (tăng mỗi lần phiên kết thúc hoặc bắt đầu) chặn cả hai. Refresh về muộn sau khi khách bấm Đăng xuất bị bỏ (test `đăng xuất trong lúc refresh đang bay`). Lệnh ghi kho cũng có thể đến **sau** lệnh xoá, nên sau khi ghi ta kiểm lại `epoch` và đưa kho về đúng trạng thái hiện tại (test `đăng xuất đúng lúc đang ghi kho`). Cặp mới vào bộ nhớ trước rồi mới ghi kho, vì server đã xoay token nên ghi kho lỗi (`PlatformException`) không được làm mất nó; lỗi báo qua `onStoreError`, nhưng kho còn cặp cũ nên lần mở app sau phải đăng nhập lại.
+Hai nơi có thể làm sống lại phiên đã đăng xuất, và `epoch` (tăng mỗi lần phiên kết thúc hoặc bắt đầu) chặn cả hai. Kết quả refresh về muộn sau khi khách bấm Đăng xuất bị bỏ qua (test `đăng xuất trong lúc refresh đang bay`). Lệnh ghi kho cũng có thể đến **sau** lệnh xoá, nên sau khi ghi ta kiểm lại `epoch` và đưa kho về đúng trạng thái hiện tại (test `đăng xuất đúng lúc đang ghi kho`). Cặp mới vào bộ nhớ trước rồi mới ghi kho, vì server đã xoay token nên ghi kho lỗi (`PlatformException`) không được làm mất nó; lỗi báo qua `onStoreError`, nhưng kho còn cặp cũ nên lần mở app sau phải đăng nhập lại.
 
 ## 5. AuthInterceptor: gắn token, bắt 401, phát lại một lần
 
@@ -285,7 +285,7 @@ try {
 Cờ `_replayedKey` bảo đảm "đúng một lần": phát lại mà vẫn 401 thì lỗi đi tiếp. Request chưa từng mang token hoặc tới đường dẫn công khai như `/quotes` bị bỏ qua. `onRequest` ghi `session.epoch` vào request, và `onError` bỏ qua 401 của request mang `epoch` khác phiên hiện tại: đó là request của người đã đăng xuất, không được phát lại bằng token người vừa đăng nhập (test `401 của phiên cũ về sau khi đã đăng nhập lại`). Ba chi tiết khác đều có test:
 
 - **Interceptor thường, không phải `QueuedInterceptor`.** Tài liệu của `dio` ghi interceptor thường chạy đồng thời, còn `QueuedInterceptor` cho truy cập tuần tự. Mã nguồn `dio` 5.11.1: `QueuedInterceptor` có hàng đợi riêng cho `onError`, task kế tiếp chỉ chạy khi `handler` của task trước hoàn tất. Nếu `onError` chờ một request đi qua chính `Dio` đó và request ấy cũng lỗi, lỗi mới xếp sau task đang chờ nó (test `QueuedInterceptor refresh qua chính Dio`: không bao giờ xong). Refresh trên `Dio` riêng chưa đủ nếu lần phát lại vẫn đi qua `Dio` đó và cũng 401 (test `refresh trên Dio riêng vẫn treo`).
-- **`Dio` riêng cho `/auth/*`**, không `AuthInterceptor`, không `RetryInterceptor`. Refresh không lặp lại được an toàn: gửi lại sau khi response mất bị coi là dùng lại. Test `refresh gặp 5xx` đếm đúng một lời gọi refresh dù client có `RetryInterceptor`.
+- **`Dio` riêng cho `/auth/*`**, không `AuthInterceptor`, không `RetryInterceptor`. Lời gọi refresh không an toàn để lặp lại: gửi lại sau khi response mất bị coi là dùng lại. Test `refresh gặp 5xx` đếm đúng một lời gọi refresh dù client có `RetryInterceptor`.
 - **`onRequest` ghi đè header mỗi lần.** Lần phát lại sau refresh và lần thử lại của `RetryInterceptor` đều gọi `dio.fetch`, tức đi lại qua cả danh sách, nên luôn mang token hiện tại. Request đến giữa lúc đang refresh thì chờ (`waitForRefresh`) và đi với token mới ngay lần đầu.
 
 ### providers.dart · 24-auth-jwt-refresh/lib/providers.dart (trích)
@@ -321,7 +321,7 @@ Lab dùng thứ tự log (đã có từ lúc tạo client), `AuthInterceptor`, r
 <-- 201 POST /trips
 ```
 
-Thứ tự log, `RetryInterceptor`, `AuthInterceptor` cũng được hỗ trợ (README của `toi_noi_api`: interceptor đứng sau Retry chỉ thấy `onError` một lần, với lỗi cuối). Với cả hai thứ tự, test chạy ba ca: năm request song song cùng 401 vẫn một lần refresh và Retry không chờ lần nào; 503 rồi 401 thì refresh một lần và chuyến chỉ tạo một lần; lần phát lại sau refresh gặp 503 thì Retry vẫn thử lại. Lý do chung: 401 là 4xx nên Retry không đụng tới, còn mọi lần gửi lại đều qua `onRequest` của ta. Ta chọn log, Auth, Retry vì đặt log sau `AuthInterceptor` thì dòng lỗi 401 biến mất: lỗi đã được xử lý trước khi tới log.
+Thứ tự log, `RetryInterceptor`, `AuthInterceptor` cũng được hỗ trợ (README của `toi_noi_api`: interceptor đứng sau Retry chỉ thấy `onError` một lần, với lỗi cuối). Với cả hai thứ tự, test chạy ba test case: năm request song song cùng 401 vẫn một lần refresh và Retry không chờ lần nào; 503 rồi 401 thì refresh một lần và chuyến chỉ tạo một lần; lần phát lại sau refresh gặp 503 thì Retry vẫn thử lại. Lý do chung: 401 là 4xx nên Retry không đụng tới, còn mọi lần gửi lại đều qua `onRequest` của ta. Ta chọn log, Auth, Retry vì đặt log sau `AuthInterceptor` thì dòng lỗi 401 biến mất: lỗi đã được xử lý trước khi tới log.
 
 ## 6. Đăng xuất và nối vào giao diện
 
@@ -338,7 +338,7 @@ try {
 }
 ```
 
-Báo server trước thì khách không có sóng bấm Đăng xuất mà app đứng im, token vẫn nằm trong kho. Làm cục bộ trước thì dù mạng ra sao, thiết bị cũng không còn giữ gì. Test `mất mạng khi báo server` kiểm kho sạch và không ném lỗi; test chạy chung cho `InMemoryTokenStore` và `SecureTokenStore` (nền tảng giả).
+Báo server trước thì khách không có sóng sẽ bấm Đăng xuất mà app đứng im, token vẫn nằm trong kho. Làm cục bộ trước thì dù mạng ra sao, thiết bị cũng không còn giữ gì. Test `mất mạng khi báo server` kiểm kho sạch và không ném lỗi; test chạy chung cho `InMemoryTokenStore` và `SecureTokenStore` (nền tảng giả).
 
 `AuthController` là một `AsyncNotifier` nghe luồng `signedOut`; đăng xuất ở đâu cũng đổi state thành `null`, kể cả khi server từ chối refresh giữa chừng một request. `AuthGate` chọn màn hình theo state nên không có `Navigator.push` nào để quên; với `go_router` ở bài 23, ta đưa luồng này vào `refreshListenable`. Test `server thu hồi phiên giữa chừng` bấm đặt chuyến khi họ token đã bị thu hồi, và màn hình tự về đăng nhập.
 
@@ -347,11 +347,11 @@ Báo server trước thì khách không có sóng bấm Đăng xuất mà app đ
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Năm lỗi hay gặp với token và interceptor</span>
 
-<p><strong>1. Mỗi request tự refresh.</strong> Dấu hiệu: nhiều lời gọi <code>/auth/refresh</code> cùng lúc, rồi cả người dùng bị đăng xuất. Nguyên nhân: không dùng chung kết quả, rotation coi lần đưa lại là trộm. Cách sửa: một <code>Future</code> chung và so token bị từ chối với token hiện tại (mục 4).</p>
+<p><strong>1. Mỗi request tự refresh.</strong> Dấu hiệu: nhiều lời gọi <code>/auth/refresh</code> cùng lúc, rồi người dùng cũng bị đăng xuất. Nguyên nhân: không dùng chung kết quả, rotation coi lần đưa lại là trộm. Cách sửa: một <code>Future</code> chung và so token bị từ chối với token hiện tại (mục 4).</p>
 
 <p><strong>2. Treo vì <code>QueuedInterceptor</code> và <code>Dio</code> dùng chung.</strong> Dấu hiệu: request không bao giờ xong khi refresh hỏng. Nguyên nhân: lỗi của lời gọi refresh xếp hàng sau task đang chờ nó. Cách sửa: <code>Interceptor</code> thường cộng <code>Dio</code> riêng cho refresh (mục 5).</p>
 
-<p><strong>3. Refresh lỗi mạng cũng đăng xuất.</strong> Dấu hiệu: khách ra khỏi hầm là phải nhập OTP lại. Nguyên nhân: coi mọi lỗi refresh là phiên chết. Cách sửa: chỉ 401 và 403 kết thúc phiên, lỗi khác giữ phiên (test <code>refresh gặp 5xx, mất mạng, 429</code>), trừ ca mất response đã nói ở mục 4.</p>
+<p><strong>3. Refresh lỗi mạng cũng đăng xuất.</strong> Dấu hiệu: khách ra khỏi hầm là phải nhập OTP lại. Nguyên nhân: coi mọi lỗi refresh là phiên chết. Cách sửa: chỉ 401 và 403 kết thúc phiên, lỗi khác giữ phiên (test <code>refresh gặp 5xx, mất mạng, 429</code>), trừ trường hợp mất response đã nói ở mục 4.</p>
 
 <p><strong>4. Tin <code>role</code> trong JWT.</strong> Dấu hiệu: đổi một chữ trong payload là mở được màn hình tài xế. Nguyên nhân: client không kiểm được chữ ký. Cách sửa: client chỉ hiển thị; server kiểm từng request (mục 2).</p>
 
@@ -373,18 +373,18 @@ flutter test
 
 Kỳ vọng: fake API `No issues found!` và **91 test** (28 test mới của `AuthModule`). Lab `No issues found!` và `All tests passed!` với **79 test**. Đã kiểm với Flutter 3.47.4, Dart 3.13.3, `dio` 5.11.1, `flutter_riverpod` 3.5.0, `flutter_secure_storage` 11.2.0. Mức kiểm chứng: **Kiểm chứng tự động**.
 
-Test dựng một "app" trên fake API chạy trong tiến trình, đồng hồ của server là biến trong test nên access token hết hạn mà không chờ thật. Ta cũng thử phá: bỏ bước dùng chung `_inFlight` làm test năm request song song đỏ, bỏ cờ phát lại làm test phát lại vẫn 401 lặp vô hạn.
+Test dựng một "app" trên fake API chạy trong tiến trình, đồng hồ của server là biến trong test nên access token hết hạn mà không chờ thật. Ta cũng thử phá: bỏ bước dùng chung `_inFlight` làm test năm request song song không đạt, bỏ cờ phát lại làm test phát lại vẫn 401 lặp vô hạn.
 
 **Chưa kiểm**: Keychain và Android Keystore thật, HTTP thật qua mạng di động, JWT có chữ ký, OTP qua SMS, ân hạn khi mất response refresh, hai tiến trình app cùng tranh một refresh token, refresh chủ động theo `exp`, và nối với `go_router` của bài 23.
 
 ## Bài tập
 
-1. Server thật cho dùng lại refresh token vừa xoay trong 10 giây (khoảng ân hạn). Ca nào trong bài hết đáng sợ hơn, và client có cần đổi gì không?
+1. Server thật cho dùng lại refresh token vừa xoay trong 10 giây (khoảng ân hạn). Trường hợp nào trong bài bớt đáng sợ hơn, và client có cần đổi gì không?
 2. Thêm refresh chủ động khi `exp` còn dưới 60 giây. Đặt ở đâu, và vì sao vẫn giữ nhánh bắt 401?
 3. Một bạn viết `if (claims.role == 'driver')` để hiện màn hình dành cho tài xế. Sai ở đâu, và nên làm gì?
 
 <details><summary>Xem lời giải</summary>
-<p><strong>1.</strong> Ca "mất response refresh" hết kéo theo thu hồi cả họ: lần gửi lại trong ân hạn nhận cặp mới. Client vẫn phải lưu cặp mới trước khi dùng, và năm request vẫn nên dùng chung một lần refresh.</p>
+<p><strong>1.</strong> Trường hợp "mất response refresh" không còn kéo theo việc thu hồi cả họ: lần gửi lại trong ân hạn nhận cặp mới. Client vẫn phải lưu cặp mới trước khi dùng, và năm request vẫn nên dùng chung một lần refresh.</p>
 <p><strong>2.</strong> Trong <code>AuthInterceptor.onRequest</code>: đọc <code>UnverifiedClaims.tryParse(token)?.expiresAt</code>, nếu gần hạn thì gọi cùng <code>refreshAfterUnauthorized</code> để vẫn dùng chung <code>Future</code>. Nhánh 401 vẫn cần: đồng hồ máy có thể lệch, server có thể thu hồi sớm.</p>
 <p><strong>3.</strong> Payload sửa được, nên ai sửa token cũng mở được màn hình đó. Ẩn lối vào theo <code>role</code> chỉ để giao diện gọn; mọi API của tài xế phải trả 403 cho token không phải tài xế, vì server mới là nơi kiểm quyền.</p>
 </details>

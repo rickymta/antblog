@@ -1,14 +1,14 @@
 ---
 slug: flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia
 title: "Widget test: pumpWidget, finder, matcher và màn hình báo giá"
-summary: "Bài 28: widget test cho màn hình báo giá Tới Nơi: pumpWidget trong ProviderScope override, pump, pump(Duration), pumpAndSettle (kèm ca hết hạn), finder và matcher, enterText, tap, warnIfMissed, ensureVisible, runAsync, font FlutterTest, kích thước màn hình và điều hướng go_router."
+summary: "Bài 28: widget test cho màn hình báo giá Tới Nơi: pumpWidget trong ProviderScope override, pump, pump(Duration), pumpAndSettle (kèm test case hết hạn), finder và matcher, enterText, tap, warnIfMissed, ensureVisible, runAsync, font FlutterTest, kích thước màn hình và điều hướng go_router."
 category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, testing, widget-test, riverpod, go-router]
 language: vi
 ---
 
-Khách mở màn hình báo giá của Tới Nơi, gõ "2,001" vào ô quãng đường, bấm "Xem báo giá" và thấy 12.005 VND. Họ cuộn xuống, bấm "Đặt chuyến", thấy vòng quay chờ, rồi sang màn hình chuyến T-0001. Bài 27 đã kiểm quy tắc cước và use case mà không cần widget nào. Nhưng lỗi hay nằm ở chỗ khác: dấu phẩy thập phân bị từ chối, nút Đặt chuyến nằm dưới đáy màn hình, màn hình vẫn hiện lỗi cũ khi khách bấm Thử lại.
+Khách mở màn hình báo giá của Tới Nơi, gõ "2,001" vào ô quãng đường, bấm "Xem báo giá" và thấy 12.005 VND. Khách cuộn xuống, bấm "Đặt chuyến", thấy vòng quay chờ, rồi sang màn hình chuyến T-0001. Bài 27 đã kiểm quy tắc cước và use case mà không cần widget nào. Nhưng lỗi hay nằm ở chỗ khác: dấu phẩy thập phân bị từ chối, nút Đặt chuyến nằm dưới đáy màn hình, màn hình vẫn hiện lỗi cũ khi khách bấm Thử lại.
 
 **Widget test** dựng đúng cây widget đó trong bộ nhớ, không cần simulator. Đây là bài 28 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 27 về unit test với mocktail và fake](/articles/flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case) và [bài 18 về Riverpod](/articles/flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen). Ví dụ dùng `Money`, `calculateFare` của `toi_noi_core` (hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi)); bảng giá là số minh hoạ.
 
@@ -20,7 +20,7 @@ Khách mở màn hình báo giá của Tới Nơi, gõ "2,001" vào ô quãng đ
 
 ## 1. Dựng màn hình trong test: ProviderScope, override và đồng hồ giả
 
-`testWidgets` đưa cho ta một `WidgetTester`. `pumpWidget` gắn cây widget vào một view ảo và dựng khung đầu tiên. Thân test chạy trong `FakeAsync` của binding: `Future.delayed`, `Timer` và hoạt ảnh dùng **đồng hồ giả** chỉ chạy khi test ra lệnh (Hình 1).
+`testWidgets` đưa cho ta một `WidgetTester`. `pumpWidget` gắn cây widget vào một view ảo và dựng khung đầu tiên. Thân test chạy trong `FakeAsync` của binding: `Future.delayed`, `Timer` và hoạt ảnh dùng **đồng hồ giả**; đồng hồ này chỉ chạy khi test ra lệnh (Hình 1).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -100,7 +100,7 @@ Khung hình trong test **không tự chạy**. Ba lệnh khác nhau ở chỗ ch
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 350" role="img" aria-label="Hình 2. Dòng thời gian đồng hồ giả từ 0 đến 400 mili giây với repository có độ trễ 400 ms. Timer hết hạn ở 400 ms và báo giá về. pump không tham số dựng khung nhưng đồng hồ đứng ở 0 ms nên vẫn loading. pump 399 ms tua tới 399 ms, vẫn loading. pump 1 ms tua tới 400 ms và hiện dữ liệu. pumpAndSettle tua từng bước 100 ms và dừng khi không còn khung được xin. Khi vòng quay chạy mãi, pumpAndSettle lặp khoảng 6.000 bước rồi ném lỗi hết hạn.">
+<svg viewBox="0 0 880 350" role="img" aria-label="Hình 2. Dòng thời gian đồng hồ giả từ 0 đến 400 mili giây với repository có độ trễ 400 ms. Timer hết hạn ở 400 ms và báo giá về. pump không tham số dựng khung nhưng đồng hồ đứng ở 0 ms nên vẫn loading. pump 399 ms tua tới 399 ms, vẫn loading. pump 1 ms tua tới 400 ms và hiện dữ liệu. pumpAndSettle tua từng bước 100 ms và dừng khi không còn khung được xin. Khi vòng quay chạy mãi, pumpAndSettle lặp khoảng 6.000 bước rồi ném lỗi timed out.">
 <defs><marker id="fl28-2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl28-2-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs>
 <text x="20" y="26" class="t-b">Đồng hồ giả của test, FakeQuoteRepository(latency: 400 ms)</text>
 <path d="M560 56 L560 114" class="f-none s-warn" stroke-width="2" stroke-dasharray="5 4"/><text x="330" y="48" class="t-small t-warn">Timer 400 ms hết hạn: báo giá về</text>
@@ -121,7 +121,7 @@ Khung hình trong test **không tự chạy**. Ba lệnh khác nhau ở chỗ ch
 <figcaption>Hình 2. Một dòng thời gian, bốn lệnh. Chỉ <code>pump(Duration)</code> và <code>pumpAndSettle</code> làm đồng hồ giả tiến; <code>pump()</code> chỉ dựng khung ở thời điểm hiện tại.</figcaption>
 </figure>
 
-Theo mã nguồn `flutter_test`, `pump(duration)` tua đồng hồ giả `duration` (timer tới hạn chạy luôn), rồi nếu có khung đang chờ thì dựng khung. `pump()` không tham số bỏ bước tua. `pumpAndSettle` lặp `pump(100 ms)` tới khi `hasScheduledFrame` là `false`, và ném `FlutterError('pumpAndSettle timed out')` nếu vượt `timeout` (mặc định 10 phút đồng hồ giả).
+Theo mã nguồn `flutter_test`, `pump(duration)` tua đồng hồ giả `duration` (timer tới hạn chạy luôn), rồi nếu có khung đang chờ thì dựng khung. `pump()` không tham số bỏ qua bước tua. `pumpAndSettle` lặp `pump(100 ms)` tới khi `hasScheduledFrame` là `false`, và ném `FlutterError('pumpAndSettle timed out')` nếu vượt `timeout` (mặc định 10 phút đồng hồ giả).
 
 ### pump_test.dart · 28-widget-test/test/pump_test.dart (trích)
 
@@ -162,9 +162,9 @@ testWidgets('pumpAndSettle hết hạn khi vòng quay chạy mãi', (tester) asy
 });
 ```
 
-Với repository có độ trễ 400 ms, `pumpAndSettle` chạy tốt vì vòng quay biến mất khi dữ liệu về. Nó chỉ treo khi hoạt ảnh không bao giờ dừng. Muốn kiểm trạng thái loading thì dùng `pump()` hoặc `pump(Duration)`, hoặc ghi đè `quoteProvider` bằng `AsyncLoading`. Khi không có hoạt ảnh nào, `pumpAndSettle` trả về sau đúng một khung.
+Với repository có độ trễ 400 ms, `pumpAndSettle` chạy tốt vì vòng quay biến mất khi dữ liệu về. Lệnh này chỉ treo khi hoạt ảnh không bao giờ dừng. Muốn kiểm trạng thái loading thì dùng `pump()` hoặc `pump(Duration)`, hoặc ghi đè `quoteProvider` bằng `AsyncLoading`. Khi không có hoạt ảnh nào, `pumpAndSettle` trả về sau đúng một khung.
 
-Hai chi tiết nữa đều có test. Một, test kết thúc khi còn `Timer` chưa tới hạn bị báo `A Timer is still pending`; hai test đầu của `pump_test.dart` vì thế kết thúc bằng `pump(Duration)` qua hạn 400 ms. Hai, `pump()` chỉ dựng khung nếu lúc bắt đầu đã có khung được xin. Màn hình đang yên mà ta `complete()` một `Future`, callback chạy ở cuối `pump()` và gọi `setState` quá muộn cho khung đó, nên cần pump lần hai; `pump(Duration.zero)` chạy microtask trước nên đủ ngay. Khi vòng quay còn chạy thì khung luôn sẵn và một `pump()` là đủ.
+Hai chi tiết nữa đều có test. Một, test kết thúc khi còn `Timer` chưa tới hạn thì bị báo `A Timer is still pending`; hai test đầu của `pump_test.dart` vì thế kết thúc bằng `pump(Duration)` qua hạn 400 ms. Hai, `pump()` chỉ dựng khung nếu lúc bắt đầu đã có khung được xin. Khi màn hình đang yên mà ta `complete()` một `Future`, callback chạy ở cuối `pump()` và gọi `setState` quá muộn cho khung đó, nên cần pump lần hai; `pump(Duration.zero)` chạy microtask trước nên đủ ngay. Khi vòng quay còn chạy thì khung luôn sẵn và một `pump()` là đủ.
 
 ## 3. Finder và matcher: tìm gì, kỳ vọng gì
 
@@ -172,7 +172,7 @@ Hai chi tiết nữa đều có test. Một, test kết thúc khi còn `Timer` c
 
 | Finder | Tìm | Lưu ý |
 |---|---|---|
-| `find.byKey(Key('quote-fare'))` | widget có `key` bằng | bền với đổi nhãn; key phải do ta đặt |
+| `find.byKey(Key('quote-fare'))` | widget có `key` bằng đúng giá trị đó | bền với đổi nhãn; key phải do ta đặt |
 | `find.text('25.500 VND')` | `Text`, `Text.rich`, `EditableText` có chuỗi **bằng đúng** | `textContaining` cho khớp một phần |
 | `find.byType(ChoiceChip)` | widget có đúng kiểu | trả cả những thứ ta không nhìn thấy |
 | `find.widgetWithText(FilledButton, 'Đặt chuyến')` | tổ tiên kiểu cho trước của một `Text` | dùng cho nút theo nhãn |
@@ -215,7 +215,7 @@ expect(find.byKey(const Key('submit')), findsOneWidget);
 
 ## 4. enterText, tap, warnIfMissed và ensureVisible
 
-`tester.enterText(finder, text)` cho ô nhập tiêu điểm rồi **thay toàn bộ** nội dung bằng `text`, như bàn phím ảo; nó không nối thêm, không gửi form, và chữ mới chưa lên khung hình nên cần `pump`. Nút "Xem báo giá" nhận số như "2,001" (dấu phẩy kiểu Việt) và từ chối chuỗi ngoài miền 0 đến 100 km. Ta liệt kê ca biên trong một bảng và sinh test từ đó:
+`tester.enterText(finder, text)` đặt focus vào ô nhập rồi **thay toàn bộ** nội dung bằng `text`, như bàn phím ảo; nó không nối thêm, không gửi form, và chữ mới chưa lên khung hình nên cần `pump`. Nút "Xem báo giá" nhận số như "2,001" (dấu phẩy kiểu Việt) và từ chối chuỗi ngoài miền 0 đến 100 km. Ta liệt kê test case biên trong một bảng và sinh test từ đó:
 
 ### input_test.dart · 28-widget-test/test/input_test.dart (trích)
 
@@ -259,7 +259,7 @@ Các chuỗi `''`, `abc`, `-1`, `100,5`, `100.001`, `NaN`, `Infinity` đều hi�
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 380" role="img" aria-label="Hình 3. Hai cách một cú chạm trượt nút Đặt chuyến. Bên trái: màn hình 360x640 có phần nội dung cuộn, nút Đặt chuyến nằm bên dưới mép dưới nên điểm chạm ngoài màn hình và không widget nào nhận; ensureVisible cuộn nút vào màn hình trước khi chạm. Bên phải: nút nằm trong màn hình nhưng lớp ModalBarrier cùng vòng quay đang đặt chuyến phủ lên, nên hit test trúng ModalBarrier trước và nút không nhận chạm.">
+<svg viewBox="0 0 880 380" role="img" aria-label="Hình 3. Hai cách một cú chạm không trúng nút Đặt chuyến. Bên trái: màn hình 360x640 có phần nội dung cuộn, nút Đặt chuyến nằm bên dưới mép dưới nên điểm chạm ngoài màn hình và không widget nào nhận; ensureVisible cuộn nút vào màn hình trước khi chạm. Bên phải: nút nằm trong màn hình nhưng lớp ModalBarrier cùng vòng quay đang đặt chuyến phủ lên, nên hit test trúng ModalBarrier trước và nút không nhận chạm.">
 <text x="20" y="26" class="t-b">1. Nút nằm ngoài màn hình</text>
 <rect x="120" y="40" width="200" height="220" rx="14" class="f-surface s-line"/>
 <rect x="132" y="54" width="176" height="22" rx="6" class="f-pk-soft s-pk"/><rect x="132" y="86" width="176" height="26" rx="6" class="f-surface s-line"/><rect x="132" y="124" width="176" height="48" rx="8" class="f-pk-soft s-pk"/><rect x="132" y="182" width="176" height="20" rx="6" class="f-surface s-line"/><rect x="132" y="212" width="176" height="20" rx="6" class="f-surface s-line"/>
@@ -281,7 +281,7 @@ Các chuỗi `''`, `abc`, `-1`, `100,5`, `100.001`, `NaN`, `Infinity` đều hi�
 <figcaption>Hình 3. Chấm cam là điểm chạm của <code>tester.tap</code>. Bên trái điểm đó nằm ngoài màn hình; bên phải nó nằm trên nút nhưng bị lớp phủ nhận chạm thay.</figcaption>
 </figure>
 
-Test dựng màn hình 360x640 và kiểm cả hai nhánh: `tap(..., warnIfMissed: false)` không gọi `placeTrip`; `ensureVisible` rồi `tap` gọi đúng một lần. Muốn cảnh báo thành lỗi thì đặt `WidgetController.hitTestWarningShouldBeFatal = true` (trả về `false` trong `addTearDown`).
+Test dựng màn hình 360x640 và kiểm cả hai nhánh: `tap(..., warnIfMissed: false)` không gọi `placeTrip`; `ensureVisible` rồi `tap` gọi đúng một lần. Muốn cảnh báo thành lỗi thì đặt `WidgetController.hitTestWarningShouldBeFatal = true` (rồi đặt lại `false` trong `addTearDown`).
 
 ### tap_test.dart · 28-widget-test/test/tap_test.dart (trích)
 
@@ -336,7 +336,7 @@ await pumpQuoteScreen(
 await tester.pumpAndSettle();
 ```
 
-Đảo lại: repository đọc file **ngay khi widget hỏi** thì chuỗi I/O bắt đầu trong vùng `FakeAsync` và **không tự xong**. Mỗi bước của chuỗi cần microtask của `FakeAsync` chạy, mà việc đó chỉ xảy ra khi `pump` hoặc khi một `runAsync` kết thúc (theo `binding.dart`). Một lượt `runAsync` 200 ms rồi `pump` vẫn để màn hình ở loading (test `I/O thật bắt đầu trong cây widget: một lượt runAsync chưa đủ`); lặp `runAsync` rồi `pump` thì cuối cùng có dữ liệu sau vài lượt (test `lặp runAsync rồi pump thì cuối cùng cũng xong, không tất định`). Số lượt phụ thuộc số bước của chuỗi chứ không phải thời gian, nên đừng dựa vào nó. Quy tắc là đọc dữ liệu thật trong `runAsync` ở thân test, rồi đưa dữ liệu đã đọc cho widget qua một bản giả. Nếu `runAsync` hỏng, nó trả `null` và lỗi nằm ở `tester.takeException()`.
+Ngược lại: repository đọc file **ngay khi widget hỏi** thì chuỗi I/O bắt đầu trong vùng `FakeAsync` và **không tự xong**. Mỗi bước của chuỗi cần microtask của `FakeAsync` chạy, mà việc đó chỉ xảy ra khi `pump` hoặc khi một `runAsync` kết thúc (theo `binding.dart`). Một lượt `runAsync` 200 ms rồi `pump` vẫn để màn hình ở loading (test `I/O thật bắt đầu trong cây widget: một lượt runAsync chưa đủ`); lặp `runAsync` rồi `pump` thì cuối cùng có dữ liệu sau vài lượt (test `lặp runAsync rồi pump thì cuối cùng cũng xong, không tất định`). Số lượt phụ thuộc số bước của chuỗi chứ không phải thời gian, nên đừng dựa vào nó. Quy tắc là đọc dữ liệu thật trong `runAsync` ở thân test, rồi đưa dữ liệu đã đọc cho widget qua một bản giả. Nếu `runAsync` hỏng, nó trả `null` và lỗi nằm ở `tester.takeException()`.
 
 ## 6. Test điều hướng với go_router
 
@@ -397,9 +397,9 @@ flutter test
 
 Kỳ vọng: `No issues found!` và `All tests passed!` với **70 test**. Đã kiểm với Flutter 3.47.4, Dart 3.13.3, `flutter_riverpod` 3.5.0 và `go_router` 18.1.3. Mức kiểm chứng: **Kiểm chứng tự động**. `flutter test` chạy với thư mục làm việc là gốc package, nên test đọc được file mẫu bằng đường dẫn tương đối.
 
-Các nhóm test: `pump_test.dart` (11) cho thời gian giả; `finders_test.dart` (8) cho finder và matcher; `input_test.dart` (17) cho `enterText` và ca biên cước (12.005 và 453.000 VND); `states_test.dart` (7) cho ba trạng thái; `tap_test.dart` (7) cho cú chạm trượt; `view_test.dart` (10) cho kích thước và font; `navigation_test.dart` (6) cho go_router; `run_async_test.dart` (4) cho I/O thật.
+Các nhóm test: `pump_test.dart` (11) cho thời gian giả; `finders_test.dart` (8) cho finder và matcher; `input_test.dart` (17) cho `enterText` và test case biên của cước (12.005 và 453.000 VND); `states_test.dart` (7) cho ba trạng thái; `tap_test.dart` (7) cho cú chạm không trúng đích; `view_test.dart` (10) cho kích thước và font; `navigation_test.dart` (6) cho go_router; `run_async_test.dart` (4) cho I/O thật.
 
-Ta thử phá để chắc test bắt được lỗi: bỏ nhánh `isLoading` làm 1 test đỏ, bỏ đổi dấu phẩy thành dấu chấm 1 test, bỏ lớp phủ đang đặt 3 test, bỏ `context.push` 3 test, bỏ `retry: (_, _) => null` 2 test, bỏ `Expanded` của nhãn 11 test.
+Ta thử phá để chắc test bắt được lỗi: bỏ nhánh `isLoading` làm 1 test đỏ, bỏ đổi dấu phẩy thành dấu chấm làm 1 test đỏ, bỏ lớp phủ đang đặt làm 3 test đỏ, bỏ `context.push` 3 test, bỏ `retry: (_, _) => null` 2 test, bỏ `Expanded` của nhãn 11 test.
 
 **Chưa kiểm**: giao diện với font thật của iOS và Android, golden và Semantics test (bài 29), test Riverpod bằng `ProviderContainer` và `fakeAsync` (bài 30), integration test trên simulator (bài 31), nút Back hệ thống và deep link do hệ điều hành gửi. Lab chưa nối `toi_noi_api` thật.
 

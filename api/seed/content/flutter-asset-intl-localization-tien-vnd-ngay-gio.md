@@ -1,7 +1,7 @@
 ---
 slug: flutter-asset-intl-localization-tien-vnd-ngay-gio
 title: "Asset, intl và localization: hiển thị tiền VND, ngày giờ và song ngữ vi/en"
-summary: "Bài 14: khai báo asset với biến thể 2.0x/3.0x, định dạng tiền VND bằng NumberFormat.currency, đổi giờ UTC sang giờ máy bằng DateFormat, rồi làm song ngữ vi/en với ARB, gen-l10n và số nhiều ICU. Mọi kết quả bám đầu ra thật của intl."
+summary: "Bài 14: khai báo asset với biến thể 2.0x/3.0x, định dạng tiền VND bằng NumberFormat.currency, đổi giờ UTC sang giờ máy bằng DateFormat, rồi làm song ngữ vi/en với ARB, gen-l10n và số nhiều ICU. Mọi kết quả lấy từ đầu ra thật của intl."
 category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, intl, localization, asset, i18n]
@@ -204,9 +204,9 @@ String formatTripTime(DateTime utc, String locale, {Duration? offset}) {
 }
 ```
 
-Giờ không phải UTC bị từ chối bằng `ArgumentError`, để lỗi lộ ngay ở chỗ gọi. Mặc định là `toLocal()`, tức múi giờ của máy chạy app. Tham số `offset` chỉ để test: nó thay múi giờ của máy bằng độ lệch cố định. Test `không truyền offset thì dùng toLocal()` so nhánh mặc định với `utc.toLocal().timeZoneOffset`. Giới hạn: trên máy đặt múi giờ UTC (như nhiều máy CI), test vẫn xanh dù bỏ `toLocal()`; nó chỉ có sức kiểm ở múi giờ khác UTC.
+Giờ không phải UTC bị từ chối bằng `ArgumentError`, để lỗi lộ ngay ở chỗ gọi. Mặc định là `toLocal()`, tức múi giờ của máy chạy app. Tham số `offset` chỉ để test: nó thay múi giờ của máy bằng độ lệch cố định. Test `không truyền offset thì dùng toLocal()` so nhánh mặc định với `utc.toLocal().timeZoneOffset`. Giới hạn: trên máy đặt múi giờ UTC (như nhiều máy CI), test vẫn xanh dù bỏ `toLocal()`; test này chỉ có tác dụng kiểm tra khi múi giờ khác UTC.
 
-Skeleton `yMd().add_jm()` để `intl` chọn thứ tự và kiểu giờ theo locale. Cùng một thời điểm 16:30 UTC:
+Skeleton `yMd().add_jm()` cho `intl` tự chọn thứ tự và kiểu giờ theo locale. Cùng một thời điểm 16:30 UTC:
 
 | Độ lệch | `vi` | `en` |
 |---|---|---|
@@ -241,7 +241,7 @@ Ngày đổi theo giờ: 18:00 UTC cộng 7 tiếng là `7/11/2026 1:00` ở `vi
 
 ## Chuỗi giao diện: ARB và gen-l10n
 
-Giờ tới các chuỗi như "Báo giá chuyến". Cách chuẩn của Flutter là **ARB**, một file JSON cho mỗi ngôn ngữ, và công cụ `gen-l10n` sinh lớp Dart có kiểu chặt. Bản vi là bản mẫu, có mô tả và kiểu của placeholder cho người dịch:
+Giờ đến lượt các chuỗi như "Báo giá chuyến". Cách chuẩn của Flutter là **ARB**, một file JSON cho mỗi ngôn ngữ, và công cụ `gen-l10n` sinh lớp Dart an toàn về kiểu. Bản vi là bản mẫu, có mô tả và kiểu của placeholder cho người dịch:
 
 ### app_vi.arb · 14-asset-intl-l10n/lib/l10n/app_vi.arb (trích)
 
@@ -405,7 +405,7 @@ Trong màn hình, một nguồn locale duy nhất, `l10n.localeName`, dùng cho 
           ),
 ```
 
-Khi thiết bị có ngôn ngữ app không hỗ trợ, Flutter chọn locale bằng `basicLocaleListResolution`: ưu tiên khớp cả ngôn ngữ và quốc gia, rồi khớp ngôn ngữ; nếu không khớp nào, nó lấy **phần tử đầu của `supportedLocales`**. Thứ tự đó do công cụ sinh quyết định. Ở máy kiểm, khi bỏ `preferred-supported-locales`, danh sách ra `[en, vi]` nên điện thoại tiếng Pháp rơi về tiếng Anh; với `[vi]` danh sách là `[vi, en]` và nó rơi về tiếng Việt. Test dưới đây bắt lỗi cấu hình này:
+Khi ngôn ngữ của thiết bị không được app hỗ trợ, Flutter chọn locale bằng `basicLocaleListResolution`: ưu tiên khớp cả ngôn ngữ và quốc gia, rồi khớp ngôn ngữ; nếu không khớp nào, nó lấy **phần tử đầu của `supportedLocales`**. Thứ tự đó do công cụ sinh quyết định. Ở máy kiểm, khi bỏ `preferred-supported-locales`, danh sách ra `[en, vi]` nên điện thoại tiếng Pháp rơi về tiếng Anh; với `[vi]` danh sách là `[vi, en]` và nó rơi về tiếng Việt. Test dưới đây bắt lỗi cấu hình này:
 
 ### localization_test.dart · 14-asset-intl-l10n/test/localization_test.dart (trích)
 
@@ -421,7 +421,7 @@ Khi thiết bị có ngôn ngữ app không hỗ trợ, Flutter chọn locale b�
 
 ```
 
-Muốn đổi ngôn ngữ ngay trong app, ta truyền `locale:` vào `MaterialApp` và `setState` khi người dùng chọn. Test chạm `English` rồi `Tiếng Việt` kiểm chữ, tiền (`₫25,500` rồi `25.500 ₫`) và giờ đổi theo. Ngôn ngữ thiết bị trong test được đặt bằng `localesTestValue`:
+Muốn đổi ngôn ngữ ngay trong app, ta truyền `locale:` vào `MaterialApp` và `setState` khi người dùng chọn. Test chạm `English` rồi `Tiếng Việt` và kiểm chữ, tiền (`₫25,500` rồi `25.500 ₫`) và giờ đổi theo. Ngôn ngữ thiết bị trong test được đặt bằng `localesTestValue`:
 
 ### support.dart · 14-asset-intl-l10n/test/support.dart (trích)
 
@@ -445,7 +445,7 @@ Số thực cũng theo locale: `2,001 km` ở vi nhưng `2.001 km` ở en, nên 
 <li><strong>Sửa ARB mà test vẫn thấy chuỗi cũ.</strong> Dấu hiệu: chuỗi mới không xuất hiện trong test. Nguyên nhân: <code>flutter analyze</code> và <code>flutter test</code> không sinh lại code (còn <code>flutter run</code> thì có). Cách sửa: <code>flutter gen-l10n</code> hoặc <code>flutter pub get</code>. Thiếu <code>generate: true</code> thì <code>flutter gen-l10n</code> dừng với thông báo về cờ này.</li>
 <li><strong>Quên <code>localizationsDelegates</code>.</strong> Dấu hiệu: <code>Null check operator used on a null value</code> khi dựng màn hình. Nguyên nhân: <code>Localizations</code> không có <code>AppLocalizations</code> để trả. Cách sửa: truyền <code>AppLocalizations.localizationsDelegates</code>.</li>
 <li><strong>Giờ lệch 7 tiếng ở Việt Nam.</strong> Dấu hiệu: màn hình ghi 16:30 khi đồng hồ chỉ 23:30. Nguyên nhân: đưa thẳng <code>DateTime</code> UTC cho <code>DateFormat</code>. Cách sửa: <code>toLocal()</code> trước khi định dạng, như <code>formatTripTime</code>.</li>
-<li><strong>Điện thoại ngôn ngữ lạ hiện tiếng Anh.</strong> Dấu hiệu: máy đặt tiếng Pháp mở app ra tiếng Anh dù bản mẫu là tiếng Việt. Nguyên nhân: không khớp locale nào thì lấy phần tử đầu của <code>supportedLocales</code>. Cách sửa: <code>preferred-supported-locales: [vi]</code>.</li>
+<li><strong>Điện thoại đặt ngôn ngữ app không hỗ trợ lại hiện tiếng Anh.</strong> Dấu hiệu: máy đặt tiếng Pháp mở app ra tiếng Anh dù bản mẫu là tiếng Việt. Nguyên nhân: không khớp locale nào thì lấy phần tử đầu của <code>supportedLocales</code>. Cách sửa: <code>preferred-supported-locales: [vi]</code>.</li>
 </ul>
 </div>
 
@@ -466,7 +466,7 @@ flutter test
 |---|---|
 | `format_vnd_test.dart` (12) | Kết quả thật của `NumberFormat.currency` ở `vi` và `en`; U+00A0; số tiền từ `calculateFare`; khác `Money.toString()` |
 | `format_time_test.dart` (8) | Đổi UTC sang UTC+7, UTC-5, UTC+5:30; qua nửa đêm; mặc định dùng `toLocal()`; giờ không UTC bị từ chối; quên đổi múi giờ cho kết quả sai |
-| `date_symbols_test.dart` (1) | Chưa nạp dữ liệu locale thì `LocaleDataException` |
+| `date_symbols_test.dart` (1) | Chưa nạp dữ liệu locale thì ném `LocaleDataException` |
 | `assets_test.dart` (17) | Manifest đủ ba bản; chọn bản ở bảy mức `devicePixelRatio`; PNG đúng 48, 96, 144 px; `Image` dựng đúng ở màn 3.0 và 1.0; asset thiếu |
 | `localization_test.dart` (19) | Thiết bị `vi`, `en_GB`, `fr`; đổi locale trong app; số nhiều ICU; `MoneyText` và `TripStatusChip` nhận chuỗi đã dịch; chuỗi Material đổi theo locale; nhãn Semantics; thiếu delegate |
 | `arb_test.dart` (8) | Hai ARB cùng khoá và placeholder; plural có `other`; `l10n.yaml` đúng; code sinh nằm trong `.gitignore` |
@@ -482,7 +482,7 @@ flutter test
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> 2.75 lớn hơn trung điểm 2.5 của hai bản, nên chọn <code>3.0x/logo.png</code>, 144 px (test mốc 2.6 cùng nhánh). Xoá <code>3.0x</code>: giá trị lớn hơn khoá cao nhất còn lại nên lấy <code>2.0x/logo.png</code>, 96 px.</p>
 <p><strong>2.</strong> Hiện <code>6/11/2026 16:30</code>. <code>DateTime.parse</code> với hậu tố <code>Z</code> cho <code>DateTime</code> UTC, và <code>DateFormat</code> không đổi múi giờ nên in nguyên giờ UTC, lệch 7 tiếng. Sửa bằng <code>formatTripTime(DateTime.parse(...), localeName)</code>, hàm này gọi <code>toLocal()</code> và từ chối giá trị không phải UTC.</p>
-<p><strong>3.</strong> Thêm <code>lib/l10n/app_ko.arb</code> có <code>@@locale</code> là <code>ko</code>, chạy <code>flutter gen-l10n</code>; <code>supportedLocales</code> tự có thêm <code>ko</code>. Thêm một <code>ButtonSegment</code> vào bộ chọn, và với iOS khai báo <code>ko</code> trong danh sách locale của <code>Info.plist</code> (runner). <code>arb_test.dart</code> hiện chỉ so cặp vi và en nên phải mở rộng sang <code>ko</code>, và các test chuỗi, tiền, giờ cần thêm ca cho <code>ko</code>.</p>
+<p><strong>3.</strong> Thêm <code>lib/l10n/app_ko.arb</code> có <code>@@locale</code> là <code>ko</code>, chạy <code>flutter gen-l10n</code>; <code>supportedLocales</code> tự có thêm <code>ko</code>. Thêm một <code>ButtonSegment</code> vào bộ chọn, và với iOS khai báo <code>ko</code> trong danh sách locale của <code>Info.plist</code> (runner). <code>arb_test.dart</code> hiện chỉ so cặp vi và en nên phải mở rộng sang <code>ko</code>, và các test chuỗi, tiền, giờ cần thêm test case cho <code>ko</code>.</p>
 </details>
 
 Bài trước: [Theme Material 3, màu, chữ và dark mode](/articles/flutter-theme-material-3-dark-mode-design-system-toi-noi). Bài tiếp: [Animation cơ bản: implicit animation và Hero khi tìm tài xế](/articles/flutter-animation-implicit-hero-tim-tai-xe), nơi ta làm giao diện chuyển động.

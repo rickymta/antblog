@@ -1,0 +1,125 @@
+{
+"file": "flutter-accessibility-responsive-adaptive-ios-android.md",
+"edits": [
+{
+"old": "nêu rõ phần Phần 2 còn thiếu.",
+"new": "nêu rõ phần còn thiếu của Phần 2.",
+"reason": "Lặp 'phần Phần', trật tự từ kiểu tiếng Anh",
+"severity": "high"
+},
+{
+"old": "và chỉ khác biệt iOS và Android ở chỗ hai hệ điều hành có quy ước riêng.",
+"new": "và chỉ tạo khác biệt giữa iOS và Android ở chỗ hai hệ điều hành có quy ước riêng.",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "Ta dùng bốn cái:",
+"new": "Ta dùng bốn guideline:",
+"reason": "'cái' mơ hồ",
+"severity": "low"
+},
+{
+"old": "| trượt | trượt | trượt |",
+"new": "| không đạt | không đạt | không đạt |",
+"reason": "'trượt' cho kết quả guideline; dùng 'không đạt'",
+"severity": "medium"
+},
+{
+"old": "| trượt | qua | qua |",
+"new": "| không đạt | đạt | đạt |",
+"reason": "Thống nhất 'đạt/không đạt'",
+"severity": "medium"
+},
+{
+"old": "| qua | qua | trượt |",
+"new": "| đạt | đạt | không đạt |",
+"reason": "Thống nhất 'đạt/không đạt'",
+"severity": "medium"
+},
+{
+"old": "| qua | qua | qua |",
+"new": "| đạt | đạt | đạt |",
+"reason": "Thống nhất 'đạt/không đạt'",
+"severity": "medium"
+},
+{
+"old": "tất cả qua, với một giới hạn.",
+"new": "tất cả đều đạt, với một giới hạn.",
+"reason": "'qua' khẩu ngữ, thống nhất 'đạt'",
+"severity": "medium"
+},
+{
+"old": "kèm ca đối chứng: chữ",
+"new": "kèm test case đối chứng: chữ",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Nó phân màu khá thô, nên là lưới an toàn;",
+"new": "Guideline này phân màu khá thô, nên là lưới an toàn;",
+"reason": "Tránh 'Nó' đầu câu, đại từ mơ hồ",
+"severity": "medium"
+},
+{
+"old": "icon 20 ở góc trên trái \"qua\" guideline 48 một cách oan.",
+"new": "icon 20 ở góc trên trái \"đạt\" guideline 48 một cách oan.",
+"reason": "Thống nhất 'đạt'",
+"severity": "low"
+},
+{
+"old": "Ca sai điển hình là",
+"new": "Trường hợp sai điển hình là",
+"reason": "'Ca' tự ghép",
+"severity": "medium"
+},
+{
+"old": "Ở cỡ chữ 1 nó vừa; ở cỡ chữ 2 test thấy",
+"new": "Ở cỡ chữ 1 widget này vừa khít; ở cỡ chữ 2 test báo",
+"reason": "Đại từ 'nó' mơ hồ; 'test thấy' gượng",
+"severity": "low"
+},
+{
+"old": "Ca cỡ chữ gấp đôi mà [bài 08](/articles/flutter-layout-constraints-row-column-the-chuyen) để lại được đóng ở đây.",
+"new": "Trường hợp cỡ chữ gấp đôi mà [bài 08](/articles/flutter-layout-constraints-row-column-the-chuyen) để lại được giải quyết nốt ở đây.",
+"reason": "'Ca' và 'được đóng' là calque của closed",
+"severity": "medium"
+},
+{
+"old": "cho **ràng buộc widget cha cấp**",
+"new": "cho **ràng buộc mà widget cha cấp**",
+"reason": "Cụm danh từ thiếu quan hệ từ",
+"severity": "medium"
+},
+{
+"old": "là ca đối chứng: cạnh dưới",
+"new": "là test case đối chứng: cạnh dưới",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Mức: **Kiểm chứng tự động**, không cần thiết bị.",
+"new": "Mức kiểm chứng: **kiểm chứng tự động**, không cần thiết bị.",
+"reason": "Cụm 'Mức:' thiếu danh từ",
+"severity": "low"
+},
+{
+"old": "Ba guideline qua trên app thật;",
+"new": "Ba guideline đạt trên app thật;",
+"reason": "Thống nhất 'đạt'",
+"severity": "low"
+},
+{
+"old": "cái nào qua, cái nào trượt, và sửa thế nào?",
+"new": "cái nào đạt, cái nào không đạt, và sửa thế nào?",
+"reason": "'trượt' cho kết quả guideline",
+"severity": "medium"
+},
+{
+"old": "<code>iOSTapTargetGuideline</code> và <code>labeledTapTargetGuideline</code> qua; <code>androidTapTargetGuideline</code> trượt vì cần 48.",
+"new": "<code>iOSTapTargetGuideline</code> và <code>labeledTapTargetGuideline</code> đạt; <code>androidTapTargetGuideline</code> không đạt vì cần 48.",
+"reason": "'trượt' cho kết quả guideline",
+"severity": "medium"
+}
+]
+}

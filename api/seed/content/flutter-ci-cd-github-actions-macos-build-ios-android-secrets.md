@@ -14,12 +14,12 @@ CI/CD đưa cả quy trình lên một máy sạch, chạy bằng lệnh viết 
 
 Đây là bài 54 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 53 về fastlane](/articles/flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build) trước: bài này đặt certificate và profile thẳng trong secret để thấy cơ chế, thay vì qua `match`. Lab dùng lại bộ kiểm workflow của [bài 33](/articles/flutter-ci-github-actions-analyze-test-golden-cache). Cách ký Android và iOS nằm ở bài 51 và 52.
 
-Nói thẳng từ đầu: workflow nằm trong `native-config/`, **không** ở `.github/workflows/` của repository này, vì repository không có secret. Nó chưa chạy trên GitHub và máy kiểm không build được AAB hay IPA. Ta kiểm tính chất của file, và chạy thật từng script `run` bằng bash với secret giả.
+Nói thẳng từ đầu: workflow nằm trong `native-config/`, **không** ở `.github/workflows/` của repository này, vì repository không có secret. Workflow này chưa chạy trên GitHub và máy chạy kiểm chứng không build được AAB hay IPA. Ta kiểm tính chất của file, và chạy thật từng script `run` bằng bash với secret giả.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Run số 57 dựng xong cả hai nền tảng. Ta bấm <strong>Re-run all jobs</strong>. Build number của lần chạy lại là bao nhiêu, và điều đó gây vấn đề gì nếu bản 57 đã lên store?</p>
-<details><summary>Xem đáp án</summary><p>Vẫn là 57. Theo tài liệu GitHub, <code>github.run_number</code> không đổi khi chạy lại; chỉ <code>run_attempt</code> tăng. Tài liệu Android nói không tải APK có <code>versionCode</code> đã dùng lên Play, và <code>flutter build</code> yêu cầu mỗi build một số duy nhất. Chạy lại run đã phát hành sẽ đụng số cũ; muốn bản mới thì tạo run mới (tag mới hoặc chạy tay).</p></details>
+<details><summary>Xem đáp án</summary><p>Vẫn là 57. Theo tài liệu GitHub, <code>github.run_number</code> không đổi khi chạy lại; chỉ <code>run_attempt</code> tăng. Tài liệu Android nói không được tải lên Play một APK có <code>versionCode</code> đã dùng, và <code>flutter build</code> yêu cầu mỗi build một số duy nhất. Chạy lại run đã phát hành sẽ trùng số cũ; muốn bản mới thì tạo run mới (tag mới hoặc chạy tay).</p></details>
 </div>
 
 ## Một workflow, ba job, hai runner
@@ -41,7 +41,7 @@ concurrency:
   cancel-in-progress: false
 ```
 
-Chỉ có hai cách kích hoạt: chạy tay và đẩy tag `staging-v*`. Không có `pull_request`: theo tài liệu, secret không được truyền cho workflow chạy từ fork (trừ `GITHUB_TOKEN`), và ta không mở môi trường có secret cho mọi nhánh. `workflow_dispatch` chỉ nhận sự kiện khi file nằm trên nhánh mặc định. `permissions` giữ `contents: read` như bài 33. Run đang build không bị huỷ vì huỷ giữa chừng chỉ đốt phút.
+Chỉ có hai cách kích hoạt: chạy tay và đẩy tag `staging-v*`. Không có `pull_request`: theo tài liệu, secret không được truyền cho workflow chạy từ fork (trừ `GITHUB_TOKEN`), và ta không mở môi trường có secret cho mọi nhánh. `workflow_dispatch` chỉ nhận sự kiện khi file nằm trên nhánh mặc định. `permissions` giữ `contents: read` như bài 33. Run đang build không bị huỷ vì huỷ giữa chừng chỉ lãng phí số phút đã chạy.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -92,10 +92,10 @@ Android gọi số này là `versionCode`, iOS gọi là `CFBundleVersion`. Cờ
           echo "Build number: $BUILD_NUMBER" >> "$GITHUB_STEP_SUMMARY"
 ```
 
-`run_number` bắt đầu từ 1 cho mỗi workflow và tăng với mỗi run mới (tài liệu contexts): một nguồn đơn điệu miễn phí. Ba chỗ cần để ý:
+`run_number` bắt đầu từ 1 cho mỗi workflow và tăng với mỗi run mới (tài liệu contexts): một nguồn số tăng dần miễn phí. Ba chỗ cần để ý:
 
-- **Offset.** Mỗi workflow có bộ đếm riêng, nên workflow mới bắt đầu lại từ 1. Nếu store đã nhận số cao hơn, biến repository `BUILD_NUMBER_OFFSET` bù vào. Biểu thức của Actions không có phép cộng nên phép cộng nằm trong shell. Chỉ được tăng offset; giảm nó làm số giảm.
-- **Trần.** Google Play cho `versionCode` tối đa 2.100.000.000 (developer.android.com, kiểm tại 11/2026), và script chặn ở đó. `10#` ép số thập phân để `008` không thành bát phân.
+- **Offset.** Mỗi workflow có bộ đếm riêng, nên workflow mới bắt đầu lại từ 1. Nếu store đã nhận số cao hơn, biến repository `BUILD_NUMBER_OFFSET` bù vào. Biểu thức của Actions không có phép cộng nên phép cộng nằm trong shell. Chỉ được tăng offset; giảm offset sẽ làm build number giảm theo.
+- **Trần.** Google Play cho `versionCode` tối đa 2.100.000.000 (developer.android.com, kiểm tại 11/2026), và script chặn ở đó. `10#` ép số thập phân để `008` không bị hiểu là số bát phân.
 - **Không dùng `run_attempt`, `run_id`, SHA hay giờ.** Test cấm các chuỗi đó: số phải tăng theo thứ tự phát hành, không theo commit.
 
 Test chạy chính script này bằng bash với `RUN_NUMBER` từ 1 đến 54321 và so với hàm Dart `computeBuildNumber`:
@@ -113,7 +113,7 @@ Test chạy chính script này bằng bash với `RUN_NUMBER` từ 1 đến 5432
 
 ## Job Android: keystore từ secret
 
-Upload keystore được lưu trong secret của GitHub (không nằm trong repository) dưới dạng chuỗi base64. Mã hoá khác cờ giữa hai hệ điều hành: macOS `base64 -i file -o file.b64`, Linux `base64 -w 0 file > file.b64`; đặt secret bằng `gh secret set TÊN --env staging < file.b64`. Bước đầu giải mã nó ra thư mục tạm của runner và ghi `android/key.properties` mà `signingConfigs` (bài 51) đọc. Mỗi giá trị đi qua `env` của bước, không bao giờ nằm trong thân script.
+Upload keystore được lưu trong secret của GitHub (không nằm trong repository) dưới dạng chuỗi base64. Cờ của lệnh mã hoá khác nhau giữa hai hệ điều hành: macOS `base64 -i file -o file.b64`, Linux `base64 -w 0 file > file.b64`; đặt secret bằng `gh secret set TÊN --env staging < file.b64`. Bước đầu tiên giải mã chuỗi này ra thư mục tạm của runner và ghi `android/key.properties` mà `signingConfigs` (bài 51) đọc. Mỗi giá trị đi qua `env` của bước, không bao giờ nằm trong thân script.
 
 ### release-staging.yml · 54-ci-cd-build/native-config/.github/workflows/release-staging.yml (trích)
 
@@ -153,11 +153,11 @@ Bốn dòng `: "${VAR:?...}"` chặn secret rỗng hoặc chưa đặt: thiếu 
             --obfuscate --split-debug-info=build/symbols/android
 ```
 
-`--flavor staging` và `config/staging.json` phải cùng tên; test mở file cấu hình của `toi-noi-app` và kiểm `FLAVOR` là `staging`. `--obfuscate` phải đi cùng `--split-debug-info` (theo `--help`), và thư mục symbols được upload để dịch stack trace sau này (bài 42). JDK cài bằng `actions/setup-java`, Temurin 17. Image ubuntu-24.04 đã có Java 17 mặc định và Android SDK (readme runner image, kiểm tại 11/2026); ghim tường minh để đổi image không đổi JDK. Bước `Remove keystore and key.properties` (`if: always()`) đứng ngay sau build, trước các bước upload. AAB nằm ở `build/app/outputs/bundle/stagingRelease/`, đường dẫn suy ra từ source công cụ Flutter 3.47.4 chứ chưa từ một lần build.
+`--flavor staging` và `config/staging.json` phải cùng tên; test mở file cấu hình của `toi-noi-app` và kiểm `FLAVOR` là `staging`. `--obfuscate` phải đi cùng `--split-debug-info` (theo `--help`), và thư mục symbols được upload để dịch stack trace sau này (bài 42). JDK cài bằng `actions/setup-java`, Temurin 17. Image ubuntu-24.04 đã có Java 17 mặc định và Android SDK (readme runner image, kiểm tại 11/2026); ghim rõ ràng để việc đổi image không làm đổi JDK. Bước `Remove keystore and key.properties` (`if: always()`) đứng ngay sau build, trước các bước upload. AAB nằm ở `build/app/outputs/bundle/stagingRelease/`, đường dẫn suy ra từ source công cụ Flutter 3.47.4 chứ chưa từ một lần build.
 
 ## Job iOS: keychain tạm, profile và việc dọn
 
-Trên macOS, `codesign` lấy khoá từ keychain. Ta không đụng keychain đăng nhập của runner: tạo một keychain riêng cho job, nhập `.p12` vào đó, rồi chép profile vào hai thư mục: `~/Library/MobileDevice/Provisioning Profiles` theo hướng dẫn của GitHub, và `~/Library/Developer/Xcode/UserData/Provisioning Profiles`, nơi Flutter 3.47.4 tìm profile (`code_signing.dart`, bài 52). Ta chưa kiểm Xcode trên runner thật đọc đường nào nên chép cả hai. Các lệnh `security` theo hướng dẫn "Installing an Apple certificate on macOS runners" của GitHub.
+Trên macOS, `codesign` lấy khoá từ keychain. Ta không đụng keychain đăng nhập của runner: tạo một keychain riêng cho job, nhập `.p12` vào đó, rồi chép profile vào hai thư mục: `~/Library/MobileDevice/Provisioning Profiles` theo hướng dẫn của GitHub, và `~/Library/Developer/Xcode/UserData/Provisioning Profiles`, nơi Flutter 3.47.4 tìm profile (`code_signing.dart`, bài 52). Ta chưa kiểm được Xcode trên runner thật đọc thư mục nào trong hai thư mục này, nên chép cả hai. Các lệnh `security` theo hướng dẫn "Installing an Apple certificate on macOS runners" của GitHub.
 
 ### release-staging.yml · 54-ci-cd-build/native-config/.github/workflows/release-staging.yml (trích)
 
@@ -204,7 +204,7 @@ Ngay sau bước build là bước dọn, đứng trước mọi bước upload 
           rm -f "$RUNNER_TEMP/distribution.p12" "$HOME/Library/MobileDevice/Provisioning Profiles/toi-noi-staging.mobileprovision" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/toi-noi-staging.mobileprovision"
 ```
 
-Trên runner GitHub-hosted, máy ảo bị huỷ khi job xong, nên bước này là phòng thủ: tài liệu GitHub nói bước dọn dành cho self-hosted runner, nơi keychain và profile có thể còn lại. Nếu sau này chuyển iOS sang self-hosted Mac, bước dọn là bắt buộc. `if: always()` là chỗ quyết định: mặc định một bước chỉ chạy khi các bước trước thành công, mà ta cần dọn đúng lúc build đỏ.
+Trên runner GitHub-hosted, máy ảo bị huỷ khi job xong, nên bước này chỉ mang tính phòng thủ: tài liệu GitHub nói bước dọn dành cho self-hosted runner, nơi keychain và profile có thể còn lại. Nếu sau này chuyển iOS sang self-hosted Mac, bước dọn là bắt buộc. `if: always()` là chỗ quyết định: mặc định một bước chỉ chạy khi các bước trước thành công, mà ta cần dọn đúng lúc build đỏ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -226,7 +226,7 @@ Trên runner GitHub-hosted, máy ảo bị huỷ khi job xong, nên bước này
 <figcaption>Hình 2. Đường đứt là đường lỗi: bước dọn chạy ngay sau build, dù cài đặt hay build đỏ, và trước khi upload.</figcaption>
 </figure>
 
-Test chạy hai script này với `security` giả (ghi lại mỗi lệnh, tạo và xoá file keychain) và `HOME` trong thư mục tạm. Ca đáng giá nhất là cho `import` thất bại:
+Test chạy hai script này với `security` giả (ghi lại mỗi lệnh, tạo và xoá file keychain) và `HOME` trong thư mục tạm. Test case đáng giá nhất là cho `import` thất bại:
 
 ### step_scripts_test.dart · 54-ci-cd-build/test/step_scripts_test.dart (trích)
 
@@ -248,12 +248,12 @@ Mỗi quy tắc dưới đây là tính chất kiểm được của file. Lab 3
 | Secret chỉ nằm trong `env` của bước `run`, không ở `env` cấp workflow hay job, không trong `with` của action | Action bên thứ ba và các bước khác không nhận secret qua `env`; file đã ghi ra đĩa thì xoá ngay sau build |
 | Không có `${{ ... }}` trong thân `run` | Giá trị đi qua biến môi trường, không bị ghép vào mã shell |
 | Không `echo`, `printf`, `cat` biến secret ra stdout, stderr hay `GITHUB_ENV`; không `set -x`, không in cả môi trường, không `cat` file ghi bí mật | Flutter docs cảnh báo đừng echo lại biến vào console; ta không dựa vào việc log tự che |
-| Job có secret phải có `environment: staging` | Reviewer và giới hạn tag gắn vào environment; secret chỉ được nạp sau khi luật bảo vệ qua |
+| Job có secret phải có `environment: staging` | Reviewer và giới hạn tag gắn vào environment; secret chỉ được nạp sau khi job vượt qua luật bảo vệ |
 | Không `id-token`, không quyền ghi | Workflow không gọi cloud, không cần OIDC |
 
-Environment cho đặt tối đa 6 reviewer, chặn tự duyệt và giới hạn tag được deploy; job chỉ đọc được environment secret sau khi các luật bảo vệ đã qua. Giới hạn gói (docs.github.com, kiểm tại 11/2026): với Free, Pro và Team, required reviewers chỉ có ở repository công khai, repository riêng cần Enterprise; luật giới hạn tag thì Pro và Team dùng được ở repository riêng. Chỉ có luật tag thì không có người duyệt: ai đẩy được tag `staging-v*` đều kích hoạt được job ký, nên phải hạn chế quyền tạo tag. Chạy tay từ nhánh sẽ bị từ chối; hãy chọn tag ở ô "Use workflow from". Reviewer và secret thật nằm trong Settings chứ không trong YAML, nên test không kiểm được. OIDC đổi token ngắn hạn lấy secret dài hạn, nhưng tài liệu chỉ nêu AWS, Azure, GCP và không nhắc Apple: certificate và profile vẫn là secret tĩnh.
+Environment cho phép đặt tối đa 6 reviewer, chặn tự duyệt và giới hạn tag được deploy; job chỉ đọc được environment secret sau khi các luật bảo vệ đã qua. Giới hạn gói (docs.github.com, kiểm tại 11/2026): với Free, Pro và Team, required reviewers chỉ có ở repository công khai, repository riêng cần Enterprise; luật giới hạn tag thì Pro và Team dùng được ở repository riêng. Chỉ có luật tag thì không có người duyệt: ai đẩy được tag `staging-v*` đều kích hoạt được job ký, nên phải hạn chế quyền tạo tag. Chạy tay từ nhánh sẽ bị từ chối; hãy chọn tag ở ô "Use workflow from". Reviewer và secret thật nằm trong Settings chứ không trong YAML, nên test không kiểm được. OIDC đổi token ngắn hạn lấy secret dài hạn, nhưng tài liệu chỉ nêu AWS, Azure, GCP và không nhắc Apple: certificate và profile vẫn là secret tĩnh.
 
-Kiểm tĩnh chưa đủ, nên test còn chạy script Android với secret giả và khẳng định log không chứa giá trị nào. Để chắc phép thử bắt được lỗi, một ca sai thay `printf` bằng `echo` và đòi giá trị **phải** hiện ra stdout. Phép khẳng định chính:
+Kiểm tĩnh chưa đủ, nên test còn chạy script Android với secret giả và khẳng định log không chứa giá trị nào. Để chắc phép thử bắt được lỗi, một test case sai thay `printf` bằng `echo` và đòi giá trị **phải** hiện ra stdout. Phép khẳng định chính:
 
 ### step_scripts_test.dart · 54-ci-cd-build/test/step_scripts_test.dart (trích)
 
@@ -265,7 +265,7 @@ Kiểm tĩnh chưa đủ, nên test còn chạy script Android với secret gi�
 
 ## Artifact, chi phí phút và Codemagic
 
-Mỗi job upload hai artifact: AAB hoặc IPA, và thư mục symbols. Tên chứa build number để truy từ một artifact về đúng run và đúng bản build trên store. `if-no-files-found: error` biến đường dẫn sai thành lỗi, và `retention-days: 14` giữ hữu hạn. Theo tài liệu, ai có quyền đọc repository đều tải được artifact, nên bản staging chỉ nên nằm ở repository riêng.
+Mỗi job upload hai artifact: AAB hoặc IPA, và thư mục symbols. Tên chứa build number để truy từ một artifact về đúng run và đúng bản build trên store. `if-no-files-found: error` biến đường dẫn sai thành lỗi, và `retention-days: 14` giới hạn thời gian lưu artifact. Theo tài liệu, ai có quyền đọc repository đều tải được artifact, nên bản staging chỉ nên nằm ở repository riêng.
 
 Giá theo phút của runner chuẩn trên trang billing của GitHub, **kiểm tại 11/2026**; Codemagic lấy từ trang pricing của họ. Thời gian job (15 phút Android, 30 phút iOS) là giả định minh hoạ, chưa đo.
 
@@ -289,7 +289,7 @@ Giá theo phút của runner chuẩn trên trang billing của GitHub, **kiểm 
 <figcaption>Hình 3. Phút macOS chiếm khoảng 95% hoá đơn GitHub của lần phát hành này; phần Linux gần như không đáng kể.</figcaption>
 </figure>
 
-Tỷ lệ macOS trên Linux của GitHub là 62 trên 6, khoảng 10,3 lần, khớp bảng ở bài 33. Repository công khai chạy runner chuẩn miễn phí; repository riêng ở gói Free có 12 USD included mỗi tháng, đủ 6 lần phát hành như trên (chỉ dựng iOS 30 phút thì cũng 6 lần, vì 12.000 chia 1.860). Codemagic có gói miễn phí 500 phút Mac M2 mỗi tháng cho một người dùng (trang giá không ghi ngày, kiểm tại 11/2026): 16 lần dựng iOS 30 phút, cùng đơn vị với con số 6 của GitHub. Gói pay as you go có một build song song, thêm mỗi build song song 49 USD một tháng, tối đa ba.
+Tỷ lệ macOS trên Linux của GitHub là 62 trên 6, khoảng 10,3 lần, khớp bảng ở bài 33. Repository công khai chạy runner chuẩn miễn phí; repository riêng ở gói Free có 12 USD included mỗi tháng, đủ 6 lần phát hành như trên (chỉ dựng iOS 30 phút thì cũng 6 lần, vì 12.000 chia 1.860). Codemagic có gói miễn phí 500 phút Mac M2 mỗi tháng cho một người dùng (trang giá không ghi ngày, kiểm tại 11/2026): 16 lần dựng iOS 30 phút, cùng đơn vị với con số 6 của GitHub. Gói pay as you go có một build song song, mỗi build song song thêm tốn 49 USD một tháng, tối đa ba.
 
 Đơn giá phút không phải tất cả. GitHub rẻ hơn theo đơn giá, nhưng ta tự viết phần ký (bài này) và tự lo bước tải lên store. Docs.flutter.dev xếp Codemagic vào nhóm tích hợp sẵn chức năng cho Flutter, và tài liệu Codemagic mô tả việc đẩy lên App Store Connect bằng API key qua giao diện. Ta không so tốc độ vì phần cứng khác nhau và chưa đo job nào. Chọn theo ba câu hỏi: repository ở đâu, mỗi tháng dựng iOS bao nhiêu lần, và đội có muốn tự giữ phần ký không.
 
@@ -324,7 +324,7 @@ dart test
 
 **Chưa làm**, nói thẳng:
 
-- Workflow chưa chạy trên GitHub: chưa có run, environment, reviewer hay secret thật. Chưa chạy `actionlint` (máy kiểm không có).
+- Workflow chưa chạy trên GitHub: chưa có run, environment, reviewer hay secret thật. Chưa chạy `actionlint` (máy chạy kiểm chứng không có).
 - Chưa build AAB hay IPA, chưa dùng `security` thật, chưa biết Xcode trên runner đọc profile ở thư mục nào trong hai thư mục đã chép.
 - Chưa upload lên store hay Firebase (bài 55 đến 57), chưa có job test trước khi build, chưa ghim action bằng SHA.
 - Gradle đọc `key.properties` như `java.util.Properties`, nên mật khẩu chứa dấu `\` cần escape; script chưa làm.

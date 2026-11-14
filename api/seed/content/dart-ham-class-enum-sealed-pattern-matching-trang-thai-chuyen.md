@@ -8,7 +8,7 @@ tags: [flutter, dart, mobile, toi-noi, pattern-matching]
 language: vi
 ---
 
-Tài xế đang tới điểm đón thì khách bấm huỷ. Vài giây sau, màn hình tài xế chưa kịp cập nhật nên anh vẫn bấm "Đã đón khách". Nếu app nhận lệnh đó, chuyến đã huỷ quay lại thành "đã đón" và hệ thống tính tiền cho chuyến không tồn tại. Cách phòng thủ rẻ nhất là chuyển trạng thái sai **bị từ chối ngay tại chỗ**.
+Tài xế đang tới điểm đón thì khách bấm huỷ. Vài giây sau, màn hình tài xế chưa kịp cập nhật nên anh vẫn bấm "Đã đón khách". Nếu app nhận lệnh đó, chuyến đã huỷ quay lại thành "đã đón" và hệ thống tính tiền cho chuyến không tồn tại. Cách phòng thủ ít tốn kém nhất là để việc chuyển trạng thái sai **bị từ chối ngay tại chỗ**.
 
 Dart có đủ công cụ: enum có hành vi, sealed class mà compiler biết hết biến thể, và `switch` mà compiler kiểm tra đã phủ mọi nhánh chưa. Ta dùng chúng để dựng một chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi): tám trạng thái, bảy loại sự kiện, class `Trip` bất biến và hàm `apply`.
 
@@ -17,7 +17,7 @@ Dart có đủ công cụ: enum có hành vi, sealed class mà compiler biết h
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Ta viết <code>switch</code> trên một giá trị thuộc <code>sealed class</code> và không có nhánh <code>_</code>. Sau đó có người thêm một lớp con mới mà chưa sửa switch. Chuyện gì xảy ra: chương trình chạy bình thường, ném lỗi lúc chạy, hay không biên dịch được?</p>
-<details><summary>Xem đáp án</summary><p><b>Không biên dịch được.</b> Với sealed class, compiler biết đủ các lớp con nên báo lỗi <code>non_exhaustive_switch_expression</code> ngay khi phân tích (với câu lệnh <code>switch</code> là <code>non_exhaustive_switch_statement</code>). Nếu có nhánh <code>_</code>, lỗi biến mất và lớp con mới rơi vào nhánh đó mà không ai hay.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không biên dịch được.</b> Với sealed class, compiler biết đủ các lớp con nên báo lỗi <code>non_exhaustive_switch_expression</code> ngay khi phân tích (với câu lệnh <code>switch</code> là <code>non_exhaustive_switch_statement</code>). Nếu có nhánh <code>_</code>, lỗi biến mất và lớp con mới rơi vào nhánh đó mà không ai biết.</p></details>
 </div>
 
 ## Hàm: tham số vị trí, đặt tên và hàm là giá trị
@@ -26,7 +26,7 @@ Hàm Dart khai báo kiểu trả về trước tên hàm. Tham số có ba loạ
 
 - **Tham số vị trí**: truyền theo thứ tự. Đặt trong `[ ]` nếu tuỳ chọn, và khi đó nên có giá trị mặc định.
 - **Tham số đặt tên**: khai báo trong `{ }`, gọi bằng `ten: giaTri`. Thứ tự lúc gọi không quan trọng.
-- **`required`**: bắt buộc truyền tham số đặt tên. Quên là lỗi biên dịch, không phải lỗi lúc chạy.
+- **`required`**: bắt buộc truyền tham số đặt tên. Quên truyền là lỗi biên dịch, không phải lỗi lúc chạy.
 
 Tham số đặt tên nên là lựa chọn mặc định khi hàm có nhiều tham số cùng kiểu hoặc có cờ bool. Đọc `tripSummary('TN-1', kind: ServiceKind.ride, fareVnd: 25500)`, ta không cần mở khai báo để đoán số nào là cước.
 
@@ -133,10 +133,10 @@ Mấy điểm cần đọc kỹ:
 
 - **Initializing formal** `required this.id` vừa khai báo tham số vừa gán thẳng vào trường `id`. Không cần thân constructor.
 - **Initializer list** sau dấu `:` chạy trước thân constructor. Ta dùng nó cho `assert(requestedAt.isUtc, ...)` vì thời điểm lưu và truyền đều ở UTC. `assert` chỉ chạy khi bật assert: `dart test`, `dart run --enable-asserts`, Flutter debug. `dart run` mặc định và bản release bỏ qua, nên đừng dùng nó để kiểm dữ liệu người dùng.
-- **Named constructor** `Trip.request` cho một cách tạo riêng: chuyến mới luôn ở `requested` và cước được tính bằng `quoteFor` (hàm ở mục 5). Nó **chuyển tiếp** sang constructor chính bằng `: this(...)` nên quy tắc `assert` vẫn được áp dụng.
+- **Named constructor** `Trip.request` cung cấp một cách tạo riêng: chuyến mới luôn ở `requested` và cước được tính bằng `quoteFor` (hàm ở mục 5). Constructor này **chuyển tiếp** sang constructor chính bằng `: this(...)` nên quy tắc `assert` vẫn được áp dụng.
 - **`const` constructor** tạo đối tượng hằng: hai lần viết `const PickedUp()` cho ra *cùng một* đối tượng. Mọi trường phải `final` và biết lúc biên dịch. `Trip` không khai báo `const` constructor vì `assert(requestedAt.isUtc)` gọi getter, không phải biểu thức hằng; và `DateTime` không có `const` constructor nên đằng nào cũng không tạo được `Trip` hằng. Các sự kiện ở mục 4 thì có.
 
-`final` chỉ ngăn gán lại biến; một `final List<String>` vẫn `add` được. Ở `Trip`, mọi trường đều là kiểu bất biến (`String`, `int`, `double`, enum, `DateTime`), nên cả đối tượng bất biến thật sự. Muốn đổi trạng thái, ta gọi `apply` và nhận về **bản sao mới**; bản cũ giữ nguyên.
+`final` chỉ ngăn gán lại biến; một `final List<String>` vẫn `add` được. Ở `Trip`, mọi trường đều là kiểu bất biến (`String`, `int`, `double`, enum, `DateTime`), nên cả đối tượng là bất biến thật sự. Muốn đổi trạng thái, ta gọi `apply` và nhận về **bản sao mới**; bản cũ giữ nguyên.
 
 Phần còn lại của class là `==` và `hashCode`:
 
@@ -208,7 +208,7 @@ enum TripStatus {
 
 - Mỗi giá trị gọi một `const` constructor, ở đây truyền nhãn tiếng Việt. `label` là trường `final`; `canCancel` và `isTerminal` là getter, nên hành vi nằm cạnh dữ liệu thay vì rải rác trong các `if` ở UI.
 - `TripStatus.values` trả về danh sách mọi giá trị theo thứ tự khai báo; `status.name` trả tên chuỗi (`'pickedUp'`). Dùng `name` khi lưu hoặc gửi qua mạng; server và database Tới Nơi dùng snake_case (`'picked_up'`, `'in_transit'`), nên cần ánh xạ ở bài dữ liệu sau.
-- `switch (this)` trên enum cũng vét cạn. Hai getter ở trên cố ý liệt kê đủ tám giá trị thay vì dùng `_`: thêm trạng thái thứ chín, compiler buộc ta quyết định nó có huỷ được hay không. Một nhánh `_ => false` sẽ lặng lẽ trả lời thay ta.
+- `switch (this)` trên enum cũng vét cạn. Hai getter ở trên cố ý liệt kê đủ tám giá trị thay vì dùng `_`: thêm trạng thái thứ chín, compiler buộc ta quyết định nó có huỷ được hay không. Một nhánh `_ => false` sẽ tự trả lời thay ta mà không báo gì.
 
 `ServiceKind` ở `lib/service_kind.dart` làm tương tự cho ba dịch vụ `ride`, `food`, `parcel`, mỗi dịch vụ có `label` riêng.
 
@@ -286,7 +286,7 @@ String describeEvent(TripEvent event) => switch (event) {
 
 `sealed` nghĩa là lớp con trực tiếp phải cùng library với lớp cha (thường là cùng file, trừ khi dùng `part`), nên compiler đếm được đủ bảy lớp con. Lớp `sealed` ngầm là `abstract`; `final` ở mỗi biến thể cấm `extends` và `implements` từ ngoài library.
 
-Hàm `describeEvent` ở cuối file là mẫu cho **switch biểu thức vét cạn**. Nó không có `_`. Thử thêm `final class Rated extends TripEvent` mà chưa sửa hàm, `dart analyze` báo:
+Hàm `describeEvent` ở cuối file là mẫu cho **switch biểu thức vét cạn**. Hàm này không có `_`. Nếu thử thêm `final class Rated extends TripEvent` mà chưa sửa hàm, `dart analyze` sẽ báo:
 
 ```text
 error - trip_event.dart:52:42 - The type 'TripEvent' isn't exhaustively matched by the switch cases
@@ -332,7 +332,7 @@ Cách đọc:
 - Nhánh `Cancelled()` dùng **or-pattern**: ba trạng thái chung một nhánh huỷ, và ta không cần `by` vì ai huỷ cũng sang `cancelled`.
 - `when driverId.trim().isEmpty` là **guard**: nhánh chỉ khớp khi điều kiện đúng. Nhánh có guard đứng **trước** nhánh `DriverAccepted` thường vì Dart chọn nhánh khớp đầu tiên từ trên xuống. Đảo thứ tự thì nhánh guard không bao giờ được chạy.
 
-Nhánh cuối `_ => throw StateError(...)` bắt 47 trên 56 cặp (trạng thái, loại sự kiện) không hợp lệ. Đây là chỗ ta **cố ý** dùng `_`, khác với lỗi nuốt nhánh: mặc định ở đây là **từ chối**. Liệt kê hết 47 cặp thì code dài gấp ba mà không an toàn hơn. Cái giá: có `_` thì compiler không còn kiểm được ta đã nghĩ tới mọi cặp. Ta bù bằng bảng test duyệt **mọi** cặp (mục "Chạy ví dụ và kiểm chứng").
+Nhánh cuối `_ => throw StateError(...)` bắt 47 trên 56 cặp (trạng thái, loại sự kiện) không hợp lệ. Đây là chỗ ta **cố ý** dùng `_`, khác với lỗi nhánh nuốt biến thể mới: mặc định ở đây là **từ chối**. Liệt kê hết 47 cặp thì code dài gấp ba mà không an toàn hơn. Cái giá: có `_` thì compiler không còn kiểm được ta đã nghĩ tới mọi cặp. Ta bù bằng bảng test duyệt **mọi** cặp (mục "Chạy ví dụ và kiểm chứng").
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -341,11 +341,11 @@ Nhánh cuối `_ => throw StateError(...)` bắt 47 trên 56 cặp (trạng thá
 <figcaption>Hình 2. Các nhánh của <code>apply</code> được thử từ trên xuống, nhánh khớp đầu tiên thắng. Hình lược bỏ guard <code>when</code>. Bảy nhánh đầu cho ra một bản sao <code>Trip</code> mới; nhánh <code>_</code> (màu cảnh báo) ném <code>StateError</code> cho 47 cặp còn lại.</figcaption>
 </figure>
 
-Hàm `_next` ở cuối class chỉ có việc dựng bản sao: giữ nguyên mọi trường, đổi `status` và (nếu có) `driverId`. Mọi thay đổi trạng thái đi qua `apply`, nên quy tắc không thể bị vòng qua. `Cancelled` mang `by` nhưng `Trip` không có trường ghi ai đã huỷ; thông tin đó thuộc nhật ký sự kiện, sẽ quay lại ở bài máy trạng thái trên client.
+Hàm `_next` ở cuối class chỉ làm một việc là dựng bản sao: giữ nguyên mọi trường, đổi `status` và (nếu có) `driverId`. Mọi thay đổi trạng thái đi qua `apply`, nên quy tắc không thể bị vòng qua. `Cancelled` mang `by` nhưng `Trip` không có trường ghi ai đã huỷ; thông tin đó thuộc nhật ký sự kiện, sẽ quay lại ở bài máy trạng thái trên client.
 
 ## Record: trả nhiều giá trị và so sánh theo cấu trúc
 
-Ta vừa dùng record làm "phiếu" cho `switch`. Công dụng đầu tiên của nó là để hàm **trả nhiều giá trị** mà không phải tạo class chỉ để chứa chúng:
+Ta vừa dùng record làm "phiếu" cho `switch`. Công dụng đầu tiên của record là để hàm **trả nhiều giá trị** mà không phải tạo class chỉ để chứa chúng:
 
 Toàn bộ `lib/quote.dart`:
 
@@ -378,7 +378,7 @@ const double _maxDistanceKm = 100;
 }
 ```
 
-Kiểu trả về `({int fareVnd, double distanceKm})` là record có hai trường đặt tên; `return (fareVnd: fare, distanceKm: distanceKm);` dựng nó. Bảng giá (12.000 VND cho 2 km đầu, 4.500 VND mỗi km vượt, miền 0 đến 100 km) là **số minh hoạ**, không phải bảng giá thật của Tới Nơi. Cước tính bằng số nguyên mét rồi chia nguyên, tránh sai số số thực; đây là dạng sẽ dùng trong `toi_noi_core` ở bài 06. Người gọi lấy từng trường bằng `quoteFor(5).fareVnd`, hoặc **destructuring**:
+Kiểu trả về `({int fareVnd, double distanceKm})` là record có hai trường đặt tên; `return (fareVnd: fare, distanceKm: distanceKm);` dựng nó. Bảng giá (12.000 VND cho 2 km đầu, 4.500 VND mỗi km vượt, miền 0 đến 100 km) là **số minh hoạ**, không phải bảng giá thật của Tới Nơi. Cước tính bằng số nguyên mét rồi chia nguyên để tránh sai số số thực; đây là dạng sẽ dùng trong `toi_noi_core` ở bài 06. Người gọi lấy từng trường bằng `quoteFor(5).fareVnd`, hoặc **destructuring**:
 
 ```dart
 final (:fareVnd, :distanceKm) = quoteFor(5);
@@ -486,7 +486,7 @@ void main() {
         }
 ```
 
-Vòng lặp sinh 64 test: 12 cặp hợp lệ phải ra đúng trạng thái đích, 52 cặp còn lại phải ném `StateError`. 32 test còn lại (tổng 96) kiểm: thông báo lỗi; `driverId` rỗng là `ArgumentError`; bản gốc không đổi sau `apply`, kể cả khi bị từ chối; `requestedAt` không UTC bị `assert` chặn; `==` theo id và status; `canCancel`, `isTerminal`; record; ca biên 0, 1,999, 2, 2,001, 100 km và ngoài miền; các hàm của `functions_tour.dart`.
+Vòng lặp sinh 64 test: 12 cặp hợp lệ phải ra đúng trạng thái đích, 52 cặp còn lại phải ném `StateError`. 32 test còn lại (tổng 96) kiểm: thông báo lỗi; `driverId` rỗng là `ArgumentError`; bản gốc không đổi sau `apply`, kể cả khi bị từ chối; `requestedAt` không UTC bị `assert` chặn; `==` theo id và status; `canCancel`, `isTerminal`; record; các giá trị biên 0, 1,999, 2, 2,001, 100 km và ngoài miền; các hàm của `functions_tour.dart`.
 
 Mức kiểm chứng: **Kiểm chứng tự động**. `dart analyze` báo 0 issue, `dart test` chạy xanh 96 test trên Flutter 3.47.4 / Dart 3.13.3. Lab chưa làm: lưu chuyến vào database, đồng bộ với server và UI; các phần đó thuộc những bài sau.
 

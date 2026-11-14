@@ -8,7 +8,7 @@ tags: [flutter, dart, mobile, toi-noi, testing, integration-test, patrol, androi
 language: vi
 ---
 
-Đội QA báo một lỗi lạ trên emulator Android 13: ở màn hình theo dõi chuyến, bấm **Bật thông báo** mà dòng trạng thái vẫn ghi "chưa bật". Widget test của màn hình này xanh từ lâu, vì nó thay quyền thông báo bằng bản giả trả lời ngay nên hộp thoại của hệ điều hành chưa bao giờ xuất hiện. Tình huống là minh hoạ, nhưng khoảng trống thì thật: lỗi ở chỗ app gặp hệ điều hành chỉ lộ ra trên thiết bị.
+Đội QA báo một lỗi lạ trên emulator Android 13: ở màn hình theo dõi chuyến, bấm **Bật thông báo** mà dòng trạng thái vẫn ghi "chưa bật". Widget test của màn hình này xanh từ lâu, vì nó thay quyền thông báo bằng bản giả trả lời ngay nên hộp thoại của hệ điều hành chưa bao giờ xuất hiện. Tình huống là minh hoạ, nhưng khoảng trống thì thật: lỗi ở chỗ app tương tác với hệ điều hành chỉ lộ ra trên thiết bị.
 
 Bài này viết luồng đặt chuyến của app khách **một lần**, rồi chạy nó bằng ba cách: `flutter test`, `integration_test` và Patrol. Ta cũng cho emulator gọi fake API trên máy dev, chụp màn hình, và tính xem loại test này đắt tới đâu.
 
@@ -22,7 +22,7 @@ Bài này viết luồng đặt chuyến của app khách **một lần**, rồi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một test <code>integration_test</code> chạy trên emulator Android 13, bấm nút xin quyền thông báo và hộp thoại "Allow" của hệ điều hành hiện ra. Test có tự bấm được "Allow" không? Nếu không thì chuyện gì xảy ra với test?</p>
-<details><summary>Xem đáp án</summary><p>Không. <code>integration_test</code> điều khiển cây widget của Flutter; hộp thoại do hệ điều hành vẽ, nằm ngoài cây đó. Không ai trả lời hộp thoại thì lời gọi xin quyền không hoàn tất và test hết giờ ở bước chờ trạng thái "đã bật" (ta suy ra từ cách công cụ hoạt động, chưa chạy trên thiết bị). Tài liệu Patrol nêu đúng khoảng trống này. Mục 5 bấm hộp thoại bằng Patrol.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. <code>integration_test</code> điều khiển cây widget của Flutter; hộp thoại do hệ điều hành vẽ, nằm ngoài cây đó. Không ai trả lời hộp thoại thì lời gọi xin quyền không hoàn tất và test hết thời gian chờ ở bước chờ trạng thái "đã bật" (ta suy ra từ cách công cụ hoạt động, chưa chạy trên thiết bị). Tài liệu Patrol nêu đúng khoảng trống này. Mục 5 dùng Patrol để bấm hộp thoại.</p></details>
 </div>
 
 ## 1. Ba tầng test và chỗ integration test lấp vào
@@ -36,7 +36,7 @@ Tài liệu Flutter so sánh ba loại test bằng một bảng. Các xếp hạ
 | Phụ thuộc | Ít | Nhiều hơn | Nhiều nhất |
 | Tốc độ chạy | Nhanh | Nhanh | Chậm |
 
-Với Tới Nơi: unit test bảo vệ `calculateFare` và máy trạng thái chuyến; widget test bảo vệ từng màn hình với server giả; integration test trả lời câu còn lại là "app thật, trên hệ điều hành thật, có đi hết luồng chính không". Nó đắt nhất nên chỉ giữ ở đó những gì tầng dưới không thấy được.
+Với Tới Nơi: unit test bảo vệ `calculateFare` và máy trạng thái chuyến; widget test bảo vệ từng màn hình với server giả; integration test trả lời câu còn lại là "app thật, trên hệ điều hành thật, có đi hết luồng chính không". Integration test đắt nhất nên chỉ giữ ở tầng này những gì tầng dưới không thấy được.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -113,7 +113,7 @@ Ta không dùng `pumpAndSettle` vì màn hình chờ tài xế có một `Linear
       );
 ```
 
-`timeout` của `pumpUntilFound` là tổng các `step` đã bơm, không phải đồng hồ treo tường. Trong `flutter test`, mỗi `pump(step)` đẩy đồng hồ giả đi đúng `step`, nên vòng chờ 10 giây không tốn giây nào. Trên thiết bị, binding là `LiveTestWidgetsFlutterBinding`: `pump(duration)` tạo một `Timer` thật, nên mỗi bước tốn ít nhất `step` thật và tổng thời gian thật có thể dài hơn.
+`timeout` của `pumpUntilFound` là tổng các `step` đã pump, không phải đồng hồ treo tường. Trong `flutter test`, mỗi `pump(step)` đẩy đồng hồ giả đi đúng `step`, nên vòng chờ 10 giây không tốn giây nào. Trên thiết bị, binding là `LiveTestWidgetsFlutterBinding`: `pump(duration)` tạo một `Timer` thật, nên mỗi bước tốn ít nhất `step` thật và tổng thời gian thật có thể dài hơn.
 
 Hàm chính ghép các bước lại. Bước "tài xế nhận" đi qua `actAsDriver`, vì trong `testWidgets` một `await` cần timer thật sẽ không bao giờ xong nếu thiếu `tester.runAsync`. Trên binding live, `runAsync` chỉ chạy và chờ việc đó (đọc `binding.dart`).
 
@@ -193,7 +193,7 @@ Uri resolveApiBaseUrl({
 
 Có cần mở HTTP không mã hoá trong cấu hình native không? Với lab này thì không. `dio` mặc định gửi qua `dart:io`, và socket do Dart sở hữu không chịu chính sách mạng của nền tảng. Engine ghi: "By default, dart:io allows all socket connections" (`switch_defs.h`). `FlutterLoader.java` không bật cờ `--disallow-insecure-connections`, `FlutterDartProject.mm` đặt `may_insecurely_connect_to_all_domains = true`, và trang network policy của Flutter nói chính sách chỉ áp cho socket do Android và iOS sở hữu. Chính sách đó (Android từ API 28, ATS trên iOS) chỉ chặn tầng nền tảng: `HttpURLConnection`, `URLSession`, WebView và adapter dựa trên chúng như `cronet_http`. Kết luận này đọc từ source và tài liệu, chưa chạy trên thiết bị.
 
-Lab vẫn giữ cấu hình dưới đây như lớp phòng khi đổi adapter hoặc mở WebView, đặt **chỉ trong thư mục `debug`** để bản release không có nó:
+Lab vẫn giữ cấu hình dưới đây như lớp phòng thủ khi đổi adapter hoặc mở WebView, đặt **chỉ trong thư mục `debug`** để bản release không có nó:
 
 ### network_security_config.xml · 31-integration-test-patrol/native-config/android/app/src/debug/res/xml/network_security_config.xml
 
@@ -206,9 +206,9 @@ Lab vẫn giữ cấu hình dưới đây như lớp phòng khi đổi adapter h
 </network-security-config>
 ```
 
-Manifest của bản debug trỏ tới file bằng `android:networkSecurityConfig="@xml/network_security_config"`; manifest chính không nhắc tới nó. `native_config_test.dart` đọc các file này để lớp phòng không vô tình rộng ra: manifest chính có `usesCleartextTraffic`, hoặc domain rộng hơn `10.0.2.2`, đều làm test đỏ (ta đã thử).
+Manifest của bản debug trỏ tới file bằng `android:networkSecurityConfig="@xml/network_security_config"`; manifest chính không nhắc tới nó. `native_config_test.dart` đọc các file này để lớp phòng thủ không vô tình rộng ra: manifest chính có `usesCleartextTraffic`, hoặc domain rộng hơn `10.0.2.2`, đều làm test đỏ (ta đã thử).
 
-Trên iOS, ATS cũng chỉ áp cho tầng nền tảng. Với adapter native, tài liệu Apple cho biết từ iOS 17 ATS không còn cho kết nối tới địa chỉ IP theo mặc định; `NSAllowsLocalNetworking` mở lại mạng cục bộ mà không tắt ATS toàn app. Lab giữ đoạn plist đó trong `native-config/ios/` như lớp phòng.
+Trên iOS, ATS cũng chỉ áp cho tầng nền tảng. Với adapter native, tài liệu Apple cho biết từ iOS 17 ATS không còn cho kết nối tới địa chỉ IP theo mặc định; `NSAllowsLocalNetworking` mở lại mạng cục bộ mà không tắt ATS toàn app. Lab giữ đoạn plist đó trong `native-config/ios/` như lớp phòng thủ.
 
 Cuối cùng là "tài xế". Test không có app tài xế, nên `DriverSimulator` là một `ToiNoiApiClient` thứ hai gửi header `x-fake-driver-id`, gọi `getTrip` rồi `acceptTrip` với đúng phiên bản vừa đọc. Một test chạy nó qua HTTP thật tới fake API trên loopback (`test()` thuần, vì binding của `flutter_test` chặn HTTP thật), để chứng minh đường đi trên thiết bị không phụ thuộc `InProcessAdapter`.
 
@@ -221,7 +221,7 @@ Cuối cùng là "tài xế". Test không có app tài xế, nên `DriverSimulat
 <rect x="36" y="240" width="230" height="84" rx="10" class="f-phys-soft s-phys"/><text x="50" y="268" class="t-b">fake API</text><text x="50" y="292" class="t-mono">127.0.0.1:8787</text>
 <rect x="340" y="20" width="524" height="330" rx="12" class="f-surface s-line"/><text x="356" y="48" class="t-b">Emulator hoặc simulator</text>
 <rect x="360" y="70" width="230" height="110" rx="10" class="f-pk-soft s-pk"/><text x="374" y="98" class="t-b">App Tới Nơi</text><text x="374" y="122" class="t-small">test Dart chạy bên trong</text><text x="374" y="144" class="t-small">gọi HTTP tới fake API</text>
-<rect x="360" y="240" width="230" height="84" rx="10" class="f-surface s-line"/><text x="374" y="268" class="t-b">Cấu hình mạng debug</text><text x="374" y="292" class="t-small">lớp phòng, tầng nền tảng</text>
+<rect x="360" y="240" width="230" height="84" rx="10" class="f-surface s-line"/><text x="374" y="268" class="t-b">Cấu hình mạng debug</text><text x="374" y="292" class="t-small">lớp phòng thủ, tầng nền tảng</text>
 <rect x="640" y="70" width="204" height="84" rx="10" class="f-warn-soft s-warn"/><text x="654" y="98" class="t-b">Hộp thoại quyền</text><text x="654" y="122" class="t-small">do hệ điều hành vẽ</text>
 <rect x="640" y="240" width="204" height="84" rx="10" class="f-phys-soft s-phys"/><text x="654" y="268" class="t-b">Native automator</text><text x="654" y="292" class="t-small">UiAutomator, XCUITest</text>
 <path d="M268 112 L358 112" class="f-none s-pk" stroke-width="2" marker-end="url(#fl31-3-a)"/>
@@ -231,7 +231,7 @@ Cuối cùng là "tài xế". Test không có app tài xế, nên `DriverSimulat
 <text x="16" y="382" class="t-small">Android emulator: app gọi http://10.0.2.2:8787. iOS Simulator: http://localhost:8787.</text>
 </svg>
 </div>
-<figcaption>Hình 3. Mũi tên chỉ chiều của việc làm: patrol build và chạy app; app gọi fake API bằng socket của Dart; test Dart gọi native automator và native automator bấm hộp thoại.</figcaption>
+<figcaption>Hình 3. Mũi tên chỉ chiều tác động: patrol build và chạy app; app gọi fake API bằng socket của Dart; test Dart gọi native automator và native automator bấm hộp thoại.</figcaption>
 </figure>
 
 ## 4. integration_test thuần: chạy và chụp màn hình
@@ -354,7 +354,7 @@ Chi phí của integration test không chỉ là giờ chạy. Mô tả trong b�
 | Hạ tầng | Máy dev, CI Linux | Emulator hoặc simulator (macOS cho iOS), server giả |
 | Nguồn gây flaky | Ít, đồng hồ giả | Đồng hồ thật, mạng, hộp thoại, thiết bị khởi động chậm |
 
-Khuyến nghị (không phải luật): giữ luồng chính và những chỗ chỉ thiết bị mới lộ (quyền, app ở nền, cấu hình native); mọi ca biên (150 km, 503, mất kết nối) đã có widget test. Một lỗi tìm ra bằng integration test thì sửa xong nên thêm test ở tầng thấp nhất tái hiện được nó. Chạy mọi commit thường quá đắt; hay chọn lịch đêm, trước khi phát hành, hoặc khi đổi file trong `android/` và `ios/`. Bài 33 dựng CI cho analyze và `flutter test`; test trên thiết bị cần runner có emulator nên là quyết định riêng.
+Khuyến nghị (không phải luật): giữ luồng chính và những chỗ chỉ thiết bị mới lộ (quyền, app ở nền, cấu hình native); mọi trường hợp biên (150 km, 503, mất kết nối) đã có widget test. Một lỗi tìm ra bằng integration test thì sửa xong nên thêm test ở tầng thấp nhất tái hiện được nó. Chạy ở mọi commit thường quá đắt; nên chọn lịch chạy ban đêm, trước khi phát hành, hoặc khi đổi file trong `android/` và `ios/`. Bài 33 dựng CI cho analyze và `flutter test`; test trên thiết bị cần runner có emulator nên là quyết định riêng.
 
 ## Lỗi thường gặp
 
@@ -382,7 +382,7 @@ flutter test
 Đã kiểm với Flutter 3.47.4, Dart 3.13.3: `flutter analyze` 0 issue, `flutter test` 31 test xanh. Các nhóm test chứng minh:
 
 - **Luồng đầy đủ**: thứ tự request, khoá idempotency, header tài xế, giá của ba dịch vụ, từ chối thông báo mà luồng vẫn đi tiếp.
-- **Lỗi**: 422 cho 150 km; 503 khi đặt chuyến (giữ giá, dùng lại cùng khoá); mất kết nối khi hỏi trạng thái rồi "Thử lại"; `pumpAndSettle` hết giờ; rời màn hình thì ngừng hỏi.
+- **Lỗi**: 422 cho 150 km; 503 khi đặt chuyến (giữ giá, dùng lại cùng khoá); mất kết nối khi hỏi trạng thái rồi "Thử lại"; `pumpAndSettle` hết thời gian chờ; rời màn hình thì ngừng hỏi.
 - **Cấu hình native**: package khớp khối `patrol:`, runner và orchestrator, cleartext chỉ ở bản debug và chỉ cho `10.0.2.2`, không có bí mật.
 - **Còn lại**: `resolveApiBaseUrl` theo nền tảng, `DriverSimulator` qua HTTP thật trên loopback.
 
@@ -392,12 +392,12 @@ flutter test
 
 1. Thêm một test Patrol cho trường hợp người dùng bấm "Don't allow". Cần dùng hàm nào của Patrol, và `runBookingFlow` có chạy được nguyên vẹn không?
 2. Ta chạy bản debug trên một điện thoại Android thật cắm cáp, fake API ở máy dev có IP LAN `192.168.1.20`. Cần đổi những gì ở app, server và cấu hình native?
-3. Một đồng nghiệp muốn thêm test trên thiết bị cho ca "nhập 150 km thì báo lỗi". Bạn có đồng ý không?
+3. Một đồng nghiệp muốn thêm test trên thiết bị cho trường hợp "nhập 150 km thì báo lỗi". Bạn có đồng ý không?
 
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Dùng <code>$.platform.mobile.denyPermission()</code> thay cho <code>grantPermissionWhenInUse()</code>. <code>runBookingFlow</code> không chạy nguyên vẹn vì nó chờ chữ "Thông báo: đã bật". Ghép từng bước: <code>requestQuote</code>, <code>placeBooking</code>, rồi <code>askForNotifications(expected: NotificationPermissionStatus.denied)</code>, như test từ chối ở bản <code>flutter test</code>.</p>
 <p><strong>2.</strong> App: truyền <code>--dart-define=API_BASE_URL=http://192.168.1.20:8787</code>, vì <code>10.0.2.2</code> chỉ có trong emulator. Server: chạy với <code>--host 0.0.0.0</code> và chỉ trên mạng tin cậy. Native: với <code>dio</code> mặc định (<code>dart:io</code>) không phải đổi; chỉ khi dùng adapter native mới thêm <code>192.168.1.20</code> vào <code>network_security_config.xml</code> của bản debug (và cấu hình ATS trên iOS).</p>
-<p><strong>3.</strong> Không. Ca đó kiểm tra đầu vào, không phụ thuộc hệ điều hành, và đã có widget test chạy trong vài giây. Test trên thiết bị đắt hơn mà không thấy thêm lỗi nào; chỉ thêm khi có bằng chứng lỗi chỉ xảy ra trên thiết bị.</p>
+<p><strong>3.</strong> Không. Trường hợp đó kiểm tra đầu vào, không phụ thuộc hệ điều hành, và đã có widget test chạy trong vài giây. Test trên thiết bị đắt hơn mà không thấy thêm lỗi nào; chỉ thêm khi có bằng chứng lỗi chỉ xảy ra trên thiết bị.</p>
 </details>
 
 Bài trước: [Kiểm thử Riverpod, async và Stream](/articles/flutter-test-riverpod-async-stream-fake-async-providercontainer). Bài tiếp: [Lint, analyzer, dart format và analyzer plugin](/articles/flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code).

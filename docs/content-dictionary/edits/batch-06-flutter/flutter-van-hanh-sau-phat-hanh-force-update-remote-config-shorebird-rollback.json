@@ -1,0 +1,83 @@
+{
+"file": "flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback.md",
+"edits": [
+{
+"old": "runbook halt hay pause rollout theo crash-free.",
+"new": "runbook halt hoặc pause rollout theo chỉ số crash-free.",
+"reason": "'halt hay pause' cụt; làm rõ crash-free là chỉ số",
+"severity": "low"
+},
+{
+"old": "Bài này dựng những thứ phải có trước sự cố: kiểm phiên bản tối thiểu",
+"new": "Bài này dựng những thứ phải có trước sự cố: kiểm tra phiên bản tối thiểu",
+"reason": "'kiểm' cụt",
+"severity": "low"
+},
+{
+"old": "Nó chỉ áp cho cập nhật tự động: bản đang phát dần vẫn tải tay được, nên pause không chặn người tự bấm cập nhật.",
+"new": "Việc tạm dừng chỉ áp cho cập nhật tự động: bản đang phát dần vẫn cập nhật thủ công được, nên pause không chặn người tự bấm cập nhật.",
+"reason": "'Nó' mơ hồ đầu câu; 'tải tay' gượng",
+"severity": "medium"
+},
+{
+"old": "do app tự thực thi và tự báo người dùng.",
+"new": "do app tự thực thi và tự thông báo cho người dùng.",
+"reason": "'tự báo người dùng' thiếu từ",
+"severity": "low"
+},
+{
+"old": "Lỗi mạng, hết giờ, JSON hỏng, cấu hình mâu thuẫn,",
+"new": "Lỗi mạng, hết thời gian chờ, JSON hỏng, cấu hình mâu thuẫn,",
+"reason": "'hết giờ' cho timeout",
+"severity": "medium"
+},
+{
+"old": "(test có ca đối chứng)",
+"new": "(test có test case đối chứng)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "khoảng hợp lệ và test được không cần plugin",
+"new": "khoảng hợp lệ và test được mà không cần plugin",
+"reason": "Câu thiếu liên từ",
+"severity": "medium"
+},
+{
+"old": "**Kiểm giá trị.**",
+"new": "**Kiểm tra giá trị.**",
+"reason": "'kiểm' cụt",
+"severity": "low"
+},
+{
+"old": "Nó kiểm giá trị, ghi cache,",
+"new": "Hàm này kiểm tra giá trị, ghi cache,",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "medium"
+},
+{
+"old": "chỉ nêu điều tài liệu của họ nói,",
+"new": "chỉ nêu điều tài liệu của Shorebird nói,",
+"reason": "Đại từ 'họ' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Bài này không kiểm giá.",
+"new": "Bài này không kiểm chứng giá.",
+"reason": "'kiểm giá' cụt",
+"severity": "low"
+},
+{
+"old": "ba mức quyết định kể cả ca biên của build;",
+"new": "ba mức quyết định kể cả test case biên của build;",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "fail open và hết giờ đúng ở 3 giây",
+"new": "fail open và hết thời gian chờ đúng ở 3 giây",
+"reason": "'hết giờ' cho timeout",
+"severity": "medium"
+}
+]
+}

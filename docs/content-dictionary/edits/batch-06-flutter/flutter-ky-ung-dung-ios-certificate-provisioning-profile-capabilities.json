@@ -1,0 +1,59 @@
+{
+"file": "flutter-ky-ung-dung-ios-certificate-provisioning-profile-capabilities.md",
+"edits": [
+{
+"old": "Apple không ghi loại profile thành một khoá.",
+"new": "Apple không có khoá riêng nào ghi loại profile.",
+"reason": "'ghi ... thành một khoá' gượng, kiểu dịch máy",
+"severity": "medium"
+},
+{
+"old": "chọn cách tìm tài sản ký.",
+"new": "chọn cách lấy các thành phần dùng để ký.",
+"reason": "'tài sản ký' là calque của signing assets",
+"severity": "medium"
+},
+{
+"old": "Với build release hoặc profile, `CODE_SIGN_STYLE = Manual` và đủ `DEVELOPMENT_TEAM` lẫn `PROVISIONING_PROFILE_SPECIFIER`, lệnh `flutter build ipa`",
+"new": "Với build release hoặc profile mà `CODE_SIGN_STYLE = Manual` và có đủ `DEVELOPMENT_TEAM` lẫn `PROVISIONING_PROFILE_SPECIFIER`, lệnh `flutter build ipa`",
+"reason": "Câu thiếu quan hệ điều kiện, khó đọc",
+"severity": "medium"
+},
+{
+"old": "Bản App Store cùng khuôn, khác `method`, bundle ID, tên profile và có `uploadSymbols`.",
+"new": "Bản App Store có cùng cấu trúc, khác ở `method`, bundle ID, tên profile, và có thêm `uploadSymbols`.",
+"reason": "'cùng khuôn' gượng, câu lược",
+"severity": "low"
+},
+{
+"old": "Test duyệt từng tên cũ và đòi gợi ý đúng tên mới:",
+"new": "Test duyệt từng tên cũ và kiểm thông báo gợi ý đúng tên mới:",
+"reason": "'đòi' là calque của require",
+"severity": "low"
+},
+{
+"old": "làm nguồn chân lý. Vì thế công cụ của lab dành cho học và gỡ lỗi, không để dựng sản phẩm. Nó đọc plist đã giải; Flutter tool cũng đọc",
+"new": "làm nguồn dữ liệu gốc. Vì thế công cụ của lab dành cho việc học và gỡ lỗi, không dùng để dựng sản phẩm. Công cụ này đọc plist đã giải mã; Flutter tool cũng đọc",
+"reason": "'nguồn chân lý' là calque của source of truth; 'Nó' đầu câu; câu cụt",
+"severity": "medium"
+},
+{
+"old": "hạn dùng ở các ca biên, thiết bị",
+"new": "hạn dùng ở các trường hợp biên, thiết bị",
+"reason": "'ca' dễ nhầm với test case",
+"severity": "low"
+},
+{
+"old": "<code>lintExportOptions</code> bắt ca này sớm.",
+"new": "<code>lintExportOptions</code> bắt trường hợp này sớm.",
+"reason": "'ca' dễ nhầm với test case",
+"severity": "low"
+},
+{
+"old": "Test khoá các ca biên: đúng 30 ngày",
+"new": "Test khoá các trường hợp biên: đúng 30 ngày",
+"reason": "'ca' dễ nhầm với test case",
+"severity": "low"
+}
+]
+}

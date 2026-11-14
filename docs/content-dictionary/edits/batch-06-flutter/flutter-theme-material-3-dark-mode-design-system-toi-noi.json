@@ -1,0 +1,59 @@
+{
+"file": "flutter-theme-material-3-dark-mode-design-system-toi-noi.md",
+"edits": [
+{
+"old": "widget đã gọi nó được dựng lại.",
+"new": "widget đã gọi nó được rebuild.",
+"reason": "Thống nhất 'rebuild' (giữ tiếng Anh)",
+"severity": "low"
+},
+{
+"old": "để chuyển sáng sang tối có nội suy",
+"new": "để chuyển từ sáng sang tối có nội suy",
+"reason": "Thiếu 'từ'",
+"severity": "low"
+},
+{
+"old": "nên gọi chúng trong `build` không tốn gì.",
+"new": "nên gọi chúng trong `build` không tốn thêm chi phí nào.",
+"reason": "'không tốn gì' gượng",
+"severity": "low"
+},
+{
+"old": "biến thể `tonalSpot` mặc định;",
+"new": "biến thể mặc định là `tonalSpot`;",
+"reason": "Trật tự từ kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "Seed không thành `primary` nguyên xi:",
+"new": "Seed không trở thành `primary` nguyên xi:",
+"reason": "Thiếu 'trở' trong 'X thành Y'",
+"severity": "medium"
+},
+{
+"old": "ngoài cây cho `null` (có test).",
+"new": "ngoài cây thì ra `null` (có test).",
+"reason": "'cho null' là calque",
+"severity": "low"
+},
+{
+"old": "`lerp` có việc thật.",
+"new": "`lerp` có tác dụng thật.",
+"reason": "Calque của 'does real work'",
+"severity": "medium"
+},
+{
+"old": "Chip phải được quyết định màu trước khi code build được.",
+"new": "Phải quyết định màu cho chip thì code mới build được.",
+"reason": "Bị động kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "mới đi được đầu đường nội suy.",
+"new": "mới đi được đoạn đầu của quá trình nội suy.",
+"reason": "Cụm tự ghép 'đầu đường'",
+"severity": "low"
+}
+]
+}

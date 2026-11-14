@@ -66,6 +66,11 @@ Lưu các tệp đề xuất đã áp vào `docs/content-dictionary/edits/<đợ
 - Đợt 4 (60 bài AWS, prompt có thêm "mục tiêu tham khảo khoảng 9–13 đề xuất mỗi bài"): 757 đề xuất, trung bình khoảng 12,6 đề xuất mỗi bài, không còn agent nào quá dè dặt. Người duyệt chỉnh 1 đề xuất: "không nằm trong writer" bị agent đổi thành "không chỉ nằm trong writer", làm đổi nghĩa. Bài học: phải xem kỹ mọi đề xuất thêm hoặc bớt từ phủ định hay từ giới hạn ("không", "chỉ", "riêng", "mọi").
 - Đợt 5 (58 bài Azure): 879 đề xuất, trung bình khoảng 15 đề xuất mỗi bài. Không phải loại đề xuất nào. Script gắn cờ có thêm kiểm tra **đổi số lần từ phủ định hoặc giới hạn** (không, chưa, chỉ, riêng, mọi, luôn…), gắn cờ khoảng 50 mục. Người duyệt đọc hết các mục này và đều thấy giữ đúng nghĩa.
 - `content:apply` trước đây từ chối mọi chỗ sửa trong `aria-label`, `alt`, `title`, vì coi cả thẻ HTML là phần phải giữ nguyên. Kết quả là lint bắt được lỗi ở đó nhưng không sửa được. Công cụ giờ đã cho sửa giá trị của ba thuộc tính này, còn các thuộc tính khác vẫn bị khoá.
+- Đợt 6 (52 bài Flutter): 729 đề xuất. Đợt này phát hiện và sửa thêm hai lỗ hổng của `content:apply`:
+  1. Dòng HTML có `<code>…</code>` (callout, `<p>`, `<li>`, `<details>`) không sửa được. Nguyên nhân là chữ nằm giữa hai thẻ bị coi là vùng code. Giờ cả cụm `<code>…</code>` được bảo vệ như một inline code: phải giữ nguyên, nhưng được nằm trong đoạn sửa.
+  2. Văn xuôi nằm giữa hai khối code làm cả tệp bị huỷ, vì regex backtick chạy trên cả tệp đã ghép nhầm hai dấu ``` lại với nhau. Giờ bước kiểm tra tính token theo từng dòng.
+  Sau khi sửa công cụ, gửi thêm yêu cầu cho 7 agent để thêm lại khoảng 22 đề xuất đã phải bỏ. Người duyệt chỉnh 2 đề xuất: một chỗ agent tự thêm thông tin, một chỗ mất chữ hoa đầu câu.
+- Cách sửa chuẩn "trượt" → "không đạt" và "im lặng" → "không báo gì" thêm chữ "không" nhưng giữ đúng nghĩa. Đây là nguồn chính của các cờ "đổi số lần không".
 - Câu mơ hồ mà agent phải đoán nghĩa thì người duyệt cần xem kèm ngữ cảnh, và ghi vào technical-notes để tác giả xác nhận.
 - Trên Windows, truyền **thư mục** cho `content:apply` thay vì liệt kê từng tệp, để tránh lỗi "command line is too long".
 - Việc thống nhất "ca" → "test case" chiếm phần lớn đề xuất. Agent thường chỉ sửa ở văn xuôi chính và để nguyên trong bảng hay hình. Cách làm này chấp nhận được.

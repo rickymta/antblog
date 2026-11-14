@@ -41,7 +41,8 @@ const VISIBLE_ATTR_VALUE = /\b(aria-label|alt|title)=(["'])[^"']*\2/g;
  */
 function protectedTokens(s: string): string[] {
   const out: string[] = [];
-  for (const re of [/(`+)[^`]*?\1/g, /<\/?[A-Za-z][^>]*>/g, /\]\([^)]*\)/g, /https?:\/\/[^\s)>"]+/g]) {
+  // `<code>…</code>` / `<kbd>…</kbd>` cùng dòng là inline code dạng HTML: cả cụm phải giữ nguyên, như `…` của Markdown.
+  for (const re of [/(`+)[^`]*?\1/g, /<(code|kbd)\b[^>]*>[^<]*<\/\1>/gi, /<\/?[A-Za-z][^>]*>/g, /\]\([^)]*\)/g, /https?:\/\/[^\s)>"]+/g]) {
     for (const m of s.matchAll(re)) out.push(m[0].startsWith('<') ? m[0].replace(VISIBLE_ATTR_VALUE, '$1=$2$2') : m[0]);
   }
   return out.sort();
@@ -107,7 +108,9 @@ export function applyEdits(markdown: string, edits: ContentEdit[]): EditResult {
     const span = prose.slice(lineStart, lineStart + edit.old.length);
     const srcSpan = lines[lineNo]!.slice(lineStart, lineStart + edit.old.length);
     // Ký tự bị che (thành khoảng trắng) mà không nằm trong token được bảo vệ ⇒ đoạn sửa chạm vào vùng không phải văn xuôi.
+    // Che token DÀI trước: `<code>x</code>` phải được che trọn trước khi `<code>` và `</code>` riêng lẻ phá vỡ nó.
     const maskedProtected = protectedTokens(edit.old)
+      .sort((a, b) => b.length - a.length)
       .reduce((s, tok) => s.split(tok).join(' '.repeat(tok.length)), srcSpan)
       // Cú pháp của thuộc tính hiển thị (aria-label=" … ") không phải văn xuôi nhưng được phép nằm trong đoạn sửa.
       .replace(/\b(aria-label|alt|title)=["']|["']/g, (m) => ' '.repeat(m.length));
@@ -123,7 +126,10 @@ export function applyEdits(markdown: string, edits: ContentEdit[]): EditResult {
   // Chốt toàn tệp.
   const fail = (fileError: string): EditResult => ({ output: markdown, applied: [], rejected: edits.map((edit) => ({ edit, why: fileError })), fileError });
   if (!same(fencedBlocks(original), fencedBlocks(text))) return fail('khối code bị thay đổi');
-  if (!same(protectedTokens(original), protectedTokens(text))) return fail('inline code / thẻ / liên kết bị thay đổi');
+  // Tính token THEO DÒNG: chạy regex backtick trên cả tệp sẽ ghép nhầm hai dấu ``` của hai khối code khác nhau
+  // thành một "inline code" bao trùm văn xuôi ở giữa, khiến mọi chỗ sửa trong đoạn đó bị coi là đổi code.
+  const lineTokens = (s: string) => s.split('\n').flatMap(protectedTokens).sort();
+  if (!same(lineTokens(original), lineTokens(text))) return fail('inline code / thẻ / liên kết bị thay đổi');
   if (text.split('\n').length !== original.split('\n').length) return fail('số dòng thay đổi');
   try {
     const before = matter(original).data as Record<string, unknown>;

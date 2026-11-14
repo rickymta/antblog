@@ -16,13 +16,13 @@ Bài này thêm hai lớp khoá. **Golden test** chụp widget thành ảnh rồ
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Một golden test chụp thẻ chuyến có địa chỉ đón "Chung cư Hoa Sen, 12 Đường Mẫu". Ai đó sửa thành "Chung cư Hoa Sun, 99 Đường Mẫu", cùng độ dài. Golden có trượt không? Còn nếu bỏ nút ẩn chuyến (icon X) thì sao?</p>
-<details><summary>Xem đáp án</summary><p>Ca đầu không trượt vì cả hai địa chỉ chỉ gồm chữ ASCII: font kiểm thử mặc định của <code>flutter test</code> (tên <code>FlutterTest</code>) vẽ chúng thành ô đặc như nhau, nên ảnh giống hệt từng byte. Test <code>golden_setup_test.dart</code> kiểm điều đó và kiểm rằng cây semantics thấy thay đổi. Chỉ thay ký tự cùng nhóm hình mới không đổi ảnh: thêm dấu tiếng Việt ("Sen" thành "Sến") làm lệch 178 trên 99.840 pixel, vượt ngưỡng 0,1%. Bỏ nút X làm lệch khoảng 0,45% ảnh một thẻ, ngưỡng 0,1% cũng bắt được. Golden khoá hình dạng và màu, không khoá nội dung chữ.</p></details>
+<p>Một golden test chụp thẻ chuyến có địa chỉ đón "Chung cư Hoa Sen, 12 Đường Mẫu". Ai đó sửa thành "Chung cư Hoa Sun, 99 Đường Mẫu", cùng độ dài. Golden có thất bại không? Còn nếu bỏ nút ẩn chuyến (icon X) thì sao?</p>
+<details><summary>Xem đáp án</summary><p>Trường hợp đầu không thất bại vì cả hai địa chỉ chỉ gồm chữ ASCII: font kiểm thử mặc định của <code>flutter test</code> (tên <code>FlutterTest</code>) vẽ chúng thành ô đặc như nhau, nên ảnh giống hệt từng byte. Test <code>golden_setup_test.dart</code> kiểm điều đó và kiểm rằng cây semantics thấy thay đổi. Chỉ thay ký tự cùng nhóm hình mới không đổi ảnh: thêm dấu tiếng Việt ("Sen" thành "Sến") làm lệch 178 trên 99.840 pixel, vượt ngưỡng 0,1%. Bỏ nút X làm lệch khoảng 0,45% ảnh một thẻ, ngưỡng 0,1% cũng bắt được. Golden khoá hình dạng và màu, không khoá nội dung chữ.</p></details>
 </div>
 
 ## Golden test: so ảnh với ảnh chuẩn đã commit
 
-`matchesGoldenFile` lấy `RepaintBoundary` gần nhất bao quanh widget tìm được, chụp thành ảnh (`captureImage`), mã hoá PNG rồi đưa cho `goldenFileComparator`. Dưới `flutter test`, comparator mặc định là `LocalFileComparator`: đọc ảnh chuẩn theo đường dẫn tương đối với thư mục file test và chỉ qua khi từng pixel khớp. Hình 1 vẽ luồng đó.
+`matchesGoldenFile` lấy `RepaintBoundary` gần nhất bao quanh widget tìm được, chụp thành ảnh (`captureImage`), mã hoá PNG rồi đưa cho `goldenFileComparator`. Dưới `flutter test`, comparator mặc định là `LocalFileComparator`: đọc ảnh chuẩn theo đường dẫn tương đối với thư mục file test và chỉ đạt khi từng pixel khớp. Hình 1 vẽ luồng đó.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -40,7 +40,7 @@ Bài này thêm hai lớp khoá. **Golden test** chụp widget thành ảnh rồ
 <path d="M592 164 L648 196" class="f-none s-warn" stroke-width="2" marker-end="url(#fl29-1-w)"/>
 </svg>
 </div>
-<figcaption>Hình 1. Một golden test từ widget tới kết quả. Ảnh chuẩn là đầu vào của comparator, nằm trong git; thư mục failures/ chỉ là đầu ra khi trượt.</figcaption>
+<figcaption>Hình 1. Một golden test từ widget tới kết quả. Ảnh chuẩn là đầu vào của comparator, nằm trong git; thư mục failures/ chỉ là đầu ra khi golden không đạt.</figcaption>
 </figure>
 
 Ta gom việc dựng khung vào một helper để mỗi golden chỉ còn vài dòng. Khung rộng cố định 390 pixel, và `RepaintBoundary` mang khoá `goldenKey` là vùng được chụp:
@@ -142,7 +142,7 @@ void setGoldenView(
 
 **Bóng đổ.** Mã nguồn `debug.dart` nói bóng mờ không đảm bảo vẽ giống nhau giữa các phiên bản, thậm chí giữa các lần chạy, nên binding của `testWidgets` bật sẵn `debugDisableShadows` (một test của lab kiểm cờ này là `true`). Theo `proxy_box.dart`, khi cờ bật, nền có `elevation` lớn hơn 0 được vẽ viền đặc thay cho bóng mờ; card của `toi_noi_ui` có elevation 0 nên ít bị ảnh hưởng.
 
-**Font.** Tài liệu `matchesGoldenFile` vẫn ghi framework mặc định dùng font Ahem, nhưng đo thực tế thì font mặc định là `FlutterTest`, khác Ahem (baseline khác nhau). Hệ quả, đều có test: chữ ASCII thành ô đặc, còn một số ký tự tiếng Việt như ư, đ, ơ thành ô rỗng; mỗi ký tự trong "Tới Nơi" rộng đúng một cỡ chữ (cỡ 16 rộng 112 pixel) nên bố cục khác máy thật. Chỉ thay chữ bằng chữ cùng nhóm hình (ASCII sang ASCII cùng độ dài) mới không đổi ảnh. Ta chấp nhận giới hạn vì lab không commit font; muốn chữ thật, nạp font có giấy phép phù hợp bằng `FontLoader` và chấp nhận ảnh đổi theo từng bản font.
+**Font.** Tài liệu `matchesGoldenFile` vẫn ghi framework mặc định dùng font Ahem, nhưng đo thực tế thì font mặc định là `FlutterTest`, khác Ahem (baseline khác nhau). Hệ quả, đều có test: chữ ASCII được vẽ thành ô đặc, còn một số ký tự tiếng Việt như ư, đ, ơ được vẽ thành ô rỗng; mỗi ký tự trong "Tới Nơi" rộng đúng một cỡ chữ (cỡ 16 rộng 112 pixel) nên bố cục khác máy thật. Chỉ thay chữ bằng chữ cùng nhóm hình (ASCII sang ASCII cùng độ dài) mới không đổi ảnh. Ta chấp nhận giới hạn vì lab không commit font; muốn chữ thật, nạp font có giấy phép phù hợp bằng `FontLoader` và chấp nhận ảnh đổi theo từng bản font.
 
 Icon thì khác. Khi dựng lab, ta thấy mọi icon là ô vuông rỗng vì `flutter test` không nạp `MaterialIcons`. Font này nằm sẵn trong asset do `uses-material-design: true` sinh ra; ta chỉ đọc và đăng ký, không commit file nào:
 
@@ -162,7 +162,7 @@ Future<void> loadMaterialIcons() async {
 
 Ảnh chuẩn của lab sinh trên macOS Apple silicon, còn CI của ta là ubuntu. Tài liệu `matchesGoldenFile` cảnh báo font tuỳ chỉnh có thể vẽ khác giữa các hệ điều hành và phiên bản Flutter; lab tự nạp font icon `MaterialIcons` nên cũng nằm trong nhóm rủi ro đó. **Lab chưa chạy trên Linux**, nên ta không biết ảnh lệch bao nhiêu và bài không đoán con số. Ba biện pháp dưới đây là cách làm an toàn khi chưa biết.
 
-**Một, comparator có hai ngưỡng.** `LocalFileComparator` coi pixel là lệch khi bất kỳ kênh nào chênh dù chỉ một mức trên 255, nên nhiễu nhẹ làm trượt cả ảnh. `TolerantGoldenComparator` chỉ tính pixel lệch khi một kênh chênh hơn 4 mức và chỉ trượt khi hơn 0,1% pixel lệch; ảnh khác kích thước luôn trượt:
+**Thứ nhất, comparator có hai ngưỡng.** `LocalFileComparator` coi pixel là lệch khi bất kỳ kênh nào chênh dù chỉ một mức trên 255, nên nhiễu nhẹ làm cả ảnh không đạt. `TolerantGoldenComparator` chỉ tính pixel lệch khi một kênh chênh hơn 4 mức và chỉ không đạt khi hơn 0,1% pixel lệch; ảnh khác kích thước luôn không đạt:
 
 ### tolerant_comparator.dart · 29-golden-semantics/test/support/tolerant_comparator.dart (trích)
 
@@ -215,9 +215,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 }
 ```
 
-**Hai, ngưỡng phải nhỏ hơn thay đổi nhỏ nhất ta muốn bắt.** Đo trên macOS, bỏ nút X của một thẻ làm lệch 446 trên 99.840 pixel, khoảng 0,45%. Ngưỡng 0,5% nuốt lỗi này, ngưỡng 0,1% bắt được; một test của lab dựng cả hai comparator và khẳng định đúng vậy. Con số 0,1% là lựa chọn của ta, chưa hiệu chỉnh trên Linux.
+**Thứ hai, ngưỡng phải nhỏ hơn thay đổi nhỏ nhất ta muốn bắt.** Đo trên macOS, bỏ nút X của một thẻ làm lệch 446 trên 99.840 pixel, khoảng 0,45%. Ngưỡng 0,5% nuốt lỗi này, ngưỡng 0,1% bắt được; một test của lab dựng cả hai comparator và khẳng định đúng vậy. Con số 0,1% là lựa chọn của ta, chưa hiệu chỉnh trên Linux.
 
-**Ba, buộc ảnh chuẩn với hệ điều hành đã sinh ra nó.** Mọi test đụng ảnh chuẩn mang tag `golden` (`@Tags(['golden'])` đầu file) và nằm trong `group(..., skip: goldenSkip)`; test cố ý làm trượt dùng `goldenCompareSkip`, thêm điều kiện không phải `--update-goldens`. Ở máy khác `goldenBaselineOs`, `goldenSkip` trả lý do và các test được bỏ qua thay vì so với ảnh của máy khác:
+**Thứ ba, buộc ảnh chuẩn với hệ điều hành đã sinh ra nó.** Mọi test đụng ảnh chuẩn mang tag `golden` (`@Tags(['golden'])` đầu file) và nằm trong `group(..., skip: goldenSkip)`; test cố ý làm trượt dùng `goldenCompareSkip`, thêm điều kiện không phải `--update-goldens`. Ở máy khác `goldenBaselineOs`, `goldenSkip` trả lý do và các test được bỏ qua thay vì so với ảnh của máy khác:
 
 ### golden_harness.dart · 29-golden-semantics/test/support/golden_harness.dart (trích)
 
@@ -262,7 +262,7 @@ Hình 2 đặt chúng vào CI. Job ubuntu chạy `flutter test --exclude-tags go
 
 Khi giao diện đổi có chủ đích, ảnh chuẩn phải đổi theo. `flutter test --update-goldens` ghi đè ảnh thay vì so, nên `matchesGoldenFile` luôn "qua"; đừng chạy nó trên cả bộ test cho xanh. Thu hẹp bằng tag và tên: `flutter test --update-goldens --tags golden --plain-name TripCard` chỉ chạy ba golden của thẻ chuyến. Rồi xem `git diff --stat test/goldens`, mở từng ảnh đổi và đối chiếu với thay đổi giao diện trong PR.
 
-Khi golden trượt, comparator ghi bốn ảnh vào `failures/` cạnh file test (chỉ hai ảnh đầu nếu hai ảnh khác kích thước): `*_masterImage.png` (ảnh chuẩn), `*_testImage.png` (ảnh vừa chụp), `*_isolatedDiff.png` (chỉ pixel lệch) và `*_maskedDiff.png` (pixel lệch chồng lên ảnh). Thư mục này chỉ để xem, nằm trong `.gitignore`, không commit. Hình 3 là quy trình đọc chúng.
+Khi golden không đạt, comparator ghi bốn ảnh vào `failures/` cạnh file test (chỉ hai ảnh đầu nếu hai ảnh khác kích thước): `*_masterImage.png` (ảnh chuẩn), `*_testImage.png` (ảnh vừa chụp), `*_isolatedDiff.png` (chỉ pixel lệch) và `*_maskedDiff.png` (pixel lệch chồng lên ảnh). Thư mục này chỉ để xem, nằm trong `.gitignore`, không commit. Hình 3 là quy trình đọc chúng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -280,10 +280,10 @@ Khi golden trượt, comparator ghi bốn ảnh vào `failures/` cạnh file tes
 <path d="M785 202 L785 228" class="f-none s-pk" stroke-width="2" marker-end="url(#fl29-3-a)"/>
 </svg>
 </div>
-<figcaption>Hình 3. Từ lúc golden trượt tới lúc commit ảnh mới. Bước "Soát ảnh đổi" là bước không được bỏ khi dùng --update-goldens.</figcaption>
+<figcaption>Hình 3. Từ lúc golden không đạt tới lúc commit ảnh mới. Bước "Soát ảnh đổi" là bước không được bỏ khi dùng --update-goldens.</figcaption>
 </figure>
 
-Ta không tin comparator chỉ vì nó chạy. `comparator_test.dart` dựng ảnh tổng hợp 100 x 100 từ hình chữ nhật nguyên pixel, nên giống hệt trên mọi hệ điều hành: nhiễu 3 mức trên mọi pixel qua (dù comparator mặc định thấy 100% pixel khác), lệch 10 mức trượt, đổi 10 pixel qua và 11 pixel trượt, khác kích thước luôn trượt, và lúc trượt có đúng bốn tên file trong `failures/`. Trên thẻ thật, `golden_proof_test.dart` chép ảnh chuẩn sang thư mục tạm, đổi trạng thái thẻ đầu thành "Tài xế đã nhận" rồi khẳng định comparator ném lỗi:
+Ta không tin comparator chỉ vì nó chạy. `comparator_test.dart` dựng ảnh tổng hợp 100 x 100 từ hình chữ nhật nguyên pixel, nên giống hệt trên mọi hệ điều hành: nhiễu 3 mức trên mọi pixel thì đạt (dù comparator mặc định thấy 100% pixel khác), lệch 10 mức thì không đạt, đổi 10 pixel thì đạt còn đổi 11 pixel thì không đạt, khác kích thước luôn không đạt, và lúc không đạt có đúng bốn tên file trong `failures/`. Trên thẻ thật, `golden_proof_test.dart` chép ảnh chuẩn sang thư mục tạm, đổi trạng thái thẻ đầu thành "Tài xế đã nhận" rồi khẳng định comparator ném lỗi:
 
 ### golden_proof_test.dart · 29-golden-semantics/test/golden_proof_test.dart (trích)
 
@@ -301,7 +301,7 @@ Ta không tin comparator chỉ vì nó chạy. `comparator_test.dart` dựng ả
     }
 ```
 
-Cơ chế: `matchesGoldenFile` chạy comparator trong `tester.runAsync`; ở đó `FlutterError` bị bắt và báo bằng `FlutterError.reportError`, còn `expectLater` vẫn hoàn tất bình thường, nên `throwsA` không thấy gì ("emitted null"). Lỗi nằm chờ ở binding và `tester.takeException()` lấy được; một test của lab dùng đúng cách đó. Ở các ca còn lại ta gọi thẳng comparator trên ảnh vừa chụp. Thư mục tạm giữ cho ảnh chuẩn đã commit không bị đụng tới.
+Cơ chế: `matchesGoldenFile` chạy comparator trong `tester.runAsync`; ở đó `FlutterError` bị bắt và báo bằng `FlutterError.reportError`, còn `expectLater` vẫn hoàn tất bình thường, nên `throwsA` không thấy gì ("emitted null"). Lỗi nằm chờ ở binding và `tester.takeException()` lấy được; một test của lab dùng đúng cách đó. Ở các test case còn lại ta gọi thẳng comparator trên ảnh vừa chụp. Thư mục tạm giữ cho ảnh chuẩn đã commit không bị đụng tới.
 
 ## Semantics test: khoá thứ người dùng trình đọc màn hình nghe
 
@@ -322,7 +322,7 @@ Golden không biết gì về trình đọc màn hình. Với `TripCard`, ta kho
 
 `isSemantics` thay cho `containsSemantics`, hàm đã deprecated và bị `flutter analyze` báo. Nút ẩn chuyến là nút riêng có `tooltip` làm nhãn, nên phải nằm ngoài vùng `excludeSemantics` của thân thẻ. Một test dựng lại sự cố mở đầu: bọc cả thẻ trong `ExcludeSemantics` thì `find.bySemanticsLabel('Ẩn chuyến')` không thấy gì, dù `IconButton` vẫn có trên màn hình. Tám trạng thái đều có test kiểm nhãn.
 
-Ba guideline `androidTapTargetGuideline` (48 pixel), `iOSTapTargetGuideline` (44 pixel) và `labeledTapTargetGuideline` đã có ở bài 16; ở đây ta áp chúng lên `TripCard` sáng và tối, đặt giữa màn hình vì guideline bỏ qua node sát mép. Ba ca sai trong `broken_cards.dart` chứng minh chúng bắt được lỗi: icon 20 không nhãn trượt cả ba, `IconButton` quên `tooltip` trượt nhãn, nhãn nhạt trên nền nhạt trượt contrast.
+Ba guideline `androidTapTargetGuideline` (48 pixel), `iOSTapTargetGuideline` (44 pixel) và `labeledTapTargetGuideline` đã có ở bài 16; ở đây ta áp chúng lên `TripCard` sáng và tối, đặt giữa màn hình vì guideline bỏ qua node sát mép. Ba trường hợp sai trong `broken_cards.dart` chứng minh chúng bắt được lỗi: icon 20 không nhãn không đạt cả ba, `IconButton` quên `tooltip` không đạt guideline nhãn, nhãn nhạt trên nền nhạt không đạt guideline contrast.
 
 Contrast có một cái bẫy mới. Mã nguồn `textContrastGuideline` duyệt node semantics rồi tìm `find.text(nhãn của node)`. Thẻ chuyến gộp cả thẻ thành một câu, không `Text` nào trùng câu đó, nên guideline không đo gì và báo qua. Ta dùng `CustomMinimumContrastGuideline` với finder là mọi `Text`:
 
@@ -352,7 +352,7 @@ AccessibilityGuideline allTextContrast() => CustomMinimumContrastGuideline(
     );
 ```
 
-Với bản custom, tám trạng thái của thẻ và của chip đều đạt 4,5:1 ở cả giao diện sáng lẫn tối. Ca sai `FaintStatusBadge` trượt ở giao diện sáng với cả tám trạng thái và qua ở giao diện tối (một test kiểm cả hai), nên ca sai kiểm riêng giao diện sáng.
+Với bản custom, tám trạng thái của thẻ và của chip đều đạt 4,5:1 ở cả giao diện sáng lẫn tối. Widget sai `FaintStatusBadge` không đạt ở giao diện sáng với cả tám trạng thái và đạt ở giao diện tối (một test kiểm cả hai), nên phần kiểm lỗi chỉ dùng giao diện sáng.
 
 ## Lỗi thường gặp
 
@@ -363,7 +363,7 @@ Với bản custom, tám trạng thái của thẻ và của chip đều đạt 
 <li><strong>Golden xanh dù đổi chữ.</strong> Dấu hiệu: sửa lỗi chính tả mà không ảnh nào đổi. Nguyên nhân: font kiểm thử vẽ chữ thành ô, và ký tự cùng nhóm hình (chữ ASCII cùng độ dài) cho cùng ảnh. Cách sửa: khoá nội dung chữ bằng finder và <code>isSemantics</code>, để golden lo hình dạng và màu.</li>
 <li><strong>Ngưỡng rộng hơn lỗi cần bắt.</strong> Dấu hiệu: mất một icon nhỏ mà golden vẫn xanh. Nguyên nhân: ngưỡng tính theo phần trăm của cả ảnh, ảnh to thì icon nhỏ lọt qua. Cách sửa: đo phần trăm lệch của thay đổi nhỏ nhất bằng <code>measurePixelDiff</code>, đặt ngưỡng dưới số đó, và chụp ảnh nhỏ hơn.</li>
 <li><strong><code>--update-goldens</code> trên cả bộ test rồi commit.</strong> Dấu hiệu: PR đổi hàng chục ảnh không ai xem. Nguyên nhân: cờ này luôn làm test qua. Cách sửa: thu hẹp bằng <code>--tags golden --plain-name</code>, xem <code>git diff --stat</code> và từng ảnh.</li>
-<li><strong>Guideline xanh vì không đo gì.</strong> Dấu hiệu: <code>textContrastGuideline</code> qua dù chữ nhạt. Nguyên nhân: nhãn semantics đã gộp nên không trùng chữ của <code>Text</code> nào; guideline vùng chạm cũng bỏ qua node sát mép. Cách sửa: dùng <code>CustomMinimumContrastGuideline</code> với finder, đặt widget giữa màn hình, và luôn có một ca sai chứng minh guideline bắt được lỗi.</li>
+<li><strong>Guideline xanh vì không đo gì.</strong> Dấu hiệu: <code>textContrastGuideline</code> qua dù chữ nhạt. Nguyên nhân: nhãn semantics đã gộp nên không trùng chữ của <code>Text</code> nào; guideline vùng chạm cũng bỏ qua node sát mép. Cách sửa: dùng <code>CustomMinimumContrastGuideline</code> với finder, đặt widget giữa màn hình, và luôn có một trường hợp sai chứng minh guideline bắt được lỗi.</li>
 </ul>
 </div>
 
@@ -393,9 +393,9 @@ Các nhóm test: 5 golden; 6 test chứng minh comparator bắt thẻ đổi tr�
 3. Chạy `FaintStatusBadge` ở giao diện tối với `allTextContrast()`. Dự đoán kết quả, rồi giải thích vì sao ca sai trong lab chỉ dùng giao diện sáng.
 
 <details><summary>Xem lời giải</summary>
-<p><strong>1.</strong> Chiều cao thẻ đổi nên ba ảnh thẻ (<code>trip_card_light</code>, <code>trip_card_dark</code>, <code>trip_card_text_x2_light</code>) trượt vì khác kích thước, và khác kích thước thì ngưỡng nào cũng không cứu. Ảnh chip không đổi vì không dùng padding đó. Hai test trong <code>golden_proof_test.dart</code> so với <code>trip_card_light.png</code> cũng đỏ cho tới khi ảnh được cập nhật. Lệnh: <code>flutter test --update-goldens --tags golden --plain-name TripCard</code>, rồi xem <code>git diff --stat test/goldens</code>.</p>
-<p><strong>2.</strong> Tổng là 368.160 pixel, nên 0,1% cho phép 368 pixel và 0,5% cho phép 1.840. Với 446 pixel, golden trượt ở ngưỡng 0,1% và qua ở ngưỡng 0,5%. Đây là phép tính giả định; số thật đo bằng <code>measurePixelDiff</code>, và nó cho thấy vì sao ngưỡng rộng nuốt lỗi nhỏ.</p>
-<p><strong>3.</strong> Qua. Màu chữ của <code>FaintStatusBadge</code> được pha 55% trắng; trên nền tối, chữ sáng hơn nền nên tỉ lệ vẫn cao, còn trên nền sáng chữ nhạt chạm nền nhạt và trượt. Ca sai phải chứng minh guideline bắt lỗi, nên ta chọn giao diện làm lỗi xảy ra.</p>
+<p><strong>1.</strong> Chiều cao thẻ đổi nên ba ảnh thẻ (<code>trip_card_light</code>, <code>trip_card_dark</code>, <code>trip_card_text_x2_light</code>) không đạt vì khác kích thước, và khác kích thước thì ngưỡng nào cũng không cứu được. Ảnh chip không đổi vì không dùng padding đó. Hai test trong <code>golden_proof_test.dart</code> so với <code>trip_card_light.png</code> cũng đỏ cho tới khi ảnh được cập nhật. Lệnh: <code>flutter test --update-goldens --tags golden --plain-name TripCard</code>, rồi xem <code>git diff --stat test/goldens</code>.</p>
+<p><strong>2.</strong> Tổng là 368.160 pixel, nên 0,1% cho phép 368 pixel và 0,5% cho phép 1.840. Với 446 pixel, golden không đạt ở ngưỡng 0,1% và đạt ở ngưỡng 0,5%. Đây là phép tính giả định; số thật đo bằng <code>measurePixelDiff</code>, và nó cho thấy vì sao ngưỡng rộng nuốt lỗi nhỏ.</p>
+<p><strong>3.</strong> Đạt. Màu chữ của <code>FaintStatusBadge</code> được pha 55% trắng; trên nền tối, chữ sáng hơn nền nên tỉ lệ vẫn cao, còn trên nền sáng chữ nhạt chạm nền nhạt nên không đạt. Ca sai phải chứng minh guideline bắt lỗi, nên ta chọn giao diện làm lỗi xảy ra.</p>
 </details>
 
 Bài trước: [Widget test: pumpWidget, finder, matcher và màn hình báo giá](/articles/flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia). Bài tiếp: [Kiểm thử Riverpod, async và Stream: ProviderContainer, fakeAsync, fake clock](/articles/flutter-test-riverpod-async-stream-fake-async-providercontainer), nơi ta kiểm hành vi theo thời gian mà ảnh tĩnh không chụp được.

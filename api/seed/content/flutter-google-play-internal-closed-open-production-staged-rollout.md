@@ -26,7 +26,7 @@ Mỗi track là một nhóm người nhận khác nhau và giữ bản riêng: i
 
 | Track | Ai nhận | Giới hạn | Tới Nơi dùng cho |
 |---|---|---|---|
-| internal | danh sách email, nhập tay hoặc CSV | tới 100 tester mỗi app | QA, PM, flavor staging |
+| internal | danh sách email, nhập thủ công hoặc CSV | tới 100 tester mỗi app | QA, PM, flavor staging |
 | closed | danh sách email, Google Groups, hoặc tổ chức theo ID | tới 200 danh sách mỗi tài khoản, 50 mỗi track, 2.000 tester mỗi danh sách; Google Groups không giới hạn cỡ | tài xế thử nghiệm |
 | open | ai cũng vào được qua trang app hoặc link | không giới hạn (mặc định), hoặc đặt giới hạn tối thiểu 1.000 | tuỳ chọn |
 | production | mọi người dùng | không có giới hạn tester | người dùng thật |
@@ -106,15 +106,15 @@ const int requiredClosedTestDays = 14;
 
 "Sau 13/11/2023" mơ hồ ở đúng ngày 13. Lab đọc theo ngày UTC: tạo ngày 13 thì chưa bị áp, ngày 14 thì bị áp. `testersOptedIn` là số tester ở lại suốt kỳ, không phải số tester được mời.
 
-Hệ quả cho lịch: 14 ngày cộng thời gian xét duyệt là ít nhất khoảng ba tuần trước production. Hãy mời dư vài tài xế phòng người rời.
+Hệ quả cho lịch: 14 ngày cộng thời gian xét duyệt là ít nhất khoảng ba tuần trước production. Hãy mời dư vài tài xế để đề phòng có người rời.
 
 ## Data safety, quyền nhạy cảm và target API khớp với manifest
 
 Khi bản rời internal, ba thứ phải khớp với những gì app thật sự làm.
 
-**Data safety.** Form bắt buộc với app có trên closed, open hoặc production; app chỉ có trên internal thì không cần. Form hỏi dữ liệu nào rời khỏi máy (kể cả qua SDK), chia sẻ cho ai, để làm gì, có mã hoá khi truyền và có đường xoá không, và đòi link chính sách quyền riêng tư. Người khai tự chịu trách nhiệm; lệch có thể kéo theo chặn cập nhật hoặc gỡ app.
+**Data safety.** Form bắt buộc với app có trên closed, open hoặc production; app chỉ có trên internal thì không cần. Form hỏi dữ liệu nào rời khỏi máy (kể cả qua SDK), chia sẻ cho ai, để làm gì, có mã hoá khi truyền và có đường xoá không, và đòi link chính sách quyền riêng tư. Người khai tự chịu trách nhiệm; khai lệch có thể dẫn đến việc bị chặn cập nhật hoặc gỡ app.
 
-Lab bắt thiếu sót hiển nhiên bằng cách đọc quyền trong manifest. Bảng "quyền kéo theo loại dữ liệu" là quy tắc của lab, chỉ phủ hai loại vị trí:
+Lab bắt thiếu sót hiển nhiên bằng cách đọc quyền trong manifest. Bảng "quyền kéo theo loại dữ liệu" là quy tắc của lab, chỉ bao gồm hai loại vị trí:
 
 ### data_safety.dart · 57-google-play/lib/data_safety.dart (trích)
 
@@ -189,13 +189,13 @@ List<Blocker> preflight(Track to, PreflightInput input) {
 }
 ```
 
-Lab chỉ đọc manifest **nguồn**. Plugin thêm quyền qua manifest riêng và Gradle gộp tất cả; muốn bỏ quyền do plugin thêm, ta ghi `tools:node="remove"` (tài liệu Android về gộp manifest). `readPermissions` bỏ qua chú thích và quyền có `tools:node="remove"`, nhưng không thấy quyền plugin thêm, nên trước khi phát hành hãy đối chiếu manifest đã gộp. Report của bộ gộp nằm ở `build/outputs/logs` của module; ở dự án Flutter ta chờ thấy nó tại `build/app/outputs/logs`, chưa kiểm trên máy này.
+Lab chỉ đọc manifest **nguồn**. Plugin thêm quyền qua manifest riêng và Gradle gộp tất cả; muốn bỏ quyền do plugin thêm, ta ghi `tools:node="remove"` (tài liệu Android về gộp manifest). `readPermissions` bỏ qua chú thích và quyền có `tools:node="remove"`, nhưng không thấy quyền plugin thêm, nên trước khi phát hành hãy đối chiếu manifest đã gộp. Report của bộ gộp nằm ở `build/outputs/logs` của module; ở dự án Flutter ta kỳ vọng thấy report này tại `build/app/outputs/logs`, chưa kiểm trên máy này.
 
 ## Staged rollout, halt và không có rollback
 
-Trang trợ giúp về staged rollout (kiểm tại 11/2026) cho các sự thật làm nền. Staged rollout chỉ dùng cho **bản cập nhật**, không dùng cho lần xuất bản đầu. Ta tự chọn phần trăm và nó không tự tăng. Halt ngừng phát cho thêm người, người đã nhận vẫn giữ bản; resume tiếp tục với cùng nhóm người. Trang không có thao tác quay về bản cũ, chỉ có phát bản mới đã sửa, và Android đòi `versionCode` tăng ở mỗi bản phát hành để tránh hạ cấp nhầm (bài 51).
+Trang trợ giúp về staged rollout (kiểm tại 11/2026) nêu các dữ kiện làm nền. Staged rollout chỉ dùng cho **bản cập nhật**, không dùng cho lần xuất bản đầu. Ta tự chọn phần trăm, và mức này không tự tăng. Halt ngừng phát cho thêm người, người đã nhận vẫn giữ bản; resume tiếp tục với cùng nhóm người. Trang không có thao tác quay về bản cũ, chỉ có phát bản mới đã sửa, và Android đòi `versionCode` tăng ở mỗi bản phát hành để tránh hạ phiên bản nhầm (bài 51).
 
-Bản đã 100% vẫn halt được (trang "Halting a fully rolled-out release"): bản hoàn chỉnh trước đó được phát lại cho người dùng mới và người chưa cài, và resume được ở mức bất kỳ. Không áp cho internal và lần phát hành đầu của một track. Người đã cập nhật không bị hạ bản, nên "không có rollback" vẫn đúng với họ.
+Bản đã 100% vẫn halt được (trang "Halting a fully rolled-out release"): bản hoàn chỉnh trước đó được phát lại cho người dùng mới và người chưa cài, và resume được ở mức bất kỳ. Cách này không áp dụng cho internal và lần phát hành đầu của một track. Người đã cập nhật không bị hạ bản, nên "không có rollback" vẫn đúng với họ.
 
 Vì Play không tự quyết, quy trình nằm ở ta. `RolloutPlan` mô hình hoá nó: bản cập nhật bắt đầu ở 1%, mỗi lần đo cho ra một trong ba quyết định (Hình 3).
 
@@ -247,7 +247,7 @@ Ngưỡng và quyết định nằm trong mã:
   }
 ```
 
-Crash-free tính bằng **phần vạn** (9950 là 99,50%) để so ngưỡng không dính sai số `double`. Số này đến từ Crashlytics của bài 48 hoặc nguồn bạn chọn. Cỡ mẫu có chỗ riêng vì 1% của một nhóm tài xế nhỏ chỉ là vài người. Dưới `minUsers`, kế hoạch giữ nguyên dù số đo đẹp hay xấu; thấy nghiêm trọng thì người phát hành vẫn gọi `halt()` tay.
+Crash-free tính bằng **phần vạn** (9950 là 99,50%) để so sánh với ngưỡng mà không bị sai số `double`. Số này đến từ Crashlytics của bài 48 hoặc nguồn bạn chọn. Cỡ mẫu có ngưỡng riêng vì 1% của một nhóm tài xế nhỏ chỉ là vài người. Dưới `minUsers`, kế hoạch giữ nguyên dù số đo đẹp hay xấu; thấy nghiêm trọng thì người phát hành vẫn gọi `halt()` thủ công.
 
 Phần còn lại là halt, resume và sửa lỗi:
 
@@ -322,9 +322,9 @@ end
     upload_to_play_store(**params)
 ```
 
-Theo tài liệu fastlane, `track` kết hợp với `track_promote_to` để promote bản đã có, nên sáu cờ `skip_upload_*` giữ lane khỏi động tới file nhị phân, metadata và ảnh. Phần đáng đọc nằm ở `rollout`. Theo mã nguồn `supply` trên GitHub (đọc tại 11/2026), khi promote, `rollout` nằm giữa 0 và 1 đặt bản ở `inProgress` với tỉ lệ đó; ngoài khoảng ấy, trạng thái lấy từ `track_promote_release_status`, mặc định `completed`. Vậy promote lên production mà quên `rollout` thì bản tới 100% người dùng ngay. Lane đòi `rollout_percent` từ 1 đến 99 và đổi nó thành tỉ lệ. Cũng theo mã nguồn đó, `supply` chọn bản ở track nguồn theo `version_code` nếu có, nếu không thì theo trạng thái; lane đòi `version_code` để bản được promote đúng là bản đã qua `preflight`.
+Theo tài liệu fastlane, `track` kết hợp với `track_promote_to` để promote bản đã có, nên sáu cờ `skip_upload_*` giữ lane khỏi động tới file nhị phân, metadata và ảnh. Phần đáng đọc nằm ở `rollout`. Theo mã nguồn `supply` trên GitHub (đọc tại 11/2026), khi promote, nếu `rollout` nằm giữa 0 và 1 thì bản được đặt ở `inProgress` với tỉ lệ đó; ngoài khoảng ấy, trạng thái lấy từ `track_promote_release_status`, mặc định `completed`. Vậy promote lên production mà quên `rollout` thì bản tới 100% người dùng ngay. Lane đòi `rollout_percent` từ 1 đến 99 và đổi nó thành tỉ lệ. Cũng theo mã nguồn đó, `supply` chọn bản ở track nguồn theo `version_code` nếu có, nếu không thì theo trạng thái; lane đòi `version_code` để bản được promote đúng là bản đã qua `preflight`.
 
-Lane chưa làm ba điều. Tên track trong Play API chưa được kiểm. docs.fastlane.tools liệt kê `internal`, `alpha`, `beta`, `production`; trang Tracks của Google ghép open testing với `beta`, có ví dụ `alpha`, nhưng ghi closed testing tạo tay có tên tuỳ ý và ghi internal là `qa`. `supply` lọc track theo tên chính xác, nên nếu API trả `qa` thì lane dừng. Hãy gọi `tracks.list` cho package của bạn trước lần chạy đầu và sửa `TRACK_NAMES`. Halt không có lane: docs.fastlane.tools liệt kê `halted` là giá trị hợp lệ nhưng không có ví dụ, nên halt làm trên Console. Lần phát hành production đầu tiên, vốn không có staged rollout, cũng làm tay.
+Lane chưa làm ba điều. Tên track trong Play API chưa được kiểm. docs.fastlane.tools liệt kê `internal`, `alpha`, `beta`, `production`; trang Tracks của Google ghép open testing với `beta`, có ví dụ `alpha`, nhưng ghi closed testing tạo tay có tên tuỳ ý và ghi internal là `qa`. `supply` lọc track theo tên chính xác, nên nếu API trả `qa` thì lane dừng. Hãy gọi `tracks.list` cho package của bạn trước lần chạy đầu và sửa `TRACK_NAMES`. Halt không có lane: docs.fastlane.tools liệt kê `halted` là giá trị hợp lệ nhưng không có ví dụ, nên halt làm trên Console. Lần phát hành production đầu tiên, vốn không có staged rollout, cũng làm thủ công.
 
 ## Lỗi thường gặp
 

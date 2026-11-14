@@ -1,0 +1,12 @@
+{"file":"flutter-asset-intl-localization-tien-vnd-ngay-gio.md","edits":[
+{"old":"Mọi kết quả bám đầu ra thật của intl.","new":"Mọi kết quả lấy từ đầu ra thật của intl.","reason":"'bám' gượng","severity":"low"},
+{"old":"nó chỉ có sức kiểm ở múi giờ khác UTC.","new":"test này chỉ có tác dụng kiểm tra khi múi giờ khác UTC.","reason":"'sức kiểm' là cụm tự ghép; 'nó' mơ hồ","severity":"medium"},
+{"old":"Skeleton `yMd().add_jm()` để `intl` chọn thứ tự","new":"Skeleton `yMd().add_jm()` cho `intl` tự chọn thứ tự","reason":"Câu thiếu động từ chính","severity":"medium"},
+{"old":"Giờ tới các chuỗi như","new":"Giờ đến lượt các chuỗi như","reason":"'Giờ tới' thiếu nghĩa, câu cụt","severity":"medium"},
+{"old":"sinh lớp Dart có kiểu chặt.","new":"sinh lớp Dart an toàn về kiểu.","reason":"'kiểu chặt' dịch từng chữ của strongly typed","severity":"medium"},
+{"old":"Khi thiết bị có ngôn ngữ app không hỗ trợ,","new":"Khi ngôn ngữ của thiết bị không được app hỗ trợ,","reason":"Trật tự từ kiểu tiếng Anh, khó đọc","severity":"medium"},
+{"old":"rồi `Tiếng Việt` kiểm chữ,","new":"rồi `Tiếng Việt` và kiểm chữ,","reason":"Câu thiếu quan hệ từ giữa hai động từ","severity":"low"},
+{"old":"Điện thoại ngôn ngữ lạ hiện tiếng Anh.","new":"Điện thoại đặt ngôn ngữ app không hỗ trợ lại hiện tiếng Anh.","reason":"Cụm 'ngôn ngữ lạ' mơ hồ, câu thiếu động từ","severity":"medium"},
+{"old":"Chưa nạp dữ liệu locale thì `LocaleDataException`","new":"Chưa nạp dữ liệu locale thì ném `LocaleDataException`","reason":"Câu lược động từ","severity":"medium"},
+{"old":"và các test chuỗi, tiền, giờ cần thêm ca cho","new":"và các test chuỗi, tiền, giờ cần thêm test case cho","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

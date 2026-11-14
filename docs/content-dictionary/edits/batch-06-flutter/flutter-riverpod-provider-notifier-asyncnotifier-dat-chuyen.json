@@ -1,0 +1,41 @@
+{
+"file": "flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen.md",
+"edits": [
+{
+"old": "hết lượt mới thành `AsyncError`.",
+"new": "hết lượt mới chuyển thành `AsyncError`.",
+"reason": "Câu lược động từ 'trở thành/chuyển thành'",
+"severity": "medium"
+},
+{
+"old": "Một vài điều khác tài liệu cũ, đã đối chiếu",
+"new": "Một vài điểm khác so với tài liệu cũ, đã đối chiếu",
+"reason": "Thiếu 'so với', trật tự kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "Disposal gài một bẫy cho code sau `await`.",
+"new": "Việc dispose gài một cái bẫy cho code sau `await`.",
+"reason": "'Disposal' là tiếng Anh thừa trong văn xuôi",
+"severity": "low"
+},
+{
+"old": "chỉ dispose mới làm nó `false`;",
+"new": "chỉ dispose mới đổi nó thành `false`;",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "Test không cần widget dùng `ProviderContainer.test(overrides: [...])`, tự `dispose` cuối mỗi test.",
+"new": "Test không cần widget thì dùng `ProviderContainer.test(overrides: [...])`; container tự `dispose` cuối mỗi test.",
+"reason": "Câu thiếu chủ ngữ ở vế sau",
+"severity": "medium"
+},
+{
+"old": "Hai `ref.listen` làm việc phụ:",
+"new": "Hai `ref.listen` xử lý side effect:",
+"reason": "'việc phụ' là cách dịch gượng của side effect",
+"severity": "medium"
+}
+]
+}

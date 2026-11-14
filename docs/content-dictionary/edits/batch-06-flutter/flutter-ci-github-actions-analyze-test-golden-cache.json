@@ -1,0 +1,125 @@
+{
+"file": "flutter-ci-github-actions-analyze-test-golden-cache.md",
+"edits": [
+{
+"old": "coverage không ngưỡng; test Dart",
+"new": "coverage không đặt ngưỡng; test Dart",
+"reason": "Câu lược động từ",
+"severity": "low"
+},
+{
+"old": "không đốt phút CI;",
+"new": "không tốn phút CI;",
+"reason": "'đốt phút' gượng, calque",
+"severity": "medium"
+},
+{
+"old": "và PR bắt buộc check đó có thể không merge được.",
+"new": "và PR đã đặt check đó là bắt buộc có thể không merge được.",
+"reason": "Câu thiếu chủ ngữ rõ ràng, khó hiểu",
+"severity": "medium"
+},
+{
+"old": "Test \"ca sai\" thử cả",
+"new": "Test case sai thử cả",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "coi CI là nơi báo trôi.",
+"new": "coi CI là nơi phát hiện việc phiên bản bị trôi.",
+"reason": "'báo trôi' là cụm tự ghép, cụt",
+"severity": "medium"
+},
+{
+"old": "cache không truy cập quá 7 ngày bị xoá, mặc định mỗi repository có 10 GB.",
+"new": "cache không được truy cập quá 7 ngày thì bị xoá, còn mỗi repository mặc định có 10 GB.",
+"reason": "Câu thiếu 'được', trật tự từ kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "Khi golden trượt, `flutter_test` ghi ảnh diff",
+"new": "Khi golden test không đạt, `flutter_test` ghi ảnh diff",
+"reason": "'trượt' cho kết quả test thành 'không đạt'",
+"severity": "medium"
+},
+{
+"old": "lab 29 ghi bốn ảnh mỗi lần trượt.",
+"new": "lab 29 ghi bốn ảnh mỗi lần không đạt.",
+"reason": "'trượt' cho kết quả test thành 'không đạt'",
+"severity": "medium"
+},
+{
+"old": "`if-no-files-found: ignore` giữ nó yên lặng khi lỗi không phải golden",
+"new": "`if-no-files-found: ignore` để bước upload không báo gì khi lỗi không phải golden",
+"reason": "'giữ nó yên lặng' là calque của silent",
+"severity": "medium"
+},
+{
+"old": "Vì vậy chỉ lệnh golden lên macOS,",
+"new": "Vì vậy ta chỉ đưa lệnh golden lên macOS,",
+"reason": "Câu lược động từ",
+"severity": "medium"
+},
+{
+"old": "Runner chậm hơn 2 đến 3 lần là 40 đến 60 phút,",
+"new": "Runner chậm hơn 2 đến 3 lần thì mất 40 đến 60 phút,",
+"reason": "Câu lược động từ",
+"severity": "medium"
+},
+{
+"old": "Khi vượt, hãy chia",
+"new": "Khi job vượt mức này, hãy chia",
+"reason": "Thiếu chủ ngữ cho 'vượt'",
+"severity": "medium"
+},
+{
+"old": "không thành `true` như YAML 1.1",
+"new": "không chuyển thành `true` như YAML 1.1",
+"reason": "Câu lược động từ",
+"severity": "low"
+},
+{
+"old": "các \"ca sai\" sửa workflow thật",
+"new": "các test case sai sửa workflow thật",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "thay vì lặng lẽ thành no-op.",
+"new": "thay vì bỏ qua mà không báo lỗi (no-op).",
+"reason": "'lặng lẽ' là calque của silently",
+"severity": "medium"
+},
+{
+"old": "mà máy kiểm không có.",
+"new": "mà máy chạy kiểm chứng không có.",
+"reason": "'máy kiểm' là cụm tự ghép",
+"severity": "low"
+},
+{
+"old": "chưa chạy ở máy kiểm |",
+"new": "chưa chạy ở máy chạy kiểm chứng |",
+"reason": "'máy kiểm' là cụm tự ghép",
+"severity": "low"
+},
+{
+"old": "31 ca sai)",
+"new": "31 test case sai)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "với bốn ảnh cho mỗi golden trượt:",
+"new": "với bốn ảnh cho mỗi golden test không đạt:",
+"reason": "'trượt' cho kết quả test thành 'không đạt'",
+"severity": "medium"
+},
+{
+"old": "đổi nên khoá mới trượt cache,",
+"new": "đổi nên kết quả băm đổi và khoá mới bị cache miss,",
+"reason": "'trượt cache' sai thuật ngữ; câu thiếu ý 'kết quả băm'",
+"severity": "high"
+}
+]
+}

@@ -1,0 +1,17 @@
+{"file":"flutter-background-work-workmanager-vi-tri-nen-app-tai-xe.md","edits":[
+{"old":"bộ đệm giới hạn khi mất mạng, foreground service","new":"bộ đệm có giới hạn khi mất mạng, foreground service","reason":"'bộ đệm giới hạn' thiếu 'có'; thống nhất với tiêu đề mục 4","severity":"low"},
+{"old":"nó thôi là việc ưu tiên của hệ điều hành.","new":"nó không còn là việc được hệ điều hành ưu tiên.","reason":"'thôi là' là calque","severity":"medium"},
+{"old":"loại thứ ba, chạy ngầm mãi mà không ai thấy, không có cách nào.","new":"loại thứ ba là chạy ngầm mãi mà không ai thấy, và loại này không có cách nào làm được.","reason":"Câu thiếu động từ, khó hiểu","severity":"medium"},
+{"old":"thêm bộ đệm giới hạn khi mất mạng, rồi","new":"thêm bộ đệm có giới hạn khi mất mạng, rồi","reason":"Thiếu 'có'","severity":"low"},
+{"old":"Nên đọc trước","new":"Bạn nên đọc trước","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"chỉ thành `earliestBeginDate`, tức cận dưới.","new":"chỉ trở thành `earliestBeginDate`, tức cận dưới.","reason":"Câu lược động từ 'thành'","severity":"medium"},
+{"old":"Không đoán trước được đường nào, nên code","new":"Không đoán trước được task sẽ chạy theo đường nào, nên code","reason":"'đường nào' mơ hồ","severity":"medium"},
+{"old":"Hai bên còn có thể gửi trùng một mẫu; `LocationSample.dedupeKey` để server khử trùng lặp (lab chưa kiểm).","new":"Hai bên còn có thể gửi trùng một mẫu; `LocationSample.dedupeKey` giúp server khử trùng lặp (lab chưa kiểm).","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"và tối đa 10 phút tuổi (vị trí cũ","new":"và mẫu không cũ quá 10 phút (vị trí cũ","reason":"'10 phút tuổi' là calque của age","severity":"medium"},
+{"old":"Việc xoá theo danh tính mẫu (`removeSent`), không theo số lượng:","new":"Ta xoá theo danh tính mẫu (`removeSent`), không theo số lượng:","reason":"Câu cụt, thiếu vị ngữ","severity":"medium"},
+{"old":"Đây là suy ra từ tài liệu, chưa chạy trên máy;","new":"Đây là kết luận suy ra từ tài liệu, chưa chạy trên máy;","reason":"Câu lược danh từ","severity":"medium"},
+{"old":"quyền này thành bắt buộc.","new":"quyền này trở thành bắt buộc.","reason":"Câu lược động từ 'thành'","severity":"medium"},
+{"old":"chỉ tác động app đã có quyền \"luôn luôn\".","new":"chỉ có tác dụng với app đã có quyền \"luôn luôn\".","reason":"'tác động app' kiểu tiếng Anh","severity":"medium"},
+{"old":"Mô tả mục đích chung chung, không nói rõ ngoài chuyến app không thu.","new":"Mô tả mục đích chung chung, không nêu rõ việc app không thu vị trí ngoài chuyến.","reason":"Câu cụt, thiếu tân ngữ","severity":"medium"},
+{"old":"nếu không test \"phủ đủ tám trạng thái\" đỏ.","new":"nếu không test \"phủ đủ tám trạng thái\" sẽ không đạt.","reason":"'đỏ' mơ hồ, thiếu động từ","severity":"low"}
+]}

@@ -17,12 +17,12 @@ Màn hình bài 19 chưa xử lý được cảnh này: lỗi mạng vẫn là `
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p><code>POST /trips</code> hết thời gian chờ nhận sau 10 giây, không có response. App gửi lại ngay lần nữa thì server có thể có bao nhiêu chuyến: chắc chắn một, hay có thể hai?</p>
-<details><summary>Xem đáp án</summary><p>Có thể hai. Hết thời gian chờ chỉ nói app thôi chờ, không nói server chưa làm. Test <code>POST không khoá, response mất</code> dựng đúng ca này. Gửi lại chỉ an toàn khi server nhận ra cùng một ý định nhờ <code>Idempotency-Key</code>; mục 3 biến điều đó thành luật cho interceptor.</p></details>
+<details><summary>Xem đáp án</summary><p>Có thể hai. Hết thời gian chờ chỉ nói app thôi chờ, không nói server chưa làm. Test <code>POST không khoá, response mất</code> dựng đúng trường hợp này. Gửi lại chỉ an toàn khi server nhận ra cùng một ý định nhờ <code>Idempotency-Key</code>; mục 3 biến điều đó thành luật cho interceptor.</p></details>
 </div>
 
 ## Năm loại lỗi, một kiểu sealed
 
-Bài 19 để lỗi thành ba kiểu: `ApiException`, `DtoFormatException`, `DioException`. Giao diện không nên biết dio, nên ta gom chúng vào một `sealed class` mà mỗi biến thể trả lời: người dùng làm được gì?
+Bài 19 để lỗi rơi vào ba kiểu: `ApiException`, `DtoFormatException`, `DioException`. Giao diện không nên biết dio, nên ta gom chúng vào một `sealed class` mà mỗi biến thể trả lời: người dùng làm được gì?
 
 ### failure.dart · packages/toi_noi_api/lib/src/failure.dart (trích)
 
@@ -40,11 +40,11 @@ sealed class ApiFailure implements Exception {
 }
 ```
 
-Năm biến thể là `NetworkFailure`, `TimeoutFailure`, `ServerFailure` (5xx), `ClientFailure` (4xx, mang `fieldErrors`) và `ParseFailure`. Vì `sealed`, `switch` thiếu nhánh không biên dịch. `retryable` có nghĩa hẹp: máy có thể tự thử lại mà không lo sai (nếu request lặp lại được). Nút Thử lại là quyết định riêng của giao diện. Hình 1 là bảng đổi.
+Năm biến thể là `NetworkFailure`, `TimeoutFailure`, `ServerFailure` (5xx), `ClientFailure` (4xx, mang `fieldErrors`) và `ParseFailure`. Vì `sealed`, `switch` thiếu nhánh không biên dịch. `retryable` có nghĩa hẹp: máy có thể tự thử lại mà không lo sai (nếu request lặp lại được). Nút Thử lại là quyết định riêng của giao diện. Hình 1 là bảng chuyển đổi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 490" role="img" aria-label="Hình 1. Từ lỗi gốc sang ApiFailure rồi sang hành động trên màn hình. connectionError, cùng HttpException hoặc SocketException nằm trong unknown, thành NetworkFailure unreachable, hành động Thử lại và Mở cài đặt. HandshakeException thành NetworkFailure badCertificate, không có nút. Bốn loại timeout thành TimeoutFailure, Thử lại. ApiException từ 500 trở lên thành ServerFailure, Thử lại kèm mã hỗ trợ. ApiException dưới 500 thành ClientFailure, riêng 408 và 429 có Thử lại, còn lại không nút. DtoFormatException thành ParseFailure, Thử lại tay kèm gợi ý Wi-Fi. DioException kiểu cancel và lỗi lạ không đổi mà được ném lại nguyên vẹn.">
+<svg viewBox="0 0 880 490" role="img" aria-label="Hình 1. Từ lỗi gốc sang ApiFailure rồi sang hành động trên màn hình. connectionError, cùng HttpException hoặc SocketException nằm trong unknown, thành NetworkFailure unreachable, hành động Thử lại và Mở cài đặt. HandshakeException thành NetworkFailure badCertificate, không có nút. Bốn loại timeout thành TimeoutFailure, Thử lại. ApiException từ 500 trở lên thành ServerFailure, Thử lại kèm mã hỗ trợ. ApiException dưới 500 thành ClientFailure, riêng 408 và 429 có Thử lại, còn lại không nút. DtoFormatException thành ParseFailure, Thử lại thủ công kèm gợi ý Wi-Fi. DioException kiểu cancel và lỗi lạ không đổi mà được ném lại nguyên vẹn.">
 <defs><marker id="fl20-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker></defs>
 <text x="20" y="22" class="t-b">Lỗi gốc</text><text x="350" y="22" class="t-b">ApiFailure</text><text x="630" y="22" class="t-b">Hành động trên màn hình</text>
 <rect x="20" y="36" width="290" height="54" rx="8" class="f-phys-soft s-phys"/><text x="34" y="58" class="t-mono">connectionError</text><text x="34" y="76" class="t-small">unknown mang HttpException hoặc SocketException</text>
@@ -99,7 +99,7 @@ NetworkReason? networkReasonOf(DioException e) {
       return null;
 ```
 
-Package import `dart:io` trực tiếp (chỉ nhắm iOS và Android, không dùng cho Flutter web). Hai nhóm không đổi: `cancel` (huỷ không phải thất bại) và `unknown` mang lỗi lạ như `StateError`, vì che chúng thành "mạng yếu" sẽ giấu lỗi lập trình.
+Package này import `dart:io` trực tiếp (chỉ nhắm iOS và Android, không dùng cho Flutter web). Hai nhóm không đổi: `cancel` (huỷ không phải thất bại) và `unknown` mang lỗi lạ như `StateError`, vì che chúng thành "mạng yếu" sẽ giấu lỗi lập trình.
 
 ### failure.dart · packages/toi_noi_api/lib/src/failure.dart (trích)
 
@@ -120,7 +120,7 @@ case DioExceptionType.unknown:
   Error.throwWithStackTrace(e, stackTrace ?? e.stackTrace);
 ```
 
-Nơi gọi dùng `guardApi(() => client.quote(request))` để đổi lỗi nhận ra được thành `ApiFailure`.
+Nơi gọi dùng `guardApi(() => client.quote(request))` để đổi những lỗi nhận diện được thành `ApiFailure`.
 
 ## Timeout: ba hạn và một ngân sách
 
@@ -141,7 +141,7 @@ class NetworkConfig {
   });
 ```
 
-Một lần thử tốn tối đa `connectTimeout + receiveTimeout` = 15 giây, nên ba lần cộng backoff (0,5 và 1 giây) là 3 × 15 + 1,5 = 46,5 giây. Nếu server nhận kết nối rồi im lặng thì mỗi lần chỉ 10 giây, tổng 31,5 giây. Quá dài, nên `RetryInterceptor` có hạn tổng `maxElapsed`: lần thử nào không kịp thì không bắt đầu, và timeout của lần thử lại bị chặn bằng phần hạn còn lại. Với 30 giây, ca server im lặng dừng đúng ở 30 giây (lần 3 chỉ còn 8,5 giây). Test chạy trên đồng hồ giả:
+Một lần thử tốn tối đa `connectTimeout + receiveTimeout` = 15 giây, nên ba lần cộng backoff (0,5 và 1 giây) là 3 × 15 + 1,5 = 46,5 giây. Nếu server nhận kết nối rồi im lặng thì mỗi lần chỉ 10 giây, tổng 31,5 giây. Quá dài, nên `RetryInterceptor` có hạn tổng `maxElapsed`: lần thử nào không kịp thì không bắt đầu, và timeout của lần thử lại bị chặn bằng phần hạn còn lại. Với 30 giây, trường hợp server im lặng dừng đúng ở 30 giây (lần 3 chỉ còn 8,5 giây). Test chạy trên đồng hồ giả:
 
 ### controllers_test.dart · 20-error-retry-connectivity/test/controllers_test.dart (trích)
 
@@ -214,7 +214,7 @@ Với Tới Nơi, cổng hai cho kết quả sau:
 | `POST /quotes` | có, phải khai báo | chỉ đọc dù dùng POST |
 | `POST` không khoá, kể cả `accept` | không | lần đầu có thể đã chạy xong |
 
-`POST /quotes` chỉ đọc nhưng interceptor không tự đoán: ta khai báo `readOnlyPostPaths` (mặc định `{'/quotes'}`) hoặc đánh dấu bằng `RetryInterceptor.safeToRetryExtra`. Với `accept`, test dựng ca mất response: interceptor không gửi lại, và lần gửi lại thủ công nhận 409. `expectedVersion` chặn hai tài xế nhận trùng nhưng không làm lần gửi lại an toàn.
+`POST /quotes` chỉ đọc nhưng interceptor không tự đoán: ta khai báo `readOnlyPostPaths` (mặc định `{'/quotes'}`) hoặc đánh dấu bằng `RetryInterceptor.safeToRetryExtra`. Với `accept`, test dựng trường hợp mất response: interceptor không gửi lại, và lần gửi lại thủ công nhận 409. `expectedVersion` chặn hai tài xế nhận trùng nhưng không làm lần gửi lại an toàn.
 
 ### retry_interceptor.dart · packages/toi_noi_api/lib/src/retry_interceptor.dart (trích)
 
@@ -240,7 +240,7 @@ bool isRepeatable(RequestOptions options) {
 }
 ```
 
-Backoff luỹ thừa chờ 0,5, 1, 2 giây. Hàng nghìn máy cùng nối lại sẽ gõ server cùng một giây, nên ta thêm **jitter**: chờ một số ngẫu nhiên đều trong `[0, trần]`. Nguồn ngẫu nhiên và hàm chờ được tiêm vào để test đọc ra con số chính xác. Response có `Retry-After` dạng số giây thì ta chờ ít nhất chừng đó, và bỏ cuộc nếu nó vượt `maxDelay`:
+Backoff luỹ thừa chờ 0,5, 1, 2 giây. Hàng nghìn máy cùng nối lại sẽ dồn request vào server trong cùng một giây, nên ta thêm **jitter**: chờ một khoảng thời gian ngẫu nhiên, phân bố đều trong `[0, trần]`. Nguồn ngẫu nhiên và hàm chờ được inject vào để test biết chính xác con số. Response có `Retry-After` dạng số giây thì ta chờ ít nhất chừng đó, và bỏ cuộc nếu nó vượt `maxDelay`:
 
 ### retry_interceptor.dart · packages/toi_noi_api/lib/src/retry_interceptor.dart (trích)
 
@@ -296,7 +296,7 @@ if (options.extra[_insideKey] == true) {
 }
 ```
 
-Mỗi lần thử lại bắt đầu từ bản sao request lúc vào retry, nên header không tích luỹ. Lỗi trung gian bị `reject` để interceptor sau không thấy; lỗi cuối đi tiếp bằng `next` nên chúng thấy đúng một lần (thử `reject` cả lỗi cuối thì chúng không thấy lỗi nào, test đỏ). Log thật khi hai request đầu bị tiêm lỗi 500:
+Mỗi lần thử lại bắt đầu từ bản sao request lúc vào retry, nên header không tích luỹ. Lỗi trung gian bị `reject` để interceptor sau không thấy; lỗi cuối đi tiếp bằng `next` nên chúng thấy đúng một lần (thử `reject` cả lỗi cuối thì chúng không thấy lỗi nào, test đỏ). Log thật khi hai request đầu bị inject lỗi 500:
 
 ### Log thật (fake API chạy với failFirst: 2, random cố định ở 1.0)
 
@@ -335,7 +335,7 @@ client.dio.interceptors.add(
 
 ## Test lỗi mạng mà không chờ thật
 
-Fake API chỉ tiêm lỗi 500 và độ trễ. Mất mạng xảy ra trước response, nên `FaultyAdapter` giả lập ở tầng adapter: phần tử thứ i của kịch bản áp cho lần gọi thứ i.
+Fake API chỉ inject lỗi 500 và độ trễ. Mất mạng xảy ra trước response, nên `FaultyAdapter` giả lập ở tầng adapter: phần tử thứ i của kịch bản áp cho lần gọi thứ i.
 
 | `NetworkFault` | Điều giả lập | Tới server? |
 |---|---|---|
@@ -346,7 +346,7 @@ Fake API chỉ tiêm lỗi 500 và độ trễ. Mất mạng xảy ra trước r
 | `reset` | server xong việc, `unknown` + `HttpException` | có |
 | `tlsFailure` | bắt tay TLS hỏng, `unknown` + `HandshakeException` | không |
 
-Ca `loseResponse` là ca xấu nhất của câu hỏi mở đầu. Có khoá thì interceptor gửi lại an toàn:
+Trường hợp `loseResponse` là trường hợp xấu nhất của câu hỏi mở đầu. Có khoá thì interceptor gửi lại an toàn:
 
 ### retry_test.dart · packages/toi_noi_api/test/retry_test.dart (trích)
 
@@ -367,13 +367,13 @@ test(
 );
 ```
 
-Server nhận hai request cùng khoá và chỉ tạo một chuyến; ca không khoá có test riêng. Adapter giả chưa đủ: file test với socket thật ở localhost (đóng sớm, đứt giữa body, TLS hỏng, cổng đóng, server im lặng) mới lộ ra lỗ hổng `unknown` ở mục 1.
+Server nhận hai request cùng khoá và chỉ tạo một chuyến; trường hợp không khoá có test riêng. Adapter giả chưa đủ: file test với socket thật ở localhost (đóng sớm, đứt giữa body, TLS hỏng, cổng đóng, server im lặng) mới lộ ra lỗ hổng `unknown` ở mục 1.
 
 Thử phá để chắc test bắt được lỗi: `isRepeatable` luôn `true` thì chín test đỏ, thử lại mọi mã từ 400 thì chín test đỏ, chỉ nhìn `connectionError` thì năm test đỏ.
 
 ## Connectivity chỉ là gợi ý
 
-Plugin `connectivity_plus` cho biết loại đường truyền, nhưng README của nó dặn không dựa vào đó để quyết định có gọi được request: Wi-Fi quán cà phê chưa đăng nhập vẫn báo Wi-Fi. README còn ghi: trên iOS có thể thấy "none" rồi "wifi" liền sau khi nối lại.
+Plugin `connectivity_plus` cho biết loại đường truyền, nhưng README của nó dặn không dựa vào đó để quyết định request có gọi được hay không: Wi-Fi quán cà phê chưa đăng nhập vẫn báo Wi-Fi. README còn ghi: trên iOS có thể thấy "none" rồi "wifi" liền sau khi nối lại.
 
 Vì thế lab chỉ dùng connectivity để hiện banner và chọn câu chữ, không chặn request. Plugin nằm sau một interface để test thay được:
 
@@ -413,7 +413,7 @@ Hai test màn hình khoá triết lý này: báo `wifi` mà server không tới 
 
 ## Màn hình lỗi có hành động, và Riverpod đừng thử lại thêm
 
-Mỗi lỗi đã có tên, nên chọn hành động là một `switch` không nhánh mặc định. `describeFailure` không đưa `title` tiếng Anh của server lên giao diện, chỉ `traceId`.
+Mỗi lỗi đã có tên, nên chọn hành động là một `switch` không nhánh mặc định. `describeFailure` không đưa `title` tiếng Anh của server lên giao diện, chỉ đưa `traceId`.
 
 ### failure_text.dart · 20-error-retry-connectivity/lib/failure_text.dart (trích)
 
@@ -440,11 +440,11 @@ case ClientFailure(statusCode: 422, :final fieldErrors)
   );
 ```
 
-`FailureView` chỉ vẽ nút có trong tập `actions`. Lỗi 422 không có nút vì bấm lại gửi y nguyên; 408 và 429 có. `ParseFailure` không retryable, nhưng nếu đó là trang đăng nhập Wi-Fi thì khách có thể đăng nhập rồi thử, nên nút bấm tay vẫn hiện kèm gợi ý: nút không suy ra từ `retryable`. Request bị huỷ (đổi form, thoát màn hình) không phải lỗi: controller huỷ request cũ bằng `CancelToken`, và `FailureView` không vẽ gì cho nó.
+`FailureView` chỉ vẽ nút có trong tập `actions`. Lỗi 422 không có nút vì bấm lại gửi y nguyên; 408 và 429 có. `ParseFailure` không retryable, nhưng nếu đó là trang đăng nhập Wi-Fi thì khách có thể đăng nhập rồi thử, nên nút bấm thủ công vẫn hiện kèm gợi ý: nút không suy ra từ `retryable`. Request bị huỷ (đổi form, thoát màn hình) không phải lỗi: controller huỷ request cũ bằng `CancelToken`, và `FailureView` không vẽ gì cho nó.
 
-Nút **Mở cài đặt** đi qua interface `SystemSettings` bọc `app_settings`, nhãn nói đúng nơi nó dẫn tới. Android mở cài đặt không dây. Trên iOS, `AppSettingsPlugin.swift` của plugin cho thấy loại không biết rơi vào `openSettingsURLString`, tức trang cài đặt của chính app, không có Wi-Fi, nên nhãn là "Mở cài đặt ứng dụng". Ta chỉ đọc source, chưa chạy thiết bị.
+Nút **Mở cài đặt** đi qua interface `SystemSettings` bọc `app_settings`, nhãn nói đúng nơi nó dẫn tới. Android mở cài đặt không dây. Trên iOS, `AppSettingsPlugin.swift` của plugin cho thấy loại không biết rơi vào `openSettingsURLString`, tức trang cài đặt của chính app, không có Wi-Fi, nên nhãn là "Mở cài đặt ứng dụng". Ta chỉ đọc source, chưa chạy trên thiết bị.
 
-Cuối cùng là bẫy chồng retry. Theo bài 18, Riverpod 3 tự thử lại provider ném `Exception` (11 lần gọi), và `ApiFailure` là `Exception`: provider gọi API trong `build` kéo theo ba request của interceptor mỗi lần. Hình 3 đếm.
+Cuối cùng là bẫy chồng retry. Theo bài 18, Riverpod 3 tự thử lại provider ném `Exception` (11 lần gọi), và `ApiFailure` là `Exception`: provider gọi API trong `build` kéo theo ba request của interceptor mỗi lần. Hình 3 đếm số request.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -491,7 +491,7 @@ Quy tắc: một tầng thử lại, đặt ở nơi biết request nào an toà
 <li><strong>Nhận mất mạng chỉ bằng <code>connectionError</code>.</strong> Dấu hiệu: đứt giữa body hay TLS hỏng hiện "lỗi không mong muốn", không được thử lại. Nguyên nhân: dio để chúng ở <code>unknown</code>. Cách sửa: nhìn cả <code>HttpException</code>, <code>SocketException</code>, <code>TlsException</code> bên trong, và kiểm bằng socket thật.</li>
 <li><strong>Lấy connectivity làm cổng.</strong> Dấu hiệu: request không gửi dù mạng dùng được, hoặc vẫn treo trên Wi-Fi chưa đăng nhập. Nguyên nhân: connectivity chỉ báo loại đường truyền. Cách sửa: coi nó là gợi ý, luôn bắt lỗi mạng thật.</li>
 <li><strong>Riverpod thử lại chồng lên interceptor.</strong> Dấu hiệu: một provider hỏng sinh hàng chục request, kể cả với 422. Nguyên nhân: <code>ApiFailure</code> là <code>Exception</code> nên bị retry mặc định. Cách sửa: <code>ProviderScope(retry: noProviderRetry)</code>.</li>
-<li><strong>Bắt mọi lỗi thành "lỗi mạng".</strong> Dấu hiệu: <code>StateError</code> hiện thành "mạng yếu", không ai báo bug. Nguyên nhân: <code>catch (e)</code> gom hết. Cách sửa: chỉ đổi loại nhận ra được, ném lại phần còn lại như <code>toApiFailure</code>.</li>
+<li><strong>Bắt mọi lỗi thành "lỗi mạng".</strong> Dấu hiệu: <code>StateError</code> hiện thành "mạng yếu", không ai báo bug. Nguyên nhân: <code>catch (e)</code> gom hết. Cách sửa: chỉ đổi loại lỗi nhận diện được, ném lại phần còn lại như <code>toApiFailure</code>.</li>
 </ul>
 </div>
 
@@ -511,7 +511,7 @@ flutter analyze
 flutter test
 ```
 
-Đã kiểm với Flutter 3.47.4 và Dart 3.13.3: hai nơi đều `No issues found!`, `toi_noi_api` 0.2.0 có 192 test xanh (106 mới của bài này), lab có 61 test xanh. Mức: **Kiểm chứng tự động**, không cần thiết bị hay mạng ngoài. Bản dùng: `connectivity_plus` 7.3.2, `app_settings` 9.0.1, `fake_async` 1.3.3, `flutter_riverpod` 3.5.0 (ràng buộc `^3.4.3` giải ra bản này).
+Đã kiểm với Flutter 3.47.4 và Dart 3.13.3: hai nơi đều `No issues found!`, `toi_noi_api` 0.2.0 có 192 test xanh (106 mới của bài này), lab có 61 test xanh. Mức: **Kiểm chứng tự động**, không cần thiết bị hay mạng ngoài. Phiên bản dùng: `connectivity_plus` 7.3.2, `app_settings` 9.0.1, `fake_async` 1.3.3, `flutter_riverpod` 3.5.0 (ràng buộc `^3.4.3` giải ra bản này).
 
 | Test | Chứng minh điều gì |
 |---|---|
@@ -530,9 +530,9 @@ flutter test
 3. Ở dev (HTTP), Wi-Fi quán cà phê trả trang HTML đăng nhập với mã 200 cho `GET /trips/{id}`. Lỗi kiểu gì, có thử lại không, màn hình hiện gì? Còn khi API chạy HTTPS?
 
 <details><summary>Xem lời giải</summary>
-<p><strong>1.</strong> 5 × 10 giây = 50 giây, cộng 0,5 + 1 + 2 + 4 = 7,5 giây chờ (lần cuối 0,5 × 2³ = 4 giây vừa bằng trần, chưa bị chặn). Tổng 57,5 giây, lý do ta có <code>maxElapsed</code>.</p>
+<p><strong>1.</strong> 5 × 10 giây = 50 giây, cộng 0,5 + 1 + 2 + 4 = 7,5 giây chờ (lần cuối 0,5 × 2³ = 4 giây vừa bằng trần, chưa bị chặn). Tổng 57,5 giây, đó là lý do ta có <code>maxElapsed</code>.</p>
 <p><strong>2.</strong> Không: <code>accept</code> là POST không khoá. Bấm lại nhận 409 vì lần đầu đã chạy xong (test <code>nhận chuyến: POST có expectedVersion nhưng không có khoá</code>). App nên GET chuyến để biết mình đã nhận chưa.</p>
-<p><strong>3.</strong> <code>DtoFormatException</code>, nên <code>ParseFailure</code>. Interceptor không thử lại vì mã 200 không phải lỗi. Màn hình nhắc đăng nhập Wi-Fi kèm nút Thử lại, không có banner vì connectivity vẫn báo Wi-Fi (test <code>Wi-Fi công cộng trả HTML với mã 200</code>). Portal chỉ thay được response khi dùng HTTP; với HTTPS, theo cơ chế TLS lỗi rơi vào bắt tay (<code>NetworkFailure</code> kiểu <code>badCertificate</code>), nhưng ta chưa thử với portal thật.</p>
+<p><strong>3.</strong> <code>DtoFormatException</code>, nên <code>ParseFailure</code>. Interceptor không thử lại vì mã 200 không phải lỗi. Màn hình nhắc đăng nhập Wi-Fi kèm nút Thử lại, không có banner vì connectivity vẫn báo Wi-Fi (test <code>Wi-Fi công cộng trả HTML với mã 200</code>). Portal chỉ thay được response khi dùng HTTP; với HTTPS, theo cơ chế TLS, lỗi sẽ nằm ở bước bắt tay (<code>NetworkFailure</code> kiểu <code>badCertificate</code>), nhưng ta chưa thử với portal thật.</p>
 </details>
 
 Bài trước: [HTTP, dio và JSON: gọi API báo giá của trip-service](/articles/flutter-http-dio-json-dto-goi-api-bao-gia). Bài tiếp: [Clean Architecture cho mobile: domain, data, presentation và repository](/articles/flutter-clean-architecture-domain-data-presentation-mobile).

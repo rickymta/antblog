@@ -97,3 +97,26 @@ Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứn
   - `azure-zero-trust-network-segmentation-sentinel.md` ("không thay thế được nhau");
   - `azure-chi-phi-pricing-cost-management-budget.md:57`;
   - `azure-database-postgresql-flexible-server-co-ban.md:168`.
+
+## Đợt 6 — nhóm flutter và dart (11/2026)
+
+Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứng.
+
+- [ ] `flutter-background-work-workmanager-vi-tri-nen-app-tai-xe.md:419` và `:421`: hai dòng lặp y hệt nhau ("`distanceFilter` 25 mét và chu kỳ 5 giây là số minh hoạ chưa đo pin").
+- [ ] `flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build.md:164-169`, `:183-208`: các khối code có vẻ bị cụt, có thể là lỗi trong bản gốc.
+- [ ] `flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build.md:110`, `:444`: bài nhắc tới "curriculum §3.2", tức tham chiếu tới tài liệu nội bộ, lọt vào bài đăng.
+- [ ] Các câu mơ hồ agent không dám sửa:
+  - `flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback.md:25`, `:198`, `:323`, `:335`;
+  - `flutter-platform-channel-pigeon-ffi-goi-native.md:561`;
+  - `flutter-firebase-app-distribution-phan-phoi-noi-bo-tester.md:353` ("mã" là version code?);
+  - `flutter-go-router-deep-link-shellroute-guard.md:358`;
+  - `flutter-ban-do-flutter-map-marker-polyline-chon-diem-don.md:295`;
+  - `flutter-code-generation-freezed-json-serializable-riverpod-generator.md:314`;
+  - `flutter-ci-cd-github-actions-macos-build-ios-android-secrets.md:292`;
+  - `flutter-google-play-internal-closed-open-production-staged-rollout.md:158`;
+  - `dart-package-pubspec-lint-test-toi-noi-core.md:311`.
+- [ ] Câu agent viết lại theo nghĩa suy đoán, người duyệt đã đối chiếu ngữ cảnh:
+  - `flutter-vi-tri-geolocator-permission-foreground-background.md:99`;
+  - `flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build.md:426`;
+  - `flutter-hieu-nang-rebuild-isolate-devtools.md` ("nên im lặng đúng lúc");
+  - `flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe.md` ("chỉ dành cho vai trò driver").

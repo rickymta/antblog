@@ -1,0 +1,10 @@
+{"file":"flutter-push-notification-fcm-apns-deep-link.md","edits":[
+{"old":"Mục 3 xử lý ca này.","new":"Mục 3 xử lý trường hợp này.","reason":"'ca' là cách gọi gượng, dễ nhầm với test case","severity":"medium"},
+{"old":"rơi đúng ca này, nên","new":"rơi đúng trường hợp này, nên","reason":"'ca' gượng; dùng 'trường hợp'","severity":"medium"},
+{"old":"Quyền đã được SDK và plugin tự khai, nhưng","new":"Quyền đã được SDK và plugin tự khai báo, nhưng","reason":"'tự khai' cụt, cần 'khai báo'","severity":"low"},
+{"old":"App nhắm API 33 trở lên tự chọn lúc hiện hộp thoại; tài liệu Android khuyên chọn lúc người dùng hiểu lợi ích","new":"App nhắm API 33 trở lên tự chọn thời điểm hiện hộp thoại; tài liệu Android khuyên chọn thời điểm người dùng hiểu lợi ích","reason":"'chọn lúc' thiếu danh từ, câu cụt","severity":"medium"},
+{"old":"Nó nghe ba luồng rồi mới hỏi tin khởi chạy","new":"Lớp này nghe ba luồng rồi mới hỏi tin khởi chạy","reason":"Tránh 'Nó' đầu câu chỉ sự vật","severity":"medium"},
+{"old":"có `/`, `?`, `%`, khoảng trắng, dài 65 ký tự, xuống dòng cuối.","new":"có `/`, `?`, `%`, khoảng trắng, dài 65 ký tự, có ký tự xuống dòng ở cuối.","reason":"Cụm 'xuống dòng cuối' thiếu danh từ","severity":"medium"},
+{"old":"FID trùng không gửi lại, lỗi thì `failed` và `retry()` gửi lại","new":"FID trùng không gửi lại, gửi lỗi thì chuyển sang `failed` và `retry()` gửi lại","reason":"Câu lược động từ, thiếu chủ thể của 'lỗi'","severity":"medium"},
+{"old":"<strong>Chờ banner ở foreground.</strong>","new":"<strong>Mong đợi banner tự hiện ở foreground.</strong>","reason":"'Chờ banner' mơ hồ, như đang chờ đợi một việc","severity":"medium"}
+]}

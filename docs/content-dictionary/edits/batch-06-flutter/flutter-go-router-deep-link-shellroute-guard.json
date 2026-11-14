@@ -1,0 +1,11 @@
+{"file":"flutter-go-router-deep-link-shellroute-guard.md","edits":[
+{"old":"Hàm trả `Future` vì lúc khởi động phiên còn đang đọc từ kho (bài 22).","new":"Hàm trả `Future` vì lúc khởi động, phiên đăng nhập còn đang được đọc từ kho lưu trữ (bài 22).","reason":"Câu mơ hồ, 'phiên còn đang đọc từ kho' thiếu chủ thể","severity":"medium"},
+{"old":"URI có scheme hay chính `/login` đều thành `/`.","new":"URI có scheme hay chính `/login` đều bị đổi thành `/`.","reason":"Thiếu động từ","severity":"medium"},
+{"old":"`GoRouter.refreshListenable` giải việc đó:","new":"`GoRouter.refreshListenable` giải quyết việc đó:","reason":"'giải việc đó' gượng","severity":"medium"},
+{"old":"Ba chi tiết đều có test. Một, provider dùng `ref.listen` và `ref.read`, không dùng `ref.watch`. Hai, `_currentSession` đọc thẳng state khi đã có giá trị và chỉ chờ `.future` khi kho còn đang đọc. Ba, `LoginScreen`","new":"Ba chi tiết đều có test. Thứ nhất, provider dùng `ref.listen` và `ref.read`, không dùng `ref.watch`. Thứ hai, `_currentSession` đọc thẳng state khi đã có giá trị và chỉ chờ `.future` khi phiên còn đang được đọc từ kho. Thứ ba, `LoginScreen`","reason":"Liệt kê 'Một, Hai, Ba' kiểu dịch máy; 'kho còn đang đọc' mơ hồ","severity":"medium"},
+{"old":"Khi app **chưa chạy** thì hai nền tảng khác nhau.","new":"Khi app **chưa chạy** thì hai nền tảng xử lý khác nhau.","reason":"Thiếu động từ","severity":"medium"},
+{"old":"(thêm một lý do để trang chủ không chờ kho phiên)","new":"(thêm một lý do để trang chủ không chờ đọc phiên từ kho)","reason":"'kho phiên' mơ hồ","severity":"medium"},
+{"old":"Loại một là đường dẫn không khớp route nào","new":"Loại thứ nhất là đường dẫn không khớp route nào","reason":"'Loại một' kiểu dịch máy","severity":"low"},
+{"old":"Loại hai là route khớp nhưng dữ liệu không có:","new":"Loại thứ hai là route khớp nhưng không có dữ liệu:","reason":"'Loại hai' kiểu dịch máy; trật tự từ","severity":"low"},
+{"old":"bỏ `refreshListenable` 8 test, luôn đợi `authProvider.future` 9 test, bỏ `safeFrom` 2 test, bỏ `recheckTopPage` 1 test, đổi `android:host` trong manifest mẫu 2 test.","new":"bỏ `refreshListenable` làm 8 test đỏ, luôn đợi `authProvider.future` làm 9 test đỏ, bỏ `safeFrom` làm 2 test đỏ, bỏ `recheckTopPage` làm 1 test đỏ, đổi `android:host` trong manifest mẫu làm 2 test đỏ.","reason":"Câu lược động từ","severity":"medium"}
+]}

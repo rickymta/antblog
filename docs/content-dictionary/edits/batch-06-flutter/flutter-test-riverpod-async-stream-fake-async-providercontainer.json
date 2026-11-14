@@ -1,0 +1,22 @@
+{"file":"flutter-test-riverpod-async-stream-fake-async-providercontainer.md","edits":[
+{"old":"tiêm Clock cho hạn báo giá","new":"inject Clock cho hạn báo giá","reason":"'tiêm' dịch từng chữ của inject; giữ thuật ngữ","severity":"medium"},
+{"old":"Hết giờ, cuốc chuyển cho người khác.","new":"Hết thời gian chờ, cuốc chuyển cho người khác.","reason":"'hết giờ' cho timeout gượng","severity":"medium"},
+{"old":"nếu vị trí tài xế im quá 10 giây thì bản đồ","new":"nếu vị trí tài xế không cập nhật quá 10 giây thì bản đồ","reason":"'vị trí im' là calque, thiếu tự nhiên","severity":"medium"},
+{"old":"bản đồ im lặng mà không báo gì.","new":"bản đồ đứng yên mà không báo gì.","reason":"'im lặng' calque của silent","severity":"low"},
+{"old":"`Clock` để giờ tiêm được,","new":"`Clock` để giờ có thể inject được,","reason":"'tiêm' dịch từng chữ của inject","severity":"medium"},
+{"old":"để tiêm lỗi mạng theo kịch bản.","new":"để inject lỗi mạng theo kịch bản.","reason":"'tiêm' dịch từng chữ của inject","severity":"medium"},
+{"old":"Ca thất bại cùng cấu trúc:","new":"Test case thất bại có cùng cấu trúc:","reason":"'Ca' gượng; thống nhất 'test case'","severity":"medium"},
+{"old":"Test kiểm chính chính sách thì giữ","new":"Test kiểm tra bản thân chính sách thì giữ","reason":"'kiểm chính chính sách' lặp từ, khó đọc","severity":"medium"},
+{"old":"Các ca còn lại kiểm hết lượt","new":"Các test case còn lại kiểm hết lượt","reason":"'ca' gượng; thống nhất 'test case'","severity":"medium"},
+{"old":"Đổi lịch 500, 1000, 2000 ms là một dòng đỏ.","new":"Đổi lịch 500, 1000, 2000 ms thì test đỏ ngay ở dòng kiểm tra đó.","reason":"Câu cụt, 'là một dòng đỏ' khó hiểu","severity":"medium"},
+{"old":"một giờ giả không làm nó nổ.","new":"một giờ giả không làm nó chạy.","reason":"'nổ' không đúng nghĩa Timer chạy","severity":"low"},
+{"old":"**Bốn: `fakeAsync` không phàn nàn Timer còn sót.**","new":"**Bốn: `fakeAsync` không báo lỗi khi còn Timer sót.**","reason":"'phàn nàn' là calque của complain","severity":"medium"},
+{"old":"còn `fakeAsync` trần thì im lặng.","new":"còn `fakeAsync` trần thì không báo gì.","reason":"'im lặng' calque của silent","severity":"low"},
+{"old":"`DateTime.now()` không thay được: `fakeAsync` bẻ Timer, nhưng không bẻ được hàm đọc giờ hệ điều hành.","new":"`DateTime.now()` không thay được: `fakeAsync` điều khiển được Timer, nhưng không can thiệp được vào hàm đọc giờ hệ điều hành.","reason":"'bẻ' dịch gượng","severity":"medium"},
+{"old":"## Đồng hồ tiêm được với package clock","new":"## Đồng hồ inject được với package clock","reason":"'tiêm' dịch từng chữ của inject","severity":"medium"},
+{"old":"để dựng ca \"máy ngủ\":","new":"để dựng test case \"máy ngủ\":","reason":"'ca' gượng; thống nhất 'test case'","severity":"medium"},
+{"old":"Cũng ở file này có ca cảnh báo:","new":"Cũng ở file này có một test case cảnh báo:","reason":"'ca' gượng; thống nhất 'test case'","severity":"medium"},
+{"old":"Cùng nhóm còn ca đóng người nghe cuối của một provider autoDispose, và ca còn một người nghe thì chưa được huỷ.","new":"Cùng nhóm còn test case đóng người nghe cuối của một provider autoDispose, và test case còn một người nghe thì chưa được huỷ.","reason":"'ca' gượng; thống nhất 'test case'","severity":"medium"},
+{"old":"`fakeAsync(initialTime:)`, ca máy ngủ và việc huỷ Timer.","new":"`fakeAsync(initialTime:)`, test case máy ngủ và việc huỷ Timer.","reason":"'ca' gượng; thống nhất 'test case'","severity":"medium"},
+{"old":"và \"Đồng hồ tiêm được với package clock\".","new":"và \"Đồng hồ inject được với package clock\".","reason":"Khớp với tiêu đề mục đã sửa","severity":"medium"}
+]}

@@ -75,7 +75,7 @@ Một test giữ quy tắc: với người sửa app, biện pháp phải thực
 
 ## 2. Bí mật và nơi lưu
 
-Quy tắc đầu tiên: **bí mật dài hạn không nằm trong app**. Bài 25 đã cho thấy `--dart-define` thành hằng trong binary. Khoá API của bên thứ ba ở server; app gọi BFF bằng token ngắn hạn như bài 24. Số thẻ không đi qua app (thanh toán qua cổng ngoài, bài 39).
+Quy tắc đầu tiên: **bí mật dài hạn không nằm trong app**. Bài 25 đã cho thấy `--dart-define` trở thành hằng trong binary. Khoá API của bên thứ ba ở server; app gọi BFF bằng token ngắn hạn như bài 24. Số thẻ không đi qua app (thanh toán qua cổng ngoài, bài 39).
 
 Với thứ app buộc phải giữ, bài 22 đặt token sau `TokenStore` dùng `flutter_secure_storage` (Keychain trên iOS, khoá bọc trong Keystore trên Android). Lab viết quyết định đó thành chính sách có test, để ai thêm loại dữ liệu mới phải trả lời "nó nằm ở đâu":
 
@@ -100,7 +100,7 @@ Với thứ app buộc phải giữ, bài 22 đặt token sau `TokenStore` dùng
 
 `Store` xếp từ ít bị lộ nhất (RAM) tới nhiều nhất (`shared_preferences`): token vào RAM hoặc Keychain/Keystore thì được, vào database hay preferences thì không. Quy tắc `null` nghĩa là app không được giữ ở bất cứ đâu.
 
-"Secure" không phải tuyệt đối: kho của hệ điều hành chống được app khác và người đọc file, không cứu được máy đã bị chiếm quyền. Trên Android còn đường rò là backup: `android:allowBackup` mặc định `true`, và với app nhắm Android 12 trở lên, `false` có thể không tắt chuyển máy trực tiếp trên một số máy (tài liệu Android). Ta cấu hình cả hai đường, loại cả hai tệp `SharedPreferences` mặc định của plugin 11.2.0, tệp dữ liệu `FlutterSecureStorage` và tệp khoá bọc `FlutterSecureKeyStorage` (đọc ở source plugin; README plugin cảnh báo lỗi `Failed to unwrap key` khi backup, ta chưa thử trên máy):
+"Secure" không phải tuyệt đối: kho của hệ điều hành chống được app khác và người đọc file, không cứu được máy đã bị chiếm quyền. Trên Android còn đường rò là backup: `android:allowBackup` mặc định `true`, và với app nhắm Android 12 trở lên, `false` có thể không tắt chuyển máy trực tiếp trên một số máy (tài liệu Android). Ta cấu hình cả hai đường và loại trừ cả hai tệp `SharedPreferences` mặc định của plugin 11.2.0, tệp dữ liệu `FlutterSecureStorage` và tệp khoá bọc `FlutterSecureKeyStorage` (đọc ở source plugin; README plugin cảnh báo lỗi `Failed to unwrap key` khi backup, ta chưa thử trên máy):
 
 ### data_extraction_rules.xml · 42-mobile-security/native-config/android/app/src/main/res/xml/data_extraction_rules.xml
 
@@ -121,7 +121,7 @@ Test đọc file này và mảnh `AndroidManifest` đi kèm để kiểm `allowB
 
 ## 3. Log không lộ dữ liệu
 
-`SafeLogInterceptor` của bài 19 không ghi body và chỉ cho vài header. Nhưng log do code app tự viết (`'đón khách tại $lat, $lng'`) không đi qua nó. `Redactor` thuần Dart là lớp thứ hai cho chuỗi tự do; mỗi quy tắc là một `RegExp` kèm cách thay:
+`SafeLogInterceptor` của bài 19 không ghi body và chỉ cho phép ghi vài header. Nhưng log do code app tự viết (`'đón khách tại $lat, $lng'`) không đi qua nó. `Redactor` thuần Dart là lớp thứ hai cho chuỗi tự do; mỗi quy tắc là một `RegExp` kèm cách thay:
 
 ### redactor.dart · 42-mobile-security/lib/src/redactor.dart (trích)
 
@@ -267,11 +267,11 @@ Callback chỉ nhận chứng chỉ **lá**, kể cả khi server gửi kèm ch�
 
 Test `khoá chết` dựng đúng cột phải: kết quả là `HandshakeException` và server nhận 0 request. Lối thoát duy nhất là cập nhật app, nên cơ chế ép cập nhật (bài 59) đi kèm ghim.
 
-**Khi nào không nên ghim.** Khi chưa có quy trình giữ khoá dự phòng và phát hành app kịp; khi ta không kiểm soát khoá server (CDN bên thứ ba tự đổi chứng chỉ); MASVS-NETWORK-2 chỉ yêu cầu ghim cho endpoint **do ta quản lý**; còn lại HTTPS đúng cách (NETWORK-1) đã là mức nền tốt.
+**Khi nào không nên ghim.** Khi chưa có quy trình giữ khoá dự phòng và phát hành app kịp, hoặc khi ta không kiểm soát khoá server (CDN bên thứ ba tự đổi chứng chỉ). MASVS-NETWORK-2 chỉ yêu cầu ghim cho endpoint **do ta quản lý**. Với phần còn lại, HTTPS đúng cách (NETWORK-1) đã là mức nền tốt.
 
 ## 5. Obfuscation và root/jailbreak: làm khó, không phải khoá
 
-`--obfuscate` với `--split-debug-info` đổi tên lớp và hàm trong code Dart. Tài liệu Flutter ghi nó **không** mã hoá tài nguyên, không chống được reverse engineering, và lưu bí mật trong app là thực hành kém. Máy kiểm không có Android SDK nên ta không chạy `flutter build`; lab đo bằng `dart compile aot-snapshot` với `--obfuscate --strip`, cùng bộ biên dịch AOT (`flutter_tools` mặc định cũng strip snapshot: iOS strip sau khi xuất dSYM, Android để AGP lo, nền tảng khác thêm `--strip`):
+`--obfuscate` với `--split-debug-info` đổi tên lớp và hàm trong code Dart. Tài liệu Flutter ghi nó **không** mã hoá tài nguyên, không chống được reverse engineering, và lưu bí mật trong app là thực hành kém. Máy chạy kiểm chứng không có Android SDK nên ta không chạy `flutter build`; lab đo bằng `dart compile aot-snapshot` với `--obfuscate --strip`, cùng bộ biên dịch AOT (`flutter_tools` mặc định cũng strip snapshot: iOS strip sau khi xuất dSYM, Android để AGP lo, nền tảng khác thêm `--strip`):
 
 Lệnh thật cho app (chưa chạy ở đây):
 
@@ -297,9 +297,9 @@ Chương trình đo có class `QuoteCalculator`, một enum và một chuỗi tr
 | chuỗi hằng "khoá" | nằm nguyên trong file | **vẫn nằm nguyên** |
 | tên enum | giữ | **vẫn giữ** (tài liệu Flutter cũng ghi) |
 
-Hàng ba quan trọng nhất: ai có file app chạy `strings` là thấy chuỗi. Obfuscation làm người đọc chậm hơn, không biến chuỗi thành bí mật.
+Hàng thứ ba quan trọng nhất: ai có file app chỉ cần chạy `strings` là thấy chuỗi. Obfuscation làm người đọc chậm hơn, không biến chuỗi thành bí mật.
 
-Cái giá: stack trace bản phát hành thành tên vô nghĩa, nên phải **giữ** thư mục `--split-debug-info` và file bản đồ của từng bản phát hành. Tài liệu Flutter dùng `flutter symbolize`; ta chưa chạy được lệnh đó (README giải thích), nên lab tự kiểm phần bản đồ:
+Cái giá: stack trace của bản phát hành chỉ còn tên vô nghĩa, nên phải **giữ** thư mục `--split-debug-info` và file bản đồ của từng bản phát hành. Tài liệu Flutter dùng `flutter symbolize`; ta chưa chạy được lệnh đó (README giải thích), nên lab tự kiểm phần bản đồ:
 
 ### obfuscation_test.dart · 42-mobile-security/test/obfuscation_test.dart (trích)
 
@@ -312,7 +312,7 @@ Cái giá: stack trace bản phát hành thành tên vô nghĩa, nên phải **g
 
 `deobfuscateStackTrace` chỉ dịch tên hàm và tên file của từng frame, để thông báo lỗi không bị thay nhầm. Bản đồ chỉ đúng với đúng bản build sinh ra nó.
 
-**Root và jailbreak** là tín hiệu, không phải khoá: có công cụ che tín hiệu, và máy người dùng thường đôi khi bị báo nhầm. Lab không có bộ phát hiện; nó mô hình hoá phản ứng của app:
+**Root và jailbreak** là tín hiệu, không phải khoá: có công cụ che tín hiệu, và máy người dùng bình thường đôi khi bị báo nhầm. Lab không có bộ phát hiện mà chỉ mô hình hoá phản ứng của app:
 
 ### integrity_policy.dart · 42-mobile-security/lib/src/integrity_policy.dart (trích)
 
@@ -327,7 +327,7 @@ Việc nhạy cảm luôn đòi xác thực lại, vì không có tín hiệu kh
 
 ## 6. Đối chiếu OWASP MASVS và khép Phần 5
 
-OWASP MASVS v2 gom kiểm soát bảo mật mobile thành tám nhóm, 24 control (đối chiếu mas.owasp.org tại 11/2026). Checklist của Tới Nơi nằm trong code: mỗi dòng có ID control, mức đã làm, bài liên quan và ghi chú còn thiếu gì:
+OWASP MASVS v2 gom kiểm soát bảo mật mobile thành tám nhóm, 24 control (đối chiếu mas.owasp.org vào 11/2026). Checklist của Tới Nơi nằm trong code: mỗi dòng có ID control, mức đã làm, bài liên quan và ghi chú còn thiếu gì:
 
 ### masvs_checklist.dart · 42-mobile-security/lib/src/masvs_checklist.dart (trích)
 
@@ -364,7 +364,7 @@ Bảng tóm theo nhóm (số trong ngoặc là bài, theo khung loạt bài; có
 <ul>
 <li><strong><code>HttpClient()</code> mặc định cộng <code>badCertificateCallback</code> để ghim.</strong> Dấu hiệu: chứng chỉ sai do CA công khai cấp vẫn chạy. Nguyên nhân: callback chỉ chạy khi chứng chỉ <em>không</em> qua được kiểm CA; với chứng chỉ CA tin, nó không được gọi dù trả <code>false</code> (test <code>HttpClient thường cộng callback</code>, dùng CA test, không ra mạng ngoài). Sửa: <code>SecurityContext(withTrustedRoots: false)</code>.</li>
 <li><strong>Ghim bằng <code>validateCertificate</code> rồi tin là an toàn.</strong> Dấu hiệu: ghim sai ném lỗi nhưng server của kẻ tấn công vẫn thấy request. Nguyên nhân: dio gọi nó sau khi đã gửi. Sửa: ghim ở <code>badCertificateCallback</code> như <code>createPinnedAdapter</code>.</li>
-<li><strong>Chỉ có một ghim.</strong> Dấu hiệu: ngày server đổi chứng chỉ, người dùng chưa cập nhật đều lỗi mạng. Nguyên nhân: không có khoá dự phòng. Sửa: hai ghim SPKI và cơ chế ép cập nhật.</li>
+<li><strong>Chỉ có một ghim.</strong> Dấu hiệu: ngày server đổi chứng chỉ, người dùng chưa cập nhật đều bị lỗi mạng. Nguyên nhân: không có khoá dự phòng. Sửa: hai ghim SPKI và cơ chế ép cập nhật.</li>
 <li><strong>Để khoá trong <code>--dart-define</code> rồi bật <code>--obfuscate</code>.</strong> Dấu hiệu: <code>strings</code> trên file app thấy chuỗi khoá. Sửa: khoá dài hạn ở server, app giữ token ngắn hạn.</li>
 <li><strong>Không giữ symbol và bản đồ của từng bản phát hành.</strong> Dấu hiệu: báo cáo crash toàn tên vô nghĩa. Sửa: lưu thư mục <code>--split-debug-info</code> và file bản đồ cùng artifact CI theo số build.</li>
 </ul>
@@ -391,7 +391,7 @@ dart test
 
 1. Ta đổi `createPinnedAdapter` thành `HttpClient()` mặc định cộng `validateCertificate`. Kẻ chen giữa có chứng chỉ do CA hợp lệ cấp, khoá khác khoá của ta. `POST /trips` kèm token có lỗi không, và token có lộ không?
 2. Server gia hạn chứng chỉ trên cùng một khoá. App A ghim hash chứng chỉ, app B ghim SPKI. App nào còn gọi được server?
-3. Có người nói "đã bật `--obfuscate` nên để khoá API trong `--dart-define` được". Phản bác, và nói khoá nên nằm ở đâu.
+3. Có người nói "đã bật `--obfuscate` nên để khoá API trong `--dart-define` được". Hãy phản bác và nói khoá nên nằm ở đâu.
 
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Có lỗi nhưng token vẫn lộ. Chuỗi chứng chỉ hợp lệ nên bắt tay thành công, request kèm <code>Authorization</code> đã được gửi, rồi <code>validateCertificate</code> mới thấy ghim sai và ném <code>badCertificate</code> (test <code>ghim sai làm request ném lỗi nhưng Authorization đã tới server</code>).</p>

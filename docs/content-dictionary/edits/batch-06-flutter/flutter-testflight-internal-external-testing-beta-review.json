@@ -1,0 +1,65 @@
+{
+"file": "flutter-testflight-internal-external-testing-beta-review.md",
+"edits": [
+{
+"old": "`BetaChecklist` kiểm `Info.plist` trước khi tải lên, `TesterGroups` kiểm kế hoạch nhóm tester",
+"new": "`BetaChecklist` kiểm tra `Info.plist` trước khi tải lên, `TesterGroups` kiểm tra kế hoạch nhóm tester",
+"reason": "'kiểm' cụt, thống nhất 'kiểm tra'",
+"severity": "low"
+},
+{
+"old": "Khoá thiếu là cảnh báo, kiểu sai là lỗi, `true` không có mã là lỗi, `false` mà vẫn có mã là cảnh báo mâu thuẫn.",
+"new": "Thiếu khoá thì cảnh báo, sai kiểu thì báo lỗi, `true` mà không có mã cũng là lỗi, còn `false` mà vẫn có mã thì cảnh báo mâu thuẫn.",
+"reason": "Câu liệt kê cụt, trật tự kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "Khoá `ITSAppUsesNonExemptEncryption` trả lời ngay trong file:",
+"new": "Khoá `ITSAppUsesNonExemptEncryption` trả lời sẵn câu hỏi đó ngay trong file:",
+"reason": "Thiếu tân ngữ của 'trả lời'",
+"severity": "medium"
+},
+{
+"old": "Apple đòi tối thiểu là build khác nhau;",
+"new": "Yêu cầu tối thiểu của Apple là số build khác nhau;",
+"reason": "Câu gượng, thiếu danh từ 'số build'",
+"severity": "medium"
+},
+{
+"old": "app chỉ-khi-đang-dùng có thể gặp lỗi",
+"new": "app chỉ xin quyền vị trí khi đang dùng có thể gặp lỗi",
+"reason": "Cụm tự ghép 'chỉ-khi-đang-dùng'",
+"severity": "medium"
+},
+{
+"old": "người vào bằng link hiện ẩn danh",
+"new": "người vào bằng link là ẩn danh",
+"reason": "'hiện ẩn danh' gượng",
+"severity": "low"
+},
+{
+"old": "bắt ca này.",
+"new": "bắt trường hợp này.",
+"reason": "'ca' là calque của 'case'",
+"severity": "medium"
+},
+{
+"old": "và so số build ở các ca biên",
+"new": "và so số build ở các trường hợp biên",
+"reason": "'ca' là calque của 'case'",
+"severity": "medium"
+},
+{
+"old": "ném `FormatException` với tên lạ, kể cả",
+"new": "ném `FormatException` khi gặp tên lạ, kể cả",
+"reason": "Thiếu động từ nối 'với' gượng",
+"severity": "low"
+},
+{
+"old": "Xử lý bởi Apple",
+"new": "Apple xử lý",
+"reason": "Bị động kiểu tiếng Anh",
+"severity": "low"
+}
+]
+}

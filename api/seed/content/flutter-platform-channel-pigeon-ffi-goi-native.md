@@ -217,7 +217,7 @@ Lời gọi qua channel là bất đồng bộ phía Dart (Hình 2). Theo tài l
 <figcaption>Hình 2. Lời gọi channel là bất đồng bộ phía Dart; handler native chạy trên platform thread, và native gọi Dart cũng phải từ thread đó. Lời gọi FFI không qua channel: nó chạy đồng bộ trong chính isolate đang gọi.</figcaption>
 </figure>
 
-Chiều ngược lại: native gọi Dart phải gọi từ platform thread. Trong lab, receiver Android đăng ký không kèm `Handler` nên `onReceive` chạy trên main thread, còn observer iOS đặt `queue: .main`. `dart:ffi` đi đường khác: `asFunction` trả `int`, không phải `Future`, nên Dart đứng chờ hàm C xong; hàm C chạy lâu sẽ làm đứng isolate đang gọi.
+Chiều ngược lại: lời gọi từ native sang Dart phải xuất phát từ platform thread. Trong lab, receiver Android đăng ký không kèm `Handler` nên `onReceive` chạy trên main thread, còn observer iOS đặt `queue: .main`. `dart:ffi` đi đường khác: `asFunction` trả `int`, không phải `Future`, nên Dart đứng chờ hàm C xong; hàm C chạy lâu sẽ làm đứng isolate đang gọi.
 
 Ba loại lỗi cần phân biệt, và gateway đổi cả ba thành một kiểu `BatteryUnavailableException` có `code`:
 
@@ -227,7 +227,7 @@ Ba loại lỗi cần phân biệt, và gateway đổi cả ba thành một ki�
 | Chưa có handler phía native, hoặc method lạ | `MissingPluginException` (MethodChannel); `PlatformException` mã `channel-error` (Pigeon) | `missing-plugin` hoặc `channel-error` |
 | Native trả sai hình dạng (không phải `Map`) hoặc mức pin ngoài 0..100 | Không lỗi nào từ framework nếu ta nhận `Object?`; ta tự kiểm và ném `FormatException` | `bad-payload` |
 
-`MissingPluginException` nói app thiếu mã native, tức lỗi cài đặt; lab chỉ hạ mức (gửi mỗi 10 giây, không đoán bừa 5 hay 30) chứ không nuốt nó im lặng.
+`MissingPluginException` nói app thiếu mã native, tức lỗi cài đặt; lab chỉ lùi về mức an toàn (gửi mỗi 10 giây, không đoán bừa 5 hay 30) chứ không nuốt lỗi này mà không báo.
 
 Isolate mới không dùng được channel ngay. Tài liệu Flutter yêu cầu isolate là isolate gốc hoặc đã gọi `BackgroundIsolateBinaryMessenger.ensureInitialized(token)`; ta thử gọi trong `Isolate.run` và nhận `StateError` nói đúng điều đó. Bài 41 dùng `Isolate.run`, nên cần nhớ.
 
@@ -376,7 +376,7 @@ Chạy `dart run pigeon --input pigeons/battery.dart` (pigeon 29.1.0, thêm làm
 
 Hai lựa chọn đáng ghi lại. `getBatteryStatus` là method đồng bộ phía native; Pigeon cho phép viết vậy dù phía Dart vẫn là `Future`. `onBatteryChanged` mang `@asyncCallback`: khi thử, file Kotlin sinh ra không có hàm `suspend` và không import `kotlinx.coroutines`, nên app khỏi thêm dependency đó (đổi lại là callback thay cho `await`).
 
-Kiểu dữ liệu giờ là thật: `levelPercent` là `int`, không còn `Map` khoá chuỗi. Nhưng kiểu đúng chưa là giá trị đúng: gateway vẫn kiểm 0..100, và test có ca native trả 250. Lỗi thiếu native cũng khác: Pigeon báo `PlatformException` mã `channel-error`, không phải `MissingPluginException` (test chứng minh). Test dùng cùng messenger giả, với codec do Pigeon sinh:
+Dữ liệu giờ có kiểu rõ ràng: `levelPercent` là `int`, không còn `Map` khoá chuỗi. Nhưng kiểu đúng chưa phải là giá trị đúng: gateway vẫn kiểm 0..100, và test có trường hợp native trả 250. Lỗi thiếu native cũng khác: Pigeon báo `PlatformException` mã `channel-error`, không phải `MissingPluginException` (test chứng minh). Test dùng cùng messenger giả, với codec do Pigeon sinh:
 
 ### pigeon_gateway_test.dart · 40-platform-channel-pigeon/test/pigeon_gateway_test.dart (trích)
 
@@ -576,7 +576,7 @@ dart test
 
 - **MethodChannel và Pigeon**: tham số gửi đi, lỗi native, thiếu native, phản hồi null, dữ liệu sai, cả chiều native gọi Dart.
 - **Logic**: khoảng cách gửi vị trí (biên 20% và 50%, tiết kiệm pin thắng đang sạc), bỏ kết quả `read()` cũ hơn sự kiện.
-- **FFI**: các ca của `calculateFare`, 5.000 cặp ngẫu nhiên, `-1`, cắt bit `Int32`; tự skip khi không có `cc`.
+- **FFI**: các trường hợp lấy từ `calculateFare`, 5.000 cặp ngẫu nhiên, `-1`, cắt bit `Int32`; tự skip khi không có `cc`.
 - **Cấu hình native**: so chuỗi giữa Dart, Kotlin, Swift và ba file Pigeon sinh ra.
 
 Để chạy trên thiết bị, làm theo README của lab. **Chưa làm**: chạy trên thiết bị, `EventChannel` phía native, hook cho Android và iOS, plugin đóng gói riêng.

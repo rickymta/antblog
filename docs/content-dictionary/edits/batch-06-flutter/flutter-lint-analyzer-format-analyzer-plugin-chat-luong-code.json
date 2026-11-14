@@ -1,0 +1,107 @@
+{
+"file": "flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code.md",
+"edits": [
+{
+"old": "Phần lint đầu tiên nằm ở [bài 06]",
+"new": "Lần đầu ta nói tới lint là ở [bài 06]",
+"reason": "'Phần lint đầu tiên nằm ở' gượng",
+"severity": "low"
+},
+{
+"old": "khung ghi `custom_lint`, nhưng cuối năm 2026 đó không còn là đường khuyên dùng.",
+"new": "khung ghi `custom_lint`, nhưng đến cuối năm 2026 cách này không còn được khuyên dùng.",
+"reason": "'đó' mơ hồ, 'đường khuyên dùng' gượng",
+"severity": "medium"
+},
+{
+"old": "4 khi không dựng được plugin (ví dụ khi không với tới pub.dev)",
+"new": "4 khi không dựng được plugin (ví dụ khi không truy cập được pub.dev)",
+"reason": "'với tới' là calque của 'reach'",
+"severity": "medium"
+},
+{
+"old": "## Ba cờ strict: dynamic không lọt qua âm thầm",
+"new": "## Ba cờ strict: dynamic không thể lọt vào mà không bị báo",
+"reason": "'âm thầm' là calque của 'silently'",
+"severity": "medium"
+},
+{
+"old": "Việc quen thuộc của Tới Nơi, đọc cước từ body JSON, viết hai lần.",
+"new": "Ta lấy việc quen thuộc của Tới Nơi, đọc cước từ body JSON, rồi viết hai lần.",
+"reason": "Câu thiếu chủ ngữ và động từ",
+"severity": "medium"
+},
+{
+"old": "Cuối năm 2026, bằng chứng cho thấy đó không còn là đường khuyên dùng.",
+"new": "Cuối năm 2026, bằng chứng cho thấy hướng này không còn được khuyên dùng.",
+"reason": "'đó', 'đường khuyên dùng' gượng",
+"severity": "medium"
+},
+{
+"old": "pub.dev không ghi deprecated; chỉ là:",
+"new": "pub.dev không ghi deprecated; tuy vậy có những dấu hiệu sau:",
+"reason": "'chỉ là:' cụt, người đọc không rõ ý",
+"severity": "medium"
+},
+{
+"old": "nên lần đầu hoặc lần đầu sau khi sửa plugin chậm hơn hẳn.",
+"new": "nên lần chạy đầu tiên và lần chạy đầu tiên sau khi sửa plugin chậm hơn hẳn.",
+"reason": "'lần đầu hoặc lần đầu sau khi' khó hiểu",
+"severity": "medium"
+},
+{
+"old": "và `dart analyze` thoát 4 kèm stack trace dù cache đã ấm. Vậy pre-commit và CI có plugin đều cần với tới pub.dev.",
+"new": "và `dart analyze` thoát 4 kèm stack trace dù cache đã có sẵn. Vậy pre-commit và CI có dùng plugin đều cần truy cập được pub.dev.",
+"reason": "'cache ấm' và 'với tới' là calque",
+"severity": "medium"
+},
+{
+"old": "đều quy về một phép so:",
+"new": "đều quy về một phép so sánh:",
+"reason": "'phép so' cụt",
+"severity": "medium"
+},
+{
+"old": "Một ca đáng xem là import có điều kiện, đúng chỗ regex của bài 21 bó tay:",
+"new": "Một test case đáng xem là import có điều kiện, đúng chỗ regex của bài 21 không xử lý được:",
+"reason": "'ca' cụt; 'bó tay' khẩu ngữ",
+"severity": "medium"
+},
+{
+"old": "và các ca không được báo (domain, `dart:`, data, composition root, package khác có `lib/data`).",
+"new": "và các trường hợp không được báo (domain, `dart:`, data, composition root, package khác có `lib/data`).",
+"reason": "'ca' cụt",
+"severity": "medium"
+},
+{
+"old": "Ta cũng phá thật: đổi `'data'` trong rule",
+"new": "Ta cũng thử phá rule thật: đổi `'data'` trong rule",
+"reason": "'phá thật' thiếu tân ngữ",
+"severity": "low"
+},
+{
+"old": "mỗi lần phân tích có plugin cần với tới nó, nên bộ test không chạy offline.",
+"new": "mỗi lần phân tích có plugin đều cần truy cập được pub.dev, nên bộ test không chạy offline.",
+"reason": "'với tới nó' mơ hồ, calque",
+"severity": "medium"
+},
+{
+"old": "Ta chạy <code>flutter analyze</code>. Nó báo gì?",
+"new": "Ta chạy <code>flutter analyze</code>. Lệnh này báo gì?",
+"reason": "Tránh 'Nó' đầu câu, nhắc lại danh từ",
+"severity": "medium"
+},
+{
+"old": "Nguyên nhân: trên Flutter 3.47.4, nó không in chẩn đoán của plugin.",
+"new": "Nguyên nhân: trên Flutter 3.47.4, lệnh này không in chẩn đoán của plugin.",
+"reason": "Đại từ 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Nguyên nhân: nó buộc <code>analyzer ^8.0.0</code>.",
+"new": "Nguyên nhân: gói này buộc <code>analyzer ^8.0.0</code>.",
+"reason": "Đại từ 'nó' mơ hồ",
+"severity": "medium"
+}
+]
+}

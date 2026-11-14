@@ -1,0 +1,125 @@
+{
+"file": "dart-future-async-await-stream-bao-gia-va-vi-tri.md",
+"edits": [
+{
+"old": "Lỗi của Future thành exception ngay tại dòng `await`,",
+"new": "Lỗi của Future trở thành exception ngay tại dòng `await`,",
+"reason": "Thiếu 'trở' trong 'thành'",
+"severity": "medium"
+},
+{
+"old": "sau một độ trễ do constructor tiêm vào, mặc định 300 ms, để test chỉnh nó mà không cần chờ thật.",
+"new": "sau một độ trễ được inject qua constructor, mặc định 300 ms, để test chỉnh độ trễ đó mà không cần chờ thật.",
+"reason": "'tiêm vào' là calque của inject; 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "`return` thành Future có giá trị; `throw` thành Future lỗi,",
+"new": "`return` cho ra Future có giá trị; `throw` cho ra Future lỗi,",
+"reason": "Câu lược động từ 'X thành Y'",
+"severity": "medium"
+},
+{
+"old": "thường chỉ thành một dòng log dễ bị bỏ qua.",
+"new": "thường chỉ để lại một dòng log dễ bị bỏ qua.",
+"reason": "Câu lược động từ",
+"severity": "low"
+},
+{
+"old": "nên đặt hạn chờ:",
+"new": "nên đặt thời gian chờ tối đa:",
+"reason": "'hạn chờ' tự ghép, thống nhất cách gọi timeout",
+"severity": "medium"
+},
+{
+"old": "chưa xong khi hết hạn,",
+"new": "chưa xong khi hết thời gian chờ,",
+"reason": "Thống nhất cách gọi timeout",
+"severity": "medium"
+},
+{
+"old": "mặc định nó chờ các cái còn lại xong",
+"new": "mặc định hàm này chờ các Future còn lại xong",
+"reason": "'nó' và 'các cái' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Hết hạn nghĩa là *ta thôi chờ*;",
+"new": "Hết thời gian chờ nghĩa là *ta thôi chờ*;",
+"reason": "Thống nhất cách gọi timeout",
+"severity": "medium"
+},
+{
+"old": "Hình 2 là dòng thời gian của ca này.",
+"new": "Hình 2 là dòng thời gian của trường hợp này.",
+"reason": "'ca' kiểu tự ghép; viết rõ hơn",
+"severity": "low"
+},
+{
+"old": "Hết hạn nghĩa là thôi chờ, không phải huỷ việc đang chạy.",
+"new": "Hết thời gian chờ nghĩa là thôi chờ, không phải huỷ việc đang chạy.",
+"reason": "Thống nhất cách gọi timeout (chữ trong SVG)",
+"severity": "low"
+},
+{
+"old": "Test mà không ngồi chờ bằng `package:fake_async`:",
+"new": "Ta test mà không phải ngồi chờ nhờ `package:fake_async`:",
+"reason": "Câu thiếu chủ ngữ, trật tự từ kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "Test sau: hết hạn 100 ms thì có",
+"new": "Test sau: hết thời gian chờ 100 ms thì có",
+"reason": "Thống nhất cách gọi timeout",
+"severity": "low"
+},
+{
+"old": "nguồn không biết người nghe đã đi sẽ chạy mãi và rò rỉ.",
+"new": "nguồn không biết người nghe đã rời đi sẽ chạy mãi và rò rỉ.",
+"reason": "'đã đi' gượng",
+"severity": "low"
+},
+{
+"old": "(equirectangular xấp xỉ, đủ cho quãng ngắn)",
+"new": "(công thức xấp xỉ equirectangular, đủ cho quãng ngắn)",
+"reason": "Trật tự từ kiểu tiếng Anh",
+"severity": "low"
+},
+{
+"old": "Phía gọi, và chu kỳ sống của subscription ở Hình 3:",
+"new": "Phía gọi như sau, còn chu kỳ sống của subscription nằm ở Hình 3:",
+"reason": "Câu cụt thiếu vị ngữ",
+"severity": "medium"
+},
+{
+"old": "gửi đối tượng lớn vào có giá,",
+"new": "gửi đối tượng lớn vào isolate cũng tốn chi phí,",
+"reason": "'có giá' là calque của 'has a cost'",
+"severity": "medium"
+},
+{
+"old": "người nghe muộn lặng lẽ mất sự kiện đầu.",
+"new": "người nghe muộn mất sự kiện đầu mà không có thông báo nào.",
+"reason": "'lặng lẽ' là calque của silently",
+"severity": "medium"
+},
+{
+"old": "Mức: **Kiểm chứng tự động**, không cần thiết bị.",
+"new": "Mức kiểm chứng: **kiểm chứng tự động**, không cần thiết bị.",
+"reason": "Cụm 'Mức:' thiếu danh từ",
+"severity": "low"
+},
+{
+"old": "Isolate chỉ thêm chi phí tạo isolate và gửi dữ liệu;",
+"new": "Isolate chỉ thêm chi phí khởi tạo và gửi dữ liệu;",
+"reason": "Lặp từ",
+"severity": "low"
+},
+{
+"old": "**một dãy giá trị theo thời gian**, việc của `Stream<T>`.",
+"new": "**một dãy giá trị theo thời gian**, và đó là việc của `Stream<T>`.",
+"reason": "Câu cụt thiếu chủ ngữ",
+"severity": "low"
+}
+]
+}

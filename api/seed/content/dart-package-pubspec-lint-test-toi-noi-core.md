@@ -10,7 +10,7 @@ language: vi
 
 Đội Tới Nơi chuẩn bị làm app tài xế. Màn hình đầu tiên của app này cũng báo giá chuyến, và con số trên máy tài xế phải khớp từng đồng với con số trên máy khách. Nhìn lại các lab bài 02 đến 05, ta thấy `TripStatus` nằm trong hai thư mục (lab 03 và 04), `Trip` có hai phiên bản khác nhau (bản đầy đủ của lab 03 và bản rút gọn của lab 04), còn công thức cước thì có cả dạng `double` lẫn dạng mét nguyên. Chép thêm một lần nữa cho app tài xế là cách nhanh nhất để hai app tính giá lệch nhau.
 
-Lối ra là **package**: một đơn vị Dart có `pubspec.yaml`, có API công khai rõ ràng, có test riêng, và nhiều project cùng dùng. Bài này gom code của bốn bài trước thành package `toi_noi_core`, đọc `pubspec.yaml`, bật lint chặt hơn, viết test có tổ chức, rồi dùng package từ một project khác. Đây là bài 06 của lộ trình **Flutter qua Tới Nơi**, nối tiếp [bài 05 về Future và Stream](/articles/dart-future-async-await-stream-bao-gia-va-vi-tri), và là bài cuối của Phần 1. Ví dụ lấy từ hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi), bảng giá là số minh hoạ. Bạn đã đọc bài C# về [record, struct và Money](/articles/csharp-record-struct-money-quote) sẽ thấy cùng ý tưởng value object, chỉ khác cú pháp.
+Lối ra là **package**: một đơn vị Dart có `pubspec.yaml`, có API công khai rõ ràng, có test riêng, và nhiều project cùng dùng. Bài này gom code của bốn bài trước thành package `toi_noi_core`, đọc `pubspec.yaml`, bật lint chặt hơn, viết test có tổ chức, rồi dùng package từ một project khác. Đây là bài 06 của lộ trình **Flutter qua Tới Nơi**, nối tiếp [bài 05 về Future và Stream](/articles/dart-future-async-await-stream-bao-gia-va-vi-tri), và là bài cuối của Phần 1. Ví dụ lấy từ hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi), bảng giá là số minh hoạ. Nếu đã đọc bài C# về [record, struct và Money](/articles/csharp-record-struct-money-quote), bạn sẽ thấy cùng ý tưởng value object, chỉ khác cú pháp.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -218,7 +218,7 @@ final class Money implements Comparable<Money> {
 }
 ```
 
-Hai lối vào kiểm tra khác nhau. Constructor `const` chỉ có thể dùng `assert`, mà `assert` chỉ chạy khi **bật assertions**: `dart test` bật sẵn, `dart run` phải thêm `--enable-asserts`, Flutter bật ở debug và tắt ở profile và release, còn bản AOT (`dart compile exe`) luôn bỏ qua. Vì vậy `const Money` dành cho hằng và giá trị đã biết chắc. Dữ liệu từ ngoài (JSON của server, form, database) đi qua `Money.fromVnd`, luôn ném `ArgumentError` nếu âm; các toán tử `-` và `*` cũng kiểm tường minh nên không bao giờ tạo ra `Money` âm. `implements Comparable<Money>` cho `list.sort()` chạy trên danh sách `Money`; `==` và `hashCode` đi cùng nhau để `Money` làm được phần tử của `Set` hay khoá của `Map`.
+Hai đường vào có cách kiểm tra khác nhau. Constructor `const` chỉ có thể dùng `assert`, mà `assert` chỉ chạy khi **bật assertions**: `dart test` bật sẵn, `dart run` phải thêm `--enable-asserts`, Flutter bật ở debug và tắt ở profile và release, còn bản AOT (`dart compile exe`) luôn bỏ qua. Vì vậy `const Money` dành cho hằng và giá trị đã biết chắc. Dữ liệu từ ngoài (JSON của server, form, database) đi qua `Money.fromVnd`, luôn ném `ArgumentError` nếu âm; các toán tử `-` và `*` cũng kiểm tường minh nên không bao giờ tạo ra `Money` âm. `implements Comparable<Money>` giúp `list.sort()` chạy được trên danh sách `Money`; `==` và `hashCode` đi cùng nhau để `Money` làm được phần tử của `Set` hay khoá của `Map`.
 
 Công thức cước nằm trong `fare.dart`:
 
@@ -274,7 +274,7 @@ int calculateFareVnd(double distanceKm) {
 Money calculateFare(double distanceKm) => Money(calculateFareVnd(distanceKm));
 ```
 
-Hàm quy đổi sang mét nguyên một lần, rồi chỉ tính bằng số nguyên. `(extraMeters * 4500 + 500) ~/ 1000` là cách làm tròn nửa đồng lên mà không cần `double`: 1 mét vượt là 4,5 đồng, cộng 500 rồi chia nguyên cho 1000 ra 5. Kết quả khớp bảng biên của bài 02 mà không phụ thuộc sai số dấu phẩy động. `Trip` bất biến như ở bài 03, chỉ đổi kiểu cước và nguồn tính cước; phần `apply` giữ nguyên:
+Hàm quy đổi sang mét nguyên một lần, rồi chỉ tính bằng số nguyên. `(extraMeters * 4500 + 500) ~/ 1000` là cách làm tròn nửa đồng lên mà không cần `double`: 1 mét vượt là 4,5 đồng, cộng 500 rồi chia nguyên cho 1000 ra 5. Kết quả khớp bảng test case biên của bài 02 mà không phụ thuộc sai số dấu phẩy động. `Trip` bất biến như ở bài 03, chỉ đổi kiểu cước và nguồn tính cước; phần `apply` giữ nguyên:
 
 ### trip.dart · packages/toi_noi_core/lib/src/trip.dart (trích, trong class Trip)
 
@@ -314,7 +314,7 @@ Tài liệu API nằm ngay trong code dưới dạng comment `///`: câu đầu 
 
 ## Lint và analyzer
 
-`dart analyze` phát hiện lỗi mà không cần chạy code. Nó đọc `analysis_options.yaml`, nơi ta chọn bộ **lint** (quy tắc phong cách và an toàn) và tuỳ chỉnh chính **analyzer**.
+`dart analyze` phát hiện lỗi mà không cần chạy code. Lệnh này đọc `analysis_options.yaml`, nơi ta chọn bộ **lint** (quy tắc phong cách và an toàn) và tuỳ chỉnh chính **analyzer**.
 
 ### analysis_options.yaml · packages/toi_noi_core/analysis_options.yaml
 
@@ -348,10 +348,10 @@ linter:
 
 Dòng `include` kéo vào bộ `recommended` của package `lints`, bộ quy tắc Dart team khuyến nghị cho mọi project (bộ nhỏ hơn là `core`, chính là bộ pub.dev dùng để chấm điểm). Phần bên dưới là các lựa chọn chặt hơn của riêng package này:
 
-- `strict-casts`, `strict-inference`, `strict-raw-types` là ba cờ của analyzer. Chúng chặn ba kẽ hở khiến kiểu `dynamic` lọt vào mà không ai hay: ép kiểu ngầm, suy luận ra `dynamic`, và `List` trơn trụi thay vì `List<Money>`.
+- `strict-casts`, `strict-inference`, `strict-raw-types` là ba cờ của analyzer. Chúng chặn ba kẽ hở khiến kiểu `dynamic` lọt vào mà không ai biết: ép kiểu ngầm, suy luận ra `dynamic`, và `List` trơn trụi thay vì `List<Money>`.
 - `prefer_final_locals` và `prefer_const_*` làm giá trị bất biến trông bất biến ngay ở chỗ khai báo.
 - `avoid_dynamic_calls` báo mọi lần gọi member trên `dynamic`, nơi compiler hết bảo vệ ta.
-- `unawaited_futures` chưa có việc ở package này vì chưa có `async`; ta bật sớm vì một `Future` bị quên `await` (bài 05) là lỗi âm thầm.
+- `unawaited_futures` chưa có việc ở package này vì chưa có `async`; ta bật sớm vì một `Future` bị quên `await` (bài 05) là lỗi mà compiler không báo.
 - `directives_ordering` cố định thứ tự `import` và `export`.
 
 Thử đặt vào `lib/src` một file nghịch ngợm có `var a = 1;`, `List raw = [];` và một lời gọi `d.length` trên biến `dynamic`: `dart analyze` báo `prefer_final_locals`, `strict_raw_type` (mức warning) và `avoid_dynamic_calls`. Nếu file còn `import 'package:test/test.dart'` trong `lib/`, ta nhận thêm `depend_on_referenced_packages`, vì `test` chỉ là `dev_dependency`.
@@ -370,7 +370,7 @@ dart fix --dry-run            # xem những chỗ analyzer sửa tự động đ
 
 Test của `toi_noi_core` nằm trong `test/`, mỗi file ứng với một phần của `lib/src`, tên kết thúc bằng `_test.dart`; đuôi này là điều kiện để `dart test` tự tìm thấy file.
 
-Khối nền tảng là ba hàm: `test` cho một ca, `group` gom các ca cùng chủ đề (có thể lồng nhau), `setUp` chạy lại trước **mỗi** test để mỗi ca có dữ liệu mới. `expect(giá_trị_thật, matcher)` so sánh với một **matcher**: `equals`, `isTrue`, `hasLength`, `contains`, `throwsArgumentError`, `throwsStateError`, `isA<T>().having(...)`. Test của công thức cước dùng một bảng ca biên thay vì viết từng `test` tay:
+Khối nền tảng là ba hàm: `test` cho một test case, `group` gom các test case cùng chủ đề (có thể lồng nhau), `setUp` chạy lại trước **mỗi** test để mỗi test case có dữ liệu mới. `expect(giá_trị_thật, matcher)` so sánh với một **matcher**: `equals`, `isTrue`, `hasLength`, `contains`, `throwsArgumentError`, `throwsStateError`, `isA<T>().having(...)`. Test của công thức cước dùng một bảng ca biên thay vì viết từng `test` tay:
 
 ### fare_test.dart · packages/toi_noi_core/test/fare_test.dart (trích)
 
@@ -441,7 +441,7 @@ Khối nền tảng là ba hàm: `test` cho một ca, `group` gom các ca cùng 
 
 Vòng `for` tạo một `test` cho mỗi dòng, nên khi hỏng, tên test cho biết đúng km nào sai. Bảng có đủ các điểm hay gãy: 0, đúng 2 km, 2,001 km (mét đầu tiên vượt), 100 km (cận trên). Phần "ngoài miền" kiểm bằng `throwsArgumentError`, kể cả vô cực; riêng `NaN` là cái bẫy mà `km < 0 || km > 100` bỏ lọt.
 
-Với `Trip`, ta không viết tay 64 ca. Bảng đặc tả liệt kê **chỉ 12 cặp hợp lệ** (trạng thái, sự kiện) và mọi cặp còn lại phải ném `StateError`:
+Với `Trip`, ta không viết tay 64 test case. Bảng đặc tả liệt kê **chỉ 12 cặp hợp lệ** (trạng thái, sự kiện) và mọi cặp còn lại phải ném `StateError`:
 
 ### trip_test.dart · packages/toi_noi_core/test/trip_test.dart (trích)
 
@@ -462,7 +462,7 @@ Với `Trip`, ta không viết tay 64 ca. Bảng đặc tả liệt kê **chỉ 
     }
 ```
 
-Nếu ai đó thêm lậu một cặp chuyển trạng thái vào `apply`, một trong 64 ca sẽ đỏ vì bảng không có cặp đó. Cùng file còn kiểm điều quan trọng không kém: `apply` không sửa bản gốc, dù thành công hay bị từ chối.
+Nếu ai đó thêm lậu một cặp chuyển trạng thái vào `apply`, một trong 64 test sẽ đỏ vì bảng không có cặp đó. Cùng file còn kiểm điều quan trọng không kém: `apply` không sửa bản gốc, dù thành công hay bị từ chối.
 
 Test truy vấn dùng `setUp` để dựng lại năm chuyến mỗi lần:
 
@@ -498,7 +498,7 @@ Bạn đã quen test bằng xUnit sẽ thấy `group` và `test` tương ứng `
 
 ## Dùng package từ project khác
 
-Project `06-dung-toi-noi-core` (package `toi_noi_06`) đóng vai app tài xế tương lai. Nó khai báo `toi_noi_core` bằng **path dependency**:
+Project `06-dung-toi-noi-core` (package `toi_noi_06`) đóng vai app tài xế tương lai. Project này khai báo `toi_noi_core` bằng **path dependency**:
 
 ### pubspec.yaml · 06-dung-toi-noi-core/pubspec.yaml
 
@@ -540,7 +540,7 @@ dev_dependencies:
 <figcaption>Hình 2. Phụ thuộc của toi_noi_06. Đường liền là dependencies, đường đứt là dev_dependencies của toi_noi_core: người dùng package nhận collection nhưng không nhận lints hay test.</figcaption>
 </figure>
 
-Project chỉ cần một dòng import. Nhờ `sealed class` của bài 03, `switch` dưới đây vẫn bị compiler bắt buộc đủ nhánh dù `TripEvent` nằm ở package khác:
+Project chỉ cần một dòng import. Nhờ `sealed class` của bài 03, `switch` dưới đây vẫn bị compiler buộc phải đủ nhánh dù `TripEvent` nằm ở package khác:
 
 ### report.dart · 06-dung-toi-noi-core/lib/report.dart
 
@@ -584,7 +584,7 @@ List<String> runTrip(Trip trip, List<TripEvent> events) {
 }
 ```
 
-Thử xoá một nhánh, ví dụ `PickedUp() => ...`, `dart analyze` báo `non_exhaustive_switch_expression`. Khi `toi_noi_core` thêm một biến thể `TripEvent`, mọi app dùng nó biết ngay chỗ cần sửa, trước khi chạy.
+Nếu thử xoá một nhánh, ví dụ `PickedUp() => ...`, `dart analyze` sẽ báo `non_exhaustive_switch_expression`. Khi `toi_noi_core` thêm một biến thể `TripEvent`, mọi app dùng nó biết ngay chỗ cần sửa, trước khi chạy.
 
 Từ nay, các bài sau dùng `Money` thay cho `int` trần để biểu diễn tiền: lấy `fare.vnd` khi cần số đồng (gửi lên API, ghi database), còn trong logic và giao diện giữ `Money`, để không ai cộng nhầm số đồng với số mét. Khi code dồn vào workspace `toi-noi-app`, ta sẽ chuyển sang **pub workspace**: một thư mục gốc quản lý nhiều package, mỗi package khai `resolution: workspace`, và `dart pub get` giải phiên bản một lần cho cả cây. Ở bài này ta dùng `path:` trần để thấy cơ chế gốc trước.
 
@@ -618,7 +618,7 @@ dart test
 dart run bin/main.dart
 ```
 
-Hoặc chạy cả bài 01 đến 06 bằng `node examples/toi-noi-flutter/verify-01-06.mjs`. Đã kiểm với Dart 3.13.3 (Flutter 3.47.4): `dart analyze` 0 issue ở cả hai project, package có 138 test xanh, project dùng có 7 test xanh, `dart doc` 0 warning. Mức: **Kiểm chứng tự động**, không cần thiết bị.
+Hoặc chạy cả bài 01 đến 06 bằng `node examples/toi-noi-flutter/verify-01-06.mjs`. Đã kiểm với Dart 3.13.3 (Flutter 3.47.4): `dart analyze` 0 issue ở cả hai project, package có 138 test xanh, project dùng có 7 test xanh, `dart doc` 0 warning. Mức kiểm chứng: **kiểm chứng tự động**, không cần thiết bị.
 
 | Test | Chứng minh điều gì |
 |---|---|

@@ -50,7 +50,7 @@ Dữ liệu OpenStreetMap miễn phí, nhưng **server tile công cộng thì kh
 - Tôn trọng header cache, hoặc giữ tile ít nhất 7 ngày.
 - Không tải hàng loạt, không dựng kho tile, không dùng ngoại tuyến.
 
-Chính sách nói thẳng: không có SLA, họ có thể chặn không báo trước, và dịch vụ thương mại nên biết quyền truy cập có thể bị rút bất kỳ lúc nào. Với Tới Nơi, lab dùng server này để học vì không cần key. App thật, với hàng triệu lượt mở bản đồ mỗi tháng, phải dùng nhà cung cấp tile trả phí hoặc tile server tự dựng, đặt `urlTemplate` ở một chỗ duy nhất. Cấu hình môi trường của [bài 25](/articles/flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod) là hằng lúc biên dịch, nằm trong binary; muốn đổi nguồn tile mà không phát hành lại thì phải lấy URL từ server hoặc remote config.
+Chính sách nói thẳng: không có SLA, bên vận hành có thể chặn không báo trước, và dịch vụ thương mại nên biết quyền truy cập có thể bị rút bất kỳ lúc nào. Với Tới Nơi, lab dùng server này để học vì không cần key. App thật, với hàng triệu lượt mở bản đồ mỗi tháng, phải dùng nhà cung cấp tile trả phí hoặc tile server tự dựng, đặt `urlTemplate` ở một chỗ duy nhất. Cấu hình môi trường của [bài 25](/articles/flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod) là hằng lúc biên dịch, nằm trong binary; muốn đổi nguồn tile mà không phát hành lại thì phải lấy URL từ server hoặc remote config.
 
 Phần tile của `PickupMap`:
 
@@ -72,7 +72,7 @@ const String tileUserAgentPackageName = 'vn.toinoi.customer';
             ),
 ```
 
-Theo source `flutter_map` 8.3.2, `TileLayer` ghép User-Agent từ `userAgentPackageName` khi không chạy trên web (trình duyệt không cho đổi header này); bỏ tham số thì là `flutter_map (unknown)`.
+Theo source `flutter_map` 8.3.2, `TileLayer` ghép User-Agent từ `userAgentPackageName` khi không chạy trên web (trình duyệt không cho đổi header này); bỏ tham số thì User-Agent sẽ là `flutter_map (unknown)`.
 
 Hai widget attribution của `flutter_map` khác nhau ở đúng chỗ chính sách quan tâm. `RichAttributionWidget` để chữ trong popup mở bằng nút `i`, và theo source nút được làm mờ còn một nửa khi popup đóng và không có hover, tức gần như luôn mờ trên màn cảm ứng. `SimpleAttributionWidget` luôn hiện chữ, trên nền đặc:
 
@@ -88,7 +88,7 @@ Hai widget attribution của `flutter_map` khác nhau ở đúng chỗ chính s�
           ],
 ```
 
-Widget này tự thêm tiền tố `flutter_map | © ` trước `source`. `onAttributionTap` để app thật mở trang giấy phép bằng `url_launcher`. Cách đọc chính sách này là của ta; trước khi phát hành, hãy đọc lại trang gốc.
+Widget này tự thêm tiền tố `flutter_map | © ` trước `source`. `onAttributionTap` là chỗ để app thật mở trang giấy phép bằng `url_launcher`. Cách đọc chính sách này là của ta; trước khi phát hành, hãy đọc lại trang gốc.
 
 ## FlutterMap: camera, layer, marker và polyline
 
@@ -138,11 +138,11 @@ Widget này tự thêm tiền tố `flutter_map | © ` trước `source`. `onAtt
           ),
 ```
 
-`containCenter` kẹp tâm camera vào hình chữ nhật. Theo source, `move()` kẹp camera trước rồi mới gọi `onPositionChanged`; test thấy kết quả trùng `ServiceArea.clamp` tới 1e-9. Hai cơ chế không thừa: `cameraConstraint` bảo vệ **bản đồ**, còn `ServiceArea` bảo vệ **dữ liệu** không đi qua bản đồ, như vị trí máy hay deep link. Nếu `initialCenter` nằm ngoài constraint, `flutter_map` ở debug dừng bằng assertion "MapCamera is no longer within the cameraConstraint"; test có đúng ca đó, nên màn hình kẹp điểm ban đầu trước khi dựng.
+`containCenter` kẹp tâm camera vào hình chữ nhật. Theo source, `move()` kẹp camera trước rồi mới gọi `onPositionChanged`; test thấy kết quả trùng `ServiceArea.clamp` tới 1e-9. Hai cơ chế không thừa: `cameraConstraint` bảo vệ **bản đồ**, còn `ServiceArea` bảo vệ **dữ liệu** không đi qua bản đồ, như vị trí máy hay deep link. Nếu `initialCenter` nằm ngoài constraint, `flutter_map` ở debug dừng bằng assertion "MapCamera is no longer within the cameraConstraint"; test có đúng trường hợp đó, nên màn hình kẹp điểm ban đầu trước khi dựng.
 
-`MapController` là tay lái từ bên ngoài; nút "về điểm đón ban đầu" dùng `move(center, zoom)`, trả `false` nếu camera không đổi hoặc constraint từ chối.
+`MapController` là công cụ điều khiển bản đồ từ bên ngoài; nút "về điểm đón ban đầu" dùng `move(center, zoom)`, trả `false` nếu camera không đổi hoặc constraint từ chối.
 
-**Marker** là vật chứa widget gắn với toạ độ, không tự là widget. Hai chi tiết hay sai. Một, `alignment` mặc định là `Alignment.center`, nên toạ độ nằm giữa marker; với biểu tượng ghim ta muốn đáy chạm toạ độ, dùng `Alignment.topCenter`. Hai, marker ngoài khung nhìn không được dựng, nên ở zoom 16 điểm đến cách 9 km không có widget nào để tìm. **Polyline** nhận danh sách toạ độ cùng nét vẽ, có thể là nét đứt:
+**Marker** là vật chứa widget gắn với toạ độ, bản thân nó không phải là widget. Hai chi tiết hay sai. Một, `alignment` mặc định là `Alignment.center`, nên toạ độ nằm giữa marker; với biểu tượng ghim ta muốn đáy chạm toạ độ, dùng `Alignment.topCenter`. Hai, marker ngoài khung nhìn không được dựng, nên ở zoom 16 điểm đến cách 9 km không có widget nào để tìm. **Polyline** nhận danh sách toạ độ cùng nét vẽ, có thể là nét đứt:
 
 ### pickup_screen.dart · 34-map-flutter-map/lib/pickup_screen.dart (trích)
 
@@ -193,13 +193,13 @@ Pin đứng yên giữa khung, bản đồ trượt bên dưới, và điểm đ
         const IgnorePointer(child: Center(child: _CenterPin())),
 ```
 
-Biểu tượng được dịch lên nửa chiều cao bằng `Transform.translate`, để **đáy hộp biểu tượng** trùng tâm khung; test đo đúng điều đó, và đo rằng kéo bắt đầu ngay trên pin vẫn làm bản đồ di chuyển.
+Ta dịch biểu tượng lên nửa chiều cao bằng `Transform.translate`, để **đáy hộp biểu tượng** trùng tâm khung; test đo đúng điều đó, và đo rằng kéo bắt đầu ngay trên pin vẫn làm bản đồ di chuyển.
 
 Camera đổi liên tục khi kéo, nhưng việc tốn kém như định tuyến, báo giá, về sau là geocoding gọi mạng chỉ nên làm khi bản đồ đứng yên. Ta cần hai nhịp (Hình 3).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 350" role="img" aria-label="Hình 3. Kéo, vuốt nhanh hoặc gọi move làm camera đổi. onPositionChanged chạy mỗi lần camera đổi. Nhánh trên gọi onCenterChanged cập nhật ValueNotifier _live, chỉ thẻ toạ độ và nút xác nhận dựng lại. Nhánh dưới huỷ và đặt lại Timer 250 ms; khi hết giờ gọi onPickupSettled, setState đặt _settled, rồi tính lại tuyến và cước.">
+<svg viewBox="0 0 880 350" role="img" aria-label="Hình 3. Kéo, vuốt nhanh hoặc gọi move làm camera đổi. onPositionChanged chạy mỗi lần camera đổi. Nhánh trên gọi onCenterChanged cập nhật ValueNotifier _live, chỉ thẻ toạ độ và nút xác nhận dựng lại. Nhánh dưới huỷ và đặt lại Timer 250 ms; khi Timer chạy xong thì gọi onPickupSettled, setState đặt _settled, rồi tính lại tuyến và cước.">
 <defs><marker id="fl34-3-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker></defs>
 <rect x="20" y="105" width="170" height="100" rx="10" class="f-phys-soft s-phys"/><text x="36" y="140" class="t-b">Camera đổi</text><text x="36" y="166" class="t-small">kéo hoặc move()</text>
 <rect x="240" y="105" width="230" height="100" rx="10" class="f-pk-soft s-pk"/><text x="256" y="140" class="t-b">onPositionChanged</text><text x="256" y="166" class="t-small">camera, hasGesture</text>
@@ -272,7 +272,7 @@ double haversineMeters(
 }
 ```
 
-`latlong2` đã có lớp `Distance`, nên ta tự viết lại là có lý do, và test đối chiếu từng lý do. Một, `Distance()` mặc định dùng **Vincenty**, không phải haversine. Hai, `DistanceHaversine` ở bản 0.10.1 luôn dùng bán kính xích đạo 6.378.137 m (`withRadius` không đổi kết quả); với cùng bán kính hàm của lab khớp nó tới 1e-6 m, còn bán kính trung bình 6.371.008,8 m cho số nhỏ hơn 0,11%, chừng 10 m trên tuyến 9,4 km. Ba, `Distance.as` trả 0 âm thầm khi toạ độ là NaN: toạ độ hỏng thành "cách nhau 0 m", cước 12.000 VND. Hàm của lab ném `ArgumentError`.
+`latlong2` đã có lớp `Distance`, nên ta tự viết lại là có lý do, và test đối chiếu từng lý do. Một, `Distance()` mặc định dùng **Vincenty**, không phải haversine. Hai, `DistanceHaversine` ở bản 0.10.1 luôn dùng bán kính xích đạo 6.378.137 m (`withRadius` không đổi kết quả); với cùng bán kính hàm của lab khớp nó tới 1e-6 m, còn bán kính trung bình 6.371.008,8 m cho số nhỏ hơn 0,11%, chừng 10 m trên tuyến 9,4 km. Ba, `Distance.as` trả 0 mà không báo lỗi khi toạ độ là NaN: toạ độ hỏng trở thành "cách nhau 0 m", cước 12.000 VND. Hàm của lab ném `ArgumentError`.
 
 Haversine là đường chim bay, không phải đường xe chạy, và với cước đó là chỗ dễ sai nhất. Lab dùng `fakeRoute`, tuyến giả hình chữ L thay cho dịch vụ định tuyến của backend. Từ điểm đón mặc định tới điểm đến, chim bay là 9.371 m (cước 45.170 VND), chữ L là 13.132 m (62.094 VND). Chữ L cố ý khắc nghiệt để thấy khoảng chênh; cước chính thức do server tính từ tuyến thật, và thẻ trên màn hình ghi rõ.
 
@@ -309,7 +309,7 @@ Vùng phục vụ là hình chữ nhật; `contains` tính cả biên, `clamp` k
   }
 ```
 
-`ServiceArea` lưu bốn số `double` thay vì hai `LatLng`: với `const` constructor, analyzer báo `const_eval_property_access` vì biểu thức hằng không đọc được `southWest.latitude` để `assert`. Cả `contains` và `clamp` ném `ArgumentError` với NaN, vì `NaN.clamp(south, north)` trả về `north`: toạ độ hỏng thành điểm hợp lệ âm thầm.
+`ServiceArea` lưu bốn số `double` thay vì hai `LatLng`: với `const` constructor, analyzer báo `const_eval_property_access` vì biểu thức hằng không đọc được `southWest.latitude` để `assert`. Cả `contains` và `clamp` ném `ArgumentError` với NaN, vì `NaN.clamp(south, north)` trả về `north`: toạ độ hỏng trở thành điểm hợp lệ mà không báo lỗi.
 
 ## Test không ra mạng
 
@@ -329,7 +329,7 @@ class FakeTileProvider extends TileProvider {
 }
 ```
 
-Thay provider vẫn chưa đủ để chứng minh "không có request thật". `flutter_test` thay `HttpClient` toàn cục bằng bản trả mã 400, nên dù dùng provider nào, test cũng không ra mạng thật; test xanh không nói được code **có cố gọi** hay không. Vì vậy lab cài một `HttpOverrides` đếm số lần có mã tạo `HttpClient`, rồi chuyển tiếp cho override của `flutter_test`:
+Thay provider vẫn chưa đủ để chứng minh "không có request thật". `flutter_test` thay `HttpClient` toàn cục bằng bản trả mã 400, nên dù dùng provider nào, test cũng không ra mạng thật; test xanh không nói được code **có cố gọi** hay không. Vì vậy lab cài một `HttpOverrides` đếm số lần có đoạn code nào tạo `HttpClient`, rồi chuyển tiếp cho override của `flutter_test`:
 
 ### support.dart · 34-map-flutter-map/test/support.dart (trích)
 
@@ -368,7 +368,7 @@ class CountingHttpOverrides extends HttpOverrides {
     });
 ```
 
-Một test đối chứng dùng `NetworkTileProvider(httpClient: IOClient())`, tắt cache và nuốt lỗi, thấy bộ đếm lớn hơn 0; nhờ vậy con số 0 ở test trên có nghĩa. Giới hạn: bộ đếm chỉ thấy `HttpClient` của `dart:io`.
+Một test đối chứng dùng `NetworkTileProvider(httpClient: IOClient())`, tắt cache và nuốt lỗi mà bộ đếm vẫn lớn hơn 0; nhờ vậy con số 0 ở test trên có nghĩa. Giới hạn: bộ đếm chỉ thấy `HttpClient` của `dart:io`.
 
 ## So với Google Maps SDK và Mapbox
 
@@ -419,7 +419,7 @@ Mức kiểm chứng của bài theo khung là **trên thiết bị**, nhưng m�
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> <code>flutter_map</code> dừng bằng assertion "MapCamera is no longer within the cameraConstraint" ngay khi dựng. Assertion chỉ chạy ở debug; ở release camera không còn được đảm bảo nằm trong vùng. Sửa bằng <code>serviceArea.clamp(initialPickup)</code> trước khi dựng, như <code>_start</code> trong <code>PickupScreen</code>.</p>
 <p><strong>2.</strong> <code>calculateFare(5)</code> cho 25.500 VND, <code>calculateFare(6.5)</code> cho 32.250 VND, chênh 6.750 VND.</p>
-<p><strong>3.</strong> Xanh không chứng minh code không gọi mạng: <code>flutter_test</code> chặn request và trả 400, còn lỗi tile bị nuốt. Chạy cùng code trên <code>integration_test</code> hoặc máy thật là request ra thật. Cách đúng là inject provider giả và đếm số lần tạo <code>HttpClient</code> như lab, kèm test đối chứng cho thấy bộ đếm tăng khi dùng provider thật.</p>
+<p><strong>3.</strong> Xanh không chứng minh code không gọi mạng: <code>flutter_test</code> chặn request và trả 400, còn lỗi tile bị nuốt. Chạy cùng code trên <code>integration_test</code> hoặc máy thật thì request sẽ ra mạng thật. Cách đúng là inject provider giả và đếm số lần tạo <code>HttpClient</code> như lab, kèm test đối chứng cho thấy bộ đếm tăng khi dùng provider thật.</p>
 </details>
 
 Bài trước: [CI với GitHub Actions: analyze, test, golden và cache pub](/articles/flutter-ci-github-actions-analyze-test-golden-cache). Bài tiếp: [Vị trí: geolocator, quyền foreground/background và cấu hình iOS, Android](/articles/flutter-vi-tri-geolocator-permission-foreground-background).

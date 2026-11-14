@@ -175,11 +175,11 @@ Future<String?> guardLocation(
 }
 ```
 
-Danh sách công khai chỉ có ba đường dẫn; mọi thứ khác cần đăng nhập, kể cả đường dẫn chưa khai báo. Quên một route mà mặc định là "chặn" thì chỉ gây phiền, mặc định là "cho vào" thì lộ dữ liệu. Hàm trả `Future` vì lúc khởi động phiên còn đang đọc từ kho (bài 22). Test `đang đọc kho phiên` cho thấy trong lúc chờ, router chưa dựng màn hình nào, nên bước 2 cho trang chủ vào luôn.
+Danh sách công khai chỉ có ba đường dẫn; mọi thứ khác cần đăng nhập, kể cả đường dẫn chưa khai báo. Quên một route mà mặc định là "chặn" thì chỉ gây phiền, mặc định là "cho vào" thì lộ dữ liệu. Hàm trả `Future` vì lúc khởi động, phiên đăng nhập còn đang được đọc từ kho lưu trữ (bài 22). Test `đang đọc kho phiên` cho thấy trong lúc chờ, router chưa dựng màn hình nào, nên bước 2 cho trang chủ vào luôn.
 
-`from` cần cẩn thận vì ai cũng gõ được tham số query, và sau đăng nhập app đi tới đó. `safeFrom` chỉ nhận đường dẫn nội bộ; `https://evil.example/...`, `//evil.example`, URI có scheme hay chính `/login` đều thành `/`.
+`from` cần cẩn thận vì ai cũng gõ được tham số query, và sau đăng nhập app đi tới đó. `safeFrom` chỉ nhận đường dẫn nội bộ; `https://evil.example/...`, `//evil.example`, URI có scheme hay chính `/login` đều bị đổi thành `/`.
 
-`redirect` chỉ chạy khi có điều hướng, nên đăng nhập xong mà không có điều hướng nào thì khách vẫn ở `/login`. `GoRouter.refreshListenable` giải việc đó: mỗi lần `Listenable` phát tín hiệu, router đánh giá lại `redirect` với vị trí **khai báo** hiện tại (phần `go`). Trạng thái đăng nhập nằm trong Riverpod nên ta bắc một cầu nhỏ, kèm một bước kiểm riêng khi mất phiên:
+`redirect` chỉ chạy khi có điều hướng, nên đăng nhập xong mà không có điều hướng nào thì khách vẫn ở `/login`. `GoRouter.refreshListenable` giải quyết việc đó: mỗi lần `Listenable` phát tín hiệu, router đánh giá lại `redirect` với vị trí **khai báo** hiện tại (phần `go`). Trạng thái đăng nhập nằm trong Riverpod nên ta bắc một cầu nhỏ, kèm một bước kiểm riêng khi mất phiên:
 
 ### router.dart · 23-go-router/lib/router.dart (trích)
 
@@ -233,7 +233,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 ```
 
-Ba chi tiết đều có test. Một, provider dùng `ref.listen` và `ref.read`, không dùng `ref.watch`. Hai, `_currentSession` đọc thẳng state khi đã có giá trị và chỉ chờ `.future` khi kho còn đang đọc. Ba, `LoginScreen` không biết `from` và không tự điều hướng: nó chỉ gọi `signIn`, rồi `refreshListenable` làm router đánh giá lại `/login?from=%2Ftrip%2FT-1002` và `safeFrom` đưa khách tới chuyến. Đăng xuất đi cùng đường: nút chỉ đổi state, `redirect` đưa khách về `/login?from=%2Faccount`.
+Ba chi tiết đều có test. Thứ nhất, provider dùng `ref.listen` và `ref.read`, không dùng `ref.watch`. Thứ hai, `_currentSession` đọc thẳng state khi đã có giá trị và chỉ chờ `.future` khi phiên còn đang được đọc từ kho. Thứ ba, `LoginScreen` không biết `from` và không tự điều hướng: nó chỉ gọi `signIn`, rồi `refreshListenable` làm router đánh giá lại `/login?from=%2Ftrip%2FT-1002` và `safeFrom` đưa khách tới chuyến. Đăng xuất đi cùng đường: nút chỉ đổi state, `redirect` đưa khách về `/login?from=%2Faccount`.
 
 Có một giới hạn, nối với chi tiết `router.state` ở mục 2: `redirect` chỉ thấy vị trí khai báo, không thấy trang đẩy bằng `push`. Đang ở `/`, `push('/trip/T-1001')` rồi `signOut()`: redirect chỉ thấy `/` (công khai) nên `TripScreen` vẫn hiện dù phiên đã mất. Test `chỉ refreshListenable thì trang push vẫn còn sau đăng xuất` tái hiện. Vì vậy `recheckTopPage` chạy `guardLocation` với `router.state.uri`, tức trang trên cùng, mỗi khi mất phiên, và `go` tới `/login?from=...` nếu bị chặn; ngăn xếp bị thay nên không còn đường Back về dữ liệu cũ. Phương án khác là mở mọi trang riêng bằng `go`, nhưng ta mất state tab.
 
@@ -287,7 +287,7 @@ Khi khách bấm link, hệ điều hành đưa URI cho **engine**. Theo mã ngu
 <figcaption>Hình 4. Luồng đi từ link tới màn hình khi app đang chạy. Mũi tên chỉ chiều dữ liệu. Khi khởi động nguội trên Android, link vào qua <code>defaultRouteName</code> và đi tiếp từ khâu parser.</figcaption>
 </figure>
 
-Khi app **chưa chạy** thì hai nền tảng khác nhau. Trên Android, engine đặt URI làm `defaultRouteName`; nếu khác `/` thì `GoRouter` dùng nó thay `initialLocation`. Trên iOS, tài liệu Flutter ghi app mở ở `/` rồi nhận link ngay sau đó; mã engine chỉ chờ khung hình đầu tối đa 3 giây, nên màn hình đầu phải lên hình nhanh (thêm một lý do để trang chủ không chờ kho phiên). Mọi đường vào đều đi qua parser và `redirect`. Ta tận dụng điều đó: go_router khớp theo `uri.path`, nhưng `state.uri` trong `redirect` cấp router vẫn giữ nguyên scheme và host, nên ta đổi link về đường dẫn nội bộ ngay tại đó.
+Khi app **chưa chạy** thì hai nền tảng xử lý khác nhau. Trên Android, engine đặt URI làm `defaultRouteName`; nếu khác `/` thì `GoRouter` dùng nó thay `initialLocation`. Trên iOS, tài liệu Flutter ghi app mở ở `/` rồi nhận link ngay sau đó; mã engine chỉ chờ khung hình đầu tối đa 3 giây, nên màn hình đầu phải lên hình nhanh (thêm một lý do để trang chủ không chờ đọc phiên từ kho). Mọi đường vào đều đi qua parser và `redirect`. Ta tận dụng điều đó: go_router khớp theo `uri.path`, nhưng `state.uri` trong `redirect` cấp router vẫn giữ nguyên scheme và host, nên ta đổi link về đường dẫn nội bộ ngay tại đó.
 
 ### deep_links.dart · 23-go-router/lib/deep_links.dart (trích)
 
@@ -355,9 +355,9 @@ Test `native_config_test.dart` đọc từng file bằng `dart:io` và gói `xml
 
 ## 6. Link hỏng và mã không tồn tại
 
-Có hai loại "không có gì để hiện". Loại một là đường dẫn không khớp route nào (`/khong-co-trang-nay`, `toinoi://trip` thiếu mã, `https://toinoi.example/pricing`). Router tạo `GoException` và gọi `onException`; callback này **thay** `errorBuilder` và `errorPageBuilder`, truyền từ hai cái trở lên sẽ vi phạm `assert` trong constructor. Ta đưa khách tới `/not-found?uri=...` để màn hình hiện lại link đã nhận kèm nút "Về trang chủ".
+Có hai loại "không có gì để hiện". Loại thứ nhất là đường dẫn không khớp route nào (`/khong-co-trang-nay`, `toinoi://trip` thiếu mã, `https://toinoi.example/pricing`). Router tạo `GoException` và gọi `onException`; callback này **thay** `errorBuilder` và `errorPageBuilder`, truyền từ hai cái trở lên sẽ vi phạm `assert` trong constructor. Ta đưa khách tới `/not-found?uri=...` để màn hình hiện lại link đã nhận kèm nút "Về trang chủ".
 
-Loại hai là route khớp nhưng dữ liệu không có: `/trip/T-9999`. Với router đây là điều hướng thành công; chính `TripScreen` xử lý `TripNotFound`:
+Loại thứ hai là route khớp nhưng không có dữ liệu: `/trip/T-9999`. Với router đây là điều hướng thành công; chính `TripScreen` xử lý `TripNotFound`:
 
 ### trip_screen.dart · 23-go-router/lib/trip_screen.dart (trích)
 
@@ -418,7 +418,7 @@ Kỳ vọng: `No issues found!` và `All tests passed!` với **90 test**. Đã 
 | `pitfalls_test.dart` (8) | Bốn lỗi đầu của mục trên, mỗi lỗi có bản sai lẫn bản đúng |
 | `native_config_test.dart` (14) | Giá trị trong `native-config/`, nhất quán chéo với `DeepLinks` |
 
-Ta thử phá để chắc test bắt được lỗi: bỏ `DeepLinks.resolve` làm 12 test đỏ, bỏ `refreshListenable` 8 test, luôn đợi `authProvider.future` 9 test, bỏ `safeFrom` 2 test, bỏ `recheckTopPage` 1 test, đổi `android:host` trong manifest mẫu 2 test.
+Ta thử phá để chắc test bắt được lỗi: bỏ `DeepLinks.resolve` làm 12 test đỏ, bỏ `refreshListenable` làm 8 test đỏ, luôn đợi `authProvider.future` làm 9 test đỏ, bỏ `safeFrom` làm 2 test đỏ, bỏ `recheckTopPage` làm 1 test đỏ, đổi `android:host` trong manifest mẫu làm 2 test đỏ.
 
 **Chưa kiểm** (cần thiết bị, tài khoản hoặc tên miền thật): hệ điều hành có thật sự mở app khi bấm link; intent-filter, entitlement, Associated Domains được chấp nhận; xác minh App Link và Universal Link với server thật (`toinoi.example` hư cấu, vân tay và Team ID giả); nút Back hệ thống sau khi mở bằng link; chọn app khi nhiều app cùng nhận một scheme. Việc engine gửi URI đầy đủ chỉ được xác nhận bằng đọc mã nguồn engine 3.47.4 và test mô phỏng thông điệp. README của lab có cách tự thử (`adb shell am start`, `xcrun simctl openurl`). Chưa dùng `onEnter`, restoration state hay `go_router_builder`.
 
