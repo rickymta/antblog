@@ -1,0 +1,6 @@
+{"file":"technical-review-api-contract.md","edits":[
+{"old":"Không phải lựa chọn tốt khi mục tiêu chính","new":"Technical review không phải lựa chọn tốt khi mục tiêu chính","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Technical review tìm phát hiện bằng cách **đọc**.","new":"Technical review tìm ra các phát hiện bằng cách **đọc**.","reason":"'tìm phát hiện' thiếu động từ bổ nghĩa, gượng","severity":"medium"},
+{"old":"reviewer nên kiểm nhanh phát hiện có đúng không.","new":"reviewer nên kiểm nhanh xem phát hiện có đúng không.","reason":"Câu thiếu từ nối, khó đọc","severity":"low"},
+{"old":"d) Để chạy toàn bộ test hồi quy trước buổi họp.","new":"d) Để chạy toàn bộ regression test trước buổi họp.","reason":"Giữ 'regression test' như thuật ngữ quen dùng, khớp bảng thuật ngữ","severity":"medium"}
+]}

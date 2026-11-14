@@ -1,0 +1,9 @@
+{"file":"vi-sao-can-kiem-thu.md","edits":[
+{"old":"là nguồn sự thật của đơn:","new":"là nguồn dữ liệu gốc của đơn:","reason":"'nguồn sự thật' là calque; theo bảng thuật ngữ","severity":"medium"},
+{"old":"Kiểm độ nhạy — đổi một tham số","new":"Phân tích độ nhạy: đổi một tham số","reason":"'Kiểm độ nhạy' cụt, nên dùng 'phân tích độ nhạy'","severity":"medium"},
+{"old":"có thể kiểm ngay ở các series sau","new":"có thể kiểm tra ngay ở các series sau","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"bằng chứng đã kiểm các yêu cầu này","new":"bằng chứng đã kiểm tra các yêu cầu này","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"khi thông tin nó tạo ra được dùng","new":"khi thông tin do kiểm thử tạo ra được sử dụng","reason":"'nó' chỉ sự vật trừu tượng, câu gượng","severity":"low"},
+{"old":"**Chi phí của việc không có lỗi cũng cần tính.**","new":"**Chi phí của việc kiểm thử thừa cũng cần tính.**","reason":"Tiêu đề ý không khớp đoạn sau (nói về kiểm thử quá mức)","severity":"medium"},
+{"old":"không có test hồi quy thì mỗi lần","new":"không có regression test thì mỗi lần","reason":"Giữ nguyên 'regression test' theo bảng thuật ngữ","severity":"medium"}
+]}

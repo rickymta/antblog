@@ -1,0 +1,9 @@
+{"file":"combinatorial-testing.md","edits":[
+{"old":"lỗi cần **ba** tham số cùng đúng thì pairwise","new":"lỗi cần **ba** tham số cùng mang giá trị gây lỗi thì pairwise","reason":"'cùng đúng' mơ hồ, khó hiểu","severity":"medium"},
+{"old":"vì biết hay lỗi đều làm số test","new":"vì biết hay gây lỗi đều làm số test","reason":"Thiếu động từ 'gây'","severity":"medium"},
+{"old":"phần lớn failure do một giá trị hoặc ít tham số tương tác (Cohen","new":"phần lớn failure do một giá trị hoặc do tương tác giữa ít tham số gây ra (Cohen","reason":"Câu thiếu động từ, trật tự kiểu tiếng Anh","severity":"medium"},
+{"old":"Viết C3 buộc phải hỏi","new":"Viết C3 buộc ta phải hỏi","reason":"Câu thiếu chủ thể","severity":"low"},
+{"old":"Đây là loại defect múi giờ rất thật mà","new":"Đây là loại defect múi giờ rất thực tế mà","reason":"'rất thật' là calque","severity":"medium"},
+{"old":"Trộn giá trị lỗi tốn hơn mà kém hơn.","new":"Trộn giá trị lỗi vừa tốn hơn vừa kém hiệu quả hơn.","reason":"Câu cụt, 'kém hơn' không rõ kém gì","severity":"medium"},
+{"old":"Syllabus nhắc tổ hợp «biết là hay lỗi».","new":"Syllabus nhắc tổ hợp «đã biết hay gây lỗi».","reason":"Thiếu động từ, thống nhất với mục 2","severity":"medium"}
+]}

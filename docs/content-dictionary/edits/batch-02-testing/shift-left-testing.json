@@ -1,0 +1,9 @@
+{"file":"shift-left-testing.md","edits":[
+{"old":"Vấn đề nó giải quyết:","new":"Vấn đề shift left giải quyết:","reason":"Tránh 'nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"Dùng được trong mọi mô hình — Waterfall","new":"Shift left dùng được trong mọi mô hình — Waterfall","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"vì nó nối refinement với test:","new":"vì ATDD nối refinement với test:","reason":"Tránh 'nó' chỉ khái niệm; chủ ngữ rõ","severity":"medium"},
+{"old":"Theo CTFL 4.5.3, ca dương tính trước (AC-1, AC-7), rồi tới ca âm và ca biên","new":"Theo CTFL 4.5.3, test case dương tính đi trước (AC-1, AC-7), rồi tới test case âm tính và test case biên","reason":"Thống nhất 'test case'; 'ca âm' cụt","severity":"medium"},
+{"old":"thành 7 ca vitest + supertest (AC-5 và AC-6 chung một ca vì","new":"thành 7 test case vitest + supertest (AC-5 và AC-6 chung một test case vì","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"(Tên ca dài được lược bằng «…»; bốn ca của tệp thứ hai ở mục 5.4.)","new":"(Tên test case dài được lược bằng «…»; bốn test case của tệp thứ hai ở mục 5.4.)","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"**120 lần** cho riêng ca này","new":"**120 lần** cho riêng trường hợp này","reason":"'ca' đơn lẻ dễ nhầm với test case","severity":"low"}
+]}

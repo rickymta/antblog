@@ -1,0 +1,20 @@
+{"file":"loop-testing.md","edits":[
+{"old":"kiểm vòng cộng tiền món và vòng thử lại thanh toán của Tới Nơi","new":"kiểm thử vòng cộng tiền món và vòng thử lại thanh toán của Tới Nơi","reason":"'kiểm vòng' cụt, thiếu 'thử'; tiêu đề cần đầy đủ","severity":"medium"},
+{"old":"21 món có ai kiểm chưa?","new":"21 món đã có ai kiểm thử chưa?","reason":"'kiểm' cụt, thiếu 'thử'","severity":"medium"},
+{"old":"Kết quả chạy có một defect mà mọi test","new":"Kết quả chạy lộ ra một defect mà mọi test","reason":"'có một defect' gượng","severity":"low"},
+{"old":"đề nghị viết lại code.","new":"nên viết lại code.","reason":"'đề nghị' là calque của recommend","severity":"medium"},
+{"old":"nó có thể sai cùng kiểu với code được kiểm.","new":"oracle đó có thể sai cùng kiểu với code đang kiểm.","reason":"Tránh 'nó' chỉ sự vật; bỏ bị động","severity":"medium"},
+{"old":"Kết hợp hai thứ cho ra câu hỏi:","new":"Kết hợp hai kỹ thuật sẽ đặt ra câu hỏi:","reason":"'hai thứ cho ra câu hỏi' là giọng dịch máy","severity":"medium"},
+{"old":"Bộ giá trị Beizer dịch sang:","new":"Bộ giá trị Beizer áp vào vòng này như sau:","reason":"'dịch sang' không rõ nghĩa","severity":"medium"},
+{"old":"Ca 0 lần lặp lộ một cấu hình không được kiểm:","new":"Test case 0 lần lặp lộ một cấu hình chưa được kiểm:","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Kiểm đủ tổ hợp là 4 × 4 = 16 ca. Chiến lược Beizer cho 7 ca (Hình 2).","new":"Kiểm đủ tổ hợp cần 4 × 4 = 16 test case. Chiến lược Beizer cho ra 7 test case (Hình 2).","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"4 + 4 − 1 = 7 ca thay vì 16","new":"4 + 4 − 1 = 7 test case thay vì 16","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Thêm hai ca âm: đổi giá trị","new":"Thêm hai test case âm: đổi giá trị","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Ca biên của biến cộng dồn (","new":"Test case biên của biến cộng dồn (","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Bật failure thật của ca biên:","new":"Bật failure thật của test case biên:","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"ca 0 lần lặp chỉ lộ qua function coverage","new":"test case 0 lần lặp chỉ lộ qua function coverage","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"sẽ cho max+1 đi qua;","new":"sẽ để max+1 lọt qua;","reason":"'cho đi qua' gượng","severity":"low"},
+{"old":"Thiết kế các ca loop testing cho","new":"Thiết kế các test case loop testing cho","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Bộ test hiện có một ca với 3 dòng món","new":"Bộ test hiện có một test case với 3 dòng món","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Ca test nào thể hiện đúng tinh thần","new":"Test case nào thể hiện đúng tinh thần","reason":"'Ca test' là cụm tự ghép","severity":"medium"}
+]}

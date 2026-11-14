@@ -43,11 +43,11 @@ Dùng khi component có **logic**: công thức cước, máy trạng thái chuy
 
 ### 2.1. Định nghĩa
 
-CTFL v4.0.1 (mục 2.2.1) mô tả component testing — **còn gọi là unit testing** — là level tập trung **kiểm các component một cách tách riêng**. Nó thường cần hỗ trợ đặc thù như **test harness** hoặc **unit test framework**, và **thường do developer thực hiện trong môi trường phát triển của họ**.
+CTFL v4.0.1 (mục 2.2.1) mô tả component testing — **còn gọi là unit testing** — là level tập trung **kiểm các component một cách tách riêng**. Test level này thường cần hỗ trợ đặc thù như **test harness** hoặc **unit test framework**, và **thường do developer thực hiện trong môi trường phát triển của họ**.
 
 Ba chữ cần đọc kỹ:
 
-- **«Tách riêng» (in isolation):** component được kiểm mà không cần phần còn lại của hệ thống. Không có nghĩa là thay mọi thứ bằng đồ giả — xem 2.3.
+- **«Tách riêng» (in isolation):** component được kiểm mà không cần phần còn lại của hệ thống. Điều này không có nghĩa là thay mọi thứ bằng đồ giả — xem 2.3.
 - **«Thường» do developer:** không phải luật. Tester vẫn góp test condition, dữ liệu biên, review bộ test.
 - **«Component»:** theo ISTQB Glossary, là một phần của hệ thống có thể kiểm riêng. Kích cỡ do ngữ cảnh quyết định: một hàm, một class, một module.
 
@@ -145,7 +145,7 @@ Bảng này là kết quả quan trọng của tư duy test level: **không ph�
 | `priceRequest` trong `pricing.ts` | Không gì | Thêm bưu kiện, đồ ăn; rộng hơn đề bài |
 | `priceQuote` trong `quote.ts` | Đồng hồ, thời tiết, kho voucher, kho chuyến (`ports.ts`) | Ranh giới với component integration: ghép domain với các cổng |
 
-Không có đáp án «đúng duy nhất». Điều cần là **ghi rõ** test object và lý do, để không ai tưởng test `calculateFare` đã kiểm luôn giờ cao điểm.
+Không có đáp án «đúng duy nhất». Điều cần làm là **ghi rõ** test object và lý do, để không ai tưởng test `calculateFare` đã kiểm luôn giờ cao điểm.
 
 ### 4.2. Phụ thuộc và cách cô lập
 
@@ -257,7 +257,7 @@ Kỹ thuật biến các condition này thành test case (EP, BVA, decision tabl
 | D9 | bike, 2 km, cao điểm, phụ phí bưu kiện 2.000 | (12.000 + 9.000 + 2.000) × 1,25 = 28.750 | 29.000 đ |
 | D10 | car, 100,04 / 100,05 km | ⇒ 100,0 km: 1.125.000 / ⇒ 100,1 km | 1.125.000 đ / lỗi |
 
-**Quan sát: vì sao component test rẻ.** Lab có sẵn ba tệp test khói ở `tests/smoke/` (không phải code của bài này), mỗi tệp ở một tầng. Chạy từng tệp:
+**Quan sát: vì sao component test rẻ.** Lab có sẵn ba tệp smoke test ở `tests/smoke/` (không phải code của bài này), mỗi tệp ở một tầng. Chạy từng tệp:
 
 ```bash
 cd examples/toi-noi-testing
@@ -294,7 +294,7 @@ Số đo của một lần chạy trên máy viết bài (Windows 11, Node 22.18
 <p><b>Test object:</b> ba hàm export và các hằng <code>MAX_PARCEL_KG</code>, <code>BIKE_MAX_KG</code>, <code>FREE_KG</code>. <b>Test basis:</b> R-PARCEL-01 (làm tròn 0,1 kg, 0 &lt; w ≤ 30), R-PARCEL-02 (&gt; 20 kg phải ô tô), R-PARCEL-03 (2.000 đ mỗi kg bắt đầu vượt 5 kg). R-PARCEL-04 (phụ phí bị nhân hệ số) thuộc <code>calculateFare</code>, không thuộc tệp này. <b>Dữ liệu:</b> 0,04 / 0,05 / 30,04 / 30,05 kg; 20,0 kg với <code>bike</code> (được) và 20,1 kg với <code>bike</code> (lỗi <code>VEHICLE_TOO_SMALL</code>); 5 / 5,1 / 6,0 / 6,1 / 30 kg ⇒ 0 / 2.000 / 2.000 / 4.000 / 50.000 đ. <b>Cô lập:</b> không phụ thuộc nào cần thay. <b>Rủi ro đáng chú ý:</b> 6,1 − 5 trong dấu phẩy động — code tính trên số phần mười kg để tránh.</p>
 </details>
 
-**Bài 2.** `customerCancellationFee` trong `src/domain/cancel.ts` phụ thuộc thời gian («đúng 2 phút sau khi nhận»). Nó cô lập phụ thuộc này thế nào? Nếu hàm tự gọi `Date.now()`, việc kiểm ở level component khó hơn ra sao?
+**Bài 2.** `customerCancellationFee` trong `src/domain/cancel.ts` phụ thuộc thời gian («đúng 2 phút sau khi nhận»). Hàm này cô lập phụ thuộc đó thế nào? Nếu hàm tự gọi `Date.now()`, việc kiểm ở level component khó hơn ra sao?
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
@@ -372,7 +372,7 @@ Số đo của một lần chạy trên máy viết bài (Windows 11, Node 22.18
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>c) đúng.</b> «Component» trong cộng đồng microservices thường là cả service; ISTQB nhấn vào kiểm tách riêng. a) bỏ qua khác biệt. b) acceptance nhằm validation nhu cầu người dùng. d) database riêng của service là một phần của hệ thống Tới Nơi, không phải hệ bên ngoài.</p>
+<p><b>c) đúng.</b> «Component» trong cộng đồng microservices thường là cả service; ISTQB nhấn mạnh việc kiểm tách riêng. a) bỏ qua khác biệt. b) acceptance nhằm validation nhu cầu người dùng. d) database riêng của service là một phần của hệ thống Tới Nơi, không phải hệ bên ngoài.</p>
 </details>
 
 ## 8. Tài liệu tham khảo

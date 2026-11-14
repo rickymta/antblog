@@ -109,7 +109,7 @@ Gần như mọi work product đều kiểm tĩnh được. Syllabus liệt kê 
 | Phát hiện defect ở những pha sớm nhất của SDLC — đúng nguyên lý kiểm thử sớm | Sửa một câu trong bản nháp đặc tả thay vì sửa code, test, dữ liệu báo giá đã lưu |
 | Tìm được defect mà dynamic testing không tìm được: mã không bao giờ chạy tới, mẫu thiết kế không được cài đúng ý, defect trong work product không thực thi được | Một ví dụ tính sai trong đặc tả — không test nào «chạy» được một đoạn văn |
 | Đánh giá chất lượng và tạo niềm tin vào work product | Đặc tả cước được review xong mới được gắn `pricingVersion` mới |
-| Qua việc kiểm yêu cầu, stakeholder chắc chắn yêu cầu mô tả đúng nhu cầu thật (validation) | Hỏi đội vận hành tài xế: phụ phí trời mưa có nên bị nhân cao điểm không? |
+| Qua việc kiểm tra yêu cầu, stakeholder bảo đảm được yêu cầu mô tả đúng nhu cầu thật (validation) | Hỏi đội vận hành tài xế: phụ phí trời mưa có nên bị nhân cao điểm không? |
 | Tạo hiểu biết chung, cải thiện giao tiếp giữa các bên — nên mời nhiều loại stakeholder | BA, developer Pricing, tester, CSKH cùng hiểu một công thức |
 | Review tốn chi phí, nhưng tổng chi phí dự án thường thấp hơn vì sửa defect muộn tốn công hơn | Xem ước tính ở mục 3 |
 | Static analysis tìm một số loại defect mã hiệu quả hơn dynamic testing ⇒ ít defect hơn, tổng công phát triển thấp hơn | ESLint chặn biến dùng trước khi gán ngay trong CI |
@@ -272,7 +272,7 @@ Nhật ký mẫu ghi **12 defect** và một **câu hỏi đã đóng** («vouch
 
 **Phát hiện ≠ defect.** Một dòng trong nhật ký là anomaly cho tới khi được phân tích. Gán vội mọi câu hỏi là defect làm tác giả phòng thủ và làm số liệu defect sai lệch.
 
-**Static analysis cho tài liệu.** Văn tự do khó phân tích bằng công cụ. Khi đặc tả có cấu trúc — mỗi quy tắc một mã `R-…`, có bảng, có ví dụ — một script nhỏ đã kiểm được «mã nào bị trùng», «quy tắc nào chưa có ví dụ».
+**Static analysis cho tài liệu.** Văn bản tự do khó phân tích bằng công cụ. Khi đặc tả có cấu trúc — mỗi quy tắc một mã `R-…`, có bảng, có ví dụ — một script nhỏ đã kiểm được «mã nào bị trùng», «quy tắc nào chưa có ví dụ».
 
 **Giới hạn.** Static testing không cho biết hệ thống chạy ra sao: không đo được độ trễ p95 của Quote API, không thấy được lỗi làm tròn số thực chỉ lộ ở một vài giá trị. Hai cách bổ trợ nhau — chủ đề của [TEST-022](/articles/static-testing-va-dynamic-testing).
 

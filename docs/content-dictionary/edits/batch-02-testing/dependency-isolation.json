@@ -1,0 +1,18 @@
+{"file":"dependency-isolation.md","edits":[
+{"old":"Dependency isolation là kiểm phần hành vi quan tâm trong khi kiểm soát những cộng tác viên có thể","new":"Dependency isolation là cách kiểm phần hành vi cần quan tâm trong khi kiểm soát những thành phần cộng tác có thể","reason":"'cộng tác viên' là calque của 'collaborator'; câu thiếu 'cần'","severity":"medium"},
+{"old":"cho phép thay một cộng tác viên mà không sửa","new":"cho phép thay một thành phần cộng tác mà không sửa","reason":"Thống nhất cách gọi 'collaborator', tránh 'cộng tác viên'","severity":"medium"},
+{"old":"Mỗi ca tạo fixture riêng","new":"Mỗi test case tạo fixture riêng","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Ca thời tiết thành công kiểm tham số port là thành phố","new":"Test case thời tiết thành công kiểm các tham số của port: thành phố","reason":"Câu cụt, thiếu quan hệ từ; thống nhất 'test case'","severity":"medium"},
+{"old":"Ca thời tiết lỗi kiểm code hiện tại","new":"Test case thời tiết lỗi kiểm rằng code hiện tại","reason":"Thống nhất 'test case', câu đủ thành phần","severity":"medium"},
+{"old":"Nó chứng minh điều kiện xử lý khi bộ quét chạy","new":"Test này chứng minh điều kiện xử lý khi bộ quét chạy","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"Ca thứ hai cấu hình","new":"Test case thứ hai cấu hình","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"có **17 ca**: 15 ca clock/weather và 2 ca scheduler.","new":"có **17 test case**: 15 test case clock/weather và 2 test case scheduler.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"cả 17 ca đạt khi chạy","new":"cả 17 test case đạt khi chạy","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Nó không tự huỷ request tới nhà cung cấp.","new":"Hàm này không tự huỷ request tới nhà cung cấp.","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"Nó không kiểm clock skew giữa máy","new":"Cách này không kiểm clock skew giữa máy","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"Ca accepted không bị bộ quét huỷ là ca tuần tự;","new":"Test case accepted không bị bộ quét huỷ là test case tuần tự;","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"sẽ vô hiệu mục tiêu kiểm giờ Việt Nam","new":"sẽ làm mất tác dụng của mục tiêu kiểm giờ Việt Nam","reason":"'vô hiệu mục tiêu' gượng","severity":"low"},
+{"old":"1. Thêm ca báo giá lúc 10:59:59","new":"1. Thêm test case báo giá lúc 10:59:59","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"3. Thêm ca kiểm thời tiết lỗi mà chỉ assert “promise rejects”. Nó còn bỏ sót","new":"3. Thêm test case kiểm thời tiết lỗi mà chỉ assert “promise rejects”. Test case đó còn bỏ sót","reason":"Thống nhất 'test case', tránh 'Nó'","severity":"low"},
+{"old":"**Câu 2.** Ca mất phản hồi dùng fake đạt.","new":"**Câu 2.** Test case mất phản hồi dùng fake đạt.","reason":"Thống nhất 'test case'","severity":"low"}
+]}

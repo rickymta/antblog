@@ -1,0 +1,11 @@
+{"file":"component-integration-testing.md","edits":[
+{"old":"kiểm chỗ các component ghép với nhau","new":"kiểm thử chỗ các component ghép với nhau","reason":"'kiểm' cụt, thiếu 'thử' ở tiêu đề","severity":"medium"},
+{"old":"và nhấn mạnh nó **phụ thuộc nhiều vào chiến lược tích hợp**","new":"và nhấn mạnh rằng test level này **phụ thuộc nhiều vào chiến lược tích hợp**","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Nếu một ca test chỉ chạy đúng một hàm","new":"Nếu một test case chỉ chạy đúng một hàm","reason":"'ca test' là cụm tự ghép; dùng 'test case'","severity":"medium"},
+{"old":"Ca integration tốt chọn dữ liệu sao cho","new":"Test case integration tốt chọn dữ liệu sao cho","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Phải chọn ca ngay biên `minAmount` của HN10","new":"Phải chọn test case ngay biên `minAmount` của HN10","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"chứng minh ca integration bắt được.","new":"chứng minh test case integration bắt được.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Ví dụ D1, một lần «tái cấu trúc» chuyển","new":"Ví dụ D1, một lần «refactor» chuyển","reason":"Giữ thuật ngữ refactor quen dùng","severity":"low"},
+{"old":"mock trả sẵn 52.000 đ là D1, D2 biến mất.","new":"mock trả sẵn 52.000 đ thì D1, D2 biến mất.","reason":"Câu thiếu quan hệ từ","severity":"medium"},
+{"old":"**Câu 4 (K2).** Ca integration nào phù hợp NHẤT","new":"**Câu 4 (K2).** Test case integration nào phù hợp NHẤT","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

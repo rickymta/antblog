@@ -1,0 +1,89 @@
+{
+"file": "crud-testing.md",
+"edits": [
+{
+"old": "được **đọc** bởi khách, bởi tài xế và bởi danh sách chuyến chờ, được **sửa** bởi tài xế, khách và một job của hệ thống.",
+"new": "rồi khách, tài xế và danh sách chuyến chờ **đọc** nó, còn tài xế, khách và một job của hệ thống thì **sửa** nó.",
+"reason": "Câu bị động 'được … bởi …' kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "(62 ca vitest, supertest + PGlite)",
+"new": "(62 test case vitest, supertest + PGlite)",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "Vấn đề kỹ thuật này giải quyết:",
+"new": "Các vấn đề mà kỹ thuật này giải quyết:",
+"reason": "Calque, thiếu quan hệ từ",
+"severity": "medium"
+},
+{
+"old": "theo thứ test condition mô hình hoá",
+"new": "theo đối tượng mà test condition mô hình hoá",
+"reason": "'thứ' gượng, thiếu quan hệ từ",
+"severity": "medium"
+},
+{
+"old": "để thiết kế ca consistency.",
+"new": "để thiết kế test case consistency.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Nó nhắm tới ba nhóm defect",
+"new": "Kỹ thuật này nhắm tới ba nhóm defect",
+"reason": "Tránh 'Nó' chỉ sự vật trừu tượng",
+"severity": "medium"
+},
+{
+"old": "permission matrix); nó chỉ nêu access control defect",
+"new": "permission matrix); syllabus chỉ nêu access control defect",
+"reason": "Tránh 'nó', nêu rõ chủ thể",
+"severity": "low"
+},
+{
+"old": "Booking/Order là nguồn sự thật của booking",
+"new": "Booking/Order là nguồn dữ liệu gốc của booking",
+"reason": "'nguồn sự thật' là calque; dùng theo bảng thuật ngữ",
+"severity": "medium"
+},
+{
+"old": "Để đo CRUD coverage không thể chỉ",
+"new": "Để đo CRUD coverage thì không thể chỉ",
+"reason": "Câu thiếu quan hệ từ, đọc cụt",
+"severity": "low"
+},
+{
+"old": "### 5.2. Ca consistency L1 (rút gọn)",
+"new": "### 5.2. Test case consistency L1 (rút gọn)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "(ca L6)",
+"new": "(test case L6)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Đúng loại «read ngầm» syllabus cảnh báo",
+"new": "Đây đúng là loại «read ngầm» mà syllabus cảnh báo",
+"reason": "Câu thiếu chủ ngữ và quan hệ từ",
+"severity": "medium"
+},
+{
+"old": "Nêu ba ca consistency.",
+"new": "Nêu ba test case consistency.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "**Câu 5 (K2).** Ca nào áp dụng",
+"new": "**Câu 5 (K2).** Test case nào áp dụng",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+}
+]
+}

@@ -34,7 +34,7 @@ Ngày mai Tới Nơi phát hành bản `rc-2026.11.2`. Bộ test tự động đ
 Kỹ thuật giải quyết khoảng giữa hai thái cực: test case viết sẵn từng bước (chắc chắn, nhưng tốn công viết và bảo trì) và khám phá tự do (nhanh, nhưng mỗi người một kiểu, dễ bỏ sót cái quan trọng). Dùng khi:
 
 - Không có (hoặc không kịp có) test case chi tiết, nhưng cần **độ nhất quán** giữa các lần chạy và giữa các tester.
-- Có một tập ý **lặp lại** mỗi lần phát hành: smoke trước release, kiểm sau khi deploy, kiểm một màn hình mới.
+- Có một tập ý **lặp lại** mỗi lần phát hành: smoke trước release, kiểm thử sau khi deploy, kiểm thử một màn hình mới.
 - Muốn đóng gói **kinh nghiệm** — lỗi từng gặp, điều khách hay phàn nàn — thành thứ người mới dùng được.
 
 <div class="tkh-callout tkh-callout--warn">
@@ -86,7 +86,7 @@ Và một câu đáng thuộc: checklist **không bao giờ hoàn tất** — lu
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB — «smoke» trong bài</span>
-<p>CTFL v4.0.1 chỉ nhắc smoke test như ví dụ tiêu chí vào (5.1.3) và đặt nó ở góc phần tư Q4, «thường được tự động hoá» (5.1.7). Trong bài, <b>smoke</b> theo nghĩa thông dụng của ngành: một lượt kiểm nhanh, nông nhưng rộng các luồng sống còn, để quyết định bản build có đáng kiểm thử chuyên sâu hay phát hành tiếp không. Hai cụm từ read-do / do-confirm vốn từ ngành hàng không và y tế, được Gawande (2009) phổ biến; CTAL-TA dùng lại cho kiểm thử.</p>
+<p>CTFL v4.0.1 chỉ nhắc smoke test như ví dụ tiêu chí vào (5.1.3) và đặt nó ở góc phần tư Q4, «thường được tự động hoá» (5.1.7). Trong bài, <b>smoke</b> được hiểu theo nghĩa thông dụng của ngành: một lượt kiểm thử nhanh, nông nhưng rộng các luồng sống còn, để quyết định bản build có đáng kiểm thử chuyên sâu hay phát hành tiếp không. Hai cụm từ read-do / do-confirm vốn xuất phát từ ngành hàng không và y tế, được Gawande (2009) phổ biến; CTAL-TA dùng lại cho kiểm thử.</p>
 </div>
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
@@ -167,7 +167,7 @@ Giá trị mong đợi của mục read-do tính trước từ SPEC (09:00, khô
 <figcaption><b>Hình 1 · Từ nguồn ý tưởng tới checklist smoke.</b> Bộ lọc là ba loại mục mà CTFL 4.4.3 khuyên không đưa vào checklist. Đường đứt nét: checklist không bao giờ «xong» — mỗi phiên trả phát hiện về nguồn để ra phiên bản sau (CTAL-TA 3.4.2).</figcaption>
 </figure>
 
-Năm ứng viên bị loại khi soạn: «máy chủ chạy, dữ liệu mẫu đã nạp?» (**tiêu chí vào**), «≥ 95% ca test đạt?» (**tiêu chí ra**), «axe-core không báo vi phạm?» (**máy kiểm được** — để cho test tự động, [TEST-091](/articles/accessibility-testing)), «mọi quy tắc R-FARE đúng?» và «ứng dụng dễ dùng?» (**quá chung** — cái đầu để cho unit test Pricing ở Series 06, cái sau tách thành SM-17…SM-20).
+Năm ứng viên bị loại khi soạn: «máy chủ chạy, dữ liệu mẫu đã nạp?» (**tiêu chí vào**), «≥ 95% test case đạt?» (**tiêu chí ra**), «axe-core không báo vi phạm?» (**máy kiểm được** — để cho test tự động, [TEST-091](/articles/accessibility-testing)), «mọi quy tắc R-FARE đúng?» và «ứng dụng dễ dùng?» (**quá chung** — cái đầu để cho unit test Pricing ở Series 06, cái sau tách thành SM-17…SM-20).
 
 ### 4.3. Bước 3 — viết, nhóm, xếp ưu tiên
 
@@ -210,7 +210,7 @@ Mọi tệp ở `examples/toi-noi-testing/articles/checklist-based-testing/` ([l
 | SM-19 | Tiền, quãng đường hiện kiểu Việt Nam («52.000 đ», «7,4 km»)? | do-confirm | P2 |
 | SM-20 | Chỉ dùng bàn phím (Tab, Enter) báo giá và đặt được chuyến? | do-confirm | P3 |
 
-SM-18 không tự nghĩ ra: nó đến từ cụm defect «giờ VN/UTC» trong lịch sử lỗi của Tới Nơi — cách tìm cụm đó ở bài sau, [TEST-054](/articles/defect-based-testing). SM-17 đến từ phát hiện của [TEST-014](/articles/system-testing).
+SM-18 không tự nghĩ ra: mục này đến từ cụm defect «giờ VN/UTC» trong lịch sử lỗi của Tới Nơi — cách tìm cụm đó ở bài sau, [TEST-054](/articles/defect-based-testing). SM-17 đến từ phát hiện của [TEST-014](/articles/system-testing).
 
 ### 5.2. Chạy phiên — người kiểm thử có ghi chép
 
@@ -266,7 +266,7 @@ SM-18 [judge] hạn báo giá: máy giờ VN «09:05:02», máy giờ Tokyo «11
 
 | Thay đổi | Mục | Lý do |
 |---|---|---|
-| **Chuyển ra test tự động** | SM-01…04, 06, 08…10, 13…15 (11 mục) | Spec đã khẳng định cứng chúng ⇒ đúng loại «máy kiểm được» mà CTFL khuyên không để trong checklist. Smoke tự động chạy ở pipeline; checklist người không lặp lại |
+| **Chuyển ra test tự động** | SM-01…04, 06, 08…10, 13…15 (11 mục) | Spec đã khẳng định cứng chúng ⇒ đúng loại «máy kiểm được» mà CTFL khuyên không để trong checklist. Smoke tự động chạy ở pipeline; checklist dành cho người không lặp lại các mục này |
 | **Gộp, viết lại** | SM-17 + O-1 ⇒ «Mọi chữ hiện cho người dùng (lỗi, danh sách, nhãn) là tiếng Việt, không lộ mã kỹ thuật?» | Phát hiện ngoài checklist cho thấy mục cũ hẹp |
 | **Thêm** | SM-21 «Khách thấy chuyến đã được thu tiền chưa (F-1)?»; SM-22 «Tài xế được báo khi chuyến bị huỷ (F-2)?» | Giữ tới khi defect đóng; sau đó xem lại có còn đáng giữ |
 | **Giữ** | SM-05 → SM-21, SM-07, 11, 12, 16 → SM-22, 18, 19, 20 | Cần phán đoán của người |
@@ -307,7 +307,7 @@ Mục nào nên giữ trong checklist smoke, mục nào chuyển đi đâu? (a) 
 
 ### Bài tập 3 — Mục mới từ defect (K3)
 
-Production báo: «khách huỷ đúng lúc 2 phút 0 giây sau khi tài xế nhận, không bị thu phí». Viết mục checklist cho v1.2 và nói nó thuộc read-do hay do-confirm.
+Production báo: «khách huỷ đúng lúc 2 phút 0 giây sau khi tài xế nhận, không bị thu phí». Viết mục checklist cho v1.2 và cho biết mục đó thuộc read-do hay do-confirm.
 
 <details><summary><b>Lời giải mẫu</b></summary><p>«Nhận chuyến, dời đồng hồ đúng 2 phút 0 giây, khách huỷ: «Phí huỷ: 10.000 đ»?» — read-do, P1, nguồn R-CANCEL-02 (đúng 2 phút tính là có phí) + defect production. Vì giá trị mong đợi rõ và máy kiểm được, mục này nên ở checklist <b>tạm thời</b>, rồi chuyển thành test tự động ở mức component (phí huỷ, Series 06) — chạy mãi mãi, rẻ hơn mắt người.</p></details>
 

@@ -1,0 +1,8 @@
+{"file":"system-testing.md","edits":[
+{"old":"Dùng khi đã có một bản hệ thống chạy được","new":"Test level này dùng khi đã có một bản hệ thống chạy được","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"không thể kiểm ở cấp thấp hơn: nó cần trình duyệt thật","new":"không thể kiểm ở cấp thấp hơn vì cần trình duyệt thật","reason":"Tránh 'nó' chỉ sự vật; viết lại cho gọn","severity":"low"},
+{"old":"**Số đo lan truyền không chứng minh R-NFR-04.**","new":"**Số đo độ trễ lan truyền không chứng minh R-NFR-04.**","reason":"'Số đo lan truyền' cụt, thiếu danh từ chính","severity":"medium"},
+{"old":"chỉ bắt được hồi quy thô (vd ai đó đổi","new":"chỉ bắt được regression thô (ví dụ ai đó đổi","reason":"Giữ 'regression' như thuật ngữ quen dùng; viết đầy đủ 'ví dụ'","severity":"medium"},
+{"old":"Lần chạy thứ hai cho 1.861–2.436 ms.","new":"Lần chạy thứ hai cho kết quả 1.861–2.436 ms.","reason":"Câu thiếu danh từ","severity":"low"},
+{"old":"**Câu 4 (K2).** Ca nào phù hợp NHẤT","new":"**Câu 4 (K2).** Test case nào phù hợp NHẤT","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

@@ -1,0 +1,17 @@
+{"file":"functional-testing.md","edits":[
+{"old":"(20 ca vitest)","new":"(20 test case vitest)","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Một ca test luôn nằm ở một ô của lưới","new":"Một test case luôn nằm ở một ô của lưới","reason":"'ca test' là cụm tự ghép; dùng 'test case'","severity":"medium"},
+{"old":"Nó **không** hỏi «nhanh không»","new":"Functional testing **không** hỏi «nhanh không»","reason":"Tránh 'Nó' chỉ sự vật trừu tượng ở đầu câu","severity":"medium"},
+{"old":"Vấn đề nó giải quyết: không gọi tên được câu hỏi thì đội có hàng trăm ca test «chức năng»","new":"Vấn đề mà khái niệm này giải quyết: nếu không gọi tên được câu hỏi, đội sẽ có hàng trăm test case «chức năng»","reason":"Câu cụt, giọng dịch máy; thống nhất 'test case'","severity":"medium"},
+{"old":"Một ca test vừa functional vừa white-box","new":"Một test case vừa functional vừa white-box","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"CSKH dùng nó để giải thích giá, ứng dụng dùng nó để hiển thị","new":"CSKH dùng báo giá này để giải thích giá, ứng dụng dùng để hiển thị","reason":"Tránh lặp 'nó' chỉ sự vật","severity":"low"},
+{"old":"Vì thế lab chạy **cùng năm ca** ở cả hai level","new":"Vì thế lab chạy **cùng năm test case** ở cả hai level","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"qua API thì (`functional-correctness.test.ts`, rút gọn):","new":"qua API thì viết như sau (`functional-correctness.test.ts`, rút gọn):","reason":"Câu thiếu vị ngữ","severity":"medium"},
+{"old":"20/20 xanh nói rằng,","new":"20/20 test xanh cho thấy,","reason":"Cách nói gượng, thiếu danh từ","severity":"low"},
+{"old":"Nó không chứng minh mọi khối lượng","new":"Kết quả này không chứng minh mọi khối lượng","reason":"Tránh 'Nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Không có ca nào trả lời TCO-07","new":"Không có test case nào trả lời TCO-07","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"**Đếm ca test không đo được completeness.**","new":"**Đếm test case không đo được completeness.**","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"có thể là 3 ca cùng kiểm một trường","new":"có thể là 3 test case cùng kiểm một trường","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"**Câu 4 (K2).** Ca test nào kiểm","new":"**Câu 4 (K2).** Test case nào kiểm","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"thêm ca 5,0 kg. Ca test này thuộc loại nào?","new":"thêm test case 5,0 kg. Test case này thuộc loại nào?","reason":"Thống nhất 'test case'","severity":"low"}
+]}

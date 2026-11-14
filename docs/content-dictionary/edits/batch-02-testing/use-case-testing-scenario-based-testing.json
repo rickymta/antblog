@@ -1,0 +1,13 @@
+{"file":"use-case-testing-scenario-based-testing.md","edits":[
+{"old":"Scenario-based Testing: kiểm trọn luồng khách đặt xe máy\"","new":"Scenario-based Testing: kiểm thử trọn luồng khách đặt xe máy\"","reason":"'kiểm' cụt trong tiêu đề","severity":"medium"},
+{"old":"Bảng quyết định kiểm từng quy tắc, state table kiểm từng cặp","new":"Bảng quyết định kiểm thử từng quy tắc, state table kiểm thử từng cặp","reason":"'kiểm' cụt","severity":"low"},
+{"old":"**cả hành trình** và kiểm những gì hệ thống nhớ","new":"**cả hành trình** và kiểm tra những gì hệ thống nhớ","reason":"'kiểm' cụt","severity":"low"},
+{"old":"- cần kiểm từ góc người dùng ở system testing","new":"- cần kiểm thử từ góc người dùng ở system testing","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"Nhưng nó dùng được ở level khác","new":"Nhưng kỹ thuật này dùng được ở level khác","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"low"},
+{"old":"giao diện đã được kiểm đầu-cuối bằng Playwright","new":"giao diện đã được kiểm thử đầu-cuối bằng Playwright","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"thay vì lặng lẽ bỏ KB-07 khỏi mẫu số","new":"thay vì bỏ KB-07 khỏi mẫu số mà không ghi chú","reason":"'lặng lẽ' là calque kiểu 'silently'","severity":"medium"},
+{"old":"Bài tập 1 có một ca khó hơn:","new":"Bài tập 1 có một trường hợp khó hơn:","reason":"'ca' ở đây là case, dễ lẫn với test case","severity":"medium"},
+{"old":"Kiểm luồng nhiều vai trò của giao đồ ăn","new":"Kiểm thử luồng nhiều vai trò của giao đồ ăn","reason":"'kiểm' cụt","severity":"low"},
+{"old":"đó là kiểm chuyển không hợp lệ của TEST-034","new":"đó là kiểm thử chuyển trạng thái không hợp lệ của TEST-034","reason":"'kiểm chuyển' cụt, thiếu danh từ chính","severity":"medium"},
+{"old":"thuộc kiểm biên/negative, không phải","new":"thuộc kiểm thử biên/negative, không phải","reason":"'kiểm' cụt","severity":"low"}
+]}

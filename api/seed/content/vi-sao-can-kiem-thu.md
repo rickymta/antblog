@@ -126,7 +126,7 @@ Dịch vụ giao bưu kiện (`parcel`) cho khách sửa địa chỉ người n
 
 Theo tài liệu kiến trúc Tới Nơi:
 
-- **Booking/Order Service** là nguồn sự thật của đơn: lưu điểm lấy/điểm giao và **quản lý version để cập nhật cũ không ghi đè cập nhật mới** (§4.4).
+- **Booking/Order Service** là nguồn dữ liệu gốc của đơn: lưu điểm lấy/điểm giao và **quản lý version để cập nhật cũ không ghi đè cập nhật mới** (§4.4).
 - **Trip/Delivery Lifecycle Service** quản lý vòng đời sau khi có tài xế (§4.7) và cung cấp dữ liệu cho Driver App qua Driver BFF.
 - Hai service nối nhau bằng **Kafka** theo kiểu at-least-once + consumer idempotent + transactional outbox/inbox (§1.1, §6.3). Sự kiện của đơn giao hàng đi trên topic `delivery.events.v1`, key `order_id` (§6.4). Tên sự kiện «đổi địa chỉ», ví dụ `DeliveryAddressChanged`, là giả định của bài.
 - Kafka chỉ giữ thứ tự **trong một partition** (§6.5). Bảng rủi ro §14 ghi đúng hai mối nguy của tình huống: **sự kiện trùng** (xử lý bằng dedup/inbox) và **sự kiện đến sai thứ tự** (xử lý bằng aggregate version và kiểm tra chuyển trạng thái).
@@ -254,7 +254,7 @@ Ba điều rút ra, không phụ thuộc vào con số chính xác:
 | 1. Phát hiện defect hiệu quả về chi phí | Một câu hỏi trong buổi review BR-DLV-02, hoặc một test áp v2 rồi v1, rẻ hơn nhiều so với 79,5 triệu đồng hậu quả. Developer sửa (debugging) — kiểm thử chỉ phát hiện |
 | 2. Đánh giá chất lượng cho quyết định | Báo cáo kiểm thử trước khi bật tính năng «sửa địa chỉ»: «test sai thứ tự sự kiện chưa chạy» ⇒ product owner quyết định bật thử ở một thành phố thay vì cả 6 |
 | 3. Đại diện gián tiếp cho người dùng | Tester đóng vai tài xế đang trên đường tới lấy hàng thì địa chỉ đổi: app có báo rõ không, có rung/chuông không? 25.000 tài xế trực tuyến lúc cao điểm không thể ngồi họp sprint |
-| 4. Hợp đồng, pháp lý, quy định | Cam kết bồi thường với shop gửi hàng; quy định bảo vệ dữ liệu cá nhân của người nhận — kiểm thử cung cấp bằng chứng đã kiểm các yêu cầu này |
+| 4. Hợp đồng, pháp lý, quy định | Cam kết bồi thường với shop gửi hàng; quy định bảo vệ dữ liệu cá nhân của người nhận — kiểm thử cung cấp bằng chứng đã kiểm tra các yêu cầu này |
 
 ## 5. Thực hành
 
@@ -284,7 +284,7 @@ B16 = B14 + B15                   ' tổng
 
 Kết quả mong đợi với giả định của bài: B13 = 30 đơn/ngày; B14 = 79.500.000 đ; B15 = 30 × 10 × 360.000 = 108.000.000 đ; B16 = **187.500.000 đ**.
 
-Kiểm độ nhạy — đổi một tham số, giữ nguyên phần còn lại:
+Phân tích độ nhạy: đổi một tham số, giữ nguyên phần còn lại:
 
 | Thay đổi | Đơn/ngày | Tổng (trực tiếp + gián tiếp) |
 |---|---:|---:|
@@ -310,7 +310,7 @@ Kết quả thực tế: **chưa chạy được** — hệ thống đích chưa
 
 ### 5.3. Phần làm được ngay trên lab
 
-Ba quy tắc của SPEC lab bảo vệ đúng những hậu quả giống SC-01, và có thể kiểm ngay ở các series sau:
+Ba quy tắc của SPEC lab bảo vệ đúng những hậu quả giống SC-01, và có thể kiểm tra ngay ở các series sau:
 
 | Quy tắc lab | Nếu sai thì hậu quả gần với… |
 |---|---|
@@ -320,13 +320,13 @@ Ba quy tắc của SPEC lab bảo vệ đúng những hậu quả giống SC-01,
 
 ## 6. Góc nhìn nâng cao
 
-**Kiểm thử không tự làm sản phẩm tốt lên.** Syllabus nói rõ: kiểm thử góp vào chất lượng **gián tiếp**. Một defect report bị xếp vào backlog vô thời hạn không giảm được đồng thiệt hại nào. Giá trị của kiểm thử chỉ thành hiện thực khi thông tin nó tạo ra được dùng — để sửa, hoặc để quyết định không phát hành.
+**Kiểm thử không tự làm sản phẩm tốt lên.** Syllabus nói rõ: kiểm thử góp vào chất lượng **gián tiếp**. Một defect report bị xếp vào backlog vô thời hạn không giảm được đồng thiệt hại nào. Giá trị của kiểm thử chỉ thành hiện thực khi thông tin do kiểm thử tạo ra được sử dụng — để sửa, hoặc để quyết định không phát hành.
 
 **«Cần kiểm thử» không có nghĩa «kiểm thử mọi thứ như nhau».** Không thể test hết mọi tổ hợp ([Bảy nguyên lý kiểm thử](/articles/bay-nguyen-ly-kiem-thu)), và ngân sách kiểm thử có giới hạn. Lập luận ở bài này dùng để quyết định **đầu tư bao nhiêu cho phần nào**: SC-01 đáng một test integration riêng; màu nút «Đặt chuyến» thì không cần cùng mức.
 
 **Con số giả định là công cụ, không phải bằng chứng.** Mô hình 4.2 hữu ích vì nó cho thấy **biến nào chi phối** thiệt hại (N, p, D) và để người đọc thay số thật. Đừng mang con số 187,5 triệu vào cuộc họp như một sự thật; mang công thức và hỏi số thật từ vận hành.
 
-**Chi phí của việc không có lỗi cũng cần tính.** Kiểm thử quá mức một tính năng ít rủi ro làm chậm phát hành và có chi phí cơ hội. Đóng góp 2 (thông tin cho quyết định) bao gồm cả câu trả lời «đủ rồi, có thể phát hành».
+**Chi phí của việc kiểm thử thừa cũng cần tính.** Kiểm thử quá mức một tính năng ít rủi ro làm chậm phát hành và có chi phí cơ hội. Đóng góp 2 (thông tin cho quyết định) bao gồm cả câu trả lời «đủ rồi, có thể phát hành».
 
 **Failure «có lợi cho khách» vẫn là failure.** Ví dụ thu thiếu 360 triệu/ngày ở mục 4.2 không sinh khiếu nại nào. Nếu chỉ dựa vào phản hồi người dùng để tìm lỗi, loại này không bao giờ được phát hiện — một lý do mạnh để có kiểm thử độc lập với khách hàng.
 
@@ -350,7 +350,7 @@ Ba quy tắc của SPEC lab bảo vệ đúng những hậu quả giống SC-01,
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>D = 1: 30 đơn × (265.000 + 360.000) đ = <b>18,75 triệu đồng</b> cho một đợt. Chưa đủ vì: (1) 30 người nhận đầu tiên vẫn bị ảnh hưởng, kể cả lộ dữ liệu cá nhân — không đảo ngược được; (2) giám sát chỉ thấy failure có triệu chứng rõ (khiếu nại), còn defect có thể quay lại mỗi lần sửa code consumer — không có test hồi quy thì mỗi lần phát hành lại trả thêm một đợt.</p>
+<p>D = 1: 30 đơn × (265.000 + 360.000) đ = <b>18,75 triệu đồng</b> cho một đợt. Chưa đủ vì: (1) 30 người nhận đầu tiên vẫn bị ảnh hưởng, kể cả lộ dữ liệu cá nhân — không đảo ngược được; (2) giám sát chỉ thấy failure có triệu chứng rõ (khiếu nại), còn defect có thể quay lại mỗi lần sửa code consumer — không có regression test thì mỗi lần phát hành lại trả thêm một đợt.</p>
 </details>
 
 **Bài 3.** Xếp mỗi việc vào một trong bốn đóng góp của 1.2.1: (a) báo cáo «2 defect cao chưa đóng» gửi buổi họp go/no-go; (b) tester thử đặt bưu kiện bằng điện thoại cũ màn hình nhỏ như nhiều tài xế đang dùng; (c) giữ bằng chứng kiểm thử theo yêu cầu của đối tác cổng thanh toán VíXanh; (d) review SPEC phát hiện R-CANCEL-04 và R-CANCEL-06 cần thống nhất thứ tự ưu tiên lý do miễn phí.

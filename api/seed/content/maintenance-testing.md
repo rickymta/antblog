@@ -35,7 +35,7 @@ Kiểm thử lúc phát triển làm việc với hệ thống **chưa có ai d�
 - Có **người dùng thật** nhận hậu quả ngay: khoảng 70 chuyến tạo mới mỗi giây lúc cao điểm (hồ sơ dự án).
 - Phần **không đổi** chiếm gần hết hệ thống, nhưng vẫn có thể bị thay đổi làm hỏng.
 
-**Maintenance testing** (kiểm thử bảo trì) là kiểm thử các thay đổi trên một hệ thống **đang vận hành**. Nó không phải một kỹ thuật mới: nó dùng lại confirmation testing và regression testing ([TEST-019](/articles/confirmation-testing-va-regression-testing)), cộng thêm những việc chỉ xuất hiện khi hệ thống đã sống: di trú dữ liệu, lưu trữ dữ liệu khi ngừng dịch vụ, chuyển đổi tại một mốc giờ cụ thể.
+**Maintenance testing** (kiểm thử bảo trì) là kiểm thử các thay đổi trên một hệ thống **đang vận hành**. Đây không phải một kỹ thuật mới: kiểm thử bảo trì dùng lại confirmation testing và regression testing ([TEST-019](/articles/confirmation-testing-va-regression-testing)), cộng thêm những việc chỉ xuất hiện khi hệ thống đã sống: di trú dữ liệu, lưu trữ dữ liệu khi ngừng dịch vụ, chuyển đổi tại một mốc giờ cụ thể.
 
 Dùng bài này khi bạn nhận một phiếu thay đổi cho hệ thống đã lên production — đổi cấu hình giá, hotfix, nâng cấp nền tảng, hay tắt một tính năng.
 
@@ -45,7 +45,7 @@ CTFL v4.0.1 mục 2.3 nêu các ý chính sau (diễn đạt lại):
 
 - **Loại bảo trì**: sửa lỗi (corrective), thích nghi với thay đổi của môi trường (adaptive), cải thiện hiệu năng hoặc khả năng bảo trì; chi tiết theo ISO/IEC 14764. Bảo trì có thể đi theo **bản phát hành có kế hoạch** hoặc **không có kế hoạch** (hotfix).
 - **Impact analysis có thể làm trước khi thay đổi**, để giúp quyết định có nên thay đổi hay không, dựa trên hậu quả có thể xảy ra ở phần khác của hệ thống. Đây là điểm khác với TEST-019, nơi impact analysis dùng để chọn test sau khi đã có bản sửa.
-- Kiểm thử thay đổi trên hệ thống vận hành gồm **hai phần**: đánh giá việc triển khai thay đổi có thành công không, và kiểm hồi quy ở phần **không đổi** — thường là phần lớn hệ thống.
+- Kiểm thử thay đổi trên hệ thống vận hành gồm **hai phần**: đánh giá việc triển khai thay đổi có thành công không, và regression testing ở phần **không đổi** — thường là phần lớn hệ thống.
 - **Phạm vi** maintenance testing thường phụ thuộc ba yếu tố: mức rủi ro của thay đổi, kích thước hệ thống hiện có, kích thước thay đổi.
 
 **Ba nhóm trigger** (sự kiện kích hoạt) của bảo trì và maintenance testing:
@@ -107,7 +107,7 @@ CTFL v4.0.1 mục 2.3 nêu các ý chính sau (diễn đạt lại):
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Ngoài syllabus CTFL — thực hành ngành</span>
-<p>Không thuộc CTFL nhưng giúp bảo trì an toàn hơn: phiên bản hoá quy tắc giá (<code>pricing_version</code>, kiến trúc §4.3); diễn tập trên <code>staging</code> (§16.2); phát hành dần và cờ tính năng theo từng thành phố (pipeline §17); đổi cấu hình giá qua Admin Portal có maker-checker, audit log (§11.2). Chọn test hồi quy khi phạm vi lớn: CTAL-TA v4.0 mục 2.2 (TA-2.2.1, K4).</p>
+<p>Không thuộc CTFL nhưng giúp bảo trì an toàn hơn: phiên bản hoá quy tắc giá (<code>pricing_version</code>, kiến trúc §4.3); diễn tập trên <code>staging</code> (§16.2); phát hành dần và cờ tính năng theo từng thành phố (pipeline §17); đổi cấu hình giá qua Admin Portal có maker-checker, audit log (§11.2). Chọn regression test khi phạm vi lớn: CTAL-TA v4.0 mục 2.2 (TA-2.2.1, K4).</p>
 </div>
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
@@ -179,10 +179,10 @@ Syllabus nói impact analysis có thể làm **trước** để quyết định 
 
 Đơn vị đồng. Năm phát hiện đáng mang tới cuộc họp duyệt thay đổi:
 
-1. **Phí giao đồ ăn tăng** (M-08, M-09): 22.000 thay vì 21.000 cho 2 km. CR-01 không nhắc tới đồ ăn — đúng kiểu «hậu quả ở phần khác» syllabus nói. Kinh doanh phải chọn: chấp nhận, hay tách công thức phí giao khỏi bảng giá xe máy.
+1. **Phí giao đồ ăn tăng** (M-08, M-09): 22.000 thay vì 21.000 cho 2 km. CR-01 không nhắc tới đồ ăn — đúng kiểu «hậu quả ở phần khác» mà syllabus nêu. Kinh doanh phải chọn: chấp nhận, hay tách công thức phí giao khỏi bảng giá xe máy.
 2. **`HN10` đổi hành vi** (M-10): xe máy 6 km ở Hà Nội trước bị từ chối voucher (A = 39.000 &lt; 40.000), nay được giảm (A = 42.000 ⇒ giảm 4.200 ⇒ 38.000 đ). Nhiều chuyến đủ điều kiện hơn ⇒ chi phí khuyến mãi tăng.
 3. **`GIAM20` chạm trần sớm hơn** (M-11): 20% × 162.000 = 32.400 &gt; trần 30.000.
-4. **Ca không nhạy** (M-04, M-05, mọi ca ô tô): cước tối thiểu và làm tròn lên nghìn «nuốt» chênh lệch. Smoke test sau triển khai mà dùng chuyến xe máy 1 km sẽ xanh **dù giá mới chưa được áp** — phải dùng ca có kết quả đổi, như M-01.
+4. **Test case không nhạy** (M-04, M-05, mọi test case ô tô): cước tối thiểu và làm tròn lên nghìn «nuốt» chênh lệch. Smoke test sau triển khai mà dùng chuyến xe máy 1 km sẽ xanh **dù giá mới chưa được áp** — phải dùng test case có kết quả đổi, như M-01.
 5. **Không bị ảnh hưởng**: `XMAS50` (đã hết hạn), phần tiền giảm của `FOOD15` (tính trên tiền món).
 
 ### 4.3 Test condition cho CR-02 và ngoài lab
@@ -193,9 +193,9 @@ Từ rủi ro 4–5 và R-STATE, R-QUOTE:
 |---|---|---|
 | TC-NT-01 | Sau G, báo giá ở `NT` bị từ chối `CITY_NOT_SUPPORTED` (M-12) | Lab |
 | TC-NT-02 | Chuyến `NT` đã kết thúc được lưu trữ đủ, khớp tổng kiểm với nguồn | Lab (MT-R1, R3) |
-| TC-NT-03 | Chuyến `NT` chưa kết thúc lúc chạy script không bị lưu trữ âm thầm mà được liệt kê để xử lý | Lab (MT-R2) |
+| TC-NT-03 | Chuyến `NT` chưa kết thúc lúc chạy script không bị lưu trữ lặng lẽ mà được liệt kê để xử lý | Lab (MT-R2) |
 | TC-NT-04 | Sau lưu trữ, tra lại được một chuyến bất kỳ với giá, phiên bản giá, nhật ký trạng thái | Lab (MT-R4, R5) |
-| TC-NT-05 | Báo giá `NT` tạo lúc G − 3 phút (còn hạn tới G + 2) — đặt được hay không? | **Cần nghiệp vụ quyết**, chạy ở staging |
+| TC-NT-05 | Báo giá `NT` tạo lúc G − 3 phút (còn hạn tới G + 2) — đặt được hay không? | **Cần bộ phận nghiệp vụ quyết định**, chạy ở staging |
 | TC-NT-06 | Voucher chỉ áp cho `NT` (`cityCodes = ['NT']`) được vô hiệu hoá, không còn hiện trong ứng dụng | Staging |
 | TC-NT-07 | Tài xế đăng ký ở Nha Trang nhận thông báo, không còn nhận được chuyến | Staging |
 | TC-NT-08 | Báo cáo doanh thu theo thành phố của kỳ cũ vẫn ra số Nha Trang từ kho lưu trữ | Staging / UAT |
@@ -267,7 +267,7 @@ const ENVIRONMENTS = [
 describe.each(ENVIRONMENTS)('TEST-020 · regression sau di trú: $name', ({ make }) => { … });
 ```
 
-Bốn ca chạy ở 11:30 (cao điểm), Sài Gòn đang mưa: MT-E1 R-FARE-09 + R-QUOTE-04 (chuyến lưu 52.000 đ, đọc lại vẫn 52.000 đ), MT-E2 R-QUOTE-03 (một báo giá một chuyến), MT-E3 R-VOUCHER-07 (hết lượt `GIAM20`, huỷ thì trả lượt), MT-E4 R-ACCEPT-03 (tài xế thứ hai nhận ⇒ `TRIP_ALREADY_TAKEN`).
+Bốn test case chạy ở 11:30 (cao điểm), Sài Gòn đang mưa: MT-E1 R-FARE-09 + R-QUOTE-04 (chuyến lưu 52.000 đ, đọc lại vẫn 52.000 đ), MT-E2 R-QUOTE-03 (một báo giá một chuyến), MT-E3 R-VOUCHER-07 (hết lượt `GIAM20`, huỷ thì trả lượt), MT-E4 R-ACCEPT-03 (tài xế thứ hai nhận ⇒ `TRIP_ALREADY_TAKEN`).
 
 ### 5.4 Chạy thật
 
@@ -306,9 +306,9 @@ Kết quả (rút gọn, chép từ lần chạy):
 
 **Test không nhạy là test nguy hiểm nhất của bảo trì.** M-04, M-05 cho cùng kết quả trước và sau thay đổi. Trong bộ regression, chúng vẫn có ích (bảo vệ cước tối thiểu, làm tròn). Làm smoke test để chứng minh «giá mới đã lên», chúng vô dụng — và sẽ cho cảm giác an toàn giả.
 
-**Hotfix nén phạm vi, không nén tư duy.** Hotfix phụ phí trời mưa trong mùa bão có thể chỉ có hai giờ. Khi đó ưu tiên: confirmation trên ca mưa, regression nhắm đích những đường đi qua phụ phí trời mưa (cước, bưu kiện, phí giao đồ ăn), smoke production; bộ đầy đủ chạy ngay sau phát hành. Ghi rõ những gì chưa chạy vào báo cáo.
+**Hotfix nén phạm vi, không nén tư duy.** Hotfix phụ phí trời mưa trong mùa bão có thể chỉ có hai giờ. Khi đó ưu tiên: confirmation trên test case có mưa, regression nhắm đích những đường đi qua phụ phí trời mưa (cước, bưu kiện, phí giao đồ ăn), smoke production; bộ đầy đủ chạy ngay sau phát hành. Ghi rõ những gì chưa chạy vào báo cáo.
 
-**Retirement hay bị quên vì không có ai «dùng» nó.** Lưu trữ chỉ có giá trị nếu khôi phục được. Kiến trúc §16.4 yêu cầu kiểm thử restore định kỳ cho cùng lý do. Ngược lại, có loại dữ liệu phải **xoá** chứ không được giữ (dữ liệu vị trí, thông tin cá nhân theo chính sách lưu giữ §13.2) — test cả chiều đó.
+**Retirement hay bị quên vì không có ai «dùng» nó.** Lưu trữ chỉ có giá trị nếu khôi phục được. Kiến trúc §16.4 yêu cầu kiểm thử restore định kỳ vì cùng lý do. Ngược lại, có loại dữ liệu phải **xoá** chứ không được giữ (dữ liệu vị trí, thông tin cá nhân theo chính sách lưu giữ §13.2) — test cả chiều đó.
 
 **Khối lượng lưu trữ.** Giả định Nha Trang chiếm 5% của 2 triệu chuyến/ngày: 100.000 chuyến/ngày ≈ 36,5 triệu dòng mỗi năm, chưa kể `trip_events`. Ở quy mô đó script phải chạy theo lô và tiếp tục được khi gián đoạn — lab không kiểm được điều này.
 

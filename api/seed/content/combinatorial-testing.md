@@ -8,7 +8,7 @@ tags: [testing, istqb, ctal-ta, test-038, combinatorial-testing, t-wise, base-ch
 language: vi
 ---
 
-[TEST-037](/articles/pairwise-testing) dừng ở câu hỏi: lỗi cần **ba** tham số cùng đúng thì pairwise chỉ bắt được nhờ may. Bài này đi tiếp: tổng quát pairwise thành **t-wise**, mô hình hoá **ràng buộc** giữa giá trị, tách **giá trị lỗi** khỏi mô hình, và trả lời câu hỏi thực tế nhất — **khi nào tăng t thì đáng tiền**. Mọi con số đo thật trên luồng voucher của lab Tới Nơi, với bốn bản build có lỗi gài từ bậc 1 tới bậc 3.
+[TEST-037](/articles/pairwise-testing) dừng ở câu hỏi: lỗi cần **ba** tham số cùng mang giá trị gây lỗi thì pairwise chỉ bắt được nhờ may. Bài này đi tiếp: tổng quát pairwise thành **t-wise**, mô hình hoá **ràng buộc** giữa giá trị, tách **giá trị lỗi** khỏi mô hình, và trả lời câu hỏi thực tế nhất — **khi nào tăng t thì đáng tiền**. Mọi con số đo thật trên luồng voucher của lab Tới Nơi, với bốn bản build có lỗi gài từ bậc 1 tới bậc 3.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-038</span>
@@ -50,9 +50,9 @@ CTAL-TA v4.0 mục 3.1.2 (LO **TA-3.1.2, K3**) định nghĩa combinatorial test
 Các ý cần nắm (diễn đạt lại):
 
 - **Base choice**: chọn cho mỗi tham số một giá trị «gốc» quan trọng nhất; hàng gốc gồm toàn giá trị gốc; các hàng tiếp theo lấy hàng gốc và thay **một** tham số bằng từng giá trị không gốc của nó. Số test = 1 + Σ(|V<sub>i</sub>| − 1).
-- **Ràng buộc** giữa parameter-value pair, tổ hợp **không hợp lệ** hoặc **không khả thi**, và tổ hợp **thêm tay** vì biết hay lỗi đều làm số test cuối cùng thay đổi.
+- **Ràng buộc** giữa parameter-value pair, tổ hợp **không hợp lệ** hoặc **không khả thi**, và tổ hợp **thêm tay** vì biết hay gây lỗi đều làm số test cuối cùng thay đổi.
 - Tham số nhiều giá trị ⇒ EP trước; ghi mô hình bằng classification tree hoặc feature model.
-- Cơ sở thực nghiệm: phần lớn failure do một giá trị hoặc ít tham số tương tác (Cohen et al., 1994; Kuhn et al., 2004 — nghiên cứu có phạm vi hạn chế). Đây là lý do t nhỏ thường đủ, **không** phải bằng chứng t = 2 luôn đủ.
+- Cơ sở thực nghiệm: phần lớn failure do một giá trị hoặc do tương tác giữa ít tham số gây ra (Cohen et al., 1994; Kuhn et al., 2004 — nghiên cứu có phạm vi hạn chế). Đây là lý do t nhỏ thường đủ, **không** phải bằng chứng t = 2 luôn đủ.
 
 Hai mục khác nối với bài:
 
@@ -136,7 +136,7 @@ Tích Descartes: 3 × 2 × 2 × 3 × 3 × 2 × 2 × 2 × 2 × 3 × 2 = **10.368*
 | C2: `perCustomerPerDay` = 1 ⇒ lịch sử ≠ «1 lượt hôm nay» | Không hợp lệ | Tổ hợp này là lỗi `VOUCHER_USAGE_LIMIT` — để cho test âm |
 | C3: lịch sử «1 lượt tối qua» ⇒ ngày ≠ «đầu hạn» | Không khả thi | Hôm qua voucher chưa có hiệu lực, không thể đã dùng |
 
-Còn **5.616** tổ hợp hợp lệ. Viết C3 buộc phải hỏi «lượt dùng hôm qua có còn tính khi voucher đã hết hạn hôm nay?» — SPEC trả lời được (R-VOUCHER-07 chỉ đếm trong ngày), nhưng câu hỏi tương tự cho chuyến **bị huỷ sau nửa đêm** thì SPEC chưa nói chuyến được tính vào ngày tạo hay ngày huỷ. Đó là ví dụ đúng tinh thần TA-5.2.1: lập mô hình tổ hợp làm lộ chỗ đặc tả chưa đủ.
+Còn **5.616** tổ hợp hợp lệ. Viết C3 buộc ta phải hỏi «lượt dùng hôm qua có còn tính khi voucher đã hết hạn hôm nay?» — SPEC trả lời được (R-VOUCHER-07 chỉ đếm trong ngày), nhưng câu hỏi tương tự cho chuyến **bị huỷ sau nửa đêm** thì SPEC chưa nói chuyến được tính vào ngày tạo hay ngày huỷ. Đó là ví dụ đúng tinh thần TA-5.2.1: lập mô hình tổ hợp làm lộ chỗ đặc tả chưa đủ.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Ràng buộc sai nguy hiểm hơn thiếu ràng buộc</span>
@@ -228,7 +228,7 @@ Mã ở `examples/toi-noi-testing/articles/combinatorial-testing/`: `t-wise.ts` 
 | V3-pham-vi | 2 | Chép nhầm `kinds.length === 0` vào điều kiện của `cityCodes` | `kinds` «gồm» × `cityCodes` «rỗng» |
 | V4-luot-utc | 3 | Đếm lượt dùng theo ngày UTC | lịch sử «tối qua» × giờ 06:00 × 1 lượt/ngày |
 
-V4 cần **đủ ba** điều kiện: lúc 06:00 giờ Việt Nam, ngày UTC vẫn là hôm qua nên lượt dùng lúc 18:00 hôm qua bị đếm vào «hôm nay»; và chỉ khi giới hạn là 1 lượt thì một lượt đếm thừa mới thành lỗi. Đây là loại defect múi giờ rất thật mà kiến trúc nhiều service (mỗi service một múi giờ máy chủ) dễ gặp.
+V4 cần **đủ ba** điều kiện: lúc 06:00 giờ Việt Nam, ngày UTC vẫn là hôm qua nên lượt dùng lúc 18:00 hôm qua bị đếm vào «hôm nay»; và chỉ khi giới hạn là 1 lượt thì một lượt đếm thừa mới thành lỗi. Đây là loại defect múi giờ rất thực tế mà kiến trúc nhiều service (mỗi service một múi giờ máy chủ) dễ gặp.
 
 Bản «dung» của `voucher-flow.ts` được test đối chiếu với `priceQuote` thật trên mọi tổ hợp — bảo đảm các bản lỗi chỉ khác mã thật đúng một chỗ.
 
@@ -280,7 +280,7 @@ Kết quả mong đợi tính từ SPEC, không từ code: ride xe máy 2 km gi�
 - **Bảo đảm theo t.** t = 1 chắc chắn bắt V1 (mỗi giá trị có mặt). t = 2 chắc chắn bắt V1–V3. Chỉ t = 3 **chắc chắn** bắt V4. Test vitest khẳng định cả ba điều.
 - **May mắn không phải chiến lược.** Bộ pairwise của lab tình cờ có hàng 10 bắt được V4; bộ ngẫu nhiên cùng cỡ 14 hàng chỉ bắt V4 trong 51,9% số lần, và bỏ sót cả lỗi bậc 2 V2 trong khoảng 30% số lần. Một công cụ khác, một thứ tự tham số khác cho bộ pairwise khác — có thể không chứa hàng 10.
 - **Test âm không thay được tổ hợp.** Bảy test base choice chỉ đỏ trên V3 (vì N5 dùng `kinds` rỗng với `cityCodes = [HN]` — V3 cho qua). Chúng không bao giờ chạm V2, V4: hai lỗi đó nằm trong **vùng hợp lệ**.
-- **Trộn giá trị lỗi tốn hơn mà kém hơn.** 3-wise trên mô hình trộn cần 70 test; 50 test dừng ở lỗi, chỉ 83,3% bộ-3 hợp lệ thực sự được xử lý tới bước lượt dùng. Tách như mục 4.3: 47 test, 100%.
+- **Trộn giá trị lỗi vừa tốn hơn vừa kém hiệu quả hơn.** 3-wise trên mô hình trộn cần 70 test; 50 test dừng ở lỗi, chỉ 83,3% bộ-3 hợp lệ thực sự được xử lý tới bước lượt dùng. Tách như mục 4.3: 47 test, 100%.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -328,7 +328,7 @@ Kết quả mong đợi tính từ SPEC, không từ code: ride xe máy 2 km gi�
 
 **Chất lượng giá trị quan trọng hơn t.** V2 và V4 chỉ lộ vì mô hình có giá trị **06:00**. Nếu giờ đặt chỉ có 10:00 và 20:00 (hai giá trị «điển hình»), không t nào bắt được hai lỗi múi giờ, kể cả mọi tổ hợp. Chọn giá trị bằng EP/BVA và hiểu rủi ro (giờ VN vs UTC) trước, rồi mới bàn tới t.
 
-**Tổ hợp thêm tay.** Syllabus nhắc tổ hợp «biết là hay lỗi». Sau khi sửa V4, thêm cố định hàng «tối qua × 06:00 × 1 lượt» vào bộ regression (PICT gọi là seeding) để bộ sinh lại không làm mất nó.
+**Tổ hợp thêm tay.** Syllabus nhắc tổ hợp «đã biết hay gây lỗi». Sau khi sửa V4, thêm cố định hàng «tối qua × 06:00 × 1 lượt» vào bộ regression (PICT gọi là seeding) để bộ sinh lại không làm mất nó.
 
 **Giới hạn của bộ sinh trong bài.** Liệt kê toàn không gian chỉ chạy được tới khoảng vài trăm nghìn hàng. Mô hình 20 tham số × 4 giá trị có 4<sup>20</sup> ≈ 10<sup>12</sup> hàng — cần thuật toán dựng hàng như AETG/IPOG (PICT, ACTS).
 

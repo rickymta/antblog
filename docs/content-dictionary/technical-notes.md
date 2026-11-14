@@ -8,3 +8,23 @@ Rà soát ngôn ngữ (giai đoạn 0) **không** sửa nội dung kỹ thuật.
 - [ ] `system-testing-regression-test.md:21`: "6 ca RG-01…RG-08 (8 lượt chạy)". Dãy RG-01…RG-08 có 8 mã. Cần xác nhận là 6 test case hay 8.
 - [ ] `system-testing-smoke-test.md:333`: "SYS-05 bàn kỹ hơn" về eventual consistency. Nhưng SYS-05 là bài System Test (hành trình UI). Có thể bài tham chiếu sai.
 - [ ] `heap-ctid-va-primary-key.md` (từ khảo sát): tiêu đề gọi heap là "clustered index thật", dễ gây hiểu nhầm.
+
+## Đợt 2 — 66 bài còn lại của nhóm testing (11/2026)
+
+Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứng.
+
+- [ ] `vi-sao-can-kiem-thu.md:39`: "một phần nghìn đơn … hàng trăm đơn mỗi ngày". Với 2 triệu chuyến × 0,1% thì ra 2.000 đơn mỗi ngày.
+- [ ] `tong-quan-5-test-level-istqb.md:251`: bài dẫn R-QUOTE-03 cho `VOUCHER_USAGE_LIMIT`, nhưng R-QUOTE-03 là quy tắc "một báo giá một chuyến". Có thể phải là một quy tắc R-VOUCHER.
+- [ ] `kiem-thu-trong-sdlc-agile-waterfall.md:164`: bài ghi nghiệm thu ở tuần 12, nhưng hình SVG (dòng 276) ghi tuần 13.
+- [ ] `state-transition-testing-co-ban.md:320`: bài ghi "ba sự kiện" nhưng liệt kê bốn (go_online, go_offline, accept_trip, finish_trip).
+- [ ] `state-transition-testing-co-ban.md:288`: bài ghi "hai phát hiện" nhưng bảng có ba dòng.
+- [ ] `static-testing-la-gi.md:167`: chênh lệch "2.000 đ mỗi chuyến" chỉ đúng sau khi làm tròn. Trước khi làm tròn, mức lệch là 1.600 đ.
+- [ ] `path-testing.md:231`: bài ghi "6/10 đường … bốn đường còn lại" nhưng liệt kê năm đường.
+- [ ] `non-functional-testing-tong-quan.md:42-51`: bài nói CTFL liệt kê "tám đặc tính" gồm cả Safety, nhưng Safety mới được thêm ở ISO 25010:2023.
+- [ ] `pairwise-testing.md:57` gọi mục 4.3 là "adaptability testing", còn dòng 418 gọi là "Flexibility Testing".
+- [ ] `review-process-va-cac-vai-tro.md:264`: bài ghi "ba điều cần thấy" nhưng chỉ có hai gạch đầu dòng.
+- [ ] `random-testing.md:244`: tỉ lệ DISTANCE_OUT_OF_RANGE 29,1% có vẻ cao so với miền ngoài khoảng (khoảng 17%).
+- [ ] `loop-testing.md:209`: bài ghi "đọc theo hàng 0", nhưng n=0 là cột.
+- [ ] `metamorphic-testing.md:297`: "31/50 … khoảng 4 lần chạy thì có 1 lần trượt". Tỉ lệ trượt thực là 19/50 (khoảng 38%).
+- [ ] `mc-dc-testing.md:429`: câu "không có điều kiện ghép thì MC/DC là lãng phí" khó hiểu. Có lẽ ý là "không có quyết định nhiều điều kiện".
+- [ ] `branch-coverage-decision-coverage.md:355`: bài ghi "hàm 16 dòng", nhưng hàm dài khoảng 19 dòng, còn 16 là số nhánh.

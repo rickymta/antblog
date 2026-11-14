@@ -1,0 +1,15 @@
+{"file":"statement-coverage.md","edits":[
+{"old":"Nó giải quyết một điểm mù của kỹ thuật hộp đen","new":"Kỹ thuật này giải quyết một điểm mù của kỹ thuật hộp đen","reason":"Tránh 'Nó' chỉ khái niệm ở đầu đoạn","severity":"medium"},
+{"old":"đã có trong bốn ca trên, nên không cần thêm.","new":"đã có trong bốn test case trên, nên không cần thêm.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"### 5.2. Bước 1 — một ca theo oracle R-FARE-09","new":"### 5.2. Bước 1 — một test case theo oracle R-FARE-09","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Một ca «chuẩn» cho đúng cùng mức","new":"Một test case «chuẩn» cho đúng cùng mức","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"### 5.3. Bước 2 — thêm ca theo từng câu lệnh chưa phủ","new":"### 5.3. Bước 2 — thêm test case theo từng câu lệnh chưa phủ","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Mã của bốn ca (rút gọn từ `bo-phu-cau-lenh.ts`; bộ ca viết thành hàm","new":"Mã của bốn test case (rút gọn từ `bo-phu-cau-lenh.ts`; bộ test case viết thành hàm","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"với đúng bốn ca như phân tích ở 4.2.","new":"với đúng bốn test case như phân tích ở 4.2.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Chạy **cùng bốn ca** trên bản lỗi","new":"Chạy **cùng bốn test case** trên bản lỗi","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Bốn ca xanh, **100% câu lệnh của chính bản lỗi**","new":"Bốn test case xanh, **100% câu lệnh của chính bản lỗi**","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Ca TC-05 lấy từ phân tích giá trị biên","new":"Test case TC-05 lấy từ phân tích giá trị biên","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"trên mã thật nó là ca thường và xanh.","new":"trên mã thật TC-05 là test case thường và xanh.","reason":"Thống nhất 'test case'; tránh 'nó' mơ hồ","severity":"medium"},
+{"old":"được mọi ca bưu kiện chạy qua;","new":"được mọi test case bưu kiện chạy qua;","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"công cụ báo dòng 82 (S16) **đã chạy** dù không ca nào tới đó","new":"công cụ báo dòng 82 (S16) **đã chạy** dù không test case nào tới đó","reason":"Thống nhất 'test case'","severity":"low"}
+]}

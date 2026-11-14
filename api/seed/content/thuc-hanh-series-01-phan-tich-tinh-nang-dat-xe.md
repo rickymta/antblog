@@ -42,13 +42,13 @@ Bài này không dạy khái niệm mới. Nó là một **bài tập test analy
 
 **Khi nào làm việc này ngoài đời?** Ngay khi có bản nháp đặc tả hoặc user story, trước khi có code. Phân tích sớm vừa tìm được lỗ hổng trong đặc tả (lúc rẻ nhất để sửa), vừa cho cả đội một danh sách rủi ro chung để ưu tiên.
 
-**Cách dùng bài:** đọc đề ở mục 3, tự làm 60–90 phút trên giấy hoặc bảng tính, rồi mới mở các khối «Lời giải mẫu» ở mục 4. Mục 5 cho bạn chạy test trên lab để kiểm những gì lời giải mẫu khẳng định.
+**Cách dùng bài:** đọc đề ở mục 3, tự làm 60–90 phút trên giấy hoặc bảng tính, rồi mới mở các khối «Lời giải mẫu» ở mục 4. Mục 5 cho bạn chạy test trên lab để kiểm chứng những gì lời giải mẫu khẳng định.
 
 ## 2. Lý thuyết theo ISTQB
 
 Chỉ ôn lại; mỗi khái niệm đã có bài riêng.
 
-- **Test objective** — lý do ta test. CTFL v4.0.1 mục 1.1.1 liệt kê mục tiêu điển hình: đánh giá work product; gây failure, tìm defect; đạt coverage cần thiết; giảm mức rủi ro chất lượng; kiểm yêu cầu đã đặc tả; kiểm tuân thủ hợp đồng/pháp lý; cung cấp thông tin để ra quyết định; tạo niềm tin; xác nhận hệ thống đúng mong đợi. Mục tiêu **đổi theo ngữ cảnh** ([TEST-006](/articles/muc-tieu-kiem-thu-va-quality-assurance)).
+- **Test objective** — lý do ta test. CTFL v4.0.1 mục 1.1.1 liệt kê mục tiêu điển hình: đánh giá work product; gây failure, tìm defect; đạt coverage cần thiết; giảm mức rủi ro chất lượng; kiểm tra yêu cầu đã đặc tả; kiểm tra tuân thủ hợp đồng/pháp lý; cung cấp thông tin để ra quyết định; tạo niềm tin; xác nhận hệ thống đúng mong đợi. Mục tiêu **đổi theo ngữ cảnh** ([TEST-006](/articles/muc-tieu-kiem-thu-va-quality-assurance)).
 - **Test object** là thứ được test (hàm, module, API, cả hệ thống). **Test basis** là tài liệu/tri thức nói hệ thống *phải* làm gì — ở đây là `SPEC.md`.
 - **Test analysis** phân tích test basis để tìm tính năng kiểm được, định nghĩa và **ưu tiên test condition theo rủi ro**, đồng thời đánh giá chính test basis để tìm defect (CTFL 1.4.1). **Test condition** là một khía cạnh kiểm được, ví dụ «báo giá hết hạn ở đúng mốc 5 phút» — chưa có dữ liệu cụ thể, chưa phải test case.
 - **Testware** của test analysis là test condition đã ưu tiên và defect report về test basis; risk register thuộc test planning (CTFL 1.4.3, [TEST-010](/articles/testware-san-pham-kiem-thu)). **Traceability** nối yêu cầu ↔ rủi ro ↔ test condition ↔ test case ↔ kết quả, để đánh giá coverage, rủi ro còn lại và tác động khi yêu cầu đổi (CTFL 1.4.4).
@@ -288,7 +288,7 @@ Gợi ý rủi ro (tài liệu kiến trúc §14): **tạo trùng giao dịch** 
 <tr><td>PJ-05</td><td>Ra mắt gấp, phạm vi phình giữa sprint</td><td>Tổ chức</td><td>2</td><td>2</td><td>4</td><td>Khoá phạm vi sprint</td></tr>
 </tbody>
 </table>
-<p>Xếp vào ma trận 3 × 3: ô mức 6 có PR-01, PR-02, PR-03, PR-10, PR-13, PR-14, PR-15 cùng PJ-01, PJ-02; không rủi ro nào mức 9 — chấm 3/3 cho mọi thứ là dấu hiệu chưa phân tích. Rủi ro mức 6 đi trước. PR-13, PR-14, PR-15 <b>không giảm được bằng lab</b> ⇒ vào thẳng báo cáo rủi ro còn lại (O-7), không lặng lẽ bỏ qua.</p>
+<p>Xếp vào ma trận 3 × 3: ô mức 6 có PR-01, PR-02, PR-03, PR-10, PR-13, PR-14, PR-15 cùng PJ-01, PJ-02; không rủi ro nào mức 9 — chấm 3/3 cho mọi thứ là dấu hiệu chưa phân tích. Rủi ro mức 6 đi trước. PR-13, PR-14, PR-15 <b>không giảm được bằng lab</b> ⇒ vào thẳng báo cáo rủi ro còn lại (O-7), không bỏ qua mà không ghi nhận.</p>
 </details>
 
 ### 4.6. T5 — Test condition có truy vết
@@ -306,26 +306,26 @@ Gợi ý rủi ro (tài liệu kiến trúc §14): **tạo trùng giao dịch** 
 <tr><td>TCD-06</td><td>Tìm đủ 5 phút ⇒ hệ thống huỷ <code>no_driver</code>, phí 0 đ</td><td>R-STATE-05</td><td>PR-06</td><td>Đã có</td></tr>
 <tr><td>TCD-07</td><td>Ví từ chối ⇒ chuyến vẫn hoàn thành, <code>paymentStatus = failed</code>, không thử lại</td><td>R-PAY-04/06</td><td>PR-08</td><td>Đã có</td></tr>
 <tr><td>TCD-08</td><td>Phí huỷ ở mốc 2 phút: 1:59 miễn, 2:00 thu</td><td>R-CANCEL-01/02</td><td>PR-09</td><td>Đã có</td></tr>
-<tr><td>TCD-09</td><td>Ví hết giờ, thử lại cùng khoá ⇒ trừ tiền một lần</td><td>R-PAY-04, R-NFR-05</td><td>PR-03</td><td>Test khói của lab</td></tr>
-<tr><td>TCD-10</td><td>Khách khác xem chuyến ⇒ 404 như chuyến không tồn tại</td><td>R-API-05</td><td>PR-10</td><td>Test khói của lab</td></tr>
+<tr><td>TCD-09</td><td>Ví hết giờ, thử lại cùng khoá ⇒ trừ tiền một lần</td><td>R-PAY-04, R-NFR-05</td><td>PR-03</td><td>Smoke test của lab</td></tr>
+<tr><td>TCD-10</td><td>Khách khác xem chuyến ⇒ 404 như chuyến không tồn tại</td><td>R-API-05</td><td>PR-10</td><td>Smoke test của lab</td></tr>
 <tr><td>TCD-11</td><td>Bỏ bước (hoàn thành khi mới <code>accepted</code>) ⇒ 409, chuyến giữ nguyên</td><td>R-STATE-03, R-API-10</td><td>PR-07</td><td>Bài tập 2</td></tr>
 <tr><td>TCD-12</td><td>Tài xế huỷ ⇒ về <code>searching</code>, mốc tìm đặt lại, khách không mất phí</td><td>R-STATE-04, R-CANCEL-05</td><td>PR-06</td><td>Chưa</td></tr>
 <tr><td>TCD-13</td><td>Một tài xế nhận đồng thời hai chuyến ⇒ một thành công, một <code>DRIVER_BUSY</code></td><td>R-ACCEPT-03/05</td><td>PR-11</td><td>Chưa</td></tr>
-<tr><td>TCD-14</td><td>Tài xế gửi lại lệnh nhận chuyến mình đang giữ ⇒ 200, không đổi gì</td><td>R-ACCEPT-07</td><td>PR-01</td><td>Test khói của lab</td></tr>
+<tr><td>TCD-14</td><td>Tài xế gửi lại lệnh nhận chuyến mình đang giữ ⇒ 200, không đổi gì</td><td>R-ACCEPT-07</td><td>PR-01</td><td>Smoke test của lab</td></tr>
 <tr><td>TCD-15</td><td>p95 tạo chuyến dưới 500 ms ở mức tải đã thoả thuận</td><td>R-NFR-02</td><td>PR-12</td><td>Minh hoạ (Series 09)</td></tr>
 <tr><td>TCD-16</td><td>Event gán tài xế bị gửi lại không tạo Trip thứ hai</td><td>Kiến trúc §6.3</td><td>PR-13</td><td>Ngoài lab (Series 11)</td></tr>
 <tr><td>TCD-17</td><td>Webhook trùng hoặc trễ không ghi sổ hai lần</td><td>Kiến trúc §4.9</td><td>PR-14</td><td>Ngoài lab (Series 07/11)</td></tr>
 <tr><td>TCD-18</td><td>Kênh theo dõi chỉ trả chuyến của người được phép</td><td>Kiến trúc §10</td><td>PR-15</td><td>Ngoài lab (Series 09)</td></tr>
 </tbody>
 </table>
-<p>Kiểm chéo hai chiều: mỗi PR-01…PR-15 có ít nhất một TCD; mỗi TCD trỏ tới ít nhất một yêu cầu. Rủi ro dự án không có TCD — chúng được xử lý bằng hành động quản lý, không bằng test.</p>
+<p>Kiểm tra chéo hai chiều: mỗi PR-01…PR-15 có ít nhất một TCD; mỗi TCD trỏ tới ít nhất một yêu cầu. Rủi ro dự án không có TCD — chúng được xử lý bằng hành động quản lý, không bằng test.</p>
 </details>
 
 ## 5. Thực hành
 
 ### 5.1. Kiểm chứng lời giải mẫu trên lab
 
-Lời giải mẫu khẳng định nhiều điều về hệ thống: báo giá hết hạn ở đúng 5 phút, gửi lại cùng khoá không tạo chuyến mới, chỉ một tài xế thắng… Tester không tin khẳng định mà kiểm. Thư mục `examples/toi-noi-testing/articles/thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe/` có 11 test vitest, mỗi test mang mã TCD và R-…; test gọi API HTTP của lab (supertest) với kho trong bộ nhớ, đồng hồ giả và ví giả; riêng TCD-05 chạy thêm trên PGlite. Ví dụ TCD-02 kiểm cả hai phía của mốc hết hạn:
+Lời giải mẫu khẳng định nhiều điều về hệ thống: báo giá hết hạn ở đúng 5 phút, gửi lại cùng khoá không tạo chuyến mới, chỉ một tài xế thắng… Tester không tin khẳng định mà kiểm chứng. Thư mục `examples/toi-noi-testing/articles/thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe/` có 11 test vitest, mỗi test mang mã TCD và R-…; test gọi API HTTP của lab (supertest) với kho trong bộ nhớ, đồng hồ giả và ví giả; riêng TCD-05 chạy thêm trên PGlite. Ví dụ TCD-02 kiểm cả hai phía của mốc hết hạn:
 
 ```ts
 it('TCD-02 · R-QUOTE-01: còn hạn ở 4 phút 59,999 giây; đúng 5 phút ⇒ 422 QUOTE_EXPIRED', async () => {
@@ -365,7 +365,7 @@ npx vitest run articles/thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe --reporte
       Tests  11 passed (11)
 ```
 
-(Đã lược tên file và tên khối `describe` ở đầu mỗi dòng.) TCD-09, TCD-10, TCD-14 không viết lại vì test khói của lab đã có (`tests/smoke/api.test.ts`; `npx vitest run tests/smoke/api.test.ts` ⇒ `11 passed (11)`). Tái dùng testware có sẵn cũng là truy vết.
+(Đã lược tên file và tên khối `describe` ở đầu mỗi dòng.) TCD-09, TCD-10, TCD-14 không viết lại vì smoke test của lab đã có (`tests/smoke/api.test.ts`; `npx vitest run tests/smoke/api.test.ts` ⇒ `11 passed (11)`). Tái dùng testware có sẵn cũng là truy vết.
 
 ### 5.2. Kết quả mong đợi và thực tế
 

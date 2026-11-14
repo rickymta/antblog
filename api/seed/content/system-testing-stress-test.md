@@ -34,7 +34,7 @@ Câu hỏi «server có chết không?» là câu hỏi kém. Một hệ thống
 - **Giữ được gì:** giá báo vẫn đúng, không ghi trùng chuyến, không trừ tiền sai — kể cả khi chậm.
 - **Trở lại thế nào:** khi tải giảm, hệ thống có quay về trạng thái phục vụ bình thường không, sau bao lâu, còn backlog không.
 
-Stress test là thí nghiệm có chủ đích để quan sát ba điều đó **ở mức tải cao hơn mức thường đã xác định**, với giới hạn an toàn rõ ràng. Nó không phải cuộc thi làm sập máy.
+Stress test là thí nghiệm có chủ đích để quan sát ba điều đó **ở mức tải cao hơn mức thường đã xác định**, với giới hạn an toàn rõ ràng. Stress test không phải cuộc thi làm sập máy.
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
 
@@ -66,7 +66,7 @@ Sau bài này, bạn có thể:
 | Breakpoint | Tìm giới hạn theo tiêu chí định trước | Tăng đủ xa, generator đủ mạnh, tiêu chí dừng rõ |
 | Recovery | Khả năng phục hồi sau sự cố | Failure model, thời gian, toàn vẹn dữ liệu (SYS-14) |
 
-Lab của bài là **stress dạng bước có giới hạn**: bốn mức tải cố định, mỗi mức drain xong mới sang mức sau. Nó không phải ramp tuyến tính, không phải spike production và không phải breakpoint.
+Lab của bài là **stress dạng bước có giới hạn**: bốn mức tải cố định, mỗi mức drain xong mới sang mức sau. Lab này không phải ramp tuyến tính, không phải spike production và không phải breakpoint.
 
 ### 2.2. Mức «bình thường» đến từ đâu
 
@@ -119,7 +119,7 @@ Rủi ro 4 hay bị bỏ qua nhất. Một script closed-model chậm lại cùn
 
 **Exit của bài tập** (đúng như mã nguồn): exit code 0 khi (a) không có request lỗi ở bất kỳ bước nào, (b) baseline và return-low nằm trong envelope — không drop, không lỗi, p95 < 500 ms, (c) probe báo giá sau tải đúng oracle, (d) health trả 200. Ở elevated và high, p95 vượt 500 ms hoặc drop được **ghi nhận là suy giảm**, không tự làm exit 1.
 
-Exit 0 vì thế chỉ có nghĩa các điều kiện bắt buộc đã đạt. Nó **không** nói mọi slot tải cao đã được gửi đủ. Nếu mục tiêu release yêu cầu «không drop ở 600/s», phải đưa tiêu chí đó vào gate **trước khi chạy**; đổi tiêu chí sau khi thấy kết quả là làm sai thí nghiệm.
+Exit 0 vì thế chỉ có nghĩa các điều kiện bắt buộc đã đạt. Exit 0 **không** nói mọi slot tải cao đã được gửi đủ. Nếu mục tiêu release yêu cầu «không drop ở 600/s», phải đưa tiêu chí đó vào gate **trước khi chạy**; đổi tiêu chí sau khi thấy kết quả là làm sai thí nghiệm.
 
 ## 4. Thiết kế thí nghiệm có ranh giới
 
@@ -174,9 +174,9 @@ Hai hệ quả của thiết kế cần nói thẳng:
 - **Drain giữa các bước** làm thí nghiệm dễ đọc (mỗi bucket chỉ chứa request của bước đó) nhưng che mất backlog liên tục. Đây không phải ramp không gián đoạn.
 - **Safety stop dùng chung bộ đếm lỗi toàn cục.** Nếu đã kích hoạt ở bước high, các slot return-low cũng bị bỏ; probe cuối vẫn chạy một lần nhưng không thay thế được phase giảm tải.
 
-### 4.2. Bảng case
+### 4.2. Bảng test case
 
-Bản nháp chỉ mô tả các bước; bài này đặt ID để dễ báo cáo. Mọi case chạy trong một lần thực thi script.
+Bản nháp chỉ mô tả các bước; bài này đặt ID để dễ báo cáo. Mọi test case chạy trong một lần thực thi script.
 
 | ID | Requirement / rủi ro | Precondition | Input | Action | Expected | Cleanup |
 |---|---|---|---|---|---|---|
@@ -300,11 +300,11 @@ Lần chạy đo được «sạch», nhưng một báo cáo stress hữu ích p
 | Mẫu quan sát | Điều có thể suy ra | Chưa thể kết luận | Bằng chứng tiếp theo |
 |---|---|---|---|
 | Latency tăng, in-flight tăng | Request giữ slot lâu hơn | Chính xác CPU, SQL hay event loop nghẽn | Profile CPU, thời gian truy vấn, event loop lag tách riêng |
-| Lag tăng, nhiều `scheduler-late` | Generator không giữ lịch | Server riêng biệt không chịu được target | Tách generator sang tiến trình/máy khác rồi lặp lại |
+| Lag tăng, nhiều `scheduler-late` | Generator không giữ lịch | Riêng server không chịu được target | Tách generator sang tiến trình/máy khác rồi lặp lại |
 | Nhiều `in-flight-cap` | Request chậm hơn khả năng nhả slot | Server đã «từ chối» | Tăng trần chỉ khi máy còn tài nguyên; so p99 |
 | Sent đủ, lỗi oracle tăng | Request tới nơi nhưng sai nghiệp vụ | Lỗi chỉ do tải | Phân loại lỗi, tái hiện ở tải thấp với cùng dữ liệu |
 | `TimeoutError` | Client bỏ cuộc sau 2 s | Server không thực hiện thao tác | Đối soát dữ liệu phía server |
-| Return-low đạt, probe đúng | Sau drain, luồng chọn hoạt động | Phục hồi đầy đủ mọi tài nguyên, RTO | Timeline liên tục, nhiều cửa sổ ổn định |
+| Return-low đạt, probe đúng | Sau drain, luồng đã chọn vẫn hoạt động | Phục hồi đầy đủ mọi tài nguyên, RTO | Timeline liên tục, nhiều cửa sổ ổn định |
 | Mọi mức đều đạt | Chưa thấy failure trong giới hạn thử | Đã tìm được capacity | Thiết kế thí nghiệm mới, không tăng tải vô hạn |
 
 Đừng ép kết quả phải có lỗi để «đúng bài Stress». Nếu 600/s vẫn đạt, bước tiếp theo là một thí nghiệm mới với phạm vi và tài nguyên phù hợp — ưu tiên tách generator khỏi SUT trước khi nâng target.

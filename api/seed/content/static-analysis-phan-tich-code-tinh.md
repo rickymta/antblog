@@ -31,7 +31,7 @@ Một hàm kiểm voucher dài 35 dòng, build xanh, chạy thử vài lần đ�
 
 **Static analysis** (phân tích tĩnh) là đánh giá code hoặc kiến trúc **mà không thực thi** nó, thường bằng công cụ. Trong dự án TypeScript, bạn đã dùng nó hằng ngày dù có thể không gọi tên: trình biên dịch `tsc` báo lỗi kiểu, ESLint gạch chân biến thừa, IDE tô xám dòng không bao giờ chạy tới.
 
-Nó giải quyết ba vấn đề: **đường đi hiếm** (test động chỉ chạm nhánh mà dữ liệu test dẫn vào, công cụ tĩnh đọc mọi nhánh như nhau); **chi phí và độ trễ** (không cần dữ liệu, môi trường, test case — chạy ngay khi code vừa gõ, ở bước 1 pipeline CI); và **thứ test động không đo được** (độ phức tạp, chuẩn coding, code trùng lặp).
+Static analysis giải quyết ba vấn đề: **đường đi hiếm** (test động chỉ chạm nhánh mà dữ liệu test dẫn vào, công cụ tĩnh đọc mọi nhánh như nhau); **chi phí và độ trễ** (không cần dữ liệu, môi trường, test case — chạy ngay khi code vừa gõ, ở bước 1 pipeline CI); và **thứ test động không đo được** (độ phức tạp, chuẩn coding, code trùng lặp).
 
 Khi nào dùng: **luôn luôn**, như cổng tự động trước code review và dynamic testing — nhưng không thay được test động (bài 022). Bài này đi sâu phía công cụ: đọc kết quả, phân loại, biến kết quả thành đề xuất cải thiện.
 
@@ -39,9 +39,9 @@ Khi nào dùng: **luôn luôn**, như cổng tự động trước code review v
 
 ### 2.1. Static analysis trong CTFL và CTAL-TTA
 
-CTFL v4.0.1 (mục 3.1) xếp static analysis cùng review vào **static testing**: tìm vấn đề trước dynamic testing với ít công sức hơn (không cần test case), thường nằm trong CI, dùng cho defect code cụ thể, maintainability và security. Sản phẩm được phân tích bằng công cụ phải **có cấu trúc để kiểm** (code, model, văn bản có cú pháp hình thức). Mục 6.1 gọi đây là **static testing tools**.
+CTFL v4.0.1 (mục 3.1) xếp static analysis cùng review vào **static testing**: tìm vấn đề trước dynamic testing với ít công sức hơn (không cần test case), thường nằm trong CI, dùng cho defect code cụ thể, maintainability và security. Sản phẩm được phân tích bằng công cụ phải **có cấu trúc để kiểm tra** (code, model, văn bản có cú pháp hình thức). Mục 6.1 gọi đây là **static testing tools**.
 
-CTAL-TTA v4.0 (mục 3.2): mục tiêu là phát hiện defect **thật hoặc tiềm ẩn** trong code, kiến trúc và **cải thiện maintainability**, qua ba kỹ thuật:
+CTAL-TTA v4.0 (mục 3.2): mục tiêu là phát hiện defect **thật hoặc tiềm ẩn** trong code và kiến trúc, đồng thời **cải thiện maintainability**, qua ba kỹ thuật:
 
 | LO | Kỹ thuật | Tìm gì |
 |---|---|---|
@@ -270,7 +270,7 @@ articles/static-analysis-phan-tich-code-tinh/voucher-smelly.mts(45,5): error TS7
 articles/static-analysis-phan-tich-code-tinh/voucher-smelly.mts(54,27): error TS2454: Variable 'errorCode' is used before being assigned.
 ```
 
-Cùng tệp, cùng trình biên dịch: tắt `strict` **0 lỗi**, bật 2, thêm cờ 4. Kiểu tĩnh là một lớp kiểm tra vặn to nhỏ được (lab bật `strict` sẵn). Mã thật trong cùng `tsconfig.json` của bài không có lỗi nào ở cả ba mức.
+Cùng tệp, cùng trình biên dịch: tắt `strict` **0 lỗi**, bật 2, thêm cờ 4. Kiểu tĩnh là một lớp kiểm tra có thể điều chỉnh độ chặt (lab bật `strict` sẵn). Mã thật trong cùng `tsconfig.json` của bài không có lỗi nào ở cả ba mức.
 
 ### 5.2. ESLint với cấu hình của bài
 
@@ -335,7 +335,7 @@ Tổng: 4 dẫn tới defect thật (F1–F4), 4 đáng sửa vì maintainabilit
 
 ### 5.4. Xác nhận bằng test động
 
-Phân loại «thật» chỉ là giả thuyết cho tới khi có bằng chứng. `xac-nhan-canh-bao.test.ts` chạy cùng ca trên mã thật (phải đạt) và bản smelly (`it.fails` — phải thất bại):
+Phân loại «thật» chỉ là giả thuyết cho tới khi có bằng chứng. `xac-nhan-canh-bao.test.ts` chạy cùng test case trên mã thật (phải đạt) và bản smelly (`it.fails` — phải thất bại):
 
 | Ca | Phát hiện | Dữ liệu | Mong đợi (SPEC) | Bản smelly cho |
 |---|---|---|---|---|
@@ -352,7 +352,7 @@ npx vitest run articles/static-analysis-phan-tich-code-tinh
       Tests  8 passed (8)
 ```
 
-4 ca trên mã thật đạt, 4 ca `it.fails` trên bản smelly thất bại đúng dự đoán ⇒ F1–F4 là defect thật. Công cụ tĩnh chỉ ra **chỗ**, test động xác nhận **hậu quả**.
+4 test case trên mã thật đạt, 4 test case `it.fails` trên bản smelly thất bại đúng dự đoán ⇒ F1–F4 là defect thật. Công cụ tĩnh chỉ ra **chỗ**, test động xác nhận **hậu quả**.
 
 ### 5.5. Đề xuất cải thiện maintainability (TTA-3.2.3)
 
@@ -366,7 +366,7 @@ npx vitest run articles/static-analysis-phan-tich-code-tinh
 
 - **False positive làm mòn niềm tin.** Hàng trăm cảnh báo giả khiến đội bỏ qua cả cảnh báo thật. Bắt đầu với ít luật giá trị cao, đo tỉ lệ thật/giả rồi mới thêm. Nhưng cảnh báo giả vẫn đáng đọc — F4 dẫn tới defect ngay cạnh.
 - **Giới hạn của công cụ.** Syllabus nêu: khó biết đường đi khả thi, khó theo dữ liệu trong mảng/bản ghi động và giữa luồng đồng thời. Lỗi «hai tài xế cùng nhận một chuyến» (kiến trúc §21) là vấn đề đồng thời — cần test hệ thống và tầng database (Series 08, 11).
-- **Độ phức tạp thấp chưa chắc đúng.** Đó là chỉ báo bảo trì, không phải chất lượng chức năng (F12). McCabe gốc và ESLint còn đếm khác nhau (3 so với 7 cho cùng hàm) — ghi rõ công cụ khi đặt ngưỡng.
+- **Độ phức tạp thấp chưa chắc là code đúng.** Đó là chỉ báo bảo trì, không phải chất lượng chức năng (F12). McCabe gốc và ESLint còn đếm khác nhau (3 so với 7 cho cùng hàm) — ghi rõ công cụ khi đặt ngưỡng.
 - **Không chỉ code.** OpenAPI, `.proto`, schema event (kiến trúc §6.6) cũng lint được, ví dụ chặn breaking change gRPC. TTA còn nói quét bảo mật (SQL injection, XSS) — R-API-14 «truy vấn dùng tham số» là thứ SAST kiểm được (Series 09).
 - **Không thay review.** Công cụ không biết «rỗng nghĩa là mọi dịch vụ», nó chỉ thấy `!array` luôn sai. Ghép với checklist review (bài 028). Đo maintainability cho cả `src/domain` và chi phí một thay đổi thật là chủ đề TEST-110 (Series 09).
 
@@ -395,7 +395,7 @@ function surcharge(kg: number, fragile: boolean, city: string): number {
 
 <details>
 <summary><b>Gợi ý lời giải</b></summary>
-<p>Lần chạy khi viết bài: 5 problems — <code>customerCancellationFee</code> complexity 9, <code>normalizeDistanceKm</code> 4, <code>calculateFare</code> 5 (chỉ là số đo, dưới ngưỡng 10 của đội) và 2 lỗi <code>restrict-template-expressions</code> ở <code>fare.ts</code> dòng 23 (thông điệp in biên 0,5 và 100 km — giả, như F11). Cách làm chung: số đo độ phức tạp chỉ thành vấn đề khi vượt ngưỡng của đội; với <code>no-unnecessary-condition</code> phải đối chiếu SPEC xem kiểu đã loại trừ giá trị (giả) hay viết nhầm (thật); cảnh báo nào cho là thật thì viết một ca test động như mục 5.4 để chứng minh.</p>
+<p>Lần chạy khi viết bài: 5 problems — <code>customerCancellationFee</code> complexity 9, <code>normalizeDistanceKm</code> 4, <code>calculateFare</code> 5 (chỉ là số đo, dưới ngưỡng 10 của đội) và 2 lỗi <code>restrict-template-expressions</code> ở <code>fare.ts</code> dòng 23 (thông điệp in biên 0,5 và 100 km — giả, như F11). Cách làm chung: số đo độ phức tạp chỉ thành vấn đề khi vượt ngưỡng của đội; với <code>no-unnecessary-condition</code> phải đối chiếu SPEC xem kiểu đã loại trừ giá trị (giả) hay viết nhầm (thật); cảnh báo nào cho là thật thì viết một test case động như mục 5.4 để chứng minh.</p>
 </details>
 
 **Câu hỏi trắc nghiệm** (tự soạn theo phong cách ISTQB, mỗi câu một đáp án đúng).

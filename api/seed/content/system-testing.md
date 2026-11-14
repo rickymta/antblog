@@ -36,7 +36,7 @@ Mọi component đã đúng, mọi chỗ nối đã kiểm — vậy khách mở
 - Thông báo lỗi khi tài xế bấm sai bước có dễ hiểu không?
 - Trạng thái mới tới tay khách mất bao lâu?
 
-Đó là câu hỏi về **hành vi của cả hệ thống** như người dùng thấy. **System testing** là test level trả lời chúng. Dùng khi đã có một bản hệ thống chạy được đầy đủ (hoặc gần đầy đủ) và một môi trường đủ giống thật.
+Đó là câu hỏi về **hành vi của cả hệ thống** như người dùng thấy. **System testing** là test level trả lời chúng. Test level này dùng khi đã có một bản hệ thống chạy được đầy đủ (hoặc gần đầy đủ) và một môi trường đủ giống thật.
 
 Bài dừng ở mức **test level**. Chiến lược system test cho Tới Nơi (phạm vi, tiêu chí vào/ra, dữ liệu) đi sâu ở TEST-079; end-to-end testing và các kịch bản nhiều người dùng, đồng thời ở Series 08.
 
@@ -188,7 +188,7 @@ Test condition cấp hệ thống mô tả **điều người dùng làm đượ
 
 ### 4.2. Vì sao những condition này thuộc cấp hệ thống
 
-Mục 2.1.2 của syllabus nhắc: mỗi test level có mục tiêu riêng để test đủ rộng mà **không trùng lặp**. Không lặp lại ở cấp hệ thống mọi tổ hợp cước (xe máy/ô tô × cao điểm × mưa × voucher) — chúng đã được khoá ở component test. TC-SYS-01 chỉ cần **một** giá trị đại diện để chứng minh màn hình hiển thị đúng con số backend tính. Ngược lại, TC-SYS-05 không thể kiểm ở cấp thấp hơn: nó cần trình duyệt thật, cơ chế hỏi lại 2 giây và backend cùng chạy.
+Mục 2.1.2 của syllabus nhắc: mỗi test level có mục tiêu riêng để test đủ rộng mà **không trùng lặp**. Không lặp lại ở cấp hệ thống mọi tổ hợp cước (xe máy/ô tô × cao điểm × mưa × voucher) — chúng đã được khoá ở component test. TC-SYS-01 chỉ cần **một** giá trị đại diện để chứng minh màn hình hiển thị đúng con số backend tính. Ngược lại, TC-SYS-05 không thể kiểm ở cấp thấp hơn vì cần trình duyệt thật, cơ chế hỏi lại 2 giây và backend cùng chạy.
 
 ### 4.3. Thiết kế test case
 
@@ -241,7 +241,7 @@ Thông báo lỗi trang tài xế: Không thể thực hiện "complete" khi chu
   2 passed (18.2s)
 ```
 
-Máy đo: Intel Core i7-10700, 64 GB RAM, Windows 11, Node 22.18, Playwright 1.64.1, Chrome 156 headless. Lần chạy thứ hai cho 1.861–2.436 ms.
+Máy đo: Intel Core i7-10700, 64 GB RAM, Windows 11, Node 22.18, Playwright 1.64.1, Chrome 156 headless. Lần chạy thứ hai cho kết quả 1.861–2.436 ms.
 
 ### 5.3. Mong đợi và thực tế
 
@@ -256,7 +256,7 @@ Máy đo: Intel Core i7-10700, 64 GB RAM, Windows 11, Node 22.18, Playwright 1.6
 
 ### 5.4. Hai điều test «xanh» chưa nói
 
-- **Số đo lan truyền không chứng minh R-NFR-04.** R-NFR-04 là p95 trên tải thật; ở đây là 5 mẫu, một người dùng, một máy dev. Con số quanh 1,9 giây chủ yếu phản ánh chu kỳ hỏi lại 2 giây của trang khách. Test này chỉ bắt được hồi quy thô (vd ai đó đổi chu kỳ thành 10 giây). Đo đúng nghĩa thuộc Series 09.
+- **Số đo độ trễ lan truyền không chứng minh R-NFR-04.** R-NFR-04 là p95 trên tải thật; ở đây là 5 mẫu, một người dùng, một máy dev. Con số quanh 1,9 giây chủ yếu phản ánh chu kỳ hỏi lại 2 giây của trang khách. Test này chỉ bắt được regression thô (ví dụ ai đó đổi chu kỳ thành 10 giây). Đo đúng nghĩa thuộc Series 09.
 - **Thông báo lộ mã nội bộ.** Tài xế đọc `"complete"` và `"accepted"` — mã kỹ thuật tiếng Anh, không phải nhãn trên nút («Hoàn thành») hay trạng thái («Tài xế đã nhận»). Đây là một phát hiện chỉ có ở cấp hệ thống: component test của `nextStatus` chỉ kiểm mã lỗi `INVALID_TRANSITION`, không ai đọc câu chữ. Ghi thành một báo cáo lỗi mức nhẹ, loại usability (mẫu báo cáo đầy đủ ở [TEST-010](/articles/testware-san-pham-kiem-thu)).
 
 ## 6. Góc nhìn nâng cao
@@ -324,7 +324,7 @@ Máy đo: Intel Core i7-10700, 64 GB RAM, Windows 11, Node 22.18, Playwright 1.6
 <p><b>b) đúng.</b> Mô phỏng sub-system là khả năng syllabus nêu rõ. Interface với VíXanh thật là đối tượng của system integration testing. c), d) sai: test level xác định bởi test object, test basis, mục tiêu — không phải bởi việc có dùng bản giả hay không.</p>
 </details>
 
-**Câu 4 (K2).** Ca nào phù hợp NHẤT để làm ở system testing thay vì component testing?
+**Câu 4 (K2).** Test case nào phù hợp NHẤT để làm ở system testing thay vì component testing?
 
 - a) `parcelSurcharge(6.1)` trả 4.000 đ
 - b) Mọi tổ hợp loại xe × cao điểm × mưa × voucher của công thức cước

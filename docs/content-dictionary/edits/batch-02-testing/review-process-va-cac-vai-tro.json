@@ -1,0 +1,9 @@
+{"file":"review-process-va-cac-vai-tro.md","edits":[
+{"old":"những cách «cắt gọt» khung này","new":"những cách «may đo» khung này","reason":"Thống nhất 'may đo' (tailor) với mục 2.1","severity":"medium"},
+{"old":"### 2.1. Một quy trình chung, cắt gọt theo tình huống","new":"### 2.1. Một quy trình chung, may đo theo tình huống","reason":"Thống nhất 'may đo' (tailor); 'cắt gọt' gượng","severity":"medium"},
+{"old":"ca số 0, ca huỷ)","new":"trường hợp số 0, trường hợp huỷ)","reason":"'ca' tự ghép, dễ lẫn với test case","severity":"medium"},
+{"old":"tạo hiểu chung giữa Payment","new":"tạo sự hiểu biết chung giữa Payment","reason":"'tạo hiểu chung' thiếu danh từ","severity":"medium"},
+{"old":"Người đọc chỉ SPEC để viết test","new":"Người chỉ đọc SPEC để viết test","reason":"Trật tự từ sai: 'chỉ' phải đứng trước 'đọc'","severity":"medium"},
+{"old":"(một người giữ nhiều vai được)","new":"(một người có thể giữ nhiều vai)","reason":"Trật tự từ kiểu dịch máy","severity":"low"},
+{"old":"đây là lúc <i>kiểm</i> đã đạt exit criteria chưa","new":"đây là lúc <i>kiểm tra</i> xem đã đạt exit criteria chưa","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"}
+]}

@@ -1,0 +1,65 @@
+{
+"file": "acceptance-testing-tong-quan.md",
+"edits": [
+{
+"old": "Nó giải quyết một vấn đề mà các level trước không giải được:",
+"new": "Level này giải quyết một vấn đề mà các level trước không giải quyết được:",
+"reason": "Tránh 'Nó' chỉ sự vật trừu tượng; 'giải được' cụt",
+"severity": "medium"
+},
+{
+"old": "Trong Agile nó còn xuất hiện ở mức từng user story",
+"new": "Trong Agile, acceptance testing còn xuất hiện ở mức từng user story",
+"reason": "Tránh 'nó' chỉ khái niệm",
+"severity": "medium"
+},
+{
+"old": "Vì nó trả lời câu hỏi «có đúng thứ người dùng cần không», nó gắn chặt",
+"new": "Vì trả lời câu hỏi «có đúng thứ người dùng cần không», acceptance testing gắn chặt",
+"reason": "Hai 'nó' liên tiếp, giọng dịch máy",
+"severity": "medium"
+},
+{
+"old": "kiểm đối tượng test tuân thủ yêu cầu hợp đồng, pháp lý và quy định — đó chính là đất của hai dạng",
+"new": "kiểm tra xem đối tượng test có tuân thủ yêu cầu hợp đồng, pháp lý và quy định hay không — đó chính là phạm vi của hai dạng",
+"reason": "'kiểm' cụt, 'đất của' là cách nói gượng",
+"severity": "medium"
+},
+{
+"old": "nên muốn dùng làm tiêu chí OAT phải được chốt thành cam kết trước.",
+"new": "nên nếu muốn dùng làm tiêu chí OAT thì phải chốt thành cam kết trước.",
+"reason": "Câu thiếu quan hệ từ, trật tự gượng",
+"severity": "medium"
+},
+{
+"old": "Pháp chế cùng tester kiểm tuân thủ dữ liệu cá nhân:",
+"new": "Pháp chế cùng tester kiểm tra tuân thủ dữ liệu cá nhân:",
+"reason": "'kiểm' cụt, thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "gợi ý: kiến trúc §8.3 có đối soát định kỳ, §15.2 có số đo tỉ lệ thu tiền thất bại",
+"new": "gợi ý: kiến trúc §8.3 có đối soát định kỳ, §15.2 có chỉ số tỉ lệ thu tiền thất bại",
+"reason": "'số đo' là metric, dùng 'chỉ số'",
+"severity": "low"
+},
+{
+"old": "(§15.2 có số đo «payment authorization/capture/failure rate»)",
+"new": "(§15.2 có chỉ số «payment authorization/capture/failure rate»)",
+"reason": "'số đo' là metric, dùng 'chỉ số'",
+"severity": "low"
+},
+{
+"old": "số đo từ beta cần sự đồng ý của người dùng — lại là chuyện quy định.",
+"new": "số liệu đo từ beta cần sự đồng ý của người dùng — đây lại là chuyện quy định.",
+"reason": "'số đo' là metric; câu thiếu chủ ngữ",
+"severity": "medium"
+},
+{
+"old": "Kiểm Tới Nơi không lưu số thẻ và mã CVV, log che dữ liệu cá nhân theo quy định hiện hành thuộc dạng nào là chính?",
+"new": "Việc kiểm tra Tới Nơi không lưu số thẻ và mã CVV, đồng thời log che dữ liệu cá nhân, theo quy định hiện hành thuộc dạng nào là chính?",
+"reason": "Câu thiếu chủ ngữ, không rõ nghĩa",
+"severity": "high"
+}
+]
+}

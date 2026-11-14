@@ -21,7 +21,7 @@ language: vi
 <tr><th scope="row">Test Type</th><td>Functional</td></tr>
 <tr><th scope="row">Test Technique</th><td>Không áp dụng</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/tong-quan-5-test-level-istqb">TEST-011 · Tổng quan 5 test level</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab <code>articles/functional-testing</code> (20 ca vitest): functional correctness của phụ phí bưu kiện R-PARCEL-03 (5 · 5,1 · 6,0 · 6,1 · 30 kg) ở mức component và qua API + kiểm tra completeness bảng chi tiết R-FARE-10</td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab <code>articles/functional-testing</code> (20 test case vitest): functional correctness của phụ phí bưu kiện R-PARCEL-03 (5 · 5,1 · 6,0 · 6,1 · 30 kg) ở mức component và qua API + kiểm tra completeness bảng chi tiết R-FARE-10</td></tr>
 <tr><th scope="row">Tham chiếu ISTQB</th><td>CTFL v4.0.1 · Chương 2 · mục 2.2 và 2.2.2 · FL-2.2.2 (K2). Đọc thêm: CTAL-TA v4.0 · Chương 4 · mục 4.1 · TA-4.1.1 (K2)</td></tr>
 </tbody>
 </table>
@@ -29,11 +29,11 @@ language: vi
 
 ## 1. Giới thiệu
 
-Bài [TEST-011](/articles/tong-quan-5-test-level-istqb) chia hoạt động kiểm thử theo **test level** — kiểm *cái gì* (hàm, giao tiếp, cả hệ thống, hệ thống với bên ngoài) và *ai, khi nào*. Bài này mở trục thứ hai: **test type** — kiểm *khía cạnh chất lượng nào*. Hai trục vuông góc nhau. Một ca test luôn nằm ở một ô của lưới: «functional × component», «functional × system», «non-functional × system»…
+Bài [TEST-011](/articles/tong-quan-5-test-level-istqb) chia hoạt động kiểm thử theo **test level** — kiểm *cái gì* (hàm, giao tiếp, cả hệ thống, hệ thống với bên ngoài) và *ai, khi nào*. Bài này mở trục thứ hai: **test type** — kiểm *khía cạnh chất lượng nào*. Hai trục vuông góc nhau. Một test case luôn nằm ở một ô của lưới: «functional × component», «functional × system», «non-functional × system»…
 
-Functional testing trả lời câu hỏi **«hệ thống làm gì?»**: báo giá bưu kiện 6,1 kg có cộng 4.000 đ phụ phí không, bảng chi tiết cước có đủ từng bước không, tính năng có thật sự giúp khách đặt được đơn không. Nó **không** hỏi «nhanh không», «có an toàn không» — đó là non-functional testing ([TEST-018](/articles/non-functional-testing-tong-quan)).
+Functional testing trả lời câu hỏi **«hệ thống làm gì?»**: báo giá bưu kiện 6,1 kg có cộng 4.000 đ phụ phí không, bảng chi tiết cước có đủ từng bước không, tính năng có thật sự giúp khách đặt được đơn không. Functional testing **không** hỏi «nhanh không», «có an toàn không» — đó là non-functional testing ([TEST-018](/articles/non-functional-testing-tong-quan)).
 
-Vấn đề nó giải quyết: không gọi tên được câu hỏi thì đội có hàng trăm ca test «chức năng» mà không biết chúng phủ **đúng**, **đủ** hay **hợp** — và thường chỉ phủ «đúng». Khi nào dùng: ở mọi test level, cho mọi chức năng trong test basis; câu hỏi chỉ là làm ở level nào cho rẻ nhất.
+Vấn đề mà khái niệm này giải quyết: nếu không gọi tên được câu hỏi, đội sẽ có hàng trăm test case «chức năng» mà không biết chúng phủ **đúng**, **đủ** hay **hợp** — và thường chỉ phủ «đúng». Khi nào dùng: ở mọi test level, cho mọi chức năng trong test basis; câu hỏi chỉ là làm ở level nào cho rẻ nhất.
 
 ## 2. Lý thuyết theo ISTQB
 
@@ -48,7 +48,7 @@ Mục 2.2 định nghĩa test type là các nhóm hoạt động kiểm thử g�
 | Black-box testing | Hành vi có khớp **đặc tả** không? | Tài liệu không liên quan tới cấu trúc bên trong |
 | White-box testing | Cấu trúc bên trong đã được **phủ** đủ chưa? | Code, kiến trúc, luồng công việc, luồng dữ liệu |
 
-Cả bốn áp được cho mọi test level, chỉ khác trọng tâm; mọi test technique đều có thể dùng để suy ra test condition cho cả bốn. Lưu ý bốn test type này **không loại trừ nhau**: hai dòng đầu phân theo *đặc tính chất lượng*, hai dòng sau phân theo *nguồn suy ra test*. Một ca test vừa functional vừa white-box là chuyện bình thường (mục 2.3).
+Cả bốn áp được cho mọi test level, chỉ khác trọng tâm; mọi test technique đều có thể dùng để suy ra test condition cho cả bốn. Lưu ý bốn test type này **không loại trừ nhau**: hai dòng đầu phân theo *đặc tính chất lượng*, hai dòng sau phân theo *nguồn suy ra test*. Một test case vừa functional vừa white-box là chuyện bình thường (mục 2.3).
 
 ### 2.2. Ba câu hỏi của functional testing
 
@@ -136,7 +136,7 @@ Người mới hay ghép «functional = black-box» và «non-functional = white
 
 ### 3.1. Yêu cầu nghiệp vụ
 
-Giao bưu kiện chiếm khoảng 0,3 trên 2 triệu chuyến mỗi ngày ([hồ sơ dự án](/articles/du-an-mau-toi-noi)). Trước khi đặt, khách nhận **báo giá** có thời hạn: tổng tiền kèm bảng chi tiết từng bước — CSKH dùng nó để giải thích giá, ứng dụng dùng nó để hiển thị.
+Giao bưu kiện chiếm khoảng 0,3 trên 2 triệu chuyến mỗi ngày ([hồ sơ dự án](/articles/du-an-mau-toi-noi)). Trước khi đặt, khách nhận **báo giá** có thời hạn: tổng tiền kèm bảng chi tiết từng bước — CSKH dùng báo giá này để giải thích giá, ứng dụng dùng để hiển thị.
 
 ### 3.2. Business rules dùng trong bài
 
@@ -196,7 +196,7 @@ Cách chọn giá trị biên (5,0 / 5,1 / 6,0 / 6,1 / 30) là việc của kỹ
 | Không bắt được | Hàm đúng nhưng không ai gọi nó | Lỗi nằm sâu khó định vị — test đỏ không chỉ ra dòng nào sai |
 | Chi phí | Mili giây, không cần dựng hệ thống | Cần dựng ứng dụng (lab: trong bộ nhớ, vài mili giây mỗi ca) |
 
-Vì thế lab chạy **cùng năm ca** ở cả hai level: nếu component xanh mà API đỏ, lỗi nằm ở phần lắp ráp chứ không ở công thức.
+Vì thế lab chạy **cùng năm test case** ở cả hai level: nếu component xanh mà API đỏ, lỗi nằm ở phần lắp ráp chứ không ở công thức.
 
 ### 4.3. Oracle: tính tay trước khi chạy
 
@@ -257,7 +257,7 @@ export function missingFareFields(fare: Record<string, unknown>): string[] {
 }
 ```
 
-Cùng bảng `ORACLE` (5 dòng của mục 4.3) chạy ở hai level; ở mức component chỉ là `expect(parcelSurcharge(weightKg)).toBe(surcharge)`, qua API thì (`functional-correctness.test.ts`, rút gọn):
+Cùng bảng `ORACLE` (5 dòng của mục 4.3) chạy ở hai level; ở mức component chỉ là `expect(parcelSurcharge(weightKg)).toBe(surcharge)`, qua API thì viết như sau (`functional-correctness.test.ts`, rút gọn):
 
 ```ts
 describe('Mức system qua API · POST /api/quotes, ô tô 3 km, SG, 09:00, không mưa', () => {
@@ -289,8 +289,8 @@ Kết quả thực tế (vitest 3.2.7, Node 22, lần chạy khi viết bài):
 
 ### 5.4. Đọc kết quả cho đúng
 
-- 20/20 xanh nói rằng, **với các ví dụ đã chọn**, phụ phí bưu kiện đúng ở cả hai level và bảng chi tiết đủ 11 bước. Nó không chứng minh mọi khối lượng đều đúng (nguyên lý «exhaustive testing is impossible», [TEST-003](/articles/bay-nguyen-ly-kiem-thu)).
-- Không có ca nào trả lời TCO-07 (appropriateness). Câu đó cần người dùng thật — xem phiếu phát hiện validation ở [TEST-005](/articles/verification-va-validation).
+- 20/20 test xanh cho thấy, **với các ví dụ đã chọn**, phụ phí bưu kiện đúng ở cả hai level và bảng chi tiết đủ 11 bước. Kết quả này không chứng minh mọi khối lượng đều đúng (nguyên lý «exhaustive testing is impossible», [TEST-003](/articles/bay-nguyen-ly-kiem-thu)).
+- Không có test case nào trả lời TCO-07 (appropriateness). Câu đó cần người dùng thật — xem phiếu phát hiện validation ở [TEST-005](/articles/verification-va-validation).
 - Muốn thấy test **đỏ** trên bản cài đặt sai (6,0 kg bị tính 4.000 đ), xem bản lỗi và test log ở [TEST-010](/articles/testware-san-pham-kiem-thu).
 
 ## 6. Góc nhìn nâng cao
@@ -301,7 +301,7 @@ Kết quả thực tế (vitest 3.2.7, Node 22, lần chạy khi viết bài):
 
 **Đúng tới mức nào?** Correctness gồm cả *precision*. Bảng chi tiết có giá trị lẻ như 37.062,5 đ (R-GEN-01 không làm tròn giữa chừng). So sánh bằng `toBe` trên số thực dễ đỏ giả vì sai số dấu phẩy động; lab dùng `toBeCloseTo(…, 6)` cho đẳng thức trung gian và `toBe` cho tổng (luôn là số nguyên đồng).
 
-**Đếm ca test không đo được completeness.** «Mỗi yêu cầu có ít nhất 3 test case» có thể là 3 ca cùng kiểm một trường. Completeness đo bằng truy vết: bước nào chưa có test condition.
+**Đếm test case không đo được completeness.** «Mỗi yêu cầu có ít nhất 3 test case» có thể là 3 test case cùng kiểm một trường. Completeness đo bằng truy vết: bước nào chưa có test condition.
 
 **Functional là nền của non-functional.** Chạy FC-02 hàng nghìn lần và đo thời gian là đã bắt đầu kiểm time behaviour — bài tiếp theo đi theo hướng đó.
 
@@ -358,7 +358,7 @@ Xếp 6 kiểm tra vào correctness (Co), completeness (Cm) hay appropriateness 
 
 <details><summary><b>Đáp án: b</b></summary><ul><li>a) Sai — đủ 11 bước, không thiếu gì.</li><li>b) Đúng — kết quả có mặt nhưng sai giá trị.</li><li>c) Sai — vấn đề không nằm ở việc người dùng có hoàn thành nhiệm vụ hay không.</li><li>d) Sai — hệ số cao điểm là quy tắc chức năng R-FARE-04.</li></ul></details>
 
-**Câu 4 (K2).** Ca test nào kiểm functional appropriateness?
+**Câu 4 (K2).** Test case nào kiểm functional appropriateness?
 
 - a) Unit test khẳng định 6,1 kg có phụ phí 4.000 đ
 - b) Đối chiếu từng bước trong R-FARE-10 với trường JSON trả về
@@ -367,7 +367,7 @@ Xếp 6 kiểm tra vào correctness (Co), completeness (Cm) hay appropriateness 
 
 <details><summary><b>Đáp án: c</b></summary><ul><li>a) Sai — correctness, có oracle từ SPEC.</li><li>b) Sai — completeness.</li><li>c) Đúng — chức năng có giúp người dùng hoàn thành nhiệm vụ không.</li><li>d) Sai — correctness với đầu vào không hợp lệ.</li></ul></details>
 
-**Câu 5 (K2).** Tester đọc mã `parcelSurcharge`, thấy nhánh trả 0 khi không vượt 5 kg chưa có test, và thêm ca 5,0 kg. Ca test này thuộc loại nào?
+**Câu 5 (K2).** Tester đọc mã `parcelSurcharge`, thấy nhánh trả 0 khi không vượt 5 kg chưa có test, và thêm test case 5,0 kg. Test case này thuộc loại nào?
 
 - a) Chỉ functional
 - b) Chỉ white-box

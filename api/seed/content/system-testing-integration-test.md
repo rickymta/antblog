@@ -1,14 +1,14 @@
 ---
 slug: system-testing-integration-test
 title: "Integration Test: khi các thành phần đúng riêng nhưng sai khi nối lại"
-summary: "Kiểm chỗ nối API – use case – repository SQL – cổng ví của Tới Nơi: chọn phần thật và phần giả có lý do, quan sát bằng SQL và sổ ghi của ví giả, tiêm lỗi decline/timeout/mất phản hồi, rồi giới hạn đúng kết luận về retry, transaction, contract và concurrency. Lab PGlite 7 ca chạy lại được."
+summary: "Kiểm chỗ nối API – use case – repository SQL – cổng ví của Tới Nơi: chọn phần thật và phần giả có lý do, quan sát bằng SQL và sổ ghi của ví giả, tiêm lỗi decline/timeout/mất phản hồi, rồi giới hạn đúng kết luận về retry, transaction, contract và concurrency. Lab PGlite gồm 7 test case chạy lại được."
 category: testing
 level: intermediate
 tags: [testing, sys-04, integration-testing, pglite, idempotency, retry, test-double, contract-testing, vitest, supertest]
 language: vi
 ---
 
-Hàm cước trả đúng 35.000 đồng, repository lưu được chuyến, cổng ví thu tiền thành công — mỗi thứ đều xanh khi kiểm riêng. Rồi một hôm phản hồi của ví bị mất giữa đường, ứng dụng thử lại với khoá mới, và khách bị trừ tiền hai lần. Không thành phần nào sai theo đặc tả của riêng nó; cái sai nằm ở **hợp đồng phối hợp**. Bài này trả lời: **integration test cần chạm vào ranh giới nào, phần nào nên thật và phần nào nên giả, oracle nào bắt được lỗi ở chỗ nối**, và bảy ca chạy được trên lab Tới Nơi chứng minh — cũng như *không* chứng minh — điều gì.
+Hàm cước trả đúng 35.000 đồng, repository lưu được chuyến, cổng ví thu tiền thành công — mỗi thứ đều xanh khi kiểm riêng. Rồi một hôm phản hồi của ví bị mất giữa đường, ứng dụng thử lại với khoá mới, và khách bị trừ tiền hai lần. Không thành phần nào sai theo đặc tả của riêng nó; cái sai nằm ở **hợp đồng phối hợp**. Bài này trả lời: **integration test cần chạm vào ranh giới nào, phần nào nên thật và phần nào nên giả, oracle nào bắt được lỗi ở chỗ nối**, và bảy test case chạy được trên lab Tới Nơi chứng minh — cũng như *không* chứng minh — điều gì.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-04</span>
@@ -26,7 +26,7 @@ Hàm cước trả đúng 35.000 đồng, repository lưu được chuyến, c�
 
 ## 1. Bài toán và mục tiêu
 
-SYS-03 đã khoá các quy tắc chức năng — cước, voucher, huỷ chuyến — bằng oracle tiền số nguyên. Nhưng các ca đó chủ yếu nhìn **response HTTP**. Chúng chưa hỏi: dòng trong bảng `trips` có khớp response không? Gửi lại cùng yêu cầu có lén thêm một dòng nhật ký không? Khi ví im lặng, ứng dụng thử lại bao nhiêu lần, với khoá nào, và rốt cuộc trừ bao nhiêu tiền?
+SYS-03 đã khoá các quy tắc chức năng — cước, voucher, huỷ chuyến — bằng oracle tiền số nguyên. Nhưng các test case đó chủ yếu chỉ nhìn vào **response HTTP**. Chúng chưa hỏi: dòng trong bảng `trips` có khớp response không? Gửi lại cùng yêu cầu có lén thêm một dòng nhật ký không? Khi ví im lặng, ứng dụng thử lại bao nhiêu lần, với khoá nào, và rốt cuộc trừ bao nhiêu tiền?
 
 Đó là những câu hỏi chỉ trả lời được khi **nối thật** các thành phần và quan sát ở nhiều phía của ranh giới.
 
@@ -35,7 +35,7 @@ Bài dành cho người đã biết viết API test, đọc SQL cơ bản và ph
 1. Vẽ ranh giới tích hợp của một test và nói rõ phần nào chạy thật, phần nào được thay — kèm lý do.
 2. Kích hoạt qua API rồi kiểm dữ liệu bằng **truy vấn SQL độc lập**, không chỉ round-trip qua repository.
 3. Tiêm lỗi thanh toán ở đúng port (decline, timeout, lỗi tạm thời, mất phản hồi sau khi đã thu) và kiểm số lần gọi, khoá idempotency và **số tiền thực bị trừ**.
-4. Viết kết luận đúng phạm vi: bảy ca xanh *không* chứng minh tính nguyên tử SQL–ví, tương thích provider thật hay xử lý tranh chấp nhiều kết nối.
+4. Viết kết luận đúng phạm vi: bảy test case xanh *không* chứng minh tính nguyên tử SQL–ví, tương thích provider thật hay xử lý tranh chấp nhiều kết nối.
 
 ## 2. Khái niệm và những chỗ dễ nhầm
 
@@ -50,12 +50,12 @@ Bài dành cho người đã biết viết API test, đọc SQL cơ bản và ph
 | System integration | Ứng dụng + nhà cung cấp ví sandbox | HTTP contract, credentials, retry và semantics phía provider |
 | System / E2E | Hành trình khách/tài xế qua hệ thống đã triển khai | Hành vi toàn luồng với cấu hình môi trường |
 
-Lab của bài nối **Express → use case → PostgreSQL repository → PGlite**, và nối use case thanh toán tới **fake PaymentGateway**. Nó kiểm tích hợp nội bộ và cách *consumer* dùng payment port. Nó **chưa** kiểm adapter HTTP tới nhà cung cấp thật — một fake đúng interface TypeScript vẫn có thể khác semantics của provider.
+Lab của bài nối **Express → use case → PostgreSQL repository → PGlite**, và nối use case thanh toán tới **fake PaymentGateway**. Lab này kiểm tích hợp nội bộ và cách *consumer* dùng payment port. Nó **chưa** kiểm adapter HTTP tới nhà cung cấp thật — một fake đúng interface TypeScript vẫn có thể khác semantics của provider.
 
 Ba cặp thuật ngữ hay bị trộn:
 
 - **Interface vs contract.** Interface TypeScript là hình dạng lời gọi, kiểm ở compile time. Contract gồm cả ý nghĩa: đơn vị tiền, mã lỗi, khoá idempotency được tôn trọng ra sao, lỗi nào được thử lại.
-- **Fake vs stub vs mock.** Stub trả lời đóng hộp; mock kiểm kỳ vọng tương tác; fake là cài đặt đơn giản *có hành vi*. `FakePaymentGateway` của lab là fake: có sổ ghi (ledger) các khoản đã trừ, dedupe theo khoá, và các chế độ lỗi.
+- **Fake vs stub vs mock.** Stub trả về kết quả dựng sẵn; mock kiểm kỳ vọng tương tác; fake là cài đặt đơn giản *có hành vi*. `FakePaymentGateway` của lab là fake: có sổ ghi (ledger) các khoản đã trừ, dedupe theo khoá, và các chế độ lỗi.
 - **Timeout vs huỷ.** Hết giờ chờ ở phía caller không có nghĩa thao tác phía provider đã dừng — đây là gốc của lỗi trừ tiền hai lần ở đầu bài.
 
 ## 3. Chiến lược ghép nối và chọn dependency
@@ -149,16 +149,16 @@ Insert một event trỏ tới chuyến không tồn tại phải bị PostgreSQ
 
 ### 4.4. Tiêu chí bắt đầu và kết thúc
 
-- **Entry:** SPEC và schema xác định; app dựng được; dữ liệu mỗi ca độc lập (reset trước từng execution); dependency cài theo lockfile.
+- **Entry:** SPEC và schema xác định; app dựng được; dữ liệu mỗi test case độc lập (reset trước từng execution); dependency cài theo lockfile.
 - **Exit:** 7/7 execution pass, không skip; `npm run typecheck` exit 0; ranh giới thật/giả được công bố trong báo cáo.
 
-## 5. Thiết kế ca kiểm
+## 5. Thiết kế test case
 
 ### 5.1. Tiền điều kiện chung
 
-Seed khách C001 và tài xế D101; xe máy (`bike`) tại SG, 5 km; đồng hồ cố định 09:00 giờ VN ngày 04/11/2026; không mưa, không voucher ⇒ `fare = 35.000`. Mỗi execution reset DB và fake ví, dựng Express app mới; suite đóng PGlite ở cuối. Các ca chạy **tuần tự** trong file vì cùng dùng một DB — reset giữa chừng sẽ phá ca khác.
+Seed khách C001 và tài xế D101; xe máy (`bike`) tại SG, 5 km; đồng hồ cố định 09:00 giờ VN ngày 04/11/2026; không mưa, không voucher ⇒ `fare = 35.000`. Mỗi execution reset DB và fake ví, dựng Express app mới; suite đóng PGlite ở cuối. Các test case chạy **tuần tự** trong file vì cùng dùng một DB — reset giữa chừng sẽ phá test case khác.
 
-### 5.2. Bảng case
+### 5.2. Bảng test case
 
 | ID / dataset | Requirement / risk | Hành động | Expected | Cleanup |
 |---|---|---|---|---|
@@ -188,7 +188,7 @@ npx vitest run articles/system-testing-integration-test
 npm run typecheck
 ```
 
-`npm ci` chỉ cần khi chuẩn bị dependency theo lockfile. Không cần PostgreSQL server: PGlite chạy PostgreSQL biên dịch sang WASM ngay trong tiến trình test. Expected: **7 tests pass** — hai ca riêng và năm dataset thanh toán.
+`npm ci` chỉ cần khi chuẩn bị dependency theo lockfile. Không cần PostgreSQL server: PGlite chạy PostgreSQL biên dịch sang WASM ngay trong tiến trình test. Expected: **7 tests pass** — hai test case riêng và năm dataset thanh toán.
 
 ### 6.1. Bước 1 — Lắp ráp và kiểm soát vòng đời
 
@@ -206,13 +206,13 @@ beforeEach(async () => {
 afterAll(async () => { await system?.db?.close(); });
 ```
 
-`createPgliteSystem` tạo schema và seed; `beforeEach` reset rồi dựng app mới để trạng thái nằm trong process (bộ nhớ idempotency, fake ví) không rò giữa các ca. Đừng dùng `test.concurrent` với setup này. Muốn chạy song song, mỗi worker cần DB riêng hoặc namespace dữ liệu và cleanup thực sự cách ly.
+`createPgliteSystem` tạo schema và seed; `beforeEach` reset rồi dựng app mới để trạng thái nằm trong process (bộ nhớ idempotency, fake ví) không rò giữa các test case. Đừng dùng `test.concurrent` với setup này. Muốn chạy song song, mỗi worker cần DB riêng hoặc namespace dữ liệu và cleanup thực sự cách ly.
 
 Lưu ý `timeoutMs: 50`: lab rút deadline từ 3 giây (mặc định của SPEC) xuống 50 ms để kiểm **logic** đếm lần thử nhanh, giữ `maxRetries: 2`. Kết quả không chứng minh ngưỡng 3 giây hay bất kỳ SLA latency nào.
 
 ### 6.2. Bước 2 — Kích hoạt qua API, quan sát bằng SQL
 
-IN-01 không insert trip trực tiếp; nó gọi báo giá và đặt chuyến thật, rồi truy vấn bảng:
+IN-01 không insert trip trực tiếp mà gọi báo giá và đặt chuyến thật, rồi truy vấn bảng:
 
 ```ts
 const tripId = first.body.trip.id;
@@ -271,7 +271,7 @@ expect(system.payments.totalCharged()).toBe(charged);
 expect(system.payments.chargedKeys()).toEqual(charged ? [`trip:${id}:fare`] : []);
 ```
 
-Khoá được dựng từ `id` của chính ca đó, không hardcode. Vòng `for` kiểm **từng** lần gọi — nếu lần retry thứ hai đổi khoá hay đổi số tiền, test đỏ. Decline/timeout/error vẫn kỳ vọng HTTP 200 theo R-PAY-06: hoàn tất chuyến và thu tiền là hai kết quả khác nhau. Test đòi 500 cho mọi lỗi ví sẽ áp đặt một hợp đồng sai.
+Khoá dựng từ `id` của chính test case đó, không hardcode. Vòng `for` kiểm **từng** lần gọi — nếu lần retry thứ hai đổi khoá hay đổi số tiền, test đỏ. Decline/timeout/error vẫn kỳ vọng HTTP 200 theo R-PAY-06: hoàn tất chuyến và thu tiền là hai kết quả khác nhau. Test đòi 500 cho mọi lỗi ví sẽ áp đặt một hợp đồng sai.
 
 ### 6.5. Kết quả: mong đợi và thực tế
 
@@ -307,9 +307,9 @@ Lượt chạy ghi trong báo cáo bài (cùng ngày, Node v24.15.0, chạy chun
 | IN-02 không lỗi | Schema/constraint chưa được nạp vào DB test | Kiểm schema thực của DB test |
 | Test treo | Deadline hoặc cleanup không hoạt động | Timer, promise đang chờ; không chỉ tăng timeout của runner |
 
-Khi ca đỏ, ghi: commit, ca/dataset, cấu hình timeout và retry, response, các row SQL và danh sách `calls` đã quan sát. Phân biệt **failed** (lỗi sản phẩm, có expected/actual và dữ liệu tái hiện) với **blocked** (môi trường: PGlite không khởi tạo, thiếu dependency). Khi mở rộng sang sandbox, không log token hay dữ liệu thanh toán thật.
+Khi test case đỏ, ghi: commit, test case/dataset, cấu hình timeout và retry, response, các row SQL và danh sách `calls` đã quan sát. Phân biệt **failed** (lỗi sản phẩm, có expected/actual và dữ liệu tái hiện) với **blocked** (môi trường: PGlite không khởi tạo, thiếu dependency). Khi mở rộng sang sandbox, không log token hay dữ liệu thanh toán thật.
 
-Ví dụ quyết định: «IN-03/lost_response đỏ: `chargedKeys` có hai khoá khác nhau. Chặn merge thay đổi ở `payment.ts`; các suite không chạm thanh toán vẫn review được. Sau khi sửa, chạy confirmation dataset này, rồi cả bảy ca.»
+Ví dụ quyết định: «IN-03/lost_response đỏ: `chargedKeys` có hai khoá khác nhau. Chặn merge thay đổi ở `payment.ts`; các suite không chạm thanh toán vẫn review được. Sau khi sửa, chạy confirmation dataset này, rồi cả bảy test case.»
 
 ## 8. Mở rộng nâng cao
 
@@ -323,7 +323,7 @@ API → SQL → ví không nằm chung một transaction ACID. Có một cửa s
 
 ### 8.3. Contract testing và provider verification
 
-Interface TypeScript kiểm hình dạng lời gọi nội bộ, không kiểm payload HTTP, mã lỗi provider, đơn vị tiền hay chữ ký. Một adapter gửi `35000` theo đồng trong khi provider hiểu là đơn vị nhỏ hơn sẽ làm mọi test ở port xanh mà tích hợp thật sai. Khi có adapter ngoài: lưu contract request/response, kiểm serialization bằng stub HTTP, và xác minh provider trên sandbox với version cụ thể. Fake cần được đối chiếu với contract định kỳ để tránh **drift** — fake dần khác provider mà không ai biết.
+Interface TypeScript kiểm hình dạng lời gọi nội bộ, không kiểm payload HTTP, mã lỗi provider, đơn vị tiền hay chữ ký. Một adapter gửi `35000` theo đồng trong khi provider hiểu là đơn vị nhỏ hơn sẽ làm mọi test ở port xanh mà tích hợp thật sai. Khi có adapter ngoài: lưu contract request/response, kiểm serialization bằng stub HTTP, và xác minh provider trên sandbox với phiên bản cụ thể. Fake cần được đối chiếu với contract định kỳ để tránh **drift** — fake dần khác provider mà không ai biết.
 
 ### 8.4. Schema evolution và nhiều phiên bản ứng dụng
 
@@ -346,9 +346,9 @@ Nếu sau này hệ thống phát event `TripCompleted`, cần kiểm payload/ve
 - **Đếm calls mà không kiểm ledger** — bỏ sót thu trùng; ngược lại, kiểm ledger mà không đếm calls bỏ sót retry vô hạn.
 - **Tăng timeout của runner để che treo** — phản hồi chậm hơn mà nguyên nhân vẫn còn.
 
-Suite chưa kiểm: toàn bộ ràng buộc schema, durability sau restart, rollback khi lỗi giữa luồng, provider thật, JWT (header `x-user` là danh tính giả lập), browser, mạng, concurrency nhiều kết nối, migration. Khác biệt cốt lõi với SYS-03 không phải số ca nhiều hơn, mà là **oracle SQL và các adapter thật được phối hợp**.
+Suite chưa kiểm: toàn bộ ràng buộc schema, durability sau restart, rollback khi lỗi giữa luồng, provider thật, JWT (header `x-user` là danh tính giả lập), browser, mạng, concurrency nhiều kết nối, migration. Khác biệt cốt lõi với SYS-03 không phải số test case nhiều hơn, mà là **oracle SQL và các adapter thật được phối hợp**.
 
-Về chi phí: bảy ca chạy vài giây, đủ rẻ để nằm trong pipeline mỗi commit. Thêm PostgreSQL server thật cho concurrency, hay sandbox provider, tăng độ trung thực nhưng kéo theo hạ tầng, dữ liệu cô lập và thời gian — nên đặt ở suite riêng, chạy theo rủi ro thay đổi.
+Về chi phí: bảy test case chạy vài giây, đủ rẻ để nằm trong pipeline mỗi commit. Thêm PostgreSQL server thật cho concurrency, hay sandbox provider, tăng độ trung thực nhưng kéo theo hạ tầng, dữ liệu cô lập và thời gian — nên đặt ở suite riêng, chạy theo rủi ro thay đổi.
 
 ## 10. Bài tập và câu hỏi tự kiểm
 

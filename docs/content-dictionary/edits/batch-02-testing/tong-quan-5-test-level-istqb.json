@@ -1,0 +1,9 @@
+{"file":"tong-quan-5-test-level-istqb.md","edits":[
+{"old":"nhiều «tầng» để kiểm: một hàm","new":"nhiều «tầng» để kiểm thử: một hàm","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"tới hệ của các hệ (system of systems)","new":"tới hệ thống của các hệ thống (system of systems)","reason":"'hệ của các hệ' tự ghép, khó hiểu","severity":"medium"},
+{"old":"Level trả lời «kiểm phạm vi nào»; type trả lời «kiểm khía cạnh nào».","new":"Level trả lời «kiểm thử ở phạm vi nào»; type trả lời «kiểm thử khía cạnh nào».","reason":"'kiểm' cụt, thiếu 'thử'","severity":"medium"},
+{"old":"là nguồn sự thật của booking (§4.4)","new":"là nguồn dữ liệu gốc của booking (§4.4)","reason":"'nguồn sự thật' là calque; theo bảng thuật ngữ","severity":"medium"},
+{"old":"Payment & Wallet nói chuyện với VíXanh","new":"Payment & Wallet giao tiếp với VíXanh","reason":"'nói chuyện' gượng cho hệ thống","severity":"low"},
+{"old":"Đừng kiểm lại mọi mốc thời gian ở system level","new":"Đừng kiểm thử lại mọi mốc thời gian ở system level","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"<p>Nó trộn hai level:","new":"<p>Dòng này trộn hai level:","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"}
+]}

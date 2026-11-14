@@ -1,0 +1,9 @@
+{"file":"system-testing-uat.md","edits":[
+{"old":"; nó không trả lời \"khách có hiểu\"","new":"; automation không trả lời \"khách có hiểu\"","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Suite có bốn case: UA-01","new":"Suite có bốn test case: UA-01","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Nó không phải cách đổi lỗi chặn thành PASS.","new":"Đây không phải cách đổi lỗi chặn thành PASS.","reason":"Tránh 'Nó' đầu câu chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"Kỳ vọng lỗi hết hạn, không có chuyến;","new":"Kỳ vọng hệ thống trả lỗi hết hạn và không tạo chuyến;","reason":"Câu cụt, thiếu chủ ngữ và động từ","severity":"medium"},
+{"old":"làm mất câu hỏi mỗi hoạt động đang trả lời","new":"làm mờ câu hỏi mà mỗi hoạt động đang trả lời","reason":"Gượng, thiếu quan hệ từ","severity":"low"},
+{"old":"Gặp lỗi cản trở thì phần chưa làm được là **BLOCKED**,","new":"Gặp lỗi cản trở thì ghi **BLOCKED** cho phần chưa làm được,","reason":"Câu lủng củng, khó hiểu","severity":"medium"},
+{"old":"dần thay ngôn ngữ nghiệp vụ","new":"dần thay thế ngôn ngữ nghiệp vụ","reason":"Thiếu chữ 'thế'","severity":"low"}
+]}

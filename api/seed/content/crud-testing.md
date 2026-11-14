@@ -8,7 +8,7 @@ tags: [testing, istqb, ctal-ta, test-039, crud-testing, black-box, access-contro
 language: vi
 ---
 
-Một chuyến của Tới Nơi được **tạo** ở màn đặt xe, được **đọc** bởi khách, bởi tài xế và bởi danh sách chuyến chờ, được **sửa** bởi tài xế, khách và một job của hệ thống. Test từng chức năng riêng lẻ có thể xanh hết mà dữ liệu vẫn sai: chức năng A ghi xong, chức năng B đọc ra một trạng thái khác, còn không chức năng nào được phép xoá. Bài này trả lời hai câu: CRUD testing của CTAL-TA kiểm điều gì, và làm sao lập ma trận CRUD cho chuyến rồi kiểm nó qua API thật của lab.
+Một chuyến của Tới Nơi được **tạo** ở màn đặt xe, rồi khách, tài xế và danh sách chuyến chờ **đọc** nó, còn tài xế, khách và một job của hệ thống thì **sửa** nó. Test từng chức năng riêng lẻ có thể xanh hết mà dữ liệu vẫn sai: chức năng A ghi xong, chức năng B đọc ra một trạng thái khác, còn không chức năng nào được phép xoá. Bài này trả lời hai câu: CRUD testing của CTAL-TA kiểm điều gì, và làm sao lập ma trận CRUD cho chuyến rồi kiểm nó qua API thật của lab.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-039</span>
@@ -21,7 +21,7 @@ Một chuyến của Tới Nơi được **tạo** ở màn đặt xe, được 
 <tr><th scope="row">Test Type</th><td>Functional; Black-box</td></tr>
 <tr><th scope="row">Test Technique</th><td>CRUD Testing</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/state-transition-testing-co-ban">TEST-034 · State Transition Testing (cơ bản)</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab <code>articles/crud-testing</code> (62 ca vitest, supertest + PGlite): ma trận CRUD 10 chức năng × 6 thực thể, ma trận vai trò × thao tác 42 ô trên chuyến, CRUD coverage 44/48</td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab <code>articles/crud-testing</code> (62 test case vitest, supertest + PGlite): ma trận CRUD 10 chức năng × 6 thực thể, ma trận vai trò × thao tác 42 ô trên chuyến, CRUD coverage 44/48</td></tr>
 <tr><th scope="row">Tham chiếu ISTQB</th><td>CTAL-TA v4.0 · Chương 3 · mục 3.2 và 3.2.1 · TA-3.2.1 (K2)</td></tr>
 </tbody>
 </table>
@@ -31,7 +31,7 @@ Một chuyến của Tới Nơi được **tạo** ở màn đặt xe, được 
 
 [TEST-034](/articles/state-transition-testing-co-ban) mô hình chuyến như một máy trạng thái. CRUD testing nhìn cùng thực thể từ góc khác: **những chức năng nào chạm vào nó, bằng thao tác gì** — tạo (Create), đọc (Read), sửa (Update), xoá (Delete).
 
-Vấn đề kỹ thuật này giải quyết: **vòng đời bị hở** (thực thể được tạo mà không ai đọc, không bao giờ được dọn — không test chức năng nào đỏ vì không có chức năng nào để test), **các chức năng không đồng ý với nhau** (tài xế nhận xong mà danh sách chờ vẫn hiện chuyến; khách huỷ xong mà tài xế vẫn `busy`), và **quyền truy cập sai** (đọc đúng dữ liệu nhưng cho nhầm người).
+Các vấn đề mà kỹ thuật này giải quyết: **vòng đời bị hở** (thực thể được tạo mà không ai đọc, không bao giờ được dọn — không test chức năng nào đỏ vì không có chức năng nào để test), **các chức năng không đồng ý với nhau** (tài xế nhận xong mà danh sách chờ vẫn hiện chuyến; khách huỷ xong mà tài xế vẫn `busy`), và **quyền truy cập sai** (đọc đúng dữ liệu nhưng cho nhầm người).
 
 Khi nào dùng: thực thể nghiệp vụ sống lâu, được nhiều chức năng và vai trò cùng xử lý (đơn, chuyến, ví, hồ sơ khách). Mức chính là system; ở Tới Nơi còn dùng ở component integration (Booking, Dispatch, Trip lifecycle cùng ghi một bảng).
 
@@ -39,7 +39,7 @@ Khi nào dùng: thực thể nghiệp vụ sống lâu, được nhiều chức 
 
 ### 2.1. Vị trí trong CTAL-TA v4.0
 
-CTAL-TA v4.0 chia kỹ thuật black-box theo thứ test condition mô hình hoá: **dữ liệu** (data-based, 3.1), **hành vi động** (behavior-based, 3.2), **quy tắc tĩnh** (rule-based, 3.3). CRUD testing thuộc behavior-based, cùng state transition và scenario-based testing. Learning objective: **TA-3.2.1 (K2) — giải thích CRUD testing**; bài vẫn làm thực hành để thấy kỹ thuật bắt được gì.
+CTAL-TA v4.0 chia kỹ thuật black-box theo đối tượng mà test condition mô hình hoá: **dữ liệu** (data-based, 3.1), **hành vi động** (behavior-based, 3.2), **quy tắc tĩnh** (rule-based, 3.3). CRUD testing thuộc behavior-based, cùng state transition và scenario-based testing. Learning objective: **TA-3.2.1 (K2) — giải thích CRUD testing**; bài vẫn làm thực hành để thấy kỹ thuật bắt được gì.
 
 ### 2.2. Ma trận CRUD
 
@@ -110,11 +110,11 @@ Syllabus (dẫn theo Koomen và cộng sự, 2006 — TMap Next) tách CRUD test
 
 ### 2.4. CRUD coverage
 
-Syllabus đo **CRUD coverage** = số thao tác trong ma trận mà bộ test đã thực thi ÷ tổng số thao tác trong ma trận. Một ô «RU» đóng góp hai coverage item. Tiêu chí chặt hơn coi **tổ hợp** thao tác là coverage item — ví dụ «sau mỗi U, phủ mọi R». Bài này dùng cả hai: tiêu chí cơ bản để đo con số, tiêu chí «sau mỗi U, mọi R» để thiết kế ca consistency.
+Syllabus đo **CRUD coverage** = số thao tác trong ma trận mà bộ test đã thực thi ÷ tổng số thao tác trong ma trận. Một ô «RU» đóng góp hai coverage item. Tiêu chí chặt hơn coi **tổ hợp** thao tác là coverage item — ví dụ «sau mỗi U, phủ mọi R». Bài này dùng cả hai: tiêu chí cơ bản để đo con số, tiêu chí «sau mỗi U, mọi R» để thiết kế test case consistency.
 
 ### 2.5. Mức áp dụng và loại defect
 
-CRUD testing chủ yếu dùng ở **system level**. Nó nhắm tới ba nhóm defect mà syllabus nêu: **vi phạm toàn vẹn dữ liệu** (data integrity), **defect kiểm soát truy cập** (access control), và **dữ liệu không nhất quán** giữa các chức năng.
+CRUD testing chủ yếu dùng ở **system level**. Kỹ thuật này nhắm tới ba nhóm defect mà syllabus nêu: **vi phạm toàn vẹn dữ liệu** (data integrity), **defect kiểm soát truy cập** (access control), và **dữ liệu không nhất quán** giữa các chức năng.
 
 ### 2.6. Bảng thuật ngữ Anh – Việt
 
@@ -132,7 +132,7 @@ CRUD testing chủ yếu dùng ở **system level**. Nó nhắm tới ba nhóm d
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB</span>
-<p>Syllabus không có «ma trận vai trò × thao tác» (permission matrix); nó chỉ nêu access control defect là một mục tiêu của CRUD testing. Bài thêm chiều <b>vai trò</b> vì Tới Nơi có khách, tài xế và hệ thống cùng chạm một chuyến — đây là phần mở rộng thực hành. Kiểm thử phân quyền đầy đủ (401/403, IDOR) nằm ở TEST-073; góc bảo mật (leo quyền, chiếm tài khoản) ở TEST-102.</p>
+<p>Syllabus không có «ma trận vai trò × thao tác» (permission matrix); syllabus chỉ nêu access control defect là một mục tiêu của CRUD testing. Bài thêm chiều <b>vai trò</b> vì Tới Nơi có khách, tài xế và hệ thống cùng chạm một chuyến — đây là phần mở rộng thực hành. Kiểm thử phân quyền đầy đủ (401/403, IDOR) nằm ở TEST-073; góc bảo mật (leo quyền, chiếm tài khoản) ở TEST-102.</p>
 </div>
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
@@ -157,7 +157,7 @@ Kế hoạch series nêu ví dụ «tạo, đọc, sửa, xoá địa chỉ giao
 
 ### 3.3. System context
 
-Trong kiến trúc đích, dữ liệu của «một chuyến» rải trên nhiều service: Booking/Order là nguồn sự thật của booking và lưu idempotency key (§4.4), Trip/Delivery Lifecycle giữ vòng đời sau khi gán tài xế (§4.7), Dispatch giữ phân công, Public Tracking Query có **read model** riêng dựng từ event (§4.14). Mỗi service sở hữu database/schema của mình (§5). Ma trận CRUD ở hệ thống đích vì thế có thêm cột cho read model, và «đọc lại sau khi sửa» chỉ đúng **sau một khoảng trễ** (mục tiêu lan truyền trạng thái p95 dưới 2–3 giây, §14.1).
+Trong kiến trúc đích, dữ liệu của «một chuyến» rải trên nhiều service: Booking/Order là nguồn dữ liệu gốc của booking và lưu idempotency key (§4.4), Trip/Delivery Lifecycle giữ vòng đời sau khi gán tài xế (§4.7), Dispatch giữ phân công, Public Tracking Query có **read model** riêng dựng từ event (§4.14). Mỗi service sở hữu database/schema của mình (§5). Ma trận CRUD ở hệ thống đích vì thế có thêm cột cho read model, và «đọc lại sau khi sửa» chỉ đúng **sau một khoảng trễ** (mục tiêu lan truyền trạng thái p95 dưới 2–3 giây, §14.1).
 
 Lab là modular monolith một database (R-ARCH-01): các module cùng ghi bảng `trips` của PGlite, không có Kafka hay read model — «đọc lại» nhất quán ngay. Độ trễ của read model là chủ đề Series 11 (TEST-133).
 
@@ -251,7 +251,7 @@ Ma trận CRUD nói **chức năng nào** chạm thực thể; nó chưa nói **
 
 ### 5.1. Đo thao tác thật sự xảy ra
 
-Để đo CRUD coverage không thể chỉ «tin» tên test. Lab bọc mỗi repository bằng một `Proxy` (`crud-tracer.ts`), quy mỗi lời gọi về (thực thể, thao tác) và gán cho chức năng đang chạy. Rút gọn:
+Để đo CRUD coverage thì không thể chỉ «tin» tên test. Lab bọc mỗi repository bằng một `Proxy` (`crud-tracer.ts`), quy mỗi lời gọi về (thực thể, thao tác) và gán cho chức năng đang chạy. Rút gọn:
 
 ```ts
 const RULES: Record<string, Classifier> = {
@@ -266,7 +266,7 @@ const accept = (d: string, id: string) =>
 
 Tracer còn một móc `failOnce('trips.create')` để giả lập database hỏng đúng ở một câu lệnh — cách duy nhất để phủ ô D của khoá idempotency trên lab.
 
-### 5.2. Ca consistency L1 (rút gọn)
+### 5.2. Test case consistency L1 (rút gọn)
 
 ```ts
 expect(outcome(await view('customer:C001', 'id-9999'))).toBe('404 TRIP_NOT_FOUND'); // R trước C
@@ -308,7 +308,7 @@ ngoài ma trận: F02|drivers|R, F06|drivers|R, F07|drivers|R, F09|drivers|R
 ### 5.4. Đọc kết quả
 
 - **CRUD coverage 44/48 ≈ 91,7%.** Bốn ô chưa phủ đều là R và D của khoá idempotency khi huỷ: bộ chính không gửi lại lệnh huỷ và không gây lỗi 5xx lúc huỷ. Bài tập 1 phủ nốt.
-- **Bốn thao tác ngoài ma trận** đều là `drivers R` — bước xác thực (R-API-03) đọc tài xế để kiểm `x-user`. Đúng loại «read ngầm» syllabus cảnh báo, và ma trận viết từ SPEC đã bỏ sót. Cách xử lý: thêm vào ma trận, hoặc ghi rõ «không tính đọc do xác thực».
+- **Bốn thao tác ngoài ma trận** đều là `drivers R` — bước xác thực (R-API-03) đọc tài xế để kiểm `x-user`. Đây đúng là loại «read ngầm» mà syllabus cảnh báo, và ma trận viết từ SPEC đã bỏ sót. Cách xử lý: thêm vào ma trận, hoặc ghi rõ «không tính đọc do xác thực».
 - **42/42 ô vai trò đúng kỳ vọng**, mọi «sau mỗi U, mọi R» khớp mục 4.3: RK-2…RK-5 không xảy ra.
 - **L6 bắt được một defect thật** — RK-1.
 
@@ -318,7 +318,7 @@ ngoài ma trận: F02|drivers|R, F06|drivers|R, F07|drivers|R, F09|drivers|R
 <span class="tkh-callout-title">DR-039-01 · Database lỗi khi ghi chuyến làm «cháy» báo giá</span>
 <table>
 <tbody>
-<tr><th scope="row">Môi trường</th><td>Lab <code>toi-noi-testing</code>, PGlite, API qua supertest; lỗi database giả lập bằng <code>tracer.failOnce('trips.create')</code> (ca L6)</td></tr>
+<tr><th scope="row">Môi trường</th><td>Lab <code>toi-noi-testing</code>, PGlite, API qua supertest; lỗi database giả lập bằng <code>tracer.failOnce('trips.create')</code> (test case L6)</td></tr>
 <tr><th scope="row">Bước</th><td>1) C001 báo giá xe máy 5 km. 2) <code>POST /api/trips</code> với khoá K, câu lệnh ghi chuyến lỗi ⇒ 500 <code>INTERNAL_ERROR</code>. 3) Gửi lại đúng yêu cầu với khoá K.</td></tr>
 <tr><th scope="row">Mong đợi</th><td>R-IDEM-05: phản hồi 5xx không được lưu, client thử lại cùng khoá ⇒ 201, đúng một chuyến cho báo giá</td></tr>
 <tr><th scope="row">Thực tế</th><td>409 <code>QUOTE_ALREADY_USED</code>. Trong database, <code>quotes.used_by_trip_id</code> trỏ tới một id không có trong <code>trips</code>. Lần gửi lại tiếp theo vẫn 409 (phản hồi 4xx đã được lưu). Khách phải báo giá lại — có thể với giá khác nếu đã sang giờ cao điểm</td></tr>
@@ -359,7 +359,7 @@ Hệ thống đích có Admin Portal (§11.2: cấu hình khuyến mãi, audit l
 
 ### Bài tập 3 — Địa chỉ đã lưu
 
-Hệ thống đích cho khách lưu «Nhà», «Công ty». Lập ma trận CRUD (chức năng × `saved_addresses`, `bookings`) và ma trận vai trò (khách chủ, khách khác, tài xế, nhân viên hỗ trợ). Nêu ba ca consistency.
+Hệ thống đích cho khách lưu «Nhà», «Công ty». Lập ma trận CRUD (chức năng × `saved_addresses`, `bookings`) và ma trận vai trò (khách chủ, khách khác, tài xế, nhân viên hỗ trợ). Nêu ba test case consistency.
 
 <details><summary><b>Lời giải mẫu</b></summary><ul><li>Chức năng: Thêm (C), Danh sách (R), Sửa (R U), Xoá (D), Đặt chuyến bằng địa chỉ đã lưu (R địa chỉ, C booking) — đủ CRUD.</li><li>Vai trò: khách chủ đủ quyền; khách khác 404; tài xế chỉ thấy điểm đón/đến của chuyến được gán; hỗ trợ chỉ đọc.</li><li>Consistency: (1) xoá «Công ty» khi có chuyến đang dùng ⇒ chuyến giữ ảnh chụp địa chỉ; (2) sửa «Nhà» ⇒ báo giá sau dùng toạ độ mới, chuyến cũ không đổi; (3) địa chỉ đã xoá ⇒ 404 và biến khỏi gợi ý.</li></ul></details>
 
@@ -401,7 +401,7 @@ Hệ thống đích cho khách lưu «Nhà», «Công ty». Lập ma trận CRUD
 
 <details><summary><b>Đáp án: a</b></summary><ul><li>a) Đúng — mẫu số là thao tác trong ma trận; thao tác ngoài ma trận không vào tử số.</li><li>b) Sai — tự đổi mẫu số.</li><li>c) Sai — cộng thao tác ngoài ma trận vào tử số.</li><li>d) Sai — muốn tính chúng phải cập nhật ma trận trước.</li></ul></details>
 
-**Câu 5 (K2).** Ca nào áp dụng tiêu chí phủ chặt «sau mỗi U, phủ mọi R» cho thao tác «tài xế huỷ chuyến»?
+**Câu 5 (K2).** Test case nào áp dụng tiêu chí phủ chặt «sau mỗi U, phủ mọi R» cho thao tác «tài xế huỷ chuyến»?
 
 - a) Tài xế huỷ, kiểm phản hồi 200 của chính lệnh huỷ
 - b) Tài xế huỷ, rồi đọc chuyến bằng khách chủ, các tài xế đủ/không đủ điều kiện và các danh sách chuyến chờ

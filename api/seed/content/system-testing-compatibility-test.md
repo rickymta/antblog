@@ -8,7 +8,7 @@ tags: [testing, sys-11, compatibility-testing, cross-browser, responsive, playwr
 language: vi
 ---
 
-Trên laptop của developer, trang đặt xe của Tới Nơi chạy trơn tru. Trên màn hình 390 px, nút «Đặt chuyến» bị đẩy ra ngoài khung và trang có thanh cuộn ngang. Trên một máy cài tiếng Anh, có người lo số tiền sẽ hiện thành `35,000 đ`. Backend vẫn tính đúng 35.000 đ, mọi bài API vẫn xanh, nhưng khách không hoàn thành được thao tác. Bài này trả lời: **làm sao chọn những cấu hình đáng kiểm, giữ chung một oracle cho mọi cấu hình, và nói chính xác ma trận đã chạy chứng minh được gì** — mà không hứa «chạy trên mọi thiết bị» chỉ từ vài test.
+Trên laptop của developer, trang đặt xe của Tới Nơi chạy trơn tru. Trên màn hình 390 px, nút «Đặt chuyến» bị đẩy ra ngoài khung và trang có thanh cuộn ngang. Trên một máy cài tiếng Anh, có người lo số tiền sẽ hiện thành `35,000 đ`. Backend vẫn tính đúng 35.000 đ, mọi test API vẫn xanh, nhưng khách không hoàn thành được thao tác. Bài này trả lời: **làm sao chọn những cấu hình đáng kiểm, giữ chung một oracle cho mọi cấu hình, và nói chính xác ma trận đã chạy chứng minh được gì** — mà không hứa «chạy trên mọi thiết bị» chỉ từ vài test.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-11</span>
@@ -18,7 +18,7 @@ Trên laptop của developer, trang đặt xe của Tới Nơi chạy trơn tru.
 <tr><th scope="row">Cấp độ</th><td>Trung cấp — đã đọc System Test, biết Playwright cơ bản</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>System · Non-functional (compatibility), giữ oracle chức năng làm điều kiện đạt</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-security-pentest">SYS-10 Security Test – Pen test</a>; hành trình UI và server riêng ở <a href="/articles/system-testing-system-test">SYS-05 System Test</a>; nhóm đặc tính chất lượng ở <a href="/articles/non-functional-testing-tong-quan">Non-functional testing tổng quan</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 2 case CP-01…02 × 3 Playwright project (Chrome desktop vi-VN, Edge desktop en-US/New York, Chrome 390×844 touch emulation), server PGlite riêng cổng 3116 — <code>examples/toi-noi-testing/articles/system-testing-compatibility-test/</code>, config <code>compatibility.config.ts</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 2 test case CP-01…02 × 3 Playwright project (Chrome desktop vi-VN, Edge desktop en-US/New York, Chrome 390×844 touch emulation), server PGlite riêng cổng 3116 — <code>examples/toi-noi-testing/articles/system-testing-compatibility-test/</code>, config <code>compatibility.config.ts</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>Playwright Projects và Emulation; <code>SPEC.md</code> của lab (R-UI-01, R-UI-04, R-FARE, R-FOOD, R-CANCEL-01)</td></tr>
 </tbody>
 </table>
@@ -28,7 +28,7 @@ Trên laptop của developer, trang đặt xe của Tới Nơi chạy trơn tru.
 
 ### 1.1. Vì sao backend xanh vẫn chưa đủ
 
-Ở [SYS-05](/articles/system-testing-system-test), ba hành trình khách–tài xế chạy xanh trên **một** cấu hình: Chrome headless, viewport mặc định, máy của người viết. Kết luận đúng của bài đó là «hệ thống hoạt động trong ranh giới đã vẽ». Nó không nói gì về:
+Ở [SYS-05](/articles/system-testing-system-test), ba hành trình khách–tài xế chạy xanh trên **một** cấu hình: Chrome headless, viewport mặc định, máy của người viết. Kết luận đúng của bài đó là «hệ thống hoạt động trong ranh giới đã vẽ». Kết luận đó không nói gì về:
 
 - Edge, Firefox hay Safari có thao tác được form không;
 - màn hình hẹp có bị tràn ngang, nút có bấm được bằng chạm không;
@@ -44,9 +44,9 @@ Bài dành cho tester/SDET đã viết được Playwright test, hiểu khái ni
 
 Sau bài này, bạn có thể:
 
-1. Liệt kê các **trục** tương thích và nói một trục **không** chứng minh được gì.
+1. Liệt kê các **trục** tương thích và nói rõ mỗi trục **không** chứng minh được điều gì.
 2. Lập **support matrix** có phân loại bắt buộc / best-effort / chưa hỗ trợ, dựa trên dữ liệu và rủi ro.
-3. Viết một case chạy được trên nhiều Playwright project mà **oracle không đổi theo cấu hình**.
+3. Viết một test case chạy được trên nhiều Playwright project mà **oracle không đổi theo cấu hình**.
 4. Ghi metadata đủ tái hiện: project, browser version, viewport, locale, timezone, input.
 5. Đọc một failure chỉ xảy ra trên một project và thiết kế thí nghiệm tách yếu tố.
 
@@ -69,7 +69,7 @@ Compatibility testing đánh giá khả năng hệ thống **hoạt động tron
 ### 2.2. Các cặp khái niệm hay bị gộp
 
 - **Responsive vs cross-browser.** Responsive testing tập trung bố cục theo kích thước khung. Cross-browser testing xét hành vi giữa các browser. Một trang có thể responsive hoàn hảo trên Chrome mà vẫn hỏng sự kiện `change` trên engine khác.
-- **Emulation vs thiết bị thật.** Playwright đặt được viewport, `isMobile`, `hasTouch`, locale, timezone. Nó **không** đổi OS, không bật bàn phím ảo, không có native picker hay giới hạn phần cứng của điện thoại.
+- **Emulation vs thiết bị thật.** Playwright đặt được viewport, `isMobile`, `hasTouch`, locale, timezone. Emulation **không** đổi OS, không bật bàn phím ảo, không có native picker hay giới hạn phần cứng của điện thoại.
 - **Compatibility vs accessibility/usability.** Nút bấm được trên mọi cấu hình chưa chắc có tên truy cập đúng, càng chưa chắc người dùng hiểu cách dùng. Hai chủ đề đó có bài riêng ([SYS-12](/articles/system-testing-usability-test)).
 - **Project vs browser.** Trong Playwright, một *project* là một tổ hợp cấu hình. Ba project không có nghĩa ba browser — ở lab này là hai browser và một biến thể của Chrome.
 
@@ -77,7 +77,7 @@ Compatibility testing đánh giá khả năng hệ thống **hoạt động tron
 
 Compatibility test có giá trị nhất khi: sản phẩm có support policy công khai; analytics cho thấy tỉ lệ người dùng đáng kể trên một cấu hình; vừa nâng cấp framework UI, CSS hay polyfill; hoặc vừa có báo lỗi «chỉ máy tôi bị».
 
-Ưu điểm: bắt được lỗi môi trường mà mọi test API bỏ sót, chạy lại được cùng case trên nhiều cấu hình với chi phí viết test một lần. Nhược điểm: số tổ hợp tăng theo cấp số nhân, browser tự cập nhật làm kết quả trôi theo thời gian, và test tự động chỉ kiểm được những gì có assertion — phần «nhìn có ổn không» vẫn cần người.
+Ưu điểm: bắt được lỗi môi trường mà mọi test API bỏ sót, chạy lại được cùng test case trên nhiều cấu hình với chi phí viết test một lần. Nhược điểm: số tổ hợp tăng theo cấp số nhân, browser tự cập nhật làm kết quả trôi theo thời gian, và test tự động chỉ kiểm được những gì có assertion — phần «nhìn có ổn không» vẫn cần người.
 
 ## 3. Test basis, rủi ro và support matrix
 
@@ -89,7 +89,7 @@ Trong dự án thật, support matrix được lập từ: analytics phân bố 
 - **Best-effort** — kiểm định kỳ, lỗi được xếp ưu tiên nhưng không chặn.
 - **Chưa hỗ trợ** — ghi rõ, không kiểm, không hứa.
 
-Không hứa «mọi thiết bị» khi chỉ có vài test. Và vì browser tự cập nhật, chỉ ghi «Chrome» là không đủ để tái hiện; phải lưu **version** của từng lượt chạy.
+Không hứa «mọi thiết bị» khi chỉ có vài test. Và vì browser tự cập nhật, chỉ ghi «Chrome» là không đủ để tái hiện; phải lưu **phiên bản** của từng lượt chạy.
 
 ### 3.2. Ma trận thử nghiệm của bài
 
@@ -185,10 +185,10 @@ Ngược lại, có những khác biệt **không** được chấp nhận dù s
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của oracle bố cục</span>
-<p>Phép kiểm <code>scrollWidth ≤ clientWidth + 1</code> chỉ chứng minh trang không tràn ngang quá 1 CSS pixel <b>tại những thời điểm test gọi nó</b>. Nó không phát hiện phần tử chồng nhau, chữ bị cắt, độ tương phản kém hay vùng chạm quá nhỏ. Đừng gọi đây là «responsive pass» cho toàn trang.</p>
+<p>Phép kiểm <code>scrollWidth ≤ clientWidth + 1</code> chỉ chứng minh trang không tràn ngang quá 1 CSS pixel <b>tại những thời điểm test gọi nó</b>. Phép kiểm này không phát hiện phần tử chồng nhau, chữ bị cắt, độ tương phản kém hay vùng chạm quá nhỏ. Đừng gọi đây là «responsive pass» cho toàn trang.</p>
 </div>
 
-## 5. Thiết kế case và dữ liệu
+## 5. Thiết kế test case và dữ liệu
 
 ### 5.1. Tiền điều kiện chung
 
@@ -197,14 +197,14 @@ Ngược lại, có những khác biệt **không** được chấp nhận dù s
 - Mỗi execution: `POST /api/test/reset` rồi `POST /api/test/clock` trong `beforeEach`; một worker để các project không reset chéo DB của nhau.
 - Playwright tạo và đóng browser context riêng cho từng test — không có cookie hay storage dùng chung.
 
-### 5.2. Bảng case
+### 5.2. Bảng test case
 
 | ID | Requirement / rủi ro | Precondition | Input | Action | Expected result | Cleanup |
 |---|---|---|---|---|---|---|
 | CP-01 | R-UI-01, R-UI-04, R-FARE-01…08, R-CANCEL-01; control, tiền, vòng đời UI | Reset, 09:00 VN | ride, bike, 5 km | Nhập 5 → kiểm tràn → Báo giá → Đặt → kiểm tràn → Huỷ | `35.000 đ`; cao điểm «Không»; «Đang tìm tài xế» → «Đã huỷ»; «Phí huỷ: 0 đ»; nút huỷ disabled; không tràn ngang | Context đóng; reset ở test kế |
 | CP-02 | R-UI-01, R-UI-04, R-FOOD-01, R-FOOD-04, R-FARE-02; trường động, select, negative path | Reset, 09:00 VN | food 5 km, rồi ride 0,1 km | Chọn food → Báo giá → kiểm tràn → chọn ride → nhập 0.1 → Báo giá → kiểm tràn | Ô tiền món hiện rồi ẩn; loại xe disabled rồi enabled; `95.000 đ`; nút đặt disabled sau khi đổi dịch vụ; lỗi chứa «Quãng đường» | Như trên |
 
-Vì sao chỉ hai case? Các tổ hợp giá đã được khoá nhanh ở [SYS-03](/articles/system-testing-functional-test); vòng đời chuyến nhiều vai trò ở [SYS-05](/articles/system-testing-system-test). Ở đây ta chọn những thao tác **nhạy với môi trường**: click/tap, `select` đổi trường động, hiển thị tiền, lỗi đầu vào. Mỗi case chạy trên ba project ⇒ sáu execution.
+Vì sao chỉ hai test case? Các tổ hợp giá đã được khoá nhanh ở [SYS-03](/articles/system-testing-functional-test); vòng đời chuyến nhiều vai trò ở [SYS-05](/articles/system-testing-system-test). Ở đây ta chọn những thao tác **nhạy với môi trường**: click/tap, `select` đổi trường động, hiển thị tiền, lỗi đầu vào. Mỗi test case chạy trên ba project ⇒ sáu execution.
 
 ### 5.3. Entry và exit criteria
 
@@ -212,7 +212,7 @@ Vì sao chỉ hai case? Các tổ hợp giá đã được khoá nhanh ở [SYS-
 - **Exit của bài tập:** sáu execution pass, không retry, typecheck đạt, khoảng trống ghi rõ.
 - **Exit của release thật:** theo support policy; có thể đòi engine, OS và thiết bị thật nằm ngoài matrix này.
 
-Một quy tắc quan trọng: case **không chạy** vì thiếu browser khác với case **fail**. «Skipped Safari» không bao giờ được đếm là «Safari pass».
+Một quy tắc quan trọng: test case **không chạy** vì thiếu browser khác với test case **fail**. «Skipped Safari» không bao giờ được đếm là «Safari pass».
 
 ## 6. Thực hành với Playwright projects
 
@@ -235,7 +235,7 @@ webServer: {
 },
 ```
 
-Cùng file đặt `workers: 1, retries: 0` và chỉ lưu trace/screenshot khi lỗi dưới `reports/compatibility`. `retries: 0` là chủ ý: với compatibility, một lần fail rồi pass khi chạy lại thường là dấu hiệu timing phụ thuộc engine — cần thấy nó, không che nó.
+Cùng file đặt `workers: 1, retries: 0` và chỉ lưu trace/screenshot khi lỗi dưới `reports/compatibility`. `retries: 0` là chủ ý: với compatibility, một lần fail rồi pass khi chạy lại thường là dấu hiệu timing phụ thuộc engine — cần thấy lỗi đó, không che đi.
 
 ### 6.2. Chạy
 
@@ -286,7 +286,7 @@ async function noHorizontalOverflow(page: Page) {
 }
 ```
 
-Project `chrome-narrow-touch` dùng `tap()` thật trong context có `hasTouch`; desktop dùng `click()`. Tuy nhiên điền ô bằng `fill()` và chọn bằng `selectOption()` vẫn là automation: chưa mô phỏng bàn phím ảo che nửa màn hình hay native picker của Android/iOS. Tolerance 1 px tránh báo lỗi giả do làm tròn sub-pixel.
+Project `chrome-narrow-touch` dùng `tap()` thật trong context có `hasTouch`; desktop dùng `click()`. Tuy nhiên, việc điền ô bằng `fill()` và chọn bằng `selectOption()` vẫn là automation: chưa mô phỏng bàn phím ảo che nửa màn hình hay native picker của Android/iOS. Tolerance 1 px tránh báo lỗi giả do làm tròn sub-pixel.
 
 ### 6.5. Phần thân CP-01
 
@@ -341,7 +341,7 @@ CP-02 nhắm vào sự kiện `change` của `<select>` — loại hành vi các
 
 ### 7.1. Expected
 
-Sáu execution pass (2 case × 3 project), không retry; typecheck exit 0. Mỗi execution in một dòng JSON metadata môi trường.
+Sáu execution pass (2 test case × 3 project), không retry; typecheck exit 0. Mỗi execution in một dòng JSON metadata môi trường.
 
 ### 7.2. Observed — báo cáo lab ngày 13/11/2026
 
@@ -371,11 +371,11 @@ Running 6 tests using 1 worker
   6 passed (18.9s)
 ```
 
-Metadata in ra cho thấy Chrome đã tự cập nhật lên **157.0.8103.78** (báo cáo gốc: .51); Edge vẫn **157.0.4341.46**. Đây chính là lý do phải ghi version từng lượt: hai lượt «Chrome pass» trong cùng một ngày không chạy trên cùng một binary. Thời gian của lượt chạy lại dài hơn vì máy đang chạy song song các tác vụ khác; số giây ở đây không phải số đo hiệu năng.
+Metadata in ra cho thấy Chrome đã tự cập nhật lên **157.0.8103.78** (báo cáo gốc: .51); Edge vẫn **157.0.4341.46**. Đây chính là lý do phải ghi phiên bản từng lượt: hai lượt «Chrome pass» trong cùng một ngày không chạy trên cùng một binary. Thời gian của lượt chạy lại dài hơn vì máy đang chạy song song các tác vụ khác; số giây ở đây không phải số đo hiệu năng.
 
 ### 7.4. Diễn giải
 
-Cả ba cấu hình hiện đúng 35.000 đ cho ride và 95.000 đ cho food; báo giá, đặt, huỷ hoạt động; phí huỷ khi searching là 0 đ; trường động và trạng thái disabled đúng; lỗi quãng đường hiện ra; không có tràn ngang vượt 1 px tại các điểm kiểm. **Không phát hiện defect** trong phạm vi đó. Kết luận đúng: «hai hành trình đạt trên hai browser Chromium và một cấu hình hẹp mô phỏng, với các version đã ghi» — không rộng hơn.
+Cả ba cấu hình hiện đúng 35.000 đ cho ride và 95.000 đ cho food; báo giá, đặt, huỷ hoạt động; phí huỷ khi searching là 0 đ; trường động và trạng thái disabled đúng; lỗi quãng đường hiện ra; không có tràn ngang vượt 1 px tại các điểm kiểm. **Không phát hiện defect** trong phạm vi đó. Kết luận đúng: «hai hành trình đạt trên hai browser Chromium và một cấu hình hẹp mô phỏng, với các phiên bản đã ghi» — không rộng hơn.
 
 ### 7.5. Đọc failure theo trục
 
@@ -387,7 +387,7 @@ Cả ba cấu hình hiện đúng 35.000 đ cho ride và 95.000 đ cho food; bá
 | Tràn ngang chỉ xuất hiện sau khi đặt | ID dài, `min-width`, flex không wrap, fieldset | Screenshot trace; đo `scrollWidth` từng khối |
 | Browser không khởi chạy | Thiếu channel, cài đặt hỏng | Báo **blocked** do môi trường, không báo chức năng hỏng |
 
-Defect compatibility cần: tên project, browser + version, OS, viewport CSS pixel, device scale nếu có, locale, timezone, input method, bước tái hiện và trace/screenshot. Với lỗi chỉ thấy trên điện thoại thật, giữ tên model, OS version, hướng màn hình, trạng thái bàn phím — đừng thay bằng ảnh Chrome thu hẹp rồi tuyên bố đã tái hiện.
+Defect compatibility cần: tên project, browser + version, OS, viewport CSS pixel, device scale nếu có, locale, timezone, input method, bước tái hiện và trace/screenshot. Với lỗi chỉ thấy trên điện thoại thật, giữ tên model, phiên bản OS, hướng màn hình, trạng thái bàn phím — đừng thay bằng ảnh Chrome thu hẹp rồi tuyên bố đã tái hiện.
 
 ## 8. Mở rộng nâng cao
 
@@ -401,11 +401,11 @@ Browser × OS × viewport × locale × input tăng rất nhanh. Pairwise testing
 
 ### 8.3. Backward compatibility của API và dữ liệu
 
-Ứng dụng tài xế cũ vẫn còn trên máy người dùng khi server đã nâng cấp. Cần kiểm: trường mới có bắt buộc không, enum mới có làm client cũ vỡ không, giá trị mặc định, đàm phán version, migration dữ liệu. Với rolling deployment, phiên bản cũ và mới của server cùng chạy trên một schema trong một khoảng thời gian — đó cũng là compatibility. Chrome/Edge xanh không chứng minh client mobile phiên bản cũ còn dùng được.
+Ứng dụng tài xế cũ vẫn còn trên máy người dùng khi server đã nâng cấp. Cần kiểm: trường mới có bắt buộc không, enum mới có làm client cũ vỡ không, giá trị mặc định, đàm phán phiên bản, migration dữ liệu. Với rolling deployment, phiên bản cũ và mới của server cùng chạy trên một schema trong một khoảng thời gian — đó cũng là compatibility. Chrome/Edge xanh không chứng minh client mobile phiên bản cũ còn dùng được.
 
 ### 8.4. Locale, timezone và định dạng nhập
 
-Ô số nhận dấu phẩy hay dấu chấm, chuỗi Unicode, font fallback cho tiếng Việt, tên địa chỉ dài, ngày chuyển giờ mùa hè (DST) đều có thể sinh lỗi khác nhau theo cấu hình. Phân biệt **locale hiển thị** với **quy tắc nghiệp vụ**: giá tính theo giờ Việt Nam, nhưng hạn báo giá hiển thị cho người ở New York có thể theo giờ địa phương nếu sản phẩm thiết kế như vậy. Cần expected được thống nhất trước; đừng tự coi mọi khác biệt ngày giờ là bug.
+Ô số nhận dấu phẩy hay dấu chấm, chuỗi Unicode, font fallback cho tiếng Việt, tên địa chỉ dài, ngày chuyển giờ mùa hè (DST) đều có thể sinh lỗi khác nhau theo cấu hình. Phân biệt **locale hiển thị** với **quy tắc nghiệp vụ**: giá tính theo giờ Việt Nam, nhưng hạn báo giá hiển thị cho người ở New York có thể theo giờ địa phương nếu sản phẩm thiết kế như vậy. Cần thống nhất kết quả mong đợi trước; đừng tự coi mọi khác biệt ngày giờ là bug.
 
 ### 8.5. Visual regression có baseline
 
@@ -413,7 +413,7 @@ Nếu thêm so sánh screenshot, tạo baseline theo từng project/font/OS và 
 
 ### 8.6. Duy trì support matrix theo thời gian
 
-«Latest» là mục tiêu di động: lượt chạy lại của chính bài này đã thấy Chrome đổi build trong cùng ngày. Hãy ghi version mỗi lượt, review matrix khi analytics hoặc dependency thay đổi, và khi bỏ hỗ trợ một môi trường thì đó là quyết định sản phẩm có thông báo — không phải xoá project test vì nó hay fail.
+«Latest» là mục tiêu di động: lượt chạy lại của chính bài này đã thấy Chrome đổi build trong cùng ngày. Hãy ghi phiên bản mỗi lượt, review matrix khi analytics hoặc dependency thay đổi, và khi bỏ hỗ trợ một môi trường thì đó là quyết định sản phẩm có thông báo — không phải xoá project test vì nó hay fail.
 
 ## 9. Anti-pattern, giới hạn và đánh đổi
 
@@ -436,7 +436,7 @@ Nếu thêm so sánh screenshot, tạo baseline theo từng project/font/OS và 
 
 ### 9.3. Đánh đổi chi phí và phạm vi
 
-Mỗi project thêm vào nhân thời gian chạy và chi phí điều tra flaky. Hai case × ba project chạy dưới 20 giây là phù hợp cho pipeline mỗi lần merge; matrix mười browser × thiết bị thật thì hợp với lịch chạy đêm hoặc trước release. Hãy để support policy quyết định cấu hình nào nằm ở gate nào, thay vì nhét mọi tổ hợp vào mọi lần chạy.
+Mỗi project thêm vào nhân thời gian chạy và chi phí điều tra flaky. Hai test case × ba project chạy dưới 20 giây là phù hợp cho pipeline mỗi lần merge; matrix mười browser × thiết bị thật thì hợp với lịch chạy đêm hoặc trước release. Hãy để support policy quyết định cấu hình nào nằm ở gate nào, thay vì nhét mọi tổ hợp vào mọi lần chạy.
 
 ## 10. Bài tập và câu hỏi tự kiểm
 
@@ -446,7 +446,7 @@ Mỗi project thêm vào nhân thời gian chạy và chi phí điều tra flaky
 
 <details>
 <summary><b>Gợi ý đáp án</b></summary>
-<p>Không. Đó là 2 case × 3 project; chỉ có hai browser (Chrome, Edge) cùng họ Chromium, và project thứ ba là Chrome với viewport hẹp + touch emulation. Câu đúng: «CP-01 và CP-02 đạt trên Chrome 157.0.8103.x và Edge 157.0.4341.46 desktop, cùng một cấu hình Chrome 390×844 mô phỏng chạm; chưa kiểm Gecko, WebKit hay thiết bị thật».</p>
+<p>Không. Đó là 2 test case × 3 project; chỉ có hai browser (Chrome, Edge) cùng họ Chromium, và project thứ ba là Chrome với viewport hẹp + touch emulation. Câu đúng: «CP-01 và CP-02 đạt trên Chrome 157.0.8103.x và Edge 157.0.4341.46 desktop, cùng một cấu hình Chrome 390×844 mô phỏng chạm; chưa kiểm Gecko, WebKit hay thiết bị thật».</p>
 </details>
 
 **Bài 2 (trung bình).** Giả sử project `edge-desktop-en` fail: `quote-total` hiện `35,000 đ`. Bạn kết luận Edge lỗi được chưa? Thiết kế thí nghiệm.
@@ -476,7 +476,7 @@ Mỗi project thêm vào nhân thời gian chạy và chi phí điều tra flaky
 
 <details>
 <summary><b>Đáp án</b></summary>
-<p>Không. Nó chỉ chứng minh không có tràn ngang tại thời điểm đo. Chồng lấn, chữ bị cắt hay tương phản cần kiểm khác (visual review, accessibility check).</p>
+<p>Không. Phép kiểm này chỉ chứng minh không có tràn ngang tại thời điểm đo. Chồng lấn, chữ bị cắt hay tương phản cần kiểm khác (visual review, accessibility check).</p>
 </details>
 
 **Câu 2.** Hai screenshot giống hệt nhau giữa Chrome và Edge có chứng minh nút «Đặt chuyến» dùng được trên Edge không?

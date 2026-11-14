@@ -1,7 +1,7 @@
 ---
 slug: system-integration-testing
 title: "System Integration Testing: kiểm thử tích hợp Tới Nơi với VíXanh, MapViet và hệ ngoài"
-summary: "System integration testing theo CTFL v4.0.1: kiểm giao diện giữa Tới Nơi và hệ không do mình làm chủ (ví VíXanh, bản đồ MapViet, SMS, push), chọn môi trường fake hay sandbox, và những gì bản giả không chứng minh được."
+summary: "System integration testing theo CTFL v4.0.1: kiểm thử giao diện giữa Tới Nơi và các hệ thống không do mình sở hữu (ví VíXanh, bản đồ MapViet, SMS, push), chọn môi trường fake hay sandbox, và những gì bản giả không chứng minh được."
 category: testing
 level: beginner
 tags: [testing, istqb, ctfl, test-015, test-level, system-integration-testing, sandbox, third-party]
@@ -31,7 +31,7 @@ Mọi test component xanh, system test trên môi trường có ví giả cũng 
 
 Tới Nơi không tự làm mọi thứ. Tiền đi qua cổng thanh toán **VíXanh** và **ThẻNội Địa**, quãng đường lấy từ bản đồ **MapViet**, mã OTP gửi qua **TinNhanh**, thông báo đẩy qua APNs/FCM, giấy tờ tài xế qua nhà cung cấp KYC. Những hệ này do người khác viết, người khác vận hành, đổi phiên bản theo lịch của họ.
 
-**System integration testing** là test level kiểm chỗ nối giữa hệ thống của ta và các hệ đó. Nó giải quyết một khoảng trống mà các level khác để lại:
+**System integration testing** là test level kiểm chỗ nối giữa hệ thống của ta và các hệ đó. SIT lấp một khoảng trống mà các level khác để lại:
 
 - [TEST-013](/articles/component-integration-testing) kiểm các thành phần **bên trong** Tới Nơi nói chuyện với nhau (Booking ↔ Pricing). Cả hai bên đều do đội mình viết.
 - [TEST-014](/articles/system-testing) kiểm **toàn bộ** Tới Nơi theo đặc tả, nhưng thường thay hệ ngoài bằng bản giả hoặc mô phỏng.
@@ -69,7 +69,7 @@ Syllabus phân biệt các test level bằng năm thuộc tính: test object, te
 | Ví dụ Tới Nơi | `quote.ts` ↔ `pricing.ts` ↔ `voucher.ts`; Booking ↔ Pricing qua gRPC | Tới Nơi ↔ VíXanh, MapViet, TinNhanh, APNs/FCM |
 | Hay dùng bản giả? | Stub/driver cho thành phần chưa xong | Sandbox của đối tác; bản giả chỉ ở bước chuẩn bị |
 
-Test level ≠ thứ tự thời gian: trong một đội Agile, SIT với VíXanh có thể chạy mỗi ngày trên sandbox, song song với component test — không phải đợi «xong system test».
+Test level không đồng nghĩa với thứ tự thời gian: trong một đội Agile, SIT với VíXanh có thể chạy mỗi ngày trên sandbox, song song với component test — không phải đợi «xong system test».
 
 ### 2.4. Môi trường: từ bản giả tới gần production
 
@@ -77,12 +77,12 @@ CTFL v4.0.1 (mục 1.4.3) liệt kê các **test environment item** thường g�
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB</span>
-<p>Sandbox của đối tác, công cụ service virtualization cụ thể (WireMock…), contract testing, kiểm webhook có chữ ký là thực hành ngành. CTFL chỉ nêu mục tiêu và yêu cầu môi trường của SIT. Kỹ thuật cụ thể với bên thứ ba được đi sâu ở bài TEST-077 (Series 07 · Integration Testing &amp; API Testing); hợp đồng API giữa các service ở TEST-074 và Series 11.</p>
+<p>Sandbox của đối tác, công cụ service virtualization cụ thể (WireMock…), contract testing, kiểm webhook có chữ ký là thực hành ngành. CTFL chỉ nêu mục tiêu và yêu cầu môi trường của SIT. Bài TEST-077 (Series 07 · Integration Testing &amp; API Testing) đi sâu vào kỹ thuật cụ thể với bên thứ ba; hợp đồng API giữa các service nằm ở TEST-074 và Series 11.</p>
 </div>
 
 ### 2.5. Một lăng kính hữu ích: interoperability (CTAL-TA v4.0, mục 4.4)
 
-CTAL-TA mô tả **interoperability testing** — kiểm hai hệ trao đổi thông tin và dùng được thông tin đã trao đổi — và nói nó thường làm trong integration testing. Danh sách loại defect mà syllabus nêu rất hợp để làm khung cho SIT: biến đổi dữ liệu khi trao đổi; hiểu hoặc dùng sai dữ liệu nhận được; luồng giao tiếp và giao thức; tuân thủ chuẩn; chức năng đầu-cuối; và chính tài liệu thiết kế (tài liệu nói một đằng, hệ chạy một nẻo). Mục 4 dùng khung này để sinh test condition. Đây là kiến thức cấp Advanced, dùng ở bài như công cụ tư duy.
+CTAL-TA mô tả **interoperability testing** — kiểm hai hệ trao đổi thông tin và dùng được thông tin đã trao đổi — và nói nó thường làm trong integration testing. Danh sách loại defect mà syllabus nêu rất hợp để làm khung cho SIT: biến đổi dữ liệu khi trao đổi; hiểu hoặc dùng sai dữ liệu nhận được; luồng giao tiếp và giao thức; tuân thủ chuẩn; chức năng đầu-cuối; và chính tài liệu thiết kế (tài liệu nói một đằng, hệ chạy một nẻo). Mục 4 dùng khung này để sinh test condition. Đây là kiến thức cấp Advanced, bài này chỉ mượn làm công cụ tư duy.
 
 ### 2.6. Bảng thuật ngữ
 
@@ -108,7 +108,7 @@ CTAL-TA mô tả **interoperability testing** — kiểm hai hệ trao đổi th
 | R-GEN-06 | Hệ đích lấy quãng đường từ MapViet; lab giản lược: client gửi `distanceKm` |
 | R-NFR-03 | Quote API p95 dưới 500 ms — trong hệ đích phụ thuộc MapViet (SLO §14.1) |
 
-Câu cuối của R-PAY-04 rất đáng chú ý: «cổng bảo đảm cùng khoá chỉ trừ một lần» không phải là hành vi của Tới Nơi mà là **giả định về VíXanh**. Tới Nơi chỉ thử lại an toàn nếu giả định đó đúng. Kiểm nó là việc của SIT. Ta gọi nó là **giả định A-1**.
+Câu cuối của R-PAY-04 rất đáng chú ý: «cổng bảo đảm cùng khoá chỉ trừ một lần» không phải là hành vi của Tới Nơi mà là **giả định về VíXanh**. Tới Nơi chỉ thử lại an toàn nếu giả định đó đúng. Kiểm thử giả định này là việc của SIT. Ta gọi đó là **giả định A-1**.
 
 ### 3.2. System context
 
@@ -221,7 +221,7 @@ Bảng điểm tích hợp (phần «lỗi có thể xảy ra» và «môi trư�
 
 ### 5.2. Kiểm phía Tới Nơi trên ví giả (chạy thật)
 
-Thư mục `examples/toi-noi-testing/articles/system-integration-testing/` có 5 ca. Bốn ca đầu kiểm **phía Tới Nơi** của IP-1 và IP-4. Ca thứ năm là bộ kiểm giả định A-1, viết thành một hàm nhận bất kỳ `PaymentGateway` nào:
+Thư mục `examples/toi-noi-testing/articles/system-integration-testing/` có 5 test case. Bốn test case đầu kiểm **phía Tới Nơi** của IP-1 và IP-4. Test case thứ năm là bộ kiểm giả định A-1, viết thành một hàm nhận bất kỳ `PaymentGateway` nào:
 
 ```ts
 async function kiemGiaDinhViXanh(gateway: PaymentGateway): Promise<void> {
@@ -235,9 +235,9 @@ async function kiemGiaDinhViXanh(gateway: PaymentGateway): Promise<void> {
 }
 ```
 
-Trong lab, hàm này nhận `new FakePaymentGateway()` — nó chỉ xác nhận bản giả mô phỏng đúng giả định. Khi có sandbox, truyền vào client sandbox của VíXanh là có ngay một test SIT thật, không phải viết lại.
+Trong lab, hàm này nhận `new FakePaymentGateway()` — lúc đó hàm chỉ xác nhận bản giả mô phỏng đúng giả định. Khi có sandbox, truyền vào client sandbox của VíXanh là có ngay một test SIT thật, không phải viết lại.
 
-Test data: khách C001, chuyến xe máy SG 5 km lúc 09:00 (ngoài cao điểm), trả `vixanh`, tài xế D101 chạy tới hoàn thành; SIT-02 cho lần gọi đầu mất phản hồi (`lost_response`), SIT-03 đặt ví ở chế độ `decline`, SIT-04 cho SG đang mưa còn HN thì không. Kết quả mong đợi ghi ngay trong tên từng ca ở log dưới. Cước 35.000 đ = 12.000 + 4.500 × 5 = 34.500 đ, làm tròn lên bội số 1.000 đ (R-FARE-01, R-FARE-08). Hết giờ được rút từ 3 giây xuống 50 ms để test nhanh; số lần thử lại giữ đúng 2.
+Test data: khách C001, chuyến xe máy SG 5 km lúc 09:00 (ngoài cao điểm), trả `vixanh`, tài xế D101 chạy tới hoàn thành; SIT-02 cho lần gọi đầu mất phản hồi (`lost_response`), SIT-03 đặt ví ở chế độ `decline`, SIT-04 cho SG đang mưa còn HN thì không. Kết quả mong đợi ghi ngay trong tên từng test case ở log dưới. Cước 35.000 đ = 12.000 + 4.500 × 5 = 34.500 đ, làm tròn lên bội số 1.000 đ (R-FARE-01, R-FARE-08). Ta rút ngưỡng hết giờ từ 3 giây xuống 50 ms để test nhanh; số lần thử lại giữ đúng 2.
 
 ```bash
 cd examples/toi-noi-testing
@@ -265,15 +265,15 @@ Kết quả thực tế: 5/5 xanh. Đọc đúng ý nghĩa: **Tới Nơi đã s�
 | 2 | Callback URL công khai nhận được webhook, đã đăng ký với VíXanh | Không có thì không kiểm được nửa bất đồng bộ của IP-1 |
 | 3 | IP đi ra của môi trường test nằm trong whitelist của đối tác | Lỗi cấu hình hay gặp nhất ở ngày đầu SIT |
 | 4 | Dữ liệu khách tổng hợp hoặc đã che | §16.2: không dùng PII production |
-| 5 | Biết cách gây lỗi trên sandbox (từ chối, chậm) và quota của sandbox | Để chạy được ca lỗi, không làm cạn quota |
+| 5 | Biết cách gây lỗi trên sandbox (từ chối, chậm) và quota của sandbox | Để chạy được test case lỗi mà không làm cạn quota |
 | 6 | Log có `correlation_id` (§15.3) để đối chiếu với log đối tác | Khi lệch, hai bên cần cùng một mã để tra |
 
 ## 6. Góc nhìn nâng cao
 
 - **SIT không phải E2E.** E2E (Series 08) đi theo hành trình người dùng xuyên qua nhiều hệ; SIT nhắm vào từng giao diện. Một test E2E xanh có thể đi qua IP-1 bằng đúng một nhánh thành công, bỏ sót mọi nhánh lỗi.
-- **Contract testing không thay SIT.** Hợp đồng kiểm cấu trúc thông điệp hai bên đã thống nhất; nó không cho biết đối tác có thật sự chống trùng theo khoá hay webhook có tới trễ 10 phút không.
-- **Sandbox có tính cách riêng.** Sandbox thường luôn trả thành công, không có quota, độ trễ thấp, có khi chạy phiên bản khác production; ghi rõ khác biệt đã biết vào báo cáo SIT. Hệ «bên ngoài» cũng không chỉ là bên thứ ba: hệ kế toán hay CRM nội bộ do đội khác sở hữu và phát hành độc lập cũng cần SIT.
-- **Lỗi đối tác không được làm hỏng nghiệp vụ của ta.** Kiến trúc §4.11: booking không phụ thuộc SMS/Push còn sống. SIT nên có ca «TinNhanh sập» và kỳ vọng chuyến vẫn tạo được — đây là test condition hay bị quên.
+- **Contract testing không thay SIT.** Hợp đồng kiểm cấu trúc thông điệp hai bên đã thống nhất; hợp đồng không cho biết đối tác có thật sự chống trùng theo khoá hay webhook có tới trễ 10 phút không.
+- **Sandbox có đặc điểm riêng.** Sandbox thường luôn trả thành công, không có quota, độ trễ thấp, có khi chạy phiên bản khác production; ghi rõ khác biệt đã biết vào báo cáo SIT. Hệ «bên ngoài» cũng không chỉ là bên thứ ba: hệ kế toán hay CRM nội bộ do đội khác sở hữu và phát hành độc lập cũng cần SIT.
+- **Lỗi đối tác không được làm hỏng nghiệp vụ của ta.** Kiến trúc §4.11: booking không phụ thuộc SMS/Push còn sống. SIT nên có test case «TinNhanh sập» và kỳ vọng chuyến vẫn tạo được — đây là test condition hay bị quên.
 - **Sai lầm thường gặp:** mock mọi thứ rồi tuyên bố «đã test tích hợp»; chỉ chạy nhánh thành công; quên nửa bất đồng bộ (webhook, kết quả KYC trả sau); dùng khoá hoặc dữ liệu production; lên lịch SIT sát ngày release mà chưa hỏi đối tác đã mở sandbox chưa.
 
 ## 7. Bài tập và câu hỏi ôn tập

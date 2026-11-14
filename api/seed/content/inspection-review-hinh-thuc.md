@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, ctal-ta, test-026, static-testing, review, inspecti
 language: vi
 ---
 
-Bản nháp đặc tả phí huỷ chuyến của Tới Nơi chỉ dài một trang, nhưng mỗi dòng của nó quyết định tiền của khách và thu nhập của tài xế. Một buổi đọc lướt sẽ thấy vài lỗi; một **inspection** tìm được nhiều hơn hẳn, đồng thời để lại số đo cho biết lần sau nên review khác đi thế nào. Bài này trả lời: inspection khác các loại review khác ở đâu, chạy nó ra sao, và số đo của nó dùng vào việc gì.
+Bản nháp đặc tả phí huỷ chuyến của Tới Nơi chỉ dài một trang, nhưng mỗi dòng trong đó quyết định tiền của khách và thu nhập của tài xế. Một buổi đọc lướt sẽ thấy vài lỗi; một **inspection** tìm được nhiều hơn hẳn, đồng thời để lại số đo cho biết lần sau nên review khác đi thế nào. Bài này trả lời: inspection khác các loại review khác ở đâu, chạy inspection ra sao, và số đo của inspection dùng vào việc gì.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-026</span>
@@ -31,7 +31,7 @@ Bản nháp đặc tả phí huỷ chuyến của Tới Nơi chỉ dài một tr
 
 **Inspection** (soát xét hình thức) là loại review chặt chẽ nhất: có kế hoạch, vai trò cố định, mỗi người chuẩn bị riêng, buổi họp có điều phối để phân loại từng phát hiện, tiêu chí để biết khi nào được dừng, và số đo được ghi lại.
 
-Vấn đề nó giải quyết: defect trong đặc tả lan sang code, test, hai ứng dụng và kịch bản tổng đài. [Informal review](/articles/informal-review) hay [walkthrough](/articles/walkthrough) hợp để thống nhất ý tưởng, nhưng không nhằm **vét hết** anomaly. Nên dùng inspection khi work product **rủi ro cao** (tiền, an toàn, pháp lý), **cần audit trail** (khách khiếu nại phí thì phải chỉ ra quy tắc do ai duyệt), đã **tương đối ổn định**, và tổ chức muốn **cải tiến quy trình bằng số đo**.
+Vấn đề mà inspection giải quyết: defect trong đặc tả lan sang code, test, hai ứng dụng và kịch bản tổng đài. [Informal review](/articles/informal-review) hay [walkthrough](/articles/walkthrough) hợp để thống nhất ý tưởng, nhưng không nhằm **vét hết** anomaly. Nên dùng inspection khi work product **rủi ro cao** (tiền, an toàn, pháp lý), **cần audit trail** (khách khiếu nại phí thì phải chỉ ra quy tắc do ai duyệt), đã **tương đối ổn định**, và tổ chức muốn **cải tiến quy trình bằng số đo**.
 
 ## 2. Lý thuyết theo ISTQB
 
@@ -61,10 +61,10 @@ Quy trình review chung (CTFL 3.2.2, dựa trên ISO/IEC 20246; chi tiết ở [
 | Hoạt động | Inspection làm gì |
 |---|---|
 | Planning | Phạm vi, vùng tập trung, **exit criteria**, nỗ lực; thêm vai trò, entry criteria, checklist, góc nhìn, số đo sẽ thu |
-| Review initiation | Kiểm entry criteria; ai cũng có tài liệu và hiểu vai trò |
+| Review initiation | Kiểm tra entry criteria; ai cũng có tài liệu và hiểu vai trò |
 | Individual review | Bắt buộc, bấm giờ, dùng **review technique**; ghi anomaly, đề xuất, câu hỏi |
 | Communication and analysis | Moderator điều phối, scribe ghi; mỗi anomaly có trạng thái, người chịu trách nhiệm, hành động; không bàn cách sửa |
-| Fixing and reporting | Defect report; leader kiểm từng sửa đổi; đạt exit criteria mới chấp nhận; tổng hợp số đo |
+| Fixing and reporting | Defect report; leader kiểm tra từng sửa đổi; đạt exit criteria mới chấp nhận; tổng hợp số đo |
 
 Điểm hay bị hỏi: anomaly **chưa chắc** là defect. Qua bước communication and analysis mới biết đó là defect, câu hỏi đã có lời đáp, hay một đề xuất.
 
@@ -83,7 +83,7 @@ Quy trình review chung (CTFL 3.2.2, dựa trên ISO/IEC 20246; chi tiết ở [
 <text x="98" y="136" text-anchor="middle" class="t-small">tiêu chí vào / ra</text>
 <rect x="201" y="40" width="156" height="115" rx="8" class="f-surface s-line"/>
 <text x="279" y="68" text-anchor="middle" class="t-b">Initiation</text>
-<text x="279" y="100" text-anchor="middle" class="t-small">kiểm tiêu chí vào</text>
+<text x="279" y="100" text-anchor="middle" class="t-small">kiểm tra tiêu chí vào</text>
 <text x="279" y="118" text-anchor="middle" class="t-small">phát work product,</text>
 <text x="279" y="136" text-anchor="middle" class="t-small">tài liệu, checklist</text>
 <rect x="382" y="40" width="156" height="115" rx="8" class="f-surface s-line"/>
@@ -167,7 +167,7 @@ Khách được huỷ chuyến trước khi được đón. Phí huỷ bù cho t
 
 ### 3.2. Business rules liên quan cần đối chiếu
 
-Bản nháp không đứng một mình. Nó phải khớp với:
+Bản nháp không đứng một mình. Bản nháp phải khớp với:
 
 | Mã SPEC | Nội dung (tóm tắt) |
 |---|---|
@@ -202,7 +202,7 @@ Thu phí sai mốc ⇒ khiếu nại và hoàn tiền; thu hai lần khi app g�
 | Vai trò | QA Lead: leader + moderator; BA: author; Tester 2: scribe; Trưởng nhóm Booking: manager | Author không làm leader, scribe |
 | Reviewer | Tester (kiểm thử), Developer Booking (cài đặt), Operator (vận hành/CSKH) | Ba góc nhìn ít trùng nhau |
 | Tiêu chí vào | Có phiên bản, đã tự soát, ≤ 2 trang, SPEC + checklist đã gửi, đủ 3 góc nhìn | Không inspect bản chưa sẵn sàng |
-| Tiêu chí ra | Mọi anomaly có trạng thái; 0 critical/major còn mở; critical + major > 5/trang ⇒ thêm một vòng kiểm | Đo được, không «cảm thấy ổn» |
+| Tiêu chí ra | Mọi anomaly có trạng thái; 0 critical/major còn mở; critical + major > 5/trang ⇒ thêm một vòng kiểm tra lại | Đo được, không «cảm thấy ổn» |
 
 ### 4.2. Checklist cho sẵn
 
@@ -292,7 +292,7 @@ Q-01 **không phải defect**: R-GEN-04 đã nói đơn đồ ăn luôn do xe m�
 | Tổng nỗ lực | 620 phút-người ≈ 10,3 giờ-người | planning 40 + khởi động 90 + chuẩn bị 105 + họp 270 + sửa 60 + kiểm lại 40 + báo cáo 15 |
 | Nỗ lực mỗi defect | ≈ 52 phút-người | 620 ÷ 12 |
 
-Kết luận theo tiêu chí ra: 10 critical + major trên 1 trang > 5 ⇒ bản sửa v0.4 phải qua thêm một vòng kiểm (leader + Tester 1). Sau khi sửa, v0.4 trùng nội dung với **R-CANCEL-01…07** hiện có trong SPEC — ví dụ D-01 thành «`now − acceptedAt < 2 phút`», D-07 thành «`now > acceptedAt + etaMinutes + 10 phút`», D-11 thành khoá `trip:<id>:cancel-fee`.
+Kết luận theo tiêu chí ra: 10 critical + major trên 1 trang > 5 ⇒ bản sửa v0.4 phải qua thêm một vòng kiểm tra lại (leader + Tester 1). Sau khi sửa, v0.4 trùng nội dung với **R-CANCEL-01…07** hiện có trong SPEC — ví dụ D-01 thành «`now − acceptedAt < 2 phút`», D-07 thành «`now > acceptedAt + etaMinutes + 10 phút`», D-11 thành khoá `trip:<id>:cancel-fee`.
 
 ### 5.5. Dùng số đo để cải tiến quy trình
 
@@ -302,7 +302,7 @@ Kết luận theo tiêu chí ra: 10 critical + major trên 1 trang > 5 ⇒ bản
 | Góc nhìn vận hành tìm 2 defect không ai khác thấy | Đặc tả có tiền luôn mời Operator |
 | 10 defect critical/major/trang ở bản nộp | BA tự soát bằng CL-SPEC trước khi nộp (thêm vào tiêu chí vào) |
 
-Không dòng nào nói «ai tìm được nhiều nhất»: số đo theo **góc nhìn** giúp chọn người cho lần sau; số đo theo **người** biến review thành buổi chấm điểm — điều CTFL 3.2.5 cấm.
+Không dòng nào trong bảng nói «ai tìm được nhiều nhất»: số đo theo **góc nhìn** giúp chọn người cho lần sau; số đo theo **người** biến review thành buổi chấm điểm — điều CTFL 3.2.5 cấm.
 
 ## 6. Góc nhìn nâng cao
 
@@ -317,9 +317,9 @@ Không dòng nào nói «ai tìm được nhiều nhất»: số đo theo **góc
 - *Coi inspection là ký duyệt* ⇒ inspection tìm anomaly; phát hành đặc tả vẫn do người sở hữu yêu cầu quyết.
 - *Chỉ đọc một tài liệu* ⇒ 4/12 defect ở bài này chỉ lộ ra khi đọc chéo SPEC.
 
-**Chi phí có đáng không? (giả định, có công thức).** Nếu D-11 lọt ra production: 2 triệu chuyến/ngày (hồ sơ dự án) × 6% huỷ (tỷ lệ trong dữ liệu mẫu của hồ sơ) × giả định 20% có phí × 30% trả VíXanh × 1% bị app gửi lại ⇒ 72 khoản thu trùng/ngày, mỗi khoản kéo theo một ticket hỗ trợ và một lần hoàn tiền. Một tuần là 504 ca. Inspection tốn 10,3 giờ-người cho cả 12 defect.
+**Chi phí có đáng không? (giả định, có công thức).** Nếu D-11 lọt ra production: 2 triệu chuyến/ngày (hồ sơ dự án) × 6% huỷ (tỷ lệ trong dữ liệu mẫu của hồ sơ) × giả định 20% có phí × 30% trả VíXanh × 1% bị app gửi lại ⇒ 72 khoản thu trùng/ngày, mỗi khoản kéo theo một ticket hỗ trợ và một lần hoàn tiền. Một tuần là 504 ticket. Inspection tốn 10,3 giờ-người cho cả 12 defect.
 
-**Inspection và kỹ thuật khác.** Static analysis ([TEST-029](/articles/static-analysis-phan-tich-code-tinh)) bắt lỗi máy đọc được trong code, không đọc được bản nháp tiếng Việt. Mô hình hoá (TA-5.2.1) — ở đây là bảng quyết định — làm ô trống của đặc tả hiện ra; nó bổ sung cho inspection. Pull request review thường là informal hoặc technical review; muốn gọi là inspection phải có đủ vai trò, tiêu chí vào/ra và số đo.
+**Inspection và kỹ thuật khác.** Static analysis ([TEST-029](/articles/static-analysis-phan-tich-code-tinh)) bắt lỗi máy đọc được trong code, không đọc được bản nháp tiếng Việt. Mô hình hoá (TA-5.2.1) — ở đây là bảng quyết định — làm ô trống của đặc tả hiện ra, và bổ sung cho inspection. Pull request review thường là informal hoặc technical review; muốn gọi là inspection phải có đủ vai trò, tiêu chí vào/ra và số đo.
 
 ## 7. Bài tập và câu hỏi ôn tập
 

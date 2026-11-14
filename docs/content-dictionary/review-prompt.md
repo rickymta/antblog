@@ -61,4 +61,6 @@ Lưu các tệp đề xuất đã áp vào `docs/content-dictionary/edits/<đợ
   - Dịch một thuật ngữ đã quen dùng bằng tiếng Anh, ví dụ "burst".
   - Sửa văn xuôi khiến lệch với chữ tương ứng trong khối code, ví dụ "ảnh chụp giá".
   - Thêm chữ không có trong bản gốc.
+- Đợt 2 (66 bài, mỗi agent 6 bài, prompt có thêm mục "bài học"): 830 đề xuất, trung bình khoảng 12,6 đề xuất mỗi bài. Người duyệt chỉ loại 1 đề xuất. Script gắn cờ (viết hoa giữa câu, lặp từ, mất thuật ngữ cần giữ, đổi số…) gắn cờ 17 đề xuất, và cả 17 đều chấp nhận được sau khi xem ngữ cảnh. Với 830 đề xuất, người duyệt đọc các mục bị gắn cờ cộng một mẫu ngẫu nhiên khoảng 40 mục, không đọc hết.
+- Trên Windows, truyền **thư mục** cho `content:apply` thay vì liệt kê từng tệp, để tránh lỗi "command line is too long".
 - Việc thống nhất "ca" → "test case" chiếm phần lớn đề xuất. Agent thường chỉ sửa ở văn xuôi chính và để nguyên trong bảng hay hình. Cách làm này chấp nhận được.

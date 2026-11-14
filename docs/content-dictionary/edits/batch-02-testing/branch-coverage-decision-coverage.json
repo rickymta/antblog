@@ -1,0 +1,203 @@
+{
+"file": "branch-coverage-decision-coverage.md",
+"edits": [
+{
+"old": "Vấn đề nó giải quyết: statement coverage",
+"new": "Vấn đề mà kỹ thuật này giải quyết: statement coverage",
+"reason": "Tránh 'nó' chỉ sự vật trừu tượng; thiếu quan hệ từ",
+"severity": "medium"
+},
+{
+"old": "không đủ phát hiện defect cần **một đường đi cụ thể**",
+"new": "chưa đủ để phát hiện defect cần **một đường đi cụ thể**",
+"reason": "Thiếu 'để', trật tự gượng",
+"severity": "low"
+},
+{
+"old": "Nếu 5% trong đó là ca tài xế trễ bị thu nhầm",
+"new": "Nếu 5% trong số đó là trường hợp tài xế trễ bị thu nhầm",
+"reason": "'ca' mơ hồ (không phải test case); 'trong đó' gượng",
+"severity": "medium"
+},
+{
+"old": "Kết quả mong đợi của ca D3-T",
+"new": "Kết quả mong đợi của test case D3-T",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Bốn ca đầu viết thẳng từ bảng",
+"new": "Bốn test case đầu viết thẳng từ bảng",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Bảy ca ⇒ **10/10 = 100%**.",
+"new": "Bảy test case ⇒ **10/10 = 100%**.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "và cần thêm một ca đi D5-F (lối `charged`) ⇒ tối thiểu **6 ca**.",
+"new": "và cần thêm một test case đi D5-F (lối `charged`) ⇒ tối thiểu **6 test case**.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "khi có một ca bất kỳ.",
+"new": "khi có một test case bất kỳ.",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "một ca đi hướng đúng chạy hết mọi câu lệnh",
+"new": "một test case đi hướng đúng chạy hết mọi câu lệnh",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "cho ô tô cần ca riêng (**BC-08**",
+"new": "cho ô tô cần test case riêng (**BC-08**",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "không ca nào thử **đúng mốc**",
+"new": "không test case nào thử **đúng mốc**",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "bộ 7 ca vẫn xanh.",
+"new": "bộ 7 test case vẫn xanh.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "chín ca BC-01…BC-09 là một bảng",
+"new": "chín test case BC-01…BC-09 là một bảng",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "### 5.1. Bước 1 — bốn ca theo bảng R-CANCEL-01",
+"new": "### 5.1. Bước 1 — bốn test case theo bảng R-CANCEL-01",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "### 5.2. Bước 2 — thêm ca cho từng outcome còn thiếu",
+"new": "### 5.2. Bước 2 — thêm test case cho từng outcome còn thiếu",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "số đo **không đổi** (vẫn 100%), nhưng hai ca này kiểm",
+"new": "chỉ số **không đổi** (vẫn 100%), nhưng hai test case này kiểm",
+"reason": "'số đo' là metric; thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Toàn bộ chín ca xanh trên mã thật.",
+"new": "Toàn bộ chín test case xanh trên mã thật.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Ca «tài xế trễ» là đường mà **cả hai quyết định đều sai** — nó không có câu lệnh riêng nào. Bộ năm ca BC-01",
+"new": "Trường hợp «tài xế trễ» đi theo đường mà **cả hai quyết định đều sai** — đường này không có câu lệnh riêng nào. Bộ năm test case BC-01",
+"reason": "Tránh 'nó'; thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "năm ca xanh**, defect lọt.",
+"new": "năm test case xanh**, defect lọt.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Viết ca cho đúng hướng đó là BC-07:",
+"new": "Viết test case cho đúng hướng đó là BC-07:",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Bộ 7 ca đi D4-F bằng",
+"new": "Bộ 7 test case đi D4-F bằng",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "nhưng không ca nào có (arriving,",
+"new": "nhưng không test case nào có (arriving,",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "phủ nhánh chỉ cần cỡ k+1 ca.",
+"new": "phủ nhánh chỉ cần cỡ k+1 test case.",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "**Viết ca chỉ để «tô xanh» nhánh.**",
+"new": "**Viết test case chỉ để «tô xanh» nhánh.**",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "một ca chỉ gọi hàm mà không assert",
+"new": "một test case chỉ gọi hàm mà không assert",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "phải có ca theo EP/BVA (BC-08, BC-09)",
+"new": "phải có test case theo EP/BVA (BC-08, BC-09)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "**một** ca bắt được bản đột biến",
+"new": "**một** test case bắt được bản đột biến",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Ca đó đi decision outcome nào? Có làm tăng số đo nhánh không?",
+"new": "Test case đó đi decision outcome nào? Có làm tăng chỉ số nhánh không?",
+"reason": "Thống nhất 'test case'; 'số đo' là metric",
+"severity": "medium"
+},
+{
+"old": "<p>Ca <b>BC-10</b>:",
+"new": "<p>Test case <b>BC-10</b>:",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "<p>Ca đi D1-F, D2-F, D3-F, D4-F, D5-F — đều là outcome đã phủ, nên số đo nhánh <b>không tăng</b> (đã 100%). Đây là ca của condition/MC/DC",
+"new": "<p>Test case này đi D1-F, D2-F, D3-F, D4-F, D5-F — đều là outcome đã phủ, nên chỉ số nhánh <b>không tăng</b> (đã 100%). Đây là test case của condition/MC/DC",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "số ca tối thiểu để đạt 100% statement coverage",
+"new": "số test case tối thiểu để đạt 100% statement coverage",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "Muốn 100% decision cần 2 ca —",
+"new": "Muốn 100% decision cần 2 test case —",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "Cần số ca bằng 2 mũ số quyết định",
+"new": "Cần số test case bằng 2 mũ số quyết định",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+}
+]
+}

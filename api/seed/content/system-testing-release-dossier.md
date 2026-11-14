@@ -18,7 +18,7 @@ Thứ Hai, 10:00, họp release. Trưởng nhóm sản phẩm hỏi một câu: 
 <tr><th scope="row">Cấp độ</th><td>Advanced — QA lead, SDET, người điều phối release đã đọc phần lớn series</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Không phải test level: thuộc test completion và quyết định release — gom, kiểm hiệu lực và diễn giải bằng chứng của mọi level/type trước đó</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-uat">SYS-15 · UAT</a> · <a href="/articles/system-testing-deployment-test">SYS-16 · Deployment Test</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): luật đề xuất thuần <code>rules.ts</code> với 8 ca RD-01…08, danh mục 17 mục bằng chứng <code>registry.ts</code> với RD-09, và <code>build-dossier.ts</code> chạy lại 10 suite Vitest, đọc git, kiểm độ mới rồi ghi dossier — <code>examples/toi-noi-testing/articles/system-testing-release-dossier/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): luật đề xuất thuần <code>rules.ts</code> với 8 test case RD-01…08, danh mục 17 mục bằng chứng <code>registry.ts</code> với RD-09, và <code>build-dossier.ts</code> chạy lại 10 suite Vitest, đọc git, kiểm độ mới rồi ghi dossier — <code>examples/toi-noi-testing/articles/system-testing-release-dossier/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 (quy trình test, test completion, test completion report); tài liệu git cho <code>git diff --name-only</code>, <code>git log --diff-filter</code>; mười sáu báo cáo SYS của series</td></tr>
 </tbody>
 </table>
@@ -105,7 +105,7 @@ Oracle của RD-01…08 là **bảng quyết định viết tay** ở mục 4.1,
 
 Entry: dependency cài theo lockfile; repo có lịch sử commit; working tree của lab sạch khi muốn có đề xuất hợp lệ. Exit bài tập: 9/9 test pass, typecheck pass, dossier dựng được trên ứng viên sạch và mọi dòng giải thích được. Đây là tiêu chí đạt bài tập, **không** phải phê duyệt release.
 
-## 4. Thiết kế luật và ca kiểm
+## 4. Thiết kế luật và test case
 
 ### 4.1. Bảng quyết định — viết trước khi viết code
 
@@ -154,7 +154,7 @@ Hai lựa chọn thiết kế đáng nói. Dòng 2 đứng trước mọi sign-o
 <figcaption><b>Hình 1 · Từ bằng chứng tới quyết định.</b> Bốn loại bằng chứng đi qua cùng một bước kiểm độ mới rồi vào luật. Luật trả một trong bốn đề xuất; bước cuối cùng thuộc về người ký. Dossier của lab hôm nay dừng ở NOT_READY.</figcaption>
 </figure>
 
-### 4.2. Bảng ca kiểm
+### 4.2. Bảng test case
 
 | ID | Điều kiện | Input | Expected | Cleanup |
 | --- | --- | --- | --- | --- |
@@ -168,7 +168,7 @@ Hai lựa chọn thiết kế đáng nói. Dòng 2 đứng trước mọi sign-o
 | RD-08 | Không gắn được commit / không có diff | `commit: null`; commit cũ không có trong `changedSince` | Cả hai `stale` | Không cần |
 | RD-09 | Danh mục toàn vẹn | `REGISTRY` thật | Đủ SYS-01…16, không trùng ID, mọi lab/báo cáo tồn tại | Không cần |
 
-RD-08 là ca dễ bị bỏ qua nhất. Khi không biết bằng chứng thuộc commit nào, có hai lựa chọn: coi là còn mới (lạc quan) hoặc coi là cũ (thận trọng). Luật chọn thận trọng — thiếu thông tin thì bằng chứng không được dùng — vì cái giá của hai kiểu sai không bằng nhau: chạy lại một suite tốn vài giây; phát hành mã chưa ai kiểm có thể tốn một sự cố.
+RD-08 là test case dễ bị bỏ qua nhất. Khi không biết bằng chứng thuộc commit nào, có hai lựa chọn: coi là còn mới (lạc quan) hoặc coi là cũ (thận trọng). Luật chọn thận trọng — thiếu thông tin thì bằng chứng không được dùng — vì cái giá của hai kiểu sai không bằng nhau: chạy lại một suite tốn vài giây; phát hành mã chưa ai kiểm có thể tốn một sự cố.
 
 ## 5. Kiến trúc lab
 
@@ -277,7 +277,7 @@ npx tsx articles/system-testing-release-dossier/build-dossier.ts --gate
 
 ### 6.2. Bước 1 — test luật trước khi tin luật
 
-Hai ca đại diện từ `dossier.test.ts`:
+Hai test case đại diện từ `dossier.test.ts`:
 
 ```ts
   it('RD-05 · mục con người critical chưa chạy (UAT) ⇒ NOT_READY dù mọi test tự động xanh', () => {
@@ -402,13 +402,13 @@ Ai đặt tiêu chí exit, ai được chấp nhận rủi ro nào, thương lư
 - **Dossier không ghi commit.** Không trả lời được "kết quả này thuộc bản nào".
 - **Chạy lại tới khi xanh, chỉ ghi lần xanh.** Dossier phải ghi cả lần đỏ trước đó và lý do.
 - **Để công cụ tự ký.** Lab cố ý không có tham số nào cho phép script ra GO.
-- **Gộp baseline vào cột đạt.** Đẹp báo cáo, sai bằng chứng.
+- **Gộp baseline vào cột đạt.** Báo cáo trông đẹp nhưng bằng chứng thì sai.
 - **Coi supporting checks là UAT.** Xem [SYS-15](/articles/system-testing-uat).
 - **Chính sách critical đổi sau khi thấy kết quả.** Hạ SYS-15 xuống "không critical" để có READY_FOR_SIGN_OFF là sửa luật cho vừa kết quả.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của lab</span>
-<p><code>watchPaths</code> khai báo tay: thiếu một phụ thuộc (ví dụ một tệp cấu hình Playwright nằm ngoài thư mục bài) thì bằng chứng bị coi là còn mới sai. Kết quả của 7 mục lấy từ báo cáo được chép tay vào <code>registry.ts</code>, không đọc tự động từ báo cáo. Script không chạy lại Playwright, đo hiệu năng hay restore drill. Script xoá <code>reports/sys17-vitest.json</code> trước mỗi lần chạy; Vitest không ghi được JSON hoặc thoát lỗi mà không có ca failed thì mọi mục Vitest thành <code>blocked</code> (đã thử bằng cách trỏ sai đường dẫn Vitest: không đọc nhầm kết quả cũ). Phân loại critical là giả định bài tập. Dossier nằm trong <code>reports/</code> bị git ignore: muốn giữ làm hồ sơ phải lưu sang nơi lưu trữ release.</p>
+<p><code>watchPaths</code> khai báo tay: thiếu một phụ thuộc (ví dụ một tệp cấu hình Playwright nằm ngoài thư mục bài) thì bằng chứng bị coi nhầm là còn mới. Kết quả của 7 mục lấy từ báo cáo được chép tay vào <code>registry.ts</code>, không đọc tự động từ báo cáo. Script không chạy lại Playwright, đo hiệu năng hay restore drill. Script xoá <code>reports/sys17-vitest.json</code> trước mỗi lần chạy; Vitest không ghi được JSON hoặc thoát lỗi mà không có test case failed thì mọi mục Vitest thành <code>blocked</code> (đã thử bằng cách trỏ sai đường dẫn Vitest: không đọc nhầm kết quả cũ). Phân loại critical là giả định bài tập. Dossier nằm trong <code>reports/</code> bị git ignore: muốn giữ làm hồ sơ phải lưu sang nơi lưu trữ release.</p>
 </div>
 
 ## 11. Bài tập và câu hỏi tự kiểm
@@ -440,14 +440,14 @@ Ai đặt tiêu chí exit, ai được chấp nhận rủi ro nào, thương lư
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Thêm loại bằng chứng riêng, ví dụ <code>kind: 'measured'</code> kèm trường <code>environmentClass: 'lab' | 'staging-slo'</code> và ngưỡng SLO. Chỉ <code>staging-slo</code> có kết quả so với R-NFR-02/03 mới được <code>fresh_pass</code>; <code>lab</code> luôn <code>baseline_only</code>. Kèm ca kiểm mới: bằng chứng staging cũ hơn ứng viên vẫn phải <code>stale</code>.</p>
+<p>Thêm loại bằng chứng riêng, ví dụ <code>kind: 'measured'</code> kèm trường <code>environmentClass: 'lab' | 'staging-slo'</code> và ngưỡng SLO. Chỉ <code>staging-slo</code> có kết quả so với R-NFR-02/03 mới được <code>fresh_pass</code>; <code>lab</code> luôn <code>baseline_only</code>. Kèm test case mới: bằng chứng staging cũ hơn ứng viên vẫn phải <code>stale</code>.</p>
 </details>
 
-**Bài 5 (nâng cao).** Kết quả của bảy mục lấy từ báo cáo đang được chép tay vào `registry.ts`, nên có thể lệch với chính báo cáo. Thiết kế cách để registry đọc kết quả từ nguồn và một ca kiểm bắt được độ lệch.
+**Bài 5 (nâng cao).** Kết quả của bảy mục lấy từ báo cáo đang được chép tay vào `registry.ts`, nên có thể lệch với chính báo cáo. Thiết kế cách để registry đọc kết quả từ nguồn và một test case bắt được độ lệch.
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Cho mỗi báo cáo một tệp kết quả máy đọc được nằm cạnh nó (ví dụ <code>05-evidence.json</code> với <code>result</code>, <code>recordedAt</code>, <code>environment</code>), do chính lệnh chạy lab ghi ra; registry chỉ giữ đường dẫn. Ca kiểm: tạo tệp kết quả <code>fail</code> trong thư mục tạm, kỳ vọng mục đó thành <code>fail</code> và đề xuất NO_GO nếu mục critical. Thêm một ca nữa: tệp kết quả thiếu hoặc sai schema ⇒ <code>blocked</code>, không mặc định là đạt.</p>
+<p>Cho mỗi báo cáo một tệp kết quả máy đọc được nằm cạnh nó (ví dụ <code>05-evidence.json</code> với <code>result</code>, <code>recordedAt</code>, <code>environment</code>), do chính lệnh chạy lab ghi ra; registry chỉ giữ đường dẫn. Test case: tạo tệp kết quả <code>fail</code> trong thư mục tạm, kỳ vọng mục đó thành <code>fail</code> và đề xuất NO_GO nếu mục critical. Thêm một test case nữa: tệp kết quả thiếu hoặc sai schema ⇒ <code>blocked</code>, không mặc định là đạt.</p>
 </details>
 
 ### Câu hỏi tự kiểm
@@ -477,7 +477,7 @@ Ai đặt tiêu chí exit, ai được chấp nhận rủi ro nào, thương lư
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p>Vì số đo ở một tiến trình, một máy lab, kho memory — không phải môi trường mà R-NFR-02/03 nói tới. Đó là baseline, chỉ cho biết hành vi trong điều kiện lab. Người ký có thể chấp nhận rủi ro "chưa có bằng chứng SLO", nhưng không được đọc nó thành "đã đạt SLO".</p>
+<p>Vì số đo ở một tiến trình, một máy lab, kho bộ nhớ — không phải môi trường mà R-NFR-02/03 nói tới. Đó là baseline, chỉ cho biết hành vi trong điều kiện lab. Người ký có thể chấp nhận rủi ro "chưa có bằng chứng SLO", nhưng không được đọc nó thành "đã đạt SLO".</p>
 </details>
 
 **Câu 5.** Dossier khác test completion report ở điểm nào cốt lõi?

@@ -1,0 +1,15 @@
+{"file":"state-transition-testing-co-ban.md","edits":[
+{"old":"(cơ bản): kiểm vòng đời 8 trạng thái","new":"(cơ bản): kiểm thử vòng đời 8 trạng thái","reason":"'kiểm' cụt, thiếu 'thử' (ở tiêu đề)","severity":"medium"},
+{"old":"chạy 96 ca vitest trên lab.","new":"chạy 96 test case vitest trên lab.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"tuỳ theo nó đang ở đâu.","new":"tuỳ theo trạng thái hiện tại của hệ thống.","reason":"'nó đang ở đâu' mơ hồ, kiểu dịch máy; nêu rõ khái niệm trạng thái","severity":"medium"},
+{"old":"thì kiểm xem nó đủ test condition chưa, cần thì sửa","new":"thì kiểm tra xem mô hình đó đã đủ test condition chưa, cần thì sửa","reason":"'kiểm xem nó' cụt, 'nó' mơ hồ","severity":"medium"},
+{"old":"**Dựng mô hình tự nó phát hiện defect của đặc tả**","new":"**Bản thân việc dựng mô hình đã phát hiện được defect của đặc tả**","reason":"'tự nó phát hiện' gượng, kiểu dịch máy","severity":"medium"},
+{"old":"Bài này kiểm máy của lab;","new":"Bài này kiểm thử máy trạng thái của lab;","reason":"'kiểm máy' là cụm tự ghép, thiếu danh từ","severity":"medium"},
+{"old":"Đếm theo dòng của đặc tả (9) là sai số coverage item thường gặp.","new":"Đếm theo dòng của đặc tả (9) là lỗi đếm coverage item thường gặp.","reason":"'sai số' là calque, không đúng nghĩa","severity":"medium"},
+{"old":"tách thành 7 ca ngắn hơn — vẫn 100%, chỉ là không tối thiểu. Tối thiểu số ca không phải mục tiêu; đạt coverage với ca dễ đọc mới là mục tiêu.","new":"tách thành 7 test case ngắn hơn — vẫn 100%, chỉ là không tối thiểu. Số test case tối thiểu không phải mục tiêu; đạt coverage bằng test case dễ đọc mới là mục tiêu.","reason":"Thống nhất 'test case'; câu 'Tối thiểu số ca' sai trật tự","severity":"medium"},
+{"old":"**mỗi ca một ô**:","new":"**mỗi test case một ô**:","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"| 96 ca vitest ở hai tầng","new":"| 96 test case vitest ở hai tầng","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"96 ca = 1 (mô hình) + 7 (5 test case + 2 ca đo coverage, tầng hàm)","new":"96 test case = 1 (mô hình) + 7 (5 test case + 2 test case đo coverage, tầng hàm)","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Valid transitions coverage chỉ cần một lần qua T12; nó không hỏi 4:59","new":"Valid transitions coverage chỉ cần một lần qua T12; tiêu chí này không hỏi 4:59","reason":"Tránh 'nó' chỉ khái niệm","severity":"low"},
+{"old":"Lab chặn bằng `updateIfStatus`; kiểm thật thuộc","new":"Lab chặn bằng `updateIfStatus`; việc kiểm thử thật thuộc","reason":"'kiểm thật' cụt, thiếu 'thử'","severity":"medium"}
+]}

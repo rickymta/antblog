@@ -1,0 +1,11 @@
+{"file":"thuc-hanh-series-01-phan-tich-tinh-nang-dat-xe.md","edits":[
+{"old":"kiểm yêu cầu đã đặc tả; kiểm tuân thủ hợp đồng/pháp lý","new":"kiểm tra yêu cầu đã đặc tả; kiểm tra tuân thủ hợp đồng/pháp lý","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"Mục 5 cho bạn chạy test trên lab để kiểm những gì lời giải mẫu khẳng định.","new":"Mục 5 cho bạn chạy test trên lab để kiểm chứng những gì lời giải mẫu khẳng định.","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"không lặng lẽ bỏ qua.","new":"không bỏ qua mà không ghi nhận.","reason":"'lặng lẽ' là calque kiểu 'silently'","severity":"medium"},
+{"old":"Kiểm chéo hai chiều:","new":"Kiểm tra chéo hai chiều:","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"Tester không tin khẳng định mà kiểm.","new":"Tester không tin khẳng định mà kiểm chứng.","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"vì test khói của lab đã có","new":"vì smoke test của lab đã có","reason":"Giữ nguyên 'smoke test' theo bảng thuật ngữ","severity":"medium"},
+{"old":"<td>PR-03</td><td>Test khói của lab</td>","new":"<td>PR-03</td><td>Smoke test của lab</td>","reason":"Giữ nguyên 'smoke test' theo bảng thuật ngữ","severity":"medium"},
+{"old":"<td>PR-10</td><td>Test khói của lab</td>","new":"<td>PR-10</td><td>Smoke test của lab</td>","reason":"Giữ nguyên 'smoke test' theo bảng thuật ngữ","severity":"medium"},
+{"old":"<td>PR-01</td><td>Test khói của lab</td>","new":"<td>PR-01</td><td>Smoke test của lab</td>","reason":"Giữ nguyên 'smoke test' theo bảng thuật ngữ","severity":"medium"}
+]}

@@ -1,7 +1,7 @@
 ---
 slug: state-transition-testing-co-ban
-title: "State Transition Testing (cơ bản): kiểm vòng đời 8 trạng thái của chuyến Tới Nơi"
-summary: "Dựng state diagram và state table cho vòng đời chuyến Tới Nơi, thiết kế 5 test case đạt 100% valid transitions, thử chuyển không hợp lệ và chạy 96 ca vitest trên lab."
+title: "State Transition Testing (cơ bản): kiểm thử vòng đời 8 trạng thái của chuyến Tới Nơi"
+summary: "Dựng state diagram và state table cho vòng đời chuyến Tới Nơi, thiết kế 5 test case đạt 100% valid transitions, thử chuyển không hợp lệ và chạy 96 test case vitest trên lab."
 category: testing
 level: intermediate
 tags: [testing, istqb, ctfl, ctal-ta, test-034, state-transition-testing, black-box, vitest, toi-noi]
@@ -29,7 +29,7 @@ Cùng một nút «Hoàn thành» nhưng hệ thống phải phản ứng khác 
 
 ## 1. Giới thiệu
 
-Một hệ thống **có trạng thái** (stateful) phản ứng với một sự kiện tuỳ theo nó đang ở đâu. Chuyến xe là ví dụ điển hình: sự kiện «khách huỷ» hợp lệ khi đang tìm tài xế, có thể mất phí khi tài xế đang tới, và bị cấm khi khách đã lên xe.
+Một hệ thống **có trạng thái** (stateful) phản ứng với một sự kiện tuỳ theo trạng thái hiện tại của hệ thống. Chuyến xe là ví dụ điển hình: sự kiện «khách huỷ» hợp lệ khi đang tìm tài xế, có thể mất phí khi tài xế đang tới, và bị cấm khi khách đã lên xe.
 
 Ba loại defect hay gặp ở hệ thống có trạng thái — kỹ thuật này nhắm thẳng vào chúng:
 
@@ -61,8 +61,8 @@ Quan hệ bao hàm: 100% valid transitions ⇒ 100% all states; 100% all transit
 
 CTAL-TA xếp state transition testing vào nhóm **behavior-based** (dựa trên hành vi), đối lập với rule-based như bảng quyết định. Ba ý dùng ngay ở bài này:
 
-- Test Analyst phải bảo đảm mô hình trạng thái **thể hiện đúng hành vi mong đợi ở mức chi tiết cần cho test**; test basis có sẵn mô hình thì kiểm xem nó đủ test condition chưa, cần thì sửa hoặc dựng mô hình mới.
-- **Dựng mô hình tự nó phát hiện defect của đặc tả** — đóng góp vào phòng ngừa defect. Kỹ thuật dùng được ở **mọi test level** và hợp với công cụ model-based testing.
+- Test Analyst phải bảo đảm mô hình trạng thái **thể hiện đúng hành vi mong đợi ở mức chi tiết cần cho test**; test basis có sẵn mô hình thì kiểm tra xem mô hình đó đã đủ test condition chưa, cần thì sửa hoặc dựng mô hình mới.
+- **Bản thân việc dựng mô hình đã phát hiện được defect của đặc tả** — đóng góp vào phòng ngừa defect. Kỹ thuật dùng được ở **mọi test level** và hợp với công cụ model-based testing.
 - Ngoài ba tiêu chí của CTFL, CTAL-TA thêm **N-switch coverage** (0-switch = valid transitions; 1-switch là cặp chuyển vào–ra tại một trạng thái) và **round-trip coverage** (vòng lặp quay về trạng thái đầu). Hai tiêu chí này thuộc [TEST-082](/articles/state-transition-testing-nang-cao).
 
 ### 2.3. Thuật ngữ Anh – Việt
@@ -96,7 +96,7 @@ CTAL-TA xếp state transition testing vào nhóm **behavior-based** (dựa trê
 
 ### 3.2. System context
 
-Kiến trúc đích (§4.7) giao vòng đời cho **Trip / Delivery Lifecycle Service**: state machine có chuyển hợp lệ, actor được phép và điều kiện chuyển — **không cho client tự gửi một trạng thái bất kỳ**. §9.1 còn tách trạng thái theo domain (Booking, Dispatch, Trip, Payment) liên kết bằng event Kafka. Lab giữ **một** máy 8 trạng thái trong `src/domain/trip-state.ts` (hàm thuần `nextStatus`) và các use case ở `src/app/trips.ts`, lưu bằng cập nhật có điều kiện `updateIfStatus` (SPEC R-STATE-08 đối chiếu hai mô hình). Bài này kiểm máy của lab; nhiều máy liên kết thuộc TEST-082.
+Kiến trúc đích (§4.7) giao vòng đời cho **Trip / Delivery Lifecycle Service**: state machine có chuyển hợp lệ, actor được phép và điều kiện chuyển — **không cho client tự gửi một trạng thái bất kỳ**. §9.1 còn tách trạng thái theo domain (Booking, Dispatch, Trip, Payment) liên kết bằng event Kafka. Lab giữ **một** máy 8 trạng thái trong `src/domain/trip-state.ts` (hàm thuần `nextStatus`) và các use case ở `src/app/trips.ts`, lưu bằng cập nhật có điều kiện `updateIfStatus` (SPEC R-STATE-08 đối chiếu hai mô hình). Bài này kiểm thử máy trạng thái của lab; nhiều máy liên kết thuộc TEST-082.
 
 ### 3.3. Rủi ro
 
@@ -159,7 +159,7 @@ Kiến trúc đích (§4.7) giao vòng đời cho **Trip / Delivery Lifecycle Se
 <figcaption><b>Hình 1 · State diagram của chuyến (R-STATE-02).</b> 8 trạng thái, 12 chuyển hợp lệ. Sơ đồ không vẽ 60 chuyển không hợp lệ — đó là lý do cần state table. <code>completed</code> và <code>cancelled</code> không có mũi tên đi ra.</figcaption>
 </figure>
 
-R-STATE-02 có 9 dòng, nhưng dòng `customer_cancel` có ba trạng thái nguồn và `driver_cancel` có hai. Coverage item là **từng chuyển** (một trạng thái nguồn, một sự kiện), nên đếm được **12 chuyển** T01…T12. Đếm theo dòng của đặc tả (9) là sai số coverage item thường gặp.
+R-STATE-02 có 9 dòng, nhưng dòng `customer_cancel` có ba trạng thái nguồn và `driver_cancel` có hai. Coverage item là **từng chuyển** (một trạng thái nguồn, một sự kiện), nên đếm được **12 chuyển** T01…T12. Đếm theo dòng của đặc tả (9) là lỗi đếm coverage item thường gặp.
 
 ### 4.2. State table
 
@@ -206,11 +206,11 @@ Mọi chuyển đều có action chung «ghi một dòng `trip_events`» (R-STAT
 
 Coverage: all states **8/8**, valid transitions **12/12**. Chỉ chạy luồng chính 6 sự kiện thì đủ 7/8 trạng thái nhưng valid transitions chỉ **6/12** — minh hoạ «all states yếu hơn valid transitions».
 
-Gộp T10, T11 vào TC-ST-01 làm test dài và khó chẩn đoán khi đỏ. Ở cấp unit, nhiều đội tách thành 7 ca ngắn hơn — vẫn 100%, chỉ là không tối thiểu. Tối thiểu số ca không phải mục tiêu; đạt coverage với ca dễ đọc mới là mục tiêu.
+Gộp T10, T11 vào TC-ST-01 làm test dài và khó chẩn đoán khi đỏ. Ở cấp unit, nhiều đội tách thành 7 test case ngắn hơn — vẫn 100%, chỉ là không tối thiểu. Số test case tối thiểu không phải mục tiêu; đạt coverage bằng test case dễ đọc mới là mục tiêu.
 
 ### 4.5. Chọn chuyển không hợp lệ theo rủi ro
 
-Thử cả 60 ô ở cấp hàm thuần rất rẻ (mục 5). Qua use case thật, ta chọn 6 ô theo rủi ro ở 3.3 — **mỗi ca một ô**:
+Thử cả 60 ô ở cấp hàm thuần rất rẻ (mục 5). Qua use case thật, ta chọn 6 ô theo rủi ro ở 3.3 — **mỗi test case một ô**:
 
 | Ca | Ô (trạng thái, sự kiện) | Ai gửi | Vì sao chọn |
 |---|---|---|---|
@@ -231,7 +231,7 @@ Kết quả mong đợi chung (R-STATE-03): lỗi `INVALID_TRANSITION`, **mọi 
 |---|---|
 | `bang-trang-thai.ts` | Mô hình chép **từ SPEC** — không import bảng `TRANSITIONS` của `src/` (test basis phải độc lập với thứ được kiểm); 5 test case; hàm `chay` và `coverage` |
 | `buggy-trip-state.ts` | Bản chép bảng chuyển có một defect: thêm `picked_up + customer_cancel ⇒ cancelled` |
-| `state-transition.test.ts` | 96 ca vitest ở hai tầng: hàm thuần `nextStatus` và use case thật (kho bộ nhớ, `FixedClock`) |
+| `state-transition.test.ts` | 96 test case vitest ở hai tầng: hàm thuần `nextStatus` và use case thật (kho bộ nhớ, `FixedClock`) |
 
 ```ts
 // bang-trang-thai.ts (trích) — đo coverage từ các chuyển thực sự đi qua
@@ -270,7 +270,7 @@ Kết quả thật (rút gọn):
       Tests  96 passed (96)
 ```
 
-96 ca = 1 (mô hình) + 7 (5 test case + 2 ca đo coverage, tầng hàm) + 72 (all transitions) + 2 (defect) + 5 (test case qua use case) + 6 (INV-01…06) + 2 (mã khác) + 1 (mô hình tất định). Bản `src/` đạt toàn bộ.
+96 test case = 1 (mô hình) + 7 (5 test case + 2 test case đo coverage, tầng hàm) + 72 (all transitions) + 2 (defect) + 5 (test case qua use case) + 6 (INV-01…06) + 2 (mã khác) + 1 (mô hình tất định). Bản `src/` đạt toàn bộ.
 
 ### 5.3. Valid transitions coverage không bắt được «huỷ khi đã đón»
 
@@ -299,13 +299,13 @@ State table nói «không hợp lệ»; API cho biết **vì sao** không hợp 
 
 **Trạng thái thoáng qua.** `requested` chỉ tồn tại trong một lệnh: `createTrip` chuyển ngay sang `searching`. Qua API không bao giờ quan sát được chuyến ở `requested` — all states coverage ở tầng hệ thống chỉ chứng minh được qua nhật ký `trip_events`. Lab kiểm đúng như vậy. Khi một trạng thái không quan sát được trực tiếp, hãy hỏi: bằng chứng nào cho thấy nó đã được đi qua?
 
-**Guard cần thêm kỹ thuật khác.** T12 có guard «≥ 5 phút». Valid transitions coverage chỉ cần một lần qua T12; nó không hỏi 4:59 có bị huỷ nhầm không. Guard số ⇒ áp BVA ([TEST-032](/articles/boundary-value-analysis)); guard tổ hợp (T02: online ∧ cùng thành phố ∧ đúng xe) ⇒ bảng quyết định ([TEST-033](/articles/decision-table-testing)) hoặc phân vùng ([TEST-031](/articles/equivalence-partitioning)).
+**Guard cần thêm kỹ thuật khác.** T12 có guard «≥ 5 phút». Valid transitions coverage chỉ cần một lần qua T12; tiêu chí này không hỏi 4:59 có bị huỷ nhầm không. Guard số ⇒ áp BVA ([TEST-032](/articles/boundary-value-analysis)); guard tổ hợp (T02: online ∧ cùng thành phố ∧ đúng xe) ⇒ bảng quyết định ([TEST-033](/articles/decision-table-testing)) hoặc phân vùng ([TEST-031](/articles/equivalence-partitioning)).
 
 **Một máy trạng thái che máy khác.** Tài xế cũng có vòng đời `offline/online/busy` (R-ACCEPT-05). T10 phải đưa tài xế về `online`; test chỉ nhìn trạng thái chuyến sẽ bỏ sót tài xế kẹt `busy`. Nhiều máy liên kết — và event đến trễ làm `completed` quay về `searching` — là phần của [TEST-082](/articles/state-transition-testing-nang-cao).
 
 **Tầng nào cho all transitions?** 60 ô ở hàm thuần chạy trong vài mili-giây. Ở E2E, mỗi ô cần dựng chuyến tới đúng trạng thái — đắt và chậm. Cách hợp lý: all transitions ở tầng component, các ô rủi ro cao (INV-01…06) thêm ở tầng use case/API, còn E2E chỉ giữ luồng chính.
 
-**Đồng thời.** Hai lệnh tới cùng lúc (khách huỷ trong khi tài xế bấm «đã tới») không phải một chuỗi tuần tự — mô hình cơ bản không biểu diễn được. Lab chặn bằng `updateIfStatus`; kiểm thật thuộc [TEST-086](/articles/race-condition-testing).
+**Đồng thời.** Hai lệnh tới cùng lúc (khách huỷ trong khi tài xế bấm «đã tới») không phải một chuỗi tuần tự — mô hình cơ bản không biểu diễn được. Lab chặn bằng `updateIfStatus`; việc kiểm thử thật thuộc [TEST-086](/articles/race-condition-testing).
 
 | Sai lầm thường gặp | Cách tránh |
 |---|---|

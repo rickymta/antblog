@@ -29,9 +29,9 @@ Các kỹ thuật hộp đen ở Series 04 cho ta test **từ những gì đặc
 
 ## 1. Giới thiệu
 
-**Error guessing** (đoán lỗi) là kỹ thuật thiết kế test dựa trên kinh nghiệm: tester **đoán trước** những sai lầm dễ xảy ra, những defect chúng để lại và những failure chúng gây ra, rồi viết test nhắm thẳng vào đó. Câu hỏi của nó không phải «đặc tả yêu cầu gì?» mà là **«chỗ này người ta thường làm sai thế nào?»**.
+**Error guessing** (đoán lỗi) là kỹ thuật thiết kế test dựa trên kinh nghiệm: tester **đoán trước** những sai lầm dễ xảy ra, những defect chúng để lại và những failure chúng gây ra, rồi viết test nhắm thẳng vào đó. Câu hỏi của kỹ thuật này không phải «đặc tả yêu cầu gì?» mà là **«chỗ này người ta thường làm sai thế nào?»**.
 
-Vấn đề nó giải quyết: kỹ thuật hộp đen chỉ mạnh bằng đặc tả. Phân vùng cho phí huỷ sinh ra ca «chưa đủ 2 phút / từ 2 phút trở lên», nhưng không tự gợi ra ca «khách và tài xế bấm cùng lúc» — đặc tả không nói tới. Kinh nghiệm thì có: dev rất hay viết «đọc → kiểm → ghi» mà quên rằng giữa đọc và ghi có người khác chen vào.
+Vấn đề mà error guessing giải quyết: kỹ thuật hộp đen chỉ mạnh bằng đặc tả. Phân vùng cho phí huỷ sinh ra test case «chưa đủ 2 phút / từ 2 phút trở lên», nhưng không tự gợi ra test case «khách và tài xế bấm cùng lúc» — đặc tả không nói tới. Kinh nghiệm thì có: dev rất hay viết «đọc → kiểm → ghi» mà quên rằng giữa đọc và ghi có người khác chen vào.
 
 Khi nào dùng:
 
@@ -43,7 +43,7 @@ Khi nào dùng:
 
 ### 2.1. Vị trí: nhóm kỹ thuật dựa trên kinh nghiệm
 
-CTFL v4.0.1 mục 4.1 (FL-4.1.1, K2) chia test technique thành ba nhóm: **black-box** (dựa trên hành vi được đặc tả), **white-box** (dựa trên cấu trúc bên trong) và **experience-based** (dựa trên hiểu biết và kinh nghiệm của tester). Syllabus nhấn hai ý về nhóm thứ ba: hiệu quả của nó **phụ thuộc rất nhiều vào kỹ năng của tester**, và nó **tìm được defect mà hai nhóm kia bỏ sót** — nên nó bổ sung cho hai nhóm kia. Mục 4.4 nêu ba kỹ thuật thường dùng: error guessing (bài này), exploratory testing ([TEST-052](/articles/exploratory-testing)) và checklist-based testing ([TEST-053](/articles/checklist-based-testing)).
+CTFL v4.0.1 mục 4.1 (FL-4.1.1, K2) chia test technique thành ba nhóm: **black-box** (dựa trên hành vi được đặc tả), **white-box** (dựa trên cấu trúc bên trong) và **experience-based** (dựa trên hiểu biết và kinh nghiệm của tester). Syllabus nhấn hai ý về nhóm thứ ba: hiệu quả của nhóm này **phụ thuộc rất nhiều vào kỹ năng của tester**, và nhóm này **tìm được defect mà hai nhóm kia bỏ sót** — nên bổ sung cho hai nhóm kia. Mục 4.4 nêu ba kỹ thuật thường dùng: error guessing (bài này), exploratory testing ([TEST-052](/articles/exploratory-testing)) và checklist-based testing ([TEST-053](/articles/checklist-based-testing)).
 
 ### 2.2. Định nghĩa và ba nguồn kinh nghiệm
 
@@ -53,7 +53,7 @@ Theo mục 4.4.1 (FL-4.4.1, K2), error guessing là kỹ thuật dùng để **d
 2. Những **loại sai lầm lập trình viên hay mắc** và loại defect chúng sinh ra.
 3. Những **loại failure đã xảy ra ở các ứng dụng tương tự**.
 
-Ba khái niệm error → defect → failure ở đây đúng nghĩa của [TEST-004](/articles/error-defect-failure-root-cause): đoán *sai lầm* (dev dùng `<=` thay `<`), suy ra *defect* (điều kiện sai trong hàm phí huỷ), rồi thiết kế input để *failure* lộ ra (huỷ đúng giây 120 mà không mất phí).
+Ba khái niệm error → defect → failure ở đây dùng đúng nghĩa như trong [TEST-004](/articles/error-defect-failure-root-cause): đoán *sai lầm* (dev dùng `<=` thay `<`), suy ra *defect* (điều kiện sai trong hàm phí huỷ), rồi thiết kế input để *failure* lộ ra (huỷ đúng giây 120 mà không mất phí).
 
 Syllabus gợi sáu nhóm nơi error/defect/failure hay nằm — input (input đúng bị từ chối, tham số thiếu), output (sai định dạng, sai kết quả), logic (thiếu trường hợp, sai toán tử), computation (sai phép tính), interfaces (lệch tham số, kiểu), data (khởi tạo sai, sai kiểu). Áp vào Tới Nơi:
 
@@ -123,7 +123,7 @@ Bảng chống lỗi ở §14 của kiến trúc gọi tên đúng những gì c
 = 60 khoản trùng/ngày × 46.000 đ (cước mẫu) ≈ 2,76 triệu đ/ngày phải hoàn — chưa tính phiếu hỗ trợ và mất lòng tin
 ```
 
-Tỉ lệ lỗi rất nhỏ nhân khối lượng lớn vẫn ra tiền thật — vì vậy thanh toán là vùng đầu tiên nên có danh sách fault attack.
+Tỉ lệ lỗi rất nhỏ nhân với khối lượng lớn vẫn ra tiền thật — vì vậy thanh toán là vùng đầu tiên nên có danh sách fault attack.
 
 ## 4. Phân tích kỹ thuật
 
@@ -141,7 +141,7 @@ Lỗi **đã biết** (TEST-024, 027, 028) không đưa vào 12 mục dưới; t
 
 Một mục fault attack tốt có bốn phần: **đoán gì** (error → defect), **tấn công thế nào** (input, thao tác, môi trường), **mong đợi gì** (mã R-… làm oracle), **quan sát gì**. Thiếu oracle thì không biết đúng sai; thiếu chỗ quan sát thì failure xảy ra mà không ai thấy — «trừ tiền hai lần» chỉ thấy khi đếm lần gọi ví, không thấy trong thân HTTP.
 
-Nhiều attack cần **móc kiểm thử** (§17.2 kiến trúc): ví giả có chế độ lỗi, đồng hồ dời được — thiếu chúng thì «cổng hết giờ» hay «huỷ đúng giây 120» gần như không làm được.
+Nhiều attack cần **test hook** (§17.2 kiến trúc): ví giả có chế độ lỗi, đồng hồ dời được — thiếu chúng thì «cổng hết giờ» hay «huỷ đúng giây 120» gần như không làm được.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -182,7 +182,7 @@ Nhiều attack cần **móc kiểm thử** (§17.2 kiến trúc): ví giả có 
 
 ### 4.3. Chọn 12 mục theo rủi ro
 
-Giữ 12 mục theo hai câu hỏi: hậu quả có dính **tiền hoặc trạng thái chuyến** không, và có **thử được trên lab** không. Ý loại ra — webhook trùng, ledger lệch, hai bản backend cùng thu — chuyển sang Series 07 và 11.
+Giữ 12 mục theo hai câu hỏi: hậu quả có dính **tiền hoặc trạng thái chuyến** không, và có **thử được trên lab** không. Những ý bị loại ra — webhook trùng, ledger lệch, hai bản backend cùng thu — chuyển sang Series 07 và 11.
 
 ## 5. Thực hành
 
@@ -211,7 +211,7 @@ Dữ liệu chung: khách `C001`, tài xế `D101` (SG, xe máy), 09:00 giờ VN
 
 ### 5.3. Chạy trên API lab
 
-Test ở `examples/toi-noi-testing/articles/error-guessing/fault-attacks.test.ts`: supertest gọi `createApp` với kho trong bộ nhớ, `FixedClock` và ví giả. Hết giờ được rút còn 50 ms cho nhanh; ca `FA-03R` đo với đúng 3 giây. FA-12 cần thao tác chen **đúng** giữa lúc đọc và ghi: test bọc `TripRepository` bằng một `Proxy` để chạy lệnh «arrive» của tài xế ngay sau khi use case huỷ đọc chuyến — một test double, vì ở system test thật race chỉ lộ ra khi lặp hàng nghìn lần ([TEST-086](/articles/race-condition-testing)).
+Test ở `examples/toi-noi-testing/articles/error-guessing/fault-attacks.test.ts`: supertest gọi `createApp` với kho trong bộ nhớ, `FixedClock` và ví giả. Hết giờ được rút còn 50 ms cho nhanh; test case `FA-03R` đo với đúng 3 giây. FA-12 cần thao tác chen **đúng** giữa lúc đọc và ghi: test bọc `TripRepository` bằng một `Proxy` để chạy lệnh «arrive» của tài xế ngay sau khi use case huỷ đọc chuyến — một test double, vì ở system test thật race chỉ lộ ra khi lặp hàng nghìn lần ([TEST-086](/articles/race-condition-testing)).
 
 ```bash
 cd examples/toi-noi-testing
@@ -296,9 +296,9 @@ Thực tế : 409 «Không thể thực hiện "customer_cancel" khi chuyến đ
 
 Phần thứ hai — **bấm lần đầu còn miễn phí, bấm lại mất phí** — là **câu hỏi cho PO**, chưa phải defect: phí tính theo lúc khách bấm hay lúc hệ thống ghi?
 
-**A-2 (FA-10) — «200 ký tự» chưa được định nghĩa.** Lab đếm theo **code point** (thư viện kiểm đầu vào zod 4): 70 chữ «ế» dạng tổ hợp NFD — người dùng thấy 70 ký tự — bị từ chối vì là 210 code point; 41 emoji gia đình bị từ chối; 101 emoji ô tô lại được nhận dù chiếm 202 đơn vị UTF-16. Nếu ứng dụng khách dùng `maxlength` của HTML (đếm theo đơn vị UTF-16) thì máy khách và máy chủ sẽ không đồng ý với nhau. Đây là anomaly ở **đặc tả**: R-API-11 cần nói rõ đơn vị đếm (đề xuất: chuẩn hoá NFC rồi đếm code point, ghi rõ trong SPEC), và test ở cả hai phía phải dùng cùng định nghĩa.
+**A-2 (FA-10) — «200 ký tự» chưa được định nghĩa.** Lab đếm theo **code point** (thư viện kiểm tra đầu vào zod 4): 70 chữ «ế» dạng tổ hợp NFD — người dùng thấy 70 ký tự — bị từ chối vì là 210 code point; 41 emoji gia đình bị từ chối; 101 emoji ô tô lại được nhận dù chiếm 202 đơn vị UTF-16. Nếu ứng dụng khách dùng `maxlength` của HTML (đếm theo đơn vị UTF-16) thì máy khách và máy chủ sẽ đếm không khớp nhau. Đây là anomaly ở **đặc tả**: R-API-11 cần nói rõ đơn vị đếm (đề xuất: chuẩn hoá NFC rồi đếm code point, ghi rõ trong SPEC), và test ở cả hai phía phải dùng cùng định nghĩa.
 
-**A-3 (FA-03R) — tài xế chờ ≈ 9 giây cho nút «Hoàn thành» khi VíXanh không trả lời.** Đúng R-PAY-04 (3 lần × 3 giây) và R-PAY-06 (vẫn 200), nhưng toàn bộ thời gian thu tiền nằm trong request HTTP của tài xế. SPEC có độ trễ cho `POST /api/trips` (R-NFR-02) mà không có cho lệnh của tài xế; kiến trúc §8.3 thì cho phép thanh toán ở `PENDING` và xử lý bất đồng bộ. Câu hỏi cho PO và kiến trúc sư: «Hoàn thành» có nên trả ngay với `paymentStatus = pending` rồi thu ở nền? Trước khi có câu trả lời, ghi là anomaly, chưa phải defect.
+**A-3 (FA-03R) — tài xế chờ ≈ 9 giây cho nút «Hoàn thành» khi VíXanh không trả lời.** Đúng R-PAY-04 (3 lần × 3 giây) và R-PAY-06 (vẫn 200), nhưng toàn bộ thời gian thu tiền nằm trong request HTTP của tài xế. SPEC quy định độ trễ cho `POST /api/trips` (R-NFR-02) mà không quy định cho lệnh của tài xế; kiến trúc §8.3 thì cho phép thanh toán ở `PENDING` và xử lý bất đồng bộ. Câu hỏi cho PO và kiến trúc sư: «Hoàn thành» có nên trả ngay với `paymentStatus = pending` rồi thu ở nền? Trước khi có câu trả lời, ghi là anomaly, chưa phải defect.
 
 ### 5.5. Cập nhật danh sách sau đợt chạy
 
@@ -308,7 +308,7 @@ Theo vòng ở Hình 1, danh sách v1.1 thêm ba mục rút từ kết quả: «
 
 **Dễ bỏ sót.** Chỉ nhìn thân HTTP sẽ bỏ lỡ FA-04 (phải đếm tiền thực trừ ở ví) và FA-06 (phải xem trạng thái tài xế). Mỗi mục cần ghi **nơi quan sát**.
 
-**Giới hạn.** «12/12 mục đã chạy» không nói gì về số lỗi còn lại. Danh sách thiên về quá khứ — lỗi của công nghệ mới chưa có trong kinh nghiệm của ai. Nhiều attack cần điều khiển môi trường (ví giả, đồng hồ, chen thao tác): thiếu testability hooks thì đội bỏ đúng những ca nguy hiểm nhất.
+**Giới hạn.** «12/12 mục đã chạy» không nói gì về số lỗi còn lại. Danh sách thiên về quá khứ — lỗi của công nghệ mới chưa có trong kinh nghiệm của ai. Nhiều attack cần điều khiển môi trường (ví giả, đồng hồ, chen thao tác): thiếu test hook thì đội bỏ đúng những test case nguy hiểm nhất.
 
 **So sánh với kỹ thuật khác.**
 

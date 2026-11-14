@@ -21,7 +21,7 @@ language: vi
 <tr><th scope="row">Test Type</th><td>Không áp dụng</td></tr>
 <tr><th scope="row">Test Technique</th><td>Checklist-based reviewing (review technique)</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/review-process-va-cac-vai-tro">TEST-027 Review Process và các vai trò</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Checklist 15 mục cho chức năng thanh toán, áp lên SPEC R-PAY và kiến trúc §4.9 — lab <code>articles/checklist-based-review</code> (tài liệu review + 2 ca vitest làm bằng chứng)</td></tr>
+<tr><th scope="row">Thực hành</th><td>Checklist 15 mục cho chức năng thanh toán, áp lên SPEC R-PAY và kiến trúc §4.9 — lab <code>articles/checklist-based-review</code> (tài liệu review + 2 test vitest làm bằng chứng)</td></tr>
 <tr><th scope="row">Tham chiếu ISTQB</th><td>CTFL v4.0.1 · Chương 3 · mục 3.2.2 · FL-3.2.2 (K2); mục 3.2.4 · FL-3.2.4 (K2). CTAL-TA v4.0 · Chương 5 · mục 5.2.2 · TA-5.2.2 (K3). CTAL-TTA v4.0 · Chương 5 · mục 5.1, 5.2 · TTA 5.2.1 (K4), TTA 5.2.2 (K4)</td></tr>
 </tbody>
 </table>
@@ -54,11 +54,11 @@ Bốn kỹ thuật còn lại của mục 5.2.2: **ad hoc** (tự do, phụ thu�
 
 ### 2.3. CTAL-TTA v4.0 chương 5 — checklist cho kiến trúc và code
 
-Mục 5.2 của CTAL-TTA bổ sung: checklist có thể chung (ví dụ dùng đúng «shall»/«should», định dạng) hoặc tập trung vào một vùng (bảo mật, hiệu năng). Checklist **hữu ích nhất** là checklist được tổ chức **tự xây dần**, vì nó phản ánh bản chất sản phẩm, môi trường phát triển (con người, công cụ, ưu tiên), lịch sử thành công và defect, và các vấn đề riêng. Checklist trong syllabus chỉ là ví dụ — phải may đo theo tổ chức, có khi theo từng dự án.
+Mục 5.2 của CTAL-TTA bổ sung: checklist có thể chung (ví dụ dùng đúng «shall»/«should», định dạng) hoặc tập trung vào một vùng (bảo mật, hiệu năng). Checklist **hữu ích nhất** là checklist do chính tổ chức **tự xây dần**, vì checklist đó phản ánh bản chất sản phẩm, môi trường phát triển (con người, công cụ, ưu tiên), lịch sử thành công và defect, và các vấn đề riêng. Checklist trong syllabus chỉ là ví dụ — phải may đo theo tổ chức, có khi theo từng dự án.
 
 - **TTA 5.2.1 (K4)** — review **kiến trúc** theo checklist. Ví dụ của syllabus cho hiệu năng website: connection pooling, cân bằng tải, xử lý phân tán, caching, lazy instantiation, transaction concurrency, tách OLTP/OLAP, nhân bản dữ liệu.
 - **TTA 5.2.2 (K4)** — review **code** theo checklist. Checklist code nên cụ thể theo ngôn ngữ, chia nhóm: cấu trúc, tài liệu, biến, phép tính số học, vòng lặp và rẽ nhánh, lập trình phòng vệ (kiểm biên, kiểm đầu vào, có hết giờ khi gọi thiết bị ngoài…).
-- Mục **5.1**: technical test analyst cần **đủ thời gian chuẩn bị**, gồm cả đối chiếu tài liệu liên quan; thiếu chuẩn bị thì review thành sửa câu chữ. Họ cũng góp phần định nghĩa, áp dụng và **bảo trì** checklist.
+- Mục **5.1**: technical test analyst cần **đủ thời gian chuẩn bị**, gồm cả đối chiếu tài liệu liên quan; thiếu chuẩn bị thì buổi review chỉ còn là sửa câu chữ. Họ cũng góp phần định nghĩa, áp dụng và **bảo trì** checklist.
 
 ### 2.4. Thuật ngữ Anh – Việt
 
@@ -128,9 +128,9 @@ Trừ tiền hai lần; trừ tiền nhưng ghi thất bại; thu sai số tiề
 | «Thanh toán có an toàn không?» | Chủ đề, ai cũng trả lời «có» | PAY-14: webhook có xác minh chữ ký, chống replay, xử lý trùng/trễ? |
 | «Có xử lý lỗi chưa?» | Không nói lỗi nào | PAY-08: lỗi nào thử lại, lỗi nào không, tối đa mấy lần? |
 | «Idempotency OK?» | Không kiểm chứng được | PAY-04/06: khoá xác định, ổn định qua lần thử, mỗi khoản một khoá? |
-| «Kiểm tra trạng thái» | Thiếu ca nguy hiểm nhất | PAY-09: «không rõ kết quả» có tách khỏi «thất bại»? |
+| «Kiểm tra trạng thái» | Thiếu tình huống nguy hiểm nhất | PAY-09: «không rõ kết quả» có tách khỏi «thất bại»? |
 
-PAY-09 không tự nghĩ ra: nó đến từ việc đọc R-TEST-03 — cổng có thể **trừ tiền rồi mất phản hồi**. Checklist 8 câu của TEST-027 hỏi «trạng thái cuối là gì?», không hỏi «trạng thái cuối có **đúng sự thật** không?».
+PAY-09 không phải tự nghĩ ra mà đến từ việc đọc R-TEST-03 — cổng có thể **trừ tiền rồi mất phản hồi**. Checklist 8 câu của TEST-027 hỏi «trạng thái cuối là gì?», không hỏi «trạng thái cuối có **đúng sự thật** không?».
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -178,7 +178,7 @@ Tài liệu ở `examples/toi-noi-testing/articles/checklist-based-review/` ([la
 | Mã | Câu hỏi (rút gọn) | Nguồn |
 |---|---|---|
 | PAY-01 | Số tiền thu được định nghĩa cho **từng** dịch vụ và từng khoản, truy được về báo giá? | R-FOOD-01 cấu trúc giá khác |
-| PAY-02 | Số tiền gửi cổng luôn > 0; ca 0 đ và số âm? | Số âm = hoàn tiền ngoài ý muốn |
+| PAY-02 | Số tiền gửi cổng luôn > 0; tình huống 0 đ và số âm thì sao? | Số âm = hoàn tiền ngoài ý muốn |
 | PAY-03 | Số nguyên đồng, không số thực? | R-GEN-01 |
 | PAY-04 | Mỗi khoản có idempotency key xác định, ổn định qua mọi lần thử? | Kiến trúc §4.9, §14 |
 | PAY-05 | Client gửi lại không tạo khoản thu thứ hai? | R-IDEM |
@@ -224,7 +224,7 @@ Tổng: 8 Đạt · 5 Phát hiện (3 mới: C-1, C-2, C-3) · 1 Câu hỏi · 1
 
 ### 5.4. C-1 — anomaly có phải defect không?
 
-Phát hiện C-1 tìm ra **chỉ bằng đọc**: R-PAY-04 cho tối đa 3 lần gọi, R-PAY-06 nói hết lượt ⇒ `failed`, R-TEST-03 nói cổng có chế độ «đã trừ tiền nhưng không trả lời». Ghép ba câu: khách có thể bị trừ tiền trong khi chuyến ghi thất bại.
+Phát hiện C-1 có được **chỉ nhờ đọc**: R-PAY-04 cho tối đa 3 lần gọi, R-PAY-06 nói hết lượt ⇒ `failed`, R-TEST-03 nói cổng có chế độ «đã trừ tiền nhưng không trả lời». Ghép ba câu: khách có thể bị trừ tiền trong khi chuyến ghi thất bại.
 
 Ở bước communication and analysis, Developer Payment phản biện: «cổng chống trùng theo khoá, thử lại sẽ nhận kết quả thành công». Đúng — **nếu cổng trả lời**. Để khép tranh luận, nhóm dùng một test nhỏ làm bằng chứng (không phải cách tìm ra lỗi):
 
@@ -271,7 +271,7 @@ Bốn mục trích từ nhóm «lập trình phòng vệ», «cấu trúc» củ
 | Mục (TTA 5.2.2) | `chargeWithRetry` | Kết quả |
 |---|---|---|
 | Có hết giờ khi gọi thiết bị/dịch vụ ngoài? | `withTimeout` bọc mỗi lần gọi | Đạt |
-| Dùng hằng có tên thay số «ma thuật»? | `timeoutMs`, `maxRetries` lấy từ cấu hình (3.000 ms, 2) | Đạt |
+| Dùng hằng có tên thay magic number? | `timeoutMs`, `maxRetries` lấy từ cấu hình (3.000 ms, 2) | Đạt |
 | Mọi nhánh đều được xử lý, có nhánh mặc định? | Lỗi không phải hết giờ/tạm thời ⇒ ném lại, không nuốt | Đạt |
 | Đầu vào được kiểm hợp lệ? | Không kiểm `amount > 0` — dựa vào nơi gọi | Ghi nhận Minor (đặc tả đã bảo đảm số tiền dương) |
 
@@ -301,7 +301,7 @@ O-1 thành mục mới **PAY-16**: «Khoá idempotency có duy nhất theo thờ
 
 Viết 5 mục checklist review cho đặc tả voucher (R-VOUCHER-01…08) và kiến trúc §4.10 (Promotion Service), rồi áp lên SPEC, ghi ít nhất một phát hiện.
 
-<details><summary><b>Lời giải mẫu</b></summary><ul><li><b>V-1</b> Mọi mốc ngày có ghi múi giờ và tính đầu mút? — Đạt: R-VOUCHER-01 (giờ Việt Nam, tính cả hai đầu).</li><li><b>V-2</b> Khi nhiều lỗi cùng lúc, thứ tự báo lỗi có xác định? — Đạt: R-VOUCHER-08.</li><li><b>V-3</b> Tiền giảm có trần và không kéo giá dưới mức tối thiểu? — Đạt: R-VOUCHER-06, R-FARE-07.</li><li><b>V-4</b> Lượt dùng được trả lại khi huỷ? — Đạt: R-VOUCHER-07.</li><li><b>V-5</b> Giới hạn lượt dùng còn đúng khi <b>hai yêu cầu tạo chuyến đồng thời</b> từ hai báo giá khác nhau? — <b>Phát hiện</b>: R-QUOTE-03 chỉ bảo đảm một báo giá ra tối đa một chuyến; R-VOUCHER-07 không nói gì về hai báo giá cùng mã gửi cùng lúc. Kiến trúc §4.10 yêu cầu chống vượt quota đồng thời bằng thao tác nguyên tử ⇒ đặc tả lab thiếu. Câu hỏi cho PO, và một ca kiểm thử đồng thời cho Series 08.</li></ul></details>
+<details><summary><b>Lời giải mẫu</b></summary><ul><li><b>V-1</b> Mọi mốc ngày có ghi múi giờ và tính đầu mút? — Đạt: R-VOUCHER-01 (giờ Việt Nam, tính cả hai đầu).</li><li><b>V-2</b> Khi nhiều lỗi cùng lúc, thứ tự báo lỗi có xác định? — Đạt: R-VOUCHER-08.</li><li><b>V-3</b> Tiền giảm có trần và không kéo giá dưới mức tối thiểu? — Đạt: R-VOUCHER-06, R-FARE-07.</li><li><b>V-4</b> Lượt dùng được trả lại khi huỷ? — Đạt: R-VOUCHER-07.</li><li><b>V-5</b> Giới hạn lượt dùng còn đúng khi <b>hai yêu cầu tạo chuyến đồng thời</b> từ hai báo giá khác nhau? — <b>Phát hiện</b>: R-QUOTE-03 chỉ bảo đảm một báo giá ra tối đa một chuyến; R-VOUCHER-07 không nói gì về hai báo giá cùng mã gửi cùng lúc. Kiến trúc §4.10 yêu cầu chống vượt quota đồng thời bằng thao tác nguyên tử ⇒ đặc tả lab thiếu. Câu hỏi cho PO, và một test case đồng thời cho Series 08.</li></ul></details>
 
 ### Bài tập 2 — Sửa mục yếu
 
@@ -323,7 +323,7 @@ async function charge(tripId: string, amount: number) {
 }
 ```
 
-<details><summary><b>Lời giải mẫu</b></summary><ul><li><b>Khoá idempotency đổi mỗi lần thử</b> (<code>Date.now()</code>) ⇒ cổng coi mỗi lần là một giao dịch mới: trừ tiền nhiều lần khi hết giờ — vi phạm R-PAY-04 và PAY-04.</li><li><b>Số ma thuật, sai giới hạn</b>: <code>i &lt;= 3</code> là 4 lần gọi, SPEC cho tối đa 3.</li><li><b>Không có hết giờ</b> cho lời gọi ra ngoài: một lần treo là treo cả hàm.</li><li><b>Nuốt mọi lỗi</b>: <code>catch {}</code> gộp cả bị từ chối (không được thử lại) lẫn lỗi lập trình; hết vòng thì trả <code>undefined</code> — nơi gọi không biết thất bại (biến đầu ra không được gán).</li><li><b>Không kiểm đầu vào</b> <code>amount</code>.</li></ul></details>
+<details><summary><b>Lời giải mẫu</b></summary><ul><li><b>Khoá idempotency đổi mỗi lần thử</b> (<code>Date.now()</code>) ⇒ cổng coi mỗi lần là một giao dịch mới: trừ tiền nhiều lần khi hết giờ — vi phạm R-PAY-04 và PAY-04.</li><li><b>Magic number, sai giới hạn</b>: <code>i &lt;= 3</code> là 4 lần gọi, SPEC cho tối đa 3.</li><li><b>Không có hết giờ</b> cho lời gọi ra ngoài: một lần treo là treo cả hàm.</li><li><b>Nuốt mọi lỗi</b>: <code>catch {}</code> gộp cả bị từ chối (không được thử lại) lẫn lỗi lập trình; hết vòng thì trả <code>undefined</code> — nơi gọi không biết thất bại (biến đầu ra không được gán).</li><li><b>Không kiểm đầu vào</b> <code>amount</code>.</li></ul></details>
 
 ### Câu hỏi trắc nghiệm
 
@@ -370,7 +370,7 @@ async function charge(tripId: string, amount: number) {
 - c) `if (amount <= 0) throw new Error('amount')`
 - d) `const TIMEOUT_MS = 3000`
 
-<details><summary><b>Đáp án: b</b></summary><ul><li>a) Sai — có hết giờ.</li><li>b) Đúng — gọi ra ngoài không hết giờ, không bẫy lỗi (TTA 5.2.2, nhóm lập trình phòng vệ).</li><li>c) Sai — là kiểm đầu vào, đáp ứng mục khác.</li><li>d) Sai — hằng có tên, đáp ứng mục «không dùng số ma thuật».</li></ul></details>
+<details><summary><b>Đáp án: b</b></summary><ul><li>a) Sai — có hết giờ.</li><li>b) Đúng — gọi ra ngoài không hết giờ, không bẫy lỗi (TTA 5.2.2, nhóm lập trình phòng vệ).</li><li>c) Sai — là kiểm đầu vào, đáp ứng mục khác.</li><li>d) Sai — hằng có tên, đáp ứng mục «không dùng magic number».</li></ul></details>
 
 **Câu 6 (K2).** Theo CTAL-TTA v4.0, vì sao checklist do tổ chức tự xây dần thường hữu ích nhất?
 

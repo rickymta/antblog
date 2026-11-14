@@ -29,7 +29,7 @@ language: vi
 
 ## 1. Giới thiệu
 
-Một hệ thống như Tới Nơi có nhiều «tầng» để kiểm: một hàm tính cước, một service, cả nền tảng, chỗ nối với ví VíXanh, và cuối cùng là câu hỏi «khách và tài xế có dùng được không». Nếu không chia tầng, đội test gặp hai vấn đề:
+Một hệ thống như Tới Nơi có nhiều «tầng» để kiểm thử: một hàm tính cước, một service, cả nền tảng, chỗ nối với ví VíXanh, và cuối cùng là câu hỏi «khách và tài xế có dùng được không». Nếu không chia tầng, đội test gặp hai vấn đề:
 
 - **Trùng lặp:** cùng một mốc «đúng 2 phút» được kiểm ở unit test, ở API test, ở test trên app — tốn công mà không thêm thông tin.
 - **Bỏ sót:** ai cũng nghĩ phần nối với VíXanh «chắc đội khác test rồi».
@@ -40,7 +40,7 @@ Test level giải quyết việc này: mỗi level có **đối tượng, mục 
 
 ### 2.1. Test level và test type
 
-Theo CTFL v4.0.1 (mục 2.2), **test level** là một nhóm hoạt động test được tổ chức và quản lý cùng nhau. Mỗi test level là **một lần chạy của test process** ([TEST-007](/articles/quy-trinh-kiem-thu-test-process)) gắn với phần mềm ở một giai đoạn phát triển — từ từng component tới cả hệ thống, có khi tới hệ của các hệ (system of systems).
+Theo CTFL v4.0.1 (mục 2.2), **test level** là một nhóm hoạt động test được tổ chức và quản lý cùng nhau. Mỗi test level là **một lần chạy của test process** ([TEST-007](/articles/quy-trinh-kiem-thu-test-process)) gắn với phần mềm ở một giai đoạn phát triển — từ từng component tới cả hệ thống, có khi tới hệ thống của các hệ thống (system of systems).
 
 Syllabus nói thêm ba ý dễ bị bỏ qua:
 
@@ -48,7 +48,7 @@ Syllabus nói thêm ba ý dễ bị bỏ qua:
 - Một hoạt động phát triển có thể trải qua nhiều test level.
 - **Các test level có thể chồng lấn về thời gian.**
 
-**Test type** thì khác: đó là nhóm hoạt động test gắn với một đặc tính chất lượng (functional, non-functional, black-box, white-box), và hầu hết làm được ở **mọi** test level. Level trả lời «kiểm phạm vi nào»; type trả lời «kiểm khía cạnh nào». Test type có bài riêng từ [TEST-017](/articles/functional-testing).
+**Test type** thì khác: đó là nhóm hoạt động test gắn với một đặc tính chất lượng (functional, non-functional, black-box, white-box), và hầu hết làm được ở **mọi** test level. Level trả lời «kiểm thử ở phạm vi nào»; type trả lời «kiểm thử khía cạnh nào». Test type có bài riêng từ [TEST-017](/articles/functional-testing).
 
 ### 2.2. Năm test level của CTFL v4.0.1
 
@@ -91,7 +91,7 @@ Syllabus liệt kê (không đầy đủ) các thuộc tính phân biệt test l
 
 **Yêu cầu nghiệp vụ.** Khách đặt chuyến từ một báo giá còn hạn; mỗi báo giá đặt được tối đa một chuyến (R-QUOTE-03); bấm «Đặt chuyến» lại không tạo chuyến trùng (R-IDEM, R-UI-01); chuyến trả bằng VíXanh được thu khi hoàn thành, hết giờ 3 giây, thử lại tối đa 2 lần cùng khoá idempotency (R-PAY-03, R-PAY-04).
 
-**System context.** Theo tài liệu kiến trúc, Booking/Order là nguồn sự thật của booking (§4.4), gọi Pricing & Quote qua gRPC (§7.1), phát `BookingCreated` qua Kafka với transactional outbox (§6.3); Payment & Wallet nói chuyện với VíXanh; Notification gửi SMS qua TinNhanh và push qua APNs/FCM; Pricing lấy quãng đường từ MapViet. Ranh giới «hệ thống Tới Nơi» bao mọi service của Tới Nơi; VíXanh, MapViet, TinNhanh, APNs/FCM là **hệ bên ngoài**.
+**System context.** Theo tài liệu kiến trúc, Booking/Order là nguồn dữ liệu gốc của booking (§4.4), gọi Pricing & Quote qua gRPC (§7.1), phát `BookingCreated` qua Kafka với transactional outbox (§6.3); Payment & Wallet giao tiếp với VíXanh; Notification gửi SMS qua TinNhanh và push qua APNs/FCM; Pricing lấy quãng đường từ MapViet. Ranh giới «hệ thống Tới Nơi» bao mọi service của Tới Nơi; VíXanh, MapViet, TinNhanh, APNs/FCM là **hệ bên ngoài**.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -237,7 +237,7 @@ Tài liệu kiến trúc liệt kê «Test level/type» theo ngôn ngữ của �
 - **«Integration» có hai nghĩa.** Một câu «đã test tích hợp» chưa nói gì: tích hợp *trong* Tới Nơi (component integration) hay *ra ngoài* (system integration)? Viết rõ trong test plan.
 - **Ranh giới «hệ thống» là một quyết định.** Với microservices, có đội coi mỗi service là một hệ riêng; khi đó Booking ↔ Pricing được xếp vào system integration. Series này coi cả nền tảng Tới Nơi là *một* hệ thống; điều quan trọng là chọn một cách và ghi vào test strategy.
 - **Level không đồng nghĩa với người làm.** Component testing «thường» do developer làm, nhưng tester vẫn góp test condition và dữ liệu biên; acceptance «lý tưởng» do người dùng làm, nhưng tester thường chuẩn bị môi trường và kịch bản.
-- **Mỗi level có mục tiêu riêng để tránh trùng lặp** (thực hành tốt của mục 2.1.2). Đừng kiểm lại mọi mốc thời gian ở system level; ở đó chỉ cần đại diện vài trường hợp và tập trung vào luồng, dữ liệu thật, đặc tính phi chức năng.
+- **Mỗi level có mục tiêu riêng để tránh trùng lặp** (thực hành tốt của mục 2.1.2). Đừng kiểm thử lại mọi mốc thời gian ở system level; ở đó chỉ cần đại diện vài trường hợp và tập trung vào luồng, dữ liệu thật, đặc tính phi chức năng.
 - **Sai lầm thường gặp:** coi «API test», «E2E test», «smoke test» là test level; coi system testing chỉ là functional (syllabus nêu rõ có non-functional); coi acceptance là «chạy lại system test với người dùng đứng xem».
 
 Đi sâu từng level: component ở [TEST-012](/articles/component-testing-unit-testing-tong-quan) rồi Series 06; component integration ở [TEST-013](/articles/component-integration-testing) rồi Series 07; system ở [TEST-014](/articles/system-testing) rồi Series 08; system integration ở [TEST-015](/articles/system-integration-testing); acceptance ở [TEST-016](/articles/acceptance-testing-tong-quan) rồi TEST-092.
@@ -255,7 +255,7 @@ Tài liệu kiến trúc liệt kê «Test level/type» theo ngôn ngữ của �
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Nó trộn hai level: <b>system testing</b> (luồng khách đặt, tài xế nhận và hoàn thành trên hệ hoàn chỉnh) và <b>system integration testing</b> (thu tiền qua PSP sandbox). Tách: (1) system test luồng đầu-cuối với ví giả để luồng ổn định, căn cứ R-STATE-02, R-UI-01, R-UI-02; (2) system integration test riêng với sandbox VíXanh cho thu tiền, timeout, webhook, căn cứ R-PAY và tài liệu đối tác; (3) giữ một vài kiểm thử E2E đầy đủ làm smoke trước phát hành. Tách ra giúp biết lỗi nằm ở đâu khi test đỏ.</p>
+<p>Dòng này trộn hai level: <b>system testing</b> (luồng khách đặt, tài xế nhận và hoàn thành trên hệ hoàn chỉnh) và <b>system integration testing</b> (thu tiền qua PSP sandbox). Tách: (1) system test luồng đầu-cuối với ví giả để luồng ổn định, căn cứ R-STATE-02, R-UI-01, R-UI-02; (2) system integration test riêng với sandbox VíXanh cho thu tiền, timeout, webhook, căn cứ R-PAY và tài liệu đối tác; (3) giữ một vài kiểm thử E2E đầy đủ làm smoke trước phát hành. Tách ra giúp biết lỗi nằm ở đâu khi test đỏ.</p>
 </details>
 
 ### Câu hỏi trắc nghiệm

@@ -1,6 +1,6 @@
 ---
 slug: use-case-testing-scenario-based-testing
-title: "Use Case Testing và Scenario-based Testing: kiểm trọn luồng khách đặt xe máy"
+title: "Use Case Testing và Scenario-based Testing: kiểm thử trọn luồng khách đặt xe máy"
 summary: "Scenario-based testing theo CTAL-TA v4.0: rút luồng chính, extension, exception từ use case «Khách đặt xe máy» của Tới Nơi, đo scenario coverage, phủ vòng lặp tài xế huỷ và chạy 11 test case qua API lab."
 category: testing
 level: intermediate
@@ -8,7 +8,7 @@ tags: [testing, istqb, ctal-ta, test-035, black-box, scenario-based-testing, use
 language: vi
 ---
 
-Bảng quyết định kiểm từng quy tắc, state table kiểm từng cặp trạng thái – sự kiện. Nhưng khách không dùng Tới Nơi theo từng quy tắc: họ báo giá, đặt, chờ tài xế, bị tài xế bỏ, chờ tiếp, rồi mới tới nơi. Nhiều lỗi chỉ lộ ra khi trạng thái **được mang qua nhiều bước**. Bài này trả lời: thiết kế test từ use case như thế nào, phân biệt luồng chính, extension và exception ra sao, và «đủ» là bao nhiêu kịch bản.
+Bảng quyết định kiểm thử từng quy tắc, state table kiểm thử từng cặp trạng thái – sự kiện. Nhưng khách không dùng Tới Nơi theo từng quy tắc: họ báo giá, đặt, chờ tài xế, bị tài xế bỏ, chờ tiếp, rồi mới tới nơi. Nhiều lỗi chỉ lộ ra khi trạng thái **được mang qua nhiều bước**. Bài này trả lời: thiết kế test từ use case như thế nào, phân biệt luồng chính, extension và exception ra sao, và «đủ» là bao nhiêu kịch bản.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-035</span>
@@ -31,12 +31,12 @@ Bảng quyết định kiểm từng quy tắc, state table kiểm từng cặp 
 
 **Scenario-based testing** (kiểm thử dựa trên kịch bản) thiết kế test case từ một **mô hình kịch bản**: chuỗi hành động người dùng và hệ thống làm để đạt một mục tiêu. Mỗi đường đi qua mô hình là một kịch bản; mỗi kịch bản là một coverage item.
 
-Kỹ thuật này giải quyết một lỗ hổng của các kỹ thuật «một bước»: EP, BVA, bảng quyết định kiểm một quy tắc tại một thời điểm; state transition kiểm từng chuyển trạng thái. Không kỹ thuật nào trong số đó buộc ta đi **cả hành trình** và kiểm những gì hệ thống nhớ giữa các bước — mốc thời gian, lượt voucher, báo giá đã dùng, tài xế đã rảnh chưa.
+Kỹ thuật này giải quyết một lỗ hổng của các kỹ thuật «một bước»: EP, BVA, bảng quyết định kiểm một quy tắc tại một thời điểm; state transition kiểm từng chuyển trạng thái. Không kỹ thuật nào trong số đó buộc ta đi **cả hành trình** và kiểm tra những gì hệ thống nhớ giữa các bước — mốc thời gian, lượt voucher, báo giá đã dùng, tài xế đã rảnh chưa.
 
 Nên dùng khi:
 
 - test basis có dạng use case, user story kèm luồng, sơ đồ quy trình nghiệp vụ;
-- cần kiểm từ góc người dùng ở system testing hoặc acceptance testing;
+- cần kiểm thử từ góc người dùng ở system testing hoặc acceptance testing;
 - hợp đồng hay khách hàng đưa sẵn danh sách kịch bản nghiệm thu (CTAL-TA 3.5.1 nêu đúng tình huống này);
 - muốn sắp xếp test theo rủi ro nghiệp vụ («khách bị tài xế bỏ» quan trọng hơn «khách sửa ô nhập»).
 
@@ -76,7 +76,7 @@ Syllabus nhắc tới các mô hình khác (flowchart, BPMN, sequence diagram, c
 
 ### 2.4. Phạm vi áp dụng
 
-Syllabus nói scenario-based testing **thường** dùng ở system testing và acceptance testing, dưới dạng end-to-end testing tập trung vào functional suitability từ góc người dùng. Nhưng nó dùng được ở level khác — component integration (kịch bản theo giao thức tương tác), component (lớp có trạng thái, gọi nhiều method theo chuỗi) — và cả non-functional testing (kịch bản làm phần tử của operational profile trong reliability, flexibility, compatibility testing).
+Syllabus nói scenario-based testing **thường** dùng ở system testing và acceptance testing, dưới dạng end-to-end testing tập trung vào functional suitability từ góc người dùng. Nhưng kỹ thuật này dùng được ở level khác — component integration (kịch bản theo giao thức tương tác), component (lớp có trạng thái, gọi nhiều method theo chuỗi) — và cả non-functional testing (kịch bản làm phần tử của operational profile trong reliability, flexibility, compatibility testing).
 
 Mục 3.5.1 còn gợi ý **kết hợp**: domain testing để chọn giá trị biến trong kịch bản; decision coverage (white-box) để phủ chặt các quyết định trong quy trình; round-trip coverage cho quy trình có chu kỳ.
 
@@ -136,7 +136,7 @@ Mục 3.5.1 còn gợi ý **kết hợp**: domain testing để chọn giá tr�
 
 Trong kiến trúc đích, một kịch bản UC-01 đi qua Customer App → API Gateway/BFF → **Pricing & Quote** (`quote_id`, `expires_at`) → **Booking** (idempotency key, `BookingCreated` qua outbox) → **Matching & Dispatch** (offer có TTL, atomic assignment) → **Trip Lifecycle** → **Payment & Wallet** (PSP VíXanh) → Notification. Kịch bản cắt ngang các state machine riêng của Booking, Dispatch, Trip, Payment (kiến trúc §9.1) — chỗ test từng service bỏ sót.
 
-Bản lab (SPEC R-ARCH) là modular monolith một tiến trình: không Kafka, không offer (tài xế tự kéo danh sách — R-ACCEPT-06), bước quét hết giờ chạy định kỳ mà test gọi tay qua `POST /api/test/expire-searches`. Kịch bản trong bài chạy qua API HTTP thật của lab, không qua giao diện (giao diện đã được kiểm đầu-cuối bằng Playwright ở [TEST-014](/articles/system-testing)).
+Bản lab (SPEC R-ARCH) là modular monolith một tiến trình: không Kafka, không offer (tài xế tự kéo danh sách — R-ACCEPT-06), bước quét hết giờ chạy định kỳ mà test gọi tay qua `POST /api/test/expire-searches`. Kịch bản trong bài chạy qua API HTTP thật của lab, không qua giao diện (giao diện đã được kiểm thử đầu-cuối bằng Playwright ở [TEST-014](/articles/system-testing)).
 
 ### 3.3. Rủi ro chỉ lộ ra khi đi trọn kịch bản
 
@@ -309,7 +309,7 @@ Cả 11 test case đạt (thêm `--reporter=verbose` để xem tên từng test 
 
 ### 5.4. Đọc coverage cho đúng
 
-**Scenario coverage 6/7 = 85,7%.** KB-07 không chạy vì nó chỉ tồn tại ở giao diện (R-UI-01). Báo cáo phải ghi rõ lý do và nơi phủ thay thế (một test Playwright ở trang `/`), thay vì lặng lẽ bỏ KB-07 khỏi mẫu số để báo 100%. Lưu ý: 11 test case nhưng chỉ 6 kịch bản — đếm test case không phải đếm coverage.
+**Scenario coverage 6/7 = 85,7%.** KB-07 không chạy vì nó chỉ tồn tại ở giao diện (R-UI-01). Báo cáo phải ghi rõ lý do và nơi phủ thay thế (một test Playwright ở trang `/`), thay vì bỏ KB-07 khỏi mẫu số mà không ghi chú để báo 100%. Lưu ý: 11 test case nhưng chỉ 6 kịch bản — đếm test case không phải đếm coverage.
 
 **Simple loop coverage 3/4.** Mục «tối đa» không thiết kế được, nên ghi thành một anomaly gửi PO:
 
@@ -320,7 +320,7 @@ Cả 11 test case đạt (thêm `--reporter=verbose` để xem tên từng test 
 
 ## 6. Góc nhìn nâng cao
 
-**Extension hay exception?** Phân loại dựa trên **mục tiêu của use case**, nên đổi mục tiêu là đổi phân loại. KB-06 (khách tự huỷ) là exception với mục tiêu «được chở tới nơi», dù hành động huỷ hoàn toàn hợp lệ. Bài tập 1 có một ca khó hơn: tiền thu thất bại nhưng chuyến vẫn hoàn thành (R-PAY-06). Viết mục tiêu và hậu điều kiện rõ trước khi phân loại.
+**Extension hay exception?** Phân loại dựa trên **mục tiêu của use case**, nên đổi mục tiêu là đổi phân loại. KB-06 (khách tự huỷ) là exception với mục tiêu «được chở tới nơi», dù hành động huỷ hoàn toàn hợp lệ. Bài tập 1 có một trường hợp khó hơn: tiền thu thất bại nhưng chuyến vẫn hoàn thành (R-PAY-06). Viết mục tiêu và hậu điều kiện rõ trước khi phân loại.
 
 **Bùng nổ kịch bản.** Ghép nhánh tự do (5a → 5a → 5b, 1a → 3a → 5a…) cho số kịch bản tăng nhanh. Đừng liệt kê mọi tổ hợp: dùng ưu tiên theo rủi ro, simple loop coverage cho vòng lặp, và chỉ ghép những nhánh **chia sẻ trạng thái** (5a đổi `acceptedAt` và `searchingSince` ⇒ đáng ghép với 5b, 4b; 1a không đổi gì mà 5b đọc ⇒ không cần ghép).
 
@@ -334,7 +334,7 @@ Cả 11 test case đạt (thêm `--reporter=verbose` để xem tên từng test 
 | Decision table ([TEST-033](/articles/decision-table-testing)) | Cột của bảng (quy tắc) | Tổ hợp điều kiện tại một thời điểm | Thứ tự các bước |
 | Scenario-based | Kịch bản (đường đi qua mô hình) | Hành trình người dùng, trạng thái mang qua bước, bàn giao giữa tác nhân | Chi tiết từng quy tắc (dùng kỹ thuật khác bên trong kịch bản) |
 
-Scenario-based testing **không thay** các kỹ thuật kia — TC-06 và TC-07 dùng BVA ngay bên trong kịch bản. Kiểm luồng nhiều vai trò của giao đồ ăn ở [TEST-081 · Business Flow Testing](/articles/business-flow-testing); end-to-end qua nhiều ứng dụng ở [TEST-080](/articles/end-to-end-testing); nhánh huỷ ở mức hệ thống ở [TEST-087](/articles/negative-flow-testing).
+Scenario-based testing **không thay** các kỹ thuật kia — TC-06 và TC-07 dùng BVA ngay bên trong kịch bản. Kiểm thử luồng nhiều vai trò của giao đồ ăn ở [TEST-081 · Business Flow Testing](/articles/business-flow-testing); end-to-end qua nhiều ứng dụng ở [TEST-080](/articles/end-to-end-testing); nhánh huỷ ở mức hệ thống ở [TEST-087](/articles/negative-flow-testing).
 
 **Kịch bản dài thì chẩn đoán khó.** TC-01 có 9 bước; đỏ ở cuối không nói lỗi ở bước nào. Khẳng định ở từng bước (TC-01 kiểm cả báo giá, trạng thái sau đặt, danh sách tài xế) và giữ test component cho từng quy tắc.
 
@@ -359,7 +359,7 @@ Tài xế nhận lúc 0:00 với ETA 5 phút. Liệt kê test case của KB-06 p
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p><code>accepted</code> 1:59 ⇒ 0 đ <code>grace_period</code>; <code>accepted</code> 2:00 ⇒ 10.000 đ <code>charged</code>; <code>arriving</code> 1:00 ⇒ 10.000 đ (ân hạn 2 phút chỉ áp cho <code>accepted</code>); <code>arriving</code> 15:00 ⇒ 10.000 đ (đúng mốc ETA + 10 phút vẫn thu — R-CANCEL-04 dùng «lớn hơn hẳn»); <code>arriving</code> 15:01 ⇒ 0 đ <code>driver_late</code>; <code>accepted</code> 15:01 ⇒ 0 đ <code>driver_late</code>. Huỷ ở <code>searching</code> (0 đ) thuộc nhánh khác (huỷ trước khi có tài xế). Ở <code>picked_up</code> khách không huỷ được ⇒ <code>INVALID_TRANSITION</code> — đó là kiểm chuyển không hợp lệ của TEST-034, không phải kịch bản của UC-01.</p>
+<p><code>accepted</code> 1:59 ⇒ 0 đ <code>grace_period</code>; <code>accepted</code> 2:00 ⇒ 10.000 đ <code>charged</code>; <code>arriving</code> 1:00 ⇒ 10.000 đ (ân hạn 2 phút chỉ áp cho <code>accepted</code>); <code>arriving</code> 15:00 ⇒ 10.000 đ (đúng mốc ETA + 10 phút vẫn thu — R-CANCEL-04 dùng «lớn hơn hẳn»); <code>arriving</code> 15:01 ⇒ 0 đ <code>driver_late</code>; <code>accepted</code> 15:01 ⇒ 0 đ <code>driver_late</code>. Huỷ ở <code>searching</code> (0 đ) thuộc nhánh khác (huỷ trước khi có tài xế). Ở <code>picked_up</code> khách không huỷ được ⇒ <code>INVALID_TRANSITION</code> — đó là kiểm thử chuyển trạng thái không hợp lệ của TEST-034, không phải kịch bản của UC-01.</p>
 </details>
 
 ### Câu hỏi trắc nghiệm
@@ -409,7 +409,7 @@ Tài xế nhận lúc 0:00 với ETA 5 phút. Liệt kê test case của KB-06 p
 
 <details>
 <summary><b>Đáp án: b</b></summary>
-<p>Simple loop coverage đòi: bỏ qua vòng (0), đúng một lần (1), nhiều lần — số điển hình (2) — và số tối đa (3). <b>a sai</b> — thiếu 0 và «nhiều lần». <b>b đúng</b>. <b>c sai</b> — thiếu 1 và số điển hình. <b>d sai</b> — thiếu 0; còn 4 là lần lặp không hợp lệ, thuộc kiểm biên/negative, không phải coverage item của vòng lặp.</p>
+<p>Simple loop coverage đòi: bỏ qua vòng (0), đúng một lần (1), nhiều lần — số điển hình (2) — và số tối đa (3). <b>a sai</b> — thiếu 0 và «nhiều lần». <b>b đúng</b>. <b>c sai</b> — thiếu 1 và số điển hình. <b>d sai</b> — thiếu 0; còn 4 là lần lặp không hợp lệ, thuộc kiểm thử biên/negative, không phải coverage item của vòng lặp.</p>
 </details>
 
 **Câu 5 (K2).** Phát biểu nào về phạm vi áp dụng của scenario-based testing là **đúng**?

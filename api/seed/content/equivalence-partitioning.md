@@ -1,7 +1,7 @@
 ---
 slug: equivalence-partitioning
 title: "Equivalence Partitioning: phân vùng tương đương cho quãng đường chuyến xe"
-summary: "Phân vùng tương đương chia miền dữ liệu thành các nhóm được xử lý giống nhau để chọn ít ca mà đủ. Bài áp EP theo CTFL v4.0.1 lên quãng đường, thành phố, loại xe của API báo giá Tới Nơi, đo EP và Each Choice coverage."
+summary: "Phân vùng tương đương chia miền dữ liệu thành các nhóm được xử lý giống nhau để chọn ít test case mà đủ. Bài áp EP theo CTFL v4.0.1 lên quãng đường, thành phố, loại xe của API báo giá Tới Nơi, đo EP và Each Choice coverage."
 category: testing
 level: intermediate
 tags: [testing, istqb, ctfl, test-031, equivalence-partitioning, black-box, test-design, toi-noi]
@@ -21,7 +21,7 @@ Quãng đường trong yêu cầu báo giá là một số thực: có vô số 
 <tr><th scope="row">Test Type</th><td>Functional; Black-box</td></tr>
 <tr><th scope="row">Test Technique</th><td>Equivalence Partitioning</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/testware-san-pham-kiem-thu">TEST-010 · Testware</a>, <a href="/articles/functional-testing">TEST-017 · Functional Testing</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Phân vùng quãng đường R-FARE-02 (&lt; 0,5 km, [0,5; 100], &gt; 100 km, không phải số), mã thành phố R-GEN-03 và loại xe; <code>test.each</code> cho <code>calculateFare</code> và <code>POST /api/quotes</code> — lab <code>articles/equivalence-partitioning</code> (34 ca vitest)</td></tr>
+<tr><th scope="row">Thực hành</th><td>Phân vùng quãng đường R-FARE-02 (&lt; 0,5 km, [0,5; 100], &gt; 100 km, không phải số), mã thành phố R-GEN-03 và loại xe; <code>test.each</code> cho <code>calculateFare</code> và <code>POST /api/quotes</code> — lab <code>articles/equivalence-partitioning</code> (34 test case vitest)</td></tr>
 <tr><th scope="row">Tham chiếu ISTQB</th><td>CTFL v4.0.1 · Chương 4 · mục 4.1 và 4.2.1 · FL-4.2.1 (K3). Đọc thêm: CTAL-TA v4.0 · Chương 3 · mục 3.1 và 3.1.1 · TA-3.1.1 (K3) — domain testing, đi sâu ở TEST-040</td></tr>
 </tbody>
 </table>
@@ -29,7 +29,7 @@ Quãng đường trong yêu cầu báo giá là một số thực: có vô số 
 
 ## 1. Giới thiệu
 
-Ở [TEST-017](/articles/functional-testing) ta lấy sẵn các ví dụ trong SPEC (5,0 · 5,1 · 6,0 · 6,1 · 30 kg) để kiểm phụ phí bưu kiện và hứa rằng *cách chọn* giá trị là việc của Series 04. Bài này bắt đầu lời hứa đó với kỹ thuật nền tảng nhất.
+Ở [TEST-017](/articles/functional-testing) ta lấy sẵn các ví dụ trong SPEC (5,0 · 5,1 · 6,0 · 6,1 · 30 kg) để kiểm phụ phí bưu kiện và hứa rằng *cách chọn* giá trị là việc của Series 04. Bài này bắt đầu thực hiện lời hứa đó bằng kỹ thuật nền tảng nhất.
 
 Vấn đề EP giải quyết là **bùng nổ đầu vào**. `distanceKm` nhận mọi số thực; `cityCode` nhận mọi chuỗi; tổ hợp của chúng là vô hạn ([TEST-003](/articles/bay-nguyen-ly-kiem-thu), nguyên lý «exhaustive testing is impossible»). EP thay câu hỏi «thử giá trị nào?» bằng câu hỏi dễ hơn: **«hệ thống xử lý các giá trị này theo bao nhiêu cách khác nhau?»** — mỗi cách là một phân vùng, mỗi phân vùng thử một lần.
 
@@ -43,9 +43,9 @@ CTFL v4.0.1 mục 4.1 chia test technique thành **black-box** (dựa trên hàn
 
 ### 2.2. Định nghĩa và giả định cốt lõi
 
-Theo mục 4.2.1, EP chia dữ liệu thành các **equivalence partition** (phân vùng tương đương) dựa trên **kỳ vọng** rằng mọi phần tử trong cùng phân vùng được test item xử lý *theo cùng một cách*. Hệ quả: nếu một giá trị trong phân vùng làm lộ defect thì giá trị khác trong cùng phân vùng cũng làm lộ defect đó ⇒ **một ca cho mỗi phân vùng là đủ**.
+Theo mục 4.2.1, EP chia dữ liệu thành các **equivalence partition** (phân vùng tương đương) dựa trên **kỳ vọng** rằng mọi phần tử trong cùng phân vùng được test item xử lý *theo cùng một cách*. Hệ quả: nếu một giá trị trong phân vùng làm lộ defect thì giá trị khác trong cùng phân vùng cũng làm lộ defect đó ⇒ **một test case cho mỗi phân vùng là đủ**.
 
-Chữ quan trọng là «kỳ vọng». EP là một **giả thuyết** về cách hệ thống xử lý dữ liệu. Giả thuyết sai — tức trong một «phân vùng» thật ra có hai cách xử lý — thì một ca không còn đủ.
+Chữ quan trọng là «kỳ vọng». EP là một **giả thuyết** về cách hệ thống xử lý dữ liệu. Giả thuyết sai — tức trong một «phân vùng» thật ra có hai cách xử lý — thì một test case không còn đủ.
 
 Các tính chất syllabus nêu:
 
@@ -61,15 +61,15 @@ Phân vùng chứa giá trị hợp lệ là **valid partition**; chứa giá tr
 
 ### 2.4. Coverage
 
-Trong EP, **coverage item** (hạng mục phủ) chính là các phân vùng. Muốn đạt 100%, các ca phải chạm **mọi** phân vùng đã xác định — **kể cả phân vùng không hợp lệ** — ít nhất một lần:
+Trong EP, **coverage item** (hạng mục phủ) chính là các phân vùng. Muốn đạt 100%, các test case phải chạm **mọi** phân vùng đã xác định — **kể cả phân vùng không hợp lệ** — ít nhất một lần:
 
 ```text
 EP coverage = số phân vùng được ít nhất một ca chạm / tổng số phân vùng đã xác định × 100%
 ```
 
-Test item có nhiều tham số thì có nhiều *tập* phân vùng, và một ca chạm phân vùng của nhiều tập cùng lúc. Tiêu chí đơn giản nhất cho trường hợp này là **Each Choice coverage** (syllabus dẫn Ammann 2016): mỗi phân vùng của mỗi tập được chạm ít nhất một lần; nó **không** xét tổ hợp giữa các phân vùng (tổ hợp là việc của [TEST-036](/articles/classification-tree-method)…[TEST-038](/articles/combinatorial-testing)).
+Test item có nhiều tham số thì có nhiều *tập* phân vùng, và một test case chạm phân vùng của nhiều tập cùng lúc. Tiêu chí đơn giản nhất cho trường hợp này là **Each Choice coverage** (syllabus dẫn Ammann 2016): mỗi phân vùng của mỗi tập được chạm ít nhất một lần; tiêu chí này **không** xét tổ hợp giữa các phân vùng (tổ hợp là việc của [TEST-036](/articles/classification-tree-method)…[TEST-038](/articles/combinatorial-testing)).
 
-Ghi chú phát hành của CTFL v4.0.1 nói bản này bổ sung vào mục 4.2.1 ý: **phân vùng không hợp lệ nên được kiểm riêng từng cái** để tránh **defect masking** (che lỗi) — hai giá trị sai trong cùng một ca thì lỗi thứ nhất có thể che mất cách xử lý giá trị thứ hai.
+Ghi chú phát hành của CTFL v4.0.1 nói bản này bổ sung vào mục 4.2.1 ý: **phân vùng không hợp lệ nên được kiểm riêng từng cái** để tránh **defect masking** (che lỗi) — hai giá trị sai trong cùng một test case thì lỗi thứ nhất có thể che mất cách xử lý giá trị thứ hai.
 
 ### 2.5. EP trong CTAL-TA v4.0
 
@@ -230,7 +230,7 @@ Biên giữa D1 và D2 nằm ở đâu trên giá trị **thô** client gửi l�
 <text x="450" y="194" text-anchor="middle" class="t-small">D4 · ngoài trục số: "7.4" (chuỗi), null, thiếu trường ⇒ 400</text>
 </svg>
 </div>
-<figcaption><b>Hình 2 · Một đại diện ở giữa mỗi phân vùng.</b> Vạch đỏ là biên — EP không cần biết chính xác, BVA ở TEST-032 mới cần. Chấm tròn là giá trị dùng trong ca EP-01…EP-04.</figcaption>
+<figcaption><b>Hình 2 · Một đại diện ở giữa mỗi phân vùng.</b> Vạch đỏ là biên — EP không cần biết chính xác, BVA ở TEST-032 mới cần. Chấm tròn là giá trị dùng trong test case EP-01…EP-04.</figcaption>
 </figure>
 
 ### 4.3. Bước 3 — phân vùng đầu ra
@@ -242,7 +242,7 @@ Syllabus cho phép phân vùng cả đầu ra. Với `calculateFare`, R-FARE-07 
 | `bike` | 12.000 + 4.500 × d &lt; 15.000 ⇔ d &lt; 0,667 | d = 0,5 (14.250 đ) và 0,6 (14.700 đ) | **có** — đại diện 0,5 km ⇒ 15.000 đ |
 | `car` | 25.000 + 11.000 × d &lt; 30.000 ⇔ d &lt; 0,455 | không có (0,5 km đã là 30.500 đ) | **rỗng** |
 
-Phân vùng phải không rỗng, nên với ô tô (không voucher) chỉ có một phân vùng đầu ra. Ca EPO-04 không «tin» phép tính tay mà quét cả 996 quãng đường hợp lệ (bước 0,1 km) để khẳng định điều đó. Có voucher thì vùng này có giá trị cho cả ô tô — việc của bảng quyết định ([TEST-033](/articles/decision-table-testing)).
+Phân vùng phải không rỗng, nên với ô tô (không voucher) chỉ có một phân vùng đầu ra. Test case EPO-04 không «tin» phép tính tay mà quét cả 996 quãng đường hợp lệ (bước 0,1 km) để khẳng định điều đó. Có voucher thì vùng này có giá trị cho cả ô tô — việc của bảng quyết định ([TEST-033](/articles/decision-table-testing)).
 
 ### 4.4. EP làm lộ câu hỏi về đặc tả
 
@@ -252,12 +252,12 @@ Khi xếp đại diện vào phân vùng, có giá trị **không biết xếp �
 
 Ba tập phân vùng: quãng đường (1 hợp lệ + 3 không hợp lệ), thành phố (1 + 2), loại xe (2 + 1).
 
-- **Ca hợp lệ:** phủ mọi phân vùng hợp lệ, ghép nhiều phân vùng vào một ca được. Tập lớn nhất có 2 phân vùng hợp lệ (V1, V2) ⇒ **2 ca**.
-- **Ca không hợp lệ:** mỗi phân vùng không hợp lệ **một ca riêng**, các tham số còn lại hợp lệ ⇒ 3 + 2 + 1 = **6 ca**.
+- **Test case hợp lệ:** phủ mọi phân vùng hợp lệ, có thể ghép nhiều phân vùng vào một test case. Tập lớn nhất có 2 phân vùng hợp lệ (V1, V2) ⇒ **2 test case**.
+- **Test case không hợp lệ:** mỗi phân vùng không hợp lệ **một test case riêng**, các tham số còn lại hợp lệ ⇒ 3 + 2 + 1 = **6 test case**.
 
-Tổng **8 ca** cho Each Choice 100%, so với 4 × 3 × 3 = 36 nếu nhân mọi phân vùng.
+Tổng **8 test case** cho Each Choice 100%, so với 4 × 3 × 3 = 36 nếu nhân mọi phân vùng.
 
-Vì sao không gộp ca sai cho đỡ tốn? Gửi `{ cityCode: "DL", distanceKm: 0.2 }`: theo R-VALID-01 hệ thống chỉ báo `CITY_NOT_SUPPORTED`, **không bao giờ** chạy tới kiểm quãng đường. Nếu kiểm D1 bị hỏng (vd quên cận dưới) thì ca này vẫn xanh — defect masking. Ca đó chỉ được tính là phủ C2.
+Vì sao không gộp các test case sai cho đỡ tốn? Gửi `{ cityCode: "DL", distanceKm: 0.2 }`: theo R-VALID-01 hệ thống chỉ báo `CITY_NOT_SUPPORTED`, **không bao giờ** chạy tới kiểm quãng đường. Nếu kiểm D1 bị hỏng (vd quên cận dưới) thì test case này vẫn xanh — defect masking. Test case đó chỉ được tính là phủ C2.
 
 ## 5. Thực hành
 
@@ -278,9 +278,9 @@ Vì sao không gộp ca sai cho đỡ tốn? Gửi `{ cityCode: "DL", distanceKm
 | EP-07 | C3 | `""` | 400 `VALIDATION_ERROR`, `details` = [`cityCode`] | R-API-02 |
 | EP-08 | V3 | `truck` | 400 `VALIDATION_ERROR`, `details` = [`vehicle`] | R-GEN-04 |
 
-Với lỗi định dạng, ca kiểm `details` **chỉ chứa đúng trường đang kiểm** — nếu không, một lỗi ở trường khác (vd ca vô tình gửi sai `kind`) cũng cho ra `VALIDATION_ERROR` và test vẫn xanh.
+Với lỗi định dạng, test case kiểm `details` **chỉ chứa đúng trường đang kiểm** — nếu không, một lỗi ở trường khác (vd test case vô tình gửi sai `kind`) cũng cho ra `VALIDATION_ERROR` và test vẫn xanh.
 
-Ngoài 8 ca bắt buộc, lab chạy thêm 9 đại diện khác của cùng phân vùng (0; −5; 1.000.000; `null`; thiếu trường; `"sg"`; `"HCM"`; chuỗi 11 ký tự; số `79`) để kiểm chính **giả định** EP: cùng phân vùng thì cùng mã lỗi.
+Ngoài 8 test case bắt buộc, lab chạy thêm 9 đại diện khác của cùng phân vùng (0; −5; 1.000.000; `null`; thiếu trường; `"sg"`; `"HCM"`; chuỗi 11 ký tự; số `79`) để kiểm chính **giả định** EP: cùng phân vùng thì cùng mã lỗi.
 
 ### 5.2. Test case mức component
 
@@ -293,7 +293,7 @@ Ngoài 8 ca bắt buộc, lab chạy thêm 9 đại diện khác của cùng ph�
 
 ### 5.3. Code
 
-Bảng ca và phân vùng đặt trong **một** tệp (`articles/equivalence-partitioning/ep-model.ts`) để vừa chạy test vừa đo coverage: hàm `epCoverage` đếm phân vùng có trong `covers` của ít nhất một ca — thêm ca mà quên khai `covers` thì số coverage lộ ngay. Trích:
+Bảng test case và phân vùng đặt trong **một** tệp (`articles/equivalence-partitioning/ep-model.ts`) để vừa chạy test vừa đo coverage: hàm `epCoverage` đếm phân vùng có trong `covers` của ít nhất một ca — thêm test case mà quên khai `covers` thì số coverage lộ ngay. Trích:
 
 ```ts
 export const API_CASES: ApiCase[] = [
@@ -344,7 +344,7 @@ Kết quả thực tế (vitest 3.2.7, Node 22, lần chạy khi viết bài; r�
 | «Thường gặp»: một ca đúng + hai ca sai quãng đường (EP-01, 03, 04) | 5/10 | **50%** | D4, C2, C3, V2, V3 |
 | Một ca gộp `DL` + 0,2 km (khai trung thực) | 1/10 | 10% | khai «phủ cả C2 và D1» là thổi phồng thành 20% |
 
-Bộ «thường gặp» — một ca vui và vài giá trị sai của trường «quan trọng nhất» — không có ca nào cho ô tô, thành phố chưa mở hay kiểu sai.
+Bộ «thường gặp» — một test case happy path và vài giá trị sai của trường «quan trọng nhất» — không có test case nào cho ô tô, thành phố chưa mở hay kiểu sai.
 
 ### 5.5. EP bắt được gì, bỏ lọt gì
 
@@ -378,7 +378,7 @@ Lỗi B từ chối 0,45 km dù R-FARE-02 ghi rõ «0,45 hợp lệ», và khôn
 
 ### Bài tập 1 — Khối lượng bưu kiện
 
-Với `POST /api/quotes` dịch vụ `parcel`, phân vùng tham số `parcelWeightKg` theo R-PARCEL-01, R-PARCEL-02 và R-PARCEL-03 (đầu vào **và** đầu ra phụ phí), rồi chọn bộ ca Each Choice nhỏ nhất kết hợp với loại xe (`bike`, `car`). Giữ thành phố `SG`, 3 km, 09:00.
+Với `POST /api/quotes` dịch vụ `parcel`, phân vùng tham số `parcelWeightKg` theo R-PARCEL-01, R-PARCEL-02 và R-PARCEL-03 (đầu vào **và** đầu ra phụ phí), rồi chọn bộ test case Each Choice nhỏ nhất kết hợp với loại xe (`bike`, `car`). Giữ thành phố `SG`, 3 km, 09:00.
 
 <details><summary><b>Lời giải mẫu</b></summary><ul><li><b>Phân vùng đầu vào</b> (theo giá trị sau làm tròn 0,1 kg): W1 ≤ 0 — không hợp lệ, <code>WEIGHT_OUT_OF_RANGE</code>; W2 (0; 20] — hợp lệ với cả hai loại xe; W3 (20; 30] — hợp lệ chỉ với ô tô; W4 &gt; 30 — không hợp lệ; W5 không phải số — 400 <code>VALIDATION_ERROR</code>.</li><li><b>Phân vùng đầu ra phụ phí:</b> S1 w ≤ 5 ⇒ 0 đ; S2 w &gt; 5 ⇒ 2.000 × ⌈w − 5⌉. S1 nằm trong W2, S2 cắt cả W2 và W3.</li><li><b>Tổ hợp bị cấm:</b> W3 × <code>bike</code> ⇒ <code>VEHICLE_TOO_SMALL</code> — một phân vùng không hợp lệ <i>của tổ hợp</i>, cần một ca riêng.</li><li><b>Bộ ca</b> (6): <code>bike</code> 3 kg (W2, S1); <code>car</code> 25 kg (W3, S2 ⇒ 40.000 đ phụ phí); <code>bike</code> 25 kg (W3 × bike ⇒ 422); <code>car</code> −1 kg (W1); <code>car</code> 40 kg (W4); <code>car</code> <code>"5"</code> (W5).</li></ul></details>
 
@@ -399,7 +399,7 @@ Xếp các giá trị `cityCode` sau vào C1, C2, C3 theo **cài đặt hiện t
 
 <details><summary><b>Đáp án: b</b></summary><ul><li>a) Sai — EP không giả định gì về xác suất lỗi.</li><li>b) Đúng — mục 4.2.1.</li><li>c) Sai — đó là lập luận của BVA.</li><li>d) Sai — Each Choice không xét tổ hợp; tổ hợp là việc của combinatorial testing.</li></ul></details>
 
-**Câu 2 (K3).** Mô hình có 10 phân vùng như mục 4.2. Bộ ca gồm: `SG`/`bike`/7,4 km (hợp lệ); `SG`/`bike`/0,2 km; `SG`/`bike`/`"abc"`. Với ca lỗi chỉ tính phân vùng không hợp lệ của nó. EP coverage là bao nhiêu?
+**Câu 2 (K3).** Mô hình có 10 phân vùng như mục 4.2. Bộ test case gồm: `SG`/`bike`/7,4 km (hợp lệ); `SG`/`bike`/0,2 km; `SG`/`bike`/`"abc"`. Với test case lỗi chỉ tính phân vùng không hợp lệ của nó. EP coverage là bao nhiêu?
 
 - a) 30%
 - b) 50%
@@ -408,7 +408,7 @@ Xếp các giá trị `cityCode` sau vào C1, C2, C3 theo **cài đặt hiện t
 
 <details><summary><b>Đáp án: b</b></summary><ul><li>Ca 1 chạm D2, C1, V1; ca 2 chạm D1; ca 3 chạm D4 ⇒ 5/10 = 50%.</li><li>a) Sai — bỏ sót C1, V1 của ca hợp lệ. c) Sai — tính thêm cho ca lỗi. d) Sai — thiếu D3, C2, C3, V2, V3.</li></ul></details>
 
-**Câu 3 (K3).** Test item có ba tham số: A có 3 phân vùng hợp lệ và 1 không hợp lệ; B có 2 hợp lệ và 2 không hợp lệ; C có 2 hợp lệ, không có phân vùng không hợp lệ. Mỗi phân vùng không hợp lệ được kiểm riêng. Số ca tối thiểu để đạt 100% Each Choice?
+**Câu 3 (K3).** Test item có ba tham số: A có 3 phân vùng hợp lệ và 1 không hợp lệ; B có 2 hợp lệ và 2 không hợp lệ; C có 2 hợp lệ, không có phân vùng không hợp lệ. Mỗi phân vùng không hợp lệ được kiểm riêng. Số test case tối thiểu để đạt 100% Each Choice?
 
 - a) 4
 - b) 6
@@ -417,7 +417,7 @@ Xếp các giá trị `cityCode` sau vào C1, C2, C3 theo **cài đặt hiện t
 
 <details><summary><b>Đáp án: b</b></summary><ul><li>Ca hợp lệ: bằng số phân vùng hợp lệ của tập lớn nhất = 3. Ca không hợp lệ: 1 + 2 = 3. Tổng 6.</li><li>a) Sai — gộp phân vùng không hợp lệ (masking). c) Sai — không ghép phân vùng hợp lệ. d) Sai — 3 × 2 × 2 là mọi tổ hợp.</li></ul></details>
 
-**Câu 4 (K2).** Ca kiểm gửi `cityCode = "DL"` và `distanceKm = 0.2` cùng lúc, nhận `CITY_NOT_SUPPORTED`. Nhận định nào đúng?
+**Câu 4 (K2).** Test case gửi `cityCode = "DL"` và `distanceKm = 0.2` cùng lúc, nhận `CITY_NOT_SUPPORTED`. Nhận định nào đúng?
 
 - a) Ca phủ cả phân vùng thành phố không hỗ trợ lẫn quãng đường quá ngắn
 - b) Ca chỉ thật sự kiểm phân vùng thành phố; việc xử lý quãng đường 0,2 km bị che (defect masking)

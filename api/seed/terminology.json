@@ -126,6 +126,18 @@
       ]
     },
     {
+      "id": "injected-clock",
+      "use": "đồng hồ được inject",
+      "english": "injected clock",
+      "glossary": true,
+      "definition": "Nguồn thời gian được truyền vào mã nghiệp vụ từ bên ngoài (dependency injection) thay vì gọi trực tiếp giờ hệ thống, để test có thể cố định thời điểm.",
+      "note": "\"tiêm vào\" là dịch từng chữ của inject",
+      "avoid": [
+        { "text": "đồng hồ tiêm vào", "severity": "medium" },
+        { "text": "đồng hồ được tiêm", "severity": "medium" }
+      ]
+    },
+    {
       "id": "version",
       "use": "phiên bản",
       "english": "version",

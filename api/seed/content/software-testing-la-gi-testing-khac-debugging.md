@@ -29,7 +29,7 @@ Một khách đặt xe máy 7,4 km lúc 11:30, trời mưa, nhập mã GIAM20. �
 
 ## 1. Giới thiệu
 
-Hỏi mười người mới vào nghề «kiểm thử là gì», phần lớn sẽ trả lời: *mở ứng dụng ra, bấm thử, thấy lỗi thì báo*. Câu trả lời đó không sai, nhưng chỉ đúng một phần nhỏ. Nó bỏ sót ba điều:
+Hỏi mười người mới vào nghề «kiểm thử là gì», phần lớn sẽ trả lời: *mở ứng dụng ra, bấm thử, thấy lỗi thì báo*. Câu trả lời đó không sai, nhưng chỉ đúng một phần nhỏ. Cách hiểu đó bỏ sót ba điều:
 
 - Kiểm thử bắt đầu **trước khi có code chạy được** — đọc đặc tả cước và thấy công thức mâu thuẫn cũng là kiểm thử.
 - Kiểm thử không chỉ để **tìm lỗi**; nó còn cung cấp thông tin để người khác ra quyết định (có phát hành bản cập nhật bảng giá hay chưa).
@@ -308,7 +308,7 @@ SHOW_RED=1 npx vitest run articles/software-testing-la-gi-testing-khac-debugging
       Tests  2 failed | 9 passed (11)
 ```
 
-(Rút gọn từ lần chạy thật trên vitest 3.2.7, Node 22; 9 ca đạt gồm 2 ca của `testing.test.ts` và 7 ca của `debugging.test.ts`.)
+(Rút gọn từ lần chạy thật trên vitest 3.2.7, Node 22; 9 test case đạt gồm 2 test case của `testing.test.ts` và 7 test case của `debugging.test.ts`.)
 
 Đến đây việc của testing **đã xong**: có failure, có bằng chứng, có căn cứ. Tester ghi báo cáo:
 
@@ -386,11 +386,11 @@ npx vitest run articles/software-testing-la-gi-testing-khac-debugging --reporter
 
 ### 5.5. Vì sao lần chạy mặc định xanh
 
-Hai ca TC-FARE-01, TC-FARE-02 trên bản có lỗi được đánh dấu `it.fails` — vitest coi chúng **đạt khi test bên trong thất bại**. Đó là cách ghi lại «failure đã biết, đã báo cáo» để `npm test` của cả lab không đỏ vĩnh viễn vì một bản chép cố ý có lỗi. Biến `SHOW_RED=1` bỏ cơ chế này để bạn nhìn thấy failure gốc. Trong dự án thật, đừng lạm dụng `it.fails`: một failure đã biết nên có defect report mở, không nên bị «chôn» thành màu xanh.
+Hai test case TC-FARE-01, TC-FARE-02 trên bản có lỗi được đánh dấu `it.fails` — vitest coi chúng **đạt khi test bên trong thất bại**. Đó là cách ghi lại «failure đã biết, đã báo cáo» để `npm test` của cả lab không đỏ vĩnh viễn vì một bản chép cố ý có lỗi. Biến `SHOW_RED=1` bỏ cơ chế này để bạn nhìn thấy failure gốc. Trong dự án thật, đừng lạm dụng `it.fails`: một failure đã biết nên có defect report mở, không nên bị «chôn» thành màu xanh.
 
 ## 6. Góc nhìn nâng cao
 
-**Test đạt không có nghĩa là không có defect.** TC-FARE-03 và TC-FARE-04 đạt **ngay trên bản có lỗi**: defect chỉ lộ ra khi tổng có phần lẻ. Nếu bộ test chỉ có hai ca này, bản lỗi đã lên production với bộ test xanh. Đây là nguyên lý đầu tiên trong [Bảy nguyên lý kiểm thử](/articles/bay-nguyen-ly-kiem-thu); vì sao một defect có lúc gây failure, có lúc không, xem [Error, Defect, Failure và Root Cause](/articles/error-defect-failure-root-cause).
+**Test đạt không có nghĩa là không có defect.** TC-FARE-03 và TC-FARE-04 đạt **ngay trên bản có lỗi**: defect chỉ lộ ra khi tổng có phần lẻ. Nếu bộ test chỉ có hai test case này, bản lỗi đã lên production với bộ test xanh. Đây là nguyên lý đầu tiên trong [Bảy nguyên lý kiểm thử](/articles/bay-nguyen-ly-kiem-thu); vì sao một defect có lúc gây failure, có lúc không, xem [Error, Defect, Failure và Root Cause](/articles/error-defect-failure-root-cause).
 
 **Oracle phải độc lập với code.** Sai lầm hay gặp: chạy code một lần, chép kết quả làm «mong đợi». Làm vậy thì bản có lỗi sẽ cho ra 51.000 và test khẳng định 51.000 là đúng — bộ test trở thành ảnh chụp của defect. Kết quả mong đợi trong bài đều tính tay từ SPEC.
 
@@ -398,7 +398,7 @@ Hai ca TC-FARE-01, TC-FARE-02 trên bản có lỗi được đánh dấu `it.fa
 
 **Debugging có thể dùng test làm công cụ.** Hai test «tái hiện» và «chẩn đoán» trong `debugging.test.ts` là code test, nhưng **mục đích** của chúng là debugging: tìm defect, không phải đánh giá chất lượng. Thước đo để phân loại là mục đích, không phải công cụ.
 
-**Confirmation test không thay regression test.** Một bản sửa có thể đúng cho TC-FARE-01 nhưng làm hỏng chỗ khác — ví dụ developer «sửa» bằng cách cộng 999 rồi làm tròn xuống: TC-FARE-01 đạt, nhưng tổng 52.000,5 đ (giá trị trung gian lẻ dưới 1 đồng) bị đẩy sai. Chỉ chạy lại đúng ca vừa lỗi là không đủ.
+**Confirmation test không thay regression test.** Một bản sửa có thể đúng cho TC-FARE-01 nhưng làm hỏng chỗ khác — ví dụ developer «sửa» bằng cách cộng 999 rồi làm tròn xuống: TC-FARE-01 đạt, nhưng tổng 52.000,5 đ (giá trị trung gian lẻ dưới 1 đồng) bị làm tròn sai. Chỉ chạy lại đúng test case vừa lỗi là không đủ.
 
 **Chỉ dẫn sửa lỗi trong defect report là con dao hai lưỡi.** Gợi ý vị trí khả nghi giúp developer nhanh hơn, nhưng nếu tester ghi «sửa thành `Math.round`» thì 51.700 sẽ đúng mà 51.200 vẫn sai. Mô tả hành vi mong đợi theo đặc tả bền hơn mô tả cách sửa.
 
@@ -414,7 +414,7 @@ Hai ca TC-FARE-01, TC-FARE-02 trên bản có lỗi được đánh dấu `it.fa
 <summary><b>Lời giải gợi ý</b></summary>
 <p><b>Tester (testing):</b> (1) xác định oracle từ R-FARE-09; (2) chạy báo giá với đúng đầu vào, ghi lại 51.000 đ; (3) thử thêm đầu vào để mô tả phạm vi lỗi (3 km ra 25.000 đ, ô tô 10 km vẫn đúng); (4) viết defect report với căn cứ, bước tái hiện, mong đợi, thực tế.</p>
 <p><b>Developer (debugging):</b> (5) tái hiện bằng đúng đầu vào; (6) chẩn đoán bằng bảng chi tiết cước, khoanh vùng hàm làm tròn; (7) sửa <code>Math.floor</code> thành <code>Math.ceil</code>.</p>
-<p><b>Tester (testing):</b> (8) confirmation test — chạy lại TC-FARE-01 trên bản mới; (9) regression test — các ca cước khác và bộ test hiện có; (10) đóng phiếu nếu đạt, mở lại nếu không.</p>
+<p><b>Tester (testing):</b> (8) confirmation test — chạy lại TC-FARE-01 trên bản mới; (9) regression test — các test case cước khác và bộ test hiện có; (10) đóng phiếu nếu đạt, mở lại nếu không.</p>
 </details>
 
 **Bài 2.** Xếp mỗi việc sau vào *kiểm thử động*, *kiểm thử tĩnh* hoặc *debugging*: (a) đọc SPEC và phát hiện R-FARE-05 không nói phụ phí trời mưa có bị nhân hệ số cao điểm không; (b) đặt breakpoint trong `calculateFare`; (c) gọi `POST /api/quotes` với 100,05 km và kiểm lỗi `DISTANCE_OUT_OF_RANGE`; (d) chạy công cụ phân tích code báo một biến không dùng; (e) thêm `console.log` in từng bước trung gian; (f) chạy lại toàn bộ test cước sau khi sửa.
@@ -462,7 +462,7 @@ Hai ca TC-FARE-01, TC-FARE-02 trên bản có lỗi được đánh dấu `it.fa
 - a) Tester ghi lại đầu vào, kết quả mong đợi và thực tế vào defect report
 - b) Tester chạy thêm ô tô 2 km để xem lỗi có lặp lại không
 - c) Developer in giá trị từng bước trung gian để tìm bước tính sai
-- d) Tester chạy lại ca 2,3 km sau khi có bản build mới
+- d) Tester chạy lại test case 2,3 km sau khi có bản build mới
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
@@ -481,7 +481,7 @@ Hai ca TC-FARE-01, TC-FARE-02 trên bản có lỗi được đánh dấu `it.fa
 <p><b>b.</b> Theo mục 1.1.2, khi kiểm thử tĩnh tìm ra defect thì không cần tái hiện hay chẩn đoán. a và d áp dụng cho failure từ kiểm thử động. c sai vì review là kiểm thử tĩnh.</p>
 </details>
 
-**Câu 5 (K2).** Sau khi developer sửa lỗi làm tròn, tester (A) chạy lại đúng ca 7,4 km từng thất bại, rồi (B) chạy toàn bộ bộ test báo giá. A và B lần lượt là gì?
+**Câu 5 (K2).** Sau khi developer sửa lỗi làm tròn, tester (A) chạy lại đúng test case 7,4 km từng thất bại, rồi (B) chạy toàn bộ bộ test báo giá. A và B lần lượt là gì?
 
 - a) A: regression testing; B: confirmation testing
 - b) A: debugging; B: regression testing
@@ -490,7 +490,7 @@ Hai ca TC-FARE-01, TC-FARE-02 trên bản có lỗi được đánh dấu `it.fa
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>c.</b> Chạy lại ca từng thất bại để xem bản sửa có giải quyết vấn đề là confirmation testing; chạy các phần khác để xem bản sửa có làm hỏng gì là regression testing. Cả hai là kiểm thử, không phải debugging (loại b, d). a đảo ngược hai khái niệm.</p>
+<p><b>c.</b> Chạy lại test case từng thất bại để xem bản sửa có giải quyết vấn đề là confirmation testing; chạy các phần khác để xem bản sửa có làm hỏng gì là regression testing. Cả hai là kiểm thử, không phải debugging (loại b, d). a đảo ngược hai khái niệm.</p>
 </details>
 
 **Câu 6 (K1).** Hai ngày trước khi áp bảng giá mới, trưởng sản phẩm Tới Nơi hỏi đội kiểm thử: «Còn rủi ro gì nếu phát hành thứ Hai?». Đội kiểm thử đang phục vụ mục tiêu nào rõ nhất?

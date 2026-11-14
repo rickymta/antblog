@@ -1,0 +1,14 @@
+{"file":"defect-based-testing.md","edits":[
+{"old":"viết test nhắm đúng cách loại lỗi đó từng xảy ra","new":"viết test nhắm đúng cách mà loại lỗi đó từng xảy ra","reason":"Câu thiếu quan hệ từ, dễ hiểu lầm 'đúng cách'","severity":"medium"},
+{"old":"Vấn đề nó giải quyết:","new":"Vấn đề mà kỹ thuật này giải quyết:","reason":"Trật tự từ kiểu tiếng Anh, 'nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"suy ra **ca kiểm** và **oracle**","new":"suy ra **test case** và **oracle**","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"nó tách một cụm «trạng thái» thành hai mô hình lỗi","new":"trục này tách một cụm «trạng thái» thành hai mô hình lỗi","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"low"},
+{"old":"với voucher hiệu lực đúng một ngày, ca «ngoài» là","new":"với voucher hiệu lực đúng một ngày, test case «ngoài» là","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Ca kiểm không dựa vào múi giờ máy","new":"Test case không dựa vào múi giờ máy","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"hoặc nó tốt, hoặc test chưa chạm tới nó","new":"hoặc Payment tốt, hoặc test chưa chạm tới Payment","reason":"Tránh đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"(một ca tái hiện) thay vì cho","new":"(một test case tái hiện) thay vì cho","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Bộ ca nào nhắm đúng mô hình lỗi này nhất?","new":"Bộ test case nào nhắm đúng mô hình lỗi này nhất?","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"a) Một ca lúc 12:00 giờ VN chạy trên máy dev","new":"a) Một test case lúc 12:00 giờ VN chạy trên máy dev","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"c) Một ca với giờ ngẫu nhiên","new":"c) Một test case với giờ ngẫu nhiên","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"d) Sai — tests wear out; chạy lại không thêm khả năng phát hiện.","new":"d) Sai — test lặp lại mãi sẽ mòn; chạy lại không thêm khả năng phát hiện.","reason":"Tiếng Anh lọt vào văn xuôi ('tests wear out')","severity":"medium"}
+]}

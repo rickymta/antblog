@@ -102,7 +102,7 @@ Ba cặp hay nhầm:
 | toàn chuỗi | đổi một yêu cầu thì **ảnh hưởng** những test nào; phục vụ **audit** và tiêu chí quản trị CNTT |
 | trạng thái theo yêu cầu | báo cáo tiến độ và báo cáo kết thúc **dễ hiểu** với stakeholder không chuyên kỹ thuật |
 
-Tóm lại, truy vết cho thông tin để đánh giá chất lượng sản phẩm, năng lực quy trình và tiến độ dự án so với mục tiêu kinh doanh. Truy vết phải **hai chiều**: xuôi (yêu cầu → test, «đã phủ chưa?») và ngược (test/defect → yêu cầu, «cái đỏ này thuộc về đâu?»).
+Tóm lại, truy vết cung cấp thông tin để đánh giá chất lượng sản phẩm, năng lực quy trình và tiến độ dự án so với mục tiêu kinh doanh. Truy vết phải **hai chiều**: xuôi (yêu cầu → test, «đã phủ chưa?») và ngược (test/defect → yêu cầu, «cái đỏ này thuộc về đâu?»).
 
 ### 2.3. Thuật ngữ Anh – Việt
 
@@ -122,7 +122,7 @@ Tóm lại, truy vết cho thông tin để đánh giá chất lượng sản ph
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB</span>
-<p>«Ma trận truy vết yêu cầu» (RTM — Requirements Traceability Matrix), mẫu test case trong công cụ quản lý test, quy ước mã kiểu <code>TC-PARCEL-002</code> và việc kiểm truy vết bằng một test tự động (mục 5.5) là thực hành ngành. CTFL chỉ yêu cầu truy vết được duy trì; hình thức là lựa chọn của đội. Mẫu tài liệu chi tiết có trong ISO/IEC/IEEE 29119-3.</p>
+<p>«Ma trận truy vết yêu cầu» (RTM — Requirements Traceability Matrix), mẫu test case trong công cụ quản lý test, quy ước mã kiểu <code>TC-PARCEL-002</code> và việc kiểm tra truy vết bằng một test tự động (mục 5.5) là thực hành ngành. CTFL chỉ yêu cầu truy vết được duy trì; hình thức là lựa chọn của đội. Mẫu tài liệu chi tiết có trong ISO/IEC/IEEE 29119-3.</p>
 </div>
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
@@ -205,7 +205,7 @@ Kiến trúc đích: Customer App → API Gateway/Customer BFF → **Pricing & Q
 
 ## 5. Thực hành
 
-Mọi tệp chạy được nằm trong lab: [`articles/testware-san-pham-kiem-thu`](https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/testware-san-pham-kiem-thu). Để có một defect thật mà **không sửa `src/`**, thư mục bài có `buggy-parcel.ts` — một bản cài đặt hàm phụ phí cố ý sai, đóng vai «bản dựng rc» mà developer gửi sang test.
+Mọi tệp chạy được nằm trong lab: [`articles/testware-san-pham-kiem-thu`](https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/testware-san-pham-kiem-thu). Để có một defect thật mà **không sửa `src/`**, thư mục bài có `buggy-parcel.ts` — một bản cài đặt hàm phụ phí cố ý sai, đóng vai «build rc» mà developer gửi sang test.
 
 ### 5.1. Trích test plan (test planning)
 
@@ -216,7 +216,7 @@ Mọi tệp chạy được nằm trong lab: [`articles/testware-san-pham-kiem-t
 | Test basis | SPEC v1.1, nhóm R-PARCEL, R-FARE-03; `pricingVersion = fare-2026.1` |
 | Risk register | RR-1 thu thừa ở biên kg — khả năng TB, tác động Cao, giảm bằng TC-PARCEL-002…004 · RR-2 sai cao điểm — khả năng Thấp, tác động Cao, giảm bằng TC-PARCEL-005 |
 | Cách tiếp cận | component test tự động trên hàm miền (developer + QA), một test qua API (QA Engineer); dữ liệu biên tách khỏi script |
-| Entry criteria | bản dựng chạy được, `npm run typecheck` sạch, SPEC đã chốt |
+| Entry criteria | build chạy được, `npm run typecheck` sạch, SPEC đã chốt |
 | Exit criteria | 100% test condition ưu tiên Cao có test case đạt; không còn defect mức nghiêm trọng Cao đang mở |
 
 ### 5.2. Test case mẫu (test design)
@@ -281,7 +281,7 @@ npx vitest run articles/testware-san-pham-kiem-thu
       Tests  13 passed (13)
 ```
 
-Chạy cùng script trên «bản dựng rc» (bản lỗi):
+Chạy cùng script trên «build rc» (bản lỗi):
 
 ```bash
 TOINOI_PARCEL_IMPL=buggy npx vitest run articles/testware-san-pham-kiem-thu/parcel-surcharge.test.ts
@@ -308,7 +308,7 @@ TOINOI_PARCEL_IMPL=buggy npx vitest run articles/testware-san-pham-kiem-thu/parc
 | Mã | DEF-0042 |
 | Tiêu đề | Phụ phí bưu kiện thừa 2.000 đ khi khối lượng là số kg nguyên trên 5 kg (6,0 kg ⇒ 4.000 đ) |
 | Ngày · tổ chức · người báo | 05/11/2026 · squad Pricing & Promotion · Lan (QA Engineer, giả định) |
-| Test object · môi trường | hàm phụ phí bưu kiện, bản dựng rc (`buggy-parcel.ts`); lab toi-noi-testing, Node 22, vitest 3.2.7, kho bộ nhớ, `pricingVersion = fare-2026.1`, đồng hồ cố định 09:00 giờ VN |
+| Test object · môi trường | hàm phụ phí bưu kiện, build rc (`buggy-parcel.ts`); lab toi-noi-testing, Node 22, vitest 3.2.7, kho bộ nhớ, `pricingVersion = fare-2026.1`, đồng hồ cố định 09:00 giờ VN |
 | Ngữ cảnh | test execution chu kỳ 1; TC-PARCEL-002 với TD-04 (cũng đỏ: TC-PARCEL-003/TD-06, TC-PARCEL-004/TD-08); dữ liệu giá trị biên |
 | Bước tái hiện | 1) Ở thư mục lab, đặt `TOINOI_PARCEL_IMPL=buggy`. 2) Chạy `npx vitest run articles/testware-san-pham-kiem-thu/parcel-surcharge.test.ts`. 3) Xem kết quả dòng TD-04. |
 | Kết quả mong đợi | 6,0 kg ⇒ phụ phí 2.000 đ, tổng 28.000 đ (R-PARCEL-03: «6,0 ⇒ 2.000 đ») |
@@ -318,7 +318,7 @@ TOINOI_PARCEL_IMPL=buggy npx vitest run articles/testware-san-pham-kiem-thu/parc
 | Trạng thái | Open |
 | Tham chiếu | R-PARCEL-03 · TCOND-PARCEL-03c · TC-PARCEL-002/003/004 · TD-PARCEL-01 · test log mục 5.4 |
 
-Tiêu đề nói **triệu chứng và điều kiện**, không đoán nguyên nhân. Phần «chỉ sai ở khối lượng nguyên» là quan sát giúp developer khoanh vùng nhanh — chuỗi error → defect → failure của chính lỗi này (đếm «kg bắt đầu» bằng `floor(w − 5) + 1`) là đề tài của [TEST-004](/articles/error-defect-failure-root-cause). Sau khi sửa, trạng thái chuyển sang chờ **confirmation testing**: chạy lại đúng TD-04, TD-06, TD-08, rồi chạy lại cả bộ để kiểm hồi quy.
+Tiêu đề nói **triệu chứng và điều kiện**, không đoán nguyên nhân. Phần «chỉ sai ở khối lượng nguyên» là quan sát giúp developer khoanh vùng nhanh — chuỗi error → defect → failure của chính lỗi này (đếm «kg bắt đầu» bằng `floor(w − 5) + 1`) là đề tài của [TEST-004](/articles/error-defect-failure-root-cause). Sau khi sửa, trạng thái chuyển sang chờ **confirmation testing**: chạy lại đúng TD-04, TD-06, TD-08, rồi chạy lại cả bộ để kiểm tra regression.
 
 ### 5.6. Ma trận truy vết, tiến độ và kết thúc
 
@@ -331,7 +331,7 @@ Tệp `traceability.test.ts` đọc `SPEC.md`, lấy mọi mã `R-PARCEL-xx` và
 | R-PARCEL-03 | TC-PARCEL-001, 002, 003, 004 | đỏ — DEF-0042 |
 | R-PARCEL-04 | TC-PARCEL-005 | đạt |
 
-Đọc ma trận theo chiều rủi ro: RR-1 (thu thừa ở biên kg) **chưa giảm** vì DEF-0042 còn mở; RR-2 (cao điểm) đã có bằng chứng đạt. Đó là thông tin cho **test progress report**: «4/4 yêu cầu có test, 7/10 dòng dữ liệu đạt, 1 defect Cao chặn phát hành». Khi DEF-0042 đóng và cả bộ xanh, **test completion report** ghi kết quả cuối, lưu bộ TD-PARCEL-01 và script để dùng lại ở đợt sau, và một lessons learned: «thêm khối lượng nguyên vào mọi bộ dữ liệu phụ phí theo đơn vị».
+Đọc ma trận theo chiều rủi ro: RR-1 (thu thừa ở biên kg) **chưa giảm** vì DEF-0042 còn mở; RR-2 (cao điểm) đã có bằng chứng đạt. Đó là thông tin cho **test progress report**: «4/4 yêu cầu có test, 7/10 dòng dữ liệu đạt, 1 defect Cao chặn phát hành». Khi DEF-0042 đóng và cả bộ xanh, **test completion report** ghi kết quả cuối, lưu bộ TD-PARCEL-01 và script để dùng lại ở đợt sau, và ghi thêm một lessons learned: «thêm khối lượng nguyên vào mọi bộ dữ liệu phụ phí theo đơn vị».
 
 ## 6. Góc nhìn nâng cao
 

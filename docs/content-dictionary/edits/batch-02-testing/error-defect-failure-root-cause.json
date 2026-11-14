@@ -1,0 +1,14 @@
+{"file":"error-defect-failure-root-cause.md","edits":[
+{"old":"khách huỷ chuyến sau khi họ đã chạy được hai phút mà họ không nhận được đồng phí bù nào","new":"khách huỷ chuyến sau khi tài xế đã chạy được hai phút, vậy mà tài xế không nhận được đồng phí bù nào","reason":"Hai đại từ 'họ' mơ hồ, câu dính liền khó đọc","severity":"medium"},
+{"old":"đó là kiểu biện pháp chặn ở tầng root cause","new":"đó là biện pháp chặn ở tầng root cause","reason":"Cụm 'kiểu biện pháp' gượng","severity":"low"},
+{"old":"đọc code, kiểm cả môi trường","new":"đọc code, kiểm tra cả môi trường","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"Nếu ca test TC-02 viết kỳ vọng","new":"Nếu test case TC-02 viết kỳ vọng","reason":"Thống nhất 'test case'; 'ca test' là cụm tự ghép","severity":"medium"},
+{"old":"Nhiều trường hợp ranh giới «môi trường hay defect thiết kế» không rõ","new":"Trong nhiều trường hợp, ranh giới giữa «môi trường» và «defect thiết kế» không rõ","reason":"Câu thiếu quan hệ từ, trật tự gượng","severity":"medium"},
+{"old":"Ca test viết sai kỳ vọng ở mốc 2:00","new":"Test case viết sai kỳ vọng ở mốc 2:00","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"thêm ca test ở mốc 2:00","new":"thêm test case ở mốc 2:00","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Code + ca test |","new":"Code + test case |","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Ca test kỳ vọng cước 7,4 km","new":"Test case kỳ vọng cước 7,4 km","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Ca test của Tới Nơi kỳ vọng phí 0 đ","new":"Test case của Tới Nơi kỳ vọng phí 0 đ","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"và ca test đỏ. Đặc tả","new":"và test case đỏ. Đặc tả","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"defect nằm trong ca test, hệ thống đúng","new":"defect nằm trong test case, hệ thống đúng","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

@@ -42,7 +42,7 @@ Phân loại dưới đây theo cách dùng phổ biến trong tài liệu *Mock
 
 Các tên nói về **vai trò trong test**, không nhất thiết là năm lớp khác nhau. `vi.fn()` có thể cung cấp phản hồi như stub, rồi được dùng để kiểm tương tác. Trong Vitest, ta thường assert sau khi chạy; bài gọi cách đó là “mock-style verification”, không đồng nhất tuyệt đối với mock có cơ chế khai báo kỳ vọng trước của mọi framework.
 
-**State verification** kiểm kết quả hoặc trạng thái: chuyến `completed`, thanh toán `failed`, số tiền fake đã thu. **Behavior verification** kiểm cộng tác: cổng được gọi với số tiền nào, khoá nào, bao nhiêu lần. Hai kiểu có thể cùng cần trong một ca.
+**State verification** kiểm kết quả hoặc trạng thái: chuyến `completed`, thanh toán `failed`, số tiền fake đã thu. **Behavior verification** kiểm cộng tác: cổng được gọi với số tiền nào, khoá nào, bao nhiêu lần. Hai kiểu có thể cùng cần trong một test case.
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
 
@@ -78,7 +78,7 @@ interface PaymentGateway {
 | TD-06 | Retry lỗi tạm thời | Stub theo thứ tự + bộ ghi lần gọi | Hai lần cùng khoá và số tiền |
 | TD-07 | Dừng khi declined | Stub + kiểm tương tác | Chỉ một lần gọi, outcome thất bại |
 
-TD-02 kiểm kết quả nghiệp vụ khi bị từ chối, TD-07 kiểm không retry. Hai ca trả lời hai câu hỏi khác nhau; không suy ra số lần gọi chỉ từ `paymentStatus` cuối.
+TD-02 kiểm kết quả nghiệp vụ khi bị từ chối, TD-07 kiểm không retry. Hai test case trả lời hai câu hỏi khác nhau; không suy ra số lần gọi chỉ từ `paymentStatus` cuối.
 
 Helper `ongoingTrip` tạo hệ thống bộ nhớ mới cho từng test, tạo báo giá, tạo chuyến, nhận chuyến rồi chạy `arrive`, `pickup`, `start`. Các use case và repository trong bộ nhớ đều chạy thật. Đây là test cộng tác trong tiến trình, không phải test HTTP hay unit cô lập mỗi hàm.
 
@@ -101,7 +101,7 @@ const dummy: PaymentGateway = {
 };
 ```
 
-Đối tượng này là dummy về vai trò, thêm guard để lời gọi ngoài dự kiến gây failure. Đừng dùng bản trả thành công âm thầm: nếu use case gọi nhầm ví rồi vẫn trả `cash`, test chỉ kiểm trạng thái có thể bỏ lọt tác dụng phụ.
+Đối tượng này là dummy về vai trò, có thêm guard để lời gọi ngoài dự kiến làm test thất bại. Đừng dùng bản trả thành công mà không báo gì: nếu use case gọi nhầm ví rồi vẫn trả `cash`, test chỉ kiểm trạng thái có thể bỏ lọt tác dụng phụ.
 
 ### 5.2. Stub đưa hệ thống vào tình huống khó
 
@@ -163,19 +163,19 @@ const charge = vi.fn<PaymentGateway['charge']>()
   .mockResolvedValue({ status: 'succeeded', chargeId: 'retry-ok' });
 ```
 
-Ca này cho thất bại ngay ở lần đầu và thành công ở lần sau, nên không chờ timeout. Nó kiểm phản ứng với lỗi tạm thời; bài kế tiếp dùng fake timers để kiểm đúng thời hạn 3 giây và tình huống đã thu tiền nhưng mất phản hồi.
+Test case này cho thất bại ngay ở lần đầu và thành công ở lần sau, nên không chờ timeout. Test case này kiểm phản ứng với lỗi tạm thời; bài kế tiếp dùng fake timers để kiểm đúng thời hạn 3 giây và tình huống đã thu tiền nhưng mất phản hồi.
 
 Kết quả kiểm chứng ngày 07/11/2026 với Vitest 3.2.7: **7 test đạt**. Không có HTTP, DB hay giao dịch ví thật trong lượt chạy.
 
 ## 6. Giới hạn, over-mocking và độ bền khi refactor
 
-**Đừng kiểm tên helper private.** Một test cố truy cập `collectPayment` bằng ép kiểu hoặc sửa export chỉ để gắn spy sẽ phụ thuộc cấu trúc `trips.ts`. Đổi tên helper hoặc gộp nó vào `driverStep` sẽ làm kiểu test đó hỏng dù hành vi không đổi. Các ca trong bài chỉ gọi use case công khai và kiểm port; đổi tên helper nội bộ không làm thay đổi những bằng chứng đó.
+**Đừng kiểm tên helper private.** Một test cố truy cập `collectPayment` bằng ép kiểu hoặc sửa export chỉ để gắn spy sẽ phụ thuộc cấu trúc `trips.ts`. Đổi tên helper hoặc gộp nó vào `driverStep` sẽ làm kiểu test đó hỏng dù hành vi không đổi. Các test case trong bài chỉ gọi use case công khai và kiểm port; đổi tên helper nội bộ không làm thay đổi những bằng chứng đó.
 
 **Số lần gọi có thể là hợp đồng.** “Không retry declined” cần assertion số lần gọi. Ngược lại, kiểm mọi lần repository đọc chuyến chỉ để tái hiện thứ tự mã hiện tại dễ trói test vào cách cài đặt. Hãy chỉ kiểm tương tác khi nó diễn đạt rủi ro hoặc yêu cầu cụ thể.
 
-**Fake có thể sai cùng giả định với ứng dụng.** Ví giả chỉ khử trùng lặp theo khoá; nó không kiểm đầy đủ trường hợp cùng khoá nhưng thay amount/customer, không có xác thực, lưu trữ bền vững hay mạng thật. Test với fake không chứng minh ví bên ngoài có cùng ngữ nghĩa. Cần contract/integration test cho adapter thật khi có môi trường phù hợp.
+**Fake có thể sai cùng giả định với ứng dụng.** Ví giả chỉ khử trùng lặp theo khoá; nó không kiểm đầy đủ trường hợp cùng khoá nhưng thay amount/customer, và cũng không có xác thực, lưu trữ bền vững hay mạng thật. Test với fake không chứng minh ví bên ngoài có cùng ngữ nghĩa. Cần contract/integration test cho adapter thật khi có môi trường phù hợp.
 
-**Reset lịch sử khác khôi phục cài đặt.** Xoá các lần gọi không nhất thiết đưa method đã thay implementation về trạng thái ban đầu. Trong bài, chọn tạo fake mới cho mỗi ca và khôi phục spy sau ca; đừng dùng một singleton ví giữa nhiều test rồi trông chờ thứ tự chạy.
+**Reset lịch sử khác khôi phục cài đặt.** Xoá các lần gọi không nhất thiết đưa method đã thay implementation về trạng thái ban đầu. Trong bài, chọn tạo fake mới cho mỗi test case và khôi phục spy sau mỗi test case; đừng dùng một singleton ví giữa nhiều test rồi trông cậy vào thứ tự chạy.
 
 **Không thay SUT bằng stub.** Nếu stub luôn trả `completed` ngay tại `driverStep`, bạn đã thay chính hành vi cần kiểm. Mục tiêu là điều khiển cộng tác viên ở port, giữ logic lập yêu cầu và xử lý kết quả chạy thật.
 

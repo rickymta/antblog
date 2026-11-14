@@ -1,6 +1,6 @@
 ---
 slug: metamorphic-testing
-title: "Metamorphic Testing: kiểm thuật toán cước khi không có oracle chính xác"
+title: "Metamorphic Testing: kiểm thử thuật toán tính cước khi không có oracle chính xác"
 summary: "Metamorphic testing theo CTAL-TA v4.0: rút metamorphic relation từ quy tắc cước Tới Nơi, sinh source/follow-up test bằng fast-check, đo MR nào bắt lỗi nào và nhận ra MR sai hoặc quá yếu."
 category: testing
 level: advanced
@@ -21,7 +21,7 @@ language: vi
 <tr><th scope="row">Test Type</th><td>Functional; Black-box</td></tr>
 <tr><th scope="row">Test Technique</th><td>Metamorphic Testing</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/random-testing">TEST-041 · Random Testing</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): định nghĩa và kiểm bằng fast-check ba MR của thuật toán cước — tăng quãng đường không làm giảm cước; trời mưa cộng đúng 8.000 đ trước voucher; giờ cao điểm không rẻ hơn giờ thường (R-FARE-03…05) — trên <code>src/domain/pricing.ts</code> và bốn bản lỗi — <code>examples/toi-noi-testing/articles/metamorphic-testing/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): định nghĩa và kiểm thử bằng fast-check ba MR của thuật toán cước — tăng quãng đường không làm giảm cước; trời mưa cộng đúng 8.000 đ trước voucher; giờ cao điểm không rẻ hơn giờ thường (R-FARE-03…05) — trên <code>src/domain/pricing.ts</code> và bốn bản lỗi — <code>examples/toi-noi-testing/articles/metamorphic-testing/</code></td></tr>
 <tr><th scope="row">Tham chiếu ISTQB</th><td>CTAL-TA v4.0 · Chương 3 · mục 3.3.2 · TA-3.3.2 (K3); liên quan mục 1.3.4 · TA-1.3.4 (K2) — test oracle problem</td></tr>
 </tbody>
 </table>
@@ -31,22 +31,22 @@ language: vi
 
 Mọi kỹ thuật thiết kế test đều giả định có **kết quả mong đợi**. Với cước Tới Nơi, SPEC cho một ví dụ tính tay (R-FARE-09: 52.000 đ); ngoài ví dụ đó, muốn biết cước của «ô tô 37,8 km, cao điểm, voucher 13% trần 21.000 đ» là bao nhiêu thì phải tính lại công thức — tức viết lại chính sản phẩm. Khi hệ thống đích chuyển sang hệ số khu vực động hoặc giá do mô hình học máy đề xuất (kiến trúc §4.3: hệ số khu vực, thời điểm, loại dịch vụ), ngay cả người viết đặc tả cũng không có con số đúng.
 
-**Metamorphic testing (MT)** né câu hỏi đó. Nó dùng **quan hệ giữa nhiều lần chạy**: tăng quãng đường thì cước không được giảm; bật mưa thì số tiền trước voucher phải tăng đúng 8.000 đ. Không cần biết cước đúng của lần nào, vẫn phát hiện được khi quan hệ bị phá.
+**Metamorphic testing (MT)** né câu hỏi đó. Kỹ thuật này dùng **quan hệ giữa nhiều lần chạy**: tăng quãng đường thì cước không được giảm; bật mưa thì số tiền trước voucher phải tăng đúng 8.000 đ. Không cần biết cước đúng của lần nào, vẫn phát hiện được khi quan hệ bị phá.
 
-Dùng khi: oracle chính xác đắt hoặc không có; test item tính toán phức tạp (giá, định tuyến, ETA, gợi ý); muốn nhân một ca tay thành hàng nghìn ca tự động.
+Dùng khi: oracle chính xác đắt hoặc không có; test item tính toán phức tạp (giá, định tuyến, ETA, gợi ý); muốn nhân một test case tính tay thành hàng nghìn test case tự động.
 
 ## 2. Lý thuyết theo ISTQB
 
 ### 2.1 Vị trí và định nghĩa
 
-CTAL-TA v4.0 xếp MT vào nhóm **rule-based test techniques** (mục 3.3) — kỹ thuật kiểm hành vi **không phụ thuộc trạng thái**, đặc tả bằng quy tắc (vd business rules) — cùng nhóm với [decision table testing](/articles/decision-table-testing). LO: **TA-3.3.2 (K3)** — áp dụng metamorphic testing.
+CTAL-TA v4.0 xếp MT vào nhóm **rule-based test techniques** (mục 3.3) — kỹ thuật kiểm thử hành vi **không phụ thuộc trạng thái**, đặc tả bằng quy tắc (vd business rules) — cùng nhóm với [decision table testing](/articles/decision-table-testing). LO: **TA-3.3.2 (K3)** — áp dụng metamorphic testing.
 
 Diễn đạt lại mục 3.3.2:
 
 - MT sinh test case **dựa trên một test case có sẵn**, gọi là **source test case**.
 - Một hoặc nhiều **follow-up test case** được tạo bằng cách biến đổi source theo một **metamorphic relation (MR)**.
 - MR mô tả một **tính chất** của test item: thay đổi ở đầu vào của test case phản ánh thế nào vào kết quả mong đợi.
-- Source và follow-up được ghép thành **một test procedure, đánh giá kết quả chung**: thoả MR ⇒ đạt; không thoả ⇒ thất bại. Khi thất bại, **debugging** phải xác định ca nào trong nhóm thực sự sai.
+- Source và follow-up được ghép thành **một test procedure, đánh giá kết quả chung**: thoả MR ⇒ đạt; không thoả ⇒ thất bại. Khi thất bại, **debugging** phải xác định test case nào trong nhóm thực sự sai.
 
 Syllabus minh hoạ bằng hàm tính trung bình: hoán vị dãy số thì trung bình không đổi; nhân mọi số với x thì trung bình nhân x. Có thể ghép hai MR (hoán vị rồi nhân 2) thành follow-up mới.
 
@@ -65,7 +65,7 @@ Ví dụ của syllabus cho trường hợp thứ hai: một chương trình AI 
 
 - Hiện **không có thước đo coverage được công nhận** cho MT làm exit criteria. Phủ mỗi MR một lần là **không đủ**, vì mỗi cặp chỉ kiểm được một phần kết quả mong đợi.
 - Vì vậy syllabus gợi ý **kết hợp MT với random testing**: sinh ngẫu nhiên nhiều source, và cả tham số biến đổi (hoán vị, hệ số) cho follow-up.
-- MT dùng được cho hầu hết test item, cả **functional** lẫn **non-functional** (vd sinh tải bằng follow-up, kiểm installability với các thứ tự tham số cài đặt khác nhau). Nó là kỹ thuật **được ưu tiên** cho hệ thống AI.
+- MT dùng được cho hầu hết test item, cả **functional** lẫn **non-functional** (vd sinh tải bằng follow-up, kiểm installability với các thứ tự tham số cài đặt khác nhau). MT là kỹ thuật **được ưu tiên** cho hệ thống AI.
 - Mục 5.2 của CTAL-TA còn nêu: mô hình rule-based như MR giúp tìm defect trong chính **business rules** — thiếu sót, mâu thuẫn, mơ hồ.
 
 ### 2.4 Thuật ngữ
@@ -176,7 +176,7 @@ Không có coverage cho MT ⇒ bài chốt: mỗi MR 2.000 cặp/seed trên bả
 <line x1="730" y1="212" x2="790" y2="182" class="s-muted" stroke-width="1.5" marker-end="url(#t042-arrow)"/>
 </svg>
 </div>
-<figcaption><b>Hình 1 · MR2 trên ca R-FARE-09.</b> Không cần biết 64.625 có đúng không; chỉ cần hai con số chênh đúng 8.000. Với source sinh ngẫu nhiên, cùng một quan hệ được kiểm trên hàng nghìn cặp.</figcaption>
+<figcaption><b>Hình 1 · MR2 trên test case R-FARE-09.</b> Không cần biết 64.625 có đúng không; chỉ cần hai con số chênh đúng 8.000. Với source sinh ngẫu nhiên, cùng một quan hệ được kiểm trên hàng nghìn cặp.</figcaption>
 </figure>
 
 ## 5. Thực hành
@@ -231,7 +231,7 @@ MT-02 · src (seed 42):
   MR4  cao điểm, voucher không trần ⇒ tiền giảm × 1,25  chạy 2000, bỏ qua 0
 ```
 
-**Mong đợi:** không MR nào đỏ. **Thực tế:** đạt cả 8.000 cặp. Cột «bỏ qua» là các cặp có một ca bị `VOUCHER_MIN_AMOUNT` — điều kiện áp dụng hoạt động đúng thay vì đếm nhầm thành đạt.
+**Mong đợi:** không MR nào đỏ. **Thực tế:** đạt cả 8.000 cặp. Cột «bỏ qua» là các cặp có một test case bị `VOUCHER_MIN_AMOUNT` — điều kiện áp dụng hoạt động đúng thay vì đếm nhầm thành đạt.
 
 ### 5.3 MT-03 — ma trận bản lỗi × MR
 
@@ -246,7 +246,7 @@ MT-03 · X = MR phát hiện (đỏ), · = MR vẫn thoả
 
 Đọc ma trận theo hai chiều:
 
-- **Theo hàng (lỗi):** B1 — lỗi «xanh 10.000 ca» ở TEST-041 — bị MR2 bắt. B2 chỉ bị MR1 bắt. B4 chỉ bị MR4 bắt: thiếu MR4 thì lỗi «voucher tính trên cước cơ bản» lọt cả oracle tính chất của TEST-041 lẫn ba MR mà curriculum yêu cầu.
+- **Theo hàng (lỗi):** B1 — lỗi «xanh 10.000 ca» ở TEST-041 — bị MR2 bắt. B2 chỉ bị MR1 bắt. B4 chỉ bị MR4 bắt: thiếu MR4 thì lỗi «voucher tính trên cước cơ bản» lọt cả oracle tính chất của TEST-041 lẫn ba MR mà chương trình học yêu cầu.
 - **Theo cột (MR):** MR3 **không giết lỗi nào** trong bốn. Không có nghĩa MR3 vô dụng — nó canh một rủi ro khác (hệ số cao điểm < 1 do cấu hình sai) — nhưng là dấu hiệu MR yếu với các lỗi thứ tự bước. Phân tích cho thấy với B2, MR3 **không thể** đỏ: ở cao điểm, cước xe máy ngắn nhất đã là 14.250 × 1,25 = 17.812,5 đ > 15.000 đ, nên nhánh lỗi của B2 không bao giờ chạy ở follow-up.
 - **B3 sống sót qua cả bốn MR.** Làm tròn «gần nhất» vẫn đơn điệu và không đụng `beforeDiscount`. Tính tay: xe máy 0,9 km, giờ thường ⇒ 12.000 + 4.050 = 16.050 đ ⇒ SPEC làm tròn lên 17.000 đ, B3 ra 16.000 đ. Oracle tính chất O4 của [TEST-041](/articles/random-testing) bắt được ngay — MT-07 chạy oracle đó trên cùng bốn bản lỗi:
 
@@ -265,7 +265,7 @@ MT-04 · thu nhỏ 9 bước: {"kind":"ride","cityCode":"SG","vehicle":"bike","d
   đối chiếu bản thật cho follow-up: trước giảm 25812.5, tổng 26000
 ```
 
-Syllabus nói khi MR thất bại, debugging phải tìm **ca nào** sai. Ở đây source khớp bản thật (17.812,5 đ — đúng ví dụ phần lẻ của R-FARE-10); follow-up sai: 10.000 = 8.000 × 1,25 — dấu vân tay của việc phụ phí trời mưa bị nhân hệ số cao điểm. Shrinking đưa về ca tối giản: không voucher, quãng đường nhỏ nhất.
+Syllabus nói khi MR thất bại, debugging phải tìm **test case nào** sai. Ở đây source khớp bản thật (17.812,5 đ — đúng ví dụ phần lẻ của R-FARE-10); follow-up sai: 10.000 = 8.000 × 1,25 — dấu vân tay của việc phụ phí trời mưa bị nhân hệ số cao điểm. Shrinking đưa về test case tối giản: không voucher, quãng đường nhỏ nhất.
 
 Báo cáo gốc khi MR1 thất bại trên B2 (`SHOW_RED=1`, 10.000 cặp):
 
@@ -276,7 +276,7 @@ Counterexample: [[{"meters":450,"c":{"peak":false,"raining":false,"voucher":{"co
 Shrunk 12 time(s)
 ```
 
-Kiểm tay: source 0,45 ⇒ 0,5 km, trước giảm 14.250 đ, giảm min(14% × 14.250; 2.000) = 1.995 đ; B2 lấy 15.000 − 1.995 = 13.005 ⇒ **14.000 đ**. Follow-up 0,55 ⇒ 0,6 km, 14.700 đ, giảm 2.000 đ (chạm trần) ⇒ 13.000 ⇒ **13.000 đ**. Đi xa hơn 100 m mà rẻ hơn 1.000 đ. Cả hai ca đều sai (bản thật ra 15.000 đ cho cả hai) — MR không chỉ ra ca nào, debugging mới làm được.
+Kiểm tay: source 0,45 ⇒ 0,5 km, trước giảm 14.250 đ, giảm min(14% × 14.250; 2.000) = 1.995 đ; B2 lấy 15.000 − 1.995 = 13.005 ⇒ **14.000 đ**. Follow-up 0,55 ⇒ 0,6 km, 14.700 đ, giảm 2.000 đ (chạm trần) ⇒ 13.000 ⇒ **13.000 đ**. Đi xa hơn 100 m mà rẻ hơn 1.000 đ. Cả hai test case đều sai (bản thật ra 15.000 đ cho cả hai) — MR không chỉ ra test case nào sai, debugging mới làm được.
 
 ### 5.5 MT-05 — MR sai và MR yếu
 
@@ -307,18 +307,18 @@ Cùng quan hệ «xa hơn thì không rẻ hơn», cùng 2.000 cặp mỗi seed.
 | Bắt B1 / B2 / B3 / B4 (MT-03, MT-07) | · / X / X / · | X / X / · / X | tuỳ hệ kia | X nếu chọn đúng ca |
 | Chi phí | thấp | thấp–vừa | cao | cao theo số ca |
 
-Không kỹ thuật nào bắt đủ bốn lỗi. Bộ test tốt cho lõi giá = vài ca tay có oracle (R-FARE-09) + oracle tính chất + bộ MR — mỗi lớp lấp lỗ của lớp kia.
+Không kỹ thuật nào bắt đủ bốn lỗi. Bộ test tốt cho lõi giá gồm vài test case tính tay có oracle (R-FARE-09), oracle tính chất và bộ MR — mỗi lớp lấp lỗ của lớp kia.
 
 **Trường hợp dễ bỏ sót.**
 
 - Quan sát nhầm điểm: MR ở `total` khi quy tắc phát biểu ở bước giữa (MR-sai).
 - Quên điều kiện áp dụng: cặp có một ca lỗi nghiệp vụ bị đếm là «đạt» hoặc «trượt».
-- Follow-up phụ thuộc trạng thái: tạo chuyến thật tiêu lượt voucher (R-VOUCHER-07) ⇒ follow-up chạy sau source khác điều kiện. MT hợp với test item không trạng thái — đúng vị trí «rule-based» của syllabus. Ở tầng API, dùng `POST /api/quotes` (báo giá không tiêu lượt).
+- Follow-up phụ thuộc trạng thái: tạo chuyến thật làm mất một lượt voucher (R-VOUCHER-07) ⇒ follow-up chạy sau source khác điều kiện. MT hợp với test item không trạng thái — đúng vị trí «rule-based» của syllabus. Ở tầng API, dùng `POST /api/quotes` (báo giá không làm mất lượt).
 - Hệ không tất định (cước động theo cung–cầu): source và follow-up phải chạy với **cùng** ảnh chụp điều kiện (cùng `pricingVersion`, cùng đồng hồ giả — kiến trúc §17.2), nếu không MR đỏ vì dữ liệu đổi giữa hai lần gọi.
 
 **Sai lầm thường gặp.**
 
-- Chỉ chạy mỗi MR một lần trên một ca — syllabus nói rõ là không đủ.
+- Chỉ chạy mỗi MR một lần trên một test case — syllabus nói rõ là không đủ.
 - Đánh giá MR chỉ trên code đúng: không biết MR có đủ mạnh không. Hãy giữ một bộ bản lỗi (hoặc dùng [mutation testing](/articles/mutation-testing)) để đo.
 - Coi MR thất bại là «code sai» ngay: MR có thể sai (MT-05). Kiểm tay phản ví dụ theo SPEC trước khi mở defect report.
 - Rút MR từ **code** thay vì từ **đặc tả**: MR khi đó lặp lại giả định của developer, mất tính hộp đen.

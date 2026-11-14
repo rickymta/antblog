@@ -1,0 +1,16 @@
+{"file":"system-integration-testing.md","edits":[
+{"old":"kiểm giao diện giữa Tới Nơi và hệ không do mình làm chủ","new":"kiểm thử giao diện giữa Tới Nơi và các hệ thống không do mình sở hữu","reason":"'làm chủ' gượng, 'hệ' cụt","severity":"medium"},
+{"old":"Nó giải quyết một khoảng trống mà các level khác để lại:","new":"SIT lấp một khoảng trống mà các level khác để lại:","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"Kiểm nó là việc của SIT. Ta gọi nó là **giả định A-1**.","new":"Kiểm thử giả định này là việc của SIT. Ta gọi đó là **giả định A-1**.","reason":"Tránh lặp 'nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Test level ≠ thứ tự thời gian: trong","new":"Test level không đồng nghĩa với thứ tự thời gian: trong","reason":"Ký hiệu ≠ trong văn xuôi gượng","severity":"medium"},
+{"old":"Kỹ thuật cụ thể với bên thứ ba được đi sâu ở bài TEST-077 (Series 07 · Integration Testing &amp; API Testing); hợp đồng API giữa các service ở TEST-074 và Series 11.","new":"Bài TEST-077 (Series 07 · Integration Testing &amp; API Testing) đi sâu vào kỹ thuật cụ thể với bên thứ ba; hợp đồng API giữa các service nằm ở TEST-074 và Series 11.","reason":"Bỏ câu bị động kiểu tiếng Anh","severity":"medium"},
+{"old":"Đây là kiến thức cấp Advanced, dùng ở bài như công cụ tư duy.","new":"Đây là kiến thức cấp Advanced, bài này chỉ mượn làm công cụ tư duy.","reason":"Câu cụt, 'dùng ở bài' gượng","severity":"medium"},
+{"old":"có 5 ca. Bốn ca đầu kiểm **phía Tới Nơi** của IP-1 và IP-4. Ca thứ năm là bộ kiểm","new":"có 5 test case. Bốn test case đầu kiểm **phía Tới Nơi** của IP-1 và IP-4. Test case thứ năm là bộ kiểm","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"— nó chỉ xác nhận bản giả mô phỏng đúng giả định.","new":"— lúc đó hàm chỉ xác nhận bản giả mô phỏng đúng giả định.","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"ghi ngay trong tên từng ca ở log dưới. Cước","new":"ghi ngay trong tên từng test case ở log dưới. Cước","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Hết giờ được rút từ 3 giây xuống 50 ms để test nhanh;","new":"Ta rút ngưỡng hết giờ từ 3 giây xuống 50 ms để test nhanh;","reason":"Câu thiếu danh từ chính, bị động","severity":"medium"},
+{"old":"Để chạy được ca lỗi, không làm cạn quota","new":"Để chạy được test case lỗi mà không làm cạn quota","reason":"Thống nhất 'test case'; câu rõ nghĩa hơn","severity":"medium"},
+{"old":"Sandbox có tính cách riêng.","new":"Sandbox có đặc điểm riêng.","reason":"'tính cách' là calque (personality)","severity":"medium"},
+{"old":"nó không cho biết đối tác có thật sự chống trùng","new":"hợp đồng không cho biết đối tác có thật sự chống trùng","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"SIT nên có ca «TinNhanh sập»","new":"SIT nên có test case «TinNhanh sập»","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

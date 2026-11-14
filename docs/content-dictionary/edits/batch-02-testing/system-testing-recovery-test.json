@@ -1,0 +1,14 @@
+{"file":"system-testing-recovery-test.md","edits":[
+{"old":"## 5. Thiết kế ca kiểm — lab A","new":"## 5. Thiết kế test case — lab A","reason":"'ca kiểm' là cụm tự ghép; thống nhất 'test case'","severity":"medium"},
+{"old":"Mỗi case trong lab A kiểm đồng thời:","new":"Mỗi test case trong lab A kiểm đồng thời:","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Mỗi case: reset seed, dựng","new":"Mỗi test case: reset seed, dựng","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"### 5.2. Bảng case","new":"### 5.2. Bảng test case","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Đây là case quan trọng nhất của bài","new":"Đây là test case quan trọng nhất của bài","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"**Bài 1 (cơ bản).** Thêm case:","new":"**Bài 1 (cơ bản).** Thêm test case:","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Nó khác với việc","new":"Recovery test khác với việc","reason":"Tránh 'Nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"phục vụ tính **tất định nghiệp vụ**","new":"giữ cho kết quả nghiệp vụ **tất định**","reason":"'phục vụ tính tất định nghiệp vụ' là cụm tự ghép, khó hiểu","severity":"medium"},
+{"old":"cổng mặc định 55484. Nó không dùng cluster","new":"cổng mặc định 55484. Script không dùng cluster","reason":"Tránh 'Nó' chỉ sự vật; nêu rõ chủ ngữ","severity":"medium"},
+{"old":"không phải \"count > 0\". Nó bắt được","new":"không phải \"count > 0\". Cách này bắt được","reason":"Tránh 'Nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Nó **không** phải RTO ứng dụng:","new":"Con số này **không** phải RTO ứng dụng:","reason":"Tránh 'Nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"cần chủ sở hữu và hạn xử lý","new":"cần người phụ trách và hạn xử lý","reason":"Calque 'owner'; style guide dùng 'người phụ trách'","severity":"medium"}
+]}

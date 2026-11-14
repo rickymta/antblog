@@ -1,9 +1,9 @@
 /**
- * `npm run content:apply -- <edits.json>... [--dry-run]`
+ * `npm run content:apply -- <edits.json | thư-mục>... [--dry-run]`
  * Áp các đề xuất sửa câu chữ vào `seed/content/*.md`. Mỗi tệp JSON là một `EditFile` ({ file, edits[] })
  * hoặc một mảng `EditFile`. Đoạn nào không qua chốt an toàn (seed/contentEdits.ts) bị từ chối và in lý do.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { applyEdits, type EditFile } from '../seed/contentEdits.js';
@@ -12,8 +12,16 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const contentDir = path.join(root, 'seed/content');
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
-const inputs = args.filter((a) => !a.startsWith('--'));
-if (inputs.length === 0) throw new Error('Cần ít nhất một tệp edits JSON.');
+// Mỗi đối số là một tệp JSON hoặc một thư mục (lấy mọi *.json bên trong — tránh giới hạn độ dài dòng lệnh trên Windows).
+const inputs = args
+  .filter((a) => !a.startsWith('--'))
+  .flatMap((a) => {
+    const p = path.resolve(a);
+    return statSync(p).isDirectory()
+      ? readdirSync(p).filter((f) => f.endsWith('.json')).sort().map((f) => path.join(p, f))
+      : [p];
+  });
+if (inputs.length === 0) throw new Error('Cần ít nhất một tệp edits JSON hoặc thư mục chứa chúng.');
 
 let applied = 0;
 let rejected = 0;

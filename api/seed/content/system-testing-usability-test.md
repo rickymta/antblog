@@ -8,7 +8,7 @@ tags: [testing, sys-12, usability-testing, user-research, accessibility, task-su
 language: vi
 ---
 
-API báo giá đúng 35.000 đ, nút «Đặt chuyến» chạy tốt trên Chrome và Edge, mọi bài functional đều xanh. Vậy mà một người mới mở trang có thể bấm «Báo giá» rồi ngồi chờ tài xế, vì tưởng đã gọi xe; hoặc thấy dòng báo lỗi đỏ mà không biết phải sửa ô nào. Script automation luôn bấm đúng nút theo kịch bản, nên nó không bao giờ gặp những nhầm lẫn đó. Bài này trả lời: **làm sao biết người dùng thật có tự hoàn thành được việc họ cần, và làm sao thu bằng chứng về điều đó mà không tự lừa mình bằng con số đẹp.** Phần lớn bài là phương pháp và tài liệu cho một phiên quan sát người dùng; phần code chỉ kiểm vài điều kiện hỗ trợ.
+API báo giá đúng 35.000 đ, nút «Đặt chuyến» chạy tốt trên Chrome và Edge, mọi bài functional đều xanh. Vậy mà một người mới mở trang có thể bấm «Báo giá» rồi ngồi chờ tài xế, vì tưởng đã gọi xe; hoặc thấy dòng báo lỗi đỏ mà không biết phải sửa ô nào. Script automation luôn bấm đúng nút theo kịch bản, nên script không bao giờ gặp những nhầm lẫn đó. Bài này trả lời: **làm sao biết người dùng thật có tự hoàn thành được việc họ cần, và làm sao thu bằng chứng về điều đó mà không tự lừa mình bằng con số đẹp.** Phần lớn bài là phương pháp và tài liệu cho một phiên quan sát người dùng; phần code chỉ kiểm vài điều kiện hỗ trợ.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-12</span>
@@ -26,7 +26,7 @@ API báo giá đúng 35.000 đ, nút «Đặt chuyến» chạy tốt trên Chro
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Trạng thái bằng chứng</span>
-<p><b>Chưa có phiên nghiên cứu nào với người tham gia thật</b> (participant = 0). Bài không có success rate, time-on-task, rating hay finding người dùng thực đo. Mọi con số và trích dẫn người dùng trong bài đều được gắn nhãn <i>minh hoạ</i>. Thứ duy nhất đã chạy là hai supporting check tự động, và chúng không đo usability.</p>
+<p><b>Chưa có phiên nghiên cứu nào với người tham gia thật</b> (participant = 0). Bài không có success rate, time-on-task, rating hay finding nào rút ra từ người dùng thật. Mọi con số và trích dẫn người dùng trong bài đều được gắn nhãn <i>minh hoạ</i>. Thứ duy nhất đã chạy là hai supporting check tự động, và chúng không đo usability.</p>
 </div>
 
 ## 1. Bài toán và mục tiêu
@@ -41,7 +41,7 @@ Nhưng có ba câu hỏi mà những bài đó không trả lời được:
 - Khi nhập quãng đường không hợp lệ, người dùng có **hiểu thông báo và tự sửa** được không? Theo R-FARE-02, 0,1 km bị từ chối vì nhỏ hơn 0,5 km. Hệ thống trả lỗi đúng, nhưng thông báo có giúp họ sửa không?
 - Sau khi huỷ, họ có **xác nhận được đã huỷ và biết có phí hay không**? R-CANCEL-01 nói huỷ khi đang tìm tài xế thì không mất phí; giao diện có nói điều đó đủ rõ không?
 
-Một test Playwright bấm đúng nút theo thứ tự đã viết sẵn. Nó trả lời «hệ thống có xử lý đúng khi được thao tác đúng không», không trả lời «một người chưa từng thấy trang này sẽ thao tác thế nào».
+Một test Playwright bấm đúng nút theo thứ tự đã viết sẵn. Test này trả lời «hệ thống có xử lý đúng khi được thao tác đúng không», không trả lời «một người chưa từng thấy trang này sẽ thao tác thế nào».
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
 
@@ -82,7 +82,7 @@ Accessibility và usability giao nhau. Người chỉ dùng bàn phím mà khôn
 
 Usability study tìm ra loại lỗi mà không suite tự động nào tìm được: mô hình hiểu sai của người dùng. Một phiên 30 phút có thể chỉ ra rằng nhãn nút gây hiểu lầm, điều mà hàng trăm test xanh không thấy.
 
-Đổi lại, nó tốn công tuyển người, cần kỹ năng điều phối, mẫu nhỏ nên không cho phép suy luận thống kê mạnh, và dễ bị thiên lệch: moderator gợi ý vô tình, participant muốn làm hài lòng người hỏi, đồng nghiệp đã quen sản phẩm. Phần lớn bài này là về cách giảm các thiên lệch đó.
+Đổi lại, phương pháp này tốn công tuyển người, cần kỹ năng điều phối, mẫu nhỏ nên không cho phép suy luận thống kê mạnh, và dễ bị thiên lệch: moderator gợi ý vô tình, participant muốn làm hài lòng người hỏi, đồng nghiệp đã quen sản phẩm. Phần lớn bài này là về cách giảm các thiên lệch đó.
 
 ## 3. Chọn phương pháp theo câu hỏi
 
@@ -99,13 +99,13 @@ Bài chọn **formative, moderated** cho ba câu hỏi ở mục 1.1. Phạm vi 
 
 ### 3.2. Bao nhiêu người, là ai
 
-Study kit đề xuất **sáu người cho vòng học ban đầu**, chia ba người mới và ba người đã quen ứng dụng đặt xe tương tự. Sáu không phải một định luật «đủ người», không bảo đảm phát hiện mọi vấn đề, càng không cho phép nói «X% khách hàng sẽ thành công». Nó là ngân sách hợp lý cho một vòng formative; sau khi sửa, ta chạy vòng tiếp theo.
+Study kit đề xuất **sáu người cho vòng học ban đầu**, chia ba người mới và ba người đã quen ứng dụng đặt xe tương tự. Sáu không phải một định luật «đủ người», không bảo đảm phát hiện mọi vấn đề, càng không cho phép nói «X% khách hàng sẽ thành công». Đó là ngân sách hợp lý cho một vòng formative; sau khi sửa, ta chạy vòng tiếp theo.
 
 Tuyển theo nhóm sử dụng dự kiến, mức kinh nghiệm, thiết bị và nhu cầu hỗ trợ. Thành viên đội đã xây giao diện thì nhớ đường đi, nên không đại diện người mới. Nếu phải pilot với đồng nghiệp — và nên pilot — thì giữ dữ liệu pilot tách riêng.
 
 ### 3.3. Test basis, rủi ro và tiêu chí bắt đầu/kết thúc
 
-Test basis gồm R-UI-01 (chức năng trang khách), R-UI-03 (khả năng tiếp cận: mọi ô có nhãn, lỗi dùng `role="alert"`, kết quả cập nhật trong vùng `aria-live`), R-UI-04 (định dạng tiền «35.000 đ»), R-FARE-02 (khoảng quãng đường hợp lệ) và R-CANCEL-01 (phí huỷ theo trạng thái). Nhưng usability còn có một basis không nằm trong SPEC: **mục tiêu của người dùng**. SPEC nói nút huỷ phải hiện phí; nó không nói người dùng phải hiểu số đó là phí hay là hoàn tiền.
+Test basis gồm R-UI-01 (chức năng trang khách), R-UI-03 (khả năng tiếp cận: mọi ô có nhãn, lỗi dùng `role="alert"`, kết quả cập nhật trong vùng `aria-live`), R-UI-04 (định dạng tiền «35.000 đ»), R-FARE-02 (khoảng quãng đường hợp lệ) và R-CANCEL-01 (phí huỷ theo trạng thái). Nhưng usability còn có một basis không nằm trong SPEC: **mục tiêu của người dùng**. SPEC nói nút huỷ phải hiện phí, nhưng không nói người dùng phải hiểu số đó là phí hay là hoàn tiền.
 
 | Rủi ro | Hậu quả với Tới Nơi | Nhiệm vụ quan sát |
 |---|---|---|
@@ -364,7 +364,7 @@ Tổng hợp theo task và nhóm người, giữ cả trường hợp trái chi�
 
 ### 9.1. Người dùng công nghệ hỗ trợ
 
-Tuyển người thực sự dùng screen reader, chỉ dùng bàn phím, hoặc phóng to màn hình, theo nhóm khách thực tế, và cho họ dùng thiết lập quen thuộc. Moderator tự nhắm mắt dùng screen reader không phải dữ liệu đại diện. W3C WAI khuyến nghị kết hợp người dùng với đánh giá theo tiêu chuẩn và công cụ; mỗi nguồn trả lời một phần khác nhau.
+Tuyển người thực sự dùng screen reader, chỉ dùng bàn phím, hoặc phóng to màn hình, theo nhóm khách thực tế, và cho họ dùng thiết lập quen thuộc. Việc moderator tự nhắm mắt dùng screen reader không cho ra dữ liệu đại diện. W3C WAI khuyến nghị kết hợp người dùng với đánh giá theo tiêu chuẩn và công cụ; mỗi nguồn trả lời một phần khác nhau.
 
 ### 9.2. Learning effect và thứ tự nhiệm vụ
 
@@ -396,7 +396,7 @@ AI có thể giúp rà prompt xem có dẫn đáp án không, gợi ý các ki�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn bằng chứng của bài</span>
-<p>Participant = 0. Không có success rate, rating, time-on-task hay finding người dùng thực đo. Hai supporting check không chứng minh giao diện dễ dùng, không phải accessibility audit, không phải UAT. Thứ đã hoàn thành: bài học, bộ study kit dùng được, và hai check được chạy lại pass. Muốn kết luận về usability, cần pilot, tuyển người phù hợp, xin đồng ý và chạy phiên thật.</p>
+<p>Participant = 0. Không có success rate, rating, time-on-task hay finding nào rút ra từ người dùng thật. Hai supporting check không chứng minh giao diện dễ dùng, không phải accessibility audit, không phải UAT. Thứ đã hoàn thành: bài học, bộ study kit dùng được, và hai check được chạy lại pass. Muốn kết luận về usability, cần pilot, tuyển người phù hợp, xin đồng ý và chạy phiên thật.</p>
 </div>
 
 ### 10.2. Đánh đổi chi phí và phạm vi
@@ -469,7 +469,7 @@ Một vòng sáu phiên tốn khoảng một ngày quan sát cộng thời gian 
 
 <details>
 <summary><b>Đáp án</b></summary>
-<p>Không. Nó là điều kiện cần theo R-UI-03, không phải bằng chứng trải nghiệm. Cần kiểm với screen reader thật và, tốt hơn, với người dùng screen reader thường xuyên.</p>
+<p>Không. Thuộc tính này là điều kiện cần theo R-UI-03, không phải bằng chứng trải nghiệm. Cần kiểm với screen reader thật và, tốt hơn, với người dùng screen reader thường xuyên.</p>
 </details>
 
 **Câu 5.** Một finding chỉ có 1/6 người gặp có nên xếp blocker?

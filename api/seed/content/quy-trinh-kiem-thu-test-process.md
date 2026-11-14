@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-007, test-process, stlc, traceability, test-pl
 language: vi
 ---
 
-Nhận bản build, mở ứng dụng, bấm thử vài luồng rồi báo «ổn» — đó là kiểm thử không có quy trình. Nó không trả lời được ba câu mà người ra quyết định release cần: đã test những gì, test tới đâu thì đủ, còn rủi ro nào. Bài này giải thích **test process** (quy trình kiểm thử) theo ISTQB CTFL v4.0.1: bảy nhóm hoạt động, quy trình thay đổi theo ngữ cảnh thế nào, và **traceability** (truy vết) nối mọi thứ lại với nhau. Ta đi trọn một vòng trên tính năng «tài xế nhận chuyến» của Tới Nơi, có bộ test chạy thật.
+Nhận bản build, mở ứng dụng, bấm thử vài luồng rồi báo «ổn» — đó là kiểm thử không có quy trình. Cách làm này không trả lời được ba câu mà người ra quyết định release cần: đã test những gì, test tới đâu thì đủ, còn rủi ro nào. Bài này giải thích **test process** (quy trình kiểm thử) theo ISTQB CTFL v4.0.1: bảy nhóm hoạt động, quy trình thay đổi theo ngữ cảnh thế nào, và **traceability** (truy vết) nối mọi thứ lại với nhau. Ta đi trọn một vòng trên tính năng «tài xế nhận chuyến» của Tới Nơi, có bộ test chạy thật.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-007</span>
@@ -185,7 +185,7 @@ Liên quan: R-STATE-02 (chuyển `searching → accepted`), R-API-10 (endpoint `
 
 - **Hệ thống đích** (tài liệu kiến trúc §4.5, §8.1): Matching & Dispatch gửi offer có TTL tới Driver App qua realtime gateway; tài xế accept; Dispatch gán bằng **atomic claim/lease** hoặc optimistic concurrency để chỉ một người thắng, lưu vào datastore rồi phát `DriverAssigned` qua Kafka (outbox) cho Trip Service. Driver Availability giữ trạng thái `online/busy`.
 - **Lab** (SPEC R-ARCH): modular monolith, mô hình «kéo» — tài xế tự xem danh sách và nhận (R-ACCEPT-06). Use case `acceptTrip` trong `src/app/trips.ts`; giữ tài xế (`online → busy` có điều kiện) rồi giành chuyến (`searching → accepted` có điều kiện). **Chưa có trong lab:** offer TTL, Kafka, nhiều instance chạy song song.
-- **Tải tham chiếu** (hồ sơ dự án): ≈ 70 chuyến tạo mới mỗi giây lúc cao điểm, 25.000 tài xế trực tuyến — hai tài xế cùng bấm một chuyến trong cùng giây là chuyện xảy ra hằng ngày, không phải ca hiếm.
+- **Tải tham chiếu** (hồ sơ dự án): ≈ 70 chuyến tạo mới mỗi giây lúc cao điểm, 25.000 tài xế trực tuyến — hai tài xế cùng bấm một chuyến trong cùng giây là chuyện xảy ra hằng ngày, không phải trường hợp hiếm.
 
 ### 3.3. Rủi ro có thể xảy ra
 
@@ -236,7 +236,7 @@ Mỗi mã lỗi của R-ACCEPT-02 là một **coverage item**; mỗi test condit
 | TC-ACC-06 | 06 | D101 đã nhận với ETA 5 | 1 phút sau D101 nhận lại với ETA 9 | Trả chuyến cũ: ETA vẫn 5, `acceptedAt` không đổi |
 | TC-ACC-07 | 03 | Khách C001 đã huỷ chuyến | D101 nhận | `INVALID_TRANSITION`; D101 vẫn `online` |
 
-Design cũng chốt **yêu cầu test data** (khách C001; tài xế D101–D104, D201 của Phụ lục A SPEC) và **môi trường**: hệ thống trong bộ nhớ với đồng hồ cố định 09:00 giờ VN (ngoài cao điểm, để giá không nhiễu). TCOND-ACC-05 và 07 chưa có test case — ta sẽ thấy ma trận truy vết lộ ra điều đó.
+Design cũng chốt **yêu cầu test data** (khách C001; tài xế D101–D104, D201 của Phụ lục A SPEC) và **môi trường**: hệ thống trong bộ nhớ với đồng hồ cố định 09:00 giờ VN (ngoài cao điểm, để giá không nhiễu). TCOND-ACC-05 và 07 chưa có test case — ma trận truy vết sẽ cho ta thấy điều đó.
 
 ## 5. Thực hành
 
@@ -250,7 +250,7 @@ Design cũng chốt **yêu cầu test data** (khách C001; tài xế D101–D104
 | Test monitoring & control | Kế hoạch, log chạy test, danh sách defect | Theo dõi % test condition có test case, % test case đã chạy, defect mở. Ví dụ control: ngày 7 TC-ACC-05 failed ⇒ dời phiên exploratory sang ngày 9, chạy thêm trên PGlite | Cập nhật tiến độ ở daily, quyết định điều chỉnh |
 | Test analysis | SPEC R-ACCEPT, rủi ro RR-01…06 | Lập test condition có ưu tiên; ghi câu hỏi về test basis | TCOND-ACC-01…07, ba ghi chú gửi BA (mục 4.1) |
 | Test design | Test condition | Suy test case, coverage item, yêu cầu test data và môi trường | TC-ACC-01…07, yêu cầu dữ liệu và môi trường |
-| Test implementation | Test case, lab | Viết test script tự động, chuẩn bị dữ liệu mẫu, sắp lịch chạy (ca rủi ro cao trước), kiểm môi trường chạy được | `nhan-chuyen.test.ts`, lệnh chạy, thứ tự ưu tiên |
+| Test implementation | Test case, lab | Viết test script tự động, chuẩn bị dữ liệu mẫu, sắp lịch chạy (test case rủi ro cao trước), kiểm môi trường chạy được | `nhan-chuyen.test.ts`, lệnh chạy, thứ tự ưu tiên |
 | Test execution | Test suite, build | Chạy, so kết quả thực tế với mong đợi, ghi log, phân tích bất thường, báo defect | Log vitest, defect report (nếu có) |
 | Test completion | Log, defect, ma trận truy vết | Ghi khoảng trống còn lại vào backlog, giữ test trong bộ regression, rút bài học cho retrospective | Tóm tắt test completion của sprint (mục 5.4) |
 
@@ -294,7 +294,7 @@ npx vitest run articles/quy-trinh-kiem-thu-test-process --reporter=verbose
       Tests  7 passed (7)
 ```
 
-(Đường dẫn tệp và thời gian từng test được lược bớt cho dễ đọc.) Kết quả thực tế khớp kết quả mong đợi ở cả bảy test case. Lưu ý: «7 passed» chỉ nói **những gì đã test** đều đạt — nó không nói đã test đủ. Câu đó thuộc về truy vết.
+(Đường dẫn tệp và thời gian từng test được lược bớt cho dễ đọc.) Kết quả thực tế khớp kết quả mong đợi ở cả bảy test case. Lưu ý: «7 passed» chỉ nói **những gì đã test** đều đạt — chứ không cho biết đã test đủ chưa. Câu hỏi đó thuộc về truy vết.
 
 ### 5.3. Ma trận truy vết — thứ mà «7 passed» không nói
 
@@ -308,7 +308,7 @@ npx vitest run articles/quy-trinh-kiem-thu-test-process --reporter=verbose
 | R-ACCEPT-06 | TCOND-ACC-07 | **chưa có** | — | RR-06 còn nguyên |
 | R-ACCEPT-07 | TCOND-ACC-06 | TC-ACC-06 | Passed | RR-05 |
 
-Đọc theo yêu cầu: 6/7 mã R-ACCEPT có ít nhất một test passed, nhưng R-ACCEPT-03 mới phủ **một nửa**. Đọc theo rủi ro: RR-02 — mức **cao** — chưa được giảm chút nào. Đó là thông tin quyết định release, và nó chỉ hiện ra nhờ ma trận. Coverage item của R-ACCEPT-02 cũng còn thiếu: `DRIVER_BUSY` và `TRIP_ALREADY_TAKEN` khi nhận tuần tự (không đồng thời) chưa có test riêng.
+Đọc theo yêu cầu: 6/7 mã R-ACCEPT có ít nhất một test passed, nhưng R-ACCEPT-03 mới phủ **một nửa**. Đọc theo rủi ro: RR-02 — mức **cao** — chưa được giảm chút nào. Đó là thông tin quyết định release, và thông tin này chỉ hiện ra nhờ ma trận. Coverage item của R-ACCEPT-02 cũng còn thiếu: `DRIVER_BUSY` và `TRIP_ALREADY_TAKEN` khi nhận tuần tự (không đồng thời) chưa có test riêng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

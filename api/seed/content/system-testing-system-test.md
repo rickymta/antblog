@@ -8,7 +8,7 @@ tags: [testing, sys-05, system-testing, e2e, playwright, test-environment, obser
 language: vi
 ---
 
-API hoàn tất chuyến trả `completed`, DB lưu đúng, nhưng trang khách vẫn hiện «Đang tìm tài xế» vì vòng hỏi lại trạng thái không chạy. Mọi bài integration của backend đều xanh, còn người dùng thì không biết chuyến đã kết thúc. Bài này trả lời: **muốn bắt loại lỗi đó, cần kiểm cái gì, qua đâu, trên môi trường nào, và được phép kết luận tới đâu.** Ta vẽ ranh giới hệ thống đang kiểm của lab Tới Nơi, thiết kế ba hành trình khách–tài xế qua hai giao diện, tự động hoá bằng Playwright trên một server riêng, rồi đọc kết quả như một người phải ký quyết định.
+API hoàn tất chuyến trả `completed`, DB lưu đúng, nhưng trang khách vẫn hiện «Đang tìm tài xế» vì vòng hỏi lại trạng thái không chạy. Mọi test integration của backend đều xanh, còn người dùng thì không biết chuyến đã kết thúc. Bài này trả lời: **muốn bắt loại lỗi đó, cần kiểm cái gì, qua đâu, trên môi trường nào, và được phép kết luận tới đâu.** Ta vẽ ranh giới hệ thống đang kiểm của lab Tới Nơi, thiết kế ba hành trình khách–tài xế qua hai giao diện, tự động hoá bằng Playwright trên một server riêng, rồi đọc kết quả như một người phải ký quyết định.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-05</span>
@@ -47,7 +47,7 @@ Sau bài này, bạn có thể:
 
 Phần định nghĩa theo ISTQB — test basis, môi trường, ai thực hiện — đã có ở [TEST-014](/articles/system-testing). Ở đây ta chỉ chốt cách dùng trong series.
 
-**System testing** đánh giá hành vi và năng lực của hệ thống hoàn chỉnh **trong phạm vi đã xác định**. Nó gồm cả chức năng và phi chức năng, và không đồng nghĩa với UI automation. «Hoàn chỉnh» luôn tương đối: bản MVP modular monolith của lab khác kiến trúc microservices mục tiêu của Tới Nơi. Vì vậy câu đầu tiên của mọi kế hoạch system test phải là: *hệ thống ở đây là gì?*
+**System testing** đánh giá hành vi và năng lực của hệ thống hoàn chỉnh **trong phạm vi đã xác định**. System testing gồm cả chức năng và phi chức năng, và không đồng nghĩa với UI automation. «Hoàn chỉnh» luôn tương đối: bản MVP modular monolith của lab khác kiến trúc microservices mục tiêu của Tới Nơi. Vì vậy câu đầu tiên của mọi kế hoạch system test phải là: *hệ thống ở đây là gì?*
 
 | Khái niệm | Đối tượng chính | Ví dụ Tới Nơi |
 |---|---|---|
@@ -110,7 +110,7 @@ Viết ranh giới ra giấy có hai tác dụng. Trước khi chạy, nó cho b
 
 ### 3.1. Chọn hành trình từ rủi ro người dùng
 
-Browser test đắt: chậm hơn API test, nhiều điểm hỏng, khó chẩn đoán. Vì vậy ta không sao chép 24 ca giá của bài [Functional](/articles/system-testing-functional-test) lên trình duyệt — những tổ hợp tiền đó đã có phép kiểm nhanh. UI giữ các đường đại diện và các lỗi **chỉ xuất hiện khi ghép đủ mảnh**.
+Browser test đắt: chậm hơn API test, nhiều điểm hỏng, khó chẩn đoán. Vì vậy ta không sao chép 24 test case giá của bài [Functional](/articles/system-testing-functional-test) lên trình duyệt — những tổ hợp tiền đó đã có phép kiểm nhanh. UI giữ các đường đại diện và các lỗi **chỉ xuất hiện khi ghép đủ mảnh**.
 
 | Rủi ro người dùng | Vì sao cần cấp hệ thống | Hành trình |
 |---|---|---|
@@ -143,7 +143,7 @@ Hai expected này được tính trên giấy từ bảng giá. Đừng đọc s
 
 ## 4. Môi trường và quyền sở hữu dữ liệu kiểm thử
 
-Bài có config riêng `system-testing.config.ts`. Nó tự khởi động server trên cổng 3115 với PGlite và **không tái sử dụng** server có sẵn. Nếu cổng đang bận, runner dừng thay vì chạy trên một server không rõ cấu hình rồi reset dữ liệu của nó. Đây là điều kiện để kết quả diễn giải được, không chỉ là tiện ích.
+Bài có config riêng `system-testing.config.ts`. Config này tự khởi động server trên cổng 3115 với PGlite và **không tái sử dụng** server có sẵn. Nếu cổng đang bận, runner dừng thay vì chạy trên một server không rõ cấu hình rồi reset dữ liệu của nó. Đây là điều kiện để kết quả diễn giải được, không chỉ là tiện ích.
 
 ```ts
 webServer: {
@@ -188,7 +188,7 @@ webServer: {
 
 Hai quyết định thiết kế đáng chú ý:
 
-- **Dùng ID thực nhận, không chọn dòng đầu.** SY-01 đọc `trip-id` trên trang khách rồi bấm đúng `accept-<id>` ở trang tài xế, sau đó assert `current-trip-id` bằng ID đó. Dùng `nth(0)` có thể nhận nhầm chuyến của case khác mà test vẫn xanh.
+- **Dùng ID thực nhận, không chọn dòng đầu.** SY-01 đọc `trip-id` trên trang khách rồi bấm đúng `accept-<id>` ở trang tài xế, sau đó assert `current-trip-id` bằng ID đó. Dùng `nth(0)` có thể nhận nhầm chuyến của test case khác mà test vẫn xanh.
 - **C002 là oracle bổ trợ qua API.** Đây không phải hành trình UI đầy đủ của người thứ ba và càng không phải pentest — phần phân quyền có bài riêng (SYS-10).
 
 ## 6. Thực hành và giải thích code
@@ -331,7 +331,7 @@ Tổng thời gian khác nhau giữa hai lượt (11,4 so với 18,2 giây) ch�
 
 **Entry criteria:** môi trường riêng; Chrome và dependency có sẵn; test API bật đúng trong lab; SPEC đúng phiên bản.
 
-**Exit criteria của bài tập:** ba case pass, không skip, không retry; typecheck đạt; giới hạn bằng chứng được ghi. Nếu có lỗi chập chờn, giữ trace và điều tra; không tăng timeout hay bật retry rồi gọi là ổn định.
+**Exit criteria của bài tập:** ba test case pass, không skip, không retry; typecheck đạt; giới hạn bằng chứng được ghi. Nếu có lỗi chập chờn, giữ trace và điều tra; không tăng timeout hay bật retry rồi gọi là ổn định.
 
 Một báo cáo lỗi tốt ghi commit, cấu hình DB/browser, dữ liệu, **bước đầu tiên lệch**, expected/actual và artifact. Không cần chép lại mọi click khi trace đã có. Trace có thể chứa payload; khi dùng dữ liệu ngoài lab, quản lý quyền truy cập artifact theo độ nhạy của dữ liệu.
 
@@ -380,10 +380,10 @@ Giữ vài hành trình kiếm tiền/huỷ/khôi phục quan trọng ở browse
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn bằng chứng của SYS-05</span>
-<p>Chỉ Chrome local được chạy. Chưa kiểm Safari/Firefox/mobile, GPS, đăng nhập JWT, provider thanh toán thật, mạng chậm, server restart, concurrency hay mọi ô làm vô hiệu báo giá. Đồng hồ là loại dời được và tiếp tục chạy, không đóng băng. PGlite trong một phiên không chứng minh dữ liệu bền sau crash. Ba case pass phản ánh ba hành trình trong ranh giới Hình 1 — không thay hồ sơ nghiệm thu.</p>
+<p>Chỉ Chrome local được chạy. Chưa kiểm Safari/Firefox/mobile, GPS, đăng nhập JWT, provider thanh toán thật, mạng chậm, server restart, concurrency hay mọi ô làm vô hiệu báo giá. Đồng hồ là loại dời được và tiếp tục chạy, không đóng băng. PGlite trong một phiên không chứng minh dữ liệu bền sau crash. Ba test case pass phản ánh ba hành trình trong ranh giới Hình 1 — không thay hồ sơ nghiệm thu.</p>
 </div>
 
-**Đánh đổi chi phí/phạm vi:** mỗi hành trình browser tốn vài giây và nhiều điểm hỏng hơn API test. Ba hành trình ở đây phủ ba rủi ro khó thấy ở cấp thấp hơn với tổng ~11–18 giây. Thêm 24 ca giá lên browser sẽ nhân thời gian mà gần như không thêm rủi ro mới được phủ.
+**Đánh đổi chi phí/phạm vi:** mỗi hành trình browser tốn vài giây và nhiều điểm hỏng hơn API test. Ba hành trình ở đây phủ ba rủi ro khó thấy ở cấp thấp hơn với tổng ~11–18 giây. Thêm 24 test case giá lên browser sẽ nhân thời gian mà gần như không thêm rủi ro mới được phủ.
 
 ## 10. Bài tập và câu hỏi tự kiểm
 
@@ -444,7 +444,7 @@ Giữ vài hành trình kiếm tiền/huỷ/khôi phục quan trọng ở browse
 
 <details>
 <summary><b>Đáp án</b></summary>
-<p>Không theo nghĩa của bài: nó kiểm giao diện với dữ liệu giả, không cung cấp bằng chứng đường browser–server–DB. Có thể gọi là UI/component test của frontend.</p>
+<p>Không theo nghĩa của bài: bộ test này kiểm giao diện với dữ liệu giả, không cung cấp bằng chứng đường browser–server–DB. Có thể gọi là UI/component test của frontend.</p>
 </details>
 
 **Câu 5.** Vì sao chọn 09:00 làm giờ chuẩn thay vì 10:59?

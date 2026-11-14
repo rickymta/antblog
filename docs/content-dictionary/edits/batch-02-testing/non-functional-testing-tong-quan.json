@@ -1,0 +1,17 @@
+{"file":"non-functional-testing-tong-quan.md","edits":[
+{"old":"vì sao phải kiểm từ sớm.\"","new":"vì sao phải kiểm thử từ sớm.\"","reason":"'kiểm' cụt, thiếu 'thử'","severity":"medium"},
+{"old":"đã kiểm điều đó.","new":"đã kiểm thử điều đó.","reason":"'kiểm' cụt, thiếu 'thử'","severity":"medium"},
+{"old":"đợi tới cuối dự án mới kiểm.","new":"đợi tới cuối dự án mới kiểm thử.","reason":"'kiểm' cụt, thiếu 'thử'","severity":"medium"},
+{"old":"Vấn đề nó giải quyết có hai mặt.","new":"Vấn đề mà non-functional testing giải quyết có hai mặt.","reason":"'nó' chỉ khái niệm trừu tượng, mơ hồ","severity":"medium"},
+{"old":"phát hiện muộn defect phi chức năng có thể đe doạ cả dự án","new":"phát hiện defect phi chức năng muộn có thể đe doạ cả dự án","reason":"Trật tự từ kiểu tiếng Anh","severity":"low"},
+{"old":"để biết bài kiểm, môi trường và người phụ trách;","new":"để biết dùng test nào, môi trường nào và ai phụ trách;","reason":"'bài kiểm' tự ghép, không rõ nghĩa","severity":"medium"},
+{"old":"R-NFR-03 đã kiểm được — nhưng","new":"R-NFR-03 đã kiểm thử được — nhưng","reason":"'kiểm' cụt, thiếu 'thử'","severity":"low"},
+{"old":"đếm ngược: **đặc tính nào","new":"xét ngược lại: **đặc tính nào","reason":"'đếm ngược' sai nghĩa (count backwards)","severity":"medium"},
+{"old":"Chỗ trống không tự động là lỗi","new":"Chỗ trống không mặc nhiên là lỗi","reason":"'tự động' là calque của 'automatically'","severity":"low"},
+{"old":"kèm một test kiểm nó phủ **đủ** mọi mã","new":"kèm một test kiểm tra lời giải có phủ **đủ** mọi mã","reason":"'nó' mơ hồ, câu cụt","severity":"medium"},
+{"old":"SPEC thêm R-NFR-08 là test đỏ.","new":"nếu SPEC thêm R-NFR-08 thì test sẽ đỏ.","reason":"Câu thiếu quan hệ điều kiện","severity":"medium"},
+{"old":"lấy ca FC-04 của TEST-017","new":"lấy test case FC-04 của TEST-017","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"gấp 14 lần p95 — lần gọi đầu khởi động kết nối.","new":"gấp 14 lần p95 vì lần gọi đầu phải khởi động kết nối.","reason":"Câu thiếu động từ, rời rạc","severity":"medium"},
+{"old":"không sắc.","new":"không rạch ròi.","reason":"'không sắc' là calque của 'not sharp'","severity":"medium"},
+{"old":"mà không để yêu cầu nào rơi khỏi cả hai bộ test.","new":"mà là không để yêu cầu nào rơi khỏi cả hai bộ test.","reason":"Câu thiếu 'là' sau 'không phải … mà'","severity":"high"}
+]}

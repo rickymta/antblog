@@ -1,0 +1,16 @@
+{"file":"error-guessing.md","edits":[
+{"old":"Câu hỏi của nó không phải","new":"Câu hỏi của kỹ thuật này không phải","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"low"},
+{"old":"Vấn đề nó giải quyết: kỹ thuật","new":"Vấn đề mà error guessing giải quyết: kỹ thuật","reason":"Tránh 'nó', câu thiếu chủ ngữ rõ","severity":"medium"},
+{"old":"sinh ra ca «chưa đủ 2 phút","new":"sinh ra test case «chưa đủ 2 phút","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"không tự gợi ra ca «khách và tài xế","new":"không tự gợi ra test case «khách và tài xế","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"hiệu quả của nó **phụ thuộc rất nhiều vào kỹ năng của tester**, và nó **tìm được defect mà hai nhóm kia bỏ sót** — nên nó bổ sung cho","new":"hiệu quả của nhóm này **phụ thuộc rất nhiều vào kỹ năng của tester**, và nhóm này **tìm được defect mà hai nhóm kia bỏ sót** — nên bổ sung cho","reason":"Ba lần 'nó' liên tiếp, giọng dịch máy","severity":"medium"},
+{"old":"ở đây đúng nghĩa của [TEST-004](/articles/error-defect-failure-root-cause)","new":"ở đây dùng đúng nghĩa như trong [TEST-004](/articles/error-defect-failure-root-cause)","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Tỉ lệ lỗi rất nhỏ nhân khối lượng lớn","new":"Tỉ lệ lỗi rất nhỏ nhân với khối lượng lớn","reason":"Thiếu giới từ, câu cụt","severity":"low"},
+{"old":"Nhiều attack cần **móc kiểm thử** (§17.2 kiến trúc)","new":"Nhiều attack cần **test hook** (§17.2 kiến trúc)","reason":"'móc kiểm thử' dịch từng chữ; bài đã dùng 'testability hooks'","severity":"medium"},
+{"old":"Ý loại ra — webhook trùng","new":"Những ý bị loại ra — webhook trùng","reason":"Cụm 'Ý loại ra' cụt, thiếu chủ ngữ rõ","severity":"low"},
+{"old":"ca `FA-03R` đo với đúng 3 giây","new":"test case `FA-03R` đo với đúng 3 giây","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"thư viện kiểm đầu vào zod 4","new":"thư viện kiểm tra đầu vào zod 4","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"máy khách và máy chủ sẽ không đồng ý với nhau","new":"máy khách và máy chủ sẽ đếm không khớp nhau","reason":"Calque của 'disagree'","severity":"medium"},
+{"old":"SPEC có độ trễ cho `POST /api/trips` (R-NFR-02) mà không có cho lệnh của tài xế","new":"SPEC quy định độ trễ cho `POST /api/trips` (R-NFR-02) mà không quy định cho lệnh của tài xế","reason":"'có độ trễ' sai nghĩa, gượng","severity":"medium"},
+{"old":"thiếu testability hooks thì đội bỏ đúng những ca nguy hiểm nhất","new":"thiếu test hook thì đội bỏ đúng những test case nguy hiểm nhất","reason":"Thống nhất 'test hook' và 'test case'","severity":"medium"}
+]}

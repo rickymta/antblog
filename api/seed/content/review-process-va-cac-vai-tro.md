@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-027, static-testing, review, review-process, r
 language: vi
 ---
 
-Đội Tới Nơi «review» rất nhiều: góp ý trong tài liệu, duyệt pull request, họp đọc đặc tả. Nhưng hỏi «buổi review đặc tả thanh toán hôm qua kết thúc khi nào, ai quyết định một góp ý là lỗi hay không, ai ghi lại» thì thường không ai trả lời được. Bài này trình bày khung chung mà CTFL v4.0.1 mượn từ ISO/IEC 20246: **năm hoạt động** của một review, **sáu vai trò** chính và **các yếu tố** làm review có ích thay vì tốn thời gian. Các loại review cụ thể (informal, walkthrough, technical review, inspection) là các bài tiếp theo; chúng đều là những cách «cắt gọt» khung này.
+Đội Tới Nơi «review» rất nhiều: góp ý trong tài liệu, duyệt pull request, họp đọc đặc tả. Nhưng hỏi «buổi review đặc tả thanh toán hôm qua kết thúc khi nào, ai quyết định một góp ý là lỗi hay không, ai ghi lại» thì thường không ai trả lời được. Bài này trình bày khung chung mà CTFL v4.0.1 mượn từ ISO/IEC 20246: **năm hoạt động** của một review, **sáu vai trò** chính và **các yếu tố** làm review có ích thay vì tốn thời gian. Các loại review cụ thể (informal, walkthrough, technical review, inspection) là các bài tiếp theo; chúng đều là những cách «may đo» khung này.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-027</span>
@@ -35,7 +35,7 @@ Một review không có quy trình thường hỏng theo ba kiểu: **không ai 
 
 ## 2. Lý thuyết theo ISTQB
 
-### 2.1. Một quy trình chung, cắt gọt theo tình huống
+### 2.1. Một quy trình chung, may đo theo tình huống
 
 CTFL v4.0.1 (mục 3.2.2) lấy **quy trình review chung** của chuẩn ISO/IEC 20246. Đây là khung «có cấu trúc nhưng linh hoạt»: một review cụ thể được may đo (tailor) từ đó. Review càng hình thức thì càng dùng nhiều nhiệm vụ trong mỗi hoạt động; review không chính thức có thể chỉ giữ dáng của vài hoạt động.
 
@@ -206,7 +206,7 @@ Mỗi reviewer được giao một **góc nhìn** để giảm trùng lặp và 
 
 ### 4.3. Review technique cho individual review
 
-- **Checklist-based**: 8 câu hỏi về tiền và gọi bên thứ ba (số tiền lấy từ đâu, đơn vị, khoá idempotency, hết giờ, thử lại, trạng thái cuối, ca số 0, ca huỷ). Cách xây checklist tốt: [TEST-028](/articles/checklist-based-review).
+- **Checklist-based**: 8 câu hỏi về tiền và gọi bên thứ ba (số tiền lấy từ đâu, đơn vị, khoá idempotency, hết giờ, thử lại, trạng thái cuối, trường hợp số 0, trường hợp huỷ). Cách xây checklist tốt: [TEST-028](/articles/checklist-based-review).
 - **Scenario-based**: đi qua 3 kịch bản — (S1) ví trừ tiền nhưng mất phản hồi (`lost_response`); (S2) khách huỷ chuyến `vixanh` có phí; (S3) đơn đồ ăn trả qua ví.
 
 ## 5. Thực hành
@@ -217,7 +217,7 @@ Bộ tài liệu đầy đủ (kế hoạch + nhật ký mẫu) nằm trong lab:
 
 | Mục | Nội dung |
 |---|---|
-| Mục đích | Tìm anomaly trong R-PAY trước khi xây Payment & Wallet Service; tạo hiểu chung giữa Payment, Booking, Vận hành, Tài chính |
+| Mục đích | Tìm anomaly trong R-PAY trước khi xây Payment & Wallet Service; tạo sự hiểu biết chung giữa Payment, Booking, Vận hành, Tài chính |
 | Work product | `SPEC.md` v1.1 mục 11 (R-PAY-01…06) + R-CANCEL-07, R-API-07/08, R-QUOTE-04, R-STATE-08 (cột Payment), R-NFR-05, R-TEST-03 |
 | Đặc tính chất lượng | Đúng (correctness), đủ (completeness), nhất quán với R-API/R-CANCEL (consistency), kiểm thử được (testability), không mơ hồ |
 | Vùng tập trung | Số tiền thu, khoá idempotency, hết giờ/thử lại, nghĩa của từng `paymentStatus`, chuyến bị huỷ |
@@ -264,7 +264,7 @@ Các cột tối thiểu: ID · vị trí · loại reviewer ghi (defect nghi ng
 Ba điều cần thấy trong bảng:
 
 - **Anomaly ≠ defect.** 7 mục ⇒ 4 defect, 1 câu hỏi thành việc mới, 1 bác bỏ, 1 hoãn. Nếu chép thẳng 7 mục thành 7 bug, đội sẽ sửa cả thứ không sai (A-05).
-- **A-01 là phát hiện thật** trên `SPEC.md` v1.1 của lab: mã nguồn đã làm đúng ý định (`src/app/trips.ts` gán `fare: q.total` cho chuyến), nhưng chữ của đặc tả thì không nói vậy. Người đọc chỉ SPEC để viết test có thể đặt oracle sai cho đơn đồ ăn.
+- **A-01 là phát hiện thật** trên `SPEC.md` v1.1 của lab: mã nguồn đã làm đúng ý định (`src/app/trips.ts` gán `fare: q.total` cho chuyến), nhưng chữ của đặc tả thì không nói vậy. Người chỉ đọc SPEC để viết test có thể đặt oracle sai cho đơn đồ ăn.
 
 ### 5.5. Báo cáo review (fixing and reporting)
 
@@ -299,7 +299,7 @@ Phản hồi       : gửi BA và squad Booking; đề xuất thêm mục «trư
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Author = PO. Author không được làm review leader hay scribe ⇒ Review leader = tester (kiêm moderator); Scribe = dev 1; Reviewer = dev 1, dev 2, tester (một người giữ nhiều vai được). Manager = người cấp thời gian (Engineering Manager), có thể ngoài 4 người. Nên mời thêm một reviewer ngoài squad, vd dev Booking — bên kiểm lượt voucher lúc tạo chuyến (R-VOUCHER-07).</p>
+<p>Author = PO. Author không được làm review leader hay scribe ⇒ Review leader = tester (kiêm moderator); Scribe = dev 1; Reviewer = dev 1, dev 2, tester (một người có thể giữ nhiều vai). Manager = người cấp thời gian (Engineering Manager), có thể ngoài 4 người. Nên mời thêm một reviewer ngoài squad, vd dev Booking — bên kiểm lượt voucher lúc tạo chuyến (R-VOUCHER-07).</p>
 </details>
 
 **Bài tập 2.** Mỗi việc sau thuộc hoạt động nào trong năm hoạt động? (a) gửi đường dẫn đặc tả và checklist, hỏi mọi người đã mở được chưa; (b) quyết định lần này chỉ review R-CANCEL, đặt tiêu chí «0 Major mở»; (c) reviewer ghi «R-CANCEL-04: "lớn hơn hẳn" có cần ví dụ biên không?»; (d) cả nhóm thống nhất mục đó là đề xuất, giao PO thêm ví dụ; (e) PO sửa đặc tả, review leader xác nhận đạt tiêu chí và gửi tóm tắt.
@@ -325,7 +325,7 @@ Phản hồi       : gửi BA và squad Booking; đề xuất thêm mục «trư
 
 <details>
 <summary><b>Đáp án: b</b></summary>
-<p><b>a sai</b> — initiation lo cho mọi người sẵn sàng (có tài liệu, hiểu vai trò). <b>b đúng</b> — phạm vi của review, gồm exit criteria, được định ở planning. <b>c sai</b> — ở đây quyết định trạng thái từng anomaly và chất lượng work product. <b>d sai</b> — đây là lúc <i>kiểm</i> đã đạt exit criteria chưa, không phải lúc đặt ra.</p>
+<p><b>a sai</b> — initiation lo cho mọi người sẵn sàng (có tài liệu, hiểu vai trò). <b>b đúng</b> — phạm vi của review, gồm exit criteria, được định ở planning. <b>c sai</b> — ở đây quyết định trạng thái từng anomaly và chất lượng work product. <b>d sai</b> — đây là lúc <i>kiểm tra</i> xem đã đạt exit criteria chưa, không phải lúc đặt ra.</p>
 </details>
 
 **Câu 2 (K1).** Vai trò nào chịu trách nhiệm giữ một môi trường review an toàn, nơi mọi người nói thẳng được?

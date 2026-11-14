@@ -1,0 +1,53 @@
+{
+ "file": "random-testing.md",
+ "edits": [
+  {
+   "old": "Lõi định giá của Tới Nơi nhận ba dịch vụ,",
+   "new": "Lõi định giá của Tới Nơi nhận đầu vào gồm ba dịch vụ,",
+   "reason": "Câu liệt kê thiếu danh từ sau động từ 'nhận'",
+   "severity": "medium"
+  },
+  {
+   "old": "Đổi lại, nó cần hai thứ:",
+   "new": "Đổi lại, kỹ thuật này cần hai thứ:",
+   "reason": "Tránh 'nó' chỉ khái niệm trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "có thể bỏ lót defect gắn",
+   "new": "có thể bỏ lọt defect gắn",
+   "reason": "Sai từ: 'bỏ lót' thay vì 'bỏ lọt'",
+   "severity": "high"
+  },
+  {
+   "old": "Nó cũng được dùng trong **fuzz testing**",
+   "new": "Random testing cũng được dùng trong **fuzz testing**",
+   "reason": "'Nó' mơ hồ vì câu trước nhắc nhiều chủ thể",
+   "severity": "low"
+  },
+  {
+   "old": "khi một ca thất bại, công cụ",
+   "new": "khi một test case thất bại, công cụ",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "gần như mọi ca bị zod chặn",
+   "new": "gần như mọi test case bị zod chặn",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "phản ví dụ như một ca do người viết:",
+   "new": "phản ví dụ như một test case do người viết:",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Phân phối dồn ca vào một phân vùng",
+   "new": "Phân phối dồn test case vào một phân vùng",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  }
+ ]
+}

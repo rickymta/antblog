@@ -1,0 +1,8 @@
+{"file":"path-testing.md","edits":[
+{"old":"Vấn đề nó giải quyết: defect nằm ở","new":"Vấn đề path testing giải quyết: defect nằm ở","reason":"'nó' chỉ khái niệm trừu tượng, mơ hồ","severity":"medium"},
+{"old":"Branch coverage không bắt buộc tổ hợp nào cả:","new":"Branch coverage không yêu cầu phủ tổ hợp nào cả:","reason":"'bắt buộc tổ hợp' thiếu động từ, gượng","severity":"medium"},
+{"old":"«structured testing» = mỗi thành phần có ít nhất","new":"«structured testing» nghĩa là mỗi thành phần có ít nhất","reason":"Dấu '=' trong văn xuôi gượng","severity":"low"},
+{"old":"kiểm độc lập (bằng tay,","new":"kiểm tra tính độc lập (bằng tay,","reason":"'kiểm độc lập' cụt, thiếu danh từ","severity":"medium"},
+{"old":"toán tử ngắt mạch tạo hai đường","new":"toán tử đoản mạch tạo hai đường","reason":"Thuật ngữ chuẩn của short-circuit là 'đoản mạch'","severity":"medium"},
+{"old":"Nó đảm bảo mỗi quyết định được «lật»","new":"Basis path đảm bảo mỗi quyết định được «lật»","reason":"'Nó' mơ hồ vì câu trước có hai chủ thể","severity":"medium"}
+]}

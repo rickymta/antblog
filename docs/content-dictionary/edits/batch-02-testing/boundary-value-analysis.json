@@ -1,0 +1,143 @@
+{
+"file": "boundary-value-analysis.md",
+"edits": [
+{
+"old": "«kiểm khoảng rồi mới làm tròn quãng đường» qua mặt cả bộ ca phân vùng tương đương",
+"new": "«kiểm tra khoảng rồi mới làm tròn quãng đường» qua mặt cả bộ test case phân vùng tương đương",
+"reason": "'kiểm khoảng' cụt; thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "so số ca 2-value với 3-value — lab",
+"new": "so số test case 2-value với 3-value — lab",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "(76 ca vitest)",
+"new": "(76 test vitest)",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "Lab có đúng các móc đó:",
+"new": "Lab có đúng những hook đó:",
+"reason": "'móc' là cách dịch gượng của hook",
+"severity": "medium"
+},
+{
+"old": "Kết quả (ca `bva-items.test.ts`):",
+"new": "Kết quả (các test case trong `bva-items.test.ts`):",
+"reason": "'ca' đứng một mình khó hiểu",
+"severity": "medium"
+},
+{
+"old": "Ca test phải dựng thời điểm bằng `vnTime(…)`",
+"new": "Test case phải dựng thời điểm bằng `vnTime(…)`",
+"reason": "'Ca test' là cụm tự ghép",
+"severity": "medium"
+},
+{
+"old": "và ca có thể xanh trên máy dev ở Việt Nam",
+"new": "và test case có thể xanh trên máy dev ở Việt Nam",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "«đáng lẽ ra gì»",
+"new": "«đáng lẽ phải ra kết quả gì»",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "so số test 2-value với 3-value. Tự làm",
+"new": "so số test case 2-value với 3-value. Tự làm",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "(3-value, 52 ca)",
+"new": "(3-value, 52 test case)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "qua API (14 ca)",
+"new": "qua API (14 test case)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Lab chọn các ca 2-value trên giá trị thô",
+"new": "Lab chọn các test case 2-value trên giá trị thô",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Ca biên giờ qua API — đồng hồ giả",
+"new": "Test case biên giờ qua API — đồng hồ giả",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "qua hết 66 ca biên (52 component + 14 API). Để biết bộ ca **có khả năng** bắt lỗi biên hay không, phải cho nó chạy trên bản sai.",
+"new": "qua hết 66 test case biên (52 component + 14 API). Để biết bộ test case **có khả năng** bắt lỗi biên hay không, phải chạy bộ đó trên bản sai.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "### 5.4. Bốn bộ ca trên ba lỗi cố ý",
+"new": "### 5.4. Bốn bộ test case trên ba lỗi cố ý",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "chạy bốn bộ ca —",
+"new": "chạy bốn bộ test case —",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "khác bản đúng (ca đỏ):",
+"new": "khác bản đúng (test case đỏ):",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "(— = không ca nào đỏ: lỗi lọt.)",
+"new": "(— = không test case nào đỏ: lỗi lọt.)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "thì toàn bộ ca biên giờ phải sinh lại",
+"new": "thì toàn bộ test case biên giờ phải sinh lại",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "thử 0:00 như một ca EP",
+"new": "thử 0:00 như một test case EP",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "chỉ ca 15:00 lộ ra",
+"new": "chỉ giá trị 15:00 lộ ra",
+"reason": "'ca 15:00' khó hiểu",
+"severity": "low"
+},
+{
+"old": "**Câu 4 (K2).** Kiểm khối lượng được cài đặt nhầm",
+"new": "**Câu 4 (K2).** Phần kiểm tra khối lượng được cài đặt nhầm",
+"reason": "'Kiểm khối lượng' cụt, dễ đọc thành mệnh lệnh",
+"severity": "medium"
+},
+{
+"old": "mỗi ca đều kiểm mã lỗi",
+"new": "mỗi test case đều kiểm tra mã lỗi",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+}
+]
+}

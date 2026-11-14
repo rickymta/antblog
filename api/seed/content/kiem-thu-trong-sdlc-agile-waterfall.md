@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-008, sdlc, agile, waterfall, devops, shift-lef
 language: vi
 ---
 
-Cùng một quy tắc «khách huỷ sau 2 phút thì mất 10.000 đ», nhưng một đội test nó ở tuần thứ 10 của dự án, đội khác test nó ngay ngày thứ ba của sprint — và cả hai đều có thể đúng. Bài này trả lời câu hỏi: **mô hình phát triển phần mềm (SDLC) ảnh hưởng tới kiểm thử thế nào**, những thực hành tốt nào dùng được cho mọi mô hình, và DevOps, test-first, shift left, retrospective thay đổi công việc của tester ra sao. Ví dụ xuyên suốt là tính năng phí huỷ chuyến (R-CANCEL) của Tới Nơi.
+Cùng một quy tắc «khách huỷ sau 2 phút thì mất 10.000 đ», nhưng một đội test quy tắc này ở tuần thứ 10 của dự án, đội khác test ngay ngày thứ ba của sprint — và cả hai đều có thể đúng. Bài này trả lời câu hỏi: **mô hình phát triển phần mềm (SDLC) ảnh hưởng tới kiểm thử thế nào**, những thực hành tốt nào dùng được cho mọi mô hình, và DevOps, test-first, shift left, retrospective thay đổi công việc của tester ra sao. Ví dụ xuyên suốt là tính năng phí huỷ chuyến (R-CANCEL) của Tới Nơi.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-008</span>
@@ -29,7 +29,7 @@ Cùng một quy tắc «khách huỷ sau 2 phút thì mất 10.000 đ», nhưng 
 
 ## 1. Giới thiệu
 
-[TEST-007](/articles/quy-trinh-kiem-thu-test-process) cho ta bảy nhóm hoạt động test và nhấn mạnh: quy trình phải may đo theo ngữ cảnh. Trong các yếu tố ngữ cảnh, **SDLC** là yếu tố làm quy trình đổi hình dạng mạnh nhất. Nó quyết định:
+[TEST-007](/articles/quy-trinh-kiem-thu-test-process) cho ta bảy nhóm hoạt động test và nhấn mạnh: quy trình phải may đo theo ngữ cảnh. Trong các yếu tố ngữ cảnh, **SDLC** là yếu tố làm quy trình đổi hình dạng mạnh nhất. SDLC quyết định:
 
 - tester bắt đầu **chạy** được phần mềm từ tuần nào;
 - test plan là tài liệu 30 trang được ký duyệt hay vài dòng trong sprint backlog;
@@ -53,14 +53,14 @@ Bên dưới mô hình là các **phương pháp và thực hành** chi tiết h
 
 ### 2.2. SDLC ảnh hưởng tới kiểm thử ra sao (FL-2.1.1)
 
-Syllabus nêu năm thứ chịu ảnh hưởng của SDLC: **phạm vi và thời điểm** của hoạt động test (gồm test level, test type), **mức chi tiết** của tài liệu test, **lựa chọn kỹ thuật và cách tiếp cận**, **mức tự động hoá**, và **vai trò, trách nhiệm** của tester.
+Syllabus nêu năm khía cạnh chịu ảnh hưởng của SDLC: **phạm vi và thời điểm** của hoạt động test (gồm test level, test type), **mức chi tiết** của tài liệu test, **lựa chọn kỹ thuật và cách tiếp cận**, **mức tự động hoá**, và **vai trò, trách nhiệm** của tester.
 
 | Khía cạnh | Tuần tự (Waterfall, V-model) | Lặp / tăng dần | Agile |
 |---|---|---|---|
 | Khi nào test động | Muộn — code chạy được ở các pha sau; giai đoạn đầu tester review yêu cầu, làm test analysis và test design | Mỗi iteration có bản chạy được ⇒ static và dynamic testing ở mọi test level trong từng iteration | Như mô hình lặp, nhịp ngắn |
 | Tài liệu | Thường chi tiết, có ký duyệt | Tuỳ dự án | Nhẹ — vì thay đổi xảy ra suốt dự án |
 | Kỹ thuật | Thiết kế trước, có hệ thống | Kết hợp | Phần lớn test thủ công dùng kỹ thuật dựa trên kinh nghiệm (experience-based), ít phân tích trước |
-| Tự động hoá | Có thể ít | Cần cho regression vì giao hàng thường xuyên | Nhiều — để regression dễ làm |
+| Tự động hoá | Có thể ít | Cần cho regression vì chuyển giao thường xuyên | Nhiều — để regression dễ làm |
 | Phản hồi | Chậm | Cần nhanh | Cần rất nhanh |
 
 Mấu chốt: giao từng phần thường xuyên kéo theo **phản hồi nhanh và regression rộng**; không tự động hoá thì regression sẽ ngốn hết thời gian test.
@@ -88,7 +88,7 @@ Với cả ba, test có thể ở lại dưới dạng **test tự động** đ�
 
 ### 2.5. DevOps và kiểm thử (FL-2.1.4)
 
-**DevOps** là cách tiếp cận tổ chức đưa phát triển (gồm cả testing) và vận hành cùng làm việc vì mục tiêu chung. Nó đòi hỏi thay đổi văn hoá, coi trọng ngang nhau hai phía; khuyến khích đội tự chủ, phản hồi nhanh, chuỗi công cụ tích hợp và các thực hành **CI** (continuous integration) và **CD** (continuous delivery), qua một **delivery pipeline**.
+**DevOps** là cách tiếp cận tổ chức đưa phát triển (gồm cả testing) và vận hành cùng làm việc vì mục tiêu chung. DevOps đòi hỏi thay đổi văn hoá, coi trọng ngang nhau hai phía; khuyến khích đội tự chủ, phản hồi nhanh, chuỗi công cụ tích hợp và các thực hành **CI** (continuous integration) và **CD** (continuous delivery), qua một **delivery pipeline**.
 
 | Lợi ích cho testing | Rủi ro / thách thức |
 |---|---|
@@ -159,7 +159,7 @@ Tính năng: **khách huỷ chuyến và phí huỷ**. Trích `SPEC.md` của la
 - **Hệ thống đích** (tài liệu kiến trúc §4.4, §4.9, §9.2): Booking Service nhận lệnh huỷ (idempotent theo khách + khoá), phát `BookingCancelled` qua outbox/Kafka; Trip Service chuyển trạng thái; Payment & Wallet thu phí qua cổng VíXanh có idempotency; nếu đã giữ khuyến mãi hay uỷ quyền thanh toán thì Saga chạy bước bù (release/void). Mỗi service có pipeline CI/CD riêng (§17).
 - **Lab:** hàm thuần `customerCancellationFee` trong `src/domain/cancel.ts`, use case `cancelByCustomer` trong `src/app/trips.ts`, ví VíXanh giả có chế độ `timeout`, `lost_response`. Chưa có Kafka, Saga hay pipeline CI/CD thật — lab tương ứng bước «unit/component test» của pipeline.
 
-### 3.3. Hai bối cảnh giao hàng (giả định)
+### 3.3. Hai bối cảnh chuyển giao (giả định)
 
 - **Bối cảnh A — Waterfall 3 tháng.** Tới Nơi thuê một đối tác làm «Gói chính sách huỷ chuyến» theo hợp đồng trọn gói: phạm vi chốt từ đầu, nghiệm thu một lần ở tuần 12, đội test độc lập của Tới Nơi.
 - **Bối cảnh B — Scrum, sprint 2 tuần + CI.** Đội sản phẩm Booking tự làm; story «Khách huỷ chuyến» vào sprint, pipeline theo §17 của tài liệu kiến trúc chạy sau mỗi lần merge.
@@ -172,7 +172,7 @@ Tính năng: **khách huỷ chuyến và phí huỷ**. Trích `SPEC.md` của la
 | Thu phí hai lần khi cổng VíXanh timeout rồi thử lại | Cần test tích hợp với ví giả; ở Waterfall chỉ thấy ở pha test hệ thống |
 | Huỷ bị chặn khi thu phí lỗi (trái R-PAY-06) | Lỗi ở ranh giới hai service — dễ lọt nếu mỗi đội chỉ test phần mình |
 | Luật đổi giữa chừng (vd vận hành muốn 3 phút thay vì 2) | Waterfall: change request, điều chỉnh hợp đồng; Agile: một item backlog, sửa test trong sprint |
-| Regression: sửa phí huỷ làm hỏng tính cước | Giao hàng thường xuyên cần regression tự động rộng |
+| Regression: sửa phí huỷ làm hỏng tính cước | Chuyển giao thường xuyên cần regression tự động rộng |
 
 ## 4. Phân tích kỹ thuật
 
@@ -247,7 +247,7 @@ Tài liệu kiến trúc §17 đặt pipeline mười bước cho mỗi service.
 
 ### 5.1. So sánh hai bối cảnh: khi nào, ai, tài liệu gì
 
-Đây là bài thực hành của bài: cùng tính năng R-CANCEL, hai cách tổ chức test.
+Đây là phần thực hành của bài: cùng tính năng R-CANCEL, hai cách tổ chức test.
 
 | Câu hỏi | A — Waterfall 3 tháng (13 tuần) | B — Scrum, sprint 2 tuần + CI |
 |---|---|---|
@@ -352,7 +352,7 @@ Kết quả ghi vào phần bài học của test completion report của sprint
 
 - **«Agile không cần tài liệu» là hiểu sai.** Syllabus nói tài liệu **nhẹ**, không nói không có. Ở Tới Nơi, phần chạm tới tiền (phí huỷ, VíXanh) vẫn cần bằng chứng truy vết được — ngữ cảnh domain (FL-1.4.2) có thể đòi nhiều tài liệu hơn ngay trong đội Scrum.
 - **Waterfall vẫn shift left được.** V-model gắn mỗi pha phát triển với một test level và đẩy test analysis/design sớm. Cái Waterfall không làm được là **test động** sớm, vì chưa có code chạy.
-- **DevOps không xoá test thủ công.** Pipeline giỏi lặp lại cái đã biết; nó không tự hỏi «thông báo phí huỷ có làm khách hiểu nhầm không». Ứng dụng di động còn có một ràng buộc khác: bản app qua cửa hàng ứng dụng không «deploy liên tục» như backend.
+- **DevOps không xoá test thủ công.** Pipeline giỏi lặp lại cái đã biết; pipeline không tự hỏi «thông báo phí huỷ có làm khách hiểu nhầm không». Ứng dụng di động còn có một ràng buộc khác: bản app qua cửa hàng ứng dụng không «deploy liên tục» như backend.
 - **Rủi ro của automation trong DevOps:** test chập chờn (flaky) làm đội quen bỏ qua CI đỏ; pipeline chậm làm phản hồi hết «nhanh»; bộ test lớn cần người bảo trì — đúng như syllabus liệt kê ở mặt thách thức.
 - **Microservices làm tăng giá trị của contract test.** Booking và Payment deploy độc lập; nếu không có bước 4 của pipeline, một thay đổi schema `BookingCancelled` chỉ lộ ra ở staging. Ngược lại, tách service quá sớm (anti-pattern 11 của tài liệu kiến trúc) nhân số pipeline phải duy trì.
 - **Shift left không phải «chỉ test sớm».** Test non-functional từ component level là shift left, nhưng tải thật 70 chuyến/giây vẫn phải đo trên môi trường gần production. Các thực hành quan sát trên production («shift right») là kiến thức ngành, ngoài syllabus.

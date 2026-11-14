@@ -1,0 +1,13 @@
+{"file":"maintenance-testing.md","edits":[
+{"old":"Nó không phải một kỹ thuật mới: nó dùng lại","new":"Đây không phải một kỹ thuật mới: kiểm thử bảo trì dùng lại","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng ở đầu câu","severity":"medium"},
+{"old":"và kiểm hồi quy ở phần **không đổi**","new":"và regression testing ở phần **không đổi**","reason":"Thống nhất 'regression testing' như cả bài","severity":"medium"},
+{"old":"Chọn test hồi quy khi phạm vi lớn","new":"Chọn regression test khi phạm vi lớn","reason":"Thống nhất 'regression test'","severity":"low"},
+{"old":"đúng kiểu «hậu quả ở phần khác» syllabus nói.","new":"đúng kiểu «hậu quả ở phần khác» mà syllabus nêu.","reason":"Thiếu quan hệ từ, câu cụt","severity":"low"},
+{"old":"**Ca không nhạy** (M-04, M-05, mọi ca ô tô)","new":"**Test case không nhạy** (M-04, M-05, mọi test case ô tô)","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"phải dùng ca có kết quả đổi, như M-01.","new":"phải dùng test case có kết quả đổi, như M-01.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"không bị lưu trữ âm thầm mà được liệt kê","new":"không bị lưu trữ lặng lẽ mà được liệt kê","reason":"'âm thầm' là calque của 'silently'","severity":"medium"},
+{"old":"**Cần nghiệp vụ quyết**, chạy ở staging","new":"**Cần bộ phận nghiệp vụ quyết định**, chạy ở staging","reason":"Câu cụt, thiếu danh từ và động từ","severity":"medium"},
+{"old":"Bốn ca chạy ở 11:30","new":"Bốn test case chạy ở 11:30","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"confirmation trên ca mưa, regression nhắm đích","new":"confirmation trên test case có mưa, regression nhắm đích","reason":"'ca mưa' là cụm tự ghép","severity":"medium"},
+{"old":"kiểm thử restore định kỳ cho cùng lý do.","new":"kiểm thử restore định kỳ vì cùng lý do.","reason":"Calque 'for the same reason'","severity":"low"}
+]}

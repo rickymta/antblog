@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-032, boundary-value-analysis, black-box, test-
 language: vi
 ---
 
-Ở [TEST-031](/articles/equivalence-partitioning), một bản cài đặt «kiểm khoảng rồi mới làm tròn quãng đường» qua mặt cả bộ ca phân vùng tương đương: nó chỉ sai trong dải 0,45–0,49 km và 100,01–100,04 km. Boundary Value Analysis (BVA — phân tích giá trị biên) sinh ra cho đúng loại lỗi đó. Bài trả lời ba câu: **biên nằm ở đâu, chọn bao nhiêu giá trị quanh mỗi biên, và khi đầu vào bị làm tròn thì biên nằm trên giá trị nào?**
+Ở [TEST-031](/articles/equivalence-partitioning), một bản cài đặt «kiểm tra khoảng rồi mới làm tròn quãng đường» qua mặt cả bộ test case phân vùng tương đương: nó chỉ sai trong dải 0,45–0,49 km và 100,01–100,04 km. Boundary Value Analysis (BVA — phân tích giá trị biên) sinh ra cho đúng loại lỗi đó. Bài trả lời ba câu: **biên nằm ở đâu, chọn bao nhiêu giá trị quanh mỗi biên, và khi đầu vào bị làm tròn thì biên nằm trên giá trị nào?**
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-032</span>
@@ -21,7 +21,7 @@ language: vi
 <tr><th scope="row">Test Type</th><td>Functional; Black-box</td></tr>
 <tr><th scope="row">Test Technique</th><td>Boundary Value Analysis</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/equivalence-partitioning">TEST-031 · Equivalence Partitioning</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>BVA cho quãng đường (0,44/0,45; 100,04/100,05 — R-FARE-02), khối lượng (0,04/0,05; 30,04/30,05 — R-PARCEL-01), ngưỡng xe máy 20,0/20,1 kg (R-PARCEL-02), giờ 10:59:59/11:00:00/12:59:59/13:00:00 (R-FARE-04); so số ca 2-value với 3-value — lab <code>articles/boundary-value-analysis</code> (76 ca vitest)</td></tr>
+<tr><th scope="row">Thực hành</th><td>BVA cho quãng đường (0,44/0,45; 100,04/100,05 — R-FARE-02), khối lượng (0,04/0,05; 30,04/30,05 — R-PARCEL-01), ngưỡng xe máy 20,0/20,1 kg (R-PARCEL-02), giờ 10:59:59/11:00:00/12:59:59/13:00:00 (R-FARE-04); so số test case 2-value với 3-value — lab <code>articles/boundary-value-analysis</code> (76 test vitest)</td></tr>
 <tr><th scope="row">Tham chiếu ISTQB</th><td>CTFL v4.0.1 · Chương 4 · mục 4.2.2 · FL-4.2.2 (K3). Đọc thêm: CTAL-TA v4.0 · Chương 3 · mục 3.1.1 · TA-3.1.1 (K3) — domain testing tổng quát hoá BVA, đi sâu ở TEST-040</td></tr>
 </tbody>
 </table>
@@ -92,7 +92,7 @@ Hai khung cao điểm chiếm 50% số chuyến trong ngày ([hồ sơ dự án]
 
 ### 3.2. System context
 
-Trong kiến trúc đích, quãng đường do **Pricing & Quote Service** (kiến trúc §4.3) lấy từ bản đồ MapViet — một số thực có nhiều chữ số lẻ, không phải số «đẹp» người test hay gõ tay. Giờ cao điểm đọc từ đồng hồ hệ thống; kiến trúc §17.2 yêu cầu *clock abstraction* để test được hết hạn và mốc thời gian. Lab có đúng các móc đó: `FixedClock` + `vnTime(…)` tạo thời điểm giờ VN chính xác tới giây; quãng đường do client gửi thẳng (R-GEN-06).
+Trong kiến trúc đích, quãng đường do **Pricing & Quote Service** (kiến trúc §4.3) lấy từ bản đồ MapViet — một số thực có nhiều chữ số lẻ, không phải số «đẹp» người test hay gõ tay. Giờ cao điểm đọc từ đồng hồ hệ thống; kiến trúc §17.2 yêu cầu *clock abstraction* để test được hết hạn và mốc thời gian. Lab có đúng những hook đó: `FixedClock` + `vnTime(…)` tạo thời điểm giờ VN chính xác tới giây; quãng đường do client gửi thẳng (R-GEN-06).
 
 Biên ở Tới Nơi vì thế nằm trên **hai lớp giá trị**: giá trị **thô** (client hoặc MapViet gửi) và giá trị **sau làm tròn** (thứ quy tắc thật sự so sánh).
 
@@ -189,7 +189,7 @@ D1 không có biên dưới, D3 không có biên trên (không chặn) — nên 
 
 ### 4.2. Bước 2 — coverage item 2-value và 3-value
 
-Lab sinh coverage item bằng hàm, không gõ tay: mỗi miền là danh sách phân vùng liền nhau theo **số nguyên bước** độ chính xác (0,45 km = 45 bước 0,01), tránh sai số dấu phẩy động khi tính «±1 bước». Kết quả (ca `bva-items.test.ts`):
+Lab sinh coverage item bằng hàm, không gõ tay: mỗi miền là danh sách phân vùng liền nhau theo **số nguyên bước** độ chính xác (0,45 km = 45 bước 0,01), tránh sai số dấu phẩy động khi tính «±1 bước». Kết quả (các test case trong `bva-items.test.ts`):
 
 | Miền | 2-value | 3-value | Số item 2v → 3v |
 |---|---|---|---|
@@ -208,7 +208,7 @@ Lab sinh coverage item bằng hàm, không gõ tay: mỗi miền là danh sách 
 Hai khung cao điểm chia ngày thành 5 phân vùng có thứ tự (sáng · trưa cao điểm · chiều · tối cao điểm · tối). Ba điểm dễ sai:
 
 - **Nửa đêm không phải biên của quy tắc này.** Đêm 19:00 → 10:59:59 hôm sau là **một** phân vùng «giờ thường» vòng qua 00:00. Nửa đêm *là* biên của quy tắc khác — ngày hiệu lực voucher (R-VOUCHER-04) và lượt dùng trong ngày (R-VOUCHER-07).
-- **Biên nằm ở giờ Việt Nam.** 11:00:00 VN = 04:00:00 UTC. Ca test phải dựng thời điểm bằng `vnTime(…)`; dùng `new Date(2026, 10, 4, 11)` thì kết quả phụ thuộc múi giờ máy chạy test, và ca có thể xanh trên máy dev ở Việt Nam, đỏ trên CI chạy UTC.
+- **Biên nằm ở giờ Việt Nam.** 11:00:00 VN = 04:00:00 UTC. Test case phải dựng thời điểm bằng `vnTime(…)`; dùng `new Date(2026, 10, 4, 11)` thì kết quả phụ thuộc múi giờ máy chạy test, và test case có thể xanh trên máy dev ở Việt Nam, đỏ trên CI chạy UTC.
 - **Độ chính xác 1 giây là giả định.** Nếu yêu cầu được nhận với mili giây, hàng xóm của 11:00:00.000 là 10:59:59.999. Lab và SPEC dùng giây; đáng hỏi lại khi đặc tả nói «tính theo thời điểm hệ thống nhận yêu cầu».
 
 <figure class="tkh-fig">
@@ -240,13 +240,13 @@ Hai khung cao điểm chia ngày thành 5 phân vùng có thứ tự (sáng · t
 
 ### 4.4. Kết quả mong đợi suy từ phân vùng, không từ code
 
-Với mỗi coverage item, kết quả mong đợi là kết quả của **phân vùng chứa nó**: 0,46 km thuộc D2 ⇒ hợp lệ; 100,05 thuộc D3 ⇒ `DISTANCE_OUT_OF_RANGE`; 12:59:59 thuộc «cao điểm trưa» ⇒ `peak = true`. Lab tính mong đợi bằng cùng mô hình phân vùng (`inValidPartition`) — không gọi hàm của sản phẩm để biết «đáng lẽ ra gì».
+Với mỗi coverage item, kết quả mong đợi là kết quả của **phân vùng chứa nó**: 0,46 km thuộc D2 ⇒ hợp lệ; 100,05 thuộc D3 ⇒ `DISTANCE_OUT_OF_RANGE`; 12:59:59 thuộc «cao điểm trưa» ⇒ `peak = true`. Lab tính mong đợi bằng cùng mô hình phân vùng (`inValidPartition`) — không gọi hàm của sản phẩm để biết «đáng lẽ phải ra kết quả gì».
 
 ## 5. Thực hành
 
-**Đề bài (curriculum TEST-032):** áp BVA cho quãng đường (0,44/0,45; 100,04/100,05), khối lượng (0,04/0,05; 30,04/30,05), ngưỡng xe máy 20,0/20,1 kg và giờ 10:59:59/11:00:00/12:59:59/13:00:00; so số test 2-value với 3-value. Tự làm trước, rồi so với lời giải.
+**Đề bài (curriculum TEST-032):** áp BVA cho quãng đường (0,44/0,45; 100,04/100,05), khối lượng (0,04/0,05; 30,04/30,05), ngưỡng xe máy 20,0/20,1 kg và giờ 10:59:59/11:00:00/12:59:59/13:00:00; so số test case 2-value với 3-value. Tự làm trước, rồi so với lời giải.
 
-### 5.1. Test case mức component (3-value, 52 ca)
+### 5.1. Test case mức component (3-value, 52 test case)
 
 | Nhóm | Test item | Giá trị | Mong đợi |
 |---|---|---|---|
@@ -255,9 +255,9 @@ Với mỗi coverage item, kết quả mong đợi là kết quả của **phân
 | Ngưỡng xe máy | `assertVehicleFits(normalizeWeightKg(kg), …)` | 19,9 · 20,0 · 20,1 · 20,2 | xe máy được với 19,9 và 20,0; ô tô được với cả bốn |
 | Giờ cao điểm | `isPeakTime(vnTime(2026, 11, 4, h, m, s))` | 16 thời điểm | `true` ⇔ trong [11:00; 13:00) hoặc [17:00; 19:00) |
 
-### 5.2. Test case mức system qua API (14 ca)
+### 5.2. Test case mức system qua API (14 test case)
 
-Biên phải còn đúng **sau khi** đi qua lớp định dạng, quy tắc đầu vào và tính cước. Lab chọn các ca 2-value trên giá trị thô (giá trị client thật sự gửi):
+Biên phải còn đúng **sau khi** đi qua lớp định dạng, quy tắc đầu vào và tính cước. Lab chọn các test case 2-value trên giá trị thô (giá trị client thật sự gửi):
 
 | Mã | Yêu cầu `POST /api/quotes` | Mong đợi | Oracle |
 |---|---|---|---|
@@ -291,7 +291,7 @@ export function threeValueItems(domain: OrderedDomain): number[] {
 }
 ```
 
-Ca biên giờ qua API — đồng hồ giả đặt đúng giây (`bva-api.test.ts`, rút gọn):
+Test case biên giờ qua API — đồng hồ giả đặt đúng giây (`bva-api.test.ts`, rút gọn):
 
 ```ts
 it.each([
@@ -322,11 +322,11 @@ Kết quả thực tế (vitest 3.2.7, Node 22, lần chạy khi viết bài):
       Tests  76 passed (76)
 ```
 
-Bản cài đặt của lab qua hết 66 ca biên (52 component + 14 API). Để biết bộ ca **có khả năng** bắt lỗi biên hay không, phải cho nó chạy trên bản sai.
+Bản cài đặt của lab qua hết 66 test case biên (52 component + 14 API). Để biết bộ test case **có khả năng** bắt lỗi biên hay không, phải chạy bộ đó trên bản sai.
 
-### 5.4. Bốn bộ ca trên ba lỗi cố ý
+### 5.4. Bốn bộ test case trên ba lỗi cố ý
 
-`bien-loi.ts` chứa ba bản cài đặt sai, mỗi bản là một lỗi biên thật người ta hay viết. `bva-so-sanh.test.ts` chạy bốn bộ ca — thô/sau làm tròn × 2-value/3-value — và ghi lại giá trị nào cho kết quả khác bản đúng (ca đỏ):
+`bien-loi.ts` chứa ba bản cài đặt sai, mỗi bản là một lỗi biên thật người ta hay viết. `bva-so-sanh.test.ts` chạy bốn bộ test case — thô/sau làm tròn × 2-value/3-value — và ghi lại giá trị nào cho kết quả khác bản đúng (test case đỏ):
 
 | Lỗi cố ý | Thô 2-value | Thô 3-value | Sau làm tròn 2-value | Sau làm tròn 3-value |
 |---|---|---|---|---|
@@ -334,7 +334,7 @@ Bản cài đặt của lab qua hết 66 ca biên (52 component + 14 API). Để
 | **T** — quãng đường: làm tròn bằng `Number(raw.toFixed(1))` | **100,05** | **100,05** | — | — |
 | **K** — khối lượng: từ chối khi `kg === 0` thay vì `kg <= 0` | — | — | — | **−0,1** |
 
-(— = không ca nào đỏ: lỗi lọt.)
+(— = không test case nào đỏ: lỗi lọt.)
 
 Đọc ma trận:
 
@@ -350,7 +350,7 @@ Bản cài đặt của lab qua hết 66 ca biên (52 component + 14 API). Để
 
 **BVA một chiều không phủ tương tác.** «20,1 kg xe máy» là biên của *tổ hợp* khối lượng × loại xe. Khi biên là một biểu thức nhiều biến (vd quãng đường × khối lượng quyết định giá), cần domain testing với điểm ON/OFF — [TEST-040](/articles/data-based-test-techniques-domain-testing).
 
-**Biên thay đổi theo phiên bản giá.** `pricingVersion` (R-QUOTE-02) cho phép đổi bảng giá. Khung cao điểm thành [10:30; 13:30) thì toàn bộ ca biên giờ phải sinh lại — lý do lab sinh coverage item từ mô hình thay vì gõ tay.
+**Biên thay đổi theo phiên bản giá.** `pricingVersion` (R-QUOTE-02) cho phép đổi bảng giá. Khung cao điểm thành [10:30; 13:30) thì toàn bộ test case biên giờ phải sinh lại — lý do lab sinh coverage item từ mô hình thay vì gõ tay.
 
 **Sai lầm thường gặp:**
 
@@ -369,7 +369,7 @@ Bản cài đặt của lab qua hết 66 ca biên (52 component + 14 API). Để
 
 R-CANCEL-02: khách huỷ chuyến `accepted` khi `now − acceptedAt < 2 phút` thì miễn phí; đúng 2:00 thì có phí. R-CANCEL-04: nếu `now > acceptedAt + etaMinutes + 10 phút` thì miễn phí do tài xế trễ; đúng bằng mốc vẫn thu. Với `etaMinutes = 5`, độ chính xác 1 giây, liệt kê coverage item 2-value và 3-value cho **thời gian từ lúc nhận chuyến tới lúc huỷ**, kèm `feeReason` mong đợi.
 
-<details><summary><b>Lời giải mẫu</b></summary><ul><li>Phân vùng (theo thời gian trôi): [0; 1:59] <code>grace_period</code> · [2:00; 15:00] <code>charged</code> · ≥ 15:01 <code>driver_late</code>.</li><li><b>2-value</b> (4 item): 1:59 → grace_period; 2:00 → charged; 15:00 → charged; 15:01 → driver_late.</li><li><b>3-value</b> (8 item): thêm 1:58 (grace_period), 2:01 (charged), 14:59 (charged), 15:02 (driver_late).</li><li>Biên dưới 0:00 (huỷ ngay khi nhận) là biên của phân vùng đầu tiên nhưng không có phân vùng kề phía dưới (thời gian âm không xảy ra) — ghi nhận và thử 0:00 như một ca EP.</li><li>Bẫy hay gặp: dùng <code>&lt;=</code> ở R-CANCEL-04 làm 15:00 thành miễn phí — chỉ ca 15:00 lộ ra.</li></ul></details>
+<details><summary><b>Lời giải mẫu</b></summary><ul><li>Phân vùng (theo thời gian trôi): [0; 1:59] <code>grace_period</code> · [2:00; 15:00] <code>charged</code> · ≥ 15:01 <code>driver_late</code>.</li><li><b>2-value</b> (4 item): 1:59 → grace_period; 2:00 → charged; 15:00 → charged; 15:01 → driver_late.</li><li><b>3-value</b> (8 item): thêm 1:58 (grace_period), 2:01 (charged), 14:59 (charged), 15:02 (driver_late).</li><li>Biên dưới 0:00 (huỷ ngay khi nhận) là biên của phân vùng đầu tiên nhưng không có phân vùng kề phía dưới (thời gian âm không xảy ra) — ghi nhận và thử 0:00 như một test case EP.</li><li>Bẫy hay gặp: dùng <code>&lt;=</code> ở R-CANCEL-04 làm 15:00 thành miễn phí — chỉ giá trị 15:00 lộ ra.</li></ul></details>
 
 ### Bài tập 2 — Tiền món tối thiểu
 
@@ -406,7 +406,7 @@ R-FOOD-02, R-FOOD-03: đơn giá là bội số 1.000 đ; tiền món &lt; 30.00
 
 <details><summary><b>Đáp án: c</b></summary><ul><li>8 giá trị biên (10:59:59, 11:00:00, 12:59:59, 13:00:00 và bốn giá trị của khung tối); mỗi giá trị biên thêm hàng xóm phía trong phân vùng của nó: 10:59:58, 11:00:01, 12:59:58, 13:00:01, … ⇒ 16.</li><li>a) Sai — đó là 2-value.</li><li>b) Sai — chỉ thêm hàng xóm cho một nửa số biên.</li><li>d) Sai — đếm trùng: hàng xóm phía ngoài của mỗi biên đã là giá trị biên của phân vùng kề.</li></ul></details>
 
-**Câu 4 (K2).** Kiểm khối lượng được cài đặt nhầm `kg === 0` thay vì `kg <= 0` (trên giá trị sau làm tròn 0,1). Vì sao 3-value BVA tìm được lỗi còn 2-value thì không?
+**Câu 4 (K2).** Phần kiểm tra khối lượng được cài đặt nhầm `kg === 0` thay vì `kg <= 0` (trên giá trị sau làm tròn 0,1). Vì sao 3-value BVA tìm được lỗi còn 2-value thì không?
 
 - a) 3-value thử nhiều phân vùng hơn
 - b) 3-value thêm hàng xóm −0,1 phía trong phân vùng không hợp lệ; với 0,0 và 0,1 bản sai cho kết quả giống bản đúng
@@ -431,7 +431,7 @@ R-FOOD-02, R-FOOD-03: đơn giá là bội số 1.000 đ; tiền món &lt; 30.00
 - c) Hàm làm tròn sai với một số giá trị thô như 100,05
 - d) Mã lỗi trả về sai
 
-<details><summary><b>Đáp án: c</b></summary><ul><li>a) Sai — 100,1 bị nhận sẽ lộ lỗi.</li><li>b) Sai — 0,5 bị từ chối sẽ lộ lỗi.</li><li>c) Đúng — giá trị đã «tròn» không đi qua đường sai của phép làm tròn (lỗi T ở mục 5.4).</li><li>d) Sai — mỗi ca đều kiểm mã lỗi.</li></ul></details>
+<details><summary><b>Đáp án: c</b></summary><ul><li>a) Sai — 100,1 bị nhận sẽ lộ lỗi.</li><li>b) Sai — 0,5 bị từ chối sẽ lộ lỗi.</li><li>c) Đúng — giá trị đã «tròn» không đi qua đường sai của phép làm tròn (lỗi T ở mục 5.4).</li><li>d) Sai — mỗi test case đều kiểm tra mã lỗi.</li></ul></details>
 
 ## 8. Tài liệu tham khảo
 

@@ -31,7 +31,7 @@ language: vi
 
 Nhiều failure chỉ xuất hiện khi **hai điều kiện cùng lúc** đúng: iOS **và** trả bằng VíXanh; bản web **và** mạng yếu. Từng giá trị riêng lẻ đều đã được test, nhưng tổ hợp gây lỗi thì chưa. Test mọi tổ hợp thì số test là **tích** số giá trị của mọi tham số — tăng theo cấp số nhân khi thêm tham số.
 
-Pairwise testing chọn một bộ nhỏ sao cho **mọi cặp giá trị của mọi hai tham số** xuất hiện ít nhất một lần. Số test lúc đó tăng rất chậm theo số tham số, vì mỗi test phủ nhiều cặp cùng lúc.
+Pairwise testing chọn một bộ nhỏ sao cho **mọi cặp giá trị của mọi cặp tham số** xuất hiện ít nhất một lần. Số test lúc đó tăng rất chậm theo số tham số, vì mỗi test phủ nhiều cặp cùng lúc.
 
 Dùng pairwise khi:
 
@@ -115,7 +115,7 @@ Kịch bản chạy trên **mỗi** cấu hình là cùng một test case hệ t
 - **Trùng giao dịch**: client trên mạng yếu sinh khoá idempotency mới khi bấm lại ⇒ hai chuyến, có thể hai lần thu tiền (rủi ro hàng đầu của tài liệu kiến trúc).
 - **Mất kết quả thanh toán**: chuyển sang app VíXanh rồi quay lại, app bị hệ điều hành dừng ⇒ khách không thấy kết quả, đặt lại.
 - **Sai số tiền hiển thị**: phí huỷ thiếu bản dịch hoặc định dạng theo locale sai.
-- **Lỗi riêng một nền tảng mà chỉ đo trên nền tảng khác**: đội test chỉ dùng Android mới nhất cho mọi kịch bản.
+- **Lỗi riêng một nền tảng mà chỉ test trên nền tảng khác**: đội test chỉ dùng Android mới nhất cho mọi kịch bản.
 
 ## 4. Phân tích kỹ thuật
 
@@ -135,11 +135,11 @@ Giữ `phienBan` **trừu tượng** (cũ nhất/phổ biến/mới nhất) thay
 
 ### 4.2 Each-choice chưa đủ
 
-Each-choice cần 3 test (mỗi giá trị xuất hiện một lần). Bộ 3 test của lab chỉ phủ **29/67 cặp**. Nó vẫn đi qua iOS và VíXanh, nhưng có thể không bao giờ đặt chúng **cùng một test**.
+Each-choice cần 3 test (mỗi giá trị xuất hiện một lần). Bộ 3 test của lab chỉ phủ **29/67 cặp**. Bộ này vẫn đi qua iOS và VíXanh, nhưng có thể không bao giờ đặt chúng **cùng một test**.
 
 ### 4.3 Sinh bộ pairwise
 
-Bộ sinh của lab (`pairwise.ts`) làm theo cách đơn giản nhất: liệt kê 108 tổ hợp, mỗi vòng chọn tổ hợp phủ **nhiều cặp chưa phủ nhất**, dừng khi đủ 67 cặp. Kết quả: **12 test**. Đây là kiểu thuật toán tham lam mà nhiều công cụ dùng (biến thể khác nhau về cách dựng hàng), và nó **không bảo đảm tối thiểu** — đúng như syllabus nói.
+Bộ sinh của lab (`pairwise.ts`) làm theo cách đơn giản nhất: liệt kê 108 tổ hợp, mỗi vòng chọn tổ hợp phủ **nhiều cặp chưa phủ nhất**, dừng khi đủ 67 cặp. Kết quả: **12 test**. Đây là kiểu thuật toán tham lam mà nhiều công cụ dùng (biến thể khác nhau về cách dựng hàng), và kiểu này **không bảo đảm bộ tối thiểu** — đúng như syllabus nói.
 
 Dựng tay từ mảng trực giao L9 cho **9 test** — chạm cận dưới:
 
@@ -186,7 +186,7 @@ Dựng tay từ mảng trực giao L9 cho **9 test** — chạm cận dưới:
 
 ### 4.4 Ràng buộc (giới thiệu)
 
-Nếu bản web chưa tích hợp VíXanh, cặp `(Web, vixanh)` **không khả thi**. Nó phải bị loại khỏi cả bộ test lẫn **mẫu số** của độ phủ: còn 90 tổ hợp, 66 cặp khả thi. Không loại khỏi mẫu số thì độ phủ không bao giờ đạt 100%; không loại khỏi bộ test thì công cụ sinh ra test không chạy được. Cách mô hình hoá ràng buộc kỹ hơn ở TEST-038.
+Nếu bản web chưa tích hợp VíXanh, cặp `(Web, vixanh)` **không khả thi**. Cặp này phải bị loại khỏi cả bộ test lẫn **mẫu số** của độ phủ: còn 90 tổ hợp, 66 cặp khả thi. Không loại khỏi mẫu số thì độ phủ không bao giờ đạt 100%; không loại khỏi bộ test thì công cụ sinh ra test không chạy được. Cách mô hình hoá ràng buộc kỹ hơn ở TEST-038.
 
 ## 5. Thực hành
 
@@ -286,7 +286,7 @@ Lab không có app di động, nên bài gài 5 lỗi **hư cấu** (không ph�
 
 - **Bảo đảm**: một bộ đạt 100% pairwise coverage chắc chắn chứa mọi cặp, nên chắc chắn kích hoạt mọi lỗi bậc 1 và bậc 2 (trong mô hình). Test `pairwise.test.ts` khẳng định điều này cho cả hai bộ.
 - **Không bảo đảm**: bộ tham lam bắt F5 mà bỏ F4; bộ L9 làm ngược lại. Nếu F4 là rủi ro cao (thanh toán), «tin vào may» là không đủ — xem mục 6.
-- **Each-choice** với 3 test chạm F2, F3 chỉ vì ba hàng tình cờ đặt đúng giá trị cạnh nhau; nó chỉ phủ 29/67 cặp.
+- **Each-choice** với 3 test chạm F2, F3 chỉ vì ba hàng tình cờ đặt đúng giá trị cạnh nhau; bộ này chỉ phủ 29/67 cặp.
 - **Ngẫu nhiên cùng ngân sách** (12 hàng khác nhau, 1.000 lần): trung bình 85,3% cặp, **không lần nào** đủ 100%; trượt F3 khoảng 1/5 số lần. Pairwise thắng ở chỗ biến một xác suất thành một bảo đảm, với cùng số test.
 
 <div class="tkh-callout tkh-callout--warn">
@@ -300,9 +300,9 @@ Lab không có app di động, nên bài gài 5 lỗi **hư cấu** (không ph�
 
 **Chất lượng mô hình quyết định tất cả.** Pairwise phủ cặp của **giá trị bạn đã chọn**. Gom «Android 10–16» thành một lớp mà lỗi chỉ ở Android 12 thì không bộ nào bắt được. Chọn giá trị là việc của EP, BVA và phân tích rủi ro (thị phần, lịch sử lỗi) — xem [TEST-031](/articles/equivalence-partitioning) và TEST-089 (Series 08) về chọn ma trận thiết bị theo thị phần.
 
-**Giá trị không hợp lệ che lẫn nhau.** Nếu mô hình chứa giá trị gây lỗi chặn (ví dụ «chưa đăng nhập»), mọi hàng có giá trị đó dừng sớm và các cặp còn lại của hàng coi như **chưa được thử**. Đặt giá trị không hợp lệ ra ngoài mô hình pairwise, test riêng từng cái — TEST-038 đo hiện tượng này trên voucher.
+**Giá trị không hợp lệ che lẫn nhau.** Nếu mô hình chứa giá trị gây lỗi chặn (ví dụ «chưa đăng nhập»), mọi hàng có giá trị đó dừng sớm và các cặp còn lại của hàng đó được coi như **chưa được thử**. Đặt giá trị không hợp lệ ra ngoài mô hình pairwise, test riêng từng cái — TEST-038 đo hiện tượng này trên voucher.
 
-**Bộ test không ổn định khi mô hình đổi.** Thêm một giá trị là công cụ có thể sinh bộ khác hẳn, làm mất lịch sử chạy theo hàng. Cố định seed, lưu bộ đã sinh cùng mô hình trong repo, và chỉ sinh lại khi mô hình đổi.
+**Bộ test không ổn định khi mô hình đổi.** Chỉ thêm một giá trị, công cụ cũng có thể sinh ra bộ khác hẳn, làm mất lịch sử chạy theo hàng. Cố định seed, lưu bộ đã sinh cùng mô hình trong repo, và chỉ sinh lại khi mô hình đổi.
 
 **Pairwise không phải oracle.** Kỹ thuật chỉ chọn **đầu vào**. Kết quả mong đợi vẫn từ SPEC (mục 5.1). Với cấu hình, oracle thường giống nhau ở mọi hàng — đó là điểm mạnh của cách dùng thứ nhất.
 
@@ -398,7 +398,7 @@ Lab không có app di động, nên bài gài 5 lỗi **hư cấu** (không ph�
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>b)</b> đúng — syllabus dẫn nghiên cứu Kuhn et al. (2004), nhấn mạnh phạm vi hạn chế (khoảng 97%). a) sai: chỉ bảo đảm chạm mọi cặp, như F4/F5 trong bài. c) sai: hiếm hơn chứ không không tồn tại. d) sai: syllabus nói tìm bộ tối thiểu nói chung là khó.</p>
+<p><b>b)</b> đúng — syllabus dẫn nghiên cứu Kuhn et al. (2004), nhấn mạnh phạm vi hạn chế (khoảng 97%). a) sai: chỉ bảo đảm chạm mọi cặp, như F4/F5 trong bài. c) sai: hiếm hơn chứ không phải không tồn tại. d) sai: syllabus nói tìm bộ tối thiểu nói chung là khó.</p>
 </details>
 
 **Câu 6 (K3).** Đội đã có bộ pairwise 9 test. Sự cố production cho thấy thanh toán VíXanh lỗi trên Android cũ nhất ở mạng 4G — tổ hợp không có trong bộ. Rủi ro thanh toán được đánh giá cao. Cách nào phù hợp nhất với ít chi phí?

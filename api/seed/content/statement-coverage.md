@@ -31,7 +31,7 @@ Bộ test báo giá của Tới Nơi xanh hết, nhưng có ai biết những d�
 
 **Statement testing** (kiểm thử câu lệnh) là kỹ thuật **white-box** (hộp trắng): thiết kế test dựa trên **cấu trúc code**, không chỉ dựa trên đặc tả. Đơn vị cần phủ là **câu lệnh thực thi được**; thước đo là **statement coverage** — bao nhiêu phần trăm câu lệnh đã chạy ít nhất một lần.
 
-Nó giải quyết một điểm mù của kỹ thuật hộp đen (Series 04): bạn chia lớp tương đương, lấy giá trị biên, dựng bảng quyết định — nhưng không biết bộ test đó **đã chạm vào phần nào của code**. Một nhánh xử lý đồ ăn chưa từng chạy thì mọi defect trong đó chắc chắn chưa có cơ hội lộ ra.
+Kỹ thuật này giải quyết một điểm mù của kỹ thuật hộp đen (Series 04): bạn chia lớp tương đương, lấy giá trị biên, dựng bảng quyết định — nhưng không biết bộ test đó **đã chạm vào phần nào của code**. Một nhánh xử lý đồ ăn chưa từng chạy thì mọi defect trong đó chắc chắn chưa có cơ hội lộ ra.
 
 Khi nào dùng: ở **component level** (bài 012) khi có mã nguồn và công cụ đo; làm **mức sàn** cho mọi code được test (CTAL-TTA 2.2), thường kèm ngưỡng trong CI; và làm **bước bổ sung** — chạy bộ test hộp đen trước, đọc báo cáo coverage để tìm vùng chưa phủ. Code quan trọng hơn cần tiêu chí mạnh hơn: branch/decision coverage (bài 044), MC/DC (bài 047).
 
@@ -148,7 +148,7 @@ Tổng **16** câu lệnh. Câu S13 và S15 mỗi câu chứa một biểu thứ
 
 ### 4.2. Bao nhiêu test là đủ?
 
-Mỗi lần gọi `normalizePriceRequest` chỉ đi ra đúng một trong bốn lối: S3 (ném lỗi thành phố), S6 (ride), S9 (parcel), S11 (food). Vậy cần **ít nhất bốn lần gọi** — với quy ước một test case một lần gọi, tối thiểu là **4 test case**. Ở `priceRequest`, S13–S14 cần một yêu cầu `food`, S15–S16 cần một yêu cầu không phải `food`; hai yêu cầu đó đã có trong bốn ca trên, nên không cần thêm.
+Mỗi lần gọi `normalizePriceRequest` chỉ đi ra đúng một trong bốn lối: S3 (ném lỗi thành phố), S6 (ride), S9 (parcel), S11 (food). Vậy cần **ít nhất bốn lần gọi** — với quy ước một test case một lần gọi, tối thiểu là **4 test case**. Ở `priceRequest`, S13–S14 cần một yêu cầu `food`, S15–S16 cần một yêu cầu không phải `food`; hai yêu cầu đó đã có trong bốn test case trên, nên không cần thêm.
 
 Test condition rút ra (mỗi condition dẫn vào một lối ra):
 
@@ -231,7 +231,7 @@ npx vitest run tests/smoke $COV $INC
 
 22 test xanh, nhưng chỉ **8/16** câu lệnh của `pricing.ts` từng chạy: smoke test API chỉ báo giá đặt xe. Nhánh bưu kiện (50–52), đồ ăn (55–56, 66–67) và lỗi thành phố (42) chưa ai đi qua.
 
-### 5.2. Bước 1 — một ca theo oracle R-FARE-09
+### 5.2. Bước 1 — một test case theo oracle R-FARE-09
 
 ```bash
 npx vitest run articles/statement-coverage/phu-cau-lenh.test.ts -t "TC-01" $COV $INC
@@ -244,11 +244,11 @@ All files   |      50 |    36.36 |     100 |      50 |
  pricing.ts |      50 |    36.36 |     100 |      50 | 42,50-56,66-67
 ```
 
-Một ca «chuẩn» cho đúng cùng mức với 22 smoke test — vì cả hai chỉ đi lối `ride`. Cột «Uncovered Line #s» là danh sách việc cần làm: mỗi dòng ứng với một câu lệnh ở bảng 4.1.
+Một test case «chuẩn» cho đúng cùng mức với 22 smoke test — vì cả hai chỉ đi lối `ride`. Cột «Uncovered Line #s» là danh sách việc cần làm: mỗi dòng ứng với một câu lệnh ở bảng 4.1.
 
-### 5.3. Bước 2 — thêm ca theo từng câu lệnh chưa phủ
+### 5.3. Bước 2 — thêm test case theo từng câu lệnh chưa phủ
 
-Mã của bốn ca (rút gọn từ `bo-phu-cau-lenh.ts`; bộ ca viết thành hàm để chạy được trên hai bản cài đặt ở bước 3):
+Mã của bốn test case (rút gọn từ `bo-phu-cau-lenh.ts`; bộ test case viết thành hàm để chạy được trên hai bản cài đặt ở bước 3):
 
 ```ts
 it('TC-03 · bưu kiện 6,1 kg ô tô 10 km cao điểm ⇒ 174.000 đ (R-PARCEL-03/04)', () => {
@@ -270,7 +270,7 @@ All files   |     100 |     90.9 |     100 |     100 |
  pricing.ts |     100 |     90.9 |     100 |     100 | 66
 ```
 
-**100% câu lệnh (16/16)** với đúng bốn ca như phân tích ở 4.2. Cột «Uncovered» vẫn còn dòng 66: đó là một **nhánh** chưa đi (vế `[]` của `??`), không phải câu lệnh. Nhánh này không thể đi qua đường công khai của module — đúng loại «không tới được» mà CTAL-TTA nhắc. Bài 044 bàn tiếp về nhánh.
+**100% câu lệnh (16/16)** với đúng bốn test case như phân tích ở 4.2. Cột «Uncovered» vẫn còn dòng 66: đó là một **nhánh** chưa đi (vế `[]` của `??`), không phải câu lệnh. Nhánh này không thể đi qua đường công khai của module — đúng loại «không tới được» mà CTAL-TTA nhắc. Bài 044 bàn tiếp về nhánh.
 
 ### 5.4. Bước 3 — một defect vẫn lọt dù 100%
 
@@ -283,7 +283,7 @@ assertVehicleFits(weight, request.vehicle);
 assertVehicleFits(request.parcelWeightKg, request.vehicle);
 ```
 
-Lỗi rất đời thường: hai biến cùng nghĩa «khối lượng», chọn nhầm. Chạy **cùng bốn ca** trên bản lỗi, đo coverage của chính bản lỗi:
+Lỗi rất đời thường: hai biến cùng nghĩa «khối lượng», chọn nhầm. Chạy **cùng bốn test case** trên bản lỗi, đo coverage của chính bản lỗi:
 
 ```bash
 npx vitest run articles/statement-coverage/ban-loi.test.ts -t "TC-0[1-4]" $COV \
@@ -297,9 +297,9 @@ All files       |     100 |     90.9 |     100 |     100 |
  pricing-loi.ts |     100 |     90.9 |     100 |     100 | 72
 ```
 
-Bốn ca xanh, **100% câu lệnh của chính bản lỗi** — dòng có defect đã chạy (TC-03), nhưng với 6,1 kg thì khối lượng thô và khối lượng đã làm tròn bằng nhau, nên không có failure. Defect chỉ lộ khi khối lượng thô nằm trong khoảng (20; 20,05) kg: làm tròn thành 20,0 kg (xe máy hợp lệ theo R-PARCEL-02) nhưng giá trị thô lại &gt; 20.
+Bốn test case xanh, **100% câu lệnh của chính bản lỗi** — dòng có defect đã chạy (TC-03), nhưng với 6,1 kg thì khối lượng thô và khối lượng đã làm tròn bằng nhau, nên không có failure. Defect chỉ lộ khi khối lượng thô nằm trong khoảng (20; 20,05) kg: làm tròn thành 20,0 kg (xe máy hợp lệ theo R-PARCEL-02) nhưng giá trị thô lại &gt; 20.
 
-Ca TC-05 lấy từ phân tích giá trị biên (bài 032), không phải từ coverage:
+Test case TC-05 lấy từ phân tích giá trị biên (bài 032), không phải từ coverage:
 
 ```ts
 // 20,04 kg ⇒ làm tròn 20,0 kg ⇒ xe máy vẫn hợp lệ (R-PARCEL-01, R-PARCEL-02)
@@ -321,7 +321,7 @@ DomainError: Bưu kiện trên 20 kg phải giao bằng ô tô.
       Tests  1 failed | 4 passed (5)
 ```
 
-Trong `npm test` của lab, TC-05 trên bản lỗi khai `it.fails` (ghi nhận defect mà không làm đỏ cả lab); trên mã thật nó là ca thường và xanh.
+Trong `npm test` của lab, TC-05 trên bản lỗi khai `it.fails` (ghi nhận defect mà không làm đỏ cả lab); trên mã thật TC-05 là test case thường và xanh.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -340,7 +340,7 @@ Trong `npm test` của lab, TC-05 trên bản lỗi khai `it.fails` (ghi nhận 
 <text x="80" y="198" class="t-small">TC-03 dùng 6,1 kg — xa biên: câu lệnh chạy nhưng không lộ lỗi.</text>
 </svg>
 </div>
-<figcaption><b>Hình 2 · Defect phụ thuộc dữ liệu.</b> Câu lệnh chứa defect được mọi ca bưu kiện chạy qua; chỉ giá trị trong một khoảng rất hẹp mới làm hai biến «khối lượng» khác nhau.</figcaption>
+<figcaption><b>Hình 2 · Defect phụ thuộc dữ liệu.</b> Câu lệnh chứa defect được mọi test case bưu kiện chạy qua; chỉ giá trị trong một khoảng rất hẹp mới làm hai biến «khối lượng» khác nhau.</figcaption>
 </figure>
 
 ### 5.5. Tổng hợp kết quả
@@ -366,7 +366,7 @@ Chạy lại bước 1 và bước 2 **không** có cờ `experimentalAstAwareRe
 
 Chế độ mặc định coi **mỗi dòng mã là một «statement»** (47 dòng, gồm cả dòng chỉ có `{` hay tham số), nên con số đẹp hơn thực tế ở bước 1. Mẫu số nhánh còn **đổi giữa hai lần chạy** (7 rồi 12) vì V8 chỉ báo nhánh của những khối mã đã được biên dịch. Bài học: khi báo cáo «statement coverage = X%», ghi kèm **công cụ và cấu hình**; đặt ngưỡng CI trên một cách đếm cố định.
 
-Thêm một sai lệch đo thật trong lab: chạy riêng TC-02 + TC-04 (`-t "TC-0[24]"`), công cụ báo dòng 82 (S16) **đã chạy** dù không ca nào tới đó — TC-02 ném lỗi trước khi gọi `priceRequest`, TC-04 trả về sớm ở nhánh `food`. V8 đo theo khối mã chứ không đặt bộ đếm cho từng câu lệnh, nên phần mã ngay sau một khối `if` có `return` có thể bị suy đoán sai. Con số coverage là **ước lượng của công cụ**; đếm tay một vài hàm quan trọng là cách kiểm chéo rẻ (bài tập 2).
+Thêm một sai lệch đo thật trong lab: chạy riêng TC-02 + TC-04 (`-t "TC-0[24]"`), công cụ báo dòng 82 (S16) **đã chạy** dù không test case nào tới đó — TC-02 ném lỗi trước khi gọi `priceRequest`, TC-04 trả về sớm ở nhánh `food`. V8 đo theo khối mã chứ không đặt bộ đếm cho từng câu lệnh, nên phần mã ngay sau một khối `if` có `return` có thể bị suy đoán sai. Con số coverage là **ước lượng của công cụ**; đếm tay một vài hàm quan trọng là cách kiểm chéo rẻ (bài tập 2).
 
 ### 6.2. Phủ không phải kiểm
 

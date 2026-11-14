@@ -31,9 +31,9 @@ Quyết định «voucher có áp được không» của Tới Nơi gồm bốn
 
 Bài 044 dừng ở **decision coverage**: mỗi quyết định phải ra cả true lẫn false. Với `if (!kindOk || !cityOk)`, hai test là đủ: một voucher sai dịch vụ (ném lỗi), một voucher hợp lệ (đi tiếp). Nhưng test «sai dịch vụ» chưa bao giờ thử trường hợp sai **thành phố**. Nếu lập trình viên viết nhầm phần `cityOk`, decision coverage 100% không báo gì.
 
-**Condition coverage** (độ phủ điều kiện) chuyển trọng tâm từ quyết định sang **từng điều kiện nguyên tử** bên trong: mỗi điều kiện phải được thấy ở cả hai giá trị. Nó giải quyết đúng chỗ mù của decision coverage — rồi tạo ra chỗ mù mới: tập test có thể lật mọi điều kiện mà quyết định vẫn chỉ ra một phía.
+**Condition coverage** (độ phủ điều kiện) chuyển trọng tâm từ quyết định sang **từng điều kiện nguyên tử** bên trong: mỗi điều kiện phải được thấy ở cả hai giá trị. Condition coverage giải quyết đúng chỗ mù của decision coverage — rồi tạo ra chỗ mù mới: tập test có thể lật mọi điều kiện mà quyết định vẫn chỉ ra một phía.
 
-Khi nào dùng: khi code có **quyết định nhiều điều kiện** (`&&`, `||`) quyết định tiền hoặc quyền — điều kiện voucher, điều kiện tài xế nhận chuyến, điều kiện hoàn tiền. Ngày nay ít ai đặt condition coverage làm tiêu chí cuối; nó là **bậc thang** để hiểu multiple condition testing (bài 046) và MC/DC (bài 047).
+Khi nào dùng: khi code có **quyết định nhiều điều kiện** (`&&`, `||`) quyết định tiền hoặc quyền — điều kiện voucher, điều kiện tài xế nhận chuyến, điều kiện hoàn tiền. Ngày nay ít ai đặt condition coverage làm tiêu chí cuối; tiêu chí này là **bậc thang** để hiểu multiple condition testing (bài 046) và MC/DC (bài 047).
 
 ## 2. Lý thuyết theo ISTQB
 
@@ -262,7 +262,7 @@ npx vitest run articles/condition-coverage
       Tests  16 passed (16)
 ```
 
-9 test so oracle SPEC với code thật cho từng dòng của ba bộ (khớp hết); các test còn lại chốt mã lỗi R-VOUCHER-08, số đo coverage và kết quả ở 5.2–5.3.
+9 test đối chiếu oracle SPEC với code thật cho từng dòng của ba bộ (khớp hết); các test còn lại chốt mã lỗi R-VOUCHER-08, số đo coverage và kết quả ở 5.2–5.3.
 
 ### 5.2. Bảng giá trị điều kiện và coverage
 
@@ -330,12 +330,12 @@ All files   |    43.9 |    66.66 |      25 |    43.9 |
 
 Hai quan sát từ lần chạy thật:
 
-1. Dòng chưa phủ 35–39 là khối `throw VOUCHER_EXPIRED` của D1. Outcome **false** của D2 (voucher hợp lệ, đi tiếp) chưa chạy, nhưng báo cáo không có dòng nào chỉ ra — nhánh false của `if` không có `else` không có câu lệnh riêng để đánh dấu. Muốn biết D2 đã đủ hai outcome chưa, phải phân tích như mục 4.
+1. Dòng chưa phủ 35–39 là khối `throw VOUCHER_EXPIRED` của D1. Outcome **false** của D2 (voucher hợp lệ, đi tiếp) chưa chạy, nhưng báo cáo không có dòng nào chỉ ra — vì nhánh false của `if` không có `else` thì không có câu lệnh riêng để đánh dấu. Muốn biết D2 đã đủ hai outcome chưa, phải phân tích như mục 4.
 2. Chạy cả 16 test, cùng lệnh không có `-t`, v8 báo `% Branch` = **100** cho `voucher.ts`. v8 không có cột condition coverage; 100% branch không nói gì về việc `kinds.length === 0` đã từng true chưa (mục 6).
 
 ## 6. Góc nhìn nâng cao
 
-- **Short-circuit thay đổi quan hệ CC–DC.** Trong TypeScript, giá trị của `x && y` / `x || y` là giá trị của toán hạng được đánh giá **sau cùng**. Điều kiện phải nhất của một quyết định, mỗi khi được đánh giá, luôn là toán hạng cuối và quyết định kết quả. Vì vậy, **nếu đếm theo đánh giá**, mọi bộ test cho điều kiện phải nhất cả T lẫn F đều phủ hai outcome — condition coverage kéo theo decision coverage cho quyết định đó. Ví dụ «CC đạt, DC hụt» kinh điển chỉ xuất hiện khi đếm theo bảng chân trị, khi điều kiện được tính sẵn vào biến (`kindOk`), hoặc khi quyết định trải qua nhiều hàm như R-VOUCHER-04…06. Ghi rõ cách đếm trong test plan.
+- **Short-circuit thay đổi quan hệ CC–DC.** Trong TypeScript, giá trị của `x && y` / `x || y` là giá trị của toán hạng được đánh giá **sau cùng**. Điều kiện ngoài cùng bên phải của một quyết định, mỗi khi được đánh giá, luôn là toán hạng cuối và quyết định kết quả. Vì vậy, **nếu đếm theo đánh giá**, mọi bộ test cho điều kiện ngoài cùng bên phải cả T lẫn F đều phủ hai outcome — condition coverage kéo theo decision coverage cho quyết định đó. Ví dụ «CC đạt, DC hụt» kinh điển chỉ xuất hiện khi đếm theo bảng chân trị, khi điều kiện được tính sẵn vào biến (`kindOk`), hoặc khi quyết định trải qua nhiều hàm như R-VOUCHER-04…06. Ghi rõ cách đếm trong test plan.
 - **Atomic ở mức nào?** Mô hình bốn điều kiện là mức đặc tả. Ở mức code, `kindOk = kinds.length === 0 || kinds.includes(kind)` là quyết định hai điều kiện. HN11 có `kinds = ['ride']`, nên `kinds.length === 0` **chưa từng true** ở cả ba bộ — nhánh «rỗng = mọi dịch vụ» của R-VOUCHER-05 không được phủ, dù v8 báo 100% branch. Cần thêm một voucher kiểu `GIAM20` (seed, `kinds` rỗng).
 - **Điều kiện ghép cặp (coupled).** `day < validFrom` và `day > validTo` cùng phụ thuộc `day`; với validFrom ≤ validTo, hai điều kiện không thể cùng true. Tổ hợp (T, T) bất khả thi — ảnh hưởng đếm tổ hợp ở bài 046 và cặp MC/DC ở bài 047 (TTA 2.4 gọi là «coupled»).
 - **Condition coverage không chọn giá trị biên.** C4=F với 39.999 đ hay 1.000 đ đều tính là phủ. Lỗi `>` thay `>=` ở minAmount chỉ lộ khi A = minAmount — việc của boundary value analysis ([TEST-032](/articles/boundary-value-analysis)). White-box và black-box bổ sung cho nhau.
