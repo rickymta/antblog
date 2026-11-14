@@ -155,7 +155,7 @@ ORDER BY i.line_no;
 (8 rows)
 ```
 
-Thứ tự nhánh `CASE` là thứ tự ưu tiên: từ chối trước, rồi khử trùng trong lô, rồi mới so với dữ liệu đang có. `first_value(...) OVER (...)` ([PG-015](/articles/postgresql-window-function-frame)) chọn dòng mới nhất mỗi nhóm (quán, sku) — cùng tiêu chí với `DISTINCT ON`. So ba cột bằng **`IS NOT DISTINCT FROM`** để NULL được coi là bằng nhau ([PG-011](/articles/postgresql-null-case-coalesce)).
+Thứ tự nhánh `CASE` là thứ tự ưu tiên: từ chối trước, rồi khử trùng lặp trong lô, rồi mới so với dữ liệu đang có. `first_value(...) OVER (...)` ([PG-015](/articles/postgresql-window-function-frame)) chọn dòng mới nhất mỗi nhóm (quán, sku) — cùng tiêu chí với `DISTINCT ON`. So ba cột bằng **`IS NOT DISTINCT FROM`** để NULL được coi là bằng nhau ([PG-011](/articles/postgresql-null-case-coalesce)).
 
 Kỳ vọng đã rõ trước khi ghi: **1 thêm, 2 cập nhật, 3 bỏ qua, 2 từ chối**.
 
@@ -201,7 +201,7 @@ Một chi tiết của tài liệu cần biết trước Phần 4: dòng bị `W
 
 ## 7. Idempotent: gửi lại lô không đổi gì
 
-Một thao tác **idempotent** (lũy đẳng) là thao tác chạy một lần hay nhiều lần cho cùng kết quả. Cổng đối tác thật sẽ gửi lại lô khi mạng chập chờn hoặc khi quán bấm «Tải lên» hai lần. Chạy lại đúng câu ở mục 6:
+Một thao tác **idempotent** (luỹ đẳng) là thao tác chạy một lần hay nhiều lần cho cùng kết quả. Cổng đối tác thật sẽ gửi lại lô khi mạng chập chờn hoặc khi quán bấm «Tải lên» hai lần. Chạy lại đúng câu ở mục 6:
 
 ```text
 INSERT 0 0
@@ -281,7 +281,7 @@ Cùng 1 thêm, 2 cập nhật như UPSERT. `MERGE` diễn đạt được nhiề
 
 | Triệu chứng | Nguyên nhân | Cách sửa |
 |---|---|---|
-| `21000 … cannot affect row a second time`, cả lô bị từ chối | Lô có hai dòng cùng khoá | Khử trùng trước (`DISTINCT ON` với thứ tự xác định) |
+| `21000 … cannot affect row a second time`, cả lô bị từ chối | Lô có hai dòng cùng khoá | Khử trùng lặp trước (`DISTINCT ON` với thứ tự xác định) |
 | `23505` dù đã có `ON CONFLICT` | Vi phạm một UNIQUE khác trọng tài | Lọc dòng vi phạm ra, ghi vào biên bản |
 | `23514`, một dòng giá 0 làm hỏng cả lô | CHECK không phải việc của `ON CONFLICT` | Đưa luật CHECK vào bộ lọc nguồn (bài tập 1) |
 | Giá mới bị giá cũ đè | `DO UPDATE` không có điều kiện thời điểm | `WHERE EXCLUDED.<giờ nguồn> > <bảng>.<giờ nguồn>` |

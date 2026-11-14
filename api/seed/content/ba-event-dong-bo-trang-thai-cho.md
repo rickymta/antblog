@@ -1,7 +1,7 @@
 ---
 slug: ba-event-dong-bo-trang-thai-cho
 title: "Event, đồng bộ và trạng thái chờ: khi kết quả đến sau response"
-summary: "Mô hình hóa hoàn tiền bất đồng bộ với callback trễ, lặp và sai thứ tự; thiết kế thông báo chờ cùng đường xử lý ngoại lệ."
+summary: "Mô hình hoá hoàn tiền bất đồng bộ với callback trễ, lặp và sai thứ tự; thiết kế thông báo chờ cùng đường xử lý ngoại lệ."
 category: business-analysis
 level: intermediate
 tags: [business-analysis, ba-038, event, state-model, toi-noi]

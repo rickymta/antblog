@@ -31,7 +31,7 @@ Lưu ý: 70 là số *chuyến* mỗi giây, không phải số *báo giá*. Kh�
 Azure Load Testing chạy kịch bản bạn đã có (JMeter `.jmx` hoặc Locust `.py`) mà không cần dựng máy sinh tải. Các khái niệm cần nắm:
 
 - **Test** là cấu hình đã lưu: kịch bản, số engine, tham số, tiêu chí. **Test run** là một lần chạy test đó, lưu kết quả để so sánh.
-- **Engine instance** là máy do dịch vụ quản lý chạy kịch bản. Muốn tăng tải thì tăng số engine thay vì dựng thêm máy. Với JMeter, số thread tính cho từng engine; với Locust hãy kiểm tài liệu xem số user tính cho từng engine hay cho cả test trước khi tin con số 500.
+- **Engine instance** là máy do dịch vụ quản lý chạy kịch bản. Muốn tăng tải thì tăng số engine thay vì dựng thêm máy. Với JMeter, số thread tính cho từng engine; với Locust hãy kiểm tra tài liệu xem số user tính cho từng engine hay cho cả test trước khi tin con số 500.
 - **Tham số** gồm biến môi trường và secret. Secret nên là tham chiếu tới Key Vault, không dán token vào file trong repo.
 - **Server-side metric**: thêm resource bị test (Container Apps, PostgreSQL) làm app component để độ trễ phía client nằm cạnh CPU, số replica, `active_connections` trong cùng kết quả. Đây là phần giá trị nhất: biết chậm mà không biết tầng nào nghẽn thì chưa sửa được gì.
 - **So sánh run** đặt hai test run cạnh nhau để thấy đổi `maxReplicas` từ 3 lên 6 có giúp p95 không.
@@ -144,7 +144,7 @@ Hai núm thời gian là `pollingInterval` (KEDA hỏi nguồn tải bao lâu m�
 
 ## Chaos Studio phá có kiểm soát để kiểm giả định
 
-Load test hỏi "đủ nhanh khi mọi thứ khỏe không". Chaos Studio hỏi "một phần hỏng thì sao, và ta có thấy không". Cơ chế gồm ba lớp:
+Load test hỏi "đủ nhanh khi mọi thứ khoẻ không". Chaos Studio hỏi "một phần hỏng thì sao, và ta có thấy không". Cơ chế gồm ba lớp:
 
 - **Target** là resource bạn cho phép bị phá (onboard), kèm **capability** bật riêng cho từng fault. Không onboard thì không fault nào chạm được.
 - **Experiment** là tài nguyên Azure khai báo các bước, nhánh và hành động, kèm danh sách target. Experiment có managed identity riêng, và identity này cần quyền trên target.

@@ -43,9 +43,9 @@ Cleanup là một phần thiết kế fixture. Nếu mở file mà không dispos
 
 SaveAsync serialize QuoteSnapshot bằng System.Text.Json rồi ghi text. ReadAsync đọc text và deserialize. Test so toàn bộ record, số tiền 14.255 và offset UTC. Chỉ assert File.Exists không phát hiện field mất, kiểu tiền đổi hoặc object đọc lại không cùng dữ liệu.
 
-JSON null được chuyển thành InvalidDataException; JSON sai cú pháp tạo JsonException; thiếu file tạo FileNotFoundException. Ta không gom cả ba thành một báo giá 0 VND. CancellationToken được truyền vào API file để người gọi có thể hủy phần việc còn hợp tác được.
+JSON null được chuyển thành InvalidDataException; JSON sai cú pháp tạo JsonException; thiếu file tạo FileNotFoundException. Ta không gom cả ba thành một báo giá 0 VND. CancellationToken được truyền vào API file để người gọi có thể huỷ phần việc còn hợp tác được.
 
-Bộ test có ca token hủy từ trước khi ghi và kiểm tra byte cũ không đổi theo hành vi API được dùng. Kết quả đó không chứng minh một thao tác đang ghi dở có rollback an toàn. Cần phân biệt chính xác điểm hủy được kiểm tra.
+Bộ test có ca token huỷ từ trước khi ghi và kiểm tra byte cũ không đổi theo hành vi API được dùng. Kết quả đó không chứng minh một thao tác đang ghi dở có rollback an toàn. Cần phân biệt chính xác điểm huỷ được kiểm tra.
 
 ## Đây chưa là Repository/Unit of Work production
 
@@ -68,7 +68,7 @@ Bốn ca gồm round-trip thật, thiếu file, JSON hỏng và pre-cancelled wr
 
 **Bài tập:** nếu thay SaveAsync bằng chỉ gán một field trong memory, round-trip qua instance mới có qua không? Muốn bảo vệ trước process crash giữa lần ghi, cần thêm loại thí nghiệm nào?
 
-<details><summary>Xem đáp án</summary><p>Không, instance đọc mới không có dữ liệu và file mong đợi chưa được ghi. Crash consistency cần cơ chế ghi/commit phù hợp cùng test gián đoạn; không suy ra từ test happy path hoặc token đã hủy trước khi mở file.</p></details>
+<details><summary>Xem đáp án</summary><p>Không, instance đọc mới không có dữ liệu và file mong đợi chưa được ghi. Crash consistency cần cơ chế ghi/commit phù hợp cùng test gián đoạn; không suy ra từ test happy path hoặc token đã huỷ trước khi mở file.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 

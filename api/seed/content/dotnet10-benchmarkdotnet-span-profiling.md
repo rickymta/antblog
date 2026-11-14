@@ -52,9 +52,9 @@ Một operation là xử lý cả N dòng, không phải một dòng. Error ở 
 
 ## Span là view có ràng buộc lifetime
 
-`ReadOnlySpan<char>` nhìn vào phần dữ liệu đã có, không sở hữu một bản sao chuỗi mới. ReadOnly nghĩa không sửa qua view này, không tự khóa nguồn mutable ở mọi tình huống. Không giữ view vượt lifetime owner hoặc đưa nó tùy tiện vào object sống lâu.
+`ReadOnlySpan<char>` nhìn vào phần dữ liệu đã có, không sở hữu một bản sao chuỗi mới. ReadOnly nghĩa không sửa qua view này, không tự khoá nguồn mutable ở mọi tình huống. Không giữ view vượt lifetime owner hoặc đưa nó tuỳ tiện vào object sống lâu.
 
-Trong ví dụ parse đồng bộ, span chỉ sống trong phương thức và trỏ tới string còn tồn tại. Không có await trong vùng đó. Các khả năng mới của C# không xóa quy tắc an toàn ref/lifetime; compiler vẫn giới hạn nơi span được sống qua điểm await/yield.
+Trong ví dụ parse đồng bộ, span chỉ sống trong phương thức và trỏ tới string còn tồn tại. Không có await trong vùng đó. Các khả năng mới của C# không xoá quy tắc an toàn ref/lifetime; compiler vẫn giới hạn nơi span được sống qua điểm await/yield.
 
 Sau khi microbenchmark thấy giảm allocation, quay lại profile service: CPU samples, allocation rate, GC pauses, heap retention, throughput và latency tail. dotnet-counters/dotnet-trace hỗ trợ quan sát thực tế nhưng không phải số đo đã được thu trong lượt benchmark này.
 
@@ -71,7 +71,7 @@ Chế độ --verify chỉ kiểm correctness, không chạy benchmark. Để ch
 
 **Bài tập:** nếu đưa dựng dataset vào trong phương thức Span nhưng để ngoài Split, so sánh còn công bằng không? Nếu bỏ validation ở parser nhanh, có được gọi đó là cùng một tối ưu không?
 
-<details><summary>Xem đáp án</summary><p>Không, hai vùng đo đã khác công việc. Bỏ validation đổi hợp đồng; phải so cùng semantics hoặc nêu rõ đang đo một loại tác vụ khác, không dùng kết quả để hợp thức hóa lỗi dữ liệu.</p></details>
+<details><summary>Xem đáp án</summary><p>Không, hai vùng đo đã khác công việc. Bỏ validation đổi hợp đồng; phải so cùng semantics hoặc nêu rõ đang đo một loại tác vụ khác, không dùng kết quả để hợp thức hoá lỗi dữ liệu.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 

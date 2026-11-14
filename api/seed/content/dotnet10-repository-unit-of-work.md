@@ -18,7 +18,7 @@ language: vi
 
 ## Repository là port cho aggregate, không phải DbSet đổi tên
 
-ITripRepository chỉ có GetAsync và Add cho root Trip. Nó không trả IQueryable để caller tùy ý gắn EF query vào domain. ITripQueries dành cho DTO đọc; IBookingRequests giữ receipt của ý định request ở application boundary.
+ITripRepository chỉ có GetAsync và Add cho root Trip. Nó không trả IQueryable để caller tuỳ ý gắn EF query vào domain. ITripQueries dành cho DTO đọc; IBookingRequests giữ receipt của ý định request ở application boundary.
 
 Một generic repository với hàng chục method phản chiếu toàn bộ EF có thể tăng lớp mà không giảm phụ thuộc. Port trong bài được chọn theo hành vi cần của service. Repository không gửi event ra mạng và Add chưa commit.
 
@@ -43,7 +43,7 @@ Cache này chỉ sống trong scope, không dùng static dictionary toàn servic
 
 UoW map TripRequested/TripAccepted sang envelope integration version v1 có payload tối thiểu. Domain event không serialize nguyên graph, request key hoặc token. Outbox row và dữ liệu Trip/request receipt được ghi trong cùng SaveChanges.
 
-Sau commit thành công mới clear PendingEvents. Nếu commit lỗi, scope sẽ kết thúc với lỗi; không clear rồi giả vờ đã có intent bền. Nếu muốn retry cùng context sau một failure, cần thiết kế reset trạng thái tracker/outbox rõ; lab không tự retry commit tùy ý.
+Sau commit thành công mới clear PendingEvents. Nếu commit lỗi, scope sẽ kết thúc với lỗi; không clear rồi giả vờ đã có intent bền. Nếu muốn retry cùng context sau một failure, cần thiết kế reset trạng thái tracker/outbox rõ; lab không tự retry commit tuỳ ý.
 
 Service này lưu intent, còn dispatcher/broker/Inbox ngoài process vẫn phải được ghép theo bài 26. Có Outbox table không đồng nghĩa mọi thông báo đã được gửi hay consumer đã hoàn tất.
 
@@ -76,7 +76,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xóa database; JWT dùng khóa ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
 
 ### Persistence.cs — 31-38-trip-service/Infrastructure/Persistence.cs
 

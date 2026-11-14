@@ -14,8 +14,8 @@ Trong «khu mẫu» tổng hợp của lab có một đại lộ hai chiều ng�
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Haversine trên mặt cầu thỏa bất đẳng thức tam giác: <code>d(a, c) ≤ d(a, b) + d(b, c)</code>. Khoảng cách equirectangular (xấp xỉ mặt phẳng) có luôn thỏa không? Quét 200.000 bộ ba điểm trong bbox HCM, phần vượt lớn nhất là bao nhiêu?</p>
-<details><summary>Xem đáp án</summary><p>Không luôn thỏa: equirectangular vượt tối đa <b>0,0007 m</b>, tức 4,64·10⁻⁸ của <code>d(a, c)</code>, còn haversine không vượt (phần vượt lớn nhất là −0,0000 m). Vì vậy test của equirect phải có dung sai nhỏ thay vì đòi đúng tuyệt đối.</p></details>
+<p>Haversine trên mặt cầu thoả bất đẳng thức tam giác: <code>d(a, c) ≤ d(a, b) + d(b, c)</code>. Khoảng cách equirectangular (xấp xỉ mặt phẳng) có luôn thoả không? Quét 200.000 bộ ba điểm trong bbox HCM, phần vượt lớn nhất là bao nhiêu?</p>
+<details><summary>Xem đáp án</summary><p>Không luôn thoả: equirectangular vượt tối đa <b>0,0007 m</b>, tức 4,64·10⁻⁸ của <code>d(a, c)</code>, còn haversine không vượt (phần vượt lớn nhất là −0,0000 m). Vì vậy test của equirect phải có dung sai nhỏ thay vì đòi đúng tuyệt đối.</p></details>
 </div>
 
 ## `geo-core` có gì
@@ -49,7 +49,7 @@ pub use segment::{PolylineProjection, SegmentProjection, project_to_polyline, pr
 | `projection` | `LocalProjection`: mặt phẳng mét quanh một điểm, cho R-tree và chiếu điểm |
 | `segment` | chiếu điểm lên đoạn và polyline, vị trí dọc tuyến, `point_at` |
 | `bearing` | `bearing_deg`, `bearing_diff_deg` |
-| `polyline` | mã hóa và giải mã Encoded Polyline, precision 5 hoặc 6 |
+| `polyline` | mã hoá và giải mã Encoded Polyline, precision 5 hoặc 6 |
 | `geojson` | `point_feature`, `line_feature`, `polygon_feature`: xuất GeoJSON, đổi thứ tự qua `to_lnglat` |
 | `h3`, `geohash` | `h3o` bọc theo kiểu `LatLng`, và geohash tối giản của bài 08 |
 
@@ -60,7 +60,7 @@ pub use segment::{PolylineProjection, SegmentProjection, project_to_polyline, pr
 <figcaption>Hình 1. Cargo workspace của P01: <code>road-graph</code> (bài 06, 07) và <code>driver-store</code> (bài 09) đều chỉ dựa vào <code>geo-core</code>. Mỗi lab <code>locNN</code> chạy trên crate nó cần.</figcaption>
 </figure>
 
-Một quyết định lặp lại xuyên suốt: mọi phép đổi thứ tự tọa độ nằm ở **một chỗ**. `LatLng` luôn là lat rồi lng; GeoJSON và Redis là lng rồi lat; `to_lnglat` và `from_lnglat` là cầu nối duy nhất, và test `geojson_feature_contains_lng_first` giữ nó đúng.
+Một quyết định lặp lại xuyên suốt: mọi phép đổi thứ tự toạ độ nằm ở **một chỗ**. `LatLng` luôn là lat rồi lng; GeoJSON và Redis là lng rồi lat; `to_lnglat` và `from_lnglat` là cầu nối duy nhất, và test `geojson_feature_contains_lng_first` giữ nó đúng.
 
 ## Kiểm thử thuộc tính: điều kiện nào luôn đúng
 
@@ -89,7 +89,7 @@ Test theo ví dụ («từ Bến Thành tới Landmark 81 là bấy nhiêu mét�
     }
 ```
 
-Chú ý chỗ khác nhau: haversine là khoảng cách thật trên mặt cầu nên đòi đúng (chỉ trừ sai số làm tròn 1 µm). Equirect thì mỗi cặp điểm dùng một cos vĩ độ riêng, nên ba cạnh của tam giác không nằm trên cùng một mặt phẳng, và tính chất chỉ đúng **trong sai số**, với dung sai 0,1% cộng 1 cm. Dung sai không được chọn tùy tiện: nó phải khớp sai số đã biết của phép xấp xỉ.
+Chú ý chỗ khác nhau: haversine là khoảng cách thật trên mặt cầu nên đòi đúng (chỉ trừ sai số làm tròn 1 µm). Equirect thì mỗi cặp điểm dùng một cos vĩ độ riêng, nên ba cạnh của tam giác không nằm trên cùng một mặt phẳng, và tính chất chỉ đúng **trong sai số**, với dung sai 0,1% cộng 1 cm. Dung sai không được chọn tuỳ tiện: nó phải khớp sai số đã biết của phép xấp xỉ.
 
 `examples/toi-noi-location/rust/crates/geo-core/tests/properties.rs`
 
@@ -120,16 +120,16 @@ Cùng tính chất, lab còn chạy một đợt quét 200.000 ca bằng `loc10_
 |---|---|
 | haversine đối xứng, 200.000 bộ ba (cả Việt Nam) | lệch 0 m |
 | equirect đối xứng (bbox HCM) | lệch 0 m |
-| tam giác, `d(a,c) − (d(a,b) + d(b,c))`, haversine | −0,0000 m (luôn thỏa) |
+| tam giác, `d(a,c) − (d(a,b) + d(b,c))`, haversine | −0,0000 m (luôn thoả) |
 | tam giác, equirect | 0,0007 m (4,64·10⁻⁸ của `d(a,c)`) |
 | polyline precision 5, 2.000 tuyến 1–60 điểm | 0,7768 m |
 | polyline precision 6 | 0,0777 m |
-| lượng tử hóa E7 | 0,0078 m |
+| lượng tử hoá E7 | 0,0078 m |
 | chiếu lên đoạn, 200.000 ca: `t` ngoài [0, 1] | 0 ca |
 | chân chiếu lệch khỏi đoạn, hoặc xa hơn hai đầu mút | 0,0000 m, 0 ca |
 | bearing sau `destination` rồi `bearing_deg` (100–5.000 m) | lệch 0,0000° |
 
-Những con số này là **số đo, không phải thời gian**, nên tái lập từng chữ số với cùng seed, không phụ thuộc máy đang tải. Hai điều cần đọc đúng. Một: precision 5 của polyline sai tới 0,78 m, E7 sai 7,8 mm, tức đủ cho hiển thị và lưu trữ nhưng không phải đủ cho mọi việc; chọn precision theo việc. Hai: thuộc tính chỉ kiểm tính chất **toán học** của công thức trên các mẫu đã sinh, không chứng minh công thức khớp mặt đất. Thuộc tính «đảo lat/lng luôn bị từ chối» (`swapped_lat_lng_always_rejected_in_vietnam`) đúng trong Việt Nam vì khi đảo, kinh độ 102–110 thành «vĩ độ» vượt khoảng cho phép; ở nơi như Abuja (lat 9,07; lng 7,40) đảo thứ tự vẫn ra tọa độ hợp lệ, khoảng giá trị không bắt được, và chỉ kiểu `LatLng` mới chặn.
+Những con số này là **số đo, không phải thời gian**, nên tái lập từng chữ số với cùng seed, không phụ thuộc máy đang tải. Hai điều cần đọc đúng. Một: precision 5 của polyline sai tới 0,78 m, E7 sai 7,8 mm, tức đủ cho hiển thị và lưu trữ nhưng không phải đủ cho mọi việc; chọn precision theo việc. Hai: thuộc tính chỉ kiểm tính chất **toán học** của công thức trên các mẫu đã sinh, không chứng minh công thức khớp mặt đất. Thuộc tính «đảo lat/lng luôn bị từ chối» (`swapped_lat_lng_always_rejected_in_vietnam`) đúng trong Việt Nam vì khi đảo, kinh độ 102–110 thành «vĩ độ» vượt khoảng cho phép; ở nơi như Abuja (lat 9,07; lng 7,40) đảo thứ tự vẫn ra toạ độ hợp lệ, khoảng giá trị không bắt được, và chỉ kiểu `LatLng` mới chặn.
 
 ## Đồ thị tổng hợp cho CI
 
@@ -209,13 +209,13 @@ Mọi số ở đây là số hình học và số đếm, tái lập từng ch�
 
 - **Định tuyến.** Chỉ có Dijkstra tối giản trong `road_graph::sp`, dùng để đo hệ số vòng; không A*, không Contraction Hierarchies, không chi phí rẽ. Phần định tuyến bắt đầu ở LOC-21.
 - **Cấm rẽ mới đọc, chưa dùng.** 270 relation có `via` là way chưa giải; 784 cấm theo giờ giữ thô (LOC-23).
-- **Cổng tòa nhà (`entrance=*`)** mới lưu thô, chưa gắn vào đồ thị; chưa có hệ tọa độ trong nhà, nơi GPS vô dụng (LOC-37).
+- **Cổng toà nhà (`entrance=*`)** mới lưu thô, chưa gắn vào đồ thị; chưa có hệ toạ độ trong nhà, nơi GPS vô dụng (LOC-37).
 - **Bám đường, lọc Kalman, tốc độ theo giờ** thuộc P02 và P03. Snap hiện tại là snap từng điểm.
-- **Hệ tọa độ và hình học.** Chỉ WGS84; VN-2000 chưa hỗ trợ. Khoảng cách dùng mặt cầu bán kính 6.371.008,8 m, lệch tới 0,526% so với ellipsoid WGS84 ở vĩ độ 10,77 (bài 04); `geo-core` chưa có hàm trắc địa. Geohash và mặt phẳng cục bộ chỉ kiểm cho vùng quanh Việt Nam. `geo-core` cũng chưa có phép toán trên đa giác (vùng cấm đón, geofence).
+- **Hệ toạ độ và hình học.** Chỉ WGS84; VN-2000 chưa hỗ trợ. Khoảng cách dùng mặt cầu bán kính 6.371.008,8 m, lệch tới 0,526% so với ellipsoid WGS84 ở vĩ độ 10,77 (bài 04); `geo-core` chưa có hàm trắc địa. Geohash và mặt phẳng cục bộ chỉ kiểm cho vùng quanh Việt Nam. `geo-core` cũng chưa có phép toán trên đa giác (vùng cấm đón, geofence).
 - **Hạ tầng.** Redis GEO chỉ đo qua Docker loopback; PostGIS không chạy.
 - **Không có GPS người thật.** Mọi vị trí tài xế, nhiễu GPS đều do lab sinh.
 - **Số thời gian.** Hầu hết số thời gian của P01 đo khi máy tải nặng, và chưa có lần đo trên máy rảnh được lưu đầy đủ; chỉ nên đọc tỉ lệ trong cùng một lần chạy.
-- **Chưa tách riêng:** tỉ lệ «snap sai» của bài 07 đếm theo mã way nên là cận trên. Ca R-tree và quét chọn khác cạnh ở 1/1.000 truy vấn đã kiểm: hòa đúng nghĩa ở nút giao (bài 07), nhưng `nearest` chưa có quy tắc phá hòa.
+- **Chưa tách riêng:** tỉ lệ «snap sai» của bài 07 đếm theo mã way nên là cận trên. Ca R-tree và quét chọn khác cạnh ở 1/1.000 truy vấn đã kiểm: hoà đúng nghĩa ở nút giao (bài 07), nhưng `nearest` chưa có quy tắc phá hoà.
 
 ## Bài tập
 
@@ -234,7 +234,7 @@ Mọi số ở đây là số hình học và số đếm, tái lập từng ch�
 **Bài 3.** Từ ví dụ đại lộ, vì sao hàm chọn điểm đón không thể xếp hạng ứng viên theo khoảng cách chim bay giữa khách và điểm đón?
 
 <details><summary>Lời giải bài 3</summary>
-<p>Hai ghim chỉ cách nhau 56,0 m nhưng ô tô đi 305,5 m một chiều và 114,8 m chiều kia; điểm đón ở phía nào của dải phân cách làm quãng đường chênh gấp 2,7 lần (305,5 chia 114,8). Khoảng cách chim bay không biết dải phân cách, một chiều và nút chặn. Đây là số đo trên một khu mẫu tổng hợp, nên chỉ minh họa cơ chế; mức độ ngoài đời phải đo bằng engine định tuyến và simulator ở các phần sau.</p>
+<p>Hai ghim chỉ cách nhau 56,0 m nhưng ô tô đi 305,5 m một chiều và 114,8 m chiều kia; điểm đón ở phía nào của dải phân cách làm quãng đường chênh gấp 2,7 lần (305,5 chia 114,8). Khoảng cách chim bay không biết dải phân cách, một chiều và nút chặn. Đây là số đo trên một khu mẫu tổng hợp, nên chỉ minh hoạ cơ chế; mức độ ngoài đời phải đo bằng engine định tuyến và simulator ở các phần sau.</p>
 </details>
 
 Bài trước: [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do). Bài tiếp: [bài 11](/articles/location-go-goroutine-channel-nhap-mon-cho-ingest).

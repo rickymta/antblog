@@ -49,7 +49,7 @@ Tái chạy test là một phần quá trình thay đổi. Khi thêm field vào 
 
 ## Bước tiếp theo để thành sản phẩm
 
-Cần bổ sung lifecycle đầy đủ, tài xế đủ điều kiện, định tuyến/giá theo vùng, hủy/hoàn tiền, ledger và đối soát. Fraud/OCR Python, các thành phần Rust và Go sẽ chia sẻ hợp đồng integration theo context, không truy cập chéo bảng nghiệp vụ.
+Cần bổ sung lifecycle đầy đủ, tài xế đủ điều kiện, định tuyến/giá theo vùng, huỷ/hoàn tiền, ledger và đối soát. Fraud/OCR Python, các thành phần Rust và Go sẽ chia sẻ hợp đồng integration theo context, không truy cập chéo bảng nghiệp vụ.
 
 Outbox hiện lưu intent; delivery worker có claim/lease, retry, broker confirm và consumer Inbox phải được ghép theo yêu cầu thật. Cần test crash/recovery, dữ liệu lớn, backup/restore, capacity, secret rotation, identity mapping và các trường hợp thất bại liên service.
 
@@ -74,7 +74,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xóa database; JWT dùng khóa ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
 
 ### README.md — 31-38-trip-service/README.md
 

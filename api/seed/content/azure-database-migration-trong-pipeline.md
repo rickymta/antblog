@@ -111,7 +111,7 @@ az containerapp job create \
   --cpu 0.5 --memory 1Gi
 ```
 
-Lệnh này khai báo job với trigger thủ công, không retry, và dùng secret của role migrator. Nó không cấp quyền Key Vault hay ACR cho identity và không chứng minh job nối được database; cú pháp tham chiếu Key Vault trong `--secrets` có thể khác theo phiên bản `az`, hãy kiểm tài liệu Container Apps jobs. `--replica-retry-limit 0` cố ý: migration lỗi giữa chừng cần người đọc log trước khi chạy lại.
+Lệnh này khai báo job với trigger thủ công, không retry, và dùng secret của role migrator. Nó không cấp quyền Key Vault hay ACR cho identity và không chứng minh job nối được database; cú pháp tham chiếu Key Vault trong `--secrets` có thể khác theo phiên bản `az`, hãy kiểm tra tài liệu Container Apps jobs. `--replica-retry-limit 0` cố ý: migration lỗi giữa chừng cần người đọc log trước khi chạy lại.
 
 Hai điểm thiết kế. Image `trips-migrator` build từ cùng commit với image API, vì vậy bộ migration được review và bộ migration được áp dụng là một. Repository hiện chỉ có `Dockerfile` cho Api, nên cần thêm một Dockerfile publish project `Migrator` (nó gọi `MigrateAsync` bằng connection string được cấp). Identity của job khác identity của `ca-toinoi-trips-<env>`, và connection string của nó trỏ vào role migrator.
 

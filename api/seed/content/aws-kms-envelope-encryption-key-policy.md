@@ -15,7 +15,7 @@ Kiểm toán viên của đối tác thanh toán hỏi Tới Nơi ba câu: ảnh
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Role <code>booking</code> có IAM policy <code>Allow kms:Decrypt</code> trên một key, nhưng key policy của key đó không nhắc gì tới tài khoản hay role. Role giải mã được không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Key policy là gốc của quyền trên KMS key. IAM policy chỉ có hiệu lực khi key policy cho phép tài khoản (thường bằng statement ủy quyền cho IAM) hoặc nêu đích danh principal.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Key policy là gốc của quyền trên KMS key. IAM policy chỉ có hiệu lực khi key policy cho phép tài khoản (thường bằng statement uỷ quyền cho IAM) hoặc nêu đích danh principal.</p></details>
 </div>
 
 ## Ba loại key và ai sở hữu
@@ -34,12 +34,12 @@ Mọi KMS key đều có **key policy**, một resource policy gắn thẳng và
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Request tới KMS luôn qua key policy; quyền đến từ ba đường: key policy nêu trực tiếp principal, key policy ủy quyền cho IAM kèm IAM policy, hoặc grant tạm thời cho dịch vụ AWS.">
+<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Request tới KMS luôn qua key policy; quyền đến từ ba đường: key policy nêu trực tiếp principal, key policy uỷ quyền cho IAM kèm IAM policy, hoặc grant tạm thời cho dịch vụ AWS.">
 <defs><marker id="aws52-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs>
 <rect x="20" y="85" width="130" height="70" rx="10" class="f-surface s-line"/><text x="34" y="115" class="t-b">Request</text><text x="34" y="137" class="t-small">Decrypt, Generate…</text>
 <rect x="200" y="85" width="150" height="70" rx="10" class="f-pk-soft s-pk"/><text x="214" y="115" class="t-b">Key policy</text><text x="214" y="137" class="t-small">luôn được xét</text>
 <rect x="420" y="20" width="250" height="60" rx="10" class="f-phys-soft s-phys"/><text x="434" y="46" class="t-b">1. Nêu trực tiếp principal</text><text x="434" y="66" class="t-small">kèm ViaService, EncryptionContext</text>
-<rect x="420" y="95" width="250" height="60" rx="10" class="f-phys-soft s-phys"/><text x="434" y="121" class="t-b">2. Ủy quyền cho IAM</text><text x="434" y="141" class="t-small">cần thêm Allow ở IAM policy của role</text>
+<rect x="420" y="95" width="250" height="60" rx="10" class="f-phys-soft s-phys"/><text x="434" y="121" class="t-b">2. Uỷ quyền cho IAM</text><text x="434" y="141" class="t-small">cần thêm Allow ở IAM policy của role</text>
 <rect x="420" y="170" width="250" height="60" rx="10" class="f-phys-soft s-phys"/><text x="434" y="196" class="t-b">3. Grant tạm thời</text><text x="434" y="216" class="t-small">EBS, RDS: tạo tự động, thu hồi được</text>
 <rect x="730" y="85" width="130" height="70" rx="10" class="f-phys-soft s-phys"/><text x="744" y="115" class="t-b t-phys">Dùng key</text><text x="744" y="137" class="t-small">và ghi CloudTrail</text>
 <path d="M150 120 L198 120" class="f-none s-phys" stroke-width="2" marker-end="url(#aws52-1-a)"/>
@@ -50,7 +50,7 @@ Mọi KMS key đều có **key policy**, một resource policy gắn thẳng và
 <figcaption>Hình 1. Ba đường cấp quyền trên KMS key; mọi đường đều bắt đầu từ key policy, và một Deny ở bất kỳ policy nào vẫn thắng.</figcaption>
 </figure>
 
-Key policy mặc định của console có statement `Principal: arn:aws:iam::123456789012:root, Action: kms:*`. Đây không phải "user root" mà là **ủy quyền cho IAM** (đường 2). Bỏ statement này thì IAM policy của cả tài khoản không còn tác dụng với key, và nếu key policy không nêu ai khác thì key có thể thành không ai quản trị được. Lab giữ statement đó rồi thêm ba lớp kiểm soát hẹp hơn:
+Key policy mặc định của console có statement `Principal: arn:aws:iam::123456789012:root, Action: kms:*`. Đây không phải "user root" mà là **uỷ quyền cho IAM** (đường 2). Bỏ statement này thì IAM policy của cả tài khoản không còn tác dụng với key, và nếu key policy không nêu ai khác thì key có thể thành không ai quản trị được. Lab giữ statement đó rồi thêm ba lớp kiểm soát hẹp hơn:
 
 ```hcl
 statement {
@@ -130,7 +130,7 @@ RDS và EBS dùng **grant**: khi bạn tạo volume mã hoá, EC2 tạo một gr
 ## Cái giá phải trả
 
 - **Phí và request**: mỗi key tính phí theo tháng, mỗi request tính theo số lượng, và request tới KMS dùng chung hạn mức mỗi region cho cả tài khoản (xem Service Quotas). Tracking nhận 6.250 toạ độ mỗi giây: gọi KMS một lần cho mỗi toạ độ sẽ chiếm phần lớn hạn mức bạn không kiểm soát. Lấy một data key cho cả lô, cache data key trong Encryption SDK, hoặc để S3 và Firehose lo.
-- **Khoá nhầm thì không mở lại**: bỏ statement ủy quyền IAM mà quên nêu admin khiến key khó quản trị.
+- **Khoá nhầm thì không mở lại**: bỏ statement uỷ quyền IAM mà quên nêu admin khiến key khó quản trị.
 - **Tách quyền chưa đủ**: nếu admin tự sửa được key policy, họ tự cấp quyền dùng cho mình. Giới hạn ai sửa policy qua SCP hoặc bài 51.
 - **Xoá key = mất dữ liệu**: không có đường quay lại sau cửa sổ chờ. Tắt key trước, xoá sau.
 - **Quên region**: key ở `ap-southeast-1` không dùng được ở region khác, trừ multi-region key đã replicate.

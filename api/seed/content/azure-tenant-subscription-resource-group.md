@@ -24,7 +24,7 @@ Azure tổ chức mọi thứ thành một cây. Trên cùng là **tenant**, m�
 
 Cây này không phải để vẽ cho đẹp. Nó là các **scope**: chỗ bạn gán quyền và policy. Quyền (RBAC role assignment) gán ở scope nào thì có hiệu lực với mọi thứ bên dưới scope đó. **Azure Policy** cũng vậy: policy gán ở management group áp xuống mọi subscription con. Resource lock cũng kế thừa xuống. Có một ngoại lệ đáng nhớ là **tag**: tag gắn ở subscription hay resource group không tự chảy xuống resource. Muốn resource nhận tag của resource group thì phải gắn riêng hoặc dùng policy để sao chép.
 
-Một chi tiết kỹ thuật: Azure RBAC nhận bốn cấp scope là management group, subscription, resource group và resource; bản thân tenant không nằm trong danh sách đó. Cấp cao nhất thường dùng là root management group (Tenant Root Group), nằm ngay dưới tenant. Số cấp management group lồng nhau cũng có giới hạn, hãy kiểm tài liệu trước khi thiết kế cây sâu.
+Một chi tiết kỹ thuật: Azure RBAC nhận bốn cấp scope là management group, subscription, resource group và resource; bản thân tenant không nằm trong danh sách đó. Cấp cao nhất thường dùng là root management group (Tenant Root Group), nằm ngay dưới tenant. Số cấp management group lồng nhau cũng có giới hạn, hãy kiểm tra tài liệu trước khi thiết kế cây sâu.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

@@ -88,7 +88,7 @@ async fn post_entry(
 }
 ```
 
-Body HTTP là luồng chỉ đọc được một lần. axum chia extractor thành hai loại: loại cài `FromRequestParts` chỉ nhìn phần đầu request (`State`, `Path`, `Method`, `Uri`), loại cài `FromRequest` tiêu thụ cả request (`Json`, `String`, `Bytes`). Loại sau chỉ được đứng cuối. Đảo thứ tự thì handler không còn thỏa trait `Handler`. Thử đặt `Json` lên trước `State` trong một file thử rồi `cargo build` (rút gọn):
+Body HTTP là luồng chỉ đọc được một lần. axum chia extractor thành hai loại: loại cài `FromRequestParts` chỉ nhìn phần đầu request (`State`, `Path`, `Method`, `Uri`), loại cài `FromRequest` tiêu thụ cả request (`Json`, `String`, `Bytes`). Loại sau chỉ được đứng cuối. Đảo thứ tự thì handler không còn thoả trait `Handler`. Thử đặt `Json` lên trước `State` trong một file thử rồi `cargo build` (rút gọn):
 
 ```text
 error[E0277]: the trait bound `fn(Json<PostEntryRequest>, ...) -> ... {post_entry}: Handler<_, _>` is not satisfied
@@ -166,7 +166,7 @@ Số dư ở `GET` là số đã commit. `asOf` lấy từ đồng hồ PostgreS
 
 ## Vì sao nói Router là một tower::Service?
 
-axum không tự định nghĩa mô hình «nhận request, trả response». Nó dùng trait `Service` của crate `tower`: một Service có `poll_ready` (sẵn sàng nhận việc chưa) và `call` (nhận một request, trả về một future cho response). Source axum 0.8.9 viết `impl<B> Service<Request<B>> for Router<()>`, với `B` là mọi kiểu body thỏa `HttpBody<Data = Bytes> + Send + 'static`, và `Error = Infallible`: lỗi không bao giờ là `Err` của Service mà luôn được đổi thành một response (như `AppError` ở trên).
+axum không tự định nghĩa mô hình «nhận request, trả response». Nó dùng trait `Service` của crate `tower`: một Service có `poll_ready` (sẵn sàng nhận việc chưa) và `call` (nhận một request, trả về một future cho response). Source axum 0.8.9 viết `impl<B> Service<Request<B>> for Router<()>`, với `B` là mọi kiểu body thoả `HttpBody<Data = Bytes> + Send + 'static`, và `Error = Infallible`: lỗi không bao giờ là `Err` của Service mà luôn được đổi thành một response (như `AppError` ở trên).
 
 Chữ `()` đáng chú ý. Tham số `S` của `Router<S>` là kiểu state **còn thiếu**: `Router<AppState>` là router đang chờ một `AppState`, và `.with_state(state)` đổi nó thành `Router<()>`. Chỉ `Router<()>` là Service, nên quên `.with_state` là lỗi biên dịch chứ không phải lỗi lúc chạy. Router không dùng state thì ngay từ đầu đã là `Router<()>`. Thử gọi `oneshot` trên router còn thiếu state (rút gọn):
 
@@ -254,7 +254,7 @@ cargo run --manifest-path examples/toi-noi-rust/31-axum-http/Cargo.toml -- --ver
 cargo test --manifest-path examples/toi-noi-rust/31-axum-http/Cargo.toml
 ```
 
-Lệnh đầu tự khởi động server trên một cổng ngẫu nhiên, gọi qua TCP thật rồi dọn schema. `reqwest` chỉ là client của `cargo run` và `--verify`; server không dùng nó. Output (rút gọn phần `asOf`; đây là in lại qua `serde_json::Value` nên khóa JSON xếp theo thứ tự chữ cái):
+Lệnh đầu tự khởi động server trên một cổng ngẫu nhiên, gọi qua TCP thật rồi dọn schema. `reqwest` chỉ là client của `cargo run` và `--verify`; server không dùng nó. Output (rút gọn phần `asOf`; đây là in lại qua `serde_json::Value` nên khoá JSON xếp theo thứ tự chữ cái):
 
 ```text
 POST /v1/entries                           -> 201 {"entryId":"JE-000001","idempotencyKey":"trip:TN-0001:capture","replayed":false}
@@ -286,7 +286,7 @@ content-type: application/json
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là hai endpoint để học cơ chế, chưa phải API production: chưa xác thực, chưa phân quyền, giới hạn body vẫn là 2 MB mặc định dù một bút toán chỉ cần vài KB, chưa timeout, chưa request id, chưa tracing, nên lỗi 5xx chỉ ghi bằng <code>eprintln!</code>. JSON lỗi tự đặt, chưa theo Problem Details. Server chưa tắt êm: <code>--serve</code> hủy task thẳng tay, graceful shutdown là bài 39. Kho PostgreSQL là bản rút gọn, không có trait nên không thay được bằng bản giả. Máy lab chạy client và server cùng một máy, không TLS.</p>
+<p>Đây là hai endpoint để học cơ chế, chưa phải API production: chưa xác thực, chưa phân quyền, giới hạn body vẫn là 2 MB mặc định dù một bút toán chỉ cần vài KB, chưa timeout, chưa request id, chưa tracing, nên lỗi 5xx chỉ ghi bằng <code>eprintln!</code>. JSON lỗi tự đặt, chưa theo Problem Details. Server chưa tắt êm: <code>--serve</code> huỷ task thẳng tay, graceful shutdown là bài 39. Kho PostgreSQL là bản rút gọn, không có trait nên không thay được bằng bản giả. Máy lab chạy client và server cùng một máy, không TLS.</p>
 </div>
 
 **Bài tập:** client gửi `POST /v1/entries` với `Content-Type: text/plain` và body `{}`. Response là gì? Nếu đổi tham số `body` của handler thành `Json<PostEntryRequest>` trần thì thân response đổi thế nào, và vì sao một client C# phân tích lỗi theo `code` sẽ gặp rắc rối?

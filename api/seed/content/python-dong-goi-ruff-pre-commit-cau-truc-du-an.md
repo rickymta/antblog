@@ -32,7 +32,7 @@ Gói `toinoi_pricing` không thêm luật nghiệp vụ nào: giá, miền 0 đ�
 | 10 | pytest, `parametrize`; `FarePolicy` | `tests/`, bảng ca biên 8 × 3; `FarePolicy` (`NamedTuple`) giữ nguyên từ bài 10 |
 | 11 | Máy trạng thái chuyến bằng `dict` | `ALLOWED_TRANSITIONS` |
 | 12 | Type hints, mypy | `distance_km: Decimal`, `mypy --strict` |
-| 13 | `frozen` dataclass, `StrEnum`, `Money`, `Quote` | `Money`, `Quote`, `TripStatus` (khóa của `ALLOWED_TRANSITIONS` là `StrEnum`); `make_quote(now=...)` nhận thời điểm từ ngoài vào |
+| 13 | `frozen` dataclass, `StrEnum`, `Money`, `Quote` | `Money`, `Quote`, `TripStatus` (khoá của `ALLOWED_TRANSITIONS` là `StrEnum`); `make_quote(now=...)` nhận thời điểm từ ngoài vào |
 
 Bài 14 đi tiếp một bước: thay tham số `now` bằng một `Clock` được tiêm vào.
 
@@ -217,7 +217,7 @@ Found 5 errors.
 [*] 3 fixable with `--fix` (2 unsafe fixes available with `--fix --unsafe-fixes`).
 ```
 
-Năm lỗi, mỗi lỗi một mã. `B006` là cái bẫy kinh điển: giá trị mặc định `[]` được tạo **một lần** lúc định nghĩa hàm và dùng chung cho mọi lần gọi, nên danh sách `stops` tích dần giữa các lần gọi. Dấu `[*]` nghĩa là ruff sửa được tự động bằng `--fix`. Còn «unsafe fix» là bản sửa có thể đổi hành vi: thay `== None` bằng `is None` đổi kết quả nếu lớp có `__eq__` tùy biến, nên ruff không tự làm khi chưa được phép. Với những bản sửa an toàn, `ruff check --fix` dọn được import thừa và thứ tự import; phần còn lại cần người quyết định.
+Năm lỗi, mỗi lỗi một mã. `B006` là cái bẫy kinh điển: giá trị mặc định `[]` được tạo **một lần** lúc định nghĩa hàm và dùng chung cho mọi lần gọi, nên danh sách `stops` tích dần giữa các lần gọi. Dấu `[*]` nghĩa là ruff sửa được tự động bằng `--fix`. Còn «unsafe fix» là bản sửa có thể đổi hành vi: thay `== None` bằng `is None` đổi kết quả nếu lớp có `__eq__` tuỳ biến, nên ruff không tự làm khi chưa được phép. Với những bản sửa an toàn, `ruff check --fix` dọn được import thừa và thứ tự import; phần còn lại cần người quyết định.
 
 `ruff format` thì không báo «lỗi», nó chỉ cho thấy khác biệt. File `demo-errors/bad_format.py` viết cẩu thả, `ruff format --diff` in thứ nó sẽ đổi:
 

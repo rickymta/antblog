@@ -8,7 +8,7 @@ tags: [toi-noi, location, rust, routing, turn-cost, u-turn, edge-based, openstre
 language: vi
 ---
 
-Trên đồ thị HCM, một xe ô tô đang chạy hướng 178° trên đường Lê Văn Thọ, đã đi qua 80% cạnh 73056. Khách đứng ở phía sau, cách đó hơn một kilômét theo chiều ngược lại. Dijkstra theo nút trả lời «đi hết đoạn phía trước, quay ngược trên chính đường này, rồi rẽ trái vào Phạm Văn Chiêu»: 120,5 s. Tuyến đó cho xe quay đầu giữa đường, miễn phí, ở một nút giao đang chạy xe cả hai chiều. Khi cấm quay đầu giữa đường, tuyến hợp lệ phải đi vòng qua ba đường nối ngắn không tên, rẽ phải ba lần, rồi quay lại: 160,8 s và 1.145 m. Câu hỏi «tài xế mất bao lâu để tới khách» có hai đáp án cách nhau 40,3 s, tùy vào việc đồ thị có biết xe đang quay mặt đi đâu hay không.
+Trên đồ thị HCM, một xe ô tô đang chạy hướng 178° trên đường Lê Văn Thọ, đã đi qua 80% cạnh 73056. Khách đứng ở phía sau, cách đó hơn một kilômét theo chiều ngược lại. Dijkstra theo nút trả lời «đi hết đoạn phía trước, quay ngược trên chính đường này, rồi rẽ trái vào Phạm Văn Chiêu»: 120,5 s. Tuyến đó cho xe quay đầu giữa đường, miễn phí, ở một nút giao đang chạy xe cả hai chiều. Khi cấm quay đầu giữa đường, tuyến hợp lệ phải đi vòng qua ba đường nối ngắn không tên, rẽ phải ba lần, rồi quay lại: 160,8 s và 1.145 m. Câu hỏi «tài xế mất bao lâu để tới khách» có hai đáp án cách nhau 40,3 s, tuỳ vào việc đồ thị có biết xe đang quay mặt đi đâu hay không.
 
 Đây là bài 23 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng CSR và Dijkstra của [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr) và quan hệ cấm rẽ mà [bài 06](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to) đã đọc từ OpenStreetMap. Chi phí rẽ trong bài (rẽ phải 3 s, rẽ trái 6 s, quay đầu 20 s) là **giả định của lab**, chưa hiệu chuẩn bằng dữ liệu thật. Toàn bộ dữ liệu chuyến là mô phỏng.
 
@@ -32,7 +32,7 @@ Cả ba cùng một gốc: trạng thái của tìm kiếm thiếu thông tin «
 
 Trong **đồ thị theo cạnh** (edge-based), một trạng thái là một cạnh có hướng, tức «xe đang đi trên cạnh `e`». Chuyển từ `e1` sang `e2` chỉ hợp lệ khi `head(e1) = tail(e2)` và cặp đó không bị cấm; chi phí là `trọng số của e2` cộng `chi phí rẽ(e1, e2)`. Chi phí rẽ bây giờ là thuộc tính của **chuyển trạng thái**, đúng chỗ của nó.
 
-Đồ thị này **không được dựng ra bộ nhớ**: các chuyển trạng thái sinh ngay lúc duyệt từ CSR theo nút của bài 21. Số trạng thái bằng số cạnh (319.074), số chuyển trạng thái bằng tổng, trên mọi nút, của (số cạnh vào) × (số cạnh ra); không cần lưu. Phần lõi của A* theo cạnh chỉ khác bài 21 hai chỗ: khóa nhãn là chỉ số cạnh, và mỗi lần nới có thêm `turn_ms`.
+Đồ thị này **không được dựng ra bộ nhớ**: các chuyển trạng thái sinh ngay lúc duyệt từ CSR theo nút của bài 21. Số trạng thái bằng số cạnh (319.074), số chuyển trạng thái bằng tổng, trên mọi nút, của (số cạnh vào) × (số cạnh ra); không cần lưu. Phần lõi của A* theo cạnh chỉ khác bài 21 hai chỗ: khoá nhãn là chỉ số cạnh, và mỗi lần nới có thêm `turn_ms`.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/turn.rs`
 

@@ -10,12 +10,12 @@ language: vi
 
 Giờ cao điểm của [Tới Nơi](/articles/du-an-mau-toi-noi) là khoảng 70 chuyến mỗi giây. Mỗi lần khách mở màn hình đặt xe, ứng dụng hỏi báo giá cho một cặp (dịch vụ, khoảng cách), và khách cùng khu vực hỏi các cặp gần giống nhau, vậy mà dịch vụ báo giá tính lại từng lần. Điều phối cần «5 tài xế gần nhất» trong 25.000 tài xế trực tuyến, và một khách bấm đặt liên tục không nên làm cạn tài nguyên của người khác. Cả ba việc cần một nơi trả lời trong cỡ một đến vài mili giây; Redis làm tốt cả ba.
 
-Đây là bài 27 của lộ trình **Python trung bình qua Tới Nơi**. Bài dùng Redis 7 trong hạ tầng dùng chung (`infra/README.md`) qua `redis.asyncio`, nên cần quen `async`/`await` và `gather` ở bài 21. Mọi key của lab có tiền tố `lab27:` và bị xóa khi chạy xong; vị trí tài xế là dữ liệu tổng hợp quanh Hà Nội.
+Đây là bài 27 của lộ trình **Python trung bình qua Tới Nơi**. Bài dùng Redis 7 trong hạ tầng dùng chung (`infra/README.md`) qua `redis.asyncio`, nên cần quen `async`/`await` và `gather` ở bài 21. Mọi key của lab có tiền tố `lab27:` và bị xoá khi chạy xong; vị trí tài xế là dữ liệu tổng hợp quanh Hà Nội.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Cache-aside cho báo giá đã chạy ổn. Lúc cache nguội, 20 request cùng cặp (ride, 2,5 km) đến đúng một thời điểm. Dịch vụ báo giá bị gọi bao nhiêu lần?</p>
-<details><summary>Xem đáp án</summary><p><b>20 lần.</b> Mỗi request đọc cache và thấy hụt trước khi có request nào kịp ghi kết quả vào, nên cả 20 cùng đi hỏi nguồn. Cache chỉ giúp những request đến <i>sau</i> khi đã có giá trị. Bài chạy đúng ca này rồi sửa bằng một khóa có hạn.</p></details>
+<details><summary>Xem đáp án</summary><p><b>20 lần.</b> Mỗi request đọc cache và thấy hụt trước khi có request nào kịp ghi kết quả vào, nên cả 20 cùng đi hỏi nguồn. Cache chỉ giúp những request đến <i>sau</i> khi đã có giá trị. Bài chạy đúng ca này rồi sửa bằng một khoá có hạn.</p></details>
 </div>
 
 ## Redis giữ gì và không giữ gì
@@ -61,7 +61,7 @@ async def get_quote(r, source, service, distance_km, *, ttl_ms=30_000):
     return quote, "miss"
 ```
 
-Ba quyết định nhỏ. **Key mang đủ biến số** ảnh hưởng tới giá: dịch vụ, khoảng cách đã chuẩn hóa (không thì `2.5` và `2.50` thành hai key) và phiên bản chính sách. Chuẩn hóa còn phải đi đúng chỗ: `get_quote` hỏi nguồn bằng **km đã chuẩn hóa**. Nếu key dùng 2,500 mà nguồn tính theo 2,5004 hay 2,5001, hai khách cùng key nhận giá của người đến trước (14.252 và 14.250 đồng) và cache đã đổi giá. Làm tròn đến mét là quyết định nghiệp vụ và phép tính cước thật phải dùng cùng quy tắc; sản phẩm thật thường gom km thành bậc lớn hơn (ví dụ 100 m) để tăng tỉ lệ trúng cache. **Giá trị là JSON với tiền là chuỗi**, vì `Decimal` không có trong JSON. **Mọi key cache đều có TTL** (`px` là mili giây), không dài hơn thời hạn hiệu lực của báo giá (`Quote.expires_at`, bài 13).
+Ba quyết định nhỏ. **Key mang đủ biến số** ảnh hưởng tới giá: dịch vụ, khoảng cách đã chuẩn hoá (không thì `2.5` và `2.50` thành hai key) và phiên bản chính sách. Chuẩn hoá còn phải đi đúng chỗ: `get_quote` hỏi nguồn bằng **km đã chuẩn hoá**. Nếu key dùng 2,500 mà nguồn tính theo 2,5004 hay 2,5001, hai khách cùng key nhận giá của người đến trước (14.252 và 14.250 đồng) và cache đã đổi giá. Làm tròn đến mét là quyết định nghiệp vụ và phép tính cước thật phải dùng cùng quy tắc; sản phẩm thật thường gom km thành bậc lớn hơn (ví dụ 100 m) để tăng tỉ lệ trúng cache. **Giá trị là JSON với tiền là chuỗi**, vì `Decimal` không có trong JSON. **Mọi key cache đều có TTL** (`px` là mili giây), không dài hơn thời hạn hiệu lực của báo giá (`Quote.expires_at`, bài 13).
 
 ```text
 == 1. Cache-aside cho báo giá ==
@@ -73,11 +73,11 @@ TTL 150 ms: ngay sau ghi -> hit; sau 200 ms -> miss
 4,0004 km -> 21000 (4.000); 4,0001 km -> 21000 (hit); 4,0006 km -> 21005 (4.001, miss)
 ```
 
-Lần đầu hụt, tốn 50 ms giả lập của nguồn; lần hai trúng sau chưa đến một mili giây và nguồn không bị gọi lại. `PTTL` là thời gian còn lại của key. Số mili giây phụ thuộc máy (xem dòng máy đo ở mục «Chạy và kiểm chứng»); chỉ tỷ lệ giữa hai lần là bài học. Với TTL 150 ms, sau 200 ms key biến mất và lần đọc kế là hụt: cache tự cập nhật khi bảng giá đổi theo cách đó. Dòng cuối cho thấy chuẩn hóa hoạt động: 4,0004 và 4,0001 km cùng key, cùng giá 21.000 đồng; 4,0006 km làm tròn lên 4,001, là key và giá khác (21.005).
+Lần đầu hụt, tốn 50 ms giả lập của nguồn; lần hai trúng sau chưa đến một mili giây và nguồn không bị gọi lại. `PTTL` là thời gian còn lại của key. Số mili giây phụ thuộc máy (xem dòng máy đo ở mục «Chạy và kiểm chứng»); chỉ tỷ lệ giữa hai lần là bài học. Với TTL 150 ms, sau 200 ms key biến mất và lần đọc kế là hụt: cache tự cập nhật khi bảng giá đổi theo cách đó. Dòng cuối cho thấy chuẩn hoá hoạt động: 4,0004 và 4,0001 km cùng key, cùng giá 21.000 đồng; 4,0006 km làm tròn lên 4,001, là key và giá khác (21.005).
 
 ## Cache nguội và đám đông
 
-Câu hỏi mở bài có đáp án trong output của lab. Với 20 yêu cầu đồng thời vào một key nguội (hai dòng đầu), rồi với nguồn cố ý chậm hơn khóa và hơn thời gian chịu chờ (dòng cuối):
+Câu hỏi mở bài có đáp án trong output của lab. Với 20 yêu cầu đồng thời vào một key nguội (hai dòng đầu), rồi với nguồn cố ý chậm hơn khoá và hơn thời gian chịu chờ (dòng cuối):
 
 ```text
 20 yêu cầu đồng thời, key nguội, cache-aside thường: nguồn bị gọi 20 lần
@@ -85,7 +85,7 @@ Câu hỏi mở bài có đáp án trong output của lab. Với 20 yêu cầu �
 nguồn chậm 0,3 s, khóa 0,1 s, chờ tối đa 0,15 s: nguồn bị gọi 2 lần, 2 caller có giá, 18 caller nhận QuoteUnavailable
 ```
 
-Đó là **cache stampede**: đúng lúc một key phổ biến hết hạn, mọi request cùng thấy hụt và cùng đổ về nguồn. Cách sửa là **single-flight**: chỉ một caller được hỏi nguồn, số còn lại chờ rồi đọc cache. Khóa là một key khác, giành bằng `SET ... NX PX`: chỉ thành công nếu key chưa tồn tại, và tự hết hạn nếu người giữ khóa chết.
+Đó là **cache stampede**: đúng lúc một key phổ biến hết hạn, mọi request cùng thấy hụt và cùng đổ về nguồn. Cách sửa là **single-flight**: chỉ một caller được hỏi nguồn, số còn lại chờ rồi đọc cache. Khoá là một key khác, giành bằng `SET ... NX PX`: chỉ thành công nếu key chưa tồn tại, và tự hết hạn nếu người giữ khoá chết.
 
 ```python
 # (trích get_quote_single_flight)
@@ -107,11 +107,11 @@ if time.monotonic() > give_up_at:   # chờ quá wait_ms: báo lỗi, KHÔNG t�
 await asyncio.sleep(0.01)           # rồi quay lại đọc cache
 ```
 
-`token` ngẫu nhiên cùng script `UNLOCK_LUA` (chỉ `DEL` nếu giá trị vẫn là token của ta) tránh việc xóa nhầm khóa của người khác sau khi khóa của ta đã hết hạn. **Kiểm lại cache sau khi giành khóa** là phần bản đầu của lab thiếu: chạy `--verify` nhiều lần, thỉnh thoảng nguồn bị gọi 2 lần, vì một caller đọc hụt trước lúc người giữ khóa ghi xong rồi giành khóa ngay sau khi khóa được nhả. Đó là lỗi «kiểm tra rồi hành động», cùng họ với lỗi nhận trùng chuyến ở [bài 23](/articles/python-concurrency-lock-queue-semaphore), và chỉ lộ khi chạy nhiều lần.
+`token` ngẫu nhiên cùng script `UNLOCK_LUA` (chỉ `DEL` nếu giá trị vẫn là token của ta) tránh việc xoá nhầm khoá của người khác sau khi khoá của ta đã hết hạn. **Kiểm lại cache sau khi giành khoá** là phần bản đầu của lab thiếu: chạy `--verify` nhiều lần, thỉnh thoảng nguồn bị gọi 2 lần, vì một caller đọc hụt trước lúc người giữ khoá ghi xong rồi giành khoá ngay sau khi khoá được nhả. Đó là lỗi «kiểm tra rồi hành động», cùng họ với lỗi nhận trùng chuyến ở [bài 23](/articles/python-concurrency-lock-queue-semaphore), và chỉ lộ khi chạy nhiều lần.
 
-Thời gian chờ có giới hạn riêng: `wait_ms` (caller chịu chờ bao lâu) khác `lock_ms` (tuổi thọ khóa). Bản đầu của lab cho caller hết kiên nhẫn tự gọi nguồn, và đó là cái bẫy: khi nguồn chậm hơn khóa, mọi caller đã chờ cùng hết hạn một lúc rồi cùng đổ về nguồn, tự tạo đúng stampede mà khóa định chặn. Giờ caller hết `wait_ms` ném `QuoteUnavailable`; tầng API trả 503 kèm `Retry-After`, hoặc giá cũ nếu đã giữ bản cũ. `lock_ms` nên lớn hơn thời gian nguồn trả lời lúc chậm; nếu không, mỗi tuổi thọ khóa chỉ thêm một caller chứ không phải tất cả (dòng cuối khối output trên: 2 lần gọi nguồn, 18 caller nhận lỗi).
+Thời gian chờ có giới hạn riêng: `wait_ms` (caller chịu chờ bao lâu) khác `lock_ms` (tuổi thọ khoá). Bản đầu của lab cho caller hết kiên nhẫn tự gọi nguồn, và đó là cái bẫy: khi nguồn chậm hơn khoá, mọi caller đã chờ cùng hết hạn một lúc rồi cùng đổ về nguồn, tự tạo đúng stampede mà khoá định chặn. Giờ caller hết `wait_ms` ném `QuoteUnavailable`; tầng API trả 503 kèm `Retry-After`, hoặc giá cũ nếu đã giữ bản cũ. `lock_ms` nên lớn hơn thời gian nguồn trả lời lúc chậm; nếu không, mỗi tuổi thọ khoá chỉ thêm một caller chứ không phải tất cả (dòng cuối khối output trên: 2 lần gọi nguồn, 18 caller nhận lỗi).
 
-Khóa này đủ cho một Redis đơn lẻ và việc chỉ cần «thường thì một lần», không đủ để bảo vệ tiền hay trạng thái nghiệp vụ (xem phần cảnh báo về distributed locks trong tài liệu Redis); bảo đảm đúng-sai phải nằm ở database như bài 25.
+Khoá này đủ cho một Redis đơn lẻ và việc chỉ cần «thường thì một lần», không đủ để bảo vệ tiền hay trạng thái nghiệp vụ (xem phần cảnh báo về distributed locks trong tài liệu Redis); bảo đảm đúng-sai phải nằm ở database như bài 25.
 
 ## Rate limit: cửa sổ cố định và token bucket
 
@@ -179,11 +179,11 @@ Vì sao phải Lua? 50 coroutine cùng xin token khi xô có 5; bản «`GET` r�
 50 yêu cầu đồng thời, dung lượng 5: GET rồi SET cho qua 50, Lua cho qua 5
 ```
 
-Đây là lỗi mất cập nhật cùng họ với bài 25: cả 50 cùng đọc «còn 5» rồi cùng trừ; Lua chạy nguyên tử trên server nên đúng 5 qua. Hai hạn chế. Lab truyền `now_ms` từ client để ca thử lặp lại được; production nhiều instance có đồng hồ lệch nên nên đọc `TIME` của Redis trong script, và nếu vẫn nhận giờ từ client thì script không được ghi lùi `ts` (dòng cuối của output: instance chậm 1 giây không làm xô nạp thừa token). Và khóa theo `client_id` chỉ có nghĩa nếu định danh đã được xác thực.
+Đây là lỗi mất cập nhật cùng họ với bài 25: cả 50 cùng đọc «còn 5» rồi cùng trừ; Lua chạy nguyên tử trên server nên đúng 5 qua. Hai hạn chế. Lab truyền `now_ms` từ client để ca thử lặp lại được; production nhiều instance có đồng hồ lệch nên nên đọc `TIME` của Redis trong script, và nếu vẫn nhận giờ từ client thì script không được ghi lùi `ts` (dòng cuối của output: instance chậm 1 giây không làm xô nạp thừa token). Và khoá theo `client_id` chỉ có nghĩa nếu định danh đã được xác thực.
 
 ## GEO cho 25.000 tài xế
 
-Redis lưu chỉ mục địa lý ngay trong **sorted set**: `GEOADD` mã hóa (kinh độ, vĩ độ) thành số nguyên 52 bit (geohash) làm điểm số của thành viên, và `GEOSEARCH` quét các khoảng điểm số lân cận rồi lọc theo khoảng cách thật; `ZCARD`, `ZREM` dùng được nguyên xi. Lab sinh 25.000 tài xế `DR-00001` đến `DR-25000` (25.000 tài xế cần 5 chữ số, dài hơn `DR-001` của từ điển miền) trong đĩa bán kính 15 km quanh Hồ Gươm, rồi tìm 5 tài xế gần nhất của một khách trong 3 km:
+Redis lưu chỉ mục địa lý ngay trong **sorted set**: `GEOADD` mã hoá (kinh độ, vĩ độ) thành số nguyên 52 bit (geohash) làm điểm số của thành viên, và `GEOSEARCH` quét các khoảng điểm số lân cận rồi lọc theo khoảng cách thật; `ZCARD`, `ZREM` dùng được nguyên xi. Lab sinh 25.000 tài xế `DR-00001` đến `DR-25000` (25.000 tài xế cần 5 chữ số, dài hơn `DR-001` của từ điển miền) trong đĩa bán kính 15 km quanh Hồ Gươm, rồi tìm 5 tài xế gần nhất của một khách trong 3 km:
 
 ```python
 # (trích)
@@ -210,7 +210,7 @@ GEOSEARCH 5 tài xế gần nhất trong 3 km (1.2 ms):
 số tài xế trong 2 km: Redis 432, tính tay 432
 ```
 
-Cùng năm mã tài xế, cùng thứ tự, khoảng cách lệch dưới 1 mét; số tài xế trong 2 km cũng khớp (432). Sai lệch nhỏ đến từ việc tọa độ bị lượng tử hóa khi lưu: `GEOPOS` trả `105.743330` thay vì `105.743332`. Khoảng cách GEO là **đường chim bay trên mô hình hình cầu**, không phải quãng đường đi: tài xế cách 100 m bên kia sông có thể xa hơn tài xế cách 400 m cùng bờ, nên điều phối thật dùng GEO để lọc ứng viên rồi mới tính lộ trình. Thời gian tìm kiếm dao động mạnh giữa các lần chạy (lần này 1,2 ms, một lần chạy khác đo được 16,3 ms), nên đừng rút kết luận từ một lần đo.
+Cùng năm mã tài xế, cùng thứ tự, khoảng cách lệch dưới 1 mét; số tài xế trong 2 km cũng khớp (432). Sai lệch nhỏ đến từ việc toạ độ bị lượng tử hoá khi lưu: `GEOPOS` trả `105.743330` thay vì `105.743332`. Khoảng cách GEO là **đường chim bay trên mô hình hình cầu**, không phải quãng đường đi: tài xế cách 100 m bên kia sông có thể xa hơn tài xế cách 400 m cùng bờ, nên điều phối thật dùng GEO để lọc ứng viên rồi mới tính lộ trình. Thời gian tìm kiếm dao động mạnh giữa các lần chạy (lần này 1,2 ms, một lần chạy khác đo được 16,3 ms), nên đừng rút kết luận từ một lần đo.
 
 ### Pipeline: bớt vòng đi-về
 
@@ -237,7 +237,7 @@ async def load_drivers_pipeline(r, key, drivers, chunk=5_000):
 
 ### Di chuyển, offline và dựng lại
 
-Tài xế di chuyển thì `GEOADD` lại cùng thành viên là cập nhật tại chỗ. Tài xế tắt app thì phải `ZREM`: sorted set không có TTL riêng cho từng thành viên, nên production cần cơ chế dọn (ví dụ một sorted set thứ hai theo thời điểm cập nhật cuối). Cuối cùng, nguyên tắc đầu bài được thử bằng cách xóa hẳn key:
+Tài xế di chuyển thì `GEOADD` lại cùng thành viên là cập nhật tại chỗ. Tài xế tắt app thì phải `ZREM`: sorted set không có TTL riêng cho từng thành viên, nên production cần cơ chế dọn (ví dụ một sorted set thứ hai theo thời điểm cập nhật cuối). Cuối cùng, nguyên tắc đầu bài được thử bằng cách xoá hẳn key:
 
 ```text
 DR-02542 đi xa: top 5 mới bắt đầu bằng DR-03814; ZCARD vẫn 25000
@@ -255,30 +255,30 @@ uv run --project examples/toi-noi-python/27-redis-cache-rate-limit-geo examples/
 uv run --project examples/toi-noi-python/27-redis-cache-rate-limit-geo examples/toi-noi-python/27-redis-cache-rate-limit-geo/main.py --verify
 ```
 
-Lệnh đầu in các khối output ở trên (trích từng phần, bỏ dòng đầu mô tả máy đo). `--verify` chạy cùng kịch bản, so 44 kết quả kỳ vọng rồi xóa mọi key `lab27:*`:
+Lệnh đầu in các khối output ở trên (trích từng phần, bỏ dòng đầu mô tả máy đo). `--verify` chạy cùng kịch bản, so 44 kết quả kỳ vọng rồi xoá mọi key `lab27:*`:
 
 ```text
 OK 44/44
 ```
 
-Thời gian chạy tùy máy (cỡ 10 đến 25 giây ở đây) vì cách nạp từng lệnh 25.000 vòng đi-về là một phần của phép đo; `--verify` chỉ kiểm số đếm và bất biến, không kiểm số mili giây. Khi chưa bật Redis, `--verify` in `FAIL: không nối được Redis tại redis://localhost:63790/0 (docker compose …)` và thoát mã 1. Môi trường: Python 3.14.7, redis-py 8.1.0, Redis 7.4.12 trong container `redis:7`, macOS 26 trên Apple Silicon (10 CPU), load average 23,81 lúc chạy lần dán output do máy đang bận việc khác, nên số mili giây trong bài chỉ cho thứ bậc độ lớn. Các số đếm (20, 1, 5, 50, 432; 44 ca) lặp lại được.
+Thời gian chạy tuỳ máy (cỡ 10 đến 25 giây ở đây) vì cách nạp từng lệnh 25.000 vòng đi-về là một phần của phép đo; `--verify` chỉ kiểm số đếm và bất biến, không kiểm số mili giây. Khi chưa bật Redis, `--verify` in `FAIL: không nối được Redis tại redis://localhost:63790/0 (docker compose …)` và thoát mã 1. Môi trường: Python 3.14.7, redis-py 8.1.0, Redis 7.4.12 trong container `redis:7`, macOS 26 trên Apple Silicon (10 CPU), load average 23,81 lúc chạy lần dán output do máy đang bận việc khác, nên số mili giây trong bài chỉ cho thứ bậc độ lớn. Các số đếm (20, 1, 5, 50, 432; 44 ca) lặp lại được.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
-| Nguồn vẫn bị gọi nhiều lần khi cache nguội, hoặc caller đã chờ lại tự đổ về nguồn | Có khóa single-flight không; có kiểm lại cache sau khi giành khóa không; hết `wait_ms` có ném lỗi thay vì tự gọi nguồn không |
-| Cache trả giá của khách khác hoặc giá cũ | Key đã đủ biến số chưa; nguồn có tính theo km đã chuẩn hóa không; TTL có dài hơn thời hạn báo giá không |
+| Nguồn vẫn bị gọi nhiều lần khi cache nguội, hoặc caller đã chờ lại tự đổ về nguồn | Có khoá single-flight không; có kiểm lại cache sau khi giành khoá không; hết `wait_ms` có ném lỗi thay vì tự gọi nguồn không |
+| Cache trả giá của khách khác hoặc giá cũ | Key đã đủ biến số chưa; nguồn có tính theo km đã chuẩn hoá không; TTL có dài hơn thời hạn báo giá không |
 | Bộ đếm rate limit không bao giờ hết | `INCR` và `EXPIRE` có nằm trong cùng MULTI/EXEC không |
 | `GEOSEARCH` trả rỗng | Thứ tự `(kinh độ, vĩ độ)` có bị đảo thành (vĩ độ, kinh độ) không; key có còn tồn tại không |
 | Vài chục nghìn lệnh chạy chậm bất thường | Có `await` từng lệnh một không; dùng pipeline hoặc lệnh nhận nhiều thành viên |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Một Redis đơn lẻ, chưa nói gì về replica, failover hay cluster; khóa <code>SET NX</code> và bộ đếm chỉ đúng trong phạm vi một node. Compose của lab không đặt <code>maxmemory</code> hay chính sách eviction, production phải đặt. Thời gian 50 ms của dịch vụ báo giá là giả lập, và tài xế đứng yên chưa mô phỏng 6.250 dòng vị trí mỗi giây. Bảng giá, vị trí gốc và mọi bảo đảm về tiền nằm ở nơi khác, không phải ở Redis.</p>
+<p>Một Redis đơn lẻ, chưa nói gì về replica, failover hay cluster; khoá <code>SET NX</code> và bộ đếm chỉ đúng trong phạm vi một node. Compose của lab không đặt <code>maxmemory</code> hay chính sách eviction, production phải đặt. Thời gian 50 ms của dịch vụ báo giá là giả lập, và tài xế đứng yên chưa mô phỏng 6.250 dòng vị trí mỗi giây. Bảng giá, vị trí gốc và mọi bảo đảm về tiền nằm ở nơi khác, không phải ở Redis.</p>
 </div>
 
-**Bài tập:** Báo giá có thêm tham số `surge` (hệ số giờ cao điểm). `quote_key` cần đổi thế nào, và vì sao đổi phiên bản `v1` thành `v2` thường tốt hơn xóa key cũ?
+**Bài tập:** Báo giá có thêm tham số `surge` (hệ số giờ cao điểm). `quote_key` cần đổi thế nào, và vì sao đổi phiên bản `v1` thành `v2` thường tốt hơn xoá key cũ?
 
-<details><summary>Xem lời giải</summary><p>Thêm <code>surge</code> (đã chuẩn hóa số chữ số thập phân) vào key, ví dụ <code>quote:v2:{service}:{km}:{surge}</code>; thiếu nó, hai khách có hệ số khác nhau dùng chung một giá. Đổi phiên bản tốt hơn xóa vì xóa hàng loạt cần quét key (tốn, dễ sót), còn key cũ không bao giờ được đọc nữa và tự chết theo TTL; instance cũ và mới lúc deploy dần cũng không giẫm lên giá trị của nhau. Giá trị <code>surge</code> cũng phải được chuẩn hóa trước khi vào key và trước khi tính giá, đúng như bài học của <code>normalize_km</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>Thêm <code>surge</code> (đã chuẩn hoá số chữ số thập phân) vào key, ví dụ <code>quote:v2:{service}:{km}:{surge}</code>; thiếu nó, hai khách có hệ số khác nhau dùng chung một giá. Đổi phiên bản tốt hơn xoá vì xoá hàng loạt cần quét key (tốn, dễ sót), còn key cũ không bao giờ được đọc nữa và tự chết theo TTL; instance cũ và mới lúc deploy dần cũng không giẫm lên giá trị của nhau. Giá trị <code>surge</code> cũng phải được chuẩn hoá trước khi vào key và trước khi tính giá, đúng như bài học của <code>normalize_km</code>.</p></details>
 
 Bài trước: [bài 26](/articles/python-mongodb-pymongo-motor-document-ocr). Bài tiếp: [bài 28](/articles/python-integration-test-testcontainers-fixture).
 
@@ -287,6 +287,6 @@ Bài trước: [bài 26](/articles/python-mongodb-pymongo-motor-document-ocr). B
 - [redis-py: tài liệu](https://redis.readthedocs.io/en/stable/).
 - [redis-py: ví dụ asyncio](https://redis.readthedocs.io/en/stable/examples/asyncio_examples.html).
 - [Redis: GEOSEARCH](https://redis.io/docs/latest/commands/geosearch/).
-- [Redis: SET (tùy chọn NX, PX)](https://redis.io/docs/latest/commands/set/).
+- [Redis: SET (tuỳ chọn NX, PX)](https://redis.io/docs/latest/commands/set/).
 - [Redis: Pipelining](https://redis.io/docs/latest/develop/using-commands/pipelining/).
 - [Redis: Distributed Locks](https://redis.io/docs/latest/develop/use/patterns/distributed-locks/).

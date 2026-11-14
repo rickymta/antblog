@@ -8,7 +8,7 @@ tags: [flutter, dart, mobile, toi-noi, ios, android, release, remote-config, sho
 language: vi
 ---
 
-Chín giờ sáng, bản 1.6.0 của app khách Tới Nơi lên 10% người dùng Android. Mười một giờ, kênh hỗ trợ nhận nhiều tin giống nhau: bấm chọn VíXanh là app đóng. Crash-free sessions thấp hơn hẳn bản 1.5.3. Phản xạ đầu tiên là "lùi về bản trước", và ta khựng lại: cả hai cửa hàng đều không có nút hạ máy đã cập nhật về bản cũ.
+Chín giờ sáng, bản 1.6.0 của app khách Tới Nơi lên 10% người dùng Android. Mười một giờ, kênh hỗ trợ nhận nhiều tin giống nhau: bấm chọn VíXanh là app đóng. Crash-free sessions thấp hơn hẳn bản 1.5.3. Phản xạ đầu tiên là "lùi về bản trước", và ta khựng lại: cả hai cửa hàng đều không có nút nào đưa các máy đã cập nhật về lại bản cũ.
 
 Bài này dựng những thứ phải có trước sự cố: kiểm phiên bản tối thiểu để buộc bản lỗi phải cập nhật, remote config với kill switch, Shorebird như lựa chọn sửa code Dart không qua store, và runbook halt hay pause theo crash-free.
 
@@ -41,7 +41,7 @@ Vì vậy "rollback" thực tế là bốn biện pháp (Hình 1); ta dùng bi�
 <rect x="682" y="60" width="188" height="180" rx="10" class="f-warn-soft s-warn"/><text x="698" y="90" class="t-b">4. Hotfix 1.6.1</text><text x="698" y="118" class="t-small">Sửa được:</text><text x="698" y="136">mọi thứ</text><text x="698" y="166" class="t-small">Giới hạn:</text><text x="698" y="184">qua review và</text><text x="698" y="202">rollout, chậm nhất</text>
 </svg>
 </div>
-<figcaption>Hình 1. Bốn biện pháp sau khi bản lỗi đã ra store. Không biện pháp nào hạ máy đã cập nhật về bản cũ; ô nét đứt là lựa chọn không bắt buộc.</figcaption>
+<figcaption>Hình 1. Bốn biện pháp sau khi bản lỗi đã ra store. Không biện pháp nào đưa được các máy đã cập nhật về lại bản cũ; ô nét đứt là lựa chọn không bắt buộc.</figcaption>
 </figure>
 
 Hotfix luôn dùng được nên là chốt cuối; khi nó lên, ta có thể nâng `minSupported` để bản lỗi buộc cập nhật. Force update phải có sẵn trong app từ trước, nên ta bắt đầu từ đó.

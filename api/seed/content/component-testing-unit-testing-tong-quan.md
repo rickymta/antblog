@@ -33,7 +33,7 @@ Giả sử system test báo: chuyến xe máy 7,4 km lúc 11:30 trời mưa có 
 
 Component testing đặt câu hỏi ở tầng thấp nhất: **từng phần nhỏ có tự làm đúng việc của nó không**, khi được kiểm riêng, không qua API, không database, không mạng. Lợi ích:
 
-- **Khoanh lỗi ngay:** test đỏ chỉ thẳng vào bước «cộng phụ phí mưa trước khi nhân 1,25».
+- **Khoanh lỗi ngay:** test đỏ chỉ thẳng vào bước «cộng phụ phí trời mưa trước khi nhân 1,25».
 - **Rẻ và nhanh:** hàng trăm test chạy trong vài mili giây, chạy được sau mỗi lần lưu file và ở bước 2 của pipeline (xem [TEST-008](/articles/kiem-thu-trong-sdlc-agile-waterfall)).
 - **Kiểm được các biên khó chạm từ ngoài:** 0,45 km, 100,05 km, đúng 13:00:00.
 
@@ -114,7 +114,7 @@ Bốn test type của mục 2.2.2 đều làm được ở level này, với tr�
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
 
-**Yêu cầu nghiệp vụ.** Pricing & Quote tính giá theo bảng giá từng loại xe (R-FARE-01), làm tròn quãng đường 0,1 km half-up và kiểm khoảng [0,5; 100] km (R-FARE-02), tính theo thứ tự cố định sáu bước: cước cơ bản → cao điểm ×1,25 → phụ phí mưa 8.000 đ → voucher → cước tối thiểu → làm tròn lên 1.000 đ (R-FARE-03…08). Mọi bước trung gian không làm tròn (R-GEN-01). Kết quả trả kèm bảng chi tiết từng bước (R-FARE-10).
+**Yêu cầu nghiệp vụ.** Pricing & Quote tính giá theo bảng giá từng loại xe (R-FARE-01), làm tròn quãng đường 0,1 km half-up và kiểm khoảng [0,5; 100] km (R-FARE-02), tính theo thứ tự cố định sáu bước: cước cơ bản → cao điểm ×1,25 → phụ phí trời mưa 8.000 đ → voucher → cước tối thiểu → làm tròn lên 1.000 đ (R-FARE-03…08). Mọi bước trung gian không làm tròn (R-GEN-01). Kết quả trả kèm bảng chi tiết từng bước (R-FARE-10).
 
 **System context.** Trong kiến trúc đích, Pricing & Quote là một service riêng (§4.3): Booking gọi nó qua gRPC, nó lấy quãng đường từ MapViet, lưu quote có `pricing_version` và breakdown. Trong lab, Pricing là module `src/domain/fare.ts`, `pricing.ts` và `src/app/quote.ts` (SPEC R-ARCH-01). Lõi `calculateFare` là **hàm thuần**: không I/O, không đọc giờ hệ thống.
 
@@ -122,7 +122,7 @@ Bốn test type của mục 2.2.2 đều làm được ở level này, với tr�
 
 | Rủi ro | Thuộc level |
 |---|---|
-| Cộng phụ phí mưa trước khi nhân 1,25 (sai R-FARE-03/05) | Component |
+| Cộng phụ phí trời mưa trước khi nhân 1,25 (sai R-FARE-03/05) | Component |
 | Làm tròn tiền ở giữa công thức ⇒ lệch 1.000 đ (R-GEN-01) | Component |
 | 0,45 km bị từ chối, 100,05 km được chấp nhận (R-FARE-02) | Component |
 | Voucher kéo giá xuống dưới cước tối thiểu (R-FARE-07) | Component |
@@ -217,7 +217,7 @@ Từ test basis, các test condition (chưa phải test case) cho `calculateFare
 2. Quãng đường làm tròn half-up trước mọi bước; biên 0,44 / 0,45 và 100,04 / 100,05 (R-FARE-02).
 3. Ngoài khoảng ⇒ lỗi `DISTANCE_OUT_OF_RANGE`, không trả giá (R-FARE-02).
 4. Hệ số cao điểm áp lên cước cơ bản kể cả phụ phí bưu kiện (R-FARE-04, R-PARCEL-04).
-5. Phụ phí mưa cộng sau hệ số, không bị nhân (R-FARE-05).
+5. Phụ phí trời mưa cộng sau hệ số, không bị nhân (R-FARE-05).
 6. Voucher tính trên số sau bước 3, theo min(percent × A, trần); dưới `minAmount` ⇒ `VOUCHER_MIN_AMOUNT` (R-FARE-06, R-VOUCHER-06).
 7. Cước tối thiểu áp sau voucher (R-FARE-07).
 8. Làm tròn lên 1.000 đ chỉ ở bước cuối; giá trị trung gian giữ phần lẻ (R-FARE-08, R-GEN-01, R-FARE-10).
@@ -353,7 +353,7 @@ Số đo của một lần chạy trên máy viết bài (Windows 11, Node 22.18
 
 **Câu 5 (K2).** Lỗi nào ít khả năng được phát hiện nhất bởi component test của `calculateFare`?
 
-- a) Phụ phí mưa bị nhân 1,25
+- a) Phụ phí trời mưa bị nhân 1,25
 - b) 100,05 km được chấp nhận
 - c) Giá bị làm tròn ở bước cao điểm
 - d) MapViet trả quãng đường bằng mét thay vì km

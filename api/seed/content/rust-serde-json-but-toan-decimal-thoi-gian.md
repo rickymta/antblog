@@ -97,11 +97,11 @@ Tỷ lệ phí là chuỗi `"0.20"`: nhiều bộ đọc JSON đưa số thực 
 
 Hai dòng cuối là bẫy: Cargo hợp nhất feature của một crate trong cả bản build, nên một crate khác bật `serde-float` là mọi `Decimal` không có `with` đổi dạng JSON mà ta không sửa dòng code nào. Lab chỉ bật `serde-with-str` và đặt `with = "rust_decimal::serde::str"` ngay trên trường; bật thêm `serde-float`, trường đó vẫn là chuỗi (đã thử). Đo được: `"feeRate": 0.2` (số) bị từ chối với `invalid type: floating point`; `"0.2"` đọc được và ghi lại đúng `"0.2"`, vì `Decimal` giữ scale. `0.20` và `0.2` so bằng nhau nhưng khác chữ, nên đừng so tỷ lệ bằng chuỗi. Phí tính bằng `Decimal`: `25.500 × 0.20` làm tròn về đồng ra `5.100 VND`.
 
-## Thời gian, trường tùy chọn và trường lạ
+## Thời gian, trường tuỳ chọn và trường lạ
 
-Với feature `serde`, `jiff::Timestamp` ghi `2026-11-06T03:15:00Z`. Đọc `2026-11-06T10:15:00+07:00` thì chuẩn hóa về `…03:15:00Z`; chuỗi thiếu `Z` hoặc offset bị từ chối, như ở bài 08. Phía C#, `DateTimeOffset` offset 0 ghi `…+00:00` chứ không ghi `Z` (đã thử). Cả hai là ISO 8601 và đọc chéo được, nhưng chuỗi khác nhau: so thời điểm, không so chuỗi.
+Với feature `serde`, `jiff::Timestamp` ghi `2026-11-06T03:15:00Z`. Đọc `2026-11-06T10:15:00+07:00` thì chuẩn hoá về `…03:15:00Z`; chuỗi thiếu `Z` hoặc offset bị từ chối, như ở bài 08. Phía C#, `DateTimeOffset` offset 0 ghi `…+00:00` chứ không ghi `Z` (đã thử). Cả hai là ISO 8601 và đọc chéo được, nhưng chuỗi khác nhau: so thời điểm, không so chuỗi.
 
-`Option` cùng `skip_serializing_if` cho trường có thể vắng: `memo: None` không xuất hiện trong JSON. `#[serde(default)]` cho phép trường thiếu khi đọc. Derive vốn coi `Option` thiếu là `None`, nhưng `Vec` thiếu là lỗi `missing field`, nên `labels` cần `default` để producer cũ vẫn đọc được. Lab in khóa ngoài cùng của hai sự kiện:
+`Option` cùng `skip_serializing_if` cho trường có thể vắng: `memo: None` không xuất hiện trong JSON. `#[serde(default)]` cho phép trường thiếu khi đọc. Derive vốn coi `Option` thiếu là `None`, nhưng `Vec` thiếu là lỗi `missing field`, nên `labels` cần `default` để producer cũ vẫn đọc được. Lab in khoá ngoài cùng của hai sự kiện:
 
 ```text
 không có memo/labels: ["entry", "entryId", "feeRate", "postedAt", "schemaVersion", "type"]
@@ -194,7 +194,7 @@ Lab lấy thân bút toán sau (hằng `ENTRY_JSON` trong `src/main.rs`), sửa 
 | Bỏ dấu phẩy cuối dòng 4 | (5, 5) | `Syntax` | expected `,` or `]` |
 | `"amount": "-25500"` | (4, 54) | `Data` | invalid type: string "-25500", expected i64 |
 | Thêm `"fee": 1` vào posting | (5, 58) | `Data` | unknown field `fee`, expected `account` or `amount` |
-| Xóa dòng `idempotencyKey` | (7, 1) | `Data` | missing field `idempotencyKey` |
+| Xoá dòng `idempotencyKey` | (7, 1) | `Data` | missing field `idempotencyKey` |
 | Đổi thành `idempotency_key` | (2, 19) | `Data` | unknown field `idempotency_key`, expected `idempotencyKey` or `postings` |
 | Đổi `5100` thành `5000` | (0, 0) | `Data` | bút toán lệch, tổng bằng -100 VND |
 
@@ -249,7 +249,7 @@ feeRate 0.20 nhân cước 25.500 = 5.100 VND
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>JSON ở đây là chuỗi nhỏ trong bộ nhớ, đọc bằng <code>from_str</code>; chưa có đọc luồng, giới hạn kích thước payload, chữ ký hay mã hóa. Chỉ có <code>schemaVersion</code> 1, chưa có chiến lược nâng lên 2. Việc C# đọc được file golden là kết quả thử tay trên .NET 10; repo chưa có test C# đọc file này. Chưa có schema chung (OpenAPI, JSON Schema) và chưa có Kafka.</p>
+<p>JSON ở đây là chuỗi nhỏ trong bộ nhớ, đọc bằng <code>from_str</code>; chưa có đọc luồng, giới hạn kích thước payload, chữ ký hay mã hoá. Chỉ có <code>schemaVersion</code> 1, chưa có chiến lược nâng lên 2. Việc C# đọc được file golden là kết quả thử tay trên .NET 10; repo chưa có test C# đọc file này. Chưa có schema chung (OpenAPI, JSON Schema) và chưa có Kafka.</p>
 </div>
 
 ## Bài tập

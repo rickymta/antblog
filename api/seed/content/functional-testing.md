@@ -145,7 +145,7 @@ Giao bưu kiện chiếm khoảng 0,3 trên 2 triệu chuyến mỗi ngày ([h�
 - **R-PARCEL-03** — phần vượt 5 kg tính 2.000 đ cho mỗi kg bắt đầu: 5,1 ⇒ 2.000 đ; 6,0 ⇒ 2.000 đ; 6,1 ⇒ 4.000 đ; 30 ⇒ 50.000 đ.
 - **R-PARCEL-04** — phụ phí cộng vào cước cơ bản nên bị nhân hệ số cao điểm.
 - **R-FARE-01, -03, -08** — bảng giá ô tô 25.000 đ + 11.000 đ/km, tối thiểu 30.000 đ; thứ tự 6 bước; làm tròn lên 1.000 đ ở bước cuối.
-- **R-FARE-10** — báo giá trả kèm **11 bước**: phí mở cửa, tiền theo km, phụ phí bưu kiện, cước cơ bản, sau cao điểm, phụ phí mưa, trước giảm, tiền giảm, sau giảm, cước tối thiểu, tổng.
+- **R-FARE-10** — báo giá trả kèm **11 bước**: phí mở cửa, tiền theo km, phụ phí bưu kiện, cước cơ bản, sau cao điểm, phụ phí trời mưa, trước giảm, tiền giảm, sau giảm, cước tối thiểu, tổng.
 - **R-API-07** — `POST /api/quotes` trả `quote.fare` là bảng R-FARE-10, kể cả với đơn đồ ăn (bảng của phí giao).
 
 ### 3.3. System context
@@ -168,7 +168,7 @@ src/web/index.html  «Báo giá»                    ← giao diện cho khách
 |---|---|---|
 | Kg chưa trọn bị bỏ qua (6,1 kg tính như 6 kg) | Thu thiếu 2.000 đ mỗi đơn; với số lớn là doanh thu thất thoát | correctness |
 | 6,0 kg bị tính thừa thành 2 kg (cài đặt «phần nguyên + 1» thay cho ⌈w − 5⌉) | Khách bị thu thừa ở mọi khối lượng nguyên trên 5 kg, khiếu nại | correctness |
-| Bảng chi tiết của đơn đồ ăn thiếu bước «phụ phí mưa» | CSKH không giải thích được phí giao ngày mưa | completeness |
+| Bảng chi tiết của đơn đồ ăn thiếu bước «phụ phí trời mưa» | CSKH không giải thích được phí giao ngày mưa | completeness |
 | Mọi bước đúng và đủ trong API nhưng ứng dụng chỉ hiện tổng tiền | Khách nghĩ bị «ăn gian» khi trời mưa | appropriateness |
 | Đơn 30,05 kg lọt qua kiểm tra | Xe quá tải, giá sai | correctness (đầu vào sai) |
 
@@ -212,7 +212,7 @@ Vì thế lab chạy **cùng năm ca** ở cả hai level: nếu component xanh 
 
 Kết quả mong đợi phải có **trước** khi nhìn kết quả thực tế. Chép đầu ra của hệ thống vào làm «mong đợi» là biến test thành bản ghi lại hành vi hiện tại — đúng hay sai đều xanh.
 
-«Nhất quán» (consistent) cũng thuộc correctness: dù không có oracle cho từng ô, các bước phải khớp nhau — cước cơ bản = phí mở cửa + tiền km + phụ phí; trước giảm = sau cao điểm + phụ phí mưa; sau giảm = trước giảm − tiền giảm; tổng = làm tròn lên của max(sau giảm, cước tối thiểu).
+«Nhất quán» (consistent) cũng thuộc correctness: dù không có oracle cho từng ô, các bước phải khớp nhau — cước cơ bản = phí mở cửa + tiền km + phụ phí; trước giảm = sau cao điểm + phụ phí trời mưa; sau giảm = trước giảm − tiền giảm; tổng = làm tròn lên của max(sau giảm, cước tối thiểu).
 
 ### 4.4. Completeness cần truy vết, không cần oracle số
 
@@ -240,7 +240,7 @@ Phép tính của FC-09: (58.000 + 4.000) × 1,25 = 77.500 → + 8.000 = 85.500 
 |---|---|---|
 | FCP-01 | Bảng ánh xạ của test phủ đúng danh sách bước đọc từ SPEC R-FARE-10 | Đúng 11 tên, không thiếu, không thừa |
 | FCP-02…04 | `quote.fare` của `ride`, `parcel`, `food` có đủ 11 khoá, mỗi khoá là số hữu hạn | Danh sách bước thiếu = rỗng |
-| FCP-05 | Chạy hàm kiểm trên một bảng chi tiết **giả định** thiếu bước (`fare-ban-cu.json`) | Báo thiếu «phụ phí mưa», «cước tối thiểu» |
+| FCP-05 | Chạy hàm kiểm trên một bảng chi tiết **giả định** thiếu bước (`fare-ban-cu.json`) | Báo thiếu «phụ phí trời mưa», «cước tối thiểu» |
 
 FCP-05 không kiểm sản phẩm mà kiểm **chính bộ kiểm tra**: một hàm completeness luôn trả rỗng thì vô dụng; cần thấy nó đỏ được.
 

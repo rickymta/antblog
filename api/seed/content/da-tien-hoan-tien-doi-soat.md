@@ -1,7 +1,7 @@
 ---
 slug: da-tien-hoan-tien-doi-soat
 title: "Tiền, hoàn tiền và đối soát: vì sao tổng thu khác tổng giá chuyến?"
-summary: "Đối chiếu giá chuyến, khoản thu thành công, hoàn tiền và tiền ròng trong cohort Tới Nơi. Giải thích chênh lệch theo trạng thái và biên kỳ, không gắn nhãn doanh thu cho dữ liệu chưa đủ."
+summary: "Đối chiếu giá chuyến, khoản thu thành công, hoàn tiền và tiền ròng trong cohort Tới Nơi. Giải thích chênh lệch theo trạng thái và ranh giới kỳ báo cáo, không gắn nhãn doanh thu cho dữ liệu chưa đủ."
 category: data-analysis
 level: advanced
 tags: [data-analysis, da-019, sql, reconciliation, payments, toi-noi]

@@ -48,7 +48,7 @@ Bất biến đề xuất: tổng đã hoàn thành cộng tiền đang giữ ch
 
 ## 6. Giải phóng tiền giữ cũng cần bằng chứng
 
-Nếu timeout rồi giải phóng ngay khoản giữ 60.000, yêu cầu mới 50.000 có thể được nhận trước callback succeeded của khoản cũ. Chỉ giải phóng theo transition có bằng chứng và rule được duyệt. Cần định nghĩa cách xử lý yêu cầu mắc kẹt, không giữ mãi cũng không tự xóa.
+Nếu timeout rồi giải phóng ngay khoản giữ 60.000, yêu cầu mới 50.000 có thể được nhận trước callback succeeded của khoản cũ. Chỉ giải phóng theo transition có bằng chứng và rule được duyệt. Cần định nghĩa cách xử lý yêu cầu mắc kẹt, không giữ mãi cũng không tự xoá.
 
 ## 7. Thực hành
 

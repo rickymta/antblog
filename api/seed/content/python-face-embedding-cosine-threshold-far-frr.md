@@ -37,7 +37,7 @@ class SFace:
         return l2_normalize(np.asarray(vectors, dtype=np.float32))
 ```
 
-Vector ra luôn được **chuẩn hóa L2** (độ dài 1), nên cosine similarity chỉ còn là tích vô hướng: `a @ b.T` cho cả ma trận cosine của hai tập. Với ArcFace, lab nạp thẳng file ONNX bằng onnxruntime (`CPUExecutionProvider` cố định để số đo lặp lại; GPU hay CoreML đổi qua `providers`, bài 52) thay vì dùng gói `insightface`, vì gói đó (bản 2.1) kéo thêm một bản OpenCV đè lên thư mục `cv2`. Lab 49 dùng `opencv-python-headless` 5.0.0 và ngưỡng điểm YuNet 0,6, khác lab 48 (`opencv-contrib-python` 4.14 và 0,7).
+Vector ra luôn được **chuẩn hoá L2** (độ dài 1), nên cosine similarity chỉ còn là tích vô hướng: `a @ b.T` cho cả ma trận cosine của hai tập. Với ArcFace, lab nạp thẳng file ONNX bằng onnxruntime (`CPUExecutionProvider` cố định để số đo lặp lại; GPU hay CoreML đổi qua `providers`, bài 52) thay vì dùng gói `insightface`, vì gói đó (bản 2.1) kéo thêm một bản OpenCV đè lên thư mục `cv2`. Lab 49 dùng `opencv-python-headless` 5.0.0 và ngưỡng điểm YuNet 0,6, khác lab 48 (`opencv-contrib-python` 4.14 và 0,7).
 
 **Giấy phép cần đọc trước khi chạy.** Mã nguồn InsightFace theo MIT, nhưng README của họ ghi các mô hình huấn luyện sẵn, trong đó có gói `buffalo_l` (file `w600k_r50.onnx`), chỉ dùng cho nghiên cứu phi thương mại; muốn dùng khác phải liên hệ InsightFace để xin giấy phép. Repository này không chứa file mô hình: cờ `--with-arcface` tải trực tiếp từ trang phát hành của họ về máy bạn, và bài chỉ dùng nó để so thang điểm giữa hai mô hình. Nếu bạn chạy trong công ty hoặc dự án có thu phí, hãy hỏi người phụ trách pháp lý trước, hoặc chỉ chạy SFace (OpenCV Zoo ghi Apache 2.0; YuNet ghi MIT). Giấy phép của file mô hình không tự trả lời câu hỏi về dữ liệu đã dùng để huấn luyện. Đoạn này không phải tư vấn pháp lý.
 
@@ -150,7 +150,7 @@ FAR vẫn dưới mục tiêu nhưng FRR là 42,36%: ngưỡng chọn ở điề
 
 ## Chọn ngưỡng: chi phí, ba vùng và người chưa thấy
 
-Có ba cách chọn ngưỡng, cho ba con số khác nhau. **Theo mục tiêu FAR** (ví dụ 0,1%): đơn giản, nhưng bỏ qua cái giá của FRR. **Theo EER**: tiện để so mô hình, hiếm khi là điều vận hành muốn. **Theo chi phí**: chi phí kỳ vọng mỗi lượt là p × C_FA × FAR + (1 − p) × C_FR × FRR, với p là tỉ lệ lượt mạo danh; lấy ngưỡng làm nó nhỏ nhất. Lab dùng giả định minh họa p = 2%, nhầm nhận tốn 100 đơn vị, nhầm từ chối tốn 1; dịch vụ thật phải thay bằng số của vận hành.
+Có ba cách chọn ngưỡng, cho ba con số khác nhau. **Theo mục tiêu FAR** (ví dụ 0,1%): đơn giản, nhưng bỏ qua cái giá của FRR. **Theo EER**: tiện để so mô hình, hiếm khi là điều vận hành muốn. **Theo chi phí**: chi phí kỳ vọng mỗi lượt là p × C_FA × FAR + (1 − p) × C_FR × FRR, với p là tỉ lệ lượt mạo danh; lấy ngưỡng làm nó nhỏ nhất. Lab dùng giả định minh hoạ p = 2%, nhầm nhận tốn 100 đơn vị, nhầm từ chối tốn 1; dịch vụ thật phải thay bằng số của vận hành.
 
 ```python
 # metrics.py (trích)
@@ -194,7 +194,7 @@ Vì máy chỉ **gợi ý** cho người duyệt, ta dùng hai ngưỡng: `t_hig
 
 Ở mức ảnh nặng, khoảng 40,80% lượt vào hàng người duyệt, gồm cả 59/400 ảnh không lấy được mặt. Không vùng nào tự duyệt hay tự từ chối hồ sơ.
 
-Ngưỡng có tổng quát hóa sang người chưa thấy không? Một cách chia 20/20 theo chỉ số cho một con số, đảo chiều cho con số khác, nên lab in cả hai chiều, rồi 300 cách chia ngẫu nhiên rời người (chọn ngưỡng ở FAR 0,1% trên nhóm A, đo trên nhóm B), và bootstrap theo người (bốc lại 40 người có hoàn lại, 200 lần):
+Ngưỡng có tổng quát hoá sang người chưa thấy không? Một cách chia 20/20 theo chỉ số cho một con số, đảo chiều cho con số khác, nên lab in cả hai chiều, rồi 300 cách chia ngẫu nhiên rời người (chọn ngưỡng ở FAR 0,1% trên nhóm A, đo trên nhóm B), và bootstrap theo người (bốc lại 40 người có hoàn lại, 200 lần):
 
 ```text
   sface       người 0-19 -> 20-39: ngưỡng 0.533; nhóm chọn FAR 0.00098 FRR 0.2690 | nhóm chưa thấy FAR 0.00063 FRR 0.3615
@@ -227,7 +227,7 @@ OK 32/32
 OK 49/49
 ```
 
-Thời gian một ảnh SFace là 14,2 ms (trung vị 15 lần, load average 117,6; dò mặt và căn chỉnh YuNet là 19,7 ms mỗi ảnh sạch): chỉ đọc thứ bậc lớn vì máy rất bận. Embedding lưu ở `out/embeddings_sface.npy` và `labels.npy` là **dữ liệu sinh trắc học**: đã gitignore, và bài 53 bàn về thời hạn lưu, đồng ý và quyền xóa.
+Thời gian một ảnh SFace là 14,2 ms (trung vị 15 lần, load average 117,6; dò mặt và căn chỉnh YuNet là 19,7 ms mỗi ảnh sạch): chỉ đọc thứ bậc lớn vì máy rất bận. Embedding lưu ở `out/embeddings_sface.npy` và `labels.npy` là **dữ liệu sinh trắc học**: đã gitignore, và bài 53 bàn về thời hạn lưu, đồng ý và quyền xoá.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -239,7 +239,7 @@ Thời gian một ảnh SFace là 14,2 ms (trung vị 15 lần, load average 117
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Olivetti chỉ có 40 người chụp trong phòng thí nghiệm, ảnh xám 64 × 64; ảnh «thẻ» là ảnh xuống cấp bằng code, không phải ảnh in thật. Các số FAR, FRR, EER ở trên cho thấy cách đo, không phải mức lỗi ngoài đời, và số ảnh không lấy được mặt (14,8% ở mức nặng) cũng chỉ đúng cho kiểu xuống cấp này. Chi phí 100 và 1 và tỉ lệ mạo danh 2% là giả định minh họa. Ta chưa đánh giá theo nhóm tuổi, giới hay màu da và không được suy ra mô hình công bằng với mọi nhóm (bài 53). Điểm so khớp là đầu vào cho người duyệt hồ sơ (người duyệt `RV-001` trong từ điển miền), không phải quyết định xác minh.</p>
+<p>Olivetti chỉ có 40 người chụp trong phòng thí nghiệm, ảnh xám 64 × 64; ảnh «thẻ» là ảnh xuống cấp bằng code, không phải ảnh in thật. Các số FAR, FRR, EER ở trên cho thấy cách đo, không phải mức lỗi ngoài đời, và số ảnh không lấy được mặt (14,8% ở mức nặng) cũng chỉ đúng cho kiểu xuống cấp này. Chi phí 100 và 1 và tỉ lệ mạo danh 2% là giả định minh hoạ. Ta chưa đánh giá theo nhóm tuổi, giới hay màu da và không được suy ra mô hình công bằng với mọi nhóm (bài 53). Điểm so khớp là đầu vào cho người duyệt hồ sơ (người duyệt `RV-001` trong từ điển miền), không phải quyết định xác minh.</p>
 </div>
 
 **Bài tập 1:** Với 78.000 cặp khác người, ngưỡng FAR ≤ 0,1% cho phép tối đa bao nhiêu cặp khác người nằm trên ngưỡng?

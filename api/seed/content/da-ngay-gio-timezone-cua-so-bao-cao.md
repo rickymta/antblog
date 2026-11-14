@@ -30,7 +30,7 @@ FROM da_cohort WHERE trip_id IN ('T07','T08') ORDER BY trip_id;
 
 T07 có accepted_day=11/10; T08 có accepted_day=10/10, cancelled_day=12/10. Việc ép `accepted_at::date` trực tiếp phụ thuộc timezone phiên và có thể đổi ngày khi chạy ở môi trường khác.
 
-## 2. Cố định biên kỳ bằng thời điểm rõ ràng
+## 2. Cố định ranh giới kỳ báo cáo bằng thời điểm rõ ràng
 
 ```sql
 SELECT trip_id
@@ -69,7 +69,7 @@ Lab là một snapshot cố định đã cung cấp, không mô phỏng đầy �
 
 T07 thuộc cohort tuần nhưng được thu lúc 12/10 00:35. Hoàn tiền R03 của T03 cũng xảy ra ngày 12/10. Nếu báo cáo tiền của cohort đến snapshot, cả hai được tính; nếu báo cáo dòng tiền phát sinh trong tuần 05–11/10, cả hai nằm ngoài cửa sổ đó.
 
-Tên cột cần nói rõ: `cohort_net_cash_vnd` và `cash_settled_in_week` trả lời hai câu hỏi. Không yêu cầu chúng bằng nhau; đối soát bằng danh sách giao dịch đi qua biên kỳ.
+Tên cột cần nói rõ: `cohort_net_cash_vnd` và `cash_settled_in_week` trả lời hai câu hỏi. Không yêu cầu chúng bằng nhau; đối soát bằng danh sách giao dịch đi qua ranh giới kỳ báo cáo.
 
 ## 6. Khoảng chờ phải nêu đơn vị và tập đo
 

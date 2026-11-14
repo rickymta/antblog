@@ -67,7 +67,7 @@ Mẫu cho Tới Nơi: Internet vào Application Gateway (WAF) ở `snet-gateway`
 <figcaption>Hình 2. Mẫu đầy đủ: Internet, Application Gateway WAF, Container Apps internal, PostgreSQL private; bên dưới là egress qua Firewall và private DNS.</figcaption>
 </figure>
 
-Hai bẫy khi ghép mẫu. Subnet của gateway v2 phải dành riêng cho gateway và cần NSG cho phép các cổng quản lý của Azure; route `0.0.0.0/0` của spoke không nên gắn nguyên xi vào subnet này, vì gateway có yêu cầu riêng về đường ra (kiểm tài liệu). Ở phía Container Apps, UDR trên subnet environment chỉ được hỗ trợ với environment loại workload profiles (loại mặc định khi tạo mới bằng CLI hiện nay), không với environment Consumption-only cũ; Firewall cũng phải cho phép các FQDN mà nền tảng cần, nên đọc tài liệu networking của Container Apps trước khi gắn route.
+Hai bẫy khi ghép mẫu. Subnet của gateway v2 phải dành riêng cho gateway và cần NSG cho phép các cổng quản lý của Azure; route `0.0.0.0/0` của spoke không nên gắn nguyên xi vào subnet này, vì gateway có yêu cầu riêng về đường ra (kiểm tra tài liệu). Ở phía Container Apps, UDR trên subnet environment chỉ được hỗ trợ với environment loại workload profiles (loại mặc định khi tạo mới bằng CLI hiện nay), không với environment Consumption-only cũ; Firewall cũng phải cho phép các FQDN mà nền tảng cần, nên đọc tài liệu networking của Container Apps trước khi gắn route.
 
 ## DNS quyết định gateway có tìm thấy backend không
 

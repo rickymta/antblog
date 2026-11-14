@@ -44,7 +44,7 @@ Trong P01, tỷ lệ huỷ trước đón là metric chính của câu hỏi. Ch
 | Grain | Một lượt đặt xe duy nhất |
 | Phạm vi | Dịch vụ ride, khu vực A; mapping A cần xác nhận |
 | Mốc cohort | Lần tài xế nhận đầu tiên trong khoảng [đầu kỳ, đầu kỳ kế tiếp) |
-| Múi giờ | Asia/Ho_Chi_Minh khi xác định biên kỳ |
+| Múi giờ | Asia/Ho_Chi_Minh khi xác định ranh giới kỳ báo cáo |
 | Mẫu số | Số lượt duy nhất thuộc cohort |
 | Tử số | Số lượt thuộc cohort được xác nhận huỷ trước khi đón |
 | Công thức | Tử số / mẫu số × 100% |
@@ -91,7 +91,7 @@ Chỉ số chất lượng dữ liệu có vai trò khác: ví dụ tỷ lệ l�
 
 Review câu sau: “Tỷ lệ huỷ tuần = số event cancelled tuần đó / số khách đã đặt xe; lấy dữ liệu hiện tại, tuần sau chạy lại cũng được.” Hãy chỉ ra ít nhất bốn điểm cần sửa và viết hợp đồng ngắn cho M-01.
 
-<details><summary>Gợi ý lời giải</summary><p>Tử số event và mẫu số khách khác grain; event trong kỳ chưa chắc thuộc cohort cùng kỳ; chưa phân biệt huỷ trước/sau nhận và trước đón; thiếu biên kỳ/timezone; không có chính sách dữ liệu trễ và version. Với M-01, đếm lượt duy nhất ở cả tử và mẫu, cố định cohort theo lần nhận đầu, kiểm chứng lịch sử trước đón, lưu thời điểm chốt và kết quả chưa biết.</p></details>
+<details><summary>Gợi ý lời giải</summary><p>Tử số event và mẫu số khách khác grain; event trong kỳ chưa chắc thuộc cohort cùng kỳ; chưa phân biệt huỷ trước/sau nhận và trước đón; thiếu ranh giới kỳ báo cáo/timezone; không có chính sách dữ liệu trễ và version. Với M-01, đếm lượt duy nhất ở cả tử và mẫu, cố định cohort theo lần nhận đầu, kiểm chứng lịch sử trước đón, lưu thời điểm chốt và kết quả chưa biết.</p></details>
 
 **Bài tính:** Nhóm X/Y trong ví dụ có tỷ lệ chung bao nhiêu? Nếu nhóm Y thiếu 20 kết quả cuối, có được tiếp tục ghi “tỷ lệ cuối kỳ 19%” không?
 

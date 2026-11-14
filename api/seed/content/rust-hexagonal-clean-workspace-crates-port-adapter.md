@@ -8,7 +8,7 @@ tags: [rust, toi-noi, ledger, architecture, workspace, hexagonal]
 language: vi
 ---
 
-Sau [bài 40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end), `ledger-api` là một crate với mười ba module: `store.rs` nói chuyện với PostgreSQL, `kafka.rs` với broker, `http.rs` với axum. Ranh giới giữa chúng là thỏa thuận miệng. Không gì ngăn một dòng `use sqlx::…` chen vào bất kỳ module nào, vì cùng một crate thì `use` nào cũng biên dịch. P05 vừa thêm hold, hoàn tiền và đối soát, nên càng nhiều người sửa thì thỏa thuận đó càng dễ vỡ.
+Sau [bài 40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end), `ledger-api` là một crate với mười ba module: `store.rs` nói chuyện với PostgreSQL, `kafka.rs` với broker, `http.rs` với axum. Ranh giới giữa chúng là thoả thuận miệng. Không gì ngăn một dòng `use sqlx::…` chen vào bất kỳ module nào, vì cùng một crate thì `use` nào cũng biên dịch. P05 vừa thêm hold, hoàn tiền và đối soát, nên càng nhiều người sửa thì thoả thuận đó càng dễ vỡ.
 
 Đây là bài 51 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**, bài mở đầu phần P06. Bài không dạy lại sqlx ([bài 23](/articles/rust-sqlx-postgresql-pool-migration-query)) hay Kafka ([bài 36](/articles/rust-kafka-rdkafka-consumer-producer-schema)). Câu hỏi là: ranh giới nào đáng để Cargo cưỡng chế, cưỡng chế được tới đâu, và trả giá gì. Lab dựng lại luồng chốt tiền chuyến `TN-0001` (capture rồi split, dạng hai bước của [bài 13](/articles/rust-double-entry-journal-entry-posting)) trong một workspace bốn crate.
 

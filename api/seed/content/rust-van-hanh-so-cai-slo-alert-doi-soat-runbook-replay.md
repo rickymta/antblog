@@ -142,7 +142,7 @@ Công cụ replay của lab ép năm điều.
 - **Group riêng, không commit.** Replay gán thẳng partition và offset, nên offset của group chính không nhúc nhích; ca diễn tập kiểm group chính vẫn ở 6, group replay không có offset nào.
 - **Giới hạn tốc độ.** Giữa hai message chờ `interval`; test thay `Sleeper` bằng bản chỉ ghi lại lần xin chờ.
 - **Dry-run.** Cùng phép kiểm dữ liệu và cùng hai lớp idempotency với lần chạy thật, chỉ đọc, phân loại sẽ ghi, đã xử lý, hỏng.
-- **Cùng đường xử lý với consumer.** Replay gọi đúng `apply_trip_completed`, nên idempotency do inbox và `idempotency_key` bảo đảm, không do công cụ replay tự thêm. Nếu hạ nguồn không khử trùng được `LedgerEntryPosted` phát lại thì cần topic riêng cho đầu ra; lab không dựng trường hợp đó.
+- **Cùng đường xử lý với consumer.** Replay gọi đúng `apply_trip_completed`, nên idempotency do inbox và `idempotency_key` bảo đảm, không do công cụ replay tự thêm. Nếu hạ nguồn không khử trùng lặp được `LedgerEntryPosted` phát lại thì cần topic riêng cho đầu ra; lab không dựng trường hợp đó.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

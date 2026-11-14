@@ -36,7 +36,7 @@ Phân loại dưới đây theo cách dùng phổ biến trong tài liệu *Mock
 |---|---|---|
 | Dummy | Lấp chỗ tham số, không dùng trong kịch bản | Cổng ví ở chuyến tiền mặt |
 | Stub | Cung cấp phản hồi đã định | Luôn trả `declined` |
-| Fake | Có cài đặt đơn giản và trạng thái hoạt động | Ví lưu khoản thu trong `Map`, khử trùng theo khoá |
+| Fake | Có cài đặt đơn giản và trạng thái hoạt động | Ví lưu khoản thu trong `Map`, khử trùng lặp theo khoá |
 | Mock | Hỗ trợ kiểm kỳ vọng tương tác | Đòi gửi đúng khách, số tiền, khoá |
 | Spy | Ghi nhận các lần gọi để kiểm tra | Quan sát `charge` trên fake đang hoạt động |
 
@@ -144,7 +144,7 @@ expect(charge).toHaveBeenCalledWith(expect.objectContaining({
 }));
 ```
 
-Không khóa cứng ID do bộ sinh ID tạo, nhưng vẫn kiểm đúng mẫu khoá gắn với chuyến đang xét. Không kiểm nguyên văn `description` nếu yêu cầu đang kiểm không quy định câu đó. Điều này tránh failure do sửa câu mô tả trong khi hợp đồng thanh toán không đổi.
+Không khoá cứng ID do bộ sinh ID tạo, nhưng vẫn kiểm đúng mẫu khoá gắn với chuyến đang xét. Không kiểm nguyên văn `description` nếu yêu cầu đang kiểm không quy định câu đó. Điều này tránh failure do sửa câu mô tả trong khi hợp đồng thanh toán không đổi.
 
 ### 5.5. Spy giữ cài đặt thật của đối tượng đang quan sát
 
@@ -173,7 +173,7 @@ Kết quả kiểm chứng ngày 07/11/2026 với Vitest 3.2.7: **7 test đạt*
 
 **Số lần gọi có thể là hợp đồng.** “Không retry declined” cần assertion số lần gọi. Ngược lại, kiểm mọi lần repository đọc chuyến chỉ để tái hiện thứ tự mã hiện tại dễ trói test vào cách cài đặt. Hãy chỉ kiểm tương tác khi nó diễn đạt rủi ro hoặc yêu cầu cụ thể.
 
-**Fake có thể sai cùng giả định với ứng dụng.** Ví giả chỉ khử trùng theo khoá; nó không kiểm đầy đủ trường hợp cùng khoá nhưng thay amount/customer, không có xác thực, lưu trữ bền vững hay mạng thật. Test với fake không chứng minh ví bên ngoài có cùng ngữ nghĩa. Cần contract/integration test cho adapter thật khi có môi trường phù hợp.
+**Fake có thể sai cùng giả định với ứng dụng.** Ví giả chỉ khử trùng lặp theo khoá; nó không kiểm đầy đủ trường hợp cùng khoá nhưng thay amount/customer, không có xác thực, lưu trữ bền vững hay mạng thật. Test với fake không chứng minh ví bên ngoài có cùng ngữ nghĩa. Cần contract/integration test cho adapter thật khi có môi trường phù hợp.
 
 **Reset lịch sử khác khôi phục cài đặt.** Xoá các lần gọi không nhất thiết đưa method đã thay implementation về trạng thái ban đầu. Trong bài, chọn tạo fake mới cho mỗi ca và khôi phục spy sau ca; đừng dùng một singleton ví giữa nhiều test rồi trông chờ thứ tự chạy.
 
@@ -212,7 +212,7 @@ Câu hỏi do bài viết biên soạn, không phải câu hỏi thi ISTQB chín
 ## 8. Tài liệu tham khảo
 
 - [Martin Fowler — Mocks Aren't Stubs](https://martinfowler.com/articles/mocksArentStubs.html): thuật ngữ test double và hai cách kiểm trạng thái/tương tác.
-- [Vitest — vi utilities](https://vitest.dev/api/vi.html): `vi.fn`, `vi.spyOn`, khôi phục spy. Ví dụ được chạy trên phiên bản khóa trong lab.
+- [Vitest — vi utilities](https://vitest.dev/api/vi.html): `vi.fn`, `vi.spyOn`, khôi phục spy. Ví dụ được chạy trên phiên bản khoá trong lab.
 - [Lab Tới Nơi](https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing): SPEC R-PAY; `app/ports.ts`, `app/payment.ts`, `app/trips.ts`, `infra/fake-payment-gateway.ts`.
 
 Bài trước: [TEST-056 · Unit Test Design cho Pricing Engine](/articles/unit-test-design-pricing-engine). Bài tiếp theo: [TEST-058 · Dependency Isolation](/articles/dependency-isolation).

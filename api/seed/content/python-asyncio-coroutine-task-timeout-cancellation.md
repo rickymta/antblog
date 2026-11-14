@@ -1,7 +1,7 @@
 ---
 slug: python-asyncio-coroutine-task-timeout-cancellation
-title: "asyncio: coroutine, Task, timeout và hủy: gọi dịch vụ báo giá"
-summary: "Bài 21: gọi mười báo giá đồng thời bằng gather và TaskGroup, giới hạn chờ bằng asyncio.timeout, hủy an toàn với CancelledError, không chặn event loop bằng to_thread. Có số đo thật và lab --verify."
+title: "asyncio: coroutine, Task, timeout và huỷ: gọi dịch vụ báo giá"
+summary: "Bài 21: gọi mười báo giá đồng thời bằng gather và TaskGroup, giới hạn chờ bằng asyncio.timeout, huỷ an toàn với CancelledError, không chặn event loop bằng to_thread. Có số đo thật và lab --verify."
 category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, asyncio, concurrency]
@@ -14,8 +14,8 @@ Màn hình xác nhận chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) 
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Ta chạy <code>asyncio.gather(a, b, c)</code>. Lời gọi <code>a</code> ném lỗi sau 0,05 giây, còn <code>b</code> và <code>c</code> cần 0,3 giây. Khi <code>gather</code> ném lỗi ra cho người gọi, <code>b</code> và <code>c</code> đã bị hủy chưa?</p>
-<details><summary>Xem đáp án</summary><p><b>Chưa.</b> <code>gather</code> chỉ chuyển lỗi đầu tiên cho người gọi; các Task còn lại vẫn chạy tới hết 0,3 giây, và kết quả của chúng bị bỏ đi. <code>TaskGroup</code> thì hủy chúng ngay. Mục «Một lời gọi lỗi» chạy cả hai và in ra sự khác biệt.</p></details>
+<p>Ta chạy <code>asyncio.gather(a, b, c)</code>. Lời gọi <code>a</code> ném lỗi sau 0,05 giây, còn <code>b</code> và <code>c</code> cần 0,3 giây. Khi <code>gather</code> ném lỗi ra cho người gọi, <code>b</code> và <code>c</code> đã bị huỷ chưa?</p>
+<details><summary>Xem đáp án</summary><p><b>Chưa.</b> <code>gather</code> chỉ chuyển lỗi đầu tiên cho người gọi; các Task còn lại vẫn chạy tới hết 0,3 giây, và kết quả của chúng bị bỏ đi. <code>TaskGroup</code> thì huỷ chúng ngay. Mục «Một lời gọi lỗi» chạy cả hai và in ra sự khác biệt.</p></details>
 </div>
 
 ## Coroutine, event loop và Task
@@ -80,7 +80,7 @@ Tổng độ trễ là 1,90 giây, tuần tự mất 1,92 giây (phần dư là 
 
 ## Một lời gọi lỗi: gather khác TaskGroup thế nào
 
-Thêm vào hai lời gọi chậm 0,3 giây và một lời gọi hỏng: khoảng cách 150 km nằm ngoài miền 0 đến 100 km của bài 03 nên `calculate_fare` ném `ValueError` sau 0,05 giây. Hai lời gọi chậm ghi lại chúng chạy xong hay bị hủy (`main.py`, rút gọn: bỏ docstring):
+Thêm vào hai lời gọi chậm 0,3 giây và một lời gọi hỏng: khoảng cách 150 km nằm ngoài miền 0 đến 100 km của bài 03 nên `calculate_fare` ném `ValueError` sau 0,05 giây. Hai lời gọi chậm ghi lại chúng chạy xong hay bị huỷ (`main.py`, rút gọn: bỏ docstring):
 
 ```python
 async def slow_sibling(events: list[str], name: str) -> str:
@@ -123,7 +123,7 @@ async def taskgroup_failure() -> list[str]:
     return lines + sorted(sibling_events)  # sắp xếp: thứ tự hủy A, B không được bảo đảm
 ```
 
-Thứ tự hai Task anh em kết thúc hoặc bị hủy **không** được asyncio bảo đảm (khi review, thứ tự bị hủy đã ra «B trước A»), nên lab sắp xếp các dòng này trước khi in; nội dung từng dòng mới là điều cần so sánh. Kết quả (trích):
+Thứ tự hai Task anh em kết thúc hoặc bị huỷ **không** được asyncio bảo đảm (khi review, thứ tự bị huỷ đã ra «B trước A»), nên lab sắp xếp các dòng này trước khi in; nội dung từng dòng mới là điều cần so sánh. Kết quả (trích):
 
 ```text
 gather:
@@ -138,17 +138,17 @@ TaskGroup:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Với gather, lời gọi hỏng kết thúc lúc 0,05 giây còn hai lời gọi chậm vẫn chạy tới 0,3 giây. Với TaskGroup, hai lời gọi chậm bị hủy ngay lúc 0,05 giây."><rect x="20" y="20" width="410" height="260" rx="10" class="f-surface s-line"/><text x="36" y="46" class="t-b">gather</text><text x="36" y="70" class="t-small">lời gọi hỏng</text><rect x="60" y="78" width="50" height="18" class="f-warn-soft s-warn"/><text x="120" y="91" class="t-small">ValueError ở 0,05 s</text><text x="36" y="120" class="t-small">A</text><rect x="60" y="128" width="300" height="18" class="f-phys-soft s-phys"/><text x="70" y="141" class="t-small">vẫn chạy, xong ở 0,30 s</text><text x="36" y="170" class="t-small">B</text><rect x="60" y="178" width="300" height="18" class="f-phys-soft s-phys"/><text x="70" y="191" class="t-small">vẫn chạy, xong ở 0,30 s</text><path d="M110 60 L110 215" class="f-none s-warn dash"/><text x="36" y="250" class="t-small">Lỗi tới người gọi lúc 0,05 s, kết quả A và B bị bỏ</text><rect x="450" y="20" width="410" height="260" rx="10" class="f-surface s-line"/><text x="466" y="46" class="t-b">TaskGroup</text><text x="466" y="70" class="t-small">lời gọi hỏng</text><rect x="490" y="78" width="50" height="18" class="f-warn-soft s-warn"/><text x="550" y="91" class="t-small">ValueError ở 0,05 s</text><text x="466" y="120" class="t-small">A</text><rect x="490" y="128" width="50" height="18" class="f-dead s-dead"/><text x="548" y="141" class="t-small">bị hủy ở 0,05 s</text><rect x="540" y="128" width="250" height="18" class="f-none s-dead dash"/><text x="466" y="170" class="t-small">B</text><rect x="490" y="178" width="50" height="18" class="f-dead s-dead"/><text x="548" y="191" class="t-small">bị hủy ở 0,05 s</text><rect x="540" y="178" width="250" height="18" class="f-none s-dead dash"/><path d="M540 60 L540 215" class="f-none s-warn dash"/><text x="466" y="250" class="t-small">Khối async with kết thúc, lỗi gói trong ExceptionGroup</text></svg>
+<svg viewBox="0 0 880 300" role="img" aria-label="Với gather, lời gọi hỏng kết thúc lúc 0,05 giây còn hai lời gọi chậm vẫn chạy tới 0,3 giây. Với TaskGroup, hai lời gọi chậm bị huỷ ngay lúc 0,05 giây."><rect x="20" y="20" width="410" height="260" rx="10" class="f-surface s-line"/><text x="36" y="46" class="t-b">gather</text><text x="36" y="70" class="t-small">lời gọi hỏng</text><rect x="60" y="78" width="50" height="18" class="f-warn-soft s-warn"/><text x="120" y="91" class="t-small">ValueError ở 0,05 s</text><text x="36" y="120" class="t-small">A</text><rect x="60" y="128" width="300" height="18" class="f-phys-soft s-phys"/><text x="70" y="141" class="t-small">vẫn chạy, xong ở 0,30 s</text><text x="36" y="170" class="t-small">B</text><rect x="60" y="178" width="300" height="18" class="f-phys-soft s-phys"/><text x="70" y="191" class="t-small">vẫn chạy, xong ở 0,30 s</text><path d="M110 60 L110 215" class="f-none s-warn dash"/><text x="36" y="250" class="t-small">Lỗi tới người gọi lúc 0,05 s, kết quả A và B bị bỏ</text><rect x="450" y="20" width="410" height="260" rx="10" class="f-surface s-line"/><text x="466" y="46" class="t-b">TaskGroup</text><text x="466" y="70" class="t-small">lời gọi hỏng</text><rect x="490" y="78" width="50" height="18" class="f-warn-soft s-warn"/><text x="550" y="91" class="t-small">ValueError ở 0,05 s</text><text x="466" y="120" class="t-small">A</text><rect x="490" y="128" width="50" height="18" class="f-dead s-dead"/><text x="548" y="141" class="t-small">bị huỷ ở 0,05 s</text><rect x="540" y="128" width="250" height="18" class="f-none s-dead dash"/><text x="466" y="170" class="t-small">B</text><rect x="490" y="178" width="50" height="18" class="f-dead s-dead"/><text x="548" y="191" class="t-small">bị huỷ ở 0,05 s</text><rect x="540" y="178" width="250" height="18" class="f-none s-dead dash"/><path d="M540 60 L540 215" class="f-none s-warn dash"/><text x="466" y="250" class="t-small">Khối async with kết thúc, lỗi gói trong ExceptionGroup</text></svg>
 </div>
-<figcaption>Hình 2. Cùng một lời gọi hỏng, hai cách xử lý khác nhau với các Task anh em: để chúng chạy tiếp hoặc hủy ngay khi nhóm đã thất bại.</figcaption>
+<figcaption>Hình 2. Cùng một lời gọi hỏng, hai cách xử lý khác nhau với các Task anh em: để chúng chạy tiếp hoặc huỷ ngay khi nhóm đã thất bại.</figcaption>
 </figure>
 
-Hành vi này đúng theo tài liệu: khi một Task trong `TaskGroup` thất bại bằng exception khác `CancelledError`, các Task còn lại bị hủy; còn `gather` mặc định để chúng chạy tiếp. Với màn hình báo giá, `gather` mặc định có nghĩa là chín lời gọi vẫn tốn kết nối và CPU của service `pricing` cho một kết quả không ai dùng. Vì lỗi có thể đến từ nhiều Task cùng lúc, `TaskGroup` gom chúng thành `ExceptionGroup` ([PEP 654](https://peps.python.org/pep-0654/)); cú pháp `except*` bắt từng loại trong nhóm, lỗi không khớp tiếp tục bay lên. Nếu muốn mọi kết quả kể cả lỗi, dùng `gather(..., return_exceptions=True)` rồi tự phân loại.
+Hành vi này đúng theo tài liệu: khi một Task trong `TaskGroup` thất bại bằng exception khác `CancelledError`, các Task còn lại bị huỷ; còn `gather` mặc định để chúng chạy tiếp. Với màn hình báo giá, `gather` mặc định có nghĩa là chín lời gọi vẫn tốn kết nối và CPU của service `pricing` cho một kết quả không ai dùng. Vì lỗi có thể đến từ nhiều Task cùng lúc, `TaskGroup` gom chúng thành `ExceptionGroup` ([PEP 654](https://peps.python.org/pep-0654/)); cú pháp `except*` bắt từng loại trong nhóm, lỗi không khớp tiếp tục bay lên. Nếu muốn mọi kết quả kể cả lỗi, dùng `gather(..., return_exceptions=True)` rồi tự phân loại.
 
 | | `gather` | `TaskGroup` |
 |---|---|---|
-| Một Task lỗi | Lỗi đầu tiên tới người gọi, Task khác chạy tiếp | Task còn lại bị hủy, lỗi gói trong `ExceptionGroup` |
-| Vòng đời Task | Khi có lỗi, trả lỗi ngay không chờ Task còn lại; Task chưa xong bị hủy khi `asyncio.run` kết thúc | Mọi Task xong hoặc bị hủy trước khi thoát `async with` |
+| Một Task lỗi | Lỗi đầu tiên tới người gọi, Task khác chạy tiếp | Task còn lại bị huỷ, lỗi gói trong `ExceptionGroup` |
+| Vòng đời Task | Khi có lỗi, trả lỗi ngay không chờ Task còn lại; Task chưa xong bị huỷ khi `asyncio.run` kết thúc | Mọi Task xong hoặc bị huỷ trước khi thoát `async with` |
 | Muốn lấy cả lỗi lẫn kết quả | `return_exceptions=True` | Tự bắt lỗi trong từng coroutine |
 
 ## Timeout: không chờ vô hạn
@@ -171,13 +171,13 @@ dịch vụ nhanh (0,10 s): nguồn=service, cước=25500, mất 0.10 s
 dịch vụ chậm  (2,00 s): nguồn=fallback, cước=25500, mất 0.30 s
 ```
 
-Cơ chế: hết hạn, `timeout` hủy Task đang chạy khối bên trong; Task nhận `CancelledError` tại `await` đang treo, và khi `CancelledError` ra tới `async with`, `timeout` đổi nó thành `TimeoutError`. Hệ quả cần nhớ: `TimeoutError` chỉ bắt được **bên ngoài** khối `async with`, không bắt được ở bên trong. Lời gọi chậm 2 giây mất đúng 0,30 giây, không phải 2 giây. Hai nguồn cho cùng cước 25.500 vì cả hai dùng chung công thức; trong thực tế fallback nên được đánh dấu là «ước tính» để người dùng và hệ thống biết.
+Cơ chế: hết hạn, `timeout` huỷ Task đang chạy khối bên trong; Task nhận `CancelledError` tại `await` đang treo, và khi `CancelledError` ra tới `async with`, `timeout` đổi nó thành `TimeoutError`. Hệ quả cần nhớ: `TimeoutError` chỉ bắt được **bên ngoài** khối `async with`, không bắt được ở bên trong. Lời gọi chậm 2 giây mất đúng 0,30 giây, không phải 2 giây. Hai nguồn cho cùng cước 25.500 vì cả hai dùng chung công thức; trong thực tế fallback nên được đánh dấu là «ước tính» để người dùng và hệ thống biết.
 
 Thời hạn nên đặt ở **biên** của một thao tác trọn vẹn (một yêu cầu của khách), không rải từng lời gọi nhỏ mà quên tổng. Ngoài ra `asyncio.timeout` chỉ có tác dụng nếu đoạn bên trong thực sự nhường quyền ở `await`: một vòng lặp tính toán không có `await` không bị ngắt giữa chừng (mục «Không chặn event loop»).
 
-## Hủy: CancelledError, dọn dẹp và điều không được làm
+## Huỷ: CancelledError, dọn dẹp và điều không được làm
 
-Hủy trong asyncio là **hợp tác**: `task.cancel()` chỉ đặt yêu cầu, và Task nhận `CancelledError` tại `await` kế tiếp. Timeout, `TaskGroup` và việc khách đóng màn hình đều đi qua cơ chế này. `CancelledError` kế thừa `BaseException` chứ không phải `Exception` (đã kiểm trên Python 3.14), nên `except Exception` không bắt nhầm nó.
+Huỷ trong asyncio là **hợp tác**: `task.cancel()` chỉ đặt yêu cầu, và Task nhận `CancelledError` tại `await` kế tiếp. Timeout, `TaskGroup` và việc khách đóng màn hình đều đi qua cơ chế này. `CancelledError` kế thừa `BaseException` chứ không phải `Exception` (đã kiểm trên Python 3.14), nên `except Exception` không bắt nhầm nó.
 
 Bài toán của Tới Nơi: khi báo giá được tạo, hệ thống **giữ chỗ giá** cho chuyến trong lúc chờ khách bấm đặt. Nếu khách bỏ đi, chỗ giữ phải được nhả (`main.py`):
 
@@ -205,7 +205,7 @@ nuốt CancelledError -> vẫn trả kết quả | cancelled() = False
 timeout 0,10 s bọc coroutine nuốt hủy -> TimeoutError: False, expired(): True, kết quả: chạy tiếp sau hạn, mất 0.20 s
 ```
 
-Phần dọn dẹp thuộc `finally`, vì nó chạy trong mọi trường hợp. Quy tắc quan trọng nhất: **bắt `CancelledError` để dọn thì phải ném lại** (`raise`). Dòng áp chót của output là phản ví dụ trong lab: một coroutine nuốt `CancelledError` rồi chạy tiếp thì Task vẫn trả kết quả và `cancelled()` là `False`. `timeout` và `TaskGroup` đều giả định hủy có hiệu lực; một coroutine nuốt nó thì việc vẫn tiếp tục chạy sau hạn chót. Dòng cuối của output là thí nghiệm trong lab (`stubborn_quote`, bọc trong `asyncio.timeout(0.1)`): không có `TimeoutError` dù `expired()` là `True`, và khối chạy 0,20 s thay vì 0,10 s. Tài liệu cũng nói: nếu thực sự cần chặn hủy thì phải gọi thêm `uncancel()`, và việc này không khuyến khích. Đoạn dọn trong `finally` cũng không nên kéo dài hay chờ mạng vô hạn, vì Task đang bị hủy mà vẫn chờ lâu thì cả nhóm chờ theo.
+Phần dọn dẹp thuộc `finally`, vì nó chạy trong mọi trường hợp. Quy tắc quan trọng nhất: **bắt `CancelledError` để dọn thì phải ném lại** (`raise`). Dòng áp chót của output là phản ví dụ trong lab: một coroutine nuốt `CancelledError` rồi chạy tiếp thì Task vẫn trả kết quả và `cancelled()` là `False`. `timeout` và `TaskGroup` đều giả định huỷ có hiệu lực; một coroutine nuốt nó thì việc vẫn tiếp tục chạy sau hạn chót. Dòng cuối của output là thí nghiệm trong lab (`stubborn_quote`, bọc trong `asyncio.timeout(0.1)`): không có `TimeoutError` dù `expired()` là `True`, và khối chạy 0,20 s thay vì 0,10 s. Tài liệu cũng nói: nếu thực sự cần chặn huỷ thì phải gọi thêm `uncancel()`, và việc này không khuyến khích. Đoạn dọn trong `finally` cũng không nên kéo dài hay chờ mạng vô hạn, vì Task đang bị huỷ mà vẫn chờ lâu thì cả nhóm chờ theo.
 
 Thí nghiệm trong lab (`main.py`, rút gọn: bỏ docstring và phần đo giờ):
 
@@ -230,7 +230,7 @@ async def timeout_vs_swallow() -> dict[str, object]:
     return {"raised": raised, "expired": scope.expired(), "result": result}
 ```
 
-Người đã đọc [bài C# về async/await và cancellation](/articles/csharp-async-await-cancellation) sẽ thấy cùng ý: C# truyền `CancellationToken` tường minh qua từng lời gọi, còn asyncio hủy bằng exception bắn vào Task tại điểm `await`, nên không có tham số nào để quên truyền nhưng có exception không được nuốt.
+Người đã đọc [bài C# về async/await và cancellation](/articles/csharp-async-await-cancellation) sẽ thấy cùng ý: C# truyền `CancellationToken` tường minh qua từng lời gọi, còn asyncio huỷ bằng exception bắn vào Task tại điểm `await`, nên không có tham số nào để quên truyền nhưng có exception không được nuốt.
 
 ## Không chặn event loop
 
@@ -310,7 +310,7 @@ cảnh báo slow callback (debug): trực tiếp [0.503], to_thread []
 OK 20/20
 ```
 
-20 ca của `--verify` chia hai nhóm. Nhóm logic lặp lại tuyệt đối: cước 0, 2, 2,5 và 5 km là 12.000, 12.000, 14.250 và 25.500; ba cách gọi cho cùng kết quả; `gather` để Task còn lại chạy xong, `TaskGroup` hủy chúng; timeout rơi vào fallback; giữ chỗ được nhả; nuốt `CancelledError` làm Task không còn `cancelled`, và `asyncio.timeout` bọc coroutine nuốt hủy không ném `TimeoutError`. Nhóm thời gian so theo tỉ lệ hoặc ngưỡng rộng, không so số giây tuyệt đối: `gather` nhanh hơn tuần tự ít nhất 3 lần, timeout dừng sau 0,28 giây và xa độ trễ 2 giây của dịch vụ, lời gọi chặn làm tick lớn nhất từ 0,45 giây trở lên, `to_thread` giữ tick lớn nhất dưới nửa lúc bị chặn. Ngưỡng vẫn có thể trượt trên máy rất bận; khi đó chạy lại.
+20 ca của `--verify` chia hai nhóm. Nhóm logic lặp lại tuyệt đối: cước 0, 2, 2,5 và 5 km là 12.000, 12.000, 14.250 và 25.500; ba cách gọi cho cùng kết quả; `gather` để Task còn lại chạy xong, `TaskGroup` huỷ chúng; timeout rơi vào fallback; giữ chỗ được nhả; nuốt `CancelledError` làm Task không còn `cancelled`, và `asyncio.timeout` bọc coroutine nuốt huỷ không ném `TimeoutError`. Nhóm thời gian so theo tỉ lệ hoặc ngưỡng rộng, không so số giây tuyệt đối: `gather` nhanh hơn tuần tự ít nhất 3 lần, timeout dừng sau 0,28 giây và xa độ trễ 2 giây của dịch vụ, lời gọi chặn làm tick lớn nhất từ 0,45 giây trở lên, `to_thread` giữ tick lớn nhất dưới nửa lúc bị chặn. Ngưỡng vẫn có thể trượt trên máy rất bận; khi đó chạy lại.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -325,11 +325,11 @@ OK 20/20
 <p>«Service báo giá» ở đây chỉ là <code>asyncio.sleep</code>, chưa có kết nối mạng, retry, circuit breaker hay giới hạn số lời gọi đồng thời (bài 23 bàn tới <code>Semaphore</code>). Mười lời gọi cùng lúc không phải bài học chung: 10.000 lời gọi cùng lúc có thể làm sập chính dịch vụ phía sau. Số giây là của một máy, một lần chạy; chỉ tỉ lệ giữa các cách gọi mới đáng tin. Fallback ở đây dùng cùng công thức nên cho cùng giá; trong thực tế fallback thường kém chính xác hơn và phải được ghi nhận rõ.</p>
 </div>
 
-**Bài tập 1:** Trong `quotes_taskgroup`, thêm tham số `limit` và bọc cả khối `async with asyncio.TaskGroup()` trong `asyncio.timeout(limit)`. Với `limit = 0.2`, kết quả là gì khi độ trễ lớn nhất là 0,24 giây, và Task nào bị hủy?
+**Bài tập 1:** Trong `quotes_taskgroup`, thêm tham số `limit` và bọc cả khối `async with asyncio.TaskGroup()` trong `asyncio.timeout(limit)`. Với `limit = 0.2`, kết quả là gì khi độ trễ lớn nhất là 0,24 giây, và Task nào bị huỷ?
 
-**Bài tập 2:** Trong `hold_quote`, xóa dòng `raise` sau `log.append(...)`. `task.cancelled()` đổi thế nào, và vì sao đó là lỗi?
+**Bài tập 2:** Trong `hold_quote`, xoá dòng `raise` sau `log.append(...)`. `task.cancelled()` đổi thế nào, và vì sao đó là lỗi?
 
-<details><summary>Xem lời giải</summary><p>(1) Khối <code>asyncio.timeout(0.2)</code> hết hạn khi vẫn còn các Task có độ trễ 0,214 đến 0,239 giây (bốn trong mười lời gọi: 0,214; 0,224; 0,218; 0,239). Timeout hủy Task đang chạy khối <code>async with</code>, <code>TaskGroup</code> hủy tiếp các Task con, và <code>TimeoutError</code> ra ngoài; không có kết quả nào được trả vì <code>t.result()</code> nằm sau khối. Muốn lấy kết quả một phần phải thu thập trong từng Task thay vì sau khối. (2) <code>cancelled()</code> thành <code>False</code> vì Task kết thúc bình thường, và <code>await task</code> không còn ném <code>CancelledError</code>. Đó là lỗi vì người hủy (timeout, TaskGroup, người dùng) tưởng Task đã dừng do bị hủy trong khi nó vẫn chạy tiếp những gì sau <code>except</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Khối <code>asyncio.timeout(0.2)</code> hết hạn khi vẫn còn các Task có độ trễ 0,214 đến 0,239 giây (bốn trong mười lời gọi: 0,214; 0,224; 0,218; 0,239). Timeout huỷ Task đang chạy khối <code>async with</code>, <code>TaskGroup</code> huỷ tiếp các Task con, và <code>TimeoutError</code> ra ngoài; không có kết quả nào được trả vì <code>t.result()</code> nằm sau khối. Muốn lấy kết quả một phần phải thu thập trong từng Task thay vì sau khối. (2) <code>cancelled()</code> thành <code>False</code> vì Task kết thúc bình thường, và <code>await task</code> không còn ném <code>CancelledError</code>. Đó là lỗi vì người huỷ (timeout, TaskGroup, người dùng) tưởng Task đã dừng do bị huỷ trong khi nó vẫn chạy tiếp những gì sau <code>except</code>.</p></details>
 
 Bài trước: [bài 20](/articles/python-dong-goi-ruff-pre-commit-cau-truc-du-an). Bài tiếp: [bài 22](/articles/python-gil-threading-multiprocessing-free-threaded).
 

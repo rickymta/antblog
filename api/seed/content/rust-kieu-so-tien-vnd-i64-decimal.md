@@ -33,7 +33,7 @@ println!("0.1 + 0.2 == 0.3 ? {}", sum == 0.3);
 0.1 + 0.2 == 0.3 ? false
 ```
 
-Tổng posting của bút toán phải đúng bằng 0, không phải «gần bằng 0». Vì vậy tiền không dùng `f32`/`f64`. Float vẫn đúng chỗ cho tọa độ hay điểm thống kê, nơi sai số nhỏ chấp nhận được.
+Tổng posting của bút toán phải đúng bằng 0, không phải «gần bằng 0». Vì vậy tiền không dùng `f32`/`f64`. Float vẫn đúng chỗ cho toạ độ hay điểm thống kê, nơi sai số nhỏ chấp nhận được.
 
 ## Rust có những kiểu số nào, và literal suy ra kiểu gì?
 
@@ -104,7 +104,7 @@ debug_assertions = false
 i32::MAX + 1 = -2147483648
 ```
 
-Tùy chọn cargo `overflow-checks` quyết định điều này: mặc định bật ở profile `dev`, tắt ở `release`. Khi tắt, tràn số không phải hành vi không xác định; kết quả quay vòng theo bù hai (wrap). Nhưng với sổ cái, số dư âm bất ngờ là lỗi tiền thật. Thêm `[profile.release]` với `overflow-checks = true` vào `Cargo.toml` (lab để sẵn dạng comment) thì bản release cũng panic với cùng thông điệp. Panic chỉ là lưới an toàn cuối; lớp chính là các phép toán tường minh ở mục sau.
+Tuỳ chọn cargo `overflow-checks` quyết định điều này: mặc định bật ở profile `dev`, tắt ở `release`. Khi tắt, tràn số không phải hành vi không xác định; kết quả quay vòng theo bù hai (wrap). Nhưng với sổ cái, số dư âm bất ngờ là lỗi tiền thật. Thêm `[profile.release]` với `overflow-checks = true` vào `Cargo.toml` (lab để sẵn dạng comment) thì bản release cũng panic với cùng thông điệp. Panic chỉ là lưới an toàn cuối; lớp chính là các phép toán tường minh ở mục sau.
 
 ## checked, saturating, wrapping: chọn cái nào cho tiền?
 
@@ -199,7 +199,7 @@ Quyết định của sổ cái: **lưu `i64` đơn vị đồng; chỉ dùng `D
 | `u64`, `u32` | Số lượng, bộ đếm không âm | Tiền có thể âm (posting ghi nợ) |
 | `usize` | Chỉ số mảng, độ dài | Tiền, mã lưu DB (kích thước đổi theo máy) |
 | `i32` | Số km nguyên, bộ đếm nhỏ | Tổng tiền (tràn ở hơn 2,1 tỷ đồng) |
-| `f64` | Tọa độ, khoảng cách đo, điểm thống kê | Tiền, số dư, tỷ lệ phải khớp từng đồng |
+| `f64` | Toạ độ, khoảng cách đo, điểm thống kê | Tiền, số dư, tỷ lệ phải khớp từng đồng |
 | `Decimal` | Tỷ lệ phí, khuyến mãi; tính trung gian | Cột số dư của sổ cái (đã chọn `i64`) |
 
 Đối chiếu C#: [bài 02 của loạt C#](/articles/csharp-bien-kieu-du-lieu-decimal) dùng `decimal` cho tiền tính toán rồi `Math.Round` với `MidpointRounding.AwayFromZero` ra số tiền phải trả. Đó là lựa chọn hợp lý khi `decimal` có sẵn trong .NET. Ở sổ cái ta thu hẹp hơn: kiểu lưu không cho phép phần lẻ, `Decimal` chỉ để tính tỷ lệ. Quy tắc làm tròn giống nhau, nên cùng cước ra cùng phí.

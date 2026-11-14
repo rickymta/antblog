@@ -30,9 +30,9 @@ Tránh mở đầu bằng danh sách mọi việc nhóm đã làm. Người quy�
 | CS/vận hành | Có phục vụ được không? | Ngoại lệ, công suất, owner và hướng dẫn |
 | Dev/QA/analytics | Cần kiểm/sửa gì? | Event, cohort, rule, case và bằng chứng |
 
-Không che giới hạn dữ liệu với sponsor để “dễ duyệt”. Rút gọn là giữ điều quyết định, không xóa điều bất lợi.
+Không che giới hạn dữ liệu với sponsor để “dễ duyệt”. Rút gọn là giữ điều quyết định, không xoá điều bất lợi.
 
-## 4. Agenda 30 phút minh họa
+## 4. Agenda 30 phút minh hoạ
 
 Năm phút xác nhận câu hỏi và thẩm quyền; bảy phút dữ kiện/giới hạn; tám phút so phương án; bảy phút quyết định và điều kiện; ba phút đọc lại owner/mốc. Điều chỉnh theo độ phức tạp, không cắt ngang vấn đề trọng yếu chỉ để đúng giờ.
 

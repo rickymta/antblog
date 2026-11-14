@@ -121,7 +121,7 @@ Hai điểm khi đọc what-if. Thứ nhất, nó cho thấy MG sẽ được t�
 
 **Subscription vending** là việc cấp subscription như một sản phẩm tự phục vụ: đội xin, pipeline dựng, đội nhận về một subscription đã đúng chuẩn. Với Tới Nơi, "một pull request cho một môi trường mới" nghĩa là thêm một file tham số cho `sub-toinoi-<env>`, review nó như code, và pipeline lo phần còn lại.
 
-Việc tạo chính subscription làm được bằng IaC thông qua resource alias của Microsoft.Subscription, nhưng cần quyền ở billing scope của hợp đồng thanh toán. Quyền này khác với quyền Azure RBAC thường và thường nằm với bộ phận tài chính, nên hãy kiểm tài liệu và hỏi người quản lý billing trước khi hứa với đội rằng "PR là có subscription". Phần sau khi subscription tồn tại thì hoàn toàn nằm trong tầm tay của đội platform, và đó là phần module dưới đây làm.
+Việc tạo chính subscription làm được bằng IaC thông qua resource alias của Microsoft.Subscription, nhưng cần quyền ở billing scope của hợp đồng thanh toán. Quyền này khác với quyền Azure RBAC thường và thường nằm với bộ phận tài chính, nên hãy kiểm tra tài liệu và hỏi người quản lý billing trước khi hứa với đội rằng "PR là có subscription". Phần sau khi subscription tồn tại thì hoàn toàn nằm trong tầm tay của đội platform, và đó là phần module dưới đây làm.
 
 | Việc vending làm | Vì sao đưa vào module |
 | --- | --- |

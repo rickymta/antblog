@@ -380,7 +380,7 @@ Người viết báo cáo ban đầu (tester) thường chỉ điền chắc ch�
 
 **Bài tập 2 — lỗi code hay lỗi nghiệp vụ?** Phân loại mỗi trường hợp: (A) lỗi code, (B) defect trong đặc tả, (C) môi trường/dữ liệu, (D) defect trong test.
 
-1. SPEC đúng; code tính phụ phí mưa trước hệ số cao điểm nên phụ phí bị nhân 1,25.
+1. SPEC đúng; code tính phụ phí trời mưa trước hệ số cao điểm nên phụ phí bị nhân 1,25.
 2. Đặc tả bản nháp quên nói đơn đồ ăn luôn đi xe máy; code cho chọn ô tô; khách chọn ô tô cho đơn trà sữa và bị tính cước ô tô.
 3. Máy chủ production đặt múi giờ UTC, code dùng giờ của máy để xét cao điểm.
 4. Ca test kỳ vọng cước 7,4 km cao điểm mưa `GIAM20` là 51.700 đ; hệ thống trả 52.000 đ.

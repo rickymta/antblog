@@ -41,7 +41,7 @@ UTC cần nhất quán tại ranh giới ghi/đọc. PostgreSQL timestamp with t
 
 ## DbContext là một đơn vị theo dõi ngắn hạn
 
-Context giữ change tracker, cấu hình mapping và đơn vị SaveChanges. Tạo context ngắn cho một use case hoặc phạm vi phù hợp, dispose sau khi dùng. Không dùng cùng một context cho nhiều thao tác song song rồi mong EF tự khóa giúp.
+Context giữ change tracker, cấu hình mapping và đơn vị SaveChanges. Tạo context ngắn cho một use case hoặc phạm vi phù hợp, dispose sau khi dùng. Không dùng cùng một context cho nhiều thao tác song song rồi mong EF tự khoá giúp.
 
 Trong test, instance ghi được dispose trước khi một instance mới đọc lại. Điều này tránh cache tracking che mất lỗi mapping và serialization provider. Bài 22 sẽ đi sâu vào tracking, projection và SQL; hiện chỉ dùng AsNoTracking cho query kiểm dữ liệu đã lưu.
 
@@ -51,24 +51,24 @@ Context đã có nhiều cơ chế giống Unit of Work, nhưng kiến trúc đ�
 
 Migrations và ModelSnapshot được sinh bằng dotnet-ef 10.0.10 từ model, được giữ trong repository. Không viết EnsureCreated trong test rồi bỏ qua migration: ta muốn kiểm schema đúng theo đường mà ứng dụng sẽ dùng.
 
-Test tạo schema tên ngẫu nhiên trong database lab, đặt SearchPath cho connection và bảng lịch sử migration trong schema đó, rồi MigrateAsync. Model không hard-code tên schema test; mỗi ca có không gian riêng. Khi xong chỉ dọn schema do fixture tạo, không gọi EnsureDeleted để xóa cả database.
+Test tạo schema tên ngẫu nhiên trong database lab, đặt SearchPath cho connection và bảng lịch sử migration trong schema đó, rồi MigrateAsync. Model không hard-code tên schema test; mỗi ca có không gian riêng. Khi xong chỉ dọn schema do fixture tạo, không gọi EnsureDeleted để xoá cả database.
 
-Migration kế tiếp cần so với snapshot để sinh delta. Review SQL, thời gian khóa, dữ liệu có sẵn và kế hoạch rollback trước khi áp dụng production. Lab tự migrate lúc dựng fixture để kiểm chứng, không phải khuyến cáo mỗi replica production tranh nhau chạy migration lúc startup.
+Migration kế tiếp cần so với snapshot để sinh delta. Review SQL, thời gian khoá, dữ liệu có sẵn và kế hoạch rollback trước khi áp dụng production. Lab tự migrate lúc dựng fixture để kiểm chứng, không phải khuyến cáo mỗi replica production tranh nhau chạy migration lúc startup.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Mỗi ca sở hữu một schema trong database lab, không xóa database hoặc dùng schema dữ liệu thật."><defs><marker id="cs21-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Test riêng</text><text x="34" y="123" class="t-small">Schema lab_GUID</text><path d="M280 115 L305 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs21-1-arrow)"/><rect x="305" y="65" width="260" height="100" rx="10" class="f-pk-soft s-pk"/><text x="319" y="95" class="t-b">Migrate + Save</text><text x="319" y="123" class="t-small">Các bước kiểm chứng</text><path d="M565 115 L590 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs21-1-arrow)"/><rect x="590" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Context đọc mới</text><text x="604" y="123" class="t-small">Kiểm round-trip</text><rect x="295" y="35" width="280" height="150" rx="12" class="f-none s-pk" stroke-dasharray="5 4"/></svg>
+<svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Mỗi ca sở hữu một schema trong database lab, không xoá database hoặc dùng schema dữ liệu thật."><defs><marker id="cs21-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Test riêng</text><text x="34" y="123" class="t-small">Schema lab_GUID</text><path d="M280 115 L305 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs21-1-arrow)"/><rect x="305" y="65" width="260" height="100" rx="10" class="f-pk-soft s-pk"/><text x="319" y="95" class="t-b">Migrate + Save</text><text x="319" y="123" class="t-small">Các bước kiểm chứng</text><path d="M565 115 L590 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs21-1-arrow)"/><rect x="590" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Context đọc mới</text><text x="604" y="123" class="t-small">Kiểm round-trip</text><rect x="295" y="35" width="280" height="150" rx="12" class="f-none s-pk" stroke-dasharray="5 4"/></svg>
 </div>
-<figcaption>Hình 2. Mỗi ca sở hữu một schema trong database lab, không xóa database hoặc dùng schema dữ liệu thật.</figcaption>
+<figcaption>Hình 2. Mỗi ca sở hữu một schema trong database lab, không xoá database hoặc dùng schema dữ liệu thật.</figcaption>
 </figure>
 
 ## Ba ca có ý nghĩa gì?
 
 Round-trip kiểm fare, instant UTC, DriverId null và không còn migration pending. Ca chạy migration lần nữa yêu cầu dữ liệu còn nguyên. Ca foreign key ghi một CustomerId không tồn tại phải thất bại; object có Guid hợp lệ về cú pháp không có nghĩa khách đó tồn tại.
 
-**Bài tập:** nếu vừa dùng context ghi để đọc lại cùng entity, vì sao có thể bỏ sót lỗi database? Tại sao fixture không xóa cả database khi dọn?
+**Bài tập:** nếu vừa dùng context ghi để đọc lại cùng entity, vì sao có thể bỏ sót lỗi database? Tại sao fixture không xoá cả database khi dọn?
 
-<details><summary>Xem đáp án</summary><p>Tracker có thể trả instance đã có mà không tạo một phép round-trip độc lập đúng ý định kiểm tra. Fixture chỉ sở hữu schema GUID của mình; xóa cả database vượt phạm vi và có thể phá dữ liệu ca khác.</p></details>
+<details><summary>Xem đáp án</summary><p>Tracker có thể trả instance đã có mà không tạo một phép round-trip độc lập đúng ý định kiểm tra. Fixture chỉ sở hữu schema GUID của mình; xoá cả database vượt phạm vi và có thể phá dữ liệu ca khác.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 

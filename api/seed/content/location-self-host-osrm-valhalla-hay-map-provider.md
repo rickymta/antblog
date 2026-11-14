@@ -37,7 +37,7 @@ Engine của lab trả lời được vài nhu cầu đầu, nhưng không cùng
 
 **B. Self-host OSRM hoặc Valhalla.** Cả hai là engine định tuyến mã nguồn mở có API HTTP. OSRM có dịch vụ route và table (ma trận); trong lab, yêu cầu Valhalla được dựng thành thân JSON để gửi bằng POST. Tài liệu Route API của Valhalla liệt kê các costing `motor_scooter` và `motorcycle`; OSRM tính tốc độ theo file profile Lua nên hồ sơ xe máy là việc phải tự viết hoặc tự chọn. Bạn tự vận hành, tự chọn bản đồ OSM và cập nhật nó. Điều chưa biết với Tới Nơi: độ trễ và thông lượng trên cấu hình thật, chất lượng hồ sơ xe máy trên đường Việt Nam, khả năng trả lời đúng phía đường, và công sức vận hành. Lab chưa chạy cái nào trong hai cái này.
 
-**C. Map provider qua API.** Dịch vụ do bên thứ ba vận hành, có thể có dữ liệu kẹt xe thực mà các hướng kia không có. Điều cần xem kỹ: điều khoản cache, giới hạn lưu kết quả, giới hạn tốc độ gọi, tọa độ khách và tài xế được gửi ra ngoài, và tính phụ thuộc vào một nhà cung cấp. Bài này cố ý không nêu giá tiền và không nêu điều khoản cụ thể của provider nào.
+**C. Map provider qua API.** Dịch vụ do bên thứ ba vận hành, có thể có dữ liệu kẹt xe thực mà các hướng kia không có. Điều cần xem kỹ: điều khoản cache, giới hạn lưu kết quả, giới hạn tốc độ gọi, toạ độ khách và tài xế được gửi ra ngoài, và tính phụ thuộc vào một nhà cung cấp. Bài này cố ý không nêu giá tiền và không nêu điều khoản cụ thể của provider nào.
 
 Điều cần nhấn: ba hướng không loại trừ nhau. Một kiến trúc hợp lý có thể dùng hướng C cho ETA hiển thị cho khách, hướng A cho mô phỏng và lô ghép, và hướng B làm đối chiếu. Port ở mục sau nhằm làm kiểu kết hợp đó rẻ hơn.
 
@@ -53,7 +53,7 @@ Bảng dưới là danh sách câu hỏi cho từng tiêu chí, không phải b�
 | Cập nhật bản đồ | Đường mới, hẻm mới, cấm rẽ mới vào dữ liệu sau bao lâu và ai làm? | Hỏi nhà cung cấp, hoặc đo công sức tự cập nhật OSM |
 | Phía đường, chi phí rẽ, quay đầu | Có trả lời được «tới đúng phía này» không? | Chạy bộ kiểm tra hợp đồng mở rộng với đích có hướng |
 | Hồ sơ xe máy | Xe máy được xử lý riêng hay xấp xỉ bằng ô tô? | So ETA và tuyến xe máy với dữ liệu chạy thật |
-| Quyền riêng tư | Tọa độ khách và tài xế có rời hệ thống của Tới Nơi không? | Xem luồng dữ liệu; với vị trí là dữ liệu cá nhân, đây có thể là ràng buộc cứng |
+| Quyền riêng tư | Toạ độ khách và tài xế có rời hệ thống của Tới Nơi không? | Xem luồng dữ liệu; với vị trí là dữ liệu cá nhân, đây có thể là ràng buộc cứng |
 | Công sức vận hành | Ai cập nhật, giám sát, nâng cấp? | Ước lượng theo số người và số giờ, không phải một con số công khai |
 | Tính phụ thuộc | Đổi sang hướng khác mất bao lâu? | Chính là lý do cho port bên dưới |
 
@@ -96,7 +96,7 @@ Phải nói thẳng hiện trạng: trong lab, chỉ `loc28_routing_provider` đ
 <figcaption>Hình 1. Port RoutingProvider và bốn adapter. Chỉ hai adapter đã chạy thật; adapter OSRM chỉ chạy qua transport giả, phần Valhalla mới chỉ dựng thân yêu cầu. Bên gọi ở đây là dự kiến: hiện simulator và dịch vụ gRPC còn gọi thẳng <code>Engine</code>.</figcaption>
 </figure>
 
-Adapter OSRM dựng URL theo hình dạng của OSRM: tọa độ theo thứ tự `lng,lat`, các điểm cách nhau bằng `;`, ma trận qua `table` với `sources` và `destinations`.
+Adapter OSRM dựng URL theo hình dạng của OSRM: toạ độ theo thứ tự `lng,lat`, các điểm cách nhau bằng `;`, ma trận qua `table` với `sources` và `destinations`.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/provider.rs`
 
@@ -151,7 +151,7 @@ Bộ kiểm tra hợp đồng `contract_violations` là thứ giữ port trung t
 Lab lấy 300 cặp điểm GPS có seed (cách nút 5–30 m nên phải snap), hồ sơ ô tô, và chạy:
 
 - **Hợp đồng cho từng adapter**: `own-engine`, `osrm-http` (qua transport giả) và `straight-line` đều có **0 vi phạm trên 50 cặp**.
-- **Adapter OSRM qua transport giả so với engine của lab** (298 cặp): chênh thời gian trung vị 0,006 s, lớn nhất 4,120 s; chênh quãng đường trung vị 0,027 m, lớn nhất 19,738 m; điểm đầu hình học lệch tối đa 0,76 m. Không trùng tuyệt đối vì tọa độ đi qua URL bị làm tròn 6 chữ số thập phân (khoảng 0,1 m) và hình học qua polyline precision 5. Transport giả được gọi 400 lần.
+- **Adapter OSRM qua transport giả so với engine của lab** (298 cặp): chênh thời gian trung vị 0,006 s, lớn nhất 4,120 s; chênh quãng đường trung vị 0,027 m, lớn nhất 19,738 m; điểm đầu hình học lệch tối đa 0,76 m. Không trùng tuyệt đối vì toạ độ đi qua URL bị làm tròn 6 chữ số thập phân (khoảng 0,1 m) và hình học qua polyline precision 5. Transport giả được gọi 400 lần.
 
 Đọc đúng ý nghĩa của hai dòng trên: **transport giả sinh JSON từ chính engine của lab**, nên việc khớp gần tuyệt đối chỉ chứng minh mã dựng URL và đọc JSON hoạt động; nó không nói gì về OSRM thật. Không có con số nào ở đây nói về độ trễ, thông lượng, độ chính xác ETA, hay chi phí vận hành của OSRM hay Valhalla.
 
@@ -184,7 +184,7 @@ Lab cũng thử chuỗi: adapter chính giả lập «down» lỗi thì trả l�
   2. Engine của lab là hướng dùng để học, để mô phỏng, để chạy test và để làm nền cho phần cần phía đường và chi phí rẽ. Lab **không tuyên bố** nó thay được OSRM hay Valhalla.
   3. Trước khi chọn hướng cho production, chạy cùng một bộ truy vấn có seed và cùng bộ kiểm tra hợp đồng qua cả ba hướng, ghi cấu hình máy, tải và điều kiện đo; đọc điều khoản cache và lưu trữ hiện hành của provider; ghi lại ai cập nhật bản đồ.
   4. Thêm một adapter mới nghĩa là thêm mã adapter và chạy `contract_violations`, không sửa bên gọi.
-- **Hệ quả**: có một lớp trừu tượng để bảo trì; adapter phải ánh xạ khác biệt giữa các hệ thống (thứ tự tọa độ, hồ sơ xe máy, đơn vị) và bộ kiểm tra hợp đồng phải đủ chặt để bắt các khác biệt đó.
+- **Hệ quả**: có một lớp trừu tượng để bảo trì; adapter phải ánh xạ khác biệt giữa các hệ thống (thứ tự toạ độ, hồ sơ xe máy, đơn vị) và bộ kiểm tra hợp đồng phải đủ chặt để bắt các khác biệt đó.
 - **Khi nào xem lại**: khi có dữ liệu chuyến thật để đo ETA, khi lưu lượng vượt ngân sách đã đo, hoặc khi điều khoản của provider đang cân nhắc thay đổi.
 
 ADR này cố ý không nói «hướng nào tốt hơn», vì câu trả lời phụ thuộc vào dữ liệu mà lab chưa có: kẹt xe thật, chuyến thật, điều khoản hiện hành và công sức vận hành của đội.

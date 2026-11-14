@@ -71,7 +71,7 @@ Tới Nơi dùng chung nghiệp vụ để nối các loạt C#, Python, Rust, G
 | Rust | Sổ cái, đối soát và các thành phần nhạy với độ trễ/tài nguyên | Tính đúng của tiền, idempotency, hiệu năng đo được, kiểm soát bộ nhớ |
 | Go (Golang) | Tiếp nhận vị trí tài xế, fan-out thông báo, worker nhiều tác vụ đồng thời | Goroutine, giới hạn concurrency, backpressure, cancellation và race safety |
 
-Rust không tự bảo đảm đúng nghiệp vụ tài chính; sổ cái cần invariant, quy tắc làm tròn và đối soát. Go được chọn cho mô hình concurrency của service dự kiến, không có nghĩa C# hoặc Rust thiếu khả năng xử lý đồng thời. Python OCR dùng dữ liệu giấy tờ tổng hợp trong bài minh họa; kết quả OCR và điểm fraud là đầu vào cho quy trình nghiệp vụ, không tự động đồng nhất với quyết định xác minh hay kết luận gian lận.
+Rust không tự bảo đảm đúng nghiệp vụ tài chính; sổ cái cần invariant, quy tắc làm tròn và đối soát. Go được chọn cho mô hình concurrency của service dự kiến, không có nghĩa C# hoặc Rust thiếu khả năng xử lý đồng thời. Python OCR dùng dữ liệu giấy tờ tổng hợp trong bài minh hoạ; kết quả OCR và điểm fraud là đầu vào cho quy trình nghiệp vụ, không tự động đồng nhất với quyết định xác minh hay kết luận gian lận.
 
 Service sở hữu dữ liệu của mình. Giao tiếp qua hợp đồng API/event có version, timeout, idempotency và trace xuyên ngôn ngữ; không để service khác ghi trực tiếp vào bảng nghiệp vụ nội bộ. Không mở một Unit of Work xuyên nhiều service hoặc nhiều loại database.
 
@@ -79,7 +79,7 @@ Service sở hữu dữ liệu của mình. Giao tiếp qua hợp đồng API/ev
 
 **Giai đoạn đầu dùng PostgreSQL làm database chủ đạo.** Các bảng SQL và quy mô bên dưới là mô hình tham chiếu cho chặng này, không ngụ ý mọi service dùng chung một database trong kiến trúc đích.
 
-Khi workload tăng, loạt bài sẽ tái hiện áp lực ghi, MVCC và vacuum, đo rồi quyết định cách tiến hóa. MySQL và MongoDB có mặt trong lộ trình để học so sánh, tách dữ liệu và migration theo từng service; không đặt quy luật “đạt một số giao dịch đồng thời thì bắt buộc rời PostgreSQL”.
+Khi workload tăng, loạt bài sẽ tái hiện áp lực ghi, MVCC và vacuum, đo rồi quyết định cách tiến hoá. MySQL và MongoDB có mặt trong lộ trình để học so sánh, tách dữ liệu và migration theo từng service; không đặt quy luật “đạt một số giao dịch đồng thời thì bắt buộc rời PostgreSQL”.
 
 | Chặng | Nội dung chia sẻ | Bằng chứng để ra quyết định |
 | --- | --- | --- |
@@ -89,7 +89,7 @@ Khi workload tăng, loạt bài sẽ tái hiện áp lực ghi, MVCC và vacuum,
 | MongoDB | Mô hình document cho kết quả OCR, hồ sơ phân tích hoặc read model phù hợp | Access pattern, kích thước document, index, consistency và ranh giới transaction |
 | Migration có kiểm soát | Chuyển một tập dữ liệu/service khi kết quả đo đủ thuyết phục | Backfill, CDC/event, đối chiếu, cutover, rollback và quyền sở hữu dữ liệu |
 
-`VACUUM` là cơ chế bảo trì phiên bản hàng của PostgreSQL; vacuum thông thường có thể chạy cùng hoạt động đọc/ghi, dù tiêu tốn I/O. Nó khác `VACUUM FULL`, vốn cần khóa độc quyền. Vì vậy phải mô tả đúng loại vacuum và điều kiện gây chậm, không gộp chúng thành “vacuum khóa toàn bộ hệ thống”. Xem [tài liệu PostgreSQL về routine vacuuming](https://www.postgresql.org/docs/18/routine-vacuuming.html).
+`VACUUM` là cơ chế bảo trì phiên bản hàng của PostgreSQL; vacuum thông thường có thể chạy cùng hoạt động đọc/ghi, dù tiêu tốn I/O. Nó khác `VACUUM FULL`, vốn cần khoá độc quyền. Vì vậy phải mô tả đúng loại vacuum và điều kiện gây chậm, không gộp chúng thành “vacuum khoá toàn bộ hệ thống”. Xem [tài liệu PostgreSQL về routine vacuuming](https://www.postgresql.org/docs/18/routine-vacuuming.html).
 
 Bài [Uber Engineering ngày 26/07/2016](https://www.uber.com/us/en/blog/postgres-to-mysql-migration/) là case study lịch sử, chủ yếu dựa trên PostgreSQL 9.2: Uber nêu write amplification, replication và các khó khăn vận hành, rồi dùng Schemaless xây trên MySQL cho nhiều trường hợp. Đây không phải bằng chứng rằng PostgreSQL hiện đại luôn phải nhường chỗ khi concurrency tăng, cũng không phải case chuyển sang MongoDB. Khi tái hiện cần ghi phiên bản và tách kết luận của Uber khỏi số đo của Tới Nơi.
 

@@ -43,15 +43,15 @@ Khi chọn thư viện cho dự án thật cần xem tính năng, license và li
 
 Telemetry được đăng ký trước Validation; vòng Reverse xây delegate sao cho telemetry bọc validation, validation đứng trước handler. Vì vậy một yêu cầu bị từ chối vẫn được tính vào metric/thời gian ở biên application, nhưng không tạo hàng dữ liệu.
 
-Validator kiểm token hủy, miền distance, precision và key. Handler chịu dùng domain cho rule nghiệp vụ. Không đưa transaction chung bao mọi query chỉ vì muốn thêm một behavior: sẽ mở transaction không cần thiết và làm khó giải thích replay/idempotency.
+Validator kiểm token huỷ, miền distance, precision và key. Handler chịu dùng domain cho rule nghiệp vụ. Không đưa transaction chung bao mọi query chỉ vì muốn thêm một behavior: sẽ mở transaction không cần thiết và làm khó giải thích replay/idempotency.
 
 Mỗi behavior gọi next đúng theo trách nhiệm. Quên next có thể làm use case không chạy; gọi hai lần có thể lặp tác động. Test HTTP với trạng thái DB/Outbox là một cách quan sát hậu quả chứ không chỉ assert delegate đã được gọi.
 
 ## Cancellation đi xuyên thay vì bị nuốt
 
-CancellationToken từ request được truyền qua dispatcher, handler, repository/query và SaveChanges. Validation check pre-cancelled token trước khi gọi handler. Test yêu cầu command đã hủy không tạo Trip.
+CancellationToken từ request được truyền qua dispatcher, handler, repository/query và SaveChanges. Validation check pre-cancelled token trước khi gọi handler. Test yêu cầu command đã huỷ không tạo Trip.
 
-Đây là hợp tác hủy, không bảo đảm request timeout thì database chắc chắn chưa commit. Client cần idempotency và tra kết quả bằng hợp đồng rõ. Một pipeline logging cũng không được bắt mọi exception rồi trả một TResponse mặc định có vẻ thành công.
+Đây là hợp tác huỷ, không bảo đảm request timeout thì database chắc chắn chưa commit. Client cần idempotency và tra kết quả bằng hợp đồng rõ. Một pipeline logging cũng không được bắt mọi exception rồi trả một TResponse mặc định có vẻ thành công.
 
 Lỗi đã hiểu được map ở API: validation 400, không có tài nguyên được phép đọc 404, conflict 409. Application không tham chiếu Results hay HttpContext để quyết định HTTP; nó cung cấp loại lỗi có ngữ nghĩa.
 
@@ -76,7 +76,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xóa database; JWT dùng khóa ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
 
 ### Dispatcher.cs — 31-38-trip-service/Infrastructure/Dispatcher.cs
 

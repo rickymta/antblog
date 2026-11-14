@@ -8,7 +8,7 @@ tags: [testing, test-058, unit-testing, dependency-injection, ports-adapters, fa
 language: vi
 ---
 
-Một test chỉ trượt lúc 13:00 hoặc khi chạy trên máy CI ở UTC thường đang phụ thuộc vào một điều kiện ngoài ý muốn. Với Tới Nơi, đồng hồ quyết định giờ cao điểm, hạn báo giá và thời gian tìm tài xế; thời tiết quyết định phụ phí mưa. Muốn tái hiện một tình huống, ta phải điều khiển những đầu vào đó thay vì đợi thế giới thật đi qua đúng thời điểm.
+Một test chỉ trượt lúc 13:00 hoặc khi chạy trên máy CI ở UTC thường đang phụ thuộc vào một điều kiện ngoài ý muốn. Với Tới Nơi, đồng hồ quyết định giờ cao điểm, hạn báo giá và thời gian tìm tài xế; thời tiết quyết định phụ phí trời mưa. Muốn tái hiện một tình huống, ta phải điều khiển những đầu vào đó thay vì đợi thế giới thật đi qua đúng thời điểm.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-058</span>

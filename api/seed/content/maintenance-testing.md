@@ -306,7 +306,7 @@ Kết quả (rút gọn, chép từ lần chạy):
 
 **Test không nhạy là test nguy hiểm nhất của bảo trì.** M-04, M-05 cho cùng kết quả trước và sau thay đổi. Trong bộ regression, chúng vẫn có ích (bảo vệ cước tối thiểu, làm tròn). Làm smoke test để chứng minh «giá mới đã lên», chúng vô dụng — và sẽ cho cảm giác an toàn giả.
 
-**Hotfix nén phạm vi, không nén tư duy.** Hotfix phụ phí mưa trong mùa bão có thể chỉ có hai giờ. Khi đó ưu tiên: confirmation trên ca mưa, regression nhắm đích những đường đi qua phụ phí mưa (cước, bưu kiện, phí giao đồ ăn), smoke production; bộ đầy đủ chạy ngay sau phát hành. Ghi rõ những gì chưa chạy vào báo cáo.
+**Hotfix nén phạm vi, không nén tư duy.** Hotfix phụ phí trời mưa trong mùa bão có thể chỉ có hai giờ. Khi đó ưu tiên: confirmation trên ca mưa, regression nhắm đích những đường đi qua phụ phí trời mưa (cước, bưu kiện, phí giao đồ ăn), smoke production; bộ đầy đủ chạy ngay sau phát hành. Ghi rõ những gì chưa chạy vào báo cáo.
 
 **Retirement hay bị quên vì không có ai «dùng» nó.** Lưu trữ chỉ có giá trị nếu khôi phục được. Kiến trúc §16.4 yêu cầu kiểm thử restore định kỳ cho cùng lý do. Ngược lại, có loại dữ liệu phải **xoá** chứ không được giữ (dữ liệu vị trí, thông tin cá nhân theo chính sách lưu giữ §13.2) — test cả chiều đó.
 
@@ -327,7 +327,7 @@ Kết quả (rút gọn, chép từ lần chạy):
 <p>(a) Modification — cải tiến có kế hoạch. (b) R-GEN-03 (danh sách thành phố, <code>CITY_NOT_SUPPORTED</code>); voucher có <code>cityCodes</code> rỗng (<code>GIAM20</code>, <code>FOOD15</code>) tự áp ở Huế — marketing phải xác nhận; bảng <code>cities</code> trong <code>schema.sql</code>; dịch vụ thời tiết (R-GEN-05); tài xế (R-ACCEPT-01 cùng thành phố). (c) Test âm nào dùng <code>HU</code> làm ví dụ «thành phố không hỗ trợ» sẽ đỏ — cần cập nhật test, không phải hồi quy. Ví dụ không hợp lệ nên là giá trị không bao giờ hợp lệ (như <code>XX</code>).</p>
 </details>
 
-**Bài tập 2 — hotfix hai giờ.** Mùa bão, phụ phí mưa R-FARE-05 tăng khẩn từ 8.000 lên 10.000 đ. (a) Tính lại oracle R-FARE-09. (b) Chọn bộ test tối thiểu trước khi phát hành và bộ chạy sau.
+**Bài tập 2 — hotfix hai giờ.** Mùa bão, phụ phí trời mưa R-FARE-05 tăng khẩn từ 8.000 lên 10.000 đ. (a) Tính lại oracle R-FARE-09. (b) Chọn bộ test tối thiểu trước khi phát hành và bộ chạy sau.
 
 <details>
 <summary><b>Lời giải</b></summary>

@@ -124,7 +124,7 @@ Lab (SPEC R-ARCH-03) có sẵn các móc đó: `FixedClock` cho giờ, `FakeWeat
 
 ### 3.3. Rủi ro
 
-- **Interaction failure:** phụ phí khối lượng phải bị nhân 1,25 (R-PARCEL-04) còn phụ phí mưa thì không (R-FARE-05). Lỗi chỉ lộ khi bưu kiện nặng **và** cao điểm cùng có mặt.
+- **Interaction failure:** phụ phí khối lượng phải bị nhân 1,25 (R-PARCEL-04) còn phụ phí trời mưa thì không (R-FARE-05). Lỗi chỉ lộ khi bưu kiện nặng **và** cao điểm cùng có mặt.
 - **Ràng buộc bị kiểm thiếu:** đồ ăn đi ô tô, bưu kiện 25 kg đi xe máy lọt qua ⇒ đơn không thể giao.
 - **Voucher sai phạm vi vẫn giảm:** lộ tiền khuyến mãi (kiến trúc §4.10).
 - **Lỗi bị che (masking):** một test case chứa hai giá trị sai chỉ chứng minh được lỗi báo đầu tiên.

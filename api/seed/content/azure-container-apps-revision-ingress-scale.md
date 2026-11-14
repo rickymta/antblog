@@ -24,7 +24,7 @@ Một **managed environment** là lớp nền mà nhiều container app cùng ch
 
 Hệ quả thực tế của việc gom chung: quyết định mạng được đưa ra ở cấp environment, lúc tạo. Muốn container app gọi được PostgreSQL qua private endpoint thì subnet của environment phải đi được tới đó. Chọn sai VNet lúc tạo là chuyện khó sửa về sau, nên bài 27 sẽ quay lại phần mạng; ở đây chỉ cần nhớ environment là nơi bạn đặt nó.
 
-Environment còn có khái niệm **workload profile**. Profile **Consumption** chạy theo mô hình serverless: Azure xếp replica lên hạ tầng chung, bạn trả theo tài nguyên replica dùng. Profile **Dedicated** dành riêng một nhóm máy cho bạn, hợp với workload cần ổn định hoặc kích thước lớn, và bạn trả cho cả nhóm máy dù replica ít hay nhiều. Tới Nơi bắt đầu bằng Consumption cho cả ba môi trường. Chỉ cân nhắc Dedicated khi có số đo cho thấy cần. Dapr (sidecar cho service invocation, pub/sub) là tính năng tùy chọn bật theo từng app. Tới Nơi chưa cần vì đã có outbox và HTTP thường ở bài 26 loạt C#.
+Environment còn có khái niệm **workload profile**. Profile **Consumption** chạy theo mô hình serverless: Azure xếp replica lên hạ tầng chung, bạn trả theo tài nguyên replica dùng. Profile **Dedicated** dành riêng một nhóm máy cho bạn, hợp với workload cần ổn định hoặc kích thước lớn, và bạn trả cho cả nhóm máy dù replica ít hay nhiều. Tới Nơi bắt đầu bằng Consumption cho cả ba môi trường. Chỉ cân nhắc Dedicated khi có số đo cho thấy cần. Dapr (sidecar cho service invocation, pub/sub) là tính năng tuỳ chọn bật theo từng app. Tới Nơi chưa cần vì đã có outbox và HTTP thường ở bài 26 loạt C#.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -43,7 +43,7 @@ Có hai **revision mode**:
 
 | Tiêu chí | Single | Multiple |
 | --- | --- | --- |
-| Revision nhận traffic | Một, bản mới nhất khỏe | Nhiều, chia theo phần trăm |
+| Revision nhận traffic | Một, bản mới nhất khoẻ | Nhiều, chia theo phần trăm |
 | Khi đổi template | Revision mới thay revision cũ sau khi sẵn sàng | Revision mới được tạo, bạn tự quyết traffic |
 | Hợp với | Dev, staging, service đơn giản | Canary, blue/green, rollback có kiểm soát |
 | Bạn phải tự dọn | Không | Có, revision cũ vẫn chạy và tính tiền cho tới khi tắt |

@@ -284,7 +284,7 @@ Kết quả thực tế: 5/5 xanh. Đọc đúng ý nghĩa: **Tới Nơi đã s�
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Dữ liệu: số điện thoại (định dạng quốc tế), nội dung có mã OTP, mã tin nhắn trả về, trạng thái gửi (nếu nhà cung cấp có báo cáo gửi). Lỗi: TinNhanh trả lỗi tạm thời; tin gửi trễ quá thời hạn OTP; gửi hai lần khi Notification thử lại. Môi trường: bậc 1 — fake ghi lại tin đã «gửi» để test lấy OTP; bậc 3 — sandbox TinNhanh chỉ gửi tới danh sách số thử; staging — gửi thật tới số của đội test. Test condition: (1) Notification thử lại sau lỗi tạm thời không làm khách nhận hai OTP khác nhau (khử trùng theo notification key, kiến trúc §4.11); (2) TinNhanh không trả lời thì luồng đăng nhập báo lỗi rõ ràng và cho gửi lại, không treo.</p>
+<p>Dữ liệu: số điện thoại (định dạng quốc tế), nội dung có mã OTP, mã tin nhắn trả về, trạng thái gửi (nếu nhà cung cấp có báo cáo gửi). Lỗi: TinNhanh trả lỗi tạm thời; tin gửi trễ quá thời hạn OTP; gửi hai lần khi Notification thử lại. Môi trường: bậc 1 — fake ghi lại tin đã «gửi» để test lấy OTP; bậc 3 — sandbox TinNhanh chỉ gửi tới danh sách số thử; staging — gửi thật tới số của đội test. Test condition: (1) Notification thử lại sau lỗi tạm thời không làm khách nhận hai OTP khác nhau (khử trùng lặp theo notification key, kiến trúc §4.11); (2) TinNhanh không trả lời thì luồng đăng nhập báo lỗi rõ ràng và cho gửi lại, không treo.</p>
 </details>
 
 **Bài 2.** Kiến trúc §8.3 nói webhook của cổng thanh toán có thể trễ hoặc trùng. Viết ba test condition SIT cho webhook VíXanh và cho biết lab có kiểm được không.

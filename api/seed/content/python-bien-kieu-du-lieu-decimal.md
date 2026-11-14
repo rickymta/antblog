@@ -74,7 +74,7 @@ print(0.1 + 0.2 == 0.3)    # False
 <figcaption>Hình 1. Cùng phép cộng, hai cách biểu diễn. Decimal chỉ giữ đúng chữ số thập phân khi được tạo từ chuỗi; tạo từ float sẽ mang theo xấp xỉ của ô bên trái.</figcaption>
 </figure>
 
-Đây là hành vi của biểu diễn, không phải lỗi của Python. float vẫn đúng chỗ cho đo đạc, tọa độ GPS, điểm mô hình; bạn so sánh bằng ngưỡng sai số (`math.isclose`) thay vì `==`. Nhưng với tiền và khoảng cách cộng dồn vào tiền, ta cần kiểu thập phân.
+Đây là hành vi của biểu diễn, không phải lỗi của Python. float vẫn đúng chỗ cho đo đạc, toạ độ GPS, điểm mô hình; bạn so sánh bằng ngưỡng sai số (`math.isclose`) thay vì `==`. Nhưng với tiền và khoảng cách cộng dồn vào tiền, ta cần kiểu thập phân.
 
 ## Decimal: tạo từ chuỗi, không từ float
 
@@ -98,7 +98,7 @@ Hai bên giống nhau ở ý chính: cả hai là kiểu thập phân, đều m�
 
 ## Làm tròn tiền bằng quantize
 
-Giữ nguyên quy tắc bài 01: 12.000 VND gồm 2 km đầu, phần vượt 4.500 VND/km. Bổ sung một quy tắc **chỉ cho mô hình minh họa**: làm tròn tiền cuối cùng đến 1 VND, điểm giữa làm tròn ra xa số 0 (`ROUND_HALF_UP`). Mô hình có ba giá trị khác nhau: khoảng cách, cước thô và tiền phải trả.
+Giữ nguyên quy tắc bài 01: 12.000 VND gồm 2 km đầu, phần vượt 4.500 VND/km. Bổ sung một quy tắc **chỉ cho mô hình minh hoạ**: làm tròn tiền cuối cùng đến 1 VND, điểm giữa làm tròn ra xa số 0 (`ROUND_HALF_UP`). Mô hình có ba giá trị khác nhau: khoảng cách, cước thô và tiền phải trả.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

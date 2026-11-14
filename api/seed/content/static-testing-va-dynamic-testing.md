@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-022, static-testing, dynamic-testing, code-rev
 language: vi
 ---
 
-Ở [TEST-021](/articles/static-testing-la-gi), bản nháp đặc tả cước bỏ ngỏ một câu hỏi: phụ phí mưa có bị nhân hệ số cao điểm không? Giả sử không ai hỏi, và developer viết code nhân luôn cả phụ phí mưa. Bây giờ có hai cách tìm lỗi đó: **đọc code** (static testing) hoặc **chạy test** (dynamic testing). Bài này so sánh hai cách theo CTFL v4.0.1, rồi làm cả hai trên cùng một bản code lỗi của lab Tới Nơi để thấy mỗi cách tìm được gì, mất công ra sao và vì sao không cách nào thay được cách kia.
+Ở [TEST-021](/articles/static-testing-la-gi), bản nháp đặc tả cước bỏ ngỏ một câu hỏi: phụ phí trời mưa có bị nhân hệ số cao điểm không? Giả sử không ai hỏi, và developer viết code nhân luôn cả phụ phí trời mưa. Bây giờ có hai cách tìm lỗi đó: **đọc code** (static testing) hoặc **chạy test** (dynamic testing). Bài này so sánh hai cách theo CTFL v4.0.1, rồi làm cả hai trên cùng một bản code lỗi của lab Tới Nơi để thấy mỗi cách tìm được gì, mất công ra sao và vì sao không cách nào thay được cách kia.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-022</span>
@@ -21,7 +21,7 @@ language: vi
 <tr><th scope="row">Test Type</th><td>White-box; Black-box</td></tr>
 <tr><th scope="row">Test Technique</th><td>Static testing</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/static-testing-la-gi">TEST-021 · Static Testing là gì?</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): cùng lỗi «phụ phí mưa bị nhân 1,25» (trái R-FARE-05) — tìm bằng đọc code, bằng một static check tự viết và bằng test vitest đỏ — <code>examples/toi-noi-testing/articles/static-testing-va-dynamic-testing/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): cùng lỗi «phụ phí trời mưa bị nhân 1,25» (trái R-FARE-05) — tìm bằng đọc code, bằng một static check tự viết và bằng test vitest đỏ — <code>examples/toi-noi-testing/articles/static-testing-va-dynamic-testing/</code></td></tr>
 <tr><th scope="row">Tham chiếu ISTQB</th><td>CTFL v4.0.1 · Chương 3 · mục 3.1.3 · FL-3.1.3 (K2). Liên quan: CTAL-TTA v4.0 · mục 3.1 (static analysis và dynamic analysis — phần giới thiệu, không có LO riêng)</td></tr>
 </tbody>
 </table>
@@ -100,7 +100,7 @@ Hàm tính cước của Pricing & Quote Service phải theo đúng thứ tự R
 
 | Mã | Defect gài | Trái với |
 |---|---|---|
-| D1 | Phụ phí mưa bị nhân hệ số cao điểm | R-FARE-03, R-FARE-05 |
+| D1 | Phụ phí trời mưa bị nhân hệ số cao điểm | R-FARE-03, R-FARE-05 |
 | D2 | Tính tiền bằng số thực thay vì milli-đồng như `money.ts` | R-GEN-01 (chính xác ở bước trung gian) |
 | D3 | Chú thích nói voucher tính trên cước cơ bản; hệ số `1.25` viết cứng thay vì `PEAK_PERCENT` | R-FARE-06; quy ước bảo trì |
 | D4 | Nhánh «cước âm» không bao giờ chạy tới | — (mã thừa) |
@@ -162,7 +162,7 @@ Trước khi chạy gì, dự đoán mỗi cách sẽ bắt được defect nào
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 920 320" role="img" aria-label="Hai đường tới defect D1. Hàng trên là static testing: mã buggy-fare.ts chưa chạy, đọc và đối chiếu SPEC R-FARE-03 thứ tự cao điểm rồi mưa, mũi tên tới thẳng ô defect. Hàng dưới là dynamic testing: chạy TC-05 theo R-FARE-09, thấy failure 54.000 khác 52.000 đồng, phân tích bảng chi tiết thấy cước cơ bản khớp nhưng sau cao điểm lệch 10.000, rồi mới tới ô defect. Ô defect bên phải: buggy-fare.ts dòng 29, biểu thức base cộng rainSurcharge nhân 1.25, phụ phí mưa bị nhân hệ số cao điểm. Dải dưới so sánh: tĩnh thấy defect trực tiếp có vị trí, không cần dữ liệu test; động thấy failure trước, chỉ lộ khi ca test có cả cao điểm và mưa.">
+<svg viewBox="0 0 920 320" role="img" aria-label="Hai đường tới defect D1. Hàng trên là static testing: mã buggy-fare.ts chưa chạy, đọc và đối chiếu SPEC R-FARE-03 thứ tự cao điểm rồi mưa, mũi tên tới thẳng ô defect. Hàng dưới là dynamic testing: chạy TC-05 theo R-FARE-09, thấy failure 54.000 khác 52.000 đồng, phân tích bảng chi tiết thấy cước cơ bản khớp nhưng sau cao điểm lệch 10.000, rồi mới tới ô defect. Ô defect bên phải: buggy-fare.ts dòng 29, biểu thức base cộng rainSurcharge nhân 1.25, phụ phí trời mưa bị nhân hệ số cao điểm. Dải dưới so sánh: tĩnh thấy defect trực tiếp có vị trí, không cần dữ liệu test; động thấy failure trước, chỉ lộ khi ca test có cả cao điểm và mưa.">
 <defs>
 <marker id="t022-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-pk"/></marker>
 <marker id="t022-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-warn"/></marker>
@@ -194,7 +194,7 @@ Trước khi chạy gì, dự đoán mỗi cách sẽ bắt được defect nào
 <text x="772" y="96" text-anchor="middle" class="t-b">Defect D1</text>
 <text x="772" y="122" text-anchor="middle" class="t-small t-mono">buggy-fare.ts dòng 29</text>
 <text x="772" y="150" text-anchor="middle" class="t-small t-mono">(base + rainSurcharge) * 1.25</text>
-<text x="772" y="180" text-anchor="middle" class="t-small">phụ phí mưa bị nhân</text>
+<text x="772" y="180" text-anchor="middle" class="t-small">phụ phí trời mưa bị nhân</text>
 <text x="772" y="198" text-anchor="middle" class="t-small">hệ số cao điểm</text>
 <rect x="16" y="262" width="436" height="46" rx="8" class="f-phys-soft s-phys"/>
 <text x="234" y="281" text-anchor="middle" class="t-small">Tĩnh: thấy thẳng defect, có vị trí,</text>
@@ -217,7 +217,7 @@ Mọi lệnh chạy trong `examples/toi-noi-testing/`. Kết quả dưới đây
 
 | # | Dòng | Phát hiện | Căn cứ | Defect |
 |---|---|---|---|---|
-| R1 | 29 | `(base + rainSurcharge) * 1.25` — phụ phí mưa nằm trong phép nhân | R-FARE-03 bước 2 → 3, R-FARE-05 | D1 |
+| R1 | 29 | `(base + rainSurcharge) * 1.25` — phụ phí trời mưa nằm trong phép nhân | R-FARE-03 bước 2 → 3, R-FARE-05 | D1 |
 | R2 | 24, 26, 40 | Tiền tính bằng số thực, `Math.ceil` trên số thực; `money.ts` của lab dùng milli-đồng chính để tránh việc này | R-GEN-01 | D2 |
 | R3 | 16 | Chú thích nói voucher tính trên cước cơ bản; mã (đúng) tính trên số sau bước 3 | R-FARE-06 | D3 |
 | R4 | 29 | `1.25` viết cứng; module đã có hằng `PEAK_PERCENT` | Bảo trì | D3 |
@@ -227,7 +227,7 @@ Nhật ký này giả định người review biết bẫy số thực (R2). Ng�
 
 ### 5.2. Cách A′ — static analysis bằng một script tự viết
 
-`static-check.ts` đọc mã nguồn **như văn bản**, không import và không gọi `calculateFareBuggy`. Hai quy tắc: S1 cấm viết cứng `1.25`; S2 cấm phụ phí mưa nằm trong dòng nhân hệ số cao điểm. Đây là minh hoạ — quy tắc thô, công cụ thật (tsc, ESLint) ở [TEST-029](/articles/static-analysis-phan-tich-code-tinh).
+`static-check.ts` đọc mã nguồn **như văn bản**, không import và không gọi `calculateFareBuggy`. Hai quy tắc: S1 cấm viết cứng `1.25`; S2 cấm phụ phí trời mưa nằm trong dòng nhân hệ số cao điểm. Đây là minh hoạ — quy tắc thô, công cụ thật (tsc, ESLint) ở [TEST-029](/articles/static-analysis-phan-tich-code-tinh).
 
 ```bash
 npx vitest run articles/static-testing-va-dynamic-testing/static-check.test.ts
@@ -272,7 +272,7 @@ Không đặt `SHOW_RED`, hai ca này được đánh `it.fails` (failure đã b
 | Sau cao điểm `afterPeak` | 56.625 | **66.625** ✘ (+10.000 = 8.000 × 1,25) | **287.000,00000000006** |
 | Tổng | 52.000 | 54.000 | 288.000 |
 
-TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí mưa × 1,25 ⇒ quay lại dòng 29. TC-06: `afterPeak` thừa 6 × 10⁻¹¹ đồng, `Math.ceil` đẩy lên 288.000 ⇒ nguyên nhân là biểu diễn số thực (D2). Sau khi định vị, ta tới đúng chỗ mà Cách A đã chỉ ra từ đầu.
+TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí trời mưa × 1,25 ⇒ quay lại dòng 29. TC-06: `afterPeak` thừa 6 × 10⁻¹¹ đồng, `Math.ceil` đẩy lên 288.000 ⇒ nguyên nhân là biểu diễn số thực (D2). Sau khi định vị, ta tới đúng chỗ mà Cách A đã chỉ ra từ đầu.
 
 ### 5.4. So sánh kết quả
 
@@ -356,7 +356,7 @@ TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí mưa �
 <p><b>c)</b> đúng — «đặc tả giao diện sai» là một loại syllabus liệt kê. a), b), d) chỉ lộ khi chạy trong điều kiện cụ thể — cần dynamic testing (b còn là đối tượng của dynamic analysis ở CTAL-TTA).</p>
 </details>
 
-**Câu 3 (K2).** Hàm tính cước có bộ unit test xanh, phủ 100% câu lệnh. Sau đó một reviewer phát hiện phụ phí mưa bị nhân hệ số cao điểm. Giải thích nào hợp lý nhất?
+**Câu 3 (K2).** Hàm tính cước có bộ unit test xanh, phủ 100% câu lệnh. Sau đó một reviewer phát hiện phụ phí trời mưa bị nhân hệ số cao điểm. Giải thích nào hợp lý nhất?
 
 - a) Bộ test sai vì không thể có defect khi phủ 100% câu lệnh
 - b) Câu lệnh lỗi đã được thực thi, nhưng không ca nào kết hợp cao điểm với mưa nên không có failure quan sát được

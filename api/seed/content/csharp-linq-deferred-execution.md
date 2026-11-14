@@ -26,7 +26,7 @@ Ba TripRow ban đầu gồm hai completed và một cancelled. Status là chuỗ
 
 ## Where, lambda, OrderBy và Select
 
-Where chọn các phần tử thỏa predicate. Trong `t => t.Status == "completed"`, t là tham số lambda, dấu => phân cách tham số và biểu thức xử lý. Nó không sửa status nguồn.
+Where chọn các phần tử thoả predicate. Trong `t => t.Status == "completed"`, t là tham số lambda, dấu => phân cách tham số và biểu thức xử lý. Nó không sửa status nguồn.
 
 OrderBy chọn thứ tự chính theo Fare; ThenBy chọn tiêu chí phụ khi bằng giá. OrderBy lần hai thiết lập thứ tự chính mới, không giống ThenBy. Lab dùng comparer ordinal cho ID để thứ tự không phụ thuộc culture giao diện.
 
@@ -47,7 +47,7 @@ Khai báo query chưa gọi predicate Where trong demo. Chỉ khi ToList hoặc 
 
 Sau ToList đầu, snapshot có 2 dòng. Thêm một chuyến completed vào nguồn, rồi duyệt lại cùng query cho 3 dòng: query còn tham chiếu tới nguồn hiện tại. Snapshot cũ giữ danh sách thành viên ban đầu.
 
-Không suy ra snapshot bất biến sâu: ToList sao chép tham chiếu phần tử. Projection ở đây tạo record chỉ có string/decimal nên đơn giản; nếu chứa List mutable, alias từ bài 07 vẫn tồn tại. Không thêm/xóa List nguồn trong khi đang foreach query trên chính List đó.
+Không suy ra snapshot bất biến sâu: ToList sao chép tham chiếu phần tử. Projection ở đây tạo record chỉ có string/decimal nên đơn giản; nếu chứa List mutable, alias từ bài 07 vẫn tồn tại. Không thêm/xoá List nguồn trong khi đang foreach query trên chính List đó.
 
 ## Deferred không có nghĩa mọi toán tử streaming
 
@@ -76,7 +76,7 @@ So sánh chuỗi cũng có thể khác: == trong memory và collation database k
 
 Đầu ra: predicate có 0 lần gọi trước duyệt; snapshot 2 dòng, duyệt lại 3 dòng, tổng completed 51.755 VND. Thứ tự TN-0004 (12.000), TN-0003 (14.255), TN-0001 (25.500). Chuyến cancelled bị loại dù có Fare trong dữ liệu gốc.
 
-Tổng này chỉ là tổng cước minh họa, chưa phải doanh thu kế toán đã ghi nhận: completed không tự chứng minh đã thu tiền/đối soát. Ranh giới tài chính có mô hình và invariant riêng.
+Tổng này chỉ là tổng cước minh hoạ, chưa phải doanh thu kế toán đã ghi nhận: completed không tự chứng minh đã thu tiền/đối soát. Ranh giới tài chính có mô hình và invariant riêng.
 
 | Hiểu nhầm | Quan sát trong lab |
 | --- | --- |
@@ -98,7 +98,7 @@ dotnet run --project examples/toi-noi-dotnet/10-linq-deferred-execution
 dotnet run --project examples/toi-noi-dotnet/10-linq-deferred-execution -- --verify
 ```
 
-Lệnh đầu minh họa hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
+Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
 
 Mã nguồn đầy đủ của Program.cs (đặt trong console net10.0 như bài 01):
 

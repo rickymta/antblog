@@ -10,7 +10,7 @@ language: vi
 
 Khi một chuyến được đặt, nhiều bên cần biết: fraud-scoring muốn chấm điểm, analytics muốn đếm, thông báo muốn nhắn khách. Nếu Dispatch của [Tới Nơi](/articles/du-an-mau-toi-noi) gọi từng bên một thì thêm một bên là sửa Dispatch, và một bên chậm kéo cả đường đặt chuyến chậm theo. Cách khác là Dispatch chỉ ghi một sự kiện `BookingCreated` vào Kafka rồi thôi; ai quan tâm thì đọc. Cái giá là những câu hỏi mà lời gọi trực tiếp không có: nếu fraud-scoring sập giữa chừng thì sự kiện đang xử lý ra sao, sự kiện của cùng một khách có đến theo thứ tự không, và khi hình dạng sự kiện đổi thì consumer cũ có gãy không.
 
-Đây là bài 38 của lộ trình **Python trung bình qua Tới Nơi**. Bạn cần quen `async`/`await` ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)) và hàng đợi cùng xử lý đồng thời ([bài 23](/articles/python-concurrency-lock-queue-semaphore)). Kafka chạy sẵn trong hạ tầng dùng chung (`localhost:9094`, xem `infra/README.md` của loạt bài). Mọi topic của lab có tiền tố `lab38.` và bị xóa khi chạy xong; bài dùng `aiokafka`, client Kafka bất đồng bộ cho `asyncio`.
+Đây là bài 38 của lộ trình **Python trung bình qua Tới Nơi**. Bạn cần quen `async`/`await` ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)) và hàng đợi cùng xử lý đồng thời ([bài 23](/articles/python-concurrency-lock-queue-semaphore)). Kafka chạy sẵn trong hạ tầng dùng chung (`localhost:9094`, xem `infra/README.md` của loạt bài). Mọi topic của lab có tiền tố `lab38.` và bị xoá khi chạy xong; bài dùng `aiokafka`, client Kafka bất đồng bộ cho `asyncio`.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -45,7 +45,7 @@ for event, event_id in events:
 await producer.flush()
 ```
 
-`send` trả về một future; lô được gửi nền và `flush` chờ tất cả xong, mỗi future cho ra partition và offset. `acks="all"` chờ mọi replica đồng bộ xác nhận (lab chỉ có một broker nên khác biệt chưa thể hiện); `enable_idempotence=True` làm broker bỏ qua bản gửi lại do lỗi mạng, nhưng chỉ trong một lần sống của producer, không thay được khử trùng ở consumer. Output (trích):
+`send` trả về một future; lô được gửi nền và `flush` chờ tất cả xong, mỗi future cho ra partition và offset. `acks="all"` chờ mọi replica đồng bộ xác nhận (lab chỉ có một broker nên khác biệt chưa thể hiện); `enable_idempotence=True` làm broker bỏ qua bản gửi lại do lỗi mạng, nhưng chỉ trong một lần sống của producer, không thay được khử trùng lặp ở consumer. Output (trích):
 
 ```text
 khách -> partition: {'CU-001': [1], 'CU-002': [1], 'CU-003': [0], 'CU-004': [2], 'CU-005': [2], 'CU-006': [2]}
@@ -53,7 +53,7 @@ số sự kiện mỗi partition: {0: 5, 1: 10, 2: 15}
 12 sự kiện của CU-001, có key: partition [1]; không key: [0, 1, 2]
 ```
 
-Hai dòng đầu cho thấy hai điều. Mỗi khách đúng một partition, nhưng **phân bố không đều**: hash trên sáu khóa dồn ba khách vào partition 2 (15 sự kiện, gấp ba partition 0). Đây là mầm của partition nóng; key càng ít giá trị hoặc càng lệch thì càng nặng. Dòng thứ ba là lý do cần key: không key, 12 sự kiện của cùng một khách rải ra cả ba partition, và thứ tự theo khách mất. Cần thêm một lưu ý khi nhiều ngôn ngữ cùng ghi vào một topic: aiokafka băm key bằng murmur2, giống client Java; còn librdkafka (nền của client C#) mặc định dùng CRC32. Producer C# của Dispatch phải đặt `partitioner` thành `murmur2_random` (trong Confluent.Kafka là `Partitioner.Murmur2Random`), nếu không cùng một khách có thể rơi vào hai partition tùy bên gửi. Ta thử riêng với librdkafka (nền của client C#, gọi qua binding Python) trên cùng topic ba partition và sáu khách:
+Hai dòng đầu cho thấy hai điều. Mỗi khách đúng một partition, nhưng **phân bố không đều**: hash trên sáu khoá dồn ba khách vào partition 2 (15 sự kiện, gấp ba partition 0). Đây là mầm của partition nóng; key càng ít giá trị hoặc càng lệch thì càng nặng. Dòng thứ ba là lý do cần key: không key, 12 sự kiện của cùng một khách rải ra cả ba partition, và thứ tự theo khách mất. Cần thêm một lưu ý khi nhiều ngôn ngữ cùng ghi vào một topic: aiokafka băm key bằng murmur2, giống client Java; còn librdkafka (nền của client C#) mặc định dùng CRC32. Producer C# của Dispatch phải đặt `partitioner` thành `murmur2_random` (trong Confluent.Kafka là `Partitioner.Murmur2Random`), nếu không cùng một khách có thể rơi vào hai partition tuỳ bên gửi. Ta thử riêng với librdkafka (nền của client C#, gọi qua binding Python) trên cùng topic ba partition và sáu khách:
 
 | Cách chọn partition | CU-001 … CU-006 |
 | --- | --- |
@@ -75,7 +75,7 @@ Máy Apple M1 Max, macOS, Kafka một broker trong Docker cùng máy; dòng đ�
 
 ## Envelope và schema version
 
-Sự kiện đi trên dây là JSON bọc trong một **envelope**: `event_id`, `event_type`, `occurred_at` (ISO UTC), `version` và `payload`. `event_id` cho phép khử trùng; `version` cho phép hình dạng payload tiến hóa. Version 1 có `trip_id`, `customer_id`, `service`, `distance_km` (chuỗi, như `Money`) và `requested_at`; version 2 thêm `device_id`. Phần giải mã (trích `envelope.py`):
+Sự kiện đi trên dây là JSON bọc trong một **envelope**: `event_id`, `event_type`, `occurred_at` (ISO UTC), `version` và `payload`. `event_id` cho phép khử trùng lặp; `version` cho phép hình dạng payload tiến hoá. Version 1 có `trip_id`, `customer_id`, `service`, `distance_km` (chuỗi, như `Money`) và `requested_at`; version 2 thêm `device_id`. Phần giải mã (trích `envelope.py`):
 
 ```python
 def decode(raw: bytes) -> Decoded:
@@ -93,7 +93,7 @@ def decode(raw: bytes) -> Decoded:
         device_id=p.get("device_id"),  # v1 không có -> None; field lạ khác bị bỏ qua
 ```
 
-Ba quy tắc nằm trong ba dòng này. **Người đọc khoan dung**: bỏ qua field lạ và coi field tùy chọn vắng là `None`, nên thêm field là thay đổi tương thích. **Kiểm version trước payload**, vì payload của version lạ có thể đổi nghĩa mà ta không biết. **Từ chối có lý do**: `EnvelopeError.reason` là mã ổn định cho log và metric, không phải câu văn. Ta gửi năm thông điệp vào một topic riêng rồi đọc bằng consumer không qua group (`assign` và `seek_to_beginning`, không phải chờ cân bằng nhóm):
+Ba quy tắc nằm trong ba dòng này. **Người đọc khoan dung**: bỏ qua field lạ và coi field tuỳ chọn vắng là `None`, nên thêm field là thay đổi tương thích. **Kiểm version trước payload**, vì payload của version lạ có thể đổi nghĩa mà ta không biết. **Từ chối có lý do**: `EnvelopeError.reason` là mã ổn định cho log và metric, không phải câu văn. Ta gửi năm thông điệp vào một topic riêng rồi đọc bằng consumer không qua group (`assign` và `seek_to_beginning`, không phải chờ cân bằng nhóm):
 
 ```text
 offset 0: v1 ok device_id=None
@@ -158,7 +158,7 @@ B bắt đầu từ offset đã commit, nên nhận 30 − 12 = 18 sự kiện, 
 đã xử lý 29 / 30; sự kiện mất: 1
 ```
 
-Với dữ liệu tài chính hay chấm điểm, mất sự kiện thường tệ hơn trùng, nên lựa chọn thông dụng là at-least-once cộng handler **idempotent**: cùng `event_id` đến lần thứ hai không tạo thêm hiệu ứng. Lab cho thấy khử trùng theo `event_id` đưa 35 lượt về đúng 30 sự kiện; cách làm bền (bảng inbox với khóa duy nhất) là bài 39. Một chi tiết thật: lab «sập» bằng cách đóng consumer, nên consumer rời group ngay và B vào được ngay. Tiến trình bị kill thật thì broker chỉ biết sau `session_timeout_ms` (mặc định của aiokafka là 10 giây), và trong lúc đó các partition của nó đứng yên.
+Với dữ liệu tài chính hay chấm điểm, mất sự kiện thường tệ hơn trùng, nên lựa chọn thông dụng là at-least-once cộng handler **idempotent**: cùng `event_id` đến lần thứ hai không tạo thêm hiệu ứng. Lab cho thấy khử trùng lặp theo `event_id` đưa 35 lượt về đúng 30 sự kiện; cách làm bền (bảng inbox với khoá duy nhất) là bài 39. Một chi tiết thật: lab «sập» bằng cách đóng consumer, nên consumer rời group ngay và B vào được ngay. Tiến trình bị kill thật thì broker chỉ biết sau `session_timeout_ms` (mặc định của aiokafka là 10 giây), và trong lúc đó các partition của nó đứng yên.
 
 ## Chia việc trong group
 
@@ -184,7 +184,7 @@ uv run --project examples/toi-noi-python/38-kafka-aiokafka-producer-consumer exa
 OK 26/26
 ```
 
-26 ca gồm: 5 ca producer (mỗi khách đúng một partition, tổng 30 sự kiện, offset liên tục trên ba partition); 2 ca key và không key; 1 ca đo gửi theo lô; 6 ca schema (5 qua Kafka, 1 cho envelope méo kiểu); 4 ca at-least-once; 1 ca commit trước xử lý; 6 ca chia partition và thứ tự; 1 ca topic đã được xóa sạch. Mất khoảng 30 giây. Khi chưa có Kafka, `--verify` in `FAIL: không nối được Kafka tại <url> (docker compose ...)` và thoát mã 1. Để chắc `--verify` đỏ khi nên đỏ, ta thử phá: trong bản sao ở thư mục tạm, bỏ `key=` khi gửi.
+26 ca gồm: 5 ca producer (mỗi khách đúng một partition, tổng 30 sự kiện, offset liên tục trên ba partition); 2 ca key và không key; 1 ca đo gửi theo lô; 6 ca schema (5 qua Kafka, 1 cho envelope méo kiểu); 4 ca at-least-once; 1 ca commit trước xử lý; 6 ca chia partition và thứ tự; 1 ca topic đã được xoá sạch. Mất khoảng 30 giây. Khi chưa có Kafka, `--verify` in `FAIL: không nối được Kafka tại <url> (docker compose ...)` và thoát mã 1. Để chắc `--verify` đỏ khi nên đỏ, ta thử phá: trong bản sao ở thư mục tạm, bỏ `key=` khi gửi.
 
 ```text
 SAI: mỗi khách đúng một partition: nhận False, kỳ vọng True
@@ -198,13 +198,13 @@ Hai ca hỏng đúng chỗ ta nói: không key thì khách rải nhiều partiti
 | --- | --- |
 | Consumer mới mất vài giây mới nhận bản ghi đầu | cân bằng nhóm; broker đợi `group.initial.rebalance.delay.ms` khi nhóm rỗng |
 | Cùng khách bị xử lý không theo thứ tự | producer có `key` không; mọi producer của topic có cùng thuật toán chọn partition không |
-| Xử lý trùng sau khi deploy hoặc restart | bình thường với at-least-once; handler có khử trùng theo `event_id` không |
+| Xử lý trùng sau khi deploy hoặc restart | bình thường với at-least-once; handler có khử trùng lặp theo `event_id` không |
 | `CommitFailedError` | group đã cân bằng lại khi ta xử lý quá lâu; xử lý nhanh hơn hoặc chỉnh `max_poll_interval_ms` |
 | Một partition không bao giờ tiến | có thông điệp «độc dược» chưa được commit qua; từ chối có lý do rồi commit |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Một broker, replication factor 1, không TLS và không xác thực: production có nhiều broker, <code>min.insync.replicas</code> lớn hơn 1 và kết nối được bảo vệ. Idempotent producer chỉ chống trùng trong một lần sống của producer; ghi vào Kafka và ghi vào database vẫn là hai lần ghi riêng (khoảng trống mà bài 39 xử lý bằng outbox). Lab khử trùng bằng danh sách trong bộ nhớ, không bền. «Sập» là đóng consumer, không phải kill tiến trình, và 30 sự kiện là quá nhỏ để bàn về lag hay thông lượng. Số đo trên một máy bận, chỉ để thấy bậc độ lớn. Điểm fraud mà consumer tính ra (bài 37) chỉ là đầu vào cho người duyệt, không phải quyết định.</p>
+<p>Một broker, replication factor 1, không TLS và không xác thực: production có nhiều broker, <code>min.insync.replicas</code> lớn hơn 1 và kết nối được bảo vệ. Idempotent producer chỉ chống trùng trong một lần sống của producer; ghi vào Kafka và ghi vào database vẫn là hai lần ghi riêng (khoảng trống mà bài 39 xử lý bằng outbox). Lab khử trùng lặp bằng danh sách trong bộ nhớ, không bền. «Sập» là đóng consumer, không phải kill tiến trình, và 30 sự kiện là quá nhỏ để bàn về lag hay thông lượng. Số đo trên một máy bận, chỉ để thấy bậc độ lớn. Điểm fraud mà consumer tính ra (bài 37) chỉ là đầu vào cho người duyệt, không phải quyết định.</p>
 </div>
 
 **Bài tập 1:** Vì sao `commit_through` commit `offset + 1`? Nếu commit `offset`, điều gì xảy ra khi consumer khởi động lại?

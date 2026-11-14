@@ -572,7 +572,7 @@ flutter test
 | `trip_history_source_test.dart` | Trang 20, 20, 7; cước 25.500, 12.005, 453.000 VND; ca biên offset và limit; phân trang theo offset bị lặp khi có chuyến chen vào đầu |
 | `app_test.dart` | `ToiNoiApp` mở thẳng màn hình lịch sử và tải trang đầu |
 
-**Chưa làm**: chạy trên iOS Simulator, Android emulator hay thiết bị thật (máy kiểm chưa có Android SDK và Xcode đầy đủ), nên cảm giác cuộn thật của iOS và Android chưa được kiểm; phân trang theo con trỏ và khử trùng theo `id`; định dạng ngày giờ và tiền theo locale (bài 14); điều hướng sang chi tiết chuyến (bài 12); nguồn gọi HTTP thật (bài 19). Để chạy trên máy, sinh runner một lần bằng `flutter create --platforms=ios,android --project-name toi_noi_09 --org vn.toinoi .` trong thư mục lab, như ghi trong README.
+**Chưa làm**: chạy trên iOS Simulator, Android emulator hay thiết bị thật (máy kiểm chưa có Android SDK và Xcode đầy đủ), nên cảm giác cuộn thật của iOS và Android chưa được kiểm; phân trang theo con trỏ và khử trùng lặp theo `id`; định dạng ngày giờ và tiền theo locale (bài 14); điều hướng sang chi tiết chuyến (bài 12); nguồn gọi HTTP thật (bài 19). Để chạy trên máy, sinh runner một lần bằng `flutter create --platforms=ios,android --project-name toi_noi_09 --org vn.toinoi .` trong thư mục lab, như ghi trong README.
 
 ## Bài tập
 
@@ -583,7 +583,7 @@ flutter test
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Việc tải thêm không bao giờ chạy. <code>extentAfter</code> không bao giờ âm (source dùng <code>max(..., 0.0)</code>), nên điều kiện <code>extentAfter &lt; 0</code> luôn sai. Test <code>ngưỡng 0 không bao giờ kích hoạt</code> kiểm đúng điều này: nguồn chỉ bị gọi với <code>offset</code> 0.</p>
 <p><strong>2.</strong> T-0047. Không key thì Element ghép theo vị trí: Element ở vị trí 1 giữ <code>_expanded = true</code>, và sau khi đổi, vị trí 1 hiển thị T-0047. Chuyến T-0046 được mở lúc đầu lại nằm ở vị trí 2 và đóng. Có <code>ValueKey</code> cùng <code>findChildIndexCallback</code> thì T-0046 vẫn mở dù chuyển sang vị trí 2.</p>
-<p><strong>3.</strong> Chuyến chen vào đẩy mọi chuyến cũ xuống một vị trí, nên trang 2 (<code>offset: 20</code>) bắt đầu bằng đúng chuyến cuối của trang 1: danh sách có một chuyến hiện hai lần (test <code>phân trang theo offset</code> trong <code>trip_history_source_test.dart</code> tái hiện điều này). Cách sửa: một là phân trang theo con trỏ (gửi id hoặc thời điểm của chuyến cuối đã có, nguồn trả những chuyến cũ hơn nó); hai là khử trùng theo <code>id</code> khi nối trang mới vào danh sách.</p>
+<p><strong>3.</strong> Chuyến chen vào đẩy mọi chuyến cũ xuống một vị trí, nên trang 2 (<code>offset: 20</code>) bắt đầu bằng đúng chuyến cuối của trang 1: danh sách có một chuyến hiện hai lần (test <code>phân trang theo offset</code> trong <code>trip_history_source_test.dart</code> tái hiện điều này). Cách sửa: một là phân trang theo con trỏ (gửi id hoặc thời điểm của chuyến cuối đã có, nguồn trả những chuyến cũ hơn nó); hai là khử trùng lặp theo <code>id</code> khi nối trang mới vào danh sách.</p>
 </details>
 
 Bài trước: [Layout và constraints: Row, Column, Expanded và thẻ chuyến](/articles/flutter-layout-constraints-row-column-the-chuyen). Bài tiếp: [StatefulWidget, lifecycle và setState: chọn dịch vụ và đếm ngược tìm tài xế](/articles/flutter-statefulwidget-lifecycle-setstate-chon-dich-vu).

@@ -1,7 +1,7 @@
 ---
 slug: python-exception-debug-logging
 title: "Exception, debug và logging: lần theo một báo giá sai"
-summary: "Bài 08: lần theo báo giá 2,5 km bị tính 25.500 VND, đọc traceback từ dưới lên, try/except/else/finally, exception tùy biến và chaining, pdb, vì sao assert không phải validation và logging cơ bản."
+summary: "Bài 08: lần theo báo giá 2,5 km bị tính 25.500 VND, đọc traceback từ dưới lên, try/except/else/finally, exception tuỳ biến và chaining, pdb, vì sao assert không phải validation và logging cơ bản."
 category: python-beginner
 level: beginner
 tags: [python, toi-noi, debug, logging]
@@ -144,7 +144,7 @@ def handle_request(raw_metres: str, *, trip_id: str = "TN-0001", buggy: bool = F
 - `try` chỉ bao đoạn có thể ném lỗi mà ta định xử lý; càng rộng, càng dễ bắt nhầm lỗi của dòng khác.
 - `except` chọn **đúng loại** exception tầng này biết cách đáp ứng. Python duyệt các `except` từ trên xuống và dùng khối đầu tiên khớp, nên lớp con phải đứng trước lớp cha.
 - `else` chạy khi `try` không có exception. Việc ghi log thành công đặt ở đây, thay vì trong `try`, để lỗi của chính dòng log không bị `except` phía trên nuốt nhầm.
-- `finally` chạy dù `try` thành công, dù có lỗi bị bắt, dù có `return` giữa chừng. Nó dành cho dọn dẹp (đóng file, nhả khóa). Nó không đảm bảo chạy khi tiến trình bị buộc dừng.
+- `finally` chạy dù `try` thành công, dù có lỗi bị bắt, dù có `return` giữa chừng. Nó dành cho dọn dẹp (đóng file, nhả khoá). Nó không đảm bảo chạy khi tiến trình bị buộc dừng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -155,7 +155,7 @@ def handle_request(raw_metres: str, *, trip_id: str = "TN-0001", buggy: bool = F
 
 Hai điều cần tránh. Một: `except:` trần hoặc `except Exception:` rồi tiếp tục như không có gì. Cả hai bắt lỗi lập trình (`NameError`, `TypeError`) lẫn lỗi dữ liệu và gộp vào cùng một nhánh; `except:` trần còn bắt cả `KeyboardInterrupt` và `SystemExit`, nghĩa là chặn luôn Ctrl+C và `sys.exit()`, còn `except Exception` thì không. Hai: `except Exception: return 0` biến lỗi thành báo giá miễn phí, nhập nhằng ba trạng thái (miễn phí thật, đầu vào sai, hệ thống hỏng). Hàm tính cước nhận khoảng cách âm là vi phạm hợp đồng, nên ném lỗi ở đó là đúng.
 
-## Exception tùy biến, `raise from` và chaining
+## Exception tuỳ biến, `raise from` và chaining
 
 Lab định nghĩa một cây exception nhỏ cho nghiệp vụ cước:
 

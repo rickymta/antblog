@@ -26,7 +26,7 @@ Tài liệu kiến trúc tổng thể của Tới Nơi mô tả vai trò, không
 | --- | --- | --- |
 | CDN, WAF, DDoS | Front Door với WAF policy | Điểm vào toàn cầu duy nhất; tier Premium mới nối được origin bằng Private Link |
 | Load balancer | Ingress của Container Apps environment | Không cần thêm lớp riêng khi Front Door đã chia tải |
-| API Gateway | API Management | JWT, rate limit, versioning, không chứa luật nghiệp vụ. Muốn APIM trong VNet: Developer, Premium hoặc Premium v2 (VNet injection); Standard v2 có VNet integration chiều ra, phần inbound private kiểm tài liệu |
+| API Gateway | API Management | JWT, rate limit, versioning, không chứa luật nghiệp vụ. Muốn APIM trong VNet: Developer, Premium hoặc Premium v2 (VNet injection); Standard v2 có VNet integration chiều ra, phần inbound private kiểm tra tài liệu |
 | Customer, Driver, Admin, Public BFF | Container Apps, mỗi BFF một app | Scale riêng theo kênh; BFF chỉ gom dữ liệu |
 | Domain service (Booking, Dispatch, Trip, Payment...) | Container Apps | Mặc định cho nhóm nhỏ; xem mục «chỗ chưa tách» cho AKS |
 | Kafka cho sự kiện nghiệp vụ | Service Bus topic và subscription | Session, dead-letter, duplicate detection hợp Saga |

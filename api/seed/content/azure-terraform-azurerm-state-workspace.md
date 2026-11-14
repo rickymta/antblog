@@ -191,7 +191,7 @@ resource "azurerm_postgresql_flexible_server" "main" {
 }
 ```
 
-`depends_on` buộc server chờ cả DNS link, thứ mà server không tham chiếu trực tiếp. File `dev.tfvars` chỉ có ba dòng: `env = "dev"`, `address_space = "10.20.0.0/16"`, `pg_sku = "B_Standard_B1ms"`. Bạn cũng khai báo các biến này trong `variables.tf`, trong đó `pg_admin_password` có `sensitive = true` và `use_oidc` là `bool` mặc định `false`. Nhớ rằng `sensitive` không đưa mật khẩu ra khỏi state; tuỳ phiên bản provider có thể có thuộc tính write-only cho mật khẩu, hãy kiểm tài liệu azurerm trước khi dùng.
+`depends_on` buộc server chờ cả DNS link, thứ mà server không tham chiếu trực tiếp. File `dev.tfvars` chỉ có ba dòng: `env = "dev"`, `address_space = "10.20.0.0/16"`, `pg_sku = "B_Standard_B1ms"`. Bạn cũng khai báo các biến này trong `variables.tf`, trong đó `pg_admin_password` có `sensitive = true` và `use_oidc` là `bool` mặc định `false`. Nhớ rằng `sensitive` không đưa mật khẩu ra khỏi state; tuỳ phiên bản provider có thể có thuộc tính write-only cho mật khẩu, hãy kiểm tra tài liệu azurerm trước khi dùng.
 
 ## plan, apply và đăng nhập OIDC thay cho client secret
 

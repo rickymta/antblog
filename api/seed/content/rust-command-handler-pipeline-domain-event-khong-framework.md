@@ -123,7 +123,7 @@ trace: kết thúc CapturePayment ok
 <figcaption>Hình 2. Bốn lớp lồng nhau dùng chung một <code>Ctx</code>. Thứ tự gọi là thứ tự lồng của kiểu.</figcaption>
 </figure>
 
-Đổi thứ tự là đổi một dòng lắp ráp, log đổi theo. Lệnh cước 0 qua `Validated` ngoài cùng chỉ để lại một dòng `validate: từ chối …`, không có `tx: begin`, không có dòng `trace`. Lắp `Traced(Validated(…))` thì cùng lệnh để lại ba dòng, từ `trace: bắt đầu` tới `trace: kết thúc CapturePayment lỗi`. Bài C# đặt telemetry bọc ngoài validation và nêu lý do: yêu cầu bị từ chối vẫn được tính vào metric ở biên application. Lab mặc định ngược lại; test `layer_order_is_visible_in_the_log` khóa lựa chọn đó.
+Đổi thứ tự là đổi một dòng lắp ráp, log đổi theo. Lệnh cước 0 qua `Validated` ngoài cùng chỉ để lại một dòng `validate: từ chối …`, không có `tx: begin`, không có dòng `trace`. Lắp `Traced(Validated(…))` thì cùng lệnh để lại ba dòng, từ `trace: bắt đầu` tới `trace: kết thúc CapturePayment lỗi`. Bài C# đặt telemetry bọc ngoài validation và nêu lý do: yêu cầu bị từ chối vẫn được tính vào metric ở biên application. Lab mặc định ngược lại; test `layer_order_is_visible_in_the_log` khoá lựa chọn đó.
 
 ## Lỗi ở lớp nào thì rollback ra sao?
 
@@ -132,7 +132,7 @@ Sau ca thành công (1 bút toán, 1 dòng outbox), lab chạy ba ca hỏng và 
 | Ca | Hỏng ở lớp | Log thấy | Sau đó trong DB |
 |---|---|---|---|
 | Cước 0 | validate | một dòng `validate: từ chối …` | không đổi |
-| Khách `CU-404` | handler, lỗi khóa ngoại `23503` | `tx: rollback, bỏ 0 sự kiện chưa ghi` | không đổi; header `JE-000003` đã INSERT bị hủy |
+| Khách `CU-404` | handler, lỗi khoá ngoại `23503` | `tx: rollback, bỏ 0 sự kiện chưa ghi` | không đổi; header `JE-000003` đã INSERT bị huỷ |
 | Bút toán lệch qua `PostRawEntry` | COMMIT, trigger `23514` | `tx: outbox +1 dòng`, rồi `tx: commit lỗi (SQLSTATE 23514), PostgreSQL đã rollback` | không đổi; dòng outbox vừa ghi cũng mất |
 
 Ca thứ ba đáng đọc kỹ. Trigger `postings_balanced` của bài 25 là `DEFERRABLE INITIALLY DEFERRED`, nên chỉ chạy lúc COMMIT. Handler ghi xong, `Transactional` thu sự kiện và ghi dòng outbox, mọi câu lệnh đều thành công; lỗi chỉ đến ở COMMIT. Thiết kế phát sự kiện "sau khi handler xong" đã nói dối ở thời điểm đó. `PostRawEntry` mô phỏng một bug lọt qua aggregate; trigger là tuyến phòng thủ cuối.
@@ -207,7 +207,7 @@ Payload có ba dòng vì lab dùng `capture_entry` của `ledger-core`, dạng r
 | `Validated<Traced<Echo>>` | 88 byte | 0 |
 | `DynBus::send` (handler đóng hộp) | 32 byte, cộng future đã `Box` | 1.000 (đúng một `Box` mỗi lần) |
 
-`Pin<Box<dyn Future>>` là con trỏ béo 16 byte, còn future nằm trên heap. Chuỗi generic không cấp phát ở đường đo này vì trình biên dịch biết toàn bộ kiểu. `Box` cần ở chỗ phải xóa kiểu, ở đây là cất các handler khác kiểu vào một `HashMap`. `async fn` trong trait không dùng được sau `dyn` (E0038, bài 26), nên `DynBus` dùng closure trả future đã đóng hộp. Tổ hợp lớp bằng generic không cần `Box`.
+`Pin<Box<dyn Future>>` là con trỏ béo 16 byte, còn future nằm trên heap. Chuỗi generic không cấp phát ở đường đo này vì trình biên dịch biết toàn bộ kiểu. `Box` cần ở chỗ phải xoá kiểu, ở đây là cất các handler khác kiểu vào một `HashMap`. `async fn` trong trait không dùng được sau `dyn` (E0038, bài 26), nên `DynBus` dùng closure trả future đã đóng hộp. Tổ hợp lớp bằng generic không cần `Box`.
 
 Future của `CapturePayment` thì khác. Qua pipeline thật là 3.248 byte ở bản debug và 9.344 byte ở bản release; hàm thẳng `capture_direct` (mục sau) là 2.952 và 9.048. Hiệu hai bản đều là 296 byte, nhưng hai đường có biến cục bộ khác nhau, nên đó là chênh lệch giữa hai cách viết, không phải giá riêng của một lớp. Phần lớn kích thước là phần chung của hai đường, trong đó có future của sqlx; lab không truy nguyên vì sao release lớn hơn debug. Số tuyệt đối đổi theo bản build và rustc (1.98.1, máy viết bài, không phải SLA). Lab không đo thời gian.
 
@@ -242,7 +242,7 @@ Lệnh đầu in năm phần ứng với năm mục trên. `--verify` kiểm m�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Lab không có relay: dòng outbox ở lại <code>published=false</code> (gửi Kafka là bài 37). Chỉ một loại sự kiện, chưa versioning. Replay chỉ so theo key, không so nội dung như bài 24 và 26; <code>account_balances</code> không được cập nhật. Chưa có phía đọc, ca hủy giữa chừng, timeout hay thử lại khi xung đột (bài 53). <code>PostRawEntry</code>, <code>NaivePublish</code> chỉ để dựng ca hỏng; <code>DynBus</code> không nối với pipeline thật.</p>
+<p>Lab không có relay: dòng outbox ở lại <code>published=false</code> (gửi Kafka là bài 37). Chỉ một loại sự kiện, chưa versioning. Replay chỉ so theo key, không so nội dung như bài 24 và 26; <code>account_balances</code> không được cập nhật. Chưa có phía đọc, ca huỷ giữa chừng, timeout hay thử lại khi xung đột (bài 53). <code>PostRawEntry</code>, <code>NaivePublish</code> chỉ để dựng ca hỏng; <code>DynBus</code> không nối với pipeline thật.</p>
 </div>
 
 **Bài tập:** viết `impl CommandHandler<VoidHold> for LedgerHandlers` trả `Ok(())`. Bài kiểm nào của lab chuyển đỏ, bài nào vẫn xanh, và vì sao đỏ ở đây là tin tốt?

@@ -42,13 +42,13 @@ Nếu khách yêu cầu bỏ C sau khi A đã giao, không thể áp máy móc p
 
 ## 5. Giá và tích hợp
 
-Chốt báo giá cho cả tuyến hay từng đơn, hiệu lực khi đổi điểm, cách phân bổ phí và hoàn tiền khi giao một phần. P05 cung cấp cách phân tích idempotency/đối soát, không cung cấp sẵn chính sách hoàn cho multi-stop. Callback từng đơn cũng cần khóa liên kết và chống tác động lặp.
+Chốt báo giá cho cả tuyến hay từng đơn, hiệu lực khi đổi điểm, cách phân bổ phí và hoàn tiền khi giao một phần. P05 cung cấp cách phân tích idempotency/đối soát, không cung cấp sẵn chính sách hoàn cho multi-stop. Callback từng đơn cũng cần khoá liên kết và chống tác động lặp.
 
 ## 6. Phương án thử có điều kiện
 
 Có thể nghiên cứu pilot thứ tự cố định, giới hạn khu vực, không thu hộ và có owner xử lý giao thất bại. Đây là phương án để review, chưa phải khuyến nghị chắc chắn. Điều kiện trước pilot gồm rule ngoại lệ, năng lực hỗ trợ, cách đo đúng hẹn từng stop và chi phí mỗi đơn hoàn tất.
 
-Guardrail cần cả khách, tài xế và hàng hóa; tối ưu quãng đường nhưng làm tăng thời gian chờ không chắc tăng giá trị tổng.
+Guardrail cần cả khách, tài xế và hàng hoá; tối ưu quãng đường nhưng làm tăng thời gian chờ không chắc tăng giá trị tổng.
 
 ## 7. Thực hành
 

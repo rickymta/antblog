@@ -22,11 +22,11 @@ Một service OCR hay xử lý payload giữ buffer quá lâu, tạo nhiều chu
 
 Allocation tạo object/buffer mới; retention là chúng còn được tham chiếu; GC thu hồi managed object không còn sống theo khả năng của runtime. Handle file, socket và buffer thuê từ pool lại có hợp đồng lifetime/ownership cần được tuân thủ.
 
-Lab dùng TrackingPool để thấy Rent/Return, không dùng nó để benchmark hiệu năng pool thật. Một AsyncProbe không có I/O thật minh họa đường gọi DisposeAsync, không chứng minh await using luôn nhanh hơn using.
+Lab dùng TrackingPool để thấy Rent/Return, không dùng nó để benchmark hiệu năng pool thật. Một AsyncProbe không có I/O thật minh hoạ đường gọi DisposeAsync, không chứng minh await using luôn nhanh hơn using.
 
 ## Ai sở hữu buffer thì người đó trả
 
-BufferLease thuê một array rồi chỉ cho truy cập phần length yêu cầu. ArrayPool thật có thể trả buffer lớn hơn và chưa được xóa; caller không được suy ra mọi byte đều bằng 0 hoặc thuộc dữ liệu của mình.
+BufferLease thuê một array rồi chỉ cho truy cập phần length yêu cầu. ArrayPool thật có thể trả buffer lớn hơn và chưa được xoá; caller không được suy ra mọi byte đều bằng 0 hoặc thuộc dữ liệu của mình.
 
 Dispose dùng Interlocked.Exchange lấy quyền trả buffer đúng một lần, sau đó Return với clearArray=true. Truy cập property sau dispose ném ObjectDisposedException. Đây là kiểm tra quyền truy cập qua owner; một Span đã lấy trước đó vẫn phải tuân lifetime và không được dùng sau Return.
 
@@ -41,9 +41,9 @@ Không vì Dispose dùng Interlocked mà tuyên bố mọi thao tác đọc/ghi 
 
 ## Using giữ cleanup khi phần việc ném lỗi
 
-Khối using đưa lời Dispose vào đường finally tương ứng. Demo cố ý ném InvalidOperationException sau khi ghi một byte; sau khi bắt lỗi, pool phải nhận lại đúng một lần và có yêu cầu xóa dữ liệu. Gọi Dispose lần hai không Return buffer lần nữa.
+Khối using đưa lời Dispose vào đường finally tương ứng. Demo cố ý ném InvalidOperationException sau khi ghi một byte; sau khi bắt lỗi, pool phải nhận lại đúng một lần và có yêu cầu xoá dữ liệu. Gọi Dispose lần hai không Return buffer lần nữa.
 
-using declaration sống tới cuối scope, còn using block giới hạn hẹp hơn bằng dấu ngoặc. Với dependency do DI container tạo và sở hữu, đừng tùy tiện dispose giữa request rồi làm các caller khác sử dụng object đã hủy.
+using declaration sống tới cuối scope, còn using block giới hạn hẹp hơn bằng dấu ngoặc. Với dependency do DI container tạo và sở hữu, đừng tuỳ tiện dispose giữa request rồi làm các caller khác sử dụng object đã huỷ.
 
 Không viết finalizer cho mọi class để dự phòng việc quên Dispose. Kiểu nắm handle unmanaged cần mẫu thiết kế phù hợp, thường qua SafeHandle; wrapper đơn giản không nắm handle trực tiếp có thể không cần finalizer. Lỗi ownership phải được xử lý ở thiết kế và kiểm thử.
 

@@ -172,7 +172,7 @@ Bảng dưới là bản đồ cố định của cả loạt: mỗi pattern g�
 | 6 | Adapter | Đổi một interface có sẵn thành interface mình cần | «MapViet», «RouteX» và OSRM tự host cùng về `RoutingService { eta(), distance() }` | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
 | 7 | Bridge | Tách hai trục thay đổi để ghép tự do | Loại thông báo (trạng thái chuyến, khuyến mãi, cảnh báo an toàn) × kênh (push, SMS, «OA chat») — 3 + 3 lớp thay vì 3 × 3 | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
 | 8 | Composite | Đối xử với một nhóm như với một phần tử | Combo chứa món, món chứa topping; giá và thời gian chuẩn bị tính đệ quy qua `MenuItem` | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
-| 9 | Decorator | Bọc thêm hành vi quanh đối tượng mà không sửa nó | `FareCalculator` gốc bọc phụ phí cao điểm, phụ phí mưa, voucher, làm tròn — thứ tự bọc đổi kết quả | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
+| 9 | Decorator | Bọc thêm hành vi quanh đối tượng mà không sửa nó | `FareCalculator` gốc bọc phụ phí cao điểm, phụ phí trời mưa, voucher, làm tròn — thứ tự bọc đổi kết quả | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
 | 10 | Facade | Một cửa vào đơn giản cho một cụm phức tạp | `PlaceTripFacade.place()`: báo giá → giữ tiền → tạo chuyến → đẩy vào hàng đợi điều phối | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
 | 11 | Flyweight | Dùng chung phần giống nhau giữa rất nhiều đối tượng | Bản đồ điều phối ~25.000 tài xế: icon, màu, kiểu xe dùng chung; toạ độ, hướng để riêng | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |
 | 12 | Proxy | Đứng thay đối tượng thật để kiểm soát lối vào | `MenuService` có proxy cache, proxy kiểm quyền, proxy lazy | [3 · Cấu trúc](/articles/nhom-cau-truc-structural) |

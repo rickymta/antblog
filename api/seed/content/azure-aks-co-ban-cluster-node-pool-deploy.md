@@ -26,7 +26,7 @@ Nửa còn lại là **node pool**: một nhóm máy ảo cùng kích thước, 
 
 Node pool có hai vai trò:
 
-- **System pool** chạy các pod hạ tầng của cluster như CoreDNS và metrics server. Cluster luôn cần ít nhất một system pool. Máy ở đây phải đủ cỡ để chạy các pod đó ổn định, nên kiểm tài liệu về yêu cầu tối thiểu của VM size.
+- **System pool** chạy các pod hạ tầng của cluster như CoreDNS và metrics server. Cluster luôn cần ít nhất một system pool. Máy ở đây phải đủ cỡ để chạy các pod đó ổn định, nên kiểm tra tài liệu về yêu cầu tối thiểu của VM size.
 - **User pool** chạy workload của bạn. Bạn có thể có nhiều user pool với kích thước khác nhau, ví dụ một pool cho API và một pool cho job tính cước nặng.
 
 Tách hai pool để pod ứng dụng ngốn tài nguyên không chen mất pod DNS của cả cluster. Cách thực thi: gắn taint `CriticalAddonsOnly=true:NoSchedule` lên system pool. Pod ứng dụng không có toleration tương ứng nên chỉ được xếp lên user pool.

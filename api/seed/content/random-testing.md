@@ -345,7 +345,7 @@ BG-04 thu miền quãng đường về 0–3 km bằng hiểu biết nghiệp v�
 BG-03 · 10.000 ca: failed=false. R-FARE-09: bản lỗi 54000 đ, bản đúng 52000 đ (oracle 52.000 đ)
 ```
 
-Bản `rain-times-peak` cộng 8.000 đ phụ phí mưa **trước** khi nhân 1,25 (vi phạm R-FARE-05). Kết quả vẫn là bội số 1.000 đ, vẫn không dưới tối thiểu, vẫn làm tròn đúng một bậc — O1–O6 không có lý do gì để đỏ. Chỉ một oracle **cụ thể** (ví dụ R-FARE-09 do người tính: 52.000 đ) mới lộ ra: bản lỗi thu 54.000 đ. Đây chính là giới hạn «phụ thuộc oracle» và «bỏ qua ngữ nghĩa»: tính chất chung không biết rằng mưa phải cộng sau cao điểm. [TEST-042](/articles/metamorphic-testing) sẽ bắt lỗi này bằng một quan hệ giữa hai lần chạy — có mưa và không mưa.
+Bản `rain-times-peak` cộng 8.000 đ phụ phí trời mưa **trước** khi nhân 1,25 (vi phạm R-FARE-05). Kết quả vẫn là bội số 1.000 đ, vẫn không dưới tối thiểu, vẫn làm tròn đúng một bậc — O1–O6 không có lý do gì để đỏ. Chỉ một oracle **cụ thể** (ví dụ R-FARE-09 do người tính: 52.000 đ) mới lộ ra: bản lỗi thu 54.000 đ. Đây chính là giới hạn «phụ thuộc oracle» và «bỏ qua ngữ nghĩa»: tính chất chung không biết rằng mưa phải cộng sau cao điểm. [TEST-042](/articles/metamorphic-testing) sẽ bắt lỗi này bằng một quan hệ giữa hai lần chạy — có mưa và không mưa.
 
 ## 6. Góc nhìn nâng cao
 

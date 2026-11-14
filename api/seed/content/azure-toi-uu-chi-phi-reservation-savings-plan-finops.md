@@ -150,7 +150,7 @@ Bước 4, viết đề xuất một trang, mỗi mục vài câu:
 
 **Bài tập:** Tới Nơi muốn cam kết cho cả `ca-toinoi-trips-prod` và batch báo cáo đêm. Trips chạy ổn định cả năm, batch chạy ba giờ mỗi đêm và có thể chạy lại. Chọn công cụ cho từng phần và nêu một điều kiện làm bạn đổi ý.
 
-<details><summary>Xem lời giải</summary><p>Trips chạy trên Container Apps, không có reservation, nên phần nền ổn định hợp với savings plan for compute (kiểm tài liệu xem plan đang phủ loại usage Container Apps bạn dùng). Batch báo cáo hợp với Spot nếu chạy trên VMSS hoặc spot node pool AKS, hoặc Container Apps job on-demand, miễn là job idempotent và có checkpoint. Điều kiện đổi ý: mức dùng nền của trips chưa ổn định hoặc sắp dời region, khi đó chưa cam kết.</p></details>
+<details><summary>Xem lời giải</summary><p>Trips chạy trên Container Apps, không có reservation, nên phần nền ổn định hợp với savings plan for compute (kiểm tra tài liệu xem plan đang phủ loại usage Container Apps bạn dùng). Batch báo cáo hợp với Spot nếu chạy trên VMSS hoặc spot node pool AKS, hoặc Container Apps job on-demand, miễn là job idempotent và có checkpoint. Điều kiện đổi ý: mức dùng nền của trips chưa ổn định hoặc sắp dời region, khi đó chưa cam kết.</p></details>
 
 ## Học tiếp từ đây
 

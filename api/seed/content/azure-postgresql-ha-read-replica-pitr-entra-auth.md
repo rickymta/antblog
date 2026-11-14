@@ -24,7 +24,7 @@ Zone-redundant HA đặt một server standby ở availability zone khác trong 
 
 Cái giá có hai mặt. Thứ nhất, bạn trả tiền compute cho cả hai server, còn storage của bản standby cũng được tính. Tra Pricing Calculator thay vì đoán. Thứ hai, ghi đồng bộ qua zone thêm một chút độ trễ vào mỗi commit, ảnh hưởng thấy rõ nhất với workload ghi dày như bảng `trips` giờ cao điểm. Standby không phục vụ truy vấn của bạn: đó là bảo hiểm, không phải thêm năng lực đọc.
 
-Có thêm kiểu **same-zone HA**: standby nằm cùng zone với primary. Nó bảo vệ trước lỗi máy chủ, không bảo vệ trước sự cố cả zone. Region nào chưa hỗ trợ availability zone cũng chỉ có kiểu này. Kiểm tài liệu để biết Southeast Asia hỗ trợ kiểu nào ở thời điểm bạn đọc.
+Có thêm kiểu **same-zone HA**: standby nằm cùng zone với primary. Nó bảo vệ trước lỗi máy chủ, không bảo vệ trước sự cố cả zone. Region nào chưa hỗ trợ availability zone cũng chỉ có kiểu này. Kiểm tra tài liệu để biết Southeast Asia hỗ trợ kiểu nào ở thời điểm bạn đọc.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

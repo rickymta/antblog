@@ -57,9 +57,9 @@ Mỗi tiêu chí dưới đây có cột «chạy bằng»; dòng nào chỉ ng�
 | Mọi lỗi có mã HTTP và gRPC | trình biên dịch | `match` vét cạn, không nhánh `_` ở `error_map.rs`, `grpc.rs` |
 | Use case chạy không cần DB | test của `application` với adapter giả | 4 test, `tokio` chỉ là dev-dependency |
 | Sổ không lệch, không sửa được kể cả khi bỏ qua ứng dụng | kịch bản `database_guards` | `23514` và `TN001` từ PostgreSQL |
-| Số dư khóa theo thứ tự mã, không theo thứ tự dòng | kịch bản `balance_lock_order` | đảo thứ tự trong `apply_balances` thì đỏ với `55P03` |
-| Lỗi nội bộ và khóa JWT không lộ ra ngoài | test `internal_errors_do_not_leak_details`, kịch bản SIGTERM | không dòng log nào chứa khóa |
-| Handler chỉ giải mã, gọi use case, mã hóa | người đọc code | không máy nào kiểm |
+| Số dư khoá theo thứ tự mã, không theo thứ tự dòng | kịch bản `balance_lock_order` | đảo thứ tự trong `apply_balances` thì đỏ với `55P03` |
+| Lỗi nội bộ và khoá JWT không lộ ra ngoài | test `internal_errors_do_not_leak_details`, kịch bản SIGTERM | không dòng log nào chứa khoá |
+| Handler chỉ giải mã, gọi use case, mã hoá | người đọc code | không máy nào kiểm |
 
 Lõi bộ kiểm nằm ở `crates/ledger-service/src/arch.rs`. Mỗi luật là dữ liệu; chạy `cargo tree` và so tên là hai hàm riêng, nên so tên test được mà không cần cargo:
 
@@ -148,7 +148,7 @@ apply_balances(&mut tx, &deltas).await?;
 tx.commit().await.db()?;
 ```
 
-`write_entry` chỉ gom thay đổi số dư vào `deltas`; `apply_balances` cập nhật `account_balances` một lần ở cuối, theo thứ tự mã tài khoản. Một bút toán thủ công chạm `platform:revenue` rồi `psp:vixanh:clearing`, còn bước chia chạm clearing rồi revenue; khóa theo hai thứ tự khác nhau là công thức của deadlock. Kịch bản `balance_lock_order` kiểm thứ tự này: một phiên giữ khóa `platform:revenue`, bút toán ghi clearing trước revenue bị chặn (thấy qua `pg_blocking_pids`), trong khi `FOR UPDATE NOWAIT` trên clearing vẫn qua. Đảo thứ tự trong `apply_balances` thì kịch bản đỏ với `55P03`. Lab không dựng deadlock thật; cuộc đua đó ở [bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update).
+`write_entry` chỉ gom thay đổi số dư vào `deltas`; `apply_balances` cập nhật `account_balances` một lần ở cuối, theo thứ tự mã tài khoản. Một bút toán thủ công chạm `platform:revenue` rồi `psp:vixanh:clearing`, còn bước chia chạm clearing rồi revenue; khoá theo hai thứ tự khác nhau là công thức của deadlock. Kịch bản `balance_lock_order` kiểm thứ tự này: một phiên giữ khoá `platform:revenue`, bút toán ghi clearing trước revenue bị chặn (thấy qua `pg_blocking_pids`), trong khi `FOR UPDATE NOWAIT` trên clearing vẫn qua. Đảo thứ tự trong `apply_balances` thì kịch bản đỏ với `55P03`. Lab không dựng deadlock thật; cuộc đua đó ở [bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update).
 
 Lắp ráp nằm ở một chỗ, trong `app.rs` của binary:
 
@@ -180,11 +180,11 @@ Ledger sở hữu database riêng; Booking, Payment và Admin BFF (C#) chỉ nó
 | HTTP `/v1` | Admin BFF | `POST /v1/entries`, `GET …/balance`, `GET …/available`, `POST /v1/holds`, `POST /v1/trips/{id}/refunds`; lỗi `application/problem+json` | `http_and_grpc_contract`, `hold_and_refund` |
 | gRPC `ledger.v1` | Payment | `GetBalance`, `PostEntry` theo `ledger.proto` của bài 35, giữ nguyên | `http_and_grpc_contract` |
 
-Hai thay đổi so với bài 40 mà service C# phải biết. **Một chuyến ra hai sự kiện thay vì một**: `trip:<id>:capture` chỉ còn khách và clearing, doanh thu và tài xế chuyển sang `trip:<id>:split`. Consumer đọc thu nhập tài xế từ sự kiện capture sẽ không thấy gì, consumer đếm «một chuyến, một sự kiện» sẽ sai. Khi topic có nhiều partition, hai key khác nhau có thể rơi vào hai partition nên không được giả định capture đến trước split ([bài 36](/articles/rust-kafka-rdkafka-consumer-producer-schema)). Khử trùng theo `idempotencyKey` thì đằng nào cũng cần vì relay là at-least-once.
+Hai thay đổi so với bài 40 mà service C# phải biết. **Một chuyến ra hai sự kiện thay vì một**: `trip:<id>:capture` chỉ còn khách và clearing, doanh thu và tài xế chuyển sang `trip:<id>:split`. Consumer đọc thu nhập tài xế từ sự kiện capture sẽ không thấy gì, consumer đếm «một chuyến, một sự kiện» sẽ sai. Khi topic có nhiều partition, hai key khác nhau có thể rơi vào hai partition nên không được giả định capture đến trước split ([bài 36](/articles/rust-kafka-rdkafka-consumer-producer-schema)). Khử trùng lặp theo `idempotencyKey` thì đằng nào cũng cần vì relay là at-least-once.
 
 **Tên topic mặc định cũng đổi**: bài 40 dùng tiền tố `ledger` (`ledger.trip.completed`, `ledger.ledger.entry-posted`), còn ở đây `LEDGER_TOPIC_PREFIX` mặc định là `toi-noi`. Service giữ tên cũ không nhận lỗi nào, chỉ ngừng thấy tin. Trên hệ đang chạy, đổi tên phải theo ba bước ghi song song, chuyển consumer, dọn topic cũ của [bài 55](/articles/rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version); lab không dựng các bước đó, và tên này chưa có hậu tố `.v1` mà bài 55 nêu là quy ước.
 
-Xác thực chung cho HTTP và gRPC: Bearer JWT ký HS256, `aud` là `ledger-api`, bắt buộc `exp`, `aud`, `sub`, khóa tối thiểu 32 byte và không vào log. Vai trò `finance` ghi và đọc, `cs` chỉ đọc. Kiểm quyền nằm ở extractor `Authorized<P>` và interceptor của tonic, nên 401, 403 đến trước lỗi đọc body. Lỗi ánh xạ như sau, cả hai phía là `match` vét cạn:
+Xác thực chung cho HTTP và gRPC: Bearer JWT ký HS256, `aud` là `ledger-api`, bắt buộc `exp`, `aud`, `sub`, khoá tối thiểu 32 byte và không vào log. Vai trò `finance` ghi và đọc, `cs` chỉ đọc. Kiểm quyền nằm ở extractor `Authorized<P>` và interceptor của tonic, nên 401, 403 đến trước lỗi đọc body. Lỗi ánh xạ như sau, cả hai phía là `match` vét cạn:
 
 | Lỗi | HTTP | gRPC |
 | --- | --- | --- |
@@ -204,7 +204,7 @@ Bút toán ghi bằng HTTP rồi gửi lại bằng gRPC cùng key trả về c�
 
 ## Hold và hoàn tiền: đường chính đi qua đâu?
 
-**Hold** không ghi bút toán. `POST /v1/holds` khóa hàng `account_balances` của ví, cộng các hold `ACTIVE` chưa hết hạn, và từ chối nếu `balance - held` không đủ. Khi `TripCompleted` đến, `apply_trip` khóa hold `trip:<id>:hold` và đóng nó trong cùng transaction với hai bút toán. Hết hạn do domain quyết định, nhận giờ như một đối số:
+**Hold** không ghi bút toán. `POST /v1/holds` khoá hàng `account_balances` của ví, cộng các hold `ACTIVE` chưa hết hạn, và từ chối nếu `balance - held` không đủ. Khi `TripCompleted` đến, `apply_trip` khoá hold `trip:<id>:hold` và đóng nó trong cùng transaction với hai bút toán. Hết hạn do domain quyết định, nhận giờ như một đối số:
 
 ```rust
 // crates/domain/src/hold.rs (rút gọn: bỏ chú thích)
@@ -221,7 +221,7 @@ pub fn settle(&self, now: Timestamp, fare: Money) -> Settlement {
 
 Kịch bản nạp ví 100.000, giữ 30.000 (khả dụng 70.000); hold thứ hai 80.000 bị 422 `insufficient-available`. Chuyến `TN-0001` xong: hold `CAPTURED` 25.500, ví còn 74.500. Giữ thêm 30.000, cho `ManualClock` chạy thêm 901 giây và hold đó thôi trừ khả dụng, không `sleep`; chuyến `TN-0002` đóng nó thành `EXPIRED`.
 
-**Hoàn tiền một phần** khóa dòng `payments` của chuyến, kiểm phần còn hoàn được rồi ghi bút toán `trip:TN-0001:refund:<n>`: khách nhận lại, nền tảng hoàn phần phí theo đúng tỷ lệ lúc thu, tài xế hoàn phần còn lại. Hoàn 10.000 là khách +10.000, doanh thu -2.000, tài xế -8.000; hoàn nốt 15.500 đưa `payments` sang `REFUNDED`, và phần của `TN-0001` ở doanh thu cùng ví tài xế về đúng 0. Phần phí mỗi lần là hiệu của `fee_target` sau và trước lần đó, tính theo tổng luỹ kế như [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker), bằng số nguyên `i128`, nên nhiều lần hoàn nhỏ vẫn cộng đúng 5.100:
+**Hoàn tiền một phần** khoá dòng `payments` của chuyến, kiểm phần còn hoàn được rồi ghi bút toán `trip:TN-0001:refund:<n>`: khách nhận lại, nền tảng hoàn phần phí theo đúng tỷ lệ lúc thu, tài xế hoàn phần còn lại. Hoàn 10.000 là khách +10.000, doanh thu -2.000, tài xế -8.000; hoàn nốt 15.500 đưa `payments` sang `REFUNDED`, và phần của `TN-0001` ở doanh thu cùng ví tài xế về đúng 0. Phần phí mỗi lần là hiệu của `fee_target` sau và trước lần đó, tính theo tổng luỹ kế như [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker), bằng số nguyên `i128`, nên nhiều lần hoàn nhỏ vẫn cộng đúng 5.100:
 
 ```rust
 // crates/domain/src/refund.rs (rút gọn: bỏ chú thích)
@@ -246,9 +246,9 @@ Cột phải là phần lab 58 lấy hoặc bỏ; phần bỏ quan trọng khôn
 | [24](/articles/rust-transaction-isolation-append-only-idempotency-key) | transaction, `ON CONFLICT`, append-only | `write_entry` (so nội dung khi key trùng), `03_append_only.sql`; không retry `40001` |
 | [25](/articles/rust-schema-so-cai-accounts-journal-postings-partition) | bốn bảng, trigger cân bút toán | `01_schema.sql`, `02_balance_check.sql` giữ nguyên từng byte; bỏ index và partition |
 | [26](/articles/rust-repository-unit-of-work-trait-transaction) | port, Unit of Work, adapter giả | `LedgerStore`; mỗi phương thức một transaction; adapter giả ở test của `application` |
-| [27](/articles/rust-integration-test-postgresql-schema-rieng-ci) | schema `lab_<uuid>`, fixture | `LabEnv`: schema, topic, group, khóa JWT riêng mỗi ca; không có CI |
+| [27](/articles/rust-integration-test-postgresql-schema-rieng-ci) | schema `lab_<uuid>`, fixture | `LabEnv`: schema, topic, group, khoá JWT riêng mỗi ca; không có CI |
 | [28](/articles/rust-redis-cache-so-du-rate-limit-lock-ttl) | cache, rate limit, lock | không dùng |
-| [29](/articles/rust-config-secrets-tracing-structured-logging) | cấu hình, secret, tracing | `Config::from_lookup` gom lỗi; `Secret` che khóa; log JSON có `request_id` |
+| [29](/articles/rust-config-secrets-tracing-structured-logging) | cấu hình, secret, tracing | `Config::from_lookup` gom lỗi; `Secret` che khoá; log JSON có `request_id` |
 | [30](/articles/rust-criterion-benchmark-do-bo-nho-10k-but-toan) | criterion, `dhat` | không dùng, lab không đo thông lượng |
 | [31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du) | `Router`, extractor | router, extractor; `POST /v1/entries` có từ bản này |
 | [32](/articles/rust-validation-problem-details-openapi-utoipa) | validate, Problem Details, OpenAPI | `problem.rs`, `validate.rs`, `error_map.rs`; bỏ OpenAPI |
@@ -262,7 +262,7 @@ Cột phải là phần lab 58 lấy hoặc bỏ; phần bỏ quan trọng khôn
 | [40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end) | service một crate end-to-end | nền của lab này; mới: workspace, JWT, hai bút toán, hold, hoàn tiền |
 | [41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen) | sơ đồ tài khoản, dòng hai bước | `chart.rs` tám mẫu; `plan_capture` hai bước; clearing về 0 |
 | [42](/articles/rust-hold-capture-void-so-du-kha-dung) | hold, capture, void | `hold.rs`, `place_hold`, capture một phần qua `settle`; bỏ void và job hết hạn |
-| [43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker) | hoàn tiền, đảo, chargeback | `refund.rs`, khóa dòng `payments`, làm tròn luỹ kế; bỏ đảo toàn phần, chargeback, maker-checker |
+| [43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker) | hoàn tiền, đảo, chargeback | `refund.rs`, khoá dòng `payments`, làm tròn luỹ kế; bỏ đảo toàn phần, chargeback, maker-checker |
 | [44](/articles/rust-vi-tai-xe-chia-tien-payout-theo-lo) | ví tài xế, payout | không dùng |
 | [45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach) | khuyến mãi, ngân sách | không dùng |
 | [46](/articles/rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong) | largest remainder | không dùng; `fee_target` chỉ chia hai phần |
@@ -272,8 +272,8 @@ Cột phải là phần lab 58 lấy hoặc bỏ; phần bỏ quan trọng khôn
 | [50](/articles/rust-audit-append-only-hash-chain-phan-quyen-pii) | `REVOKE`, hash chain, PII | không dùng |
 | [51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter) | workspace hexagonal | cấu trúc crate và luật phụ thuộc; root là binary riêng, `cargo tree` thay `cargo metadata`, bỏ feature `kafka` |
 | [52](/articles/rust-command-handler-pipeline-domain-event-khong-framework) | command, pipeline, domain event | không dùng pipeline, bus hay domain event; `Ledger<S>` là các phương thức thường, trường hợp «một hàm thẳng là đủ» của bài đó |
-| [53](/articles/rust-aggregate-invariant-optimistic-locking-for-update) | aggregate, `version`, `FOR UPDATE` | khóa dòng ở `place_hold`, `refund`; cột `version` chỉ tăng, không dùng optimistic lock, không retry |
-| [54](/articles/rust-use-case-thanh-toan-chuyen-end-to-end) | use case thanh toán đầu-cuối | hai bút toán trong `apply_trip`; bỏ aggregate `TripPayment` và thứ tự đến tùy ý; không tiêu thụ `PaymentCaptured` |
+| [53](/articles/rust-aggregate-invariant-optimistic-locking-for-update) | aggregate, `version`, `FOR UPDATE` | khoá dòng ở `place_hold`, `refund`; cột `version` chỉ tăng, không dùng optimistic lock, không retry |
+| [54](/articles/rust-use-case-thanh-toan-chuyen-end-to-end) | use case thanh toán đầu-cuối | hai bút toán trong `apply_trip`; bỏ aggregate `TripPayment` và thứ tự đến tuỳ ý; không tiêu thụ `PaymentCaptured` |
 | [55](/articles/rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version) | hợp đồng sự kiện, version | JSON camelCase `schemaVersion: 1`; không protobuf cho sự kiện, không fixture cho consumer đa ngôn ngữ, không registry |
 | [56](/articles/rust-feature-flag-config-migration-expand-contract) | flag, expand/contract | không dùng; `migrate` chỉ nạp SQL khi chưa có bảng |
 | [57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao) | mutation, fuzz, `insta`, giờ giả | `ManualClock` theo cùng nguyên tắc; chưa chạy mutation, fuzz hay `insta` trên lab này |
@@ -331,11 +331,11 @@ Lệnh đầu kể lại từng kịch bản (lần build đầu lâu vì `rdkaf
 VERIFY OK
 ```
 
-`-- --verify` chạy đúng các kịch bản đó, chỉ in tên và `VERIFY OK`; sai thì thoát mã 1. `cargo test` chạy 34 unit test và 8 test end-to-end. Số dòng log của tiến trình con đổi mỗi lần chạy. Không kịch bản nào assert thời gian: giờ nghiệp vụ đi qua `ManualClock`, việc chờ sự kiện dùng hạn chót, stdout của tiến trình con đọc tới EOF thay vì đoán bằng `sleep`. Mỗi ca có schema `lab_<uuid>`, topic `lab.58.<uuid>.*`, group, khóa JWT và cổng `127.0.0.1:0` riêng.
+`-- --verify` chạy đúng các kịch bản đó, chỉ in tên và `VERIFY OK`; sai thì thoát mã 1. `cargo test` chạy 34 unit test và 8 test end-to-end. Số dòng log của tiến trình con đổi mỗi lần chạy. Không kịch bản nào assert thời gian: giờ nghiệp vụ đi qua `ManualClock`, việc chờ sự kiện dùng hạn chót, stdout của tiến trình con đọc tới EOF thay vì đoán bằng `sleep`. Mỗi ca có schema `lab_<uuid>`, topic `lab.58.<uuid>.*`, group, khoá JWT và cổng `127.0.0.1:0` riêng.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là service để học, không phải bản deploy được. Khóa JWT là chuỗi dùng chung, chưa có JWKS hay xoay khóa; topic một partition; relay là một task trong cùng process; <code>migrate</code> chỉ nạp SQL khi chưa có bảng; sự kiện hỏng bị bỏ qua và ghi log. Kịch bản chạy trên PostgreSQL và Kafka local.</p></div>
+<p>Đây là service để học, không phải bản deploy được. Khoá JWT là chuỗi dùng chung, chưa có JWKS hay xoay khoá; topic một partition; relay là một task trong cùng process; <code>migrate</code> chỉ nạp SQL khi chưa có bảng; sự kiện hỏng bị bỏ qua và ghi log. Kịch bản chạy trên PostgreSQL và Kafka local.</p></div>
 
 ## Những gì chưa có
 

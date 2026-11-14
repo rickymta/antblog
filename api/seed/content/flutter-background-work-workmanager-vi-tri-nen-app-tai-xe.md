@@ -196,7 +196,7 @@ Thiếu một trong hai thì iOS báo `notPermitted` (`BGTaskSchedulerErrorDomai
   });
 ```
 
-Mỗi lần ghi dùng file tạm riêng (test cho 3 isolate ghi 100 lần, không lỗi), vì dùng chung một tên tạm thì các isolate đổi tên mất file của nhau. Hai lần ghi đồng thời không hợp nhất: bản sau cùng thắng, bản kia mất. Hai bên còn có thể gửi trùng một mẫu; `LocationSample.dedupeKey` để server khử trùng (lab chưa kiểm).
+Mỗi lần ghi dùng file tạm riêng (test cho 3 isolate ghi 100 lần, không lỗi), vì dùng chung một tên tạm thì các isolate đổi tên mất file của nhau. Hai lần ghi đồng thời không hợp nhất: bản sau cùng thắng, bản kia mất. Hai bên còn có thể gửi trùng một mẫu; `LocationSample.dedupeKey` để server khử trùng lặp (lab chưa kiểm).
 
 ## 3. DriverLocationPolicy: chỉ gửi khi có chuyến hợp lệ
 
@@ -515,7 +515,7 @@ flutter test
 - **Chạy tự động, xanh:** chính sách trên tám trạng thái, bộ đệm, bộ gửi, bộ điều khiển với tracker giả, việc của task, `native-config/` của hai app và các điều đọc từ source plugin đã pin.
 - **Chỉ biên dịch:** `WorkmanagerScheduler`, `callbackDispatcher`, `GeolocatorLocationTracker` với stream thật, `main.dart`.
 - **Chưa chạy:** foreground service và thông báo, chỉ báo xanh dương, task `workmanager` thật, `AppDelegate.swift`, merged manifest, thủ tục Play và App Review.
-- **Chưa làm:** gửi thật qua `toi_noi_api` (sink chỉ ghi log), xin quyền lúc chạy, màn hình giải thích quyền, server khử trùng mẫu. README của lab hướng dẫn thử trên máy thật.
+- **Chưa làm:** gửi thật qua `toi_noi_api` (sink chỉ ghi log), xin quyền lúc chạy, màn hình giải thích quyền, server khử trùng lặp mẫu. README của lab hướng dẫn thử trên máy thật.
 
 ## Bài tập
 

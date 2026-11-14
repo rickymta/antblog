@@ -28,7 +28,7 @@ Không phải mọi defect đều nằm ở code. Yêu cầu có thể thiếu h
 |---|---|---|
 | Người khác xác nhận được | RULE-P04-01 chỉ chủ chuyến | Defect cần điều tra |
 | Muốn sửa điểm sau accepted | Ngoài phạm vi P04 | Change request |
-| Không rõ timeout nên báo gì | Nếu AC-P04-05 có outcome thì đối chiếu | Defect hoặc câu hỏi tùy baseline thực |
+| Không rõ timeout nên báo gì | Nếu AC-P04-05 có outcome thì đối chiếu | Defect hoặc câu hỏi tuỳ baseline thực |
 | Muốn miễn phí tại accepted 150 giây | Baseline dưới 120 giây | CR-BA-01, không tự đổi rule |
 
 Nhãn có thể cập nhật khi có bằng chứng mới. Giữ lịch sử lý do thay đổi, tránh sửa ticket làm mất dấu cuộc trao đổi.

@@ -121,7 +121,7 @@ Với Tới Nơi, quy tắc là **Owner trên subscription prod chỉ ở dạng
 <figcaption>Hình 2. Luồng PIM: eligible, yêu cầu kích hoạt với lý do và MFA, phê duyệt, rồi active có thời hạn và tự thu hồi.</figcaption>
 </figure>
 
-PIM cần license Entra phù hợp, hãy kiểm tài liệu trước khi lên kế hoạch. Nó cũng không thay RBAC: về bản chất PIM tạo và xoá role assignment có thời hạn thay bạn, nên mọi khái niệm ở trên vẫn đúng. Sau khi kích hoạt, token cũ có thể chưa phản ánh quyền mới; đăng nhập lại nếu thao tác vẫn bị từ chối.
+PIM cần license Entra phù hợp, hãy kiểm tra tài liệu trước khi lên kế hoạch. Nó cũng không thay RBAC: về bản chất PIM tạo và xoá role assignment có thời hạn thay bạn, nên mọi khái niệm ở trên vẫn đúng. Sau khi kích hoạt, token cũ có thể chưa phản ánh quyền mới; đăng nhập lại nếu thao tác vẫn bị từ chối.
 
 ## Lab: Reader ở subscription dev, Contributor ở RG trips-dev
 

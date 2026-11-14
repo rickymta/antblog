@@ -91,7 +91,7 @@ async def test_quote_prices_follow_the_spec(client, auth, distance, fare):
 
 Kỳ vọng viết sẵn từ đặc tả như bài 10. Điều mới là dòng chú thích: Decimal đi ra JSON dưới dạng **chuỗi**, nên không có `double` nào xen giữa để làm mất chính xác; ai đổi sang `float` sẽ thấy đỏ. Các test khác kiểm `Location: /v1/quotes/QT-0001`, đọc lại báo giá, khách khác đọc báo giá của mình ra 404 giống hệt báo giá không tồn tại, và `expires_at` đúng `2026-11-06T03:05:00Z` nhờ `get_clock`.
 
-Phần lỗi quan trọng ngang phần thành công, vì client rẽ nhánh theo mã và `type`. Với 422, test kiểm đúng cặp `field` và `code` (ví dụ `body.distance_km`, `decimal_max_places`) và mỗi lỗi chỉ có ba khóa `field`, `code`, `message`, không có `input`. Thay vì lặp assertion, `tests/test_problems.py` giữ một bảng ca lỗi và một test kiểm chung:
+Phần lỗi quan trọng ngang phần thành công, vì client rẽ nhánh theo mã và `type`. Với 422, test kiểm đúng cặp `field` và `code` (ví dụ `body.distance_km`, `decimal_max_places`) và mỗi lỗi chỉ có ba khoá `field`, `code`, `message`, không có `input`. Thay vì lặp assertion, `tests/test_problems.py` giữ một bảng ca lỗi và một test kiểm chung:
 
 ```python
 @pytest.mark.parametrize(("method", "url", "kwargs", "role", "status"),
@@ -130,7 +130,7 @@ Cùng mẫu cho lỗi không lường trước: kho giả ném `RuntimeError("m�
 
 ## Xác thực: token thật và thay bộ kiểm token
 
-Fixture `auth` ký token bằng `jwt.encode` với khóa của riêng test, không gọi hàm nào của app, nên bắt được cả lỗi phía app (đọc sai claim, quên kiểm chữ ký). Token đủ claim như lab 34 (`iss`, `aud`, `sub`, `scope`, `iat`, `exp`); tham số của fixture làm hỏng từng thứ một (`tests/conftest.py`, trích):
+Fixture `auth` ký token bằng `jwt.encode` với khoá của riêng test, không gọi hàm nào của app, nên bắt được cả lỗi phía app (đọc sai claim, quên kiểm chữ ký). Token đủ claim như lab 34 (`iss`, `aud`, `sub`, `scope`, `iat`, `exp`); tham số của fixture làm hỏng từng thứ một (`tests/conftest.py`, trích):
 
 ```python
 def make(sub="CU-001", scope="customer", *, expires_in=timedelta(minutes=15), secret=TEST_SECRET,
@@ -193,7 +193,7 @@ Cờ `--update-snapshots` do `conftest.py` đăng ký. Quy trình: test đỏ k�
 <figcaption>Hình 2. Snapshot không phán đúng sai; nó buộc mọi thay đổi của hợp đồng đi qua một lần review có diff.</figcaption>
 </figure>
 
-Snapshot bắt thay đổi, nhưng không nói app có tuân theo tài liệu hay không. Năm test còn lại trong `test_openapi.py` lấp chỗ đó: tập `operationId` đúng bốn tên (client sinh mã từ đây nên đổi tên là đổi hợp đồng); scope hiện trong tài liệu (`createQuote` đòi `customer`, `cancelTrip` đòi `dispatcher`, `getTrip` chỉ đòi token); mọi operation khai báo 401, operation có scope khai báo thêm 403; mọi lỗi 4xx và 5xx khai báo `application/problem+json` (FastAPI mặc định tả 422 bằng schema riêng và tự thêm 422 cho cả route chỉ có path `str`; `problems.py` sửa cho khớp handler). Và quan trọng nhất, response thật khớp schema đã tài liệu hóa:
+Snapshot bắt thay đổi, nhưng không nói app có tuân theo tài liệu hay không. Năm test còn lại trong `test_openapi.py` lấp chỗ đó: tập `operationId` đúng bốn tên (client sinh mã từ đây nên đổi tên là đổi hợp đồng); scope hiện trong tài liệu (`createQuote` đòi `customer`, `cancelTrip` đòi `dispatcher`, `getTrip` chỉ đòi token); mọi operation khai báo 401, operation có scope khai báo thêm 403; mọi lỗi 4xx và 5xx khai báo `application/problem+json` (FastAPI mặc định tả 422 bằng schema riêng và tự thêm 422 cho cả route chỉ có path `str`; `problems.py` sửa cho khớp handler). Và quan trọng nhất, response thật khớp schema đã tài liệu hoá:
 
 ```python
 root = {"$ref": f"#/components/schemas/{schema_name}", "components": spec["components"]}
@@ -246,7 +246,7 @@ hợp đồng OpenAPI đã đổi; chạy lại với --update-snapshots nếu c
 +            "title": "Rating"
 ```
 
-Cùng lúc `test_customer_sees_own_trip` đỏ vì so cả dict response (`Left contains 1 more item: {'rating': None}`): `2 failed, 57 passed`. Hai tầng test bắt cùng một thay đổi theo hai cách. **Hai:** đổi route hủy từ `require_scope("dispatcher")` sang `Authenticated`. Bốn test đỏ, ba trong số đó thuộc tầng hợp đồng:
+Cùng lúc `test_customer_sees_own_trip` đỏ vì so cả dict response (`Left contains 1 more item: {'rating': None}`): `2 failed, 57 passed`. Hai tầng test bắt cùng một thay đổi theo hai cách. **Hai:** đổi route huỷ từ `require_scope("dispatcher")` sang `Authenticated`. Bốn test đỏ, ba trong số đó thuộc tầng hợp đồng:
 
 ```text
 FAILED tests/test_openapi.py::test_openapi_matches_the_committed_snapshot
@@ -278,7 +278,7 @@ pytest in tên ca tiếng Việt dưới dạng escape Unicode (`\u1ebf` là «�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Kho chuyến là một <code>dict</code> trong bộ nhớ, kèm kho giả để dựng lỗi; không test nào chạm PostgreSQL (bài 28). Test trong tiến trình không thấy TLS, timeout của proxy, nhiều tiến trình hay độ trễ mạng. Lab chỉ kiểm token chứ không cấp token (bài 34); production dùng IdP và khóa bất đối xứng. Snapshot chỉ bắt thay đổi tài liệu, không chứng minh mọi nhánh của route đã được test, và bốn ca kiểm schema chạy bằng tay không thay được kiểm thử theo schema tự động. Chạy trên một máy macOS, Python 3.14.7, fastapi 0.162.0, starlette 1.10.0, httpx 0.28.1, httpx2 2.16.0, pytest 9.2.0, pytest-asyncio 1.4.1; lúc đó load average khoảng 48 đến 52 nên số giây chỉ để tham khảo.</p>
+<p>Kho chuyến là một <code>dict</code> trong bộ nhớ, kèm kho giả để dựng lỗi; không test nào chạm PostgreSQL (bài 28). Test trong tiến trình không thấy TLS, timeout của proxy, nhiều tiến trình hay độ trễ mạng. Lab chỉ kiểm token chứ không cấp token (bài 34); production dùng IdP và khoá bất đối xứng. Snapshot chỉ bắt thay đổi tài liệu, không chứng minh mọi nhánh của route đã được test, và bốn ca kiểm schema chạy bằng tay không thay được kiểm thử theo schema tự động. Chạy trên một máy macOS, Python 3.14.7, fastapi 0.162.0, starlette 1.10.0, httpx 0.28.1, httpx2 2.16.0, pytest 9.2.0, pytest-asyncio 1.4.1; lúc đó load average khoảng 48 đến 52 nên số giây chỉ để tham khảo.</p>
 </div>
 
 **Bài tập 1:** `test_every_bad_token_gets_the_same_401...` có ca token hết hạn bằng `expires_in=-1s`. Ca này có thể chập chờn trên máy chậm không? Nếu đổi sang `+1s` rồi `await asyncio.sleep(1.1)` thì sao, và đồng hồ cố định `get_clock` có giúp được không?

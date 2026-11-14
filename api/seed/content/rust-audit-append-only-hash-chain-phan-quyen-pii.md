@@ -60,9 +60,9 @@ Chủ bảng tự `REVOKE` rồi `GRANT` lại ngay; khi đó chỉ trigger còn
 
 Mỗi bút toán có một dòng trong `entry_chain`: `seq` tăng đều từ 1, `prev_hash`, `entry_hash`, với `entry_hash = SHA-256(prev_hash || canonical_bytes)`; dòng đầu có `prev_hash` là 32 byte 0. Sửa một byte trong bút toán đổi `entry_hash` của nó, còn dòng sau đã băm giá trị cũ.
 
-Phần khó là `canonical_bytes`: mọi bên phải ra cùng byte từ cùng bút toán, mãi mãi. Không dùng JSON vì thứ tự khóa, khoảng trắng và cách viết số không cố định. Lab dùng dạng nhị phân có tiền tố phiên bản, số nguyên big-endian, chuỗi kèm độ dài `u32` (để `"ab"+"c"` không trùng `"a"+"bc"`), posting sắp theo `line_no`. Bảng theo đúng thứ tự byte, phủ đủ mọi cột của `journal_entries` và `postings`:
+Phần khó là `canonical_bytes`: mọi bên phải ra cùng byte từ cùng bút toán, mãi mãi. Không dùng JSON vì thứ tự khoá, khoảng trắng và cách viết số không cố định. Lab dùng dạng nhị phân có tiền tố phiên bản, số nguyên big-endian, chuỗi kèm độ dài `u32` (để `"ab"+"c"` không trùng `"a"+"bc"`), posting sắp theo `line_no`. Bảng theo đúng thứ tự byte, phủ đủ mọi cột của `journal_entries` và `postings`:
 
-| Trường | Mã hóa |
+| Trường | Mã hoá |
 |---|---|
 | Tiền tố | `TKH-LEDGER-ENTRY-V1` (đổi dạng thì thành `V2`) |
 | `entry_id` | `i64` |
@@ -131,7 +131,7 @@ Không có gì chặn thì chuỗi rẽ nhánh mà cả hai bên báo thành cô
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 320" role="img" aria-label="Hình 2. Bên trái, không khoá: hai transaction cùng đọc đầu chuỗi H0 rồi cùng ghi prev bằng H0, chuỗi rẽ nhánh. Bên phải, có advisory lock: T1 giữ khoá, đọc H0 ghi H1 rồi commit; T2 chờ, sau đó đọc H1 ghi H2, chuỗi thẳng."><defs><marker id="rust-audit-append-only-hash-chain-phan-quyen-pii-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="22" class="t-b">Không khoá: rẽ nhánh</text><rect x="20" y="40" width="190" height="50" rx="10" class="f-phys-soft s-phys"/><text x="34" y="70" class="t-b">T1 đọc đầu: H0</text><rect x="230" y="40" width="190" height="50" rx="10" class="f-phys-soft s-phys"/><text x="244" y="70" class="t-b">T2 đọc đầu: H0</text><rect x="20" y="110" width="190" height="50" rx="10" class="f-phys-soft s-phys"/><text x="34" y="140" class="t-b">T1 ghi prev = H0</text><rect x="230" y="110" width="190" height="50" rx="10" class="f-phys-soft s-phys"/><text x="244" y="140" class="t-b">T2 ghi prev = H0</text><path d="M115 90 L115 110" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-audit-append-only-hash-chain-phan-quyen-pii-1-a)"/><path d="M325 90 L325 110" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-audit-append-only-hash-chain-phan-quyen-pii-1-a)"/><path d="M115 160 L115 180" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-audit-append-only-hash-chain-phan-quyen-pii-1-a)"/><path d="M325 160 L325 180" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-audit-append-only-hash-chain-phan-quyen-pii-1-a)"/><rect x="20" y="180" width="400" height="115" rx="10" class="f-warn-soft s-warn"/><text x="34" y="212" class="t-b">Cùng prev_hash, seq = [1, 1]</text><text x="34" y="238" class="t-small">cả hai bên đều báo thành công</text><text x="34" y="262" class="t-small">verify_chain: SeqMismatch ở dòng thứ hai</text><text x="460" y="22" class="t-b">Advisory lock: tuần tự</text><rect x="460" y="40" width="190" height="50" rx="10" class="f-phys-soft s-phys"/><text x="474" y="70" class="t-b">T1 xin khoá: có</text><rect x="670" y="40" width="190" height="50" rx="10" class="f-warn-soft s-warn dash"/><text x="684" y="70" class="t-b">T2 xin khoá: chờ</text><rect x="460" y="110" width="190" height="50" rx="10" class="f-phys-soft s-phys"/><text x="474" y="140" class="t-b">T1 đọc H0, ghi H1</text><rect x="670" y="110" width="190" height="50" rx="10" class="f-warn-soft s-warn dash"/><text x="684" y="140" class="t-b">T2 vẫn chờ</text><rect x="460" y="180" width="190" height="50" rx="10" class="f-phys-soft s-phys"/><text x="474" y="210" class="t-b">T1 COMMIT, nhả khoá</text><rect x="670" y="180" width="190" height="50" rx="10" class="f-phys-soft s-phys"/><text x="684" y="210" class="t-b">T2 đọc H1, ghi H2</text><path d="M555 90 L555 110" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-audit-append-only-hash-chain-phan-quyen-pii-1-a)"/><path d="M555 160 L555 180" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-audit-append-only-hash-chain-phan-quyen-pii-1-a)"/><path d="M650 205 L670 205" class="f-none s-pk" stroke-width="2" marker-end="url(#rust-audit-append-only-hash-chain-phan-quyen-pii-1-a)"/><rect x="460" y="250" width="400" height="45" rx="10" class="f-pk-soft s-pk"/><text x="474" y="279" class="t-b">seq = 1, 2: một đường thẳng</text></svg>
 </div>
-<figcaption>Hình 2. Điểm nối chuỗi là điểm tuần tự hóa của mọi lần ghi.</figcaption>
+<figcaption>Hình 2. Điểm nối chuỗi là điểm tuần tự hoá của mọi lần ghi.</figcaption>
 </figure>
 
 Phần mã quyết định nằm trong `append` (rút gọn: bỏ hai rào `Barrier` dùng cho test):
@@ -200,7 +200,7 @@ bút toán lách chuỗi        : dòng đầu tiên sai: seq=None entry_id=6 Un
 xoá dòng chuỗi thứ 3       : dòng đầu tiên sai: seq=Some(4) entry_id=4 SeqMismatch (đã duyệt 2 dòng trước nó)
 ```
 
-Hash chain chỉ phát hiện, không ngăn. Kẻ có toàn quyền sửa nội dung rồi tính lại `entry_hash` mọi dòng, và `verify_chain` xanh trở lại. Kẻ khác cắt đuôi, xoá bút toán cuối cùng cùng dòng chuỗi: phần còn lại vẫn là chuỗi hợp lệ. Cả hai chỉ lộ khi có thứ ngoài tầm với của kẻ đó: định kỳ công bố `(seq, entry_hash)` của đầu chuỗi sang nơi khác, như kho đối tượng bật khóa không xóa hoặc hệ thống do đội khác giữ. Lab giữ điểm neo trong biến của tiến trình:
+Hash chain chỉ phát hiện, không ngăn. Kẻ có toàn quyền sửa nội dung rồi tính lại `entry_hash` mọi dòng, và `verify_chain` xanh trở lại. Kẻ khác cắt đuôi, xoá bút toán cuối cùng cùng dòng chuỗi: phần còn lại vẫn là chuỗi hợp lệ. Cả hai chỉ lộ khi có thứ ngoài tầm với của kẻ đó: định kỳ công bố `(seq, entry_hash)` của đầu chuỗi sang nơi khác, như kho đối tượng bật khoá không xoá hoặc hệ thống do đội khác giữ. Lab giữ điểm neo trong biến của tiến trình:
 
 ```text
 điểm neo (seq:hash)        : 5:<64 ký tự hex, đổi mỗi lần chạy vì posted_at do database cấp>
@@ -270,7 +270,7 @@ chuỗi nhạy cảm lọt vào bảng: [] (tìm thấy mã khách: true)
 đối chứng derive(Debug)    : bộ quét bắt được ["0900000123"]
 ```
 
-Hai dòng đối chứng quan trọng: `derive(Debug)` chứng minh bộ quét log bắt được rò rỉ thật, «tìm thấy mã khách: true» chứng minh bộ quét bảng đọc được dữ liệu. Thiếu chúng, test xanh có thể chỉ vì bộ quét mù. Lợi ích phụ: service khách hàng xóa hồ sơ một người thì sổ cái không phải sửa gì.
+Hai dòng đối chứng quan trọng: `derive(Debug)` chứng minh bộ quét log bắt được rò rỉ thật, «tìm thấy mã khách: true» chứng minh bộ quét bảng đọc được dữ liệu. Thiếu chúng, test xanh có thể chỉ vì bộ quét mù. Lợi ích phụ: service khách hàng xoá hồ sơ một người thì sổ cái không phải sửa gì.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -287,7 +287,7 @@ cargo run  --release --manifest-path examples/toi-noi-rust/50-audit-hash-chain/C
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Lab đổi vai bằng <code>SET ROLE</code> trên kết nối superuser nên chỉ đo quyền SQL của role: không kiểm được đăng nhập, <code>pg_hba.conf</code>, mật khẩu hay TLS, và <code>RESET ROLE</code> đưa phiên về superuser (test kiểm), nên đây không phải ranh giới bảo mật. Service thật phải đăng nhập bằng role riêng. Điểm neo chỉ là biến trong tiến trình. <code>verify_chain</code> nạp cả sổ vào bộ nhớ và đọc bằng hai câu riêng, nên chỉ đúng khi không có ghi đồng thời; production phải kiểm theo đoạn từ điểm neo gần nhất, trong một snapshot. Chưa có log DDL, row-level security, MFA, mã hóa lưu trữ; <code>accounts</code> và <code>audit_log</code> chưa nằm trong chuỗi. Lab không bàn thời hạn lưu hay quy định pháp lý.</p></div>
+<p>Lab đổi vai bằng <code>SET ROLE</code> trên kết nối superuser nên chỉ đo quyền SQL của role: không kiểm được đăng nhập, <code>pg_hba.conf</code>, mật khẩu hay TLS, và <code>RESET ROLE</code> đưa phiên về superuser (test kiểm), nên đây không phải ranh giới bảo mật. Service thật phải đăng nhập bằng role riêng. Điểm neo chỉ là biến trong tiến trình. <code>verify_chain</code> nạp cả sổ vào bộ nhớ và đọc bằng hai câu riêng, nên chỉ đúng khi không có ghi đồng thời; production phải kiểm theo đoạn từ điểm neo gần nhất, trong một snapshot. Chưa có log DDL, row-level security, MFA, mã hoá lưu trữ; <code>accounts</code> và <code>audit_log</code> chưa nằm trong chuỗi. Lab không bàn thời hạn lưu hay quy định pháp lý.</p></div>
 
 **Bài tập:** trong ca «sửa bút toán 4», kẻ tấn công sửa luôn `entry_hash` của dòng 4 cho khớp nội dung mới nhưng không đụng dòng 5. `verify_chain` báo gì, ở đâu? Muốn qua mặt, hắn phải làm gì thêm, và còn gì để bắt hắn?
 

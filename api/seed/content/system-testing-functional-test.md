@@ -8,7 +8,7 @@ tags: [testing, sys-03, functional-testing, system-testing, boundary-value-analy
 language: vi
 ---
 
-Khách đặt xe máy 5 km lúc 9 giờ sáng thấy cước 35.000 đ — đúng. Đến trưa, Sài Gòn đổ mưa, cùng quãng đường đó hệ thống báo 54.000 đ thay vì 52.000 đ. Request vẫn trả 200, trang vẫn hiện giá, smoke test xanh, sanity cho thay đổi voucher cũng xanh. Lỗi nằm ở chỗ phụ phí mưa bị cộng **trước** khi nhân hệ số cao điểm. Bài này chỉ cách thiết kế functional test để bắt đúng loại lỗi đó: đi từ quy tắc trong đặc tả tới dữ liệu chọn có chủ đích, tới oracle tính tay độc lập với code, rồi tới một bộ test chạy lại được qua API của Tới Nơi.
+Khách đặt xe máy 5 km lúc 9 giờ sáng thấy cước 35.000 đ — đúng. Đến trưa, Sài Gòn đổ mưa, cùng quãng đường đó hệ thống báo 54.000 đ thay vì 52.000 đ. Request vẫn trả 200, trang vẫn hiện giá, smoke test xanh, sanity cho thay đổi voucher cũng xanh. Lỗi nằm ở chỗ phụ phí trời mưa bị cộng **trước** khi nhân hệ số cao điểm. Bài này chỉ cách thiết kế functional test để bắt đúng loại lỗi đó: đi từ quy tắc trong đặc tả tới dữ liệu chọn có chủ đích, tới oracle tính tay độc lập với code, rồi tới một bộ test chạy lại được qua API của Tới Nơi.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-03</span>
@@ -27,7 +27,7 @@ Khách đặt xe máy 5 km lúc 9 giờ sáng thấy cước 35.000 đ — đún
 
 ## 1. Bài toán và mục tiêu
 
-[SYS-01](/articles/system-testing-smoke-test) trả lời «bản build có đủ tốt để kiểm sâu không», [SYS-02](/articles/system-testing-sanity-test) trả lời «thay đổi vừa sửa có hợp lý không». Cả hai cố tình nhỏ. Chúng không được thiết kế để trả lời câu hỏi khó hơn: **mọi quy tắc tính tiền có cho đúng con số ở những tổ hợp dễ sai nhất không?** Đó là việc của functional test được thiết kế từ đặc tả.
+[SYS-01](/articles/system-testing-smoke-test) trả lời «bản build có đủ tốt để kiểm thử chuyên sâu không», [SYS-02](/articles/system-testing-sanity-test) trả lời «thay đổi vừa sửa có hợp lý không». Cả hai cố tình nhỏ. Chúng không được thiết kế để trả lời câu hỏi khó hơn: **mọi quy tắc tính tiền có cho đúng con số ở những tổ hợp dễ sai nhất không?** Đó là việc của functional test được thiết kế từ đặc tả.
 
 Ví dụ mở đầu là một lỗi tổ hợp: từng điều kiện riêng lẻ (chỉ cao điểm, chỉ mưa, chỉ voucher) có thể đều cho giá đúng, chỉ khi hai điều kiện cùng xảy ra thì thứ tự phép tính mới lộ ra. Một bộ test chọn dữ liệu ngẫu hứng — «5 km, giờ thường» rồi «5 km, có voucher» — sẽ không bao giờ đi vào nhánh đó.
 
@@ -76,7 +76,7 @@ Test basis trực tiếp là `examples/toi-noi-testing/SPEC.md`. Đọc implemen
 | R-QUOTE-04 | Chuyến giữ ảnh chụp giá của báo giá | Giá đổi sau khi khách đã đồng ý |
 | R-STATE-02, 03 | Chỉ chuyển trạng thái có trong bảng; chuyển sai ⇒ 409 và chuyến giữ nguyên | Hoàn thành chuyến khi chưa chở khách; dữ liệu bị ghi dở |
 
-Các con số cước của xe máy trong bài lấy từ bảng R-FARE-01: phí mở cửa **12.000 đ**, **4.500 đ/km**, cước tối thiểu **15.000 đ**. Hệ số cao điểm **1,25** cho khung [11:00; 13:00) và [17:00; 19:00) (R-FARE-04), phụ phí mưa **8.000 đ** cộng sau hệ số (R-FARE-05). Voucher mẫu `GIAM20`: 20%, trần 30.000 đ, tối thiểu 0 đ, 1 lần/ngày (Phụ lục dữ liệu mẫu).
+Các con số cước của xe máy trong bài lấy từ bảng R-FARE-01: phí mở cửa **12.000 đ**, **4.500 đ/km**, cước tối thiểu **15.000 đ**. Hệ số cao điểm **1,25** cho khung [11:00; 13:00) và [17:00; 19:00) (R-FARE-04), phụ phí trời mưa **8.000 đ** cộng sau hệ số (R-FARE-05). Voucher mẫu `GIAM20`: 20%, trần 30.000 đ, tối thiểu 0 đ, 1 lần/ngày (Phụ lục dữ liệu mẫu).
 
 ### 3.2. Test condition chưa phải test case
 
@@ -338,7 +338,7 @@ Kết luận đúng phạm vi: **trong lab bộ nhớ, các hành vi đã chọn
 |---|---|---|
 | 0,45 bị từ chối, 0,5 qua | Kiểm khoảng trước khi làm tròn | Thứ tự normalize/validate trong luồng báo giá |
 | 7,35 thành 7,3 | Làm tròn sai kiểu hoặc sai số dấu phẩy động | Hàm làm tròn, giá trị trung gian |
-| Chỉ quy tắc 7 và 8 sai | Vị trí cộng phụ phí mưa | `fare` breakdown: sau cao điểm, phụ phí mưa |
+| Chỉ quy tắc 7 và 8 sai | Vị trí cộng phụ phí trời mưa | `fare` breakdown: sau cao điểm, phụ phí trời mưa |
 | Tổng đúng nhưng `discount` sai | Làm tròn giữa chừng bị tổng che | `discount`, `afterDiscount` của dòng đó |
 | FN-04 cho `discount` = 0 | Voucher bị bỏ khi chạm sàn thay vì áp rồi nâng | Breakdown R-FARE-10 |
 | Giá chuyến đổi khi mưa đổi | Luồng tạo chuyến tính lại giá | So `fareBreakdown` của chuyến với quote |

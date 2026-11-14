@@ -26,7 +26,7 @@ Registry ở đây là một thư mục có quy ước. Mỗi phiên bản là m
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 290" role="img" aria-label="Thư mục out/registry gồm ba thư mục phiên bản bất biến, mỗi thư mục có model.joblib, model_meta.json và manifest.json. Bên phải là current.json trỏ tới phiên bản v2 và history.jsonl ghi các sự kiện registered, promoted, rolled_back. Rollback là phát lại lịch sử và bỏ phần tử cuối của ngăn xếp promote."><defs><marker id="py60-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker></defs><text x="20" y="24" class="t-b">out/registry/  (tên rút gọn: v1, v2, v3)</text><rect x="20" y="40" width="380" height="64" rx="8" class="f-phys-soft s-phys"/><text x="34" y="64" class="t-b">fraud-lgbm-f81991ad  (v1)</text><text x="34" y="86" class="t-small">model.joblib · model_meta.json · manifest.json</text><rect x="20" y="116" width="380" height="64" rx="8" class="f-phys-soft s-phys"/><text x="34" y="140" class="t-b">fraud-lgbm-4b482d65  (v2)</text><text x="34" y="162" class="t-small">model.joblib · model_meta.json · manifest.json</text><rect x="20" y="192" width="380" height="64" rx="8" class="f-phys-soft s-phys"/><text x="34" y="216" class="t-b">fraud-lgbm-6fec401c  (v3)</text><text x="34" y="238" class="t-small">model.joblib · model_meta.json · manifest.json</text><rect x="480" y="40" width="380" height="76" rx="8" class="f-pk-soft s-pk"/><text x="494" y="64" class="t-b">current.json</text><text x="494" y="86" class="t-small">{"version": "...4b482d65", "since": ...}</text><text x="494" y="106" class="t-small">đổi bằng os.replace: đọc thấy bản cũ hoặc mới</text><path d="M480 78 L400 142" class="f-none s-pk dash" stroke-width="2" marker-end="url(#py60-0-arrow)"/><rect x="480" y="140" width="380" height="116" rx="8" class="f-warn-soft s-warn"/><text x="494" y="164" class="t-b">history.jsonl  (chỉ ghi thêm)</text><text x="494" y="186" class="t-small">registered x3, promoted v1, v2, v3</text><text x="494" y="206" class="t-small">rolled_back v3 -> v2</text><text x="494" y="230" class="t-small">rollback = phát lại lịch sử, bỏ phần tử cuối</text></svg>
 </div>
-<figcaption>Hình 1. Bố cục registry của lab: phiên bản bất biến, con trỏ thay nguyên tử, lịch sử chỉ ghi thêm. Rollback chỉ đổi con trỏ, không huấn luyện lại và không xóa gì.</figcaption>
+<figcaption>Hình 1. Bố cục registry của lab: phiên bản bất biến, con trỏ thay nguyên tử, lịch sử chỉ ghi thêm. Rollback chỉ đổi con trỏ, không huấn luyện lại và không xoá gì.</figcaption>
 </figure>
 
 Quyết định promote đi qua một hàm, và mọi kiểm tra nằm trước khi con trỏ đổi (`registry.py`, trích):
@@ -217,7 +217,7 @@ cust_prior_trips đếm số chuyến trước đó của khách từ đầu log
 tỉ lệ chuyến đầu tiên của khách (cust_prior_trips = 0): 30.9% ở tập tham chiếu, 8.6%, 6.9%, 5.9% ở ba tuần
 ```
 
-`cust_prior_trips` là bộ đếm tích lũy từ đầu log nên chỉ tăng khi log dài ra (PSI 0,65, 0,83, 0,99); tỉ lệ chuyến đầu tiên của khách giảm từ 30,9 % xuống 5,9 % vì quần thể khách gần như cố định, một giả định của bộ sinh. Độ quan trọng cần đo bằng thứ phản ánh tác động lên điểm: theo gain đặc trưng này chỉ 3,2 %, theo mean|SHAP| nó đứng **đầu** (15,3 %; hạng 1 ở cả ba seed, 15,3 đến 20,4 %), nên drift của nó đáng điều tra: mô hình dựa vào một bộ đếm tự trôi. PR-AUC của v1 dao động 0,878, 0,903, 0,864 giữa các tuần (cùng mô hình, khác mẫu), nên một tuần PR-AUC không đủ để nói «tụt» hay «không tụt». `cust_promo_share_30d` lệch nhẹ (khoảng 0,11); lab chưa tách nó khỏi tạo tác dưới đây.
+`cust_prior_trips` là bộ đếm tích luỹ từ đầu log nên chỉ tăng khi log dài ra (PSI 0,65, 0,83, 0,99); tỉ lệ chuyến đầu tiên của khách giảm từ 30,9 % xuống 5,9 % vì quần thể khách gần như cố định, một giả định của bộ sinh. Độ quan trọng cần đo bằng thứ phản ánh tác động lên điểm: theo gain đặc trưng này chỉ 3,2 %, theo mean|SHAP| nó đứng **đầu** (15,3 %; hạng 1 ở cả ba seed, 15,3 đến 20,4 %), nên drift của nó đáng điều tra: mô hình dựa vào một bộ đếm tự trôi. PR-AUC của v1 dao động 0,878, 0,903, 0,864 giữa các tuần (cùng mô hình, khác mẫu), nên một tuần PR-AUC không đủ để nói «tụt» hay «không tụt». `cust_promo_share_30d` lệch nhẹ (khoảng 0,11); lab chưa tách nó khỏi tạo tác dưới đây.
 
 Bộ sinh còn hai tạo tác ảnh hưởng mọi phép đo drift và mọi valid của phần 07:
 
@@ -302,7 +302,7 @@ rollback -> current = v2; đổi con trỏ và nạp lại mất 123.1 ms; đi�
 v3 vẫn còn trong registry để điều tra: True; số bản: 3
 ```
 
-Rollback chỉ đổi con trỏ, kiểm bản đích và nạp lại từ đĩa (vài chục mili giây): không huấn luyện lại, không xóa v3, và điểm sau rollback giống hệt từng bit điểm v2 trước đó. Lịch sử cho thấy ai làm gì và vì sao:
+Rollback chỉ đổi con trỏ, kiểm bản đích và nạp lại từ đĩa (vài chục mili giây): không huấn luyện lại, không xoá v3, và điểm sau rollback giống hệt từng bit điểm v2 trước đó. Lịch sử cho thấy ai làm gì và vì sao:
 
 ```text
   promoted    ...f81991ad <- - bởi oncall-ml: bản đầu tiên, cùng công thức mô hình bài 57
@@ -354,7 +354,7 @@ Kiểm chứng: OK 88/88
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
-| PSI của một đặc trưng vọt lên nhưng PR-AUC trên nhãn đã chín không đổi | Đặc trưng có phải bộ đếm tích lũy hoặc phụ thuộc lịch sử khách không; đừng bỏ qua vì gain thấp, xem trung bình trị tuyệt đối SHAP |
+| PSI của một đặc trưng vọt lên nhưng PR-AUC trên nhãn đã chín không đổi | Đặc trưng có phải bộ đếm tích luỹ hoặc phụ thuộc lịch sử khách không; đừng bỏ qua vì gain thấp, xem trung bình trị tuyệt đối SHAP |
 | PR-AUC của bản mới bằng hoặc cao hơn nhưng số cờ lệch hẳn | So tỉ lệ cờ và p99 với bản đang chạy cùng khoảng thời gian; kiểm nhãn lúc huấn luyện đã chín chưa |
 | Nhóm A/B treatment đắt hơn dù mô hình mới tốt hơn trên shadow | Chạy A/A trước để biết nhiễu chia khách; kiểm khoảng tin cậy bootstrap theo khách |
 | `RegistryError` «con trỏ lệch lịch sử» | Tiến trình chết giữa hai bước ghi; xem `history.jsonl`, sửa tay, rồi mới promote hay rollback |

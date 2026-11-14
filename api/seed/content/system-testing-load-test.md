@@ -85,7 +85,7 @@ Workload model bắt đầu từ dữ liệu nghiệp vụ, không từ «cho 10
 - Phân bố theo dịch vụ (ride/parcel/food), thành phố, loại xe, quãng đường.
 - Tỷ lệ đọc/ghi: một chuyến kéo theo nhiều lần hỏi lại trạng thái (trang khách hỏi mỗi 2 giây theo R-NFR-04).
 
-Từ đó suy ra arrival rate **cho từng endpoint**, không chia đều tải tùy ý. Ví dụ giả định: 3 lần báo giá cho mỗi chuyến đặt ⇒ báo giá chiếm phần lớn request ghi, còn polling chiếm phần lớn request đọc.
+Từ đó suy ra arrival rate **cho từng endpoint**, không chia đều tải tuỳ ý. Ví dụ giả định: 3 lần báo giá cho mỗi chuyến đặt ⇒ báo giá chiếm phần lớn request ghi, còn polling chiếm phần lớn request đọc.
 
 ### 3.2. Thiết kế lab và giới hạn của nó
 
@@ -102,7 +102,7 @@ Oracle 35.000 tính tay từ SPEC, không gọi lại calculator: xe máy 12.000
 
 Ba lựa chọn có chủ đích:
 
-- **Không reset giữa các bước**: sau warm-up 20 request, dữ liệu được reset một lần; sau đó số quote tăng từ 0 lên 300 qua ba bước, phản ánh ghi tích lũy trong lượt này.
+- **Không reset giữa các bước**: sau warm-up 20 request, dữ liệu được reset một lần; sau đó số quote tăng từ 0 lên 300 qua ba bước, phản ánh ghi tích luỹ trong lượt này.
 - **Không dùng voucher**: voucher có giới hạn lượt, sẽ làm đổi mix lỗi giữa chừng.
 - **Không đặt chuyến**: R-API-13 giới hạn 5 lần `POST /api/trips`/60 giây/khách; R-API-07 ghi rõ endpoint báo giá «không bị giới hạn tần suất». Chọn endpoint không có limiter là chọn đúng đối tượng cho câu hỏi này, **không phải** tắt limiter để kết quả đẹp.
 

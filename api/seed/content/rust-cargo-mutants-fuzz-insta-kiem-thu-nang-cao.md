@@ -273,7 +273,7 @@ Nên ưu tiên cách đầu: truyền đồng hồ vào thì kiểm được gi�
 
 ## Test flaky: HashMap, đồng hồ và seed
 
-Bản đầu của `compare` duyệt thẳng `HashMap` rồi trả danh sách lệch theo thứ tự duyệt. Mỗi `HashMap` mới lấy khóa băm ngẫu nhiên riêng nên thứ tự đổi giữa các lần chạy, và snapshot ở trên khi xanh khi đỏ. Tạm bỏ dòng `sort_by` rồi chạy riêng test này 30 lần: hai lượt đo cho 20 xanh, 10 đỏ và 13 xanh, 17 đỏ. Diff của lần đỏ chỉ là hai dòng đổi chỗ:
+Bản đầu của `compare` duyệt thẳng `HashMap` rồi trả danh sách lệch theo thứ tự duyệt. Mỗi `HashMap` mới lấy khoá băm ngẫu nhiên riêng nên thứ tự đổi giữa các lần chạy, và snapshot ở trên khi xanh khi đỏ. Tạm bỏ dòng `sort_by` rồi chạy riêng test này 30 lần: hai lượt đo cho 20 xanh, 10 đỏ và 13 xanh, 17 đỏ. Diff của lần đỏ chỉ là hai dòng đổi chỗ:
 
 ```text
           3 │+  vx_ch_0004  MissingInPsp     sổ=18.000 sao kê=-
@@ -345,7 +345,7 @@ Lệnh cuối tái hiện crash từ file 7 byte đã commit. `cargo test` có 2
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Parser chỉ có ba cột, không dùng <code>csv</code> crate hay SQL như bài 47; fuzz chỉ chạy 60 đến 120 giây trên một máy, không có corpus tích lũy. Mutation chỉ chạy trên hai file. Chưa có: workflow CI thật (bảng tầng là đề xuất), fuzz cho tầng đối soát và SQL, test hợp đồng với service C#, đo độ phủ. Các số thời gian đo ở máy rất tải.</p></div>
+<p>Parser chỉ có ba cột, không dùng <code>csv</code> crate hay SQL như bài 47; fuzz chỉ chạy 60 đến 120 giây trên một máy, không có corpus tích luỹ. Mutation chỉ chạy trên hai file. Chưa có: workflow CI thật (bảng tầng là đề xuất), fuzz cho tầng đối soát và SQL, test hợp đồng với service C#, đo độ phủ. Các số thời gian đo ở máy rất tải.</p></div>
 
 **Bài tập:** Trong `fare_for_km`, đổi `if km <= 2` thành `if km < 2` rồi chạy `cargo test`. Test nào đỏ? Đây có phải lỗ hổng của bộ test không?
 

@@ -404,7 +404,7 @@ message CancelTripResponse { bool ok = 1; double cancellation_fee = 2; string er
 
 <details>
 <summary><b>Đáp án: b</b></summary>
-<p><b>a sai</b> — sửa là việc của tác giả. <b>b đúng</b> — nội dung TTA-5.1.1: chuẩn bị gồm đọc work product, kiểm tài liệu được tham chiếu, tìm điều thiếu; không chuẩn bị thì thành editing exercise. <b>c sai</b> — TTA thường tham gia cả technical review và inspection. <b>d sai</b> — chạy test là dynamic testing, không phải chuẩn bị review.</p>
+<p><b>a sai</b> — sửa là việc của tác giả. <b>b đúng</b> — nội dung TTA-5.1.1: chuẩn bị gồm đọc work product, kiểm tra tài liệu được tham chiếu, tìm điều thiếu; không chuẩn bị thì thành editing exercise. <b>c sai</b> — TTA thường tham gia cả technical review và inspection. <b>d sai</b> — chạy test là dynamic testing, không phải chuẩn bị review.</p>
 </details>
 
 **Câu 4 (K2).** Khi review bản Protobuf v2 của Pricing, việc nào thể hiện đúng nhất ý «review không cô lập» của CTAL-TTA?

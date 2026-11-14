@@ -28,7 +28,7 @@ Pilot giới hạn giúp tìm vấn đề vận hành, khả năng dùng và ch�
 
 Với marketplace, một tài xế phục vụ cả hai nhóm có thể học thói quen mới rồi áp sang nhóm đối chứng. Randomize theo khách không tự loại ảnh hưởng chéo này. Có thể cần thiết kế theo cụm hoặc thời gian, với phân tích phù hợp và đánh đổi về công suất thống kê.
 
-## 4. Chọn outcome không bị đổi mẫu số tùy tiện
+## 4. Chọn outcome không bị đổi mẫu số tuỳ tiện
 
 Nếu tính năng xuất hiện trước accepted, chỉ phân tích chuyến đã accepted có thể bỏ qua tác động lên khả năng được nhận. Experiment brief nên chốt cohort từ lúc đủ điều kiện, rồi theo dõi cả accepted rate và huỷ. Có thể giữ metric P01 cho mục đích so vận hành nhưng phải nêu giới hạn chọn mẫu.
 
@@ -36,7 +36,7 @@ Nếu tính năng xuất hiện trước accepted, chỉ phân tích chuyến đ
 
 Chọn metric chính, hiệu ứng tối thiểu đáng quan tâm, guardrail và kế hoạch phân tích trước. Cỡ mẫu phụ thuộc baseline, mức biến thiên, đơn vị phân nhóm, công suất mong muốn và thiết kế; không mặc định 1.000 chuyến là đủ. Cần thời gian bao phủ chu kỳ hành vi và độ trễ outcome.
 
-Kiểm phân bổ nhóm và telemetry trước khi đọc effect. Không dừng tùy hứng ngay khi đồ thị có màu xanh; quy tắc dừng phải tương thích phương pháp phân tích đã chọn.
+Kiểm phân bổ nhóm và telemetry trước khi đọc effect. Không dừng tuỳ hứng ngay khi đồ thị có màu xanh; quy tắc dừng phải tương thích phương pháp phân tích đã chọn.
 
 ## 6. Đọc kết quả có độ bất định
 

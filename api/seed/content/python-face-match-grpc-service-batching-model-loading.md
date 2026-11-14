@@ -14,8 +14,8 @@ Mỗi hồ sơ tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) c
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Dịch vụ hồ sơ tài xế gọi <code>Embed</code> với deadline 150 ms, còn lần suy luận trên thread mất 400 ms. Sau 150 ms client nhận <code>DEADLINE_EXCEEDED</code>. Ở bài 37 handler bị hủy tại chỗ <code>await</code> và việc dừng ngay. Lần này, thread suy luận có dừng không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> gRPC hủy handler ở chỗ nó đang <code>await</code>, nhưng hàm đang chạy trên thread không bị ngắt: nó chạy hết 400 ms rồi kết quả bị vứt. Lab đếm đúng ca này: suy luận +1, giao được +0, phí +1. Vì vậy phải chặn việc phí <em>trước</em> khi nó bắt đầu: từ chối khi ngân sách còn quá ít, và bỏ qua yêu cầu đã hủy khi lập batch.</p></details>
+<p>Dịch vụ hồ sơ tài xế gọi <code>Embed</code> với deadline 150 ms, còn lần suy luận trên thread mất 400 ms. Sau 150 ms client nhận <code>DEADLINE_EXCEEDED</code>. Ở bài 37 handler bị huỷ tại chỗ <code>await</code> và việc dừng ngay. Lần này, thread suy luận có dừng không?</p>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> gRPC huỷ handler ở chỗ nó đang <code>await</code>, nhưng hàm đang chạy trên thread không bị ngắt: nó chạy hết 400 ms rồi kết quả bị vứt. Lab đếm đúng ca này: suy luận +1, giao được +0, phí +1. Vì vậy phải chặn việc phí <em>trước</em> khi nó bắt đầu: từ chối khi ngân sách còn quá ít, và bỏ qua yêu cầu đã huỷ khi lập batch.</p></details>
 </div>
 
 ## Service có mô hình khác service chấm điểm ở đâu
@@ -33,13 +33,13 @@ message CompareRequest { bytes image_a = 1; bytes image_b = 2; }
 message CompareResponse { double score = 1; string model_version = 2; }
 ```
 
-`Embed` trả vector 128 số đã chuẩn hóa L2, `Compare` trả cosine của hai ảnh, và `model_version` đi cùng mọi kết quả vì hai vector chỉ so được khi cùng mô hình và tiền xử lý. Ảnh gửi lên là PNG hoặc JPEG của **một crop mặt đã căn chỉnh 112×112** như bài 48 làm; service không dò mặt hay căn chỉnh. Cỡ khác (16 đến 512 điểm ảnh mỗi cạnh, tối đa 1 MiB) được co giãn về 112 nhưng không căn chỉnh lại; `preprocess` kiểm định dạng và kích thước trước khi giải mã điểm ảnh.
+`Embed` trả vector 128 số đã chuẩn hoá L2, `Compare` trả cosine của hai ảnh, và `model_version` đi cùng mọi kết quả vì hai vector chỉ so được khi cùng mô hình và tiền xử lý. Ảnh gửi lên là PNG hoặc JPEG của **một crop mặt đã căn chỉnh 112×112** như bài 48 làm; service không dò mặt hay căn chỉnh. Cỡ khác (16 đến 512 điểm ảnh mỗi cạnh, tối đa 1 MiB) được co giãn về 112 nhưng không căn chỉnh lại; `preprocess` kiểm định dạng và kích thước trước khi giải mã điểm ảnh.
 
 Mô hình là SFace (OpenCV Zoo, bản 2021dec, ghi Apache 2.0) chạy bằng ONNX Runtime, cùng mô hình và tiền xử lý với bài 49: lab đưa một crop qua `cv2.FaceRecognizerSF` và qua session của lab rồi in cosine. Cùng cách căn chỉnh nên thang điểm so được với bài 49 (ngưỡng 0,567 ở FAR 0,1%); đổi căn chỉnh hay tiền xử lý thì không. Giấy phép và lý do không dùng mô hình InsightFace nằm ở bài 49. Dữ liệu là Olivetti faces, do AT&T Laboratories Cambridge thu thập, xem tài liệu scikit-learn (tải 4,26 MB, cache 1,4 MB): 400 ảnh xám 64×64 của 40 người, YuNet căn chỉnh thành crop 112×112; repository không chứa ảnh người nào.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Một lời gọi đi qua client có deadline, handler grpc.aio chạy trên event loop, hàng chờ asyncio.Queue, worker gom batch, rồi một thread riêng chạy phiên ONNX Runtime. Ba chỗ lời gọi rời đi sớm: handler trả INVALID_ARGUMENT hoặc DEADLINE_EXCEEDED, hàng chờ đầy trả RESOURCE_EXHAUSTED, worker bỏ qua yêu cầu đã hủy hoặc hết hạn."><defs><marker id="py52-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="110" width="130" height="90" rx="10" class="f-pk-soft s-pk"/><text x="36" y="144" class="t-b">Client</text><text x="36" y="168" class="t-small">có deadline</text><rect x="190" y="110" width="150" height="90" rx="10" class="f-pk-soft s-pk"/><text x="206" y="138" class="t-b">grpc.aio</text><text x="206" y="160" class="t-small">giải mã, kiểm ảnh</text><text x="206" y="178" class="t-small">xét ngân sách</text><rect x="370" y="110" width="140" height="90" rx="10" class="f-warn-soft s-warn"/><text x="386" y="144" class="t-b">asyncio.Queue</text><text x="386" y="168" class="t-small">có giới hạn</text><rect x="550" y="110" width="140" height="90" rx="10" class="f-phys-soft s-phys"/><text x="566" y="138" class="t-b">Worker</text><text x="566" y="160" class="t-small">gom tối đa 8 ảnh</text><text x="566" y="178" class="t-small">chờ tối đa 5 ms</text><rect x="730" y="110" width="130" height="90" rx="10" class="f-phys-soft s-phys"/><text x="746" y="138" class="t-b">Thread riêng</text><text x="746" y="160" class="t-small">ONNX Runtime</text><text x="746" y="178" class="t-small">một session</text><path d="M150 155 L190 155" class="f-none s-phys" stroke-width="2" marker-end="url(#py52-0-arrow)"/><path d="M340 155 L370 155" class="f-none s-phys" stroke-width="2" marker-end="url(#py52-0-arrow)"/><path d="M510 155 L550 155" class="f-none s-phys" stroke-width="2" marker-end="url(#py52-0-arrow)"/><path d="M690 155 L730 155" class="f-none s-phys" stroke-width="2" marker-end="url(#py52-0-arrow)"/><path d="M265 110 L265 70" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py52-0-arrow)"/><text x="190" y="36" class="t-small t-warn">INVALID_ARGUMENT</text><text x="190" y="56" class="t-small t-warn">DEADLINE_EXCEEDED</text><path d="M440 200 L440 240" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py52-0-arrow)"/><text x="372" y="262" class="t-small t-warn">RESOURCE_EXHAUSTED</text><path d="M620 200 L620 240" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py52-0-arrow)"/><text x="552" y="262" class="t-small t-warn">bỏ qua: hủy, hết hạn</text><path d="M795 200 L795 240" class="f-none s-dead dash" stroke-width="2" marker-end="url(#py52-0-arrow)"/><text x="700" y="262" class="t-small t-dead">không dừng giữa chừng</text></svg>
+<svg viewBox="0 0 880 300" role="img" aria-label="Một lời gọi đi qua client có deadline, handler grpc.aio chạy trên event loop, hàng chờ asyncio.Queue, worker gom batch, rồi một thread riêng chạy phiên ONNX Runtime. Ba chỗ lời gọi rời đi sớm: handler trả INVALID_ARGUMENT hoặc DEADLINE_EXCEEDED, hàng chờ đầy trả RESOURCE_EXHAUSTED, worker bỏ qua yêu cầu đã huỷ hoặc hết hạn."><defs><marker id="py52-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="110" width="130" height="90" rx="10" class="f-pk-soft s-pk"/><text x="36" y="144" class="t-b">Client</text><text x="36" y="168" class="t-small">có deadline</text><rect x="190" y="110" width="150" height="90" rx="10" class="f-pk-soft s-pk"/><text x="206" y="138" class="t-b">grpc.aio</text><text x="206" y="160" class="t-small">giải mã, kiểm ảnh</text><text x="206" y="178" class="t-small">xét ngân sách</text><rect x="370" y="110" width="140" height="90" rx="10" class="f-warn-soft s-warn"/><text x="386" y="144" class="t-b">asyncio.Queue</text><text x="386" y="168" class="t-small">có giới hạn</text><rect x="550" y="110" width="140" height="90" rx="10" class="f-phys-soft s-phys"/><text x="566" y="138" class="t-b">Worker</text><text x="566" y="160" class="t-small">gom tối đa 8 ảnh</text><text x="566" y="178" class="t-small">chờ tối đa 5 ms</text><rect x="730" y="110" width="130" height="90" rx="10" class="f-phys-soft s-phys"/><text x="746" y="138" class="t-b">Thread riêng</text><text x="746" y="160" class="t-small">ONNX Runtime</text><text x="746" y="178" class="t-small">một session</text><path d="M150 155 L190 155" class="f-none s-phys" stroke-width="2" marker-end="url(#py52-0-arrow)"/><path d="M340 155 L370 155" class="f-none s-phys" stroke-width="2" marker-end="url(#py52-0-arrow)"/><path d="M510 155 L550 155" class="f-none s-phys" stroke-width="2" marker-end="url(#py52-0-arrow)"/><path d="M690 155 L730 155" class="f-none s-phys" stroke-width="2" marker-end="url(#py52-0-arrow)"/><path d="M265 110 L265 70" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py52-0-arrow)"/><text x="190" y="36" class="t-small t-warn">INVALID_ARGUMENT</text><text x="190" y="56" class="t-small t-warn">DEADLINE_EXCEEDED</text><path d="M440 200 L440 240" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py52-0-arrow)"/><text x="372" y="262" class="t-small t-warn">RESOURCE_EXHAUSTED</text><path d="M620 200 L620 240" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py52-0-arrow)"/><text x="552" y="262" class="t-small t-warn">bỏ qua: huỷ, hết hạn</text><path d="M795 200 L795 240" class="f-none s-dead dash" stroke-width="2" marker-end="url(#py52-0-arrow)"/><text x="700" y="262" class="t-small t-dead">không dừng giữa chừng</text></svg>
 </div>
 <figcaption>Hình 1. Ba chỗ một lời gọi rời đi sớm trước khi tốn suy luận, và chỗ cuối cùng nó không rời đi được nữa: khi thread đã chạy.</figcaption>
 </figure>
@@ -106,7 +106,7 @@ sau warm-up: health=SERVING, Embed trả 128 số
 sau khi tắt: health -> UNAVAILABLE
 ```
 
-**Thứ tự tắt.** Bản đầu của lab dừng batcher trước server: lời gọi đang chạy bị hủy, client nhận `UNAVAILABLE` dù việc sắp xong. Thứ tự đúng là ba bước ở khối `finally`: `NOT_SERVING`, để gRPC đợi lời gọi đang chạy (tối đa `shutdown_grace`) khi worker còn sống, rồi mới dừng worker; Future còn treo khi worker bị hủy được giải bằng `UNAVAILABLE`. Ca kiểm bắt đầu tắt khi một lời gọi 400 ms đang chạy:
+**Thứ tự tắt.** Bản đầu của lab dừng batcher trước server: lời gọi đang chạy bị huỷ, client nhận `UNAVAILABLE` dù việc sắp xong. Thứ tự đúng là ba bước ở khối `finally`: `NOT_SERVING`, để gRPC đợi lời gọi đang chạy (tối đa `shutdown_grace`) khi worker còn sống, rồi mới dừng worker; Future còn treo khi worker bị huỷ được giải bằng `UNAVAILABLE`. Ca kiểm bắt đầu tắt khi một lời gọi 400 ms đang chạy:
 
 ```text
 lời gọi đang chạy lúc bắt đầu tắt: OK, 128 số; mô hình giả chạy 1 lần
@@ -171,7 +171,7 @@ Tải máy là 214,9 lúc đầu và 162,6 lúc hết phần p50/p95, trên 10 l
 
 ## Deadline hai đầu, hàng chờ đầy và max_pending_requests
 
-Bài 37 cho thấy deadline chạy ở hai đầu: client giữ đồng hồ riêng, server hủy handler khi hết hạn. Với thread suy luận có bốn trường hợp, dựng bằng một mô hình giả mất 400 ms mỗi lần (`FakeEmbedder`, không phải mô hình thật):
+Bài 37 cho thấy deadline chạy ở hai đầu: client giữ đồng hồ riêng, server huỷ handler khi hết hạn. Với thread suy luận có bốn trường hợp, dựng bằng một mô hình giả mất 400 ms mỗi lần (`FakeEmbedder`, không phải mô hình thật):
 
 ```text
 (a) B hết hạn khi xếp hàng: client nhận DEADLINE_EXCEEDED sau 155 ms; suy luận 1 ảnh, bỏ qua 1 (hủy 1, hết hạn 0); mô hình giả chạy 1 lần
@@ -180,7 +180,7 @@ Bài 37 cho thấy deadline chạy ở hai đầu: client giữ đồng hồ ri�
 (d) yêu cầu có hạn đã qua: DeadlineExpired (hết hạn trong hàng chờ); skipped_expired=1, suy luận 0 ảnh
 ```
 
-Ca (a): B xếp hàng sau A và hết hạn khi chưa tới lượt. gRPC hủy handler, `gather` chuyển lệnh hủy xuống `Future`, và khi lập batch kế tiếp worker thấy `Future` đã hủy mà bỏ qua: mô hình chỉ chạy một lần, cho A. Ca (b) là câu hỏi đầu bài: yêu cầu đã vào thread thì không dừng được, kết quả bị vứt. Ca (c): ngân sách còn dưới `min_budget_ms` (5 ms) thì handler từ chối ngay, không xếp hàng. Ca (d) thử riêng batcher: mốc hết hạn đã qua đúng lúc lập batch bị loại với `DeadlineExpired`, không tốn suy luận. Mốc tuyệt đối đó đổi từ `context.time_remaining()` và đi cùng yêu cầu.
+Ca (a): B xếp hàng sau A và hết hạn khi chưa tới lượt. gRPC huỷ handler, `gather` chuyển lệnh huỷ xuống `Future`, và khi lập batch kế tiếp worker thấy `Future` đã huỷ mà bỏ qua: mô hình chỉ chạy một lần, cho A. Ca (b) là câu hỏi đầu bài: yêu cầu đã vào thread thì không dừng được, kết quả bị vứt. Ca (c): ngân sách còn dưới `min_budget_ms` (5 ms) thì handler từ chối ngay, không xếp hàng. Ca (d) thử riêng batcher: mốc hết hạn đã qua đúng lúc lập batch bị loại với `DeadlineExpired`, không tốn suy luận. Mốc tuyệt đối đó đổi từ `context.time_remaining()` và đi cùng yêu cầu.
 
 Hàng chờ là chỗ thứ hai cần giới hạn: `queue_size` mặc định 64; đầy thì `submit_many` ném `QueueFull` và handler trả `RESOURCE_EXHAUSTED` ngay, trong vài chục mili giây thay vì 400 ms. `Compare` cần hai chỗ nên thấy chỉ còn 1 chỗ vẫn bị từ chối, không đặt nửa chừng:
 
@@ -189,7 +189,7 @@ Hàng chờ là chỗ thứ hai cần giới hạn: `queue_size` mặc định 6
 Compare khi hàng chờ còn 1 chỗ: RESOURCE_EXHAUSTED; rejected_full=2
 ```
 
-Hàng chờ ứng dụng không phải hàng chờ duy nhất. Lõi gRPC phía server cũng giữ hàng cho các lời gọi chưa giao cho handler, với hai cơ chế làm lời gọi bị `CANCELLED` mà handler và `Stats` không thấy. **Ngưỡng số lượng:** vượt ngưỡng mềm `grpc.server.max_pending_requests` (mặc định 1.000) thì từ chối theo xác suất, chạm ngưỡng cứng `..._hard_limit` (3.000) thì từ chối hết ([tài liệu channel arguments](https://grpc.github.io/grpc/core/group__grpc__arg__keys.html)); hàng chờ ứng dụng không chạm nó, vì handler chỉ đặt việc vào `Queue`, còn cú dồn 3.000 lời gọi đến nhanh hơn event loop nhận chúng ra khỏi lõi. **Giới hạn tuổi:** `grpc.server_max_unrequested_time_in_server` (tên có trong grpcio 1.85.1; theo mã nguồn `server.cc` mặc định 30 giây) hủy lời gọi nằm trong hàng của lõi quá lâu. Dấu khác nhau: ngưỡng số lượng hủy gần như ngay (t ≈ 0), giới hạn tuổi hủy ở đúng mốc tuổi. `--burst` bắn 3.000 lời gọi `Embed` cùng lúc vào server ở tiến trình riêng, in mốc t của từng `CANCELLED`, ở bốn cấu hình (cuối cùng: suy luận chặn event loop và giới hạn tuổi 5 giây):
+Hàng chờ ứng dụng không phải hàng chờ duy nhất. Lõi gRPC phía server cũng giữ hàng cho các lời gọi chưa giao cho handler, với hai cơ chế làm lời gọi bị `CANCELLED` mà handler và `Stats` không thấy. **Ngưỡng số lượng:** vượt ngưỡng mềm `grpc.server.max_pending_requests` (mặc định 1.000) thì từ chối theo xác suất, chạm ngưỡng cứng `..._hard_limit` (3.000) thì từ chối hết ([tài liệu channel arguments](https://grpc.github.io/grpc/core/group__grpc__arg__keys.html)); hàng chờ ứng dụng không chạm nó, vì handler chỉ đặt việc vào `Queue`, còn cú dồn 3.000 lời gọi đến nhanh hơn event loop nhận chúng ra khỏi lõi. **Giới hạn tuổi:** `grpc.server_max_unrequested_time_in_server` (tên có trong grpcio 1.85.1; theo mã nguồn `server.cc` mặc định 30 giây) huỷ lời gọi nằm trong hàng của lõi quá lâu. Dấu khác nhau: ngưỡng số lượng huỷ gần như ngay (t ≈ 0), giới hạn tuổi huỷ ở đúng mốc tuổi. `--burst` bắn 3.000 lời gọi `Embed` cùng lúc vào server ở tiến trình riêng, in mốc t của từng `CANCELLED`, ở bốn cấu hình (cuối cùng: suy luận chặn event loop và giới hạn tuổi 5 giây):
 
 ```text
 máy: 10 lõi logic; tải máy lúc đo (load average 1 phút): 271.9
@@ -205,7 +205,7 @@ tải máy lúc đo (load average 1 phút): 194.9 (cuối lần đo)
 
 Cấu hình đầu: 719 lời gọi `CANCELLED` ở t = 0,2 đến 0,3 giây, 1.905 lời gọi bị hàng chờ của ta từ chối, 376 được phục vụ: t gần 0 là dấu của ngưỡng số lượng. Cấu hình hai (hàng chờ 5.000): hết `RESOURCE_EXHAUSTED` nhưng vẫn 695 `CANCELLED` ở t = 0,4 giây, nên hàng chờ ứng dụng không chặn được ngưỡng lõi; 1.162 lời gọi hết hạn 60 giây sau khi chiếm chỗ. Cấu hình ba (ngưỡng lõi 20.000 và 40.000): hết `CANCELLED`, nhưng 1.694 lời gọi hết hạn: nâng ngưỡng chỉ đổi chỗ chờ. Cấu hình bốn: 2.950 `CANCELLED` ở t = 5,2 đến 5,3 giây, đúng mốc giới hạn tuổi đã đặt, chỉ 50 lời gọi được phục vụ. Mốc t trùng giới hạn tuổi là dấu hiệu, không phải bằng chứng từ bên trong lõi; `details` chỉ ghi «CANCELLED» ở cả hai cơ chế. Số đổi mỗi lần chạy, ở tải 200 đến gần 300.
 
-Phía gọi nên coi `CANCELLED` không do mình hủy như một dạng quá tải và lùi dần, và giữ tổng số lời gọi đang bay (cộng mọi client) dưới sức server. Nâng `max_pending_requests` chỉ để hiểu cơ chế: nó đẩy lời gọi từ chỗ bị từ chối sang chỗ chờ lâu rồi hết hạn.
+Phía gọi nên coi `CANCELLED` không do mình huỷ như một dạng quá tải và lùi dần, và giữ tổng số lời gọi đang bay (cộng mọi client) dưới sức server. Nâng `max_pending_requests` chỉ để hiểu cơ chế: nó đẩy lời gọi từ chỗ bị từ chối sang chỗ chờ lâu rồi hết hạn.
 
 Cuối cùng, cái giá của suy luận chạy ngay trên event loop. Phần cuối của `--bench` đo một health check trong lúc 64 lời gọi `Embed` đang chạy, khi suy luận ở thread riêng và khi chạy trong event loop (`--inline`):
 
@@ -215,7 +215,7 @@ chặn event loop (--inline)   247 lần hỏi: p50 243.0 ms, p95 1145.4 ms, l�
 tải máy lúc đo (load average 1 phút): 267.8 (cuối lần đo)
 ```
 
-Ở thread riêng, health check trả lời với p50 3,7 ms, p95 41,3 ms (950 lần hỏi). Chạy trong event loop, p50 là 243,0 ms, p95 1.145,4 ms, lớn nhất 1.534,2 ms (247 lần hỏi): mỗi lần suy luận chặn cả event loop nên health check và mọi lời gọi khác xếp hàng sau nó. Chênh lệch cỡ 65 lần ở p50 đủ lớn để nhiễu tải không che được, và probe có timeout ngắn hơn 1,5 giây sẽ báo hỏng một service vẫn khỏe.
+Ở thread riêng, health check trả lời với p50 3,7 ms, p95 41,3 ms (950 lần hỏi). Chạy trong event loop, p50 là 243,0 ms, p95 1.145,4 ms, lớn nhất 1.534,2 ms (247 lần hỏi): mỗi lần suy luận chặn cả event loop nên health check và mọi lời gọi khác xếp hàng sau nó. Chênh lệch cỡ 65 lần ở p50 đủ lớn để nhiễu tải không che được, và probe có timeout ngắn hơn 1,5 giây sẽ báo hỏng một service vẫn khoẻ.
 
 | Mã | Khi nào ở service này | Gọi lại y nguyên? |
 | --- | --- | --- |
@@ -223,7 +223,7 @@ tải máy lúc đo (load average 1 phút): 267.8 (cuối lần đo)
 | `DEADLINE_EXCEEDED` | hết hạn khi xếp hàng, ngân sách quá ngắn, hoặc client tự hết hạn | Có thể, nếu còn ngân sách |
 | `RESOURCE_EXHAUSTED` | hàng chờ suy luận đầy; tin nhắn vượt giới hạn nhận của server | Có, sau khi lùi dần; tin nhắn quá lớn thì không |
 | `UNAVAILABLE` | mô hình đang nạp hoặc server đang tắt | Có, với lùi dần |
-| `CANCELLED` | một bên chủ động hủy; hoặc lõi gRPC hủy vì ngưỡng số lượng hay giới hạn tuổi ở trên | Tùy lý do hủy |
+| `CANCELLED` | một bên chủ động huỷ; hoặc lõi gRPC huỷ vì ngưỡng số lượng hay giới hạn tuổi ở trên | Tuỳ lý do huỷ |
 
 ## ONNX Runtime providers: CPU, CoreML và GPU
 
@@ -263,13 +263,13 @@ OK 56/56
 | --- | --- |
 | `UNAVAILABLE` ngay sau khi khởi động | health của service có phải `NOT_SERVING` (đang nạp, warm-up) không; chờ `SERVING` rồi mới gọi |
 | `DEADLINE_EXCEEDED` hàng loạt dù mô hình nhanh | hàng chờ có dài không (`rejected_full`, `skipped_*` trong `Stats`); suy luận có chạy trong event loop không |
-| `CANCELLED` nhưng handler không thấy | thời điểm hủy: gần t = 0 là ngưỡng số lượng, đúng mốc tuổi là giới hạn tuổi; giảm tải từ phía gọi |
+| `CANCELLED` nhưng handler không thấy | thời điểm huỷ: gần t = 0 là ngưỡng số lượng, đúng mốc tuổi là giới hạn tuổi; giảm tải từ phía gọi |
 | Batch 8 lỗi hình dạng đầu vào | khai báo `[1, 3, 112, 112]` của file ONNX gốc; vá chiều batch; thử `pad_to` nếu provider biên dịch lại |
 | Điểm khác nhau giữa hai môi trường | `model_version`, provider, cách căn chỉnh và tiền xử lý (RGB, 0..255, 112×112) có giống nhau không |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Kênh không mã hóa (<code>insecure</code>): production dùng TLS hoặc mTLS. Ảnh là crop Olivetti (64×64, xám) căn chỉnh bằng YuNet; selfie thật cần phát hiện, căn chỉnh và kiểm chất lượng trước (bài 48, 50), và độ chính xác ở đây không phản ánh hệ thống thật. Giải mã ảnh chạy trong event loop vì ảnh nhỏ. Production cần nhiều bản sao service và đo lại <code>max_batch</code>, <code>max_wait_ms</code> trên phần cứng thật. Số đo lấy trên máy dùng chung rất bận, chỉ đọc theo bậc độ lớn; chưa đo GPU. Vector khuôn mặt là dữ liệu sinh trắc học: không ghi vào log (bài 53).</p></div>
+<p>Kênh không mã hoá (<code>insecure</code>): production dùng TLS hoặc mTLS. Ảnh là crop Olivetti (64×64, xám) căn chỉnh bằng YuNet; selfie thật cần phát hiện, căn chỉnh và kiểm chất lượng trước (bài 48, 50), và độ chính xác ở đây không phản ánh hệ thống thật. Giải mã ảnh chạy trong event loop vì ảnh nhỏ. Production cần nhiều bản sao service và đo lại <code>max_batch</code>, <code>max_wait_ms</code> trên phần cứng thật. Số đo lấy trên máy dùng chung rất bận, chỉ đọc theo bậc độ lớn; chưa đo GPU. Vector khuôn mặt là dữ liệu sinh trắc học: không ghi vào log (bài 53).</p></div>
 
 **Bài tập:** Chạy `--bench --max-wait-ms 50` rồi so p50 ở C=1 với lần chạy mặc định (5 ms). Bạn kỳ vọng p50 đổi theo hướng nào và tối đa bao nhiêu, và vì sao tải thấp chịu thiệt nhiều nhất?
 

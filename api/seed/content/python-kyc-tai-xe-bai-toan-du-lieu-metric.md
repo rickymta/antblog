@@ -133,7 +133,7 @@ Bộ này (seed 2026) dùng cho bài 41 và 42; các bài sau sinh bộ riêng v
 
 ## Đo OCR: CER, WER, precision và cổng duyệt
 
-**Khoảng cách Levenshtein** là số phép sửa ít nhất (thay, xóa hoặc chèn một phần tử, mỗi phép giá 1) để biến chuỗi này thành chuỗi kia. Hàm trong `metrics.py` chạy trên bất kỳ dãy nào, nên đếm được cả ký tự (CER) lẫn từ (WER):
+**Khoảng cách Levenshtein** là số phép sửa ít nhất (thay, xoá hoặc chèn một phần tử, mỗi phép giá 1) để biến chuỗi này thành chuỗi kia. Hàm trong `metrics.py` chạy trên bất kỳ dãy nào, nên đếm được cả ký tự (CER) lẫn từ (WER):
 
 ```python
 def levenshtein(ref: Sequence[str], hyp: Sequence[str]) -> int:

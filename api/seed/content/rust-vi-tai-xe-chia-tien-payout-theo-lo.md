@@ -194,9 +194,9 @@ lô thứ hai: chọn DR-004, DR-005
 ví                  : DR-001 0 VND, DR-002 0 VND, DR-003 0 VND, DR-004 0 VND, DR-005 0 VND
 ```
 
-`SELECT` thường, không chỉ mục unique: hai lô chi trùng, ba ví âm 61.200. Có chỉ mục unique theo kỳ: lô thua nhận 23505 và rollback toàn bộ, sổ đúng nhưng một lô bị bỏ phí. `FOR UPDATE SKIP LOCKED`: lô sau bỏ qua ví đang khóa và lấy phần còn lại, không trùng, ví nào cũng về 0.
+`SELECT` thường, không chỉ mục unique: hai lô chi trùng, ba ví âm 61.200. Có chỉ mục unique theo kỳ: lô thua nhận 23505 và rollback toàn bộ, sổ đúng nhưng một lô bị bỏ phí. `FOR UPDATE SKIP LOCKED`: lô sau bỏ qua ví đang khoá và lấy phần còn lại, không trùng, ví nào cũng về 0.
 
-Lô nào lấy ví nào là may rủi, hai tập còn có thể xen kẽ; khối trên chỉ là một lần chạy. Test chỉ kiểm bất biến: hai tập rời nhau, hợp lại đủ năm ví, kích thước 2 và 3, mọi ví về 0. Khóa trên hàng ví còn khiến việc kiểm hạn mức rồi ghi của một tài xế không thể xen với lô khác. Chỉ mục unique vẫn giữ làm lưới thứ hai cho đường ghi không đi qua khóa, như một script SQL chạy tay.
+Lô nào lấy ví nào là may rủi, hai tập còn có thể xen kẽ; khối trên chỉ là một lần chạy. Test chỉ kiểm bất biến: hai tập rời nhau, hợp lại đủ năm ví, kích thước 2 và 3, mọi ví về 0. Khoá trên hàng ví còn khiến việc kiểm hạn mức rồi ghi của một tài xế không thể xen với lô khác. Chỉ mục unique vẫn giữ làm lưới thứ hai cho đường ghi không đi qua khoá, như một script SQL chạy tay.
 
 ## Timeout sau khi ngân hàng đã nhận lệnh
 
@@ -363,7 +363,7 @@ lượt gửi thứ ba               : SendReport { sent: 0, rejected: 0, timed_
 lệnh ngân hàng đã nhận        : DR-001=1 DR-003=1 DR-004=1 DR-005=1
 ```
 
-Lệnh tạo lô sau chờ lệnh trước commit, thấy conflict và trả về đúng lô đã có. Hai lượt gửi đồng thời cùng gọi ngân hàng, nhưng ngân hàng trả lệnh cũ theo `reference` và chỉ một bên thắng lúc sang `SENT`, nên tổng là 4 chứ không phải 8. Cùng mô hình với [bài transaction và idempotency của loạt .NET](/articles/dotnet10-transaction-concurrency-idempotency): khóa do bên gọi đặt, bên nhận lưu và trả lại kết quả cũ.
+Lệnh tạo lô sau chờ lệnh trước commit, thấy conflict và trả về đúng lô đã có. Hai lượt gửi đồng thời cùng gọi ngân hàng, nhưng ngân hàng trả lệnh cũ theo `reference` và chỉ một bên thắng lúc sang `SENT`, nên tổng là 4 chứ không phải 8. Cùng mô hình với [bài transaction và idempotency của loạt .NET](/articles/dotnet10-transaction-concurrency-idempotency): khoá do bên gọi đặt, bên nhận lưu và trả lại kết quả cũ.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -375,7 +375,7 @@ cargo run --manifest-path examples/toi-noi-rust/44-driver-wallet-payout/Cargo.to
 cargo test --manifest-path examples/toi-noi-rust/44-driver-wallet-payout/Cargo.toml
 ```
 
-`--verify` in các khối kết quả ở trên (bài trích từng dòng nguyên văn) rồi kiểm từng giá trị; đạt thì in `VERIFY OK` và thoát mã 0. `cargo test` chạy 7 unit test và 10 test tích hợp, mỗi test một schema `lab_<uuid>` xóa khi xong. Lab dùng `sqlx` 0.9.0, `tokio` 1.54.1, `jiff` 0.2.39 và `ledger-core` của lab 20.
+`--verify` in các khối kết quả ở trên (bài trích từng dòng nguyên văn) rồi kiểm từng giá trị; đạt thì in `VERIFY OK` và thoát mã 0. `cargo test` chạy 7 unit test và 10 test tích hợp, mỗi test một schema `lab_<uuid>` xoá khi xong. Lab dùng `sqlx` 0.9.0, `tokio` 1.54.1, `jiff` 0.2.39 và `ledger-core` của lab 20.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

@@ -136,7 +136,7 @@ ApiManagementGatewayLogs
 | order by errors desc
 ```
 
-Để nối trace, logger Application Insights của APIM truyền header `traceparent` (W3C) tới backend; service có OpenTelemetry ([bài 37 loạt C#](/articles/dotnet10-opentelemetry-traces-metrics-logs)) nối span vào cùng trace. Tên tuỳ chọn correlation khác nhau giữa các phiên bản, hãy kiểm tài liệu. Để debug từng request, **trace** của APIM trả về chuỗi policy đã chạy, hữu ích nhất khi tìm policy nào chặn request. Cách bật trace đã đổi (Test console trong portal, hoặc debug credential ngắn hạn thay cho header cũ), và trace lộ chi tiết nội bộ nên không bật bừa trên production.
+Để nối trace, logger Application Insights của APIM truyền header `traceparent` (W3C) tới backend; service có OpenTelemetry ([bài 37 loạt C#](/articles/dotnet10-opentelemetry-traces-metrics-logs)) nối span vào cùng trace. Tên tuỳ chọn correlation khác nhau giữa các phiên bản, hãy kiểm tra tài liệu. Để debug từng request, **trace** của APIM trả về chuỗi policy đã chạy, hữu ích nhất khi tìm policy nào chặn request. Cách bật trace đã đổi (Test console trong portal, hoặc debug credential ngắn hạn thay cho header cũ), và trace lộ chi tiết nội bộ nên không bật bừa trên production.
 
 ## Lab: APIM Consumption, product Partner, key và token
 

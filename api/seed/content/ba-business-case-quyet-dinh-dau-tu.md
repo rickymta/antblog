@@ -36,7 +36,7 @@ Không lấy 80 cuộc gọi của baseline P01 để suy ra con số 200; bộ 
 
 ## 4. Tính cả chi phí duy trì
 
-Giả sử chi phí ban đầu 12 triệu, duy trì 0,2 triệu/tháng. Nếu lợi ích quy đổi 1 triệu/tháng được hiện thực hóa đều, lợi ích ròng là 0,8 triệu/tháng và thời gian hoàn vốn đơn giản là 15 tháng. Phép tính bỏ qua giá trị thời gian của tiền, biến động và rủi ro; chỉ minh họa cách làm rõ giả định.
+Giả sử chi phí ban đầu 12 triệu, duy trì 0,2 triệu/tháng. Nếu lợi ích quy đổi 1 triệu/tháng được hiện thực hoá đều, lợi ích ròng là 0,8 triệu/tháng và thời gian hoàn vốn đơn giản là 15 tháng. Phép tính bỏ qua giá trị thời gian của tiền, biến động và rủi ro; chỉ minh hoạ cách làm rõ giả định.
 
 ## 5. Kiểm độ nhạy
 
@@ -48,7 +48,7 @@ Gán người theo dõi metric, điều kiện ghi nhận lợi ích và mốc r
 
 ## 7. Thực hành
 
-Viết đề xuất xin một đợt kiểm chứng cho P07, gồm quyết định, ba phương án, giả định nhạy nhất, chi phí chưa biết và tín hiệu dừng. Không dùng phép tính minh họa làm số thực của sáng kiến.
+Viết đề xuất xin một đợt kiểm chứng cho P07, gồm quyết định, ba phương án, giả định nhạy nhất, chi phí chưa biết và tín hiệu dừng. Không dùng phép tính minh hoạ làm số thực của sáng kiến.
 
 <details><summary>Điểm phải phân biệt</summary><p>Mục tiêu là điều muốn đạt, forecast là ước lượng có giả định, realized benefit là lợi ích đã được xác minh. UAT pass hoặc có ngân sách không biến mục tiêu thành lợi ích đã đạt.</p></details>
 

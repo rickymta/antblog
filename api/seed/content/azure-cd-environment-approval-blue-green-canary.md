@@ -74,7 +74,7 @@ jobs:
 
 ## Approval là luật của environment, và Azure cũng phải đồng ý
 
-Dòng `environment: prod` không tự có người duyệt. Người duyệt cấu hình ở Settings, mục Environments: required reviewers, tuỳ chọn cấm tự duyệt, và giới hạn nhánh được deploy. Khi job trỏ tới `prod`, runner không bắt đầu bước nào cho tới khi reviewer chấp thuận. Biến và secret của environment cũng chỉ được nạp sau đó, nên `vars.AZURE_CLIENT_ID` của prod không lộ cho job staging. Với repository private, required reviewers phụ thuộc gói GitHub, hãy kiểm tài liệu.
+Dòng `environment: prod` không tự có người duyệt. Người duyệt cấu hình ở Settings, mục Environments: required reviewers, tuỳ chọn cấm tự duyệt, và giới hạn nhánh được deploy. Khi job trỏ tới `prod`, runner không bắt đầu bước nào cho tới khi reviewer chấp thuận. Biến và secret của environment cũng chỉ được nạp sau đó, nên `vars.AZURE_CLIENT_ID` của prod không lộ cho job staging. Với repository private, required reviewers phụ thuộc gói GitHub, hãy kiểm tra tài liệu.
 
 Phần quan trọng hơn nằm phía Azure. Ở bài 42, federated credential có `subject` chứa tên environment, dạng `repo:<org>/<repo>:environment:prod`. Hệ quả: Microsoft Entra chỉ phát token cho identity prod khi job chạy trong environment `prod`, tức là sau khi qua cổng duyệt. Ai sửa workflow để bỏ dòng `environment:` sẽ có subject khác và bị từ chối. Approval vì vậy là cổng để lấy danh tính, nhưng chỉ khi identity prod là identity riêng và role của nó gắn ở `rg-toinoi-trips-prod-sea`, không phải cả subscription.
 
@@ -205,7 +205,7 @@ az containerapp revision list -g rg-toinoi-trips-prod-sea -n ca-toinoi-trips-pro
 
 **Bài tập:** lúc 3 giờ sáng gate báo `errorRate` bằng 0 ở bước 10% sau 15 phút, nhưng `total` chỉ có 6 request. Bạn có nên cho lên 50% không? Cách khắc phục không cần chờ người thức dậy là gì?
 
-<details><summary>Xem lời giải</summary><p>Không nên. Sáu request không đủ để nói revision mới khỏe, vì một lỗi chỉ xảy ra ở 5% request vẫn có thể không xuất hiện. Gate cần ngưỡng `total` tối thiểu và coi «chưa đủ dữ liệu» là fail hoặc kéo dài quan sát. Với khung giờ ít traffic, có thể chạy thêm smoke test chủ động có xác thực qua label `canary` để tạo request, hoặc đơn giản hơn là không bắt đầu canary ngoài giờ có lưu lượng đủ.</p></details>
+<details><summary>Xem lời giải</summary><p>Không nên. Sáu request không đủ để nói revision mới khoẻ, vì một lỗi chỉ xảy ra ở 5% request vẫn có thể không xuất hiện. Gate cần ngưỡng `total` tối thiểu và coi «chưa đủ dữ liệu» là fail hoặc kéo dài quan sát. Với khung giờ ít traffic, có thể chạy thêm smoke test chủ động có xác thực qua label `canary` để tạo request, hoặc đơn giản hơn là không bắt đầu canary ngoài giờ có lưu lượng đủ.</p></details>
 
 ## Học tiếp từ đây
 

@@ -64,7 +64,7 @@ Sau bài này, bạn có thể:
 
 ### 2.2. Deployment test khác smoke của SYS-01 ở đâu
 
-SYS-01 chạy smoke trên ứng dụng **lắp ráp trong tiến trình test** bằng supertest: không có cổng mạng, không có biến môi trường, không có bước khởi động. Nó trả lời "mã của build này có đủ tốt để kiểm sâu". Deployment test chạy trên **bản đang chạy**: một tiến trình riêng, đọc cấu hình từ môi trường như khi triển khai, nghe một cổng, và được kiểm qua HTTP thật. Nó trả lời "chính bản triển khai này có đúng cấu hình, sẵn sàng, và dùng được không".
+SYS-01 chạy smoke trên ứng dụng **lắp ráp trong tiến trình test** bằng supertest: không có cổng mạng, không có biến môi trường, không có bước khởi động. Nó trả lời "mã của build này có đủ tốt để kiểm thử chuyên sâu". Deployment test chạy trên **bản đang chạy**: một tiến trình riêng, đọc cấu hình từ môi trường như khi triển khai, nghe một cổng, và được kiểm qua HTTP thật. Nó trả lời "chính bản triển khai này có đúng cấu hình, sẵn sàng, và dùng được không".
 
 Deployment test không phải một test level của ISTQB. Nó thường nằm cuối system testing và chồng lấn với operational acceptance testing (mục kiểm tra khả năng cài đặt, cấu hình, backup/restore trong acceptance). Ghi rõ phạm vi trong test plan quan trọng hơn tranh luận tên gọi.
 

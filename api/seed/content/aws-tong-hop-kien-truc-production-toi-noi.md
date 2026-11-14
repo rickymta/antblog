@@ -68,7 +68,7 @@ Bảng dưới đi theo thứ tự thời gian, ghi chỗ nào bảo đảm khô
 | 5. Tìm tài xế | Saga gửi yêu cầu kèm task token qua SQS; `dispatch` tìm trong DynamoDB, đẩy offer qua WebSocket | Offer có TTL và `bookingId` | Offer có thể mất, re-dispatch sau timeout |
 | 6. Nhận chuyến | DynamoDB `TransactWriteItems`, rồi `SendTaskSuccess` | Điều kiện trạng thái, khoá `IDEMP#` | Không: một người thắng |
 | 7. Xác nhận, thu tiền | Step Functions, bù trừ khi lỗi | Khoá `bookingId#bước` | Không: có hàng đợi xử lý thủ công |
-| 8. Webhook VíXanh | API Gateway, Lambda xác minh chữ ký, SQS | Khử trùng theo mã giao dịch | Webhook có thể đến trễ; đối soát bù |
+| 8. Webhook VíXanh | API Gateway, Lambda xác minh chữ ký, SQS | Khử trùng lặp theo mã giao dịch | Webhook có thể đến trễ; đối soát bù |
 | 9. Sự kiện hoàn tất | EventBridge, rule tới thông báo và thống kê | `eventId`, DLQ của rule | Có archive để replay |
 | 10. Toạ độ GPS | Tracking, Kinesis, Firehose, S3 | Theo `driverId` và thời điểm | Vị trí hiện tại tự dựng lại; lịch sử có thể lấy mẫu |
 | 11. Đối soát đêm | Step Functions distributed map đọc S3, Athena | Theo `tripId` và ngày | Không: lô lỗi ghi lại để xem |

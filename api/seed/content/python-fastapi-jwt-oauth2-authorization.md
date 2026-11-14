@@ -15,7 +15,7 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Token của khách <code>CU-001</code> có payload <code>"scope": "customer"</code>. Khách này giải mã phần payload bằng base64, sửa thành <code>"scope": "dispatcher"</code>, ghép lại với phần chữ ký cũ rồi gửi. Server có chấp nhận không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Chữ ký được tính trên header và payload, sửa một ký tự là chữ ký không còn khớp, và server trả 401. Nhưng chiều ngược lại đáng chú ý: <b>đọc</b> payload thì ai cũng làm được, vì JWT mặc định chỉ ký chứ không mã hóa. Bài chạy đúng ca này.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Chữ ký được tính trên header và payload, sửa một ký tự là chữ ký không còn khớp, và server trả 401. Nhưng chiều ngược lại đáng chú ý: <b>đọc</b> payload thì ai cũng làm được, vì JWT mặc định chỉ ký chứ không mã hoá. Bài chạy đúng ca này.</p></details>
 </div>
 
 ## Ba người gọi, ba quyền khác nhau
@@ -78,7 +78,7 @@ Sau khi mật khẩu đúng, server phát một **JWT** (JSON Web Token): chuỗ
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 250" role="img" aria-label="Một JWT gồm ba phần: header khai thuật toán HS256, payload chứa các claim sub, scope, iss, aud, iat, exp, và chữ ký tính từ header, payload và khóa. Header và payload đọc được bằng base64; chữ ký chống việc sửa nội dung."><defs><marker id="py34-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="250" height="110" rx="10" class="f-pk-soft s-pk"/><text x="36" y="58" class="t-b">Header</text><text x="36" y="84" class="t-mono">{"alg":"HS256",</text><text x="36" y="102" class="t-mono"> "typ":"JWT"}</text><text x="279" y="92" class="t-b">.</text><rect x="290" y="30" width="340" height="110" rx="10" class="f-pk-soft s-pk"/><text x="306" y="58" class="t-b">Payload (các claim)</text><text x="306" y="82" class="t-mono">"sub":"CU-001", "scope":"customer"</text><text x="306" y="100" class="t-mono">"iss", "aud", "iat", "exp"</text><text x="306" y="122" class="t-small">tối thiểu để biết ai, quyền gì, hết hạn khi nào</text><text x="639" y="92" class="t-b">.</text><rect x="650" y="30" width="210" height="110" rx="10" class="f-warn-soft s-warn"/><text x="666" y="58" class="t-b">Chữ ký</text><text x="666" y="84" class="t-small">HMAC-SHA256 của</text><text x="666" y="102" class="t-small">header.payload + khóa</text><path d="M20 164 L630 164" class="f-none s-pk" stroke-width="2"/><text x="20" y="188" class="t-small">Đọc được bằng base64, không cần khóa. Đừng đặt bí mật hay số giấy tờ ở đây.</text><path d="M650 164 L860 164" class="f-none s-warn" stroke-width="2"/><text x="650" y="188" class="t-small">Chỉ bên có khóa mới tạo lại được.</text><text x="20" y="226" class="t-small">Server nhận token thì tính lại chữ ký từ header.payload bằng khóa của mình rồi so; lệch một ký tự là 401.</text></svg>
+<svg viewBox="0 0 880 250" role="img" aria-label="Một JWT gồm ba phần: header khai thuật toán HS256, payload chứa các claim sub, scope, iss, aud, iat, exp, và chữ ký tính từ header, payload và khoá. Header và payload đọc được bằng base64; chữ ký chống việc sửa nội dung."><defs><marker id="py34-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="250" height="110" rx="10" class="f-pk-soft s-pk"/><text x="36" y="58" class="t-b">Header</text><text x="36" y="84" class="t-mono">{"alg":"HS256",</text><text x="36" y="102" class="t-mono"> "typ":"JWT"}</text><text x="279" y="92" class="t-b">.</text><rect x="290" y="30" width="340" height="110" rx="10" class="f-pk-soft s-pk"/><text x="306" y="58" class="t-b">Payload (các claim)</text><text x="306" y="82" class="t-mono">"sub":"CU-001", "scope":"customer"</text><text x="306" y="100" class="t-mono">"iss", "aud", "iat", "exp"</text><text x="306" y="122" class="t-small">tối thiểu để biết ai, quyền gì, hết hạn khi nào</text><text x="639" y="92" class="t-b">.</text><rect x="650" y="30" width="210" height="110" rx="10" class="f-warn-soft s-warn"/><text x="666" y="58" class="t-b">Chữ ký</text><text x="666" y="84" class="t-small">HMAC-SHA256 của</text><text x="666" y="102" class="t-small">header.payload + khoá</text><path d="M20 164 L630 164" class="f-none s-pk" stroke-width="2"/><text x="20" y="188" class="t-small">Đọc được bằng base64, không cần khoá. Đừng đặt bí mật hay số giấy tờ ở đây.</text><path d="M650 164 L860 164" class="f-none s-warn" stroke-width="2"/><text x="650" y="188" class="t-small">Chỉ bên có khoá mới tạo lại được.</text><text x="20" y="226" class="t-small">Server nhận token thì tính lại chữ ký từ header.payload bằng khoá của mình rồi so; lệch một ký tự là 401.</text></svg>
 </div>
 <figcaption>Hình 2. Ba phần của một JWT. Chữ ký bảo vệ tính nguyên vẹn của hai phần đầu, không che giấu chúng.</figcaption>
 </figure>
@@ -117,7 +117,7 @@ Sáu claim, không hơn: `sub` chủ thể, `scope` quyền (chuỗi cách nhau 
 
 Ba chi tiết cần nhớ. Hai chi tiết đầu là khuyến nghị của RFC 8725 (JWT Best Current Practices): **luôn khai danh sách thuật toán** khi kiểm (mục 3.1), vì header do người gửi viết; và **kiểm `iss`, `aud`** (mục 3.8, 3.9), vì token phát cho dịch vụ khác không được dùng ở đây dù chữ ký đúng. Chi tiết thứ ba là quyết định của bài, không phải của RFC: **đòi đủ claim cần thiết** (`require`), vì thiếu `exp` mà không đòi thì token sống mãi. Lab còn từ chối token có `scope` không phải chuỗi.
 
-**Khóa ký là chỗ dễ sai nhất.** HS256 dùng một khóa chung để ký và kiểm. RFC 7518 mục 3.2 đòi khóa ít nhất 32 byte; RFC 8725 mục 3.5 đòi thêm rằng mật khẩu con người nhớ được **không** được dùng trực tiếp làm khóa HS256. Cách đúng là sinh ngẫu nhiên, ví dụ `secrets.token_urlsafe(32)` (43 ký tự). `Settings` của lab bắt cả ba lỗi và **không có giá trị mặc định** cho `environment` lẫn `jwt_secret`. Bản đầu của bài mặc định là khóa công khai của lab và chỉ báo lỗi khi đặt `environment="prod"`: quên đặt biến thì dịch vụ mở ra với khóa cả thế giới biết. Giờ thiếu biến là không khởi động (output của `uvicorn --factory` thật):
+**Khoá ký là chỗ dễ sai nhất.** HS256 dùng một khoá chung để ký và kiểm. RFC 7518 mục 3.2 đòi khoá ít nhất 32 byte; RFC 8725 mục 3.5 đòi thêm rằng mật khẩu con người nhớ được **không** được dùng trực tiếp làm khoá HS256. Cách đúng là sinh ngẫu nhiên, ví dụ `secrets.token_urlsafe(32)` (43 ký tự). `Settings` của lab bắt cả ba lỗi và **không có giá trị mặc định** cho `environment` lẫn `jwt_secret`. Bản đầu của bài mặc định là khoá công khai của lab và chỉ báo lỗi khi đặt `environment="prod"`: quên đặt biến thì dịch vụ mở ra với khoá cả thế giới biết. Giờ thiếu biến là không khởi động (output của `uvicorn --factory` thật):
 
 ```text
 pydantic_core._pydantic_core.ValidationError: 2 validation errors for Settings
@@ -127,7 +127,7 @@ jwt_secret
   Field required [type=missing]
 ```
 
-Khóa sai cũng không được lộ. Với `TOINOI_JWT_SECRET=my-real-short-key`, `ValidationError` mặc định của pydantic in cả `input_value`, tức khóa thật nằm ngay trong log lúc khởi động. `hide_input_in_errors=True` tắt việc đó, và `--verify` kiểm chuỗi lỗi không chứa khóa (trích):
+Khoá sai cũng không được lộ. Với `TOINOI_JWT_SECRET=my-real-short-key`, `ValidationError` mặc định của pydantic in cả `input_value`, tức khoá thật nằm ngay trong log lúc khởi động. `hide_input_in_errors=True` tắt việc đó, và `--verify` kiểm chuỗi lỗi không chứa khoá (trích):
 
 ```text
 thiếu cả hai biến    -> environment: Field required; jwt_secret: Field required
@@ -138,7 +138,7 @@ dev + khóa của lab   -> OK
 prod + khóa sinh bằng secrets.token_urlsafe(32) (43 ký tự) -> OK, repr=SecretStr('**********')
 ```
 
-Kiểm «quá đơn điệu» (dưới 12 ký tự khác nhau) chỉ chặn khóa kiểu `xxxx…`, không chứng minh được entropy. Khóa `lab34-dev-secret-not-for-production` là khóa công khai: chỉ chạy được khi đặt tường minh `TOINOI_ENVIRONMENT=dev`, còn `--verify` dùng khóa sinh mới mỗi lần.
+Kiểm «quá đơn điệu» (dưới 12 ký tự khác nhau) chỉ chặn khoá kiểu `xxxx…`, không chứng minh được entropy. Khoá `lab34-dev-secret-not-for-production` là khoá công khai: chỉ chạy được khi đặt tường minh `TOINOI_ENVIRONMENT=dev`, còn `--verify` dùng khoá sinh mới mỗi lần.
 
 ## OAuth2 password flow và Bearer trong FastAPI
 
@@ -148,7 +148,7 @@ FastAPI có sẵn hai mảnh ghép của OAuth2. `OAuth2PasswordRequestForm` đ�
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token", scopes=SCOPES, auto_error=False)
 ```
 
-`auto_error=False` để lab tự trả 401 theo hợp đồng riêng (Problem Details, tiếng Việt) thay vì chuỗi mặc định. Server thật chạy bằng `uvicorn --factory` với `TOINOI_ENVIRONMENT=dev` và một khóa sinh ngẫu nhiên; đoạn tương tác dưới đây là output của nó (bỏ các header `date`, `server`, `content-length`):
+`auto_error=False` để lab tự trả 401 theo hợp đồng riêng (Problem Details, tiếng Việt) thay vì chuỗi mặc định. Server thật chạy bằng `uvicorn --factory` với `TOINOI_ENVIRONMENT=dev` và một khoá sinh ngẫu nhiên; đoạn tương tác dưới đây là output của nó (bỏ các header `date`, `server`, `content-length`):
 
 ```text
 $ curl -i localhost:8034/v1/me
@@ -219,7 +219,7 @@ Route chỉ cần `principal: Annotated[Principal, require_scope("dispatcher")]`
         raise HTTPException(status_code=404, detail="không tìm thấy chuyến")
 ```
 
-Chuyến của người khác trả 404 thay vì 403 là quyết định có cân nhắc. RFC 9110 mục 15.5.4 cho phép máy chủ muốn «giấu» tài nguyên bị cấm trả 404: với 403, kẻ dò `TN-0001`, `TN-0002`… biết chuyến nào có thật; với 404, chuyến của người khác và chuyến không có là một. Đổi lại, gỡ lỗi khó hơn; nơi mã chuyến không bí mật và cần thông báo rõ, 403 như bài C# lại hợp hơn. Vì 404 xóa dấu vết với client, lab **ghi log** `auth.trip.denied` cho chuyến có thật bị từ chối. `--verify` kiểm body 404 của `TN-0002` (khách khác) và `TN-9999` (không có) trùng nhau, và chỉ chuyến có thật có dòng log từ chối. Bảng quyền (output của `main.py`; hàng là người gọi, cột là route; `TN-0001` của `CU-001` do `DR-001` chạy, `TN-0002` của `CU-002`):
+Chuyến của người khác trả 404 thay vì 403 là quyết định có cân nhắc. RFC 9110 mục 15.5.4 cho phép máy chủ muốn «giấu» tài nguyên bị cấm trả 404: với 403, kẻ dò `TN-0001`, `TN-0002`… biết chuyến nào có thật; với 404, chuyến của người khác và chuyến không có là một. Đổi lại, gỡ lỗi khó hơn; nơi mã chuyến không bí mật và cần thông báo rõ, 403 như bài C# lại hợp hơn. Vì 404 xoá dấu vết với client, lab **ghi log** `auth.trip.denied` cho chuyến có thật bị từ chối. `--verify` kiểm body 404 của `TN-0002` (khách khác) và `TN-9999` (không có) trùng nhau, và chỉ chuyến có thật có dòng log từ chối. Bảng quyền (output của `main.py`; hàng là người gọi, cột là route; `TN-0001` của `CU-001` do `DR-001` chạy, `TN-0002` của `CU-002`):
 
 ```text
                me   quotes  TN-0001  TN-0002   driver    queue
@@ -264,7 +264,7 @@ uv run --project examples/toi-noi-python/34-fastapi-jwt-authorization examples/t
 uv run --project examples/toi-noi-python/34-fastapi-jwt-authorization examples/toi-noi-python/34-fastapi-jwt-authorization/main.py --verify
 ```
 
-Lệnh đầu in các khối ở trên (trích từng phần). `--verify` chạy cùng kịch bản và so 73 kết quả kỳ vọng: argon2 và token, `Cache-Control`, `invalid_grant`, bảng quyền 4 hàng 6 cột, hợp đồng `quotes` và Problem Details, mười token xấu (mỗi ca kiểm mã, lý do log, nội dung response và việc token không lọt vào log), cấu hình khóa không mặc định và không lộ khóa:
+Lệnh đầu in các khối ở trên (trích từng phần). `--verify` chạy cùng kịch bản và so 73 kết quả kỳ vọng: argon2 và token, `Cache-Control`, `invalid_grant`, bảng quyền 4 hàng 6 cột, hợp đồng `quotes` và Problem Details, mười token xấu (mỗi ca kiểm mã, lý do log, nội dung response và việc token không lọt vào log), cấu hình khoá không mặc định và không lộ khoá:
 
 ```text
 OK 73/73
@@ -277,19 +277,19 @@ SAI: token xấu 'hết hạn 1 giây': 401 và lý do log: nhận (200, ''), k�
 FAIL 61/73
 ```
 
-Phá kiểm scope (`if False`) cho `SAI: ma trận quyền: CU-001: …` rồi `FAIL 68/73`; bỏ `hide_input_in_errors` thì ca «không lộ khóa» đỏ; cho `jwt_secret` một mặc định thì ca «không có giá trị mặc định» đỏ. Môi trường: Python 3.14.7, FastAPI 0.162.0, PyJWT 2.15.1, pwdlib 0.3.1, python-multipart 0.0.33, pydantic-settings 2.16.2 (`uv.lock`). Lần chạy cuối in `load average 32.64 / 47.56` (máy Apple M1 Max đang bận), nên 32 ms của argon2 chỉ để tham khảo; mã trạng thái và lý do từ chối lặp lại được.
+Phá kiểm scope (`if False`) cho `SAI: ma trận quyền: CU-001: …` rồi `FAIL 68/73`; bỏ `hide_input_in_errors` thì ca «không lộ khoá» đỏ; cho `jwt_secret` một mặc định thì ca «không có giá trị mặc định» đỏ. Môi trường: Python 3.14.7, FastAPI 0.162.0, PyJWT 2.15.1, pwdlib 0.3.1, python-multipart 0.0.33, pydantic-settings 2.16.2 (`uv.lock`). Lần chạy cuối in `load average 32.64 / 47.56` (máy Apple M1 Max đang bận), nên 32 ms của argon2 chỉ để tham khảo; mã trạng thái và lý do từ chối lặp lại được.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
 | Service không lên, báo `Field required` | Đã đặt `TOINOI_ENVIRONMENT` và `TOINOI_JWT_SECRET` chưa; không có mặc định là chủ ý |
-| Mọi token đều bị 401 sau khi đổi khóa | Mọi replica có cùng khóa không; token ký bằng khóa cũ hỏng khi xoay khóa |
+| Mọi token đều bị 401 sau khi đổi khoá | Mọi replica có cùng khoá không; token ký bằng khoá cũ hỏng khi xoay khoá |
 | 401 dù token vừa phát | `aud`, `iss` trong token và trong `Settings` có khớp không; `exp` có tính theo UTC không |
 | Token hợp lệ nhưng 403 | Claim `scope` là chuỗi cách nhau bằng dấu cách; route cần đủ **mọi** scope được liệt kê |
 | Đăng nhập chậm, request khác bị treo theo | `verify` argon2 đang chạy thẳng trong `async def`; dùng `asyncio.to_thread` |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>HS256 dùng chung một khóa: mọi service kiểm token đều ký được token. Production dùng IdP và khóa bất đối xứng (RS256 hoặc ES256) công bố qua JWKS, để service chỉ giữ khóa công khai. Bản lab không có refresh token, thu hồi token (token đã phát sống tới <code>exp</code> kể cả khi tài khoản bị khóa), giới hạn đăng nhập sai (bài 27 có token bucket), xác thực hai bước, TLS và CORS. Kho người dùng là bốn tài khoản giả trong bộ nhớ, mật khẩu công khai trong mã lab; kho báo giá và bộ đếm <code>quote_id</code> cũng chỉ nằm trong một tiến trình.</p>
+<p>HS256 dùng chung một khoá: mọi service kiểm token đều ký được token. Production dùng IdP và khoá bất đối xứng (RS256 hoặc ES256) công bố qua JWKS, để service chỉ giữ khoá công khai. Bản lab không có refresh token, thu hồi token (token đã phát sống tới <code>exp</code> kể cả khi tài khoản bị khoá), giới hạn đăng nhập sai (bài 27 có token bucket), xác thực hai bước, TLS và CORS. Kho người dùng là bốn tài khoản giả trong bộ nhớ, mật khẩu công khai trong mã lab; kho báo giá và bộ đếm <code>quote_id</code> cũng chỉ nằm trong một tiến trình.</p>
 </div>
 
 **Bài tập:** (1) Thêm route `GET /v1/dispatch/trips/{trip_id}/driver` chỉ dành cho `dispatcher`. Cần sửa những chỗ nào, và test nào trong bảng quyền phải thêm? (2) Một khách xin token bằng `scope=customer dispatcher`. Lab trả gì, và vì sao kiểm điều này ở **lúc phát token** chưa đủ nếu token do hệ thống khác ký?

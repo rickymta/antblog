@@ -41,7 +41,7 @@ Hai danh sách trước/sau phát hành cần tách rõ; nếu dùng chung nhãn
 
 ## 5. Điều kiện dừng và phương án phục hồi
 
-Đề xuất pilot cần xác định ai theo dõi, tín hiệu nào dừng và cách đưa người dùng về luồng phù hợp. Tắt tính năng không xóa dữ liệu đã ghi hoặc thông báo đã gửi. Cần cách xử lý giao dịch đang dở, giữ dấu vết và hỗ trợ khách.
+Đề xuất pilot cần xác định ai theo dõi, tín hiệu nào dừng và cách đưa người dùng về luồng phù hợp. Tắt tính năng không xoá dữ liệu đã ghi hoặc thông báo đã gửi. Cần cách xử lý giao dịch đang dở, giữ dấu vết và hỗ trợ khách.
 
 ## 6. Decision record mẫu
 

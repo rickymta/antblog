@@ -93,7 +93,7 @@ Syllabus dẫn nguồn cho từng nguyên lý (Buxton 1970, Manna 1978, Boehm 19
 Tính năng đang xét là **luồng đặt chuyến**: khách xin báo giá, đặt chuyến từ báo giá, tài xế nhận, khách có thể huỷ, hệ thống thu tiền. Theo đặc tả phòng lab ([SPEC v1.1](https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing)):
 
 - **Báo giá** `POST /api/quotes` (R-API-07): ba dịch vụ `ride`, `parcel`, `food`; sáu thành phố (R-GEN-03); xe máy hoặc ô tô (R-GEN-04); quãng đường làm tròn 0,1 km, hợp lệ trong [0,5; 100] km (R-FARE-02).
-- **Thứ tự tính cước cố định 6 bước** (R-FARE-03): cước cơ bản → hệ số cao điểm 1,25 trong [11:00; 13:00) và [17:00; 19:00) (R-FARE-04) → phụ phí mưa 8.000 đ (R-FARE-05) → trừ voucher → nâng lên cước tối thiểu → làm tròn lên 1.000 đ.
+- **Thứ tự tính cước cố định 6 bước** (R-FARE-03): cước cơ bản → hệ số cao điểm 1,25 trong [11:00; 13:00) và [17:00; 19:00) (R-FARE-04) → phụ phí trời mưa 8.000 đ (R-FARE-05) → trừ voucher → nâng lên cước tối thiểu → làm tròn lên 1.000 đ.
 - **Voucher** (R-VOUCHER): thời hạn, phạm vi dịch vụ/thành phố, số tiền tối thiểu, lượt dùng mỗi ngày, thứ tự báo lỗi cố định.
 - **Báo giá có hạn 5 phút** và mỗi báo giá đặt tối đa một chuyến (R-QUOTE-01, R-QUOTE-03).
 - **Tài xế nhận**: đúng một người thắng khi nhiều người cùng bấm (R-ACCEPT-03).
@@ -126,7 +126,7 @@ Bảy nguyên lý giúp quyết định nên đổ công sức vào hàng nào c
 | 4 | Nhật ký defect của bản MVP dồn vào hai module | Toàn hệ thống |
 | 5 | Bộ hồi quy voucher chỉ dùng mã `GIAM20` ở TP. Hồ Chí Minh | Promotion |
 | 6 | Kiểm thử thanh toán VíXanh khác kiểm thử trang tra cứu đơn | Payment vs Public Tracking |
-| 7 | Báo giá đúng đặc tả nhưng khách bỏ đặt vì không thấy phụ phí mưa | Booking UI |
+| 7 | Báo giá đúng đặc tả nhưng khách bỏ đặt vì không thấy phụ phí trời mưa | Booking UI |
 
 ## 4. Phân tích kỹ thuật
 
@@ -218,7 +218,7 @@ Ngữ cảnh còn gồm giai đoạn: bản lab MVP một tiến trình không c
 
 ### 4.7 Nguyên lý 7 — ngộ nhận «không có defect là thành công»
 
-Màn hình báo giá qua hết các ca test R-FARE và R-UI. Không còn defect mở. Sau một tuần, tỉ lệ khách bấm «Báo giá» rồi bỏ không đặt tăng lên trong những ngày mưa. Phỏng vấn nhanh cho thấy khách chỉ thấy **tổng tiền**, còn phụ phí mưa 8.000 đ nằm trong bảng chi tiết phải mở ra mới thấy (R-FARE-10 có trả bảng chi tiết, nhưng đặc tả không bắt hiển thị nổi bật). Khách thấy giá «tự nhiên tăng» và nghĩ ứng dụng ăn gian.
+Màn hình báo giá qua hết các ca test R-FARE và R-UI. Không còn defect mở. Sau một tuần, tỉ lệ khách bấm «Báo giá» rồi bỏ không đặt tăng lên trong những ngày mưa. Phỏng vấn nhanh cho thấy khách chỉ thấy **tổng tiền**, còn phụ phí trời mưa 8.000 đ nằm trong bảng chi tiết phải mở ra mới thấy (R-FARE-10 có trả bảng chi tiết, nhưng đặc tả không bắt hiển thị nổi bật). Khách thấy giá «tự nhiên tăng» và nghĩ ứng dụng ăn gian.
 
 Phần mềm đúng đặc tả — verification đạt. Nhưng nó không đáp ứng kỳ vọng của người dùng — validation chưa từng được làm. [TEST-005](/articles/verification-va-validation) đi sâu vào cặp khái niệm này.
 
@@ -452,7 +452,7 @@ Kết quả là vài chục ca thay cho 10<sup>15</sup> — và mỗi ca có lý
 <p><b>b)</b> đúng — defect trong đặc tả được gỡ bằng static testing trước khi lan sang code và test. a), c), d) đều là hoạt động ở giai đoạn muộn; có ích nhưng không minh hoạ nguyên lý 3.</p>
 </details>
 
-**Câu 6 (K2).** Màn hình báo giá của Tới Nơi qua mọi ca test theo đặc tả, nhưng khách bỏ đặt vì không thấy phụ phí mưa. Nguyên lý nào mô tả đúng nhất tình huống này?
+**Câu 6 (K2).** Màn hình báo giá của Tới Nơi qua mọi ca test theo đặc tả, nhưng khách bỏ đặt vì không thấy phụ phí trời mưa. Nguyên lý nào mô tả đúng nhất tình huống này?
 
 - a) Exhaustive testing is impossible
 - b) Defects cluster together

@@ -106,7 +106,7 @@ dấu vết «mong đợi» là bản đồ ta viết từ hình 1 bài 54, rộ
 bản đồ HẸP (chỉ đặc trưng nêu thẳng trong hình 1 bài 54, bỏ speed_kmh, duration_s, amount_vnd...): top-1 SHAP 81.6%, top-3 SHAP 95.6%, top-3 ngẫu nhiên 37.5%
 ```
 
-Ở top-1, SHAP trúng 83,0 % so với 21,9 % của bộ gain cố định, chênh lớn với khoảng tin cậy rất xa số 0. Ở top-3, bộ gain cố định trúng 94,8 % vì ba đặc trưng đầu theo gain tình cờ trùng dấu vết của ba trong bốn loại, nhưng 0 % ở `collusion` (21 chuyến); SHAP hơn nó 3,2 điểm phần trăm, khoảng tin cậy chỉ vừa qua số 0. Bản đồ hẹp cho top-3 95,6 % so với 37,5 % ngẫu nhiên. Giá trị của SHAP nằm ở **tính theo từng chuyến**, không ở một số trúng cao hơn hẳn. Xóa lý do có làm điểm tụt không? Ta đặt đặc trưng về trung vị dữ liệu huấn luyện rồi chấm lại, so với xóa đặc trưng ngẫu nhiên:
+Ở top-1, SHAP trúng 83,0 % so với 21,9 % của bộ gain cố định, chênh lớn với khoảng tin cậy rất xa số 0. Ở top-3, bộ gain cố định trúng 94,8 % vì ba đặc trưng đầu theo gain tình cờ trùng dấu vết của ba trong bốn loại, nhưng 0 % ở `collusion` (21 chuyến); SHAP hơn nó 3,2 điểm phần trăm, khoảng tin cậy chỉ vừa qua số 0. Bản đồ hẹp cho top-3 95,6 % so với 37,5 % ngẫu nhiên. Giá trị của SHAP nằm ở **tính theo từng chuyến**, không ở một số trúng cao hơn hẳn. Xoá lý do có làm điểm tụt không? Ta đặt đặc trưng về trung vị dữ liệu huấn luyện rồi chấm lại, so với xoá đặc trưng ngẫu nhiên:
 
 ```text
 xóa lý do (đặt về trung vị train), trên 407 chuyến gian lận bị gắn cờ; p trung bình trước khi xóa 0.875, còn bị gắn cờ 100%:
@@ -117,7 +117,7 @@ ba đặc trưng lý do đầu             0.058         10%
 3 đặc trưng ngẫu nhiên             0.780         92%  (trung bình 10 lần bốc)
 ```
 
-Xóa ba lý do đầu đưa p trung bình từ 0,875 xuống 0,058, trong khi xóa ba đặc trưng ngẫu nhiên chỉ xuống 0,780: lý do trỏ đúng chỗ mô hình dựa vào. Xóa riêng lý do số 1 chưa đủ để chuyến thoát cờ (57 % vẫn bị gắn); lab không đo vì sao. Họ tín hiệu có đóng góp lớn nhất của từng loại:
+Xoá ba lý do đầu đưa p trung bình từ 0,875 xuống 0,058, trong khi xoá ba đặc trưng ngẫu nhiên chỉ xuống 0,780: lý do trỏ đúng chỗ mô hình dựa vào. Xoá riêng lý do số 1 chưa đủ để chuyến thoát cờ (57 % vẫn bị gắn); lab không đo vì sao. Họ tín hiệu có đóng góp lớn nhất của từng loại:
 
 ```text
 họ tín hiệu có đóng góp lớn nhất, theo loại gian lận (số chuyến):
@@ -139,7 +139,7 @@ Mô hình đã học lối tắt này: khi `cust_promo_share_30d > 0`, đóng g�
 
 ## Hàng đợi và nhật ký trên PostgreSQL
 
-Mỗi chuyến vào hàng đợi mang theo điều người duyệt và kiểm toán cần: điểm, **phiên bản mô hình** và **phiên bản cấu hình rule**, lý do của mô hình (SHAP) cộng lý do của rule engine, mức ưu tiên và hạn duyệt. Ưu tiên là chi phí kỳ vọng của bỏ sót `p × (tiền chuyến + 20.000)`; hạn duyệt (SLA) là 24 giờ. Hàng đợi nằm ở schema `lab61` của PostgreSQL hạ tầng chung, tạo lúc đầu và xóa khi xong, kể cả khi lỗi (`review.py`, trích):
+Mỗi chuyến vào hàng đợi mang theo điều người duyệt và kiểm toán cần: điểm, **phiên bản mô hình** và **phiên bản cấu hình rule**, lý do của mô hình (SHAP) cộng lý do của rule engine, mức ưu tiên và hạn duyệt. Ưu tiên là chi phí kỳ vọng của bỏ sót `p × (tiền chuyến + 20.000)`; hạn duyệt (SLA) là 24 giờ. Hàng đợi nằm ở schema `lab61` của PostgreSQL hạ tầng chung, tạo lúc đầu và xoá khi xong, kể cả khi lỗi (`review.py`, trích):
 
 ```sql
 CREATE TABLE lab61.review_queue (
@@ -186,7 +186,7 @@ RV-001 (mô phỏng, 70 đề xuất mỗi ngày làm việc 08:00-17:00, ưu ti
 
 ## Ai được chốt: ràng buộc và che số giấy tờ
 
-Quy tắc «chỉ người duyệt mới chốt» mà chỉ nằm trong mã Python thì một câu `UPDATE` viết vội phá được. Lab ép nó ở cơ sở dữ liệu: khóa ngoại `decided_by` tới bảng `reviewer` (chỉ có `RV-001`, trigger kiểm người đó đang hoạt động), CHECK ràng buộc trạng thái với người chốt và thời điểm chốt, trigger chặn INSERT đề xuất đã ở trạng thái chốt, sửa dòng đã chốt, xóa dòng và mọi thay đổi `decision_log`. Mỗi dòng log còn phải **khớp hàng đợi** (cùng chuyến, phiên bản, điểm; sự kiện chốt đúng với trạng thái, người chốt, thời điểm hiện có), nên không ghi được log «giả mạo». Hai mươi ca thử, mỗi ca phải bị chặn:
+Quy tắc «chỉ người duyệt mới chốt» mà chỉ nằm trong mã Python thì một câu `UPDATE` viết vội phá được. Lab ép nó ở cơ sở dữ liệu: khoá ngoại `decided_by` tới bảng `reviewer` (chỉ có `RV-001`, trigger kiểm người đó đang hoạt động), CHECK ràng buộc trạng thái với người chốt và thời điểm chốt, trigger chặn INSERT đề xuất đã ở trạng thái chốt, sửa dòng đã chốt, xoá dòng và mọi thay đổi `decision_log`. Mỗi dòng log còn phải **khớp hàng đợi** (cùng chuyến, phiên bản, điểm; sự kiện chốt đúng với trạng thái, người chốt, thời điểm hiện có), nên không ghi được log «giả mạo». Hai mươi ca thử, mỗi ca phải bị chặn:
 
 ```text
   dịch vụ chấm điểm tự chốt confirmed_fraud: người duyệt svc:fraud-scoring không hoạt động
@@ -221,7 +221,7 @@ ghi chú được lưu:        CCCD 099*******89 dùng ở hai tài khoản, kh�
 quét 2,184 trường văn bản của cả hai bảng bằng chính hàm che (kể cả số xen dấu cách, chấm, gạch): 0 trường còn có thể che thêm
 ```
 
-Đây là lớp chặn cuối. Giới hạn: số viết liền từ 9 chữ số trở lên luôn bị che kể cả khi là tiền (`125000000` thành `125****00`); số viết chữ hoặc tách bằng ký tự lạ lọt qua. Ở dữ liệu thật hãy dùng mã định danh giả (HMAC-SHA-256 có khóa, như bài 47) và đừng đưa số giấy tờ vào lý do ngay từ đầu.
+Đây là lớp chặn cuối. Giới hạn: số viết liền từ 9 chữ số trở lên luôn bị che kể cả khi là tiền (`125000000` thành `125****00`); số viết chữ hoặc tách bằng ký tự lạ lọt qua. Ở dữ liệu thật hãy dùng mã định danh giả (HMAC-SHA-256 có khoá, như bài 47) và đừng đưa số giấy tờ vào lý do ngay từ đầu.
 
 ## Công suất, SLA và tỉ lệ sai cho phép
 
@@ -236,7 +236,7 @@ dải điểm của các đề xuất (nhãn cuối; phí duyệt 8,000 VND cho 
 điểm hòa vốn p* = phí duyệt / (tiền chuyến + xử lý), vì phí duyệt trả cho mọi cờ: chuyến 30,000 VND -> 0.160, chuyến 120,000 VND -> 0.057, chuyến 500,000 VND -> 0.015
 ```
 
-Dải thấp nhất (precision 0,200, 80 đề xuất) lãi ròng 336.281 VND trên 640.000 VND phí duyệt: 80 % đề xuất ở đó là gắn cờ nhầm mà tổng vẫn chưa lỗ; ở ba seed lãi ròng dải này là 0,34, 0,05 và 0,30 triệu VND, sát hòa vốn. Công suất người duyệt mới là giới hạn thật. Lab mô phỏng cùng 547 đề xuất với nhiều mức công suất và hai chính sách chọn việc (ưu tiên theo chi phí kỳ vọng, hoặc FIFO). «Tiền bắt được» giả sử duyệt trễ vẫn chặn đủ thiệt hại; «chờ p95» chỉ tính đề xuất đã được duyệt nên bị cắt khi còn tồn đọng:
+Dải thấp nhất (precision 0,200, 80 đề xuất) lãi ròng 336.281 VND trên 640.000 VND phí duyệt: 80 % đề xuất ở đó là gắn cờ nhầm mà tổng vẫn chưa lỗ; ở ba seed lãi ròng dải này là 0,34, 0,05 và 0,30 triệu VND, sát hoà vốn. Công suất người duyệt mới là giới hạn thật. Lab mô phỏng cùng 547 đề xuất với nhiều mức công suất và hai chính sách chọn việc (ưu tiên theo chi phí kỳ vọng, hoặc FIFO). «Tiền bắt được» giả sử duyệt trễ vẫn chặn đủ thiệt hại; «chờ p95» chỉ tính đề xuất đã được duyệt nên bị cắt khi còn tồn đọng:
 
 ```text
  công suất/ngày chính sách đã duyệt tồn đọng vi phạm SLA  chờ p95 đã duyệt (giờ) gian lận bắt tiền bắt được
@@ -291,7 +291,7 @@ bản đồ HẸP (chỉ đặc trưng nêu thẳng trong hình 1 bài 54): top-
   123     79.8%     96.0%     37.2%     99.1%
 ```
 
-Ở cả ba seed top-1 SHAP trúng nhiều hơn top-1 gain cố định (khoảng tin cậy dưới lớn hơn 0), xóa ba lý do hạ p sâu hơn nhiều so với xóa ba đặc trưng ngẫu nhiên, và ở 50 mỗi ngày ưu tiên bắt nhiều tiền hơn FIFO (98,5, 94,5, 95,2 % so với 94,4, 83,0, 85,7 %). Ở seed 123 bộ gain cố định trúng tới 77,1 % nên chênh còn [+11,9 %, +21,1 %]: vững về chiều, không vững về độ lớn. SLA ở 65 mỗi ngày không đồng đều: FIFO ít quá hạn hơn rõ ở seed 42 (5 so với 24) và 123 (11 so với 62), nhưng ở seed 7 FIFO 44 và ưu tiên 42 (p95 chờ 25,5 so với 44,5 giờ). Công suất nên tính theo lượng đề xuất mỗi ngày (54,7, 63,0, 60,1 ở ba seed), không theo một con số cố định.
+Ở cả ba seed top-1 SHAP trúng nhiều hơn top-1 gain cố định (khoảng tin cậy dưới lớn hơn 0), xoá ba lý do hạ p sâu hơn nhiều so với xoá ba đặc trưng ngẫu nhiên, và ở 50 mỗi ngày ưu tiên bắt nhiều tiền hơn FIFO (98,5, 94,5, 95,2 % so với 94,4, 83,0, 85,7 %). Ở seed 123 bộ gain cố định trúng tới 77,1 % nên chênh còn [+11,9 %, +21,1 %]: vững về chiều, không vững về độ lớn. SLA ở 65 mỗi ngày không đồng đều: FIFO ít quá hạn hơn rõ ở seed 42 (5 so với 24) và 123 (11 so với 62), nhưng ở seed 7 FIFO 44 và ưu tiên 42 (p95 chờ 25,5 so với 44,5 giờ). Công suất nên tính theo lượng đề xuất mỗi ngày (54,7, 63,0, 60,1 ở ba seed), không theo một con số cố định.
 
 ## Chạy và kiểm chứng
 
@@ -312,7 +312,7 @@ Kiểm chứng: OK 61/61
 30 passed in 15.95s
 ```
 
-`--verify` kiểm 61 bất biến, không ghim số tuyệt đối hay tốc độ: SHAP cộng ra điểm thô, log-odds của p là hàm affine của điểm thô, hai mươi ca chặn của cơ sở dữ liệu, che số giấy tờ, nhật ký khớp hàng đợi, schema đã xóa, khoảng tin cậy top-1 ở ba seed.
+`--verify` kiểm 61 bất biến, không ghim số tuyệt đối hay tốc độ: SHAP cộng ra điểm thô, log-odds của p là hàm affine của điểm thô, hai mươi ca chặn của cơ sở dữ liệu, che số giấy tờ, nhật ký khớp hàng đợi, schema đã xoá, khoảng tin cậy top-1 ở ba seed.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -329,7 +329,7 @@ Kiểm chứng: OK 61/61
 
 **Bài tập:** (1) Một chuyến 80.000 VND. Theo mô hình chi phí của bài, `p` tối thiểu để chuyến này đáng vào hàng đợi là bao nhiêu? (2) Tổng đóng góp SHAP của một chuyến là +3,0 và `base_value` là −7,386. Với bộ hiệu chỉnh của lab, p hiển thị xấp xỉ bao nhiêu, và vì sao không đọc «+3,0» thành «tăng xác suất 3 điểm»?
 
-<details><summary>Xem lời giải</summary><p>(1) Gắn cờ khi <code>p × (80.000 + 20.000) &gt; 8.000</code>, tức <b>p &gt; 0,08</b>. (2) Điểm thô = −7,386 + 3,0 = −4,386; log-odds của p = 1,073 + 0,943 × (−4,386) ≈ −3,063, nên p ≈ <b>0,045</b>. «+3,0» là đóng góp vào điểm thô ở thang log-odds trước hiệu chỉnh (ở thang log-odds của p là 0,943 × 3,0 ≈ 2,83); sigmoid đổi log-odds thành xác suất nên cùng một mức cộng làm xác suất tăng rất khác nhau tùy điểm xuất phát (ở thang xác suất gốc: từ điểm thô −7,386 là từ 0,06 % lên 1,2 %; từ điểm thô 0 là từ 50 % lên 95 %).</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Gắn cờ khi <code>p × (80.000 + 20.000) &gt; 8.000</code>, tức <b>p &gt; 0,08</b>. (2) Điểm thô = −7,386 + 3,0 = −4,386; log-odds của p = 1,073 + 0,943 × (−4,386) ≈ −3,063, nên p ≈ <b>0,045</b>. «+3,0» là đóng góp vào điểm thô ở thang log-odds trước hiệu chỉnh (ở thang log-odds của p là 0,943 × 3,0 ≈ 2,83); sigmoid đổi log-odds thành xác suất nên cùng một mức cộng làm xác suất tăng rất khác nhau tuỳ điểm xuất phát (ở thang xác suất gốc: từ điểm thô −7,386 là từ 0,06 % lên 1,2 %; từ điểm thô 0 là từ 50 % lên 95 %).</p></details>
 
 Bài trước: [bài 60](/articles/python-model-registry-ab-drift-retraining). Bài tiếp: [bài 62](/articles/python-eta-prediction-regression).
 

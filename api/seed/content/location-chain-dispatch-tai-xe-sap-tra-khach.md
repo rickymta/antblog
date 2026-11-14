@@ -26,7 +26,7 @@ Cơ chế chỉ thêm một thứ vào ma trận chi phí của bài 42: mỗi t
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 330" role="img" aria-label="Hình 1. Hai ứng viên cho cùng một điểm đón. Tài xế B đang bận nhưng tới điểm đón sớm hơn tài xế rảnh A ở xa. Hungarian so hai cột này như hai tài xế bình thường; chi phí của B thêm khoảng dẫn đầu."><rect x="10" y="10" width="860" height="310" rx="10" class="f-bg s-line" stroke-width="1.5"/><text x="30" y="40" class="t-b">Hai ứng viên cho cùng một điểm đón (độ dài các đoạn chỉ minh họa cơ chế, không phải số đo)</text><text x="80" y="74" class="t-b">A. tài xế rảnh nhưng ở xa</text><rect x="80" y="84" width="560" height="34" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="92" y="106" class="t-small">ETA(vị trí hiện tại → điểm đón)</text><text x="80" y="152" class="t-b">B. tài xế đang chở khách, sắp tới điểm trả</text><rect x="80" y="162" width="250" height="34" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="92" y="184" class="t-small">remaining_est (+ dừng trả khách)</text><rect x="330" y="162" width="190" height="34" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="342" y="184" class="t-small">ETA(điểm trả → điểm đón)</text><rect x="520" y="162" width="70" height="34" rx="6" class="f-none s-warn dash" stroke-width="1.5"/><text x="530" y="184" class="t-small">risk_k·sd</text><text x="30" y="240" class="t-mono">lead_ms = remaining_est + risk_k × sd</text><text x="30" y="260" class="t-small">chi phí của cặp (khách, B) = lead_ms + ETA(điểm trả → điểm đón), rồi vào ma trận Hungarian như một tài xế thường</text><text x="30" y="280" class="t-small">sd ≈ remaining_est × (e^σ − 1), xấp xỉ một độ lệch chuẩn, σ = speed_jitter; khách ghép với B thì xếp hàng chờ B trả khách xong</text><text x="30" y="304" class="t-small">risk_k = 0: tin ước lượng tuyệt đối; risk_k = 1: cộng một độ lệch chuẩn vào chi phí (nét đứt)</text></svg>
+<svg viewBox="0 0 880 330" role="img" aria-label="Hình 1. Hai ứng viên cho cùng một điểm đón. Tài xế B đang bận nhưng tới điểm đón sớm hơn tài xế rảnh A ở xa. Hungarian so hai cột này như hai tài xế bình thường; chi phí của B thêm khoảng dẫn đầu."><rect x="10" y="10" width="860" height="310" rx="10" class="f-bg s-line" stroke-width="1.5"/><text x="30" y="40" class="t-b">Hai ứng viên cho cùng một điểm đón (độ dài các đoạn chỉ minh hoạ cơ chế, không phải số đo)</text><text x="80" y="74" class="t-b">A. tài xế rảnh nhưng ở xa</text><rect x="80" y="84" width="560" height="34" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="92" y="106" class="t-small">ETA(vị trí hiện tại → điểm đón)</text><text x="80" y="152" class="t-b">B. tài xế đang chở khách, sắp tới điểm trả</text><rect x="80" y="162" width="250" height="34" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="92" y="184" class="t-small">remaining_est (+ dừng trả khách)</text><rect x="330" y="162" width="190" height="34" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="342" y="184" class="t-small">ETA(điểm trả → điểm đón)</text><rect x="520" y="162" width="70" height="34" rx="6" class="f-none s-warn dash" stroke-width="1.5"/><text x="530" y="184" class="t-small">risk_k·sd</text><text x="30" y="240" class="t-mono">lead_ms = remaining_est + risk_k × sd</text><text x="30" y="260" class="t-small">chi phí của cặp (khách, B) = lead_ms + ETA(điểm trả → điểm đón), rồi vào ma trận Hungarian như một tài xế thường</text><text x="30" y="280" class="t-small">sd ≈ remaining_est × (e^σ − 1), xấp xỉ một độ lệch chuẩn, σ = speed_jitter; khách ghép với B thì xếp hàng chờ B trả khách xong</text><text x="30" y="304" class="t-small">risk_k = 0: tin ước lượng tuyệt đối; risk_k = 1: cộng một độ lệch chuẩn vào chi phí (nét đứt)</text></svg>
 </div>
 <figcaption>Hình 1. Hai ứng viên cho cùng một điểm đón. Tài xế B đang bận nhưng tới điểm đón sớm hơn tài xế rảnh A ở xa. Hungarian so hai cột này như hai tài xế bình thường; chi phí của B thêm khoảng dẫn đầu.</figcaption>
 </figure>
@@ -112,9 +112,9 @@ pub struct ChainConfig {
 
 `risk_k = 0` tin ước lượng tuyệt đối. `risk_k = 1` cộng một độ lệch chuẩn vào chi phí của tài xế bận, tức bắt xe sắp trả khách phải «thắng» với một biên an toàn. Cần nhớ rằng margin này chỉ đổi **ai được chọn**. Nó không rút ngắn chuyến trước. Phần kết quả sẽ cho thấy điều đó.
 
-## Khách xếp hàng cũng có thể hủy
+## Khách xếp hàng cũng có thể huỷ
 
-Khách xếp hàng chờ chưa có xe nào đang chạy tới, nhưng mô hình hủy của simulator vẫn tính cho họ. Xác suất hủy dùng ETA tổng (phần còn lại của chuyến trước cộng quãng đón), và khách hủy được cả khi còn đang xếp hàng:
+Khách xếp hàng chờ chưa có xe nào đang chạy tới, nhưng mô hình huỷ của simulator vẫn tính cho họ. Xác suất huỷ dùng ETA tổng (phần còn lại của chuyến trước cộng quãng đón), và khách huỷ được cả khi còn đang xếp hàng:
 
 `examples/toi-noi-location/rust/crates/simulator/src/sim.rs`
 
@@ -143,15 +143,15 @@ Khách xếp hàng chờ chưa có xe nào đang chạy tới, nhưng mô hình 
         }
 ```
 
-Điều này quan trọng cho cách đọc số. Trên dữ liệu mô phỏng, ở bộ «thưa xe» với chain-120 có khoảng 89 khách xếp hàng mỗi seed, trong đó khoảng 28 khách hủy trước khi xe tới: khoảng 31% khách xếp hàng. Những khách ở lại thì chờ một chuyến chưa kết thúc.
+Điều này quan trọng cho cách đọc số. Trên dữ liệu mô phỏng, ở bộ «thưa xe» với chain-120 có khoảng 89 khách xếp hàng mỗi seed, trong đó khoảng 28 khách huỷ trước khi xe tới: khoảng 31% khách xếp hàng. Những khách ở lại thì chờ một chuyến chưa kết thúc.
 
-Có thêm một chỗ cần cẩn thận, đã nêu từ bài 41: các chỉ số `wait_s`, `pickup_eta_s`, `deadhead_m` của simulator tính **trên chuyến hoàn thành**. Chain cứu thêm những khách lẽ ra bị bỏ rơi, và những khách đó có thời gian chờ dài. Trung bình `wait_s` có thể tăng dù chính sách làm lợi cho khách. Vì vậy mọi bảng dưới đây đi kèm tỉ lệ hủy, khách hết kiên nhẫn và số chuyến hoàn thành.
+Có thêm một chỗ cần cẩn thận, đã nêu từ bài 41: các chỉ số `wait_s`, `pickup_eta_s`, `deadhead_m` của simulator tính **trên chuyến hoàn thành**. Chain cứu thêm những khách lẽ ra bị bỏ rơi, và những khách đó có thời gian chờ dài. Trung bình `wait_s` có thể tăng dù chính sách làm lợi cho khách. Vì vậy mọi bảng dưới đây đi kèm tỉ lệ huỷ, khách hết kiên nhẫn và số chuyến hoàn thành.
 
 ## Kết quả trên bộ «thưa xe»
 
 Baseline là Hungarian ghép ngay, không chain. Trên dữ liệu mô phỏng (60 xe, 3,5 chuyến/phút, 20 seed 20261106…20261125), trung bình mỗi seed baseline có 228,4 khách đặt, 150,5 chuyến hoàn thành, `cancel_rate` 0,3385, tỉ lệ hết kiên nhẫn 0,0733, `wait_s` 576,6 (p95 1.297,4) và `deadhead_m` 4.689,1. Bảng dưới là **hiệu** chain − không chain, KTC 95% trong ngoặc, dấu `*` khi KTC không chứa 0:
 
-| Cấu hình | Xếp hàng | Hủy khi chờ | `wait_s` TB (s) | `deadhead_m` TB (m) | `cancel_rate` | Hoàn thành |
+| Cấu hình | Xếp hàng | Huỷ khi chờ | `wait_s` TB (s) | `deadhead_m` TB (m) | `cancel_rate` | Hoàn thành |
 |---|---:|---:|---|---|---|---|
 | chain-60 | 66,3 | 13,1 | +2,9 [−8,7; 14,5] | −74,1 [−185,3; 37,2] | −0,0021 [−0,0076; 0,0034] | +0,6 [−0,7; 1,8] |
 | chain-120 | 89,3 | 27,9 | +26,9 [8,9; 44,8]* | +11,1 [−192,5; 214,8] | −0,0139 [−0,0208; −0,0070]* | +3,2 [1,6; 4,8]* |
@@ -167,7 +167,7 @@ Baseline là Hungarian ghép ngay, không chain. Trên dữ liệu mô phỏng (
 
 Bốn điều đọc từ bảng và hình:
 
-- **Chain giảm khách bị bỏ rơi nhưng khách điển hình chờ lâu hơn.** Chain-120 thêm 3,2 chuyến hoàn thành, hủy giảm 0,0139, nhưng `wait_s` tăng 26,9 s và `pickup_eta_s` tăng 34,7 s. Thiên lệch người sống sót không đủ giải thích khoản này. Làm phép tính: để riêng 3,2 chuyến thêm kéo trung bình từ 576,6 s lên 603,4 s, mỗi chuyến đó phải chờ khoảng 1.864 s. Và **trung vị** `wait_s` cũng tăng 33,8 s [14,6; 53,0], điều vài chuyến thêm không làm được. Một giả thuyết khớp với code, chưa có thí nghiệm riêng: khi thiếu xe, baseline để khách chờ rồi mỗi lần có xe rảnh chọn khách rẻ nhất cho xe đó; chain gán khách vào xe sắp rảnh ngay lúc đặt, nên xe bị giữ chỗ sớm và mất quyền chọn khách gần hơn về sau.
+- **Chain giảm khách bị bỏ rơi nhưng khách điển hình chờ lâu hơn.** Chain-120 thêm 3,2 chuyến hoàn thành, huỷ giảm 0,0139, nhưng `wait_s` tăng 26,9 s và `pickup_eta_s` tăng 34,7 s. Thiên lệch người sống sót không đủ giải thích khoản này. Làm phép tính: để riêng 3,2 chuyến thêm kéo trung bình từ 576,6 s lên 603,4 s, mỗi chuyến đó phải chờ khoảng 1.864 s. Và **trung vị** `wait_s` cũng tăng 33,8 s [14,6; 53,0], điều vài chuyến thêm không làm được. Một giả thuyết khớp với code, chưa có thí nghiệm riêng: khi thiếu xe, baseline để khách chờ rồi mỗi lần có xe rảnh chọn khách rẻ nhất cho xe đó; chain gán khách vào xe sắp rảnh ngay lúc đặt, nên xe bị giữ chỗ sớm và mất quyền chọn khách gần hơn về sau.
 - **Tầm nhìn dài giảm km rỗng của chuyến hoàn thành, trả bằng chờ.** Chain-300 giảm `deadhead_m` 381,2 m và thêm 6,8 chuyến, nhưng `wait_s` vẫn tăng 22,9 s. Km rỗng tổng trên mỗi khách đặt giảm 151,5 m, tuy KTC của số đó [−308,0; 4,9] chứa 0, nên không khẳng định được.
 - **Ở xe thưa, chain-60 không phân biệt được với baseline** ở cả `wait_s`, `deadhead_m` lẫn số chuyến. Điều này không có nghĩa nó vô tác dụng: 20 seed có thể chưa đủ để thấy hiệu cỡ đó.
 - **Phân phối chuyến giữa tài xế lệch hơn một chút** khi tầm nhìn dài: chỉ số Gini số chuyến mỗi xe tăng 0,015 ở chain-300 (KTC [0,005; 0,025]). Lab không điều tra nguyên nhân; có thể là các xe nằm gần nơi đông khách trả xe được nối chuyến nhiều hơn, nhưng đó mới là giả thuyết.
@@ -184,7 +184,7 @@ Chain không có tác dụng như nhau ở mọi mật độ. Cùng 20 seed, hi�
 | «thường»: 120 xe, 3,5 chuyến/phút | chain-120 | −3,1 [−5,9; −0,4]* | −96,3 [−128,3; −64,4]* | +1,2 [0,2; 2,2]* |
 | | chain-300 | −3,2 [−6,5; 0,0] | −181,1 [−232,7; −129,4]* | +2,3 [1,3; 3,3]* |
 
-Ở bộ «thường», xe không khan nên lợi nhỏ, và vẫn có giá: `wait_s` giảm 3,1 s, `deadhead_m` giảm 96,3 m, km rỗng tổng mỗi khách giảm 74,6 m [−103,1; −46,1], nhưng Gini số chuyến tăng 0,013 [0,007; 0,019] và 3,6 trong 25,1 khách xếp hàng mỗi seed hủy khi chờ. Ở «cao điểm», chain-60 thêm 4,7 chuyến, hủy −0,0105, đổi lấy `wait_s` +9,9 s và p95 +42,8 s [3,2; 82,3]. Chain-300 thêm 12,0 chuyến, giảm `deadhead_m` 399,8 m và km rỗng tổng 206,0 m [−384,4; −27,7], đổi lấy Gini +0,016 và 72,7 khách hủy khi xếp hàng mỗi seed; `wait_s` p95 không phân biệt được (−9,2 s, KTC [−98,3; 79,8]). Lab không đặt tiêu chí chọn trước cho tầm nhìn, nên bài không tuyên bố cấu hình nào thắng. Bốn cấu hình nhân bốn bộ giả định và hơn mười cột cho nhiều phép so sánh: dấu sao đơn lẻ sát 0 nên đọc dè dặt, mẫu hình lặp lại qua nhiều bộ thì đáng tin hơn.
+Ở bộ «thường», xe không khan nên lợi nhỏ, và vẫn có giá: `wait_s` giảm 3,1 s, `deadhead_m` giảm 96,3 m, km rỗng tổng mỗi khách giảm 74,6 m [−103,1; −46,1], nhưng Gini số chuyến tăng 0,013 [0,007; 0,019] và 3,6 trong 25,1 khách xếp hàng mỗi seed huỷ khi chờ. Ở «cao điểm», chain-60 thêm 4,7 chuyến, huỷ −0,0105, đổi lấy `wait_s` +9,9 s và p95 +42,8 s [3,2; 82,3]. Chain-300 thêm 12,0 chuyến, giảm `deadhead_m` 399,8 m và km rỗng tổng 206,0 m [−384,4; −27,7], đổi lấy Gini +0,016 và 72,7 khách huỷ khi xếp hàng mỗi seed; `wait_s` p95 không phân biệt được (−9,2 s, KTC [−98,3; 79,8]). Lab không đặt tiêu chí chọn trước cho tầm nhìn, nên bài không tuyên bố cấu hình nào thắng. Bốn cấu hình nhân bốn bộ giả định và hơn mười cột cho nhiều phép so sánh: dấu sao đơn lẻ sát 0 nên đọc dè dặt, mẫu hình lặp lại qua nhiều bộ thì đáng tin hơn.
 
 **Chuyến trước kéo dài thất thường** là rủi ro cần thử. Ta cho nhiễu tốc độ σ = 0,3 (thay vì 0,1) ở bộ «thưa xe», tức chuyến thật dao động quanh kế hoạch rộng hơn. Baseline không chain có `wait_s` 605,3 (p95 1.435,7) ở bộ này.
 
@@ -197,7 +197,7 @@ Chain không có tác dụng như nhau ở mọi mật độ. Cùng 20 seed, hi�
 
 ## Ai lợi, ai chịu thiệt, và điều chưa chạy
 
-**Lợi:** khách suýt bị bỏ rơi. Ở bộ «thưa xe» số chuyến hoàn thành tăng, hủy giảm, và khách hết kiên nhẫn giảm gần một nửa. **Thiệt:** khách điển hình chờ lâu hơn (`wait_s` +26,9 s, trung vị +33,8 s ở chain-120). Tài xế thì nhận được chuyến nối, nhưng ở tầm nhìn dài, chuyến phân bố lệch hơn giữa các tài xế.
+**Lợi:** khách suýt bị bỏ rơi. Ở bộ «thưa xe» số chuyến hoàn thành tăng, huỷ giảm, và khách hết kiên nhẫn giảm gần một nửa. **Thiệt:** khách điển hình chờ lâu hơn (`wait_s` +26,9 s, trung vị +33,8 s ở chain-120). Tài xế thì nhận được chuyến nối, nhưng ở tầm nhìn dài, chuyến phân bố lệch hơn giữa các tài xế.
 
 Những thứ **chưa chạy**, để không ai đọc nhầm là đã kiểm:
 
@@ -237,8 +237,8 @@ Tham số: `--seeds N` (mặc định 20), `--jobs N`, `--fixture`. Lab chạy k
 
 ## Giới hạn của ví dụ
 
-- **Mọi thứ là mô phỏng.** Nhu cầu, hủy, nhiễu tốc độ, hành vi tài xế đều là giả định của kịch bản; không có số nào nói về một công ty thật.
-- **Chiến lược không dùng mô hình hủy.** Chi phí ở đây chỉ là ETA cộng `lead_ms` (`risk_ms = 0`), nên việc khách xếp hàng dễ hủy hơn không vào quyết định. Hủy khi xếp hàng là cái simulator đo được, không phải cái chiến lược cân nhắc.
+- **Mọi thứ là mô phỏng.** Nhu cầu, huỷ, nhiễu tốc độ, hành vi tài xế đều là giả định của kịch bản; không có số nào nói về một công ty thật.
+- **Chiến lược không dùng mô hình huỷ.** Chi phí ở đây chỉ là ETA cộng `lead_ms` (`risk_ms = 0`), nên việc khách xếp hàng dễ huỷ hơn không vào quyết định. Huỷ khi xếp hàng là cái simulator đo được, không phải cái chiến lược cân nhắc.
 - **Hai mức nhiễu tốc độ** (σ = 0,1 và σ = 0,3). Không biết chuyến thật có kéo dài giống log-chuẩn hay không; kẹt xe, tai nạn, khách đổi điểm trả không có trong mô hình.
 - **Cỡ mẫu 20 seed**, KTC rộng ở nhiều chỉ số đuôi (`wait_s` p95 và max đều không phân biệt được ở nhiều dòng). Những chỗ ghi «không phân biệt được» đừng đọc thành «không có tác dụng».
 

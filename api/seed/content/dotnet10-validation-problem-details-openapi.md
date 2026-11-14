@@ -39,11 +39,11 @@ AddValidation đăng ký cơ chế .NET 10, với phần khám phá/sinh hỗ tr
 <figcaption>Hình 1. Kiểm shape/miền ở biên HTTP trước handler; domain vẫn bảo vệ hợp đồng của nó.</figcaption>
 </figure>
 
-## Problem Details chuẩn hóa gì?
+## Problem Details chuẩn hoá gì?
 
-Validation failure của lab trả 400 với application/problem+json, status và errors theo field. Client nên dùng cấu trúc/mã đã cam kết thay vì parse một câu tiếng Việt để ra quyết định. AddProblemDetails và UseExceptionHandler phục vụ đường lỗi tương ứng; đừng nghĩ gọi chúng sẽ tự chuẩn hóa mọi response tùy biến hoặc mọi body 400 ở mọi môi trường.
+Validation failure của lab trả 400 với application/problem+json, status và errors theo field. Client nên dùng cấu trúc/mã đã cam kết thay vì parse một câu tiếng Việt để ra quyết định. AddProblemDetails và UseExceptionHandler phục vụ đường lỗi tương ứng; đừng nghĩ gọi chúng sẽ tự chuẩn hoá mọi response tuỳ biến hoặc mọi body 400 ở mọi môi trường.
 
-JSON hỏng có thể dừng ở binding trước validation. Bộ test riêng chỉ assert 400 cho ca đó, không áp một cấu trúc body chưa được hợp đồng hóa. Một lỗi bất ngờ trong server không nên bị gắn nhãn “distanceKm sai” chỉ để tất cả phản hồi giống nhau.
+JSON hỏng có thể dừng ở binding trước validation. Bộ test riêng chỉ assert 400 cho ca đó, không áp một cấu trúc body chưa được hợp đồng hoá. Một lỗi bất ngờ trong server không nên bị gắn nhãn “distanceKm sai” chỉ để tất cả phản hồi giống nhau.
 
 Không gửi stack trace, connection string hay thông tin token trong Problem Details. Trace identifier giúp tra log nội bộ mà không cần đưa chi tiết thực thi cho client. Bài 18 sẽ bổ sung đường quan sát request.
 
@@ -53,7 +53,7 @@ AddOpenApi đăng ký sinh tài liệu. MapOpenApi mở endpoint `/openapi/v1.js
 
 TypedResults giúp framework biết metadata của response; ProducesValidationProblem công bố đường 400 validation. Dù schema có mô tả đúng, code hoặc middleware vẫn có thể sai: test HTTP phải đối chiếu tài liệu với hành vi quan sát được. Không dùng một tệp schema đẹp làm bằng chứng kiểm tra request đã bật.
 
-Project pin Microsoft.OpenApi 2.7.5 trên dòng 2.x thay cho dependency cũ có advisory. Đây là phiên bản kiểm chứng của lab; khi nâng package cần chạy lại test/schema, không đổi major tùy ý mà chỉ nhìn build thành công.
+Project pin Microsoft.OpenApi 2.7.5 trên dòng 2.x thay cho dependency cũ có advisory. Đây là phiên bản kiểm chứng của lab; khi nâng package cần chạy lại test/schema, không đổi major tuỳ ý mà chỉ nhìn build thành công.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -71,7 +71,7 @@ Project pin Microsoft.OpenApi 2.7.5 trên dòng 2.x thay cho dependency cũ có 
 | 0 hoặc 100 | 200, đúng giá cận |
 | JSON hỏng | 400 binding; handler không thành công |
 
-Chạy API cùng cách bài 16 ở port 5197. Muốn đọc OpenAPI, đặt environment Development bằng tùy chọn dòng lệnh `--environment Development` ở môi trường lab; ở Production route tài liệu không được map theo code. Đây là lựa chọn phạm vi xuất tài liệu, không phải biện pháp thay auth cho API.
+Chạy API cùng cách bài 16 ở port 5197. Muốn đọc OpenAPI, đặt environment Development bằng tuỳ chọn dòng lệnh `--environment Development` ở môi trường lab; ở Production route tài liệu không được map theo code. Đây là lựa chọn phạm vi xuất tài liệu, không phải biện pháp thay auth cho API.
 
 **Bài tập:** bỏ Required nhưng giữ Range rồi gửi null. Test nào phải bắt thay đổi? Nếu schema có đường 400 mà endpoint vẫn trả 200 cho -1 km, tài liệu hay runtime quyết định dữ liệu có bị chặn?
 

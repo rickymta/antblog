@@ -10,7 +10,7 @@ language: vi
 
 “Chắc tài xế sẽ đọc thông tin” là một giả định quan trọng của điểm đón. Nếu không kiểm nó, nhóm có thể làm đúng toàn bộ chức năng phía khách mà vẫn không cải thiện việc gặp nhau.
 
-<div class="tkh-callout"><span class="tkh-callout-title">BA-059 · Phần 8/8 · Cơ bản</span><p>Đầu ra: log có hành động cho P07. Đánh giá mức rủi ro là minh họa định tính; không phải xác suất được đo từ dữ liệu thật.</p></div>
+<div class="tkh-callout"><span class="tkh-callout-title">BA-059 · Phần 8/8 · Cơ bản</span><p>Đầu ra: log có hành động cho P07. Đánh giá mức rủi ro là minh hoạ định tính; không phải xác suất được đo từ dữ liệu thật.</p></div>
 
 ## 1. Ba loại thông tin
 

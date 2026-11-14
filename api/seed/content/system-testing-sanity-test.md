@@ -8,7 +8,7 @@ tags: [testing, sys-02, sanity-testing, confirmation-testing, regression-testing
 language: vi
 ---
 
-Khách Tới Nơi dán mã ` giam20 ` từ tin nhắn vào ô voucher — có một dấu cách ở đầu và một ở cuối. Ứng dụng báo «không tìm thấy voucher», dù GIAM20 đang chạy khuyến mãi. Developer thêm `trim()` và báo đã sửa. Câu hỏi của tester lúc này không phải «chạy hết bao nhiêu test», mà là: **bản sửa này có đủ hợp lý để đưa vào vòng kiểm sâu chưa, và cần kiểm những gì để trả lời câu đó?** Bài này dùng tình huống ấy để dựng một sanity suite nhỏ nhưng có lý do cho từng ca: từ hàm chuẩn hoá, qua API báo giá, tới chuyến được tạo và lượt dùng voucher.
+Khách Tới Nơi dán mã ` giam20 ` từ tin nhắn vào ô voucher — có một dấu cách ở đầu và một ở cuối. Ứng dụng báo «không tìm thấy voucher», dù GIAM20 đang chạy khuyến mãi. Developer thêm `trim()` và báo đã sửa. Câu hỏi của tester lúc này không phải «chạy hết bao nhiêu test», mà là: **bản sửa này có đủ hợp lý để đưa vào vòng kiểm thử chuyên sâu chưa, và cần kiểm những gì để trả lời câu đó?** Bài này dùng tình huống ấy để dựng một sanity suite nhỏ nhưng có lý do cho từng ca: từ hàm chuẩn hoá, qua API báo giá, tới chuyến được tạo và lượt dùng voucher.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-02</span>
@@ -56,7 +56,7 @@ Sau bài này, bạn có thể:
 
 ### 2.1. Định nghĩa dùng trong series
 
-**Sanity testing** trong series này là vòng kiểm ngắn, tập trung vào **một thay đổi cụ thể và những hành vi liên quan trực tiếp**, nhằm đánh giá thay đổi đó có đủ hợp lý để tiếp tục kiểm sâu hay không. Đây là quy ước vận hành của nhóm, không phải một test level độc lập và cũng không phải tên suite bắt buộc ở mọi tổ chức. Syllabus ISTQB CTFL v4.0.1 không định nghĩa «sanity» như một test type riêng; nó phân biệt **confirmation testing** và **regression testing**, và khuyên dùng **impact analysis** để quyết định phạm vi regression. Sanity ở đây là cách ghép hai thứ đó lại cho một thay đổi nhỏ.
+**Sanity testing** trong series này là vòng kiểm ngắn, tập trung vào **một thay đổi cụ thể và những hành vi liên quan trực tiếp**, nhằm đánh giá thay đổi đó có đủ hợp lý để tiếp tục kiểm thử chuyên sâu hay không. Đây là quy ước vận hành của nhóm, không phải một test level độc lập và cũng không phải tên suite bắt buộc ở mọi tổ chức. Syllabus ISTQB CTFL v4.0.1 không định nghĩa «sanity» như một test type riêng; nó phân biệt **confirmation testing** và **regression testing**, và khuyên dùng **impact analysis** để quyết định phạm vi regression. Sanity ở đây là cách ghép hai thứ đó lại cho một thay đổi nhỏ.
 
 Sanity có thể được làm bằng manual testing, component test hay API test — tuỳ thay đổi nằm ở đâu. Một ca có sẵn trong bộ regression có thể được chọn vào sanity của lần sửa này nhưng không cần cho lần sửa khác. Tính chất «sanity» nằm ở **lý do chọn**, không nằm ở bản thân ca test.
 
@@ -120,7 +120,7 @@ Báo giá dùng xe máy (`bike`), 5 km, thành phố SG, 09:00 giờ Việt Nam 
 |---|---|---|
 | 1. Cước cơ bản: 12.000 + 4.500 × 5 | 34.500 | 34.500 |
 | 2. Cao điểm (09:00 không thuộc khung) | 34.500 | 34.500 |
-| 3. Phụ phí mưa (không mưa) | 34.500 | 34.500 |
+| 3. Phụ phí trời mưa (không mưa) | 34.500 | 34.500 |
 | 4. Trừ voucher: min(20% × 34.500; 30.000) = 6.900 | 27.600 | — |
 | 5. Cước tối thiểu xe máy 15.000 | 27.600 | 34.500 |
 | Làm tròn lên bội 1.000 (R-FARE-08) | **28.000** | **35.000** |
@@ -394,7 +394,7 @@ Một property hữu ích là tính idempotent: chuẩn hoá hai lần bằng ch
 
 - a) Bản sửa đủ điều kiện release production
 - b) Không còn lỗi voucher nào
-- c) Thay đổi hoạt động hợp lý trong phạm vi đã chọn; được tiếp tục kiểm sâu
+- c) Thay đổi hoạt động hợp lý trong phạm vi đã chọn; được tiếp tục kiểm thử chuyên sâu
 - d) Giới hạn một lượt mỗi ngày an toàn khi có request đồng thời
 
 <details>

@@ -232,7 +232,7 @@ Các câu hỏi là bài tự luyện do tác giả biên soạn, không phải 
 ## 8. Tài liệu tham khảo
 
 - [ISTQB CTFL Syllabus v4.0.1](https://www.istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf): mục 4.2.1–4.2.3. Quyền tác giả thuộc ISTQB và các tác giả trong syllabus.
-- [Vitest — Test API](https://vitest.dev/api/test): `it.each` và tổ chức các ca dữ liệu. Dùng API tương thích phiên bản khóa trong lab.
+- [Vitest — Test API](https://vitest.dev/api/test): `it.each` và tổ chức các ca dữ liệu. Dùng API tương thích phiên bản khoá trong lab.
 - [Lab Tới Nơi](https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing): SPEC R-FARE, R-GEN-01, R-VOUCHER-06, R-VALID-01; `fare.ts`, `pricing.ts`, `money.ts`, `api/schemas.ts`.
 
 Bài trước: [TEST-055 · Unit Testing Fundamentals](/articles/unit-testing-fundamentals). Bài tiếp theo: [TEST-057 · Test Doubles — Dummy, Stub, Fake, Mock, Spy](/articles/test-doubles-dummy-stub-fake-mock-spy).

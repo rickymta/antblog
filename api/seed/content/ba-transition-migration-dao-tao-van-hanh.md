@@ -38,7 +38,7 @@ Cũng cần chốt chuyến đang hoạt động lúc bật tính năng có đư
 
 ## 4. Kiểm migration theo ý nghĩa
 
-Số dòng trước/sau bằng nhau chưa chứng minh dữ liệu đúng. Kiểm khóa, quan hệ, đơn vị, trạng thái và mẫu ngoại lệ. Nếu có script sửa dữ liệu, cần phương án chạy lại không tạo lặp và dấu vết các bản ghi được tác động. BA xác định quy tắc và bằng chứng nghiệp vụ; kỹ thuật thiết kế cách thực hiện.
+Số dòng trước/sau bằng nhau chưa chứng minh dữ liệu đúng. Kiểm khoá, quan hệ, đơn vị, trạng thái và mẫu ngoại lệ. Nếu có script sửa dữ liệu, cần phương án chạy lại không tạo lặp và dấu vết các bản ghi được tác động. BA xác định quy tắc và bằng chứng nghiệp vụ; kỹ thuật thiết kế cách thực hiện.
 
 ## 5. Đào tạo bằng tình huống
 

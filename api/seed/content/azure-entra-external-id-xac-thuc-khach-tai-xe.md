@@ -26,7 +26,7 @@ Tên gọi dễ gây rối. Azure AD B2C là sản phẩm đời trước cùng 
 
 Trải nghiệm đăng ký và đăng nhập được mô tả bằng **user flow** sign-up/sign-in. User flow quyết định ba thứ:
 
-- Cách xác thực: email kèm mã một lần hoặc email kèm mật khẩu, cộng tài khoản mạng xã hội nếu bạn cấu hình làm identity provider. Đăng nhập bằng số điện thoại phụ thuộc tính năng hiện hành, kiểm tài liệu.
+- Cách xác thực: email kèm mã một lần hoặc email kèm mật khẩu, cộng tài khoản mạng xã hội nếu bạn cấu hình làm identity provider. Đăng nhập bằng số điện thoại phụ thuộc tính năng hiện hành, kiểm tra tài liệu.
 - MFA: mã qua email hoặc SMS làm yếu tố thứ hai. SMS tính phí riêng.
 - Thuộc tính thu thập lúc đăng ký: tên hiển thị, và custom attribute như `driver_id`. Custom attribute xuất hiện trong token với tên dạng `extension_<app-id>_driver_id` (app-id là của app `b2c-extensions-app` trong tenant, bỏ dấu gạch) và chỉ có trong token khi bạn thêm nó vào cấu hình claim của app.
 
@@ -136,7 +136,7 @@ External ID tính tiền chủ yếu theo **MAU** (monthly active users), có m�
 - MAU đếm người dùng hoạt động, không đếm lượt gọi API: tài xế mở app 300 lần trong tháng vẫn là một MAU. Nhưng bot tự đăng ký hàng loạt làm MAU phình ra, nên cần chặn ở biên (bài 18) và theo dõi số tài khoản mới theo ngày.
 - Tenant gắn với một subscription để thanh toán, nên đưa nó vào budget và cảnh báo chi phí ([bài về Cost Management và budget](/articles/azure-chi-phi-pricing-cost-management-budget)).
 
-Người dùng cũ từ hệ thống trước là bài toán migration. Hash mật khẩu cũ thường không nhập thẳng được vì thuật toán băm khác nhau. Hai cách hay dùng: tạo tài khoản hàng loạt qua Microsoft Graph rồi buộc đặt lại mật khẩu hoặc đăng nhập bằng mã email ở lần đầu; hoặc migration dần khi người dùng đăng nhập lần đầu bằng custom authentication extension. Kiểm tài liệu hiện hành về hạn chế của từng cách.
+Người dùng cũ từ hệ thống trước là bài toán migration. Hash mật khẩu cũ thường không nhập thẳng được vì thuật toán băm khác nhau. Hai cách hay dùng: tạo tài khoản hàng loạt qua Microsoft Graph rồi buộc đặt lại mật khẩu hoặc đăng nhập bằng mã email ở lần đầu; hoặc migration dần khi người dùng đăng nhập lần đầu bằng custom authentication extension. Kiểm tra tài liệu hiện hành về hạn chế của từng cách.
 
 Nguyên tắc cuối: Tới Nơi không viết form đăng nhập, không lưu hash mật khẩu. Băm, chống brute force, đặt lại mật khẩu là việc của dịch vụ danh tính; tự viết lại chỉ thêm bề mặt tấn công.
 

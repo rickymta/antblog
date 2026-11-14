@@ -25,7 +25,7 @@ Hoàn qua nhiều nhà cung cấp, chênh lệch tỷ giá và tranh chấp chư
 | Glossary/dictionary | Captured, reserved, refunded khác nhau thế nào? |
 | Request/response | Ai được yêu cầu, input nào bắt buộc? |
 | State model | Bằng chứng nào cho phép chuyển trạng thái? |
-| Mapping/đối soát | Khóa nào nối giao dịch và ai xử lý lệch? |
+| Mapping/đối soát | Khoá nào nối giao dịch và ai xử lý lệch? |
 | Ma trận lỗi/retry | Khi nào gửi lại, khi nào tra cứu? |
 | Kịch bản nghiệm thu | Kết quả và tiền khả dụng sau mỗi bước? |
 

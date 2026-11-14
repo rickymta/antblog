@@ -150,7 +150,7 @@ Có ba điều cần đọc cho đúng.
 
 Kết quả rỗng cần một giải thích, không chỉ một câu «ngưỡng quá chặt». Số liệu cho ba manh mối.
 
-Một: cổng thứ nhất **không** là thủ phạm. Hysteresis tính lại 3,10 tới 12,86 lần mỗi ca, nên điều kiện lệch quá 30 s thỏa thường xuyên, nhất là khi tài xế trễ hay GPS nhiễu.
+Một: cổng thứ nhất **không** là thủ phạm. Hysteresis tính lại 3,10 tới 12,86 lần mỗi ca, nên điều kiện lệch quá 30 s thoả thường xuyên, nhất là khi tài xế trễ hay GPS nhiễu.
 
 Hai: cổng `J` giảm ít nhất 25 s **và** ít nhất 10% là chặn chính. Lab có một lần quét ngưỡng ở tình huống tài xế trễ 120 s, bỏ cổng 10% và chỉ giữ cổng giây:
 

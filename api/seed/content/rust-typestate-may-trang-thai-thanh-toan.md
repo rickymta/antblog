@@ -1,14 +1,14 @@
 ---
 slug: rust-typestate-may-trang-thai-thanh-toan
 title: "Typestate và máy trạng thái: hold → capture → settle không thể đi sai"
-summary: "Bài 14: mô hình hóa sáu trạng thái thanh toán bằng enum và match trả Result, rồi bằng typestate Payment<S> với PhantomData để capture sai thứ tự không biên dịch được; cách nối với database và khi nào enum là đủ."
+summary: "Bài 14: mô hình hoá sáu trạng thái thanh toán bằng enum và match trả Result, rồi bằng typestate Payment<S> với PhantomData để capture sai thứ tự không biên dịch được; cách nối với database và khi nào enum là đủ."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, typestate, state-machine]
 language: vi
 ---
 
-Chuyến `TN-0001` kết thúc, VíXanh đã giữ 25.500 VND trên phương tiện thanh toán của khách (`AUTHORIZED`). Một handler gọi `capture` hai lần vì Kafka giao lại thông điệp. Một handler khác gọi `capture` cho khoản vừa tạo, chưa hề giữ tiền. Ở sổ cái, bút toán thu cước ghi nhầm không xóa được, chỉ sửa bằng bút toán đảo, nên ta muốn những lệnh gọi sai thứ tự bị chặn càng sớm càng tốt, tốt nhất là ngay khi biên dịch.
+Chuyến `TN-0001` kết thúc, VíXanh đã giữ 25.500 VND trên phương tiện thanh toán của khách (`AUTHORIZED`). Một handler gọi `capture` hai lần vì Kafka giao lại thông điệp. Một handler khác gọi `capture` cho khoản vừa tạo, chưa hề giữ tiền. Ở sổ cái, bút toán thu cước ghi nhầm không xoá được, chỉ sửa bằng bút toán đảo, nên ta muốn những lệnh gọi sai thứ tự bị chặn càng sớm càng tốt, tốt nhất là ngay khi biên dịch.
 
 Đây là bài 14 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài dựng trên lab của [bài 10](/articles/rust-module-crate-cargo-test-clippy); sáu trạng thái đã xuất hiện ở [bài 05](/articles/rust-struct-enum-match-tai-khoan-but-toan), bút toán cân ở [bài 13](/articles/rust-double-entry-journal-entry-posting).
 
@@ -59,7 +59,7 @@ pub fn apply(
 }
 ```
 
-Ghi sổ trước, đổi trạng thái sau: nếu `post` lỗi thì `?` thoát và `self.state` giữ nguyên. Thứ tự này thuộc về kỷ luật của người viết code. `capture_entry` trả bút toán ba dòng của bài 10: khách -25.500, nền tảng +5.100, tài xế +20.400, khóa `trip:TN-0001:capture` (lab gộp một bước cho gọn; bài 13 tách qua clearing). `refund_entry` đổi dấu cả ba dòng, khóa `trip:TN-0001:refund`.
+Ghi sổ trước, đổi trạng thái sau: nếu `post` lỗi thì `?` thoát và `self.state` giữ nguyên. Thứ tự này thuộc về kỷ luật của người viết code. `capture_entry` trả bút toán ba dòng của bài 10: khách -25.500, nền tảng +5.100, tài xế +20.400, khoá `trip:TN-0001:capture` (lab gộp một bước cho gọn; bài 13 tách qua clearing). `refund_entry` đổi dấu cả ba dòng, khoá `trip:TN-0001:refund`.
 
 Bảng này dễ test: lab duyệt đủ 30 cặp, đếm đúng 6 hợp lệ và 24 bị từ chối. Điểm yếu là lỗi chỉ lộ khi chạy: `record.apply(PaymentEvent::Capture, …)` trên bản ghi `INITIATED` vẫn biên dịch.
 
@@ -134,7 +134,7 @@ impl Payment<Captured> {
 
 Ở đây `capture` *tạo bút toán*: nó chỉ trả `Payment<Captured>` khi `ledger.post` thành công, kèm mã `JE-000001`. Khác với `apply`, người gọi không có chỗ nào để quên ghi sổ hay đổi trạng thái trước khi ghi. `settle_refund` làm tương tự với bút toán hoàn tiền; `refund()` chỉ đổi kiểu, vì khách mới yêu cầu còn VíXanh chưa hoàn.
 
-Hủy giao dịch (`fail`) hợp lệ từ hai trạng thái. Thay vì viết hai `impl`, ta dùng trait bound với một trait đánh dấu:
+Huỷ giao dịch (`fail`) hợp lệ từ hai trạng thái. Thay vì viết hai `impl`, ta dùng trait bound với một trait đánh dấu:
 
 ```rust
 // src/typestate.rs (rút gọn: ghép các đoạn)
@@ -239,9 +239,9 @@ impl<S: State> TryFrom<PaymentRecord> for Payment<S> {
 
 Khi chạy lab (mục sau), nạp bản ghi `CAPTURED` thành `Payment<Authorized>` cho `Err(WrongState …)`, còn chuỗi `"AUTHORISED"` gõ sai cho `Err(UnknownState …)`.
 
-Biên cũng là chỗ typestate hết tác dụng, theo hai nghĩa. Thứ nhất, `TryFrom` tin cột `state`: `PaymentRecord::restore(terms, PaymentState::Captured)` rồi `try_from` cho ra `Payment<Captured>` dù sổ cái chưa có bút toán nào. Thứ hai, Kafka giao lại thông điệp nghĩa là một lần nạp mới, một giá trị mới, nên E0382 không chặn được: đó là việc của trạng thái đã lưu và khóa idempotency.
+Biên cũng là chỗ typestate hết tác dụng, theo hai nghĩa. Thứ nhất, `TryFrom` tin cột `state`: `PaymentRecord::restore(terms, PaymentState::Captured)` rồi `try_from` cho ra `Payment<Captured>` dù sổ cái chưa có bút toán nào. Thứ hai, Kafka giao lại thông điệp nghĩa là một lần nạp mới, một giá trị mới, nên E0382 không chặn được: đó là việc của trạng thái đã lưu và khoá idempotency.
 
-Thiết kế `capture(self, …)` còn một cái giá: `self` bị tiêu thụ cả khi trả `Err`, nên nhánh lỗi không còn `Payment<Authorized>`. Không mất dữ liệu, vì bản ghi trong database vẫn là `AUTHORIZED`, nhưng muốn thử lại phải nạp lại. Thử lại chỉ có ích trong hai trường hợp. Một, lần trước đã ghi sổ mà chưa kịp lưu trạng thái: khóa `trip:TN-0001:capture` trả bút toán cũ, không ghi đôi (test `reload_and_retry_capture_is_idempotent`). Hai, lỗi tạm thời như mất kết nối database, thứ lab chưa có. Lỗi sổ cái trong lab đều xác định: thử lại ra đúng lỗi cũ và cần người xử lý (test `capture_error_consumes_value_and_retry_repeats_same_error`). Muốn giữ giá trị thì trả nó trong lỗi, `Result<_, (Payment<Authorized>, PaymentError)>`, đổi lại chữ ký nặng hơn; lab không chọn cách này.
+Thiết kế `capture(self, …)` còn một cái giá: `self` bị tiêu thụ cả khi trả `Err`, nên nhánh lỗi không còn `Payment<Authorized>`. Không mất dữ liệu, vì bản ghi trong database vẫn là `AUTHORIZED`, nhưng muốn thử lại phải nạp lại. Thử lại chỉ có ích trong hai trường hợp. Một, lần trước đã ghi sổ mà chưa kịp lưu trạng thái: khoá `trip:TN-0001:capture` trả bút toán cũ, không ghi đôi (test `reload_and_retry_capture_is_idempotent`). Hai, lỗi tạm thời như mất kết nối database, thứ lab chưa có. Lỗi sổ cái trong lab đều xác định: thử lại ra đúng lỗi cũ và cần người xử lý (test `capture_error_consumes_value_and_retry_repeats_same_error`). Muốn giữ giá trị thì trả nó trong lỗi, `Result<_, (Payment<Authorized>, PaymentError)>`, đổi lại chữ ký nặng hơn; lab không chọn cách này.
 
 ## Khi nào enum là đủ?
 
@@ -300,12 +300,12 @@ cặp hợp lệ: 6/30
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là mô hình để học typestate, không phải service thanh toán. Không có database: <code>to_record</code> và <code>TryFrom</code> chỉ minh họa biên. <code>authorize()</code> không gọi VíXanh và chưa ghi gì vào sổ. Phí 5.100 được truyền vào. Không có đồng thời: hai request cùng nạp một bản ghi <code>AUTHORIZED</code> rồi cùng capture chỉ an toàn nhờ idempotency key, chưa có khóa hay phiên bản dòng. Chưa có thời hạn hold, capture một phần, hay <code>REFUND_PENDING</code> thất bại.</p>
+<p>Đây là mô hình để học typestate, không phải service thanh toán. Không có database: <code>to_record</code> và <code>TryFrom</code> chỉ minh hoạ biên. <code>authorize()</code> không gọi VíXanh và chưa ghi gì vào sổ. Phí 5.100 được truyền vào. Không có đồng thời: hai request cùng nạp một bản ghi <code>AUTHORIZED</code> rồi cùng capture chỉ an toàn nhờ idempotency key, chưa có khoá hay phiên bản dòng. Chưa có thời hạn hold, capture một phần, hay <code>REFUND_PENDING</code> thất bại.</p>
 </div>
 
 ## Bài tập
 
-Thêm trạng thái `Voided` (hủy giữ tiền, cuối) đến được từ `Authorized` bằng sự kiện `Void`. Với mỗi cách (enum và typestate), nói compiler bắt buộc bạn sửa những chỗ nào và chỗ nào bạn có thể quên.
+Thêm trạng thái `Voided` (huỷ giữ tiền, cuối) đến được từ `Authorized` bằng sự kiện `Void`. Với mỗi cách (enum và typestate), nói compiler bắt buộc bạn sửa những chỗ nào và chỗ nào bạn có thể quên.
 
 <details><summary>Xem lời giải</summary><p>Cả hai cách đều phải thêm <code>Voided</code> vào <code>PaymentState</code> (typestate cần nó cho <code>KIND</code>). Việc đó làm <code>as_str</code> và <code>AnyPayment::from</code> báo E0004 vì không có nhánh <code>_</code>: compiler chỉ ra những chỗ phải sửa. Mảng <code>ALL</code> thì không: quên thêm <code>Voided</code> vào đó, code vẫn biên dịch, chỉ <code>FromStr</code> từ chối chuỗi <code>"VOIDED"</code>. <b>Enum:</b> thêm <code>Void</code> vào <code>PaymentEvent</code>; <code>transition</code> vẫn biên dịch nhờ nhánh cuối, nên nếu quên <code>(Authorized, Void) =&gt; Ok(Voided)</code> thì sự kiện luôn bị từ chối lúc chạy. Test đếm cặp đỏ ngay khi <code>ALL</code> có thêm phần tử, vì nó kiểm 6 hợp lệ và 24 bị từ chối; sửa xong phải là 7 và 35 trên 42 cặp. <b>Typestate:</b> thêm <code>marker!(Voided, PaymentState::Voided)</code> và <code>impl Payment&lt;Authorized&gt; { fn void(self) -&gt; Payment&lt;Voided&gt; }</code>. Không có bảng nào để quên, nhưng cũng không có gì nhắc bạn viết <code>void()</code>. Chỗ dễ quên ở cả hai cách: migration cho cột <code>state</code>.</p></details>
 

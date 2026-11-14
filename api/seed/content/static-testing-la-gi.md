@@ -31,7 +31,7 @@ Nhóm Pricing của Tới Nơi vừa gửi bản nháp đặc tả cước. Chư
 
 Nhiều người mới vào nghề nghĩ kiểm thử là «chạy phần mềm rồi xem kết quả». Đó mới là một nửa — **dynamic testing** (kiểm thử động). Nửa còn lại diễn ra khi chưa có gì để chạy: đọc đặc tả, soi user story, rà code, dùng công cụ quét mã nguồn.
 
-Vấn đề static testing giải quyết rất cụ thể. Câu đặc tả «trời mưa cộng phụ phí 8.000 đ» đi qua developer (viết code) và tester (viết test) — nếu cả hai cùng hiểu sai một kiểu thì test xanh, sản phẩm lên production vẫn sai. Chỉ người **đọc** đặc tả và hỏi «phụ phí mưa có bị nhân hệ số cao điểm không?» mới chặn được nó.
+Vấn đề static testing giải quyết rất cụ thể. Câu đặc tả «trời mưa cộng phụ phí 8.000 đ» đi qua developer (viết code) và tester (viết test) — nếu cả hai cùng hiểu sai một kiểu thì test xanh, sản phẩm lên production vẫn sai. Chỉ người **đọc** đặc tả và hỏi «phụ phí trời mưa có bị nhân hệ số cao điểm không?» mới chặn được nó.
 
 Khi nào dùng: ngay khi có một work product (sản phẩm công việc) đọc được — bản nháp yêu cầu, user story, thiết kế API, mã nguồn, cả bộ test case. Càng sớm càng rẻ.
 
@@ -109,7 +109,7 @@ Gần như mọi work product đều kiểm tĩnh được. Syllabus liệt kê 
 | Phát hiện defect ở những pha sớm nhất của SDLC — đúng nguyên lý kiểm thử sớm | Sửa một câu trong bản nháp đặc tả thay vì sửa code, test, dữ liệu báo giá đã lưu |
 | Tìm được defect mà dynamic testing không tìm được: mã không bao giờ chạy tới, mẫu thiết kế không được cài đúng ý, defect trong work product không thực thi được | Một ví dụ tính sai trong đặc tả — không test nào «chạy» được một đoạn văn |
 | Đánh giá chất lượng và tạo niềm tin vào work product | Đặc tả cước được review xong mới được gắn `pricingVersion` mới |
-| Qua việc kiểm yêu cầu, stakeholder chắc chắn yêu cầu mô tả đúng nhu cầu thật (validation) | Hỏi đội vận hành tài xế: phụ phí mưa có nên bị nhân cao điểm không? |
+| Qua việc kiểm yêu cầu, stakeholder chắc chắn yêu cầu mô tả đúng nhu cầu thật (validation) | Hỏi đội vận hành tài xế: phụ phí trời mưa có nên bị nhân cao điểm không? |
 | Tạo hiểu biết chung, cải thiện giao tiếp giữa các bên — nên mời nhiều loại stakeholder | BA, developer Pricing, tester, CSKH cùng hiểu một công thức |
 | Review tốn chi phí, nhưng tổng chi phí dự án thường thấp hơn vì sửa defect muộn tốn công hơn | Xem ước tính ở mục 3 |
 | Static analysis tìm một số loại defect mã hiệu quả hơn dynamic testing ⇒ ít defect hơn, tổng công phát triển thấp hơn | ESLint chặn biến dùng trước khi gán ngay trong CI |
@@ -160,11 +160,11 @@ Booking gọi Pricing qua gRPC (`.proto` là hợp đồng, kiến trúc §7.2);
 
 | Rủi ro | Vì sao test động không cứu |
 |---|---|
-| Đặc tả bỏ ngỏ thứ tự cao điểm – mưa, developer nhân cả phụ phí mưa | Tester viết test từ cùng đặc tả ⇒ test và code cùng sai, test xanh |
+| Đặc tả bỏ ngỏ thứ tự cao điểm – mưa, developer nhân cả phụ phí trời mưa | Tester viết test từ cùng đặc tả ⇒ test và code cùng sai, test xanh |
 | Biên 100 km mâu thuẫn giữa hai câu | Mỗi bên chọn một câu, hai bản code khác nhau đều «đúng đặc tả» |
 | Giá sai được lưu vào báo giá và chuyến (R-QUOTE-04) | Sửa code xong vẫn còn dữ liệu giá sai đã chụp, phải đối soát |
 
-**Ước tính chi phí nếu lọt (giả định).** Defect «phụ phí mưa bị nhân 1,25» làm thu thừa khoảng 8.000 × 0,25 = **2.000 đ** mỗi chuyến cao điểm có mưa (đúng con số ở ví dụ R-FARE-09: 54.000 thay vì 52.000 đ). Hồ sơ dự án cho 1,1 triệu chuyến đặt xe + bưu kiện mỗi ngày, hai khung cao điểm chiếm 50% chuyến. **Giả định** trong một ngày mưa, 20% chuyến cao điểm gặp mưa:
+**Ước tính chi phí nếu lọt (giả định).** Defect «phụ phí trời mưa bị nhân 1,25» làm thu thừa khoảng 8.000 × 0,25 = **2.000 đ** mỗi chuyến cao điểm có mưa (đúng con số ở ví dụ R-FARE-09: 54.000 thay vì 52.000 đ). Hồ sơ dự án cho 1,1 triệu chuyến đặt xe + bưu kiện mỗi ngày, hai khung cao điểm chiếm 50% chuyến. **Giả định** trong một ngày mưa, 20% chuyến cao điểm gặp mưa:
 
 ```text
 1.100.000 × 50% × 20% = 110.000 chuyến × 2.000 đ ≈ 220 triệu đ thu thừa mỗi ngày mưa
@@ -241,7 +241,7 @@ Tệp đầy đủ: `examples/toi-noi-testing/articles/static-testing-la-gi/ban-
 <tr><td>F2</td><td>D-02, D-03</td><td>Thiếu</td><td>Làm tròn trước hay sau khi kiểm khoảng?</td><td>R-FARE-02: trước</td><td>100,04 km hợp lệ hay lỗi tuỳ người code</td></tr>
 <tr><td>F3</td><td>D-03 ↔ D-13</td><td>Mâu thuẫn</td><td>«dưới 100» vs «tối đa 100»</td><td>R-FARE-02 [0,5; 100]</td><td>Chuyến đúng 100,0 km bị từ chối</td></tr>
 <tr><td>F4</td><td>D-04</td><td>Mơ hồ + thiếu</td><td>13:00 có là cao điểm? Giờ máy chủ hay giờ VN?</td><td>R-FARE-04, R-GEN-02</td><td>Máy chủ chạy UTC ⇒ cao điểm lệch 7 giờ</td></tr>
-<tr><td>F5</td><td>D-04, D-05</td><td>Thiếu</td><td>Phụ phí mưa có bị nhân 1,25?</td><td>R-FARE-03, R-FARE-05</td><td>Ví dụ R-FARE-09: 54.000 đ thay vì 52.000 đ</td></tr>
+<tr><td>F5</td><td>D-04, D-05</td><td>Thiếu</td><td>Phụ phí trời mưa có bị nhân 1,25?</td><td>R-FARE-03, R-FARE-05</td><td>Ví dụ R-FARE-09: 54.000 đ thay vì 52.000 đ</td></tr>
 <tr><td>F6</td><td>D-06</td><td>Mơ hồ</td><td>«phần trăm của cước» — cước ở bước nào?</td><td>R-FARE-06: sau bước 3</td><td>Giảm trên cước cơ bản ⇒ khách được giảm ít hơn</td></tr>
 <tr><td>F7</td><td>D-07</td><td>Sai</td><td>Tối thiểu trước voucher ⇒ voucher kéo cước dưới mức tối thiểu</td><td>R-FARE-07</td><td>Xe máy 0,5 km, voucher 20%, ngoài cao điểm: 12.000 đ thay vì 15.000 đ</td></tr>
 <tr><td>F8</td><td>D-08</td><td>Mơ hồ + thiếu</td><td>Làm tròn lên/xuống/gần nhất? Ở bước nào?</td><td>R-GEN-01, R-FARE-08</td><td>Làm tròn gần nhất ở mọi bước: ví dụ R-FARE-09 ra 51.000 đ</td></tr>
@@ -363,7 +363,7 @@ AC4: Khối lượng làm tròn một chữ số thập phân.
 <p><b>a)</b> đúng — sát ý mục 3.1.2. b) «luôn» là quá đà; syllabus nói «thường». c) đi ngược nguyên lý kiểm thử sớm. d) sai — mã nguồn là work product điển hình của review.</p>
 </details>
 
-**Câu 5 (K2).** Trong buổi refinement story «phụ phí mưa», tester hỏi: «Phụ phí có bị nhân hệ số cao điểm không?» và nhóm bổ sung acceptance criterion. Nhận định nào đúng?
+**Câu 5 (K2).** Trong buổi refinement story «phụ phí trời mưa», tester hỏi: «Phụ phí có bị nhân hệ số cao điểm không?» và nhóm bổ sung acceptance criterion. Nhận định nào đúng?
 
 - a) Chưa phải kiểm thử vì chưa có code
 - b) Đây là debugging vì đang tìm nguyên nhân lỗi

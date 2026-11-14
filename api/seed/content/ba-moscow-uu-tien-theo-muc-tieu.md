@@ -32,7 +32,7 @@ Các nhóm giúp thương lượng phạm vi, không thay phân tích giá trị
 | Kiểm state và revision | Must | Tránh xác nhận thông tin cũ hoặc sai thời điểm |
 | Tài xế được phân công đọc điểm đón | Must | Thiếu thì không kiểm được hành trình đã chọn |
 | Mẫu hướng dẫn theo từng cổng | Should | Có thể dùng ghi chú có hướng dẫn tạm thời |
-| Minh họa chuyển động | Could | Không quyết định tính đúng của xác nhận |
+| Minh hoạ chuyển động | Could | Không quyết định tính đúng của xác nhận |
 | Chat đầy đủ | Won't lần này | Chưa có bằng chứng và vượt lát cắt |
 
 Đây là đề xuất cần các bên đồng thuận, không tự động trở thành quyết định chỉ vì BA đặt trong bảng.

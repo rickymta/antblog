@@ -170,7 +170,7 @@ timed_inside  : ['INFO price mất 0.200 s', 'INFO price mất 0.200 s', 'INFO p
 <figcaption>Hình 1. Cùng ba thành phần, hai thứ tự bọc cho hai con số khác nhau: lớp đo thời gian ở ngoài thấy tổng thời gian người dùng chờ, ở trong thấy từng lần gọi dịch vụ.</figcaption>
 </figure>
 
-Con số nào đúng tùy câu hỏi: khách chờ báo giá bao lâu thì đo ở ngoài (2,100 giây = 3 × 0,2 + 0,5 + 1,0); dịch vụ chậm bao nhiêu mỗi lần gọi thì đo ở trong, không lẫn thời gian ta tự chờ.
+Con số nào đúng tuỳ câu hỏi: khách chờ báo giá bao lâu thì đo ở ngoài (2,100 giây = 3 × 0,2 + 0,5 + 1,0); dịch vụ chậm bao nhiêu mỗi lần gọi thì đo ở trong, không lẫn thời gian ta tự chờ.
 
 Về retry: nó chỉ an toàn khi thao tác **idempotent**, tức gọi thêm lần nữa không đổi kết quả. Báo giá là đọc nên an toàn; tạo chuyến hay thu tiền thì không, vì lần gọi «lỗi» có thể đã thực hiện xong trước khi mạng đứt. Loạt C# bàn chuyện này trong bài [cache, timeout, retry và rate limiting](/articles/dotnet10-cache-timeout-retry-rate-limit); phía Python là chủ đề bài 25.
 
@@ -287,7 +287,7 @@ Chọn dạng nào? Generator với `@contextmanager` gọn khi logic là «chu�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn so với production</span>
-<p>Transaction trong bài chỉ là sao chép cả dict rồi ghi đè: một process, một luồng, không cách ly giữa hai người ghi, không bền khi tiến trình chết, và chi phí sao chép tăng theo dữ liệu. Transaction thật nằm ở database (bài 24, 25). <code>retry</code> chưa có jitter (ngẫu nhiên hóa thời gian chờ để nhiều client không thử lại cùng lúc), chưa giới hạn tổng thời gian, và chỉ hợp với thao tác idempotent; <code>FakeTimer</code> không mô phỏng timeout giữa chừng một lời gọi. <code>DriverLock</code> chỉ an toàn khi dùng tuần tự trong một luồng, vì <code>in busy</code> rồi <code>add</code> không nguyên tử; nhiều luồng cần <code>threading.Lock</code> (bài 23), nhiều server cần khóa phân tán hoặc ràng buộc ở database. Số tài xế, số chuyến và độ trễ 0,2 giây đều là số giả.</p>
+<p>Transaction trong bài chỉ là sao chép cả dict rồi ghi đè: một process, một luồng, không cách ly giữa hai người ghi, không bền khi tiến trình chết, và chi phí sao chép tăng theo dữ liệu. Transaction thật nằm ở database (bài 24, 25). <code>retry</code> chưa có jitter (ngẫu nhiên hoá thời gian chờ để nhiều client không thử lại cùng lúc), chưa giới hạn tổng thời gian, và chỉ hợp với thao tác idempotent; <code>FakeTimer</code> không mô phỏng timeout giữa chừng một lời gọi. <code>DriverLock</code> chỉ an toàn khi dùng tuần tự trong một luồng, vì <code>in busy</code> rồi <code>add</code> không nguyên tử; nhiều luồng cần <code>threading.Lock</code> (bài 23), nhiều server cần khoá phân tán hoặc ràng buộc ở database. Số tài xế, số chuyến và độ trễ 0,2 giây đều là số giả.</p>
 </div>
 
 ## Chạy và kiểm chứng

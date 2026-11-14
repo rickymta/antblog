@@ -1,7 +1,7 @@
 ---
 slug: csharp-class-property-encapsulation
 title: "Class, property và encapsulation: bảo vệ trạng thái chuyến trong C#"
-summary: "Bài 06: dùng class có identity, property chỉ đọc từ bên ngoài và hành vi chuyển trạng thái để giữ invariant; phân biệt encapsulation với khóa đồng thời."
+summary: "Bài 06: dùng class có identity, property chỉ đọc từ bên ngoài và hành vi chuyển trạng thái để giữ invariant; phân biệt encapsulation với khoá đồng thời."
 category: csharp-beginner
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
@@ -75,7 +75,7 @@ Trong service theo DDD/Clean Architecture, Trip sẽ trở thành một phần a
 | Driver trắng | Từ chối, Requested giữ nguyên |
 | ID chuyến rỗng | Không tạo được object hợp lệ |
 
-**Bài tập:** thêm Cancel cho phép hủy chỉ khi còn Requested. Nên cho caller set Status trực tiếp hay thêm một hành vi? Khi Accept thất bại do driver rỗng, trạng thái nên là gì?
+**Bài tập:** thêm Cancel cho phép huỷ chỉ khi còn Requested. Nên cho caller set Status trực tiếp hay thêm một hành vi? Khi Accept thất bại do driver rỗng, trạng thái nên là gì?
 
 <details><summary>Xem đáp án</summary><p>Thêm hành vi Cancel kiểm tra trạng thái, mở enum theo mô hình rút gọn và bổ sung kiểm tra biên. Không mở public setter. Accept lỗi phải để object ở Requested với DriverId null; không ghi trạng thái dở dang trước validation.</p></details>
 
@@ -88,7 +88,7 @@ dotnet run --project examples/toi-noi-dotnet/06-class-encapsulation
 dotnet run --project examples/toi-noi-dotnet/06-class-encapsulation -- --verify
 ```
 
-Lệnh đầu minh họa hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
+Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
 
 Mã nguồn đầy đủ của Program.cs (đặt trong console net10.0 như bài 01):
 

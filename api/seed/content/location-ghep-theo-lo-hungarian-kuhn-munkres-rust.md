@@ -20,7 +20,7 @@ Bài này làm cả hai việc: cài đặt phép gán tối ưu bằng crate `p
 <details><summary>Xem đáp án</summary><p>Ở cao điểm, <code>deadhead_m</code> trung bình giảm 911,7 m, khoảng [−1.143,2; −680,3], 20/20 seed. Nhưng tỉ lệ khách hết kiên nhẫn (chưa có xe sau 300 s) tăng từ 0,0149 lên 0,0717. Ở mật độ thường, hai cách <b>không phân biệt được</b> ở mọi chỉ số: lô trung bình chỉ 1,64 khách, nên gần như không có gì để tối ưu.</p></details>
 </div>
 
-## Mô hình hóa: ma trận chi phí và nhiều hơn một cách sai
+## Mô hình hoá: ma trận chi phí và nhiều hơn một cách sai
 
 Quy ước của crate `matcher`: **hàng là khách, cột là tài xế, ô là ETA đường bộ tính bằng mili giây** (số nguyên, lấy từ `bucket_matrix` trên CH ở bài 26). Ô bị cấm hoặc không tới được mang giá trị `FORBIDDEN`. Mọi hàm phân công trả danh sách cặp `(khách, tài xế)`, mỗi khách và mỗi tài xế tối đa một lần, và không bao giờ chứa cặp bị cấm.
 
@@ -30,7 +30,7 @@ Phép gán tối ưu cần một thứ mà tham lam không có: nhìn cả lô. 
 - `greedy_global`: lặp lại việc lấy cặp rẻ nhất trong mọi cặp còn lại. Mạnh hơn, vẫn không tối ưu.
 - `hungarian`: tối đa số cặp được phép trước, rồi tối thiểu tổng chi phí.
 
-Crate `pathfinding` có `kuhn_munkres`, nhưng hàm đó **tối đa hóa** tổng trọng số và đòi số hàng không vượt số cột. Ma trận ETA là chi phí cần tối thiểu, thường chữ nhật theo cả hai chiều, và có ô cấm. Ba điều chỉnh trong `hungarian`: chuyển ma trận khi thừa khách; đổi chi phí `v` thành trọng số `big − (v − lo)`; ô cấm nhận trọng số 0 và bị loại khỏi kết quả. Hằng `big` đủ lớn để **thêm một cặp luôn thắng mọi khoản tiết kiệm chi phí**, nhờ đó thứ tự ưu tiên là «ghép được nhiều khách nhất» rồi mới «rẻ nhất».
+Crate `pathfinding` có `kuhn_munkres`, nhưng hàm đó **tối đa hoá** tổng trọng số và đòi số hàng không vượt số cột. Ma trận ETA là chi phí cần tối thiểu, thường chữ nhật theo cả hai chiều, và có ô cấm. Ba điều chỉnh trong `hungarian`: chuyển ma trận khi thừa khách; đổi chi phí `v` thành trọng số `big − (v − lo)`; ô cấm nhận trọng số 0 và bị loại khỏi kết quả. Hằng `big` đủ lớn để **thêm một cặp luôn thắng mọi khoản tiết kiệm chi phí**, nhờ đó thứ tự ưu tiên là «ghép được nhiều khách nhất» rồi mới «rẻ nhất».
 
 `examples/toi-noi-location/rust/crates/matcher/src/assign.rs`
 
@@ -117,7 +117,7 @@ Mục 1 của lab dựng lô ngẫu nhiên từ thế giới mô phỏng 300 tà
 
 Mọi khoảng tin cậy 95% đều không chứa 0. Ba cách đọc.
 
-**Khi lô cân bằng, lợi 9,5–14,7% so với tham lam theo thứ tự.** Lô càng lớn, lợi càng nhiều (5 × 5: 9,5%; 20 × 20: 14,7%), vì càng nhiều khả năng có «khách cướp xe của khách sau». So với tham lam toàn cục, lợi chỉ 4,6–8,3%: nếu chọn cách giải rẻ hơn để đỡ tốn CPU, tham lam toàn cục đã lấy khoảng một nửa phần lợi (47–55% tùy cỡ, tính từ bảng).
+**Khi lô cân bằng, lợi 9,5–14,7% so với tham lam theo thứ tự.** Lô càng lớn, lợi càng nhiều (5 × 5: 9,5%; 20 × 20: 14,7%), vì càng nhiều khả năng có «khách cướp xe của khách sau». So với tham lam toàn cục, lợi chỉ 4,6–8,3%: nếu chọn cách giải rẻ hơn để đỡ tốn CPU, tham lam toàn cục đã lấy khoảng một nửa phần lợi (47–55% tuỳ cỡ, tính từ bảng).
 
 **Khi thừa khách, con số 45,1% và 65,4% không nên đọc như «tối ưu hơn một nửa».** Ở 50 × 30, cả hai cách ghép đúng 30 khách. Khác biệt là **ai** được phục vụ: tham lam theo thứ tự phục vụ 30 khách đầu danh sách, còn Hungarian, vì tối thiểu tổng ETA, tự chọn 30 khách rẻ nhất trong 50. Phần lớn khoản «tiết kiệm» là do chọn lại tập khách được phục vụ. Đó là điều thuật toán làm theo đúng định nghĩa của nó, và là mầm của kết quả ở mục «Cái giá» bên dưới. Còn so với tham lam toàn cục, lợi chỉ 3,6%.
 
@@ -166,10 +166,10 @@ Mục 3 chạy simulator với cửa sổ lô cố định 10 s: khi có khách 
 | `wait_s` p95 | +4,7 [−11,6; 21,0] | −271,9 [−382,5; −161,3] | −315,1 [−403,2; −227,0] |
 | km rỗng tổng / khách đặt (m) | +13,3 [−13,2; 39,8] | −636,3 [−819,0; −453,6] | −632,1 [−801,6; −462,5] |
 | chuyến hoàn thành | +0,5 [−0,2; 1,1] | +0,1 [−1,4; 1,6] | +1,1 [−3,3; 5,5] |
-| hủy (`cancel_rate`) | −0,0019 [−0,0049; 0,0011] | −0,0005 [−0,0072; 0,0063] | −0,0023 [−0,0119; 0,0073] |
+| huỷ (`cancel_rate`) | −0,0019 [−0,0049; 0,0011] | −0,0005 [−0,0072; 0,0063] | −0,0023 [−0,0119; 0,0073] |
 | **khách hết kiên nhẫn** | 0,0000 → 0,0000 | **0,0341 → 0,0796 XẤU HƠN** | **0,0149 → 0,0717 XẤU HƠN** |
 
-Số khách ở một lô cho biết trước kết quả. Ở `thưa xe` và `cao điểm` (lô 3,9 và 6,7 khách) Hungarian giảm km rỗng khoảng 900–975 m, ETA đón khoảng 87–90 s, `wait_s` p95 hơn 270 s, ở 16 đến 20 trên 20 seed tùy chỉ số. Ở `thường`, không chỉ số nào phân biệt được với 0, và đây không phải một dấu sao đơn lẻ mà là cả một khối chỉ số cùng hướng. Chỉ số ít bị thiên lệch nhất là km rỗng tổng trên mỗi khách đặt, vì mẫu số là mọi khách: −632,1 m ở `cao điểm`, nhỏ hơn con số 911,7 m tính trên chuyến hoàn thành.
+Số khách ở một lô cho biết trước kết quả. Ở `thưa xe` và `cao điểm` (lô 3,9 và 6,7 khách) Hungarian giảm km rỗng khoảng 900–975 m, ETA đón khoảng 87–90 s, `wait_s` p95 hơn 270 s, ở 16 đến 20 trên 20 seed tuỳ chỉ số. Ở `thường`, không chỉ số nào phân biệt được với 0, và đây không phải một dấu sao đơn lẻ mà là cả một khối chỉ số cùng hướng. Chỉ số ít bị thiên lệch nhất là km rỗng tổng trên mỗi khách đặt, vì mẫu số là mọi khách: −632,1 m ở `cao điểm`, nhỏ hơn con số 911,7 m tính trên chuyến hoàn thành.
 
 ## Cái giá: số khách bị bỏ rơi tăng gần gấp năm lần
 
@@ -195,10 +195,10 @@ Lab kiểm trực tiếp giải thích này bằng cờ `--bo-roi`: bọc chiế
 
 Dưới tham lam, khách hết kiên nhẫn đơn giản là vì thiếu xe, không ai chen trước họ. Dưới Hungarian, không có khách hết kiên nhẫn nào mà chưa từng bị khách đến sau vượt. Đối chiếu thêm cùng bộ `cao điểm`, cùng seed: Hungarian ghép tức thì, không cửa sổ, đã có tỉ lệ hết kiên nhẫn 0,0660 ([bài 43](/articles/location-cua-so-lo-do-tre-doi-chat-luong-ghep)), còn tham lam ghép ngay chỉ 0,0126 ([bài 41](/articles/location-gan-nhat-sai-o-dau-do-bang-mo-phong)). Vậy nguồn gốc là quyền chọn khách của Hungarian, không phải cửa sổ lô. Đây vẫn là đo trong mô phỏng, nhưng không còn là phỏng đoán từ công thức.
 
-**Phép trừ cho thấy câu chuyện không đơn giản là «mất thêm khách».** `cancel_rate` của simulator đếm mọi chuyến không hoàn thành (hủy sau khi gán lẫn hết kiên nhẫn). Ở `cao điểm` nó gần như không đổi (0,3047 → 0,3024, −0,0023, khoảng chứa 0), số chuyến hoàn thành cũng không đổi (+1,1, khoảng chứa 0). Vậy khoản +0,0568 hết kiên nhẫn phải được bù bằng khoảng −0,0591 hủy sau khi gán (phép trừ trên các giá trị trung bình, chưa phải bảng riêng của lab). Nói cách khác, Hungarian không bỏ rơi thêm khách trên tổng thể: nó chuyển một số khách từ «được giao một tài xế quá xa rồi hủy» sang «không được giao, chờ cho hết kiên nhẫn». Cả hai đều không đi được xe. Điều khác nhau:
+**Phép trừ cho thấy câu chuyện không đơn giản là «mất thêm khách».** `cancel_rate` của simulator đếm mọi chuyến không hoàn thành (huỷ sau khi gán lẫn hết kiên nhẫn). Ở `cao điểm` nó gần như không đổi (0,3047 → 0,3024, −0,0023, khoảng chứa 0), số chuyến hoàn thành cũng không đổi (+1,1, khoảng chứa 0). Vậy khoản +0,0568 hết kiên nhẫn phải được bù bằng khoảng −0,0591 huỷ sau khi gán (phép trừ trên các giá trị trung bình, chưa phải bảng riêng của lab). Nói cách khác, Hungarian không bỏ rơi thêm khách trên tổng thể: nó chuyển một số khách từ «được giao một tài xế quá xa rồi huỷ» sang «không được giao, chờ cho hết kiên nhẫn». Cả hai đều không đi được xe. Điều khác nhau:
 
-- **Khách ở xa:** trước đây nhận được lời chào xe sau vài giây rồi tự hủy khi thấy ETA dài; nay phải chờ trọn 300 s mới biết không có xe. Lab chưa đo khách nào tệ hơn trong hai kịch bản, và mô hình hủy là giả định chưa hiệu chuẩn.
-- **Tài xế:** không còn chạy vô ích tới khách sẽ hủy. Đó là một nguồn của khoản giảm km rỗng tổng trên mỗi khách đặt (−632,1 m): tài xế được lợi.
+- **Khách ở xa:** trước đây nhận được lời chào xe sau vài giây rồi tự huỷ khi thấy ETA dài; nay phải chờ trọn 300 s mới biết không có xe. Lab chưa đo khách nào tệ hơn trong hai kịch bản, và mô hình huỷ là giả định chưa hiệu chuẩn.
+- **Tài xế:** không còn chạy vô ích tới khách sẽ huỷ. Đó là một nguồn của khoản giảm km rỗng tổng trên mỗi khách đặt (−632,1 m): tài xế được lợi.
 - **Khách còn lại:** ETA đón trung bình −87,1 s, nhưng con số này tính trên chuyến hoàn thành, trong khi những khách khó nhất đã rời khỏi mẫu. Một phần khoản lợi 87,1 s là thiên lệch người sống sót, chưa biết bao nhiêu.
 
 Theo vùng, ở `cao điểm` cả ba vùng đều xấu đi: trung tâm 0,0172 → 0,0685, vành trong 0,0139 → 0,0644, ngoại vi 0,0147 → 0,0867; ngoại vi tăng nhiều nhất (+0,0720 [0,0545; 0,0896]) nhưng khoảng chồng lên hai vùng kia. «Xa» ở đây là xa xe rảnh lúc đó, không phải xa trung tâm thành phố. [Bài 45](/articles/location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy) thử thêm thưởng chờ lâu và giới hạn đón xa vào hàm chi phí, kể cả ở đúng cấu hình này (lô 10 s, `cao điểm`): thưởng chờ lâu 0,5 chỉ giảm tỉ lệ hết kiên nhẫn 0,0025, còn giới hạn đón xa đẩy nó lên 0,1973. Chưa có bản sửa nào trong lab.
@@ -228,7 +228,7 @@ Tham số: `--seeds N` (20), `--batches N` (200), `--jobs N`, `--bo-roi` (chỉ 
 
 ## Giới hạn của ví dụ
 
-- **Mô phỏng.** Mô hình hủy là công thức chưa hiệu chuẩn; kiên nhẫn 300 s là giả định; khách ở đây không có «ưu tiên» nào ngoài thứ tự đặt.
+- **Mô phỏng.** Mô hình huỷ là công thức chưa hiệu chuẩn; kiên nhẫn 300 s là giả định; khách ở đây không có «ưu tiên» nào ngoài thứ tự đặt.
 - **Chỉ ba bộ giả định** (`thường`, `cao điểm`, `thưa xe`); `dày xe`, `huỷ nặng` và `huỷ theo chờ` chưa chạy cho bài này.
 - **Phép đo «bị vượt» là đếm trong cùng một lần chạy**, không phải thí nghiệm phản thực: nó không nói nếu không bị vượt thì khách đó có được phục vụ hay không.
 - **Thời gian giải** (µs, ms) đo khi máy chịu tải nặng, nên không có giá trị tuyệt đối; độ dốc 2,23 cũng nhiễu.
@@ -260,6 +260,6 @@ Bài trước: [bài 41](/articles/location-gan-nhat-sai-o-dau-do-bang-mo-phong)
 ## Tài liệu gốc
 
 - [Hungarian algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Hungarian_algorithm): bài toán phân công và nguồn gốc thuật toán; trang liệt kê bài báo của Kuhn (1955) và Munkres (1957) đã trích ở trên.
-- [`pathfinding::kuhn_munkres` (docs.rs)](https://docs.rs/pathfinding/4.16.0/pathfinding/kuhn_munkres/fn.kuhn_munkres.html): chữ ký, quy ước tối đa hóa, yêu cầu số hàng không vượt số cột, độ phức tạp O(n³).
+- [`pathfinding::kuhn_munkres` (docs.rs)](https://docs.rs/pathfinding/4.16.0/pathfinding/kuhn_munkres/fn.kuhn_munkres.html): chữ ký, quy ước tối đa hoá, yêu cầu số hàng không vượt số cột, độ phức tạp O(n³).
 - [Student's t-test (Wikipedia)](https://en.wikipedia.org/wiki/Student%27s_t-test): kiểm định mẫu ghép cặp, nền của khoảng tin cậy trong bài.
 - [Bản quyền và giấy phép của OpenStreetMap](https://www.openstreetmap.org/copyright): điều kiện ghi công cho dữ liệu OSM.

@@ -549,7 +549,7 @@ _attach(connection);
 <span class="tkh-callout-title">Bốn lỗi hay gặp với WebSocket di động</span>
 <ul>
 <li><strong>Nối lại ngay, không backoff hoặc không jitter.</strong> Dấu hiệu: sau mỗi lần deploy gateway, số kết nối mới tăng vọt. Nguyên nhân: mọi máy chờ cùng một khoảng. Cách sửa: backoff có trần với full jitter, chỉ reset khi kết nối đã sống ổn định.</li>
-<li><strong><code>subscribe</code> lại mà không kèm <code>lastSequence</code> và <code>logEpoch</code>.</strong> Dấu hiệu: màn hình kẹt ở trạng thái cũ sau khi mạng chập chờn, hoặc sự kiện của log khác được đưa ra như của log này. Cách sửa: nhớ cả hai theo chuyến, gửi lại khi nối, khử trùng khi nhận, thôi nghe khi log đổi.</li>
+<li><strong><code>subscribe</code> lại mà không kèm <code>lastSequence</code> và <code>logEpoch</code>.</strong> Dấu hiệu: màn hình kẹt ở trạng thái cũ sau khi mạng chập chờn, hoặc sự kiện của log khác được đưa ra như của log này. Cách sửa: nhớ cả hai theo chuyến, gửi lại khi nối, khử trùng lặp khi nhận, thôi nghe khi log đổi.</li>
 <li><strong>Nối lại vô hạn khi token hết hạn.</strong> Dấu hiệu: log đầy các kết nối bị đóng mã 4401 hoặc HTTP 401. Cách sửa: dừng ở <code>closed(unauthorized)</code>, làm mới token trong <code>tokenProvider</code> rồi mới <code>connect()</code>.</li>
 <li><strong>Không có heartbeat.</strong> Dấu hiệu: vẫn "connected" nhưng không có dữ liệu sau khi đổi mạng. Cách sửa: ping định kỳ, coi im lặng quá hạn là chết.</li>
 </ul>

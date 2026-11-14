@@ -76,7 +76,7 @@ RFC 9457 (thay thế RFC 7807) định nghĩa media type `application/problem+js
 - `detail`: giải thích riêng cho lần này. RFC khuyên client không phân tích chuỗi này.
 - `instance`: URI tham chiếu của lần xảy ra.
 
-Lab không dùng `about:blank`, vì client cần một `type` riêng để rẽ nhánh. RFC khuyến nghị `type` là URI tuyệt đối, cho phép URI không mở được nhưng khuyến khích URI mở ra tài liệu; miền `toi-noi.example` chỉ để minh họa. Schema của lab chặt hơn RFC: năm thành phần cộng `traceId` đều `required`, đó là cam kết riêng của API này.
+Lab không dùng `about:blank`, vì client cần một `type` riêng để rẽ nhánh. RFC khuyến nghị `type` là URI tuyệt đối, cho phép URI không mở được nhưng khuyến khích URI mở ra tài liệu; miền `toi-noi.example` chỉ để minh hoạ. Schema của lab chặt hơn RFC: năm thành phần cộng `traceId` đều `required`, đó là cam kết riêng của API này.
 
 RFC cho phép thành phần mở rộng, và client phải bỏ qua mở rộng nó không nhận ra. Lab thêm hai, đều không thuộc chuẩn: `errors` (chỉ có khi lỗi validation) và `traceId`. RFC có ví dụ `errors` gồm `detail` và `pointer`, nhưng đó chỉ là ví dụ; lab chọn `field`, `code`, `message` để client rẽ nhánh theo `code`.
 
@@ -107,7 +107,7 @@ detail: 3 trường không hợp lệ
   postings[1].amountDong [zero_amount] số tiền phải khác 0
 ```
 
-Client rẽ nhánh theo `code` (`blank`, `zero_amount`), không phân tích câu tiếng Việt. Còn `traceId` (32 ký tự hex, dạng W3C trace-id) sinh ngẫu nhiên cho từng lỗi; bài 33 mới có `x-request-id` do middleware cấp và đi vào log, còn nối hai thứ đó là việc của service thật. `instance` ở đây là đường dẫn request, một cách đơn giản hóa: hai lần gọi cùng đường dẫn có cùng `instance`, nên nó chưa định danh được lần xảy ra, và `traceId` gánh phần đó.
+Client rẽ nhánh theo `code` (`blank`, `zero_amount`), không phân tích câu tiếng Việt. Còn `traceId` (32 ký tự hex, dạng W3C trace-id) sinh ngẫu nhiên cho từng lỗi; bài 33 mới có `x-request-id` do middleware cấp và đi vào log, còn nối hai thứ đó là việc của service thật. `instance` ở đây là đường dẫn request, một cách đơn giản hoá: hai lần gọi cùng đường dẫn có cùng `instance`, nên nó chưa định danh được lần xảy ra, và `traceId` gánh phần đó.
 
 Lỗi nội bộ không kèm chi tiết: `LedgerError::InvalidFee` ra 500 với `detail` cố định «xem log với traceId».
 

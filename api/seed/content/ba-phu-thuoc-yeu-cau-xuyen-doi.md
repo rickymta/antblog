@@ -14,7 +14,7 @@ Backend báo đã xong, mobile báo đang chờ backend, CS chưa biết ngày �
 
 ## 1. Phụ thuộc là đầu ra cần nhận
 
-Thay “chờ đội API” bằng “cần response mô tả policy áp dụng và ví dụ chuyến qua mốc để mobile hiển thị đúng”. Ghi provider, consumer, artifact, ngày cần và tiêu chí chấp nhận. Tên đội đơn lẻ không cho biết khi nào phụ thuộc được giải tỏa.
+Thay “chờ đội API” bằng “cần response mô tả policy áp dụng và ví dụ chuyến qua mốc để mobile hiển thị đúng”. Ghi provider, consumer, artifact, ngày cần và tiêu chí chấp nhận. Tên đội đơn lẻ không cho biết khi nào phụ thuộc được giải toả.
 
 ## 2. Bảng bàn giao
 

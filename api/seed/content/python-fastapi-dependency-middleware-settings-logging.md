@@ -76,7 +76,7 @@ quote_ttl_seconds
   Input should be greater than or equal to 30 [type=greater_than_equal, input_value='5', input_type=str]
 ```
 
-Chết ngay khi khởi động tốt hơn chạy với TTL báo giá 5 giây. Lab chưa có bí mật nào. Khi có (bài 34 có khóa ký), `SecretStr` che giá trị trong `repr` và log, nhưng **không** che trong thông báo `ValidationError` khi cấu hình sai; bài 34 xử lý chỗ đó.
+Chết ngay khi khởi động tốt hơn chạy với TTL báo giá 5 giây. Lab chưa có bí mật nào. Khi có (bài 34 có khoá ký), `SecretStr` che giá trị trong `repr` và log, nhưng **không** che trong thông báo `ValidationError` khi cấu hình sai; bài 34 xử lý chỗ đó.
 
 ## Depends: cache, yield và scope
 
@@ -267,7 +267,7 @@ class RequestIdFilter(logging.Filter):
         return json.dumps(data, ensure_ascii=False, default=str)
 ```
 
-Thuộc tính `LogRecord` ngoài tập chuẩn là trường do `extra={...}` thêm vào, nên `extra={"trip_id": …}` sinh khóa `trip_id`. `ensure_ascii=False` giữ tiếng Việt; `default=str` để `Decimal`, `datetime` không làm vỡ dòng log.
+Thuộc tính `LogRecord` ngoài tập chuẩn là trường do `extra={...}` thêm vào, nên `extra={"trip_id": …}` sinh khoá `trip_id`. `ensure_ascii=False` giữ tiếng Việt; `default=str` để `Decimal`, `datetime` không làm vỡ dòng log.
 
 **Correlation id đi bằng `contextvars`.** Ta không muốn truyền `request_id` qua tham số của mọi hàm. `ContextVar` là biến mà mỗi ngữ cảnh thực thi (mỗi task asyncio có một ngữ cảnh, sao chép từ nơi tạo task) có giá trị riêng. Middleware `set` ở đầu request và `reset` bằng token trong `finally`; filter đọc giá trị đó cho mọi dòng log. Cả bốn chỗ dưới đây đều thấy đúng mã (route `/v1/diagnostics/context`):
 

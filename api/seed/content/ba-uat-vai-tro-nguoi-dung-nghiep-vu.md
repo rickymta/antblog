@@ -36,7 +36,7 @@ Một người có thể kiêm vai trò, nhưng quyền nghiệm thu phải rõ.
 
 Mục tiêu: kiểm hành trình khách xác nhận đúng điểm trước accepted và tài xế được phân công đọc được. Phạm vi gồm revision cũ, actor sai, chuyến đổi trạng thái và timeout. Ngoài phạm vi là chat, chỉnh điểm sau accepted và chứng minh giảm huỷ ngoài thực tế.
 
-Đầu vào cần có baseline, build, tài khoản/role, dữ liệu và môi trường đủ đại diện. Thiếu điều kiện đầu vào thì ghi blocked, không đánh dấu fail sản phẩm một cách tùy tiện.
+Đầu vào cần có baseline, build, tài khoản/role, dữ liệu và môi trường đủ đại diện. Thiếu điều kiện đầu vào thì ghi blocked, không đánh dấu fail sản phẩm một cách tuỳ tiện.
 
 ## 5. Hướng dẫn vừa đủ
 

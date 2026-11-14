@@ -34,7 +34,7 @@ Hồ sơ Tới Nơi ghi 25.000 tài xế online lúc cao điểm, mỗi người
 
 Điều cần rút ra từ phép tính này là đơn vị nào chạm trần trước. Với event nhỏ và nhiều, giới hạn theo số event/giây chạm trước giới hạn MB/giây. Cho nên đếm event, không chỉ đếm byte. Ước lượng này chỉ là điểm xuất phát; phải load test để biết cần bao nhiêu TU, và kiểm tra auto-inflate có tự nâng theo tải không.
 
-Số partition là quyết định khó đảo ngược hơn. Partition là trần song song cho consumer: trong một consumer group, tối đa bằng số partition reader hoạt động cùng lúc. Với 4 partition, bạn không thể có 10 instance Dispatch cùng đọc có ích. Partition cũng là trần ghi: ở Standard, một partition chỉ nhận được cỡ thông lượng của một TU, nên 8.300 event/giây cần nhiều hơn hẳn 4 partition; con số 4 trong lab chỉ đủ cho lab. Ở Basic và Standard, số partition cố định sau khi tạo; Premium và Dedicated cho tăng (không cho giảm) nhưng việc tăng không phân phối lại event cũ và có thể làm đổi ánh xạ key sang partition. Kiểm tài liệu trước khi chọn.
+Số partition là quyết định khó đảo ngược hơn. Partition là trần song song cho consumer: trong một consumer group, tối đa bằng số partition reader hoạt động cùng lúc. Với 4 partition, bạn không thể có 10 instance Dispatch cùng đọc có ích. Partition cũng là trần ghi: ở Standard, một partition chỉ nhận được cỡ thông lượng của một TU, nên 8.300 event/giây cần nhiều hơn hẳn 4 partition; con số 4 trong lab chỉ đủ cho lab. Ở Basic và Standard, số partition cố định sau khi tạo; Premium và Dedicated cho tăng (không cho giảm) nhưng việc tăng không phân phối lại event cũ và có thể làm đổi ánh xạ key sang partition. Kiểm tra tài liệu trước khi chọn.
 
 ## Partition key = driverId giữ thứ tự theo tài xế
 

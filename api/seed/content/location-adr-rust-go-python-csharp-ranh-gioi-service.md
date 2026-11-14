@@ -33,7 +33,7 @@ Ngoài ra còn hai ràng buộc không thuộc về kỹ thuật. Blog đã có 
 
 | Thành phần | Ngôn ngữ | Sở hữu gì | Vì sao ở đây |
 |---|---|---|---|
-| `geo-engine`: bám đường, định tuyến, ma trận chi phí, chọn điểm đón, gợi ý ghép chuyến | **Rust** | Bản đồ đã biên dịch, vị trí mới nhất | Nhạy với độ trễ và bộ nhớ, đồ thị lớn trong RAM, kiểu tọa độ bắt lỗi lúc biên dịch |
+| `geo-engine`: bám đường, định tuyến, ma trận chi phí, chọn điểm đón, gợi ý ghép chuyến | **Rust** | Bản đồ đã biên dịch, vị trí mới nhất | Nhạy với độ trễ và bộ nhớ, đồ thị lớn trong RAM, kiểu toạ độ bắt lỗi lúc biên dịch |
 | `location-ingest`, `tracking-hub` | **Go** | Kết nối, hàng đợi có giới hạn | Rất nhiều kết nối, goroutine, backpressure; mất một điểm GPS không làm lệch tiền |
 | Pipeline offline: ETA, dự báo nhu cầu, phân cụm điểm đón, phân tích thí nghiệm | **Python** | Dữ liệu huấn luyện, mô hình ONNX, bảng điểm đón học được | Hệ sinh thái dữ liệu và solver, không nằm trên đường nóng |
 | `Dispatch`, `Trip` | **C#** (đã có) | Nguồn sự thật của assignment | Nghiệp vụ và transaction vẫn thuộc backend chính |
@@ -58,14 +58,14 @@ Lý do cụ thể để `geo-engine` là Rust:
 
 - **Đồ thị lớn trong bộ nhớ, bố cục dự đoán được.** Đồ thị TP.HCM của lab là các cột mảng liền nhau (CSR). Theo `results/p01.md`, file nhị phân 18,4 MB, nạp lại 9–10 ms (24 ms một lần; đo khi máy đang chịu tải nặng); mảng cột ước tính 17,5 MB.
 - **Độ trễ đuôi.** Khi cả bản đồ đã ở trong RAM, p99 phụ thuộc vào thuật toán chứ không phụ thuộc vào một bộ thu gom rác. Đây là lý do thiết kế; lab **chưa** đo so với ngôn ngữ khác và các bài định tuyến ở P03 mới là nơi đo p99 thật.
-- **Sai kiểu tọa độ bị chặn lúc biên dịch.** Bài 03 cho thấy `LatLng::new(Lng, Lat)` không biên dịch.
+- **Sai kiểu toạ độ bị chặn lúc biên dịch.** Bài 03 cho thấy `LatLng::new(Lng, Lat)` không biên dịch.
 - Một lý do thành thật hơn: loạt này chọn Rust cho phần lõi vì mục tiêu của nó là dạy cách viết engine bản đồ bằng Rust. Nếu mục tiêu là sản phẩm, C# hay Go hoàn toàn có thể giữ đồ thị trong bộ nhớ; chênh lệch nằm ở mức kiểm soát bố cục dữ liệu và độ ổn định của p99, thứ cần đo chứ không nên khẳng định.
 
 Phần đã đo tới lúc này còn khiêm tốn: một phép khoảng cách haversine tốn vài chục nano giây trên máy viết (đo khi máy chịu tải nặng, nên chỉ nên nhớ thứ bậc chứ không nhớ con số), và việc nạp đồ thị như trên. Chưa có số nào cho Dijkstra hay contraction hierarchies, vì chúng nằm ở các bài sau.
 
 ## Vì sao Go ở ingest và tracking-hub
 
-Ingest có hình dạng rất riêng: 25.000 kết nối WebSocket sống lâu, mỗi kết nối chỉ gửi một lô vài điểm sau mỗi vài giây, gần như không tính toán. Mất một điểm GPS không làm lệch tiền; điểm mới hơn sẽ thay điểm cũ. Mô hình goroutine cho mỗi kết nối, kênh có giới hạn và `context` để hủy là cách diễn đạt gần nhất với bài toán. Bài LOC-13 về backpressure sẽ nói kỹ cách bỏ có chủ đích khi quá tải.
+Ingest có hình dạng rất riêng: 25.000 kết nối WebSocket sống lâu, mỗi kết nối chỉ gửi một lô vài điểm sau mỗi vài giây, gần như không tính toán. Mất một điểm GPS không làm lệch tiền; điểm mới hơn sẽ thay điểm cũ. Mô hình goroutine cho mỗi kết nối, kênh có giới hạn và `context` để huỷ là cách diễn đạt gần nhất với bài toán. Bài LOC-13 về backpressure sẽ nói kỹ cách bỏ có chủ đích khi quá tải.
 
 Lab đã dựng bản Go này. Các số dưới đây lấy từ `results/p02-go.md`, mục LOC-12 (Apple M1 Max 10 lõi, Go 1.27.1, 25.000 kết nối, seed 1), kèm các hạn chế đi theo chúng:
 
@@ -114,7 +114,7 @@ Hệ quả thực tế: nếu `geo-engine` chậm hay lỗi, Dispatch vẫn gán
 
 ## Hợp đồng chung và cái giá của bốn ngôn ngữ
 
-Các service nói chuyện với nhau qua một file duy nhất, `examples/toi-noi-location/proto/location/v1/location.proto`, và một topic Kafka `location.updates.v1` với key là `driver_id`. File `examples/toi-noi-location/proto/README.md` ghi các quy ước số mà **mọi ngôn ngữ phải hiểu giống nhau**: tọa độ là `lat_e7` và `lng_e7` kiểu `sint32` (độ nhân 10⁷, 1 đơn vị khoảng 1,1 cm), thời gian là `int64` mili giây UTC, độ chính xác tính bằng 0,1 m. Nguyên tắc tương thích theo mục 6.6 của kiến trúc: không đổi ý nghĩa hay số thứ tự field đã có, field mới thêm ở cuối, đổi không tương thích thì tạo `location.updates.v2`.
+Các service nói chuyện với nhau qua một file duy nhất, `examples/toi-noi-location/proto/location/v1/location.proto`, và một topic Kafka `location.updates.v1` với key là `driver_id`. File `examples/toi-noi-location/proto/README.md` ghi các quy ước số mà **mọi ngôn ngữ phải hiểu giống nhau**: toạ độ là `lat_e7` và `lng_e7` kiểu `sint32` (độ nhân 10⁷, 1 đơn vị khoảng 1,1 cm), thời gian là `int64` mili giây UTC, độ chính xác tính bằng 0,1 m. Nguyên tắc tương thích theo mục 6.6 của kiến trúc: không đổi ý nghĩa hay số thứ tự field đã có, field mới thêm ở cuối, đổi không tương thích thì tạo `location.updates.v2`.
 
 Có hợp đồng rõ không có nghĩa bốn ngôn ngữ miễn phí. Chi phí cụ thể:
 
@@ -150,7 +150,7 @@ Có hai thứ không nên gộp. C# không gộp vào Rust, vì ranh giới đ�
 
 ## Giới hạn của ví dụ
 
-Bài này không có code. Các con số về Go lấy từ lab LOC-12, mỗi con số là một lần chạy trên một máy chia sẻ với `loadgen` và Kafka, không có bản Rust để đối chiếu, nên chúng minh họa chi phí của lựa chọn Go chứ không chứng minh Go là lựa chọn tốt nhất. Phần Rust mới có số cho khoảng cách và việc nạp đồ thị; chưa có số cho định tuyến. Phần Python và hợp đồng gRPC chưa chạy: `.proto` hiện chưa có service nào, chưa có test hợp đồng giữa các ngôn ngữ, chưa có trace xuyên suốt. Quy mô tải là số hư cấu của hồ sơ dự án mẫu. Mọi việc ở trên là việc của các bài sau.
+Bài này không có code. Các con số về Go lấy từ lab LOC-12, mỗi con số là một lần chạy trên một máy chia sẻ với `loadgen` và Kafka, không có bản Rust để đối chiếu, nên chúng minh hoạ chi phí của lựa chọn Go chứ không chứng minh Go là lựa chọn tốt nhất. Phần Rust mới có số cho khoảng cách và việc nạp đồ thị; chưa có số cho định tuyến. Phần Python và hợp đồng gRPC chưa chạy: `.proto` hiện chưa có service nào, chưa có test hợp đồng giữa các ngôn ngữ, chưa có trace xuyên suốt. Quy mô tải là số hư cấu của hồ sơ dự án mẫu. Mọi việc ở trên là việc của các bài sau.
 
 ## Bài tập
 

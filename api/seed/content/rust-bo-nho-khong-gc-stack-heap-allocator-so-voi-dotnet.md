@@ -117,7 +117,7 @@ tx rollback
 panic caught: true
 ```
 
-Ba ca: commit, trả lỗi sớm, panic giữa chừng. `MutexGuard` cùng khuôn: ra phạm vi thì khóa được nhả. Bên C#, `using` giải cùng bài toán nhưng người gọi phải nhớ viết, còn finalizer chạy theo lịch GC ([bài 27 loạt C#](/articles/dotnet10-allocation-gc-disposal)).
+Ba ca: commit, trả lỗi sớm, panic giữa chừng. `MutexGuard` cùng khuôn: ra phạm vi thì khoá được nhả. Bên C#, `using` giải cùng bài toán nhưng người gọi phải nhớ viết, còn finalizer chạy theo lịch GC ([bài 27 loạt C#](/articles/dotnet10-allocation-gc-disposal)).
 
 ## Ghi 10.000 bút toán cấp phát bao nhiêu lần?
 
@@ -130,7 +130,7 @@ Ba ca: commit, trả lỗi sớm, panic giữa chừng. `MutexGuard` cùng khuô
 | Bộ nhớ sống sau build, sau drop | 3.389.944 byte, 676 byte (bằng mức trước build) |
 | Block trả về khi drop sổ cái | 60.002 |
 
-90.026 block trùng đúng số `dhat` ở bài 30. Chín block mỗi bút toán: tám của `make_entry` (ba là chuỗi tạm do `format!`) và một cho bản sao khóa idempotency trong chỉ mục; 26 block còn lại là `Vec` và `HashMap` của `Ledger` tự tăng. Drop sổ cái trả 60.002 block trong một lời gọi và đưa bộ nhớ sống về mức trước build. «Trả» ở đây là trả cho allocator; RSS có giảm hay không còn tùy allocator, như mục sau đo.
+90.026 block trùng đúng số `dhat` ở bài 30. Chín block mỗi bút toán: tám của `make_entry` (ba là chuỗi tạm do `format!`) và một cho bản sao khoá idempotency trong chỉ mục; 26 block còn lại là `Vec` và `HashMap` của `Ledger` tự tăng. Drop sổ cái trả 60.002 block trong một lời gọi và đưa bộ nhớ sống về mức trước build. «Trả» ở đây là trả cho allocator; RSS có giảm hay không còn tuỳ allocator, như mục sau đo.
 
 ## Đổi allocator có đổi được gì?
 
@@ -161,9 +161,9 @@ Hai cảnh báo. `mimalloc` và `jemalloc` đều biên dịch C, `jemalloc` ch�
 
 ## Một tiến trình Rust so với .NET: so thế nào cho công bằng?
 
-`dotnet-compare/` là code C# thông thường, không tinh chỉnh, chạy cùng khối lượng (10.000 bút toán ba posting, `List` và `Dictionary` theo khóa), in `GC.GetTotalAllocatedBytes`, số lần GC và RSS.
+`dotnet-compare/` là code C# thông thường, không tinh chỉnh, chạy cùng khối lượng (10.000 bút toán ba posting, `List` và `Dictionary` theo khoá), in `GC.GetTotalAllocatedBytes`, số lần GC và RSS.
 
-Hai chương trình **không giống hệt**. Rust kiểm tra và sao chép mọi mã tài khoản thành `String` UTF-8, sao chép khóa vào chỉ mục và giữ `Posting` ngay trong `Vec`. C# chia sẻ tham chiếu chuỗi UTF-16 (literal dùng chung, khóa không sao chép), mỗi `Posting` là một object, tính số dư bằng LINQ, và còn có JIT.
+Hai chương trình **không giống hệt**. Rust kiểm tra và sao chép mọi mã tài khoản thành `String` UTF-8, sao chép khoá vào chỉ mục và giữ `Posting` ngay trong `Vec`. C# chia sẻ tham chiếu chuỗi UTF-16 (literal dùng chung, khoá không sao chép), mỗi `Posting` là một object, tính số dư bằng LINQ, và còn có JIT.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -204,7 +204,7 @@ Thời gian chỉ đọc theo hướng. Cùng binary Rust cho 402 ms ở lô nà
 
 [Bài 09](/articles/rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho) dạy `'a`. Bốn chỗ hay vấp tiếp theo có code trong `src/lifetimes.rs`.
 
-**`'static` không có nghĩa là sống mãi**, chỉ là không chứa tham chiếu nào ngắn hơn chương trình. `Vec<Money>` thỏa; `&ledger` trỏ vào biến cục bộ thì không. `thread::spawn` đòi `'static`:
+**`'static` không có nghĩa là sống mãi**, chỉ là không chứa tham chiếu nào ngắn hơn chương trình. `Vec<Money>` thoả; `&ledger` trỏ vào biến cục bộ thì không. `thread::spawn` đòi `'static`:
 
 ```text
 error[E0373]: closure may outlive the current function, but it borrows `ledger`, which is owned by the current function
@@ -217,7 +217,7 @@ Hai lối ra: `move`, hoặc `thread::scope`, nơi mọi thread kết thúc trư
 
 **`Cow`** là «mượn nếu không phải sửa»: `normalize_memo` trả `Cow::Borrowed` khi ghi chú đã sạch (0 block) và chỉ cấp phát khi phải sửa (1 block). [Bài 61](/articles/rust-toi-uu-co-so-do-clone-cow-batching-copy-p99) bàn kỹ hơn.
 
-**HRTB**: `for<'a> Fn(&'a str) -> &'a str` nghĩa là «đúng với mọi lifetime». Hàm thường như `without_kind` thỏa. Closure gán vào biến trước khi dùng thì không: compiler không nối lifetime của kết quả với lifetime của tham số, nên `'1` và `'2` tách rời. Truyền thẳng closure vào `apply_to_both` thì nó lấy chữ ký từ bound và biên dịch được.
+**HRTB**: `for<'a> Fn(&'a str) -> &'a str` nghĩa là «đúng với mọi lifetime». Hàm thường như `without_kind` thoả. Closure gán vào biến trước khi dùng thì không: compiler không nối lifetime của kết quả với lifetime của tham số, nên `'1` và `'2` tách rời. Truyền thẳng closure vào `apply_to_both` thì nó lấy chữ ký từ bound và biên dịch được.
 
 ```text
 error: lifetime may not live long enough

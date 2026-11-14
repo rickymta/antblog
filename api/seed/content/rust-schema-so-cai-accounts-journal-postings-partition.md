@@ -58,7 +58,7 @@ CREATE TABLE account_balances (
 
 `postings` không có cột thời gian: `posted_at` nằm ở `journal_entries`, một thời điểm cho cả bút toán. `amount_dong` có dấu theo dòng tiền (dương là vào, âm là ra), không phải nợ/có. Mọi DDL chạy trong schema `lab_<uuid>` do pool đặt `search_path`, xoá cuối ca.
 
-`CHECK` và khóa ngoại được kiểm ngay tại câu `INSERT`, từng dòng một. Ba vi phạm dưới đây cho SQLSTATE và thông điệp thật của PostgreSQL 18.6:
+`CHECK` và khoá ngoại được kiểm ngay tại câu `INSERT`, từng dòng một. Ba vi phạm dưới đây cho SQLSTATE và thông điệp thật của PostgreSQL 18.6:
 
 ```text
 accounts.kind = 'equity'
@@ -113,7 +113,7 @@ Số `4`, `5`, `6` là `id` của các bút toán bị huỷ: identity không ho
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 260" role="img" aria-label="Hình 2. Dòng thời gian một transaction ghi bút toán lệch. Bước 1 đến 5 là BEGIN, INSERT bút toán, hai INSERT posting và upsert số dư, tất cả chạy được. Bước 6 là COMMIT: constraint trigger chạy, thấy tổng bằng -10, ném lỗi 23514 và transaction bị rollback, mất cả posting, bút toán và số dư."><defs><marker id="rust-schema-so-cai-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="10" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="22" y="46" class="t-b">1 · BEGIN</text><text x="22" y="66" class="t-small">mở transaction</text><rect x="158" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="170" y="46" class="t-b">2 · INSERT</text><text x="170" y="66" class="t-small">bút toán rỗng</text><rect x="306" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="318" y="46" class="t-b">3 · INSERT</text><text x="318" y="66" class="t-small">posting -100</text><rect x="454" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="466" y="46" class="t-b">4 · INSERT</text><text x="466" y="66" class="t-small">posting +90</text><rect x="602" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="614" y="46" class="t-b">5 · UPSERT</text><text x="614" y="66" class="t-small">2 dòng số dư</text><rect x="750" y="20" width="120" height="64" rx="10" class="f-warn-soft s-warn"/><text x="762" y="46" class="t-b">6 · COMMIT</text><text x="762" y="66" class="t-small">chạy trigger</text><path d="M130 52 L158 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M278 52 L306 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M426 52 L454 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M574 52 L602 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M722 52 L750 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><rect x="10" y="130" width="540" height="100" rx="10" class="f-none s-line dash"/><text x="26" y="156" class="t-b">Bước 1 đến 5: DB chưa kiểm tổng</text><text x="26" y="180" class="t-small">Trigger đã xếp một sự kiện chờ cho mỗi dòng vừa ghi (DEFERRED).</text><text x="26" y="198" class="t-small">Trạng thái dở dang là hợp lệ: bút toán được dựng từng dòng.</text><text x="26" y="216" class="t-small">Khóa ngoại và CHECK từng dòng thì đã chạy ngay ở mỗi INSERT.</text><rect x="590" y="130" width="280" height="100" rx="10" class="f-warn-soft s-warn"/><text x="606" y="156" class="t-b">Bước 6: SUM = -10 ≠ 0</text><text x="606" y="180" class="t-small">RAISE 23514, COMMIT thất bại</text><text x="606" y="198" class="t-small">rollback: mất cả posting, bút toán</text><text x="606" y="216" class="t-small">và hai lần cập nhật số dư</text><path d="M810 84 L810 130" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/></svg>
+<svg viewBox="0 0 880 260" role="img" aria-label="Hình 2. Dòng thời gian một transaction ghi bút toán lệch. Bước 1 đến 5 là BEGIN, INSERT bút toán, hai INSERT posting và upsert số dư, tất cả chạy được. Bước 6 là COMMIT: constraint trigger chạy, thấy tổng bằng -10, ném lỗi 23514 và transaction bị rollback, mất cả posting, bút toán và số dư."><defs><marker id="rust-schema-so-cai-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="10" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="22" y="46" class="t-b">1 · BEGIN</text><text x="22" y="66" class="t-small">mở transaction</text><rect x="158" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="170" y="46" class="t-b">2 · INSERT</text><text x="170" y="66" class="t-small">bút toán rỗng</text><rect x="306" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="318" y="46" class="t-b">3 · INSERT</text><text x="318" y="66" class="t-small">posting -100</text><rect x="454" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="466" y="46" class="t-b">4 · INSERT</text><text x="466" y="66" class="t-small">posting +90</text><rect x="602" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="614" y="46" class="t-b">5 · UPSERT</text><text x="614" y="66" class="t-small">2 dòng số dư</text><rect x="750" y="20" width="120" height="64" rx="10" class="f-warn-soft s-warn"/><text x="762" y="46" class="t-b">6 · COMMIT</text><text x="762" y="66" class="t-small">chạy trigger</text><path d="M130 52 L158 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M278 52 L306 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M426 52 L454 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M574 52 L602 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M722 52 L750 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><rect x="10" y="130" width="540" height="100" rx="10" class="f-none s-line dash"/><text x="26" y="156" class="t-b">Bước 1 đến 5: DB chưa kiểm tổng</text><text x="26" y="180" class="t-small">Trigger đã xếp một sự kiện chờ cho mỗi dòng vừa ghi (DEFERRED).</text><text x="26" y="198" class="t-small">Trạng thái dở dang là hợp lệ: bút toán được dựng từng dòng.</text><text x="26" y="216" class="t-small">Khoá ngoại và CHECK từng dòng thì đã chạy ngay ở mỗi INSERT.</text><rect x="590" y="130" width="280" height="100" rx="10" class="f-warn-soft s-warn"/><text x="606" y="156" class="t-b">Bước 6: SUM = -10 ≠ 0</text><text x="606" y="180" class="t-small">RAISE 23514, COMMIT thất bại</text><text x="606" y="198" class="t-small">rollback: mất cả posting, bút toán</text><text x="606" y="216" class="t-small">và hai lần cập nhật số dư</text><path d="M810 84 L810 130" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/></svg>
 </div>
 <figcaption>Hình 2. Kiểm tổng chạy ở bước cuối; lỗi xoá luôn phần số dư vì cùng transaction.</figcaption>
 </figure>
@@ -140,9 +140,9 @@ for (account, delta) in deltas {
 }
 ```
 
-`EXCLUDED` là dòng định chèn; phép cộng chạy trong DB, dưới khóa dòng, nên ở READ COMMITTED không mất cập nhật. `post_entry_in` nhận `&mut Transaction` nên bút toán, posting và số dư cùng commit hoặc cùng mất.
+`EXCLUDED` là dòng định chèn; phép cộng chạy trong DB, dưới khoá dòng, nên ở READ COMMITTED không mất cập nhật. `post_entry_in` nhận `&mut Transaction` nên bút toán, posting và số dư cùng commit hoặc cùng mất.
 
-Deadlock có xảy ra không? Có, nếu sai thứ tự: mỗi upsert giữ khóa dòng số dư tới hết transaction. Test `opposite_lock_order_deadlocks` cho hai transaction khóa hai tài khoản ngược chiều; PostgreSQL huỷ đúng một bên với SQLSTATE `40P01`. Lab tránh bằng cách gộp delta rồi duyệt theo tên tài khoản. Transaction ghi nhiều bút toán, hay job khóa theo thứ tự khác, vẫn có thể kẹt, nên đường ghi production phải thử lại khi gặp `40P01`.
+Deadlock có xảy ra không? Có, nếu sai thứ tự: mỗi upsert giữ khoá dòng số dư tới hết transaction. Test `opposite_lock_order_deadlocks` cho hai transaction khoá hai tài khoản ngược chiều; PostgreSQL huỷ đúng một bên với SQLSTATE `40P01`. Lab tránh bằng cách gộp delta rồi duyệt theo tên tài khoản. Transaction ghi nhiều bút toán, hay job khoá theo thứ tự khác, vẫn có thể kẹt, nên đường ghi production phải thử lại khi gặp `40P01`.
 
 Chuyến `TN-0001` qua `ledger-core` (`capture_entry` với chính sách phí mặc định) ghi `JE-000001`:
 
@@ -182,7 +182,7 @@ Lab sửa tay số dư tài xế bớt 500, đối chiếu, dựng lại từ po
 
 ## Index nào cho truy vấn nào?
 
-Khóa chính `(entry_id, line_no)` không tìm được theo tài khoản, mà đó là truy vấn của job đối chiếu và mọi sao kê. Lab sinh 60.000 bút toán hai dòng bằng `generate_series` (1.000 tài khoản, mỗi tài khoản khoảng 120 posting), chạy `EXPLAIN (ANALYZE, BUFFERS)` hai lần và lấy lần sau để cache ấm. Chưa có index:
+Khoá chính `(entry_id, line_no)` không tìm được theo tài khoản, mà đó là truy vấn của job đối chiếu và mọi sao kê. Lab sinh 60.000 bút toán hai dòng bằng `generate_series` (1.000 tài khoản, mỗi tài khoản khoảng 120 posting), chạy `EXPLAIN (ANALYZE, BUFFERS)` hai lần và lấy lần sau để cache ấm. Chưa có index:
 
 ```text
 Aggregate  (cost=2383.60..2383.61 rows=1 width=40) (actual time=5.239..5.239 rows=1.00 loops=1)
@@ -227,21 +227,21 @@ Lab dựng thêm `postings_p`, cùng nội dung `postings` nhưng `PARTITION BY 
 <figcaption>Hình 3. Partition pruning thấy trong <code>EXPLAIN</code>: kế hoạch một tháng chỉ nhắc tới <code>postings_p_2026_03</code>.</figcaption>
 </figure>
 
-Pruning là phần dễ chịu; phần phải trả nằm ở ràng buộc. Thứ nhất, giữ khóa chính cũ `(entry_id, line_no)` bị từ chối:
+Pruning là phần dễ chịu; phần phải trả nằm ở ràng buộc. Thứ nhất, giữ khoá chính cũ `(entry_id, line_no)` bị từ chối:
 
 ```text
 PRIMARY KEY (entry_id, line_no) trên bảng PARTITION BY RANGE (posted_at):
   Some(("0A000", "unique constraint on partitioned table must include all partitioning columns"))
 ```
 
-Khóa chính và unique của bảng partition phải chứa partition key, vì mỗi partition chỉ tự kiểm unique trong phạm vi nó; nên `postings_p` có khóa chính `(entry_id, line_no, posted_at)`. Thứ hai là lỗ hổng: DB không còn đảm bảo `(entry_id, line_no)` duy nhất toàn bảng.
+Khoá chính và unique của bảng partition phải chứa partition key, vì mỗi partition chỉ tự kiểm unique trong phạm vi nó; nên `postings_p` có khoá chính `(entry_id, line_no, posted_at)`. Thứ hai là lỗ hổng: DB không còn đảm bảo `(entry_id, line_no)` duy nhất toàn bảng.
 
 ```text
 trùng (entry_id, line_no, posted_at) bị từ chối: true
 trùng (entry_id, line_no) nhưng khác tháng được nhận: true
 ```
 
-Thứ ba, khóa ngoại trỏ vào `postings_p` phải gồm đủ cột của một unique constraint, tức cả `posted_at`:
+Thứ ba, khoá ngoại trỏ vào `postings_p` phải gồm đủ cột của một unique constraint, tức cả `posted_at`:
 
 ```text
 FK (entry_id, line_no) -> postings_p:
@@ -249,7 +249,7 @@ FK (entry_id, line_no) -> postings_p:
 FK (entry_id, line_no, posted_at) -> postings_p: được chấp nhận
 ```
 
-Chiều ngược lại êm: `postings_p` trỏ khóa ngoại tới `journal_entries(id)` và `accounts(id)` bình thường. Thứ tư, nặng nhất với sổ cái: partition luôn `journal_entries` theo `posted_at` thì sao?
+Chiều ngược lại êm: `postings_p` trỏ khoá ngoại tới `journal_entries(id)` và `accounts(id)` bình thường. Thứ tư, nặng nhất với sổ cái: partition luôn `journal_entries` theo `posted_at` thì sao?
 
 ```text
 UNIQUE (idempotency_key) trên bảng PARTITION BY RANGE (posted_at):
@@ -257,7 +257,7 @@ UNIQUE (idempotency_key) trên bảng PARTITION BY RANGE (posted_at):
 UNIQUE (idempotency_key, posted_at), cùng key khác posted_at: cả hai dòng được nhận
 ```
 
-`idempotency_key` không thể unique toàn cục nữa. Thêm `posted_at` vào unique thì tạo được bảng, nhưng lần ghi lại `trip:TN-0001:capture` có `posted_at` mới là thành bút toán thứ hai. Vì vậy lab chỉ partition posting; nếu buộc phải partition `journal_entries`, khóa idempotency phải nằm ở một bảng riêng không partition. Thứ năm, dòng có `posted_at` ngoài mọi partition không có chỗ ở:
+`idempotency_key` không thể unique toàn cục nữa. Thêm `posted_at` vào unique thì tạo được bảng, nhưng lần ghi lại `trip:TN-0001:capture` có `posted_at` mới là thành bút toán thứ hai. Vì vậy lab chỉ partition posting; nếu buộc phải partition `journal_entries`, khoá idempotency phải nằm ở một bảng riêng không partition. Thứ năm, dòng có `posted_at` ngoài mọi partition không có chỗ ở:
 
 ```text
 posted_at = 2026-11-06 (ngoài mọi partition):
@@ -270,7 +270,7 @@ Partition phải được tạo trước kỳ ghi, bằng job; hoặc có partit
 
 Với 120.000 posting, bảng và index chiếm khoảng 17 MB; truy vấn một tài khoản đọc 123 page, dưới 1 ms, với index thường. Bản partition cho một tài khoản trong một tháng đọc 24 page nhưng cũng chỉ trả 22 dòng thay vì 120: không phải lợi thế bù được các ràng buộc vừa liệt kê. Partition đáng giá ở chỗ khác: bỏ dữ liệu cũ bằng `DROP` hay `DETACH` thay vì `DELETE` hàng triệu dòng, `VACUUM` từng phần, chuyển tháng ít dùng sang lưu trữ rẻ hơn. Tài liệu PostgreSQL nêu quy tắc kinh nghiệm: bảng phải lớn hơn bộ nhớ máy chủ thì partition mới đáng.
 
-Cách làm gợi ý: bắt đầu bằng bảng thường, đúng khóa chính, đúng index; đo trên dữ liệu cỡ thật; chuyển sang partition khi một con số cụ thể (thời gian `VACUUM`, kích thước bảng) chạm ngưỡng đã định.
+Cách làm gợi ý: bắt đầu bằng bảng thường, đúng khoá chính, đúng index; đo trên dữ liệu cỡ thật; chuyển sang partition khi một con số cụ thể (thời gian `VACUUM`, kích thước bảng) chạm ngưỡng đã định.
 
 ## Chạy ví dụ và kiểm chứng
 

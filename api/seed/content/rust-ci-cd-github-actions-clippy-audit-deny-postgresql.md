@@ -47,7 +47,7 @@ error: rustc 1.93.0 is not supported by the following packages:
 
 ## Cache cargo và cờ `-D warnings`: đặt ở đâu để không biên dịch lại?
 
-Crate này có 183 crate trong `Cargo.lock` (chủ yếu từ `sqlx`); biên dịch từ `target/` trống mất 3 phút 15 giây trên máy viết bài. `Swatinem/rust-cache` tốt hơn tự cache `target/` bằng `actions/cache` vì (theo README của action) khóa cache gồm phiên bản rustc, hash `Cargo.lock`/`Cargo.toml` và biến như `RUSTFLAGS`; trước khi lưu nó xóa artifact của chính crate repo, artifact incremental và file quá một tuần, nên cache chỉ giữ dependency, thứ ít đổi; và nó đặt `CARGO_INCREMENTAL=0`. Cache `target/` thô không có các bước dọn đó.
+Crate này có 183 crate trong `Cargo.lock` (chủ yếu từ `sqlx`); biên dịch từ `target/` trống mất 3 phút 15 giây trên máy viết bài. `Swatinem/rust-cache` tốt hơn tự cache `target/` bằng `actions/cache` vì (theo README của action) khoá cache gồm phiên bản rustc, hash `Cargo.lock`/`Cargo.toml` và biến như `RUSTFLAGS`; trước khi lưu nó xoá artifact của chính crate repo, artifact incremental và file quá một tuần, nên cache chỉ giữ dependency, thứ ít đổi; và nó đặt `CARGO_INCREMENTAL=0`. Cache `target/` thô không có các bước dọn đó.
 
 Cờ `-D warnings` có hai cách viết:
 
@@ -65,7 +65,7 @@ Khác biệt nằm ở cache: `RUSTFLAGS` là một phần fingerprint của t�
 <figcaption>Hình 2. Đổi tham số sau <code>--</code> không đụng dependency; đặt <code>RUSTFLAGS</code> lần đầu biên dịch lại tất cả.</figcaption>
 </figure>
 
-Vì `rust-cache` đưa `RUSTFLAGS` vào khóa, job đổi cờ cũng bắt đầu từ cache khác. Lab chọn cách đầu và không đặt `RUSTFLAGS` cấp workflow. Về lint: `cargo -v` cho thấy crate registry như `uuid` luôn biên dịch với `--cap-lints allow`, nên cảnh báo của chúng không làm đỏ job dù dùng cách nào. Khác ở `ledger-core`, path dependency ngoài workspace: không có `--cap-lints` nên `RUSTFLAGS` nâng cả cảnh báo của nó thành lỗi, còn cờ sau `--` không tới nó (nó chạy bằng `rustc` thường, không qua `clippy-driver`). Nhớ `--all-targets` để lint cả test.
+Vì `rust-cache` đưa `RUSTFLAGS` vào khoá, job đổi cờ cũng bắt đầu từ cache khác. Lab chọn cách đầu và không đặt `RUSTFLAGS` cấp workflow. Về lint: `cargo -v` cho thấy crate registry như `uuid` luôn biên dịch với `--cap-lints allow`, nên cảnh báo của chúng không làm đỏ job dù dùng cách nào. Khác ở `ledger-core`, path dependency ngoài workspace: không có `--cap-lints` nên `RUSTFLAGS` nâng cả cảnh báo của nó thành lỗi, còn cờ sau `--` không tới nó (nó chạy bằng `rustc` thường, không qua `clippy-driver`). Nhớ `--all-targets` để lint cả test.
 
 Lint đỏ trông thế này (chèn tạm một biến thừa và `len() == 0`, rồi bỏ; rút gọn):
 
@@ -156,7 +156,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 ```
 
-Khai `contents: read` cấp workflow thì job nào cần thêm quyền phải xin riêng, thấy ngay trong diff. `concurrency` hủy lượt cũ của cùng PR khi có push mới, không hủy lượt đang chạy trên `main` (lượt đang chờ vẫn có thể bị lượt mới hơn thay thế); `release.yml` đặt `cancel-in-progress: false` vì release đang build không nên bị bỏ ngang.
+Khai `contents: read` cấp workflow thì job nào cần thêm quyền phải xin riêng, thấy ngay trong diff. `concurrency` huỷ lượt cũ của cùng PR khi có push mới, không huỷ lượt đang chạy trên `main` (lượt đang chờ vẫn có thể bị lượt mới hơn thay thế); `release.yml` đặt `cancel-in-progress: false` vì release đang build không nên bị bỏ ngang.
 
 **Pin theo SHA**: `actions/checkout@v7` là tag có thể bị dời, commit SHA thì không; tài liệu bảo mật của GitHub nêu SHA đầy đủ là cách pin action bên thứ ba. Ba SHA tra bằng `git ls-remote`; tag có chú thích như `v2.9.3` của `rust-cache` phải lấy dòng `^{}`, tức commit, không phải tag object:
 
@@ -226,7 +226,7 @@ actionlint workflows/*.yml
 check-jsonschema --builtin-schema vendor.github-workflows workflows/*.yml
 ```
 
-`actionlint` 1.7.12 và `check-jsonschema` 0.36.2 (kèm schema SchemaStore) báo sạch cả ba workflow, và cả hai thật sự bắt lỗi: khóa sai `timeout-minutez` làm cả hai đỏ, còn `needs:` trỏ job không tồn tại chỉ `actionlint` bắt. `shellcheck` không cài nên script trong `run:` chưa được lint.
+`actionlint` 1.7.12 và `check-jsonschema` 0.36.2 (kèm schema SchemaStore) báo sạch cả ba workflow, và cả hai thật sự bắt lỗi: khoá sai `timeout-minutez` làm cả hai đỏ, còn `needs:` trỏ job không tồn tại chỉ `actionlint` bắt. `shellcheck` không cài nên script trong `run:` chưa được lint.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

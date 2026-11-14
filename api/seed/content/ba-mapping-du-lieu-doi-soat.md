@@ -8,9 +8,9 @@ tags: [business-analysis, ba-037, mapping, reconciliation, toi-noi]
 language: vi
 ---
 
-Hai hệ thống cùng ghi 30.000 chưa chứng minh chúng đang nói về cùng một khoản hoàn tiền. BA cần chốt ý nghĩa, khóa nối và thời điểm trước khi so tổng.
+Hai hệ thống cùng ghi 30.000 chưa chứng minh chúng đang nói về cùng một khoản hoàn tiền. BA cần chốt ý nghĩa, khoá nối và thời điểm trước khi so tổng.
 
-<div class="tkh-callout"><span class="tkh-callout-title">BA-037 · Phần 5/8 · Trung bình</span><p>Đầu ra: mapping và bảng ngoại lệ cho refund đề xuất. Dữ liệu minh họa độc lập, không phải giao dịch thật hoặc API hiện có của Tới Nơi.</p></div>
+<div class="tkh-callout"><span class="tkh-callout-title">BA-037 · Phần 5/8 · Trung bình</span><p>Đầu ra: mapping và bảng ngoại lệ cho refund đề xuất. Dữ liệu minh hoạ độc lập, không phải giao dịch thật hoặc API hiện có của Tới Nơi.</p></div>
 
 ## 1. Bắt đầu từ đơn vị bản ghi
 
@@ -21,7 +21,7 @@ Một dòng nội bộ là một refund, trong khi file đối tác có thể l�
 | Nội bộ | Đối tác giả lập | Quy tắc đề xuất |
 |---|---|---|
 | refundId | merchant_ref | Giữ nguyên chuỗi, không chuyển số |
-| providerRef | transaction_ref | Khóa đối tác, không thay refundId |
+| providerRef | transaction_ref | Khoá đối tác, không thay refundId |
 | amountVnd | amount_minor | Chỉ nối khi đã xác nhận currency và đơn vị |
 | succeeded | SUCCESS | Mapping có phiên bản và owner |
 | occurredAt | event_time | Lưu múi giờ/offset; phân biệt receivedAt |
@@ -40,14 +40,14 @@ Không trộn tổng refund tạo ngày D với tổng refund hoàn tất ngày 
 |---|---|---|---|
 | RF-A | processing 30.000 | succeeded 30.000 | Tra cứu, xác nhận rồi cập nhật theo rule |
 | RF-B | succeeded 20.000 | succeeded 25.000 | Lệch tiền, chuyển owner điều tra |
-| RF-C | processing 10.000 | Không tìm thấy | Chưa đủ kết luận; kiểm khóa/cửa sổ |
+| RF-C | processing 10.000 | Không tìm thấy | Chưa đủ kết luận; kiểm khoá/cửa sổ |
 | Không có | Không có | RF-D succeeded 5.000 | Giao dịch không khớp, không tạo bù tự động |
 
 Đừng gộp mọi trường hợp thành “lỗi thanh toán”. Mỗi loại cần người chịu trách nhiệm, bằng chứng và đường phục hồi riêng.
 
 ## 5. Kiểm tổng và kiểm từng dòng
 
-Tổng khớp vẫn có thể che một khoản dư 5.000 và một khoản thiếu 5.000. Kiểm số lượng, tổng theo currency, khóa trùng và chênh từng refund. Khi xử lý thủ công, giữ giá trị trước/sau, người xử lý và lý do; không sửa file nguồn để báo cáo đẹp hơn.
+Tổng khớp vẫn có thể che một khoản dư 5.000 và một khoản thiếu 5.000. Kiểm số lượng, tổng theo currency, khoá trùng và chênh từng refund. Khi xử lý thủ công, giữ giá trị trước/sau, người xử lý và lý do; không sửa file nguồn để báo cáo đẹp hơn.
 
 ## 6. Thiết kế việc đóng ngoại lệ
 

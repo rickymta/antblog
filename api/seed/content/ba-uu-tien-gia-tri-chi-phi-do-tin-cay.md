@@ -20,7 +20,7 @@ Phương án giữ nguyên kèm thu thập bằng chứng cũng phải xuất hi
 
 ## 2. Công thức học tập
 
-Dùng điểm minh họa S = reach × impact × confidence / effort. Reach là số chuyến đủ điều kiện trong một tuần giả định; impact là hệ số do nhóm định nghĩa; confidence từ 0 đến 1; effort là tuần công ước lượng cùng phạm vi. Đây là công cụ gợi thảo luận, không phải phép tính lợi nhuận.
+Dùng điểm minh hoạ S = reach × impact × confidence / effort. Reach là số chuyến đủ điều kiện trong một tuần giả định; impact là hệ số do nhóm định nghĩa; confidence từ 0 đến 1; effort là tuần công ước lượng cùng phạm vi. Đây là công cụ gợi thảo luận, không phải phép tính lợi nhuận.
 
 Thang impact phải có diễn giải dùng chung. Nếu người này chấm 3 vì thích UI còn người kia chấm 3 vì giảm cuộc gọi, công thức không sửa được sự thiếu nhất quán.
 
@@ -35,7 +35,7 @@ A cao hơn theo giả định này. Không được viết “A mang lại 300 �
 
 ## 4. Độ nhạy có đổi thứ tự không?
 
-Nếu confidence của A chỉ là 0,2, điểm A còn 100 và B lên trước. Điểm hòa của A là confidence 0,24 khi các yếu tố khác giữ nguyên. Như vậy quyết định nhạy với bằng chứng về A; một hoạt động kiểm chứng nhỏ có thể hữu ích hơn tranh luận thêm về số thập phân.
+Nếu confidence của A chỉ là 0,2, điểm A còn 100 và B lên trước. Điểm hoà của A là confidence 0,24 khi các yếu tố khác giữ nguyên. Như vậy quyết định nhạy với bằng chứng về A; một hoạt động kiểm chứng nhỏ có thể hữu ích hơn tranh luận thêm về số thập phân.
 
 Tương tự, nếu B phải thêm công cụ vận hành và effort tăng, thứ tự càng khác. Đừng bỏ chi phí hỗ trợ để làm phương án ưa thích trông rẻ hơn.
 
@@ -49,9 +49,9 @@ Quyền truy cập, tính đúng của tiền và giới hạn vận hành khôn
 
 ## 7. Thực hành
 
-Giữ confidence A = 0,6, tính effort A tại điểm hòa với B = 120. Sau đó viết một câu hỏi giúp xác minh chi phí còn thiếu.
+Giữ confidence A = 0,6, tính effort A tại điểm hoà với B = 120. Sau đó viết một câu hỏi giúp xác minh chi phí còn thiếu.
 
-<details><summary>Đáp án</summary><p>Effort hòa là 5 tuần công: 1.000 × 1 × 0,6 / 5 = 120. Hỏi estimate đã gồm nội dung hướng dẫn, kiểm tra accessibility, đo lường và đào tạo CS chưa; các phần cần thiết phải nằm trong phạm vi so sánh.</p></details>
+<details><summary>Đáp án</summary><p>Effort hoà là 5 tuần công: 1.000 × 1 × 0,6 / 5 = 120. Hỏi estimate đã gồm nội dung hướng dẫn, kiểm tra accessibility, đo lường và đào tạo CS chưa; các phần cần thiết phải nằm trong phạm vi so sánh.</p></details>
 
 ## 8. Đọc tiếp
 

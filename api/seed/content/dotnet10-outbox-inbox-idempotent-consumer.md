@@ -41,7 +41,7 @@ Không đánh dấu Published trước khi gọi broker để giảm duplicate: 
 
 ## Inbox gắn nhận diện thông điệp với hiệu ứng
 
-ReceiptConsumer ghi Inbox với khóa consumer/EventId cùng ReceiptRow trong một SaveChanges. Khi hai lần giao cùng EventId cạnh tranh, unique constraint và transaction bảo vệ để chỉ một lần tạo hiệu ứng local.
+ReceiptConsumer ghi Inbox với khoá consumer/EventId cùng ReceiptRow trong một SaveChanges. Khi hai lần giao cùng EventId cạnh tranh, unique constraint và transaction bảo vệ để chỉ một lần tạo hiệu ứng local.
 
 Sau SQLSTATE 23505, consumer kiểm tra Inbox đúng consumer/EventId đã có trước khi trả false. Không bỏ qua mọi unique violation hoặc mọi DbUpdateException như thể đó chắc chắn là duplicate hợp lệ. EventId cần ổn định giữa các lần gửi lại của cùng sự kiện.
 

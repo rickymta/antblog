@@ -53,7 +53,7 @@ proptest! {
 
 Dùng `prop_assert_eq!` thay `assert_eq!`: khi sai nó trả `Err` thay vì panic, nên lúc thu nhỏ không sinh hàng loạt thông điệp panic (`assert_eq!` vẫn hoạt động, vì proptest bắt panic). Ngoài `any::<T>()` còn có khoảng (`-MAX..=MAX`), `prop::sample::select` (chọn từ danh sách), `prop::collection::vec(strategy, 2..=8)` và tuple của các strategy.
 
-Một lưu ý: `any::<i64>()` chia đều trên 2^64 giá trị, nên gần như không bao giờ ra số nhỏ hay đầu mút (thử 200.000 mẫu: không mẫu nào có trị tuyệt đối dưới 1 tỷ, không mẫu nào là `i64::MIN`). Muốn thử biên phải nói rõ, ta làm ở mục chia tiền. Hai bộ biến đổi quan trọng: `prop_map` đổi giá trị sinh ra thành giá trị khác (thu nhỏ vẫn chạy trên dữ liệu gốc rồi map lại), và `prop_filter` loại giá trị không thỏa điều kiện. Loại quá nhiều thì proptest dừng báo lỗi. Với điều kiện như "bút toán cân", đừng lọc, hãy xây.
+Một lưu ý: `any::<i64>()` chia đều trên 2^64 giá trị, nên gần như không bao giờ ra số nhỏ hay đầu mút (thử 200.000 mẫu: không mẫu nào có trị tuyệt đối dưới 1 tỷ, không mẫu nào là `i64::MIN`). Muốn thử biên phải nói rõ, ta làm ở mục chia tiền. Hai bộ biến đổi quan trọng: `prop_map` đổi giá trị sinh ra thành giá trị khác (thu nhỏ vẫn chạy trên dữ liệu gốc rồi map lại), và `prop_filter` loại giá trị không thoả điều kiện. Loại quá nhiều thì proptest dừng báo lỗi. Với điều kiện như "bút toán cân", đừng lọc, hãy xây.
 
 ## Làm sao sinh bút toán luôn cân?
 
@@ -149,7 +149,7 @@ Sửa: `let is_conflict = matches!(…);` rồi `prop_assert!(is_conflict);`.
 
 ## Chia tiền cho nhiều bên mà không mất đồng
 
-Lab cài `split` theo largest remainder: mỗi bên nhận phần nguyên trước, số đồng còn dư cộng thêm 1 đồng cho các bên có phần dư lớn nhất, hòa thì bên đứng trước được ưu tiên.
+Lab cài `split` theo largest remainder: mỗi bên nhận phần nguyên trước, số đồng còn dư cộng thêm 1 đồng cho các bên có phần dư lớn nhất, hoà thì bên đứng trước được ưu tiên.
 
 ```rust
 // src/split.rs

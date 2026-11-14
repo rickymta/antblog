@@ -50,12 +50,12 @@ Group có vài loại, chọn theo mục đích:
 | Loại group | Thành viên được quyết định bởi | Dùng khi nào |
 | --- | --- | --- |
 | Security group (assigned) | Admin thêm tay | Cấp quyền RBAC cho đội, như `grp-toinoi-platform` |
-| Security group (dynamic) | Rule trên thuộc tính user | Tự động theo phòng ban hay vị trí; cần license phù hợp, kiểm tài liệu |
+| Security group (dynamic) | Rule trên thuộc tính user | Tự động theo phòng ban hay vị trí; cần license phù hợp, kiểm tra tài liệu |
 | Microsoft 365 group | Admin thêm tay, rule dynamic, hoặc user tự tham gia nếu group mở | Cộng tác (hộp thư, kênh chung); không dùng cho phân quyền hạ tầng |
 
 Quy tắc dễ giữ nhất: **không gán quyền cho từng user, chỉ gán cho group**. Khi một kỹ sư chuyển đội, bạn sửa thành viên một chỗ thay vì lần theo hàng chục role assignment rải rác. Danh sách assignment cũng ngắn và dễ review hơn nhiều.
 
-Hai lớp bảo vệ nên có từ ngày đầu. **MFA** bắt user chứng minh thêm một yếu tố ngoài mật khẩu. **Conditional Access** là rule dạng «nếu user/ứng dụng/vị trí/rủi ro thỏa điều kiện thì yêu cầu MFA, yêu cầu thiết bị tuân thủ hoặc chặn». Tenant mới thường có sẵn security defaults ở mức cơ bản; Conditional Access đầy đủ cần license riêng.
+Hai lớp bảo vệ nên có từ ngày đầu. **MFA** bắt user chứng minh thêm một yếu tố ngoài mật khẩu. **Conditional Access** là rule dạng «nếu user/ứng dụng/vị trí/rủi ro thoả điều kiện thì yêu cầu MFA, yêu cầu thiết bị tuân thủ hoặc chặn». Tenant mới thường có sẵn security defaults ở mức cơ bản; Conditional Access đầy đủ cần license riêng.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -87,7 +87,7 @@ Entra phát hai loại token đáng nhớ. **ID token** nói cho client biết u
 
 Quyền trong access token xuất hiện ở hai dạng:
 
-- **`scp`** (scope): quyền ủy quyền đại diện cho user đã đăng nhập, ví dụ `Trips.Read`. Chỉ có khi có user.
+- **`scp`** (scope): quyền uỷ quyền đại diện cho user đã đăng nhập, ví dụ `Trips.Read`. Chỉ có khi có user.
 - **`roles`** (app role): quyền gán cho chính ứng dụng, dùng khi không có user (service gọi service).
 
 Một JWT gồm ba đoạn base64url nối bằng dấu chấm; đoạn giữa là payload JSON. API phải kiểm chữ ký bằng khoá công khai của tenant, rồi kiểm các claim sau:
@@ -96,7 +96,7 @@ Một JWT gồm ba đoạn base64url nối bằng dấu chấm; đoạn giữa l
 | --- | --- | --- |
 | `iss` | Ai phát token | Đúng tenant của bạn, đúng phiên bản endpoint |
 | `aud` | Token dành cho ai | Đúng API của bạn; token cho API khác phải bị từ chối |
-| `scp` | Scope đã được ủy quyền | Có scope cần cho thao tác |
+| `scp` | Scope đã được uỷ quyền | Có scope cần cho thao tác |
 | `roles` | App role của ứng dụng gọi | Có role cần cho thao tác app-only |
 | `exp` | Hết hạn lúc nào | Chưa hết hạn |
 | `tid`, `oid` | Tenant và object ID của principal | Dùng để định danh và audit, không dùng tên hiển thị |
@@ -161,7 +161,7 @@ az rest --method PATCH \
 
 Lệnh `az rest` tự lấy token Microsoft Graph từ phiên `az login` và tự đặt header JSON khi body là JSON; user đăng nhập cần quyền sửa ứng dụng này (là owner của nó, hoặc có role như Application Administrator). Khối trên chỉ khai báo scope; nó chưa cho client nào quyền xin scope đó.
 
-Azure CLI là một ứng dụng first-party của Microsoft, client ID `04b07795-8ddb-461a-bbee-02f9e1bf7b46`. Mặc định nó chưa được consent cho scope của API bạn vừa tạo, nên bước lấy token sẽ báo lỗi consent (AADSTS65001). Cách gọn cho lab là khai báo Azure CLI là client được ủy quyền trước, trong một lần PATCH thứ hai sau khi scope đã tồn tại. Gửi lại đủ khối `api` (cả `requestedAccessTokenVersion` và `oauth2PermissionScopes` như trên) và thêm:
+Azure CLI là một ứng dụng first-party của Microsoft, client ID `04b07795-8ddb-461a-bbee-02f9e1bf7b46`. Mặc định nó chưa được consent cho scope của API bạn vừa tạo, nên bước lấy token sẽ báo lỗi consent (AADSTS65001). Cách gọn cho lab là khai báo Azure CLI là client được uỷ quyền trước, trong một lần PATCH thứ hai sau khi scope đã tồn tại. Gửi lại đủ khối `api` (cả `requestedAccessTokenVersion` và `oauth2PermissionScopes` như trên) và thêm:
 
 ```json
 "preAuthorizedApplications": [{
@@ -170,7 +170,7 @@ Azure CLI là một ứng dụng first-party của Microsoft, client ID `04b0779
 }]
 ```
 
-`delegatedPermissionIds` phải trùng `id` của scope `Trips.Read`. Ủy quyền trước nghĩa là user không còn thấy màn hình consent khi Azure CLI xin scope này; chỉ làm vậy với client bạn tin.
+`delegatedPermissionIds` phải trùng `id` của scope `Trips.Read`. Uỷ quyền trước nghĩa là user không còn thấy màn hình consent khi Azure CLI xin scope này; chỉ làm vậy với client bạn tin.
 
 ## Lấy token và giải mã claim
 

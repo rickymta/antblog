@@ -120,7 +120,7 @@ var res = await container.ReadItemAsync<DriverLocation>(
 logger.LogInformation("RU: {Charge}", res.RequestCharge);
 ```
 
-Đoạn này cho thấy cách khởi tạo client và đọc một item kèm RU; nó không chứng minh `DefaultAzureCredential` có quyền. Quyền data-plane qua Entra là role assignment riêng của Cosmos DB, không phải Azure RBAC thông thường, nên cần kiểm tài liệu và cấp cho managed identity của `trip-service`.
+Đoạn này cho thấy cách khởi tạo client và đọc một item kèm RU; nó không chứng minh `DefaultAzureCredential` có quyền. Quyền data-plane qua Entra là role assignment riêng của Cosmos DB, không phải Azure RBAC thông thường, nên cần kiểm tra tài liệu và cấp cho managed identity của `trip-service`.
 
 Hai quy tắc đi kèm. Thứ nhất, đường nóng chỉ dùng point read hoặc query có partition key trong điều kiện lọc. Cross-partition query tốn RU theo số partition và tăng theo dữ liệu, nên chỉ hợp cho báo cáo, không hợp cho request đặt xe. Thứ hai, ghi hàng loạt (nạp dữ liệu, replay) bật `AllowBulkExecution = true` để SDK gom các thao tác song song thay vì mỗi item một vòng round trip.
 

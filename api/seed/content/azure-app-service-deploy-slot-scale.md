@@ -155,7 +155,7 @@ Hai hướng scale giải hai bài toán khác nhau:
 | --- | --- | --- |
 | Thay đổi gì | SKU của plan (CPU, RAM mỗi instance) | Số instance của plan |
 | Gỡ nút thắt nào | Một request cần nhiều CPU hoặc RAM | Quá nhiều request đồng thời |
-| Điều kiện | Có thể gián đoạn ngắn khi đổi SKU, hãy kiểm tài liệu | App phải stateless, ARR affinity tắt |
+| Điều kiện | Có thể gián đoạn ngắn khi đổi SKU, hãy kiểm tra tài liệu | App phải stateless, ARR affinity tắt |
 | Chi phí | Đơn giá mỗi instance tăng | Nhân số instance |
 
 Autoscale là một tập luật chạy trên metric, thường là metric của plan (`CpuPercentage`, `MemoryPercentage`, `HttpQueueLength`). Luật scale out và scale in phải có ngưỡng cách nhau đủ xa, nếu không plan sẽ dao động liên tục. `trip-service` chủ yếu chờ PostgreSQL, nên CPU có thể thấp trong khi latency đã tăng. Khối dưới thử `HttpQueueLength`, nhưng hãy xem metric này có dữ liệu thật trên plan Linux của bạn trước khi dựa vào nó; nếu không, quay về CPU kèm cảnh báo latency.

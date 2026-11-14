@@ -16,7 +16,7 @@ Hai việc phải làm đúng cùng lúc. Một là gợi ý **đúng chỗ**, t
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Bộ «thường» (120 xe, 3,5 chuyến mỗi phút), tài xế rảnh nghe theo gợi ý theo nhu cầu với xác suất 70%. Thời gian chờ đón trung bình giảm 36,1 s. Theo bạn <b>km rỗng tổng mỗi khách đặt</b> (km chạy không của chuyến hoàn thành, của chuyến hủy sau khi gán, và quãng chạy theo gợi ý) giảm, tăng hay không đổi?</p>
+<p>Bộ «thường» (120 xe, 3,5 chuyến mỗi phút), tài xế rảnh nghe theo gợi ý theo nhu cầu với xác suất 70%. Thời gian chờ đón trung bình giảm 36,1 s. Theo bạn <b>km rỗng tổng mỗi khách đặt</b> (km chạy không của chuyến hoàn thành, của chuyến huỷ sau khi gán, và quãng chạy theo gợi ý) giảm, tăng hay không đổi?</p>
 <details><summary>Xem đáp án</summary><p>Tăng, và tăng mạnh: <b>+1.428,9 m</b> mỗi khách đặt (KTC 95% [1.285,5; 1.572,3], tăng ở cả 20/20 seed). Quãng chạy theo gợi ý là 1.595,6 m mỗi khách, lớn hơn nhiều phần km đón tiết kiệm được. Khách được lợi, tài xế chịu chi phí. So với baseline là Hungarian ghép ngay, không gợi ý.</p></details>
 </div>
 
@@ -205,7 +205,7 @@ Tham số: `--seeds N` (mặc định 20), `--jobs N`, `--fixture`. Lab chạy k
 **Bài 2.** `deadhead_m` trung bình giảm 255,4 m mà km rỗng tổng mỗi khách đặt lại tăng 1.428,9 m. Giải thích vì sao hai số không mâu thuẫn.
 
 <details><summary>Lời giải bài 2</summary>
-<p><code>deadhead_m</code> chỉ đo quãng xe chạy không tới điểm đón, trên chuyến hoàn thành. Km rỗng tổng cộng thêm quãng chạy theo gợi ý (1.595,6 m mỗi khách đặt) và quãng chạy không của chuyến hủy sau khi gán, rồi chia cho số khách đặt. Quãng đón ngắn đi nhưng quãng di chuyển dọn chỗ lớn hơn nhiều, nên tổng tăng. Đây là lý do bài báo cáo cả hai, không chọn một.</p>
+<p><code>deadhead_m</code> chỉ đo quãng xe chạy không tới điểm đón, trên chuyến hoàn thành. Km rỗng tổng cộng thêm quãng chạy theo gợi ý (1.595,6 m mỗi khách đặt) và quãng chạy không của chuyến huỷ sau khi gán, rồi chia cho số khách đặt. Quãng đón ngắn đi nhưng quãng di chuyển dọn chỗ lớn hơn nhiều, nên tổng tăng. Đây là lý do bài báo cáo cả hai, không chọn một.</p>
 </details>
 
 **Bài 3.** Đề xuất một cách chia sẻ chi phí km rỗng cho tài xế và hai chỉ số cần đo thêm để biết nó có làm mất lợi của khách không.

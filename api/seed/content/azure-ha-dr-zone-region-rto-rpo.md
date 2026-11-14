@@ -55,9 +55,9 @@ Availability zone là các nhóm datacenter tách nhau trong một region, có �
 | Container Apps | Environment bật zone redundancy, replica trải qua các zone | Chỉ chọn lúc tạo environment, cần VNet; min replica từ 2 |
 | AKS | Node pool trải qua các zone | Disk LRS khoá pod vào một zone; cân nhắc disk ZRS |
 | PostgreSQL Flexible Server | HA zone-redundant, standby đồng bộ ở zone khác | HA không hỗ trợ tier Burstable; chi tiết ở bài 30 |
-| Service Bus | Tier Premium, zone redundancy bật sẵn ở region có zone | Kiểm tài liệu hiện hành cho tier khác và region của bạn |
+| Service Bus | Tier Premium, zone redundancy bật sẵn ở region có zone | Kiểm tra tài liệu hiện hành cho tier khác và region của bạn |
 | Storage | Redundancy ZRS | Đổi LRS sang ZRS là quá trình chuyển đổi chạy nền, có điều kiện, không tức thì |
-| Redis | Azure Managed Redis có zone redundancy ở region có zone | Azure Cache for Redis đang nghỉ hưu (bài về Redis); SKU kiểm tài liệu |
+| Redis | Azure Managed Redis có zone redundancy ở region có zone | Azure Cache for Redis đang nghỉ hưu (bài về Redis); SKU kiểm tra tài liệu |
 
 Với mỗi dòng, kiểm SKU đó có hỗ trợ zone tại Southeast Asia lúc bạn đọc không. Nếu không, ghi lại lựa chọn: chấp nhận rủi ro, đổi SKU, hoặc bù bằng thiết kế.
 

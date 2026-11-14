@@ -8,13 +8,13 @@ tags: [python, toi-noi, concurrency, gil, multiprocessing]
 language: vi
 ---
 
-Khi [Tới Nơi](/articles/du-an-mau-toi-noi) mở một đợt tuyển tài xế mới, hồ sơ KYC đổ về `kyc-ocr` thành từng lô: mỗi hồ sơ có ảnh căn cước và ảnh giấy phép lái xe. Trước khi chữ được đọc, mỗi ảnh phải qua tiền xử lý: lấy từ object storage, làm mượt, nhị phân hóa, nén lại. Đội Python gói việc đó vào `ThreadPoolExecutor(10)` trên máy 10 lõi và chờ thời gian giảm mười lần; nó không giảm. Họ đổi sang `ProcessPoolExecutor` thì nhanh hơn rõ rệt, nhưng với lô chỉ vài ảnh thì phí khởi động pool ăn hết phần lời. Bài này giải thích vì sao, bằng số đo chạy thật trên cùng một lô ảnh giả.
+Khi [Tới Nơi](/articles/du-an-mau-toi-noi) mở một đợt tuyển tài xế mới, hồ sơ KYC đổ về `kyc-ocr` thành từng lô: mỗi hồ sơ có ảnh căn cước và ảnh giấy phép lái xe. Trước khi chữ được đọc, mỗi ảnh phải qua tiền xử lý: lấy từ object storage, làm mượt, nhị phân hoá, nén lại. Đội Python gói việc đó vào `ThreadPoolExecutor(10)` trên máy 10 lõi và chờ thời gian giảm mười lần; nó không giảm. Họ đổi sang `ProcessPoolExecutor` thì nhanh hơn rõ rệt, nhưng với lô chỉ vài ảnh thì phí khởi động pool ăn hết phần lời. Bài này giải thích vì sao, bằng số đo chạy thật trên cùng một lô ảnh giả.
 
 Đây là bài 22 của lộ trình **Python trung bình qua Tới Nơi**. Bài 21 cho ta `asyncio` để chờ nhiều I/O mà không cần thread; bài này trả lời câu hỏi còn lại: khi việc nặng là **tính toán**, Python chạy song song bằng cách nào, và GIL nằm ở đâu.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Máy có 10 lõi. Bạn nhị phân hóa 20 ảnh bằng một vòng <code>for</code> Python thuần, mỗi ảnh khoảng 0,2 giây, rồi chuyển sang <code>ThreadPoolExecutor(10)</code> với đúng hàm đó. Cả lô sẽ nhanh hơn tuần tự khoảng mấy lần?</p>
+<p>Máy có 10 lõi. Bạn nhị phân hoá 20 ảnh bằng một vòng <code>for</code> Python thuần, mỗi ảnh khoảng 0,2 giây, rồi chuyển sang <code>ThreadPoolExecutor(10)</code> với đúng hàm đó. Cả lô sẽ nhanh hơn tuần tự khoảng mấy lần?</p>
 <details><summary>Xem đáp án</summary><p><b>Khoảng 1 lần, tức không nhanh hơn.</b> Ở bản Python có GIL (bản mặc định), tại mỗi thời điểm chỉ một thread chạy bytecode Python, nên 10 thread tranh nhau một lõi hiệu dụng. Lab đo được 3,889 giây tuần tự và 4,206 giây với 10 thread (chậm hơn một chút). Với process (pool sẵn), mỗi process có GIL riêng và cùng lô đó chạy trong 0,618 giây.</p></details>
 </div>
 
@@ -52,18 +52,18 @@ def compress_page(page_id: int, pixels: int = PAGE_PIXELS) -> int:
 | Việc | Hàm | Thời gian khi chạy tuần tự (một ảnh) | Bản chất |
 | --- | --- | --- | --- |
 | Chờ storage | `fetch_page` | 0,1 s (cố định) | I/O-bound |
-| Nhị phân hóa bằng vòng lặp Python | `binarize_page` | khoảng 0,2 s | CPU-bound, bytecode Python |
+| Nhị phân hoá bằng vòng lặp Python | `binarize_page` | khoảng 0,2 s | CPU-bound, bytecode Python |
 | Nén zlib mức 9 | `compress_page` | khoảng 0,07 s | CPU-bound, nhưng chạy trong mã C |
 
 `time.sleep` chỉ thay cho I/O thật: nó nhả GIL như một lần chờ socket. Hàng thứ ba có mặt để cho thấy rằng «CPU-bound» chưa đủ để kết luận; điều quyết định là **đoạn tính toán nằm trong bytecode Python hay trong mã C**.
 
-## GIL: một khóa trong interpreter
+## GIL: một khoá trong interpreter
 
 GIL (Global Interpreter Lock) là một mutex trong CPython. Ở bản build thường, một thread phải giữ nó mới được chạy bytecode Python, nên dù process có 10 thread và máy có 10 lõi, tại mỗi thời điểm chỉ một thread đang thực thi bytecode trong một interpreter. Hệ quả cần nhớ:
 
 - **GIL được nhả khi thread chờ I/O** (`time.sleep`, socket, đọc file) và khi mã C của một thư viện chủ động nhả nó. `zlib` nhả GIL trong lúc nén; thư viện số như NumPy hay OpenCV thường làm vậy ở phần nặng, nhưng đó là quyết định của từng thư viện, nên đáng đo trước khi tin.
 - **Thread CPU-bound thuần Python thay phiên nhau**, không chạy song song. `sys.getswitchinterval()` in `0.005`: thread đang giữ GIL được yêu cầu nhả sau khoảng 5 mili giây, để thread khác có lượt.
-- **GIL không thay cho khóa của ta.** Nó bảo vệ trạng thái nội bộ của interpreter (như bộ đếm tham chiếu), không bảo vệ logic nghiệp vụ. Hai thread vẫn có thể cùng đọc «chuyến còn trống» rồi cùng ghi; đó là chủ đề bài 23, và là điều [bài Concurrency và thread safety của loạt C#](/articles/csharp-concurrency-thread-safety) mô tả bằng `lock`.
+- **GIL không thay cho khoá của ta.** Nó bảo vệ trạng thái nội bộ của interpreter (như bộ đếm tham chiếu), không bảo vệ logic nghiệp vụ. Hai thread vẫn có thể cùng đọc «chuyến còn trống» rồi cùng ghi; đó là chủ đề bài 23, và là điều [bài Concurrency và thread safety của loạt C#](/articles/csharp-concurrency-thread-safety) mô tả bằng `lock`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -193,7 +193,7 @@ CPU trong C: zlib.compress: 20 ảnh, trung vị 3 lần
   interpreter x10 (pool sẵn)             0.200 s   x 6.20   (load  58.1 ->  55.8)
 ```
 
-Điều đổi là hàng `thread` của việc Python thuần: từ 0,92 lên 4,33 lần mà không cần pickle hay spawn. Lần đo này pool process sẵn (5,75) và interpreter sẵn (5,97) nhỉnh hơn thread (4,33), nhưng máy bận (load 42 đến 58) nên ta không xếp hạng ba mô hình đó, cũng không rút ra «bản free-threaded nhanh hơn bao nhiêu». Hai dòng `tuần tự` (3,799 s trên 3.14t và 3,889 s trên build thường) chênh nhau trong nhiễu, nên không kết luận được về chi phí chạy đơn luồng. Tài liệu có hai con số cho chi phí đơn luồng: What's New 3.14 nói khoảng 5–10% tùy nền tảng và trình biên dịch, còn trang free-threading howto ghi trung bình trên pyperformance từ khoảng 1% trên macOS aarch64 đến 8% trên x86-64 Linux.
+Điều đổi là hàng `thread` của việc Python thuần: từ 0,92 lên 4,33 lần mà không cần pickle hay spawn. Lần đo này pool process sẵn (5,75) và interpreter sẵn (5,97) nhỉnh hơn thread (4,33), nhưng máy bận (load 42 đến 58) nên ta không xếp hạng ba mô hình đó, cũng không rút ra «bản free-threaded nhanh hơn bao nhiêu». Hai dòng `tuần tự` (3,799 s trên 3.14t và 3,889 s trên build thường) chênh nhau trong nhiễu, nên không kết luận được về chi phí chạy đơn luồng. Tài liệu có hai con số cho chi phí đơn luồng: What's New 3.14 nói khoảng 5–10% tuỳ nền tảng và trình biên dịch, còn trang free-threading howto ghi trung bình trên pyperformance từ khoảng 1% trên macOS aarch64 đến 8% trên x86-64 Linux.
 
 Về thư viện: cùng ngày, `numpy` 2.5.4 cài được trên 3.14t và sau `import numpy`, `sys._is_gil_enabled()` vẫn trả `False`. Với `opencv-python-headless`, `uv` không tìm thấy bản dựng sẵn cho 3.14t và bắt đầu biên dịch từ mã nguồn; ta dừng lệnh đó. Nghĩa là phần OCR dùng OpenCV (từ bài 30) chưa có đường chạy thẳng trên build này.
 
@@ -210,7 +210,7 @@ Với `kyc-ocr`, quy tắc rút ra từ số đo là:
 
 1. **Đo trước, rồi chọn, và đo khi máy rảnh.** Tốc độ phụ thuộc máy, loại lõi và tải lúc đó; chỉ tin chênh lệch cỡ lớn, như thread với I/O so với thread với vòng lặp Python thuần.
 2. **Nếu phần nặng đã nằm trong mã C nhả GIL**, như nén zlib ở đây, thread là đủ và rẻ nhất. Bài 30 thay vòng lặp của `binarize_page` bằng phép toán mảng của NumPy và OpenCV rồi đo thread trên một lô thẻ; khi đó câu hỏi «cần process không» đổi hẳn, và ta đo thay vì giả định.
-3. **Nếu phần nặng là vòng lặp Python thuần**, dùng process. Giữ pool sống trong service để trả phí spawn một lần, và truyền cho worker một khóa nhỏ (`page_id`, đường dẫn storage) thay vì cả ảnh qua pickle.
+3. **Nếu phần nặng là vòng lặp Python thuần**, dùng process. Giữ pool sống trong service để trả phí spawn một lần, và truyền cho worker một khoá nhỏ (`page_id`, đường dẫn storage) thay vì cả ảnh qua pickle.
 4. **Chờ I/O thì asyncio hoặc thread**; process chỉ thêm chi phí.
 
 Một lưu ý nghiệp vụ: kết quả tiền xử lý và OCR là đầu vào cho người duyệt hồ sơ, không tự động là quyết định xác minh.
@@ -225,7 +225,7 @@ Một lưu ý nghiệp vụ: kết quả tiền xử lý và OCR là đầu vào
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Ảnh là byte ngẫu nhiên, vòng lặp nhị phân hóa là bài toán chủ ý đơn giản, và việc I/O là <code>time.sleep</code>, không phải object storage thật. Số đo đến từ một máy đang bận (load average từ 26,6 đến 41,9 ở build thường, từ 41,9 đến 58,2 ở 3.14t, trên 10 lõi), mỗi cấu hình chỉ lấy trung vị 3 lần. Chưa có hàng đợi, giới hạn bộ nhớ, timeout, hay xử lý một worker chết giữa chừng; phần backpressure là bài 23. <code>os.process_cpu_count()</code> theo CPU affinity (ví dụ cpuset của container), nên có thể nhỏ hơn <code>os.cpu_count()</code>; nó không phản ánh quota CPU kiểu <code>--cpus</code> hay giới hạn của Kubernetes, nên ở đó ta tự đặt số worker.</p>
+<p>Ảnh là byte ngẫu nhiên, vòng lặp nhị phân hoá là bài toán chủ ý đơn giản, và việc I/O là <code>time.sleep</code>, không phải object storage thật. Số đo đến từ một máy đang bận (load average từ 26,6 đến 41,9 ở build thường, từ 41,9 đến 58,2 ở 3.14t, trên 10 lõi), mỗi cấu hình chỉ lấy trung vị 3 lần. Chưa có hàng đợi, giới hạn bộ nhớ, timeout, hay xử lý một worker chết giữa chừng; phần backpressure là bài 23. <code>os.process_cpu_count()</code> theo CPU affinity (ví dụ cpuset của container), nên có thể nhỏ hơn <code>os.cpu_count()</code>; nó không phản ánh quota CPU kiểu <code>--cpus</code> hay giới hạn của Kubernetes, nên ở đó ta tự đặt số worker.</p>
 </div>
 
 **Bài tập 1:** Lô 20 ảnh, mỗi ảnh tốn 0,2 giây CPU thuần Python. Dùng `ProcessPoolExecutor(4)` trên máy rảnh. Thời gian lý tưởng là bao nhiêu, và hai nguyên nhân nào làm đo thực tế dài hơn?

@@ -1,7 +1,7 @@
 ---
 slug: rust-feature-flag-config-migration-expand-contract
 title: "Feature flag, cấu hình kiểu an toàn và migration không dừng"
-summary: "Bài 56: thêm cột và bật quy tắc phí mới khi sổ đang nhận bút toán: expand/contract với hai phiên bản code, backfill có checkpoint, khóa thật qua pg_locks, cờ theo tripId, policy_version để replay, rollback."
+summary: "Bài 56: thêm cột và bật quy tắc phí mới khi sổ đang nhận bút toán: expand/contract với hai phiên bản code, backfill có checkpoint, khoá thật qua pg_locks, cờ theo tripId, policy_version để replay, rollback."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, migration, feature-flag]
@@ -15,7 +15,7 @@ Finance muốn mỗi posting mang mã tiền tệ. Product muốn thử quy tắ
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Cột <code>currency</code> đã thêm, backfill xong, mọi posting đã là <code>'VND'</code>. Chạy <code>ALTER TABLE postings ALTER COLUMN currency SET NOT NULL</code> lúc sổ đang nhận bút toán có an toàn không?</p>
-<details><summary>Xem đáp án</summary><p>Dữ liệu thì đúng, khóa thì không. Không có ràng buộc nào chứng minh sẵn hết <code>NULL</code>, nên PostgreSQL quét cả bảng trong lúc giữ <code>ACCESS EXCLUSIVE</code>, và mọi bút toán mới đứng chờ. Cách an toàn là thêm <code>CHECK ... NOT VALID</code>, <code>VALIDATE</code> rồi mới <code>SET NOT NULL</code>.</p></details>
+<details><summary>Xem đáp án</summary><p>Dữ liệu thì đúng, khoá thì không. Không có ràng buộc nào chứng minh sẵn hết <code>NULL</code>, nên PostgreSQL quét cả bảng trong lúc giữ <code>ACCESS EXCLUSIVE</code>, và mọi bút toán mới đứng chờ. Cách an toàn là thêm <code>CHECK ... NOT VALID</code>, <code>VALIDATE</code> rồi mới <code>SET NOT NULL</code>.</p></details>
 </div>
 
 ## Vì sao không đổi cột trong một lần triển khai?
@@ -72,7 +72,7 @@ TN-0121 bởi code v1: currency ["VND"], fee_percent Some(20), policy_version So
 TN-0122 bởi code v2: currency ["VND"], fee_percent Some(15), policy_version Some(2)
 ```
 
-**Backfill theo lô.** Mỗi lô lấy `batch_size` khóa kế tiếp sau checkpoint, điền dòng còn `NULL` và dời checkpoint trong một transaction. `IS NULL` làm lô idempotent; `FOR UPDATE` trên dòng checkpoint để hai tiến trình cùng tên xếp hàng: test giữ dòng đó tới khi `pg_stat_activity` thấy cả hai đang chờ, rồi nhả, và không lô nào dùng chung checkpoint (`backfill_batch`, rút gọn):
+**Backfill theo lô.** Mỗi lô lấy `batch_size` khoá kế tiếp sau checkpoint, điền dòng còn `NULL` và dời checkpoint trong một transaction. `IS NULL` làm lô idempotent; `FOR UPDATE` trên dòng checkpoint để hai tiến trình cùng tên xếp hàng: test giữ dòng đó tới khi `pg_stat_activity` thấy cả hai đang chờ, rồi nhả, và không lô nào dùng chung checkpoint (`backfill_batch`, rút gọn):
 
 ```rust
 // src/migrate.rs
@@ -110,7 +110,7 @@ VALIDATE CONSTRAINT postings_currency_nn                   ShareUpdateExclusiveL
 SET NOT NULL postings.currency                             AccessExclusiveLock        quét 0
 ```
 
-`ADD COLUMN` xin khóa mạnh nhất nhưng không quét và không viết lại bảng (`pg_relation_filenode` giữ nguyên). `VALIDATE` quét một lần nhưng chỉ lấy `ShareUpdateExclusiveLock`: giữ nó mở thì bút toán mới vẫn ghi được. `SET NOT NULL` sau khi có `CHECK` hợp lệ không quét (từ PostgreSQL 12), rồi `CHECK` tạm được bỏ. Còn `NULL` mà `VALIDATE` thì PostgreSQL trả `23514` và không đổi gì: hàng rào chặn contract sớm.
+`ADD COLUMN` xin khoá mạnh nhất nhưng không quét và không viết lại bảng (`pg_relation_filenode` giữ nguyên). `VALIDATE` quét một lần nhưng chỉ lấy `ShareUpdateExclusiveLock`: giữ nó mở thì bút toán mới vẫn ghi được. `SET NOT NULL` sau khi có `CHECK` hợp lệ không quét (từ PostgreSQL 12), rồi `CHECK` tạm được bỏ. Còn `NULL` mà `VALIDATE` thì PostgreSQL trả `23514` và không đổi gì: hàng rào chặn contract sớm.
 
 **Có khi không cần đường dài.** Giá trị là hằng thì từ PostgreSQL 11, `ADD COLUMN ... NOT NULL DEFAULT` chỉ ghi mặc định vào catalog: không viết lại bảng, không `UPDATE`, không phải nới trigger. Với riêng `currency`, đó là cách nên chọn ngoài đời; bài đi đường dài vì giá trị phải tính từ dữ liệu thì không có lối tắt này. `DEFAULT` volatile vẫn viết lại cả bảng. PostgreSQL 18 còn cho `ADD CONSTRAINT ... NOT NULL ... NOT VALID` rồi `VALIDATE`, không cần `CHECK` tạm:
 
@@ -125,9 +125,9 @@ VALIDATE CONSTRAINT note_nn                                ShareUpdateExclusiveL
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 270" role="img" aria-label="Hình 2. Hai đường đổi cột sang NOT NULL. Đường thẳng giữ khóa ACCESS EXCLUSIVE trong lúc quét cả bảng và chặn ghi. Đường an toàn gồm ba bước: thêm CHECK NOT VALID không quét, VALIDATE quét một lần nhưng cho ghi, rồi SET NOT NULL không quét."><rect x="20" y="20" width="410" height="230" rx="10" class="f-warn-soft s-warn"/><text x="36" y="48" class="t-b">SET NOT NULL thẳng</text><text x="36" y="86" class="t-small">không ràng buộc nào chứng minh hết NULL</text><text x="36" y="116" class="t-small">AccessExclusiveLock, quét 1 lần cả bảng</text><text x="36" y="146" class="t-small">bút toán mới đứng chờ suốt lúc quét</text><text x="36" y="176" class="t-small">bảng càng lớn, hàng đợi càng dài</text><text x="36" y="226" class="t-small">lab: ghi bị chặn, thấy trong pg_stat_activity</text><rect x="450" y="20" width="410" height="230" rx="10" class="f-phys-soft s-phys"/><text x="466" y="48" class="t-b">Đường an toàn, ba bước</text><rect x="466" y="62" width="378" height="52" rx="8" class="f-surface s-phys"/><text x="478" y="83" class="t-b">1. ADD CONSTRAINT CHECK ... NOT VALID</text><text x="478" y="102" class="t-small">AccessExclusiveLock, quét 0: chỉ áp cho dòng mới</text><rect x="466" y="122" width="378" height="52" rx="8" class="f-surface s-pk"/><text x="478" y="143" class="t-b">2. VALIDATE CONSTRAINT</text><text x="478" y="162" class="t-small">ShareUpdateExclusiveLock, quét 1: ghi vẫn chạy</text><rect x="466" y="182" width="378" height="52" rx="8" class="f-surface s-phys"/><text x="478" y="203" class="t-b">3. SET NOT NULL (đã có CHECK hợp lệ)</text><text x="478" y="222" class="t-small">AccessExclusiveLock, quét 0: chỉ đổi catalog</text></svg>
+<svg viewBox="0 0 880 270" role="img" aria-label="Hình 2. Hai đường đổi cột sang NOT NULL. Đường thẳng giữ khoá ACCESS EXCLUSIVE trong lúc quét cả bảng và chặn ghi. Đường an toàn gồm ba bước: thêm CHECK NOT VALID không quét, VALIDATE quét một lần nhưng cho ghi, rồi SET NOT NULL không quét."><rect x="20" y="20" width="410" height="230" rx="10" class="f-warn-soft s-warn"/><text x="36" y="48" class="t-b">SET NOT NULL thẳng</text><text x="36" y="86" class="t-small">không ràng buộc nào chứng minh hết NULL</text><text x="36" y="116" class="t-small">AccessExclusiveLock, quét 1 lần cả bảng</text><text x="36" y="146" class="t-small">bút toán mới đứng chờ suốt lúc quét</text><text x="36" y="176" class="t-small">bảng càng lớn, hàng đợi càng dài</text><text x="36" y="226" class="t-small">lab: ghi bị chặn, thấy trong pg_stat_activity</text><rect x="450" y="20" width="410" height="230" rx="10" class="f-phys-soft s-phys"/><text x="466" y="48" class="t-b">Đường an toàn, ba bước</text><rect x="466" y="62" width="378" height="52" rx="8" class="f-surface s-phys"/><text x="478" y="83" class="t-b">1. ADD CONSTRAINT CHECK ... NOT VALID</text><text x="478" y="102" class="t-small">AccessExclusiveLock, quét 0: chỉ áp cho dòng mới</text><rect x="466" y="122" width="378" height="52" rx="8" class="f-surface s-pk"/><text x="478" y="143" class="t-b">2. VALIDATE CONSTRAINT</text><text x="478" y="162" class="t-small">ShareUpdateExclusiveLock, quét 1: ghi vẫn chạy</text><rect x="466" y="182" width="378" height="52" rx="8" class="f-surface s-phys"/><text x="478" y="203" class="t-b">3. SET NOT NULL (đã có CHECK hợp lệ)</text><text x="478" y="222" class="t-small">AccessExclusiveLock, quét 0: chỉ đổi catalog</text></svg>
 </div>
-<figcaption>Hình 2. Cả hai đường đều xin khóa mạnh nhất; khác nhau ở chỗ lúc giữ khóa đó có quét bảng hay không.</figcaption>
+<figcaption>Hình 2. Cả hai đường đều xin khoá mạnh nhất; khác nhau ở chỗ lúc giữ khoá đó có quét bảng hay không.</figcaption>
 </figure>
 
 Đường thẳng trong lab, sau khi backfill xong:
@@ -140,15 +140,15 @@ khóa AccessExclusiveLock, quét 1 lần; bút toán mới bị chặn: true; gh
 
 Contract tách hai giai đoạn. **A** (còn quay lại được): `SET NOT NULL` hai cột mới, nới `fee_percent`, trả trigger append-only về chặt (sửa `currency` của posting cũ lại nhận `TN001`). **B** (không quay lại được): bỏ trigger ghi hộ và cột `fee_percent`.
 
-## Một ALTER đang chờ khóa có chặn cả truy vấn đọc không?
+## Một ALTER đang chờ khoá có chặn cả truy vấn đọc không?
 
 Có. Lab dựng ba phiên: A đọc dài, giữ `AccessShareLock` trên `postings`; B chạy `ADD COLUMN`; C là `SELECT count(*)` ngắn đến sau B.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 200" role="img" aria-label="Hình 3. Hàng đợi khóa. Phiên A đọc dài giữ AccessShareLock. Phiên B chạy ALTER TABLE xin AccessExclusiveLock nên phải chờ A. Phiên C chạy SELECT ngắn xin AccessShareLock, tương thích với A nhưng vẫn phải xếp sau B."><defs><marker id="rust-feature-flag-config-migration-expand-contract-2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><rect x="20" y="30" width="250" height="110" rx="10" class="f-phys-soft s-phys"/><text x="36" y="62" class="t-b">A · báo cáo đọc dài</text><text x="36" y="90" class="t-small">giữ AccessShareLock</text><text x="36" y="114" class="t-small">chưa commit</text><rect x="315" y="30" width="250" height="110" rx="10" class="f-warn-soft s-warn"/><text x="331" y="62" class="t-b">B · ALTER TABLE</text><text x="331" y="90" class="t-small">xin AccessExclusiveLock</text><text x="331" y="114" class="t-small">chờ A</text><rect x="610" y="30" width="250" height="110" rx="10" class="f-warn-soft s-warn dash"/><text x="626" y="62" class="t-b">C · SELECT ngắn</text><text x="626" y="90" class="t-small">xin AccessShareLock</text><text x="626" y="114" class="t-small">tương thích với A, xếp sau B</text><path d="M313 85 L272 85" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-feature-flag-config-migration-expand-contract-2-a)"/><path d="M608 85 L567 85" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-feature-flag-config-migration-expand-contract-2-a)"/><text x="20" y="178" class="t-small">pg_blocking_pids(C) chứa B, pg_blocking_pids(B) chứa A: lab đọc cả hai từ pg_stat_activity.</text></svg>
+<svg viewBox="0 0 880 200" role="img" aria-label="Hình 3. Hàng đợi khoá. Phiên A đọc dài giữ AccessShareLock. Phiên B chạy ALTER TABLE xin AccessExclusiveLock nên phải chờ A. Phiên C chạy SELECT ngắn xin AccessShareLock, tương thích với A nhưng vẫn phải xếp sau B."><defs><marker id="rust-feature-flag-config-migration-expand-contract-2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><rect x="20" y="30" width="250" height="110" rx="10" class="f-phys-soft s-phys"/><text x="36" y="62" class="t-b">A · báo cáo đọc dài</text><text x="36" y="90" class="t-small">giữ AccessShareLock</text><text x="36" y="114" class="t-small">chưa commit</text><rect x="315" y="30" width="250" height="110" rx="10" class="f-warn-soft s-warn"/><text x="331" y="62" class="t-b">B · ALTER TABLE</text><text x="331" y="90" class="t-small">xin AccessExclusiveLock</text><text x="331" y="114" class="t-small">chờ A</text><rect x="610" y="30" width="250" height="110" rx="10" class="f-warn-soft s-warn dash"/><text x="626" y="62" class="t-b">C · SELECT ngắn</text><text x="626" y="90" class="t-small">xin AccessShareLock</text><text x="626" y="114" class="t-small">tương thích với A, xếp sau B</text><path d="M313 85 L272 85" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-feature-flag-config-migration-expand-contract-2-a)"/><path d="M608 85 L567 85" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-feature-flag-config-migration-expand-contract-2-a)"/><text x="20" y="178" class="t-small">pg_blocking_pids(C) chứa B, pg_blocking_pids(B) chứa A: lab đọc cả hai từ pg_stat_activity.</text></svg>
 </div>
-<figcaption>Hình 3. Mũi tên là «đang chờ». Ngay cả truy vấn không xung đột với ai cũng bị giữ lại sau một yêu cầu khóa mạnh đang xếp hàng.</figcaption>
+<figcaption>Hình 3. Mũi tên là «đang chờ». Ngay cả truy vấn không xung đột với ai cũng bị giữ lại sau một yêu cầu khoá mạnh đang xếp hàng.</figcaption>
 </figure>
 
 ```text
@@ -158,7 +158,7 @@ ALTER bị chặn bởi phiên đọc dài: true; truy vấn đọc ngắn bị 
 nhả phiên đọc dài: ALTER xong (true), truy vấn đọc thấy 50 dòng
 ```
 
-Cách chữa là `lock_timeout` ngắn: không lấy được khóa thì bỏ cuộc, trả hàng đợi, thử lại. Mẫu của lab: 200 ms, tối đa 5 lần, chỉ thử lại khi lỗi là `55P03` (`src/migrate.rs`):
+Cách chữa là `lock_timeout` ngắn: không lấy được khoá thì bỏ cuộc, trả hàng đợi, thử lại. Mẫu của lab: 200 ms, tối đa 5 lần, chỉ thử lại khi lỗi là `55P03` (`src/migrate.rs`):
 
 ```rust
 match attempt(n).await {
@@ -179,7 +179,7 @@ lần 1: SQLSTATE 55P03; cột chưa được thêm: true; người ghi không b
 phiên đọc dài kết thúc: thành công ở lần 2, cột có mặt: true
 ```
 
-Lab thử lại ngay; production nên nghỉ có jitter giữa các lần. `expand` của lab gộp hai bảng trong một transaction để hoàn tác sạch, nên khóa `postings` có thể bị giữ thêm tối đa một `lock_timeout` lúc chờ `fee_events`; bảng lớn nên tách mỗi bảng một transaction.
+Lab thử lại ngay; production nên nghỉ có jitter giữa các lần. `expand` của lab gộp hai bảng trong một transaction để hoàn tác sạch, nên khoá `postings` có thể bị giữ thêm tối đa một `lock_timeout` lúc chờ `fee_events`; bảng lớn nên tách mỗi bảng một transaction.
 
 ## Feature flag: lưu ở đâu, đọc lúc nào, replay có ra đúng số cũ không?
 
@@ -287,7 +287,7 @@ cách chuỗi, "v2" / "V2" / "v3" thành: [V2, V1, V1]
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Bảng nhỏ (vài trăm dòng), một PostgreSQL local, không có tải ghi liên tục: lab chứng minh <em>cơ chế</em> khóa và thứ tự, không đo thời gian giữ khóa trên bảng lớn. Cờ đọc từ DB mỗi chuyến, chưa có cache TTL, giao diện quản trị hay nhật ký ai đổi cờ. Backfill chưa điều tiết theo tải, chưa chờ replica. Guard chỉ có trên <code>postings</code>: không có trigger <code>TRUNCATE</code> và <code>journal_entries</code> của bài 24, còn <code>fee_events</code> chưa append-only. Chưa thử partition, khóa ngoại, đổi kiểu cột (viết lại bảng) hay khôi phục từ sao lưu.</p></div>
+<p>Bảng nhỏ (vài trăm dòng), một PostgreSQL local, không có tải ghi liên tục: lab chứng minh <em>cơ chế</em> khoá và thứ tự, không đo thời gian giữ khoá trên bảng lớn. Cờ đọc từ DB mỗi chuyến, chưa có cache TTL, giao diện quản trị hay nhật ký ai đổi cờ. Backfill chưa điều tiết theo tải, chưa chờ replica. Guard chỉ có trên <code>postings</code>: không có trigger <code>TRUNCATE</code> và <code>journal_entries</code> của bài 24, còn <code>fee_events</code> chưa append-only. Chưa thử partition, khoá ngoại, đổi kiểu cột (viết lại bảng) hay khôi phục từ sao lưu.</p></div>
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -299,7 +299,7 @@ cargo run --manifest-path examples/toi-noi-rust/56-feature-flag-migration/Cargo.
 cargo test --manifest-path examples/toi-noi-rust/56-feature-flag-migration/Cargo.toml
 ```
 
-`--verify` kiểm từng giá trị ở trên, đạt thì in `VERIFY OK`. `cargo test` chạy 17 test đơn vị và 15 test tích hợp. Không test nào assert thời gian: chờ khóa được quan sát qua `pg_stat_activity`. Lab dùng `sqlx` 0.9.0, `tokio` 1.54.1.
+`--verify` kiểm từng giá trị ở trên, đạt thì in `VERIFY OK`. `cargo test` chạy 17 test đơn vị và 15 test tích hợp. Không test nào assert thời gian: chờ khoá được quan sát qua `pg_stat_activity`. Lab dùng `sqlx` 0.9.0, `tokio` 1.54.1.
 
 **Bài tập:** đổi tên `fee_events.fee_percent` thành `fee_rate_percent` mà code cũ (đọc `fee_percent`) vẫn chạy. Làm theo thứ tự nào, và khi nào được `DROP COLUMN fee_percent`?
 
@@ -310,7 +310,7 @@ Bài trước: [bài 55](/articles/rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf
 ## Tài liệu gốc
 
 - [PostgreSQL: ALTER TABLE, mục `ADD CONSTRAINT ... NOT VALID`, `VALIDATE CONSTRAINT` và `SET NOT NULL`](https://www.postgresql.org/docs/18/sql-altertable.html).
-- [PostgreSQL: Explicit Locking, bảng chế độ khóa mức bảng](https://www.postgresql.org/docs/18/explicit-locking.html).
+- [PostgreSQL: Explicit Locking, bảng chế độ khoá mức bảng](https://www.postgresql.org/docs/18/explicit-locking.html).
 - [PostgreSQL: view `pg_locks`](https://www.postgresql.org/docs/18/view-pg-locks.html).
 - [PostgreSQL: `lock_timeout` trong Client Connection Defaults](https://www.postgresql.org/docs/18/runtime-config-client.html).
 - [Rust std: `DefaultHasher`](https://doc.rust-lang.org/std/hash/struct.DefaultHasher.html).

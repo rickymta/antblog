@@ -20,7 +20,7 @@ Lỗi biên ô là lý do không ai nên tìm tài xế bằng cách so sánh ti
 
 ## Geohash: đan xen bit, và đường biên không tránh được
 
-Geohash mã hóa một điểm thành chuỗi ký tự bằng cách luân phiên chia đôi khoảng kinh độ rồi khoảng vĩ độ: bit 1 nếu điểm nằm ở nửa trên, bit 0 nếu nửa dưới, gom năm bit thành một ký tự base32. Chuỗi càng dài, ô càng nhỏ; hai điểm trong cùng một ô dài thì chung tiền tố. Đó là cái hay (tiền tố làm khóa, làm chỉ mục theo văn bản) và cũng là cái dở: hai điểm sát nhau nhưng nằm hai bên một đường chia **ở mức thô** (một trong những bit đầu của chuỗi) có thể chung rất ít ký tự.
+Geohash mã hoá một điểm thành chuỗi ký tự bằng cách luân phiên chia đôi khoảng kinh độ rồi khoảng vĩ độ: bit 1 nếu điểm nằm ở nửa trên, bit 0 nếu nửa dưới, gom năm bit thành một ký tự base32. Chuỗi càng dài, ô càng nhỏ; hai điểm trong cùng một ô dài thì chung tiền tố. Đó là cái hay (tiền tố làm khoá, làm chỉ mục theo văn bản) và cũng là cái dở: hai điểm sát nhau nhưng nằm hai bên một đường chia **ở mức thô** (một trong những bit đầu của chuỗi) có thể chung rất ít ký tự.
 
 `examples/toi-noi-location/rust/crates/geo-core/src/geohash.rs`
 
@@ -65,7 +65,7 @@ Kích thước ô tại Bến Thành (lat 10,7725), đo bằng haversine trên h
 | 7 | 150,0 | 152,7 |
 | 8 | 37,5 | 19,1 |
 
-Lab quét hai đường trong bbox (lat = 10,78 theo kinh độ, và lng = 106,69 theo vĩ độ) với bước 0,00005° (cỡ 5,5 m), mã hóa geohash độ dài 8 cho từng cặp điểm liền kề và đếm số lần hai điểm khác ô. Có **1.456** lần, phân theo độ dài tiền tố chung: 3 ký tự 1 lần, 4 ký tự 7 lần, 5 ký tự 39 lần, 6 ký tự 201 lần, 7 ký tự 1.208 lần. Tức là 47 lần hai điểm cách nhau chừng 5,5 m mà chung dưới 6 ký tự. Cặp tệ nhất là cặp đầu bài.
+Lab quét hai đường trong bbox (lat = 10,78 theo kinh độ, và lng = 106,69 theo vĩ độ) với bước 0,00005° (cỡ 5,5 m), mã hoá geohash độ dài 8 cho từng cặp điểm liền kề và đếm số lần hai điểm khác ô. Có **1.456** lần, phân theo độ dài tiền tố chung: 3 ký tự 1 lần, 4 ký tự 7 lần, 5 ký tự 39 lần, 6 ký tự 201 lần, 7 ký tự 1.208 lần. Tức là 47 lần hai điểm cách nhau chừng 5,5 m mà chung dưới 6 ký tự. Cặp tệ nhất là cặp đầu bài.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -161,13 +161,13 @@ Hình 3 cho một quy tắc đơn giản: **ô cần lớn hơn nhiều so với
 | 10 | 300 | 3 | 37 | 2,0 |
 | 10 | 1.000 | quá 8 vòng | – | – |
 
-(«k nhỏ nhất» là k nhỏ nhất cho 0 bỏ sót trong 200.000 mẫu, thử tới k = 8.) Cột này không phải ngẫu nhiên, và có thể tính trước. Đích nằm ở ô cách từ k + 1 bước trở lên thì tâm hai ô cách nhau ít nhất 1,5·(k + 1)·e; điểm hỏi và đích mỗi bên lệch khỏi tâm ô của mình tối đa `e`. Vậy mọi đích gần hơn **(1,5·k − 0,5)·e** chắc chắn nằm trong k-ring k. Với `e` đo tại HCM, k nhỏ nhất thỏa (1,5·k − 0,5)·e ≥ r cho đúng mọi dòng của bảng: res 9 có k = 1 bảo đảm 216 m, k = 2 bảo đảm 539 m, nên r = 300 m cần k = 2; res 10 với r = 1 km cần k = 9, tức quá 8 vòng. Đây là ước lượng trên lưới phẳng đều, đối chiếu với mẫu đo chứ không phải chứng minh chặt trên mặt cầu.
+(«k nhỏ nhất» là k nhỏ nhất cho 0 bỏ sót trong 200.000 mẫu, thử tới k = 8.) Cột này không phải ngẫu nhiên, và có thể tính trước. Đích nằm ở ô cách từ k + 1 bước trở lên thì tâm hai ô cách nhau ít nhất 1,5·(k + 1)·e; điểm hỏi và đích mỗi bên lệch khỏi tâm ô của mình tối đa `e`. Vậy mọi đích gần hơn **(1,5·k − 0,5)·e** chắc chắn nằm trong k-ring k. Với `e` đo tại HCM, k nhỏ nhất thoả (1,5·k − 0,5)·e ≥ r cho đúng mọi dòng của bảng: res 9 có k = 1 bảo đảm 216 m, k = 2 bảo đảm 539 m, nên r = 300 m cần k = 2; res 10 với r = 1 km cần k = 9, tức quá 8 vòng. Đây là ước lượng trên lưới phẳng đều, đối chiếu với mẫu đo chứ không phải chứng minh chặt trên mặt cầu.
 
 Đọc bảng: res 9 với r = 300 m quét 19 ô, diện tích gấp 7,1 lần hình tròn, bỏ sót 0,20% nếu chỉ lấy vòng 1. Res 10 vừa khít hơn (2,0 lần) nhưng cần 37 ô, và ở 1 km quá 8 vòng. Độ phân giải tốt là độ phân giải có cạnh ô cỡ bán kính hay dùng.
 
 ## Chi phí tính ô, và khi nào lưới hơn cây
 
-Tính ô cho một điểm không đắt, nhưng cũng không miễn phí. Trung vị 5 lần của 1.000.000 điểm, `--release`: ở lần chạy cuối `H3 cell_of` res 9 tốn 456,7 ns mỗi điểm, `geohash::encode` độ dài 7 tốn 281,8 ns, `k_ring(1)` 176,1 ns mỗi ô. **Các con số này đo khi máy chịu tải nặng** và dao động mạnh: qua các lần chạy `cell_of` từ 401,6 đến 1.217,9 ns, `encode` từ 281,8 đến 1.008,5 ns. Chỉ kết luận được là cả hai cùng cỡ vài trăm ns. Geohash của lab cấp phát một `String` mỗi lần mã hóa nên không nhanh hơn H3 rõ rệt dù công thức đơn giản hơn.
+Tính ô cho một điểm không đắt, nhưng cũng không miễn phí. Trung vị 5 lần của 1.000.000 điểm, `--release`: ở lần chạy cuối `H3 cell_of` res 9 tốn 456,7 ns mỗi điểm, `geohash::encode` độ dài 7 tốn 281,8 ns, `k_ring(1)` 176,1 ns mỗi ô. **Các con số này đo khi máy chịu tải nặng** và dao động mạnh: qua các lần chạy `cell_of` từ 401,6 đến 1.217,9 ns, `encode` từ 281,8 đến 1.008,5 ns. Chỉ kết luận được là cả hai cùng cỡ vài trăm ns. Geohash của lab cấp phát một `String` mỗi lần mã hoá nên không nhanh hơn H3 rõ rệt dù công thức đơn giản hơn.
 
 Khi nào lưới hơn cây? `H3Buckets` của bài 09 giữ một danh sách tài xế cho mỗi ô; truy vấn mở rộng từng vòng quanh điểm hỏi tới khi đủ k người và người thứ k đã gần hơn khoảng cách an toàn của vòng tiếp theo.
 
@@ -200,9 +200,9 @@ Khi nào lưới hơn cây? `H3Buckets` của bài 09 giữ một danh sách tà
     }
 ```
 
-Khoảng cách an toàn chính là công thức vừa tính. Hệ số 0,8 là biên do lab chọn cho độ méo của lưới, không có chứng minh trong bài, nhưng kết quả truy vấn khớp quét toàn bộ 100,0% ở cả ba quy mô của bảng bài 09. Tài xế di chuyển, nên chi phí cập nhật quan trọng: đổi ô là chuyển giỏ, và chỉ khoảng 7,1–7,4% lần cập nhật ở res 9 làm tài xế đổi ô (xe đi 0–40 km/h, báo vị trí 4 giây một lần). Phần còn lại chỉ ghi vị trí mới. Cây phải xóa rồi chèn lại mỗi lần. Đổi lại lưới cần chọn độ phân giải khớp mật độ: ở 250.000 tài xế, res 8 có p50 truy vấn 81,0 µs còn res 9 chỉ 18,0 µs (đo khi máy chịu tải nặng), vì ô res 8 chứa nhiều tài xế hơn (bài 09).
+Khoảng cách an toàn chính là công thức vừa tính. Hệ số 0,8 là biên do lab chọn cho độ méo của lưới, không có chứng minh trong bài, nhưng kết quả truy vấn khớp quét toàn bộ 100,0% ở cả ba quy mô của bảng bài 09. Tài xế di chuyển, nên chi phí cập nhật quan trọng: đổi ô là chuyển giỏ, và chỉ khoảng 7,1–7,4% lần cập nhật ở res 9 làm tài xế đổi ô (xe đi 0–40 km/h, báo vị trí 4 giây một lần). Phần còn lại chỉ ghi vị trí mới. Cây phải xoá rồi chèn lại mỗi lần. Đổi lại lưới cần chọn độ phân giải khớp mật độ: ở 250.000 tài xế, res 8 có p50 truy vấn 81,0 µs còn res 9 chỉ 18,0 µs (đo khi máy chịu tải nặng), vì ô res 8 chứa nhiều tài xế hơn (bài 09).
 
-Tóm lại: lưới hơn cây khi điểm di chuyển liên tục và câu hỏi là «ai ở quanh đây» (tài xế). Cây hơn lưới khi phần tử là đoạn đường cố định và câu hỏi là «đoạn nào gần nhất» (bài 07). Ô còn là khóa tự nhiên để chia kho vị trí và bộ nhớ đệm theo vùng, điều mà các bài sau dùng tới.
+Tóm lại: lưới hơn cây khi điểm di chuyển liên tục và câu hỏi là «ai ở quanh đây» (tài xế). Cây hơn lưới khi phần tử là đoạn đường cố định và câu hỏi là «đoạn nào gần nhất» (bài 07). Ô còn là khoá tự nhiên để chia kho vị trí và bộ nhớ đệm theo vùng, điều mà các bài sau dùng tới.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -231,7 +231,7 @@ Các tỉ lệ bỏ sót và kích thước ô là số đếm và số hình h�
 
 ## Giới hạn của ví dụ
 
-- **Geohash tối giản.** `neighbors` lấy tâm ô cộng trừ kích thước rồi mã hóa lại; chỉ đúng ở vùng xa cực và xa kinh tuyến 180, đủ cho Việt Nam.
+- **Geohash tối giản.** `neighbors` lấy tâm ô cộng trừ kích thước rồi mã hoá lại; chỉ đúng ở vùng xa cực và xa kinh tuyến 180, đủ cho Việt Nam.
 - **Độ phủ k-ring đo bằng mẫu.** «k nhỏ nhất» là thực nghiệm trên 200.000 mẫu và các bán kính 100 m, 300 m, 1 km; công thức (1,5·k − 0,5)·e chỉ là ước lượng trên lưới phẳng khớp với mẫu, và chưa thử các bán kính khác.
 - **Hệ số 0,8 của `H3Buckets` là kinh nghiệm**, chưa có chứng minh; truy vấn gần ô ngũ giác dùng cách phụ (đĩa trừ đĩa) mà bài không kiểm riêng.
 - **Mật độ đều và tải đơn giản.** Điểm hỏi rải đều trong bbox; thực tế tài xế dồn về vài điểm nóng, khiến ô res 8 chứa nhiều người hơn mức trung bình.
@@ -252,7 +252,7 @@ Các tỉ lệ bỏ sót và kích thước ô là số đếm và số hình h�
 <p>Số ô phủ bbox (ước tính) là 474 ở res 8 và 3.321 ở res 9, nên trung bình khoảng 527 và 75 tài xế mỗi ô. Res 8, k = 2 là 19 ô: xấp xỉ 10.000 tài xế. Res 9, k = 4 là 61 ô: xấp xỉ 4.600. Res 9 xét ít hơn, phù hợp với số đo ở bài 09 (p50 18,0 µs so với 81,0 µs). Đây là tính số học với giả định đều; tài xế dồn về điểm nóng thì số ở ô đông còn lớn hơn.</p>
 </details>
 
-**Bài 3.** Vì sao chỉ cắt ngắn geohash (dùng độ dài 5 thay vì 8) không xóa được lỗi biên?
+**Bài 3.** Vì sao chỉ cắt ngắn geohash (dùng độ dài 5 thay vì 8) không xoá được lỗi biên?
 
 <details><summary>Lời giải bài 3</summary>
 <p>Mọi độ dài đều có đường biên ô; cắt ngắn chỉ dời biên và làm lỗi hiếm hơn, đồng thời làm ô to hơn nên mỗi ô chứa nhiều người hơn. Ở độ dài 5 (ô khoảng 4,8 km), quét một ô vẫn bỏ sót 3,89% đích cách 300 m. Chữa tận gốc là quét cả ô láng giềng, hoặc dùng lưới có k-ring như H3 và chọn độ phân giải theo bán kính.</p>
@@ -264,4 +264,4 @@ Bài trước: [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong). B�
 
 - [h3o trên docs.rs](https://docs.rs/h3o): thư viện H3 thuần Rust của lab.
 - [Tài liệu H3](https://h3geo.org/): mô hình lưới lục giác, các độ phân giải và ô ngũ giác.
-- [Geohash trên Wikipedia](https://en.wikipedia.org/wiki/Geohash): cách mã hóa và hạn chế ở biên ô.
+- [Geohash trên Wikipedia](https://en.wikipedia.org/wiki/Geohash): cách mã hoá và hạn chế ở biên ô.

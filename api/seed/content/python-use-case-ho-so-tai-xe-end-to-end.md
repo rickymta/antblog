@@ -200,7 +200,7 @@ Khi hồ sơ đã có đủ ba kết quả và vào hàng chờ, aggregate ghi l
         return pending
 ```
 
-`pull_events()` lấy và xóa danh sách, nên mỗi sự kiện chỉ phát một lần; hồ sơ nạp lại từ cơ sở dữ liệu có danh sách rỗng. Sự kiện mang mã hồ sơ, mã tài xế, ba con số và các lý do, **không** mang số giấy tờ hay họ tên. Hồ sơ chưa có điểm thì không có sự kiện, nên `DR-003` không xuất hiện. Handler giao sự kiện cho port `EventPublisher` ngay sau `save`:
+`pull_events()` lấy và xoá danh sách, nên mỗi sự kiện chỉ phát một lần; hồ sơ nạp lại từ cơ sở dữ liệu có danh sách rỗng. Sự kiện mang mã hồ sơ, mã tài xế, ba con số và các lý do, **không** mang số giấy tờ hay họ tên. Hồ sơ chưa có điểm thì không có sự kiện, nên `DR-003` không xuất hiện. Handler giao sự kiện cho port `EventPublisher` ngay sau `save`:
 
 ```python
 # src/kyc_service/application/handlers.py (trích)
@@ -305,14 +305,14 @@ def commit_fails(engine: Engine) -> Callable[[], None]:
 
 Hồ sơ không tồn tại nhưng một sự kiện nói nó đã được chấm điểm: «sự kiện ma». Giao sau commit thì khe hở đổi chiều: commit xong, tiến trình chết trước khi giao, và sự kiện mất. Không thứ tự nào sửa được vì cơ sở dữ liệu và nơi nhận không có transaction chung. Đó là bài toán outbox của bài 39, và bài 71 ghi sự kiện vào một bảng trong **cùng transaction** với hồ sơ.
 
-Một giới hạn nữa: lệnh nộp chưa có khóa idempotency (bài 25), nên client nộp lại sau khi mất phản hồi tạo hồ sơ thứ hai:
+Một giới hạn nữa: lệnh nộp chưa có khoá idempotency (bài 25), nên client nộp lại sau khi mất phản hồi tạo hồ sơ thứ hai:
 
 ```text
 == 11. Nộp hai lần: hai hồ sơ (chưa có khóa idempotency)
   mã hồ sơ: ['KYC-0001', 'KYC-0002']
 ```
 
-Ca verify giữ hành vi này như giới hạn đã biết; muốn chặn, lệnh cần mang một khóa và bảng cần ràng buộc duy nhất trên khóa.
+Ca verify giữ hành vi này như giới hạn đã biết; muốn chặn, lệnh cần mang một khoá và bảng cần ràng buộc duy nhất trên khoá.
 
 ## Chạy và kiểm chứng
 
@@ -395,7 +395,7 @@ OK 6/6
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Ba service là adapter giả với năm tài xế tổng hợp, không đọc ảnh nào; điểm và ba ngưỡng là ví dụ, không đo từ dữ liệu của lab, và không có tỉ lệ hàng chờ nào ở đây đại diện cho production. Use case và cả <code>ResumeScreening</code> giữ transaction mở suốt lúc gọi service (đã đo), không có timeout hay retry cho từng service, không có worker tự làm tiếp hồ sơ dừng giữa chừng, và chưa có khóa idempotency cho lệnh nộp. Sự kiện giao trước commit có thể thành sự kiện ma. Kết quả OCR, điểm khuôn mặt và điểm rủi ro là đầu vào cho người duyệt, không phải kết luận về một con người; hàng đợi, audit và tỉ lệ sai cho phép của người duyệt thuộc bài 61.</p>
+<p>Ba service là adapter giả với năm tài xế tổng hợp, không đọc ảnh nào; điểm và ba ngưỡng là ví dụ, không đo từ dữ liệu của lab, và không có tỉ lệ hàng chờ nào ở đây đại diện cho production. Use case và cả <code>ResumeScreening</code> giữ transaction mở suốt lúc gọi service (đã đo), không có timeout hay retry cho từng service, không có worker tự làm tiếp hồ sơ dừng giữa chừng, và chưa có khoá idempotency cho lệnh nộp. Sự kiện giao trước commit có thể thành sự kiện ma. Kết quả OCR, điểm khuôn mặt và điểm rủi ro là đầu vào cho người duyệt, không phải kết luận về một con người; hàng đợi, audit và tỉ lệ sai cho phép của người duyệt thuộc bài 61.</p>
 </div>
 
 **Bài tập:** (1) Đề xuất cách tách bước gọi ba service ra khỏi transaction mà vẫn giữ «máy luôn dừng ở `needs_review`». `ResumeScreening` đóng vai gì? (2) Thêm lý do `DEVICE_SHARED` (thiết bị đã dùng cho nhiều hồ sơ): sửa những chỗ nào, và vì sao cần nghĩ tới các bên đọc dữ liệu?

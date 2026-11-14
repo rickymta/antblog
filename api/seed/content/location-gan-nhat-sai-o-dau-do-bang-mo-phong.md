@@ -22,7 +22,7 @@ Vậy có nên thay hết «gần nhất theo chim bay» bằng «gần nhất t
 
 ## Baseline của cả phần: hai cách chọn, một so sánh
 
-Baseline P03 là `NearestStraightLine`: duyệt khách theo thứ tự đặt, mỗi khách lấy tài xế rảnh gần điểm đón nhất theo haversine (hòa thì mã nhỏ hơn). Đó cũng là cách tìm tài xế ở [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do).
+Baseline P03 là `NearestStraightLine`: duyệt khách theo thứ tự đặt, mỗi khách lấy tài xế rảnh gần điểm đón nhất theo haversine (hoà thì mã nhỏ hơn). Đó cũng là cách tìm tài xế ở [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do).
 
 `examples/toi-noi-location/rust/crates/simulator/src/strategy.rs`
 
@@ -117,7 +117,7 @@ Bốn lời cảnh báo đi kèm, vì quy trình này vẫn có thể bị đọ
 - **«Không phân biệt được» không có nghĩa là «bằng nhau».** Nó nói rằng 20 seed không đủ để thấy hiệu; hiệu thật có thể nhỏ hơn độ phân giải của phép đo.
 - **«Khác 0» không có nghĩa là «lớn» hay «đáng làm».** `cancel_rate` −0,0093 có khoảng không chứa 0, nhưng trên 228,4 khách đặt mỗi seed chỉ là chừng 2 khách. Độ lớn phải đọc riêng.
 - **Mỗi bảng có 17 chỉ số.** Với mức tin cậy 95%, kể cả khi hai chiến lược hoàn toàn giống nhau, kỳ vọng vẫn có chừng một chỉ số «có ý nghĩa» do may rủi. Vì vậy hãy đọc **mẫu hình**: nhiều chỉ số liên quan cùng hướng (km rỗng trung bình, p95, max, ETA, chờ) đáng tin hơn một dấu sao đơn lẻ. Phần sau của bài có đúng một ví dụ.
-- **Cùng seed chỉ khử một phần nhiễu.** Dòng khách và vị trí tài xế ban đầu giống nhau, nhưng dòng hủy chuyến và nhiễu tốc độ bị lệch khi hai chiến lược gán khác thứ tự (bài 30 đã nêu).
+- **Cùng seed chỉ khử một phần nhiễu.** Dòng khách và vị trí tài xế ban đầu giống nhau, nhưng dòng huỷ chuyến và nhiễu tốc độ bị lệch khi hai chiến lược gán khác thứ tự (bài 30 đã nêu).
 - **Khoảng t giả định hiệu giữa các seed xấp xỉ phân phối chuẩn.** Với 20 seed, giả định này chưa được kiểm; đó là lý do các bài ghi thêm trung vị hai bên và số seed theo từng hướng.
 
 ## Chim bay sai ở đâu: mẫu 2.000 khách
@@ -179,7 +179,7 @@ Mục 3 chạy hai chiến lược trên simulator, 20 seed ghép cặp 20261106
 | chuyến hoàn thành | 196,0 | 198,2 | +2,2 [0,9; 3,5] | 4/13 | TỐT HƠN |
 | km rỗng tổng / khách đặt (m) | 2.113,5 | 2.078,9 | −34,6 [−80,5; 11,3] | 14/6 | không phân biệt được |
 
-Cách đọc mẫu hình thay vì từng dòng: mọi chỉ số đuôi (p95, max của km rỗng; p95, max của chờ) cùng hướng và rõ; trung vị không phân biệt được; km rỗng tổng trên mỗi khách đặt, chỉ số gộp cả chuyến hủy sau khi gán, giảm 34,6 m và khoảng chứa 0. Kết luận trung thực: **lợi nhỏ ở trung bình (66,2 m trên mức 2.439,2 m), lớn ở đuôi.** `walk_m` không phân biệt được, đúng như chờ đợi vì cả hai chiến lược đón đúng ghim.
+Cách đọc mẫu hình thay vì từng dòng: mọi chỉ số đuôi (p95, max của km rỗng; p95, max của chờ) cùng hướng và rõ; trung vị không phân biệt được; km rỗng tổng trên mỗi khách đặt, chỉ số gộp cả chuyến huỷ sau khi gán, giảm 34,6 m và khoảng chứa 0. Kết luận trung thực: **lợi nhỏ ở trung bình (66,2 m trên mức 2.439,2 m), lớn ở đuôi.** `walk_m` không phân biệt được, đúng như chờ đợi vì cả hai chiến lược đón đúng ghim.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -222,13 +222,13 @@ Cùng so sánh, thử thêm các bộ giả định (20 seed, ghép cặp):
 | Bộ giả định | `deadhead_m` trung bình | Các chỉ số khác đáng chú ý |
 |---|---|---|
 | `thường` | −66,2 [−112,1; −20,3] TỐT HƠN | như bảng trên |
-| `dày xe` (240 xe) | −165,0 [−196,5; −133,6] TỐT HƠN | hủy −0,0167, chuyến hoàn thành +3,8, `wait_s` max −655,5 s |
+| `dày xe` (240 xe) | −165,0 [−196,5; −133,6] TỐT HƠN | huỷ −0,0167, chuyến hoàn thành +3,8, `wait_s` max −655,5 s |
 | `thưa xe` (60 xe) | −226,0 [−465,0; 13,0] không phân biệt được | `pickup_eta_s` −28,0 s TỐT HƠN; khách hết kiên nhẫn 0,0466 → 0,0302 |
 | `cao điểm` (7,0 khách/phút) | +65,7 [−6,8; 138,3] không phân biệt được | km rỗng tổng/khách +64,3 m [9,6; 118,9] **XẤU HƠN**; `wait_s` p50 +8,1 s XẤU HƠN |
-| `huỷ nặng` | −13,4 [−54,5; 27,6] không phân biệt được | `deadhead_m` p50 +59,7 m XẤU HƠN; hủy −0,0210, hoàn thành +4,8 TỐT HƠN |
+| `huỷ nặng` | −13,4 [−54,5; 27,6] không phân biệt được | `deadhead_m` p50 +59,7 m XẤU HƠN; huỷ −0,0210, hoàn thành +4,8 TỐT HƠN |
 | `huỷ theo chờ` | cho đúng kết quả của `thường` | ghép ngay thì thời gian chờ chính là ETA, bộ này chưa thêm thông tin ở bài này |
 
-Hiệu rõ nhất khi dư xe. Khi xe quá ít hoặc cầu quá cao, ai cũng phải chạy xa, nên chọn xe nào gần hơn gần như không đổi gì; đó là cách đọc của lab, không phải kết luận đã kiểm riêng. Ở `cao điểm` có hai dòng XẤU HƠN với cận dưới sát 0 trong 17 chỉ số: có thể là may rủi, chưa được chạy lại. Bộ `huỷ theo chờ` giống hệt `thường` không phải vì cẩu thả: với ghép ngay, thời gian chờ tính từ lúc đặt bằng ETA tính từ lúc gán, nên hai mô hình hủy trùng nhau. Nó chỉ có ý nghĩa khi có cửa sổ lô, ở bài 43.
+Hiệu rõ nhất khi dư xe. Khi xe quá ít hoặc cầu quá cao, ai cũng phải chạy xa, nên chọn xe nào gần hơn gần như không đổi gì; đó là cách đọc của lab, không phải kết luận đã kiểm riêng. Ở `cao điểm` có hai dòng XẤU HƠN với cận dưới sát 0 trong 17 chỉ số: có thể là may rủi, chưa được chạy lại. Bộ `huỷ theo chờ` giống hệt `thường` không phải vì cẩu thả: với ghép ngay, thời gian chờ tính từ lúc đặt bằng ETA tính từ lúc gán, nên hai mô hình huỷ trùng nhau. Nó chỉ có ý nghĩa khi có cửa sổ lô, ở bài 43.
 
 Kết luận cho baseline của phần P05: **ở mật độ thường, ETA thay chim bay không làm chỉ số toàn hệ thống nào xấu đi một cách phân biệt được, và giá trị chính của nó là cắt đuôi.** Nó không phải thuốc chữa km rỗng trung bình. Cái giá về tính toán (ma trận ETA thay cho phép tính haversine) không đo ở bài này; [bài 44](/articles/location-cat-tia-ung-vien-h3-ma-tran-thua) đo chi phí dựng ma trận. Từ đây, mọi bài sau so với **`nearest-eta` ghép ngay** hoặc nêu rõ so với cái gì.
 
@@ -260,7 +260,7 @@ Lab chạy hai lần, lần đầu có năm bộ giả định, lần sau thêm 
 
 ## Giới hạn của ví dụ
 
-- **Tất cả là mô phỏng.** Nhu cầu quanh tám điểm nóng đặt tay, mô hình hủy là công thức chưa hiệu chuẩn, tài xế không từ chối chuyến, không rong ruổi. Bài này không nói một hệ thống thật nên có thay đổi nào.
+- **Tất cả là mô phỏng.** Nhu cầu quanh tám điểm nóng đặt tay, mô hình huỷ là công thức chưa hiệu chuẩn, tài xế không từ chối chuyến, không rong ruổi. Bài này không nói một hệ thống thật nên có thay đổi nào.
 - **ETA của matcher là ETA CH theo nút**, không có chi phí rẽ, và chưa thử với giao thông tổng hợp theo giờ: CH của matcher dùng tốc độ tự do.
 - **Mẫu 1 và 2 là mẫu dựng**, không phải phân phối của vận hành. Mẫu 2 cố tình tạo xung đột.
 - **Chỉ 20 seed** và khoảng t giả định gần chuẩn; chỉ bộ `thường` được chạy lại trên seed mới, các bộ khác chưa.

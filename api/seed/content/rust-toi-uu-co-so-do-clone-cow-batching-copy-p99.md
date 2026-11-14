@@ -123,7 +123,7 @@ Round trip là một lần client dừng chờ server. Với sqlx đó là mỗi
 
 Kết quả khớp công thức thiết kế (9 mỗi bút toán; mỗi lô 5 với `Unnest`, 6 với `Copy`, 1 với `Cte`), `--verify` kiểm trên 199 bút toán. `COPY` không giảm round trip mà thêm một lượt mỗi lô. Nó gửi ít byte hơn, và proxy chỉ ra vì sao: riêng posting, `Bind` tốn 152.091 byte còn `CopyData` 82.613, trên 2.997 dòng. Mảng nhị phân tốn 4 byte độ dài cho mỗi phần tử, nên một dòng mất 36 byte cộng độ dài mã tài khoản; dòng text chỉ có bốn dấu phân cách và vài chữ số, khoảng 13 byte cộng độ dài mã. Đổi lại ta phải tự thoát `\`, tab, xuống dòng (`escape_copy_text`, cũng trả `Cow`).
 
-Hai chi tiết nghiệp vụ. Cột `version` của `account_balances` đếm số lần hàng bị ghi: cùng 200 bút toán, lô gộp cho tổng version 2, từng dòng cho 199, số dư giống hệt; mã dựa vào `version` ([bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update)) phải biết điều này. Và số dư ghi theo thứ tự mã tài khoản, để hai writer không khóa chéo nhau.
+Hai chi tiết nghiệp vụ. Cột `version` của `account_balances` đếm số lần hàng bị ghi: cùng 200 bút toán, lô gộp cho tổng version 2, từng dòng cho 199, số dư giống hệt; mã dựa vào `version` ([bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update)) phải biết điều này. Và số dư ghi theo thứ tự mã tài khoản, để hai writer không khoá chéo nhau.
 
 Thời gian, 10.000 bút toán, lô 500, `--release`, trung vị ba lượt (từng dòng chỉ 1.000 bút toán, một lượt), ở hai mức load. Dòng `Bare` là đúng hai câu lệnh của bài 30, chỉ có ở đợt sau:
 
@@ -189,7 +189,7 @@ Trong thời gian ảo, kết quả chạy lại ra đúng số cũ:
 | Vòng đóng + `record_corrected` | 0,5 ms | 951 ms | 1.000 ms |
 | Vòng mở | 0,5 ms | 980 ms | 1.000 ms |
 
-Vòng đóng báo p99 tốt hơn thực tế gần 2.000 lần. `record_corrected` (như `record_correct` của HdrHistogram) kéo p99 về gần vòng mở. Trên PostgreSQL thật, lab khóa bảng `probe` 500 ms (load 429): vòng đóng 2 luồng ghi 570 mẫu, p99 55 ms, max 512 ms; vòng mở 100 request/giây ghi đủ 400 mẫu, p99 476 ms, max 517 ms. Số mẫu dài của vòng đóng tối đa bằng số luồng.
+Vòng đóng báo p99 tốt hơn thực tế gần 2.000 lần. `record_corrected` (như `record_correct` của HdrHistogram) kéo p99 về gần vòng mở. Trên PostgreSQL thật, lab khoá bảng `probe` 500 ms (load 429): vòng đóng 2 luồng ghi 570 mẫu, p99 55 ms, max 512 ms; vòng mở 100 request/giây ghi đủ 400 mẫu, p99 476 ms, max 517 ms. Số mẫu dài của vòng đóng tối đa bằng số luồng.
 
 So trước và sau cho một bút toán mỗi request, vòng mở 20 request/giây, 5 giây:
 
@@ -202,7 +202,7 @@ So trước và sau cho một bút toán mỗi request, vòng mở 20 request/gi
 
 Hướng ổn định: đường một câu thấp hơn ở mọi lượt. Tỷ lệ thì không: p50 từ 2 đến 10 lần, p99 từ 2 đến 3 lần. Kết luận được phép: cùng điều kiện, đường ít round trip có đuôi ngắn hơn.
 
-Vì sao giảm 9 lần round trip không cho 9 lần độ trễ? `--breakdown` dùng một kết nối, không tranh khóa, xen kẽ các trường hợp để cùng chịu nhiễu (200 vòng, hai lượt, load 115 đến 147). Tỷ lệ p50 giữa hai đường là 5,8 và 7,3 khi `synchronous_commit = on`, 8,9 và 9,3 khi `off`. Tắt flush, tỷ lệ về gần đúng 9: hai đường khác nhau gần như chỉ ở round trip. Bật flush, cả hai cùng cộng một phần không nhân theo round trip: `pg_stat_get_backend_io` báo mỗi commit tốn trung bình 2,1 đến 4,8 ms fsync WAL, và mỗi đường chỉ có một commit. Tức `9r + c` so với `r + c`. Tỷ lệ chỉ 2 lần lúc load 430 và p99 thì tôi chưa tách: không có số fsync của đợt đó, nên `c` lớn lên chỉ là giả thuyết. `off` chỉ để tách số; nó có thể mất transaction vừa commit, không dùng cho sổ cái.
+Vì sao giảm 9 lần round trip không cho 9 lần độ trễ? `--breakdown` dùng một kết nối, không tranh khoá, xen kẽ các trường hợp để cùng chịu nhiễu (200 vòng, hai lượt, load 115 đến 147). Tỷ lệ p50 giữa hai đường là 5,8 và 7,3 khi `synchronous_commit = on`, 8,9 và 9,3 khi `off`. Tắt flush, tỷ lệ về gần đúng 9: hai đường khác nhau gần như chỉ ở round trip. Bật flush, cả hai cùng cộng một phần không nhân theo round trip: `pg_stat_get_backend_io` báo mỗi commit tốn trung bình 2,1 đến 4,8 ms fsync WAL, và mỗi đường chỉ có một commit. Tức `9r + c` so với `r + c`. Tỷ lệ chỉ 2 lần lúc load 430 và p99 thì tôi chưa tách: không có số fsync của đợt đó, nên `c` lớn lên chỉ là giả thuyết. `off` chỉ để tách số; nó có thể mất transaction vừa commit, không dùng cho sổ cái.
 
 ## Khi nào dừng tối ưu?
 
@@ -212,7 +212,7 @@ Dừng khi đạt mục tiêu đã viết, hoặc khi thay đổi tiếp theo c�
 | --- | --- | --- |
 | Gộp lô `unnest` | round trip 8.991 xuống 10 (1.000 bút toán) | Giữ |
 | Cột mượn `&str` | cấp phát 70.005 xuống 5 | Giữ |
-| `Cow` khi chuẩn hóa | cấp phát 10.000 xuống 500 | Giữ ở biên đọc |
+| `Cow` khi chuẩn hoá | cấp phát 10.000 xuống 500 | Giữ ở biên đọc |
 | `COPY` thay `unnest` | round trip 10 lên 12; byte 219 xuống 149 | Bỏ: thêm hàm thoát, thông lượng trong nhiễu |
 | Một câu CTE cho cả lô | round trip 10 xuống 2 | Bỏ: phải khử key trùng trước, thông lượng trong nhiễu |
 | Một câu CTE cho một bút toán | round trip 9 xuống 1, p50 và p99 thấp hơn ở mọi lượt | Giữ ở đường request đơn |

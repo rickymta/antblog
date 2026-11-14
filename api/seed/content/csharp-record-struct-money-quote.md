@@ -20,9 +20,9 @@ language: vi
 
 Hai Trip trùng số tiền chưa chắc là một chuyến; hai giá trị tiền 14.255 VND lại có thể được coi là bằng nhau. Chọn kiểu theo ý nghĩa đó trước khi chọn cú pháp ngắn.
 
-Entity quan tâm identity và vòng đời. Value object quan tâm các thành phần giá trị và quy tắc hợp lệ. Với Tới Nơi, Money mang Amount và Currency. `14255 VND` khác `14255 USD`; so sánh mỗi Amount không đủ. Bản demo chỉ hỗ trợ VND và tiền không âm, chưa mô hình hóa ghi nợ hay hoàn tiền.
+Entity quan tâm identity và vòng đời. Value object quan tâm các thành phần giá trị và quy tắc hợp lệ. Với Tới Nơi, Money mang Amount và Currency. `14255 VND` khác `14255 USD`; so sánh mỗi Amount không đủ. Bản demo chỉ hỗ trợ VND và tiền không âm, chưa mô hình hoá ghi nợ hay hoàn tiền.
 
-Record hỗ trợ value equality do compiler tạo, nhưng từ khóa record không tự biến kiểu thành một value object nghiệp vụ đúng. Ta vẫn phải quyết định validation, bất biến và ý nghĩa equality. Domain entity không nên được chuyển sang record chỉ để tiết kiệm vài dòng code.
+Record hỗ trợ value equality do compiler tạo, nhưng từ khoá record không tự biến kiểu thành một value object nghiệp vụ đúng. Ta vẫn phải quyết định validation, bất biến và ý nghĩa equality. Domain entity không nên được chuyển sang record chỉ để tiết kiệm vài dòng code.
 
 ## record class và record struct khác gì?
 
@@ -53,7 +53,7 @@ Ngược lại, `DistanceKm` được cố ý viết để cho thấy một lỗ
 
 Để nhìn giới hạn, ví dụ TaggedQuote chứa List. Bản sao with dùng chung List với bản gốc. Thêm label qua bản sao làm danh sách của bản gốc cũng thay đổi. `init` chỉ hạn chế gán lại property, không đóng băng object bên trong. Cần bất biến sâu đến mức nào là quyết định thiết kế, không được suy ra từ việc compiler cho viết record.
 
-Equality của record dùng equality của từng member. Hai List có nội dung giống nhau nhưng là hai instance khác không tự có sequence equality chỉ vì nằm trong record. Khi cần so sánh tập phần tử, phải chọn cấu trúc hoặc logic equality phù hợp; đừng thêm List mutable vào khóa dictionary rồi mong hash luôn ổn định.
+Equality của record dùng equality của từng member. Hai List có nội dung giống nhau nhưng là hai instance khác không tự có sequence equality chỉ vì nằm trong record. Khi cần so sánh tập phần tử, phải chọn cấu trúc hoặc logic equality phù hợp; đừng thêm List mutable vào khoá dictionary rồi mong hash luôn ổn định.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -66,7 +66,7 @@ Equality của record dùng equality của từng member. Hai List có nội dun
 
 Quote positional record phù hợp dữ liệu snapshot trong lab. Nó chưa kiểm tra TripId rỗng hoặc Fare null ở runtime; nullable annotation chỉ hỗ trợ compiler, không thay validation với dữ liệu bên ngoài. Đừng dùng trực tiếp một DTO nhận từ API làm domain object được tin cậy.
 
-Từ đây ta có cách phân vai: Trip là entity có hành vi chuyển trạng thái; Money là dữ liệu có equality theo giá trị; Quote là snapshot. Khi sang CQRS, một query có thể trả Quote DTO mà không khởi tạo toàn bộ Trip aggregate. Các kiểu dùng cùng một tên trong bài minh họa không có nghĩa tất cả nằm chung một project production.
+Từ đây ta có cách phân vai: Trip là entity có hành vi chuyển trạng thái; Money là dữ liệu có equality theo giá trị; Quote là snapshot. Khi sang CQRS, một query có thể trả Quote DTO mà không khởi tạo toàn bộ Trip aggregate. Các kiểu dùng cùng một tên trong bài minh hoạ không có nghĩa tất cả nằm chung một project production.
 
 | Thí nghiệm | Kỳ vọng |
 | --- | --- |
@@ -88,7 +88,7 @@ dotnet run --project examples/toi-noi-dotnet/07-record-struct-money-quote
 dotnet run --project examples/toi-noi-dotnet/07-record-struct-money-quote -- --verify
 ```
 
-Lệnh đầu minh họa hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
+Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
 
 Mã nguồn đầy đủ của Program.cs (đặt trong console net10.0 như bài 01):
 

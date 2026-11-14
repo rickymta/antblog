@@ -45,13 +45,13 @@ TimeProvider.System được đăng ký singleton, không mang dữ liệu riên
 
 Route diagnostics chỉ map trong Development, trả SameScoped=true, SameTransient=false và ScopeId. Hai request liên tiếp phải có ScopeId khác nhau. Đây là thí nghiệm lifetime, không là endpoint tiết lộ thông tin hạ tầng cần public ở production.
 
-Không inject dependency scoped vào singleton rồi giữ lâu: nó có thể bị nâng lifetime và chia sẻ state ngoài ý muốn. Middleware truyền thống sống lâu cũng cần cách nhận dependency scoped đúng phạm vi, ví dụ qua InvokeAsync, thay vì cất vào constructor tùy tiện.
+Không inject dependency scoped vào singleton rồi giữ lâu: nó có thể bị nâng lifetime và chia sẻ state ngoài ý muốn. Middleware truyền thống sống lâu cũng cần cách nhận dependency scoped đúng phạm vi, ví dụ qua InvokeAsync, thay vì cất vào constructor tuỳ tiện.
 
 ## Options hợp lệ trước khi nhận request
 
 FareOptions được bind từ mục Fare. ValidateOnStart buộc BaseFare nằm trong miền lab trước khi host phục vụ. Nếu cấu hình âm, test mong OptionsValidationException khi khởi động, không chờ tới request đầu rồi trả giá âm.
 
-Trong host mặc định, biến môi trường `Fare__BaseFare` có thể ghi đè khóa cấu hình theo provider order. Không log toàn bộ configuration để debug vì các mục khác có thể chứa bí mật. Chỉ ghi trường đã được phân loại phù hợp hoặc phiên bản cấu hình cần quan sát.
+Trong host mặc định, biến môi trường `Fare__BaseFare` có thể ghi đè khoá cấu hình theo provider order. Không log toàn bộ configuration để debug vì các mục khác có thể chứa bí mật. Chỉ ghi trường đã được phân loại phù hợp hoặc phiên bản cấu hình cần quan sát.
 
 ConfiguredFarePolicy dùng IOptions trong bài; điều này không hứa hot reload theo từng request. IOptionsSnapshot/IOptionsMonitor có lifetime và ý nghĩa cập nhật khác, chỉ đưa vào khi đã chốt yêu cầu. Test thay TimeProvider bằng FixedClock để timestamp có kỳ vọng cố định, không so “gần bằng DateTime.Now”.
 
@@ -64,9 +64,9 @@ ConfiguredFarePolicy dùng IOptions trong bài; điều này không hứa hot re
 
 ## Logging theo sự kiện và bài tập
 
-Log dùng placeholder `{StatusCode}` thay vì chỉ nối chuỗi. Scope thêm TraceId cho provider có hỗ trợ scope; cách hiển thị scope tùy cấu hình provider. X-Trace-Id giúp client gửi ID cho đội hỗ trợ mà không cần gửi body chứa dữ liệu khách.
+Log dùng placeholder `{StatusCode}` thay vì chỉ nối chuỗi. Scope thêm TraceId cho provider có hỗ trợ scope; cách hiển thị scope tuỳ cấu hình provider. X-Trace-Id giúp client gửi ID cho đội hỗ trợ mà không cần gửi body chứa dữ liệu khách.
 
-Không log Authorization header, JWT hay giấy tờ OCR. Ví dụ tự dùng server TraceIdentifier thay vì phản chiếu một header tùy ý của client vào log; nếu sau này chấp nhận correlation từ ngoài phải validate/giới hạn theo hợp đồng.
+Không log Authorization header, JWT hay giấy tờ OCR. Ví dụ tự dùng server TraceIdentifier thay vì phản chiếu một header tuỳ ý của client vào log; nếu sau này chấp nhận correlation từ ngoài phải validate/giới hạn theo hợp đồng.
 
 **Bài tập:** đổi StampReader thành scoped. SameTransient còn false không? Đặt BaseFare=-1 rồi chạy host: vì sao fail fast tốt hơn âm thầm thay về 0?
 

@@ -1,6 +1,6 @@
 ---
 slug: unit-testing-fundamentals
-title: "Unit Testing Fundamentals: năm test đầu tiên cho cước Tới Nơi"
+title: "Unit Testing Fundamentals: năm test case đầu tiên cho chức năng tính cước của Tới Nơi"
 summary: "Viết unit test theo Arrange–Act–Assert, đánh giá chất lượng bằng FIRST và hiểu vòng red–green–refactor qua năm quy tắc tính cước có oracle từ SPEC."
 category: testing
 level: advanced
@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-055, unit-testing, vitest, aaa, first]
 language: vi
 ---
 
-Một lần sửa hệ số cao điểm có thể khiến phụ phí mưa cũng bị nhân lên. Mở ứng dụng, tạo chuyến rồi nhìn số tiền là một cách phát hiện lỗi; nhưng khi đang sửa hàm tính cước, ta cần một phản hồi nhỏ và nhanh hơn. Bài này bắt đầu Series 06 bằng năm test gọi thẳng mã nghiệp vụ của Tới Nơi, mỗi test nói rõ một quy tắc và số tiền mong đợi.
+Một lần sửa hệ số cao điểm có thể khiến phụ phí trời mưa cũng bị nhân lên. Mở ứng dụng, tạo chuyến rồi nhìn số tiền là một cách phát hiện lỗi; nhưng khi đang sửa hàm tính cước, ta cần một phản hồi nhỏ và nhanh hơn. Bài này bắt đầu Series 06 bằng năm test gọi thẳng mã nghiệp vụ của Tới Nơi, mỗi test nói rõ một quy tắc và số tiền mong đợi.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-055</span>
@@ -28,7 +28,7 @@ Một lần sửa hệ số cao điểm có thể khiến phụ phí mưa cũng 
 
 [TEST-012](/articles/component-testing-unit-testing-tong-quan) giải thích component testing nằm ở đâu trong các test level. Ở đây, câu hỏi là: khi mở editor, ta viết gì để kiểm một quy tắc mà đồng nghiệp có thể hiểu và chạy lại?
 
-Đối tượng là `calculateFare(input)` trong `src/domain/fare.ts`. Hàm nhận loại xe, quãng đường, cờ cao điểm, cờ mưa và voucher tùy chọn; trả một bảng chi tiết cước. Nó không mở kết nối mạng, không đọc DB, không lấy giờ hiện tại. Vì thế ta có thể kiểm các phép tính với dữ liệu cố định.
+Đối tượng là `calculateFare(input)` trong `src/domain/fare.ts`. Hàm nhận loại xe, quãng đường, cờ cao điểm, cờ mưa và voucher tuỳ chọn; trả một bảng chi tiết cước. Nó không mở kết nối mạng, không đọc DB, không lấy giờ hiện tại. Vì thế ta có thể kiểm các phép tính với dữ liệu cố định.
 
 Sau bài này, bạn có thể viết test theo AAA, nhận ra test phụ thuộc trạng thái và dùng kết quả thất bại để tìm quy tắc bị phá vỡ. Năm ca đầu tiên là điểm khởi đầu; thiết kế có hệ thống cho biên và tổ hợp nằm ở TEST-056.
 
@@ -78,7 +78,7 @@ Một khách chọn xe máy cho chuyến 2 km. Nhóm sắp thay đổi cách c�
 | R-FARE-07 | Sau voucher, nâng lên cước tối thiểu nếu cần |
 | R-FARE-08 | Cuối cùng làm tròn lên bội số 1.000 đ |
 
-Rủi ro cần bắt ngay: chọn nhầm bảng giá, bỏ mức sàn, nhân nhầm phụ phí mưa hoặc làm tròn xuống. Cờ `peak` đã là đầu vào; xác định 11:00 có thuộc cao điểm hay không là trách nhiệm của phần xử lý thời gian, chưa được năm test này kiểm chứng.
+Rủi ro cần bắt ngay: chọn nhầm bảng giá, bỏ mức sàn, nhân nhầm phụ phí trời mưa hoặc làm tròn xuống. Cờ `peak` đã là đầu vào; xác định 11:00 có thuộc cao điểm hay không là trách nhiệm của phần xử lý thời gian, chưa được năm test này kiểm chứng.
 
 ## 4. Phân tích kỹ thuật và thiết kế test
 
@@ -202,7 +202,7 @@ Các câu hỏi do bài viết tự biên soạn, không phải đề thi ISTQB 
 ## 8. Tài liệu tham khảo
 
 - [ISTQB CTFL Syllabus v4.0.1](https://www.istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf): mục 2.1.3 và 2.2.1. Quyền tác giả syllabus thuộc ISTQB và các tác giả được nêu trong tài liệu.
-- [Vitest — Test API](https://vitest.dev/api/test): định nghĩa và chạy test; lab dùng phiên bản khóa trong `package-lock.json`.
+- [Vitest — Test API](https://vitest.dev/api/test): định nghĩa và chạy test; lab dùng phiên bản khoá trong `package-lock.json`.
 - [Lab Tới Nơi](https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing): `SPEC.md`, `src/domain/fare.ts` và thư mục bài TEST-055.
 
 Bài trước: [TEST-054 · Defect-based Testing](/articles/defect-based-testing). Bài tiếp theo: [TEST-056 · Unit Test Design cho Pricing Engine](/articles/unit-test-design-pricing-engine).

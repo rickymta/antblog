@@ -26,7 +26,7 @@ Hai chi tiết về dữ liệu cần nói trước, vì người đọc loạt 
 
 **Lịch sử là CSV do simulator xuất, không phải Parquet.** [Bài 20](/articles/location-lich-su-gps-parquet-retention-quyen-rieng-tu) thiết kế lịch sử GPS lưu dạng Parquet. Bài này **không** dùng nó, vì hợp đồng Parquet của dự án (`proto/location/v1/gps-history-parquet.md`) mô tả điểm GPS lấy mẫu của tài xế, không có nhãn «đây là điểm đón». Thứ DBSCAN cần là **điểm dừng đón**: nơi một chuyến hoàn thành đã đón khách. Lab Rust xuất đúng thứ đó ra CSV với cột `seed, customer, lat, lng, pin_lat, pin_lng, outcome`. Trong thực tế bạn sẽ dựng điểm đón từ sự kiện chuyến (trạng thái «đã đón») ghép với vị trí tài xế lúc đó, có thể từ Parquet, và đó là việc của pipeline Python ở phần P06.
 
-**Lịch sử có đúng 40 seed riêng.** Seed 20260301…20260340, không giao với dải chỉnh (20261201…20261210) và dải đánh giá (20270001…20270020). Lab chạy baseline (đón đúng ghim, tài xế gần nhất) trên 40 seed, được 8.723 dòng, trong đó 7.546 chuyến hoàn thành. Chỉ chuyến hoàn thành mới được học, vì ở chuyến hủy khách chưa thực sự được đón tại điểm đó.
+**Lịch sử có đúng 40 seed riêng.** Seed 20260301…20260340, không giao với dải chỉnh (20261201…20261210) và dải đánh giá (20270001…20270020). Lab chạy baseline (đón đúng ghim, tài xế gần nhất) trên 40 seed, được 8.723 dòng, trong đó 7.546 chuyến hoàn thành. Chỉ chuyến hoàn thành mới được học, vì ở chuyến huỷ khách chưa thực sự được đón tại điểm đó.
 
 ## DBSCAN trên đơn vị mét
 
@@ -63,7 +63,7 @@ def fit_hubs(xy: np.ndarray, eps: float, min_samples: int) -> tuple[np.ndarray, 
 
 ## Chọn tham số: một quy tắc đặt trước, một cái so ngẫu nhiên
 
-Chọn `eps` và `min_samples` bằng mắt là cách dễ nhất để «chỉnh tới khi đẹp». Script làm khác: chia 40 seed thành 30 seed huấn luyện và 10 seed kiểm định **theo seed, không xáo trộn**; học hub trên huấn luyện; chấm trên kiểm định bằng **độ phủ** (tỉ lệ điểm đón kiểm định cách một hub không quá 100 m); và so với một baseline ngẫu nhiên có cùng số hub chọn trong điểm đón huấn luyện. Quy tắc chọn được đặt trước: trong các cấu hình có từ 5 đến 150 hub và trung bình từ 10 điểm mỗi hub, chọn cấu hình có độ phủ **vượt** ngẫu nhiên lớn nhất; hòa thì ít hub hơn.
+Chọn `eps` và `min_samples` bằng mắt là cách dễ nhất để «chỉnh tới khi đẹp». Script làm khác: chia 40 seed thành 30 seed huấn luyện và 10 seed kiểm định **theo seed, không xáo trộn**; học hub trên huấn luyện; chấm trên kiểm định bằng **độ phủ** (tỉ lệ điểm đón kiểm định cách một hub không quá 100 m); và so với một baseline ngẫu nhiên có cùng số hub chọn trong điểm đón huấn luyện. Quy tắc chọn được đặt trước: trong các cấu hình có từ 5 đến 150 hub và trung bình từ 10 điểm mỗi hub, chọn cấu hình có độ phủ **vượt** ngẫu nhiên lớn nhất; hoà thì ít hub hơn.
 
 Để chọn lưới, script in khoảng cách từ mỗi điểm tới láng giềng thứ k (trên tập huấn luyện):
 
@@ -108,7 +108,7 @@ Nguồn: `results/p04.md`, LOC-39, quét tham số trên 24 cấu hình (sáu d�
 
 Hình 2 đọc được hai điều. Các điểm nóng có trọng số cao (Chợ Bến Thành, Landmark 81: trọng số 3,0 và 2,0) có hub gần nhất chỉ 64–65 m và hàng chục hub quanh đó. Điểm nóng trọng số thấp, nhu cầu ít (Gò Vấp, trọng số 1,0) thì hub gần nhất cách 2.346 m, **không có hub nào** trong 2σ. DBSCAN không phát hiện «điểm đón mới», nó phát hiện **nơi simulator đã cho nhiều khách**. Script đo mỗi hub bằng σ riêng của điểm nóng: 62/62 hub nằm trong 2σ, 52 hub trong 1σ, xa nhất 1,5σ. Tám vòng 2σ chỉ phủ 18% diện tích bbox của lab, nên việc mọi hub rơi vào đó không phải chuyện ngẫu nhiên. Nhưng vòng 2σ vẫn rộng (bán kính 1.400–2.000 m): nó nói hub nằm trong vùng đã đặt, không nói hub trùng điểm nóng; bảng khoảng cách ở Hình 2 cho biết chi tiết đó. Cụm học được là vùng nhu cầu cho trước, không phải khám phá.
 
-**Không có «điểm đón nổi tiếng» để học.** Vì khách đứng ngẫu nhiên và trơn quanh điểm nóng, mật độ điểm đón không có đỉnh nhọn cấp vài chục mét. Với `eps` từ 50 m trở xuống, chỉ `min_samples` = 5 còn cho cụm (32 hub ở `eps` 50 m, 3 hub ở 25 m), mỗi hub trung bình chưa tới 6 điểm; các `min_samples` lớn hơn cho 0 hub. Ngoài đời, những nơi như cổng một tòa nhà hay miệng hẻm thật sự có đỉnh nhọn. Mô phỏng này không có, nên nó không thể cho thấy DBSCAN học được gì từ chúng.
+**Không có «điểm đón nổi tiếng» để học.** Vì khách đứng ngẫu nhiên và trơn quanh điểm nóng, mật độ điểm đón không có đỉnh nhọn cấp vài chục mét. Với `eps` từ 50 m trở xuống, chỉ `min_samples` = 5 còn cho cụm (32 hub ở `eps` 50 m, 3 hub ở 25 m), mỗi hub trung bình chưa tới 6 điểm; các `min_samples` lớn hơn cho 0 hub. Ngoài đời, những nơi như cổng một toà nhà hay miệng hẻm thật sự có đỉnh nhọn. Mô phỏng này không có, nên nó không thể cho thấy DBSCAN học được gì từ chúng.
 
 **Vòng 2: học từ nơi tài xế đã đón sẽ củng cố thiên lệch.** Đây là vòng mà lab **không** đo trực tiếp, nhưng nó là rủi ro chính khi đem phương pháp này ra thực tế. Lịch sử điểm đón là nơi tài xế **đã** dừng, tức nơi mà hệ thống hiện tại (ở đây là baseline, đón ở ghim đã snap) đã đưa họ tới. Nếu bảng học được được đưa lại vào bộ chọn điểm đón và bộ chọn thiên về các hub, tài xế sẽ đón nhiều hơn ở các hub; lần học sau, các hub đó lại đông hơn. Nơi chưa ai từng đón không bao giờ vào bảng, kể cả khi nó tốt hơn. Cái bạn học được là thói quen của hệ thống cũ, không phải điểm đón tốt.
 

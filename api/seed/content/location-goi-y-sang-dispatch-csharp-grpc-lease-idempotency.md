@@ -8,7 +8,7 @@ tags: [toi-noi, location, rust, csharp, grpc, dispatch, idempotency, contract-te
 language: vi
 ---
 
-Lab của bài này dựng một lô ba booking trên đồ thị fixture, gọi `SuggestMatch`, và nhận lại ba gợi ý: `BK-001` ← `DR-001` (ETA 54 giây), `BK-002` ← `DR-002` (17 giây), `BK-003` ← `DR-003` (20 giây). Đó là cặp tối ưu theo ETA đường bộ tại thời điểm Rust tính. Nhưng giữa lúc Rust tính xong và lúc Dispatch đọc xong phản hồi, `DR-001` có thể vừa nhận một offer khác, vừa bị hủy ca, hoặc vừa di chuyển tới chỗ khác. Gợi ý lúc đó vẫn đúng với bức ảnh Rust được xem, và sai với thế giới hiện tại.
+Lab của bài này dựng một lô ba booking trên đồ thị fixture, gọi `SuggestMatch`, và nhận lại ba gợi ý: `BK-001` ← `DR-001` (ETA 54 giây), `BK-002` ← `DR-002` (17 giây), `BK-003` ← `DR-003` (20 giây). Đó là cặp tối ưu theo ETA đường bộ tại thời điểm Rust tính. Nhưng giữa lúc Rust tính xong và lúc Dispatch đọc xong phản hồi, `DR-001` có thể vừa nhận một offer khác, vừa bị huỷ ca, hoặc vừa di chuyển tới chỗ khác. Gợi ý lúc đó vẫn đúng với bức ảnh Rust được xem, và sai với thế giới hiện tại.
 
 Câu hỏi của bài: **ai có quyền nói «tài xế này thuộc chuyến này»?** Các bài 41 đến 45 đã tìm cặp tốt; bài này vẽ ranh giới giữa «tìm cặp tốt» và «gán». Câu trả lời của cả loạt là một dòng: Rust đề xuất, C# quyết định. Phần còn lại là cơ chế để dòng đó đúng khi có gợi ý cũ, tài xế từ chối, câu trả lời đến muộn và lời gọi bị lặp.
 
@@ -37,7 +37,7 @@ Bên được lợi từ ranh giới này là cả hai phía của chuyến: kh�
 
 ## Hợp đồng SuggestMatch
 
-Hợp đồng nằm ở `proto/location/v1/matching.proto`, dùng chung quy ước của `routing.proto` (tọa độ E7, thời gian mili giây) và chỉ thêm field mới. Hai thông điệp mang ý nghĩa nặng nhất:
+Hợp đồng nằm ở `proto/location/v1/matching.proto`, dùng chung quy ước của `routing.proto` (toạ độ E7, thời gian mili giây) và chỉ thêm field mới. Hai thông điệp mang ý nghĩa nặng nhất:
 
 `examples/toi-noi-location/proto/location/v1/matching.proto`
 
@@ -81,7 +81,7 @@ Mỗi field ở đó có một lý do:
 - **`state_version`** tăng đơn điệu mỗi khi Dispatch đổi trạng thái tài xế (nhận offer, rảnh lại, di chuyển đáng kể). Gợi ý ghi lại phiên bản đã dùng. Chỉ cần so một số nguyên là Dispatch biết bức ảnh Rust xem đã cũ.
 - **`valid_until_ms`** là hạn để *áp dụng* gợi ý, tính từ `now_ms` trong yêu cầu, tức đồng hồ của người gọi. Rust không đọc đồng hồ của chính nó để tính hạn, nên danh sách gợi ý là hàm thuần của yêu cầu và tất định; chỉ `SolverStats` đo thời gian nên khác nhau giữa các lần gọi.
 - **`busy_remaining_ms`** cho phép đưa tài xế đang chở khách vào lô; bài 47 dùng field này, và contract test kiểm rằng ETA cộng đúng thời gian còn lại.
-- **`policy_version`** gắn chính sách chi phí (bài 45) vào từng gợi ý, để một cặp được chọn có thể giải thích lại sau này. `MatchPolicy` có giới hạn đón xa, phạt mềm, thưởng chờ và thưởng rảnh, nhưng **không có** số hạng rủi ro hủy: `to_policy` đặt `risk_ms = 0`.
+- **`policy_version`** gắn chính sách chi phí (bài 45) vào từng gợi ý, để một cặp được chọn có thể giải thích lại sau này. `MatchPolicy` có giới hạn đón xa, phạt mềm, thưởng chờ và thưởng rảnh, nhưng **không có** số hạng rủi ro huỷ: `to_policy` đặt `risk_ms = 0`.
 
 `request_id` tham gia vào mã gợi ý, là băm tất định của bốn thứ. Rust không lưu lại lời gọi nào; idempotent ở đây nghĩa là cùng đầu vào cho cùng đầu ra:
 
@@ -181,7 +181,7 @@ Tài xế từ chối thì sao? Stub nhả lease, tăng `StateVersion`, nhớ `R
 
 ## Accept idempotent và phản hồi muộn
 
-Mạng di động làm tài xế bấm nhận hai lần, hoặc ứng dụng gửi lại khi chưa thấy phản hồi. Stub xử lý bằng khóa idempotency gắn với thao tác và offer:
+Mạng di động làm tài xế bấm nhận hai lần, hoặc ứng dụng gửi lại khi chưa thấy phản hồi. Stub xử lý bằng khoá idempotency gắn với thao tác và offer:
 
 `examples/toi-noi-location/dotnet/DispatchStub/InMemoryDispatch.cs`
 
@@ -215,7 +215,7 @@ Mạng di động làm tài xế bấm nhận hai lần, hoặc ứng dụng g�
     });
 ```
 
-Cùng khóa thì trả đúng kết quả lần đầu, không tác dụng phụ; khác khóa mà offer đã quyết thì `AlreadyDecided`. Nếu accept đến sau hạn offer, kết quả là `LateResponse`: offer chuyển `Expired`, tài xế nhả về `Idle`, booking về `Pending` và không có assignment nào. Backend thật thay `Dictionary` bằng unique constraint trong cơ sở dữ liệu, như loạt C# đã làm ở bài về [transaction, concurrency và idempotency](/articles/dotnet10-transaction-concurrency-idempotency) và [outbox, inbox](/articles/dotnet10-outbox-inbox-idempotent-consumer).
+Cùng khoá thì trả đúng kết quả lần đầu, không tác dụng phụ; khác khoá mà offer đã quyết thì `AlreadyDecided`. Nếu accept đến sau hạn offer, kết quả là `LateResponse`: offer chuyển `Expired`, tài xế nhả về `Idle`, booking về `Pending` và không có assignment nào. Backend thật thay `Dictionary` bằng unique constraint trong cơ sở dữ liệu, như loạt C# đã làm ở bài về [transaction, concurrency và idempotency](/articles/dotnet10-transaction-concurrency-idempotency) và [outbox, inbox](/articles/dotnet10-outbox-inbox-idempotent-consumer).
 
 ## Contract test: 23 kiểm tra, và những điều chúng không chứng minh
 

@@ -10,7 +10,7 @@ language: vi
 
 Khách `CU-001` vừa trả 25.500 VND cho chuyến `TN-0001` qua VíXanh. Với sổ cái của [Tới Nơi](/articles/du-an-mau-toi-noi), đó không phải một con số cập nhật vào cột `balance` mà là một **bút toán** gồm hai dòng ghi, tổng bằng 0. Bài này đi từ máy trống tới chương trình Rust nhỏ ghi đúng bút toán đó và in số dư.
 
-Đây là bài 02 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 01](/articles/rust-vi-sao-so-cai-toi-noi-chon-rust) đã giải thích vì sao riêng service sổ cái dùng Rust. Hôm nay ta làm quen công cụ: cài, tạo, build, chạy. Các từ khóa trong code (`struct`, `i64`, `&`) chỉ giới thiệu sơ lược; bài 03 và bài 05 sẽ đi sâu.
+Đây là bài 02 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 01](/articles/rust-vi-sao-so-cai-toi-noi-chon-rust) đã giải thích vì sao riêng service sổ cái dùng Rust. Hôm nay ta làm quen công cụ: cài, tạo, build, chạy. Các từ khoá trong code (`struct`, `i64`, `&`) chỉ giới thiệu sơ lược; bài 03 và bài 05 sẽ đi sâu.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -27,7 +27,7 @@ Loạt C# dùng một SDK mang theo compiler, CLI và runtime. Rust tách vai tr
 | `rustup` | Cài và chọn phiên bản toolchain thế nào? | Trình cài SDK và `global.json` |
 | `rustc` | Biến source thành file thực thi thế nào? | Compiler C# (`csc`) |
 | `cargo` | Tạo, build, chạy, quản lý dependency thế nào? | `dotnet` CLI, MSBuild và NuGet |
-| `Cargo.toml` / `Cargo.lock` | Dự án khai báo và khóa gì? | `.csproj` / `packages.lock.json` (tùy chọn) |
+| `Cargo.toml` / `Cargo.lock` | Dự án khai báo và khoá gì? | `.csproj` / `packages.lock.json` (tuỳ chọn) |
 
 Một **toolchain** (ví dụ `stable`) gồm `rustc`, `cargo`, thư viện chuẩn và, với profile cài đặt mặc định của rustup, cả `rustfmt` và `clippy`. `rustup` đứng ngoài toolchain: nó tải, chuyển đổi phiên bản và có thể ghim phiên bản cho từng repository bằng `rust-toolchain.toml`, gần với `global.json` bên .NET. Ta hiếm khi gọi `rustc` trực tiếp vì `cargo` gọi giúp, nhưng `rustc` mới là chương trình biên dịch, như bài 01 loạt C# đã tách [SDK khỏi runtime](/articles/csharp-va-dotnet-10-tu-source-code-den-chuong-trinh).
 
@@ -84,7 +84,7 @@ edition = "2024"
 | `cargo run` | Build nếu cần rồi chạy; tham số cho chương trình đặt sau `--` | Như `build`, rồi chạy |
 | `cargo build --release` | Biên dịch profile **release** (`opt-level = 3`, không debug info, tắt kiểm tra tràn số) | `target/release/<tên>` |
 
-Thư mục `target/` là đầu ra build, xóa và sinh lại được, không đưa vào Git. Vì cấu hình khác nhau, một phép cộng tràn `i64` có thể panic ở debug nhưng quay vòng im lặng ở release; bài 03 sẽ làm thí nghiệm này. Khi sửa code, dùng `cargo check` và `cargo run`; trước khi đo hiệu năng hoặc đóng gói, dùng `--release`. Các dòng `Compiling`, `Finished`, `Running` cargo ghi ra stderr.
+Thư mục `target/` là đầu ra build, xoá và sinh lại được, không đưa vào Git. Vì cấu hình khác nhau, một phép cộng tràn `i64` có thể panic ở debug nhưng quay vòng im lặng ở release; bài 03 sẽ làm thí nghiệm này. Khi sửa code, dùng `cargo check` và `cargo run`; trước khi đo hiệu năng hoặc đóng gói, dùng `--release`. Các dòng `Compiling`, `Finished`, `Running` cargo ghi ra stderr.
 
 ## Từ source đến binary: Rust không có runtime đứng giữa
 

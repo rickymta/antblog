@@ -45,7 +45,7 @@ Tiêu chí hoàn thành cần kiểm tra được: số đối soát, định ng
 
 ## 3. Sản phẩm B — Metric contract M-01
 
-Hợp đồng phải có grain, cohort, tử số/mẫu số, biên kỳ, timezone, quy tắc loại trừ, dữ liệu chưa có kết quả, version và owner. Nêu rằng A, lịch cao điểm và điều kiện chốt thật còn cần xác nhận.
+Hợp đồng phải có grain, cohort, tử số/mẫu số, ranh giới kỳ báo cáo, timezone, quy tắc loại trừ, dữ liệu chưa có kết quả, version và owner. Nêu rằng A, lịch cao điểm và điều kiện chốt thật còn cần xác nhận.
 
 Thêm ít nhất hai guardrail đề xuất, giải thích chúng phát hiện đánh đổi nào và còn thiếu dữ liệu gì. Chẳng hạn, khiếu nại theo lượt và tỷ lệ hoàn thành trên mọi yêu cầu giúp phát hiện những mặt khác nhau; cả hai đều cần hợp đồng riêng và hiện chưa có số để chốt baseline.
 
@@ -57,7 +57,7 @@ Lập danh mục SRC-01–SRC-05: bảng DA, schema/script chung, nguồn thanh 
 
 Với schema chung, chỉ ra được `trips` có trạng thái hiện tại và `accepted_at`, còn `trip_events` mô tả sự kiện; script sinh chuyến không bảo đảm có lịch sử đủ để xác minh M-01. Thanh toán và CSKH chưa được cung cấp cho ca này.
 
-Kế hoạch kiểm tra cần bao gồm khoá duy nhất, trùng/thiếu, biên kỳ, độ đầy đủ lịch sử và số dòng sau join. Nếu một chuyến có nhiều payment attempt và nhiều ticket, phải nêu nguy cơ nhân số trước khi cộng tiền hoặc đếm lượt.
+Kế hoạch kiểm tra cần bao gồm khoá duy nhất, trùng/thiếu, ranh giới kỳ báo cáo, độ đầy đủ lịch sử và số dòng sau join. Nếu một chuyến có nhiều payment attempt và nhiều ticket, phải nêu nguy cơ nhân số trước khi cộng tiền hoặc đếm lượt.
 
 ## 5. Sản phẩm D — Bản nhận định và kế hoạch giả thuyết
 

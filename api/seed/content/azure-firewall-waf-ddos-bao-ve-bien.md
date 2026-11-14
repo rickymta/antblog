@@ -101,7 +101,7 @@ Rate limit đặt trong custom rule. Đây là phần `properties.customRules` c
 }
 ```
 
-Hãy nhớ hai điều dễ quên. Rate limit mặc định đếm theo IP client (socket IP). Nhiều khách dùng mạng di động qua NAT chung có thể cùng một IP công cộng, nên ngưỡng quá thấp chặn nhầm cả một khu phố; kiểm tài liệu về các tuỳ chọn gom nhóm (group by) trước khi chốt. Và mỗi máy chủ edge của Front Door đếm riêng, nên ngưỡng chỉ gần đúng chứ không phải con số chính xác toàn cục. Trong chế độ Detection, rule này cũng chỉ ghi log, không chặn.
+Hãy nhớ hai điều dễ quên. Rate limit mặc định đếm theo IP client (socket IP). Nhiều khách dùng mạng di động qua NAT chung có thể cùng một IP công cộng, nên ngưỡng quá thấp chặn nhầm cả một khu phố; kiểm tra tài liệu về các tuỳ chọn gom nhóm (group by) trước khi chốt. Và mỗi máy chủ edge của Front Door đếm riêng, nên ngưỡng chỉ gần đúng chứ không phải con số chính xác toàn cục. Trong chế độ Detection, rule này cũng chỉ ghi log, không chặn.
 
 ## Không phải môi trường nào cũng cần đủ bốn lớp
 

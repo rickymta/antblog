@@ -8,9 +8,9 @@ tags: [toi-noi, location, rust, haversine, equirectangular, geodesic, routing]
 language: vi
 ---
 
-Ở bài mở đầu có lúc tài xế chạy ngang qua đúng chỗ ghim, chỉ cách khách một dải phân cách. Nếu app hiện «tài xế cách bạn …», con số đó là mấy chục mét hay 1.200 m? Cả hai đều đúng, tùy bạn hỏi đường chim bay hay đường xe đi. Service định vị cần cả hai: chim bay để lọc nhanh, đường đi để quyết định. Và mỗi phép đo có một độ sai số riêng mà ta nên biết bằng số, không bằng cảm giác.
+Ở bài mở đầu có lúc tài xế chạy ngang qua đúng chỗ ghim, chỉ cách khách một dải phân cách. Nếu app hiện «tài xế cách bạn …», con số đó là mấy chục mét hay 1.200 m? Cả hai đều đúng, tuỳ bạn hỏi đường chim bay hay đường xe đi. Service định vị cần cả hai: chim bay để lọc nhanh, đường đi để quyết định. Và mỗi phép đo có một độ sai số riêng mà ta nên biết bằng số, không bằng cảm giác.
 
-Bài này tính khoảng cách giữa hai tọa độ bằng hai công thức, đo xem chúng sai bao nhiêu mét ở vĩ độ Việt Nam và độ dài vài kilômét, đo tốc độ, rồi so với quãng đường xe thật sự đi trên đồ thị đường bộ TP.HCM. Đây là bài 04 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng `LatLng` của [bài 03](/articles/location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac) và đồ thị đường bộ của bài [từ OpenStreetMap tới đồ thị](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to); nếu chưa có đồ thị, lab có cờ `--fixture` để chạy trên đồ thị tổng hợp.
+Bài này tính khoảng cách giữa hai toạ độ bằng hai công thức, đo xem chúng sai bao nhiêu mét ở vĩ độ Việt Nam và độ dài vài kilômét, đo tốc độ, rồi so với quãng đường xe thật sự đi trên đồ thị đường bộ TP.HCM. Đây là bài 04 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng `LatLng` của [bài 03](/articles/location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac) và đồ thị đường bộ của bài [từ OpenStreetMap tới đồ thị](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to); nếu chưa có đồ thị, lab có cờ `--fixture` để chạy trên đồ thị tổng hợp.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -79,7 +79,7 @@ Không có `asin`, không có `sqrt` lồng, chỉ một `cos` và một `hypot`
 
 Ở TP.HCM, equirectangular lệch haversine tối đa 0,00029 m ở 10 km và 0,037 m ở 50 km; ngay cả ở vĩ độ 23, gần cực bắc lãnh thổ, chỉ 0,056 m ở 50 km. Sai số mét tăng gần như theo lập phương khoảng cách: từ 10 km lên 50 km là gấp 5 lần, còn sai số gấp 127 lần (5³ = 125). Vì thế ở vài km nó nhỏ hơn nhiễu GPS hàng nghìn lần, và ở 50 km vẫn nhỏ hơn vài chục lần.
 
-Một biến thể gặp ở R-tree và ở bài chiếu điểm lên đường là **mặt phẳng mét cố định**: chọn một điểm gốc (tâm bbox TP.HCM), cố định `cos φ₀`, và đổi mọi tọa độ sang (x, y) mét bằng một lần nhân:
+Một biến thể gặp ở R-tree và ở bài chiếu điểm lên đường là **mặt phẳng mét cố định**: chọn một điểm gốc (tâm bbox TP.HCM), cố định `cos φ₀`, và đổi mọi toạ độ sang (x, y) mét bằng một lần nhân:
 
 `examples/toi-noi-location/rust/crates/geo-core/src/projection.rs`
 
@@ -207,7 +207,7 @@ Kết quả (200 nút nguồn mỗi profile, 3.000 cặp mỗi ô):
 <figcaption>Hình 2. Hệ số vòng giảm khi khoảng cách tăng, nhưng ở dải ngắn có đuôi dài: p90 của ô tô ở dải 1–2 km là 2,481. Số của đồ thị OSM TP.HCM trong khung lab, bỏ qua cấm rẽ.</figcaption>
 </figure>
 
-Ba điều rút ra. **Một**, hệ số giảm khi khoảng cách tăng: ô tô trung bình 1,840 ở dải 1–2 km và 1,291 ở dải 5–10 km. Nên «chim bay nhân một hằng số» là phương án lùi tồi: hằng số đúng ở 7 km sai nhiều ở 1,5 km. **Hai**, ở dải ngắn đuôi rất dài: 17,7% số cặp ô tô trong dải 1–2 km có đường đi dài gấp hai lần chim bay trở lên, lớn nhất tới 13,6. Đó là loại cặp có thể làm tài xế «gần nhất» theo chim bay hóa ra xa hơn theo đường (xem bài mở đầu). **Ba**, đi bộ thấp nhất vì đi được hai chiều và có lối đi bộ, xe máy ở giữa, ô tô cao nhất.
+Ba điều rút ra. **Một**, hệ số giảm khi khoảng cách tăng: ô tô trung bình 1,840 ở dải 1–2 km và 1,291 ở dải 5–10 km. Nên «chim bay nhân một hằng số» là phương án lùi tồi: hằng số đúng ở 7 km sai nhiều ở 1,5 km. **Hai**, ở dải ngắn đuôi rất dài: 17,7% số cặp ô tô trong dải 1–2 km có đường đi dài gấp hai lần chim bay trở lên, lớn nhất tới 13,6. Đó là loại cặp có thể làm tài xế «gần nhất» theo chim bay hoá ra xa hơn theo đường (xem bài mở đầu). **Ba**, đi bộ thấp nhất vì đi được hai chiều và có lối đi bộ, xe máy ở giữa, ô tô cao nhất.
 
 Ba giới hạn bắt buộc khi đọc con số này. Phép đo **bỏ qua cấm rẽ** và cho quay đầu ở mọi nút, nên trên cùng đồ thị, đường đi hợp lệ chỉ có thể dài hơn. Đồ thị bị cắt ở biên bbox, nên một cặp gần biên có thể bị thổi cao vì lối tắt thật nằm ngoài khung. Và nó đo độ dài ngắn nhất, không phải thời gian nhanh nhất; tốc độ chưa được xét. Những con số này mô tả đồ thị OSM trong khung lab, không phải thành phố nói chung.
 

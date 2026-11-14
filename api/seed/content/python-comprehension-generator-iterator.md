@@ -45,7 +45,7 @@ for t in TRIPS:
         loop[t.driver].append(t.id)
 ```
 
-Hai cách ra cùng kết quả `{'DR-001': ['TN-0001', 'TN-0003'], 'DR-003': ['TN-0004']}` sau khi bỏ khóa có list rỗng (cách 1 còn tạo khóa `DR-002` với list rỗng, cách 2 không), nhưng cách 1 có độ phức tạp tỷ lệ tích số tài xế và số chuyến. Với 25.000 tài xế và vài triệu chuyến, đây là lỗi hiệu năng ẩn trong một dòng "thông minh". Dấu hiệu nên chuyển về vòng `for`: phải cuộn ngang, có `if` lồng nhau, cần log hay bắt exception từng phần tử, hoặc đang dùng comprehension chỉ để gọi hàm có side effect (`[print(x) for x in xs]`).
+Hai cách ra cùng kết quả `{'DR-001': ['TN-0001', 'TN-0003'], 'DR-003': ['TN-0004']}` sau khi bỏ khoá có list rỗng (cách 1 còn tạo khoá `DR-002` với list rỗng, cách 2 không), nhưng cách 1 có độ phức tạp tỷ lệ tích số tài xế và số chuyến. Với 25.000 tài xế và vài triệu chuyến, đây là lỗi hiệu năng ẩn trong một dòng "thông minh". Dấu hiệu nên chuyển về vòng `for`: phải cuộn ngang, có `if` lồng nhau, cần log hay bắt exception từng phần tử, hoặc đang dùng comprehension chỉ để gọi hàm có side effect (`[print(x) for x in xs]`).
 
 ## Iterator: vòng `for` thật sự làm gì
 
@@ -176,14 +176,14 @@ list(batched((t.id for t in TRIPS), 4))                 # từng nhóm 4 phần 
 
 Kết quả `batched` là `[('TN-0001', 'TN-0002', 'TN-0003', 'TN-0004'), ('TN-0005', 'TN-0006')]`. `itertools.batched` có sẵn trong thư viện chuẩn từ Python 3.12, không cần cài thêm gói; hữu ích khi ghi 1 triệu điểm xuống database từng lô 1.000 dòng.
 
-`groupby` là hàm đặt bẫy người mới. Nó chỉ gom các phần tử **liền nhau** có cùng khóa, không như `GROUP BY` của SQL. Cùng sáu chuyến, khi chưa sắp xếp, ta nhận sáu nhóm:
+`groupby` là hàm đặt bẫy người mới. Nó chỉ gom các phần tử **liền nhau** có cùng khoá, không như `GROUP BY` của SQL. Cùng sáu chuyến, khi chưa sắp xếp, ta nhận sáu nhóm:
 
 ```text
 unsorted_groups : [('SG', 1), ('HN', 1), ('SG', 1), ('DN', 1), ('SG', 1), ('HP', 1)]
 sorted_groups   : [('DN', 1), ('HN', 1), ('HP', 1), ('SG', 3)]
 ```
 
-Muốn mỗi thành phố một nhóm, phải `sorted(..., key=...)` theo cùng khóa trước. Lưu ý `sorted` trả về list nên nó phá tính lười của pipeline: dữ liệu phải nạp hết để sắp xếp. Với luồng rất lớn, `Counter` hoặc `defaultdict(list)` ở bài 05 thường hợp lý hơn `groupby`.
+Muốn mỗi thành phố một nhóm, phải `sorted(..., key=...)` theo cùng khoá trước. Lưu ý `sorted` trả về list nên nó phá tính lười của pipeline: dữ liệu phải nạp hết để sắp xếp. Với luồng rất lớn, `Counter` hoặc `defaultdict(list)` ở bài 05 thường hợp lý hơn `groupby`.
 
 Các hàm tổng hợp `sum`, `max`, `min`, `any`, `all` nhận thẳng generator. `any` và `all` dừng ngay khi biết đáp án (short-circuit). Trên luồng giả lập, `any(is_absurd(p) for p in gps_stream(POINTS))` trả `True` sau khi mới kéo **2.307** điểm trong số 1 triệu; lab đếm số lần kéo bằng một generator bọc. Với 100.000 điểm đầu, `max(p.speed_kmh ...)` ra 398,81 km/h và `all(...)` xác nhận mọi vĩ độ nằm trong khung thành phố. Cả hai đều chạy mà không lập list.
 
@@ -202,7 +202,7 @@ Cả hai thế giới có chung một cạm bẫy: lazy không đồng nghĩa m�
 | --- | --- |
 | Generator trả rỗng ở lần duyệt thứ hai | Đã bị tiêu thụ ở lần đầu; tạo lại generator hoặc lưu bằng `list` |
 | `TypeError: object of type 'generator' has no len()` | Generator không biết độ dài; đếm bằng `sum(1 for _ in g)` hoặc lưu list |
-| `groupby` cho nhiều nhóm trùng khóa | Chưa `sorted` theo cùng khóa; `groupby` chỉ gom phần tử liền nhau |
+| `groupby` cho nhiều nhóm trùng khoá | Chưa `sorted` theo cùng khoá; `groupby` chỉ gom phần tử liền nhau |
 | RAM tăng vọt khi xử lý file/luồng lớn | Có `list(...)` hoặc `[... for ...]` ở giữa pipeline không; đổi sang generator expression |
 | Lỗi chỉ xuất hiện khi chạy một nơi xa chỗ khai báo | Lazy: lỗi bung ra khi có người kéo; kiểm tra chỗ tiêu thụ |
 
@@ -225,7 +225,7 @@ Sai kiểm tra nào, chương trình in `FAIL` kèm tên và thoát với mã 1.
 
 **Bài tập:** (1) Viết generator expression tính tổng tốc độ của các điểm phi lý trong 1 triệu điểm mà không tạo list. (2) Vì sao `groupby(gps_stream(1000), key=lambda p: p.driver_no)` hầu như cho mỗi điểm một nhóm riêng?
 
-<details><summary>Xem lời giải</summary><p>(1) <code>sum(p.speed_kmh for p in gps_stream(POINTS) if is_absurd(p))</code>: generator expression truyền thẳng vào <code>sum</code>, bộ nhớ không đổi, và <code>sum</code> chỉ kéo từng điểm một. (2) Điểm của cùng một tài xế nằm rải rác trong luồng (mã tài xế được sinh ngẫu nhiên trong 25.000 mã), còn <code>groupby</code> chỉ gom các phần tử liền kề cùng khóa; muốn gom theo tài xế phải dùng <code>defaultdict(list)</code> hoặc sắp xếp theo <code>driver_no</code> trước (và chấp nhận nạp hết dữ liệu để sort).</p></details>
+<details><summary>Xem lời giải</summary><p>(1) <code>sum(p.speed_kmh for p in gps_stream(POINTS) if is_absurd(p))</code>: generator expression truyền thẳng vào <code>sum</code>, bộ nhớ không đổi, và <code>sum</code> chỉ kéo từng điểm một. (2) Điểm của cùng một tài xế nằm rải rác trong luồng (mã tài xế được sinh ngẫu nhiên trong 25.000 mã), còn <code>groupby</code> chỉ gom các phần tử liền kề cùng khoá; muốn gom theo tài xế phải dùng <code>defaultdict(list)</code> hoặc sắp xếp theo <code>driver_no</code> trước (và chấp nhận nạp hết dữ liệu để sort).</p></details>
 
 Bài trước: [bài 05](/articles/python-list-dict-set-tuple). Bài tiếp: [bài 07](/articles/python-module-package-import).
 

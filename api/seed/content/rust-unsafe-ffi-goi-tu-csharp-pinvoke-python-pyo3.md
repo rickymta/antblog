@@ -222,11 +222,11 @@ thread caused non-unwinding panic. aborting.
 
 `guard` chỉ có tác dụng khi profile dùng `panic = "unwind"` (mặc định). Đặt `panic = "abort"` trong `Cargo.toml` thì `catch_unwind` không còn bắt được gì; `--verify` kiểm `cfg!(panic = "unwind")` để lỗi cấu hình hiện ra sớm.
 
-Về giải phóng, quy tắc là ai cấp phát thì người đó giải phóng, và `fee_ffi.h` có sẵn cặp `fee_quote_new` / `fee_quote_free`, `fee_quote_describe` / `fee_string_free`. Để dựng double free mà lab không crash, thư viện ghi địa chỉ mọi con trỏ nó cấp vào một sổ có khóa. `fee_quote_free` gỡ địa chỉ khỏi sổ rồi mới `Box::from_raw`; lần gọi thứ hai không thấy địa chỉ và trả `BadHandle` mà không chạm vào bộ nhớ. Test `concurrent_free_has_exactly_one_winner` cho tám luồng cùng free một handle: đúng một luồng nhận `Ok`, bảy luồng nhận `BadHandle`.
+Về giải phóng, quy tắc là ai cấp phát thì người đó giải phóng, và `fee_ffi.h` có sẵn cặp `fee_quote_new` / `fee_quote_free`, `fee_quote_describe` / `fee_string_free`. Để dựng double free mà lab không crash, thư viện ghi địa chỉ mọi con trỏ nó cấp vào một sổ có khoá. `fee_quote_free` gỡ địa chỉ khỏi sổ rồi mới `Box::from_raw`; lần gọi thứ hai không thấy địa chỉ và trả `BadHandle` mà không chạm vào bộ nhớ. Test `concurrent_free_has_exactly_one_winner` cho tám luồng cùng free một handle: đúng một luồng nhận `Ok`, bảy luồng nhận `BadHandle`.
 
 Ba hàm `fee_quote_describe`, `fee_quote_free`, `fee_string_free` nhận con trỏ mà không phải `unsafe fn`, nên mọi giá trị truyền vào, kể cả từ code Rust an toàn, đều không được gây UB. Tra sổ thôi chưa đủ: bản đầu của lab tra đúng địa chỉ rồi dereference chính con trỏ phía gọi đưa vào, và Miri bắt UB với một con trỏ chỉ có địa chỉ (`ptr::without_provenance_mut`, gọi được không cần `unsafe`). Bản hiện tại chỉ lấy `.addr()` của tham số; lúc cấp phát ghi sổ bằng `expose_provenance`, lúc dùng dựng con trỏ bằng `with_exposed_provenance`. Test `free_trusts_only_the_address_not_the_callers_pointer` giữ điều đó.
 
-Sổ này là lưới an toàn, không thay được kỷ luật sở hữu. Nó có khóa toàn cục nên không dành cho đường nóng. Nếu địa chỉ đã free được cấp lại cho một báo giá khác thì free con trỏ cũ giải phóng báo giá mới: an toàn về bộ nhớ nhưng sai về logic, và `SafeHandle` ở phía C# ngăn chuyện đó.
+Sổ này là lưới an toàn, không thay được kỷ luật sở hữu. Nó có khoá toàn cục nên không dành cho đường nóng. Nếu địa chỉ đã free được cấp lại cho một báo giá khác thì free con trỏ cũ giải phóng báo giá mới: an toàn về bộ nhớ nhưng sai về logic, và `SafeHandle` ở phía C# ngăn chuyện đó.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -250,7 +250,7 @@ Cùng một ranh giới ngôn ngữ, hai cách nối cho hai loại việc khác
 | Hợp đồng | ABI: bố cục, cấp phát, ai free | proto sinh code cho hai phía |
 | Đổi hợp đồng | tăng `fee_abi_version`, build lại mọi bên gọi | thêm trường, tương thích ngược |
 
-Sổ cái giữ transaction, khóa số dư và idempotency key trên database mà chỉ nó được ghi (kiến trúc §4.9). Một lỗi nặng ở đó phải chết trong tiến trình của nó, không kéo theo service gọi. Đó là lý do bài 35 chọn gRPC. FFI chỉ hợp với thư viện tính phí: thuần, không I/O, chạy trong tiến trình gọi. Ngay cả khi ấy, mỗi lần đổi chính sách phí là một lần build lại và phát hành lại ở mọi tiến trình nạp thư viện; số `fee_abi_version` có để bên gọi từ chối nạp bản lệch. Lab không đo độ trễ nên bài không khẳng định FFI nhanh hơn gRPC bao nhiêu.
+Sổ cái giữ transaction, khoá số dư và idempotency key trên database mà chỉ nó được ghi (kiến trúc §4.9). Một lỗi nặng ở đó phải chết trong tiến trình của nó, không kéo theo service gọi. Đó là lý do bài 35 chọn gRPC. FFI chỉ hợp với thư viện tính phí: thuần, không I/O, chạy trong tiến trình gọi. Ngay cả khi ấy, mỗi lần đổi chính sách phí là một lần build lại và phát hành lại ở mọi tiến trình nạp thư viện; số `fee_abi_version` có để bên gọi từ chối nạp bản lệch. Lab không đo độ trễ nên bài không khẳng định FFI nhanh hơn gRPC bao nhiêu.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -283,7 +283,7 @@ VERIFY OK
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là một thư viện hàm thuần với một chính sách phí, không có I/O. Sổ đăng ký handle dùng khóa toàn cục và chưa được đo dưới tải. Lab chỉ chạy trên macOS arm64 (Python 3.9.6, .NET 10.0.401); chưa chạy trên Linux hay Windows, chưa đóng gói NuGet hay wheel, chưa kiểm tương thích ABI giữa các phiên bản ngoài một số nguyên. Miri không phủ phần bên kia ranh giới.</p>
+<p>Đây là một thư viện hàm thuần với một chính sách phí, không có I/O. Sổ đăng ký handle dùng khoá toàn cục và chưa được đo dưới tải. Lab chỉ chạy trên macOS arm64 (Python 3.9.6, .NET 10.0.401); chưa chạy trên Linux hay Windows, chưa đóng gói NuGet hay wheel, chưa kiểm tương thích ABI giữa các phiên bản ngoài một số nguyên. Miri không phủ phần bên kia ranh giới.</p>
 </div>
 
 **Bài tập:** thêm hàm `fee_quote_trip_id(quote)` trả mã chuyến cho phía gọi, không cấp phát chuỗi mới. Ai phải giữ cho con trỏ trả về còn hợp lệ, và hợp đồng của hàm nên ghi gì?

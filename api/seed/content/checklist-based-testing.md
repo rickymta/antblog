@@ -86,7 +86,7 @@ Và một câu đáng thuộc: checklist **không bao giờ hoàn tất** — lu
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB — «smoke» trong bài</span>
-<p>CTFL v4.0.1 chỉ nhắc smoke test như ví dụ tiêu chí vào (5.1.3) và đặt nó ở góc phần tư Q4, «thường được tự động hoá» (5.1.7). Trong bài, <b>smoke</b> theo nghĩa thông dụng của ngành: một lượt kiểm nhanh, nông nhưng rộng các luồng sống còn, để quyết định bản build có đáng kiểm sâu hay phát hành tiếp không. Hai cụm từ read-do / do-confirm vốn từ ngành hàng không và y tế, được Gawande (2009) phổ biến; CTAL-TA dùng lại cho kiểm thử.</p>
+<p>CTFL v4.0.1 chỉ nhắc smoke test như ví dụ tiêu chí vào (5.1.3) và đặt nó ở góc phần tư Q4, «thường được tự động hoá» (5.1.7). Trong bài, <b>smoke</b> theo nghĩa thông dụng của ngành: một lượt kiểm nhanh, nông nhưng rộng các luồng sống còn, để quyết định bản build có đáng kiểm thử chuyên sâu hay phát hành tiếp không. Hai cụm từ read-do / do-confirm vốn từ ngành hàng không và y tế, được Gawande (2009) phổ biến; CTAL-TA dùng lại cho kiểm thử.</p>
 </div>
 
 ## 3. Tình huống kiểm thử tại Tới Nơi

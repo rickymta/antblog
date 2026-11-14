@@ -1,7 +1,7 @@
 ---
 slug: system-testing-smoke-test
-title: "Smoke Test: bản build có đủ tốt để bắt đầu kiểm sâu?"
-summary: "Smoke test là bộ kiểm nhỏ trả lời một câu hỏi duy nhất: build này có đáng để đội kiểm sâu tiếp không. Chọn ba case từ rủi ro cho Tới Nơi — health, chặn truy cập vô danh, đặt → hoàn tất → thu tiền — chạy qua API và PGlite, đọc thất bại và viết quyết định có bằng chứng."
+title: "Smoke Test: bản build có đủ tốt để bắt đầu kiểm thử chuyên sâu?"
+summary: "Smoke test là bộ kiểm nhỏ trả lời một câu hỏi duy nhất: build này có đáng để đội kiểm thử chuyên sâu tiếp không. Chọn ba case từ rủi ro cho Tới Nơi — health, chặn truy cập vô danh, đặt → hoàn tất → thu tiền — chạy qua API và PGlite, đọc thất bại và viết quyết định có bằng chứng."
 category: testing
 level: beginner
 tags: [testing, sys-01, smoke-test, build-verification, release-gate, api-testing, pglite, vitest, test-oracle]
@@ -32,7 +32,7 @@ Tới Nơi là ứng dụng gọi xe, giao bưu kiện và đồ ăn. Lab của 
 
 Mỗi lần có build mới, đội có hai lựa chọn tốn kém nếu chọn sai:
 
-- **Kiểm sâu ngay**: nếu build hỏng ở tầng nền (không ghi được chuyến, không thu được tiền), mọi ca chức năng phía sau đều đỏ với cùng một nguyên nhân. Thời gian điều tra bị nhân lên, báo cáo lỗi trùng lặp.
+- **Kiểm thử chuyên sâu ngay**: nếu build hỏng ở tầng nền (không ghi được chuyến, không thu được tiền), mọi ca chức năng phía sau đều đỏ với cùng một nguyên nhân. Thời gian điều tra bị nhân lên, báo cáo lỗi trùng lặp.
 - **Trả build về ngay**: nếu không có bằng chứng cụ thể, developer nhận một câu "build hỏng" không tái hiện được.
 
 Smoke test là bước nhỏ ở giữa: vài phép kiểm chọn lọc, chạy nhanh, cho ra quyết định *tiếp tục* hoặc *dừng* kèm bằng chứng tái hiện được.
@@ -137,7 +137,7 @@ Exit criteria này cho phép **kiểm tiếp**, không cho phép release product
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 920 250" role="img" aria-label="Smoke test là cổng giữa build và vòng kiểm sâu. Build mới đi vào ba case SM-01 health, SM-02 chặn vô danh, SM-03 đặt đến thu tiền. Nếu cả ba pass thì sang kiểm sâu gồm sanity, functional, integration, system. Nếu có case đỏ thì phân loại blocked do môi trường hoặc failed do sản phẩm và trả build kèm bằng chứng.">
+<svg viewBox="0 0 920 250" role="img" aria-label="Smoke test là cổng giữa build và vòng kiểm thử chuyên sâu. Build mới đi vào ba case SM-01 health, SM-02 chặn vô danh, SM-03 đặt đến thu tiền. Nếu cả ba pass thì sang kiểm thử chuyên sâu gồm sanity, functional, integration, system. Nếu có case đỏ thì phân loại blocked do môi trường hoặc failed do sản phẩm và trả build kèm bằng chứng.">
 <defs>
 <marker id="sys01-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-pk"/></marker>
 </defs>
@@ -154,7 +154,7 @@ Exit criteria này cho phép **kiểm tiếp**, không cho phép release product
 <line x1="490" y1="160" x2="556" y2="180" class="s-warn" stroke-width="1.6" marker-end="url(#sys01-arrow)"/>
 </svg>
 </div>
-<figcaption><b>Hình 1 · Smoke là cổng quyết định "có kiểm tiếp không".</b> Ba case nhỏ đứng giữa build và vòng kiểm sâu. Nhánh xanh chỉ mở cửa cho các suite khác; nhánh đỏ phải đi kèm bằng chứng tái hiện được.</figcaption>
+<figcaption><b>Hình 1 · Smoke là cổng quyết định "có kiểm tiếp không".</b> Ba case nhỏ đứng giữa build và vòng kiểm thử chuyên sâu. Nhánh xanh chỉ mở cửa cho các suite khác; nhánh đỏ phải đi kèm bằng chứng tái hiện được.</figcaption>
 </figure>
 
 ## 4. Thực hành có thể chạy lại

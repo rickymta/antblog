@@ -145,7 +145,7 @@ Branch protection (hoặc ruleset) mới biến CI thành cổng thật: đặt 
 
 Digest chứng minh image không đổi sau khi build, nhưng không chứng minh image do pipeline của bạn tạo ra. Chữ ký làm việc thứ hai: pipeline ký digest bằng khoá giữ trong Key Vault, và bên deploy chỉ chấp nhận digest có chữ ký hợp lệ. Hai công cụ phổ biến là cosign và notation. ACR hỗ trợ lưu chữ ký cùng image, và bài 21 đã nhắc Microsoft hướng sang Notary Project cho phần này.
 
-Phần khó là chính sách. Nền tảng có admission control (như AKS) có thể từ chối image chưa ký ngay lúc tạo pod. Theo hiểu biết lúc viết, Container Apps không có tầng tương đương, nên cách thực tế là một bước verify trong job CD trước khi đổi revision. Hãy kiểm tài liệu hiện hành của từng dịch vụ trước khi dựa vào một cơ chế cụ thể. Với Tới Nơi ở giai đoạn này, chỉ cần biết vị trí của nó trong chuỗi, chưa cần dựng.
+Phần khó là chính sách. Nền tảng có admission control (như AKS) có thể từ chối image chưa ký ngay lúc tạo pod. Theo hiểu biết lúc viết, Container Apps không có tầng tương đương, nên cách thực tế là một bước verify trong job CD trước khi đổi revision. Hãy kiểm tra tài liệu hiện hành của từng dịch vụ trước khi dựa vào một cơ chế cụ thể. Với Tới Nơi ở giai đoạn này, chỉ cần biết vị trí của nó trong chuỗi, chưa cần dựng.
 
 ## Lab: ci.yml đẩy được image, và PR hỏng bị chặn
 

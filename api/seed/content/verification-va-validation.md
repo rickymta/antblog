@@ -31,7 +31,7 @@ language: vi
 
 Mọi sản phẩm phần mềm đều đi qua một chuỗi chuyển đổi: **nhu cầu** của người dùng được viết thành **đặc tả**, đặc tả được xây thành **sản phẩm chạy được**. Mỗi bước chuyển có thể sai theo hai cách khác nhau:
 
-- Sản phẩm **không làm đúng** điều đặc tả viết. Ví dụ: code nhân phụ phí mưa với hệ số cao điểm, trong khi đặc tả nói cộng sau.
+- Sản phẩm **không làm đúng** điều đặc tả viết. Ví dụ: code nhân phụ phí trời mưa với hệ số cao điểm, trong khi đặc tả nói cộng sau.
 - Sản phẩm làm đúng đặc tả, nhưng **đặc tả không phản ánh đúng nhu cầu**. Ví dụ: đặc tả cho phép voucher «giảm» trên chuyến mà khách không được rẻ hơn.
 
 Verification bắt loại sai thứ nhất. Validation bắt loại sai thứ hai. Một đội chỉ làm verification sẽ giao một sản phẩm «đúng đặc tả» mà người dùng vẫn không hài lòng. Một đội chỉ làm validation sẽ có sản phẩm được khách thích trong buổi demo nhưng tính sai tiền ở tình huống biên.
@@ -178,10 +178,10 @@ Lab là bản MVP modular monolith: module Pricing & Quote, Promotion và Bookin
 
 | Rủi ro | Loại câu hỏi phát hiện được |
 |---|---|
-| Sai thứ tự bước (nhân phụ phí mưa với 1,25) | Verification |
+| Sai thứ tự bước (nhân phụ phí trời mưa với 1,25) | Verification |
 | Làm tròn sai (tròn xuống, hoặc làm tròn giữa chừng) | Verification |
 | Mốc 13:00:00 bị tính là cao điểm | Verification |
-| Khách không hiểu vì sao giá cao hơn hôm qua (không thấy rõ phụ phí mưa) | Validation |
+| Khách không hiểu vì sao giá cao hơn hôm qua (không thấy rõ phụ phí trời mưa) | Validation |
 | Báo giá ghi «giảm» nhưng khách không rẻ hơn; khách phàn nàn, gọi tổng đài | Validation |
 | Hạn 5 phút quá ngắn với khách đang so giá | Validation |
 
@@ -192,14 +192,14 @@ Lab là bản MVP modular monolith: module Pricing & Quote, Promotion và Bookin
 | Mã | Verification — test condition | Truy vết |
 |---|---|---|
 | VC-1 | Ví dụ kiểm ra đúng từng bước và 52.000 đ | R-FARE-09 |
-| VC-2 | Phụ phí mưa không bị nhân hệ số cao điểm | R-FARE-03, R-FARE-05 |
+| VC-2 | Phụ phí trời mưa không bị nhân hệ số cao điểm | R-FARE-03, R-FARE-05 |
 | VC-3 | Tổng làm tròn lên bội 1.000 đ; số tròn nghìn giữ nguyên | R-FARE-08 |
 | VC-4 | Voucher không kéo cước dưới 15.000 đ | R-FARE-07 |
 
 | Mã | Validation — câu hỏi | Hỏi ai / bằng gì |
 |---|---|---|
 | VQ-1 | Khách có hiểu bảng chi tiết cước (R-FARE-10) không? | Phiên quan sát 5 khách, ghi lại câu họ hỏi |
-| VQ-2 | Khách có thấy phụ phí mưa **trước khi** đặt không? | Quan sát trên điện thoại thật; số ticket «sao đắt hơn» |
+| VQ-2 | Khách có thấy phụ phí trời mưa **trước khi** đặt không? | Quan sát trên điện thoại thật; số ticket «sao đắt hơn» |
 | VQ-3 | Dòng «Giảm giá» có đúng với số tiền khách thực tiết kiệm không? | PO + Marketing (chủ chiến dịch voucher) |
 | VQ-4 | Khách có muốn giữ voucher cho chuyến dài hơn không? | Phỏng vấn CSKH, dữ liệu lượt dùng voucher |
 
@@ -311,9 +311,9 @@ Phát hiện này **không** được ghi như một defect của code: code là
 
 ### Bài tập 1 — Báo giá cước
 
-Cho báo giá cước (R-FARE), viết **2 kiểm tra verification** (một cho thứ tự 6 bước R-FARE-03, một cho làm tròn lên R-FARE-08) và **2 câu hỏi validation** (khách có hiểu bảng chi tiết R-FARE-10 không; khách có thấy phụ phí mưa trước khi đặt không). Với mỗi câu hỏi validation, ghi: hỏi ai, bằng cách nào, dấu hiệu nào cho thấy câu trả lời là «không».
+Cho báo giá cước (R-FARE), viết **2 kiểm tra verification** (một cho thứ tự 6 bước R-FARE-03, một cho làm tròn lên R-FARE-08) và **2 câu hỏi validation** (khách có hiểu bảng chi tiết R-FARE-10 không; khách có thấy phụ phí trời mưa trước khi đặt không). Với mỗi câu hỏi validation, ghi: hỏi ai, bằng cách nào, dấu hiệu nào cho thấy câu trả lời là «không».
 
-<details><summary><b>Lời giải mẫu</b></summary><p><b>Verification 1 — R-FARE-03.</b> Ô tô 10 km, cao điểm, mưa, không voucher. Mong đợi: 25.000 + 110.000 = 135.000 → ×1,25 = 168.750 → +8.000 = 176.750 → tổng <b>177.000 đ</b>. Bản cài sai (cộng mưa trước rồi mới nhân) sẽ ra 178.750 → 179.000 đ, nên ca này phân biệt được hai thứ tự.</p><p><b>Verification 2 — R-FARE-08.</b> Xe máy 2,0 km thấp điểm: 21.000 đ phải giữ nguyên 21.000 đ (không thành 22.000); xe máy 7,4 km thấp điểm: 45.300 đ phải thành 46.000 đ (không thành 45.000).</p><p><b>Validation 1 — R-FARE-10.</b> Hỏi: 5 khách thật, phiên quan sát 15 phút trên điện thoại của họ. Cách: đưa báo giá 52.000 đ (ví dụ R-FARE-09), nhờ họ giải thích vì sao ra số đó. Dấu hiệu «không»: quá nửa không chỉ ra được phụ phí mưa hoặc hệ số cao điểm.</p><p><b>Validation 2 — phụ phí mưa.</b> Hỏi: CSKH và dữ liệu ticket. Cách: đếm ticket «sao đắt hơn» trong ngày mưa so với ngày khô; quan sát khách có nhìn thấy cờ «Đang mưa» trước khi bấm «Đặt chuyến». Dấu hiệu «không»: ticket tăng rõ vào ngày mưa, hoặc khách chỉ nhìn tổng tiền.</p></details>
+<details><summary><b>Lời giải mẫu</b></summary><p><b>Verification 1 — R-FARE-03.</b> Ô tô 10 km, cao điểm, mưa, không voucher. Mong đợi: 25.000 + 110.000 = 135.000 → ×1,25 = 168.750 → +8.000 = 176.750 → tổng <b>177.000 đ</b>. Bản cài sai (cộng mưa trước rồi mới nhân) sẽ ra 178.750 → 179.000 đ, nên ca này phân biệt được hai thứ tự.</p><p><b>Verification 2 — R-FARE-08.</b> Xe máy 2,0 km thấp điểm: 21.000 đ phải giữ nguyên 21.000 đ (không thành 22.000); xe máy 7,4 km thấp điểm: 45.300 đ phải thành 46.000 đ (không thành 45.000).</p><p><b>Validation 1 — R-FARE-10.</b> Hỏi: 5 khách thật, phiên quan sát 15 phút trên điện thoại của họ. Cách: đưa báo giá 52.000 đ (ví dụ R-FARE-09), nhờ họ giải thích vì sao ra số đó. Dấu hiệu «không»: quá nửa không chỉ ra được phụ phí trời mưa hoặc hệ số cao điểm.</p><p><b>Validation 2 — phụ phí trời mưa.</b> Hỏi: CSKH và dữ liệu ticket. Cách: đếm ticket «sao đắt hơn» trong ngày mưa so với ngày khô; quan sát khách có nhìn thấy cờ «Đang mưa» trước khi bấm «Đặt chuyến». Dấu hiệu «không»: ticket tăng rõ vào ngày mưa, hoặc khách chỉ nhìn tổng tiền.</p></details>
 
 ### Bài tập 2 — Phân loại hoạt động
 
@@ -334,7 +334,7 @@ Xếp 6 hoạt động vào V (verification) hoặc Val (validation), kèm stati
 
 **Câu 2 (K2).** Hoạt động nào là verification?
 
-- a) Quan sát 5 khách đặt chuyến để xem họ có hiểu phụ phí mưa không
+- a) Quan sát 5 khách đặt chuyến để xem họ có hiểu phụ phí trời mưa không
 - b) Unit test khẳng định chuyến ví dụ R-FARE-09 có tổng 52.000 đ
 - c) Chạy beta tính năng giao đồ ăn ở Đà Nẵng
 - d) Phỏng vấn CSKH về các khiếu nại tiền giảm voucher

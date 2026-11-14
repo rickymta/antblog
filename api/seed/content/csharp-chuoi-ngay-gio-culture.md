@@ -49,7 +49,7 @@ Offset `+07:00` không phải timezone ID. Lịch hẹn tương lai theo giờ �
 
 ## Round-trip và hiển thị
 
-Format `O` giữ thông tin cần cho round-trip. Ta chuẩn hóa instant sang UTC ở ranh giới trao đổi bằng `ToUniversalTime`, sau đó format với InvariantCulture. ParseExact đọc lại đúng hợp đồng đã chọn. So sánh DateTimeOffset bằng `==` kiểm tra cùng instant; không yêu cầu offset gốc giống nhau.
+Format `O` giữ thông tin cần cho round-trip. Ta chuẩn hoá instant sang UTC ở ranh giới trao đổi bằng `ToUniversalTime`, sau đó format với InvariantCulture. ParseExact đọc lại đúng hợp đồng đã chọn. So sánh DateTimeOffset bằng `==` kiểm tra cùng instant; không yêu cầu offset gốc giống nhau.
 
 Giao diện dùng `N0` cùng culture Việt Nam để phân nhóm tiền, nhưng wire không dùng chuỗi giao diện. Đừng lưu vào database một thời gian đã format `06/11/2026 08:30` rồi bỏ offset. Bài EF Core/PostgreSQL sau sẽ chọn kiểu cột, mapping và kiểm chứng round-trip; bài hiện tại chưa có database.
 
@@ -57,9 +57,9 @@ Trong code production, “bây giờ” cũng là một phụ thuộc: thay đ�
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 185" role="img" aria-label="Hình 2. Đổi offset khi chuẩn hóa UTC giữ nguyên instant; nó không chỉ là xóa phần offset khỏi chuỗi."><rect x="20" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="32" y="79" class="t-b">Giờ đã phát sinh</text><text x="32" y="115" class="t-small">08:30 +07:00</text><text x="280" y="100" class="t-b">→</text><rect x="300" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="312" y="79" class="t-b">Cùng instant UTC</text><text x="312" y="115" class="t-small">01:30 +00:00</text><text x="560" y="100" class="t-b">→</text><rect x="580" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="592" y="79" class="t-b">Đọc lại</text><text x="592" y="115" class="t-small">Instant không đổi</text></svg>
+<svg viewBox="0 0 880 185" role="img" aria-label="Hình 2. Đổi offset khi chuẩn hoá UTC giữ nguyên instant; nó không chỉ là xoá phần offset khỏi chuỗi."><rect x="20" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="32" y="79" class="t-b">Giờ đã phát sinh</text><text x="32" y="115" class="t-small">08:30 +07:00</text><text x="280" y="100" class="t-b">→</text><rect x="300" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="312" y="79" class="t-b">Cùng instant UTC</text><text x="312" y="115" class="t-small">01:30 +00:00</text><text x="560" y="100" class="t-b">→</text><rect x="580" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="592" y="79" class="t-b">Đọc lại</text><text x="592" y="115" class="t-small">Instant không đổi</text></svg>
 </div>
-<figcaption>Hình 2. Đổi offset khi chuẩn hóa UTC giữ nguyên instant; nó không chỉ là xóa phần offset khỏi chuỗi.</figcaption>
+<figcaption>Hình 2. Đổi offset khi chuẩn hoá UTC giữ nguyên instant; nó không chỉ là xoá phần offset khỏi chuỗi.</figcaption>
 </figure>
 
 ## Đọc kết quả và tránh lỗi
@@ -70,7 +70,7 @@ Trong code production, “bây giờ” cũng là một phụ thuộc: thay đ�
 | --- | --- | --- |
 | Dùng culture mặc định trên server | Đổi máy là đổi cách parse | Chỉ rõ grammar/culture ở biên |
 | Bỏ kết quả bool của TryParse | Giá trị mặc định bị coi là thật | Dừng luồng khi parse thất bại |
-| UTC hóa một ngày sinh | Ngày có thể lệch khi hiển thị | Chọn DateOnly cho ngày thuần túy |
+| UTC hoá một ngày sinh | Ngày có thể lệch khi hiển thị | Chọn DateOnly cho ngày thuần tuý |
 | Gọi offset là timezone | Sai lịch tương lai khi quy tắc đổi | Lưu timezone ID khi nghiệp vụ cần |
 
 **Bài tập:** đổi offset gốc thành +08:00 nhưng giữ 08:30. UTC có còn 01:30 không? Nếu người dùng nhập `1.234,5`, grammar hiện tại có chấp nhận không?
@@ -86,7 +86,7 @@ dotnet run --project examples/toi-noi-dotnet/04-chuoi-ngay-gio-culture
 dotnet run --project examples/toi-noi-dotnet/04-chuoi-ngay-gio-culture -- --verify
 ```
 
-Lệnh đầu minh họa hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
+Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
 
 Mã nguồn đầy đủ của Program.cs (đặt trong console net10.0 như bài 01):
 

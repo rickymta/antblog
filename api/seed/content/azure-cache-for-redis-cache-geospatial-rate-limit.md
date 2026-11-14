@@ -27,7 +27,7 @@ Bài này dựng một Redis được quản lý cho ba việc nóng của Tới
 | Basic | Một node, không replica | Dev, thử nghiệm | Restart hoặc vá lỗi là mất dữ liệu, không có SLA |
 | Standard | Hai node primary và replica | Cache production đơn giản | Replica sao chép bất đồng bộ, failover có thể mất ghi cuối; vẫn là cache |
 | Premium | Thêm clustering, persistence, zone redundancy, mạng riêng | Cần dữ liệu sống sót qua sự cố, nhiều shard | Đắt hơn, cấu hình nhiều hơn |
-| Azure Managed Redis | Redis Enterprise, clustering mặc định, module, Redis 7.x | Mọi dự án mới; nơi chuyển tới trước 2028 | Client phải chạy được với cluster; SKU và region kiểm tài liệu |
+| Azure Managed Redis | Redis Enterprise, clustering mặc định, module, Redis 7.x | Mọi dự án mới; nơi chuyển tới trước 2028 | Client phải chạy được với cluster; SKU và region kiểm tra tài liệu |
 
 Với Tới Nơi, cache báo giá mất đi chỉ làm tăng tải tính lại, nên Standard là đủ. Tập tài xế rảnh (geo set) đáng quan tâm hơn: nếu Redis mất dữ liệu, điều phối thấy đội xe trống tới khi các tài xế gửi lại vị trí. Vì vậy dữ liệu này phải **dựng lại được** từ luồng vị trí hoặc từ Cosmos DB ở bài 32, thay vì trông vào persistence. Private endpoint nên có ở staging và prod để Redis không đứng ở địa chỉ công khai; cách cấu hình nằm ở [bài private endpoint](/articles/azure-private-endpoint-private-dns-service-endpoint). Tier nào hỗ trợ private endpoint, persistence hay zone redundancy cần kiểm bảng so sánh trong tài liệu, vì danh sách đổi theo thời gian.
 

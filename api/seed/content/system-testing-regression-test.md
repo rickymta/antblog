@@ -8,7 +8,7 @@ tags: [testing, sys-06, regression-testing, impact-analysis, test-selection, tes
 language: vi
 ---
 
-Đội Tới Nơi muốn dọn code tính cước: phụ phí mưa và phụ phí khối lượng bưu kiện «trông giống nhau», vậy gom về một chỗ cho gọn. Reviewer chạy thử chuyến xe máy 5 km lúc 9 giờ sáng trời mưa: 43.000 đồng, đúng như trước. Refactor được duyệt. Đến trưa, khách đặt xe lúc 11:30 trời mưa bị tính 54.000 thay vì 52.000 — phụ phí mưa đã lén đi vào phần bị nhân hệ số cao điểm. Ca dùng để review không sai, nó chỉ **không có khả năng** lộ ra lỗi này. Bài này trả lời: **sau một thay đổi, chọn ca nào để phát hiện hành vi cũ bị hỏng, oracle lấy từ đâu, và làm sao biết bộ regression thực sự bắt được lỗi** — chứ không chỉ đếm được nhiều test xanh.
+Đội Tới Nơi muốn dọn code tính cước: phụ phí trời mưa và phụ phí khối lượng bưu kiện «trông giống nhau», vậy gom về một chỗ cho gọn. Reviewer chạy thử chuyến xe máy 5 km lúc 9 giờ sáng trời mưa: 43.000 đồng, đúng như trước. Refactor được duyệt. Đến trưa, khách đặt xe lúc 11:30 trời mưa bị tính 54.000 thay vì 52.000 — phụ phí trời mưa đã lén đi vào phần bị nhân hệ số cao điểm. Ca dùng để review không sai, nó chỉ **không có khả năng** lộ ra lỗi này. Bài này trả lời: **sau một thay đổi, chọn ca nào để phát hiện hành vi cũ bị hỏng, oracle lấy từ đâu, và làm sao biết bộ regression thực sự bắt được lỗi** — chứ không chỉ đếm được nhiều test xanh.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-06</span>
@@ -28,7 +28,7 @@ language: vi
 
 ### 1.1. Một refactor «không đổi hành vi»
 
-Công thức cước của Tới Nơi có thứ tự cố định (R-FARE-03): cước cơ bản cộng phụ phí khối lượng → nhân hệ số cao điểm → cộng phụ phí mưa → trừ voucher → nâng lên cước tối thiểu → làm tròn lên 1.000 đ. Hai khoản phụ phí nằm ở **hai bước khác nhau**: phí khối lượng bưu kiện bị nhân 1,25 lúc cao điểm (R-PARCEL-04), còn phí mưa 8.000 đ thì không (R-FARE-05).
+Công thức cước của Tới Nơi có thứ tự cố định (R-FARE-03): cước cơ bản cộng phụ phí khối lượng → nhân hệ số cao điểm → cộng phụ phí trời mưa → trừ voucher → nâng lên cước tối thiểu → làm tròn lên 1.000 đ. Hai khoản phụ phí nằm ở **hai bước khác nhau**: phí khối lượng bưu kiện bị nhân 1,25 lúc cao điểm (R-PARCEL-04), còn phí mưa 8.000 đ thì không (R-FARE-05).
 
 Refactor giả định gom phí mưa vào chung chỗ với phí khối lượng — tức là đưa nó lên bước 1. Đặc tả không đổi, nên mọi expected nghiệp vụ phải giữ nguyên. Nhưng hàm `calculateFare` không chỉ phục vụ đặt xe: nó được `pricing.ts` gọi cho ride/parcel và được `food.ts` gọi để tính phí giao đồ ăn; giá lại được chụp vào báo giá, chép sang chuyến, rồi chuyển tới bước thu tiền. Một dòng sửa trong hàm dùng chung có thể làm sai ở nơi không ai nhìn vào diff.
 
@@ -65,7 +65,7 @@ Test regression không phải một «loại cú pháp» khác. Ca functional RG
 | Hoạt động | Câu hỏi trả lời | Ví dụ Tới Nơi |
 |---|---|---|
 | Smoke ([SYS-01](/articles/system-testing-smoke-test)) | Build/môi trường có đủ hoạt động để kiểm tiếp? | Đặt → nhận → hoàn tất → thu tiền được |
-| Sanity ([SYS-02](/articles/system-testing-sanity-test)) | Thay đổi cụ thể có hợp lý để đưa vào kiểm sâu? | Trim mã voucher, mã rỗng, consumer của mã chuẩn |
+| Sanity ([SYS-02](/articles/system-testing-sanity-test)) | Thay đổi cụ thể có hợp lý để đưa vào kiểm thử chuyên sâu? | Trim mã voucher, mã rỗng, consumer của mã chuẩn |
 | Confirmation | Lỗi đã báo còn tái hiện không? | Mã có khoảng trắng dùng được sau sửa |
 | Regression | Hành vi khác có bị hỏng bởi thay đổi? | Refactor cước làm sai phí giao đồ ăn lúc cao điểm |
 
@@ -411,7 +411,7 @@ Theo dõi escaped defects (lỗi lọt tới người dùng), thời gian phát 
 2. **Trung bình.** Refactor cũng ảnh hưởng xe ô tô. Viết thêm một ca với oracle tính tay.
 3. **Trung bình.** Một test food bắt đầu flaky trong CI. Có nên xoá khỏi gate không?
 4. **Nâng cao.** Thiết kế mapping regression cho một thay đổi trong `src/domain/money.ts` (chuyển đổi đồng ↔ milli-đồng).
-5. **Nâng cao.** Yêu cầu mới: phụ phí mưa tăng từ 8.000 lên 10.000. Suite hiện tại phản ứng thế nào và cần làm gì?
+5. **Nâng cao.** Yêu cầu mới: phụ phí trời mưa tăng từ 8.000 lên 10.000. Suite hiện tại phản ứng thế nào và cần làm gì?
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>

@@ -8,7 +8,7 @@ tags: [testing, istqb, ctal-ta, test-042, metamorphic-testing, test-oracle, fast
 language: vi
 ---
 
-[TEST-041](/articles/random-testing) kết thúc bằng một thất bại có chủ đích: 10.000 báo giá ngẫu nhiên đều «xanh» trong khi bản cài đặt nhân nhầm phụ phí mưa với hệ số cao điểm. Oracle kiểm tính chất của **từng** kết quả không đủ sức phân biệt 52.000 đ với 54.000 đ. Bài này dùng **metamorphic testing**: không hỏi «tổng này đúng chưa», mà hỏi «nếu đổi đầu vào theo cách này thì tổng phải đổi theo cách kia» — và cho thấy câu hỏi thứ hai bắt được lỗi mà câu hỏi thứ nhất bỏ lọt.
+[TEST-041](/articles/random-testing) kết thúc bằng một thất bại có chủ đích: 10.000 báo giá ngẫu nhiên đều «xanh» trong khi bản cài đặt nhân nhầm phụ phí trời mưa với hệ số cao điểm. Oracle kiểm tính chất của **từng** kết quả không đủ sức phân biệt 52.000 đ với 54.000 đ. Bài này dùng **metamorphic testing**: không hỏi «tổng này đúng chưa», mà hỏi «nếu đổi đầu vào theo cách này thì tổng phải đổi theo cách kia» — và cho thấy câu hỏi thứ hai bắt được lỗi mà câu hỏi thứ nhất bỏ lọt.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-042</span>
@@ -219,7 +219,7 @@ MT-01 · tổng và «trước giảm» của source/follow-up:
   MR3 follow-up: giờ thường  trước giảm    53300  tổng 43000
 ```
 
-Source có oracle (52.000 đ, SPEC). Ba follow-up thoả ba MR: 53.000 ≥ 52.000; 64.625 − 56.625 = 8.000; 52.000 ≥ 43.000. Để ý MR2 ở **tổng**: 52.000 − 46.000 = 6.000, không phải 8.000 — voucher 20% đã «ăn» 1.600 đ của phụ phí mưa, làm tròn ăn thêm phần còn lại. Đây là lý do MR2 quan sát `beforeDiscount`.
+Source có oracle (52.000 đ, SPEC). Ba follow-up thoả ba MR: 53.000 ≥ 52.000; 64.625 − 56.625 = 8.000; 52.000 ≥ 43.000. Để ý MR2 ở **tổng**: 52.000 − 46.000 = 6.000, không phải 8.000 — voucher 20% đã «ăn» 1.600 đ của phụ phí trời mưa, làm tròn ăn thêm phần còn lại. Đây là lý do MR2 quan sát `beforeDiscount`.
 
 ### 5.2 MT-02 — bản thật thoả cả bốn MR
 
@@ -265,7 +265,7 @@ MT-04 · thu nhỏ 9 bước: {"kind":"ride","cityCode":"SG","vehicle":"bike","d
   đối chiếu bản thật cho follow-up: trước giảm 25812.5, tổng 26000
 ```
 
-Syllabus nói khi MR thất bại, debugging phải tìm **ca nào** sai. Ở đây source khớp bản thật (17.812,5 đ — đúng ví dụ phần lẻ của R-FARE-10); follow-up sai: 10.000 = 8.000 × 1,25 — dấu vân tay của việc phụ phí mưa bị nhân hệ số cao điểm. Shrinking đưa về ca tối giản: không voucher, quãng đường nhỏ nhất.
+Syllabus nói khi MR thất bại, debugging phải tìm **ca nào** sai. Ở đây source khớp bản thật (17.812,5 đ — đúng ví dụ phần lẻ của R-FARE-10); follow-up sai: 10.000 = 8.000 × 1,25 — dấu vân tay của việc phụ phí trời mưa bị nhân hệ số cao điểm. Shrinking đưa về ca tối giản: không voucher, quãng đường nhỏ nhất.
 
 Báo cáo gốc khi MR1 thất bại trên B2 (`SHOW_RED=1`, 10.000 cặp):
 
@@ -286,7 +286,7 @@ MT-05 · MR-sai trên BẢN THẬT: {"kind":"ride","cityCode":"SG","vehicle":"bi
   MR-yếu trên B1: failed=false (MR2 cùng nguồn sinh thì đỏ)
 ```
 
-MR-sai đỏ trên **code đúng**. Kiểm tay theo SPEC: ca khô bị nâng lên cước tối thiểu 15.000 đ; ca mưa không bị nâng; voucher 2% lấy thêm 160 đ của phụ phí mưa ⇒ chênh 7.000 đ là đúng. Kết luận: sửa MR (đổi điểm quan sát sang `beforeDiscount` như MR2), không sửa code. MR-yếu xanh trên B1 dù B1 sai — quan hệ «không giảm» không đủ chặt.
+MR-sai đỏ trên **code đúng**. Kiểm tay theo SPEC: ca khô bị nâng lên cước tối thiểu 15.000 đ; ca mưa không bị nâng; voucher 2% lấy thêm 160 đ của phụ phí trời mưa ⇒ chênh 7.000 đ là đúng. Kết luận: sửa MR (đổi điểm quan sát sang `beforeDiscount` như MR2), không sửa code. MR-yếu xanh trên B1 dù B1 sai — quan hệ «không giảm» không đủ chặt.
 
 ### 5.6 MT-06 — cỡ biến đổi của follow-up
 

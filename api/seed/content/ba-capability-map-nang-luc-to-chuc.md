@@ -20,7 +20,7 @@ Phân biệt này giúp nhóm cân nhắc đào tạo hoặc đổi quyền quy�
 
 ## 2. Bản đồ rút gọn cho Tới Nơi
 
-| Nhóm năng lực | Năng lực con minh họa |
+| Nhóm năng lực | Năng lực con minh hoạ |
 |---|---|
 | Phục vụ chuyến | Tiếp nhận nhu cầu, điều phối, hỗ trợ điểm đón |
 | Quản lý giao dịch | Báo giá, thu tiền, xử lý hoàn tiền đề xuất |
@@ -37,7 +37,7 @@ Không cộng các mức thành một điểm tổng chính xác giả tạo. M�
 
 ## 4. Tách người, quy trình và công cụ
 
-Với hoàn tiền P05, có thể thiết kế contract tốt nhưng chưa có người xử lý RF-C không khớp đối tác. Khoảng trống là ownership và quy trình ngoại lệ. Ngược lại, có người giỏi nhưng thiếu khóa nối refundId/providerRef thì công cụ và dữ liệu cũng cần thay đổi.
+Với hoàn tiền P05, có thể thiết kế contract tốt nhưng chưa có người xử lý RF-C không khớp đối tác. Khoảng trống là ownership và quy trình ngoại lệ. Ngược lại, có người giỏi nhưng thiếu khoá nối refundId/providerRef thì công cụ và dữ liệu cũng cần thay đổi.
 
 Viết mỗi khoảng trống theo bằng chứng: “chưa có owner nhận giao dịch chờ quá hạn”, thay vì nhận xét chung “vận hành yếu”.
 

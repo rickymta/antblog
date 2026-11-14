@@ -74,7 +74,7 @@ Một ngoại lệ đáng biết: các dịch vụ hạ tầng của Azure qua �
 
 - Luôn cấp phát **static**: địa chỉ không đổi, nên bản ghi DNS trỏ vào không hỏng khi tắt bật VM.
 - **Đóng theo mặc định** với traffic đi vào cho tới khi NSG cho phép, đúng như callout đầu bài.
-- Có hỗ trợ availability zone, theo hướng bạn đã gặp ở bài 1. Cách tạo zone-redundant phụ thuộc region, kiểm tài liệu trước khi chọn.
+- Có hỗ trợ availability zone, theo hướng bạn đã gặp ở bài 1. Cách tạo zone-redundant phụ thuộc region, kiểm tra tài liệu trước khi chọn.
 
 Địa chỉ tĩnh còn một cái giá nhắc từ bài 5: public IP Standard tính tiền theo giờ chừng nào resource còn tồn tại, kể cả khi không gắn vào đâu hay VM đã deallocate. Vì vậy đừng cấp public IP cho từng VM chỉ để tiện vào máy. API của Tới Nơi sẽ ra Internet qua một điểm vào có kiểm soát (ingress của Container Apps hoặc một gateway), còn VM chạy phía sau với địa chỉ riêng.
 

@@ -26,11 +26,11 @@ Bản demo có route `/trips/{ownerId}` chỉ để phân biệt role với owne
 
 ## JWT cần kiểm nhiều hơn payload
 
-AddJwtBearer dùng handler thật. Tối thiểu hợp đồng token cần xác thực chữ ký với khóa tin cậy, issuer, audience và thời hạn; production còn phải quản lý algorithm, metadata/rotation và các yêu cầu riêng của hệ thống danh tính. Không tự viết một parser base64 rồi dựng ClaimsPrincipal.
+AddJwtBearer dùng handler thật. Tối thiểu hợp đồng token cần xác thực chữ ký với khoá tin cậy, issuer, audience và thời hạn; production còn phải quản lý algorithm, metadata/rotation và các yêu cầu riêng của hệ thống danh tính. Không tự viết một parser base64 rồi dựng ClaimsPrincipal.
 
 MapInboundClaims=false giữ tên claim theo hợp đồng; bài dùng sub cho chủ thể và role cho vai trò. Nhà cung cấp token khác có thể dùng tên/shape khác, nên phải mapping có chủ đích. Role hiển thị ở UI không thay enforcement phía server.
 
-JWT bearer không mặc định mã hóa payload. Không đưa giấy tờ định danh hoặc bí mật vào token chỉ vì token có chữ ký. Truyền bearer qua TLS ở môi trường triển khai; không ghi token vào log và không gửi qua query string để tiện copy.
+JWT bearer không mặc định mã hoá payload. Không đưa giấy tờ định danh hoặc bí mật vào token chỉ vì token có chữ ký. Truyền bearer qua TLS ở môi trường triển khai; không ghi token vào log và không gửi qua query string để tiện copy.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -45,15 +45,15 @@ Policy Customer yêu cầu đã xác thực và có role customer; Driver và Di
 
 Không có hoặc token không hợp lệ dẫn tới challenge, thường là 401 ở bearer API. Có danh tính hợp lệ nhưng không đạt role/ownership dẫn tới forbid, 403. Bài chưa triển khai chiến lược 404 để che tồn tại tài nguyên; nếu chọn chiến lược đó phải thống nhất hợp đồng và kiểm thử riêng.
 
-UseAuthentication đứng trước UseAuthorization để principal được dựng trước khi kiểm quyền. Cấu hình default scheme giúp framework biết handler nào xác thực/challenge. Không đặt một middleware tự cấp role tùy ý phía sau rồi coi policy là đủ.
+UseAuthentication đứng trước UseAuthorization để principal được dựng trước khi kiểm quyền. Cấu hình default scheme giúp framework biết handler nào xác thực/challenge. Không đặt một middleware tự cấp role tuỳ ý phía sau rồi coi policy là đủ.
 
-## Chạy local mà không nhúng khóa vào source
+## Chạy local mà không nhúng khoá vào source
 
-Project không chứa khóa ký dùng chung, endpoint cấp token hoặc tài khoản mặc định. Có thể chạy host và thử request không credential để thấy 401. Để thử local có token, dùng dotnet user-jwts với user-secrets trong môi trường Development theo hướng dẫn README; không dùng công cụ dev đó như identity provider production.
+Project không chứa khoá ký dùng chung, endpoint cấp token hoặc tài khoản mặc định. Có thể chạy host và thử request không credential để thấy 401. Để thử local có token, dùng dotnet user-jwts với user-secrets trong môi trường Development theo hướng dẫn README; không dùng công cụ dev đó như identity provider production.
 
-Bộ test bài 20 tạo khóa đối xứng ngẫu nhiên riêng trong AuthFactory, cấu hình JWT validator bằng issuer/audience test rồi ký token trong process test. HMAC chỉ là fixture có phạm vi rõ; production nên dùng hệ thống danh tính/metadata được tin cậy và quản lý khóa phù hợp, không copy AuthFactory vào service.
+Bộ test bài 20 tạo khoá đối xứng ngẫu nhiên riêng trong AuthFactory, cấu hình JWT validator bằng issuer/audience test rồi ký token trong process test. HMAC chỉ là fixture có phạm vi rõ; production nên dùng hệ thống danh tính/metadata được tin cậy và quản lý khoá phù hợp, không copy AuthFactory vào service.
 
-User-secrets không phải kho bí mật production và không phải cam kết mã hóa file local. Khi cài cấu hình triển khai thật, quản lý secret/authority qua cơ chế môi trường và quyền truy cập đã thiết kế. Bài này không tự mở một token issuer cho website.
+User-secrets không phải kho bí mật production và không phải cam kết mã hoá file local. Khi cài cấu hình triển khai thật, quản lý secret/authority qua cơ chế môi trường và quyền truy cập đã thiết kế. Bài này không tự mở một token issuer cho website.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -98,7 +98,7 @@ dotnet user-jwts create --project examples/toi-noi-dotnet/19-authentication-auth
 dotnet run --project examples/toi-noi-dotnet/19-authentication-authorization -- --environment Development --urls http://127.0.0.1:5199
 ```
 
-Công cụ dev tạo token và lưu khóa trong user-secrets local, có thể cập nhật cấu hình audience của project; không đưa token/khóa lên Git. Gửi token qua Authorization: Bearer ở client local. Cách này dành cho dev; suite bài 20 tự tạo fixture trong memory, không cần chạy các lệnh tạo token trên.
+Công cụ dev tạo token và lưu khoá trong user-secrets local, có thể cập nhật cấu hình audience của project; không đưa token/khoá lên Git. Gửi token qua Authorization: Bearer ở client local. Cách này dành cho dev; suite bài 20 tự tạo fixture trong memory, không cần chạy các lệnh tạo token trên.
 
 ### Program.cs — 19-authentication-authorization/Program.cs
 

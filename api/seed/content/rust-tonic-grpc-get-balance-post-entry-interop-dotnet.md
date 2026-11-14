@@ -185,7 +185,7 @@ Adapter PostgreSQL nhận ra `ABORTED` qua SQLSTATE: `classify_sqlx` coi `40001`
 
 Client tonic đặt deadline bằng `request.set_timeout(Duration::from_millis(300))`; tonic ghi nó vào header `grpc-timeout` dạng `300000u` (micro giây). Interceptor đọc header này, và lab giả lập một kho chậm 1200 ms để xem server có dừng không và client nhận mã nào.
 
-Trên tonic 0.14.9, nếu chỉ dựa vào tầng timeout có sẵn, mã hết giờ là `CANCELLED`. Tầng `GrpcTimeout` nằm ở cả server lẫn client của tonic, và `status.rs` của tonic đổi `TimeoutExpired` thành `Status::cancelled("Timeout expired")`. [Tài liệu gRPC về deadline](https://grpc.io/docs/guides/deadlines/) nói client hết hạn thì thấy `DEADLINE_EXCEEDED`, còn server tự hủy call với `CANCELLED`. Ở tonic, mã của server đi thẳng ra dây, và chính client tonic cũng báo `CANCELLED`. Việc dừng vẫn đúng (future của handler bị thả), nhưng client phân biệt hai mã sẽ xử lý sai.
+Trên tonic 0.14.9, nếu chỉ dựa vào tầng timeout có sẵn, mã hết giờ là `CANCELLED`. Tầng `GrpcTimeout` nằm ở cả server lẫn client của tonic, và `status.rs` của tonic đổi `TimeoutExpired` thành `Status::cancelled("Timeout expired")`. [Tài liệu gRPC về deadline](https://grpc.io/docs/guides/deadlines/) nói client hết hạn thì thấy `DEADLINE_EXCEEDED`, còn server tự huỷ call với `CANCELLED`. Ở tonic, mã của server đi thẳng ra dây, và chính client tonic cũng báo `CANCELLED`. Việc dừng vẫn đúng (future của handler bị thả), nhưng client phân biệt hai mã sẽ xử lý sai.
 
 Lab để handler tự đếm ngược: lấy `grpc-timeout`, trừ dự trữ 25 ms, bọc việc gọi kho trong `tokio::time::timeout`. Hết giờ thì future của kho bị thả và client nhận `DEADLINE_EXCEEDED`.
 

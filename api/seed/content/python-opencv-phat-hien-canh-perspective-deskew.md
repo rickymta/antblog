@@ -150,7 +150,7 @@ hình chữ nhật vẽ sẵn xoay theo góc đã biết (dương = theo chiều
       20.0                -69.9           20.1
 ```
 
-Trên OpenCV 5.0.0 (bản lab chạy; ta chạy riêng cùng phép thử trên 4.14.0 và ra cùng kết quả), góc thô nằm trong [-90, 0); trên 4.10.0 (cũng chạy riêng) nó nằm trong (0, 90] và hình nằm ngang đúng cho 90. Ở 5.0.0: hình nằm ngang đúng cho -90 chứ không phải 0, và +10 độ cho -80. Dùng thẳng giá trị thô để xoay là xoay nhầm gần 90 độ. Vì thế `min_area_rect_angle` lấy hình chữ nhật từ `boxPoints`, chọn cạnh dài nhất và tính hướng của nó, đưa về (-45, 45]; cột «góc chuẩn hóa» khớp góc vẽ trong khoảng 0,1 độ (`vision.py`, trích):
+Trên OpenCV 5.0.0 (bản lab chạy; ta chạy riêng cùng phép thử trên 4.14.0 và ra cùng kết quả), góc thô nằm trong [-90, 0); trên 4.10.0 (cũng chạy riêng) nó nằm trong (0, 90] và hình nằm ngang đúng cho 90. Ở 5.0.0: hình nằm ngang đúng cho -90 chứ không phải 0, và +10 độ cho -80. Dùng thẳng giá trị thô để xoay là xoay nhầm gần 90 độ. Vì thế `min_area_rect_angle` lấy hình chữ nhật từ `boxPoints`, chọn cạnh dài nhất và tính hướng của nó, đưa về (-45, 45]; cột «góc chuẩn hoá» khớp góc vẽ trong khoảng 0,1 độ (`vision.py`, trích):
 
 ```python
 rect = cv2.minAreaRect(points)
@@ -272,7 +272,7 @@ Lệnh đầu in bảy bước ở trên; lệnh sau kiểm 33 điều và kết
 OK 33/33
 ```
 
-Các ca kiểm là bất biến và thứ bậc lớn: homography, thứ tự góc, góc `minAreaRect` chuẩn hóa sai dưới 1 độ, tìm được tứ giác ở ít nhất 90% ảnh không bị cắt, ảnh bị cắt mép bị từ chối, ảnh không có thẻ trả `None`, và `warp` hoặc `deskew` giảm CER ít nhất một nửa ở điều kiện tương ứng (cấu hình `vie --psm 4`). Số trong bài đo trên macOS với font Arial, Tesseract 5.5.4, opencv-python-headless 5.0.0, trên máy đang rất bận (load average 241,6 lúc bắt đầu), mất 9 phút 1 giây.
+Các ca kiểm là bất biến và thứ bậc lớn: homography, thứ tự góc, góc `minAreaRect` chuẩn hoá sai dưới 1 độ, tìm được tứ giác ở ít nhất 90% ảnh không bị cắt, ảnh bị cắt mép bị từ chối, ảnh không có thẻ trả `None`, và `warp` hoặc `deskew` giảm CER ít nhất một nửa ở điều kiện tương ứng (cấu hình `vie --psm 4`). Số trong bài đo trên macOS với font Arial, Tesseract 5.5.4, opencv-python-headless 5.0.0, trên máy đang rất bận (load average 241,6 lúc bắt đầu), mất 9 phút 1 giây.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -283,7 +283,7 @@ Các ca kiểm là bất biến và thứ bậc lớn: homography, thứ tự g�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Ảnh sinh bằng code: thẻ phẳng tuyệt đối, một font, bốn điều kiện cố định, không có ngón tay che, lóa, nếp gấp hay thẻ úp ngược. 50 ảnh là bộ nhỏ và tham số thử trên chính bộ này, nên số CER lạc quan hơn ảnh thật. Canny giả định thẻ có mép rõ; với ảnh thật nên cân nhắc mô hình phát hiện góc. Dù ảnh nắn thẳng đến đâu, kết quả OCR vẫn là đầu vào cho người duyệt, không tự động là quyết định xác minh.</p>
+<p>Ảnh sinh bằng code: thẻ phẳng tuyệt đối, một font, bốn điều kiện cố định, không có ngón tay che, loá, nếp gấp hay thẻ úp ngược. 50 ảnh là bộ nhỏ và tham số thử trên chính bộ này, nên số CER lạc quan hơn ảnh thật. Canny giả định thẻ có mép rõ; với ảnh thật nên cân nhắc mô hình phát hiện góc. Dù ảnh nắn thẳng đến đâu, kết quả OCR vẫn là đầu vào cho người duyệt, không tự động là quyết định xác minh.</p>
 </div>
 
 **Bài tập 1:** Với bảy ảnh `cutoff`, tắt kiểm tra sát mép cho CER 0,020 thay vì 0,336. Có nên tắt hẳn không? Đề xuất một cách dùng tứ giác đó mà vẫn an toàn.

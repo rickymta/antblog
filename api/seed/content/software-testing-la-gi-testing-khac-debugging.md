@@ -417,7 +417,7 @@ Hai ca TC-FARE-01, TC-FARE-02 trên bản có lỗi được đánh dấu `it.fa
 <p><b>Tester (testing):</b> (8) confirmation test — chạy lại TC-FARE-01 trên bản mới; (9) regression test — các ca cước khác và bộ test hiện có; (10) đóng phiếu nếu đạt, mở lại nếu không.</p>
 </details>
 
-**Bài 2.** Xếp mỗi việc sau vào *kiểm thử động*, *kiểm thử tĩnh* hoặc *debugging*: (a) đọc SPEC và phát hiện R-FARE-05 không nói phụ phí mưa có bị nhân hệ số cao điểm không; (b) đặt breakpoint trong `calculateFare`; (c) gọi `POST /api/quotes` với 100,05 km và kiểm lỗi `DISTANCE_OUT_OF_RANGE`; (d) chạy công cụ phân tích code báo một biến không dùng; (e) thêm `console.log` in từng bước trung gian; (f) chạy lại toàn bộ test cước sau khi sửa.
+**Bài 2.** Xếp mỗi việc sau vào *kiểm thử động*, *kiểm thử tĩnh* hoặc *debugging*: (a) đọc SPEC và phát hiện R-FARE-05 không nói phụ phí trời mưa có bị nhân hệ số cao điểm không; (b) đặt breakpoint trong `calculateFare`; (c) gọi `POST /api/quotes` với 100,05 km và kiểm lỗi `DISTANCE_OUT_OF_RANGE`; (d) chạy công cụ phân tích code báo một biến không dùng; (e) thêm `console.log` in từng bước trung gian; (f) chạy lại toàn bộ test cước sau khi sửa.
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>

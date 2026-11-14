@@ -62,7 +62,7 @@ Sau bài này, bạn có thể:
 | Load | Đạt tiêu chí ở tải dự kiến | Mức vận hành mục tiêu, thời lượng ổn định |
 | Stress | Quan sát hành vi khi tải cao hơn bình thường | Chấp nhận suy giảm, **vẫn giữ oracle dữ liệu** |
 | Spike | Phản ứng với thay đổi tải đột ngột | Tốc độ tăng/giảm, không chỉ đỉnh |
-| Soak | Ổn định trong thời gian dài | Rò rỉ bộ nhớ, tích lũy dữ liệu, kết nối |
+| Soak | Ổn định trong thời gian dài | Rò rỉ bộ nhớ, tích luỹ dữ liệu, kết nối |
 | Breakpoint | Tìm giới hạn theo tiêu chí định trước | Tăng đủ xa, generator đủ mạnh, tiêu chí dừng rõ |
 | Recovery | Khả năng phục hồi sau sự cố | Failure model, thời gian, toàn vẹn dữ liệu (SYS-14) |
 
@@ -98,7 +98,7 @@ Ngược lại, có những thứ **không bao giờ** được coi là «suy gi
 | R-API-07 | `POST /api/quotes` cho khách, trả 200 với `quote.quoteId`, `quote.total` |
 | R-API-03 | Header `x-user: customer:C001` là danh tính giản lược của lab |
 | R-FARE-01…08 | Xe máy SG 5 km, giờ thường, không mưa, không voucher ⇒ 12.000 + 4.500 × 5 = 34.500, làm tròn lên bội số 1.000 ⇒ **35.000 đ** |
-| R-QUOTE-01 | Mỗi báo giá thành công tạo một bản ghi lưu lại ⇒ dữ liệu tích lũy qua các bước |
+| R-QUOTE-01 | Mỗi báo giá thành công tạo một bản ghi lưu lại ⇒ dữ liệu tích luỹ qua các bước |
 | R-NFR-03 | p95 của `POST /api/quotes` dưới 500 ms (hệ thống đích) |
 | R-API-15 | `GET /api/health` trả 200 `{ "status": "ok" }` |
 
@@ -183,7 +183,7 @@ Bản nháp chỉ mô tả các bước; bài này đặt ID để dễ báo cá
 | ST-01 | Script và SUT sẵn sàng (rủi ro đo sai) | Server loopback mới, PGlite mới | 20 báo giá chuẩn | Gửi tuần tự | Cả 20 đúng oracle; lỗi ⇒ dừng toàn bộ | `system.reset()` |
 | ST-02 | R-API-07, R-FARE, R-NFR-03 | Sau reset | 30/s × 3s | Open slots | 90 sent, 0 drop, 0 lỗi, p95 < 500 ms | Drain |
 | ST-03 | Rủi ro dữ liệu, latency | Dữ liệu từ ST-02 | 150/s × 4s | Open slots | 0 lỗi bắt buộc; drop/p95 ghi nhận | Drain |
-| ST-04 | Rủi ro dữ liệu, latency đuôi, đo sai | Dữ liệu tích lũy | 600/s × 4s | Open slots | 0 lỗi bắt buộc; drop/p95 ghi nhận | Drain |
+| ST-04 | Rủi ro dữ liệu, latency đuôi, đo sai | Dữ liệu tích luỹ | 600/s × 4s | Open slots | 0 lỗi bắt buộc; drop/p95 ghi nhận | Drain |
 | ST-05 | Rủi ro phục hồi | Ngay sau high | 30/s × 3s | Open slots | 90 sent, 0 drop, 0 lỗi, p95 < 500 ms | Drain |
 | ST-06 | R-API-07, R-API-15 | Sau mọi bước | 1 báo giá + 1 health | Gửi đơn lẻ | Báo giá đúng oracle; health 200 `ok` | Đóng server và DB trong `finally` |
 
@@ -420,7 +420,7 @@ Trên staging có autoscaler, ghi số replica, thời gian khởi động, read
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>b) đúng.</b> a) sai: health là R-API-15. c) không phải lý do thiết kế. d) sai: R-QUOTE-01 lưu mỗi báo giá, dữ liệu tích lũy qua các bước — chính vì thế script reset sau warm-up.</p>
+<p><b>b) đúng.</b> a) sai: health là R-API-15. c) không phải lý do thiết kế. d) sai: R-QUOTE-01 lưu mỗi báo giá, dữ liệu tích luỹ qua các bước — chính vì thế script reset sau warm-up.</p>
 </details>
 
 **Câu 5.** Return-low đạt envelope và probe đúng. Có được kết luận «hệ thống phục hồi hoàn toàn sau stress» không?
@@ -438,7 +438,7 @@ Trên staging có autoscaler, ghi số replica, thời gian khởi động, read
 ## 11. Tài liệu tham khảo
 
 - Grafana k6 — *Load test types*: https://grafana.com/docs/k6/latest/testing-guides/test-types/ — phân loại smoke, average-load, stress, soak, spike, breakpoint (tra cứu 13/11/2026).
-- Grafana k6 — *Stress testing*: https://grafana.com/docs/k6/latest/testing-guides/test-types/stress-testing/ — tải cao hơn thông thường, cần baseline/load trước, mức tăng tùy hệ thống (tra cứu 13/11/2026). Bài dùng k6 làm nguồn thuật ngữ; script lab là Node tự viết.
+- Grafana k6 — *Stress testing*: https://grafana.com/docs/k6/latest/testing-guides/test-types/stress-testing/ — tải cao hơn thông thường, cần baseline/load trước, mức tăng tuỳ hệ thống (tra cứu 13/11/2026). Bài dùng k6 làm nguồn thuật ngữ; script lab là Node tự viết.
 - Phòng lab: `SPEC.md` (R-API-07, R-API-15, R-FARE-01…08, R-QUOTE-01, R-NFR-03, R-NFR-07) và mã bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-stress-test
 - Evidence: `stress-observed.json` cùng thư mục, đo ngày 13/11/2026 (Node v24.15.0, Windows 10.0.26300, i7-10700K).
 - Bài liên quan: [SYS-07 · Performance Test](/articles/system-testing-performance-test) · [SYS-08 · Load Test](/articles/system-testing-load-test) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-13 · Data Integrity Test](/articles/system-testing-data-integrity-test) · [SYS-14 · Recovery Test](/articles/system-testing-recovery-test)

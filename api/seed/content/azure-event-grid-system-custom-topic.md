@@ -32,7 +32,7 @@ Có ba loại topic, khác nhau ở nguồn sự kiện:
 | Custom topic | Code của bạn | Dịch vụ xác minh gửi `toinoi.driver.document.verified` |
 | Namespace topic | Code hoặc thiết bị của bạn | Thiết bị gửi qua MQTT, hoặc consumer chủ động kéo (pull) sự kiện |
 
-System topic bạn không tự gửi vào được. Azure gửi giúp, và bạn chỉ tạo topic để gắn subscription. Namespace topic nằm trong một Event Grid namespace, có thêm MQTT broker và pull delivery; đó là hướng khác với push thuần, nên bài này chỉ nhắc tên và không dựng lab. Hãy kiểm tài liệu để biết tính năng nào của loại nào đã sẵn sàng ở region bạn dùng.
+System topic bạn không tự gửi vào được. Azure gửi giúp, và bạn chỉ tạo topic để gắn subscription. Namespace topic nằm trong một Event Grid namespace, có thêm MQTT broker và pull delivery; đó là hướng khác với push thuần, nên bài này chỉ nhắc tên và không dựng lab. Hãy kiểm tra tài liệu để biết tính năng nào của loại nào đã sẵn sàng ở region bạn dùng.
 
 ## Một sự kiện CloudEvents trông thế nào
 

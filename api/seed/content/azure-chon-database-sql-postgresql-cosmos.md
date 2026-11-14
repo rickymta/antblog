@@ -38,7 +38,7 @@ Họ Azure SQL có ba hình thức triển khai. Azure SQL Database là database
 Về năng lực quan hệ, cả hai đều đủ cho `trips` và thanh toán: giao dịch ACID, index, ràng buộc, join. Khác biệt nằm ở những thứ xung quanh.
 
 - **Ecosystem.** EF Core dùng được với cả hai. Nhưng loạt C# của Tới Nơi đã viết migration, mapping và test trên PostgreSQL. Chuyển sang database khác không chỉ là đổi connection string mà là viết lại những chỗ dùng tính năng riêng.
-- **Extension.** PostgreSQL có hệ extension rộng, ví dụ PostGIS cho truy vấn không gian như "tài xế gần điểm đón". Azure SQL có kiểu dữ liệu không gian riêng, nhưng không cùng hệ công cụ. Danh sách extension Flexible Server cho phép thay đổi, nên kiểm tài liệu trước khi dựa vào một cái.
+- **Extension.** PostgreSQL có hệ extension rộng, ví dụ PostGIS cho truy vấn không gian như "tài xế gần điểm đón". Azure SQL có kiểu dữ liệu không gian riêng, nhưng không cùng hệ công cụ. Danh sách extension Flexible Server cho phép thay đổi, nên kiểm tra tài liệu trước khi dựa vào một cái.
 - **Kỹ năng đội.** Đội đã chạy hàng chục bài lab PostgreSQL. Kỹ năng sẵn có là một khoản tiết kiệm thật, không nên xem nhẹ.
 - **Khi nào Azure SQL thắng.** Đội có sẵn T-SQL và SQL Server, cần Managed Instance để lift-and-shift, hoặc cần một tính năng chỉ có ở đó. Tới Nơi không rơi vào các trường hợp này, nên `trips` ở lại PostgreSQL như loạt C# đã chọn.
 

@@ -150,7 +150,7 @@ UA-06 là **đề xuất** tiêu chí bàn giao vận hành, chưa phải chức
 
 | Vai trò | Làm gì | Không được làm gì |
 |---|---|---|
-| Business owner | Chốt tiêu chí, phạm vi, ra quyết định | Ủy quyền ngầm cho pipeline |
+| Business owner | Chốt tiêu chí, phạm vi, ra quyết định | Uỷ quyền ngầm cho pipeline |
 | Đại diện khách/tài xế | Thực hiện công việc, mô tả điều thấy và hiểu | Đọc kịch bản từng click do QA soạn |
 | QA | Chuẩn bị dữ liệu, clock, ghi evidence, hỗ trợ tái hiện | Sửa dữ liệu ngầm để luồng "đẹp" |
 | Developer | Điều tra lỗi | Tự quyết sai lệch là "không đáng kể" |
@@ -380,7 +380,7 @@ Hiện trạng đọc theo các chỉ số này: 6 scenario, 0 PASS từ phiên 
 
 **Nghiệm thu nhiều bên có mục tiêu xung đột.** Hoàn thành chuyến dù ví lỗi (R-PAY-06) giúp tài xế làm tiếp nhưng tạo khoản cần đối soát cho vận hành. Biên bản phải ghi ai sở hữu quyết định từng tiêu chí; không lấy lợi ích của một bên để che rủi ro của bên kia.
 
-**Continuous delivery.** Pipeline có thể tự thu evidence và áp dụng cơ chế phê duyệt đã được tổ chức ủy quyền (ví dụ: owner phê duyệt trên một change request gắn build ID). Vẫn phải truy được build → tiêu chí → evidence → quyết định. Pipeline xanh không tự sinh ra thẩm quyền nghiệm thu.
+**Continuous delivery.** Pipeline có thể tự thu evidence và áp dụng cơ chế phê duyệt đã được tổ chức uỷ quyền (ví dụ: owner phê duyệt trên một change request gắn build ID). Vẫn phải truy được build → tiêu chí → evidence → quyết định. Pipeline xanh không tự sinh ra thẩm quyền nghiệm thu.
 
 **Release dossier.** Nối bằng chứng [security](/articles/system-testing-security-pentest), [performance](/articles/system-testing-performance-test), [compatibility](/articles/system-testing-compatibility-test), [usability](/articles/system-testing-usability-test), [integrity](/articles/system-testing-data-integrity-test) và [recovery](/articles/system-testing-recovery-test) với phạm vi UAT. Không gom mọi kết quả lịch sử thành một "chứng nhận hiện tại": mỗi dòng ghi build, ngày, môi trường, và thay đổi nào làm evidence phải chạy lại. [SYS-16](/articles/system-testing-deployment-test) kiểm chính bản triển khai đó.
 

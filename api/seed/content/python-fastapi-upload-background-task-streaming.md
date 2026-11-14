@@ -88,15 +88,15 @@ def inspect_image(data: bytes, max_pixels: int) -> ImageInfo:
 
 Cửa thứ hai là file hỏng. `verify()` kiểm cấu trúc mà không giải nén và chỉ PNG có checksum: PNG cắt đôi ném `OSError`, PNG sai một byte ném `SyntaxError`, cả hai thành 400 `image-corrupt`. Bản đầu của lab chỉ bắt `UnidentifiedImageError` nên ba ca này ra 500 `text/plain`. Với JPEG, `verify()` gần như không kiểm gì; lỗi lộ ở job.
 
-Khóa lưu không bao giờ dựa vào `filename` mà là `kyc/<mã tài xế>/<16 ký tự đầu của sha256>.<đuôi suy từ định dạng thật>`, nên `../../evil.jpg` chỉ còn là một chuỗi hiển thị lại trong response.
+Khoá lưu không bao giờ dựa vào `filename` mà là `kyc/<mã tài xế>/<16 ký tự đầu của sha256>.<đuôi suy từ định dạng thật>`, nên `../../evil.jpg` chỉ còn là một chuỗi hiển thị lại trong response.
 
 Giới hạn phải khớp với ảnh thật: điện thoại thường chụp JPEG 12 MP (4032 x 3024, 1 đến 5 MB), có máy ghi MPO (JPEG nhiều khung); mức 10 MiB, 50 triệu điểm ảnh và danh sách `JPEG`, `MPO`, `PNG` cho chúng đi qua. HEIC của iPhone không có sẵn trong Pillow, client phải đổi sang JPEG. Giải nén ảnh 50 MP tốn khoảng 150 MB RAM mỗi job, nên số job song song cần giới hạn (bài 40). Mã tài xế và loại giấy tờ đi qua `Form(...)` với `pattern=r"^DR-\d{3}$"` và một `StrEnum`; sai thì 422 dạng Problem Details của bài 32, không phản chiếu giá trị đã gửi.
 
 ## Lưu vào kho và trả 202
 
-«Object storage» của lab là một thư mục sau giao diện hai hàm `put` và `get` (một `Protocol`, bài 14), để thay bằng S3 hay GCS mà không đụng handler. Hai chi tiết đáng giữ: ghi qua file tạm rồi `os.replace` để không ai thấy file ghi dở, và kiểm đường dẫn cuối nằm trong thư mục gốc (`is_relative_to`) phòng khi một khóa xấu lọt qua.
+«Object storage» của lab là một thư mục sau giao diện hai hàm `put` và `get` (một `Protocol`, bài 14), để thay bằng S3 hay GCS mà không đụng handler. Hai chi tiết đáng giữ: ghi qua file tạm rồi `os.replace` để không ai thấy file ghi dở, và kiểm đường dẫn cuối nằm trong thư mục gốc (`is_relative_to`) phòng khi một khoá xấu lọt qua.
 
-Khóa suy từ nội dung nên tải cùng ảnh hai lần ra cùng khóa và ghi lại là vô hại, ý tưởng idempotency của bài 25; lab kiểm: ảnh gửi lại với tên khác ra cùng khóa, nhưng tạo job mới.
+Khoá suy từ nội dung nên tải cùng ảnh hai lần ra cùng khoá và ghi lại là vô hại, ý tưởng idempotency của bài 25; lab kiểm: ảnh gửi lại với tên khác ra cùng khoá, nhưng tạo job mới.
 
 Phần cuối của handler là chỗ phân biệt «nhận» với «xử lý» (trích):
 
@@ -313,14 +313,14 @@ Bỏ các nhánh `except` của Pillow và nhánh trả 204 thì `--verify` báo
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Job nằm trong một <code>dict</code>: khởi động lại là mất hết, nhiều bản API không chia sẻ được. Kho đối tượng là một thư mục, không mã hóa, không quét virus. Không có xác thực (bài 34) hay giới hạn tốc độ, và ai biết mã job đều đọc được trạng thái. <code>MIN_SHARPNESS = 1000</code> chọn theo thẻ giả và phải đo lại trên ảnh thật; chất lượng ảnh chỉ là gợi ý cho người duyệt, không phải quyết định xác minh danh tính. Số liệu chạy trên một máy macOS, Python 3.14.7, fastapi 0.162.0, starlette 1.10.0, uvicorn 0.54.0, pillow 13.0.0, lúc load average khoảng 45 nên thời gian tuyệt đối chỉ để tham khảo.</p>
+<p>Job nằm trong một <code>dict</code>: khởi động lại là mất hết, nhiều bản API không chia sẻ được. Kho đối tượng là một thư mục, không mã hoá, không quét virus. Không có xác thực (bài 34) hay giới hạn tốc độ, và ai biết mã job đều đọc được trạng thái. <code>MIN_SHARPNESS = 1000</code> chọn theo thẻ giả và phải đo lại trên ảnh thật; chất lượng ảnh chỉ là gợi ý cho người duyệt, không phải quyết định xác minh danh tính. Số liệu chạy trên một máy macOS, Python 3.14.7, fastapi 0.162.0, starlette 1.10.0, uvicorn 0.54.0, pillow 13.0.0, lúc load average khoảng 45 nên thời gian tuyệt đối chỉ để tham khảo.</p>
 </div>
 
 **Bài tập 1:** Client gửi một JPEG hợp lệ với tên `cccd.PNG` và `Content-Type: application/octet-stream`. Service xử lý thế nào, có cần sửa gì không?
 
 **Bài tập 2:** Muốn job sống sót qua việc khởi động lại API mà đổi ít nhất, bạn đổi gì, và SSE đọc trạng thái từ đâu?
 
-<details><summary>Xem lời giải</summary><p><b>1.</b> Nhận bình thường: lab trả <code>202</code> với khóa <code>kyc/DR-001/12ae24e6e6b1f448.jpg</code> và <code>format: "JPEG"</code>, vì không dòng code nào dùng <code>filename</code> hay <code>content_type</code> để quyết định; đuôi file đến từ định dạng Pillow đọc từ byte. Không cần sửa. <b>2.</b> Ghi job và sự kiện vào PostgreSQL (bài 24) hoặc Redis (bài 27) thay cho <code>JobRegistry</code>; handler ghi dòng job rồi đưa <code>job_id</code> vào hàng đợi của worker (bài 40) thay cho <code>add_task</code>; worker cập nhật trạng thái ở kho chung. SSE đọc cùng kho: hỏi lặp theo <code>Last-Event-ID</code> mỗi giây, hoặc nghe kênh pub/sub rồi đọc phần còn thiếu.</p></details>
+<details><summary>Xem lời giải</summary><p><b>1.</b> Nhận bình thường: lab trả <code>202</code> với khoá <code>kyc/DR-001/12ae24e6e6b1f448.jpg</code> và <code>format: "JPEG"</code>, vì không dòng code nào dùng <code>filename</code> hay <code>content_type</code> để quyết định; đuôi file đến từ định dạng Pillow đọc từ byte. Không cần sửa. <b>2.</b> Ghi job và sự kiện vào PostgreSQL (bài 24) hoặc Redis (bài 27) thay cho <code>JobRegistry</code>; handler ghi dòng job rồi đưa <code>job_id</code> vào hàng đợi của worker (bài 40) thay cho <code>add_task</code>; worker cập nhật trạng thái ở kho chung. SSE đọc cùng kho: hỏi lặp theo <code>Last-Event-ID</code> mỗi giây, hoặc nghe kênh pub/sub rồi đọc phần còn thiếu.</p></details>
 
 Bài trước: [bài 34](/articles/python-fastapi-jwt-oauth2-authorization). Bài tiếp: [bài 36](/articles/python-fastapi-api-test-httpx).
 

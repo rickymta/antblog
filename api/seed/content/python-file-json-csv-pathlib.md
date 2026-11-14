@@ -80,9 +80,9 @@ Khối `with` gọi `__enter__` khi vào và `__exit__` khi ra, kể cả khi ex
 
 File văn bản là dãy byte; **encoding** quy định byte nào ứng với ký tự nào. Nếu không truyền `encoding`, Python dùng encoding mặc định của máy (phụ thuộc locale, có thể khác nhau giữa Windows và Linux). Theo PEP 686, UTF-8 chỉ trở thành mặc định từ Python 3.15; với 3.14, và để mã chạy giống nhau ở mọi nơi, hãy luôn ghi `encoding="utf-8"` khi mở file văn bản. Chữ "Đà Nẵng" có 7 ký tự nhưng 11 byte UTF-8; đọc sai encoding là ký tự vỡ ngay.
 
-### newline: ai chuẩn hóa xuống dòng?
+### newline: ai chuẩn hoá xuống dòng?
 
-Windows kết thúc dòng bằng `\r\n`, Linux và macOS bằng `\n`. Khi mở ở chế độ văn bản với tham số mặc định, Python **chuẩn hóa** mọi kiểu xuống dòng thành `\n` lúc đọc. Riêng với module `csv`, tài liệu yêu cầu mở file bằng `newline=""` để chính `csv` xử lý xuống dòng, kể cả khi một ô có chứa xuống dòng bên trong dấu ngoặc kép. Bạn thấy sự khác biệt bằng chế độ `--demo` của lab (trích năm trong số mười một dòng output):
+Windows kết thúc dòng bằng `\r\n`, Linux và macOS bằng `\n`. Khi mở ở chế độ văn bản với tham số mặc định, Python **chuẩn hoá** mọi kiểu xuống dòng thành `\n` lúc đọc. Riêng với module `csv`, tài liệu yêu cầu mở file bằng `newline=""` để chính `csv` xử lý xuống dòng, kể cả khi một ô có chứa xuống dòng bên trong dấu ngoặc kép. Bạn thấy sự khác biệt bằng chế độ `--demo` của lab (trích năm trong số mười một dòng output):
 
 ```text
 cwd-relative exists: False
@@ -222,7 +222,7 @@ def write_json_atomic(path: Path, data: object) -> None:
         raise
 ```
 
-Vài chi tiết đáng đọc kỹ. Tên file tạm do `tempfile` sinh nên hai tiến trình không đè lên nhau. `dir=path.parent` là bắt buộc: đổi tên chỉ nguyên tử khi nguồn và đích cùng filesystem (POSIX; Windows có hành vi riêng, xem tài liệu `os.replace`). `flush()` rồi `os.fsync()` đẩy dữ liệu xuống đĩa trước khi đổi tên. Khối `except` xóa file tạm rồi `raise` lại: lỗi vẫn lan lên, chỉ là không để rác. `--verify` thử đúng kịch bản này: ghi một đối tượng không serialize được, rồi xác nhận file cũ còn nguyên và không sót `.tmp`.
+Vài chi tiết đáng đọc kỹ. Tên file tạm do `tempfile` sinh nên hai tiến trình không đè lên nhau. `dir=path.parent` là bắt buộc: đổi tên chỉ nguyên tử khi nguồn và đích cùng filesystem (POSIX; Windows có hành vi riêng, xem tài liệu `os.replace`). `flush()` rồi `os.fsync()` đẩy dữ liệu xuống đĩa trước khi đổi tên. Khối `except` xoá file tạm rồi `raise` lại: lỗi vẫn lan lên, chỉ là không để rác. `--verify` thử đúng kịch bản này: ghi một đối tượng không serialize được, rồi xác nhận file cũ còn nguyên và không sót `.tmp`.
 
 ## Chạy chương trình và đọc kết quả
 
@@ -243,7 +243,7 @@ NT  Nha Trang         1 xong, 1 hủy,   6.7 km,    33150 VND
 Tổng doanh thu chuyến hoàn thành: 641700 VND
 ```
 
-Tổng có 24 chuyến hoàn thành, 4 chuyến hủy và 2 chuyến còn `in_transit`, đủ 30. Thư mục `out/` do `mkdir(parents=True, exist_ok=True)` tạo khi chạy và nằm trong `.gitignore` của lab. Trong `out/summary.json`, tiếng Việt còn nguyên (nhờ `ensure_ascii=False`), tiền là chuỗi (nhờ `default=`, ví dụ `"revenue_vnd": "641700"`), thời điểm là ISO 8601 có offset (`"first_requested_at": "2026-11-02T00:23:00+00:00"`). Chạy `--verify` để so với các số trên; lệnh này dùng thư mục tạm nên không ghi gì vào repo:
+Tổng có 24 chuyến hoàn thành, 4 chuyến huỷ và 2 chuyến còn `in_transit`, đủ 30. Thư mục `out/` do `mkdir(parents=True, exist_ok=True)` tạo khi chạy và nằm trong `.gitignore` của lab. Trong `out/summary.json`, tiếng Việt còn nguyên (nhờ `ensure_ascii=False`), tiền là chuỗi (nhờ `default=`, ví dụ `"revenue_vnd": "641700"`), thời điểm là ISO 8601 có offset (`"first_requested_at": "2026-11-02T00:23:00+00:00"`). Chạy `--verify` để so với các số trên; lệnh này dùng thư mục tạm nên không ghi gì vào repo:
 
 ```bash
 uv run --project examples/toi-noi-python/09-file-json-csv-pathlib examples/toi-noi-python/09-file-json-csv-pathlib/main.py --verify
@@ -263,12 +263,12 @@ OK 15/15
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Ta đọc toàn bộ CSV vào một <code>list</code>. Với 730 triệu dòng chuyến mỗi năm, hay 6.250 dòng vị trí mỗi giây, cách này hết bộ nhớ; bài 06 (generator) cho cách đọc từng dòng. Ví dụ chưa kiểm định schema đầy đủ (mã thành phố lạ chỉ nổ <code>KeyError</code>, file rỗng làm <code>min()</code> lỗi), chưa khóa khi nhiều tiến trình cùng ghi, và <code>replace</code> chưa bảo đảm bền khi mất điện nếu không fsync cả thư mục chứa. Đường dẫn trong bài do ta viết nên tin cậy được; đường dẫn từ người dùng phải được kiểm tra để không thoát ra ngoài thư mục cho phép. File tạm của <code>tempfile</code> có quyền 0600, nên file đích sau <code>replace</code> cũng vậy. Phía C#, <a href="/articles/csharp-integration-test-json-filesystem">bài 15</a> cũng ghi trực tiếp bằng <code>WriteAllTextAsync</code> và nêu cùng giới hạn.</p>
+<p>Ta đọc toàn bộ CSV vào một <code>list</code>. Với 730 triệu dòng chuyến mỗi năm, hay 6.250 dòng vị trí mỗi giây, cách này hết bộ nhớ; bài 06 (generator) cho cách đọc từng dòng. Ví dụ chưa kiểm định schema đầy đủ (mã thành phố lạ chỉ nổ <code>KeyError</code>, file rỗng làm <code>min()</code> lỗi), chưa khoá khi nhiều tiến trình cùng ghi, và <code>replace</code> chưa bảo đảm bền khi mất điện nếu không fsync cả thư mục chứa. Đường dẫn trong bài do ta viết nên tin cậy được; đường dẫn từ người dùng phải được kiểm tra để không thoát ra ngoài thư mục cho phép. File tạm của <code>tempfile</code> có quyền 0600, nên file đích sau <code>replace</code> cũng vậy. Phía C#, <a href="/articles/csharp-integration-test-json-filesystem">bài 15</a> cũng ghi trực tiếp bằng <code>WriteAllTextAsync</code> và nêu cùng giới hạn.</p>
 </div>
 
 **Bài tập:** (1) Thêm vào cuối `trips.csv` dòng `TN-0031,SG,ride,"2,5",completed,2026-11-02T18:00:00Z` (số km dùng dấu phẩy thập phân, đặt trong ngoặc kép). Chương trình báo gì, ở dòng mấy của file? Nên sửa ở đâu? (2) Vì sao file tạm của `write_json_atomic` phải nằm cùng thư mục với file đích?
 
-<details><summary>Xem lời giải</summary><p>(1) <code>DictReader</code> đọc <code>"2,5"</code> thành chuỗi <code>2,5</code> (nhờ ngoặc kép, ô không bị chẻ), nhưng <code>Decimal("2,5")</code> không hợp lệ, nên <code>read_trips</code> ném <code>ValueError: trips.csv, dòng 32: distance_km '2,5' không phải số</code>. Dòng 32 vì dòng 1 là tiêu đề và có 30 dòng dữ liệu trước nó. Cách sửa gốc rễ là chuẩn hóa tại nguồn xuất file (dấu chấm thập phân); nếu hợp đồng dữ liệu cho phép dấu phẩy thì thêm <code>.replace(",", ".")</code> một cách tường minh trong <code>read_trips</code>, đừng để Python đoán. (2) <code>replace</code> là đổi tên, và đổi tên chỉ làm được khi nguồn và đích cùng filesystem. Thư mục tạm của hệ thống thường nằm trên phân vùng khác; khi đó <code>os.replace</code> báo lỗi (trên POSIX là <code>OSError</code> kiểu EXDEV) thay vì ghi được, và chương trình sẽ hỏng đúng lúc cần lưu kết quả.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) <code>DictReader</code> đọc <code>"2,5"</code> thành chuỗi <code>2,5</code> (nhờ ngoặc kép, ô không bị chẻ), nhưng <code>Decimal("2,5")</code> không hợp lệ, nên <code>read_trips</code> ném <code>ValueError: trips.csv, dòng 32: distance_km '2,5' không phải số</code>. Dòng 32 vì dòng 1 là tiêu đề và có 30 dòng dữ liệu trước nó. Cách sửa gốc rễ là chuẩn hoá tại nguồn xuất file (dấu chấm thập phân); nếu hợp đồng dữ liệu cho phép dấu phẩy thì thêm <code>.replace(",", ".")</code> một cách tường minh trong <code>read_trips</code>, đừng để Python đoán. (2) <code>replace</code> là đổi tên, và đổi tên chỉ làm được khi nguồn và đích cùng filesystem. Thư mục tạm của hệ thống thường nằm trên phân vùng khác; khi đó <code>os.replace</code> báo lỗi (trên POSIX là <code>OSError</code> kiểu EXDEV) thay vì ghi được, và chương trình sẽ hỏng đúng lúc cần lưu kết quả.</p></details>
 
 Bài trước: [bài 08](/articles/python-exception-debug-logging). Bài tiếp: [bài 10](/articles/python-pytest-kiem-thu-chinh-sach-cuoc).
 

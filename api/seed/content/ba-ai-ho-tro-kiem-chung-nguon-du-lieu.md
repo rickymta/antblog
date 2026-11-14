@@ -20,7 +20,7 @@ Chọn phạm vi nhỏ với nguồn rõ giúp kiểm nhanh hơn yêu cầu “v
 
 ## 2. Chuẩn bị dữ liệu tối thiểu
 
-Dùng bản giả lập hoặc dữ liệu đã được xử lý theo quy định tổ chức. Kiểm quyền sử dụng công cụ, nơi lưu và phạm vi chia sẻ trước khi đưa dữ liệu dự án vào. Xóa tên chưa chắc đủ: địa chỉ, lịch sử chuyến hoặc tổ hợp thông tin vẫn có thể nhận diện người.
+Dùng bản giả lập hoặc dữ liệu đã được xử lý theo quy định tổ chức. Kiểm quyền sử dụng công cụ, nơi lưu và phạm vi chia sẻ trước khi đưa dữ liệu dự án vào. Xoá tên chưa chắc đủ: địa chỉ, lịch sử chuyến hoặc tổ hợp thông tin vẫn có thể nhận diện người.
 
 Không dán token, mật khẩu hoặc dữ liệu khách thật chỉ vì muốn bản tóm tắt chi tiết hơn. Khi không có quyền phù hợp, tạo tình huống giả giữ cấu trúc cần phân tích.
 

@@ -250,7 +250,7 @@ Mặc định là không. Event sourcing trả giá bằng lag, replay, schema s
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Một PostgreSQL local, log tối đa 5.000 bút toán, không có tải ghi liên tục lúc đo. Chưa có giám sát lag, chưa đặt <code>idle_in_transaction_session_timeout</code> để chặn giao dịch treo, chưa dọn bảng <code>_v1</code>, chưa thử logical decoding, chưa kiểm <code>xmin</code> trên replica, với nhiều database, hay sau restore. <code>NaiveId</code>, <code>HorizonId</code> và <code>apply_commit_without_checkpoint</code> chỉ để minh họa, đừng sao chép vào service thật.</p></div>
+<p>Một PostgreSQL local, log tối đa 5.000 bút toán, không có tải ghi liên tục lúc đo. Chưa có giám sát lag, chưa đặt <code>idle_in_transaction_session_timeout</code> để chặn giao dịch treo, chưa dọn bảng <code>_v1</code>, chưa thử logical decoding, chưa kiểm <code>xmin</code> trên replica, với nhiều database, hay sau restore. <code>NaiveId</code>, <code>HorizonId</code> và <code>apply_commit_without_checkpoint</code> chỉ để minh hoạ, đừng sao chép vào service thật.</p></div>
 
 ## Chạy ví dụ và kiểm chứng
 

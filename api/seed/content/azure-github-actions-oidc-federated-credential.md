@@ -49,7 +49,7 @@ Ba giá trị cho GitHub Actions là issuer `https://token.actions.githubusercon
 
 ## Subject quyết định ai đổi được token
 
-Mặc định Entra so khớp subject chính xác, từng ký tự (biến thể cho phép biểu thức khớp mẫu còn ở dạng preview, kiểm tài liệu nếu muốn dùng). Vì vậy chọn subject là chọn ai được vào. GitHub sinh subject theo ngữ cảnh job, và ngữ cảnh này đổi theo cách job được kích hoạt.
+Mặc định Entra so khớp subject chính xác, từng ký tự (biến thể cho phép biểu thức khớp mẫu còn ở dạng preview, kiểm tra tài liệu nếu muốn dùng). Vì vậy chọn subject là chọn ai được vào. GitHub sinh subject theo ngữ cảnh job, và ngữ cảnh này đổi theo cách job được kích hoạt.
 
 | Ngữ cảnh job | Subject GitHub phát hành |
 | --- | --- |
@@ -77,7 +77,7 @@ az ad app federated-credential create \
   --parameters credential-prod.json
 ```
 
-Hai khối trên chỉ đăng ký niềm tin. Chúng không cho pipeline quyền làm gì, vì quyền đến từ role assignment ở phần sau. Mỗi app registration cũng có giới hạn số federated credential, nên kiểm tài liệu nếu bạn định gom nhiều repository vào một app.
+Hai khối trên chỉ đăng ký niềm tin. Chúng không cho pipeline quyền làm gì, vì quyền đến từ role assignment ở phần sau. Mỗi app registration cũng có giới hạn số federated credential, nên kiểm tra tài liệu nếu bạn định gom nhiều repository vào một app.
 
 ## Workflow đăng nhập: ba định danh và một quyền id-token
 
