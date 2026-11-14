@@ -1,0 +1,16 @@
+{"file":"azure-bicep-co-ban-module-parameter-what-if.md","edits":[
+{"old":"và đó là chế độ dễ gây tai nạn.","new":"và đó là chế độ dễ gây sự cố.","reason":"'tai nạn' là calque của accident","severity":"medium"},
+{"old":"của ARM: nó nhận một mô tả","new":"của ARM: ARM nhận một mô tả","reason":"Tránh đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"không phải một phần của lab. Nó cho thấy decorator,","new":"không phải một phần của lab. Đoạn này cho thấy decorator,","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Khối này cho thấy cú pháp, nhưng nó không chứng minh template deploy được: tên API version và quyền của bạn trên vault vẫn phải kiểm khi chạy.","new":"Khối này cho thấy cú pháp, nhưng không chứng minh template deploy được: tên API version và quyền của bạn trên vault vẫn phải kiểm tra khi chạy.","reason":"Thừa 'nó'; thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"và Bicep kiểm kiểu ngay lúc compile","new":"và Bicep kiểm tra kiểu dữ liệu ngay lúc compile","reason":"Thiếu 'tra', 'kiểm kiểu' cụt","severity":"medium"},
+{"old":"Nó không chứa bí mật nào, và đó là chủ đích","new":"File tham số không chứa bí mật nào, và đó là chủ đích","reason":"Tránh 'Nó' mơ hồ","severity":"low"},
+{"old":"AVM tiết kiệm công.","new":"AVM tiết kiệm công sức.","reason":"'công' cụt, thiếu danh từ","severity":"medium"},
+{"old":"Nó không chứng minh container app tới được database, vì environment từ bài 22 tạo không gắn VNet này.","new":"Hạ tầng này không chứng minh container app tới được database, vì environment tạo ở bài 22 không gắn VNet này.","reason":"'Nó' mơ hồ; trật tự từ kiểu tiếng Anh 'từ bài 22 tạo'","severity":"medium"},
+{"old":"nên kiểm bằng","new":"nên kiểm tra bằng","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"đọc secret lúc deploy và chuyền thẳng vào param","new":"đọc secret lúc deploy và truyền thẳng vào param","reason":"'chuyền' dùng sai, phải là 'truyền'","severity":"medium"},
+{"old":"Bạn gọi nó như hai module trên","new":"Bạn gọi module này như hai module trên","reason":"Tránh đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"Nó so template với hiện trạng nên không biết quyền của identity, không biết quota còn đủ, và đôi khi báo thay đổi giả ở các thuộc tính ARM tự điền giá trị mặc định. Đọc nó như bản xem trước, không như lời cam kết.","new":"Công cụ này so template với hiện trạng nên không biết quyền của identity, không biết quota còn đủ, và đôi khi báo thay đổi không có thật ở các thuộc tính mà ARM tự điền giá trị mặc định. Hãy đọc kết quả như bản xem trước, không như lời cam kết.","reason":"Tránh 'Nó'; 'thay đổi giả' là calque của false positive; thiếu 'mà'","severity":"medium"},
+{"old":"chỉ bật Complete cho resource group chỉ chứa thứ do template này quản.","new":"chỉ bật Complete cho resource group chỉ chứa những resource do template này quản lý.","reason":"'thứ ... quản' cụt, thiếu động từ 'quản lý'","severity":"medium"},
+{"old":"Diff nhỏ về chữ không có nghĩa tác động nhỏ.","new":"Diff chỉ vài dòng không có nghĩa tác động nhỏ.","reason":"'nhỏ về chữ' gượng","severity":"low"}
+]}

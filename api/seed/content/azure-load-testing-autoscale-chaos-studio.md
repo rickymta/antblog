@@ -1,7 +1,7 @@
 ---
 slug: azure-load-testing-autoscale-chaos-studio
 title: "Hiệu năng: Azure Load Testing, autoscale và Chaos Studio"
-summary: "Bài 56: kiểm chứng mục tiêu 70 chuyến/giây và p95 dưới 500 ms của Tới Nơi bằng Azure Load Testing với Locust, chỉnh scale rule của Container Apps theo số đo, rồi dùng Chaos Studio phá có kiểm soát trên staging."
+summary: "Bài 56: kiểm chứng mục tiêu 70 chuyến/giây và p95 dưới 500 ms của Tới Nơi bằng Azure Load Testing với Locust, chỉnh scale rule của Container Apps theo kết quả đo, rồi dùng Chaos Studio phá có kiểm soát trên staging."
 category: devops-azure
 level: advanced
 tags: [azure, cloud, devops, toi-noi, load-testing, autoscale, chaos-engineering, performance]
@@ -38,7 +38,7 @@ Azure Load Testing chạy kịch bản bạn đã có (JMeter `.jmx` hoặc Locu
 
 ### Kịch bản Locust cho POST /quotes
 
-Mỗi người dùng ảo chờ 5 đến 9 giây giữa hai lần xin báo giá; 500 người dùng với thời gian chờ trung bình 7 giây cho khoảng 70 request mỗi giây. Kịch bản dùng một JWT chung từ secret, nên không kiểm xác thực từng người dùng, và không chứng minh body mẫu phủ các trường hợp giá của 6 thành phố.
+Mỗi người dùng ảo chờ 5 đến 9 giây giữa hai lần xin báo giá; 500 người dùng với thời gian chờ trung bình 7 giây cho khoảng 70 request mỗi giây. Kịch bản dùng một JWT chung từ secret, nên không kiểm tra xác thực từng người dùng, và không chứng minh body mẫu phủ các trường hợp giá của 6 thành phố.
 
 ```python
 import os
@@ -68,7 +68,7 @@ class Rider(HttpUser):
 
 ### Cấu hình test và tiêu chí pass/fail
 
-Tiêu chí pass/fail biến load test từ "xem thử" thành cổng kiểm. Khối YAML dưới đây tạo test 5 engine, mỗi engine 100 người dùng (giả định số user Locust tính theo engine), chạy 10 phút, và fail nếu p95 vượt 500 ms hoặc tỉ lệ lỗi vượt 1%. `failureCriteria` hỗ trợ `p95` cho `response_time_ms`; biến `LOCUST_*` nên đối chiếu lại với schema YAML hiện hành. File này không khai báo app component; thêm Container Apps và PostgreSQL bằng portal hoặc theo schema.
+Tiêu chí pass/fail biến load test từ "xem thử" thành cổng kiểm tra. Khối YAML dưới đây tạo test 5 engine, mỗi engine 100 người dùng (giả định số user Locust tính theo engine), chạy 10 phút, và fail nếu p95 vượt 500 ms hoặc tỉ lệ lỗi vượt 1%. `failureCriteria` hỗ trợ `p95` cho `response_time_ms`; biến `LOCUST_*` nên đối chiếu lại với schema YAML hiện hành. File này không khai báo app component; thêm Container Apps và PostgreSQL bằng portal hoặc theo schema.
 
 ```yaml
 version: v0.1
@@ -112,7 +112,7 @@ az load test-run create --load-test-resource "$LT" --resource-group "$RG" \
   --display-name "baseline, max 3 replica"
 ```
 
-Đừng giả định lệnh CLI tự trả mã lỗi khi tiêu chí fail. Trong CI, dùng action `azure/load-testing` của GitHub Actions (hoặc task tương ứng của Azure Pipelines), vốn đánh dấu bước fail khi tiêu chí không đạt; nếu tự viết bằng CLI, đọc `testResult` qua `az load test-run show ... --query testResult` rồi tự thoát. Kiểm một lần bằng cách cố ý hạ ngưỡng. Identity của resource load test cần quyền đọc secret Key Vault và đọc metric của resource bị đo.
+Đừng giả định lệnh CLI tự trả mã lỗi khi tiêu chí fail. Trong CI, dùng action `azure/load-testing` của GitHub Actions (hoặc task tương ứng của Azure Pipelines), vốn đánh dấu bước fail khi tiêu chí không đạt; nếu tự viết bằng CLI, đọc `testResult` qua `az load test-run show ... --query testResult` rồi tự thoát. Kiểm tra một lần bằng cách cố ý hạ ngưỡng. Identity của resource load test cần quyền đọc secret Key Vault và đọc metric của resource bị đo.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -130,9 +130,9 @@ az load test-run create --load-test-resource "$LT" --resource-group "$RG" \
 
 Kết quả load test là đầu vào để chỉnh autoscale. Các rule của `trip-service` đã có ở [bài 22](/articles/azure-container-apps-revision-ingress-scale): HTTP theo số request đồng thời, CPU hoặc memory, và độ dài queue Service Bus cho consumer. Ở đây chỉ bàn cách đọc kết quả để chỉnh.
 
-| Triệu chứng trong test run | Nghĩa là gì | Núm cần chỉnh |
+| Triệu chứng trong test run | Nghĩa là gì | Tham số cần chỉnh |
 | --- | --- | --- |
-| p95 tăng, replica đã chạm `maxReplicas` | Hết đường scale | Nâng max, nhưng kiểm connection trước |
+| p95 tăng, replica đã chạm `maxReplicas` | Không còn chỗ để scale | Nâng max, nhưng kiểm tra connection trước |
 | p95 tăng, replica còn xa trần | Scale quá chậm hoặc ngưỡng quá cao | Hạ ngưỡng HTTP; với rule KEDA, rút `pollingInterval` |
 | Replica dao động lên xuống liên tục | Cooldown quá ngắn | Tăng `cooldownPeriod` |
 | p95 tăng, CPU replica thấp, `active_connections` cao | Nghẽn ở database | Pool, PgBouncer, SKU, không phải replica |
@@ -140,9 +140,9 @@ Kết quả load test là đầu vào để chỉnh autoscale. Các rule của `
 
 Hàng thứ tư quan trọng nhất. **PostgreSQL Flexible Server không autoscale compute.** Đổi SKU là thao tác chủ động và thường kèm khởi động lại, nên database không tự lớn theo tải như replica. IOPS cũng bị ràng buộc bởi cấu hình storage. Việc chuẩn bị nằm ở phía ứng dụng: pool nhỏ vừa đủ, cân nhắc PgBouncer tích hợp của Flexible Server, và tính `maxReplicas × kích thước pool` so với giới hạn connection của SKU. Redis tương tự: tier và dung lượng chọn trước, đổi bằng thao tác scale riêng.
 
-Hai núm thời gian là `pollingInterval` (KEDA hỏi nguồn tải bao lâu một lần) và `cooldownPeriod` (chờ bao lâu mới giảm replica); kiểm giá trị mặc định trong schema Container Apps của API version bạn dùng. Cooldown ngắn tiết kiệm tiền nhưng đợt cao điểm kế tiếp gặp replica vừa bị tắt. Với tải theo khung giờ như 11:00 đến 13:00 của Tới Nơi, đặt `minReplicas` cao hơn trước giờ cao điểm có thể rẻ hơn chịu p95 xấu.
+Hai tham số thời gian là `pollingInterval` (KEDA hỏi nguồn tải bao lâu một lần) và `cooldownPeriod` (chờ bao lâu mới giảm replica); kiểm tra giá trị mặc định trong schema Container Apps của API version bạn dùng. Cooldown ngắn tiết kiệm tiền nhưng đợt cao điểm kế tiếp gặp replica vừa bị tắt. Với tải theo khung giờ như 11:00 đến 13:00 của Tới Nơi, đặt `minReplicas` cao hơn trước giờ cao điểm có thể rẻ hơn so với việc chịu p95 xấu.
 
-## Chaos Studio phá có kiểm soát để kiểm giả định
+## Chaos Studio phá có kiểm soát để kiểm tra giả định
 
 Load test hỏi "đủ nhanh khi mọi thứ khoẻ không". Chaos Studio hỏi "một phần hỏng thì sao, và ta có thấy không". Cơ chế gồm ba lớp:
 
@@ -150,7 +150,7 @@ Load test hỏi "đủ nhanh khi mọi thứ khoẻ không". Chaos Studio hỏi 
 - **Experiment** là tài nguyên Azure khai báo các bước, nhánh và hành động, kèm danh sách target. Experiment có managed identity riêng, và identity này cần quyền trên target.
 - **Fault** là hành động cụ thể: tắt VM, áp lực CPU, độ trễ mạng, kill pod AKS qua Chaos Mesh, failover Cosmos DB, chặn truy cập Key Vault, hay mô phỏng mất zone bằng cách tắt các instance VMSS trong một zone. Mỗi loại resource có danh sách fault riêng và cách chạy riêng (agent trong máy hay service-direct).
 
-CPU pressure và network latency chạy qua agent trên VM/VMSS hoặc qua Chaos Mesh trên AKS. Tại thời điểm viết, thư viện fault không có fault trực tiếp cho Container Apps hay PostgreSQL Flexible Server; danh sách đổi theo thời gian, nên hãy đối chiếu lại. Khối dưới là experiment mẫu tạo áp lực CPU 10 phút trên VM có agent, chỉ để thấy hình dạng khai báo. Nó không chạm vào `ca-toinoi-trips-staging`.
+CPU pressure và network latency chạy qua agent trên VM/VMSS hoặc qua Chaos Mesh trên AKS. Tại thời điểm viết, thư viện fault không có fault trực tiếp cho Container Apps hay PostgreSQL Flexible Server; danh sách đổi theo thời gian, nên hãy đối chiếu lại. Khối dưới là experiment mẫu tạo áp lực CPU 10 phút trên VM có agent, chỉ để thấy hình dạng khai báo. Experiment này không chạm vào `ca-toinoi-trips-staging`.
 
 ```json
 {
@@ -179,7 +179,7 @@ CPU pressure và network latency chạy qua agent trên VM/VMSS hoặc qua Chaos
 }
 ```
 
-Không có fault cho Container Apps thì vẫn thử được. Mất một replica có thể mô phỏng bằng một endpoint chỉ bật ở staging khiến đúng một replica tự thoát (với `minReplicas` từ 3 trở lên), thay vì restart cả revision. Độ trễ 200 ms tới PostgreSQL có thể tạo bằng proxy mã nguồn mở như Toxiproxy đặt giữa app và database. Cả hai thô hơn Chaos Studio nhưng kiểm được cùng giả định. Nếu một service chạy trên AKS, dùng fault Chaos Mesh (pod chaos, network chaos) thay cho cách thủ công.
+Không có fault cho Container Apps thì vẫn thử được. Mất một replica có thể mô phỏng bằng một endpoint chỉ bật ở staging khiến đúng một replica tự thoát (với `minReplicas` từ 3 trở lên), thay vì restart cả revision. Độ trễ 200 ms tới PostgreSQL có thể tạo bằng proxy mã nguồn mở như Toxiproxy đặt giữa app và database. Cả hai thô hơn Chaos Studio nhưng kiểm tra được cùng giả định. Nếu một service chạy trên AKS, dùng fault Chaos Mesh (pod chaos, network chaos) thay cho cách thủ công.
 
 ### Mục tiêu và điều kiện dừng viết ra trước khi chạy
 
@@ -196,16 +196,16 @@ Quy tắc vận hành: chỉ chạy ở staging, có người trực nhìn dashb
 <figcaption>Hình 2. Experiment Chaos Studio có target, fault và duration làm trần; alert burn-rate gọi người trực, người trực cancel khi cần và ghi SLI.</figcaption>
 </figure>
 
-## Load test và chaos là cách kiểm error budget trước khi khách kiểm giúp
+## Load test và chaos là cách kiểm tra error budget trước khi khách hàng kiểm tra giúp bạn
 
-Nối lại với SLO ở bài 48. Load test cho biết mức tải mà p95 bắt đầu vượt 500 ms, tức là lúc SLI latency bắt đầu cháy budget. Chaos cho biết hệ thống chịu mất một phần ra sao, và alert burn-rate có nổ đúng lúc không. Alert chưa từng nổ trong thử nghiệm là alert chưa được kiểm. Bỏ qua cả hai thì khách hàng sẽ kiểm thay bạn vào ngày khuyến mãi đầu tiên.
+Nối lại với SLO ở bài 48. Load test cho biết mức tải mà p95 bắt đầu vượt 500 ms, tức là lúc SLI latency bắt đầu cháy budget. Chaos cho biết hệ thống chịu mất một phần ra sao, và alert burn-rate có nổ đúng lúc không. Alert chưa từng nổ trong thử nghiệm là alert chưa được kiểm tra. Bỏ qua cả hai thì khách hàng sẽ kiểm tra thay bạn vào ngày khuyến mãi đầu tiên.
 
 ## Lab: 500 user ảo, chỉnh scale rule, rồi phá hai thứ
 
 Lab mô tả cách làm trên staging, chưa phải kết quả đã chạy. Xoá resource Load Testing và experiment sau lab nếu không giữ.
 
 1. **Baseline.** Chạy `quotes-500u` với `maxReplicas` hiện tại (ví dụ 3). Ghi p95, tỉ lệ lỗi, số replica cao nhất, CPU cao nhất, `active_connections` cao nhất.
-2. **Chỉnh một núm.** Ví dụ hạ ngưỡng HTTP từ 50 xuống 30 hoặc nâng `maxReplicas`. Chạy lại với `test-run-id` khác và so sánh hai run. Đổi hai núm cùng lúc thì không biết núm nào có tác dụng.
+2. **Chỉnh một tham số.** Ví dụ hạ ngưỡng HTTP từ 50 xuống 30 hoặc nâng `maxReplicas`. Chạy lại với `test-run-id` khác và so sánh hai run. Đổi hai tham số cùng lúc thì không biết tham số nào có tác dụng.
 3. **Chaos 1: mất một replica.** Khi tải đang chạy ở mức bình thường, mô phỏng mất một replica như trên. Ghi p95, tỉ lệ 5xx trong 5 phút sau đó, và số replica có tự hồi phục không.
 4. **Chaos 2: thêm 200 ms tới PostgreSQL.** Chạy tối đa 10 phút. Ghi thời điểm alert nổ, p95 cao nhất, và có lỗi timeout dây chuyền hay không.
 5. **Ghi nhận SLI.** Mỗi lần chạy ghi một dòng: giả thuyết, kết quả, có đạt p95 dưới 500 ms không, alert có nổ không, hành động tiếp theo.
@@ -218,7 +218,7 @@ Lab mô tả cách làm trên staging, chưa phải kết quả đã chạy. Xo�
 
 ## Học tiếp từ đây
 
-Bạn vừa có cách kiểm mục tiêu 70 chuyến/giây và p95 dưới 500 ms bằng Azure Load Testing, cách đọc kết quả để chỉnh scale rule mà không đẩy rủi ro xuống PostgreSQL, và khung thử chaos có giả thuyết và điều kiện dừng. Kết quả phải do bạn tự đo trên staging.
+Bạn vừa có cách kiểm tra mục tiêu 70 chuyến/giây và p95 dưới 500 ms bằng Azure Load Testing, cách đọc kết quả để chỉnh scale rule mà không đẩy rủi ro xuống PostgreSQL, và khung thử chaos có giả thuyết và điều kiện dừng. Kết quả phải do bạn tự đo trên staging.
 
 [Bài 57](/articles/azure-multi-region-data-residency-multi-tenant) bàn chuyện Tới Nơi sang nước khác: hạ tầng nhân đôi thế nào, dữ liệu nào được rời region, và khách doanh nghiệp được cách ly ở mức nào.
 

@@ -1,0 +1,18 @@
+{"file":"azure-terraform-azurerm-state-workspace.md","edits":[
+{"old":"không phải vì nó mạnh hơn","new":"không phải vì Terraform mạnh hơn","reason":"Tránh đại từ 'nó' trong tiêu đề mục","severity":"low"},
+{"old":"module nội bộ viết bằng nó.","new":"module nội bộ viết bằng HCL.","reason":"'nó' mơ hồ, nhắc lại danh từ","severity":"low"},
+{"old":"bọc từng resource thành một khái niệm ổn định","new":"bọc từng resource thành một lớp trừu tượng ổn định","reason":"'khái niệm' là dịch gượng của abstraction","severity":"medium"},
+{"old":"Mỗi công cụ tin rằng nó sở hữu resource đó.","new":"Mỗi công cụ tin rằng mình sở hữu resource đó.","reason":"'nó' mơ hồ","severity":"low"},
+{"old":"Tệ hơn, deployment Bicep ở chế độ Complete sẽ xoá resource Terraform tạo trong cùng resource group.","new":"Tệ hơn, deployment Bicep ở chế độ Complete sẽ xoá resource do Terraform tạo trong cùng resource group.","reason":"Thiếu 'do', câu cụt","severity":"medium"},
+{"old":"Nó cho bạn ba thứ không có khi để state trên máy cá nhân: nhiều người và pipeline dùng chung một nguồn sự thật","new":"Backend này cho bạn ba thứ mà state trên máy cá nhân không có: nhiều người và pipeline dùng chung một nguồn dữ liệu gốc","reason":"Tránh 'Nó' đầu câu, trật tự từ kiểu Anh; 'nguồn sự thật' là calque","severity":"high"},
+{"old":"cho mỗi môi trường backend, tfvars và state của nó","new":"cho mỗi môi trường backend, tfvars và state riêng","reason":"'của nó' gượng","severity":"medium"},
+{"old":"Nó giống phần Bicep ở bài 40 về ý.","new":"Về ý, module này giống phần Bicep ở bài 40.","reason":"Tránh 'Nó' và trật tự từ kiểu Anh","severity":"medium"},
+{"old":"Module này chưa kiểm tra gì về kết nối thật từ app tới database. Nó chỉ mô tả tài nguyên.","new":"Module này chưa kiểm tra gì về kết nối thật từ app tới database. Module chỉ mô tả resource.","reason":"Tránh 'Nó'; 'tài nguyên' không khớp 'resource' dùng trong cả bài","severity":"medium"},
+{"old":"còn mật khẩu admin chuyền qua biến môi trường","new":"còn mật khẩu admin truyền qua biến môi trường","reason":"'chuyền' sai từ, đúng là 'truyền'","severity":"medium"},
+{"old":"và Terraform đổi nó lấy quyền truy cập, đó là `use_oidc`.","new":"và Terraform đổi token đó lấy quyền truy cập, tức cơ chế `use_oidc`.","reason":"Câu mơ hồ, 'nó' và 'đó là' không rõ chỉ gì","severity":"medium"},
+{"old":"nên coi nó như state: không đưa vào artifact công khai","new":"nên coi file plan như state: không đưa vào artifact công khai","reason":"'nó' mơ hồ","severity":"low"},
+{"old":"chạy `terraform plan -detailed-exitcode` trong lịch","new":"chạy `terraform plan -detailed-exitcode` theo lịch","reason":"'trong lịch' là calque của 'on a schedule'","severity":"medium"},
+{"old":"Nó chỉ bảo vệ trước lệnh Terraform.","new":"Cơ chế này chỉ bảo vệ trước lệnh Terraform.","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"nếu không, chạy `apply` để về đúng.","new":"nếu không, chạy `apply` để đưa resource về đúng như code.","reason":"Câu lược tân ngữ","severity":"medium"},
+{"old":"Nếu tag do hệ thống khác quản (ví dụ policy gắn tag)","new":"Nếu tag do hệ thống khác quản lý (ví dụ policy gắn tag)","reason":"'quản' thiếu 'lý'","severity":"medium"}
+]}

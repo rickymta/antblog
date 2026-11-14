@@ -1,0 +1,22 @@
+{"file":"azure-database-migration-trong-pipeline.md","edits":[
+{"old":"fixture test gọi `MigrateAsync` để kiểm schema","new":"fixture test gọi `MigrateAsync` để kiểm tra schema","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Ngược lại, nó không bảo vệ bạn khỏi một migration","new":"Ngược lại, cơ chế này không bảo vệ bạn khỏi một migration","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"low"},
+{"old":"bài viết snake_case cho dễ đọc, còn SQL do EF sinh sẽ dùng","new":"bài viết ghi tên dạng snake_case cho dễ đọc, còn SQL do EF sinh sẽ dùng","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Bảng ghi ba release, nhưng lab chỉ cần hai","new":"Bảng liệt kê ba release, nhưng lab chỉ cần hai","reason":"'Bảng ghi' gượng","severity":"low"},
+{"old":"Khối dưới mô tả cách entity đọc với fallback; nó không chứng minh backfill đã xong","new":"Khối dưới cho thấy entity đọc dữ liệu kèm fallback như thế nào; khối này không chứng minh backfill đã xong","reason":"'đọc với fallback' cụt; tránh 'nó'","severity":"medium"},
+{"old":"Khối này mô tả phân quyền và một cấu hình lock, nó không tạo role hay gán chúng cho identity nào.","new":"Khối này mô tả phân quyền và một cấu hình lock, chứ không tạo role hay gán role cho identity nào.","reason":"Hai mệnh đề nối bằng dấu phẩy, 'chúng' mơ hồ","severity":"low"},
+{"old":"quan trọng vì lý do cơ chế: một `ALTER TABLE`","new":"quan trọng vì cách hoạt động của khoá: một `ALTER TABLE`","reason":"'vì lý do cơ chế' là calque","severity":"medium"},
+{"old":"Runner của GitHub thường không với tới PostgreSQL private.","new":"Runner của GitHub thường không kết nối được tới PostgreSQL private.","reason":"'không với tới' gượng","severity":"medium"},
+{"old":"Workflow chỉ gọi mặt điều khiển Azure (","new":"Workflow chỉ gọi control plane của Azure (","reason":"'mặt điều khiển' là dịch từng chữ của control plane","severity":"medium"},
+{"old":"migrator. Nó không cấp quyền Key Vault hay ACR cho identity và không chứng minh job nối được database","new":"migrator, nhưng không cấp quyền Key Vault hay ACR cho identity và không chứng minh job nối được database","reason":"Tránh 'Nó' chỉ lệnh ở đầu câu","severity":"medium"},
+{"old":"bộ migration được review và bộ migration được áp dụng là một.","new":"bộ migration được review cũng chính là bộ migration được áp dụng.","reason":"'là một' dịch máy","severity":"medium"},
+{"old":"nó chỉ áp phần migration chưa có trong bảng lịch sử, nên chạy lại không gây hại. Pipeline sinh nó ở CI","new":"script này chỉ áp phần migration chưa có trong bảng lịch sử, nên chạy lại không gây hại. Pipeline sinh script ở CI","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"Workflow chỉ khởi động job, chưa chờ nó xong; bước kế tiếp trong thực tế phải poll","new":"Workflow chỉ khởi động job mà chưa chờ job chạy xong; trong thực tế, bước kế tiếp phải poll","reason":"Tránh 'nó'; câu rõ chủ thể hơn","severity":"low"},
+{"old":"Nếu muốn chặt hơn, cho job chạy chính file SQL đó bằng một image `psql`.","new":"Nếu muốn kiểm soát chặt hơn, hãy cho job chạy chính file SQL đó bằng một image `psql`.","reason":"'chặt hơn' thiếu danh từ","severity":"medium"},
+{"old":"Migration đã commit không rollback bằng cách quay revision.","new":"Migration đã commit không rollback được bằng cách quay lại revision cũ.","reason":"Câu cụt","severity":"medium"},
+{"old":"Restore tạo ra một server mới, nó không ghi đè server đang chạy.","new":"Restore tạo ra một server mới, chứ không ghi đè server đang chạy.","reason":"Tránh 'nó', nối câu rõ nghĩa","severity":"medium"},
+{"old":"Nó chưa nói gì về thời gian restore","new":"Lệnh trên chưa nói gì về thời gian restore","reason":"'Nó' mơ hồ ở đầu câu","severity":"medium"},
+{"old":"| Kiểm trước khi chạy ở prod | Cách kiểm |","new":"| Kiểm tra trước khi chạy ở prod | Cách kiểm tra |","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Vậy schema database có tự quay về bản trước theo không?","new":"Vậy schema database có tự quay về bản trước không?","reason":"Thừa 'theo'","severity":"low"},
+{"old":"việc nhìn thấy hệ thống khi nó chạy","new":"việc quan sát hệ thống khi hệ thống đang chạy","reason":"'nhìn thấy ... khi nó chạy' gượng","severity":"low"}
+]}

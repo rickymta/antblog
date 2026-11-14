@@ -1,0 +1,11 @@
+{"file":"azure-toi-uu-chi-phi-reservation-savings-plan-finops.md","edits":[
+{"old":"charge-back khi tag còn thủng biến mọi tranh luận","new":"charge-back khi tag còn thiếu sót biến mọi tranh luận","reason":"'thủng' là cách nói gượng, dịch từ 'gaps'","severity":"medium"},
+{"old":"Các công cụ dưới theo một nguyên lý:","new":"Các công cụ dưới đây dùng chung một nguyên lý:","reason":"'dưới theo một nguyên lý' cụt, gượng","severity":"medium"},
+{"old":"kiểm lại trước khi mua","new":"kiểm tra lại trước khi mua","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"| Cách kiểm |","new":"| Cách kiểm tra |","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Dừng server dev ngoài giờ được, nhưng storage vẫn tính","new":"Có thể dừng server dev ngoài giờ, nhưng storage vẫn tính","reason":"Trật tự từ gượng","severity":"medium"},
+{"old":"có người sở hữu.","new":"có người phụ trách.","reason":"'người sở hữu' là calque của owner","severity":"low"},
+{"old":"Mỗi lần giảm một khoản ẩn đều đổi một thứ khác:","new":"Mỗi lần giảm một khoản ẩn đều phải đánh đổi một thứ khác:","reason":"'đổi một thứ khác' mơ hồ, thiếu nghĩa đánh đổi","severity":"medium"},
+{"old":"Nó không nhóm theo tag và không đảm bảo dữ liệu một hai ngày gần nhất đã về đủ.","new":"Lệnh này không nhóm theo tag và không đảm bảo dữ liệu của một, hai ngày gần nhất đã về đủ.","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"thước đo độ thủng của pha inform","new":"thước đo mức thiếu tag của pha inform","reason":"'độ thủng' tự ghép, không rõ nghĩa","severity":"medium"}
+]}

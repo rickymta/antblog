@@ -1,0 +1,16 @@
+{"file":"azure-postgresql-ha-read-replica-pitr-entra-auth.md","edits":[
+{"old":"mất dev nửa giờ là phiền, không là thiệt hại","new":"mất dev nửa giờ là phiền, không phải thiệt hại","reason":"Thiếu 'phải' trong 'không phải'","severity":"medium"},
+{"old":"Nó bảo vệ trước lỗi máy chủ, không bảo vệ trước sự cố cả zone.","new":"Kiểu này bảo vệ trước lỗi máy chủ, không bảo vệ trước sự cố cả zone.","reason":"Tránh 'Nó' chỉ sự vật trừu tượng ở đầu câu","severity":"medium"},
+{"old":"Với lỡ tay `delete from trips` thì thường restore ra server tạm","new":"Với trường hợp lỡ tay chạy `delete from trips` thì thường restore ra server tạm","reason":"Câu thiếu danh từ và động từ","severity":"high"},
+{"old":"Server kiểm token rồi khớp với một role","new":"Server kiểm tra token rồi khớp với một role","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Quyền truy cập thu hồi được ở Entra thay vì đổi password ở mọi nơi.","new":"Có thể thu hồi quyền truy cập ở Entra thay vì đổi password ở mọi nơi.","reason":"Trật tự từ kiểu tiếng Anh, câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Nó chưa chứng minh identity có role","new":"Đoạn code này chưa chứng minh identity có role","reason":"Tránh 'Nó' mơ hồ ở đầu câu","severity":"medium"},
+{"old":"Firewall rule, private endpoint và các thiết lập mạng phải kiểm lại","new":"Firewall rule, private endpoint và các thiết lập mạng phải kiểm tra lại","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"kiểm extension và query chậm","new":"kiểm tra extension và các query chậm","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"vì token chỉ kiểm lúc xác thực","new":"vì token chỉ được kiểm tra lúc xác thực","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Token trong `PGPASSWORD` chỉ sống ngắn","new":"Token trong `PGPASSWORD` chỉ có hiệu lực ngắn","reason":"'sống ngắn' gượng","severity":"low"},
+{"old":"Mốc thời gian phải nằm trong khoảng dịch vụ còn giữ được","new":"Mốc thời gian phải nằm trong khoảng dịch vụ còn lưu backup","reason":"'khoảng ... còn giữ được' thiếu danh từ, gượng","severity":"medium"},
+{"old":"nó chạy tốt đến khi pool cần mở connection mới","new":"ứng dụng chạy tốt đến khi pool cần mở connection mới","reason":"Tránh 'nó' mơ hồ, trùng với 'app' ở vế trước","severity":"low"},
+{"old":"Cắt traffic sang server restore","new":"Chuyển traffic sang server restore","reason":"'Cắt traffic' dễ hiểu thành ngắt traffic, trái nghĩa","severity":"medium"},
+{"old":"khi tải dồn","new":"khi tải tăng đột biến","reason":"'tải dồn' gượng","severity":"low"}
+]}

@@ -34,9 +34,9 @@ Phần dưới đây đi sâu vào GitHub Actions và chỉ ra chỗ tương đ�
 
 ## Federated credential thay client secret bằng một lời hứa có điều kiện
 
-Cách cũ là tạo app registration, sinh client secret, dán vào secret của repository. Secret đó có hạn, nằm ở hai nơi, và ai đọc được biến môi trường của runner đều mang nó đi được. Bài 13 đã giới thiệu federated credential cho workload ngoài Azure. Ở đây ta áp dụng cho pipeline.
+Cách cũ là tạo app registration, sinh client secret, dán vào secret của repository. Secret đó có thời hạn, nằm ở hai nơi, và ai đọc được biến môi trường của runner đều mang nó đi được. Bài 13 đã giới thiệu federated credential cho workload ngoài Azure. Ở đây ta áp dụng cho pipeline.
 
-Mỗi lần job chạy, GitHub có thể phát một token OIDC ký bằng khoá của GitHub, sống ngắn và mang các claim mô tả job: repository nào, nhánh nào, environment nào. Entra ID đã được bạn dặn trước qua federated credential gắn vào app registration. Khi token tới, Entra kiểm chữ ký theo issuer, kiểm audience, và so khớp subject. Khớp cả ba thì Entra cấp token Entra để gọi Azure Resource Manager. Không khớp thì dừng ngay, kể cả khi token hợp lệ về chữ ký.
+Mỗi lần job chạy, GitHub có thể phát một token OIDC ký bằng khoá của GitHub, sống ngắn và mang các claim mô tả job: repository nào, nhánh nào, environment nào. Entra ID đã được bạn cấu hình trước qua federated credential gắn vào app registration. Khi token tới, Entra kiểm chữ ký theo issuer, kiểm audience, và so khớp subject. Khớp cả ba thì Entra cấp token Entra để gọi Azure Resource Manager. Không khớp thì dừng ngay, kể cả khi token hợp lệ về chữ ký.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -58,7 +58,7 @@ Mặc định Entra so khớp subject chính xác, từng ký tự (biến thể
 | Job chạy do pull request | `repo:<org>/<repo>:pull_request` |
 | Job chạy trên tag | `repo:<org>/<repo>:ref:refs/tags/<tag>` |
 
-Có một hệ quả dễ hiểu sai. Khi job khai `environment`, subject chỉ chứa tên environment, không chứa nhánh. Entra không biết nhánh nào đang chạy và cũng không biết approval đã được duyệt chưa. Thứ chặn là phía GitHub: job tới environment `prod` phải qua required reviewer và quy tắc giới hạn nhánh trước khi runner bắt đầu và token được phát. Nếu bạn quên đặt hai quy tắc đó, bất kỳ ai push được workflow vào repository đều khai được `environment: prod` và đổi token prod. Federated credential chỉ đúng khi cấu hình environment đứng sau nó cũng đúng.
+Có một hệ quả dễ hiểu sai. Khi job khai `environment`, subject chỉ chứa tên environment, không chứa nhánh. Entra không biết nhánh nào đang chạy và cũng không biết approval đã được duyệt chưa. Phía GitHub mới là nơi chặn: job tới environment `prod` phải qua required reviewer và quy tắc giới hạn nhánh trước khi runner bắt đầu và token được phát. Nếu bạn quên đặt hai quy tắc đó, bất kỳ ai push được workflow vào repository đều khai được `environment: prod` và đổi token prod. Federated credential chỉ an toàn khi cấu hình environment đứng sau nó cũng chặt chẽ.
 
 Lệnh tạo credential cho environment `prod` trên app registration dùng một file JSON mô tả ba trường:
 
@@ -77,7 +77,7 @@ az ad app federated-credential create \
   --parameters credential-prod.json
 ```
 
-Hai khối trên chỉ đăng ký niềm tin. Chúng không cho pipeline quyền làm gì, vì quyền đến từ role assignment ở phần sau. Mỗi app registration cũng có giới hạn số federated credential, nên kiểm tra tài liệu nếu bạn định gom nhiều repository vào một app.
+Hai khối trên chỉ đăng ký quan hệ tin cậy. Chúng không cho pipeline quyền làm gì, vì quyền đến từ role assignment ở phần sau. Mỗi app registration cũng có giới hạn số federated credential, nên kiểm tra tài liệu nếu bạn định gom nhiều repository vào một app.
 
 ## Workflow đăng nhập: ba định danh và một quyền id-token
 
@@ -108,7 +108,7 @@ jobs:
       - run: az group list --query "[].name" -o tsv
 ```
 
-Khối này chạy cùng một file cho dev và prod, vì mỗi environment giữ giá trị `AZURE_CLIENT_ID` riêng và subject đổi theo tên environment. Nó không chứng minh bất cứ thứ gì về an toàn của prod. Phiên bản action `v2` ở đây chỉ để minh hoạ, nên hãy kiểm bản hiện hành và ghim vào một commit SHA trong repository thật, vì action bên thứ ba chạy với quyền của job.
+Khối này chạy cùng một file cho dev và prod, vì mỗi environment giữ giá trị `AZURE_CLIENT_ID` riêng và subject đổi theo tên environment. Khối này không chứng minh được điều gì về độ an toàn của prod. Phiên bản action `v2` ở đây chỉ để minh hoạ, nên hãy kiểm bản hiện hành và ghim vào một commit SHA trong repository thật, vì action bên thứ ba chạy với quyền của job.
 
 Trên Azure DevOps, tương đương là service connection loại Azure Resource Manager chọn workload identity federation, rồi task `AzureCLI@2` trỏ vào tên service connection qua tham số `azureSubscription`. Approval và check nằm ở environment Azure DevOps, cùng vai trò với required reviewer của GitHub.
 
@@ -138,7 +138,7 @@ Mô hình đúng là hai identity, một cho mỗi môi trường. Credential c�
 
 ## Workflow có sẵn trong repo và chỗ mở rộng
 
-Repository đã có `.github/workflows/toi-noi-dotnet.yml`. Nó chạy khi có thay đổi trong thư mục service hoặc chính file workflow, với `permissions: contents: read` ở cấp workflow. Job `verify` dựng PostgreSQL 18 làm service container có health check, chạy `dotnet test` với `TOI_NOI_PG` trỏ vào nó, rồi dùng `PublishContainer` để xuất image ra file OCI archive, không push đâu cả. Cuối cùng nó upload các artifact kể cả khi test lỗi.
+Repository đã có `.github/workflows/toi-noi-dotnet.yml`. Workflow này chạy khi có thay đổi trong thư mục service hoặc chính file workflow, với `permissions: contents: read` ở cấp workflow. Job `verify` dựng PostgreSQL 18 làm service container có health check, chạy `dotnet test` với `TOI_NOI_PG` trỏ vào nó, rồi dùng `PublishContainer` để xuất image ra file OCI archive, không push đâu cả. Cuối cùng, job upload các artifact kể cả khi test lỗi.
 
 Workflow này chưa đăng nhập Azure, và đó là chủ ý của một lab học: nó không cần bất kỳ credential nào ngoài mật khẩu PostgreSQL chỉ dùng trong runner. Khi mở rộng, có một bẫy. Vì quyền `id-token` ở cấp workflow đang không được cấp, job nào gọi `azure/login` sẽ lỗi lúc xin token. Cách sửa đúng không phải sửa quyền ở cấp workflow, mà khai riêng ở job cần đăng nhập, để job test vẫn chỉ đọc nội dung:
 
@@ -207,7 +207,7 @@ Kỳ vọng khi chạy workflow `oidc-smoke` với `env = dev`: bước `azure/l
 
 ## Học tiếp từ đây
 
-Bạn vừa mô tả cách cho GitHub Actions đăng nhập Azure bằng federated credential theo environment, cấp quyền ở scope hẹp, và nối vào workflow có sẵn của repo mà không đụng tới secret dài hạn. Bài kế tiếp, [bài 43](/articles/azure-ci-pipeline-build-test-scan-push-acr), dùng danh tính này để build image, quét lỗ hổng và push vào `acrtoinoidev`. Nếu cần ôn cơ chế federated credential, xem lại [bài 13](/articles/azure-managed-identity-workload-identity), còn phần hạ tầng bằng code nằm ở [bài 41](/articles/azure-terraform-azurerm-state-workspace).
+Bạn vừa cấu hình cách cho GitHub Actions đăng nhập Azure bằng federated credential theo environment, cấp quyền ở scope hẹp, và nối vào workflow có sẵn của repo mà không đụng tới secret dài hạn. Bài kế tiếp, [bài 43](/articles/azure-ci-pipeline-build-test-scan-push-acr), dùng danh tính này để build image, quét lỗ hổng và push vào `acrtoinoidev`. Nếu cần ôn cơ chế federated credential, xem lại [bài 13](/articles/azure-managed-identity-workload-identity), còn phần hạ tầng bằng code nằm ở [bài 41](/articles/azure-terraform-azurerm-state-workspace).
 
 ## Tài liệu gốc
 

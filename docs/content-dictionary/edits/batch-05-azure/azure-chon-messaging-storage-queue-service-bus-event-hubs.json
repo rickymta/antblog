@@ -1,0 +1,15 @@
+{"file":"azure-chon-messaging-storage-queue-service-bus-event-hubs.md","edits":[
+{"old":"cách mỗi consumer chịu được việc nhận trùng.","new":"cách mỗi consumer xử lý được message trùng lặp.","reason":"'chịu được việc nhận trùng' là calque","severity":"high"},
+{"old":"Ba bài trước đã đi riêng từng dịch vụ:","new":"Ba bài trước đã lần lượt đi sâu vào từng dịch vụ:","reason":"'đi riêng từng dịch vụ' thiếu giới từ, gượng","severity":"low"},
+{"old":"Chọn broker theo tính năng dễ dẫn tới sai,","new":"Chọn broker theo tính năng dễ dẫn tới chọn sai,","reason":"Thiếu động từ sau 'dẫn tới'","severity":"low"},
+{"old":"và mỗi dịch vụ sinh ra cho một loại.","new":"và mỗi dịch vụ dành cho một loại.","reason":"'sinh ra cho' là calque của built for","severity":"medium"},
+{"old":"Lệch loại là nguồn của phần lớn thiết kế khó chịu:","new":"Chọn sai loại là nguồn gốc của phần lớn thiết kế rắc rối:","reason":"'Lệch loại', 'thiết kế khó chịu' gượng","severity":"medium"},
+{"old":"thì quá đắt và đọc không được lại,","new":"thì quá đắt và không đọc lại được,","reason":"Trật tự từ sai: 'đọc không được lại'","severity":"high"},
+{"old":"nên nó phụ thuộc vào partition key bạn chọn ở bài 35","new":"nên thứ tự phụ thuộc vào partition key bạn chọn ở bài 35","reason":"Tránh đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"Nó không biến việc ghi PostgreSQL thành một phần của transaction đó,","new":"Cơ chế này không biến việc ghi PostgreSQL thành một phần của transaction đó,","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Kiến trúc tổng thể của Tới Nơi dùng ngôn ngữ Kafka.","new":"Kiến trúc tổng thể của Tới Nơi dùng thuật ngữ Kafka.","reason":"'ngôn ngữ Kafka' là calque của Kafka vocabulary","severity":"medium"},
+{"old":"Hãy xem nó như một cách di chuyển, và đối chiếu","new":"Hãy xem đây như một cách chuyển đổi, và đối chiếu","reason":"Tránh 'nó'; 'cách di chuyển' gượng","severity":"low"},
+{"old":"nếu consumer cứ thử lại nó.","new":"nếu consumer cứ thử lại message đó.","reason":"Đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"Consumer kéo theo nhịp của nó, có retry và dead-letter.","new":"Consumer tự kéo message theo nhịp riêng, có retry và dead-letter.","reason":"'kéo theo nhịp của nó' mơ hồ, thiếu tân ngữ","severity":"medium"},
+{"old":"thiếu nó thì subscription im lặng và không có lỗi nào báo.","new":"thiếu nó thì subscription không nhận được message nào mà không báo lỗi.","reason":"'im lặng' là calque của silent","severity":"medium"}
+]}

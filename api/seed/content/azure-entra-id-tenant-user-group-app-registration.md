@@ -10,7 +10,7 @@ language: vi
 
 Đây là **bài 11** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 2 · Danh tính và bảo mật (bài 1/9 của phần).
 
-Phần 2 gồm 9 bài (11 đến 19) với hai mục tiêu cụ thể: không còn mật khẩu nằm trong cấu hình, và không còn database mở ra Internet. Mọi thứ bắt đầu từ câu hỏi nằm dưới cùng: ai đang gọi? Bài này dựng nền danh tính của Tới Nơi bằng Microsoft Entra ID và kết thúc bằng một lab đăng ký API rồi giải mã token. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
+Phần 2 gồm 9 bài (11 đến 19) với hai mục tiêu cụ thể: không còn mật khẩu nằm trong cấu hình, và không còn database mở ra Internet. Mọi thứ bắt đầu từ câu hỏi nền tảng nhất: ai đang gọi? Bài này dựng nền danh tính của Tới Nơi bằng Microsoft Entra ID và kết thúc bằng một lab đăng ký API rồi giải mã token. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -24,7 +24,7 @@ Một **tenant** là một thực thể Entra ID riêng của tổ chức: nó g
 
 Từ đó có ba ranh giới hay bị trộn lẫn:
 
-- **Entra ID**: xác thực, quản lý danh tính, phát token. Câu hỏi nó trả lời là «đây là ai».
+- **Entra ID**: xác thực, quản lý danh tính, phát token. Entra ID trả lời câu hỏi «đây là ai».
 - **Azure RBAC**: quyết định principal đó làm được gì trên resource nào. Đây là bài 12.
 - **Entra External ID**: tenant dành cho khách hàng và tài xế của ứng dụng, tách khỏi tenant nhân viên. Đây là bài 19.
 
@@ -47,7 +47,7 @@ Entra có ba loại danh tính người cần phân biệt:
 
 Group có vài loại, chọn theo mục đích:
 
-| Loại group | Thành viên được quyết định bởi | Dùng khi nào |
+| Loại group | Cách xác định thành viên | Dùng khi nào |
 | --- | --- | --- |
 | Security group (assigned) | Admin thêm tay | Cấp quyền RBAC cho đội, như `grp-toinoi-platform` |
 | Security group (dynamic) | Rule trên thuộc tính user | Tự động theo phòng ban hay vị trí; cần license phù hợp, kiểm tra tài liệu |
@@ -64,7 +64,7 @@ Hai lớp bảo vệ nên có từ ngày đầu. **MFA** bắt user chứng minh
 
 ## App registration và enterprise application là hai mặt của một ứng dụng
 
-Khi một ứng dụng cần nhận hoặc kiểm token, nó phải được Entra biết đến. Có hai object, hay bị gọi nhầm là một:
+Khi một ứng dụng cần nhận hoặc kiểm tra token, ứng dụng đó phải được Entra biết đến. Có hai object, hay bị gọi nhầm là một:
 
 - **App registration** là bản định nghĩa ứng dụng, sống ở home tenant: client ID, redirect URI, scope mà API mở ra, app role, credential. Mỗi ứng dụng có đúng một registration.
 - **Enterprise application** (service principal) là bản thể hiện của ứng dụng trong một tenant cụ thể. Đây là nơi gán user/group được phép dùng, ghi nhận consent và áp Conditional Access. Ứng dụng đa tenant có một registration nhưng mỗi tenant có một service principal.
@@ -83,14 +83,14 @@ Chạy trên Azure thì còn một lựa chọn tốt hơn cả ba: managed iden
 
 ## Token: audience và scope quyết định API có chấp nhận hay không
 
-Entra phát hai loại token đáng nhớ. **ID token** nói cho client biết user là ai sau khi đăng nhập; audience của nó là chính client. **Access token** dùng để gọi API; audience của nó là API đó. Client không nên đọc ruột access token của API khác, vì định dạng đó không thuộc hợp đồng với client.
+Entra phát hai loại token đáng nhớ. **ID token** nói cho client biết user là ai sau khi đăng nhập; audience của nó là chính client. **Access token** dùng để gọi API; audience của nó là API đó. Client không nên đọc nội dung bên trong access token của API khác, vì định dạng đó không thuộc hợp đồng với client.
 
 Quyền trong access token xuất hiện ở hai dạng:
 
 - **`scp`** (scope): quyền uỷ quyền đại diện cho user đã đăng nhập, ví dụ `Trips.Read`. Chỉ có khi có user.
 - **`roles`** (app role): quyền gán cho chính ứng dụng, dùng khi không có user (service gọi service).
 
-Một JWT gồm ba đoạn base64url nối bằng dấu chấm; đoạn giữa là payload JSON. API phải kiểm chữ ký bằng khoá công khai của tenant, rồi kiểm các claim sau:
+Một JWT gồm ba đoạn base64url nối bằng dấu chấm; đoạn giữa là payload JSON. API phải kiểm tra chữ ký bằng khoá công khai của tenant, rồi kiểm tra các claim sau:
 
 | Claim | Ý nghĩa | API phải kiểm gì |
 | --- | --- | --- |
@@ -101,7 +101,7 @@ Một JWT gồm ba đoạn base64url nối bằng dấu chấm; đoạn giữa l
 | `exp` | Hết hạn lúc nào | Chưa hết hạn |
 | `tid`, `oid` | Tenant và object ID của principal | Dùng để định danh và audit, không dùng tên hiển thị |
 
-Giải mã payload không bằng kiểm chứng token. Ai cũng đọc được claim; chỉ chữ ký mới cho biết claim có thật. Cách kiểm trong ASP.NET Core nằm ở [bài 19 của loạt C#](/articles/dotnet10-authentication-authorization).
+Giải mã payload không đồng nghĩa với xác minh token. Ai cũng đọc được claim; chỉ chữ ký mới cho biết claim có thật. Cách kiểm tra trong ASP.NET Core nằm ở [bài 19 của loạt C#](/articles/dotnet10-authentication-authorization).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -112,7 +112,7 @@ Giải mã payload không bằng kiểm chứng token. Ai cũng đọc được 
 
 ## Lab: group, app registration và scope Trips.Read
 
-Lab này tạo group, đăng ký API rồi mở một scope. Khối đầu chỉ dựng object; nó không chứng minh bất kỳ client nào đã được phép gọi API.
+Lab này tạo group, đăng ký API rồi mở một scope. Khối đầu chỉ dựng object; khối này không chứng minh bất kỳ client nào đã được phép gọi API.
 
 ```bash
 az login --tenant <tenant-id>
@@ -131,7 +131,7 @@ az ad app create \
 az ad sp create --id <app-id>
 ```
 
-Tiếp theo là mở scope. Tạo `api.json` với một GUID mới (chạy `uuidgen`) rồi PATCH vào object ứng dụng qua Microsoft Graph. Đặt `requestedAccessTokenVersion` bằng 2 để Entra phát access token phiên bản 2.0 cho API này. Thuộc tính này nằm ở phía API, nên client gọi endpoint nào thì định dạng token vẫn do nó quyết định.
+Tiếp theo là mở scope. Tạo `api.json` với một GUID mới (chạy `uuidgen`) rồi PATCH vào object ứng dụng qua Microsoft Graph. Đặt `requestedAccessTokenVersion` bằng 2 để Entra phát access token phiên bản 2.0 cho API này. Thuộc tính này nằm ở phía API, nên client gọi endpoint nào thì định dạng token vẫn do thuộc tính này quyết định.
 
 ```json
 {
@@ -161,7 +161,7 @@ az rest --method PATCH \
 
 Lệnh `az rest` tự lấy token Microsoft Graph từ phiên `az login` và tự đặt header JSON khi body là JSON; user đăng nhập cần quyền sửa ứng dụng này (là owner của nó, hoặc có role như Application Administrator). Khối trên chỉ khai báo scope; nó chưa cho client nào quyền xin scope đó.
 
-Azure CLI là một ứng dụng first-party của Microsoft, client ID `04b07795-8ddb-461a-bbee-02f9e1bf7b46`. Mặc định nó chưa được consent cho scope của API bạn vừa tạo, nên bước lấy token sẽ báo lỗi consent (AADSTS65001). Cách gọn cho lab là khai báo Azure CLI là client được uỷ quyền trước, trong một lần PATCH thứ hai sau khi scope đã tồn tại. Gửi lại đủ khối `api` (cả `requestedAccessTokenVersion` và `oauth2PermissionScopes` như trên) và thêm:
+Azure CLI là một ứng dụng first-party của Microsoft, client ID `04b07795-8ddb-461a-bbee-02f9e1bf7b46`. Mặc định Azure CLI chưa được consent cho scope của API bạn vừa tạo, nên bước lấy token sẽ báo lỗi consent (AADSTS65001). Cách gọn cho lab là khai báo Azure CLI là client được uỷ quyền trước, trong một lần PATCH thứ hai sau khi scope đã tồn tại. Gửi lại đủ khối `api` (cả `requestedAccessTokenVersion` và `oauth2PermissionScopes` như trên) và thêm:
 
 ```json
 "preAuthorizedApplications": [{
@@ -200,13 +200,13 @@ Kết quả kỳ vọng với token do user đăng nhập (không có `roles`, g
 }
 ```
 
-Với token phiên bản 2.0, `aud` luôn là client ID của API và `iss` có hậu tố `/v2.0`; với phiên bản 1.0, `aud` thường là App ID URI dạng `api://<app-id>` và `iss` có dạng `https://sts.windows.net/<tenant-id>/`. API cấu hình kiểm sai phiên bản sẽ từ chối token hợp lệ, nên bước PATCH ở trên đặt phiên bản rõ ràng. Nếu service Booking gọi bằng client credentials, token sẽ không có `scp` mà có `roles` (khi bạn đã định nghĩa app role và gán cho nó).
+Với token phiên bản 2.0, `aud` luôn là client ID của API và `iss` có hậu tố `/v2.0`; với phiên bản 1.0, `aud` thường là App ID URI dạng `api://<app-id>` và `iss` có dạng `https://sts.windows.net/<tenant-id>/`. API kiểm tra theo sai phiên bản sẽ từ chối token hợp lệ, nên bước PATCH ở trên đặt phiên bản rõ ràng. Nếu service Booking gọi bằng client credentials, token sẽ không có `scp` mà có `roles` (khi bạn đã định nghĩa app role và gán cho nó).
 
 App registration và group không tính tiền, nhưng đừng để object lab nằm lại trong tenant. Dọn bằng `az ad app delete --id <app-id>` (service principal đi kèm bị xoá theo, registration nằm trong mục deleted items một thời gian trước khi mất hẳn) và `az ad group delete --group grp-toinoi-platform`.
 
-**Bài tập:** service Booking gọi `api-toinoi-trips` bằng client credentials, không có user. API của bạn chỉ kiểm `aud` và `scp`. Chuyện gì xảy ra, và kiểm sai theo hướng ngược lại (chỉ kiểm `aud`) nguy hiểm ở đâu?
+**Bài tập:** service Booking gọi `api-toinoi-trips` bằng client credentials, không có user. API của bạn chỉ kiểm `aud` và `scp`. Chuyện gì xảy ra, và kiểm tra sai theo hướng ngược lại (chỉ kiểm tra `aud`) nguy hiểm ở đâu?
 
-<details><summary>Xem lời giải</summary><p>Token app-only không có `scp` nên API từ chối mọi lời gọi của Booking, một lỗi an toàn nhưng làm hỏng tính năng. Nếu API chỉ kiểm `aud` thì mọi ứng dụng trong tenant xin được token cho API này đều qua được, kể cả ứng dụng không liên quan. API cần kiểm `scp` cho luồng có user và `roles` cho luồng app-only, và nên bắt buộc gán app role cho client được phép.</p></details>
+<details><summary>Xem lời giải</summary><p>Token app-only không có `scp` nên API từ chối mọi lời gọi của Booking, một lỗi theo hướng an toàn nhưng làm hỏng tính năng. Nếu API chỉ kiểm `aud` thì mọi ứng dụng trong tenant xin được token cho API này đều qua được, kể cả ứng dụng không liên quan. API cần kiểm `scp` cho luồng có user và `roles` cho luồng app-only, và nên bắt buộc gán app role cho client được phép.</p></details>
 
 ## Học tiếp từ đây
 

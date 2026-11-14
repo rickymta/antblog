@@ -20,9 +20,9 @@ Bài này giải thích Event Grid là bộ định tuyến sự kiện kiểu p
 
 ## Event Grid báo điều đã xảy ra, không giao việc cần làm
 
-Event Grid là dịch vụ **push**. Một **publisher** gửi sự kiện vào một **topic**. Mỗi **event subscription** gắn với topic mô tả: lọc sự kiện nào, giao tới **handler** nào. Event Grid khớp bộ lọc, gọi handler, và thử lại khi handler lỗi. Không có consumer nào phải dò hay giữ kết nối.
+Event Grid là dịch vụ **push**. Một **publisher** gửi sự kiện vào một **topic**. Mỗi **event subscription** gắn với một topic và mô tả: lọc sự kiện nào, giao tới **handler** nào. Event Grid khớp bộ lọc, gọi handler, và thử lại khi handler lỗi. Không consumer nào phải poll hay giữ kết nối.
 
-Điều này đặt Event Grid ở đúng một loại thông điệp: **event notification**, tức «việc này đã xảy ra». Một blob vừa được tạo, một secret sắp hết hạn, một tài xế vừa được duyệt. Người gửi không quan tâm ai nghe, và người nghe tự quyết làm gì. Command kiểu «hãy trừ tiền chuyến này» thuộc về queue, và stream vị trí GPS thuộc về Event Hubs (bài 35).
+Vì vậy Event Grid chỉ phù hợp với một loại thông điệp: **event notification**, tức «việc này đã xảy ra». Một blob vừa được tạo, một secret sắp hết hạn, một tài xế vừa được duyệt. Người gửi không quan tâm ai nghe, và người nghe tự quyết làm gì. Command kiểu «hãy trừ tiền chuyến này» thuộc về queue, và stream vị trí GPS thuộc về Event Hubs (bài 35).
 
 Có ba loại topic, khác nhau ở nguồn sự kiện:
 
@@ -32,7 +32,7 @@ Có ba loại topic, khác nhau ở nguồn sự kiện:
 | Custom topic | Code của bạn | Dịch vụ xác minh gửi `toinoi.driver.document.verified` |
 | Namespace topic | Code hoặc thiết bị của bạn | Thiết bị gửi qua MQTT, hoặc consumer chủ động kéo (pull) sự kiện |
 
-System topic bạn không tự gửi vào được. Azure gửi giúp, và bạn chỉ tạo topic để gắn subscription. Namespace topic nằm trong một Event Grid namespace, có thêm MQTT broker và pull delivery; đó là hướng khác với push thuần, nên bài này chỉ nhắc tên và không dựng lab. Hãy kiểm tra tài liệu để biết tính năng nào của loại nào đã sẵn sàng ở region bạn dùng.
+System topic bạn không tự gửi vào được. Azure gửi giúp, và bạn chỉ tạo topic để gắn subscription. Namespace topic nằm trong một Event Grid namespace, có thêm MQTT broker và pull delivery; đó là hướng khác với push thuần, nên bài này chỉ nhắc tên và không dựng lab. Hãy kiểm tra tài liệu để biết tính năng nào của loại topic nào đã sẵn sàng ở region bạn dùng.
 
 ## Một sự kiện CloudEvents trông thế nào
 
@@ -58,7 +58,7 @@ Bốn trường đáng chú ý. `id` là khoá để bạn khử trùng lặp. `
 
 ## Subject và data là nơi lọc sự kiện
 
-Filter chạy ở phía Event Grid, trước khi gọi handler. Có ba lớp: lọc theo **loại sự kiện**, theo **tiền tố/hậu tố của subject**, và theo **advanced filter** trên các trường trong `data`. Lọc sớm có hai lợi ích: handler không bị gọi vô ích, và bạn không trả tiền cho thực thi function vô nghĩa. Lọc theo subject chỉ so khớp chuỗi, không hiểu nội dung ảnh, nên một file `.jpg` rác vẫn lọt qua; handler vẫn phải kiểm.
+Filter chạy ở phía Event Grid, trước khi gọi handler. Có ba lớp: lọc theo **loại sự kiện**, theo **tiền tố/hậu tố của subject**, và theo **advanced filter** trên các trường trong `data`. Lọc sớm có hai lợi ích: handler không bị gọi vô ích, và bạn không trả tiền cho những lần function chạy vô nghĩa. Lọc theo subject chỉ so khớp chuỗi, không hiểu nội dung ảnh, nên một file `.jpg` rác vẫn lọt qua; handler vẫn phải kiểm tra.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -98,7 +98,7 @@ az eventgrid system-topic event-subscription create -g $RG \
   --subject-ends-with .jpg
 ```
 
-Tiền tố khoá sự kiện vào đúng container `driver-docs`, hậu tố loại `.png` và `.pdf` (và cả `.jpeg`, nếu app có thể đặt đuôi đó). Mặc định so khớp subject không phân biệt hoa thường. Hai bộ lọc này không chứng minh ảnh hợp lệ, và tên cờ cùng giá trị schema nên đối chiếu với `az eventgrid system-topic event-subscription create --help` của phiên bản CLI bạn có. Phía Function, handler tối thiểu như sau:
+Tiền tố khoá sự kiện vào đúng container `driver-docs`, hậu tố loại bỏ file `.png` và `.pdf` (và cả `.jpeg`, nếu app có thể đặt đuôi đó). Mặc định so khớp subject không phân biệt hoa thường. Hai bộ lọc này không chứng minh ảnh hợp lệ, còn tên cờ và giá trị schema thì nên đối chiếu với `az eventgrid system-topic event-subscription create --help` của phiên bản CLI bạn đang dùng. Phía Function, handler tối thiểu như sau:
 
 ```csharp
 using Azure.Messaging;
@@ -143,7 +143,7 @@ Khi handler trả lỗi hoặc không phản hồi, Event Grid thử lại theo 
 <figcaption>Hình 2. Giao sự kiện thất bại thì thử lại theo backoff; hết số lần hoặc hết thời gian sống thì ghi vào container dead-letter trong Blob.</figcaption>
 </figure>
 
-Có hai hệ quả cho code. Thứ nhất, giao thành công theo kiểu **at-least-once**: handler chậm trả lời có thể nhận cùng sự kiện hai lần, nên handler phải idempotent và dùng `id` hoặc tên blob làm khoá, như ở [bài outbox/inbox](/articles/dotnet10-outbox-inbox-idempotent-consumer). Thứ hai, Event Grid không bảo đảm thứ tự. Hai blob tạo liền nhau có thể tới đảo thứ tự.
+Có hai hệ quả cho code. Thứ nhất, Event Grid giao sự kiện theo kiểu **at-least-once**: handler chậm trả lời có thể nhận cùng sự kiện hai lần, nên handler phải idempotent và dùng `id` hoặc tên blob làm khoá, như ở [bài outbox/inbox](/articles/dotnet10-outbox-inbox-idempotent-consumer). Thứ hai, Event Grid không bảo đảm thứ tự. Hai blob được tạo liền nhau có thể tới không đúng thứ tự.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -171,13 +171,13 @@ az eventgrid system-topic event-subscription create -g rg-toinoi-ops-prod-sea \
   --advanced-filter data.operationName StringContains Microsoft.Network/publicIPAddresses
 ```
 
-Cấu hình này chỉ **báo sau khi** public IP đã được tạo. Nó không ngăn được việc tạo; chặn thì dùng [Azure Policy](/articles/azure-policy-deny-audit-initiative). Vị trí `global` và tên loại sự kiện cần đối chiếu tài liệu system topic trước khi chạy.
+Cấu hình này chỉ **báo sau khi** public IP đã được tạo. Cấu hình này không ngăn được việc tạo; chặn thì dùng [Azure Policy](/articles/azure-policy-deny-audit-initiative). Vị trí `global` và tên loại sự kiện cần đối chiếu tài liệu system topic trước khi chạy.
 
 ## Bảo mật: handshake, danh tính và phiên bản schema
 
-Với endpoint **Webhook** thường, Event Grid phải chắc endpoint thật sự của bạn. Lúc tạo subscription, nó gửi một sự kiện xác nhận chứa mã; endpoint phải trả mã đó về, nếu không subscription không được tạo. Function dùng Event Grid trigger xử lý bước này sẵn. Tự viết endpoint thì phải tự làm đúng handshake, và với CloudEvents nó dùng cơ chế riêng (abuse protection qua request HTTP OPTIONS) nên đọc phần validation của tài liệu. Webhook còn có thể bảo vệ bằng Entra: subscription cấu hình một app registration, Event Grid gửi kèm token, endpoint kiểm token trước khi nhận sự kiện.
+Với endpoint **Webhook** thường, Event Grid phải xác nhận endpoint đúng là của bạn. Lúc tạo subscription, Event Grid gửi một sự kiện xác nhận chứa mã; endpoint phải trả mã đó về, nếu không subscription không được tạo. Function dùng Event Grid trigger xử lý bước này sẵn. Tự viết endpoint thì phải tự làm đúng handshake, và với CloudEvents thì handshake dùng cơ chế riêng (abuse protection qua request HTTP OPTIONS) nên đọc phần validation của tài liệu. Webhook còn có thể bảo vệ bằng Entra: subscription cấu hình một app registration, Event Grid gửi kèm token, endpoint kiểm tra token trước khi nhận sự kiện.
 
-Phía **gửi vào custom topic**, có hai cách xác thực: access key (SAS) hoặc Entra ID với role **EventGrid Data Sender**. Chọn Entra cho service chạy trên Azure, giống nguyên tắc ở các bài trước: không có secret để rò. Phía **giao ra**, system topic hoặc custom topic có thể dùng managed identity để ghi vào Service Bus, Event Hubs, Storage Queue và Blob dead-letter, nên không cần chuỗi kết nối trong subscription.
+Phía **gửi vào custom topic**, có hai cách xác thực: access key (SAS) hoặc Entra ID với role **EventGrid Data Sender**. Chọn Entra cho service chạy trên Azure, giống nguyên tắc ở các bài trước: không có secret nào để rò rỉ. Phía **giao ra**, system topic hoặc custom topic có thể dùng managed identity để ghi vào Service Bus, Event Hubs, Storage Queue và Blob dead-letter, nên không cần chuỗi kết nối trong subscription.
 
 Custom topic dựng bằng một lệnh, schema chọn lúc tạo:
 
@@ -187,7 +187,7 @@ az eventgrid topic create -g rg-toinoi-docs-dev-sea \
   --input-schema cloudeventschemav1_0
 ```
 
-Người gửi phải đặt `type` có phiên bản, chẳng hạn `toinoi.driver.document.verified.v1`. Thêm trường vào `data` là thay đổi tương thích; đổi nghĩa hoặc xoá trường thì ra `v2`, chạy song song với `v1` cho tới khi consumer cũ biến mất. Consumer cần bỏ qua trường lạ thay vì báo lỗi.
+Người gửi phải đặt `type` có phiên bản, chẳng hạn `toinoi.driver.document.verified.v1`. Thêm trường vào `data` là thay đổi tương thích; đổi nghĩa hoặc xoá trường thì ra `v2`, chạy song song với `v1` cho tới khi không còn consumer cũ. Consumer cần bỏ qua trường lạ thay vì báo lỗi.
 
 ## Khi nào KHÔNG dùng Event Grid
 
@@ -195,14 +195,14 @@ Người gửi phải đặt `type` có phiên bản, chẳng hạn `toinoi.driv
 | --- | --- | --- |
 | Thứ tự theo chuyến | Không bảo đảm thứ tự | Service Bus session (bài 34) |
 | Stream khối lượng lớn, đọc lại được | Không giữ lại để replay | Event Hubs (bài 35) |
-| Xử lý có transaction, lock, retry theo từng message | Là push, không phải broker việc | Service Bus |
+| Xử lý có transaction, lock, retry theo từng message | Event Grid là push, không phải broker xử lý công việc | Service Bus |
 | Tải ổn định tới một consumer chậm | Handler chậm sẽ bị retry dồn | Queue làm bộ đệm |
 
 Mẫu thường gặp là Event Grid đứng đầu, rồi đẩy sang Service Bus để consumer kéo theo nhịp của nó. Bài sau gom cả bốn dịch vụ vào một bảng quyết định.
 
 **Bài tập:** Dịch vụ xác minh nhận sự kiện Blob created và gọi một API OCR chỉ chịu được vài request mỗi giây. Đợt tài xế mới tải hàng nghìn ảnh cùng lúc. Chỉ dùng Event Grid tới Function có đủ không, và bạn thay đổi gì?
 
-<details><summary>Xem lời giải</summary><p>Chưa đủ: Function scale theo số sự kiện và sẽ đập API OCR, lỗi sinh retry và làm tải tăng thêm. Cho subscription giao vào một Service Bus queue hoặc Storage Queue, rồi giới hạn đồng thời của consumer cho khớp khả năng OCR. Queue giữ phần dư và dead-letter phần lỗi, còn Event Grid vẫn lo việc báo «blob đã có».</p></details>
+<details><summary>Xem lời giải</summary><p>Chưa đủ: Function scale theo số sự kiện và sẽ gọi dồn dập vào API OCR, lỗi sinh retry và làm tải tăng thêm. Cho subscription giao vào một Service Bus queue hoặc Storage Queue, rồi giới hạn đồng thời của consumer cho khớp khả năng OCR. Queue giữ phần dư và dead-letter phần lỗi, còn Event Grid vẫn lo việc báo «blob đã có».</p></details>
 
 ## Học tiếp từ đây
 

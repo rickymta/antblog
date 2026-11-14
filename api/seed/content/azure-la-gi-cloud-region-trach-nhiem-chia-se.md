@@ -1,7 +1,7 @@
 ---
 slug: azure-la-gi-cloud-region-trach-nhiem-chia-se
 title: "Azure là gì: cloud, region, availability zone và trách nhiệm chia sẻ"
-summary: "Bài 1: phân biệt IaaS, PaaS, SaaS qua câu hỏi Tới Nơi tự lo gì khi chạy API, chọn region Southeast Asia, đọc SLA ra phút downtime, cùng bản đồ sáu phần của loạt và lab đưa trip-service lên Azure."
+summary: "Bài 1: phân biệt IaaS, PaaS, SaaS qua câu hỏi Tới Nơi tự lo gì khi chạy API, chọn region Southeast Asia, quy đổi SLA thành số phút downtime, cùng bản đồ sáu phần của loạt và lab đưa trip-service lên Azure."
 category: devops-azure
 level: beginner
 tags: [azure, cloud, devops, toi-noi, region, sla, shared-responsibility]
@@ -41,17 +41,17 @@ Không tầng nào đưa dữ liệu ra khỏi trách nhiệm của bạn. Nếu
 
 ## Azure không có region ở Việt Nam nên Tới Nơi chọn Singapore
 
-Một **region** là một vùng địa lý gồm một hay nhiều datacenter nối nhau bằng mạng độ trễ thấp. Hầu hết resource được tạo trong đúng một region. Database, máy ảo, storage luôn có địa chỉ vật lý cụ thể. Một số ít dịch vụ là global, như Entra ID hay Front Door, không gắn với một region.
+Một **region** là một vùng địa lý gồm một hay nhiều datacenter nối nhau bằng mạng độ trễ thấp. Hầu hết resource được tạo trong đúng một region. Database, máy ảo, storage luôn nằm ở một vị trí vật lý cụ thể. Một số ít dịch vụ là global, như Entra ID hay Front Door, không gắn với một region.
 
 Theo danh sách region Microsoft công bố tại thời điểm viết, chưa có region ở Việt Nam. Tới Nơi vì vậy chọn **Southeast Asia** (Singapore) làm region chính. Khu vực Đông Nam Á có thêm vài region mới hơn, nhưng danh mục dịch vụ ở region mới thường hẹp hơn, nên Singapore là lựa chọn an toàn cho loạt bài. Nhiều region, gồm Southeast Asia, có một **region pair**: region thứ hai cùng khu vực địa lý mà Microsoft ghép sẵn. Các region mới thường không có cặp. Cặp của Southeast Asia là **East Asia** (Hồng Kông). Một số dịch vụ dùng cặp này tự động, ví dụ storage geo-redundant (GRS) sao chép sang region pair. Với thiết kế của riêng bạn, cặp region là gợi ý mặc định cho nhân bản địa lý, không bắt buộc.
 
 Ba tiêu chí quyết định region, theo thứ tự nên cân nhắc:
 
 1. **Độ trễ.** Khoảng cách tới người dùng ảnh hưởng thời gian phản hồi, và khoảng cách giữa các resource với nhau còn ảnh hưởng nhiều hơn. API ở Singapore mà database ở Hồng Kông nghĩa là mỗi truy vấn trả thêm một vòng đi về giữa hai thành phố.
-2. **Nơi dữ liệu nằm** (data residency). Dữ liệu khách và tài xế của Tới Nơi sẽ nằm ở Singapore. Quy định pháp lý về nơi lưu dữ liệu cá nhân bạn phải tự kiểm với pháp chế, bài này không phải tư vấn pháp lý.
+2. **Nơi dữ liệu nằm** (data residency). Dữ liệu khách và tài xế của Tới Nơi sẽ nằm ở Singapore. Quy định pháp lý về nơi lưu dữ liệu cá nhân bạn phải tự kiểm tra với bộ phận pháp chế, bài này không phải tư vấn pháp lý.
 3. **Dịch vụ có mặt hay không.** Không phải dịch vụ, SKU hay tính năng nào cũng có ở mọi region, và hạn mức (quota) được tính riêng cho từng region. Hãy kiểm tra trước khi chốt thiết kế.
 
-Lệnh sau liệt kê hai region của Tới Nơi và region pair của chúng. Nó chỉ xác nhận cặp ghép, không chứng minh dịch vụ có sẵn hay subscription còn quota.
+Lệnh sau liệt kê hai region của Tới Nơi và region pair của chúng. Lệnh này chỉ xác nhận cặp ghép, không chứng minh dịch vụ có sẵn hay subscription còn quota.
 
 ```bash
 az account list-locations \
@@ -61,7 +61,7 @@ az account list-locations \
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Region của một resource thường không đổi tại chỗ được. Chọn nhầm region nghĩa là tạo resource mới ở region đúng rồi chuyển dữ liệu sang, kèm thời gian ngừng và công kiểm thử lại. Ghi quyết định region vào tài liệu thiết kế ngay từ đầu.</p>
+<p>Region của một resource thường không đổi tại chỗ được. Chọn nhầm region nghĩa là tạo resource mới ở region đúng rồi chuyển dữ liệu sang, kèm thời gian ngừng và công sức kiểm thử lại. Ghi quyết định region vào tài liệu thiết kế ngay từ đầu.</p>
 </div>
 
 ## Availability zone chống lỗi datacenter, region pair chống lỗi cả vùng
@@ -82,7 +82,7 @@ Zone và region pair bảo vệ ở hai tầng khác nhau, và không cái nào 
 | Sự cố | Lớp bảo vệ | Tới Nơi trả giá |
 | --- | --- | --- |
 | Một máy chủ hoặc instance hỏng | Nhiều instance, health probe | Thêm instance chạy song song |
-| Một datacenter mất điện hoặc mạng | Zone-redundant hoặc zonal có replica | Thêm replica, phải kiểm SKU hỗ trợ zone |
+| Một datacenter mất điện hoặc mạng | Zone-redundant hoặc zonal có replica | Thêm replica, phải kiểm tra SKU có hỗ trợ zone không |
 | Cả region gặp sự cố | Triển khai sang region pair, failover | Gấp đôi hạ tầng, đồng bộ dữ liệu, phải diễn tập |
 | Deploy lỗi hoặc xoá nhầm dữ liệu | Backup, khôi phục về thời điểm, rollback | Thời gian giữ backup, quy trình khôi phục |
 
@@ -104,7 +104,7 @@ Catalog Azure có hàng trăm dịch vụ, Tới Nơi chỉ cần bảy nhóm. C
 
 Một chuyến đi qua Booking, Pricing & Quote, Dispatch, Location & Tracking, Payment và Notification, và mỗi bước dùng nhiều nhóm cùng lúc. Hiểu từng nhóm riêng rồi mới ghép lại là cách học ít rối nhất.
 
-## SLA 99,9% là 43 phút mỗi tháng và không cộng dồn
+## SLA 99,9% là 43 phút mỗi tháng, và SLA nhiều thành phần nhân với nhau chứ không cộng
 
 **SLA** (service level agreement) là cam kết tỷ lệ thời gian dịch vụ khả dụng trong một chu kỳ, thường là tháng. Nếu Azure không đạt, bạn được **service credit**, tức khoản giảm vào hoá đơn. Đó không phải khoản bồi thường doanh thu bạn mất khi app ngừng chạy, và thường bạn phải tự gửi yêu cầu mới nhận được. Với tháng 30 ngày (43.200 phút), các mức phổ biến quy ra như sau:
 
@@ -115,7 +115,7 @@ Một chuyến đi qua Booking, Pricing & Quote, Dispatch, Location & Tracking, 
 | 99,95% | khoảng 21,6 phút |
 | 99,99% | khoảng 4,3 phút |
 
-Điều dễ sai nhất là cộng dồn SLA. Khi một request bắt buộc đi qua nhiều thành phần nối tiếp, SLA tổ hợp là tích của các SLA. Lấy ví dụ giả định, không phải số cam kết thật của dịch vụ nào: API 99,95%, PostgreSQL 99,99%, một dependency bắt buộc khác 99,9%. Tích là 0,9995 × 0,9999 × 0,999, xấp xỉ 99,84%, tương đương chừng 69 phút mỗi tháng. Hệ thống tổ hợp thấp hơn cả thành phần yếu nhất. Ngược lại, thêm thành phần dự phòng độc lập chạy song song có thể nâng SLA tổ hợp lên.
+Điều dễ nhầm nhất là cộng SLA của các thành phần lại với nhau. Khi một request bắt buộc đi qua nhiều thành phần nối tiếp, SLA tổ hợp bằng tích các SLA. Lấy ví dụ giả định, không phải số cam kết thật của dịch vụ nào: API 99,95%, PostgreSQL 99,99%, một dependency bắt buộc khác 99,9%. Tích là 0,9995 × 0,9999 × 0,999, xấp xỉ 99,84%, tương đương chừng 69 phút mỗi tháng. Hệ thống tổ hợp thấp hơn cả thành phần yếu nhất. Ngược lại, thêm thành phần dự phòng độc lập chạy song song có thể nâng SLA tổ hợp lên.
 
 Vài điều kiện cần đọc kỹ ở trang SLA của từng dịch vụ:
 
@@ -129,12 +129,12 @@ Loạt bài đi theo một lab duy nhất: đưa `trip-service` của loạt C# 
 
 | Phần | Câu hỏi chính | Lab đi tới đâu |
 | --- | --- | --- |
-| 1. Nền tảng Azure (bài 1–10) | Resource nằm ở đâu, ai trả tiền, quản ra sao | Subscription, resource group, VNet, VM chạy API, Blob, PostgreSQL, alert đầu tiên |
+| 1. Nền tảng Azure (bài 1–10) | Resource nằm ở đâu, ai trả tiền, quản lý ra sao | Subscription, resource group, VNet, VM chạy API, Blob, PostgreSQL, alert đầu tiên |
 | 2. Danh tính và bảo mật (bài 11–19) | Ai được làm gì, secret để đâu, biên mạng ra sao | Entra ID, RBAC, managed identity, Key Vault, Policy, private endpoint, xác thực khách và tài xế |
 | 3. Compute và ứng dụng (bài 20–29) | Chạy code ở đâu cho đúng | App Service, Container Registry, trip-service lên Container Apps, AKS, Functions, Front Door |
 | 4. Dữ liệu và tích hợp (bài 30–39) | Dữ liệu và message đi đường nào | PostgreSQL HA, Cosmos DB, Redis, Service Bus, Event Hubs, API Management |
 | 5. DevOps trên Azure (bài 40–49) | Deploy thế nào cho lặp lại được | Bicep, Terraform, GitHub Actions OIDC, CI/CD, Application Insights, landing zone |
-| 6. Kiến trúc nâng cao và vận hành (bài 50–58) | Chịu lỗi, tối ưu và lớn lên thế nào | Well-Architected, HA/DR nhiều region, Saga, tối ưu chi phí, Zero Trust, checklist go-live |
+| 6. Kiến trúc nâng cao và vận hành (bài 50–58) | Chịu lỗi, tối ưu và mở rộng thế nào | Well-Architected, HA/DR nhiều region, Saga, tối ưu chi phí, Zero Trust, checklist go-live |
 
 Phần 1 gồm mười bài, và bài này là bài đầu. Bicep trong repo đã compile sang ARM nhưng chưa được chứng minh bằng việc tạo resource trên subscription thật, nên các bài lab mô tả cách làm và nói rõ điều gì chưa kiểm chứng.
 
@@ -144,7 +144,7 @@ Phần 1 gồm mười bài, và bài này là bài đầu. Bicep trong repo đ�
 
 ## Học tiếp từ đây
 
-Bạn đã biết cách chia việc giữa Azure và Tới Nơi theo từng tầng, vì sao loạt dùng cặp Southeast Asia và East Asia, và cách đọc SLA ra phút downtime. Bài sau trả lời: resource nằm trong cái gì và ai trả tiền cho chúng. Đó là phân cấp tenant, subscription và resource group trong [bài 2](/articles/azure-tenant-subscription-resource-group).
+Bạn đã biết cách chia việc giữa Azure và Tới Nơi theo từng tầng, vì sao loạt dùng cặp Southeast Asia và East Asia, và cách quy đổi SLA thành số phút downtime. Bài sau trả lời: resource nằm trong cái gì và ai trả tiền cho chúng. Đó là phân cấp tenant, subscription và resource group trong [bài 2](/articles/azure-tenant-subscription-resource-group).
 
 ## Tài liệu gốc
 

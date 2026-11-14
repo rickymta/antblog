@@ -1,7 +1,7 @@
 ---
 slug: azure-chon-compute-cho-tung-service-toi-noi
 title: "Chọn compute cho từng service Tới Nơi: VM, App Service, Container Apps, AKS, Functions"
-summary: "Bài 26: so sánh VM, App Service, Container Apps, AKS và Functions theo chín tiêu chí, rồi gán compute cho từng service của Tới Nơi (Pricing, Booking, Dispatch, Location, Notification, Admin) kèm lý do và điều kiện đổi quyết định."
+summary: "Bài 26: so sánh VM, App Service, Container Apps, AKS và Functions theo chín tiêu chí, rồi gán compute cho từng service của Tới Nơi (Pricing, Booking, Dispatch, Location, Notification, Admin) kèm lý do và điều kiện khiến quyết định thay đổi."
 category: devops-azure
 level: intermediate
 tags: [azure, cloud, devops, toi-noi, compute, architecture, container-apps, aks]
@@ -22,7 +22,7 @@ Bài 7 (VM) và các bài 20 tới 25 dựng từng loại compute riêng lẻ. 
 
 Năm lựa chọn nằm trên một trục. Một đầu là bạn kiểm soát gần như toàn bộ nhưng tự gánh vận hành (VM). Đầu kia là bạn chỉ viết hàm, Azure lo hầu hết phần còn lại (Functions). Ở giữa là App Service, Container Apps và AKS, mỗi cái cắt trục ở một điểm khác.
 
-Điều dễ quên: càng kiểm soát nhiều thì càng có nhiều thứ để hỏng ở 2 giờ sáng và người phải sửa là bạn. Câu hỏi đúng không phải «công nghệ nào mạnh nhất» mà là «service này cần kiểm soát những gì, và đội có đủ người để giữ phần kiểm soát đó».
+Điều dễ quên: càng kiểm soát nhiều thì càng có nhiều thứ để hỏng ở 2 giờ sáng và người phải sửa là bạn. Câu hỏi đúng không phải «công nghệ nào mạnh nhất» mà là «service này cần kiểm soát những gì, và đội có đủ người để giữ phần kiểm soát đó hay không».
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -35,7 +35,7 @@ Hai lựa chọn ở giữa dễ nhầm nhất. AKS và Container Apps đều ch
 
 ## Chín tiêu chí để so sánh năm lựa chọn
 
-Bảng dưới là công cụ chính của bài. Các ô mô tả cơ chế, không ghi số cụ thể vì giới hạn và tên tier thay đổi theo thời gian; kiểm trang tài liệu của từng dịch vụ trước khi chốt.
+Bảng dưới là công cụ chính của bài. Các ô mô tả cơ chế, không ghi số cụ thể vì giới hạn và tên tier thay đổi theo thời gian; hãy kiểm tra trang tài liệu của từng dịch vụ trước khi chốt.
 
 | Tiêu chí | VM | App Service | Container Apps | AKS | Functions |
 | --- | --- | --- | --- | --- | --- |
@@ -59,18 +59,18 @@ Kiến trúc Tới Nơi có nhiều domain service với tải rất khác nhau.
 | --- | --- | --- | --- |
 | Pricing & Quote | Container Apps | Stateless, tải theo giờ cao điểm, scale theo HTTP | Cần scaler tự viết hoặc mesh |
 | Booking, Trip (`trip-service`) | Container Apps; AKS khi cần | Đã có image và Bicep từ loạt C#; revision giúp rollout an toàn | Số service và nhu cầu CRD tăng |
-| Dispatch | AKS | State khớp tài xế theo cell địa lý nằm trong bộ nhớ; cần StatefulSet và scaler tự viết theo độ trễ hàng đợi | Giải được state ra ngoài và scaler có sẵn đủ dùng |
+| Dispatch | AKS | State ghép cặp tài xế theo ô địa lý (cell) nằm trong bộ nhớ; cần StatefulSet và scaler tự viết theo độ trễ hàng đợi | Tách được state ra ngoài pod và scaler có sẵn đủ dùng |
 | Location & Tracking | AKS, hoặc consumer của Event Hubs | Tải đều, liên tục nên scale về 0 không có lợi; consumer cần ổn định theo partition | Tải thấp ở thành phố mới |
 | Payment & Wallet | Container Apps, min replica 1 | Latency quan trọng, không muốn cold start; ít cần hạ tầng đặc biệt | Yêu cầu tuân thủ cần cô lập node |
-| Notification | Functions | Bùng nổ theo sự kiện, ít state, retry sẵn | Cần xử lý dài hoặc cần giữ kết nối |
+| Notification | Functions | Tải tăng vọt theo sự kiện, ít state, retry sẵn | Cần xử lý dài hoặc cần giữ kết nối |
 | Admin Portal | App Service, hoặc Static Web Apps | Web truyền thống, ít tải; không cần container nếu app đã đóng gói sẵn | Frontend tách thuần tĩnh thì Static Web Apps |
 | Batch đối soát | Functions timer, hoặc Container Apps job | Chạy theo lịch, trả tiền khi chạy | Job vượt thời gian của Functions: dùng job |
 
-Vài chỗ cần giải thích thêm. **Dispatch trên AKS** không vì AKS «mạnh hơn», mà vì hai nhu cầu cụ thể: state theo vùng địa lý cần định danh pod ổn định (StatefulSet), và việc scale phải bám một chỉ số riêng như số yêu cầu chờ khớp. Container Apps cho dùng các scaler dựng sẵn của KEDA qua scale rule, nhưng bạn không truy cập KEDA hay Kubernetes API bên dưới, nên không cài CRD, operator hay một scaler tự viết theo cách bạn làm trên AKS. Nếu bạn thiết kế lại để state nằm ngoài (Redis, PostgreSQL) và scaler có sẵn đủ dùng, Dispatch cũng về Container Apps được.
+Vài chỗ cần giải thích thêm. **Dispatch trên AKS** không vì AKS «mạnh hơn», mà vì hai nhu cầu cụ thể: state theo vùng địa lý cần định danh pod ổn định (StatefulSet), và việc scale phải dựa vào một chỉ số riêng như số yêu cầu đang chờ ghép cặp. Container Apps cho dùng các scaler dựng sẵn của KEDA qua scale rule, nhưng bạn không truy cập KEDA hay Kubernetes API bên dưới, nên không cài CRD, operator hay một scaler tự viết theo cách bạn làm trên AKS. Nếu bạn thiết kế lại để state nằm ngoài (Redis, PostgreSQL) và scaler có sẵn đủ dùng, Dispatch cũng chuyển về Container Apps được.
 
-**Location & Tracking** là chỗ ngược trực giác. Tải GPS của tài xế đều suốt ngày, nên lợi thế scale về 0 biến mất, trong khi tính ổn định theo partition lại quan trọng. Consumer chạy lâu là hợp với node luôn bật.
+**Location & Tracking** là trường hợp đi ngược trực giác. Tải GPS của tài xế đều suốt ngày, nên lợi thế scale về 0 biến mất, trong khi tính ổn định theo partition lại quan trọng. Consumer chạy lâu là hợp với node luôn bật.
 
-**Notification trên Functions** hợp vì mỗi thông điệp là một sự kiện độc lập. Nhưng trigger cung cấp at-least-once, nên handler vẫn phải idempotent, xem [bài 26 của loạt C#](/articles/dotnet10-outbox-inbox-idempotent-consumer). Functions cũng không phải chỗ cho API đặt xe nhạy độ trễ: gói theo mức dùng có thể cold start đúng lúc khách mở app.
+**Notification trên Functions** hợp vì mỗi thông điệp là một sự kiện độc lập. Nhưng trigger đảm bảo at-least-once, nên handler vẫn phải idempotent, xem [bài 26 của loạt C#](/articles/dotnet10-outbox-inbox-idempotent-consumer). Functions cũng không phải chỗ cho API đặt xe nhạy độ trễ: gói theo mức dùng có thể cold start đúng lúc khách mở app.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -85,7 +85,7 @@ Vài chỗ cần giải thích thêm. **Dispatch trên AKS** không vì AKS «m�
 
 **Chọn Functions cho API nhạy độ trễ.** Functions rất hợp với xử lý theo sự kiện. Với API mà khách đang đợi trên màn hình, cold start và mô hình thực thi theo từng lần gọi biến thành độ trễ khó đoán. Nếu vẫn muốn dùng, hãy giữ instance luôn sẵn, và khi đó chi phí tiến gần một plan chạy liên tục, mất lợi thế ban đầu.
 
-**Dùng VM vì quen.** VM là lựa chọn hợp lý khi bạn thật sự cần quyền với OS (driver, agent riêng, phần mềm không đóng container được). Nếu chỉ vì «chạy lệnh cho nhanh», bạn đang nhận về việc vá OS, tự dựng health check, tự làm rolling deploy. Đó là cái giá của bài VM Linux ở Phần 1 ([bài 7](/articles/azure-virtual-machine-linux-chay-api)), và bài đó được viết để bạn hiểu nền, không để làm đích.
+**Dùng VM vì quen.** VM là lựa chọn hợp lý khi bạn thật sự cần quyền kiểm soát OS (driver, agent riêng, phần mềm không đóng container được). Nếu chỉ vì «chạy lệnh cho nhanh», bạn đang nhận về việc vá OS, tự dựng health check, tự làm rolling deploy. Đó là cái giá của bài VM Linux ở Phần 1 ([bài 7](/articles/azure-virtual-machine-linux-chay-api)), và bài đó được viết để bạn hiểu nền, không phải để làm đích đến.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -96,18 +96,18 @@ Vài chỗ cần giải thích thêm. **Dispatch trên AKS** không vì AKS «m�
 
 Một lộ trình thực tế cho `trip-service`: bắt đầu trên VM như bài 7 ở Phần 1 để hiểu nền; đóng gói container và đẩy lên ACR (bài 21); chạy trên Container Apps (bài 22) với revision và scale theo KEDA; chỉ chuyển một service lên AKS khi điều kiện cụ thể xuất hiện.
 
-Điều kiện đủ để chuyển lên AKS có thể kiểm bằng câu hỏi:
+Điều kiện đủ để chuyển lên AKS có thể kiểm tra bằng các câu hỏi sau:
 
 - Có nhu cầu CRD, operator hay scaler tự viết mà Container Apps không cho cài?
 - Có workload stateful cần định danh pod ổn định, hoặc node pool riêng (spot, GPU, cô lập)?
 - Có service mesh hay network policy chi tiết mà bạn không thoả được ở tầng khác?
-- Có ít nhất một người đủ thời gian sở hữu cluster: nâng cấp, theo dõi, xử lý sự cố?
+- Có ít nhất một người đủ thời gian phụ trách cluster: nâng cấp, theo dõi, xử lý sự cố?
 
-Nếu cả bốn câu đều «không», không có lý do kỹ thuật để rời Container Apps. Đích cuối của Tới Nơi hoàn toàn có thể là Container Apps cho hầu hết service, cộng AKS cho một hai service như Dispatch, cộng Functions cho nhóm theo sự kiện. Đa số hệ thống thật là hỗn hợp, và điều đó không sao.
+Nếu cả bốn câu đều «không», không có lý do kỹ thuật để rời Container Apps. Đích cuối của Tới Nơi hoàn toàn có thể là Container Apps cho hầu hết service, cộng AKS cho một hoặc hai service như Dispatch, cộng Functions cho nhóm theo sự kiện. Đa số hệ thống thật là hỗn hợp, và điều đó không sao.
 
 ## Lab: ra quyết định cho hai service mới
 
-Rating & Review và Support là hai service chưa có compute được chọn. Thay vì dựng hạ tầng, bài lab là điền một bản ghi quyết định. Khối dưới tạo file ghi quyết định và liệt kê những gì đang chạy trong resource group dev để bạn so với bảng ở trên. Nó không chứng minh lựa chọn nào đúng; nó chỉ giúp bạn nhìn thấy hiện trạng thật trước khi viết lý do.
+Rating & Review và Support là hai service chưa có compute được chọn. Thay vì dựng hạ tầng, bài lab là điền một bản ghi quyết định. Khối dưới tạo file ghi quyết định và liệt kê những gì đang chạy trong resource group dev để bạn so với bảng ở trên. Khối này không chứng minh lựa chọn nào đúng, chỉ giúp bạn nhìn thấy hiện trạng thật trước khi viết lý do.
 
 ```bash
 RG=rg-toinoi-trips-dev-sea
@@ -128,11 +128,11 @@ cat > docs/adr/0026-compute-rating-support.md <<'EOF'
 EOF
 ```
 
-Mỗi service cần trả lời bốn câu: tải đều hay bùng nổ, người dùng có đang chờ response không, có state trong bộ nhớ không, có cần thứ mà Container Apps không cho không. Rồi viết một đoạn biện hộ và một điều kiện đổi quyết định.
+Mỗi service cần trả lời bốn câu: tải đều hay bùng nổ, người dùng có đang chờ response không, có state trong bộ nhớ không, có cần thứ mà Container Apps không cho không. Rồi viết một đoạn lập luận và một điều kiện khiến quyết định thay đổi.
 
-**Bài tập:** chọn compute cho Rating (nhận sự kiện hoàn thành chuyến, tính điểm trung bình, trả API đọc điểm) và Support (hoàn tiền, khiếu nại, quy trình nhiều bước chờ nhân viên duyệt). Biện hộ lựa chọn bằng tiêu chí trong bảng.
+**Bài tập:** chọn compute cho Rating (nhận sự kiện hoàn thành chuyến, tính điểm trung bình, trả API đọc điểm) và Support (hoàn tiền, khiếu nại, quy trình nhiều bước chờ nhân viên duyệt). Lý giải lựa chọn bằng các tiêu chí trong bảng.
 
-<details><summary>Xem lời giải</summary><p>Một đáp án hợp lý: Rating là Container Apps cho API đọc điểm (min replica 1) cộng một consumer sự kiện cùng service; không cần AKS vì không có state trong bộ nhớ hay CRD. Support là Container Apps cho API admin, cộng Durable Functions cho quy trình chờ duyệt kéo dài nhiều ngày, vì orchestration giữ trạng thái và hẹn giờ giúp bạn khỏi tự viết bộ máy chờ. Đáp án khác cũng đúng nếu nêu được tiêu chí và điều kiện đổi quyết định.</p></details>
+<details><summary>Xem lời giải</summary><p>Một đáp án hợp lý: Rating là Container Apps cho API đọc điểm (min replica 1) cộng một consumer sự kiện cùng service; không cần AKS vì không có state trong bộ nhớ hay CRD. Support là Container Apps cho API admin, cộng Durable Functions cho quy trình chờ duyệt kéo dài nhiều ngày, vì orchestration giữ trạng thái và hẹn giờ giúp bạn khỏi phải tự viết cơ chế chờ. Đáp án khác cũng đúng nếu nêu được tiêu chí và điều kiện khiến quyết định thay đổi.</p></details>
 
 ## Học tiếp từ đây
 

@@ -10,7 +10,7 @@ language: vi
 
 Đây là **bài 4** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 1 · Nền tảng Azure (bài 4/10 của phần).
 
-Bài 3 cho thấy mọi lệnh `az` là một request tới Azure Resource Manager (ARM). Bài này mở cánh cửa đó ra: ARM làm gì với request, resource được định danh thế nào và Tới Nơi dùng tag, lock, tên để giữ mọi thứ gọn. Lệnh trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.
+Bài 3 cho thấy mọi lệnh `az` là một request tới Azure Resource Manager (ARM). Bài này mở cánh cửa đó ra: ARM làm gì với request, resource được định danh thế nào và Tới Nơi dùng tag, lock và quy ước đặt tên để giữ mọi thứ gọn gàng. Lệnh trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Bài 3 cho thấy mọi lệnh `az` là một request tới Azure Resource Manag
 
 ## ARM là control plane, dữ liệu của bạn đi đường khác
 
-Khi bạn tạo, sửa hoặc xoá một resource, request tới ARM và được xử lý theo một chuỗi chung: xác thực danh tính, kiểm quyền RBAC, đánh giá policy và lock, ghi Activity Log, rồi mới chuyển cho **resource provider** phụ trách loại resource đó. Thứ tự chi tiết do ARM quyết định; điều cần nhớ là mọi thao tác quản lý đều qua cổng chung này, nên chính sách đặt ở đây áp dụng được cho mọi công cụ.
+Khi bạn tạo, sửa hoặc xoá một resource, request được gửi tới ARM và xử lý theo một chuỗi chung: xác thực danh tính, kiểm tra quyền RBAC, đánh giá policy và lock, ghi Activity Log, rồi mới chuyển cho **resource provider** phụ trách loại resource đó. Thứ tự chi tiết do ARM quyết định; điều cần nhớ là mọi thao tác quản lý đều qua cổng chung này, nên chính sách đặt ở đây áp dụng được cho mọi công cụ.
 
 Đó là **control plane**: quản lý bản thân resource (tạo server, đổi cấu hình, xoá). **Data plane** là đường đi của dữ liệu: đọc blob, `SELECT` từ bảng `trips`. Data plane không đi qua ARM. Ứng dụng của Tới Nơi kết nối thẳng tới endpoint của PostgreSQL hoặc Blob Storage, và dùng cơ chế xác thực riêng của dịch vụ đó.
 
@@ -63,9 +63,9 @@ az provider show \
   --query "resourceTypes[?resourceType=='flexibleServers'] | [0].apiVersions[:3]"
 ```
 
-Khối này kiểm trạng thái đăng ký, đăng ký namespace và chờ xong rồi in vài API version của loại `flexibleServers`. Nó không chứng minh bạn đủ quota hoặc đủ quyền để tạo server ở region đã chọn; đăng ký chỉ mở khả năng gọi provider.
+Khối này kiểm tra trạng thái đăng ký, đăng ký namespace và chờ xong rồi in vài API version của loại `flexibleServers`. Nó không chứng minh bạn đủ quota hoặc đủ quyền để tạo server ở region đã chọn; đăng ký chỉ mở khả năng gọi provider.
 
-**API version** là điểm dễ bị bỏ qua. Mỗi request tới ARM kèm một `api-version`, và provider hỗ trợ nhiều version song song. Bicep và template luôn ghi version trong khai báo, ví dụ `Microsoft.App/containerApps@2025-01-01` ở bài 36 loạt C#. Nâng version có thể thêm hoặc đổi thuộc tính, nên template cũ vẫn chạy ổn định còn template mới dùng được tính năng mới. Chọn version nào nên theo trang schema của resource trên Microsoft Learn.
+**API version** là điểm dễ bị bỏ qua. Mỗi request tới ARM kèm một `api-version`, và provider hỗ trợ nhiều version song song. Bicep và template luôn ghi version trong khai báo, ví dụ `Microsoft.App/containerApps@2025-01-01` ở bài 36 loạt C#. Nhờ ghi cố định version, template cũ vẫn chạy ổn định còn template mới dùng được tính năng mới; nâng version có thể thêm hoặc đổi thuộc tính. Nên chọn version theo trang schema của resource trên Microsoft Learn.
 
 ## Resource ID là địa chỉ đầy đủ của mọi resource
 
@@ -124,7 +124,7 @@ az resource list --tag env=prod \
   --output table
 ```
 
-Khối này gộp ba tag vào resource mà không xoá tag có sẵn (`Merge`), đọc lại tag rồi liệt kê mọi resource có `env=prod`. Nó không bắt buộc ai phải gắn tag; muốn ép quy ước, cần policy.
+Khối này gộp ba tag vào resource mà không xoá tag có sẵn (`Merge`), đọc lại tag rồi liệt kê mọi resource có `env=prod`. Khối này không bắt buộc ai phải gắn tag; muốn ép quy ước thì cần policy.
 
 Hình 2 gom lại phần phân cấp: scope nào truyền xuống scope con, và thứ gì không truyền.
 
@@ -152,7 +152,7 @@ az lock list \
   --output table
 ```
 
-Khối này tạo lock mức CanNotDelete trên server rồi liệt kê lock của resource group. Nó không bảo vệ dữ liệu bên trong, như đã thấy ở câu hỏi mở đầu.
+Khối này tạo lock mức CanNotDelete trên server rồi liệt kê lock của resource group. Lock không bảo vệ dữ liệu bên trong, như đã thấy ở câu hỏi mở đầu.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -180,9 +180,9 @@ Nhưng mỗi resource provider có luật riêng, nên một quy ước chung ph
 
 Bảng này tóm tắt luật tại thời điểm viết; hãy đối chiếu với trang quy tắc đặt tên và hạn chế của Microsoft Learn trước khi chốt, vì provider có thể đổi. Vài hệ quả đáng ghi nhớ:
 
-- Tên cho resource có endpoint DNS (storage, Key Vault, registry, PostgreSQL) phải **duy nhất toàn Azure**. Kiểm trước khi tạo, ví dụ `az storage account check-name` hoặc `az acr check-name`.
+- Tên cho resource có endpoint DNS (storage, Key Vault, registry, PostgreSQL) phải **duy nhất toàn Azure**. Kiểm tra trước khi tạo, ví dụ `az storage account check-name` hoặc `az acr check-name`.
 - Giới hạn 24 ký tự của storage: sau `sttoinoi` (8 ký tự) còn tối đa 16 cho phần mục đích và môi trường. Với `staging` (7 ký tự), phần mục đích chỉ còn khoảng 9 ký tự.
-- Key Vault bị xoá mềm vẫn **giữ tên** trong thời gian lưu giữ, nên tên của vault vừa xoá có thể chưa dùng lại ngay.
+- Key Vault bị xoá mềm vẫn **giữ tên** trong thời gian lưu giữ, nên tên của vault vừa xoá có thể chưa dùng lại được ngay.
 - Tên đẹp mà thiếu tag vẫn không trả lời được "ai chịu chi phí". Tên và tag bổ sung cho nhau.
 
 ```bash
@@ -205,7 +205,7 @@ Khối này hỏi Azure xem tên storage account và registry đã bị chiếm 
 
 ## Học tiếp từ đây
 
-Bạn đã biết ARM là cổng chung của control plane, resource provider cần đăng ký, resource ID chính là scope, tag không kế thừa, lock chặn xoá nhưng không thay RBAC, và mỗi loại resource có luật đặt tên riêng nên bảng quy ước cần kiểm thật trước khi dùng.
+Bạn đã biết ARM là cổng chung của control plane, resource provider cần đăng ký, resource ID chính là scope, tag không kế thừa, lock chặn xoá nhưng không thay RBAC, và mỗi loại resource có luật đặt tên riêng nên bảng quy ước cần được kiểm tra thực tế trước khi dùng.
 
 Bài tiếp theo là [Bài 5](/articles/azure-chi-phi-pricing-cost-management-budget): tag và tên bạn vừa chốt sẽ được dùng để đọc chi phí, đặt budget và hiểu hoá đơn tháng đầu của Tới Nơi. Quay lại [Bài 3](/articles/azure-portal-cli-cloud-shell-resource-group-dau-tien) nếu cần ôn cách chạy `az` và lọc kết quả bằng `--query`.
 

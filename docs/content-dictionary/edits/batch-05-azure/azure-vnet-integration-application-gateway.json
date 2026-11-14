@@ -1,0 +1,95 @@
+{
+"file": "azure-vnet-integration-application-gateway.md",
+"edits": [
+{
+"old": "đi từ subnet đó. Nó không biến app",
+"new": "đi từ subnet đó. Cơ chế này không biến app",
+"reason": "Tránh 'Nó' chỉ sự vật ở đầu câu",
+"severity": "medium"
+},
+{
+"old": "Container Apps chọn lúc tạo environment, và không đổi được sau đó:",
+"new": "Với Container Apps, bạn chọn chế độ ngay lúc tạo environment và không đổi được sau đó:",
+"reason": "Câu thiếu chủ ngữ rõ ràng, 'chọn' không có tân ngữ",
+"severity": "medium"
+},
+{
+"old": "kiểm trạng thái hỗ trợ trong tài liệu trước khi dựa vào nó",
+"new": "kiểm tra trạng thái hỗ trợ trong tài liệu trước khi dựa vào tính năng này",
+"reason": "'kiểm' thiếu 'tra'; đại từ 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "tầng L7: nó hiểu HTTP, đọc host và path, rồi quyết định gửi tới đâu. Cấu hình của nó gồm",
+"new": "tầng L7: gateway hiểu HTTP, đọc host và path, rồi quyết định gửi tới đâu. Cấu hình gateway gồm",
+"reason": "Tránh đại từ 'nó' chỉ sự vật",
+"severity": "medium"
+},
+{
+"old": "probe là nguồn sự thật về sức khoẻ backend",
+"new": "probe là nguồn dữ liệu gốc về sức khoẻ backend",
+"reason": "Calque 'source of truth'",
+"severity": "medium"
+},
+{
+"old": "thứ đã kiểm database và migration",
+"new": "thứ đã kiểm tra database và migration",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "Environment internal không có DNS công khai. Nó có một",
+"new": "Environment internal không có DNS công khai. Environment này có một",
+"reason": "Tránh 'Nó' ở đầu câu",
+"severity": "medium"
+},
+{
+"old": "Khối đầu tạo environment internal và private DNS zone cho nó; nó không chứng minh DNS đã đúng.",
+"new": "Khối lệnh đầu tiên tạo environment internal và private DNS zone cho environment đó; khối này không chứng minh DNS đã đúng.",
+"reason": "Hai đại từ 'nó' chỉ hai đối tượng khác nhau, gây mơ hồ",
+"severity": "medium"
+},
+{
+"old": "kiểm bằng curl qua public IP của gateway",
+"new": "kiểm tra bằng curl qua public IP của gateway",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "rồi kiểm sức khoẻ và gọi thử bằng curl",
+"new": "rồi kiểm tra sức khoẻ và gọi thử bằng curl",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "probe hoạt động; nó chưa chứng minh WAF chặn đúng",
+"new": "probe hoạt động; điều này chưa chứng minh WAF chặn đúng",
+"reason": "Tránh 'nó' mơ hồ",
+"severity": "low"
+},
+{
+"old": "(cần kiểm riêng ở bài 17",
+"new": "(cần kiểm tra riêng ở bài 17",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "Bạn kiểm gì trước?",
+"new": "Bạn kiểm tra gì trước?",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "Kiểm DNS từ góc nhìn gateway",
+"new": "Kiểm tra DNS từ góc nhìn của gateway",
+"reason": "'Kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "là chỗ kiểm cuối",
+"new": "là chỗ kiểm tra cuối cùng",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+}
+]
+}

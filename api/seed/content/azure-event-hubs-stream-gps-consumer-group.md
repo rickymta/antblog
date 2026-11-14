@@ -22,11 +22,11 @@ Bài này dựng đường ống cho luồng vị trí GPS của tài xế: prod
 
 Event Hubs có cấu trúc gần với Kafka. **Namespace** chứa các **event hub** (giống topic của Kafka). Mỗi event hub chia thành nhiều **partition**; mỗi partition là một dãy event chỉ ghi nối thêm, đánh số thứ tự. Event nằm lại trong partition theo **retention** (thời gian giữ, giới hạn theo tier), hết hạn mới bị xoá, bất kể có ai đọc hay chưa.
 
-Khác biệt với queue nằm ở hai chỗ. Event không bị "nhận rồi xoá": consumer tự nhớ mình đã đọc tới đâu (offset). Và broker không quản lý trạng thái từng message: không lock, không abandon, không dead-letter. Đổi lại, nó nuốt được lượng event lớn với chi phí mỗi event thấp.
+Khác biệt với queue nằm ở hai chỗ. Event không bị "nhận rồi xoá": consumer tự nhớ mình đã đọc tới đâu (offset). Và broker không quản lý trạng thái từng message: không lock, không abandon, không dead-letter. Đổi lại, Event Hubs tiếp nhận được lượng event lớn với chi phí mỗi event thấp.
 
-Dung lượng được mua theo đơn vị, tên đổi theo tier: **throughput unit** (TU) ở Standard, **processing unit** (PU) ở Premium, capacity unit ở Dedicated. Một TU là một khoản ingress và egress cố định, tính theo MB/giây hoặc số event/giây, cái nào chạm trước thì bị throttle. Con số cụ thể và khả năng auto-inflate xem trang quota hiện hành trên Microsoft Learn, đừng nhớ theo bài.
+Dung lượng được mua theo đơn vị, tên đổi theo tier: **throughput unit** (TU) ở Standard, **processing unit** (PU) ở Premium, capacity unit ở Dedicated. Một TU là một mức ingress và egress cố định, tính theo MB/giây hoặc số event/giây, cái nào chạm trước thì bị throttle. Con số cụ thể và khả năng auto-inflate xem trang quota hiện hành trên Microsoft Learn, đừng lấy số trong bài làm căn cứ.
 
-Event Hubs còn có **endpoint tương thích giao thức Kafka** (ở tier Standard trở lên). Ứng dụng đã dùng client Kafka đổi địa chỉ bootstrap, cấu hình xác thực và chạy tiếp, không phải cài cluster Kafka. Nó không làm đầy đủ mọi tính năng Kafka, nên kiểm bảng tương thích trước khi di chuyển ứng dụng lớn. Event Hubs cũng có **schema registry** để lưu schema (Avro, JSON) và kiểm tính tương thích giữa phiên bản, hữu ích khi nhiều service cùng đọc một dạng event.
+Event Hubs còn có **endpoint tương thích giao thức Kafka** (ở tier Standard trở lên). Ứng dụng đã dùng client Kafka đổi địa chỉ bootstrap, cấu hình xác thực và chạy tiếp, không phải cài cluster Kafka. Endpoint này không hỗ trợ đầy đủ mọi tính năng Kafka, nên kiểm tra bảng tương thích trước khi chuyển ứng dụng lớn sang. Event Hubs cũng có **schema registry** để lưu schema (Avro, JSON) và kiểm tra tính tương thích giữa các phiên bản, hữu ích khi nhiều service cùng đọc một dạng event.
 
 ## Ước lượng tải từ số tài xế online
 
@@ -34,11 +34,11 @@ Hồ sơ Tới Nơi ghi 25.000 tài xế online lúc cao điểm, mỗi người
 
 Điều cần rút ra từ phép tính này là đơn vị nào chạm trần trước. Với event nhỏ và nhiều, giới hạn theo số event/giây chạm trước giới hạn MB/giây. Cho nên đếm event, không chỉ đếm byte. Ước lượng này chỉ là điểm xuất phát; phải load test để biết cần bao nhiêu TU, và kiểm tra auto-inflate có tự nâng theo tải không.
 
-Số partition là quyết định khó đảo ngược hơn. Partition là trần song song cho consumer: trong một consumer group, tối đa bằng số partition reader hoạt động cùng lúc. Với 4 partition, bạn không thể có 10 instance Dispatch cùng đọc có ích. Partition cũng là trần ghi: ở Standard, một partition chỉ nhận được cỡ thông lượng của một TU, nên 8.300 event/giây cần nhiều hơn hẳn 4 partition; con số 4 trong lab chỉ đủ cho lab. Ở Basic và Standard, số partition cố định sau khi tạo; Premium và Dedicated cho tăng (không cho giảm) nhưng việc tăng không phân phối lại event cũ và có thể làm đổi ánh xạ key sang partition. Kiểm tra tài liệu trước khi chọn.
+Số partition là quyết định khó đảo ngược hơn. Partition là trần song song cho consumer: trong một consumer group, số reader hoạt động cùng lúc tối đa bằng số partition. Với 4 partition, bạn không thể có 10 instance Dispatch cùng đọc mà đều có ích. Partition cũng là trần ghi: ở Standard, một partition chỉ nhận được cỡ thông lượng của một TU, nên 8.300 event/giây cần nhiều hơn hẳn 4 partition; con số 4 trong lab chỉ đủ cho lab. Ở Basic và Standard, số partition cố định sau khi tạo; Premium và Dedicated cho tăng (không cho giảm) nhưng việc tăng không phân phối lại event cũ và có thể làm đổi ánh xạ key sang partition. Kiểm tra tài liệu trước khi chọn.
 
 ## Partition key = driverId giữ thứ tự theo tài xế
 
-Event Hubs không bảo đảm thứ tự toàn event hub. Nó chỉ bảo đảm thứ tự bên trong một partition. Producer chọn partition bằng **partition key**: broker băm key, và cùng key luôn rơi vào cùng partition. Dùng `driverId` làm key thì mọi điểm của một tài xế nằm trong một partition, đúng thứ tự gửi, và Dispatch tính được hướng đi từ điểm trước tới điểm sau.
+Event Hubs không bảo đảm thứ tự trên toàn event hub. Event Hubs chỉ bảo đảm thứ tự bên trong một partition. Producer chọn partition bằng **partition key**: broker băm key, và cùng key luôn rơi vào cùng partition. Dùng `driverId` làm key thì mọi điểm của một tài xế nằm trong một partition, đúng thứ tự gửi, và Dispatch tính được hướng đi từ điểm trước tới điểm sau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -47,7 +47,7 @@ Event Hubs không bảo đảm thứ tự toàn event hub. Nó chỉ bảo đả
 <figcaption>Hình 1. Producer gửi điểm GPS với partition key driverId; broker băm key sang một trong bốn partition nên mọi điểm của một tài xế nằm cùng partition.</figcaption>
 </figure>
 
-Hình trên là minh hoạ, việc tài xế nào rơi vào partition nào do hàm băm quyết định, không do bạn. Khi chọn key, hãy nghĩ tới độ lệch. Key là `cityId` chỉ có 6 giá trị cho 4 partition và thành phố đông nhất sẽ biến một partition thành điểm nóng. `driverId` có hàng chục nghìn giá trị nên phân tán đều hơn. Một điều không đổi được: không chia nhỏ được một key. Tài xế nào gửi quá dày sẽ làm nóng partition của nó.
+Hình trên là minh hoạ, việc tài xế nào rơi vào partition nào do hàm băm quyết định, không do bạn. Khi chọn key, hãy nghĩ tới độ lệch. Key là `cityId` chỉ có 6 giá trị cho 4 partition và thành phố đông nhất sẽ biến một partition thành điểm nóng. `driverId` có hàng chục nghìn giá trị nên phân tán đều hơn. Có một giới hạn không đổi được: một key không chia nhỏ được. Tài xế nào gửi quá dày sẽ làm nóng partition của nó.
 
 | Cách chọn key | Thứ tự | Phân tải | Phù hợp khi |
 | --- | --- | --- | --- |
@@ -57,7 +57,7 @@ Hình trên là minh hoạ, việc tài xế nào rơi vào partition nào do h�
 
 ## Consumer group và checkpoint: hai bên đọc độc lập cùng một dòng
 
-**Consumer group** là một góc nhìn độc lập lên event hub, mỗi group có vị trí đọc riêng trên từng partition. Dispatch cần độ trễ thấp và Analytics đọc theo lô dày; cả hai không nên tranh nhau, nên mỗi bên một group: `dispatch` và `analytics`. Chậm ở Analytics không kéo Dispatch chậm theo, vì hai bên không chia sẻ offset.
+**Consumer group** là một góc nhìn độc lập lên event hub, mỗi group có vị trí đọc riêng trên từng partition. Dispatch cần độ trễ thấp còn Analytics đọc theo từng lô lớn; cả hai không nên tranh nhau, nên mỗi bên một group: `dispatch` và `analytics`. Chậm ở Analytics không kéo Dispatch chậm theo, vì hai bên không chia sẻ offset.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -66,7 +66,7 @@ Hình trên là minh hoạ, việc tài xế nào rơi vào partition nào do h�
 <figcaption>Hình 2. Một event hub, hai consumer group dispatch và analytics; mỗi group có checkpoint riêng trong Blob nên đọc độc lập và có thể replay.</figcaption>
 </figure>
 
-Việc nhớ vị trí đọc gọi là **checkpoint**. `EventProcessorClient` lưu checkpoint và quyền sở hữu partition vào một Blob container. Nhiều instance của cùng một group chia partition qua Blob (mỗi partition một owner) và khi một instance chết, instance khác tiếp quản. Checkpoint là lời nói "tôi đã xử lý tới sequence number này", nên đặt sau khi hiệu ứng đã xong. Checkpoint trước khi xử lý mà crash thì mất event. Checkpoint quá thưa mà crash thì đọc lại nhiều event. Tức là Event Hubs cũng at-least-once; handler của Dispatch phải chịu được việc nhận lại một điểm GPS cũ.
+Việc nhớ vị trí đọc gọi là **checkpoint**. `EventProcessorClient` lưu checkpoint và quyền sở hữu partition vào một Blob container. Nhiều instance của cùng một group chia partition qua Blob (mỗi partition một owner) và khi một instance chết, instance khác tiếp quản. Checkpoint là lời khẳng định "tôi đã xử lý tới sequence number này", nên đặt sau khi các tác dụng phụ đã hoàn tất. Checkpoint trước khi xử lý mà crash thì mất event. Checkpoint quá thưa mà crash thì đọc lại nhiều event. Tức là Event Hubs cũng at-least-once; handler của Dispatch phải xử lý được việc nhận lại một điểm GPS cũ.
 
 **Replay** là hệ quả của log: miễn event còn trong retention, bạn có thể bắt đầu đọc lại từ một offset hoặc thời điểm cũ, hoặc tạo consumer group mới đọc từ đầu để dựng lại một bảng tổng hợp. Event đã bị retention xoá thì hết cách, và đó là một lý do bật Capture.
 
@@ -87,11 +87,11 @@ Với Tới Nơi, các file Avro này là nguyên liệu cho báo cáo thu nhậ
 | Số bên nhận | Mỗi subscription một bản | Mỗi consumer group một vị trí đọc |
 | Hợp với | Lệnh, sự kiện nghiệp vụ cần xử lý chắc chắn | Luồng khối lượng lớn, đọc lại được |
 
-Điểm đáng ghi nhớ là Event Hubs không có chỗ cho một event hỏng. Event JSON sai định dạng không bị đẩy sang dead-letter, nó nằm trong partition và consumer phải tự bỏ qua hoặc ghi vào nơi lưu lỗi. [Bài 37](/articles/azure-chon-messaging-storage-queue-service-bus-event-hubs) sẽ đặt bốn dịch vụ messaging cạnh nhau.
+Điểm đáng ghi nhớ là Event Hubs không có nơi xử lý riêng cho event hỏng. Event JSON sai định dạng không bị đẩy sang dead-letter mà vẫn nằm trong partition, và consumer phải tự bỏ qua hoặc ghi vào nơi lưu lỗi. [Bài 37](/articles/azure-chon-messaging-storage-queue-service-bus-event-hubs) sẽ đặt bốn dịch vụ messaging cạnh nhau.
 
 ## Lab: event hub driver-gps 4 partition, hai consumer group, bật Capture
 
-Khối đầu tạo namespace, storage cho Capture và event hub với 4 partition. Tên namespace và storage phải duy nhất toàn cầu. Tên cờ của Capture có thể thay đổi theo phiên bản; kiểm `az eventhubs eventhub create --help`.
+Khối đầu tạo namespace, storage cho Capture và event hub với 4 partition. Tên namespace và storage phải duy nhất toàn cầu. Tên cờ của Capture có thể thay đổi theo phiên bản; kiểm tra `az eventhubs eventhub create --help`.
 
 ```bash
 RG=rg-toinoi-stream-dev-sea
@@ -113,7 +113,7 @@ for GROUP in dispatch analytics; do
 done
 ```
 
-Khối này tạo tài nguyên theo mô tả. Nó chưa chứng minh Capture có quyền ghi vào storage; nếu file không xuất hiện sau cửa sổ capture, kiểm cấu hình quyền của namespace trên storage và cột lỗi trong Portal. Bạn cũng cần vai trò Azure Event Hubs Data Sender cho producer, Data Receiver cho consumer, và Storage Blob Data Contributor cho container checkpoint.
+Khối này tạo tài nguyên theo mô tả. Nó chưa chứng minh Capture có quyền ghi vào storage; nếu file không xuất hiện sau cửa sổ capture, kiểm tra cấu hình quyền của namespace trên storage và cột lỗi trong Portal. Bạn cũng cần vai trò Azure Event Hubs Data Sender cho producer, Data Receiver cho consumer, và Storage Blob Data Contributor cho container checkpoint.
 
 Producer gửi 10.000 điểm giả của 200 tài xế (mỗi người 50 điểm). Partition key áp dụng cho cả batch, nên mỗi tài xế một batch:
 
@@ -156,22 +156,22 @@ processor.ProcessErrorAsync += a => { Console.WriteLine(a.Exception.Message); re
 await processor.StartProcessingAsync();
 ```
 
-Container `checkpoints` nằm ở một storage riêng (hoặc cùng storage, container khác) và phải tạo trước. Đoạn này chưa xử lý lỗi của `HandlePoint`, chưa tính cân bằng khi nhiều instance và chưa dọn checkpoint khi đổi số partition.
+Container `checkpoints` nằm ở một storage riêng (hoặc cùng storage, container khác) và phải tạo trước. Đoạn này chưa xử lý lỗi của `HandlePoint`, chưa tính tới việc cân bằng partition khi chạy nhiều instance và chưa dọn checkpoint khi đổi số partition.
 
 Kỳ vọng theo cơ chế: cả hai group nhận đủ 10.000 event, mỗi tài xế theo đúng thứ tự `seq`. Sau cửa sổ Capture, container `gps-capture` có các file `.avro` theo đường dẫn chứa tên event hub, partition và mốc thời gian. Mở bằng công cụ đọc Avro để xem cấu trúc `Body`. Đó là việc xem file, chưa phải kết quả đã đo của riêng bạn.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Số partition và khoá phân vùng khó sửa sau khi đã có dữ liệu và consumer. Chọn 4 partition cho lab thì không sao; chọn cho production phải tính cả tải 2 đến 3 năm tới, và nhớ rằng đổi số partition thường đồng nghĩa dựng event hub mới rồi chuyển dần. Capture và storage chạy tới khi bạn xoá: <code>az group delete -n rg-toinoi-stream-dev-sea --yes</code> sau lab.</p>
+<p>Số partition và khoá phân vùng khó sửa sau khi đã có dữ liệu và consumer. Chọn 4 partition cho lab thì không sao; còn chọn số partition cho production thì phải tính cả tải 2 đến 3 năm tới, và nhớ rằng đổi số partition thường đồng nghĩa với việc dựng event hub mới rồi chuyển dần. Capture và storage chạy tới khi bạn xoá: <code>az group delete -n rg-toinoi-stream-dev-sea --yes</code> sau lab.</p>
 </div>
 
 **Bài tập:** Dispatch cần đọc nhanh hơn nên bạn triển khai 8 instance cùng group `dispatch` trên event hub 4 partition. Có bao nhiêu instance thực sự nhận event, và nếu chỉ muốn tăng thông lượng đọc thì làm gì?
 
-<details><summary>Xem lời giải</summary><p>Chỉ 4 instance giữ partition và nhận event, 4 instance còn lại rảnh. Trần song song của một group là số partition. Muốn đọc nhanh hơn, hoặc làm handler nhanh hơn, hoặc tạo event hub mới với nhiều partition rồi chuyển luồng sang, chứ thêm instance không giúp được.</p></details>
+<details><summary>Xem lời giải</summary><p>Chỉ 4 instance giữ partition và nhận event, 4 instance còn lại rảnh. Trần song song của một group là số partition. Muốn đọc nhanh hơn, hoặc phải làm handler nhanh hơn, hoặc phải tạo event hub mới với nhiều partition rồi chuyển luồng sang, chứ thêm instance không giúp được.</p></details>
 
 ## Học tiếp từ đây
 
-Bạn vừa mô tả cách dựng một luồng GPS có thứ tự theo tài xế, hai consumer group đọc độc lập, checkpoint trong Blob và Capture ghi Avro ra storage. Phần còn lại cần bạn tự kiểm: tải thật, quyền của Capture và xử lý event lặp. Bài tiếp theo là [Bài 36](/articles/azure-event-grid-system-custom-topic), về Event Grid: sự kiện hệ thống và custom topic, một kiểu phát sự kiện nhẹ hơn nhiều. Nếu cần nhắc lại phía message có lock và dead-letter, xem [Bài 34](/articles/azure-service-bus-queue-topic-session-dead-letter).
+Bạn vừa mô tả cách dựng một luồng GPS có thứ tự theo tài xế, hai consumer group đọc độc lập, checkpoint trong Blob và Capture ghi Avro ra storage. Phần còn lại cần bạn tự kiểm tra: tải thật, quyền của Capture và xử lý event lặp. Bài tiếp theo là [Bài 36](/articles/azure-event-grid-system-custom-topic), về Event Grid: sự kiện hệ thống và custom topic, một kiểu phát sự kiện nhẹ hơn nhiều. Nếu cần nhắc lại phía message có lock và dead-letter, xem [Bài 34](/articles/azure-service-bus-queue-topic-session-dead-letter).
 
 ## Tài liệu gốc
 

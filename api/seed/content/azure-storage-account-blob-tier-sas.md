@@ -24,7 +24,7 @@ Một storage account là một namespace trong Azure, cấp cho bạn bốn d�
 
 Account là nơi đặt các cấu hình áp cho mọi thứ bên trong: redundancy, mức TLS tối thiểu, có cho phép truy cập ẩn danh không, có cho phép account key không. Hậu quả là gộp dữ liệu có mức nhạy cảm khác nhau vào một account sẽ buộc chúng chia sẻ chung một bộ cấu hình. Vì vậy Tới Nơi tách riêng account cho ảnh giấy tờ (`sttoinoidriverdocsdev`), không trộn với ảnh khuyến mãi hay file xuất báo cáo.
 
-Tên account là **duy nhất toàn cầu**, chỉ gồm chữ thường và số, độ dài 3 đến 24 ký tự. Nó thành một phần địa chỉ `sttoinoidriverdocsdev.blob.core.windows.net`. Đó là lý do quy ước đặt tên của loạt không có dấu gạch ngang. Tên đã bị người khác dùng thì bạn đổi tên chứ không đòi lại được.
+Tên account là **duy nhất toàn cầu**, chỉ gồm chữ thường và số, độ dài 3 đến 24 ký tự. Tên này trở thành một phần địa chỉ `sttoinoidriverdocsdev.blob.core.windows.net`. Đó là lý do quy ước đặt tên của loạt không có dấu gạch ngang. Tên đã bị người khác dùng thì bạn đổi tên chứ không đòi lại được.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -35,7 +35,7 @@ Tên account là **duy nhất toàn cầu**, chỉ gồm chữ thường và s�
 
 Hai tuỳ chọn tạo account cần quyết ngay từ đầu. Performance chọn Standard hoặc Premium. Standard đủ cho ảnh giấy tờ. Premium dành cho workload cần độ trễ thấp và ổn định, tính tiền khác. Redundancy chọn số bản sao và nơi đặt chúng:
 
-| Redundancy | Bản sao nằm ở | Sống sót khi |
+| Redundancy | Bản sao nằm ở | Vẫn còn dữ liệu khi |
 | --- | --- | --- |
 | LRS | Một datacenter trong region | Hỏng ổ hoặc máy chủ |
 | ZRS | Nhiều zone trong một region | Mất một zone |
@@ -74,11 +74,11 @@ Lifecycle management tự chuyển tier theo luật, thay cho script cron của 
 }
 ```
 
-Policy này chỉ mô tả luật chuyển tier. Nó không xoá blob, và không quyết định ảnh được giữ bao lâu. Thời hạn lưu giấy tờ phụ thuộc quy định pháp lý nơi Tới Nơi hoạt động, và bài này không là tư vấn pháp lý. Lifecycle cũng chạy bất đồng bộ, theo chu kỳ của dịch vụ, không đúng từng phút của ngày thứ 91.
+Policy này chỉ mô tả luật chuyển tier. Policy không xoá blob, và không quyết định ảnh được giữ bao lâu. Thời hạn lưu giấy tờ phụ thuộc quy định pháp lý nơi Tới Nơi hoạt động, và bài này không phải tư vấn pháp lý. Lifecycle cũng chạy bất đồng bộ, theo chu kỳ của dịch vụ, không đúng từng phút của ngày thứ 91.
 
 ## Tránh account key: SAS user delegation cho app, RBAC cho service
 
-Bất kỳ request nào tới Blob cũng phải chứng minh nó được phép. Có ba hướng chính, trong đó SAS có hai biến thể:
+Bất kỳ request nào tới Blob cũng phải chứng minh mình được phép. Có ba hướng chính, trong đó SAS có hai biến thể:
 
 | Cách | Cơ chế | Rủi ro |
 | --- | --- | --- |
@@ -89,7 +89,7 @@ Bất kỳ request nào tới Blob cũng phải chứng minh nó được phép.
 
 Account key nên **tránh** và tốt nhất là tắt (`--allow-shared-key-access false`). Với RBAC, role dữ liệu như **Storage Blob Data Contributor** cho phép đọc, ghi, xoá blob. Đây là cách service của bạn sẽ dùng khi có managed identity ở Phần 2, thay vì giữ khoá.
 
-Nhưng app tài xế chạy trên điện thoại, không có danh tính Entra để gán role. Nó cần một thứ ngắn hạn, hẹp quyền, đưa bằng URL. Đó là SAS. Phiên bản nên dùng là user delegation SAS: API của Tới Nơi dùng danh tính của chính nó để xin một user delegation key từ Entra, rồi ký SAS bằng khoá đó. Account key không tham gia. Danh tính ký cần hai thứ. Thứ nhất là quyền lấy user delegation key (action `generateUserDelegationKey`, gán ở scope storage account trở lên), có trong role Storage Blob Delegator và trong các role dữ liệu như Storage Blob Data Contributor. Thứ hai, quyền thực của SAS là **giao** của quyền ghi trên SAS với quyền RBAC của chính danh tính ký. Chỉ có Storage Blob Delegator thì lấy được key, nhưng SAS quyền ghi ký ra sẽ không ghi được gì. Vì vậy danh tính của API cần một role dữ liệu có quyền ghi trên container `driver-docs`.
+Nhưng app tài xế chạy trên điện thoại, không có danh tính Entra để gán role. App cần một thứ ngắn hạn, hẹp quyền, đưa bằng URL. Đó là SAS. Loại nên dùng là user delegation SAS: API của Tới Nơi dùng danh tính của chính nó để xin một user delegation key từ Entra, rồi ký SAS bằng khoá đó. Account key không tham gia. Danh tính ký cần hai thứ. Thứ nhất là quyền lấy user delegation key (action `generateUserDelegationKey`, gán ở scope storage account trở lên), có trong role Storage Blob Delegator và trong các role dữ liệu như Storage Blob Data Contributor. Thứ hai, quyền thực của SAS là **giao** của quyền ghi trên SAS với quyền RBAC của chính danh tính ký. Chỉ có Storage Blob Delegator thì lấy được key, nhưng SAS quyền ghi ký ra sẽ không ghi được gì. Vì vậy danh tính của API cần một role dữ liệu có quyền ghi trên container `driver-docs`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -98,7 +98,7 @@ Nhưng app tài xế chạy trên điện thoại, không có danh tính Entra �
 <figcaption>Hình 2. Luồng upload: app tài xế xin quyền từ API, API xin user delegation key từ Entra và trả SAS, app upload thẳng lên container private.</figcaption>
 </figure>
 
-Phần code của API chỉ vài dòng. Đoạn dưới dùng Azure SDK cho .NET để ký SAS bằng user delegation key. Nó không chứng minh API đã xác thực tài xế trước đó, và không chứng minh danh tính của API có đúng role. Hai việc đó phải đúng trước khi đoạn này chạy.
+Phần code của API chỉ vài dòng. Đoạn dưới dùng Azure SDK cho .NET để ký SAS bằng user delegation key. Đoạn code này không chứng minh API đã xác thực tài xế trước đó, và không chứng minh danh tính của API có đúng role. Hai việc đó phải đúng trước khi đoạn này chạy.
 
 ```csharp
 // service: BlobServiceClient tạo bằng TokenCredential (danh tính của API)
@@ -122,7 +122,7 @@ var uri = new BlobUriBuilder(blobClient.Uri)
 }.ToUri();
 ```
 
-Tên blob do API chọn, là GUID, không chứa tên hay số giấy tờ, và URL trả về phải trỏ đúng blob mà SAS ký (SAS có `Resource = "b"` chỉ hợp lệ cho đúng tên đó). App không được tự đặt tên, nên không ghi được vào ảnh của người khác. Quyền `Write` cho phép ghi đè chính blob đó trong 15 phút; muốn chặn cả việc ghi đè, chỉ cấp `Create`.
+Tên blob do API chọn, dùng GUID, không chứa tên hay số giấy tờ, và URL trả về phải trỏ đúng blob mà SAS ký (SAS có `Resource = "b"` chỉ hợp lệ cho đúng tên đó). App không được tự đặt tên, nên không ghi được vào ảnh của người khác. Quyền `Write` cho phép ghi đè chính blob đó trong 15 phút; muốn chặn cả việc ghi đè, chỉ cấp `Create`.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -132,7 +132,7 @@ Tên blob do API chọn, là GUID, không chứa tên hay số giấy tờ, và 
 
 CORS chỉ cần khi trình duyệt upload thẳng lên Blob từ một origin khác, ví dụ trang web quản trị tài xế. App di động native không bị CORS chặn nên không cần. Nếu cần, bạn thêm rule trên Blob service, liệt kê chính xác origin, method `PUT` và các header cần dùng, thay vì `*`.
 
-Soft delete giữ blob đã xoá trong một khoảng thời gian để khôi phục. Versioning giữ các phiên bản cũ khi blob bị ghi đè. Cả hai cứu bạn khỏi thao tác nhầm, và cả hai có giá. Dung lượng của blob đã xoá mềm và của mọi version vẫn tính tiền cho tới khi hết hạn hoặc bị xoá. Policy lifecycle ở trên chỉ áp cho bản hiện hành (`baseBlob`); muốn chuyển tier hay dọn version cũ, bạn thêm action trong mục `version` của policy. Với ảnh giấy tờ còn có một hệ quả riêng: khi một tài xế yêu cầu xoá dữ liệu, ảnh vẫn còn trong vùng soft delete cho tới hết thời hạn. Thời hạn giữ phải được chọn cùng với chính sách xoá dữ liệu, chứ không chọn một con số cho đẹp.
+Soft delete giữ blob đã xoá trong một khoảng thời gian để khôi phục. Versioning giữ các phiên bản cũ khi blob bị ghi đè. Cả hai giúp bạn tránh hậu quả của thao tác nhầm, và cả hai đều tốn tiền. Dung lượng của blob đã xoá mềm và của mọi version vẫn tính tiền cho tới khi hết hạn hoặc bị xoá. Policy lifecycle ở trên chỉ áp cho bản hiện hành (`baseBlob`); muốn chuyển tier hay dọn version cũ, bạn thêm action trong mục `version` của policy. Với ảnh giấy tờ còn có một hệ quả riêng: khi một tài xế yêu cầu xoá dữ liệu, ảnh vẫn còn trong vùng soft delete cho tới hết thời hạn. Thời hạn giữ phải được chọn cùng với chính sách xoá dữ liệu, chứ không chọn một con số cho đẹp.
 
 ## Lab: tạo account, container private và cấp SAS 15 phút
 
@@ -179,7 +179,7 @@ curl -s -o /dev/null -w '%{http_code}\n' \
   "https://$SA.blob.core.windows.net/driver-docs/$BLOB"
 ```
 
-Kỳ vọng: lệnh upload thành công, còn `curl` không kèm SAS không trả 200 (thường là 404 hoặc 409 vì account cấm truy cập ẩn danh). Lab này chưa chứng minh lifecycle chuyển tier, vì chính sách đó cần hơn 90 ngày mới có tác dụng. Nó cũng chưa thử CORS hay thu hồi key. Xong lab, xoá `az group delete -n rg-toinoi-storage-dev-sea` để không để ảnh mẫu và các bản soft delete nằm lại.
+Kỳ vọng: lệnh upload thành công, còn `curl` không kèm SAS không trả 200 (thường là 404 hoặc 409 vì account cấm truy cập ẩn danh). Lab này chưa chứng minh lifecycle chuyển tier, vì chính sách đó cần hơn 90 ngày mới có tác dụng. Lab cũng chưa thử CORS hay thu hồi key. Xong lab, xoá `az group delete -n rg-toinoi-storage-dev-sea` để không để ảnh mẫu và các bản soft delete nằm lại.
 
 **Bài tập:** nhóm xác minh muốn app tài xế xem lại ảnh vừa upload, nên đề xuất cấp SAS quyền đọc cho cả container, sống 24 giờ. Bạn trả lời thế nào?
 

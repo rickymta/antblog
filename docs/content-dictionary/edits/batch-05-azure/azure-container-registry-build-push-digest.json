@@ -1,0 +1,14 @@
+{"file":"azure-container-registry-build-push-digest.md","edits":[
+{"old":"để pull gần runtime và sống sót khi mất region,","new":"để pull gần runtime và vẫn hoạt động khi mất region,","reason":"'sống sót' là calque của survive","severity":"medium"},
+{"old":"Nó không chứng minh image an toàn hay không chứa lỗ hổng.","new":"Digest không chứng minh image an toàn hay không chứa lỗ hổng.","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"và bản retention policy cho manifest không còn tag là tính năng của Premium.","new":"còn retention policy cho manifest không có tag là tính năng của Premium.","reason":"'bản retention policy' là cụm tự ghép; câu lặp 'không còn tag'","severity":"medium"},
+{"old":"và kiểm trang Tasks overview.","new":"và kiểm tra trang Tasks overview.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"không còn là digest đã kiểm.","new":"không còn là digest đã được kiểm tra.","reason":"'đã kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"hãy kiểm với trường hợp của bạn.","new":"hãy đối chiếu với trường hợp của bạn.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nó cũng không quyết định image nào được lên production.","new":"Khối này cũng không quyết định image nào được lên production.","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Hãy kiểm chế độ của registry bạn tạo trong tài liệu roles.","new":"Hãy kiểm tra chế độ của registry bạn tạo trong tài liệu roles.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"thu hồi được độc lập, và hết hạn được.","new":"thu hồi được độc lập, và có thể đặt ngày hết hạn.","reason":"'hết hạn được' gượng","severity":"medium"},
+{"old":"Đây là lối thoát hẹp, tốt hơn nhiều so với admin user.","new":"Đây là giải pháp ngoại lệ với phạm vi hẹp, tốt hơn nhiều so với admin user.","reason":"'lối thoát hẹp' là calque của escape hatch","severity":"medium"},
+{"old":"Hai: việc quét tự nó không chặn ai kéo hay deploy image có lỗ hổng. Nó là tín hiệu.","new":"Hai: bản thân việc quét không chặn ai kéo hay deploy image có lỗ hổng. Kết quả quét là một tín hiệu.","reason":"'tự nó' và 'Nó' mơ hồ, dịch máy","severity":"medium"},
+{"old":"Nó chưa chứng minh runtime kéo được image:","new":"Điều này chưa chứng minh runtime kéo được image:","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"}
+]}

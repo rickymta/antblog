@@ -1,0 +1,10 @@
+{"file":"azure-portal-cli-cloud-shell-resource-group-dau-tien.md","edits":[
+{"old":"tạo resource ở một subscription không định tạo.","new":"tạo resource ở một subscription mà bạn không định dùng.","reason":"'subscription không định tạo' sai nghĩa/lược từ","severity":"high"},
+{"old":"rồi in lại để kiểm. Nó không chứng minh bạn có quyền","new":"rồi in lại để kiểm tra. Khối này không chứng minh bạn có quyền","reason":"'kiểm' thiếu 'tra'; tránh 'Nó'","severity":"medium"},
+{"old":"Nó chưa tạo resource nào bên trong, nên chưa phát sinh tiền","new":"Resource group này chưa chứa resource nào, nên chưa phát sinh tiền","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu, 'tạo resource bên trong' gượng","severity":"low"},
+{"old":"Khối này không kiểm tra bạn có tag viết sai chính tả;","new":"Khối này không kiểm tra xem có tag nào bị viết sai chính tả hay không;","reason":"Câu thiếu chữ, 'bạn có tag' sai nghĩa","severity":"medium"},
+{"old":"mỗi resource provider có phiên bản riêng, nội dung bài 4.","new":"mỗi resource provider có phiên bản riêng, bài 4 sẽ nói về điều này.","reason":"'nội dung bài 4' thiếu động từ, cụt","severity":"medium"},
+{"old":"`az rest` là lối thoát chính thống.","new":"`az rest` là cách xử lý chính thức.","reason":"'lối thoát chính thống' là calque (escape hatch)","severity":"low"},
+{"old":"Lỗi gõ tên group trên subscription thật có thể mất dữ liệu","new":"Gõ nhầm tên group trên subscription thật có thể làm mất dữ liệu","reason":"Câu thiếu động từ, trật tự kiểu Anh","severity":"medium"},
+{"old":"nên hãy dự tính tag cũ bị thay bằng","new":"nên cần dự đoán rằng tag cũ bị thay bằng","reason":"'hãy dự tính' gượng trong lời giải","severity":"low"}
+]}

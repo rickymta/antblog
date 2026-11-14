@@ -43,7 +43,7 @@ Giai đoạn 0c và 1–2 có thể chạy song song **sau khi 0a đã chốt**,
 |---|---|
 | 0a | Đã khảo sát xong ([báo cáo](survey-2026-11.md)). Đã chốt: chính tả kiểu huỷ/khoá, "test case", "phiên bản" |
 | 0b | Đã có `npm run content:lint`, kèm `--fix` cho các rule chắc chắn |
-| 0c | Đã sửa mọi lỗi mức cao lặp lại trên toàn site và chuẩn hoá chính tả huỷ/khoá. **Nhóm testing đã rà xong toàn bộ 74/74 bài**: đợt thử 8 bài, 137 chỗ sửa ([hồ sơ](edits/batch-01-testing-pilot/)); đợt 2 66 bài, 829 chỗ sửa ([hồ sơ](edits/batch-02-testing/)). **Nhóm business-analysis đã rà xong 64/64 bài**: 604 chỗ sửa ([hồ sơ](edits/batch-03-ba/)). **Nhóm devops-aws đã rà xong 60/60 bài**: 757 chỗ sửa ([hồ sơ](edits/batch-04-aws/)). Còn 408 bài thuộc các nhóm khác chưa rà. Chỗ nghi lỗi kỹ thuật ghi ở [technical-notes.md](technical-notes.md) |
+| 0c | Đã sửa mọi lỗi mức cao lặp lại trên toàn site và chuẩn hoá chính tả huỷ/khoá. **Nhóm testing đã rà xong toàn bộ 74/74 bài**: đợt thử 8 bài, 137 chỗ sửa ([hồ sơ](edits/batch-01-testing-pilot/)); đợt 2 66 bài, 829 chỗ sửa ([hồ sơ](edits/batch-02-testing/)). **Nhóm business-analysis đã rà xong 64/64 bài**: 604 chỗ sửa ([hồ sơ](edits/batch-03-ba/)). **Nhóm devops-aws đã rà xong 60/60 bài**: 757 chỗ sửa ([hồ sơ](edits/batch-04-aws/)). **Nhóm devops-azure đã rà xong 58/58 bài**: 881 chỗ sửa ([hồ sơ](edits/batch-05-azure/)). Còn 350 bài thuộc các nhóm khác chưa rà. Chỗ nghi lỗi kỹ thuật ghi ở [technical-notes.md](technical-notes.md) |
 | 1–5 | Chưa làm |
 
 ## Ràng buộc chung

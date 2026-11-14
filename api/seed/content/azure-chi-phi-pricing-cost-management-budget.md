@@ -10,12 +10,12 @@ language: vi
 
 Đây là **bài 5** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 1 · Nền tảng Azure (bài 5/10 của phần).
 
-Bài này không dựng hạ tầng mới. Nó trả lời câu hỏi mà mọi người dùng cloud đều gặp ở tháng đầu tiên: tiền đi đâu, ai làm nó tăng, và làm sao biết trước khi hoá đơn tới. Các lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.
+Bài này không dựng hạ tầng mới. Thay vào đó, bài trả lời câu hỏi mà mọi người dùng cloud đều gặp ở tháng đầu tiên: tiền đi đâu, ai làm nó tăng, và làm sao biết trước khi hoá đơn tới. Các lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Bạn bấm Stop cho một VM dev trước khi đi ngủ. Sáng hôm sau, hoá đơn của VM đó có về 0 không?</p>
-<details><summary>Xem đáp án</summary><p>Không chắc. Chỉ trạng thái Stopped (deallocated) mới ngừng tính tiền compute. Disk, public IP (SKU Standard luôn là IP tĩnh) và snapshot gắn với VM vẫn tiếp tục có đồng hồ chạy. Stop từ bên trong hệ điều hành mà không deallocate thì compute vẫn bị tính.</p></details>
+<details><summary>Xem đáp án</summary><p>Không chắc. Chỉ trạng thái Stopped (deallocated) mới ngừng tính tiền compute. Disk, public IP (SKU Standard luôn là IP tĩnh) và snapshot gắn với VM vẫn tiếp tục bị tính tiền. Stop từ bên trong hệ điều hành mà không deallocate thì compute vẫn bị tính.</p></details>
 </div>
 
 ## Hoá đơn Azure là tổng của nhiều đồng hồ đo
@@ -27,7 +27,7 @@ Bốn loại đồng hồ chiếm gần hết hoá đơn của Tới Nơi:
 - **Compute theo thời gian.** VM tính theo giờ hoặc giây chạy. Container Apps tính theo vCPU-giây và GiB-giây, trạng thái đang xử lý và trạng thái rảnh được tính khác nhau (xem trang billing của dịch vụ).
 - **Storage theo GB-tháng.** Bạn trả cho dung lượng cấp phát hoặc đã lưu, kể cả khi không ai đọc. Disk của VM và storage của PostgreSQL thuộc nhóm này.
 - **Mạng ra ngoài (egress).** Dữ liệu vào Azure thường không tính, dữ liệu ra Internet hoặc sang region khác thì có. Quy tắc hiện hành về dung lượng miễn phí nằm ở trang Bandwidth pricing.
-- **Request và thao tác.** Mỗi lần đọc, ghi, liệt kê blob; mỗi request qua một số dịch vụ; mỗi GB log đưa vào Log Analytics.
+- **Request và thao tác.** Mỗi lần đọc, ghi hoặc liệt kê blob, mỗi request qua một số dịch vụ và mỗi GB log đưa vào Log Analytics đều bị tính phí.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -54,13 +54,13 @@ Bài này cố tình không ghi giá. Đơn giá khác nhau theo region, SKU, lo
 
 Cách dùng bảng: mở **Azure Pricing Calculator**, chọn region Southeast Asia (cặp East Asia nếu bạn tính cả bản sao), thêm từng hàng với đúng SKU và đúng đơn vị. Điểm hay sai nhất là số giờ. Calculator thường mặc định cả tháng chạy liên tục. Một VM dev chạy mười giờ mỗi ngày, hai mươi hai ngày mỗi tháng, ít hơn nhiều so với cả tháng. Hãy nhập đúng giờ thực tế, rồi cộng thêm các khoản vẫn tính khi resource «nghỉ» ở mục dưới.
 
-Khi lên staging và prod, các biến số trong bảng không chỉ nhân lên mà đổi bản chất. Prod thường bật HA cho PostgreSQL, tức có thêm một bản sao compute và storage chạy song song. Container Apps có nhiều replica hơn và có thể trải qua nhiều availability zone. Log được giữ lâu hơn vì yêu cầu điều tra sự cố. Storage thêm replication sang East Asia, kéo theo egress giữa region mỗi lần đồng bộ. Vì thế đừng lấy hoá đơn dev nhân với ba để dự phòng prod. Lập lại bảng cho từng môi trường.
+Khi lên staging và prod, các biến số trong bảng không chỉ nhân lên mà đổi bản chất. Prod thường bật HA cho PostgreSQL, tức có thêm một bản sao compute và storage chạy song song. Container Apps có nhiều replica hơn và có thể trải trên nhiều availability zone. Log được giữ lâu hơn vì yêu cầu điều tra sự cố. Storage thêm replication sang East Asia, kéo theo egress giữa region mỗi lần đồng bộ. Vì thế đừng lấy hoá đơn dev nhân với ba để dự đoán chi phí prod. Hãy lập lại bảng cho từng môi trường.
 
 Kết quả của Calculator là ước lượng để quyết định có làm hay không, không phải cam kết. Sau tháng đầu, hãy lấy số thật từ Cost Management và sửa lại bảng.
 
 ## Cost Management cho biết tiền đã đi đâu
 
-Bản thân **Cost analysis** nằm trong Cost Management, mở được ở scope management group, subscription hoặc resource group (nhắc lại phân cấp ở bài 2). Ba cách nhóm nên thử ngay:
+**Cost analysis** nằm trong Cost Management, mở được ở scope management group, subscription hoặc resource group (nhắc lại phân cấp ở bài 2). Ba cách nhóm chi phí nên thử ngay:
 
 - **Resource group name.** Tên `rg-toinoi-<workload>-<env>-sea` ở bài 4 phát huy tác dụng ở đây: mỗi workload và môi trường tách thành một cột.
 - **Tag.** Tag `cost-center` cho phép gom chi phí xuyên nhiều resource group, ví dụ tất cả resource của `toinoi-dev`.
@@ -68,7 +68,7 @@ Bản thân **Cost analysis** nằm trong Cost Management, mở được ở sco
 
 Cần phân biệt hai thứ hay bị coi là một. **Invoice** là hoá đơn chính thức, kèm thuế, tín dụng và điều chỉnh của kỳ thanh toán. **Cost analysis** là bản ước tính chi phí gần với hoá đơn, cập nhật liên tục trong tháng. Dùng cost analysis để hành động giữa tháng, dùng invoice để đối chiếu với kế toán.
 
-Hai giới hạn cần biết. Thứ nhất, dữ liệu chi phí **trễ**: usage có thể mất vài giờ, đôi khi lâu hơn, mới hiện lên. Đừng dùng Cost analysis như đồng hồ thời gian thực. Thứ hai, tag chỉ giúp với resource đã có tag và dịch vụ hỗ trợ tag; tag gắn muộn thường không sửa lại dữ liệu cũ. Tag trên resource group không tự chảy xuống resource, trừ khi bạn bật tính năng tag inheritance của Cost Management hoặc dùng policy gán tag. Vì vậy hãy bắt buộc tag ngay lúc tạo, không sửa sau.
+Hai giới hạn cần biết. Thứ nhất, dữ liệu chi phí **trễ**: usage có thể mất vài giờ, đôi khi lâu hơn, mới hiện lên. Đừng dùng Cost analysis như đồng hồ thời gian thực. Thứ hai, tag chỉ giúp với resource đã có tag và dịch vụ hỗ trợ tag; tag gắn muộn thường không áp lại cho dữ liệu chi phí đã ghi nhận. Tag trên resource group không tự kế thừa xuống resource, trừ khi bạn bật tính năng tag inheritance của Cost Management hoặc dùng policy gán tag. Vì vậy hãy bắt buộc tag ngay lúc tạo, không sửa sau.
 
 Với báo cáo lâu dài, tạo **export** hàng ngày ra Storage. Bạn nhận file chi tiết từng dòng usage (CSV, hoặc Parquet với một số loại export mới trên Portal) để phân tích riêng hoặc lưu theo yêu cầu kiểm toán. Lệnh dưới thuộc extension `costmanagement` của Azure CLI, được tự cài ở lần chạy đầu.
 
@@ -86,7 +86,7 @@ az costmanagement export create \
   --schedule-status Active
 ```
 
-Lệnh trên mô tả một export chi phí thực tế (ActualCost) ghi mỗi ngày vào container `cost-exports`. Ngày `from` của `--recurrence-period` phải nằm trong tương lai, và `--schedule-status` mặc định là `Inactive` nên phải đặt `Active` thì export mới chạy. Nó không chứng minh container đã tồn tại, không cấp quyền cho dịch vụ export ghi vào storage account, và có thể yêu cầu resource provider liên quan đã được đăng ký (nhớ bài 4). Kiểm `az costmanagement export create -h` nếu tham số đổi.
+Lệnh trên mô tả một export chi phí thực tế (ActualCost) ghi mỗi ngày vào container `cost-exports`. Ngày `from` của `--recurrence-period` phải nằm trong tương lai, và `--schedule-status` mặc định là `Inactive` nên phải đặt `Active` thì export mới chạy. Lệnh này không chứng minh container đã tồn tại, không cấp quyền cho dịch vụ export ghi vào storage account, và có thể yêu cầu resource provider liên quan đã được đăng ký (nhớ bài 4). Hãy kiểm tra `az costmanagement export create -h` nếu tham số đổi.
 
 ## Budget cảnh báo, nhưng không có phanh
 
@@ -145,7 +145,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-05-01' = {
 }
 ```
 
-Khối này khai báo budget và ba mốc cảnh báo. Nó không chứng minh email đến được hộp thư, và nó không giới hạn chi tiêu theo bất kỳ cách nào.
+Khối này khai báo budget và ba mốc cảnh báo. Cấu hình này không chứng minh email đến được hộp thư, và cũng không giới hạn chi tiêu theo bất kỳ cách nào.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -161,12 +161,12 @@ Khối này khai báo budget và ba mốc cảnh báo. Nó không chứng minh e
 
 ## Khoản dễ quên nằm ở những resource trông như đã tắt
 
-Phần lớn «hoá đơn bất ngờ» không đến từ resource đang chạy. Nó đến từ thứ bạn tưởng đã dừng.
+Phần lớn «hoá đơn bất ngờ» không đến từ resource đang chạy. Khoản phát sinh đó đến từ thứ bạn tưởng đã dừng.
 
-| Khoản dễ quên | Vì sao vẫn tính tiền | Cách kiểm |
+| Khoản dễ quên | Vì sao vẫn tính tiền | Cách kiểm tra |
 | --- | --- | --- |
 | Public IP Standard (luôn tĩnh) | Được tính khi còn cấp phát, kể cả không gắn vào đâu | Liệt kê IP không gắn resource |
-| Disk của VM đã deallocate, disk mồ côi | Managed disk tính theo dung lượng cấp phát, không theo trạng thái VM; xoá VM không tự xoá disk nếu không chọn | Liệt kê VM deallocated, và disk không gắn VM nào |
+| Disk của VM đã deallocate, disk mồ côi | Managed disk tính theo dung lượng cấp phát, không theo trạng thái VM; xoá VM không tự xoá disk nếu bạn không chọn xoá kèm | Liệt kê VM deallocated, và disk không gắn VM nào |
 | Snapshot và backup | Mỗi bản giữ dung lượng riêng, tăng dần khi quên dọn | Xem theo tag và ngày tạo |
 | PostgreSQL đã dừng | Compute có thể ngừng nhưng storage cấp phát vẫn tính, và thời gian dừng có giới hạn | Đọc trang stop/start của Flexible Server |
 | Log Analytics ingestion | Bảng Analytics tính chủ yếu theo GB đưa vào, cộng số ngày giữ vượt mức miễn phí | Chạy KQL bên dưới |
@@ -195,13 +195,13 @@ Usage
 | sort by BillableGB desc
 ```
 
-Truy vấn này chỉ cho biết loại dữ liệu nào đưa vào nhiều nhất. Nó không nói log nào hữu ích hay thừa; việc đó cần đọc nội dung log.
+Truy vấn này chỉ cho biết loại dữ liệu nào đưa vào nhiều nhất. Truy vấn cũng không cho biết log nào hữu ích hay thừa; việc đó cần đọc nội dung log.
 
 ## Thói quen giữ hoá đơn dev nhỏ
 
 Công cụ chỉ giúp được khi thói quen đúng. Bốn thói quen đáng giá nhất:
 
-1. **Mỗi lab một resource group.** Xong lab thì `az group delete`, lấy toàn bộ resource đi cùng. Không gắn lock xoá cho resource group lab; lock là việc của prod (bài 4).
+1. **Mỗi lab một resource group.** Xong lab thì `az group delete`, xoá luôn toàn bộ resource bên trong. Không gắn lock xoá cho resource group lab; lock là việc của prod (bài 4).
 2. **Auto-shutdown cho VM dev.** Đặt giờ tắt ngay khi tạo VM, đừng chờ nhớ.
 3. **Tag bắt buộc.** Mọi resource group và resource có `cost-center` và `env`. Dùng Azure Policy để từ chối hoặc gắn tag tự động khi thiếu.
 4. **Xem Cost analysis mỗi tuần,** không đợi hoá đơn.
@@ -213,7 +213,7 @@ az vm auto-shutdown \
   --time 1700
 ```
 
-Lệnh trên đặt giờ tắt hàng ngày theo UTC (1700 là 17:00 UTC, tức 00:00 giờ Việt Nam). Nó chỉ deallocate VM, không xoá disk hay public IP, nên các khoản ở mục trước vẫn còn.
+Lệnh trên đặt giờ tắt hàng ngày theo UTC (1700 là 17:00 UTC, tức 00:00 giờ Việt Nam). Lệnh này chỉ deallocate VM, không xoá disk hay public IP, nên các khoản ở mục trước vẫn còn.
 
 **Bài tập:** hoá đơn dev của Tới Nơi tháng này cao gấp đôi tháng trước dù không ai deploy thêm service. Nêu ba nghi vấn và chỗ để kiểm từng cái.
 

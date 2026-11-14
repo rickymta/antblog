@@ -68,3 +68,32 @@ Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứn
 - [ ] Câu agent viết lại theo nghĩa suy đoán, tác giả nên xác nhận:
   - `aws-resilience-multi-region-route53-failover-fis.md:133` ("FIS tác động lên hệ thống thật");
   - `aws-aurora-postgresql-rds-proxy-failover.md:18` ("không nằm riêng trong writer").
+
+## Đợt 5 — nhóm devops-azure (11/2026)
+
+Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứng.
+
+- [ ] `azure-vnet-subnet-nsg-public-ip.md:67`: bài ghi "khác ở ba điểm" nhưng bảng ngay sau có bốn hàng.
+- [ ] `azure-tong-ket-go-live-checklist-chung-chi.md:128`: "chỉ đọc trạng thái và đổi traffic". "Chỉ đọc" mâu thuẫn với việc đổi traffic.
+- [ ] `azure-app-service-deploy-slot-scale.md:174`: bài nói scale từ 1 lên 3 instance là "nhân đôi hoặc gấp ba". Số liệu này có thể chưa chính xác.
+- [ ] `azure-developer-cli-azd-deployment-stacks-moi-truong.md:185`: lời giải dùng backtick Markdown bên trong thẻ `<details>`, nên sẽ không hiển thị thành code.
+- [ ] `azure-entra-external-id-xac-thuc-khach-tai-xe.md:37` (SVG): nhãn "Kiểm iss, aud, exp, ký" thiếu chữ "tra". Agent không sửa vì hộp chữ trong hình hẹp.
+- [ ] `azure-aks-nang-cao-ingress-workload-identity-upgrade.md:82-84` (SVG Hình 1): cụm "Pod trình token" nghe gượng.
+- [ ] Các câu mơ hồ agent không dám sửa:
+  - `azure-firewall-waf-ddos-bao-ve-bien.md:34` ("bảo đảm chi phí khi bị tấn công");
+  - `azure-front-door-cdn-custom-domain-tls.md:54`;
+  - `azure-managed-identity-workload-identity.md:81`;
+  - `azure-cache-for-redis-cache-geospatial-rate-limit.md:114`;
+  - `azure-chon-compute-cho-tung-service-toi-noi.md:50` và `:88`;
+  - `azure-cd-environment-approval-blue-green-canary.md:166`;
+  - `azure-postgresql-ha-read-replica-pitr-entra-auth.md:25`;
+  - `azure-saga-outbox-service-bus-postgresql.md:202`;
+  - `azure-service-bus-queue-topic-session-dead-letter.md:97`;
+  - `azure-private-endpoint-private-dns-service-endpoint.md:74`;
+  - `azure-vnet-subnet-nsg-public-ip.md` ("không có lock bảo vệ ở nhầm chỗ").
+- [ ] Câu agent viết lại theo nghĩa suy đoán, người duyệt đã đối chiếu ngữ cảnh và thấy hợp lý:
+  - `azure-policy-deny-audit-initiative.md:121`, `:183` ("resource hợp lệ" → "resource vi phạm thật");
+  - `azure-virtual-machine-linux-chay-api.md:188`;
+  - `azure-zero-trust-network-segmentation-sentinel.md` ("không thay thế được nhau");
+  - `azure-chi-phi-pricing-cost-management-budget.md:57`;
+  - `azure-database-postgresql-flexible-server-co-ban.md:168`.

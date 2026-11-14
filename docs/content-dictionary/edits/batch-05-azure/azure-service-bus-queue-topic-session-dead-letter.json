@@ -1,0 +1,17 @@
+{"file":"azure-service-bus-queue-topic-session-dead-letter.md","edits":[
+{"old":"Hợp với việc cần làm đúng một lần bởi một worker","new":"Hợp với việc chỉ một worker làm và chỉ làm một lần","reason":"Bị động 'bởi' kiểu tiếng Anh","severity":"medium"},
+{"old":"có thể bị throttle khi hàng xóm ồn","new":"có thể bị throttle khi các tenant dùng chung gây ảnh hưởng (noisy neighbor)","reason":"'hàng xóm ồn' là dịch từng chữ của noisy neighbor","severity":"high"},
+{"old":"Ba field của message là chỗ mối nối với bài 26 nằm:","new":"Ba field của message là chỗ nối với bài 26:","reason":"Câu lủng củng, trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"để filter có cái mà so.","new":"để filter có thuộc tính mà so khớp.","reason":"'có cái mà so' khẩu ngữ, mơ hồ","severity":"medium"},
+{"old":"Thứ nhất, song song hoá giờ là theo session:","new":"Thứ nhất, việc xử lý song song giờ diễn ra theo session:","reason":"Câu thiếu chủ ngữ rõ, 'song song hoá giờ là' gượng","severity":"medium"},
+{"old":"chỉ che được duplicate ở phía gửi trong cửa sổ đó. Dispatcher retry sau một giờ thì không còn được che. Nó là lớp phòng thủ bổ sung","new":"chỉ loại được bản gửi trùng ở phía gửi trong cửa sổ đó. Dispatcher retry sau một giờ thì không còn được loại. Cơ chế này là lớp phòng thủ bổ sung","reason":"'che' là calque của cover; tránh 'Nó'","severity":"medium"},
+{"old":"Hợp với nhắc 15 phút: chuyến vẫn ở","new":"Hợp với việc nhắc sau 15 phút: nếu chuyến vẫn ở","reason":"Câu thiếu động từ, cụt","severity":"medium"},
+{"old":"Nó không trải qua namespace khác, và tất nhiên không gộp được","new":"Transaction này không áp dụng xuyên qua namespace khác, và tất nhiên không gộp được","reason":"'trải qua' sai nghĩa; tránh 'Nó'","severity":"medium"},
+{"old":"Khối này chỉ tạo tài nguyên. Nó chưa chứng minh","new":"Khối này chỉ tạo tài nguyên và chưa chứng minh","reason":"Tránh 'Nó' mơ hồ","severity":"low"},
+{"old":"Tên cờ có thể khác giữa các phiên bản Azure CLI, hãy kiểm","new":"Tên cờ có thể khác giữa các phiên bản Azure CLI, hãy kiểm tra","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"nhận 10 message `TripCompleted`, chín cái xong. Cái mang cờ `poison` bị abandon qua mỗi lần handler throw","new":"nhận 10 message `TripCompleted`, chín message xử lý xong. Message mang cờ `poison` bị abandon sau mỗi lần handler throw","reason":"'chín cái xong' thiếu động từ, khẩu ngữ","severity":"medium"},
+{"old":"## Dead-letter không tự được xem: cần alert","new":"## Dead-letter không tự có ai xem: cần alert","reason":"'không tự được xem' bị động gượng","severity":"medium"},
+{"old":"lớn hơn 0 là có người phải nhìn.","new":"giá trị lớn hơn 0 nghĩa là có người phải xem.","reason":"Câu thiếu chủ ngữ","severity":"low"},
+{"old":"không bấm tay cho từng message","new":"không xử lý thủ công từng message","reason":"'bấm tay' khẩu ngữ","severity":"low"},
+{"old":"và mình bảo vệ tiền của khách bằng cách nào?","new":"và ta bảo vệ tiền của khách bằng cách nào?","reason":"Thống nhất đại từ 'ta' với cả loạt","severity":"low"}
+]}

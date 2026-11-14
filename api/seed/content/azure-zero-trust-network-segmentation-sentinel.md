@@ -20,15 +20,15 @@ Các bài trước đã dựng từng lớp bảo mật riêng lẻ. Bài này g
 
 ## Zero Trust là ba câu hỏi đặt lên mọi request, không phải một sản phẩm
 
-Mô hình cũ coi bên trong mạng là tin cậy. Zero Trust bỏ giả định đó. Nó không phải một dịch vụ để mua mà là ba câu hỏi, và mỗi câu đã có lời đáp trong các bài trước.
+Mô hình cũ coi bên trong mạng là tin cậy. Zero Trust bỏ giả định đó. Đây không phải một dịch vụ để mua mà là ba câu hỏi, và mỗi câu đã có lời đáp trong các bài trước.
 
 | Nguyên tắc | Câu hỏi | Tới Nơi trả lời ở đâu |
 | --- | --- | --- |
-| Xác minh mọi request | Ai đang gọi, từ thiết bị nào, bằng cách nào? | Nhân viên: Conditional Access trên [Entra ID](/articles/azure-entra-id-tenant-user-group-app-registration) (cần license phù hợp, kiểm trang tài liệu). Khách và tài xế: JWT từ [Entra External ID](/articles/azure-entra-external-id-xac-thuc-khach-tai-xe), API kiểm issuer và audience ([bài 19 loạt C#](/articles/dotnet10-authentication-authorization)). Service: [managed identity](/articles/azure-managed-identity-workload-identity) |
+| Xác minh mọi request | Ai đang gọi, từ thiết bị nào, bằng cách nào? | Nhân viên: Conditional Access trên [Entra ID](/articles/azure-entra-id-tenant-user-group-app-registration) (cần license phù hợp, hãy kiểm tra trang tài liệu). Khách và tài xế: JWT từ [Entra External ID](/articles/azure-entra-external-id-xac-thuc-khach-tai-xe), API kiểm tra issuer và audience ([bài 19 loạt C#](/articles/dotnet10-authentication-authorization)). Service: [managed identity](/articles/azure-managed-identity-workload-identity) |
 | Quyền tối thiểu | Identity này cần gì, ở scope nào, trong bao lâu? | [RBAC, scope hẹp và PIM](/articles/azure-rbac-role-scope-assignment-pim); RBAC data plane trên [Key Vault](/articles/azure-key-vault-secret-key-certificate); guardrail bằng [Policy](/articles/azure-policy-deny-audit-initiative) |
 | Giả định bị xâm nhập | Nếu một thành phần đã thất thủ, thiệt hại dừng ở đâu và ai biết? | Phân đoạn ([NSG, ASG](/articles/azure-vnet-subnet-nsg-public-ip), [private endpoint](/articles/azure-private-endpoint-private-dns-service-endpoint), [Firewall](/articles/azure-firewall-waf-ddos-bao-ve-bien)); log; phát hiện ([Defender](/articles/azure-defender-for-cloud-secure-score) và Sentinel ở bài này) |
 
-Ba câu hỏi độc lập nhau. Xác minh tốt mà quyền rộng thì token bị đánh cắp vẫn làm được nhiều việc. Quyền hẹp mà không có log thì không ai biết token bị dùng sai. Dùng bảng như danh sách kiểm: service nào còn ô trống?
+Ba câu hỏi này không thay thế được nhau. Xác minh tốt mà quyền rộng thì token bị đánh cắp vẫn làm được nhiều việc. Quyền hẹp mà không có log thì không ai biết token bị dùng sai. Dùng bảng như danh sách kiểm: service nào còn ô trống?
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -39,7 +39,7 @@ Ba câu hỏi độc lập nhau. Xác minh tốt mà quyền rộng thì token b
 
 ## Phân đoạn nghĩa là mỗi bước đi ngang đều phải có lý do
 
-Phân đoạn là thực hành của nguyên tắc thứ ba. Nếu kẻ tấn công vào được Notification, từ đó nó không được chạm tới Payment hay database. Các biện pháp dưới đây đã gặp ở bài 6, 17 và 18; ở đây ta nhìn chúng như một chuỗi chặn bước.
+Phân đoạn là thực hành của nguyên tắc thứ ba. Nếu kẻ tấn công vào được Notification, từ đó nó không được chạm tới Payment hay database. Các biện pháp dưới đây đã gặp ở bài 6, 17 và 18; ở đây ta nhìn chúng như một chuỗi các lớp chặn liên tiếp.
 
 | Biện pháp | Chặn gì | Giới hạn cần biết |
 | --- | --- | --- |
@@ -53,26 +53,26 @@ Quy tắc đơn giản: không cổng 22 hay 3389 nào mở ra Internet ở bấ
 
 ## Bảo vệ dữ liệu: mặc định đã mã hoá, câu hỏi là ai giữ khoá
 
-Dữ liệu nghỉ trong PostgreSQL, Storage và hầu hết dịch vụ Azure được mã hoá mặc định bằng khoá do nền tảng quản lý. Lớp này có sẵn, nhưng không phải bằng chứng bạn kiểm soát dữ liệu.
+Dữ liệu lưu trữ (data at rest) trong PostgreSQL, Storage và hầu hết dịch vụ Azure được mã hoá mặc định bằng khoá do nền tảng quản lý. Lớp này có sẵn, nhưng không phải bằng chứng bạn kiểm soát dữ liệu.
 
 **Customer-managed key** (khoá nằm trong Key Vault của bạn) chỉ cần khi có yêu cầu tuân thủ hoặc hợp đồng đòi bạn kiểm soát vòng đời khoá. Cái giá thực: bạn phải xoay khoá, bảo vệ Key Vault, và nếu khoá bị vô hiệu hoặc xoá thì dữ liệu mã hoá bằng nó không đọc được. Bật soft delete và purge protection trước khi dùng. Các bước còn lại ngắn gọn hơn: TLS cho mọi kết nối (với PostgreSQL, client dùng chế độ `VerifyFull` để xác minh cả chứng chỉ server, như [bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment)), và phân loại dữ liệu để biết đâu là PII.
 
-Với PII của Tới Nơi (số điện thoại khách, ảnh giấy tờ tài xế, địa chỉ nhận hàng), Microsoft Purview giúp quét và gắn nhãn phân loại ở các nguồn được hỗ trợ; kiểm danh sách nguồn trước khi lên kế hoạch. Phần khó hơn là báo cáo: dữ liệu chảy sang data lake hay dashboard nên được che hoặc bỏ cột nhạy cảm từ lớp truy vấn, vì sao chép dữ liệu thô sang chỗ ít bảo vệ hơn là đường rò rỉ rất phổ biến.
+Với PII của Tới Nơi (số điện thoại khách, ảnh giấy tờ tài xế, địa chỉ nhận hàng), Microsoft Purview giúp quét và gắn nhãn phân loại ở các nguồn được hỗ trợ; kiểm tra danh sách nguồn trước khi lên kế hoạch. Phần khó hơn là báo cáo: dữ liệu chảy sang data lake hay dashboard nên được che hoặc bỏ cột nhạy cảm từ lớp truy vấn, vì sao chép dữ liệu thô sang chỗ ít bảo vệ hơn là đường rò rỉ rất phổ biến.
 
 ## Supply chain: kẻ tấn công cũng đi qua pipeline của bạn
 
 Nếu pipeline đưa được image vào prod thì chiếm pipeline là chiếm prod. Bốn kiểm soát cho Tới Nơi:
 
-- **Image ký.** Ký digest sau khi build (dùng công cụ mã nguồn mở như Notation hoặc cosign) và kiểm chữ ký ở bước deploy. Container Apps không tự ép chữ ký, nên bước kiểm nằm trong pipeline; trên AKS có thể ép ở admission (Ratify, Image Integrity). Tag có thể bị đẩy đè, digest thì không ([bài về ACR và digest](/articles/azure-container-registry-build-push-digest)).
+- **Image ký.** Ký digest sau khi build (dùng công cụ mã nguồn mở như Notation hoặc cosign) và kiểm tra chữ ký ở bước deploy. Container Apps không tự ép chữ ký, nên bước kiểm tra nằm trong pipeline; trên AKS có thể ép ở admission (Ratify, Image Integrity). Tag có thể bị ghi đè, digest thì không ([bài về ACR và digest](/articles/azure-container-registry-build-push-digest)).
 - **Dependency scan.** Quét thư viện trong CI để chặn CVE đã biết trước khi image tới registry ([bài về CI](/articles/azure-ci-pipeline-build-test-scan-push-acr)); Defender quét tiếp lúc image đã nằm trong ACR.
 - **Secret scanning.** Bật quét secret trên repository và push protection để chặn commit chứa khoá. Secret đã lộ phải xoay, không chỉ xoá khỏi lịch sử.
 - **Branch protection.** Bắt review và check đạt trước khi merge vào nhánh deploy.
 
-Bốn thứ này không chứng minh code hết lỗi; chúng khiến việc chèn thay đổi độc hại không thể im lặng.
+Bốn thứ này không chứng minh code hết lỗi; chúng khiến việc chèn thay đổi độc hại không thể diễn ra mà không bị phát hiện.
 
 ## Sentinel đọc log của bạn để tìm hành vi mà cấu hình không chặn được
 
-**Microsoft Sentinel** là SIEM chạy trên Log Analytics. Cơ chế: **data connector** đưa log vào workspace (Entra, Azure Activity, Defender, Firewall); **analytics rule** là truy vấn KQL chạy theo lịch; khi rule trả hàng, nó tạo **alert** và gộp thành **incident**; **automation rule** gắn **playbook** (Logic Apps) vào incident để thông báo hoặc xử lý.
+**Microsoft Sentinel** là SIEM chạy trên Log Analytics. Cơ chế: **data connector** đưa log vào workspace (Entra, Azure Activity, Defender, Firewall); **analytics rule** là truy vấn KQL chạy theo lịch; khi rule trả về dòng kết quả, rule đó tạo **alert** và gộp thành **incident**; **automation rule** gắn **playbook** (Logic Apps) vào incident để thông báo hoặc xử lý.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -81,7 +81,7 @@ Bốn thứ này không chứng minh code hết lỗi; chúng khiến việc ch�
 <figcaption>Hình 2. Luồng Sentinel: connector đưa log vào workspace, analytics rule tạo incident, playbook Logic Apps báo vào Teams.</figcaption>
 </figure>
 
-Chi phí chủ yếu là **ingest**: tính theo GB log vào workspace, cộng phần Sentinel; một số nguồn có chính sách riêng, nên kiểm trang giá trước khi bật connector. Đừng bật mọi thứ. Bắt đầu với năm rule có ý nghĩa, mỗi rule có người nhận:
+Chi phí chủ yếu là **ingest**: tính theo GB log vào workspace, cộng phần Sentinel; một số nguồn có chính sách riêng, nên kiểm tra trang giá trước khi bật connector. Đừng bật mọi thứ. Bắt đầu với năm rule có ý nghĩa, mỗi rule có người nhận:
 
 | Rule | Nguồn | Câu hỏi nó trả lời |
 | --- | --- | --- |
@@ -98,7 +98,7 @@ Chi phí chủ yếu là **ingest**: tính theo GB log vào workspace, cộng ph
 
 ## Lab: bật Sentinel, hai rule, một playbook, một incident
 
-Dùng workspace lab riêng, không dùng workspace prod. Bước 1, tạo workspace và onboard Sentinel. `az sentinel` là extension của Azure CLI (đang ở trạng thái preview, có thể đổi); kiểm `az sentinel onboarding-state create -h` trước khi chạy. Cách bền hơn cho IaC là khai báo resource `Microsoft.SecurityInsights/onboardingStates` trong Bicep.
+Dùng workspace lab riêng, không dùng workspace prod. Bước 1, tạo workspace và onboard Sentinel. `az sentinel` là extension của Azure CLI (đang ở trạng thái preview, có thể đổi); hãy kiểm tra `az sentinel onboarding-state create -h` trước khi chạy. Cách bền hơn cho IaC là khai báo resource `Microsoft.SecurityInsights/onboardingStates` trong Bicep.
 
 ```bash
 az group create --name rg-toinoi-sec-dev-sea --location southeastasia
@@ -115,9 +115,9 @@ az sentinel onboarding-state create \
 
 Lệnh cuối chỉ đăng ký Sentinel trên workspace, không bật connector, không tạo rule. Microsoft đang chuyển Sentinel sang Defender portal và đã công bố lộ trình dừng trải nghiệm trên Azure portal, nên tên menu bên dưới có thể khác.
 
-Bước 2, cài solution từ **Content hub** rồi bật connector: **Microsoft Entra ID** (gửi SigninLogs, AuditLogs; cần Security Administrator hoặc vai trò cao hơn ở tenant, và SigninLogs cần license Entra ID P1/P2) và **Azure Activity** (cấu hình diagnostic setting của subscription, thường qua Azure Policy). Kiểm dữ liệu bằng `AzureActivity | take 5`; dữ liệu có thể trễ vài phút.
+Bước 2, cài solution từ **Content hub** rồi bật connector: **Microsoft Entra ID** (gửi SigninLogs, AuditLogs; cần Security Administrator hoặc vai trò cao hơn ở tenant, và SigninLogs cần license Entra ID P1/P2) và **Azure Activity** (cấu hình diagnostic setting của subscription, thường qua Azure Policy). Kiểm tra dữ liệu bằng `AzureActivity | take 5`; dữ liệu có thể trễ vài phút.
 
-Bước 3, tạo hai analytics rule dạng Scheduled. Rule 1 bắt tạo hoặc sửa public IP trong resource group thuộc prod (tên có `-prod-`). Rule này cũng khớp khi cập nhật vì tạo và sửa dùng chung operation `write`. Giá trị trạng thái thành công trong `ActivityStatusValue` là `Success` ở schema hiện tại; lọc thêm `Succeeded` để chịu được dữ liệu cũ.
+Bước 3, tạo hai analytics rule dạng Scheduled. Rule 1 bắt tạo hoặc sửa public IP trong resource group thuộc prod (tên có `-prod-`). Rule này cũng khớp khi cập nhật vì tạo và sửa dùng chung operation `write`. Giá trị trạng thái thành công trong `ActivityStatusValue` là `Success` ở schema hiện tại; lọc thêm `Succeeded` để xử lý được dữ liệu cũ.
 
 ```kusto
 AzureActivity
@@ -143,9 +143,9 @@ AzureActivity
 | project TimeGenerated, Caller, CallerIpAddress, principalId, _ResourceId
 ```
 
-Hai truy vấn chỉ là điểm bắt đầu: chưa lọc ngoại lệ hợp lệ (pipeline, PIM kích hoạt có chủ đích) và chưa chứng minh bắt được mọi kênh cấp quyền. Cho mỗi rule: chạy mỗi 5 phút, nhìn lại 15 phút. Cửa sổ `TimeGenerated` rộng để không sót event đến trễ; điều kiện `ingestion_time()` bằng tần suất để mỗi event chỉ bắn một lần. Bật gộp alert thành incident và ánh xạ entity Account vào `Caller`, IP vào `CallerIpAddress`.
+Hai truy vấn chỉ là điểm bắt đầu: chưa lọc ngoại lệ hợp lệ (pipeline, PIM kích hoạt có chủ đích) và chưa chứng minh bắt được mọi kênh cấp quyền. Cho mỗi rule: chạy mỗi 5 phút, nhìn lại 15 phút. Cửa sổ `TimeGenerated` rộng để không sót event đến trễ; điều kiện `ingestion_time()` có độ rộng bằng tần suất chạy để mỗi event chỉ bắn một lần. Bật gộp alert thành incident và ánh xạ entity Account vào `Caller`, IP vào `CallerIpAddress`.
 
-Bước 4, playbook. Tạo một Logic App (Consumption) với trigger **Microsoft Sentinel incident**. Hành động: gửi tin vào kênh Teams (tiêu đề, mức nghiêm trọng, link incident), rồi thêm comment vào incident cho biết đã báo ai. Cấp cho Sentinel quyền chạy playbook (vai trò Microsoft Sentinel Automation Contributor trên resource group chứa Logic App) và cấp cho managed identity của Logic App vai trò Microsoft Sentinel Responder để ghi comment. Cuối cùng tạo automation rule: khi incident được tạo từ hai rule trên, chạy playbook này. Phần mô tả này chưa chứng minh connector Teams đã được uỷ quyền; kiểm bằng cách chạy thử playbook thủ công trên một incident mẫu.
+Bước 4, playbook. Tạo một Logic App (Consumption) với trigger **Microsoft Sentinel incident**. Hành động: gửi tin vào kênh Teams (tiêu đề, mức nghiêm trọng, link incident), rồi thêm comment vào incident cho biết đã báo ai. Cấp cho Sentinel quyền chạy playbook (vai trò Microsoft Sentinel Automation Contributor trên resource group chứa Logic App) và cấp cho managed identity của Logic App vai trò Microsoft Sentinel Responder để ghi comment. Cuối cùng tạo automation rule: khi incident được tạo từ hai rule trên, chạy playbook này. Phần mô tả này chưa chứng minh connector Teams đã được uỷ quyền; hãy kiểm tra bằng cách chạy thử playbook thủ công trên một incident mẫu.
 
 Bước 5, kích hoạt. Tạo resource group giả prod chỉ để thử rồi một public IP trong đó:
 
@@ -166,7 +166,7 @@ Chờ lịch rule chạy (có thể mất vài phút cộng độ trễ ingest).
 
 Bạn vừa đặt các lớp bảo mật đã có dưới ba nguyên tắc Zero Trust, thấy chỗ phân đoạn, dữ liệu và supply chain còn cần siết, và dựng một đường phát hiện từ Activity log tới Teams qua Sentinel. Duy trì rule và trực incident là việc hằng ngày, không phải cấu hình một lần.
 
-Bài tiếp theo là [bài 56](/articles/azure-load-testing-autoscale-chaos-studio): đo hiệu năng bằng Azure Load Testing, autoscale và Chaos Studio, để kiểm hệ thống chịu tải và chịu lỗi như thế nào.
+Bài tiếp theo là [bài 56](/articles/azure-load-testing-autoscale-chaos-studio): đo hiệu năng bằng Azure Load Testing, autoscale và Chaos Studio, để kiểm tra hệ thống chịu tải và chịu lỗi ra sao.
 
 ## Tài liệu gốc
 

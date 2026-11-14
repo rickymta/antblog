@@ -1,0 +1,14 @@
+{"file":"azure-kien-truc-tham-chieu-microservices-toi-noi.md","edits":[
+{"old":"Azure là một cách hiện thực nó","new":"Azure là một cách hiện thực hoá kiến trúc đó","reason":"'hiện thực nó' thiếu động từ trọn nghĩa, đại từ mơ hồ","severity":"medium"},
+{"old":"cột cuối nói lý do, phần còn dùng được khi dịch vụ đổi tên.","new":"cột cuối nói lý do chọn và phần vẫn còn đúng khi dịch vụ đổi tên.","reason":"Câu lược, 'phần còn dùng được' thiếu mạch","severity":"medium"},
+{"old":"Azure Cache for Redis đang nghỉ hưu |","new":"Azure Cache for Redis đang ngừng hỗ trợ |","reason":"'nghỉ hưu' là calque của retire","severity":"high"},
+{"old":"phần inbound private kiểm tra tài liệu |","new":"phần inbound private thì hãy kiểm tra tài liệu |","reason":"Câu lược chủ ngữ/động từ","severity":"low"},
+{"old":"phần bạn vẫn làm là cấp token kết nối có claim theo người dùng và kiểm quyền vào group ở server","new":"phần bạn vẫn làm là cấp token kết nối có claim theo người dùng và kiểm tra quyền vào group ở server","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"App iOS và Android chưa muốn kéo client SignalR thì Web PubSub","new":"Nếu app iOS và Android chưa muốn kéo client SignalR vào thì Web PubSub","reason":"Câu thiếu liên từ điều kiện","severity":"medium"},
+{"old":"và là thứ APIM và BFF kiểm (xem","new":"và là thứ APIM và BFF kiểm tra (xem","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Hãy kiểm một trace thật từ","new":"Hãy kiểm tra một trace thật từ","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"kèm tiêu chí đổi quan sát được.","new":"kèm tiêu chí quan sát được để quyết định khi nào đổi.","reason":"'tiêu chí đổi quan sát được' là cụm tự ghép, khó hiểu","severity":"medium"},
+{"old":"Thêm upgrade cluster, node pool, bảo mật pod phải tự vận hành |","new":"Phải tự vận hành thêm việc upgrade cluster, node pool và bảo mật pod |","reason":"Câu lộn trật tự, thiếu động từ rõ","severity":"medium"},
+{"old":"Thêm region thứ hai không tự cho mọi thành phần hai bản.","new":"Thêm region thứ hai không tự động tạo bản thứ hai cho mọi thành phần.","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"tại sao replica hay Front Door không che được.","new":"tại sao replica hay Front Door không khắc phục được.","reason":"'che' là calque của cover","severity":"low"}
+]}

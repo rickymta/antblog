@@ -22,7 +22,7 @@ Bài này đưa Outbox của `trip-service` (bài 26 loạt C#) lên một broke
 
 Service Bus là broker theo kiểu message: mỗi message có vòng đời riêng (đang chờ, đang bị khoá, đã xong, hoặc bị loại sang dead-letter). Đơn vị cấp cao nhất là **namespace**, nơi chọn tier. Bên trong có hai loại entity:
 
-- **Queue**: nhiều producer, nhiều consumer cạnh tranh. Mỗi message chỉ tới một consumer. Hợp với việc cần làm đúng một lần bởi một worker, ví dụ gửi một hoá đơn.
+- **Queue**: nhiều producer, nhiều consumer cạnh tranh. Mỗi message chỉ tới một consumer. Hợp với việc chỉ một worker làm và chỉ làm một lần, ví dụ gửi một hoá đơn.
 - **Topic**: producer gửi một lần vào topic, mỗi **subscription** nhận một bản sao riêng. Bản sao nào được tạo phụ thuộc **rule** (filter) của subscription.
 
 Với Tới Nơi, sự kiện `TripAccepted` hay `TripCompleted` là sự kiện có nhiều người quan tâm: Notification báo khách, Payment trừ tiền, Analytics ghi nhận. Đó là topic, không phải queue. Thêm bên nhận thứ tư chỉ là thêm một subscription, producer không phải sửa.
@@ -32,7 +32,7 @@ Tier quyết định bạn được dùng gì:
 | Tier | Topic/subscription | Mạng riêng | Cách tính tải |
 | --- | --- | --- | --- |
 | Basic | Không, chỉ queue; không có session, transaction, duplicate detection | Không | Dùng chung hạ tầng, tính theo số thao tác |
-| Standard | Có | Không có private endpoint | Dùng chung hạ tầng, có thể bị throttle khi hàng xóm ồn |
+| Standard | Có | Không có private endpoint | Dùng chung hạ tầng, có thể bị throttle khi các tenant dùng chung gây ảnh hưởng (noisy neighbor) |
 | Premium | Có | Có VNet, private endpoint | Tài nguyên dành riêng theo messaging unit, throughput dự đoán được |
 
 Lab dùng Standard vì cần topic. Production của Tới Nơi muốn private endpoint ([bài về Private Endpoint](/articles/azure-private-endpoint-private-dns-service-endpoint)) và độ trễ ổn định lúc cao điểm thì phải tính tới Premium. Số liệu giới hạn và cách tính tiền của từng tier thay đổi theo thời gian; tra tài liệu và Pricing Calculator thay vì nhớ một con số.
@@ -45,11 +45,11 @@ Có một cái bẫy ngay từ đầu: subscription mới tạo luôn kèm rule 
 
 ## Outbox đẩy vào topic, mỗi consumer có subscription riêng
 
-Ở bài 26, dispatcher đọc bảng Outbox và gọi publisher. Bài này thay publisher giả bằng `ServiceBusSender` trỏ vào `trip-events`. Ba field của message là chỗ mối nối với bài 26 nằm:
+Ở bài 26, dispatcher đọc bảng Outbox và gọi publisher. Bài này thay publisher giả bằng `ServiceBusSender` trỏ vào `trip-events`. Ba field của message là chỗ nối với bài 26:
 
 - `MessageId` = `EventId` của dòng Outbox, ổn định giữa các lần dispatcher retry.
 - `SessionId` = `tripId`, để các sự kiện cùng chuyến đi vào cùng một session.
-- `Subject` hoặc application property `eventType`, để filter có cái mà so.
+- `Subject` hoặc application property `eventType`, để filter có thuộc tính mà so khớp.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -92,13 +92,13 @@ Từ đó suy ra hệ quả mà bài 26 đã nói: at-least-once cộng crash đ
 
 Queue và subscription thông thường không bảo đảm thứ tự khi có nhiều consumer. Với chuyến, `TripAccepted` đến sau `TripCompleted` là lỗi nghiệp vụ. **Session** giải quyết bằng cách gom mọi message cùng `SessionId` vào một luồng; tại một thời điểm chỉ một consumer giữ lock của session đó và nhận message theo thứ tự gửi. Entity phải được tạo với session bật, và producer phải đặt `SessionId` trên mọi message.
 
-Cái giá có hai mặt. Thứ nhất, song song hoá giờ là theo session: một chuyến luôn được xử lý tuần tự, nhiều chuyến mới chạy song song. Thứ hai, một **poison message chặn cả session của nó**. Message hỏng bị abandon và giao lại liên tục, các message sau của cùng chuyến không qua được cho tới khi nó bị dead-letter. Vì vậy max delivery count thấp hơn thì chuyến bị kẹt ngắn hơn, nhưng sự cố tạm (database nghẽn vài giây) cũng dễ đẩy message tốt vào DLQ hơn.
+Cái giá có hai mặt. Thứ nhất, việc xử lý song song giờ diễn ra theo session: một chuyến luôn được xử lý tuần tự, nhiều chuyến mới chạy song song. Thứ hai, một **poison message chặn cả session của nó**. Message hỏng bị abandon và giao lại liên tục, các message sau của cùng chuyến không qua được cho tới khi nó bị dead-letter. Vì vậy max delivery count thấp hơn thì chuyến bị kẹt ngắn hơn, nhưng sự cố tạm (database nghẽn vài giây) cũng dễ đẩy message tốt vào DLQ hơn.
 
 Ba cơ chế còn lại trong đề cương đều nhỏ nhưng dễ dùng sai:
 
-- **Duplicate detection** theo `MessageId`: broker loại bản gửi trùng trong một cửa sổ thời gian. Bật khi tạo entity, và chỉ che được duplicate ở phía gửi trong cửa sổ đó. Dispatcher retry sau một giờ thì không còn được che. Nó là lớp phòng thủ bổ sung, không thay Inbox.
-- **Scheduled message**: đặt `ScheduledEnqueueTime` để message chỉ hiện ra sau một lúc. Hợp với nhắc 15 phút: chuyến vẫn ở `searching` thì nhắc khách. Khi chuyến đã có tài xế, huỷ message đã hẹn bằng `CancelScheduledMessageAsync` với sequence number mà `ScheduleMessageAsync` trả về. Nếu subscription nhận có bật session, message hẹn giờ cũng phải mang `SessionId`.
-- **Transaction**: nhận, settle và gửi tới entity khác trong cùng namespace có thể gói chung một transaction (kiểu «send via»), cần tier Standard trở lên. Nó không trải qua namespace khác, và tất nhiên không gộp được với PostgreSQL. Đó vẫn là việc của Outbox.
+- **Duplicate detection** theo `MessageId`: broker loại bản gửi trùng trong một cửa sổ thời gian. Bật khi tạo entity, và chỉ loại được bản gửi trùng ở phía gửi trong cửa sổ đó. Dispatcher retry sau một giờ thì không còn được loại. Cơ chế này là lớp phòng thủ bổ sung, không thay Inbox.
+- **Scheduled message**: đặt `ScheduledEnqueueTime` để message chỉ hiện ra sau một lúc. Hợp với việc nhắc sau 15 phút: nếu chuyến vẫn ở `searching` thì nhắc khách. Khi chuyến đã có tài xế, huỷ message đã hẹn bằng `CancelScheduledMessageAsync` với sequence number mà `ScheduleMessageAsync` trả về. Nếu subscription nhận có bật session, message hẹn giờ cũng phải mang `SessionId`.
+- **Transaction**: nhận, settle và gửi tới entity khác trong cùng namespace có thể gói chung một transaction (kiểu «send via»), cần tier Standard trở lên. Transaction này không áp dụng xuyên qua namespace khác, và tất nhiên không gộp được với PostgreSQL. Đó vẫn là việc của Outbox.
 
 ## Lab: namespace Standard, topic trip-events, hai subscription có filter
 
@@ -117,9 +117,9 @@ az role assignment create --role "Azure Service Bus Data Owner" \
   --scope $(az servicebus namespace show -g $RG -n $NS --query id -o tsv)
 ```
 
-Khối này chỉ tạo tài nguyên. Nó chưa chứng minh quyền đã lan truyền xong; vai trò mới gán có thể cần vài phút mới có hiệu lực.
+Khối này chỉ tạo tài nguyên và chưa chứng minh quyền đã lan truyền xong; vai trò mới gán có thể cần vài phút mới có hiệu lực.
 
-Khối thứ hai tạo hai subscription bật session, xoá `$Default` rồi gắn rule SQL. Tên cờ có thể khác giữa các phiên bản Azure CLI, hãy kiểm `az servicebus topic subscription rule create --help` nếu lệnh báo lỗi tham số.
+Khối thứ hai tạo hai subscription bật session, xoá `$Default` rồi gắn rule SQL. Tên cờ có thể khác giữa các phiên bản Azure CLI, hãy kiểm tra `az servicebus topic subscription rule create --help` nếu lệnh báo lỗi tham số.
 
 ```bash
 for SUB in notification payment; do
@@ -186,20 +186,20 @@ await Task.Delay(TimeSpan.FromMinutes(2));
 await processor.StopProcessingAsync();
 ```
 
-Kỳ vọng theo cơ chế, chưa phải kết quả đã đo: subscription `payment` nhận 10 message `TripCompleted`, chín cái xong. Cái mang cờ `poison` bị abandon qua mỗi lần handler throw (processor mặc định tự complete khi handler thành công và abandon khi throw), delivery count tăng tới 10 rồi message sang `$deadletterqueue`. Subscription `notification` nhận 100 message. Handler này chưa có Inbox; nó chỉ chứng minh đường đi của vòng giao lại, không chứng minh idempotency.
+Kỳ vọng theo cơ chế, chưa phải kết quả đã đo: subscription `payment` nhận 10 message `TripCompleted`, chín message xử lý xong. Message mang cờ `poison` bị abandon sau mỗi lần handler throw (processor mặc định tự complete khi handler thành công và abandon khi throw), delivery count tăng tới 10 rồi message sang `$deadletterqueue`. Subscription `notification` nhận 100 message. Handler này chưa có Inbox; nó chỉ chứng minh đường đi của vòng giao lại, không chứng minh idempotency.
 
-## Dead-letter không tự được xem: cần alert và một người chịu trách nhiệm
+## Dead-letter không tự có ai xem: cần alert và một người chịu trách nhiệm
 
 DLQ là một hàng đợi con của entity, đường dẫn dạng `trip-events/Subscriptions/payment/$deadletterqueue`. Message trong đó mang `DeadLetterReason` và `DeadLetterErrorDescription`; với message do bạn tự dead-letter, hai trường này do bạn đặt. DLQ không tự hết hạn và message ở đó vẫn tính vào dung lượng entity.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Dead-letter không phải thùng rác. Message ở đó là một chuyến chưa được thanh toán hoặc một khách chưa được báo. Nếu không có alert, bạn chỉ biết khi khách gọi hỏi. Đặt alert trên metric dead-lettered messages của namespace, lớn hơn 0 là có người phải nhìn. Nhớ xoá resource group sau lab: <code>az group delete -n rg-toinoi-msg-dev-sea --yes</code>.</p>
+<p>Dead-letter không phải thùng rác. Message ở đó là một chuyến chưa được thanh toán hoặc một khách chưa được báo. Nếu không có alert, bạn chỉ biết khi khách gọi hỏi. Đặt alert trên metric dead-lettered messages của namespace, giá trị lớn hơn 0 nghĩa là có người phải xem. Nhớ xoá resource group sau lab: <code>az group delete -n rg-toinoi-msg-dev-sea --yes</code>.</p>
 </div>
 
-Quan sát hằng ngày dựa trên hai metric trong Azure Monitor: số message active (backlog đang dài ra hay không) và số message dead-lettered (có thứ đang hỏng). Active tăng đều trong khi consumer vẫn chạy thường là dấu hiệu consumer chậm hơn producer, chứ chưa chắc là lỗi. **Service Bus Explorer** trong Portal cho phép peek message, gửi message thử và xem DLQ. Hãy dùng nó để đọc `DeadLetterReason` của message `poison`; thao tác sửa rồi gửi lại nên đi qua một quy trình có người duyệt, không bấm tay cho từng message.
+Quan sát hằng ngày dựa trên hai metric trong Azure Monitor: số message active (backlog đang dài ra hay không) và số message dead-lettered (có thứ đang hỏng). Active tăng đều trong khi consumer vẫn chạy thường là dấu hiệu consumer chậm hơn producer, chứ chưa chắc là lỗi. **Service Bus Explorer** trong Portal cho phép peek message, gửi message thử và xem DLQ. Hãy dùng nó để đọc `DeadLetterReason` của message `poison`; thao tác sửa rồi gửi lại nên đi qua một quy trình có người duyệt, không xử lý thủ công từng message.
 
-**Bài tập:** `lock-duration` đặt 30 giây, handler của Payment mất 45 giây và không gia hạn lock. Điều gì xảy ra, và mình bảo vệ tiền của khách bằng cách nào?
+**Bài tập:** `lock-duration` đặt 30 giây, handler của Payment mất 45 giây và không gia hạn lock. Điều gì xảy ra, và ta bảo vệ tiền của khách bằng cách nào?
 
 <details><summary>Xem lời giải</summary><p>Lock hết ở giây 30, message quay lại hàng đợi và có thể giao cho consumer khác, delivery count tăng. Lời gọi Complete ở giây 45 thất bại vì lock đã mất, trong khi hiệu ứng đã xảy ra. Hai bản cùng xử lý một thanh toán. Cách bảo vệ là Inbox với khoá (consumer, MessageId) trong cùng transaction với ghi thanh toán, cộng gia hạn lock hoặc tăng lock duration cho khớp thời gian xử lý thật.</p></details>
 

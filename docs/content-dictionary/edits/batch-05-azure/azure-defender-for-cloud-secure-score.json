@@ -1,0 +1,22 @@
+{"file":"azure-defender-for-cloud-secure-score.md","edits":[
+{"old":"nhìn subscription của Tới Nơi bằng hai con mắt khác nhau","new":"nhìn subscription của Tới Nơi theo hai góc độ khác nhau","reason":"'hai con mắt' là cách nói sát tiếng Anh, không rõ nghĩa","severity":"medium"},
+{"old":"Secure Score đo tư thế cấu hình (bạn đã bật","new":"Secure Score đo mức độ an toàn của cấu hình (bạn đã bật","reason":"'tư thế' là calque của posture","severity":"medium"},
+{"old":"## Hai nửa của Defender for Cloud: tư thế và bảo vệ workload","new":"## Hai nửa của Defender for Cloud: đánh giá cấu hình và bảo vệ workload","reason":"'tư thế' là calque của posture","severity":"medium"},
+{"old":"CSPM miễn phí cho tư thế bảo mật;","new":"CSPM miễn phí để đánh giá cấu hình bảo mật;","reason":"'tư thế bảo mật' là calque","severity":"medium"},
+{"old":"nên bật plan Storage cho tất cả sẽ cộng dồn nhanh.","new":"nên bật plan Storage cho tất cả sẽ khiến chi phí cộng dồn nhanh.","reason":"Câu lược danh từ chính 'chi phí'","severity":"medium"},
+{"old":"Foundational CSPM không phải hộp đen. Nó dựa trên","new":"Foundational CSPM không phải hộp đen: cơ chế này dựa trên","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"Defender for Cloud xếp cùng dữ liệu đó thành recommendation có mức nghiêm trọng, nhóm thành security control.","new":"Defender for Cloud trình bày cùng dữ liệu đó thành recommendation có mức nghiêm trọng, rồi nhóm thành security control.","reason":"'xếp ... thành' gượng, thiếu nối ý","severity":"low"},
+{"old":"Đọc nó theo bốn câu hỏi.","new":"Hãy đọc recommendation này theo bốn câu hỏi.","reason":"Tránh 'nó' ở đầu câu, thiếu chủ ngữ","severity":"medium"},
+{"old":"nút sửa nhanh trên portal sẽ bị lần deploy kế tiếp ghi đè về cấu hình cũ","new":"thay đổi từ nút sửa nhanh trên portal sẽ bị lần deploy kế tiếp ghi đè về cấu hình cũ","reason":"Chủ ngữ sai: nút không bị ghi đè, thay đổi mới bị ghi đè","severity":"medium"},
+{"old":"hãy kiểm trang Secure Score trong tài liệu","new":"hãy kiểm tra trang Secure Score trong tài liệu","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"workflow automation đưa nó tới người trực","new":"workflow automation đưa alert tới người trực","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"Nó kiểm được đường đi tới Teams, nhưng không chứng minh","new":"Alert mẫu kiểm tra được đường đi tới Teams, nhưng không chứng minh","reason":"'Nó' mơ hồ; 'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"nó bắt được CVE công bố sau khi bạn đã push","new":"đồng thời bắt được CVE công bố sau khi bạn đã push","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"gắn mỗi phát hiện vào một chủ sở hữu và một hạn xử lý","new":"giao mỗi phát hiện cho một người phụ trách và một hạn xử lý","reason":"'chủ sở hữu' là calque của owner, theo style guide dùng 'người phụ trách'","severity":"medium"},
+{"old":"Bật plan cho loại tài nguyên đối xứng với prod","new":"Bật plan cho các loại tài nguyên giống prod","reason":"'đối xứng với' là calque","severity":"low"},
+{"old":"mở Defender for Cloud trên portal và kiểm trạng thái","new":"mở Defender for Cloud trên portal và kiểm tra trạng thái","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nó ở tier `Free` nghĩa là bạn chỉ có Foundational CSPM; các plan khác ở `Free` nghĩa là chưa bật Defender plan nào.","new":"Nếu gói này ở tier `Free` thì bạn chỉ có Foundational CSPM; nếu các plan khác ở `Free` thì bạn chưa bật Defender plan nào.","reason":"Tránh 'Nó' đầu câu; câu 'X nghĩa là' thiếu vế điều kiện","severity":"medium"},
+{"old":"lệnh sau. Nó không chứng minh VM đã được onboard và gửi dữ liệu;","new":"lệnh sau. Lệnh này không chứng minh VM đã onboard và gửi dữ liệu;","reason":"'Nó' mơ hồ; bỏ bị động","severity":"medium"},
+{"old":"Quên tắt sau lab là một khoản chi phí âm thầm kéo dài.","new":"Quên tắt sau lab sẽ thành một khoản chi phí kéo dài mà không ai để ý.","reason":"'âm thầm' là calque, nêu nghĩa cụ thể","severity":"high"},
+{"old":"Hãy đặt budget cảnh báo cho subscription dev","new":"Hãy đặt budget kèm cảnh báo cho subscription dev","reason":"Cụm 'budget cảnh báo' tự ghép","severity":"low"}
+]}

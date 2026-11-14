@@ -1,0 +1,19 @@
+{"file":"azure-saga-outbox-service-bus-postgresql.md","edits":[
+{"old":"Saga không cho bạn tính cô lập.","new":"Saga không đảm bảo tính cô lập.","reason":"'không cho bạn tính cô lập' là calque","severity":"medium"},
+{"old":"Thiết kế phải chấp nhận điều đó và làm nó an toàn.","new":"Thiết kế phải chấp nhận điều đó và làm cho trạng thái dở dang ấy an toàn.","reason":"'làm nó an toàn' mơ hồ","severity":"medium"},
+{"old":"đổi lại tự viết timer, khoá và phục hồi sau crash","new":"đổi lại bạn phải tự viết timer, khoá và cơ chế phục hồi sau crash","reason":"Câu thiếu chủ ngữ và danh từ","severity":"medium"},
+{"old":"Nó không chứa activity `Send` (gửi một `ServiceBusMessage` tới queue đã chọn)","new":"Khối này không chứa activity `Send` (gửi một `ServiceBusMessage` tới queue đã chọn)","reason":"Tránh 'Nó' mơ hồ","severity":"medium"},
+{"old":"nên cùng chuyến vẫn được che","new":"nên cùng chuyến vẫn được loại trùng","reason":"'che' là calque của covers","severity":"medium"},
+{"old":"Timer hết hạn không có nghĩa lệnh bị huỷ. Nó chỉ nghĩa orchestrator ngừng chờ.","new":"Timer hết hạn không có nghĩa lệnh bị huỷ, mà chỉ có nghĩa orchestrator ngừng chờ.","reason":"Câu thiếu động từ 'có nghĩa'","severity":"high"},
+{"old":"nên chạy nhiều bản relay không đọc trùng cùng một dòng","new":"nên khi chạy nhiều relay cùng lúc thì chúng không đọc trùng cùng một dòng","reason":"Cấu trúc gượng, 'bản relay'","severity":"low"},
+{"old":"loại bản thứ hai nếu nó rơi trong cửa sổ bạn đặt","new":"loại bản thứ hai nếu bản đó rơi vào cửa sổ bạn đặt","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"message trùng làm unique vi phạm và hiệu ứng không lặp (cách kiểm đúng loại lỗi 23505 ở bài 26)","new":"message trùng làm vi phạm ràng buộc unique nên hiệu ứng không lặp (cách kiểm tra đúng loại lỗi 23505 có ở bài 26)","reason":"Trật tự từ kiểu tiếng Anh; 'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Một Saga chưa thử khi bị phá thì mới là bản vẽ.","new":"Một Saga chưa được thử phá thì mới chỉ là bản vẽ.","reason":"Câu gượng, khó hiểu","severity":"medium"},
+{"old":"| Inbox thấy `message_id` đã có và bỏ qua; không hiệu ứng thứ hai |","new":"| Inbox thấy `message_id` đã có và bỏ qua; không có hiệu ứng thứ hai |","reason":"Thiếu động từ 'có'","severity":"medium"},
+{"old":"dù nó khiến chuyến kẹt trong session","new":"dù lệnh hỏng khiến chuyến kẹt trong session","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"Tên cờ CLI có thể khác giữa các phiên bản; kiểm bằng","new":"Tên cờ CLI có thể khác giữa các phiên bản; kiểm tra bằng","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Khối này chỉ tạo entity. Nó chưa chứng minh","new":"Khối này chỉ tạo entity và chưa chứng minh","reason":"Tránh 'Nó' mơ hồ","severity":"low"},
+{"old":"lab đi ba bước:","new":"lab gồm ba bước:","reason":"'đi ba bước' dịch máy","severity":"medium"},
+{"old":"hai cơ chế nào trong bài bảo đảm nó cuối cùng đúng?","new":"hai cơ chế nào trong bài bảo đảm kết quả cuối cùng đúng?","reason":"'nó' mơ hồ (tiền hay Saga)","severity":"medium"},
+{"old":"cách theo dõi cho cả những thành phần như","new":"cách theo dõi chi phí cho cả những thành phần như","reason":"Thiếu danh từ 'chi phí'","severity":"medium"}
+]}

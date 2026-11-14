@@ -1,0 +1,22 @@
+{"file":"azure-chon-compute-cho-tung-service-toi-noi.md","edits":[
+{"old":"kèm lý do và điều kiện đổi quyết định.","new":"kèm lý do và điều kiện khiến quyết định thay đổi.","reason":"'điều kiện đổi quyết định' là cụm tự ghép, thiếu chủ thể","severity":"medium"},
+{"old":"và đội có đủ người để giữ phần kiểm soát đó»","new":"và đội có đủ người để giữ phần kiểm soát đó hay không»","reason":"Câu hỏi thiếu vế nghi vấn, không có động từ hỏi","severity":"medium"},
+{"old":"kiểm trang tài liệu của từng dịch vụ","new":"hãy kiểm tra trang tài liệu của từng dịch vụ","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"State khớp tài xế theo cell địa lý nằm trong bộ nhớ","new":"State ghép cặp tài xế theo ô địa lý (cell) nằm trong bộ nhớ","reason":"'khớp tài xế' dịch từng chữ của match drivers, thiếu nghĩa","severity":"high"},
+{"old":"Giải được state ra ngoài và scaler có sẵn đủ dùng","new":"Tách được state ra ngoài pod và scaler có sẵn đủ dùng","reason":"'Giải được state ra ngoài' là cụm tự ghép","severity":"high"},
+{"old":"| Bùng nổ theo sự kiện, ít state","new":"| Tải tăng vọt theo sự kiện, ít state","reason":"'Bùng nổ' thiếu chủ thể (tải), dịch từng chữ của bursty","severity":"medium"},
+{"old":"việc scale phải bám một chỉ số riêng như số yêu cầu chờ khớp","new":"việc scale phải dựa vào một chỉ số riêng như số yêu cầu đang chờ ghép cặp","reason":"'bám' gượng, 'chờ khớp' cụt","severity":"medium"},
+{"old":"Dispatch cũng về Container Apps được","new":"Dispatch cũng chuyển về Container Apps được","reason":"Thiếu động từ 'chuyển'","severity":"low"},
+{"old":"là chỗ ngược trực giác.","new":"là trường hợp đi ngược trực giác.","reason":"'chỗ ngược trực giác' gượng","severity":"low"},
+{"old":"trigger cung cấp at-least-once","new":"trigger đảm bảo at-least-once","reason":"'cung cấp' là calque của provides","severity":"low"},
+{"old":"khi bạn thật sự cần quyền với OS","new":"khi bạn thật sự cần quyền kiểm soát OS","reason":"'quyền với OS' cụt","severity":"medium"},
+{"old":"để bạn hiểu nền, không để làm đích.","new":"để bạn hiểu nền, không phải để làm đích đến.","reason":"'làm đích' cụt, thiếu danh từ","severity":"medium"},
+{"old":"có thể kiểm bằng câu hỏi:","new":"có thể kiểm tra bằng các câu hỏi sau:","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"đủ thời gian sở hữu cluster","new":"đủ thời gian phụ trách cluster","reason":"'sở hữu' là calque của own; dùng 'phụ trách'","severity":"medium"},
+{"old":"cho một hai service như Dispatch","new":"cho một hoặc hai service như Dispatch","reason":"Thiếu liên từ","severity":"low"},
+{"old":"Nó không chứng minh lựa chọn nào đúng; nó chỉ giúp bạn nhìn thấy","new":"Khối này không chứng minh lựa chọn nào đúng, chỉ giúp bạn nhìn thấy","reason":"Tránh 'Nó' lặp, mơ hồ","severity":"medium"},
+{"old":"Rồi viết một đoạn biện hộ và một điều kiện đổi quyết định.","new":"Rồi viết một đoạn lập luận và một điều kiện khiến quyết định thay đổi.","reason":"'biện hộ' mang nghĩa bào chữa; 'điều kiện đổi quyết định' tự ghép","severity":"medium"},
+{"old":"Biện hộ lựa chọn bằng tiêu chí trong bảng.","new":"Lý giải lựa chọn bằng các tiêu chí trong bảng.","reason":"'Biện hộ' sai sắc thái","severity":"medium"},
+{"old":"giúp bạn khỏi tự viết bộ máy chờ.","new":"giúp bạn khỏi phải tự viết cơ chế chờ.","reason":"'bộ máy' là calque của engine","severity":"medium"},
+{"old":"nếu nêu được tiêu chí và điều kiện đổi quyết định.","new":"nếu nêu được tiêu chí và điều kiện khiến quyết định thay đổi.","reason":"'điều kiện đổi quyết định' tự ghép","severity":"low"}
+]}

@@ -10,7 +10,7 @@ language: vi
 
 Đây là **bài 7** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 1 · Nền tảng Azure (bài 7/10 của phần).
 
-Bài này dựng một máy ảo Linux đầu tiên cho `trip-service` và giải thích từng resource đi kèm. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.* VM là cách chạy API dễ hiểu nhất vì nó giống một máy chủ bạn đã quen. Đó cũng là lý do nó để lộ rõ phần việc bạn phải tự gánh. Phần 3 sẽ thay nó bằng Container Apps.
+Bài này dựng một máy ảo Linux đầu tiên cho `trip-service` và giải thích từng resource đi kèm. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.* VM là cách chạy API dễ hiểu nhất vì VM giống một máy chủ bạn đã quen. Đó cũng là lý do VM để lộ rõ phần việc bạn phải tự gánh. Phần 3 sẽ thay nó bằng Container Apps.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Bài này dựng một máy ảo Linux đầu tiên cho `trip-service` và giả
 
 ## Một VM là sáu resource, không phải một
 
-Khi bạn bấm «Create a VM» trên Portal, Azure tạo nhiều resource độc lập trong cùng resource group. Mỗi thứ có resource ID, vòng đời và dòng tiền riêng.
+Khi bạn bấm «Create a VM» trên Portal, Azure tạo nhiều resource độc lập trong cùng resource group. Mỗi thứ có resource ID, vòng đời và chi phí riêng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -43,7 +43,7 @@ Cách tách này có lợi: bạn thay NSG, đổi size hoặc gắn thêm disk 
 
 ## Chọn size, image và disk theo việc cần làm
 
-Size trả lời câu hỏi «cần bao nhiêu CPU và RAM». Họ B có CPU burst, hợp với lab và môi trường dev ít tải. Họ D là lựa chọn mặc định cho API chạy đều. Họ E dành cho workload ngốn RAM như cache lớn. Tên size cụ thể và khả năng cấp phát khác nhau theo region, nên hãy kiểm bằng `az vm list-sizes` hoặc trang sizes trước khi chốt. Đừng chọn size theo cảm giác. Đo tải trước, như [bài 25 của loạt C#](/articles/dotnet10-cache-timeout-retry-rate-limit) đã làm với timeout và rate limit.
+Size trả lời câu hỏi «cần bao nhiêu CPU và RAM». Họ B có CPU burst, hợp với lab và môi trường dev ít tải. Họ D là lựa chọn mặc định cho API chạy đều. Họ E dành cho workload ngốn RAM như cache lớn. Tên size cụ thể và khả năng cấp phát khác nhau theo region, nên hãy kiểm tra bằng `az vm list-sizes` hoặc trang sizes trước khi chốt. Đừng chọn size theo cảm giác. Đo tải trước, như [bài 25 của loạt C#](/articles/dotnet10-cache-timeout-retry-rate-limit) đã làm với timeout và rate limit.
 
 Image quyết định bạn nhận hệ điều hành nào. Lab dùng Ubuntu LTS bản 24.04 (alias `Ubuntu2404` trong CLI). Image từ Marketplace do nhà phát hành cập nhật bản dựng mới, nhưng VM đã tạo thì không tự đổi sang image mới. Ubuntu bật sẵn `unattended-upgrades` cho bản vá bảo mật, nhưng khởi động lại sau khi vá kernel, nâng cấp lớn và kiểm tra service còn chạy vẫn là việc của bạn.
 
@@ -61,7 +61,7 @@ Một điều bài này chủ động không làm: **không đặt dữ liệu P
 
 ## Tạo VM bằng az vm create và cloud-init
 
-Cloud-init là đoạn cấu hình Azure đưa vào VM lúc boot đầu tiên. Khối dưới cài nginx, runtime ASP.NET Core, ghi file môi trường và định nghĩa service systemd. Nó **không** copy code của trip-service lên máy. Bước đó nằm ở mục sau. Theo tài liệu cài .NET trên Ubuntu, gói `aspnetcore-runtime-10.0` có sẵn trong feed mặc định của Ubuntu 24.04, không cần thêm kho Microsoft. Nếu bạn đổi sang bản Ubuntu khác mà `apt` báo không tìm thấy, hãy tra lại bảng phiên bản trong tài liệu đó.
+Cloud-init là đoạn cấu hình Azure đưa vào VM lúc boot đầu tiên. Khối dưới cài nginx, runtime ASP.NET Core, ghi file môi trường và định nghĩa service systemd. Cloud-init **không** copy code của trip-service lên máy. Bước đó nằm ở mục sau. Theo tài liệu cài .NET trên Ubuntu, gói `aspnetcore-runtime-10.0` có sẵn trong feed mặc định của Ubuntu 24.04, không cần thêm kho Microsoft. Nếu bạn đổi sang bản Ubuntu khác mà `apt` báo không tìm thấy, hãy tra lại bảng phiên bản trong tài liệu đó.
 
 ```yaml
 #cloud-config
@@ -94,14 +94,14 @@ runcmd:
   - [systemctl, restart, nginx]
 ```
 
-Các giá trị `.invalid` là giả có chủ đích. Host production kiểm cấu hình lúc khởi động: connection string phải đúng cú pháp, có `SslMode=VerifyFull`, và `Auth:Authority` phải là địa chỉ HTTPS. Giá trị giả vượt qua kiểm tra đó để process lên được. Nó không kết nối tới database nào, và JWT handler chỉ tải metadata của `Auth:Authority` khi có request mang token, nên hai endpoint health ẩn danh vẫn trả lời được. Khối này cũng không chứng minh nginx hay service chạy đúng. Bạn chỉ biết điều đó sau khi curl.
+Các giá trị `.invalid` là giả có chủ đích. Host production kiểm tra cấu hình lúc khởi động: connection string phải đúng cú pháp, có `SslMode=VerifyFull`, và `Auth:Authority` phải là địa chỉ HTTPS. Giá trị giả vượt qua kiểm tra đó để process lên được. Process này không kết nối tới database nào, và JWT handler chỉ tải metadata của `Auth:Authority` khi có request mang token, nên hai endpoint health ẩn danh vẫn trả lời được. Khối này cũng không chứng minh nginx hay service chạy đúng. Bạn chỉ biết điều đó sau khi curl.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
 <p>Custom data của VM không phải nơi giấu bí mật. Ai có quyền đọc cấu hình VM hoặc đăng nhập vào máy đều đọc lại được. Vì vậy file trên không có password. Secret thật sẽ nằm trong Key Vault, truy cập bằng managed identity ở Phần 2.</p>
 </div>
 
-Lệnh tạo VM, theo quy ước đặt tên của loạt. VM cắm vào `snet-app` của `vnet-toinoi-dev-sea` từ bài 6 (nếu đã xoá, chạy lại khối tạo mạng và NSG của bài 6 trước). VNet nằm ở resource group khác, nên phải truyền **ID** của subnet: nếu chỉ truyền tên, `az vm create` tìm VNet trong resource group của VM, không thấy thì lặng lẽ tạo một VNet mới với dải mặc định. NSG gắn vào NIC được tạo trống (`--nsg-rule NONE`) để CLI không tự mở port 22 cho cả thế giới:
+Lệnh tạo VM, theo quy ước đặt tên của loạt. VM cắm vào `snet-app` của `vnet-toinoi-dev-sea` từ bài 6 (nếu đã xoá, chạy lại khối tạo mạng và NSG của bài 6 trước). VNet nằm ở resource group khác, nên phải truyền **ID** của subnet: nếu chỉ truyền tên, `az vm create` tìm VNet trong resource group của VM, không thấy thì tự tạo một VNet mới với dải mặc định mà không báo lỗi. NSG gắn vào NIC được tạo trống (`--nsg-rule NONE`) để CLI không tự mở port 22 cho cả thế giới:
 
 ```bash
 RG=rg-toinoi-api-dev-sea
@@ -140,7 +140,7 @@ az network nsg rule create -g $RG --nsg-name nsg-toinoi-api-dev-sea \
   --destination-port-ranges 80 --source-address-prefixes "$MYIP/32"
 ```
 
-Khối này không chứng minh rule đúng ý. Kiểm bằng effective security rules của NIC (`az network nic list-effective-nsg`) hoặc IP flow verify của Network Watcher, đúng như bài 6 hẹn.
+Khối này không chứng minh rule đúng ý. Hãy kiểm tra bằng effective security rules của NIC (`az network nic list-effective-nsg`) hoặc IP flow verify của Network Watcher, đúng như bài 6 hẹn.
 
 `--generate-ssh-keys` dùng cặp khoá sẵn có trong `~/.ssh` (mặc định RSA), hoặc tạo mới nếu chưa có. Khoá riêng ở lại máy bạn. Azure chỉ nhận khoá công khai. Mất khoá riêng là mất đường SSH vào VM, và không ai khôi phục hộ bạn.
 
@@ -148,9 +148,9 @@ Khối lệnh này không chứng minh Standard_B2s còn hàng ở Southeast Asi
 
 ### SSH bằng khoá thay cho mật khẩu
 
-Port 22 có public IP bị dò mật khẩu liên tục. Lab chặn bằng hai lớp rẻ: khoá SSH (kẻ dò không có gì để đoán) và rule nguồn `/32` (họ không chạm được tới port). Nếu cả nhóm cần vào VM, mỗi người một khoá, thêm khoá công khai vào `authorized_keys`, ai rời nhóm thì gỡ đúng khoá đó. Ở quy mô lớn hơn, Azure có Bastion để vào VM mà không mở port 22 ra Internet, và đăng nhập SSH bằng Microsoft Entra để thay việc rải khoá bằng phân quyền RBAC (cách này vẫn cần đường mạng tới port 22, ví dụ qua Bastion). Lab này chưa cần tới chúng.
+Port 22 có public IP bị dò mật khẩu liên tục. Lab chặn bằng hai lớp bảo vệ đơn giản, ít tốn kém: khoá SSH (kẻ dò không có gì để đoán) và rule nguồn `/32` (họ không chạm được tới port). Nếu cả nhóm cần vào VM, mỗi người một khoá, thêm khoá công khai vào `authorized_keys`, ai rời nhóm thì gỡ đúng khoá đó. Ở quy mô lớn hơn, Azure có Bastion để vào VM mà không mở port 22 ra Internet, và đăng nhập SSH bằng Microsoft Entra để thay việc rải khoá bằng phân quyền RBAC (cách này vẫn cần đường mạng tới port 22, ví dụ qua Bastion). Lab này chưa cần tới chúng.
 
-## Đưa trip-service lên và kiểm /health/live
+## Đưa trip-service lên và kiểm tra /health/live
 
 Cloud-init chạy nền sau khi VM báo «Succeeded». Đợi nó xong rồi mới copy code, bằng `cloud-init status --wait`. Sau đó publish service từ máy bạn và đẩy lên.
 
@@ -174,7 +174,7 @@ Kỳ vọng: `/health/live` trả 200, vì endpoint này không truy vấn datab
 <figcaption>Hình 2. Đường đi của một request curl tới trip-service: public IP và NSG mở port 80, nginx, rồi service chỉ lắng nghe trên 127.0.0.1:8080.</figcaption>
 </figure>
 
-Thiết kế này có lý do. Service chỉ bind vào loopback nên port 8080 không bao giờ ra Internet, dù ai đó lỡ mở nhầm NSG. Nginx là điểm duy nhất nhìn thấy từ ngoài. Hạn chế của lab nằm ở chỗ khác: HTTP thuần port 80, không TLS, không xác thực. Chỉ dùng cho `/health/live`, đừng đẩy dữ liệu chuyến thật qua nó.
+Thiết kế này có lý do. Service chỉ bind vào loopback nên port 8080 không bao giờ ra Internet, dù ai đó lỡ mở nhầm NSG. Nginx là điểm duy nhất truy cập được từ bên ngoài. Hạn chế của lab nằm ở chỗ khác: HTTP thuần port 80, không TLS, không xác thực. Chỉ dùng cho `/health/live`, đừng cho dữ liệu chuyến thật đi qua đó.
 
 ## Một VM đơn lẻ không phải kiến trúc sẵn sàng cao
 
@@ -187,7 +187,7 @@ Một VM nằm trên một máy chủ vật lý trong một datacenter. Máy ch�
 | Availability zone | Mất một datacenter trong region | Mất cả region (cần cặp East Asia) |
 | Scale set | Tự thêm và bớt VM theo tải | Phần lớn lỗi logic của ứng dụng |
 
-Availability zone là thứ bài 1 đã nói về region. Với VM, bạn chọn zone khi tạo bằng `--zone`, nếu region và size hỗ trợ. Hai VM ở hai zone cần thêm load balancer phía trước, và bạn phải bỏ trạng thái ra khỏi VM. Scale set để dành cho bài sau. Với Tới Nơi, câu hỏi thật sự là Container Apps đã giải quyết phần lớn bài toán này rồi, nên bạn không nên tự xây lại nó trên VM.
+Availability zone là khái niệm bài 1 đã giới thiệu cùng với region. Với VM, bạn chọn zone khi tạo bằng `--zone`, nếu region và size hỗ trợ. Hai VM ở hai zone cần thêm load balancer phía trước, và bạn phải tách trạng thái ra khỏi VM. Scale set để dành cho bài sau. Với Tới Nơi, câu hỏi thật sự là có nên tự làm việc này hay không. Container Apps đã giải quyết phần lớn bài toán này rồi, nên bạn không nên tự xây lại trên VM.
 
 ## Vận hành: dừng đúng cách, cập nhật, chẩn đoán
 
@@ -200,7 +200,7 @@ Bảng sau trả lời câu hỏi «hành động nào ngừng tính tiền cái
 | `az vm delete` mặc định | Ngừng | Còn lại nếu không đặt xoá kèm | Còn lại nếu không xoá |
 | Xoá cả resource group | Ngừng | Xoá | Xoá |
 
-Có ba thói quen đáng tạo ngay từ VM đầu tiên. Thứ nhất, bật auto-shutdown cho VM dev, ví dụ `az vm auto-shutdown -g $RG -n vm-toinoi-api-dev --time 1800` (giờ UTC). Auto-shutdown đưa VM về trạng thái deallocated, nên nó thực sự cắt tiền compute. Thứ hai, tự vá hệ điều hành bằng `apt upgrade`, hoặc bật cơ chế vá tự động theo tài liệu. Thứ ba, chụp snapshot của OS disk trước thay đổi lớn: `az snapshot create` với `--source` là ID của disk.
+Có ba thói quen đáng tạo ngay từ VM đầu tiên. Thứ nhất, bật auto-shutdown cho VM dev, ví dụ `az vm auto-shutdown -g $RG -n vm-toinoi-api-dev --time 1800` (giờ UTC). Auto-shutdown đưa VM về trạng thái deallocated, nên cách này thực sự cắt được tiền compute. Thứ hai, tự vá hệ điều hành bằng `apt upgrade`, hoặc bật cơ chế vá tự động theo tài liệu. Thứ ba, chụp snapshot của OS disk trước thay đổi lớn: `az snapshot create` với `--source` là ID của disk.
 
 Khi SSH không vào được, đừng dựng lại VM ngay. Boot diagnostics cho bạn thấy log và ảnh chụp màn hình lúc boot. Serial console cho bạn một console qua kênh quản lý của Azure, không đi qua NSG hay SSH; nó cần boot diagnostics đã bật (lệnh `az vm boot-diagnostics enable` ở trên), và để đăng nhập qua đó VM cần một user có mật khẩu, điều VM chỉ dùng SSH key như lab này không có sẵn. Khi đó Run Command (`az vm run-command invoke`) là đường chạy lệnh thay thế. Các công cụ này đều dựa vào quyền trên Azure, nên ai có quyền đó là vào được máy. Hãy cấp quyền đó cẩn thận.
 

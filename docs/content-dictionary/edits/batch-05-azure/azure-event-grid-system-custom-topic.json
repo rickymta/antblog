@@ -1,0 +1,22 @@
+{"file":"azure-event-grid-system-custom-topic.md","edits":[
+{"old":"Mỗi **event subscription** gắn với topic mô tả:","new":"Mỗi **event subscription** gắn với một topic và mô tả:","reason":"Thiếu liên từ, câu khó hiểu","severity":"medium"},
+{"old":"Không có consumer nào phải dò hay giữ kết nối.","new":"Không consumer nào phải poll hay giữ kết nối.","reason":"'dò' là dịch của poll","severity":"medium"},
+{"old":"Điều này đặt Event Grid ở đúng một loại thông điệp:","new":"Vì vậy Event Grid chỉ phù hợp với một loại thông điệp:","reason":"Câu gượng, kiểu tiếng Anh","severity":"medium"},
+{"old":"để biết tính năng nào của loại nào đã sẵn sàng","new":"để biết tính năng nào của loại topic nào đã sẵn sàng","reason":"'loại nào' thiếu danh từ","severity":"low"},
+{"old":"bạn không trả tiền cho thực thi function vô nghĩa.","new":"bạn không trả tiền cho những lần function chạy vô nghĩa.","reason":"'thực thi function' lược danh từ, gượng","severity":"medium"},
+{"old":"nên một file `.jpg` rác vẫn lọt qua; handler vẫn phải kiểm.","new":"nên một file `.jpg` rác vẫn lọt qua; handler vẫn phải kiểm tra.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"hậu tố loại `.png` và `.pdf` (và cả `.jpeg`, nếu app có thể đặt đuôi đó).","new":"hậu tố loại bỏ file `.png` và `.pdf` (và cả `.jpeg`, nếu app có thể đặt đuôi đó).","reason":"'loại' thiếu 'bỏ', dễ hiểu nhầm là 'loại' (kiểu)","severity":"medium"},
+{"old":"và tên cờ cùng giá trị schema nên đối chiếu với","new":"còn tên cờ và giá trị schema thì nên đối chiếu với","reason":"Câu thiếu chủ thể, trật tự rối","severity":"medium"},
+{"old":"của phiên bản CLI bạn có. Phía Function","new":"của phiên bản CLI bạn đang dùng. Phía Function","reason":"'bạn có' gượng","severity":"low"},
+{"old":"Thứ nhất, giao thành công theo kiểu **at-least-once**:","new":"Thứ nhất, Event Grid giao sự kiện theo kiểu **at-least-once**:","reason":"Thiếu chủ ngữ","severity":"medium"},
+{"old":"Hai blob tạo liền nhau có thể tới đảo thứ tự.","new":"Hai blob được tạo liền nhau có thể tới không đúng thứ tự.","reason":"Thiếu 'được', 'tới đảo thứ tự' gượng","severity":"low"},
+{"old":"Với endpoint **Webhook** thường, Event Grid phải chắc endpoint thật sự của bạn.","new":"Với endpoint **Webhook** thường, Event Grid phải xác nhận endpoint đúng là của bạn.","reason":"'phải chắc endpoint' thiếu động từ, dịch máy","severity":"high"},
+{"old":"Lúc tạo subscription, nó gửi một sự kiện xác nhận","new":"Lúc tạo subscription, Event Grid gửi một sự kiện xác nhận","reason":"'nó' mơ hồ","severity":"low"},
+{"old":"và với CloudEvents nó dùng cơ chế riêng","new":"và với CloudEvents thì handshake dùng cơ chế riêng","reason":"'nó' mơ hồ","severity":"low"},
+{"old":"endpoint kiểm token trước khi nhận sự kiện.","new":"endpoint kiểm tra token trước khi nhận sự kiện.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"không có secret để rò.","new":"không có secret nào để rò rỉ.","reason":"'rò' đứng một mình là gượng","severity":"low"},
+{"old":"Cấu hình này chỉ **báo sau khi** public IP đã được tạo. Nó không ngăn được việc tạo;","new":"Cấu hình này chỉ **báo sau khi** public IP đã được tạo. Cấu hình này không ngăn được việc tạo;","reason":"Tránh 'Nó' ở đầu câu","severity":"low"},
+{"old":"chạy song song với `v1` cho tới khi consumer cũ biến mất.","new":"chạy song song với `v1` cho tới khi không còn consumer cũ.","reason":"'biến mất' gượng","severity":"low"},
+{"old":"Là push, không phải broker việc","new":"Event Grid là push, không phải broker xử lý công việc","reason":"'broker việc' là cụm tự ghép, thiếu chủ ngữ","severity":"medium"},
+{"old":"Function scale theo số sự kiện và sẽ đập API OCR,","new":"Function scale theo số sự kiện và sẽ gọi dồn dập vào API OCR,","reason":"'đập API' là calque của hammer","severity":"medium"}
+]}

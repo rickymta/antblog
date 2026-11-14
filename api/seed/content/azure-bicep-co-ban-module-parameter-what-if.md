@@ -17,12 +17,12 @@ Phần 5 gồm 10 bài và đi theo một đường: định nghĩa hạ tầng 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Bạn xoá một resource khỏi file Bicep rồi chạy lại <code>az deployment group create</code>. Resource đó có bị xoá trên Azure không?</p>
-<details><summary>Xem đáp án</summary><p>Mặc định thì không. Deployment ở chế độ Incremental chỉ tạo hoặc cập nhật những gì có trong template, còn resource thừa được để yên. Chỉ chế độ Complete mới xoá resource không có trong template, và đó là chế độ dễ gây tai nạn.</p></details>
+<details><summary>Xem đáp án</summary><p>Mặc định thì không. Deployment ở chế độ Incremental chỉ tạo hoặc cập nhật những gì có trong template, còn resource thừa được để yên. Chỉ chế độ Complete mới xoá resource không có trong template, và đó là chế độ dễ gây sự cố.</p></details>
 </div>
 
 ## Bicep chỉ là cú pháp dễ đọc hơn trên Azure Resource Manager
 
-Bicep không có engine riêng. Khi bạn deploy, Azure CLI compile file `.bicep` thành ARM JSON rồi gửi cho Azure Resource Manager. Mọi hành vi quan trọng đều là hành vi của ARM: nó nhận một mô tả trạng thái mong muốn, so với trạng thái hiện có, rồi tạo hoặc sửa cho khớp. Đó là nghĩa của **declarative** (bạn mô tả đích, không viết từng bước) và **idempotent** (chạy lại cùng template cho cùng kết quả, không tạo bản sao).
+Bicep không có engine riêng. Khi bạn deploy, Azure CLI compile file `.bicep` thành ARM JSON rồi gửi cho Azure Resource Manager. Mọi hành vi quan trọng đều là hành vi của ARM: ARM nhận một mô tả trạng thái mong muốn, so với trạng thái hiện có, rồi tạo hoặc sửa cho khớp. Đó là nghĩa của **declarative** (bạn mô tả đích, không viết từng bước) và **idempotent** (chạy lại cùng template cho cùng kết quả, không tạo bản sao).
 
 Hệ quả thực tế: Bicep không nhớ gì giữa hai lần chạy. Không có file state như Terraform ở bài 41. ARM chính là nơi giữ trạng thái, nên "hiện trạng" luôn là cái đang có trên Azure, kể cả khi ai đó sửa tay trên portal. Lần deploy kế tiếp áp lại toàn bộ định nghĩa của resource, không cộng dồn từng thuộc tính: thuộc tính template không khai báo có thể bị đặt về giá trị mặc định. Vì vậy template phải mô tả trạng thái cuối đầy đủ của resource, và subnet nên khai báo trong `subnets` của VNet để deploy lại không làm mất subnet.
 
@@ -49,7 +49,7 @@ Scope khai báo bằng dòng `targetScope` (bỏ trống thì là `resourceGroup
 
 Một file Bicep gồm vài loại khai báo. **`param`** nhận giá trị từ ngoài vào. **`var`** tính giá trị từ param. **`resource`** khai báo một resource với **symbolic name** (tên dùng trong code, không phải tên trên Azure). **`output`** trả giá trị ra cho người gọi hoặc module cha. Symbolic name là chỗ Bicep thắng ARM JSON rõ nhất: bạn viết `vnet.id` thay vì ghép chuỗi `resourceId(...)`, và compiler tự suy ra thứ tự tạo.
 
-Đoạn dưới là bản tóm tắt cú pháp, không phải một phần của lab. Nó cho thấy decorator, `existing`, vòng lặp và điều kiện trong một chỗ.
+Đoạn dưới là bản tóm tắt cú pháp, không phải một phần của lab. Đoạn này cho thấy decorator, `existing`, vòng lặp và điều kiện trong một chỗ.
 
 ```bicep
 @allowed(['dev', 'staging', 'prod'])
@@ -83,9 +83,9 @@ resource lock 'Microsoft.Authorization/locks@2020-05-01' = if (isProd) {
 output identityIds array = [for i in range(0, length(services)): ids[i].id]
 ```
 
-Khối này cho thấy cú pháp, nhưng nó không chứng minh template deploy được: tên API version và quyền của bạn trên vault vẫn phải kiểm khi chạy. `@secure()` che giá trị khỏi log và lịch sử deployment, còn param thường được lưu trong lịch sử deployment của resource group, nên đừng nhét mật khẩu vào param không có `@secure()`.
+Khối này cho thấy cú pháp, nhưng không chứng minh template deploy được: tên API version và quyền của bạn trên vault vẫn phải kiểm tra khi chạy. `@secure()` che giá trị khỏi log và lịch sử deployment, còn param thường được lưu trong lịch sử deployment của resource group, nên đừng nhét mật khẩu vào param không có `@secure()`.
 
-Giá trị theo môi trường nên nằm trong file **`.bicepparam`**, mỗi môi trường một file. Dòng `using` trỏ về template, và Bicep kiểm kiểu ngay lúc compile.
+Giá trị theo môi trường nên nằm trong file **`.bicepparam`**, mỗi môi trường một file. Dòng `using` trỏ về template, và Bicep kiểm tra kiểu dữ liệu ngay lúc compile.
 
 ```bicep
 using 'main.bicep'
@@ -96,7 +96,7 @@ param pgSku = 'Standard_B1ms'
 param deployApp = false
 ```
 
-File này khiến `staging.bicepparam` và `prod.bicepparam` chỉ khác vài dòng, trong khi code hạ tầng chỉ có một bản. Nó không chứa bí mật nào, và đó là chủ đích: mật khẩu admin sẽ đi qua Key Vault ở phần lab.
+File này khiến `staging.bicepparam` và `prod.bicepparam` chỉ khác vài dòng, trong khi code hạ tầng chỉ có một bản. File tham số không chứa bí mật nào, và đó là chủ đích: mật khẩu admin sẽ đi qua Key Vault ở phần lab.
 
 ## Module tách theo vòng đời và dependency đi theo tham chiếu
 
@@ -123,7 +123,7 @@ module vnet 'br/public:avm/res/network/virtual-network:<phiên-bản>' = {
 }
 ```
 
-Hai điều cần cân nhắc. Một là phải ghim phiên bản cụ thể; tra số hiện hành trong tài liệu AVM, đừng dùng số bạn đoán. Hai là module dựng sẵn bao phủ rất nhiều tuỳ chọn, nên khi review bạn đọc một giao diện rộng thay vì ba mươi dòng của riêng mình. Với network của Tới Nơi, module tự viết ngắn thì dễ hiểu hơn. Với resource nhiều ràng buộc như Key Vault hay Log Analytics, AVM tiết kiệm công.
+Hai điều cần cân nhắc. Một là phải ghim phiên bản cụ thể; tra số hiện hành trong tài liệu AVM, đừng dùng số bạn đoán. Hai là module dựng sẵn bao phủ rất nhiều tuỳ chọn, nên khi review bạn đọc một giao diện rộng thay vì ba mươi dòng của riêng mình. Với network của Tới Nơi, module tự viết ngắn thì dễ hiểu hơn. Với resource nhiều ràng buộc như Key Vault hay Log Analytics, AVM tiết kiệm công sức.
 
 ## Lab: viết module network và postgres cho môi trường dev
 
@@ -162,7 +162,7 @@ output pgSubnetId string = '${vnet.id}/subnets/snet-pg'
 output zoneId string = zone.id
 ```
 
-Module này tạo mạng riêng để PostgreSQL không có địa chỉ công khai: subnet `snet-pg` được delegate cho dịch vụ, còn zone DNS riêng được nối vào VNet để tên server phân giải ra IP nội bộ. Nó không chứng minh container app tới được database, vì environment từ bài 22 tạo không gắn VNet này. Subnet `snet-apps` chỉ là chỗ để dành cho environment tạo sau.
+Module này tạo mạng riêng để PostgreSQL không có địa chỉ công khai: subnet `snet-pg` được delegate cho dịch vụ, còn zone DNS riêng được nối vào VNet để tên server phân giải ra IP nội bộ. Hạ tầng này không chứng minh container app tới được database, vì environment tạo ở bài 22 không gắn VNet này. Subnet `snet-apps` chỉ là chỗ để dành cho environment tạo sau.
 
 Module thứ hai là `modules/postgres.bicep`.
 
@@ -196,7 +196,7 @@ resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
 output serverName string = pg.name
 ```
 
-`@allowed` chặn gõ nhầm SKU ngay lúc compile. Biến `tier` suy ra từ tên SKU để hai giá trị không lệch nhau. Output chỉ trả tên server, không trả mật khẩu hay chuỗi kết nối. Danh sách SKU còn bán ở region thay đổi theo thời gian, nên kiểm bằng `az postgres flexible-server list-skus --location southeastasia`. Nếu bạn đã tạo tay `psql-toinoi-dev-sea` ở bài trước, hãy xoá hoặc đổi tên trước, vì Bicep sẽ cố sửa resource đó thay vì tạo mới.
+`@allowed` chặn gõ nhầm SKU ngay lúc compile. Biến `tier` suy ra từ tên SKU để hai giá trị không lệch nhau. Output chỉ trả tên server, không trả mật khẩu hay chuỗi kết nối. Danh sách SKU còn bán ở region thay đổi theo thời gian, nên kiểm tra bằng `az postgres flexible-server list-skus --location southeastasia`. Nếu bạn đã tạo tay `psql-toinoi-dev-sea` ở bài trước, hãy xoá hoặc đổi tên trước, vì Bicep sẽ cố sửa resource đó thay vì tạo mới.
 
 Cuối cùng là `main.bicep`.
 
@@ -234,7 +234,7 @@ module postgres 'modules/postgres.bicep' = {
 }
 ```
 
-`kv.getSecret(...)` đọc secret lúc deploy và chuyền thẳng vào param `@secure()`. Hàm này chỉ dùng được trong `params` của một module và chỉ cho param có `@secure()`; muốn lấy secret ngay trong file tham số thì dùng `az.getSecret(...)` trong `.bicepparam`. Nhờ vậy mật khẩu không đi qua dòng lệnh hay file tham số. Module thứ ba, `containerapp`, là file `cloud/main.bicep` của `trip-service` chép vào `modules/containerapp.bicep`. Bạn gọi nó như hai module trên với điều kiện `= if (deployApp)`, truyền `environmentResourceId` lấy từ `cae-toinoi-dev` qua một khai báo `existing`. Trong lab giữ `deployApp = false` để không chạm vào app từ bài 22. Khi nào đưa app vào luồng này là chuyện của bài 45.
+`kv.getSecret(...)` đọc secret lúc deploy và truyền thẳng vào param `@secure()`. Hàm này chỉ dùng được trong `params` của một module và chỉ cho param có `@secure()`; muốn lấy secret ngay trong file tham số thì dùng `az.getSecret(...)` trong `.bicepparam`. Nhờ vậy mật khẩu không đi qua dòng lệnh hay file tham số. Module thứ ba, `containerapp`, là file `cloud/main.bicep` của `trip-service` chép vào `modules/containerapp.bicep`. Bạn gọi module này như hai module trên với điều kiện `= if (deployApp)`, truyền `environmentResourceId` lấy từ `cae-toinoi-dev` qua một khai báo `existing`. Trong lab giữ `deployApp = false` để không chạm vào app từ bài 22. Khi nào đưa app vào luồng này là chuyện của bài 45.
 
 ## what-if đọc trước thay đổi, không kiểm chứng ứng dụng
 
@@ -257,7 +257,7 @@ az deployment group create \
 
 Không cần `--template-file`, vì dòng `using` trong `dev.bicepparam` đã chỉ đúng template. Linter bắt lỗi kiểu: param không dùng (`no-unused-params`), API version cũ (`use-recent-api-versions`, mặc định tắt, bật trong `bicepconfig.json`), và quan trọng nhất là output chứa secret (quy tắc `outputs-should-not-contain-secrets`). Ai có quyền đọc deployment đều đọc được output, nên không bao giờ đưa mật khẩu, khoá hay chuỗi kết nối vào đó. Kỳ vọng ở lần chạy đầu: what-if liệt kê bốn resource sẽ được tạo (VNet, zone, link, server). Deployment PostgreSQL thường mất vài phút.
 
-what-if cũng có giới hạn. Nó so template với hiện trạng nên không biết quyền của identity, không biết quota còn đủ, và đôi khi báo thay đổi giả ở các thuộc tính ARM tự điền giá trị mặc định. Đọc nó như bản xem trước, không như lời cam kết. Khi deployment thất bại, bước đầu là đọc lỗi từng bước, đừng đoán.
+what-if cũng có giới hạn. Công cụ này so template với hiện trạng nên không biết quyền của identity, không biết quota còn đủ, và đôi khi báo thay đổi không có thật ở các thuộc tính mà ARM tự điền giá trị mặc định. Hãy đọc kết quả như bản xem trước, không như lời cam kết. Khi deployment thất bại, bước đầu là đọc lỗi từng bước, đừng đoán.
 
 ```bash
 az deployment group show -g $RG -n platform-dev --query properties.error
@@ -270,7 +270,7 @@ Mỗi module là một deployment lồng nhau mang tên trong thuộc tính `nam
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Thêm <code>--mode Complete</code> vào <code>create</code> trên resource group chung sẽ xoá mọi resource mà template không nhắc tới, kể cả Key Vault hay database ai đó tạo tay. Hãy chạy <code>what-if</code> với cùng <code>--mode</code> trước khi dùng, và chỉ bật Complete cho resource group chỉ chứa thứ do template này quản. Microsoft khuyên dùng deployment stack (bài 45) thay cho Complete khi cần xoá resource. PostgreSQL xoá nhầm là mất dữ liệu; khoá <code>CanNotDelete</code> ở <a href="/articles/azure-resource-manager-resource-id-tag-lock">bài 4</a> vẫn là lớp chặn cuối.</p>
+<p>Thêm <code>--mode Complete</code> vào <code>create</code> trên resource group chung sẽ xoá mọi resource mà template không nhắc tới, kể cả Key Vault hay database ai đó tạo tay. Hãy chạy <code>what-if</code> với cùng <code>--mode</code> trước khi dùng, và chỉ bật Complete cho resource group chỉ chứa những resource do template này quản lý. Microsoft khuyên dùng deployment stack (bài 45) thay cho Complete khi cần xoá resource. PostgreSQL xoá nhầm là mất dữ liệu; khoá <code>CanNotDelete</code> ở <a href="/articles/azure-resource-manager-resource-id-tag-lock">bài 4</a> vẫn là lớp chặn cuối.</p>
 </div>
 
 ## Đổi SKU và xem what-if báo gì
@@ -288,7 +288,7 @@ Chỉ một thuộc tính đổi, còn VNet, zone và link chỉ hiện dòng `=
 
 **Bài tập:** bạn chạy `what-if` thấy dòng `~ Microsoft.Network/virtualNetworks/vnet-toinoi-dev-sea` và `addressSpace` đổi từ `10.20.0.0/16` sang `10.30.0.0/16`. Nên deploy ngay không?
 
-<details><summary>Xem lời giải</summary><p>Không nên. Subnet và DNS link phụ thuộc vào address space, còn subnet đã được delegate cho PostgreSQL đang chứa server. Đổi dải địa chỉ có thể bị ARM từ chối hoặc buộc tạo lại. Nếu muốn đổi, hãy lên kế hoạch tạo VNet mới và chuyển dữ liệu. Diff nhỏ về chữ không có nghĩa tác động nhỏ.</p></details>
+<details><summary>Xem lời giải</summary><p>Không nên. Subnet và DNS link phụ thuộc vào address space, còn subnet đã được delegate cho PostgreSQL đang chứa server. Đổi dải địa chỉ có thể bị ARM từ chối hoặc buộc tạo lại. Nếu muốn đổi, hãy lên kế hoạch tạo VNet mới và chuyển dữ liệu. Diff chỉ vài dòng không có nghĩa tác động nhỏ.</p></details>
 
 ## Học tiếp từ đây
 

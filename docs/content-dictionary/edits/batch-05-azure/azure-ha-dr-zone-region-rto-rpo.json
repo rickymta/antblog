@@ -1,0 +1,17 @@
+{"file":"azure-ha-dr-zone-region-rto-rpo.md","edits":[
+{"old":"mô phỏng tắt origin chính để đo thời gian chuyển.","new":"mô phỏng tắt origin chính để đo thời gian failover.","reason":"'thời gian chuyển' thiếu danh từ, dùng thuật ngữ quen dùng failover","severity":"medium"},
+{"old":"Bài này lấp nó bằng bảng RTO/RPO","new":"Bài này lấp khoảng trống đó bằng bảng RTO/RPO","reason":"Đại từ 'nó' mơ hồ, nhắc lại danh từ","severity":"medium"},
+{"old":"Nó tự động, trong một region, đo bằng phút.","new":"HA tự động, diễn ra trong một region, đo bằng phút.","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Nó thường có bước thủ công, nằm ở region khác","new":"DR thường có bước thủ công, nằm ở region khác","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"vì không giữ dữ liệu gốc; DR của nó chỉ là chạy lại IaC.","new":"vì không giữ dữ liệu chính; DR của service này chỉ là chạy lại IaC.","reason":"'dữ liệu gốc' lệch với cột 'Dữ liệu chính'; bỏ 'nó' mơ hồ","severity":"low"},
+{"old":"Azure Cache for Redis đang nghỉ hưu (bài về Redis); SKU kiểm tra tài liệu","new":"Azure Cache for Redis đang ngừng hỗ trợ (bài về Redis); với SKU, hãy kiểm tra tài liệu","reason":"'nghỉ hưu' là calque của retire; câu lược động từ","severity":"high"},
+{"old":"Với mỗi dòng, kiểm SKU đó có hỗ trợ zone","new":"Với mỗi dòng, hãy kiểm tra xem SKU đó có hỗ trợ zone","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"consumer phải chịu trùng (bài 53)","new":"consumer phải xử lý được tin trùng lặp (bài 53)","reason":"'chịu trùng' là calque của tolerate duplicates","severity":"high"},
+{"old":"kiểm trạng thái hỗ trợ trong tài liệu trước khi dựa vào","new":"kiểm tra trạng thái hỗ trợ trong tài liệu trước khi dựa vào","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"(endpoint ghi đi theo primary khi promote kiểu switchover)","new":"(endpoint ghi tự trỏ về primary mới khi promote kiểu switchover)","reason":"'đi theo primary' gượng, không rõ nghĩa","severity":"medium"},
+{"old":"Hình 2 cho thấy điểm lệch: Front Door tự chuyển traffic, PostgreSQL thì không. Database còn là replica chỉ đọc thì mọi lệnh ghi đều lỗi.","new":"Hình 2 cho thấy điểm khác biệt: Front Door tự chuyển traffic, PostgreSQL thì không. Khi database vẫn là replica chỉ đọc thì mọi lệnh ghi đều lỗi.","reason":"'điểm lệch' gượng; câu thiếu liên từ điều kiện","severity":"medium"},
+{"old":"và biên bản so mục tiêu với số đo. Tập mỗi quý","new":"và biên bản so sánh mục tiêu với kết quả đo. Tập mỗi quý","reason":"'so ... với số đo' thiếu động từ rõ nghĩa","severity":"low"},
+{"old":"Số đo vượt mục tiêu thì chọn: trả tiền","new":"Nếu kết quả đo vượt mục tiêu thì chọn một trong hai hướng: trả tiền","reason":"Câu thiếu liên từ điều kiện; 'số đo' gượng","severity":"medium"},
+{"old":"để kiểm standby qua một route riêng.","new":"để kiểm tra standby qua một route riêng.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"nên bạn kiểm standby mà không chờ sự cố.","new":"nên bạn kiểm tra standby mà không phải chờ sự cố.","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

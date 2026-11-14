@@ -1,0 +1,13 @@
+{"file":"azure-aks-co-ban-cluster-node-pool-deploy.md","edits":[
+{"old":"Service ClusterIP và kiểm /health/ready qua port-forward","new":"Service ClusterIP và kiểm tra /health/ready qua port-forward","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"không chen mất pod DNS của cả cluster. Cách thực thi:","new":"không chiếm chỗ của pod DNS trong cluster. Cách thực hiện:","reason":"'chen mất' gượng; 'cách thực thi' là calque","severity":"medium"},
+{"old":"vì sai chỗ này sửa rất đau.","new":"vì nếu sai chỗ này thì sửa rất vất vả.","reason":"'sửa rất đau' gượng","severity":"medium"},
+{"old":"nên hãy kiểm trang thông báo của AKS","new":"nên hãy kiểm tra trang thông báo của AKS","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"kiểm `az vm list-skus`","new":"kiểm tra `az vm list-skus`","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Nó không phải ranh giới bảo mật cứng","new":"Namespace không phải ranh giới bảo mật cứng","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Nó chỉ chứng minh pod chạy","new":"Kết quả này chỉ chứng minh pod chạy","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Dùng nó cho lab thôi.","new":"Chỉ dùng Secret này cho lab.","reason":"Tránh 'nó' mơ hồ, văn nói","severity":"low"},
+{"old":"hãy chọn theo số đo của bạn.","new":"hãy chọn theo số liệu đo được của bạn.","reason":"'số đo' dùng cho metric","severity":"medium"},
+{"old":"để biết chính xác bản nào đang chạy.","new":"để biết chính xác phiên bản nào đang chạy.","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"### Kiểm bằng port-forward","new":"### Kiểm tra bằng port-forward","reason":"'Kiểm' thiếu 'tra'","severity":"high"}
+]}

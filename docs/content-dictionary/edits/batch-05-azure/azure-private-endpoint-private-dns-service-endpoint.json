@@ -1,0 +1,17 @@
+{"file":"azure-private-endpoint-private-dns-service-endpoint.md","edits":[
+{"old":"đưa Key Vault và PostgreSQL của Tới Nơi khỏi Internet công cộng","new":"đưa Key Vault và PostgreSQL của Tới Nơi ra khỏi Internet công cộng","reason":"Thiếu 'ra' trong 'ra khỏi'","severity":"medium"},
+{"old":"ai biết tên, ai thử được mật khẩu hay token bị lộ đều chạm được vào cổng dịch vụ","new":"bất kỳ ai biết tên dịch vụ, hoặc thử được mật khẩu hay token bị lộ, đều chạm được vào cổng dịch vụ","reason":"Câu lặp 'ai' gượng, khó đọc","severity":"medium"},
+{"old":"Cái nó **không** làm:","new":"Điều service endpoint **không** làm:","reason":"'Cái nó' khẩu ngữ, đại từ mơ hồ","severity":"medium"},
+{"old":"vì nó không xuất phát từ subnet có bật endpoint","new":"vì traffic đó không xuất phát từ subnet có bật endpoint","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"Nó gọi `kv-toinoi-dev-sea.vault.azure.net`, và DNS mới là thứ chọn đường.","new":"Ứng dụng gọi `kv-toinoi-dev-sea.vault.azure.net`, và DNS mới là thứ chọn đường.","reason":"Tránh 'Nó' ở đầu câu","severity":"medium"},
+{"old":"Nếu không, nó nhận IP công cộng như chưa có gì xảy ra.","new":"Nếu không, client nhận IP công cộng như chưa có gì xảy ra.","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"và kiểm lại trang networking trong tài liệu","new":"và kiểm tra lại trang networking trong tài liệu","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"kiểm trang networking của PostgreSQL Flexible Server trước khi chốt","new":"kiểm tra trang networking của PostgreSQL Flexible Server trước khi chốt","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"sẽ khoá luôn chính bạn và pipeline CI chạy ngoài VNet khỏi secret","new":"sẽ khoá luôn quyền truy cập secret của chính bạn và của pipeline CI chạy ngoài VNet","reason":"'khoá ... khỏi secret' gượng, thiếu rõ nghĩa","severity":"medium"},
+{"old":"Nó mô tả cách làm; nó không chứng minh DNS","new":"Khối này mô tả cách làm, chưa chứng minh DNS","reason":"Tránh 'Nó' lặp, đại từ mơ hồ","severity":"medium"},
+{"old":"kiểm tên phân giải ra đâu","new":"kiểm tra xem tên phân giải ra IP nào","reason":"'kiểm' thiếu 'tra'; 'ra đâu' gượng","severity":"medium"},
+{"old":"Bạn kiểm theo thứ tự nào?","new":"Bạn kiểm tra theo thứ tự nào?","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Đầu tiên kiểm DNS:","new":"Đầu tiên kiểm tra DNS:","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nếu không, kiểm link của private DNS zone với VNet","new":"Nếu không, kiểm tra link của private DNS zone với VNet","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Sau đó kiểm trạng thái kết nối của private endpoint","new":"Sau đó kiểm tra trạng thái kết nối của private endpoint","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

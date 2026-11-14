@@ -1,0 +1,21 @@
+{"file":"azure-chi-phi-pricing-cost-management-budget.md","edits":[
+{"old":"Nó trả lời câu hỏi mà mọi người dùng cloud","new":"Thay vào đó, bài trả lời câu hỏi mà mọi người dùng cloud","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"vẫn tiếp tục có đồng hồ chạy.","new":"vẫn tiếp tục bị tính tiền.","reason":"'có đồng hồ chạy' là cách nói ẩn dụ gượng, lẫn với meter","severity":"medium"},
+{"old":"Mỗi lần đọc, ghi, liệt kê blob; mỗi request qua một số dịch vụ; mỗi GB log đưa vào Log Analytics.","new":"Mỗi lần đọc, ghi hoặc liệt kê blob, mỗi request qua một số dịch vụ và mỗi GB log đưa vào Log Analytics đều bị tính phí.","reason":"Câu liệt kê thiếu vị ngữ","severity":"medium"},
+{"old":"đừng lấy hoá đơn dev nhân với ba để dự phòng prod","new":"đừng lấy hoá đơn dev nhân với ba để dự đoán chi phí prod","reason":"'dự phòng' sai nghĩa (ý là ước tính)","severity":"high"},
+{"old":"có thể trải qua nhiều availability zone","new":"có thể trải trên nhiều availability zone","reason":"'trải qua' là calque của span","severity":"low"},
+{"old":"Lập lại bảng cho từng môi trường.","new":"Hãy lập lại bảng cho từng môi trường.","reason":"Câu mệnh lệnh thiếu 'hãy' cho thống nhất giọng văn","severity":"low"},
+{"old":"Bản thân **Cost analysis** nằm trong","new":"**Cost analysis** nằm trong","reason":"'Bản thân' là calque của itself","severity":"low"},
+{"old":"Ba cách nhóm nên thử ngay:","new":"Ba cách nhóm chi phí nên thử ngay:","reason":"Thiếu danh từ sau 'nhóm'","severity":"medium"},
+{"old":"tag gắn muộn thường không sửa lại dữ liệu cũ","new":"tag gắn muộn thường không áp lại cho dữ liệu chi phí đã ghi nhận","reason":"'không sửa lại dữ liệu cũ' thiếu rõ nghĩa","severity":"medium"},
+{"old":"không tự chảy xuống resource","new":"không tự kế thừa xuống resource","reason":"'chảy xuống' là calque của flow down","severity":"medium"},
+{"old":"Nó không chứng minh container đã tồn tại","new":"Lệnh này không chứng minh container đã tồn tại","reason":"Tránh 'Nó' mơ hồ","severity":"medium"},
+{"old":"đã được đăng ký (nhớ bài 4). Kiểm","new":"đã được đăng ký (nhớ bài 4). Hãy kiểm tra","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"Nó không chứng minh email đến được hộp thư, và nó không giới hạn chi tiêu","new":"Cấu hình này không chứng minh email đến được hộp thư, và cũng không giới hạn chi tiêu","reason":"Tránh 'Nó' lặp, mơ hồ","severity":"medium"},
+{"old":"Nó đến từ thứ bạn tưởng đã dừng.","new":"Khoản phát sinh đó đến từ thứ bạn tưởng đã dừng.","reason":"'Nó' mơ hồ","severity":"medium"},
+{"old":"| Vì sao vẫn tính tiền | Cách kiểm |","new":"| Vì sao vẫn tính tiền | Cách kiểm tra |","reason":"Thiếu 'tra' sau 'kiểm'","severity":"low"},
+{"old":"xoá VM không tự xoá disk nếu không chọn","new":"xoá VM không tự xoá disk nếu bạn không chọn xoá kèm","reason":"'nếu không chọn' thiếu tân ngữ","severity":"medium"},
+{"old":"Nó không nói log nào hữu ích hay thừa","new":"Truy vấn cũng không cho biết log nào hữu ích hay thừa","reason":"Tránh 'Nó' mơ hồ","severity":"medium"},
+{"old":"lấy toàn bộ resource đi cùng","new":"xoá luôn toàn bộ resource bên trong","reason":"'lấy đi cùng' là calque của take along","severity":"medium"},
+{"old":"Nó chỉ deallocate VM, không xoá disk","new":"Lệnh này chỉ deallocate VM, không xoá disk","reason":"Tránh 'Nó' mơ hồ","severity":"medium"}
+]}

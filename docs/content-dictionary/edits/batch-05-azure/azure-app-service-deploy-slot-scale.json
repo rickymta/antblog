@@ -1,0 +1,11 @@
+{"file":"azure-app-service-deploy-slot-scale.md","edits":[
+{"old":"Có một thất bại khó nhìn:","new":"Có một kiểu lỗi khó nhận ra:","reason":"'thất bại khó nhìn' là dịch từng chữ","severity":"medium"},
+{"old":"URI không kèm version thì nền tảng lấy phiên bản mới nhất","new":"URI không kèm phiên bản thì nền tảng lấy phiên bản mới nhất","reason":"Thống nhất 'phiên bản' trong văn xuôi, không lẫn 'version' trong cùng câu","severity":"low"},
+{"old":"Bài 29 quay lại chu kỳ làm mới.","new":"Bài 29 quay lại chu kỳ refresh.","reason":"'làm mới' là dịch từng chữ của refresh","severity":"low"},
+{"old":"endpoint kiểm kết nối PostgreSQL và migration","new":"endpoint kiểm tra kết nối PostgreSQL và migration","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"khi mọi instance cùng fail.","new":"khi mọi instance cùng báo lỗi.","reason":"Từ tiếng Anh thông thường lọt vào văn xuôi","severity":"low"},
+{"old":"Kiểm bằng hostname riêng","new":"Kiểm tra bằng hostname riêng","reason":"'Kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Hãy kiểm lại, đừng giả định nó thừa kế.","new":"Hãy kiểm tra lại, đừng giả định slot thừa kế.","reason":"'kiểm' thiếu 'tra'; tránh 'nó' mơ hồ","severity":"high"},
+{"old":"và nó càng không đụng tới database.","new":"và swap càng không đụng tới database.","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"Nó không sửa được dữ liệu hay schema","new":"Swap ngược không sửa được dữ liệu hay schema","reason":"Tránh 'Nó' đầu câu","severity":"medium"}
+]}

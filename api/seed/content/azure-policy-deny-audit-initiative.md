@@ -22,7 +22,7 @@ Bài này dựng bộ guardrail `toinoi-guardrails` cho subscription dev của T
 
 Mọi thao tác tạo hoặc sửa resource đi qua Azure Resource Manager (control plane). Sau khi RBAC cho phép, Resource Manager đưa nội dung request cho Azure Policy đánh giá trước khi chuyển tới resource provider. Policy so sánh các thuộc tính của resource với điều kiện trong định nghĩa. Nếu khớp, effect của policy quyết định chuyện gì xảy ra.
 
-Hệ quả có hai mặt. Thứ nhất, Policy không phụ thuộc người gọi: portal, `az`, Bicep hay pipeline CI đều bị đối xử như nhau. Thứ hai, Policy chủ yếu nhìn control plane. Nó biết storage account bật public access hay không, nhưng không biết ai đang đọc blob. Một số resource provider mode (Kubernetes, Key Vault) mở rộng phạm vi đánh giá, và đó là chủ đề riêng của từng dịch vụ.
+Hệ quả có hai mặt. Thứ nhất, Policy không phụ thuộc người gọi: portal, `az`, Bicep hay pipeline CI đều được xử lý như nhau. Thứ hai, Policy chủ yếu nhìn control plane. Policy biết storage account có bật public access hay không, nhưng không biết ai đang đọc blob. Một số resource provider mode (Kubernetes, Key Vault) mở rộng phạm vi đánh giá, và đó là chủ đề riêng của từng dịch vụ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -47,7 +47,7 @@ Hai điều hay bị hiểu nhầm. Deny chỉ có tác dụng với request m�
 
 ## Assignment kế thừa xuống dưới, exemption là lối thoát có kiểm soát
 
-Định nghĩa policy chỉ là «luật trên giấy». Luật có hiệu lực khi bạn tạo assignment ở một scope: management group, subscription hoặc resource group. Mọi thứ bên dưới scope đó kế thừa assignment. Tới Nơi gán `toinoi-guardrails` ở subscription dev trước. Khi đã tin cậy, cùng định nghĩa đó được gán ở scope cao hơn cho staging và prod, thường với effect nghiêm hơn.
+Định nghĩa policy chỉ là «luật trên giấy». Luật có hiệu lực khi bạn tạo assignment ở một scope: management group, subscription hoặc resource group. Mọi thứ bên dưới scope đó kế thừa assignment. Tới Nơi gán `toinoi-guardrails` ở subscription dev trước. Khi đã yên tâm, cùng định nghĩa đó được gán ở scope cao hơn cho staging và prod, thường với effect nghiêm hơn.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -66,7 +66,7 @@ Trước khi viết custom, hãy xem built-in có sẵn chưa. Tên hiển thị
 | --- | --- | --- |
 | Chỉ chạy ở Southeast Asia và East Asia | «Allowed locations», tham số `listOfAllowedLocations` | Effect cố định là Deny; bỏ qua location `global` và không áp lên resource group (có policy riêng «Allowed locations for resource groups») |
 | Bắt buộc tag `cost-center` | Custom policy (bên dưới) | Có built-in yêu cầu tag, nhưng custom cho phép chạy Audit rồi mới Deny với cùng một định nghĩa |
-| Cấm public access của storage | «Storage account public access should be disallowed» | Kiểm `allowBlobPublicAccess` (truy cập blob ẩn danh), không phải public network access; có tham số effect |
+| Cấm public access của storage | «Storage account public access should be disallowed» | Kiểm tra `allowBlobPublicAccess` (truy cập blob ẩn danh), không phải public network access; có tham số effect |
 | Bắt buộc TLS 1.2 | «Storage accounts should have the specified minimum TLS version» | Tham số `minimumTlsVersion` (giá trị như `TLS1_2`) và effect |
 | Cấm public network cho PostgreSQL | Policy về public network access của PostgreSQL flexible server (tra tên hiện hành) | Chỉ bật Deny sau khi có private access ở bài 17 |
 
@@ -92,7 +92,7 @@ Policy bắt buộc tag của Tới Nơi chỉ cần một điều kiện: tag k
 }
 ```
 
-Lưu thành `params.json`. Khối tiếp theo là luật, lưu thành `rule.json`. Hai khối này chỉ chứng minh cú pháp đúng với CLI; chúng không chứng minh policy cover được mọi resource type, vì loại không hỗ trợ tag nằm ngoài mode `Indexed`.
+Lưu thành `params.json`. Khối tiếp theo là luật, lưu thành `rule.json`. Hai khối này chỉ chứng minh cú pháp đúng với CLI; chúng không chứng minh policy bao phủ được mọi resource type, vì loại không hỗ trợ tag nằm ngoài mode `Indexed`.
 
 ```json
 {
@@ -118,13 +118,13 @@ az policy definition create \
   --params params.json
 ```
 
-Quy trình an toàn cho mọi custom policy là Audit trước, Deny sau. Gán với effect Audit, đọc danh sách non-compliant, sửa các resource hợp lệ hoặc tạo exemption, rồi mới đổi tham số sang Deny. Nếu bỏ qua bước này, bạn sẽ phát hiện luật sai khi pipeline deploy của đồng đội bị chặn lúc nửa đêm.
+Quy trình an toàn cho mọi custom policy là Audit trước, Deny sau. Gán với effect Audit, đọc danh sách non-compliant, sửa các resource vi phạm thật hoặc tạo exemption, rồi mới đổi tham số sang Deny. Nếu bỏ qua bước này, bạn sẽ phát hiện luật sai khi pipeline deploy của đồng đội bị chặn lúc nửa đêm.
 
 ## Initiative gom policy lại, compliance cho thấy bức tranh
 
 Gán từng policy một thì nhanh chóng thành chuỗi assignment khó quản lý. Initiative (policy set) gom nhiều policy thành một đơn vị, có tham số riêng và một điểm compliance chung. Microsoft cloud security benchmark là một initiative lớn như vậy; thường nó đã được gán sẵn ở subscription dùng Defender for Cloud (bài 16). `toinoi-guardrails` là initiative nhỏ của riêng Tới Nơi, gồm bốn policy: Allowed locations, custom tag `cost-center`, storage không public access, storage tối thiểu TLS 1.2.
 
-Khối dưới tra ID built-in theo tên hiển thị rồi dựng `initiative.json`. Nó không kiểm tra tên hiển thị còn đúng hay không: nếu biến rỗng, hãy `az policy definition list` và tìm lại. Nó cũng không kiểm `allowedValues` của tham số effect trong từng built-in; đọc bằng `az policy definition show --name <id> --query parameters` trước khi truyền chung một giá trị `effect` cho nhiều policy.
+Khối dưới tra ID built-in theo tên hiển thị rồi dựng `initiative.json`. Khối này không kiểm tra tên hiển thị còn đúng hay không: nếu biến rỗng, hãy `az policy definition list` và tìm lại. Khối này cũng không kiểm tra `allowedValues` của tham số effect trong từng built-in; đọc bằng `az policy definition show --name <id> --query parameters` trước khi truyền chung một giá trị `effect` cho nhiều policy.
 
 ```bash
 LOC=$(az policy definition list \
@@ -180,7 +180,7 @@ az policy state list \
   --query "[].{resource:resourceId, policy:policyDefinitionReferenceId}" -o table
 ```
 
-`--no-wait` trả về ngay trong khi lượt quét còn chạy, nên `az policy state list` lúc đó có thể chưa có kết quả; chờ rồi chạy lại. Đọc danh sách, xử lý resource hợp lệ rồi bật enforcement bằng `az policy assignment update --name toinoi-guardrails-dev --scope /subscriptions/<subscription-id> --enforcement-mode Default` (hoặc chạy lại đúng lệnh `create` ở trên với `--enforcement-mode Default`, vì `create` ghi đè assignment cùng tên). Sau đó tạo resource group và thử storage ở West US:
+`--no-wait` trả về ngay trong khi lượt quét còn chạy, nên `az policy state list` lúc đó có thể chưa có kết quả; chờ rồi chạy lại. Đọc danh sách, xử lý các resource vi phạm thật rồi bật enforcement bằng `az policy assignment update --name toinoi-guardrails-dev --scope /subscriptions/<subscription-id> --enforcement-mode Default` (hoặc chạy lại đúng lệnh `create` ở trên với `--enforcement-mode Default`, vì `create` ghi đè assignment cùng tên). Sau đó tạo resource group và thử storage ở West US:
 
 ```bash
 az group create \

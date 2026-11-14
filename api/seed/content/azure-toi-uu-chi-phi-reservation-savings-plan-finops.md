@@ -33,13 +33,13 @@ Hoá đơn tăng chậm và đều không làm ai bị gọi dậy lúc 3 giờ 
 <figcaption>Hình 1. Vòng FinOps của Tới Nơi: inform bằng tag và show-back, optimize bằng right-size rồi cam kết, operate bằng review hàng tuần.</figcaption>
 </figure>
 
-Pha **inform** dựa vào tag. Tag gắn muộn không sửa được dữ liệu chi phí cũ, nên với prod hãy bắt buộc `env`, `service` (ví dụ `trips`, `dispatch`, `payment`) và `owner` ngay lúc tạo, rồi ép bằng Azure Policy ([bài 15](/articles/azure-policy-deny-audit-initiative)). **Show-back** là cho từng team thấy phần chi phí của mình mà chưa tính tiền nội bộ; **charge-back** là chuyển khoản thật. Bắt đầu bằng show-back; charge-back khi tag còn thủng biến mọi tranh luận kỹ thuật thành tranh luận ai bị tính nhầm.
+Pha **inform** dựa vào tag. Tag gắn muộn không sửa được dữ liệu chi phí cũ, nên với prod hãy bắt buộc `env`, `service` (ví dụ `trips`, `dispatch`, `payment`) và `owner` ngay lúc tạo, rồi ép bằng Azure Policy ([bài 15](/articles/azure-policy-deny-audit-initiative)). **Show-back** là cho từng team thấy phần chi phí của mình mà chưa tính tiền nội bộ; **charge-back** là chuyển khoản thật. Bắt đầu bằng show-back; charge-back khi tag còn thiếu sót biến mọi tranh luận kỹ thuật thành tranh luận ai bị tính nhầm.
 
 Pha **operate** là chỗ tiền được giữ lại. Mười lăm phút mỗi tuần: mở Cost analysis nhóm theo tag `service`, so với tuần trước, và mỗi mức tăng vượt ngưỡng phải có một câu trả lời («do release X bật log Debug»).
 
 ## Cam kết là đổi sự linh hoạt lấy đơn giá thấp hơn
 
-Các công cụ dưới theo một nguyên lý: bạn hứa trước một lượng dùng ổn định, Azure giảm đơn giá cho lượng đó. Khác nhau ở chỗ hứa cái gì.
+Các công cụ dưới đây dùng chung một nguyên lý: bạn hứa trước một lượng dùng ổn định, Azure giảm đơn giá cho lượng đó. Khác nhau ở chỗ hứa cái gì.
 
 | Công cụ | Bạn cam kết | Phù hợp khi | Không phù hợp khi |
 | --- | --- | --- | --- |
@@ -49,7 +49,7 @@ Các công cụ dưới theo một nguyên lý: bạn hứa trước một lư�
 | Spot (VM, VMSS, AKS spot node pool) | Chấp nhận bị thu hồi khi Azure cần chỗ, không có SLA | Batch báo cáo, CI runner, việc chạy lại được | Dispatch, Payment, mọi thứ trên đường đi của một chuyến |
 | On-demand | Không gì cả | Dev, thử nghiệm, workload chưa rõ hình dạng | Nền tảng ổn định chạy cả năm |
 
-Reservation thường giảm sâu hơn savings plan vì hẹp hơn: bạn đặt cược vào một thứ cụ thể. Cả hai đều tính theo kỳ hạn dù dùng ít hay không; phần cam kết theo giờ không dùng hết thì mất, không cộng dồn. Azure còn có **savings plan for databases** (phủ cả Azure Database for PostgreSQL và Cosmos DB), nên với `psql-toinoi-prod-sea` hãy so cả hai. Phạm vi áp dụng (một subscription hay chia sẻ), danh sách dịch vụ được phủ và chính sách đổi, hoàn thay đổi theo thời gian; danh sách trong bảng là theo tài liệu lúc viết, kiểm lại trước khi mua. Một điểm hay hiểu sai: reservation PostgreSQL Flexible Server chỉ phủ compute (vCore), storage và backup vẫn tính on-demand.
+Reservation thường giảm sâu hơn savings plan vì hẹp hơn: bạn đặt cược vào một thứ cụ thể. Cả hai đều tính theo kỳ hạn dù dùng ít hay không; phần cam kết theo giờ không dùng hết thì mất, không cộng dồn. Azure còn có **savings plan for databases** (phủ cả Azure Database for PostgreSQL và Cosmos DB), nên với `psql-toinoi-prod-sea` hãy so cả hai. Phạm vi áp dụng (một subscription hay chia sẻ), danh sách dịch vụ được phủ và chính sách đổi, hoàn thay đổi theo thời gian; danh sách trong bảng là theo tài liệu lúc viết, kiểm tra lại trước khi mua. Một điểm hay hiểu sai: reservation PostgreSQL Flexible Server chỉ phủ compute (vCore), storage và backup vẫn tính on-demand.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -71,7 +71,7 @@ Cam kết chỉ nên phủ phần mà metric đã chứng minh luôn có mặt. 
 
 - **Azure Advisor.** Nhóm Cost liệt kê resource dùng thấp và gợi ý mua reservation. Đọc như danh sách ứng viên: Advisor nhìn một cửa sổ thời gian, không biết cuối tuần là cao điểm giao đồ ăn.
 - **Container Apps.** Chế độ consumption tính theo tài nguyên dùng thật và cho phép scale về 0; workload profile dedicated tính theo instance đã cấp, dù replica có đầy hay không. Dev ngoài giờ nên `minReplicas` bằng 0. Prod của `trip-service` giữ ít nhất một replica vì cold start nằm trên đường đặt xe.
-- **PostgreSQL.** Dev dùng tier Burstable (bài 5), prod chọn cỡ theo CPU và connection sau load test (bài 56). Dừng server dev ngoài giờ được, nhưng storage vẫn tính và server tự bật lại sau tối đa 7 ngày dừng.
+- **PostgreSQL.** Dev dùng tier Burstable (bài 5), prod chọn cỡ theo CPU và connection sau load test (bài 56). Có thể dừng server dev ngoài giờ, nhưng storage vẫn tính và server tự bật lại sau tối đa 7 ngày dừng.
 - **Log Analytics.** Ingestion hằng ngày ổn định ở mức cao thì commitment tier rẻ hơn pay-as-you-go, nhưng trả đủ mức cam kết kể cả hôm ít log. Giảm retention cho bảng ít giá trị, chuyển bảng phù hợp sang plan Basic hoặc Auxiliary (đổi lại giới hạn truy vấn).
 
 ```bash
@@ -85,13 +85,13 @@ az postgres flexible-server stop \
   --name psql-toinoi-dev-sea
 ```
 
-Hai lệnh trên dừng phần dư của dev ngoài giờ. Chúng không xử lý disk, snapshot hay public IP còn lại. Muốn lặp lại hằng ngày, đặt chúng vào một workflow có lịch và có người sở hữu.
+Hai lệnh trên dừng phần dư của dev ngoài giờ. Chúng không xử lý disk, snapshot hay public IP còn lại. Muốn lặp lại hằng ngày, đặt chúng vào một workflow có lịch và có người phụ trách.
 
 ## Khoản ẩn nằm ở thiết kế, không ở resource bị quên
 
 Ở prod, khoản ẩn thường đến từ chính kiến trúc bạn chọn.
 
-| Khoản ẩn | Cơ chế | Cách kiểm | Cách giảm |
+| Khoản ẩn | Cơ chế | Cách kiểm tra | Cách giảm |
 | --- | --- | --- | --- |
 | Egress liên region | Nhân bản sang East Asia là dữ liệu rời Southeast Asia, mỗi lần đồng bộ | Cost analysis lọc meter băng thông | Chỉ nhân bản dữ liệu cần RPO thấp (bài 51), nén và gộp batch |
 | Private endpoint | Tính theo giờ tồn tại và theo GB đi qua; mỗi dịch vụ mỗi môi trường một cái | Đếm endpoint theo subscription | Gộp cho dịch vụ thật sự cần private, dev dùng ít hơn |
@@ -100,7 +100,7 @@ Hai lệnh trên dừng phần dư của dev ngoài giờ. Chúng không xử l�
 | Defender plan bật toàn bộ | Tính theo từng resource hoặc lượng dữ liệu ([bài 16](/articles/azure-defender-for-cloud-secure-score)) | `az security pricing list` | Bật theo mức nhạy cảm của dữ liệu |
 | Firewall và DDoS | Firewall tính theo giờ triển khai cộng GB xử lý; DDoS Network Protection tính phí cố định theo plan ([bài 18](/articles/azure-firewall-waf-ddos-bao-ve-bien)) | Cost analysis theo service | Chỉ dùng ở môi trường có lý do rủi ro |
 
-Mỗi lần giảm một khoản ẩn đều đổi một thứ khác: bỏ private endpoint mất ranh giới mạng, hạ tier mất tính năng, rút ngắn backup làm RPO xấu hơn. Tối ưu chi phí mà bỏ qua bốn trụ còn lại của [bài 50](/articles/azure-well-architected-framework-5-tru-cot) chỉ là chuyển rủi ro sang chỗ khác.
+Mỗi lần giảm một khoản ẩn đều phải đánh đổi một thứ khác: bỏ private endpoint mất ranh giới mạng, hạ tier mất tính năng, rút ngắn backup làm RPO xấu hơn. Tối ưu chi phí mà bỏ qua bốn trụ còn lại của [bài 50](/articles/azure-well-architected-framework-5-tru-cot) chỉ là chuyển rủi ro sang chỗ khác.
 
 ## Lab: báo cáo 30 ngày, ba khoản lớn nhất, mô phỏng reservation
 
@@ -115,7 +115,7 @@ az consumption usage list \
 | sort -nr | head -3
 ```
 
-Lệnh cộng các dòng usage theo resource rồi in ba dòng lớn nhất. Nó không nhóm theo tag và không đảm bảo dữ liệu một hai ngày gần nhất đã về đủ. Bước 2: nhóm theo tag `service` bằng Query API của Cost Management; tên cột tổng là `Cost` hoặc `PreTaxCost` tuỳ loại tài khoản.
+Lệnh cộng các dòng usage theo resource rồi in ba dòng lớn nhất. Lệnh này không nhóm theo tag và không đảm bảo dữ liệu của một, hai ngày gần nhất đã về đủ. Bước 2: nhóm theo tag `service` bằng Query API của Cost Management; tên cột tổng là `Cost` hoặc `PreTaxCost` tuỳ loại tài khoản.
 
 ```bash
 az rest --method post \
@@ -132,7 +132,7 @@ az rest --method post \
   }'
 ```
 
-Kết quả là các hàng theo giá trị tag, kèm một hàng rỗng cho phần chưa gắn tag: thước đo độ thủng của pha inform. Không muốn dùng lệnh thì trong Cost analysis nhóm theo Tag `service`, cùng khoảng 30 ngày.
+Kết quả là các hàng theo giá trị tag, kèm một hàng rỗng cho phần chưa gắn tag: thước đo mức thiếu tag của pha inform. Không muốn dùng lệnh thì trong Cost analysis nhóm theo Tag `service`, cùng khoảng 30 ngày.
 
 Bước 3, mô phỏng reservation. Mở Pricing Calculator, region Southeast Asia, thêm Azure Database for PostgreSQL Flexible Server đúng cỡ compute của `psql-toinoi-prod-sea` (nếu bật HA thì tính cả standby), 730 giờ mỗi tháng. Ghi con số on-demand, đổi sang reservation 1 năm cùng cỡ và ghi con số mới; storage và backup giữ nguyên. Điểm hoà vốn: reservation đáng mua khi tỷ lệ giờ chạy thật lớn hơn tỷ số giữa đơn giá hiệu dụng của reservation và đơn giá on-demand. Database prod chạy liên tục vượt ngưỡng đó dễ dàng, trừ khi bạn định đổi cỡ hay region trong năm.
 

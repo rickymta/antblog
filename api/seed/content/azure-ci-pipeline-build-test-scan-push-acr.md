@@ -20,7 +20,7 @@ Bài này dựng giai đoạn CI cho `trip-service`: test với PostgreSQL thậ
 
 ## CI là một chuỗi cổng, mỗi cổng chặn một loại lỗi
 
-CI của Tới Nơi chạy bốn việc theo thứ tự rẻ trước, đắt sau: test, build image, quét, push. Test hỏng thì không build. Quét ra CRITICAL thì không push. Mỗi bước sau tốn thời gian và đụng tài nguyên dùng chung hơn bước trước, nên lỗi sớm nhất dừng cả chuỗi.
+CI của Tới Nơi chạy bốn việc theo thứ tự rẻ trước, đắt sau: test, build image, quét, push. Test hỏng thì không build. Quét ra CRITICAL thì không push. Mỗi bước sau tốn nhiều thời gian hơn và đụng tới nhiều tài nguyên dùng chung hơn bước trước, nên lỗi xuất hiện sớm nhất sẽ dừng cả chuỗi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -29,7 +29,7 @@ CI của Tới Nơi chạy bốn việc theo thứ tự rẻ trước, đắt sa
 <figcaption>Hình 1. Bốn cổng của CI theo thứ tự: test với PostgreSQL, build image gắn git sha, quét Trivy chặn CRITICAL, push ACR và xuất digest.</figcaption>
 </figure>
 
-Workflow `toi-noi-dotnet.yml` có sẵn đã làm tốt cổng đầu: PostgreSQL 18 là service container có health check, `dotnet test` chạy với `TOI_NOI_PG` trỏ vào nó. Nó cũng đã build image nhưng chỉ ra file OCI archive, không push. Bài này giữ cùng khung và thêm ba cổng còn lại. Phần đăng nhập Azure dùng đúng `gh-toinoi-deploy` và environment ở [bài 42](/articles/azure-github-actions-oidc-federated-credential).
+Workflow `toi-noi-dotnet.yml` có sẵn đã làm tốt cổng đầu: PostgreSQL 18 là service container có health check, `dotnet test` chạy với `TOI_NOI_PG` trỏ vào nó. Workflow này cũng đã build image nhưng chỉ xuất ra file OCI archive, không push. Bài này giữ cùng khung và thêm ba cổng còn lại. Phần đăng nhập Azure dùng đúng `gh-toinoi-deploy` và environment ở [bài 42](/articles/azure-github-actions-oidc-federated-credential).
 
 ## Một file ci.yml cho cả bốn cổng
 
@@ -78,21 +78,21 @@ jobs:
           echo "image-digest=$(az acr repository show -n acrtoinoidev --image trips:${{ github.sha }} --query digest -o tsv)" >> "$GITHUB_OUTPUT"
 ```
 
-Khối này mô tả cách ghép, nó không chứng minh pipeline xanh. Ba chi tiết cần kiểm trên repo của bạn: `--collect:"XPlat Code Coverage"` chỉ ra số liệu nếu project test tham chiếu `coverlet.collector` (project `Tests` hiện chưa có); cache của `setup-dotnet` khoá theo `packages.lock.json`, nên phải bật `RestorePackagesWithLockFile` và commit file lock, nếu không bước setup sẽ báo thiếu file; và phiên bản các action ở đây là minh hoạ, nên hãy ghim vào commit SHA đã kiểm trước khi dùng thật.
+Khối này mô tả cách ghép chứ không chứng minh pipeline xanh. Ba chi tiết cần kiểm tra trên repo của bạn: `--collect:"XPlat Code Coverage"` chỉ ra số liệu nếu project test tham chiếu `coverlet.collector` (project `Tests` hiện chưa có); cache của `setup-dotnet` khoá theo `packages.lock.json`, nên phải bật `RestorePackagesWithLockFile` và commit file lock, nếu không bước setup sẽ báo thiếu file; và phiên bản các action ở đây là minh hoạ, nên hãy ghim vào commit SHA đã kiểm tra trước khi dùng thật.
 
 ## Test thật, và kết quả phải đọc được
 
-Service container PostgreSQL cho phép test chạm database thật thay vì mock, nhờ đó bắt được lỗi SQL, lỗi mapping và lỗi migration mà test đơn vị bỏ sót. Cái giá là thời gian khởi động database, nên health check phải đủ kiên nhẫn: lệnh `pg_isready` với số lần thử đủ lớn và `--health-interval` ngắn. Bỏ interval thì Docker dùng mặc định 30 giây giữa hai lần kiểm, job chờ lâu vô ích. Thiếu bước này, test bắt đầu khi database chưa nhận kết nối và lỗi nhìn như lỗi code.
+Service container PostgreSQL cho phép test chạm database thật thay vì mock, nhờ đó bắt được lỗi SQL, lỗi mapping và lỗi migration mà test đơn vị bỏ sót. Cái giá là thời gian khởi động database, nên health check phải chờ đủ lâu: lệnh `pg_isready` với số lần thử đủ lớn và `--health-interval` ngắn. Bỏ interval thì Docker dùng mặc định 30 giây giữa hai lần kiểm tra, job chờ lâu vô ích. Thiếu bước này, test bắt đầu khi database chưa nhận kết nối và lỗi trông như lỗi code.
 
 Mật khẩu `ci-lab-only` nằm trong YAML vì database sống và chết trong runner. Quy tắc đó chỉ đúng với database tạm, không áp dụng cho thứ gì nằm ngoài runner.
 
-Coverage cho biết dòng nào chưa được test chạm tới, không cho biết test có đúng không. Dùng nó để tìm vùng chưa kiểm, đừng biến ngưỡng phần trăm thành mục tiêu. Để kết quả hiện ngay trên trang run thay vì trong log dài, bạn có thể thêm logger cho Actions (có package mã nguồn mở in annotation và summary) hoặc ghi báo cáo vào `$GITHUB_STEP_SUMMARY`. Hai việc này cần thêm package vào project test, và bài không kiểm chúng trên repo.
+Coverage cho biết dòng nào chưa được test chạm tới, không cho biết test có đúng không. Dùng chỉ số này để tìm vùng chưa được kiểm thử, đừng biến ngưỡng phần trăm thành mục tiêu. Để kết quả hiện ngay trên trang run thay vì trong log dài, bạn có thể thêm logger cho Actions (có package mã nguồn mở in annotation và summary) hoặc ghi báo cáo vào `$GITHUB_STEP_SUMMARY`. Hai việc này cần thêm package vào project test, và bài không kiểm tra chúng trên repo.
 
 ## Image: tag theo git sha, quét trước khi push
 
-Dockerfile của service dùng multi-stage: một stage SDK để restore và publish, một stage runtime `aspnet:10.0` chỉ chứa kết quả publish. Stage cuối không mang SDK, nên image nhỏ hơn và có ít gói hơn để bị báo lỗ hổng. Tag là `github.sha`, nên mỗi commit có đúng một tag, và từ tag nhìn ngược ra commit ngay. Tag kiểu `latest` hay `1.0` bị bài 21 chỉ ra là tag trôi.
+Dockerfile của service dùng multi-stage: một stage SDK để restore và publish, một stage runtime `aspnet:10.0` chỉ chứa kết quả publish. Stage cuối không mang SDK, nên image nhỏ hơn và có ít gói hơn để bị báo lỗ hổng. Tag là `github.sha`, nên mỗi commit có đúng một tag, và từ tag nhìn ngược ra commit ngay. Tag kiểu `latest` hay `1.0` được bài 21 chỉ ra là tag trôi.
 
-Quét bằng Trivy đặt giữa build và push. Cờ `exit-code: 1` kèm `severity: CRITICAL` làm bước đỏ khi có lỗ hổng nghiêm trọng, và image chưa bao giờ vào registry. Cờ `ignore-unfixed` bỏ qua lỗ hổng chưa có bản vá, vì build lại cũng không sửa được và pipeline chỉ đỏ vô ích. Cái giá là bạn chấp nhận rủi ro đó có chủ ý, nên ghi nó vào quy ước của đội. Cũng nhớ rằng nguồn lỗi hay là base image, không phải code của bạn. Khi đó cách sửa là build lại trên base image đã vá.
+Quét bằng Trivy đặt giữa build và push. Cờ `exit-code: 1` kèm `severity: CRITICAL` làm bước đỏ khi có lỗ hổng nghiêm trọng, và image chưa bao giờ vào registry. Cờ `ignore-unfixed` bỏ qua lỗ hổng chưa có bản vá, vì build lại cũng không sửa được và pipeline chỉ đỏ vô ích. Cái giá là bạn chấp nhận rủi ro đó có chủ ý, nên ghi nó vào quy ước của đội. Cũng nhớ rằng lỗ hổng thường nằm ở base image, không phải code của bạn. Khi đó cách sửa là build lại trên base image đã vá.
 
 Trivy không thay Defender for Containers đã nói ở bài 21. Trivy là cổng tại thời điểm build. Defender quét tiếp image đã nằm trong registry khi cơ sở dữ liệu lỗ hổng cập nhật, nên bắt được lỗ hổng công bố sau khi bạn đã push. Hai cái bổ sung nhau.
 
@@ -100,9 +100,9 @@ SBOM là danh sách thành phần của image. Có thể sinh bằng syft trên 
 
 ## Push bằng OIDC, ghi lại digest, khoá tag
 
-`azure/login` đổi token OIDC lấy token Entra, rồi `az acr login` dùng phiên đó để lấy quyền docker với registry. Không có mật khẩu registry, không bật admin user. Identity cần đúng một role: AcrPush ở scope registry, và nó cũng kéo được. Nếu registry bật chế độ phân quyền theo repository (ABAC), AcrPush không còn hiệu lực và bạn cần role kiểu Container Registry Repository Writer; kiểm chế độ của `acrtoinoidev` trước. Phần còn lại của việc deploy không cần quyền này.
+`azure/login` đổi token OIDC lấy token Entra, rồi `az acr login` dùng phiên đó để lấy quyền docker với registry. Không có mật khẩu registry, không bật admin user. Identity cần đúng một role: AcrPush ở scope registry, role này cũng cho phép pull image. Nếu registry bật chế độ phân quyền theo repository (ABAC), AcrPush không còn hiệu lực và bạn cần role kiểu Container Registry Repository Writer; kiểm tra chế độ của `acrtoinoidev` trước. Phần còn lại của việc deploy không cần quyền này.
 
-Điểm quan trọng nhất của bước push là digest. Sau `docker push`, job hỏi chính registry digest của tag vừa đẩy và ghi giá trị `sha256:...` vào output `image-digest`, thay vì đọc `RepoDigests` của Docker local vốn có thể chứa nhiều mục. Workflow CD ở [bài 44](/articles/azure-cd-environment-approval-blue-green-canary) nhận giá trị này qua input: hoặc `ci.yml` gọi `cd.yml` như reusable workflow và truyền `needs.image.outputs.image-digest`, hoặc người chạy dán vào khi kích hoạt tay. Ghép với tên registry, ví dụ `acrtoinoidev.azurecr.io/trips@sha256:...`, nó chính là giá trị `imageDigest` của Bicep trong bài 36 loạt C#. Nhờ vậy thứ được test, được quét và thứ được deploy là cùng một dãy byte, không có chỗ nào quay lại tag để tra.
+Điểm quan trọng nhất của bước push là digest. Sau `docker push`, job hỏi chính registry digest của tag vừa đẩy và ghi giá trị `sha256:...` vào output `image-digest`, thay vì đọc `RepoDigests` của Docker local vốn có thể chứa nhiều mục. Workflow CD ở [bài 44](/articles/azure-cd-environment-approval-blue-green-canary) nhận giá trị này qua input: hoặc `ci.yml` gọi `cd.yml` như reusable workflow và truyền `needs.image.outputs.image-digest`, hoặc người chạy dán vào khi kích hoạt tay. Ghép với tên registry, ví dụ `acrtoinoidev.azurecr.io/trips@sha256:...`, nó chính là giá trị `imageDigest` của Bicep trong bài 36 loạt C#. Nhờ vậy image đem đi test, quét và image đem đi deploy là cùng một dãy byte, không bước nào phải quay lại tag để tra.
 
 Tag theo sha vẫn có thể bị ghi đè nếu có người push lại. Để tag không đổi sau khi push, khoá nó:
 
@@ -112,9 +112,9 @@ az acr repository update -n acrtoinoidev \
   --write-enabled false
 ```
 
-Lệnh này khoá ghi cho một tag cụ thể, đúng như bài 21 mô tả. Nó không chứng minh identity của pipeline đủ quyền thực hiện; hãy chạy thử và đọc lỗi nếu có. Nếu AcrPush không đủ, đừng nâng pipeline lên Owner chỉ để khoá tag. Hãy xem tài liệu về role của registry và cân nhắc quyền hẹp nhất cho việc này.
+Lệnh này khoá ghi cho một tag cụ thể, đúng như bài 21 mô tả. Lệnh này không chứng minh identity của pipeline đủ quyền thực hiện; hãy chạy thử và đọc lỗi nếu có. Nếu AcrPush không đủ, đừng nâng pipeline lên Owner chỉ để khoá tag. Hãy xem tài liệu về role của registry và cân nhắc quyền hẹp nhất cho việc này.
 
-Về cache layer: runner GitHub là máy mới mỗi lần chạy, nên `docker build` ở trên luôn build lại mọi layer. Nếu restore và publish làm pipeline chậm, chuyển sang `docker/build-push-action` với cache kiểu `gha` hoặc cache vào registry. Đổi lại bạn có thêm một nơi chứa layer cần dọn và cần tin. Chỉ làm khi số đo cho thấy cần.
+Về cache layer: runner GitHub là máy mới mỗi lần chạy, nên `docker build` ở trên luôn build lại mọi layer. Nếu restore và publish làm pipeline chậm, chuyển sang `docker/build-push-action` với cache kiểu `gha` hoặc cache vào registry. Đổi lại bạn có thêm một nơi chứa layer cần dọn và cần tin. Chỉ làm khi số liệu đo được cho thấy việc đó cần thiết.
 
 ## Chạy dưới 10 phút và để branch protection làm việc
 
@@ -143,7 +143,7 @@ Branch protection (hoặc ruleset) mới biến CI thành cổng thật: đặt 
 
 ## Ký image: bước tiếp theo, chưa bắt buộc
 
-Digest chứng minh image không đổi sau khi build, nhưng không chứng minh image do pipeline của bạn tạo ra. Chữ ký làm việc thứ hai: pipeline ký digest bằng khoá giữ trong Key Vault, và bên deploy chỉ chấp nhận digest có chữ ký hợp lệ. Hai công cụ phổ biến là cosign và notation. ACR hỗ trợ lưu chữ ký cùng image, và bài 21 đã nhắc Microsoft hướng sang Notary Project cho phần này.
+Digest chứng minh image không đổi sau khi build, nhưng không chứng minh image do pipeline của bạn tạo ra. Chữ ký chứng minh điều thứ hai: pipeline ký digest bằng khoá giữ trong Key Vault, và bên deploy chỉ chấp nhận digest có chữ ký hợp lệ. Hai công cụ phổ biến là cosign và notation. ACR hỗ trợ lưu chữ ký cùng image, và bài 21 đã nhắc Microsoft hướng sang Notary Project cho phần này.
 
 Phần khó là chính sách. Nền tảng có admission control (như AKS) có thể từ chối image chưa ký ngay lúc tạo pod. Theo hiểu biết lúc viết, Container Apps không có tầng tương đương, nên cách thực tế là một bước verify trong job CD trước khi đổi revision. Hãy kiểm tra tài liệu hiện hành của từng dịch vụ trước khi dựa vào một cơ chế cụ thể. Với Tới Nơi ở giai đoạn này, chỉ cần biết vị trí của nó trong chuỗi, chưa cần dựng.
 
@@ -167,7 +167,7 @@ az acr repository show -n acrtoinoidev \
   --query "{digest:digest,writeEnabled:changeableAttributes.writeEnabled}" -o json
 ```
 
-Digest phải trùng với log. Lab này chưa chứng minh image chạy đúng, vì chưa có container nào khởi động từ nó; bước đó là việc của CD. Phần chặn merge: trong Settings của repository, đặt `test` là required check cho main. Rồi mở một nhánh, cố ý sửa một assertion trong test cho sai và mở pull request. Kỳ vọng là check `test` đỏ và nút merge bị khoá. Sửa lại assertion thì check xanh và merge mở. Dọn lab bằng `az acr repository delete -n acrtoinoidev --image trips:<commit-sha>`, lệnh này xoá cả manifest mà tag trỏ tới cùng mọi tag khác của nó (chỉ gỡ tag thì dùng `az acr repository untag`), rồi bỏ role AcrPush nếu không còn dùng.
+Digest phải trùng với log. Lab này chưa chứng minh image chạy đúng, vì chưa có container nào khởi động từ nó; bước đó là việc của CD. Để chặn merge, vào Settings của repository và đặt `test` là required check cho main. Rồi mở một nhánh, cố ý sửa một assertion trong test cho sai và mở pull request. Kỳ vọng là check `test` đỏ và nút merge bị khoá. Sửa lại assertion thì check xanh và merge mở. Dọn lab bằng `az acr repository delete -n acrtoinoidev --image trips:<commit-sha>`, lệnh này xoá cả manifest mà tag trỏ tới cùng mọi tag khác của nó (chỉ gỡ tag thì dùng `az acr repository untag`), rồi bỏ role AcrPush nếu không còn dùng.
 
 **Bài tập:** đội bật required check `test` cho main và giữ path filter trên workflow. Một pull request chỉ sửa tài liệu ngoài thư mục service không merge được. Chuyện gì xảy ra và sửa thế nào?
 

@@ -54,6 +54,15 @@ describe('content:apply', () => {
     expect(r.rejected.every((x) => x.why.startsWith('nằm trong'))).toBe(true);
   });
 
+  it('cho sửa chữ trong aria-label/alt/title nhưng không cho đổi thuộc tính khác của thẻ', () => {
+    const svg = '<svg viewBox="0 0 10 10" role="img" aria-label="Rẻ, bán kính lỗi lớn">\n<text x="1">x</text>\n</svg>';
+    const ok = applyEdits(svg, [{ old: 'aria-label="Rẻ, bán kính lỗi lớn"', new: 'aria-label="Rẻ, phạm vi ảnh hưởng lớn"' }]);
+    expect(ok.rejected).toEqual([]);
+    expect(ok.output).toContain('aria-label="Rẻ, phạm vi ảnh hưởng lớn"');
+    const bad = applyEdits(svg, [{ old: 'viewBox="0 0 10 10" role="img"', new: 'viewBox="0 0 20 20" role="img"' }]);
+    expect(bad.applied).toEqual([]);
+  });
+
   it('huỷ cả tệp nếu title bị làm rỗng; giữ CRLF khi áp', () => {
     expect(applyEdits(md, [{ old: '"Năm test đầu tiên cho cước"', new: '""' }]).fileError).toBe('frontmatter title không hợp lệ');
     const crlf = md.replace(/\n/g, '\r\n');

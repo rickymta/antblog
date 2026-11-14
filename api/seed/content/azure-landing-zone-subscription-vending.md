@@ -20,13 +20,13 @@ language: vi
 
 ## Landing zone là khung quản trị dựng sẵn trước khi workload tới
 
-Cloud Adoption Framework là bộ hướng dẫn của Microsoft về cách một tổ chức đưa workload lên Azure. Azure Landing Zone là phần hiện thực hoá nó: một môi trường đã có sẵn management group, policy, mạng, danh tính và logging, để đội ứng dụng chỉ việc đặt workload vào.
+Cloud Adoption Framework là bộ hướng dẫn của Microsoft về cách một tổ chức đưa workload lên Azure. Azure Landing Zone là phần hiện thực hoá khung đó: một môi trường đã có sẵn management group, policy, mạng, danh tính và logging, để đội ứng dụng chỉ việc đặt workload vào.
 
 Kiến trúc tham chiếu chia management group thành hai nhánh chính. **Platform** chứa các subscription dùng chung, thường tách ba vai trò: identity, management (Log Analytics trung tâm, automation) và connectivity (hub-spoke, DNS, firewall). **Landing zones** chứa subscription cho workload, thường tách `corp` (chỉ nối nội bộ qua mạng riêng) và `online` (hướng ra internet). Ngoài ra thường có thêm nhóm sandbox cho thử nghiệm và decommissioned cho subscription sắp xoá.
 
-Lý do của hình dạng này là **policy gán ở management group, kế thừa xuống subscription**. Gán một lần ở trên thì mọi subscription mới đặt dưới đó tự mang luật: region được phép, tag bắt buộc, cấm public IP cho VM. Log Analytics trung tâm cho phép đội bảo mật hỏi một câu KQL xuyên mọi môi trường. Hub-spoke cho phép mọi spoke đi chung một chỗ kiểm soát lối ra, thay vì mỗi VNet tự xoay.
+Lý do của hình dạng này là **policy gán ở management group, kế thừa xuống subscription**. Gán một lần ở trên thì mọi subscription mới đặt dưới đó tự mang luật: region được phép, tag bắt buộc, cấm public IP cho VM. Log Analytics trung tâm cho phép đội bảo mật hỏi một câu KQL xuyên mọi môi trường. Hub-spoke cho phép mọi spoke đi chung một chỗ kiểm soát lối ra, thay vì mỗi VNet tự xoay xở.
 
-Điểm yếu là kích thước. Bản tham chiếu đầy đủ viết cho tổ chức có hàng chục đội, mạng lai on-premises và đội bảo mật riêng. Dựng nguyên bản đó cho một sản phẩm đặt xe và giao hàng sáu thành phố là trả giá vận hành cho thứ chưa cần.
+Điểm yếu nằm ở quy mô. Bản tham chiếu đầy đủ viết cho tổ chức có hàng chục đội, mạng lai on-premises và đội bảo mật riêng. Dựng nguyên bản đó cho một sản phẩm đặt xe và giao hàng sáu thành phố là trả giá vận hành cho thứ chưa cần.
 
 ## Tới Nơi chỉ cần một cây nhỏ với ba subscription workload và một platform
 
@@ -40,7 +40,7 @@ Tới Nơi chọn cây tối thiểu vẫn giữ đúng nguyên lý: policy ở 
 | Tách `corp` và `online` | Chưa | Mọi workload hiện ra public qua Front Door; tách khi có service nội bộ thuần |
 | Hub-spoke và firewall | Chưa | Thêm khi có nhu cầu kiểm soát lối ra tập trung; peering vẫn nằm trong module vending để bật sau |
 
-Cái giá của bản nhỏ là khi lớn lên bạn phải tách nhóm và di chuyển subscription, điều làm được nhưng cần kế hoạch. Đổi lại, bạn không vận hành mười MG chưa có việc làm. Nguyên tắc: thêm tầng khi có một luật thật sự khác nhau giữa hai nhóm, không thêm cho đẹp sơ đồ.
+Cái giá của bản nhỏ là khi hệ thống mở rộng, bạn phải tách nhóm và di chuyển subscription, điều làm được nhưng cần kế hoạch. Đổi lại, bạn không phải vận hành mười MG chưa có workload nào. Nguyên tắc: thêm tầng khi có một luật thật sự khác nhau giữa hai nhóm, không thêm cho đẹp sơ đồ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -51,7 +51,7 @@ Cái giá của bản nhỏ là khi lớn lên bạn phải tách nhóm và di c
 
 ## Lab: Bicep ở scope management group tạo MG và gán ba policy
 
-File `mg-toinoi.bicep` có `targetScope = 'managementGroup'` và được deploy ở root management group. Nó tạo `mg-toinoi` (management group là resource ở scope tenant, nên khai báo `scope: tenant()`), rồi gọi module gán ba built-in policy lên chính MG đó: allowed locations cho resource, allowed locations cho resource group, và bắt buộc resource group có tag `env`. Xác nhận ID built-in bằng `az policy definition show --name <id>` trước khi tin. Template cũng chưa chứng minh bạn có quyền: tạo MG và gán policy ở gần root cần role cao ở scope đó.
+File `mg-toinoi.bicep` có `targetScope = 'managementGroup'` và được deploy ở root management group. Template này tạo `mg-toinoi` (management group là resource ở scope tenant, nên khai báo `scope: tenant()`), rồi gọi module gán ba built-in policy lên chính MG đó: allowed locations cho resource, allowed locations cho resource group, và bắt buộc resource group có tag `env`. Xác nhận ID built-in bằng `az policy definition show --name <id>` trước khi tin. Template cũng chưa chứng minh bạn có quyền: tạo MG và gán policy ở gần root cần role cao ở scope đó.
 
 ```bicep
 targetScope = 'managementGroup'
@@ -110,7 +110,7 @@ az deployment mg create \
   --template-file mg-toinoi.bicep
 ```
 
-Hai điểm khi đọc what-if. Thứ nhất, nó cho thấy MG sẽ được tạo; phần module nhắm vào một MG chưa tồn tại nên lần đầu có thể hiện không đủ, và what-if không dự đoán được policy sau này chặn resource nào. Thứ hai, MG mới tạo có thể cần một lúc để hiển thị nhất quán, nên nếu assignment lỗi ngay sau lần tạo đầu, chạy lại là cách thử đầu tiên. Cờ `DoNotEnforce` khiến policy chỉ đánh giá và báo compliance, chưa chặn gì. Đây là cách ra mắt policy an toàn: xem kết quả vài ngày, rồi đổi sang enforce. Built-in Allowed locations đã bỏ qua resource có location `global` (Front Door, action group), nhưng resource group chứa chúng vẫn phải ở region được phép.
+Hai điểm cần lưu ý khi đọc what-if. Thứ nhất, what-if cho thấy MG sẽ được tạo; phần module nhắm vào một MG chưa tồn tại nên lần đầu có thể hiện không đủ, và what-if không dự đoán được policy sau này chặn resource nào. Thứ hai, MG mới tạo có thể cần một lúc để hiển thị nhất quán, nên nếu assignment lỗi ngay sau lần tạo đầu, chạy lại là cách thử đầu tiên. Cờ `DoNotEnforce` khiến policy chỉ đánh giá và báo compliance, chưa chặn gì. Đây là cách ra mắt policy an toàn: xem kết quả vài ngày, rồi đổi sang enforce. Built-in Allowed locations đã bỏ qua resource có location `global` (Front Door, action group), nhưng resource group chứa chúng vẫn phải ở region được phép.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -131,7 +131,7 @@ Việc tạo chính subscription làm được bằng IaC thông qua resource al
 | Tạo budget kèm cảnh báo | Chi phí môi trường mới có chủ từ ngày đầu |
 | Peering tới hub (khi có hub) | Mạng đúng chuẩn, không mở thủ công |
 
-Module dưới chạy ở scope subscription. Nó tạo ba resource group, một budget tháng cảnh báo khi chi thực đạt 80%, và chỉ gán Contributor cho group dev khi `env` là dev; staging và prod dùng quyền eligible qua PIM. Số tiền budget là tham số: tra Pricing Calculator và dữ liệu thực tế, đừng đoán. Module chưa kiểm tên group đúng object ID và chưa chứng minh email nhận cảnh báo.
+Module dưới chạy ở scope subscription. Module này tạo ba resource group, một budget tháng cảnh báo khi chi thực đạt 80%, và chỉ gán Contributor cho group dev khi `env` là dev; staging và prod dùng quyền eligible qua PIM. Số tiền budget là tham số: tra Pricing Calculator và dữ liệu thực tế, đừng đoán. Module chưa kiểm tra object ID của group có đúng hay không và chưa chứng minh email nhận cảnh báo.
 
 ```bicep
 targetScope = 'subscription'
@@ -181,7 +181,7 @@ az deployment sub what-if --subscription <subscription-id> \
                alertEmail=platform@toinoi.example devGroupObjectId=<group-object-id>
 ```
 
-Đặt subscription vào management group nằm ngoài module scope subscription; trong lab dùng `az account management-group subscription add --name mg-toinoi --subscription <subscription-id>` (cây đầy đủ đặt vào `mg-workloads`). Cùng module dùng cho staging và prod, chỉ khác tham số. Đó là điều làm ba môi trường giống nhau có chủ đích: khác nhau ở tham số nằm trong Git, không ở cái ai đó đã click.
+Đặt subscription vào management group nằm ngoài module scope subscription; trong lab dùng `az account management-group subscription add --name mg-toinoi --subscription <subscription-id>` (cây đầy đủ đặt vào `mg-workloads`). Cùng module dùng cho staging và prod, chỉ khác tham số. Nhờ vậy ba môi trường giống nhau có chủ đích: mọi khác biệt nằm ở tham số trong Git, không phải ở thứ ai đó đã click.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -194,13 +194,13 @@ az deployment sub what-if --subscription <subscription-id> \
 
 Module trên gán quyền cho **group**, không cho từng người. Người vào hay ra đội thì đổi thành viên group trong Entra ID, template không đổi. Tới Nơi bắt đầu với vài group theo vai trò: `platform-admin` (đội dựng nền tảng, quyền rộng ở platform và management group), `trips-dev` (đội viết `trip-service`, Contributor ở dev), `trips-ops` (vận hành, Reader thường trực ở prod) và một group chỉ đọc chi phí cho người quản lý.
 
-Với prod, Contributor thường trực là rủi ro: tài khoản bị chiếm là kẻ tấn công có quyền ghi. **Privileged Identity Management (PIM)** đổi quyền thường trực thành quyền đủ điều kiện (eligible): người dùng phải kích hoạt, nêu lý do, có thể cần duyệt, và quyền tự hết sau một khoảng. Chi tiết về role, scope và PIM nằm ở [bài về RBAC](/articles/azure-rbac-role-scope-assignment-pim); hãy kiểm yêu cầu license của PIM trước khi hứa với đội.
+Với prod, Contributor thường trực là rủi ro: tài khoản bị chiếm đồng nghĩa kẻ tấn công có quyền ghi. **Privileged Identity Management (PIM)** đổi quyền thường trực thành quyền đủ điều kiện (eligible): người dùng phải kích hoạt, nêu lý do, có thể cần duyệt, và quyền tự hết sau một khoảng. Chi tiết về role, scope và PIM nằm ở [bài về RBAC](/articles/azure-rbac-role-scope-assignment-pim); hãy kiểm tra yêu cầu license của PIM trước khi hứa với đội.
 
 Cuối cùng là **break-glass account**: hai tài khoản chỉ nằm trong Entra ID (không đồng bộ từ nơi khác), có quyền cao nhất, dùng khi cơ chế đăng nhập thông thường hỏng, chẳng hạn một Conditional Access policy khoá nhầm toàn bộ admin. Theo khuyến nghị của Microsoft, chúng cần phương thức xác thực mạnh và chống phishing, thông tin lưu ngoại tuyến ở nơi an toàn, được thử định kỳ, và mọi lần đăng nhập đều phải kích hoạt alert, vì bình thường không ai được dùng chúng. Bạn đã có hạ tầng alert từ [bài 48](/articles/azure-alert-action-group-slo-workbook) để làm việc đó.
 
 ## Quản trị liên tục: dựng xong mới là một nửa
 
-Landing zone mục ruỗng nếu không ai nhìn. Bốn việc định kỳ sau giữ nó đúng:
+Landing zone sẽ xuống cấp nếu không ai theo dõi. Bốn việc định kỳ sau giữ nó đúng:
 
 | Việc | Công cụ | Dấu hiệu xấu |
 | --- | --- | --- |
@@ -209,7 +209,7 @@ Landing zone mục ruỗng nếu không ai nhìn. Bốn việc định kỳ sau 
 | Tag governance | Policy bắt buộc tag, Resource Graph | Resource không có `env` hoặc không có chủ |
 | Decommission | Quy trình có checklist | Subscription chạy tiếp dù đội đã giải tán |
 
-Khối dưới đếm resource non-compliant theo từng assignment ở `mg-toinoi`. Nó cho bạn một con số để theo dõi theo thời gian, không cho biết resource nào cần sửa trước; muốn vậy hãy mở chi tiết từng assignment. Chi phí và budget đã nói ở [bài về Cost Management](/articles/azure-chi-phi-pricing-cost-management-budget), tag và lock ở [bài về Resource Manager](/articles/azure-resource-manager-resource-id-tag-lock).
+Khối dưới đếm resource non-compliant theo từng assignment ở `mg-toinoi`. Lệnh này cho bạn một con số để theo dõi theo thời gian, không cho biết resource nào cần sửa trước; muốn vậy hãy mở chi tiết từng assignment. Chi phí và budget đã nói ở [bài về Cost Management](/articles/azure-chi-phi-pricing-cost-management-budget), tag và lock ở [bài về Resource Manager](/articles/azure-resource-manager-resource-id-tag-lock).
 
 ```bash
 az policy state summarize --management-group mg-toinoi \
@@ -225,9 +225,9 @@ az policy state summarize --management-group mg-toinoi \
 
 ## Học tiếp từ đây
 
-Bạn vừa có một cây management group vừa cỡ cho Tới Nơi, một template Bicep tạo MG và gán ba policy, một module vending dựng resource group, budget và RBAC cho từng môi trường, cùng cách giữ nó đúng theo thời gian. Lab mô tả cách làm, kết quả what-if và compliance bạn cần tự kiểm trên tenant của mình.
+Bạn vừa có một cây management group vừa cỡ cho Tới Nơi, một template Bicep tạo MG và gán ba policy, một module vending dựng resource group, budget và RBAC cho từng môi trường, cùng cách giữ nó đúng theo thời gian. Lab mô tả cách làm, kết quả what-if và compliance bạn cần tự kiểm tra trên tenant của mình.
 
-Đây là bài cuối của Phần 5. Phần 6 là Kiến trúc nâng cao và vận hành, bắt đầu bằng [bài 50 về Well-Architected Framework](/articles/azure-well-architected-framework-5-tru-cot), nơi ta chấm điểm toàn bộ những gì đã dựng theo năm trụ cột. Nếu cần ôn việc kiểm trước khi deploy, xem lại [bài 40 về Bicep và what-if](/articles/azure-bicep-co-ban-module-parameter-what-if).
+Đây là bài cuối của Phần 5. Phần 6 là Kiến trúc nâng cao và vận hành, bắt đầu bằng [bài 50 về Well-Architected Framework](/articles/azure-well-architected-framework-5-tru-cot), nơi ta chấm điểm toàn bộ những gì đã dựng theo năm trụ cột. Nếu cần ôn việc kiểm tra trước khi deploy, xem lại [bài 40 về Bicep và what-if](/articles/azure-bicep-co-ban-module-parameter-what-if).
 
 ## Tài liệu gốc
 

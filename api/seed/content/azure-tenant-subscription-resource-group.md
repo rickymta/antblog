@@ -22,7 +22,7 @@ Bài này dựng khung tổ chức mà mọi resource sau này sẽ nằm trong:
 
 Azure tổ chức mọi thứ thành một cây. Trên cùng là **tenant**, một thư mục Microsoft Entra ID chứa người dùng, nhóm và service principal của tổ chức. Dưới tenant có thể có các **management group** để gom nhiều subscription. Mỗi **subscription** là một vùng chứa riêng, và bên trong nó là các **resource group**, nơi cuối cùng chứa **resource** như máy ảo, database, storage.
 
-Cây này không phải để vẽ cho đẹp. Nó là các **scope**: chỗ bạn gán quyền và policy. Quyền (RBAC role assignment) gán ở scope nào thì có hiệu lực với mọi thứ bên dưới scope đó. **Azure Policy** cũng vậy: policy gán ở management group áp xuống mọi subscription con. Resource lock cũng kế thừa xuống. Có một ngoại lệ đáng nhớ là **tag**: tag gắn ở subscription hay resource group không tự chảy xuống resource. Muốn resource nhận tag của resource group thì phải gắn riêng hoặc dùng policy để sao chép.
+Cây này không phải để vẽ cho đẹp. Các cấp trong cây chính là các **scope**: chỗ bạn gán quyền và policy. Quyền (RBAC role assignment) gán ở scope nào thì có hiệu lực với mọi thứ bên dưới scope đó. **Azure Policy** cũng vậy: policy gán ở management group áp xuống mọi subscription con. Resource lock cũng kế thừa xuống. Có một ngoại lệ đáng nhớ là **tag**: tag gắn ở subscription hay resource group không tự chảy xuống resource. Muốn resource nhận tag của resource group thì phải gắn riêng hoặc dùng policy để sao chép.
 
 Một chi tiết kỹ thuật: Azure RBAC nhận bốn cấp scope là management group, subscription, resource group và resource; bản thân tenant không nằm trong danh sách đó. Cấp cao nhất thường dùng là root management group (Tenant Root Group), nằm ngay dưới tenant. Số cấp management group lồng nhau cũng có giới hạn, hãy kiểm tra tài liệu trước khi thiết kế cây sâu.
 
@@ -37,7 +37,7 @@ Kế thừa là con dao hai lưỡi. Gán Contributor ở subscription nghĩa l�
 
 ## Subscription là ranh giới billing và quota
 
-Subscription là đơn vị tính hoá đơn: chi phí được gom và báo cáo theo subscription. Nó cũng là đơn vị của **quota** và giới hạn dịch vụ, ví dụ số vCPU được dùng ở mỗi region. Vì vậy tách subscription là cách rẻ nhất để dựng một ranh giới thật: một đợt load test ở dev có thể ăn hết quota vCPU của subscription dev, và prod không bị ảnh hưởng vì quota của nó tính riêng.
+Subscription là đơn vị tính hoá đơn: chi phí được gom và báo cáo theo subscription. Subscription cũng là đơn vị của **quota** và giới hạn dịch vụ, ví dụ số vCPU được dùng ở mỗi region. Vì vậy tách subscription là cách rẻ nhất để dựng một ranh giới thật: một đợt load test ở dev có thể ăn hết quota vCPU của subscription dev, và prod không bị ảnh hưởng vì quota của nó tính riêng.
 
 Tới Nơi chia theo môi trường: `sub-toinoi-dev`, `sub-toinoi-staging`, `sub-toinoi-prod`. Tên subscription là nhãn hiển thị, đặt tuỳ ý. Khi hệ thống lớn lên, đội sẽ thêm một subscription theo nền tảng (platform-shared) để chứa thứ dùng chung như registry, DNS và logging tập trung. Bài 49 về landing zone và subscription vending (Phần 5) sẽ quay lại chuyện này, còn lab hôm nay chỉ vẽ ba subscription.
 
@@ -47,7 +47,7 @@ Tới Nơi chia theo môi trường: `sub-toinoi-dev`, `sub-toinoi-staging`, `su
 | Quota | Dev và prod tranh nhau một hạn mức | Mỗi môi trường một hạn mức riêng |
 | Quyền | Dễ cấp thừa vì mọi thứ chung chỗ | Dev rộng quyền, prod chặt, tách bạch |
 | Rủi ro xoá nhầm | Dev xoá nhầm có thể chạm prod | Lệnh ở dev không chạm resource prod |
-| Công vận hành | Ít việc hơn | Nhiều subscription, cần chuẩn hoá bằng template |
+| Công sức vận hành | Ít việc hơn | Nhiều subscription, cần chuẩn hoá bằng template |
 
 Cái giá nằm ở dòng cuối. Ba subscription nghĩa là ba bộ quyền, ba bộ policy và ba lần tạo resource lặp lại. Đó là lý do management group và Infrastructure as Code (Bicep) xuất hiện sớm trong loạt.
 
@@ -59,7 +59,7 @@ Cái giá nằm ở dòng cuối. Ba subscription nghĩa là ba bộ quyền, ba
 
 Quy ước đặt tên của Tới Nơi là `rg-toinoi-<workload>-<env>-<region>`. Ví dụ `rg-toinoi-trips-prod-sea` đọc ra: nhóm của workload `trips`, môi trường prod, region Southeast Asia. Đặt tên có cấu trúc giúp lọc bằng lệnh và đọc hoá đơn mà không phải mở từng resource.
 
-Bicep sau tạo ba RG cho một môi trường ở scope subscription. Nó chỉ tạo RG rỗng. Nó không chứng minh bạn có quyền tạo RG ở subscription đó, và không kiểm tra policy chặn tên hay region.
+Bicep sau tạo ba RG cho một môi trường ở scope subscription. Bicep này chỉ tạo RG rỗng, không chứng minh bạn có quyền tạo RG ở subscription đó, và không kiểm tra policy chặn tên hay region.
 
 ```bicep
 targetScope = 'subscription'
@@ -77,7 +77,7 @@ resource rgs 'Microsoft.Resources/resourceGroups@2024-03-01' = [for w in workloa
 }]
 ```
 
-Triển khai ở scope subscription dùng lệnh `az deployment sub create`, khác với `az deployment group create` dùng cho RG. Khối dưới chạy trên subscription dev đang chọn. Nó không chứng minh template sạch với mọi API version, hãy đọc kết quả của lệnh.
+Triển khai ở scope subscription dùng lệnh `az deployment sub create`, khác với `az deployment group create` dùng cho RG. Khối dưới chạy trên subscription dev đang chọn. Khối này không chứng minh template không có lỗi với mọi API version, nên hãy đọc kết quả của lệnh.
 
 ```bash
 az deployment sub create \
@@ -95,7 +95,7 @@ az deployment sub create \
 
 Đây là ngộ nhận phổ biến nhất của người mới. Hai điều cần nhớ.
 
-Thứ nhất, **RG không cô lập mạng**. Một VM ở `rg-toinoi-trips-dev-sea` hoàn toàn có thể gọi PostgreSQL ở `rg-toinoi-data-dev-sea` nếu đường mạng và quyền cho phép, và ngược lại hai resource cùng RG vẫn bị chặn nếu NSG không cho. Ranh giới mạng là VNet, subnet, NSG và firewall của từng dịch vụ, sẽ gặp ở [bài 6](/articles/azure-vnet-subnet-nsg-public-ip). RG cũng không phải ranh giới bảo mật. Nó chỉ tiện cho việc gán quyền, vì quyền gán ở RG áp xuống mọi resource trong nhóm.
+Thứ nhất, **RG không cô lập mạng**. Một VM ở `rg-toinoi-trips-dev-sea` hoàn toàn có thể gọi PostgreSQL ở `rg-toinoi-data-dev-sea` nếu đường mạng và quyền cho phép, và ngược lại hai resource cùng RG vẫn bị chặn nếu NSG không cho. Ranh giới mạng là VNet, subnet, NSG và firewall của từng dịch vụ, sẽ gặp ở [bài 6](/articles/azure-vnet-subnet-nsg-public-ip). RG cũng không phải ranh giới bảo mật. RG chỉ tiện cho việc gán quyền, vì quyền gán ở RG áp xuống mọi resource trong nhóm.
 
 Thứ hai, **resource trong RG có thể ở region khác với RG**. RG có một location, nhưng đó là nơi lưu metadata của nhóm, không bắt resource bên trong cùng region. Điều này linh hoạt, nhưng có hệ quả: nếu region của RG gặp sự cố, bạn có thể không cập nhật được resource trong RG đó dù resource ở region còn khoẻ, vì metadata không truy cập được. Quy tắc thực dụng cho Tới Nơi là giữ RG cùng region với resource chính. Khi dựng phương án thảm hoạ ở East Asia, tạo RG riêng, chẳng hạn `rg-toinoi-trips-prod-ea`, thay vì nhét resource Hồng Kông vào RG Singapore.
 
@@ -109,7 +109,7 @@ Lab này làm trên giấy hoặc công cụ vẽ, không cần tạo resource. 
 | --- | --- | --- |
 | `ca-toinoi-trips-<env>` và `cae-toinoi-<env>` | `rg-toinoi-trips-<env>-sea` | Deploy lại thường xuyên, xoá dựng lại được |
 | `psql-toinoi-<env>-sea` | `rg-toinoi-data-<env>-sea` | Chứa dữ liệu, vòng đời dài, cần lock ở prod |
-| Log Analytics workspace | `rg-toinoi-monitor-<env>-sea` | Log phải sống sót khi app bị xoá để điều tra |
+| Log Analytics workspace | `rg-toinoi-monitor-<env>-sea` | Log phải còn lại khi app bị xoá để điều tra |
 | `vnet-toinoi-<env>-sea` | `rg-toinoi-network-<env>-sea` | Nhiều workload dùng chung, thay đổi hiếm |
 
 Tên RG cho mạng không nằm trong ba RG của đoạn Bicep, vì bài 6 mới dựng mạng. Bạn có thể thêm `network` vào mảng `workloads` khi tới lúc đó.

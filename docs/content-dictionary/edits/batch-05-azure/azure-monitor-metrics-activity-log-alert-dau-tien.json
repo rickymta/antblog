@@ -1,0 +1,13 @@
+{"file":"azure-monitor-metrics-activity-log-alert-dau-tien.md","edits":[
+{"old":"Nó **không** ghi một request HTTP nào của `trip-service`, vì đó là data plane.","new":"Activity Log **không** ghi một request HTTP nào của `trip-service`, vì đó là data plane.","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"Cũng cần chống một ngộ nhận khác:","new":"Cũng cần gỡ một ngộ nhận khác:","reason":"'chống ngộ nhận' gượng","severity":"low"},
+{"old":"Mỗi biểu đồ có hai núm dễ bị bỏ qua.","new":"Mỗi biểu đồ có hai tuỳ chọn dễ bị bỏ qua.","reason":"'núm' là calque của knob","severity":"medium"},
+{"old":"Hai núm này đổi hoàn toàn câu chuyện:","new":"Hai tuỳ chọn này thay đổi hoàn toàn cách đọc biểu đồ:","reason":"'núm' calque; 'đổi câu chuyện' calque","severity":"medium"},
+{"old":"nửa kia quyết định nó đi đâu.","new":"nửa kia quyết định log đó đi đâu.","reason":"Tránh đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"4. **Severity**: từ 0 (nghiêm trọng nhất) tới 4 (thông tin). Nó chỉ là nhãn","new":"4. **Severity**: từ 0 (nghiêm trọng nhất) tới 4 (thông tin). Severity chỉ là nhãn","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"Có thêm **alert processing rule** để tắt tiếng có chủ đích.","new":"Ngoài ra còn có **alert processing rule** để chủ động tạm tắt thông báo.","reason":"'tắt tiếng' là calque của mute","severity":"medium"},
+{"old":"Khối này cũng chưa chứng minh có dữ liệu về:","new":"Khối này cũng chưa chứng minh là có dữ liệu đổ về:","reason":"Thiếu từ, 'có dữ liệu về' cụt","severity":"medium"},
+{"old":"trong cửa sổ 5 phút, kiểm mỗi phút\" vào VM của bài 7. Nó chưa chứng minh","new":"trong cửa sổ 5 phút, đánh giá mỗi phút\" vào VM của bài 7. Lệnh này chưa chứng minh","reason":"'kiểm' thiếu 'tra' (đúng nghĩa là evaluate); tránh 'Nó'","severity":"medium"},
+{"old":"không cần kiểm từng phút.","new":"không cần đánh giá từng phút.","reason":"'kiểm' thiếu 'tra' (đúng nghĩa là evaluate)","severity":"medium"},
+{"old":"tạo alert processing rule với loại bỏ action group trong một khung giờ.","new":"tạo alert processing rule kiểu loại bỏ action group trong một khung giờ.","reason":"'với loại bỏ' sai ngữ pháp, thiếu danh từ","severity":"medium"}
+]}

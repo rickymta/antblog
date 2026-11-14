@@ -1,7 +1,7 @@
 ---
 slug: azure-aks-co-ban-cluster-node-pool-deploy
 title: "AKS cơ bản: cluster, node pool và deploy service đầu tiên"
-summary: "Bài 23: dựng cluster AKS nhỏ cho Tới Nơi với managed identity, Azure CNI overlay và attach ACR, tách system pool khỏi user pool, rồi deploy trip-service bằng Deployment và Service ClusterIP và kiểm /health/ready qua port-forward."
+summary: "Bài 23: dựng cluster AKS nhỏ cho Tới Nơi với managed identity, Azure CNI overlay và attach ACR, tách system pool khỏi user pool, rồi deploy trip-service bằng Deployment và Service ClusterIP và kiểm tra /health/ready qua port-forward."
 category: devops-azure
 level: intermediate
 tags: [azure, cloud, devops, toi-noi, aks, kubernetes, containers]
@@ -29,7 +29,7 @@ Node pool có hai vai trò:
 - **System pool** chạy các pod hạ tầng của cluster như CoreDNS và metrics server. Cluster luôn cần ít nhất một system pool. Máy ở đây phải đủ cỡ để chạy các pod đó ổn định, nên kiểm tra tài liệu về yêu cầu tối thiểu của VM size.
 - **User pool** chạy workload của bạn. Bạn có thể có nhiều user pool với kích thước khác nhau, ví dụ một pool cho API và một pool cho job tính cước nặng.
 
-Tách hai pool để pod ứng dụng ngốn tài nguyên không chen mất pod DNS của cả cluster. Cách thực thi: gắn taint `CriticalAddonsOnly=true:NoSchedule` lên system pool. Pod ứng dụng không có toleration tương ứng nên chỉ được xếp lên user pool.
+Tách hai pool để pod ứng dụng ngốn tài nguyên không chiếm chỗ của pod DNS trong cluster. Cách thực hiện: gắn taint `CriticalAddonsOnly=true:NoSchedule` lên system pool. Pod ứng dụng không có toleration tương ứng nên chỉ được xếp lên user pool.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -42,7 +42,7 @@ Tách hai pool để pod ứng dụng ngốn tài nguyên không chen mất pod 
 
 Pod cần một địa chỉ IP, và cách cấp IP quyết định bạn tốn bao nhiêu không gian trong VNet. Với **Azure CNI overlay**, node lấy IP từ subnet VNet, còn pod lấy IP từ một dải riêng (`--pod-cidr`) chỉ có nghĩa bên trong cluster. Pod nói chuyện với nhau qua overlay, và traffic ra khỏi cluster được SNAT qua IP của node. Hệ quả: subnet không cạn vì số pod, bạn chỉ cần chừa chỗ cho node.
 
-**kubenet** là plugin cũ hơn, cũng dùng dải IP riêng cho pod nhưng dựa vào route table, và có nhiều giới hạn về quy mô. Microsoft đã công bố lộ trình ngừng hỗ trợ kubenet, nên hãy kiểm trang thông báo của AKS thay vì chọn nó cho cluster mới. Với Tới Nơi, overlay là lựa chọn mặc định hợp lý. Dải pod CIDR không được chồng lên VNet, dải on-premises hoặc VNet peering mà cluster sẽ nối tới, vì sai chỗ này sửa rất đau.
+**kubenet** là plugin cũ hơn, cũng dùng dải IP riêng cho pod nhưng dựa vào route table, và có nhiều giới hạn về quy mô. Microsoft đã công bố lộ trình ngừng hỗ trợ kubenet, nên hãy kiểm tra trang thông báo của AKS thay vì chọn nó cho cluster mới. Với Tới Nơi, overlay là lựa chọn mặc định hợp lý. Dải pod CIDR không được chồng lên VNet, dải on-premises hoặc VNet peering mà cluster sẽ nối tới, vì nếu sai chỗ này thì sửa rất vất vả.
 
 ## Cluster dùng managed identity, ACR gắn bằng một cờ
 
@@ -52,7 +52,7 @@ Cờ `--attach-acr` gán role `AcrPull` của registry cho kubelet identity. Nh�
 
 ## Lab: tạo cluster hai pool
 
-Lab dùng resource group dev, ACR `acrtoinoidev` có sẵn từ bài 21, và giả định VM size dòng B có sẵn ở Southeast Asia cho subscription của bạn. Nếu lệnh báo lỗi, kiểm `az vm list-skus` (size có bị hạn chế ở region không) và `az vm list-usage` (quota vCPU). Cluster có một system pool với một node, gắn taint để pod ứng dụng không lên đó. Tài liệu AKS không khuyên dùng dòng B cho system pool vì CPU burstable; ở lab ta chấp nhận để tiết kiệm, production nên chọn size không burstable.
+Lab dùng resource group dev, ACR `acrtoinoidev` có sẵn từ bài 21, và giả định VM size dòng B có sẵn ở Southeast Asia cho subscription của bạn. Nếu lệnh báo lỗi, kiểm tra `az vm list-skus` (size có bị hạn chế ở region không) và `az vm list-usage` (quota vCPU). Cluster có một system pool với một node, gắn taint để pod ứng dụng không lên đó. Tài liệu AKS không khuyên dùng dòng B cho system pool vì CPU burstable; ở lab ta chấp nhận để tiết kiệm, production nên chọn size không burstable.
 
 ```bash
 RG=rg-toinoi-trips-dev-sea
@@ -90,7 +90,7 @@ kubectl get nodes
 kubectl create namespace toinoi
 ```
 
-Kỳ vọng: `kubectl get nodes` liệt kê hai node ở trạng thái `Ready`, và namespace `toinoi` được tạo. **Namespace** là ranh giới logic để áp RBAC, quota và NetworkPolicy theo nhóm service. Nó không phải ranh giới bảo mật cứng: hai namespace trên cùng node vẫn chia sẻ kernel.
+Kỳ vọng: `kubectl get nodes` liệt kê hai node ở trạng thái `Ready`, và namespace `toinoi` được tạo. **Namespace** là ranh giới logic để áp RBAC, quota và NetworkPolicy theo nhóm service. Namespace không phải ranh giới bảo mật cứng: hai namespace trên cùng node vẫn chia sẻ kernel.
 
 ## Cấu hình và manifest cho trip-service
 
@@ -108,7 +108,7 @@ kubectl -n toinoi create secret generic trips-pg \
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Kubernetes Secret chỉ được encode base64 khi đọc qua API, base64 không phải mã hoá: ai đọc được Secret trong namespace là đọc được chuỗi kết nối. Dùng nó cho lab thôi. Và nhớ xoá cluster khi xong: node pool tính tiền theo giờ chạy dù không có pod nào, đây là chỗ lab AKS hay bị quên và phát sinh chi phí.</p>
+<p>Kubernetes Secret chỉ được encode base64 khi đọc qua API, base64 không phải mã hoá: ai đọc được Secret trong namespace là đọc được chuỗi kết nối. Chỉ dùng Secret này cho lab. Và nhớ xoá cluster khi xong: node pool tính tiền theo giờ chạy dù không có pod nào, đây là chỗ lab AKS hay bị quên và phát sinh chi phí.</p>
 </div>
 
 Manifest dưới đây gồm Deployment và Service. Pod yêu cầu tài nguyên để scheduler biết xếp vào đâu, và có đủ ba probe giống Container Apps.
@@ -148,7 +148,7 @@ spec:
   ports: [{ port: 80, targetPort: 8080 }]
 ```
 
-Manifest này cho thấy cấu trúc, nhưng tự nó không chứng minh pod chạy được hay chuỗi kết nối đúng. Vài điểm cần giải thích. **Request** là lượng tài nguyên scheduler dành sẵn cho pod, quyết định pod có xếp vừa node không. **Limit** bộ nhớ là trần: vượt là pod bị kill (OOMKilled). Manifest cố ý không đặt limit CPU vì limit CPU gây throttling ngay cả khi node còn rảnh; đây là điểm nhiều đội tranh luận, hãy chọn theo số đo của bạn. Digest cố định giống Bicep ở bài 22, để biết chính xác bản nào đang chạy.
+Manifest này cho thấy cấu trúc, nhưng tự nó không chứng minh pod chạy được hay chuỗi kết nối đúng. Vài điểm cần giải thích. **Request** là lượng tài nguyên scheduler dành sẵn cho pod, quyết định pod có xếp vừa node không. **Limit** bộ nhớ là trần: vượt là pod bị kill (OOMKilled). Manifest cố ý không đặt limit CPU vì limit CPU gây throttling ngay cả khi node còn rảnh; đây là điểm nhiều đội tranh luận, hãy chọn theo số liệu đo được của bạn. Digest cố định giống Bicep ở bài 22, để biết chính xác phiên bản nào đang chạy.
 
 ### Không mở LoadBalancer public thẳng cho service
 
@@ -156,7 +156,7 @@ Service `ClusterIP` chỉ có địa chỉ bên trong cluster, đúng ý với m
 
 Hướng đúng: giữ mọi service ở ClusterIP, đặt một ingress controller phía trước làm cửa duy nhất, có thể kết hợp Application Gateway ở bài 27. Phần ingress thuộc bài 24. Khi chỉ cần nội bộ trong VNet, có thể dùng internal load balancer thay vì public.
 
-### Kiểm bằng port-forward
+### Kiểm tra bằng port-forward
 
 Áp dụng manifest, đợi pod sẵn sàng, rồi chuyển cổng từ máy bạn vào Service để gọi readiness endpoint.
 
@@ -170,7 +170,7 @@ kubectl -n toinoi port-forward service/trips 8080:80
 curl -i http://localhost:8080/health/ready
 ```
 
-Kỳ vọng: pod nằm ở node của `userpool`, và `/health/ready` trả 200 khi kết nối PostgreSQL hoạt động. Port-forward đi vòng qua mọi ingress, nên 200 ở đây không chứng minh đường vào từ Internet, TLS hay xác thực JWT hoạt động. Nó chỉ chứng minh pod chạy, kéo được image và nói chuyện được với database.
+Kỳ vọng: pod nằm ở node của `userpool`, và `/health/ready` trả 200 khi kết nối PostgreSQL hoạt động. Port-forward đi vòng qua mọi ingress, nên 200 ở đây không chứng minh đường vào từ Internet, TLS hay xác thực JWT hoạt động. Kết quả này chỉ chứng minh pod chạy, kéo được image và nói chuyện được với database.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

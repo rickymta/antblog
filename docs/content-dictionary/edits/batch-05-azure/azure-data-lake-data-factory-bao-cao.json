@@ -1,0 +1,137 @@
+{
+"file": "azure-data-lake-data-factory-bao-cao.md",
+"edits": [
+{
+"old": "Replica gỡ tải đọc khỏi primary nhưng không đổi bản chất query",
+"new": "Replica giảm tải đọc cho primary nhưng không đổi bản chất query",
+"reason": "'gỡ tải đọc khỏi' là calque (offload)",
+"severity": "medium"
+},
+{
+"old": "sống nhờ truy vấn ngắn theo khoá",
+"new": "chủ yếu phục vụ các truy vấn ngắn theo khoá",
+"reason": "'sống nhờ' gượng, thiếu rõ nghĩa",
+"severity": "medium"
+},
+{
+"old": "sắp xếp, và hay được mở đúng giờ cao điểm",
+"new": "sắp xếp, và thường được chạy đúng giờ cao điểm",
+"reason": "'hay được mở' là giọng dịch máy",
+"severity": "low"
+},
+{
+"old": "Nguồn là database mà dataset đích không đặt tên file thì",
+"new": "Nếu nguồn là database và dataset đích không đặt tên file thì",
+"reason": "Câu thiếu 'Nếu', mệnh đề điều kiện cụt",
+"severity": "high"
+},
+{
+"old": "Parquet trong `curated` mới là bản sao của bảng nguồn. Để báo cáo dễ hỏi,",
+"new": "Parquet trong `curated` mới chỉ là bản sao của bảng nguồn. Để dễ truy vấn khi làm báo cáo,",
+"reason": "'mới là' sai nghĩa; 'dễ hỏi' là calque",
+"severity": "high"
+},
+{
+"old": "data lake không có masking tự động để bật. Che dữ liệu phải làm ở pipeline:",
+"new": "data lake không có sẵn tính năng masking tự động để bật. Việc che dữ liệu phải làm ở pipeline:",
+"reason": "Thiếu danh từ 'tính năng'; câu bắt đầu bằng động từ thiếu chủ ngữ",
+"severity": "medium"
+},
+{
+"old": "## Capture của Event Hubs cho km thực tế, nhưng cần một bước đổi định dạng",
+"new": "## Dùng Capture của Event Hubs để lấy km thực tế, nhưng cần thêm một bước đổi định dạng",
+"reason": "Tiêu đề thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "thì GPS tới lake mà không phải viết thêm consumer",
+"new": "thì dữ liệu GPS đổ thẳng vào lake mà không phải viết thêm consumer",
+"reason": "Lược danh từ 'dữ liệu'",
+"severity": "low"
+},
+{
+"old": "không có máy chủ để quản lý: nó đọc file trực tiếp trong storage",
+"new": "không có máy chủ để quản lý: pool này đọc file trực tiếp trong storage",
+"reason": "Tránh 'nó' chỉ sự vật",
+"severity": "low"
+},
+{
+"old": "mỗi khoản có một cách làm nhỏ lại",
+"new": "mỗi khoản có một cách giảm chi phí",
+"reason": "'làm nhỏ lại' gượng",
+"severity": "medium"
+},
+{
+"old": "nên query chọn ba cột không đọc các cột còn lại",
+"new": "nên query chọn ba cột sẽ không phải đọc các cột còn lại",
+"reason": "Câu cụt, khó đọc",
+"severity": "low"
+},
+{
+"old": "Mỗi query serverless là một khoản tiền.",
+"new": "Mỗi query serverless đều tốn tiền.",
+"reason": "Calque, gượng",
+"severity": "medium"
+},
+{
+"old": "Bắt buộc điều kiện theo thư mục, đặt budget alert",
+"new": "Hãy bắt buộc lọc theo thư mục, đặt budget alert",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "Phía PostgreSQL, hỗ trợ xác thực Entra của connector tuỳ phiên bản.",
+"new": "Phía PostgreSQL, việc connector có hỗ trợ xác thực Entra hay không tuỳ phiên bản.",
+"reason": "Câu cụt, trật tự kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "thì cần managed virtual network kèm managed private endpoint, hoặc self-hosted integration runtime đặt trong mạng đó; hỗ trợ khác nhau theo connector.",
+"new": "thì cần managed virtual network kèm managed private endpoint, hoặc self-hosted integration runtime đặt trong mạng đó; mức hỗ trợ khác nhau tuỳ connector.",
+"reason": "Thiếu danh từ 'mức'",
+"severity": "low"
+},
+{
+"old": "Azure integration runtime chỉ tới được nguồn có đường mạng.",
+"new": "Azure integration runtime chỉ kết nối được tới nguồn mà nó có đường mạng tới.",
+"reason": "Câu mơ hồ, thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "Có ACL kiểu POSIX trên từng thư mục và file, ngoài RBAC của Azure.",
+"new": "Hỗ trợ ACL kiểu POSIX trên từng thư mục và file, bên cạnh RBAC của Azure.",
+"reason": "Câu thiếu chủ ngữ/động từ rõ",
+"severity": "medium"
+},
+{
+"old": "kiểm bảng tính năng trước khi bật",
+"new": "kiểm tra bảng tính năng được hỗ trợ trước khi bật",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "medium"
+},
+{
+"old": "Blob thường có không gian phẳng:",
+"new": "Blob thường dùng không gian tên phẳng:",
+"reason": "Calque (flat namespace)",
+"severity": "low"
+},
+{
+"old": "cú pháp có thể đổi; kiểm bằng `-h`.",
+"new": "cú pháp có thể đổi; kiểm tra bằng `-h`.",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "medium"
+},
+{
+"old": "Kiểm bằng cách so",
+"new": "Kiểm tra bằng cách so",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "medium"
+},
+{
+"old": "nên đừng đẩy xuống đó dữ liệu còn query hằng tuần",
+"new": "nên đừng chuyển xuống đó dữ liệu vẫn được query hằng tuần",
+"reason": "Gượng, thiếu mạch",
+"severity": "low"
+}
+]
+}

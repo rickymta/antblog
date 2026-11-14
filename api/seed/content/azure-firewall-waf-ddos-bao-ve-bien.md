@@ -20,7 +20,7 @@ Bài này vẽ bản đồ các lớp bảo vệ biên mà Tới Nơi có thể 
 
 ## Mỗi lớp chặn một loại tấn công khác nhau
 
-Phòng thủ biên hay bị mô tả như một bức tường. Thực tế nó là bốn thứ nhìn ở bốn độ sâu khác nhau, và dùng nhầm lớp là cách phổ biến nhất để vừa tốn tiền vừa không an toàn.
+Phòng thủ biên hay bị mô tả như một bức tường. Thực tế đó là bốn lớp nhìn ở bốn độ sâu khác nhau, và dùng nhầm lớp là cách phổ biến nhất để vừa tốn tiền vừa không an toàn.
 
 | Lớp | Tầng | Hướng chính | Chặn cái gì | Chi phí tương đối |
 | --- | --- | --- | --- | --- |
@@ -29,11 +29,11 @@ Phòng thủ biên hay bị mô tả như một bức tường. Thực tế nó 
 | Azure Firewall | L3 tới L7 (FQDN) | Ra, và giữa các spoke | Egress tới đích không cho phép, đích bị threat intel đánh dấu | Cao, tính theo giờ triển khai và theo GB |
 | NSG và ASG | L3/4 | Vào và ra giữa subnet, NIC | Cổng và nguồn không được phép trong VNet | Thấp nhất, rule không tính tiền riêng |
 
-Đọc bảng này theo cột «Chặn cái gì», không theo cột «Chi phí». Một lớp đắt không thay được lớp rẻ: Firewall không đọc được thân JSON của `POST /quotes`, và NSG không biết nổi một request có nhúng `' OR '1'='1`.
+Đọc bảng này theo cột «Chặn cái gì», không theo cột «Chi phí». Một lớp đắt không thay được lớp rẻ: Firewall không đọc được thân JSON của `POST /quotes`, và NSG không nhận ra được một request có nhúng `' OR '1'='1`.
 
-**DDoS Protection** có hai dạng gói. Network Protection là một DDoS protection plan gắn vào VNet và bảo vệ các public IP của tài nguyên trong VNet đó (Application Gateway, Azure Firewall, load balancer, VM). IP Protection bật theo từng public IP; nó có cùng cơ chế giảm thiểu nhưng không kèm DDoS Rapid Response, bảo đảm chi phí khi bị tấn công và ưu đãi WAF như Network Protection. Danh sách khác biệt có thể thay đổi, hãy đối chiếu bảng so sánh SKU trong tài liệu trước khi chọn. Hạ tầng Azure vốn đã có một mức bảo vệ mặc định (infrastructure protection) cho mọi public IP, nên câu hỏi không phải «có hay không» mà là «có cần bảo vệ điều chỉnh theo traffic của riêng mình, telemetry và hỗ trợ khi bị tấn công không». Front Door là dịch vụ edge toàn cầu với bảo vệ L3/4 có sẵn ở hạ tầng; DDoS plan không gắn vào Front Door mà vào public IP trong VNet của bạn, ví dụ khi đi vào qua Application Gateway.
+**DDoS Protection** có hai dạng gói. Network Protection là một DDoS protection plan gắn vào VNet và bảo vệ các public IP của tài nguyên trong VNet đó (Application Gateway, Azure Firewall, load balancer, VM). IP Protection bật theo từng public IP; nó có cùng cơ chế giảm thiểu nhưng không kèm DDoS Rapid Response, bảo đảm chi phí khi bị tấn công và ưu đãi WAF như Network Protection. Danh sách khác biệt có thể thay đổi, hãy đối chiếu bảng so sánh SKU trong tài liệu trước khi chọn. Hạ tầng Azure vốn đã có một mức bảo vệ mặc định (infrastructure protection) cho mọi public IP, nên câu hỏi không phải «có hay không» mà là «có cần mức bảo vệ được điều chỉnh theo traffic riêng của mình, cùng telemetry và hỗ trợ khi bị tấn công hay không». Front Door là dịch vụ edge toàn cầu với bảo vệ L3/4 có sẵn ở hạ tầng; DDoS plan không gắn vào Front Door mà vào public IP trong VNet của bạn, ví dụ khi đi vào qua Application Gateway.
 
-**WAF** là thứ duy nhất ở đây hiểu HTTP. Nó chạy trên Front Door (edge toàn cầu) hoặc Application Gateway (regional, nằm trong VNet), dùng bộ managed rule dựa trên OWASP Core Rule Set (Default Rule Set của Microsoft), thêm bot rule và custom rule do bạn viết. Trên Front Door, managed rule set và bot rule chỉ có ở tier **Premium**; tier Standard chỉ có custom rule. Số phiên bản rule set và tên bộ rule đổi theo thời gian, kiểm trang WAF của dịch vụ bạn chọn.
+**WAF** là lớp duy nhất ở đây hiểu được HTTP. WAF chạy trên Front Door (edge toàn cầu) hoặc Application Gateway (regional, nằm trong VNet), dùng bộ managed rule dựa trên OWASP Core Rule Set (Default Rule Set của Microsoft), thêm bot rule và custom rule do bạn viết. Trên Front Door, managed rule set và bot rule chỉ có ở tier **Premium**; tier Standard chỉ có custom rule. Số phiên bản rule set và tên bộ rule đổi theo thời gian, kiểm tra trang WAF của dịch vụ bạn chọn.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -57,7 +57,7 @@ az network nsg rule create -g rg-toinoi-net-prod-sea \
   --destination-port-ranges 5432
 ```
 
-Rule trên chỉ cho phép luồng app tới db; nó không tự chặn mọi thứ còn lại, đó là việc của rule deny mặc định và các rule bạn thêm sau.
+Rule trên chỉ cho phép luồng app tới db; rule này không tự chặn mọi thứ còn lại, việc đó thuộc về rule deny mặc định và các rule bạn thêm sau.
 
 Với egress, mô hình **hub-spoke** đặt Azure Firewall ở hub, các spoke (`vnet-toinoi-prod-sea`) gắn **user-defined route** `0.0.0.0/0` với next hop là IP private của Firewall. Mọi traffic ra Internet đi qua một cửa, nơi bạn viết application rule theo FQDN («chỉ cho ra `*.example-psp.invalid`», đích của cổng thanh toán Payment service) và bật threat intelligence ở chế độ cảnh báo hoặc chặn. Firewall có nhiều SKU với khả năng khác nhau (kiểm tra TLS, lọc URL nằm ở SKU cao); xem bảng so sánh SKU trong tài liệu.
 
@@ -101,7 +101,7 @@ Rate limit đặt trong custom rule. Đây là phần `properties.customRules` c
 }
 ```
 
-Hãy nhớ hai điều dễ quên. Rate limit mặc định đếm theo IP client (socket IP). Nhiều khách dùng mạng di động qua NAT chung có thể cùng một IP công cộng, nên ngưỡng quá thấp chặn nhầm cả một khu phố; kiểm tra tài liệu về các tuỳ chọn gom nhóm (group by) trước khi chốt. Và mỗi máy chủ edge của Front Door đếm riêng, nên ngưỡng chỉ gần đúng chứ không phải con số chính xác toàn cục. Trong chế độ Detection, rule này cũng chỉ ghi log, không chặn.
+Hãy nhớ hai điều dễ quên. Rate limit mặc định đếm theo IP client (socket IP). Nhiều khách dùng mạng di động qua NAT chung có thể dùng chung một IP công cộng, nên ngưỡng quá thấp chặn nhầm cả một khu phố; kiểm tra tài liệu về các tuỳ chọn gom nhóm (group by) trước khi chốt. Và mỗi máy chủ edge của Front Door đếm riêng, nên ngưỡng chỉ gần đúng chứ không phải con số chính xác toàn cục. Trong chế độ Detection, rule này cũng chỉ ghi log, không chặn.
 
 ## Không phải môi trường nào cũng cần đủ bốn lớp
 
@@ -110,7 +110,7 @@ Chi phí và độ phức tạp là một phần của quyết định bảo m�
 | Môi trường | WAF | Azure Firewall | DDoS Protection | NSG và ASG |
 | --- | --- | --- | --- | --- |
 | dev | Front Door WAF, Detection | Không | Mặc định hạ tầng | Có, rule đơn giản |
-| staging | Prevention sau khi chỉnh rule | Tuỳ, thử để kiểm egress | Mặc định hạ tầng | Có, giống prod |
+| staging | Prevention sau khi chỉnh rule | Tuỳ, thử để kiểm tra egress | Mặc định hạ tầng | Có, giống prod |
 | prod | Prevention, bot rule, rate limit | Có nếu egress cần kiểm soát | Network hoặc IP Protection theo rủi ro | Có, rule theo ASG |
 
 Dev chỉ cần WAF trên Front Door để luyện đọc log và tune rule (nhớ rằng managed rule cần Front Door Premium, nên dev chỉ bật trong thời gian thử); Firewall và DDoS Network Protection đắt hơn nhiều so với dữ liệu giả của dev. Prod đưa chúng vào khi đánh giá rủi ro (doanh thu khi gián đoạn, yêu cầu tuân thủ về egress) đủ biện minh cho chi phí. Tra Pricing Calculator cho từng thứ, và đừng quên chi phí nhân sự để duy trì rule.
@@ -129,7 +129,7 @@ curl -i -G "https://<frontdoor-endpoint>/quotes" \
   --data-urlencode "city=sgn' OR '1'='1"
 ```
 
-Ở Detection, request vẫn tới backend và có thể nhận 200 hoặc 404; điều cần xem là log. Với Front Door Standard/Premium, log WAF (category `FrontDoorWebApplicationFirewallLog`) nằm trong bảng `AzureDiagnostics`, các trường JSON được làm phẳng thành cột có hậu tố `_s`. Nếu không thấy cột nào, kiểm bằng `AzureDiagnostics | getschema`. Application Gateway dùng category khác (`ApplicationGatewayFirewallLog`) và tên cột khác.
+Ở Detection, request vẫn tới backend và có thể nhận 200 hoặc 404; điều cần xem là log. Với Front Door Standard/Premium, log WAF (category `FrontDoorWebApplicationFirewallLog`) nằm trong bảng `AzureDiagnostics`, các trường JSON được làm phẳng thành cột có hậu tố `_s`. Nếu không thấy cột nào, kiểm tra bằng `AzureDiagnostics | getschema`. Application Gateway dùng category khác (`ApplicationGatewayFirewallLog`) và tên cột khác.
 
 ```kusto
 AzureDiagnostics
@@ -140,17 +140,17 @@ AzureDiagnostics
 | order by TimeGenerated desc
 ```
 
-Kỳ vọng là thấy dòng khớp rule SQLi với `action_s` là `Log` (hoặc `AnomalyScoring` cho từng rule con khi dùng Default Rule Set 2.x) chứ không phải `Block`. Nếu bảng trống, kiểm diagnostic settings và độ trễ nạp log trước khi nghi WAF.
+Kỳ vọng là thấy dòng khớp rule SQLi với `action_s` là `Log` (hoặc `AnomalyScoring` cho từng rule con khi dùng Default Rule Set 2.x) chứ không phải `Block`. Nếu bảng trống, kiểm tra diagnostic settings và độ trễ nạp log trước khi nghi WAF.
 
 **Bài tập:** Sau vài ngày ở Detection, log cho thấy rule SQLi khớp với thân request hợp lệ của app tài xế khi gửi ghi chú giao hàng. Bạn xử lý thế nào trước khi chuyển Prevention?
 
-<details><summary>Xem lời giải</summary><p>Đừng tắt cả rule set. Xác định rule ID và trường bị khớp trong log, rồi thêm exclusion hẹp cho đúng trường (ví dụ thân của một field ghi chú) hoặc tắt riêng rule đó. Sau đó chạy lại vài ngày ở Detection để chắc không còn false positive, rồi mới chuyển Prevention.</p></details>
+<details><summary>Xem lời giải</summary><p>Đừng tắt cả rule set. Xác định rule ID và trường bị khớp trong log, rồi thêm exclusion hẹp cho đúng trường (ví dụ thân của một field ghi chú) hoặc tắt riêng rule đó. Sau đó chạy lại vài ngày ở Detection để chắc chắn không còn false positive, rồi mới chuyển Prevention.</p></details>
 
 ## Học tiếp từ đây
 
 Bạn đã có bản đồ bốn lớp biên: DDoS ở L3/4, WAF ở L7, Firewall cho egress và NSG/ASG cho phân đoạn nội bộ, cùng một WAF Detection với rule rate-limit để đọc log. Biên đã dựng, nhưng khách và tài xế vẫn cần một danh tính để API biết ai đang gọi.
 
-Bài sau là [Bài 19](/articles/azure-entra-external-id-xac-thuc-khach-tai-xe): Entra External ID, xác thực khách và tài xế, và cách API kiểm JWT. Về mạng riêng cho dữ liệu, xem lại [Bài 17](/articles/azure-private-endpoint-private-dns-service-endpoint).
+Bài sau là [Bài 19](/articles/azure-entra-external-id-xac-thuc-khach-tai-xe): Entra External ID, xác thực khách và tài xế, và cách API kiểm tra JWT. Về mạng riêng cho dữ liệu, xem lại [Bài 17](/articles/azure-private-endpoint-private-dns-service-endpoint).
 
 ## Tài liệu gốc
 

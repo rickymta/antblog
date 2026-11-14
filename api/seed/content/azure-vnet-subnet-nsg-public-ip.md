@@ -15,14 +15,14 @@ Bài này dựng khung mạng mà các service của Tới Nơi sẽ sống tron
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Bạn gắn một public IP Standard vào VM nhưng chưa tạo NSG nào. Internet có kết nối được tới port 22 của VM không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Public IP Standard đóng với traffic đi vào cho tới khi một NSG cho phép rõ ràng. Có địa chỉ công khai không có nghĩa là có đường vào.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Public IP Standard chặn traffic đi vào cho tới khi một NSG cho phép tường minh. Có địa chỉ công khai không có nghĩa là có đường vào.</p></details>
 </div>
 
 ## VNet là mạng riêng của một region, và dải địa chỉ phải chọn trước
 
 **Virtual Network (VNet)** là mạng riêng nằm trong một subscription và một region. Resource trong cùng VNet nói chuyện với nhau bằng địa chỉ riêng, không đi qua Internet. VNet ở Southeast Asia không tự thấy VNet ở East Asia; muốn nối hai bên phải dùng peering hoặc VPN, những thứ ta để dành cho phần sau.
 
-VNet không thuộc ranh giới của resource group. Resource group chỉ là ranh giới quản lý (bài 2 và 4). Một VM nằm trong `rg-toinoi-trips-dev-sea` vẫn dùng chung VNet với resource ở `rg-toinoi-net-dev-sea`. Đừng suy ra «hai RG khác nhau thì hai mạng khác nhau».
+VNet không bị giới hạn trong ranh giới của resource group. Resource group chỉ là ranh giới quản lý (bài 2 và 4). Một VM nằm trong `rg-toinoi-trips-dev-sea` vẫn dùng chung VNet với resource ở `rg-toinoi-net-dev-sea`. Đừng suy ra «hai RG khác nhau thì hai mạng khác nhau».
 
 Khi tạo VNet bạn khai **address space** theo CIDR. Với Tới Nơi dev ta dùng `10.10.0.0/16`, tức 65 536 địa chỉ. Staging và prod dùng dải riêng, ví dụ `10.20.0.0/16` và `10.30.0.0/16`. Quy tắc quan trọng nhất: **không trùng dải** với VNet khác sẽ được peering, hoặc với mạng văn phòng sẽ nối bằng VPN. Hai mạng trùng dải không định tuyến được cho nhau, và đổi address space khi đã có resource bên trong rất đau đầu. Hãy ghi bảng dải IP ở một chỗ cả đội cùng thấy.
 
@@ -36,7 +36,7 @@ Một thay đổi mặc định cần biết: với API phát hành sau 31/3/202
 | `snet-db` | `10.10.2.0/24` | Tầng dữ liệu | Database tự chạy trên VM, phục vụ lab |
 | `snet-gateway` | `10.10.0.0/24` | Điểm vào, dành cho sau | Gateway, bastion hoặc thiết bị mạng |
 
-Một lưu ý để khỏi hiểu sai: nhiều dịch vụ PaaS đòi một subnet riêng, đôi khi phải delegate cho dịch vụ đó và không cho đặt resource khác vào. PostgreSQL Flexible Server ở chế độ VNet integration (bài 9) và Container Apps environment là hai ví dụ. Lab này dùng `snet-db` cho một database tự chạy để thấy nguyên tắc; khi chuyển sang dịch vụ managed, kiểm yêu cầu subnet trong tài liệu của dịch vụ.
+Một lưu ý để khỏi hiểu sai: nhiều dịch vụ PaaS đòi một subnet riêng, đôi khi phải delegate cho dịch vụ đó và không cho đặt resource khác vào. PostgreSQL Flexible Server ở chế độ VNet integration (bài 9) và Container Apps environment là hai ví dụ. Lab này dùng `snet-db` cho một database tự chạy để thấy nguyên tắc; khi chuyển sang dịch vụ managed, hãy kiểm tra yêu cầu về subnet trong tài liệu của dịch vụ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -70,15 +70,15 @@ Một ngoại lệ đáng biết: các dịch vụ hạ tầng của Azure qua �
 
 ## Public IP: dùng Standard, cấp tĩnh, và đừng mở SSH ra Internet
 
-**Public IP** là địa chỉ công khai gắn vào NIC, load balancer hoặc gateway. SKU Basic đã bị Microsoft cho nghỉ hưu (retired) từ 30/9/2025; resource mới dùng SKU **Standard**. Nếu gặp tài liệu hay script cũ còn `--sku Basic` hoặc `--allocation-method Dynamic`, đó là dấu hiệu nó viết trước thời điểm này. Ba đặc điểm của Standard đáng nhớ:
+**Public IP** là địa chỉ công khai gắn vào NIC, load balancer hoặc gateway. SKU Basic đã bị Microsoft ngừng hỗ trợ (retired) từ 30/9/2025; resource mới dùng SKU **Standard**. Nếu gặp tài liệu hay script cũ còn `--sku Basic` hoặc `--allocation-method Dynamic`, đó là dấu hiệu tài liệu hay script ấy được viết trước thời điểm này. Ba đặc điểm của Standard đáng nhớ:
 
 - Luôn cấp phát **static**: địa chỉ không đổi, nên bản ghi DNS trỏ vào không hỏng khi tắt bật VM.
-- **Đóng theo mặc định** với traffic đi vào cho tới khi NSG cho phép, đúng như callout đầu bài.
+- **Chặn theo mặc định** traffic đi vào cho tới khi NSG cho phép, đúng như callout đầu bài.
 - Có hỗ trợ availability zone, theo hướng bạn đã gặp ở bài 1. Cách tạo zone-redundant phụ thuộc region, kiểm tra tài liệu trước khi chọn.
 
-Địa chỉ tĩnh còn một cái giá nhắc từ bài 5: public IP Standard tính tiền theo giờ chừng nào resource còn tồn tại, kể cả khi không gắn vào đâu hay VM đã deallocate. Vì vậy đừng cấp public IP cho từng VM chỉ để tiện vào máy. API của Tới Nơi sẽ ra Internet qua một điểm vào có kiểm soát (ingress của Container Apps hoặc một gateway), còn VM chạy phía sau với địa chỉ riêng.
+Địa chỉ tĩnh còn một cái giá đã nhắc ở bài 5: public IP Standard tính tiền theo giờ chừng nào resource còn tồn tại, kể cả khi không gắn vào đâu hay VM đã deallocate. Vì vậy đừng cấp public IP cho từng VM chỉ để tiện vào máy. API của Tới Nơi sẽ ra Internet qua một điểm vào có kiểm soát (ingress của Container Apps hoặc một gateway), còn VM chạy phía sau với địa chỉ riêng.
 
-Về quản trị VM, câu trả lời an toàn là không mở port 22 ra `Internet`. Có hai lựa chọn chính: **Azure Bastion** cho SSH hoặc RDP qua trình duyệt trên TLS; các SKU thông thường cần một subnet tên `AzureBastionSubnet` (tối thiểu `/26`) và tính tiền theo giờ, còn SKU Developer dùng hạ tầng chung, không cần subnet riêng nhưng ít tính năng và chỉ có ở một số region. Lựa chọn thứ hai là **just-in-time VM access** của Defender for Cloud, mở port tạm thời theo yêu cầu cho một IP cụ thể, cần bật plan Defender for Servers tương ứng (kiểm plan nào có JIT trong tài liệu). Cả hai có chi phí, nên lên bảng ước lượng của bài 5.
+Về quản trị VM, câu trả lời an toàn là không mở port 22 ra `Internet`. Có hai lựa chọn chính: **Azure Bastion** cho SSH hoặc RDP qua trình duyệt trên TLS; các SKU thông thường cần một subnet tên `AzureBastionSubnet` (tối thiểu `/26`) và tính tiền theo giờ, còn SKU Developer dùng hạ tầng chung, không cần subnet riêng nhưng ít tính năng và chỉ có ở một số region. Lựa chọn thứ hai là **just-in-time VM access** của Defender for Cloud, mở port tạm thời theo yêu cầu cho một IP cụ thể, cần bật plan Defender for Servers tương ứng (kiểm tra plan nào có JIT trong tài liệu). Cả hai có chi phí, nên đưa vào bảng ước lượng của bài 5.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -132,7 +132,7 @@ az network vnet subnet create --resource-group $RG \
   --address-prefixes 10.10.0.0/24
 ```
 
-Khối này tạo mạng và gắn tag `cost-center` như bài 5 khuyên. Nó chưa lọc gì: lúc này mọi thứ trong VNet vẫn gọi nhau qua default rule. Tiếp theo là hai NSG với các rule dưới đây.
+Khối này tạo mạng và gắn tag `cost-center` như bài 5 khuyên. Mạng này chưa lọc gì: lúc này mọi thứ trong VNet vẫn gọi nhau qua default rule. Tiếp theo là hai NSG với các rule dưới đây.
 
 | NSG | Priority | Direction | Source | Destination | Port | Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -142,7 +142,7 @@ Khối này tạo mạng và gắn tag `cost-center` như bài 5 khuyên. Nó ch
 | cả hai | 65000 | Inbound | `VirtualNetwork` | `VirtualNetwork` | mọi | Allow (mặc định, bị rule 4000 đè với snet-db) |
 | cả hai | 65500 | Inbound | mọi | mọi | mọi | Deny (mặc định) |
 
-Rule 4000 là phần dễ bị bỏ sót. Không có nó, `AllowVnetInBound` ở priority 65000 vẫn cho mọi máy trong VNet vào `snet-db`. Lưu ý nó cũng chặn traffic giữa các máy trong chính `snet-db`, vì NSG gắn ở subnet áp cả cho luồng nội bộ subnet. Nếu sau này database có replica cùng subnet, bạn cần thêm rule cho luồng đó.
+Rule 4000 là phần dễ bị bỏ sót. Không có nó, `AllowVnetInBound` ở priority 65000 vẫn cho mọi máy trong VNet vào `snet-db`. Lưu ý rule này cũng chặn traffic giữa các máy trong chính `snet-db`, vì NSG gắn ở subnet áp cả cho luồng nội bộ subnet. Nếu sau này database có replica cùng subnet, bạn cần thêm rule cho luồng đó.
 
 ```bash
 az network nsg create -g $RG -n nsg-toinoi-app-dev-sea -l $LOC
@@ -177,9 +177,9 @@ az network nsg rule list -g $RG --nsg-name nsg-toinoi-db-dev-sea \
   --include-default -o table
 ```
 
-Lệnh `list` chỉ chứng minh rule đã được lưu đúng thứ tự và nội dung. Nó **không** chứng minh traffic thật bị chặn hay cho qua. Việc đó cần VM thật: sau bài 7, dùng Network Watcher IP flow verify hoặc effective security rules của NIC để kiểm, rồi thử kết nối từ hai subnet khác nhau. Nếu bạn muốn thử public IP, tạo một cái Standard tĩnh bằng `az network public-ip create --sku Standard --allocation-method Static` và xoá ngay sau đó, vì nó tính tiền khi còn cấp phát. Kiểm `-h` của từng lệnh nếu tham số khác trong phiên bản CLI bạn đang dùng.
+Lệnh `list` chỉ chứng minh rule đã được lưu đúng thứ tự và nội dung. Lệnh này **không** chứng minh traffic thật bị chặn hay cho qua. Việc đó cần VM thật: sau bài 7, dùng Network Watcher IP flow verify hoặc effective security rules của NIC để kiểm tra, rồi thử kết nối từ hai subnet khác nhau. Nếu bạn muốn thử public IP, tạo một cái Standard tĩnh bằng `az network public-ip create --sku Standard --allocation-method Static` và xoá ngay sau đó, vì public IP tính tiền khi còn cấp phát. Kiểm `-h` của từng lệnh nếu tham số khác trong phiên bản CLI bạn đang dùng.
 
-VNet, subnet và NSG tự chúng không tính tiền theo giờ, nên nếu làm tiếp bài 7 ngay, bạn có thể giữ resource group này (chỉ public IP thử nghiệm là phải xoá). Khi xong hẳn, dọn lab bằng lệnh dưới. Nó xoá toàn bộ resource group, nên hãy chắc `$RG` đúng là resource group lab và không có lock bảo vệ ở nhầm chỗ:
+VNet, subnet và NSG tự thân không tính tiền theo giờ, nên nếu làm tiếp bài 7 ngay, bạn có thể giữ resource group này (chỉ public IP thử nghiệm là phải xoá). Khi xong hẳn, dọn lab bằng lệnh dưới. Lệnh này xoá toàn bộ resource group, nên hãy chắc `$RG` đúng là resource group lab và không có lock bảo vệ ở nhầm chỗ:
 
 ```bash
 az group delete --name $RG --yes --no-wait
@@ -193,7 +193,7 @@ az group delete --name $RG --yes --no-wait
 
 Bạn đã dựng được VNet với ba subnet, viết NSG theo nguyên tắc chỉ mở đúng luồng cần, biết vì sao phải có rule Deny tường minh, và hiểu đường đi của gói tin từ public IP tới VM. Đây là nền cho mọi bài sau, vì VM, database và Container Apps đều cần một chỗ trong mạng.
 
-[Bài 7](/articles/azure-virtual-machine-linux-chay-api) đặt một VM Linux vào `snet-app`, chạy API Tới Nơi, SSH vào một cách an toàn và đọc về disk, image. Đó cũng là lúc bạn kiểm thật các rule hôm nay.
+[Bài 7](/articles/azure-virtual-machine-linux-chay-api) đặt một VM Linux vào `snet-app`, chạy API Tới Nơi, SSH vào một cách an toàn và đọc về disk, image. Đó cũng là lúc bạn kiểm tra thật các rule hôm nay.
 
 ## Tài liệu gốc
 

@@ -32,11 +32,17 @@ export interface EditResult {
   fileError?: string;
 }
 
-/** Các phần phải giữ nguyên tuyệt đối khi sửa câu chữ. */
+/** Thuộc tính chứa chữ người đọc thấy/nghe — được sửa như văn xuôi (khớp VISIBLE_ATTRS của content:lint). */
+const VISIBLE_ATTR_VALUE = /\b(aria-label|alt|title)=(["'])[^"']*\2/g;
+
+/**
+ * Các phần phải giữ nguyên tuyệt đối khi sửa câu chữ. Thẻ HTML được so sánh sau khi thay giá trị
+ * aria-label/alt/title bằng chỗ trống, để sửa chữ hiển thị trong đó không bị coi là đổi thẻ.
+ */
 function protectedTokens(s: string): string[] {
   const out: string[] = [];
   for (const re of [/(`+)[^`]*?\1/g, /<\/?[A-Za-z][^>]*>/g, /\]\([^)]*\)/g, /https?:\/\/[^\s)>"]+/g]) {
-    for (const m of s.matchAll(re)) out.push(m[0]);
+    for (const m of s.matchAll(re)) out.push(m[0].startsWith('<') ? m[0].replace(VISIBLE_ATTR_VALUE, '$1=$2$2') : m[0]);
   }
   return out.sort();
 }
@@ -101,7 +107,10 @@ export function applyEdits(markdown: string, edits: ContentEdit[]): EditResult {
     const span = prose.slice(lineStart, lineStart + edit.old.length);
     const srcSpan = lines[lineNo]!.slice(lineStart, lineStart + edit.old.length);
     // Ký tự bị che (thành khoảng trắng) mà không nằm trong token được bảo vệ ⇒ đoạn sửa chạm vào vùng không phải văn xuôi.
-    const maskedProtected = protectedTokens(edit.old).reduce((s, tok) => s.split(tok).join(' '.repeat(tok.length)), srcSpan);
+    const maskedProtected = protectedTokens(edit.old)
+      .reduce((s, tok) => s.split(tok).join(' '.repeat(tok.length)), srcSpan)
+      // Cú pháp của thuộc tính hiển thị (aria-label=" … ") không phải văn xuôi nhưng được phép nằm trong đoạn sửa.
+      .replace(/\b(aria-label|alt|title)=["']|["']/g, (m) => ' '.repeat(m.length));
     let touchesCode = false;
     for (let i = 0; i < srcSpan.length; i++) {
       if (span[i] === ' ' && srcSpan[i] !== ' ' && maskedProtected[i] !== ' ') { touchesCode = true; break; }

@@ -1,0 +1,14 @@
+{"file":"azure-la-gi-cloud-region-trach-nhiem-chia-se.md","edits":[
+{"old":"đọc SLA ra phút downtime, cùng bản đồ","new":"quy đổi SLA thành số phút downtime, cùng bản đồ","reason":"'đọc SLA ra phút' là calque, khó hiểu","severity":"medium"},
+{"old":"cách đọc SLA ra phút downtime. Bài sau","new":"cách quy đổi SLA thành số phút downtime. Bài sau","reason":"'đọc SLA ra phút' là calque, khó hiểu","severity":"medium"},
+{"old":"Database, máy ảo, storage luôn có địa chỉ vật lý cụ thể.","new":"Database, máy ảo, storage luôn nằm ở một vị trí vật lý cụ thể.","reason":"'địa chỉ vật lý' dễ nhầm với địa chỉ MAC","severity":"low"},
+{"old":"bạn phải tự kiểm với pháp chế, bài này","new":"bạn phải tự kiểm tra với bộ phận pháp chế, bài này","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nó chỉ xác nhận cặp ghép, không chứng minh","new":"Lệnh này chỉ xác nhận cặp ghép, không chứng minh","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"kèm thời gian ngừng và công kiểm thử lại.","new":"kèm thời gian ngừng và công sức kiểm thử lại.","reason":"Thiếu danh từ 'sức'","severity":"high"},
+{"old":"phải kiểm SKU hỗ trợ zone |","new":"phải kiểm tra SKU có hỗ trợ zone không |","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"## SLA 99,9% là 43 phút mỗi tháng và không cộng dồn","new":"## SLA 99,9% là 43 phút mỗi tháng, và SLA nhiều thành phần nhân với nhau chứ không cộng","reason":"'không cộng dồn' mơ hồ; nội dung mục là phép nhân SLA tổ hợp","severity":"medium"},
+{"old":"Điều dễ sai nhất là cộng dồn SLA. Khi một request","new":"Điều dễ nhầm nhất là cộng SLA của các thành phần lại với nhau. Khi một request","reason":"'cộng dồn' sai nghĩa vì phép tính thực ra là nhân","severity":"high"},
+{"old":"SLA tổ hợp là tích của các SLA.","new":"SLA tổ hợp bằng tích các SLA.","reason":"Gọn và tự nhiên hơn","severity":"low"},
+{"old":"quản ra sao |","new":"quản lý ra sao |","reason":"'quản' cụt, thiếu 'lý'","severity":"low"},
+{"old":"Chịu lỗi, tối ưu và lớn lên thế nào |","new":"Chịu lỗi, tối ưu và mở rộng thế nào |","reason":"'lớn lên' là calque của grow/scale","severity":"medium"}
+]}

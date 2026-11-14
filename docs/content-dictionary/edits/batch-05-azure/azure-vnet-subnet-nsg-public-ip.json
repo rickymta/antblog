@@ -1,0 +1,107 @@
+{
+"file": "azure-vnet-subnet-nsg-public-ip.md",
+"edits": [
+{
+"old": "Public IP Standard đóng với traffic đi vào cho tới khi một NSG cho phép rõ ràng.",
+"new": "Public IP Standard chặn traffic đi vào cho tới khi một NSG cho phép tường minh.",
+"reason": "'đóng với traffic' và 'rõ ràng' gượng, dịch sát từ closed/explicitly",
+"severity": "medium"
+},
+{
+"old": "**Đóng theo mặc định** với traffic đi vào cho tới khi NSG cho phép",
+"new": "**Chặn theo mặc định** traffic đi vào cho tới khi NSG cho phép",
+"reason": "Thống nhất với đáp án đầu bài; bỏ cấu trúc 'đóng với'",
+"severity": "medium"
+},
+{
+"old": "VNet không thuộc ranh giới của resource group.",
+"new": "VNet không bị giới hạn trong ranh giới của resource group.",
+"reason": "'không thuộc ranh giới' gượng",
+"severity": "medium"
+},
+{
+"old": "khi chuyển sang dịch vụ managed, kiểm yêu cầu subnet",
+"new": "khi chuyển sang dịch vụ managed, hãy kiểm tra yêu cầu về subnet",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "đã bị Microsoft cho nghỉ hưu (retired)",
+"new": "đã bị Microsoft ngừng hỗ trợ (retired)",
+"reason": "Calque 'retire' -> 'ngừng hỗ trợ'",
+"severity": "high"
+},
+{
+"old": "đó là dấu hiệu nó viết trước thời điểm này",
+"new": "đó là dấu hiệu tài liệu hay script ấy được viết trước thời điểm này",
+"reason": "Đại từ 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Địa chỉ tĩnh còn một cái giá nhắc từ bài 5:",
+"new": "Địa chỉ tĩnh còn một cái giá đã nhắc ở bài 5:",
+"reason": "Thiếu trợ từ, câu cụt",
+"severity": "low"
+},
+{
+"old": "(kiểm plan nào có JIT trong tài liệu)",
+"new": "(kiểm tra plan nào có JIT trong tài liệu)",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "nên lên bảng ước lượng của bài 5.",
+"new": "nên đưa vào bảng ước lượng của bài 5.",
+"reason": "'lên bảng' gượng",
+"severity": "medium"
+},
+{
+"old": "VNet, subnet và NSG tự chúng không tính tiền theo giờ",
+"new": "VNet, subnet và NSG tự thân không tính tiền theo giờ",
+"reason": "'tự chúng' là calque của 'themselves'",
+"severity": "low"
+},
+{
+"old": "Nó chưa lọc gì: lúc này mọi thứ",
+"new": "Mạng này chưa lọc gì: lúc này mọi thứ",
+"reason": "Tránh 'Nó' chỉ sự vật ở đầu câu",
+"severity": "medium"
+},
+{
+"old": "Lưu ý nó cũng chặn traffic giữa các máy",
+"new": "Lưu ý rule này cũng chặn traffic giữa các máy",
+"reason": "Tránh 'nó' mơ hồ",
+"severity": "low"
+},
+{
+"old": "Nó **không** chứng minh traffic thật bị chặn hay cho qua.",
+"new": "Lệnh này **không** chứng minh traffic thật bị chặn hay cho qua.",
+"reason": "Tránh 'Nó' chỉ sự vật ở đầu câu",
+"severity": "medium"
+},
+{
+"old": "effective security rules của NIC để kiểm, rồi thử",
+"new": "effective security rules của NIC để kiểm tra, rồi thử",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "xoá ngay sau đó, vì nó tính tiền khi còn cấp phát.",
+"new": "xoá ngay sau đó, vì public IP tính tiền khi còn cấp phát.",
+"reason": "Tránh 'nó' mơ hồ",
+"severity": "low"
+},
+{
+"old": "Nó xoá toàn bộ resource group, nên hãy chắc",
+"new": "Lệnh này xoá toàn bộ resource group, nên hãy chắc",
+"reason": "Tránh 'Nó' chỉ sự vật ở đầu câu",
+"severity": "medium"
+},
+{
+"old": "Đó cũng là lúc bạn kiểm thật các rule hôm nay.",
+"new": "Đó cũng là lúc bạn kiểm tra thật các rule hôm nay.",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+}
+]
+}

@@ -30,7 +30,7 @@ SKU quyết định tính năng, không chỉ dung lượng:
 | Standard | Nhiều dung lượng và băng thông hơn Basic | Dev, staging (lab này) |
 | Premium | Geo-replication, Private Link, content trust, các tính năng bảo vệ cho production | Prod, khi cần private endpoint hoặc bản sao ở East Asia |
 
-Con số cụ thể về dung lượng và throughput thay đổi, hãy đọc trang SKUs hiện hành. Hai tính năng Premium đáng nói ngay. **Private Link** đưa registry vào mạng riêng, nối với [bài 17 về Private Endpoint](/articles/azure-private-endpoint-private-dns-service-endpoint). **Geo-replication** giữ bản sao ở nhiều region để pull gần runtime và sống sót khi mất region, và phải bật trước khi bạn cần chứ không sau sự cố. Content trust (Docker Content Trust) cũng thuộc Premium, nhưng đã bị đánh dấu deprecated; Microsoft hướng sang ký image bằng Notary Project. Hãy kiểm tra tài liệu trước khi xây quy trình ký.
+Con số cụ thể về dung lượng và throughput thay đổi, hãy đọc trang SKUs hiện hành. Hai tính năng Premium đáng nói ngay. **Private Link** đưa registry vào mạng riêng, nối với [bài 17 về Private Endpoint](/articles/azure-private-endpoint-private-dns-service-endpoint). **Geo-replication** giữ bản sao ở nhiều region để pull gần runtime và vẫn hoạt động khi mất region, và phải bật trước khi bạn cần chứ không sau sự cố. Content trust (Docker Content Trust) cũng thuộc Premium, nhưng đã bị đánh dấu deprecated; Microsoft hướng sang ký image bằng Notary Project. Hãy kiểm tra tài liệu trước khi xây quy trình ký.
 
 Về đăng nhập: registry có sẵn một **admin user** với username/password dùng chung. Hãy tắt nó (`--admin-enabled false`). Mật khẩu chung không biết ai đã dùng, không thu hồi riêng cho từng người, và là bí mật nằm ngoài Key Vault. Thay vào đó, người dùng chạy `az acr login` (xác thực bằng Entra) và runtime dùng managed identity có role trên registry. Mọi lần kéo và đẩy đều có danh tính trong log.
 
@@ -46,9 +46,9 @@ Tag là nhãn trỏ tới một manifest, và nhãn đó gỡ ra gắn lại đ�
 | Dễ đọc | Có | Không, cần công cụ |
 | Dùng để | Build, nói chuyện giữa người với nhau | Deploy |
 
-Đây là lý do Bicep ở [bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment) nhận tham số `imageDigest` thay vì tag. Quy ước Tới Nơi: build đánh tag cho dễ đọc, deploy chỉ ghi digest. Cần nhớ giới hạn: digest chứng minh image không bị đổi sau khi build. Nó không chứng minh image an toàn hay không chứa lỗ hổng.
+Đây là lý do Bicep ở [bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment) nhận tham số `imageDigest` thay vì tag. Quy ước Tới Nơi: build đánh tag cho dễ đọc, deploy chỉ ghi digest. Cần nhớ giới hạn: digest chứng minh image không bị đổi sau khi build. Digest không chứng minh image an toàn hay không chứa lỗ hổng.
 
-Image tích tụ theo thời gian và registry tính tiền theo dung lượng lưu. Có hai việc cần làm. Thứ nhất là dọn: lệnh `acr purge` chạy qua `az acr run` xoá theo tuổi và bộ lọc, và bản retention policy cho manifest không còn tag là tính năng của Premium. Thứ hai là khoá những image đang chạy:
+Image tích tụ theo thời gian và registry tính tiền theo dung lượng lưu. Có hai việc cần làm. Thứ nhất là dọn: lệnh `acr purge` chạy qua `az acr run` xoá theo tuổi và bộ lọc, còn retention policy cho manifest không có tag là tính năng của Premium. Thứ hai là khoá những image đang chạy:
 
 ```bash
 PURGE="acr purge --filter 'trips:.*' --ago 30d --keep 10 --untagged --dry-run"
@@ -62,7 +62,7 @@ Cờ `--dry-run` chỉ liệt kê những gì sẽ bị xoá. Khối này không
 
 ## ACR Tasks build trên cloud, không cần Docker local
 
-Lệnh `az acr build` gửi thư mục nguồn lên ACR, build bằng Dockerfile ở đó trên hạ tầng của Azure rồi đẩy kết quả vào registry. Bạn không cần Docker daemon trên máy, và image không đi qua mạng của bạn hai lần. Lệnh này là một **quick task**: chạy một lần, theo yêu cầu. Một số loại subscription hạn chế ACR Tasks. Nếu lệnh báo lỗi về điều này, hãy build local rồi push, và kiểm trang Tasks overview.
+Lệnh `az acr build` gửi thư mục nguồn lên ACR, build bằng Dockerfile ở đó trên hạ tầng của Azure rồi đẩy kết quả vào registry. Bạn không cần Docker daemon trên máy, và image không đi qua mạng của bạn hai lần. Lệnh này là một **quick task**: chạy một lần, theo yêu cầu. Một số loại subscription hạn chế ACR Tasks. Nếu lệnh báo lỗi về điều này, hãy build local rồi push, và kiểm tra trang Tasks overview.
 
 Quick task khác **task** theo kích hoạt:
 
@@ -73,7 +73,7 @@ Quick task khác **task** theo kích hoạt:
 | Lưu cấu hình | Không | Có, task là resource |
 | Dùng cho | Thử nhanh, lab | Build lặp lại có kiểm soát |
 
-Base image trigger đáng giá nhất. Dockerfile của trip-service dựa trên `mcr.microsoft.com/dotnet/aspnet:10.0`. Khi base image được vá, một task có trigger này tự build lại và sinh digest mới mà bạn không cần đụng code. Điều đó tốt cho bản vá bảo mật, nhưng cũng nghĩa là digest mới nhất của registry không còn là digest đã kiểm. Việc promote lên production vẫn phải là quyết định của bạn. Tài liệu nêu rõ registry nào của base image được theo dõi, hãy kiểm với trường hợp của bạn.
+Base image trigger đáng giá nhất. Dockerfile của trip-service dựa trên `mcr.microsoft.com/dotnet/aspnet:10.0`. Khi base image được vá, một task có trigger này tự build lại và sinh digest mới mà bạn không cần đụng code. Điều đó tốt cho bản vá bảo mật, nhưng cũng nghĩa là digest mới nhất của registry không còn là digest đã được kiểm tra. Việc promote lên production vẫn phải là quyết định của bạn. Tài liệu nêu rõ registry nào của base image được theo dõi, hãy đối chiếu với trường hợp của bạn.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -94,7 +94,7 @@ az acr task create -r acrtoinoidev -n build-trips \
   --base-image-trigger-enabled true
 ```
 
-Khối này không chứng minh task chạy đúng. Bạn chỉ biết sau khi push một commit và xem `az acr task list-runs`. Nó cũng không quyết định image nào được lên production.
+Khối này không chứng minh task chạy đúng. Bạn chỉ biết sau khi push một commit và xem `az acr task list-runs`. Khối này cũng không quyết định image nào được lên production.
 
 ## AcrPull cho runtime, AcrPush cho pipeline
 
@@ -106,9 +106,9 @@ Quyền trên registry chia theo việc, và Tới Nơi cấp theo nguyên tắc
 | Pipeline CI (Phần 5) | AcrPush | Đẩy image, và cũng kéo được |
 | Người vận hành | Role quản trị registry theo nhu cầu | Cấu hình, xoá |
 
-Vì sao tách? AcrPush cho phép ghi đè tag. Nếu runtime có AcrPush và bị chiếm quyền, kẻ tấn công thay image bằng bản của họ rồi chờ replica tiếp theo kéo về. Với AcrPull, runtime bị chiếm vẫn không sửa được image. Registry mới tạo gần đây có thể dùng chế độ phân quyền theo repository với role khác. Hãy kiểm chế độ của registry bạn tạo trong tài liệu roles.
+Vì sao tách? AcrPush cho phép ghi đè tag. Nếu runtime có AcrPush và bị chiếm quyền, kẻ tấn công thay image bằng bản của họ rồi chờ replica tiếp theo kéo về. Với AcrPull, runtime bị chiếm vẫn không sửa được image. Registry mới tạo gần đây có thể dùng chế độ phân quyền theo repository với role khác. Hãy kiểm tra chế độ của registry bạn tạo trong tài liệu roles.
 
-Có một nhóm không dùng Entra: công cụ hay đối tác chỉ hỗ trợ username/password. Với họ có **token và scope map**. Scope map liệt kê repository và hành động được phép, ví dụ chỉ `content/read` trên `trips`. Token gắn với một scope map, có mật khẩu riêng thu hồi được độc lập, và hết hạn được. Đây là lối thoát hẹp, tốt hơn nhiều so với admin user.
+Có một nhóm không dùng Entra: công cụ hay đối tác chỉ hỗ trợ username/password. Với họ có **token và scope map**. Scope map liệt kê repository và hành động được phép, ví dụ chỉ `content/read` trên `trips`. Token gắn với một scope map, có mật khẩu riêng thu hồi được độc lập, và có thể đặt ngày hết hạn. Đây là giải pháp ngoại lệ với phạm vi hẹp, tốt hơn nhiều so với admin user.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -121,7 +121,7 @@ Có một nhóm không dùng Entra: công cụ hay đối tác chỉ hỗ trợ 
 
 Defender for Containers quét image trong ACR để tìm lỗ hổng đã biết và đưa kết quả vào Defender for Cloud dưới dạng khuyến nghị, cùng chỗ với [secure score ở bài 16](/articles/azure-defender-for-cloud-secure-score). Quét chạy khi image được đẩy và định kỳ với image còn được dùng, theo mô hình tính tiền riêng của Defender. Hãy đọc tài liệu để biết chính xác chu kỳ và phạm vi.
 
-Hai điểm cần nhớ. Một: cơ sở dữ liệu lỗ hổng cập nhật liên tục, nên một digest sạch hôm nay có thể bị báo lỗi tuần sau mà không đổi một byte. Đó là lý do «đã deploy» không có nghĩa là «xong». Hai: việc quét tự nó không chặn ai kéo hay deploy image có lỗ hổng. Nó là tín hiệu. Muốn chặn, bạn phải đặt cổng trong pipeline, và đó là việc của Phần 5 về CI.
+Hai điểm cần nhớ. Một: cơ sở dữ liệu lỗ hổng cập nhật liên tục, nên một digest sạch hôm nay có thể bị báo lỗi tuần sau mà không đổi một byte. Đó là lý do «đã deploy» không có nghĩa là «xong». Hai: bản thân việc quét không chặn ai kéo hay deploy image có lỗ hổng. Kết quả quét là một tín hiệu. Muốn chặn, bạn phải đặt cổng trong pipeline, và đó là việc của Phần 5 về CI.
 
 ## Lab: build trips:1.0, lấy digest, gán AcrPull
 
@@ -161,7 +161,7 @@ az role assignment list --assignee $PRINCIPAL_ID --scope $ACR_ID \
   --query "[].roleDefinitionName" -o tsv
 ```
 
-Dòng cuối chỉ chứng minh role assignment tồn tại. Nó chưa chứng minh runtime kéo được image: role mới có thể mất vài phút để có hiệu lực, và runtime còn phải được cấu hình dùng đúng identity (`registries[].identity` trong Bicep bài 36, hoặc `acrUserManagedIdentityID` ở bài 20). Phép thử thật là một lần kéo từ runtime.
+Dòng cuối chỉ chứng minh role assignment tồn tại. Điều này chưa chứng minh runtime kéo được image: role mới có thể mất vài phút để có hiệu lực, và runtime còn phải được cấu hình dùng đúng identity (`registries[].identity` trong Bicep bài 36, hoặc `acrUserManagedIdentityID` ở bài 20). Phép thử thật là một lần kéo từ runtime.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>

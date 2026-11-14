@@ -20,9 +20,9 @@ Bài này dựng đăng nhập cho khách và tài xế bằng Microsoft Entra E
 
 ## Khách và tài xế cần một tenant riêng, không phải thư mục nhân viên
 
-Nhân viên Tới Nơi đăng nhập portal bằng tài khoản công ty trong workforce tenant (bài 11). Khách và tài xế tự đăng ký, số lượng lên hàng trăm nghìn, và không nên nằm chung thư mục với nhân viên. Vì vậy Tới Nơi dùng một **external tenant** của Entra External ID, chỉ chứa tài khoản khách hàng và app đối diện họ.
+Nhân viên Tới Nơi đăng nhập portal bằng tài khoản công ty trong workforce tenant (bài 11). Khách và tài xế tự đăng ký, số lượng lên hàng trăm nghìn, và không nên nằm chung thư mục với nhân viên. Vì vậy Tới Nơi dùng một **external tenant** của Entra External ID, chỉ chứa tài khoản khách hàng và các app dành cho họ.
 
-Tên gọi dễ gây rối. Azure AD B2C là sản phẩm đời trước cùng mục đích, với endpoint `b2clogin.com` và custom policy XML; theo thông báo trên Microsoft Learn, B2C đã ngừng bán cho khách hàng mới từ 05/2025. External tenant dùng endpoint `ciamlogin.com` và user flow trong Entra admin center. Authority chép từ ví dụ cũ phải kiểm lại loại nào.
+Tên gọi dễ gây rối. Azure AD B2C là sản phẩm đời trước cùng mục đích, với endpoint `b2clogin.com` và custom policy XML; theo thông báo trên Microsoft Learn, B2C đã ngừng bán cho khách hàng mới từ 05/2025. External tenant dùng endpoint `ciamlogin.com` và user flow trong Entra admin center. Khi chép authority từ ví dụ cũ, hãy kiểm tra lại nó thuộc loại nào.
 
 Trải nghiệm đăng ký và đăng nhập được mô tả bằng **user flow** sign-up/sign-in. User flow quyết định ba thứ:
 
@@ -50,7 +50,7 @@ App Tới Nơi trên điện thoại là **public client**: ai cũng giải nén
 
 Bước 4 là chỗ PKCE có tác dụng: app độc hại chặn được `code` ở bước 3 vẫn không đổi được token vì thiếu `code_verifier`. Thực tế MSAL lo sinh verifier, mở trình duyệt, lưu token. Đừng tự dựng form đăng nhập trong WebView.
 
-Scope `offline_access` cho app một **refresh token** để lấy access token mới mà không bắt tài xế đăng nhập lại giữa ca. Mặt trái: access token là JWT, API kiểm bằng chữ ký chứ không hỏi lại tenant, nên khoá tài khoản hay thu hồi refresh token không làm access token đang lưu hành chết ngay.
+Scope `offline_access` cho app một **refresh token** để lấy access token mới mà không bắt tài xế đăng nhập lại giữa ca. Mặt trái: access token là JWT, API kiểm tra bằng chữ ký chứ không hỏi lại tenant, nên khoá tài khoản hay thu hồi refresh token không làm access token đang lưu hành mất hiệu lực ngay.
 
 ## Access token phải nhắm đúng API trips
 
@@ -62,7 +62,7 @@ Tới Nơi cần ba app registration trong external tenant (khái niệm xem bà
 | `app-toinoi-customer-mobile` | Public client | App khách, xin scope của API trips |
 | `app-toinoi-driver-mobile` | Public client | App tài xế, cùng API nhưng redirect URI và branding riêng |
 
-App di động xin scope dạng `api://<api-client-id>/trips.read`. Token trả về có `aud` trỏ về API trips, nên API phải kiểm `aud`: token hợp lệ của app khác trong cùng tenant không được đi qua cổng của bạn. Với token v2 (thường là mặc định trong external tenant), `aud` là client ID của API; với token v1 là Application ID URI. Hãy decode token lab một lần rồi cấu hình Audience đúng giá trị đó.
+App di động xin scope dạng `api://<api-client-id>/trips.read`. Token trả về có `aud` trỏ về API trips, nên API phải kiểm tra `aud`: token hợp lệ của app khác trong cùng tenant không được đi qua cổng của bạn. Với token v2 (thường là mặc định trong external tenant), `aud` là client ID của API; với token v1 là Application ID URI. Hãy decode token lab một lần rồi cấu hình Audience đúng giá trị đó.
 
 Các claim bạn sẽ gặp trong token:
 
@@ -79,10 +79,10 @@ Bẫy ở hai dòng cuối: `sub` khác nhau giữa các app cho cùng một ng�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Custom attribute thu lúc đăng ký là dữ liệu người dùng tự gõ. Tin claim <code>driver_id</code> để mở quyền nhận chuyến thì ai cũng tự nhận mình là tài xế. Quyền tài xế phải do Tới Nơi cấp sau khi xác minh hồ sơ (ví dụ gán app role từ quy trình onboarding); thuộc tính tự khai chỉ để đối chiếu.</p>
+<p>Custom attribute thu lúc đăng ký là dữ liệu người dùng tự gõ. Nếu tin claim <code>driver_id</code> để mở quyền nhận chuyến thì ai cũng có thể tự nhận mình là tài xế. Quyền tài xế phải do Tới Nơi cấp sau khi xác minh hồ sơ (ví dụ gán app role từ quy trình onboarding); thuộc tính tự khai chỉ để đối chiếu.</p>
 </div>
 
-## ASP.NET Core chỉ cần kiểm token, không cần biết đăng nhập diễn ra thế nào
+## ASP.NET Core chỉ cần kiểm tra token, không cần biết đăng nhập diễn ra thế nào
 
 Bài 19 loạt C# ([Authentication và authorization](/articles/dotnet10-authentication-authorization)) dựng `AddJwtBearer`, policy theo role và ownership, nhưng chứng minh bằng token tự ký trong test. Bài này thay nguồn token bằng một issuer thật. Phía API đổi authority, audience và hai claim type:
 
@@ -105,13 +105,13 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("Driver", p => p.RequireAuthenticatedUser().RequireRole("driver"));
 ```
 
-Handler lấy metadata và khoá công khai từ authority, kiểm chữ ký, issuer, audience và hạn. Nó không chứng minh ownership: khách A có xem được chuyến của khách B hay không vẫn kiểm trong handler nghiệp vụ như bài 19 loạt C#. `Auth__Authority` và `Auth__Audience` chính là hai biến môi trường mà Bicep của Container Apps ở [bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment) truyền vào.
+Handler lấy metadata và khoá công khai từ authority, kiểm chữ ký, issuer, audience và hạn. Bước này không chứng minh ownership: khách A có xem được chuyến của khách B hay không vẫn do handler nghiệp vụ kiểm tra, như bài 19 loạt C#. `Auth__Authority` và `Auth__Audience` chính là hai biến môi trường mà Bicep của Container Apps ở [bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment) truyền vào.
 
 Ba điểm cần để ý. Khoá ký lấy từ metadata nên tenant xoay khoá thì API không cần deploy lại. Đừng gõ cứng `ValidIssuer`: authority dùng subdomain, còn `iss` trong token và metadata (`/.well-known/openid-configuration` dưới authority) dùng tenant ID làm host; nếu nhận 401, so hai giá trị đó trước. Cuối cùng, mapping claim phải có chủ đích: code `trip-service` hiện đọc `sub` và parse thành GUID làm chủ sở hữu chuyến, cùng `RoleClaimType = "role"` cho token test. Với Entra phải chuyển sang `oid` và `roles`, nếu không mọi request sẽ bị từ chối dù token hợp lệ.
 
 ## Bốn danh tính trong Tới Nơi, bốn cổng kiểm tra khác nhau
 
-Sau bài 11 tới bài 19, Tới Nơi có đủ bốn loại danh tính, và nhầm chúng là nguồn lỗi phổ biến:
+Sau bài 11 tới bài 19, Tới Nơi có đủ bốn loại danh tính, và nhầm lẫn giữa chúng là nguồn lỗi phổ biến:
 
 | Danh tính | Dịch vụ cấp | Ví dụ ở Tới Nơi | Cổng kiểm tra |
 | --- | --- | --- | --- |
@@ -133,10 +133,10 @@ Token của khách không có quyền gì trên Azure Resource Manager, và mana
 
 External ID tính tiền chủ yếu theo **MAU** (monthly active users), có một hạn mức miễn phí rồi tính theo bậc; SMS cho MFA và add-on có giá riêng. Tra Pricing Calculator. Hai hệ quả thiết kế:
 
-- MAU đếm người dùng hoạt động, không đếm lượt gọi API: tài xế mở app 300 lần trong tháng vẫn là một MAU. Nhưng bot tự đăng ký hàng loạt làm MAU phình ra, nên cần chặn ở biên (bài 18) và theo dõi số tài khoản mới theo ngày.
+- MAU đếm người dùng hoạt động, không đếm lượt gọi API: tài xế mở app 300 lần trong tháng vẫn là một MAU. Nhưng bot tự đăng ký hàng loạt làm MAU phình ra, nên cần chặn ngay ở lớp ngoài cùng (bài 18) và theo dõi số tài khoản mới theo ngày.
 - Tenant gắn với một subscription để thanh toán, nên đưa nó vào budget và cảnh báo chi phí ([bài về Cost Management và budget](/articles/azure-chi-phi-pricing-cost-management-budget)).
 
-Người dùng cũ từ hệ thống trước là bài toán migration. Hash mật khẩu cũ thường không nhập thẳng được vì thuật toán băm khác nhau. Hai cách hay dùng: tạo tài khoản hàng loạt qua Microsoft Graph rồi buộc đặt lại mật khẩu hoặc đăng nhập bằng mã email ở lần đầu; hoặc migration dần khi người dùng đăng nhập lần đầu bằng custom authentication extension. Kiểm tra tài liệu hiện hành về hạn chế của từng cách.
+Người dùng cũ từ hệ thống trước là bài toán migration. Hash mật khẩu cũ thường không nhập thẳng được vì thuật toán băm khác nhau. Hai cách hay dùng: tạo tài khoản hàng loạt qua Microsoft Graph rồi buộc đặt lại mật khẩu hoặc đăng nhập bằng mã email ở lần đầu; hoặc chuyển dần từng người dùng khi họ đăng nhập lần đầu bằng custom authentication extension. Kiểm tra tài liệu hiện hành về hạn chế của từng cách.
 
 Nguyên tắc cuối: Tới Nơi không viết form đăng nhập, không lưu hash mật khẩu. Băm, chống brute force, đặt lại mật khẩu là việc của dịch vụ danh tính; tự viết lại chỉ thêm bề mặt tấn công.
 
@@ -150,7 +150,7 @@ Lab mô tả cách làm trên một external tenant dùng thử; ghi lại `<ten
 4. Đăng ký `app-toinoi-customer-mobile` với platform «Mobile and desktop applications», redirect URI `http://localhost`, xin quyền `trips.read` rồi cấp admin consent.
 5. Gắn app khách vào user flow, tự đăng ký một người dùng thử, gán app role `customer` cho người đó qua enterprise application của API.
 
-Khối dưới sinh cặp PKCE và in URL authorize; nó chưa lấy token, và trang localhost báo lỗi kết nối sau khi đăng nhập là bình thường:
+Khối dưới sinh cặp PKCE và in URL authorize; khối này chưa lấy token, và việc trang localhost báo lỗi kết nối sau khi đăng nhập là bình thường:
 
 ```bash
 TENANT=<tenant-id>
@@ -187,7 +187,7 @@ curl -i https://<fqdn-ca-toinoi-trips-dev>/trips
 curl -i -H "Authorization: Bearer $TOKEN" https://<fqdn-ca-toinoi-trips-dev>/trips
 ```
 
-`403` nghĩa là token hợp lệ nhưng thiếu role: kiểm claim `roles`. `401` thì nghi `aud`, `iss` hoặc authority. Đây chính là ranh giới authentication và authorization ở bài 19 loạt C#. Token là credential: đừng dán token thật vào công cụ decode trực tuyến, đừng để nó trong lịch sử lệnh máy dùng chung, và xoá tenant lab khi xong.
+`403` nghĩa là token hợp lệ nhưng thiếu role: kiểm tra claim `roles`. `401` thì nghi `aud`, `iss` hoặc authority. Đây chính là ranh giới authentication và authorization ở bài 19 loạt C#. Token là credential: đừng dán token thật vào công cụ decode trực tuyến, đừng để token nằm trong lịch sử lệnh của máy dùng chung, và xoá tenant lab khi xong.
 
 **Bài tập:** tài xế bị khoá lúc 10:00 trong khi access token của họ còn hạn tới 10:40. Lúc 10:20 `trip-service` có từ chối request của họ không? Nếu muốn từ chối ngay, bạn làm gì?
 
