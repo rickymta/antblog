@@ -1,0 +1,137 @@
+{
+ "file": "dotnet10-benchmarkdotnet-span-profiling.md",
+ "edits": [
+  {
+   "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng",
+   "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng",
+   "reason": "\"target\" dùng như động từ; thiếu \"được\"",
+   "severity": "low"
+  },
+  {
+   "old": "có đủ khẳng định API production nhanh hơn cùng tỷ lệ không?",
+   "new": "có đủ để khẳng định API production nhanh hơn cùng tỷ lệ không?",
+   "reason": "Thiếu \"để\"",
+   "severity": "low"
+  },
+  {
+   "old": "Giả sử đọc batch dòng “ID,amount” đang tạo nhiều chuỗi tạm.",
+   "new": "Giả sử việc đọc một batch dòng “ID,amount” đang tạo nhiều chuỗi tạm.",
+   "reason": "Câu thiếu danh từ hoá",
+   "severity": "low"
+  },
+  {
+   "old": "Split tạo mảng/các phần chuỗi, còn ReadOnlySpan",
+   "new": "Split tạo ra một mảng các chuỗi con, còn ReadOnlySpan",
+   "reason": "Dấu gạch chéo mơ hồ",
+   "severity": "high"
+  },
+  {
+   "old": "hai parser phải cùng nhận format",
+   "new": "hai parser phải cùng chấp nhận format",
+   "reason": "\"nhận format\" gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Format lab rất hẹp:",
+   "new": "Định dạng của lab rất hẹp:",
+   "reason": "Danh từ làm định ngữ, cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "giữ tiêu chí tính đúng trước.",
+   "new": "đặt tiêu chí về tính đúng đắn lên trước.",
+   "reason": "Cụm tự ghép \"tiêu chí tính đúng\"",
+   "severity": "medium"
+  },
+  {
+   "old": "## Setup nằm ngoài vùng đo",
+   "new": "## Phần setup nằm ngoài vùng đo",
+   "reason": "Thiếu danh từ chính",
+   "severity": "low"
+  },
+  {
+   "old": "đều kiểm shape cơ bản trước parse.",
+   "new": "đều kiểm tra cấu trúc cơ bản của dòng trước khi parse.",
+   "reason": "Từ tiếng Anh \"shape\", thiếu \"khi\"",
+   "severity": "medium"
+  },
+  {
+   "old": "và kiểm hai cặp input lỗi.",
+   "new": "và kiểm tra hai cặp input lỗi.",
+   "reason": "\"kiểm\" cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Không dựa vào “hai implementation bằng nhau” nếu cả hai có thể cùng sai.",
+   "new": "Không dựa vào việc “hai implementation cho kết quả bằng nhau” nếu cả hai có thể cùng sai.",
+   "reason": "Câu thiếu động từ, trích dẫn cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Chạy Release, không gắn debugger, ghi runtime/hardware/job.",
+   "new": "Chạy ở cấu hình Release, không gắn debugger, ghi lại runtime, phần cứng và job.",
+   "reason": "Danh sách cụt, dấu gạch chéo",
+   "severity": "medium"
+  },
+  {
+   "old": "| N dòng / operation | Split Mean | Span Mean | Split allocated | Span allocated báo cáo |",
+   "new": "| N dòng / operation | Split Mean | Span Mean | Split allocated | Span allocated theo báo cáo |",
+   "reason": "Cụm cụt, thiếu \"theo\"",
+   "severity": "low"
+  },
+  {
+   "old": "lớn hơn Mean do lượt ngắn nhiễu;",
+   "new": "lớn hơn Mean vì lượt đo ngắn có nhiều sai số;",
+   "reason": "\"lượt ngắn nhiễu\" dịch gượng từ noise",
+   "severity": "medium"
+  },
+  {
+   "old": "ReadOnly nghĩa không sửa qua view này,",
+   "new": "ReadOnly nghĩa là không sửa được qua view này,",
+   "reason": "Thiếu \"là\", câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Không giữ view vượt lifetime owner hoặc đưa nó tuỳ tiện vào object sống lâu.",
+   "new": "Không giữ view lâu hơn vòng đời (lifetime) của chủ sở hữu hoặc đưa nó tuỳ tiện vào object có vòng đời dài.",
+   "reason": "Cụm \"lifetime owner\" tự ghép; \"object sống lâu\" gượng",
+   "severity": "high"
+  },
+  {
+   "old": "compiler vẫn giới hạn nơi span được sống qua điểm await/yield.",
+   "new": "compiler vẫn giới hạn việc span tồn tại qua điểm await/yield.",
+   "reason": "\"nơi span được sống\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Chế độ --verify chỉ kiểm correctness, không chạy benchmark.",
+   "new": "Chế độ --verify chỉ kiểm tra correctness, không chạy benchmark.",
+   "reason": "\"kiểm\" cụt",
+   "severity": "low"
+  },
+  {
+   "old": "nếu đưa dựng dataset vào trong phương thức Span nhưng để ngoài Split,",
+   "new": "nếu đưa bước dựng dataset vào trong phương thức Span nhưng để ngoài phương thức Split,",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "phải so cùng semantics hoặc nêu rõ",
+   "new": "phải so sánh cùng ngữ nghĩa hoặc nêu rõ",
+   "reason": "Từ tiếng Anh thường, \"so\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Kết quả máy khác hoặc lượt đo dài hơn có thể khác;",
+   "new": "Kết quả trên máy khác hoặc lượt đo dài hơn có thể khác;",
+   "reason": "Thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "không viết assertion phụ thuộc một số nanosecond cố định.",
+   "new": "không viết assertion phụ thuộc vào một số nanosecond cố định.",
+   "reason": "Thiếu giới từ",
+   "severity": "low"
+  }
+ ]
+}

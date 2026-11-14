@@ -8,29 +8,29 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
 language: vi
 ---
 
-Đây là **bài 31** của loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài 31–38 cùng giải thích code cuối của service tại `examples/toi-noi-dotnet/31-38-trip-service`, target `net10.0`.
+Đây là **bài 31** của loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài 31–38 cùng giải thích code cuối của service tại `examples/toi-noi-dotnet/31-38-trip-service`, nhắm tới `net10.0`.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>API gọi repository ở runtime có nghĩa Domain phải tham chiếu project Infrastructure không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Lõi định nghĩa abstraction; Infrastructure hiện thực nó và composition root ghép các implementation.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Lõi định nghĩa abstraction; Infrastructure triển khai nó và composition root ghép các implementation.</p></details>
 </div>
 
 ## Từ các thí nghiệm sang một service
 
-Ba mươi bài đầu đã kiểm từng cơ chế. Tám bài cuối cùng dùng chung service Trips để thấy chúng phối hợp: khách tạo chuyến, đọc chuyến của mình; tài xế nhận một chuyến còn trống; dữ liệu và Outbox commit trên PostgreSQL.
+Ba mươi bài đầu đã kiểm tra từng cơ chế. Tám bài cuối cùng dùng chung service Trips để thấy chúng phối hợp: khách tạo chuyến, đọc chuyến của mình; tài xế nhận một chuyến còn trống; dữ liệu và Outbox được commit trên PostgreSQL.
 
-Không thêm tám bản chép công thức khác nhau. Thư mục 31-38-trip-service là code cuối của cùng một lab, mỗi bài giải thích một lát cắt. Nó chưa là toàn bộ sản phẩm Tới Nơi: chưa có điều phối thực, thu tiền, fraud/OCR hoặc broker production.
+Không thêm tám bản sao công thức khác nhau. Thư mục 31-38-trip-service là code cuối của cùng một lab, mỗi bài giải thích một lát cắt. Service này chưa phải là toàn bộ sản phẩm Tới Nơi: chưa có điều phối thực, thu tiền, fraud/OCR hoặc broker production.
 
-Clean Architecture ở đây phục vụ ranh giới thay đổi và kiểm thử. Bốn project trông gọn không tự chứng minh clean; điều cần xem là ai sở hữu rule, ai tham chiếu ai và chi tiết hạ tầng có rò vào mô hình hay không.
+Clean Architecture ở đây phục vụ ranh giới thay đổi và kiểm thử. Bốn project trông gọn không tự chứng minh kiến trúc đó là clean; điều cần xem là ai sở hữu rule, ai tham chiếu ai và chi tiết hạ tầng có rò vào mô hình hay không.
 
-## Bốn tầng có việc gì?
+## Bốn tầng làm những việc gì?
 
-Domain giữ Trip, Money, DistanceKm, invariant và domain event; không biết EF, HTTP hay DI container. Application mô tả command/query, handler, validator và port cần dùng. Infrastructure triển khai repository, UoW, query projection và dispatcher. API bind HTTP, xác thực/phân quyền và là composition root.
+Domain giữ Trip, Money, DistanceKm, invariant và domain event; không biết EF, HTTP hay DI container. Application mô tả command/query, handler, validator và port cần dùng. Infrastructure triển khai repository, UoW, query projection và dispatcher. API bind HTTP, xác thực, phân quyền và đóng vai trò composition root.
 
-Application tham chiếu Domain. Infrastructure tham chiếu Application và dùng các kiểu Domain. API tham chiếu các lớp cần lắp. Không có ProjectReference từ Domain/Application sang Infrastructure; architecture test còn kiểm referenced assemblies để phát hiện EF/ASP.NET lọt vào lõi.
+Application tham chiếu Domain. Infrastructure tham chiếu Application và dùng các kiểu Domain. API tham chiếu các lớp cần ghép vào. Không có ProjectReference từ Domain/Application sang Infrastructure; architecture test còn kiểm tra các assembly được tham chiếu để phát hiện EF/ASP.NET lọt vào lõi.
 
-Chiều gọi runtime có thể đi từ handler tới repository implementation. Chiều phụ thuộc source vẫn hướng vào interface do Application sở hữu. Đừng vẽ hai chiều đó thành một mũi tên duy nhất rồi kết luận dependency inversion đã bị vi phạm.
+Chiều gọi runtime có thể đi từ handler tới lớp triển khai repository. Chiều phụ thuộc trong mã nguồn vẫn hướng vào interface do Application sở hữu. Đừng vẽ hai chiều đó thành một mũi tên duy nhất rồi kết luận dependency inversion đã bị vi phạm.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -39,21 +39,21 @@ Chiều gọi runtime có thể đi từ handler tới repository implementation
 <figcaption>Hình 1. Chiều tham chiếu hướng vào lõi; chiều gọi runtime qua interface có thể đi tới adapter.</figcaption>
 </figure>
 
-## Domain khác persistence row
+## Domain khác với persistence row
 
-TripRow có setter để EF materialize; Trip aggregate chỉ đổi qua hành vi. Adapter rehydrate Trip bằng Restore, kiểm trạng thái lưu hợp lệ và không phát một sự kiện tạo chuyến mới mỗi lần đọc.
+TripRow có setter để EF nạp dữ liệu vào đối tượng (materialize); Trip aggregate chỉ đổi qua hành vi. Adapter rehydrate Trip bằng Restore, kiểm tra trạng thái đã lưu có hợp lệ và không phát một sự kiện tạo chuyến mới mỗi lần đọc.
 
-Không dùng reflection để tự sửa private state của aggregate. Một đường Restore tường minh giúp nhìn rõ invariant và khác biệt giữa tạo mới với khôi phục. Restore không đồng nghĩa tin mọi dữ liệu từ API: dữ liệu ngoài phải qua binding/validation, còn dữ liệu lưu hỏng cần được nhìn thấy như lỗi hệ thống.
+Không dùng reflection để tự sửa private state của aggregate. Một đường Restore tường minh giúp thấy rõ invariant và sự khác biệt giữa tạo mới với khôi phục. Restore không có nghĩa là tin mọi dữ liệu từ API: dữ liệu ngoài phải qua binding/validation, còn dữ liệu đã lưu bị hỏng cần hiện ra như một lỗi hệ thống.
 
-Không nhất thiết mọi ứng dụng đều cần hai mô hình riêng. Trong lab, chi phí mapping được chấp nhận để giữ domain thuần và làm rõ bài học. Khi đánh giá một cách map khác, hãy nói cả lợi ích và cái giá thay vì chỉ đếm số class.
+Không nhất thiết mọi ứng dụng đều cần hai mô hình riêng. Trong lab, chi phí mapping được chấp nhận để giữ domain thuần và làm rõ bài học. Khi đánh giá một cách ánh xạ khác, hãy nói cả lợi ích và cái giá thay vì chỉ đếm số class.
 
 ## Composition root là nơi biết implementation
 
-Program đăng ký repository concrete scoped một lần, rồi map ITripRepository về cùng instance; EfUnitOfWork dùng chính repository đó để gom các aggregate đang tham gia use case. Nếu đăng ký hai instance repository khác nhau cho hai interface, UoW có thể không thấy thay đổi domain cần flush.
+Program đăng ký repository concrete với vòng đời scoped một lần, rồi ánh xạ ITripRepository về cùng instance đó; EfUnitOfWork dùng chính repository đó để gom các aggregate đang tham gia use case. Nếu đăng ký hai instance repository khác nhau cho hai interface, UoW có thể không thấy thay đổi domain cần flush.
 
-DbContext là scoped theo request. TimeProvider sống dùng chung và được thay bằng FixedClock trong test. Domain không gọi IServiceProvider; việc tìm handler nằm ở dispatcher hạ tầng có phạm vi rõ, không biến service locator thành thói quen trong mọi lớp.
+DbContext là scoped theo request. TimeProvider là bản dùng chung và được thay bằng FixedClock trong test. Domain không gọi IServiceProvider; việc tìm handler nằm ở dispatcher thuộc hạ tầng, với phạm vi được giới hạn rõ ràng, không biến service locator thành thói quen trong mọi lớp.
 
-Cấu hình storage/auth được bind và validate khi host khởi động. API không tự migrate; readiness kiểm kết nối và pending migration. Live không query DB để lỗi database không dẫn đến vòng restart của chính process.
+Cấu hình storage và auth được bind và validate khi host khởi động. API không tự migrate; readiness kiểm tra kết nối và migration đang chờ. Liveness không query DB để lỗi database không dẫn đến vòng restart của chính process.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -64,11 +64,11 @@ Cấu hình storage/auth được bind và validate khi host khởi động. API
 
 ## Bài tập và bằng chứng
 
-**Bài tập:** chuyển một câu UseNpgsql vào Domain có làm test giá tiền sai ngay không? Nếu không, tại sao architecture test vẫn đáng giữ?
+**Bài tập:** chuyển một lời gọi UseNpgsql vào Domain có làm test giá tiền sai ngay không? Nếu không, tại sao architecture test vẫn đáng giữ?
 
-<details><summary>Xem đáp án</summary><p>Test số tiền có thể vẫn qua, nhưng dependency boundary đã đổi. Architecture test bảo vệ một thuộc tính khác: lõi không phụ thuộc ORM/web/hạ tầng, giúp test và thay đổi chi tiết độc lập.</p></details>
+<details><summary>Xem đáp án</summary><p>Test số tiền có thể vẫn đạt, nhưng dependency boundary đã đổi. Architecture test bảo vệ một thuộc tính khác: lõi không phụ thuộc ORM/web/hạ tầng, giúp ta test và thay đổi từng chi tiết một cách độc lập.</p></details>
 
-Phạm vi được kiểm ở đây là bốn tầng của service Trips. Không suy ra một repository hay một database có thể dùng chung cho mọi service Python/Rust/Go trong Tới Nơi.
+Phạm vi được kiểm tra ở đây là bốn tầng của service Trips. Không suy ra một repository hay một database có thể dùng chung cho mọi service Python/Rust/Go trong Tới Nơi.
 
 ## Code và kiểm chứng
 
@@ -78,7 +78,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự bỏ qua khi thiếu PostgreSQL. Về đặc tả Docker/CI/cloud, xem README của service và cloud/README.md để biết phạm vi, điều kiện tiên quyết và phần chưa được triển khai thật.
 
 ### Contracts.cs — 31-38-trip-service/Application/Contracts.cs
 

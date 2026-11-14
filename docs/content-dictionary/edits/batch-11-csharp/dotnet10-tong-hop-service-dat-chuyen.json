@@ -1,0 +1,161 @@
+{
+  "file": "dotnet10-tong-hop-service-dat-chuyen.md",
+  "edits": [
+    {
+      "old": "tổng kết một lát cắt Tới Nơi có Clean Architecture,",
+      "new": "tổng kết một lát cắt của Tới Nơi dùng Clean Architecture,",
+      "reason": "Lược mất \"của\"; \"có\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "có đồng nghĩa code lab đã là sản phẩm",
+      "new": "có đồng nghĩa với việc code lab đã là sản phẩm",
+      "reason": "Thiếu giới từ, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "nhiều yêu cầu sản phẩm/hạ tầng vẫn cần thiết kế và kiểm riêng.",
+      "new": "nhiều yêu cầu về sản phẩm và hạ tầng vẫn cần được thiết kế và kiểm tra riêng.",
+      "reason": "Gạch chéo; lược mất chữ \"tra\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Cước, tiền tệ và thời gian có kiểu/hợp đồng.",
+      "new": "Cước, tiền tệ và thời gian có kiểu dữ liệu và hợp đồng.",
+      "reason": "Cụm gạch chéo tự ghép, cụt",
+      "severity": "high"
+    },
+    {
+      "old": "Hai driver không cùng thắng một lượt accept;",
+      "new": "Hai tài xế không thể cùng thắng một lượt accept;",
+      "reason": "Thống nhất \"tài xế\"",
+      "severity": "low"
+    },
+    {
+      "old": "mọi luồng ride/food/parcel của Tới Nơi.",
+      "new": "mọi luồng dịch vụ ride, food và parcel của Tới Nơi.",
+      "reason": "Lược mất danh từ chính, gạch chéo",
+      "severity": "low"
+    },
+    {
+      "old": "Mediator nhỏ điều phối behavior/handler trong scope.",
+      "new": "Mediator nhỏ điều phối các behavior và handler trong cùng scope.",
+      "reason": "Gạch chéo, thiếu từ nối",
+      "severity": "low"
+    },
+    {
+      "old": "Infrastructure map aggregate/row,",
+      "new": "Infrastructure ánh xạ giữa aggregate và row,",
+      "reason": "\"map\" dịch máy, thiếu từ nối",
+      "severity": "medium"
+    },
+    {
+      "old": "Migration có executable riêng, readiness không tự áp schema, live không phụ thuộc DB.",
+      "new": "Migration có tệp thực thi riêng, readiness không tự áp schema, probe live không phụ thuộc DB.",
+      "reason": "\"executable\" có từ Việt; \"live\" thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "giữ metric dimensions hữu hạn.",
+      "new": "giữ dimension của metric ở mức hữu hạn.",
+      "reason": "Danh từ ghép kiểu tiếng Anh; thống nhất \"dimension\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Không có một pattern nào thay thế tất cả phần còn lại.",
+      "new": "Không pattern nào thay thế được tất cả phần còn lại.",
+      "reason": "Câu gượng, thiếu \"được\"",
+      "severity": "low"
+    },
+    {
+      "old": "HTTP/JWT đi với PostgreSQL, validation, duplicate, ownership, accept conflict, rehydrate, cancellation, health, dependency boundary và telemetry.",
+      "new": "HTTP/JWT chạy với PostgreSQL, validation, duplicate, ownership, accept conflict, rehydrate, cancellation, health, ranh giới dependency và telemetry.",
+      "reason": "\"đi với\" gượng; trật tự từ kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Các bài trước còn có unit/integration lab chuyên sâu và report benchmark thật.",
+      "new": "Các bài trước còn có bài thực hành unit/integration chuyên sâu và báo cáo benchmark thật.",
+      "reason": "\"lab\" mơ hồ; \"report\" có từ Việt",
+      "severity": "medium"
+    },
+    {
+      "old": "hai lần publish fake ở bài 26",
+      "new": "hai lần publish giả lập ở bài 26",
+      "reason": "\"fake\" văn nói",
+      "severity": "medium"
+    },
+    {
+      "old": "Tái chạy test là một phần quá trình thay đổi.",
+      "new": "Chạy lại test là một phần của quá trình thay đổi.",
+      "reason": "\"Tái chạy\" gượng, thiếu \"của\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Khi thêm field vào command hoặc đổi rule, cập nhật fingerprint/validation/domain/test/schema và hợp đồng response theo phạm vi,",
+      "new": "Khi thêm trường vào command hoặc đổi rule, cập nhật fingerprint, validation, domain, test, schema và hợp đồng response theo phạm vi;",
+      "reason": "Gạch chéo; \"field\" có từ Việt",
+      "severity": "medium"
+    },
+    {
+      "old": "Cần bổ sung lifecycle đầy đủ, tài xế đủ điều kiện, định tuyến/giá theo vùng, huỷ/hoàn tiền,",
+      "new": "Cần bổ sung vòng đời đầy đủ, tài xế đủ điều kiện, định tuyến và giá theo vùng, huỷ và hoàn tiền,",
+      "reason": "\"lifecycle\" có từ Việt; gạch chéo",
+      "severity": "medium"
+    },
+    {
+      "old": "Fraud/OCR Python, các thành phần Rust và Go sẽ chia sẻ",
+      "new": "Các thành phần Python (fraud, OCR), Rust và Go sẽ chia sẻ",
+      "reason": "Cụm gạch chéo tự ghép, khó đọc",
+      "severity": "medium"
+    },
+    {
+      "old": "Outbox hiện lưu intent; delivery worker có claim/lease, retry, broker confirm và consumer Inbox phải được ghép theo yêu cầu thật.",
+      "new": "Outbox hiện lưu intent; phải ghép thêm delivery worker có claim/lease, retry, broker confirm và consumer Inbox theo yêu cầu thật.",
+      "reason": "Bỏ bị động, chuỗi thuật ngữ dày đặc",
+      "severity": "medium"
+    },
+    {
+      "old": "khi workload/mô hình dữ liệu có bằng chứng phù hợp.",
+      "new": "khi workload hoặc mô hình dữ liệu có bằng chứng phù hợp.",
+      "reason": "Gạch chéo",
+      "severity": "low"
+    },
+    {
+      "old": "không có một ngưỡng concurrency chung bắt buộc đổi database chỉ vì vacuum.",
+      "new": "không có ngưỡng concurrency chung nào buộc phải đổi database chỉ vì vacuum.",
+      "reason": "Câu tối nghĩa, \"bắt buộc đổi\" cụt",
+      "severity": "high"
+    },
+    {
+      "old": "thêm loại dịch vụ parcel. Hãy liệt kê phần hợp đồng ảnh hưởng trước khi viết class.",
+      "new": "thêm loại dịch vụ giao bưu kiện (parcel). Hãy liệt kê các phần hợp đồng bị ảnh hưởng trước khi viết class.",
+      "reason": "\"parcel\" chưa giải nghĩa; \"hợp đồng ảnh hưởng\" cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "khác biệt nào làm thay fingerprint và integration schema?",
+      "new": "khác biệt nào làm thay đổi fingerprint và integration schema?",
+      "reason": "Thiếu chữ \"đổi\"",
+      "severity": "medium"
+    },
+    {
+      "old": "định nghĩa input/response/event version,",
+      "new": "định nghĩa input, response và phiên bản event,",
+      "reason": "Gạch chéo; thống nhất \"phiên bản\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Test không tự skip khi thiếu PostgreSQL.",
+      "new": "Test không tự bỏ qua khi thiếu PostgreSQL.",
+      "reason": "Từ Việt quen dùng cho \"skip\"",
+      "severity": "medium"
+    },
+    {
+      "old": "phạm vi, prerequisites và phần chưa được triển khai thật.",
+      "new": "phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.",
+      "reason": "Từ Việt quen dùng cho \"prerequisites\"",
+      "severity": "medium"
+    }
+  ]
+}

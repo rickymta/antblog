@@ -1,0 +1,143 @@
+{
+ "file": "dotnet10-repository-unit-of-work.md",
+ "edits": [
+  {
+   "old": "Nó không trả IQueryable để caller tuỳ ý",
+   "new": "Repository không trả IQueryable để bên gọi tuỳ ý",
+   "reason": "Nhắc lại danh từ thay cho \"Nó\"; \"caller\" đã có từ Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "có thể tăng lớp mà không giảm phụ thuộc",
+   "new": "có thể thêm một tầng trung gian mà không giảm phụ thuộc",
+   "reason": "Cụm \"tăng lớp\" dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Port trong bài được chọn theo hành vi cần của service.",
+   "new": "Bài này chọn port theo hành vi mà service cần.",
+   "reason": "Bỏ câu bị động, viết chủ động",
+   "severity": "medium"
+  },
+  {
+   "old": "UoW là ranh giới flush cùng transaction local.",
+   "new": "UoW là ranh giới của việc flush và của transaction local.",
+   "reason": "Câu thiếu liên kết, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "abstraction của lab thêm việc đồng bộ",
+   "new": "lớp abstraction của lab bổ sung việc đồng bộ",
+   "reason": "Thiếu danh từ chính, giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Đọc lại cùng ID trong scope trả aggregate đã có;",
+   "new": "Đọc lại cùng ID trong scope sẽ trả về aggregate đã có;",
+   "reason": "Câu thiếu động từ nối, cụt",
+   "severity": "low"
+  },
+  {
+   "old": "phát TripRequested như tạo mới.",
+   "new": "phát TripRequested như khi tạo mới.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "đánh dấu mọi field Modified.",
+   "new": "đánh dấu mọi field là Modified.",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Money/Distance được dựng với rule của domain, không nhận setter tự do từ request body.",
+   "new": "Money/Distance được dựng theo rule của domain, không cho request body gán trực tiếp qua setter.",
+   "reason": "\"nhận setter tự do\" là cụm tự ghép, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không thay transaction isolation",
+   "new": "Cache này không thay được transaction isolation",
+   "reason": "Nhắc lại danh từ thay cho \"Nó\"",
+   "severity": "medium"
+  },
+  {
+   "old": "UoW map TripRequested/TripAccepted sang envelope integration version v1",
+   "new": "UoW chuyển TripRequested/TripAccepted thành envelope integration phiên bản v1",
+   "reason": "\"map sang\" dịch máy; thống nhất \"phiên bản\"",
+   "severity": "medium"
+  },
+  {
+   "old": "không clear rồi giả vờ đã có intent bền.",
+   "new": "không clear rồi coi như intent đã được lưu bền.",
+   "reason": "\"giả vờ\" sai sắc thái, intent không phải chủ thể có ý định giả",
+   "severity": "medium"
+  },
+  {
+   "old": "cùng context sau một failure, cần thiết kế reset trạng thái tracker/outbox rõ;",
+   "new": "cùng context sau một lần lỗi, cần thiết kế rõ cách reset trạng thái tracker/outbox;",
+   "reason": "\"reset ... rõ\" cụt, \"failure\" có từ Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "vẫn phải được ghép theo bài 26.",
+   "new": "vẫn phải ghép thêm theo bài 26.",
+   "reason": "Bỏ câu bị động",
+   "severity": "low"
+  },
+  {
+   "old": "DbUpdateConcurrencyException được dịch thành ConcurrencyConflictException của application.",
+   "new": "Adapter dịch DbUpdateConcurrencyException thành ConcurrencyConflictException của application.",
+   "reason": "Bỏ câu bị động, nêu rõ chủ thể",
+   "severity": "low"
+  },
+  {
+   "old": "Unique violation chỉ được coi là duplicate request khi",
+   "new": "Adapter chỉ coi unique violation là duplicate request khi",
+   "reason": "Bỏ câu bị động",
+   "severity": "low"
+  },
+  {
+   "old": "hai người cùng nhận chỉ một người có thể commit theo invariant.",
+   "new": "khi hai người cùng nhận, chỉ một người commit được theo invariant.",
+   "reason": "Câu thiếu quan hệ điều kiện, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "Transaction local không bao network.",
+   "new": "Transaction local không bao trùm network.",
+   "reason": "\"bao network\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "không mặc định tên UoW tự làm tất cả nguyên tử.",
+   "new": "không mặc định rằng cứ có UoW là mọi thao tác tự nguyên tử.",
+   "reason": "Câu tối nghĩa: \"tên UoW\" không làm được gì",
+   "severity": "high"
+  },
+  {
+   "old": "không thực hiện hành vi nên dùng projection có filter ownership riêng là phù hợp.",
+   "new": "không thực hiện hành vi, nên dùng projection kèm filter ownership riêng là phù hợp.",
+   "reason": "Thiếu dấu ngắt ý, câu khó đọc",
+   "severity": "low"
+  },
+  {
+   "old": "Test không tự skip khi thiếu PostgreSQL.",
+   "new": "Test không tự bỏ qua khi thiếu PostgreSQL.",
+   "reason": "Từ Việt quen dùng cho \"skip\" (style guide §6)",
+   "severity": "medium"
+  },
+  {
+   "old": "phạm vi, prerequisites và phần chưa được triển khai thật.",
+   "new": "phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.",
+   "reason": "Từ Việt quen dùng cho \"prerequisites\"",
+   "severity": "medium"
+  },
+  {
+   "old": "mapping domain event vào Outbox",
+   "new": "ánh xạ domain event sang Outbox",
+   "reason": "\"mapping ... vào\" dịch máy",
+   "severity": "medium"
+  }
+ ]
+}

@@ -13,7 +13,7 @@ Một báo giá 14.254,50 VND phải thu 14.254 hay 14.255? Đây là quyết đ
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Đoán kết quả</span>
 <p><code>decimal half = 5 / 2;</code> có cho kết quả 2,5 không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Hai toán hạng là int nên phép chia nguyên cho kết quả 2 trước khi chuyển thành decimal. Kiểu biến nhận kết quả không thay đổi phép toán đã diễn ra. Viết <code>5m / 2m</code> để được 2,5.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Hai toán hạng là int nên phép chia nguyên cho kết quả 2 trước khi chuyển thành decimal. Kiểu của biến nhận kết quả không làm thay đổi phép toán đã thực hiện. Viết <code>5m / 2m</code> để được 2,5.</p></details>
 </div>
 
 ## Biến có tên, kiểu và giá trị
@@ -27,7 +27,7 @@ decimal distanceKm = 2.501m;
 
 `string` giữ mã chuyến dạng văn bản. `int` giữ số nguyên có dấu 32 bit, phù hợp số hành khách trong ví dụ. `bool` có hai giá trị `true` và `false`. `decimal` biểu diễn khoảng cách thập phân theo giả định đầu vào của bài. Dấu `=` gán giá trị, còn `==` so sánh bằng nhau. Dấu chấm trong literal `2.501m` là cú pháp C#, không đổi thành dấu phẩy dù người dùng ở Việt Nam.
 
-Tên `distanceKm` mang theo đơn vị km. Nếu API sau này nhận mét, phải chuyển đổi rõ ràng; kiểu decimal không tự biết 2500 là mét hay km. Tương tự, biến `fareVnd` dễ hiểu hơn `amount` khi ứng dụng chỉ có VND. Khi hỗ trợ nhiều tiền tệ, ta sẽ đưa currency và quy tắc vào một kiểu Money riêng.
+Tên `distanceKm` mang theo đơn vị km. Nếu API sau này nhận mét, phải chuyển đổi rõ ràng; kiểu decimal không tự biết 2500 là mét hay km. Tương tự, biến `fareVnd` dễ hiểu hơn `amount` khi ứng dụng chỉ có VND. Khi hỗ trợ nhiều tiền tệ, ta sẽ đưa đơn vị tiền tệ (currency) và quy tắc vào một kiểu Money riêng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -44,22 +44,22 @@ var distanceKm = 2.501m; // compiler suy ra decimal
 const decimal BaseFare = 12_000m;
 ```
 
-`var` yêu cầu compiler suy ra kiểu từ biểu thức khởi tạo. Kiểu vẫn cố định ở thời điểm biên dịch. Nó khác `dynamic`, vốn dời nhiều kiểm tra sang lúc chạy. Với bài nhập môn, viết tường minh `decimal` giúp đọc công thức dễ hơn.
+`var` yêu cầu compiler suy ra kiểu từ biểu thức khởi tạo. Kiểu vẫn cố định ở thời điểm biên dịch. Cách này khác `dynamic`, vốn dời nhiều kiểm tra sang lúc chạy. Với bài nhập môn, viết tường minh `decimal` giúp đọc công thức dễ hơn.
 
-`const` biểu diễn hằng có giá trị xác định ở thời điểm biên dịch; không thể gán lại. Dấu gạch dưới trong `12_000m` chỉ giúp mắt đọc, giá trị bằng `12000m`. Bảng giá thật thường là dữ liệu cấu hình có hiệu lực theo thời điểm; dùng const ở đây để giữ ví dụ nhỏ, không phải bắt buộc deploy lại ứng dụng mỗi lần đổi giá.
+`const` biểu diễn hằng có giá trị xác định ở thời điểm biên dịch; không thể gán lại. Dấu gạch dưới trong `12_000m` chỉ giúp mắt đọc, giá trị bằng `12000m`. Bảng giá thật thường là dữ liệu cấu hình có hiệu lực theo thời điểm; dùng const ở đây để giữ ví dụ nhỏ, chứ không có nghĩa là bắt buộc phải deploy lại ứng dụng mỗi lần đổi giá.
 
 ## decimal, double và giới hạn của độ chính xác
 
-`double` phù hợp nhiều phép tính khoa học, đo đạc và dữ liệu số thực. Nó biểu diễn số theo cơ số 2 nên một số phân số thập phân như 0,1 không có biểu diễn hữu hạn chính xác. `decimal` dùng biểu diễn thập phân, có khoảng 28–29 chữ số có nghĩa và giữ chính xác các giá trị như 0,1 trong khả năng của nó. Vì vậy ví dụ tiền dùng decimal.
+`double` phù hợp nhiều phép tính khoa học, đo đạc và dữ liệu số thực. Nó biểu diễn số theo cơ số 2 nên một số phân số thập phân như 0,1 không có biểu diễn hữu hạn chính xác. `decimal` dùng biểu diễn thập phân, có khoảng 28–29 chữ số có nghĩa và giữ chính xác các giá trị thập phân như 0,1 trong phạm vi biểu diễn của nó. Vì vậy ví dụ tiền dùng decimal.
 
 ```csharp
 Console.WriteLine(0.1m + 0.2m == 0.3m); // True
 Console.WriteLine(0.1d + 0.2d == 0.3d); // False
 ```
 
-Đây là một thí nghiệm về biểu diễn, không phải khuyến cáo so sánh mọi phép đo bằng `==`. Với double, cần tiêu chí sai số theo bài toán. Với decimal, `1m / 3m` vẫn phải xấp xỉ: số chữ số hữu hạn không thể chứa vô hạn số 3. decimal cũng có thể tràn số; chọn nó không thay thế validation hoặc quy tắc tiền tệ.
+Đây là một thí nghiệm về biểu diễn, không phải khuyến cáo so sánh mọi phép đo bằng `==`. Với double, cần tiêu chí sai số theo bài toán. Với decimal, `1m / 3m` vẫn phải xấp xỉ: số chữ số hữu hạn không thể chứa vô hạn số 3. decimal cũng có thể tràn số; chọn nó không thay thế việc kiểm tra đầu vào hoặc quy tắc tiền tệ.
 
-Không trộn double với decimal trong một phép cộng. Ép kiểu `(decimal)someDouble` không bảo đảm khôi phục dữ liệu gốc đã mất trước đó. Nếu đầu vào là chuỗi hoặc JSON, xác định cách parse và hợp đồng số từ đầu; phần đọc dữ liệu sẽ học ở bài sau.
+Không trộn double với decimal trong một phép cộng. Ép kiểu `(decimal)someDouble` không bảo đảm khôi phục dữ liệu gốc đã mất trước đó. Nếu đầu vào là chuỗi hoặc JSON, xác định ngay từ đầu cách parse và quy ước biểu diễn số; phần đọc dữ liệu sẽ học ở bài sau.
 
 ## Ba giá trị khác nhau: khoảng cách, cước thô, tiền phải trả
 
@@ -81,7 +81,7 @@ decimal payableFare = Math.Round(rawFare, 0, MidpointRounding.AwayFromZero);
 
 Đối số `0` nghĩa là giữ 0 chữ số sau dấu thập phân. `AwayFromZero` quyết định cách xử lý đúng điểm giữa. Overload `Math.Round(value, digits)` dùng quy tắc `ToEven` mặc định: 14.254,5 thành 14.254; không nên dựa vào mặc định khi hợp đồng nghiệp vụ đã chọn cách khác. Với giá trị không ở điểm giữa, AwayFromZero vẫn làm tròn về số gần nhất; không phải luôn làm tròn lên.
 
-Format `:0` hoặc `:0.00` chỉ tạo cách hiển thị. Muốn các bước sau sử dụng giá đã làm tròn, phải lưu kết quả `Math.Round` vào biến. Tách `rawFare` và `payableFare` giúp tránh thu một số nhưng ghi log một số khác.
+Định dạng `:0` hoặc `:0.00` chỉ tạo cách hiển thị. Muốn các bước sau sử dụng giá đã làm tròn, phải lưu kết quả `Math.Round` vào biến. Tách `rawFare` và `payableFare` giúp tránh thu một số nhưng ghi log một số khác.
 
 ## Chạy ví dụ đầy đủ
 
@@ -128,7 +128,7 @@ Decimal equality: True
 Double equality: False
 ```
 
-`using System.Globalization` cho phép gọi `CultureInfo` bằng tên ngắn. Ví dụ dùng InvariantCulture ở các giá trị thập phân để đầu ra kiểm chứng ổn định giữa máy; đây không phải lựa chọn bắt buộc cho giao diện người Việt. Bài về chuỗi/ngày giờ sẽ tách format máy trao đổi và format người đọc.
+`using System.Globalization` cho phép gọi `CultureInfo` bằng tên ngắn. Ví dụ dùng InvariantCulture ở các giá trị thập phân để đầu ra kiểm chứng ổn định giữa các máy; đây không phải lựa chọn bắt buộc cho giao diện người Việt. Bài về chuỗi/ngày giờ sẽ tách định dạng dùng để máy trao đổi dữ liệu và định dạng dành cho người đọc.
 
 ## Chuyển kiểu cần một quyết định
 
@@ -137,15 +137,15 @@ int wholeKm = (int)2.9m; // 2, bỏ phần thập phân về phía 0
 long count = 5;         // int -> long là chuyển đổi ngầm định
 ```
 
-Ép decimal sang int không phải làm tròn gần nhất. Đừng ép khoảng cách thành int trước khi tính phần vượt. Nếu giá trị nằm ngoài miền của kiểu đích, phép chuyển đổi decimal sang kiểu nguyên có thể ném OverflowException. Bài này giữ đầu vào nhỏ, gán sẵn; dữ liệu ngoài hệ thống phải được kiểm tra miền giá trị và độ chính xác.
+Ép decimal sang int không phải phép làm tròn về số gần nhất. Đừng ép khoảng cách thành int trước khi tính phần vượt. Nếu giá trị nằm ngoài miền của kiểu đích, phép chuyển đổi decimal sang kiểu nguyên có thể ném OverflowException. Bài này giữ đầu vào nhỏ, gán sẵn; dữ liệu ngoài hệ thống phải được kiểm tra miền giá trị và độ chính xác.
 
 | Lỗi hay gặp | Vì sao sai | Cách sửa trong ví dụ |
 | --- | --- | --- |
 | `5 / 2` rồi mới gán decimal | Đã chia nguyên | Dùng `5m / 2m` |
 | Dùng `4.5` trong phép toán decimal | Literal mặc định là double | Viết `4.5m` |
 | Cắt khoảng cách về int | Mất phần km lẻ | Giữ decimal tới bước tính |
-| Chỉ format `:0` | Biến gốc chưa được làm tròn | Dùng Math.Round theo chính sách |
-| Mặc định mọi tiền đều 2 chữ số lẻ | Quy tắc phụ thuộc tiền tệ và sản phẩm | Nêu rõ đơn vị và độ chia nhỏ |
+| Chỉ dùng định dạng `:0` | Biến gốc chưa được làm tròn | Dùng Math.Round theo chính sách |
+| Mặc định mọi loại tiền đều có 2 chữ số thập phân | Quy tắc phụ thuộc tiền tệ và sản phẩm | Nêu rõ đơn vị và độ chia nhỏ |
 
 ## Bài tập và điểm kiểm tra
 

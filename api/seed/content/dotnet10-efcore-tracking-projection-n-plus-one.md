@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, postgresql, ef-core]
 language: vi
 ---
 
-Đây là **bài 22** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 22** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,17 +20,17 @@ language: vi
 
 Màn hình cần Id chuyến, tên khách và fare. Cách viết quen là tải ba chuyến rồi foreach query khách cho từng chuyến. Dữ liệu nhỏ khiến mọi thứ trông nhanh, nhưng một request đã tạo 1 + 3 truy vấn.
 
-Lab cố ý viết N+1 bằng query tường minh trong vòng lặp, không cài lazy-loading proxy. Vì vậy không thể sửa bằng việc tắt lazy loading vốn chưa được bật. Cần nhìn vị trí materialization và số lần database được gọi.
+Lab cố ý viết N+1 bằng query tường minh trong vòng lặp, không cài lazy-loading proxy. Vì vậy không thể sửa bằng việc tắt lazy loading vốn chưa được bật. Cần quan sát vị trí materialization và số lần gọi database.
 
-SqlCounter là interceptor đếm lệnh đọc async trong đúng vùng test sau seed. Con số này không phải QPS toàn hệ thống hay số packet mạng; nó là bằng chứng giới hạn cho lượng command mà hai cách query tạo ra ở lab.
+SqlCounter là interceptor đếm lệnh đọc async trong đúng vùng test sau seed. Con số này không phải QPS toàn hệ thống hay số packet mạng; nó là bằng chứng có phạm vi hạn chế về số command mà hai cách query tạo ra ở lab.
 
 ## Tracking và identity map trả lời chuyện gì?
 
-Hai tracked query lấy cùng Id trong cùng context có thể trả cùng object reference. Context giữ identity map và original values cho phát hiện thay đổi. Điều này hữu ích cho use case ghi nhưng có chi phí bộ nhớ và có thể khiến người đọc hiểu sai rằng query luôn trả snapshot mới.
+Hai tracked query lấy cùng Id trong cùng context có thể trả cùng object reference. Context giữ identity map và original values để phát hiện thay đổi. Điều này hữu ích cho use case ghi nhưng có chi phí bộ nhớ và có thể khiến người đọc hiểu sai rằng query luôn trả snapshot mới.
 
-AsNoTracking phù hợp nhiều query chỉ đọc: kết quả entity không được gắn vào tracker theo đường thông thường đó. Nó không bảo đảm object bất biến, không đóng băng database và không ngăn người khác sửa cùng hàng. No-tracking cũng không đồng nghĩa mọi kết quả tự được identity resolution giống tracker.
+AsNoTracking phù hợp với nhiều query chỉ đọc: entity trong kết quả không được gắn vào tracker theo đường thông thường. AsNoTracking không bảo đảm object bất biến, không đóng băng database và không ngăn người khác sửa cùng hàng. No-tracking cũng không đồng nghĩa với việc mọi kết quả tự được identity resolution như tracker.
 
-Trong test, ChangeTracker.Clear được gọi để tách các quan sát. Code production không nên rải Clear như thuốc chữa một context sống quá lâu; hãy sửa lifetime/ràng buộc của context trước.
+Trong test, ChangeTracker.Clear được gọi để tách các quan sát. Code production không nên rải Clear như thuốc chữa cho việc một context sống quá lâu; hãy sửa lifetime/ràng buộc của context trước.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Trong test, ChangeTracker.Clear được gọi để tách các quan sát. Code 
 
 ## Projection chọn dữ liệu cần trước ToList
 
-Query sửa dùng Select sang TripListItem với Customer.Name ngay trong expression. Provider dịch quan hệ thành JOIN, sắp theo CreatedAt rồi Id và Take(20) trước khi materialize. Test kiểm query có JOIN và một command đọc, đồng thời kết quả đúng ba dòng.
+Query đã sửa dùng Select để chuyển sang TripListItem với Customer.Name ngay trong expression. Provider dịch quan hệ thành JOIN, sắp xếp theo CreatedAt rồi Id và áp dụng Take(20) trước khi materialize. Test kiểm tra query có JOIN và một command đọc, đồng thời kết quả có đúng ba dòng.
 
-DTO chỉ chứa Guid/string/decimal nên không mang entity vào tracker. Nhưng Select nói chung không phải bảo đảm no tracking: nếu projection vẫn chứa entity, phần entity có thể được theo dõi. Hãy đọc shape kết quả cụ thể thay vì chỉ tìm chữ Select.
+DTO chỉ chứa Guid/string/decimal nên không mang entity vào tracker. Nhưng Select nói chung không bảo đảm no tracking: nếu projection vẫn chứa entity, phần entity có thể được theo dõi. Hãy đọc cấu trúc kết quả cụ thể thay vì chỉ tìm chữ Select.
 
-OrderBy với tie-breaker Id tạo thứ tự xác định hơn cho trang dữ liệu. Take giới hạn số hàng trả về, chưa giải toàn bộ phân trang tải lớn. Offset sâu, keyset, index và query plan sẽ được chọn theo access pattern, không chỉ theo cú pháp LINQ ngắn.
+OrderBy với tie-breaker Id tạo thứ tự xác định hơn cho trang dữ liệu. Take giới hạn số hàng trả về, nhưng chưa giải quyết toàn bộ bài toán phân trang khi tải lớn. Offset sâu, keyset, index và query plan sẽ được chọn theo access pattern, không chỉ theo cú pháp LINQ ngắn.
 
 ## Đọc SQL chưa đủ, nhưng là bước cần
 
 ToQueryString giúp xem SQL dự kiến cho query trước khi chạy; nó không phải dữ liệu thực tế hay số đo latency. Query được build trên PostgreSQL provider, còn interceptor quan sát lệnh đã thực thi trong test.
 
-Đưa từ 4 round-trip về 1 trong lab là kết quả cụ thể. Không suy ra “mọi JOIN đều nhanh hơn” hoặc thêm Include tất cả navigation. Join nhiều collection có thể nhân số hàng và payload; projection, split query và index đều có trade-off cần đo.
+Giảm từ 4 round-trip xuống 1 trong lab là kết quả cụ thể. Đừng suy ra “mọi JOIN đều nhanh hơn” hoặc thêm Include cho tất cả navigation. Join nhiều collection có thể nhân số hàng và payload; projection, split query và index đều có trade-off cần đo.
 
-Khi query lớn, xem EXPLAIN trên dữ liệu/thống kê phù hợp, lượng hàng trả, cột đọc, kích thước payload và p95/p99. Không sửa AsNoTracking rồi tuyên bố đã tối ưu database chỉ vì một test hết lỗi.
+Khi query lớn, hãy xem EXPLAIN trên dữ liệu và thống kê phù hợp, cùng lượng hàng trả về, cột đọc, kích thước payload và p95/p99. Đừng sửa AsNoTracking rồi tuyên bố đã tối ưu database chỉ vì một test hết lỗi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,17 +62,17 @@ Khi query lớn, xem EXPLAIN trên dữ liệu/thống kê phù hợp, lượng 
 <figcaption>Hình 2. Projection được provider dịch trước materialization; lượng dữ liệu và số command được kiểm riêng.</figcaption>
 </figure>
 
-## Ca kiểm chứng và bài tập
+## Test case kiểm chứng và bài tập
 
-Hai test kiểm tracker/reference và no-tracking; test kia đối chiếu N+1 với projection. Interceptor được reset sau seed và sau đoạn N+1 để hai con số không lẫn chi phí fixture.
+Có hai test: một test kiểm tra tracker/reference và no-tracking, test kia đối chiếu N+1 với projection. Interceptor được reset sau seed và sau đoạn N+1 để hai con số không bị lẫn chi phí của fixture.
 
 **Bài tập:** nếu gọi ToList trước Select Customer.Name rồi trong foreach mới query khách, có còn một query không? Thêm một entity nguyên vẹn vào DTO có làm lời khẳng định “không tracking” cần xem lại không?
 
-<details><summary>Xem đáp án</summary><p>Không: đã materialize nguồn và tiếp tục query ở vòng lặp thì N+1 vẫn còn. Projection chứa entity cần xem hành vi tracking cụ thể; test tracker và SQL thay vì suy luận từ tên DTO.</p></details>
+<details><summary>Xem đáp án</summary><p>Không: nếu đã materialize nguồn và tiếp tục query trong vòng lặp thì N+1 vẫn còn. Projection chứa entity cần xem hành vi tracking cụ thể; test tracker và SQL thay vì suy luận từ tên DTO.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
-Cần PostgreSQL local và database riêng tên `toi_noi_dotnet_lab`. Thiết lập biến môi trường `TOI_NOI_PG` bằng connection string của lab trước khi chạy; không đưa mật khẩu vào source. README của persistence lab có hướng dẫn. Fixture từ chối database khác tên hoặc host ngoài localhost, không âm thầm skip khi thiếu kết nối; nó chỉ tạo và dọn schema GUID riêng.
+Cần PostgreSQL local và database riêng tên `toi_noi_dotnet_lab`. Thiết lập biến môi trường `TOI_NOI_PG` bằng connection string của lab trước khi chạy; không đưa mật khẩu vào source. README của persistence lab có hướng dẫn. Fixture từ chối database khác tên hoặc host ngoài localhost, không tự bỏ qua test mà không báo lỗi khi thiếu kết nối; fixture chỉ tạo và dọn schema GUID riêng.
 
 Từ thư mục gốc repository:
 

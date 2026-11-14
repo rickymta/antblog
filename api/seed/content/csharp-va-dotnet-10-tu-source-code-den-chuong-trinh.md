@@ -42,7 +42,7 @@ Tên đúng là **.NET 10**, không phải “.NET Framework 10”. .NET Framewo
 
 ## Chuẩn bị môi trường
 
-Cài **SDK .NET 10** phù hợp hệ điều hành từ [trang tải chính thức](https://dotnet.microsoft.com/en-us/download/dotnet/10.0). Chọn SDK, không chỉ Runtime. Dùng editor quen thuộc; terminal đủ để chạy ví dụ.
+Cài **SDK .NET 10** phù hợp hệ điều hành từ [trang tải chính thức](https://dotnet.microsoft.com/en-us/download/dotnet/10.0). Chọn SDK, không chỉ Runtime. Dùng trình soạn thảo quen thuộc; terminal đủ để chạy ví dụ.
 
 ```bash
 dotnet --list-sdks
@@ -57,7 +57,7 @@ cd FareDemo
 dotnet run
 ```
 
-Kết quả ban đầu là `Hello, World!`. `dotnet run` build nếu cần rồi chạy. Lần đầu có thể cần mạng để restore; không đưa thông tin bí mật vào source code hoặc log.
+Kết quả ban đầu là `Hello, World!`. `dotnet run` build nếu cần rồi chạy. Lần đầu có thể cần mạng để tải gói phụ thuộc (restore); không đưa thông tin bí mật vào source code hoặc log.
 
 ## Đọc cấu trúc trước khi viết
 
@@ -65,11 +65,11 @@ Kết quả ban đầu là `Hello, World!`. `dotnet run` build nếu cần rồi
 
 `Program.cs` chứa code. `obj/` giữ dữ liệu trung gian, `bin/` giữ đầu ra build; không sửa hai thư mục này và không đưa chúng vào Git. File `.csproj` và `.cs` mới là những thứ ta chủ động quản lý.
 
-Template dùng **top-level statements**: câu lệnh đặt trực tiếp trong file. Compiler tạo điểm vào chương trình giúp ta. Không thấy `class Program` hay `Main` không có nghĩa là chương trình không có điểm vào. Khi học lớp và phương thức, ta sẽ đọc cả dạng viết tường minh.
+Template dùng **top-level statements**: câu lệnh đặt trực tiếp trong file. Compiler tự tạo điểm vào chương trình cho ta. Không thấy `class Program` hay `Main` không có nghĩa là chương trình không có điểm vào. Khi học lớp và phương thức, ta sẽ đọc cả dạng viết tường minh.
 
 ## Tính báo giá đầu tiên
 
-Quy tắc minh hoạ: 12.000 VND bao gồm 2 km đầu, mỗi km vượt thêm 4.500 VND. Chưa có phụ phí, thuế, giảm giá hoặc làm tròn theo bậc. Đây là giả định để học, không phải bảng giá thực tế của sản phẩm.
+Quy tắc minh hoạ: giá cơ bản 12.000 VND đã gồm 2 km đầu, mỗi km vượt thêm tính 4.500 VND. Chưa có phụ phí, thuế, giảm giá hoặc làm tròn theo bậc. Đây là giả định để học, không phải bảng giá thực tế của sản phẩm.
 
 Thay toàn bộ `Program.cs` bằng:
 
@@ -130,11 +130,11 @@ dotnet build
 dotnet run --no-build
 ```
 
-`--no-build` chạy đầu ra đã có. Nếu sửa source mà không build lại, bạn có thể thấy kết quả cũ. Còn `dotnet publish` chuẩn bị đầu ra để triển khai; lựa chọn framework-dependent hay self-contained quyết định máy đích có cần runtime được cài riêng hay không. Cài SDK ở máy lập trình không tự cài runtime cho server.
+`--no-build` chạy đầu ra đã có. Nếu sửa source mà không build lại, bạn có thể thấy kết quả cũ. Còn `dotnet publish` chuẩn bị đầu ra để triển khai; lựa chọn framework-dependent hay self-contained quyết định máy đích có cần cài runtime riêng hay không. Cài SDK ở máy lập trình không tự cài runtime cho server.
 
 ## Một chương trình chạy được vẫn có thể sai
 
-Đổi `distanceKm` thành `-1m`: chương trình vẫn in 12.000 VND. Compiler không biết khoảng cách âm là vô nghĩa trong nghiệp vụ. Công thức chặn phần vượt âm không phải validation đầu vào.
+Đổi `distanceKm` thành `-1m`: chương trình vẫn in 12.000 VND. Compiler không biết khoảng cách âm là vô nghĩa trong nghiệp vụ. Công thức chặn phần vượt âm không phải bước kiểm tra đầu vào.
 
 Bài sau sẽ thêm kiểm tra miền giá trị và giải thích kiểu dữ liệu; hiện tại hãy ghi rõ giới hạn: khoảng cách được gán sẵn, chưa đọc từ người dùng, chưa từ chối số âm, chưa có tiền tệ hay chính sách làm tròn. Đừng đưa ví dụ này thành endpoint nhận dữ liệu công khai khi chưa bổ sung các điều kiện đó.
 
@@ -157,21 +157,21 @@ Mỗi lần đổi `distanceKm`, chạy lại `dotnet run` và so với bảng:
 | 2,5 km | 0,5 km | 14250 VND |
 | 5 km | 3 km | 25500 VND |
 
-0 km vẫn tính giá cơ bản là lựa chọn của mô hình này, không phải quy luật bắt buộc. Khi yêu cầu sản phẩm thay đổi, cần đổi cả quy tắc lẫn kỳ vọng kiểm thử.
+Việc 0 km vẫn tính giá cơ bản là lựa chọn của mô hình này, không phải quy luật bắt buộc. Khi yêu cầu sản phẩm thay đổi, cần đổi cả quy tắc lẫn kỳ vọng kiểm thử.
 
 **Bài tập:** đổi giá mỗi km vượt thành 5.000 VND. Khách đi 4 km phải trả bao nhiêu? Nếu đổi `:0` thành `:0.00`, giá trị tiền lưu trong biến có thay đổi không?
 
-<details><summary>Xem lời giải</summary><p>Phần vượt là 2 km, tổng bằng 12.000 + 2 × 5.000 = <b>22.000 VND</b>. Đổi format chỉ thay cách in ra: biến total vẫn giữ giá trị tính toán ban đầu.</p></details>
+<details><summary>Xem lời giải</summary><p>Phần vượt là 2 km, tổng bằng 12.000 + 2 × 5.000 = <b>22.000 VND</b>. Đổi định dạng chỉ thay cách in ra: biến total vẫn giữ giá trị tính toán ban đầu.</p></details>
 
 ## Kiến trúc mà loạt bài hướng tới
 
-Các backend service chính của Tới Nơi sẽ dùng **DDD + Clean Architecture + CQRS + Mediator + Repository + Unit of Work**. Chương trình console ở bài này là bước đầu học ngôn ngữ. Khi sang service hoàn chỉnh, quy tắc nghiệp vụ thuộc Domain, use case thuộc Application, lưu trữ thuộc Infrastructure và HTTP thuộc API. Những pattern bổ sung sẽ được chọn theo vấn đề cụ thể. Xem [định hướng kiến trúc trong hồ sơ Tới Nơi](/articles/du-an-mau-toi-noi).
+Các backend service chính của Tới Nơi sẽ dùng **DDD + Clean Architecture + CQRS + Mediator + Repository + Unit of Work**. Chương trình console ở bài này là bước đầu học ngôn ngữ. Khi sang service hoàn chỉnh, quy tắc nghiệp vụ thuộc Domain, use case thuộc Application, lưu trữ thuộc Infrastructure và HTTP thuộc API. Ta sẽ chọn thêm các pattern khác theo từng vấn đề cụ thể. Xem [định hướng kiến trúc trong hồ sơ Tới Nơi](/articles/du-an-mau-toi-noi).
 
 ## Học tiếp từ đây
 
 Bạn đã tạo một ứng dụng `net10.0`, phân biệt ngôn ngữ với nền tảng và kiểm tra một công thức có đầu ra xác định. [Bài 02](/articles/csharp-bien-kieu-du-lieu-decimal) đi sâu vào biến, kiểu số, chuyển đổi và `decimal`, trước khi thêm điều kiện, vòng lặp, phương thức và mô hình chuyến xe.
 
-Toàn bộ lộ trình đi qua sáu chặng: nền tảng C# → mô hình hoá nghiệp vụ → bất đồng bộ và kiểm thử → ASP.NET Core 10 → dữ liệu và độ tin cậy → vận hành và tối ưu. Code bài này nằm trong repository tại `examples/toi-noi-dotnet/01-csharp-va-dotnet`; khung biên tập nằm trong `examples/toi-noi-dotnet/README.md`.
+Toàn bộ lộ trình đi qua sáu chặng: nền tảng C# → mô hình hoá nghiệp vụ → bất đồng bộ và kiểm thử → ASP.NET Core 10 → dữ liệu và độ tin cậy → vận hành và tối ưu. Code bài này nằm trong repository tại `examples/toi-noi-dotnet/01-csharp-va-dotnet`; hướng dẫn biên soạn nằm trong `examples/toi-noi-dotnet/README.md`.
 
 ## Tài liệu gốc
 

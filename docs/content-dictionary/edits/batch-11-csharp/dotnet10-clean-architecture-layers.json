@@ -1,0 +1,191 @@
+{
+  "file": "dotnet10-clean-architecture-layers.md",
+  "edits": [
+    {
+      "old": ", target `net10.0`.",
+      "new": ", nhắm tới `net10.0`.",
+      "reason": "\"target\" dùng như động từ",
+      "severity": "low"
+    },
+    {
+      "old": "Infrastructure hiện thực nó và composition root",
+      "new": "Infrastructure triển khai nó và composition root",
+      "reason": "Thống nhất \"triển khai\" trong cùng bài",
+      "severity": "low"
+    },
+    {
+      "old": "Ba mươi bài đầu đã kiểm từng cơ chế.",
+      "new": "Ba mươi bài đầu đã kiểm tra từng cơ chế.",
+      "reason": "\"kiểm\" cụt",
+      "severity": "low"
+    },
+    {
+      "old": "dữ liệu và Outbox commit trên PostgreSQL.",
+      "new": "dữ liệu và Outbox được commit trên PostgreSQL.",
+      "reason": "Thiếu \"được\", câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Không thêm tám bản chép công thức khác nhau.",
+      "new": "Không thêm tám bản sao công thức khác nhau.",
+      "reason": "\"bản chép công thức khác nhau\" dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó chưa là toàn bộ sản phẩm Tới Nơi:",
+      "new": "Service này chưa phải là toàn bộ sản phẩm Tới Nơi:",
+      "reason": "Đại từ \"Nó\" mơ hồ, thiếu \"phải\"",
+      "severity": "medium"
+    },
+    {
+      "old": "không tự chứng minh clean;",
+      "new": "không tự chứng minh kiến trúc đó là clean;",
+      "reason": "Câu cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "## Bốn tầng có việc gì?",
+      "new": "## Bốn tầng làm những việc gì?",
+      "reason": "Câu hỏi gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "xác thực/phân quyền và là composition root.",
+      "new": "xác thực, phân quyền và đóng vai trò composition root.",
+      "reason": "Dấu gạch chéo, cấu trúc song song lệch",
+      "severity": "medium"
+    },
+    {
+      "old": "API tham chiếu các lớp cần lắp.",
+      "new": "API tham chiếu các lớp cần ghép vào.",
+      "reason": "\"cần lắp\" cụt",
+      "severity": "low"
+    },
+    {
+      "old": "còn kiểm referenced assemblies để phát hiện",
+      "new": "còn kiểm tra các assembly được tham chiếu để phát hiện",
+      "reason": "Cụm tiếng Anh chưa Việt hoá, \"kiểm\" cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "có thể đi từ handler tới repository implementation.",
+      "new": "có thể đi từ handler tới lớp triển khai repository.",
+      "reason": "Cụm tiếng Anh xen vào, trật tự từ kiểu Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Chiều phụ thuộc source vẫn hướng vào",
+      "new": "Chiều phụ thuộc trong mã nguồn vẫn hướng vào",
+      "reason": "\"phụ thuộc source\" tự ghép",
+      "severity": "medium"
+    },
+    {
+      "old": "## Domain khác persistence row",
+      "new": "## Domain khác với persistence row",
+      "reason": "Tiêu đề cụt",
+      "severity": "low"
+    },
+    {
+      "old": "có setter để EF materialize;",
+      "new": "có setter để EF nạp dữ liệu vào đối tượng (materialize);",
+      "reason": "Từ tiếng Anh chưa giải thích",
+      "severity": "medium"
+    },
+    {
+      "old": "kiểm trạng thái lưu hợp lệ và không phát",
+      "new": "kiểm tra trạng thái đã lưu có hợp lệ và không phát",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "giúp nhìn rõ invariant và khác biệt giữa tạo mới với khôi phục.",
+      "new": "giúp thấy rõ invariant và sự khác biệt giữa tạo mới với khôi phục.",
+      "reason": "Thiếu danh từ hoá",
+      "severity": "low"
+    },
+    {
+      "old": "Restore không đồng nghĩa tin mọi dữ liệu từ API:",
+      "new": "Restore không có nghĩa là tin mọi dữ liệu từ API:",
+      "reason": "Thiếu động từ \"là\"",
+      "severity": "medium"
+    },
+    {
+      "old": "dữ liệu lưu hỏng cần được nhìn thấy như lỗi hệ thống.",
+      "new": "dữ liệu đã lưu bị hỏng cần hiện ra như một lỗi hệ thống.",
+      "reason": "Bị động kiểu Anh, thiếu \"bị\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Khi đánh giá một cách map khác,",
+      "new": "Khi đánh giá một cách ánh xạ khác,",
+      "reason": "\"map\" lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "đăng ký repository concrete scoped một lần, rồi map ITripRepository về cùng instance;",
+      "new": "đăng ký repository concrete với vòng đời scoped một lần, rồi ánh xạ ITripRepository về cùng instance đó;",
+      "reason": "Cụm tiếng Anh xếp chồng, \"map\" lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "TimeProvider sống dùng chung và được thay",
+      "new": "TimeProvider là bản dùng chung và được thay",
+      "reason": "\"sống dùng chung\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "nằm ở dispatcher hạ tầng có phạm vi rõ,",
+      "new": "nằm ở dispatcher thuộc hạ tầng, với phạm vi được giới hạn rõ ràng,",
+      "reason": "Cụm \"dispatcher hạ tầng có phạm vi rõ\" nặng, cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Cấu hình storage/auth được bind và validate",
+      "new": "Cấu hình storage và auth được bind và validate",
+      "reason": "Dấu gạch chéo",
+      "severity": "low"
+    },
+    {
+      "old": "readiness kiểm kết nối và pending migration. Live không query DB để",
+      "new": "readiness kiểm tra kết nối và migration đang chờ. Liveness không query DB để",
+      "reason": "\"kiểm\" cụt; \"Live\" cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "chuyển một câu UseNpgsql vào Domain",
+      "new": "chuyển một lời gọi UseNpgsql vào Domain",
+      "reason": "\"câu\" dịch từ statement, gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Test số tiền có thể vẫn qua,",
+      "new": "Test số tiền có thể vẫn đạt,",
+      "reason": "\"vẫn qua\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "giúp test và thay đổi chi tiết độc lập.",
+      "new": "giúp ta test và thay đổi từng chi tiết một cách độc lập.",
+      "reason": "Câu thiếu chủ ngữ, mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Phạm vi được kiểm ở đây là bốn tầng",
+      "new": "Phạm vi được kiểm tra ở đây là bốn tầng",
+      "reason": "\"kiểm\" cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Test không tự skip khi thiếu PostgreSQL.",
+      "new": "Test không tự bỏ qua khi thiếu PostgreSQL.",
+      "reason": "\"skip\" tiếng Anh thường",
+      "severity": "medium"
+    },
+    {
+      "old": "Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.",
+      "new": "Về đặc tả Docker/CI/cloud, xem README của service và cloud/README.md để biết phạm vi, điều kiện tiên quyết và phần chưa được triển khai thật.",
+      "reason": "Câu thiếu chủ ngữ, danh từ làm định ngữ",
+      "severity": "high"
+    }
+  ]
+}

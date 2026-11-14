@@ -1,0 +1,12 @@
+{"file":"csharp-va-dotnet-10-tu-source-code-den-chuong-trinh.md","edits":[
+{"old":"Dùng editor quen thuộc; terminal đủ để chạy ví dụ.","new":"Dùng trình soạn thảo quen thuộc; terminal đủ để chạy ví dụ.","reason":"Từ tiếng Anh thông thường đã có từ Việt quen dùng","severity":"low"},
+{"old":"Lần đầu có thể cần mạng để restore;","new":"Lần đầu có thể cần mạng để tải gói phụ thuộc (restore);","reason":"Giải nghĩa thuật ngữ restore cho người mới","severity":"low"},
+{"old":"Công thức chặn phần vượt âm không phải validation đầu vào.","new":"Công thức chặn phần vượt âm không phải bước kiểm tra đầu vào.","reason":"Thống nhất cách gọi validation là kiểm tra đầu vào","severity":"medium"},
+{"old":"khung biên tập nằm trong","new":"hướng dẫn biên soạn nằm trong","reason":"Cụm tự ghép, khó hiểu","severity":"medium"},
+{"old":"Quy tắc minh hoạ: 12.000 VND bao gồm 2 km đầu, mỗi km vượt thêm 4.500 VND.","new":"Quy tắc minh hoạ: giá cơ bản 12.000 VND đã gồm 2 km đầu, mỗi km vượt thêm tính 4.500 VND.","reason":"Câu cụt, thiếu chủ thể và động từ","severity":"medium"},
+{"old":"Compiler tạo điểm vào chương trình giúp ta.","new":"Compiler tự tạo điểm vào chương trình cho ta.","reason":"Cách nói gượng kiểu dịch","severity":"low"},
+{"old":"0 km vẫn tính giá cơ bản là lựa chọn của mô hình này","new":"Việc 0 km vẫn tính giá cơ bản là lựa chọn của mô hình này","reason":"Câu thiếu chủ ngữ, phải đoán ý","severity":"medium"},
+{"old":"quyết định máy đích có cần runtime được cài riêng hay không.","new":"quyết định máy đích có cần cài runtime riêng hay không.","reason":"Bỏ bị động kiểu tiếng Anh","severity":"medium"},
+{"old":"Những pattern bổ sung sẽ được chọn theo vấn đề cụ thể.","new":"Ta sẽ chọn thêm các pattern khác theo từng vấn đề cụ thể.","reason":"Chuyển bị động sang chủ động","severity":"medium"},
+{"old":"Đổi format chỉ thay cách in ra:","new":"Đổi định dạng chỉ thay cách in ra:","reason":"Từ tiếng Anh thông thường đã có từ Việt","severity":"low"}
+]}

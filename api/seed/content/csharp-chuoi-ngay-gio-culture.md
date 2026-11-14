@@ -1,7 +1,7 @@
 ---
 slug: csharp-chuoi-ngay-gio-culture
 title: "Chuỗi, ngày giờ và culture: hiển thị đúng, trao đổi đúng trong C#"
-summary: "Bài 04: tách format giao diện khỏi hợp đồng dữ liệu, parse khoảng cách có culture, dùng DateTimeOffset và biểu diễn UTC cho báo giá Tới Nơi."
+summary: "Bài 04: tách định dạng giao diện khỏi hợp đồng dữ liệu, parse khoảng cách có culture, dùng DateTimeOffset và biểu diễn UTC cho báo giá Tới Nơi."
 category: csharp-beginner
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
@@ -13,12 +13,12 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Chuỗi 2,501 có luôn mang cùng một số không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Cần biết grammar và culture; dấu phẩy có thể là dấu thập phân, dấu phân nhóm hoặc bị từ chối.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Cần biết quy tắc đọc số (grammar) và culture; dấu phẩy có thể là dấu thập phân, dấu phân nhóm hoặc bị từ chối.</p></details>
 </div>
 
 ## Một con số, hai người đọc
 
-Khách nhập **2,501 km**, service lại hiểu thành **2501 km**: công thức tính tiền có thể hoàn toàn đúng nhưng dữ liệu đã sai ngay ở cửa vào. Sau [bài 03](/articles/csharp-dieu-kien-vong-lap-phuong-thuc), ta biết từ chối ngoài miền; hôm nay phải biết chuỗi nhập vào mang ý nghĩa gì trước khi kiểm tra miền.
+Khách nhập **2,501 km**, service lại hiểu thành **2501 km**: công thức tính tiền có thể hoàn toàn đúng nhưng dữ liệu đã sai ngay ở cửa vào. Sau [bài 03](/articles/csharp-dieu-kien-vong-lap-phuong-thuc), ta đã biết cách từ chối giá trị ngoài miền; hôm nay phải biết chuỗi nhập vào mang ý nghĩa gì trước khi kiểm tra miền.
 
 Chuỗi (`string`) là văn bản Unicode và bất biến: gọi `Trim()` tạo kết quả mới, không sửa chuỗi cũ. Bất biến không có nghĩa mọi biến string không gán lại được. `string label = "A"; label = "B";` vẫn hợp lệ; đó là biến trỏ tới giá trị chuỗi khác.
 
@@ -28,20 +28,20 @@ Trong Tới Nơi có ít nhất ba cách biểu diễn báo giá: số decimal �
 
 `decimal.TryParse` trả bool và ghi kết quả qua `out`; khi thất bại, kết quả không được xem là dữ liệu hợp lệ. Dùng TryParse cho lỗi nhập liệu dự kiến, thay vì tạo exception cho mỗi lần người dùng gõ dở một con số.
 
-Ví dụ này cố ý chỉ cho phép chữ số và dấu thập phân theo `vi-VN`: không có dấu phân nhóm nghìn, dấu âm, khoảng trắng hay ký hiệu VND. `NumberStyles.AllowDecimalPoint` diễn đạt phạm vi hẹp đó. Vì vậy `2,501` nhận được, còn `2.501` bị từ chối. Nếu dùng style rộng hơn có dấu phân nhóm, cùng chuỗi có thể mang ý nghĩa khác. Đây là lựa chọn grammar của lab, không phải mọi ô nhập số đều phải dùng quy tắc này.
+Ví dụ này cố ý chỉ cho phép chữ số và dấu thập phân theo `vi-VN`: không có dấu phân nhóm nghìn, dấu âm, khoảng trắng hay ký hiệu VND. `NumberStyles.AllowDecimalPoint` diễn đạt phạm vi hẹp đó. Vì vậy `2,501` được chấp nhận, còn `2.501` bị từ chối. Nếu dùng style rộng hơn, có chấp nhận dấu phân nhóm, cùng chuỗi có thể mang ý nghĩa khác. Đây là lựa chọn grammar của bài thực hành, không phải mọi ô nhập số đều phải dùng quy tắc này.
 
-Sau parse vẫn cần validation miền 0–100 km như bài trước. Parse trả lời “có đọc được thành decimal không”, không trả lời “có hợp lệ cho chuyến xe không”. Dữ liệu JSON nên giữ trường số là số với schema và đơn vị rõ ràng; không áp dụng thói quen phân cách địa phương của textbox vào JSON number.
+Sau parse vẫn cần kiểm tra miền 0–100 km như bài trước. Parse trả lời “có đọc được thành decimal không”, không trả lời “có hợp lệ cho chuyến xe không”. Dữ liệu JSON nên giữ trường số là số với schema và đơn vị rõ ràng; không áp dụng cách phân cách theo thói quen địa phương của ô nhập vào JSON number.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 185" role="img" aria-label="Hình 1. Parse tại cửa vào, tính bằng dữ liệu có kiểu, format tại cửa ra. Không dùng chuỗi giao diện làm dữ liệu tiền."><rect x="20" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="32" y="79" class="t-b">Ô nhập Việt Nam</text><text x="32" y="115" class="t-small">2,501 km</text><text x="280" y="100" class="t-b">→</text><rect x="300" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="312" y="79" class="t-b">Trong ứng dụng</text><text x="312" y="115" class="t-small">decimal 2.501</text><text x="560" y="100" class="t-b">→</text><rect x="580" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="592" y="79" class="t-b">Giao diện</text><text x="592" y="115" class="t-small">14.255 VND</text></svg>
+<svg viewBox="0 0 880 185" role="img" aria-label="Hình 1. Parse tại cửa vào, tính bằng dữ liệu có kiểu, định dạng tại cửa ra. Không dùng chuỗi giao diện làm dữ liệu tiền."><rect x="20" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="32" y="79" class="t-b">Ô nhập Việt Nam</text><text x="32" y="115" class="t-small">2,501 km</text><text x="280" y="100" class="t-b">→</text><rect x="300" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="312" y="79" class="t-b">Trong ứng dụng</text><text x="312" y="115" class="t-small">decimal 2.501</text><text x="560" y="100" class="t-b">→</text><rect x="580" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="592" y="79" class="t-b">Giao diện</text><text x="592" y="115" class="t-small">14.255 VND</text></svg>
 </div>
-<figcaption>Hình 1. Parse tại cửa vào, tính bằng dữ liệu có kiểu, format tại cửa ra. Không dùng chuỗi giao diện làm dữ liệu tiền.</figcaption>
+<figcaption>Hình 1. Parse tại cửa vào, tính bằng dữ liệu có kiểu, định dạng tại cửa ra. Không dùng chuỗi giao diện làm dữ liệu tiền.</figcaption>
 </figure>
 
 ## Thời điểm, thời lượng và múi giờ
 
-`DateTimeOffset` biểu diễn thời gian cùng offset, phù hợp ghi nhận một thời điểm đã phát sinh. Ví dụ `08:30 +07:00` và `01:30 +00:00` là cùng instant. `DateTime` có Kind nhưng không mang một định danh múi giờ đầy đủ; đừng nghĩ DateTime bất kỳ tự biết thành phố của khách.
+`DateTimeOffset` biểu diễn thời gian cùng offset, phù hợp ghi nhận một thời điểm đã phát sinh. Ví dụ `08:30 +07:00` và `01:30 +00:00` là cùng instant. `DateTime` có Kind nhưng không mang một định danh múi giờ đầy đủ; đừng nghĩ giá trị DateTime nào cũng tự biết thành phố của khách.
 
 `TimeSpan` biểu diễn thời lượng như báo giá có hiệu lực 5 phút. `DateOnly` phù hợp ngày không kèm giờ, như một ngày nghiệp vụ đã được định nghĩa; đừng biến mọi ngày thành nửa đêm UTC rồi coi như không còn vấn đề múi giờ.
 
@@ -49,22 +49,22 @@ Offset `+07:00` không phải timezone ID. Lịch hẹn tương lai theo giờ �
 
 ## Round-trip và hiển thị
 
-Format `O` giữ thông tin cần cho round-trip. Ta chuẩn hoá instant sang UTC ở ranh giới trao đổi bằng `ToUniversalTime`, sau đó format với InvariantCulture. ParseExact đọc lại đúng hợp đồng đã chọn. So sánh DateTimeOffset bằng `==` kiểm tra cùng instant; không yêu cầu offset gốc giống nhau.
+Định dạng `O` giữ thông tin cần cho round-trip. Ta chuẩn hoá instant sang UTC ở ranh giới trao đổi bằng `ToUniversalTime`, sau đó định dạng với InvariantCulture. ParseExact đọc lại đúng hợp đồng đã chọn. So sánh DateTimeOffset bằng `==` kiểm tra cùng instant; không yêu cầu offset gốc giống nhau.
 
-Giao diện dùng `N0` cùng culture Việt Nam để phân nhóm tiền, nhưng wire không dùng chuỗi giao diện. Đừng lưu vào database một thời gian đã format `06/11/2026 08:30` rồi bỏ offset. Bài EF Core/PostgreSQL sau sẽ chọn kiểu cột, mapping và kiểm chứng round-trip; bài hiện tại chưa có database.
+Giao diện dùng `N0` cùng culture Việt Nam để phân nhóm tiền, nhưng dữ liệu truyền giữa các hệ thống không dùng chuỗi giao diện. Đừng lưu vào database một thời điểm đã được định dạng thành `06/11/2026 08:30` rồi bỏ offset. Bài EF Core/PostgreSQL sau sẽ chọn kiểu cột, mapping và kiểm chứng round-trip; bài hiện tại chưa có database.
 
-Trong code production, “bây giờ” cũng là một phụ thuộc: thay đọc đồng hồ rải rác bằng TimeProvider khi cần kiểm thử hết hạn báo giá. Hôm nay dùng thời điểm cố định giúp người đọc đối chiếu kết quả mà không phụ thuộc giờ chạy.
+Trong code production, “bây giờ” cũng là một phụ thuộc: thay việc đọc đồng hồ rải rác bằng TimeProvider khi cần kiểm thử trường hợp báo giá hết hạn. Hôm nay dùng thời điểm cố định giúp người đọc đối chiếu kết quả mà không phụ thuộc giờ chạy.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 185" role="img" aria-label="Hình 2. Đổi offset khi chuẩn hoá UTC giữ nguyên instant; nó không chỉ là xoá phần offset khỏi chuỗi."><rect x="20" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="32" y="79" class="t-b">Giờ đã phát sinh</text><text x="32" y="115" class="t-small">08:30 +07:00</text><text x="280" y="100" class="t-b">→</text><rect x="300" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="312" y="79" class="t-b">Cùng instant UTC</text><text x="312" y="115" class="t-small">01:30 +00:00</text><text x="560" y="100" class="t-b">→</text><rect x="580" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="592" y="79" class="t-b">Đọc lại</text><text x="592" y="115" class="t-small">Instant không đổi</text></svg>
+<svg viewBox="0 0 880 185" role="img" aria-label="Hình 2. Quy đổi offset khi chuẩn hoá về UTC giữ nguyên instant; đây không chỉ là việc xoá phần offset khỏi chuỗi."><rect x="20" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="32" y="79" class="t-b">Giờ đã phát sinh</text><text x="32" y="115" class="t-small">08:30 +07:00</text><text x="280" y="100" class="t-b">→</text><rect x="300" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="312" y="79" class="t-b">Cùng instant UTC</text><text x="312" y="115" class="t-small">01:30 +00:00</text><text x="560" y="100" class="t-b">→</text><rect x="580" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="592" y="79" class="t-b">Đọc lại</text><text x="592" y="115" class="t-small">Instant không đổi</text></svg>
 </div>
-<figcaption>Hình 2. Đổi offset khi chuẩn hoá UTC giữ nguyên instant; nó không chỉ là xoá phần offset khỏi chuỗi.</figcaption>
+<figcaption>Hình 2. Quy đổi offset khi chuẩn hoá về UTC giữ nguyên instant; đây không chỉ là việc xoá phần offset khỏi chuỗi.</figcaption>
 </figure>
 
 ## Đọc kết quả và tránh lỗi
 
-Đầu ra chính: khoảng cách `2,501 km`, giá `14.255 VND`, wire UTC `2026-11-06T01:30:00.0000000+00:00`, và `Same instant: True`. Dấu phân nhóm hiển thị theo dữ liệu globalization của runtime, nên kiểm chứng số tiền bằng decimal chứ không lấy chuỗi hiển thị làm invariant.
+Đầu ra chính: khoảng cách `2,501 km`, giá `14.255 VND`, wire UTC `2026-11-06T01:30:00.0000000+00:00`, và `Same instant: True`. Dấu phân nhóm hiển thị theo dữ liệu globalization của runtime, nên kiểm chứng số tiền bằng decimal, không lấy chuỗi hiển thị làm giá trị chuẩn để so sánh.
 
 | Lỗi | Hậu quả | Cách xử lý |
 | --- | --- | --- |
@@ -75,7 +75,7 @@ Trong code production, “bây giờ” cũng là một phụ thuộc: thay đ�
 
 **Bài tập:** đổi offset gốc thành +08:00 nhưng giữ 08:30. UTC có còn 01:30 không? Nếu người dùng nhập `1.234,5`, grammar hiện tại có chấp nhận không?
 
-<details><summary>Xem đáp án</summary><p>UTC thành 00:30 vì instant đã đổi. Chuỗi có dấu phân nhóm bị từ chối theo grammar hẹp của lab; không tự gỡ dấu chấm rồi đoán ý người nhập.</p></details>
+<details><summary>Xem đáp án</summary><p>UTC thành 00:30 vì instant đã đổi. Chuỗi có dấu phân nhóm bị từ chối theo grammar hẹp của bài thực hành; không tự gỡ dấu chấm rồi đoán ý người nhập.</p></details>
 
 ## Chạy và kiểm chứng
 
@@ -86,7 +86,7 @@ dotnet run --project examples/toi-noi-dotnet/04-chuoi-ngay-gio-culture
 dotnet run --project examples/toi-noi-dotnet/04-chuoi-ngay-gio-culture -- --verify
 ```
 
-Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
+Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Khi kiểm tra không đạt, chương trình ném lỗi và trả exit code báo thất bại. Đây là harness chạy trên console, dùng cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu mới học đến đây, bạn chưa cần hiểu toàn bộ generics/delegate trong harness.
 
 Mã nguồn đầy đủ của Program.cs (đặt trong console net10.0 như bài 01):
 

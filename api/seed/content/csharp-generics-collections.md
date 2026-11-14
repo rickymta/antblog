@@ -1,7 +1,7 @@
 ---
 slug: csharp-generics-collections
 title: "Generics và collections: quản lý chuyến và tài xế trong C#"
-summary: "Bài 09: chọn List, Dictionary, HashSet và Queue theo thao tác nghiệp vụ; hiểu generic type safety, alias và giới hạn thread safety của collection thường."
+summary: "Bài 09: chọn List, Dictionary, HashSet và Queue theo thao tác nghiệp vụ; hiểu type safety của generic, alias và giới hạn thread safety của collection thường."
 category: csharp-beginner
 level: beginner
 tags: [csharp, dotnet, dotnet-10, toi-noi]
@@ -12,25 +12,25 @@ language: vi
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>HashSet trong memory đủ chống trùng sau restart không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Set mất theo process; idempotency bền cần được lưu nhất quán.</p></details>
+<p>HashSet trong bộ nhớ có đủ để chống trùng sau khi restart không?</p>
+<details><summary>Xem đáp án</summary><p>Không. Set mất cùng với process; idempotency bền cần được lưu nhất quán.</p></details>
 </div>
 
 ## Đừng chọn collection bằng thói quen
 
-Màn hình cần danh sách chuyến theo thứ tự. Điều phối cần tìm tài xế bằng ID. Bộ xử lý event cần nhận biết ID đã thấy. Worker cần lấy công việc theo thứ tự vào hàng. Cả bốn đều chứa nhiều phần tử nhưng thao tác chính khác nhau.
+Màn hình cần danh sách chuyến theo thứ tự. Bộ phận điều phối cần tìm tài xế bằng ID. Bộ xử lý event cần nhận biết ID đã gặp. Worker cần lấy công việc theo thứ tự vào hàng. Cả bốn đều chứa nhiều phần tử nhưng thao tác chính khác nhau.
 
-Chọn collection bắt đầu từ câu hỏi: cần thứ tự, tra theo khoá, loại trùng hay lấy đầu hàng? Nếu dùng List cho tất cả rồi quét từ đầu mỗi lần, code có thể đúng ở 10 phần tử nhưng chậm khi dữ liệu tăng. Ngược lại, thêm Dictionary cho 3 phần tử chỉ đọc một lần chưa chắc đáng đổi độ đơn giản.
+Việc chọn collection nên bắt đầu từ câu hỏi: cần thứ tự, tra theo khoá, loại trùng hay lấy đầu hàng? Nếu dùng List cho tất cả rồi quét từ đầu mỗi lần, code có thể đúng ở 10 phần tử nhưng chậm khi dữ liệu tăng. Ngược lại, thêm Dictionary cho 3 phần tử chỉ đọc một lần chưa chắc đáng để đánh đổi sự đơn giản.
 
-Bài dùng ID giả, dữ liệu trong bộ nhớ và một luồng thực thi. Không tạo repository generic chỉ vì vừa học T; collection trong memory không mang cam kết durability hay transaction của database.
+Bài dùng ID giả, dữ liệu trong bộ nhớ và một luồng thực thi. Không tạo repository generic chỉ vì vừa học T; collection trong bộ nhớ không mang cam kết về độ bền dữ liệu (durability) hay transaction của database.
 
 ## T trong `List<T>` mang ý nghĩa gì?
 
-`List<string>` là generic type đã đóng với kiểu string. Compiler kiểm tra phần tử thêm vào, nên `trips.Add(123)` không biên dịch. Ta không phải lấy object ra rồi ép kiểu ở mỗi nơi như collection không generic.
+`List<string>` là generic type đã đóng với kiểu string. Compiler kiểm tra phần tử thêm vào, nên `trips.Add(123)` không biên dịch. Ta không phải lấy object ra rồi ép kiểu ở mỗi nơi như khi dùng collection không generic.
 
-Generics cho phép cùng cấu trúc dữ liệu làm việc với nhiều kiểu và giữ type safety. Nó không có nghĩa mọi kiểu đều hỗ trợ mọi phép toán: muốn cộng hoặc gọi một member trên T cần hợp đồng/constraint phù hợp. Constraint nâng cao sẽ học khi có nhu cầu; chưa cần tự xây `GenericRepository<T>` cho mọi aggregate.
+Generics cho phép cùng cấu trúc dữ liệu làm việc với nhiều kiểu và giữ type safety. Điều đó không có nghĩa là mọi kiểu đều hỗ trợ mọi phép toán: muốn cộng hoặc gọi một member trên T cần hợp đồng/constraint phù hợp. Constraint nâng cao sẽ học khi có nhu cầu; chưa cần tự xây `GenericRepository<T>` cho mọi aggregate.
 
-`var trips = new List<string>()` vẫn là `List<string>` tĩnh. Tên biến không quyết định kiểu phần tử, và var không tự thay string thành Trip khi sau này ta có class Trip.
+`var trips = new List<string>()` vẫn là `List<string>` với kiểu phần tử cố định từ lúc biên dịch. Tên biến không quyết định kiểu phần tử, và var không tự thay string thành Trip khi sau này ta có class Trip.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -43,22 +43,22 @@ Generics cho phép cùng cấu trúc dữ liệu làm việc với nhiều kiể
 
 | Cấu trúc | Thao tác phù hợp | Cái giá cần nhớ |
 | --- | --- | --- |
-| `List<T>` | Đọc chỉ số, giữ thứ tự, thêm cuối | Tìm ID thường phải quét; chèn/xoá giữa dịch phần tử |
-| `Dictionary<TKey,TValue>` | Tra khoá, cập nhật theo ID | Bộ nhớ cấu trúc hash; equality/hash của khoá cần ổn định |
-| `HashSet<T>` | Hỏi đã có chưa, thêm duy nhất | Không coi thứ tự duyệt là thứ tự nghiệp vụ |
-| `Queue<T>` | FIFO, enqueue/dequeue | Hàng trong memory mất khi process dừng |
+| `List<T>` | Đọc chỉ số, giữ thứ tự, thêm cuối | Tìm ID thường phải quét; chèn/xoá ở giữa phải dịch chuyển phần tử |
+| `Dictionary<TKey,TValue>` | Tra khoá, cập nhật theo ID | Tốn bộ nhớ cho cấu trúc hash; equality/hash của khoá cần ổn định |
+| `HashSet<T>` | Kiểm tra đã có chưa, thêm không trùng | Không coi thứ tự duyệt là thứ tự nghiệp vụ |
+| `Queue<T>` | FIFO, enqueue/dequeue | Hàng đợi trong bộ nhớ mất khi process dừng |
 
 Tra hash có chi phí kỳ vọng gần O(1) trong điều kiện thông thường, không phải cam kết cho mọi comparer và va chạm. List truy cập chỉ số O(1), nhưng tìm ID bất kỳ O(n). Hiệu năng còn phụ thuộc số phần tử, phân bổ bộ nhớ và mẫu truy cập.
 
-Dùng TryGetValue khi không tìm thấy là tình huống bình thường. `drivers[id]` với khoá thiếu ném KeyNotFoundException. TryAdd không ghi đè giá trị đã có; phép gán qua indexer có thể ghi đè. Chọn hành vi theo nghiệp vụ, đừng đổi qua lại chỉ để test hết lỗi.
+Dùng TryGetValue khi không tìm thấy là tình huống bình thường. `drivers[id]` với khoá thiếu ném KeyNotFoundException. TryAdd không ghi đè giá trị đã có; phép gán qua indexer có thể ghi đè. Chọn hành vi theo nghiệp vụ, đừng đổi qua lại chỉ để test không còn báo lỗi.
 
 ## Identity, comparer và quyền sửa
 
-Dictionary và HashSet dùng comparer để xác định khoá có cùng ý nghĩa không. Lab dùng StringComparer.Ordinal: có phân biệt hoa thường, không theo ngôn ngữ hiển thị. EV-001 khác ev-001. Nếu hợp đồng ID không phân biệt hoa thường, chọn OrdinalIgnoreCase hoặc chuẩn hoá theo rule đã định, không ToLower theo culture mặc định.
+Dictionary và HashSet dùng comparer để xác định khoá có cùng ý nghĩa không. Lab dùng StringComparer.Ordinal: có phân biệt hoa thường, không theo ngôn ngữ hiển thị. EV-001 khác ev-001. Nếu hợp đồng ID không phân biệt hoa thường, chọn OrdinalIgnoreCase hoặc chuẩn hoá theo rule đã định, đừng dùng ToLower theo culture mặc định.
 
-`List<T>` là reference type. `var other = trips` tạo alias; sửa other là sửa cùng danh sách. ToArray sao chép thành viên tại thời điểm gọi, nhưng nếu thành viên là object mutable thì hai collection vẫn có thể giữ chung tham chiếu phần tử. Bài 07 về shallow copy tiếp tục áp dụng.
+`List<T>` là reference type. `var other = trips` tạo alias; sửa other là sửa cùng danh sách. ToArray sao chép thành viên tại thời điểm gọi, nhưng nếu thành viên là object mutable thì hai collection vẫn có thể giữ chung tham chiếu phần tử. Điều đã học ở bài 07 về shallow copy vẫn áp dụng ở đây.
 
-IReadOnlyList chỉ giới hạn API nhìn từ caller; nó không đóng băng List nền mà người khác còn giữ. Nếu cần snapshot bất biến, thiết kế rõ cách sao chép/cấu trúc immutable và trạng thái phần tử. Đừng lấy chữ ReadOnly làm bằng chứng toàn graph không đổi được.
+IReadOnlyList chỉ giới hạn API mà người gọi nhìn thấy; nó không đóng băng List nền mà người khác còn giữ. Nếu cần snapshot bất biến, thiết kế rõ cách sao chép/cấu trúc immutable và trạng thái phần tử. Đừng coi chữ ReadOnly là bằng chứng cho thấy toàn bộ graph không thể thay đổi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -69,11 +69,11 @@ IReadOnlyList chỉ giới hạn API nhìn từ caller; nó không đóng băng 
 
 ## Demo chưa phải hệ thống chống xử lý trùng
 
-HashSet processedEvents minh hoạ nhận biết một ID trong một process, một lần chạy. Hai worker ở hai máy có hai set riêng sẽ cùng nhận EV-001. Restart mất set. Chống trùng cho thanh toán cần khoá idempotency lưu bền, unique constraint và transaction phù hợp.
+HashSet processedEvents minh hoạ việc nhận biết một ID trong một process, một lần chạy. Hai worker ở hai máy có hai set riêng sẽ cùng nhận EV-001. Restart mất set. Chống trùng cho thanh toán cần khoá idempotency lưu bền, unique constraint và transaction phù hợp.
 
-List, Dictionary, HashSet và Queue thường không bảo đảm đồng bộ cho ghi nhiều thread. ConcurrentDictionary hoặc Channel giúp một số mô hình concurrency, nhưng nhiều bước nghiệp vụ ghép lại vẫn cần atomicity. Bài async/concurrency sau sẽ tái hiện race riêng.
+List, Dictionary, HashSet và Queue thường không bảo đảm đồng bộ khi nhiều thread cùng ghi. ConcurrentDictionary hoặc Channel giúp một số mô hình concurrency, nhưng khi ghép nhiều bước nghiệp vụ lại thì vẫn cần tính nguyên tử (atomicity). Bài async/concurrency sau sẽ tái hiện riêng race condition.
 
-Đầu ra demo báo 2 chuyến, tìm thấy tài xế, event đầu thêm được, event trùng không thêm, TN-0001 ra khỏi queue trước. Bộ --verify kiểm tra thêm khoá thiếu, không ghi đè, queue rỗng và snapshot thành viên.
+Đầu ra của demo báo 2 chuyến, tìm thấy tài xế, event đầu tiên thêm được, event trùng không thêm được, TN-0001 ra khỏi queue trước. Nhánh --verify kiểm tra thêm các trường hợp khoá thiếu, không ghi đè, queue rỗng và snapshot thành viên.
 
 **Bài tập:** muốn hiển thị chuyến theo thứ tự tạo rồi tra nhanh theo Id, có nhất thiết dùng một collection? Nếu process chết sau Dequeue, Queue này có tự giao lại công việc không?
 
@@ -88,7 +88,7 @@ dotnet run --project examples/toi-noi-dotnet/09-generics-collections
 dotnet run --project examples/toi-noi-dotnet/09-generics-collections -- --verify
 ```
 
-Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
+Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Khi kiểm tra không đạt, chương trình ném lỗi và trả exit code báo thất bại. Đây là harness chạy trên console, dùng cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu mới học đến đây, bạn chưa cần hiểu toàn bộ generics/delegate của harness.
 
 Mã nguồn đầy đủ của Program.cs (đặt trong console net10.0 như bài 01):
 

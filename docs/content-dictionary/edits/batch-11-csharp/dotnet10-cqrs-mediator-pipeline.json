@@ -1,0 +1,191 @@
+{
+  "file": "dotnet10-cqrs-mediator-pipeline.md",
+  "edits": [
+    {
+      "old": ", target `net10.0`.",
+      "new": ", nhắm tới `net10.0`.",
+      "reason": "\"target\" dùng như động từ",
+      "severity": "low"
+    },
+    {
+      "old": "xây dispatcher typed trong process, kiểm validator trước handler và quan sát toàn bộ đường gọi bằng telemetry behavior.",
+      "new": "xây dispatcher typed trong process, kiểm tra bằng validator trước handler và quan sát toàn bộ luồng gọi bằng telemetry behavior.",
+      "reason": "Câu cụt \"kiểm validator\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab tách mô hình/đường xử lý ghi và đọc trên cùng PostgreSQL;",
+      "new": "Lab tách mô hình và luồng xử lý ghi, đọc trên cùng PostgreSQL;",
+      "reason": "Dấu gạch chéo, \"đường xử lý\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "API không tự biết cách new aggregate hoặc join dữ liệu để dựng response.",
+      "new": "API không tự biết cách khởi tạo (new) aggregate hoặc join dữ liệu để dựng response.",
+      "reason": "Động từ tiếng Anh \"new\" lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "CQRS làm rõ hai đường có yêu cầu khác nhau.",
+      "new": "CQRS làm rõ hai luồng có yêu cầu khác nhau.",
+      "reason": "\"hai đường\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Query dùng projection no-tracking, không tải aggregate",
+      "new": "Query dùng projection không theo dõi thay đổi (no-tracking) và không tải aggregate",
+      "reason": "Cụm tiếng Anh chưa giải thích, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Command gọi hành vi domain, commit qua UoW.",
+      "new": "Command gọi hành vi domain rồi commit qua UoW.",
+      "reason": "Thiếu liên từ",
+      "severity": "low"
+    },
+    {
+      "old": "mediator không là message broker.",
+      "new": "mediator không phải là message broker.",
+      "reason": "Thiếu \"phải\"",
+      "severity": "medium"
+    },
+    {
+      "old": "không tạo durability, redelivery hoặc transaction với một service ngoài.",
+      "new": "không tạo ra tính bền vững (durability), khả năng giao lại (redelivery) hay transaction với một service bên ngoài.",
+      "reason": "Thuật ngữ tiếng Anh không giải thích",
+      "severity": "medium"
+    },
+    {
+      "old": "## Dispatcher typed nhỏ để nhìn cơ chế",
+      "new": "## Dispatcher typed nhỏ để quan sát cơ chế",
+      "reason": "\"nhìn cơ chế\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Đây là implementation giảng giải có phạm vi nhỏ;",
+      "new": "Đây là một bản cài đặt nhỏ phục vụ giảng giải;",
+      "reason": "Cụm tự ghép, từ tiếng Anh thường",
+      "severity": "medium"
+    },
+    {
+      "old": "không hứa thay thế một thư viện mediator về notifications,",
+      "new": "không hứa thay thế được một thư viện mediator ở các mặt notifications,",
+      "reason": "\"về\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "không yêu cầu người đọc tin một lời gọi Send bí ẩn.",
+      "new": "không bắt người đọc tin vào một lời gọi Send bí ẩn.",
+      "reason": "\"yêu cầu … tin\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "vòng Reverse xây delegate sao cho",
+      "new": "vòng lặp Reverse dựng delegate sao cho",
+      "reason": "\"vòng Reverse\", \"xây\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "metric/thời gian ở biên application,",
+      "new": "metric và thời gian ở ranh giới application,",
+      "reason": "Dấu gạch chéo; \"biên\" tự ghép",
+      "severity": "medium"
+    },
+    {
+      "old": "Validator kiểm token huỷ, miền distance, precision và key.",
+      "new": "Validator kiểm tra token huỷ, miền giá trị của distance, precision và key.",
+      "reason": "\"kiểm\" cụt, \"miền distance\" cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Handler chịu dùng domain cho rule nghiệp vụ.",
+      "new": "Handler dùng domain cho rule nghiệp vụ.",
+      "reason": "\"chịu dùng\" là cách dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Không đưa transaction chung bao mọi query chỉ vì muốn thêm một behavior: sẽ mở transaction",
+      "new": "Không đưa một transaction chung bao quanh mọi query chỉ vì muốn thêm một behavior: làm vậy sẽ mở transaction",
+      "reason": "Câu thiếu chủ ngữ và giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Test HTTP với trạng thái DB/Outbox là một cách quan sát hậu quả chứ không chỉ assert delegate đã được gọi.",
+      "new": "Test HTTP kèm kiểm tra trạng thái DB/Outbox là một cách quan sát hậu quả, chứ không chỉ assert rằng delegate đã được gọi.",
+      "reason": "Câu cụt, \"assert\" lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "## Cancellation đi xuyên thay vì bị nuốt",
+      "new": "## Cancellation được truyền xuyên suốt thay vì bị nuốt mất",
+      "reason": "\"đi xuyên\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Validation check pre-cancelled token trước khi gọi handler.",
+      "new": "Validation kiểm tra token đã bị huỷ từ trước khi gọi handler.",
+      "reason": "Câu thiếu chủ ngữ/động từ rõ ràng",
+      "severity": "high"
+    },
+    {
+      "old": "Test yêu cầu command đã huỷ không tạo Trip.",
+      "new": "Test yêu cầu rằng command đã huỷ thì không tạo Trip.",
+      "reason": "Câu cụt, thiếu liên kết",
+      "severity": "medium"
+    },
+    {
+      "old": "Đây là hợp tác huỷ, không bảo đảm request timeout thì database chắc chắn chưa commit.",
+      "new": "Đây là việc huỷ mang tính hợp tác, không bảo đảm rằng khi request bị timeout thì database chắc chắn chưa commit.",
+      "reason": "Câu dịch gượng, thiếu động từ",
+      "severity": "high"
+    },
+    {
+      "old": "Client cần idempotency và tra kết quả bằng hợp đồng rõ.",
+      "new": "Client cần idempotency và cách tra kết quả theo một hợp đồng rõ ràng.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Lỗi đã hiểu được map ở API:",
+      "new": "Các lỗi đã được nhận biết thì được ánh xạ ở API:",
+      "reason": "\"hiểu được map\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Có cần làm GetTrip đi qua repository aggregate để được gọi là CQRS không?",
+      "new": "Có cần bắt GetTrip đi qua repository aggregate thì mới được gọi là CQRS không?",
+      "reason": "Câu dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "đoạn telemetry trong không chạy.",
+      "new": "đoạn telemetry bên trong không chạy.",
+      "reason": "\"trong\" mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "Test không tự skip khi thiếu PostgreSQL.",
+      "new": "Test không tự bỏ qua khi thiếu PostgreSQL.",
+      "reason": "\"skip\" tiếng Anh thường",
+      "severity": "medium"
+    },
+    {
+      "old": "Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.",
+      "new": "Về đặc tả Docker/CI/cloud, xem README của service và cloud/README.md để biết phạm vi, điều kiện tiên quyết và phần chưa được triển khai thật.",
+      "reason": "Câu thiếu chủ ngữ, danh từ làm định ngữ",
+      "severity": "high"
+    },
+    {
+      "old": "aria-label=\"Hình 1. Điều phối trong process; không tạo giao hàng bền giữa service.\"",
+      "new": "aria-label=\"Hình 1. Điều phối trong process; không tạo ra việc giao thông điệp bền vững giữa các service.\"",
+      "reason": "\"giao hàng\" sai ngữ cảnh",
+      "severity": "medium"
+    },
+    {
+      "old": "<figcaption>Hình 1. Điều phối trong process; không tạo giao hàng bền giữa service.</figcaption>",
+      "new": "<figcaption>Hình 1. Điều phối trong process; không tạo ra việc giao thông điệp bền vững giữa các service.</figcaption>",
+      "reason": "\"giao hàng\" sai ngữ cảnh",
+      "severity": "medium"
+    }
+  ]
+}

@@ -1,36 +1,36 @@
 ---
 slug: csharp-unit-test-test-double
-title: "Unit test và test double: kiểm thử chính sách cước C# bằng xUnit"
-summary: "Bài 14: chuyển kiểm chứng console sang xUnit, chọn ca biên độc lập và dùng test double đúng phạm vi; phân biệt test công thức với test đường điều phối."
+title: "Unit test và test double: kiểm thử chính sách tính cước trong C# bằng xUnit"
+summary: "Bài 14: chuyển kiểm chứng console sang xUnit, chọn test case biên độc lập và dùng test double đúng phạm vi; phân biệt test công thức với test đường điều phối."
 category: csharp-intermediate
 level: intermediate
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 14** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 14** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Test dùng fake policy trả 999 VND có chứng minh công thức StandardFarePolicy đúng không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Nó kiểm tra use case phối hợp dependency; công thức thật cần test trực tiếp với kỳ vọng nghiệp vụ.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Test đó kiểm tra use case phối hợp dependency; công thức thật cần test trực tiếp với kỳ vọng nghiệp vụ.</p></details>
 </div>
 
 ## Từ chữ PASS sang test có tên và báo cáo
 
-Các bài đầu dùng --verify để tự kiểm chứng mà chưa cần framework. Khi số rule tăng, ta cần mỗi tình huống có tên, dữ liệu đầu vào, assertion và báo cáo riêng. xUnit cung cấp runner, Fact và Theory; nó không tự chọn giúp ta các ca có giá trị.
+Các bài đầu dùng --verify để tự kiểm chứng mà chưa cần framework. Khi số rule tăng, ta cần mỗi tình huống có tên, dữ liệu đầu vào, assertion và báo cáo riêng. xUnit cung cấp runner, Fact và Theory; xUnit không tự chọn giúp ta những test case có giá trị.
 
-FareDomain là class library nhỏ lấy quy tắc đã học: 12.000 VND gồm 2 km, vượt 4.500/km, miền 0–100, làm tròn cuối đến 1 VND với AwayFromZero. Test project tham chiếu thư viện bằng ProjectReference; không sao chép công thức vào test rồi so hai bản với nhau.
+FareDomain là class library nhỏ, dùng lại quy tắc đã học: 12.000 VND gồm 2 km, phần vượt 4.500/km, miền 0–100, làm tròn cuối đến 1 VND với AwayFromZero. Test project tham chiếu thư viện bằng ProjectReference; không sao chép công thức vào test rồi so hai bản với nhau.
 
-Đây là unit test theo phạm vi: chạy logic trong memory, không chạm file, HTTP hay database. Chưa cần dựng Clean Architecture đầy đủ để kiểm tra một policy thuần. Các project API sau dùng lại thư viện này để cùng một rule được kiểm chứng qua nhiều ranh giới.
+Đây là unit test theo phạm vi: chạy logic trong bộ nhớ, không chạm file, HTTP hay database. Chưa cần dựng Clean Architecture đầy đủ để kiểm tra một policy thuần. Các project API sau dùng lại thư viện này để cùng một rule được kiểm chứng qua nhiều ranh giới.
 
 ## Arrange, Act, Assert và kỳ vọng độc lập
 
-Arrange dựng StandardFarePolicy và dữ liệu. Act gọi Calculate. Assert so với số tiền đã tính từ hợp đồng. Với 2,001 km, phần vượt 0,001 × 4.500 = 4,5; cước cuối 12.005 VND. Chọn ca này để bắt sai quy tắc midpoint, không chỉ chọn số km tròn.
+Arrange dựng StandardFarePolicy và dữ liệu. Act gọi Calculate. Assert so kết quả với số tiền đã tính từ hợp đồng. Với 2,001 km, phần vượt 0,001 × 4.500 = 4,5; cước cuối 12.005 VND. Chọn test case này để bắt lỗi ở quy tắc làm tròn midpoint, không chỉ chọn số km tròn.
 
-Theory nhận nhiều bộ dữ liệu qua InlineData. Test dùng chuỗi và parse InvariantCulture để biểu diễn decimal chính xác, vì decimal không dùng trực tiếp làm đối số attribute như số nguyên hoặc string. Bảng ca gồm 0, 2, 2,001, 2,499, 5, 100 km.
+Theory nhận nhiều bộ dữ liệu qua InlineData. Test dùng chuỗi và parse InvariantCulture để biểu diễn decimal chính xác, vì decimal không dùng trực tiếp làm đối số attribute như số nguyên hoặc string. Bảng test case gồm 0, 2, 2,001, 2,499, 5, 100 km.
 
-Ca ngoài miền còn assert tên tham số của exception. Đừng assert nguyên văn thông báo đã dịch theo môi trường nếu hợp đồng không yêu cầu. Tên test nên mô tả hành vi, không đóng cứng private method hoặc số dòng source.
+Test case ngoài miền còn assert tên tham số của exception. Đừng assert nguyên văn thông báo đã dịch theo môi trường nếu hợp đồng không yêu cầu. Tên test nên mô tả hành vi, không phụ thuộc cứng vào private method hay số dòng source.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Ca ngoài miền còn assert tên tham số của exception. Đừng assert nguy
 
 ## Test double có vai trò riêng
 
-SpyPolicy trả một giá trị dễ nhận ra và ghi LastDistance cùng Calls. Test QuoteService xác nhận nó trả kết quả dependency, truyền 5 km và gọi đúng một lần. Nó không thực thi StandardFarePolicy, nên không thể thay nhóm test công thức.
+SpyPolicy trả một giá trị dễ nhận ra và ghi LastDistance cùng Calls. Test QuoteService xác nhận QuoteService trả về kết quả của dependency, truyền 5 km và gọi đúng một lần. Cách này không thực thi StandardFarePolicy, nên không thể thay thế nhóm test công thức.
 
-Một stub cung cấp dữ liệu sắp đặt; spy ghi tương tác; mock thường có kỳ vọng tương tác được kiểm tra; fake có implementation đơn giản. Cách gọi có thể khác giữa đội ngũ, nhưng phải nói rõ thứ gì đã thay và test còn bao phủ phần nào.
+Một stub cung cấp dữ liệu sắp đặt; spy ghi tương tác; mock thường có kỳ vọng tương tác được kiểm tra; fake có bản cài đặt đơn giản. Cách gọi tên có thể khác nhau giữa các đội, nhưng phải nói rõ thứ gì đã thay và test còn bao phủ phần nào.
 
-Không mock decimal, Math.Round hay mọi property rồi assert y hệt các lời gọi trong source. Mục tiêu là hành vi thấy được. Nếu đổi cách triển khai mà vẫn đúng hợp đồng, phần lớn test nên tiếp tục qua.
+Đừng mock decimal, Math.Round hay mọi property rồi assert y hệt các lời gọi trong source. Mục tiêu là kiểm tra hành vi quan sát được. Nếu đổi cách triển khai mà vẫn đúng hợp đồng, phần lớn test nên tiếp tục đạt.
 
 ## Một test đáng tin phải có thể thất bại
 
-Thử trong nhánh làm việc riêng: đổi AwayFromZero thành ToEven, ca 2,001 hoặc 2,499 cần thất bại; đổi giá cơ bản, các kỳ vọng liên quan phải phát hiện. Không commit bản cố ý sai. Việc nhìn test đỏ trước khi tin một assertion giúp tránh một bộ chỉ luôn báo xanh.
+Thử trong nhánh làm việc riêng: đổi AwayFromZero thành ToEven, ca 2,001 hoặc 2,499 cần thất bại; nếu đổi giá cơ bản, các kỳ vọng liên quan phải phát hiện được. Đừng commit bản cố ý làm sai. Việc nhìn test đỏ trước khi tin một assertion giúp tránh một bộ test lúc nào cũng báo xanh.
 
-Đừng kiểm tra thời gian thực hay tên driver ngẫu nhiên trong bài này. Unit test dùng dữ liệu xác định, không phụ thuộc mạng, culture hoặc thứ tự chạy. Test double mới cho mỗi ca, tránh field static làm ca sau thừa hưởng trạng thái ca trước.
+Đừng kiểm tra thời gian thực hay tên driver ngẫu nhiên trong bài này. Unit test dùng dữ liệu xác định, không phụ thuộc mạng, culture hoặc thứ tự chạy. Dùng test double mới cho mỗi test case, tránh field static khiến test case sau thừa hưởng trạng thái của test case trước.
 
-Coverage có thể cho biết dòng nào chưa được đi qua, nhưng 100% dòng không chứng minh đã chọn đúng biên hoặc đúng kỳ vọng. Kết nối với loạt kiểm thử của blog: bắt đầu từ partition, boundary và rủi ro nghiệp vụ rồi mới xem coverage bổ trợ.
+Coverage có thể cho biết dòng nào chưa được chạy tới, nhưng 100% dòng không chứng minh đã chọn đúng biên hoặc đúng kỳ vọng. Phần này nối tiếp loạt bài kiểm thử của blog: bắt đầu từ partition, boundary và rủi ro nghiệp vụ, rồi mới xem coverage như thông tin bổ trợ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -64,11 +64,11 @@ Coverage có thể cho biết dòng nào chưa được đi qua, nhưng 100% dò
 
 ## Chạy bộ test và bài tập
 
-Lệnh dotnet test tự restore package lần đầu nếu cần mạng. Project pin xUnit 2.9.3, runner 3.1.4 và Microsoft.NET.Test.Sdk 17.14.1; đây là bộ đã chạy cho lab, không phải khẳng định luôn là phiên bản mới nhất. Kết quả hiện có 9 ca: 6 giá hợp lệ, 2 ca ngoài miền và 1 ca điều phối bằng spy.
+Lệnh dotnet test tự restore package lần đầu nếu cần mạng. Project pin xUnit 2.9.3, runner 3.1.4 và Microsoft.NET.Test.Sdk 17.14.1; đây là bộ đã chạy cho lab, không có nghĩa là chúng luôn là phiên bản mới nhất. Kết quả hiện có 9 test case: 6 với giá hợp lệ, 2 ngoài miền và 1 kiểm tra điều phối bằng spy.
 
-**Bài tập:** thêm ca 100,001 km mà không ép về int. Ca 2 km phát hiện được nhầm dấu < thành <= trong nhánh giá cơ bản không nếu hai nhánh tình cờ cho cùng giá?
+**Bài tập:** thêm test case 100,001 km mà không ép về int. Nếu hai nhánh tình cờ cho cùng giá, test case 2 km có phát hiện được việc nhầm dấu < thành <= trong nhánh giá cơ bản không?
 
-<details><summary>Xem đáp án</summary><p>Thêm một Fact hoặc Theory dùng chuỗi decimal để giữ phần lẻ. Một ca chỉ so số tiền tại 2 km có thể không phân biệt hai đường đi cùng kết quả; cần hiểu rule và chọn kiểm chứng phù hợp thay vì suy ra nhánh đúng từ một giá trị.</p></details>
+<details><summary>Xem đáp án</summary><p>Thêm một Fact hoặc Theory dùng chuỗi decimal để giữ phần lẻ. Một test case chỉ so số tiền tại 2 km có thể không phân biệt được hai đường đi cho cùng kết quả; cần hiểu rule và chọn kiểm chứng phù hợp thay vì suy ra nhánh đúng từ một giá trị.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -78,7 +78,7 @@ Từ thư mục gốc repository:
 dotnet test examples/toi-noi-dotnet/14-unit-test/FareRules.Tests
 ```
 
-Lần đầu cần restore các package test từ NuGet. Project được pin phiên bản trong .csproj; mỗi ca test có dữ liệu và tài nguyên riêng để chạy lại được.
+Lần đầu cần restore các package test từ NuGet. Project được pin phiên bản trong .csproj; mỗi test case có dữ liệu và tài nguyên riêng để chạy lại được.
 
 ### FarePolicy.cs — 14-unit-test/FareDomain/FarePolicy.cs
 

@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, postgresql, ef-core]
 language: vi
 ---
 
-Đây là **bài 21** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 21** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -18,19 +18,19 @@ language: vi
 
 ## Từ HTTP đúng tới dữ liệu lưu đúng
 
-API báo giá từ chặng trước chưa lưu trạng thái. Bây giờ ta bắt đầu persistence: một chuyến có identity, khách, cước, thời điểm tạo và driver còn thiếu. EF Core ánh xạ object sang mô hình quan hệ; Npgsql là provider nối EF Core với PostgreSQL.
+API báo giá từ chặng trước chưa lưu trạng thái. Bây giờ ta bắt đầu persistence: một chuyến có identity, khách, cước, thời điểm tạo và tài xế (có thể chưa có). EF Core ánh xạ object sang mô hình quan hệ; Npgsql là provider nối EF Core với PostgreSQL.
 
-Ta dùng EF Core 10 và provider Npgsql 10, không phải EF6 cũ. Có DbContext không có nghĩa mọi biểu thức C# tự thành SQL tốt; mapping, query và transaction vẫn phải được nhìn và kiểm chứng. Bài này dùng PostgreSQL 18 thật cho lab, không dùng InMemory provider để suy ra hành vi cột/constraint.
+Ta dùng EF Core 10 và provider Npgsql 10, không phải EF6 cũ. Có DbContext không có nghĩa là mọi biểu thức C# tự động thành SQL tốt; mapping, query và transaction vẫn phải được xem xét và kiểm chứng. Bài này dùng PostgreSQL 18 thật cho lab, không dùng InMemory provider để suy ra hành vi cột/constraint.
 
-Persistence project phục vụ bài 21–26 nên chứa cả các bảng sẽ được giải thích ở bài idempotency/Outbox. TripRow là persistence model để quan sát cơ chế; nó chưa phải Trip aggregate có hành vi ở chặng DDD. Các setter public của model này không thay định hướng encapsulation trong domain.
+Project persistence phục vụ bài 21–26 nên chứa cả các bảng sẽ được giải thích ở bài về idempotency/Outbox. TripRow là persistence model để quan sát cơ chế; nó chưa phải Trip aggregate có hành vi ở chặng DDD. Các setter public của model này không thay đổi định hướng encapsulation của domain.
 
 ## Mapping là hợp đồng giữa hai hệ kiểu
 
-Fare được cấu hình numeric(18,2), CreatedAt ánh xạ thời điểm có offset theo provider; lab ghi UTC. DriverId nullable, Status có độ dài, quan hệ Trip–Customer có foreign key và index theo CustomerId/CreatedAt. Cột numeric giữ độ chính xác theo scale, không tự chọn quy tắc làm tròn nghiệp vụ.
+Fare được cấu hình numeric(18,2), CreatedAt ánh xạ thời điểm có offset theo provider; lab ghi UTC. DriverId nullable, Status được giới hạn độ dài, quan hệ Trip–Customer có foreign key và index theo CustomerId/CreatedAt. Cột numeric giữ độ chính xác theo scale, không tự chọn quy tắc làm tròn nghiệp vụ.
 
-Ca round-trip cố ý ghi 14255.50 để kiểm khả năng lưu decimal có phần lẻ; nó không đổi policy cước nguyên VND từ bài 14. Nếu model nhận nhiều chữ số hơn scale, database có thể làm tròn theo kiểu cột, nên phải kiểm soát precision trước khi lưu khi hợp đồng yêu cầu.
+Test case round-trip cố ý ghi 14255.50 để kiểm tra khả năng lưu decimal có phần lẻ; test case này không đổi policy cước nguyên VND từ bài 14. Nếu model nhận nhiều chữ số hơn scale, database có thể làm tròn theo kiểu cột, nên phải kiểm soát precision trước khi lưu khi hợp đồng yêu cầu.
 
-UTC cần nhất quán tại ranh giới ghi/đọc. PostgreSQL timestamp with time zone không lưu lại tên múi giờ gốc của khách; nếu nghiệp vụ lịch tương lai cần timezone ID, phải có field riêng. Không suy ra kiểu cột thời gian đã giải mọi câu hỏi DST.
+UTC cần nhất quán tại ranh giới ghi/đọc. PostgreSQL timestamp with time zone không lưu lại tên múi giờ gốc của khách; nếu nghiệp vụ lịch tương lai cần timezone ID, phải có field riêng. Đừng suy ra rằng kiểu cột thời gian đã giải quyết mọi câu hỏi về DST.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -43,36 +43,36 @@ UTC cần nhất quán tại ranh giới ghi/đọc. PostgreSQL timestamp with t
 
 Context giữ change tracker, cấu hình mapping và đơn vị SaveChanges. Tạo context ngắn cho một use case hoặc phạm vi phù hợp, dispose sau khi dùng. Không dùng cùng một context cho nhiều thao tác song song rồi mong EF tự khoá giúp.
 
-Trong test, instance ghi được dispose trước khi một instance mới đọc lại. Điều này tránh cache tracking che mất lỗi mapping và serialization provider. Bài 22 sẽ đi sâu vào tracking, projection và SQL; hiện chỉ dùng AsNoTracking cho query kiểm dữ liệu đã lưu.
+Trong test, instance ghi được dispose trước khi một instance mới đọc lại. Cách này tránh để cache của tracker che mất lỗi mapping và lỗi serialization ở provider. Bài 22 sẽ đi sâu vào tracking, projection và SQL; hiện chỉ dùng AsNoTracking cho query kiểm tra dữ liệu đã lưu.
 
 Context đã có nhiều cơ chế giống Unit of Work, nhưng kiến trúc đích vẫn cần ranh giới application/domain rõ. Không vội bọc mọi method EF thành một generic repository chỉ để có thêm interface ở bài nhập môn dữ liệu.
 
 ## Migration là lịch sử có thể review
 
-Migrations và ModelSnapshot được sinh bằng dotnet-ef 10.0.10 từ model, được giữ trong repository. Không viết EnsureCreated trong test rồi bỏ qua migration: ta muốn kiểm schema đúng theo đường mà ứng dụng sẽ dùng.
+Migrations và ModelSnapshot do dotnet-ef 10.0.10 sinh ra từ model và được giữ trong repository. Đừng dùng EnsureCreated trong test rồi bỏ qua migration: ta muốn kiểm schema đúng theo đường mà ứng dụng sẽ dùng.
 
-Test tạo schema tên ngẫu nhiên trong database lab, đặt SearchPath cho connection và bảng lịch sử migration trong schema đó, rồi MigrateAsync. Model không hard-code tên schema test; mỗi ca có không gian riêng. Khi xong chỉ dọn schema do fixture tạo, không gọi EnsureDeleted để xoá cả database.
+Test tạo schema tên ngẫu nhiên trong database lab, đặt SearchPath cho connection và bảng lịch sử migration trong schema đó, rồi MigrateAsync. Model không hard-code tên schema test; mỗi test case có không gian riêng. Khi xong, chỉ dọn schema do fixture tạo, không gọi EnsureDeleted để xoá cả database.
 
-Migration kế tiếp cần so với snapshot để sinh delta. Review SQL, thời gian khoá, dữ liệu có sẵn và kế hoạch rollback trước khi áp dụng production. Lab tự migrate lúc dựng fixture để kiểm chứng, không phải khuyến cáo mỗi replica production tranh nhau chạy migration lúc startup.
+Migration kế tiếp cần so với snapshot để sinh delta. Review SQL, thời gian khoá, dữ liệu có sẵn và kế hoạch rollback trước khi áp dụng production. Lab tự migrate lúc dựng fixture để kiểm chứng, không phải khuyến cáo để mỗi replica production tranh nhau chạy migration lúc startup.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Mỗi ca sở hữu một schema trong database lab, không xoá database hoặc dùng schema dữ liệu thật."><defs><marker id="cs21-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Test riêng</text><text x="34" y="123" class="t-small">Schema lab_GUID</text><path d="M280 115 L305 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs21-1-arrow)"/><rect x="305" y="65" width="260" height="100" rx="10" class="f-pk-soft s-pk"/><text x="319" y="95" class="t-b">Migrate + Save</text><text x="319" y="123" class="t-small">Các bước kiểm chứng</text><path d="M565 115 L590 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs21-1-arrow)"/><rect x="590" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Context đọc mới</text><text x="604" y="123" class="t-small">Kiểm round-trip</text><rect x="295" y="35" width="280" height="150" rx="12" class="f-none s-pk" stroke-dasharray="5 4"/></svg>
+<svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Mỗi test case sở hữu một schema trong database lab, không xoá database hoặc dùng schema dữ liệu thật."><defs><marker id="cs21-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Test riêng</text><text x="34" y="123" class="t-small">Schema lab_GUID</text><path d="M280 115 L305 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs21-1-arrow)"/><rect x="305" y="65" width="260" height="100" rx="10" class="f-pk-soft s-pk"/><text x="319" y="95" class="t-b">Migrate + Save</text><text x="319" y="123" class="t-small">Các bước kiểm chứng</text><path d="M565 115 L590 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs21-1-arrow)"/><rect x="590" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Context đọc mới</text><text x="604" y="123" class="t-small">Kiểm round-trip</text><rect x="295" y="35" width="280" height="150" rx="12" class="f-none s-pk" stroke-dasharray="5 4"/></svg>
 </div>
-<figcaption>Hình 2. Mỗi ca sở hữu một schema trong database lab, không xoá database hoặc dùng schema dữ liệu thật.</figcaption>
+<figcaption>Hình 2. Mỗi test case sở hữu một schema trong database lab, không xoá database hoặc dùng schema dữ liệu thật.</figcaption>
 </figure>
 
-## Ba ca có ý nghĩa gì?
+## Ba test case có ý nghĩa gì?
 
-Round-trip kiểm fare, instant UTC, DriverId null và không còn migration pending. Ca chạy migration lần nữa yêu cầu dữ liệu còn nguyên. Ca foreign key ghi một CustomerId không tồn tại phải thất bại; object có Guid hợp lệ về cú pháp không có nghĩa khách đó tồn tại.
+Test case round-trip kiểm tra fare, instant UTC, DriverId null và không còn migration pending. Test case chạy migration lần nữa yêu cầu dữ liệu còn nguyên. Test case foreign key ghi một CustomerId không tồn tại phải thất bại; object có Guid hợp lệ về cú pháp không có nghĩa là khách đó tồn tại.
 
 **Bài tập:** nếu vừa dùng context ghi để đọc lại cùng entity, vì sao có thể bỏ sót lỗi database? Tại sao fixture không xoá cả database khi dọn?
 
-<details><summary>Xem đáp án</summary><p>Tracker có thể trả instance đã có mà không tạo một phép round-trip độc lập đúng ý định kiểm tra. Fixture chỉ sở hữu schema GUID của mình; xoá cả database vượt phạm vi và có thể phá dữ liệu ca khác.</p></details>
+<details><summary>Xem đáp án</summary><p>Tracker có thể trả về instance đã có sẵn mà không tạo ra một lượt round-trip độc lập đúng như ý định kiểm tra. Fixture chỉ sở hữu schema GUID của mình; xoá cả database vượt phạm vi và có thể phá dữ liệu của test case khác.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
-Cần PostgreSQL local và database riêng tên `toi_noi_dotnet_lab`. Thiết lập biến môi trường `TOI_NOI_PG` bằng connection string của lab trước khi chạy; không đưa mật khẩu vào source. README của persistence lab có hướng dẫn. Fixture từ chối database khác tên hoặc host ngoài localhost, không âm thầm skip khi thiếu kết nối; nó chỉ tạo và dọn schema GUID riêng.
+Cần PostgreSQL local và database riêng tên `toi_noi_dotnet_lab`. Thiết lập biến môi trường `TOI_NOI_PG` bằng connection string của lab trước khi chạy; không đưa mật khẩu vào source. README của persistence lab có hướng dẫn. Fixture từ chối database khác tên hoặc host ngoài localhost, không tự bỏ qua test mà không báo lỗi khi thiếu kết nối; fixture chỉ tạo và dọn schema GUID riêng.
 
 Từ thư mục gốc repository:
 

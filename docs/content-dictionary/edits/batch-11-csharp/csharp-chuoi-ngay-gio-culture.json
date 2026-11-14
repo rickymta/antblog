@@ -1,0 +1,143 @@
+{
+"file": "csharp-chuoi-ngay-gio-culture.md",
+"edits": [
+{
+"old": "tách format giao diện khỏi hợp đồng dữ liệu",
+"new": "tách định dạng giao diện khỏi hợp đồng dữ liệu",
+"reason": "Từ tiếng Anh thông thường đã có từ Việt",
+"severity": "low"
+},
+{
+"old": "Cần biết grammar và culture;",
+"new": "Cần biết quy tắc đọc số (grammar) và culture;",
+"reason": "Giải nghĩa thuật ngữ ở lần đầu",
+"severity": "medium"
+},
+{
+"old": "ta biết từ chối ngoài miền",
+"new": "ta đã biết cách từ chối giá trị ngoài miền",
+"reason": "Thiếu danh từ, câu cụt",
+"severity": "medium"
+},
+{
+"old": "Nếu dùng style rộng hơn có dấu phân nhóm,",
+"new": "Nếu dùng style rộng hơn, có chấp nhận dấu phân nhóm,",
+"reason": "Câu mơ hồ về chủ thể của 'có dấu phân nhóm'",
+"severity": "low"
+},
+{
+"old": "nhận được, còn `2.501` bị từ chối",
+"new": "được chấp nhận, còn `2.501` bị từ chối",
+"reason": "'nhận được' dễ hiểu nhầm",
+"severity": "low"
+},
+{
+"old": "Đây là lựa chọn grammar của lab,",
+"new": "Đây là lựa chọn grammar của bài thực hành,",
+"reason": "Từ tiếng Anh lọt vào văn xuôi",
+"severity": "low"
+},
+{
+"old": "Sau parse vẫn cần validation miền 0–100 km như bài trước.",
+"new": "Sau parse vẫn cần kiểm tra miền 0–100 km như bài trước.",
+"reason": "Thống nhất cách gọi validation",
+"severity": "medium"
+},
+{
+"old": "không áp dụng thói quen phân cách địa phương của textbox vào JSON number",
+"new": "không áp dụng cách phân cách theo thói quen địa phương của ô nhập vào JSON number",
+"reason": "Cụm ghép gượng, thống nhất 'ô nhập'",
+"severity": "medium"
+},
+{
+"old": "đừng nghĩ DateTime bất kỳ tự biết thành phố của khách",
+"new": "đừng nghĩ giá trị DateTime nào cũng tự biết thành phố của khách",
+"reason": "Ngữ pháp gượng",
+"severity": "medium"
+},
+{
+"old": "Format `O` giữ thông tin cần cho round-trip.",
+"new": "Định dạng `O` giữ thông tin cần cho round-trip.",
+"reason": "Từ tiếng Anh thông thường đã có từ Việt",
+"severity": "low"
+},
+{
+"old": "sau đó format với InvariantCulture",
+"new": "sau đó định dạng với InvariantCulture",
+"reason": "Từ tiếng Anh thông thường đã có từ Việt",
+"severity": "low"
+},
+{
+"old": "nhưng wire không dùng chuỗi giao diện",
+"new": "nhưng dữ liệu truyền giữa các hệ thống không dùng chuỗi giao diện",
+"reason": "'wire' không giải thích",
+"severity": "medium"
+},
+{
+"old": "một thời gian đã format",
+"new": "một thời điểm đã được định dạng thành",
+"reason": "Dùng đúng danh từ và từ Việt",
+"severity": "medium"
+},
+{
+"old": "thay đọc đồng hồ rải rác bằng TimeProvider khi cần kiểm thử hết hạn báo giá",
+"new": "thay việc đọc đồng hồ rải rác bằng TimeProvider khi cần kiểm thử trường hợp báo giá hết hạn",
+"reason": "Câu thiếu danh từ, nghe cụt",
+"severity": "medium"
+},
+{
+"old": "aria-label=\"Hình 1. Parse tại cửa vào, tính bằng dữ liệu có kiểu, format tại cửa ra.",
+"new": "aria-label=\"Hình 1. Parse tại cửa vào, tính bằng dữ liệu có kiểu, định dạng tại cửa ra.",
+"reason": "Thống nhất 'định dạng'",
+"severity": "low"
+},
+{
+"old": "<figcaption>Hình 1. Parse tại cửa vào, tính bằng dữ liệu có kiểu, format tại cửa ra.",
+"new": "<figcaption>Hình 1. Parse tại cửa vào, tính bằng dữ liệu có kiểu, định dạng tại cửa ra.",
+"reason": "Thống nhất 'định dạng'",
+"severity": "low"
+},
+{
+"old": "aria-label=\"Hình 2. Đổi offset khi chuẩn hoá UTC giữ nguyên instant; nó không chỉ là xoá phần offset khỏi chuỗi.\"",
+"new": "aria-label=\"Hình 2. Quy đổi offset khi chuẩn hoá về UTC giữ nguyên instant; đây không chỉ là việc xoá phần offset khỏi chuỗi.\"",
+"reason": "Câu thiếu chủ thể rõ, 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "<figcaption>Hình 2. Đổi offset khi chuẩn hoá UTC giữ nguyên instant; nó không chỉ là xoá phần offset khỏi chuỗi.",
+"new": "<figcaption>Hình 2. Quy đổi offset khi chuẩn hoá về UTC giữ nguyên instant; đây không chỉ là việc xoá phần offset khỏi chuỗi.",
+"reason": "Câu thiếu chủ thể rõ, 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "nên kiểm chứng số tiền bằng decimal chứ không lấy chuỗi hiển thị làm invariant.",
+"new": "nên kiểm chứng số tiền bằng decimal, không lấy chuỗi hiển thị làm giá trị chuẩn để so sánh.",
+"reason": "'invariant' lọt vào văn xuôi, câu tối nghĩa",
+"severity": "high"
+},
+{
+"old": "Kiểm tra sai ném lỗi, trả exit code thất bại.",
+"new": "Khi kiểm tra không đạt, chương trình ném lỗi và trả exit code báo thất bại.",
+"reason": "Câu cụt, thiếu chủ ngữ",
+"severity": "medium"
+},
+{
+"old": "Đây là harness console cho bài học;",
+"new": "Đây là harness chạy trên console, dùng cho bài học;",
+"reason": "Cụm ghép cụt",
+"severity": "low"
+},
+{
+"old": "nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness",
+"new": "nếu mới học đến đây, bạn chưa cần hiểu toàn bộ generics/delegate trong harness",
+"reason": "'bài sớm' gượng, thiếu chủ ngữ",
+"severity": "medium"
+},
+{
+"old": "theo grammar hẹp của lab;",
+"new": "theo grammar hẹp của bài thực hành;",
+"reason": "Từ tiếng Anh lọt vào văn xuôi",
+"severity": "low"
+}
+]
+}

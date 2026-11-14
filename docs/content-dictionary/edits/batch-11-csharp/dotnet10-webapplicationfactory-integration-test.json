@@ -1,0 +1,137 @@
+{
+  "file": "dotnet10-webapplicationfactory-integration-test.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.",
+      "new": "Các ví dụ nhắm tới `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.",
+      "reason": "Bỏ giọng dịch máy, 'target' và 'implementation' lọt vào văn xuôi.",
+      "severity": "medium"
+    },
+    {
+      "old": "<p>Không. Nó chạy pipeline ứng dụng trong test host;",
+      "new": "<p>Không. TestServer chạy pipeline ứng dụng trong test host;",
+      "reason": "'Nó' chỉ vật ở đầu câu, nhắc lại danh từ.",
+      "severity": "low"
+    },
+    {
+      "old": "BaseAddress của client test không có nghĩa request đi ra Internet. Ngược lại, nếu app thật gọi dependency ngoài, phải chủ động thay/configure dependency đó;",
+      "new": "BaseAddress của client test không có nghĩa là request đi ra Internet. Ngược lại, nếu app thật gọi dependency ngoài, phải chủ động thay thế hoặc cấu hình lại dependency đó;",
+      "reason": "'không có nghĩa' thiếu 'là'; 'thay/configure' trộn cách viết.",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca baseline gửi JSON 5 km và assert status, fare, currency bằng JSON parser.",
+      "new": "Test case baseline gửi JSON 5 km và assert status, fare, currency bằng JSON parser.",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "kiểm 400 cùng errors; hai cận 0/100 vẫn thành công. Ca JSON hỏng chỉ assert 400",
+      "new": "kiểm tra 400 cùng errors; hai cận 0/100 vẫn thành công. Test case JSON hỏng chỉ assert 400",
+      "reason": "'kiểm' cụt; thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca OpenAPI dựng Development và kiểm route /quotes tồn tại trong tài liệu; một ca Production đảm bảo endpoint tài liệu không được map.",
+      "new": "Test case OpenAPI dựng môi trường Development và kiểm tra route /quotes có trong tài liệu; một test case Production bảo đảm endpoint tài liệu không được map.",
+      "reason": "Thống nhất 'test case'; thiếu danh từ 'môi trường'; 'kiểm' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "Assertion mong 26.500 cho 5 km",
+      "new": "Assertion kỳ vọng 26.500 cho 5 km",
+      "reason": "'mong' gượng.",
+      "severity": "low"
+    },
+    {
+      "old": "## Kiểm lifetime và cấu hình sai",
+      "new": "## Kiểm tra lifetime và cấu hình sai",
+      "reason": "'Kiểm' cụt trong tiêu đề.",
+      "severity": "low"
+    },
+    {
+      "old": "Test so identity trong response rồi gửi request khác, yêu cầu ScopeId đổi.",
+      "new": "Test so sánh identity trong response, rồi gửi request khác và yêu cầu ScopeId đổi.",
+      "reason": "'so' cụt, câu nối lủng củng.",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca options âm mong host khởi động thất bại.",
+      "new": "Test case options âm kỳ vọng host khởi động thất bại.",
+      "reason": "Thống nhất 'test case'; 'mong' gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "thì đã khác fail-fast contract. Mỗi factory được dispose để host, client và tài nguyên gắn với nó được dọn.",
+      "new": "thì đã đi ngược hợp đồng fail-fast. Mỗi factory được dispose để dọn host, client và tài nguyên gắn với nó.",
+      "reason": "'khác fail-fast contract' cụt; bị động lặp 'được'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Test configuration override có phạm vi trong host test;",
+      "new": "Phần override cấu hình trong test có phạm vi nằm trong host test;",
+      "reason": "Trật tự từ kiểu Anh, câu thiếu động từ.",
+      "severity": "high"
+    },
+    {
+      "old": "Nhờ vậy chạy song song/CI không ghi đè cấu hình nhau.",
+      "new": "Nhờ vậy các lượt chạy song song hoặc trên CI không ghi đè cấu hình của nhau.",
+      "reason": "Câu thiếu chủ ngữ, 'nhau' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "role/sub theo từng ca.",
+      "new": "role/sub theo từng test case.",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "low"
+    },
+    {
+      "old": "Suite kiểm role và owner, token hết hạn,",
+      "new": "Suite kiểm tra role và owner, token hết hạn,",
+      "reason": "'kiểm' cụt.",
+      "severity": "low"
+    },
+    {
+      "old": "Các ranh giới đó cần test và vận hành riêng.",
+      "new": "Các ranh giới đó cần được kiểm thử và vận hành riêng.",
+      "reason": "'cần test' gượng.",
+      "severity": "low"
+    },
+    {
+      "old": "Điều không thay là authentication handler và authorization policy của ứng dụng. Điều thay là nguồn trust/config trong host test.",
+      "new": "Phần không bị thay là authentication handler và authorization policy của ứng dụng. Phần được thay là nguồn trust và cấu hình trong host test.",
+      "reason": "'Điều thay' cụt, thiếu bị động đúng chỗ.",
+      "severity": "medium"
+    },
+    {
+      "old": "không nhầm việc ký một token test với dựng hệ thống đăng nhập thật.",
+      "new": "không nhầm việc ký một token test với việc dựng hệ thống đăng nhập thật.",
+      "reason": "Thiếu 'việc' để song song hai vế.",
+      "severity": "low"
+    },
+    {
+      "old": "## 24 ca API và những gì vẫn chưa biết",
+      "new": "## 24 test case API và những gì vẫn chưa biết",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Suite hiện có 24 ca API: baseline, validation/binding, schema theo environment, lifetime, options/clock và auth. Các ca chỉ kiểm những phần đã thực thi; không đếm số assertion làm thước đo bao phủ nghiệp vụ.",
+      "new": "Suite hiện có 24 test case API: baseline, validation/binding, schema theo environment, lifetime, options/clock và auth. Các test case chỉ kiểm tra những phần đã thực thi; không lấy số assertion làm thước đo độ bao phủ nghiệp vụ.",
+      "reason": "Thống nhất 'test case'; câu cuối thiếu động từ.",
+      "severity": "medium"
+    },
+    {
+      "old": "test ứng dụng không thay kiểm tra môi trường triển khai.",
+      "new": "test ứng dụng không thay thế việc kiểm tra môi trường triển khai.",
+      "reason": "'không thay kiểm tra' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "Project được pin phiên bản trong .csproj; mỗi ca test có dữ liệu",
+      "new": "Project ghim phiên bản trong .csproj; mỗi test case có dữ liệu",
+      "reason": "'pin' lọt tiếng Anh; thống nhất 'test case'.",
+      "severity": "medium"
+    }
+  ]
+}

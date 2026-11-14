@@ -1,0 +1,143 @@
+{
+  "file": "csharp14-extension-members-field.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng",
+      "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng",
+      "reason": "\"target\" dùng như động từ; thiếu \"được\"",
+      "severity": "low"
+    },
+    {
+      "old": "## Cú pháp mới chỉ có ích khi giữ ý nghĩa rõ",
+      "new": "## Cú pháp mới chỉ có ích khi ý nghĩa vẫn rõ ràng",
+      "reason": "Câu cụt, thiếu chủ ngữ cho \"giữ\"",
+      "severity": "medium"
+    },
+    {
+      "old": "nhưng không làm validation, ownership hay persistence tự xuất hiện.",
+      "new": "nhưng không tự mang lại validation, ownership hay persistence.",
+      "reason": "Cụm \"làm … tự xuất hiện\" gượng",
+      "severity": "high"
+    },
+    {
+      "old": "không phải identity bất biến của tài xế/chuyến.",
+      "new": "không phải định danh bất biến của tài xế hay của chuyến.",
+      "reason": "\"identity bất biến\" gượng, dấu gạch chéo",
+      "severity": "medium"
+    },
+    {
+      "old": "Ví dụ không thay quy tắc Money",
+      "new": "Ví dụ này không thay thế quy tắc Money",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Đưa now vào tham số làm hành vi kiểm chứng được, không đọc DateTime.Now kín bên trong.",
+      "new": "Đưa now vào tham số giúp hành vi kiểm chứng được, thay vì đọc DateTime.Now ngầm bên trong.",
+      "reason": "\"làm … kiểm chứng được\" và \"kín bên trong\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "import namespace và xung đột extension vẫn cần được quản lý.",
+      "new": "việc import namespace và xung đột giữa các extension vẫn cần được quản lý.",
+      "reason": "Thiếu danh từ hoá, cụm cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "nó cần sống trong nơi sở hữu nghiệp vụ phù hợp, có version/chính sách chứ không rải extension helper ở mọi module",
+      "new": "nó cần nằm ở nơi sở hữu nghiệp vụ phù hợp, có phiên bản và chính sách, chứ không rải extension helper khắp mọi module",
+      "reason": "\"sống trong nơi\" gượng; thống nhất \"phiên bản\"",
+      "severity": "medium"
+    },
+    {
+      "old": "set kiểm string trắng trước khi gán",
+      "new": "set kiểm tra chuỗi trắng trước khi gán",
+      "reason": "\"kiểm\" cụt, \"string\" tiếng Anh thường",
+      "severity": "medium"
+    },
+    {
+      "old": "property phải giữ giá trị cũ; test kiểm điều đó.",
+      "new": "property phải giữ giá trị cũ; test kiểm tra điều đó.",
+      "reason": "\"kiểm\" cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Tính năng không tự validation initializer hoặc mọi đường deserialize theo mọi framework: phải hiểu đường tạo object thực tế khi dùng ở biên hệ thống.",
+      "new": "Tính năng này không tự validate giá trị khởi tạo hay mọi đường deserialize của mọi framework; phải hiểu đường tạo object thực tế khi dùng ở ranh giới hệ thống.",
+      "reason": "Thiếu động từ (\"validation\" dùng như động từ)",
+      "severity": "high"
+    },
+    {
+      "old": "như gửi mạng hoặc commit database.",
+      "new": "như gọi qua mạng hoặc commit database.",
+      "reason": "\"gửi mạng\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Cú pháp ngắn không thay hợp đồng của accessor;",
+      "new": "Cú pháp ngắn không thay đổi hợp đồng của accessor;",
+      "reason": "\"không thay\" cụt",
+      "severity": "low"
+    },
+    {
+      "old": "người đọc vẫn kỳ vọng đọc property không bất ngờ khởi động một use case đắt tiền.",
+      "new": "người đọc vẫn kỳ vọng việc đọc property không bất ngờ kích hoạt một use case tốn kém.",
+      "reason": "Câu cụt, \"khởi động\", \"đắt tiền\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab dùng biến đếm để nhìn điều đó; khi receiver tồn tại, RHS được tính một lần và setter thực hiện.",
+      "new": "Lab dùng biến đếm để quan sát điều đó; khi receiver tồn tại, RHS được tính một lần và setter được gọi.",
+      "reason": "\"nhìn điều đó\", \"setter thực hiện\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "return lỗi rõ thay vì",
+      "new": "hãy trả về lỗi rõ ràng thay vì",
+      "reason": "Từ tiếng Anh thông thường, thiếu động từ mệnh lệnh",
+      "severity": "medium"
+    },
+    {
+      "old": "Short-circuit phù hợp nơi thiếu receiver là một trường hợp được chấp nhận.",
+      "new": "Short-circuit phù hợp ở nơi việc thiếu receiver là một trường hợp được chấp nhận.",
+      "reason": "Câu cụt, thiếu giới từ và danh từ hoá",
+      "severity": "medium"
+    },
+    {
+      "old": "có thể làm lựa chọn overload cần được xem lại khi nâng SDK;",
+      "new": "có thể buộc ta xem lại việc chọn overload khi nâng SDK;",
+      "reason": "Câu thiếu chủ ngữ, giọng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "bài chỉ kiểm các feature cụ thể đang chạy, không xem danh sách",
+      "new": "bài chỉ kiểm tra các feature cụ thể đang chạy, và không xem danh sách",
+      "reason": "\"kiểm\" cụt, câu dài thiếu liên từ",
+      "severity": "low"
+    },
+    {
+      "old": "là bằng chứng ứng dụng đã tương thích mọi thay đổi.",
+      "new": "là bằng chứng ứng dụng đã tương thích với mọi thay đổi.",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "## Bảy kiểm tra và bài tập",
+      "new": "## Bảy test case và bài tập",
+      "reason": "Thống nhất \"test case\"",
+      "severity": "low"
+    },
+    {
+      "old": "Bộ kiểm tra chuẩn hoá nhãn, từ chối whitespace, giữ giá trị cũ, ngưỡng extension property, biên hết hạn và hai nhánh receiver null/không null. Không assert Guid hoặc thời gian hệ thống ngẫu nhiên.",
+      "new": "Bộ test case kiểm tra việc chuẩn hoá nhãn, từ chối whitespace, giữ giá trị cũ, ngưỡng của extension property, ranh giới hết hạn và hai nhánh receiver null/không null. Không assert giá trị Guid hoặc thời gian hệ thống ngẫu nhiên.",
+      "reason": "Câu liệt kê thiếu động từ; \"assert\" lọt vào văn xuôi",
+      "severity": "high"
+    },
+    {
+      "old": "phải có luồng/hợp đồng rõ ràng;",
+      "new": "phải có luồng và hợp đồng rõ ràng;",
+      "reason": "Dấu gạch chéo",
+      "severity": "low"
+    }
+  ]
+}

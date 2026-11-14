@@ -1,0 +1,107 @@
+{
+  "file": "dotnet10-backgroundservice-channel.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.",
+      "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.",
+      "reason": "'target' lọt tiếng Anh; 'code' → 'mã nguồn'.",
+      "severity": "medium"
+    },
+    {
+      "old": "cũng khiến lỗi mất người quan sát và dependency",
+      "new": "cũng khiến lỗi xảy ra mà không ai theo dõi, và dependency",
+      "reason": "'lỗi mất người quan sát' dịch máy (theo style guide).",
+      "severity": "high"
+    },
+    {
+      "old": "không tự tạo đảm bảo giao hàng của broker.",
+      "new": "không tự tạo ra bảo đảm giao thông điệp như một broker.",
+      "reason": "'đảm bảo giao hàng' calque của delivery guarantee.",
+      "severity": "medium"
+    },
+    {
+      "old": "tránh dựa vào đoạn đầu ExecuteAsync sẽ chặn startup như ở một số suy luận từ phiên bản cũ.",
+      "new": "tránh dựa vào giả định rằng đoạn đầu của ExecuteAsync sẽ chặn startup, như một số suy luận từ phiên bản cũ.",
+      "reason": "Câu thiếu động từ, 'dựa vào đoạn đầu ... sẽ chặn' khó hiểu.",
+      "severity": "high"
+    },
+    {
+      "old": "Host readiness cần tín hiệu được thiết kế rõ;",
+      "new": "Trạng thái sẵn sàng của host (readiness) cần một tín hiệu được thiết kế rõ ràng;",
+      "reason": "Cụm 'Host readiness' chưa giải nghĩa, câu cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "huỷ token làm lời ghi chờ kết thúc",
+      "new": "huỷ token khiến lần ghi đang chờ kết thúc",
+      "reason": "'lời ghi chờ' tự ghép.",
+      "severity": "medium"
+    },
+    {
+      "old": "QueueLimit ở một limiter HTTP và capacity Channel là hai hàng khác nhau; không chồng vô hạn hàng chờ rồi gọi đó là resilience.",
+      "new": "QueueLimit của một limiter HTTP và capacity của Channel là hai hàng chờ khác nhau; đừng chồng vô hạn các hàng chờ rồi gọi đó là resilience.",
+      "reason": "Câu thiếu quan hệ sở thuộc; 'không chồng' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "Không inject một DbContext scoped vào constructor worker và giữ nó cho mọi job.",
+      "new": "Đừng inject một DbContext scoped vào constructor của worker rồi giữ lại dùng cho mọi job.",
+      "reason": "Lời khuyên nên dùng 'đừng'; 'nó' mơ hồ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai job trong test xử lý FIFO với single reader, có ScopeId khác nhau và handler đều được dispose.",
+      "new": "Hai job trong test được xử lý theo FIFO với single reader, có ScopeId khác nhau và handler của cả hai đều được dispose.",
+      "reason": "Thiếu giới từ 'theo', 'handler đều' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "Hoàn thành writer cho phép reader đọc hết rồi kết thúc bình thường.",
+      "new": "Khi writer hoàn thành, reader có thể đọc hết rồi kết thúc bình thường.",
+      "reason": "Chuỗi danh từ 'Hoàn thành writer' kiểu Anh.",
+      "severity": "medium"
+    },
+    {
+      "old": "vòng đọc và handler hợp tác dừng.",
+      "new": "vòng đọc và handler dừng theo cơ chế hợp tác.",
+      "reason": "'hợp tác dừng' gượng.",
+      "severity": "low"
+    },
+    {
+      "old": "lifecycle ack/persistence cần thiết kế nếu đó là yêu cầu sản phẩm.",
+      "new": "lifecycle ack/persistence cần được thiết kế nếu đó là yêu cầu sản phẩm.",
+      "reason": "'cần thiết kế' dễ đọc thành 'cần thiết'.",
+      "severity": "low"
+    },
+    {
+      "old": "sau khi đánh dấu job.Completed lỗi; nó không catch rồi âm thầm bỏ job.",
+      "new": "sau khi đánh dấu job.Completed ở trạng thái lỗi; lab không catch rồi bỏ qua job mà không báo lỗi.",
+      "reason": "Câu cụt; calque 'âm thầm'.",
+      "severity": "high"
+    },
+    {
+      "old": "Scoped handler và FIFO không giải idempotency.",
+      "new": "Scoped handler và FIFO không giải quyết được idempotency.",
+      "reason": "'không giải' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "đưa intent và nhận diện thông điệp vào database",
+      "new": "đưa intent và định danh thông điệp vào database",
+      "reason": "'nhận diện thông điệp' gượng.",
+      "severity": "low"
+    },
+    {
+      "old": "FIFO ở một reader cũng không có nghĩa mọi tác vụ nền nhiều worker sẽ hoàn thành theo thứ tự nhận.",
+      "new": "FIFO ở một reader cũng không có nghĩa là mọi tác vụ nền chạy bằng nhiều worker sẽ hoàn thành theo thứ tự nhận.",
+      "reason": "Câu thiếu 'là' và động từ, 'nền nhiều worker' cụt.",
+      "severity": "high"
+    },
+    {
+      "old": "Hai test hiện tại kiểm scoped disposal/FIFO và huỷ lần ghi bị backpressure.",
+      "new": "Hai test hiện tại kiểm tra scoped disposal/FIFO và việc huỷ lần ghi đang bị backpressure giữ lại.",
+      "reason": "'kiểm' cụt; 'huỷ lần ghi bị backpressure' thiếu động từ.",
+      "severity": "medium"
+    }
+  ]
+}

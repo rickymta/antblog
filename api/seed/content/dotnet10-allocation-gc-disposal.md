@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 27** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 27** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -18,19 +18,19 @@ language: vi
 
 ## Bộ nhớ tăng có nhiều nguyên nhân
 
-Một service OCR hay xử lý payload giữ buffer quá lâu, tạo nhiều chuỗi tạm hoặc quên dispose stream có thể tiêu tốn tài nguyên theo những cách khác nhau. Không phải đường biểu đồ RAM đi lên nào cũng là memory leak, và không phải gọi GC.Collect là cách sửa.
+Một service OCR hay xử lý payload mà giữ buffer quá lâu, tạo nhiều chuỗi tạm hoặc quên dispose stream thì có thể tiêu tốn tài nguyên theo những cách khác nhau. Không phải biểu đồ RAM đi lên nào cũng là memory leak, và gọi GC.Collect cũng không phải là cách sửa.
 
-Allocation tạo object/buffer mới; retention là chúng còn được tham chiếu; GC thu hồi managed object không còn sống theo khả năng của runtime. Handle file, socket và buffer thuê từ pool lại có hợp đồng lifetime/ownership cần được tuân thủ.
+Allocation là việc tạo object/buffer mới; retention là việc chúng vẫn còn được tham chiếu; GC thu hồi managed object không còn sống, theo khả năng của runtime. Handle file, socket và buffer thuê từ pool lại có hợp đồng về lifetime và ownership mà code phải tuân thủ.
 
-Lab dùng TrackingPool để thấy Rent/Return, không dùng nó để benchmark hiệu năng pool thật. Một AsyncProbe không có I/O thật minh hoạ đường gọi DisposeAsync, không chứng minh await using luôn nhanh hơn using.
+Lab dùng TrackingPool để thấy Rent/Return, không dùng nó để benchmark hiệu năng pool thật. Một AsyncProbe không có I/O thật minh hoạ luồng gọi DisposeAsync, không chứng minh await using luôn nhanh hơn using.
 
-## Ai sở hữu buffer thì người đó trả
+## Ai sở hữu buffer thì người đó phải trả lại
 
-BufferLease thuê một array rồi chỉ cho truy cập phần length yêu cầu. ArrayPool thật có thể trả buffer lớn hơn và chưa được xoá; caller không được suy ra mọi byte đều bằng 0 hoặc thuộc dữ liệu của mình.
+BufferLease thuê một array rồi chỉ cho phép truy cập phần có độ dài (length) được yêu cầu. ArrayPool thật có thể trả buffer lớn hơn yêu cầu, và buffer đó có thể chưa được xoá; caller không được suy ra mọi byte đều bằng 0 hoặc thuộc dữ liệu của mình.
 
-Dispose dùng Interlocked.Exchange lấy quyền trả buffer đúng một lần, sau đó Return với clearArray=true. Truy cập property sau dispose ném ObjectDisposedException. Đây là kiểm tra quyền truy cập qua owner; một Span đã lấy trước đó vẫn phải tuân lifetime và không được dùng sau Return.
+Dispose dùng Interlocked.Exchange lấy quyền trả buffer đúng một lần, sau đó Return với clearArray=true. Truy cập property sau dispose ném ObjectDisposedException. Đây là kiểm tra quyền truy cập qua owner; một Span đã lấy trước đó vẫn phải tuân thủ lifetime và không được dùng sau Return.
 
-Không vì Dispose dùng Interlocked mà tuyên bố mọi thao tác đọc/ghi Span của lease thread-safe. Demo giả định owner dùng buffer tuần tự; phối hợp dùng-và-dispose giữa thread cần hợp đồng riêng. Pool giảm allocation không tự giải race hoặc rò dữ liệu.
+Không vì Dispose dùng Interlocked mà tuyên bố mọi thao tác đọc/ghi Span của lease đều thread-safe. Demo giả định owner dùng buffer tuần tự; việc phối hợp giữa thao tác dùng buffer và dispose trên nhiều thread cần hợp đồng riêng. Pool giảm allocation không tự giải quyết race hoặc rò dữ liệu.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -39,21 +39,21 @@ Không vì Dispose dùng Interlocked mà tuyên bố mọi thao tác đọc/ghi 
 <figcaption>Hình 1. Quyền dùng buffer kết thúc khi Return; GC và pool có lifetime riêng.</figcaption>
 </figure>
 
-## Using giữ cleanup khi phần việc ném lỗi
+## Using vẫn thực hiện cleanup khi phần việc ném lỗi
 
-Khối using đưa lời Dispose vào đường finally tương ứng. Demo cố ý ném InvalidOperationException sau khi ghi một byte; sau khi bắt lỗi, pool phải nhận lại đúng một lần và có yêu cầu xoá dữ liệu. Gọi Dispose lần hai không Return buffer lần nữa.
+Khối using đặt lời gọi Dispose vào nhánh finally tương ứng. Demo cố ý ném InvalidOperationException sau khi ghi một byte; sau khi bắt lỗi, pool phải nhận lại đúng một lần và có yêu cầu xoá dữ liệu. Gọi Dispose lần hai không Return buffer lần nữa.
 
-using declaration sống tới cuối scope, còn using block giới hạn hẹp hơn bằng dấu ngoặc. Với dependency do DI container tạo và sở hữu, đừng tuỳ tiện dispose giữa request rồi làm các caller khác sử dụng object đã huỷ.
+using declaration có hiệu lực tới cuối scope, còn using block giới hạn phạm vi hẹp hơn bằng dấu ngoặc. Với dependency do DI container tạo và sở hữu, đừng tuỳ tiện dispose giữa request khiến các caller khác phải dùng object đã bị huỷ.
 
-Không viết finalizer cho mọi class để dự phòng việc quên Dispose. Kiểu nắm handle unmanaged cần mẫu thiết kế phù hợp, thường qua SafeHandle; wrapper đơn giản không nắm handle trực tiếp có thể không cần finalizer. Lỗi ownership phải được xử lý ở thiết kế và kiểm thử.
+Không viết finalizer cho mọi class để dự phòng việc quên Dispose. Kiểu nắm handle unmanaged cần mẫu thiết kế phù hợp, thường qua SafeHandle; wrapper đơn giản không nắm handle trực tiếp có thể không cần finalizer. Lỗi về ownership cần được xử lý từ khâu thiết kế và kiểm thử.
 
 ## Await using không phải Task.Run cho Dispose
 
-IAsyncDisposable có DisposeAsync trả ValueTask; await using chờ cleanup bất đồng bộ theo implementation. Với tài nguyên có flush/close async thật, điều đó tránh bắt caller chặn thread. Nếu kiểu chỉ cần cleanup đồng bộ thì không nên thêm async chỉ để đồng bộ hình thức.
+IAsyncDisposable có DisposeAsync trả ValueTask; await using chờ cleanup bất đồng bộ theo cách triển khai của kiểu. Với tài nguyên có flush/close async thật, điều đó giúp không buộc phía gọi phải chặn thread. Nếu kiểu chỉ cần cleanup đồng bộ thì không nên thêm async chỉ để cho giống nhau về hình thức.
 
-Ví dụ AsyncProbe đánh dấu đã dispose rồi trả ValueTask.CompletedTask. Ca kiểm chứng xác nhận đường await using được gọi, không đo hệ điều hành đã ghi dữ liệu xuống đĩa hay socket đã đóng ở đầu xa.
+Ví dụ AsyncProbe đánh dấu đã dispose rồi trả ValueTask.CompletedTask. Test case kiểm chứng xác nhận luồng await using được gọi, và không đo việc hệ điều hành đã ghi dữ liệu xuống đĩa hay socket đã đóng ở đầu xa.
 
-GC.GetAllocatedBytesForCurrentThread ở demo chỉ đo một đoạn đồng bộ ngắn trên thread hiện tại. Nếu đặt await giữa hai mốc rồi continuation chạy thread khác, cách đo này không còn mang cùng ý nghĩa. Nó cũng không đo live heap, native memory hoặc working set.
+GC.GetAllocatedBytesForCurrentThread ở demo chỉ đo một đoạn đồng bộ ngắn trên thread hiện tại. Nếu đặt await giữa hai mốc rồi phần continuation chạy trên thread khác, cách đo này không còn mang cùng ý nghĩa. Nó cũng không đo live heap, native memory hoặc working set.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,13 +62,13 @@ GC.GetAllocatedBytesForCurrentThread ở demo chỉ đo một đoạn đồng b�
 <figcaption>Hình 2. Ba câu hỏi khác nhau cần ba loại bằng chứng, không gom thành một con số RAM.</figcaption>
 </figure>
 
-## Năm kiểm tra và bài tập
+## Năm test case và bài tập
 
-Kiểm chứng gồm trả lease sau exception, yêu cầu clear, dispose lặp không trả hai lần, từ chối truy cập owner đã dispose và async cleanup được gọi. Con số allocation quan sát cho byte[4096] có overhead và phụ thuộc runtime; không assert nó bằng đúng 4096.
+Năm test case kiểm chứng gồm: trả lease sau exception, yêu cầu xoá dữ liệu khi trả, dispose lặp lại không trả buffer hai lần, từ chối truy cập owner đã dispose và gọi async cleanup. Con số allocation quan sát cho byte[4096] có overhead và phụ thuộc runtime; không assert nó bằng đúng 4096.
 
 **Bài tập:** giữ Span từ lease rồi dùng sau Dispose có an toàn vì property đã có guard không? Nếu working set không giảm ngay sau Dispose, có đủ kết luận Dispose không hoạt động không?
 
-<details><summary>Xem đáp án</summary><p>Không: guard chỉ kiểm lúc lấy property, không làm biến Span đã lấy trở nên an toàn sau khi owner trả buffer. Working set còn chịu GC, pool và allocator; cần đo đúng metric và xem ownership thay vì dựa vào một đường RAM.</p></details>
+<details><summary>Xem đáp án</summary><p>Không: guard chỉ kiểm lúc lấy property, không làm cho Span đã lấy trở nên an toàn sau khi owner trả buffer. Working set còn chịu ảnh hưởng của GC, pool và allocator; cần đo đúng metric và xem ownership thay vì dựa vào một đường biểu đồ RAM.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 

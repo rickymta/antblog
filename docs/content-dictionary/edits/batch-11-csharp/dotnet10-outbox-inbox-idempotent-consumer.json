@@ -1,0 +1,143 @@
+{
+  "file": "dotnet10-outbox-inbox-idempotent-consumer.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng",
+      "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng",
+      "reason": "\"target\" dùng như động từ; thiếu \"được\"",
+      "severity": "low"
+    },
+    {
+      "old": "transaction local không phải kéo dài tới broker",
+      "new": "transaction local không cần phải kéo dài tới broker",
+      "reason": "Calque \"doesn't have to\"",
+      "severity": "low"
+    },
+    {
+      "old": "Nó chưa kiểm broker mạng, confirm/ack của một sản phẩm cụ thể hoặc vận hành nhiều dispatcher.",
+      "new": "Lab chưa kiểm chứng broker chạy qua mạng, cơ chế confirm/ack của một sản phẩm cụ thể hoặc việc vận hành nhiều dispatcher.",
+      "reason": "Câu cụt, đại từ \"Nó\" mơ hồ, \"broker mạng\" gượng",
+      "severity": "high"
+    },
+    {
+      "old": "## Atomicity ở writer, giao lại ở dispatcher",
+      "new": "## Tính nguyên tử ở writer, lần giao lại ở dispatcher",
+      "reason": "Tiêu đề lẫn tiếng Anh, \"giao lại\" thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Test foreign key thất bại yêu cầu cả hai bảng không có hàng mới.",
+      "new": "Test cho trường hợp foreign key thất bại yêu cầu cả hai bảng không có hàng mới.",
+      "reason": "Cụm tự ghép, đọc cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Chạy lại dispatcher gửi cùng EventId thêm lần nữa.",
+      "new": "Chạy lại dispatcher thì cùng EventId được gửi thêm một lần nữa.",
+      "reason": "Câu thiếu liên kết, đọc cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "để giảm duplicate: cách đó đổi duplicate thành nguy cơ mất thông điệp.",
+      "new": "để giảm lần giao trùng: cách đó đổi lần giao trùng thành nguy cơ mất thông điệp.",
+      "reason": "Một khái niệm nhiều tên (duplicate / lần giao)",
+      "severity": "medium"
+    },
+    {
+      "old": "## Inbox gắn nhận diện thông điệp với hiệu ứng",
+      "new": "## Inbox gắn định danh thông điệp với hiệu ứng",
+      "reason": "\"nhận diện\" gượng, cần danh từ định danh",
+      "severity": "medium"
+    },
+    {
+      "old": "unique constraint và transaction bảo vệ để chỉ một lần tạo hiệu ứng local.",
+      "new": "unique constraint và transaction bảo đảm chỉ một lần giao tạo ra hiệu ứng local.",
+      "reason": "Câu thiếu chủ thể, \"bảo vệ để\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "consumer kiểm tra Inbox đúng consumer/EventId đã có trước khi trả false.",
+      "new": "consumer kiểm tra xem Inbox đã có đúng cặp consumer/EventId đó hay chưa trước khi trả false.",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "như thể đó chắc chắn là duplicate hợp lệ.",
+      "new": "như thể đó chắc chắn là bản trùng hợp lệ.",
+      "reason": "Thống nhất cách gọi, bỏ tiếng Anh thường",
+      "severity": "low"
+    },
+    {
+      "old": "Receipt ở đây chỉ là dấu hiệu ứng trong database consumer, chưa là thu tiền hoặc gửi email thật.",
+      "new": "Receipt ở đây chỉ là bản ghi đánh dấu hiệu ứng trong database của consumer, chưa phải việc thu tiền hoặc gửi email thật.",
+      "reason": "\"dấu hiệu ứng\" gượng, thiếu động từ",
+      "severity": "high"
+    },
+    {
+      "old": "không suy từ một hàng Inbox ra mọi tác động ngoài đều once.",
+      "new": "không suy từ một hàng Inbox ra rằng mọi tác động bên ngoài đều chỉ xảy ra đúng một lần.",
+      "reason": "Câu cụt lẫn tiếng Anh",
+      "severity": "high"
+    },
+    {
+      "old": "Dispatcher lab chỉ có một worker và tải tập pending nhỏ. Chưa có lease,",
+      "new": "Dispatcher lab chỉ có một worker và khối lượng pending nhỏ. Lab chưa có lease,",
+      "reason": "\"tải tập\" khó hiểu; thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Source và consumer được đặt trong một persistence lab/schema",
+      "new": "Bên gửi và consumer được đặt trong cùng một persistence lab và schema",
+      "reason": "\"Source\" và \"lab/schema\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Production mỗi service sở hữu dữ liệu",
+      "new": "Ở production, mỗi service sở hữu dữ liệu",
+      "reason": "Thiếu giới từ, câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "không serialize nguyên graph EF đang tracking",
+      "new": "không serialize nguyên graph đối tượng mà EF đang theo dõi (tracking)",
+      "reason": "Cụm tự ghép, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "nhưng một Inbox/Receipt; Outbox cuối cùng published, dữ liệu chuyến tồn tại.",
+      "new": "nhưng kết quả vẫn là một Inbox/Receipt; Outbox cuối cùng ở trạng thái published và dữ liệu chuyến tồn tại.",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Test thứ hai quan sát ghi chuyến thất bại không để lại",
+      "new": "Test thứ hai quan sát trường hợp ghi chuyến thất bại không để lại",
+      "reason": "Thiếu danh từ, cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Nếu mark Published trước publish, lỗi sau mark gây ra điều gì?",
+      "new": "Nếu đánh dấu Published trước khi publish, lỗi xảy ra sau bước đánh dấu gây ra điều gì?",
+      "reason": "Thiếu \"khi\", từ tiếng Anh thường (mark)",
+      "severity": "medium"
+    },
+    {
+      "old": "Mark trước có thể làm intent biến mất khỏi tập pending dù chưa gửi, gây mất giao hàng.",
+      "new": "Đánh dấu trước có thể làm ý định gửi biến mất khỏi tập pending dù chưa gửi, gây mất thông điệp.",
+      "reason": "\"mất giao hàng\" sai ngữ cảnh (thông điệp, không phải hàng)",
+      "severity": "high"
+    },
+    {
+      "old": "Chấp nhận và kiểm soát duplicate tốt hơn che một cửa sổ mất dữ liệu.",
+      "new": "Chấp nhận và kiểm soát lần giao trùng tốt hơn là che đi một cửa sổ mất dữ liệu.",
+      "reason": "Thiếu \"là\", thống nhất cách gọi",
+      "severity": "medium"
+    },
+    {
+      "old": "không âm thầm skip khi thiếu kết nối; nó chỉ tạo và dọn schema GUID riêng.",
+      "new": "không tự bỏ qua test mà không báo lỗi khi thiếu kết nối; fixture chỉ tạo và dọn schema GUID riêng.",
+      "reason": "Calque \"không âm thầm\", \"skip\" tiếng Anh, thiếu danh từ",
+      "severity": "high"
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "file": "dotnet10-allocation-gc-disposal.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng",
+      "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng",
+      "reason": "\"target\" dùng như động từ; thiếu \"được\"",
+      "severity": "low"
+    },
+    {
+      "old": "Một service OCR hay xử lý payload giữ buffer quá lâu,",
+      "new": "Một service OCR hay xử lý payload mà giữ buffer quá lâu,",
+      "reason": "Câu không rõ chủ ngữ cho vế sau",
+      "severity": "medium"
+    },
+    {
+      "old": "quên dispose stream có thể tiêu tốn tài nguyên",
+      "new": "quên dispose stream thì có thể tiêu tốn tài nguyên",
+      "reason": "Thiếu liên từ điều kiện, câu dài khó đọc",
+      "severity": "medium"
+    },
+    {
+      "old": "Không phải đường biểu đồ RAM đi lên nào cũng là memory leak, và không phải gọi GC.Collect là cách sửa.",
+      "new": "Không phải biểu đồ RAM đi lên nào cũng là memory leak, và gọi GC.Collect cũng không phải là cách sửa.",
+      "reason": "Giọng dịch máy, \"đường biểu đồ RAM đi lên\" gượng",
+      "severity": "high"
+    },
+    {
+      "old": "Allocation tạo object/buffer mới; retention là chúng còn được tham chiếu; GC thu hồi managed object không còn sống theo khả năng của runtime.",
+      "new": "Allocation là việc tạo object/buffer mới; retention là việc chúng vẫn còn được tham chiếu; GC thu hồi managed object không còn sống, theo khả năng của runtime.",
+      "reason": "Các vế cụt, thiếu động từ \"là\"",
+      "severity": "medium"
+    },
+    {
+      "old": "có hợp đồng lifetime/ownership cần được tuân thủ.",
+      "new": "có hợp đồng về lifetime và ownership mà code phải tuân thủ.",
+      "reason": "Bị động kiểu Anh, dấu gạch chéo",
+      "severity": "medium"
+    },
+    {
+      "old": "minh hoạ đường gọi DisposeAsync",
+      "new": "minh hoạ luồng gọi DisposeAsync",
+      "reason": "\"đường gọi\" gượng (call path)",
+      "severity": "low"
+    },
+    {
+      "old": "## Ai sở hữu buffer thì người đó trả",
+      "new": "## Ai sở hữu buffer thì người đó phải trả lại",
+      "reason": "Thiếu tân ngữ của \"trả\"",
+      "severity": "medium"
+    },
+    {
+      "old": "rồi chỉ cho truy cập phần length yêu cầu.",
+      "new": "rồi chỉ cho phép truy cập phần có độ dài (length) được yêu cầu.",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "ArrayPool thật có thể trả buffer lớn hơn và chưa được xoá;",
+      "new": "ArrayPool thật có thể trả buffer lớn hơn yêu cầu, và buffer đó có thể chưa được xoá;",
+      "reason": "\"chưa được xoá\" mơ hồ, thiếu so sánh",
+      "severity": "high"
+    },
+    {
+      "old": "vẫn phải tuân lifetime và không được dùng sau Return.",
+      "new": "vẫn phải tuân thủ lifetime và không được dùng sau Return.",
+      "reason": "Thiếu chữ \"thủ\"",
+      "severity": "low"
+    },
+    {
+      "old": "tuyên bố mọi thao tác đọc/ghi Span của lease thread-safe.",
+      "new": "tuyên bố mọi thao tác đọc/ghi Span của lease đều thread-safe.",
+      "reason": "Thiếu từ nối, câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "phối hợp dùng-và-dispose giữa thread cần hợp đồng riêng.",
+      "new": "việc phối hợp giữa thao tác dùng buffer và dispose trên nhiều thread cần hợp đồng riêng.",
+      "reason": "Cụm tự ghép \"dùng-và-dispose\"",
+      "severity": "medium"
+    },
+    {
+      "old": "không tự giải race hoặc rò dữ liệu.",
+      "new": "không tự giải quyết race hoặc rò dữ liệu.",
+      "reason": "\"giải race\" là cụm tự ghép",
+      "severity": "medium"
+    },
+    {
+      "old": "## Using giữ cleanup khi phần việc ném lỗi",
+      "new": "## Using vẫn thực hiện cleanup khi phần việc ném lỗi",
+      "reason": "\"giữ cleanup\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Khối using đưa lời Dispose vào đường finally tương ứng.",
+      "new": "Khối using đặt lời gọi Dispose vào nhánh finally tương ứng.",
+      "reason": "\"lời Dispose\", \"đường finally\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "using declaration sống tới cuối scope, còn using block giới hạn hẹp hơn bằng dấu ngoặc.",
+      "new": "using declaration có hiệu lực tới cuối scope, còn using block giới hạn phạm vi hẹp hơn bằng dấu ngoặc.",
+      "reason": "Câu cụt, \"sống\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "đừng tuỳ tiện dispose giữa request rồi làm các caller khác sử dụng object đã huỷ.",
+      "new": "đừng tuỳ tiện dispose giữa request khiến các caller khác phải dùng object đã bị huỷ.",
+      "reason": "Trật tự từ kiểu Anh, thiếu \"bị\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Lỗi ownership phải được xử lý ở thiết kế và kiểm thử.",
+      "new": "Lỗi về ownership cần được xử lý từ khâu thiết kế và kiểm thử.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "await using chờ cleanup bất đồng bộ theo implementation.",
+      "new": "await using chờ cleanup bất đồng bộ theo cách triển khai của kiểu.",
+      "reason": "\"implementation\" tiếng Anh thường",
+      "severity": "low"
+    },
+    {
+      "old": "điều đó tránh bắt caller chặn thread.",
+      "new": "điều đó giúp không buộc phía gọi phải chặn thread.",
+      "reason": "Giọng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "không nên thêm async chỉ để đồng bộ hình thức.",
+      "new": "không nên thêm async chỉ để cho giống nhau về hình thức.",
+      "reason": "\"đồng bộ hình thức\" dễ hiểu nhầm thành đồng bộ hoá",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca kiểm chứng xác nhận đường await using được gọi, không đo hệ điều hành đã ghi dữ liệu",
+      "new": "Test case kiểm chứng xác nhận luồng await using được gọi, và không đo việc hệ điều hành đã ghi dữ liệu",
+      "reason": "Thống nhất \"test case\"; câu thiếu \"việc\"",
+      "severity": "medium"
+    },
+    {
+      "old": "rồi continuation chạy thread khác,",
+      "new": "rồi phần continuation chạy trên thread khác,",
+      "reason": "Thiếu giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "## Năm kiểm tra và bài tập",
+      "new": "## Năm test case và bài tập",
+      "reason": "Thống nhất \"test case\"",
+      "severity": "low"
+    },
+    {
+      "old": "Kiểm chứng gồm trả lease sau exception, yêu cầu clear, dispose lặp không trả hai lần, từ chối truy cập owner đã dispose và async cleanup được gọi.",
+      "new": "Năm test case kiểm chứng gồm: trả lease sau exception, yêu cầu xoá dữ liệu khi trả, dispose lặp lại không trả buffer hai lần, từ chối truy cập owner đã dispose và gọi async cleanup.",
+      "reason": "Câu liệt kê cụt, \"yêu cầu clear\" gượng",
+      "severity": "high"
+    },
+    {
+      "old": "không làm biến Span đã lấy trở nên an toàn",
+      "new": "không làm cho Span đã lấy trở nên an toàn",
+      "reason": "\"làm biến\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Working set còn chịu GC, pool và allocator;",
+      "new": "Working set còn chịu ảnh hưởng của GC, pool và allocator;",
+      "reason": "Thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "thay vì dựa vào một đường RAM.",
+      "new": "thay vì dựa vào một đường biểu đồ RAM.",
+      "reason": "\"đường RAM\" cụt",
+      "severity": "medium"
+    }
+  ]
+}

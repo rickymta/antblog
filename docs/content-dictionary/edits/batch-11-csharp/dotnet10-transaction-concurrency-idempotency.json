@@ -1,0 +1,113 @@
+{
+  "file": "dotnet10-transaction-concurrency-idempotency.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.",
+      "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.",
+      "reason": "'target' lọt tiếng Anh; 'code' → 'mã nguồn'.",
+      "severity": "medium"
+    },
+    {
+      "old": "có tự giải được hai tài xế cùng nhận chuyến?",
+      "new": "có tự giải quyết được tình huống hai tài xế cùng nhận chuyến không?",
+      "reason": "'giải được' cụt, thiếu 'không'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Idempotency giữ một ý định request lặp không tạo nhiều hiệu ứng.",
+      "new": "Idempotency bảo đảm một ý định request được lặp lại không tạo ra nhiều hiệu ứng.",
+      "reason": "'giữ ... lặp' cụt, khó hiểu.",
+      "severity": "high"
+    },
+    {
+      "old": "rồi nối chúng trong một implementation nhỏ.",
+      "new": "rồi nối chúng trong một bản cài đặt nhỏ.",
+      "reason": "'implementation' lọt tiếng Anh.",
+      "severity": "low"
+    },
+    {
+      "old": "Không giữ một transaction SQL mở trong lúc gọi các service đó và không coi Unit of Work C# là transaction xuyên service.",
+      "new": "Đừng giữ một transaction SQL mở trong lúc gọi các service đó, và đừng coi Unit of Work C# là transaction xuyên service.",
+      "reason": "Lời khuyên nên dùng 'đừng', tách hai vế rõ.",
+      "severity": "low"
+    },
+    {
+      "old": "không được commit khoá xử lý nhưng mất chuyến, hoặc commit chuyến mà mất khoá.",
+      "new": "không để xảy ra tình huống commit khoá xử lý nhưng mất chuyến, hoặc commit chuyến mà mất khoá.",
+      "reason": "Câu thiếu chủ ngữ, 'không được commit' dễ hiểu nhầm.",
+      "severity": "medium"
+    },
+    {
+      "old": "vì rollback database không có nghĩa mọi object",
+      "new": "vì rollback database không có nghĩa là mọi object",
+      "reason": "Thiếu 'là'.",
+      "severity": "low"
+    },
+    {
+      "old": "Câu trả lời không phải bỏ transaction mà là chọn phạm vi nhỏ đúng invariant và tránh I/O ngoài database bên trong.",
+      "new": "Giải pháp không phải bỏ transaction mà là chọn phạm vi nhỏ vừa đủ cho invariant cần bảo vệ và tránh I/O ngoài database bên trong transaction.",
+      "reason": "'Câu trả lời', 'đúng invariant', 'bên trong' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "## Version phải tham gia điều kiện UPDATE",
+      "new": "## Version phải nằm trong điều kiện của UPDATE",
+      "reason": "'tham gia điều kiện' dịch gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "từ chối ý định nhận thứ hai. Không tự động retry ghi đè bằng version mới chỉ để exception biến mất.",
+      "new": "từ chối ý định nhận chuyến thứ hai. Đừng tự động retry rồi ghi đè bằng version mới chỉ để exception biến mất.",
+      "reason": "Thiếu danh từ 'chuyến'; câu thiếu động từ nối.",
+      "severity": "medium"
+    },
+    {
+      "old": "Khoá chính ghép customerId/key phân vùng theo chủ thể. Nếu đã có, cùng khoảng cách trả TripId cũ; khác input bị từ chối.",
+      "new": "Khoá chính ghép customerId và key, phân vùng theo chủ thể. Nếu khoá đã có và khoảng cách giống nhau thì trả TripId cũ; input khác thì bị từ chối.",
+      "reason": "Câu cụt thiếu chủ ngữ, vị ngữ.",
+      "severity": "high"
+    },
+    {
+      "old": "candidate thua bị rollback trong SaveChanges.",
+      "new": "request thua bị rollback trong SaveChanges.",
+      "reason": "'candidate' lọt tiếng Anh thường.",
+      "severity": "medium"
+    },
+    {
+      "old": "Giới hạn độ dài key và độ chia nhỏ distance được kiểm để mapping numeric(12,6) không âm thầm đổi ý nghĩa fingerprint.",
+      "new": "Giới hạn độ dài của key và độ mịn của distance được kiểm tra để mapping numeric(12,6) không làm đổi ý nghĩa fingerprint mà không báo lỗi.",
+      "reason": "Calque 'âm thầm'; 'độ chia nhỏ' dịch gượng.",
+      "severity": "high"
+    },
+    {
+      "old": "response snapshot đầy đủ cần thiết kế tiếp cho service thật.",
+      "new": "response snapshot đầy đủ cần được thiết kế tiếp cho service thật.",
+      "reason": "'cần thiết kế' dễ đọc thành 'cần thiết'.",
+      "severity": "low"
+    },
+    {
+      "old": "Test đối chiếu rollback, stale update và hai lời đặt cùng key cho cùng TripId;",
+      "new": "Test kiểm tra rollback, stale update và việc hai yêu cầu đặt chuyến cùng key cho cùng một TripId;",
+      "reason": "'hai lời đặt' tự ghép, 'đối chiếu' không hợp.",
+      "severity": "high"
+    },
+    {
+      "old": "Hai lời gọi Task.WhenAll là yêu cầu chồng lấp, không khẳng định một lịch lock PostgreSQL cụ thể được ép tại từng bước.",
+      "new": "Hai lời gọi Task.WhenAll là hai yêu cầu chạy chồng lấp nhau, không khẳng định một trình tự lock cụ thể của PostgreSQL bị ép xảy ra ở từng bước.",
+      "reason": "'lịch lock', 'được ép' gượng, thiếu danh từ.",
+      "severity": "medium"
+    },
+    {
+      "old": "khoảng giữa kiểm tra và ghi vẫn race.",
+      "new": "khoảng trống giữa lúc kiểm tra và lúc ghi vẫn dẫn tới race condition.",
+      "reason": "'vẫn race' thiếu danh từ; theo terminology 'race condition'.",
+      "severity": "high"
+    },
+    {
+      "old": "không âm thầm skip khi thiếu kết nối; nó chỉ tạo và dọn schema GUID riêng.",
+      "new": "không tự bỏ qua test mà không báo lỗi khi thiếu kết nối; fixture chỉ tạo và dọn schema GUID riêng.",
+      "reason": "Calque 'âm thầm' và 'skip' (theo style guide); 'nó' mơ hồ.",
+      "severity": "high"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 ---
 slug: dotnet10-use-case-dat-chuyen-end-to-end
 title: "Ghép use case đặt chuyến: validation, transaction, domain event và kiểm thử"
-summary: "Bài 34: lần theo POST /trips từ subject đã xác thực đến aggregate và commit PostgreSQL; kiểm replay, conflict và hai tài xế cùng nhận bằng HTTP thật trong test host."
+summary: "Bài 34: lần theo POST /trips từ subject đã xác thực đến aggregate và commit PostgreSQL; kiểm tra replay, conflict và hai tài xế cùng nhận bằng HTTP thật trong test host."
 category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
@@ -13,24 +13,24 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>CustomerId trong body có thể thay subject của token nếu client gửi đúng định dạng Guid không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Identity nghiệp vụ phải lấy từ mapping danh tính đã xác thực; một Guid đúng cú pháp không chứng minh quyền sở hữu.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Danh tính nghiệp vụ phải lấy từ phần ánh xạ danh tính đã xác thực; một Guid đúng cú pháp không chứng minh quyền sở hữu.</p></details>
 </div>
 
 ## Một đường xử lý có thể lần theo
 
-Khách gửi distanceKm và Idempotency-Key. API lấy sub đã xác thực, map sang Guid theo hợp đồng lab rồi tạo CreateTrip. Pipeline kiểm dữ liệu; handler tìm receipt cũ hoặc tạo DistanceKm/Money/Trip mới, thêm receipt và commit qua UoW.
+Khách gửi distanceKm và Idempotency-Key. API lấy sub đã xác thực, ánh xạ thành Guid theo hợp đồng của lab rồi tạo CreateTrip. Pipeline kiểm tra dữ liệu; handler tìm receipt cũ hoặc tạo DistanceKm/Money/Trip mới, thêm receipt và commit qua UoW.
 
 Fare dùng cùng quy tắc minh hoạ từ đầu loạt: 12.000 gồm 2 km, vượt 4.500/km, làm tròn cuối tới 1 VND AwayFromZero. CreatedAt lấy từ TimeProvider, không từ trường tuỳ ý của client. Test thay đồng hồ để assert thời điểm cố định.
 
-Một API bind xong chưa là một command hợp lệ. Validation hình thức, policy quyền, invariant domain và constraint database đều có phần việc riêng; không xoá lớp sau chỉ vì lớp trước đã kiểm.
+Dữ liệu từ API được bind xong vẫn chưa phải là một command hợp lệ. Validation hình thức, policy quyền, invariant domain và constraint database đều có phần việc riêng; không xoá lớp sau chỉ vì lớp trước đã kiểm.
 
 ## Replay và xung đột nội dung
 
-Receipt khoá theo CustomerId/key chứa input chuẩn hoá và kết quả TripId/Fare. Replay cùng ý định trả cùng kết quả, lab dùng 201 và cùng Location cho cả lần đầu/lần lặp. Cùng key mà đổi distance trả 409.
+Receipt có khoá là CustomerId/key và chứa input chuẩn hoá và kết quả TripId/Fare. Replay cùng ý định trả cùng kết quả, lab dùng 201 và cùng Location ở cả lần đầu lẫn lần lặp. Cùng key mà đổi distance thì trả 409.
 
-Nếu hai request đều chưa thấy receipt, constraint phân xử cuối. Candidate thua rollback cả Trip và Outbox của nó, rồi handler đọc kết quả đã commit. AsNoTracking của đường đọc receipt tránh identity map trả lại object candidate còn trong tracker sau failure.
+Nếu hai request đều chưa thấy receipt, constraint là nơi phân xử cuối cùng. Ứng viên thua cuộc rollback cả Trip và Outbox của nó, rồi handler đọc kết quả đã commit. AsNoTracking ở đường đọc receipt giúp identity map không trả lại object ứng viên còn trong tracker sau khi lỗi.
 
-Khi mở rộng body có pickup, destination hay loại xe, fingerprint/so khớp phải mở rộng theo tất cả field ảnh hưởng ý định. Không dùng chỉ distance như lab cho hợp đồng nhiều field rồi nhận nhầm replay.
+Khi mở rộng body có pickup, destination hay loại xe, fingerprint và phép so khớp phải mở rộng theo tất cả trường ảnh hưởng ý định. Đừng chỉ dùng distance như lab cho hợp đồng nhiều trường, rồi nhận nhầm replay.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Khi mở rộng body có pickup, destination hay loại xe, fingerprint/so khớ
 
 ## Read ownership và accept concurrency
 
-GetTrip lọc cả TripId và CustomerId ở query. Khác chủ hoặc không tồn tại đều 404 trong service tổng hợp này; đây là lựa chọn khác demo đơn giản bài 19 trả 403 cho owner sai. Hợp đồng mới được nêu và test tường minh để tránh tiết lộ sự tồn tại tài nguyên.
+GetTrip lọc cả TripId và CustomerId ở query. Khác chủ hoặc không tồn tại đều trả 404 trong service tổng hợp này; đây là lựa chọn khác với demo đơn giản ở bài 19, vốn trả 403 cho owner sai. Hợp đồng mới được nêu rõ và có test riêng để tránh tiết lộ sự tồn tại tài nguyên.
 
-DriverId của Accept lấy từ sub, expectedVersion từ request. Handler kiểm version quan sát được, gọi hành vi, sau đó database kiểm original version lúc commit. Hai request chồng lấp có một 200 và một 409; test còn kiểm chỉ có một trip.accepted.v1 trong Outbox.
+DriverId của Accept lấy từ sub, expectedVersion từ request. Handler kiểm tra version đã quan sát được, gọi hành vi, sau đó database kiểm original version lúc commit. Hai request chồng lấp cho ra một kết quả 200 và một kết quả 409; test còn kiểm tra rằng chỉ có một trip.accepted.v1 trong Outbox.
 
-Policy driver ở lab chưa kiểm hồ sơ/khu vực/khả năng nhận thêm chuyến. Không đưa demo này thành dispatch production chỉ vì đã có JWT role và concurrency token.
+Policy dành cho tài xế ở lab chưa kiểm tra hồ sơ, khu vực hay khả năng nhận thêm chuyến. Đừng biến demo này thành hệ thống dispatch chạy production chỉ vì đã có JWT role và concurrency token.
 
 ## Bằng chứng chạy qua ranh giới thật
 
-Test dùng WebApplicationFactory, JWT handler thật với khoá fixture và PostgreSQL thật trong schema GUID. Không fake nguyên HTTP response hoặc thay EF bằng một dictionary rồi gọi đó là kiểm transaction.
+Test dùng WebApplicationFactory, JWT handler thật với khoá fixture và PostgreSQL thật trong schema GUID. Không giả lập toàn bộ HTTP response hoặc thay EF bằng một dictionary rồi gọi đó là kiểm tra transaction.
 
-Các ca gồm thiếu/ngoài miền/precision sai, key lỗi, duplicate/replay, key đổi input, ownership, role, nhận trùng, rehydrate và huỷ trước command. Khi validation thất bại, database phải không có Trip/Outbox mới. Health/architecture/telemetry được kiểm trong cùng suite nhưng có tiêu chí riêng.
+Các test case gồm thiếu giá trị, ngoài miền, sai độ chính xác thập phân, key lỗi, duplicate/replay, key đổi input, ownership, role, nhận trùng, rehydrate và huỷ trước command. Khi validation thất bại, database không được có Trip/Outbox mới. Health, architecture và telemetry được kiểm tra trong cùng suite nhưng có tiêu chí riêng.
 
-Không có user/token/password production trong fixture. Việc test trust dùng khoá trong memory không chứng minh identity provider thật, metadata rotation hoặc TLS của môi trường triển khai.
+Không có user/token/password production trong fixture. Việc test trust bằng khoá trong memory không chứng minh được identity provider thật, metadata rotation hay TLS của môi trường triển khai.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -64,9 +64,9 @@ Không có user/token/password production trong fixture. Việc test trust dùng
 
 ## Bài tập
 
-**Bài tập:** nếu trả 200 với fare=0 khi SaveChanges lỗi, invariant nào về phản hồi đã bị phá? Nếu chèn một network call giữa ghi Trip và receipt bằng hai commit, rủi ro gì xuất hiện?
+**Bài tập:** nếu trả 200 với fare=0 khi SaveChanges lỗi, invariant nào về phản hồi đã bị phá? Nếu ghi Trip và receipt bằng hai commit rồi chèn một network call vào giữa, rủi ro gì xuất hiện?
 
-<details><summary>Xem đáp án</summary><p>Client có thể coi một lỗi hệ thống là báo giá thành công. Hai commit mở khoảng trống khiến ý định request và chuyến không còn nguyên tử; dùng một ranh giới local đúng và cơ chế giao tiếp ngoài transaction.</p></details>
+<details><summary>Xem đáp án</summary><p>Client có thể coi một lỗi hệ thống là báo giá thành công. Hai commit mở khoảng trống khiến ý định request và chuyến không còn nguyên tử; dùng một ranh giới local đúng và để cơ chế giao tiếp nằm ngoài transaction.</p></details>
 
 ## Code và kiểm chứng
 
@@ -76,7 +76,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự bỏ qua khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.
 
 ### Handlers.cs — 31-38-trip-service/Application/Handlers.cs
 

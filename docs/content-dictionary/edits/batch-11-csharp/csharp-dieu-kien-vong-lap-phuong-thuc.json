@@ -1,0 +1,20 @@
+{"file":"csharp-dieu-kien-vong-lap-phuong-thuc.md","edits":[
+{"old":"giả định để luyện validation, không phải giới hạn thật","new":"giả định để luyện kiểm tra đầu vào, không phải giới hạn thật","reason":"Từ tiếng Anh lọt vào văn xuôi, thống nhất cách gọi","severity":"medium"},
+{"old":"vế phải chỉ được đánh giá khi cần.","new":"vế phải chỉ chạy khi cần.","reason":"Bỏ bị động kiểu tiếng Anh","severity":"low"},
+{"old":"để tránh thêm một dòng nhưng quên đưa nó vào nhánh","new":"để tránh trường hợp thêm một dòng mà quên đưa dòng đó vào nhánh","reason":"'Nó' mơ hồ, nhắc lại danh từ","severity":"medium"},
+{"old":"nó nằm trong điểm vào do compiler tạo","new":"hàm này nằm trong điểm vào do compiler tạo","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"low"},
+{"old":"bắt giữ biến cục bộ bên ngoài, làm phụ thuộc của công thức rõ hơn.","new":"capture biến cục bộ bên ngoài, giúp phụ thuộc của công thức hiện rõ hơn.","reason":"'bắt giữ' là dịch từng chữ của capture","severity":"medium"},
+{"old":"tránh chuỗi bị lỗi khi đổi tên","new":"tránh để chuỗi tên bị sai lệch khi tham số đổi tên","reason":"Cụm dịch gượng, không rõ chuỗi nào lỗi","severity":"high"},
+{"old":"bài 05 sẽ học cách xử lý và chẩn đoán nó.","new":"bài 05 sẽ học cách xử lý và chẩn đoán exception.","reason":"Nhắc lại danh từ thay cho 'nó'","severity":"low"},
+{"old":"Không bọc mọi lỗi rồi trả 0 VND vì người gọi có thể hiểu thành một chuyến miễn phí hợp lệ.","new":"Đừng bọc mọi lỗi rồi trả 0 VND, vì người gọi có thể hiểu đó là một chuyến miễn phí hợp lệ.","reason":"Câu cụt, thiếu dấu ngắt ý","severity":"low"},
+{"old":"Trong ví dụ không có console, database hoặc HTTP bên trong hàm: cùng đầu vào hợp lệ cho cùng giá, giúp kiểm chứng dễ hơn.","new":"Hàm trong ví dụ không dùng console, database hay HTTP: cùng đầu vào hợp lệ cho cùng giá, nên kiểm chứng dễ hơn.","reason":"Câu thiếu chủ ngữ, trật tự kiểu Anh","severity":"medium"},
+{"old":"là collection expression, được hỗ trợ trong cấu hình C# của .NET 10","new":"là collection expression, mà cấu hình C# của .NET 10 hỗ trợ","reason":"Bỏ bị động","severity":"low"},
+{"old":"tránh sao chép rule khắp nơi; bài mô hình domain sẽ gom rule và thiết kế kiểu kết quả validation phù hợp.","new":"đừng sao chép quy tắc ra khắp nơi; bài mô hình domain sẽ gom quy tắc lại và thiết kế kiểu kết quả kiểm tra đầu vào phù hợp.","reason":"Từ tiếng Anh thông thường lặp trong văn xuôi","severity":"medium"},
+{"old":"nếu khác, nó ném lỗi và trả exit code thất bại.","new":"nếu có giá trị lệch, chương trình ném lỗi và trả exit code báo thất bại.","reason":"'khác' thiếu chủ ngữ, 'nó' mơ hồ","severity":"medium"},
+{"old":"Đúng biên phần bao gồm","new":"Đúng biên của phần đã bao gồm trong giá cơ bản","reason":"Cụm cụt, thiếu danh từ","severity":"low"},
+{"old":"Kiểm tra điểm giữa khác","new":"Kiểm tra một điểm giữa khác","reason":"Cụm cụt","severity":"low"},
+{"old":"không thay thế validation của chương trình tính cước.","new":"không thay thế việc kiểm tra đầu vào của chương trình tính cước.","reason":"Thống nhất cách gọi validation","severity":"medium"},
+{"old":"và các ca kiểm tra quanh 80 km","new":"và các test case quanh 80 km","reason":"Thống nhất 'test case', bỏ 'ca'","severity":"medium"},
+{"old":"đây cũng là dấu hiệu cần gom rule khi cấu trúc lớn lên.","new":"đây cũng là dấu hiệu cần gom quy tắc lại khi cấu trúc lớn lên.","reason":"Từ tiếng Anh lọt vào văn xuôi","severity":"medium"},
+{"old":"cùng một báo giá cần được trao đổi giữa service và trình bày cho khách theo hai nhu cầu khác nhau.","new":"cùng một báo giá vừa phải trao đổi giữa các service, vừa phải trình bày cho khách, với hai nhu cầu khác nhau.","reason":"Cấu trúc bị động, hai vế không song song","severity":"medium"}
+]}

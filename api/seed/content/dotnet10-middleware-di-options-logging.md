@@ -8,29 +8,29 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi
 ---
 
-Đây là **bài 18** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 18** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một singleton trong container có nghĩa là chỉ có một instance cho toàn bộ cluster Tới Nơi không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Nó sống theo container/process đang chạy; mỗi replica có container và bộ nhớ riêng.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Singleton sống theo container/process đang chạy; mỗi replica có container và bộ nhớ riêng.</p></details>
 </div>
 
 ## Một request đi qua những đâu?
 
-Khi API trả giá sai, ta cần biết bảng giá đã cấu hình, request được xử lý bởi luồng nào và timestamp nào đi ra. Rải Console.WriteLine trong policy không tạo được một cách quan sát thống nhất.
+Khi API trả giá sai, ta cần biết bảng giá đã cấu hình, luồng nào xử lý request và timestamp nào được trả về. Rải Console.WriteLine trong policy không tạo ra một cách quan sát thống nhất.
 
 Middleware bọc đường xử lý HTTP; DI quản lý object graph/lifetime; options tạo hợp đồng cấu hình; logging ghi sự kiện có cấu trúc. Tách vai trò giúp code domain không phải biết header hoặc cách đọc file appsettings.
 
-Trong lab, policy cấu hình vẫn chỉ là giá cơ bản với đơn giá phần vượt cố định. Không mô phỏng hệ thống version giá theo thời điểm hiệu lực; snapshot cấu hình và rule đổi giá thật sẽ cần thiết kế rộng hơn.
+Trong lab, policy cấu hình vẫn chỉ là giá cơ bản với đơn giá phần vượt cố định. Bài không mô phỏng hệ thống phiên bản bảng giá theo thời điểm hiệu lực; snapshot cấu hình và rule đổi giá thật sẽ cần thiết kế rộng hơn.
 
 ## Thứ tự middleware có ý nghĩa
 
-UseExceptionHandler được đăng ký trước middleware quan sát để bọc lỗi phía trong. Middleware quan sát lưu trace identifier do server tạo, đăng ký OnStarting để thêm X-Trace-Id, mở logging scope rồi await next.
+UseExceptionHandler đăng ký trước middleware quan sát để bọc các lỗi phát sinh bên trong. Middleware quan sát lưu trace identifier do server tạo, đăng ký OnStarting để thêm X-Trace-Id, mở logging scope rồi await next.
 
-Đường request đi vào theo thứ tự đăng ký, quay ra sau await theo chiều ngược. Nếu không gọi next, middleware có thể short-circuit; nếu viết header quá muộn sau khi response bắt đầu, hành vi không còn như kỳ vọng. OnStarting là vị trí phù hợp để thêm header tại ranh giới đó.
+Request đi vào theo thứ tự đăng ký và quay ra sau await theo chiều ngược lại. Nếu không gọi next, middleware có thể ngắt chuỗi xử lý (short-circuit); nếu ghi header quá muộn, sau khi response đã bắt đầu, hành vi sẽ không như kỳ vọng. OnStarting là vị trí phù hợp để thêm header tại ranh giới đó.
 
-Log Request completed chỉ chạy ở đường next trở về bình thường của middleware này; đoạn code chưa đo duration hay bảo đảm một log kết thúc cho mọi exception. Nếu cần đo cả lỗi, phải thiết kế try/finally và xác định status cuối do handler ngoài đặt, không gán cho ví dụ những bảo đảm nó chưa có.
+Log Request completed chỉ chạy khi next trả về bình thường trong middleware này; đoạn code chưa đo duration hay bảo đảm một log kết thúc cho mọi exception. Nếu cần đo cả lỗi, phải thiết kế try/finally và xác định status cuối do handler ngoài đặt, đừng gán cho ví dụ những bảo đảm mà ví dụ chưa có.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -43,17 +43,17 @@ Log Request completed chỉ chạy ở đường next trở về bình thường
 
 TimeProvider.System được đăng ký singleton, không mang dữ liệu riêng của khách. RequestStamp là scoped: cùng một request chia sẻ instance trong scope đó. StampReader là transient: mỗi lần resolve có instance mới, nhưng hai reader trong cùng request nhận chung RequestStamp.
 
-Route diagnostics chỉ map trong Development, trả SameScoped=true, SameTransient=false và ScopeId. Hai request liên tiếp phải có ScopeId khác nhau. Đây là thí nghiệm lifetime, không là endpoint tiết lộ thông tin hạ tầng cần public ở production.
+Route diagnostics chỉ map trong Development, trả SameScoped=true, SameTransient=false và ScopeId. Hai request liên tiếp phải có ScopeId khác nhau. Đây là thí nghiệm về lifetime, không phải endpoint tiết lộ thông tin hạ tầng cần công khai ở production.
 
-Không inject dependency scoped vào singleton rồi giữ lâu: nó có thể bị nâng lifetime và chia sẻ state ngoài ý muốn. Middleware truyền thống sống lâu cũng cần cách nhận dependency scoped đúng phạm vi, ví dụ qua InvokeAsync, thay vì cất vào constructor tuỳ tiện.
+Đừng inject dependency scoped vào singleton rồi giữ lại lâu dài: dependency đó có thể sống lâu như singleton (lifetime bị nâng lên) và chia sẻ state ngoài ý muốn. Middleware truyền thống có vòng đời dài cũng cần cách nhận dependency scoped đúng phạm vi, ví dụ qua InvokeAsync, thay vì cất vào constructor tuỳ tiện.
 
 ## Options hợp lệ trước khi nhận request
 
-FareOptions được bind từ mục Fare. ValidateOnStart buộc BaseFare nằm trong miền lab trước khi host phục vụ. Nếu cấu hình âm, test mong OptionsValidationException khi khởi động, không chờ tới request đầu rồi trả giá âm.
+FareOptions được bind từ mục Fare. ValidateOnStart buộc BaseFare nằm trong miền lab trước khi host phục vụ. Nếu cấu hình có giá trị âm, test kỳ vọng OptionsValidationException ngay khi khởi động, thay vì chờ tới request đầu tiên rồi trả giá âm.
 
-Trong host mặc định, biến môi trường `Fare__BaseFare` có thể ghi đè khoá cấu hình theo provider order. Không log toàn bộ configuration để debug vì các mục khác có thể chứa bí mật. Chỉ ghi trường đã được phân loại phù hợp hoặc phiên bản cấu hình cần quan sát.
+Trong host mặc định, biến môi trường `Fare__BaseFare` có thể ghi đè khoá cấu hình theo provider order. Đừng log toàn bộ cấu hình để debug, vì các mục khác có thể chứa bí mật. Chỉ ghi trường đã được phân loại phù hợp hoặc phiên bản cấu hình cần quan sát.
 
-ConfiguredFarePolicy dùng IOptions trong bài; điều này không hứa hot reload theo từng request. IOptionsSnapshot/IOptionsMonitor có lifetime và ý nghĩa cập nhật khác, chỉ đưa vào khi đã chốt yêu cầu. Test thay TimeProvider bằng FixedClock để timestamp có kỳ vọng cố định, không so “gần bằng DateTime.Now”.
+ConfiguredFarePolicy dùng IOptions trong bài; điều này không bảo đảm tự nạp lại cấu hình (hot reload) theo từng request. IOptionsSnapshot/IOptionsMonitor có lifetime và ý nghĩa cập nhật khác, chỉ đưa vào khi đã chốt yêu cầu. Test thay TimeProvider bằng FixedClock để timestamp có kỳ vọng cố định, không so “gần bằng DateTime.Now”.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -66,11 +66,11 @@ ConfiguredFarePolicy dùng IOptions trong bài; điều này không hứa hot re
 
 Log dùng placeholder `{StatusCode}` thay vì chỉ nối chuỗi. Scope thêm TraceId cho provider có hỗ trợ scope; cách hiển thị scope tuỳ cấu hình provider. X-Trace-Id giúp client gửi ID cho đội hỗ trợ mà không cần gửi body chứa dữ liệu khách.
 
-Không log Authorization header, JWT hay giấy tờ OCR. Ví dụ tự dùng server TraceIdentifier thay vì phản chiếu một header tuỳ ý của client vào log; nếu sau này chấp nhận correlation từ ngoài phải validate/giới hạn theo hợp đồng.
+Không log Authorization header, JWT hay giấy tờ OCR. Ví dụ tự dùng server TraceIdentifier thay vì phản chiếu một header tuỳ ý của client vào log; nếu sau này chấp nhận mã correlation từ bên ngoài thì phải kiểm tra và giới hạn theo hợp đồng.
 
-**Bài tập:** đổi StampReader thành scoped. SameTransient còn false không? Đặt BaseFare=-1 rồi chạy host: vì sao fail fast tốt hơn âm thầm thay về 0?
+**Bài tập:** đổi StampReader thành scoped. SameTransient còn false không? Đặt BaseFare=-1 rồi chạy host: vì sao fail fast tốt hơn việc tự thay về 0 mà không báo gì?
 
-<details><summary>Xem đáp án</summary><p>Cùng scope sẽ nhận cùng StampReader nên kết quả so instance đổi. Cấu hình sai cần được nhìn thấy và sửa; thay về 0 có thể biến lỗi vận hành thành báo giá miễn phí.</p></details>
+<details><summary>Xem đáp án</summary><p>Cùng scope sẽ nhận cùng StampReader nên kết quả so sánh instance sẽ đổi. Cấu hình sai cần được nhìn thấy và sửa; thay về 0 có thể biến lỗi vận hành thành báo giá miễn phí.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 

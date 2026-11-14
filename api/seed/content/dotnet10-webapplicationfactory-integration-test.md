@@ -8,12 +8,12 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi
 ---
 
-Đây là **bài 20** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 20** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>TestServer trả 200 có chứng minh cấu hình TLS/nginx của production đúng không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Nó chạy pipeline ứng dụng trong test host; network server, proxy và cấu hình triển khai là ranh giới khác.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. TestServer chạy pipeline ứng dụng trong test host; network server, proxy và cấu hình triển khai là ranh giới khác.</p></details>
 </div>
 
 ## Unit test endpoint chưa nhìn thấy pipeline
@@ -22,15 +22,15 @@ Gọi thẳng hàm tính giá không đi qua JSON binding, validation hay author
 
 Suite tham chiếu bốn project API 16–19 bằng alias entry point riêng. Mỗi Program là public partial class có Main tường minh, nên factory chọn đúng ứng dụng. Microsoft.AspNetCore.Mvc.Testing cung cấp hạ tầng TestServer; xUnit chạy test và báo kết quả.
 
-Không cần mở port hoặc server dev cho suite này. BaseAddress của client test không có nghĩa request đi ra Internet. Ngược lại, nếu app thật gọi dependency ngoài, phải chủ động thay/configure dependency đó; WebApplicationFactory không tự fake tất cả hạ tầng.
+Không cần mở port hoặc server dev cho suite này. BaseAddress của client test không có nghĩa là request đi ra Internet. Ngược lại, nếu app thật gọi dependency ngoài, phải chủ động thay thế hoặc cấu hình lại dependency đó; WebApplicationFactory không tự fake tất cả hạ tầng.
 
 ## Giữ HTTP thật, thay dependency có chủ đích
 
-Ca baseline gửi JSON 5 km và assert status, fare, currency bằng JSON parser. Nhóm validation gửi body thiếu/null/ngoài miền, kiểm 400 cùng errors; hai cận 0/100 vẫn thành công. Ca JSON hỏng chỉ assert 400 ở môi trường Production, đúng phạm vi hợp đồng bài 17.
+Test case baseline gửi JSON 5 km và assert status, fare, currency bằng JSON parser. Nhóm validation gửi body thiếu/null/ngoài miền, kiểm tra 400 cùng errors; hai cận 0/100 vẫn thành công. Test case JSON hỏng chỉ assert 400 ở môi trường Production, đúng phạm vi hợp đồng bài 17.
 
-Ca OpenAPI dựng Development và kiểm route /quotes tồn tại trong tài liệu; một ca Production đảm bảo endpoint tài liệu không được map. Đặt environment rõ ràng để test không phụ thuộc biến môi trường đang có trên máy chạy.
+Test case OpenAPI dựng môi trường Development và kiểm tra route /quotes có trong tài liệu; một test case Production bảo đảm endpoint tài liệu không được map. Đặt environment rõ ràng để test không phụ thuộc biến môi trường đang có trên máy chạy.
 
-Factory có thể thay TimeProvider bằng FixedClock và cấu hình BaseFare=13000. Assertion mong 26.500 cho 5 km và timestamp UnixEpoch: kỳ vọng đó chứng minh DI/config đi tới endpoint, không chỉ chứng minh một fake trả sẵn toàn bộ HTTP response.
+Factory có thể thay TimeProvider bằng FixedClock và cấu hình BaseFare=13000. Assertion kỳ vọng 26.500 cho 5 km và timestamp UnixEpoch: kỳ vọng đó chứng minh DI/config đi tới endpoint, không chỉ chứng minh một fake trả sẵn toàn bộ HTTP response.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -39,21 +39,21 @@ Factory có thể thay TimeProvider bằng FixedClock và cấu hình BaseFare=1
 <figcaption>Hình 1. Test giữ pipeline ứng dụng, chỉ thay dependency/cấu hình đã nêu; không giả toàn bộ HTTP response.</figcaption>
 </figure>
 
-## Kiểm lifetime và cấu hình sai
+## Kiểm tra lifetime và cấu hình sai
 
-Diagnostics ở bài 18 cho thấy hai transient reader trong cùng request giữ chung scoped stamp. Test so identity trong response rồi gửi request khác, yêu cầu ScopeId đổi. Chỉ assert “không ném exception” sẽ bỏ qua bug đăng ký sai lifetime.
+Diagnostics ở bài 18 cho thấy hai transient reader trong cùng request giữ chung scoped stamp. Test so sánh identity trong response, rồi gửi request khác và yêu cầu ScopeId đổi. Chỉ assert “không ném exception” sẽ bỏ qua bug đăng ký sai lifetime.
 
-Ca options âm mong host khởi động thất bại. Tình huống này không cần gửi một request thành công giả để “warm up”; nếu cấu hình sai vẫn nhận traffic thì đã khác fail-fast contract. Mỗi factory được dispose để host, client và tài nguyên gắn với nó được dọn.
+Test case options âm kỳ vọng host khởi động thất bại. Tình huống này không cần gửi một request thành công giả để “warm up”; nếu cấu hình sai vẫn nhận traffic thì đã đi ngược hợp đồng fail-fast. Mỗi factory được dispose để dọn host, client và tài nguyên gắn với nó.
 
-Test configuration override có phạm vi trong host test; không sửa appsettings của source để chạy rồi cố khôi phục bằng tay. Nhờ vậy chạy song song/CI không ghi đè cấu hình nhau.
+Phần override cấu hình trong test có phạm vi nằm trong host test; không sửa appsettings của source để chạy rồi cố khôi phục bằng tay. Nhờ vậy các lượt chạy song song hoặc trên CI không ghi đè cấu hình của nhau.
 
 ## JWT đi qua handler thật trong test
 
-AuthFactory post-configure JwtBearerOptions với khoá ngẫu nhiên, issuer toi-noi-tests, audience toi-noi-api và ClockSkew=0 cho fixture. Token có hạn ngắn và role/sub theo từng ca. Không có secret thật hoặc một token cố định được commit.
+AuthFactory post-configure JwtBearerOptions với khoá ngẫu nhiên, issuer toi-noi-tests, audience toi-noi-api và ClockSkew=0 cho fixture. Token có hạn ngắn và role/sub theo từng test case. Không có secret thật hoặc một token cố định được commit.
 
-Suite kiểm role và owner, token hết hạn, audience sai, chữ ký từ khoá khác. Đây là bằng chứng cho JWT pipeline đã cấu hình trong fixture, không chứng minh identity provider production, rotation metadata hoặc độ lệch đồng hồ thật. Các ranh giới đó cần test và vận hành riêng.
+Suite kiểm tra role và owner, token hết hạn, audience sai, chữ ký từ khoá khác. Đây là bằng chứng cho JWT pipeline đã cấu hình trong fixture, không chứng minh identity provider production, rotation metadata hoặc độ lệch đồng hồ thật. Các ranh giới đó cần được kiểm thử và vận hành riêng.
 
-Điều không thay là authentication handler và authorization policy của ứng dụng. Điều thay là nguồn trust/config trong host test. Ghi rõ sự thay thế giúp người đọc không nhầm việc ký một token test với dựng hệ thống đăng nhập thật.
+Phần không bị thay là authentication handler và authorization policy của ứng dụng. Phần được thay là nguồn trust và cấu hình trong host test. Ghi rõ sự thay thế giúp người đọc không nhầm việc ký một token test với việc dựng hệ thống đăng nhập thật.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,9 +62,9 @@ Suite kiểm role và owner, token hết hạn, audience sai, chữ ký từ kho
 <figcaption>Hình 2. Ba ranh giới kiểm chứng riêng, không suy từ một bộ xanh sang toàn bộ hệ thống đúng.</figcaption>
 </figure>
 
-## 24 ca API và những gì vẫn chưa biết
+## 24 test case API và những gì vẫn chưa biết
 
-Suite hiện có 24 ca API: baseline, validation/binding, schema theo environment, lifetime, options/clock và auth. Các ca chỉ kiểm những phần đã thực thi; không đếm số assertion làm thước đo bao phủ nghiệp vụ.
+Suite hiện có 24 test case API: baseline, validation/binding, schema theo environment, lifetime, options/clock và auth. Các test case chỉ kiểm tra những phần đã thực thi; không lấy số assertion làm thước đo độ bao phủ nghiệp vụ.
 
 | Đã đi qua | Chưa được chứng minh bởi suite này |
 | --- | --- |
@@ -75,7 +75,7 @@ Suite hiện có 24 ca API: baseline, validation/binding, schema theo environmen
 
 **Bài tập:** nếu mock toàn bộ HTTP response 200 thì còn bắt được lỗi quên RequireAuthorization không? Vì sao một health check production vẫn cần khi integration suite đã xanh?
 
-<details><summary>Xem đáp án</summary><p>Không, response giả đã bỏ pipeline cần kiểm. Deployment vẫn có thể sai port, quyền, secret, proxy hoặc kết nối hạ tầng; test ứng dụng không thay kiểm tra môi trường triển khai.</p></details>
+<details><summary>Xem đáp án</summary><p>Không, response giả đã bỏ pipeline cần kiểm. Deployment vẫn có thể sai port, quyền, secret, proxy hoặc kết nối hạ tầng; test ứng dụng không thay thế việc kiểm tra môi trường triển khai.</p></details>
 
 Sau bài này, chặng dữ liệu sẽ đưa EF Core 10/PostgreSQL vào với integration test đúng database. DDD, Clean Architecture, CQRS/Mediator và Repository/UoW vẫn là kiến trúc đích; các ví dụ hiện tại đang xây từng nền tảng cần thiết trước khi ghép service hoàn chỉnh.
 
@@ -87,7 +87,7 @@ Từ thư mục gốc repository:
 dotnet test examples/toi-noi-dotnet/20-api-integration-tests
 ```
 
-Lần đầu cần restore các package test từ NuGet. Project được pin phiên bản trong .csproj; mỗi ca test có dữ liệu và tài nguyên riêng để chạy lại được.
+Lần đầu cần restore các package test từ NuGet. Project ghim phiên bản trong .csproj; mỗi test case có dữ liệu và tài nguyên riêng để chạy lại được.
 
 ### ApiTests.cs — 20-api-integration-tests/ApiTests.cs
 

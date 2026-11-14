@@ -1,0 +1,131 @@
+{
+  "file": "dotnet10-efcore-postgresql-mapping-migration.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.",
+      "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.",
+      "reason": "'target' lọt tiếng Anh; 'code' → 'mã nguồn'.",
+      "severity": "medium"
+    },
+    {
+      "old": "thời điểm tạo và driver còn thiếu.",
+      "new": "thời điểm tạo và tài xế (có thể chưa có).",
+      "reason": "'driver còn thiếu' cụt, tiếng Anh lọt vào.",
+      "severity": "medium"
+    },
+    {
+      "old": "Có DbContext không có nghĩa mọi biểu thức C# tự thành SQL tốt; mapping, query và transaction vẫn phải được nhìn và kiểm chứng.",
+      "new": "Có DbContext không có nghĩa là mọi biểu thức C# tự động thành SQL tốt; mapping, query và transaction vẫn phải được xem xét và kiểm chứng.",
+      "reason": "Thiếu 'là'; 'được nhìn' gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "Persistence project phục vụ bài 21–26 nên chứa cả các bảng sẽ được giải thích ở bài idempotency/Outbox.",
+      "new": "Project persistence phục vụ bài 21–26 nên chứa cả các bảng sẽ được giải thích ở bài về idempotency/Outbox.",
+      "reason": "Trật tự từ kiểu Anh; thiếu 'về'.",
+      "severity": "medium"
+    },
+    {
+      "old": "không thay định hướng encapsulation trong domain.",
+      "new": "không thay đổi định hướng encapsulation của domain.",
+      "reason": "'không thay' cụt, thiếu 'đổi'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Status có độ dài,",
+      "new": "Status được giới hạn độ dài,",
+      "reason": "'có độ dài' cụt.",
+      "severity": "low"
+    },
+    {
+      "old": "Ca round-trip cố ý ghi 14255.50 để kiểm khả năng lưu decimal có phần lẻ; nó không đổi policy cước nguyên VND từ bài 14.",
+      "new": "Test case round-trip cố ý ghi 14255.50 để kiểm tra khả năng lưu decimal có phần lẻ; test case này không đổi policy cước nguyên VND từ bài 14.",
+      "reason": "Thống nhất 'test case'; 'nó' mơ hồ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Không suy ra kiểu cột thời gian đã giải mọi câu hỏi DST.",
+      "new": "Đừng suy ra rằng kiểu cột thời gian đã giải quyết mọi câu hỏi về DST.",
+      "reason": "Câu thiếu chủ ngữ, 'giải' cụt.",
+      "severity": "high"
+    },
+    {
+      "old": "Điều này tránh cache tracking che mất lỗi mapping và serialization provider.",
+      "new": "Cách này tránh để cache của tracker che mất lỗi mapping và lỗi serialization ở provider.",
+      "reason": "Chuỗi danh từ ghép khó đọc.",
+      "severity": "medium"
+    },
+    {
+      "old": "AsNoTracking cho query kiểm dữ liệu đã lưu.",
+      "new": "AsNoTracking cho query kiểm tra dữ liệu đã lưu.",
+      "reason": "'kiểm' cụt.",
+      "severity": "low"
+    },
+    {
+      "old": "Migrations và ModelSnapshot được sinh bằng dotnet-ef 10.0.10 từ model, được giữ trong repository.",
+      "new": "Migrations và ModelSnapshot do dotnet-ef 10.0.10 sinh ra từ model và được giữ trong repository.",
+      "reason": "Bị động lặp 'được' kiểu Anh.",
+      "severity": "low"
+    },
+    {
+      "old": "Không viết EnsureCreated trong test rồi bỏ qua migration:",
+      "new": "Đừng dùng EnsureCreated trong test rồi bỏ qua migration:",
+      "reason": "Lời khuyên nên dùng 'đừng'; 'viết' không hợp.",
+      "severity": "low"
+    },
+    {
+      "old": "mỗi ca có không gian riêng. Khi xong chỉ dọn schema do fixture tạo,",
+      "new": "mỗi test case có không gian riêng. Khi xong, chỉ dọn schema do fixture tạo,",
+      "reason": "Thống nhất 'test case'; thêm dấu phẩy cho rõ.",
+      "severity": "medium"
+    },
+    {
+      "old": "không phải khuyến cáo mỗi replica production tranh nhau chạy migration lúc startup.",
+      "new": "không phải khuyến cáo để mỗi replica production tranh nhau chạy migration lúc startup.",
+      "reason": "Thiếu liên từ, câu khó đọc.",
+      "severity": "medium"
+    },
+    {
+      "old": "aria-label=\"Hình 2. Mỗi ca sở hữu một schema",
+      "new": "aria-label=\"Hình 2. Mỗi test case sở hữu một schema",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "low"
+    },
+    {
+      "old": "<figcaption>Hình 2. Mỗi ca sở hữu một schema",
+      "new": "<figcaption>Hình 2. Mỗi test case sở hữu một schema",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "low"
+    },
+    {
+      "old": "## Ba ca có ý nghĩa gì?",
+      "new": "## Ba test case có ý nghĩa gì?",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Round-trip kiểm fare, instant UTC, DriverId null và không còn migration pending. Ca chạy migration lần nữa yêu cầu dữ liệu còn nguyên. Ca foreign key ghi một CustomerId không tồn tại phải thất bại; object có Guid hợp lệ về cú pháp không có nghĩa khách đó tồn tại.",
+      "new": "Test case round-trip kiểm tra fare, instant UTC, DriverId null và không còn migration pending. Test case chạy migration lần nữa yêu cầu dữ liệu còn nguyên. Test case foreign key ghi một CustomerId không tồn tại phải thất bại; object có Guid hợp lệ về cú pháp không có nghĩa là khách đó tồn tại.",
+      "reason": "Thống nhất 'test case'; 'kiểm' cụt; thiếu 'là'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Tracker có thể trả instance đã có mà không tạo một phép round-trip độc lập đúng ý định kiểm tra.",
+      "new": "Tracker có thể trả về instance đã có sẵn mà không tạo ra một lượt round-trip độc lập đúng như ý định kiểm tra.",
+      "reason": "'phép round-trip' gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "có thể phá dữ liệu ca khác.",
+      "new": "có thể phá dữ liệu của test case khác.",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "không âm thầm skip khi thiếu kết nối; nó chỉ tạo và dọn schema GUID riêng.",
+      "new": "không tự bỏ qua test mà không báo lỗi khi thiếu kết nối; fixture chỉ tạo và dọn schema GUID riêng.",
+      "reason": "Calque 'âm thầm' và 'skip' (theo style guide); 'nó' mơ hồ.",
+      "severity": "high"
+    }
+  ]
+}

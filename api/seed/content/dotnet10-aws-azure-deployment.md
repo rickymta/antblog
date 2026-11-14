@@ -1,7 +1,7 @@
 ---
 slug: dotnet10-aws-azure-deployment
 title: "Triển khai AWS và Azure: cấu hình, secrets và health check của service .NET"
-summary: "Bài 36: cùng image tới ECS Fargate hoặc Azure Container Apps, phân biệt workload/user identity và đi qua migration, readiness, rollout có kiểm soát."
+summary: "Bài 36: cùng image tới ECS Fargate hoặc Azure Container Apps, phân biệt workload identity với user identity và đi qua migration, readiness, rollout có kiểm soát."
 category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
@@ -18,19 +18,19 @@ language: vi
 
 ## Cùng service, hai đích vận hành
 
-AWS chọn ECS Fargate với RDS PostgreSQL; Azure chọn Container Apps với PostgreSQL Flexible Server. Hai phương án là hướng dẫn cho cùng service/image, không là yêu cầu deploy đồng thời lên hai cloud hay nhân đôi dữ liệu.
+AWS chọn ECS Fargate với RDS PostgreSQL; Azure chọn Container Apps với PostgreSQL Flexible Server. Hai phương án là hướng dẫn cho cùng service/image, không phải là yêu cầu deploy đồng thời lên hai cloud hay nhân đôi dữ liệu.
 
-Repository có task-definition template và Bicep cụ thể để review. Bicep đã compile sang ARM trong môi trường soạn bài; chưa có tài nguyên được tạo ở một account/subscription và chưa có phép thử network/identity trên cloud thật.
+Repository có task-definition template và Bicep cụ thể để review. Bicep đã compile sang ARM trong môi trường soạn bài; chưa có tài nguyên nào được tạo ở một account hoặc subscription và chưa có phép thử network và identity trên cloud thật.
 
-CPU/memory/replica trong template chỉ là điểm bắt đầu lab. Phải load-test, quan sát PostgreSQL connections và latency trước khi định capacity hoặc autoscale. Không lấy kết quả microbenchmark parser ở bài 28 để sizing Fargate.
+CPU/memory/replica trong template chỉ là điểm bắt đầu cho lab. Phải load-test, quan sát PostgreSQL connections và latency trước khi chốt capacity hoặc autoscale. Không dùng kết quả microbenchmark của parser ở bài 28 để chọn cỡ tài nguyên cho Fargate.
 
 ## AWS: execution role khác task role
 
-Execution role cho agent pull image, gửi log và lấy secret cần lúc task khởi động. Task role là quyền runtime của ứng dụng nếu nó gọi AWS API. Nhầm hai role có thể khiến cấu hình chạy không được hoặc cấp quyền quá rộng.
+Execution role cho phép agent pull image, gửi log và lấy secret cần thiết lúc task khởi động. Task role là quyền runtime của ứng dụng nếu nó gọi AWS API. Nhầm hai role có thể khiến cấu hình không chạy được hoặc cấp quyền quá rộng.
 
-Task definition nhận immutable ECR image digest, secret ARN và thông tin identity provider. Secret phải là full connection string hợp lệ với TLS VerifyFull theo kiểm tra production của API, không chỉ riêng password.
+Task definition nhận immutable ECR image digest, secret ARN và thông tin identity provider. Secret phải là connection string đầy đủ và hợp lệ với TLS VerifyFull theo kiểm tra production của API, không chỉ riêng password.
 
-ECS service, target group ip, ALB/TLS, VPC/subnet/security group, RDS và DNS là prerequisites ngoài file task definition. Dùng path /health/ready cho kiểm khả năng nhận traffic, không mở RDS ra Internet để chữa lỗi private networking.
+ECS service, target group ip, ALB/TLS, VPC/subnet/security group, RDS và DNS là điều kiện tiên quyết nằm ngoài file task definition. Dùng path /health/ready để kiểm tra khả năng nhận traffic; không mở RDS ra Internet để xử lý lỗi private networking.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,21 +41,21 @@ ECS service, target group ip, ALB/TLS, VPC/subnet/security group, RDS và DNS l�
 
 ## Azure: identity cho ACR và Key Vault
 
-Bicep nhận managed environment, user-assigned identity và registry đã có. Identity dùng pull image và đọc đúng secret Key Vault được tham chiếu qua URI, không ghi password trực tiếp vào parameter thường hoặc source.
+Bicep nhận managed environment, user-assigned identity và registry đã có. Identity dùng để pull image và đọc đúng secret Key Vault mà URI tham chiếu tới, không ghi password trực tiếp vào parameter thường hoặc source.
 
-Identity đó không tự làm Npgsql dùng Entra authentication. Code mẫu vẫn nhận connection string; muốn dùng token database cần thêm credential/token refresh và database role mapping đúng cơ chế. Tương tự, workload identity không thay JWT của khách/tài xế.
+Identity đó không tự khiến Npgsql dùng xác thực Entra. Code mẫu vẫn nhận connection string; muốn dùng token cho database thì cần thêm credential, cơ chế làm mới token và ánh xạ database role đúng cách. Tương tự, workload identity không thay JWT của khách/tài xế.
 
-Private endpoint/firewall/DNS và quyền Key Vault/ACR cần kiểm riêng. Compile Bicep không chứng minh identity có quyền đọc secret URI hay app tới được PostgreSQL trong mạng của subscription.
+Private endpoint/firewall/DNS và quyền Key Vault/ACR cần kiểm tra riêng. Compile Bicep không chứng minh identity có quyền đọc secret URI hay app tới được PostgreSQL trong mạng của subscription.
 
 ## Probe và rollout theo trạng thái
 
-Live chỉ chứng minh process có thể trả lời; readiness kiểm database cùng migration. Startup probe cho thời gian khởi động riêng. Không dùng DB outage làm lý do restart mọi replica qua một liveness query DB.
+Probe live chỉ chứng minh process có thể trả lời; readiness kiểm tra cả database lẫn migration. Startup probe cho ứng dụng một khoảng thời gian khởi động riêng. Không lấy sự cố DB làm lý do khởi động lại mọi replica thông qua một liveness query tới DB.
 
-Release nên review/chạy migration bằng role riêng, triển khai cùng image đã kiểm, đợi readiness, làm authenticated smoke và quan sát error/conflict/latency. Secret rotation có thể cần task/revision mới để workload nhận giá trị; đừng mặc định toàn bộ cấu hình hot reload.
+Release nên review và chạy migration bằng role riêng, triển khai cùng image đã kiểm tra, đợi readiness, chạy smoke test có xác thực và quan sát error/conflict/latency. Secret rotation có thể cần task/revision mới để workload nhận được giá trị mới; đừng mặc định rằng mọi cấu hình đều được nạp lại khi đang chạy (hot reload).
 
-**Bài tập:** readiness 503 trong khi live 200 có luôn là bug không? Image rollback có đảm bảo dữ liệu migration quay lại nguyên trạng không?
+**Bài tập:** readiness trả 503 trong khi live trả 200 có luôn là bug không? Image rollback có đảm bảo dữ liệu migration quay lại nguyên trạng không?
 
-<details><summary>Xem đáp án</summary><p>Không: process còn sống nhưng chưa sẵn sàng nhận traffic là trạng thái hữu ích. Rollback code không tự hoàn tác dữ liệu/schema; cần kế hoạch migration tương thích và phục hồi rõ.</p></details>
+<details><summary>Xem đáp án</summary><p>Không: process còn sống nhưng chưa sẵn sàng nhận traffic là trạng thái hữu ích. Rollback code không tự hoàn tác dữ liệu/schema; cần kế hoạch migration tương thích và kế hoạch phục hồi rõ ràng.</p></details>
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -72,7 +72,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự bỏ qua khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.
 
 ### main.bicep — 31-38-trip-service/cloud/main.bicep
 

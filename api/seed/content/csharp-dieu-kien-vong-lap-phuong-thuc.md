@@ -20,7 +20,7 @@ Bài này tiếp nối [kiểu dữ liệu và decimal](/articles/csharp-bien-ki
 
 ## Chốt hợp đồng trước khi viết if
 
-Khoảng cách hợp lệ trong lab là **0 đến 100 km, bao gồm hai đầu**. 0 km vẫn thu giá cơ bản như bài 01; giới hạn 100 km là giả định để luyện validation, không phải giới hạn thật của Tới Nơi. Các giá trị ngoài miền bị từ chối, không sửa lén thành 0 hoặc 100.
+Khoảng cách hợp lệ trong lab là **0 đến 100 km, bao gồm hai đầu**. 0 km vẫn thu giá cơ bản như bài 01; giới hạn 100 km là giả định để luyện kiểm tra đầu vào, không phải giới hạn thật của Tới Nơi. Các giá trị ngoài miền bị từ chối, không sửa lén thành 0 hoặc 100.
 
 Giá cơ bản là 12.000 VND gồm 2 km; phần vượt 4.500 VND/km. Tổng cuối cùng làm tròn đến 1 VND với AwayFromZero như bài 02. Ta chưa có phụ phí hay giảm giá; không thêm chúng vào công thức nếu chưa có quy tắc về thứ tự áp dụng.
 
@@ -40,28 +40,28 @@ if (distanceKm < 0m || distanceKm > 100m)
 }
 ```
 
-`if` chạy khối trong `{}` khi biểu thức bool là true. `||` là “hoặc”: chỉ một phía đúng đã đủ từ chối. `&&` là “và”: muốn viết miền hợp lệ ta dùng `distanceKm >= 0m && distanceKm <= 100m`. Hai toán tử có short-circuit: vế phải chỉ được đánh giá khi cần.
+`if` chạy khối trong `{}` khi biểu thức bool là true. `||` là “hoặc”: chỉ một phía đúng đã đủ từ chối. `&&` là “và”: muốn viết miền hợp lệ ta dùng `distanceKm >= 0m && distanceKm <= 100m`. Hai toán tử có short-circuit: vế phải chỉ chạy khi cần.
 
-Đừng đổi điều kiện từ chối thành `< 0 && > 100`: không số nào đồng thời nhỏ hơn 0 và lớn hơn 100, nên đầu vào sai sẽ lọt hết. Dùng ngoặc khi ghép nhiều điều kiện để người đọc không phải đoán thứ tự ưu tiên. Với đoạn ngắn cũng giữ dấu `{}` để tránh thêm một dòng nhưng quên đưa nó vào nhánh.
+Đừng đổi điều kiện từ chối thành `< 0 && > 100`: không số nào đồng thời nhỏ hơn 0 và lớn hơn 100, nên đầu vào sai sẽ lọt hết. Dùng ngoặc khi ghép nhiều điều kiện để người đọc không phải đoán thứ tự ưu tiên. Với đoạn ngắn cũng giữ dấu `{}` để tránh trường hợp thêm một dòng mà quên đưa dòng đó vào nhánh.
 
 ## Một hàm, một kết quả, một hợp đồng
 
-Trong project mẫu, ta tách thành `static decimal CalculateFare(decimal distanceKm)`. Đây là **local function** ở cuối file dùng top-level statements: nó nằm trong điểm vào do compiler tạo. Khi chuyển sang class ở chặng OOP, ta sẽ đưa hành vi vào kiểu phù hợp.
+Trong project mẫu, ta tách thành `static decimal CalculateFare(decimal distanceKm)`. Đây là **local function** ở cuối file dùng top-level statements: hàm này nằm trong điểm vào do compiler tạo. Khi chuyển sang class ở chặng OOP, ta sẽ đưa hành vi vào kiểu phù hợp.
 
 - `decimal` trước tên hàm là kiểu kết quả.
 - `distanceKm` trong ngoặc là tham số; lời gọi `CalculateFare(5m)` truyền đối số 5m.
 - `return` trả kết quả và thoát ngay khỏi hàm.
-- `static` ngăn local function bắt giữ biến cục bộ bên ngoài, làm phụ thuộc của công thức rõ hơn.
+- `static` ngăn local function capture biến cục bộ bên ngoài, giúp phụ thuộc của công thức hiện rõ hơn.
 
-Hàm tự kiểm tra miền và ném `ArgumentOutOfRangeException` khi hợp đồng bị vi phạm. `nameof(distanceKm)` lấy tên tham số theo cú pháp C#, tránh chuỗi bị lỗi khi đổi tên. Exception dừng luồng bình thường; bài 05 sẽ học cách xử lý và chẩn đoán nó. Không bọc mọi lỗi rồi trả 0 VND vì người gọi có thể hiểu thành một chuyến miễn phí hợp lệ.
+Hàm tự kiểm tra miền và ném `ArgumentOutOfRangeException` khi hợp đồng bị vi phạm. `nameof(distanceKm)` lấy tên tham số theo cú pháp C#, tránh để chuỗi tên bị sai lệch khi tham số đổi tên. Exception dừng luồng bình thường; bài 05 sẽ học cách xử lý và chẩn đoán exception. Đừng bọc mọi lỗi rồi trả 0 VND, vì người gọi có thể hiểu đó là một chuyến miễn phí hợp lệ.
 
-Sau guard clause, `if (distanceKm <= IncludedKm)` trả ngay giá cơ bản. Phần còn lại chỉ xử lý quãng đường vượt; không cần thêm `else` sau một nhánh đã return. Trong ví dụ không có console, database hoặc HTTP bên trong hàm: cùng đầu vào hợp lệ cho cùng giá, giúp kiểm chứng dễ hơn.
+Sau guard clause, `if (distanceKm <= IncludedKm)` trả ngay giá cơ bản. Phần còn lại chỉ xử lý quãng đường vượt; không cần thêm `else` sau một nhánh đã return. Hàm trong ví dụ không dùng console, database hay HTTP: cùng đầu vào hợp lệ cho cùng giá, nên kiểm chứng dễ hơn.
 
 ## foreach và continue: một yêu cầu sai không làm mất cả lô
 
-`decimal[]` là mảng các giá trị decimal. Cú pháp `[-1m, 0m, ...]` là collection expression, được hỗ trợ trong cấu hình C# của .NET 10. `foreach` lần lượt lấy mỗi phần tử, gán vào biến vòng lặp `distance`, rồi thực hiện khối lệnh.
+`decimal[]` là mảng các giá trị decimal. Cú pháp `[-1m, 0m, ...]` là collection expression, mà cấu hình C# của .NET 10 hỗ trợ. `foreach` lần lượt lấy mỗi phần tử, gán vào biến vòng lặp `distance`, rồi thực hiện khối lệnh.
 
-Trong chương trình minh hoạ, tầng điều phối kiểm tra khoảng cách trước. Nếu sai, in `REJECT` rồi `continue` để đi tới phần tử tiếp theo. Hàm vẫn có guard riêng để bảo vệ hợp đồng khi một nơi khác gọi trực tiếp. Với sản phẩm lớn hơn, tránh sao chép rule khắp nơi; bài mô hình domain sẽ gom rule và thiết kế kiểu kết quả validation phù hợp.
+Trong chương trình minh hoạ, tầng điều phối kiểm tra khoảng cách trước. Nếu sai, in `REJECT` rồi `continue` để đi tới phần tử tiếp theo. Hàm vẫn có guard riêng để bảo vệ hợp đồng khi một nơi khác gọi trực tiếp. Với sản phẩm lớn hơn, đừng sao chép quy tắc ra khắp nơi; bài mô hình domain sẽ gom quy tắc lại và thiết kế kiểu kết quả kiểm tra đầu vào phù hợp.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -138,9 +138,9 @@ Hàm không tự in kết quả. Vòng lặp chịu trách nhiệm giao tiếp c
 | -0,001 | Từ chối | Dưới miền |
 | 0 | 12000 | Cận dưới được chấp nhận |
 | 1,999 | 12000 | Trong đoạn giá cơ bản |
-| 2 | 12000 | Đúng biên phần bao gồm |
+| 2 | 12000 | Đúng biên của phần đã bao gồm trong giá cơ bản |
 | 2,001 | 12005 | Cước thô 12004,5; làm tròn AwayFromZero |
-| 2,499 | 14246 | Kiểm tra điểm giữa khác |
+| 2,499 | 14246 | Kiểm tra một điểm giữa khác |
 | 2,501 | 14255 | Giữ khoảng cách lẻ tới cuối |
 | 5 | 25500 | Trường hợp thông thường |
 | 100 | 453000 | Cận trên được chấp nhận |
@@ -152,7 +152,7 @@ Repository có chế độ `--verify` đối chiếu các giá trị trên và g
 dotnet run --project examples/toi-noi-dotnet/03-dieu-kien-vong-lap-phuong-thuc -- --verify
 ```
 
-Nếu tất cả đúng, chương trình in `PASS: 10 boundary cases`; nếu khác, nó ném lỗi và trả exit code thất bại. Chặng kiểm thử sau sẽ chuyển cách kiểm chứng này sang test project có cấu trúc. Không cần cài test framework chỉ để hiểu if và foreach ở bước này.
+Nếu tất cả đúng, chương trình in `PASS: 10 boundary cases`; nếu có giá trị lệch, chương trình ném lỗi và trả exit code báo thất bại. Chặng kiểm thử sau sẽ chuyển cách kiểm chứng này sang test project có cấu trúc. Không cần cài test framework chỉ để hiểu if và foreach ở bước này.
 
 ## Khi nào dùng for hoặc while?
 
@@ -165,7 +165,7 @@ for (int i = 0; i < distances.Length; i++)
 }
 ```
 
-Chỉ số bắt đầu bằng 0, nên điều kiện phải là `< distances.Length`, không phải `<=`. Đoạn trên minh hoạ duyệt chỉ số, không thay thế validation của chương trình tính cước.
+Chỉ số bắt đầu bằng 0, nên điều kiện phải là `< distances.Length`, không phải `<=`. Đoạn trên minh hoạ duyệt chỉ số, không thay thế việc kiểm tra đầu vào của chương trình tính cước.
 
 ## Bài tập
 
@@ -173,9 +173,9 @@ Chỉ số bắt đầu bằng 0, nên điều kiện phải là `< distances.Le
 2. Đổi `continue` thành `break` ở chương trình chính. Đầu vào -1 km đầu mảng sẽ ảnh hưởng các chuyến sau thế nào?
 3. Đơn giá phần vượt đổi thành 5.000 VND/km. Với 2,001 km, giá sau làm tròn là bao nhiêu?
 
-<details><summary>Xem lời giải</summary><p>1. Cập nhật guard của hàm, tầng điều phối, thông báo lỗi, bảng hợp đồng và các ca kiểm tra quanh 80 km; đây cũng là dấu hiệu cần gom rule khi cấu trúc lớn lên. 2. Vòng lặp dừng ngay sau REJECT đầu tiên; các phần tử còn lại không được xử lý. 3. Cước thô 12000 + 0,001 × 5000 = 12005, nên trả 12005 VND.</p></details>
+<details><summary>Xem lời giải</summary><p>1. Cập nhật guard của hàm, tầng điều phối, thông báo lỗi, bảng hợp đồng và các test case quanh 80 km; đây cũng là dấu hiệu cần gom quy tắc lại khi cấu trúc lớn lên. 2. Vòng lặp dừng ngay sau REJECT đầu tiên; các phần tử còn lại không được xử lý. 3. Cước thô 12000 + 0,001 × 5000 = 12005, nên trả 12005 VND.</p></details>
 
-Tới đây, công thức đã có tên, miền hợp lệ và kết quả kiểm chứng được. [Bài 04](/articles/csharp-chuoi-ngay-gio-culture) đi vào chuỗi, ngày giờ và culture: cùng một báo giá cần được trao đổi giữa service và trình bày cho khách theo hai nhu cầu khác nhau.
+Tới đây, công thức đã có tên, miền hợp lệ và kết quả kiểm chứng được. [Bài 04](/articles/csharp-chuoi-ngay-gio-culture) đi vào chuỗi, ngày giờ và culture: cùng một báo giá vừa phải trao đổi giữa các service, vừa phải trình bày cho khách, với hai nhu cầu khác nhau.
 
 ## Tài liệu gốc
 

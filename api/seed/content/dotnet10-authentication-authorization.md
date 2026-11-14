@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi
 ---
 
-Đây là **bài 19** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 19** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -18,19 +18,19 @@ language: vi
 
 ## Ba người dùng, ba quyền khác nhau
 
-Khách yêu cầu báo giá, tài xế xem khả năng nhận chuyến, điều phối xem hàng đợi. Hệ thống cần biết người gọi là ai và được phép làm gì. Authentication tạo principal từ credential đã kiểm; authorization quyết định principal đó có quyền trên thao tác/tài nguyên không.
+Khách yêu cầu báo giá, tài xế xem khả năng nhận chuyến, điều phối xem hàng đợi. Hệ thống cần biết người gọi là ai và được phép làm gì. Authentication tạo principal từ credential đã được kiểm tra; authorization quyết định principal đó có quyền thực hiện thao tác hoặc truy cập tài nguyên hay không.
 
-Không nhận một header X-Role=dispatcher rồi coi như đã đăng nhập. Không lấy customerId trong body làm bằng chứng chủ sở hữu. Dữ liệu client có thể là tham số yêu cầu, nhưng quyền phải dựa vào danh tính đã xác thực và dữ liệu sở hữu do server tin cậy.
+Đừng nhận một header X-Role=dispatcher rồi coi như đã đăng nhập. Đừng lấy customerId trong body làm bằng chứng về chủ sở hữu. Dữ liệu client có thể là tham số yêu cầu, nhưng quyền phải dựa vào danh tính đã xác thực và dữ liệu sở hữu do server tin cậy.
 
-Bản demo có route `/trips/{ownerId}` chỉ để phân biệt role với ownership bằng một ID tổng hợp; nó không đọc kho chuyến thật. Service hoàn chỉnh sẽ nhận tripId, tải aggregate/read model và kiểm OwnerId lưu tại server, không coi ownerId caller truyền là nguồn chân lý.
+Bản demo có route `/trips/{ownerId}` chỉ để phân biệt role với ownership bằng một ID giả lập; route này không đọc kho chuyến thật. Service hoàn chỉnh sẽ nhận tripId, tải aggregate/read model và kiểm tra OwnerId lưu tại server, không coi ownerId do caller truyền vào là nguồn dữ liệu gốc.
 
 ## JWT cần kiểm nhiều hơn payload
 
-AddJwtBearer dùng handler thật. Tối thiểu hợp đồng token cần xác thực chữ ký với khoá tin cậy, issuer, audience và thời hạn; production còn phải quản lý algorithm, metadata/rotation và các yêu cầu riêng của hệ thống danh tính. Không tự viết một parser base64 rồi dựng ClaimsPrincipal.
+AddJwtBearer dùng handler thật. Hợp đồng token tối thiểu phải xác thực chữ ký bằng khoá tin cậy, cùng issuer, audience và thời hạn; production còn phải quản lý algorithm, metadata/rotation và các yêu cầu riêng của hệ thống danh tính. Đừng tự viết một parser base64 rồi dựng ClaimsPrincipal.
 
-MapInboundClaims=false giữ tên claim theo hợp đồng; bài dùng sub cho chủ thể và role cho vai trò. Nhà cung cấp token khác có thể dùng tên/shape khác, nên phải mapping có chủ đích. Role hiển thị ở UI không thay enforcement phía server.
+MapInboundClaims=false giữ tên claim theo hợp đồng; bài dùng sub cho chủ thể và role cho vai trò. Nhà cung cấp token khác có thể dùng tên hoặc cấu trúc khác, nên phải ánh xạ có chủ đích. Role hiển thị ở UI không thay thế được enforcement phía server.
 
-JWT bearer không mặc định mã hoá payload. Không đưa giấy tờ định danh hoặc bí mật vào token chỉ vì token có chữ ký. Truyền bearer qua TLS ở môi trường triển khai; không ghi token vào log và không gửi qua query string để tiện copy.
+Theo mặc định, JWT bearer không mã hoá payload. Không đưa giấy tờ định danh hoặc bí mật vào token chỉ vì token có chữ ký. Truyền bearer token qua TLS ở môi trường triển khai; không ghi token vào log và không gửi qua query string để tiện copy.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ JWT bearer không mặc định mã hoá payload. Không đưa giấy tờ đị
 
 ## Policy và ownership là hai lớp kiểm tra
 
-Policy Customer yêu cầu đã xác thực và có role customer; Driver và Dispatcher tương tự. RequireAuthorization gắn policy vào endpoint. Route demo về chuyến còn so claim sub với ownerId để chặn khách A xem dữ liệu của khách B.
+Policy Customer yêu cầu người gọi đã xác thực và có role customer; Driver và Dispatcher tương tự. RequireAuthorization gắn policy vào endpoint. Route demo về chuyến còn so sánh claim sub với ownerId để chặn khách A xem dữ liệu của khách B.
 
-Không có hoặc token không hợp lệ dẫn tới challenge, thường là 401 ở bearer API. Có danh tính hợp lệ nhưng không đạt role/ownership dẫn tới forbid, 403. Bài chưa triển khai chiến lược 404 để che tồn tại tài nguyên; nếu chọn chiến lược đó phải thống nhất hợp đồng và kiểm thử riêng.
+Không có token hoặc token không hợp lệ dẫn tới challenge, thường là 401 ở bearer API. Có danh tính hợp lệ nhưng không đạt role/ownership dẫn tới forbid, 403. Bài chưa triển khai chiến lược 404 để che giấu sự tồn tại của tài nguyên; nếu chọn chiến lược đó phải thống nhất hợp đồng và kiểm thử riêng.
 
 UseAuthentication đứng trước UseAuthorization để principal được dựng trước khi kiểm quyền. Cấu hình default scheme giúp framework biết handler nào xác thực/challenge. Không đặt một middleware tự cấp role tuỳ ý phía sau rồi coi policy là đủ.
 
 ## Chạy local mà không nhúng khoá vào source
 
-Project không chứa khoá ký dùng chung, endpoint cấp token hoặc tài khoản mặc định. Có thể chạy host và thử request không credential để thấy 401. Để thử local có token, dùng dotnet user-jwts với user-secrets trong môi trường Development theo hướng dẫn README; không dùng công cụ dev đó như identity provider production.
+Project không chứa khoá ký dùng chung, endpoint cấp token hoặc tài khoản mặc định. Có thể chạy host và thử request không kèm credential để thấy 401. Để thử local có token, dùng dotnet user-jwts với user-secrets trong môi trường Development theo hướng dẫn README; không dùng công cụ dev đó như identity provider production.
 
 Bộ test bài 20 tạo khoá đối xứng ngẫu nhiên riêng trong AuthFactory, cấu hình JWT validator bằng issuer/audience test rồi ký token trong process test. HMAC chỉ là fixture có phạm vi rõ; production nên dùng hệ thống danh tính/metadata được tin cậy và quản lý khoá phù hợp, không copy AuthFactory vào service.
 
-User-secrets không phải kho bí mật production và không phải cam kết mã hoá file local. Khi cài cấu hình triển khai thật, quản lý secret/authority qua cơ chế môi trường và quyền truy cập đã thiết kế. Bài này không tự mở một token issuer cho website.
+User-secrets không phải kho bí mật production và không bảo đảm mã hoá file local. Khi thiết lập cấu hình triển khai thật, quản lý secret/authority qua cơ chế môi trường và quyền truy cập đã thiết kế. Bài này không tự mở một token issuer cho website.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,7 +62,7 @@ User-secrets không phải kho bí mật production và không phải cam kết 
 <figcaption>Hình 2. 401 và 403 thể hiện hai nguyên nhân khác nhau; thành công chỉ khi policy và ownership đều đạt.</figcaption>
 </figure>
 
-## Bảng quyền phải có cả ca bị từ chối
+## Bảng quyền phải có cả test case bị từ chối
 
 | Principal / credential | Thao tác | Kỳ vọng lab |
 | --- | --- | --- |
@@ -74,11 +74,11 @@ User-secrets không phải kho bí mật production và không phải cam kết 
 | Token dispatcher hợp lệ | Queue | 200 |
 | Sai audience / hết hạn / sai chữ ký | Route cần auth | 401 |
 
-Test authorization dùng token đã ký thật để không bỏ qua handler xác thực. Test dùng một fake authentication handler có thể hữu ích cho một số policy test, nhưng không thay được bằng chứng JWT được kiểm đúng.
+Test authorization dùng token đã ký thật để không bỏ qua handler xác thực. Test dùng một fake authentication handler có thể hữu ích cho một số policy test, nhưng không thay được bằng chứng cho thấy JWT được kiểm tra đúng.
 
-**Bài tập:** token có role customer và sub customer-1 truy cập dữ liệu customer-2: đã qua role thì có được phép không? Nếu token đổi payload role mà không ký lại, test nào phải thất bại?
+**Bài tập:** token có role customer và sub customer-1 truy cập dữ liệu customer-2: đã qua role thì có được phép không? Nếu token bị đổi payload role mà không ký lại, test nào phải thất bại?
 
-<details><summary>Xem đáp án</summary><p>Không, ownership vẫn phải kiểm. Sửa payload làm chữ ký không còn hợp lệ; handler phải trả 401. Ca wrong signing key trong suite kiểm chứng một token có chữ ký không được tin cậy.</p></details>
+<details><summary>Xem đáp án</summary><p>Không, ownership vẫn phải kiểm. Sửa payload làm chữ ký không còn hợp lệ; handler phải trả 401. Test case wrong signing key trong suite kiểm chứng trường hợp token có chữ ký không được tin cậy.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -98,7 +98,7 @@ dotnet user-jwts create --project examples/toi-noi-dotnet/19-authentication-auth
 dotnet run --project examples/toi-noi-dotnet/19-authentication-authorization -- --environment Development --urls http://127.0.0.1:5199
 ```
 
-Công cụ dev tạo token và lưu khoá trong user-secrets local, có thể cập nhật cấu hình audience của project; không đưa token/khoá lên Git. Gửi token qua Authorization: Bearer ở client local. Cách này dành cho dev; suite bài 20 tự tạo fixture trong memory, không cần chạy các lệnh tạo token trên.
+Công cụ dev tạo token và lưu khoá trong user-secrets local, có thể cập nhật cấu hình audience của project; không đưa token/khoá lên Git. Gửi token qua Authorization: Bearer ở client local. Cách này dành cho dev; suite bài 20 tự tạo fixture trong bộ nhớ, không cần chạy các lệnh tạo token ở trên.
 
 ### Program.cs — 19-authentication-authorization/Program.cs
 

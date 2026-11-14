@@ -20,40 +20,40 @@ language: vi
 
 Khách thường và khách ưu tiên đều yêu cầu báo giá. Quy tắc minh hoạ của nhóm ưu tiên là giá tiêu chuẩn cộng đúng 3.000 VND. Nếu mỗi nơi tự chép công thức gốc, lần đổi đơn giá sau sẽ phải sửa nhiều chỗ và có nguy cơ lệch nhau.
 
-Ta đặt câu hỏi: use case tạo báo giá có cần biết chi tiết công thức không? Nó cần một thứ tính giá theo hợp đồng. **Interface** định nghĩa hợp đồng đó; **composition** ghép hành vi từ các object; **dependency injection** đưa dependency từ ngoài vào. Ba ý liên quan nhưng không phải ba tên cho một cơ chế tự động duy nhất.
+Ta đặt câu hỏi: use case tạo báo giá có cần biết chi tiết công thức không? Use case cần một thành phần tính giá theo hợp đồng. **Interface** định nghĩa hợp đồng đó; **composition** ghép hành vi từ các object; **dependency injection** đưa dependency từ ngoài vào. Ba ý liên quan nhưng không phải ba tên cho một cơ chế tự động duy nhất.
 
-Đây là bước chuẩn bị cho Application/Domain trong kiến trúc đích. QuoteService ở lab vẫn nhỏ, chưa là command handler đầy đủ, chưa có repository hay transaction. Không thêm abstraction cho mọi class chỉ để các tên có cùng mẫu.
+Đây là bước chuẩn bị cho Application/Domain trong kiến trúc đích. QuoteService ở bài thực hành này vẫn nhỏ, chưa là command handler đầy đủ, chưa có repository hay transaction. Đừng thêm abstraction cho mọi class chỉ vì muốn các tên theo cùng một mẫu.
 
 ## Interface không chứa lựa chọn nghiệp vụ
 
-IFarePolicy có phương thức Calculate nhận km và trả decimal VND. Class triển khai cung cấp phương thức public tương ứng. Khi biến có kiểu IFarePolicy, caller nhìn thấy hợp đồng thay vì toàn bộ chi tiết class cụ thể.
+IFarePolicy có phương thức Calculate nhận km và trả decimal VND. Class triển khai cung cấp phương thức public tương ứng. Khi biến có kiểu IFarePolicy, người gọi nhìn thấy hợp đồng thay vì toàn bộ chi tiết của class cụ thể.
 
-Chữ ký chưa đủ làm hợp đồng: các implementation phải thống nhất miền 0–100 km, cách làm tròn và đơn vị tiền. Một class trả USD dù cùng decimal vẫn vi phạm ý nghĩa hợp đồng. FixedFarePolicy trong demo là test double để kiểm tra đường gọi, không là policy đưa vào production.
+Chữ ký chưa đủ để làm hợp đồng: các implementation phải thống nhất miền 0–100 km, cách làm tròn và đơn vị tiền. Một class trả USD dù cùng decimal vẫn vi phạm ý nghĩa hợp đồng. FixedFarePolicy trong demo là test double để kiểm tra đường gọi, không phải policy để đưa vào production.
 
-Interface không tự quyết định khách nào dùng giá ưu tiên. Việc lựa chọn nằm tại luồng điều phối dựa trên nghiệp vụ; đừng để caller ngoài API tuỳ chọn tên class rồi cấp phát trực tiếp.
+Interface không tự quyết định khách nào dùng giá ưu tiên. Việc lựa chọn nằm tại luồng điều phối dựa trên nghiệp vụ; đừng để người gọi bên ngoài API tự chọn tên class rồi khởi tạo trực tiếp.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 185" role="img" aria-label="Hình 1. Root lắp dependency; use case nhận abstraction. Đây là luồng object trong process, không phải gọi qua mạng."><rect x="20" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="32" y="79" class="t-b">Composition root</text><text x="32" y="115" class="t-small">Chọn implementation</text><text x="280" y="100" class="t-b">→</text><rect x="300" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="312" y="79" class="t-b">QuoteService</text><text x="312" y="115" class="t-small">Nhận IFarePolicy</text><text x="560" y="100" class="t-b">→</text><rect x="580" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="592" y="79" class="t-b">Policy</text><text x="592" y="115" class="t-small">Tính theo hợp đồng</text></svg>
+<svg viewBox="0 0 880 185" role="img" aria-label="Hình 1. Composition root lắp ráp dependency; use case nhận abstraction. Đây là luồng object trong process, không phải gọi qua mạng."><rect x="20" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="32" y="79" class="t-b">Composition root</text><text x="32" y="115" class="t-small">Chọn implementation</text><text x="280" y="100" class="t-b">→</text><rect x="300" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="312" y="79" class="t-b">QuoteService</text><text x="312" y="115" class="t-small">Nhận IFarePolicy</text><text x="560" y="100" class="t-b">→</text><rect x="580" y="40" width="256" height="110" rx="10" class="f-phys-soft s-phys"/><text x="592" y="79" class="t-b">Policy</text><text x="592" y="115" class="t-small">Tính theo hợp đồng</text></svg>
 </div>
-<figcaption>Hình 1. Root lắp dependency; use case nhận abstraction. Đây là luồng object trong process, không phải gọi qua mạng.</figcaption>
+<figcaption>Hình 1. Composition root lắp ráp dependency; use case nhận abstraction. Đây là luồng object trong process, không phải gọi qua mạng.</figcaption>
 </figure>
 
 ## Constructor injection là DI ngay cả khi không có container
 
-`new QuoteService(new StandardFarePolicy())` là dependency injection bằng tay. QuoteService không tự new policy, cũng không gọi registry toàn cục để tìm dependency. Constructor làm rõ điều kiện cần để object hoạt động; guard null bảo vệ cả khi caller dùng null! để bỏ qua cảnh báo compiler.
+`new QuoteService(new StandardFarePolicy())` là dependency injection bằng tay. QuoteService không tự new policy, cũng không gọi registry toàn cục để tìm dependency. Constructor làm rõ điều kiện cần để object hoạt động; guard null bảo vệ cả khi người gọi dùng null! để bỏ qua cảnh báo của compiler.
 
-readonly ngăn field bị gán lại sau constructor; nó không làm object policy bất biến sâu. Trong ví dụ, policy nghiệp vụ không giữ trạng thái thay đổi theo request. Test double có LastDistance để quan sát lời gọi, nên không dùng chung nó như singleton giữa request.
+readonly ngăn field bị gán lại sau constructor, nhưng không làm object policy bất biến sâu. Trong ví dụ, policy nghiệp vụ không giữ trạng thái thay đổi theo request. Test double có LastDistance để quan sát lời gọi, nên không chia sẻ test double này như một singleton giữa các request.
 
-Tại composition root ta lắp implementation cụ thể. Khi sang ASP.NET Core sẽ dùng DI container để quản lý đăng ký và lifetime. Container là công cụ xây object graph, không thay trách nhiệm thiết kế. Không tiêm IServiceProvider vào mọi class rồi tự Resolve bên trong: cách đó che phụ thuộc và làm test khó hơn.
+Tại composition root ta lắp implementation cụ thể. Khi sang ASP.NET Core sẽ dùng DI container để quản lý đăng ký và lifetime. Container là công cụ xây object graph, không thay trách nhiệm thiết kế. Đừng inject IServiceProvider vào mọi class rồi tự Resolve bên trong: cách đó che phụ thuộc và làm test khó hơn.
 
 ## Strategy và Decorator xuất hiện vì nhu cầu cụ thể
 
-QuoteService nhận một IFarePolicy có thể thay thế: đó là vai trò Strategy. PriorityFarePolicy nhận policy bên trong, gọi nó rồi cộng phụ phí: đó là hình dạng Decorator. Sự khác nhau là ý định và quan hệ giữa các object, không phải hậu tố tên class.
+QuoteService nhận một IFarePolicy có thể thay thế: đó là vai trò Strategy. PriorityFarePolicy nhận policy bên trong, gọi policy đó rồi cộng phụ phí: đó là cấu trúc của Decorator. Sự khác nhau là ý định và quan hệ giữa các object, không phải hậu tố tên class.
 
-Surcharge là VND nguyên không âm; constructor từ chối số lẻ để không âm thầm làm mất chính sách làm tròn cuối. Demo tính giá tiêu chuẩn đã làm tròn rồi cộng một số nguyên. Nếu phụ phí chuyển thành tỷ lệ phần trăm hoặc có thuế/giảm giá, phải chốt lại thứ tự và ranh giới làm tròn, không bọc tuỳ ý rồi mong phép toán giao hoán.
+Surcharge là số VND nguyên không âm; constructor từ chối số lẻ để không làm mất chính sách làm tròn cuối mà không báo lỗi. Demo tính giá tiêu chuẩn đã làm tròn rồi cộng một số nguyên. Nếu phụ phí chuyển thành tỷ lệ phần trăm hoặc có thuế/giảm giá, phải chốt lại thứ tự và ranh giới làm tròn, đừng bọc tuỳ ý rồi mong phép toán có tính giao hoán.
 
-Lợi ích là dùng lại quy tắc nền và test riêng phần ghép. Cái giá là thêm đối tượng gián tiếp, khó lần đường gọi khi bọc nhiều tầng. Với một công thức không cần thay, một class/hàm thẳng có thể dễ đọc hơn. Pattern phải gắn với chỗ đau này mới có lý do tồn tại.
+Lợi ích là dùng lại quy tắc nền và test riêng phần ghép. Cái giá là phải thêm các đối tượng gián tiếp, khiến việc lần theo đường gọi khó hơn khi bọc nhiều tầng. Với một công thức không cần thay, một class/hàm thẳng có thể dễ đọc hơn. Pattern phải gắn với một vấn đề cụ thể như thế này mới có lý do tồn tại.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -64,20 +64,20 @@ Lợi ích là dùng lại quy tắc nền và test riêng phần ghép. Cái gi
 
 ## Kiểm chứng dependency và ranh giới
 
-Demo in Standard 25500 VND và Priority 28500 VND cho 5 km. Bộ --verify kiểm tra hai mức giá, đường truyền đối số qua test double, dependency null, khoảng cách âm và surcharge âm.
+Demo in Standard 25500 VND và Priority 28500 VND cho 5 km. Nhánh --verify kiểm tra hai mức giá, việc truyền đối số qua test double, dependency null, khoảng cách âm và surcharge âm.
 
-Bài này không dùng package DI nên chạy chỉ với SDK .NET 10. Mỗi bài là project độc lập; khi dựng service thật sẽ gom các kiểu theo module và hợp đồng ổn định.
+Bài này không dùng package DI nên chỉ cần SDK .NET 10 là chạy được. Mỗi bài là project độc lập; khi dựng service thật sẽ gom các kiểu theo module và hợp đồng ổn định.
 
 | Sai lầm | Điều nên làm |
 | --- | --- |
 | new policy bên trong use case | Nhận dependency qua constructor |
 | Interface chỉ để đổi tên class | Nêu nhu cầu thay thế và hợp đồng |
-| Bọc nhiều decorator không có thứ tự | Ghi rule và test từng tổ hợp |
+| Bọc nhiều decorator không có thứ tự | Ghi lại quy tắc và test từng tổ hợp |
 | Singleton giữ dữ liệu từng khách | Thiết kế lifetime và trạng thái phù hợp |
 
 **Bài tập:** thêm chính sách giá cố định cho thí nghiệm mà không sửa QuoteService. Vì sao test double 999 VND không chứng minh Standard đúng?
 
-<details><summary>Xem đáp án</summary><p>Thêm class triển khai IFarePolicy rồi inject ở composition root. Test double chứng minh use case gọi dependency và truyền đúng đối số; công thức Standard phải có ca kiểm tra nghiệp vụ độc lập.</p></details>
+<details><summary>Xem đáp án</summary><p>Thêm class triển khai IFarePolicy rồi inject ở composition root. Test double chứng minh use case gọi dependency và truyền đúng đối số; công thức Standard phải có test case nghiệp vụ độc lập.</p></details>
 
 ## Chạy và kiểm chứng
 
@@ -88,7 +88,7 @@ dotnet run --project examples/toi-noi-dotnet/08-interface-composition-di
 dotnet run --project examples/toi-noi-dotnet/08-interface-composition-di -- --verify
 ```
 
-Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
+Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Khi kiểm tra không đạt, chương trình ném lỗi và trả exit code báo thất bại. Đây là harness chạy trên console, dùng cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu mới học đến đây, bạn chưa cần hiểu toàn bộ generics/delegate trong harness.
 
 Mã nguồn đầy đủ của Program.cs (đặt trong console net10.0 như bài 01):
 

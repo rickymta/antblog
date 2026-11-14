@@ -1,0 +1,167 @@
+{
+  "file": "dotnet10-cache-timeout-retry-rate-limit.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng",
+      "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng",
+      "reason": "\"target\" dùng như động từ; thiếu \"được\"",
+      "severity": "low"
+    },
+    {
+      "old": "Một POST thanh toán timeout có thể retry an toàn chỉ vì dùng HttpClient resilience không?",
+      "new": "Một POST thanh toán bị timeout có thể retry an toàn chỉ vì đã dùng HttpClient resilience không?",
+      "reason": "Thiếu động từ \"bị\", câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "retry cần hợp đồng idempotency và tra trạng thái, không chỉ một policy kỹ thuật.",
+      "new": "retry cần có hợp đồng idempotency và việc tra trạng thái, chứ không chỉ một policy kỹ thuật.",
+      "reason": "Câu cụt, thiếu động từ và liên từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Cache tránh tính/đọc lại dữ liệu phù hợp;",
+      "new": "Cache giúp tránh tính lại hoặc đọc lại dữ liệu phù hợp;",
+      "reason": "Dấu gạch chéo làm câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Chúng không cùng chữa một loại lỗi và không thay transaction.",
+      "new": "Chúng không chữa cùng một loại lỗi và không thay thế được transaction.",
+      "reason": "Trật tự từ kiểu Anh, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "endpoint có quyền sở hữu.",
+      "new": "endpoint gắn với quyền sở hữu.",
+      "reason": "Cụm \"có quyền sở hữu\" nghe gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Named HttpClient partner dùng handler giả",
+      "new": "Named HttpClient tên partner dùng handler giả",
+      "reason": "Dịch lai \"Named HttpClient\"",
+      "severity": "medium"
+    },
+    {
+      "old": "giúp request thứ ba bộc lộ đường từ chối mà không phải bắn tải lớn",
+      "new": "giúp request thứ ba đi vào nhánh bị từ chối mà không cần bắn tải lớn",
+      "reason": "\"bộc lộ đường từ chối\" là cách ghép gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai lần đọc tuần tự trong thời gian cache sống chỉ gọi",
+      "new": "Hai lần đọc tuần tự khi cache còn hiệu lực chỉ gọi",
+      "reason": "\"cache sống\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Remove key rồi đọc lại làm nguồn được gọi lần hai",
+      "new": "Remove key rồi đọc lại thì nguồn được gọi lần hai",
+      "reason": "Câu thiếu liên kết, đọc cụt",
+      "severity": "low"
+    },
+    {
+      "old": "chỉ có một lần fill.",
+      "new": "chỉ có một lần nạp dữ liệu vào cache.",
+      "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "Key cần phản ánh version/biến số làm đổi nội dung",
+      "new": "Key cần phản ánh phiên bản và các biến số làm đổi nội dung",
+      "reason": "Thống nhất \"phiên bản\", bỏ dấu gạch chéo",
+      "severity": "medium"
+    },
+    {
+      "old": "Memory cache ở mỗi replica khác nhau, mất khi process dừng.",
+      "new": "Memory cache của mỗi replica là một bản riêng, và mất khi process dừng.",
+      "reason": "Câu thiếu vị ngữ, khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "làm nguồn chân lý cho tiền hoặc quyền",
+      "new": "làm nguồn dữ liệu gốc cho tiền hoặc quyền",
+      "reason": "Theo terminology.json (source of truth)",
+      "severity": "medium"
+    },
+    {
+      "old": "tắt jitter chỉ để test xác định.",
+      "new": "tắt jitter chỉ để test cho kết quả xác định.",
+      "reason": "Thiếu danh từ, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "POST cùng failure không retry theo DisableForUnsafeHttpMethods",
+      "new": "POST gặp cùng lỗi thì không retry, theo DisableForUnsafeHttpMethods",
+      "reason": "Từ tiếng Anh thường (failure), câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Attempt timeout 1 giây, tổng budget 3 giây.",
+      "new": "Timeout cho mỗi lần thử là 1 giây, tổng ngân sách thời gian là 3 giây.",
+      "reason": "Câu thiếu vị ngữ; thống nhất \"ngân sách\" như tiêu đề mục",
+      "severity": "high"
+    },
+    {
+      "old": "Token của caller và các timeout",
+      "new": "Token của phía gọi và các timeout",
+      "reason": "\"caller\" lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "Handler chờ trong test nhận token và hợp tác dừng.",
+      "new": "Handler chờ trong test nhận token và chủ động dừng theo token đó.",
+      "reason": "\"hợp tác dừng\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "phớt lờ cancellation sẽ tự chết.",
+      "new": "phớt lờ cancellation sẽ tự dừng.",
+      "reason": "\"tự chết\" cụt, không đúng sắc thái kỹ thuật",
+      "severity": "medium"
+    },
+    {
+      "old": "ngay cả khi cấu hình kỹ thuật cho phép nó.",
+      "new": "ngay cả khi cấu hình kỹ thuật cho phép retry.",
+      "reason": "Đại từ \"nó\" chỉ sự vật trừu tượng, mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "queue bằng 0 và tự replenishment.",
+      "new": "queue bằng 0 và tự nạp lại hạn mức.",
+      "reason": "Từ tiếng Anh chèn giữa câu, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "giới hạn nhận request và cache hit là hai quyết định riêng.",
+      "new": "giới hạn số request được nhận và cache hit là hai quyết định riêng.",
+      "reason": "Thiếu danh từ, cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "nên là giới hạn chia sẻ trong process",
+      "new": "nên đây là giới hạn dùng chung trong process",
+      "reason": "\"chia sẻ\" gượng, thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "cần có budget rõ, nếu không",
+      "new": "cần có ngân sách rõ ràng, nếu không",
+      "reason": "Thống nhất \"ngân sách\" trong cùng bài",
+      "severity": "medium"
+    },
+    {
+      "old": "## Bốn ca kiểm chứng và bài tập",
+      "new": "## Bốn test case kiểm chứng và bài tập",
+      "reason": "Thống nhất \"test case\" theo terminology.json",
+      "severity": "low"
+    },
+    {
+      "old": "Các ca kiểm cache hit/429, invalidation, retry GET nhưng không POST và timeout dependency hợp tác.",
+      "new": "Bốn test case kiểm chứng gồm cache hit/429, invalidation, retry GET nhưng không retry POST, và timeout với dependency hợp tác.",
+      "reason": "Câu thiếu chủ ngữ và động từ",
+      "severity": "high"
+    }
+  ]
+}

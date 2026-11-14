@@ -1,0 +1,125 @@
+{
+  "file": "dotnet10-efcore-tracking-projection-n-plus-one.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.",
+      "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.",
+      "reason": "'target' lọt tiếng Anh; 'code' → 'mã nguồn'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Cần nhìn vị trí materialization và số lần database được gọi.",
+      "new": "Cần quan sát vị trí materialization và số lần gọi database.",
+      "reason": "'nhìn' và bị động gượng.",
+      "severity": "low"
+    },
+    {
+      "old": "nó là bằng chứng giới hạn cho lượng command mà hai cách query tạo ra ở lab.",
+      "new": "nó là bằng chứng có phạm vi hạn chế về số command mà hai cách query tạo ra ở lab.",
+      "reason": "'bằng chứng giới hạn' tự ghép, nghe cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "original values cho phát hiện thay đổi.",
+      "new": "original values để phát hiện thay đổi.",
+      "reason": "'cho phát hiện' kiểu Anh.",
+      "severity": "medium"
+    },
+    {
+      "old": "AsNoTracking phù hợp nhiều query chỉ đọc: kết quả entity không được gắn vào tracker theo đường thông thường đó. Nó không bảo đảm",
+      "new": "AsNoTracking phù hợp với nhiều query chỉ đọc: entity trong kết quả không được gắn vào tracker theo đường thông thường. AsNoTracking không bảo đảm",
+      "reason": "Thiếu 'với', 'kết quả entity' cụt, 'Nó' đầu câu.",
+      "severity": "medium"
+    },
+    {
+      "old": "No-tracking cũng không đồng nghĩa mọi kết quả tự được identity resolution giống tracker.",
+      "new": "No-tracking cũng không đồng nghĩa với việc mọi kết quả tự được identity resolution như tracker.",
+      "reason": "Câu cụt, thiếu 'với việc'.",
+      "severity": "low"
+    },
+    {
+      "old": "như thuốc chữa một context sống quá lâu;",
+      "new": "như thuốc chữa cho việc một context sống quá lâu;",
+      "reason": "'thuốc chữa một context' thiếu quan hệ.",
+      "severity": "low"
+    },
+    {
+      "old": "Query sửa dùng Select sang TripListItem với Customer.Name ngay trong expression.",
+      "new": "Query đã sửa dùng Select để chuyển sang TripListItem với Customer.Name ngay trong expression.",
+      "reason": "'Query sửa' cụt, 'Select sang' thiếu động từ.",
+      "severity": "high"
+    },
+    {
+      "old": "sắp theo CreatedAt rồi Id và Take(20) trước khi materialize.",
+      "new": "sắp xếp theo CreatedAt rồi Id và áp dụng Take(20) trước khi materialize.",
+      "reason": "'sắp theo' cụt, 'Take' thiếu động từ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Test kiểm query có JOIN và một command đọc, đồng thời kết quả đúng ba dòng.",
+      "new": "Test kiểm tra query có JOIN và một command đọc, đồng thời kết quả có đúng ba dòng.",
+      "reason": "'kiểm' cụt, thiếu 'có'.",
+      "severity": "low"
+    },
+    {
+      "old": "Nhưng Select nói chung không phải bảo đảm no tracking:",
+      "new": "Nhưng Select nói chung không bảo đảm no tracking:",
+      "reason": "'không phải bảo đảm' dịch máy.",
+      "severity": "medium"
+    },
+    {
+      "old": "Hãy đọc shape kết quả cụ thể thay vì chỉ tìm chữ Select.",
+      "new": "Hãy đọc cấu trúc kết quả cụ thể thay vì chỉ tìm chữ Select.",
+      "reason": "'shape' lọt tiếng Anh.",
+      "severity": "low"
+    },
+    {
+      "old": "chưa giải toàn bộ phân trang tải lớn.",
+      "new": "nhưng chưa giải quyết toàn bộ bài toán phân trang khi tải lớn.",
+      "reason": "'chưa giải' và 'phân trang tải lớn' cụt.",
+      "severity": "high"
+    },
+    {
+      "old": "Đưa từ 4 round-trip về 1 trong lab là kết quả cụ thể. Không suy ra “mọi JOIN đều nhanh hơn” hoặc thêm Include tất cả navigation.",
+      "new": "Giảm từ 4 round-trip xuống 1 trong lab là kết quả cụ thể. Đừng suy ra “mọi JOIN đều nhanh hơn” hoặc thêm Include cho tất cả navigation.",
+      "reason": "'Đưa từ ... về' gượng; câu thiếu giới từ 'cho'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Khi query lớn, xem EXPLAIN trên dữ liệu/thống kê phù hợp, lượng hàng trả, cột đọc, kích thước payload và p95/p99. Không sửa AsNoTracking",
+      "new": "Khi query lớn, hãy xem EXPLAIN trên dữ liệu và thống kê phù hợp, cùng lượng hàng trả về, cột đọc, kích thước payload và p95/p99. Đừng sửa AsNoTracking",
+      "reason": "Câu liệt kê thiếu động từ nối và 'trả' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "## Ca kiểm chứng và bài tập",
+      "new": "## Test case kiểm chứng và bài tập",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai test kiểm tracker/reference và no-tracking; test kia đối chiếu N+1 với projection.",
+      "new": "Có hai test: một test kiểm tra tracker/reference và no-tracking, test kia đối chiếu N+1 với projection.",
+      "reason": "'Hai test ... test kia' mâu thuẫn, sửa cấu trúc câu.",
+      "severity": "high"
+    },
+    {
+      "old": "để hai con số không lẫn chi phí fixture.",
+      "new": "để hai con số không bị lẫn chi phí của fixture.",
+      "reason": "'không lẫn' cụt.",
+      "severity": "low"
+    },
+    {
+      "old": "Không: đã materialize nguồn và tiếp tục query ở vòng lặp thì N+1 vẫn còn.",
+      "new": "Không: nếu đã materialize nguồn và tiếp tục query trong vòng lặp thì N+1 vẫn còn.",
+      "reason": "Câu thiếu 'nếu'.",
+      "severity": "medium"
+    },
+    {
+      "old": "không âm thầm skip khi thiếu kết nối; nó chỉ tạo và dọn schema GUID riêng.",
+      "new": "không tự bỏ qua test mà không báo lỗi khi thiếu kết nối; fixture chỉ tạo và dọn schema GUID riêng.",
+      "reason": "Calque 'âm thầm' và 'skip' (theo style guide); 'nó' mơ hồ.",
+      "severity": "high"
+    }
+  ]
+}

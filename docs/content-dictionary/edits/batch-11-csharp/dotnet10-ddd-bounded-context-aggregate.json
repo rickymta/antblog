@@ -1,0 +1,185 @@
+{
+ "file": "dotnet10-ddd-bounded-context-aggregate.md",
+ "edits": [
+  {
+   "old": "Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng",
+   "new": "Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng",
+   "reason": "\"target\" dùng như động từ; thiếu \"được\"",
+   "severity": "low"
+  },
+  {
+   "old": "bắt đầu mô hình domain có hành vi,",
+   "new": "bắt đầu từ một mô hình domain có hành vi,",
+   "reason": "Thiếu giới từ, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và phát domain event sau chuyển trạng thái hợp lệ.",
+   "new": "và phát domain event sau khi chuyển trạng thái hợp lệ.",
+   "reason": "Thiếu \"khi\"",
+   "severity": "medium"
+  },
+  {
+   "old": "## Một từ chuyến có thể mang nhiều ý nghĩa",
+   "new": "## Từ “chuyến” có thể mang nhiều ý nghĩa",
+   "reason": "Tiêu đề cụt, cần đánh dấu là một từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Chia sẻ cùng một tên nghiệp vụ không có nghĩa mọi nơi",
+   "new": "Dùng chung một tên nghiệp vụ không có nghĩa là mọi nơi",
+   "reason": "\"Chia sẻ\" gượng, thiếu \"là\"",
+   "severity": "medium"
+  },
+  {
+   "old": "Định hướng Tới Nơi là backend",
+   "new": "Định hướng của Tới Nơi là backend",
+   "reason": "Thiếu giới từ sở hữu",
+   "severity": "low"
+  },
+  {
+   "old": "Một context có thể khởi đầu là module rõ ranh giới trước khi",
+   "new": "Một context có thể khởi đầu là một module có ranh giới rõ ràng trước khi",
+   "reason": "Cụm tự ghép \"module rõ ranh giới\"",
+   "severity": "medium"
+  },
+  {
+   "old": "Code bài này tập trung domain thuần;",
+   "new": "Code bài này tập trung vào domain thuần;",
+   "reason": "Thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "không coi một project library đơn lẻ là toàn kiến trúc đã xong.",
+   "new": "và không coi một project library đơn lẻ là toàn bộ kiến trúc đã hoàn tất.",
+   "reason": "Câu cụt, thiếu liên từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Aggregate là ranh giới giữ invariant và thay đổi nhất quán;",
+   "new": "Aggregate là ranh giới giữ invariant và giữ cho các thay đổi nhất quán;",
+   "reason": "Câu thiếu động từ cho vế sau",
+   "severity": "medium"
+  },
+  {
+   "old": "Ranh giới aggregate không được chọn bằng việc một màn hình cần hiển thị bao nhiêu dữ liệu.",
+   "new": "Ranh giới aggregate không được chọn theo lượng dữ liệu mà một màn hình cần hiển thị.",
+   "reason": "Trật tự từ kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu mở hoàn tiền/đa tiền tệ,",
+   "new": "Nếu mở rộng sang hoàn tiền hoặc đa tiền tệ,",
+   "reason": "Thiếu động từ, dấu gạch chéo",
+   "severity": "medium"
+  },
+  {
+   "old": "không ép mọi bút toán tài chính Rust thành",
+   "new": "không ép mọi bút toán của context tài chính (Rust) thành",
+   "reason": "Dễ hiểu nhầm Rust là ngôn ngữ của bút toán; thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Accept yêu cầu driver khác Guid.Empty, trạng thái còn Requested;",
+   "new": "Accept yêu cầu driver khác Guid.Empty và trạng thái vẫn là Requested;",
+   "reason": "Câu cụt, thiếu liên từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Version int trong domain demo biểu diễn thứ tự thay đổi của root; nó không tự là token Guid của persistence lab bài 23.",
+   "new": "Version kiểu int trong domain demo biểu diễn thứ tự thay đổi của root; nó không đồng nghĩa với token Guid của persistence lab ở bài 23.",
+   "reason": "\"không tự là\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "phải mapping/chọn chiến lược concurrency có chủ đích.",
+   "new": "phải ánh xạ (mapping) và chọn chiến lược concurrency một cách có chủ đích.",
+   "reason": "Dấu gạch chéo, động từ tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Không đồng nhất mọi field tên Version giữa các mô hình.",
+   "new": "Không đánh đồng mọi trường tên Version giữa các mô hình.",
+   "reason": "\"field\" tiếng Anh thường; \"đồng nhất\" dùng sai sắc thái",
+   "severity": "medium"
+  },
+  {
+   "old": "Tuy vậy object giữ luật không tự ngăn hai process cùng tải trạng thái cũ;",
+   "new": "Tuy vậy, object giữ luật không tự ngăn hai process cùng nạp một trạng thái cũ;",
+   "reason": "Câu dễ hiểu nhầm, \"tải\" gượng",
+   "severity": "low"
+  },
+  {
+   "old": "## Domain event không phải một lần publish đã bảo đảm",
+   "new": "## Domain event không phải là một lần publish đã được bảo đảm",
+   "reason": "Tiêu đề cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "EventId giúp nhận diện; test kiểm nội dung và số event, không đoán giá trị Guid mới.",
+   "new": "EventId giúp nhận diện sự kiện; test kiểm tra nội dung và số lượng event, và không đoán giá trị Guid mới.",
+   "reason": "Thiếu tân ngữ, \"kiểm\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Events trả snapshot để caller không thay được list riêng của root.",
+   "new": "Events trả về snapshot để caller không sửa được list nội bộ của root.",
+   "reason": "\"thay\", \"list riêng\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Event trong memory không tự sống qua crash, không tự là integration event công khai.",
+   "new": "Event nằm trong memory không tự tồn tại qua một lần crash, và cũng không tự trở thành integration event công khai.",
+   "reason": "\"tự sống qua crash\" gượng, câu cụt",
+   "severity": "high"
+  },
+  {
+   "old": "đo và giữ hợp đồng ownership trước.",
+   "new": "hãy đo và giữ hợp đồng ownership trước.",
+   "reason": "Thiếu chủ ngữ/mệnh lệnh",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ để giảm một bản sao khi chưa có bằng chứng chi phí đáng kể.",
+   "new": "chỉ để tiết kiệm một bản sao khi chưa có bằng chứng về chi phí đáng kể.",
+   "reason": "Cụm cụt, thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "## Bốn test và bước nối tiếp",
+   "new": "## Bốn test case và bước tiếp theo",
+   "reason": "Thống nhất \"test case\"",
+   "severity": "low"
+  },
+  {
+   "old": "Test kiểm value equality/validation Money, một lần Accept và snapshot event, driver lỗi không làm đổi root, cùng điều kiện bắt buộc khi tạo.",
+   "new": "Các test case kiểm tra value equality và validation của Money, một lần Accept cùng snapshot event, trường hợp driver lỗi không làm đổi root, và điều kiện bắt buộc khi tạo.",
+   "reason": "Câu liệt kê cụt, dấu gạch chéo",
+   "severity": "high"
+  },
+  {
+   "old": "Vòng đời được rút xuống Requested → Accepted",
+   "new": "Vòng đời được rút gọn thành Requested → Accepted",
+   "reason": "\"rút xuống\" gượng",
+   "severity": "low"
+  },
+  {
+   "old": "chưa mô tả đầy đủ cancel/arriving/completed của hồ sơ Tới Nơi.",
+   "new": "chưa mô tả đầy đủ các trạng thái cancel, arriving, completed trong hồ sơ Tới Nơi.",
+   "reason": "Thiếu danh từ chính (trạng thái)",
+   "severity": "medium"
+  },
+  {
+   "old": "điều phối ngoài domain theo sự kiện/use case.",
+   "new": "điều phối ngoài domain theo sự kiện hoặc use case.",
+   "reason": "Dấu gạch chéo",
+   "severity": "low"
+  },
+  {
+   "old": "Mỗi lớp phải có trách nhiệm chứng minh được, không chỉ thêm folder theo tên pattern.",
+   "new": "Mỗi lớp phải có trách nhiệm có thể chứng minh được, chứ không chỉ thêm folder theo tên pattern.",
+   "reason": "Câu cụt, thiếu liên từ",
+   "severity": "medium"
+  }
+ ]
+}
