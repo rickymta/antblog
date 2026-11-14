@@ -1,0 +1,20 @@
+{"file":"da-bang-khoa-grain-mot-dong-du-lieu.md","edits":[
+{"old": "Bắt đầu SQL cho DA bằng dataset Tới Nơi", "new": "Bắt đầu SQL cho DA bằng bộ dữ liệu Tới Nơi", "reason": "\"dataset\" có từ Việt tự nhiên.", "severity": "low"},
+{"old": "Nó có 14 lượt với các trường hợp biên và ngoại lệ.", "new": "Bộ này có 14 lượt, gồm các trường hợp biên và ngoại lệ.", "reason": "Tránh \"Nó\" chỉ sự vật trừu tượng.", "severity": "medium"},
+{"old": "Đây là dataset học tập độc lập", "new": "Đây là bộ dữ liệu học tập độc lập", "reason": "\"dataset\" có từ Việt tự nhiên.", "severity": "low"},
+{"old": "trong fixture cũng không sửa quy tắc nghiệp vụ chung", "new": "trong fixture cũng không thay đổi quy tắc nghiệp vụ chung", "reason": "\"sửa quy tắc\" gượng.", "severity": "low"},
+{"old": "không ghi vào database blog", "new": "không ghi vào database của blog", "reason": "Thiếu giới từ, cụm cụt.", "severity": "medium"},
+{"old": "Quy ước một lượt/ticket chỉ thuộc lab", "new": "Quy ước mỗi ticket gắn một lượt chỉ áp dụng trong lab", "reason": "Cụm cụt, phải đoán ý.", "severity": "medium"},
+{"old": "Truy vấn đầu trả một dòng. Truy vấn thứ hai trả hai dòng, cùng số tiền yêu cầu 100.000 VND nhưng khác kết quả.", "new": "Truy vấn đầu tiên trả về một dòng. Truy vấn thứ hai trả về hai dòng, có cùng số tiền yêu cầu 100.000 VND nhưng khác kết quả.", "reason": "Câu cụt, thiếu từ.", "severity": "medium"},
+{"old": "là thuộc tính của attempt; chỉ trạng thái thành công cùng hợp đồng nguồn mới cho phép dùng nó như khoản thu trong lab.", "new": "là thuộc tính của từng lần thử (attempt); chỉ khi có trạng thái thành công và hợp đồng nguồn thì mới được dùng giá trị này làm khoản thu trong lab.", "reason": "Câu rối, trật tự kiểu tiếng Anh.", "severity": "medium"},
+{"old": "Việc đặt tên rõ giúp đọc câu lệnh nhưng", "new": "Việc đặt tên rõ giúp đọc câu lệnh dễ hiểu hơn nhưng", "reason": "Câu cụt.", "severity": "low"},
+{"old": "rồi mới nối, nên có thể dùng cùng grain với cohort", "new": "rồi mới nối bảng, nên có thể dùng cùng grain với cohort", "reason": "Thiếu danh từ sau \"nối\".", "severity": "low"},
+{"old": "Một JOIN event có thể tạo nhiều dòng/lượt.", "new": "Phép JOIN với event có thể tạo nhiều dòng cho một lượt.", "reason": "Cụm tự ghép cụt.", "severity": "medium"},
+{"old": "cần tổng hợp hoặc đếm khoá lượt theo câu hỏi.", "new": "cần tổng hợp hoặc đếm theo khoá lượt, tuỳ câu hỏi.", "reason": "Trật tự từ kiểu tiếng Anh.", "severity": "medium"},
+{"old": "có thể che join sai mà vẫn cộng tiền sai.", "new": "có thể che một phép nối sai mà tiền vẫn bị cộng sai.", "reason": "\"join\" lọt vào văn xuôi.", "severity": "medium"},
+{"old": "Viết dictionary năm bảng gồm grain,", "new": "Viết data dictionary cho năm bảng, gồm grain,", "reason": "Thiếu giới từ, thống nhất \"data dictionary\".", "severity": "medium"},
+{"old": "Payment là attempt. P01F thất bại", "new": "Mỗi payment là một lần thử (attempt). P01F thất bại", "reason": "Câu cụt, thiếu từ.", "severity": "medium"},
+{"old": "chỉ P01 ghi dòng tiền thu 100.000", "new": "chỉ P01 ghi nhận dòng tiền thu 100.000", "reason": "\"ghi dòng tiền\" cụt.", "severity": "low"},
+{"old": "primary key có tự phát hiện trùng nghiệp vụ không?", "new": "khoá chính (primary key) có tự phát hiện trùng nghiệp vụ không?", "reason": "Thống nhất \"khoá chính\".", "severity": "low"},
+{"old": "hoặc quy tắc dedup theo hợp đồng nguồn.", "new": "hoặc quy tắc khử trùng lặp theo hợp đồng nguồn.", "reason": "Theo terminology: khử trùng lặp.", "severity": "medium"}
+]}

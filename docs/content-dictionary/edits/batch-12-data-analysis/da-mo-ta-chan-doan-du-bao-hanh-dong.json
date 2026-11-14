@@ -1,0 +1,20 @@
+{"file":"da-mo-ta-chan-doan-du-bao-hanh-dong.md","edits":[
+{"old": "không thể dùng cùng một phép chia để bảo vệ.", "new": "không thể dùng cùng một phép chia để chứng minh.", "reason": "\"bảo vệ\" là calque của defend/support, tối nghĩa", "severity": "medium"},
+{"old": "mục tiêu là biết câu hỏi nào cần dữ liệu và cách kiểm chứng nào.", "new": "mục tiêu là biết câu hỏi nào cần dữ liệu gì và kiểm chứng bằng cách nào.", "reason": "\"cách kiểm chứng nào\" cụt, trật tự kiểu tiếng Anh", "severity": "medium"},
+{"old": "đánh giá ngoài dữ liệu dùng xây mô hình", "new": "đánh giá trên dữ liệu nằm ngoài tập dùng để xây mô hình", "reason": "cụm cụt, thiếu danh từ", "severity": "medium"},
+{"old": "Các nhóm không phải bậc nghề nghiệp.", "new": "Bốn nhóm này không phải các bậc thang nghề nghiệp.", "reason": "câu thiếu chủ ngữ rõ, dịch gượng", "severity": "high"},
+{"old": "trong phạm vi bảng đã cấp.", "new": "trong phạm vi bảng đã cho.", "reason": "\"đã cấp\" gượng, dịch từ provided", "severity": "medium"},
+{"old": "hãy hỏi có số tài xế sẵn sàng phục vụ đúng khu vực/thời điểm không.", "new": "hãy hỏi xem có số liệu về tài xế sẵn sàng phục vụ đúng khu vực và thời điểm đó không.", "reason": "\"có số tài xế … không\" không thành câu hỏi tự nhiên", "severity": "medium"},
+{"old": "nó chưa đo đúng nguồn cung liên quan.", "new": "con số này chưa đo đúng nguồn cung liên quan.", "reason": "tránh \"nó\" chỉ sự vật trừu tượng", "severity": "low"},
+{"old": "Nếu thấy lúc nguồn cung thấp thì huỷ cao, vẫn phải xét yếu tố như mưa có thể đồng thời làm giảm cung và tăng huỷ.", "new": "Nếu thấy khi nguồn cung thấp thì huỷ cao, vẫn phải xét những yếu tố như mưa, vì mưa có thể đồng thời làm giảm cung và tăng huỷ.", "reason": "\"lúc nguồn cung thấp\" gượng; câu thiếu liên từ, phải đoán ý", "severity": "high"},
+{"old": "Lượng lượt nhận 1.200 cũng là giả định,", "new": "Con số 1.200 lượt nhận cũng là giả định,", "reason": "\"Lượng lượt nhận\" lặp từ, cụt", "severity": "medium"},
+{"old": "đánh giá trên các kỳ tương lai so với tập dùng xây mô hình.", "new": "đánh giá trên các kỳ nằm sau tập dùng để xây mô hình.", "reason": "\"so với\" sai logic; thiếu \"để\"", "severity": "medium"},
+{"old": "Hiệu quả đánh giá có thể trông rất tốt nhưng không sử dụng được.", "new": "Chất lượng mô hình trên bộ đánh giá có thể trông rất tốt nhưng mô hình không dùng được.", "reason": "\"Hiệu quả đánh giá\" cụt; thiếu chủ ngữ cho vế sau", "severity": "medium"},
+{"old": "đã tính được ROI của chat.", "new": "đã tính được ROI (lợi tức đầu tư) của chat.", "reason": "ROI chưa được giải nghĩa", "severity": "low"},
+{"old": "Kiểm tra tracking và dữ liệu trễ", "new": "Kiểm tra cách ghi nhận và dữ liệu trễ", "reason": "từ tiếng Anh thông thường lọt vào văn xuôi", "severity": "medium"},
+{"old": "Review một tập ca cao điểm và ca đối chiếu", "new": "Xem xét một tập ca cao điểm và ca đối chiếu", "reason": "từ tiếng Anh thông thường lọt vào văn xuôi", "severity": "low"},
+{"old": "Pilot phương án được chọn sau discovery", "new": "Chạy thử nghiệm (pilot) phương án được chọn sau giai đoạn khám phá", "reason": "discovery chưa được giải nghĩa; câu cụt", "severity": "medium"},
+{"old": "khi chưa có ước lượng được cung cấp.", "new": "khi chưa ai cung cấp ước lượng.", "reason": "\"chưa có ước lượng được cung cấp\" tối nghĩa, bị động kiểu tiếng Anh", "severity": "medium"},
+{"old": "Chọn một công cụ học máy không biến câu hỏi mô tả thành dự báo hợp lệ; đặt một nút", "new": "Việc chọn một công cụ học máy không biến câu hỏi mô tả thành dự báo hợp lệ; việc đặt một nút", "reason": "vế câu thiếu chủ ngữ danh từ hoá, đọc cụt", "severity": "low"},
+{"old": "cần owner, phạm vi và chi phí được xác nhận", "new": "cần người phụ trách, phạm vi và chi phí được xác nhận", "reason": "từ tiếng Anh thông thường lọt vào văn xuôi", "severity": "medium"}
+]}

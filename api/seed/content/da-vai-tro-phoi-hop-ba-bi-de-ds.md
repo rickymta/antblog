@@ -19,11 +19,11 @@ Một DA có thể tham gia cả ba cuộc trao đổi. Nhưng nếu chưa thố
 
 ## 1. Bắt đầu từ công việc cần có
 
-Với bộ số liệu DA-P01, nhóm đã biết tỷ lệ huỷ chung của W1 và W2 cùng là 12%, nhưng nhóm cao điểm lần lượt là 16% và 18%. Bước tiếp cần xác minh sự khác biệt và tìm bằng chứng giải thích, chưa phải triển khai chat.
+Với bộ số liệu DA-P01, nhóm đã biết tỷ lệ huỷ chung của W1 và W2 cùng là 12%, nhưng nhóm cao điểm lần lượt là 16% và 18%. Bước tiếp theo là xác minh sự khác biệt và tìm bằng chứng giải thích, chứ chưa phải triển khai chat.
 
 Để làm được, nhóm phải có người xác định câu hỏi, giải thích trạng thái chuyến, cung cấp dữ liệu, kiểm tra phép tính và quyết định dành nguồn lực cho bước tìm hiểu tiếp theo. Các trách nhiệm đó vẫn tồn tại dù tổ chức có đủ chức danh hay một người kiêm nhiều việc.
 
-[Microsoft Learn về các vai trò phân tích](https://learn.microsoft.com/en-us/training/modules/data-analytics-microsoft/3-roles) phân biệt công việc xây luồng dữ liệu, tạo mô hình dùng lại, phân tích, khoa học dữ liệu và phân tích nghiệp vụ. Bảng dưới là **cách phân công giả lập cho Tới Nơi**, không phải chuẩn chức danh áp dụng cho mọi công ty.
+[Microsoft Learn về các vai trò phân tích](https://learn.microsoft.com/en-us/training/modules/data-analytics-microsoft/3-roles) phân biệt công việc xây dựng luồng dữ liệu, tạo mô hình có thể dùng lại, phân tích, khoa học dữ liệu và phân tích nghiệp vụ. Bảng dưới là **cách phân công giả lập cho Tới Nơi**, không phải chuẩn chức danh áp dụng cho mọi công ty.
 
 | Vai trò / năng lực | Trọng tâm trong ca Tới Nơi | Đầu ra để người khác dùng |
 |---|---|---|
@@ -36,7 +36,7 @@ Với bộ số liệu DA-P01, nhóm đã biết tỷ lệ huỷ chung của W1 
 | Backend / chủ nguồn | Giải thích và duy trì dữ liệu phát sinh từ ứng dụng | Hợp đồng sự kiện, ý nghĩa trạng thái và lịch sử thay đổi |
 | Vận hành / chủ quyết định | Xác nhận ngữ cảnh sử dụng và chọn hành động trong thẩm quyền | Định nghĩa được xác nhận, quyết định và người thực hiện |
 
-BI có thể là năng lực của đội, tên sản phẩm hoặc tên vị trí; không mặc định luôn có một người “BI” đứng riêng với DA. Tương tự, DA có thể làm mô hình dữ liệu hay thống kê, và DE có thể viết truy vấn phân tích. Điều cần chốt là **trách nhiệm cụ thể trong ca này**.
+BI có thể là năng lực của đội, tên sản phẩm hoặc tên vị trí; không mặc định lúc nào cũng có một người “BI” làm riêng, tách khỏi DA. Tương tự, DA có thể làm mô hình dữ liệu hay thống kê, và DE có thể viết truy vấn phân tích. Điều cần chốt là **trách nhiệm cụ thể trong ca này**.
 
 Chưa cần DS chỉ để chia 180 cho 1.500. Nếu câu hỏi chuyển thành dự báo nhu cầu hoặc thiết kế thử nghiệm có ảnh hưởng chéo giữa khách và tài xế, nhóm mới đánh giá năng lực chuyên sâu cần bổ sung.
 
@@ -44,7 +44,7 @@ Chưa cần DS chỉ để chia 180 cho 1.500. Nếu câu hỏi chuyển thành 
 
 DA đầu tiên làm rõ người hỏi muốn quyết định điều gì: cần bố trí người xử lý nhiều ca hơn, hay cần thay đổi trải nghiệm vì tỷ lệ huỷ tăng? Hai mục tiêu dẫn tới cách phân tích khác nhau.
 
-Tiếp đó, DA đọc định nghĩa nguồn cùng backend và vận hành. “Huỷ” trên màn hình có thể tính cả lượt chưa được nhận, còn DA-P01 chỉ tính huỷ trước đón trong cohort đã được nhận. Chênh số chưa chắc là lỗi phần mềm; phải đặt hai định nghĩa cạnh nhau trước khi yêu cầu sửa.
+Tiếp đó, DA đọc định nghĩa nguồn cùng backend và vận hành. “Huỷ” trên màn hình có thể tính cả lượt chưa được nhận, còn DA-P01 chỉ tính huỷ trước đón trong cohort đã được nhận. Số liệu chênh nhau chưa chắc là lỗi phần mềm; phải đặt hai định nghĩa cạnh nhau trước khi yêu cầu sửa.
 
 Sau khi lấy dữ liệu, DA kiểm tra độ đầy đủ, trùng lặp và thời điểm chốt. Khi có bảng chi tiết, DA thử các phép đối soát: số dòng sau join có tăng bất thường không, tổng nhóm có bằng tổng chung không, lượt cuối tuần đã đủ kết quả chưa?
 
@@ -52,7 +52,7 @@ Cuối cùng, DA trình bày phát hiện, giới hạn và lựa chọn tiếp 
 
 ## 3. Bảng trách nhiệm: phân biệt làm, kiểm tra và chốt
 
-Chỉ ghi “DA phụ trách dữ liệu” quá rộng để xử lý tranh chấp. Ta cần tách người thực hiện, người kiểm tra và người quyết định đầu ra đã đủ dùng hay chưa.
+Chỉ ghi “DA phụ trách dữ liệu” thì quá rộng để xử lý tranh chấp. Ta cần tách người thực hiện, người kiểm tra và người quyết định xem đầu ra đã đủ dùng hay chưa.
 
 | Công việc | Người thực hiện chính | Người kiểm tra / phối hợp | Người chốt trong bài tập |
 |---|---|---|---|
@@ -65,9 +65,9 @@ Chỉ ghi “DA phụ trách dữ liệu” quá rộng để xử lý tranh ch�
 
 Các vai trò “chủ chỉ số”, “chủ nguồn” và “chủ báo cáo” cần được gán cho người cụ thể khi làm thật. Một người có thể giữ nhiều vai trò, nhưng việc chấp nhận một định nghĩa không tự động trao quyền đọc toàn bộ dữ liệu hoặc sửa ứng dụng.
 
-Ví dụ, DA đề xuất loại bản ghi trùng trong lớp phân tích. Chủ nguồn phải xác nhận đó là trùng do ingest hay là hai sự kiện hợp lệ. DA không tự xoá sự kiện nguồn để số đẹp hơn; cách sửa phải giữ được dấu vết và khả năng giải thích báo cáo cũ.
+Ví dụ, DA đề xuất loại bản ghi trùng trong lớp phân tích. Chủ nguồn phải xác nhận đó là trùng do nạp dữ liệu (ingest) hay là hai sự kiện hợp lệ. DA không tự xoá sự kiện nguồn để số đẹp hơn; cách sửa phải giữ được dấu vết và khả năng giải thích báo cáo cũ.
 
-## 4. Bàn giao bằng bằng chứng thay vì một file đính kèm
+## 4. Bàn giao kèm bằng chứng thay vì gửi một file đính kèm
 
 Một phiếu bàn giao dữ liệu cho DA có thể gồm:
 
@@ -85,23 +85,23 @@ Trong hồ sơ P01 hiện tại, ta chỉ có bảng tổng hợp giả lập. P
 
 ## 5. Ba tình huống dễ vướng
 
-**“Dashboard chậm, DA tự chọn database mới được không?”** DA có thể ghi lại truy vấn, thời gian trả lời, lượng dữ liệu và nhu cầu độ mới. DE/DBA cùng người sở hữu nền tảng kiểm tra phương án vận hành; chủ ngân sách chốt đầu tư. P04 sẽ học cách lập hồ sơ lựa chọn, nhưng thẩm quyền không tự sinh ra từ việc biết tên một database.
+**“Dashboard chậm, DA tự chọn database mới được không?”** DA có thể ghi lại truy vấn, thời gian trả lời, lượng dữ liệu và nhu cầu độ mới. DE/DBA cùng người phụ trách nền tảng kiểm tra phương án vận hành; chủ ngân sách chốt đầu tư. P04 sẽ học cách lập hồ sơ lựa chọn, nhưng thẩm quyền không tự sinh ra từ việc biết tên một database.
 
-**“Hai báo cáo khác số, đội nào sai?”** So sánh định nghĩa, filter, thời điểm cập nhật, timezone và quyền lọc dữ liệu trước. Nếu một báo cáo đếm sự kiện còn một báo cáo đếm lượt duy nhất, cả hai có thể tính đúng nhưng chỉ một cái phù hợp câu hỏi. Ghi rõ phiên bản định nghĩa đã thống nhất rồi đối soát lại.
+**“Hai báo cáo khác số, đội nào sai?”** So sánh định nghĩa, bộ lọc, thời điểm cập nhật, múi giờ và quyền lọc dữ liệu trước. Nếu một báo cáo đếm sự kiện còn một báo cáo đếm lượt duy nhất, cả hai có thể tính đúng nhưng chỉ một cái phù hợp với câu hỏi. Ghi rõ phiên bản định nghĩa đã thống nhất rồi đối soát lại.
 
-**“DA tìm thấy cao điểm xấu hơn, có được kết luận cần chat?”** DA được khuyến nghị điều tra hoặc thử phương án khi có cơ sở. Việc chat xử lý được nguyên nhân nào cần BA, vận hành và kỹ thuật cùng xem xét; việc dành nguồn lực phải có người chốt. Phát hiện mô tả chưa là bằng chứng về hiệu quả giải pháp.
+**“DA tìm thấy cao điểm xấu hơn, có được kết luận cần chat?”** DA có thể khuyến nghị điều tra hoặc thử phương án khi có cơ sở. Việc chat xử lý được nguyên nhân nào cần BA, vận hành và kỹ thuật cùng xem xét; việc dành nguồn lực phải có người chốt. Phát hiện mang tính mô tả chưa phải là bằng chứng về hiệu quả của giải pháp.
 
 ## 6. Khi nhóm chỉ có hai hoặc ba người
 
-Một developer có thể kiêm DE và người sở hữu báo cáo; một BA có thể kiêm DA. Hãy giữ danh sách trách nhiệm và các lần xác nhận dù chưa cần thêm nhân sự.
+Một developer có thể kiêm DE và người phụ trách báo cáo; một BA có thể kiêm DA. Hãy giữ danh sách trách nhiệm và các lần xác nhận dù chưa cần thêm nhân sự.
 
-Ví dụ, người viết truy vấn có thể tự kiểm tra bằng một phép tính khác, rồi nhờ người hiểu nghiệp vụ xem lại mẫu số. Đây chưa thay thế đầy đủ review kỹ thuật độc lập, nên phải ghi giới hạn đó. Khi báo cáo được dùng cho quyết định quan trọng hơn, nhóm cân nhắc bổ sung người review phù hợp.
+Ví dụ, người viết truy vấn có thể tự kiểm tra bằng một phép tính khác, rồi nhờ người hiểu nghiệp vụ xem lại mẫu số. Cách này chưa thay thế được đầy đủ review kỹ thuật độc lập, nên phải ghi giới hạn đó. Khi báo cáo được dùng cho quyết định quan trọng hơn, nhóm cân nhắc bổ sung người review phù hợp.
 
 Không nên chia vai trò bằng công cụ: “biết Python là DS”, “dùng Power BI là BI”, “viết SQL là DE”. Cùng một công cụ có thể phục vụ nhiều trách nhiệm. Cách bàn giao và mức bằng chứng mới cho biết công việc đã hoàn thành tới đâu.
 
 ## 7. Bài tập và tự đánh giá
 
-Giả sử nhóm Tới Nơi của bài tập có một DA, một backend và một quản lý vận hành; chưa có DE/BI/DS riêng. Phân công sáu việc: chốt mẫu số, lấy dữ liệu, đối soát, dựng báo cáo, xử lý refresh lỗi và duyệt điều tra cao điểm.
+Giả sử nhóm Tới Nơi của bài tập có một DA, một backend và một quản lý vận hành; chưa có DE/BI/DS riêng. Phân công sáu việc: chốt mẫu số, lấy dữ liệu, đối soát, dựng báo cáo, xử lý lỗi làm mới dữ liệu (refresh) và duyệt điều tra cao điểm.
 
 Với mỗi việc, ghi người làm, người kiểm tra, người chốt và đầu ra bàn giao. Nếu không có người đủ năng lực kiểm tra, ghi đó là khoảng trống cần giải quyết, không tự đánh dấu “đã review”.
 
@@ -111,7 +111,7 @@ Với mỗi việc, ghi người làm, người kiểm tra, người chốt và 
 
 <details><summary>Gợi ý trả lời</summary><p>Độ đúng phụ thuộc định nghĩa, ghi nhận ở nguồn, pipeline và phép tính. DA chịu trách nhiệm kiểm tra và diễn giải trong phạm vi đã thống nhất, đồng thời phải làm rõ phụ thuộc và vấn đề chưa xác minh. Một lời cam kết chung không thay thế trách nhiệm cụ thể của từng khâu.</p></details>
 
-Checklist bàn giao: từng việc có người sở hữu; có người xác nhận nghiệp vụ; có review phù hợp; có giới hạn dữ liệu; có người duy trì báo cáo; quyết định đầu tư hoặc thay đổi có đúng người chốt.
+Checklist bàn giao: từng việc có người phụ trách; có người xác nhận nghiệp vụ; có review phù hợp; có giới hạn dữ liệu; có người duy trì báo cáo; quyết định đầu tư hoặc thay đổi có đúng người chốt.
 
 ## 8. Đọc thêm và thực hành tiếp
 

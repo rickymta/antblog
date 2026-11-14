@@ -1,0 +1,19 @@
+{"file":"da-vai-tro-phoi-hop-ba-bi-de-ds.md","edits":[
+{"old":"Bước tiếp cần xác minh sự khác biệt và tìm bằng chứng giải thích, chưa phải triển khai chat.","new":"Bước tiếp theo là xác minh sự khác biệt và tìm bằng chứng giải thích, chứ chưa phải triển khai chat.","reason":"câu thiếu động từ \"là\", phải đoán ý","severity":"medium"},
+{"old":"phân biệt công việc xây luồng dữ liệu, tạo mô hình dùng lại,","new":"phân biệt công việc xây dựng luồng dữ liệu, tạo mô hình có thể dùng lại,","reason":"cụm cụt, nghe như dịch máy","severity":"low"},
+{"old":"không mặc định luôn có một người “BI” đứng riêng với DA","new":"không mặc định lúc nào cũng có một người “BI” làm riêng, tách khỏi DA","reason":"\"đứng riêng với\" gượng","severity":"medium"},
+{"old":"Chênh số chưa chắc là lỗi phần mềm","new":"Số liệu chênh nhau chưa chắc là lỗi phần mềm","reason":"\"chênh số\" là cụm tự ghép, cụt","severity":"medium"},
+{"old":"Chỉ ghi “DA phụ trách dữ liệu” quá rộng để xử lý tranh chấp.","new":"Chỉ ghi “DA phụ trách dữ liệu” thì quá rộng để xử lý tranh chấp.","reason":"câu thiếu liên từ, đọc cụt","severity":"low"},
+{"old":"người quyết định đầu ra đã đủ dùng hay chưa","new":"người quyết định xem đầu ra đã đủ dùng hay chưa","reason":"thiếu từ nối khiến câu khó đọc","severity":"medium"},
+{"old":"là trùng do ingest hay là hai sự kiện hợp lệ","new":"là trùng do nạp dữ liệu (ingest) hay là hai sự kiện hợp lệ","reason":"ingest chưa được giải nghĩa cho người mới","severity":"medium"},
+{"old":"## 4. Bàn giao bằng bằng chứng thay vì một file đính kèm","new":"## 4. Bàn giao kèm bằng chứng thay vì gửi một file đính kèm","reason":"tiêu đề lặp từ \"bằng bằng\", đọc gượng","severity":"high"},
+{"old":"cùng người sở hữu nền tảng kiểm tra phương án vận hành","new":"cùng người phụ trách nền tảng kiểm tra phương án vận hành","reason":"\"người sở hữu\" là calque của owner","severity":"medium"},
+{"old":"So sánh định nghĩa, filter, thời điểm cập nhật, timezone và quyền lọc dữ liệu trước.","new":"So sánh định nghĩa, bộ lọc, thời điểm cập nhật, múi giờ và quyền lọc dữ liệu trước.","reason":"từ tiếng Anh thông thường lọt vào văn xuôi; thống nhất \"bộ lọc\", \"múi giờ\" với phần còn lại của bài","severity":"medium"},
+{"old":"chỉ một cái phù hợp câu hỏi","new":"chỉ một cái phù hợp với câu hỏi","reason":"thiếu giới từ","severity":"medium"},
+{"old":"DA được khuyến nghị điều tra hoặc thử phương án khi có cơ sở.","new":"DA có thể khuyến nghị điều tra hoặc thử phương án khi có cơ sở.","reason":"\"được khuyến nghị\" đọc như câu bị động, sai chủ thể","severity":"medium"},
+{"old":"Phát hiện mô tả chưa là bằng chứng về hiệu quả giải pháp.","new":"Phát hiện mang tính mô tả chưa phải là bằng chứng về hiệu quả của giải pháp.","reason":"\"chưa là\" thiếu \"phải\", cụm cụt","severity":"medium"},
+{"old":"developer có thể kiêm DE và người sở hữu báo cáo","new":"developer có thể kiêm DE và người phụ trách báo cáo","reason":"\"người sở hữu\" là calque của owner","severity":"medium"},
+{"old":"Đây chưa thay thế đầy đủ review kỹ thuật độc lập","new":"Cách này chưa thay thế được đầy đủ review kỹ thuật độc lập","reason":"\"Đây\" thiếu chủ thể rõ, câu cụt","severity":"medium"},
+{"old":"xử lý refresh lỗi","new":"xử lý lỗi làm mới dữ liệu (refresh)","reason":"cụm \"refresh lỗi\" tối nghĩa, trật tự kiểu tiếng Anh","severity":"medium"},
+{"old":"từng việc có người sở hữu;","new":"từng việc có người phụ trách;","reason":"\"người sở hữu\" là calque của owner","severity":"medium"}
+]}

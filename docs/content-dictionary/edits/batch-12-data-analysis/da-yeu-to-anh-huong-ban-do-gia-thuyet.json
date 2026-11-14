@@ -1,0 +1,20 @@
+{"file":"da-yeu-to-anh-huong-ban-do-gia-thuyet.md","edits":[
+{"old":"Kỹ thuật nhớ tuần vừa rồi có đổi tracking.","new":"Kỹ thuật nhớ tuần vừa rồi có đổi cách ghi nhận.","reason":"từ tiếng Anh thông thường lọt vào văn xuôi","severity":"medium"},
+{"old":"vì khách/tài xế hành xử khác, hoặc vì cách ghi nhận/lọc/tổng hợp khác.","new":"vì khách hoặc tài xế hành xử khác đi, hoặc vì cách ghi nhận, lọc, tổng hợp khác đi.","reason":"dùng dấu gạch chéo thay liên từ, câu cụt","severity":"low"},
+{"old":"đồng thời sửa việc gửi event huỷ. Khi thấy số huỷ tăng sau phát hành,","new":"đồng thời sửa việc gửi sự kiện huỷ. Khi thấy số huỷ tăng sau khi phát hành,","reason":"thống nhất \"sự kiện\"; \"sau phát hành\" cụt","severity":"medium"},
+{"old":"Nhãn huỷ, timezone, định nghĩa cohort thay đổi","new":"Nhãn huỷ, múi giờ, định nghĩa cohort thay đổi","reason":"thống nhất \"múi giờ\"","severity":"low"},
+{"old":"Schema/metric version, đối soát","new":"Phiên bản schema/metric, đối soát","reason":"thống nhất \"phiên bản\" trong văn xuôi","severity":"low"},
+{"old":"nên chưa được gắn W2 với một trận mưa","new":"nên chưa thể gắn W2 với một trận mưa","reason":"\"chưa được gắn\" gượng, mang giọng bị động","severity":"medium"},
+{"old":"không giải quyết được thiếu mapping ngày/vùng của bộ minh hoạ.","new":"không giải quyết được việc bộ minh hoạ thiếu ánh xạ ngày và vùng.","reason":"câu thiếu chủ ngữ cho \"thiếu\", mapping lọt vào văn xuôi","severity":"high"},
+{"old":"có vai trò trong cả phía phơi nhiễm và kết quả của câu hỏi nhân quả.","new":"có liên quan tới cả hai phía là phơi nhiễm và kết quả của câu hỏi nhân quả.","reason":"\"vai trò trong cả phía\" gượng, khó hiểu","severity":"medium"},
+{"old":"Nguyên nhân toán học là tỷ trọng nhóm H có tỷ lệ cao tăng từ 10% lên 90%.","new":"Nguyên nhân toán học là tỷ trọng của nhóm H, nhóm có tỷ lệ cao, tăng từ 10% lên 90%.","reason":"câu dễ đọc nhầm, thiếu ngắt ý","severity":"medium"},
+{"old":"nó trả lời câu hỏi khác:","new":"con số này trả lời câu hỏi khác:","reason":"tránh \"nó\" chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Không dùng lời giải thích đổi tỷ trọng của MIX-01 cho bảng P01","new":"Không áp lời giải thích về thay đổi tỷ trọng của MIX-01 cho bảng P01","reason":"\"lời giải thích đổi tỷ trọng\" cụt, thiếu danh từ","severity":"medium"},
+{"old":"Thiếu event ở W1 làm tỷ lệ cao điểm trông thấp","new":"Thiếu sự kiện ở W1 làm tỷ lệ cao điểm trông thấp","reason":"thống nhất \"sự kiện\"","severity":"medium"},
+{"old":"Lập mẫu ca huỷ và ca đón thành công để review","new":"Lập mẫu ca huỷ và ca đón thành công để rà soát","reason":"từ tiếng Anh thông thường lọt vào văn xuôi","severity":"low"},
+{"old":"biến động chỉ ở bản app mới","new":"biến động chỉ ở bản ứng dụng mới","reason":"từ tiếng Anh thông thường lọt vào văn xuôi","severity":"low"},
+{"old":"H-03 cần nguồn mới nên chưa hứa kết quả trong cùng hạn.","new":"H-03 cần nguồn mới nên chưa hứa kết quả trong cùng thời hạn.","reason":"\"hạn\" đứng một mình cụt","severity":"medium"},
+{"old":"chỉ vì tìm được một ca phù hợp câu chuyện.","new":"chỉ vì tìm được một ca khớp với câu chuyện mình đang kể.","reason":"\"phù hợp câu chuyện\" thiếu giới từ, dịch gượng","severity":"medium"},
+{"old":"Dùng thời điểm release làm bằng chứng đủ cho nguyên nhân;","new":"Dùng thời điểm phát hành làm bằng chứng đủ để kết luận nguyên nhân;","reason":"release là từ tiếng Anh thông thường; câu cụt","severity":"medium"},
+{"old":"Tinh thần khám phá và kiểm tra giả định được trình bày trong [NIST — What is EDA?](https://www.itl.nist.gov/div898/handbook/eda/section1/eda11.htm).","new":"[NIST — What is EDA?](https://www.itl.nist.gov/div898/handbook/eda/section1/eda11.htm) trình bày tinh thần khám phá và kiểm tra giả định.","reason":"đổi câu bị động \"được … trong\" sang chủ động","severity":"low"}
+]}

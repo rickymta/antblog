@@ -1,0 +1,20 @@
+{"file":"da-ngay-gio-timezone-cua-so-bao-cao.md","edits":[
+{"old": "truy vấn không phụ thuộc timezone phiên. Dataset chốt tại 13/10/2026 00:00 +07; không sử dụng now() để thay ngày chốt của fixture.", "new": "truy vấn không phụ thuộc múi giờ của phiên. Bộ dữ liệu chốt tại 13/10/2026 00:00 +07; không dùng now() để thay ngày chốt của fixture.", "reason": "Thống nhất \"múi giờ\"; \"dataset\" có từ Việt; \"timezone phiên\" cụt.", "severity": "medium"},
+{"old": "chịu ảnh hưởng timezone của phiên.", "new": "chịu ảnh hưởng của múi giờ trong phiên.", "reason": "Thống nhất \"múi giờ\".", "severity": "low"},
+{"old": "Nó không giữ nguyên tên múi giờ", "new": "Kiểu này không giữ nguyên tên múi giờ", "reason": "\"Nó\" chỉ sự vật trừu tượng, mơ hồ.", "severity": "medium"},
+{"old": "chuyển thời điểm sang vùng giờ cần dùng", "new": "chuyển thời điểm sang múi giờ cần dùng", "reason": "Thống nhất \"múi giờ\".", "severity": "low"},
+{"old": "phụ thuộc timezone phiên và có thể đổi ngày", "new": "phụ thuộc múi giờ của phiên và có thể đổi ngày", "reason": "\"timezone phiên\" cụt.", "severity": "medium"},
+{"old": "ngay cả khi session timezone là UTC. Offset ở hai literal đã xác định thời điểm, còn việc hiển thị có thể khác. Bộ kiểm tra lab đổi timezone để xác nhận tính ổn định này.", "new": "ngay cả khi múi giờ của phiên là UTC. Độ lệch múi giờ (offset) ở hai literal đã xác định thời điểm, còn cách hiển thị có thể khác. Bộ kiểm tra lab đổi múi giờ của phiên để xác nhận tính ổn định này.", "reason": "\"literal\", \"session timezone\" lọt vào văn xuôi.", "severity": "medium"},
+{"old": "tên timezone phù hợp thay vì cộng cứng số giây", "new": "tên múi giờ phù hợp thay vì cộng cứng số giây", "reason": "Thống nhất \"múi giờ\".", "severity": "low"},
+{"old": "Hai tổng bằng nhau tình cờ, các đối tượng khác nhau.", "new": "Hai tổng bằng nhau là do tình cờ, còn các đối tượng thì khác nhau.", "reason": "Câu cụt, thiếu liên từ.", "severity": "medium"},
+{"old": "Chỉ đối soát tổng 3 với 3 có thể bỏ qua lỗi phạm vi.", "new": "Nếu chỉ đối soát tổng 3 với 3 thì có thể bỏ sót lỗi phạm vi.", "reason": "Câu thiếu liên từ điều kiện.", "severity": "medium"},
+{"old": "cần thời gian ghi nhận/ingest hoặc snapshot đã lưu.", "new": "cần có thời điểm ghi nhận (ingest) hoặc snapshot đã lưu.", "reason": "Cụm cụt.", "severity": "low"},
+{"old": "không đủ để tái dựng tri thức quá khứ khi", "new": "không đủ để tái dựng những gì ta đã biết vào thời điểm đó khi", "reason": "\"tri thức quá khứ\" gượng.", "severity": "medium"},
+{"old": "không mô phỏng đầy đủ event time và ingestion time. Không dùng nó để khẳng định pipeline vận hành", "new": "không mô phỏng đầy đủ thời điểm xảy ra sự kiện (event time) và thời điểm nạp dữ liệu (ingestion time). Không dùng snapshot này để khẳng định pipeline vận hành", "reason": "Thuật ngữ chưa chú giải; \"nó\" mơ hồ.", "severity": "medium"},
+{"old": "## 6. Khoảng chờ phải nêu đơn vị và tập đo", "new": "## 6. Khoảng chờ phải nêu đơn vị và tập dữ liệu được đo", "reason": "\"tập đo\" cụt.", "severity": "medium"},
+{"old": "T07 khoảng 15,02 phút do bắt đầu ở giây 59.", "new": "T07 khoảng 15,02 phút vì thời điểm nhận rơi vào giây thứ 59.", "reason": "Nguyên nhân viết cụt, phải đoán ý.", "severity": "medium"},
+{"old": "Viết danh sách lượt của mỗi tập bằng dữ kiện trên.", "new": "Viết danh sách lượt của mỗi tập dựa trên dữ kiện ở trên.", "reason": "Cấu trúc gượng.", "severity": "low"},
+{"old": "Chạy lại report tháng sau với now() có tái tạo báo cáo fixture không?", "new": "Chạy lại báo cáo vào tháng sau với now() có tái tạo được báo cáo của fixture không?", "reason": "\"report\" lọt vào câu hỏi; thiếu từ.", "severity": "medium"},
+{"old": "Cần tham số kỳ và snapshot/version rõ ràng.", "new": "Cần tham số kỳ báo cáo và snapshot hoặc phiên bản rõ ràng.", "reason": "Thống nhất \"phiên bản\"; câu cụt.", "severity": "medium"},
+{"old": "hệ thống thật cần lưu khả năng tái lập phù hợp", "new": "hệ thống thật cần cơ chế lưu trữ để bảo đảm khả năng tái lập phù hợp", "reason": "\"lưu khả năng\" gượng.", "severity": "medium"}
+]}

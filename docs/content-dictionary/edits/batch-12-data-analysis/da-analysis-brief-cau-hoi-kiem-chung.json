@@ -1,0 +1,16 @@
+{"file":"da-analysis-brief-cau-hoi-kiem-chung.md","edits":[
+{"old": "còn kỹ thuật có thể cần điều tra sự cố ghi nhận.", "new": "còn kỹ thuật có thể cần điều tra sự cố trong khâu ghi nhận dữ liệu.", "reason": "\"sự cố ghi nhận\" là cụm ghép cụt", "severity": "medium"},
+{"old": "Còn cần biết tỷ lệ ca cần hỗ trợ", "new": "Ta còn cần biết tỷ lệ ca cần hỗ trợ", "reason": "câu thiếu chủ ngữ", "severity": "medium"},
+{"old": "hai tổng số trước khi tính năng được thử.", "new": "hai tổng số trước khi thử tính năng.", "reason": "tránh câu bị động kiểu tiếng Anh", "severity": "medium"},
+{"old": "Mốc xếp cohort là nhận lần đầu, không phải ngày phát sinh huỷ.", "new": "Mốc để xếp cohort là thời điểm nhận lần đầu, không phải ngày phát sinh huỷ.", "reason": "\"là nhận lần đầu\" thiếu danh từ, câu cụt", "severity": "medium"},
+{"old": "Đầu ra hỗ trợ ưu tiên điều tra, chưa xác nhận nguyên nhân.", "new": "Đầu ra giúp xếp thứ tự ưu tiên điều tra, chưa xác nhận nguyên nhân.", "reason": "\"hỗ trợ ưu tiên điều tra\" cụt, dễ đọc sai nghĩa", "severity": "low"},
+{"old": "để người thực hiện thiết kế đúng, không yêu cầu một cột mà dữ liệu không thể có.", "new": "để người thực hiện thiết kế đúng cách đo, thay vì yêu cầu một cột mà dữ liệu không thể có.", "reason": "\"thiết kế đúng\" thiếu danh từ; \"không yêu cầu\" thiếu nối ý", "severity": "medium"},
+{"old": "Cuối T+1 rà soát thiếu dữ liệu; báo lại phạm vi nếu không đủ", "new": "Cuối T+1 rà soát phần dữ liệu còn thiếu; báo lại về phạm vi nếu dữ liệu không đủ", "reason": "\"rà soát thiếu dữ liệu\" cụt, thiếu chủ ngữ cho \"không đủ\"", "severity": "medium"},
+{"old": "Thay bằng các điều kiện cụ thể:", "new": "Hãy thay bằng các điều kiện cụ thể:", "reason": "câu thiếu chủ ngữ, giọng cộc", "severity": "low"},
+{"old": "Nghiệm thu sản phẩm phân tích không đồng nghĩa đồng ý mọi khuyến nghị.", "new": "Việc nghiệm thu sản phẩm phân tích không có nghĩa là đồng ý với mọi khuyến nghị.", "reason": "câu thiếu chủ ngữ rõ, \"đồng nghĩa đồng ý\" thiếu giới từ", "severity": "high"},
+{"old": "Cũng không lấy giá chuyến làm thiệt hại: phải định nghĩa chi phí nào,", "new": "Cũng không coi giá chuyến là thiệt hại: phải định nghĩa đó là chi phí nào,", "reason": "\"lấy … làm\" gượng, câu thiếu chủ ngữ cho vế sau", "severity": "high"},
+{"old": "giữ hạn với phạm vi cũ hoặc đổi hạn/phạm vi;", "new": "giữ thời hạn với phạm vi cũ hoặc đổi thời hạn, phạm vi;", "reason": "\"giữ hạn\" cụt, dễ hiểu nhầm", "severity": "medium"},
+{"old": "Đổi quyết định thành đánh giá có nên dành nguồn lực tìm hiểu hoặc thử chat.", "new": "Viết lại quyết định thành việc đánh giá xem có nên dành nguồn lực tìm hiểu hoặc thử chat hay không.", "reason": "câu thiếu liên từ, phải đoán ý", "severity": "medium"},
+{"old": "Câu hỏi ngay: số/tỷ lệ huỷ", "new": "Câu hỏi trả lời ngay được: số/tỷ lệ huỷ", "reason": "\"Câu hỏi ngay\" cụt", "severity": "medium"},
+{"old": "có in/out; có nguồn và giới hạn; có hạn phụ thuộc điều kiện;", "new": "có phạm vi trong và ngoài; có nguồn và giới hạn; có thời hạn gắn với điều kiện;", "reason": "\"in/out\" và \"hạn phụ thuộc điều kiện\" là cách nói cụt", "severity": "medium"}
+]}
