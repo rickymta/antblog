@@ -20,7 +20,7 @@ language: vi
 
 Cache tránh tính/đọc lại dữ liệu phù hợp; timeout giới hạn thời gian chờ; retry thử lại lỗi tạm theo hợp đồng; rate limiting quyết định lượng yêu cầu được nhận. Chúng không cùng chữa một loại lỗi và không thay transaction.
 
-Lab tạo GET /tariffs cho bảng giá công khai, không cache báo giá riêng của khách hoặc endpoint có quyền sở hữu. Named HttpClient partner dùng handler giả trong test, không gọi ra Internet. Giá trị bảng giá vẫn là dữ liệu minh họa của Tới Nơi.
+Lab tạo GET /tariffs cho bảng giá công khai, không cache báo giá riêng của khách hoặc endpoint có quyền sở hữu. Named HttpClient partner dùng handler giả trong test, không gọi ra Internet. Giá trị bảng giá vẫn là dữ liệu minh hoạ của Tới Nơi.
 
 Mục tiêu là quan sát từng chính sách. Một bộ limiter cực nhỏ với permit 2 không phải cấu hình production; nó giúp request thứ ba bộc lộ đường từ chối mà không phải bắn tải lớn.
 
@@ -34,9 +34,9 @@ Memory cache ở mỗi replica khác nhau, mất khi process dừng. Không dùn
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 220" role="img" aria-label="Hình 1. Limiter kiểm soát đầu vào trước cache/handler; cache không xóa giới hạn tải."><defs><marker id="cs25-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Request</text><text x="34" y="123" class="t-small">Qua limiter</text><path d="M280 115 L305 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs25-0-arrow)"/><rect x="305" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="319" y="95" class="t-b">Cache public</text><text x="319" y="123" class="t-small">Hit / load nguồn</text><path d="M565 115 L590 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs25-0-arrow)"/><rect x="590" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Response</text><text x="604" y="123" class="t-small">Bảng giá theo version</text></svg>
+<svg viewBox="0 0 880 220" role="img" aria-label="Hình 1. Limiter kiểm soát đầu vào trước cache/handler; cache không xoá giới hạn tải."><defs><marker id="cs25-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Request</text><text x="34" y="123" class="t-small">Qua limiter</text><path d="M280 115 L305 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs25-0-arrow)"/><rect x="305" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="319" y="95" class="t-b">Cache public</text><text x="319" y="123" class="t-small">Hit / load nguồn</text><path d="M565 115 L590 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs25-0-arrow)"/><rect x="590" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Response</text><text x="604" y="123" class="t-small">Bảng giá theo version</text></svg>
 </div>
-<figcaption>Hình 1. Limiter kiểm soát đầu vào trước cache/handler; cache không xóa giới hạn tải.</figcaption>
+<figcaption>Hình 1. Limiter kiểm soát đầu vào trước cache/handler; cache không xoá giới hạn tải.</figcaption>
 </figure>
 
 ## Retry phải có ngân sách và loại thao tác

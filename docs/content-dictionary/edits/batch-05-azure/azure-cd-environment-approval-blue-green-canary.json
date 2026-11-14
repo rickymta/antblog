@@ -1,0 +1,22 @@
+{"file":"azure-cd-environment-approval-blue-green-canary.md","edits":[
+{"old":"quyết định tiếp tục hay quay lại.","new":"quyết định tiếp tục hay rollback.","reason":"'quay lại' mơ hồ, bài dùng rollback","severity":"medium"},
+{"old":"Nó không chứng minh artifact chạy đúng","new":"CI không chứng minh artifact chạy đúng","reason":"Tránh 'Nó' mơ hồ, nhắc lại chủ ngữ","severity":"medium"},
+{"old":"trước khi nó chạm toàn bộ khách.","new":"trước khi lỗi ảnh hưởng toàn bộ khách.","reason":"'nó chạm' là calque của touch, đại từ mơ hồ","severity":"medium"},
+{"old":"là sai về cơ chế.","new":"là sai nguyên tắc.","reason":"'sai về cơ chế' gượng","severity":"low"},
+{"old":"thứ test ở staging không còn là thứ chạy ở prod","new":"bản được test ở staging không còn là bản chạy ở prod","reason":"'thứ' lặp, mơ hồ","severity":"medium"},
+{"old":"so lại digest sau khi import thay vì tin.","new":"so lại digest sau khi import thay vì tin vào kết quả import.","reason":"'tin' thiếu bổ ngữ","severity":"medium"},
+{"old":"luồng. Nó không chứng minh federated credential","new":"luồng, không chứng minh federated credential","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"Người duyệt cấu hình ở Settings","new":"Bạn cấu hình người duyệt ở Settings","reason":"Chủ ngữ sai: người duyệt không tự cấu hình","severity":"medium"},
+{"old":"rồi đẩy weight 10, 50, 100 và gọi gate","new":"rồi tăng weight lần lượt lên 10, 50, 100 và gọi gate","reason":"'đẩy' là calque của push","severity":"medium"},
+{"old":"hãy kiểm bằng lệnh liệt kê ở lab","new":"hãy kiểm tra bằng lệnh liệt kê ở lab","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"bạn mất đường lui một lệnh","new":"bạn không còn đường lui chỉ bằng một lệnh","reason":"Câu lược, khó hiểu","severity":"medium"},
+{"old":"Đây là giả định cần kiểm trên bảng","new":"Đây là giả định cần kiểm tra trên bảng","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"chứ không được pass im lặng.","new":"chứ không được pass mà không cảnh báo.","reason":"'im lặng' là calque của silently","severity":"medium"},
+{"old":"vì dự án này đã ngừng được duy trì từ 2026","new":"vì dự án này đã ngừng bảo trì từ năm 2026","reason":"'ngừng được duy trì' gượng, bị động","severity":"medium"},
+{"old":"revision cũ và mới cùng đọc ghi vào","new":"revision cũ và mới cùng đọc và ghi vào","reason":"'đọc ghi' là cụm cụt","severity":"low"},
+{"old":"tổng connection là của cả hai revision cộng lại","new":"tổng số connection bằng tổng của cả hai revision","reason":"Câu gượng, trật tự kiểu tiếng Anh","severity":"medium"},
+{"old":"đọc giờ theo múi giờ đội vận hành","new":"đọc giờ theo múi giờ của đội vận hành","reason":"Thiếu 'của'","severity":"low"},
+{"old":"; kiểm gói GitHub của bạn.","new":"; hãy kiểm tra gói GitHub của bạn.","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"nếu nó không chứa thứ bạn còn cần.","new":"nếu resource group đó không chứa thứ bạn còn cần.","reason":"'nó' mơ hồ","severity":"low"},
+{"old":"đẩy canary bằng weight của revision","new":"chạy canary bằng cách chia weight giữa các revision","reason":"'đẩy canary' là calque","severity":"medium"}
+]}

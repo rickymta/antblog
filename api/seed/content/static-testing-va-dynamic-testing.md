@@ -1,14 +1,14 @@
 ---
 slug: static-testing-va-dynamic-testing
 title: "Static Testing và Dynamic Testing: đọc code hay chạy test để tìm lỗi tính cước"
-summary: "So sánh static testing và dynamic testing theo CTFL v4.0.1: loại defect mỗi cách tìm được, cách phát hiện, thời điểm. Tìm cùng một lỗi tính cước Tới Nơi bằng đọc code và bằng test vitest đỏ, chạy thật trên lab."
+summary: "So sánh static testing và dynamic testing theo CTFL v4.0.1: loại defect mỗi cách tìm được, cách phát hiện defect và thời điểm áp dụng. Tìm cùng một lỗi tính cước của Tới Nơi bằng cách đọc code và bằng test vitest đỏ, chạy thật trên lab."
 category: testing
 level: intermediate
 tags: [testing, istqb, ctfl, test-022, static-testing, dynamic-testing, code-review, vitest, toi-noi]
 language: vi
 ---
 
-Ở [TEST-021](/articles/static-testing-la-gi), bản nháp đặc tả cước bỏ ngỏ một câu hỏi: phụ phí mưa có bị nhân hệ số cao điểm không? Giả sử không ai hỏi, và developer viết code nhân luôn cả phụ phí mưa. Bây giờ có hai cách tìm lỗi đó: **đọc code** (static testing) hoặc **chạy test** (dynamic testing). Bài này so sánh hai cách theo CTFL v4.0.1, rồi làm cả hai trên cùng một bản code lỗi của lab Tới Nơi để thấy mỗi cách tìm được gì, mất công ra sao và vì sao không cách nào thay được cách kia.
+Ở [TEST-021](/articles/static-testing-la-gi), bản nháp đặc tả cước bỏ ngỏ một câu hỏi: phụ phí trời mưa có bị nhân hệ số cao điểm không? Giả sử không ai hỏi, và developer viết code nhân luôn cả phụ phí trời mưa. Bây giờ có hai cách tìm lỗi đó: **đọc code** (static testing) hoặc **chạy test** (dynamic testing). Bài này so sánh hai cách theo CTFL v4.0.1, rồi làm cả hai trên cùng một bản code lỗi của lab Tới Nơi để thấy mỗi cách tìm được gì, mất công ra sao và vì sao không cách nào thay được cách kia.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-022</span>
@@ -21,7 +21,7 @@ language: vi
 <tr><th scope="row">Test Type</th><td>White-box; Black-box</td></tr>
 <tr><th scope="row">Test Technique</th><td>Static testing</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/static-testing-la-gi">TEST-021 · Static Testing là gì?</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): cùng lỗi «phụ phí mưa bị nhân 1,25» (trái R-FARE-05) — tìm bằng đọc code, bằng một static check tự viết và bằng test vitest đỏ — <code>examples/toi-noi-testing/articles/static-testing-va-dynamic-testing/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): cùng lỗi «phụ phí trời mưa bị nhân 1,25» (trái R-FARE-05) — tìm bằng đọc code, bằng một static check tự viết và bằng test vitest đỏ — <code>examples/toi-noi-testing/articles/static-testing-va-dynamic-testing/</code></td></tr>
 <tr><th scope="row">Tham chiếu ISTQB</th><td>CTFL v4.0.1 · Chương 3 · mục 3.1.3 · FL-3.1.3 (K2). Liên quan: CTAL-TTA v4.0 · mục 3.1 (static analysis và dynamic analysis — phần giới thiệu, không có LO riêng)</td></tr>
 </tbody>
 </table>
@@ -48,7 +48,7 @@ Static và dynamic testing có mục tiêu tương tự — hỗ trợ phát hi�
 |---|---|---|
 | 1 | Cả hai đều dẫn tới phát hiện defect, nhưng có **loại defect chỉ một trong hai cách** tìm được | Chú thích sai công thức trong `fare.ts`: không test nào đỏ vì chú thích. Độ trễ p95 của Quote API: không ai đọc code mà đo ra được |
 | 2 | Static testing tìm **thẳng defect**; dynamic testing gây ra **failure**, rồi defect được xác định qua **phân tích sau đó** | Đọc code thấy ngay dòng 29; chạy test chỉ thấy «54.000 ≠ 52.000», còn phải phân tích |
-| 3 | Static testing dễ phát hiện defect nằm trên **đường đi ít khi chạy** hoặc khó chạm tới bằng dynamic testing | Nhánh xử lý cước âm không bao giờ chạy tới — không dữ liệu test nào vào được |
+| 3 | Static testing dễ phát hiện defect nằm trên **đường đi ít khi chạy** hoặc khó chạm tới bằng dynamic testing | Nhánh xử lý cước âm không bao giờ chạy tới — không bộ dữ liệu test nào đi vào được |
 | 4 | Static testing áp được cho work product **không thực thi được**; dynamic testing chỉ cho thứ **thực thi được** | Review được đặc tả, `.proto`, test plan; chạy test chỉ được trên mã |
 | 5 | Static testing đo được đặc tính chất lượng **không phụ thuộc thực thi** (vd maintainability); dynamic testing đo đặc tính **phụ thuộc thực thi** (vd performance efficiency) | Số `1.25` viết cứng khó bảo trì; p95 `POST /api/quotes` dưới 500 ms (R-NFR-03) |
 
@@ -64,7 +64,7 @@ Static và dynamic testing có mục tiêu tương tự — hỗ trợ phát hi�
 | Một số loại lỗ hổng bảo mật | Syllabus lấy ví dụ tràn bộ đệm; ở Node/TypeScript, ví dụ tương tự là ghép chuỗi SQL từ đầu vào |
 | Lỗ hổng hoặc sai lệch trong độ phủ test basis | Không có test nào cho mốc 13:00 của R-FARE-04 |
 
-Chiều ngược lại, dynamic testing cần cho mọi thứ **chỉ lộ ra khi chạy**: hiệu năng, hành vi khi các thành phần ghép lại, khác biệt của môi trường, và những lỗi tính toán mà không dòng code nào trông sai — sẽ thấy ở phần thực hành.
+Chiều ngược lại, dynamic testing cần thiết cho mọi thứ **chỉ lộ ra khi chạy**: hiệu năng, hành vi khi các thành phần ghép lại, khác biệt của môi trường, và những lỗi tính toán mà không dòng code nào trông sai — sẽ thấy ở phần thực hành.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Static/dynamic analysis ở CTAL-TTA — đừng nhầm với dynamic testing</span>
@@ -90,17 +90,17 @@ Chiều ngược lại, dynamic testing cần cho mọi thứ **chỉ lộ ra kh
 
 ### Yêu cầu nghiệp vụ và business rules
 
-Hàm tính cước của Pricing & Quote Service phải theo đúng thứ tự R-FARE-03: cước cơ bản → **× 1,25 nếu cao điểm** (R-FARE-04) → **+ 8.000 đ nếu mưa, không bị nhân** (R-FARE-05) → − voucher → nâng lên cước tối thiểu → làm tròn lên 1.000 đ (R-FARE-08). Các bước trung gian tính chính xác, không làm tròn (R-GEN-01). Ví dụ kiểm R-FARE-09: xe máy 7,4 km, cao điểm, mưa, voucher 20% ⇒ **52.000 đ**.
+Hàm tính cước của Pricing & Quote Service phải tuân theo đúng thứ tự R-FARE-03: cước cơ bản → **× 1,25 nếu cao điểm** (R-FARE-04) → **+ 8.000 đ nếu mưa, không bị nhân** (R-FARE-05) → − voucher → nâng lên cước tối thiểu → làm tròn lên 1.000 đ (R-FARE-08). Các bước trung gian tính chính xác, không làm tròn (R-GEN-01). Ví dụ để kiểm tra R-FARE-09: xe máy 7,4 km, cao điểm, mưa, voucher 20% ⇒ **52.000 đ**.
 
 ### System context
 
-Đối tượng kiểm là **một component**: hàm `calculateFare` trong `src/domain/fare.ts` của lab, tương ứng phần lõi của Pricing & Quote Service (kiến trúc §4.3). Pipeline CI của mỗi service (kiến trúc §17) đặt sẵn hai lớp: bước 1 **lint/static analysis**, bước 2 **unit test**. Đọc code là góc nhìn **white-box**; test suy từ SPEC là góc nhìn **black-box** — vì thế metadata ghi cả hai.
+Đối tượng được kiểm thử là **một component**: hàm `calculateFare` trong `src/domain/fare.ts` của lab, tương ứng phần lõi của Pricing & Quote Service (kiến trúc §4.3). Pipeline CI của mỗi service (kiến trúc §17) đặt sẵn hai lớp: bước 1 **lint/static analysis**, bước 2 **unit test**. Đọc code là góc nhìn **white-box**; test suy ra từ SPEC là góc nhìn **black-box** — vì thế metadata ghi cả hai.
 
-Để không sửa `src/`, bài dùng một bản chép có lỗi: `articles/static-testing-va-dynamic-testing/buggy-fare.ts`, gài 4 defect:
+Để không sửa `src/`, bài dùng một bản sao có lỗi: `articles/static-testing-va-dynamic-testing/buggy-fare.ts`, gài 4 defect:
 
 | Mã | Defect gài | Trái với |
 |---|---|---|
-| D1 | Phụ phí mưa bị nhân hệ số cao điểm | R-FARE-03, R-FARE-05 |
+| D1 | Phụ phí trời mưa bị nhân hệ số cao điểm | R-FARE-03, R-FARE-05 |
 | D2 | Tính tiền bằng số thực thay vì milli-đồng như `money.ts` | R-GEN-01 (chính xác ở bước trung gian) |
 | D3 | Chú thích nói voucher tính trên cước cơ bản; hệ số `1.25` viết cứng thay vì `PEAK_PERCENT` | R-FARE-06; quy ước bảo trì |
 | D4 | Nhánh «cước âm» không bao giờ chạy tới | — (mã thừa) |
@@ -108,9 +108,9 @@ Hàm tính cước của Pricing & Quote Service phải theo đúng thứ tự R
 ### Rủi ro có thể xảy ra
 
 - D1 trốn sau bộ test «mỗi ca một điều kiện»: test riêng cao điểm, riêng mưa đều xanh.
-- D2 chỉ lộ ở vài quãng đường, sai đúng 1.000 đ — khách khó nhận ra, đối soát mới thấy.
+- D2 chỉ lộ ở vài quãng đường, sai đúng 1.000 đ — khách khó nhận ra, chỉ khi đối soát mới thấy.
 - D3 chưa gây failure hôm nay, nhưng khi bộ giá `fare-2026.2` đổi `PEAK_PERCENT`, dòng viết cứng vẫn nhân 1,25.
-- Giá sai được chụp vào báo giá và chuyến (R-QUOTE-04), sửa code không sửa được dữ liệu đã lưu.
+- Giá sai bị lưu cố định vào báo giá và chuyến (R-QUOTE-04), nên sửa code không sửa được dữ liệu đã lưu.
 
 ## 4. Phân tích kỹ thuật
 
@@ -149,7 +149,7 @@ export function calculateFareBuggy(input: FareInput): FareBreakdown {
 
 ### 4.2. Dự đoán trước khi làm
 
-Trước khi chạy gì, dự đoán mỗi cách sẽ bắt được defect nào — đây chính là năng lực FL-3.1.3 đòi hỏi:
+Trước khi chạy bất cứ thứ gì, hãy dự đoán mỗi cách sẽ bắt được defect nào — đây chính là năng lực FL-3.1.3 đòi hỏi:
 
 | Defect | Review code | Static check tự viết | Test «mỗi ca một điều kiện» | Thêm ca tổ hợp + ca chọn giá trị |
 |---|---|---|---|---|
@@ -162,7 +162,7 @@ Trước khi chạy gì, dự đoán mỗi cách sẽ bắt được defect nào
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 920 320" role="img" aria-label="Hai đường tới defect D1. Hàng trên là static testing: mã buggy-fare.ts chưa chạy, đọc và đối chiếu SPEC R-FARE-03 thứ tự cao điểm rồi mưa, mũi tên tới thẳng ô defect. Hàng dưới là dynamic testing: chạy TC-05 theo R-FARE-09, thấy failure 54.000 khác 52.000 đồng, phân tích bảng chi tiết thấy cước cơ bản khớp nhưng sau cao điểm lệch 10.000, rồi mới tới ô defect. Ô defect bên phải: buggy-fare.ts dòng 29, biểu thức base cộng rainSurcharge nhân 1.25, phụ phí mưa bị nhân hệ số cao điểm. Dải dưới so sánh: tĩnh thấy defect trực tiếp có vị trí, không cần dữ liệu test; động thấy failure trước, chỉ lộ khi ca test có cả cao điểm và mưa.">
+<svg viewBox="0 0 920 320" role="img" aria-label="Hai đường tới defect D1. Hàng trên là static testing: mã buggy-fare.ts chưa chạy, đọc và đối chiếu SPEC R-FARE-03 thứ tự cao điểm rồi mưa, mũi tên tới thẳng ô defect. Hàng dưới là dynamic testing: chạy TC-05 theo R-FARE-09, thấy failure 54.000 khác 52.000 đồng, phân tích bảng chi tiết thấy cước cơ bản khớp nhưng sau cao điểm lệch 10.000, rồi mới tới ô defect. Ô defect bên phải: buggy-fare.ts dòng 29, biểu thức base cộng rainSurcharge nhân 1.25, phụ phí trời mưa bị nhân hệ số cao điểm. Dải dưới so sánh: tĩnh thấy defect trực tiếp có vị trí, không cần dữ liệu test; động thấy failure trước, chỉ lộ khi ca test có cả cao điểm và mưa.">
 <defs>
 <marker id="t022-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-pk"/></marker>
 <marker id="t022-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-warn"/></marker>
@@ -194,7 +194,7 @@ Trước khi chạy gì, dự đoán mỗi cách sẽ bắt được defect nào
 <text x="772" y="96" text-anchor="middle" class="t-b">Defect D1</text>
 <text x="772" y="122" text-anchor="middle" class="t-small t-mono">buggy-fare.ts dòng 29</text>
 <text x="772" y="150" text-anchor="middle" class="t-small t-mono">(base + rainSurcharge) * 1.25</text>
-<text x="772" y="180" text-anchor="middle" class="t-small">phụ phí mưa bị nhân</text>
+<text x="772" y="180" text-anchor="middle" class="t-small">phụ phí trời mưa bị nhân</text>
 <text x="772" y="198" text-anchor="middle" class="t-small">hệ số cao điểm</text>
 <rect x="16" y="262" width="436" height="46" rx="8" class="f-phys-soft s-phys"/>
 <text x="234" y="281" text-anchor="middle" class="t-small">Tĩnh: thấy thẳng defect, có vị trí,</text>
@@ -217,17 +217,17 @@ Mọi lệnh chạy trong `examples/toi-noi-testing/`. Kết quả dưới đây
 
 | # | Dòng | Phát hiện | Căn cứ | Defect |
 |---|---|---|---|---|
-| R1 | 29 | `(base + rainSurcharge) * 1.25` — phụ phí mưa nằm trong phép nhân | R-FARE-03 bước 2 → 3, R-FARE-05 | D1 |
+| R1 | 29 | `(base + rainSurcharge) * 1.25` — phụ phí trời mưa nằm trong phép nhân | R-FARE-03 bước 2 → 3, R-FARE-05 | D1 |
 | R2 | 24, 26, 40 | Tiền tính bằng số thực, `Math.ceil` trên số thực; `money.ts` của lab dùng milli-đồng chính để tránh việc này | R-GEN-01 | D2 |
 | R3 | 16 | Chú thích nói voucher tính trên cước cơ bản; mã (đúng) tính trên số sau bước 3 | R-FARE-06 | D3 |
 | R4 | 29 | `1.25` viết cứng; module đã có hằng `PEAK_PERCENT` | Bảo trì | D3 |
 | R5 | 36–38 | `atLeastMinimum` ≥ cước tối thiểu (≥ 15.000 đ) nên điều kiện không bao giờ đúng | Mã không chạy tới được | D4 |
 
-Nhật ký này giả định người review biết bẫy số thực (R2). Người review ít kinh nghiệm thường bỏ qua dòng 24 vì nó «trông đúng» — đó là giới hạn thật của review.
+Nhật ký này giả định người review biết bẫy số thực (R2). Người review ít kinh nghiệm thường bỏ qua dòng 24 vì dòng đó «trông đúng» — đó là giới hạn thật của review.
 
 ### 5.2. Cách A′ — static analysis bằng một script tự viết
 
-`static-check.ts` đọc mã nguồn **như văn bản**, không import và không gọi `calculateFareBuggy`. Hai quy tắc: S1 cấm viết cứng `1.25`; S2 cấm phụ phí mưa nằm trong dòng nhân hệ số cao điểm. Đây là minh hoạ — quy tắc thô, công cụ thật (tsc, ESLint) ở [TEST-029](/articles/static-analysis-phan-tich-code-tinh).
+`static-check.ts` đọc mã nguồn **như văn bản**, không import và không gọi `calculateFareBuggy`. Hai quy tắc: S1 cấm viết cứng `1.25`; S2 cấm phụ phí trời mưa nằm trong dòng nhân hệ số cao điểm. Đây là minh hoạ — quy tắc thô, công cụ thật (tsc, ESLint) xem ở [TEST-029](/articles/static-analysis-phan-tich-code-tinh).
 
 ```bash
 npx vitest run articles/static-testing-va-dynamic-testing/static-check.test.ts
@@ -240,13 +240,13 @@ buggy-fare.ts:29 [S2] Phụ phí mưa nằm trong phép nhân hệ số cao đi�
     const afterPeak = input.peak ? (base + rainSurcharge) * 1.25 : base + rainSurcharge;
 ```
 
-Cùng script chạy trên `src/domain/fare.ts` (bản đúng) cho 0 phát hiện. Script bắt D1 và nửa D3, nhưng không thấy D2, D4 và chú thích sai — vì không ai viết quy tắc cho chúng.
+Cùng script chạy trên `src/domain/fare.ts` (bản đúng) cho ra 0 phát hiện. Script bắt D1 và nửa D3, nhưng không thấy D2, D4 và chú thích sai — vì không ai viết quy tắc cho chúng.
 
 ### 5.3. Cách B — dynamic testing (black-box từ SPEC)
 
-**Bước 1 — bộ test «mỗi ca một điều kiện».** Kiểu bộ test hay được viết đầu tiên: TC-01 không điều kiện (46.000 đ), TC-02 chỉ cao điểm (57.000 đ), TC-03 chỉ mưa (54.000 đ), TC-04 chỉ voucher GIAM20 (37.000 đ). Trên bản lỗi: **4/4 xanh**. Dòng 29 chạy ở cả bốn ca, nhưng chưa ca nào có cao điểm và mưa cùng lúc, nên `rainSurcharge` hoặc `peak` luôn mang giá trị «vô hại» — không có failure.
+**Bước 1 — bộ test «mỗi ca một điều kiện».** Kiểu bộ test hay được viết đầu tiên: TC-01 không điều kiện (46.000 đ), TC-02 chỉ cao điểm (57.000 đ), TC-03 chỉ mưa (54.000 đ), TC-04 chỉ voucher GIAM20 (37.000 đ). Trên bản lỗi: **4/4 xanh**. Dòng 29 chạy ở cả bốn test case, nhưng chưa test case nào có cao điểm và mưa cùng lúc, nên `rainSurcharge` hoặc `peak` luôn mang giá trị «vô hại» — không có failure.
 
-**Bước 2 — thêm ca tổ hợp và ca chọn giá trị.** TC-05 là chính ví dụ R-FARE-09; TC-06 là ô tô 18,6 km cao điểm, chọn vì 25.000 + 11.000 × 18,6 = 229.600, × 1,25 = **287.000** — rơi đúng bội số 1.000 đ, nơi sai số nhỏ nhất cũng bị làm tròn lên.
+**Bước 2 — thêm test case tổ hợp và test case chọn giá trị.** TC-05 là chính ví dụ R-FARE-09; TC-06 là ô tô 18,6 km cao điểm, chọn vì 25.000 + 11.000 × 18,6 = 229.600, × 1,25 = **287.000** — rơi đúng bội số 1.000 đ, nơi sai số nhỏ nhất cũng bị làm tròn lên.
 
 ```bash
 SHOW_RED=1 npx vitest run articles/static-testing-va-dynamic-testing
@@ -262,7 +262,7 @@ AssertionError: expected 288000 to be 287000 // Object.is equality
       Tests  2 failed | 16 passed (18)
 ```
 
-Không đặt `SHOW_RED`, hai ca này được đánh `it.fails` (failure đã biết) nên `npm test` của lab vẫn xanh: `18 passed` (gồm cả hai ca static check và tệp quét `d2-scan.test.ts` ở mục 6).
+Khi không đặt `SHOW_RED`, hai test case này được đánh dấu `it.fails` (failure đã biết) nên `npm test` của lab vẫn xanh: `18 passed` (gồm cả hai ca static check và tệp quét `d2-scan.test.ts` ở mục 6).
 
 **Bước 3 — phân tích failure.** Test chỉ nói «sai bao nhiêu», chưa nói «sai ở đâu». So bảng chi tiết (R-FARE-10) của bản lỗi với SPEC:
 
@@ -272,7 +272,7 @@ Không đặt `SHOW_RED`, hai ca này được đánh `it.fails` (failure đã b
 | Sau cao điểm `afterPeak` | 56.625 | **66.625** ✘ (+10.000 = 8.000 × 1,25) | **287.000,00000000006** |
 | Tổng | 52.000 | 54.000 | 288.000 |
 
-TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí mưa × 1,25 ⇒ quay lại dòng 29. TC-06: `afterPeak` thừa 6 × 10⁻¹¹ đồng, `Math.ceil` đẩy lên 288.000 ⇒ nguyên nhân là biểu diễn số thực (D2). Sau khi định vị, ta tới đúng chỗ mà Cách A đã chỉ ra từ đầu.
+TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí trời mưa × 1,25 ⇒ quay lại dòng 29. TC-06: `afterPeak` thừa 6 × 10⁻¹¹ đồng, `Math.ceil` đẩy lên 288.000 ⇒ nguyên nhân là biểu diễn số thực (D2). Sau khi định vị, ta tới đúng chỗ mà Cách A đã chỉ ra từ đầu.
 
 ### 5.4. So sánh kết quả
 
@@ -292,20 +292,20 @@ TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí mưa �
 
 **Phủ dòng ≠ tìm được defect.** Ở bước 1, dòng 29 đã được thực thi nhưng không có failure. Statement coverage 100% của hàm này vẫn để lọt D1. Đây là lý do kỹ thuật thiết kế test (tổ hợp điều kiện — Decision Table ở Series 04) quan trọng hơn con số coverage; chủ đề coverage có ở Series 05 (TEST-043 trở đi).
 
-**Chọn giá trị là một nửa của dynamic testing.** `d2-scan.test.ts` quét cả 996 quãng đường hợp lệ (0,5–100 km, bước 0,1): với ô tô chỉ cao điểm, đúng **12 quãng** lộ D2 (18,6; 32,2; 36,2; … 91,4 km); ô tô ngoài cao điểm và xe máy: 0 quãng. Ca chọn ngẫu nhiên gần như chắc chắn bỏ lỡ; ca rơi đúng bội số 1.000 đ là ca có chủ đích — tư duy giá trị biên ở TEST-032.
+**Chọn giá trị là một nửa của dynamic testing.** `d2-scan.test.ts` quét cả 996 quãng đường hợp lệ (0,5–100 km, bước 0,1): với ô tô chỉ cao điểm, đúng **12 quãng** lộ D2 (18,6; 32,2; 36,2; … 91,4 km); ô tô ngoài cao điểm và xe máy: 0 quãng. Giá trị chọn ngẫu nhiên gần như chắc chắn bỏ lỡ D2; test case rơi đúng bội số 1.000 đ là test case có chủ đích — tư duy giá trị biên ở TEST-032.
 
 **Có những thứ chỉ chạy mới biết.** Độ trễ p95 của `POST /api/quotes` (R-NFR-03), hành vi khi VíXanh hết giờ, rò rỉ bộ nhớ sau nhiều giờ chạy — không review nào thay được. Syllabus gọi đây là đặc tính chất lượng phụ thuộc thực thi.
 
 **Static analysis có báo động giả.** Quy tắc S1 sẽ báo cả khi `1.25` là một hằng số khác (vd hệ số phí giờ đêm). Phân loại cảnh báo thật/giả là kỹ năng riêng ([TEST-029](/articles/static-analysis-phan-tich-code-tinh)).
 
-**Test đúng đặc tả sai.** Nếu bản nháp đặc tả ở TEST-021 không được sửa, tester có thể viết TC-05 kỳ vọng 54.000 đ — test xanh, code sai. Dynamic testing chỉ tốt bằng test basis của nó; static testing trên test basis là lớp bảo vệ bên dưới.
+**Test đúng theo một đặc tả sai.** Nếu bản nháp đặc tả ở TEST-021 không được sửa, tester có thể viết TC-05 kỳ vọng 54.000 đ — test xanh, code sai. Dynamic testing chỉ tốt bằng test basis của nó; static testing trên test basis là lớp bảo vệ bên dưới.
 
 **Thứ tự trong pipeline.** Kiến trúc §17 đặt static analysis trước unit test: rẻ, nhanh, chặn lỗi hiển nhiên trước khi tốn thời gian chạy. Nhưng đó là thứ tự **trong một lần build**, không phải «làm xong tĩnh rồi mới động».
 
 **Sai lầm thường gặp:**
 
 - Dùng một cách để «miễn» cách kia (hai câu ở mục 1).
-- Bộ test chỉ có ca một điều kiện cho công thức nhiều bước.
+- Bộ test chỉ có test case một điều kiện cho công thức nhiều bước.
 - Coi chú thích, README là «không phải code» nên không review — chúng là work product, sai thì người sau làm sai theo.
 - Nhầm dynamic analysis (CTAL-TTA) với dynamic testing nói chung.
 
@@ -318,14 +318,14 @@ TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí mưa �
 <p>(a) static — đặc tả giao diện sai kiểu tham số, review hợp đồng thấy ngay (chi tiết ở <a href="/articles/technical-review-api-contract">TEST-025</a>). (b) dynamic — hiệu năng phụ thuộc thực thi. (c) static — test plan không thực thi được. (d) static — loại defect mã syllabus nêu, static analysis bắt rẻ. (e) cả hai — review đối chiếu R-FOOD-04 hoặc test có mưa; dynamic cho bằng chứng hành vi. (f) static — lỗ hổng độ phủ test basis, review bộ test đối chiếu R-FARE-04.</p>
 </details>
 
-**Bài 2.** Thiết kế ca dynamic **ít điều kiện nhất** làm lộ D1. Kết quả mong đợi theo SPEC và kết quả bản lỗi là bao nhiêu?
+**Bài 2.** Thiết kế test case dynamic **ít điều kiện nhất** mà vẫn làm lộ D1. Kết quả mong đợi theo SPEC và kết quả bản lỗi là bao nhiêu?
 
 <details>
 <summary><b>Lời giải</b></summary>
-<p>Cần đúng hai điều kiện: cao điểm và mưa, không voucher. Xe máy 7,4 km: SPEC 45.300 × 1,25 = 56.625 + 8.000 = 64.625 ⇒ <b>65.000 đ</b>. Bản lỗi: (45.300 + 8.000) × 1,25 = 66.625 ⇒ <b>67.000 đ</b>. Thêm voucher không cần thiết để lộ D1 — ca R-FARE-09 làm lộ được nhưng có nhiều điều kiện hơn mức cần.</p>
+<p>Cần đúng hai điều kiện: cao điểm và mưa, không voucher. Xe máy 7,4 km: SPEC 45.300 × 1,25 = 56.625 + 8.000 = 64.625 ⇒ <b>65.000 đ</b>. Bản lỗi: (45.300 + 8.000) × 1,25 = 66.625 ⇒ <b>67.000 đ</b>. Thêm voucher không cần thiết để lộ D1 — test case R-FARE-09 cũng làm lộ được nhưng có nhiều điều kiện hơn mức cần.</p>
 </details>
 
-**Bài 3.** Dùng lab, tìm một quãng đường **khác 18,6 km** làm lộ D2 với ô tô cao điểm, không mưa, không voucher. Viết ca test (đầu vào, kết quả mong đợi).
+**Bài 3.** Dùng lab, tìm một quãng đường **khác 18,6 km** làm lộ D2 với ô tô cao điểm, không mưa, không voucher. Viết test case (đầu vào, kết quả mong đợi).
 
 <details>
 <summary><b>Lời giải</b></summary>
@@ -356,7 +356,7 @@ TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí mưa �
 <p><b>c)</b> đúng — «đặc tả giao diện sai» là một loại syllabus liệt kê. a), b), d) chỉ lộ khi chạy trong điều kiện cụ thể — cần dynamic testing (b còn là đối tượng của dynamic analysis ở CTAL-TTA).</p>
 </details>
 
-**Câu 3 (K2).** Hàm tính cước có bộ unit test xanh, phủ 100% câu lệnh. Sau đó một reviewer phát hiện phụ phí mưa bị nhân hệ số cao điểm. Giải thích nào hợp lý nhất?
+**Câu 3 (K2).** Hàm tính cước có bộ unit test xanh, phủ 100% câu lệnh. Sau đó một reviewer phát hiện phụ phí trời mưa bị nhân hệ số cao điểm. Giải thích nào hợp lý nhất?
 
 - a) Bộ test sai vì không thể có defect khi phủ 100% câu lệnh
 - b) Câu lệnh lỗi đã được thực thi, nhưng không ca nào kết hợp cao điểm với mưa nên không có failure quan sát được
@@ -383,7 +383,7 @@ TC-05: lệch bắt đầu ở bước 2–3 và đúng bằng phụ phí mưa �
 **Câu 5 (K2).** Nhánh xử lý khi MapViet trả quãng đường âm chỉ chạy khi nhà cung cấp gặp sự cố hiếm gặp, khó tái tạo trên môi trường test. Theo syllabus, cách nào **dễ** phát hiện defect trong nhánh này hơn?
 
 - a) Dynamic testing, vì chỉ dynamic testing mới tìm được defect thật
-- b) Static testing, vì nó dễ phát hiện defect trên đường đi ít khi chạy hoặc khó chạm tới
+- b) Static testing, vì static testing dễ phát hiện defect trên đường đi ít khi chạy hoặc khó chạm tới
 - c) Không cách nào, vì nhánh hiếm khi chạy thì không phải defect
 - d) Acceptance testing với người dùng thật
 

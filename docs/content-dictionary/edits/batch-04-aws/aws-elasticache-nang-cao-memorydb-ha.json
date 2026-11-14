@@ -1,0 +1,12 @@
+{"file":"aws-elasticache-nang-cao-memorydb-ha.md","edits":[
+{"old":"chịu mất node, chia nhiều shard,","new":"chịu được việc mất node, chia nhiều shard,","reason":"'chịu mất node' là calque, thiếu động từ","severity":"medium"},
+{"old":"ghi tới khi primary mới sẵn sàng bị lỗi, và nếu client cache kết quả DNS quá lâu thì tiếp tục gõ vào địa chỉ cũ.","new":"lệnh ghi bị lỗi cho tới khi primary mới sẵn sàng, và nếu client cache kết quả DNS quá lâu thì tiếp tục gọi vào địa chỉ cũ.","reason":"Trật tự từ kiểu Anh; 'gõ vào' gượng","severity":"medium"},
+{"old":"Client đáng dùng phải có timeout ngắn","new":"Client tốt phải có timeout ngắn","reason":"'đáng dùng' gượng","severity":"low"},
+{"old":"Bộ nhớ và thông lượng ghi giờ cộng dồn theo số shard.","new":"Bộ nhớ và thông lượng ghi giờ tăng theo số shard.","reason":"'cộng dồn' dùng sai nghĩa (bảng bên dưới ghi là nhân theo số shard)","severity":"medium"},
+{"old":"làm ngoài khung 11:00 và 17:00.","new":"tránh các khung 11:00 và 17:00.","reason":"'làm ngoài khung' gượng","severity":"low"},
+{"old":"nhưng bạn mất quyền điều khiển các tham số bên dưới.","new":"nhưng bạn không còn chỉnh được các tham số bên dưới.","reason":"'mất quyền điều khiển' là calque","severity":"low"},
+{"old":"Nó đáng cân nhắc khi cần cấu trúc dữ liệu kiểu Redis","new":"MemoryDB đáng cân nhắc khi cần cấu trúc dữ liệu kiểu Redis","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"nhân dữ liệu sang region khác, thuộc bài 56.","new":"sao chép dữ liệu sang region khác, thuộc bài 56.","reason":"'nhân dữ liệu' là calque của replicate","severity":"medium"},
+{"old":"Dùng cho việc không được rơi: hàng đợi chào chuyến","new":"Dùng cho dữ liệu không được để rơi mất: hàng đợi chào chuyến","reason":"'việc không được rơi' mơ hồ","severity":"medium"},
+{"old":"Gặp `MOVED` mà không theo là lỗi; kiểm thư viện trước.","new":"Client gặp `MOVED` mà không chuyển hướng theo sẽ báo lỗi; kiểm thư viện trước.","reason":"Câu thiếu chủ ngữ","severity":"medium"}
+]}

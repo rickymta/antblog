@@ -120,7 +120,7 @@ Mấy chi tiết thiết kế đáng nói:
 - **Đầy hẳn** (≥ sức chứa) thì đẩy phần tử ở đầu hàng, tức điểm chờ lâu nhất, ra; đây là nhánh `Evicted`.
 - Một `sync.Mutex` bảo vệ mọi thứ, và `ready` là channel đệm 1 làm tín hiệu đánh thức consumer: `signal()` gửi không chặn, nên tín hiệu thừa bị bỏ mà không mất gì.
 
-`TakeBatch` là phía consumer: chờ tới khi có ít nhất một điểm hoặc `ctx` bị hủy, rồi lấy tối đa `max` điểm. Hàng đã `Close` và cạn thì trả `ErrClosed` để các worker cùng thóat.
+`TakeBatch` là phía consumer: chờ tới khi có ít nhất một điểm hoặc `ctx` bị huỷ, rồi lấy tối đa `max` điểm. Hàng đã `Close` và cạn thì trả `ErrClosed` để các worker cùng thoát.
 
 ## Sink chậm: ba chính sách trên cùng một tải
 
@@ -160,7 +160,7 @@ Số đo này của sink giả trên simulator. Nó chứng minh cơ chế, khô
 
 ## Tắt êm: xả trong hạn, phần còn lại bỏ có đếm
 
-Khi ingest nhận tín hiệu tắt, hàng đợi có thể còn hàng chục nghìn điểm. Xả hết thì có thể tốn quá lâu; bỏ ngay thì mất hết. Lab chọn: xả trong một hạn, hết hạn thì hủy worker, đếm phần còn lại.
+Khi ingest nhận tín hiệu tắt, hàng đợi có thể còn hàng chục nghìn điểm. Xả hết thì có thể tốn quá lâu; bỏ ngay thì mất hết. Lab chọn: xả trong một hạn, hết hạn thì huỷ worker, đếm phần còn lại.
 
 Tệp `examples/toi-noi-location/go/internal/backpressure/pump.go` (dòng 59–77):
 
@@ -217,7 +217,7 @@ D	5s	5000	9500	10400	100	Closed
 D	15s	10434	20000	0	0	Closed
 ```
 
-Mỗi dòng cộng lại đúng 20.000 (1.900 + 18.000 + 100; 9.500 + 10.400 + 100). Hạn 1 giây xả được 1.900 điểm, bỏ 18.000 (đã tính vào `shutdown_dropped`), và 100 điểm của lô đang gửi dở bị hủy cùng worker (`lost_in_flight`, tính bằng phần còn lại của tổng). Hạn 15 giây đủ xả hết, thực tế mất 10,4 giây. Sau `Shutdown`, `Offer` trả `Closed`, nên không có điểm lọt vào hàng đã bỏ. Số lô bị hủy dở là một lô cho mỗi worker nên là chi phí không tránh được của «hủy khi hết hạn»; ở đây chỉ có một worker, nên 100 điểm.
+Mỗi dòng cộng lại đúng 20.000 (1.900 + 18.000 + 100; 9.500 + 10.400 + 100). Hạn 1 giây xả được 1.900 điểm, bỏ 18.000 (đã tính vào `shutdown_dropped`), và 100 điểm của lô đang gửi dở bị huỷ cùng worker (`lost_in_flight`, tính bằng phần còn lại của tổng). Hạn 15 giây đủ xả hết, thực tế mất 10,4 giây. Sau `Shutdown`, `Offer` trả `Closed`, nên không có điểm lọt vào hàng đã bỏ. Số lô bị huỷ dở là một lô cho mỗi worker nên là chi phí không tránh được của «huỷ khi hết hạn»; ở đây chỉ có một worker, nên 100 điểm.
 
 ## Kafka thật bị dừng 25 giây
 
@@ -307,7 +307,7 @@ Lần coalesce 30 giây tái hiện đúng con số 20.000, và lỗi gốc tron
 | 34 giây, lần 1 | 4 | hạn 20 giây (19.717), hạn 25 giây (17), cả hai hạn 30 giây (19.742 và 19.717) |
 | 34 giây, lần 2 | 0 | |
 
-Mọi lỗi đều là `record_timeout`. Producer hạn 35 giây trở lên hoặc không đặt hạn không lỗi ở cả bốn lần; không producer nào lỗi khi dừng 26 giây, kể cả producer hạn 20 giây. Hai producer hạn 30 giây giống hệt nhau, cùng một lần dừng 30 giây, có một lỗi 19.628 bản ghi và một không lỗi; cùng thời gian dừng 34 giây, hai lần chạy cho kết quả khác nhau. Vậy ở vùng 30 đến 34 giây, cùng cấu hình mà lúc lỗi lúc không; gọi đó là một cuộc đua thời gian bên trong client mới là đặt tên cho hiện tượng, chưa phải lời giải thích. Hai điều **vẫn chưa giải quyết được**. Một: vì sao cùng hạn, cùng thời gian dừng mà lúc lỗi lúc không. Tài liệu nói hạn chỉ được xét trước khi ghi một request hoặc sau một phản hồi, và chỉ khi an toàn với idempotence; mã nguồn franz-go v1.22.2 tính tuổi từ `Timestamp` của bản ghi đầu lô và không hủy lô đang ở trạng thái chưa rõ đã ghi hay chưa (`unsureIfProduced`). Bài chưa nối các chi tiết đó với từng lần chạy. Hai: lần coalesce gốc lỗi ở thời gian dừng danh nghĩa 26 giây (hiệu hai mốc giờ ghi theo giây, độ trễ của lệnh `docker pause` và `unpause` lúc máy rất nặng không ghi), còn các lần lặp 26 giây đều không lỗi. Có thể thời gian Kafka thực sự đóng băng dài hơn 26 giây, nhưng chưa chứng minh được. Các lần chạy này cũng chạy khi máy đang chịu tải nặng (`uptime` ghi trong file raw), và mỗi ô của bảng thứ nhất là một lần chạy. Hạn 30 giây là tham số chọn cho lab; đặt nó lớn hơn thời gian sự cố dự kiến là hướng sửa hiển nhiên, chưa thử.
+Mọi lỗi đều là `record_timeout`. Producer hạn 35 giây trở lên hoặc không đặt hạn không lỗi ở cả bốn lần; không producer nào lỗi khi dừng 26 giây, kể cả producer hạn 20 giây. Hai producer hạn 30 giây giống hệt nhau, cùng một lần dừng 30 giây, có một lỗi 19.628 bản ghi và một không lỗi; cùng thời gian dừng 34 giây, hai lần chạy cho kết quả khác nhau. Vậy ở vùng 30 đến 34 giây, cùng cấu hình mà lúc lỗi lúc không; gọi đó là một cuộc đua thời gian bên trong client mới là đặt tên cho hiện tượng, chưa phải lời giải thích. Hai điều **vẫn chưa giải quyết được**. Một: vì sao cùng hạn, cùng thời gian dừng mà lúc lỗi lúc không. Tài liệu nói hạn chỉ được xét trước khi ghi một request hoặc sau một phản hồi, và chỉ khi an toàn với idempotence; mã nguồn franz-go v1.22.2 tính tuổi từ `Timestamp` của bản ghi đầu lô và không huỷ lô đang ở trạng thái chưa rõ đã ghi hay chưa (`unsureIfProduced`). Bài chưa nối các chi tiết đó với từng lần chạy. Hai: lần coalesce gốc lỗi ở thời gian dừng danh nghĩa 26 giây (hiệu hai mốc giờ ghi theo giây, độ trễ của lệnh `docker pause` và `unpause` lúc máy rất nặng không ghi), còn các lần lặp 26 giây đều không lỗi. Có thể thời gian Kafka thực sự đóng băng dài hơn 26 giây, nhưng chưa chứng minh được. Các lần chạy này cũng chạy khi máy đang chịu tải nặng (`uptime` ghi trong file raw), và mỗi ô của bảng thứ nhất là một lần chạy. Hạn 30 giây là tham số chọn cho lab; đặt nó lớn hơn thời gian sự cố dự kiến là hướng sửa hiển nhiên, chưa thử.
 
 Điều chắc chắn rút ra: **bộ đếm của hàng đợi phía trước không thấy phần mất này**. Một sự cố có thể làm mất điểm ở client Kafka mà `queue.dropped` vẫn bằng 0. Vì vậy ingest phải xuất cả `queue.*` lẫn `kafka.failed` (`/debug/stats` hiện xuất cả hai, cùng `kafka.buffered` và `kafka.failed_<nguyên nhân>`), và cảnh báo nên đặt trên cả hai.
 
@@ -315,7 +315,7 @@ Một thiếu sót cần nêu: **tuổi điểm lúc giao khi Kafka thật bị 
 
 ## Race detector trong test hàng đợi
 
-`Queue` có mutex, bộ đếm trong `Stats()` được sao chép dưới khóa, `Pump.SendErrs` có khóa riêng. Những chỗ đó là nơi một người sửa code sau này dễ bỏ sót (đọc `q.st` ngoài khóa chẳng hạn), và `-race` bắt được nếu test chạy tới đường đó. Test `TestDongThoiKhongMatDauVet` chạy 8 producer (mỗi producer 5.000 điểm) và 3 consumer cho cả ba chính sách, kiểm một bất biến: **tổng điểm vào = tổng điểm ra + tổng điểm mất có đếm**. Các test khác kiểm coalesce chỉ bật khi vượt ngưỡng, gộp giữ điểm mới nhất, đầy thì đẩy tài xế chờ lâu nhất, và tắt êm cả trong hạn lẫn hết hạn. Bất biến bảo toàn này chính là điều kiện để các bộ đếm trong bài dùng được.
+`Queue` có mutex, bộ đếm trong `Stats()` được sao chép dưới khoá, `Pump.SendErrs` có khoá riêng. Những chỗ đó là nơi một người sửa code sau này dễ bỏ sót (đọc `q.st` ngoài khoá chẳng hạn), và `-race` bắt được nếu test chạy tới đường đó. Test `TestDongThoiKhongMatDauVet` chạy 8 producer (mỗi producer 5.000 điểm) và 3 consumer cho cả ba chính sách, kiểm một bất biến: **tổng điểm vào = tổng điểm ra + tổng điểm mất có đếm**. Các test khác kiểm coalesce chỉ bật khi vượt ngưỡng, gộp giữ điểm mới nhất, đầy thì đẩy tài xế chờ lâu nhất, và tắt êm cả trong hạn lẫn hết hạn. Bất biến bảo toàn này chính là điều kiện để các bộ đếm trong bài dùng được.
 
 ## Chạy ví dụ và kiểm chứng
 

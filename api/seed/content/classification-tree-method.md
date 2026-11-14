@@ -31,11 +31,11 @@ Báo giá của Tới Nơi phụ thuộc bảy yếu tố: dịch vụ, khối l
 
 **Classification Tree Method** (CTM, phương pháp cây phân loại) là cách mô hình hoá miền đầu vào của test object bằng một cây: mỗi nhánh là một **khía cạnh** ảnh hưởng tới hành vi (classification), mỗi lá là một **phân vùng** của khía cạnh đó (class). Dưới cây là **bảng tổ hợp**: mỗi dòng chọn một lá ở mỗi nhánh và trở thành một test case.
 
-Vấn đề nó giải quyết:
+Vấn đề CTM giải quyết:
 
 - **Nhiều tham số, mỗi tham số nhiều giá trị.** EP ([TEST-031](/articles/equivalence-partitioning)) chia từng tham số thành phân vùng; CTM sắp các phân vùng đó lên một hình duy nhất để thấy toàn cảnh.
-- **Tham số phụ thuộc nhau.** Khối lượng chỉ có nghĩa với bưu kiện; đồ ăn không đi ô tô. Cây diễn đạt quan hệ cha–con, ràng buộc ghi cạnh cây.
-- **Cần chọn tổ hợp có lý do.** Bảng tổ hợp cho biết dòng nào phủ class nào; đổi tiêu chí (each choice, base choice, pairwise) thì số dòng thay đổi có thể giải thích được.
+- **Tham số phụ thuộc nhau.** Khối lượng chỉ có nghĩa với bưu kiện; đồ ăn không đi ô tô. Cây diễn đạt quan hệ cha–con, còn ràng buộc ghi bên cạnh cây.
+- **Cần chọn tổ hợp có lý do.** Bảng tổ hợp cho biết dòng nào phủ class nào; đổi tiêu chí (each choice, base choice, pairwise) thì số dòng thay đổi theo cách giải thích được.
 
 Nên dùng khi hành vi phụ thuộc nhiều yếu tố đầu vào hoặc môi trường cùng lúc: báo giá, cấu hình thiết bị × hệ điều hành × phương thức thanh toán, điều kiện voucher. CTM là **nền** cho combinatorial testing: [TEST-037](/articles/pairwise-testing) và [TEST-038](/articles/combinatorial-testing) dùng lại mô hình này.
 
@@ -85,7 +85,7 @@ Classification không nhất thiết là một trường của request. «Mưa»
 | **Loại trừ** (infeasible) | Tổ hợp không dựng được trong thực tế | Loại khỏi mọi bộ test | «Đang mưa» ở thành phố không hỗ trợ: dịch vụ thời tiết không có trạng thái cho mã đó |
 | **Quy tắc nghiệp vụ** | Tổ hợp **dựng được** nhưng hệ thống phải từ chối | **Giữ lại** dưới dạng test case âm, mỗi quy tắc ít nhất một dòng | đồ ăn + ô tô (R-FOOD-06); > 20 kg + xe máy (R-PARCEL-02) |
 
-Nhầm loại thứ ba thành loại thứ hai là lỗi thiết kế nguy hiểm: loại «đồ ăn + ô tô» khỏi bảng tổ hợp đồng nghĩa không bao giờ kiểm R-FOOD-06.
+Nhầm loại thứ ba thành loại thứ hai là lỗi thiết kế nguy hiểm: loại «đồ ăn + ô tô» khỏi bảng tổ hợp đồng nghĩa với việc không bao giờ kiểm R-FOOD-06.
 
 ### 2.5. Thuật ngữ Anh – Việt
 
@@ -118,13 +118,13 @@ Nhầm loại thứ ba thành loại thứ hai là lỗi thiết kế nguy hiể
 
 ### 3.2. System context
 
-Trong kiến trúc đích, client gọi Customer BFF; **Pricing & Quote Service** tính giá, lấy quãng đường từ MapViet, trạng thái mưa từ dịch vụ thời tiết, điều kiện voucher từ **Promotion Service**, rồi lưu quote có `quote_id`, `expires_at`, `pricing_version` (kiến trúc §4.3). Booking gọi Pricing qua gRPC khi tạo chuyến. Classification môi trường của cây ứng với **phụ thuộc** của service — test được chúng nghĩa là điều khiển được đồng hồ và thời tiết (testability hooks §17.2).
+Trong kiến trúc đích, client gọi Customer BFF; **Pricing & Quote Service** tính giá, lấy quãng đường từ MapViet, trạng thái mưa từ dịch vụ thời tiết, điều kiện voucher từ **Promotion Service**, rồi lưu quote có `quote_id`, `expires_at`, `pricing_version` (kiến trúc §4.3). Booking gọi Pricing qua gRPC khi tạo chuyến. Classification môi trường của cây ứng với **phụ thuộc** của service — muốn test được chúng thì phải điều khiển được đồng hồ và thời tiết (testability hooks §17.2).
 
 Lab (SPEC R-ARCH-03) có sẵn các móc đó: `FixedClock` cho giờ, `FakeWeather` cho mưa; quãng đường do client gửi (R-GEN-06).
 
 ### 3.3. Rủi ro
 
-- **Interaction failure:** phụ phí khối lượng phải bị nhân 1,25 (R-PARCEL-04) còn phụ phí mưa thì không (R-FARE-05). Lỗi chỉ lộ khi bưu kiện nặng **và** cao điểm cùng có mặt.
+- **Interaction failure:** phụ phí khối lượng phải bị nhân 1,25 (R-PARCEL-04) còn phụ phí trời mưa thì không (R-FARE-05). Lỗi chỉ lộ khi bưu kiện nặng **và** cao điểm cùng có mặt.
 - **Ràng buộc bị kiểm thiếu:** đồ ăn đi ô tô, bưu kiện 25 kg đi xe máy lọt qua ⇒ đơn không thể giao.
 - **Voucher sai phạm vi vẫn giảm:** lộ tiền khuyến mãi (kiến trúc §4.10).
 - **Lỗi bị che (masking):** một test case chứa hai giá trị sai chỉ chứng minh được lỗi báo đầu tiên.
@@ -273,11 +273,11 @@ Theo cây: (1 `ride` + 3 khối lượng của `parcel` + 1 `food`) × 2 loại 
 | 400 `VALIDATION_ERROR` (đồ ăn + ô tô, kể cả ở mã không hỗ trợ — kiểm định dạng đứng trước) | 30 |
 | 422 `VEHICLE_TOO_SMALL` | 24 |
 
-172 trong 300 tổ hợp chỉ kiểm **đường lỗi**, phần lớn lặp lại cùng một lỗi: chạy hết không phải «test kỹ hơn».
+172 trong 300 tổ hợp chỉ kiểm **đường lỗi**, phần lớn lặp lại cùng một lỗi: chạy hết cũng không có nghĩa là «test kỹ hơn».
 
 ### 4.5. Chọn bộ each-choice
 
-**Cận dưới.** Classification nhiều class nhất có 3 class, nên ngây thơ ta nghĩ 3 dòng là đủ. Nhưng ba class khối lượng chỉ xuất hiện trong dòng `parcel` ⇒ cần 3 dòng `parcel`, cộng 1 dòng `ride` và 1 dòng `food` ⇒ **ít nhất 5 dòng hợp lệ**. Cấu trúc cây làm tăng cận dưới.
+**Cận dưới.** Classification nhiều class nhất có 3 class, nên nếu nghĩ ngây thơ thì 3 dòng là đủ. Nhưng ba class khối lượng chỉ xuất hiện trong dòng `parcel` ⇒ cần 3 dòng `parcel`, cộng 1 dòng `ride` và 1 dòng `food` ⇒ **ít nhất 5 dòng hợp lệ**. Cấu trúc cây làm tăng cận dưới.
 
 **Class không hợp lệ đi một mình.** Theo R-VALID-01, hệ thống dừng ở lỗi đầu tiên. Dòng chứa thành phố `VT` sẽ dừng ở `CITY_NOT_SUPPORTED`; mọi class khác trong dòng đó **không được xử lý**. Vì vậy mỗi class không hợp lệ cần dòng riêng, các class còn lại lấy giá trị hợp lệ đã phủ ⇒ +2 dòng (E6, E7). Mỗi ràng buộc quy tắc thêm một dòng âm ⇒ +2 dòng (E8, E9). Tổng **9 dòng**.
 
@@ -353,7 +353,7 @@ Năm tổng tiền tính tay ở 4.5 khớp lab; bốn dòng âm trả đúng m�
 
 **Each choice không phủ tương tác.** E4 bắt được lỗi «phụ phí khối lượng không bị nhân cao điểm» chỉ vì tình cờ ghép (20; 30] với cao điểm. Đổi cao điểm từ E4 sang E3 vẫn đạt each choice (E3 có phụ phí 14.000 đ nên vẫn bắt được), nhưng nếu dòng cao điểm duy nhất của bưu kiện là E2 (≤ 5 kg, phụ phí 0) thì lỗi lọt hoàn toàn. Muốn **bảo đảm** mọi cặp (khối lượng, cao điểm) được thử, cần pairwise — [TEST-037](/articles/pairwise-testing); bộ ba trở lên thì t-wise — [TEST-038](/articles/combinatorial-testing). CTAL-TA dẫn một nghiên cứu giới hạn cho thấy phần lớn failure do một hoặc hai điều kiện tương tác gây ra — lý do pairwise hay được chọn làm mức mặc định.
 
-**Thêm tay tổ hợp biết là nguy hiểm** — CTAL-TA nêu đây là một yếu tố quyết định số test case. Ví dụ: bưu kiện nặng + cao điểm + mưa (hai phụ phí cùng lúc, kiểm thứ tự R-FARE-03); đồ ăn + `FOOD15` khi tiền món dưới 50.000 đ.
+**Thêm tay các tổ hợp đã biết hay gây lỗi** — CTAL-TA nêu đây là một yếu tố quyết định số test case. Ví dụ: bưu kiện nặng + cao điểm + mưa (hai phụ phí cùng lúc, kiểm thứ tự R-FARE-03); đồ ăn + `FOOD15` khi tiền món dưới 50.000 đ.
 
 **So với kỹ thuật khác.**
 
@@ -366,7 +366,7 @@ Năm tổng tiền tính tay ở 4.5 khớp lab; bốn dòng âm trả đúng m�
 
 **Sai lầm thường gặp:** dựng classification theo **trường API** thay vì khía cạnh ảnh hưởng hành vi (bỏ sót mưa, cao điểm); class chồng nhau hoặc thiếu (quên «không voucher»); đưa mọi giá trị biên vào cây (để biên cho BVA); coi ràng buộc quy tắc là loại trừ; dồn nhiều class không hợp lệ vào một dòng; cây sâu quá ba tầng (thường là dấu hiệu nên tách test object).
 
-**Cây cũng là tài liệu review.** Vẽ cây buộc hỏi với từng cặp class «đã có quy tắc chưa?». Ví dụ «đồ ăn + mưa: phí giao có cộng 8.000 đ không?» — R-FOOD-04 trả lời có. Câu hỏi nào **không** tìm được câu trả lời trong đặc tả là một anomaly cần gửi BA trước khi viết test ([TEST-021](/articles/static-testing-la-gi)).
+**Cây cũng là tài liệu review.** Vẽ cây buộc ta hỏi về từng cặp class «đã có quy tắc chưa?». Ví dụ «đồ ăn + mưa: phí giao có cộng 8.000 đ không?» — R-FOOD-04 trả lời có. Câu hỏi nào **không** tìm được câu trả lời trong đặc tả là một anomaly cần gửi BA trước khi viết test ([TEST-021](/articles/static-testing-la-gi)).
 
 ## 7. Bài tập và câu hỏi ôn tập
 

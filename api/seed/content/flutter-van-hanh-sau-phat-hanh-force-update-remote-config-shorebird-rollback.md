@@ -1,16 +1,16 @@
 ---
 slug: flutter-van-hanh-sau-phat-hanh-force-update-remote-config-shorebird-rollback
 title: "Vận hành sau phát hành: force update, remote config, Shorebird và rollback cho Tới Nơi"
-summary: "Bài 59: store không có nút lùi, nên ta dựng sẵn force update fail open, remote config với kill switch, đối chiếu Shorebird theo tài liệu, và runbook halt hay pause rollout theo crash-free. Test tự động cho logic; chưa chạy với store, Firebase hay Shorebird thật. Kết Phần 7."
+summary: "Bài 59: store không có nút lùi, nên ta dựng sẵn force update fail open, remote config với kill switch, đối chiếu Shorebird theo tài liệu, và runbook halt hoặc pause rollout theo chỉ số crash-free. Test tự động cho logic; chưa chạy với store, Firebase hay Shorebird thật. Kết Phần 7."
 category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, ios, android, release, remote-config, shorebird]
 language: vi
 ---
 
-Chín giờ sáng, bản 1.6.0 của app khách Tới Nơi lên 10% người dùng Android. Mười một giờ, kênh hỗ trợ nhận nhiều tin giống nhau: bấm chọn VíXanh là app đóng. Crash-free sessions thấp hơn hẳn bản 1.5.3. Phản xạ đầu tiên là "lùi về bản trước", và ta khựng lại: cả hai cửa hàng đều không có nút hạ máy đã cập nhật về bản cũ.
+Chín giờ sáng, bản 1.6.0 của app khách Tới Nơi lên 10% người dùng Android. Mười một giờ, kênh hỗ trợ nhận nhiều tin giống nhau: bấm chọn VíXanh là app đóng. Crash-free sessions thấp hơn hẳn bản 1.5.3. Phản xạ đầu tiên là "lùi về bản trước", và ta khựng lại: cả hai cửa hàng đều không có nút nào đưa các máy đã cập nhật về lại bản cũ.
 
-Bài này dựng những thứ phải có trước sự cố: kiểm phiên bản tối thiểu để buộc bản lỗi phải cập nhật, remote config với kill switch, Shorebird như lựa chọn sửa code Dart không qua store, và runbook halt hay pause theo crash-free.
+Bài này dựng những thứ phải có trước sự cố: kiểm tra phiên bản tối thiểu để buộc bản lỗi phải cập nhật, remote config với kill switch, Shorebird như lựa chọn sửa code Dart không qua store, và runbook halt hay pause theo crash-free.
 
 Đây là bài 59 của lộ trình **Flutter qua Tới Nơi**, bài kết Phần 7. Ta nên đọc [bài 58 về App Store production](/articles/flutter-app-store-production-metadata-privacy-review-phased-release) trước: phased release ở đó là công cụ ta dùng lại. Nói thẳng về kiểm chứng: lab không có tài khoản store, Firebase hay Shorebird; logic được test tự động, hai lớp bọc plugin chỉ qua `flutter analyze`.
 
@@ -26,7 +26,7 @@ Theo tài liệu Google Play, staged rollout có nút **Halt rollout**: không t
 
 Muốn quay về code cũ, ta phát release mới có `versionCode` cao hơn mà chứa code 1.5.3 (hotfix dạng revert). Theo developer.android.com, không tải lên được APK có `versionCode` đã dùng, và hệ thống chặn cài bản thấp hơn đè lên bản đang có, nên dựng lại file 1.5.3 với số cũ không dùng được.
 
-App Store tương tự. Phased release (bài 58) cho tạm dừng tổng cộng tối đa 30 ngày. Nó chỉ áp cho cập nhật tự động: bản đang phát dần vẫn tải tay được, nên pause không chặn người tự bấm cập nhật.
+App Store tương tự. Phased release (bài 58) cho tạm dừng tổng cộng tối đa 30 ngày. Việc tạm dừng chỉ áp cho cập nhật tự động: bản đang phát dần vẫn cập nhật thủ công được, nên pause không chặn người tự bấm cập nhật.
 
 Vì vậy "rollback" thực tế là bốn biện pháp (Hình 1); ta dùng biện pháp nhanh nhất còn đủ để sửa.
 
@@ -41,14 +41,14 @@ Vì vậy "rollback" thực tế là bốn biện pháp (Hình 1); ta dùng bi�
 <rect x="682" y="60" width="188" height="180" rx="10" class="f-warn-soft s-warn"/><text x="698" y="90" class="t-b">4. Hotfix 1.6.1</text><text x="698" y="118" class="t-small">Sửa được:</text><text x="698" y="136">mọi thứ</text><text x="698" y="166" class="t-small">Giới hạn:</text><text x="698" y="184">qua review và</text><text x="698" y="202">rollout, chậm nhất</text>
 </svg>
 </div>
-<figcaption>Hình 1. Bốn biện pháp sau khi bản lỗi đã ra store. Không biện pháp nào hạ máy đã cập nhật về bản cũ; ô nét đứt là lựa chọn không bắt buộc.</figcaption>
+<figcaption>Hình 1. Bốn biện pháp sau khi bản lỗi đã ra store. Không biện pháp nào đưa được các máy đã cập nhật về lại bản cũ; ô nét đứt là lựa chọn không bắt buộc.</figcaption>
 </figure>
 
 Hotfix luôn dùng được nên là chốt cuối; khi nó lên, ta có thể nâng `minSupported` để bản lỗi buộc cập nhật. Force update phải có sẵn trong app từ trước, nên ta bắt đầu từ đó.
 
 ## Force update: chính sách, so phiên bản và fail open
 
-Tài liệu Android nói hệ thống chỉ dùng thông tin phiên bản để chống hạ cấp; mọi giới hạn phiên bản do app tự thực thi và tự báo người dùng. Ta áp cùng cách cho iOS. Server (BFF) trả JSON như `native-config/min-version.example.json`: mỗi nền tảng có `minSupported`, `recommended` và `latestPublished`, tách riêng vì `build` của hai bên khác nhau (bài [54](/articles/flutter-ci-cd-github-actions-macos-build-ios-android-secrets)).
+Tài liệu Android nói hệ thống chỉ dùng thông tin phiên bản để chống hạ cấp; mọi giới hạn phiên bản do app tự thực thi và tự thông báo cho người dùng. Ta áp cùng cách cho iOS. Server (BFF) trả JSON như `native-config/min-version.example.json`: mỗi nền tảng có `minSupported`, `recommended` và `latestPublished`, tách riêng vì `build` của hai bên khác nhau (bài [54](/articles/flutter-ci-cd-github-actions-macos-build-ios-android-secrets)).
 
 `AppVersion` đọc `x.y.z+build` và so lần lượt major, minor, patch, build, bằng số chứ không bằng chuỗi (1.9.0 nhỏ hơn 1.10.0). Bản `1.4.0` không ghi build là build 0, tức mốc "từ 1.4.0 trở lên". Phép quyết định là hàm thuần:
 
@@ -102,7 +102,7 @@ if (rec != null && (rec < minSupported || rec > latestPublished)) {
 }
 ```
 
-Cùng nguyên tắc đó dẫn tới **fail open** (Hình 2). `UpdateGate` hỏi server với thời gian chờ 3 giây. Lỗi mạng, hết giờ, JSON hỏng, cấu hình mâu thuẫn, kể cả `Error` do bug: tất cả cho `UpdateOk`. Chỉ chính sách hợp lệ mới có quyền chặn.
+Cùng nguyên tắc đó dẫn tới **fail open** (Hình 2). `UpdateGate` hỏi server với thời gian chờ 3 giây. Lỗi mạng, hết thời gian chờ, JSON hỏng, cấu hình mâu thuẫn, kể cả `Error` do bug: tất cả cho `UpdateOk`. Chỉ chính sách hợp lệ mới có quyền chặn.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -157,7 +157,7 @@ Future<UpdateDecision> check({
 }
 ```
 
-`UpdateGuard` cho người dùng thấy `child` lúc chờ và khi gate trả `UpdateOk`; chỉ `UpdateForce` mới thay bằng màn hình chặn. Ta đặt nó ở `MaterialApp.builder` để bao cả Navigator. Đặt ở `home:` thì route push trong lúc chờ chính sách sẽ nằm trên guard, và màn hình chặn nằm sau route đó (test có ca đối chứng).
+`UpdateGuard` cho người dùng thấy `child` lúc chờ và khi gate trả `UpdateOk`; chỉ `UpdateForce` mới thay bằng màn hình chặn. Ta đặt nó ở `MaterialApp.builder` để bao cả Navigator. Đặt ở `home:` thì route push trong lúc chờ chính sách sẽ nằm trên guard, và màn hình chặn nằm sau route đó (test có test case đối chứng).
 
 ### update_guard_test.dart · 59-post-release-ops/test/update_guard_test.dart (trích)
 
@@ -221,8 +221,8 @@ Future<bool> shouldRemind(AppVersion recommended) async {
 
 Remote config đổi hành vi của binary đang chạy, là biện pháp 1 ở Hình 1. Ba quy tắc, đều nằm ở `FeatureFlags` chứ không ở plugin:
 
-- **Mặc định thuộc về app.** Đọc source `firebase_remote_config` 7.0.1, `getBool` trả `false` cho khoá không tồn tại, nên cờ mặc định `true` đọc thẳng bằng SDK sẽ tắt khi mạng lỗi và cache trống. `setDefaults` là cách chuẩn của SDK; ta vẫn đặt mặc định trong `FlagDef` để nó nằm cạnh kiểu, khoảng hợp lệ và test được không cần plugin. Lớp bọc chỉ lấy giá trị có nguồn `ValueSource.valueRemote`.
-- **Kiểm giá trị.** `asBool` của SDK nhận cả `1`; `FlagDef.boolean` chỉ nhận `true` và `false`. Số ngoài khoảng bị bỏ.
+- **Mặc định thuộc về app.** Đọc source `firebase_remote_config` 7.0.1, `getBool` trả `false` cho khoá không tồn tại, nên cờ mặc định `true` đọc thẳng bằng SDK sẽ tắt khi mạng lỗi và cache trống. `setDefaults` là cách chuẩn của SDK; ta vẫn đặt mặc định trong `FlagDef` để nó nằm cạnh kiểu, khoảng hợp lệ và test được mà không cần plugin. Lớp bọc chỉ lấy giá trị có nguồn `ValueSource.valueRemote`.
+- **Kiểm tra giá trị.** `asBool` của SDK nhận cả `1`; `FlagDef.boolean` chỉ nhận `true` và `false`. Số ngoài khoảng bị bỏ.
 - **Kill switch áp ngay, cờ thường chờ lần mở sau.** `load()` đọc cache lúc khởi động nên cả phiên dùng một bộ giá trị ổn định. Tài liệu Firebase có chiến lược nạp giá trị mới cho lần khởi động tiếp theo, và cảnh báo đừng kích hoạt ngay khi UI có thể đổi lúc người dùng đang dùng.
 
 Mặc định an toàn: tính năng mới tắt, chức năng đang chạy bật.
@@ -243,7 +243,7 @@ static final newRouting = FlagDef.boolean(
 );
 ```
 
-`refresh()` không ném lỗi. Nó kiểm giá trị, ghi cache, rồi chỉ cập nhật ngay các cờ `killSwitch` (Hình 3); khoá bị server gỡ thì kill switch về mặc định ngay.
+`refresh()` không ném lỗi. Hàm này kiểm tra giá trị, ghi cache, rồi chỉ cập nhật ngay các cờ `killSwitch` (Hình 3); khoá bị server gỡ thì kill switch về mặc định ngay.
 
 ### feature_flags.dart · 59-post-release-ops/lib/feature_flags.dart (trích)
 
@@ -310,13 +310,13 @@ Firebase giới hạn tần suất fetch bằng `minimumFetchInterval`, nên `re
 
 ## Shorebird: sửa code Dart không qua store
 
-Shorebird là dịch vụ thương mại của bên thứ ba cho code push của Flutter. Với loạt bài này nó là lựa chọn không bắt buộc; phần này chỉ nêu điều tài liệu của họ nói, kiểm tại 11/2026.
+Shorebird là dịch vụ thương mại của bên thứ ba cho code push của Flutter. Với loạt bài này nó là lựa chọn không bắt buộc; phần này chỉ nêu điều tài liệu của Shorebird nói, kiểm tại 11/2026.
 
 - Patch chỉ đổi code Dart. Native, asset và phiên bản Flutter cần release mới qua store.
 - Mỗi patch gắn với đúng một release version (`--release-version`); `shorebird patch` cảnh báo hoặc chặn mặc định khi thấy khác biệt native hay asset so với release đã lưu.
 - Patch tải ở nền, áp ở lần khởi động sau, chỉ có tác dụng ở bản release.
 - `shorebird patches rollback` gỡ patch: máy chỉ biết khi kiểm tra cập nhật, rồi quay về patch tốt trước đó hoặc bản gốc ở lần khởi động sau.
-- Có gói Hobby miễn phí, phí tính theo số lần patch được cài. Hết hạn mức thì Shorebird từ chối kiểm tra patch: máy không nhận cả patch mới lẫn rollback. Bài này không kiểm giá.
+- Có gói Hobby miễn phí, phí tính theo số lần patch được cài. Hết hạn mức thì Shorebird từ chối kiểm tra patch: máy không nhận cả patch mới lẫn rollback. Bài này không kiểm chứng giá.
 
 Về chính sách store, ta đọc tài liệu của Apple và Google thay vì tin lời ai. Guideline 2.5.2 của App Review cấm app tải, cài hay thực thi code làm thêm hoặc đổi tính năng. Điều 3.3.1(B) của Apple Developer Program License Agreement cho tải interpreted code nếu không đổi mục đích chính của app, không vượt cơ chế ký hay sandbox, không lập cửa hàng. Chính sách Device and Network Abuse của Google Play cấm app tự cập nhật ngoài cơ chế của Play và cấm tải executable code (dex, JAR, `.so`), ngoại lệ cho code chạy trong máy ảo hoặc interpreter chỉ cho truy cập gián tiếp tới Android API. Shorebird cho rằng cách họ làm nằm trong các điều kiện đó; đó là lời nhà cung cấp, không phải của store. Hãy kiểm lại tại thời điểm phát hành.
 
@@ -476,7 +476,7 @@ flutter test
 
 Đã kiểm với Flutter 3.47.4 và Dart 3.13.3 trên macOS Apple silicon: `flutter analyze` báo `No issues found!`, `flutter test` chạy 161 test xanh. Mức: **Kiểm chứng cấu hình**, phần logic kiểm tự động. Test không dùng mạng, Firebase, thiết bị hay đồng hồ thật.
 
-Test chứng minh: ba mức quyết định kể cả ca biên của build; cấu hình mâu thuẫn bị từ chối; fail open và hết giờ đúng ở 3 giây (đồng hồ giả); throttle ở ranh giới 3 ngày; `builder:` so với `home:` và hành vi Back; kill switch và lỗi cache; ngưỡng `RolloutGuard` kể cả sàn với mẫu nhỏ; file mẫu trong `native-config/` khớp với code.
+Test chứng minh: ba mức quyết định kể cả test case biên của build; cấu hình mâu thuẫn bị từ chối; fail open và hết thời gian chờ đúng ở 3 giây (đồng hồ giả); throttle ở ranh giới 3 ngày; `builder:` so với `home:` và hành vi Back; kill switch và lỗi cache; ngưỡng `RolloutGuard` kể cả sàn với mẫu nhỏ; file mẫu trong `native-config/` khớp với code.
 
 **Chưa làm**, nói thẳng:
 

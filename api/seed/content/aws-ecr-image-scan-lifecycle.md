@@ -66,9 +66,9 @@ Cờ `--platform linux/amd64` tránh một lỗi hay gặp: build trên máy App
 
 ## Tag bất biến và deploy theo digest
 
-Với `IMMUTABLE`, push lên một tag đã tồn tại bị từ chối với lỗi `ImageTagAlreadyExistsException`. Việc này chặn đúng sự cố mở đầu. Từ 2025, ECR có thêm chế độ `IMMUTABLE_WITH_EXCLUSION`: mọi tag bất biến trừ những tag khớp filter wildcard, ví dụ `--image-tag-mutability-exclusion-filters filterType=WILDCARD,filter=staging-*` để tag môi trường vẫn trỏ lại được. Chỉ dùng khi thật cần, vì mỗi tag được loại trừ lại mở đúng rủi ro ở đầu bài.
+Với `IMMUTABLE`, push lên một tag đã tồn tại bị từ chối với lỗi `ImageTagAlreadyExistsException`. Việc này chặn đúng sự cố mở đầu. Từ 2025, ECR có thêm chế độ `IMMUTABLE_WITH_EXCLUSION`: mọi tag đều bất biến, trừ những tag khớp filter wildcard, ví dụ `--image-tag-mutability-exclusion-filters filterType=WILDCARD,filter=staging-*` để tag môi trường vẫn trỏ lại được. Chỉ dùng khi thật cần, vì mỗi tag được loại trừ lại mang đúng rủi ro đã nêu ở đầu bài.
 
-Bất biến chưa đủ. Quy trình tốt nhất vẫn là lấy digest và đưa digest vào task definition:
+Bất biến chưa đủ. Cách làm tốt nhất vẫn là lấy digest và đưa digest vào task definition:
 
 ```bash
 aws ecr describe-images --repository-name toinoi/booking \
@@ -76,7 +76,7 @@ aws ecr describe-images --repository-name toinoi/booking \
   --query 'imageDetails[0].imageDigest' --output text
 ```
 
-Kết quả `sha256:…` ghép vào tham chiếu `…/toinoi/booking@sha256:…`. Lợi ích: task đang chạy, task thay thế và bản rollback đều kéo đúng byte đã kiểm. Tag chỉ còn là nhãn cho người đọc; pipeline ở Phần 03 sẽ tự đổi tag sang digest. Nếu cần ký image, AWS Signer kết hợp Notation là hướng để tìm hiểu; bài này chỉ nhắc, chưa dựng.
+Ghép kết quả `sha256:…` vào tham chiếu `…/toinoi/booking@sha256:…`. Lợi ích: task đang chạy, task thay thế và bản rollback đều kéo đúng byte đã được kiểm tra. Tag chỉ còn là nhãn cho người đọc; pipeline ở Phần 03 sẽ tự đổi tag sang digest. Nếu cần ký image, AWS Signer kết hợp Notation là hướng nên tìm hiểu; bài này chỉ nhắc, chưa dựng.
 
 ## Quét lỗ hổng: basic và enhanced
 
@@ -98,11 +98,11 @@ aws ecr describe-image-scan-findings \
   --query 'imageScanFindings.findingSeverityCounts'
 ```
 
-Kết quả dạng `{"HIGH": 2, "MEDIUM": 7}`. Đừng chặn deploy chỉ vì có finding: nhiều CVE chưa có bản vá hoặc nằm ở gói không được gọi tới. Quy tắc hợp lý hơn: chặn `CRITICAL` có bản vá, còn lại tạo việc để xử lý. Với service .NET, finding thường nằm ở image nền (`aspnet`); rebuild trên image nền mới thường đủ.
+Kết quả dạng `{"HIGH": 2, "MEDIUM": 7}`. Đừng chặn deploy chỉ vì có finding: nhiều CVE chưa có bản vá hoặc nằm ở gói không được gọi tới. Quy tắc hợp lý hơn: chặn `CRITICAL` có bản vá, còn lại thì tạo công việc để xử lý. Với service .NET, finding thường nằm ở image nền (`aspnet`); rebuild trên image nền mới thường đủ.
 
 ## Lifecycle, repository policy và pull-through cache
 
-Mỗi bản build giữ lại mãi sẽ phình dung lượng và tăng tiền lưu. Lifecycle policy xoá theo luật. Tới Nơi chọn hai luật: xoá image untagged sau 7 ngày, giữ 10 image mới nhất.
+Giữ lại mãi mọi bản build sẽ làm phình dung lượng và tăng chi phí lưu trữ. Lifecycle policy xoá theo luật. Tới Nơi chọn hai luật: xoá image untagged sau 7 ngày, giữ 10 image mới nhất.
 
 ```json
 {
@@ -129,7 +129,7 @@ Lifecycle policy **không biết** image nào đang chạy. Nếu bản rollback
 
 Để tài khoản khác pull, dùng repository policy thay vì tạo user. Cách gọn là cho phép mọi tài khoản trong cùng AWS Organization qua điều kiện `aws:PrincipalOrgID`, chỉ cấp ba hành động đọc `BatchCheckLayerAvailability`, `GetDownloadUrlForLayer`, `BatchGetImage`. Bên pull vẫn cần quyền `ecr:GetAuthorizationToken` trong IAM của mình.
 
-Pull-through cache dành cho image công khai. Khi bạn tạo rule với prefix `ecr-public` trỏ về `public.ecr.aws`, lần pull đầu qua `…/ecr-public/<image>` sẽ kéo và lưu bản sao vào registry của bạn; các lần sau lấy từ bản sao. Lợi ích là build không phụ thuộc vào nguồn ngoài đang sống hay chết và tránh giới hạn tốc độ của nguồn. Với Docker Hub (và GitHub, GitLab, Azure Container Registry), rule cần credential lưu trong Secrets Manager: tên secret phải bắt đầu bằng `ecr-pullthroughcache/`, gồm hai khoá `username` và `accessToken`, mã hoá bằng key mặc định `aws/secretsmanager`. AWS khuyên để repository do pull-through cache tạo ở chế độ `MUTABLE` để ECR cập nhật được bản cache.
+Pull-through cache dành cho image công khai. Khi bạn tạo rule với prefix `ecr-public` trỏ về `public.ecr.aws`, lần pull đầu qua `…/ecr-public/<image>` sẽ kéo và lưu bản sao vào registry của bạn; các lần sau lấy từ bản sao. Lợi ích là build không phụ thuộc vào việc nguồn ngoài có đang hoạt động hay không và tránh giới hạn tốc độ của nguồn. Với Docker Hub (và GitHub, GitLab, Azure Container Registry), rule cần credential lưu trong Secrets Manager: tên secret phải bắt đầu bằng `ecr-pullthroughcache/`, gồm hai khoá `username` và `accessToken`, mã hoá bằng key mặc định `aws/secretsmanager`. AWS khuyên để repository do pull-through cache tạo ở chế độ `MUTABLE` để ECR cập nhật được bản cache.
 
 ## Chi phí và đường mạng cho Fargate
 
@@ -168,7 +168,7 @@ Cách tránh là tạo VPC endpoint để Fargate pull trong mạng của AWS:
 <figcaption>Hình 1. Hai đường để task Fargate trong private subnet lấy image. Đường trên (endpoint) đi trong mạng AWS; đường dưới (NAT) chạy được nhưng mọi layer đi qua NAT gateway.</figcaption>
 </figure>
 
-Interface endpoint cũng tính tiền theo giờ và theo GB. Với một VPC chạy nhiều service Fargate, endpoint thường rẻ hơn NAT; với lab một task thì có thể ngược lại. Hãy tính bằng Pricing Calculator thay vì đoán. Security group của endpoint phải cho phép cổng 443 từ security group của task. Policy của S3 endpoint nếu bị thu hẹp phải vẫn cho phép bucket chứa layer của ECR; kiểm tra tên bucket trong trang vpc-endpoints của user guide.
+Interface endpoint cũng tính tiền theo giờ và theo GB. Với một VPC chạy nhiều service Fargate, endpoint thường rẻ hơn NAT; với lab một task thì có thể ngược lại. Hãy tính bằng Pricing Calculator thay vì đoán. Security group của endpoint phải cho phép cổng 443 từ security group của task. Nếu policy của S3 endpoint bị thu hẹp thì vẫn phải cho phép bucket chứa layer của ECR; kiểm tra tên bucket trong trang vpc-endpoints của user guide.
 
 ## Lỗi thường gặp
 
@@ -186,7 +186,7 @@ Interface endpoint cũng tính tiền theo giờ và theo GB. Với một VPC ch
 
 Mã nằm ở `examples/toi-noi-aws/p02-11-ecr`: Terraform tạo repository bất biến có scan on push, lifecycle policy, repository policy theo Organization và pull-through cache cho ECR Public; thêm script `push-image.sh` và `check-scan.sh`. README trong thư mục nêu tài nguyên nào tính tiền và lệnh dọn (`terraform destroy`).
 
-Kiểm trên máy mà không cần tài khoản AWS: `terraform fmt -check`, `terraform init -backend=false` và `terraform validate` chạy được qua Docker (lệnh có trong README của lab), cùng việc parse hai tệp JSON. Những bước này chỉ chứng minh cấu hình đúng cú pháp. Chưa có lệnh nào được chạy trên tài khoản thật: hành vi của lifecycle policy, repository policy và pull-through cache cần bạn tự kiểm trong tài khoản lab, nhất là việc quét enhanced vì nó bật Inspector cho cả registry.
+Đã kiểm tra trên máy mà không cần tài khoản AWS: `terraform fmt -check`, `terraform init -backend=false` và `terraform validate` chạy được qua Docker (lệnh có trong README của lab), cùng việc parse hai tệp JSON. Những bước này chỉ chứng minh cấu hình đúng cú pháp. Chưa có lệnh nào được chạy trên tài khoản thật: hành vi của lifecycle policy, repository policy và pull-through cache cần bạn tự kiểm tra trong tài khoản lab, nhất là việc quét enhanced vì nó bật Inspector cho cả registry.
 
 Bài trước: [bài 10](/articles/aws-cloudwatch-budgets-tagging-co-ban). Bài tiếp: [bài 12](/articles/aws-ecs-fargate-task-definition-roles).
 

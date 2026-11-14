@@ -10,12 +10,12 @@ language: vi
 
 Đây là **bài 25** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 3 · Compute và ứng dụng (bài 6/10 của phần).
 
-Bài này giải thích Azure Functions chạy thế nào, ba thứ đi kèm (hosting plan, trigger/binding, Durable) và ranh giới giữa việc hợp với function với việc không hợp. Lab dựng một function .NET isolated nhận sự kiện `trip.completed` từ Service Bus. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
+Bài này giải thích Azure Functions chạy thế nào, ba khái niệm đi kèm (hosting plan, trigger/binding, Durable) và ranh giới giữa việc nên và không nên dùng function. Lab dựng một function .NET isolated nhận sự kiện `trip.completed` từ Service Bus. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Function có Service Bus trigger xử lý mỗi message đúng một lần phải không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Trigger cho at-least-once: nếu function lỗi hoặc instance chết giữa chừng, message được giao lại. Function phải chịu được việc nhận cùng một message hai lần.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Trigger cho at-least-once: nếu function lỗi hoặc instance chết giữa chừng, message được giao lại. Function phải xử lý được việc nhận cùng một message hai lần.</p></details>
 </div>
 
 ## Hosting plan quyết định cold start, mạng và cách tính tiền
@@ -29,7 +29,7 @@ Function là code chạy trong một **function host**. Host này lắng nghe ng
 | Premium | Instance warm sẵn, giữ tối thiểu một số | Gần như không | Có | Tải đều, cần mạng riêng và thời gian chạy dài |
 | Trên Container Apps | Function container chạy trong environment có sẵn | Theo cấu hình replica tối thiểu | Theo environment | Đã có Container Apps environment, muốn một nơi vận hành |
 
-Cold start là chuỗi việc: cấp instance, khởi động host, nạp worker .NET, nạp code của bạn. Instance đang warm bỏ qua toàn bộ chuỗi này. Plan giữ instance sẵn trả bằng tiền để mua độ trễ ổn định, nên trả lời câu hỏi «chịu được bao nhiêu giây cho request đầu tiên» trước khi chọn. Tính tiền theo thực thi, thời gian và instance giữ sẵn tuỳ plan; tra Pricing Calculator. Microsoft hiện hướng workload serverless mới về Flex Consumption; Consumption trên Linux đã có lịch nghỉ hưu và không nhận phiên bản ngôn ngữ mới (.NET 10 cần Flex Consumption, Premium hoặc Dedicated). Lộ trình các plan thay đổi, nên kiểm trang hosting và bảng phiên bản hỗ trợ trước khi quyết định.
+Cold start là chuỗi việc: cấp instance, khởi động host, nạp worker .NET, nạp code của bạn. Instance đang warm bỏ qua toàn bộ chuỗi này. Plan giữ sẵn instance nghĩa là bạn trả tiền để có độ trễ ổn định, nên hãy trả lời câu hỏi «request đầu tiên chờ được tối đa bao nhiêu giây» trước khi chọn. Cách tính tiền theo số lần thực thi, thời gian chạy và instance giữ sẵn tuỳ plan; tra Pricing Calculator. Microsoft hiện hướng workload serverless mới về Flex Consumption; Consumption trên Linux đã có lịch ngừng hỗ trợ và không nhận phiên bản ngôn ngữ mới (.NET 10 cần Flex Consumption, Premium hoặc Dedicated). Lộ trình các plan thay đổi, nên kiểm tra trang hosting và bảng phiên bản hỗ trợ trước khi quyết định.
 
 Mọi function app cần một **storage account**. Đây không phải chi tiết phụ: host lưu khoá, lease cho trigger như Timer và Blob, checkpoint, và với Durable (khi dùng storage provider mặc định là Azure Storage) còn lưu toàn bộ lịch sử orchestration. Storage hỏng hay bị xoá nhầm thì trigger mất trạng thái. Dùng account riêng cho function (`sttoinoifuncdev`), tách khỏi account chứa giấy tờ tài xế, và cấp quyền cho host bằng identity thay vì connection string nếu plan hỗ trợ.
 
@@ -58,7 +58,7 @@ Hai chi tiết hay bị bỏ qua. Thứ nhất, Timer chỉ khởi động việ
 
 ## Lab: nhận trip.completed và ghi biên nhận vào Blob
 
-Service Bus được dựng kỹ ở [bài 34](/articles/azure-service-bus-queue-topic-session-dead-letter) (Phần 4, bài 5 của phần đó), nơi outbox của `trip-service` đẩy sự kiện sang topic `trip-events`. Lab này đi trước nên tạo tạm một queue `trip.completed` trong namespace Standard `sb-toinoi-dev-sea` (lệnh ở khối bash bên dưới); khi có bài 34, đổi trigger sang một subscription của topic là đủ. Bên gửi là outbox theo [bài 26 loạt C#](/articles/dotnet10-outbox-inbox-idempotent-consumer). Điều lab cần bên gửi làm: đặt `MessageId` bằng mã chuyến. Function dưới đây dùng đúng giá trị đó làm tên blob.
+Service Bus được dựng kỹ ở [bài 34](/articles/azure-service-bus-queue-topic-session-dead-letter) (Phần 4, bài 5 của phần đó), nơi outbox của `trip-service` đẩy sự kiện sang topic `trip-events`. Lab này đi trước bài 34 nên tạo tạm một queue `trip.completed` trong namespace Standard `sb-toinoi-dev-sea` (lệnh ở khối bash bên dưới); khi có bài 34, đổi trigger sang một subscription của topic là đủ. Bên gửi là outbox theo [bài 26 loạt C#](/articles/dotnet10-outbox-inbox-idempotent-consumer). Lab cần bên gửi làm một việc: đặt `MessageId` bằng mã chuyến. Function dưới đây dùng đúng giá trị đó làm tên blob.
 
 ```csharp
 using Azure.Messaging.ServiceBus;
@@ -86,9 +86,9 @@ public class TripCompletedFunction(ILogger<TripCompletedFunction> logger)
 }
 ```
 
-Đoạn code cho thấy cách trigger và binding nối nhau. Nó không chứng minh biên nhận đúng nghiệp vụ, vì function chỉ chép body; nó cũng không chứng minh quyền: tên setting `ServiceBus` và `ReceiptsStorage` phải khớp cấu hình bên dưới, và cú pháp biểu thức `{MessageId}` nên đối chiếu với tài liệu binding của phiên bản extension bạn dùng.
+Đoạn code cho thấy cách trigger và binding nối nhau. Đoạn này không chứng minh biên nhận đúng nghiệp vụ, vì function chỉ chép body; đoạn này cũng không chứng minh quyền: tên setting `ServiceBus` và `ReceiptsStorage` phải khớp cấu hình bên dưới, và cú pháp biểu thức `{MessageId}` nên đối chiếu với tài liệu binding của phiên bản extension bạn dùng.
 
-Chạy local bằng Core Tools, cùng Azurite thay storage của host. Hai setting dùng identity (`<tên>__fullyQualifiedNamespace` và `<tên>__serviceUri`), nên máy bạn cần đăng nhập `az login` và có quyền tương ứng.
+Chạy local bằng Core Tools, dùng Azurite thay cho storage của host. Hai setting dùng identity (`<tên>__fullyQualifiedNamespace` và `<tên>__serviceUri`), nên máy bạn cần đăng nhập `az login` và có quyền tương ứng.
 
 ```json
 {
@@ -128,15 +128,15 @@ az functionapp config appsettings set -g $RG -n func-toinoi-receipts-dev \
 func azure functionapp publish func-toinoi-receipts-dev
 ```
 
-Template Service Bus chỉ kèm extension Service Bus; `[BlobOutput]` cần thêm gói `Microsoft.Azure.Functions.Worker.Extensions.Storage.Blobs`, thiếu gói này project không build vì không có attribute đó. Kỳ vọng sau deploy: system-assigned identity của function app cần role **Azure Service Bus Data Receiver** trên queue và **Storage Blob Data Contributor** trên container `trip-receipts` (gán bằng `az role assignment create`, không hiện ở đây). Phiên bản runtime và cờ của Core Tools thay đổi theo bản phát hành, nên kiểm bảng phiên bản được hỗ trợ và `func --help` trước khi chạy. Gửi một message thử có `MessageId` là mã chuyến, rồi kiểm blob xuất hiện. Dọn lab bằng cách xoá function app, Service Bus namespace tạm, storage account và các role assignment đã tạo.
+Template Service Bus chỉ kèm extension Service Bus; `[BlobOutput]` cần thêm gói `Microsoft.Azure.Functions.Worker.Extensions.Storage.Blobs`, thiếu gói này project không build vì không có attribute đó. Kỳ vọng sau deploy: system-assigned identity của function app cần role **Azure Service Bus Data Receiver** trên queue và **Storage Blob Data Contributor** trên container `trip-receipts` (gán bằng `az role assignment create`, không hiện ở đây). Phiên bản runtime và cờ của Core Tools thay đổi theo bản phát hành, nên kiểm tra bảng phiên bản được hỗ trợ và `func --help` trước khi chạy. Gửi một message thử có `MessageId` là mã chuyến, rồi kiểm tra xem blob đã xuất hiện chưa. Dọn lab bằng cách xoá function app, Service Bus namespace tạm, storage account và các role assignment đã tạo.
 
 ## At-least-once nghĩa là function phải idempotent
 
 Service Bus giao message theo cơ chế **peek-lock**: message bị khoá khi function nhận, chỉ bị xoá khi function chạy xong không lỗi. Nếu function ném exception, runtime abandon message ngay; nếu instance chết giữa chừng, khoá hết hạn. Cả hai trường hợp message quay lại hàng đợi và **delivery count** tăng. Quá `MaxDeliveryCount` của queue (lab đặt 10), Service Bus tự chuyển message sang **dead-letter queue** con của queue đó. Đó là **poison message**: nó không bao giờ thành công, và nếu không ai theo dõi dead-letter queue thì lỗi nằm im ở đó, không ai biết.
 
-Hệ quả cho code: cùng một `trip.completed` có thể tới hai lần. Function ở lab an toàn vì tên blob lấy từ `MessageId`, nên lần hai ghi đè đúng blob đó với cùng nội dung. Nếu thay bằng thao tác cộng dồn (cộng tiền vào thu nhập tài xế) thì lần giao lại sẽ cộng hai lần. Với thao tác như vậy, cần khoá idempotency như ở bài outbox/inbox đã dẫn, kiểm trước khi ghi.
+Hệ quả cho code: cùng một `trip.completed` có thể tới hai lần. Function ở lab an toàn vì tên blob lấy từ `MessageId`, nên lần hai ghi đè đúng blob đó với cùng nội dung. Nếu thay bằng thao tác cộng dồn (cộng tiền vào thu nhập tài xế) thì lần giao lại sẽ cộng hai lần. Với thao tác như vậy, cần khoá idempotency như ở bài outbox/inbox đã dẫn, kiểm tra khoá đó trước khi ghi.
 
-Poison message cần người xử lý: đặt cảnh báo trên độ dài dead-letter queue, đọc nguyên nhân (thuộc tính `DeadLetterReason` và `DeadLetterErrorDescription` của message), sửa dữ liệu hoặc code rồi gửi lại có kiểm soát. Blob trigger có cơ chế riêng: sau vài lần thất bại blob được đẩy vào một poison queue của host. Retry policy ở mức function không áp cho mọi trigger, nên đọc bảng hỗ trợ trong tài liệu thay vì giả định.
+Poison message cần người xử lý: đặt cảnh báo trên độ dài dead-letter queue, đọc nguyên nhân (thuộc tính `DeadLetterReason` và `DeadLetterErrorDescription` của message), sửa dữ liệu hoặc code rồi gửi lại có kiểm soát. Blob trigger có cơ chế riêng: sau vài lần thất bại blob được đẩy vào một poison queue của host. Retry policy ở mức function không áp dụng cho mọi trigger, nên đọc bảng hỗ trợ trong tài liệu thay vì giả định.
 
 ## Function hợp với việc rời rạc, không hợp với luật cốt lõi của chuyến
 
@@ -148,7 +148,7 @@ Luật cốt lõi của chuyến thì khác: một chuyến chỉ nhận một t
 
 Function thường không nhớ gì giữa hai lần chạy. **Durable Functions** thêm ba khái niệm. **Orchestrator** là function mô tả luồng việc. **Activity** là function làm một việc cụ thể, có I/O. **Entity** là một đối tượng nhỏ có trạng thái, địa chỉ theo khoá, hợp với bộ đếm hay trạng thái từng tài xế. Pattern thường gặp: function chaining (kết quả bước này vào bước sau), fan-out/fan-in (chạy nhiều activity song song rồi gom) và human interaction (chờ con người hoặc hệ thống ngoài phản hồi, có timeout).
 
-Cơ chế cần hiểu: orchestrator được **chạy lại từ đầu** (replay) mỗi khi một activity xong hoặc timer đến, và dựa vào lịch sử lưu trong storage để bỏ qua các bước đã làm. Vì vậy code orchestrator phải xác định: không đọc `DateTime.UtcNow`, không sinh `Guid.NewGuid()`, không gọi HTTP hay database trực tiếp. Dùng `context.CurrentUtcDateTime`, và đẩy mọi I/O vào activity.
+Cơ chế cần hiểu: orchestrator được **chạy lại từ đầu** (replay) mỗi khi một activity xong hoặc timer đến, và dựa vào lịch sử lưu trong storage để bỏ qua các bước đã làm. Vì vậy code orchestrator phải có tính xác định: không đọc `DateTime.UtcNow`, không sinh `Guid.NewGuid()`, không gọi HTTP hay database trực tiếp. Dùng `context.CurrentUtcDateTime`, và đẩy mọi I/O vào activity.
 
 Ví dụ ở Tới Nơi: gửi SMS nhắc tài xế nộp giấy tờ, chờ tới 48 giờ. Nếu tài xế nộp thì dừng, nếu không thì báo bộ phận vận hành. Orchestrator dưới đây chờ hai thứ cùng lúc: sự kiện `DocsUploaded` và timer.
 
@@ -184,7 +184,7 @@ public static class DriverDocReminder
 }
 ```
 
-Hai activity `SendReminderSms` và `NotifyOps` không hiện ở đây; mỗi cái gọi dịch vụ gửi tin thật và phải tự idempotent, vì activity cũng có thể bị chạy lại. Cũng không hiện phần khởi động: một client function dùng `DurableTaskClient` để gọi `ScheduleNewOrchestrationInstanceAsync` với instance ID theo mã tài xế, và khi tài xế tải giấy tờ lên thì gọi `RaiseEventAsync(instanceId, "DocsUploaded", true)`. Code cần gói `Microsoft.Azure.Functions.Worker.Extensions.DurableTask`; nó cho thấy hình dạng của pattern, không chứng minh API đúng ở phiên bản gói bạn dùng. Một điểm dễ bỏ sót: timer không dùng tới phải được huỷ bằng `cts.Cancel()`, nếu không orchestration không kết thúc cho tới khi timer chạy hết 48 giờ.
+Hai activity `SendReminderSms` và `NotifyOps` không hiện ở đây; mỗi cái gọi dịch vụ gửi tin thật và phải tự idempotent, vì activity cũng có thể bị chạy lại. Cũng không hiện phần khởi động: một client function dùng `DurableTaskClient` để gọi `ScheduleNewOrchestrationInstanceAsync` với instance ID theo mã tài xế, và khi tài xế tải giấy tờ lên thì gọi `RaiseEventAsync(instanceId, "DocsUploaded", true)`. Code cần gói `Microsoft.Azure.Functions.Worker.Extensions.DurableTask`; đoạn code cho thấy hình dạng của pattern nhưng không chứng minh API đúng ở phiên bản gói bạn dùng. Một điểm dễ bỏ sót: timer không dùng tới phải được huỷ bằng `cts.Cancel()`, nếu không orchestration không kết thúc cho tới khi timer chạy hết 48 giờ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

@@ -1,0 +1,107 @@
+{
+ "file": "ba-thuc-hanh-de-xuat-cai-thien-diem-don.md",
+ "edits": [
+  {
+   "old": "Bạn có mười phút trước PO, vận hành và Tech Lead.",
+   "new": "Bạn có mười phút trước PO, bộ phận vận hành và Tech Lead.",
+   "reason": "Thiếu chủ thể khi nhắc bộ phận",
+   "severity": "medium"
+  },
+  {
+   "old": "Vận hành đề nghị thêm chat",
+   "new": "Bộ phận vận hành đề nghị thêm chat",
+   "reason": "Thiếu chủ thể khi nhắc bộ phận",
+   "severity": "high"
+  },
+  {
+   "old": "| In/out, giả định, ràng buộc, phụ thuộc; có owner đề xuất |",
+   "new": "| In/out, giả định, ràng buộc, phụ thuộc; có người phụ trách đề xuất |",
+   "reason": "owner → người phụ trách",
+   "severity": "medium"
+  },
+  {
+   "old": "Các mức mục tiêu, owner và lịch chưa",
+   "new": "Các mức mục tiêu, người phụ trách và lịch chưa",
+   "reason": "owner → người phụ trách",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ ra giả thuyết nó xử lý và bằng chứng",
+   "new": "chỉ ra giả thuyết mà phương án đó xử lý và bằng chứng",
+   "reason": "Tránh đại từ 'nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "phục vụ nhu cầu tài xế nhận biết đúng cổng. Nó chưa chắc giải quyết",
+   "new": "phục vụ nhu cầu nhận biết đúng cổng của tài xế. Phương án này chưa chắc giải quyết",
+   "reason": "Câu thiếu giới từ; tránh 'Nó'",
+   "severity": "medium"
+  },
+  {
+   "old": "giới hạn suy rộng.",
+   "new": "giới hạn khi suy rộng kết quả.",
+   "reason": "'giới hạn suy rộng' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Chưa có baseline guardrail thì ghi công việc phải làm trước pilot",
+   "new": "Nếu chưa có baseline cho guardrail thì ghi lại công việc phải làm trước pilot",
+   "reason": "Cụm tự ghép 'baseline guardrail'",
+   "severity": "medium"
+  },
+  {
+   "old": "Không cam kết discovery tự làm tỷ lệ huỷ giảm.",
+   "new": "Không cam kết discovery tự làm giảm tỷ lệ huỷ.",
+   "reason": "Trật tự từ",
+   "severity": "low"
+  },
+  {
+   "old": "chuyển quyết định lên người có thẩm quyền, ghi ảnh hưởng rõ ràng.",
+   "new": "chuyển quyết định lên người có thẩm quyền, ghi rõ ảnh hưởng.",
+   "reason": "Trật tự từ",
+   "severity": "low"
+  },
+  {
+   "old": "ghi rõ căn cứ, bất định đã nêu,",
+   "new": "ghi rõ căn cứ, những điểm bất định đã nêu,",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "baseline có thể sử dụng, owner hỗ trợ, phạm vi",
+   "new": "baseline có thể sử dụng, người phụ trách hỗ trợ, phạm vi",
+   "reason": "owner → người phụ trách",
+   "severity": "medium"
+  },
+  {
+   "old": "Đạt target trong một khu vực",
+   "new": "Đạt mục tiêu trong một khu vực",
+   "reason": "'target' → 'mục tiêu' cho thống nhất",
+   "severity": "low"
+  },
+  {
+   "old": "| Có in/out, owner đề xuất, quyền chốt và phụ thuộc |",
+   "new": "| Có in/out, người phụ trách đề xuất, quyền chốt và phụ thuộc |",
+   "reason": "owner → người phụ trách",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu dùng 80 cuộc gọi thành 80 khách hoặc biến target thành kết quả đạt được,",
+   "new": "Nếu coi 80 cuộc gọi là 80 khách hoặc biến mục tiêu thành kết quả đạt được,",
+   "reason": "Động từ 'dùng … thành' sai; target → mục tiêu",
+   "severity": "medium"
+  },
+  {
+   "old": "khác biệt điểm đón, owner vận hành,",
+   "new": "khác biệt điểm đón, người phụ trách vận hành,",
+   "reason": "owner → người phụ trách",
+   "severity": "medium"
+  },
+  {
+   "old": "Một quyết định được hỗ trợ bởi lập luận, bằng chứng và các giới hạn rõ ràng.",
+   "new": "Một quyết định có lập luận, bằng chứng và các giới hạn rõ ràng làm cơ sở.",
+   "reason": "Bị động 'được … bởi'",
+   "severity": "low"
+  }
+ ]
+}

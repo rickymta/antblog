@@ -8,19 +8,19 @@ tags: [aws, toi-noi, devops, architecture, production, reference-architecture, r
 language: vi
 ---
 
-Lúc 17:42 một khách ở Quận 7 bấm "Đặt xe". Trong vài giây, yêu cầu đi qua CloudFront và WAF, service `booking`, một transaction Aurora, một sự kiện MSK, một saga Step Functions và một lượt tìm tài xế trên DynamoDB; mỗi dịch vụ là một bài trong lộ trình. Bài cuối không dạy dịch vụ mới mà ghép chúng lại: một chuyến đi đâu, hỏng ở đâu, và ai làm gì lúc 02:00 sáng.
+Lúc 17:42 một khách ở Quận 7 bấm "Đặt xe". Trong vài giây, yêu cầu đi qua CloudFront và WAF, service `booking`, một transaction Aurora, một sự kiện MSK, một saga Step Functions và một lượt tìm tài xế trên DynamoDB; mỗi dịch vụ là một bài trong lộ trình. Bài cuối không dạy dịch vụ mới mà ghép chúng lại: một chuyến đi qua những dịch vụ nào, hỏng ở đâu, và ai làm gì lúc 02:00 sáng.
 
-Đây là **bài 60**, bài kết của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn nên đã đọc các bài trước, hoặc dùng số bài trong ngoặc làm mục lục để quay lại.
+Đây là **bài 60**, bài kết của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn nên đọc các bài trước, hoặc dùng số bài trong ngoặc làm mục lục để quay lại.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Booking ghi chuyến vào Aurora rồi gửi sự kiện sang MSK. Nếu service crash giữa hai việc đó, chuyến có bị "mất tăm" khỏi dispatch không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không, nếu dùng outbox.</b> Chuyến và dòng outbox ghi trong cùng transaction Aurora, connector đẩy outbox sang MSK sau. Crash chỉ làm sự kiện đến muộn hoặc hai lần, nên consumer phải idempotent.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không, nếu dùng outbox.</b> Chuyến và dòng outbox ghi trong cùng transaction Aurora, connector đẩy outbox sang MSK sau. Crash chỉ làm sự kiện đến muộn hoặc đến hai lần, nên consumer phải idempotent.</p></details>
 </div>
 
 ## Bản vẽ tổng, đọc theo ba lớp
 
-Kiến trúc đích của Tới Nơi hiện thực trên AWS thành ba lớp. Lớp nền là tài khoản và mạng.
+Kiến trúc đích của Tới Nơi trên AWS gồm ba lớp. Lớp nền là tài khoản và mạng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -29,7 +29,7 @@ Kiến trúc đích của Tới Nơi hiện thực trên AWS thành ba lớp. L�
 <figcaption>Hình 1. Lớp tài khoản và mạng; số trong ngoặc là bài tham chiếu, mạng hybrid và Network Firewall ở bài 53.</figcaption>
 </figure>
 
-Mỗi môi trường một tài khoản, SCP đặt trần quyền (bài 28); prod có VPC ba AZ, ba tầng subnet và endpoint để traffic S3, DynamoDB không qua NAT; region phụ chạy warm standby. Lớp thứ hai là code và dữ liệu.
+Mỗi môi trường một tài khoản, SCP đặt trần quyền (bài 28); prod có VPC ba AZ, ba tầng subnet và endpoint để traffic S3, DynamoDB không qua NAT; region phụ chạy warm standby. Lớp thứ hai là compute và dữ liệu.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -68,7 +68,7 @@ Bảng dưới đi theo thứ tự thời gian, ghi chỗ nào bảo đảm khô
 | 5. Tìm tài xế | Saga gửi yêu cầu kèm task token qua SQS; `dispatch` tìm trong DynamoDB, đẩy offer qua WebSocket | Offer có TTL và `bookingId` | Offer có thể mất, re-dispatch sau timeout |
 | 6. Nhận chuyến | DynamoDB `TransactWriteItems`, rồi `SendTaskSuccess` | Điều kiện trạng thái, khoá `IDEMP#` | Không: một người thắng |
 | 7. Xác nhận, thu tiền | Step Functions, bù trừ khi lỗi | Khoá `bookingId#bước` | Không: có hàng đợi xử lý thủ công |
-| 8. Webhook VíXanh | API Gateway, Lambda xác minh chữ ký, SQS | Khử trùng theo mã giao dịch | Webhook có thể đến trễ; đối soát bù |
+| 8. Webhook VíXanh | API Gateway, Lambda xác minh chữ ký, SQS | Khử trùng lặp theo mã giao dịch | Webhook có thể đến trễ; đối soát bù |
 | 9. Sự kiện hoàn tất | EventBridge, rule tới thông báo và thống kê | `eventId`, DLQ của rule | Có archive để replay |
 | 10. Toạ độ GPS | Tracking, Kinesis, Firehose, S3 | Theo `driverId` và thời điểm | Vị trí hiện tại tự dựng lại; lịch sử có thể lấy mẫu |
 | 11. Đối soát đêm | Step Functions distributed map đọc S3, Athena | Theo `tripId` và ngày | Không: lô lỗi ghi lại để xem |
@@ -83,22 +83,22 @@ SLO ban đầu là mục tiêu khởi tạo, chưa phải cam kết, chỉ đổ
 | --- | --- | --- |
 | API đặt chuyến khả dụng | 99,9% mỗi tháng | Burn rate nhanh và chậm của error budget |
 | Độ trễ đặt chuyến | p99 của `POST /v1/trips` dưới 800 ms, không tính chờ tài xế | SLO latency, alarm p99 |
-| Độ tươi vị trí tài xế | p95 dưới 5 đến 10 giây | Tuổi bản ghi mới nhất, Kinesis iterator age |
+| Độ mới của vị trí tài xế | p95 dưới 5 đến 10 giây | Tuổi bản ghi mới nhất, Kinesis iterator age |
 | Thanh toán hội tụ | Theo cam kết của cổng, có đối soát | Số saga ở hàng đợi xử lý thủ công |
 
 Runbook ngắn cho năm sự cố hay gặp, mỗi mục gắn với bài để đọc sâu:
 
-| Sự cố | Kiểm đầu tiên | Hành động | Bài |
+| Sự cố | Kiểm tra đầu tiên | Hành động | Bài |
 | --- | --- | --- | --- |
 | Aurora failover | Writer endpoint, kết nối của RDS Proxy | Chờ failover, xác nhận ứng dụng nối lại; không restart hàng loạt | 31 |
 | Spot thu hồi hàng loạt | Số task theo capacity provider (`FARGATE_SPOT`) | Tăng tạm phần `FARGATE` on-demand; trên EKS đa dạng instance type | 59, 45 |
-| MSK consumer lag tăng | Lag theo consumer group, partition lệch | Scale consumer tới số partition; kiểm message độc | 34 |
+| MSK consumer lag tăng | Lag theo consumer group, partition lệch | Scale consumer tới số partition; kiểm tra poison message | 34 |
 | WAF chặn nhầm | Sampled requests, rule gây chặn | Chuyển rule sang Count, đưa ngoại lệ, rồi mới siết lại | 20 |
-| Deploy lỗi | Alarm canary, error rate theo phiên bản | Rollback theo digest; kiểm migration tương thích hai bản | 26, 27 |
+| Deploy lỗi | Alarm canary, error rate theo phiên bản | Rollback theo digest; kiểm tra migration tương thích với cả hai phiên bản | 26, 27 |
 
 Cả năm theo cùng thứ tự: xác nhận ảnh hưởng, giảm thiệt hại trước (rollback, chuyển Count, dời traffic), tìm nguyên nhân sau. Mỗi quý chạy game day bằng FIS và diễn tập restore (bài 37, 56).
 
-Bảo mật theo lớp: biên có WAF và Shield (bài 20); mạng chia subnet, không mở dữ liệu ra Internet (bài 04, 53); danh tính tạm thời, quyền tối thiểu có boundary (bài 03, 25, 51); mã hoá bằng KMS, secret trong Secrets Manager (bài 14, 52); phát hiện bằng CloudTrail, GuardDuty, Security Hub (bài 54); image có quét và digest bất biến (bài 11).
+Bảo mật theo lớp: biên có WAF và Shield (bài 20); mạng chia subnet, không mở dữ liệu ra Internet (bài 04, 53); danh tính tạm thời, quyền tối thiểu có boundary (bài 03, 25, 51); mã hoá bằng KMS, secret trong Secrets Manager (bài 14, 52); phát hiện bằng CloudTrail, GuardDuty, Security Hub (bài 54); image được quét và dùng digest bất biến (bài 11).
 
 ## Chi phí: nhìn theo lớp, không theo con số
 
@@ -109,7 +109,7 @@ Bảng này **không ghi tiền** vì giá đổi theo thời gian và region. M
 | Biên (CloudFront, WAF, Shield) | Thấp | Vừa | Lượng request, quy tắc WAF, băng thông ra |
 | Compute (ECS Fargate, Lambda) | Thấp | Cao | Số giờ vCPU và GB, phần cam kết và Spot |
 | Cơ sở dữ liệu (Aurora, RDS Proxy) | Thấp | Cao | Instance, I/O, số reader, backup |
-| NoSQL và cache | Thấp | Vừa | Dung lượng đọc ghi, số node |
+| NoSQL và cache | Thấp | Vừa | Dung lượng đọc và ghi, số node |
 | Streaming (MSK, Kinesis) | Thấp | Vừa đến cao | Broker-giờ hoặc shard-giờ, retention |
 | Lưu trữ và phân tích (S3, Athena) | Thấp | Vừa | Dung lượng, byte quét |
 | Quan sát (log, metric, trace) | Thấp | Vừa đến cao | Lượng log nhận vào, cardinality metric |
@@ -119,19 +119,19 @@ Mỗi dòng theo công thức `chi phí ≈ số đơn vị × số giờ × đ�
 
 ## Lộ trình tiếp
 
-Chứng chỉ chỉ là mốc tham chiếu: Phần 01 ứng CLF-C02 và nửa đầu SAA-C03; Phần 02 DVA-C02, SAA-C03; Phần 03 DOP-C02, DVA-C02; Phần 04 SAA-C03, SAP-C02, DEA-C01; Phần 05 DOP-C02, CKA; Phần 06 SCS-C02, SAP-C02. Chủ đề chưa phủ: machine learning và Bedrock, IoT cho thiết bị trên xe, media cho video chứng từ, kết nối hybrid sâu với Direct Connect.
+Chứng chỉ chỉ là mốc tham chiếu: Phần 01 ứng với CLF-C02 và nửa đầu SAA-C03; Phần 02 DVA-C02, SAA-C03; Phần 03 DOP-C02, DVA-C02; Phần 04 SAA-C03, SAP-C02, DEA-C01; Phần 05 DOP-C02, CKA; Phần 06 SCS-C02, SAP-C02. Chủ đề chưa phủ: machine learning và Bedrock, IoT cho thiết bị trên xe, media cho video chứng từ, kết nối hybrid sâu với Direct Connect.
 
 Mã nằm ở `examples/toi-noi-aws/`; mỗi lab có README ghi chi phí và cách dọn, **không có lệnh nào tự tạo tài nguyên**. Cách học tốt nhất: dựng một lab trong tài khoản riêng, phá có chủ đích như bài 56, đo, rồi dọn.
 
 ## Cái giá phải trả
 
-- **Nhiều dịch vụ là nhiều thứ phải vận hành**: mỗi khối trong ba hình cần owner, alarm và runbook.
+- **Nhiều dịch vụ là nhiều thứ phải vận hành**: mỗi khối trong ba hình cần người phụ trách, alarm và runbook.
 - **Bản vẽ này là điểm xuất phát, không phải đích bắt buộc**: đội nhỏ có thể bỏ EKS, MSK hay region phụ cho tới khi số liệu đòi hỏi.
 - **Mọi con số ở đây là giả định**: SLO, mức chi phí và quy mô phải đo lại bằng tải và hoá đơn thật.
 
-**Bài tập:** vẽ lại luồng **huỷ chuyến** với compensation. Khách huỷ sau khi tài xế đã nhận nhưng trước khi đón. Ghi rõ từng bước, bù trừ của nó và khoá idempotency.
+**Bài tập:** vẽ lại luồng **huỷ chuyến** với compensation. Khách huỷ sau khi tài xế đã nhận nhưng trước khi đón. Ghi rõ từng bước, bước bù trừ tương ứng và khoá idempotency.
 
-<details><summary>Xem đáp án</summary><p>Một saga huỷ riêng: (1) <code>booking</code> ghi <code>CANCEL_REQUESTED</code> cùng outbox trong một transaction Aurora, khoá <code>bookingId#cancel</code>. (2) Dispatch giải phóng tài xế bằng cập nhật DynamoDB có điều kiện, khoá <code>bookingId#release-driver</code>. (3) Payment hoàn giữ tiền hoặc thu phí huỷ theo chính sách, khoá <code>bookingId#release-or-fee</code>. (4) Booking chốt <code>CANCELLED</code> và phát <code>TripCancelled</code> qua EventBridge. Bước 3 lỗi sau khi retry thì đẩy vào hàng đợi xử lý thủ công, không chốt <code>CANCELLED</code> khi tiền chưa nhả. Chuyến đã chạy thì sang luồng hoàn tiền.</p></details>
+<details><summary>Xem đáp án</summary><p>Một saga huỷ riêng: (1) <code>booking</code> ghi <code>CANCEL_REQUESTED</code> cùng outbox trong một transaction Aurora, khoá <code>bookingId#cancel</code>. (2) Dispatch giải phóng tài xế bằng cập nhật DynamoDB có điều kiện, khoá <code>bookingId#release-driver</code>. (3) Payment nhả khoản tiền đã giữ hoặc thu phí huỷ theo chính sách, khoá <code>bookingId#release-or-fee</code>. (4) Booking chốt <code>CANCELLED</code> và phát <code>TripCancelled</code> qua EventBridge. Nếu bước 3 vẫn lỗi sau khi retry thì đẩy vào hàng đợi xử lý thủ công, không chốt <code>CANCELLED</code> khi tiền chưa nhả. Chuyến đã chạy thì sang luồng hoàn tiền.</p></details>
 
 Bài trước: [bài 59](/articles/aws-finops-savings-plans-spot-right-sizing). Đây là bài cuối; muốn ôn lại thì bắt đầu từ [bài 01](/articles/aws-la-gi-region-az-shared-responsibility) cùng [hồ sơ dự án Tới Nơi](/articles/du-an-mau-toi-noi).
 

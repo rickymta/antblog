@@ -1,7 +1,7 @@
 ---
 slug: flutter-accessibility-responsive-adaptive-ios-android
 title: "Accessibility, responsive và adaptive: một giao diện cho iOS và Android"
-summary: "Bài 16: làm cho app Tới Nơi nhỏ dùng được với trình đọc màn hình, chữ cỡ lớn, tai thỏ, tablet, iOS và Android: Semantics, guideline vùng chạm, text scale, SafeArea, breakpoint, Theme.platform; kiểm bằng widget test, nêu rõ phần Phần 2 còn thiếu."
+summary: "Bài 16: làm cho app Tới Nơi nhỏ dùng được với trình đọc màn hình, chữ cỡ lớn, tai thỏ, tablet, iOS và Android: Semantics, guideline vùng chạm, text scale, SafeArea, breakpoint, Theme.platform; kiểm bằng widget test, nêu rõ phần còn thiếu của Phần 2."
 category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, accessibility, responsive, adaptive, ios, android]
@@ -10,7 +10,7 @@ language: vi
 
 Bản thử nghiệm app khách Tới Nơi vừa qua tay ba người dùng. Chị Lan đặt cỡ chữ lớn nhất vì mắt kém, và thẻ chuyến cắt mất dòng giá cước. Anh Minh dùng điện thoại có tai thỏ, nút "Đặt chuyến" đè lên vạch home indicator. Bạn Hà dùng trình đọc màn hình, và nút xoá chỉ được đọc là "nút". Tên và tình huống là hư cấu.
 
-Cả ba lỗi có chung một gốc: ta dựng giao diện cho một cỡ chữ, một cỡ màn hình và một cách tương tác. Bài này sửa bằng `Semantics`, guideline vùng chạm, chữ phóng to, `SafeArea`, breakpoint, và chỉ khác biệt iOS và Android ở chỗ hai hệ điều hành có quy ước riêng. Lab là app nhỏ gom lại phần lớn màn hình của Phần 2.
+Cả ba lỗi có chung một gốc: ta dựng giao diện cho một cỡ chữ, một cỡ màn hình và một cách tương tác. Bài này sửa bằng `Semantics`, guideline vùng chạm, chữ phóng to, `SafeArea`, breakpoint, và chỉ tạo khác biệt giữa iOS và Android ở chỗ hai hệ điều hành có quy ước riêng. Lab là app nhỏ gom lại phần lớn màn hình của Phần 2.
 
 Đây là bài 16 của lộ trình **Flutter qua Tới Nơi**, nối tiếp [bài 15 về animation](/articles/flutter-animation-implicit-hero-tim-tai-xe), bài cuối của Phần 2. Bạn cần biết theme `toi_noi_ui` ([bài 13](/articles/flutter-theme-material-3-dark-mode-design-system-toi-noi)) và `Navigator` ([bài 12](/articles/flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen)). Bối cảnh nằm ở hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi); bảng giá là số minh hoạ.
 
@@ -153,16 +153,16 @@ Chuỗi do framework tạo, như "Tab 1 trong tổng số 3", cũng phải bằn
 
 ## Vùng chạm, nhãn và độ tương phản: guideline chạy tự động
 
-`flutter_test` có sẵn các **accessibility guideline** chạy trên cây semantics bằng `meetsGuideline`. Ta dùng bốn cái: `androidTapTargetGuideline` (vùng chạm tối thiểu 48 x 48), `iOSTapTargetGuideline` (44 x 44), `labeledTapTargetGuideline` (node có hành động chạm phải có `label` hoặc `tooltip`) và `textContrastGuideline`. Tài liệu Flutter cũng khuyến nghị vùng chạm 48 và tỉ lệ tương phản 4,5:1.
+`flutter_test` có sẵn các **accessibility guideline** chạy trên cây semantics bằng `meetsGuideline`. Ta dùng bốn guideline: `androidTapTargetGuideline` (vùng chạm tối thiểu 48 x 48), `iOSTapTargetGuideline` (44 x 44), `labeledTapTargetGuideline` (node có hành động chạm phải có `label` hoặc `tooltip`) và `textContrastGuideline`. Tài liệu Flutter cũng khuyến nghị vùng chạm 48 và tỉ lệ tương phản 4,5:1.
 
 Guideline chỉ có giá trị khi ta biết nó bắt được lỗi, nên lab có bốn widget để đo cả hai chiều:
 
 | Widget | Android 48 | iOS 44 | Có nhãn |
 |---|---|---|---|
-| `UnlabeledTinyIcon`: `GestureDetector` + icon 20, không nhãn | trượt | trượt | trượt |
-| `Square44Button`: vuông 44, có `Semantics` | trượt | qua | qua |
-| `IconButtonWithoutTooltip`: nút chuẩn, quên `tooltip` | qua | qua | trượt |
-| `LabeledCloseButton`: `IconButton` có `tooltip` | qua | qua | qua |
+| `UnlabeledTinyIcon`: `GestureDetector` + icon 20, không nhãn | không đạt | không đạt | không đạt |
+| `Square44Button`: vuông 44, có `Semantics` | không đạt | đạt | đạt |
+| `IconButtonWithoutTooltip`: nút chuẩn, quên `tooltip` | đạt | đạt | không đạt |
+| `LabeledCloseButton`: `IconButton` có `tooltip` | đạt | đạt | đạt |
 
 Hàng thứ hai đáng nhớ: 44 đủ cho iOS nhưng chưa đủ cho Android, nên app dùng chung lấy 48. Hàng thứ ba: nút biểu tượng phải có `tooltip`, vì guideline chấp nhận `tooltip` thay cho `label`.
 
@@ -187,15 +187,15 @@ Future<void> expectMeetsTapGuidelines(WidgetTester tester) async {
     });
 ```
 
-Ba guideline này chạy trên app thật ở ba bề rộng (390, 700, 1000) và ba tab, thêm trang chi tiết và cỡ chữ gấp đôi: tất cả qua, với một giới hạn. Guideline bỏ qua node sát mép, nên thanh điều hướng không được đo ở đó; ba đích điều hướng được đo riêng bằng kích thước node semantics (đủ 48 x 48 ở 390 và 700 pixel). `textContrastGuideline` chạy trên màn lịch sử ở theme sáng và tối, kèm ca đối chứng: chữ `0xFFBBBBBB` trên nền trắng (tỉ lệ khoảng 1,9) bị bắt đúng. Nó phân màu khá thô, nên là lưới an toàn; tỉ lệ từng cặp màu token đã kiểm ở bài 13.
+Ba guideline này chạy trên app thật ở ba bề rộng (390, 700, 1000) và ba tab, thêm trang chi tiết và cỡ chữ gấp đôi: tất cả đều đạt, với một giới hạn. Guideline bỏ qua node sát mép, nên thanh điều hướng không được đo ở đó; ba đích điều hướng được đo riêng bằng kích thước node semantics (đủ 48 x 48 ở 390 và 700 pixel). `textContrastGuideline` chạy trên màn lịch sử ở theme sáng và tối, kèm test case đối chứng: chữ `0xFFBBBBBB` trên nền trắng (tỉ lệ khoảng 1,9) bị bắt đúng. Guideline này phân màu khá thô, nên là lưới an toàn; tỉ lệ từng cặp màu token đã kiểm ở bài 13.
 
-Hai cái bẫy. Một, guideline **bỏ qua** node sát mép cửa sổ hoặc mép vùng cuộn; helper `pumpCentered` đặt widget giữa màn hình, và một test riêng chứng minh icon 20 ở góc trên trái "qua" guideline 48 một cách oan. Hai, guideline chỉ xét node có hành động `tap` hoặc `longPress`, nên không đo `Slider`.
+Hai cái bẫy. Một, guideline **bỏ qua** node sát mép cửa sổ hoặc mép vùng cuộn; helper `pumpCentered` đặt widget giữa màn hình, và một test riêng chứng minh icon 20 ở góc trên trái "đạt" guideline 48 một cách oan. Hai, guideline chỉ xét node có hành động `tap` hoặc `longPress`, nên không đo `Slider`.
 
 ## Cỡ chữ hệ thống: đừng giả định chữ cao 14 pixel
 
 Cỡ chữ người dùng đặt trong hệ điều hành đi tới widget qua `MediaQuery.textScalerOf(context)`. Kiểu trả về là `TextScaler`, không phải một số: Flutter đã đánh dấu `textScaleFactor` là deprecated để chuẩn bị cho text scaling phi tuyến, nên hãy gọi `scaler.scale(14)`.
 
-Ba quy tắc: không đặt chiều cao cố định cho container chứa chữ; dùng `Wrap`, `Flexible`, `Expanded` để nội dung xuống dòng; cho màn hình cuộn được. Ca sai điển hình là `FixedHeightTripTile` cao đúng 72:
+Ba quy tắc: không đặt chiều cao cố định cho container chứa chữ; dùng `Wrap`, `Flexible`, `Expanded` để nội dung xuống dòng; cho màn hình cuộn được. Trường hợp sai điển hình là `FixedHeightTripTile` cao đúng 72:
 
 ### broken_examples.dart · 16-a11y-responsive-adaptive/lib/broken_examples.dart (trích)
 
@@ -213,7 +213,7 @@ Ba quy tắc: không đặt chiều cao cố định cho container chứa chữ;
     );
 ```
 
-Ở cỡ chữ 1 nó vừa; ở cỡ chữ 2 test thấy `A RenderFlex overflowed by ... pixels on the bottom`. `TripTile` thật không có chiều cao cố định và dùng `Wrap` cho hàng đầu: chip nằm cùng hàng với tên dịch vụ khi đủ chỗ và xuống dòng khi hết chỗ. Test giả lập cỡ chữ bằng `platformDispatcher`, cùng đường mà cài đặt thật đi qua:
+Ở cỡ chữ 1 widget này vừa khít; ở cỡ chữ 2 test báo `A RenderFlex overflowed by ... pixels on the bottom`. `TripTile` thật không có chiều cao cố định và dùng `Wrap` cho hàng đầu: chip nằm cùng hàng với tên dịch vụ khi đủ chỗ và xuống dòng khi hết chỗ. Test giả lập cỡ chữ bằng `platformDispatcher`, cùng đường mà cài đặt thật đi qua:
 
 ### support.dart · 16-a11y-responsive-adaptive/test/support.dart (trích)
 
@@ -224,13 +224,13 @@ void setTextScale(WidgetTester tester, double scale) {
 }
 ```
 
-Ca cỡ chữ gấp đôi mà [bài 08](/articles/flutter-layout-constraints-row-column-the-chuyen) để lại được đóng ở đây. `TripTile` ở 320 pixel với đủ 8 trạng thái và cỡ chữ 1, 1,5, 2, 3 không overflow; chip nằm cùng hàng tiêu đề ở cỡ 1 và xuống dưới ở cỡ 2. Toàn app ở 320 x 568 với cỡ chữ 2 cũng không overflow ở cả ba tab. Ở trang chi tiết, nút "Huỷ chuyến" bị đẩy xuống dưới khung nhìn nên test phải cuộn tới (`ensureVisible`).
+Trường hợp cỡ chữ gấp đôi mà [bài 08](/articles/flutter-layout-constraints-row-column-the-chuyen) để lại được giải quyết nốt ở đây. `TripTile` ở 320 pixel với đủ 8 trạng thái và cỡ chữ 1, 1,5, 2, 3 không overflow; chip nằm cùng hàng tiêu đề ở cỡ 1 và xuống dưới ở cỡ 2. Toàn app ở 320 x 568 với cỡ chữ 2 cũng không overflow ở cả ba tab. Ở trang chi tiết, nút "Huỷ chuyến" bị đẩy xuống dưới khung nhìn nên test phải cuộn tới (`ensureVisible`).
 
 Lưu ý: `flutter test` dùng font kiểm thử riêng, phần lớn ký tự là ô vuông bằng cỡ chữ, thường rộng hơn chữ thật; phép thử khắt khe nhưng không thay được việc nhìn app trên máy thật.
 
 ## Responsive: bề rộng cửa sổ, vùng an toàn và breakpoint
 
-Hai API trả lời hai câu hỏi khác nhau. `MediaQuery.sizeOf(context)` cho kích thước **cả cửa sổ**, dùng để chọn thanh điều hướng. `LayoutBuilder` cho **ràng buộc widget cha cấp**, dùng khi một widget cần biết mình có bao nhiêu chỗ (như bài 08). Ở cửa sổ 1000, cột danh sách của bố cục hai cột chỉ rộng 360, và test đo đúng điều này.
+Hai API trả lời hai câu hỏi khác nhau. `MediaQuery.sizeOf(context)` cho kích thước **cả cửa sổ**, dùng để chọn thanh điều hướng. `LayoutBuilder` cho **ràng buộc mà widget cha cấp**, dùng khi một widget cần biết mình có bao nhiêu chỗ (như bài 08). Ở cửa sổ 1000, cột danh sách của bố cục hai cột chỉ rộng 360, và test đo đúng điều này.
 
 Ta chia bề rộng thành ba lớp theo ngưỡng 600 và 840 của window size classes Android (tài liệu Flutter cũng dùng 600 để chọn giữa thanh đáy và thanh bên). Quyết định theo bề rộng cửa sổ, không theo "loại thiết bị", nên điện thoại xoay ngang hay cửa sổ chia đôi đều rơi vào lớp phù hợp.
 
@@ -373,7 +373,7 @@ void setInsets(
 
 Ta đặt cả `padding` lẫn `viewPadding`: `SafeArea` đọc `padding`, nhưng phần đáy của `padding` có thể bị bàn phím mở "ăn" mất, còn `maintainBottomViewPadding` dùng `viewPadding` để giữ lại.
 
-Cặp `UnsafeFooter` và `SafeFooter` là ca đối chứng: cạnh dưới nút ở đúng y = 784 khi thiếu `SafeArea` và y = 750 khi có, cả hai được `expect` trong test.
+Cặp `UnsafeFooter` và `SafeFooter` là test case đối chứng: cạnh dưới nút ở đúng y = 784 khi thiếu `SafeArea` và y = 750 khi có, cả hai được `expect` trong test.
 
 ## Adaptive: khác biệt iOS và Android có chủ đích
 
@@ -476,12 +476,12 @@ flutter analyze
 flutter test
 ```
 
-Đã kiểm với Flutter 3.47.4 và Dart 3.13.3: `flutter analyze` báo 0 issue, 85 test xanh. Mức: **Kiểm chứng tự động**, không cần thiết bị. Mỗi file test tập trung vào một mảng:
+Đã kiểm với Flutter 3.47.4 và Dart 3.13.3: `flutter analyze` báo 0 issue, 85 test xanh. Mức kiểm chứng: **kiểm chứng tự động**, không cần thiết bị. Mỗi file test tập trung vào một mảng:
 
 | File test | Chứng minh điều gì |
 |---|---|
 | `semantics_test.dart` (12) | `25.500 đồng`; câu đọc 8 trạng thái; live region; thẻ chuyến là một nút; slider có nhãn, giá trị, tăng giảm |
-| `guidelines_test.dart` (21) | Ba guideline qua trên app thật; đo riêng thanh điều hướng; contrast sáng, tối; các ca sai bị bắt |
+| `guidelines_test.dart` (21) | Ba guideline đạt trên app thật; đo riêng thanh điều hướng; contrast sáng, tối; các ca sai bị bắt |
 | `text_scale_test.dart` (13) | `TripTile` không overflow ở 320 px, cỡ x1 đến x3; ca cao 72 tràn ở x2; app ở 320 x 568 chữ x2 |
 | `safe_area_test.dart` (9) | `view.padding` tới `MediaQuery`; 784 và 750; `AppBar`, `NavigationBar`, xoay ngang |
 | `breakpoint_test.dart` (12) | Ngưỡng 600, 840; ba bố cục; hai cột; state giữ khi đổi cỡ cửa sổ |
@@ -491,12 +491,12 @@ flutter test
 
 ## Bài tập
 
-1. `Square44Button` vuông 44, có nhãn "Đóng". Trong ba guideline `android`, `iOS` và `labeled`, cái nào qua, cái nào trượt, và sửa thế nào?
+1. `Square44Button` vuông 44, có nhãn "Đóng". Trong ba guideline `android`, `iOS` và `labeled`, cái nào đạt, cái nào không đạt, và sửa thế nào?
 2. Thẻ chuyến bọc trong `SizedBox(height: 72)` chứa ba dòng chữ. Chuyện gì xảy ra ở cỡ chữ gấp đôi, và sửa ra sao?
 3. Test đặt `debugDefaultTargetPlatformOverride = TargetPlatform.iOS` rồi `addTearDown(() => debugDefaultTargetPlatformOverride = null)`. Mọi `expect` đều đúng nhưng test vẫn báo lỗi. Lỗi gì, vì sao, sửa thế nào?
 
 <details><summary>Xem lời giải</summary>
-<p><strong>1.</strong> <code>iOSTapTargetGuideline</code> và <code>labeledTapTargetGuideline</code> qua; <code>androidTapTargetGuideline</code> trượt vì cần 48. Sửa: nâng <code>dimension</code> lên 48, hoặc dùng <code>IconButton</code> có <code>tooltip</code>.</p>
+<p><strong>1.</strong> <code>iOSTapTargetGuideline</code> và <code>labeledTapTargetGuideline</code> đạt; <code>androidTapTargetGuideline</code> không đạt vì cần 48. Sửa: nâng <code>dimension</code> lên 48, hoặc dùng <code>IconButton</code> có <code>tooltip</code>.</p>
 <p><strong>2.</strong> Ba dòng ở cỡ chữ gấp đôi cao hơn 72, <code>Column</code> báo <code>A RenderFlex overflowed by ... pixels on the bottom</code>. Sửa: bỏ chiều cao cố định (hoặc <code>minHeight</code>) và đặt thẻ trong vùng cuộn.</p>
 <p><strong>3.</strong> Lỗi <code>The value of a foundation debug variable was changed by the test</code>: kiểm tra cuối test chạy trước các hàm <code>addTearDown</code>. Sửa: đặt <code>null</code> trong <code>finally</code> ở thân test, hoặc dùng <code>TargetPlatformVariant.only(TargetPlatform.iOS)</code>.</p>
 </details>

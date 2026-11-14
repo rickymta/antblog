@@ -1,0 +1,131 @@
+{
+"file": "flutter-http-dio-json-dto-goi-api-bao-gia.md",
+"edits": [
+{
+"old": "Retry, xác thực và realtime để các bài 20, 24 và 36.",
+"new": "Retry, xác thực và realtime dành cho các bài 20, 24 và 36.",
+"reason": "Câu lược động từ",
+"severity": "medium"
+},
+{
+"old": "Mục 3 viết bộ đọc báo đúng tên DTO và tên trường.",
+"new": "Mục 3 viết bộ đọc báo lỗi kèm đúng tên DTO và tên trường.",
+"reason": "Câu thiếu danh từ 'lỗi'",
+"severity": "medium"
+},
+{
+"old": "bằng cộng chuỗi (xem",
+"new": "bằng cách nối chuỗi (xem",
+"reason": "'cộng chuỗi' là dịch từng chữ của string concatenation",
+"severity": "medium"
+},
+{
+"old": "trước lớp tiêm lỗi và độ trễ",
+"new": "trước lớp inject lỗi và độ trễ",
+"reason": "Thống nhất 'inject' thay cho 'tiêm'",
+"severity": "medium"
+},
+{
+"old": "422 và 500 tiêm bằng cờ",
+"new": "422 và 500 được inject bằng cờ",
+"reason": "'tiêm' là calque của inject",
+"severity": "medium"
+},
+{
+"old": "là đối tượng có hình dạng đúng như dữ liệu trên dây:",
+"new": "là đối tượng có hình dạng đúng như dữ liệu trên đường truyền:",
+"reason": "'trên dây' là calque của 'on the wire'",
+"severity": "medium"
+},
+{
+"old": "Cột trái là JSON trên dây, cột giữa là TripDto sau fromJson, cột phải là Trip của domain sau toDomain: mét thành km, đồng thành Money, tên trạng thái thành enum, chuỗi thời gian thành DateTime UTC.",
+"new": "Cột trái là JSON trên đường truyền, cột giữa là TripDto sau fromJson, cột phải là Trip của domain sau toDomain: mét đổi thành km, đồng đổi thành Money, tên trạng thái đổi thành enum, chuỗi thời gian đổi thành DateTime UTC.",
+"reason": "Câu lược động từ 'đổi'; 'trên dây' là calque",
+"severity": "medium"
+},
+{
+"old": "<text x=\"20\" y=\"28\" class=\"t-b\">JSON trên dây</text>",
+"new": "<text x=\"20\" y=\"28\" class=\"t-b\">JSON trên đường truyền</text>",
+"reason": "'trên dây' là calque",
+"severity": "medium"
+},
+{
+"old": "DTO giữ hình dạng của dây dẫn;",
+"new": "DTO giữ hình dạng dữ liệu trên đường truyền;",
+"reason": "'dây dẫn' là calque của 'wire'",
+"severity": "medium"
+},
+{
+"old": "Đổi lại vài dòng, mọi lỗi payload có địa chỉ (`TripDto.fare: số đồng phải là số nguyên`) thay cho `TypeError` vô danh.",
+"new": "Tốn thêm vài dòng, nhưng mọi lỗi payload đều chỉ rõ vị trí (`TripDto.fare: số đồng phải là số nguyên`) thay vì `TypeError` vô danh.",
+"reason": "'Đổi lại' và 'có địa chỉ' gượng, giọng dịch máy (suy đoán ý: đánh đổi thêm vài dòng để có thông báo rõ vị trí)",
+"severity": "medium"
+},
+{
+"old": "Một test khác chứng minh `accepted` không tài xế bị báo ở trường `driverId`:",
+"new": "Một test khác chứng minh trạng thái `accepted` mà không có tài xế bị báo lỗi ở trường `driverId`:",
+"reason": "'không tài xế' cụt, thiếu động từ 'báo lỗi'",
+"severity": "medium"
+},
+{
+"old": "Muốn gọi service thật cần mở rộng nó hoặc đặt BFF ở giữa.",
+"new": "Muốn gọi service thật cần mở rộng view đó hoặc đặt BFF ở giữa.",
+"reason": "'nó' mơ hồ (suy đoán: view hiện tại của service)",
+"severity": "low"
+},
+{
+"old": "dù body là gì (kể cả chữ thường hay JSON cụt)",
+"new": "dù body là gì (kể cả văn bản thuần hay JSON cụt)",
+"reason": "'chữ thường' dễ hiểu nhầm là lowercase",
+"severity": "low"
+},
+{
+"old": "Để dio giải JSON thì một body hỏng ở mã 200 ra `DioException` của bộ giải mã, không phải `DtoFormatException`.",
+"new": "Nếu để dio giải JSON thì một body hỏng ở mã 200 sẽ ra `DioException` của bộ giải mã, không phải `DtoFormatException`.",
+"reason": "Câu thiếu 'nếu' và 'sẽ', khó đọc",
+"severity": "medium"
+},
+{
+"old": "ta chỉ hiện `traceId` thành \"mã hỗ trợ\".",
+"new": "ta chỉ hiện `traceId` dưới tên \"mã hỗ trợ\".",
+"reason": "'hiện X thành Y' thiếu nghĩa",
+"severity": "low"
+},
+{
+"old": "gom chúng thành `sealed ApiFailure` có hành động là bài 20.",
+"new": "việc gom chúng thành `sealed ApiFailure` có hành động xử lý đi kèm thuộc về bài 20.",
+"reason": "Câu thiếu chủ ngữ, 'có hành động là bài 20' khó hiểu (suy đoán ý)",
+"severity": "medium"
+},
+{
+"old": "quên override adapter ở provider thật cho `ApiException` 400 (cũng có test).",
+"new": "quên override adapter ở provider thật sẽ cho ra `ApiException` 400 (cũng có test).",
+"reason": "Câu thiếu động từ, khó hiểu",
+"severity": "high"
+},
+{
+"old": "Nó ghi lại request, tôn trọng `receiveTimeout`, và đổi `SocketException` thành `DioException.connectionError` như socket thật:",
+"new": "Adapter này ghi lại request, tuân theo `receiveTimeout`, và đổi `SocketException` thành `DioException.connectionError` như socket thật:",
+"reason": "Tránh 'Nó' đầu câu; 'tôn trọng' là calque của respect",
+"severity": "medium"
+},
+{
+"old": "Test mạnh nhất mô phỏng ca xấu nhất:",
+"new": "Test mạnh nhất mô phỏng trường hợp xấu nhất:",
+"reason": "'ca' dễ nhầm với test case",
+"severity": "low"
+},
+{
+"old": "là phá đảm bảo ấy.",
+"new": "là phá vỡ bảo đảm đó.",
+"reason": "Gượng, 'đảm bảo' làm danh từ",
+"severity": "low"
+},
+{
+"old": "<p>Nó ném <code>TypeError</code>.",
+"new": "<p>Dòng này ném <code>TypeError</code>.",
+"reason": "Tránh 'Nó' đầu câu, nhắc lại danh từ",
+"severity": "medium"
+}
+]
+}

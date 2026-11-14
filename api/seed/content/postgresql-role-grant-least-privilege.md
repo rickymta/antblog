@@ -1,7 +1,7 @@
 ---
 slug: postgresql-role-grant-least-privilege
 title: "Role, GRANT và quyền tối thiểu: tách API, báo cáo và migration của Tới Nơi"
-summary: "API, job báo cáo và migration của Tới Nơi cùng dùng tài khoản sở hữu bảng — một lỗi ở job báo cáo đủ xoá sạch dữ liệu chuyến. Tách owner, application, report và monitor; đọc ACL thật; kiểm cả quyền được phép lẫn bị cấm; và cái bẫy default privileges với bảng tạo mới."
+summary: "API, job báo cáo và migration của Tới Nơi cùng dùng tài khoản sở hữu bảng — một lỗi ở job báo cáo đủ xoá sạch dữ liệu chuyến. Tách owner, application, report và monitor; đọc ACL thật; kiểm cả quyền được phép lẫn bị cấm; và chỉ ra cái bẫy default privileges với bảng tạo mới."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-041, roles, grant, permissions, least-privilege, default-privileges, toi-noi]
@@ -28,7 +28,7 @@ cd examples/toi-noi-postgresql
 npm run p05
 ```
 
-Dữ liệu là một **projection vận hành** thu nhỏ, độc lập với schema P01–P04 để các phép thử quản trị không đụng fixture cũ: bảng `ops.trips` có 100 chuyến hoàn thành, tenant 1 và tenant 2 mỗi bên 50 chuyến, mỗi chuyến 30.000 đ, tổng 3.000.000 đ. Dòng đầu `OUTPUT.txt`:
+Dữ liệu là một **bản chiếu (projection) vận hành** thu nhỏ, độc lập với schema P01–P04 để các phép thử quản trị không đụng fixture cũ: bảng `ops.trips` có 100 chuyến hoàn thành, tenant 1 và tenant 2 mỗi bên 50 chuyến, mỗi chuyến 30.000 đ, tổng 3.000.000 đ. Dòng đầu `OUTPUT.txt`:
 
 ```text
 P05 operations lab · PostgreSQL 18.1
@@ -99,7 +99,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA ops GRANT SELECT ON TABLES TO tn_report;
 RESET ROLE;
 ```
 
-Script chạy bằng `postgres` nhưng tạo bảng và GRANT **sau** `SET ROLE tn_owner`, nên bảng thuộc `tn_owner` và người cấp (grantor) cũng là `tn_owner`. `tn_app` cố ý **không** có `DELETE`: Tới Nơi không xoá chuyến, chỉ đổi trạng thái — ma trận quyền phản ánh nghiệp vụ, không phải «đủ bộ CRUD». Dòng `ALTER DEFAULT PRIVILEGES` để mục 7.
+Script chạy bằng `postgres` nhưng tạo bảng và GRANT **sau** `SET ROLE tn_owner`, nên bảng thuộc `tn_owner` và người cấp (grantor) cũng là `tn_owner`. `tn_app` cố ý **không** có `DELETE`: Tới Nơi không xoá chuyến, chỉ đổi trạng thái — ma trận quyền phản ánh nghiệp vụ, không phải «đủ bộ CRUD». Dòng `ALTER DEFAULT PRIVILEGES` sẽ nói ở mục 7.
 
 ## 5. Chứng minh cả hai chiều
 
@@ -131,7 +131,7 @@ SET ROLE tn_app;    ALTER TABLE ops.trips ADD COLUMN bad int;
   ERROR:  42501: must be owner of table trips
 ```
 
-Cùng SQLSTATE `42501` (`insufficient_privilege`) nhưng hai thông báo khác nhau, và khác có lý do:
+Cùng SQLSTATE `42501` (`insufficient_privilege`) nhưng hai thông báo khác nhau, và sự khác biệt đó có lý do:
 
 - `permission denied for table trips`: `DELETE` là một privilege có thể GRANT; `tn_report` đơn giản là không được cấp.
 - `must be owner of table trips`: `ALTER TABLE` không phải privilege cấp được — nó gắn với **quyền sở hữu**. Muốn app đổi được cấu trúc bảng thì phải biến app thành owner (hoặc thành viên của owner), tức là trao luôn quyền `DROP`. Đó chính là lý do tách migration khỏi runtime.
@@ -215,10 +215,10 @@ PASS 041 future table not granted to app: f
 
 Default ACL đọc là: khi **`tn_owner`** tạo đối tượng loại `r` (relation — bảng, view…) trong `ops`, cấp `r` (SELECT) cho `tn_report`. Đúng như vậy, `next_report` trong ACL ở mục 6 có `tn_report=r/tn_owner` dù không ai chạy GRANT trên nó.
 
-Còn `tn_app` **không** có gì trên bảng mới, vì default privileges chỉ khai báo cho report. Đúng thiết kế, nhưng là bất ngờ quen thuộc trên production: migration tạo bảng, deploy API, request đầu tiên nhận `permission denied`. Hai cách chữa:
+Còn `tn_app` **không** có gì trên bảng mới, vì default privileges chỉ khai báo cho report. Đúng như thiết kế, nhưng đây là bất ngờ quen thuộc trên production: migration tạo bảng, deploy API, request đầu tiên nhận `permission denied`. Hai cách chữa:
 
 - **Migration tự GRANT** cho app ngay trong cùng script tạo bảng. Quyền của app được viết tường minh cạnh DDL, review được trong pull request. Cái giá: phải nhớ, và quên thì lỗi chỉ lộ khi chạy.
-- **Default privileges cho app** (`… GRANT SELECT, INSERT, UPDATE ON TABLES TO tn_app`). Tiện, nhưng app tự động có quyền ghi trên **mọi** bảng tương lai trong schema, kể cả bảng nó không nên chạm tới. Điều này đi ngược quyền tối thiểu.
+- **Default privileges cho app** (`… GRANT SELECT, INSERT, UPDATE ON TABLES TO tn_app`). Tiện, nhưng app tự động có quyền ghi trên **mọi** bảng tương lai trong schema, kể cả bảng nó không nên chạm tới. Điều này đi ngược nguyên tắc quyền tối thiểu.
 
 Tới Nơi chọn cách đầu cho quyền ghi. Dù chọn cách nào, kiểm thử sau migration phải chạy bằng role ứng dụng, cả ca được phép lẫn ca bị cấm, không chỉ bằng owner.
 
@@ -286,7 +286,7 @@ Mặt trái: một login không có gì trong ACL vẫn có thể là thành vi�
 - **Nhiều role hay ít role.** Mỗi role thêm vào là một dòng trong ma trận phải kiểm và rà định kỳ. Bốn vai ở đây là mức tối thiểu có ý nghĩa; tách thêm (vd. role riêng cho từng microservice) chỉ đáng khi các service thật sự cần quyền khác nhau.
 - **Default privileges hay GRANT tường minh.** Default privileges tránh lỗi «quên GRANT» nhưng giấu quyền khỏi script migration; GRANT tường minh dễ review nhưng dễ quên. Tới Nơi dùng default privileges cho quyền đọc, GRANT tường minh cho quyền ghi.
 - **Quyền cột.** `GRANT SELECT (id, fare) ON …` hẹp hơn quyền bảng, nhưng `SELECT *` của report sẽ lỗi và mỗi cột mới lại phải cấp. View thường dễ quản lý hơn (bài tập 1).
-- **Bảo mật không thay cho kiểm soát thay đổi.** Quyền tối thiểu giới hạn **thiệt hại** của một lỗi; nó không ngăn được migration tự tay xoá dữ liệu. Phục hồi khi thiệt hại đã xảy ra là việc của PG-046 và PG-048.
+- **Bảo mật không thay thế được kiểm soát thay đổi.** Quyền tối thiểu giới hạn **thiệt hại** của một lỗi; nó không ngăn được migration tự tay xoá dữ liệu. Phục hồi khi thiệt hại đã xảy ra là việc của PG-046 và PG-048.
 
 ## 12. Bài tập
 

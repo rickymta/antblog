@@ -1,21 +1,21 @@
 ---
 slug: flutter-clean-architecture-domain-data-presentation-mobile
 title: "Clean Architecture cho mobile: domain, data, presentation và repository"
-summary: "Bài 21: chia luồng đặt chuyến thành domain, data và presentation với một chiều phụ thuộc; repository là interface do domain sở hữu, DTO và ApiFailure được đổi ở lớp data, use case chỉ giữ khi có quy tắc, provider nối lớp, test đọc source để khoá chiều import và phân tích khi nào kiến trúc quá tay."
+summary: "Bài 21: chia luồng đặt chuyến thành domain, data và presentation với một chiều phụ thuộc; repository là interface do domain sở hữu, DTO và ApiFailure được chuyển đổi ở lớp data, use case chỉ giữ khi có quy tắc, provider nối lớp, test đọc source để khoá chiều import và phân tích khi nào kiến trúc quá tay."
 category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, architecture, clean-architecture, riverpod, repository]
 language: vi
 ---
 
-Trip-service của Tới Nơi sắp tách trường `fare` thành tiền cước và phụ phí. Đội mở màn hình bài 20 xem phải sửa gì. `providers.dart` dựng `ToiNoiApiClient`, giữ khoá idempotency, gọi `guardApi` rồi ghép luôn state của màn hình; `failure_text.dart` thì `switch` trên `ApiFailure`. Đổi hợp đồng API chạm cả logic lẫn giao diện, và test nút Thử lại đòi dựng cả fake API.
+Trip-service của Tới Nơi sắp tách trường `fare` thành tiền cước và phụ phí. Đội mở code màn hình ở bài 20 để xem phải sửa gì. `providers.dart` dựng `ToiNoiApiClient`, giữ khoá idempotency, gọi `guardApi` rồi ghép luôn state của màn hình; `failure_text.dart` thì `switch` trên `ApiFailure`. Đổi hợp đồng API chạm cả logic lẫn giao diện, và test nút Thử lại đòi dựng cả fake API.
 
 Cách chữa là cho mỗi việc một chỗ ở và quy định ai được biết ai: ta chia luồng đặt chuyến thành domain, data và presentation. Đây là bài 21 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 20 về lỗi, retry và mất mạng](/articles/flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong) trước, vì bài này dùng lại `ApiFailure`, `guardApi` và `Idempotency-Key`; thêm [bài 19 về dio và DTO](/articles/flutter-http-dio-json-dto-goi-api-bao-gia) và [bài 18 về Riverpod](/articles/flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen). Phía backend, [bài về Clean Architecture của lộ trình .NET](/articles/dotnet10-clean-architecture-layers) có bốn tầng và đặt port `ITripRepository` ở Application; `domain` của bài này gộp Domain và Application của bên đó.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một màn hình Flutter muốn đặt chuyến mà không biết gì về dio. Ta khai báo <code>abstract interface class TripRepository</code> và để màn hình gọi nó. Interface này nên nằm cạnh code gọi API (lớp data), hay cạnh code dùng nó?</p>
-<details><summary>Xem đáp án</summary><p>Cạnh code dùng nó, tức domain. Nếu interface nằm ở data, domain phải import data để biết hình dạng cổng, và mũi tên đi từ lõi ra ngoài. Khi domain sở hữu interface, data import domain để thực thi nó, và mũi tên quay vào lõi. Test <code>architecture_test.dart</code> khoá chiều này.</p></details>
+<details><summary>Xem đáp án</summary><p>Cạnh code dùng nó, tức domain. Nếu interface nằm ở data, domain phải import data để biết hình dạng cổng, và mũi tên đi từ lõi ra ngoài. Khi domain sở hữu interface, data import domain để triển khai nó, và mũi tên quay vào lõi. Test <code>architecture_test.dart</code> khoá chiều này.</p></details>
 </div>
 
 ## Ba lớp và một chiều phụ thuộc
@@ -32,7 +32,7 @@ Ba lớp là ba thư mục dưới `lib/`. Quy tắc duy nhất: **mã nguồn c
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 420" role="img" aria-label="Hình 1. Chiều import giữa ba lớp. Composition root ở trên cùng import presentation và data (không vẽ: nó còn import toi_noi_api). Presentation import domain. Data import domain. Domain chỉ import toi_noi_core. Presentation còn import flutter, flutter_riverpod và toi_noi_ui. Data còn import toi_noi_api, và toi_noi_api import dio. Không có mũi tên nào đi từ domain sang presentation, data, flutter hay dio.">
 <defs><marker id="fl21-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl21-1-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-muted"/></marker></defs>
-<rect x="20" y="16" width="840" height="52" rx="10" class="f-surface s-muted"/><text x="36" y="40" class="t-b">Composition root: composition.dart, main.dart</text><text x="36" y="58" class="t-small">nơi duy nhất import cả data lẫn presentation, và cắm thực thi vào chỗ cắm</text>
+<rect x="20" y="16" width="840" height="52" rx="10" class="f-surface s-muted"/><text x="36" y="40" class="t-b">Composition root: composition.dart, main.dart</text><text x="36" y="58" class="t-small">nơi duy nhất import cả data lẫn presentation, và cắm bản triển khai thật vào chỗ cắm</text>
 <rect x="20" y="140" width="260" height="140" rx="10" class="f-phys-soft s-phys"/><text x="36" y="168" class="t-b">Presentation</text><text x="36" y="196" class="t-small">providers, controller</text><text x="36" y="214" class="t-small">màn hình, câu chữ lỗi</text><text x="36" y="232" class="t-small">chỗ cắm repository</text>
 <rect x="310" y="140" width="260" height="140" rx="10" class="f-pk-soft s-pk"/><text x="326" y="168" class="t-b">Domain</text><text x="326" y="196" class="t-small">QuoteRequest, TripFailure</text><text x="326" y="214" class="t-small">RequestTrip (use case)</text><text x="326" y="232" class="t-small">TripRepository: interface</text>
 <rect x="600" y="140" width="260" height="140" rx="10" class="f-phys-soft s-phys"/><text x="616" y="168" class="t-b">Data</text><text x="616" y="196" class="t-small">TripRepositoryImpl</text><text x="616" y="214" class="t-small">mapper: DTO, lỗi</text><text x="616" y="232" class="t-small">guardApi</text>
@@ -54,7 +54,7 @@ Ba lớp là ba thư mục dưới `lib/`. Quy tắc duy nhất: **mã nguồn c
 
 Có hai điểm đáng nói. Một: entity nằm ở `toi_noi_core` dùng chung cho hai app, nên "domain" của lab là phần riêng của luồng đặt chuyến cộng entity chung. Hai: presentation **không** import data. Provider ở presentation chỉ biết một chỗ cắm; ai cắm vào là việc của composition root, ở mục 5.
 
-Đây không phải đáp án duy nhất. [Hướng dẫn của Flutter](https://docs.flutter.dev/app-architecture/guide) đặt repository trong data layer, coi domain layer (use case) là tuỳ chọn, và tự nhận là khuyến nghị chứ không phải luật. Lab khác một điểm: interface nằm ở domain. Ta đổi sự gọn của UI import thẳng repository cụ thể lấy ranh giới mà test khoá được.
+Đây không phải đáp án duy nhất. [Hướng dẫn của Flutter](https://docs.flutter.dev/app-architecture/guide) đặt repository trong data layer, coi domain layer (use case) là tuỳ chọn, và tự nhận là khuyến nghị chứ không phải luật. Lab khác một điểm: interface nằm ở domain. Ta đánh đổi sự gọn khi UI import thẳng repository cụ thể để lấy ranh giới mà test khoá được.
 
 ## Domain sở hữu cổng và lỗi của mình
 
@@ -88,7 +88,7 @@ final class QuoteRequest {
 }
 ```
 
-Cổng ra thế giới là `TripRepository`. Nó nằm trong domain, và thân hàm không tồn tại:
+Cổng ra thế giới là `TripRepository`. Interface này nằm trong domain và không có thân hàm:
 
 ### trip_repository.dart · 21-clean-architecture/lib/domain/trip_repository.dart (trích)
 
@@ -106,7 +106,7 @@ abstract interface class TripRepository {
 }
 ```
 
-Chữ ký chỉ dùng kiểu của domain: `QuoteRequest` vào, `Money` và `Trip` ra, không có DTO hay `Response`. Còn lỗi? Nếu interface ném `ApiFailure`, người dùng cổng phải import `toi_noi_api` để bắt nó. Vì thế domain có bộ lỗi riêng, `sealed` như `ApiFailure` nhưng nói bằng lời của sản phẩm: `Unreachable` (mất mạng, quá chậm, kết nối không an toàn), `ServiceFault`, `Rejected` (kèm `RejectionKind`) và `Unreadable`.
+Chữ ký chỉ dùng kiểu của domain: `QuoteRequest` vào, `Money` và `Trip` ra, không có DTO hay `Response`. Còn lỗi? Nếu interface ném `ApiFailure`, code dùng cổng phải import `toi_noi_api` để bắt nó. Vì thế domain có bộ lỗi riêng, `sealed` như `ApiFailure` nhưng nói bằng lời của sản phẩm: `Unreachable` (mất mạng, quá chậm, kết nối không an toàn), `ServiceFault`, `Rejected` (kèm `RejectionKind`) và `Unreadable`.
 
 ### trip_failure.dart · 21-clean-architecture/lib/domain/trip_failure.dart (trích)
 
@@ -130,11 +130,11 @@ sealed class TripFailure implements Exception {
 }
 ```
 
-Hai chi tiết có chủ ý. `cause` là `Object?`: log vẫn thấy lỗi gốc mà domain không cần biết kiểu của nó. Và cờ tên `canRetryByUser`, không phải `retryable`: ở `toi_noi_api`, `ApiFailure.retryable` trả lời "máy có tự gửi lại được không", còn nút Thử lại là quyết định của người dùng. `Unreadable` cho bấm tay (Wi-Fi công cộng đôi khi trả trang đăng nhập thay JSON) dù máy sẽ không tự thử.
+Hai chi tiết có chủ ý. `cause` là `Object?`: log vẫn thấy lỗi gốc mà domain không cần biết kiểu của nó. Và cờ tên `canRetryByUser`, không phải `retryable`: ở `toi_noi_api`, `ApiFailure.retryable` trả lời "máy có tự gửi lại được không", còn nút Thử lại là quyết định của người dùng. `Unreadable` cho phép người dùng bấm Thử lại bằng tay (Wi-Fi công cộng đôi khi trả trang đăng nhập thay JSON) dù máy sẽ không tự thử.
 
 ## Data thực thi cổng: DTO, mapper và dịch lỗi
 
-`TripRepositoryImpl` implement interface của domain. Mỗi phương thức làm ba việc: đổi domain sang DTO, gọi client, đổi DTO về domain.
+`TripRepositoryImpl` implement interface của domain. Mỗi phương thức làm ba việc: chuyển domain sang DTO, gọi client, rồi chuyển DTO về domain.
 
 ### trip_repository_impl.dart · 21-clean-architecture/lib/data/trip_repository_impl.dart (trích)
 
@@ -160,7 +160,7 @@ Future<T> _translate<T>(Future<T> Function() call) async {
 }
 ```
 
-`intentId` của domain thành header `Idempotency-Key` ở đúng chỗ này, và chỉ ở đây. `_translate` chồng hai lớp: `guardApi` của bài 20 đổi lỗi nhận ra được thành `ApiFailure` (và ném lại lỗi lạ cùng việc huỷ request), rồi `catch` này đổi `ApiFailure` thành `TripFailure`. Lỗi không nhận ra không bị che thành `TripFailure`, nhưng cũng không giữ nguyên kiểu: một `StateError` trong handler lên tới nơi gọi dưới dạng `DioException` kiểu `unknown` bọc nó, vì dio gói lỗi lạ như vậy. Domain không giấu được kiểu đó mà không nuốt lỗi lập trình, nên interface ghi rõ: thứ gì không phải `TripFailure` là bug, đừng bắt. Hai test khoá điều đó: `intentId` sai định dạng ra `ArgumentError` nguyên vẹn, và `StateError` ra đúng `DioException(unknown)` bọc `StateError`.
+`intentId` của domain trở thành header `Idempotency-Key` ở đúng chỗ này, và chỉ ở đây. `_translate` xếp chồng hai lớp: `guardApi` của bài 20 đổi lỗi nhận ra được thành `ApiFailure` (và ném lại lỗi lạ cùng việc huỷ request), rồi `catch` này đổi `ApiFailure` thành `TripFailure`. Lỗi không nhận ra không bị che thành `TripFailure`, nhưng cũng không giữ nguyên kiểu: một `StateError` trong handler lên tới nơi gọi dưới dạng `DioException` kiểu `unknown` bọc nó, vì dio gói lỗi lạ như vậy. Domain không giấu được kiểu đó mà không nuốt lỗi lập trình, nên interface ghi rõ: thứ gì không phải `TripFailure` là bug, đừng bắt. Hai test khoá điều đó: `intentId` sai định dạng ra `ArgumentError` nguyên vẹn, và `StateError` ra đúng `DioException(unknown)` bọc `StateError`.
 
 Về mapper, lab chỉ viết phần chưa có. DTO sang `Trip` và `Money` đã nằm trong `toi_noi_api` (`TripDto.toDomain`, `QuoteDto.toMoney`) từ bài 19. Còn thiếu domain sang DTO, và lỗi sang lỗi; chiều lỗi đáng đọc:
 
@@ -190,7 +190,7 @@ extension ApiFailureMapper on ApiFailure {
 }
 ```
 
-`switch` không có nhánh mặc định, nên thêm loại thứ sáu vào `ApiFailure` thì file không biên dịch cho tới khi ta quyết định tên của nó ở domain. Các nhánh `ClientFailure` (đã lược) đọc mã trạng thái: 422 trên `distanceKm` thành `invalidDistance`, 404 `notFound`, 409 `conflict`, còn lại `other`. Chỉ `traceId` đi qua, thành `supportCode`; `title` tiếng Anh của server thì không.
+`switch` không có nhánh mặc định, nên thêm loại thứ sáu vào `ApiFailure` thì file không biên dịch cho tới khi ta quyết định tên của nó ở domain. Các nhánh `ClientFailure` (đã lược) đọc mã trạng thái: 422 trên `distanceKm` thành `invalidDistance`, 404 thành `notFound`, 409 thành `conflict`, các mã còn lại thành `other`. Chỉ `traceId` đi qua và trở thành `supportCode`; còn `title` tiếng Anh của server thì không.
 
 ## Use case: chỉ giữ khi có quy tắc
 
@@ -246,7 +246,7 @@ Test `booking_flow_test.dart` dựng đúng Hình 2 với data thật: `FaultyAd
 
 ## Presentation, chỗ cắm và composition root
 
-Presentation cần repository nhưng không được import data, nên có một provider **chỗ cắm** không kèm thực thi:
+Presentation cần repository nhưng không được import data, nên có một provider **chỗ cắm** không kèm bản triển khai:
 
 ### providers.dart · 21-clean-architecture/lib/presentation/providers.dart (trích)
 
@@ -258,7 +258,7 @@ final tripRepositoryProvider = Provider<TripRepository>(
 );
 ```
 
-Quên ghi đè thì đọc provider này ném `ProviderException` bọc `UnimplementedError` ngay lần đầu (một test khoá hành vi đó), nên app không lặng lẽ chạy với thực thi sai. Phần còn lại của presentation chỉ thấy domain. `BookingController` gọi use case, gói kết quả bằng `AsyncValue.guard`, và lỗi trong state là `TripFailure`:
+Quên ghi đè thì đọc provider này ném `ProviderException` bọc `UnimplementedError` ngay lần đầu (một test khoá hành vi đó), nên app không chạy tiếp mà không báo lỗi với bản triển khai sai. Phần còn lại của presentation chỉ thấy domain. `BookingController` gọi use case, gói kết quả bằng `AsyncValue.guard`, và lỗi trong state là `TripFailure`:
 
 ### providers.dart · 21-clean-architecture/lib/presentation/providers.dart (trích)
 
@@ -276,7 +276,7 @@ Future<void> book() async {
 }
 ```
 
-Composition root cắm thực thi thật vào chỗ cắm, gắn log và retry của bài 20 lên client:
+Composition root cắm bản triển khai thật vào chỗ cắm, gắn log và retry của bài 20 lên client:
 
 ### composition.dart · 21-clean-architecture/lib/composition.dart (trích)
 
@@ -297,7 +297,7 @@ Nhóm test đầu của `quote_screen_test.dart` chạy màn hình với `FakeTr
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 412" role="img" aria-label="Hình 3. Đường đi lúc chạy của một lần đặt chuyến, từ trên xuống. BookingController.book thuộc presentation gọi RequestTrip. RequestTrip thuộc domain gọi TripRepository, một interface cũng thuộc domain. TripRepositoryImpl thuộc data thực thi interface đó và gọi ToiNoiApiClient của toi_noi_api. Mũi tên đi lên mang Trip hoặc TripFailure; từ client lên TripRepositoryImpl là TripDto hoặc lỗi thô. Giữa interface và phần thực thi có đường ranh giới, nơi mũi tên import đi ngược từ TripRepositoryImpl lên TripRepository.">
+<svg viewBox="0 0 880 412" role="img" aria-label="Hình 3. Đường đi lúc chạy của một lần đặt chuyến, từ trên xuống. BookingController.book thuộc presentation gọi RequestTrip. RequestTrip thuộc domain gọi TripRepository, một interface cũng thuộc domain. TripRepositoryImpl thuộc data triển khai interface đó và gọi ToiNoiApiClient của toi_noi_api. Mũi tên đi lên mang Trip hoặc TripFailure; từ client lên TripRepositoryImpl là TripDto hoặc lỗi thô. Giữa interface và phần thực thi có đường ranh giới, nơi mũi tên import đi ngược từ TripRepositoryImpl lên TripRepository.">
 <defs><marker id="fl21-3-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl21-3-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs>
 <rect x="20" y="14" width="840" height="46" rx="8" class="f-phys-soft s-phys"/><text x="36" y="42" class="t-b">BookingController.book</text><text x="330" y="42" class="t-small">presentation: đọc QuoteRequest từ provider</text>
 <rect x="20" y="92" width="840" height="46" rx="8" class="f-pk-soft s-pk"/><text x="36" y="120" class="t-b">RequestTrip.call</text><text x="330" y="120" class="t-small">domain: kiểm miền 0 đến 100 km, giữ intentId</text>
@@ -349,7 +349,7 @@ const layers = [
 
 Test đọc từng file `.dart` dưới `lib/<lớp>`, lấy mọi dòng `import` và `export`, rồi so với bảng. Domain có thêm ba test nêu đích danh `package:flutter`, `package:dio` và `package:toi_noi_api`. Import tương đối cũng bị chặn, vì `../data/x.dart` trong domain trèo sang lớp khác mà không có chữ `package:`. Data không import Flutter và presentation không import data: cả hai là hệ quả của bảng.
 
-Test không thể đỏ thì không đáng tin, nên tám test nữa kiểm chính bộ kiểm: nó bắt `import` bị cấm, `export`, import tương đối sang lớp khác, `dart:io` trong domain, và bỏ qua dòng chú thích. Một test chặn thư mục rỗng cho kết quả xanh giả. Ta phá thật: thêm `import 'package:dio/dio.dart'` vào `trip_repository.dart` thì hai test đỏ và thông báo chỉ ra file; thêm import `data/mappers.dart` vào một file presentation thì test lớp presentation đỏ; thêm import `toi_noi_api` vào `quote_request.dart` thì hai test đỏ.
+Test không thể đỏ thì không đáng tin, nên tám test nữa kiểm chính bộ kiểm: bộ kiểm này bắt `import` bị cấm, `export`, import tương đối sang lớp khác, `dart:io` trong domain, và bỏ qua dòng chú thích. Một test chặn lỗi thư mục rỗng khiến kết quả xanh giả. Ta phá thật: thêm `import 'package:dio/dio.dart'` vào `trip_repository.dart` thì hai test đỏ và thông báo chỉ ra file; thêm import `data/mappers.dart` vào một file presentation thì test lớp presentation đỏ; thêm import `toi_noi_api` vào `quote_request.dart` thì hai test đỏ.
 
 Giới hạn cần nói: bộ kiểm dùng biểu thức chính quy trên dòng `import` và `export`, không dùng analyzer. Một directive viết URI ở dòng khác với từ khoá, hoặc import có điều kiện kiểu `if (dart.library.io) 'package:dio/dio.dart'`, sẽ lọt. Lint chuyên dụng thuộc bài 32.
 
@@ -368,7 +368,7 @@ Lab bỏ có chủ ý: lớp cơ sở `UseCase<T, P>`, kiểu `Either`/`Result` 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Bốn lỗi hay gặp khi chia lớp</span>
 <ul>
-<li><strong>Interface repository đặt ở data.</strong> Dấu hiệu: domain import <code>data/</code> chỉ để biết kiểu của cổng. Nguyên nhân: đặt interface cạnh thực thi cho tiện. Cách sửa: chuyển interface sang domain; test import bắt khi quay lại.</li>
+<li><strong>Interface repository đặt ở data.</strong> Dấu hiệu: domain import <code>data/</code> chỉ để biết kiểu của cổng. Nguyên nhân: đặt interface cạnh thực thi cho tiện. Cách sửa: chuyển interface sang domain; test import sẽ bắt nếu lỗi này tái diễn.</li>
 <li><strong>Lỗi kỹ thuật lọt lên giao diện.</strong> Dấu hiệu: <code>failure_text.dart</code> import <code>toi_noi_api</code>. Nguyên nhân: repository ném lại lỗi của client. Cách sửa: đổi sang lỗi domain ở biên data, giữ lỗi gốc trong <code>cause</code>.</li>
 <li><strong>Che lỗi lập trình thành lỗi miền.</strong> Dấu hiệu: một <code>StateError</code> hiện thành "Không tới được máy chủ". Nguyên nhân: <code>catch (e)</code> đổi mọi thứ. Cách sửa: chỉ đổi <code>ApiFailure</code>, như <code>_translate</code> làm.</li>
 <li><strong>Dùng cờ của máy cho nút của người.</strong> Dấu hiệu: nút Thử lại ẩn với <code>ParseFailure</code> dù Wi-Fi công cộng chỉ cần đăng nhập. Nguyên nhân: lấy <code>ApiFailure.retryable</code> (máy tự gửi lại có an toàn không) làm điều kiện cho nút. Cách sửa: cờ riêng <code>canRetryByUser</code>.</li>
@@ -398,7 +398,7 @@ flutter test
 
 **Chưa làm**: chạy trên simulator, emulator hay thiết bị thật; không test nào chạy `productionTripRepository` (composition root chưa được kiểm); lint chiều import bằng analyzer (bài 32); lưu cục bộ sau repository (bài 22); connectivity và nút Mở cài đặt của bài 20.
 
-Giới hạn của use case: ý định chỉ sống trong bộ nhớ và chỉ nhớ một yêu cầu. Mất response rồi đổi yêu cầu thì server có hai chuyến, quay lại yêu cầu đầu thành ba (một test ghi lại điều này), tắt app thì mất khoá. Lưu khoá bền là việc của bài 46.
+Giới hạn của use case: ý định chỉ sống trong bộ nhớ và chỉ nhớ một yêu cầu. Mất response rồi đổi yêu cầu thì server có hai chuyến, quay lại yêu cầu đầu thì thành ba chuyến (một test ghi lại điều này), tắt app thì mất khoá. Lưu khoá bền là việc của bài 46.
 
 Ở Phần 6, khi chuyển sang feature-first, chỗ cắm provider và bộ lỗi dùng chung sẽ phải tách theo feature.
 

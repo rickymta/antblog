@@ -30,7 +30,7 @@ Well-Architected Framework (WAF) là tập nguyên tắc và câu hỏi của Mi
 | Operational Excellence | Đội có triển khai, quan sát và sửa lỗi theo cách lặp lại được không? | Bicep, pipeline có what-if, alert gắn SLO, runbook, revision rollback |
 | Performance Efficiency | Hệ thống có đáp ứng tải thật mà không lãng phí không? | Load test, autoscale, pool kết nối, index, cache |
 
-WAF đi kèm hai công cụ khác loại. **Well-Architected Review** là bảng câu hỏi theo workload: đội ngồi trả lời, kết quả là danh sách việc theo trụ cột. Nó đo thiết kế và quy trình, thứ không có trong telemetry. **Azure Advisor** đọc cấu hình và số liệu sử dụng thật của resource rồi gợi ý. Advisor không biết `psql-toinoi-prod-sea` phục vụ thanh toán, còn Review hỏi đúng điều đó. Dùng cả hai.
+WAF đi kèm hai công cụ khác loại. **Well-Architected Review** là bảng câu hỏi theo workload: đội ngồi trả lời, kết quả là danh sách việc theo trụ cột. Review đo thiết kế và quy trình, những thứ không có trong telemetry. **Azure Advisor** đọc cấu hình và số liệu sử dụng thật của resource rồi gợi ý. Advisor không biết `psql-toinoi-prod-sea` phục vụ thanh toán, còn Review hỏi đúng điều đó. Dùng cả hai.
 
 ## Trade-off: hai trụ cột đòi hai điều ngược nhau
 
@@ -45,7 +45,7 @@ WAF đi kèm hai công cụ khác loại. **Well-Architected Review** là bảng
 
 Hai trade-off điển hình của Tới Nơi:
 
-- **HA PostgreSQL và chi phí.** Zone-redundant HA cho `trips` đưa RPO về 0 trong cùng region nhưng nhân đôi compute (bài 30). Bật cho `prod` là hiển nhiên; bật cho `dev` là trả tiền cho độ tin cậy không ai cần. Mức bảo vệ theo hậu quả của việc mất môi trường đó, không theo thói quen «cho giống prod».
+- **HA PostgreSQL và chi phí.** Zone-redundant HA cho `trips` đưa RPO về 0 trong cùng region nhưng nhân đôi compute (bài 30). Bật cho `prod` là hiển nhiên; bật cho `dev` là trả tiền cho độ tin cậy không ai cần. Mức bảo vệ phải tương xứng với hậu quả khi mất môi trường đó, không dựa theo thói quen «cho giống prod».
 - **Private endpoint và độ phức tạp vận hành.** Private endpoint cho PostgreSQL và Key Vault (bài 17) đóng đường vào từ Internet, nhưng kéo theo Private DNS, peering, và việc pipeline hay máy dev phải đứng trong mạng mới chạm được dữ liệu. Đội chưa có runbook cho lỗi DNS nội bộ thì vừa tăng bảo mật vừa giảm độ tin cậy.
 
 Không có đáp án đúng tuyệt đối, chỉ có đáp án đúng cho yêu cầu đã ghi. Buổi review nên mở bằng câu hỏi: RTO, RPO, SLO và ngân sách do ai chốt?
@@ -87,15 +87,15 @@ Bảng dưới rút gọn WAF thành 20 câu, bốn câu mỗi trụ cột, cho 
 | 15 | Operations | Mỗi alert gắn SLO, action group có người nhận thật và có runbook? | Alert rule, runbook |
 | 16 | Operations | Có thể lần một chuyến theo trip id từ Front Door tới database? | Trace trong Application Insights |
 | 17 | Performance | Đã load test theo kịch bản giờ cao điểm và biết điểm bão hoà (CPU, connection DB)? | Báo cáo load test (bài 56) |
-| 18 | Performance | Autoscale có min/max đã kiểm với tải; tổng pool không vượt `max_connections`? | Cấu hình scale, tính toán pool |
-| 19 | Performance | Có SLI độ trễ p95 cho đường đặt xe và nó được đo liên tục? | Dashboard, workbook |
-| 20 | Performance | Truy vấn nóng đã kiểm bằng `EXPLAIN`, cache dữ liệu đọc nhiều có TTL hợp lý? | Kế hoạch truy vấn, cấu hình cache |
+| 18 | Performance | Autoscale có min/max đã được kiểm tra với tải; tổng pool không vượt `max_connections`? | Cấu hình scale, tính toán pool |
+| 19 | Performance | Có SLI độ trễ p95 cho đường đặt xe và được đo liên tục? | Dashboard, workbook |
+| 20 | Performance | Truy vấn nóng đã kiểm tra bằng `EXPLAIN`, cache dữ liệu đọc nhiều có TTL hợp lý? | Kế hoạch truy vấn, cấu hình cache |
 
 Đừng khoe «17/20». Hãy xếp theo hậu quả: một câu «chưa» về Reliability của Payment nặng hơn năm câu «chưa» về Cost của dev.
 
 ## Azure Advisor là nguồn gợi ý, không phải bản án
 
-Advisor phân gợi ý vào năm nhóm tương ứng với trụ cột, kèm mức tác động High, Medium, Low. Portal gọi nhóm độ tin cậy là Reliability, nhưng API và CLI vẫn dùng giá trị `HighAvailability`; nhóm vận hành mang giá trị `OperationalExcellence`. Advisor mạnh ở việc phát hiện thứ bạn quên: disk không gắn, resource ít dùng, thiếu bản sao lưu. Nó yếu ở bối cảnh nghiệp vụ.
+Advisor phân gợi ý vào năm nhóm tương ứng với trụ cột, kèm mức tác động High, Medium, Low. Portal gọi nhóm độ tin cậy là Reliability, nhưng API và CLI vẫn dùng giá trị `HighAvailability`; nhóm vận hành mang giá trị `OperationalExcellence`. Advisor mạnh ở việc phát hiện thứ bạn quên: disk không gắn, resource ít dùng, thiếu bản sao lưu. Advisor yếu ở bối cảnh nghiệp vụ.
 
 Quy trình đọc có ba bước. **Phân loại** theo nhóm và mức tác động, vì danh sách phẳng vài chục dòng sẽ không ai đọc. **Gắn chủ** cho từng gợi ý, tức người quyết định chứ không phải người gõ lệnh. **Quyết định** một trong ba: làm ngay, lên lịch kèm hạn, hoặc bỏ qua có lý do.
 
@@ -110,7 +110,7 @@ Lý do bỏ qua hợp lệ: gợi ý giảm SKU cho `dev` trong khi tuần tới
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Làm theo Advisor máy móc là tự bắn vào chân: resource «ít dùng» bị gợi ý thu nhỏ có thể chính là standby DR. Ngược lại, bỏ qua hàng loạt cho danh sách «sạch» chỉ biến nợ kỹ thuật thành nợ vô hình. Mọi lần bỏ qua phải có người, lý do và hạn xem lại.</p>
+<p>Làm theo Advisor máy móc là tự làm hại mình: resource «ít dùng» bị gợi ý thu nhỏ có thể chính là standby DR. Ngược lại, bỏ qua hàng loạt cho danh sách «sạch» chỉ biến nợ kỹ thuật thành nợ vô hình. Mọi lần bỏ qua phải có người, lý do và hạn xem lại.</p>
 </div>
 
 ## Lab: đọc Advisor của Tới Nơi bằng az CLI
@@ -141,11 +141,11 @@ az advisor recommendation disable \
   --ids "<recommendation-id>" --days 30
 ```
 
-Lệnh này ẩn gợi ý 30 ngày rồi nó xuất hiện lại. Bỏ `--days` thì gợi ý bị ẩn vĩnh viễn, điều nên tránh. Lệnh không sửa vấn đề và không thay bản ghi lý do. Danh sách thu được cũng chưa phải Well-Architected Review: hãy ngồi với đội trả lời 20 câu ở trên cho từng service.
+Lệnh này ẩn gợi ý 30 ngày, sau đó gợi ý xuất hiện lại. Bỏ `--days` thì gợi ý bị ẩn vĩnh viễn, điều nên tránh. Lệnh không sửa vấn đề và không thay bản ghi lý do. Danh sách thu được cũng chưa phải Well-Architected Review: hãy ngồi với đội trả lời 20 câu ở trên cho từng service.
 
 **Bài tập:** đánh giá Notification service (Azure Functions đọc hàng đợi Service Bus rồi gửi SMS và email) theo năm trụ cột và nêu 3 rủi ro cao nhất.
 
-<details><summary>Xem lời giải</summary><p>Ba rủi ro đáng kể nhất: (1) Reliability: Service Bus giao at-least-once, handler không idempotent thì khách nhận trùng thông báo, và dead-letter không ai theo dõi sẽ âm thầm nuốt tin. (2) Performance cộng Cost: Function scale theo độ dài hàng đợi, backlog lớn đẩy hàng loạt instance gọi nhà cung cấp SMS, bị giới hạn tốc độ và sinh chi phí nếu không giới hạn đồng thời. (3) Security: dùng connection string hay SAS key trong app settings thay vì managed identity với quyền tối thiểu. Thiếu alert cho dead-letter (Operations) làm cả ba bị phát hiện muộn.</p></details>
+<details><summary>Xem lời giải</summary><p>Ba rủi ro đáng kể nhất: (1) Reliability: Service Bus giao at-least-once, handler không idempotent thì khách nhận trùng thông báo, và dead-letter không ai theo dõi sẽ nuốt tin mà không báo lỗi. (2) Performance cộng Cost: Function scale theo độ dài hàng đợi, backlog lớn đẩy hàng loạt instance gọi nhà cung cấp SMS, bị giới hạn tốc độ và sinh chi phí nếu không giới hạn đồng thời. (3) Security: dùng connection string hay SAS key trong app settings thay vì managed identity với quyền tối thiểu. Thiếu alert cho dead-letter (Operations) làm cả ba bị phát hiện muộn.</p></details>
 
 ## Học tiếp từ đây
 

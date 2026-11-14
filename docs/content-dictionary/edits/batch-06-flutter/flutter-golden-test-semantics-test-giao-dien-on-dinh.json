@@ -1,0 +1,23 @@
+{"file":"flutter-golden-test-semantics-test-giao-dien-on-dinh.md","edits":[
+{"old":"Golden có trượt không?","new":"Golden có thất bại không?","reason":"'trượt' cho kết quả test","severity":"medium"},
+{"old":"Ca đầu không trượt vì cả hai địa chỉ","new":"Trường hợp đầu không thất bại vì cả hai địa chỉ","reason":"'Ca' cụt; 'trượt' cho kết quả test","severity":"medium"},
+{"old":"và chỉ qua khi từng pixel khớp.","new":"và chỉ đạt khi từng pixel khớp.","reason":"Thống nhất đạt/không đạt","severity":"low"},
+{"old":"thư mục failures/ chỉ là đầu ra khi trượt.","new":"thư mục failures/ chỉ là đầu ra khi golden không đạt.","reason":"'trượt' cho kết quả test","severity":"medium"},
+{"old":"chữ ASCII thành ô đặc, còn một số ký tự tiếng Việt như ư, đ, ơ thành ô rỗng;","new":"chữ ASCII được vẽ thành ô đặc, còn một số ký tự tiếng Việt như ư, đ, ơ được vẽ thành ô rỗng;","reason":"Thiếu động từ","severity":"medium"},
+{"old":"**Một, comparator có hai ngưỡng.**","new":"**Thứ nhất, comparator có hai ngưỡng.**","reason":"'Một' kiểu dịch máy","severity":"low"},
+{"old":"nên nhiễu nhẹ làm trượt cả ảnh.","new":"nên nhiễu nhẹ làm cả ảnh không đạt.","reason":"'trượt' cho kết quả test","severity":"medium"},
+{"old":"chỉ trượt khi hơn 0,1% pixel lệch; ảnh khác kích thước luôn trượt:","new":"chỉ không đạt khi hơn 0,1% pixel lệch; ảnh khác kích thước luôn không đạt:","reason":"'trượt' cho kết quả test","severity":"medium"},
+{"old":"**Hai, ngưỡng phải nhỏ hơn thay đổi nhỏ nhất ta muốn bắt.**","new":"**Thứ hai, ngưỡng phải nhỏ hơn thay đổi nhỏ nhất ta muốn bắt.**","reason":"'Hai' kiểu dịch máy","severity":"low"},
+{"old":"**Ba, buộc ảnh chuẩn với hệ điều hành đã sinh ra nó.**","new":"**Thứ ba, buộc ảnh chuẩn với hệ điều hành đã sinh ra nó.**","reason":"'Ba' kiểu dịch máy","severity":"low"},
+{"old":"Khi golden trượt, comparator ghi bốn ảnh","new":"Khi golden không đạt, comparator ghi bốn ảnh","reason":"'trượt' cho kết quả test","severity":"medium"},
+{"old":"Từ lúc golden trượt tới lúc commit ảnh mới.","new":"Từ lúc golden không đạt tới lúc commit ảnh mới.","reason":"'trượt' cho kết quả test","severity":"medium"},
+{"old":"nhiễu 3 mức trên mọi pixel qua (dù comparator mặc định thấy 100% pixel khác), lệch 10 mức trượt, đổi 10 pixel qua và 11 pixel trượt, khác kích thước luôn trượt, và lúc trượt có đúng bốn tên file","new":"nhiễu 3 mức trên mọi pixel thì đạt (dù comparator mặc định thấy 100% pixel khác), lệch 10 mức thì không đạt, đổi 10 pixel thì đạt còn đổi 11 pixel thì không đạt, khác kích thước luôn không đạt, và lúc không đạt có đúng bốn tên file","reason":"'qua/trượt' lược chủ vị, giọng dịch máy","severity":"medium"},
+{"old":"Ở các ca còn lại ta gọi thẳng comparator","new":"Ở các test case còn lại ta gọi thẳng comparator","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Ba ca sai trong `broken_cards.dart` chứng minh chúng bắt được lỗi: icon 20 không nhãn trượt cả ba, `IconButton` quên `tooltip` trượt nhãn, nhãn nhạt trên nền nhạt trượt contrast.","new":"Ba trường hợp sai trong `broken_cards.dart` chứng minh chúng bắt được lỗi: icon 20 không nhãn không đạt cả ba, `IconButton` quên `tooltip` không đạt guideline nhãn, nhãn nhạt trên nền nhạt không đạt guideline contrast.","reason":"'ca sai' cụt; 'trượt nhãn/contrast' tự ghép","severity":"medium"},
+{"old":"Ca sai `FaintStatusBadge` trượt ở giao diện sáng với cả tám trạng thái và qua ở giao diện tối (một test kiểm cả hai), nên ca sai kiểm riêng giao diện sáng.","new":"Widget sai `FaintStatusBadge` không đạt ở giao diện sáng với cả tám trạng thái và đạt ở giao diện tối (một test kiểm cả hai), nên phần kiểm lỗi chỉ dùng giao diện sáng.","reason":"'Ca sai' cụt; 'trượt/qua' cho kết quả test","severity":"medium"},
+{"old":"và luôn có một ca sai chứng minh guideline bắt được lỗi.","new":"và luôn có một trường hợp sai chứng minh guideline bắt được lỗi.","reason":"'ca sai' cụt","severity":"low"},
+{"old":"trượt vì khác kích thước, và khác kích thước thì ngưỡng nào cũng không cứu.","new":"không đạt vì khác kích thước, và khác kích thước thì ngưỡng nào cũng không cứu được.","reason":"'trượt' cho kết quả test","severity":"medium"},
+{"old":"golden trượt ở ngưỡng 0,1% và qua ở ngưỡng 0,5%.","new":"golden không đạt ở ngưỡng 0,1% và đạt ở ngưỡng 0,5%.","reason":"'trượt/qua' cho kết quả test","severity":"medium"},
+{"old":"<strong>3.</strong> Qua. Màu chữ","new":"<strong>3.</strong> Đạt. Màu chữ","reason":"'Qua' cụt","severity":"low"},
+{"old":"chữ nhạt chạm nền nhạt và trượt.","new":"chữ nhạt chạm nền nhạt nên không đạt.","reason":"'trượt' cho kết quả test","severity":"medium"}
+]}

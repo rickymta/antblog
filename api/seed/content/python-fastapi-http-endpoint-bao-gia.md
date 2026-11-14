@@ -20,7 +20,7 @@ Bài này đưa hàm lên HTTP bằng **FastAPI** chạy trên **uvicorn**. Đi�
 
 ## Giữa socket và hàm của ta: WSGI và ASGI
 
-HTTP là chữ chạy trên TCP. Ai đó phải đọc byte, tách method, đường dẫn, header, body, gọi code ứng dụng rồi viết response trở lại. Python chuẩn hóa chỗ nối «server» và «ứng dụng» bằng một giao diện để mỗi bên thay được độc lập. Có hai thế hệ:
+HTTP là chữ chạy trên TCP. Ai đó phải đọc byte, tách method, đường dẫn, header, body, gọi code ứng dụng rồi viết response trở lại. Python chuẩn hoá chỗ nối «server» và «ứng dụng» bằng một giao diện để mỗi bên thay được độc lập. Có hai thế hệ:
 
 | | WSGI (PEP 3333) | ASGI |
 | --- | --- | --- |
@@ -101,7 +101,7 @@ class QuoteResponse(BaseModel):
     expires_at: datetime = Field(description="UTC, hết hạn sau 5 phút.")
 ```
 
-`QuoteRequest` từ chối trường lạ (`extra="forbid"`), nhận `distance_km` dạng chuỗi `"2.5"` hoặc số `2.5` (kiểu `Decimal` ép kiểu ở chế độ lax như bài 15), tối đa 3 chữ số thập phân. Hợp đồng khuyên gửi chuỗi, cùng quy ước với `fare`: tiền không nên đi qua số thực. `Decimal` còn nhận ký pháp khoa học và chữ số Unicode: `"1e2"` vào thì phản hồi chuẩn hóa `distance_km` thành `"100"` (không để lộ `"1E+2"`), còn `"٢"` vẫn được nhận thành 2 km và `--verify` ghi lại đó là giới hạn đã biết; production nên kiểm chuỗi đầu vào bằng biểu thức chính quy chỉ nhận chữ số ASCII. Phản hồi có `Decimal` ra JSON là **chuỗi** (`"14250"`), nên client không phải đoán số nguyên hay số thực.
+`QuoteRequest` từ chối trường lạ (`extra="forbid"`), nhận `distance_km` dạng chuỗi `"2.5"` hoặc số `2.5` (kiểu `Decimal` ép kiểu ở chế độ lax như bài 15), tối đa 3 chữ số thập phân. Hợp đồng khuyên gửi chuỗi, cùng quy ước với `fare`: tiền không nên đi qua số thực. `Decimal` còn nhận ký pháp khoa học và chữ số Unicode: `"1e2"` vào thì phản hồi chuẩn hoá `distance_km` thành `"100"` (không để lộ `"1E+2"`), còn `"٢"` vẫn được nhận thành 2 km và `--verify` ghi lại đó là giới hạn đã biết; production nên kiểm chuỗi đầu vào bằng biểu thức chính quy chỉ nhận chữ số ASCII. Phản hồi có `Decimal` ra JSON là **chuỗi** (`"14250"`), nên client không phải đoán số nguyên hay số thực.
 
 Route nối các lớp (trích `app/main.py`):
 
@@ -175,7 +175,7 @@ Hai chỗ cuối thuộc bài 32; giới hạn thập phân quay lại ở bài 
 
 ## async def hay def: ai chạy ở đâu
 
-Quay lại câu hỏi đầu bài. FastAPI chạy handler theo cách tùy vào chữ `async`: **`async def`** chạy thẳng trên event loop, **`def` thường** được đẩy sang thread pool. Lab dựng một app thử nhỏ với ba route cùng ngủ 0,2 giây (trích `main.py`):
+Quay lại câu hỏi đầu bài. FastAPI chạy handler theo cách tuỳ vào chữ `async`: **`async def`** chạy thẳng trên event loop, **`def` thường** được đẩy sang thread pool. Lab dựng một app thử nhỏ với ba route cùng ngủ 0,2 giây (trích `main.py`):
 
 ```python
 @probe.get("/async-block")
@@ -212,7 +212,7 @@ Kết quả nói rõ ba trường hợp:
 | `async def` + `await asyncio.sleep` | 0,20 s | `await` nhường loop, năm handler chờ chồng lên nhau |
 | `def` + `time.sleep` | 0,25 s | Mỗi handler một luồng của thread pool (mặc định 40 luồng trong AnyIO của bản đã chạy), loop vẫn rảnh |
 
-Quy tắc rút ra: handler gọi thư viện async (redis asyncio, `AsyncMongoClient` của PyMongo, httpx) thì dùng `async def`; gọi thư viện chặn (driver đồng bộ, `requests`) thì dùng `def` để FastAPI tự cách ly; còn **`async def` mà gọi hàm chặn là kết hợp tệ nhất**, vì không báo lỗi mà chỉ làm cả service chậm lại. `create_quote` chỉ tính toán thuần, không I/O, nên `async def` hợp lý. Việc nặng CPU thì chữ `async` nào cũng không cứu: trong `async def` nó giữ cả event loop, trong `def` nó chạy ở luồng của pool nhưng trên bản Python thường vẫn tranh GIL với loop. Hướng đi là tiến trình riêng hoặc worker nền (bài 22 và bài 40); cách nhường loop đúng chỗ ở bài 21 ([asyncio: coroutine, Task, timeout và hủy](/articles/python-asyncio-coroutine-task-timeout-cancellation)).
+Quy tắc rút ra: handler gọi thư viện async (redis asyncio, `AsyncMongoClient` của PyMongo, httpx) thì dùng `async def`; gọi thư viện chặn (driver đồng bộ, `requests`) thì dùng `def` để FastAPI tự cách ly; còn **`async def` mà gọi hàm chặn là kết hợp tệ nhất**, vì không báo lỗi mà chỉ làm cả service chậm lại. `create_quote` chỉ tính toán thuần, không I/O, nên `async def` hợp lý. Việc nặng CPU thì chữ `async` nào cũng không cứu: trong `async def` nó giữ cả event loop, trong `def` nó chạy ở luồng của pool nhưng trên bản Python thường vẫn tranh GIL với loop. Hướng đi là tiến trình riêng hoặc worker nền (bài 22 và bài 40); cách nhường loop đúng chỗ ở bài 21 ([asyncio: coroutine, Task, timeout và huỷ](/articles/python-asyncio-coroutine-task-timeout-cancellation)).
 
 Năm request chạy in-process bằng `ASGITransport`, không qua mạng, nên phép đo chỉ phản ánh event loop, không phải độ trễ HTTP thật.
 
@@ -293,7 +293,7 @@ QT-0001 3 km, fare 16500
 QT-0001 3 km, fare 16500
 ```
 
-(Trích: giữ năm dòng POST và ba dòng GET đầu.) `QT-0001` và `QT-0002` mỗi mã xuất hiện hai lần cho hai quãng đường khác nhau, và GET `QT-0001` trả 4 km rồi 3 km tùy kết nối rơi vào worker nào: một khách có thể nhận báo giá của người khác khi đọc lại theo mã.
+(Trích: giữ năm dòng POST và ba dòng GET đầu.) `QT-0001` và `QT-0002` mỗi mã xuất hiện hai lần cho hai quãng đường khác nhau, và GET `QT-0001` trả 4 km rồi 3 km tuỳ kết nối rơi vào worker nào: một khách có thể nhận báo giá của người khác khi đọc lại theo mã.
 
 **Bài tập:** (1) Bỏ `decimal_places=3` khỏi `QuoteRequest`. Gửi `{"distance_km": "2.1234"}`: status là gì và `fare` bao nhiêu? Việc này cho thấy quy tắc «tối đa 3 chữ số thập phân» nên đặt ở lớp nào? (2) Đổi `async def create_quote` thành `def create_quote`. Kết quả HTTP có đổi không? Giải thích vì sao tên luồng chạy handler đổi, và nêu một điều kiện mà việc đổi này sẽ có lợi.
 

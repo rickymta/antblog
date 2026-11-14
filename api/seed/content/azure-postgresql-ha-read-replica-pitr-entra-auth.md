@@ -24,7 +24,7 @@ Zone-redundant HA đặt một server standby ở availability zone khác trong 
 
 Cái giá có hai mặt. Thứ nhất, bạn trả tiền compute cho cả hai server, còn storage của bản standby cũng được tính. Tra Pricing Calculator thay vì đoán. Thứ hai, ghi đồng bộ qua zone thêm một chút độ trễ vào mỗi commit, ảnh hưởng thấy rõ nhất với workload ghi dày như bảng `trips` giờ cao điểm. Standby không phục vụ truy vấn của bạn: đó là bảo hiểm, không phải thêm năng lực đọc.
 
-Có thêm kiểu **same-zone HA**: standby nằm cùng zone với primary. Nó bảo vệ trước lỗi máy chủ, không bảo vệ trước sự cố cả zone. Region nào chưa hỗ trợ availability zone cũng chỉ có kiểu này. Kiểm tài liệu để biết Southeast Asia hỗ trợ kiểu nào ở thời điểm bạn đọc.
+Có thêm kiểu **same-zone HA**: standby nằm cùng zone với primary. Kiểu này bảo vệ trước lỗi máy chủ, không bảo vệ trước sự cố cả zone. Region nào chưa hỗ trợ availability zone cũng chỉ có kiểu này. Kiểm tra tài liệu để biết Southeast Asia hỗ trợ kiểu nào ở thời điểm bạn đọc.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -33,11 +33,11 @@ Có thêm kiểu **same-zone HA**: standby nằm cùng zone với primary. Nó b
 <figcaption>Hình 1. Zone-redundant HA: primary ở zone 1 ghi đồng bộ sang standby ở zone 2; ứng dụng chỉ nối vào một endpoint.</figcaption>
 </figure>
 
-Môi trường `dev` của Tới Nơi không cần HA: mất dev nửa giờ là phiền, không là thiệt hại, và Burstable cũng không hỗ trợ HA. `staging` bật HA vì đó là nơi tập diễn failover trước khi làm trên `prod`. `prod` bật zone-redundant HA là mặc định hợp lý cho `trips` và thanh toán.
+Môi trường `dev` của Tới Nơi không cần HA: mất dev nửa giờ là phiền, không phải thiệt hại, và Burstable cũng không hỗ trợ HA. `staging` bật HA vì đó là nơi tập diễn failover trước khi làm trên `prod`. `prod` bật zone-redundant HA là mặc định hợp lý cho `trips` và thanh toán.
 
 ## Read replica là bản sao bất đồng bộ, không phải nơi ghi
 
-Read replica nhận WAL từ primary nhưng không chặn commit. Vì vậy primary không chậm đi, đổi lại replica luôn trễ một khoảng gọi là replica lag. Hai hệ quả cần nhớ. Truy vấn trên replica có thể thấy dữ liệu cũ vài giây hoặc hơn khi tải dồn. Và khi primary mất đột ngột, những giao dịch chưa kịp sang replica sẽ mất nếu bạn promote nó.
+Read replica nhận WAL từ primary nhưng không chặn commit. Vì vậy primary không chậm đi, đổi lại replica luôn trễ một khoảng gọi là replica lag. Hai hệ quả cần nhớ. Truy vấn trên replica có thể thấy dữ liệu cũ vài giây hoặc hơn khi tải tăng đột biến. Và khi primary mất đột ngột, những giao dịch chưa kịp sang replica sẽ mất nếu bạn promote nó.
 
 | Đặc điểm | Zone-redundant HA | Read replica |
 | --- | --- | --- |
@@ -56,7 +56,7 @@ Promote có hai kiểu. Kiểu «thành server độc lập» cắt replica kh�
 
 Flexible Server sao lưu tự động, giữ theo retention bạn chọn trong khoảng 7 đến 35 ngày. PITR dựng lại dữ liệu về một thời điểm trong khoảng đó bằng backup cộng WAL. Kết quả luôn là **một server mới** với tên mới. Server cũ không bị đụng tới, bạn không thể "lùi" bảng `trips` tại chỗ.
 
-Hệ quả: trước khi restore phải quyết định cách đưa dữ liệu cần thiết về. Với lỡ tay `delete from trips` thì thường restore ra server tạm, `pg_dump` đúng bảng hoặc đúng dòng, rồi nạp lại vào server chính. Cắt traffic sang server restore chỉ hợp lý khi toàn bộ server hỏng. Firewall rule, private endpoint và các thiết lập mạng phải kiểm lại, vì không phải thiết lập nào cũng đi theo bản restore.
+Hệ quả: trước khi restore phải quyết định cách đưa dữ liệu cần thiết về. Với trường hợp lỡ tay chạy `delete from trips` thì thường restore ra server tạm, `pg_dump` đúng bảng hoặc đúng dòng, rồi nạp lại vào server chính. Chuyển traffic sang server restore chỉ hợp lý khi toàn bộ server hỏng. Firewall rule, private endpoint và các thiết lập mạng phải kiểm tra lại, vì không phải thiết lập nào cũng đi theo bản restore.
 
 Backup mặc định lưu trong cùng region. **Geo-redundant backup** chép backup sang region cặp, cho phép restore ở đó khi cả region mất. Lựa chọn này thường phải đặt khi tạo server, nên cân nhắc ngay từ đầu cho `prod`. Retention dài hơn và geo-redundant đều tính thêm tiền storage backup.
 
@@ -69,7 +69,7 @@ Backup chưa từng restore thì chưa phải backup. Đặt lịch mỗi quý c
 
 ## Entra authentication: token thay cho password
 
-Với Entra authentication, client không gửi password database mà gửi **access token** do Microsoft Entra ID cấp, đặt vào chỗ password trong giao thức PostgreSQL. Server kiểm token rồi khớp với một role trong database đã được tạo cho đúng identity đó. Lợi ích rõ nhất: không còn secret tĩnh nào trong connection string để lộ hay để quên xoay. Quyền truy cập thu hồi được ở Entra thay vì đổi password ở mọi nơi.
+Với Entra authentication, client không gửi password database mà gửi **access token** do Microsoft Entra ID cấp, đặt vào chỗ password trong giao thức PostgreSQL. Server kiểm tra token rồi khớp với một role trong database đã được tạo cho đúng identity đó. Lợi ích rõ nhất: không còn secret tĩnh nào trong connection string để lộ hay để quên xoay. Có thể thu hồi quyền truy cập ở Entra thay vì đổi password ở mọi nơi.
 
 Có hai bước chuẩn bị. Bật Entra authentication trên server và đặt một Entra admin. Sau đó, đăng nhập bằng admin và tạo role cho từng identity ứng dụng, ví dụ managed identity `id-toinoi-trips-staging` của `trip-service`, bằng hàm `pgaadauth_create_principal`. Role phải trùng tên identity, và chỉ cấp quyền runtime (đọc/ghi các bảng của service), tách khỏi role chạy migration như bài 9 đã nói.
 
@@ -80,7 +80,7 @@ Có hai bước chuẩn bị. Bật Entra authentication trên server và đặt
 <figcaption>Hình 2. Luồng token Entra: managed identity xin token từ Entra ID, trip-service dùng token làm password khi mở connection tới PostgreSQL.</figcaption>
 </figure>
 
-Điểm dễ vấp nằm ở vòng đời. Token hết hạn, thường trong khoảng một giờ. Nếu app lấy token một lần lúc khởi động rồi nhét vào connection string, nó chạy tốt đến khi pool cần mở connection mới sau khi token hết hạn, và lúc đó đăng nhập thất bại, thường vào đúng lúc tải lên. Connection đang mở vẫn sống nên lỗi trông ngẫu nhiên. Cách đúng: gắn một password provider vào `NpgsqlDataSource` để mỗi lần pool mở connection mới đều lấy token còn hạn.
+Điểm dễ vấp nằm ở vòng đời. Token hết hạn, thường trong khoảng một giờ. Nếu app lấy token một lần lúc khởi động rồi nhét vào connection string, ứng dụng chạy tốt đến khi pool cần mở connection mới sau khi token hết hạn, và lúc đó đăng nhập thất bại, thường vào đúng lúc tải lên. Connection đang mở vẫn sống nên lỗi trông ngẫu nhiên. Cách đúng: gắn một password provider vào `NpgsqlDataSource` để mỗi lần pool mở connection mới đều lấy token còn hạn.
 
 ```csharp
 var credential = new DefaultAzureCredential();
@@ -98,12 +98,12 @@ builder.UsePeriodicPasswordProvider(async (_, ct) =>
 await using var dataSource = builder.Build();
 ```
 
-Đoạn này chỉ minh hoạ ý tưởng: password là hàm sinh token, được làm mới theo chu kỳ ngắn hơn hạn của token. Nó chưa chứng minh identity có role trong database hay app tới được server qua mạng. Tên hàm và chữ ký phụ thuộc phiên bản Npgsql và Azure.Identity, hãy đối chiếu tài liệu của chúng. Như [bài 36 của loạt C#](/articles/dotnet10-aws-azure-deployment) đã nói, managed identity của container không tự làm Npgsql dùng token: code mẫu hiện vẫn nhận connection string, nên phần provider này là việc cần thêm.
+Đoạn này chỉ minh hoạ ý tưởng: password là hàm sinh token, được làm mới theo chu kỳ ngắn hơn hạn của token. Đoạn code này chưa chứng minh identity có role trong database hay app tới được server qua mạng. Tên hàm và chữ ký phụ thuộc phiên bản Npgsql và Azure.Identity, hãy đối chiếu tài liệu của chúng. Như [bài 36 của loạt C#](/articles/dotnet10-aws-azure-deployment) đã nói, managed identity của container không tự làm Npgsql dùng token: code mẫu hiện vẫn nhận connection string, nên phần provider này là việc cần thêm.
 
 ## Vận hành: bảo trì, nâng version, pooler và metric
 
 - **Maintenance window.** Chọn ngày giờ cho bản vá đã lên lịch, thường là thời điểm vắng khách của Tới Nơi (rạng sáng). Bản vá có thể làm server khởi động lại. Có HA thì thời gian gián đoạn thường ngắn hơn nhờ chuyển vai, nhưng vẫn là gián đoạn: client phải có retry, đã nói ở [bài 25 loạt C#](/articles/dotnet10-cache-timeout-retry-rate-limit).
-- **Major version upgrade.** Nâng tại chỗ lên một phiên bản PostgreSQL chính mới hơn là thao tác có downtime, và không lùi lại được. Thử trên bản restore của `staging` trước, kiểm extension và query chậm, rồi mới làm `prod` trong window đã báo.
+- **Major version upgrade.** Nâng tại chỗ lên một phiên bản PostgreSQL chính mới hơn là thao tác có downtime, và không lùi lại được. Thử trên bản restore của `staging` trước, kiểm tra extension và các query chậm, rồi mới làm `prod` trong window đã báo.
 - **PgBouncer built-in.** Nhiều replica của `trip-service`, mỗi replica một pool, nhanh chóng đụng `max_connections` như bài 9 đã tính. PgBouncer tích hợp sẵn trên server, điều khiển bằng tham số `pgbouncer.enabled`; app giữ nguyên host nhưng đổi sang cổng 6432 để gộp nhiều connection ứng dụng vào ít connection thật. PgBouncer không hỗ trợ tier Burstable, và một số tính năng gắn với session của PostgreSQL (prepared statement kiểu cũ, `SET` cấp session, advisory lock) không đáng tin ở chế độ transaction pooling.
 - **Metric nên có alert.** Số connection đang dùng so với trần, CPU và IOPS tiêu thụ so với giới hạn của tier, dung lượng storage còn trống, và replica lag nếu có replica. Tên metric cụ thể xem trong Azure Monitor; bài 10 đã dựng cách đặt alert.
 
@@ -137,7 +137,7 @@ az postgres flexible-server restore \
   --restore-time "$RESTORE_TIME"
 ```
 
-Server `psql-toinoi-staging-pitr` xuất hiện độc lập, dữ liệu như lúc `RESTORE_TIME`. Sau khi mở firewall cho IP lab, chạy `select count(*) from trips` ở cả hai server để so. Mốc thời gian phải nằm trong khoảng dịch vụ còn giữ được và sau thời điểm backup đầu tiên, nếu không lệnh báo lỗi.
+Server `psql-toinoi-staging-pitr` xuất hiện độc lập, dữ liệu như lúc `RESTORE_TIME`. Sau khi mở firewall cho IP lab, chạy `select count(*) from trips` ở cả hai server để so. Mốc thời gian phải nằm trong khoảng dịch vụ còn lưu backup và sau thời điểm backup đầu tiên, nếu không lệnh báo lỗi.
 
 Cuối cùng, bật Entra admin và nối bằng token.
 
@@ -161,11 +161,11 @@ psql "host=$SERVER.postgres.database.azure.com dbname=postgres \
   -c "select current_user;"
 ```
 
-Bản CLI cũ gọi hai lệnh đầu là `--active-directory-auth` và `ad-admin create`. File `sslrootcert` là các root CA tải theo trang TLS của Flexible Server; nếu chưa có, tạm dùng `sslmode=require`. Nếu `current_user` trả về UPN của bạn, token được chấp nhận. Lab này dùng tài khoản người; managed identity của `trip-service` cần thêm `pgaadauth_create_principal` và một identity gắn vào Container Apps, hai việc lab chưa làm. Token trong `PGPASSWORD` chỉ sống ngắn, nên lệnh sau một giờ sẽ phải lấy token mới. Xong lab, xoá replica và server restore trước, rồi mới xoá resource group nếu muốn bỏ hết.
+Bản CLI cũ gọi hai lệnh đầu là `--active-directory-auth` và `ad-admin create`. File `sslrootcert` là các root CA tải theo trang TLS của Flexible Server; nếu chưa có, tạm dùng `sslmode=require`. Nếu `current_user` trả về UPN của bạn, token được chấp nhận. Lab này dùng tài khoản người; managed identity của `trip-service` cần thêm `pgaadauth_create_principal` và một identity gắn vào Container Apps, hai việc lab chưa làm. Token trong `PGPASSWORD` chỉ có hiệu lực ngắn, nên lệnh sau một giờ sẽ phải lấy token mới. Xong lab, xoá replica và server restore trước, rồi mới xoá resource group nếu muốn bỏ hết.
 
 **Bài tập:** `trip-service` lấy token Entra một lần lúc khởi động, đặt vào connection string. Sau khoảng một giờ, một số request bắt đầu lỗi đăng nhập, số khác vẫn chạy bình thường. Vì sao, và sửa thế nào?
 
-<details><summary>Xem lời giải</summary><p>Connection đang mở trong pool vẫn dùng được vì token chỉ kiểm lúc xác thực. Request nào buộc pool mở connection mới thì mang token đã hết hạn nên bị từ chối. Sửa bằng password provider định kỳ (hoặc theo từng lần mở connection) để luôn gọi credential lấy token còn hạn, kèm retry cho lỗi tạm thời.</p></details>
+<details><summary>Xem lời giải</summary><p>Connection đang mở trong pool vẫn dùng được vì token chỉ được kiểm tra lúc xác thực. Request nào buộc pool mở connection mới thì mang token đã hết hạn nên bị từ chối. Sửa bằng password provider định kỳ (hoặc theo từng lần mở connection) để luôn gọi credential lấy token còn hạn, kèm retry cho lỗi tạm thời.</p></details>
 
 ## Học tiếp từ đây
 

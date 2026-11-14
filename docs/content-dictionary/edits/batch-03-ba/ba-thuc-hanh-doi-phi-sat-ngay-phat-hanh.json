@@ -1,0 +1,10 @@
+{"file":"ba-thuc-hanh-doi-phi-sat-ngay-phat-hanh.md","edits":[
+{"old":"Nhóm đã kiểm rule cũ,","new":"Nhóm đã kiểm tra rule cũ,","reason":"Động từ cụt","severity":"low"},
+{"old":"không phải bằng chứng thay đổi làm kịp","new":"không phải bằng chứng cho thấy thay đổi làm kịp","reason":"Thiếu động từ, câu khó hiểu","severity":"medium"},
+{"old":"## 4. Kiểm minimum evidence","new":"## 4. Kiểm tra bằng chứng tối thiểu","reason":"Cụm Việt-Anh gượng, động từ cụt","severity":"medium"},
+{"old":"cần quyết định rule hiệu lực, estimate từ nhóm thực hiện,","new":"cần chốt rule hiệu lực, có estimate từ nhóm thực hiện,","reason":"Danh sách danh từ thiếu động từ","severity":"medium"},
+{"old":"Có thời gian chốt và kiểm |","new":"Có thời gian chốt và kiểm tra |","reason":"Động từ cụt","severity":"low"},
+{"old":"Phạm vi nhỏ giảm phạm vi ảnh hưởng","new":"Phạm vi nhỏ giảm mức ảnh hưởng","reason":"Lặp từ","severity":"low"},
+{"old":"## 6. Kế hoạch tiếp theo có owner","new":"## 6. Kế hoạch tiếp theo có người phụ trách","reason":"owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Nghiệp vụ chốt rule hiệu lực và giả thuyết giá trị; kỹ thuật phân tích policy/replay; QA thiết kế case","new":"Bộ phận nghiệp vụ chốt rule hiệu lực và giả thuyết giá trị; bộ phận kỹ thuật phân tích policy/replay; QA thiết kế case","reason":"Thiếu chủ thể bộ phận","severity":"medium"}
+]}

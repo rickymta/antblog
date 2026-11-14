@@ -1,14 +1,14 @@
 ---
 slug: aws-api-gateway-authorizer-websocket
 title: "API Gateway: HTTP API, JWT authorizer, throttling và WebSocket theo dõi chuyến"
-summary: "Bài 19: API Gateway trước Lambda và ALB nội bộ: HTTP API vs REST API, JWT authorizer với identity provider của Tới Nơi, throttling, usage plan, stage và custom domain; WebSocket API để khách xem vị trí tài xế theo thời gian thực."
+summary: "Bài 19: API Gateway trước Lambda và ALB nội bộ: HTTP API so với REST API, JWT authorizer với identity provider của Tới Nơi, throttling, usage plan, stage và custom domain; WebSocket API để khách xem vị trí tài xế theo thời gian thực."
 category: devops-aws
 level: intermediate
 tags: [aws, toi-noi, devops, api-gateway, http-api, jwt-authorizer, throttling, websocket]
 language: vi
 ---
 
-App khách của Tới Nơi cần hai thứ: xem báo giá và theo dõi tài xế đang chạy tới. Quán đối tác thì gọi API để nhận đơn. Ba nhóm người gọi, ba mức tin cậy khác nhau. Nếu mỗi service tự xác thực, tự giới hạn tốc độ và tự bật HTTPS, ta lặp lại cùng một đoạn code ở `quote`, `booking`, `tracking`. **Amazon API Gateway** gom phần lặp lại đó vào một cổng: nó kiểm danh tính, chặn lưu lượng quá mức, ghi log truy cập, rồi mới chuyển request vào phía sau.
+App khách của Tới Nơi cần hai thứ: xem báo giá và theo dõi tài xế đang chạy tới. Quán đối tác thì gọi API để nhận đơn. Ba nhóm người gọi, ba mức tin cậy khác nhau. Nếu mỗi service tự xác thực, tự giới hạn tốc độ và tự bật HTTPS, ta lặp lại cùng một đoạn code ở `quote`, `booking`, `tracking`. **Amazon API Gateway** gom phần lặp lại đó vào một cổng: nó kiểm tra danh tính, chặn lưu lượng vượt hạn mức, ghi log truy cập, rồi mới chuyển request vào phía sau.
 
 Đây là **bài 19** của lộ trình **AWS qua Tới Nơi · Phần 02: Container, serverless và dịch vụ ứng dụng**. Bạn cần xong bài 18 (Lambda) và nhớ khái niệm ALB ở bài 08.
 
@@ -35,7 +35,7 @@ API Gateway có hai họ API cho HTTP, thiết kế cho mục tiêu khác nhau. 
 
 Quy tắc chọn cho Tới Nơi: **BFF của app khách và app tài xế** dùng HTTP API với JWT authorizer, vì cần nhanh, rẻ và xác thực bằng token của identity provider. **API công khai cho đối tác quán** dùng REST API: cần usage plan và API key để đo lượng gọi từng quán, validate schema và gắn WAF. **API nội bộ giữa service** có thể đi HTTP API với IAM auth. Không phải chọn một cho cả hệ thống, vì các API có yêu cầu khác nhau.
 
-Phía sau, route có thể tới Lambda hoặc tới **ALB nội bộ** qua **VPC link**: API Gateway tạo đường riêng vào subnet private của bạn, nên ALB không cần public. Lab của bài này không dựng VPC link vì nó cần VPC và ALB của Phần 01.
+Phía sau, route có thể tới Lambda hoặc tới **ALB nội bộ** qua **VPC link**: API Gateway tạo đường riêng vào subnet private của bạn, nên ALB không cần public. Lab của bài này không dựng VPC link vì VPC link cần VPC và ALB của Phần 01.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -46,7 +46,7 @@ Phía sau, route có thể tới Lambda hoặc tới **ALB nội bộ** qua **VP
 
 ## Xác thực: JWT authorizer, Lambda authorizer và IAM
 
-**JWT authorizer** hợp với app của Tới Nơi vì identity provider đã cấp token. Bạn khai báo `issuer` và `audience`; API Gateway lấy khoá công khai từ địa chỉ `.well-known/openid-configuration` của issuer, rồi kiểm chữ ký, `iss`, `aud` (hoặc `client_id`), hạn `exp`. Có thể thêm yêu cầu **scope** theo từng route. Claims đã xác minh được chuyển cho backend; hàm không phải tự kiểm chữ ký token, chỉ đọc `sub` để biết khách là ai.
+**JWT authorizer** hợp với app của Tới Nơi vì identity provider đã cấp token. Bạn khai báo `issuer` và `audience`; API Gateway lấy khoá công khai từ địa chỉ `.well-known/openid-configuration` của issuer, rồi kiểm tra chữ ký, `iss`, `aud` (hoặc `client_id`), hạn `exp`. Có thể thêm yêu cầu **scope** theo từng route. Claims đã xác minh được chuyển cho backend; hàm không cần tự kiểm tra chữ ký token, chỉ đọc `sub` để biết khách là ai.
 
 ```hcl
 resource "aws_apigatewayv2_authorizer" "jwt" {
@@ -62,11 +62,11 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
 }
 ```
 
-JWT authorizer không có logic tuỳ chỉnh và không thu hồi token giữa chừng: token hợp lệ tới khi hết hạn, nên đặt hạn ngắn. Khi cần logic (tra API key trong DynamoDB, token không phải JWT, kiểm tài khoản bị khoá) dùng **Lambda authorizer**: hàm trả quyết định cho phép hoặc từ chối, kết quả được cache theo identity source trong một TTL để không gọi hàm mỗi request. Với service gọi service, dùng **IAM auth**: người gọi ký request bằng SigV4 và cần quyền `execute-api:Invoke`. **CORS** của HTTP API cấu hình ở cấp API, preflight `OPTIONS` do API Gateway trả. CORS chỉ ràng buộc trình duyệt, không bảo vệ gì trước client ngoài trình duyệt.
+JWT authorizer không có logic tuỳ chỉnh và không thu hồi token giữa chừng: token hợp lệ tới khi hết hạn, nên đặt hạn ngắn. Khi cần logic (tra API key trong DynamoDB, token không phải JWT, kiểm tra tài khoản bị khoá) dùng **Lambda authorizer**: hàm trả quyết định cho phép hoặc từ chối, kết quả được cache theo identity source trong một TTL để không gọi hàm mỗi request. Với service gọi service, dùng **IAM auth**: người gọi ký request bằng SigV4 và cần quyền `execute-api:Invoke`. **CORS** của HTTP API cấu hình ở cấp API, preflight `OPTIONS` do API Gateway trả. CORS chỉ ràng buộc trình duyệt, không bảo vệ gì trước client ngoài trình duyệt.
 
 ## Throttling, usage plan, log và domain
 
-**Throttling** dùng thuật toán token bucket với hai tham số: `rate` (request/giây bền vững) và `burst` (dung lượng xô). Có nhiều tầng: hạn mức account theo region (xem Service Quotas), mặc định của stage, rồi từng route. Ở HTTP API, đặt trần riêng cho route đắt như `GET /v1/quotes` để một route bị dội không ăn hết ngân sách chung. Vượt trần thì API Gateway trả `429` ngay, trước khi chạm backend.
+**Throttling** dùng thuật toán token bucket với hai tham số: `rate` (request/giây duy trì được) và `burst` (dung lượng bucket). Có nhiều tầng: hạn mức account theo region (xem Service Quotas), mặc định của stage, rồi từng route. Ở HTTP API, đặt trần riêng cho route đắt như `GET /v1/quotes` để một route bị gọi dồn dập không dùng hết hạn mức chung. Vượt trần thì API Gateway trả `429` ngay, trước khi chạm backend.
 
 **Usage plan** (chỉ REST API) gắn API key với quota theo ngày, tuần hoặc tháng và throttle riêng từng khách. Lệnh dưới tạo gói cho quán đối tác, mỗi giây 10 request, burst 20, hạn mức 100.000 request mỗi tháng. Các số này là giả định minh hoạ:
 
@@ -79,11 +79,11 @@ aws apigateway create-usage-plan --name toinoi-partner-basic \
 
 API key dùng để nhận diện và đo lường chứ không phải cơ chế xác thực mạnh; đừng coi nó thay token.
 
-**Access log** nên là JSON với `requestId`, `routeKey`, `status`, `responseLatency`, `integrationStatus`, `authorizerError`, ghi vào CloudWatch Logs. Cột `integrationStatus` rỗng khi request bị chặn trước backend là manh mối tách lỗi của API Gateway khỏi lỗi của service. **Custom domain** `api.toinoi.example` cần chứng chỉ ACM cùng region với API (với endpoint regional), bản ghi Route 53 trỏ vào domain của API Gateway (bài 09), và một API mapping nối domain với stage.
+**Access log** nên là JSON với `requestId`, `routeKey`, `status`, `responseLatency`, `integrationStatus`, `authorizerError`, ghi vào CloudWatch Logs. Cột `integrationStatus` rỗng khi request bị chặn trước backend là manh mối để phân biệt lỗi của API Gateway với lỗi của service. **Custom domain** `api.toinoi.example` cần chứng chỉ ACM cùng region với API (với endpoint regional), bản ghi Route 53 trỏ vào domain của API Gateway (bài 09), và một API mapping nối domain với stage.
 
 ## WebSocket API: khách xem tài xế chạy tới
 
-HTTP là hỏi-đáp; muốn khách thấy chấm xanh di chuyển mà không hỏi liên tục, ta dùng **WebSocket API**: kết nối hai chiều giữ mở. Có ba route đặc biệt: `$connect` khi mở kết nối, `$disconnect` khi đóng, `$default` cho thông điệp không khớp route nào; thêm route tuỳ chỉnh bằng biểu thức chọn route như `$request.body.action`.
+HTTP hoạt động theo kiểu hỏi-đáp; muốn khách thấy chấm xanh di chuyển mà không hỏi liên tục, ta dùng **WebSocket API**: kết nối hai chiều giữ mở. Có ba route đặc biệt: `$connect` khi mở kết nối, `$disconnect` khi đóng, `$default` cho message không khớp route nào; thêm route tuỳ chỉnh bằng biểu thức chọn route như `$request.body.action`.
 
 Điểm cốt yếu: API Gateway giữ kết nối, còn **bạn** phải nhớ ai đang xem chuyến nào. Mẫu chuẩn: ở `$connect`, hàm lưu `connectionId` và `tripId` vào DynamoDB kèm TTL; ở `$disconnect` xoá. Khi service `tracking` nhận vị trí mới, nó tra các `connectionId` đang xem chuyến đó rồi gọi API quản lý `post_to_connection` (cần quyền `execute-api:ManageConnections`). Kết nối đã rớt trả lỗi `410 Gone`: xoá bản ghi tương ứng.
 
@@ -98,8 +98,8 @@ Giới hạn cần biết: một kết nối sống tối đa 2 giờ và bị c
 
 ## Cái giá phải trả
 
-- **JWT authorizer không thu hồi token**: khách bị khoá vẫn gọi được tới khi token hết hạn; đặt hạn ngắn và kiểm trạng thái ở service với thao tác nhạy cảm.
-- **Throttle của API Gateway là thô**: nó đếm theo route hoặc API key, không theo thành phố hay khách; quy tắc nghiệp vụ vẫn nằm ở service (rate limit bằng Redis, bài 15).
+- **JWT authorizer không thu hồi token**: khách bị khoá vẫn gọi được tới khi token hết hạn; đặt hạn ngắn và kiểm tra lại trạng thái ở service khi thực hiện thao tác nhạy cảm.
+- **Throttle của API Gateway chỉ ở mức thô**: nó đếm theo route hoặc API key, không theo thành phố hay khách; quy tắc nghiệp vụ vẫn nằm ở service (rate limit bằng Redis, bài 15).
 - **HTTP API không có WAF trực tiếp, usage plan hay cache**: cần chúng thì dùng REST API hoặc đặt CloudFront phía trước (bài 20).
 - **Bảng connectionId dễ phình**: luôn có TTL và xử lý `410 Gone`.
 - **Timeout tích hợp có trần**: HTTP API tối đa 30 giây và không tăng được; REST API mặc định 29 giây, endpoint regional hoặc private có thể xin tăng quota, và AWS có thể giảm hạn mức throttle của account tương ứng. Việc dài phải chuyển sang bất đồng bộ, và ảnh chứng từ dùng presigned URL của S3 chứ không đi qua API.
@@ -110,7 +110,7 @@ Giới hạn cần biết: một kết nối sống tối đa 2 giờ và bị c
 
 ## Lab và kiểm chứng
 
-Mã nằm ở `examples/toi-noi-aws/p02-19-api-gateway`: HTTP API với JWT authorizer, throttling theo route, access log JSON, custom domain tuỳ chọn; Lambda `quote`; WebSocket API cùng bảng DynamoDB có TTL; script `push-location.sh` và `partner-usage-plan.sh`. Kiểm cú pháp bằng Docker:
+Mã nằm ở `examples/toi-noi-aws/p02-19-api-gateway`: HTTP API với JWT authorizer, throttling theo route, access log JSON, custom domain tuỳ chọn; Lambda `quote`; WebSocket API cùng bảng DynamoDB có TTL; script `push-location.sh` và `partner-usage-plan.sh`. Kiểm tra cú pháp bằng Docker:
 
 ```bash
 cd examples/toi-noi-aws/p02-19-api-gateway
@@ -118,7 +118,7 @@ docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 init -backend=false 
 docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 validate
 ```
 
-`validate` chỉ chứng minh hợp lệ về cấu hình. Chưa kiểm chứng trên tài khoản thật: JWT với issuer thật, throttling, kết nối WebSocket và `post-to-connection`. Chạy `terraform apply` tốn chi phí theo request, message và phút kết nối; dọn bằng `terraform destroy` như README ghi.
+`validate` chỉ chứng minh cấu hình hợp lệ. Chưa kiểm chứng trên tài khoản thật: JWT với issuer thật, throttling, kết nối WebSocket và `post-to-connection`. Chạy `terraform apply` tốn chi phí theo request, message và phút kết nối; dọn bằng `terraform destroy` như README ghi.
 
 Bài trước: [bài 18](/articles/aws-lambda-webhook-thanh-toan-cold-start). Bài tiếp: [bài 20](/articles/aws-cloudfront-waf-shield).
 

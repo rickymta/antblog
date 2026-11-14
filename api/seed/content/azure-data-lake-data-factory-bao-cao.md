@@ -15,12 +15,12 @@ Bài này đưa báo cáo thu nhập tài xế ra khỏi database giao dịch: c
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Đã có read replica của PostgreSQL rồi thì cứ cho bộ phận báo cáo query thẳng vào replica, cần gì data lake?</p>
-<details><summary>Xem đáp án</summary><p>Replica gỡ tải đọc khỏi primary nhưng không đổi bản chất query: vẫn quét hàng chục triệu dòng trên engine thiết kế cho giao dịch, và query dài vẫn có thể xung đột với replay WAL. Replica hợp làm nguồn để copy đi, ít hợp làm nơi chạy báo cáo nặng thường xuyên.</p></details>
+<details><summary>Xem đáp án</summary><p>Replica giảm tải đọc cho primary nhưng không đổi bản chất query: vẫn quét hàng chục triệu dòng trên engine thiết kế cho giao dịch, và query dài vẫn có thể xung đột với replay WAL. Replica hợp làm nguồn để copy đi, ít hợp làm nơi chạy báo cáo nặng thường xuyên.</p></details>
 </div>
 
 ## Báo cáo 30 ngày không nên chạy trên database đang nhận chuyến
 
-Bảng `trips` của Tới Nơi ghi nhiều và sống nhờ truy vấn ngắn theo khoá. Bộ phận vận hành lại muốn thu nhập của từng tài xế trong 30 ngày, chia theo thành phố, so với tháng trước: query quét phần lớn bảng, gom nhóm, sắp xếp, và hay được mở đúng giờ cao điểm.
+Bảng `trips` của Tới Nơi ghi nhiều và chủ yếu phục vụ các truy vấn ngắn theo khoá. Bộ phận vận hành lại muốn thu nhập của từng tài xế trong 30 ngày, chia theo thành phố, so với tháng trước: query quét phần lớn bảng, gom nhóm, sắp xếp, và thường được chạy đúng giờ cao điểm.
 
 Chạy trên primary là cách nhanh nhất để làm chậm việc đặt xe: query tranh CPU, bộ nhớ đệm và I/O với giao dịch thật. Read replica (bài 30) đỡ hơn, nhưng query dài có thể bị huỷ khi xung đột với WAL cần replay, và mỗi báo cáo lại tính từ đầu trên dữ liệu thô.
 
@@ -35,12 +35,12 @@ Hướng đi của bài là **tách OLTP khỏi analytics**: mỗi đêm một j
 
 ## Data Lake Storage Gen2 là Blob Storage có thư mục thật
 
-Data Lake Storage Gen2 không phải dịch vụ riêng mà là storage account ([bài 8](/articles/azure-storage-account-blob-tier-sas)) bật **hierarchical namespace** (cờ `--enable-hierarchical-namespace`). Blob thường có không gian phẳng: `curated/trips/dt=2026-11-05/part-0.parquet` là một cái tên dài, dấu `/` chỉ là quy ước. Bật hierarchical namespace thì thư mục là đối tượng thật, kéo theo hai hậu quả:
+Data Lake Storage Gen2 không phải dịch vụ riêng mà là storage account ([bài 8](/articles/azure-storage-account-blob-tier-sas)) bật **hierarchical namespace** (cờ `--enable-hierarchical-namespace`). Blob thường dùng không gian tên phẳng: `curated/trips/dt=2026-11-05/part-0.parquet` là một cái tên dài, dấu `/` chỉ là quy ước. Bật hierarchical namespace thì thư mục là đối tượng thật, kéo theo hai hậu quả:
 
 - Đổi tên hoặc xoá cả thư mục là một thao tác metadata, không phải copy rồi xoá từng blob.
-- Có ACL kiểu POSIX trên từng thư mục và file, ngoài RBAC của Azure. Bạn có thể cho nhóm phân tích đọc `curated` nhưng không đọc thư mục chứa thông tin cá nhân.
+- Hỗ trợ ACL kiểu POSIX trên từng thư mục và file, bên cạnh RBAC của Azure. Bạn có thể cho nhóm phân tích đọc `curated` nhưng không đọc thư mục chứa thông tin cá nhân.
 
-Một số tính năng Blob chưa hỗ trợ đầy đủ trên account loại này; kiểm bảng tính năng trước khi bật, vì bật rồi không tắt lại được.
+Một số tính năng Blob chưa hỗ trợ đầy đủ trên account loại này; kiểm tra bảng tính năng được hỗ trợ trước khi bật, vì bật rồi không tắt lại được.
 
 Tới Nơi chia lake thành ba container:
 
@@ -57,10 +57,10 @@ Tách vùng để kiểm soát quyền và vòng đời: `raw` quyền hẹp nh�
 Azure Data Factory chủ yếu điều phối việc di chuyển dữ liệu. Bốn khái niệm cần nắm:
 
 - **Pipeline** là chuỗi activity; pipeline của Tới Nơi ban đầu chỉ có một activity **copy**. **Linked service** là thông tin kết nối tới nguồn hoặc đích, **dataset** mô tả hình dạng dữ liệu trên kết nối đó.
-- **Integration runtime** là hạ tầng chạy copy. Azure integration runtime chỉ tới được nguồn có đường mạng. PostgreSQL chỉ mở trong mạng riêng ([bài 17](/articles/azure-private-endpoint-private-dns-service-endpoint)) thì cần managed virtual network kèm managed private endpoint, hoặc self-hosted integration runtime đặt trong mạng đó; hỗ trợ khác nhau theo connector.
+- **Integration runtime** là hạ tầng chạy copy. Azure integration runtime chỉ kết nối được tới nguồn mà nó có đường mạng tới. PostgreSQL chỉ mở trong mạng riêng ([bài 17](/articles/azure-private-endpoint-private-dns-service-endpoint)) thì cần managed virtual network kèm managed private endpoint, hoặc self-hosted integration runtime đặt trong mạng đó; mức hỗ trợ khác nhau tuỳ connector.
 - **Trigger** chạy pipeline theo lịch. Schedule trigger đơn giản; tumbling window có thêm khoảng thời gian, phụ thuộc và chạy bù, hợp khi cần nạp lại ngày bị lỡ.
 
-Factory có system-assigned managed identity ([bài 13](/articles/azure-managed-identity-workload-identity)); role `Storage Blob Data Contributor` trên storage account đủ để ghi lake, không cần key hay SAS. Phía PostgreSQL, hỗ trợ xác thực Entra của connector tuỳ phiên bản. Nếu chưa dùng được, tạo database role chỉ `SELECT` trên cột cần, lưu mật khẩu trong Key Vault để linked service lấy qua managed identity.
+Factory có system-assigned managed identity ([bài 13](/articles/azure-managed-identity-workload-identity)); role `Storage Blob Data Contributor` trên storage account đủ để ghi lake, không cần key hay SAS. Phía PostgreSQL, việc connector có hỗ trợ xác thực Entra hay không tuỳ phiên bản. Nếu chưa dùng được, tạo database role chỉ `SELECT` trên cột cần, lưu mật khẩu trong Key Vault để linked service lấy qua managed identity.
 
 Khối dưới là thân pipeline rút gọn: một copy activity đọc các chuyến hoàn tất trong một ngày, ghi Parquet vào dataset tham số hoá theo `dt`, retry hai lần. Linked service và dataset được giả định đã tạo; khối này không chứng minh kết nối hay quyền ghi chạy được.
 
@@ -94,11 +94,11 @@ Khối dưới là thân pipeline rút gọn: một copy activity đọc các ch
 }
 ```
 
-Ba chi tiết đáng đọc kỹ. Query liệt kê cột, không `SELECT *`, nên cột tên hay số điện thoại không rời database. Khoảng thời gian viết theo giờ Việt Nam (`+07`) còn `completed_at` lưu UTC; sai múi giờ làm mọi con số lệch mà không báo lỗi. Cuối cùng, `retry` chỉ an toàn khi pipeline **idempotent** theo ngày. Nguồn là database mà dataset đích không đặt tên file thì mỗi lần chạy sinh tên file mới theo run ID, chạy lại sẽ nhân đôi dữ liệu. Hãy đặt tên file cố định trong `ds_curated_trips` hoặc thêm activity Delete xoá thư mục `dt=` trước khi copy.
+Ba chi tiết đáng đọc kỹ. Query liệt kê cột, không `SELECT *`, nên cột tên hay số điện thoại không rời database. Khoảng thời gian viết theo giờ Việt Nam (`+07`) còn `completed_at` lưu UTC; sai múi giờ làm mọi con số lệch mà không báo lỗi. Cuối cùng, `retry` chỉ an toàn khi pipeline **idempotent** theo ngày. Nếu nguồn là database và dataset đích không đặt tên file thì mỗi lần chạy sinh tên file mới theo run ID, chạy lại sẽ nhân đôi dữ liệu. Hãy đặt tên file cố định trong `ds_curated_trips` hoặc thêm activity Delete xoá thư mục `dt=` trước khi copy.
 
 ## Mô hình báo cáo: một bảng fact, hai dimension, và dữ liệu cá nhân ở lại vùng hẹp
 
-Parquet trong `curated` mới là bản sao của bảng nguồn. Để báo cáo dễ hỏi, Tới Nơi dựng mô hình sao trong `serving`:
+Parquet trong `curated` mới chỉ là bản sao của bảng nguồn. Để dễ truy vấn khi làm báo cáo, Tới Nơi dựng mô hình sao trong `serving`:
 
 | Bảng | Mỗi dòng là | Cột chính |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ Parquet trong `curated` mới là bản sao của bảng nguồn. Để báo cá
 
 Thu nhập tài xế theo ngày là tổng `driver_payout` của các chuyến hoàn tất, nhóm theo `driver_key`. Không dùng `fare_amount` khách trả, vì chênh lệch là phí nền tảng.
 
-Họ tên, số điện thoại, biển số và toạ độ đón chính xác đều nhạy cảm, và data lake không có masking tự động để bật. Che dữ liệu phải làm ở pipeline:
+Họ tên, số điện thoại, biển số và toạ độ đón chính xác đều nhạy cảm, và data lake không có sẵn tính năng masking tự động để bật. Việc che dữ liệu phải làm ở pipeline:
 
 - Chỉ chọn cột cần thiết ngay ở câu SELECT nguồn, như khối trên.
 - Thay `driver_id` bằng `driver_key` được băm có muối, muối lưu trong Key Vault. Cùng một tài xế luôn ra cùng một khoá để nối bảng, nhưng người đọc báo cáo không suy ngược ra hồ sơ.
@@ -116,9 +116,9 @@ Họ tên, số điện thoại, biển số và toạ độ đón chính xác �
 
 Băm có muối là giả danh hoá, không phải ẩn danh: ai có cả muối lẫn danh sách id vẫn dò ngược được.
 
-## Capture của Event Hubs cho km thực tế, nhưng cần một bước đổi định dạng
+## Dùng Capture của Event Hubs để lấy km thực tế, nhưng cần thêm một bước đổi định dạng
 
-Cột `distance_km` trong `trips` thường là quãng đường ước tính lúc đặt; km chạy thật cần chuỗi toạ độ GPS. Ở [bài 35](/articles/azure-event-hubs-stream-gps-consumer-group), luồng đó đi qua Event Hubs và bật Capture. Trỏ Capture vào container `raw` thì GPS tới lake mà không phải viết thêm consumer.
+Cột `distance_km` trong `trips` thường là quãng đường ước tính lúc đặt; km chạy thật cần chuỗi toạ độ GPS. Ở [bài 35](/articles/azure-event-hubs-stream-gps-consumer-group), luồng đó đi qua Event Hubs và bật Capture. Trỏ Capture vào container `raw` thì dữ liệu GPS đổ thẳng vào lake mà không phải viết thêm consumer.
 
 Capture ghi Avro, thư mục theo namespace, event hub, partition và thời điểm, không theo `dt=`. Synapse serverless không đọc Avro, nên cần một bước đổi sang Parquet theo ngày trước khi vào `curated` (hoặc ghi Parquet từ đầu bằng Stream Analytics no-code editor). Tính km thực tế cũng là bài toán dữ liệu: điểm GPS chỉ mang `driverId`, nên phải ghép vào chuyến theo tài xế và khoảng thời gian chuyến, cộng khoảng cách giữa các điểm liên tiếp và lọc điểm nhảy do nhiễu. Kết quả là cột `distance_km_gps` trong `fact_trips`.
 
@@ -131,9 +131,9 @@ Capture ghi Avro, thư mục theo namespace, event hub, partition và thời đi
 
 ## Synapse serverless tính tiền theo dữ liệu quét, nên chia thư mục là tối ưu chi phí
 
-**Synapse serverless SQL pool** không có máy chủ để quản lý: nó đọc file trực tiếp trong storage và tính tiền theo dữ liệu được xử lý. `OPENROWSET` coi một đường dẫn (kèm wildcard) như một bảng. Microsoft Fabric là hướng mới cho cùng bài toán, gom lake, SQL và báo cáo vào một nền tảng; bài này chỉ nhắc tên.
+**Synapse serverless SQL pool** không có máy chủ để quản lý: pool này đọc file trực tiếp trong storage và tính tiền theo dữ liệu được xử lý. `OPENROWSET` coi một đường dẫn (kèm wildcard) như một bảng. Microsoft Fabric là hướng mới cho cùng bài toán, gom lake, SQL và báo cáo vào một nền tảng; bài này chỉ nhắc tên.
 
-Chi phí của luồng báo cáo gồm ba khoản, mỗi khoản có một cách làm nhỏ lại:
+Chi phí của luồng báo cáo gồm ba khoản, mỗi khoản có một cách giảm chi phí:
 
 | Khoản | Tính theo | Cách giảm |
 | --- | --- | --- |
@@ -141,14 +141,14 @@ Chi phí của luồng báo cáo gồm ba khoản, mỗi khoản có một cách
 | Lưu trữ trong lake | GB-tháng theo tầng nóng, mát, lạnh, archive | Lifecycle policy chuyển `raw` và `curated` cũ sang tầng rẻ hơn |
 | Query serverless | Dữ liệu được xử lý (theo TB) | Parquet, chọn đúng cột, lọc theo thư mục `dt=` |
 
-Parquet lưu theo cột nên query chọn ba cột không đọc các cột còn lại, và thư mục `dt=YYYY-MM-DD` cho phép bỏ qua cả ngày không cần. Cùng dữ liệu lưu CSV và quét hết mỗi lần thì trả nhiều hơn mà không nhanh hơn.
+Parquet lưu theo cột nên query chọn ba cột sẽ không phải đọc các cột còn lại, và thư mục `dt=YYYY-MM-DD` cho phép bỏ qua cả ngày không cần. Cùng dữ liệu lưu CSV và quét hết mỗi lần thì trả nhiều hơn mà không nhanh hơn.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Mỗi query serverless là một khoản tiền. Dashboard tự làm mới mỗi phút trên toàn bộ <code>curated/trips</code> không lọc ngày sẽ quét lại cả năm dữ liệu hàng nghìn lần mỗi ngày. Bắt buộc điều kiện theo thư mục, đặt budget alert ([bài 5](/articles/azure-chi-phi-pricing-cost-management-budget)), và cho công cụ BI đọc <code>serving</code> đã tổng hợp.</p>
+<p>Mỗi query serverless đều tốn tiền. Dashboard tự làm mới mỗi phút trên toàn bộ <code>curated/trips</code> không lọc ngày sẽ quét lại cả năm dữ liệu hàng nghìn lần mỗi ngày. Hãy bắt buộc lọc theo thư mục, đặt budget alert ([bài 5](/articles/azure-chi-phi-pricing-cost-management-budget)), và cho công cụ BI đọc <code>serving</code> đã tổng hợp.</p>
 </div>
 
-Lifecycle management là policy JSON gắn vào storage account, chẳng hạn chuyển blob trong `raw/` sang Cool sau một số ngày kể từ lần sửa cuối, rồi sang Archive. Archive lấy lại phải rehydrate, mất hàng giờ và có phí, nên đừng đẩy xuống đó dữ liệu còn query hằng tuần.
+Lifecycle management là policy JSON gắn vào storage account, chẳng hạn chuyển blob trong `raw/` sang Cool sau một số ngày kể từ lần sửa cuối, rồi sang Archive. Archive lấy lại phải rehydrate, mất hàng giờ và có phí, nên đừng chuyển xuống đó dữ liệu vẫn được query hằng tuần.
 
 ## Lab: từ trips hôm qua tới tổng thu nhập theo tài xế
 
@@ -170,7 +170,7 @@ for c in raw curated serving; do
 done
 ```
 
-Khối thứ hai tạo factory, cấp quyền ghi lake cho managed identity của nó, nạp pipeline từ `pipeline.json` (khối JSON ở trên) và chạy thử một ngày. `az datafactory` là extension, cú pháp có thể đổi; kiểm bằng `-h`. Linked service và dataset cần tạo trước, bằng portal hoặc `az datafactory linked-service create` và `dataset create`:
+Khối thứ hai tạo factory, cấp quyền ghi lake cho managed identity của nó, nạp pipeline từ `pipeline.json` (khối JSON ở trên) và chạy thử một ngày. `az datafactory` là extension, cú pháp có thể đổi; kiểm tra bằng `-h`. Linked service và dataset cần tạo trước, bằng portal hoặc `az datafactory linked-service create` và `dataset create`:
 
 ```bash
 ADF=adf-toinoi-dev-sea
@@ -218,7 +218,7 @@ Câu SQL chứng minh file đọc được, chưa chứng minh số liệu khớ
 
 **Bài tập:** pipeline đêm chạy xong lúc 02:00 nhưng một chuyến hoàn tất lúc 23:58 lại không có trong `dt=` của ngày đó. Nêu hai nguyên nhân có thể và cách kiểm.
 
-<details><summary>Xem lời giải</summary><p>Thứ nhất là múi giờ: query lọc theo UTC trong khi ngày báo cáo tính theo giờ Việt Nam, nên chuyến rơi sang ngày khác. Thứ hai là trạng thái: lúc copy chuyến chưa ở <code>completed</code>, hoặc <code>completed_at</code> được ghi muộn hơn. Kiểm bằng cách so <code>completed_at</code> với hai biên của query rồi chạy lại ngày đó; chạy lại an toàn khi đích ghi đè đúng một thư mục <code>dt=</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>Thứ nhất là múi giờ: query lọc theo UTC trong khi ngày báo cáo tính theo giờ Việt Nam, nên chuyến rơi sang ngày khác. Thứ hai là trạng thái: lúc copy chuyến chưa ở <code>completed</code>, hoặc <code>completed_at</code> được ghi muộn hơn. Kiểm tra bằng cách so <code>completed_at</code> với hai biên của query rồi chạy lại ngày đó; chạy lại an toàn khi đích ghi đè đúng một thư mục <code>dt=</code>.</p></details>
 
 ## Học tiếp từ đây
 

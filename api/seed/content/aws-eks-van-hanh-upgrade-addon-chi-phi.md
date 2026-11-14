@@ -22,7 +22,7 @@ Tháng 11, Tới Nơi nhận email từ AWS: phiên bản Kubernetes của clust
 
 Kubernetes ra khoảng ba minor version mỗi năm. EKS hỗ trợ mỗi version 14 tháng **standard support** kể từ ngày EKS phát hành, rồi thêm 12 tháng **extended support** có phí theo giờ cluster. Chính sách nâng cấp của cluster quyết định chuyện gì xảy ra khi hết standard support: `STANDARD` thì EKS tự nâng control plane lên bản kế tiếp; `EXTENDED` thì cluster ở lại và trả phí, tới khi hết extended support cũng bị tự nâng. Ngày cụ thể xem trang Kubernetes versions của EKS hoặc `aws eks describe-cluster-versions`.
 
-Hệ quả: mỗi cluster phải nâng 2 đến 3 lần mỗi năm, nên việc này cần có lịch, có chặng thử và có người sở hữu. Tới Nơi chọn đi **dev trước, staging sau một tuần, prod sau thêm một tuần**, ngoài các khung cao điểm 11:00 và 17:00.
+Hệ quả: mỗi cluster phải nâng 2 đến 3 lần mỗi năm, nên việc này cần có lịch, có chặng thử và có người phụ trách. Tới Nơi chọn đi **dev trước, staging sau một tuần, prod sau thêm một tuần**, tránh các khung cao điểm 11:00 và 17:00.
 
 ## Quy trình nâng cấp: kiểm, control plane, add-on, node, app
 
@@ -40,7 +40,7 @@ aws eks list-insights --cluster-name toinoi-prod-eks
 aws eks describe-insight --cluster-name toinoi-prod-eks --id <insight-id>
 ```
 
-Bổ sung bằng `pluto` hoặc `kubent` để quét manifest và Helm release tìm API sắp bị gỡ (chạy trên repo GitOps của bài 46 là chỗ rẻ nhất), và kiểm PDB: PDB đặt `minAvailable` bằng số replica làm node không bao giờ drain được, nâng cấp treo.
+Bổ sung bằng `pluto` hoặc `kubent` để quét manifest và Helm release tìm API sắp bị gỡ (chạy trên repo GitOps của bài 46 là chỗ rẻ nhất), và kiểm PDB: PDB đặt `minAvailable` bằng số replica khiến node không bao giờ drain được và nâng cấp bị treo.
 
 **Bước 2, control plane.** Một lệnh, nhưng EKS làm cả quy trình phía sau:
 
@@ -49,13 +49,13 @@ aws eks update-cluster-version --name toinoi-prod-eks --kubernetes-version 1.N+1
 aws eks wait cluster-active --name toinoi-prod-eks
 ```
 
-EKS thay các thành phần control plane lần lượt nên API vẫn phục vụ trong lúc đó. Thay `1.N+1` bằng version cụ thể; với Terraform, đổi biến version rồi `plan` và đọc kỹ.
+EKS thay các thành phần control plane lần lượt nên API vẫn phục vụ trong lúc đó. Thay `1.N+1` bằng phiên bản cụ thể; với Terraform, đổi biến version rồi `plan` và đọc kỹ.
 
-**Bước 3, add-on.** Mỗi add-on có bảng tương thích; lấy danh sách version hợp với bản Kubernetes bằng `aws eks describe-addon-versions --kubernetes-version 1.N+1 --addon-name vpc-cni`. Cập nhật bằng `aws eks update-addon`, và quyết định cách xử lý xung đột với `--resolve-conflicts`:
+**Bước 3, add-on.** Mỗi add-on có bảng tương thích; lấy danh sách phiên bản hợp với bản Kubernetes bằng `aws eks describe-addon-versions --kubernetes-version 1.N+1 --addon-name vpc-cni`. Cập nhật bằng `aws eks update-addon`, và quyết định cách xử lý xung đột với `--resolve-conflicts`:
 
 | Giá trị | Ý nghĩa | Khi dùng |
 |---|---|---|
-| `NONE` | Thất bại nếu có cấu hình tự sửa lệch | Mặc định an toàn để phát hiện |
+| `NONE` | Báo lỗi nếu có cấu hình bạn đã tự sửa | Mặc định an toàn để phát hiện |
 | `PRESERVE` | Giữ giá trị bạn đã sửa | Bạn cố ý chỉnh cấu hình |
 | `OVERWRITE` | Ghi đè về giá trị của EKS | Muốn quay về chuẩn, chấp nhận mất chỉnh sửa |
 
@@ -71,7 +71,7 @@ EKS thay các thành phần control plane lần lượt nên API vẫn phục v�
 | CloudWatch observability | Có | Trùng chức năng với Fluent Bit, chọn một (bài 47) |
 | Argo CD, Rollouts, ESO, Kyverno | Helm qua GitOps | Nâng theo release riêng, ghi vào repo deploy |
 
-EKS add-on cho bạn một nơi biết version, cập nhật bằng API, và `configurationValues` dạng JSON để chỉnh tham số. Cái giá là phụ thuộc danh sách và lịch của EKS. Thành phần ngoài danh sách tự cài bằng Helm qua GitOps, nên mỗi lần nâng minor phải kiểm chart có hỗ trợ version mới.
+EKS add-on cho bạn một nơi để biết phiên bản, cập nhật bằng API, và `configurationValues` dạng JSON để chỉnh tham số. Cái giá là bạn phụ thuộc vào danh sách và lịch của EKS. Thành phần ngoài danh sách tự cài bằng Helm qua GitOps, nên mỗi lần nâng minor phải kiểm xem chart có hỗ trợ phiên bản mới không.
 
 ## Chi phí: hoá đơn EKS gồm những dòng nào
 
@@ -83,7 +83,7 @@ Bài không nêu giá; điều cần nắm là **mỗi dòng bị chi phối b�
 | Node | Số và loại instance, giờ chạy | Karpenter, Spot cho tải chịu gián đoạn, Graviton, Savings Plans (bài 59) |
 | NAT và data transfer | Lưu lượng ra Internet và chéo AZ | VPC endpoint cho S3, ECR; topology-aware routing |
 | Load balancer | Số ALB, LCU | Dùng chung ALB qua nhóm Ingress |
-| CloudWatch Logs, metric | Dung lượng log, số series | Retention, sampling, bỏ label nổ (bài 47) |
+| CloudWatch Logs, metric | Dung lượng log, số series | Retention, sampling, bỏ label làm số series bùng nổ (bài 47) |
 
 Ví dụ: Service 6 replica rải 3 AZ gọi nhau thì khoảng hai phần ba lưu lượng là chéo AZ. Annotation `service.kubernetes.io/topology-mode: Auto` ưu tiên endpoint cùng AZ khi đủ endpoint, đổi lại có nguy cơ mất cân bằng tải; đo trước khi bật rộng.
 
@@ -94,11 +94,11 @@ Ví dụ: Service 6 replica rải 3 AZ gọi nhau thì khoảng hai phần ba l�
 <figcaption>Hình 2. Hoá đơn AWS chỉ biết tới node; muốn trả lời "namespace nào tốn bao nhiêu" cần một lớp phân bổ thêm.</figcaption>
 </figure>
 
-Hoá đơn chỉ thấy node, không thấy pod. **Split Cost Allocation Data** (bật trong Billing preferences, dữ liệu ra Cost and Usage Reports) chia chi phí node xuống từng pod theo CPU và memory (kể cả GPU), kèm tag `aws:eks:namespace`, `aws:eks:workload-name`; **Kubecost** hoặc **OpenCost** làm việc tương tự trong cluster và thêm khuyến nghị. Cả hai tính phần pod giữ chỗ bằng **request**: request quá cao thì namespace bị tính nhiều và node bị giữ chỗ phí. Rà soát định kỳ bằng cách so request với mức dùng thực (VPA ở chế độ khuyến nghị, hoặc PromQL ở bài 47), giảm dần chứ đừng cắt mạnh.
+Hoá đơn chỉ thấy node, không thấy pod. **Split Cost Allocation Data** (bật trong Billing preferences, dữ liệu ra Cost and Usage Reports) chia chi phí node xuống từng pod theo CPU và memory (kể cả GPU), kèm tag `aws:eks:namespace`, `aws:eks:workload-name`; **Kubecost** hoặc **OpenCost** làm việc tương tự trong cluster và thêm khuyến nghị. Cả hai tính phần pod giữ chỗ bằng **request**: request quá cao thì namespace bị tính nhiều tiền và node bị giữ chỗ lãng phí. Rà soát định kỳ bằng cách so request với mức dùng thực (VPA ở chế độ khuyến nghị, hoặc PromQL ở bài 47), giảm dần chứ đừng cắt mạnh.
 
 ## Multi-cluster, Velero và DR
 
-Một cluster hay nhiều: **theo môi trường** (dev, staging, prod tách cluster, tách tài khoản ở bài 28) giữ blast radius của lỗi nâng cấp và lỗi cấu hình nhỏ; **theo region** cần khi có yêu cầu độ trễ hoặc DR (bài 56). Càng nhiều cluster thì chi phí control plane và công nâng cấp càng nhân lên, nên Tới Nơi dừng ở ba cluster theo môi trường và chỉ thêm cluster DR ở `ap-northeast-1` khi quyết định ở bài 56.
+Một cluster hay nhiều: **theo môi trường** (dev, staging, prod tách cluster, tách tài khoản ở bài 28) giữ blast radius của lỗi nâng cấp và lỗi cấu hình nhỏ; **theo region** cần khi có yêu cầu độ trễ hoặc DR (bài 56). Càng nhiều cluster thì chi phí control plane và công sức nâng cấp càng nhân lên, nên Tới Nơi dừng ở ba cluster theo môi trường và chỉ thêm cluster DR ở `ap-northeast-1` khi quyết định ở bài 56.
 
 **Velero** sao lưu các tài nguyên Kubernetes lên S3 và snapshot volume (qua EBS snapshot). Với Tới Nơi, giá trị chính là dữ liệu trong PersistentVolume và các tài nguyên không đi qua GitOps; còn Deployment hay Service dựng lại từ Git. Dữ liệu quan trọng nằm ở RDS và Aurora, đã có chiến lược ở [bài 37](/articles/aws-backup-disaster-recovery-rpo-rto). Phải diễn tập restore, không chỉ lên lịch backup.
 
@@ -108,11 +108,11 @@ Một cluster hay nhiều: **theo môi trường** (dev, staging, prod tách clu
 |---|---|---|
 | Node `NotReady` | `kubectl describe node`; trạng thái instance trong EC2; log kubelet qua Session Manager | Hết disk hoặc memory pressure, kubelet mất kết nối API, VPC CNI lỗi. Cordon, drain, để node group thay node thay vì sửa tay |
 | Pod `CrashLoopBackOff` | `kubectl logs --previous`; `kubectl describe pod` xem `OOMKilled` và exit code | Lỗi cấu hình hoặc secret, probe quá gắt, memory limit thấp. Rollback bằng `git revert` |
-| Pod `Pending` "không gán được IP" | Số IP còn trống: `aws ec2 describe-subnets --query "Subnets[].AvailableIpAddressCount"` | Subnet cạn IP. Prefix delegation hoặc custom networking với CIDR phụ (bài 43), thêm subnet |
+| Pod `Pending` "không gán được IP" | Số IP còn trống: `aws ec2 describe-subnets --query "Subnets[].AvailableIpAddressCount"` | Subnet hết IP. Prefix delegation hoặc custom networking với CIDR phụ (bài 43), thêm subnet |
 | DNS chậm, lỗi `i/o timeout` | Metric CoreDNS; số request trên mỗi replica | CoreDNS quá tải: tăng replica hoặc bật autoscaling của add-on, thêm NodeLocal DNSCache, giảm truy vấn thừa |
 | API server chậm, lỗi `etcdserver` | Metric kích thước lưu trữ của API server; số đối tượng theo kind | Quá nhiều object (Event, Job đã xong, ConfigMap lớn). Dọn Job bằng `ttlSecondsAfterFinished`, giảm kích thước object |
 
-EKS quản lý etcd nhưng không miễn nhiễm với số object quá lớn; giới hạn dung lượng hãy đối chiếu tài liệu EKS hiện hành. Mỗi runbook nên ghi thêm ai được gọi, lệnh kiểm đầu tiên và khi nào leo thang cho AWS Support.
+EKS quản lý etcd nhưng etcd vẫn có thể gặp sự cố khi số object quá lớn; giới hạn dung lượng hãy đối chiếu tài liệu EKS hiện hành. Mỗi runbook nên ghi thêm ai được gọi, lệnh kiểm đầu tiên và khi nào leo thang cho AWS Support.
 
 ## Lỗi thường gặp
 

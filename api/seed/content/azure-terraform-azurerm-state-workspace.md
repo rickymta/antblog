@@ -18,9 +18,9 @@ Bài này dựng lại network và PostgreSQL dev của Tới Nơi bằng Terraf
 <details><summary>Xem đáp án</summary><p>Có. <code>sensitive</code> chỉ che giá trị khỏi output của <code>plan</code> và <code>apply</code>. State vẫn lưu giá trị ở dạng văn bản thường, nên quyền đọc state ngang quyền đọc secret.</p></details>
 </div>
 
-## Chọn Terraform vì đội và hệ sinh thái, không phải vì nó mạnh hơn
+## Chọn Terraform vì đội và hệ sinh thái, không phải vì Terraform mạnh hơn
 
-Bài 40 đã cho thấy Bicep đủ để dựng hạ tầng Azure. Terraform chỉ đáng chọn khi có lý do cụ thể. Lý do thứ nhất là đa cloud hoặc cần quản lý thứ không thuộc Azure bằng cùng một quy trình, ví dụ bản ghi DNS ở nhà cung cấp khác hay cấu hình của hệ thống bên thứ ba có provider. Lý do thứ hai là đội đã quen **HCL** và đã có pipeline, review, module nội bộ viết bằng nó. Lý do thứ ba là hệ sinh thái provider và module sẵn có.
+Bài 40 đã cho thấy Bicep đủ để dựng hạ tầng Azure. Terraform chỉ đáng chọn khi có lý do cụ thể. Lý do thứ nhất là đa cloud hoặc cần quản lý thứ không thuộc Azure bằng cùng một quy trình, ví dụ bản ghi DNS ở nhà cung cấp khác hay cấu hình của hệ thống bên thứ ba có provider. Lý do thứ hai là đội đã quen **HCL** và đã có pipeline, review, module nội bộ viết bằng HCL. Lý do thứ ba là hệ sinh thái provider và module sẵn có.
 
 Cái giá là bạn tự vận hành **state**. Bicep không có state vì ARM là nơi giữ hiện trạng; Terraform ghi lại những gì nó đã tạo vào một file, rồi dùng file đó để biết phải sửa gì. Hỏng, mất hoặc lộ file này là sự cố thật.
 
@@ -32,13 +32,13 @@ Cái giá là bạn tự vận hành **state**. Bicep không có state vì ARM l
 | Phạm vi | Chỉ Azure | Nhiều provider, nhiều cloud |
 | Khoá chống chạy đồng thời | ARM tự xử lý | Lease trên blob state |
 
-Trong Terraform có hai provider cho Azure. **azurerm** bọc từng resource thành một khái niệm ổn định, có kiểm tra giá trị và tên thuộc tính riêng (ví dụ `sku_name = "B_Standard_B1ms"`, khác cặp `sku.name` và `tier` của Bicep). **azapi** gọi thẳng ARM REST API, nên dùng được ngay thuộc tính hoặc resource mới mà azurerm chưa bọc, đổi lại bạn viết gần với JSON của ARM hơn. Cách dùng hợp lý: azurerm cho phần lớn resource, azapi chỉ cho phần azurerm còn thiếu.
+Trong Terraform có hai provider cho Azure. **azurerm** bọc từng resource thành một lớp trừu tượng ổn định, có kiểm tra giá trị và tên thuộc tính riêng (ví dụ `sku_name = "B_Standard_B1ms"`, khác cặp `sku.name` và `tier` của Bicep). **azapi** gọi thẳng ARM REST API, nên dùng được ngay thuộc tính hoặc resource mới mà azurerm chưa bọc, đổi lại bạn viết gần với JSON của ARM hơn. Cách dùng hợp lý: azurerm cho phần lớn resource, azapi chỉ cho phần azurerm còn thiếu.
 
-Một quy tắc cứng: **Bicep và Terraform không được trộn trên cùng một resource.** Mỗi công cụ tin rằng nó sở hữu resource đó. Bicep không biết state của Terraform, Terraform không biết deployment của Bicep, nên hai bên ghi đè thuộc tính của nhau, và `plan` hiện drift mãi không dứt. Tệ hơn, deployment Bicep ở chế độ Complete sẽ xoá resource Terraform tạo trong cùng resource group. Chia ranh giới theo resource hoặc theo tầng: ví dụ Bicep dựng storage chứa state và phần nền của subscription, Terraform dựng workload.
+Một quy tắc cứng: **Bicep và Terraform không được trộn trên cùng một resource.** Mỗi công cụ tin rằng mình sở hữu resource đó. Bicep không biết state của Terraform, Terraform không biết deployment của Bicep, nên hai bên ghi đè thuộc tính của nhau, và `plan` hiện drift mãi không dứt. Tệ hơn, deployment Bicep ở chế độ Complete sẽ xoá resource do Terraform tạo trong cùng resource group. Chia ranh giới theo resource hoặc theo tầng: ví dụ Bicep dựng storage chứa state và phần nền của subscription, Terraform dựng workload.
 
 ## State nằm trong Storage nên Storage là thứ phải bảo vệ nhất
 
-Backend **azurerm** lưu state thành một blob trong container của Storage account. Nó cho bạn ba thứ không có khi để state trên máy cá nhân: nhiều người và pipeline dùng chung một nguồn sự thật, khoá chống hai lần `apply` chạy cùng lúc, và lịch sử để quay lại. Khoá thực hiện bằng **lease** trên blob: khi `plan` hoặc `apply` bắt đầu, Terraform giữ lease, người thứ hai thấy lỗi "state locked" và phải chờ. **Blob versioning** giữ các phiên bản cũ của file state, nên một lần ghi hỏng vẫn khôi phục được.
+Backend **azurerm** lưu state thành một blob trong container của Storage account. Backend này cho bạn ba thứ mà state trên máy cá nhân không có: nhiều người và pipeline dùng chung một nguồn dữ liệu gốc, khoá chống hai lần `apply` chạy cùng lúc, và lịch sử để quay lại. Khoá thực hiện bằng **lease** trên blob: khi `plan` hoặc `apply` bắt đầu, Terraform giữ lease, người thứ hai thấy lỗi "state locked" và phải chờ. **Blob versioning** giữ các phiên bản cũ của file state, nên một lần ghi hỏng vẫn khôi phục được.
 
 Quan trọng hơn cả là quyền. State chứa mọi thuộc tính resource, kể cả mật khẩu administrator của PostgreSQL và chuỗi kết nối. Mỗi phiên bản cũ cũng chứa chúng. Vì vậy storage state phải tách khỏi storage ứng dụng, tắt truy cập công khai, tắt shared key để buộc dùng Entra ID, và chỉ gán `Storage Blob Data Contributor` cho đúng identity của pipeline trên đúng container.
 
@@ -100,7 +100,7 @@ provider "azurerm" {
 }
 ```
 
-`key` là tên blob state, và mỗi môi trường phải có key riêng. Có hai cách tách môi trường. **Workspace** giữ một bộ code và một backend, mỗi workspace có blob state riêng. **Thư mục theo môi trường** (`envs/dev`, `envs/prod`) cho mỗi môi trường backend, tfvars và state của nó, còn code chung nằm trong `modules/`.
+`key` là tên blob state, và mỗi môi trường phải có key riêng. Có hai cách tách môi trường. **Workspace** giữ một bộ code và một backend, mỗi workspace có blob state riêng. **Thư mục theo môi trường** (`envs/dev`, `envs/prod`) cho mỗi môi trường backend, tfvars và state riêng, còn code chung nằm trong `modules/`.
 
 | Tiêu chí | Workspace | Thư mục `envs/<env>` |
 | --- | --- | --- |
@@ -111,7 +111,7 @@ provider "azurerm" {
 
 Tới Nơi chọn thư mục theo môi trường. Lý do quyết định là prod phải có `prevent_destroy` còn dev thì không, và `lifecycle` chỉ nhận giá trị viết thẳng, không nhận biến, nên workspace không diễn tả được khác biệt đó.
 
-Module `modules/network/main.tf` dưới đây tạo VNet, subnet delegate cho PostgreSQL và private DNS zone. Nó giống phần Bicep ở bài 40 về ý.
+Module `modules/network/main.tf` dưới đây tạo VNet, subnet delegate cho PostgreSQL và private DNS zone. Về ý, module này giống phần Bicep ở bài 40.
 
 ```hcl
 variable "env" { type = string }
@@ -156,9 +156,9 @@ output "pg_subnet_id" { value = azurerm_subnet.pg.id }
 output "dns_zone_id" { value = azurerm_private_dns_zone.pg.id }
 ```
 
-Module này chưa kiểm tra gì về kết nối thật từ app tới database. Nó chỉ mô tả tài nguyên. Bài giữ server PostgreSQL ở root cho ngắn; khi tách `modules/postgres` và `modules/containerapp` theo cùng khuôn (biến vào, output ra), bạn cần block `moved` ở phần sau. Ngoài module tự viết, bạn có thể dùng module từ registry công khai, nhưng nên ghim phiên bản và đọc kỹ biến đầu vào, vì mỗi module ngoài là code bạn chạy với quyền của pipeline.
+Module này chưa kiểm tra gì về kết nối thật từ app tới database. Module chỉ mô tả resource. Bài giữ server PostgreSQL ở root cho ngắn; khi tách `modules/postgres` và `modules/containerapp` theo cùng khuôn (biến vào, output ra), bạn cần block `moved` ở phần sau. Ngoài module tự viết, bạn có thể dùng module từ registry công khai, nhưng nên ghim phiên bản và đọc kỹ biến đầu vào, vì mỗi module ngoài là code bạn chạy với quyền của pipeline.
 
-Trong `envs/dev/main.tf`, root gọi module và khai báo server PostgreSQL. Giá trị riêng của môi trường đặt trong `dev.tfvars`, còn mật khẩu admin chuyền qua biến môi trường `TF_VAR_pg_admin_password`, không viết vào file.
+Trong `envs/dev/main.tf`, root gọi module và khai báo server PostgreSQL. Giá trị riêng của môi trường đặt trong `dev.tfvars`, còn mật khẩu admin truyền qua biến môi trường `TF_VAR_pg_admin_password`, không viết vào file.
 
 ```hcl
 data "azurerm_resource_group" "this" {
@@ -191,11 +191,11 @@ resource "azurerm_postgresql_flexible_server" "main" {
 }
 ```
 
-`depends_on` buộc server chờ cả DNS link, thứ mà server không tham chiếu trực tiếp. File `dev.tfvars` chỉ có ba dòng: `env = "dev"`, `address_space = "10.20.0.0/16"`, `pg_sku = "B_Standard_B1ms"`. Bạn cũng khai báo các biến này trong `variables.tf`, trong đó `pg_admin_password` có `sensitive = true` và `use_oidc` là `bool` mặc định `false`. Nhớ rằng `sensitive` không đưa mật khẩu ra khỏi state; tuỳ phiên bản provider có thể có thuộc tính write-only cho mật khẩu, hãy kiểm tài liệu azurerm trước khi dùng.
+`depends_on` buộc server chờ cả DNS link, thứ mà server không tham chiếu trực tiếp. File `dev.tfvars` chỉ có ba dòng: `env = "dev"`, `address_space = "10.20.0.0/16"`, `pg_sku = "B_Standard_B1ms"`. Bạn cũng khai báo các biến này trong `variables.tf`, trong đó `pg_admin_password` có `sensitive = true` và `use_oidc` là `bool` mặc định `false`. Nhớ rằng `sensitive` không đưa mật khẩu ra khỏi state; tuỳ phiên bản provider có thể có thuộc tính write-only cho mật khẩu, hãy kiểm tra tài liệu azurerm trước khi dùng.
 
 ## plan, apply và đăng nhập OIDC thay cho client secret
 
-`terraform plan` đọc state, hỏi Azure hiện trạng thật rồi in ra khác biệt với code. `terraform apply` thực hiện khác biệt đó. Trong CI, bạn không đưa client secret vào pipeline. Pipeline xin một token OIDC ngắn hạn và Terraform đổi nó lấy quyền truy cập, đó là `use_oidc`. Bài 42 trình bày cách tạo federated credential; ở đây chỉ cần biết phía Terraform cần gì.
+`terraform plan` đọc state, hỏi Azure hiện trạng thật rồi in ra khác biệt với code. `terraform apply` thực hiện khác biệt đó. Trong CI, bạn không đưa client secret vào pipeline. Pipeline xin một token OIDC ngắn hạn và Terraform đổi token đó lấy quyền truy cập, tức cơ chế `use_oidc`. Bài 42 trình bày cách tạo federated credential; ở đây chỉ cần biết phía Terraform cần gì.
 
 ```bash
 export ARM_CLIENT_ID=<client-id>
@@ -206,7 +206,7 @@ terraform init -backend-config="use_oidc=true"
 terraform plan -var-file=dev.tfvars -var="use_oidc=true" -out=dev.plan
 ```
 
-Các biến `ARM_*` chỉ là định danh, không phải bí mật. Token OIDC do runner của pipeline cấp, bài này không chứng minh việc cấp đó. Với `-out`, file plan cũng chứa giá trị nhạy cảm, nên coi nó như state: không đưa vào artifact công khai. Để phát hiện drift định kỳ, chạy `terraform plan -detailed-exitcode` trong lịch; mã thoát 2 nghĩa là có khác biệt.
+Các biến `ARM_*` chỉ là định danh, không phải bí mật. Token OIDC do runner của pipeline cấp, bài này không chứng minh việc cấp đó. Với `-out`, file plan cũng chứa giá trị nhạy cảm, nên coi file plan như state: không đưa vào artifact công khai. Để phát hiện drift định kỳ, chạy `terraform plan -detailed-exitcode` theo lịch; mã thoát 2 nghĩa là có khác biệt.
 
 ## Import, moved và prevent_destroy cho resource đã có
 
@@ -238,7 +238,7 @@ resource "azurerm_postgresql_flexible_server" "main" {
 }
 ```
 
-Với `prevent_destroy`, mọi plan có bước xoá server này đều lỗi. Nó chỉ bảo vệ trước lệnh Terraform. Ai xoá tay trên portal hoặc bằng `az` vẫn xoá được, nên cần thêm khoá `CanNotDelete` của bài 4 và quyền RBAC chặt.
+Với `prevent_destroy`, mọi plan có bước xoá server này đều lỗi. Cơ chế này chỉ bảo vệ trước lệnh Terraform. Ai xoá tay trên portal hoặc bằng `az` vẫn xoá được, nên cần thêm khoá `CanNotDelete` của bài 4 và quyền RBAC chặt.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -276,7 +276,7 @@ az tag update --resource-id $PG_ID \
 terraform plan -var-file=dev.tfvars
 ```
 
-Kỳ vọng: plan báo `1 to change`, với dòng `tags` có `- "costcenter" = "manual"` nghĩa là Terraform sẽ gỡ tag đó, vì code không khai báo. Đây không phải lỗi mà là bằng chứng drift được phát hiện. Nếu tag hợp lệ, thêm nó vào `tags` trong code; nếu không, chạy `apply` để về đúng. `terraform apply -refresh-only` chỉ ghi hiện trạng vào state; lần `plan` thường kế tiếp vẫn đòi gỡ tag vì code không khai báo. Nếu tag do hệ thống khác quản (ví dụ policy gắn tag), hãy dùng `lifecycle { ignore_changes = [tags["costcenter"]] }` để Terraform bỏ qua đúng khoá đó. Dọn lab bằng `terraform destroy` (dev không có `prevent_destroy`) và xoá state container khi không còn cần.
+Kỳ vọng: plan báo `1 to change`, với dòng `tags` có `- "costcenter" = "manual"` nghĩa là Terraform sẽ gỡ tag đó, vì code không khai báo. Đây không phải lỗi mà là bằng chứng drift được phát hiện. Nếu tag hợp lệ, thêm nó vào `tags` trong code; nếu không, chạy `apply` để đưa resource về đúng như code. `terraform apply -refresh-only` chỉ ghi hiện trạng vào state; lần `plan` thường kế tiếp vẫn đòi gỡ tag vì code không khai báo. Nếu tag do hệ thống khác quản lý (ví dụ policy gắn tag), hãy dùng `lifecycle { ignore_changes = [tags["costcenter"]] }` để Terraform bỏ qua đúng khoá đó. Dọn lab bằng `terraform destroy` (dev không có `prevent_destroy`) và xoá state container khi không còn cần.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>

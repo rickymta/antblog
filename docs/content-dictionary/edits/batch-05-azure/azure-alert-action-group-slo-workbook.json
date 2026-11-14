@@ -1,0 +1,19 @@
+{"file":"azure-alert-action-group-slo-workbook.md","edits":[
+{"old":"Hai cặp này là cặp phổ biến trong sách SRE","new":"Hai cặp giá trị này phổ biến trong sách SRE","reason":"'là cặp phổ biến' lặp và gượng","severity":"low"},
+{"old":"Từ đó ra **burn rate**","new":"Từ đó suy ra **burn rate**","reason":"Thiếu động từ 'suy'","severity":"medium"},
+{"old":"Cái giá: mỗi lần đánh giá chạy một truy vấn, chịu độ trễ ingest, và tính tiền","new":"Cái giá phải trả: mỗi lần đánh giá chạy một truy vấn, có độ trễ ingest, và tính tiền","reason":"'Cái giá:' cụt; 'chịu độ trễ' gượng","severity":"medium"},
+{"old":"Nó không chứng minh webhook nhận được: dùng chức năng test action group","new":"Khối lệnh này không chứng minh webhook nhận được; hãy dùng chức năng test action group","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"ai biết nó đều gửi được payload giả","new":"ai biết URL đó cũng đều gửi được payload giả","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"chỉ kiểm kết nối và migration nên vẫn xanh","new":"chỉ kiểm tra kết nối và migration nên vẫn xanh","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Alert không tự resolve để lại hàng đống mục mở và người trực học cách phớt lờ.","new":"Alert không tự resolve sẽ để lại hàng đống mục mở, và người trực học cách phớt lờ.","reason":"Câu thiếu động từ, mơ hồ chủ ngữ","severity":"medium"},
+{"old":"Alert tốt ít, hiếm, và cái nào cũng cần hành động.","new":"Alert tốt thì ít, hiếm khi nổ, và alert nào cũng cần hành động.","reason":"Câu lược động từ","severity":"medium"},
+{"old":"(kiểm status code, TLS, nội dung)","new":"(kiểm tra status code, TLS, nội dung)","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"đã có lịch nghỉ hưu.","new":"đã có lịch ngừng hỗ trợ.","reason":"'nghỉ hưu' là calque của retire","severity":"high"},
+{"old":"dù process còn sống. Nó không chứng minh","new":"dù process còn sống. Test này không chứng minh","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"nghĩa là autoscale hết đường.","new":"nghĩa là autoscale không thể mở rộng thêm.","reason":"'hết đường' là văn nói, mơ hồ","severity":"low"},
+{"old":"Message chết có đang tăng không","new":"Message dead-letter có đang tăng không","reason":"'Message chết' là dịch từng chữ của dead-letter","severity":"medium"},
+{"old":"mỗi ô vẽ một cột. Nó đếm bằng","new":"mỗi ô vẽ một cột. Truy vấn này đếm bằng","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"nên chịu được sampling, nhưng","new":"nên vẫn đúng khi có sampling, nhưng","reason":"'chịu được sampling' là calque","severity":"medium"},
+{"old":"đổi nó thành hai alert burn-rate","new":"chuyển SLO đó thành hai alert burn-rate","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"là kỳ vọng bạn cần tự kiểm trên subscription dev.","new":"là kỳ vọng bạn cần tự kiểm tra trên subscription dev.","reason":"'kiểm' thiếu 'tra'","severity":"high"}
+]}

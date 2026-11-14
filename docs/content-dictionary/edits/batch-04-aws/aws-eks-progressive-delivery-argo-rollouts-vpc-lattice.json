@@ -1,0 +1,17 @@
+{"file":"aws-eks-progressive-delivery-argo-rollouts-vpc-lattice.md","edits":[
+{"old":"App Mesh đã ngừng, khi nào cần Istio.","new":"App Mesh đã ngừng hỗ trợ, khi nào cần Istio.","reason":"'đã ngừng' thiếu tân ngữ","severity":"low"},
+{"old":"nhưng trong 11:00 ngày đầu lên prod,","new":"nhưng trong khung 11:00 của ngày đầu lên prod,","reason":"Lược danh từ 'khung giờ'","severity":"medium"},
+{"old":"rồi tự quay lại nếu xấu.","new":"rồi tự quay lại nếu kết quả xấu.","reason":"'nếu xấu' thiếu chủ ngữ","severity":"medium"},
+{"old":"canary xem [bài 27](/articles/aws-chien-luoc-deploy-rolling-canary-rollback)","new":"canary thì xem [bài 27](/articles/aws-chien-luoc-deploy-rolling-canary-rollback)","reason":"Câu cộc, thiếu liên từ","severity":"low"},
+{"old":"Cần kiểm hoàn chỉnh trước khi chuyển","new":"Cần kiểm tra đầy đủ trước khi chuyển","reason":"'kiểm' đứng một mình, từ cụt","severity":"medium"},
+{"old":"khi khách thật chưa nhận request nào.","new":"trong lúc khách thật chưa nhận request nào.","reason":"Liên từ 'khi' dịch sát tiếng Anh gây mơ hồ","severity":"low"},
+{"old":"`matchTrafficWeight: true` trả số pod canary về theo trọng số; thiếu nó,","new":"`matchTrafficWeight: true` đưa số pod canary về khớp với trọng số; thiếu nó,","reason":"'trả ... về theo' gượng","severity":"low"},
+{"old":"**Auth policy** cho phép nói rõ","new":"**Auth policy** cho phép quy định rõ","reason":"'nói rõ' khẩu ngữ","severity":"low"},
+{"old":"tính tiền theo giờ của service, dữ liệu xử lý và số request;","new":"tính tiền theo giờ chạy của service, lượng dữ liệu xử lý và số request;","reason":"Danh sách thiếu danh từ, 'dữ liệu xử lý' cụt","severity":"medium"},
+{"old":"Chia sẻ service network giữa tài khoản dùng AWS RAM.","new":"Muốn chia sẻ service network giữa các tài khoản thì dùng AWS RAM.","reason":"Câu thiếu chủ ngữ và vị ngữ rõ","severity":"medium"},
+{"old":"Chỉ vào mesh khi có yêu cầu cụ thể","new":"Chỉ dùng mesh khi có yêu cầu cụ thể","reason":"'vào mesh' gượng","severity":"medium"},
+{"old":"**Quên Argo CD sau abort:**","new":"**Quên xử lý lệch Git sau abort:**","reason":"Cụm cụt, không rõ quên điều gì","severity":"medium"},
+{"old":"điều kiện sai lập tức hoặc rollout kẹt.","new":"khiến điều kiện bị đánh giá sai ngay hoặc rollout bị kẹt.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"client gọi không SigV4 nhận 403 dù mạng thông. Kiểm danh tính và policy trước khi nghi mạng.","new":"client gọi mà không ký SigV4 sẽ nhận 403 dù mạng thông. Hãy kiểm tra danh tính và policy trước khi nghi ngờ mạng.","reason":"Câu lược động từ, 'Kiểm' cụt","severity":"medium"},
+{"old":"README ghi tiền tính thế nào và lệnh dọn.","new":"README ghi cách tính chi phí và lệnh dọn.","reason":"Khẩu ngữ","severity":"low"}
+]}

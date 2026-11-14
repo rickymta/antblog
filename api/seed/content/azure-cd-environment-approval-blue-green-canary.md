@@ -10,19 +10,19 @@ language: vi
 
 Đây là **bài 44** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 5 · DevOps trên Azure (bài 5/10 của phần).
 
-Bài này nối bước CI của bài 43 với ba môi trường: dev tự động, staging có smoke test, prod có người duyệt và canary theo revision, rồi để một truy vấn KQL quyết định tiếp tục hay quay lại. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
+Bài này nối bước CI của bài 43 với ba môi trường: dev tự động, staging có smoke test, prod có người duyệt và canary theo revision, rồi để một truy vấn KQL quyết định tiếp tục hay rollback. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>CI đã chạy test và scan image, tất cả đều xanh. Deploy thẳng 100% lên prod có an toàn không?</p>
-<details><summary>Xem đáp án</summary><p>Chưa. CI chứng minh artifact build đúng và không có lỗ hổng đã biết. Nó không chứng minh artifact chạy đúng với dữ liệu, cấu hình và lượng request thật của prod. Canary và health gate sinh ra để bắt đúng loại lỗi đó trước khi nó chạm toàn bộ khách.</p></details>
+<details><summary>Xem đáp án</summary><p>Chưa. CI chứng minh artifact build đúng và không có lỗ hổng đã biết. CI không chứng minh artifact chạy đúng với dữ liệu, cấu hình và lượng request thật của prod. Canary và health gate sinh ra để bắt đúng loại lỗi đó trước khi lỗi ảnh hưởng toàn bộ khách.</p></details>
 </div>
 
 ## CD nhận digest từ CI và không build lại
 
-Bài 43 kết thúc bằng output `image-digest` dạng `sha256:...`. Pipeline CD nhận digest đó làm input và chỉ đưa đúng artifact ấy qua ba môi trường. Build lại ở staging hay prod là sai về cơ chế. Cùng một commit vẫn có thể cho image khác nếu base image hoặc package đã đổi giữa hai lần build, và thứ test ở staging không còn là thứ chạy ở prod.
+Bài 43 kết thúc bằng output `image-digest` dạng `sha256:...`. Pipeline CD nhận digest đó làm input và chỉ đưa đúng artifact ấy qua ba môi trường. Build lại ở staging hay prod là sai nguyên tắc. Cùng một commit vẫn có thể cho image khác nếu base image hoặc package đã đổi giữa hai lần build, và bản được test ở staging không còn là bản chạy ở prod.
 
-Tới Nơi dùng một registry cho mỗi môi trường (`acrtoinoidev`, `acrtoinoistaging`, `acrtoinoiprod`). Đưa image sang registry kế tiếp bằng `az acr import` thì manifest được sao chép nguyên, và bạn nên so lại digest sau khi import thay vì tin. Thứ tự là: dev tự động mỗi khi CI xanh trên `main`, staging chạy sau dev kèm smoke test, prod chỉ bắt đầu khi có người bấm duyệt.
+Tới Nơi dùng một registry cho mỗi môi trường (`acrtoinoidev`, `acrtoinoistaging`, `acrtoinoiprod`). Đưa image sang registry kế tiếp bằng `az acr import` thì manifest được sao chép nguyên, và bạn nên so lại digest sau khi import thay vì tin vào kết quả import. Thứ tự là: dev tự động mỗi khi CI xanh trên `main`, staging chạy sau dev kèm smoke test, prod chỉ bắt đầu khi có người bấm duyệt.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -31,7 +31,7 @@ Tới Nơi dùng một registry cho mỗi môi trường (`acrtoinoidev`, `acrto
 <figcaption>Hình 1. Một digest từ CI đi qua dev tự động, staging có smoke test, rồi dừng ở approval trước prod.</figcaption>
 </figure>
 
-Workflow dưới đây dựng đúng khung đó. `workflow_call` cho phép `ci.yml` gọi nó ngay sau job `image` (job gọi phải cấp `id-token: write`), nên dev được deploy tự động; `workflow_dispatch` để chạy tay khi cần. Mỗi job gắn một `environment`, còn logic deploy nằm trong `cd/*.sh` để YAML ngắn. Khối này chỉ mô tả luồng. Nó không chứng minh federated credential đã được tạo cho từng environment hay các script đã tồn tại.
+Workflow dưới đây dựng đúng khung đó. `workflow_call` cho phép `ci.yml` gọi nó ngay sau job `image` (job gọi phải cấp `id-token: write`), nên dev được deploy tự động; `workflow_dispatch` để chạy tay khi cần. Mỗi job gắn một `environment`, còn logic deploy nằm trong `cd/*.sh` để YAML ngắn. Khối này chỉ mô tả luồng, không chứng minh federated credential đã được tạo cho từng environment hay các script đã tồn tại.
 
 ```yaml
 name: cd
@@ -74,7 +74,7 @@ jobs:
 
 ## Approval là luật của environment, và Azure cũng phải đồng ý
 
-Dòng `environment: prod` không tự có người duyệt. Người duyệt cấu hình ở Settings, mục Environments: required reviewers, tuỳ chọn cấm tự duyệt, và giới hạn nhánh được deploy. Khi job trỏ tới `prod`, runner không bắt đầu bước nào cho tới khi reviewer chấp thuận. Biến và secret của environment cũng chỉ được nạp sau đó, nên `vars.AZURE_CLIENT_ID` của prod không lộ cho job staging. Với repository private, required reviewers phụ thuộc gói GitHub, hãy kiểm tài liệu.
+Dòng `environment: prod` không tự có người duyệt. Bạn cấu hình người duyệt ở Settings, mục Environments: required reviewers, tuỳ chọn cấm tự duyệt, và giới hạn nhánh được deploy. Khi job trỏ tới `prod`, runner không bắt đầu bước nào cho tới khi reviewer chấp thuận. Biến và secret của environment cũng chỉ được nạp sau đó, nên `vars.AZURE_CLIENT_ID` của prod không lộ cho job staging. Với repository private, required reviewers phụ thuộc gói GitHub, hãy kiểm tra tài liệu.
 
 Phần quan trọng hơn nằm phía Azure. Ở bài 42, federated credential có `subject` chứa tên environment, dạng `repo:<org>/<repo>:environment:prod`. Hệ quả: Microsoft Entra chỉ phát token cho identity prod khi job chạy trong environment `prod`, tức là sau khi qua cổng duyệt. Ai sửa workflow để bỏ dòng `environment:` sẽ có subject khác và bị từ chối. Approval vì vậy là cổng để lấy danh tính, nhưng chỉ khi identity prod là identity riêng và role của nó gắn ở `rg-toinoi-trips-prod-sea`, không phải cả subscription.
 
@@ -92,7 +92,7 @@ Phần quan trọng hơn nằm phía Azure. Ở bài 42, federated credential c�
 
 Có một cái bẫy cụ thể với repository này. `main.bicep` của trip-service đang cố định `activeRevisionsMode: 'Single'`. Muốn canary ở prod bạn phải tham số hoá giá trị này hoặc đổi bằng `az containerapp revision set-mode --mode multiple`, và nhớ rằng lần deploy Bicep kế tiếp sẽ ghi đè nó về Single. Một bẫy nữa: mặc định ingress gửi 100% traffic cho revision mới nhất (`latestRevision`), nên revision mới vừa sẵn sàng là nhận hết traffic, trừ khi bạn đã ghim traffic vào revision cũ theo tên.
 
-Script `canary.sh` ghi nhớ revision đang nhận 100%, ghim traffic vào nó theo tên, tạo revision mới từ digest với suffix theo số lần chạy, rồi đẩy weight 10, 50, 100 và gọi gate sau mỗi bước quan sát. Gate fail thì hàm `rollback` trả weight về bản cũ và làm job thất bại.
+Script `canary.sh` ghi nhớ revision đang nhận 100%, ghim traffic vào nó theo tên, tạo revision mới từ digest với suffix theo số lần chạy, rồi tăng weight lần lượt lên 10, 50, 100 và gọi gate sau mỗi bước quan sát. Gate fail thì hàm `rollback` trả weight về bản cũ và làm job thất bại.
 
 ```bash
 set -euo pipefail
@@ -122,7 +122,7 @@ done
 az containerapp revision deactivate -g $RG -n $APP --revision "$STABLE"
 ```
 
-Suffix có thêm `GITHUB_RUN_ATTEMPT` để chạy lại job không đụng tên revision đã có. Khối này không chứng minh revision mới thật sự giữ 0% trước bước 10%, hãy kiểm bằng lệnh liệt kê ở lab. Dòng cuối tắt revision cũ, nên sau khi qua gate cuối bạn mất đường lui một lệnh; muốn giữ, dời bước tắt sang một job dọn dẹp chạy sau vài giờ. Bạn cũng có thể gán label `canary` (`az containerapp revision label add`) cho revision mới để có URL riêng cho smoke test trước khi chia weight.
+Suffix có thêm `GITHUB_RUN_ATTEMPT` để chạy lại job không đụng tên revision đã có. Khối này không chứng minh revision mới thật sự giữ 0% trước bước 10%, hãy kiểm tra bằng lệnh liệt kê ở lab. Dòng cuối tắt revision cũ, nên sau khi qua gate cuối bạn không còn đường lui chỉ bằng một lệnh; muốn giữ, dời bước tắt sang một job dọn dẹp chạy sau vài giờ. Bạn cũng có thể gán label `canary` (`az containerapp revision label add`) cho revision mới để có URL riêng cho smoke test trước khi chia weight.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -133,7 +133,7 @@ Suffix có thêm `GITHUB_RUN_ATTEMPT` để chạy lại job không đụng tên
 
 ## Health gate: KQL trả error rate, script quyết định
 
-Gate là một truy vấn KQL trên Application Insights (bài 47 đi sâu hơn) trả về ba con số cho riêng revision mới: tổng request, tỷ lệ lỗi và p95 latency. Tên replica của Container Apps bắt đầu bằng tên revision, nên lọc theo tiền tố `cloud_RoleInstance` là cách đơn giản; thêm dấu `-` sau tên để revision `--c4` không khớp nhầm replica của `--c42`. Đây là giả định cần kiểm trên bảng `requests` của bạn, vì nó phụ thuộc cách OpenTelemetry gán resource attribute ở bài 37 loạt C#.
+Gate là một truy vấn KQL trên Application Insights (bài 47 đi sâu hơn) trả về ba con số cho riêng revision mới: tổng request, tỷ lệ lỗi và p95 latency. Tên replica của Container Apps bắt đầu bằng tên revision, nên lọc theo tiền tố `cloud_RoleInstance` là cách đơn giản; thêm dấu `-` sau tên để revision `--c4` không khớp nhầm replica của `--c42`. Đây là giả định cần kiểm tra trên bảng `requests` của bạn, vì nó phụ thuộc cách OpenTelemetry gán resource attribute ở bài 37 loạt C#.
 
 ```kusto
 let rev = "__REV__";
@@ -146,7 +146,7 @@ requests
 | extend errorRate = iff(total == 0, 0.0, 100.0 * failed / total)
 ```
 
-Script `gate.sh` thay `__REV__` bằng tên revision, chạy truy vấn bằng `az monitor app-insights query` (cần extension `application-insights`) và áp hai điều kiện. Điều kiện thứ nhất là `errorRate` không vượt 1%. Điều kiện thứ hai dễ bị quên: `total` phải đủ lớn, vì «0% lỗi trên 4 request» không có nghĩa gì. Nếu `total` dưới ngưỡng, gate phải coi là chưa đủ dữ liệu, kéo dài thời gian quan sát hoặc fail, chứ không được pass im lặng. Truy vấn trên cũng chưa so p95 với revision cũ; muốn vậy hãy chạy nó cho cả `STABLE`.
+Script `gate.sh` thay `__REV__` bằng tên revision, chạy truy vấn bằng `az monitor app-insights query` (cần extension `application-insights`) và áp hai điều kiện. Điều kiện thứ nhất là `errorRate` không vượt 1%. Điều kiện thứ hai dễ bị quên: `total` phải đủ lớn, vì «0% lỗi trên 4 request» không có nghĩa gì. Nếu `total` dưới ngưỡng, gate phải coi là chưa đủ dữ liệu, kéo dài thời gian quan sát hoặc fail, chứ không được pass mà không cảnh báo. Truy vấn trên cũng chưa so p95 với revision cũ; muốn vậy hãy chạy nó cho cả `STABLE`.
 
 Rollback chỉ trả traffic, không hoàn tác dữ liệu. Gate bắt lỗi kỹ thuật, không bắt lỗi nghiệp vụ như trip bị tính sai giá nhưng vẫn trả HTTP 200.
 
@@ -161,20 +161,20 @@ Không phải workload nào của Tới Nơi cũng ở Container Apps. Cơ chế
 | Rollback | Đặt weight về revision cũ | Swap ngược lại | `kubectl rollout undo` hoặc đổi weight |
 | Cái giá | Revision cũ còn chạy cho tới khi tắt | Slot thứ hai tốn tài nguyên; setting phải đánh dấu sticky | Phải tự dựng lớp chia traffic |
 
-Với App Service, blue/green là deploy vào slot `staging`, warm-up ở đó, rồi `az webapp deployment slot swap`; slot cũ giữ bản trước nên swap ngược là rollback. Với AKS, rolling update thay pod dần nhưng không kiểm soát phần trăm traffic. Canary thật cần lớp định tuyến có weight, ví dụ Gateway API với `HTTPRoute` có `backendRefs` kèm weight, hoặc service mesh. Đừng chọn ingress-nginx cho thiết kế mới, vì dự án này đã ngừng được duy trì từ 2026.
+Với App Service, blue/green là deploy vào slot `staging`, warm-up ở đó, rồi `az webapp deployment slot swap`; slot cũ giữ bản trước nên swap ngược là rollback. Với AKS, rolling update thay pod dần nhưng không kiểm soát phần trăm traffic. Canary thật cần lớp định tuyến có weight, ví dụ Gateway API với `HTTPRoute` có `backendRefs` kèm weight, hoặc service mesh. Đừng chọn ingress-nginx cho thiết kế mới, vì dự án này đã ngừng bảo trì từ năm 2026.
 
 ## Migration chạy trước revision mới và phải tương thích ngược
 
-Trong canary, revision cũ và mới cùng đọc ghi vào `psql-toinoi-prod-sea` khá lâu. Vì vậy migration phải chạy trước khi tạo revision mới, bằng role riêng ở một job riêng (bài 46 sẽ làm kỹ), và schema sau migration phải phục vụ được cả hai phiên bản code. Kiểu mẫu an toàn là expand rồi contract. Bước expand thêm cột `pickup_zone` kiểu nullable vào bảng `trips`, code cũ bỏ qua cột này còn code mới ghi vào nó. Chỉ sau khi revision mới đã chạy 100% và ổn định qua một chu kỳ release, bước contract mới ràng buộc NOT NULL hoặc xoá cột cũ.
+Trong canary, revision cũ và mới cùng đọc và ghi vào `psql-toinoi-prod-sea` khá lâu. Vì vậy migration phải chạy trước khi tạo revision mới, bằng role riêng ở một job riêng (bài 46 sẽ làm kỹ), và schema sau migration phải phục vụ được cả hai phiên bản code. Kiểu mẫu an toàn là expand rồi contract. Bước expand thêm cột `pickup_zone` kiểu nullable vào bảng `trips`, code cũ bỏ qua cột này còn code mới ghi vào nó. Chỉ sau khi revision mới đã chạy 100% và ổn định qua một chu kỳ release, bước contract mới ràng buộc NOT NULL hoặc xoá cột cũ.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Rollback revision không hoàn tác migration. Nếu migration đã đổi tên cột hay xoá dữ liệu, revision cũ quay lại sẽ chạy trên schema nó không hiểu. Mỗi revision đang hoạt động cũng giữ connection pool riêng tới PostgreSQL, nên trong lúc canary tổng connection là của cả hai revision cộng lại. Và canary lỗi lúc chiều thứ 6 sẽ do ít người nhất xử lý.</p>
+<p>Rollback revision không hoàn tác migration. Nếu migration đã đổi tên cột hay xoá dữ liệu, revision cũ quay lại sẽ chạy trên schema nó không hiểu. Mỗi revision đang hoạt động cũng giữ connection pool riêng tới PostgreSQL, nên trong lúc canary tổng số connection bằng tổng của cả hai revision. Và canary lỗi lúc chiều thứ 6 sẽ do ít người nhất xử lý.</p>
 </div>
 
 ## Không deploy chiều thứ 6: ghi thành luật, không ghi thành thói quen
 
-Quy ước truyền miệng sẽ bị phá ngay lần đầu có áp lực deadline. Hãy biến nó thành bước đầu của `deploy.sh` và `canary.sh`: đọc giờ theo múi giờ đội vận hành và fail trong cửa sổ cấm, trừ khi có biến override được ghi vào log.
+Quy ước truyền miệng sẽ bị phá ngay lần đầu có áp lực deadline. Hãy biến nó thành bước đầu của `deploy.sh` và `canary.sh`: đọc giờ theo múi giờ của đội vận hành và fail trong cửa sổ cấm, trừ khi có biến override được ghi vào log.
 
 ```bash
 freeze_check() {  # $1 = tên môi trường
@@ -186,7 +186,7 @@ freeze_check() {  # $1 = tên môi trường
 }
 ```
 
-`deploy.sh` truyền tên môi trường nó nhận, còn `canary.sh` gọi `freeze_check prod` vì tham số đầu của nó là digest. Khối này chỉ chặn từ phía script, người sửa được workflow vẫn gỡ được, nên `cd/` và `.github/workflows` cần quy tắc review riêng. Muốn luật nằm ở chính environment, GitHub có custom deployment protection rule (một GitHub App trả lời cho phép hay không); kiểm gói GitHub của bạn.
+`deploy.sh` truyền tên môi trường nó nhận, còn `canary.sh` gọi `freeze_check prod` vì tham số đầu của nó là digest. Khối này chỉ chặn từ phía script, người sửa được workflow vẫn gỡ được, nên `cd/` và `.github/workflows` cần quy tắc review riêng. Muốn luật nằm ở chính environment, GitHub có custom deployment protection rule (một GitHub App trả lời cho phép hay không); hãy kiểm tra gói GitHub của bạn.
 
 ## Lab: canary 10% tới 100% và rollback do lỗi cố ý
 
@@ -201,15 +201,15 @@ az containerapp revision list -g rg-toinoi-trips-prod-sea -n ca-toinoi-trips-pro
 ```
 
 3. Chạy lại workflow với digest B. Kỳ vọng: ở bước 10% revision mới nhận một phần traffic, `errorRate` vượt 1%, `gate.sh` trả mã khác 0, `rollback` đặt `STABLE=100` và `NEW=0`, job fail. Chạy lệnh liệt kê ở trên để xác nhận weight đã về revision cũ. Gate thấy lỗi sau độ trễ ingestion của Application Insights, có thể vài phút.
-4. Dọn lab: deactivate revision lỗi, xoá nhánh lab chứa middleware lỗi, và `az group delete` cho resource group lab nếu nó không chứa thứ bạn còn cần.
+4. Dọn lab: deactivate revision lỗi, xoá nhánh lab chứa middleware lỗi, và `az group delete` cho resource group lab nếu resource group đó không chứa thứ bạn còn cần.
 
 **Bài tập:** lúc 3 giờ sáng gate báo `errorRate` bằng 0 ở bước 10% sau 15 phút, nhưng `total` chỉ có 6 request. Bạn có nên cho lên 50% không? Cách khắc phục không cần chờ người thức dậy là gì?
 
-<details><summary>Xem lời giải</summary><p>Không nên. Sáu request không đủ để nói revision mới khỏe, vì một lỗi chỉ xảy ra ở 5% request vẫn có thể không xuất hiện. Gate cần ngưỡng `total` tối thiểu và coi «chưa đủ dữ liệu» là fail hoặc kéo dài quan sát. Với khung giờ ít traffic, có thể chạy thêm smoke test chủ động có xác thực qua label `canary` để tạo request, hoặc đơn giản hơn là không bắt đầu canary ngoài giờ có lưu lượng đủ.</p></details>
+<details><summary>Xem lời giải</summary><p>Không nên. Sáu request không đủ để nói revision mới khoẻ, vì một lỗi chỉ xảy ra ở 5% request vẫn có thể không xuất hiện. Gate cần ngưỡng `total` tối thiểu và coi «chưa đủ dữ liệu» là fail hoặc kéo dài quan sát. Với khung giờ ít traffic, có thể chạy thêm smoke test chủ động có xác thực qua label `canary` để tạo request, hoặc đơn giản hơn là không bắt đầu canary ngoài giờ có lưu lượng đủ.</p></details>
 
 ## Học tiếp từ đây
 
-Bạn đã dựng được luồng CD đi từ một digest qua dev, staging và prod có người duyệt, đẩy canary bằng weight của revision, và có một gate KQL biến lỗi thành rollback tự động thay cho người nhìn dashboard. Phần còn thiếu là cách khai báo cả ba môi trường một cách nhất quán và dựng nhanh một môi trường thử, việc của [bài 45](/articles/azure-developer-cli-azd-deployment-stacks-moi-truong) với Azure Developer CLI và deployment stack. Sau đó [bài 46](/articles/azure-database-migration-trong-pipeline) quay lại thứ tự và role của migration trong pipeline.
+Bạn đã dựng được luồng CD đi từ một digest qua dev, staging và prod có người duyệt, chạy canary bằng cách chia weight giữa các revision, và có một gate KQL biến lỗi thành rollback tự động thay cho người nhìn dashboard. Phần còn thiếu là cách khai báo cả ba môi trường một cách nhất quán và dựng nhanh một môi trường thử, việc của [bài 45](/articles/azure-developer-cli-azd-deployment-stacks-moi-truong) với Azure Developer CLI và deployment stack. Sau đó [bài 46](/articles/azure-database-migration-trong-pipeline) quay lại thứ tự và role của migration trong pipeline.
 
 ## Tài liệu gốc
 

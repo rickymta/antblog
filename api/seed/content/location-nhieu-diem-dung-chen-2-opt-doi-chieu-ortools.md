@@ -148,9 +148,9 @@ Mọi bước chỉ được nhận khi **giảm** tổng chi phí, nên vòng l
 
 Nói «Rust kém bao nhiêu» cần một mốc. Lab dùng hai.
 
-**Quy hoạch động chính xác** theo tập đỉnh đã đi, `O(2^(2n) · (2n)²)` thời gian và `2^(2n) · 2n` ô bộ nhớ, nên chỉ chạy với n ≤ 9 và chỉ chạy ở lab cho n = 4 và 8. Đây là mốc duy nhất **chứng minh được** tối ưu. Công thức là cận trên: code chỉ mở rộng các trạng thái thỏa lấy trước giao, nên số trạng thái thật đi qua ít hơn nhiều, dù bảng vẫn cấp phát đủ ô.
+**Quy hoạch động chính xác** theo tập đỉnh đã đi, `O(2^(2n) · (2n)²)` thời gian và `2^(2n) · 2n` ô bộ nhớ, nên chỉ chạy với n ≤ 9 và chỉ chạy ở lab cho n = 4 và 8. Đây là mốc duy nhất **chứng minh được** tối ưu. Công thức là cận trên: code chỉ mở rộng các trạng thái thoả lấy trước giao, nên số trạng thái thật đi qua ít hơn nhiều, dù bảng vẫn cấp phát đủ ô.
 
-**OR-Tools** (Python 3.13, `ortools` 9.15.6755) chạy offline, một lần, ghi vào `fixtures/loc50/ortools-results.json`; lab Rust đọc file đó. Mô hình khớp bài toán Rust: tuyến mở bằng một đỉnh kết thúc giả có chi phí 0 từ mọi đỉnh, lấy trước giao bằng `AddPickupAndDelivery`, cùng xe, thời điểm tích lũy của lấy không muộn hơn của giao:
+**OR-Tools** (Python 3.13, `ortools` 9.15.6755) chạy offline, một lần, ghi vào `fixtures/loc50/ortools-results.json`; lab Rust đọc file đó. Mô hình khớp bài toán Rust: tuyến mở bằng một đỉnh kết thúc giả có chi phí 0 từ mọi đỉnh, lấy trước giao bằng `AddPickupAndDelivery`, cùng xe, thời điểm tích luỹ của lấy không muộn hơn của giao:
 
 `examples/toi-noi-location/python/loc50/loc50_ortools.py`
 
@@ -214,7 +214,7 @@ Một đoạn output nguyên văn cho n = 8, nơi cả hai mốc cùng có mặt
     trạng thái OR-Tools: {"SUCCESS": 20}
 ```
 
-Đọc ra ba điều. Một, **chèn rẻ nhất + tìm kiếm cục bộ kém OR-Tools khoảng 0,4 đến 2,8%** (gap trung bình +0,39% đến +2,77% tùy cỡ), và chỉ chèn thì kém 2,4 đến 7,5%. Trên cả 100 instance, Rust tốt hơn OR-Tools 1 lần, bằng 29 lần, kém hơn 70 lần. Hai, với n nhỏ, gap so với OR-Tools cũng là gap so với tối ưu thật (OR-Tools bằng DP): +0,39% ở n = 4 và +2,77% ở n = 8, tệ nhất +13,06% ở một instance n = 8. Ba, gap không tăng đều theo n; ở n = 30 là +2,13%, thấp hơn n = 8. Lab không giải thích được điều này; với 20 instance mỗi cỡ, các KTC chồng lên nhau nên chưa nói được gap đổi theo cỡ.
+Đọc ra ba điều. Một, **chèn rẻ nhất + tìm kiếm cục bộ kém OR-Tools khoảng 0,4 đến 2,8%** (gap trung bình +0,39% đến +2,77% tuỳ cỡ), và chỉ chèn thì kém 2,4 đến 7,5%. Trên cả 100 instance, Rust tốt hơn OR-Tools 1 lần, bằng 29 lần, kém hơn 70 lần. Hai, với n nhỏ, gap so với OR-Tools cũng là gap so với tối ưu thật (OR-Tools bằng DP): +0,39% ở n = 4 và +2,77% ở n = 8, tệ nhất +13,06% ở một instance n = 8. Ba, gap không tăng đều theo n; ở n = 30 là +2,13%, thấp hơn n = 8. Lab không giải thích được điều này; với 20 instance mỗi cỡ, các KTC chồng lên nhau nên chưa nói được gap đổi theo cỡ.
 
 Phần gap còn lại có thể đến từ việc Rust không có xáo trộn hay khởi động lại ngẫu nhiên, trong khi Guided Local Search có cơ chế thoát cực tiểu cục bộ. Đó là giả thuyết, **chưa thử** (thêm xáo trộn sẽ là bước tiếp theo, không phải kết quả của bài).
 
@@ -247,11 +247,11 @@ Các bài dùng simulator của P05 cùng một thước: so với baseline P03 
 
 | Bài | Can thiệp, kết quả chính (mật độ «thường» nếu không ghi) | Ai lợi | Ai chịu thiệt | Kết quả rỗng hoặc xấu |
 |---|---|---|---|---|
-| [41](/articles/location-gan-nhat-sai-o-dau-do-bang-mo-phong) | Gần nhất theo ETA thay chim bay: `deadhead_m` TB −66,2 m, p95 −533,0 m, max −3.703,1 m, ETA −12,9 s, hủy −0,0093 | Khách ngoại vi, khách ở đuôi | Không rõ: +145,3 m ở trung tâm không lặp lại trên 40 seed mới (+32,6 m, khoảng chứa 0) | p50 `deadhead_m` và km rỗng tổng không phân biệt được; «thưa xe», «cao điểm» cũng vậy ở `deadhead_m` |
+| [41](/articles/location-gan-nhat-sai-o-dau-do-bang-mo-phong) | Gần nhất theo ETA thay chim bay: `deadhead_m` TB −66,2 m, p95 −533,0 m, max −3.703,1 m, ETA −12,9 s, huỷ −0,0093 | Khách ngoại vi, khách ở đuôi | Không rõ: +145,3 m ở trung tâm không lặp lại trên 40 seed mới (+32,6 m, khoảng chứa 0) | p50 `deadhead_m` và km rỗng tổng không phân biệt được; «thưa xe», «cao điểm» cũng vậy ở `deadhead_m` |
 | [42](/articles/location-ghep-theo-lo-hungarian-kuhn-munkres-rust) | Hungarian trên lô: rẻ hơn tham lam 9,5–14,7% trên cùng ma trận; trong sim chỉ có lợi khi lô từ 2 khách (cao điểm: `deadhead_m` −911,7 m) | Khách gần xe, tài xế (km rỗng tổng −632,1 m ở cao điểm) | Khách xa xe (hết kiên nhẫn 0,0149 → 0,0717 ở cao điểm; cả 659 khách đều từng bị khách đặt sau vượt) | «thường»: không phân biệt được |
 | [43](/articles/location-cua-so-lo-do-tre-doi-chat-luong-ghep) | Cửa sổ lô: cao điểm, cửa sổ 30 s giảm cả chờ (−13,7 s) lẫn `deadhead_m` (−327,9 m) | Khách và tài xế khi cầu dày | Khách khi cầu thường (+6,6…+30,7 s chờ) | «thường»: cửa sổ chỉ thêm chờ; thích ứng không thắng cố định |
 | [44](/articles/location-cat-tia-ung-vien-h3-ma-tran-thua) | Cắt tỉa H3 và ma trận thưa: xe gấp 4 lần khách, +2,43…+4,58% ETA, thường nhanh hơn (1,9–18,3 lần, số rất nhiễu) | Độ trễ máy chủ | Chất lượng ghép 1–13% | Xe bằng khách: mất khách; ở 3.000×3.000 một vùng khổng lồ, bộ giải đặc nên không rút được khâu giải; cắt tỉa + lượt bù đắt hơn tối ưu 14,9% trên một lô |
-| [45](/articles/location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy) | Chi phí có công bằng, giới hạn đón xa, rủi ro hủy: `v1-idle` Gini −0,039; `v1-limit` ETA −18,5 s | Tài xế rảnh lâu; khách gần | Khách ngoại vi (hoàn thành −0,027…−0,031), tài xế ở «thưa xe» (rảnh dài nhất +1.904 s) | `v1-risk`, `v1-age` khi ghép ngay chưa được thử (y hệt `v0-eta` do hình dạng lô); trong lô 10 s ở cao điểm không có hiệu đáng kể |
+| [45](/articles/location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy) | Chi phí có công bằng, giới hạn đón xa, rủi ro huỷ: `v1-idle` Gini −0,039; `v1-limit` ETA −18,5 s | Tài xế rảnh lâu; khách gần | Khách ngoại vi (hoàn thành −0,027…−0,031), tài xế ở «thưa xe» (rảnh dài nhất +1.904 s) | `v1-risk`, `v1-age` khi ghép ngay chưa được thử (y hệt `v0-eta` do hình dạng lô); trong lô 10 s ở cao điểm không có hiệu đáng kể |
 | [46](/articles/location-goi-y-sang-dispatch-csharp-grpc-lease-idempotency) | `SuggestMatch` gRPC và stub Dispatch: 23/23 kiểm tra hợp đồng qua | Ranh giới Rust/C# rõ | Một vòng gọi thêm; gợi ý cũ bị bỏ phí (chưa đo tần suất) | Stub trong bộ nhớ: không chứng minh Dispatch thật |
 | [47](/articles/location-chain-dispatch-tai-xe-sap-tra-khach) | Chain (xe sắp trả khách): «thưa xe» +3,2 chuyến, hết kiên nhẫn 0,0733 → 0,0415 | Khách suýt bị bỏ rơi | Khách còn lại (`wait_s` +26,9 s) | Chuyến trước kéo dài (σ 0,3): p95 +82,7 s, không phân biệt được với mức σ 0,1 (+69,7 s); `risk_k = 1` không thấy giúp |
 | [48](/articles/location-lech-tuyen-dinh-tuyen-lai-ghep-lai) | Phát hiện lệch tuyến, hysteresis, ghép lại: phát hiện 95,2%, báo nhầm 2,5%; khách nhận 5/279 cập nhật | Khách (ít thông báo vô nghĩa) | Tài xế bị rút chuyến (17 ca đổi đều mất ≥ 1 km đã chạy) | Nhiễu thô: 80,5% báo nhầm; lợi của ghép lại bị thổi lên vì tài xế trong lab không được chọn bằng ghép |
@@ -313,7 +313,7 @@ Bài trước: [bài 49](/articles/location-tai-xe-ranh-di-dau-dieu-huong-theo-n
 
 ## Tài liệu gốc
 
-- [OR-Tools: Vehicle Routing with Pickups and Deliveries](https://developers.google.com/optimization/routing/pickup_delivery): cách mô hình lấy trước giao bằng `AddPickupAndDelivery` và ràng buộc thời điểm tích lũy.
+- [OR-Tools: Vehicle Routing with Pickups and Deliveries](https://developers.google.com/optimization/routing/pickup_delivery): cách mô hình lấy trước giao bằng `AddPickupAndDelivery` và ràng buộc thời điểm tích luỹ.
 - [OR-Tools: Routing Options](https://developers.google.com/optimization/routing/routing_options): chiến lược lời giải đầu, metaheuristic (Guided Local Search) và giới hạn thời gian.
 - [2-opt (Wikipedia)](https://en.wikipedia.org/wiki/2-opt): phép đảo đoạn cơ bản của tìm kiếm cục bộ.
 - [Held–Karp algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Held%E2%80%93Karp_algorithm): quy hoạch động theo tập đỉnh, nền của mốc chính xác cho cỡ nhỏ.

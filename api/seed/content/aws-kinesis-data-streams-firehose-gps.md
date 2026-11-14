@@ -1,6 +1,6 @@
 ---
 slug: aws-kinesis-data-streams-firehose-gps
-title: "Kinesis Data Streams và Data Firehose: nuốt 6.250 toạ độ GPS mỗi giây"
+title: "Kinesis Data Streams và Data Firehose: tiếp nhận 6.250 toạ độ GPS mỗi giây"
 summary: "Bài 35: pipeline vị trí tài xế: Kinesis Data Streams với shard hoặc on-demand, partition key theo driverId, PutRecords, consumer Lambda qua enhanced fan-out, Amazon Data Firehose ghi Parquet vào S3 theo thành phố và giờ; so với MSK và SQS; retention, replay, tính số shard và chi phí."
 category: devops-aws
 level: advanced
@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, kinesis, data-streams, firehose, streaming, gps, pa
 language: vi
 ---
 
-25.000 tài xế trực tuyến, mỗi người gửi một toạ độ sau mỗi 4 giây: 6.250 bản ghi mỗi giây, không ngừng. Hai nhóm cùng cần dòng đó. Dispatch cần vị trí mới nhất trong vài giây để ghép chuyến. Đội phân tích cần giữ toàn bộ lịch sử để hỏi những câu như "giờ nào tài xế ở Đà Nẵng chạy chậm nhất". Bài này dựng nguồn đó bằng **Amazon Kinesis Data Streams**, rồi chuyển lịch sử sang S3 bằng **Amazon Data Firehose** (tên cũ Kinesis Data Firehose).
+25.000 tài xế trực tuyến, mỗi người gửi một toạ độ sau mỗi 4 giây: 6.250 bản ghi mỗi giây, không ngừng. Hai nhóm đều cần luồng dữ liệu này. Dispatch cần vị trí mới nhất trong vài giây để ghép chuyến. Đội phân tích cần giữ toàn bộ lịch sử để hỏi những câu như "giờ nào tài xế ở Đà Nẵng chạy chậm nhất". Bài này dựng luồng dữ liệu đó bằng **Amazon Kinesis Data Streams**, rồi chuyển lịch sử sang S3 bằng **Amazon Data Firehose** (tên cũ Kinesis Data Firehose).
 
 Đây là **bài 35** của lộ trình **AWS qua Tới Nơi · Phần 04: Dữ liệu, lưu trữ và messaging**. Bạn cần xong [bài 32](/articles/aws-dynamodb-single-table-gsi-ttl-streams) (nơi lưu vị trí mới nhất) và [bài 34](/articles/aws-msk-kafka-iam-auth-msk-connect) (để so Kinesis với Kafka).
 
@@ -52,7 +52,7 @@ App chỉ gửi một lần, và hai đường không biết nhau: Firehose ch�
 
 ## Data Streams: shard, khoá và thời gian giữ
 
-Stream chia thành các **shard**. Mỗi bản ghi mang một **partition key**; Kinesis băm khoá để chọn shard, nên các bản ghi cùng khoá nằm cùng shard và giữ thứ tự. Giới hạn mỗi shard: ghi 1 MiB hoặc 1.000 bản ghi mỗi giây, đọc dùng chung 2 MiB mỗi giây và tối đa 5 lần `GetRecords` mỗi giây cho mọi consumer cộng lại. Khoá `driverId` có 25.000 giá trị nên phân đều. Khoá `city` chỉ có 6 giá trị: thành phố lớn dồn vào một shard và chạm giới hạn ghi dù cả stream còn dư (**hot shard**), hệt hot partition ở bài 32.
+Stream chia thành các **shard**. Mỗi bản ghi mang một **partition key**; Kinesis băm khoá để chọn shard, nên các bản ghi cùng khoá nằm cùng shard và giữ thứ tự. Giới hạn mỗi shard: ghi 1 MiB hoặc 1.000 bản ghi mỗi giây, đọc dùng chung 2 MiB mỗi giây và tối đa 5 lần `GetRecords` mỗi giây cho mọi consumer cộng lại. Khoá `driverId` có 25.000 giá trị nên phân đều. Khoá `city` chỉ có 6 giá trị: thành phố lớn dồn vào một shard và chạm giới hạn ghi dù cả stream còn dư (**hot shard**), giống hệt hot partition ở bài 32.
 
 | | On-demand | Provisioned |
 |---|---|---|
@@ -76,7 +76,7 @@ Phép tính chỉ cần hai dòng. Tải ghi: 25.000 tài xế ÷ 4 giây = 6.25
 | Số bản ghi, 1.000 mỗi giây mỗi shard | 6.250 ÷ 1.000 = 6,25 | **7** |
 | Băng thông, 1 MiB mỗi giây mỗi shard | 1,25 ÷ 1,05 ≈ 1,2 | 2 |
 
-Số bản ghi quyết định: cần ít nhất 7 shard, và nên cộng khoảng 30% dự phòng cho giờ cao điểm (lab mặc định 8; `scripts/shard-math.sh` tính cả dự phòng). On-demand bỏ phép tính này nhưng không bỏ nhu cầu chọn khoá tốt.
+Giới hạn số bản ghi là yếu tố quyết định: cần ít nhất 7 shard, và nên cộng khoảng 30% dự phòng cho giờ cao điểm (lab mặc định 8; `scripts/shard-math.sh` tính cả dự phòng). On-demand bỏ phép tính này nhưng không bỏ nhu cầu chọn khoá tốt.
 
 ## Lambda đọc stream
 
@@ -92,7 +92,7 @@ Event source mapping của Lambda đọc từng shard và gọi hàm theo lô. C
 | `function_response_types` | `ReportBatchItemFailures`: chỉ thử lại bản ghi lỗi | bật |
 | `destination_config.on_failure` | Đích (SQS, SNS) nhận thông tin lô thất bại | tuỳ chọn |
 
-Không có giới hạn thử lại và đích lỗi, một bản ghi "độc" chặn cả shard tới khi hết retention. Toạ độ cũ vô giá trị, nên lab bỏ bản ghi quá 300 giây. Theo dõi `IteratorAge`: số này tăng nghĩa là hàm chậm hơn dòng dữ liệu.
+Nếu không đặt giới hạn thử lại và đích lỗi, một bản ghi "độc" sẽ chặn cả shard tới khi hết retention. Toạ độ cũ không còn giá trị, nên lab bỏ bản ghi quá 300 giây. Theo dõi `IteratorAge`: số này tăng nghĩa là hàm chậm hơn dòng dữ liệu.
 
 ## Firehose: từ JSON sang Parquet trên S3
 
@@ -102,7 +102,7 @@ Firehose không cần viết consumer. Ba khái niệm:
 - **Chuyển đổi Parquet**: dùng lược đồ trong Glue Data Catalog để đổi JSON thành Parquet nén, nhỏ và quét nhanh hơn nhiều so với JSON.
 - **Dynamic partitioning**: trích `city` từ bản ghi và ghi vào `location/city=hcm/dt=.../hour=.../`. Phải bật ngay khi tạo delivery stream, không bật thêm sau.
 
-Hai chi tiết dễ hiểu nhầm. Một, `dt` và `hour` trong đường dẫn mặc định là thời điểm Firehose nhận bản ghi, không phải thời điểm tài xế gửi; muốn theo thời gian sự kiện phải trích từ bản ghi. Hai, "ghi theo giờ" nghĩa là đường dẫn chia theo giờ, không phải mỗi giờ một tệp: với 200 byte mỗi bản ghi và buffer trên, mỗi thành phố lớn ghi cỡ chục đối tượng mỗi giờ (phép tính từ giả định). Gộp lại thành tệp lớn hơn là việc của bài 38. Bản ghi không chuyển đổi được (JSON thiếu trường, sai kiểu) được ghi vào tiền tố `errors/` theo loại lỗi thay vì làm hỏng cả lô.
+Hai chi tiết dễ hiểu nhầm. Thứ nhất, `dt` và `hour` trong đường dẫn mặc định là thời điểm Firehose nhận bản ghi, không phải thời điểm tài xế gửi; muốn theo thời gian sự kiện phải trích từ bản ghi. Thứ hai, "ghi theo giờ" nghĩa là đường dẫn chia theo giờ, không phải mỗi giờ một tệp: với 200 byte mỗi bản ghi và buffer trên, mỗi thành phố lớn ghi cỡ chục đối tượng mỗi giờ (phép tính từ giả định). Gộp lại thành tệp lớn hơn là việc của bài 38. Bản ghi không chuyển đổi được (JSON thiếu trường, sai kiểu) được ghi vào tiền tố `errors/` theo loại lỗi thay vì làm hỏng cả lô.
 
 ## Kinesis, MSK hay SQS
 
@@ -112,14 +112,14 @@ Hai chi tiết dễ hiểu nhầm. Một, `dt` và `hour` trong đường dẫn 
 | Replay | Có, trong retention (tới 365 ngày) | Có, trong retention | Không |
 | Thông lượng | Theo số shard hoặc on-demand | Theo broker và partition | Rất cao, gần như không giới hạn |
 | Vận hành | Ít: không có server, chỉ shard | Nhiều: cluster, partition, lag | Không có |
-| Mô hình tiền | Shard-giờ hoặc theo dữ liệu | Broker-giờ chạy liên tục | Theo request |
+| Mô hình tính tiền | Shard-giờ hoặc theo dữ liệu | Broker-giờ chạy liên tục | Theo request |
 
 Bài 34 và bài này không mâu thuẫn mà giải hai bài toán khác nhau. Sự kiện nghiệp vụ của chuyến cần outbox qua CDC, nhiều consumer group độc lập và replay để dựng lại read model, nên đi MSK. GPS là bản ghi nhỏ, sống vài phút, một đường nóng và một đường đổ xuống S3 qua Firehose không cần viết code, nên Kinesis gọn hơn. Nếu đội đã vận hành MSK tốt, topic `location.updates.v1` trong tài liệu kiến trúc là phương án thay thế hợp lệ (Firehose cũng đọc được từ MSK); điều cần tránh là chạy cả hai cho cùng một luồng GPS.
 
 ## Cái giá phải trả
 
 - **Hot shard.** Khoá nhỏ (thành phố, khu vực) làm một shard nghẽn trong khi shard khác rảnh.
-- **Shard bị đếm sai.** Chỉ tính băng thông mà quên giới hạn 1.000 bản ghi mỗi giây.
+- **Tính sai số shard.** Chỉ tính băng thông mà quên giới hạn 1.000 bản ghi mỗi giây.
 - **Consumer bị kẹt.** Bản ghi độc không có giới hạn thử lại làm chậm cả shard.
 - **Nhiều tệp nhỏ.** Buffer nhỏ hoặc nhiều partition tạo vô số đối tượng S3, làm Athena chậm và tốn tiền request.
 - **Mất bản ghi do hết retention.** Consumer chậm hơn 24 giờ thì dữ liệu biến mất khỏi stream; đặt alarm theo iterator age.
@@ -143,7 +143,7 @@ resource "aws_kinesis_stream" "location" {
 }
 ```
 
-Bản đầy đủ có thêm mã hoá và số liệu theo shard. Stream tính tiền ngay khi tạo, kể cả khi không có dữ liệu.
+Bản đầy đủ có thêm mã hoá và chỉ số theo shard. Stream tính tiền ngay khi tạo, kể cả khi không có dữ liệu.
 
 Kiểm trên máy: `terraform fmt`, `init -backend=false`, `validate` qua Docker; `bash -n`; `shard-math.sh` chạy với hai bộ số của bài. **Chưa kiểm chứng trên tài khoản thật:** `apply` toàn bộ, nhất là Firehose kết hợp dynamic partitioning, `MetadataExtractionQuery` và chuyển Parquet, và event source mapping qua enhanced fan-out. Kích thước 200 byte mỗi bản ghi và dự phòng 30% là giả định.
 

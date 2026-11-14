@@ -1,0 +1,15 @@
+{"file":"flutter-ban-do-flutter-map-marker-polyline-chon-diem-don.md","edits":[
+{"old":"không có SLA, họ có thể chặn không báo trước,","new":"không có SLA, bên vận hành có thể chặn không báo trước,","reason":"Đại từ 'họ' mơ hồ","severity":"medium"},
+{"old":"bỏ tham số thì là `flutter_map (unknown)`.","new":"bỏ tham số thì User-Agent sẽ là `flutter_map (unknown)`.","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"`onAttributionTap` để app thật mở trang giấy phép","new":"`onAttributionTap` là chỗ để app thật mở trang giấy phép","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"test có đúng ca đó, nên màn hình","new":"test có đúng trường hợp đó, nên màn hình","reason":"'ca' gượng","severity":"low"},
+{"old":"`MapController` là tay lái từ bên ngoài;","new":"`MapController` là công cụ điều khiển bản đồ từ bên ngoài;","reason":"'tay lái' là cách nói ẩn dụ gượng","severity":"low"},
+{"old":"không tự là widget.","new":"bản thân nó không phải là widget.","reason":"'không tự là' là calque","severity":"medium"},
+{"old":"Biểu tượng được dịch lên nửa chiều cao bằng `Transform.translate`, để","new":"Ta dịch biểu tượng lên nửa chiều cao bằng `Transform.translate`, để","reason":"Bị động kiểu tiếng Anh","severity":"low"},
+{"old":"Ba, `Distance.as` trả 0 âm thầm khi toạ độ là NaN: toạ độ hỏng thành","new":"Ba, `Distance.as` trả 0 mà không báo lỗi khi toạ độ là NaN: toạ độ hỏng trở thành","reason":"'âm thầm' là calque; câu lược 'trở'","severity":"medium"},
+{"old":"toạ độ hỏng thành điểm hợp lệ âm thầm.","new":"toạ độ hỏng trở thành điểm hợp lệ mà không báo lỗi.","reason":"'âm thầm' là calque; câu lược 'trở'","severity":"medium"},
+{"old":"đếm số lần có mã tạo `HttpClient`,","new":"đếm số lần có đoạn code nào tạo `HttpClient`,","reason":"'có mã' dễ hiểu nhầm","severity":"medium"},
+{"old":"nuốt lỗi, thấy bộ đếm lớn hơn 0;","new":"nuốt lỗi mà bộ đếm vẫn lớn hơn 0;","reason":"Câu thiếu quan hệ từ","severity":"low"},
+{"old":"hoặc máy thật là request ra thật.","new":"hoặc máy thật thì request sẽ ra mạng thật.","reason":"Câu lược động từ","severity":"medium"},
+{"old":"khi hết giờ gọi onPickupSettled","new":"khi Timer chạy xong thì gọi onPickupSettled","reason":"'hết giờ' gượng với Timer","severity":"low"}
+]}

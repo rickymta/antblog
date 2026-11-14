@@ -80,7 +80,7 @@ Found 9 errors in 1 file (checked 1 source file)
 
 Hai kiểu lỗi mở đầu bài đều có mặt: dòng 16 là `km_label(2.5)` với số thực thay vì `Decimal`, dòng 17 là `.upper()` trên `driver_id` có thể là `None`. Mỗi lỗi mang một mã trong ngoặc vuông (`arg-type`, `union-attr`...); mã này dùng để tra tài liệu hoặc tắt đúng một loại lỗi khi thật sự cần.
 
-Cờ `--strict` là gói nhiều tùy chọn nghiêm ngặt: nó bật, trong số khác, `--disallow-untyped-defs` (mọi hàm phải có annotation), `--warn-return-any` và `--warn-unused-ignores`. Lỗi ở dòng 35 chỉ xuất hiện nhờ nó: chạy `mypy broken.py` không có `--strict` chỉ báo 8 lỗi, hàm `helper(x)` không annotation lọt qua. Với mã mới, ta nên bật `--strict` ngay từ đầu; kéo một dự án cũ lên strict từng bước thì khó hơn nhiều.
+Cờ `--strict` là gói nhiều tuỳ chọn nghiêm ngặt: nó bật, trong số khác, `--disallow-untyped-defs` (mọi hàm phải có annotation), `--warn-return-any` và `--warn-unused-ignores`. Lỗi ở dòng 35 chỉ xuất hiện nhờ nó: chạy `mypy broken.py` không có `--strict` chỉ báo 8 lỗi, hàm `helper(x)` không annotation lọt qua. Với mã mới, ta nên bật `--strict` ngay từ đầu; kéo một dự án cũ lên strict từng bước thì khó hơn nhiều.
 
 **pyright** của Microsoft là công cụ kiểm tra thứ hai, cũng đọc các annotation này (Pylance trong VS Code dựa trên nó). Hai công cụ có thể không đồng ý ở một số ca biên. Bài này chỉ chạy mypy; lab không cài pyright, nên ta không đưa số liệu nào về nó.
 
@@ -116,7 +116,7 @@ Hàm cũng có tham số kiểu: `def first[T](items: Sequence[T]) -> T` nói r�
 <figcaption>Hình 2. Generics giữ thông tin kiểu qua một cấu trúc dùng chung. Kiểu đóng vai trò hợp đồng: thêm sai loại đối tượng bị báo ngay trên dòng gọi.</figcaption>
 </figure>
 
-Có hai điểm tinh tế. Thứ nhất là **cận trên** `T: SupportsFare` (ở phần Protocol bên dưới): T phải thỏa một hợp đồng nhưng kết quả vẫn mang đúng kiểu T, không bị «nới» thành kiểu của hợp đồng. Thứ hai là **variance**. Dòng 30 của `broken.py` truyền `list[Trip]` vào tham số `list[object]` và bị từ chối, vì `list` đổi được: nếu cho phép, hàm kia có thể nhét một `str` vào danh sách chuyến. mypy gợi ý dùng `Sequence`, kiểu chỉ đọc nên là covariant (hợp biến) và chấp nhận danh sách của kiểu con. Quy tắc thực hành: **tham số nhận kiểu rộng và chỉ đọc (`Sequence`), kết quả trả kiểu cụ thể (`list`)**. Với cú pháp PEP 695, trình kiểm tra tự suy ra variance từ cách T được dùng, nên không cần khai `covariant=True` bằng tay.
+Có hai điểm tinh tế. Thứ nhất là **cận trên** `T: SupportsFare` (ở phần Protocol bên dưới): T phải thoả một hợp đồng nhưng kết quả vẫn mang đúng kiểu T, không bị «nới» thành kiểu của hợp đồng. Thứ hai là **variance**. Dòng 30 của `broken.py` truyền `list[Trip]` vào tham số `list[object]` và bị từ chối, vì `list` đổi được: nếu cho phép, hàm kia có thể nhét một `str` vào danh sách chuyến. mypy gợi ý dùng `Sequence`, kiểu chỉ đọc nên là covariant (hợp biến) và chấp nhận danh sách của kiểu con. Quy tắc thực hành: **tham số nhận kiểu rộng và chỉ đọc (`Sequence`), kết quả trả kiểu cụ thể (`list`)**. Với cú pháp PEP 695, trình kiểm tra tự suy ra variance từ cách T được dùng, nên không cần khai `covariant=True` bằng tay.
 
 ## Protocol: khớp theo cấu trúc, không cần kế thừa
 
@@ -139,11 +139,11 @@ class QuoteLine(NamedTuple):
     fare: Decimal
 ```
 
-`Trip` có `fare` là property, `QuoteLine` có `fare` là field của NamedTuple; không lớp nào nhắc tới `SupportsFare`, nhưng cả hai đều thỏa vì có thành viên đúng tên và đúng kiểu. `Driver` không có `fare`, nên `cheapest([driver])` bị báo `type-var` ở dòng 21. Sự khác biệt so với lớp cha thường: hợp đồng nằm ở **nơi dùng**, người viết `Trip` không cần biết nó sẽ được dùng theo cách nào. Bài 14 đi tiếp: so Protocol với lớp trừu tượng `abc.ABC` và dùng nó để tiêm phụ thuộc.
+`Trip` có `fare` là property, `QuoteLine` có `fare` là field của NamedTuple; không lớp nào nhắc tới `SupportsFare`, nhưng cả hai đều thoả vì có thành viên đúng tên và đúng kiểu. `Driver` không có `fare`, nên `cheapest([driver])` bị báo `type-var` ở dòng 21. Sự khác biệt so với lớp cha thường: hợp đồng nằm ở **nơi dùng**, người viết `Trip` không cần biết nó sẽ được dùng theo cách nào. Bài 14 đi tiếp: so Protocol với lớp trừu tượng `abc.ABC` và dùng nó để tiêm phụ thuộc.
 
 ## TypedDict: hình dạng dict từ JSON, và giới hạn của lời khai
 
-Sự kiện Kafka đến dưới dạng dict. `TypedDict` (PEP 589) mô tả khóa nào có, kiểu giá trị là gì. Kèm cú pháp generics, ta khai báo được bì thư dùng chung cho mọi loại sự kiện:
+Sự kiện Kafka đến dưới dạng dict. `TypedDict` (PEP 589) mô tả khoá nào có, kiểu giá trị là gì. Kèm cú pháp generics, ta khai báo được bì thư dùng chung cho mọi loại sự kiện:
 
 ```python
 class BookingCreatedPayload(TypedDict):
@@ -250,7 +250,7 @@ Success: no issues found in 1 source file
 
 Lệnh chỉ nêu `main.py`, nhưng mypy đi theo `import domain` và kiểm cả `domain.py`; con số «1 source file» đếm file ta chỉ định, không đếm file được kéo vào qua import.
 
-Chế độ `--verify` kiểm các kết quả trên (cước, `Registry`, `cheapest`, TypedDict thiếu khóa, annotation lười đọc bằng `Format.VALUE`, `km_label(2.5)` vẫn chạy được) và còn chạy mypy thật hai lần: `main.py` phải xanh, `broken.py` phải báo đúng 9 lỗi tại đúng các dòng đánh dấu:
+Chế độ `--verify` kiểm các kết quả trên (cước, `Registry`, `cheapest`, TypedDict thiếu khoá, annotation lười đọc bằng `Format.VALUE`, `km_label(2.5)` vẫn chạy được) và còn chạy mypy thật hai lần: `main.py` phải xanh, `broken.py` phải báo đúng 9 lỗi tại đúng các dòng đánh dấu:
 
 ```bash
 uv run --project examples/toi-noi-python/12-type-hints-mypy-protocol examples/toi-noi-python/12-type-hints-mypy-protocol/main.py --verify

@@ -1,0 +1,14 @@
+{"file":"ba-facilitation-ke-chuyen-bang-chung.md","edits":[
+{"old":"BA không cần ba phiên bản sự thật; cần một bộ","new":"BA không cần ba phiên bản sự thật, mà cần một bộ","reason":"Thiếu liên từ","severity":"low"},
+{"old":"cuộc họp không tạo approval nếu thiếu","new":"cuộc họp không tạo ra phê duyệt nếu thiếu","reason":"approval thành phê duyệt","severity":"medium"},
+{"old":"và owner của từng việc”","new":"và người phụ trách của từng việc”","reason":"owner thành người phụ trách","severity":"medium"},
+{"old":"Khuyến nghị kiểm telemetry và rào cản","new":"Khuyến nghị kiểm tra telemetry và rào cản","reason":"Lược tra","severity":"medium"},
+{"old":"| Ngoại lệ, công suất, owner và hướng dẫn |","new":"| Ngoại lệ, công suất, người phụ trách và hướng dẫn |","reason":"owner","severity":"low"},
+{"old":"Không che giới hạn dữ liệu với sponsor","new":"Không che giấu giới hạn dữ liệu trước sponsor","reason":"che với gượng","severity":"medium"},
+{"old":"Rút gọn là giữ điều quyết định, không xoá điều bất lợi.","new":"Rút gọn là giữ lại những điều ảnh hưởng đến quyết định, không xoá điều bất lợi.","reason":"Câu cụt, khó hiểu","severity":"medium"},
+{"old":"tám phút so phương án;","new":"tám phút so sánh phương án;","reason":"Lược sánh","severity":"medium"},
+{"old":"ba phút đọc lại owner/mốc.","new":"ba phút đọc lại người phụ trách/mốc.","reason":"owner","severity":"medium"},
+{"old":"ghi vào parking lot với owner và cách xử lý sau.","new":"ghi vào parking lot kèm người phụ trách và cách xử lý sau.","reason":"owner","severity":"medium"},
+{"old":"để tránh người nói lớn nhất quyết định kết luận.","new":"để tránh việc người nói to nhất quyết định kết luận.","reason":"Calque nói lớn nhất","severity":"medium"},
+{"old":"Cách kể hấp dẫn không được làm bằng chứng mạnh hơn thực tế.","new":"Cách kể hấp dẫn không được làm cho bằng chứng trông mạnh hơn thực tế.","reason":"Thiếu động từ","severity":"medium"}
+]}

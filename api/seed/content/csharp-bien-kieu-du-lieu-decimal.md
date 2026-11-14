@@ -63,7 +63,7 @@ Không trộn double với decimal trong một phép cộng. Ép kiểu `(decima
 
 ## Ba giá trị khác nhau: khoảng cách, cước thô, tiền phải trả
 
-Giữ nguyên quy tắc bài 01: 12.000 VND gồm 2 km đầu, phần vượt 4.500 VND/km. Bổ sung một quy tắc **chỉ cho mô hình minh họa**: làm tròn tiền cuối cùng đến 1 VND, điểm giữa làm tròn ra xa số 0.
+Giữ nguyên quy tắc bài 01: 12.000 VND gồm 2 km đầu, phần vượt 4.500 VND/km. Bổ sung một quy tắc **chỉ cho mô hình minh hoạ**: làm tròn tiền cuối cùng đến 1 VND, điểm giữa làm tròn ra xa số 0.
 
 Với 2,501 km: phần vượt 0,501 km, tiền vượt 2.254,5 VND, tổng thô 14.254,5 VND và phải trả 14.255 VND. Không làm tròn khoảng cách trước khi tính vì điều đó có thể đổi báo giá.
 

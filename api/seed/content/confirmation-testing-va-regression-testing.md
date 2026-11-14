@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-019, confirmation-testing, regression-testing,
 language: vi
 ---
 
-Developer báo «đã sửa lỗi làm tròn quãng đường». Tester chạy lại đúng ca từng đỏ: xanh. Có nên đóng phiếu lỗi và phát hành bảng giá mới không? Chưa. Còn câu hỏi thứ hai: bản sửa có làm hỏng chỗ nào khác không. Bài này tách hai câu hỏi đó thành **confirmation testing** và **regression testing**, chỉ cách dùng **impact analysis** để biết phải chạy lại những gì, rồi chạy thật trên ba bản build — trong đó có một bản «sửa xong» vượt qua mọi confirmation test nhưng vẫn làm sai cước.
+Developer báo «đã sửa lỗi làm tròn quãng đường». Tester chạy lại đúng test case từng đỏ: xanh. Có nên đóng phiếu lỗi và phát hành bảng giá mới không? Chưa. Còn câu hỏi thứ hai: bản sửa có làm hỏng chỗ nào khác không. Bài này tách hai câu hỏi đó thành **confirmation testing** và **regression testing**, chỉ cách dùng **impact analysis** để biết phải chạy lại những gì, rồi chạy thật trên ba bản build — trong đó có một bản «sửa xong» vượt qua mọi confirmation test nhưng vẫn làm sai cước.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-019</span>
@@ -29,7 +29,7 @@ Developer báo «đã sửa lỗi làm tròn quãng đường». Tester chạy l
 
 ## 1. Giới thiệu
 
-Mọi thay đổi mang hai rủi ro: thay đổi **không làm được** điều nó hứa (lỗi vẫn còn, hoặc chỉ hết ở đúng ca đã báo), hoặc **làm được nhưng phá thứ khác** (chức năng từng đúng nay sai). Hai rủi ro cần hai loại test khác nhau.
+Mọi thay đổi mang hai rủi ro: thay đổi **không làm được** điều nó hứa (lỗi vẫn còn, hoặc chỉ hết ở đúng test case đã báo), hoặc **làm được nhưng phá thứ khác** (chức năng từng đúng nay sai). Hai rủi ro cần hai loại test khác nhau.
 
 [TEST-001](/articles/software-testing-la-gi-testing-khac-debugging) đã giới thiệu hai khái niệm ở mức định nghĩa, trên một lỗi làm tròn tiền. Bài này đi tiếp ba bước:
 
@@ -87,7 +87,7 @@ Hai ý cuối của mục 2.2.3 dẫn thẳng tới tự động hoá:
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Đọc thêm — CTAL-TA v4.0, mục 2.2 (TA-2.2.1, K4)</span>
-<p>Syllabus Test Analyst đi sâu vào việc <b>chọn</b> test hồi quy khi không chạy hết được. Với test tự động, tin cậy nhất là impact analysis có công cụ: ghi lại test nào chạy qua configuration item nào, item đổi thì chọn đúng các test đó. Với test thủ công, hay dùng: theo rủi ro, theo lịch sử lỗi, theo độ phủ, theo ma trận truy vết yêu cầu, theo operational profile — thường kết hợp và xét lại sau mỗi chu kỳ. Bài này dùng truy vết yêu cầu và impact analysis bằng công cụ.</p>
+<p>Syllabus Test Analyst đi sâu vào việc <b>chọn</b> test hồi quy khi không chạy hết được. Với test tự động, tin cậy nhất là impact analysis có công cụ: ghi lại test nào chạy qua configuration item nào, item đổi thì chọn đúng các test đó. Với test thủ công, các cách hay dùng là chọn theo rủi ro, theo lịch sử lỗi, theo độ phủ, theo ma trận truy vết yêu cầu, theo operational profile — thường kết hợp và xét lại sau mỗi chu kỳ. Bài này dùng truy vết yêu cầu và impact analysis bằng công cụ.</p>
 </div>
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
@@ -103,7 +103,7 @@ Các quy tắc trong SPEC lab dính tới thay đổi:
 
 ### Sự cố (giả định)
 
-Trước đợt phát hành bảng giá `fare-2026.1`, bản build **rc1** có hàm làm tròn viết bằng `Number(v.toFixed(1))`. Tester chạy bộ test cước: ca xe máy 7,35 km lúc 09:00 ra **45.000 đ** thay vì **46.000 đ**. Defect report (cách viết xem [TEST-010](/articles/testware-san-pham-kiem-thu)) ghi triệu chứng: «quãng đường dạng x,x5 km có lúc bị làm tròn xuống». Developer sửa thành rc2, rồi rc3. Câu chuyện của bài là việc kiểm thử hai bản sửa đó.
+Trước đợt phát hành bảng giá `fare-2026.1`, bản build **rc1** có hàm làm tròn viết bằng `Number(v.toFixed(1))`. Tester chạy bộ test cước: test case xe máy 7,35 km lúc 09:00 ra **45.000 đ** thay vì **46.000 đ**. Defect report (cách viết xem [TEST-010](/articles/testware-san-pham-kiem-thu)) ghi triệu chứng: «quãng đường dạng x,x5 km có lúc bị làm tròn xuống». Developer sửa thành rc2, rồi rc3. Câu chuyện của bài là việc kiểm thử hai bản sửa đó.
 
 ### System context
 
@@ -118,7 +118,7 @@ Lab là modular monolith: hàm `roundToTenth` ở `src/domain/money.ts` được
 | 1 | Bản sửa chỉ hết lỗi ở ca 7,35 km đã báo | Hàng trăm giá trị x,x5 khác vẫn sai — khách bị tính thiếu hoặc thừa |
 | 2 | Bản sửa đổi hành vi ở biên [0,5; 100] km | Chuyến 100,04 km bị từ chối, chuyến 0,44 km được nhận |
 | 3 | Bản sửa đụng hàm dùng chung | Phụ phí bưu kiện và biên khối lượng đổi theo mà không ai để ý |
-| 4 | Phí giao đồ ăn đổi âm thầm | Đối soát tài chính lệch giữa báo giá và thu tiền |
+| 4 | Phí giao đồ ăn thay đổi mà không ai hay | Đối soát tài chính lệch giữa báo giá và thu tiền |
 | 5 | Môi trường build khác (phiên bản Node, ICU) | Hành vi số/định dạng khác giữa máy dev và production |
 
 ## 4. Phân tích kỹ thuật
@@ -312,7 +312,7 @@ Chạy không có `SHOW_RED` (như CI của lab): `Tests 45 passed (45)`, khoả
 
 Ba điều đáng rút ra:
 
-- **rc2 là cái bẫy kinh điển.** Mọi confirmation test, kể cả CF-06 quét 996 giá trị, đều xanh: `Math.ceil` đúng là đẩy lên mọi giá trị x,x5. Nhưng nó cũng đẩy 0,44 và 100,04 — hai ví dụ biên SPEC viết sẵn. Dừng ở confirmation thì Tới Nơi từ chối chuyến 100,04 km và tính phí giao 22.000 đ cho đơn 2,01 km.
+- **rc2 là cái bẫy kinh điển.** Mọi confirmation test, kể cả CF-06 quét 996 giá trị, đều xanh: `Math.ceil` đúng là đẩy lên mọi giá trị x,x5. Nhưng hàm này cũng đẩy 0,44 và 100,04 — hai ví dụ biên SPEC viết sẵn. Dừng ở confirmation thì Tới Nơi từ chối chuyến 100,04 km và tính phí giao 22.000 đ cho đơn 2,01 km.
 - **Regression trên rc1 xanh hết, và đó là thông tin:** defect không lan ra biên. Bộ regression không có nhiệm vụ bắt defect cũ.
 - **Khối lượng chỉ lộ ra nhờ test mới.** Bốn ví dụ khối lượng của SPEC (0,04; 0,05; 30,04; 30,05) đều đúng trên rc1; defect chỉ hiện ở 5,05 kg — giá trị không có trong bộ test cũ. Không có impact analysis thì không ai thêm CF-05.
 
@@ -322,7 +322,7 @@ Một vòng sửa lỗi này cần 15 test × 3 bản build = 45 lượt. Giả 
 
 ## 6. Góc nhìn nâng cao
 
-**Confirmation đạt chưa phải bản sửa đúng.** Nó chỉ chứng minh failure cũ không còn. rc2 là ví dụ: bản sửa đúng cho lớp giá trị bị báo, sai cho lớp giá trị khác.
+**Confirmation đạt chưa phải bản sửa đúng.** Kết quả này chỉ chứng minh failure cũ không còn. rc2 là ví dụ: bản sửa đúng cho lớp giá trị bị báo, sai cho lớp giá trị khác.
 
 **Bộ regression chỉ có giá trị khi nhạy với thay đổi.** Một bộ toàn ví dụ «đẹp» có thể xanh trên bản lỗi (bốn ví dụ khối lượng trên rc1). Khi impact analysis chỉ ra một vùng bị ảnh hưởng mà chưa test nào phân biệt được bản đúng và bản sai, đó là tín hiệu thêm test — không phải tín hiệu vùng đó an toàn.
 
@@ -336,7 +336,7 @@ Một vòng sửa lỗi này cần 15 test × 3 bản build = 45 lượt. Giả 
 
 **Báo giá đã lưu không phải hồi quy.** Báo giá tạo trên rc1 còn hạn vẫn giữ giá cũ khi đặt chuyến trên rc3 — đúng R-QUOTE-04 (không đổi giá hồi tố).
 
-**Sai lầm thường gặp:** gọi «chạy lại ca vừa sửa» là regression; nghĩ unit test của developer thay được confirmation ở system level; chép kết quả của rc3 làm kết quả mong đợi; bỏ qua test regression đỏ vì «không liên quan» mà chưa điều tra (có thể là hồi quy thật, có thể là defect trong test).
+**Sai lầm thường gặp:** gọi «chạy lại test case vừa sửa» là regression; nghĩ unit test của developer thay được confirmation ở system level; chép kết quả của rc3 làm kết quả mong đợi; bỏ qua test regression đỏ vì «không liên quan» mà chưa điều tra (có thể là hồi quy thật, có thể là defect trong test).
 
 ## 7. Bài tập và câu hỏi ôn tập
 
@@ -356,7 +356,7 @@ Một vòng sửa lỗi này cần 15 test × 3 bản build = 45 lượt. Giả 
 
 **Câu hỏi trắc nghiệm** (tự soạn theo phong cách ISTQB, mỗi câu một đáp án đúng).
 
-**Câu 1 (K2).** Tester báo defect: đơn bưu kiện 5,05 kg không bị tính phụ phí. Sau khi developer sửa, tester chạy lại đúng ca 5,05 kg và kiểm phụ phí là 2.000 đ. Hoạt động này là gì?
+**Câu 1 (K2).** Tester báo defect: đơn bưu kiện 5,05 kg không bị tính phụ phí. Sau khi developer sửa, tester chạy lại đúng test case 5,05 kg và kiểm phụ phí là 2.000 đ. Hoạt động này là gì?
 
 - a) Regression testing
 - b) Confirmation testing

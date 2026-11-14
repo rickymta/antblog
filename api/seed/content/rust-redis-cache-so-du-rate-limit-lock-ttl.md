@@ -65,7 +65,7 @@ số lần đọc sổ cái sau 2 lần đọc: 1; TTL còn lại 1498 ms
 sau ghi TN-0002 và DEL: 33.600 VND từ sổ cái
 ```
 
-Lần đọc đầu miss và chạm PostgreSQL; lần hai là hit, bộ đếm đọc sổ cái vẫn bằng 1. Key mang TTL 1.500 ms (nhỏ để bài chạy nhanh; TTL production tùy mức chịu số cũ của từng màn hình). Sau khi ghi `TN-0002`, `post_and_invalidate` commit transaction rồi mới `DEL`; lần đọc kế tiếp thấy 33.600, đúng 20.400 + 13.200.
+Lần đọc đầu miss và chạm PostgreSQL; lần hai là hit, bộ đếm đọc sổ cái vẫn bằng 1. Key mang TTL 1.500 ms (nhỏ để bài chạy nhanh; TTL production tuỳ mức chịu số cũ của từng màn hình). Sau khi ghi `TN-0002`, `post_and_invalidate` commit transaction rồi mới `DEL`; lần đọc kế tiếp thấy 33.600, đúng 20.400 + 13.200.
 
 Thứ tự «commit trước, xoá sau» là có chủ ý: xoá trước khi commit thì một người đọc chen vào sẽ nạp lại đúng số cũ ngay trước khi sổ cái đổi. Đây là lập luận, lab không đo.
 
@@ -165,7 +165,7 @@ Con số 10 không cứng: nếu chạy lâu hơn một giây, xô được hoà
 
 ## Lock SET NX PX bảo vệ được đến đâu?
 
-Lock phổ biến nhất là `SET key token NX PX ttl`: tạo key nếu chưa có, kèm TTL để lock không kẹt vĩnh viễn nếu người giữ chết. Token ngẫu nhiên cho biết ai là chủ. Mở khóa phải so token rồi mới xoá, hai bước đó phải nguyên tử, nên cũng là Lua. Phần chính trong `src/lock.rs`:
+Lock phổ biến nhất là `SET key token NX PX ttl`: tạo key nếu chưa có, kèm TTL để lock không kẹt vĩnh viễn nếu người giữ chết. Token ngẫu nhiên cho biết ai là chủ. Mở khoá phải so token rồi mới xoá, hai bước đó phải nguyên tử, nên cũng là Lua. Phần chính trong `src/lock.rs`:
 
 ```rust
 // src/lock.rs (rút gọn)

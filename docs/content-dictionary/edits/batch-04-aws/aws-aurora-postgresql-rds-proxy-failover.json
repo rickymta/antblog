@@ -1,0 +1,53 @@
+{
+  "file": "aws-aurora-postgresql-rds-proxy-failover.md",
+  "edits": [
+    {
+      "old": "nên dữ liệu đã được ghi nhận không nằm trong writer.",
+      "new": "nên dữ liệu đã được ghi nhận không nằm riêng trong writer.",
+      "reason": "Câu sai nghĩa/thiếu chữ: dữ liệu nằm ở volume dùng chung, không chỉ ở writer (đã chỉnh khi duyệt: \"không chỉ\" làm đổi nghĩa)",
+      "severity": "high"
+    },
+    {
+      "old": "Nó cân bằng ở **mức kết nối**,",
+      "new": "Reader endpoint cân bằng ở **mức kết nối**,",
+      "reason": "Tránh 'Nó' chỉ sự vật trừu tượng",
+      "severity": "medium"
+    },
+    {
+      "old": "nên tải đọc âm thầm đổ lên writer;",
+      "new": "nên tải đọc đổ lên writer mà không báo lỗi;",
+      "reason": "'âm thầm' là calque",
+      "severity": "medium"
+    },
+    {
+      "old": "Reader endpoint âm thầm trỏ về writer, tải đọc đè lên writer.",
+      "new": "Reader endpoint tự trỏ về writer mà không báo lỗi, tải đọc đè lên writer.",
+      "reason": "'âm thầm' là calque",
+      "severity": "medium"
+    },
+    {
+      "old": "proxy giữ một hồ nhỏ connection tới database",
+      "new": "proxy giữ một pool nhỏ connection tới database",
+      "reason": "'hồ' là calque của pool",
+      "severity": "medium"
+    },
+    {
+      "old": "<text x=\"739\" y=\"156\" class=\"t-small\">tự lớn theo dữ liệu</text>",
+      "new": "<text x=\"739\" y=\"156\" class=\"t-small\">tự mở rộng theo dữ liệu</text>",
+      "reason": "'tự lớn' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Kiểm trên máy: `terraform fmt`,",
+      "new": "Kiểm tra trên máy: `terraform fmt`,",
+      "reason": "'kiểm' cụt",
+      "severity": "low"
+    },
+    {
+      "old": "so với I/O-Optimized bằng số đo thật.",
+      "new": "hãy so sánh với I/O-Optimized bằng số đo thật.",
+      "reason": "Câu lược động từ",
+      "severity": "medium"
+    }
+  ]
+}

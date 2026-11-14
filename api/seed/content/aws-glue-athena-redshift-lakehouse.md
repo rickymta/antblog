@@ -20,7 +20,7 @@ language: vi
 
 ## Tách OLTP khỏi OLAP
 
-Aurora (bài 31) được thiết kế cho **OLTP**: nhiều thao tác nhỏ, mỗi thao tác chạm vài dòng. Báo cáo là **OLAP**: ít câu lệnh nhưng mỗi câu quét rất nhiều dòng và ít cột. Lưu theo hàng khiến báo cáo đọc cả những cột nó không cần; lưu theo cột (Parquet, ORC) thì ngược lại. Có ba chỗ để chạy báo cáo:
+Aurora (bài 31) được thiết kế cho **OLTP**: nhiều thao tác nhỏ, mỗi thao tác chạm vài dòng. Báo cáo là **OLAP**: ít câu lệnh nhưng mỗi câu quét rất nhiều dòng và ít cột. Lưu theo hàng khiến báo cáo đọc cả những cột mà báo cáo không cần; lưu theo cột (Parquet, ORC) thì ngược lại. Có ba chỗ để chạy báo cáo:
 
 | Chỗ chạy | Ưu | Nhược |
 | --- | --- | --- |
@@ -40,7 +40,7 @@ Lake của Tới Nơi chia ba tầng trong một bucket: **raw** (dữ liệu ng
 
 ## Đưa dữ liệu vào lake
 
-- **Aurora:** xuất snapshot ra S3 dạng Parquet cho lần nạp đầu; sau đó dùng DMS với CDC (bài 40) hoặc **zero-ETL** sang Redshift (GA cho Aurora PostgreSQL từ 2024; kiểm phiên bản engine được hỗ trợ) để dữ liệu mới tới gần như liên tục mà không tự viết job.
+- **Aurora:** xuất snapshot ra S3 dạng Parquet cho lần nạp đầu; sau đó dùng DMS với CDC (bài 40) hoặc **zero-ETL** sang Redshift (GA cho Aurora PostgreSQL từ 2024; kiểm phiên bản engine được hỗ trợ) để dữ liệu mới tới gần như liên tục mà không phải tự viết job.
 - **DynamoDB:** tính năng **export to S3** lấy dữ liệu từ point-in-time recovery mà không tốn read capacity; định dạng là DynamoDB JSON hoặc Ion, nên cần một bước đổi sang Parquet.
 - **Kinesis và Firehose:** Firehose có thể tự chuyển JSON sang Parquet theo schema khai báo trong Glue Data Catalog và ghi vào prefix theo ngày. Dùng đường này cho vị trí tài xế và sự kiện chuyến.
 
@@ -68,9 +68,9 @@ WHERE substr(requested_at, 1, 10) = '2026-03-02';
 
 Cột partition phải nằm cuối `SELECT`, và một câu CTAS hay `INSERT INTO` chỉ ghi tối đa 100 partition, nên chạy theo từng ngày. Bản đầy đủ nằm trong lab.
 
-Khi partition nhiều (365 ngày × 6 thành phố mỗi năm), việc hỏi Glue danh sách partition làm chậm query. **Partition projection** cho Athena tự tính đường dẫn từ quy tắc khai báo trong thuộc tính bảng (`projection.dt.type = date`, `projection.city.type = enum`), không cần crawler hay `MSCK REPAIR TABLE`. Cái giá là đường dẫn phải đúng quy ước `dt=.../city=.../`.
+Khi partition nhiều (365 ngày × 6 thành phố mỗi năm), việc truy vấn Glue để lấy danh sách partition làm chậm query. **Partition projection** cho Athena tự tính đường dẫn từ quy tắc khai báo trong thuộc tính bảng (`projection.dt.type = date`, `projection.city.type = enum`), không cần crawler hay `MSCK REPAIR TABLE`. Cái giá là đường dẫn phải đúng quy ước `dt=.../city=.../`.
 
-**Workgroup** là ranh giới quản lý: chọn nơi lưu kết quả, ép cấu hình và đặt trần `bytes_scanned_cutoff_per_query` để câu lệnh quá lớn bị huỷ thay vì đốt tiền. Một câu hỏi điển hình của vận hành:
+**Workgroup** là ranh giới quản lý: chọn nơi lưu kết quả, bắt buộc áp dụng cấu hình và đặt trần `bytes_scanned_cutoff_per_query` để câu lệnh quá lớn bị huỷ thay vì đốt tiền. Một truy vấn điển hình của bộ phận vận hành:
 
 ```sql
 SELECT city, hour(requested_at) AS hour_of_day, count(*) AS trips, sum(fare) AS revenue
@@ -91,7 +91,7 @@ Câu này đọc ba cột của sáu partition trong một ngày. Bỏ điều k
 
 ## Redshift Serverless và Lake Formation
 
-Khi nhiều người cùng mở dashboard hoặc câu lệnh phức tạp (join nhiều bảng lớn), Athena trả tiền theo mỗi lần quét sẽ đắt và chậm. **Redshift Serverless** là kho dữ liệu cột tính theo **RPU** (Redshift Processing Unit): bạn đặt năng lực nền và trần, hệ thống co giãn, tính tiền theo thời gian dùng và không tính khi rảnh. Nó đọc cả dữ liệu trong S3 qua **Spectrum**, và **materialized view** lưu sẵn kết quả tổng hợp để dashboard không tính lại. **QuickSight** thường là lớp hiển thị phía trên.
+Khi nhiều người cùng mở dashboard hoặc câu lệnh phức tạp (join nhiều bảng lớn), Athena tính tiền theo mỗi lần quét sẽ đắt và chậm. **Redshift Serverless** là kho dữ liệu cột tính theo **RPU** (Redshift Processing Unit): bạn đặt năng lực nền và trần, hệ thống co giãn, tính tiền theo thời gian dùng và không tính khi rảnh. Redshift Serverless đọc cả dữ liệu trong S3 qua **Spectrum**, và **materialized view** lưu sẵn kết quả tổng hợp để dashboard không tính lại. **QuickSight** thường là lớp hiển thị phía trên.
 
 | Tiêu chí | Athena | Redshift Serverless |
 | --- | --- | --- |
@@ -100,12 +100,12 @@ Khi nhiều người cùng mở dashboard hoặc câu lệnh phức tạp (join 
 | Dữ liệu | Đọc thẳng từ S3 | Nạp vào Redshift hoặc đọc S3 qua Spectrum |
 | Vận hành | Gần như không | Đặt RPU nền và trần chi phí |
 
-**Lake Formation** cấp quyền ở mức database, bảng, cột và dòng cho Athena, Redshift Spectrum và Glue. Với Tới Nơi, nhóm phân tích được `SELECT` trên `trips_curated` nhưng bị loại cột `customer_phone`; vị trí S3 phải được đăng ký với Lake Formation. Quyền S3 trực tiếp của IAM vẫn đọc được file, nên cần đóng đường đó cho role phân tích, nếu không việc che cột chỉ là hình thức.
+**Lake Formation** cấp quyền ở mức database, bảng, cột và dòng cho Athena, Redshift Spectrum và Glue. Với Tới Nơi, nhóm phân tích được `SELECT` trên `trips_curated` nhưng không được thấy cột `customer_phone`; vị trí S3 phải được đăng ký với Lake Formation. Quyền S3 trực tiếp của IAM vẫn đọc được file, nên cần đóng đường đó cho role phân tích, nếu không việc che cột chỉ là hình thức.
 
 ## Cái giá phải trả
 
-- **Quét nhầm là đắt nhất.** Thiếu điều kiện partition hay `SELECT *` biến một câu truy vấn nhỏ thành quét cả năm; luôn đặt trần ở workgroup.
-- **File nhỏ giết hiệu năng.** Firehose ghi file nhỏ theo từng phút; cần gộp (compaction) thành file hàng trăm MB.
+- **Quét nhầm là lỗi tốn kém nhất.** Thiếu điều kiện partition hay `SELECT *` biến một câu truy vấn nhỏ thành quét cả năm; luôn đặt trần ở workgroup.
+- **File nhỏ làm hiệu năng sụt giảm.** Firehose ghi file nhỏ theo từng phút; cần gộp (compaction) thành file hàng trăm MB.
 - **Dữ liệu trễ.** Lake hợp với báo cáo và phân tích, không phải màn hình thời gian thực.
 - **PII nằm ở nhiều nơi.** Mỗi tầng raw, curated, serving có thể chứa số điện thoại; che cột không đủ nếu raw vẫn mở.
 - **Redshift Serverless vẫn tính tiền lưu trữ khi rảnh**, và một truy vấn nặng có thể đẩy RPU lên sát trần; hãy đặt năng lực nền vừa phải và giới hạn mức dùng.
@@ -124,7 +124,7 @@ docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 init -backend=false 
 docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 validate
 ```
 
-Terraform đã qua `fmt` và `validate`; SQL và Lake Formation chưa chạy trên tài khoản thật. Tiền lab đến từ dung lượng S3 và dữ liệu Athena quét; bước dọn nằm trong README.
+Terraform đã qua `fmt` và `validate`; SQL và Lake Formation chưa chạy trên tài khoản thật. Chi phí của lab đến từ dung lượng S3 và dữ liệu Athena quét; bước dọn nằm trong README.
 
 Bài trước: [bài 37](/articles/aws-backup-disaster-recovery-rpo-rto). Bài tiếp: [bài 39](/articles/aws-opensearch-tim-kiem-log-analytics).
 

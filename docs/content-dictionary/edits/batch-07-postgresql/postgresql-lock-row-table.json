@@ -1,0 +1,12 @@
+{"file":"postgresql-lock-row-table.md","edits":[
+{"old":"Tạo lại hàng chờ khoá trên PostgreSQL 18.1,","new":"Bài này tạo lại hàng chờ khoá trên PostgreSQL 18.1,","reason":"Câu cụt thiếu chủ ngữ trong summary","severity":"medium"},
+{"old":"PG-034 so chuyện này với Repeatable Read","new":"PG-034 so sánh việc này với Repeatable Read","reason":"'so chuyện này' gượng, lược 'sánh'","severity":"low"},
+{"old":"Nó cần khoá độc quyền bảng khoá trong chốc lát","new":"Hàm này cần khoá độc quyền bảng khoá trong chốc lát","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Kiểm khoá ngoại khi chèn dòng con","new":"Kiểm tra khoá ngoại khi chèn dòng con","reason":"'Kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Lý do: chèn dòng con phải kiểm khoá ngoại","new":"Lý do: chèn dòng con phải kiểm tra khoá ngoại","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Khi không xoá dòng, không đổi khoá chính, dùng","new":"Khi không xoá dòng và không đổi khoá chính thì dùng","reason":"Câu thiếu liên kết, đọc vấp","severity":"medium"},
+{"old":"khoá theo con số do ứng dụng đặt nghĩa","new":"khoá theo con số do ứng dụng tự quy ước ý nghĩa","reason":"'đặt nghĩa' là cụm tự ghép gượng","severity":"medium"},
+{"old":"là khoá trên một con số PostgreSQL không gắn với bảng hay dòng nào","new":"là khoá trên một con số mà PostgreSQL không gắn với bảng hay dòng nào","reason":"Thiếu từ nối, câu khó đọc","severity":"medium"},
+{"old":"rồi ghi một lần có kiểm `version` (PG-035)","new":"rồi ghi một lần có kiểm tra `version` (PG-035)","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"**Timeout ngắn** lỗi sớm và rõ nhưng","new":"**Timeout ngắn** báo lỗi sớm và rõ ràng, nhưng","reason":"Câu thiếu động từ","severity":"medium"}
+]}

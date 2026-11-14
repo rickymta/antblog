@@ -127,7 +127,7 @@ final class WebSocketTransport implements RealtimeTransport {
 
 Gateway có hai cách từ chối token xấu, và client phải coi cả hai là lỗi xác thực. Một: HTTP 401 ngay ở bước nâng cấp; `dart:io` báo qua `WebSocketException.httpStatusCode` (test kiểm trên Dart 3.13.3) và transport đổi thành `RealtimeAuthRejected`. Hai: nâng cấp xong rồi đóng bằng mã **4401** (vùng 4000 đến 4999 dành cho ứng dụng), kiểu gateway giả dùng mặc định; `rejectBeforeUpgrade` bật kiểu một. Transport còn một việc: `Future.timeout` không huỷ việc đang chạy, nên socket nâng cấp tới sau `connectTimeout` phải bị đóng ngay, nếu không nó mở mà không ai giữ.
 
-Trạng thái kết nối chỉ có bốn giá trị (Hình 2). `connected` chỉ đến khi gateway gửi `welcome`: bắt tay WebSocket xong mới là có đường ống, chưa chắc token được chấp nhận.
+Trạng thái kết nối chỉ có bốn giá trị (Hình 2). `connected` chỉ xuất hiện sau khi gateway gửi `welcome`: bắt tay WebSocket xong mới là có đường ống, chưa chắc token được chấp nhận.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -147,7 +147,7 @@ Trạng thái kết nối chỉ có bốn giá trị (Hình 2). `connected` ch�
 <figcaption>Hình 2. Bốn trạng thái của <code>RealtimeClient</code>. Đường nét đứt về <code>closed</code> không bao giờ tự quay lại: <code>closed</code> chỉ rời đi khi người dùng client gọi <code>connect()</code> hoặc <code>resume()</code>.</figcaption>
 </figure>
 
-Hai kiểu thất bại phải được tách. Mất mạng, lỗi socket, gateway khởi động lại: nối lại. Lỗi xác thực: **không** nối lại, vì cùng một token thì lần nào cũng bị từ chối. Client dừng ở `closed` với `cause: unauthorized`; `resume()` không mở lại, phải `connect()` sau khi đăng nhập lại. Gateway giả cũng đóng kết nối đang mở bằng 4401 khi token hết hạn, và client xử lý như vậy.
+Phải tách hai kiểu thất bại. Mất mạng, lỗi socket, gateway khởi động lại: nối lại. Lỗi xác thực: **không** nối lại, vì cùng một token thì lần nào cũng bị từ chối. Client dừng ở `closed` với `cause: unauthorized`; `resume()` không mở lại, phải `connect()` sau khi đăng nhập lại. Gateway giả cũng đóng kết nối đang mở bằng 4401 khi token hết hạn, và client xử lý như vậy.
 
 ### realtime_client.dart · 36-realtime-websocket/lib/realtime_client.dart (trích)
 
@@ -166,11 +166,11 @@ void _lost(_Live live, {bool dead = false}) {
 }
 ```
 
-`_lost` nhận mọi cách kết nối chấm dứt; chỉ mã 4401 rẽ sang `closed`. Test kiểm chỉ một lần gọi transport sau một giờ giả.
+`_lost` nhận mọi cách kết nối chấm dứt; chỉ mã 4401 rẽ sang `closed`. Test kiểm tra transport chỉ bị gọi một lần sau một giờ thời gian giả.
 
 ## Mất kết nối: backoff full jitter và heartbeat
 
-Nối lại ngay nghe hợp lý, cho tới khi gateway khởi động lại và hàng chục nghìn máy cùng nối. **Exponential backoff** gấp đôi thời gian chờ sau mỗi lần thất bại, có trần. Nhưng nếu mọi máy đều chờ đúng 1 giây rồi đúng 2 giây, chúng vẫn đồng bộ với nhau. **Full jitter** chọn thời gian chờ đều ngẫu nhiên từ 0 tới trần, nên đám đông bị rải ra.
+Nối lại ngay nghe hợp lý, cho tới khi gateway khởi động lại và hàng chục nghìn máy cùng nối. **Exponential backoff** gấp đôi thời gian chờ sau mỗi lần thất bại, có trần. Nhưng nếu mọi máy đều chờ đúng 1 giây rồi đúng 2 giây, chúng vẫn đồng bộ với nhau. **Full jitter** chọn thời gian chờ ngẫu nhiên, phân bố đều từ 0 tới trần, nên đám đông bị rải ra.
 
 ### backoff.dart · 36-realtime-websocket/lib/backoff.dart
 
@@ -489,7 +489,7 @@ void _onLocation(DriverLocation location) {
 
 Với 50 bản trong 10 giây, test kiểm client đưa ra đúng 11 bản và bản cuối là bản thứ 50: tối đa một lần dựng lại bản đồ mỗi giây, nhưng vị trí cuối không bị nuốt.
 
-App tài xế (bài 47) cần thêm kênh theo **người dùng** `driver:{id}:offers` của hồ sơ kiến trúc. Gateway giả dành sẵn frame `offer` (chuyến, cước, hạn) và client có `subscribeOffers()`. Kênh luôn là của người dùng trong token (client không gửi mã tài xế), chỉ vai trò `driver`, và không phát lại. Simulator có `POST /realtime/drivers/{userId}/offers`.
+App tài xế (bài 47) cần thêm kênh theo **người dùng** `driver:{id}:offers` của hồ sơ kiến trúc. Gateway giả dành sẵn frame `offer` (chuyến, cước, hạn) và client có `subscribeOffers()`. Kênh luôn là của người dùng trong token (client không gửi mã tài xế), chỉ dành cho vai trò `driver`, và không phát lại. Simulator có `POST /realtime/drivers/{userId}/offers`.
 
 ## Quyền, nền và huỷ
 
@@ -528,7 +528,7 @@ final class RealtimeLifecycleBinding with WidgetsBindingObserver {
 
 `inactive` và `hidden` là trạng thái thoáng qua nên không ngắt; theo tài liệu `AppLifecycleState`, trên Android `Activity.onPause` là `inactive` còn `onStop` mới là `paused`. `pause()` nhớ chuyến và `sequence`, nên `resume()` subscribe tiếp đúng chỗ. `lifecycle_test.dart` giả lập vòng đời bằng `handleAppLifecycleStateChanged`; vòng đời thật chưa được kiểm.
 
-Cuối cùng là huỷ, và nguy hiểm nhất là chuyện giữa chừng: người dùng rời màn hình đúng lúc đang bắt tay. Mỗi lần `connect`, `close`, `pause` và `dispose` tăng bộ đếm `_generation`; mọi bước bất đồng bộ kiểm lại nó sau mỗi `await`. Riêng `dispose` đặt cờ đã huỷ **trước** `await`: nếu đặt sau, `connect()` gọi ngay sau `dispose()` vẫn mở được kết nối sống cùng hai Timer.
+Cuối cùng là huỷ, và nguy hiểm nhất là trường hợp huỷ giữa chừng: người dùng rời màn hình đúng lúc đang bắt tay. Mỗi lần `connect`, `close`, `pause` và `dispose` tăng bộ đếm `_generation`; mọi bước bất đồng bộ kiểm lại nó sau mỗi `await`. Riêng `dispose` đặt cờ đã huỷ **trước** `await`: nếu đặt sau, `connect()` gọi ngay sau `dispose()` vẫn mở được kết nối sống cùng hai Timer.
 
 ### realtime_client.dart · 36-realtime-websocket/lib/realtime_client.dart (trích)
 
@@ -549,9 +549,9 @@ _attach(connection);
 <span class="tkh-callout-title">Bốn lỗi hay gặp với WebSocket di động</span>
 <ul>
 <li><strong>Nối lại ngay, không backoff hoặc không jitter.</strong> Dấu hiệu: sau mỗi lần deploy gateway, số kết nối mới tăng vọt. Nguyên nhân: mọi máy chờ cùng một khoảng. Cách sửa: backoff có trần với full jitter, chỉ reset khi kết nối đã sống ổn định.</li>
-<li><strong><code>subscribe</code> lại mà không kèm <code>lastSequence</code> và <code>logEpoch</code>.</strong> Dấu hiệu: màn hình kẹt ở trạng thái cũ sau khi mạng chập chờn, hoặc sự kiện của log khác được đưa ra như của log này. Cách sửa: nhớ cả hai theo chuyến, gửi lại khi nối, khử trùng khi nhận, thôi nghe khi log đổi.</li>
+<li><strong><code>subscribe</code> lại mà không kèm <code>lastSequence</code> và <code>logEpoch</code>.</strong> Dấu hiệu: màn hình kẹt ở trạng thái cũ sau khi mạng chập chờn, hoặc sự kiện của log khác được đưa ra như của log này. Cách sửa: nhớ cả hai theo chuyến, gửi lại khi nối, khử trùng lặp khi nhận, thôi nghe khi log đổi.</li>
 <li><strong>Nối lại vô hạn khi token hết hạn.</strong> Dấu hiệu: log đầy các kết nối bị đóng mã 4401 hoặc HTTP 401. Cách sửa: dừng ở <code>closed(unauthorized)</code>, làm mới token trong <code>tokenProvider</code> rồi mới <code>connect()</code>.</li>
-<li><strong>Không có heartbeat.</strong> Dấu hiệu: vẫn "connected" nhưng không có dữ liệu sau khi đổi mạng. Cách sửa: ping định kỳ, coi im lặng quá hạn là chết.</li>
+<li><strong>Không có heartbeat.</strong> Dấu hiệu: vẫn "connected" nhưng không có dữ liệu sau khi đổi mạng. Cách sửa: ping định kỳ, coi việc không có tin nào quá hạn là kết nối đã chết.</li>
 </ul>
 </div>
 

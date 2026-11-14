@@ -1,7 +1,7 @@
 ---
 slug: postgresql-mo-hinh-quan-he-chuan-hoa
 title: "Chuẩn hoá và ranh giới mô hình dữ liệu"
-summary: "Khách Tới Nơi đổi số điện thoại, tổng đài vẫn gọi số cũ vì bảng phẳng chỉ sửa một dòng. Dùng chuẩn hoá 1NF–3NF để tìm dữ kiện lặp, biết khi nào snapshot là đúng và đặt ranh giới chuyến – sự kiện."
+summary: "Khách Tới Nơi đổi số điện thoại, tổng đài vẫn gọi số cũ vì bảng phẳng chỉ sửa một dòng. Bài này dùng chuẩn hoá 1NF–3NF để tìm dữ kiện lặp, xác định khi nào snapshot là đúng và đặt ranh giới chuyến – sự kiện."
 category: postgresql
 level: advanced
 tags: [postgresql, pg-008, normalization, data-modeling, foreign-key, denormalization, toi-noi]
@@ -19,7 +19,7 @@ Ba tuần sau, khách Nguyễn Văn An đổi số điện thoại; nhân viên 
 
 ## 1. Bảng phẳng: một dòng biết mọi thứ
 
-Dựng bảng CSKH muốn trong schema nháp `phang`, 5 chuyến chép từ fixture. Lab không có tệp này: chép lần lượt các khối SQL của mục 1, 3, 4 vào một tệp rồi chạy `node run.mjs p01/00-reset.sql p01/01-schema.sql p01/02-fixture-valid.sql <tệp>.sql` trong `examples/toi-noi-postgresql`. Kết quả trong bài là lần chạy thật trên PGlite (PostgreSQL 17.5), đã bỏ dòng `-- [lab]`.
+Dựng bảng phẳng mà CSKH muốn trong schema nháp `phang`, 5 chuyến chép từ fixture. Lab không có tệp này: chép lần lượt các khối SQL của mục 1, 3, 4 vào một tệp rồi chạy `node run.mjs p01/00-reset.sql p01/01-schema.sql p01/02-fixture-valid.sql <tệp>.sql` trong `examples/toi-noi-postgresql`. Kết quả trong bài là lần chạy thật trên PGlite (PostgreSQL 17.5), đã bỏ dòng `-- [lab]`.
 
 ```sql
 CREATE SCHEMA phang;
@@ -184,11 +184,11 @@ PostgreSQL có mảng và JSONB nên một ô nhiều giá trị không bị c�
 
 ### 2NF — phụ thuộc vào toàn bộ khoá
 
-Giả sử sửa 1NF vội: một dòng mỗi (chuyến, trạng thái), khoá ghép `(trip_code, status)`, giữ nguyên cột khách, tài xế, cước. Khi đó `customer_name` chỉ phụ thuộc `trip_code` — **một phần** khoá — nên lặp ở cả 7 dòng sự kiện của một chuyến. **Dạng chuẩn 2** yêu cầu mọi cột không thuộc khoá phụ thuộc vào **toàn bộ** khoá; nó chỉ có nghĩa với khoá nhiều cột. Sửa: cột của chuyến ở bảng chuyến, bảng sự kiện chỉ giữ `trip_id`, `status`, `occurred_at`.
+Giả sử sửa 1NF vội: một dòng mỗi (chuyến, trạng thái), khoá ghép `(trip_code, status)`, giữ nguyên cột khách, tài xế, cước. Khi đó `customer_name` chỉ phụ thuộc `trip_code` — **một phần** khoá — nên lặp ở cả 7 dòng sự kiện của một chuyến. **Dạng chuẩn 2** yêu cầu mọi cột không thuộc khoá phụ thuộc vào **toàn bộ** khoá; dạng chuẩn này chỉ có nghĩa với khoá nhiều cột. Sửa: cột của chuyến ở bảng chuyến, bảng sự kiện chỉ giữ `trip_id`, `status`, `occurred_at`.
 
 ### 3NF — không phụ thuộc bắc cầu
 
-`trip_code → driver_code` và `driver_code → driver_name`, nên `driver_name` phụ thuộc `trip_code` qua trung gian — **phụ thuộc bắc cầu** (transitive dependency). **Dạng chuẩn 3** yêu cầu cột không thuộc khoá chỉ phụ thuộc vào khoá. Mỗi chuỗi bắc cầu thành một bảng:
+`trip_code → driver_code` và `driver_code → driver_name`, nên `driver_name` phụ thuộc `trip_code` qua trung gian — **phụ thuộc bắc cầu** (transitive dependency). **Dạng chuẩn 3** yêu cầu cột không thuộc khoá chỉ phụ thuộc vào khoá. Mỗi chuỗi bắc cầu tách thành một bảng:
 
 | Chuỗi trong `trip_flat` | Bảng trong lab | Chuyến giữ |
 |---|---|---|
@@ -206,7 +206,7 @@ Schema chuẩn hoá vẫn có chỗ một dữ kiện xuất hiện hai lần: `
 
 ### FK hai cột cho quán
 
-FK trên **cặp** `(merchant_id, city_id)`. Cột được FK tham chiếu phải là khoá chính hoặc có UNIQUE, nên cần `UNIQUE (id, city_id)` cho `merchants` — dư về logic (`id` đã duy nhất) nhưng là điều kiện để tham chiếu cặp cột. Chạy sau `00 → 02`:
+Dùng FK trên **cặp** `(merchant_id, city_id)`. Cột được FK tham chiếu phải là khoá chính hoặc có UNIQUE, nên cần `UNIQUE (id, city_id)` cho `merchants` — dư về logic (`id` đã duy nhất) nhưng là điều kiện để tham chiếu cặp cột. Chạy sau `00 → 02`:
 
 ```sql
 SET search_path TO toinoi;
@@ -228,7 +228,7 @@ ERROR:  insert or update on table "trips" violates foreign key constraint "fk_tr
 DETAIL:  Key (merchant_id, city_id)=(e0000000-0000-4000-8000-000000000002, 1) is not present in table "merchants".
 ```
 
-Mặc định, dòng có một cột FK là NULL không bị kiểm, nên FK này không đụng `ride`/`parcel` (`merchant_id` NULL); luật «chỉ đơn đồ ăn có quán» vẫn do `ck_trips_merchant_only_food` giữ. Cái giá là một UNIQUE (kèm index) trên `merchants` — đáng, vì quán gần như không đổi thành phố.
+Mặc định, dòng có một cột FK là NULL không bị kiểm tra, nên FK này không đụng `ride`/`parcel` (`merchant_id` NULL); luật «chỉ đơn đồ ăn có quán» vẫn do `ck_trips_merchant_only_food` giữ. Cái giá là một UNIQUE (kèm index) trên `merchants` — đáng, vì quán gần như không đổi thành phố.
 
 ### Cùng kỹ thuật cho tài xế thì vỡ
 
@@ -243,9 +243,9 @@ ERROR:  update or delete on table "drivers" violates foreign key constraint "fk_
 DETAIL:  Key (id, city_id)=(d0000000-0000-4000-8000-000000008001, 1) is still referenced from table "trips".
 ```
 
-Tài xế không được đổi thành phố vì từng chạy chuyến ở SG. «Chữa» bằng `ON UPDATE CASCADE` (sao giá trị mới sang dòng tham chiếu) còn tệ hơn. Tạo lại FK có `ON UPDATE CASCADE` rồi chạy lại câu `UPDATE` (lần này `UPDATE 1`): `SELECT code, status, city_id FROM trips WHERE driver_id = 'd0000000-…-000000008001'` trả ba chuyến 100000, 100008 (`completed`) và 100012 (`accepted`), cả ba từ `city_id = 1` thành **2**. Chuyến 100000 chở khách ở TP. Hồ Chí Minh sáng 02/11 giờ bị ghi là ở Hà Nội — lịch sử bị viết lại, doanh thu theo thành phố của tháng trước đổi theo.
+Tài xế không được đổi thành phố vì từng chạy chuyến ở SG. «Chữa» bằng `ON UPDATE CASCADE` (sao giá trị mới sang dòng tham chiếu) còn tệ hơn. Tạo lại FK có `ON UPDATE CASCADE` rồi chạy lại câu `UPDATE` (lần này `UPDATE 1`): `SELECT code, status, city_id FROM trips WHERE driver_id = 'd0000000-…-000000008001'` trả ba chuyến 100000, 100008 (`completed`) và 100012 (`accepted`), cả ba đều đổi từ `city_id = 1` thành **2**. Chuyến 100000 chở khách ở TP. Hồ Chí Minh sáng 02/11 giờ bị ghi là ở Hà Nội — lịch sử bị viết lại, doanh thu theo thành phố của tháng trước đổi theo.
 
-Bài học nằm ở nghĩa của cột: **`trips.city_id` và `drivers.city_id` không phải cùng một dữ kiện.** Cột thứ nhất là nơi chuyến diễn ra, cố định từ lúc đặt. Cột thứ hai là nơi tài xế *đang* đăng ký, đổi theo thời gian. Quy tắc «tài xế chỉ nhận chuyến ở thành phố mình đăng ký» chỉ đúng **tại thời điểm nhận**, nên phải kiểm ở bước nhận chuyến, trong cùng giao dịch với `UPDATE` nhận chuyến (Phần 4), cộng một truy vấn đối soát kiểu 07-B1 — viết sao cho không báo nhầm chuyến cũ (bài tập 3).
+Bài học nằm ở nghĩa của cột: **`trips.city_id` và `drivers.city_id` không phải cùng một dữ kiện.** Cột thứ nhất là nơi chuyến diễn ra, cố định từ lúc đặt. Cột thứ hai là nơi tài xế *đang* đăng ký, đổi theo thời gian. Quy tắc «tài xế chỉ nhận chuyến ở thành phố mình đăng ký» chỉ đúng **tại thời điểm nhận**, nên phải kiểm tra ở bước nhận chuyến, trong cùng giao dịch với `UPDATE` nhận chuyến (Phần 4), cộng một truy vấn đối soát kiểu 07-B1 — viết sao cho không báo nhầm chuyến cũ (bài tập 3).
 
 ### Dữ liệu suy ra: `drivers.status = 'busy'`
 
@@ -253,7 +253,7 @@ Bài học nằm ở nghĩa của cột: **`trips.city_id` và `drivers.city_id`
 
 ## 6. Khi nào chấp nhận phi chuẩn hoá
 
-**Phi chuẩn hoá** (denormalization) là cố ý giữ một dữ kiện ở nhiều chỗ. Trước khi gọi một cột như vậy, hỏi: nó là *bản sao của cùng dữ kiện*, hay là *một dữ kiện khác* trông giống?
+**Phi chuẩn hoá** (denormalization) là cố ý giữ một dữ kiện ở nhiều chỗ. Trước khi gọi một cột như vậy là phi chuẩn hoá, hãy hỏi: nó là *bản sao của cùng dữ kiện*, hay là *một dữ kiện khác* trông giống?
 
 ### Snapshot giá cước: dữ kiện tại thời điểm
 
@@ -291,17 +291,17 @@ LIMIT 1;
 (1 row)
 ```
 
-Câu cuối dùng đúng kỹ thuật PG-007. Bảng giá có phiên bản trả lời «áp giá nào»; `fare` trả lời «khách trả bao nhiêu». Cần cả hai thì giữ cả hai — chuyến có thể thêm `fare_rule_version_id` để kiểm toán. Cùng lập luận áp cho chứng từ — bài tập 2.
+Câu cuối dùng đúng kỹ thuật PG-007. Bảng giá có phiên bản trả lời «áp giá nào»; `fare` trả lời «khách trả bao nhiêu». Cần cả hai thì giữ cả hai — chuyến có thể thêm `fare_rule_version_id` để kiểm toán. Lập luận này cũng áp dụng cho chứng từ — xem bài tập 2.
 
 ### Bản sao để đọc nhanh: được, nếu có luật
 
-`drivers.status`, bộ đếm, cột tổng hợp là bản sao thật sự — suy ra được từ nguồn. Chấp nhận khi lợi ích đọc rõ ràng và đủ bốn điều; với `drivers.status`: nguồn sự thật xác định (chuyến đang chạy trong `trips`), đường ghi duy nhất cùng giao dịch với nguồn (bước nhận/hoàn thành — giao dịch ở Phần 4), truy vấn kiểm tra lệch (07-B4), và dựng lại được từ nguồn khi lệch.
+`drivers.status`, bộ đếm, cột tổng hợp là bản sao thật sự — suy ra được từ nguồn. Chấp nhận khi lợi ích đọc rõ ràng và đủ bốn điều; với `drivers.status`: nguồn dữ liệu gốc xác định (chuyến đang chạy trong `trips`), đường ghi duy nhất cùng giao dịch với nguồn (bước nhận/hoàn thành — giao dịch ở Phần 4), truy vấn kiểm tra lệch (07-B4), và dựng lại được từ nguồn khi lệch.
 
 Bảng phẳng của CSKH cũng hợp lệ *ở dạng này*: một view hay materialized view dựng từ bảng chuẩn hoá, chỉ để đọc (PG-056, Phần 6) — không phải nơi sửa số điện thoại.
 
 ## 7. Ranh giới mô hình: chuyến và sự kiện chuyến
 
-Lab tách một chuyến thành hai bảng có hai kiểu sống. Một dòng `trips` là trạng thái **hiện tại**, bị `UPDATE` khoảng 8 lần mỗi chuyến (hồ sơ: ≈ 560 UPDATE/giây lúc cao điểm), trả lời «chuyến nào đang chạy, tài xế nào đang bận». Một dòng `trip_events` là **một lần** đổi trạng thái, chỉ `INSERT` (hồ sơ: ~16 triệu dòng/ngày), trả lời «chuyện gì đã xảy ra, lúc nào» cho khiếu nại và đối soát.
+Lab tách một chuyến thành hai bảng có hai vòng đời khác nhau. Một dòng `trips` là trạng thái **hiện tại**, bị `UPDATE` khoảng 8 lần mỗi chuyến (hồ sơ: ≈ 560 UPDATE/giây lúc cao điểm), trả lời «chuyến nào đang chạy, tài xế nào đang bận». Một dòng `trip_events` là **một lần** đổi trạng thái, chỉ `INSERT` (hồ sơ: ~16 triệu dòng/ngày), trả lời «chuyện gì đã xảy ra, lúc nào» cho khiếu nại và đối soát.
 
 Chuyến 100029 ở PG-006 có đúng một dòng `trips` (`completed`) và bảy dòng `trip_events`, từ `requested` lúc 09:00:00 tới `completed` lúc 09:31:00 (phần `04-lifecycle.sql` của `OUTPUT.txt`).
 

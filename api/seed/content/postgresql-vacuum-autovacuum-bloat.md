@@ -10,7 +10,7 @@ language: vi
 
 Sáng thứ Hai, kênh vận hành của Tới Nơi nhận cảnh báo dung lượng: file của bảng `trips` lớn thêm khá nhiều trong vài tuần, trong khi số chuyến chỉ tăng đều như mọi tháng. Mỗi chuyến đổi trạng thái hay sửa giá khoảng tám lần; lúc cao điểm bảng nhận khoảng **560 câu `UPDATE` mỗi giây** (hồ sơ Tới Nơi). Trong buổi họp có hai đề xuất: «chạy `VACUUM FULL` ngay cho file nhỏ lại» và «tắt autovacuum đi, nó ăn I/O lúc cao điểm». Rồi có người nhớ ra tối thứ Sáu ai đó mở một phiên báo cáo trong công cụ GUI, chạy một câu `SELECT` rồi để đó cả cuối tuần.
 
-Cả ba chi tiết dẫn về cùng một cơ chế. MVCC (PG-032) không ghi đè dòng mà tạo phiên bản mới; phiên bản cũ phải được dọn sau, và chỉ dọn được khi không còn snapshot nào có thể cần nó. Bài này dùng lab PostgreSQL 18.1 để tách bốn chuyện hay bị gộp làm một: tuple chết, chỗ trống tái sử dụng được, dung lượng trả lại hệ điều hành, và «đường chân trời» (horizon) mà một giao dịch mở lâu giữ lại.
+Cả ba chi tiết dẫn về cùng một cơ chế. MVCC (PG-032) không ghi đè dòng mà tạo phiên bản mới; phiên bản cũ phải được dọn sau, và chỉ dọn được khi không còn snapshot nào có thể cần nó. Bài này dùng lab PostgreSQL 18.1 để tách bốn chuyện hay bị gộp làm một: tuple chết, chỗ trống tái sử dụng được, dung lượng trả lại hệ điều hành, và «ranh giới dọn được» (horizon) mà một giao dịch mở lâu giữ lại.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-044 · Phần 5/6 · Trung bình</span>
@@ -42,14 +42,14 @@ Với **HOT update** (PG-024), bước **dọn tỉa trang** (page pruning) có 
 
 Tài liệu PostgreSQL 18 (Routine Vacuuming) nêu bốn lý do cần VACUUM:
 
-1. **Thu hồi chỗ** của tuple chết đã dọn được, ghi vào FSM, và xoá các mục index trỏ tới chúng.
+1. **Thu hồi chỗ trống** của tuple chết đã dọn được, ghi vào FSM, và xoá các mục index trỏ tới chúng.
 2. **Cập nhật thống kê** cho planner — khi chạy kèm `ANALYZE`.
 3. **Cập nhật visibility map** (PG-026): bật bit all-visible cho page sạch, giúp index-only scan và giúp lần VACUUM sau bỏ qua page đó.
 4. **Chống quay vòng mã giao dịch** (transaction ID wraparound) bằng cách đóng băng tuple cũ (mục 8).
 
 `VACUUM` thường (không `FULL`) lấy khoá `SHARE UPDATE EXCLUSIVE`: không chặn `SELECT`, `INSERT`, `UPDATE`, `DELETE`; chỉ xung đột với những thao tác như `ALTER TABLE`, `CREATE INDEX CONCURRENTLY` hoặc một VACUUM khác trên cùng bảng.
 
-Điều VACUUM thường **không** hứa: thu nhỏ file. Tài liệu nói nó chỉ trả dung lượng cho hệ điều hành khi các page **ở cuối bảng** trống hoàn toàn và lấy được khoá độc quyền một cách dễ dàng. Chỗ trống ở giữa file chỉ vào FSM để dùng lại. Viết lại cả bảng cho gọn là việc của `VACUUM FULL` — một công cụ khác hẳn, với cái giá khác hẳn (mục 7).
+Điều VACUUM thường **không** hứa: thu nhỏ file. Tài liệu nói VACUUM thường chỉ trả dung lượng cho hệ điều hành khi các page **ở cuối bảng** trống hoàn toàn và lấy được khoá độc quyền một cách dễ dàng. Chỗ trống ở giữa file chỉ vào FSM để dùng lại. Viết lại cả bảng cho gọn là việc của `VACUUM FULL` — một công cụ khác hẳn, với cái giá khác hẳn (mục 7).
 
 ## 4. Thí nghiệm 1: xoá nửa bảng rồi VACUUM
 
@@ -121,7 +121,7 @@ removable cutoff: 774, which was 1 XIDs old when operation ended
 
 `pgstattuple` sau T3 đếm đúng **500** tuple chết (cổng `PASS 044 old snapshot keeps dead tuples: 500`). VACUUM không lỗi, không chờ khoá — nó **chạy trọn** và báo thẳng rằng 500 tuple «đã chết nhưng chưa được phép dọn».
 
-`removable cutoff` chính là **horizon**: VACUUM chỉ được dọn tuple bị xoá bởi giao dịch có xid nhỏ hơn 774. H chỉ đọc nên không có xid riêng (PG-032), nhưng snapshot của nó có `xmin` — mọi giao dịch từ mốc đó trở đi có thể «chưa xảy ra» trong mắt H. `DELETE` ở T2 nhận xid từ mốc đó trở đi, nên các phiên bản nó xoá phải được giữ cho H. «1 XIDs old»: lúc VACUUM kết thúc, horizon chỉ cách xid kế tiếp đúng một — chỉ có giao dịch `DELETE` chen giữa.
+`removable cutoff` chính là **horizon**: VACUUM chỉ được dọn tuple bị xoá bởi giao dịch có xid nhỏ hơn 774. H chỉ đọc nên không có xid riêng (PG-032), nhưng snapshot của nó có `xmin` — mọi giao dịch từ mốc đó trở đi có thể «chưa xảy ra» trong mắt H. `DELETE` ở T2 nhận xid từ mốc đó trở đi, nên các phiên bản mà giao dịch này xoá phải được giữ lại cho H. «1 XIDs old»: lúc VACUUM kết thúc, horizon chỉ cách xid kế tiếp đúng một — chỉ có giao dịch `DELETE` chen giữa.
 
 Câu ở T4 hỏi `pg_stat_activity` về H:
 
@@ -145,10 +145,10 @@ Lưu ý: `remain` (2494, rồi 1592) **không** khớp số dòng sống thật 
 Ba bài học vận hành:
 
 1. **«VACUUM chạy xong» không có nghĩa «đã dọn».** Đọc `removed` và `dead but not yet removable`, đừng chỉ nhìn exit code.
-2. **Một phiên bỏ quên đủ chặn cả database.** Horizon tính theo snapshot cũ nhất trong database, nên giữ tuple chết của **mọi** bảng, không chỉ bảng phiên kia đã đọc. Với 560 `UPDATE`/giây, mỗi phút phiên kia còn mở là hàng chục nghìn phiên bản không dọn được.
-3. **Mức cô lập quyết định ai giữ snapshot.** Ở Read Committed, snapshot sống trong từng câu; phiên Read Committed chỉ đọc rồi ngồi yên thường không giữ `backend_xmin`. Nhưng nếu nó đã **ghi** (có xid), xid đó giữ horizon. Lab dùng Repeatable Read để giữ snapshot một cách tất định.
+2. **Một phiên bỏ quên đủ chặn cả database.** Horizon tính theo snapshot cũ nhất trong database, nên tuple chết của **mọi** bảng đều bị giữ lại, không chỉ bảng phiên kia đã đọc. Với 560 `UPDATE`/giây, mỗi phút phiên kia còn mở là hàng chục nghìn phiên bản không dọn được.
+3. **Isolation level quyết định ai giữ snapshot.** Ở Read Committed, snapshot sống trong từng câu; phiên Read Committed chỉ đọc rồi ngồi yên thường không giữ `backend_xmin`. Nhưng nếu nó đã **ghi** (có xid), xid đó giữ horizon. Lab dùng Repeatable Read để giữ snapshot một cách tất định.
 
-Tài liệu còn kể các nguồn giữ horizon khác: replication slot có `xmin` không được tiêu thụ, giao dịch đã `PREPARE TRANSACTION` mà chưa chốt, standby bật `hot_standby_feedback` đang chạy truy vấn dài. Bộ câu kiểm sau **không chạy trong lab**, dùng làm khởi điểm cho runbook:
+Tài liệu còn kể các nguồn giữ horizon khác: replication slot có `xmin` không được tiêu thụ, giao dịch đã `PREPARE TRANSACTION` mà chưa chốt, standby bật `hot_standby_feedback` đang chạy truy vấn dài. Bộ câu truy vấn kiểm tra sau **không chạy trong lab**, dùng làm khởi điểm cho runbook:
 
 ```sql
 SELECT pid, usename, state, age(backend_xmin) AS xmin_age,
@@ -209,7 +209,7 @@ SELECT relname, reloptions FROM pg_class WHERE relname = 'trips';
 
 Cùng giả định thô, 200.050 tuple chết ứng với khoảng 6 phút cao điểm: VACUUM chạy thường hơn, mỗi lần ít việc hơn. Hiệu quả phải **đo lại** sau khi đổi: `n_dead_tup`, thời lượng mỗi lần autovacuum, I/O.
 
-**Tốc độ worker.** Autovacuum tự hãm: cộng «điểm chi phí» cho page đọc/ghi, chạm `vacuum_cost_limit` (200) thì ngủ `autovacuum_vacuum_cost_delay` (2 ms). Chạy liên tục mà `n_dead_tup` vẫn tăng thì có thể đang hãm quá tay — lab **không thử** điều chỉnh nhóm này nên bài không đưa số khuyến nghị. Autovacuum (trừ lần chống quay vòng) cũng **tự nhường**: chặn một yêu cầu khoá xung đột như `ALTER TABLE` thì nó bị huỷ.
+**Tốc độ worker.** Autovacuum tự hãm: cộng «điểm chi phí» cho page đọc/ghi, chạm `vacuum_cost_limit` (200) thì ngủ `autovacuum_vacuum_cost_delay` (2 ms). Chạy liên tục mà `n_dead_tup` vẫn tăng thì có thể đang hãm quá tay — lab **không thử** điều chỉnh nhóm này nên bài không đưa số khuyến nghị. Autovacuum (trừ lần chống quay vòng) cũng **tự nhường**: nếu đang chặn một yêu cầu khoá xung đột như `ALTER TABLE` thì nó bị huỷ.
 
 **Quan sát định kỳ** — câu **chưa chạy trong lab** (lab dùng `pgstattuple` để có số chính xác):
 
@@ -238,7 +238,7 @@ Các lựa chọn, **không lựa chọn nào chạy trong lab**:
 |---|---|---|
 | Để yên, sửa autovacuum | Chỗ trống được dùng lại dần | File không nhỏ đi |
 | `VACUUM FULL` / `CLUSTER` | Viết lại bảng gọn | `ACCESS EXCLUSIVE` suốt thời gian chạy, cần thêm đĩa tạm |
-| Extension `pg_repack` | Viết lại bảng trực tuyến, khoá ngắn ở đầu và cuối | Ngoài lõi PostgreSQL, cần cài và thử riêng |
+| Extension `pg_repack` | Viết lại bảng online, khoá ngắn ở đầu và cuối | Ngoài lõi PostgreSQL, cần cài và thử riêng |
 | `REINDEX CONCURRENTLY` | Dựng lại index phình | Tốn I/O, không xử lý heap |
 
 Đo trước khi quyết: `pgstattuple` (chính xác nhưng quét cả bảng — đừng chạy mỗi phút trên bảng lớn), `pgstattuple_approx` (bỏ qua page all-visible, gần đúng), `pgstatindex` cho B-tree.
@@ -263,7 +263,7 @@ Horizon ở mục 5 chặn đóng băng giống như chặn dọn. Vì vậy gia
 | VACUUM xong mà tuple chết không giảm | Snapshot cũ giữ horizon (lab: `500 are dead but not yet removable`) | Tìm `backend_xmin` cũ nhất, slot, prepared xact; kết thúc nguồn giữ |
 | `n_dead_tup` cao, kết luận autovacuum hỏng | Thống kê là ước lượng; có thể chưa tới ngưỡng hoặc bị horizon chặn | Đối chiếu `last_autovacuum`, log autovacuum, `pg_stat_progress_vacuum` |
 | Tắt autovacuum để giảm I/O | Dồn việc sang tương lai; thống kê cũ; rủi ro wraparound | Hạ ngưỡng theo bảng, điều chỉnh hãm tốc có đo đạc |
-| `VACUUM FULL` lúc cao điểm | `ACCESS EXCLUSIVE` chặn mọi truy cập bảng | Gỡ nguyên nhân trước; cửa sổ bảo trì hoặc công cụ trực tuyến đã thử |
+| `VACUUM FULL` lúc cao điểm | `ACCESS EXCLUSIVE` chặn mọi truy cập bảng | Gỡ nguyên nhân trước; maintenance window hoặc công cụ online đã thử |
 | `autovacuum_enabled = false` rồi quên | Bảng chỉ còn được dọn khi chống quay vòng | `RESET` như lab; rà `reloptions` định kỳ |
 
 ## 10. Đánh đổi

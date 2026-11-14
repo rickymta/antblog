@@ -10,7 +10,7 @@ language: vi
 
 Trong một trang ghi chép, BA nhận được bốn câu: “Giảm huỷ chuyến”, “Tài xế cần biết khách đứng cổng nào”, “Hiển thị ghi chú điểm đón” và “Màn hình phải nhanh”. Nếu gom cả bốn vào danh sách tính năng, nhóm sẽ khó biết câu nào giải thích mục tiêu, câu nào mô tả nhu cầu và câu nào đủ rõ để triển khai.
 
-Phân loại yêu cầu giúp nhóm nối những câu này thành một lập luận có thể kiểm tra. Nó cũng cho thấy khi nào một tính năng không còn phục vụ mục tiêu, hoặc một mục tiêu chưa có yêu cầu nào hỗ trợ.
+Phân loại yêu cầu giúp nhóm nối những câu này thành một lập luận có thể kiểm tra. Phân loại yêu cầu cũng cho thấy khi nào một tính năng không còn phục vụ mục tiêu, hoặc một mục tiêu chưa có yêu cầu nào hỗ trợ.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">BA-003 · Phần 1/8 · Cơ bản</span>
@@ -36,7 +36,7 @@ Solution requirement thường được tách thành **functional** — hành vi
 
 > **BR-01 · Đề xuất:** Trong pilot bốn tuần ở khu vực A, tỷ lệ lượt huỷ trước đón trên các lượt đặt xe đã được tài xế nhận không quá 9%; đồng thời tỷ lệ khiếu nại trên 1.000 lượt được nhận không tăng so với baseline tương đương.
 
-Baseline minh hoạ từ bài trước là 120/1.000 = 12% trong một tuần. Trước khi duyệt BR-01, nhóm phải kiểm tra tính đại diện của baseline, đo baseline khiếu nại và thống nhất cách chờ kết quả của cohort pilot. Con số 9% là mục tiêu để thảo luận, không phải bằng chứng cho tác động của một tính năng.
+Baseline minh hoạ từ bài trước là 120/1.000 = 12% trong một tuần. Trước khi duyệt BR-01, nhóm phải kiểm tra tính đại diện của baseline, đo baseline khiếu nại và thống nhất thời gian chờ kết quả của cohort pilot. Con số 9% là mục tiêu để thảo luận, không phải bằng chứng cho tác động của một tính năng.
 
 Yêu cầu này sẽ được đánh giá bằng dữ liệu vận hành sau pilot. Không thể chạy một unit test để kết luận tổ chức đã đạt BR-01. Ngược lại, việc chỉ số đạt mục tiêu cũng chưa tự chứng minh tính năng là nguyên nhân: khu vực, thời tiết hoặc cơ cấu lượt đặt xe có thể đã thay đổi.
 
@@ -64,7 +64,7 @@ Giả sử nhóm đang đánh giá phương án hiển thị ghi chú điểm đ
 
 **NFR-01 — hiệu năng, ngưỡng minh hoạ:** Trong môi trường kiểm thử tham chiếu đã thống nhất, với 100 phiên tài xế đồng thời đọc chi tiết lượt của mình trong 15 phút, ít nhất 95% lần mở thành công hiển thị nội dung trong tối đa 2 giây tính từ thao tác mở; tỷ lệ lần mở lỗi không quá 1% trên tất cả lần mở.
 
-NFR-01 vẫn phải được nhóm kỹ thuật và nghiệp vụ thống nhất thiết bị, điều kiện mạng, dữ liệu và cách ghi nhận kết quả trước khi coi là sẵn sàng kiểm thử. Các con số là giả định bài tập, không lấy từ tải hoặc SLO chính thức của Tới Nơi. Việc đo riêng lỗi giúp tránh loại hết các lần lỗi rồi báo “95% nhanh”.
+NFR-01 vẫn phải được nhóm kỹ thuật và nghiệp vụ thống nhất thiết bị, điều kiện mạng, dữ liệu và cách ghi nhận kết quả trước khi coi là sẵn sàng kiểm thử. Các con số là giả định bài tập, không lấy từ tải hoặc SLO chính thức của Tới Nơi. Việc đo riêng tỷ lệ lỗi giúp tránh loại hết các lần lỗi rồi báo “95% nhanh”.
 
 Một yêu cầu tốt cũng làm lộ câu hỏi còn mở: nếu khách sửa ghi chú sau khi tài xế đã đọc thì có thông báo không; ai được sửa; lưu phiên bản nào; thông tin được giữ bao lâu? Chưa có quyết định thì ghi thành câu hỏi, không tự lấp bằng phỏng đoán.
 
@@ -79,7 +79,7 @@ When D mở chi tiết lượt B thành công
 Then phần điểm đón hiển thị "Cổng số 2, cạnh nhà thuốc"
 ```
 
-Cần thêm ví dụ không có ghi chú và trường hợp truy cập trái phân công cho FR-02. Tiêu chí chấp nhận không thay thế toàn bộ yêu cầu; một ví dụ luồng thuận chưa bao phủ ngoại lệ hoặc chất lượng cần đáp ứng.
+Cần thêm ví dụ không có ghi chú và trường hợp truy cập trái phân công cho FR-02. Tiêu chí chấp nhận không thay thế toàn bộ yêu cầu; một ví dụ ở luồng chính chưa bao phủ ngoại lệ hoặc chất lượng cần đáp ứng.
 
 ## 5. Transition requirement không nên biến mất khỏi kế hoạch
 

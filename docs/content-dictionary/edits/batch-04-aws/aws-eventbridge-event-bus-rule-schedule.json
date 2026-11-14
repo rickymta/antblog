@@ -1,0 +1,16 @@
+{"file":"aws-eventbridge-event-bus-rule-schedule.md","edits":[
+{"old":"ta cần một công cụ giỏi định tuyến hơn","new":"ta cần một công cụ định tuyến mạnh hơn","reason":"'giỏi' gượng khi nói về công cụ","severity":"medium"},
+{"old":"nên luôn kiểm `FailedEntryCount`","new":"nên luôn kiểm tra `FailedEntryCount`","reason":"Lược động từ 'kiểm tra'","severity":"low"},
+{"old":"hãy gom entry theo lô và kiểm Quotas","new":"hãy gom entry theo lô và kiểm tra Quotas","reason":"Lược động từ 'kiểm tra'","severity":"medium"},
+{"old":"Có thể thử không tốn tài nguyên bằng","new":"Có thể thử mà không tốn tài nguyên bằng","reason":"Thiếu liên từ, câu cụt","severity":"low"},
+{"old":"Nó đi kèm **connection** giữ phương thức xác thực","new":"API destination đi kèm **connection** để giữ phương thức xác thực","reason":"Tránh 'Nó' chỉ sự vật; thêm liên từ","severity":"medium"},
+{"old":"để không dội đối tác","new":"để không làm quá tải đối tác","reason":"'dội' là tiếng lóng, gượng","severity":"medium"},
+{"old":"**Input transformer** cắt phong bì","new":"**Input transformer** cắt gọn phong bì","reason":"Rõ nghĩa hơn","severity":"low"},
+{"old":"nhưng múi giờ khai báo tường minh giúp","new":"nhưng khai báo múi giờ rõ ràng giúp","reason":"'tường minh' gượng, trật tự từ kiểu Anh","severity":"medium"},
+{"old":"dàn nhẹ tải khi nhiều schedule cùng điểm","new":"dàn nhẹ tải khi nhiều schedule cùng chạy một giờ","reason":"'cùng điểm' lược động từ, khó hiểu","severity":"medium"},
+{"old":"theo mặc định nó tới mọi rule khớp nên","new":"theo mặc định sự kiện phát lại tới mọi rule khớp nên","reason":"Tránh 'nó' mơ hồ","severity":"medium"},
+{"old":"Pipes thay phần \"keo\" hay phải tự viết giữa hai dịch vụ.","new":"Pipes thay phần code \"keo\" mà ta thường phải tự viết giữa hai dịch vụ.","reason":"'hay phải tự viết' lược danh từ, giọng dịch máy","severity":"medium"},
+{"old":"sự kiện có thể tới trùng hoặc đảo;","new":"sự kiện có thể tới trùng lặp hoặc sai thứ tự;","reason":"'đảo' lược nghĩa","severity":"medium"},
+{"old":"sai pattern là sự kiện lặng lẽ không khớp rule nào.","new":"sai pattern thì sự kiện không khớp rule nào mà không báo lỗi.","reason":"'lặng lẽ' là calque (silently)","severity":"high"},
+{"old":"một rule bắt-mọi-thứ gửi vào","new":"một rule bắt mọi sự kiện, gửi vào","reason":"Cụm tự ghép 'bắt-mọi-thứ'","severity":"medium"}
+]}

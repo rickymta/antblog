@@ -8,7 +8,7 @@ tags: [testing, istqb, ctal-tta, test-047, mc-dc, white-box, code-coverage, vouc
 language: vi
 ---
 
-Quyết định «voucher có được áp không» của Tới Nơi ghép chín điều kiện. Decision coverage chỉ cần hai ca (một được, một không) và để lọt lỗi gõ nhầm `||` thành `&&`; multiple condition coverage đòi 2⁹ = 512 tổ hợp. Bài này trả lời: **MC/DC đòi gì, vì sao N + 1 ca thường là đủ, thiết kế cặp test độc lập thế nào khi điều kiện bị ghép và ngôn ngữ luôn ngắt mạch** — rồi làm trọn bài thực hành nâng cao của Series 05: một bộ test cho thuật toán áp voucher đạt 100% statement, 100% branch và MC/DC, chạy thật, nộp báo cáo coverage.
+Quyết định «voucher có được áp không» của Tới Nơi ghép chín điều kiện. Decision coverage chỉ cần hai test case (một được, một không) và để lọt lỗi gõ nhầm `||` thành `&&`; multiple condition coverage đòi 2⁹ = 512 tổ hợp. Bài này trả lời: **MC/DC đòi gì, vì sao N + 1 test case thường là đủ, thiết kế cặp test độc lập thế nào khi điều kiện bị ghép và ngôn ngữ luôn ngắt mạch** — rồi làm trọn bài thực hành nâng cao của Series 05: một bộ test cho thuật toán áp voucher đạt 100% statement, 100% branch và MC/DC, chạy thật, nộp báo cáo coverage.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-047</span>
@@ -29,9 +29,9 @@ Quyết định «voucher có được áp không» của Tới Nơi ghép chín
 
 ## 1. Giới thiệu
 
-**Modified condition/decision testing** (MC/DC — kiểm thử điều kiện/quyết định sửa đổi) là kỹ thuật white-box cho các **quyết định gồm nhiều điều kiện**. Nó không hỏi «quyết định đã đúng và sai chưa» (decision testing, [TEST-044](/articles/branch-coverage-decision-coverage)), cũng không đòi mọi tổ hợp (multiple condition testing, [TEST-046](/articles/multiple-condition-testing)). Nó đòi một bằng chứng cụ thể: **mỗi điều kiện, khi đổi giá trị một mình, làm đổi kết quả của quyết định**.
+**Modified condition/decision testing** (MC/DC — kiểm thử điều kiện/quyết định sửa đổi) là kỹ thuật white-box cho các **quyết định gồm nhiều điều kiện**. MC/DC không hỏi «quyết định đã đúng và sai chưa» (decision testing, [TEST-044](/articles/branch-coverage-decision-coverage)), cũng không đòi mọi tổ hợp (multiple condition testing, [TEST-046](/articles/multiple-condition-testing)). Kỹ thuật này đòi một bằng chứng cụ thể: **mỗi điều kiện, khi đổi giá trị một mình, làm đổi kết quả của quyết định**.
 
-Nó nhắm loại defect «quyết định đi sai đường vì một điều kiện bị bỏ qua, đảo dấu hoặc nối sai toán tử» — loại mà hai ca decision coverage đi qua mà không điều kiện nào thật sự «được hỏi ý kiến».
+MC/DC nhắm vào loại defect «quyết định đi sai đường vì một điều kiện bị bỏ qua, đảo dấu hoặc nối sai toán tử» — loại mà hai test case decision coverage đi qua mà không điều kiện nào thật sự «được hỏi ý kiến».
 
 Khi nào dùng: syllabus nêu ngành an toàn (hàng không, ô tô) — nơi failure có thể gây thảm hoạ. Ngoài đó, MC/DC đáng tiền ở quyết định **trực tiếp ra tiền hoặc ra quyền**: áp voucher, duyệt hoàn tiền, nhận chuyến.
 
@@ -42,12 +42,12 @@ Khi nào dùng: syllabus nêu ngành an toàn (hàng không, ô tô) — nơi fa
 CTAL-TTA v4.0 mục 2.4 mô tả MC/DC như sau (diễn đạt lại):
 
 - Một **decision predicate** (vị từ quyết định) gồm một hoặc nhiều **atomic condition** (điều kiện nguyên tử), mỗi điều kiện cho TRUE/FALSE, được nối bằng toán tử logic để ra kết quả quyết định. Quyết định chỉ có một điều kiện thì MC/DC trùng decision testing.
-- Kỹ thuật kiểm rằng **từng điều kiện nguyên tử ảnh hưởng độc lập và đúng đắn** tới kết quả. Cách chứng minh: **cặp test** chỉ khác nhau ở giá trị **một** điều kiện và cho **kết quả quyết định khác nhau**.
+- Kỹ thuật này kiểm tra rằng **từng điều kiện nguyên tử ảnh hưởng độc lập và đúng đắn** tới kết quả. Cách chứng minh: **cặp test** chỉ khác nhau ở giá trị **một** điều kiện và cho **kết quả quyết định khác nhau**.
 - Với N điều kiện **duy nhất, độc lập lẫn nhau**, thường đạt MC/DC với **N + 1 lần thực thi quyết định**. Một test case có thể đi qua nhiều quyết định, nên số test case có thể ít hơn N + 1 lần đếm riêng từng quyết định.
 
 **MC/DC coverage** = số điều kiện đã chứng minh được ảnh hưởng độc lập ÷ tổng số điều kiện. LO **TTA-2.4.1 (K3)**: thiết kế test case cho một test object để đạt **MC/DC đầy đủ**.
 
-Vì sao N + 1: với một quyết định toàn AND, lấy một ca «tất cả đúng» (kết quả TRUE) rồi lần lượt lật từng điều kiện thành sai (N ca, kết quả FALSE). Mỗi ca lật ghép cặp với ca gốc. Với OR thì đối xứng: ca gốc «tất cả sai». Quyết định trộn AND/OR như voucher cần chọn ca gốc khéo hơn (mục 4.3).
+Vì sao N + 1: với một quyết định toàn AND, lấy một test case «tất cả đúng» (kết quả TRUE) rồi lần lượt lật từng điều kiện thành sai (N test case, kết quả FALSE). Mỗi test case lật ghép cặp với test case gốc. Với OR thì đối xứng: test case gốc «tất cả sai». Quyết định trộn AND/OR như voucher cần chọn test case gốc khéo hơn (mục 4.3).
 
 ### 2.2. Giới hạn syllabus nêu
 
@@ -168,14 +168,14 @@ N = 9. R-VOUCHER-02 (chuẩn hoá) là một quyết định **riêng** đứng 
 - **C4, C5 ghép** qua biến `kinds`: rỗng thì không chứa gì ⇒ (C4, C5) = (T, T) bất khả thi. C6, C7 tương tự.
 - **C2, C3 ghép** qua biến `day`: với validFrom ≤ validTo, không thể vừa trước validFrom vừa sau validTo ⇒ (C2, C3) = (F, F) bất khả thi.
 
-Multiple condition coverage vì thế không phải 512 mà 288 tổ hợp khả thi (mục 2.3, Hình 1), và còn ít hơn nữa nếu tính ngắt mạch. MC/DC chỉ cần **các cặp còn lật được**: với OR `C4 ∨ C5`, cặp cho C5 là (F, T) ↔ (F, F) và cặp cho C4 là (T, F) ↔ (F, F) — cả bốn vectơ đều khả thi, nên ghép ở đây **không** chặn MC/DC unique-cause.
+Multiple condition coverage vì thế cần 288 tổ hợp khả thi chứ không phải 512 (mục 2.3, Hình 1), và còn ít hơn nữa nếu tính ngắt mạch. MC/DC chỉ cần **các cặp còn lật được**: với OR `C4 ∨ C5`, cặp cho C5 là (F, T) ↔ (F, F) và cặp cho C4 là (T, F) ↔ (F, F) — cả bốn vectơ đều khả thi, nên ghép ở đây **không** chặn MC/DC unique-cause.
 
 ### 4.3. Thiết kế bộ N + 1
 
 Cách làm từng bước:
 
-1. **Ca gốc M1** cho V = TRUE. Với nhóm OR, chọn vế «chứa» đúng và vế «rỗng» sai (C4 = F, C5 = T), để còn chỗ lật.
-2. **Lật lần lượt từng điều kiện của phần AND** (C1, C2, C3, C8, C9) ⇒ 5 ca, mỗi ca ghép cặp với M1.
+1. **Test case gốc M1** cho V = TRUE. Với nhóm OR, chọn vế «chứa» đúng và vế «rỗng» sai (C4 = F, C5 = T), để còn chỗ lật.
+2. **Lật lần lượt từng điều kiện của phần AND** (C1, C2, C3, C8, C9) ⇒ 5 test case, mỗi test case ghép cặp với M1.
 3. **Nhóm OR**: lật C5 (M5: `kinds = [food]` ⇒ (F, F), V = F) ghép với M1. Muốn chứng minh C4 cần thêm M6 (T, F) ⇒ V = T, ghép với **M5**, không phải M1. Nhóm C6/C7 làm y hệt (M7, M8).
 4. Đếm: 1 + 5 + 2 + 2 = **10 = N + 1**.
 
@@ -224,10 +224,10 @@ Cách làm từng bước:
 <text x="680" y="336" class="t-small">10 ca = N + 1, N = 9</text>
 </svg>
 </div>
-<figcaption><b>Hình 2 · Cấu trúc V và cặp độc lập của từng điều kiện.</b> Điều kiện trong nhóm OR (màu hồng) không ghép cặp được hết với ca gốc: C4 phải ghép M5 ↔ M6.</figcaption>
+<figcaption><b>Hình 2 · Cấu trúc V và cặp độc lập của từng điều kiện.</b> Điều kiện trong nhóm OR (màu hồng) không ghép cặp được hết với test case gốc: C4 phải ghép M5 ↔ M6.</figcaption>
 </figure>
 
-Bộ test (T đúng, F sai, «–» không đánh giá). Đặt lúc 09:00 04/11/2026 giờ VN (ngoài cao điểm, không mưa); xe máy SG 7,4 km ⇒ A = 12.000 + 4.500 × 7,4 = **45.300 đ**. Ca gốc: giảm 10%, trần 20.000 đ, `minAmount` 45.300 đ, `kinds = [ride, parcel]`, `cityCodes = [SG, HN]`, hạn 04/11–04/11, 1 lượt/ngày.
+Bộ test (T đúng, F sai, «–» không đánh giá). Đặt lúc 09:00 04/11/2026 giờ VN (ngoài cao điểm, không mưa); xe máy SG 7,4 km ⇒ A = 12.000 + 4.500 × 7,4 = **45.300 đ**. Test case gốc: giảm 10%, trần 20.000 đ, `minAmount` 45.300 đ, `kinds = [ride, parcel]`, `cityCodes = [SG, HN]`, hạn 04/11–04/11, 1 lượt/ngày.
 
 | Ca | Dữ liệu khác ca gốc | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 | C9 | V | Kết quả mong đợi |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -246,11 +246,11 @@ Kết quả mong đợi tính theo R-FARE-03: 45.300 − 4.530 = 40.770 ≥ 15.0
 
 ### 4.4. Chọn giá trị: ghép MC/DC với BVA
 
-MC/DC chỉ đòi điều kiện nhận T/F, không đòi giá trị nào. Tận dụng tự do đó: ca gốc đặt **ngay biên** — `minAmount` = A, validFrom = validTo = ngày đặt — nên M1 đồng thời kiểm «tính cả hai đầu» của R-VOUCHER-04/06; M9 lấy A + 1 đồng. Một bộ, hai kỹ thuật ([TEST-032](/articles/boundary-value-analysis)).
+MC/DC chỉ đòi điều kiện nhận T/F, không đòi giá trị nào. Tận dụng sự tự do đó: test case gốc đặt **ngay biên** — `minAmount` = A, validFrom = validTo = ngày đặt — nên M1 đồng thời kiểm «tính cả hai đầu» của R-VOUCHER-04/06; M9 lấy A + 1 đồng. Một bộ, hai kỹ thuật ([TEST-032](/articles/boundary-value-analysis)).
 
 ### 4.5. Từ quyết định đặc tả xuống quyết định trong code
 
-Code không có biểu thức V; nó là **chuỗi guard** ném lỗi. Mỗi guard là một quyết định nhỏ, chỉ được đánh giá khi các guard trước đã qua, và `||` ngắt mạch vế phải. Kiểm lại: 10 ca có đạt MC/DC trên **từng** quyết định của code không?
+Code không có biểu thức V; nó là **chuỗi guard** ném lỗi. Mỗi guard là một quyết định nhỏ, chỉ được đánh giá khi các guard trước đã qua, và `||` ngắt mạch vế phải. Kiểm tra lại: 10 test case có đạt MC/DC trên **từng** quyết định của code không?
 
 | Quyết định trong code | Số điều kiện | Ca đi tới | Cặp độc lập |
 |---|---|---|---|
@@ -273,9 +273,9 @@ Lời giải trong `examples/toi-noi-testing/articles/mc-dc-testing/`:
 
 `mcdc.ts` (bộ kiểm MC/DC tối giản — V8 không đo được MC/DC) · `voucher-cases.ts` (10 ca, hàm tính vectơ điều kiện **từ dữ liệu theo SPEC**, bộ chạy `priceQuote` thật) · `mcdc-voucher.test.ts` (A kiểm thiết kế, B chạy 10 ca, C MC/DC trên từng quyết định code) · `bo-sung-statement-branch.test.ts` · `buggy-eligible.ts` + `bat-loi-and-or.test.ts` · `bao-cao-coverage.md` (báo cáo nộp bài).
 
-### 5.2. Kiểm thiết kế bằng code, không bằng mắt
+### 5.2. Kiểm tra thiết kế bằng code, không bằng mắt
 
-Vectơ điều kiện của mỗi ca **không gõ tay**: `conditionsOf` tính từ dữ liệu ca theo đúng câu chữ SPEC, độc lập với code. Bộ kiểm tìm cặp chỉ khác nhau ở một điều kiện (điều kiện không đánh giá là «không quan tâm») mà kết quả khác nhau:
+Vectơ điều kiện của mỗi test case **không gõ tay**: `conditionsOf` tính từ dữ liệu ca theo đúng câu chữ SPEC, độc lập với code. Bộ kiểm tìm cặp chỉ khác nhau ở một điều kiện (điều kiện không đánh giá là «không quan tâm») mà kết quả khác nhau:
 
 ```ts
 // mcdc.ts — hai vectơ chỉ khác ở điều kiện i
@@ -288,7 +288,7 @@ export function differsOnlyAt(x: readonly CondValue[], y: readonly CondValue[], 
 ```
 
 
-Ca gốc `BASE` nằm ngay biên; M10 tiêu lượt **thật** (`createQuote` + `createTrip` một chuyến với mã, rồi báo giá lại).
+Test case gốc `BASE` nằm ngay biên; M10 dùng lượt **thật** (`createQuote` + `createTrip` một chuyến với mã, rồi báo giá lại).
 
 ### 5.3. Chạy
 
@@ -327,7 +327,7 @@ All files    |   98.05 |    82.75 |     100 |   98.05 |
   voucher.ts |     100 |     87.5 |     100 |     100 | 24-25
 ```
 
-MC/DC 100% trên V mà branch của tệp chỉ 82,75%. Không mâu thuẫn với mục 2.3: các nhánh thiếu thuộc **quyết định khác** — `raw ?? ''` và `code === '' ? null : code` (chuẩn hoá), `if (code === null) return null` và `voucher?.code ?? null` (không nhập voucher), nhánh ném của `requireRole`. Thêm 6 ca bổ sung:
+MC/DC 100% trên V mà branch của tệp chỉ 82,75%. Không mâu thuẫn với mục 2.3: các nhánh thiếu thuộc **quyết định khác** — `raw ?? ''` và `code === '' ? null : code` (chuẩn hoá), `if (code === null) return null` và `voucher?.code ?? null` (không nhập voucher), nhánh ném của `requireRole`. Thêm 6 test case bổ sung:
 
 S1 không gửi `voucherCode` (tổng 46.000 đ; phủ `?? ''`, `return null`, `?? null`) · S2 mã `'   '` (phủ `? null`) · S3 `' mcdc10 '` ≡ `MCDC10` (R-VOUCHER-02) · S4 `createQuote` lưu báo giá · S5 tài xế báo giá ⇒ `FORBIDDEN` · S6 `requireRole(khách, 'driver')` (vế còn lại của `?:`).
 
@@ -344,7 +344,7 @@ All files    |     100 |      100 |     100 |     100 |
 
 ### 5.5. Bằng chứng: decision coverage để lọt, MC/DC bắt được
 
-`buggy-eligible.ts` chép `assertVoucherEligible` và đổi `!kindOk || !cityOk` thành `!kindOk && !cityOk` — chỉ chặn khi sai **cả** dịch vụ **lẫn** thành phố. Một bộ 3 ca «decision coverage» (đúng hết; sai cả hai; hết hạn) chạy trên bản lỗi:
+`buggy-eligible.ts` chép `assertVoucherEligible` và đổi `!kindOk || !cityOk` thành `!kindOk && !cityOk` — chỉ chặn khi sai **cả** dịch vụ **lẫn** thành phố. Một bộ 3 test case «decision coverage» (đúng hết; sai cả hai; hết hạn) chạy trên bản lỗi:
 
 ```bash
 npx vitest run articles/mc-dc-testing/bat-loi-and-or.test.ts -t "decision coverage" --coverage.enabled \
@@ -358,7 +358,7 @@ File               | % Stmts | % Branch | % Funcs | % Lines
  buggy-eligible.ts |     100 |      100 |     100 |     100
 ```
 
-**100% statement, 100% branch — và lỗi vẫn nằm đó**: cả ba ca cho cùng kết quả trên bản đúng và bản lỗi. Thêm hai ca MC/DC M5 (chỉ sai dịch vụ) và M7 (chỉ sai thành phố): bản đúng ném `VOUCHER_NOT_APPLICABLE`, bản lỗi trả «OK» ⇒ failure lộ ra. Đây là đúng loại defect mục 2.1 nói tới: quyết định đi sai đường vì một điều kiện không còn ảnh hưởng độc lập.
+**100% statement, 100% branch — và lỗi vẫn nằm đó**: cả ba test case cho cùng kết quả trên bản đúng và bản lỗi. Thêm hai test case MC/DC M5 (chỉ sai dịch vụ) và M7 (chỉ sai thành phố): bản đúng ném `VOUCHER_NOT_APPLICABLE`, bản lỗi trả «OK» ⇒ failure lộ ra. Đây là đúng loại defect mục 2.1 nói tới: quyết định đi sai đường vì một điều kiện không còn ảnh hưởng độc lập.
 
 ### 5.6. Báo cáo nộp bài
 
@@ -367,8 +367,8 @@ File               | % Stmts | % Branch | % Funcs | % Lines
 ## 6. Góc nhìn nâng cao
 
 - **MC/DC của một quyết định ≠ MC/DC của test object.** Quan hệ bao hàm (mục 2.3) chỉ đúng khi tiêu chí áp cho **mọi** quyết định. Đặt mục tiêu «MC/DC cho V» là hợp lý theo rủi ro; nhưng đừng ghi «đã đạt MC/DC» cho cả module.
-- **Ngắt mạch không chặn MC/DC.** Unique-cause với «không quan tâm» (hoặc masking) vẫn cho đủ cặp — như M3 ở mục 4.5; chỉ đừng thiết kế ca dựa vào giá trị vế phải của `||` khi vế trái đúng.
-- **Cặp phải đổi ĐÚNG MỘT điều kiện.** Sai lầm hay gặp: lấy M1 ghép với ca «kinds = [food], cityCodes = [HN]» rồi ghi «đã chứng minh C5» — ca đó lật cả C5 lẫn C7. Đếm N + 1 ca mà không kiểm cặp là đếm test case, không phải đo coverage.
+- **Ngắt mạch không chặn MC/DC.** Unique-cause với «không quan tâm» (hoặc masking) vẫn cho đủ cặp — như M3 ở mục 4.5; chỉ đừng thiết kế test case dựa vào giá trị vế phải của `||` khi vế trái đúng.
+- **Cặp phải đổi ĐÚNG MỘT điều kiện.** Sai lầm hay gặp: lấy M1 ghép với test case «kinds = [food], cityCodes = [HN]» rồi ghi «đã chứng minh C5» — test case đó lật cả C5 lẫn C7. Đếm N + 1 test case mà không kiểm cặp là đếm test case, không phải đo coverage.
 - **MC/DC không tìm điều kiện bị thiếu.** Nếu code quên hẳn kiểm lượt lần hai khi tạo chuyến (R-VOUCHER-07 «kiểm hai lần»), không tiêu chí cấu trúc nào trên `quote.ts` phát hiện — phải có test từ đặc tả. Tương tự trần tiền giảm (Đ1) và thứ tự lỗi (Đ2).
 - **Coverage là tiêu chí cấu trúc, nhạy với refactor.** Gom R-VOUCHER-04…06 vào một biểu thức hay chuyển sang bảng luật là đổi coverage item; phải phân tích lại — xem [TEST-062](/articles/code-coverage-trong-thuc-hanh) về vận hành công cụ coverage và ngưỡng trong CI.
 - **Chọn kỹ thuật theo rủi ro (TTA-2.8.1, K4).** Tới Nơi không phải hệ an toàn; theo mục 2.8.1 (hợp đồng, chiến lược, phong cách code, lịch sử defect, kỹ năng, công cụ), đề xuất: MC/DC cho quyết định ra tiền/ra quyền (voucher, hoàn tiền, nhận chuyến), branch coverage cho phần còn lại, black-box trước rồi white-box bù chỗ thiếu.
@@ -386,13 +386,13 @@ File               | % Stmts | % Branch | % Funcs | % Lines
 **Câu 1 (K2).** MC/DC yêu cầu điều gì?
 
 - a) Mọi tổ hợp giá trị của các điều kiện nguyên tử được thực thi
-- b) Mỗi điều kiện nguyên tử được chứng minh, bằng một cặp test, là đổi một mình nó thì đổi kết quả quyết định
+- b) Mỗi điều kiện nguyên tử được chứng minh bằng một cặp test rằng chỉ riêng việc đổi nó cũng làm đổi kết quả quyết định
 - c) Mỗi điều kiện nguyên tử nhận cả TRUE và FALSE ít nhất một lần
 - d) Mỗi quyết định nhận cả TRUE và FALSE ít nhất một lần
 
 <details><summary><b>Đáp án</b></summary><p><b>b)</b> đúng (TTA mục 2.4). a) là multiple condition coverage. c) là condition coverage — chưa chắc đổi kết quả (bài <a href="/articles/condition-coverage">TEST-045</a>). d) là decision coverage.</p></details>
 
-**Câu 2 (K3).** Quyết định `A && B && C && D`, bốn điều kiện độc lập. Số ca tối thiểu để đạt MC/DC là bao nhiêu?
+**Câu 2 (K3).** Quyết định `A && B && C && D`, bốn điều kiện độc lập. Số test case tối thiểu để đạt MC/DC là bao nhiêu?
 
 - a) 2
 - b) 4
@@ -413,7 +413,7 @@ File               | % Stmts | % Branch | % Funcs | % Lines
 **Câu 4 (K2).** Trong TypeScript, `if (kinds.length === 0 || kinds.includes(kind))`. Ảnh hưởng của đánh giá ngắt mạch tới MC/DC là gì?
 
 - a) Không thể đạt MC/DC cho quyết định này
-- b) Khi vế trái đúng, vế phải không được đánh giá, nên ca đó không cho biết giá trị vế phải; cặp test phải được chọn tính tới điều này
+- b) Khi vế trái đúng, vế phải không được đánh giá, nên test case đó không cho biết giá trị vế phải; cặp test phải được chọn tính tới điều này
 - c) Ngắt mạch làm tăng số ca cần thiết lên 2^N
 - d) Có thể tắt ngắt mạch bằng cờ biên dịch của TypeScript
 

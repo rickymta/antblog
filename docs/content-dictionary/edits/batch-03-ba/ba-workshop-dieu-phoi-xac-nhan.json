@@ -1,0 +1,13 @@
+{"file":"ba-workshop-dieu-phoi-xac-nhan.md","edits":[
+{"old":"chuyển thành tranh luận chat hay gọi điện. Vận hành nói nhiều nhất","new":"chuyển thành tranh luận nên dùng chat hay gọi điện. Bộ phận vận hành nói nhiều nhất","reason":"Câu thiếu động từ; thiếu chủ thể 'bộ phận'","severity":"high"},
+{"old":"Nó chưa có mục tiêu duyệt chat.","new":"Workshop này chưa nhằm duyệt chat.","reason":"Tránh 'Nó'; câu gượng","severity":"medium"},
+{"old":"hành động với owner và hạn cần xác nhận.","new":"hành động kèm người phụ trách và hạn cần xác nhận.","reason":"owner → người phụ trách","severity":"medium"},
+{"old":"sử dụng bằng chứng đã được ghi nhận phù hợp và không biến","new":"hãy dùng bằng chứng đã ghi nhận một cách phù hợp và đừng biến","reason":"Câu thiếu chủ ngữ, bị động","severity":"medium"},
+{"old":"| Đọc lại kết quả, owner, hạn và trạng thái |","new":"| Đọc lại kết quả, người phụ trách, hạn và trạng thái |","reason":"owner → người phụ trách","severity":"low"},
+{"old":"Vận hành nói “cần xem toàn bộ lịch sử chat”.","new":"Bộ phận vận hành nói “cần xem toàn bộ lịch sử chat”.","reason":"Thiếu chủ thể 'bộ phận'","severity":"high"},
+{"old":"Cho mỗi người ghi ý kiến riêng trước khi thảo luận giúp giảm","new":"Để mỗi người ghi ý kiến riêng trước khi thảo luận sẽ giúp giảm","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"| Owner tài liệu xác nhận |","new":"| Người phụ trách tài liệu xác nhận |","reason":"owner → người phụ trách","severity":"low"},
+{"old":"Người xác nhận luồng hỗ trợ không tự phê duyệt mở quyền dữ liệu.","new":"Người xác nhận luồng hỗ trợ không tự phê duyệt việc mở quyền dữ liệu.","reason":"Thiếu danh từ 'việc'","severity":"medium"},
+{"old":"<p>Không nếu chưa có cơ chế quyết định","new":"<p>Không, nếu chưa có cơ chế quyết định","reason":"Thiếu dấu phẩy, câu cụt","severity":"low"},
+{"old":"có đầu ra, phạm vi, cách ghi bất đồng, owner/hạn và","new":"có đầu ra, phạm vi, cách ghi bất đồng, người phụ trách/hạn và","reason":"owner → người phụ trách","severity":"low"}
+]}

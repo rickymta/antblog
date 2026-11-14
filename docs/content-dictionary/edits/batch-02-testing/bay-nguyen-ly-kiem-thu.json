@@ -1,0 +1,173 @@
+{
+"file": "bay-nguyen-ly-kiem-thu.md",
+"edits": [
+{
+"old": "nhìn vào số ca test không thấy được",
+"new": "nhìn vào số test case không thấy được",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "thì nó ngày càng kém trong việc tìm defect",
+"new": "thì bộ test đó ngày càng kém trong việc tìm defect",
+"reason": "Tránh 'nó' chỉ sự vật",
+"severity": "low"
+},
+{
+"old": "ưu tiên ca kiểm thử",
+"new": "ưu tiên test case",
+"reason": "Thống nhất 'test case' (khớp với tên tiếng Anh)",
+"severity": "low"
+},
+{
+"old": "Đội Pricing viết 150 ca test cho hàm",
+"new": "Đội Pricing viết 150 test case cho hàm",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "150 ca xanh không sai.",
+"new": "150 test case xanh không sai.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "«cước đúng với 150 ca, chạy ở UTC+7»",
+"new": "«cước đúng với 150 test case, chạy ở UTC+7»",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Thêm ít nhất một ca chạy với đồng hồ",
+"new": "Thêm ít nhất một test case chạy với đồng hồ",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "có 30 ca, chạy mỗi lần merge. Mọi ca đều dùng",
+"new": "có 30 test case, chạy mỗi lần merge. Mọi test case đều dùng",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Bộ 30 ca vẫn xanh suốt ba tháng, vì không ca nào chạm",
+"new": "Bộ 30 test case vẫn xanh suốt ba tháng, vì không test case nào chạm",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "— nó đã «nhờn». Nó vẫn làm tốt việc của nó (bắt lỗi hồi quy",
+"new": "— chỉ là đã «nhờn». Bộ test vẫn làm tốt việc của mình (bắt lỗi hồi quy",
+"reason": "Hai 'nó' liên tiếp, giọng dịch máy",
+"severity": "medium"
+},
+{
+"old": "mỗi mã có ít nhất một ca; xoay dữ liệu",
+"new": "mỗi mã có ít nhất một test case; xoay dữ liệu",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Giữ các ca cũ vì chúng vẫn bảo vệ hồi quy.",
+"new": "Giữ các test case cũ vì chúng vẫn bảo vệ hồi quy.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "qua hết các ca test R-FARE và R-UI",
+"new": "qua hết các test case R-FARE và R-UI",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Nhưng nó không đáp ứng kỳ vọng của người dùng",
+"new": "Nhưng phần mềm không đáp ứng kỳ vọng của người dùng",
+"reason": "Tránh 'nó' đầu câu",
+"severity": "low"
+},
+{
+"old": "thành một tập ca test có chủ đích",
+"new": "thành một tập test case có chủ đích",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "tới một tập ca có chủ đích",
+"new": "tới một tập test case có chủ đích",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "= **3.780** ca. Thay vào đó:",
+"new": "= **3.780** test case. Thay vào đó:",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "tối thiểu **9 ca** (bằng yếu tố",
+"new": "tối thiểu **9 test case** (bằng yếu tố",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Kết quả là vài chục ca thay cho",
+"new": "Kết quả là vài chục test case thay cho",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "— và mỗi ca có lý do để tồn tại.",
+"new": "— và mỗi test case có lý do để tồn tại.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Số tiền ở ca 1, 3, 5, 6 đã kiểm",
+"new": "Số tiền ở tổ hợp 1, 3, 5, 6 đã kiểm",
+"reason": "'ca' chỉ dòng của bảng, dùng 'tổ hợp' cho rõ",
+"severity": "low"
+},
+{
+"old": "Bộ test cước của Tới Nơi có 150 ca, tất cả đều đạt.",
+"new": "Bộ test cước của Tới Nơi có 150 test case, tất cả đều đạt.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Không phát hiện defect trong 150 ca đã chạy;",
+"new": "Không phát hiện defect trong 150 test case đã chạy;",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Dùng nó làm đầu vào cho kiểm thử dựa trên rủi ro",
+"new": "Dùng thông tin này làm đầu vào cho kiểm thử dựa trên rủi ro",
+"reason": "Tránh 'nó' chỉ sự vật",
+"severity": "low"
+},
+{
+"old": "Rà và bổ sung ca test, đổi dữ liệu",
+"new": "Rà và bổ sung test case, đổi dữ liệu",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "giữ các ca cũ còn giá trị hồi quy.",
+"new": "giữ các test case cũ còn giá trị hồi quy.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Tester tăng số ca test hồi quy trước",
+"new": "Tester tăng số test case hồi quy trước",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "qua mọi ca test theo đặc tả",
+"new": "qua mọi test case theo đặc tả",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+}
+]
+}

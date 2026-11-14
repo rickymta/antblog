@@ -29,9 +29,9 @@ Tài xế bấm «Nhận chuyến». Hệ thống phải trả lời đúng mộ
 
 ## 1. Giới thiệu
 
-Bài 045 cho thấy condition coverage chỉ đòi mỗi điều kiện nhận cả true lẫn false — có thể đạt mà chưa thấy quyết định ra cả hai phía. **Multiple condition testing** (kiểm thử đa điều kiện) đi tới cực đoan ngược lại: chạy **mọi tổ hợp** giá trị của các atomic condition trong quyết định. Với N điều kiện độc lập là 2^N tổ hợp.
+Bài 045 cho thấy condition coverage chỉ đòi mỗi điều kiện nhận cả true lẫn false — có thể đạt mà chưa thấy quyết định ra cả hai phía. **Multiple condition testing** (kiểm thử đa điều kiện) đi tới cực đoan ngược lại: chạy **mọi tổ hợp** giá trị của các atomic condition trong quyết định. Với N điều kiện độc lập sẽ có 2^N tổ hợp.
 
-Vấn đề nó giải quyết: lỗi chỉ lộ khi **nhiều điều kiện cùng ở một trạng thái** — ví dụ thứ tự ưu tiên lỗi khi tài xế vừa sai thành phố vừa sai loại xe. Các tiêu chí nhẹ hơn không đòi chạy tổ hợp đó.
+Vấn đề mà kỹ thuật này giải quyết: lỗi chỉ lộ khi **nhiều điều kiện cùng ở một trạng thái** — ví dụ thứ tự ưu tiên lỗi khi tài xế vừa sai thành phố vừa sai loại xe. Các tiêu chí nhẹ hơn không đòi chạy tổ hợp đó.
 
 Khi nào dùng: số điều kiện nhỏ (thường ≤ 4–5), quyết định rủi ro cao, hoặc kết quả **phụ thuộc vào tổ hợp** chứ không chỉ vào từng điều kiện (thứ tự ưu tiên, bảng quyền). Khi N lớn, MC/DC (bài 047) là lựa chọn thực tế hơn.
 
@@ -41,10 +41,10 @@ Khi nào dùng: số điều kiện nhỏ (thường ≤ 4–5), quyết định
 
 Theo CTAL-TTA v4.0 mục 2.5 (diễn đạt lại):
 
-- Multiple condition testing kiểm **mọi tổ hợp có thể** của các atomic condition mà một quyết định chứa. Với N điều kiện duy nhất, độc lập nhau, đạt đầy đủ bằng cách thực thi quyết định 2^N lần.
+- Multiple condition testing kiểm **mọi tổ hợp có thể** của các atomic condition mà một quyết định chứa. Với N điều kiện duy nhất, độc lập nhau, có thể đạt đầy đủ bằng cách thực thi quyết định 2^N lần.
 - Một test case có thể chạm nhiều tổ hợp (của nhiều quyết định khác nhau), nên số test case không nhất thiết là 2^N.
 - **Coverage** = số tổ hợp atomic condition đã thực thi / tổng số tổ hợp trên mọi quyết định của test object, thường tính theo phần trăm.
-- **Phạm vi áp dụng**: phần mềm rủi ro cao, phần mềm nhúng phải chạy tin cậy rất lâu không sập.
+- **Phạm vi áp dụng**: phần mềm rủi ro cao, phần mềm nhúng phải chạy ổn định rất lâu mà không sập.
 - **Giới hạn**: số tổ hợp lấy thẳng từ bảng chân trị nên dễ xác định, nhưng **số lượng** quá lớn khiến MC/DC khả thi hơn khi quyết định có nhiều điều kiện. Nếu trình biên dịch ngắt mạch (short-circuiting), số tổ hợp **thực thi được** thường giảm, tuỳ thứ tự và cách nhóm toán tử.
 
 LO **TTA-2.5.1 (K3)**: thiết kế test case cho một test object bằng multiple condition testing để đạt một mức coverage xác định.
@@ -61,7 +61,7 @@ Mục 2.8 xếp thứ bậc: **multiple condition coverage bao hàm MC/DC**, MC/
 | 8 | 256 | 9 | 2 |
 | 10 | 1.024 | 11 | 2 |
 
-Mỗi điều kiện thêm vào **nhân đôi** bộ test multiple condition, chỉ **cộng một** test MC/DC.
+Mỗi điều kiện thêm vào **nhân đôi** bộ test multiple condition, nhưng chỉ **thêm một** test MC/DC.
 
 ### 2.3. Tổ hợp bất khả thi
 
@@ -69,7 +69,7 @@ Syllabus giả định điều kiện «độc lập nhau». Thực tế, điề
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB</span>
-<p>CTAL-TTA không quy định cách đếm tổ hợp bất khả thi. Thực hành phổ biến: (1) liệt kê đủ 2^N dòng; (2) đánh dấu từng dòng bất khả thi kèm <b>lý do truy vết được</b> (quy tắc, ràng buộc schema, kiểu dữ liệu); (3) báo coverage trên mẫu số là số tổ hợp khả thi, ghi rõ số dòng đã loại. Không xoá dòng một cách im lặng — dòng «bất khả thi» do hiểu sai là chỗ lỗi trốn.</p>
+<p>CTAL-TTA không quy định cách đếm tổ hợp bất khả thi. Thực hành phổ biến: (1) liệt kê đủ 2^N dòng; (2) đánh dấu từng dòng bất khả thi kèm <b>lý do truy vết được</b> (quy tắc, ràng buộc schema, kiểu dữ liệu); (3) báo coverage trên mẫu số là số tổ hợp khả thi, ghi rõ số dòng đã loại. Không lặng lẽ xoá dòng — dòng «bất khả thi» do hiểu sai là chỗ lỗi trốn.</p>
 </div>
 
 ### 2.4. Thuật ngữ Anh – Việt
@@ -102,7 +102,7 @@ Tài xế thấy danh sách chuyến đang chờ cùng thành phố, đúng lo�
 
 ### System context
 
-Trong kiến trúc Tới Nơi, quyết định này thuộc **Matching & Dispatch** (§4.5: xử lý accept, một booking chỉ một assignment hợp lệ) và đọc trạng thái online/offline/busy từ **Driver Availability** (§4.6). Lab gộp chúng trong modular monolith (§18): `acceptTrip` ở `src/app/trips.ts` kiểm điều kiện bằng chuỗi `if … throw`, rồi giành chuyến có điều kiện (`acceptIfSearching`). Lab dùng mô hình **kéo** — không có offer, TTL hay Redis. Bài test ở **component level**, kho trong bộ nhớ.
+Trong kiến trúc Tới Nơi, quyết định này thuộc **Matching & Dispatch** (§4.5: xử lý accept, một booking chỉ một assignment hợp lệ) và đọc trạng thái online/offline/busy từ **Driver Availability** (§4.6). Lab gộp chúng trong modular monolith (§18): `acceptTrip` ở `src/app/trips.ts` kiểm điều kiện bằng chuỗi `if … throw`, rồi giành chuyến có điều kiện (`acceptIfSearching`). Lab dùng mô hình **kéo** — không có offer, TTL hay Redis. Bài này kiểm thử ở **component level**, với kho trong bộ nhớ.
 
 ### Rủi ro có thể xảy ra
 
@@ -260,7 +260,7 @@ Bản sai đổi chỗ hai `if` thành phố / loại xe. So hai bộ:
 | «Lật từng điều kiện»: #1 (toàn T) + 5 dòng chỉ một điều kiện F (#2, #3, #5, #9, #17) | 6 | — | Lọt |
 | Đủ tổ hợp khả thi | 24 | #7 `TTFFT`, #8 `TTFFF` | Bắt |
 
-Bộ 6 test giống cấu trúc N + 1 của MC/DC cho một AND thuần: mỗi điều kiện có một test mà chỉ nó sai. Nó chứng minh từng điều kiện **có tác dụng**, nhưng không bao giờ cho hai điều kiện cùng sai, nên không chạm thứ tự ưu tiên. Lỗi chỉ lộ ở 2/24 tổ hợp — 8% bảng — đúng loại «lỗi do tổ hợp» mà decision testing có thể bỏ sót (TTA 2.3, phần giới hạn).
+Bộ 6 test giống cấu trúc N + 1 của MC/DC cho một AND thuần: mỗi điều kiện có một test mà chỉ nó sai. Bộ này chứng minh từng điều kiện **có tác dụng**, nhưng không bao giờ cho hai điều kiện cùng sai, nên không chạm thứ tự ưu tiên. Lỗi chỉ lộ ở 2/24 tổ hợp — 8% bảng — đúng loại «lỗi do tổ hợp» mà decision testing có thể bỏ sót (TTA 2.3, phần giới hạn).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Mẫu báo cáo coverage của bài thực hành</span>
@@ -273,7 +273,7 @@ Bộ 6 test giống cấu trúc N + 1 của MC/DC cho một AND thuần: mỗi �
 - **So với decision table testing ([TEST-033](/articles/decision-table-testing)).** Bảng 24 dòng ở đây trông như một decision table đầy đủ. Khác nhau ở **test basis**: decision table là black-box, điều kiện lấy từ đặc tả và được phép gộp cột «không quan trọng» (`–`); multiple condition testing là white-box, đo trên quyết định trong code. Gộp cột kiểu decision table chính là bước từ 24 về 6 — tiết kiệm, và mất đúng hai dòng bắt lỗi thứ tự.
 - **Không nhầm với combinatorial/pairwise ([TEST-037](/articles/pairwise-testing), [TEST-038](/articles/combinatorial-testing)).** Pairwise phủ mọi cặp giá trị **tham số đầu vào** để giảm số test; multiple condition phủ mọi tổ hợp **điều kiện của một quyết định**. Pairwise trên 5 điều kiện Boolean cần khoảng 6 test — vẫn có thể lọt lỗi cần cả ba điều kiện cùng giá trị.
 - **Khi nào xứng đáng?** TTA 2.5 nói «hiếm khi» và nêu phần mềm rủi ro cao, nhúng. Ở Tới Nơi, quyết định nhỏ (N ≤ 5) có thứ tự ưu tiên hoặc tiền đi kèm là ứng viên hợp lý; quyết định 8 điều kiện thì chuyển sang MC/DC (bài 047) và thêm vài tổ hợp chọn theo rủi ro (thứ tự lỗi, biên).
-- **Tổ hợp bất khả thi có thể là defect.** Nếu một ngày tài xế vừa `busy` vừa không giữ chuyến nào (R-ACCEPT-05 bị vi phạm do lỗi đồng bộ), dòng «bất khả thi» thành khả thi. Ghi lý do loại để khi giả định đổi, dòng đó được xét lại. Kiến trúc thật tách Availability thành service riêng (§4.6) — trạng thái có thể **trễ** so với Dispatch, giả định «một trạng thái» yếu hơn trong lab.
+- **Tổ hợp bất khả thi có thể là defect.** Nếu một ngày tài xế vừa `busy` vừa không giữ chuyến nào (R-ACCEPT-05 bị vi phạm do lỗi đồng bộ), dòng «bất khả thi» thành khả thi. Ghi lý do loại để khi giả định đổi, dòng đó được xét lại. Kiến trúc thật tách Availability thành service riêng (§4.6) — trạng thái có thể **trễ** so với Dispatch, nên giả định «một trạng thái» kém vững hơn so với trong lab.
 - **Không phủ đồng thời.** Bảng kiểm từng lệnh nhận đơn lẻ. Hai tài xế cùng nhận một chuyến (R-ACCEPT-03) là bài toán race condition — Series 08 (TEST-085, TEST-086).
 - **Sai lầm thường gặp:** sinh 2^N dòng nhưng tự viết «kết quả mong đợi» bằng cách chạy code (oracle vòng tròn); xoá dòng bất khả thi không ghi lý do; dựng trạng thái bằng cách sửa kho trực tiếp, tạo ra dữ liệu không thể có (vd `busy` không có chuyến) rồi «phát hiện» lỗi giả.
 

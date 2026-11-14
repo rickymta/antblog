@@ -32,7 +32,7 @@ Tools • Dart 3.13.3 • DevTools 2.60.0
 
 Dòng Framework, Engine và Tools tương ứng ba hàng của bảng dưới; Dart 3.13.3 đi kèm trong Tools.
 
-Người mới thường gọi tất cả là "Flutter". Khi gặp lỗi, cách gọi đó khiến ta không biết nên tìm ở đâu. Bảng dưới tách từng tầng. Dart giống C# ở vai ngôn ngữ. **Flutter SDK** (cả gói) là một nền tảng ứng dụng; riêng tầng framework bên trong nó là một thư viện Dart.
+Người mới thường gọi tất cả là "Flutter". Khi gặp lỗi, cách gọi đó khiến ta không biết nên tìm ở đâu. Bảng dưới tách từng tầng. Dart đóng vai ngôn ngữ, giống C#. **Flutter SDK** (cả gói) là một nền tảng ứng dụng; riêng tầng framework bên trong nó là một thư viện Dart.
 
 | Thành phần | Trả lời câu hỏi nào? | Trong bài này |
 | --- | --- | --- |
@@ -42,7 +42,7 @@ Người mới thường gọi tất cả là "Flutter". Khi gặp lỗi, cách 
 | Embedder | Làm sao engine chạy được trên một hệ điều hành? | Lớp mỏng riêng cho iOS và Android: cửa sổ, sự kiện chạm, vòng lặp |
 | Tooling | Tạo, chạy, kiểm thử, đóng gói thế nào? | Lệnh `flutter create`, `flutter run`, `flutter test`, `flutter doctor` |
 
-**Flutter framework** là thư viện Dart: mọi thứ trên màn hình là một **widget**, từ nút bấm tới cả cái app. **Engine** nằm dưới, nhận cây giao diện đã tính và biến nó thành pixel. Flutter không dùng nút bấm gốc của iOS hay Android; nó tự vẽ, nên một widget trông gần như giống nhau trên hai hệ; một số hành vi như cuộn và chuyển trang vẫn tự theo nền tảng.
+**Flutter framework** là thư viện Dart: mọi thứ trên màn hình là một **widget**, từ nút bấm tới cả cái app. **Engine** nằm dưới, nhận cây giao diện đã tính và biến nó thành pixel. Flutter không dùng nút bấm gốc của iOS hay Android; nó tự vẽ, nên một widget trông gần như giống nhau trên hai hệ điều hành; một số hành vi như cuộn và chuyển trang vẫn tự theo nền tảng.
 
 **Impeller** là bộ vẽ của engine. Trên iOS engine luôn dùng Impeller; trên Android từ Android 10 (API 29) trở lên cũng vậy, còn máy cũ hơn hoặc GPU không hỗ trợ thì engine tự lùi về Skia (OpenGL ES). Ta không gọi nó trực tiếp: nó thuộc engine, không nằm trong `lib/`.
 
@@ -53,11 +53,11 @@ Người mới thường gọi tất cả là "Flutter". Khi gặp lỗi, cách 
 <figcaption>Hình 1. Các tầng của một app Flutter. Ta chỉ viết tầng trên cùng; embedder là phần nền tảng riêng nên có hai thư mục <code>ios/</code> và <code>android/</code>.</figcaption>
 </figure>
 
-Hình 1 giải thích vì sao một mã nguồn chạy được trên hai hệ: code Dart và framework giống nhau; engine cùng mã nguồn nhưng được biên dịch riêng cho từng nền tảng (Metal trên iOS, Vulkan hoặc GLES trên Android); embedder khác hẳn, và `flutter create` đã sinh sẵn.
+Hình 1 giải thích vì sao một mã nguồn chạy được trên hai hệ điều hành: code Dart và framework giống nhau; engine cùng mã nguồn nhưng được biên dịch riêng cho từng nền tảng (Metal trên iOS, Vulkan hoặc GLES trên Android); embedder khác hẳn, và `flutter create` đã sinh sẵn.
 
 ## Chuẩn bị môi trường
 
-Cài Flutter SDK theo hướng dẫn chính thức ở [docs.flutter.dev](https://docs.flutter.dev/get-started/install), chọn hệ điều hành của bạn. Loạt này kiểm với **Flutter 3.47.4 stable** và **Dart 3.13.3**. Dùng channel stable, không dùng beta hay master. Sau khi cài, mở terminal mới rồi chạy:
+Cài Flutter SDK theo hướng dẫn chính thức ở [docs.flutter.dev](https://docs.flutter.dev/get-started/install), chọn hệ điều hành của bạn. Loạt này kiểm chứng với **Flutter 3.47.4 stable** và **Dart 3.13.3**. Dùng channel stable, không dùng beta hay master. Sau khi cài, mở terminal mới rồi chạy:
 
 ```bash
 flutter --version
@@ -176,7 +176,7 @@ class ToiNoiApp extends StatelessWidget {
 }
 ```
 
-`main()` là hàm Dart đầu tiên được gọi, giống `Main` bên C#. Nó gọi `runApp`, truyền vào widget gốc. Flutter gắn widget đó vào cửa sổ do embedder cung cấp, rồi bắt đầu vòng lặp: nhận sự kiện, gọi `build`, vẽ khung hình.
+`main()` là hàm Dart đầu tiên được gọi, giống `Main` bên C#. Hàm này gọi `runApp`, truyền vào widget gốc. Flutter gắn widget đó vào cửa sổ do embedder cung cấp, rồi bắt đầu vòng lặp: nhận sự kiện, gọi `build`, vẽ khung hình.
 
 `ToiNoiApp` là một `StatelessWidget`: widget không giữ trạng thái riêng, chỉ có phương thức `build` trả về một widget khác. Từ khoá `const` báo Dart rằng đối tượng này bất biến và được tạo sẵn lúc biên dịch. `MaterialApp` bọc toàn bộ app, cấp theme và điều hướng. `useMaterial3: true` bật Material 3; đây vốn là mặc định, ta ghi ra cho rõ. `ColorScheme.fromSeed` sinh cả bảng màu từ một màu gốc.
 
@@ -246,9 +246,9 @@ flutter run -d <id>
 
 `flutter devices` in ra các đích chạy mà tooling nhìn thấy: iOS Simulator, Android emulator, máy thật cắm dây, thậm chí Chrome. `flutter emulators` liệt kê emulator và simulator đã tạo sẵn để bạn khởi động. `flutter run -d <id>` build bản debug, cài vào thiết bị đó và mở app.
 
-Trong lúc `flutter run` đang chạy, terminal nhận phím tắt. Bấm `r` để **hot reload**: Flutter nạp lại code đã sửa vào VM và dựng lại cây widget, giữ nguyên state hiện có. Bấm `R` để **hot restart**: khởi động lại ứng dụng Dart từ `main()`, state bị xoá nhưng không phải build lại phần native. Sửa chữ trong `Text` chỉ cần hot reload. Đổi nội dung `main()` (hoặc `initState` đã chạy), giá trị khởi tạo của biến toàn cục hay static, đổi một class thành enum hoặc ngược lại, đổi tham số generic của một kiểu, hay sửa code native thì cần hot restart (code native còn cần build lại).
+Trong lúc `flutter run` đang chạy, terminal nhận phím tắt. Bấm `r` để **hot reload**: Flutter nạp lại code đã sửa vào VM và rebuild cây widget, giữ nguyên state hiện có. Bấm `R` để **hot restart**: khởi động lại ứng dụng Dart từ `main()`, state bị xoá nhưng không phải build lại phần native. Sửa chữ trong `Text` chỉ cần hot reload. Đổi nội dung `main()` (hoặc `initState` đã chạy), giá trị khởi tạo của biến toàn cục hay static, đổi một class thành enum hoặc ngược lại, đổi tham số generic của một kiểu, hay sửa code native thì cần hot restart (code native còn cần build lại).
 
-Để biết điểm đến cuối cùng, chỉ cần nhớ hai lệnh. `flutter build apk` hoặc `flutter build appbundle` tạo gói Android, `flutter build ipa` tạo gói iOS (cần macOS và tài khoản ký). Cả hai dùng AOT ở chế độ release. Bài này chưa chạy chúng vì cần chứng chỉ ký; chi tiết nằm ở phần phát hành.
+Để đóng gói app phát hành, chỉ cần nhớ hai lệnh. `flutter build apk` hoặc `flutter build appbundle` tạo gói Android, `flutter build ipa` tạo gói iOS (cần macOS và tài khoản ký). Cả hai dùng AOT ở chế độ release. Bài này chưa chạy chúng vì cần chứng chỉ ký; chi tiết nằm ở phần phát hành.
 
 ## Tính cước đầu tiên và kiểm chứng bằng test
 
@@ -302,7 +302,7 @@ String formatVnd(int amount) {
 }
 ```
 
-Giờ tới kiểm chứng. Test của `calculateFareVnd` đi qua các ca biên của bảng giá:
+Giờ tới kiểm chứng. Test của `calculateFareVnd` đi qua các test case biên của bảng giá:
 
 ### test/fare_test.dart (01-flutter-va-dart)
 
@@ -375,7 +375,7 @@ void main() {
 }
 ```
 
-`tester.pumpWidget` đặt `ToiNoiApp` vào một cây widget thử và dựng khung hình đầu tiên. `find.text` tìm widget `Text` có đúng nội dung, `findsOneWidget` khẳng định chỉ có một. Widget test chạy trên máy phát triển, không cần simulator. Nó chứng minh cây widget thực sự hiển thị đúng chữ, điều test thuần Dart không kiểm được.
+`tester.pumpWidget` đặt `ToiNoiApp` vào một cây widget thử và dựng khung hình đầu tiên. `find.text` tìm widget `Text` có đúng nội dung, `findsOneWidget` khẳng định chỉ có một. Widget test chạy trên máy phát triển, không cần simulator. Widget test chứng minh cây widget thực sự hiển thị đúng chữ, điều test thuần Dart không kiểm được.
 
 ## Lỗi thường gặp
 

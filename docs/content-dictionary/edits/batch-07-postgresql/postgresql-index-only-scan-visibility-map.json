@@ -1,0 +1,47 @@
+{
+  "file": "postgresql-index-only-scan-visibility-map.md",
+  "edits": [
+    {
+      "old": "Quan sát Heap Fetches, visibility map, VACUUM và cái giá của INCLUDE.",
+      "new": "Bài này quan sát Heap Fetches, visibility map, VACUUM và cái giá của INCLUDE.",
+      "reason": "Câu cụt thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Điều kiện thứ hai kín hơn.",
+      "new": "Điều kiện thứ hai khó thấy hơn.",
+      "reason": "'kín' là calque của subtle",
+      "severity": "medium"
+    },
+    {
+      "old": "bit VM chỉ được **VACUUM bật**, nhưng bị **xoá bởi bất kỳ thao tác sửa dữ liệu nào** trên page.",
+      "new": "bit VM chỉ do **VACUUM bật**, còn **bất kỳ thao tác sửa dữ liệu nào** trên page cũng **xoá** bit này.",
+      "reason": "Bỏ bị động 'bởi' kiểu Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "số này chỉ được cập nhật bởi những lệnh như VACUUM, ANALYZE",
+      "new": "số này chỉ do những lệnh như VACUUM, ANALYZE cập nhật",
+      "reason": "Bỏ bị động 'được ... bởi' kiểu Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Câu màn B1 về `Heap Fetches: 0`",
+      "new": "Câu của màn B1 trở về `Heap Fetches: 0`",
+      "reason": "Thiếu 'của' và 'trở' làm câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "- **Index Only Scan là phần thưởng của bảng «tĩnh».**",
+      "new": "- **Index Only Scan phát huy tác dụng tốt nhất với bảng «tĩnh».**",
+      "reason": "'phần thưởng' là calque của reward (đã chỉnh khi duyệt: \"chỉ phát huy tác dụng\" khẳng định quá mạnh so với bản gốc)",
+      "severity": "medium"
+    },
+    {
+      "old": "tài liệu mặc định `AUTO` có lý do",
+      "new": "PostgreSQL đặt mặc định `AUTO` là có lý do",
+      "reason": "'tài liệu mặc định' khó hiểu, sai chủ thể",
+      "severity": "medium"
+    }
+  ]
+}

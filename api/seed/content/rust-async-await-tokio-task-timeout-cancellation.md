@@ -1,7 +1,7 @@
 ---
 slug: rust-async-await-tokio-task-timeout-cancellation
-title: "async/await và tokio: task, join, timeout và hủy khi gọi VíXanh"
-summary: "Bài 21: async fn là future lười; đo join! so với tuần tự bằng đồng hồ ảo, timeout, select!, spawn, CancellationToken; hủy future không hủy việc VíXanh đã làm nên cần idempotency key; spawn_blocking thay vì chặn runtime."
+title: "async/await và tokio: task, join, timeout và huỷ khi gọi VíXanh"
+summary: "Bài 21: async fn là future lười; đo join! so với tuần tự bằng đồng hồ ảo, timeout, select!, spawn, CancellationToken; huỷ future không huỷ việc VíXanh đã làm nên cần idempotency key; spawn_blocking thay vì chặn runtime."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, tokio, async, cancellation]
@@ -37,7 +37,7 @@ tạo future, authorize_calls = 0
 sau .await, authorize_calls = 1 (VX-AUTH-TN-0001)
 ```
 
-Muốn chạy mà không chờ ngay thì dùng `tokio::spawn`: nó giao future cho runtime, task bắt đầu chạy nền kể cả khi bạn không `.await` cái `JoinHandle` trả về. `spawn` không poll task ngay trong lời gọi; runtime xếp lịch, và trên runtime một luồng task chỉ chạy khi task hiện tại nhường. Drop `JoinHandle` không hủy task; muốn hủy thì gọi `abort()`. Phần đối chiếu `Task` và `CancellationToken` đầy đủ nằm ở [bài C# về async và cancellation](/articles/csharp-async-await-cancellation).
+Muốn chạy mà không chờ ngay thì dùng `tokio::spawn`: nó giao future cho runtime, task bắt đầu chạy nền kể cả khi bạn không `.await` cái `JoinHandle` trả về. `spawn` không poll task ngay trong lời gọi; runtime xếp lịch, và trên runtime một luồng task chỉ chạy khi task hiện tại nhường. Drop `JoinHandle` không huỷ task; muốn huỷ thì gọi `abort()`. Phần đối chiếu `Task` và `CancellationToken` đầy đủ nằm ở [bài C# về async và cancellation](/articles/csharp-async-await-cancellation).
 
 ## join! nhanh hơn tuần tự bao nhiêu?
 
@@ -76,7 +76,7 @@ help: to force the async block to take ownership of `psp` (and any other referen
 
 Vì thế `Vixanh` là một handle `Clone` rẻ (một `Arc` bên trong) và hàm `authorize_spawned` clone nó vào từng task. Ràng buộc `Send` là chuyện của [bài 22](/articles/rust-send-sync-arc-mutex-channel-concurrency); riêng quy tắc cần nhớ ngay bây giờ: đừng giữ `std::sync::MutexGuard` qua một `.await` trong task đã spawn, compiler từ chối với `future cannot be sent between threads safely`.
 
-## timeout và select! hủy bằng cách nào?
+## timeout và select! huỷ bằng cách nào?
 
 Cách ngắn nhất để đặt hạn cho một lời gọi là `tokio::time::timeout`:
 
@@ -88,9 +88,9 @@ match timeout(limit, psp.authorize(&trip.id, trip.fare)).await {
 }
 ```
 
-Với hạn 250 ms và authorize mất 300 ms, kết quả là `Err(Timeout(250ms))`. `select!` làm được cùng việc bằng cách đua hai future, ví dụ `psp.authorize(...)` và `sleep(limit)`; chương trình in ra cùng kết quả cho cả hai. Phía thua thì **future bị drop**. Rust không có cơ chế ném exception vào một task đang chờ; hủy một future đơn giản là thôi poll nó và giải phóng nó. Mọi thứ future đang giữ được `Drop` dọn, còn code sau `.await` đó không bao giờ chạy.
+Với hạn 250 ms và authorize mất 300 ms, kết quả là `Err(Timeout(250ms))`. `select!` làm được cùng việc bằng cách đua hai future, ví dụ `psp.authorize(...)` và `sleep(limit)`; chương trình in ra cùng kết quả cho cả hai. Phía thua thì **future bị drop**. Rust không có cơ chế ném exception vào một task đang chờ; huỷ một future đơn giản là thôi poll nó và giải phóng nó. Mọi thứ future đang giữ được `Drop` dọn, còn code sau `.await` đó không bao giờ chạy.
 
-Hủy chỉ xảy ra tại điểm `.await`, không giữa hai dòng đồng bộ. Mặc định `select!` kiểm từ một nhánh ngẫu nhiên, nên nhiều nhánh cùng sẵn sàng thì không đoán trước được nhánh nào thắng; ghi `biased;` thì nó poll đúng thứ tự viết.
+Huỷ chỉ xảy ra tại điểm `.await`, không giữa hai dòng đồng bộ. Mặc định `select!` kiểm từ một nhánh ngẫu nhiên, nên nhiều nhánh cùng sẵn sàng thì không đoán trước được nhánh nào thắng; ghi `biased;` thì nó poll đúng thứ tự viết.
 
 ## Hết hạn có nghĩa là VíXanh chưa trừ tiền?
 
@@ -100,7 +100,7 @@ Không. Hết hạn chỉ nói rằng ta không nghe được phản hồi trong
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 235" role="img" aria-label="Hình 2. Hai làn thời gian. Làn của ta chờ phản hồi đến mốc 250 ms thì hết hạn và drop future. Làn VíXanh đã trừ 25.500 đồng ở mốc 100 ms, phản hồi tới ở mốc 400 ms khi không còn ai chờ."><text x="20" y="75" class="t-b">Ta</text><text x="20" y="170" class="t-b">VíXanh</text><rect x="150" y="50" width="350" height="40" rx="6" class="f-pk-soft s-pk"/><text x="162" y="75" class="t-small">chờ phản hồi, hạn 250 ms</text><path d="M500 36 L500 195" class="f-none s-warn dash" stroke-width="2"/><text x="510" y="62" class="t-small">250 ms: hết hạn, future bị drop</text><rect x="150" y="145" width="140" height="40" rx="6" class="f-phys-soft s-phys"/><text x="162" y="170" class="t-small">nhận và xử lý</text><text x="300" y="137" class="t-small">100 ms: trừ tiền</text><rect x="290" y="145" width="420" height="40" rx="6" class="f-warn-soft s-warn"/><text x="302" y="170" class="t-small">đã trừ 25.500 VND, phản hồi đang đi</text><text x="300" y="212" class="t-small">400 ms: phản hồi tới nơi, không còn ai nhận</text></svg>
 </div>
-<figcaption>Hình 2. Ta bỏ chờ ở 250 ms, nhưng VíXanh đã trừ tiền ở 100 ms. Hủy future ở phía ta không hủy việc phía VíXanh.</figcaption>
+<figcaption>Hình 2. Ta bỏ chờ ở 250 ms, nhưng VíXanh đã trừ tiền ở 100 ms. Huỷ future ở phía ta không huỷ việc phía VíXanh.</figcaption>
 </figure>
 
 `tokio::spawn` đóng vai máy chủ, `oneshot` đóng vai đường phản hồi. Drop future của ta là drop đầu nhận; máy chủ vẫn làm xong việc.
@@ -127,11 +127,11 @@ sổ cái: JE-000001 trip:TN-0001:capture replayed = false
 
 Key mỗi lần (`trip:TN-0001:capture:attempt-N`) trông có vẻ "duy nhất, an toàn" nhưng VíXanh thấy hai yêu cầu khác nhau và trừ hai lần: khách mất 51.000 VND cho một chuyến 25.500. Key phải gắn với **ý định** (một chuyến, một lần thu), không gắn với lần gửi. Ta dùng đúng `trip:TN-0001:capture`, trùng key bút toán của `ledger-core`; ghi sổ lần hai chỉ là replay, sổ vẫn một bút toán.
 
-## Hủy một future thì việc dở dang đi đâu?
+## Huỷ một future thì việc dở dang đi đâu?
 
-Hủy chỉ bỏ phần chưa chạy: việc đã xong trước `.await` đó (như trừ tiền ở VíXanh) vẫn xong. Tài liệu `select!` định nghĩa **an toàn khi hủy** (cancellation safe): drop một future chưa xong rồi tạo lại thì không mất gì. `mpsc::Receiver::recv` đạt; `read_exact` thì không, vì phần đã đọc bị mất. Nhiều hàm chờ của tokio có mục «Cancel safety» riêng, `select!` có danh sách hàm thường gặp, nhưng không phải hàm nào cũng được ghi. Với hàm của mình, hãy nhìn từng `.await` và hỏi: bị bỏ ở đây rồi chạy lại thì có sai không?
+Huỷ chỉ bỏ phần chưa chạy: việc đã xong trước `.await` đó (như trừ tiền ở VíXanh) vẫn xong. Tài liệu `select!` định nghĩa **an toàn khi huỷ** (cancellation safe): drop một future chưa xong rồi tạo lại thì không mất gì. `mpsc::Receiver::recv` đạt; `read_exact` thì không, vì phần đã đọc bị mất. Nhiều hàm chờ của tokio có mục «Cancel safety» riêng, `select!` có danh sách hàm thường gặp, nhưng không phải hàm nào cũng được ghi. Với hàm của mình, hãy nhìn từng `.await` và hỏi: bị bỏ ở đây rồi chạy lại thì có sai không?
 
-Ví dụ trong lab: ledger đánh dấu chuyến đang thu tiền để một process không thu hai lần cùng lúc. Bản ngây thơ gỡ dấu ở dòng sau `.await`; bị hủy thì dòng đó không chạy và chuyến kẹt mãi:
+Ví dụ trong lab: ledger đánh dấu chuyến đang thu tiền để một process không thu hai lần cùng lúc. Bản ngây thơ gỡ dấu ở dòng sau `.await`; bị huỷ thì dòng đó không chạy và chuyến kẹt mãi:
 
 ```rust
 // src/flows.rs
@@ -141,9 +141,9 @@ let result = psp.capture(auth, &key, trip.fare).await;
 in_flight.leave(&key);   // không chạy nếu future bị drop ở .await trên
 ```
 
-Bản an toàn đưa việc gỡ dấu vào `Drop` của một guard (`InFlightGuard`), vì `Drop` chạy cả khi future bị hủy: `let _guard = in_flight.guard(&key)?;`. Kiểm tra bằng `timeout(10 ms, ...)`: bản ngây thơ in `key còn kẹt = true`, bản có guard in `false`. Quy tắc thực dụng: dọn dẹp đặt trong `Drop`, và với việc không đảo ngược được, như trừ tiền, hãy thiết kế để thử lại an toàn (idempotency) thay vì cố bảo đảm không bao giờ bị hủy.
+Bản an toàn đưa việc gỡ dấu vào `Drop` của một guard (`InFlightGuard`), vì `Drop` chạy cả khi future bị huỷ: `let _guard = in_flight.guard(&key)?;`. Kiểm tra bằng `timeout(10 ms, ...)`: bản ngây thơ in `key còn kẹt = true`, bản có guard in `false`. Quy tắc thực dụng: dọn dẹp đặt trong `Drop`, và với việc không đảo ngược được, như trừ tiền, hãy thiết kế để thử lại an toàn (idempotency) thay vì cố bảo đảm không bao giờ bị huỷ.
 
-Hủy cả một lô thì cần tín hiệu chung. `CancellationToken` của `tokio-util` gần với `CancellationToken` của C#, nhưng cách dùng khác: ở C#, hủy là hợp tác, code phải tự kiểm tra hoặc truyền token xuống; ở Rust, đua `token.cancelled()` với lời gọi trong `select!` thì lời gọi bị drop ngay. `capture_batch` kết hợp hai mức:
+Huỷ cả một lô thì cần tín hiệu chung. `CancellationToken` của `tokio-util` gần với `CancellationToken` của C#, nhưng cách dùng khác: ở C#, huỷ là hợp tác, code phải tự kiểm tra hoặc truyền token xuống; ở Rust, đua `token.cancelled()` với lời gọi trong `select!` thì lời gọi bị drop ngay. `capture_batch` kết hợp hai mức:
 
 ```rust
 // src/flows.rs (rút gọn)
@@ -156,7 +156,7 @@ for (index, trip) in trips.iter().enumerate() {
 }
 ```
 
-Lô bốn chuyến, mỗi capture 50 ms, token bị hủy ở 130 ms (đồng hồ ảo):
+Lô bốn chuyến, mỗi capture 50 ms, token bị huỷ ở 130 ms (đồng hồ ảo):
 
 ```text
 đã xong     : ["TN-0001", "TN-0002"]
@@ -165,7 +165,7 @@ chưa gửi    : ["TN-0004"]
 VíXanh đã trừ 3 giao dịch
 ```
 
-`TN-0003` là chuyến «chưa biết»: VíXanh trừ tiền ở 120 ms nhưng phản hồi (150 ms) tới sau khi ta hủy. Việc đúng là gửi lại với cùng key để lấy biên lai, không phải coi như chưa thu.
+`TN-0003` là chuyến «chưa biết»: VíXanh trừ tiền ở 120 ms nhưng phản hồi (150 ms) tới sau khi ta huỷ. Việc đúng là gửi lại với cùng key để lấy biên lai, không phải coi như chưa thu.
 
 ## Vì sao std::thread::sleep trong async fn chặn cả worker?
 
@@ -207,7 +207,7 @@ cargo run --manifest-path examples/toi-noi-rust/21-async-tokio/Cargo.toml -- --v
 cargo test --manifest-path examples/toi-noi-rust/21-async-tokio/Cargo.toml
 ```
 
-`--verify` chạy các kịch bản bằng đồng hồ ảo, kiểm các con số trong bài (620 ms so với 300 ms, 25.500 so với 51.000, danh sách chuyến bị hủy) và in (rút gọn):
+`--verify` chạy các kịch bản bằng đồng hồ ảo, kiểm các con số trong bài (620 ms so với 300 ms, 25.500 so với 51.000, danh sách chuyến bị huỷ) và in (rút gọn):
 
 ```text
 ok   tuần tự = 120 + 300 + 200 = 620 ms

@@ -43,7 +43,7 @@ Với `decimal?`, dấu hỏi lại là `Nullable<decimal>`, một value type c�
 
 Describe dùng switch expression: mỗi nhánh gồm pattern, dấu => và kết quả. Nhánh null đứng đầu; property pattern `{ DriverId: null }` nhận một object tồn tại nhưng thiếu driver. Nhánh có `var driver` lấy giá trị property và dùng when để từ chối chuỗi trắng. Dấu `_` hứng trường hợp còn lại.
 
-Property pattern không match null ở object gốc, nên nhánh thứ hai không vô tình dereference một TripView thiếu. Pattern `is null` không gọi toán tử == tùy biến của kiểu. Khi một kiểu overload equality, khác biệt này có thể quan trọng.
+Property pattern không match null ở object gốc, nên nhánh thứ hai không vô tình dereference một TripView thiếu. Pattern `is null` không gọi toán tử == tuỳ biến của kiểu. Khi một kiểu overload equality, khác biệt này có thể quan trọng.
 
 Thứ tự nhánh là một phần logic. Nếu đặt nhánh bắt rộng lên trước, compiler có thể báo nhánh sau không thể tới, hoặc ý nghĩa phân loại bị thay đổi. Hãy đọc bảng ca trước khi rút gọn switch; ngắn hơn không tự dễ hiểu hơn.
 
@@ -85,7 +85,7 @@ Từ thư mục gốc repository:
 dotnet run --project examples/toi-noi-dotnet/11-nullable-patterns -- --verify
 ```
 
-Lệnh --verify chạy các ca cố định trên chính code minh họa; sai kỳ vọng sẽ trả exit code thất bại. Không cần package NuGet bổ sung.
+Lệnh --verify chạy các ca cố định trên chính code minh hoạ; sai kỳ vọng sẽ trả exit code thất bại. Không cần package NuGet bổ sung.
 
 ### Program.cs — 11-nullable-patterns/Program.cs
 

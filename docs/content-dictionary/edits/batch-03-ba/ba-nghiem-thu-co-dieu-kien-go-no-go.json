@@ -1,0 +1,53 @@
+{
+ "file": "ba-nghiem-thu-co-dieu-kien-go-no-go.md",
+ "edits": [
+  {
+   "old": "Một báo cáo có 99 ca pass và một ca fail không đủ",
+   "new": "Một báo cáo có 99 test case pass và một test case fail không đủ",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu ca fail cho phép người khác sửa điểm đón",
+   "new": "Nếu test case fail cho phép người khác sửa điểm đón",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Xem tác động hiểu sai, không chỉ hình thức",
+   "new": "Xét xem có gây hiểu sai không, không chỉ về hình thức",
+   "reason": "Câu thiếu động từ, trật tự gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Với ca chưa chạy, ghi rõ",
+   "new": "Với test case chưa chạy, ghi rõ",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy lại ca liên quan trên build xác định",
+   "new": "chạy lại test case liên quan trên build xác định",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Gán owner, bằng chứng hoàn thành và người kiểm.",
+   "new": "Gán người phụ trách, bằng chứng hoàn thành và người kiểm.",
+   "reason": "Từ Anh thông thường có từ Việt tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "với hạn sửa và owner.",
+   "new": "với hạn sửa và người phụ trách.",
+   "reason": "Từ Anh thông thường có từ Việt tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu tách phạm vi khác, phải chứng minh nó độc lập",
+   "new": "Nếu tách phạm vi khác, phải chứng minh phạm vi đó độc lập",
+   "reason": "Tránh 'nó' chỉ sự vật trừu tượng",
+   "severity": "low"
+  }
+ ]
+}

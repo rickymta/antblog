@@ -10,7 +10,7 @@ language: vi
 
 Một khách đặt xe trên [Tới Nơi](/articles/du-an-mau-toi-noi), nhập quãng đường 5 km và muốn biết giá trước khi xác nhận. Ta sẽ bắt đầu loạt C# bằng đúng việc nhỏ đó: tính một báo giá trong terminal. Khi hiểu chương trình này, ta mới đưa cùng quy tắc lên API, lưu dữ liệu và triển khai lên cloud.
 
-Đây là bài 01 của lộ trình **C# và .NET 10 qua Tới Nơi**. Bạn chỉ cần mở được terminal và sửa file văn bản. Các từ khóa xuất hiện hôm nay sẽ được học kỹ ở những bài sau.
+Đây là bài 01 của lộ trình **C# và .NET 10 qua Tới Nơi**. Bạn chỉ cần mở được terminal và sửa file văn bản. Các từ khoá xuất hiện hôm nay sẽ được học kỹ ở những bài sau.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -49,7 +49,7 @@ dotnet --list-sdks
 dotnet --version
 ```
 
-Lệnh đầu phải có một dòng `10.0.xxx`; lệnh sau cho biết SDK đang được chọn ở thư mục hiện tại. Nếu máy đã cài nhiều SDK hoặc repository có `global.json`, phiên bản được chọn có thể khác. Hãy kiểm tra trước khi tạo dự án; không xóa cấu hình SDK của dự án khác để sửa lỗi này.
+Lệnh đầu phải có một dòng `10.0.xxx`; lệnh sau cho biết SDK đang được chọn ở thư mục hiện tại. Nếu máy đã cài nhiều SDK hoặc repository có `global.json`, phiên bản được chọn có thể khác. Hãy kiểm tra trước khi tạo dự án; không xoá cấu hình SDK của dự án khác để sửa lỗi này.
 
 ```bash
 dotnet new console --framework net10.0 --name FareDemo
@@ -69,7 +69,7 @@ Template dùng **top-level statements**: câu lệnh đặt trực tiếp trong 
 
 ## Tính báo giá đầu tiên
 
-Quy tắc minh họa: 12.000 VND bao gồm 2 km đầu, mỗi km vượt thêm 4.500 VND. Chưa có phụ phí, thuế, giảm giá hoặc làm tròn theo bậc. Đây là giả định để học, không phải bảng giá thực tế của sản phẩm.
+Quy tắc minh hoạ: 12.000 VND bao gồm 2 km đầu, mỗi km vượt thêm 4.500 VND. Chưa có phụ phí, thuế, giảm giá hoặc làm tròn theo bậc. Đây là giả định để học, không phải bảng giá thực tế của sản phẩm.
 
 Thay toàn bộ `Program.cs` bằng:
 
@@ -171,7 +171,7 @@ Các backend service chính của Tới Nơi sẽ dùng **DDD + Clean Architectu
 
 Bạn đã tạo một ứng dụng `net10.0`, phân biệt ngôn ngữ với nền tảng và kiểm tra một công thức có đầu ra xác định. [Bài 02](/articles/csharp-bien-kieu-du-lieu-decimal) đi sâu vào biến, kiểu số, chuyển đổi và `decimal`, trước khi thêm điều kiện, vòng lặp, phương thức và mô hình chuyến xe.
 
-Toàn bộ lộ trình đi qua sáu chặng: nền tảng C# → mô hình hóa nghiệp vụ → bất đồng bộ và kiểm thử → ASP.NET Core 10 → dữ liệu và độ tin cậy → vận hành và tối ưu. Code bài này nằm trong repository tại `examples/toi-noi-dotnet/01-csharp-va-dotnet`; khung biên tập nằm trong `examples/toi-noi-dotnet/README.md`.
+Toàn bộ lộ trình đi qua sáu chặng: nền tảng C# → mô hình hoá nghiệp vụ → bất đồng bộ và kiểm thử → ASP.NET Core 10 → dữ liệu và độ tin cậy → vận hành và tối ưu. Code bài này nằm trong repository tại `examples/toi-noi-dotnet/01-csharp-va-dotnet`; khung biên tập nằm trong `examples/toi-noi-dotnet/README.md`.
 
 ## Tài liệu gốc
 

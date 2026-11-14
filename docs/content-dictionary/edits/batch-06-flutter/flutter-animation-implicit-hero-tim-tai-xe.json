@@ -1,0 +1,13 @@
+{"file":"flutter-animation-implicit-hero-tim-tai-xe.md","edits":[
+{"old":"Animation cho mắt thời gian theo kịp một thay đổi.","new":"Animation cho mắt có thời gian theo kịp một thay đổi.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Hình 1 vẽ vòng đang đi từ 50% lên 100% thì khách huỷ chuyến.","new":"Hình 1 vẽ lúc vòng đang đi từ 50% lên 100% thì khách huỷ chuyến.","reason":"Câu cụt, thiếu mốc thời điểm","severity":"low"},
+{"old":"Nó gán `begin` vào chính `Tween` ta truyền vào,","new":"Widget này gán `begin` vào chính `Tween` ta truyền vào,","reason":"Tránh 'Nó' mơ hồ đầu câu","severity":"medium"},
+{"old":"Chỗ dễ sai là đúng bằng `duration`:","new":"Chỗ dễ sai là mốc thời gian đúng bằng `duration`:","reason":"Cụm 'đúng bằng duration' thiếu danh từ","severity":"medium"},
+{"old":"Khi chuyến sang `arriving`,","new":"Khi chuyến chuyển sang `arriving`,","reason":"Câu lược động từ","severity":"medium"},
+{"old":"Một cái bẫy với thẻ bấm được:","new":"Một cái bẫy với thẻ có thể bấm:","reason":"'bấm được' gượng","severity":"low"},
+{"old":"Khi cả nội dung đổi, từ chip","new":"Khi đổi cả nội dung, từ chip","reason":"Trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"Test thiếu key chứng minh điều ở \"Thử trước khi đọc\":","new":"Test không có key chứng minh điều nêu trong phần \"Thử trước khi đọc\":","reason":"Cụm 'điều ở' gượng, 'thiếu key' mơ hồ","severity":"medium"},
+{"old":"Test lab thấy đúng vậy:","new":"Test của lab xác nhận điều đó:","reason":"'thấy đúng vậy' gượng, thiếu 'của'","severity":"medium"},
+{"old":"nhưng bấm vào thẻ là `FlutterError` \"There","new":"nhưng bấm vào thẻ thì ném `FlutterError` \"There","reason":"Câu lược động từ kiểu 'X là Y'","severity":"medium"},
+{"old":"làm `pumpAndSettle` hết hạn","new":"làm `pumpAndSettle` hết thời gian chờ","reason":"'hết hạn' sai nghĩa với timeout","severity":"medium"}
+]}

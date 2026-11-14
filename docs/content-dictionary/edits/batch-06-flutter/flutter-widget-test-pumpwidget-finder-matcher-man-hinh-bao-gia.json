@@ -1,0 +1,107 @@
+{
+ "file": "flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia.md",
+ "edits": [
+  {
+   "old": "kèm ca hết hạn",
+   "new": "kèm test case hết hạn",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Họ cuộn xuống",
+   "new": "Khách cuộn xuống",
+   "reason": "Đại từ mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "**đồng hồ giả** chỉ chạy khi test ra lệnh",
+   "new": "**đồng hồ giả**; đồng hồ này chỉ chạy khi test ra lệnh",
+   "reason": "Câu dính, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "không tham số bỏ bước tua.",
+   "new": "không tham số bỏ qua bước tua.",
+   "reason": "'bỏ' thiếu nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "Nó chỉ treo khi hoạt ảnh không bao giờ dừng.",
+   "new": "Lệnh này chỉ treo khi hoạt ảnh không bao giờ dừng.",
+   "reason": "'Nó' đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Một, test kết thúc khi còn `Timer` chưa tới hạn bị báo `A Timer is still pending`;",
+   "new": "Một, test kết thúc khi còn `Timer` chưa tới hạn thì bị báo `A Timer is still pending`;",
+   "reason": "Thiếu quan hệ từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Màn hình đang yên mà ta `complete()` một `Future`, callback chạy",
+   "new": "Khi màn hình đang yên mà ta `complete()` một `Future`, callback chạy",
+   "reason": "Thiếu quan hệ từ",
+   "severity": "low"
+  },
+  {
+   "old": "widget có `key` bằng",
+   "new": "widget có `key` bằng đúng giá trị đó",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "cho ô nhập tiêu điểm rồi",
+   "new": "đặt focus vào ô nhập rồi",
+   "reason": "'cho tiêu điểm' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "Ta liệt kê ca biên trong một bảng",
+   "new": "Ta liệt kê test case biên trong một bảng",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai cách một cú chạm trượt nút Đặt chuyến",
+   "new": "Hai cách một cú chạm không trúng nút Đặt chuyến",
+   "reason": "'trượt' dễ nhầm với trượt màn hình",
+   "severity": "medium"
+  },
+  {
+   "old": "(trả về `false` trong `addTearDown`)",
+   "new": "(rồi đặt lại `false` trong `addTearDown`)",
+   "reason": "'trả về' sai nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "Đảo lại: repository",
+   "new": "Ngược lại: repository",
+   "reason": "'Đảo lại' là calque",
+   "severity": "low"
+  },
+  {
+   "old": "và ca biên cước (12.005 và 453.000 VND)",
+   "new": "và test case biên của cước (12.005 và 453.000 VND)",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "(7) cho cú chạm trượt;",
+   "new": "(7) cho cú chạm không trúng đích;",
+   "reason": "'trượt' dễ nhầm",
+   "severity": "medium"
+  },
+  {
+   "old": "ném lỗi hết hạn.",
+   "new": "ném lỗi timed out.",
+   "reason": "Khớp thông báo lỗi",
+   "severity": "low"
+  },
+  {
+   "old": "bỏ đổi dấu phẩy thành dấu chấm 1 test, bỏ lớp phủ đang đặt 3 test",
+   "new": "bỏ đổi dấu phẩy thành dấu chấm làm 1 test đỏ, bỏ lớp phủ đang đặt làm 3 test đỏ",
+   "reason": "Câu lược động từ",
+   "severity": "low"
+  }
+ ]
+}

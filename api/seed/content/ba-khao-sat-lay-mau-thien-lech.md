@@ -1,16 +1,16 @@
 ---
 slug: ba-khao-sat-lay-mau-thien-lech
 title: "Khảo sát và lấy mẫu: tránh kết luận từ nhóm dễ tiếp cận"
-summary: "Thiết kế khảo sát điểm đón có mục tiêu, câu hỏi trung tính và kế hoạch chọn người phù hợp. Phân biệt tỷ lệ trong người trả lời với tỷ lệ toàn bộ khách, nhận diện thiên lệch và giới hạn suy rộng."
+summary: "Thiết kế khảo sát điểm đón có mục tiêu, câu hỏi trung tính và kế hoạch chọn người phù hợp. Phân biệt tỷ lệ trong người trả lời với tỷ lệ toàn bộ khách, nhận diện thiên lệch và giới hạn khi khái quát kết quả."
 category: business-analysis
 level: intermediate
 tags: [business-analysis, ba-013, survey, sampling, bias, toi-noi]
 language: vi
 ---
 
-Nhóm gửi một form vào cộng đồng khách tích cực và nhận 100 phản hồi; 70 người muốn có chat. Một slide lập tức ghi “70% khách hàng cần chat”. Sai lệch bắt đầu ở chỗ từ “người trả lời form” đã biến thành “khách hàng” mà không có bằng chứng về cách chọn mẫu.
+Nhóm gửi một form vào cộng đồng khách tích cực và nhận 100 phản hồi; 70 người muốn có chat. Một slide lập tức ghi “70% khách hàng cần chat”. Sai lệch bắt đầu ở chỗ “người trả lời form” đã biến thành “khách hàng” mà không có bằng chứng về cách chọn mẫu.
 
-Khảo sát giúp thu câu trả lời có cấu trúc, nhưng nhiều phản hồi không tự làm kết luận đại diện. BA phải xác định muốn biết điều gì, từ ai và bằng cách tuyển người nào.
+Khảo sát giúp thu câu trả lời có cấu trúc, nhưng nhiều phản hồi không tự khiến kết luận mang tính đại diện. BA phải xác định muốn biết điều gì, từ ai và bằng cách tuyển người nào.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">BA-013 · Phần 2/8 · Trung bình</span>
@@ -19,9 +19,9 @@ Khảo sát giúp thu câu trả lời có cấu trúc, nhưng nhiều phản h�
 
 ## 1. Chốt quyết định khảo sát sẽ hỗ trợ
 
-“Hỏi người dùng thích gì” quá rộng. Với điểm đón, có thể muốn hiểu các dạng khó khăn tự báo cáo trong lần đặt xe gần nhất tại A, hoặc chọn tình huống cần nghiên cứu sâu hơn. Nếu mục tiêu là đo tỷ lệ huỷ, dữ liệu vận hành với định nghĩa đúng có thể phù hợp hơn hỏi trí nhớ người dùng.
+“Hỏi người dùng thích gì” quá rộng. Với điểm đón, có thể muốn hiểu các dạng khó khăn tự báo cáo trong lần đặt xe gần nhất tại A, hoặc chọn tình huống cần nghiên cứu sâu hơn. Nếu mục tiêu là đo tỷ lệ huỷ, dữ liệu vận hành với định nghĩa đúng có thể phù hợp hơn việc hỏi trí nhớ của người dùng.
 
-Nếu mục tiêu là tìm nguyên nhân chi tiết, phỏng vấn/quan sát thường giúp làm rõ cơ chế trước khi viết lựa chọn trả lời. Khảo sát không thay thế mọi phương pháp; nên nêu ngay quyết định nào kết quả đủ sức hỗ trợ và điều gì vẫn chưa biết.
+Nếu mục tiêu là tìm nguyên nhân chi tiết, phỏng vấn/quan sát thường giúp làm rõ cơ chế trước khi viết lựa chọn trả lời. Khảo sát không thay thế mọi phương pháp; nên nêu ngay kết quả đủ sức hỗ trợ quyết định nào và điều gì vẫn chưa biết.
 
 ## 2. Phân biệt quần thể, khung chọn mẫu và người trả lời
 
@@ -33,7 +33,7 @@ Nếu mục tiêu là tìm nguyên nhân chi tiết, phỏng vấn/quan sát th�
 | Người trả lời | Người đã gửi câu trả lời hợp lệ |
 | Đơn vị phân tích | Người hay lượt đặt xe; cần chọn và giải thích |
 
-Nếu hỏi mỗi người về lần gần nhất, kết quả không tự là tỷ lệ trên mọi lượt đặt xe. Người đi nhiều lần và người đi một lần có thể cùng đóng góp một câu trả lời. Nếu chỉ mời sau chuyến hoàn thành, nhóm bỏ sót những lượt huỷ đang cần tìm hiểu.
+Nếu hỏi mỗi người về lần gần nhất, kết quả không tự trở thành tỷ lệ trên mọi lượt đặt xe. Người đi nhiều lần và người đi một lần có thể cùng đóng góp một câu trả lời. Nếu chỉ mời sau chuyến hoàn thành, nhóm bỏ sót những lượt huỷ đang cần tìm hiểu.
 
 ## 3. Nhận diện các nguồn lệch trước khi phát form
 
@@ -61,19 +61,19 @@ Lấy mẫu ngẫu nhiên từ một khung bị thiếu người vẫn không s�
 
 Lựa chọn nhiều đáp án có thể cộng vượt 100%; báo cáo phải nêu mẫu số là số người đủ điều kiện trả lời câu đó. Câu bỏ trống không tự là “không gặp khó”. Trước khi gửi rộng, thử cách người tham gia hiểu câu hỏi, mốc thời gian và từ “điểm đón”.
 
-## 5. Đọc 70/100 mà không suy rộng sai
+## 5. Đọc 70/100 mà không khái quát sai
 
-Với 70 trong 100 phản hồi hợp lệ nói muốn chat, câu đúng là “70% người trả lời trong mẫu này chọn phương án đó”, kèm cách tuyển và cách đặt câu hỏi. Nó chưa chứng minh 70% khách tại A cần chat, cũng chưa chứng minh chat giảm huỷ.
+Với 70 trong 100 phản hồi hợp lệ nói muốn chat, câu đúng là “70% người trả lời trong mẫu này chọn phương án đó”, kèm cách tuyển và cách đặt câu hỏi. Con số này chưa chứng minh 70% khách tại A cần chat, cũng chưa chứng minh chat giảm huỷ.
 
-Nếu có 500 lời mời hợp lệ tới các người duy nhất và 100 người gửi phản hồi hợp lệ theo cùng quy tắc, tỷ lệ phản hồi đơn giản của ví dụ là 100/500 = 20%. Điều này vẫn không chứng minh 400 người còn lại không có nhu cầu. Nếu dùng đường link mở và không biết bao nhiêu người đủ điều kiện nhìn thấy, không tính tỷ lệ phản hồi bằng mẫu số tự đoán.
+Nếu có 500 lời mời hợp lệ tới những người không trùng nhau và 100 người gửi phản hồi hợp lệ theo cùng quy tắc, tỷ lệ phản hồi đơn giản của ví dụ là 100/500 = 20%. Điều này vẫn không chứng minh 400 người còn lại không có nhu cầu. Nếu dùng đường link mở và không biết bao nhiêu người đủ điều kiện nhìn thấy, không tính tỷ lệ phản hồi bằng mẫu số tự đoán.
 
 Không gắn biên sai số của mẫu ngẫu nhiên đơn giản vào khảo sát tự chọn. Nếu cần ước lượng quần thể, thiết kế chọn mẫu, cỡ mẫu, xử lý không phản hồi và trọng số cần được xác định phù hợp trước; bài này không đưa một cỡ mẫu “đủ” cho mọi trường hợp.
 
 ## 6. Viết phần giới hạn ngay cạnh kết quả
 
-Một đoạn báo cáo phù hợp: “Mẫu được tuyển từ nhóm khách tích cực nên có thể thiếu người ít dùng app hoặc đã bỏ dịch vụ. Kết quả dùng để xác định câu hỏi phỏng vấn tiếp, chưa dùng ước lượng nhu cầu của toàn bộ khách. Lời chọn chat là phản ứng với ý tưởng được trình bày, chưa là hành vi sử dụng.”
+Một đoạn báo cáo phù hợp: “Mẫu được tuyển từ nhóm khách tích cực nên có thể thiếu người ít dùng app hoặc đã bỏ dịch vụ. Kết quả dùng để xác định câu hỏi phỏng vấn tiếp, chưa dùng để ước lượng nhu cầu của toàn bộ khách. Việc chọn chat là phản ứng với ý tưởng được trình bày, chưa là hành vi sử dụng.”
 
-Các giới hạn không làm khảo sát vô ích. Chúng định vị đúng công dụng để người quyết định không đặt trọng lượng lớn hơn bằng chứng cho phép.
+Các giới hạn không làm khảo sát vô ích. Chúng định vị đúng công dụng để người quyết định không đặt trọng lượng lớn hơn mức bằng chứng cho phép.
 
 ## 7. Bài tập và câu hỏi ôn tập
 
@@ -81,7 +81,7 @@ Sửa form có hai câu: “Bạn có khó chịu vì không có chat không?”
 
 **Câu hỏi:** Có 30 người chọn “khác cổng” trong 60 người trả lời câu nhiều lựa chọn. Toàn form có 100 phản hồi. Tỷ lệ là 30% hay 50%?
 
-<details><summary>Gợi ý trả lời</summary><p>50% trong 60 người trả lời câu đó. 30/100 chỉ diễn tả số người chọn trên toàn bộ phản hồi, không được thay thế nếu 40 người còn lại không đủ điều kiện hoặc bỏ câu. Phải nêu logic rẽ nhánh và mẫu số.</p></details>
+<details><summary>Gợi ý trả lời</summary><p>50% trong 60 người trả lời câu đó. 30/100 chỉ diễn tả số người chọn trên toàn bộ phản hồi, không được dùng thay thế nếu 40 người còn lại không đủ điều kiện hoặc bỏ câu. Phải nêu logic rẽ nhánh và mẫu số.</p></details>
 
 ## 8. Tham khảo và bài tiếp theo
 

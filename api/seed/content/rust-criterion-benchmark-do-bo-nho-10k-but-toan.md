@@ -15,7 +15,7 @@ Nhóm Payment hỏi: sổ cái ghi được 10.000 bút toán mỗi giây không
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một benchmark báo 0,345 nanosecond để cộng 1.000 số nguyên, cỡ một chu kỳ của CPU 3 GHz. Con số có đáng tin không?</p>
-<details><summary>Xem đáp án</summary><p>Không: compiler đã xóa lời gọi vì không ai dùng kết quả. Mục <code>black_box</code> có đúng ví dụ này.</p></details>
+<details><summary>Xem đáp án</summary><p>Không: compiler đã xoá lời gọi vì không ai dùng kết quả. Mục <code>black_box</code> có đúng ví dụ này.</p></details>
 </div>
 
 ## Đo cái gì, trên máy nào, để trả lời câu hỏi nào?
@@ -44,7 +44,7 @@ Mọi số trong bài là số đo trên máy viết bài, không phải SLA.
 
 ## Vì sao benchmark nào cũng cần black_box?
 
-Hàm không có tác dụng phụ mà kết quả không ai dùng thì compiler được phép xóa lời gọi, và benchmark đo cái không tồn tại. `std::hint::black_box` gợi ý compiler giả định giá trị có thể bị dùng theo mọi cách hợp lệ. Tài liệu ghi rõ đây là best-effort, nhưng dùng được cho benchmark, thường bọc ở đầu vào. `Bencher::iter` của criterion tự `black_box` giá trị trả về, nên cách sai điển hình là bỏ kết quả bằng dấu chấm phẩy.
+Hàm không có tác dụng phụ mà kết quả không ai dùng thì compiler được phép xoá lời gọi, và benchmark đo cái không tồn tại. `std::hint::black_box` gợi ý compiler giả định giá trị có thể bị dùng theo mọi cách hợp lệ. Tài liệu ghi rõ đây là best-effort, nhưng dùng được cho benchmark, thường bọc ở đầu vào. `Bencher::iter` của criterion tự `black_box` giá trị trả về, nên cách sai điển hình là bỏ kết quả bằng dấu chấm phẩy.
 
 ```rust
 // benches/black_box_demo.rs (rút gọn)
@@ -68,7 +68,7 @@ group.bench_function("dung_black_box_dau_vao", |b| {
 
 `cargo bench --bench black_box_demo` trên `AMOUNTS`, mảng 1.000 số tiền sinh lúc biên dịch, cho `SAI_bo_ket_qua` 345 ps, `tra_ket_qua_dau_vao_hang` 74,5 ns, `dung_black_box_dau_vao` 71,9 ns.
 
-Bản sai nhanh hơn bản đúng khoảng 200 lần: code đã bị xóa. Bản đầu vào hằng ngang bản đúng: ở bản build này LLVM không tính sẵn tổng của mảng hằng 1.000 phần tử, nhưng không gì bảo đảm điều đó, nên `black_box` ở đầu vào là bảo hiểm. Quy tắc dùng được: nghi ngờ mọi con số nhỏ hơn mức phần cứng có thể đạt.
+Bản sai nhanh hơn bản đúng khoảng 200 lần: code đã bị xoá. Bản đầu vào hằng ngang bản đúng: ở bản build này LLVM không tính sẵn tổng của mảng hằng 1.000 phần tử, nhưng không gì bảo đảm điều đó, nên `black_box` ở đầu vào là bảo hiểm. Quy tắc dùng được: nghi ngờ mọi con số nhỏ hơn mức phần cứng có thể đạt.
 
 BenchmarkDotNet tiêu thụ giá trị method `[Benchmark]` trả về, và với cấu hình mặc định, `JitOptimizationsValidator` báo validation error rồi không chạy benchmark nếu assembly build không tối ưu ([bài 28 loạt C#](/articles/dotnet10-benchmarkdotnet-span-profiling)). Với Rust, `cargo bench` mặc định đã tối ưu vì profile `bench` kế thừa `release`.
 
@@ -175,7 +175,7 @@ Vec::with_capacity     : 1 block, 240000 byte, len 30000
 ALLOC OK
 ```
 
-`Vec` hiện tăng gấp đôi, nên thu 30.000 con trỏ cần 14 lần cấp phát (kể cả cấp phát lại), tổng 524.256 byte, gấp 2,2 lần 240.000 byte mà `with_capacity` xin một lần. Nhưng tạo 10.000 bút toán tốn 90.026 block, 9 block mỗi bút toán, gần hết là chuỗi (khóa idempotency, `AccountId`, `format!`). Muốn bớt cấp phát thật thì nhìn vào chuỗi, không phải `Vec`. Bỏ `.testing()` thì dhat ghi `dhat-heap.json` cho `dh_view`.
+`Vec` hiện tăng gấp đôi, nên thu 30.000 con trỏ cần 14 lần cấp phát (kể cả cấp phát lại), tổng 524.256 byte, gấp 2,2 lần 240.000 byte mà `with_capacity` xin một lần. Nhưng tạo 10.000 bút toán tốn 90.026 block, 9 block mỗi bút toán, gần hết là chuỗi (khoá idempotency, `AccountId`, `format!`). Muốn bớt cấp phát thật thì nhìn vào chuỗi, không phải `Vec`. Bỏ `.testing()` thì dhat ghi `dhat-heap.json` cho `dh_view`.
 
 Còn thời gian? Ít cấp phát hơn 14 lần không thành nhanh hơn 14 lần. Ở 10.000 bút toán, criterion đo `Vec::new` + `push` 31,2 µs, `with_capacity` biết trước dung lượng 24,8 µs, còn bản tự đếm trước 35,4 µs vì thêm một lượt duyệt sổ. Ở 100.000, chênh lệch giữa bản biết trước và `push` (347 so với 327 µs) nằm trong nhiễu. Số cấp phát ổn định giữa các lần đo, còn thời gian thì không, nên cần cả hai công cụ. Bên C#, `MemoryDiagnoser` báo byte cấp phát kèm số lần GC ([bài về allocation và GC](/articles/dotnet10-allocation-gc-disposal)); Rust không có GC nên dhat không có cột đó.
 
@@ -227,7 +227,7 @@ Trả lời thẳng: trên máy này chỉ cách 3, gộp lô bằng `unnest`, v
 
 Còn `fsync`? Ở cấu hình này, `synchronous_commit = off` không làm cách 1 nhanh hơn (294 đến 371 so với 324 đến 422), tức thời gian chờ flush WAL nhỏ so với round trip. Kết luận đó chỉ đúng cho Docker Desktop với round trip cỡ này: đĩa ảo có thể flush rẻ hơn đĩa thật, và trên server có round trip ngắn, fsync có thể thành phần lớn; tôi chưa đo ở đó. `synchronous_commit = off` có thể mất các transaction vừa commit khi server sập, nên không dùng cho sổ cái.
 
-Gộp lô có giá riêng. Request đến từng cái một không tự thành lô: ta phải chờ đủ 500 hoặc hết thời gian chờ, tức đổi độ trễ lấy thông lượng. Một khóa trùng làm cả lô rollback, nên idempotency của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) phải xử lý trước hoặc bằng `ON CONFLICT`.
+Gộp lô có giá riêng. Request đến từng cái một không tự thành lô: ta phải chờ đủ 500 hoặc hết thời gian chờ, tức đổi độ trễ lấy thông lượng. Một khoá trùng làm cả lô rollback, nên idempotency của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) phải xử lý trước hoặc bằng `ON CONFLICT`.
 
 ## Chạy ví dụ và kiểm chứng
 

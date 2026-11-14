@@ -258,7 +258,7 @@ Vậy chọn engine nào cho `kyc-ocr`? Theo số đo trên bộ ảnh này: Tes
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Bộ ảnh chỉ có 24 ảnh từ 6 thẻ, một font (Arial), nền phẳng, chữ in hoa sạch; mờ, nghiêng và tối là hiệu ứng sinh bằng code, không phải nhiễu của camera điện thoại, lóa, nén JPEG hay thẻ cong. Sáu tên và sáu thành phố là toàn bộ từ vựng, nên con số theo trường (một trường sai ở một thẻ là 4 điểm phần trăm) chỉ đáng tin ở mức thứ bậc lớn. Phép chấm dễ dãi với trường ngắn, ta chỉ thử một cấu hình mỗi engine ngoài lưới của Tesseract, và chỉ chạy CPU trên một máy đang bận. Trước khi chọn engine cho production, cần đo lại trên ảnh thật đã được phép dùng, đủ lớn, theo đúng quy trình của người duyệt.</p>
+<p>Bộ ảnh chỉ có 24 ảnh từ 6 thẻ, một font (Arial), nền phẳng, chữ in hoa sạch; mờ, nghiêng và tối là hiệu ứng sinh bằng code, không phải nhiễu của camera điện thoại, loá, nén JPEG hay thẻ cong. Sáu tên và sáu thành phố là toàn bộ từ vựng, nên con số theo trường (một trường sai ở một thẻ là 4 điểm phần trăm) chỉ đáng tin ở mức thứ bậc lớn. Phép chấm dễ dãi với trường ngắn, ta chỉ thử một cấu hình mỗi engine ngoài lưới của Tesseract, và chỉ chạy CPU trên một máy đang bận. Trước khi chọn engine cho production, cần đo lại trên ảnh thật đã được phép dùng, đủ lớn, theo đúng quy trình của người duyệt.</p>
 </div>
 
 ## Chạy và kiểm chứng
@@ -286,7 +286,7 @@ OK 31/31
 | --- | --- |
 | `uv pip install paddlepaddle` báo không có wheel `cp314` | Dùng project con `paddle/` chạy Python 3.13; kiểm lại wheel mới của `paddlepaddle` trước khi nâng Python |
 | Chữ Việt mất dấu hoàn toàn | Thiếu gói `vie` (`tesseract --list-langs`) hoặc dùng `-l eng`; với PaddleOCR kiểm `character_dict` có đủ ký tự |
-| Dòng tên dính ký tự rác ở đầu, số căn cước bị chèn dấu cách | Xem `image_to_data` theo từng từ, lọc từ confidence thấp; chuẩn hóa ở hậu xử lý (bài 44) |
+| Dòng tên dính ký tự rác ở đầu, số căn cước bị chèn dấu cách | Xem `image_to_data` theo từng từ, lọc từ confidence thấp; chuẩn hoá ở hậu xử lý (bài 44) |
 | Thời gian mỗi ảnh nhảy hàng chục lần giữa hai lần chạy | Xem load average trong bảng; so CPU thay vì thời gian thật |
 | EasyOCR nuốt dấu cách hoặc dấu chấm | So đáp án với chuỗi thô; sửa bằng hậu xử lý theo định dạng từng trường |
 

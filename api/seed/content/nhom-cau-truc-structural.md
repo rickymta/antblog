@@ -370,7 +370,7 @@ Cái giá:
 - **Luật của từng tầng nằm rải rác.** Giảm giá combo được trừ trước hay sau voucher của giỏ? Câu hỏi đó trả lời ở đâu trong cây? Composite không giải quyết hộ — bạn phải ghi rõ.
 - **Cây sâu hoặc có vòng** (combo chứa chính nó) làm đệ quy tràn ngăn xếp. Dữ liệu menu do quán tự nhập thì phải kiểm vòng lúc lưu.
 
-Khi dữ liệu chỉ phẳng một tầng (món + vài tùy chọn cố định), một mảng và một `reduce` là đủ.
+Khi dữ liệu chỉ phẳng một tầng (món + vài tuỳ chọn cố định), một mảng và một `reduce` là đủ.
 
 ### Cách viết gọn ở TypeScript hiện đại
 
@@ -397,7 +397,7 @@ Cấu trúc vẫn là Composite; chỉ có hành vi chuyển từ phương thứ
 
 ### Vấn đề ở Tới Nơi
 
-Cước một chuyến đặt xe gồm cước gốc theo km, rồi lần lượt: phụ phí giờ cao điểm (nhân hệ số), phụ phí mưa (cộng thêm), voucher (trừ theo phần trăm có trần), làm tròn lên nghìn đồng. Mỗi thành phố, mỗi loại xe, mỗi chiến dịch lại bật tắt một tổ hợp khác nhau.
+Cước một chuyến đặt xe gồm cước gốc theo km, rồi lần lượt: phụ phí giờ cao điểm (nhân hệ số), phụ phí trời mưa (cộng thêm), voucher (trừ theo phần trăm có trần), làm tròn lên nghìn đồng. Mỗi thành phố, mỗi loại xe, mỗi chiến dịch lại bật tắt một tổ hợp khác nhau.
 
 ```ts
 // Mỗi phụ phí mới = thêm một nhánh if; thứ tự nằm ngầm trong thứ tự dòng code.
@@ -536,7 +536,7 @@ Cái giá:
 
 - **Thứ tự** như vừa thấy — sai thứ tự không báo lỗi, chỉ ra số sai.
 - **Danh tính**: `a !== a.inner`; code nào so sánh đối tượng hoặc dùng `instanceof BaseFare` sẽ hỏng khi có lớp bọc.
-- **Nhiều lớp nhỏ** và stack trace dài. Khi các quy tắc phụ thuộc lẫn nhau (voucher chỉ áp nếu không có phụ phí mưa), chuỗi decorator bắt đầu phải «nhìn» các lớp khác — lúc đó một bảng quy tắc tường minh hoặc Chain of Responsibility hợp hơn.
+- **Nhiều lớp nhỏ** và stack trace dài. Khi các quy tắc phụ thuộc lẫn nhau (voucher chỉ áp nếu không có phụ phí trời mưa), chuỗi decorator bắt đầu phải «nhìn» các lớp khác — lúc đó một bảng quy tắc tường minh hoặc Chain of Responsibility hợp hơn.
 
 ### Cách viết gọn ở TypeScript hiện đại
 

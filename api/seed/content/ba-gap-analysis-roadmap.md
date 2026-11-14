@@ -27,23 +27,23 @@ P07 cho thấy adoption toàn cohort 24%, telemetry cần xác minh và guardrai
 | Event có thể thiếu/lặp | Metric có thể kiểm chứng | Chất lượng đo | Đối chiếu và sửa instrumentation |
 | Chưa biết vì sao không xác nhận | Hiểu rào cản chính | Bằng chứng hành vi | Quan sát nhóm không dùng |
 | CS chưa chứng minh công suất | Hỗ trợ trong giới hạn pilot | Năng lực vận hành | Diễn tập, đo thời gian xử lý |
-| So trước/sau chưa có đối chứng | Đánh giá effect phù hợp | Thiết kế thử nghiệm | Review với analytics/statistics |
+| So trước/sau chưa có đối chứng | Đánh giá tác động phù hợp | Thiết kế thử nghiệm | Review với analytics/statistics |
 
 Một khoảng trống có thể cần nhiều hoạt động và không phải hoạt động nào cũng là phát triển phần mềm.
 
 ## 4. Roadmap theo đợt học và thay đổi
 
-Đợt A làm dữ liệu đáng tin và xác định rào cản. Đợt B thử cải thiện ưu tiên cùng quy trình hỗ trợ. Đợt C đánh giá để quyết định mở rộng, chỉnh hoặc dừng. Không hứa C chắc chắn là rollout: nó là một quyết định dựa trên bằng chứng từ A/B.
+Đợt A làm cho dữ liệu đáng tin và xác định rào cản. Đợt B thử cải thiện ưu tiên cùng quy trình hỗ trợ. Đợt C đánh giá để quyết định mở rộng, chỉnh hoặc dừng. Không hứa chắc đợt C là rollout: đợt này là một quyết định dựa trên bằng chứng từ A/B.
 
-Trong từng đợt, owner và estimate phải được nhóm thực hiện xác nhận. “Now/Next/Later” cũng cần mục tiêu và điều kiện chuyển, nếu không chỉ là lịch mơ hồ.
+Trong từng đợt, người phụ trách và ước lượng phải do nhóm thực hiện xác nhận. “Now/Next/Later” cũng cần mục tiêu và điều kiện chuyển, nếu không chỉ là lịch mơ hồ.
 
 ## 5. Sắp thứ tự theo phụ thuộc
 
-Đo hiệu quả cải thiện trước khi telemetry đáng tin tạo ra học sai. Đào tạo CS trước khi chốt ý nghĩa trạng thái có thể phải làm lại. Dùng dependency register P06 để tìm điều kiện tiên quyết, đồng thời cho phép các việc độc lập như nghiên cứu người dùng và kiểm pipeline chạy song song.
+Đo hiệu quả cải thiện trước khi telemetry đáng tin sẽ dẫn đến học sai. Đào tạo CS trước khi chốt ý nghĩa trạng thái thì có thể phải đào tạo lại. Dùng dependency register P06 để tìm điều kiện tiên quyết, đồng thời cho phép các việc độc lập như nghiên cứu người dùng và kiểm pipeline chạy song song.
 
 ## 6. Cập nhật roadmap có lý do
 
-Nếu quan sát cho thấy cổng đóng là nguyên nhân chính, roadmap có thể chuyển sang cập nhật thông tin vận hành thay vì chat. Ghi bằng chứng mới, tác động và quyết định bỏ/hoãn. Thay roadmap không phải thất bại nếu nó phản ánh điều học được và được truyền đạt rõ.
+Nếu quan sát cho thấy cổng đóng là nguyên nhân chính, roadmap có thể chuyển sang cập nhật thông tin vận hành thay vì chat. Ghi bằng chứng mới, tác động và quyết định bỏ/hoãn. Thay đổi roadmap không phải là thất bại nếu việc đó phản ánh điều học được và được truyền đạt rõ.
 
 ## 7. Thực hành
 

@@ -17,7 +17,7 @@ Repository này không có tài khoản Apple Developer và máy kiểm không c
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Từ khoá tiếng Việt dài 99 ký tự, nhiều chữ có dấu; trường keywords cho tối đa 100. Ta có chắc nộp được không?</p>
-<details><summary>Xem đáp án</summary><p>Không chắc. App Store Connect Help ghi tối đa 100 <strong>byte</strong>, không phải ký tự. Trong UTF-8, chữ "ớ" chiếm 3 byte: 34 chữ "ớ" là 102 byte. Tên app và description thì tính theo ký tự. Lab có test cho đúng ca này.</p></details>
+<details><summary>Xem đáp án</summary><p>Không chắc. App Store Connect Help ghi tối đa 100 <strong>byte</strong>, không phải ký tự. Trong UTF-8, chữ "ớ" chiếm 3 byte: 34 chữ "ớ" là 102 byte. Tên app và description thì tính theo ký tự. Lab có test cho đúng trường hợp này.</p></details>
 </div>
 
 ## Bản ghi app và metadata: giới hạn kiểm được bằng máy
@@ -108,7 +108,7 @@ int _bytes(String s) => utf8.encode(s).length;
       );
 ```
 
-Test dựng đúng ca của câu hỏi đầu bài. Dấu phẩy tính vào 100 byte (đếm thừa là an toàn); bản mẫu của app khách dùng 69 byte cho 54 ký tự.
+Test dựng đúng tình huống của câu hỏi đầu bài. Dấu phẩy tính vào 100 byte (đếm thừa là an toàn); bản mẫu của app khách dùng 69 byte cho 54 ký tự.
 
 ### metadata_test.dart · 58-app-store-release/test/metadata_test.dart (trích)
 
@@ -145,7 +145,7 @@ Kiểm alpha chỉ cần đọc phần đầu file PNG:
     return PngInfo(width: width, height: height, hasAlpha: hasAlpha);
 ```
 
-Chunk `tRNS` cũng là trong suốt nên vòng lặp tìm nó. Test tạo PNG trong bộ nhớ.
+Chunk `tRNS` cũng cho biết ảnh có độ trong suốt nên vòng lặp tìm nó. Test tạo PNG trong bộ nhớ.
 
 ## Privacy manifest và required reason API
 
@@ -179,7 +179,7 @@ Manifest của app chỉ khai dữ liệu chính app thu thập và API mà code
 		</dict>
 ```
 
-Mỗi nhóm chỉ nhận lý do của nó (`CA92.1` đúng cho UserDefaults, sai cho FileTimestamp), và `0A2A.1`, `C56D.1` dành riêng cho SDK nên app khai chúng là sai. Lab mã hoá bảng của Apple và kiểm từng lý do:
+Mỗi nhóm chỉ nhận lý do của nó (`CA92.1` đúng cho UserDefaults, sai cho FileTimestamp), và `0A2A.1`, `C56D.1` dành riêng cho SDK nên app khai chúng là sai. Lab viết bảng của Apple thành code và kiểm từng lý do:
 
 ### store_limits.dart · 58-app-store-release/lib/src/store_limits.dart (trích, trong RequiredReasonApi)
 
@@ -265,8 +265,8 @@ Bản sao ghi mỗi dòng với nguồn `app` (phải có trong manifest của a
 
 Các quy tắc của `ReleaseChecklist`:
 
-- Có `NSLocation...UsageDescription` mà label không khai Precise hay Coarse Location thì `label-missing-location`; chiều ngược lại là `location-without-usage-description`.
-- Mọi loại trong manifest phải có trong label, cùng `linked`, `tracking`, đủ mục đích (`label-missing-type`, `label-manifest-mismatch`); dòng nguồn `app` mà manifest không có là `label-app-type-not-in-manifest`.
+- Có `NSLocation...UsageDescription` mà label không khai Precise hay Coarse Location thì checklist báo `label-missing-location`; chiều ngược lại báo `location-without-usage-description`.
+- Mọi loại trong manifest phải có trong label, cùng `linked`, `tracking`, đủ mục đích (`label-missing-type`, `label-manifest-mismatch`); dòng nguồn `app` mà manifest không có thì báo `label-app-type-not-in-manifest`.
 - Quyền liên hệ, micro, ảnh, camera chỉ cảnh báo, vì xin quyền chưa chắc đã thu thập. Mô tả quyền dưới 20 ký tự cũng chỉ cảnh báo (ngưỡng của lab); nội dung tạm là lỗi (5.1.1(ii)).
 
 ### release_checklist.dart · 58-app-store-release/lib/src/release_checklist.dart (trích, trong _labelAgainstUsage)
@@ -304,7 +304,7 @@ Các quy tắc của `ReleaseChecklist`:
 
 Apple nói thường duyệt 90% bản trong dưới 48 giờ, và hơn 40% vấn đề chưa giải quyết thuộc Guideline 2.1 (crash, nội dung tạm, thiếu thông tin). Thất bại hay gặp nhất là thiếu chuẩn bị.
 
-**Tài khoản demo.** Mục App Review Information gồm liên hệ (số điện thoại quốc tế có dấu +), ghi chú tối đa 4.000 byte và tài khoản demo. Theo Platform version information, tài khoản demo không được hết hạn; theo 2.1(a), máy chủ phải đang chạy, và demo mode chỉ thay được khi Apple đồng ý trước. Bản prod gọi API production, không có server duyệt riêng: tài khoản demo nằm trên production, cô lập theo tài khoản, và chuyến mô phỏng không được tới tài xế thật. Reviewer có thể bấm xoá tài khoản (5.1.1(v)), nên server tự tạo lại tài khoản demo và notes nói điều đó.
+**Tài khoản demo.** Mục App Review Information gồm liên hệ (số điện thoại quốc tế có dấu +), ghi chú tối đa 4.000 byte và tài khoản demo. Theo Platform version information, tài khoản demo không được hết hạn; theo 2.1(a), máy chủ phải đang chạy, và chỉ được dùng demo mode thay cho máy chủ thật khi Apple đồng ý trước. Bản prod gọi API production, không có server duyệt riêng: tài khoản demo nằm trên production, cô lập theo tài khoản, và chuyến mô phỏng không được tới tài xế thật. Người duyệt có thể bấm xoá tài khoản (5.1.1(v)), nên máy chủ tự tạo lại tài khoản demo và ghi chú nói rõ điều đó.
 
 Người duyệt không nhận được SMS, nên tài khoản demo có OTP riêng. Đó là thiết kế của ta, không phải yêu cầu của Apple, và là một cửa sau: mã phải ngẫu nhiên, lấy từ secret hoặc ENV, nằm ở ô Password của App Store Connect chứ không trong git, kèm giới hạn số lần thử, cảnh báo mỗi lần đăng nhập, đổi mã sau mỗi lần duyệt. Giá trị trong `demo_password.txt` của lab là hư cấu; mã `123456` của bài 24 chỉ dành cho fake API. Mỗi app tự khép kín: bên mô phỏng đóng vai tài xế hoặc khách. Apple không nói người duyệt ở đâu, nên ghi chú chỉ cách đi tiếp khi ở ngoài khu vực dịch vụ.
 
@@ -334,7 +334,7 @@ Số 25.500 VND không gõ tay: test so với `calculateFare(5)` của `toi_noi_
 | 3.1.3(e) | Dịch vụ dùng ngoài app thu tiền bằng cách khác IAP | VíXanh, không IAP (bài 39) |
 | 4.5.4 | Push không bắt buộc; quảng cáo qua push cần đồng ý | Tách thông báo chuyến và khuyến mãi (bài 37) |
 
-**Xếp hạng độ tuổi:** từ 31/1/2026 Apple dùng mức 4+, 9+, 13+, 16+, 18+, tính từ bảng câu hỏi trong App Information; ta khai đúng tính năng thật (có chat thì đọc Guideline 1.2). **Công cụ build:** từ 28/4/2026 phải dùng Xcode 26 trở lên, từ 9/9/2026 phải nhắm iOS 13 trở lên (template Flutter 3.47.4 đặt 15.0). **Duyệt nhanh:** Apple nêu hai ca, sửa lỗi nghiêm trọng (kèm bước tái hiện) và app gắn với sự kiện; đó là đặc cách từng lần qua biểu mẫu, không phải lane.
+**Xếp hạng độ tuổi:** từ 31/1/2026 Apple dùng mức 4+, 9+, 13+, 16+, 18+, tính từ bảng câu hỏi trong App Information; ta khai đúng tính năng thật (có chat thì đọc Guideline 1.2). **Công cụ build:** từ 28/4/2026 phải dùng Xcode 26 trở lên, từ 9/9/2026 phải nhắm iOS 13 trở lên (template Flutter 3.47.4 đặt 15.0). **Duyệt nhanh:** Apple nêu hai trường hợp: sửa lỗi nghiêm trọng (kèm bước tái hiện) và app gắn với sự kiện; đó là đặc cách từng lần qua biểu mẫu, không phải lane.
 
 Hai lane fastlane: `listing` chỉ đẩy metadata và ảnh; `submit` chọn build có sẵn và gửi duyệt, đòi `confirm:yes` vì đó là quyết định của người phát hành. Cả hai tắt `precheck_include_in_app_purchases` (mặc định làm deliver báo lỗi khi dùng `api_key`), và `submit` không được bỏ qua metadata, vì khi đó deliver bỏ luôn `automatic_release` và `phased_release`:
 
@@ -374,7 +374,7 @@ Phased release thả bản cập nhật cho người bật tự động cập nh
 |---|---|---|---|---|---|---|---|
 | Người dùng | 1% | 2% | 5% | 10% | 20% | 50% | 100% |
 
-Tuỳ chọn được viết cho bản cập nhật (bản đầu chọn thủ công, tự động hoặc theo mốc giờ). Tạm dừng tối đa 30 ngày cộng dồn. **Release to All Users** phát ngay cho mọi người dùng bật tự động cập nhật. Gỡ app khỏi bán thì đợt dừng hẳn, và khi app trở lại nó tới mọi người ngay.
+Tuỳ chọn này dành cho bản cập nhật (bản đầu chọn thủ công, tự động hoặc theo mốc giờ). Tạm dừng tối đa 30 ngày cộng dồn. **Release to All Users** phát ngay cho mọi người dùng bật tự động cập nhật. Gỡ app khỏi bán thì đợt dừng hẳn, và khi app được bán lại thì bản cập nhật tới mọi người ngay.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -442,7 +442,7 @@ Quyết định dựa trên số liệu phiên (Crashlytics, bài 48). Ngưỡng
   }
 ```
 
-Ngày 1 chỉ có 200 trên 20.000 người, nên `decide` trả `wait` thay vì kết luận từ mẫu nhỏ. Tạm dừng không phải rollback: người đã cập nhật giữ bản lỗi. Thao tác Make a version unavailable for download gỡ phiên bản khỏi App Store để xử lý vấn đề pháp lý hay khả dụng (trang đó yêu cầu gửi bản cập nhật trừ khi không thể); nó không đưa ai về bản cũ. Lối ra là bản sửa lỗi (có thể xin duyệt nhanh); force update và hotfix ở bài 59.
+Ngày 1 chỉ có 200 trên 20.000 người, nên `decide` trả `wait` thay vì kết luận từ mẫu nhỏ. Tạm dừng không phải rollback: người đã cập nhật giữ bản lỗi. Thao tác Make a version unavailable for download gỡ phiên bản khỏi App Store để xử lý vấn đề pháp lý hay khả dụng (trang đó yêu cầu gửi bản cập nhật trừ khi không thể); thao tác này không đưa ai về bản cũ. Lối ra là bản sửa lỗi (có thể xin duyệt nhanh); force update và hotfix ở bài 59.
 
 ## Lỗi thường gặp
 
@@ -453,7 +453,7 @@ Ngày 1 chỉ có 200 trên 20.000 người, nên `decide` trả `wait` thay vì
 <li><strong>Ảnh có alpha, hoặc thiếu ảnh iPad.</strong> Dấu hiệu: không nộp được ảnh, hoặc bị đòi ảnh iPad 13 inch. Nguyên nhân: PNG còn alpha; template hỗ trợ iPad. Cách sửa: xuất không alpha; chọn chỉ iPhone hoặc chụp ảnh iPad.</li>
 <li><strong>Khai lý do dành cho SDK trong manifest của app.</strong> Dấu hiệu: <code>0A2A.1</code> hoặc <code>C56D.1</code> trong app. Nguyên nhân: nhầm vai app và SDK. Cách sửa: app chỉ khai API mà code native của nó gọi.</li>
 <li><strong>Tài khoản demo không dùng được.</strong> Dấu hiệu: "Information Needed" (2.1). Nguyên nhân: OTP qua SMS, tài khoản demo bị xoá hoặc khoá, thiếu bên đối diện. Cách sửa: OTP riêng cho tài khoản demo, tự tạo lại sau khi xoá, bên đối diện mô phỏng.</li>
-<li><strong>Label, quyền và ghi chú mâu thuẫn nhau.</strong> Dấu hiệu: reviewer hỏi vì sao dùng vị trí mà label không có. Nguyên nhân: sửa một nơi, quên hai nơi. Cách sửa: chạy <code>bin/check.dart</code> trước mỗi lần gửi.</li>
+<li><strong>Label, quyền và ghi chú mâu thuẫn nhau.</strong> Dấu hiệu: người duyệt hỏi vì sao dùng vị trí mà label không có. Nguyên nhân: sửa một nơi, quên hai nơi. Cách sửa: chạy <code>bin/check.dart</code> trước mỗi lần gửi.</li>
 </ul>
 </div>
 
@@ -472,7 +472,7 @@ dart run bin/check.dart driver --update
 
 Đã kiểm với Dart 3.13.3 (Flutter 3.47.4): `dart analyze` 0 issue, **135 test xanh**. Mức: **Kiểm chứng cấu hình**, không dùng mạng hay thiết bị. Hai lệnh `bin/check.dart` chỉ báo thiếu ảnh chụp (và `release-notes-missing` với `--update`), vì repo không chứa ảnh.
 
-Các test sửa đúng một chỗ của file thật rồi đòi checklist đỏ đúng mã lỗi: giới hạn metadata ở biên, lý do sai nhóm hay dành cho SDK, label lệch manifest hoặc quyền vị trí, ảnh PNG dựng trong bộ nhớ, bảng phased release và biên 99,50%, và `ruby -c` cùng luật cho `Fastfile.store.example` (chỉ so chuỗi, chưa chạy lane).
+Các test sửa đúng một chỗ của file thật rồi đòi checklist báo đúng mã lỗi: giới hạn metadata ở biên, lý do sai nhóm hay dành cho SDK, label lệch manifest hoặc quyền vị trí, ảnh PNG dựng trong bộ nhớ, bảng phased release và biên 99,50%, và `ruby -c` cùng luật cho `Fastfile.store.example` (chỉ so chuỗi, chưa chạy lane).
 
 **Chưa làm**, nói thẳng: không tạo bản ghi app, không nhập label, không tải ảnh, không gửi duyệt, không chạy phased release thật. Không dựng runner iOS nên chưa thêm manifest vào target Runner và chưa chạy **Generate Privacy Report**. Không cài fastlane nên tên action và tham số chỉ đối chiếu với docs.fastlane.tools. URL chỉ kiểm cú pháp. Xếp hạng độ tuổi và Digital Services Act nằm ngoài lab.
 

@@ -8,11 +8,11 @@ tags: [flutter, dart, mobile, toi-noi, drift, sqlite, shared-preferences, secure
 language: vi
 ---
 
-Khách của Tới Nơi vào hầm gửi xe, mất sóng, mở app để xem hôm qua mình trả bao nhiêu cho chuyến về nhà. Màn hình trống trơn, vì lịch sử chuyến chỉ sống trong bộ nhớ và mỗi lần mở app là tải lại từ server. Cùng lúc app quên chế độ tối họ đã chọn, và bắt đăng nhập lại vì token cũng không được giữ.
+Khách của Tới Nơi vào hầm gửi xe, mất sóng, mở app để xem hôm qua mình trả bao nhiêu cho chuyến về nhà. Màn hình trống trơn, vì lịch sử chuyến chỉ sống trong bộ nhớ và mỗi lần mở app là tải lại từ server. Cùng lúc app quên chế độ tối khách đã chọn, và bắt đăng nhập lại vì token cũng không được giữ.
 
 Đó là ba loại dữ liệu khác nhau, và cám dỗ là nhét hết vào một kho. Bài này tách chúng ra: lịch sử chuyến vào SQLite qua **drift**, chế độ sáng/tối vào **shared_preferences**, token vào kho của hệ điều hành qua **flutter_secure_storage** đứng sau interface `TokenStore`.
 
-Đây là bài 22 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 21 về Clean Architecture](/articles/flutter-clean-architecture-domain-data-presentation-mobile) trước, vì `TripHistoryRepository` đứng đúng ranh giới domain và data như bài đó. Provider nối kho với màn hình là của [bài 18 về Riverpod](/articles/flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen), còn `Trip` và `Money` là của package ở [bài 06](/articles/dart-package-pubspec-lint-test-toi-noi-core). Ví dụ lấy từ hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi), bảng giá là số minh hoạ. OTP, refresh và interceptor để [bài 24](/articles/flutter-authentication-otp-jwt-refresh-token-secure-storage).
+Đây là bài 22 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 21 về Clean Architecture](/articles/flutter-clean-architecture-domain-data-presentation-mobile) trước, vì `TripHistoryRepository` đứng đúng ranh giới domain và data như bài đó. Provider nối kho với màn hình là của [bài 18 về Riverpod](/articles/flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen), còn `Trip` và `Money` là của package ở [bài 06](/articles/dart-package-pubspec-lint-test-toi-noi-core). Ví dụ lấy từ hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi), bảng giá là số minh hoạ. OTP, refresh và interceptor sẽ nằm ở [bài 24](/articles/flutter-authentication-otp-jwt-refresh-token-secure-storage).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -59,7 +59,7 @@ Hình 1 cho thấy ba kho nằm sau ba interface. Màn hình chỉ biết `TripH
 <figcaption>Hình 1. Ba loại dữ liệu đi qua ba interface tới ba kho. Mũi tên là hướng gọi. Hàng token có màu cảnh báo vì đó là bí mật.</figcaption>
 </figure>
 
-Các gói của lab (hai gói `platform_interface` chỉ để test thay nền tảng) và chỗ nối ba kho thành provider:
+Dưới đây là các gói của lab (hai gói `platform_interface` chỉ dùng để thay nền tảng trong test) và chỗ nối ba kho thành provider:
 
 ### pubspec.yaml · 22-persistence-drift/pubspec.yaml (trích)
 
@@ -156,7 +156,7 @@ class Trips extends Table {
 ```
 
 - **Thời điểm lưu bằng mili giây UTC** trong cột `int`: ta tự quyết định định dạng trên đĩa, múi giờ là việc của giao diện.
-- **`textEnum` lưu tên enum** (`completed`), không lưu chỉ số, nên đổi thứ tự giá trị không làm dòng cũ đổi nghĩa. Xoá hay đổi tên một giá trị thì dòng cũ thành tên lạ và lần đọc ném `ArgumentError`; test chèn tên `teleporting` để chứng minh.
+- **`textEnum` lưu tên enum** (`completed`), không lưu chỉ số, nên đổi thứ tự giá trị không làm dòng cũ đổi nghĩa. Xoá hay đổi tên một giá trị thì dòng cũ mang tên lạ và lần đọc sẽ ném `ArgumentError`; test chèn tên `teleporting` để chứng minh.
 - **`check` đặt luật trong database**: cước âm bị SQLite từ chối bằng `CHECK constraint failed: fare_vnd`, và lệnh ghi nhiều dòng chạy trong một transaction nên cả lô không được ghi.
 
 Hai cột cuối thuộc schema 2. Giờ đến class database:
@@ -336,7 +336,7 @@ extension TripToCompanion on Trip {
 }
 ```
 
-Dữ liệu đọc từ đĩa là dữ liệu ngoài: `Money.fromVnd` và constructor của `Trip` kiểm lại, nên dòng `accepted` không có `driverId` ném `ArgumentError` thay vì thành chuyến sai. Chiều ghi đổi quãng đường sang mét nguyên và cắt thời điểm xuống mili giây; test kiểm cả hai, cùng các ca 2,001 km (12.005 VND) và 100 km (453.000 VND). Một dòng hỏng làm cả stream báo lỗi, nên màn hình xử lý nhánh lỗi:
+Dữ liệu đọc từ đĩa là dữ liệu ngoài: `Money.fromVnd` và constructor của `Trip` kiểm lại, nên dòng `accepted` không có `driverId` ném `ArgumentError` thay vì trở thành chuyến sai. Chiều ghi đổi quãng đường sang mét nguyên và cắt thời điểm xuống mili giây; test kiểm cả hai, cùng các trường hợp 2,001 km (12.005 VND) và 100 km (453.000 VND). Một dòng hỏng làm cả stream báo lỗi, nên màn hình xử lý nhánh lỗi:
 
 ### history_screen.dart · 22-persistence-drift/lib/history_screen.dart (trích)
 
@@ -400,11 +400,11 @@ drift ghi phiên bản schema vào `PRAGMA user_version` của file, và mỗi l
 
 `addColumn` chạy `ALTER TABLE ... ADD COLUMN` và SQLite đặt cột mới ở **cuối** bảng, nên `serviceKind` và `driverId` được khai báo ở cuối `Trips` để bảng tạo mới và bảng đã nâng cấp có cùng thứ tự cột. `serviceKind` là `NOT NULL` nên có mặc định `ride` cho dòng cũ.
 
-Hình 3 vẽ ba trường hợp khi mở file; ca thứ ba là người dùng cài lại bản app cũ.
+Hình 3 vẽ ba trường hợp khi mở file; trường hợp thứ ba là người dùng cài lại bản app cũ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Hình 3. Ba trường hợp khi mở file database với schemaVersion của code là 2. File ở version 1 nhỏ hơn 2 nên gọi onUpgrade và chạy from1To2. File ở version 2 bằng 2 nên mở bình thường. File ở version 3 lớn hơn 2 vì người dùng hạ app, nên stepByStep ném StateError."><defs><marker id="fl22-3-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl22-3-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs>
+<svg viewBox="0 0 880 300" role="img" aria-label="Hình 3. Ba trường hợp khi mở file database với schemaVersion của code là 2. File ở version 1 nhỏ hơn 2 nên gọi onUpgrade và chạy from1To2. File ở version 2 bằng 2 nên mở bình thường. File ở version 3 lớn hơn 2 vì người dùng hạ phiên bản app, nên stepByStep ném StateError."><defs><marker id="fl22-3-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl22-3-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs>
 <rect x="10" y="20" width="220" height="70" rx="10" class="f-phys-soft s-phys"/><text x="24" y="50" class="t-b">File ở version 1</text><text x="24" y="74" class="t-small">user_version = 1</text>
 <rect x="300" y="20" width="270" height="70" rx="10" class="f-pk-soft s-pk"/><text x="314" y="50" class="t-b">1 &lt; 2: gọi onUpgrade</text><text x="314" y="74" class="t-small">schemaVersion của code là 2</text>
 <rect x="640" y="20" width="230" height="70" rx="10" class="f-pk-soft s-pk"/><text x="654" y="50" class="t-b">Chạy from1To2</text><text x="654" y="74" class="t-small">cột mới, dòng cũ = ride</text>
@@ -416,7 +416,7 @@ Hình 3 vẽ ba trường hợp khi mở file; ca thứ ba là người dùng c�
 <path d="M232 150 L298 150" class="f-none s-pk" stroke-width="2" marker-end="url(#fl22-3-a)"/>
 <path d="M572 150 L638 150" class="f-none s-pk" stroke-width="2" marker-end="url(#fl22-3-a)"/>
 <rect x="10" y="210" width="220" height="70" rx="10" class="f-warn-soft s-warn"/><text x="24" y="240" class="t-b">File ở version 3</text><text x="24" y="264" class="t-small">user_version = 3</text>
-<rect x="300" y="210" width="270" height="70" rx="10" class="f-warn-soft s-warn"/><text x="314" y="240" class="t-b">3 &gt; 2: người dùng hạ app</text><text x="314" y="264" class="t-small">schemaVersion của code là 2</text>
+<rect x="300" y="210" width="270" height="70" rx="10" class="f-warn-soft s-warn"/><text x="314" y="240" class="t-b">3 &gt; 2: người dùng hạ phiên bản app</text><text x="314" y="264" class="t-small">schemaVersion của code là 2</text>
 <rect x="640" y="210" width="230" height="70" rx="10" class="f-warn-soft s-warn"/><text x="654" y="240" class="t-b">StateError</text><text x="654" y="264" class="t-small">các bước chỉ đi lên</text>
 <path d="M232 245 L298 245" class="f-none s-warn" stroke-width="2" marker-end="url(#fl22-3-w)"/>
 <path d="M572 245 L638 245" class="f-none s-warn" stroke-width="2" marker-end="url(#fl22-3-w)"/>
@@ -425,7 +425,7 @@ Hình 3 vẽ ba trường hợp khi mở file; ca thứ ba là người dùng c�
 <figcaption>Hình 3. drift so <code>user_version</code> của file với <code>schemaVersion</code> của code: nhỏ hơn thì chạy các bước, bằng nhau thì mở luôn, lớn hơn thì <code>stepByStep</code> ném lỗi vì các bước chỉ đi lên.</figcaption>
 </figure>
 
-Test do drift sinh dựng database ở từng phiên bản cũ, chạy migration rồi so schema thật với schema kỳ vọng. Ta điền thêm một test dữ liệu:
+Test do drift sinh dựng database ở từng phiên bản cũ, chạy migration rồi so schema thật với schema kỳ vọng. Ta bổ sung một test kiểm dữ liệu:
 
 ### migration_test.dart · 22-persistence-drift/test/drift/app_database/migration_test.dart (trích)
 
@@ -542,7 +542,7 @@ Với test, gói có sẵn `InMemorySharedPreferencesAsync`, bản nền tảng 
 
 ## flutter_secure_storage và TokenStore
 
-Token cho phép hành động như người dùng nên không thuộc về `shared_preferences`. `flutter_secure_storage` dùng Keychain trên iOS và macOS. Trên Android, với cấu hình mặc định, giá trị được mã hoá bằng AES-GCM; khoá AES đã bọc và bản mã nằm trong `SharedPreferences` của app, còn Android Keystore chỉ giữ khoá RSA dùng để bọc (README ghi RSA OAEP cộng AES-GCM; mã nguồn plugin gọi `AndroidKeyStore`). Ta che nó sau một interface nhỏ:
+Token cho phép hành động như người dùng nên không thuộc về `shared_preferences`. `flutter_secure_storage` dùng Keychain trên iOS và macOS. Trên Android, với cấu hình mặc định, giá trị được mã hoá bằng AES-GCM; khoá AES đã bọc và bản mã nằm trong `SharedPreferences` của app, còn Android Keystore chỉ giữ khoá RSA dùng để bọc (README ghi RSA OAEP cộng AES-GCM; mã nguồn plugin gọi `AndroidKeyStore`). Ta che kho này sau một interface nhỏ:
 
 ### token_store.dart · 22-persistence-drift/lib/auth/token_store.dart (trích)
 
@@ -621,7 +621,7 @@ class SecureTokenStore implements TokenStore {
 
 Android cần thêm một bước ngoài code: README yêu cầu tắt Auto Backup (`android:allowBackup="false"`); lab không commit `android/` nên do người chạy tự làm. Về việc gỡ app, đây là kiến thức nền, chưa kiểm trên máy và Apple không cam kết: Keychain có thể còn dữ liệu sau khi gỡ app, còn Android mất khoá. Vì vậy lần mở app đầu sau khi cài lại nên gọi `clear()`. "Secure" không phải tuyệt đối: kho của hệ điều hành không cứu được thiết bị đã bị chiếm quyền (bài bảo mật mobile ở Phần 5 nói kỹ hơn).
 
-Về test, `InMemoryTokenStore` dùng cho test màn hình, còn `SecureTokenStore` dùng `FlutterSecureStorage.setMockInitialValues` của gói. Một bộ test hợp đồng chạy chung cho cả hai bản, và nền tảng giả luôn lỗi kiểm các nhánh `PlatformException`:
+Về test, `InMemoryTokenStore` dùng cho test màn hình, còn `SecureTokenStore` dùng `FlutterSecureStorage.setMockInitialValues` của gói. Một bộ test hợp đồng chạy chung cho cả hai bản, và nền tảng giả luôn báo lỗi để kiểm các nhánh `PlatformException`:
 
 ### token_store_test.dart · 22-persistence-drift/test/token_store_test.dart (trích)
 

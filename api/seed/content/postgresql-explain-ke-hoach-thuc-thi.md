@@ -1,7 +1,7 @@
 ---
 slug: postgresql-explain-ke-hoach-thuc-thi
 title: "Đọc EXPLAIN từ truy vấn tìm chuyến"
-summary: "Màn «Lịch sử chuyến» của Tới Nơi chạy cùng một câu SQL cho khách lẻ và khách doanh nghiệp B1, nhưng PostgreSQL chọn hai cách đọc khác nhau. Học đọc EXPLAIN: kiểu scan, kiểu join, ước lượng và chỗ khác giữa kế hoạch với thực thi."
+summary: "Màn «Lịch sử chuyến» của Tới Nơi chạy cùng một câu SQL cho khách lẻ và khách doanh nghiệp B1, nhưng PostgreSQL chọn hai cách đọc khác nhau. Học đọc EXPLAIN: kiểu scan, kiểu join, ước lượng và chỗ chênh lệch giữa kế hoạch và thực thi."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-021, explain, explain-analyze, query-plan, buffers, planner, toi-noi]
@@ -10,7 +10,7 @@ language: vi
 
 Màn «Lịch sử chuyến» của Tới Nơi chỉ chạy một câu: 20 chuyến gần nhất của một khách. Kỹ sư A dán kế hoạch của khách doanh nghiệp B1 lên kênh chat — `Index Scan`, 10 page — và kết luận index đang chạy tốt. Kỹ sư B dán kế hoạch của một khách lẻ — `Bitmap Heap Scan` rồi `Sort`, 44 page — và kết luận index «bị bỏ qua». Cả hai đúng về những gì họ thấy, sai về kết luận. Cùng tuần đó, một bạn mới gõ `EXPLAIN ANALYZE DELETE …` trên môi trường thử «để xem kế hoạch» và mất 68 dòng dữ liệu.
 
-Ba chuyện đó cùng một gốc: đọc `EXPLAIN` mà không biết dòng nào là **dự đoán**, dòng nào là **đo thật**, và lệnh nào **chạy thật câu lệnh**. Bài này mở đầu Phần 3 bằng đúng truy vấn tìm chuyến ấy.
+Ba chuyện đó có chung một gốc: đọc `EXPLAIN` mà không biết dòng nào là **dự đoán**, dòng nào là **đo thật**, và lệnh nào **chạy thật câu lệnh**. Bài này mở đầu Phần 3 bằng đúng truy vấn tìm chuyến ấy.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-021 · Phần 3/6 · Cơ bản</span>
@@ -49,15 +49,15 @@ ORDER BY requested_at DESC LIMIT 20;
                      Index Cond: (customer_id = '3b3bf766-…'::uuid)
 ```
 
-Mỗi dòng có `->` là một **nút** (node). Nút thụt vào sâu hơn là nút con: nó chạy trước và đưa dòng lên nút cha. Đọc **từ trong ra ngoài, từ dưới lên**: quét index lấy vị trí dòng → đọc bảng → sắp → cắt 20 dòng.
+Mỗi dòng có `->` là một **nút** (node). Nút thụt vào sâu hơn là nút con: nút này chạy trước và đưa dòng lên nút cha. Đọc **từ trong ra ngoài, từ dưới lên**: quét index lấy vị trí dòng → đọc bảng → sắp → cắt 20 dòng.
 
 | Trường | Nghĩa |
 |---|---|
 | `cost=4.51..47.86` | Chi phí **khởi động** (trước khi trả dòng đầu tiên) .. chi phí **tổng** nếu nút chạy tới hết. Đơn vị tương đối, quy ước đọc tuần tự một page = 1 — **không phải mili giây** |
-| `rows=11` | Số dòng nút **ước lượng** sẽ trả ra (không phải số dòng nó đọc) |
+| `rows=11` | Số dòng nút **ước lượng** sẽ trả ra (không phải số dòng nút đọc) |
 | `width=30` | Độ rộng trung bình một dòng đầu ra, byte |
 
-Chi phí nút cha đã gồm chi phí nút con. Chú ý `rows=11`: khách này thật ra có **40** chuyến. Số trong ngoặc đến từ thống kê do `ANALYZE` lấy mẫu 30.000 dòng, nên máy bạn sẽ lệch đôi chút. Muốn so **hình dạng** kế hoạch, dùng `EXPLAIN (COSTS OFF)`: cùng cây, bỏ phần trong ngoặc.
+Chi phí nút cha đã gồm chi phí nút con. Chú ý `rows=11`: khách này thật ra có **40** chuyến. Các số trong ngoặc được tính từ thống kê do `ANALYZE` lấy mẫu 30.000 dòng, nên máy bạn sẽ lệch đôi chút. Muốn so **hình dạng** kế hoạch, dùng `EXPLAIN (COSTS OFF)`: cùng cây, bỏ phần trong ngoặc.
 
 ## 3. EXPLAIN ANALYZE: chạy thật và đo
 
@@ -89,10 +89,10 @@ ORDER BY requested_at DESC LIMIT 20;
    Buffers: shared hit=149 read=23
 ```
 
-Chạy lại y nguyên câu đó, mọi dòng `Buffers` thành `shared hit=44`, không còn `read`.
+Chạy lại y nguyên câu đó, mọi dòng `Buffers` đổi thành `shared hit=44`, không còn `read`.
 
-- **`actual rows=40.00 loops=1`**: số dòng thật nút trả ra, **trung bình mỗi lần chạy**; `loops` = số lần nút chạy. PostgreSQL 18 in hai chữ số thập phân vì là trung bình (mục 6 có `0.93`).
-- **`Buffers: shared hit=… read=…`**: số page 8 KB nút (gồm nút con) đã chạm. `hit` = có sẵn trong `shared_buffers`; `read` = phải xin hệ điều hành — **chưa chắc là đọc đĩa**, page có thể nằm trong cache của hệ điều hành. [PG-022](/articles/page-don-vi-doc-ghi) đào sâu page và buffer.
+- **`actual rows=40.00 loops=1`**: số dòng thật mà nút trả ra, **trung bình mỗi lần chạy**; `loops` = số lần nút chạy. PostgreSQL 18 in hai chữ số thập phân vì đây là giá trị trung bình (mục 6 có `0.93`).
+- **`Buffers: shared hit=… read=…`**: số page 8 KB mà nút (gồm cả nút con) đã chạm. `hit` = có sẵn trong `shared_buffers`; `read` = phải xin hệ điều hành — **chưa chắc là đọc đĩa**, page có thể nằm trong cache của hệ điều hành. [PG-022](/articles/page-don-vi-doc-ghi) đào sâu page và buffer.
 - **`Heap Blocks: exact=40`**: 40 chuyến trên 40 page bảng khác nhau; cộng 4 page index = 44 page cho 20 dòng.
 - **`Planning: Buffers`**: page catalog đọc lúc lập kế hoạch.
 
@@ -111,7 +111,7 @@ Câu y hệt, đổi sang khách B1:
          Buffers: shared hit=1 read=9
 ```
 
-Thống kê cho planner biết B1 rất đông (B1 nằm trong danh sách giá trị phổ biến, khoảng 51 nghìn chuyến). Đọc hết rồi sắp thì quá đắt; đi index `(customer_id, requested_at DESC)` theo đúng thứ tự cần và **dừng sau 20 dòng** thì rẻ — 10 page. Với khách lẻ, planner ước khoảng 11 chuyến: gom vị trí bằng bitmap rồi sắp 11 dòng rẻ hơn. Cả hai kế hoạch đều dùng `ix_trips_customer_requested`; kỹ sư B kết luận «index bị bỏ qua» chỉ vì không nhận ra `Bitmap Index Scan` cũng là dùng index.
+Thống kê cho planner biết B1 có rất nhiều chuyến (B1 nằm trong danh sách giá trị phổ biến, khoảng 51 nghìn chuyến). Đọc hết rồi sắp thì quá đắt; đi index `(customer_id, requested_at DESC)` theo đúng thứ tự cần và **dừng sau 20 dòng** thì rẻ — 10 page. Với khách lẻ, planner ước khoảng 11 chuyến: gom vị trí bằng bitmap rồi sắp 11 dòng rẻ hơn. Cả hai kế hoạch đều dùng `ix_trips_customer_requested`; kỹ sư B kết luận «index bị bỏ qua» chỉ vì không nhận ra `Bitmap Index Scan` cũng là dùng index.
 
 Bài học cho cuộc tranh luận ở đầu bài: **một kế hoạch chỉ đúng cho tham số đã dùng** — dán kế hoạch thì ghi kèm tham số. Kế hoạch của khách lẻ dựa trên ước lượng lấy mẫu, một lần `ANALYZE` khác có thể nghiêng sang `Index Scan`. [PG-027](/articles/postgresql-statistics-analyze-cardinality) giải thích ước lượng 11 từ đâu ra.
 
@@ -141,11 +141,11 @@ SELECT count(*) FROM trips WHERE fare >= 150000;
          Buffers: shared hit=47 read=19394
 ```
 
-`Filter` là điều kiện áp **sau khi** đọc dòng lên; `Rows Removed by Filter: 996459` = số dòng đọc rồi bỏ. 19.441 page cho 3.541 dòng. Chạy lần hai vẫn `hit=190 read=19251`: với bảng lớn hơn một phần tư `shared_buffers`, Seq Scan chỉ dùng một vòng đệm nhỏ (256 kB) để khỏi đẩy dữ liệu khác ra khỏi cache — nên nó không «ấm lên» như bảng nhỏ.
+`Filter` là điều kiện áp **sau khi** đọc dòng lên; `Rows Removed by Filter: 996459` = số dòng đọc rồi bỏ. 19.441 page cho 3.541 dòng. Chạy lần hai vẫn `hit=190 read=19251`: với bảng lớn hơn một phần tư `shared_buffers`, Seq Scan chỉ dùng một vòng đệm nhỏ (256 kB) để khỏi đẩy dữ liệu khác ra khỏi cache — nên bảng này không «ấm lên» như bảng nhỏ.
 
 **Index Scan.** Dải mã chuyến nhỏ: `WHERE code BETWEEN 600000 AND 600050` ra `Index Scan using uq_trips_code on trips` với `Index Cond: ((code >= 600000) AND (code <= 600050))`. **`Index Cond`** là điều kiện dùng để **đi cây index** — khác hẳn `Filter`.
 
-**Bitmap.** Chuyến Đà Nẵng trong 7 ngày:
+**Bitmap.** Truy vấn các chuyến ở Đà Nẵng trong 7 ngày:
 
 ```sql
 EXPLAIN (ANALYZE, COSTS OFF, TIMING OFF, SUMMARY OFF)
@@ -165,7 +165,7 @@ WHERE city_id = 3 AND requested_at >= TIMESTAMPTZ '2026-10-01 00:00+07'
                Buffers: shared hit=3 read=24
 ```
 
-5.477 dòng trên 827 page bảng (`Heap Blocks: exact=827`), 27 page index. `Recheck Cond` là điều kiện được kiểm lại trên dòng đã đọc khi cần (bitmap quá lớn phải chuyển sang chỉ nhớ page, «lossy»); ở đây mọi page đều `exact`.
+5.477 dòng trên 827 page bảng (`Heap Blocks: exact=827`), 27 page index. `Recheck Cond` là điều kiện được kiểm tra lại trên dòng đã đọc khi cần (bitmap quá lớn thì phải chuyển sang chế độ chỉ nhớ page, «lossy»); ở đây mọi page đều `exact`.
 
 ## 6. Ba kiểu join
 
@@ -198,7 +198,7 @@ WHERE city_id = 3 AND requested_at >= TIMESTAMPTZ '2026-10-01 00:00+07'
                ->  Seq Scan on drivers d (actual rows=6000.00 loops=1)
 ```
 
-`Batches: 1` nghĩa là bảng băm 6.000 tài xế vừa bộ nhớ ([PG-029](/articles/postgresql-sort-hash-memory-spill) xem khi nó không vừa). `Index Searches: 5`: câu chỉ lọc ngày nhưng index bắt đầu bằng `city_id`; PostgreSQL 18 có **skip scan** — nhảy qua từng giá trị cột đầu — nên vẫn dùng được index này ([PG-025](/articles/postgresql-index-nhieu-cot-partial-expression)).
+`Batches: 1` nghĩa là bảng băm 6.000 tài xế vừa bộ nhớ ([PG-029](/articles/postgresql-sort-hash-memory-spill) xem trường hợp bảng không vừa). `Index Searches: 5`: câu chỉ lọc ngày nhưng index bắt đầu bằng `city_id`; PostgreSQL 18 có **skip scan** — nhảy qua từng giá trị cột đầu — nên vẫn dùng được index này ([PG-025](/articles/postgresql-index-nhieu-cot-partial-expression)).
 
 **Merge Join** — hai đầu vào đã sắp theo khoá join, trộn như kéo khoá kéo:
 
@@ -215,7 +215,7 @@ Bên lề: `SELECT count(*) FROM trips a JOIN trips b ON b.id = a.id` trên Post
 
 ## 7. Ước lượng so với thực tế
 
-Chỗ đáng đọc nhất của `EXPLAIN ANALYZE` là đặt `rows=` (ước lượng) cạnh `actual rows=` (thực tế) ở **từng nút**:
+Chỗ đáng đọc nhất của `EXPLAIN ANALYZE` là đặt `rows=` (ước lượng) cạnh `actual rows=` (thực tế) ở **từng nút** để so sánh:
 
 ```sql
 EXPLAIN (ANALYZE, TIMING OFF, SUMMARY OFF)
@@ -232,7 +232,7 @@ SELECT count(*) FROM trips WHERE city_id = 3 AND pickup_area_id = 311;
          ->  Bitmap Index Scan on ix_trips_city_requested  (cost=0.00..2971.92 rows=129533 width=0) (actual rows=129795.00 loops=1)
 ```
 
-Ước khoảng 2.800, thật 22.222 — lệch khoảng 8 lần (hàm `uoc_luong()` của lab ra hệ số 7,9 ở lần chạy này). Khu 311 thuộc hẳn Đà Nẵng, nhưng planner coi hai điều kiện **độc lập** và nhân hai xác suất: tỉ lệ chuyến ở khu 311 × tỉ lệ chuyến ở Đà Nẵng (~13 %). Nút `Bitmap Index Scan` thì ước sát (129.533 vs 129.795) — lỗi nằm ở chỗ kết hợp điều kiện. Lệch ở nút dưới sẽ lan lên: nút cha chọn kiểu join, kiểu sắp dựa trên con số sai. Để ý thêm `Heap Blocks: exact=19424` — Đà Nẵng rải khắp bảng nên bitmap chạm gần hết 19.441 page. [PG-027](/articles/postgresql-statistics-analyze-cardinality) sửa ước lượng này bằng `CREATE STATISTICS`.
+Ước khoảng 2.800, thật 22.222 — lệch khoảng 8 lần (hàm `uoc_luong()` của lab ra hệ số 7,9 ở lần chạy này). Khu 311 thuộc hẳn Đà Nẵng, nhưng planner coi hai điều kiện **độc lập** và nhân hai xác suất: tỉ lệ chuyến ở khu 311 × tỉ lệ chuyến ở Đà Nẵng (~13 %). Nút `Bitmap Index Scan` thì ước sát (129.533 vs 129.795) — lỗi nằm ở chỗ kết hợp điều kiện. Lệch ở nút dưới sẽ lan lên: nút cha dựa trên con số sai để chọn kiểu join và kiểu sắp. Để ý thêm `Heap Blocks: exact=19424` — Đà Nẵng rải khắp bảng nên bitmap chạm gần hết 19.441 page. [PG-027](/articles/postgresql-statistics-analyze-cardinality) sửa ước lượng này bằng `CREATE STATISTICS`.
 
 ## 8. EXPLAIN ANALYZE chạy thật câu lệnh ghi
 
@@ -243,7 +243,7 @@ Lab chép 100 chuyến vào bảng tạm `thu_explain`, rồi:
 | `EXPLAIN (COSTS OFF) DELETE FROM thu_explain WHERE fare > 50000;` | In `Delete on thu_explain` → `Seq Scan`; bảng vẫn **100** dòng |
 | `EXPLAIN (ANALYZE, …) DELETE FROM thu_explain WHERE fare > 50000;` | `Seq Scan … (actual rows=68.00 …)`, `Rows Removed by Filter: 32`; bảng còn **32** dòng |
 
-Đó chính là 68 dòng của bạn mới ở đầu bài. Nút gốc `Delete on …` in `actual rows=0.00` vì nó không trả dòng lên trên; số dòng bị xoá nằm ở nút con. Cách an toàn mà tài liệu PostgreSQL khuyên: bọc trong giao dịch rồi huỷ.
+Đó chính là 68 dòng mà bạn mới ở đầu bài đã xoá. Nút gốc `Delete on …` in `actual rows=0.00` vì nút này không trả dòng lên trên; số dòng bị xoá nằm ở nút con. Cách an toàn mà tài liệu PostgreSQL khuyên: bọc trong giao dịch rồi huỷ.
 
 ```sql
 BEGIN;
@@ -259,7 +259,7 @@ ROLLBACK;
          Index Cond: (code = 600000)
 ```
 
-`dirtied=8`: câu UPDATE đã làm «bẩn» thật 8 page trong bộ nhớ. Sau `ROLLBACK`, chuyến 600000 vẫn 31.000 đ. `ROLLBACK` không thu hồi số đã lấy từ sequence và không huỷ được việc ngoài database (trigger gửi tin, gọi dịch vụ khác) — câu có tác dụng như vậy thì đừng `ANALYZE` trên môi trường thật.
+`dirtied=8`: câu UPDATE đã làm «bẩn» thật 8 page trong bộ nhớ. Sau `ROLLBACK`, chuyến 600000 vẫn 31.000 đ. `ROLLBACK` không thu hồi số đã lấy từ sequence và không huỷ được việc ngoài database (trigger gửi tin, gọi dịch vụ khác) — câu có tác dụng phụ như vậy thì đừng `ANALYZE` trên môi trường thật.
 
 ## 9. Ba tuỳ chọn nên dùng khi chia sẻ kế hoạch
 
@@ -274,8 +274,8 @@ EXPLAIN (COSTS OFF, SETTINGS) SELECT count(*) FROM trips WHERE fare >= 150000;
  Settings: jit = 'off', max_parallel_workers_per_gather = '0', search_path = 'toinoi'
 ```
 
-- **`SETTINGS`** in các tham số ảnh hưởng planner đang khác mặc định — người đọc kế hoạch của bạn biết ngay vì sao không có nút song song.
-- **`VERBOSE`** thêm dòng `Output:` (cột mỗi nút trả ra), tên bảng kèm schema (`toinoi.trips t`) và `Query Identifier` khi `compute_query_id` bật (lab nạp `pg_stat_statements` nên có).
+- **`SETTINGS`** in các tham số ảnh hưởng tới planner mà đang khác giá trị mặc định — người đọc kế hoạch của bạn biết ngay vì sao không có nút song song.
+- **`VERBOSE`** thêm dòng `Output:` (các cột mà mỗi nút trả ra), tên bảng kèm schema (`toinoi.trips t`) và `Query Identifier` khi `compute_query_id` bật (lab nạp `pg_stat_statements` nên có).
 - **`FORMAT JSON`** cho chương trình đọc; hàm `uoc_luong()` của lab dùng nó để lấy `Plan Rows` và `Actual Rows`.
 
 ## 10. Lỗi thường gặp
@@ -291,7 +291,7 @@ EXPLAIN (COSTS OFF, SETTINGS) SELECT count(*) FROM trips WHERE fare >= 150000;
 
 ## 11. Đánh đổi và giới hạn kết luận
 
-- **`EXPLAIN` trần** an toàn, nhanh, nhưng chỉ là dự đoán. **`EXPLAIN ANALYZE`** cho sự thật, đổi lại tốn đúng thời gian của câu lệnh, chạy thật mọi tác dụng phụ, và đo giờ từng nút cũng tốn thêm (`TIMING OFF` giảm phần này).
+- **`EXPLAIN` trần** an toàn, nhanh, nhưng chỉ là dự đoán. **`EXPLAIN ANALYZE`** cho số đo thật, đổi lại tốn đúng thời gian của câu lệnh, chạy thật mọi tác dụng phụ, và việc đo thời gian từng nút cũng tốn thêm (`TIMING OFF` giảm phần này).
 - Trên dữ liệu lab, `Buffers` và `actual rows` tất định; `cost`, `rows=` dao động theo mỗi lần `ANALYZE`; thời gian phụ thuộc máy và cache. Mang **cách đọc** sang hệ thống khác, đừng mang con số.
 - Lab tắt song song và JIT; server mặc định có thể thêm nút `Gather` và dòng JIT — cây đọc theo cùng nguyên tắc.
 
@@ -302,10 +302,10 @@ Lời giải đầy đủ chạy được: `p03/thu-nghiem/pg021-bai-tap.sql` (k
 **Bài 1.** Viết câu «các chuyến tài xế mã 20007 nhận trong ngày 15/10 (giờ VN)» rồi `EXPLAIN ANALYZE`. Bảng chỉ có index `(driver_id)` và `(city_id, requested_at)`. Kế hoạch dùng index nào, điều kiện ngày nằm ở `Index Cond` hay `Filter`, đọc bao nhiêu page bảng?
 
 <details><summary><b>Lời giải</b></summary>
-<p>Tài xế có 139 chuyến, 2 chuyến trong ngày. Lần chạy khi viết bài ra <code>BitmapAnd</code> của hai <code>Bitmap Index Scan</code>: trên <code>ix_trips_driver_id</code> (139 dòng) và trên <code>ix_trips_city_requested</code> (5.896 chuyến trong ngày, <code>Index Searches: 5</code> nhờ skip scan) — mỗi điều kiện là <code>Index Cond</code> của một index, giao hai bitmap rồi mới đọc bảng: <code>Heap Blocks: exact=2</code>. Kế hoạch dựa trên ước lượng nên máy bạn có thể ra cây khác; số thật 2 và 139 thì không đổi.</p>
+<p>Tài xế có 139 chuyến, 2 chuyến trong ngày. Lần chạy khi viết bài cho ra <code>BitmapAnd</code> của hai <code>Bitmap Index Scan</code>: trên <code>ix_trips_driver_id</code> (139 dòng) và trên <code>ix_trips_city_requested</code> (5.896 chuyến trong ngày, <code>Index Searches: 5</code> nhờ skip scan) — mỗi điều kiện là <code>Index Cond</code> của một index, giao hai bitmap rồi mới đọc bảng: <code>Heap Blocks: exact=2</code>. Kế hoạch dựa trên ước lượng nên máy bạn có thể ra cây khác; số thật 2 và 139 thì không đổi.</p>
 </details>
 
-**Bài 2.** Bạn cần xem kế hoạch của câu «cộng 1.000 đ cho 300 chuyến đang chạy» (`requested_at >= '2026-10-31 00:00+07'`) có số thật, mà không để lại thay đổi. Viết các lệnh và chỉ ra dòng nào cho biết số chuyến bị sửa.
+**Bài 2.** Bạn cần xem kế hoạch của câu «cộng 1.000 đ cho 300 chuyến đang chạy» (`requested_at >= '2026-10-31 00:00+07'`) kèm số đo thật mà không để lại thay đổi. Viết các lệnh và chỉ ra dòng nào cho biết số chuyến bị sửa.
 
 <details><summary><b>Lời giải</b></summary>
 <pre><code class="language-sql">BEGIN;
@@ -313,7 +313,7 @@ EXPLAIN (ANALYZE, COSTS OFF, TIMING OFF, SUMMARY OFF)
 UPDATE trips SET fare = fare + 1000
 WHERE requested_at &gt;= TIMESTAMPTZ '2026-10-31 00:00+07';
 ROLLBACK;</code></pre>
-<p>Kết quả: <code>Update on trips (actual rows=0.00 loops=1)</code> → <code>Index Scan using ix_trips_city_requested on trips (actual rows=300.00 loops=1)</code> (<code>Index Searches: 4</code>, skip scan). Số chuyến bị sửa là 300 ở nút con. Thí nghiệm kiểm thêm: trong giao dịch tổng cước đã tăng đúng 300.000 đ; sau <code>ROLLBACK</code> tổng về như cũ. <code>EXPLAIN</code> không <code>ANALYZE</code> của một câu <code>INSERT</code> thì không thêm dòng nào.</p>
+<p>Kết quả: <code>Update on trips (actual rows=0.00 loops=1)</code> → <code>Index Scan using ix_trips_city_requested on trips (actual rows=300.00 loops=1)</code> (<code>Index Searches: 4</code>, skip scan). Số chuyến bị sửa là 300 ở nút con. Thí nghiệm kiểm tra thêm: trong giao dịch tổng cước đã tăng đúng 300.000 đ; sau <code>ROLLBACK</code> tổng về như cũ. <code>EXPLAIN</code> không <code>ANALYZE</code> của một câu <code>INSERT</code> thì không thêm dòng nào.</p>
 </details>
 
 **Bài 3.** Dự đoán ước lượng của `city_id = 1 AND pickup_area_id = 111` (khu 111 thuộc Sài Gòn, ~55 % chuyến) lệch khoảng bao nhiêu lần, so với ví dụ Đà Nẵng ở mục 7. Còn `city_id = 3 AND kind = 'parcel'`?

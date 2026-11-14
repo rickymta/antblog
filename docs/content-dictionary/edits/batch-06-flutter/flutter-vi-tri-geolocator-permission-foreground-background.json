@@ -1,0 +1,143 @@
+{
+ "file": "flutter-vi-tri-geolocator-permission-foreground-background.md",
+ "edits": [
+  {
+   "old": "ghim điểm đón ở đó là nơi vị trí hiện tại đổ vào",
+   "new": "ghim điểm đón ở đó là nơi nhận vị trí hiện tại",
+   "reason": "'đổ vào' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nhận định về plugin lấy từ mã nguồn, về hệ điều hành từ developer.android.com và developer.apple.com",
+   "new": "Nhận định về plugin dựa trên mã nguồn, còn về hệ điều hành dựa trên developer.android.com và developer.apple.com",
+   "reason": "Câu lược động từ",
+   "severity": "low"
+  },
+  {
+   "old": "nghĩa là tài xế bằng khách cộng phần thêm",
+   "new": "nghĩa là khai báo của app tài xế bằng khai báo của app khách cộng phần thêm",
+   "reason": "Thiếu danh từ chính",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ lấy vị trí ngoài \"có màn hình mở\" và \"có foreground service\" mới cần quyền nền",
+   "new": "chỉ khi lấy vị trí lúc không có màn hình mở và cũng không có foreground service thì mới cần quyền nền",
+   "reason": "Trật tự từ khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó đổi exception của plugin thành exception của ta, gộp enum quyền về bốn giá trị, và đưa bước xin nền, chỉ có trên iOS, đi đường khác:",
+   "new": "Lớp này đổi exception của plugin thành exception của ta, gộp enum quyền về bốn giá trị, và chuyển bước xin nền, chỉ có trên iOS, sang một đường khác:",
+   "reason": "'Nó' đầu câu; 'đi đường khác' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "cho gán bản giả",
+   "new": "cho phép gán bản giả",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "vì hệ điều hành là nguồn sự thật",
+   "new": "vì hệ điều hành là nguồn dữ liệu gốc",
+   "reason": "Theo bảng thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Dịch vụ vị trí tắt thắng mọi quyền khác",
+   "new": "Dịch vụ vị trí tắt được ưu tiên hơn mọi quyền khác",
+   "reason": "'thắng' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ kết quả của chính lần xin mới trả.",
+   "new": "chỉ kết quả của chính lần xin mới cho giá trị đó.",
+   "reason": "Thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bản đầu của controller có hai lỗi. Nó bỏ kết quả lần xin rồi đọc lại bằng",
+   "new": "Bản đầu của controller có hai lỗi. Một, bản đầu bỏ kết quả lần xin rồi đọc lại bằng",
+   "reason": "Tránh 'Nó' đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "nút \"Tiếp tục\" bấm không có gì",
+   "new": "nút \"Tiếp tục\" bấm vào không có phản ứng nào",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó cũng chỉ kiểm `next is! Asking`",
+   "new": "Hai, bản đầu cũng chỉ kiểm `next is! Asking`",
+   "reason": "Tránh 'Nó' đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "`reduce` trả chính `Asking` cho `Asking`.",
+   "new": "với trạng thái `Asking`, `reduce` lại trả về chính `Asking`.",
+   "reason": "'trả X cho Y' khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "nếu họ đã chọn Allow Once",
+   "new": "nếu người dùng đã chọn Allow Once",
+   "reason": "Đại từ mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Dựng màn hình không xin gì;",
+   "new": "Khi dựng màn hình, app không xin gì;",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "và một lần nhờ `backgroundAsked`",
+   "new": "và hiện một lần nhờ cờ `backgroundAsked`",
+   "reason": "'một lần nhờ' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "bản đồ bài 34 cho sửa tay",
+   "new": "bản đồ bài 34 cho phép sửa tay",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "chiều giảm là độ chính xác thấp hơn, `distanceFilter` lớn hơn và dừng luồng khi không cần.",
+   "new": "muốn giảm thì hạ độ chính xác, tăng `distanceFilter` và dừng luồng khi không cần.",
+   "reason": "'chiều giảm' tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Chạy được là phần logic.",
+   "new": "Phần chạy được là phần logic.",
+   "reason": "Thiếu danh từ chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "lớp bọc đổi thành",
+   "new": "lớp bọc đổi nó thành",
+   "reason": "Thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "lần từ chối thứ hai làm Denied sang DeniedForever",
+   "new": "lần từ chối thứ hai chuyển Denied sang DeniedForever",
+   "reason": "'làm X sang Y' sai cấu trúc",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ xin sau khi họ chạm vào tính năng",
+   "new": "chỉ xin sau khi người dùng chạm vào tính năng",
+   "reason": "Đại từ mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "<code>canTrack</code> thành <code>false</code>",
+   "new": "<code>canTrack</code> chuyển thành <code>false</code>",
+   "reason": "Thiếu 'chuyển'",
+   "severity": "medium"
+  }
+ ]
+}

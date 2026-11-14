@@ -1,0 +1,18 @@
+{"file":"aws-chien-luoc-deploy-rolling-canary-rollback.md","edits":[
+{"old":"expand/contract migration để schema tương thích hai bản; cổng kiểm trước khi chuyển traffic;","new":"migration theo kiểu expand/contract để schema tương thích với cả hai bản; cổng kiểm tra trước khi chuyển traffic;","reason":"Câu cụt thiếu động từ/danh từ; 'cổng kiểm' lược danh từ","severity":"medium"},
+{"old":"Bạn nên đã đọc","new":"Bạn nên đọc trước","reason":"Calque 'should have read'","severity":"medium"},
+{"old":"khả năng quay lại do cách ta viết migration (expand/contract), không do chiến lược deploy.","new":"khả năng quay lại phụ thuộc vào cách ta viết migration (expand/contract), không phụ thuộc vào chiến lược deploy.","reason":"'do' thiếu động từ, giọng dịch máy","severity":"medium"},
+{"old":"Chậm: lại rolling về bản cũ;","new":"Chậm: phải rolling lại về bản cũ;","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"lỗi chỉ lộ ra ở phần nhỏ khách","new":"lỗi chỉ lộ ra với một nhóm nhỏ khách","reason":"Cụm 'phần nhỏ khách' tự ghép","severity":"medium"},
+{"old":"Chúng không loại trừ nhau.","new":"Bốn chiến lược này không loại trừ nhau.","reason":"Tránh đại từ chỉ sự vật trừu tượng ở đầu câu","severity":"low"},
+{"old":"đều có một khoảng thời gian bản cũ và bản mới cùng nói chuyện với một database. Nên mọi migration","new":"đều có một khoảng thời gian mà bản cũ và bản mới cùng làm việc với một database. Vì vậy mọi migration","reason":"'nói chuyện với' là calque (talk to); 'Nên' đầu câu gượng","severity":"medium"},
+{"old":"trong chốc lát, và nếu nó phải đợi một transaction dài thì mọi câu","new":"trong chốc lát, và nếu câu này phải đợi một transaction dài thì mọi câu","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"**không rollback một migration phá dữ liệu**","new":"**không thể rollback một migration làm mất dữ liệu**","reason":"Thiếu 'thể'; 'phá dữ liệu' gượng","severity":"medium"},
+{"old":"Đó là lý do loạt .NET để migrator thành bước release riêng","new":"Đó là lý do loạt bài .NET tách migrator thành một bước release riêng","reason":"'để ... thành' là calque (make into)","severity":"medium"},
+{"old":"Một synthetic canary tên giống canary deployment nhưng khác bản chất: nó là một script","new":"Synthetic canary có tên giống canary deployment nhưng khác bản chất: đó là một script","reason":"Câu thiếu động từ; tránh 'nó'","severity":"medium"},
+{"old":"Nó chỉ an toàn khi **image cũ","new":"Rollback chỉ an toàn khi **image cũ","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"Quyền quyết định cũng cần ghi trước, không bàn lúc 10:58.","new":"Quyền quyết định cũng cần ghi rõ từ trước, không bàn lúc 10:58.","reason":"'ghi trước' thiếu ý","severity":"medium"},
+{"old":"còn khi tiêu chí nhập nhằng thì","new":"còn khi tiêu chí không rõ ràng thì","reason":"'nhập nhằng' gượng trong ngữ cảnh này","severity":"low"},
+{"old":"do bản lỗi ghi trong cửa sổ canary cần được liệt kê và sửa tiến, vì không có gì tự hoàn tác chúng.","new":"do bản lỗi ghi trong cửa sổ canary cần liệt kê và sửa tiến, vì không có cơ chế nào tự hoàn tác chúng.","reason":"Bỏ câu bị động kiểu Anh; 'không có gì' mơ hồ","severity":"medium"},
+{"old":"Chỉ canary theo metric hạ tầng","new":"Chỉ canary dựa trên metric hạ tầng","reason":"'theo' mơ hồ","severity":"low"}
+]}

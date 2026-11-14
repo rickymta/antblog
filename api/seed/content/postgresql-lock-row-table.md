@@ -1,7 +1,7 @@
 ---
 slug: postgresql-lock-row-table
 title: "Khoá dòng, khoá bảng và thời gian chờ: ai đang chặn ai?"
-summary: "Lúc 01:00, tổng đài Tới Nơi báo màn sửa cước bị treo dù database không lỗi gì. Tạo lại hàng chờ khoá trên PostgreSQL 18.1, đọc pg_stat_activity, pg_locks, pg_blocking_pids để tìm phiên gốc, rồi đặt thời gian chờ có chủ đích."
+summary: "Lúc 01:00, tổng đài Tới Nơi báo màn sửa cước bị treo dù database không lỗi gì. Bài này tạo lại hàng chờ khoá trên PostgreSQL 18.1, đọc pg_stat_activity, pg_locks, pg_blocking_pids để tìm phiên gốc, rồi đặt thời gian chờ có chủ đích."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-033, lock, row-lock, pg-locks, lock-timeout, advisory-lock, toi-noi]
@@ -41,7 +41,7 @@ Mỗi **phiên** (session) A, B, C… là một kết nối psql riêng. Bước
 | T4 | A | `COMMIT;` | A xong |
 | T5 | B | (bước T3 chạy tiếp) | ✔ **35500**, `version` = 3 |
 
-Người đọc (T2) không chờ: khoá dòng **không chặn SELECT thường**. Người ghi thứ hai chờ tới khi **giao dịch** của A kết thúc, không phải tới khi câu UPDATE của A xong (nó xong từ T1). Và B cộng 500 lên **bản mới** 35000: ở Read Committed, người chờ đọc lại dòng sau khi được khoá — PG-034 so chuyện này với Repeatable Read. Hệ quả cho màn sửa cước: nếu ứng dụng mở giao dịch lúc người dùng *mở* màn và chỉ COMMIT khi bấm «Lưu», cả thời gian người dùng ngồi nhìn màn hình là thời gian khoá bị giữ.
+Người đọc (T2) không chờ: khoá dòng **không chặn SELECT thường**. Người ghi thứ hai chờ tới khi **giao dịch** của A kết thúc, không phải tới khi câu UPDATE của A xong (nó xong từ T1). Và B cộng 500 lên **bản mới** 35000: ở Read Committed, người chờ đọc lại dòng sau khi được khoá — PG-034 so sánh việc này với Repeatable Read. Hệ quả cho màn sửa cước: nếu ứng dụng mở giao dịch lúc người dùng *mở* màn và chỉ COMMIT khi bấm «Lưu», cả thời gian người dùng ngồi nhìn màn hình là thời gian khoá bị giữ.
 
 ## 3. Ba nguồn để biết ai chặn ai
 
@@ -75,7 +75,7 @@ Không dòng nào nói «A khoá chuyến 400104». Theo tài liệu, thông tin
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Hỏi pg_blocking_pids(), đừng tự nối pg_locks</span>
-<p><code>pg_locks</code> không cho biết thứ tự trong hàng chờ; tài liệu khuyên dùng <code>pg_blocking_pids()</code>, hàm này tính cả «chặn mềm» (phiên đang chờ và đứng trước trong hàng). Nó cần khoá độc quyền bảng khoá trong chốc lát — dùng để chẩn đoán, đừng gọi liên tục.</p>
+<p><code>pg_locks</code> không cho biết thứ tự trong hàng chờ; tài liệu khuyên dùng <code>pg_blocking_pids()</code>, hàm này tính cả «chặn mềm» (phiên đang chờ và đứng trước trong hàng). Hàm này cần khoá độc quyền bảng khoá trong chốc lát — dùng để chẩn đoán, đừng gọi liên tục.</p>
 </div>
 
 ## 4. Bốn mức khoá dòng và bẫy khoá ngoại
@@ -84,14 +84,14 @@ Muốn «đọc rồi sửa» an toàn, ứng dụng khoá dòng ngay lúc đọ
 
 | Mức | Ai tự lấy | Chặn |
 |---|---|---|
-| `FOR KEY SHARE` | Kiểm khoá ngoại khi chèn dòng con | DELETE, đổi khoá, `FOR UPDATE` |
+| `FOR KEY SHARE` | Kiểm tra khoá ngoại khi chèn dòng con | DELETE, đổi khoá, `FOR UPDATE` |
 | `FOR SHARE` | — | Mọi UPDATE/DELETE, `FOR NO KEY UPDATE`, `FOR UPDATE` |
 | `FOR NO KEY UPDATE` | UPDATE không đổi cột khoá | UPDATE/DELETE, `FOR SHARE`, `FOR NO KEY UPDATE`, `FOR UPDATE` — **không** chặn `FOR KEY SHARE` |
 | `FOR UPDATE` | DELETE, UPDATE đổi cột có unique index dùng được cho khoá ngoại | Tất cả, kể cả `FOR KEY SHARE` |
 
 Không mức nào chặn `SELECT` thường. Lab §2: A `BEGIN; SELECT … WHERE code = 400105 FOR UPDATE;` — dòng không bị sửa nhưng `xmax` đã là xid của A. B chèn một sự kiện cho chuyến đó (`INSERT INTO trip_events …`) thì **⏳ chờ** tới khi A COMMIT. Lặp lại với `FOR NO KEY UPDATE`: B chèn sự kiện **ngay**, còn `SELECT … FOR NO KEY UPDATE` của B vẫn **⏳ chờ** và sau khi A huỷ chuyến rồi COMMIT thì nhận `400105 | cancelled` — đọc lại bản mới.
 
-Lý do: chèn dòng con phải kiểm khoá ngoại `trip_events.trip_id → trips.id`, tức lấy `FOR KEY SHARE` trên chuyến, và `FOR UPDATE` xung đột với nó. Khi không xoá dòng, không đổi khoá chính, dùng **`FOR NO KEY UPDATE`**: hai người sửa vẫn không chồng nhau mà việc ghi lịch sử chuyến không bị chặn.
+Lý do: chèn dòng con phải kiểm tra khoá ngoại `trip_events.trip_id → trips.id`, tức lấy `FOR KEY SHARE` trên chuyến, và `FOR UPDATE` xung đột với nó. Khi không xoá dòng và không đổi khoá chính thì dùng **`FOR NO KEY UPDATE`**: hai người sửa vẫn không chồng nhau mà việc ghi lịch sử chuyến không bị chặn.
 
 ## 5. Khoá bảng: DDL chặn cả người đọc
 
@@ -181,9 +181,9 @@ Kết quả: `lab-A | idle in transaction`. Trên production thêm `pid`, `usena
 
 Hai cách gỡ khác nhau ở cái bị huỷ. **Gỡ sai chỗ** — D chạy `pg_cancel_backend(pid)` cho lab-B: B nhận ✔ `57014 canceling statement due to user request`, chuyển `idle`; đọc lại hàng chờ thì `lab-C | active | Lock | transactionid | lab-A` — C chỉ tiến lên một bậc, gốc vẫn còn. **Gỡ đúng chỗ** — D chạy `pg_terminate_backend(pid, 5000)` cho lab-A: C ✔ ngay với `fare` **38500**; khi A quay lại gửi `COMMIT` thì **mất kết nối**. 38500 = 38000 + 500: +1000 của A bị ROLLBACK, +200 của B đã bị huỷ — cả hai phải làm lại. `pg_cancel_backend` huỷ **câu đang chạy**; `pg_terminate_backend` cắt **kết nối**, nhả mọi khoá. Đó là chữa cháy có hậu quả; cách bền là không để giao dịch ngồi yên và đặt `idle_in_transaction_session_timeout` cho role ứng dụng.
 
-## 8. Advisory lock: khoá theo con số do ứng dụng đặt nghĩa
+## 8. Advisory lock: khoá theo con số do ứng dụng tự quy ước ý nghĩa
 
-**Advisory lock** (khoá tư vấn) là khoá trên một con số PostgreSQL không gắn với bảng hay dòng nào — ứng dụng tự quy ước nghĩa (ở đây: mã chuyến). Lab §5: A `SELECT pg_advisory_lock(400107)`; B `pg_try_advisory_lock(400107)` → `f` (thử, không chờ), rồi `pg_advisory_lock(400107)` → **⏳ chờ** (Lock: advisory; `pg_locks` có `advisory 400107 ExclusiveLock`: A `t`, B `f`); A `pg_advisory_unlock` → `t` thì B ✔.
+**Advisory lock** (khoá tư vấn) là khoá trên một con số mà PostgreSQL không gắn với bảng hay dòng nào — ứng dụng tự quy ước nghĩa (ở đây: mã chuyến). Lab §5: A `SELECT pg_advisory_lock(400107)`; B `pg_try_advisory_lock(400107)` → `f` (thử, không chờ), rồi `pg_advisory_lock(400107)` → **⏳ chờ** (Lock: advisory; `pg_locks` có `advisory 400107 ExclusiveLock`: A `t`, B `f`); A `pg_advisory_unlock` → `t` thì B ✔.
 
 `pg_advisory_lock` là khoá **mức phiên**: giữ tới khi tự unlock hoặc phiên đóng — với connection pool, «phiên đóng» có thể là rất lâu sau. **`pg_advisory_xact_lock`** là khoá mức giao dịch: tự nhả khi COMMIT/ROLLBACK, không có hàm unlock; lab chạy nó trong `BEGIN … COMMIT` và sau đó `pg_locks` còn 0 khoá advisory. Ưu tiên loại sau (bài tập 2 cho thấy vì sao).
 
@@ -198,9 +198,9 @@ Hai cách gỡ khác nhau ở cái bị huỷ. **Gỡ sai chỗ** — D chạy `
 
 ## 10. Đánh đổi
 
-- **Giao dịch theo màn hình** chắc chắn không ai chen vào, nhưng biến thời gian suy nghĩ của người dùng thành thời gian khoá. Màn sửa cước nên đọc, cho sửa ngoài giao dịch, rồi ghi một lần có kiểm `version` (PG-035).
+- **Giao dịch theo màn hình** chắc chắn không ai chen vào, nhưng biến thời gian suy nghĩ của người dùng thành thời gian khoá. Màn sửa cước nên đọc, cho sửa ngoài giao dịch, rồi ghi một lần có kiểm tra `version` (PG-035).
 - **`FOR UPDATE`** không «an toàn hơn» `FOR NO KEY UPDATE` cho đọc–sửa thường; nó chỉ chặn thêm dòng con (và làm `SKIP LOCKED` bỏ qua dòng — PG-036).
-- **Timeout ngắn** lỗi sớm và rõ nhưng app phải biết thử lại; **0** thì không lỗi nhưng hàng chờ lan sang mọi request. Giữ `lock_timeout` < `statement_timeout`.
+- **Timeout ngắn** báo lỗi sớm và rõ ràng, nhưng app phải biết thử lại; **0** thì không lỗi nhưng hàng chờ lan sang mọi request. Giữ `lock_timeout` < `statement_timeout`.
 
 ## 11. Bài tập
 

@@ -1,0 +1,11 @@
+{"file":"system-testing-usability-test.md","edits":[
+{"old":"theo kịch bản, nên nó không bao giờ gặp","new":"theo kịch bản, nên script không bao giờ gặp","reason":"Tránh 'nó' chỉ sự vật; nhắc lại danh từ","severity":"low"},
+{"old":"rating hay finding người dùng thực đo. Mọi","new":"rating hay finding nào rút ra từ người dùng thật. Mọi","reason":"'người dùng thực đo' là cụm tự ghép, khó hiểu","severity":"medium"},
+{"old":"time-on-task hay finding người dùng thực đo. Hai","new":"time-on-task hay finding nào rút ra từ người dùng thật. Hai","reason":"'người dùng thực đo' là cụm tự ghép, khó hiểu","severity":"medium"},
+{"old":"Nó trả lời «hệ thống có xử lý đúng","new":"Test này trả lời «hệ thống có xử lý đúng","reason":"Tránh 'Nó' đầu câu; nhắc lại danh từ","severity":"medium"},
+{"old":"Đổi lại, nó tốn công tuyển người","new":"Đổi lại, phương pháp này tốn công tuyển người","reason":"Tránh 'nó' chỉ sự vật; nhắc lại danh từ","severity":"medium"},
+{"old":"Nó là ngân sách hợp lý","new":"Đó là ngân sách hợp lý","reason":"Tránh 'Nó' chỉ con số trừu tượng","severity":"low"},
+{"old":"SPEC nói nút huỷ phải hiện phí; nó không nói người dùng","new":"SPEC nói nút huỷ phải hiện phí, nhưng không nói người dùng","reason":"Tránh 'nó' mơ hồ, chủ ngữ rõ hơn","severity":"medium"},
+{"old":"Moderator tự nhắm mắt dùng screen reader không phải dữ liệu đại diện.","new":"Việc moderator tự nhắm mắt dùng screen reader không cho ra dữ liệu đại diện.","reason":"Câu thiếu cấu trúc chủ ngữ rõ, dịch sát tiếng Anh","severity":"medium"},
+{"old":"Không. Nó là điều kiện cần theo R-UI-03","new":"Không. Thuộc tính này là điều kiện cần theo R-UI-03","reason":"Tránh 'Nó' chỉ sự vật; nhắc lại danh từ","severity":"low"}
+]}

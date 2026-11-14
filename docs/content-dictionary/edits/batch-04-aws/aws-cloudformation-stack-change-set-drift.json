@@ -1,0 +1,17 @@
+{"file":"aws-cloudformation-stack-change-set-drift.md","edits":[
+{"old":"Bạn cần xong Phần 01","new":"Bạn cần học xong Phần 01","reason":"Thiếu động từ","severity":"medium"},
+{"old":"CloudFormation đổi tên cái database đang chạy, đúng hay sai?","new":"CloudFormation đổi tên database đang chạy, đúng hay sai?","reason":"'cái database' gượng","severity":"low"},
+{"old":"ID mới nghĩa là một tài nguyên mới cần tạo,","new":"ID mới nghĩa là phải tạo một tài nguyên mới,","reason":"Trật tự từ kiểu Anh","severity":"low"},
+{"old":"Click console cho kết quả nhanh nhưng không để lại dấu vết có thể đọc lại. IaC đổi bốn thứ:","new":"Thao tác trên console cho kết quả nhanh nhưng không để lại dấu vết có thể đọc lại. IaC thay đổi bốn điều:","reason":"'Click console' và 'đổi bốn thứ' gượng","severity":"medium"},
+{"old":"biến template con thành một tài nguyên của stack cha; vòng đời đi cùng nhau.","new":"biến template con thành một tài nguyên của stack cha, và hai bên có chung vòng đời.","reason":"'vòng đời đi cùng nhau' gượng","severity":"medium"},
+{"old":"với mỗi tài nguyên, nó nói `Add`, `Modify` hay `Remove`, và với `Modify` nó nói `Replacement` là `True`, `False` hay `Conditional`.","new":"với mỗi tài nguyên, nó cho biết `Add`, `Modify` hay `Remove`, và với `Modify` nó cho biết `Replacement` là `True`, `False` hay `Conditional`.","reason":"'nói' (says) là giọng dịch máy","severity":"medium"},
+{"old":"nghĩa là tài nguyên cũ sẽ bị thay bằng cái mới.","new":"nghĩa là tài nguyên cũ sẽ bị thay bằng tài nguyên mới.","reason":"'cái mới' lược danh từ","severity":"low"},
+{"old":"để bỏ qua tài nguyên kẹt, chấp nhận stack và thực tế lệch nhau ở đó.","new":"để bỏ qua tài nguyên kẹt, chấp nhận để stack lệch với thực tế ở tài nguyên đó.","reason":"Câu cụt, trật tự lủng củng","severity":"medium"},
+{"old":"Cập nhật lên tài nguyên chỉ định","new":"Cập nhật trên các tài nguyên được chỉ định","reason":"'lên' calque (on)","severity":"low"},
+{"old":"ghi tường minh để người review thấy","new":"ghi rõ để người review thấy","reason":"'tường minh' gượng","severity":"medium"},
+{"old":"Lúc đó template không còn là sự thật.","new":"Lúc đó template không còn là nguồn dữ liệu gốc.","reason":"Calque 'source of truth'","severity":"medium"},
+{"old":"hoặc lỗi vì trạng thái không như dự kiến.","new":"hoặc báo lỗi vì trạng thái không như dự kiến.","reason":"Câu thiếu động từ","severity":"low"},
+{"old":"; thứ tự tạo, thời gian và thông báo lỗi hãy tự xác nhận khi chạy.","new":"; hãy tự xác nhận thứ tự tạo, thời gian và thông báo lỗi khi chạy.","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"Để CloudFormation sinh tên, trừ khi tên là hợp đồng với hệ thống ngoài.","new":"Hãy để CloudFormation tự sinh tên, trừ khi tên đó là cam kết với hệ thống bên ngoài.","reason":"Thiếu chủ ngữ/động từ; 'hợp đồng' dịch sát chữ","severity":"medium"},
+{"old":"khi hai stack đổi với nhịp khác nhau.","new":"khi hai stack thay đổi theo nhịp khác nhau.","reason":"'đổi với nhịp' calque","severity":"medium"}
+]}

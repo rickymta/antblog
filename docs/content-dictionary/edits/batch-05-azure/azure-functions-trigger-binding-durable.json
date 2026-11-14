@@ -1,0 +1,18 @@
+{"file":"azure-functions-trigger-binding-durable.md","edits":[
+{"old":"ba thứ đi kèm (hosting plan, trigger/binding, Durable) và ranh giới giữa việc hợp với function với việc không hợp.","new":"ba khái niệm đi kèm (hosting plan, trigger/binding, Durable) và ranh giới giữa việc nên và không nên dùng function.","reason":"'hợp với function với việc không hợp' lặp 'với', khó đọc","severity":"medium"},
+{"old":"Function phải chịu được việc nhận cùng một message hai lần.","new":"Function phải xử lý được việc nhận cùng một message hai lần.","reason":"'chịu được' là calque","severity":"high"},
+{"old":"Plan giữ instance sẵn trả bằng tiền để mua độ trễ ổn định, nên trả lời câu hỏi «chịu được bao nhiêu giây cho request đầu tiên» trước khi chọn.","new":"Plan giữ sẵn instance nghĩa là bạn trả tiền để có độ trễ ổn định, nên hãy trả lời câu hỏi «request đầu tiên chờ được tối đa bao nhiêu giây» trước khi chọn.","reason":"Câu cụt, 'mua độ trễ', 'chịu được bao nhiêu giây' là calque","severity":"high"},
+{"old":"Tính tiền theo thực thi, thời gian và instance giữ sẵn tuỳ plan;","new":"Cách tính tiền theo số lần thực thi, thời gian chạy và instance giữ sẵn tuỳ plan;","reason":"Câu cụt, 'theo thực thi' thiếu danh từ","severity":"medium"},
+{"old":"đã có lịch nghỉ hưu và không nhận phiên bản ngôn ngữ mới","new":"đã có lịch ngừng hỗ trợ và không nhận phiên bản ngôn ngữ mới","reason":"'nghỉ hưu' là calque của retire","severity":"high"},
+{"old":"nên kiểm trang hosting và bảng phiên bản hỗ trợ trước khi quyết định.","new":"nên kiểm tra trang hosting và bảng phiên bản hỗ trợ trước khi quyết định.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Lab này đi trước nên tạo tạm một queue","new":"Lab này đi trước bài 34 nên tạo tạm một queue","reason":"'đi trước' thiếu tham chiếu","severity":"low"},
+{"old":"Điều lab cần bên gửi làm: đặt `MessageId` bằng mã chuyến.","new":"Lab cần bên gửi làm một việc: đặt `MessageId` bằng mã chuyến.","reason":"Câu cụt thiếu danh từ","severity":"low"},
+{"old":"Nó không chứng minh biên nhận đúng nghiệp vụ, vì function chỉ chép body; nó cũng không chứng minh quyền","new":"Đoạn này không chứng minh biên nhận đúng nghiệp vụ, vì function chỉ chép body; đoạn này cũng không chứng minh quyền","reason":"'Nó' mơ hồ chỉ đoạn code","severity":"medium"},
+{"old":"Chạy local bằng Core Tools, cùng Azurite thay storage của host.","new":"Chạy local bằng Core Tools, dùng Azurite thay cho storage của host.","reason":"Thiếu động từ","severity":"medium"},
+{"old":"nên kiểm bảng phiên bản được hỗ trợ và `func --help` trước khi chạy.","new":"nên kiểm tra bảng phiên bản được hỗ trợ và `func --help` trước khi chạy.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"rồi kiểm blob xuất hiện.","new":"rồi kiểm tra xem blob đã xuất hiện chưa.","reason":"'kiểm blob xuất hiện' lược động từ","severity":"medium"},
+{"old":"như ở bài outbox/inbox đã dẫn, kiểm trước khi ghi.","new":"như ở bài outbox/inbox đã dẫn, kiểm tra khoá đó trước khi ghi.","reason":"'kiểm' thiếu 'tra' và đối tượng","severity":"medium"},
+{"old":"Retry policy ở mức function không áp cho mọi trigger,","new":"Retry policy ở mức function không áp dụng cho mọi trigger,","reason":"Thiếu động từ 'áp dụng'","severity":"low"},
+{"old":"Vì vậy code orchestrator phải xác định:","new":"Vì vậy code orchestrator phải có tính xác định:","reason":"'phải xác định' thiếu nghĩa, dịch từ deterministic","severity":"medium"},
+{"old":"; nó cho thấy hình dạng của pattern, không chứng minh API đúng","new":"; đoạn code cho thấy hình dạng của pattern nhưng không chứng minh API đúng","reason":"'nó' mơ hồ","severity":"low"}
+]}

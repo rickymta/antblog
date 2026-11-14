@@ -28,9 +28,9 @@ Key Vault chứa ba loại object. Chọn sai loại là lỗi thiết kế, kh�
 | Key | Khoá mật mã; thao tác (ký, mã hoá, giải mã) chạy trong dịch vụ | Ký dữ liệu, khoá bọc cho mã hoá dữ liệu |
 | Certificate | Chứng chỉ X.509 kèm vòng đời, có chính sách cấp và gia hạn | Chứng chỉ TLS cho domain của Tới Nơi |
 
-Điểm cần nắm ở key: với key do Key Vault giữ, bạn gửi dữ liệu tới để ký hoặc giải mã thay vì lấy private key về. Khoá không rời vault, nên lộ app không có nghĩa là lộ khoá. Certificate là loại ghép: tạo một certificate sẽ sinh ra key và secret đi kèm. Secret chứa cả private key để dịch vụ khác (như ingress) tải về dùng, vì thế quyền đọc secret của một certificate cũng là quyền lấy được private key.
+Điểm cần nắm ở key: với key do Key Vault giữ, bạn gửi dữ liệu tới để ký hoặc giải mã thay vì lấy private key về. Khoá không rời vault, nên app bị lộ không có nghĩa là khoá bị lộ. Certificate là loại ghép: tạo một certificate sẽ sinh ra key và secret đi kèm. Secret chứa cả private key để dịch vụ khác (như ingress) tải về dùng, vì thế quyền đọc secret của một certificate cũng là quyền lấy được private key.
 
-Mỗi lần ghi đè giá trị thực chất là tạo một **version** mới. Version cũ vẫn còn, truy cập được bằng URI có version. URI không có version luôn trỏ tới bản mới nhất. Hai cơ chế bảo vệ xoá cũng nên biết. **Soft delete** giữ object đã xoá trong thời gian lưu giữ để khôi phục, và nó luôn bật. **Purge protection** chặn cả việc xoá vĩnh viễn trước hạn, kể cả với người có quyền. Purge protection một khi bật thì không tắt được, và tên vault bị giữ trong suốt thời gian lưu giữ nếu bạn xoá vault.
+Mỗi lần ghi đè giá trị thực chất là tạo một **version** mới. Version cũ vẫn còn, truy cập được bằng URI có version. URI không có version luôn trỏ tới bản mới nhất. Hai cơ chế bảo vệ xoá cũng nên biết. **Soft delete** giữ object đã xoá trong thời gian lưu giữ để khôi phục, và tính năng này luôn bật. **Purge protection** chặn cả việc xoá vĩnh viễn trước hạn, kể cả với người có quyền. Purge protection một khi bật thì không tắt được, và tên vault bị giữ trong suốt thời gian lưu giữ nếu bạn xoá vault.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -94,7 +94,7 @@ az keyvault secret show --vault-name kv-toinoi-dev-sea \
   --name Postgres--Trips --query id -o tsv
 ```
 
-Lệnh dùng `--query id` để chỉ in URI của version hiện hành, không in giá trị ra màn hình; lệnh vẫn phải đọc được secret mới trả về kết quả, nên đây là phép thử quyền thật. Nếu nhận 403 ngay sau khi gán, chờ vài phút cho role assignment có hiệu lực. Nếu nhận 403 mãi, kiểm hai thứ: vault có thật sự bật RBAC, và firewall của vault (mục sau) có chặn IP của VM không.
+Lệnh dùng `--query id` để chỉ in URI của version hiện hành, không in giá trị ra màn hình; lệnh vẫn phải đọc được secret mới trả về kết quả, nên đây là phép thử quyền thật. Nếu nhận 403 ngay sau khi gán, chờ vài phút cho role assignment có hiệu lực. Nếu nhận 403 mãi, hãy kiểm tra hai thứ: vault có thật sự bật RBAC, và firewall của vault (mục sau) có chặn IP của VM không.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -105,20 +105,20 @@ Lệnh dùng `--query id` để chỉ in URI của version hiện hành, không 
 
 Bicep của `trip-service` (trong `31-38-trip-service/cloud/main.bicep`, giải thích ở [bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment)) không nhận mật khẩu mà nhận `postgresSecretUrl`, một URI Key Vault, cùng `identityResourceId`. Khối `secrets` khai báo URI và identity dùng để lấy nó, rồi biến môi trường `ConnectionStrings__Trips` tham chiếu secret đó. Mật khẩu không nằm trong source, không nằm trong parameter thường.
 
-Cơ chế này cũng là nguồn của hiểu lầm về rotation. Có hai bước tách rời. Nền tảng dùng identity lấy giá trị từ Key Vault về kho secret của app; với URI không version, nó định kỳ lấy lại bản mới nhất. Nhưng biến môi trường `ConnectionStrings__Trips` chỉ được nạp vào container **lúc container khởi động**, và biến môi trường của một process Linux đang chạy không đổi được từ bên ngoài. Vì vậy sau khi tạo version mới, app phải được restart revision (`az containerapp revision restart`, đúng quyền của custom role ở bài 12) hoặc có **revision mới** để nhận giá trị. Chu kỳ nền tảng kiểm lại Key Vault có thể thay đổi, hãy đọc tài liệu Container Apps thay vì dựa vào một con số. App Service có cơ chế Key Vault reference tương tự, cũng nạp giá trị vào app setting và cần app khởi động lại để process thấy giá trị mới.
+Cơ chế này cũng là nguồn của hiểu lầm về rotation. Có hai bước tách rời. Nền tảng dùng identity lấy giá trị từ Key Vault về kho secret của app; với URI không version, nó định kỳ lấy lại bản mới nhất. Nhưng biến môi trường `ConnectionStrings__Trips` chỉ được nạp vào container **lúc container khởi động**, và biến môi trường của một process Linux đang chạy không đổi được từ bên ngoài. Vì vậy sau khi tạo version mới, app phải được restart revision (`az containerapp revision restart`, đúng quyền của custom role ở bài 12) hoặc có **revision mới** để nhận giá trị. Chu kỳ nền tảng kiểm tra lại Key Vault có thể thay đổi, hãy đọc tài liệu Container Apps thay vì dựa vào một con số. App Service có cơ chế Key Vault reference tương tự, cũng nạp giá trị vào app setting và cần app khởi động lại để process thấy giá trị mới.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Rotation: tạo version secret mới, tạo revision mới nhận giá trị, kiểm readiness rồi mới vô hiệu version cũ."><defs><marker id="az14-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">1. Version secret mới</text><text x="34" y="123" class="t-small">Version cũ còn hiệu lực</text><path d="M280 108 L305 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az14-1-a)"/><rect x="305" y="65" width="260" height="85" rx="10" class="f-pk-soft s-pk"/><text x="319" y="95" class="t-b">2. Revision mới</text><text x="319" y="123" class="t-small">Replica đọc giá trị lúc start</text><path d="M565 108 L590 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az14-1-a)"/><rect x="590" y="65" width="260" height="85" rx="10" class="f-warn-soft s-warn"/><text x="604" y="95" class="t-b">3. Tắt version cũ</text><text x="604" y="123" class="t-small">Sau khi readiness ổn</text></svg>
 </div>
-<figcaption>Hình 2. Rotation: tạo version secret mới, tạo revision mới nhận giá trị, kiểm readiness rồi mới vô hiệu version cũ.</figcaption>
+<figcaption>Hình 2. Rotation: tạo version secret mới, tạo revision mới nhận giá trị, kiểm tra readiness rồi mới vô hiệu version cũ.</figcaption>
 </figure>
 
-Thứ tự trên quan trọng. Với mật khẩu database còn một việc ngầm: đổi mật khẩu của role đang dùng thì replica cũ vẫn giữ mật khẩu cũ, nên mọi kết nối mới từ chúng (pool mở thêm, reconnect) thất bại trước khi replica mới sẵn sàng. Cách an toàn là dùng hai role luân phiên, hoặc chấp nhận một khoảng gián đoạn có kế hoạch. Đừng coi rotation là một lệnh duy nhất.
+Thứ tự trên quan trọng. Với mật khẩu database còn một điểm dễ bị bỏ sót: đổi mật khẩu của role đang dùng thì replica cũ vẫn giữ mật khẩu cũ, nên mọi kết nối mới từ chúng (pool mở thêm, reconnect) thất bại trước khi replica mới sẵn sàng. Cách an toàn là dùng hai role luân phiên, hoặc chấp nhận một khoảng gián đoạn có kế hoạch. Đừng coi rotation là một lệnh duy nhất.
 
 ## Mạng, log và chuyện không nhồi mọi thứ vào vault
 
-Mặc định Key Vault có endpoint công khai và được bảo vệ bằng xác thực Entra. Có hai cách cứng hơn: giữ public nhưng bật firewall chỉ cho IP hoặc subnet được phép, hoặc dùng **private endpoint** để vault chỉ truy cập trong VNet (xem [bài 17](/articles/azure-private-endpoint-private-dns-service-endpoint)). Đặt default action là Deny mà quên thêm IP của chính bạn thì chính bạn cũng không đọc được data plane, và đây là lỗi hay gặp khi bật firewall lần đầu.
+Mặc định Key Vault có endpoint công khai và được bảo vệ bằng xác thực Entra. Có hai cách cứng hơn: giữ public nhưng bật firewall chỉ cho IP hoặc subnet được phép, hoặc dùng **private endpoint** để vault chỉ truy cập được trong VNet (xem [bài 17](/articles/azure-private-endpoint-private-dns-service-endpoint)). Đặt default action là Deny mà quên thêm IP của chính bạn thì chính bạn cũng không đọc được data plane, và đây là lỗi hay gặp khi bật firewall lần đầu.
 
 Muốn biết ai đọc secret nào thì bật **diagnostic setting** gửi log `AuditEvent` tới Log Analytics. Log ghi thao tác, danh tính, URI object, mã kết quả, không ghi giá trị secret.
 

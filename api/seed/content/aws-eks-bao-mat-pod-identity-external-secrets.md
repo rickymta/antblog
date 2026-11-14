@@ -1,7 +1,7 @@
 ---
 slug: aws-eks-bao-mat-pod-identity-external-secrets
 title: "Bảo mật EKS: Pod Identity, External Secrets, Pod Security Standards, network policy và ký image"
-summary: "Bài 48: danh tính pod với Pod Identity và quyền tối thiểu, External Secrets Operator đồng bộ Secrets Manager vào Secret, Pod Security Standards restricted, NetworkPolicy default deny, image ký bằng cosign hoặc Signer và policy admission bằng Kyverno, GuardDuty EKS và audit log."
+summary: "Bài 48: danh tính pod với Pod Identity và quyền tối thiểu, External Secrets Operator đồng bộ Secrets Manager vào Secret, Pod Security Standards restricted, NetworkPolicy default deny, ký image bằng cosign hoặc Signer, policy admission bằng Kyverno, GuardDuty EKS và audit log."
 category: devops-aws
 level: advanced
 tags: [aws, toi-noi, devops, eks, security, pod-identity, external-secrets, kyverno, pod-security, network-policy]
@@ -31,7 +31,7 @@ language: vi
 | Chuỗi cung ứng | Quét ECR, ký image, admission bằng Kyverno | `kyverno/` |
 | Phát hiện | GuardDuty EKS audit và runtime; Inspector | Terraform tuỳ chọn |
 
-Kịch bản pentest ở trên bị chặn ở ít nhất ba chỗ: IMDS hop limit 1 khiến pod không với tới metadata của node; không có quyền Secrets Manager trên role node; NetworkPolicy chặn egress tới `169.254.169.254`. Phòng thủ nhiều lớp nghĩa là một lớp sai không làm sụp cả chuỗi.
+Kịch bản pentest ở trên bị chặn ở ít nhất ba chỗ: IMDS hop limit 1 khiến pod không với tới metadata của node; không có quyền Secrets Manager trên role node; NetworkPolicy chặn egress tới `169.254.169.254`. Phòng thủ nhiều lớp nghĩa là một lớp cấu hình sai không làm sụp cả chuỗi.
 
 ## Pod Identity: mỗi service một role, quyền đúng việc
 
@@ -47,7 +47,7 @@ resource "aws_eks_pod_identity_association" "service" {
 }
 ```
 
-`booking` được `s3:PutObject`, `GetObject` trên `proof/*` (như bài 42) và `sns:Publish` vào topic sự kiện chuyến; `dispatch` chỉ nhận và xoá message của hàng đợi `toinoi-lab-dispatch-jobs` (bài 45); `tracking` chỉ `GetObject` trên `proof/*`. ServiceAccount trong manifest không cần annotation role ARN, vì association nằm ở API của EKS. Hai điều dễ vấp: association chỉ có hiệu lực với pod được tạo sau đó, nên phải restart workload; và agent được pod gọi qua địa chỉ link-local `169.254.170.23`, nhớ ở phần NetworkPolicy. Pod Identity còn gắn **session tag** (`kubernetes-namespace`, `kubernetes-service-account`...) vào credentials, dùng được trong điều kiện ABAC ở [bài 51](/articles/aws-iam-nang-cao-permission-boundary-abac-access-analyzer).
+`booking` được `s3:PutObject`, `GetObject` trên `proof/*` (như bài 42) và `sns:Publish` vào topic sự kiện chuyến; `dispatch` chỉ nhận và xoá message của hàng đợi `toinoi-lab-dispatch-jobs` (bài 45); `tracking` chỉ `GetObject` trên `proof/*`. ServiceAccount trong manifest không cần annotation role ARN, vì association nằm ở API của EKS. Hai điều dễ vấp: association chỉ có hiệu lực với pod được tạo sau đó, nên phải restart workload; và pod gọi agent qua địa chỉ link-local `169.254.170.23`, nên nhớ mở đường này ở phần NetworkPolicy. Pod Identity còn gắn **session tag** (`kubernetes-namespace`, `kubernetes-service-account`...) vào credentials, dùng được trong điều kiện ABAC ở [bài 51](/articles/aws-iam-nang-cao-permission-boundary-abac-access-analyzer).
 
 ## Secret: External Secrets Operator, không commit vào Git
 
@@ -68,7 +68,7 @@ spec:
 
 `ClusterSecretStore` dùng chung toàn cluster và không khai báo `auth`: ESO dùng chuỗi credential mặc định, tức role Pod Identity của controller. `refreshInterval` quyết định độ trễ nhận giá trị mới và số lần gọi API (cũng là tiền); đổi secret trên AWS không làm pod tự restart nếu pod đọc qua biến môi trường.
 
-Cần nhìn thẳng ranh giới: ESO dùng **một** role cho mọi namespace, nên IAM chỉ giới hạn tới prefix `toinoi/<env>/*`. Ranh giới giữa namespace do `conditions` của store và một policy Kyverno (ở dưới) bảo đảm. So sánh nhanh các cách:
+Cần nói thẳng về giới hạn này: ESO dùng **một** role cho mọi namespace, nên IAM chỉ giới hạn tới prefix `toinoi/<env>/*`. Việc tách biệt giữa các namespace do `conditions` của store và một policy Kyverno (ở dưới) bảo đảm. So sánh nhanh các cách:
 
 | Cách | Secret nằm ở đâu | Ưu | Nhược |
 |---|---|---|---|
@@ -87,7 +87,7 @@ Về etcd, từ Kubernetes 1.28 EKS mặc định mã hoá envelope mọi dữ l
 
 ## Pod Security Admission và NetworkPolicy
 
-**Pod Security Admission** là cơ chế có sẵn của Kubernetes, bật bằng nhãn namespace. Lab đặt `enforce`, `audit` và `warn` đều ở mức `restricted`: pod phải chạy không phải root, bỏ mọi capability, `allowPrivilegeEscalation: false`, seccomp `RuntimeDefault`. Chart bài 46 đã tuân thủ sẵn các điều này (kèm `readOnlyRootFilesystem` và `emptyDir` cho `/tmp`). Áp dụng với namespace đang có workload cũ thì bật `warn` và `audit` trước để thấy cái gì sẽ bị chặn, rồi mới `enforce`.
+**Pod Security Admission** là cơ chế có sẵn của Kubernetes, bật bằng nhãn namespace. Lab đặt `enforce`, `audit` và `warn` đều ở mức `restricted`: pod phải chạy không phải root, bỏ mọi capability, `allowPrivilegeEscalation: false`, seccomp `RuntimeDefault`. Chart bài 46 đã tuân thủ sẵn các điều này (kèm `readOnlyRootFilesystem` và `emptyDir` cho `/tmp`). Với namespace đang có workload cũ, hãy bật `warn` và `audit` trước để biết những gì sẽ bị chặn, rồi mới `enforce`.
 
 **NetworkPolicy** mặc định cho phép mọi pod nói chuyện với nhau. Với VPC CNI, bật policy bằng cấu hình add-on `enableNetworkPolicy`. Lab cho namespace `booking` default deny cả ingress lẫn egress, rồi mở từng đường:
 
@@ -100,7 +100,7 @@ Về etcd, từ Kubernetes 1.28 EKS mặc định mã hoá envelope mọi dữ l
 | `allow-egress-https-except-metadata` | HTTPS ra ngoài, trừ `169.254.169.254` | Chặn IMDS ngay cả khi có egress rộng |
 | `allow-egress-postgres` | Tới subnet dữ liệu, cổng 5432 | Kết nối RDS |
 
-Với RDS, thêm **security group for pods** (`SecurityGroupPolicy`): pod `booking` dùng security group riêng và RDS chỉ cho phép nguồn là security group đó, thay vì mở cho cả dải IP của node. Cái giá là pod dùng branch ENI, giới hạn theo loại instance, không áp dụng cho Fargate.
+Với RDS, thêm **security group for pods** (`SecurityGroupPolicy`): pod `booking` dùng security group riêng và RDS chỉ cho phép nguồn là security group đó, thay vì mở cho cả dải IP của node. Cái giá là pod dùng branch ENI, số lượng bị giới hạn theo loại instance, và tính năng này không áp dụng cho Fargate.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -111,9 +111,9 @@ Với RDS, thêm **security group for pods** (`SecurityGroupPolicy`): pod `booki
 
 ## Chuỗi cung ứng image và phát hiện
 
-Chuỗi: build, **quét ECR** (bài 11; Inspector cho quét nâng cao), **ký**, rồi cổng admission **chỉ cho chạy image đã ký**. Hai cách ký phổ biến: cosign với khoá (hoặc keyless) và AWS Signer với Notation cho ECR. Lab dùng cosign: `kyverno/verify-images.yaml` yêu cầu mọi image `toinoi/*` có chữ ký khớp khoá công khai, và `mutateDigest` đổi tag thành digest để thứ được kiểm đúng là thứ chạy. Kyverno cần quyền đọc ECR để lấy chữ ký. Hai policy còn lại bắt buộc nhãn `Project` và `Service`, request và limit bộ nhớ, và image ghim digest (nên cấm luôn tag `latest`).
+Chuỗi: build, **quét ECR** (bài 11; Inspector cho quét nâng cao), **ký**, rồi cổng admission **chỉ cho chạy image đã ký**. Hai cách ký phổ biến: cosign với khoá (hoặc keyless) và AWS Signer với Notation cho ECR. Lab dùng cosign: `kyverno/verify-images.yaml` yêu cầu mọi image `toinoi/*` có chữ ký khớp khoá công khai, và `mutateDigest` đổi tag thành digest để thứ được kiểm đúng là thứ chạy. Kyverno cần quyền đọc ECR để lấy chữ ký. Hai policy còn lại bắt buộc có nhãn `Project` và `Service`, có request và limit bộ nhớ, và image phải ghim digest (nên cấm luôn tag `latest`).
 
-Một lưu ý quan trọng: cú pháp chính sách của Kyverno đã đổi qua các phiên bản gần đây (`spec.validationFailureAction` đã deprecated, thay bằng `failureAction` trong từng rule; `ClusterPolicy` đang được chuyển dần sang các loại policy mới viết bằng CEL). Đối chiếu tài liệu đúng phiên bản bạn cài trước khi chép lab; các policy ở đây **chưa được chạy trên Kyverno thật**.
+Một lưu ý quan trọng: cú pháp chính sách của Kyverno đã đổi qua các phiên bản gần đây (`spec.validationFailureAction` đã deprecated, thay bằng `failureAction` trong từng rule; `ClusterPolicy` đang được chuyển dần sang các loại policy mới viết bằng CEL). Hãy đối chiếu với tài liệu đúng phiên bản bạn cài trước khi chép lab; các policy ở đây **chưa được chạy trên Kyverno thật**.
 
 Phát hiện là lớp cuối: GuardDuty cho EKS có hai phần, **EKS Protection** phân tích audit log của control plane, và **Runtime Monitoring** (thay cho EKS Runtime Monitoring cũ) dùng agent trên node do GuardDuty cài qua add-on. Bật audit log control plane cũng cho bạn dấu vết "ai gọi API gì". Phần phát hiện được đi sâu ở [bài 54](/articles/aws-cloudtrail-config-security-hub-guardduty).
 
@@ -122,16 +122,16 @@ Phát hiện là lớp cuối: GuardDuty cho EKS có hai phần, **EKS Protectio
 - **Default deny làm hỏng credentials:** quên rule tới `169.254.170.23` hoặc DNS và mọi pod đồng loạt mất khả năng gọi AWS. Áp policy vào namespace thử trước.
 - **ClusterSecretStore không `conditions`:** namespace nào cũng tham chiếu được store và đọc mọi secret trong prefix IAM. Luôn khai báo `conditions` và policy ngăn ExternalSecret trỏ sang key của namespace khác.
 - **Ép `enforce` ngay:** namespace cũ có pod root bị từ chối hàng loạt khi rollout. Đi từ `warn`, `audit` tới `enforce`.
-- **Policy admission làm chết cluster:** Kyverno ngừng thì webhook có thể chặn hoặc cho qua tất cả tuỳ cấu hình. Chạy nhiều replica, loại trừ namespace hệ thống và thử failure mode trước.
-- **Role node vẫn quyền rộng:** chuyển workload sang Pod Identity mà không thu hẹp role node thì lớp mới vô nghĩa.
+- **Policy admission làm chết cluster:** Khi Kyverno ngừng chạy, webhook có thể chặn hoặc cho qua mọi request, tuỳ cấu hình. Chạy nhiều replica, loại trừ namespace hệ thống và thử failure mode trước.
+- **Role node vẫn có quyền rộng:** chuyển workload sang Pod Identity mà không thu hẹp role node thì lớp mới vô nghĩa.
 
-**Bài tập:** pod `tracking` chỉ cần đọc ảnh trên S3 nhưng đọc được secret RDS của `booking`. Lỗi có thể ở những đâu, và kiểm bằng cách nào?
+**Bài tập:** pod `tracking` chỉ cần đọc ảnh trên S3 nhưng đọc được secret RDS của `booking`. Lỗi có thể nằm ở những đâu, và kiểm tra bằng cách nào?
 
 <details><summary>Xem đáp án</summary><p>Ba chỗ cần nghi. Một: role của pod hoặc role node có <code>secretsmanager:GetSecretValue</code> trên <code>*</code> thay vì chỉ S3. Hai: pod dùng chung ServiceAccount hoặc role với service khác. Ba: một <code>ExternalSecret</code> trong namespace <code>tracking</code> trỏ vào key của <code>booking</code> qua <code>ClusterSecretStore</code> không có <code>conditions</code> hoặc không bị policy ngăn. Kiểm: chạy <code>aws sts get-caller-identity</code> trong pod để biết role đang dùng, xem policy của role đó, liệt kê ExternalSecret cùng key mà nó tham chiếu, và tra CloudTrail xem ai gọi <code>GetSecretValue</code>.</p></details>
 
 ## Lab và kiểm chứng
 
-Mã ở `examples/toi-noi-aws/p05-48-eks-security`: Terraform cho role Pod Identity theo service, role của ESO và GuardDuty EKS (tuỳ chọn); manifest namespace với Pod Security, NetworkPolicy và SecurityGroupPolicy; ClusterSecretStore, ExternalSecret; ba policy Kyverno. README ghi tiền tính thế nào và lệnh dọn.
+Mã ở `examples/toi-noi-aws/p05-48-eks-security`: Terraform cho role Pod Identity theo service, role của ESO và GuardDuty EKS (tuỳ chọn); manifest namespace với Pod Security, NetworkPolicy và SecurityGroupPolicy; ClusterSecretStore, ExternalSecret; ba policy Kyverno. README ghi cách tính chi phí và lệnh dọn.
 
 `terraform validate` đã chạy trong Docker và YAML đã parse được. **Chưa kiểm chứng trên cluster và tài khoản thật**: toàn bộ policy Kyverno (`verifyImages`, wildcard trong `NotEquals`), ESO dùng Pod Identity, `conditions` của store, tương tác NetworkPolicy với security group for pods, và GuardDuty runtime agent.
 

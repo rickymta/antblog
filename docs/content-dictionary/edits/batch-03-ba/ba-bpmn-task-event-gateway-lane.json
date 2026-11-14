@@ -1,0 +1,53 @@
+{
+"file": "ba-bpmn-task-event-gateway-lane.md",
+"edits": [
+{
+"old": "giao tiếp giữa participant.",
+"new": "giao tiếp giữa các participant.",
+"reason": "Thiếu từ chỉ số nhiều",
+"severity": "low"
+},
+{
+"old": "quy trình thực tế còn bước xác thực và replay được tách khỏi sơ đồ nhập môn",
+"new": "quy trình thực tế còn bước xác thực và replay, các bước này được tách khỏi sơ đồ nhập môn",
+"reason": "Câu mơ hồ: 'được tách' có vẻ bổ nghĩa cho 'replay'",
+"severity": "medium"
+},
+{
+"old": "dữ liệu nào khiến chưa thể kết luận và owner xử lý",
+"new": "dữ liệu nào khiến chưa thể kết luận và người phụ trách xử lý",
+"reason": "owner -> người phụ trách",
+"severity": "medium"
+},
+{
+"old": "gateway hỏi điều chưa được tính/đọc",
+"new": "gateway hỏi về điều chưa được tính hoặc chưa được đọc",
+"reason": "Câu cụt, khó hiểu",
+"severity": "medium"
+},
+{
+"old": "như cùng một tiến trình",
+"new": "như thể cùng một tiến trình",
+"reason": "Thiếu 'thể', câu gượng",
+"severity": "medium"
+},
+{
+"old": "Đi một case khách huỷ searching",
+"new": "Đi qua một case khách huỷ searching",
+"reason": "Thiếu giới từ",
+"severity": "low"
+},
+{
+"old": "Đi một case picked_up",
+"new": "Đi qua một case picked_up",
+"reason": "Thiếu giới từ",
+"severity": "low"
+},
+{
+"old": "tại sao token đi mỗi nhánh",
+"new": "tại sao token đi theo mỗi nhánh",
+"reason": "Thiếu giới từ",
+"severity": "low"
+}
+]
+}

@@ -1,0 +1,71 @@
+{
+"file": "api-testing-tu-goc-nhin-code.md",
+"edits": [
+{
+"old": "Kiểm API từ bên ngoài, bạn so mã trạng thái",
+"new": "Khi kiểm thử API từ bên ngoài, bạn so mã trạng thái",
+"reason": "Thiếu liên từ, 'Kiểm API' cụt",
+"severity": "medium"
+},
+{
+"old": "để một chương trình gọi một hệ thống khác lấy dịch vụ",
+"new": "để một chương trình gọi dịch vụ của một hệ thống khác",
+"reason": "Trật tự từ kiểu dịch máy",
+"severity": "medium"
+},
+{
+"old": "Mục 2.7 không quy định cách chọn ca.",
+"new": "Mục 2.7 không quy định cách chọn test case.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "mỗi lối thoát ra một mã trạng thái là một outcome",
+"new": "mỗi lối thoát trả về một mã trạng thái là một outcome",
+"reason": "'thoát ra một mã' gượng",
+"severity": "medium"
+},
+{
+"old": "Ghi nhận dạng «cần chủ đặc tả quyết».",
+"new": "Ghi nhận ở dạng «cần chủ đặc tả quyết định».",
+"reason": "'quyết' cụt",
+"severity": "medium"
+},
+{
+"old": "Hai ca ghi nhận defect (N02b, N21)",
+"new": "Hai test case ghi nhận defect (N02b, N21)",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "**Bản thay thế cũng có lỗi.**",
+"new": "**Test double cũng có thể có lỗi.**",
+"reason": "'Bản thay thế' mơ hồ, đoạn sau dùng 'test double'",
+"severity": "medium"
+},
+{
+"old": "Nó không chứng minh câu `UPDATE … WHERE used_by_trip_id IS NULL` an toàn",
+"new": "Cách này không chứng minh câu `UPDATE … WHERE used_by_trip_id IS NULL` an toàn",
+"reason": "Tránh 'Nó' chỉ sự vật trừu tượng",
+"severity": "medium"
+},
+{
+"old": "thứ tự R-VALID-02 đầu–cuối cần một lớp test hệ thống",
+"new": "muốn kiểm thứ tự R-VALID-02 từ đầu đến cuối thì cần một lớp test hệ thống",
+"reason": "Câu thiếu động từ, kiểu dịch máy",
+"severity": "medium"
+},
+{
+"old": "SPEC không nói rõ ca này ⇒",
+"new": "SPEC không nói rõ tình huống này ⇒",
+"reason": "'ca này' không rõ nghĩa",
+"severity": "medium"
+},
+{
+"old": "vì API được gọi bởi chương trình khác",
+"new": "vì API do chương trình khác gọi",
+"reason": "Bỏ bị động 'được … bởi'",
+"severity": "low"
+}
+]
+}

@@ -8,7 +8,7 @@ tags: [flutter, dart, mobile, toi-noi, navigation, ui]
 language: vi
 ---
 
-Khách xem báo giá 5 km: 25.500 VND. Họ bấm "Đặt chuyến" và sang màn hình xác nhận, nơi họ đổi cách trả tiền từ tiền mặt sang ví. Rồi tay chạm nhầm vào nút back. Nếu màn hình đóng ngay, lựa chọn vừa đổi biến mất mà không ai hỏi. Còn khi khách bấm xác nhận, màn hình báo giá phải biết chuyến nào vừa được tạo để hiện "Đã đặt chuyến T-0001".
+Khách xem báo giá 5 km: 25.500 VND. Họ bấm "Đặt chuyến" và sang màn hình xác nhận, nơi họ đổi cách trả tiền từ tiền mặt sang ví. Rồi khách chạm nhầm vào nút back. Nếu màn hình đóng ngay, lựa chọn vừa đổi biến mất mà không ai hỏi. Còn khi khách bấm xác nhận, màn hình báo giá phải biết chuyến nào vừa được tạo để hiện "Đã đặt chuyến T-0001".
 
 Đó là hai nửa của điều hướng: đưa dữ liệu đi và nhận kết quả về, rồi kiểm soát chuyện thoát khỏi màn hình. Đây là bài 12 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 11 về Form và validation](/articles/flutter-form-validation-focus-nhap-diem-don-diem-den) và [bài 10 về StatefulWidget](/articles/flutter-statefulwidget-lifecycle-setstate-chon-dich-vu) trước, vì ta dùng `mounted` và `State` ở đây. Mọi ví dụ dùng `Trip`, `Money` và `calculateFare` của package `toi_noi_core` ở [bài 06](/articles/dart-package-pubspec-lint-test-toi-noi-core), và bảng giá chỉ là số minh hoạ của hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi).
 
@@ -64,7 +64,7 @@ Khách xem báo giá 5 km: 25.500 VND. Họ bấm "Đặt chuyến" và sang mà
     });
 ```
 
-Ta khai báo kiểu ở hai chỗ: `push<Trip>` và `MaterialPageRoute<Trip>`. Nhờ đó `trip` có kiểu `Trip?` và compiler buộc ta xử lý `null`. Lab quy ước `Trip` là khách đã xác nhận, `null` là khách rời đi. Nếu bỏ kiểu, `push` suy ra `dynamic` và `trip.foo.bar` vẫn qua analyzer. Còn nếu route khai báo `Trip` mà ta `pop('đã đặt')` thì khi bật assertions (debug và test) `Navigator` ném `FlutterError` với thông báo rõ ràng, và test `pop sai kiểu kết quả bị chặn khi bật assertions` đã thử đúng tình huống đó. Chỉ thông báo nằm trong `assert`. Khi tắt assertions, kết quả sai kiểu vẫn nổ `TypeError` do kiểm tra kiểu covariant lúc chạy, chỉ mất thông báo dễ hiểu; ta chưa chạy trên bản release thật.
+Ta khai báo kiểu ở hai chỗ: `push<Trip>` và `MaterialPageRoute<Trip>`. Nhờ đó `trip` có kiểu `Trip?` và compiler buộc ta xử lý `null`. Lab quy ước `Trip` là khách đã xác nhận, `null` là khách rời đi. Nếu bỏ kiểu, `push` suy ra `dynamic` và `trip.foo.bar` vẫn qua analyzer. Còn nếu route khai báo `Trip` mà ta `pop('đã đặt')` thì khi bật assertions (debug và test) `Navigator` ném `FlutterError` với thông báo rõ ràng, và test `pop sai kiểu kết quả bị chặn khi bật assertions` đã thử đúng tình huống đó. Chỉ có thông báo là nằm trong `assert`. Khi tắt assertions, kết quả sai kiểu vẫn nổ `TypeError` do kiểm tra kiểu covariant lúc chạy, chỉ mất thông báo dễ hiểu; ta chưa chạy trên bản release thật.
 
 ## Truyền dữ liệu bằng constructor
 
@@ -126,7 +126,7 @@ class ConfirmTripScreen extends StatefulWidget {
   }
 ```
 
-`Trip` chỉ được tạo lúc khách xác nhận, vì `requestedAt` là thời điểm đặt chứ không phải thời điểm báo giá. `Clock` là hàm trả giờ UTC, mặc định là đồng hồ thật và được test thay bằng một giờ cố định, nên test so sánh được cả đối tượng `Trip` bằng `==`.
+`Trip` chỉ được tạo lúc khách xác nhận, vì `requestedAt` là thời điểm đặt chứ không phải thời điểm báo giá. `Clock` là hàm trả giờ UTC, mặc định là đồng hồ thật, còn trong test ta thay bằng một giờ cố định, nên test so sánh được cả đối tượng `Trip` bằng `==`.
 
 ## Bottom sheet và dialog cũng là route
 
@@ -174,7 +174,7 @@ Future<PaymentMethod?> showPaymentMethodSheet(
   }
 ```
 
-Test `đóng sheet không chọn thì giữ lựa chọn cũ và back không bị chặn` chạm vùng mờ, rồi kiểm lựa chọn vẫn là "Tiền mặt". Một chi tiết cho khi có nhiều `Navigator` lồng nhau: theo chữ ký trong source, `showModalBottomSheet` mặc định `useRootNavigator: false` còn `showDialog` mặc định `true`.
+Test `đóng sheet không chọn thì giữ lựa chọn cũ và back không bị chặn` chạm vùng mờ, rồi kiểm lựa chọn vẫn là "Tiền mặt". Một chi tiết cần nhớ khi có nhiều `Navigator` lồng nhau: theo chữ ký trong source, `showModalBottomSheet` mặc định `useRootNavigator: false` còn `showDialog` mặc định `true`.
 
 ## PopScope: chặn back khi có thay đổi chưa lưu
 
@@ -221,7 +221,7 @@ Phần `PopScope` nằm ngay trong `build`:
 
 Chữ ký hiện tại, theo source của Flutter 3.47, là `onPopInvokedWithResult(bool didPop, T? result)`. Callback cũ `onPopInvoked` và widget `WillPopScope` đều được đánh dấu deprecated, nên đừng dùng chúng trong code mới. Kiểu `T` của `PopScope<T>` nên khớp hoặc là kiểu cha của kiểu route, vì thế ta viết `PopScope<Trip>` cho route `MaterialPageRoute<Trip>`.
 
-Có hai điều cần hiểu đúng. Thứ nhất, khi `canPop` sai, callback vẫn chạy với `didPop == false`, và đó là lúc ta mở hộp thoại; test `onPopInvokedWithResult báo didPop false khi bị chặn` ghi lại đúng chuỗi `[false]`. Thứ hai, callback chạy sau khi lần pop đã được xử lý, nên không thể huỷ một pop đang diễn ra; muốn chặn phải đặt `canPop` từ trước. Lý do còn nằm ở cử chỉ back: theo `popGestureEnabled` trong source, route có `popDisposition` là `doNotPop` thì cử chỉ back của người dùng không được bắt đầu, nên predictive back của Android cũng không chạy animation khi `canPop` sai. Đó cũng là lý do `WillPopScope`, vốn quyết định bằng callback bất đồng bộ lúc back đã diễn ra, bị đánh dấu deprecated vì không hoạt động với predictive back. Vì `canPop` đọc từ `_hasChanges`, nó cập nhật theo `setState`: chọn ví thì back bị chặn, chọn lại tiền mặt thì back đi thẳng.
+Có hai điều cần hiểu đúng. Thứ nhất, khi `canPop` sai, callback vẫn chạy với `didPop == false`, và đó là lúc ta mở hộp thoại; test `onPopInvokedWithResult báo didPop false khi bị chặn` ghi lại đúng chuỗi `[false]`. Thứ hai, callback chạy sau khi lần pop đã được xử lý, nên không thể huỷ một pop đang diễn ra; muốn chặn phải đặt `canPop` từ trước. Gốc của vấn đề nằm ở cử chỉ back: theo `popGestureEnabled` trong source, route có `popDisposition` là `doNotPop` thì cử chỉ back của người dùng không được bắt đầu, nên predictive back của Android cũng không chạy animation khi `canPop` sai. Đó cũng là lý do `WillPopScope`, vốn quyết định bằng callback bất đồng bộ lúc back đã diễn ra, bị đánh dấu deprecated vì không hoạt động với predictive back. Vì `canPop` đọc từ `_hasChanges`, nó cập nhật theo `setState`: chọn ví thì back bị chặn, chọn lại tiền mặt thì back đi thẳng.
 
 Hộp thoại xác nhận rời đi:
 
@@ -254,7 +254,7 @@ Future<void> askToLeave(BuildContext context) async {
 
 Ta so sánh `leave != true` thay vì `leave == false`, vì chạm ra ngoài hộp thoại cũng cho `null` và cũng phải hiểu là "ở lại" (test `chạm ra ngoài hộp thoại (kết quả null) thì ở lại`). Khi khách chọn "Rời đi", `Navigator.of(context).pop()` đóng màn hình xác nhận và vì không kèm giá trị, Future ở `QuoteScreen` nhận `null`.
 
-Trên iOS có một khác biệt đáng biết. Trên iOS, `MaterialPageRoute` dùng `CupertinoPageTransitionsBuilder` nên có cử chỉ vuốt từ mép trái như app iOS. Tài liệu API của `PopScope` nói rằng với `canPop` sai, cử chỉ vuốt từ mép trái của `CupertinoRouteTransitionMixin` không được nhận ra, nên callback không được gọi. Hai test chạy với nền tảng giả lập iOS xác nhận điều đó:
+Trên iOS có một khác biệt đáng biết. Ở đó `MaterialPageRoute` dùng `CupertinoPageTransitionsBuilder` nên có cử chỉ vuốt từ mép trái như app iOS. Tài liệu API của `PopScope` nói rằng với `canPop` sai, cử chỉ vuốt từ mép trái của `CupertinoRouteTransitionMixin` không được nhận ra, nên callback không được gọi. Hai test chạy với nền tảng giả lập iOS xác nhận điều đó:
 
 ### ios_swipe_test.dart · 12-navigator-route/test/ios_swipe_test.dart (trích)
 
@@ -352,7 +352,7 @@ So với `push` có kiểu, named route mất ba lớp bảo vệ của compiler
 
 Mỗi chỗ có một test riêng. `arguments` là `Object?`, nên `pushNamed<Trip>('/confirm', arguments: '5 km')` biên dịch bình thường và chỉ hiện trang "cần một Quote, nhận String" khi chạy; thiếu `arguments` thì ra "nhận Null". Còn `T` của `pushNamed` thì `Navigator` ép kiểu route lúc push: `pushNamed<int>` trên route `MaterialPageRoute<Trip>` ném `TypeError`. Lúc viết lab ta vấp đúng lỗi này: trang lỗi ban đầu là `MaterialPageRoute<void>`, nên `pushNamed<Trip>` với `arguments` sai ném `TypeError` thay vì hiện trang lỗi. Vì thế nhánh lỗi cũng ghi `MaterialPageRoute<Trip>`.
 
-Ngoài ra, trang "Navigation and routing" của docs.flutter.dev khuyên không dùng named route cho hầu hết ứng dụng, và nói khi deep link tới, Flutter đẩy một route mới lên `Navigator` bất kể người dùng đang ở đâu. Vì thế luồng chính của lab dùng `push` có kiểu với constructor, còn named route chỉ để minh hoạ. Khi app cần deep link và bảo vệ route theo đăng nhập, bài 23 của loạt chuyển sang `go_router`.
+Ngoài ra, trang "Navigation and routing" của docs.flutter.dev khuyên không dùng named route cho hầu hết ứng dụng, và nói khi deep link tới, Flutter đẩy một route mới lên `Navigator` bất kể người dùng đang ở đâu. Vì thế luồng chính của lab dùng `push` có kiểu với constructor, còn named route chỉ để minh hoạ. Khi app cần deep link và bảo vệ route theo đăng nhập, bài 23 của loạt bài chuyển sang `go_router`.
 
 ## Lỗi thường gặp
 
@@ -361,7 +361,7 @@ Ngoài ra, trang "Navigation and routing" của docs.flutter.dev khuyên không 
 <ul>
 <li><strong>Dùng <code>setState</code> hoặc <code>context</code> sau <code>await</code> mà không kiểm <code>mounted</code>.</strong> Dấu hiệu: <code>setState() called after dispose()</code>, hoặc lỗi tra cứu <code>Navigator</code> từ context đã bị gỡ; lint <code>use_build_context_synchronously</code> báo phần dùng context. Cách sửa: <code>if (!mounted) return;</code> trong <code>State</code>, <code>if (!context.mounted) return;</code> trong hàm ngoài lớp.</li>
 <li><strong>Nghĩ <code>PopScope</code> chặn mọi lần pop.</strong> Dấu hiệu: nút "Xác nhận" vẫn đóng được màn hình dù <code>canPop</code> sai. Nguyên nhân: <code>pop</code> không hỏi <code>PopScope</code>, chỉ <code>maybePop</code> hỏi. Cách sửa: lối ra của người dùng đi qua back, lối ra có chủ đích dùng <code>pop</code> kèm kết quả.</li>
-<li><strong><code>canPop: false</code> mà không có lối ra.</strong> Dấu hiệu: back không làm gì, trên iOS vuốt từ mép trái cũng im lặng. Nguyên nhân: cử chỉ iOS không gọi callback khi <code>canPop</code> sai. Cách sửa: gắn <code>canPop</code> với điều kiện thật như <code>!_hasChanges</code> và luôn có nút rõ ràng để thoát.</li>
+<li><strong><code>canPop: false</code> mà không có lối ra.</strong> Dấu hiệu: back không làm gì, trên iOS vuốt từ mép trái cũng không có phản ứng nào. Nguyên nhân: cử chỉ iOS không gọi callback khi <code>canPop</code> sai. Cách sửa: gắn <code>canPop</code> với điều kiện thật như <code>!_hasChanges</code> và luôn có nút rõ ràng để thoát.</li>
 <li><strong>Bỏ kiểu của route.</strong> Dấu hiệu: <code>await Navigator.of(context).push(MaterialPageRoute(...))</code> cho kết quả <code>dynamic</code> và <code>r.foo.bar</code> vẫn qua analyzer. Cách sửa: viết <code>push&lt;Trip&gt;</code> cùng <code>MaterialPageRoute&lt;Trip&gt;</code>, rồi xử lý đủ hai nhánh của <code>Trip?</code>.</li>
 <li><strong>Truyền dữ liệu qua biến toàn cục hoặc <code>arguments</code> không kiểm.</strong> Dấu hiệu: màn hình xác nhận hiện báo giá cũ, hoặc test phải dựng trạng thái ở nơi khác mới chạy được. Cách sửa: nhận đối tượng qua constructor; nếu dùng named route thì kiểm <code>arguments is Quote</code> và cho trang lỗi cùng kiểu kết quả.</li>
 </ul>

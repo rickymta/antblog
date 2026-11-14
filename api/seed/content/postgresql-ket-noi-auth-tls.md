@@ -1,26 +1,26 @@
 ---
 slug: postgresql-ket-noi-auth-tls
 title: "Xác thực và bảo vệ kết nối PostgreSQL: pg_hba.conf, SCRAM và TLS verify-full"
-summary: "API của Tới Nơi «kết nối được database» chưa có nghĩa là nó đang nói chuyện với đúng server qua đường truyền được bảo vệ. Đọc pg_hba.conf theo luật khớp dòng đầu, lưu mật khẩu dạng SCRAM, bật TLS với chứng chỉ lab, rồi chứng minh bằng lỗi thật: plaintext, sai mật khẩu và sai hostname đều bị từ chối — còn verify-ca thì không."
+summary: "Việc API của Tới Nơi «kết nối được database» chưa có nghĩa là nó đang nói chuyện với đúng server qua đường truyền được bảo vệ. Đọc pg_hba.conf theo luật khớp dòng đầu, lưu mật khẩu dạng SCRAM, bật TLS với chứng chỉ lab, rồi chứng minh bằng lỗi thật: plaintext, sai mật khẩu và sai hostname đều bị từ chối — còn verify-ca thì không."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-042, authentication, pg-hba, scram, tls, sslmode, toi-noi]
 language: vi
 ---
 
-Đội hạ tầng của Tới Nơi chuyển database sang một máy mới. Chuỗi kết nối của API được sửa vội thành `host=10.20.0.15 sslmode=require`, API chạy bình thường, mọi người yên tâm vì «đã có SSL». Ba tuần sau, khi rà cấu hình, có người hỏi: nếu một máy khác trong mạng giả làm `10.20.0.15`, API có phát hiện không? Câu trả lời là **không** — `require` mã hoá đường truyền nhưng không kiểm server là ai (trừ một ngoại lệ ở mục 6). API sẽ gửi tên đăng nhập, rồi dữ liệu chuyến của khách, cho bất kỳ ai đứng giữa; server giả còn có thể đòi mật khẩu dạng thô (cleartext), và libpq mặc định chấp nhận phương thức server đòi — trừ khi client đặt `require_auth` (có từ PostgreSQL 16, lab không thử).
+Đội hạ tầng của Tới Nơi chuyển database sang một máy mới. Chuỗi kết nối của API được sửa vội thành `host=10.20.0.15 sslmode=require`, API chạy bình thường, mọi người yên tâm vì «đã có SSL». Ba tuần sau, khi rà cấu hình, có người hỏi: nếu một máy khác trong mạng giả làm `10.20.0.15`, API có phát hiện không? Câu trả lời là **không** — `require` mã hoá đường truyền nhưng không kiểm tra server là ai (trừ một ngoại lệ ở mục 6). API sẽ gửi tên đăng nhập, rồi dữ liệu chuyến của khách, cho bất kỳ ai đứng giữa; server giả còn có thể đòi mật khẩu dạng thô (cleartext), và libpq mặc định chấp nhận phương thức server đòi — trừ khi client đặt `require_auth` (có từ PostgreSQL 16, lab không thử).
 
 PG-041 trả lời «tài khoản được làm gì». Bài này trả lời ba câu độc lập:
 
 1. **Ai được phép thử đăng nhập, từ đâu, bằng phương thức nào?** — `pg_hba.conf`.
-2. **Làm sao chứng minh mình đúng là tài khoản đó?** — mật khẩu lưu và kiểm bằng SCRAM.
+2. **Làm sao chứng minh mình đúng là tài khoản đó?** — mật khẩu được lưu và kiểm tra bằng SCRAM.
 3. **Đường truyền có được bảo vệ, và client có đang nói chuyện với đúng server?** — TLS cùng tham số `sslmode` phía client.
 
 Kết nối thành công không cho biết lớp nào đang làm việc, nên lab chứng minh bằng **các lần bị từ chối**.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-042 · Phần 5/6 · Cơ bản</span>
-<p>Đọc trước: <a href="/articles/postgresql-role-grant-least-privilege">PG-041 · Role, GRANT và quyền tối thiểu</a>. Lab: <code>examples/toi-noi-postgresql/p05</code> (PostgreSQL 18.1 thật; phần «PG-042» trong <code>run.mjs</code>, kết quả <code>OUTPUT.txt</code>). Cần OpenSSL hỗ trợ <code>req -addext</code> để tạo chứng chỉ tạm. Sau bài này, bạn kiểm được kết nối hợp lệ và các kết nối phải bị từ chối, đọc được dòng HBA đã khớp trong log server, và chọn đúng <code>sslmode</code>.</p>
+<p>Đọc trước: <a href="/articles/postgresql-role-grant-least-privilege">PG-041 · Role, GRANT và quyền tối thiểu</a>. Lab: <code>examples/toi-noi-postgresql/p05</code> (PostgreSQL 18.1 thật; phần «PG-042» trong <code>run.mjs</code>, kết quả <code>OUTPUT.txt</code>). Cần OpenSSL hỗ trợ <code>req -addext</code> để tạo chứng chỉ tạm. Sau bài này, bạn kiểm tra được kết nối hợp lệ lẫn các kết nối phải bị từ chối, đọc được dòng HBA đã khớp trong log server, và chọn đúng <code>sslmode</code>.</p>
 </div>
 
 ## 1. Dữ liệu và cách chạy
@@ -31,7 +31,7 @@ Lab dùng lại cluster tạm và các role của PG-041 (`tn_owner`, `tn_app`, 
 npm run p05
 ```
 
-Binary không ở vị trí mặc định thì đặt `PG_BIN` và `OPENSSL_BIN` như README của lab. Cluster chỉ nghe localhost và bị xoá khi runner kết thúc; mật khẩu, port và thư mục dữ liệu được che trong `OUTPUT.txt` bằng `<PASSWORD>`, `<PORT>`, `<DATA>`.
+Nếu binary không nằm ở vị trí mặc định thì đặt `PG_BIN` và `OPENSSL_BIN` như README của lab. Cluster chỉ nghe localhost và bị xoá khi runner kết thúc; mật khẩu, port và thư mục dữ liệu được che trong `OUTPUT.txt` bằng `<PASSWORD>`, `<PORT>`, `<DATA>`.
 
 ## 2. Thuật ngữ
 
@@ -73,12 +73,12 @@ Runner ghi đè `pg_hba.conf` của cluster tạm, bật `ssl=on`, khởi độn
 
 (Bảng chỉ có địa chỉ, không có cột netmask; trong tệp, dòng 4 viết là `127.0.0.1/32`.) Đọc theo thứ tự:
 
-- **Dòng 1–3 và 7 — `trust` cho `postgres`**: không cần mật khẩu. Đây là **control plane của lab**: runner cần điều khiển cluster tạm mà không quản lý thêm bí mật. Cluster chỉ nghe loopback và chỉ sống trong lúc chạy lab, nhưng bất kỳ tiến trình nào trên cùng máy, kể cả của người dùng khác, đều có thể đăng nhập làm superuser trong khoảng đó. **Đây không phải cấu hình production**: đừng chạy lab trên máy có người dùng không tin cậy, đừng chép các dòng này đi đâu. Trong triển khai, tài khoản quản trị và replication cũng phải xác thực (SCRAM, chứng chỉ client, hoặc `peer` cho socket cục bộ).
+- **Dòng 1–3 và 7 — `trust` cho `postgres`**: không cần mật khẩu. Đây là **control plane của lab**: runner cần điều khiển cluster tạm mà không quản lý thêm bí mật. Cluster chỉ nghe loopback và chỉ sống trong lúc chạy lab, nhưng bất kỳ tiến trình nào trên cùng máy, kể cả của người dùng khác, đều có thể đăng nhập làm superuser trong khoảng đó. **Đây không phải cấu hình production**: đừng chạy lab trên máy có người dùng không tin cậy, đừng chép các dòng này sang nơi khác. Trong triển khai, tài khoản quản trị và replication cũng phải xác thực (SCRAM, chứng chỉ client, hoặc `peer` cho socket cục bộ).
 - **Dòng 4 — `hostssl … tn_app … scram-sha-256`**: `tn_app` chỉ được thử đăng nhập qua TLS, từ 127.0.0.1, bằng SCRAM.
 - **Dòng 5–6 — `reject`**: mọi kết nối TCP khác từ loopback bị từ chối **tường minh**. `tn_app` không dùng TLS thì trượt dòng 4 (`hostssl`), rơi xuống dòng 5 và bị chặn.
 - **Dòng 7 — `replication`**: nằm sau dòng `reject` mà vẫn có tác dụng, vì từ khoá `all` ở cột database **không** khớp kết nối physical replication. Kết nối replication chỉ khớp dòng ghi `replication` (lab dùng nó cho PG-048).
 
-Cột `error` báo dòng viết sai cú pháp. `pg_hba_file_rules` đọc **tệp hiện có trên đĩa**, không phải cấu hình đang nạp, nên dùng được để kiểm thay đổi **trước** khi reload. Thay đổi có hiệu lực sau reload (`SELECT pg_reload_conf();`) và chỉ áp cho kết nối **mới** — khi sửa HBA trên máy thật, giữ một phiên quản trị đang mở để còn sửa lại nếu tự khoá mình ngoài cửa.
+Cột `error` báo dòng viết sai cú pháp. `pg_hba_file_rules` đọc **tệp hiện có trên đĩa**, không phải cấu hình đang nạp, nên dùng được để kiểm tra thay đổi **trước** khi reload. Thay đổi có hiệu lực sau reload (`SELECT pg_reload_conf();`) và chỉ áp cho kết nối **mới** — khi sửa HBA trên máy thật, giữ một phiên quản trị đang mở để còn sửa lại nếu tự khoá mình ngoài cửa.
 
 Sai lầm kinh điển: dòng rộng đặt **trên** dòng hẹp. Nếu dòng 5 nằm trên dòng 4, `tn_app` bị từ chối dù dùng TLS và mật khẩu đúng. Lab không chạy cấu hình đảo này; đó là bài tập 2.
 
@@ -91,7 +91,7 @@ SET password_encryption = 'scram-sha-256';
 ALTER ROLE tn_app PASSWORD '<PASSWORD>';
 ```
 
-`password_encryption` quyết định mật khẩu được biến đổi thế nào **trước khi lưu**. Giá trị mặc định đã là `scram-sha-256` từ PostgreSQL 14; lab đặt tường minh để không phụ thuộc cấu hình. Rồi kiểm phần đầu của giá trị lưu trong `pg_authid`:
+`password_encryption` quyết định mật khẩu được biến đổi thế nào **trước khi lưu**. Giá trị mặc định đã là `scram-sha-256` từ PostgreSQL 14; lab đặt tường minh để không phụ thuộc cấu hình. Sau đó kiểm tra phần đầu của giá trị đã lưu trong `pg_authid`:
 
 ```sql
 SELECT split_part(rolpassword, '$', 1) FROM pg_authid WHERE rolname = 'tn_app';
@@ -158,7 +158,7 @@ PASS 042 TLS verify-full: t
   ssl=true version=TLSv1.3 bits=256 user=tn_app
 ```
 
-Phiên dùng TLS 1.3, thuật toán mã hoá với khoá 256 bit (cột `bits`), đăng nhập bằng `tn_app`. Nhưng `pg_stat_ssl` là góc nhìn của server: nó biết đường truyền được mã hoá, không biết client có kiểm chứng chỉ hay không — client `sslmode=require` cũng cho `ssl = t`. Muốn chứng minh client kiểm tên thì phải cho nó gặp tên sai.
+Phiên dùng TLS 1.3, thuật toán mã hoá với khoá 256 bit (cột `bits`), đăng nhập bằng `tn_app`. Nhưng `pg_stat_ssl` là góc nhìn của server: server biết đường truyền được mã hoá, nhưng không biết client có kiểm chứng chỉ hay không — client `sslmode=require` cũng cho `ssl = t`. Muốn chứng minh client kiểm tên thì phải cho nó gặp tên sai.
 
 ## 7. Ma trận bị từ chối
 
@@ -220,9 +220,9 @@ Client chỉ nhận thông báo tối thiểu. Runner lọc log server lấy cá
   DETAIL:  Connection matched file "<DATA>/pg_hba.conf" line 4: "hostssl all tn_app 127.0.0.1/32 scram-sha-256"
 ```
 
-(Prefix thời gian và PID đã được runner bỏ.) Dòng `DETAIL` sau lần sai mật khẩu cho biết đúng **tệp, số dòng và nội dung dòng HBA** đã khớp — khi một tài khoản bị từ chối bất ngờ, đây là thông tin đầu tiên cần đọc: kết nối có rơi vào dòng bạn nghĩ không?
+(Runner đã bỏ prefix thời gian và PID.) Dòng `DETAIL` sau lần sai mật khẩu cho biết đúng **tệp, số dòng và nội dung dòng HBA** đã khớp — khi một tài khoản bị từ chối bất ngờ, đây là thông tin đầu tiên cần đọc: kết nối có rơi vào dòng bạn nghĩ không?
 
-Hai điều cần đọc đúng trong excerpt này:
+Hai điều cần hiểu đúng khi đọc đoạn trích này:
 
 - Ca A (bị dòng `reject` chặn) chỉ có dòng `FATAL`, không kèm `DETAIL` số dòng trong output lab.
 - Ca C không có dòng `FATAL` nào: lỗi phát sinh ở client trong lúc bắt tay TLS, trước khi tới bước xác thực. Bộ lọc của runner chỉ giữ `FATAL` và `DETAIL: Connection matched`, nên những dòng mức `LOG` khác mà server có thể ghi về lần bắt tay bị huỷ không có trong excerpt; bài không khẳng định nội dung của chúng. Ca D thành công nên không sinh lỗi.
@@ -253,7 +253,7 @@ Hệ quả vận hành: **lỗi xác minh server chỉ thấy ở phía client**
 - **`verify-full` và vận hành chứng chỉ.** Kiểm tên máy buộc chứng chỉ phải đúng với mọi tên client dùng (tên DNS, tên qua load balancer, tên qua pooler). Đổi kiến trúc mạng là đổi chứng chỉ. Cái giá này đáng trả: không kiểm tên thì TLS không chống được kẻ đứng giữa.
 - **Mật khẩu hay chứng chỉ client.** Chứng chỉ client không có bí mật để gõ nhầm hay dán vào log, nhưng cần hạ tầng cấp và thu hồi. Mật khẩu SCRAM đơn giản hơn, đổi lại cần kho bí mật và xoay vòng mật khẩu.
 - **HBA hẹp hay rộng.** Dòng ghi đúng user, database, dải địa chỉ thì an toàn hơn, nhưng tệp dài ra và thứ tự trở nên quan trọng; dòng `reject` tường minh ở cuối cho lỗi rõ ràng nhưng mọi dòng hợp lệ phải nằm trên nó.
-- **Chi phí TLS.** Bắt tay TLS thêm độ trễ cho mỗi kết nối mới; connection pool (PG-047) trả chi phí đó một lần cho nhiều request. Lab không đo nó.
+- **Chi phí TLS.** Bắt tay TLS thêm độ trễ cho mỗi kết nối mới; connection pool (PG-047) trả chi phí đó một lần cho nhiều request. Lab không đo chi phí này.
 
 ## 12. Bài tập
 

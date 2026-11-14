@@ -31,7 +31,7 @@ Một phân tích có thể hoàn thành phần mô tả và vẫn để phần 
 
 ## 2. Bốn loại bất định không nên gộp chung
 
-**Bất định về định nghĩa:** “huỷ” có cùng nghĩa giữa hai nhóm không; cohort có cùng biên kỳ không? Cách giảm là xác nhận nghiệp vụ, không phải thu thêm triệu dòng với định nghĩa mơ hồ.
+**Bất định về định nghĩa:** “huỷ” có cùng nghĩa giữa hai nhóm không; cohort có cùng ranh giới kỳ báo cáo không? Cách giảm là xác nhận nghiệp vụ, không phải thu thêm triệu dòng với định nghĩa mơ hồ.
 
 **Bất định về đo lường và độ phủ:** thiếu sự kiện, trễ pipeline, nhóm khách không được ghi nhận. Cách giảm là đối soát và bổ sung nguồn; có trường hợp cần thu thập lại.
 

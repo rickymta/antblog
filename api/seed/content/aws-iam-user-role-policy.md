@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, iam, policy, role, least-privilege, trust-policy]
 language: vi
 ---
 
-Khi tài xế giao xong một đơn, app chụp ảnh chứng từ và gửi lên service `delivery-photo` của [Tới Nơi](/articles/du-an-mau-toi-noi), service này ghi ảnh vào S3. Lần đầu chạy thử, nó bị `AccessDenied`. Một đồng nghiệp đề nghị: "Gắn `AdministratorAccess` cho nhanh, lúc nào ổn rồi thu hẹp sau." Cái "sau" đó hiếm khi đến, và một lỗi trong service nhỏ này từ nay có thể xoá database hay tắt cả hệ thống.
+Khi tài xế giao xong một đơn, app chụp ảnh chứng từ và gửi lên service `delivery-photo` của [Tới Nơi](/articles/du-an-mau-toi-noi), service này ghi ảnh vào S3. Lần đầu chạy thử, nó bị `AccessDenied`. Một đồng nghiệp đề nghị: "Gắn `AdministratorAccess` cho nhanh, lúc nào ổn rồi thu hẹp sau." Cái "sau" đó hiếm khi đến, và một lỗi trong service nhỏ này có thể dẫn tới việc xoá database hay tắt cả hệ thống.
 
 Đây là **bài 03** của lộ trình **AWS qua Tới Nơi · Phần 01: Nền tảng AWS**. Bạn cần đọc [bài 02](/articles/aws-tai-khoan-iam-identity-center-cli) và có profile `toinoi-lab` chạy được. Bài này giải thích IAM từ đầu rồi viết một policy vừa đủ cho `delivery-photo`.
 
@@ -24,11 +24,11 @@ Khi tài xế giao xong một đơn, app chụp ảnh chứng từ và gửi lê
 
 | Khái niệm | Là gì | Credential | Dùng cho |
 |---|---|---|---|
-| IAM user | Danh tính cố định gắn với một người hoặc ứng dụng | Mật khẩu và access key dài hạn | Hạn chế dùng; người nên đi qua Identity Center |
+| IAM user | Danh tính cố định gắn với một người hoặc ứng dụng | Mật khẩu và access key dài hạn | Hạn chế dùng; người dùng nên đăng nhập qua Identity Center |
 | IAM group | Tập hợp user để gán quyền chung | Không có | Gom user theo vai trò |
 | IAM role | Danh tính **không có credential riêng**, ai được phép thì *assume* (đảm nhận) | Tạm thời, hết hạn | Workload (EC2, ECS, Lambda), người đăng nhập SSO, truy cập chéo tài khoản |
 
-Quy tắc đơn giản cho Tới Nơi: **người dùng SSO, workload dùng role, không phát access key dài hạn**. Role của `delivery-photo` sẽ được gắn vào máy chạy service, nên mã nguồn không chứa khoá nào.
+Quy tắc đơn giản cho Tới Nơi: **người dùng đăng nhập bằng SSO, workload dùng role, không phát access key dài hạn**. Role của `delivery-photo` sẽ được gắn vào máy chạy service, nên mã nguồn không chứa khoá nào.
 
 ## Đọc một policy
 
@@ -181,7 +181,7 @@ Trust policy cũng có thể dùng `Condition`. Ví dụ dưới đây cho phép
 
 ## Quyền tối thiểu cho `delivery-photo`
 
-Policy ở phần đầu bài cho phép ghi và đọc đúng prefix `proof/`, không xoá, không động tới các prefix khác. Chỉ thiếu việc liệt kê object. Hành động `s3:ListBucket` áp dụng lên **bucket**, không phải object, nên cần statement riêng với `Resource` là ARN bucket và một `Condition` giới hạn prefix:
+Policy ở phần đầu bài cho phép ghi và đọc đúng prefix `proof/`, không xoá, không động tới các prefix khác. Policy này chỉ thiếu quyền liệt kê object. Hành động `s3:ListBucket` áp dụng lên **bucket**, không phải object, nên cần statement riêng với `Resource` là ARN bucket và một `Condition` giới hạn prefix:
 
 ```json
 {
@@ -195,11 +195,11 @@ Policy ở phần đầu bài cho phép ghi và đọc đúng prefix `proof/`, k
 
 Nhầm lẫn phổ biến nhất của người mới là đặt `ListBucket` vào statement có `Resource` kết thúc bằng `/*`; statement đó sẽ không bao giờ khớp.
 
-**Debug `AccessDenied`**: đọc kỹ thông báo lỗi. Thông báo hiện đại thường nói rõ vì sao ("no identity-based policy allows…" hay "explicit deny in…"). Sau đó dùng ba công cụ:
+**Debug `AccessDenied`**: đọc kỹ thông báo lỗi. Thông báo lỗi của AWS hiện nay thường nói rõ vì sao ("no identity-based policy allows…" hay "explicit deny in…"). Sau đó dùng ba công cụ:
 
 1. **IAM Policy Simulator** (console, hoặc `aws iam simulate-principal-policy` và `simulate-custom-policy`) để thử một action trên một ARN mà không gọi thật.
-2. **CloudTrail event history** tìm sự kiện có `errorCode` là `AccessDenied`, xem chính xác principal, action và resource.
-3. **IAM Access Analyzer** kiểm policy và gợi ý thu hẹp quyền từ lịch sử truy cập.
+2. **CloudTrail event history** giúp tìm sự kiện có `errorCode` là `AccessDenied`, để xem chính xác principal, action và resource.
+3. **IAM Access Analyzer** kiểm tra policy và gợi ý thu hẹp quyền từ lịch sử truy cập.
 
 Simulator mô phỏng theo policy bạn đưa vào, nên vẫn cần kiểm lại bằng một lời gọi thật ở tài khoản lab.
 
@@ -209,7 +209,7 @@ Simulator mô phỏng theo policy bạn đưa vào, nên vẫn cần kiểm lạ
 - **Nhầm ARN bucket và ARN object**: `arn:aws:s3:::bucket` và `arn:aws:s3:::bucket/*` là hai thứ khác nhau.
 - **Quên rằng Deny thắng**: một Deny cũ ở lớp khác khiến Allow mới không có tác dụng.
 - **Gắn quyền cho user thay vì role**: kéo theo access key dài hạn.
-- **Dán policy đồng nghiệp chia sẻ mà không đọc**: kiểm từng `Action` và `Resource`.
+- **Dán policy do đồng nghiệp chia sẻ mà không đọc**: kiểm tra từng `Action` và `Resource`.
 
 ## Bài tập
 
@@ -226,7 +226,7 @@ Simulator mô phỏng theo policy bạn đưa vào, nên vẫn cần kiểm lạ
 
 ## Lab: tạo role và kiểm bằng simulator
 
-Lab ở `examples/toi-noi-aws/p01-03-iam-policies` có trust policy, policy quyền tối thiểu, policy quá rộng để so sánh, script `simulate.sh` và script tạo role. Script mô phỏng chỉ đọc (gọi `simulate-custom-policy`) và kiểm các kết quả mong đợi: ghi vào `proof/` được phép, ghi sang prefix khác hay xoá object bị từ chối ngầm, còn policy rộng cho phép tất cả. Script tạo role mặc định chỉ in lệnh; thêm `--apply` mới tạo, và `cleanup.sh` dọn lại. IAM role và policy không tính phí riêng.
+Lab ở `examples/toi-noi-aws/p01-03-iam-policies` có trust policy, policy quyền tối thiểu, policy quá rộng để so sánh, script `simulate.sh` và script tạo role. Script mô phỏng chỉ đọc (gọi `simulate-custom-policy`) và kiểm các kết quả mong đợi: ghi vào `proof/` được phép, ghi sang prefix khác hay xoá object bị từ chối ngầm, còn policy rộng cho phép tất cả. Script tạo role mặc định chỉ in lệnh; chỉ khi thêm `--apply` thì mới tạo, và `cleanup.sh` dọn lại. IAM role và policy không tính phí riêng.
 
 ```bash
 cd examples/toi-noi-aws/p01-03-iam-policies
@@ -234,7 +234,7 @@ cd examples/toi-noi-aws/p01-03-iam-policies
 ./create-role.sh toinoi-lab
 ```
 
-Script đã được kiểm cú pháp, shellcheck, chạy thử với CLI giả lập, và tham số của các lệnh `aws iam` được đối chiếu với bộ mô hình dịch vụ của AWS CLI; **chưa chạy trên tài khoản AWS thật**, nên kết quả thực của simulator chưa được đối chiếu.
+Script đã được kiểm tra cú pháp, chạy shellcheck, chạy thử với CLI giả lập, và tham số của các lệnh `aws iam` được đối chiếu với bộ mô hình dịch vụ của AWS CLI; **chưa chạy trên tài khoản AWS thật**, nên kết quả thực của simulator chưa được đối chiếu.
 
 Bài trước: [bài 02](/articles/aws-tai-khoan-iam-identity-center-cli). Bài tiếp: [bài 04](/articles/aws-vpc-subnet-route-security-group).
 

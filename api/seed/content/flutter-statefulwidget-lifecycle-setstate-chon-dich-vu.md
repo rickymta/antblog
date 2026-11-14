@@ -94,7 +94,7 @@ class _ServicePickerState extends State<ServicePicker> {
 
 Ba điểm cần để ý. `late ServiceKind _selected` chưa có giá trị lúc khai báo vì phải đọc `widget.initial` ở `initState`. `widget` trong State luôn là widget **hiện tại**, nên khi cha đưa widget mới xuống, `widget.onChanged` tự trỏ sang hàm mới. Và `initial` chỉ được đọc một lần: cha đổi `initial` về sau thì lựa chọn đã có không đổi, giống `initialValue` của `TextFormField`; test `đổi initial ở cha không đổi lựa chọn đã có` chứng minh điều này.
 
-`SegmentedButton<ServiceKind>` là widget Material 3 để chọn một trong vài phương án. `emptySelectionAllowed` mặc định `false` và `multiSelectionEnabled` mặc định `false` (đã đọc source), nên luôn có đúng một lựa chọn và `selection.first` an toàn. Chạm lại đoạn đang chọn thì `SegmentedButton` không gọi `onSelectionChanged`, nên `_select` không cần tự chặn. Nhãn lấy từ `ServiceKind.label` của `toi_noi_core`. Dữ liệu do cha quyết định, như danh sách chuyến, thì giữ ở cha; State chỉ dành cho thứ mà chính widget này sở hữu.
+`SegmentedButton<ServiceKind>` là widget Material 3 để chọn một trong vài phương án. `emptySelectionAllowed` mặc định `false` và `multiSelectionEnabled` mặc định `false` (đã đọc mã nguồn), nên luôn có đúng một lựa chọn và `selection.first` an toàn. Chạm lại đoạn đang chọn thì `SegmentedButton` không gọi `onSelectionChanged`, nên `_select` không cần tự chặn. Nhãn lấy từ `ServiceKind.label` của `toi_noi_core`. Dữ liệu do cha quyết định, như danh sách chuyến, thì giữ ở cha; State chỉ dành cho thứ mà chính widget này sở hữu.
 
 ## Vòng đời của State
 
@@ -126,7 +126,7 @@ Framework gọi các phương thức của State theo thứ tự cố định (H
 <figcaption>Hình 2. Thứ tự gọi của State. Mũi tên vào build cho thấy hai nguồn hay gặp khiến build chạy lại: setState từ code của ta, và didUpdateWidget khi widget cha đưa cấu hình mới xuống.</figcaption>
 </figure>
 
-Ta đã đọc source framework để chắc thứ tự: `initState` rồi `didChangeDependencies` chạy trước lần `build` đầu; `didUpdateWidget` luôn được theo sau bởi `build`; `dispose` đến sau `deactivate`. Nhiệm vụ từng phương thức:
+Ta đã đọc mã nguồn framework để chắc về thứ tự: `initState` rồi `didChangeDependencies` chạy trước lần `build` đầu; sau `didUpdateWidget` luôn là `build`; `dispose` đến sau `deactivate`. Nhiệm vụ từng phương thức:
 
 - **`initState`**: khởi tạo state từ `widget`, bật timer hay subscription. Phải đồng bộ: khai báo `async` thì debug ném lỗi.
 - **`didUpdateWidget(oldWidget)`**: so `oldWidget` với `widget` để phản ứng khi tham số đổi. Không cần `setState` vì `build` chạy ngay sau.
@@ -179,7 +179,7 @@ Ta đã đọc source framework để chắc thứ tự: `initState` rồi `didC
     }
 ```
 
-`didUpdateWidget` chỉ làm gì khi `seconds` thực sự đổi: đặt lại số giây rồi bật timer mới. `_startTimer` luôn `cancel` timer cũ trước, nếu không hai timer cùng đếm và số giây giảm hai lần mỗi giây. Khi về 0, `_tick` tự huỷ timer và gọi `onTimeout` một lần.
+`didUpdateWidget` chỉ làm việc khi `seconds` thực sự đổi: đặt lại số giây rồi bật timer mới. `_startTimer` luôn `cancel` timer cũ trước, nếu không hai timer cùng đếm và số giây giảm hai lần mỗi giây. Khi về 0, `_tick` tự huỷ timer và gọi `onTimeout` một lần.
 
 ## setState và phạm vi rebuild
 
@@ -245,7 +245,7 @@ Test của lab đếm số lần `build` bằng một widget `Probe` ghi vào b�
       });
 ```
 
-Sau khi chạm "Giao đồ ăn", `summaryBuilder` (nằm trong `build` của State) chạy hai lần, còn `Probe` anh em vẫn chỉ một. Vì thế đặt `setState` **càng thấp càng tốt**: đồng hồ nằm riêng trong `SearchingCountdown`, nên mỗi giây chỉ một nhánh nhỏ dựng lại, không phải cả `FindDriverScreen`.
+Sau khi chạm "Giao đồ ăn", `summaryBuilder` (nằm trong `build` của State) chạy hai lần, còn `Probe` anh em vẫn chỉ chạy một lần. Vì thế đặt `setState` **càng thấp càng tốt**: đồng hồ nằm riêng trong `SearchingCountdown`, nên mỗi giây chỉ một nhánh nhỏ dựng lại, không phải cả `FindDriverScreen`.
 
 Hai lưu ý nhỏ. Sửa field mà không bọc trong `setState` thì giá trị đổi nhưng giao diện chưa vẽ lại. Truyền cho `setState` một closure `async` bị debug chặn với "setState() callback argument returned a Future" (ta đã thử): việc bất đồng bộ làm trước, rồi mới `setState` đồng bộ với kết quả.
 
@@ -356,7 +356,7 @@ Timer huỷ được tại nguồn, còn `Future` đã `await` thì không rút 
 
 `mounted` là `true` từ lúc State gắn vào cây tới lúc `dispose`. Quy tắc: **sau mỗi `await`, trước khi chạm `setState` hay `context`, kiểm `mounted`**. Trước `await` thì không cần vì code chạy đồng bộ ngay trong lúc State còn sống. Nhánh `catch` cũng phải kiểm `mounted`, vì lỗi cũng đến sau `await`.
 
-Lint `use_build_context_synchronously` nằm trong `flutter_lints` 6.0.0 hỗ trợ việc này: ta đã thử đặt `Navigator.of(context).pop()` sau một `await` không kiểm thì lint báo, thêm `if (!mounted) return;` thì hết báo. Nhưng lint chỉ canh `context`; `setState` thiếu `mounted` thì lint im lặng, nên ta cần test:
+Lint `use_build_context_synchronously` nằm trong `flutter_lints` 6.0.0 hỗ trợ việc này: ta đã thử đặt `Navigator.of(context).pop()` sau một `await` không kiểm thì lint báo, thêm `if (!mounted) return;` thì hết báo. Nhưng lint chỉ canh `context`; `setState` thiếu `mounted` thì lint không báo gì, nên ta cần test:
 
 ```dart
     testWidgets('widget bị gỡ trong lúc await: mounted chặn setState', (
@@ -405,7 +405,7 @@ Lint `use_build_context_synchronously` nằm trong `flutter_lints` 6.0.0 hỗ tr
 
 Test thứ nhất gỡ widget khi `onCancel` còn treo (một `Completer` chưa hoàn thành), hoàn thành nó, và không có lỗi. Test thứ hai chạy cùng kịch bản trên `_NoMountedCheck`, bản thiếu `mounted`, và bắt được `FlutterError`. Ta gọi `state.run()` trực tiếp để lỗi trả về qua `Future`; nếu lỗi trôi ra ngoài `onPressed`, nó là lỗi bất đồng bộ không ai bắt và làm test đỏ.
 
-`FindDriverScreen._cancelSearch` cũng kiểm `mounted` trước khi `setState`, vì chính màn hình có thể bị thoát trong lúc chờ. Test `thoát màn hình khi đang huỷ` chứng minh.
+`FindDriverScreen._cancelSearch` cũng kiểm `mounted` trước khi `setState`, vì chính màn hình có thể bị thoát trong lúc chờ. Test `thoát màn hình khi đang huỷ` chứng minh điều đó.
 
 ## Key và GlobalKey: khi nào cần
 
@@ -477,7 +477,7 @@ class _ReparentState extends State<_Reparent> {
 
 Không key: đổi từ `Padding` sang `Center` là hai loại cha khác nhau, Element cũ không dùng lại được, và đồng hồ về 30. Có `GlobalKey`: framework gỡ Element ra rồi gắn vào chỗ mới, State đang đếm được giữ nguyên, đồng hồ tiếp tục ở 20 rồi 19.
 
-Đừng với tới `GlobalKey` quá sớm. Đếm lại khi đổi tham số thì `didUpdateWidget` gọn hơn (như `FindDriverScreen` đổi dịch vụ). Đếm lại từ đầu bất kể tham số thì đổi `ValueKey`: test `đổi ValueKey` chứng minh State mới bắt đầu từ 30 dù `seconds` không đổi. Gọi `key.currentState` từ ngoài là ra lệnh lén cho widget con; tham số cộng `didUpdateWidget` dễ đọc và dễ thử hơn.
+Đừng với tới `GlobalKey` quá sớm. Đếm lại khi đổi tham số thì `didUpdateWidget` gọn hơn (như `FindDriverScreen` đổi dịch vụ). Đếm lại từ đầu bất kể tham số thì đổi `ValueKey`: test `đổi ValueKey` chứng minh State mới bắt đầu từ 30 dù `seconds` không đổi. Gọi `key.currentState` từ ngoài là ra lệnh lén cho widget con; tham số cùng với `didUpdateWidget` dễ đọc và dễ thử hơn.
 
 ## Lỗi thường gặp
 
@@ -524,7 +524,7 @@ Ta cũng thử bốn "đột biến" trên `SearchingCountdown`: xoá `cancel` �
 
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Vẫn "Giao đồ ăn": <code>initial</code> chỉ được đọc ở <code>initState</code>, mà State được giữ qua lần dựng lại (Hình 1). Muốn theo cha: so <code>widget.initial</code> với <code>oldWidget.initial</code> trong <code>didUpdateWidget</code>, đổi <code>ValueKey</code> để tạo lại State, hoặc để cha giữ giá trị và bỏ State của picker.</p>
-<p><strong>2.</strong> Cách một: cha đổi <code>ValueKey</code> (ví dụ số lần tìm) để tạo lại State; test <code>đổi ValueKey</code> chứng minh. Cách hai: thêm tham số <code>restartToken</code> và reset trong <code>didUpdateWidget</code> khi nó đổi. <code>GlobalKey</code> cộng <code>currentState?.restart()</code> cũng chạy nhưng khó đọc, khó thử, để sau cùng.</p>
+<p><strong>2.</strong> Cách một: cha đổi <code>ValueKey</code> (ví dụ số lần tìm) để tạo lại State; test <code>đổi ValueKey</code> chứng minh. Cách hai: thêm tham số <code>restartToken</code> và reset trong <code>didUpdateWidget</code> khi nó đổi. <code>GlobalKey</code> cùng với <code>currentState?.restart()</code> cũng chạy nhưng khó đọc, khó thử, để sau cùng.</p>
 <p><strong>3.</strong> Cách một (nên dùng): thay bằng <code>Timer</code> lưu trong field, huỷ ở <code>dispose</code>. Cách hai: giữ <code>Future.delayed</code> và kiểm <code>if (!mounted) return;</code> trước <code>setState</code>. Test: <code>pumpWidget</code> widget, <code>pumpWidget(const SizedBox())</code> để gỡ, <code>pump(const Duration(seconds: 5))</code>, rồi <code>expect(tester.takeException(), isNull)</code>.</p>
 </details>
 

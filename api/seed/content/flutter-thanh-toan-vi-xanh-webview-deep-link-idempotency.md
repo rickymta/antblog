@@ -1,7 +1,7 @@
 ---
 slug: flutter-thanh-toan-vi-xanh-webview-deep-link-idempotency
 title: "Thanh toán qua VíXanh: WebView, deep link quay về và idempotency key"
-summary: "Bài 39: trả cước bằng ví VíXanh mà app không chạm vào thẻ. Chọn trình duyệt trong app thay WebView, idempotency key giữ qua các lần thử, deep link chỉ là tín hiệu, máy trạng thái hỏi server có giới hạn, trạng thái bền khi app bị kill, đối chiếu chính sách Apple và Google."
+summary: "Bài 39: trả cước bằng ví VíXanh mà app không chạm vào thẻ. Chọn trình duyệt trong app thay vì WebView, idempotency key giữ qua các lần thử, deep link chỉ là tín hiệu, máy trạng thái hỏi server có giới hạn, trạng thái bền khi app bị kill, đối chiếu chính sách Apple và Google."
 category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, payment, deep-link, idempotency, riverpod, ios, android]
@@ -15,12 +15,12 @@ Bài này dựng `PaymentFlow`, máy trạng thái Dart thuần cho luồng đó
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Khách trả xong ở trang VíXanh. Trình duyệt mở <code>toinoi://payment/return?session=S1&amp;status=success</code> và app nhận được link. App có nên hiện "Thanh toán thành công" ngay không?</p>
-<details><summary>Xem đáp án</summary><p><strong>Không.</strong> Link tuỳ chỉnh ai cũng gọi được, nên <code>status=success</code> chỉ là lời khẳng định của người gọi. App chỉ dùng link để biết phiên nào vừa quay về, rồi hỏi server. Test <code>status=success nhưng server nói chưa</code> chứng minh state không thành công trong ca đó.</p></details>
+<details><summary>Xem đáp án</summary><p><strong>Không.</strong> Link tuỳ chỉnh ai cũng gọi được, nên <code>status=success</code> chỉ là lời khẳng định của người gọi. App chỉ dùng link để biết phiên nào vừa quay về, rồi hỏi server. Test <code>status=success nhưng server nói chưa</code> chứng minh state không phải thành công trong trường hợp đó.</p></details>
 </div>
 
 ## Không xử lý thẻ trong app: app chỉ giữ một phiên thanh toán
 
-Hồ sơ kiến trúc của Tới Nơi (§4.9) có miền Payment & Wallet, chung cho mọi cổng chứ không riêng VíXanh: ledger, webhook của cổng, đối soát; không lưu số thẻ, dùng trang thanh toán do cổng host. App theo đúng ranh giới đó: không bao giờ thấy số thẻ, mật khẩu hay OTP của ví. Nó xin server một **phiên thanh toán** (mã phiên, địa chỉ trang cổng, hạn), mở trang đó, rồi hỏi lại server kết quả. `PaymentGateway` là chỗ Adapter mà hồ sơ nói tới ([nhóm cấu trúc](/articles/nhom-cau-truc-structural)): phần còn lại của app không biết VíXanh hay dio.
+Hồ sơ kiến trúc của Tới Nơi (§4.9) có miền Payment & Wallet, chung cho mọi cổng chứ không riêng VíXanh: ledger, webhook của cổng, đối soát; không lưu số thẻ, dùng trang thanh toán do cổng host. App theo đúng ranh giới đó: không bao giờ thấy số thẻ, mật khẩu hay OTP của ví. App xin server một **phiên thanh toán** (mã phiên, địa chỉ trang cổng, hạn), mở trang đó, rồi hỏi lại server kết quả. `PaymentGateway` là chỗ Adapter mà hồ sơ nói tới ([nhóm cấu trúc](/articles/nhom-cau-truc-structural)): phần còn lại của app không biết VíXanh hay dio.
 
 ### payment_gateway.dart · 39-payment-flow/lib/payment_gateway.dart
 
@@ -93,9 +93,9 @@ Hình 1 là cả luồng. Chú ý mũi tên 5 và 6: kết quả thật đến s
 | Cookie, đăng nhập sẵn | Android: WebView không chia sẻ trạng thái với trình duyệt | Android: Custom Tabs chia sẻ cookie jar và autofill. iOS: chia sẻ dữ liệu với Safari thì tài liệu chỉ sang `ASWebAuthenticationSession` |
 | Việc app phải làm | Tự chặn điều hướng ra ngoài, tự xử lý lỗi TLS | Tự đóng tab sau khi quay về: plugin đóng được trên iOS, không đóng được Custom Tabs trên Android |
 
-Ta chọn **trình duyệt trong app**. Một: với WebView, mã của app và mọi thư viện trong app đọc được điều khách gõ vào trang ví; với SFSafariViewController thì không. Hai: khách thấy địa chỉ thật nên khó bị lừa bằng trang giả. Ba, riêng Android: khách đã đăng nhập ví trên trình duyệt thì khỏi đăng nhập lại, và Custom Tabs dùng Safe Browsing. Tài liệu Android nói WebView hợp khi app chỉ chứa nội dung của mình hoặc cần chèn JavaScript; ta không thuộc hai ca đó.
+Ta chọn **trình duyệt trong app**. Một: với WebView, mã của app và mọi thư viện trong app đọc được điều khách gõ vào trang ví; với SFSafariViewController thì không. Hai: khách thấy địa chỉ thật nên khó bị lừa bằng trang giả. Ba, riêng Android: khách đã đăng nhập ví trên trình duyệt thì khỏi đăng nhập lại, và Custom Tabs dùng Safe Browsing. Tài liệu Android nói WebView hợp khi app chỉ chứa nội dung của mình hoặc cần chèn JavaScript; ta không thuộc hai trường hợp đó.
 
-Lớp bọc chỉ mở địa chỉ `https` của host đã biết và đổi lỗi của plugin thành `false`.
+Lớp bọc chỉ mở địa chỉ `https` của host đã biết và chuyển lỗi của plugin thành giá trị `false`.
 
 ### checkout_launcher.dart · 39-payment-flow/lib/checkout_launcher.dart (trích)
 
@@ -168,7 +168,7 @@ WebViewVerdict judgeNavigation(Uri target, CheckoutUrlPolicy policy) {
 
 ## Idempotency key: sinh ở client, giữ qua các lần thử
 
-Bài 20 đã nói: hết thời gian chờ không có nghĩa server chưa làm. Client không phân biệt được "chưa tới" với "đã tới, phản hồi rơi", thử lại, và server tạo phiên thứ hai ([phía server](/articles/dotnet10-transaction-concurrency-idempotency) có bài riêng). Hình 2 vẽ ca đó và cách khoá chặn nó.
+Bài 20 đã nói: hết thời gian chờ không có nghĩa server chưa làm. Client không phân biệt được "chưa tới" với "đã tới, phản hồi rơi", thử lại, và server tạo phiên thứ hai ([phía server](/articles/dotnet10-transaction-concurrency-idempotency) có bài riêng). Hình 2 vẽ trường hợp đó và cách khoá chặn lỗi này.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -202,7 +202,7 @@ Bài 20 đã nói: hết thời gian chờ không có nghĩa server chưa làm. 
 <figcaption>Hình 2. Phản hồi tạo phiên bị rơi. Khoá sinh một lần, lưu trước khi gửi và dùng lại ở lần thử thứ hai nên server trả lại đúng phiên S1.</figcaption>
 </figure>
 
-Lab theo ba quy tắc. Khoá sinh ở client **trước** khi gọi và lưu vào kho ngay, để app chết giữa chừng vẫn còn khoá. Khoá chỉ dùng lại khi lần trước chưa nhận được phiên cho cùng chuyến và số tiền. Sau một kết quả cuối không thành công, thanh toán lại là lần mới với khoá mới: khoá cũ chỉ nhận lại phiên đã huỷ (test của server giả).
+Lab tuân theo ba quy tắc. Khoá sinh ở client **trước** khi gọi và lưu vào kho ngay, để app chết giữa chừng vẫn còn khoá. Khoá chỉ dùng lại khi lần trước chưa nhận được phiên cho cùng chuyến và số tiền. Sau một kết quả cuối không thành công, thanh toán lại là lần mới với khoá mới: khoá cũ chỉ nhận lại phiên đã huỷ (test của server giả).
 
 ### payment_flow.dart · 39-payment-flow/lib/payment_flow.dart (trích)
 
@@ -284,7 +284,7 @@ Server giả của lab (một `FakeApiModule` trong test, không sửa `tools/fa
 
 ## Deep link quay về: tín hiệu, không phải bằng chứng
 
-Custom scheme không chứng minh người gọi là VíXanh, và ai cũng đăng ký được. Android: app khác đăng ký cùng scheme vẫn kích hoạt được hộp chọn app. Apple: nhiều app cùng scheme thì app nhận link là không xác định, và tài liệu khuyên mạnh dùng universal link. Bài 23 cũng chỉ cho custom scheme dùng với việc không nhạy cảm. Hậu quả: một app lạ có thể nhận mã phiên và `status`, nên mã phiên không được đủ để xem kết quả: `GET` trạng thái phải kèm token đăng nhập của khách (bài 24; server giả của lab chưa có bước này). `PaymentReturn` chỉ nhận ra đúng `toinoi://payment/return` và lấy mã phiên; `status` nằm trong `claimed` để ghi log, không dòng code nào dùng nó để kết luận.
+Custom scheme không chứng minh người gọi là VíXanh, và ai cũng đăng ký được. Android: app khác đăng ký cùng scheme vẫn kích hoạt được hộp chọn app. Apple: nhiều app cùng scheme thì không xác định được app nào nhận link, và tài liệu khuyên mạnh dùng universal link. Bài 23 cũng chỉ khuyên dùng custom scheme cho việc không nhạy cảm. Hậu quả: một app lạ có thể nhận mã phiên và `status`, nên chỉ có mã phiên thì chưa đủ để xem kết quả: `GET` trạng thái phải kèm token đăng nhập của khách (bài 24; server giả của lab chưa có bước này). `PaymentReturn` chỉ nhận ra đúng `toinoi://payment/return` và lấy mã phiên; `status` nằm trong `claimed` để ghi log, không dòng code nào dùng nó để kết luận.
 
 ### payment_return.dart · 39-payment-flow/lib/payment_return.dart (trích)
 
@@ -465,7 +465,7 @@ Thoát trạng thái chờ bằng nút "Kiểm tra lại" (có cả ở `Awaitin
   }
 ```
 
-Test sau là ca đầu bài.
+Test sau chính là test case ở đầu bài.
 
 ### payment_flow_test.dart · 39-payment-flow/test/payment_flow_test.dart (trích)
 
@@ -555,7 +555,7 @@ class PaymentController extends Notifier<PaymentState> {
 <ul>
 <li><strong>Coi <code>status=success</code> trên link là thành công.</strong> Dấu hiệu: tự mở link bằng <code>adb</code> là app báo thành công. Nguyên nhân: ai cũng tạo được link. Cách sửa: link chỉ để tìm phiên, kết quả lấy từ server.</li>
 <li><strong>Sinh khoá idempotency mới ở mỗi lần thử.</strong> Dấu hiệu: một chuyến có hai phiên sau một lần mất mạng. Nguyên nhân: khoá sinh trong hàm gọi API. Cách sửa: sinh một lần, lưu vào kho, giữ tới khi có phiên.</li>
-<li><strong>Giữ khoá cũ sau khi huỷ hoặc hết hạn.</strong> Dấu hiệu: bấm thanh toán lại thì nhận ngay phiên đã huỷ. Nguyên nhân: cùng khoá thì server trả phiên cũ. Cách sửa: kết quả cuối không thành công kết thúc lần đó; lần sau dùng khoá mới.</li>
+<li><strong>Giữ khoá cũ sau khi huỷ hoặc hết hạn.</strong> Dấu hiệu: bấm thanh toán lại thì nhận ngay phiên đã huỷ. Nguyên nhân: cùng khoá thì server trả phiên cũ. Cách sửa: khi có kết quả cuối không thành công thì kết thúc lần thanh toán đó; lần sau dùng khoá mới.</li>
 <li><strong>Chỉ chờ deep link.</strong> Dấu hiệu: khách bấm Done, app đứng ở "đợi khách". Nguyên nhân: đóng tab không gửi link. Cách sửa: hỏi server khi app trở lại foreground và có nút Kiểm tra lại.</li>
 <li><strong>Báo thất bại khi mất mạng.</strong> Dấu hiệu: khách thấy "thất bại", trả lần hai và bị trừ hai lần. Nguyên nhân: lẫn "server nói không" với "không hỏi được". Sửa: mất mạng và hết lượt hỏi là <code>PaymentPendingConfirmation</code>; chỉ server mới làm ra <code>PaymentFailed</code>.</li>
 </ul>
@@ -585,7 +585,7 @@ Mức kiểm chứng theo §3.3 là **trên thiết bị**, nhưng máy viết b
 3. Link quay về tới đúng lúc `PaymentFlow` còn ở `PaymentCreating`. Kết quả là gì?
 
 <details><summary>Xem lời giải</summary>
-<p><strong>1.</strong> Thêm giá trị vào <code>PaymentStatus</code>. Analyzer báo <code>non_exhaustive_switch_expression</code> ở <code>switch</code> trong <code>_runConfirm</code> (đã thử). Nhưng <code>isFinal</code> là <code>this != pending</code>, nên <code>authorized</code> mặc nhiên thành trạng thái cuối và không có lỗi biên dịch: phải sửa tay, rồi quyết định nó vào <code>PendingConfirmation</code> hay một trạng thái riêng.</p>
+<p><strong>1.</strong> Thêm giá trị vào <code>PaymentStatus</code>. Analyzer báo <code>non_exhaustive_switch_expression</code> ở <code>switch</code> trong <code>_runConfirm</code> (đã thử). Nhưng <code>isFinal</code> là <code>this != pending</code>, nên <code>authorized</code> mặc nhiên trở thành trạng thái cuối và không có lỗi biên dịch: phải sửa tay, rồi quyết định nó vào <code>PendingConfirmation</code> hay một trạng thái riêng.</p>
 <p><strong>2.</strong> <code>PaymentAwaitingCheckout</code>. Có hai lối đi tiếp: <code>AppLifecycleListener</code> trong <code>PaymentScreen</code> gọi <code>refresh()</code> khi app về <code>resumed</code> (test <code>đóng tab bằng nút Done</code> trong <code>payment_screen_test.dart</code> đẩy chuỗi vòng đời), hoặc khách bấm Kiểm tra lại. Trên iOS thật, tab đóng có phát <code>resumed</code> hay không thì chưa kiểm.</p>
 <p><strong>3.</strong> <code>ReturnHandling.unknownSession</code>, state vẫn là <code>PaymentCreating</code> vì chưa có phiên để khớp mã; phiên vẫn được tạo bình thường sau đó (test <code>link đến khi còn đang tạo phiên</code>).</p>
 </details>

@@ -1,7 +1,7 @@
 ---
 slug: aws-resilience-multi-region-route53-failover-fis
 title: "Resilience: multi-AZ tới multi-region, Route 53 failover và ARC, Global Accelerator, Fault Injection Service"
-summary: "Bài 56: Tới Nơi sống qua mất một AZ nhờ static stability, cell theo thành phố, retry có jitter; dữ liệu đa region với Aurora Global Database và DynamoDB Global Tables; Route 53 failover, ARC routing control, zonal shift, Global Accelerator; diễn tập bằng Fault Injection Service có stop condition."
+summary: "Bài 56: Tới Nơi vẫn hoạt động khi mất một AZ nhờ static stability, cell theo thành phố, retry có jitter; dữ liệu đa region với Aurora Global Database và DynamoDB Global Tables; Route 53 failover, ARC routing control, zonal shift, Global Accelerator; diễn tập bằng Fault Injection Service có stop condition."
 category: devops-aws
 level: advanced
 tags: [aws, toi-noi, devops, resilience, multi-region, route53, application-recovery-controller, fault-injection, chaos-engineering]
@@ -14,7 +14,7 @@ Lúc 17:40, giờ cao điểm, một availability zone của `ap-southeast-1` b�
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Region chính mất, bạn đổi bản ghi Route 53 sang region phụ bằng console. Việc đổi bản ghi đó có thể chính nó cũng hỏng trong sự cố không?</p>
+<p>Region chính mất, bạn đổi bản ghi Route 53 sang region phụ bằng console. Việc đổi bản ghi đó có thể bị hỏng ngay trong sự cố không?</p>
 <details><summary>Xem đáp án</summary><p>Có thể. Đổi bản ghi là thao tác của <b>control plane</b>, còn việc trả lời DNS là <b>data plane</b>. Thiết kế tốt không gọi control plane lúc sự cố: dùng health check tự động hoặc routing control của ARC (data plane riêng) và dựng sẵn công suất ở nơi nhận tải.</p></details>
 </div>
 
@@ -34,9 +34,9 @@ Mất cả region hiếm hơn nhiều so với các dòng khác, nhưng chỉ ai
 
 ## Static stability, cell và retry
 
-**Static stability** nghĩa là hệ thống giữ nguyên hoạt động khi một phần hạ tầng mất, mà không cần gọi API nào để sửa. Chờ Auto Scaling bật thêm task sau khi AZ mất nghĩa là phụ thuộc EC2, ECS và quota đúng lúc cả khu vực đang rối. Cách vững hơn là cấp **dư sẵn**: với N AZ, mỗi AZ gánh được `1/(N-1)` tải đỉnh; 3 AZ thì mỗi AZ bằng 50% tải đỉnh, tổng 150%. Đó là khoản bảo hiểm trả liên tục để không phải bật gì lúc sự cố.
+**Static stability** nghĩa là hệ thống giữ nguyên hoạt động khi một phần hạ tầng mất, mà không cần gọi API nào để sửa. Chờ Auto Scaling bật thêm task sau khi AZ mất nghĩa là phụ thuộc vào EC2, ECS và quota đúng lúc cả region đang rối loạn. Cách vững hơn là cấp **dư sẵn**: với N AZ, mỗi AZ gánh được `1/(N-1)` tải đỉnh; 3 AZ thì mỗi AZ bằng 50% tải đỉnh, tổng 150%. Đó là khoản bảo hiểm trả liên tục để không phải bật gì lúc sự cố.
 
-**Cell-based architecture** chia hệ thống thành nhiều bản sao độc lập gọi là cell, mỗi cell phục vụ một phần khách hàng. Với Tới Nơi, cell tự nhiên là **thành phố**: `toinoi-prod-booking-hcm`, `toinoi-prod-booking-hn`... có service, queue và (ở mức dữ liệu) partition riêng. Lỗi triển khai hay tải bất thường chỉ chạm một cell, blast radius còn khoảng một phần sáu; cái giá là sáu bản để vận hành và một lớp định tuyến mỏng phía trước.
+**Cell-based architecture** chia hệ thống thành nhiều bản sao độc lập gọi là cell, mỗi cell phục vụ một phần khách hàng. Với Tới Nơi, cell tự nhiên là **thành phố**: `toinoi-prod-booking-hcm`, `toinoi-prod-booking-hn`... có service, queue và (ở mức dữ liệu) partition riêng. Lỗi triển khai hay tải bất thường chỉ chạm một cell, blast radius còn khoảng một phần sáu; cái giá là phải vận hành sáu bản sao và một lớp định tuyến mỏng phía trước.
 
 Ba thói quen phần mềm quyết định một sự cố nhỏ có lan hay không:
 
@@ -78,16 +78,16 @@ aws rds switchover-global-cluster \
   --target-db-cluster-identifier arn:aws:rds:ap-northeast-1:123456789012:cluster:toinoi-prod-trips-b
 ```
 
-Switchover chuyển vai trò ghi sang `ap-northeast-1` khi cả hai vùng còn khoẻ; sự cố thật dùng `aws rds failover-global-cluster --allow-data-loss`, chấp nhận mất phần chưa nhân bản, và bước này do người quyết.
+Switchover chuyển vai trò ghi sang `ap-northeast-1` khi cả hai region còn khoẻ; sự cố thật dùng `aws rds failover-global-cluster --allow-data-loss`, chấp nhận mất phần chưa nhân bản, và bước này do người quyết.
 
 ## Điều hướng traffic: Route 53, ARC và Global Accelerator
 
 **Route 53 failover record** gồm bản ghi PRIMARY và SECONDARY; health check của PRIMARY lỗi thì Route 53 trả SECONDARY. `TTL` và cache của client quyết định bao lâu client mới thật sự đổi đích.
 
-**Amazon Application Recovery Controller (ARC)**, trước đây mang tên Route 53 ARC, thêm các thứ sau:
+**Amazon Application Recovery Controller (ARC)**, trước đây mang tên Route 53 ARC, bổ sung các thành phần sau:
 
 - **Routing control**: công tắc Bật/Tắt do con người điều khiển, gắn vào health check kiểu `RECOVERY_CONTROL`. Công tắc nằm trên một **cluster** có endpoint ở nhiều region nên vẫn đổi được khi một region hỏng; **safety rule** chặn thao tác nguy hiểm như tắt cả hai region.
-- **Region switch**: kế hoạch chuyển region chạy thành từng bước (failover Aurora Global, scale ECS ở region đích, đổi routing control), có plan evaluation định kỳ. **Readiness check** cũ đã đóng với khách hàng mới từ 2026; AWS khuyên dùng Region switch thay thế.
+- **Region switch**: kế hoạch chuyển region chạy thành từng bước (failover Aurora Global, scale ECS ở region đích, đổi routing control), có plan evaluation định kỳ. **Readiness check** cũ đã ngừng nhận khách hàng mới từ 2026; AWS khuyên dùng Region switch thay thế.
 - **Zonal shift** và **zonal autoshift**: dời traffic của ALB/NLB (và một số tài nguyên được hỗ trợ) khỏi một AZ. Zonal shift tự hết hạn, tối đa vài ngày và gia hạn được; autoshift để AWS tự dời khi phát hiện AZ suy giảm.
 
 ```bash
@@ -130,11 +130,11 @@ FIS tính tiền theo phút action chạy. Game day mỗi quý: đặt giả thu
 - **Multi-region gần như nhân đôi hạ tầng** và thêm lỗi mới (replication lag, split-brain).
 - **Failover chưa phải là xong**: cache nguội, connection pool trỏ DB cũ, secret chưa nhân bản, quota thiếu đều kéo dài RTO.
 - **Health check quá nhạy gây flapping**: failover rồi failback liên tục; phần lớn trường hợp nên để người quyết qua routing control.
-- **FIS là tải thật**: target viết sai có thể dừng nhầm production. Luôn có stop condition, tag riêng cho tài nguyên được thử.
+- **FIS tác động lên hệ thống thật**: target viết sai có thể dừng nhầm production. Luôn có stop condition, tag riêng cho tài nguyên được thử.
 
 **Bài tập:** DNS failover mất 60 giây nhưng người dùng vẫn thấy lỗi 10 phút. Hãy kể ít nhất bốn nguyên nhân có thể.
 
-<details><summary>Xem đáp án</summary><p>(1) TTL và cache của resolver hoặc client (kể cả connection pool giữ kết nối cũ). (2) Region phụ thiếu công suất: `desiredCount` thấp, quota Fargate thiếu. (3) Database chưa được promote nên ghi đặt chuyến vẫn lỗi. (4) Thiếu secret, khoá KMS hoặc image ở region phụ nên task không khởi động. (5) Cache nguội làm DB quá tải. Chữa bằng checklist region phụ, diễn tập đo giờ thật và bước promote DB trong runbook.</p></details>
+<details><summary>Xem đáp án</summary><p>(1) TTL và cache của resolver hoặc client (kể cả connection pool giữ kết nối cũ). (2) Region phụ thiếu công suất: `desiredCount` thấp, quota Fargate thiếu. (3) Database chưa được promote nên thao tác ghi đặt chuyến vẫn lỗi. (4) Thiếu secret, khoá KMS hoặc image ở region phụ nên task không khởi động. (5) Cache nguội làm DB quá tải. Chữa bằng checklist region phụ, diễn tập đo giờ thật và bước promote DB trong runbook.</p></details>
 
 ## Lab: FIS và failover bằng Terraform
 
@@ -146,7 +146,7 @@ docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 init -backend=false 
 docker run --rm -v "$PWD:/w" -w /w hashicorp/terraform:1.10 validate
 ```
 
-Terraform đã qua `fmt` và `validate` nhưng **chưa `apply` trên tài khoản thật**; target `aws:ecs:task` (tham số `cluster`, `service`), action và quyền FIS đã đối chiếu tài liệu, API cấu hình ARC chỉ có ở `us-west-2`. Tiền lab đến từ ARC cluster tính theo giờ, health check và phút action của FIS; README ghi cách dọn.
+Terraform đã qua `fmt` và `validate` nhưng **chưa `apply` trên tài khoản thật**; target `aws:ecs:task` (tham số `cluster`, `service`), action và quyền FIS đã đối chiếu tài liệu, API cấu hình ARC chỉ có ở `us-west-2`. Chi phí của lab đến từ ARC cluster tính theo giờ, health check và phút action của FIS; README ghi cách dọn.
 
 Bài trước: [bài 55](/articles/aws-observability-nang-cao-xray-adot-logs-insights-slo). Bài tiếp: [bài 57](/articles/aws-step-functions-saga-dat-chuyen).
 

@@ -18,7 +18,7 @@ language: vi
 
 ## Một use case, hai chính sách
 
-Khách thường và khách ưu tiên đều yêu cầu báo giá. Quy tắc minh họa của nhóm ưu tiên là giá tiêu chuẩn cộng đúng 3.000 VND. Nếu mỗi nơi tự chép công thức gốc, lần đổi đơn giá sau sẽ phải sửa nhiều chỗ và có nguy cơ lệch nhau.
+Khách thường và khách ưu tiên đều yêu cầu báo giá. Quy tắc minh hoạ của nhóm ưu tiên là giá tiêu chuẩn cộng đúng 3.000 VND. Nếu mỗi nơi tự chép công thức gốc, lần đổi đơn giá sau sẽ phải sửa nhiều chỗ và có nguy cơ lệch nhau.
 
 Ta đặt câu hỏi: use case tạo báo giá có cần biết chi tiết công thức không? Nó cần một thứ tính giá theo hợp đồng. **Interface** định nghĩa hợp đồng đó; **composition** ghép hành vi từ các object; **dependency injection** đưa dependency từ ngoài vào. Ba ý liên quan nhưng không phải ba tên cho một cơ chế tự động duy nhất.
 
@@ -30,7 +30,7 @@ IFarePolicy có phương thức Calculate nhận km và trả decimal VND. Class
 
 Chữ ký chưa đủ làm hợp đồng: các implementation phải thống nhất miền 0–100 km, cách làm tròn và đơn vị tiền. Một class trả USD dù cùng decimal vẫn vi phạm ý nghĩa hợp đồng. FixedFarePolicy trong demo là test double để kiểm tra đường gọi, không là policy đưa vào production.
 
-Interface không tự quyết định khách nào dùng giá ưu tiên. Việc lựa chọn nằm tại luồng điều phối dựa trên nghiệp vụ; đừng để caller ngoài API tùy chọn tên class rồi cấp phát trực tiếp.
+Interface không tự quyết định khách nào dùng giá ưu tiên. Việc lựa chọn nằm tại luồng điều phối dựa trên nghiệp vụ; đừng để caller ngoài API tuỳ chọn tên class rồi cấp phát trực tiếp.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -51,7 +51,7 @@ Tại composition root ta lắp implementation cụ thể. Khi sang ASP.NET Core
 
 QuoteService nhận một IFarePolicy có thể thay thế: đó là vai trò Strategy. PriorityFarePolicy nhận policy bên trong, gọi nó rồi cộng phụ phí: đó là hình dạng Decorator. Sự khác nhau là ý định và quan hệ giữa các object, không phải hậu tố tên class.
 
-Surcharge là VND nguyên không âm; constructor từ chối số lẻ để không âm thầm làm mất chính sách làm tròn cuối. Demo tính giá tiêu chuẩn đã làm tròn rồi cộng một số nguyên. Nếu phụ phí chuyển thành tỷ lệ phần trăm hoặc có thuế/giảm giá, phải chốt lại thứ tự và ranh giới làm tròn, không bọc tùy ý rồi mong phép toán giao hoán.
+Surcharge là VND nguyên không âm; constructor từ chối số lẻ để không âm thầm làm mất chính sách làm tròn cuối. Demo tính giá tiêu chuẩn đã làm tròn rồi cộng một số nguyên. Nếu phụ phí chuyển thành tỷ lệ phần trăm hoặc có thuế/giảm giá, phải chốt lại thứ tự và ranh giới làm tròn, không bọc tuỳ ý rồi mong phép toán giao hoán.
 
 Lợi ích là dùng lại quy tắc nền và test riêng phần ghép. Cái giá là thêm đối tượng gián tiếp, khó lần đường gọi khi bọc nhiều tầng. Với một công thức không cần thay, một class/hàm thẳng có thể dễ đọc hơn. Pattern phải gắn với chỗ đau này mới có lý do tồn tại.
 
@@ -88,7 +88,7 @@ dotnet run --project examples/toi-noi-dotnet/08-interface-composition-di
 dotnet run --project examples/toi-noi-dotnet/08-interface-composition-di -- --verify
 ```
 
-Lệnh đầu minh họa hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
+Lệnh đầu minh hoạ hành vi; lệnh sau kiểm tra kỳ vọng cố định và báo PASS khi đúng. Kiểm tra sai ném lỗi, trả exit code thất bại. Đây là harness console cho bài học; chặng kiểm thử sẽ chuyển các tình huống sang test project. Check, `Expect<T>` và nhánh --verify là phần hỗ trợ kiểm chứng; nếu đang ở bài sớm, chưa cần hiểu toàn bộ generics/delegate của harness.
 
 Mã nguồn đầy đủ của Program.cs (đặt trong console net10.0 như bài 01):
 

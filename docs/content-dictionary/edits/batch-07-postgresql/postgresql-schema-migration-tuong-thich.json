@@ -1,0 +1,83 @@
+{
+ "file": "postgresql-schema-migration-tuong-thich.md",
+ "edits": [
+  {
+   "old": "Tới Nơi cần lưu biển số xe bắt buộc cho tài xế",
+   "new": "Tới Nơi cần bắt buộc phải lưu biển số xe của tài xế",
+   "reason": "Trật tự từ kiểu Anh, dễ hiểu nhầm 'biển số xe bắt buộc'",
+   "severity": "medium"
+  },
+  {
+   "old": "trong một file bộ phận tuyển dụng gửi sang",
+   "new": "trong một file do bộ phận tuyển dụng gửi sang",
+   "reason": "Thiếu từ nối, câu gượng",
+   "severity": "low"
+  },
+  {
+   "old": "một phát lỗi ngay",
+   "new": "chạy thẳng sẽ lỗi ngay",
+   "reason": "'một phát' khẩu ngữ, câu gượng",
+   "severity": "low"
+  },
+  {
+   "old": "— lý do ứng dụng không nên phụ thuộc",
+   "new": "— đó là lý do ứng dụng không nên phụ thuộc vào",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ để chạy lại file không lỗi trùng mã",
+   "new": "chỉ để file chạy lại được mà không lỗi trùng mã",
+   "reason": "Câu cụt, trật tự lạ",
+   "severity": "medium"
+  },
+  {
+   "old": "việc dọn phiên bản dòng cũ",
+   "new": "việc dọn các tuple cũ",
+   "reason": "'phiên bản dòng' là calque của row version",
+   "severity": "medium"
+  },
+  {
+   "old": "ghi nhận ràng buộc chưa được tin cho toàn bảng",
+   "new": "ghi nhận rằng ràng buộc chưa được tin cậy trên toàn bảng",
+   "reason": "Câu thiếu từ nối, 'tin' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "là một lần quét toàn bảng bỏ phí",
+   "new": "là một lần quét toàn bảng uổng phí",
+   "reason": "'bỏ phí' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ chạy khi mọi phiên bản đã gửi biển số",
+   "new": "chỉ chạy khi mọi phiên bản app đã gửi biển số",
+   "reason": "Lược mất danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "mọi phiên bản app đọc/ghi `vehicle_plate` phải được gỡ trước",
+   "new": "phải gỡ mọi phiên bản app còn đọc/ghi `vehicle_plate`",
+   "reason": "Bị động mơ hồ, trật tự kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "làm một bước có thể chấp nhận",
+   "new": "làm gộp trong một bước vẫn có thể chấp nhận được",
+   "reason": "'làm một bước' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "tài xế đăng ký trong lúc cột vắng mặt cần nguồn khác",
+   "new": "tài xế đăng ký trong lúc cột đã bị gỡ cần nguồn khác",
+   "reason": "'vắng mặt' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "File nguồn có **một dòng sai định dạng** cố ý",
+   "new": "File nguồn cố ý có **một dòng sai định dạng**",
+   "reason": "Trật tự từ kiểu Anh",
+   "severity": "low"
+  }
+ ]
+}

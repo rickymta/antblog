@@ -10,12 +10,12 @@ language: vi
 
 Đây là **bài 24** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 3 · Compute và ứng dụng (bài 5/10 của phần).
 
-[Bài 23](/articles/azure-aks-co-ban-cluster-node-pool-deploy) dừng ở chỗ `trip-service` chạy được trong cluster. Bài này làm cho nó chạy đáng tin: cửa vào có TLS, đọc secret mà không giữ secret, tự thêm node khi thiếu chỗ, và nâng phiên bản mà không làm rơi chuyến đang chạy. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
+[Bài 23](/articles/azure-aks-co-ban-cluster-node-pool-deploy) dừng ở chỗ `trip-service` chạy được trong cluster. Bài này làm cho service đó chạy đáng tin: cửa vào có TLS, đọc secret mà không giữ secret, tự thêm node khi thiếu chỗ, và nâng phiên bản mà không làm rơi chuyến đang chạy. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Cluster autoscaler có thêm node khi CPU của các node vượt 80% không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Nó thêm node khi có pod ở trạng thái Pending vì không node nào còn đủ phần request để xếp vào. CPU thực dùng không phải tín hiệu của nó.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Autoscaler thêm node khi có pod ở trạng thái Pending vì không node nào còn đủ phần request để xếp vào. CPU thực dùng không phải tín hiệu mà autoscaler dựa vào.</p></details>
 </div>
 
 ## Ingress là cửa vào, và cửa nội bộ phải là cửa khác
@@ -30,7 +30,7 @@ Một Service kiểu LoadBalancer cho mỗi microservice nghĩa là mỗi servic
 | Hợp với | Cluster nhỏ tới vừa, cần chạy nhanh | Cần WAF, nhiều route, tách hạ tầng ingress khỏi node |
 | Cái giá | Nâng cấp NGINX đi cùng vòng đời add-on | Thêm một resource Azure phải tính tiền và quản lý subnet riêng |
 
-Có một chi tiết cần kiểm trước khi chọn: dự án NGINX ingress upstream đã công bố dừng bảo trì, và lộ trình hỗ trợ của add-on theo đó có thể đổi. Đọc trang Application Routing trên Microsoft Learn để biết ngày hỗ trợ hiện hành. Nếu cluster dự định sống nhiều năm, hãy coi Application Gateway for Containers là điểm đến, không phải phương án phụ.
+Có một chi tiết cần kiểm tra trước khi chọn: dự án NGINX ingress upstream đã công bố dừng bảo trì, và lộ trình hỗ trợ của add-on theo đó có thể đổi. Đọc trang Application Routing trên Microsoft Learn để biết ngày hỗ trợ hiện hành. Nếu cluster dự định sống nhiều năm, hãy coi Application Gateway for Containers là điểm đến, không phải phương án phụ.
 
 Với add-on, bật nó và nối Key Vault để lấy chứng chỉ TLS như sau. Lệnh chỉ đăng ký tích hợp; nó không chứng minh chứng chỉ tồn tại hay hợp lệ.
 
@@ -69,22 +69,22 @@ spec:
               service: {name: trips, port: {number: 80}}
 ```
 
-Ingress trỏ tới Service `trips` (ClusterIP, cổng 80) đã tạo ở bài 23. Add-on yêu cầu `secretName` theo dạng `keyvault-<tên-ingress>`. Manifest chỉ mô tả đường đi: DNS trỏ đúng và quyền của add-on trên Key Vault phải kiểm riêng, đối chiếu với tài liệu gốc.
+Ingress trỏ tới Service `trips` (ClusterIP, cổng 80) đã tạo ở bài 23. Add-on yêu cầu `secretName` theo dạng `keyvault-<tên-ingress>`. Manifest chỉ mô tả đường đi: DNS trỏ đúng và quyền của add-on trên Key Vault phải kiểm tra riêng, đối chiếu với tài liệu gốc.
 
-Các service nội bộ như Dispatch hay Payment không nên chung cửa với Booking. Hãy dựng một ingress controller thứ hai với Service kiểu LoadBalancer nội bộ (annotation `service.beta.kubernetes.io/azure-load-balancer-internal: "true"`), nhận IP trong subnet của VNet. Với add-on, việc này làm bằng một resource `NginxIngressController` thứ hai khai báo annotation đó. Request từ Internet không có đường tới nó, chỉ workload trong VNet hoặc mạng đã peering mới gọi được. Đây là ranh giới mạng thật, khác với việc đặt một path `/internal` trên ingress public và hy vọng không ai đoán ra.
+Các service nội bộ như Dispatch hay Payment không nên chung cửa với Booking. Hãy dựng một ingress controller thứ hai với Service kiểu LoadBalancer nội bộ (annotation `service.beta.kubernetes.io/azure-load-balancer-internal: "true"`), nhận IP trong subnet của VNet. Với add-on, việc này làm bằng một resource `NginxIngressController` thứ hai khai báo annotation đó. Request từ Internet không có đường tới controller này, chỉ workload trong VNet hoặc mạng đã peering mới gọi được. Đây là ranh giới mạng thật, khác với việc đặt một path `/internal` trên ingress public và hy vọng không ai đoán ra.
 
 ## Workload identity: pod đổi token của Kubernetes lấy token Entra
 
-[Bài 13](/articles/azure-managed-identity-workload-identity) đã giải thích federated credential. Trên AKS, cơ chế đó trông thế này. Cluster bật **OIDC issuer**: một endpoint công khai công bố khoá để kiểm chữ ký token do cluster ký. Mỗi pod có ServiceAccount, và Kubernetes chiếu vào pod một token ngắn hạn ký bởi cluster, trong đó `subject` có dạng `system:serviceaccount:<namespace>:<tên-sa>`. Pod đưa token đó cho Entra ID. Entra tra federated credential trên user-assigned identity, thấy khớp ba trường issuer, subject, audience, rồi đổi lấy token Entra. Không có secret nào được sinh ra, lưu hay xoay.
+[Bài 13](/articles/azure-managed-identity-workload-identity) đã giải thích federated credential. Trên AKS, cơ chế đó trông thế này. Cluster bật **OIDC issuer**: một endpoint công khai công bố khoá để kiểm tra chữ ký token do cluster ký. Mỗi pod có ServiceAccount, và Kubernetes chiếu vào pod một token ngắn hạn do cluster ký, trong đó `subject` có dạng `system:serviceaccount:<namespace>:<tên-sa>`. Pod đưa token đó cho Entra ID. Entra tra federated credential trên user-assigned identity, thấy khớp ba trường issuer, subject, audience, rồi đổi lấy token Entra. Không có secret nào được sinh ra, lưu hay xoay.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 220" role="img" aria-label="Hình 1. Pod trình token ServiceAccount do cluster ký cho Entra ID, Entra kiểm issuer, subject, audience rồi cấp token để gọi Key Vault theo RBAC."><defs><marker id="az24-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="85" rx="10" class="f-pk-soft s-pk"/><text x="34" y="95" class="t-b">Pod trip-service</text><text x="34" y="123" class="t-small">sa-trips + token ký sẵn</text><path d="M280 108 L305 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az24-0-a)"/><rect x="305" y="65" width="260" height="85" rx="10" class="f-warn-soft s-warn"/><text x="319" y="95" class="t-b">Entra kiểm 3 trường</text><text x="319" y="123" class="t-small">issuer, subject, audience</text><path d="M565 108 L590 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az24-0-a)"/><rect x="590" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Key Vault</text><text x="604" y="123" class="t-small">Kiểm role Secrets User</text></svg>
+<svg viewBox="0 0 880 220" role="img" aria-label="Hình 1. Pod trình token ServiceAccount do cluster ký cho Entra ID, Entra kiểm issuer, subject, audience rồi cấp token để gọi Key Vault theo RBAC."><defs><marker id="az24-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="85" rx="10" class="f-pk-soft s-pk"/><text x="34" y="95" class="t-b">Pod trip-service</text><text x="34" y="123" class="t-small">sa-trips + token ký sẵn</text><path d="M280 108 L305 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az24-0-a)"/><rect x="305" y="65" width="260" height="85" rx="10" class="f-warn-soft s-warn"/><text x="319" y="95" class="t-b">Entra kiểm tra 3 trường</text><text x="319" y="123" class="t-small">issuer, subject, audience</text><path d="M565 108 L590 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az24-0-a)"/><rect x="590" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Key Vault</text><text x="604" y="123" class="t-small">Kiểm tra role Secrets User</text></svg>
 </div>
 <figcaption>Hình 1. Pod trình token ServiceAccount do cluster ký cho Entra ID, Entra kiểm issuer, subject, audience rồi cấp token để gọi Key Vault theo RBAC.</figcaption>
 </figure>
 
-Bật hai tính năng cho cluster rồi đăng ký niềm tin cho đúng ServiceAccount `sa-trips` trong namespace `toinoi`. Identity `id-toinoi-trips-dev` đã có từ bài 13, và nó cần role **Key Vault Secrets User** trên vault hoặc trên từng secret. Khối lệnh này chỉ thiết lập niềm tin; nó không cấp quyền đọc secret.
+Bật hai tính năng cho cluster rồi đăng ký quan hệ tin cậy cho đúng ServiceAccount `sa-trips` trong namespace `toinoi`. Identity `id-toinoi-trips-dev` đã có từ bài 13, và nó cần role **Key Vault Secrets User** trên vault hoặc trên từng secret. Khối lệnh này chỉ thiết lập quan hệ tin cậy; nó không cấp quyền đọc secret.
 
 ```bash
 az aks update -g $RG -n $AKS \
@@ -102,7 +102,7 @@ az identity federated-credential create \
   --audiences api://AzureADTokenExchange
 ```
 
-Phía Kubernetes cần hai thứ nối ServiceAccount với identity. Annotation chứa client-id của identity, và nhãn trên pod để webhook của workload identity tiêm token vào.
+Phía Kubernetes cần hai thứ nối ServiceAccount với identity: annotation chứa client-id của identity, và nhãn trên pod để webhook của workload identity inject token vào.
 
 ```yaml
 apiVersion: v1
@@ -141,7 +141,7 @@ spec:
           objectType: secret
 ```
 
-Deployment dưới là bản rút gọn của `trips` ở bài 23 (giữ nguyên port, envFrom, probe), thêm ServiceAccount và volume CSI; `objectAlias` đặt tên file là `ConnectionStrings__Trips`. Manifest này không chứng minh nội dung secret đúng định dạng connection string hay `trip-service` đọc được nó; ứng dụng phải có cấu hình đọc từ file (ví dụ key-per-file) hoặc bạn phải đồng bộ sang Secret Kubernetes bằng `secretObjects`, đổi lại giá trị nằm thêm trong etcd.
+Deployment dưới là bản rút gọn của `trips` ở bài 23 (giữ nguyên port, envFrom, probe), thêm ServiceAccount và volume CSI; `objectAlias` đặt tên file là `ConnectionStrings__Trips`. Manifest này không chứng minh nội dung secret đúng định dạng connection string hay `trip-service` đọc được nó; ứng dụng phải có cấu hình đọc từ file (ví dụ key-per-file) hoặc bạn phải đồng bộ sang Secret Kubernetes bằng `secretObjects`, cái giá là giá trị secret nằm thêm trong etcd.
 
 ```yaml
 apiVersion: apps/v1
@@ -185,7 +185,7 @@ Bảng dưới tách bốn tầng để khỏi nhầm.
 
 HPA dựa trên CPU tính theo phần trăm của **request**, nên pod không khai request thì HPA không có mẫu số để tính. KEDA hợp với Notification hay Dispatch, vốn phản ứng theo độ dài hàng đợi hơn là theo CPU, và bật bằng cờ `--enable-keda`. Phần scale theo KEDA ở Container Apps đã nói ở [bài 22](/articles/azure-container-apps-revision-ingress-scale); trên AKS cùng ý tưởng, nhưng bạn tự lo node.
 
-Cluster autoscaler chạy theo node pool. Pool hệ thống giữ `min-count` đủ để CoreDNS và các thành phần quản lý luôn sống. Pool user cho `trip-service` cần `max-count` đặt có chủ đích, vì đó là trần chi phí của bạn khi HPA tăng vọt. Khi scale down, autoscaler cordon và drain node ít tải. Nếu không có **PodDisruptionBudget**, drain có thể đuổi cả hai replica `trip-service` cùng lúc. Có PDB, Kubernetes chỉ đuổi khi vẫn còn đủ pod phục vụ.
+Cluster autoscaler chạy theo node pool. System pool giữ `min-count` đủ để CoreDNS và các thành phần quản lý luôn sống. User pool cho `trip-service` cần `max-count` đặt có chủ đích, vì đó là trần chi phí của bạn khi HPA tăng vọt. Khi scale down, autoscaler cordon và drain node ít tải. Nếu không có **PodDisruptionBudget**, drain có thể evict cả hai replica `trip-service` cùng lúc. Khi có PDB, Kubernetes chỉ evict pod khi vẫn còn đủ pod phục vụ.
 
 ```yaml
 apiVersion: policy/v1
@@ -196,7 +196,7 @@ spec:
   selector: {matchLabels: {app: trips}}
 ```
 
-PDB bảo vệ trước việc di chuyển có chủ ý (drain, scale down, upgrade). Nó không cứu bạn khỏi node chết đột ngột hay pod bị OOM.
+PDB bảo vệ trước việc di chuyển có chủ ý (drain, scale down, upgrade). PDB không cứu bạn khỏi node chết đột ngột hay pod bị OOM.
 
 ## Upgrade là chuyện của lịch, không phải của một lệnh
 
@@ -224,7 +224,7 @@ az aks nodepool update -g $RG --cluster-name $AKS \
   -n userpool --max-surge 33%
 ```
 
-Lịch `aksManagedAutoUpgradeSchedule` chỉ áp cho kênh Kubernetes; kênh OS của node dùng cấu hình riêng `aksManagedNodeOSUpgradeSchedule`, tạo cùng cách. Khối này không đảm bảo upgrade thành công. **Surge** là số node dư tạm thời được tạo thêm khi nâng một pool: surge cao thì nâng nhanh nhưng cần đủ quota vCPU và tốn thêm tiền trong lúc nâng. Surge thấp thì chậm hơn nhưng nhẹ quota.
+Lịch `aksManagedAutoUpgradeSchedule` chỉ áp dụng cho kênh Kubernetes; kênh OS của node dùng cấu hình riêng `aksManagedNodeOSUpgradeSchedule`, tạo cùng cách. Khối này không đảm bảo upgrade thành công. **Surge** là số node dư tạm thời được tạo thêm khi nâng một pool: surge cao thì nâng nhanh nhưng cần đủ quota vCPU và tốn thêm tiền trong lúc nâng. Surge thấp thì chậm hơn nhưng nhẹ quota.
 
 Với prod, một user pool là điểm yếu: mọi pod chạy trên cùng một nhóm node đang bị nâng. Hai user pool cho phép làm blue/green ở tầng node. Pool `userpool-blue` đang chạy phiên bản cũ, bạn tạo `userpool-green` ở phiên bản mới, đẩy workload sang bằng `nodeSelector` hoặc taint, quan sát, rồi cordon và drain pool cũ. Nếu có sự cố, chuyển ngược lại trong vài phút thay vì chờ AKS dựng lại node.
 
@@ -262,7 +262,7 @@ Cluster ở bài 23 có hai pool, nên autoscaler bật theo từng pool bằng 
 
 **Bài tập:** `trips` có 2 replica và một PDB với `minAvailable: 2`. Khi AKS nâng node pool, bước drain kẹt rồi upgrade báo lỗi. Vì sao, và sửa thế nào?
 
-<details><summary>Xem lời giải</summary><p>PDB yêu cầu cả hai pod luôn sẵn sàng nên Kubernetes không thể đuổi pod nào khỏi node. Drain chờ tới hết thời gian chờ rồi AKS dừng upgrade với lỗi vi phạm disruption budget. Đổi thành <code>maxUnavailable: 1</code> hoặc <code>minAvailable: 1</code>, và chạy ít nhất 3 replica khi cần dư sức chịu tải trong lúc nâng.</p></details>
+<details><summary>Xem lời giải</summary><p>PDB yêu cầu cả hai pod luôn sẵn sàng nên Kubernetes không thể evict pod nào khỏi node. Drain chờ tới hết thời gian chờ rồi AKS dừng upgrade với lỗi vi phạm disruption budget. Đổi thành <code>maxUnavailable: 1</code> hoặc <code>minAvailable: 1</code>, và chạy ít nhất 3 replica khi cần dư sức chịu tải trong lúc nâng.</p></details>
 
 ## Học tiếp từ đây
 

@@ -1,0 +1,10 @@
+{"file":"ba-use-case-xac-nhan-diem-don.md","edits":[
+{"old":"ở lúc mở đang trong phạm vi thao tác","new":"lúc mở màn hình, lượt vẫn còn trong phạm vi thao tác","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Một yêu cầu trực tiếp hoặc phiên hết hạn vẫn cần xử lý","new":"Một yêu cầu gọi trực tiếp hoặc phiên đã hết hạn vẫn cần xử lý","reason":"yêu cầu trực tiếp thiếu động từ","severity":"medium"},
+{"old":"Hệ thống kiểm quyền, state và revision nhất quán tại quyết định ghi.","new":"Hệ thống kiểm tra quyền, state và revision còn nhất quán tại thời điểm quyết định ghi.","reason":"kiểm quyền tự ghép; câu thiếu từ","severity":"medium"},
+{"old":"Chi tiết giao diện ở wireframe, cùng liên kết bước use case để tránh hai nơi mô tả khác nhau.","new":"Chi tiết giao diện nằm ở wireframe; giữ liên kết với bước use case tương ứng để tránh hai nơi mô tả khác nhau.","reason":"Thiếu động từ, câu cụt","severity":"high"},
+{"old":"kiểm lại bằng định danh","new":"kiểm tra lại bằng mã định danh","reason":"Thiếu danh từ mã; kiểm cụt","severity":"low"},
+{"old":"AC-P04-01–05 đưa ví dụ kiểm;","new":"AC-P04-01–05 đưa ví dụ kiểm thử;","reason":"ví dụ kiểm cụt","severity":"low"},
+{"old":"cần dẫn ID đúng version.","new":"cần dẫn ID đúng phiên bản.","reason":"Thống nhất phiên bản trong văn xuôi","severity":"medium"},
+{"old":"làm luồng khó đọc mà không nhất thiết","new":"khiến luồng khó đọc mà không nhất thiết","reason":"làm + tính từ là giọng dịch máy","severity":"low"}
+]}

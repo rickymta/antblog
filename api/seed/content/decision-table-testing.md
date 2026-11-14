@@ -1,14 +1,14 @@
 ---
 slug: decision-table-testing
 title: "Decision Table Testing: bảng quyết định cho phí huỷ chuyến của Tới Nơi"
-summary: "Lập bảng quyết định cho phí huỷ chuyến Tới Nơi (người huỷ, trạng thái, mốc 2 phút, tài xế trễ, loại xe), bỏ cột không khả thi, rút gọn, kiểm bảng bằng checksum và chạy 64 ca vitest."
+summary: "Lập bảng quyết định cho phí huỷ chuyến Tới Nơi (người huỷ, trạng thái, mốc 2 phút, tài xế trễ, loại xe), bỏ cột không khả thi, rút gọn, kiểm bảng bằng checksum và chạy 64 test case vitest."
 category: testing
 level: intermediate
 tags: [testing, istqb, ctfl, ctal-ta, test-033, decision-table-testing, black-box, vitest, toi-noi]
 language: vi
 ---
 
-Phí huỷ chuyến của Tới Nơi chỉ có sáu quy tắc (R-CANCEL-01…06), nhưng chúng đan vào nhau: ai huỷ, chuyến đang ở đâu, tài xế nhận được bao lâu, tài xế có trễ không, xe máy hay ô tô. Viết test «theo cảm giác» sẽ phủ được vài tổ hợp dễ thấy và bỏ sót đúng tổ hợp gây khiếu nại. Bài này dùng **decision table testing** để liệt kê có hệ thống mọi tổ hợp, loại tổ hợp không thể xảy ra, rút gọn bảng, tự kiểm bảng bằng checksum của CTAL-TA, rồi biến từng cột thành một ca kiểm thử chạy thật trên lab.
+Phí huỷ chuyến của Tới Nơi chỉ có sáu quy tắc (R-CANCEL-01…06), nhưng chúng đan vào nhau: ai huỷ, chuyến đang ở đâu, tài xế nhận được bao lâu, tài xế có trễ không, xe máy hay ô tô. Viết test «theo cảm giác» sẽ phủ được vài tổ hợp dễ thấy và bỏ sót đúng tổ hợp gây khiếu nại. Bài này dùng **decision table testing** để liệt kê có hệ thống mọi tổ hợp, loại tổ hợp không thể xảy ra, rút gọn bảng, tự kiểm bảng bằng checksum của CTAL-TA, rồi biến từng cột thành một test case chạy thật trên lab.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-033</span>
@@ -29,7 +29,7 @@ Phí huỷ chuyến của Tới Nơi chỉ có sáu quy tắc (R-CANCEL-01…06)
 
 ## 1. Giới thiệu
 
-Decision table testing (kiểm thử bằng bảng quyết định) là kỹ thuật hộp đen dành cho yêu cầu kiểu **«nếu tổ hợp điều kiện này thì kết quả kia»**. Nó giải quyết hai vấn đề:
+Decision table testing (kiểm thử bằng bảng quyết định) là kỹ thuật hộp đen dành cho yêu cầu kiểu **«nếu tổ hợp điều kiện này thì kết quả kia»**. Kỹ thuật này giải quyết hai vấn đề:
 
 - **Bỏ sót tổ hợp.** Năm điều kiện nhỏ đã cho 96 tổ hợp. Người viết test thường chỉ nghĩ tới 5–6 tổ hợp «điển hình».
 - **Đặc tả có lỗ hổng hoặc mâu thuẫn.** Khi buộc phải điền kết quả cho từng tổ hợp, ta phát hiện tổ hợp mà đặc tả không nói tới, hoặc hai quy tắc cho hai kết quả khác nhau.
@@ -212,7 +212,7 @@ Còn **40 cột khả thi**: khách 20, tài xế 18, hệ thống 2.
 <text x="460" y="240" text-anchor="middle" class="t-small">Mỗi con số trên được test trong examples/toi-noi-testing/articles/decision-table-testing</text>
 </svg>
 </div>
-<figcaption><b>Hình 1 · Từ 96 tổ hợp tới 13 ca kiểm thử.</b> Hai lựa chọn coverage: 13 cột rút gọn (mặc định) hoặc 40 cột khả thi của bảng đầy đủ khi rủi ro cao — CTAL-TA khuyên chọn cách sau cho logic tiền.</figcaption>
+<figcaption><b>Hình 1 · Từ 96 tổ hợp tới 13 test case.</b> Hai lựa chọn coverage: 13 cột rút gọn (mặc định) hoặc 40 cột khả thi của bảng đầy đủ khi rủi ro cao — CTAL-TA khuyên chọn cách sau cho logic tiền.</figcaption>
 </figure>
 
 ### 4.4. Bảng rút gọn — 13 quy tắc
@@ -247,7 +247,7 @@ Bốn tiêu chí đều đạt và lab tự kiểm ba tiêu chí đầu: **nhấ
 
 Lập bảng là một dạng static testing của đặc tả. Ba câu hỏi gửi BA:
 
-1. **Thứ tự ưu tiên `grace_period` → `driver_late` của R-CANCEL-06** hiện thừa: hai lý do không bao giờ cùng đúng (mục 4.3). Nó chỉ có tác dụng nếu ETA được phép bằng 0 hoặc thời gian miễn phí nới ra — nên giữ, kèm ví dụ.
+1. **Thứ tự ưu tiên `grace_period` → `driver_late` của R-CANCEL-06** hiện thừa: hai lý do không bao giờ cùng đúng (mục 4.3). Thứ tự này chỉ có tác dụng nếu ETA được phép bằng 0 hoặc thời gian miễn phí nới ra — nên giữ, kèm ví dụ.
 2. **Kết quả khi tài xế huỷ** (R-API-11) không có `feeReason`. Màn hình của khách hiển thị gì khi chuyến tự quay về «đang tìm tài xế»?
 3. **Phương thức thanh toán** (`cash`/`vixanh`) không đổi số phí nhưng đổi hành động thu tiền (R-PAY-05). Bảng này chủ động bỏ ra ngoài phạm vi — Bài tập 1 thêm nó vào.
 
@@ -262,7 +262,7 @@ Lập bảng là một dạng static testing của đặc tả. Ba câu hỏi g�
 | `buggy-cancel-fee.ts` | Bản chép `customerCancellationFee` có một defect cố ý |
 | `decision-table.test.ts` | 64 ca vitest |
 
-Viết bảng thành dữ liệu: test **kiểm chính bảng** (đầy đủ, không chồng lấn, checksum) trước khi kiểm sản phẩm, và bảng thành **oracle** — thêm một cột là thêm một ca test.
+Viết bảng thành dữ liệu: test **kiểm chính bảng** (đầy đủ, không chồng lấn, checksum) trước khi kiểm sản phẩm, và bảng thành **oracle** — thêm một cột là thêm một test case.
 
 ```ts
 // bang-quyet-dinh.ts (trích)
@@ -292,7 +292,7 @@ Chung: TP. Hồ Chí Minh, đặt xe 5 km lúc 09:00 giờ VN (ngoài cao điể
 | DT-12 | `picked_up`, xe máy | 5′ | tài xế | 409 `INVALID_TRANSITION`, không đổi |
 | DT-13 | `searching`, ô tô | +5′ | hệ thống | `cancelled`, `no_driver`, phí 0 |
 
-Mỗi ca so **cả ba hành động**: trạng thái sau, số tiền, lý do. Ca từ chối còn kiểm số dòng `trip_events` không đổi (R-STATE-03).
+Mỗi test case so **cả ba hành động**: trạng thái sau, số tiền, lý do. Test case từ chối còn kiểm số dòng `trip_events` không đổi (R-STATE-03).
 
 ### 5.3. Chạy
 
@@ -313,7 +313,7 @@ Kết quả thật (rút gọn):
       Tests  64 passed (64)
 ```
 
-64 ca = 4 ca kiểm bảng + 13 ca bảng rút gọn + 40 ca bảng đầy đủ + 2 ca biên + 5 ca về defect. Bản `src/` hiện tại đạt toàn bộ — đúng như kỳ vọng với một bản đã qua review. Giá trị của kỹ thuật thấy rõ ở phần dưới.
+64 test case = 4 test case kiểm bảng + 13 test case bảng rút gọn + 40 test case bảng đầy đủ + 2 test case biên + 5 test case về defect. Bản `src/` hiện tại đạt toàn bộ — đúng như kỳ vọng với một bản đã qua review. Giá trị của kỹ thuật thấy rõ ở phần dưới.
 
 ### 5.4. Bảng quyết định bắt một defect thật sự dễ mắc
 
@@ -337,13 +337,13 @@ Hai bài học, cả hai đúng như CTAL-TA nói: 100% coverage bảng rút g�
 
 ## 6. Góc nhìn nâng cao
 
-**Bảng không tự chọn giá trị biên.** Cột DT-02 nói «chưa đủ 2 phút» — 1 phút hay 1 phút 59,999 giây đều thoả. Lỗi `<` thành `<=` ([TEST-004](/articles/error-defect-failure-root-cause)) chỉ lộ ở đúng 2:00. Vì vậy lab thêm 2 ca kết hợp BVA ([TEST-032](/articles/boundary-value-analysis)) cho C3 (1:59,999 / 2:00) và C4 (15:00 / 15:00,001). Quy tắc thực hành: điều kiện là phép so sánh số ⇒ mỗi cột liên quan nên có thêm giá trị biên.
+**Bảng không tự chọn giá trị biên.** Cột DT-02 nói «chưa đủ 2 phút» — 1 phút hay 1 phút 59,999 giây đều thoả. Lỗi `<` thành `<=` ([TEST-004](/articles/error-defect-failure-root-cause)) chỉ lộ ở đúng 2:00. Vì vậy lab thêm 2 test case kết hợp BVA ([TEST-032](/articles/boundary-value-analysis)) cho C3 (1:59,999 / 2:00) và C4 (15:00 / 15:00,001). Quy tắc thực hành: điều kiện là phép so sánh số ⇒ mỗi cột liên quan nên có thêm giá trị biên.
 
 **`–` không phải «khỏi test».** `–` nghĩa là hành động không phụ thuộc giá trị đó **theo đặc tả**. Bản cài đặt có thể vẫn phụ thuộc — đó chính là defect ở 5.4. Chọn đại diện cho `–` là quyết định thiết kế test; nên chọn giá trị «khó» (giá trị mà một cách hiểu sai sẽ cho kết quả khác) hoặc luân phiên giữa các lần chạy.
 
 **Không khả thi theo đặc tả ≠ không bao giờ xảy ra trong hệ phân tán.** «Hệ thống huỷ chuyến `accepted`» không khả thi theo R-STATE-05, nhưng nếu job quét đọc chuyến lúc `searching` rồi tài xế nhận ngay sau đó, lệnh huỷ đến muộn với một chuyến đã `accepted`. Lab chặn bằng cập nhật có điều kiện (`updateIfStatus(…, 'searching')`). Đây là bài toán race condition ([TEST-086](/articles/race-condition-testing)), không phải của bảng quyết định — nhưng danh sách tổ hợp không khả thi là nơi tốt để nảy ra câu hỏi đó.
 
-**Bảng quyết định vs state transition.** Bảng ở đây coi trạng thái là **một điều kiện tại một thời điểm**. Nó không trả lời «tài xế huỷ rồi tài xế khác nhận lại, khách huỷ sau 1 phút thì sao?» — câu hỏi về **chuỗi** sự kiện. Đáp án đúng (miễn phí, vì `acceptedAt` mới) dựa vào R-STATE-04 xoá `acceptedAt`; kiểm chuỗi đó thuộc [TEST-034](/articles/state-transition-testing-co-ban). CTAL-TA phân biệt rõ: decision table là rule-based (không trạng thái), state transition là behavior-based.
+**Bảng quyết định vs state transition.** Bảng ở đây coi trạng thái là **một điều kiện tại một thời điểm**. Bảng này không trả lời «tài xế huỷ rồi tài xế khác nhận lại, khách huỷ sau 1 phút thì sao?» — câu hỏi về **chuỗi** sự kiện. Đáp án đúng (miễn phí, vì `acceptedAt` mới) dựa vào R-STATE-04 xoá `acceptedAt`; kiểm chuỗi đó thuộc [TEST-034](/articles/state-transition-testing-co-ban). CTAL-TA phân biệt rõ: decision table là rule-based (không trạng thái), state transition là behavior-based.
 
 **Khi bảng quá lớn.** Ba hướng: rút gọn; tách bảng theo nhóm điều kiện độc lập (bảng phí, bảng thu tiền); hoặc [combinatorial testing](/articles/combinatorial-testing) khi điều kiện chủ yếu là tham số cấu hình.
 
@@ -413,7 +413,7 @@ d) Không gộp được cột nào
 <p>Chỉ gộp các cột <b>cùng hành động</b>, khác nhau ở một điều kiện và phủ hết giá trị của nó. b thoả. a sai: hai nhóm có số tiền khác nhau. c sai: 10.000 khác 20.000. d sai: b là cách gộp hợp lệ.</p>
 </details>
 
-**Câu 5 (K3).** Bảng rút gọn có 13 cột khả thi. Bộ test gồm 12 ca, trong đó hai ca cùng chạy cột DT-03, các ca còn lại chạy các cột khác nhau. Decision table coverage là bao nhiêu?
+**Câu 5 (K3).** Bảng rút gọn có 13 cột khả thi. Bộ test gồm 12 test case, trong đó hai test case cùng chạy cột DT-03, các test case còn lại chạy các cột khác nhau. Decision table coverage là bao nhiêu?
 
 a) 92,3%
 b) 84,6%
@@ -421,7 +421,7 @@ c) 100%
 d) 85,7%
 
 <details><summary><b>Đáp án: b</b></summary>
-<p>12 ca nhưng chỉ 11 cột khác nhau được chạy: 11 ÷ 13 ≈ 84,6%. a đếm số ca thay vì số cột. c sai vì còn 2 cột chưa chạy. d chia cho 14.</p>
+<p>12 test case nhưng chỉ 11 cột khác nhau được chạy: 11 ÷ 13 ≈ 84,6%. a đếm số test case thay vì số cột. c sai vì còn 2 cột chưa chạy. d chia cho 14.</p>
 </details>
 
 **Câu 6 (K2 — CTAL-TA).** Checksum của bảng đã rút gọn **lớn hơn** checksum của bảng gốc. Kết luận hợp lý nhất?

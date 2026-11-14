@@ -1,0 +1,59 @@
+{
+"file": "flutter-va-dart-tu-source-code-den-ung-dung-toi-noi.md",
+"edits": [
+{
+"old": "Dart giống C# ở vai ngôn ngữ.",
+"new": "Dart đóng vai ngôn ngữ, giống C#.",
+"reason": "Câu gượng, trật tự kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "trông gần như giống nhau trên hai hệ;",
+"new": "trông gần như giống nhau trên hai hệ điều hành;",
+"reason": "'hệ' cụt, thiếu danh từ chính",
+"severity": "medium"
+},
+{
+"old": "một mã nguồn chạy được trên hai hệ:",
+"new": "một mã nguồn chạy được trên hai hệ điều hành:",
+"reason": "'hệ' cụt, thiếu danh từ chính",
+"severity": "medium"
+},
+{
+"old": "Loạt này kiểm với **Flutter 3.47.4 stable**",
+"new": "Loạt này kiểm chứng với **Flutter 3.47.4 stable**",
+"reason": "'kiểm với' cụt",
+"severity": "low"
+},
+{
+"old": "Nó gọi `runApp`, truyền vào widget gốc.",
+"new": "Hàm này gọi `runApp`, truyền vào widget gốc.",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "medium"
+},
+{
+"old": "nạp lại code đã sửa vào VM và dựng lại cây widget, giữ nguyên state hiện có.",
+"new": "nạp lại code đã sửa vào VM và rebuild cây widget, giữ nguyên state hiện có.",
+"reason": "Thống nhất 'rebuild'",
+"severity": "low"
+},
+{
+"old": "Để biết điểm đến cuối cùng, chỉ cần nhớ hai lệnh.",
+"new": "Để đóng gói app phát hành, chỉ cần nhớ hai lệnh.",
+"reason": "'điểm đến cuối cùng' tự ghép, mơ hồ",
+"severity": "medium"
+},
+{
+"old": "đi qua các ca biên của bảng giá:",
+"new": "đi qua các test case biên của bảng giá:",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Nó chứng minh cây widget thực sự hiển thị đúng chữ",
+"new": "Widget test chứng minh cây widget thực sự hiển thị đúng chữ",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "medium"
+}
+]
+}

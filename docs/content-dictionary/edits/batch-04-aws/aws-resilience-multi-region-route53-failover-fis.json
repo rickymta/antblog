@@ -1,0 +1,12 @@
+{"file":"aws-resilience-multi-region-route53-failover-fis.md","edits":[
+{"old":"Tới Nơi sống qua mất một AZ nhờ static stability","new":"Tới Nơi vẫn hoạt động khi mất một AZ nhờ static stability","reason":"'sống qua mất' là calque của survive","severity":"medium"},
+{"old":"Việc đổi bản ghi đó có thể chính nó cũng hỏng trong sự cố không?","new":"Việc đổi bản ghi đó có thể bị hỏng ngay trong sự cố không?","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"phụ thuộc EC2, ECS và quota đúng lúc cả khu vực đang rối.","new":"phụ thuộc vào EC2, ECS và quota đúng lúc cả region đang rối loạn.","reason":"Thống nhất 'region'; câu gượng","severity":"medium"},
+{"old":"cái giá là sáu bản để vận hành","new":"cái giá là phải vận hành sáu bản sao","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"khi cả hai vùng còn khoẻ","new":"khi cả hai region còn khoẻ","reason":"Thống nhất 'region'","severity":"medium"},
+{"old":"thêm các thứ sau:","new":"bổ sung các thành phần sau:","reason":"'các thứ' khẩu ngữ, giọng dịch","severity":"medium"},
+{"old":"đã đóng với khách hàng mới từ 2026","new":"đã ngừng nhận khách hàng mới từ 2026","reason":"Calque của closed to new customers","severity":"medium"},
+{"old":"**FIS là tải thật**: target viết sai","new":"**FIS tác động lên hệ thống thật**: target viết sai","reason":"'tải thật' mơ hồ, calque","severity":"medium"},
+{"old":"nên ghi đặt chuyến vẫn lỗi","new":"nên thao tác ghi đặt chuyến vẫn lỗi","reason":"Câu cụt, thiếu danh từ","severity":"medium"},
+{"old":"Tiền lab đến từ ARC cluster","new":"Chi phí của lab đến từ ARC cluster","reason":"'Tiền lab' cụm tự ghép","severity":"medium"}
+]}

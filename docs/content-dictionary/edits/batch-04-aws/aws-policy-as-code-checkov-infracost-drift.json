@@ -1,0 +1,12 @@
+{"file":"aws-policy-as-code-checkov-infracost-drift.md","edits":[
+{"old":"con người đọc plan dài rất dở trong việc tìm điều vắng mặt","new":"con người rất kém trong việc tìm ra điều còn thiếu khi đọc một plan dài","reason":"'điều vắng mặt' là calque (absence), câu dịch máy","severity":"medium"},
+{"old":"cần công cụ kiểm luật riêng","new":"cần công cụ kiểm tra theo luật riêng","reason":"Cụm tự ghép","severity":"low"},
+{"old":"và bước sau tin vào bước trước:","new":"và bước sau dựa vào kết quả của bước trước:","reason":"'tin vào' là calque của rely on","severity":"medium"},
+{"old":"Hai nguyên tắc quan trọng. Thứ nhất,","new":"Có hai nguyên tắc quan trọng. Thứ nhất,","reason":"Câu thiếu động từ","severity":"low"},
+{"old":"sau khi người duyệt bấm môi trường mới được assume role apply","new":"sau khi người duyệt phê duyệt environment mới được assume role apply","reason":"'bấm môi trường' gượng, thiếu động từ rõ nghĩa","severity":"medium"},
+{"old":"`cfn-guard test` chạy các ca","new":"`cfn-guard test` chạy các test case","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"để chính rule cũng được kiểm như code","new":"để chính rule cũng được kiểm thử như code","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"lên instance lớn kéo chi phí đi lên bao nhiêu","new":"lên instance lớn làm chi phí tăng bao nhiêu","reason":"'kéo đi lên' gượng","severity":"low"},
+{"old":"Nó cần API key (`INFRACOST_API_KEY`) và ước tính theo bảng giá công khai nên không","new":"Infracost cần API key (`INFRACOST_API_KEY`) và ước tính theo bảng giá công khai, nên không","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"cfn-guard 3.2.1 qua cả năm ca test","new":"cfn-guard 3.2.1 qua cả năm test case","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

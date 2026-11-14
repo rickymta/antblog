@@ -1,21 +1,21 @@
 ---
 slug: aws-well-architected-review-toi-noi
 title: "Well-Architected Framework: review sáu trụ cột cho Tới Nơi và biến finding thành backlog"
-summary: "Bài 58: chạy một Well-Architected review trên kiến trúc Tới Nơi đã dựng qua 57 bài: sáu trụ cột, câu hỏi trọng tâm, high-risk issue, Well-Architected Tool với lens, milestone và improvement plan; ví dụ finding thật, cách ưu tiên và biến thành backlog có owner, ước lượng, chỉ số; review lại sau 90 ngày."
+summary: "Bài 58: chạy một Well-Architected review trên kiến trúc Tới Nơi đã dựng qua 57 bài: sáu trụ cột, câu hỏi trọng tâm, high-risk issue, Well-Architected Tool với lens, milestone và improvement plan; ví dụ finding thật, cách ưu tiên và biến thành backlog có người phụ trách, ước lượng, chỉ số; review lại sau 90 ngày."
 category: devops-aws
 level: advanced
 tags: [aws, toi-noi, devops, well-architected, architecture-review, best-practices, operational-excellence, cost-optimization, sustainability]
 language: vi
 ---
 
-Tới Nơi sắp mở thêm hai thành phố, tải dự kiến tăng gấp đôi. Đội hạ tầng đã làm theo từng bài: VPC, ECS, Aurora, MSK, pipeline, SLO. Người ký ngân sách hỏi: "Đã đủ vững chưa, chỗ nào còn rủi ro, làm gì trước?". Không ai trả lời được bằng cảm giác. Well-Architected review đưa ra bộ câu hỏi chung, buộc đội nhìn lại bằng chứng và ra danh sách việc có thứ tự.
+Tới Nơi sắp mở thêm hai thành phố, tải dự kiến tăng gấp đôi. Đội hạ tầng đã làm theo từng bài: VPC, ECS, Aurora, MSK, pipeline, SLO. Người ký ngân sách hỏi: "Đã đủ vững chưa, chỗ nào còn rủi ro, làm gì trước?". Không ai trả lời được bằng cảm giác. Well-Architected review đưa ra bộ câu hỏi chung, buộc đội nhìn lại bằng chứng và lập danh sách việc có thứ tự.
 
-Đây là **bài 58** của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn nên đã đọc các bài 51 đến 57, vì bài này dùng chúng làm bằng chứng. Bài không có lab: sản phẩm là một bảng đánh giá và một backlog.
+Đây là **bài 58** của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn nên đọc các bài 51 đến 57 trước, vì bài này dùng chúng làm bằng chứng. Bài không có lab: sản phẩm là một bảng đánh giá và một backlog.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một hệ thống có đủ mọi dịch vụ "đúng chuẩn" (Multi-AZ, WAF, backup). Có cần review kiến trúc nữa không?</p>
-<details><summary>Xem đáp án</summary><p><b>Có.</b> Có dịch vụ khác với dùng đúng: NAT chỉ ở một AZ làm Multi-AZ mất ý nghĩa, backup chưa từng restore thử thì chưa phải backup, log không có retention âm thầm tăng hoá đơn. Review tìm khoảng cách giữa "đã bật tính năng" và "đạt mục tiêu".</p></details>
+<details><summary>Xem đáp án</summary><p><b>Có.</b> Có dịch vụ chưa chắc là dùng đúng: NAT chỉ ở một AZ làm Multi-AZ mất ý nghĩa, backup chưa từng restore thử thì chưa phải backup, log không có retention làm hoá đơn tăng dần mà không ai để ý. Review tìm khoảng cách giữa "đã bật tính năng" và "đạt mục tiêu".</p></details>
 </div>
 
 ## Sáu trụ cột và điều chúng hỏi
@@ -26,12 +26,12 @@ Tới Nơi sắp mở thêm hai thành phố, tải dự kiến tăng gấp đô
 | --- | --- | --- |
 | Operational Excellence | Chạy, quan sát và cải tiến hệ thống ra sao | Pipeline, runbook, game day |
 | Security | Bảo vệ dữ liệu, danh tính và phát hiện bất thường | IAM, KMS, GuardDuty |
-| Reliability | Chịu và phục hồi từ lỗi | Multi-AZ, DR, retry |
+| Reliability | Chịu lỗi và phục hồi sau lỗi | Multi-AZ, DR, retry |
 | Performance Efficiency | Dùng đúng tài nguyên cho đúng tải | Chọn DB, cache, autoscaling |
 | Cost Optimization | Tránh chi tiêu không tạo giá trị | Tag, Savings Plans, retention |
 | Sustainability | Giảm tài nguyên tiêu thụ cho cùng một khối lượng việc | Graviton, scale về 0 ngoài giờ |
 
-Các trụ cột kéo nhau: Reliability muốn dư thừa, Cost muốn bớt; Security thêm lớp kiểm, Performance muốn bớt độ trễ. Review không tối ưu riêng từng trụ cột mà làm rõ đánh đổi nào được chấp nhận và đã ghi lại chưa.
+Các trụ cột kéo nhau: Reliability muốn dư thừa, Cost muốn bớt; Security thêm lớp kiểm tra, Performance muốn bớt độ trễ. Review không tối ưu riêng từng trụ cột mà làm rõ đánh đổi nào được chấp nhận và đã ghi lại chưa.
 
 ## Chấm điểm bằng bằng chứng, không bằng cảm giác
 
@@ -50,7 +50,7 @@ Bảng dưới là một lượt review của Tới Nơi vào cuối lộ trình
 | Reliability | Giới hạn blast radius, quota và retry có jitter? | [56](/articles/aws-resilience-multi-region-route53-failover-fis), [57](/articles/aws-step-functions-saga-dat-chuyen) | Một phần |
 | Performance | Mỗi access pattern có kho dữ liệu phù hợp? | [15](/articles/aws-elasticache-redis-cache-rate-limit), [31](/articles/aws-aurora-postgresql-rds-proxy-failover), [32](/articles/aws-dynamodb-single-table-gsi-ttl-streams) | Đạt |
 | Performance | Sizing dựa trên load test, không đoán? | [13](/articles/aws-ecs-alb-rolling-deploy-autoscaling), [55](/articles/aws-observability-nang-cao-xray-adot-logs-insights-slo) | Một phần |
-| Cost | Thấy chi phí theo service và owner? | [10](/articles/aws-cloudwatch-budgets-tagging-co-ban), [59](/articles/aws-finops-savings-plans-spot-right-sizing) | Một phần: tag chưa đủ |
+| Cost | Thấy chi phí theo service và người phụ trách? | [10](/articles/aws-cloudwatch-budgets-tagging-co-ban), [59](/articles/aws-finops-savings-plans-spot-right-sizing) | Một phần: tag chưa đủ |
 | Cost | Log và snapshot có vòng đời? | [10](/articles/aws-cloudwatch-budgets-tagging-co-ban), [37](/articles/aws-backup-disaster-recovery-rpo-rto) | Chưa: log không retention |
 | Cost | Cam kết và Spot đặt đúng chỗ? | [59](/articles/aws-finops-savings-plans-spot-right-sizing) | Chưa |
 | Sustainability | Dùng tài nguyên vừa đủ, Graviton, tắt ngoài giờ? | [12](/articles/aws-ecs-fargate-task-definition-roles), [45](/articles/aws-eks-hpa-karpenter-spot), [59](/articles/aws-finops-savings-plans-spot-right-sizing) | Chưa: Graviton chưa dùng |
@@ -65,9 +65,9 @@ Bảng dưới là một lượt review của Tới Nơi vào cuối lộ trình
 
 ## Well-Architected Tool, lens và milestone
 
-**AWS Well-Architected Tool** (miễn phí, trong console) lưu một **workload**, dẫn bạn qua từng câu hỏi và cho chọn các thực hành đã làm. Từ lựa chọn đó nó gán mức rủi ro cho từng câu: **HRI** (high-risk issue), **MRI** (medium-risk issue) hoặc không rủi ro, rồi sinh **improvement plan**. Các khái niệm cần biết:
+**AWS Well-Architected Tool** (miễn phí, trong console) lưu một **workload**, dẫn bạn qua từng câu hỏi và cho chọn các thực hành đã làm. Từ các lựa chọn đó, Tool gán mức rủi ro cho từng câu: **HRI** (high-risk issue), **MRI** (medium-risk issue) hoặc không rủi ro, rồi sinh **improvement plan**. Các khái niệm cần biết:
 
-- **Lens**: bộ câu hỏi chuyên biệt thêm vào Framework gốc. Với Tới Nơi hợp nhất là **Serverless Applications Lens** (bài 18, 19, 57) và **Container Build Lens** (bài 11, 25, 26). Lens Catalog còn có **DevOps** và **Connected Mobility** (hệ thống giao thông, sát nghiệp vụ Tới Nơi); không có lens riêng cho Operational Readiness Review, vốn là một tài liệu hướng dẫn. Tiêu chuẩn nội bộ thì viết **custom lens** bằng JSON.
+- **Lens**: bộ câu hỏi chuyên biệt thêm vào Framework gốc. Với Tới Nơi phù hợp nhất là **Serverless Applications Lens** (bài 18, 19, 57) và **Container Build Lens** (bài 11, 25, 26). Lens Catalog còn có **DevOps** và **Connected Mobility** (hệ thống giao thông, sát nghiệp vụ Tới Nơi); không có lens riêng cho Operational Readiness Review, vốn là một tài liệu hướng dẫn. Tiêu chuẩn nội bộ thì viết **custom lens** bằng JSON.
 - **Milestone**: ảnh chụp trạng thái tại một thời điểm, dùng để so sánh trước và sau khi cải tiến.
 - **Pillar priorities**: bạn xếp trụ cột nào quan trọng hơn cho workload này, để kế hoạch cải tiến ưu tiên theo đó.
 
@@ -83,7 +83,7 @@ aws wellarchitected create-workload \
 
 Lệnh này tạo workload cho nhóm `booking` ở production, gắn Framework gốc (alias `wellarchitected`) cùng Serverless Lens (`serverless`) và xếp ba trụ cột ưu tiên; alias của lens khác tra bằng `aws wellarchitected list-lenses`. Sau khi trả lời, `aws wellarchitected list-lens-review-improvements --workload-id <id> --lens-alias wellarchitected` liệt kê các cải tiến, và `aws wellarchitected create-milestone --workload-id <id> --milestone-name 2026-q4-baseline` chụp mốc.
 
-Tool không thấy hệ thống, chỉ dựa vào câu trả lời của bạn. Phần "nhìn thấy thật" đến từ **Trusted Advisor** (kiểm chi phí, bảo mật, khả năng chịu lỗi, giới hạn dịch vụ; phạm vi tuỳ support plan) và **AWS Health Dashboard** (sự kiện của AWS ảnh hưởng tới tài khoản).
+Tool không thấy hệ thống, chỉ dựa vào câu trả lời của bạn. Phần "nhìn thấy thật" đến từ **Trusted Advisor** (kiểm tra chi phí, bảo mật, khả năng chịu lỗi, giới hạn dịch vụ; phạm vi tuỳ support plan) và **AWS Health Dashboard** (sự kiện của AWS ảnh hưởng tới tài khoản).
 
 ## Finding thật và cách đọc chúng
 
@@ -97,28 +97,28 @@ Một finding tốt gồm bằng chứng, hậu quả và cách sửa. Năm find
 | Ảnh chứng từ có thể chứa PII, chưa quét | Security | Rò rỉ dữ liệu khách không phát hiện được | Bật Macie cho bucket chứng từ (bài 54) |
 | Service `quote` chạy x86, chưa thử Graviton | Sustainability | Tốn năng lượng và tiền hơn cho cùng việc | Build image arm64, task definition `ARM64`, canary (bài 11, 12) |
 
-Không phải finding nào cũng sửa ngay. Chấm hai trục: **tác động** nếu xảy ra và **công sửa**. NAT một AZ tác động lớn, công vừa, nên đứng đầu; Graviton tác động vừa nhưng công lớn hơn (thư viện native, test hiệu năng) nên xếp sau.
+Không phải finding nào cũng sửa ngay. Chấm hai trục: **tác động** nếu xảy ra và **công sức sửa**. NAT một AZ tác động lớn, công sức vừa phải, nên đứng đầu; Graviton tác động vừa nhưng công sức lớn hơn (thư viện native, test hiệu năng) nên xếp sau.
 
-## Biến finding thành backlog có đo được
+## Biến finding thành backlog có thể đo được
 
-Review thất bại khi danh sách kết quả nằm trong một tài liệu không ai mở lại. Mỗi finding phải thành một việc trong công cụ quản lý công việc của đội, với năm thứ:
+Review thất bại khi danh sách kết quả nằm trong một tài liệu không ai mở lại. Mỗi finding phải thành một việc trong công cụ quản lý công việc của đội, với năm trường thông tin:
 
 | Trường | Ví dụ |
 | --- | --- |
-| Owner | Một người, không phải "team hạ tầng" |
+| Người phụ trách | Một người, không phải "team hạ tầng" |
 | Ước lượng | 2 ngày, hoặc "cần thiết kế trước" |
 | Chỉ số hoàn thành | "Mọi log group có `retentionInDays`", kiểm bằng script AWS Config |
 | Hạn | Theo mức rủi ro: HRI trong quý, MRI trong hai quý |
 | Liên kết | Câu hỏi và bằng chứng trong Tool |
 
-Review thành "checkbox" theo ba cách: chọn đáp án cho điểm đẹp, một người chấm thay cả đội, và không bao giờ review lại. Cách tránh: mỗi câu trả lời kèm bằng chứng (dashboard, kết quả diễn tập), có cả người vận hành lẫn người phát triển, và **review lại sau 90 ngày** bằng milestone mới để thấy HRI nào đã đóng. Review trước mỗi mốc lớn (mở thành phố, đổi kiến trúc) để phát hiện khi còn rẻ.
+Review biến thành "checkbox" theo ba cách: chọn đáp án cho điểm đẹp, một người chấm thay cả đội, và không bao giờ review lại. Cách tránh: mỗi câu trả lời kèm bằng chứng (dashboard, kết quả diễn tập), có cả người vận hành lẫn người phát triển, và **review lại sau 90 ngày** bằng milestone mới để thấy HRI nào đã đóng. Review trước mỗi mốc lớn (mở thành phố, đổi kiến trúc) để phát hiện vấn đề khi sửa còn rẻ.
 
 ## Cái giá phải trả
 
 - **Review tốn thời gian của người giỏi**: một lượt cho workload vừa mất vài buổi; chọn workload quan trọng nhất.
 - **Câu trả lời tự chấm dễ lạc quan**: kiểm chéo với dữ liệu thật như Trusted Advisor, Config, kết quả diễn tập.
-- **Framework không biết nghiệp vụ**: nó không nói chuyến đặt xe cần bao nhiêu nine. SLO của bạn vẫn phải do sản phẩm đặt ra.
-- **Backlog phình ra**: nếu mọi MRI đều thành việc, đội ngập. Chấp nhận có chủ đích một số rủi ro, ghi lại lý do và hạn xem lại.
+- **Framework không biết nghiệp vụ**: Framework không cho biết dịch vụ đặt xe cần bao nhiêu số 9 khả dụng. SLO của bạn vẫn phải do sản phẩm đặt ra.
+- **Backlog phình ra**: nếu mọi MRI đều thành việc, đội sẽ ngập việc. Chấp nhận có chủ đích một số rủi ro, ghi lại lý do và hạn xem lại.
 
 **Bài tập:** tự chấm năm câu hỏi Reliability cho hệ thống bạn đang vận hành: (1) mất một AZ thì sao, (2) backup đã restore thử chưa, (3) retry có jitter và circuit breaker chưa, (4) có giới hạn blast radius khi một khách hoặc lỗi triển khai gây hại không, (5) quota đã đủ để mở rộng gấp đôi chưa. Với mỗi câu ghi bằng chứng và một hành động.
 

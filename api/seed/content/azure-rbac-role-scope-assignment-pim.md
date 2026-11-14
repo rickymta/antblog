@@ -28,7 +28,7 @@ Mỗi role assignment ghép đúng ba thứ:
 
 Assignment ở scope cha được **kế thừa** xuống mọi scope con. Gán Reader ở subscription nghĩa là đọc được mọi resource group trong đó, kể cả cái tạo sau này. Muốn quyền hẹp thì gán ở scope hẹp, không có cách «trừ bớt» ở scope con.
 
-Hai điểm hay hiểu sai. Thứ nhất, quyền hiệu lực là **phép hợp** của mọi assignment áp lên principal: nhiều assignment chỉ cộng thêm, không bao giờ bớt đi. `NotActions` chỉ loại một quyền khỏi chính role đó, nó không phải lệnh cấm; nếu role khác cho quyền ấy thì principal vẫn có. Thứ hai, **deny assignment** mới là thứ thực sự chặn: Azure đánh giá deny trước, và deny thắng mọi allow. Nhưng bạn không tự tạo deny assignment trực tiếp được; chúng do nền tảng sinh ra, ví dụ khi bảo vệ resource của một managed application hoặc từ deny settings của deployment stack (bài 45). Vì vậy nó không phải công cụ phân quyền hằng ngày; xem deny assignment đang có trên một scope ở mục Access control (IAM) của portal.
+Hai điểm hay hiểu sai. Thứ nhất, quyền hiệu lực là **phép hợp** của mọi assignment áp lên principal: nhiều assignment chỉ cộng thêm, không bao giờ bớt đi. `NotActions` chỉ loại một quyền khỏi chính role đó, nó không phải lệnh cấm; nếu role khác cho quyền ấy thì principal vẫn có. Thứ hai, **deny assignment** mới là thứ thực sự chặn: Azure đánh giá deny trước, và deny thắng mọi allow. Nhưng bạn không tự tạo deny assignment trực tiếp được; chúng do nền tảng sinh ra, ví dụ khi bảo vệ resource của một managed application hoặc từ deny settings của deployment stack (bài 45). Vì vậy deny assignment không phải công cụ phân quyền hằng ngày; xem deny assignment đang có trên một scope ở mục Access control (IAM) của portal.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -50,11 +50,11 @@ Hai điểm hay hiểu sai. Thứ nhất, quyền hiệu lực là **phép hợp
 | Storage Blob Data Reader | Đọc blob (data plane) | Ghi hay xoá blob | Service đọc ảnh chứng từ |
 | Key Vault Secrets User | Đọc giá trị secret (data plane) | Tạo hay sửa secret | `trip-service` đọc connection string |
 
-Hai role đầu dễ gây hiểu lầm nhất. Contributor có thể làm hầu như mọi thứ trừ chuyện gán quyền, vì quyền ghi `Microsoft.Authorization` bị loại khỏi nó. User Access Administrator thì ngược lại: không đụng được vào resource nhưng gán được quyền, tức có thể tự nâng mình thành Owner. Vì vậy hãy xem nó nguy hiểm ngang Owner.
+Hai role đầu dễ gây hiểu lầm nhất. Contributor có thể làm hầu như mọi thứ trừ chuyện gán quyền, vì quyền ghi `Microsoft.Authorization` bị loại khỏi nó. User Access Administrator thì ngược lại: không đụng được vào resource nhưng gán được quyền, tức có thể tự nâng mình thành Owner. Vì vậy hãy xem role này nguy hiểm ngang Owner.
 
 ## Control plane và data plane là hai cánh cổng khác nhau
 
-**Control plane** là các thao tác qua Azure Resource Manager: tạo vault, đổi cấu hình, xoá account. **Data plane** là thao tác trên dữ liệu bên trong: đọc secret, đọc blob. Role Contributor khai báo `Actions` gồm mọi thứ nhưng **không có `DataActions`**, nên nó quản lý được vault mà không đọc được secret.
+**Control plane** là các thao tác qua Azure Resource Manager: tạo vault, đổi cấu hình, xoá account. **Data plane** là thao tác trên dữ liệu bên trong: đọc secret, đọc blob. Role Contributor khai báo `Actions` gồm mọi thứ nhưng **không có `DataActions`**, nên role này quản lý được vault mà không đọc được secret.
 
 Từ đó có hai hệ quả bảo mật:
 
@@ -63,7 +63,7 @@ Từ đó có hai hệ quả bảo mật:
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Contributor không có nghĩa «chỉ quản lý hạ tầng, không chạm dữ liệu». Nếu một resource đưa ra khoá truy cập qua thao tác control plane, người có Contributor vẫn lấy được dữ liệu. Khi nghi ngờ, đọc danh sách <code>Actions</code> của role và của resource provider tương ứng thay vì tin vào tên role.</p>
+<p>Contributor không có nghĩa «chỉ quản lý hạ tầng, không chạm dữ liệu». Nếu một resource cung cấp khoá truy cập qua thao tác control plane, người có Contributor vẫn lấy được dữ liệu. Khi nghi ngờ, đọc danh sách <code>Actions</code> của role và của resource provider tương ứng thay vì tin vào tên role.</p>
 </div>
 
 ## Custom role khi built-in quá rộng
@@ -102,17 +102,17 @@ az role assignment create \
   --scope /subscriptions/<subscription-id>/resourceGroups/rg-toinoi-trips-prod-sea
 ```
 
-Người on-call sau đó restart bằng `az containerapp revision restart --name ca-toinoi-trips-prod --resource-group rg-toinoi-trips-prod-sea --revision <revision-name>`. `AssignableScopes` giới hạn nơi role này được gán, nên nó không lan sang RG khác. Cái giá của custom role: bạn phải tự bảo trì danh sách operation khi provider thêm thao tác mới, và role chỉ xem được log nếu bạn thêm quyền đọc tương ứng, thứ đoạn JSON trên cố tình bỏ ra.
+Người on-call sau đó restart bằng `az containerapp revision restart --name ca-toinoi-trips-prod --resource-group rg-toinoi-trips-prod-sea --revision <revision-name>`. `AssignableScopes` giới hạn nơi role này được gán, nên nó không lan sang RG khác. Cái giá của custom role: bạn phải tự bảo trì danh sách operation khi provider thêm thao tác mới, và role chỉ xem được log nếu bạn thêm quyền đọc tương ứng, phần mà đoạn JSON trên cố tình bỏ qua.
 
 ## PIM: quyền Owner chỉ tồn tại khi có người cần và có lý do
 
-Quyền thường trực (permanent) là rủi ro nằm yên: tài khoản bị chiếm thì kẻ tấn công thừa hưởng ngay Owner. **Privileged Identity Management (PIM)** đổi mô hình này thành **just-in-time**:
+Quyền thường trực (permanent) là rủi ro nằm yên: tài khoản bị chiếm thì kẻ tấn công có ngay quyền Owner. **Privileged Identity Management (PIM)** đổi mô hình này thành **just-in-time**:
 
 - **Eligible**: principal đủ điều kiện nhưng chưa có quyền thật.
-- **Kích hoạt**: người dùng yêu cầu, nhập lý do, có thể bị bắt MFA, và tuỳ cấu hình cần người phê duyệt.
+- **Kích hoạt**: người dùng yêu cầu, nhập lý do, có thể phải xác thực MFA, và tuỳ cấu hình cần người phê duyệt.
 - **Active có thời hạn**: assignment hiệu lực trong số giờ cho phép rồi tự thu hồi.
 
-Với Tới Nơi, quy tắc là **Owner trên subscription prod chỉ ở dạng eligible**, thời hạn kích hoạt ngắn, bắt buộc có lý do và người duyệt. Mọi lần kích hoạt để lại dấu vết kiểm toán. Kèm theo là **access review**: định kỳ yêu cầu chủ group hoặc quản lý xác nhận ai còn cần quyền, và gỡ những assignment không ai nhận.
+Với Tới Nơi, quy tắc là **Owner trên subscription prod chỉ ở dạng eligible**, thời hạn kích hoạt ngắn, bắt buộc có lý do và người duyệt. Mọi lần kích hoạt để lại dấu vết kiểm toán. Kèm theo là **access review**: định kỳ yêu cầu chủ group hoặc quản lý xác nhận ai còn cần quyền, và gỡ những assignment không còn ai cần.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -121,7 +121,7 @@ Với Tới Nơi, quy tắc là **Owner trên subscription prod chỉ ở dạng
 <figcaption>Hình 2. Luồng PIM: eligible, yêu cầu kích hoạt với lý do và MFA, phê duyệt, rồi active có thời hạn và tự thu hồi.</figcaption>
 </figure>
 
-PIM cần license Entra phù hợp, hãy kiểm tài liệu trước khi lên kế hoạch. Nó cũng không thay RBAC: về bản chất PIM tạo và xoá role assignment có thời hạn thay bạn, nên mọi khái niệm ở trên vẫn đúng. Sau khi kích hoạt, token cũ có thể chưa phản ánh quyền mới; đăng nhập lại nếu thao tác vẫn bị từ chối.
+PIM cần license Entra phù hợp, hãy kiểm tra tài liệu trước khi lên kế hoạch. Nó cũng không thay RBAC: về bản chất PIM tạo và xoá role assignment có thời hạn thay bạn, nên mọi khái niệm ở trên vẫn đúng. Sau khi kích hoạt, token cũ có thể chưa phản ánh quyền mới; đăng nhập lại nếu thao tác vẫn bị từ chối.
 
 ## Lab: Reader ở subscription dev, Contributor ở RG trips-dev
 
@@ -156,7 +156,7 @@ az tag update --resource-id \
   --operation Merge --tags lab=rbac
 ```
 
-Kỳ vọng: lệnh đầu thất bại với lỗi `AuthorizationFailed`, vì Reader ở subscription không cho tạo resource group. Lệnh thứ hai thành công vì Contributor ở RG `trips-dev`. Dùng `az tag update --operation Merge` thay vì `az tag create`, vì `az tag create` thay toàn bộ tag hiện có của resource group, kể cả tag `cost-center` mà bài 15 bắt buộc. Đây là hành vi mong đợi theo tài liệu, không phải kết quả tôi đã chạy; nếu khác, kiểm assignment kế thừa bằng `az role assignment list --scope <scope> --include-inherited`. Role assignment không tính tiền, nhưng sau lab hãy gỡ chúng bằng `az role assignment delete --assignee "$GROUP_ID" --role Reader --scope /subscriptions/<subscription-id>` (và tương tự cho Contributor) để không để lại quyền thừa.
+Kỳ vọng: lệnh đầu thất bại với lỗi `AuthorizationFailed`, vì Reader ở subscription không cho tạo resource group. Lệnh thứ hai thành công vì Contributor ở RG `trips-dev`. Dùng `az tag update --operation Merge` thay vì `az tag create`, vì `az tag create` thay toàn bộ tag hiện có của resource group, kể cả tag `cost-center` mà bài 15 bắt buộc. Đây là hành vi mong đợi theo tài liệu, không phải kết quả tôi đã chạy; nếu khác, kiểm tra assignment kế thừa bằng `az role assignment list --scope <scope> --include-inherited`. Role assignment không tính tiền, nhưng sau lab hãy gỡ chúng bằng `az role assignment delete --assignee "$GROUP_ID" --role Reader --scope /subscriptions/<subscription-id>` (và tương tự cho Contributor) để không để lại quyền thừa.
 
 **Bài tập:** `grp-toinoi-dev` được Contributor ở `rg-toinoi-trips-dev-sea` và Reader ở subscription. Một admin thêm `NotActions` vào custom role gán cho nhóm khác để «cấm» xoá Container App, nhưng user vẫn xoá được. Vì sao, và cách chặn thật là gì?
 

@@ -1,0 +1,47 @@
+{
+ "file": "postgresql-role-grant-least-privilege.md",
+ "edits": [
+  {
+   "old": "và cái bẫy default privileges với bảng tạo mới",
+   "new": "và chỉ ra cái bẫy default privileges với bảng tạo mới",
+   "reason": "Câu cụt trong summary, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Dòng `ALTER DEFAULT PRIVILEGES` để mục 7.",
+   "new": "Dòng `ALTER DEFAULT PRIVILEGES` sẽ nói ở mục 7.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng hai thông báo khác nhau, và khác có lý do:",
+   "new": "nhưng hai thông báo khác nhau, và sự khác biệt đó có lý do:",
+   "reason": "'khác có lý do' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Đúng thiết kế, nhưng là bất ngờ quen thuộc",
+   "new": "Đúng như thiết kế, nhưng đây là bất ngờ quen thuộc",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Bảo mật không thay cho kiểm soát thay đổi.",
+   "new": "Bảo mật không thay thế được kiểm soát thay đổi.",
+   "reason": "'thay cho' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Điều này đi ngược quyền tối thiểu.",
+   "new": "Điều này đi ngược nguyên tắc quyền tối thiểu.",
+   "reason": "Thiếu danh từ 'nguyên tắc'",
+   "severity": "low"
+  },
+  {
+   "old": "Dữ liệu là một **projection vận hành** thu nhỏ",
+   "new": "Dữ liệu là một **bản chiếu (projection) vận hành** thu nhỏ",
+   "reason": "Giữ thuật ngữ gốc nhưng thêm danh từ tiếng Việt cho dễ hiểu",
+   "severity": "low"
+  }
+ ]
+}

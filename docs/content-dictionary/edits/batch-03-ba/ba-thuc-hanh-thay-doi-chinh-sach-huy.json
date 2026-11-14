@@ -1,0 +1,10 @@
+{"file":"ba-thuc-hanh-thay-doi-chinh-sach-huy.md","edits":[
+{"old":"thông báo, version và replay","new":"thông báo, phiên bản và replay","reason":"version trong văn xuôi","severity":"low"},
+{"old":"tài xế đã chuyển arriving có được","new":"tài xế đã chuyển sang arriving có được","reason":"Thiếu giới từ","severity":"low"},
+{"old":"Gửi lại sau khi version thay đổi","new":"Gửi lại sau khi phiên bản thay đổi","reason":"version trong văn xuôi","severity":"low"},
+{"old":"phải nói rõ tài xế rời rồi người khác nhận có chọn version mới không.","new":"phải nói rõ: khi tài xế rời chuyến và người khác nhận chuyến, người nhận có dùng phiên bản mới không.","reason":"Câu cụt, khó hiểu","severity":"high"},
+{"old":"Các ca độc lập dùng xe máy","new":"Các case độc lập dùng xe máy","reason":"Thống nhất 'case' trong bài","severity":"low"},
+{"old":"dữ liệu version, nội dung và quyền phê duyệt","new":"dữ liệu phiên bản, nội dung và quyền phê duyệt","reason":"version trong văn xuôi","severity":"low"},
+{"old":"kiểm case thay đổi và regression; có owner theo dõi.","new":"kiểm thử các case thay đổi và regression; có người phụ trách theo dõi.","reason":"Động từ cụt; owner","severity":"medium"},
+{"old":"Nó chưa chứng minh phản ứng người dùng","new":"Phân tích đó chưa chứng minh phản ứng người dùng","reason":"Tránh 'Nó' đầu câu","severity":"medium"}
+]}

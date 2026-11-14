@@ -1,0 +1,23 @@
+{"file":"flutter-code-generation-freezed-json-serializable-riverpod-generator.md","edits":[
+{"old":"nên phần lẻ bị cắt thầm lặng, còn","new":"nên phần lẻ bị cắt mà không báo lỗi, còn","reason":"'thầm lặng' là calque của silently","severity":"medium"},
+{"old":"Mỗi file sinh khai `part of` file nguồn, nên","new":"Mỗi file sinh khai báo `part of` file nguồn, nên","reason":"'khai' cụt, thiếu 'báo'","severity":"low"},
+{"old":"hoặc cần `copyWith`, union;","new":"hoặc cần `copyWith` và union;","reason":"Thiếu từ nối","severity":"low"},
+{"old":"Hai `TripDto` sinh mã cùng JSON thì `==`; hai `TripDto` viết tay thì không","new":"Hai `TripDto` bản sinh mã dựng từ cùng một JSON thì bằng nhau theo `==`; hai `TripDto` bản viết tay thì không","reason":"Câu thiếu động từ, 'thì `==`' khó hiểu","severity":"high"},
+{"old":"Mỗi dòng là một quyết định mà `JsonReader` của bài 19 quyết định khác.","new":"Mỗi dòng là một quyết định mà `JsonReader` của bài 19 đã quyết định theo cách khác.","reason":"Câu cụt, đọc như dịch máy","severity":"medium"},
+{"old":"Trên cả bảng ca, bản viết tay từ chối 35 ca JSON object sai; bản mặc định nhận thầm lặng 16 ca, ném","new":"Trên cả bảng test case, bản viết tay từ chối 35 test case JSON object sai; bản mặc định nhận mà không báo lỗi 16 test case, ném","reason":"Thống nhất 'test case'; 'thầm lặng' calque","severity":"medium"},
+{"old":"ở 13 ca và lỗi khác ở 6 ca.","new":"ở 13 test case và lỗi khác ở 6 test case.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"nên body thiếu `id` làm app lỗi thay vì thành `ParseFailure`","new":"nên body thiếu `id` làm app lỗi thay vì trở thành `ParseFailure`","reason":"Câu lược động từ 'trở thành'","severity":"medium"},
+{"old":"làm lỗi `fromJson` mang tên khoá","new":"khiến lỗi của `fromJson` mang tên khoá","reason":"'làm lỗi' mơ hồ (gây lỗi?)","severity":"medium"},
+{"old":"DTO nào do tay viết, DTO nào do máy sinh","new":"DTO nào viết tay, DTO nào do máy sinh","reason":"'do tay viết' gượng","severity":"low"},
+{"old":"Converter chỉ canh **biên JSON**.","new":"Converter chỉ kiểm soát **biên JSON**.","reason":"'canh' khẩu ngữ, không rõ nghĩa kỹ thuật","severity":"medium"},
+{"old":"Bảng ca có 47 ca cho","new":"Bảng so sánh có 47 test case cho","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"thêm 13 ca cho","new":"thêm 13 test case cho","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"đếm đúng 8 ca được nhận, để bảng không thể thành toàn ca lỗi mà vẫn xanh.","new":"đếm đúng 8 test case được nhận, để bảng không thể thành toàn test case lỗi mà vẫn xanh.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Bằng chứng chỉ phủ các ca đã liệt kê","new":"Bằng chứng chỉ phủ các test case đã liệt kê","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"ngoài `Ref` thành family","new":"ngoài `Ref` trở thành family","reason":"Câu lược động từ 'trở thành'","severity":"medium"},
+{"old":"mất 131 giây trên máy kiểm,","new":"mất 131 giây trên máy chạy kiểm chứng,","reason":"'máy kiểm' là cụm tự ghép","severity":"low"},
+{"old":"Nó không cần cây git sạch.","new":"Lệnh này không cần cây git sạch.","reason":"Tránh 'Nó' đầu câu","severity":"low"},
+{"old":"nhưng nó ghi đè file và","new":"nhưng cách này ghi đè file và","reason":"'nó' mơ hồ","severity":"low"},
+{"old":"Nghĩ converter canh cả constructor.","new":"Nghĩ converter kiểm soát cả constructor.","reason":"'canh' khẩu ngữ","severity":"medium"},
+{"old":"11 test đỏ: 8 ca hợp lệ của","new":"11 test đỏ: 8 test case hợp lệ của","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

@@ -1,0 +1,14 @@
+{"file":"azure-firewall-waf-ddos-bao-ve-bien.md","edits":[
+{"old":"Thực tế nó là bốn thứ nhìn ở bốn độ sâu khác nhau,","new":"Thực tế đó là bốn lớp nhìn ở bốn độ sâu khác nhau,","reason":"'nó', 'bốn thứ' mơ hồ; thống nhất dùng 'lớp'","severity":"medium"},
+{"old":"và NSG không biết nổi một request có nhúng","new":"và NSG không nhận ra được một request có nhúng","reason":"'biết nổi' gượng","severity":"low"},
+{"old":"«có cần bảo vệ điều chỉnh theo traffic của riêng mình, telemetry và hỗ trợ khi bị tấn công không»","new":"«có cần mức bảo vệ được điều chỉnh theo traffic riêng của mình, cùng telemetry và hỗ trợ khi bị tấn công hay không»","reason":"Câu liệt kê rối, thiếu từ nối","severity":"medium"},
+{"old":"WAF** là thứ duy nhất ở đây hiểu HTTP. Nó chạy trên","new":"WAF** là lớp duy nhất ở đây hiểu được HTTP. WAF chạy trên","reason":"'thứ' mơ hồ; tránh 'Nó'","severity":"medium"},
+{"old":"kiểm trang WAF của dịch vụ bạn chọn.","new":"kiểm tra trang WAF của dịch vụ bạn chọn.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"nó không tự chặn mọi thứ còn lại, đó là việc của rule deny mặc định","new":"rule này không tự chặn mọi thứ còn lại, việc đó thuộc về rule deny mặc định","reason":"Tránh 'nó', câu ghép nối bằng dấu phẩy","severity":"low"},
+{"old":"có thể cùng một IP công cộng, nên ngưỡng quá thấp","new":"có thể dùng chung một IP công cộng, nên ngưỡng quá thấp","reason":"Thiếu động từ","severity":"medium"},
+{"old":"Tuỳ, thử để kiểm egress","new":"Tuỳ, thử để kiểm tra egress","reason":"'kiểm' thiếu 'tra'","severity":"low"},
+{"old":"Nếu không thấy cột nào, kiểm bằng `AzureDiagnostics | getschema`.","new":"Nếu không thấy cột nào, kiểm tra bằng `AzureDiagnostics | getschema`.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nếu bảng trống, kiểm diagnostic settings và độ trễ nạp log","new":"Nếu bảng trống, kiểm tra diagnostic settings và độ trễ nạp log","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"để chắc không còn false positive,","new":"để chắc chắn không còn false positive,","reason":"'chắc' thiếu 'chắn'","severity":"low"},
+{"old":"và cách API kiểm JWT.","new":"và cách API kiểm tra JWT.","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

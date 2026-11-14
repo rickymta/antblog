@@ -135,7 +135,7 @@ Output thật của `cargo run`:
 3) thứ tự: work done -> drop entry_lock -> drop db_conn
 ```
 
-Với tài nguyên như kết nối hay khóa, C# cũng giải phóng tất định bằng `using`/`IDisposable`. Khác biệt là ở Rust cả bộ nhớ heap cũng theo cùng quy tắc, không có bộ gom rác. Đó là cơ sở cho **xu hướng** độ trễ đuôi dễ đoán hơn và bộ nhớ thấp hơn; chỉ là xu hướng, **chưa đo**, vì allocator, khóa, I/O và Kafka vẫn gây trễ. Ta không đưa con số nào cho đến bài hiệu năng của lộ trình nâng cao.
+Với tài nguyên như kết nối hay khoá, C# cũng giải phóng tất định bằng `using`/`IDisposable`. Khác biệt là ở Rust cả bộ nhớ heap cũng theo cùng quy tắc, không có bộ gom rác. Đó là cơ sở cho **xu hướng** độ trễ đuôi dễ đoán hơn và bộ nhớ thấp hơn; chỉ là xu hướng, **chưa đo**, vì allocator, khoá, I/O và Kafka vẫn gây trễ. Ta không đưa con số nào cho đến bài hiệu năng của lộ trình nâng cao.
 
 ## Cái giá của Rust là gì?
 

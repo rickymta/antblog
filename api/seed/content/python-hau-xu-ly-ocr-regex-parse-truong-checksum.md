@@ -1,7 +1,7 @@
 ---
 slug: python-hau-xu-ly-ocr-regex-parse-truong-checksum
 title: "Hậu xử lý OCR: regex, tách trường CCCD/GPLX, checksum và fuzzy matching"
-summary: "Bài 44: biến chữ OCR thô thành trường có kiểu: chuẩn hóa Unicode, regex có tên, sửa ký tự theo ngữ cảnh, kiểm cấu trúc số, rapidfuzz, confidence là min các từ. Có output thật và lab chạy được."
+summary: "Bài 44: biến chữ OCR thô thành trường có kiểu: chuẩn hoá Unicode, regex có tên, sửa ký tự theo ngữ cảnh, kiểm cấu trúc số, rapidfuzz, confidence là min các từ. Có output thật và lab chạy được."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, ocr, regex, rapidfuzz]
@@ -38,7 +38,7 @@ Trong `Word`, `conf` đã đổi về khoảng 0 đến 1; `postprocess.py` đi 
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 270" role="img" aria-label="Năm bước nối tiếp: từ Tesseract, tìm nhãn, chuẩn hóa NFC, sửa và regex, kiểm tra; kết quả là FieldResult, còn khi không chắc thì ghi cờ lý do thay vì đoán."><defs><marker id="py44-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker><marker id="py44-0-arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><rect x="20" y="30" width="148" height="96" rx="10" class="f-phys-soft s-phys"/><text x="32" y="62" class="t-b">1. Tesseract</text><text x="32" y="88" class="t-small">từ + khung + conf</text><text x="32" y="106" class="t-small">dạng TSV</text><path d="M168 78 L193 78" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><rect x="193" y="30" width="148" height="96" rx="10" class="f-pk-soft s-pk"/><text x="205" y="62" class="t-b">2. Tìm nhãn</text><text x="205" y="88" class="t-small">so khớp mờ đầu dòng</text><text x="205" y="106" class="t-small">lấy dòng giá trị</text><path d="M341 78 L366 78" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><rect x="366" y="30" width="148" height="96" rx="10" class="f-pk-soft s-pk"/><text x="378" y="62" class="t-b">3. Chuẩn hóa</text><text x="378" y="88" class="t-small">NFC, gộp ký tự lạ</text><text x="378" y="106" class="t-small">bỏ dấu cách thừa</text><path d="M514 78 L539 78" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><rect x="539" y="30" width="148" height="96" rx="10" class="f-pk-soft s-pk"/><text x="551" y="62" class="t-b">4. Sửa + regex</text><text x="551" y="88" class="t-small">theo ngữ cảnh trường</text><text x="551" y="106" class="t-small">fullmatch, fuzzy</text><path d="M687 78 L712 78" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><rect x="712" y="30" width="148" height="96" rx="10" class="f-pk-soft s-pk"/><text x="724" y="62" class="t-b">5. Kiểm tra</text><text x="724" y="88" class="t-small">ngày có thật không</text><text x="724" y="106" class="t-small">cấu trúc số khớp thẻ</text><path d="M786 126 L786 168" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><path d="M440 126 L440 168" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py44-0-arrow-warn)"/><rect x="20" y="170" width="440" height="80" rx="10" class="f-warn-soft s-warn dash"/><text x="36" y="200" class="t-b">Không chắc: ghi issues, không đoán</text><text x="36" y="224" class="t-small">không dùng được thì value = None (label_not_found...)</text><text x="36" y="240" class="t-small">ngày không có thật: giữ chữ, cờ impossible_date</text><rect x="500" y="170" width="360" height="80" rx="10" class="f-phys-soft s-phys"/><text x="516" y="200" class="t-b">FieldResult</text><text x="516" y="224" class="t-small">raw, value, corrections, issues</text><text x="516" y="240" class="t-small">confidence = min(conf từng từ)</text></svg>
+<svg viewBox="0 0 880 270" role="img" aria-label="Năm bước nối tiếp: từ Tesseract, tìm nhãn, chuẩn hoá NFC, sửa và regex, kiểm tra; kết quả là FieldResult, còn khi không chắc thì ghi cờ lý do thay vì đoán."><defs><marker id="py44-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker><marker id="py44-0-arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><rect x="20" y="30" width="148" height="96" rx="10" class="f-phys-soft s-phys"/><text x="32" y="62" class="t-b">1. Tesseract</text><text x="32" y="88" class="t-small">từ + khung + conf</text><text x="32" y="106" class="t-small">dạng TSV</text><path d="M168 78 L193 78" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><rect x="193" y="30" width="148" height="96" rx="10" class="f-pk-soft s-pk"/><text x="205" y="62" class="t-b">2. Tìm nhãn</text><text x="205" y="88" class="t-small">so khớp mờ đầu dòng</text><text x="205" y="106" class="t-small">lấy dòng giá trị</text><path d="M341 78 L366 78" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><rect x="366" y="30" width="148" height="96" rx="10" class="f-pk-soft s-pk"/><text x="378" y="62" class="t-b">3. Chuẩn hoá</text><text x="378" y="88" class="t-small">NFC, gộp ký tự lạ</text><text x="378" y="106" class="t-small">bỏ dấu cách thừa</text><path d="M514 78 L539 78" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><rect x="539" y="30" width="148" height="96" rx="10" class="f-pk-soft s-pk"/><text x="551" y="62" class="t-b">4. Sửa + regex</text><text x="551" y="88" class="t-small">theo ngữ cảnh trường</text><text x="551" y="106" class="t-small">fullmatch, fuzzy</text><path d="M687 78 L712 78" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><rect x="712" y="30" width="148" height="96" rx="10" class="f-pk-soft s-pk"/><text x="724" y="62" class="t-b">5. Kiểm tra</text><text x="724" y="88" class="t-small">ngày có thật không</text><text x="724" y="106" class="t-small">cấu trúc số khớp thẻ</text><path d="M786 126 L786 168" class="f-none s-phys" stroke-width="2" marker-end="url(#py44-0-arrow)"/><path d="M440 126 L440 168" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py44-0-arrow-warn)"/><rect x="20" y="170" width="440" height="80" rx="10" class="f-warn-soft s-warn dash"/><text x="36" y="200" class="t-b">Không chắc: ghi issues, không đoán</text><text x="36" y="224" class="t-small">không dùng được thì value = None (label_not_found...)</text><text x="36" y="240" class="t-small">ngày không có thật: giữ chữ, cờ impossible_date</text><rect x="500" y="170" width="360" height="80" rx="10" class="f-phys-soft s-phys"/><text x="516" y="200" class="t-b">FieldResult</text><text x="516" y="224" class="t-small">raw, value, corrections, issues</text><text x="516" y="240" class="t-small">confidence = min(conf từng từ)</text></svg>
 </div>
 <figcaption>Hình 1. Luồng hậu xử lý. Mỗi bước ghi lại điều nó đã sửa (<code>corrections</code>) hoặc nghi ngờ (<code>issues</code>); bước nào không chắc thì ghi cờ (và để trống giá trị khi không dùng được) thay vì đoán.</figcaption>
 </figure>
@@ -72,9 +72,9 @@ Thẻ seed 7 bị nghiêng cho ra kết quả từ đầu đến cuối như sau
 
 Dấu cách trong số thẻ được bỏ, thành phố về dạng chuẩn có dấu, ngày `43/03/1990` bị cờ vì không có ngày 43, và tên có `confidence` thấp nhất thẻ (0,62).
 
-## Chuẩn hóa Unicode trước khi so khớp
+## Chuẩn hoá Unicode trước khi so khớp
 
-Cùng một chữ «Ễ» có hai cách mã hóa: một mã dựng sẵn (NFC) hoặc chữ `E` cộng hai dấu rời (NFD). Mắt người không thấy khác, `==` và regex thì có:
+Cùng một chữ «Ễ» có hai cách mã hoá: một mã dựng sẵn (NFC) hoặc chữ `E` cộng hai dấu rời (NFD). Mắt người không thấy khác, `==` và regex thì có:
 
 ```python
 def normalize_text(text: str) -> str:
@@ -89,7 +89,7 @@ def fold(text: str) -> str:
     return "".join(ch for ch in decomposed if not unicodedata.combining(ch)).casefold()
 ```
 
-`_CONFUSABLE` đổi nháy cong về nháy thẳng, các loại gạch ngang về `-`, khoảng trắng không ngắt về dấu cách và xóa ký tự rộng bằng 0. Tác động:
+`_CONFUSABLE` đổi nháy cong về nháy thẳng, các loại gạch ngang về `-`, khoảng trắng không ngắt về dấu cách và xoá ký tự rộng bằng 0. Tác động:
 
 ```text
 [2] Unicode: cùng một chữ, hai dãy mã
@@ -139,7 +139,7 @@ TO_LETTER = str.maketrans({"0": "O", "1": "I", "5": "S", "8": "B"})
   license_class  'Cc'               -> None             sửa=[] vấn đề=['license_class_unknown']
 ```
 
-Ba quyết định. Một: chữ số ở đầu hay cuối từ không bị đổi (`VAN5` không thành `VANS`, vì có thể là chữ số thật hoặc vệt nhiễu), và tên còn chữ số sau khi sửa thì **từ chối** (`digit_in_name`) thay vì xóa chữ số cho khớp regex; xóa lặng lẽ biến `NGUY3N` thành `NGUYN`, một tên hợp lệ nhưng sai. Hai: `'Cc'` không đoán thành `'C'`. Ba: `Al` thành `A1` vì vị trí thứ hai của hạng bằng chỉ có thể là chữ số; ca này có thật trong hai ảnh của bộ, không chỉ là chuỗi dựng tay.
+Ba quyết định. Một: chữ số ở đầu hay cuối từ không bị đổi (`VAN5` không thành `VANS`, vì có thể là chữ số thật hoặc vệt nhiễu), và tên còn chữ số sau khi sửa thì **từ chối** (`digit_in_name`) thay vì xoá chữ số cho khớp regex; xoá lặng lẽ biến `NGUY3N` thành `NGUYN`, một tên hợp lệ nhưng sai. Hai: `'Cc'` không đoán thành `'C'`. Ba: `Al` thành `A1` vì vị trí thứ hai của hạng bằng chỉ có thể là chữ số; ca này có thật trong hai ảnh của bộ, không chỉ là chuỗi dựng tay.
 
 Tóm lại, trên bộ 64 ảnh bảng sửa chưa lần nào phải đổi `O` thành `0`. Cái cứu được nhiều nhất là bỏ dấu cách chèn thừa: `re.sub(r"[\s.\-]", "", text)` ở số thẻ và số GPLX (6 trường), và `re.sub(r"\s+", "", text)` ở đầu `parse_date` (3 ngày). Đo trước, rồi mới thêm luật.
 
@@ -205,7 +205,7 @@ def match_city(text: str) -> tuple[str | None, float, float]:
     return None, best_score, second_score
 ```
 
-Giá trị trả về là khóa của từ điển, tức dạng chuẩn có dấu, nên so khớp mờ vừa sửa chính tả vừa khôi phục dấu. Output thật:
+Giá trị trả về là khoá của từ điển, tức dạng chuẩn có dấu, nên so khớp mờ vừa sửa chính tả vừa khôi phục dấu. Output thật:
 
 ```text
 [5] rapidfuzz với danh sách đóng (tối thiểu 80 điểm, hơn hạng nhì 10 điểm)
@@ -264,7 +264,7 @@ Bộ ảnh này khác bộ của bài 41 và 42 (GPLX cùng seed là người kh
   sai không cờ theo trường: {'full_name': 9}
 ```
 
-Cột «chỉ nối từ OCR» vẫn dùng bước tìm nhãn và dòng giá trị, chỉ bỏ chuẩn hóa, sửa và kiểm tra. Bước quét cả trang tìm số 12 chữ số khi mất nhãn (`scan_for_number`, dòng cuối của khối trên) nằm ở cả hai cột nên không hiện ở bảng. Ảnh sạch gần như không cần hậu xử lý (hai trường sai đều là hạng bằng `Cc`, bị từ chối), ảnh nghiêng hưởng nhiều nhất (48 lên 58), và hậu xử lý không làm hỏng trường nào đã đúng. **Lỗi nguy hiểm nhất là lỗi không bị từ chối**: 45 trường sai đều có cờ hoặc bị bỏ trống, nhưng 9 trường sai không có cờ nào, toàn là tên:
+Cột «chỉ nối từ OCR» vẫn dùng bước tìm nhãn và dòng giá trị, chỉ bỏ chuẩn hoá, sửa và kiểm tra. Bước quét cả trang tìm số 12 chữ số khi mất nhãn (`scan_for_number`, dòng cuối của khối trên) nằm ở cả hai cột nên không hiện ở bảng. Ảnh sạch gần như không cần hậu xử lý (hai trường sai đều là hạng bằng `Cc`, bị từ chối), ảnh nghiêng hưởng nhiều nhất (48 lên 58), và hậu xử lý không làm hỏng trường nào đã đúng. **Lỗi nguy hiểm nhất là lỗi không bị từ chối**: 45 trường sai đều có cờ hoặc bị bỏ trống, nhưng 9 trường sai không có cờ nào, toàn là tên:
 
 ```text
     cccd-1-dark    full_name  đúng 'LÊ VĂN C'     đọc 'A LE VAN C'     confidence 0.00

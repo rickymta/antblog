@@ -1,0 +1,21 @@
+{"file":"azure-ci-pipeline-build-test-scan-push-acr.md","edits":[
+{"old":"Mỗi bước sau tốn thời gian và đụng tài nguyên dùng chung hơn bước trước, nên lỗi sớm nhất dừng cả chuỗi.","new":"Mỗi bước sau tốn nhiều thời gian hơn và đụng tới nhiều tài nguyên dùng chung hơn bước trước, nên lỗi xuất hiện sớm nhất sẽ dừng cả chuỗi.","reason":"Câu so sánh thiếu vị ngữ ('tốn thời gian ... hơn')","severity":"medium"},
+{"old":"Nó cũng đã build image nhưng chỉ ra file OCI archive, không push.","new":"Workflow này cũng đã build image nhưng chỉ xuất ra file OCI archive, không push.","reason":"Tránh 'Nó' ở đầu câu; 'chỉ ra file' gây hiểu nhầm với nghĩa 'chỉ ra'","severity":"medium"},
+{"old":"Khối này mô tả cách ghép, nó không chứng minh pipeline xanh.","new":"Khối này mô tả cách ghép chứ không chứng minh pipeline xanh.","reason":"Ghép hai vế bằng dấu phẩy, dùng 'nó' thừa","severity":"low"},
+{"old":"Ba chi tiết cần kiểm trên repo của bạn:","new":"Ba chi tiết cần kiểm tra trên repo của bạn:","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"hãy ghim vào commit SHA đã kiểm trước khi dùng thật.","new":"hãy ghim vào commit SHA đã kiểm tra trước khi dùng thật.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"nên health check phải đủ kiên nhẫn:","new":"nên health check phải chờ đủ lâu:","reason":"'đủ kiên nhẫn' là calque của patient","severity":"medium"},
+{"old":"giữa hai lần kiểm, job chờ lâu vô ích.","new":"giữa hai lần kiểm tra, job chờ lâu vô ích.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"lỗi nhìn như lỗi code.","new":"lỗi trông như lỗi code.","reason":"Trật từ tự nhiên hơn: 'trông như'","severity":"low"},
+{"old":"Dùng nó để tìm vùng chưa kiểm, đừng","new":"Dùng chỉ số này để tìm vùng chưa được kiểm thử, đừng","reason":"'chưa kiểm' thiếu 'thử'; 'nó' mơ hồ","severity":"medium"},
+{"old":"Hai việc này cần thêm package vào project test, và bài không kiểm chúng trên repo.","new":"Hai việc này cần thêm package vào project test, và bài không kiểm tra chúng trên repo.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"bị bài 21 chỉ ra là tag trôi.","new":"được bài 21 chỉ ra là tag trôi.","reason":"Giữ nguyên nghĩa nhưng 'bị' sai sắc thái; không phải việc xấu xảy ra với bài","severity":"low"},
+{"old":"Cũng nhớ rằng nguồn lỗi hay là base image, không phải code của bạn.","new":"Cũng nhớ rằng lỗ hổng thường nằm ở base image, không phải code của bạn.","reason":"'nguồn lỗi hay là' gượng","severity":"medium"},
+{"old":"AcrPush ở scope registry, và nó cũng kéo được.","new":"AcrPush ở scope registry, role này cũng cho phép pull image.","reason":"'nó cũng kéo được' mơ hồ, thiếu tân ngữ","severity":"medium"},
+{"old":"kiểm chế độ của","new":"kiểm tra chế độ của","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nhờ vậy thứ được test, được quét và thứ được deploy là cùng một dãy byte, không có chỗ nào quay lại tag để tra.","new":"Nhờ vậy image đem đi test, quét và image đem đi deploy là cùng một dãy byte, không bước nào phải quay lại tag để tra.","reason":"Bị động lặp 'được', câu nặng kiểu tiếng Anh","severity":"medium"},
+{"old":"Nó không chứng minh identity của pipeline đủ quyền thực hiện;","new":"Lệnh này không chứng minh identity của pipeline đủ quyền thực hiện;","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Chỉ làm khi số đo cho thấy cần.","new":"Chỉ làm khi số liệu đo được cho thấy việc đó cần thiết.","reason":"Câu cụt: 'cho thấy cần' thiếu thành phần","severity":"medium"},
+{"old":"Chữ ký làm việc thứ hai:","new":"Chữ ký chứng minh điều thứ hai:","reason":"'làm việc thứ hai' là calque","severity":"medium"},
+{"old":"Phần chặn merge: trong Settings của repository, đặt","new":"Để chặn merge, vào Settings của repository và đặt","reason":"Câu cụt, thiếu chủ ngữ và động từ","severity":"low"}
+]}

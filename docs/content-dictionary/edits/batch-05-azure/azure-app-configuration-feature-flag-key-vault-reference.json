@@ -1,0 +1,17 @@
+{"file":"azure-app-configuration-feature-flag-key-vault-reference.md","edits":[
+{"old":"ai kiểm quyền đọc Key Vault","new":"ai kiểm tra quyền đọc Key Vault","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"được nướng vào image","new":"bị đóng cứng vào image","reason":"'nướng vào' là calque của baked into","severity":"medium"},
+{"old":"Nó dùng để «đóng băng»","new":"Snapshot dùng để «đóng băng»","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"tập giá trị đã kiểm thay vì nhớ xem","new":"tập giá trị đã kiểm tra thay vì nhớ xem","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"thì app nạp cấu hình lỗi ngay tại key trỏ sang secret","new":"thì việc nạp cấu hình của app báo lỗi ngay tại key trỏ sang secret","reason":"Câu gượng, thiếu danh từ chủ thể","severity":"medium"},
+{"old":"mặc định không tự làm tươi;","new":"mặc định không tự refresh;","reason":"'làm tươi' là dịch từng chữ của refresh; thống nhất với phần còn lại","severity":"medium"},
+{"old":"phải cấu hình chu kỳ làm tươi","new":"phải cấu hình chu kỳ refresh","reason":"Thống nhất 'refresh'","severity":"medium"},
+{"old":"bật feature flag, giải Key Vault reference.","new":"bật feature flag, resolve Key Vault reference.","reason":"'giải' là dịch từng chữ của resolve","severity":"medium"},
+{"old":"Nó không chứng minh refresh chạy:","new":"Đoạn code này không chứng minh refresh chạy:","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"nó làm việc lấy","new":"nó khiến việc lấy","reason":"'làm việc lấy' là cụm tự ghép","severity":"high"},
+{"old":"nó quyết ngẫu nhiên ở","new":"nó quyết định ngẫu nhiên ở","reason":"'quyết' lược mất 'định'","severity":"medium"},
+{"old":"Percentage filter quyết ngẫu nhiên ở mỗi lần đánh giá, nên","new":"Percentage filter quyết định ngẫu nhiên ở mỗi lần đánh giá, nên","reason":"'quyết' lược mất 'định'","severity":"medium"},
+{"old":"Đừng đặt chu kỳ vài giây cho đội replica lớn, kiểm quota trong tài liệu.","new":"Đừng đặt chu kỳ vài giây cho đội replica lớn, hãy kiểm tra quota trong tài liệu.","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Để kiểm «không restart», gọi","new":"Để kiểm tra «không restart», gọi","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"kiểm lần lượt `UseAzureAppConfiguration`","new":"kiểm tra lần lượt `UseAzureAppConfiguration`","reason":"'kiểm' thiếu 'tra'","severity":"high"}
+]}

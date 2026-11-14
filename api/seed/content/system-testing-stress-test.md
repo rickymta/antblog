@@ -34,7 +34,7 @@ Câu hỏi «server có chết không?» là câu hỏi kém. Một hệ thống
 - **Giữ được gì:** giá báo vẫn đúng, không ghi trùng chuyến, không trừ tiền sai — kể cả khi chậm.
 - **Trở lại thế nào:** khi tải giảm, hệ thống có quay về trạng thái phục vụ bình thường không, sau bao lâu, còn backlog không.
 
-Stress test là thí nghiệm có chủ đích để quan sát ba điều đó **ở mức tải cao hơn mức thường đã xác định**, với giới hạn an toàn rõ ràng. Nó không phải cuộc thi làm sập máy.
+Stress test là thí nghiệm có chủ đích để quan sát ba điều đó **ở mức tải cao hơn mức thường đã xác định**, với giới hạn an toàn rõ ràng. Stress test không phải cuộc thi làm sập máy.
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
 
@@ -62,11 +62,11 @@ Sau bài này, bạn có thể:
 | Load | Đạt tiêu chí ở tải dự kiến | Mức vận hành mục tiêu, thời lượng ổn định |
 | Stress | Quan sát hành vi khi tải cao hơn bình thường | Chấp nhận suy giảm, **vẫn giữ oracle dữ liệu** |
 | Spike | Phản ứng với thay đổi tải đột ngột | Tốc độ tăng/giảm, không chỉ đỉnh |
-| Soak | Ổn định trong thời gian dài | Rò rỉ bộ nhớ, tích lũy dữ liệu, kết nối |
+| Soak | Ổn định trong thời gian dài | Rò rỉ bộ nhớ, tích luỹ dữ liệu, kết nối |
 | Breakpoint | Tìm giới hạn theo tiêu chí định trước | Tăng đủ xa, generator đủ mạnh, tiêu chí dừng rõ |
 | Recovery | Khả năng phục hồi sau sự cố | Failure model, thời gian, toàn vẹn dữ liệu (SYS-14) |
 
-Lab của bài là **stress dạng bước có giới hạn**: bốn mức tải cố định, mỗi mức drain xong mới sang mức sau. Nó không phải ramp tuyến tính, không phải spike production và không phải breakpoint.
+Lab của bài là **stress dạng bước có giới hạn**: bốn mức tải cố định, mỗi mức drain xong mới sang mức sau. Lab này không phải ramp tuyến tính, không phải spike production và không phải breakpoint.
 
 ### 2.2. Mức «bình thường» đến từ đâu
 
@@ -98,7 +98,7 @@ Ngược lại, có những thứ **không bao giờ** được coi là «suy gi
 | R-API-07 | `POST /api/quotes` cho khách, trả 200 với `quote.quoteId`, `quote.total` |
 | R-API-03 | Header `x-user: customer:C001` là danh tính giản lược của lab |
 | R-FARE-01…08 | Xe máy SG 5 km, giờ thường, không mưa, không voucher ⇒ 12.000 + 4.500 × 5 = 34.500, làm tròn lên bội số 1.000 ⇒ **35.000 đ** |
-| R-QUOTE-01 | Mỗi báo giá thành công tạo một bản ghi lưu lại ⇒ dữ liệu tích lũy qua các bước |
+| R-QUOTE-01 | Mỗi báo giá thành công tạo một bản ghi lưu lại ⇒ dữ liệu tích luỹ qua các bước |
 | R-NFR-03 | p95 của `POST /api/quotes` dưới 500 ms (hệ thống đích) |
 | R-API-15 | `GET /api/health` trả 200 `{ "status": "ok" }` |
 
@@ -119,7 +119,7 @@ Rủi ro 4 hay bị bỏ qua nhất. Một script closed-model chậm lại cùn
 
 **Exit của bài tập** (đúng như mã nguồn): exit code 0 khi (a) không có request lỗi ở bất kỳ bước nào, (b) baseline và return-low nằm trong envelope — không drop, không lỗi, p95 < 500 ms, (c) probe báo giá sau tải đúng oracle, (d) health trả 200. Ở elevated và high, p95 vượt 500 ms hoặc drop được **ghi nhận là suy giảm**, không tự làm exit 1.
 
-Exit 0 vì thế chỉ có nghĩa các điều kiện bắt buộc đã đạt. Nó **không** nói mọi slot tải cao đã được gửi đủ. Nếu mục tiêu release yêu cầu «không drop ở 600/s», phải đưa tiêu chí đó vào gate **trước khi chạy**; đổi tiêu chí sau khi thấy kết quả là làm sai thí nghiệm.
+Exit 0 vì thế chỉ có nghĩa các điều kiện bắt buộc đã đạt. Exit 0 **không** nói mọi slot tải cao đã được gửi đủ. Nếu mục tiêu release yêu cầu «không drop ở 600/s», phải đưa tiêu chí đó vào gate **trước khi chạy**; đổi tiêu chí sau khi thấy kết quả là làm sai thí nghiệm.
 
 ## 4. Thiết kế thí nghiệm có ranh giới
 
@@ -174,16 +174,16 @@ Hai hệ quả của thiết kế cần nói thẳng:
 - **Drain giữa các bước** làm thí nghiệm dễ đọc (mỗi bucket chỉ chứa request của bước đó) nhưng che mất backlog liên tục. Đây không phải ramp không gián đoạn.
 - **Safety stop dùng chung bộ đếm lỗi toàn cục.** Nếu đã kích hoạt ở bước high, các slot return-low cũng bị bỏ; probe cuối vẫn chạy một lần nhưng không thay thế được phase giảm tải.
 
-### 4.2. Bảng case
+### 4.2. Bảng test case
 
-Bản nháp chỉ mô tả các bước; bài này đặt ID để dễ báo cáo. Mọi case chạy trong một lần thực thi script.
+Bản nháp chỉ mô tả các bước; bài này đặt ID để dễ báo cáo. Mọi test case chạy trong một lần thực thi script.
 
 | ID | Requirement / rủi ro | Precondition | Input | Action | Expected | Cleanup |
 |---|---|---|---|---|---|---|
 | ST-01 | Script và SUT sẵn sàng (rủi ro đo sai) | Server loopback mới, PGlite mới | 20 báo giá chuẩn | Gửi tuần tự | Cả 20 đúng oracle; lỗi ⇒ dừng toàn bộ | `system.reset()` |
 | ST-02 | R-API-07, R-FARE, R-NFR-03 | Sau reset | 30/s × 3s | Open slots | 90 sent, 0 drop, 0 lỗi, p95 < 500 ms | Drain |
 | ST-03 | Rủi ro dữ liệu, latency | Dữ liệu từ ST-02 | 150/s × 4s | Open slots | 0 lỗi bắt buộc; drop/p95 ghi nhận | Drain |
-| ST-04 | Rủi ro dữ liệu, latency đuôi, đo sai | Dữ liệu tích lũy | 600/s × 4s | Open slots | 0 lỗi bắt buộc; drop/p95 ghi nhận | Drain |
+| ST-04 | Rủi ro dữ liệu, latency đuôi, đo sai | Dữ liệu tích luỹ | 600/s × 4s | Open slots | 0 lỗi bắt buộc; drop/p95 ghi nhận | Drain |
 | ST-05 | Rủi ro phục hồi | Ngay sau high | 30/s × 3s | Open slots | 90 sent, 0 drop, 0 lỗi, p95 < 500 ms | Drain |
 | ST-06 | R-API-07, R-API-15 | Sau mọi bước | 1 báo giá + 1 health | Gửi đơn lẻ | Báo giá đúng oracle; health 200 `ok` | Đóng server và DB trong `finally` |
 
@@ -300,11 +300,11 @@ Lần chạy đo được «sạch», nhưng một báo cáo stress hữu ích p
 | Mẫu quan sát | Điều có thể suy ra | Chưa thể kết luận | Bằng chứng tiếp theo |
 |---|---|---|---|
 | Latency tăng, in-flight tăng | Request giữ slot lâu hơn | Chính xác CPU, SQL hay event loop nghẽn | Profile CPU, thời gian truy vấn, event loop lag tách riêng |
-| Lag tăng, nhiều `scheduler-late` | Generator không giữ lịch | Server riêng biệt không chịu được target | Tách generator sang tiến trình/máy khác rồi lặp lại |
+| Lag tăng, nhiều `scheduler-late` | Generator không giữ lịch | Riêng server không chịu được target | Tách generator sang tiến trình/máy khác rồi lặp lại |
 | Nhiều `in-flight-cap` | Request chậm hơn khả năng nhả slot | Server đã «từ chối» | Tăng trần chỉ khi máy còn tài nguyên; so p99 |
 | Sent đủ, lỗi oracle tăng | Request tới nơi nhưng sai nghiệp vụ | Lỗi chỉ do tải | Phân loại lỗi, tái hiện ở tải thấp với cùng dữ liệu |
 | `TimeoutError` | Client bỏ cuộc sau 2 s | Server không thực hiện thao tác | Đối soát dữ liệu phía server |
-| Return-low đạt, probe đúng | Sau drain, luồng chọn hoạt động | Phục hồi đầy đủ mọi tài nguyên, RTO | Timeline liên tục, nhiều cửa sổ ổn định |
+| Return-low đạt, probe đúng | Sau drain, luồng đã chọn vẫn hoạt động | Phục hồi đầy đủ mọi tài nguyên, RTO | Timeline liên tục, nhiều cửa sổ ổn định |
 | Mọi mức đều đạt | Chưa thấy failure trong giới hạn thử | Đã tìm được capacity | Thiết kế thí nghiệm mới, không tăng tải vô hạn |
 
 Đừng ép kết quả phải có lỗi để «đúng bài Stress». Nếu 600/s vẫn đạt, bước tiếp theo là một thí nghiệm mới với phạm vi và tài nguyên phù hợp — ưu tiên tách generator khỏi SUT trước khi nâng target.
@@ -420,7 +420,7 @@ Trên staging có autoscaler, ghi số replica, thời gian khởi động, read
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>b) đúng.</b> a) sai: health là R-API-15. c) không phải lý do thiết kế. d) sai: R-QUOTE-01 lưu mỗi báo giá, dữ liệu tích lũy qua các bước — chính vì thế script reset sau warm-up.</p>
+<p><b>b) đúng.</b> a) sai: health là R-API-15. c) không phải lý do thiết kế. d) sai: R-QUOTE-01 lưu mỗi báo giá, dữ liệu tích luỹ qua các bước — chính vì thế script reset sau warm-up.</p>
 </details>
 
 **Câu 5.** Return-low đạt envelope và probe đúng. Có được kết luận «hệ thống phục hồi hoàn toàn sau stress» không?
@@ -438,7 +438,7 @@ Trên staging có autoscaler, ghi số replica, thời gian khởi động, read
 ## 11. Tài liệu tham khảo
 
 - Grafana k6 — *Load test types*: https://grafana.com/docs/k6/latest/testing-guides/test-types/ — phân loại smoke, average-load, stress, soak, spike, breakpoint (tra cứu 13/11/2026).
-- Grafana k6 — *Stress testing*: https://grafana.com/docs/k6/latest/testing-guides/test-types/stress-testing/ — tải cao hơn thông thường, cần baseline/load trước, mức tăng tùy hệ thống (tra cứu 13/11/2026). Bài dùng k6 làm nguồn thuật ngữ; script lab là Node tự viết.
+- Grafana k6 — *Stress testing*: https://grafana.com/docs/k6/latest/testing-guides/test-types/stress-testing/ — tải cao hơn thông thường, cần baseline/load trước, mức tăng tuỳ hệ thống (tra cứu 13/11/2026). Bài dùng k6 làm nguồn thuật ngữ; script lab là Node tự viết.
 - Phòng lab: `SPEC.md` (R-API-07, R-API-15, R-FARE-01…08, R-QUOTE-01, R-NFR-03, R-NFR-07) và mã bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-stress-test
 - Evidence: `stress-observed.json` cùng thư mục, đo ngày 13/11/2026 (Node v24.15.0, Windows 10.0.26300, i7-10700K).
 - Bài liên quan: [SYS-07 · Performance Test](/articles/system-testing-performance-test) · [SYS-08 · Load Test](/articles/system-testing-load-test) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-13 · Data Integrity Test](/articles/system-testing-data-integrity-test) · [SYS-14 · Recovery Test](/articles/system-testing-recovery-test)

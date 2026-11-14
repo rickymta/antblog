@@ -1,0 +1,18 @@
+{"file":"aws-s3-nang-cao-storage-class-replication-object-lock.md","edits":[
+{"old":"Hạ tầng nhìn hoá đơn S3 thì thấy","new":"Đội hạ tầng xem hoá đơn S3 thì thấy","reason":"'Hạ tầng' làm chủ ngữ không hợp lý (thiếu danh từ 'đội')","severity":"medium"},
+{"old":"rút ngắn được retention hay xoá version đó cho tới ngày hết hạn","new":"rút ngắn được retention hay xoá phiên bản đó cho tới ngày hết hạn","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"| Bản tái tạo được |","new":"| Dữ liệu tạo lại được |","reason":"'Bản tái tạo được' tự ghép, thiếu danh từ rõ","severity":"medium"},
+{"old":"| Request cực nhiều, trễ thấp |","new":"| Request cực nhiều, latency thấp |","reason":"Dùng thuật ngữ latency quen thuộc","severity":"low"},
+{"old":"Áp vào Tới Nơi: ảnh chứng từ","new":"Áp dụng vào Tới Nơi: ảnh chứng từ","reason":"'Áp vào' gượng","severity":"low"},
+{"old":"là ca khó vì nhỏ hơn 128 KB, IA không có lợi:","new":"là trường hợp khó vì nhỏ hơn 128 KB nên IA không có lợi:","reason":"'ca khó' khẩu ngữ; câu thiếu liên kết nhân quả","severity":"medium"},
+{"old":"chỉ chuyển object từ 128 KB ở prefix","new":"chỉ chuyển lớp các object từ 128 KB trở lên ở prefix","reason":"Thiếu 'lớp' và 'trở lên', dễ hiểu nhầm","severity":"medium"},
+{"old":"với hàng triệu object nhỏ có thể lớn hơn tiền lưu tiết kiệm được.","new":"với hàng triệu object nhỏ, phí này có thể lớn hơn số tiền lưu trữ tiết kiệm được.","reason":"Câu thiếu chủ ngữ rõ; 'tiền lưu tiết kiệm' cụt","severity":"medium"},
+{"old":"Xoá một version cụ thể ở nguồn **không** lan sang đích","new":"Xoá một phiên bản cụ thể ở nguồn **không** lan sang đích","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"Nó khoá từng **version** chứ không phải key","new":"Object Lock khoá từng **version** chứ không phải key","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"Lifecycle không xoá được version đang khoá","new":"Lifecycle không xoá được phiên bản đang khoá","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"S3 báo theo hai đường.","new":"S3 gửi thông báo theo hai cách.","reason":"'báo theo hai đường' gượng","severity":"low"},
+{"old":"mở được hàng chục nghìn ảnh khiếu nại","new":"khôi phục được hàng chục nghìn ảnh khiếu nại","reason":"'mở' sai nghĩa với restore từ Glacier","severity":"medium"},
+{"old":"tự compaction và dọn snapshot","new":"tự chạy compaction và dọn snapshot","reason":"Thiếu động từ","severity":"low"},
+{"old":"đừng coi S3 event là nguồn sự thật cho trạng thái chuyến","new":"đừng coi S3 event là nguồn dữ liệu gốc cho trạng thái chuyến","reason":"Theo bảng thuật ngữ: 'nguồn dữ liệu gốc'","severity":"high"},
+{"old":"phải xoá mọi version, delete marker và đợi hết retention","new":"phải xoá mọi phiên bản, delete marker và đợi hết retention","reason":"Thống nhất 'phiên bản'","severity":"low"}
+]}

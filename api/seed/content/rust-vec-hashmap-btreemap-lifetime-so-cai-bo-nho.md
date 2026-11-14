@@ -57,7 +57,7 @@ fn flip_signs(postings: &mut [Posting]) {
 
 ## `HashMap` và `entry`: số dư theo tài khoản
 
-Số dư cần tra theo tên tài khoản, không theo vị trí. `HashMap<K, V>` băm khóa để nhảy thẳng tới ô chứa giá trị: tra và chèn O(1) trung bình. Khóa phải implement `Eq + Hash`; `String` thỏa cả hai. Thứ tự duyệt **không xác định** và có thể khác giữa hai lần chạy, nên lab sắp khóa trước khi in:
+Số dư cần tra theo tên tài khoản, không theo vị trí. `HashMap<K, V>` băm khoá để nhảy thẳng tới ô chứa giá trị: tra và chèn O(1) trung bình. Khoá phải implement `Eq + Hash`; `String` thoả cả hai. Thứ tự duyệt **không xác định** và có thể khác giữa hai lần chạy, nên lab sắp khoá trước khi in:
 
 ```rust
 let mut rows: Vec<(&String, &i64)> = ledger.balances.iter().collect();
@@ -74,7 +74,7 @@ Cập nhật số dư là mẫu «có thì cộng, chưa có thì tạo từ 0»
 
 ## `BTreeMap`, `HashSet` và `VecDeque` dùng khi nào?
 
-`BTreeMap<K, V>` giữ khóa luôn được sắp, nên duyệt theo thứ tự và hỏi theo khoảng được. Giá phải trả là tra O(log n). Lab đặt bút toán vào `BTreeMap<String, JournalEntry>` với khóa `JE-000001`, `JE-000002`…:
+`BTreeMap<K, V>` giữ khoá luôn được sắp, nên duyệt theo thứ tự và hỏi theo khoảng được. Giá phải trả là tra O(log n). Lab đặt bút toán vào `BTreeMap<String, JournalEntry>` với khoá `JE-000001`, `JE-000002`…:
 
 ```rust
 fn entries_from<'a>(&'a self, from: &str) -> impl Iterator<Item = &'a JournalEntry> + 'a {
@@ -83,13 +83,13 @@ fn entries_from<'a>(&'a self, from: &str) -> impl Iterator<Item = &'a JournalEnt
 }
 ```
 
-Viết thẳng `range(from..)` với `from: &str` thì compiler suy ra kiểu cận là `&str` và báo `E0277: the trait bound String: Borrow<&str> is not satisfied`. Ép kiểu cận thành `str` bằng `range::<str, _>(from..)` thì gặp một E0277 khác, `the size for values of type str cannot be known at compilation time`, vì impl `RangeBounds<T> for RangeFrom<&T>` chỉ áp dụng cho `T` có kích thước biết trước. Tạo một `String` làm cận dưới là cách ngắn nhất. Còn `+ 'a` ở kiểu trả về nói iterator chỉ mượn `self`; bỏ đi thì edition 2024 coi iterator mượn cả `from`, và caller phải giữ chuỗi `from` sống đến khi dùng xong iterator. Một điểm cần nhớ: khóa `String` được so theo thứ tự chữ cái, nên `JE-9` đứng sau `JE-10`; phải đệm số 0 (`JE-{seq:06}`) thì thứ tự chữ cái mới trùng thứ tự thời gian.
+Viết thẳng `range(from..)` với `from: &str` thì compiler suy ra kiểu cận là `&str` và báo `E0277: the trait bound String: Borrow<&str> is not satisfied`. Ép kiểu cận thành `str` bằng `range::<str, _>(from..)` thì gặp một E0277 khác, `the size for values of type str cannot be known at compilation time`, vì impl `RangeBounds<T> for RangeFrom<&T>` chỉ áp dụng cho `T` có kích thước biết trước. Tạo một `String` làm cận dưới là cách ngắn nhất. Còn `+ 'a` ở kiểu trả về nói iterator chỉ mượn `self`; bỏ đi thì edition 2024 coi iterator mượn cả `from`, và caller phải giữ chuỗi `from` sống đến khi dùng xong iterator. Một điểm cần nhớ: khoá `String` được so theo thứ tự chữ cái, nên `JE-9` đứng sau `JE-10`; phải đệm số 0 (`JE-{seq:06}`) thì thứ tự chữ cái mới trùng thứ tự thời gian.
 
 `HashSet<String>` là tập hợp không trùng. `insert` trả `false` khi phần tử đã có, nên một lệnh vừa kiểm tra vừa đánh dấu: đây là bộ nhớ idempotency key của sổ cái. `VecDeque<T>` là hàng đợi hai đầu (`push_back`, `pop_front` đều O(1)); lab dùng nó làm hàng bút toán chờ ghi, vào trước ra trước.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 290" role="img" aria-label="Hình 1. Ba cấu trúc chính của sổ cái: Vec giữ thứ tự thêm, HashMap tra O(1) trung bình không có thứ tự, BTreeMap tra O(log n) và luôn sắp xếp. HashSet ghi nhớ idempotency key."><rect x="20" y="20" width="260" height="190" rx="10" class="f-phys-soft s-phys"/><text x="36" y="50" class="t-b">Vec&lt;Posting&gt;</text><text x="36" y="76" class="t-small">Mảng liền nhau, giữ thứ tự thêm</text><text x="36" y="100" class="t-small">Truy cập theo chỉ số: O(1)</text><text x="36" y="124" class="t-small">Tìm theo giá trị: O(n)</text><text x="36" y="148" class="t-small">Chỉ số ngoài biên: v[i] panic</text><text x="36" y="188" class="t-b">Dùng cho: các dòng posting</text><rect x="310" y="20" width="260" height="190" rx="10" class="f-pk-soft s-pk"/><text x="326" y="50" class="t-b">HashMap&lt;String, i64&gt;</text><text x="326" y="76" class="t-small">Băm khóa, nhảy tới ô chứa giá trị</text><text x="326" y="100" class="t-small">Tra, chèn: O(1) trung bình</text><text x="326" y="124" class="t-small">Thứ tự duyệt không xác định</text><text x="326" y="148" class="t-small">Khóa cần Eq + Hash</text><text x="326" y="188" class="t-b">Dùng cho: số dư tài khoản</text><rect x="600" y="20" width="260" height="190" rx="10" class="f-phys-soft s-phys"/><text x="616" y="50" class="t-b">BTreeMap&lt;String, Entry&gt;</text><text x="616" y="76" class="t-small">Cây cân bằng, khóa luôn sắp xếp</text><text x="616" y="100" class="t-small">Tra, chèn: O(log n)</text><text x="616" y="124" class="t-small">Duyệt có thứ tự, có range</text><text x="616" y="148" class="t-small">Khóa cần Ord</text><text x="616" y="188" class="t-b">Dùng cho: bút toán theo id</text><rect x="20" y="232" width="840" height="40" rx="10" class="f-warn-soft s-warn dash"/><text x="36" y="257" class="t-b">HashSet&lt;String&gt;<tspan class="t-small" dx="10">idempotency key đã thấy · insert trả false khi trùng · O(1) trung bình</tspan></text></svg>
+<svg viewBox="0 0 880 290" role="img" aria-label="Hình 1. Ba cấu trúc chính của sổ cái: Vec giữ thứ tự thêm, HashMap tra O(1) trung bình không có thứ tự, BTreeMap tra O(log n) và luôn sắp xếp. HashSet ghi nhớ idempotency key."><rect x="20" y="20" width="260" height="190" rx="10" class="f-phys-soft s-phys"/><text x="36" y="50" class="t-b">Vec&lt;Posting&gt;</text><text x="36" y="76" class="t-small">Mảng liền nhau, giữ thứ tự thêm</text><text x="36" y="100" class="t-small">Truy cập theo chỉ số: O(1)</text><text x="36" y="124" class="t-small">Tìm theo giá trị: O(n)</text><text x="36" y="148" class="t-small">Chỉ số ngoài biên: v[i] panic</text><text x="36" y="188" class="t-b">Dùng cho: các dòng posting</text><rect x="310" y="20" width="260" height="190" rx="10" class="f-pk-soft s-pk"/><text x="326" y="50" class="t-b">HashMap&lt;String, i64&gt;</text><text x="326" y="76" class="t-small">Băm khoá, nhảy tới ô chứa giá trị</text><text x="326" y="100" class="t-small">Tra, chèn: O(1) trung bình</text><text x="326" y="124" class="t-small">Thứ tự duyệt không xác định</text><text x="326" y="148" class="t-small">Khoá cần Eq + Hash</text><text x="326" y="188" class="t-b">Dùng cho: số dư tài khoản</text><rect x="600" y="20" width="260" height="190" rx="10" class="f-phys-soft s-phys"/><text x="616" y="50" class="t-b">BTreeMap&lt;String, Entry&gt;</text><text x="616" y="76" class="t-small">Cây cân bằng, khoá luôn sắp xếp</text><text x="616" y="100" class="t-small">Tra, chèn: O(log n)</text><text x="616" y="124" class="t-small">Duyệt có thứ tự, có range</text><text x="616" y="148" class="t-small">Khoá cần Ord</text><text x="616" y="188" class="t-b">Dùng cho: bút toán theo id</text><rect x="20" y="232" width="840" height="40" rx="10" class="f-warn-soft s-warn dash"/><text x="36" y="257" class="t-b">HashSet&lt;String&gt;<tspan class="t-small" dx="10">idempotency key đã thấy · insert trả false khi trùng · O(1) trung bình</tspan></text></svg>
 </div>
 <figcaption>Hình 1. Ba cấu trúc chính của sổ cái và <code>HashSet</code> ghi nhớ key. Chọn theo câu hỏi cần trả lời, không theo thói quen.</figcaption>
 </figure>
@@ -191,11 +191,11 @@ error[E0502]: cannot borrow `balances` as mutable because it is also borrowed as
 | Thao tác | Vec | HashMap | BTreeMap |
 | --- | --- | --- | --- |
 | Tra theo chỉ số | O(1) | không có | không có |
-| Tra theo khóa / tìm theo giá trị | O(n) quét | O(1) trung bình | O(log n) |
-| Thêm cuối / chèn khóa mới | O(1) khấu hao | O(1) trung bình | O(log n) |
-| Thứ tự duyệt | thứ tự thêm | không xác định | theo khóa |
+| Tra theo khoá / tìm theo giá trị | O(n) quét | O(1) trung bình | O(log n) |
+| Thêm cuối / chèn khoá mới | O(1) khấu hao | O(1) trung bình | O(log n) |
+| Thứ tự duyệt | thứ tự thêm | không xác định | theo khoá |
 | Truy vấn khoảng | sau khi sắp xếp | không | `range` |
-| Yêu cầu với khóa | không có | `Eq + Hash` | `Ord` |
+| Yêu cầu với khoá | không có | `Eq + Hash` | `Ord` |
 
 Đây là độ phức tạp tiệm cận, không phải thời gian đo: với vài chục phần tử, `Vec` quét thẳng thường không kém bảng băm. Chỉ đổi cấu trúc khi có câu hỏi truy vấn rõ ràng, và chỉ tối ưu khi có số đo (loạt nâng cao có bài đo hiệu năng).
 
@@ -234,7 +234,7 @@ VERIFY OK
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là sổ cái mất sạch khi tiến trình dừng: không có lưu trữ, không transaction, không khóa khi nhiều luồng cùng ghi. Phép cộng <code>+=</code> trên <code>i64</code> chưa dùng <code>checked_add</code> (xem bài 03), phí 20% là phép rút gọn <code>fare / 5</code>: chia nguyên cắt phần lẻ, chỉ đúng vì ba cước mẫu chia hết cho 5 (cước 25.503 sẽ bị cắt mất 0,6 đồng thay vì làm tròn theo quy tắc của bài 03), và <code>TooFewPostings</code>, <code>Unbalanced</code> mới là kiểm tra tối thiểu. Production cần database, <code>checked_*</code> và kiểm thử đồng thời.</p>
+<p>Đây là sổ cái mất sạch khi tiến trình dừng: không có lưu trữ, không transaction, không khoá khi nhiều luồng cùng ghi. Phép cộng <code>+=</code> trên <code>i64</code> chưa dùng <code>checked_add</code> (xem bài 03), phí 20% là phép rút gọn <code>fare / 5</code>: chia nguyên cắt phần lẻ, chỉ đúng vì ba cước mẫu chia hết cho 5 (cước 25.503 sẽ bị cắt mất 0,6 đồng thay vì làm tròn theo quy tắc của bài 03), và <code>TooFewPostings</code>, <code>Unbalanced</code> mới là kiểm tra tối thiểu. Production cần database, <code>checked_*</code> và kiểm thử đồng thời.</p>
 </div>
 
 ## Bài tập

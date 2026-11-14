@@ -18,15 +18,15 @@ Bài này ghép các mảnh của năm phần trước thành một bản vẽ t
 <details><summary>Xem đáp án</summary><p>Vẫn còn. Front Door là điểm vào công khai có chủ đích, Firewall cần public IP cho egress, Bastion thường cũng cần (trừ các cấu hình private-only). Điều bạn loại bỏ là public IP ở data plane, nơi dữ liệu và service nghiệp vụ nằm.</p></details>
 </div>
 
-## Kiến trúc tổng thể trung lập, Azure là một cách hiện thực nó
+## Kiến trúc tổng thể trung lập, Azure là một cách hiện thực hoá kiến trúc đó
 
-Tài liệu kiến trúc tổng thể của Tới Nơi mô tả vai trò, không mô tả sản phẩm: lớp edge, các BFF theo nhóm client, 14 domain service, event backbone, datastore do từng service sở hữu và một Realtime Gateway. Bảng dưới gán mỗi vai trò vào một dịch vụ Azure; cột cuối nói lý do, phần còn dùng được khi dịch vụ đổi tên.
+Tài liệu kiến trúc tổng thể của Tới Nơi mô tả vai trò, không mô tả sản phẩm: lớp edge, các BFF theo nhóm client, 14 domain service, event backbone, datastore do từng service sở hữu và một Realtime Gateway. Bảng dưới gán mỗi vai trò vào một dịch vụ Azure; cột cuối nói lý do chọn và phần vẫn còn đúng khi dịch vụ đổi tên.
 
 | Thành phần trong kiến trúc tổng thể | Dịch vụ Azure | Lý do và giới hạn |
 | --- | --- | --- |
 | CDN, WAF, DDoS | Front Door với WAF policy | Điểm vào toàn cầu duy nhất; tier Premium mới nối được origin bằng Private Link |
 | Load balancer | Ingress của Container Apps environment | Không cần thêm lớp riêng khi Front Door đã chia tải |
-| API Gateway | API Management | JWT, rate limit, versioning, không chứa luật nghiệp vụ. Muốn APIM trong VNet: Developer, Premium hoặc Premium v2 (VNet injection); Standard v2 có VNet integration chiều ra, phần inbound private kiểm tài liệu |
+| API Gateway | API Management | JWT, rate limit, versioning, không chứa luật nghiệp vụ. Muốn APIM trong VNet: Developer, Premium hoặc Premium v2 (VNet injection); Standard v2 có VNet integration chiều ra, phần inbound private thì hãy kiểm tra tài liệu |
 | Customer, Driver, Admin, Public BFF | Container Apps, mỗi BFF một app | Scale riêng theo kênh; BFF chỉ gom dữ liệu |
 | Domain service (Booking, Dispatch, Trip, Payment...) | Container Apps | Mặc định cho nhóm nhỏ; xem mục «chỗ chưa tách» cho AKS |
 | Kafka cho sự kiện nghiệp vụ | Service Bus topic và subscription | Session, dead-letter, duplicate detection hợp Saga |
@@ -35,7 +35,7 @@ Tài liệu kiến trúc tổng thể của Tới Nơi mô tả vai trò, không
 | Outbox relay và CDC | Relay trong code (bài 53) | CDC chưa dùng; tránh thêm một thành phần phải vận hành |
 | Database của từng service | PostgreSQL Flexible Server | Transaction local, PITR, private endpoint |
 | Location store, dữ liệu theo vùng | Cosmos DB | Partition key theo thành phố; chọn theo mẫu truy cập |
-| Redis | Azure Managed Redis | Cache, lease, geospatial; dữ liệu phải dựng lại được. Azure Cache for Redis đang nghỉ hưu |
+| Redis | Azure Managed Redis | Cache, lease, geospatial; dữ liệu phải dựng lại được. Azure Cache for Redis đang ngừng hỗ trợ |
 | Object storage | Storage Account (Blob) | Giấy tờ tài xế, ảnh; SAS ngắn hạn hoặc identity |
 | Realtime Gateway | Azure SignalR Service hoặc Web PubSub | SignalR Service cần client theo giao thức ASP.NET Core SignalR; Web PubSub dùng WebSocket thuần hoặc subprotocol pub/sub |
 | Identity Provider OIDC | Entra External ID (khách, tài xế), Entra ID (nhân viên) | Hai tenant khác nhau, hai vòng đời khác nhau |
@@ -57,7 +57,7 @@ Service mesh không có dòng riêng vì Container Apps đã đóng gói ingress
 
 Kafka trong bản tổng thể gánh hai việc khác tính chất, và Azure cho phép tách chúng. Sự kiện nghiệp vụ như `BookingCreated` hay `DriverAssigned` ít, quan trọng, cần thứ tự theo chuyến và cần biết khi nào một message hỏng. Đó là việc của Service Bus: session theo `tripId`, dead-letter, duplicate detection (xem [bài 34](/articles/azure-service-bus-queue-topic-session-dead-letter)). Luồng vị trí GPS thì nhiều, ngắn hạn, mất một điểm không sao. Đó là việc của Event Hubs: partition theo `driverId`, consumer group cho tracking và analytics (xem [bài về Event Hubs](/articles/azure-event-hubs-stream-gps-consumer-group)).
 
-Tách có giá: hai dịch vụ, hai mô hình tính tiền, đội phải nhớ message nào đi đường nào. Đổi lại, một đợt GPS dồn dập không làm chậm Saga đặt chuyến. Với Realtime Gateway, dịch vụ quản lý giữ kết nối thay bạn; phần bạn vẫn làm là cấp token kết nối có claim theo người dùng và kiểm quyền vào group ở server, vì tài liệu tổng thể cấm client tự đoán channel ID. App iOS và Android chưa muốn kéo client SignalR thì Web PubSub với WebSocket thuần dễ tích hợp hơn.
+Tách có giá: hai dịch vụ, hai mô hình tính tiền, đội phải nhớ message nào đi đường nào. Đổi lại, một đợt GPS dồn dập không làm chậm Saga đặt chuyến. Với Realtime Gateway, dịch vụ quản lý giữ kết nối thay bạn; phần bạn vẫn làm là cấp token kết nối có claim theo người dùng và kiểm tra quyền vào group ở server, vì tài liệu tổng thể cấm client tự đoán channel ID. Nếu app iOS và Android chưa muốn kéo client SignalR vào thì Web PubSub với WebSocket thuần dễ tích hợp hơn.
 
 ## Hub-spoke đặt kiểm soát ở một nơi, workload ở nơi khác
 
@@ -101,7 +101,7 @@ az network vnet subnet update -g $SPK_RG --vnet-name $SPK -n snet-app \
 
 Tới Nơi có ba nhóm chủ thể và mỗi nhóm có cơ chế riêng:
 
-- **Khách và tài xế** đăng nhập bằng Entra External ID. Token của họ mang claim nghiệp vụ như vai trò và customer ID, và là thứ APIM và BFF kiểm (xem [bài về Entra External ID](/articles/azure-entra-external-id-xac-thuc-khach-tai-xe)).
+- **Khách và tài xế** đăng nhập bằng Entra External ID. Token của họ mang claim nghiệp vụ như vai trò và customer ID, và là thứ APIM và BFF kiểm tra (xem [bài về Entra External ID](/articles/azure-entra-external-id-xac-thuc-khach-tai-xe)).
 - **Service** dùng managed identity để lấy secret từ Key Vault, kéo image, đọc blob và gọi Service Bus. Không có password nào nằm trong biến môi trường (xem [bài về managed identity](/articles/azure-managed-identity-workload-identity)).
 - **Con người vận hành** dùng tài khoản Entra ID của tổ chức, và quyền cao đi qua PIM: kích hoạt có thời hạn, có lý do, có phê duyệt (xem [bài về RBAC và PIM](/articles/azure-rbac-role-scope-assignment-pim)).
 
@@ -111,15 +111,15 @@ Ranh giới giữa ba loại là chỗ dễ nhầm nhất. Managed identity củ
 
 Mỗi môi trường có một workspace Log Analytics dùng chung, để log prod không lẫn staging về quyền và thời gian lưu. Mỗi service có Application Insights riêng ở chế độ workspace-based trỏ vào workspace đó, nên lọc được theo service mà vẫn truy vấn chéo bằng một KQL. Azure Managed Grafana đọc từ Azure Monitor để dựng dashboard SLO.
 
-Điểm khó nhất là trace đi qua bus. SDK .NET của Service Bus tự gắn context W3C vào application property `Diagnostic-Id` khi gửi trong một Activity đang chạy. Nhưng relay của Outbox chạy sau, ngoài request gốc, nên context phải được lưu vào cột của dòng outbox lúc ghi (giá trị `traceparent`) rồi relay đặt lại khi gửi. Thiếu bước đó, bạn có hai trace rời nhau cho cùng một chuyến. Hãy kiểm một trace thật từ `POST /trips` tới Dispatch rồi mới tin. Bài [OpenTelemetry của loạt C#](/articles/dotnet10-opentelemetry-traces-metrics-logs) và [bài Application Insights](/articles/azure-application-insights-opentelemetry-kql) cho phần cấu hình.
+Điểm khó nhất là trace đi qua bus. SDK .NET của Service Bus tự gắn context W3C vào application property `Diagnostic-Id` khi gửi trong một Activity đang chạy. Nhưng relay của Outbox chạy sau, ngoài request gốc, nên context phải được lưu vào cột của dòng outbox lúc ghi (giá trị `traceparent`) rồi relay đặt lại khi gửi. Thiếu bước đó, bạn có hai trace rời nhau cho cùng một chuyến. Hãy kiểm tra một trace thật từ `POST /trips` tới Dispatch rồi mới tin. Bài [OpenTelemetry của loạt C#](/articles/dotnet10-opentelemetry-traces-metrics-logs) và [bài Application Insights](/articles/azure-application-insights-opentelemetry-kql) cho phần cấu hình.
 
 ## Những chỗ cố tình chưa tách
 
-Bản vẽ tham chiếu trung thực phải ghi cả những thứ chưa quyết, kèm tiêu chí đổi quan sát được.
+Bản vẽ tham chiếu trung thực phải ghi cả những thứ chưa quyết, kèm tiêu chí quan sát được để quyết định khi nào đổi.
 
 | Quyết định | Mặc định hôm nay | Đổi khi nào | Cái giá của việc đổi |
 | --- | --- | --- | --- |
-| Một AKS hay nhiều Container Apps | Container Apps cho mọi service | Cần quyền kiểm soát node, operator hay CRD, mạng pod đặc thù, hoặc đội đã có người trực Kubernetes | Thêm upgrade cluster, node pool, bảo mật pod phải tự vận hành |
+| Một AKS hay nhiều Container Apps | Container Apps cho mọi service | Cần quyền kiểm soát node, operator hay CRD, mạng pod đặc thù, hoặc đội đã có người trực Kubernetes | Phải tự vận hành thêm việc upgrade cluster, node pool và bảo mật pod |
 | Kafka thật hay Event Hubs | Service Bus cho sự kiện nghiệp vụ, Event Hubs cho GPS | Cần tính năng Kafka mà endpoint tương thích không có, hệ sinh thái connector hoặc stream processing của Kafka, hoặc retention và replay vượt khả năng | Tự vận hành broker, replication, DR; tính vào chi phí nhân sự |
 | Một server PostgreSQL hay mỗi service một server | Một server, mỗi service một database và một role riêng | Một service gây noisy neighbor, cần restore riêng, hoặc có yêu cầu tuân thủ cho Payment | Nhiều server, nhiều chi phí cố định, nhiều private endpoint |
 | SignalR Service hay Web PubSub hay tự dựng | Dịch vụ quản lý | Cần giao thức hoặc hành vi mà dịch vụ không hỗ trợ, hoặc kết nối vượt hạn mức đã đo | Tự giữ kết nối, tự scale, tự vá lỗi |
@@ -129,9 +129,9 @@ Chưa đo được điều kiện ở cột «Đổi khi nào» thì chưa đổ
 
 ### Vẽ lại với hai region để thấy chỗ còn một bản
 
-Mọi thứ trên đây nằm ở Southeast Asia, cặp region là East Asia ([bài 51](/articles/azure-ha-dr-zone-region-rto-rpo)). Thêm region thứ hai không tự cho mọi thành phần hai bản.
+Mọi thứ trên đây nằm ở Southeast Asia, cặp region là East Asia ([bài 51](/articles/azure-ha-dr-zone-region-rto-rpo)). Thêm region thứ hai không tự động tạo bản thứ hai cho mọi thành phần.
 
-**Bài tập:** vẽ lại Hình 2 với hai region, mỗi region có một hub và một spoke prod. Chỉ ra ba điểm single-point-of-failure còn lại và với mỗi điểm nói tại sao replica hay Front Door không che được.
+**Bài tập:** vẽ lại Hình 2 với hai region, mỗi region có một hub và một spoke prod. Chỉ ra ba điểm single-point-of-failure còn lại và với mỗi điểm nói tại sao replica hay Front Door không khắc phục được.
 
 <details><summary>Xem lời giải</summary><p>Đáp án không duy nhất; ba điểm hợp lý là: (1) PostgreSQL chỉ có một primary ghi ở một region, replica sang East Asia là bất đồng bộ nên failover có thể mất vài giao dịch cuối và cần quyết định promote; (2) namespace Service Bus chỉ ở một region trừ khi bạn cấu hình geo-DR hay geo-replication, và geo-DR không sao chép message đang chờ; (3) đường điều khiển dùng chung như Entra tenant của khách, pipeline triển khai hoặc registry nếu không có bản thứ hai. Front Door chia traffic tới app ở hai region nhưng không đồng bộ dữ liệu giúp bạn.</p></details>
 

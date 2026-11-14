@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-009, test-roles, whole-team, test-independence
 language: vi
 ---
 
-Trong đội Tới Nơi có người tên chức danh là «QA Engineer», có «SDET», có «QA Lead», còn developer cũng viết test. Vậy ai chịu trách nhiệm kiểm thử? Bài này trả lời theo cách của ISTQB: kiểm thử không chia theo chức danh mà theo **vai trò** (role), một người có thể đóng nhiều vai, và mức **độc lập** (independence) của người kiểm thử là một lựa chọn có chủ đích chứ không phải sơ đồ tổ chức ngẫu nhiên.
+Trong đội Tới Nơi có người mang chức danh «QA Engineer», có «SDET», có «QA Lead», còn developer cũng viết test. Vậy ai chịu trách nhiệm kiểm thử? Bài này trả lời theo cách của ISTQB: kiểm thử không chia theo chức danh mà theo **vai trò** (role), một người có thể đóng nhiều vai, và mức **độc lập** (independence) của người kiểm thử là một lựa chọn có chủ đích chứ không phải sơ đồ tổ chức ngẫu nhiên.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-009</span>
@@ -29,9 +29,9 @@ Trong đội Tới Nơi có người tên chức danh là «QA Engineer», có �
 
 ## 1. Giới thiệu
 
-Một lỗi voucher lọt lên production: khách huỷ chuyến nhưng không được trả lại lượt dùng mã `GIAM20`. Họp sau sự cố, developer nói «QA chưa test ca huỷ», QA nói «ca này không có trong ticket», product owner nói «tưởng ai cũng biết». Cái thiếu không phải chuyên môn mà là **ai chịu trách nhiệm phần nào của việc kiểm thử**.
+Một lỗi voucher lọt lên production: khách huỷ chuyến nhưng không được trả lại lượt dùng mã `GIAM20`. Họp sau sự cố, developer nói «QA chưa test test case huỷ chuyến», QA nói «test case này không có trong ticket», product owner nói «tưởng ai cũng biết». Cái thiếu không phải chuyên môn mà là **ai chịu trách nhiệm phần nào của việc kiểm thử**.
 
-Chủ đề vai trò trả lời ba câu: **ai làm việc gì** trong 7 nhóm hoạt động kiểm thử ([TEST-007](/articles/quy-trinh-kiem-thu-test-process)); **người đó cần kỹ năng gì**; và **người kiểm thử nên «xa» tác giả đến mức nào**. Dùng khi lập đội cho tính năng mới, khi viết mục stakeholder và độc lập kiểm thử trong test plan, hoặc khi đội tranh cãi «QA có phải chịu trách nhiệm chất lượng không».
+Chủ đề vai trò trả lời ba câu: **ai làm việc gì** trong 7 nhóm hoạt động kiểm thử ([TEST-007](/articles/quy-trinh-kiem-thu-test-process)); **người đó cần kỹ năng gì**; và **người kiểm thử nên «xa» tác giả đến mức nào**. Bạn dùng chủ đề này khi lập đội cho tính năng mới, khi viết mục stakeholder và độc lập kiểm thử trong test plan, hoặc khi đội tranh cãi «QA có phải chịu trách nhiệm chất lượng không».
 
 ## 2. Lý thuyết theo ISTQB
 
@@ -47,7 +47,7 @@ CTFL v4.0.1 chỉ nói tới **hai vai trò**, không nói tới chức danh:
 Ba điểm syllabus nhấn mạnh:
 
 - Việc giao nhiệm vụ cho mỗi vai trò **phụ thuộc ngữ cảnh**: dự án, sản phẩm, kỹ năng của người đảm nhận và tổ chức.
-- Vai trò quản lý có thể do **nhiều kiểu người** đảm nhận: trưởng nhóm, test manager, development manager… Trong Agile, một phần việc quản lý test có thể do **chính đội Agile** làm; việc trải qua nhiều đội thì do test manager bên ngoài đội.
+- Vai trò quản lý có thể do **nhiều kiểu người** đảm nhận: trưởng nhóm, test manager, development manager… Trong Agile, một phần việc quản lý test có thể do **chính đội Agile** làm; việc xuyên suốt nhiều đội thì do test manager bên ngoài đội.
 - **Một người có thể giữ cả hai vai trò** cùng lúc, và người giữ vai trò có thể thay đổi theo thời gian.
 
 <figure class="tkh-fig">
@@ -171,7 +171,7 @@ Squad **Pricing & Promotion** phát hành tính năng mã giảm giá cho cả b
 - **R-VOUCHER-02** — mã được bỏ khoảng trắng và đổi chữ hoa (` giam20 ` ≡ `GIAM20`).
 - **R-VOUCHER-04** — thời hạn tính theo ngày giờ Việt Nam, tính cả hai đầu.
 - **R-VOUCHER-06** — tiền giảm = min(percent% × A, maxDiscount); A < minAmount ⇒ `VOUCHER_MIN_AMOUNT`.
-- **R-VOUCHER-07** — lượt dùng trong ngày; chuyến bị huỷ trả lại lượt; kiểm hai lần (khi báo giá và khi tạo chuyến).
+- **R-VOUCHER-07** — lượt dùng trong ngày; chuyến bị huỷ trả lại lượt; kiểm tra hai lần (khi báo giá và khi tạo chuyến).
 - **R-VOUCHER-08** — nhiều lỗi thì chỉ báo lỗi đầu tiên theo thứ tự cố định.
 - **R-FARE-07** — voucher không bao giờ kéo cước xuống dưới cước tối thiểu.
 
@@ -237,7 +237,7 @@ R = Responsible (người làm) · A = Accountable (người chịu trách nhi�
 | Báo cáo tiến độ, đề xuất go/no-go | C | I | C | I | **A/R** |
 | Test completion report + lessons learned | C | R | R | R | **A** |
 
-Cách kiểm ma trận: mỗi dòng có **đúng một A**; mỗi hoạt động của test management role có A là người giữ vai trò đó (QA Lead); không ai bị A ở quá nhiều dòng đến mức thành nút thắt. Riêng dòng acceptance test, A là PO vì đó là quyết định nghiệp vụ.
+Cách kiểm tra ma trận: mỗi dòng có **đúng một A**; mỗi hoạt động của test management role có A là người giữ vai trò đó (QA Lead); không ai bị A ở quá nhiều dòng đến mức thành nút thắt. Riêng dòng acceptance test, A là PO vì đó là quyết định nghiệp vụ.
 
 ### 5.2. Mức độc lập đã chọn cho đợt voucher
 

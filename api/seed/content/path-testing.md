@@ -31,7 +31,7 @@ Branch coverage 100% có thể đạt bằng vài test mà không test nào đi 
 
 **Path testing** (kiểm thử đường đi) thiết kế test theo các **đường đi** qua control flow graph của một thành phần: dãy nút và cạnh từ lối vào tới lối ra. Statement testing hỏi «mỗi câu lệnh đã chạy chưa», branch testing hỏi «mỗi cạnh đã đi chưa»; path testing hỏi «những **chuỗi** quyết định nào đã được đi cùng nhau».
 
-Vấn đề nó giải quyết: defect nằm ở **tương tác giữa các quyết định nối tiếp** — quyết định trước để lại trạng thái làm quyết định sau sai. Branch coverage không bắt buộc tổ hợp nào cả: hai test có thể phủ hết mọi cạnh của hai `if` nối tiếp mà chưa đi (T, F) hay (F, T).
+Vấn đề path testing giải quyết: defect nằm ở **tương tác giữa các quyết định nối tiếp** — quyết định trước để lại trạng thái làm quyết định sau sai. Branch coverage không yêu cầu phủ tổ hợp nào cả: hai test có thể phủ hết mọi cạnh của hai `if` nối tiếp mà chưa đi (T, F) hay (F, T).
 
 Khi nào dùng: hàm có nhiều quyết định nối tiếp và đường đi xử lý lỗi quan trọng (hàm điều phối, máy trạng thái viết bằng `if`), và khi muốn một con số mục tiêu khách quan cho số test tối thiểu. Ở Tới Nơi, `acceptTrip` — nơi quyết định «tài xế nào giữ chuyến» — là ứng viên tốt.
 
@@ -49,7 +49,7 @@ Nghĩa là: **cyclomatic complexity** vẫn là kiến thức thi (ở góc đ�
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB</span>
-<p>Các khái niệm sau lấy từ McCabe (1976) và Watson &amp; McCabe, <i>Structured Testing</i> (NIST SP 500-235, 1996), không phải nội dung thi CTAL-TTA v4.0: <b>all-paths coverage</b>, <b>linearly independent path</b>, <b>basis set</b>, phương pháp <b>đường cơ sở</b> (baseline method), «structured testing» = mỗi thành phần có ít nhất V(G) test đi qua một tập basis.</p>
+<p>Các khái niệm sau lấy từ McCabe (1976) và Watson &amp; McCabe, <i>Structured Testing</i> (NIST SP 500-235, 1996), không phải nội dung thi CTAL-TTA v4.0: <b>all-paths coverage</b>, <b>linearly independent path</b>, <b>basis set</b>, phương pháp <b>đường cơ sở</b> (baseline method), «structured testing» nghĩa là mỗi thành phần có ít nhất V(G) test đi qua một tập basis.</p>
 </div>
 
 ### 2.2. Khái niệm
@@ -71,7 +71,7 @@ V(G) = E − N + 2        (E cạnh, N nút, một lối vào và một lối ra
 1. Chọn **đường cơ sở**: đường «nghiệp vụ bình thường», đi qua nhiều quyết định nhất.
 2. Lần lượt **lật từng quyết định** trên đường cơ sở (giữ nguyên các quyết định trước nó, sau khi lật thì đi tiếp theo hướng gần đường cơ sở nhất).
 3. Gặp quyết định mới (chỉ xuất hiện sau khi lật) thì cũng lật nó, xuất phát từ đường vừa tạo.
-4. Dừng khi có V(G) đường; kiểm độc lập (bằng tay, hoặc tính hạng ma trận như phần 5).
+4. Dừng khi có V(G) đường; kiểm tra tính độc lập (bằng tay, hoặc tính hạng ma trận như phần 5).
 
 ### 2.4. Thuật ngữ Anh – Việt
 
@@ -132,7 +132,7 @@ Bài học: trước khi chọn path testing, hỏi **logic nằm ở đâu**. V
 
 ### 4.2. Control flow graph của `acceptTrip`
 
-Quy ước đếm (giống ESLint `complexity`): mỗi `if` một nút quyết định; mỗi `&&` và `??` thêm một nút vì toán tử ngắt mạch tạo hai đường; lời gọi hàm khác là câu lệnh thường (McCabe không đếm đường ném lỗi **bên trong** hàm được gọi).
+Quy ước đếm (giống ESLint `complexity`): mỗi `if` một nút quyết định; mỗi `&&` và `??` thêm một nút vì toán tử đoản mạch tạo hai đường; lời gọi hàm khác là câu lệnh thường (McCabe không đếm đường ném lỗi **bên trong** hàm được gọi).
 
 | Nút | Dòng | Quyết định |
 |---|---|---|
@@ -344,7 +344,7 @@ npx vitest run articles/path-testing --coverage.enabled --coverage.include=src/a
 ## 6. Góc nhìn nâng cao
 
 - **Vòng lặp làm path coverage vô hạn.** `expireStaleSearches` có V(G) = 3 (một `for`, một `if`). Với đúng n chuyến quá hạn, mỗi vòng có 2 kết quả của `updateIfStatus` ⇒ 2ⁿ đường; tổng với n ≤ k là 2^(k+1) − 1. Basis path vẫn chỉ 3. Cách chọn số vòng là việc của [TEST-049 · Loop Testing](/articles/loop-testing).
-- **Basis path ≠ mọi tổ hợp quyết định.** 10 basis path không đi qua «D2a T, D2b F rồi D7 T» (mục 5.2) — nếu defect chỉ lộ ở tổ hợp đó, basis path không đảm bảo bắt được. Nó đảm bảo mỗi quyết định được «lật» ít nhất một lần **trong ngữ cảnh** một đường hoàn chỉnh — mạnh hơn branch, yếu hơn all-paths.
+- **Basis path ≠ mọi tổ hợp quyết định.** 10 basis path không đi qua «D2a T, D2b F rồi D7 T» (mục 5.2) — nếu defect chỉ lộ ở tổ hợp đó, basis path không đảm bảo bắt được. Basis path đảm bảo mỗi quyết định được «lật» ít nhất một lần **trong ngữ cảnh** một đường hoàn chỉnh — mạnh hơn branch, yếu hơn all-paths.
 - **McCabe không thấy đường ném lỗi trong hàm được gọi.** `assertDriverAvailable`, `assertAcceptable` có thể ném giữa chừng; V(G) của `acceptTrip` không tính chúng. Hoặc test các hàm phụ riêng (V(G) 3 và 4), hoặc tính chung khi chúng là logic nghiệp vụ cốt lõi.
 - **Cách đếm khác nhau cho số khác nhau.** Coi `&&`, `??` là một phần của `if` (McCabe theo câu lệnh) thì `acceptTrip` chỉ có V(G) = 8. Ghi rõ quy ước đếm khi báo cáo; dùng cùng công cụ cho mọi lần đo.
 - **Complexity cao là tín hiệu thiết kế, không chỉ tín hiệu test** (TTA-3.2.1). `createTrip` và `acceptTrip` cùng chạm 10 — ngưỡng cảnh báo phổ biến. Tách «kiểm điều kiện tài xế» khỏi «giành chuyến» sẽ hạ V(G) mỗi hàm và làm basis set nhỏ, dễ test hơn.

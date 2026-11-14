@@ -22,7 +22,7 @@ Bài này nối ba thứ đã học riêng lẻ: Outbox/Inbox ở [bài 26 loạ
 
 Một chuyến đi của Tới Nơi chạm ba service, mỗi service có PostgreSQL riêng. Booking tạo chuyến ở trạng thái `PENDING`. Payment giữ tiền của khách. Dispatch gán tài xế. Không có lệnh `COMMIT` nào bao được cả ba database, và kiến trúc tổng thể đã cấm service chọc vào database của service khác. Vì vậy mỗi bước là một transaction local, và mỗi bước đã làm phải có một bước ngược để gọi khi các bước sau thất bại.
 
-Đó là **Saga**: chuỗi transaction local nối bằng message, kèm compensation. Saga không cho bạn tính cô lập. Giữa hai bước, thế giới nhìn thấy trạng thái dở dang: tiền đã giữ nhưng chưa có tài xế. Thiết kế phải chấp nhận điều đó và làm nó an toàn.
+Đó là **Saga**: chuỗi transaction local nối bằng message, kèm compensation. Saga không đảm bảo tính cô lập. Giữa hai bước, thế giới nhìn thấy trạng thái dở dang: tiền đã giữ nhưng chưa có tài xế. Thiết kế phải chấp nhận điều đó và làm cho trạng thái dở dang ấy an toàn.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -43,7 +43,7 @@ Có hai cách nối các bước. **Choreography**: mỗi service nghe event c�
 | Thêm bước thứ tư | Sửa nhiều subscriber | Sửa một orchestrator |
 | Rủi ro | Vòng lặp event khó thấy | Orchestrator thành nơi chứa luật nghiệp vụ |
 
-Tài liệu tổng thể gợi ý chỉ dùng orchestrator cho quy trình quan trọng như booking, không cho mọi tương tác nhỏ. Với ba bước, timeout và hai nhánh hỏng, orchestration đáng giá. Rủi ro ở dòng cuối bảng vẫn thật: orchestrator chỉ nên biết thứ tự và điều kiện, còn luật nghiệp vụ nằm trong service. Phương án thay thế là một service riêng giữ state machine trong bảng `saga_state` của PostgreSQL, đổi lại tự viết timer, khoá và phục hồi sau crash. Orchestrator dưới đây chạy trên Durable Functions (bài 25), isolated worker; lệnh đi qua ba queue có session, kết quả quay về qua một subscription.
+Tài liệu tổng thể gợi ý chỉ dùng orchestrator cho quy trình quan trọng như booking, không cho mọi tương tác nhỏ. Với ba bước, timeout và hai nhánh hỏng, orchestration đáng giá. Rủi ro ở dòng cuối bảng vẫn thật: orchestrator chỉ nên biết thứ tự và điều kiện, còn luật nghiệp vụ nằm trong service. Phương án thay thế là một service riêng giữ state machine trong bảng `saga_state` của PostgreSQL, đổi lại bạn phải tự viết timer, khoá và cơ chế phục hồi sau crash. Orchestrator dưới đây chạy trên Durable Functions (bài 25), isolated worker; lệnh đi qua ba queue có session, kết quả quay về qua một subscription.
 
 ```csharp
 public sealed record Cmd(string TripId, string Queue, string Name);
@@ -83,11 +83,11 @@ public static class BookTripSaga
 }
 ```
 
-Khối này cho thấy hình dạng của pattern, dùng API `TaskOrchestrationContext` của gói `Microsoft.Azure.Functions.Worker.Extensions.DurableTask`. Nó không chứa activity `Send` (gửi một `ServiceBusMessage` tới queue đã chọn), không chứa hàm chuyển reply thành `RaiseEventAsync`, và chưa được biên dịch cùng project thật.
+Khối này cho thấy hình dạng của pattern, dùng API `TaskOrchestrationContext` của gói `Microsoft.Azure.Functions.Worker.Extensions.DurableTask`. Khối này không chứa activity `Send` (gửi một `ServiceBusMessage` tới queue đã chọn), không chứa hàm chuyển reply thành `RaiseEventAsync`, và chưa được biên dịch cùng project thật.
 
-Ba chi tiết trong đoạn code đáng đọc kỹ. Thứ nhất, lệnh ngược được đẩy vào ngăn xếp **trước** khi gửi lệnh thuận. Nếu orchestrator hết giờ chờ Payment, bạn không biết Payment đã giữ tiền hay chưa; gửi `RefundPayment` vô điều kiện là an toàn nếu Payment xử lý nó idempotent. Thứ hai, mọi lệnh mang `SessionId = tripId` và đi cùng một queue của service đó, nên Payment luôn nhận `AuthorizePayment` trước `RefundPayment`. Thứ ba, activity `Send` đặt `MessageId = {tripId}:{tên lệnh}` cố định, không sinh Guid mới. Activity có thể bị chạy lại, và ID ổn định cho phép duplicate detection loại bản gửi trùng. Duplicate detection xét `MessageId` trong cả entity, không phụ thuộc session; riêng entity partitioned thì phạm vi là từng partition, mà partition lại chọn theo `SessionId`, nên cùng chuyến vẫn được che.
+Ba chi tiết trong đoạn code đáng đọc kỹ. Thứ nhất, lệnh ngược được đẩy vào ngăn xếp **trước** khi gửi lệnh thuận. Nếu orchestrator hết giờ chờ Payment, bạn không biết Payment đã giữ tiền hay chưa; gửi `RefundPayment` vô điều kiện là an toàn nếu Payment xử lý nó idempotent. Thứ hai, mọi lệnh mang `SessionId = tripId` và đi cùng một queue của service đó, nên Payment luôn nhận `AuthorizePayment` trước `RefundPayment`. Thứ ba, activity `Send` đặt `MessageId = {tripId}:{tên lệnh}` cố định, không sinh Guid mới. Activity có thể bị chạy lại, và ID ổn định cho phép duplicate detection loại bản gửi trùng. Duplicate detection xét `MessageId` trong cả entity, không phụ thuộc session; riêng entity partitioned thì phạm vi là từng partition, mà partition lại chọn theo `SessionId`, nên cùng chuyến vẫn được loại trùng.
 
-Timer hết hạn không có nghĩa lệnh bị huỷ. Nó chỉ nghĩa orchestrator ngừng chờ. Mọi service nhận lệnh phải coi đó là at-least-once và có thể đến muộn.
+Timer hết hạn không có nghĩa lệnh bị huỷ, mà chỉ có nghĩa orchestrator ngừng chờ. Mọi service nhận lệnh phải coi đó là at-least-once và có thể đến muộn.
 
 ## Outbox ghi cùng transaction, relay giữ MessageId, inbox chặn hiệu ứng lặp
 
@@ -100,7 +100,7 @@ Các service phản hồi orchestrator bằng event, và mỗi event phải rờ
 <figcaption>Hình 2. Outbox trong PostgreSQL, relay gửi với MessageId bằng outbox id, Service Bus loại trùng trong cửa sổ, inbox của consumer chặn hiệu ứng lặp.</figcaption>
 </figure>
 
-Relay dưới đây đọc một lô bằng `FOR UPDATE SKIP LOCKED`, nên chạy nhiều bản relay không đọc trùng cùng một dòng. Việc giữ transaction suốt lúc gọi mạng chỉ hợp với lô nhỏ; lô lớn cần thiết kế lease riêng.
+Relay dưới đây đọc một lô bằng `FOR UPDATE SKIP LOCKED`, nên khi chạy nhiều relay cùng lúc thì chúng không đọc trùng cùng một dòng. Việc giữ transaction suốt lúc gọi mạng chỉ hợp với lô nhỏ; lô lớn cần thiết kế lease riêng.
 
 ```csharp
 public sealed class OutboxRelay(NpgsqlDataSource db, ServiceBusSender sender)
@@ -135,7 +135,7 @@ public sealed class OutboxRelay(NpgsqlDataSource db, ServiceBusSender sender)
 }
 ```
 
-Relay crash sau `SendMessageAsync` nhưng trước `CommitAsync` thì dòng vẫn chưa gửi, và lần chạy sau gửi lại cùng `MessageId`. Duplicate detection của topic loại bản thứ hai nếu nó rơi trong cửa sổ bạn đặt. Ngoài cửa sổ, hoặc ở hạ nguồn không có duplicate detection, chỉ **inbox** còn bảo vệ. Consumer ghi `(consumer, message_id)` với ràng buộc unique cùng hiệu ứng nghiệp vụ trong một transaction; message trùng làm unique vi phạm và hiệu ứng không lặp (cách kiểm đúng loại lỗi 23505 ở bài 26). Hai lớp này bổ sung nhau, không lớp nào thay được lớp kia.
+Relay crash sau `SendMessageAsync` nhưng trước `CommitAsync` thì dòng vẫn chưa gửi, và lần chạy sau gửi lại cùng `MessageId`. Duplicate detection của topic loại bản thứ hai nếu bản đó rơi vào cửa sổ bạn đặt. Ngoài cửa sổ, hoặc ở hạ nguồn không có duplicate detection, chỉ **inbox** còn bảo vệ. Consumer ghi `(consumer, message_id)` với ràng buộc unique cùng hiệu ứng nghiệp vụ trong một transaction; message trùng làm vi phạm ràng buộc unique nên hiệu ứng không lặp (cách kiểm tra đúng loại lỗi 23505 có ở bài 26). Hai lớp này bổ sung nhau, không lớp nào thay được lớp kia.
 
 ## Idempotency key và trạng thái pending là một phần của sản phẩm
 
@@ -151,23 +151,23 @@ Về UX, app hiển thị «Đang tìm tài xế» khi `PENDING`, và tuyệt đ
 
 ## Kiểm thử bằng cách phá từng chỗ của chuỗi
 
-Một Saga chưa thử khi bị phá thì mới là bản vẽ. Bảng dưới liệt kê kịch bản, cách gây ra và điều cơ chế dự đoán. Tất cả là kỳ vọng theo thiết kế, không phải kết quả đã đo.
+Một Saga chưa được thử phá thì mới chỉ là bản vẽ. Bảng dưới liệt kê kịch bản, cách gây ra và điều cơ chế dự đoán. Tất cả là kỳ vọng theo thiết kế, không phải kết quả đã đo.
 
 | Kịch bản | Cách gây ra | Kỳ vọng theo cơ chế | Quan sát ở đâu |
 | --- | --- | --- | --- |
 | Tắt Payment giữa chừng | Deactivate revision của Payment trước khi gửi `POST /trips` | Lệnh nằm trong queue; sau 2 phút orchestrator hết giờ chờ, gửi `RefundPayment` và `CancelTrip`; chuyến `CANCELLED`. Bật lại Payment: nó xử lý `AuthorizePayment` rồi `RefundPayment` theo thứ tự session, tiền về trạng thái đã hoàn | Bảng `trips` và `payments`; trạng thái instance Durable |
 | Payment trả lỗi | Cho Payment trả `failed` cho `AuthorizePayment` | Compensation chạy ngay, không chờ timer | Orchestrator, `cancel_reason` của chuyến |
-| Replay message | Gửi lại message từ dead-letter hoặc đặt lại `published_at` của một dòng outbox | Inbox thấy `message_id` đã có và bỏ qua; không hiệu ứng thứ hai | Bảng inbox, số dòng `payments` của chuyến |
+| Replay message | Gửi lại message từ dead-letter hoặc đặt lại `published_at` của một dòng outbox | Inbox thấy `message_id` đã có và bỏ qua; không có hiệu ứng thứ hai | Bảng inbox, số dòng `payments` của chuyến |
 | Message trùng | Dừng relay giữa `SendMessageAsync` và commit, rồi chạy lại | Cùng `MessageId` bị duplicate detection loại nếu trong cửa sổ; nếu lọt, inbox chặn | Metric message của queue, bảng inbox |
 | Poison command | Gửi lệnh không parse được | Qua số lần giao tối đa thì vào dead-letter; orchestrator hết giờ và chạy compensation | Dead-letter queue, alert |
 | Host orchestrator khởi động lại | Restart Function app giữa lúc chờ | Replay lại từ lịch sử, không bắt đầu lại; lệnh đã gửi không gửi lại với ID mới | Lịch sử instance Durable |
 | Client gửi hai lần cùng key | Hai `POST /trips` cùng `Idempotency-Key` | Một chuyến, hai phản hồi giống nhau | Bảng `trips`, bảng idempotency |
 
-Kịch bản «Poison command» hay bị bỏ quên nhất, dù nó khiến chuyến kẹt trong session: một message hỏng chặn các message sau của cùng chuyến cho tới khi nó vào dead-letter, đúng như đã nói ở bài 34. Alert trên dead-letter không phải tuỳ chọn; một message ở đó là một khách đang chờ.
+Kịch bản «Poison command» hay bị bỏ quên nhất, dù lệnh hỏng khiến chuyến kẹt trong session: một message hỏng chặn các message sau của cùng chuyến cho tới khi nó vào dead-letter, đúng như đã nói ở bài 34. Alert trên dead-letter không phải tuỳ chọn; một message ở đó là một khách đang chờ.
 
 ## Lab: dựng ba queue, cố ý làm Payment lỗi và đọc kết quả trong PostgreSQL
 
-Lab dùng lại namespace `sb-toinoi-dev-sea` (tier Standard, đủ cho session và duplicate detection) và topic `trip-events` của bài 34; nếu đã xoá sau bài 34, dựng lại bằng khối lệnh ở đó, vì duplicate detection chỉ bật được lúc tạo entity. Khối đầu tạo ba queue lệnh có session và duplicate detection, rồi một subscription nhận kết quả để một function chuyển thành `RaiseEventAsync` vào đúng instance (instance ID = `tripId`). Tên cờ CLI có thể khác giữa các phiên bản; kiểm bằng `--help` nếu lệnh báo lỗi.
+Lab dùng lại namespace `sb-toinoi-dev-sea` (tier Standard, đủ cho session và duplicate detection) và topic `trip-events` của bài 34; nếu đã xoá sau bài 34, dựng lại bằng khối lệnh ở đó, vì duplicate detection chỉ bật được lúc tạo entity. Khối đầu tạo ba queue lệnh có session và duplicate detection, rồi một subscription nhận kết quả để một function chuyển thành `RaiseEventAsync` vào đúng instance (instance ID = `tripId`). Tên cờ CLI có thể khác giữa các phiên bản; kiểm tra bằng `--help` nếu lệnh báo lỗi.
 
 ```bash
 RG=rg-toinoi-msg-dev-sea; NS=sb-toinoi-dev-sea
@@ -186,9 +186,9 @@ az servicebus topic subscription rule create -g $RG --namespace-name $NS \
   --filter-type SqlFilter --filter-sql-expression "eventType LIKE '%Result'"
 ```
 
-Khối này chỉ tạo entity. Nó chưa chứng minh quyền của Function app trên Service Bus đã được cấp (gán vai trò dữ liệu cho managed identity của app, như bài 34 làm cho danh tính của bạn), và cũng chưa có service nào chạy.
+Khối này chỉ tạo entity và chưa chứng minh quyền của Function app trên Service Bus đã được cấp (gán vai trò dữ liệu cho managed identity của app, như bài 34 làm cho danh tính của bạn), và cũng chưa có service nào chạy.
 
-Sau khi triển khai Booking, Payment, Dispatch và Function app chứa orchestrator, lab đi ba bước: deactivate revision của Payment để lệnh `AuthorizePayment` nằm chờ trong queue; gửi `POST /trips` với một `Idempotency-Key`; đợi quá hai phút rồi đọc trạng thái trong PostgreSQL. Nếu app chạy single revision mode và lệnh deactivate bị từ chối, chuyển sang multiple revision mode trước. Tên bảng và cột là minh hoạ.
+Sau khi triển khai Booking, Payment, Dispatch và Function app chứa orchestrator, lab gồm ba bước: deactivate revision của Payment để lệnh `AuthorizePayment` nằm chờ trong queue; gửi `POST /trips` với một `Idempotency-Key`; đợi quá hai phút rồi đọc trạng thái trong PostgreSQL. Nếu app chạy single revision mode và lệnh deactivate bị từ chối, chuyển sang multiple revision mode trước. Tên bảng và cột là minh hoạ.
 
 ```bash
 az containerapp revision deactivate -g rg-toinoi-payment-dev-sea \
@@ -206,13 +206,13 @@ Kỳ vọng theo cơ chế: chuyến chuyển sang `CANCELLED` sau khoảng hai 
 <p>Compensation không phải undo: khách có thể đã nhận thông báo «đã giữ tiền» trước khi nhận «chuyến bị huỷ». Mỗi lệnh ngược phải idempotent và thực sự chạy được ở mọi trạng thái, kể cả khi lệnh thuận chưa từng thành công. Orchestrator còn có chi phí: lịch sử mỗi instance nằm trong storage và tính tiền theo giao dịch, và sửa code orchestrator khi còn instance đang chạy có thể làm replay lệch. Xoá resource sau lab: <code>az group delete -n rg-toinoi-msg-dev-sea --yes</code>.</p>
 </div>
 
-**Bài tập:** Payment trả lời «ok» cho `AuthorizePayment` đúng lúc timer hai phút vừa hết. Orchestrator đã chọn nhánh hết giờ và gửi `RefundPayment`. Chuyện gì xảy ra với tiền của khách, và hai cơ chế nào trong bài bảo đảm nó cuối cùng đúng?
+**Bài tập:** Payment trả lời «ok» cho `AuthorizePayment` đúng lúc timer hai phút vừa hết. Orchestrator đã chọn nhánh hết giờ và gửi `RefundPayment`. Chuyện gì xảy ra với tiền của khách, và hai cơ chế nào trong bài bảo đảm kết quả cuối cùng đúng?
 
 <details><summary>Xem lời giải</summary><p>Payment đã giữ tiền, rồi nhận <code>RefundPayment</code> và hoàn lại, nên khách không mất tiền. Hai cơ chế: session theo <code>tripId</code> giữ thứ tự để refund đến sau authorize, và lệnh ngược idempotent chạy đúng dù reply đến muộn hay không đến. Reply «ok» muộn gửi về orchestrator bị bỏ qua vì instance đã kết thúc; chuyến vẫn kết thúc ở <code>CANCELLED</code>.</p></details>
 
 ## Học tiếp từ đây
 
-Bạn vừa có một Saga ba bước với compensation theo ngăn xếp, outbox và inbox giữ phần của từng service, idempotency key cho `POST /trips` và bảng kịch bản để phá từng chỗ của chuỗi. Phần chưa được chứng minh là hành vi thật khi tải cao, nhiều relay và nhiều instance cùng chạy. Bài sau, [bài 54](/articles/azure-toi-uu-chi-phi-reservation-savings-plan-finops), chuyển sang chi phí: reservation, savings plan, spot và cách theo dõi cho cả những thành phần như Service Bus, orchestrator và Firewall vừa xuất hiện.
+Bạn vừa có một Saga ba bước với compensation theo ngăn xếp, outbox và inbox giữ phần của từng service, idempotency key cho `POST /trips` và bảng kịch bản để phá từng chỗ của chuỗi. Phần chưa được chứng minh là hành vi thật khi tải cao, nhiều relay và nhiều instance cùng chạy. Bài sau, [bài 54](/articles/azure-toi-uu-chi-phi-reservation-savings-plan-finops), chuyển sang chi phí: reservation, savings plan, spot và cách theo dõi chi phí cho cả những thành phần như Service Bus, orchestrator và Firewall vừa xuất hiện.
 
 ## Tài liệu gốc
 

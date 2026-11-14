@@ -10,7 +10,7 @@ language: vi
 
 Đây là **bài 37** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 4 · Dữ liệu và tích hợp (bài 8/10 của phần).
 
-Ba bài trước đã đi riêng từng dịch vụ: Service Bus ở [bài 34](/articles/azure-service-bus-queue-topic-session-dead-letter), Event Hubs ở [bài 35](/articles/azure-event-hubs-stream-gps-consumer-group), Event Grid ở [bài 36](/articles/azure-event-grid-system-custom-topic). Bài này là bài quyết định: một bảng so sánh, một bảng ánh xạ luồng của Tới Nơi vào broker, và các mẫu kết hợp. Không có lab; mọi lệnh trong bài là ví dụ cấu hình, hãy đối chiếu với Microsoft Learn (11/2026) trước khi chạy trên subscription của bạn.
+Ba bài trước đã lần lượt đi sâu vào từng dịch vụ: Service Bus ở [bài 34](/articles/azure-service-bus-queue-topic-session-dead-letter), Event Hubs ở [bài 35](/articles/azure-event-hubs-stream-gps-consumer-group), Event Grid ở [bài 36](/articles/azure-event-grid-system-custom-topic). Bài này là bài quyết định: một bảng so sánh, một bảng ánh xạ luồng của Tới Nơi vào broker, và các mẫu kết hợp. Không có lab; mọi lệnh trong bài là ví dụ cấu hình, hãy đối chiếu với Microsoft Learn (11/2026) trước khi chạy trên subscription của bạn.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,13 +20,13 @@ Ba bài trước đã đi riêng từng dịch vụ: Service Bus ở [bài 34](/
 
 ## Bắt đầu từ loại việc, không từ tên dịch vụ
 
-Chọn broker theo tính năng dễ dẫn tới sai, vì cả bốn dịch vụ đều «gửi thông điệp từ A sang B». Cách chọn bền hơn là hỏi thông điệp này **là loại gì**. Có ba loại, và mỗi dịch vụ sinh ra cho một loại.
+Chọn broker theo tính năng dễ dẫn tới chọn sai, vì cả bốn dịch vụ đều «gửi thông điệp từ A sang B». Cách chọn bền hơn là hỏi thông điệp này **là loại gì**. Có ba loại, và mỗi dịch vụ dành cho một loại.
 
 - **Command (việc cần làm).** «Hãy resize ảnh này», «hãy trừ tiền chuyến này». Người gửi mong có người làm, và mất message nghĩa là việc không được làm. Cần hàng đợi: giữ message tới khi có người nhận, có retry, có chỗ để message lỗi.
 - **Event notification (điều đã xảy ra).** «Blob đã được tạo», «chuyến đã hoàn tất». Người gửi không quan tâm ai nghe. Nhiều bên cùng muốn biết, mỗi bên tự quyết làm gì.
 - **Stream (dòng dữ liệu liên tục).** Toạ độ GPS mỗi vài giây từ mỗi tài xế. Từng bản ghi không quan trọng, cái quan trọng là cả dòng: khối lượng lớn, đọc theo thứ tự, đọc lại được.
 
-Storage Queue và Service Bus phục vụ loại command, Service Bus topic còn phục vụ event nghiệp vụ cần độ tin cậy cao. Event Grid phục vụ event notification kiểu push. Event Hubs phục vụ stream. Lệch loại là nguồn của phần lớn thiết kế khó chịu: dùng queue cho GPS thì quá đắt và đọc không được lại, dùng Event Hubs làm hàng đợi việc thì không có dead-letter và không khoá message.
+Storage Queue và Service Bus phục vụ loại command, Service Bus topic còn phục vụ event nghiệp vụ cần độ tin cậy cao. Event Grid phục vụ event notification kiểu push. Event Hubs phục vụ stream. Chọn sai loại là nguồn gốc của phần lớn thiết kế rắc rối: dùng queue cho GPS thì quá đắt và không đọc lại được, dùng Event Hubs làm hàng đợi việc thì không có dead-letter và không khoá message.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -51,7 +51,7 @@ Bảng dưới nói về **cơ chế và khuynh hướng**, không ghi số gi�
 | Protocol | HTTP/REST | AMQP, HTTP | AMQP, Kafka, HTTPS | HTTP push; MQTT ở namespace |
 | VNet | Firewall và private endpoint của storage account | Private endpoint và service endpoint chỉ ở Premium | Private endpoint, service endpoint (không có ở Basic) | Private endpoint cho chiều publisher gửi vào; giao tới đích private cần managed identity và trusted service |
 
-Chi phí chỉ ghi chiều hướng; tra Pricing Calculator cho số liệu. Hai ô hay bị đọc sai. **Thứ tự của Event Hubs** chỉ có trong một partition, nên nó phụ thuộc vào partition key bạn chọn ở bài 35, không phải một bảo đảm toàn cục. **Transaction của Service Bus** là thứ không dịch vụ nào khác có: nhận message, ghi trạng thái và gửi message mới trong một đơn vị công việc. Nó không biến việc ghi PostgreSQL thành một phần của transaction đó, nên outbox vẫn cần.
+Chi phí chỉ ghi chiều hướng; tra Pricing Calculator cho số liệu. Hai ô hay bị đọc sai. **Thứ tự của Event Hubs** chỉ có trong một partition, nên thứ tự phụ thuộc vào partition key bạn chọn ở bài 35, không phải một bảo đảm toàn cục. **Transaction của Service Bus** là thứ không dịch vụ nào khác có: nhận message, ghi trạng thái và gửi message mới trong một đơn vị công việc. Cơ chế này không biến việc ghi PostgreSQL thành một phần của transaction đó, nên outbox vẫn cần.
 
 ## Áp vào Tới Nơi: mỗi luồng một lý do
 
@@ -67,20 +67,20 @@ Bảng dưới gán từng luồng của Tới Nơi vào broker, kèm lý do ng�
 | Lệnh trừ tiền một chuyến | Command | Service Bus queue | Không được mất, cần khoá message và dead-letter |
 | Báo giá cho Booking | Request/response | Không dùng broker | Cần trả lời ngay; REST hoặc gRPC |
 
-Dòng `driver-gps` cần một lưu ý. Kiến trúc tổng thể của Tới Nơi dùng ngôn ngữ Kafka. Trên Azure, endpoint Kafka của Event Hubs cho phép client Kafka kết nối mà thường chỉ đổi cấu hình kết nối và xác thực, nhưng nó **không phải một cụm Kafka**: một số tính năng Kafka không có hoặc hoạt động khác. Hãy xem nó như một cách di chuyển, và đối chiếu danh sách tính năng được hỗ trợ trước khi dựa vào một tính năng cụ thể.
+Dòng `driver-gps` cần một lưu ý. Kiến trúc tổng thể của Tới Nơi dùng thuật ngữ Kafka. Trên Azure, endpoint Kafka của Event Hubs cho phép client Kafka kết nối mà thường chỉ đổi cấu hình kết nối và xác thực, nhưng nó **không phải một cụm Kafka**: một số tính năng Kafka không có hoặc hoạt động khác. Hãy xem đây như một cách chuyển đổi, và đối chiếu danh sách tính năng được hỗ trợ trước khi dựa vào một tính năng cụ thể.
 
 Dòng cuối trong bảng quan trọng ngang các dòng còn lại: Pricing & Quote trả giá cho Booking qua lời gọi đồng bộ. Nhưng sự kiện «đã báo giá» để phân tích về sau thì đi qua broker. Hai việc khác loại.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Chọn một broker «cho gọn» cho mọi thứ nghe hợp lý, nhưng giá phải trả nằm ở chỗ khác. Đưa GPS vào Service Bus thì hoá đơn và độ trễ tăng theo từng bản ghi. Đưa lệnh trừ tiền vào Event Hubs thì không có dead-letter, nên một message lỗi có thể chặn cả partition nếu consumer cứ thử lại nó. Mỗi broker thêm một thứ để vận hành và giám sát, vì vậy hãy giữ số lượng ít nhưng đúng loại.</p>
+<p>Chọn một broker «cho gọn» cho mọi thứ nghe hợp lý, nhưng giá phải trả nằm ở chỗ khác. Đưa GPS vào Service Bus thì hoá đơn và độ trễ tăng theo từng bản ghi. Đưa lệnh trừ tiền vào Event Hubs thì không có dead-letter, nên một message lỗi có thể chặn cả partition nếu consumer cứ thử lại message đó. Mỗi broker thêm một thứ để vận hành và giám sát, vì vậy hãy giữ số lượng ít nhưng đúng loại.</p>
 </div>
 
 ## Mẫu kết hợp: broker làm đúng một việc rồi chuyển giao
 
 Thực tế ít khi dừng ở một dịch vụ. Ba mẫu thường gặp:
 
-**Event Grid tới Service Bus.** Event Grid bắt sự kiện từ nguồn Azure, rồi thả vào một queue Service Bus. Consumer kéo theo nhịp của nó, có retry và dead-letter. Bạn mượn khả năng tự phát của Event Grid và độ bền của Service Bus. Bài 36 đã dùng đúng lý do này khi API OCR chậm hơn tốc độ upload ảnh.
+**Event Grid tới Service Bus.** Event Grid bắt sự kiện từ nguồn Azure, rồi thả vào một queue Service Bus. Consumer tự kéo message theo nhịp riêng, có retry và dead-letter. Bạn mượn khả năng tự phát của Event Grid và độ bền của Service Bus. Bài 36 đã dùng đúng lý do này khi API OCR chậm hơn tốc độ upload ảnh.
 
 **Event Hubs tới Function tới Service Bus.** GPS đi vào Event Hubs với khối lượng lớn. Một Function (hoặc consumer khác) đọc, gộp và chỉ phát ra sự kiện có nghĩa, chẳng hạn «tài xế đã tới điểm đón». Sự kiện đó mới vào Service Bus topic cho Dispatch và Notification. Tránh để mọi consumer nghiệp vụ đọc thẳng dòng thô.
 
@@ -114,13 +114,13 @@ az servicebus topic subscription rule create -g $RG \
   --filter-sql-expression "eventType = 'trip.completed'"
 ```
 
-Luật mặc định `$Default` nhận mọi message nên phải xoá, nếu không filter mới không có tác dụng. Lệnh không chứng minh publisher đã gắn thuộc tính `eventType`; thiếu nó thì subscription im lặng và không có lỗi nào báo. Tên cờ nên đối chiếu với `az servicebus topic subscription rule create --help` của phiên bản CLI bạn đang dùng.
+Luật mặc định `$Default` nhận mọi message nên phải xoá, nếu không filter mới không có tác dụng. Lệnh không chứng minh publisher đã gắn thuộc tính `eventType`; thiếu nó thì subscription không nhận được message nào mà không báo lỗi. Tên cờ nên đối chiếu với `az servicebus topic subscription rule create --help` của phiên bản CLI bạn đang dùng.
 
 ## Bài tập thiết kế: trip.completed tới bốn consumer
 
-**Bài tập:** `trip-service` hoàn tất một chuyến và cần báo cho bốn bên: Payment (chốt thanh toán), Notification (gửi biên nhận cho khách), Driver Earnings (cộng thu nhập cho tài xế), và Analytics (đưa vào Data Lake cho báo cáo ở bài 38). Hãy chọn broker, nói rõ cách giữ thứ tự với các sự kiện khác của cùng chuyến, và cách mỗi consumer chịu được việc nhận trùng.
+**Bài tập:** `trip-service` hoàn tất một chuyến và cần báo cho bốn bên: Payment (chốt thanh toán), Notification (gửi biên nhận cho khách), Driver Earnings (cộng thu nhập cho tài xế), và Analytics (đưa vào Data Lake cho báo cáo ở bài 38). Hãy chọn broker, nói rõ cách giữ thứ tự với các sự kiện khác của cùng chuyến, và cách mỗi consumer xử lý được message trùng lặp.
 
-<details><summary>Xem lời giải</summary><p>Đường đi: <code>trip-service</code> ghi <code>trip.completed</code> vào bảng outbox cùng transaction với trạng thái chuyến, relay đẩy sang một Service Bus topic <code>trip-events</code> với <code>SessionId</code> là mã chuyến và <code>MessageId</code> là mã sự kiện, mỗi consumer có subscription riêng lọc theo <code>eventType</code>. Chọn Service Bus vì bốn bên độc lập cần retry và dead-letter riêng, và session giữ «đã nhận, bắt đầu, hoàn tất» của cùng một chuyến đúng thứ tự mà Event Grid không bảo đảm. Không dùng Storage Queue vì sẽ phải gửi bốn lần vào bốn queue; không dùng Event Hubs vì không có dead-letter theo consumer.</p><p>Idempotency nằm ở từng consumer: mỗi bên ghi dấu inbox theo (tên consumer, mã sự kiện) cùng transaction với tác dụng phụ của nó. Payment dùng thêm khoá idempotency theo mã chuyến khi gọi cổng thanh toán, Earnings cộng một lần cho mỗi mã chuyến, Notification chấp nhận rủi ro gửi trùng nhưng kiểm trước. Analytics được phép ghi trùng nếu bước dựng báo cáo khử trùng bằng mã sự kiện.</p></details>
+<details><summary>Xem lời giải</summary><p>Đường đi: <code>trip-service</code> ghi <code>trip.completed</code> vào bảng outbox cùng transaction với trạng thái chuyến, relay đẩy sang một Service Bus topic <code>trip-events</code> với <code>SessionId</code> là mã chuyến và <code>MessageId</code> là mã sự kiện, mỗi consumer có subscription riêng lọc theo <code>eventType</code>. Chọn Service Bus vì bốn bên độc lập cần retry và dead-letter riêng, và session giữ «đã nhận, bắt đầu, hoàn tất» của cùng một chuyến đúng thứ tự mà Event Grid không bảo đảm. Không dùng Storage Queue vì sẽ phải gửi bốn lần vào bốn queue; không dùng Event Hubs vì không có dead-letter theo consumer.</p><p>Idempotency nằm ở từng consumer: mỗi bên ghi dấu inbox theo (tên consumer, mã sự kiện) cùng transaction với tác dụng phụ của nó. Payment dùng thêm khoá idempotency theo mã chuyến khi gọi cổng thanh toán, Earnings cộng một lần cho mỗi mã chuyến, Notification chấp nhận rủi ro gửi trùng nhưng kiểm trước. Analytics được phép ghi trùng nếu bước dựng báo cáo khử trùng lặp bằng mã sự kiện.</p></details>
 
 ## Học tiếp từ đây
 

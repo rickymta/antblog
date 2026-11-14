@@ -19,7 +19,7 @@ Không có lỗi nào được báo. PostgreSQL trả đúng những gì câu l�
 
 ## 1. Dữ liệu dùng trong bài
 
-Mọi ví dụ chạy trên fixture của lab: 15 chuyến cố định (ảnh chụp 08:30 ngày 03/11/2026, giờ VN) cộng chuyến **100029** do vòng đời ở PG-006 tạo — 16 chuyến. Tái lập rồi chạy các câu của bài:
+Mọi ví dụ chạy trên fixture của lab: 15 chuyến cố định (ảnh chụp 08:30 ngày 03/11/2026, giờ VN) cộng chuyến **100029** do phần vòng đời ở PG-006 tạo ra, thành 16 chuyến. Tái lập rồi chạy các câu của bài:
 
 ```bash
 cd examples/toi-noi-postgresql
@@ -111,7 +111,7 @@ SELECT code, status FROM trips WHERE driver_id = NULL;
 
 Viết `WHERE driver_id IS NULL ORDER BY code` thì ra đúng 3 chuyến chưa có tài xế: 100006 (`cancelled` trước khi có người nhận), 100013 (`searching`), 100014 (`requested`).
 
-**`AND` mạnh hơn `OR`.** Muốn «chuyến hoàn thành hoặc bị huỷ, ở TP. Hồ Chí Minh (`city_id = 1`)». Viết thiếu ngoặc:
+**`AND` được ưu tiên trước `OR`.** Giả sử bạn muốn lấy «chuyến hoàn thành hoặc bị huỷ, ở TP. Hồ Chí Minh (`city_id = 1`)». Viết thiếu ngoặc:
 
 ```sql
 SELECT code, status, city_id FROM trips
@@ -175,7 +175,7 @@ SELECT timestamptz '2026-11-03 00:00:00+07'
 
 Một khoảnh khắc thuộc hai ngày: báo cáo theo ngày cộng lại lớn hơn tổng thật.
 
-Thêm một lý do sẽ rõ ở Phần 3: so sánh trực tiếp trên cột để nguyên giá trị cột, nên index trên `requested_at` dùng được; bọc cột trong hàm hay phép ép kiểu thường làm mất khả năng đó.
+Còn một lý do nữa, sẽ rõ ở Phần 3: so sánh trực tiếp trên cột giữ nguyên giá trị của cột, nên index trên `requested_at` dùng được; bọc cột trong hàm hay phép ép kiểu thường làm mất khả năng đó.
 
 ### Vì sao người thứ hai đếm ra 9?
 
@@ -218,12 +218,12 @@ FROM trips;
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Quy tắc lọc ngày của Tới Nơi</span>
-<p>Mốc lọc luôn ghi rõ <code>+07</code> (hoặc ứng dụng truyền tham số <code>timestamptz</code> đã có múi giờ), luôn dạng nửa hở <code>&gt;= from AND &lt; to</code>. Câu nào đổi kết quả sau <code>SET TIME ZONE 'UTC'</code> là câu đang dựa vào phiên. PG-016 ở Phần 2 sẽ quay lại với tuần, tháng và kiểm hai biên.</p>
+<p>Mốc lọc luôn ghi rõ <code>+07</code> (hoặc ứng dụng truyền tham số <code>timestamptz</code> đã có múi giờ), luôn dạng nửa hở <code>&gt;= from AND &lt; to</code>. Câu nào đổi kết quả sau <code>SET TIME ZONE 'UTC'</code> là câu đang dựa vào phiên. PG-016 ở Phần 2 sẽ quay lại với tuần, tháng và việc kiểm tra hai đầu của khoảng.</p>
 </div>
 
 ## 5. ORDER BY: sắp xếp và tie-breaker
 
-Không có `ORDER BY`, PostgreSQL trả dòng theo thứ tự **không xác định**. Tài liệu nói rõ thứ tự khi đó phụ thuộc kiểu quét, kiểu nối và thứ tự trên đĩa, và «must not be relied on» — không được dựa vào, dù bảng nhỏ trong lab có thể trả đúng thứ tự chèn nhiều lần liền.
+Không có `ORDER BY`, PostgreSQL trả dòng theo thứ tự **không xác định**. Tài liệu nói rõ thứ tự khi đó phụ thuộc kiểu quét, kiểu nối và thứ tự trên đĩa, và «must not be relied on» — không được dựa vào, dù bảng nhỏ trong lab có thể trả đúng thứ tự chèn nhiều lần liên tiếp.
 
 `ORDER BY` nhận một hay nhiều khoá sắp xếp, mỗi khoá có chiều riêng: `ASC` (tăng, mặc định) hoặc `DESC` (giảm). `ORDER BY requested_at DESC, code` nghĩa là giờ đặt giảm dần, **code tăng dần** — chiều không lan sang khoá sau.
 
@@ -291,7 +291,7 @@ Kết quả: Lê Hoàng Cường, Nguyễn Văn An, Phạm Thu Dung, Trần Th�
 
 **`LIMIT n`** lấy tối đa `n` dòng đầu của kết quả đã sắp; **`OFFSET k`** bỏ qua `k` dòng đầu. Kết hợp lại thành phân trang: trang `p` (đánh từ 1), mỗi trang `n` dòng là `LIMIT n OFFSET (p - 1) * n`.
 
-Tài liệu PostgreSQL cảnh báo hai điều: dùng `LIMIT` mà không có `ORDER BY` ràng thứ tự duy nhất thì nhận «một tập con không đoán trước được»; và planner tính cả `LIMIT`/`OFFSET` khi chọn kế hoạch, nên các trang khác nhau có thể dùng kế hoạch khác nhau và cho kết quả không nhất quán. Màn hình «chuyến theo loại dịch vụ» của đội vận hành dính đúng lỗi này:
+Tài liệu PostgreSQL cảnh báo hai điều: dùng `LIMIT` mà không có `ORDER BY` cho ra một thứ tự duy nhất thì nhận «một tập con không đoán trước được»; và planner tính cả `LIMIT`/`OFFSET` khi chọn kế hoạch, nên các trang khác nhau có thể dùng kế hoạch khác nhau và cho kết quả không nhất quán. Màn hình «chuyến theo loại dịch vụ» của đội vận hành dính đúng lỗi này:
 
 ```sql
 SELECT code, kind, status FROM trips ORDER BY kind LIMIT 3;            -- trang 1
@@ -344,9 +344,9 @@ Mỗi dòng có một vị trí duy nhất, các trang ghép lại vừa khít.
 `OFFSET` vẫn còn hai giới hạn mà tie-breaker không chữa được:
 
 - **Chi phí:** dòng bị `OFFSET` bỏ qua vẫn phải được tính trong server; trang thứ 1.000 của lịch sử chuyến trên bảng 730 triệu dòng/năm là cái giá thật.
-- **Dữ liệu chạy:** giữa hai lần bấm «trang sau», một chuyến mới chen vào đầu danh sách thì mọi dòng dịch xuống một bậc — người dùng thấy lại một dòng của trang trước.
+- **Dữ liệu thay đổi liên tục:** giữa hai lần bấm «trang sau», một chuyến mới chen vào đầu danh sách thì mọi dòng dịch xuống một bậc — người dùng thấy lại một dòng của trang trước.
 
-Cả hai được giải bằng **phân trang keyset** («lấy các dòng đứng sau dòng cuối tôi đã thấy») ở PG-018, Phần 2. Ở Phần 1, `LIMIT`/`OFFSET` có tie-breaker là đủ cho danh sách ngắn.
+Cả hai giới hạn này được giải quyết bằng **phân trang keyset** («lấy các dòng đứng sau dòng cuối tôi đã thấy») ở PG-018, Phần 2. Ở Phần 1, `LIMIT`/`OFFSET` có tie-breaker là đủ cho danh sách ngắn.
 
 ## 7. Lỗi thường gặp
 
@@ -362,7 +362,7 @@ Cả hai được giải bằng **phân trang keyset** («lấy các dòng đứ
 
 ## 8. Đánh đổi
 
-- **Liệt kê cột hay `SELECT *`:** liệt kê dài hơn nhưng ổn định khi schema đổi. `*` để khám phá, liệt kê trong mã ứng dụng.
+- **Liệt kê cột hay `SELECT *`:** liệt kê dài hơn nhưng ổn định khi schema đổi. Dùng `*` để khám phá, còn trong mã ứng dụng thì liệt kê cột.
 - **Tie-breaker `code` hay `id`:** cả hai duy nhất; `code` tăng theo giờ tạo nên thứ tự có nghĩa với người vận hành, `id` là uuid ngẫu nhiên.
 - **Nửa hở hay hàm trên cột:** `(requested_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date = '2026-11-02'` cũng ra đúng 8 và dễ đọc, nhưng biến đổi cột ở mỗi dòng; nửa hở để nguyên cột — có lợi khi có index (Phần 3).
 - **`OFFSET` hay keyset:** `OFFSET` đơn giản, nhảy trang bất kỳ; keyset rẻ và ổn định hơn nhưng chỉ đi «trang sau/trước».

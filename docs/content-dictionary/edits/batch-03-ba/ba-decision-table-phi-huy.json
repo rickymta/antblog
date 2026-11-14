@@ -1,0 +1,13 @@
+{"file":"ba-decision-table-phi-huy.md","edits":[
+{"old":"Đầu ra: bảng quyết định và bộ case chứng minh độ phủ.","new":"Đầu ra: bảng quyết định và bộ test case chứng minh độ phủ.","reason":"Thống nhất test case","severity":"low"},
+{"old":"Các biến G/L chỉ được đánh giá khi dữ liệu cần thiết có nghĩa và đầy đủ.","new":"Các biến G/L chỉ được xét khi dữ liệu cần thiết tồn tại và đầy đủ.","reason":"'có nghĩa' sai nghĩa","severity":"high"},
+{"old":"Phân chia miền đầu vào như vậy tránh tạo tổ hợp vô nghĩa","new":"Phân chia miền đầu vào như vậy giúp tránh tạo tổ hợp vô nghĩa","reason":"Câu thiếu động từ","severity":"low"},
+{"old":"D4 không có nghĩa mọi accepted đều có phí; nó chỉ được xét","new":"D4 không có nghĩa mọi accepted đều có phí; dòng này chỉ được xét","reason":"Tránh 'nó' chỉ khái niệm","severity":"medium"},
+{"old":"Ngoài ba trạng thái được phép đi D0.","new":"Trạng thái nằm ngoài ba trạng thái được phép thì đi vào D0.","reason":"Câu thiếu chủ ngữ","severity":"high"},
+{"old":"Việc tách bảng giúp không lặp toàn bộ điều kiện miễn","new":"Việc tách bảng giúp tránh lặp lại toàn bộ điều kiện miễn","reason":"Câu gượng","severity":"medium"},
+{"old":"## 5. Chọn case để kiểm bảng","new":"## 5. Chọn test case để kiểm bảng","reason":"Thống nhất test case","severity":"low"},
+{"old":"xe máy; các ca độc lập:","new":"xe máy; các test case độc lập:","reason":"Thống nhất test case","severity":"low"},
+{"old":"Thêm ca ô tô có phí để kiểm B;","new":"Thêm test case ô tô có phí để kiểm B;","reason":"Thống nhất test case","severity":"low"},
+{"old":"Review delta theo từng nhóm: dòng nào thay, case nào thay, case nào phải giữ nguyên.","new":"Review phần chênh lệch theo từng nhóm: dòng nào thay, test case nào thay, test case nào phải giữ nguyên.","reason":"delta thành phần chênh lệch; test case","severity":"medium"},
+{"old":"chứng minh mỗi case T1–T7 chỉ khớp một dòng. Thêm C03/C04 trong hồ sơ P03 để kiểm 2:59 và 3:00 cho v2 đề xuất.","new":"chứng minh mỗi test case T1–T7 chỉ khớp một dòng. Thêm C03/C04 trong hồ sơ P03 để kiểm mốc 2 phút 59 giây và 3 phút cho v2 đề xuất.","reason":"test case; 2:59 dễ đọc nhầm thành giờ","severity":"medium"}
+]}

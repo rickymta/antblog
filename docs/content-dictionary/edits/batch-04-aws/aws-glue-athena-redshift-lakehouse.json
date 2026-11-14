@@ -1,0 +1,13 @@
+{"file":"aws-glue-athena-redshift-lakehouse.md","edits":[
+{"old":"khiến báo cáo đọc cả những cột nó không cần;","new":"khiến báo cáo đọc cả những cột mà báo cáo không cần;","reason":"Tránh 'nó' mơ hồ","severity":"medium"},
+{"old":"mà không tự viết job.","new":"mà không phải tự viết job.","reason":"Thiếu 'phải', câu gượng","severity":"low"},
+{"old":"việc hỏi Glue danh sách partition làm chậm query.","new":"việc truy vấn Glue để lấy danh sách partition làm chậm query.","reason":"'hỏi' dịch từng chữ (ask)","severity":"medium"},
+{"old":"ép cấu hình và đặt trần","new":"bắt buộc áp dụng cấu hình và đặt trần","reason":"'ép' là calque (enforce)","severity":"medium"},
+{"old":"Một câu hỏi điển hình của vận hành:","new":"Một truy vấn điển hình của bộ phận vận hành:","reason":"Lược danh từ ('vận hành' đứng cụt), 'câu hỏi' thay cho truy vấn","severity":"medium"},
+{"old":"Athena trả tiền theo mỗi lần quét sẽ đắt và chậm.","new":"Athena tính tiền theo mỗi lần quét sẽ đắt và chậm.","reason":"'trả tiền' sai chủ thể: Athena là bên tính tiền","severity":"high"},
+{"old":"Nó đọc cả dữ liệu trong S3 qua **Spectrum**","new":"Redshift Serverless đọc cả dữ liệu trong S3 qua **Spectrum**","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"nhưng bị loại cột `customer_phone`;","new":"nhưng không được thấy cột `customer_phone`;","reason":"'bị loại cột' gượng","severity":"medium"},
+{"old":"**Quét nhầm là đắt nhất.**","new":"**Quét nhầm là lỗi tốn kém nhất.**","reason":"Câu thiếu danh từ","severity":"medium"},
+{"old":"**File nhỏ giết hiệu năng.**","new":"**File nhỏ làm hiệu năng sụt giảm.**","reason":"'giết' là calque (kill performance)","severity":"low"},
+{"old":"Tiền lab đến từ dung lượng S3","new":"Chi phí của lab đến từ dung lượng S3","reason":"'Tiền lab' là cụm tự ghép","severity":"medium"}
+]}

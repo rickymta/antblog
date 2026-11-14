@@ -1,0 +1,15 @@
+{"file":"aws-eks-ebs-efs-csi-statefulset.md","edits":[
+{"old":"Bài cần bạn đã xong","new":"Bài này yêu cầu bạn đã học xong","reason":"Thiếu chủ ngữ rõ, câu cộc","severity":"medium"},
+{"old":"giúp ích, nhưng bài giải thích lại phần liên quan tới Kubernetes.","new":"giúp ích, nhưng bài này vẫn giải thích lại phần liên quan tới Kubernetes.","reason":"'bài' thiếu chỉ định, câu cụt","severity":"low"},
+{"old":"Pod khai một **PersistentVolumeClaim**","new":"Pod khai báo một **PersistentVolumeClaim**","reason":"'khai' thiếu thành phần, dùng 'khai báo'","severity":"medium"},
+{"old":"EKS không tự có driver cho EBS","new":"EKS không có sẵn driver cho EBS","reason":"'tự có' gượng","severity":"low"},
+{"old":"EBS gắn theo AZ, nếu volume được tạo ngay khi PVC xuất hiện (kiểu `Immediate`), driver chọn","new":"EBS gắn theo AZ, nên nếu volume được tạo ngay khi PVC xuất hiện (kiểu `Immediate`), driver sẽ chọn","reason":"Thiếu liên từ nhân quả","severity":"medium"},
+{"old":"Kèm theo là PodDisruptionBudget (`maxUnavailable: 1`) để khi drain node không tắt cả hai worker cùng lúc.","new":"Lab còn có PodDisruptionBudget (`maxUnavailable: 1`) để khi drain node không tắt cả hai worker cùng lúc.","reason":"Cấu trúc đảo kiểu Anh, thiếu chủ ngữ","severity":"medium"},
+{"old":"Tới Nơi không cần cho bài này.","new":"Tới Nơi không cần đến nó trong bài này.","reason":"Câu thiếu tân ngữ","severity":"low"},
+{"old":"không đảm bảo tính toàn vẹn ứng dụng như database đang ghi dở.","new":"không đảm bảo tính toàn vẹn ở mức ứng dụng, ví dụ database đang ghi dở.","reason":"Câu so sánh sai cấu trúc ('như' làm lệch nghĩa)","severity":"medium"},
+{"old":"Kỹ thuật cho phép: operator như","new":"Về kỹ thuật thì làm được: operator như","reason":"Calque, câu cụt","severity":"medium"},
+{"old":"Volume gắn AZ; node group chỉ ở một AZ hoặc thiếu chỗ ở AZ đó thì pod chờ vô thời hạn.","new":"Volume gắn theo AZ; nếu node group chỉ ở một AZ hoặc thiếu chỗ ở AZ đó thì pod chờ vô thời hạn.","reason":"Thiếu giới từ và liên từ điều kiện","severity":"medium"},
+{"old":"Xoá StatefulSet nhưng PVC còn; volume `Retain` còn sau khi xoá PVC.","new":"Xoá StatefulSet nhưng PVC vẫn còn; volume `Retain` vẫn còn sau khi xoá PVC.","reason":"Câu cụt","severity":"low"},
+{"old":"Kiểm trên máy: `fmt`","new":"Kiểm tra trên máy cục bộ: `fmt`","reason":"'Kiểm' đứng một mình là từ cụt","severity":"medium"},
+{"old":"README ghi phần tính tiền (EBS, snapshot, EFS)","new":"README ghi cách tính chi phí (EBS, snapshot, EFS)","reason":"Khẩu ngữ","severity":"low"}
+]}

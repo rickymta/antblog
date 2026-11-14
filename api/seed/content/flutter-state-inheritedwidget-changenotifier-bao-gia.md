@@ -75,7 +75,7 @@ Có hai cách tra cứu, khác nhau ở một điểm:
 - `context.dependOnInheritedWidgetOfExactType<T>()` trả về widget và **đăng ký** `context` làm dependent. Khi widget đó được cập nhật và `updateShouldNotify` trả `true`, framework gọi `didChangeDependencies` của từng dependent, tức dựng lại chúng.
 - `context.getInheritedWidgetOfExactType<T>()` chỉ trả về widget, **không đăng ký**. Context đó không bị dựng lại khi dữ liệu đổi.
 
-Quy ước bọc chúng trong hàm tĩnh `of` và `maybeOf`. Lab có một `InheritedWidget` viết tay mang ảnh chụp bất biến của bản nháp:
+Theo quy ước, ta bọc chúng trong hàm tĩnh `of` và `maybeOf`. Lab có một `InheritedWidget` viết tay mang ảnh chụp bất biến của bản nháp:
 
 ### snapshot_scope.dart · 17-state-changenotifier/lib/snapshot_scope.dart (trích)
 
@@ -103,7 +103,7 @@ class QuoteSnapshotScope extends InheritedWidget {
 }
 ```
 
-`updateShouldNotify` chỉ chạy khi cha dựng lại và đưa vào một `InheritedWidget` mới thay cho cái cũ. Nó so hai ảnh chụp theo giá trị: bằng nhau thì không dependent nào bị đánh thức. Test kiểm cả hai chiều, kèm một scope đối chứng luôn trả `true`:
+`updateShouldNotify` chỉ chạy khi cha dựng lại và đưa vào một `InheritedWidget` mới thay cho cái cũ. Hàm này so hai ảnh chụp theo giá trị: bằng nhau thì không dependent nào bị đánh thức. Test kiểm cả hai chiều, kèm một scope đối chứng luôn trả `true`:
 
 ### snapshot_scope_test.dart · 17-state-changenotifier/test/snapshot_scope_test.dart (trích)
 
@@ -122,7 +122,7 @@ class QuoteSnapshotScope extends InheritedWidget {
 
 Hai lưu ý. Một, `child` truyền vào scope phải là cùng một đối tượng ở mọi lần dựng; cha tạo widget con mới mỗi lần thì con vẫn bị dựng lại dù `updateShouldNotify` trả `false`. Hai, `updateShouldNotify` là một quyết định chung cho mọi dependent. Đổi nó thành chỉ so cước thì widget đọc dịch vụ bị bỏ sót: test `chỉ so cước` cho thấy chip vẫn hiện "ride" sau khi dịch vụ đã đổi. Muốn đăng ký theo từng phần dữ liệu, Flutter có `InheritedModel` với tham số `aspect`; lab không đi hướng đó.
 
-`InheritedWidget` bất biến và không biết lắng nghe, nên lab thêm một `StatefulWidget` đóng vai chủ:
+`InheritedWidget` bất biến và không biết lắng nghe, nên lab thêm một `StatefulWidget` đóng vai host:
 
 ### snapshot_scope.dart · 17-state-changenotifier/lib/snapshot_scope.dart (trích)
 
@@ -154,7 +154,7 @@ class _QuoteSnapshotHostState extends State<QuoteSnapshotHost> {
 
 Đây là việc Flutter đã làm sẵn trong `InheritedNotifier`, nên ta sang đó.
 
-## ChangeNotifier và InheritedNotifier: bỏ phần chủ viết tay
+## ChangeNotifier và InheritedNotifier: bỏ phần host viết tay
 
 `ChangeNotifier` là một đối tượng có danh sách listener và phương thức `notifyListeners`. Phương thức đó được đánh dấu `@protected`, nên chỉ lớp con mới gọi được, và lớp con thường để lộ các hàm nghiệp vụ như `setKm`. `QuoteDraft` giữ dịch vụ, quãng đường và cước:
 
@@ -186,7 +186,7 @@ class _QuoteSnapshotHostState extends State<QuoteSnapshotHost> {
 
 Ba quy tắc. Chỉ báo khi có gì đó thật sự đổi. Tính trước rồi mới gán, để lỗi không để lại trạng thái nửa vời (`setKm(101)` ném `ArgumentError` mà draft không đổi). Cước vẫn do `calculateFare` của `toi_noi_core` tính, không có công thức thứ hai trong UI. Notifier cũng phải được huỷ: sau `dispose`, thêm listener bị chặn ở chế độ debug.
 
-Constructor viết `this._service` là tham số tên cho thành viên private (Dart 3.12): khi gọi, tên vẫn là `service`.
+Constructor viết `this._service` là tham số có tên cho thành viên private (Dart 3.12): khi gọi, tên vẫn là `service`.
 
 Để đưa draft xuống cây, ta dùng `InheritedNotifier<T>`, một `InheritedWidget` nhận một `Listenable`:
 
@@ -208,7 +208,7 @@ class QuoteScope extends InheritedNotifier<QuoteDraft> {
       (throw _missing(context));
 ```
 
-Source `InheritedNotifier` trong Flutter 3.47 làm đúng việc của `QuoteSnapshotHost` ở tầng Element: đăng ký listener lên notifier ngay khi tạo; khi notifier báo, tự đánh dấu cần dựng lại; ở lần build kế tiếp gọi `notifyClients` để đánh thức mọi dependent. Vì chỉ đánh dấu rồi đợi build, nhiều thông báo giữa hai khung hình gộp thành một: test gọi `selectService`, `setKm`, `setKm` liền nhau và dependent chỉ dựng thêm một lần. `updateShouldNotify` của `InheritedNotifier` mặc định chỉ so danh tính notifier (`oldWidget.notifier != notifier`), tức chỉ cần khi đổi sang một draft khác.
+Mã nguồn `InheritedNotifier` trong Flutter 3.47 làm đúng việc của `QuoteSnapshotHost` ở tầng Element: đăng ký listener lên notifier ngay khi tạo; khi notifier báo, tự đánh dấu cần dựng lại; ở lần build kế tiếp gọi `notifyClients` để đánh thức mọi dependent. Vì chỉ đánh dấu rồi đợi build, nhiều thông báo giữa hai khung hình gộp thành một: test gọi `selectService`, `setKm`, `setKm` liền nhau và dependent chỉ dựng thêm một lần. `updateShouldNotify` của `InheritedNotifier` mặc định chỉ so danh tính notifier (`oldWidget.notifier != notifier`), tức chỉ cần khi đổi sang một draft khác.
 
 Hình 2 vẽ đường đi của một thông báo.
 
@@ -283,7 +283,7 @@ Cách 1 là `QuoteScope.of`. Cách 3 là truyền cả notifier rồi bọc `Lis
   }
 ```
 
-Widget này lấy draft bằng `read`, nên không phụ thuộc scope và `build` của nó chạy đúng một lần. Nó chỉ nghe `fareListenable`. `ValueNotifier` chỉ báo khi giá trị mới khác giá trị cũ theo `==`, và `Money` so sánh theo số đồng. Hậu quả: đổi từ 1 km sang 1,5 km làm draft báo nhưng cước vẫn 12.000 nên không ai nghe cước bị gọi. Tham số `child` là phần không đổi ("Cước dự kiến"), dựng một lần rồi dùng lại mỗi lần `builder` chạy.
+Widget này lấy draft bằng `read`, nên không phụ thuộc scope và `build` của nó chạy đúng một lần. Nó chỉ nghe `fareListenable`. `ValueNotifier` chỉ báo khi giá trị mới khác giá trị cũ theo `==`, và `Money` so sánh theo số đồng. Hậu quả: đổi từ 1 km sang 1,5 km làm draft báo nhưng cước vẫn 12.000 nên listener của cước không bị gọi. Tham số `child` là phần không đổi ("Cước dự kiến"), dựng một lần rồi dùng lại mỗi lần `builder` chạy.
 
 Test dựng ba widget trong cùng một scope, bắt đầu ở 1 km, rồi bắn từng loại thay đổi:
 
@@ -301,7 +301,7 @@ Test dựng ba widget trong cùng một scope, bắt đầu ở 1 km, rồi bắ
     });
 ```
 
-Hình 3 tổng hợp kết quả của ba ca thay đổi. Mỗi ô là số lần build **thêm** sau lần dựng đầu.
+Hình 3 tổng hợp kết quả của ba tình huống thay đổi. Mỗi ô là số lần build **thêm** sau lần dựng đầu.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -418,7 +418,7 @@ Tài liệu Flutter nói lựa chọn phụ thuộc độ phức tạp của app
 
 | | provider | bloc (`flutter_bloc`) | Riverpod (`flutter_riverpod`) |
 |---|---|---|---|
-| Ý tưởng | Bọc `InheritedWidget` cho đỡ boilerplate: cấp phát và huỷ tài nguyên, tải lười, `Consumer` | `Cubit` gọi hàm rồi `emit` state; `Bloc` nhận event; widget dùng `BlocBuilder` | Khai báo provider, state nằm trong container ngoài cây widget, đọc bằng `ref.watch` |
+| Ý tưởng | Bọc `InheritedWidget` cho đỡ boilerplate: cấp phát và huỷ tài nguyên, lazy loading, `Consumer` | `Cubit` gọi hàm rồi `emit` state; `Bloc` nhận event; widget dùng `BlocBuilder` | Khai báo provider, state nằm trong container ngoài cây widget, đọc bằng `ref.watch` |
 | Nghe một phần | `Selector` | `buildWhen`, `BlocSelector` | `select` |
 | Bất đồng bộ | `FutureProvider`, `StreamProvider` | tự mô hình hoá loading, success, failure | `AsyncValue` có sẵn |
 | Điểm mạnh | Gần `ChangeNotifier` nhất, tài liệu Flutter dùng làm ví dụ | Luồng event rõ ràng, hợp đội muốn quy ước chặt; `Cubit`/`Bloc` là lớp Dart, package `bloc` là Dart thuần nên test không cần cây widget | Provider đọc provider khác qua `ref`, không cần `BuildContext`; chạy được trong Dart thuần |
@@ -438,7 +438,7 @@ Lộ trình chọn Riverpod làm trục vì bốn việc sắp tới trúng đi�
 <ul>
 <li><strong>Đặt scope quá thấp.</strong> Dấu hiệu: <code>FlutterError</code> "Không tìm thấy QuoteScope" khi mở trang mới. Nguyên nhân: scope nằm trong <code>home</code>, còn route được đẩy nằm dưới <code>MaterialApp</code>. Cách sửa: đặt scope trên <code>MaterialApp</code>. Gọi <code>of</code> bằng chính <code>context</code> đã dựng ra scope cũng lỗi như vậy; dùng <code>Builder</code>.</li>
 <li><strong>Gọi <code>of</code> trong <code>initState</code>.</strong> Dấu hiệu: debug báo "was called before ... initState() completed". Nguyên nhân: <code>initState</code> chỉ chạy một lần nên giá trị lấy ở đó sẽ cũ. Cách sửa: lấy trong <code>build</code> hoặc <code>didChangeDependencies</code>.</li>
-<li><strong>Dùng <code>read</code> để hiển thị dữ liệu.</strong> Dấu hiệu: nhãn đứng yên dù state đã đổi (test: "ride-read" không đổi khi dịch vụ thành food). Nguyên nhân: <code>read</code> không đăng ký phụ thuộc. Cách sửa: dùng <code>of</code>, hoặc nghe một <code>ValueListenable</code> như <code>FareFromValue</code>; để <code>read</code> cho trình xử lý sự kiện.</li>
+<li><strong>Dùng <code>read</code> để hiển thị dữ liệu.</strong> Dấu hiệu: nhãn đứng yên dù state đã đổi (test: "ride-read" không đổi khi dịch vụ đổi thành food). Nguyên nhân: <code>read</code> không đăng ký phụ thuộc. Cách sửa: dùng <code>of</code>, hoặc nghe một <code>ValueListenable</code> như <code>FareFromValue</code>; để <code>read</code> cho trình xử lý sự kiện.</li>
 <li><strong>Tạo notifier trong <code>build</code>.</strong> Dấu hiệu: chọn "Giao đồ ăn" xong lại tự về "Đặt xe" khi widget cha dựng lại. Nguyên nhân: mỗi lần <code>build</code> tạo một <code>QuoteDraft</code> mới và không huỷ cái cũ. Cách sửa: tạo trong <code>State</code>, huỷ trong <code>dispose</code>, như <code>ToiNoiApp</code>.</li>
 <li><strong>Sửa tại chỗ giá trị trong <code>ValueNotifier</code>.</strong> Dấu hiệu: <code>trips.value.add(trip)</code> mà giao diện không đổi. Nguyên nhân: <code>ValueNotifier</code> chỉ báo khi gán giá trị khác theo <code>==</code>, còn <code>add</code> giữ nguyên một <code>List</code>. Cách sửa: gán bản sao, <code>value = [...value, trip]</code>.</li>
 </ul>
@@ -466,7 +466,7 @@ flutter test
 | `rebuild_boundary_test.dart` (6) | Ma trận ở Hình 3 và `child` của `ValueListenableBuilder` |
 | `app_test.dart` (8) | Luồng chọn, đặt, huỷ không callback; tập widget bị dựng lại khi kéo km, đổi dịch vụ, đặt chuyến |
 
-Thử đổi tạm `read` thành `dependOnInheritedWidgetOfExactType` thì 8 test đỏ, gồm hai ca của ma trận; lab đã trả về như cũ.
+Thử đổi tạm `read` thành `dependOnInheritedWidgetOfExactType` thì 8 test đỏ, gồm hai test của ma trận; lab đã trả về như cũ.
 
 **Chưa làm**: chạy trên simulator, emulator hay máy thật; đo hiệu năng thật (số lần build ở trên đo trong chế độ debug, DevTools thuộc bài 41); `InheritedModel`; provider, bloc, Riverpod (chỉ so sánh qua tài liệu); lưu cục bộ, gọi mạng, xử lý lỗi bất đồng bộ (bài 19, 20, 22); accessibility và responsive của bài 16, vì màn hình lab này là bản rút gọn.
 

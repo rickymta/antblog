@@ -8,9 +8,9 @@ tags: [flutter, dart, mobile, toi-noi, widget, testing]
 language: vi
 ---
 
-Thứ Hai, PM của Tới Nơi ngồi cạnh một lập trình viên đang chạy bản debug trên máy của anh ấy và nhắn: "Chữ cước to hơn một chút, thêm dòng nhắc đây là giá minh hoạ." Lập trình viên sửa hai dòng, hot reload, và màn hình đang mở đổi ngay, không phải khởi động lại app. Cảm giác đó là thứ Flutter bán, và nó dựa trên một mô hình khá cụ thể: giao diện là một cây widget được dựng lại liên tục, còn những gì thật sự nằm trên màn hình thì sống lâu hơn nhiều.
+Thứ Hai, PM của Tới Nơi ngồi cạnh một lập trình viên đang chạy bản debug trên máy của anh ấy và nhắn: "Chữ cước to hơn một chút, thêm dòng nhắc đây là giá minh hoạ." Lập trình viên sửa hai dòng, hot reload, và màn hình đang mở đổi ngay, không phải khởi động lại app. Cảm giác đó chính là điểm bán hàng của Flutter, và nó dựa trên một mô hình khá cụ thể: giao diện là một cây widget được dựng lại liên tục, còn những gì thật sự nằm trên màn hình thì sống lâu hơn nhiều.
 
-Đây là bài 07 của lộ trình **Flutter qua Tới Nơi**, bài đầu tiên của Phần 2 về giao diện. Bạn nên đã đọc [bài 06 về package toi_noi_core](/articles/dart-package-pubspec-lint-test-toi-noi-core), vì màn hình báo giá gọi `calculateFare` của package đó thay vì tự tính cước. Ta dựng `ToiNoiApp` và `QuoteScreen`, nhìn vào ba cây Widget, Element, RenderObject, xem hot reload tận dụng chúng ra sao, rồi viết widget test đầu tiên. Ví dụ lấy từ hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi), bảng giá chỉ là số minh hoạ. Nếu cần nhắc lại cách chạy app và phím `r`, `R`, xem [bài 01](/articles/flutter-va-dart-tu-source-code-den-ung-dung-toi-noi).
+Đây là bài 07 của lộ trình **Flutter qua Tới Nơi**, bài đầu tiên của Phần 2 về giao diện. Bạn nên đọc trước [bài 06 về package toi_noi_core](/articles/dart-package-pubspec-lint-test-toi-noi-core), vì màn hình báo giá gọi `calculateFare` của package đó thay vì tự tính cước. Ta dựng `ToiNoiApp` và `QuoteScreen`, nhìn vào ba cây Widget, Element, RenderObject, xem hot reload tận dụng chúng ra sao, rồi viết widget test đầu tiên. Ví dụ lấy từ hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi), bảng giá chỉ là số minh hoạ. Nếu cần nhắc lại cách chạy app và phím `r`, `R`, xem [bài 01](/articles/flutter-va-dart-tu-source-code-den-ung-dung-toi-noi).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Thứ Hai, PM của Tới Nơi ngồi cạnh một lập trình viên đang ch�
 
 ## Ba cây: Widget, Element và RenderObject
 
-Một thứ trên màn hình Flutter do ba loại đối tượng phối hợp, mỗi loại một việc (Hình 1).
+Mỗi thành phần trên màn hình Flutter do ba loại đối tượng phối hợp tạo nên, mỗi loại một việc (Hình 1).
 
 **Widget** là bản mô tả cấu hình: "ô này có padding 16, bên trong là cái kia". Widget bất biến (lớp `Widget` được đánh dấu `@immutable`) và rẻ để tạo. `QuoteScreen(distanceKm: 5)` không vẽ gì cả, nó chỉ ghi lại rằng ta muốn báo giá 5 km.
 
@@ -232,7 +232,7 @@ Hai chi tiết của code. Một, các widget con không đổi viết với `co
 
 ## Dựng lại: widget mới, Element và RenderObject sống tiếp
 
-Mỗi khi `build` chạy, ta có một cây widget mới. Framework không thay cả cây mà so từng cặp widget cũ và mới ở cùng vị trí. Quy tắc nằm trong `Element.updateChild`. Khi cả Element con cũ và widget mới đều khác null, nó có ba nhánh (Hình 3).
+Mỗi khi `build` chạy, ta có một cây widget mới. Framework không thay cả cây mà so từng cặp widget cũ và mới ở cùng vị trí. Quy tắc nằm trong `Element.updateChild`. Khi cả Element con cũ và widget mới đều khác null, hàm này có ba nhánh (Hình 3).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -305,7 +305,7 @@ Còn nhánh đầu tiên của Hình 3? Test dưới đây dùng một widget đ
       expect(_probeBuilds, 1); // cùng instance: framework bỏ qua
 ```
 
-Đây là lý do widget con không đổi nên viết `const`: cùng instance thì framework bỏ qua cả nhánh. Source của `Widget` cũng khuyên cache những widget biết chắc không đổi. Cùng test file còn một ca đảo lại: đổi con của `Directionality` từ `Text` sang `Padding` thì `canUpdate` sai và Element của dòng chữ là đối tượng mới. Quy tắc này cũng là nền cho `key` ở bài về danh sách.
+Đây là lý do widget con không đổi nên viết `const`: cùng instance thì framework bỏ qua cả nhánh. Source của `Widget` cũng khuyên cache những widget biết chắc không đổi. Cùng file test còn một test case ngược lại: đổi con của `Directionality` từ `Text` sang `Padding` thì `canUpdate` sai và Element của dòng chữ là đối tượng mới. Quy tắc này cũng là nền cho `key` ở bài về danh sách.
 
 ## Hot reload và hot restart
 
@@ -360,7 +360,7 @@ Bước cuối ứng với `Element.reassemble` trong source: nó gọi `markNee
 <figcaption>Hình 4. Hot reload nạp mã vào VM đang chạy và dựng lại cây hiện có; hot restart khởi động lại ứng dụng Dart nên mất state.</figcaption>
 </figure>
 
-Vì hot reload không chạy lại `main()` hay `initState`, có những thay đổi nó không thấy. Bảng dưới tóm tắt theo tài liệu chính thức; tài liệu cũng nói hot reload chỉ dùng được ở chế độ debug.
+Vì hot reload không chạy lại `main()` hay `initState`, có những thay đổi hot reload không thấy. Bảng dưới tóm tắt theo tài liệu chính thức; tài liệu cũng nói hot reload chỉ dùng được ở chế độ debug.
 
 | Ta sửa | Cần gì | Lý do |
 |---|---|---|
@@ -375,7 +375,7 @@ Tài liệu còn nhắc một điểm tinh tế: state cũ ghép với code mớ
 
 ## Widget test đầu tiên
 
-Test là cách nhanh nhất để biết màn hình đúng mà không cần thiết bị. `flutter_test` cung cấp `testWidgets`, truyền vào một `WidgetTester`. `pumpWidget` đặt widget ta đưa làm gốc cây rồi chạy một frame (tài liệu ghi là gọi `runApp`, còn code của `flutter_test` gọi `attachRootWidget`; tài liệu này cũng viết rằng nó ép dựng lại cả cây dù widget không đổi, nhưng bài theo kết quả đo ở mục trên: `build` của widget `const` cùng instance không chạy lại); sau đó `find` tìm widget trên cây và `expect` kiểm bằng matcher như `findsOneWidget`. Test của ca chính:
+Test là cách nhanh nhất để biết màn hình đúng mà không cần thiết bị. `flutter_test` cung cấp `testWidgets`, truyền vào một `WidgetTester`. `pumpWidget` đặt widget ta đưa làm gốc cây rồi chạy một frame (tài liệu ghi là gọi `runApp`, còn code của `flutter_test` gọi `attachRootWidget`; tài liệu này cũng viết rằng nó ép dựng lại cả cây dù widget không đổi, nhưng bài theo kết quả đo ở mục trên: `build` của widget `const` cùng instance không chạy lại); sau đó `find` tìm widget trên cây và `expect` kiểm bằng matcher như `findsOneWidget`. Test case chính:
 
 ### quote_screen_test.dart · 07-widget-man-hinh-bao-gia/test/quote_screen_test.dart (trích)
 
@@ -391,7 +391,7 @@ Test là cách nhanh nhất để biết màn hình đúng mà không cần thi�
   });
 ```
 
-`find.text` so khớp cả chuỗi, nên `find.text('25.500')` không tìm thấy gì còn `find.textContaining('25.500')` thì có. Test tiếp theo dựng `QuoteScreen` trong `MaterialApp` rồi chạy qua một bảng ca biên của chính công thức ở bài 06:
+`find.text` so khớp cả chuỗi, nên `find.text('25.500')` không tìm thấy gì còn `find.textContaining('25.500')` thì có. Test tiếp theo dựng `QuoteScreen` trong `MaterialApp` rồi chạy qua một bảng test case biên của chính công thức ở bài 06:
 
 ### quote_screen_test.dart · 07-widget-man-hinh-bao-gia/test/quote_screen_test.dart (trích)
 
@@ -414,7 +414,7 @@ Test là cách nhanh nhất để biết màn hình đúng mà không cần thi�
     }
 ```
 
-Còn `_host` chỉ bọc `QuoteScreen` bằng `MaterialApp`. Thiếu lớp bọc đó, `Scaffold` không tìm được `Directionality` và test ném `FlutterError: No Directionality widget found`; thêm `Directionality` thì lỗi kế tiếp là thiếu `MaterialLocalizations`. `Theme.of` thì có giá trị dự phòng nên không gây lỗi. Một ca nữa chứng minh nhánh `else` của màn hình: với -1, 100,5, NaN và hai vô cực, màn hình hiện thông báo thay cho cước, không có dòng "VND" nào, và `tester.takeException()` là `null`.
+Còn `_host` chỉ bọc `QuoteScreen` bằng `MaterialApp`. Thiếu lớp bọc đó, `Scaffold` không tìm được `Directionality` và test ném `FlutterError: No Directionality widget found`; thêm `Directionality` thì lỗi kế tiếp là thiếu `MaterialLocalizations`. `Theme.of` thì có giá trị dự phòng nên không gây lỗi. Một test case nữa chứng minh nhánh `else` của màn hình: với -1, 100,5, NaN và hai vô cực, màn hình hiện thông báo thay cho cước, không có dòng "VND" nào, và `tester.takeException()` là `null`.
 
 ## Lỗi thường gặp
 
@@ -423,7 +423,7 @@ Còn `_host` chỉ bọc `QuoteScreen` bằng `MaterialApp`. Thiếu lớp bọc
 <ul>
 <li><strong>Gọi hàm có thể ném lỗi ngay trong <code>build</code>.</strong> Dấu hiệu: ở debug, màn hình đỏ với thông báo lỗi; ở release, một ô xám trơn. Nguyên nhân: lỗi ném trong <code>build</code> bị framework bắt và thay widget hỏng bằng <code>ErrorWidget</code> (tài liệu của <code>ErrorWidget.builder</code> mô tả hai chế độ). Test <code>tính cước 101 km trong build ném ArgumentError</code> dựng đúng tình huống này: <code>tester.takeException()</code> trả <code>ArgumentError</code> và trên cây có một <code>ErrorWidget</code>. Cách sửa: kiểm điều kiện trước khi gọi, như <code>_isInRange</code>, rồi hiện thông báo.</li>
 <li><strong>Sửa <code>main()</code> hoặc giá trị biến toàn cục rồi chỉ hot reload.</strong> Dấu hiệu: bấm <code>r</code> báo thành công nhưng màn hình không đổi. Nguyên nhân: hot reload không chạy lại <code>main()</code> hay khởi tạo toàn cục. Cách sửa: bấm <code>R</code>; nếu vẫn không đổi thì dừng và <code>flutter run</code> lại.</li>
-<li><strong>Widget test thiếu <code>MaterialApp</code>.</strong> Dấu hiệu: <code>FlutterError: No Directionality widget found</code> khi <code>pumpWidget(const QuoteScreen(...))</code> trần. Nguyên nhân: <code>Scaffold</code> cần tổ tiên cung cấp <code>Directionality</code> và <code>MaterialLocalizations</code> (thêm <code>Directionality</code> thì lỗi kế tiếp là <code>No MaterialLocalizations found</code>); <code>Theme.of</code> có giá trị dự phòng. Cách sửa: bọc bằng <code>MaterialApp(home: ...)</code> như <code>_host</code>.</li>
+<li><strong>Widget test thiếu <code>MaterialApp</code>.</strong> Dấu hiệu: <code>FlutterError: No Directionality widget found</code> khi <code>pumpWidget(const QuoteScreen(...))</code> không bọc gì. Nguyên nhân: <code>Scaffold</code> cần tổ tiên cung cấp <code>Directionality</code> và <code>MaterialLocalizations</code> (thêm <code>Directionality</code> thì lỗi kế tiếp là <code>No MaterialLocalizations found</code>); <code>Theme.of</code> có giá trị dự phòng. Cách sửa: bọc bằng <code>MaterialApp(home: ...)</code> như <code>_host</code>.</li>
 <li><strong>Tìm chữ bằng <code>find.text</code> với một phần chuỗi.</strong> Dấu hiệu: <code>findsOneWidget</code> báo tìm thấy 0 widget dù chữ có trên màn hình. Nguyên nhân: <code>find.text</code> so khớp cả chuỗi. Cách sửa: viết đủ chuỗi ("25.500 VND") hoặc dùng <code>find.textContaining</code>.</li>
 </ul>
 </div>
@@ -443,8 +443,8 @@ flutter test --reporter expanded
 
 | Test | Chứng minh điều gì |
 |---|---|
-| `quote_screen_test.dart`, ca chính | `ToiNoiApp` mặc định 5 km hiện "Quãng đường: 5 km" và "25.500 VND", có icon và dòng nhắc giá minh hoạ |
-| `quote_screen_test.dart`, bảng ca biên | 0, 2, 2,001, 5, 100 km hiện 12.000, 12.000, 12.005, 25.500, 453.000 VND; `build` không ném |
+| `quote_screen_test.dart`, test case chính | `ToiNoiApp` mặc định 5 km hiện "Quãng đường: 5 km" và "25.500 VND", có icon và dòng nhắc giá minh hoạ |
+| `quote_screen_test.dart`, bảng test case biên | 0, 2, 2,001, 5, 100 km hiện 12.000, 12.000, 12.005, 25.500, 453.000 VND; `build` không ném |
 | `quote_screen_test.dart`, ngoài miền | -1, 100,5, NaN, hai vô cực hiện thông báo thay cước, không có `ErrorWidget` |
 | `quote_screen_test.dart`, `ToiNoiApp` và `formatKm` | `MaterialApp` Material 3, `distanceKm` đi xuống `QuoteScreen` (10 km thành 48.000 VND); `formatKm` cho "5", "2,001", không ném với NaN và vô cực |
 | `widget_tree_test.dart`, ba cây | `QuoteScreen` và `Text` là `StatelessElement`; `Padding` là `SingleChildRenderObjectElement` với `RenderPadding` 16; chữ vẽ bởi `RenderParagraph` của `RichText` |

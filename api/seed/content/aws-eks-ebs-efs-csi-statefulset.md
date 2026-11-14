@@ -10,7 +10,7 @@ language: vi
 
 Worker đối soát của Tới Nơi chạy mỗi đêm: nó đọc hàng triệu dòng `trip_events`, đối chiếu với báo cáo của cổng VíXanh và ghi một file checkpoint để lần sau chạy tiếp thay vì làm lại từ đầu. Trên ECS Fargate, file đó mất mỗi khi task bị thay. Khi chuyển sang EKS, đội dựng `reconcile` bằng Deployment và đêm đầu tiên checkpoint biến mất cùng pod. Pod là thứ dùng một lần; dữ liệu cần sống lâu hơn nó phải nằm ở nơi khác.
 
-Đây là **bài 44** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bài cần bạn đã xong [bài 43](/articles/aws-eks-vpc-cni-load-balancer-controller-ingress); lab dùng cluster và namespace đã dựng ở [bài 42](/articles/aws-eks-terraform-eksctl-kubectl-namespace). EBS ở [bài 05](/articles/aws-ec2-ami-ebs-user-data) giúp ích, nhưng bài giải thích lại phần liên quan tới Kubernetes.
+Đây là **bài 44** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bài này yêu cầu bạn đã học xong [bài 43](/articles/aws-eks-vpc-cni-load-balancer-controller-ingress); lab dùng cluster và namespace đã dựng ở [bài 42](/articles/aws-eks-terraform-eksctl-kubectl-namespace). EBS ở [bài 05](/articles/aws-ec2-ami-ebs-user-data) giúp ích, nhưng bài này vẫn giải thích lại phần liên quan tới Kubernetes.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Worker đối soát của Tới Nơi chạy mỗi đêm: nó đọc hàng triệ
 
 ## PV, PVC, StorageClass và CSI
 
-Kubernetes tách "tôi cần đĩa" khỏi "đĩa ở đâu". Pod khai một **PersistentVolumeClaim** (PVC): dung lượng, kiểu truy cập, StorageClass. **StorageClass** mô tả loại đĩa và driver nào tạo ra nó. Khi PVC xuất hiện, driver CSI tạo đĩa thật rồi sinh một **PersistentVolume** (PV) gắn với PVC đó. Quá trình tự động này là *dynamic provisioning*; bạn không tạo volume bằng tay.
+Kubernetes tách "tôi cần đĩa" khỏi "đĩa ở đâu". Pod khai báo một **PersistentVolumeClaim** (PVC): dung lượng, kiểu truy cập, StorageClass. **StorageClass** mô tả loại đĩa và driver nào tạo ra nó. Khi PVC xuất hiện, driver CSI tạo đĩa thật rồi sinh một **PersistentVolume** (PV) gắn với PVC đó. Quá trình tự động này là *dynamic provisioning*; bạn không tạo volume bằng tay.
 
 | Đối tượng | Do ai tạo | Vai trò |
 |---|---|---|
@@ -32,7 +32,7 @@ Kubernetes tách "tôi cần đĩa" khỏi "đĩa ở đâu". Pod khai một **P
 
 ## EBS CSI driver với gp3
 
-EKS không tự có driver cho EBS: bạn cài add-on `aws-ebs-csi-driver` và gắn cho nó một role IAM qua Pod Identity (service account `ebs-csi-controller-sa`, policy do AWS quản lý cho driver). Terraform của lab làm cả hai trong một resource `aws_eks_addon` có khối `pod_identity_association`. Với EKS Auto Mode, phần block storage do EKS quản lý và provisioner mang tên khác (`ebs.csi.eks.amazonaws.com`), nên StorageClass của bài này cần đổi tên provisioner.
+EKS không có sẵn driver cho EBS: bạn cài add-on `aws-ebs-csi-driver` và gắn cho nó một role IAM qua Pod Identity (service account `ebs-csi-controller-sa`, policy do AWS quản lý cho driver). Terraform của lab làm cả hai trong một resource `aws_eks_addon` có khối `pod_identity_association`. Với EKS Auto Mode, phần block storage do EKS quản lý và provisioner mang tên khác (`ebs.csi.eks.amazonaws.com`), nên StorageClass của bài này cần đổi tên provisioner.
 
 ```yaml
 apiVersion: storage.k8s.io/v1
@@ -52,7 +52,7 @@ reclaimPolicy: Delete
 
 `gp3` cho baseline IOPS và throughput không phụ thuộc dung lượng, nên đĩa 5 GiB vẫn có hiệu năng ổn; muốn hơn thì khai `iops` và `throughput`, trả thêm theo mức vượt. `encrypted` bật mã hoá bằng KMS (khoá mặc định của EBS nếu không chỉ định, bài 52 nói kỹ). `allowVolumeExpansion: true` cho phép tăng dung lượng bằng cách sửa PVC mà không cần tắt pod; chỉ tăng được, không giảm, và EBS giới hạn tần suất sửa cùng một volume.
 
-Dòng quan trọng nhất là `WaitForFirstConsumer`. EBS gắn theo AZ, nếu volume được tạo ngay khi PVC xuất hiện (kiểu `Immediate`), driver chọn một AZ trước khi scheduler biết pod sẽ chạy đâu. Kết quả có thể là volume ở AZ này còn pod buộc phải chạy ở AZ kia. `WaitForFirstConsumer` hoãn việc tạo volume tới khi scheduler đã chọn node, rồi tạo volume đúng AZ của node đó.
+Dòng quan trọng nhất là `WaitForFirstConsumer`. EBS gắn theo AZ, nên nếu volume được tạo ngay khi PVC xuất hiện (kiểu `Immediate`), driver sẽ chọn một AZ trước khi scheduler biết pod sẽ chạy đâu. Kết quả có thể là volume ở AZ này còn pod buộc phải chạy ở AZ kia. `WaitForFirstConsumer` hoãn việc tạo volume tới khi scheduler đã chọn node, rồi tạo volume đúng AZ của node đó.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -104,7 +104,7 @@ spec:
         resources: { requests: { storage: 5Gi } }
 ```
 
-Mặc định pod được tạo lần lượt theo thứ tự `0, 1, ...` và cập nhật theo thứ tự ngược lại, pod số lớn nhất trước. `partition` cho phép cập nhật có kiểm soát (chỉ pod số lớn hơn ngưỡng). `persistentVolumeClaimRetentionPolicy` quyết định PVC có bị xoá khi StatefulSet bị xoá hoặc giảm replica hay không; lab đặt `Retain` để một lệnh `scale` nhầm không xoá checkpoint. Cái giá: PVC mồ côi vẫn tính tiền. Kèm theo là PodDisruptionBudget (`maxUnavailable: 1`) để khi drain node không tắt cả hai worker cùng lúc.
+Mặc định pod được tạo lần lượt theo thứ tự `0, 1, ...` và cập nhật theo thứ tự ngược lại, pod số lớn nhất trước. `partition` cho phép cập nhật có kiểm soát (chỉ pod số lớn hơn ngưỡng). `persistentVolumeClaimRetentionPolicy` quyết định PVC có bị xoá khi StatefulSet bị xoá hoặc giảm replica hay không; lab đặt `Retain` để một lệnh `scale` nhầm không xoá checkpoint. Cái giá: PVC mồ côi vẫn tính tiền. Lab còn có PodDisruptionBudget (`maxUnavailable: 1`) để khi drain node không tắt cả hai worker cùng lúc.
 
 ## EFS cho dữ liệu dùng chung
 
@@ -118,7 +118,7 @@ EBS chỉ gắn vào một node tại một thời điểm (`ReadWriteOnce`). Kh
 | Tính tiền | Theo GB cấp phát cộng IOPS vượt mức | Theo GB thực lưu cộng throughput |
 | Hợp với | Checkpoint, WAL, dữ liệu riêng của pod | Cache dùng chung, model, file đầu vào chia sẻ |
 
-EFS tiện nhưng chậm hơn EBS với nhiều thao tác nhỏ, và đắt hơn theo GB; đừng dùng nó cho database hay thư mục build. Nếu pod chỉ cần *đọc* object từ bucket S3 như một thư mục, có thêm add-on **Mountpoint for Amazon S3 CSI driver**: tiện, nhưng không phải hệ thống file POSIX đầy đủ, phù hợp đọc nhiều hơn ghi. Tới Nơi không cần cho bài này.
+EFS tiện nhưng chậm hơn EBS với nhiều thao tác nhỏ, và đắt hơn theo GB; đừng dùng nó cho database hay thư mục build. Nếu pod chỉ cần *đọc* object từ bucket S3 như một thư mục, có thêm add-on **Mountpoint for Amazon S3 CSI driver**: tiện, nhưng không phải hệ thống file POSIX đầy đủ, phù hợp đọc nhiều hơn ghi. Tới Nơi không cần đến nó trong bài này.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -161,16 +161,16 @@ spec:
   source: { persistentVolumeClaimName: data-reconcile-0 }
 ```
 
-Snapshot chụp ở mức đĩa nên chỉ bảo đảm nhất quán khi crash (như mất điện đột ngột), không đảm bảo tính toàn vẹn ứng dụng như database đang ghi dở. Với checkpoint thì đủ. Để bảo vệ đều đặn và có lịch giữ, AWS Backup bảo vệ volume EBS theo tag, như bài 37; snapshot của Kubernetes hợp hơn cho việc chụp tức thời trước một thay đổi rủi ro. Snapshot cũng là cách chuyển dữ liệu sang AZ khác: restore thành PVC mới ở AZ cần dùng.
+Snapshot chụp ở mức đĩa nên chỉ bảo đảm nhất quán khi crash (như mất điện đột ngột), không đảm bảo tính toàn vẹn ở mức ứng dụng, ví dụ database đang ghi dở. Với checkpoint thì đủ. Để bảo vệ đều đặn và có lịch giữ, AWS Backup bảo vệ volume EBS theo tag, như bài 37; snapshot của Kubernetes hợp hơn cho việc chụp tức thời trước một thay đổi rủi ro. Snapshot cũng là cách chuyển dữ liệu sang AZ khác: restore thành PVC mới ở AZ cần dùng.
 
 ## Database có nên chạy trên EKS
 
-Kỹ thuật cho phép: operator như CloudNativePG hay Zalando Postgres Operator chạy PostgreSQL trên StatefulSet và EBS. Nhưng với Tới Nơi, cơ sở dữ liệu `trips` (730 triệu dòng mỗi năm, 560 UPDATE mỗi giây lúc cao điểm) vẫn nên ở RDS hoặc Aurora (bài 07, 31). Failover, backup liên tục, PITR, vá lỗi và nâng phiên bản là việc bạn phải tự xây và tự diễn tập nếu chạy trên EKS, trong khi dịch vụ managed đã làm sẵn. Ngoại lệ hợp lý: database tạm cho môi trường dev, hoặc đội đã có DBA thành thạo operator và lý do rõ ràng.
+Về kỹ thuật thì làm được: operator như CloudNativePG hay Zalando Postgres Operator chạy PostgreSQL trên StatefulSet và EBS. Nhưng với Tới Nơi, cơ sở dữ liệu `trips` (730 triệu dòng mỗi năm, 560 UPDATE mỗi giây lúc cao điểm) vẫn nên ở RDS hoặc Aurora (bài 07, 31). Failover, backup liên tục, PITR, vá lỗi và nâng phiên bản là việc bạn phải tự xây và tự diễn tập nếu chạy trên EKS, trong khi dịch vụ managed đã làm sẵn. Ngoại lệ hợp lý: database tạm cho môi trường dev, hoặc đội đã có DBA thành thạo operator và lý do rõ ràng.
 
 ## Cái giá phải trả
 
-- **Pod Pending vì AZ.** Volume gắn AZ; node group chỉ ở một AZ hoặc thiếu chỗ ở AZ đó thì pod chờ vô thời hạn.
-- **PVC mồ côi tính tiền.** Xoá StatefulSet nhưng PVC còn; volume `Retain` còn sau khi xoá PVC. Dọn là việc của bạn.
+- **Pod Pending vì AZ.** Volume gắn theo AZ; nếu node group chỉ ở một AZ hoặc thiếu chỗ ở AZ đó thì pod chờ vô thời hạn.
+- **PVC mồ côi tính tiền.** Xoá StatefulSet nhưng PVC vẫn còn; volume `Retain` vẫn còn sau khi xoá PVC. Dọn là việc của bạn.
 - **EFS chậm hơn kỳ vọng.** Nhiều thao tác nhỏ hoặc nhiều file nhỏ trên NFS sẽ chậm; đo trước khi chọn.
 - **Snapshot không phải bản sao lưu hoàn chỉnh.** Chúng nằm trong cùng tài khoản và region; thiếu AWS Backup hay sao chép sang nơi khác thì không phải kế hoạch khôi phục thảm hoạ.
 - **Tăng đĩa không giảm được.** Chọn dung lượng ban đầu vừa phải; mở rộng thì dễ, thu nhỏ phải tạo đĩa mới.
@@ -181,9 +181,9 @@ Kỹ thuật cho phép: operator như CloudNativePG hay Zalando Postgres Operato
 
 ## Lab: StorageClass, StatefulSet và EFS
 
-Mã ở `examples/toi-noi-aws/p05-44-eks-storage`: Terraform (add-on EBS và EFS CSI với Pod Identity, add-on `snapshot-controller`, EFS đã mã hoá, security group chỉ cho node vào cổng NFS 2049, mount target mỗi subnet), cùng manifest StorageClass gp3 và EFS, StatefulSet `reconcile`, PVC chung `photo-cache`, snapshot và restore. README ghi phần tính tiền (EBS, snapshot, EFS) và thứ tự dọn: xoá workload và PVC trước khi `destroy`, vì access point do driver tạo nằm ngoài Terraform.
+Mã ở `examples/toi-noi-aws/p05-44-eks-storage`: Terraform (add-on EBS và EFS CSI với Pod Identity, add-on `snapshot-controller`, EFS đã mã hoá, security group chỉ cho node vào cổng NFS 2049, mount target mỗi subnet), cùng manifest StorageClass gp3 và EFS, StatefulSet `reconcile`, PVC chung `photo-cache`, snapshot và restore. README ghi cách tính chi phí (EBS, snapshot, EFS) và thứ tự dọn: xoá workload và PVC trước khi `destroy`, vì access point do driver tạo nằm ngoài Terraform.
 
-Kiểm trên máy: `fmt`, `init -backend=false`, `validate` qua Docker (đã sạch) và parse YAML. **Chưa kiểm chứng trên tài khoản thật:** driver cấp được volume với các tham số đã khai, EFS access point, việc chụp snapshot và restore, và việc hai image `reconcile`, `photo-resizer` (giả định) chạy được. `kubectl apply --dry-run=client` cần cluster nên không dùng ở đây.
+Kiểm tra trên máy cục bộ: `fmt`, `init -backend=false`, `validate` qua Docker (đã sạch) và parse YAML. **Chưa kiểm chứng trên tài khoản thật:** driver cấp được volume với các tham số đã khai, EFS access point, việc chụp snapshot và restore, và việc hai image `reconcile`, `photo-resizer` (giả định) chạy được. `kubectl apply --dry-run=client` cần cluster nên không dùng ở đây.
 
 Bài trước: [bài 43](/articles/aws-eks-vpc-cni-load-balancer-controller-ingress). Bài tiếp: [bài 45](/articles/aws-eks-hpa-karpenter-spot).
 

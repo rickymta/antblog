@@ -93,7 +93,7 @@ Một lưu ý về «truthiness»: `Decimal("0")` được coi là sai trong đi
 
 ## Vòng lặp: for, range, enumerate và while
 
-`for` trong Python lặp qua một **iterable** (list, chuỗi, `range`, khóa của dict, ...), không có bộ đếm ba phần như ở C#. Muốn lặp N lần, ta dùng `range`: `range(3)` cho `0, 1, 2`; `range(0, 10, 5)` cho `0, 5`. Điểm cuối luôn bị loại trừ.
+`for` trong Python lặp qua một **iterable** (list, chuỗi, `range`, khoá của dict, ...), không có bộ đếm ba phần như ở C#. Muốn lặp N lần, ta dùng `range`: `range(3)` cho `0, 1, 2`; `range(0, 10, 5)` cho `0, 5`. Điểm cuối luôn bị loại trừ.
 
 Khi cần cả vị trí lẫn giá trị, dùng `enumerate` thay vì tự cộng biến đếm; tham số `start=1` đánh số từ 1 cho người đọc:
 
@@ -248,7 +248,7 @@ def calculate_fare(distance_km: Decimal, *, service: str = "ride") -> Decimal:
 
 Tới Nơi có ba dịch vụ `ride`, `food`, `parcel`. **Ở mô hình học tập này, cả ba dùng cùng công thức giá**: 12.000 VND cho 2 km đầu, 4.500 VND mỗi km vượt, không phụ phí, thuế, giảm giá hay hệ số giờ cao điểm. Đây là giả định để học, không phải bảng giá thật. Tham số `service` vẫn có mặt vì ba lý do: hợp đồng của hàm đã nói rõ loại chuyến, ta kiểm được giá trị lạ như `"taxi"` ngay từ bây giờ, và khi sản phẩm đổi quy tắc theo dịch vụ thì chữ ký hàm không phải đổi. Dấu `*` còn buộc người gọi viết `service="food"`, nên đọc lời gọi là biết loại chuyến.
 
-Ném `ValueError` là cách báo «đầu vào sai hợp đồng». Khác với trả `0` hay `None`, người gọi không thể vô tình xem đó là một báo giá hợp lệ. Bài 08 sẽ đào sâu `try/except`, exception tùy biến và traceback; hôm nay ta chỉ cần biết exception dừng luồng thông thường và mang theo một thông báo.
+Ném `ValueError` là cách báo «đầu vào sai hợp đồng». Khác với trả `0` hay `None`, người gọi không thể vô tình xem đó là một báo giá hợp lệ. Bài 08 sẽ đào sâu `try/except`, exception tuỳ biến và traceback; hôm nay ta chỉ cần biết exception dừng luồng thông thường và mang theo một thông báo.
 
 Chạy lab từ thư mục gốc repository:
 
@@ -278,7 +278,7 @@ Bảng cước (giả định học tập):
   7. 100.5 km  TỪ CHỐI (ngoài miền)
 ```
 
-Gần cuối, lab in ba dòng tách chuyến và ngân sách, rồi phần minh họa mặc định `list` đã trích ở trên:
+Gần cuối, lab in ba dòng tách chuyến và ngân sách, rồi phần minh hoạ mặc định `list` đã trích ở trên:
 
 ```text
 Tách 5 km food: cơ bản=12000, phần vượt=13500

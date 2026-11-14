@@ -1,0 +1,19 @@
+{"file":"postgresql-null-case-coalesce.md","edits":[
+{"old":"để tách thiếu dữ liệu, không áp dụng và số 0 thật.","new":"để phân biệt dữ liệu thiếu, giá trị không áp dụng và số 0 thật.","reason":"Lược mất danh từ, câu cụt trong summary","severity":"medium"},
+{"old":"Bài này chỉ ra cách PostgreSQL đối xử với NULL","new":"Bài này chỉ ra cách PostgreSQL xử lý NULL","reason":"'đối xử' gượng cho dữ liệu","severity":"low"},
+{"old":"Phần 2 dùng lược đồ Phần 1 với bộ dữ liệu lớn hơn","new":"Phần 2 dùng lại schema của Phần 1 với bộ dữ liệu lớn hơn","reason":"Giữ 'schema' theo thuật ngữ; câu thiếu quan hệ sở hữu","severity":"medium"},
+{"old":"nghĩa nào phải suy từ chỗ khác","new":"muốn biết là nghĩa nào thì phải suy từ chỗ khác","reason":"Câu lược, khó hiểu","severity":"medium"},
+{"old":"giá trị chân lý thứ ba","new":"giá trị chân trị thứ ba","reason":"Thống nhất với 'bảng chân trị' trong cùng bài","severity":"low"},
+{"old":"kết quả chắc chắn nếu vế đã biết đủ quyết định","new":"kết quả chắc chắn khi vế đã biết đã đủ để quyết định","reason":"Câu thiếu từ nối, trật tự kiểu Anh","severity":"medium"},
+{"old":"hễ nó xuất hiện là có chuyến đã nhận mà mất tài xế. Hôm nay nó vắng nhờ","new":"hễ nhóm này xuất hiện là có chuyến đã nhận mà mất tài xế. Hôm nay nhóm này vắng mặt nhờ","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"bị nhánh đầu bắt mất","new":"bị nhánh đầu lấy mất","reason":"'bắt mất' gượng","severity":"low"},
+{"old":"thì luôn hỏi: nhóm NULL nằm đâu?","new":"thì phải luôn tự hỏi: nhóm NULL nằm ở đâu?","reason":"Câu thiếu chủ ngữ/trợ từ, cụt","severity":"medium"},
+{"old":"Thiếu gần 36 triệu đồng, im lặng.","new":"Thiếu gần 36 triệu đồng mà không có lỗi hay cảnh báo nào.","reason":"'im lặng' là calque của 'silently'","severity":"medium"},
+{"old":"Lưu sự thật (0 đ), quyết định loại hay không ở câu truy vấn.","new":"Lưu dữ liệu thật (0 đ), còn việc loại hay không thì quyết định ở câu truy vấn.","reason":"'sự thật' calque; câu thiếu chủ ngữ","severity":"medium"},
+{"old":"để biểu đồ, cảnh báo phía sau biết «không xác định»","new":"để biểu đồ và cảnh báo phía sau biết đó là «không xác định»","reason":"Câu thiếu từ nối và động từ","severity":"medium"},
+{"old":"không bao giờ kêu cho ngày đó","new":"không bao giờ được kích hoạt cho ngày đó","reason":"'kêu' khẩu ngữ, không hợp văn kỹ thuật","severity":"low"},
+{"old":"Theo tài liệu, nó chỉ tính các đối số cần thiết","new":"Theo tài liệu, hàm này chỉ tính các đối số cần thiết","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"Chỗ đúng nhất của nó là tầng hiển thị","new":"Chỗ dùng hợp lý nhất là ở tầng hiển thị","reason":"'Chỗ đúng nhất của nó' dịch máy","severity":"medium"},
+{"old":"(chiều ngược: `IS NOT DISTINCT FROM`)","new":"(dạng phủ định: `IS NOT DISTINCT FROM`)","reason":"'chiều ngược' gượng","severity":"low"},
+{"old":"Cùng họ là","new":"Bẫy cùng loại là","reason":"'Cùng họ là' cụt, thiếu danh từ","severity":"medium"}
+]}

@@ -1,0 +1,65 @@
+{
+"file": "flutter-layout-constraints-row-column-the-chuyen.md",
+"edits": [
+{
+"old": "con không biết vị trí tuyệt đối của mình và không quyết định nó.",
+"new": "con không biết vị trí tuyệt đối của mình và không tự quyết định vị trí đó.",
+"reason": "'không quyết định nó' mơ hồ, đại từ không rõ",
+"severity": "medium"
+},
+{
+"old": "Lab tận dụng điều đó: `tester.view.physicalSize` đổi cửa sổ giả.",
+"new": "Lab tận dụng điều đó: dùng `tester.view.physicalSize` để đổi kích thước cửa sổ giả.",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "Đây là ca sai có chủ đích.",
+"new": "Đây là trường hợp sai có chủ đích.",
+"reason": "'ca' cụt, dễ lẫn với test case",
+"severity": "medium"
+},
+{
+"old": "Ca sai nhờ vậy tái hiện **ổn định**. Ca đúng là nửa kia",
+"new": "Trường hợp sai nhờ vậy tái hiện **ổn định**. Trường hợp đúng là nửa kia",
+"reason": "'ca' cụt, dễ lẫn với test case",
+"severity": "medium"
+},
+{
+"old": "Để chắc test có răng, ta thử phá mã:",
+"new": "Để chắc test thật sự bắt được lỗi, ta thử phá mã:",
+"reason": "'có răng' là calque của 'has teeth'",
+"severity": "high"
+},
+{
+"old": "phần lớn test (18 trên 31 lúc thử) của lab chuyển đỏ.",
+"new": "phần lớn test của lab (18 trên 31 lúc thử) chuyển sang đỏ.",
+"reason": "Trật tự từ gượng, 'test (18 trên 31...) của lab' tách rời",
+"severity": "low"
+},
+{
+"old": "mục cuối quay lại:",
+"new": "mục cuối sẽ nói lại về nó:",
+"reason": "'quay lại' thiếu chủ thể, không rõ quay lại cái gì",
+"severity": "medium"
+},
+{
+"old": "`maxLines: 2` và `TextOverflow.ellipsis` quyết định việc cần làm khi vẫn dài:",
+"new": "`maxLines: 2` và `TextOverflow.ellipsis` quy định cách xử lý khi chữ vẫn còn dài:",
+"reason": "'việc cần làm khi vẫn dài' thiếu chủ ngữ, gượng",
+"severity": "medium"
+},
+{
+"old": "Một ô vuông viết <code>SizedBox(width: 100, height: 100)</code> nằm trong",
+"new": "Một ô vuông dựng bằng <code>SizedBox(width: 100, height: 100)</code> nằm trong",
+"reason": "'viết' gượng khi nói về widget",
+"severity": "low"
+},
+{
+"old": "Dấu hiệu: đúng trên cả màn hình nhưng sai trong cột hẹp.",
+"new": "Dấu hiệu: bố cục đúng khi xét cả màn hình nhưng sai trong cột hẹp.",
+"reason": "Câu lược chủ ngữ, mơ hồ",
+"severity": "medium"
+}
+]
+}

@@ -17,12 +17,12 @@ Code generation giao phần lặp đó cho máy: ta khai báo trường một l�
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Server trả <code>"distanceMeters": 5000.5</code>. Một DTO sinh bằng <code>json_serializable</code> có trường <code>int distanceMeters</code>, không converter, không tuỳ chọn nào khác. <code>fromJson</code> cho kết quả gì?</p>
-<details><summary>Xem đáp án</summary><p>Trường nhận <strong>5000</strong>, không có lỗi nào. Code sinh đọc <code>int</code> bằng <code>(json['distanceMeters'] as num).toInt()</code> nên phần lẻ bị cắt thầm lặng, còn <code>TripDto</code> viết tay của bài 19 ném <code>DtoFormatException</code>. Test <code>mét lẻ 5000.5 bị cắt thành 5000 mà không báo</code> chứng minh điều này. Mục 3 liệt kê các chỗ tương tự và cách siết.</p></details>
+<details><summary>Xem đáp án</summary><p>Trường nhận <strong>5000</strong>, không có lỗi nào. Code sinh đọc <code>int</code> bằng <code>(json['distanceMeters'] as num).toInt()</code> nên phần lẻ bị cắt mà không báo lỗi, còn <code>TripDto</code> viết tay của bài 19 ném <code>DtoFormatException</code>. Test <code>mét lẻ 5000.5 bị cắt thành 5000 mà không báo</code> chứng minh điều này. Mục 3 liệt kê các chỗ tương tự và cách siết.</p></details>
 </div>
 
 ## 1. Khi nào sinh mã đáng giá
 
-`build_runner` đọc code của ta bằng analyzer, chạy các generator và ghi file mới ngay cạnh file nguồn (Hình 1). `freezed` sinh `==`, `hashCode`, `toString`, `copyWith` và các nhánh của union vào `*.freezed.dart`. `json_serializable` sinh `fromJson` và `toJson`, `riverpod_generator` sinh provider; cả hai ghi vào `*.g.dart`. Mỗi file sinh khai `part of` file nguồn, nên cùng một library: nguồn gọi được `_$TripDtoFromJson` dù tên bắt đầu bằng dấu gạch dưới.
+`build_runner` đọc code của ta bằng analyzer, chạy các generator và ghi file mới ngay cạnh file nguồn (Hình 1). `freezed` sinh `==`, `hashCode`, `toString`, `copyWith` và các nhánh của union vào `*.freezed.dart`. `json_serializable` sinh `fromJson` và `toJson`, `riverpod_generator` sinh provider; cả hai ghi vào `*.g.dart`. Mỗi file sinh khai báo `part of` file nguồn, nên cùng một library: nguồn gọi được `_$TripDtoFromJson` dù tên bắt đầu bằng dấu gạch dưới.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -55,7 +55,7 @@ Sinh mã không làm code ngắn đi. Số dòng thật trong repo, cho `QuoteDt
 | Dòng do máy viết | 0 | 708 dòng (`*.freezed.dart` và `*.g.dart` của hai DTO) |
 | `==`, `hashCode`, `copyWith`, `toString` | không có | có |
 
-Khai báo ngắn hơn một chút, nhưng quy tắc kiểm JSON vẫn phải viết (giờ nằm trong converter) và máy viết thêm 708 dòng. Thứ ta mua được là một chỗ khai báo trường thay vì năm, bốn thành viên miễn phí và union `sealed`. Theo nhận định của ta, sinh mã đáng giá khi có nhiều model đổi thường xuyên hoặc cần `copyWith`, union; với vài DTO ổn định, một `JsonReader` viết tay như bài 19 dễ đọc hơn và không cần bước build.
+Khai báo ngắn hơn một chút, nhưng quy tắc kiểm JSON vẫn phải viết (giờ nằm trong converter) và máy viết thêm 708 dòng. Thứ ta mua được là một chỗ khai báo trường thay vì năm, bốn thành viên miễn phí và union `sealed`. Theo nhận định của ta, sinh mã đáng giá khi có nhiều model đổi thường xuyên hoặc cần `copyWith` và union; với vài DTO ổn định, một `JsonReader` viết tay như bài 19 dễ đọc hơn và không cần bước build.
 
 ## 2. freezed: data class, copyWith và union sealed
 
@@ -90,7 +90,7 @@ abstract class TripDto with _$TripDto {
 
 `const TripDto._()` cho phép thêm method như `toDomain`. `@JsonKey(name: 'fare')` ánh xạ field `fareVnd` vào khoá JSON `fare`. `fromJson` nhận `Object?` vì ta bọc nó trong `decodeDto` ở mục 3.
 
-Hai `TripDto` sinh mã cùng JSON thì `==`; hai `TripDto` viết tay thì không, vì lớp đó không định nghĩa `==`. `copyWith(version: 5)` giữ `driverId`, còn `copyWith(driverId: null)` xoá nó.
+Hai `TripDto` bản sinh mã dựng từ cùng một JSON thì bằng nhau theo `==`; hai `TripDto` bản viết tay thì không, vì lớp đó không định nghĩa `==`. `copyWith(version: 5)` giữ `driverId`, còn `copyWith(driverId: null)` xoá nó.
 
 Chỗ `freezed` đáng tiền nhất là union. Màn hình báo giá có bốn trạng thái loại trừ nhau, mỗi trạng thái chỉ mang dữ liệu có nghĩa ở đó:
 
@@ -162,7 +162,7 @@ _NaiveTripDto _$NaiveTripDtoFromJson(Map<String, dynamic> json) =>
     );
 ```
 
-Mỗi dòng là một quyết định mà `JsonReader` của bài 19 quyết định khác. Kết quả test trên cùng một JSON:
+Mỗi dòng là một quyết định mà `JsonReader` của bài 19 đã quyết định theo cách khác. Kết quả test trên cùng một JSON:
 
 | JSON đầu vào | Bản viết tay | Bản mặc định |
 |---|---|---|
@@ -175,7 +175,7 @@ Mỗi dòng là một quyết định mà `JsonReader` của bài 19 quyết đ�
 | `id` là số, hoặc thiếu `id` | `DtoFormatException` | `TypeError` |
 | `serviceKind: "RIDE"` | nhận | `ArgumentError` (chặt hơn) |
 
-Trên cả bảng ca, bản viết tay từ chối 35 ca JSON object sai; bản mặc định nhận thầm lặng 16 ca, ném `TypeError` ở 13 ca và lỗi khác ở 6 ca. Ví dụ cho ngày tràn:
+Trên cả bảng test case, bản viết tay từ chối 35 test case JSON object sai; bản mặc định nhận mà không báo lỗi 16 test case, ném `TypeError` ở 13 test case và lỗi khác ở 6 test case. Ví dụ cho ngày tràn:
 
 ### naive_dto_test.dart · 26-codegen/test/naive_dto_test.dart (trích)
 
@@ -193,7 +193,7 @@ Trên cả bảng ca, bản viết tay từ chối 35 ca JSON object sai; bản 
     });
 ```
 
-`TypeError` là `Error`, không phải `Exception`: `toApiFailure` của bài 20 ném lại nguyên, nên body thiếu `id` làm app lỗi thay vì thành `ParseFailure`.
+`TypeError` là `Error`, không phải `Exception`: `toApiFailure` của bài 20 ném lại nguyên, nên body thiếu `id` làm app lỗi thay vì trở thành `ParseFailure`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -219,7 +219,7 @@ Trên cả bảng ca, bản viết tay từ chối 35 ca JSON object sai; bản 
 <figcaption>Hình 2. Cùng một JSON đi qua hai bản. Mũi tên chỉ chiều xử lý, từ trên xuống. Cột trái kết thúc bằng một con số sai mà không ai biết; cột phải kết thúc bằng một lỗi có tên DTO, tên trường và nơi hiển thị.</figcaption>
 </figure>
 
-Hai công cụ để siết. `checked: true` trong `build.yaml` làm lỗi `fromJson` mang tên khoá (`CheckedFromJsonException`) thay vì `TypeError` trần. `JsonConverter` là lớp có `const` constructor, gắn vào field bằng annotation. Converter cho mét và số phiên bản:
+Hai công cụ để siết. `checked: true` trong `build.yaml` khiến lỗi của `fromJson` mang tên khoá (`CheckedFromJsonException`) thay vì `TypeError` trần. `JsonConverter` là lớp có `const` constructor, gắn vào field bằng annotation. Converter cho mét và số phiên bản:
 
 ### converters.dart · 26-codegen/lib/dto/converters.dart (trích)
 
@@ -251,7 +251,7 @@ final class NonNegativeIntConverter implements JsonConverter<int, Object?> {
 }
 ```
 
-`toApiFailure` không hiểu `CheckedFromJsonException`, nên `decodeDto` dịch nó về `DtoFormatException`; phần còn lại của app không biết DTO nào do tay viết, DTO nào do máy sinh:
+`toApiFailure` không hiểu `CheckedFromJsonException`, nên `decodeDto` dịch nó về `DtoFormatException`; phần còn lại của app không biết DTO nào viết tay, DTO nào do máy sinh:
 
 ### decode.dart · 26-codegen/lib/dto/decode.dart (trích)
 
@@ -276,7 +276,7 @@ T decodeDto<T>(
 }
 ```
 
-Converter chỉ canh **biên JSON**. `copyWith(fareVnd: -1)` lọt qua constructor nhưng bị `toDomain` chặn. `copyWith(distanceMeters: -5)` lọt cả `toDomain`: ra `Trip` dài -0,005 km, chỉ `fromJson(toJson())` mới bắt được. `copyWith(currency: 'USD')` đi qua cả `toJson` lẫn `toDomain`, trong khi bản viết tay luôn ghi `VND`. Mỗi điều có một test riêng.
+Converter chỉ kiểm soát **biên JSON**. `copyWith(fareVnd: -1)` lọt qua constructor nhưng bị `toDomain` chặn. `copyWith(distanceMeters: -5)` lọt cả `toDomain`: ra `Trip` dài -0,005 km, chỉ `fromJson(toJson())` mới bắt được. `copyWith(currency: 'USD')` đi qua cả `toJson` lẫn `toDomain`, trong khi bản viết tay luôn ghi `VND`. Mỗi điều có một test riêng.
 
 ## 4. Chứng minh hai bản cùng hành vi trên cùng một JSON
 
@@ -307,11 +307,11 @@ Object outcome(Object? Function() decode) {
     }
 ```
 
-Bảng ca có 47 ca cho `TripDto`: 8 hợp lệ (cước `25500.0`, tên enum hoa thường, độ lệch `+07:00`, khoá thừa...) và 39 sai (thiếu khoá, sai kiểu, âm, lẻ, ngày tràn, không phải object), thêm 13 ca cho `QuoteDto`. Một test riêng đếm đúng 8 ca được nhận, để bảng không thể thành toàn ca lỗi mà vẫn xanh.
+Bảng so sánh có 47 test case cho `TripDto`: 8 hợp lệ (cước `25500.0`, tên enum hoa thường, độ lệch `+07:00`, khoá thừa...) và 39 sai (thiếu khoá, sai kiểu, âm, lẻ, ngày tràn, không phải object), thêm 13 test case cho `QuoteDto`. Một test riêng đếm đúng 8 test case được nhận, để bảng không thể thành toàn test case lỗi mà vẫn xanh.
 
 Hai DTO cũng đọc body thật của `tools/fake_api` và cho cùng kết quả: 5 km là 25.500 VND, 2,001 km là 12.005 VND, tính bằng `calculateFare`. `DioQuoteSource` đổi lỗi thành `ApiFailure`: 404 thành `ClientFailure`, 500 thành `ServerFailure`, cước lẻ thành `ParseFailure` ở trường `fare`.
 
-Giới hạn. Bằng chứng chỉ phủ các ca đã liệt kê, và test chỉ so tên DTO và trường chứ không so câu chữ. Khi một JSON có hai lỗi cùng lúc, tên trường có thể khác: bản viết tay luôn kiểm `currency` trước, bản sinh mã báo trường đầu theo thứ tự khai báo, nên JSON thiếu `currency` và `id` được báo là `currency` và `id` (một test ghi lại điều này). Và converter lặp lại quy tắc của `JsonReader` vì `JsonReader` không nằm trong API công khai của `toi_noi_api`: một quy tắc, hai nơi giữ, và test so sánh là thứ báo động khi hai nơi lệch nhau.
+Giới hạn. Bằng chứng chỉ phủ các test case đã liệt kê, và test chỉ so tên DTO và trường chứ không so câu chữ. Khi một JSON có hai lỗi cùng lúc, tên trường có thể khác: bản viết tay luôn kiểm `currency` trước, bản sinh mã báo trường đầu theo thứ tự khai báo, nên JSON thiếu `currency` và `id` được báo là `currency` và `id` (một test ghi lại điều này). Và converter lặp lại quy tắc của `JsonReader` vì `JsonReader` không nằm trong API công khai của `toi_noi_api`: một quy tắc, hai nơi giữ, và test so sánh là thứ báo động khi hai nơi lệch nhau.
 
 ## 5. riverpod_generator: viết hàm, sinh provider
 
@@ -368,7 +368,7 @@ Future<TripSnapshot> tripSnapshot(Ref ref, String id) async {
 }
 ```
 
-Tên provider sinh từ tên hàm hoặc class, và hậu tố `Notifier` bị bỏ (ta đã thử: class `FooNotifier` sinh `fooProvider`, hàm `barNotifier` sinh `barProvider`). Ở lab: `quoteSourceProvider`, `quoteControllerProvider`, `tripSnapshotProvider`. Mặc định provider là auto-dispose; `@Riverpod(keepAlive: true)` tắt nó. Hàm có tham số ngoài `Ref` thành family: `tripSnapshotProvider('T-1')` và `('T-2')` có state riêng. Test đọc các cờ do generator sinh:
+Tên provider sinh từ tên hàm hoặc class, và hậu tố `Notifier` bị bỏ (ta đã thử: class `FooNotifier` sinh `fooProvider`, hàm `barNotifier` sinh `barProvider`). Ở lab: `quoteSourceProvider`, `quoteControllerProvider`, `tripSnapshotProvider`. Mặc định provider là auto-dispose; `@Riverpod(keepAlive: true)` tắt nó. Hàm có tham số ngoài `Ref` trở thành family: `tripSnapshotProvider('T-1')` và `('T-2')` có state riêng. Test đọc các cờ do generator sinh:
 
 ### providers_test.dart · 26-codegen/test/providers_test.dart (trích)
 
@@ -421,7 +421,7 @@ dart run build_runner build
 dart run build_runner watch
 ```
 
-Cờ `--delete-conflicting-outputs` (hay `-d`) trong nhiều hướng dẫn cũ đã bị gỡ ở `build_runner` 2.17.1: lệnh in `These options have been removed and were ignored` rồi vẫn chạy. Lần chạy đầu biên dịch builder mất 131 giây trên máy kiểm, các lần sau 5 đến 20 giây (bậc độ lớn, lúc máy còn nhiều tiến trình khác).
+Cờ `--delete-conflicting-outputs` (hay `-d`) trong nhiều hướng dẫn cũ đã bị gỡ ở `build_runner` 2.17.1: lệnh in `These options have been removed and were ignored` rồi vẫn chạy. Lần chạy đầu biên dịch builder mất 131 giây trên máy chạy kiểm chứng, các lần sau 5 đến 20 giây (bậc độ lớn, lúc máy còn nhiều tiến trình khác).
 
 Tuỳ chọn generator đặt trong `build.yaml`; lab bật `checked`:
 
@@ -453,7 +453,7 @@ Lab chọn commit để `flutter test` xanh từ trạng thái sạch (`generate
 dart run build_runner build --only-check
 ```
 
-Cờ này không ghi, không xoá, chỉ so kết quả mong đợi với đĩa: sạch thì mã thoát 0; đổi nguồn hoặc sửa tay file sinh mà chưa sinh lại thì mã thoát 1 và in tên file lệch. Nó không cần cây git sạch. Ta đã thử cả ba tình huống và xác nhận file sinh không bị ghi. Cách phụ là `dart run build_runner build && git diff --exit-code -- lib`, nhưng nó ghi đè file và `git diff` không thấy file chưa theo dõi.
+Cờ này không ghi, không xoá, chỉ so kết quả mong đợi với đĩa: sạch thì mã thoát 0; đổi nguồn hoặc sửa tay file sinh mà chưa sinh lại thì mã thoát 1 và in tên file lệch. Lệnh này không cần cây git sạch. Ta đã thử cả ba tình huống và xác nhận file sinh không bị ghi. Cách phụ là `dart run build_runner build && git diff --exit-code -- lib`, nhưng cách này ghi đè file và `git diff` không thấy file chưa theo dõi.
 
 Một rủi ro lab không chặn được: `.gitignore` của lab bỏ `pubspec.lock`, còn generator khai bằng caret (`freezed: ^4.0.3`). Clone sạch có thể giải ra bản vá mới mà bản vá đổi code sinh, nên lệnh kiểm đỏ giả dù không ai sửa gì (suy từ changelog, ta chưa tái hiện). Dự án thật nên commit `pubspec.lock` và chạy `flutter pub get --enforce-lockfile` trong CI; lab giữ quy ước không commit lock của loạt bài.
 
@@ -506,7 +506,7 @@ analyzer:
 <li><strong>Quên chạy <code>build_runner</code> hoặc quên commit file sinh.</strong> Dấu hiệu: analyzer báo <code>uri_has_not_been_generated</code>, hoặc biên dịch báo <code>Undefined name '_$TripDtoFromJson'</code>. Cách sửa: chạy <code>build</code>, commit file sinh, chạy <code>build --only-check</code> trong CI. Khi hai nhánh cùng sửa nguồn, đừng merge file sinh bằng tay: hợp nhất nguồn rồi sinh lại.</li>
 <li><strong>Lớp <code>freezed</code> thiếu <code>abstract</code> hoặc <code>sealed</code>.</strong> Dấu hiệu: <code>non_abstract_class_inherits_abstract_member</code> ở lớp một biến thể, hoặc <code>non_exhaustive_switch_expression</code> ở mọi <code>switch</code> trên union. Cách sửa: thêm từ khoá đúng.</li>
 <li><strong>Tin rằng <code>fromJson</code> sinh ra là an toàn.</strong> Dấu hiệu: <code>distanceMeters</code> hay <code>fare</code> mất phần lẻ, ngày <code>2026-13-45</code> thành <code>2027-02-14</code>, <code>TypeError</code> chui ra tận UI. Nguyên nhân: code sinh theo kiểu Dart, không theo hợp đồng API. Cách sửa: converter, <code>checked: true</code>, <code>decodeDto</code> và test so sánh.</li>
-<li><strong>Nghĩ converter canh cả constructor.</strong> Dấu hiệu: <code>copyWith(distanceMeters: -5)</code> chạy được và <code>toDomain</code> trả <code>Trip</code> dài -0,005 km. Nguyên nhân: converter chỉ chạy trong <code>fromJson</code> và <code>toJson</code>. Cách sửa: chặn ở biên JSON và kiểm bất biến trong domain, đừng coi DTO là nơi giữ bất biến nghiệp vụ.</li>
+<li><strong>Nghĩ converter kiểm soát cả constructor.</strong> Dấu hiệu: <code>copyWith(distanceMeters: -5)</code> chạy được và <code>toDomain</code> trả <code>Trip</code> dài -0,005 km. Nguyên nhân: converter chỉ chạy trong <code>fromJson</code> và <code>toJson</code>. Cách sửa: chặn ở biên JSON và kiểm bất biến trong domain, đừng coi DTO là nơi giữ bất biến nghiệp vụ.</li>
 </ul>
 </div>
 
@@ -549,7 +549,7 @@ Còn hai điều chưa đạt: backend của lab là fake API (trip-service .NET
 3. Thêm nhánh `QuoteScreenState.offline()` vào union. Chuyện gì xảy ra với `quote_screen.dart` và `quote_state_test.dart`?
 
 <details><summary>Xem lời giải</summary>
-<p><strong>1.</strong> Một chỗ: thêm <code>String? note,</code> vào <code>factory TripDto</code>. Chạy <code>dart run build_runner build</code> rồi commit cả file sinh. Chạy <code>flutter test</code> mà chưa build thì không biên dịch được. Sau khi build, ta đã thử và có 11 test đỏ: 8 ca hợp lệ của <code>dto_parity_test.dart</code>, 2 test <code>toJson</code> của <code>dto_behaviour_test.dart</code> và test <code>đặt chuyến, đọc lại, tài xế nhận</code> của <code>fake_api_json_test.dart</code>, vì <code>toJson</code> của bản sinh thêm khoá <code>note: null</code> mà bản viết tay không có. Hai bản không còn cùng hợp đồng cho tới khi bản viết tay sửa theo.</p>
+<p><strong>1.</strong> Một chỗ: thêm <code>String? note,</code> vào <code>factory TripDto</code>. Chạy <code>dart run build_runner build</code> rồi commit cả file sinh. Chạy <code>flutter test</code> mà chưa build thì không biên dịch được. Sau khi build, ta đã thử và có 11 test đỏ: 8 test case hợp lệ của <code>dto_parity_test.dart</code>, 2 test <code>toJson</code> của <code>dto_behaviour_test.dart</code> và test <code>đặt chuyến, đọc lại, tài xế nhận</code> của <code>fake_api_json_test.dart</code>, vì <code>toJson</code> của bản sinh thêm khoá <code>note: null</code> mà bản viết tay không có. Hai bản không còn cùng hợp đồng cho tới khi bản viết tay sửa theo.</p>
 <p><strong>2.</strong> Bản mặc định ném <code>TypeError</code>; bản có converter ném <code>FormatException</code>, thành <code>ParseFailure</code> ở trường <code>fare</code>. Để nhận chuỗi, thêm nhánh <code>json is String</code> với <code>int.tryParse</code> vào <code>WholeVndConverter</code>, vẫn từ chối số âm hoặc quá 2^53. Ca <code>cước là chuỗi</code> trong bảng so sánh sẽ đỏ vì bản viết tay vẫn từ chối: đổi hợp đồng thì đổi cả hai bên.</p>
 <p><strong>3.</strong> Sau khi chạy lại <code>build_runner</code>, ta đã thử và analyzer báo ba lỗi: <code>non_exhaustive_switch_expression</code> ở <code>switch</code> trong <code>quote_screen.dart</code>, cùng lỗi đó ở hàm <code>describe</code> trong <code>quote_state_test.dart</code>, và <code>missing_required_argument</code> (thiếu tham số <code>offline</code>) ở lời gọi <code>state.when</code> của test <code>when và map vẫn có</code>. <code>_describe(ApiFailure)</code> không đổi vì nó <code>switch</code> trên <code>ApiFailure</code>.</p>
 </details>

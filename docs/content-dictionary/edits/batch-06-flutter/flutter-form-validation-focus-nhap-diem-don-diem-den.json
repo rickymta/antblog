@@ -1,0 +1,10 @@
+{"file":"flutter-form-validation-focus-nhap-diem-don-diem-den.md","edits":[
+{"old":"Test chạy tức thì và ca biên liệt kê bằng một danh sách thay vì dựng cây widget.","new":"Test chạy tức thì, và các test case biên chỉ cần liệt kê trong một danh sách thay vì dựng cây widget.","reason":"Câu cụt, thiếu động từ; thống nhất 'test case'","severity":"medium"},
+{"old":"chặn nó, và test có ca này.","new":"chặn nó, và có test case cho trường hợp này.","reason":"'test có ca này' cụt","severity":"medium"},
+{"old":"ca biên `100,01` đỏ.","new":"test case biên `100,01` đỏ.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Hiện lỗi quá sớm thì khách thấy mình bị la ngay chữ đầu;","new":"Hiện lỗi quá sớm thì khách thấy mình bị báo lỗi ngay từ ký tự đầu tiên;","reason":"'bị la' quá khẩu ngữ, không chính xác","severity":"medium"},
+{"old":"source Flutter 3.47.4 có năm chế độ:","new":"mã nguồn Flutter 3.47.4 có năm chế độ:","reason":"'source' có từ Việt tự nhiên","severity":"low"},
+{"old":"Đặt `autovalidateMode` ở `Form` khác ở từng field:","new":"Đặt `autovalidateMode` ở `Form` khác với đặt ở từng field:","reason":"Câu thiếu vế so sánh","severity":"medium"},
+{"old":"gọi `focusNode.nextFocus()` (source `EditableText`).","new":"gọi `focusNode.nextFocus()` (mã nguồn `EditableText`).","reason":"'source' có từ Việt tự nhiên","severity":"low"},
+{"old":"Ô nhận focus trong vùng cuộn được `EditableText` cuộn vào vùng nhìn thấy, chừa `scrollPadding` (mặc định 20 điểm ảnh); `keyboardDismissBehavior: onDrag` cho kéo để hạ bàn phím.","new":"Khi một ô nhận focus trong vùng cuộn được, `EditableText` cuộn ô đó vào vùng nhìn thấy, chừa `scrollPadding` (mặc định 20 điểm ảnh); `keyboardDismissBehavior: onDrag` cho phép kéo để hạ bàn phím.","reason":"Câu đầu khó phân tách chủ vị, trật tự từ kiểu tiếng Anh","severity":"medium"}
+]}

@@ -1,0 +1,9 @@
+{"file":"ba-defect-change-cau-hoi-mo.md","edits":[
+{"old":"Kiểm môi trường/dữ liệu có đúng không.","new":"Kiểm tra xem môi trường và dữ liệu có đúng không.","reason":"Lược động từ kiểm tra","severity":"medium"},
+{"old":"cần sửa điều kiện kiểm trước khi","new":"cần sửa điều kiện kiểm tra trước khi","reason":"Lược chữ tra","severity":"medium"},
+{"old":"dù ca khó gặp.","new":"dù trường hợp đó khó gặp.","reason":"ca ở đây không phải test case, gây khó hiểu","severity":"medium"},
+{"old":"Định nghĩa thang dùng chung trong dự án; đừng áp nhãn P1/P2 khi mỗi đội hiểu khác.","new":"Hãy định nghĩa thang dùng chung trong dự án; đừng áp nhãn P1/P2 khi mỗi đội hiểu một kiểu.","reason":"Câu cụt, thiếu động từ dẫn","severity":"medium"},
+{"old":"tác động, owner và bước tiếp.","new":"tác động, người phụ trách và bước tiếp.","reason":"owner thành người phụ trách","severity":"medium"},
+{"old":"không owner có thể chặn UAT","new":"không có người phụ trách có thể chặn UAT","reason":"owner thành người phụ trách","severity":"medium"},
+{"old":"prototype lại không có thông báo stale.","new":"nhưng prototype không có thông báo stale.","reason":"lại gượng, thiếu liên từ đối lập","severity":"medium"}
+]}

@@ -29,7 +29,7 @@ Offset đã commit là con trỏ «group đã xử lý xong tới đâu» trên 
 
 Sổ cái chọn dòng dưới: trùng thì chặn được bằng `idempotency_key` ([bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key)), còn mất thì không ai biết để sửa. Bài không hứa «exactly-once»: at-least-once cộng ghi idempotent cho hiệu ứng trên sổ cái đúng một lần.
 
-`enable.auto.commit=false` trong `src/kafka.rs` tắt commit nền (mặc định bật, và có thể commit offset của thông điệp chưa xử lý xong). `enable.auto.offset.store` để mặc định không ảnh hưởng, vì lab commit tường minh từng thông điệp; muốn commit theo lô thì bật lại commit nền, đặt nó `false` và gọi `store_offset` sau khi ghi. `auto.offset.reset=earliest` cho group chưa có offset đọc từ đầu; với mặc định `latest`, consumer chết trước lần commit đầu tiên sẽ không nhận lại thông điệp đó. Producer bật `enable.idempotence` (kéo theo `acks=all`) để librdkafka gửi lại khi lỗi tạm thời mà không sinh bản trùng hay đảo thứ tự; chỉ bảo vệ trong một phiên producer, không thay việc khử trùng ở bên nhận.
+`enable.auto.commit=false` trong `src/kafka.rs` tắt commit nền (mặc định bật, và có thể commit offset của thông điệp chưa xử lý xong). `enable.auto.offset.store` để mặc định không ảnh hưởng, vì lab commit tường minh từng thông điệp; muốn commit theo lô thì bật lại commit nền, đặt nó `false` và gọi `store_offset` sau khi ghi. `auto.offset.reset=earliest` cho group chưa có offset đọc từ đầu; với mặc định `latest`, consumer chết trước lần commit đầu tiên sẽ không nhận lại thông điệp đó. Producer bật `enable.idempotence` (kéo theo `acks=all`) để librdkafka gửi lại khi lỗi tạm thời mà không sinh bản trùng hay đảo thứ tự; chỉ bảo vệ trong một phiên producer, không thay việc khử trùng lặp ở bên nhận.
 
 ```rust
 // src/kafka.rs (rút gọn)
@@ -102,7 +102,7 @@ LedgerEntryPosted trên topic đầu ra: 2 sự kiện
 
 `Some(1)` là offset của thông điệp **sẽ đọc tiếp**: `commit_message` commit offset thông điệp cộng 1, và vì đó là con trỏ nên nó chốt luôn mọi offset thấp hơn của partition. Lần chạy 3 chờ được gán partition rồi mới đếm hai giây im lặng.
 
-Nhưng topic đầu ra có **hai** sự kiện `LedgerEntryPosted` cùng key `trip:TN-0001:capture`. Replay vẫn phát lại vì lần phát trước có thể chưa tới nơi, nên bên nhận cũng phải khử trùng bằng `idempotencyKey`. Gốc là dual-write: ghi sổ và phát Kafka không chung transaction; bài 37 giải bằng outbox.
+Nhưng topic đầu ra có **hai** sự kiện `LedgerEntryPosted` cùng key `trip:TN-0001:capture`. Replay vẫn phát lại vì lần phát trước có thể chưa tới nơi, nên bên nhận cũng phải khử trùng lặp bằng `idempotencyKey`. Gốc là dual-write: ghi sổ và phát Kafka không chung transaction; bài 37 giải bằng outbox.
 
 ## Chọn key thế nào khi một bút toán chạm ba tài khoản?
 
@@ -183,7 +183,7 @@ Số partition là trần song song (consumer thứ năm của topic 4 partition
 
 ## Thông điệp hỏng hoặc version lạ có được làm kẹt partition không?
 
-Sự kiện của loạt là JSON camelCase và luôn mang `schemaVersion`. Consumer đọc `schemaVersion` **trước**, chỉ đọc phần còn lại khi hiểu version đó. Trường lạ trong cùng version được bỏ qua, nên thêm trường tùy chọn không làm hỏng consumer cũ; đổi tên, xoá hoặc đổi nghĩa trường thì phải tăng version. Thông điệp v2 báo «version 2 chưa hỗ trợ», không phải «thiếu trường».
+Sự kiện của loạt là JSON camelCase và luôn mang `schemaVersion`. Consumer đọc `schemaVersion` **trước**, chỉ đọc phần còn lại khi hiểu version đó. Trường lạ trong cùng version được bỏ qua, nên thêm trường tuỳ chọn không làm hỏng consumer cũ; đổi tên, xoá hoặc đổi nghĩa trường thì phải tăng version. Thông điệp v2 báo «version 2 chưa hỗ trợ», không phải «thiếu trường».
 
 ```rust
 // src/events.rs
@@ -238,7 +238,7 @@ Vậy phải thử lại tại chỗ, `seek` về offset đó, hoặc thoát đ�
 
 Confluent.Kafka, client Kafka phổ biến của .NET, cũng bọc librdkafka (lab dùng librdkafka 2.12.1 đi kèm `rdkafka-sys`). Vì vậy tên cấu hình gần như nguyên: `EnableAutoCommit`, `AutoOffsetReset`, `EnableIdempotence`, `Partitioner` ứng với `enable.auto.commit`, `auto.offset.reset`, `enable.idempotence`, `partitioner`, và mặc định cũng là `consistent_random`. Một lần kiểm riêng ngoài lab bằng Confluent.Kafka 2.12.0, topic 6 partition, cho đúng các partition Rust in ở trên với cả hai cấu hình (cùng key UTF-8, cùng số partition). Producer Java thì bài không chạy.
 
-Khác nhau ở mô hình lập trình. Phía .NET, `IConsumer<TKey, TValue>.Consume(...)` chặn một thread (nhận timeout hoặc `CancellationToken`) nên vòng đọc thường nằm trong `BackgroundService` ([bài .NET về BackgroundService và Channel](/articles/dotnet10-backgroundservice-channel)), và `consumer.Commit(result)` là commit thủ công, cũng lưu offset cộng 1. Phía Rust, `recv()` là future, hủy được bằng `tokio::time::timeout`. `ProduceAsync` ứng với `FutureProducer::send`. Ý tưởng «ghi rồi commit, chặn trùng bằng khóa» giống hệt, xem [Outbox và Inbox trong .NET](/articles/dotnet10-outbox-inbox-idempotent-consumer). Phần mô hình lập trình dựa vào tài liệu của hai thư viện.
+Khác nhau ở mô hình lập trình. Phía .NET, `IConsumer<TKey, TValue>.Consume(...)` chặn một thread (nhận timeout hoặc `CancellationToken`) nên vòng đọc thường nằm trong `BackgroundService` ([bài .NET về BackgroundService và Channel](/articles/dotnet10-backgroundservice-channel)), và `consumer.Commit(result)` là commit thủ công, cũng lưu offset cộng 1. Phía Rust, `recv()` là future, huỷ được bằng `tokio::time::timeout`. `ProduceAsync` ứng với `FutureProducer::send`. Ý tưởng «ghi rồi commit, chặn trùng bằng khoá» giống hệt, xem [Outbox và Inbox trong .NET](/articles/dotnet10-outbox-inbox-idempotent-consumer). Phần mô hình lập trình dựa vào tài liệu của hai thư viện.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -261,7 +261,7 @@ cargo test --manifest-path examples/toi-noi-rust/36-kafka-rdkafka/Cargo.toml
 
 **Bài tập:** bút toán đảo của `trip:TN-0001:capture` có key `trip:TN-0001:capture:reversal` và cũng chạm ba tài khoản. Nếu topic `ledger.entry-posted` dùng `idempotencyKey` làm key partition, điều gì có thể xảy ra với thứ tự giữa bút toán gốc và bút toán đảo? Sửa thế nào?
 
-<details><summary>Xem lời giải</summary><p>Hai chuỗi key khác nhau thì hash khác nhau, nên hai sự kiện có thể rơi vào hai partition và bên nhận có thể thấy bút toán đảo trước bút toán gốc (lập luận, lab không chạy trường hợp này). Cách sửa: chọn key là định danh ổn định của chuỗi sự kiện (ở đây là <code>tripId</code>) thay vì khóa idempotency của từng bút toán; hoặc để bên nhận chịu được sự kiện đến sớm bằng cách giữ lại rồi thử lại.</p></details>
+<details><summary>Xem lời giải</summary><p>Hai chuỗi key khác nhau thì hash khác nhau, nên hai sự kiện có thể rơi vào hai partition và bên nhận có thể thấy bút toán đảo trước bút toán gốc (lập luận, lab không chạy trường hợp này). Cách sửa: chọn key là định danh ổn định của chuỗi sự kiện (ở đây là <code>tripId</code>) thay vì khoá idempotency của từng bút toán; hoặc để bên nhận chịu được sự kiện đến sớm bằng cách giữ lại rồi thử lại.</p></details>
 
 Bài trước: [bài 35](/articles/rust-tonic-grpc-get-balance-post-entry-interop-dotnet). Bài tiếp: [bài 37](/articles/rust-outbox-inbox-idempotent-consumer).
 

@@ -22,9 +22,9 @@ Bài này tách việc nối mạng cho ứng dụng thành hai chiều, rồi d
 
 Một ứng dụng giao tiếp theo hai hướng, và mỗi hướng cần câu trả lời riêng. **Outbound**: `trip-service` gọi PostgreSQL, Key Vault, nhà cung cấp bên ngoài. **Inbound**: khách, tài xế và các service khác gọi vào `trip-service`.
 
-Với outbound, App Service dùng **VNet integration**: instance của app được gắn vào một subnet được delegate cho App Service, nên lời gọi ra tới địa chỉ private trong VNet đi từ subnet đó. Nó không biến app thành thứ nằm trong VNet và không đóng cổng vào. Container Apps đơn giản hơn: environment được đặt thẳng vào subnet bạn chọn, nên traffic ra của mọi app trong environment đều đi từ subnet đó mà không cần thêm bước.
+Với outbound, App Service dùng **VNet integration**: instance của app được gắn vào một subnet được delegate cho App Service, nên lời gọi ra tới địa chỉ private trong VNet đi từ subnet đó. Cơ chế này không biến app thành thứ nằm trong VNet và không đóng cổng vào. Container Apps đơn giản hơn: environment được đặt thẳng vào subnet bạn chọn, nên traffic ra của mọi app trong environment đều đi từ subnet đó mà không cần thêm bước.
 
-Với inbound, App Service dùng **private endpoint** (bài 17) để app có một IP private trong VNet, hoặc access restriction để lọc theo IP. Container Apps chọn lúc tạo environment, và không đổi được sau đó: **external** (có IP công cộng) hoặc **internal** (chỉ có IP private trong VNet). Environment workload profiles còn cho gắn private endpoint như App Service; kiểm trạng thái hỗ trợ trong tài liệu trước khi dựa vào nó. Trong environment internal, ingress đặt `external` nghĩa là «mở cho toàn VNet», còn ingress `internal` nghĩa là chỉ app khác trong cùng environment gọi được. Hai chữ trùng tên nhưng khác phạm vi, đây là chỗ dễ đọc nhầm.
+Với inbound, App Service dùng **private endpoint** (bài 17) để app có một IP private trong VNet, hoặc access restriction để lọc theo IP. Với Container Apps, bạn chọn chế độ ngay lúc tạo environment và không đổi được sau đó: **external** (có IP công cộng) hoặc **internal** (chỉ có IP private trong VNet). Environment workload profiles còn cho gắn private endpoint như App Service; kiểm tra trạng thái hỗ trợ trong tài liệu trước khi dựa vào tính năng này. Trong environment internal, ingress đặt `external` nghĩa là «mở cho toàn VNet», còn ingress `internal` nghĩa là chỉ app khác trong cùng environment gọi được. Hai chữ trùng tên nhưng khác phạm vi, đây là chỗ dễ đọc nhầm.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -35,7 +35,7 @@ Với inbound, App Service dùng **private endpoint** (bài 17) để app có m�
 
 ## Application Gateway v2 ghép sáu thành phần thành một đường vào
 
-Application Gateway là bộ cân bằng tải ở tầng L7: nó hiểu HTTP, đọc host và path, rồi quyết định gửi tới đâu. Cấu hình của nó gồm các mảnh nối vào nhau, và hầu hết lỗi 502 đến từ việc hai mảnh không khớp:
+Application Gateway là bộ cân bằng tải ở tầng L7: gateway hiểu HTTP, đọc host và path, rồi quyết định gửi tới đâu. Cấu hình gateway gồm các mảnh nối vào nhau, và hầu hết lỗi 502 đến từ việc hai mảnh không khớp:
 
 | Thành phần | Việc nó làm | Lỗi thường gặp |
 | --- | --- | --- |
@@ -48,7 +48,7 @@ Application Gateway là bộ cân bằng tải ở tầng L7: nó hiểu HTTP, �
 
 **URL path routing** cho phép một gateway phục vụ nhiều service: ví dụ `/api/quotes/*` tới pool của Pricing & Quote, `/api/trips/*` tới pool của Trip. Mỗi pool có HTTP setting và probe riêng. **WAF_v2** là SKU gắn thêm một WAF policy (bài 18); nguyên tắc vẫn là chạy Detection trước, đọc log, rồi mới chuyển Prevention.
 
-Hai chi tiết cơ chế đáng nhớ. Thứ nhất, probe là nguồn sự thật về sức khoẻ backend: nếu mọi backend bị đánh dấu unhealthy, gateway trả 502 cho khách dù các app vẫn đang chạy. Dùng đúng `/health/ready` của `trip-service`, thứ đã kiểm database và migration (xem [bài triển khai AWS và Azure](/articles/dotnet10-aws-azure-deployment)), thay vì trang chủ. Thứ hai, **host header** quyết định Container Apps ingress route tới app nào, nên HTTP setting phải gửi đúng tên miền của app, thường bằng cách lấy host name từ backend pool.
+Hai chi tiết cơ chế đáng nhớ. Thứ nhất, probe là nguồn dữ liệu gốc về sức khoẻ backend: nếu mọi backend bị đánh dấu unhealthy, gateway trả 502 cho khách dù các app vẫn đang chạy. Dùng đúng `/health/ready` của `trip-service`, thứ đã kiểm tra database và migration (xem [bài triển khai AWS và Azure](/articles/dotnet10-aws-azure-deployment)), thay vì trang chủ. Thứ hai, **host header** quyết định Container Apps ingress route tới app nào, nên HTTP setting phải gửi đúng tên miền của app, thường bằng cách lấy host name từ backend pool.
 
 ### TLS: kết thúc ở gateway hay đi hết tới ứng dụng
 
@@ -67,11 +67,11 @@ Mẫu cho Tới Nơi: Internet vào Application Gateway (WAF) ở `snet-gateway`
 <figcaption>Hình 2. Mẫu đầy đủ: Internet, Application Gateway WAF, Container Apps internal, PostgreSQL private; bên dưới là egress qua Firewall và private DNS.</figcaption>
 </figure>
 
-Hai bẫy khi ghép mẫu. Subnet của gateway v2 phải dành riêng cho gateway và cần NSG cho phép các cổng quản lý của Azure; route `0.0.0.0/0` của spoke không nên gắn nguyên xi vào subnet này, vì gateway có yêu cầu riêng về đường ra (kiểm tài liệu). Ở phía Container Apps, UDR trên subnet environment chỉ được hỗ trợ với environment loại workload profiles (loại mặc định khi tạo mới bằng CLI hiện nay), không với environment Consumption-only cũ; Firewall cũng phải cho phép các FQDN mà nền tảng cần, nên đọc tài liệu networking của Container Apps trước khi gắn route.
+Hai bẫy khi ghép mẫu. Subnet của gateway v2 phải dành riêng cho gateway và cần NSG cho phép các cổng quản lý của Azure; route `0.0.0.0/0` của spoke không nên gắn nguyên xi vào subnet này, vì gateway có yêu cầu riêng về đường ra (kiểm tra tài liệu). Ở phía Container Apps, UDR trên subnet environment chỉ được hỗ trợ với environment loại workload profiles (loại mặc định khi tạo mới bằng CLI hiện nay), không với environment Consumption-only cũ; Firewall cũng phải cho phép các FQDN mà nền tảng cần, nên đọc tài liệu networking của Container Apps trước khi gắn route.
 
 ## DNS quyết định gateway có tìm thấy backend không
 
-Environment internal không có DNS công khai. Nó có một **default domain** dạng `<tên>.<vùng>.azurecontainerapps.io` và một IP tĩnh trong subnet. Để tên của app phân giải ra IP đó trong VNet, bạn tạo **private DNS zone** mang đúng tên default domain, thêm bản ghi A wildcard `*` trỏ về IP tĩnh, và link zone vào VNet (như bài 17).
+Environment internal không có DNS công khai. Environment này có một **default domain** dạng `<tên>.<vùng>.azurecontainerapps.io` và một IP tĩnh trong subnet. Để tên của app phân giải ra IP đó trong VNet, bạn tạo **private DNS zone** mang đúng tên default domain, thêm bản ghi A wildcard `*` trỏ về IP tĩnh, và link zone vào VNet (như bài 17).
 
 Nếu quên bước này, app vẫn chạy khoẻ nhưng gateway không phân giải được FQDN của backend, probe fail và khách thấy 502. Với tên nội bộ đẹp hơn như `trips.dev.toinoi.example`, bạn làm một private zone riêng và thêm custom domain cho app, kèm chứng chỉ khớp tên. Cũng như bài 17, câu hỏi chẩn đoán đầu tiên là: tên này đang ra IP nào, nhìn từ subnet của gateway.
 
@@ -88,7 +88,7 @@ Front Door (bài 28) là lựa chọn ở rìa toàn cầu: edge gần khách, t
 
 ## Lab: Application Gateway trước Container Apps internal
 
-Mục tiêu: environment `cae-toinoi-dev` ở chế độ internal trong `snet-app`, Application Gateway v2 trong `snet-gateway` với probe `/health/ready`, kiểm bằng curl qua public IP của gateway. Giả sử đã có `rg-toinoi-net-dev-sea` và `vnet-toinoi-dev-sea` (bài 6), và `snet-app` (`/24`, đủ so với mức tối thiểu `/27` của environment workload profiles) đang trống để dành riêng cho environment (xoá VM lab cũ nếu còn). Khối đầu tạo environment internal và private DNS zone cho nó; nó không chứng minh DNS đã đúng.
+Mục tiêu: environment `cae-toinoi-dev` ở chế độ internal trong `snet-app`, Application Gateway v2 trong `snet-gateway` với probe `/health/ready`, kiểm tra bằng curl qua public IP của gateway. Giả sử đã có `rg-toinoi-net-dev-sea` và `vnet-toinoi-dev-sea` (bài 6), và `snet-app` (`/24`, đủ so với mức tối thiểu `/27` của environment workload profiles) đang trống để dành riêng cho environment (xoá VM lab cũ nếu còn). Khối lệnh đầu tiên tạo environment internal và private DNS zone cho environment đó; khối này không chứng minh DNS đã đúng.
 
 ```bash
 RG=rg-toinoi-net-dev-sea
@@ -145,7 +145,7 @@ az network application-gateway create -g $RG \
   --http-settings-protocol Http --servers $APP_FQDN
 ```
 
-Cuối cùng gắn probe `/health/ready`, cho HTTP setting lấy host header từ backend, rồi kiểm sức khoẻ và gọi thử bằng curl:
+Cuối cùng gắn probe `/health/ready`, cho HTTP setting lấy host header từ backend, rồi kiểm tra sức khoẻ và gọi thử bằng curl:
 
 ```bash
 az network application-gateway probe create -g $RG \
@@ -166,11 +166,11 @@ PIP=$(az network public-ip show -g $RG -n pip-toinoi-agw-dev-sea \
 curl -i http://$PIP/health/ready
 ```
 
-Kỳ vọng: backend health là `Healthy` và curl nhận `200`. Điều này chỉ chứng minh đường gateway tới app và probe hoạt động; nó chưa chứng minh WAF chặn đúng, TLS đúng, hay app gọi được PostgreSQL private (cần kiểm riêng ở bài 17 và bài PostgreSQL). Xong lab, xoá resource group để dừng tính tiền gateway.
+Kỳ vọng: backend health là `Healthy` và curl nhận `200`. Điều này chỉ chứng minh đường gateway tới app và probe hoạt động; điều này chưa chứng minh WAF chặn đúng, TLS đúng, hay app gọi được PostgreSQL private (cần kiểm tra riêng ở bài 17 và bài PostgreSQL). Xong lab, xoá resource group để dừng tính tiền gateway.
 
-**Bài tập:** `show-backend-health` trả `Unhealthy`, curl trả 502, trong khi từ VM trong cùng VNet `curl` thẳng tới FQDN của app thì thành công. Bạn kiểm gì trước?
+**Bài tập:** `show-backend-health` trả `Unhealthy`, curl trả 502, trong khi từ VM trong cùng VNet `curl` thẳng tới FQDN của app thì thành công. Bạn kiểm tra gì trước?
 
-<details><summary>Xem lời giải</summary><p>Kiểm DNS từ góc nhìn gateway: private zone đã link vào đúng VNet chưa, wildcard có trỏ về IP tĩnh chưa. Sau đó kiểm host header của HTTP setting (đã lấy từ backend pool chưa) và đường dẫn probe (app có trả 200 ở `/health/ready` không, và có redirect HTTP sang HTTPS làm probe fail không). NSG của `snet-gateway` và `snet-app` là chỗ kiểm cuối.</p></details>
+<details><summary>Xem lời giải</summary><p>Kiểm tra DNS từ góc nhìn của gateway: private zone đã link vào đúng VNet chưa, wildcard có trỏ về IP tĩnh chưa. Sau đó kiểm host header của HTTP setting (đã lấy từ backend pool chưa) và đường dẫn probe (app có trả 200 ở `/health/ready` không, và có redirect HTTP sang HTTPS làm probe fail không). NSG của `snet-gateway` và `snet-app` là chỗ kiểm tra cuối cùng.</p></details>
 
 ## Học tiếp từ đây
 

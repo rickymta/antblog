@@ -1,0 +1,9 @@
+{"file":"checklist-based-testing.md","edits":[
+{"old":"smoke trước release, kiểm sau khi deploy, kiểm một màn hình mới.","new":"smoke trước release, kiểm thử sau khi deploy, kiểm thử một màn hình mới.","reason":"'kiểm' cụt, thiếu 'thử'","severity":"medium"},
+{"old":"Trong bài, <b>smoke</b> theo nghĩa thông dụng của ngành: một lượt kiểm nhanh, nông nhưng rộng","new":"Trong bài, <b>smoke</b> được hiểu theo nghĩa thông dụng của ngành: một lượt kiểm thử nhanh, nông nhưng rộng","reason":"Câu thiếu động từ; 'kiểm' cụt","severity":"medium"},
+{"old":"vốn từ ngành hàng không và y tế, được Gawande","new":"vốn xuất phát từ ngành hàng không và y tế, được Gawande","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"«≥ 95% ca test đạt?»","new":"«≥ 95% test case đạt?»","reason":"'ca test' là cụm tự ghép; dùng 'test case'","severity":"medium"},
+{"old":"SM-18 không tự nghĩ ra: nó đến từ cụm defect","new":"SM-18 không tự nghĩ ra: mục này đến từ cụm defect","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"low"},
+{"old":"Smoke tự động chạy ở pipeline; checklist người không lặp lại","new":"Smoke tự động chạy ở pipeline; checklist dành cho người không lặp lại các mục này","reason":"'checklist người' là cụm tự ghép, câu cụt","severity":"medium"},
+{"old":"Viết mục checklist cho v1.2 và nói nó thuộc read-do hay do-confirm.","new":"Viết mục checklist cho v1.2 và cho biết mục đó thuộc read-do hay do-confirm.","reason":"Tránh 'nó' chỉ sự vật; 'nói' gượng","severity":"low"}
+]}

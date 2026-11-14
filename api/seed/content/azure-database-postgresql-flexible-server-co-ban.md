@@ -20,9 +20,9 @@ Bài này đưa database `toi_noi` của `trip-service` lên Azure Database for 
 
 ## Managed không có nghĩa là hết việc
 
-Ở bài 7 Tới Nơi chạy API trên một VM Linux. Nếu cài PostgreSQL lên chính VM đó, bạn tự lo mọi tầng: vá hệ điều hành, nâng bản PostgreSQL, cấu hình backup, kiểm tra backup có restore được không, theo dõi ổ đĩa đầy. Làm đúng thì rẻ và toàn quyền. Làm sai một lần thì bảng `trips` mất, và không ai ở Azure chịu trách nhiệm thay bạn.
+Ở bài 7 Tới Nơi chạy API trên một VM Linux. Nếu cài PostgreSQL lên chính VM đó, bạn tự lo mọi tầng: vá hệ điều hành, nâng phiên bản PostgreSQL, cấu hình backup, kiểm tra backup có restore được không, theo dõi ổ đĩa đầy. Làm đúng thì rẻ và có toàn quyền kiểm soát. Làm sai một lần thì bảng `trips` mất, và không ai ở Azure chịu trách nhiệm thay bạn.
 
-Một ghi chú về tên gọi: Single Server, mô hình cũ, đã nghỉ hưu, nên Flexible Server giờ là mô hình triển khai duy nhất và tài liệu mới thường chỉ gọi là «Azure Database for PostgreSQL». Bài này vẫn dùng chữ Flexible Server để khớp tên lệnh `az postgres flexible-server`.
+Một ghi chú về tên gọi: Single Server, mô hình cũ, đã ngừng hỗ trợ, nên Flexible Server giờ là mô hình triển khai duy nhất và tài liệu mới thường chỉ gọi là «Azure Database for PostgreSQL». Bài này vẫn dùng chữ Flexible Server để khớp tên lệnh `az postgres flexible-server`.
 
 Flexible Server chuyển các tầng thấp sang Microsoft: máy chủ vật lý, hệ điều hành, bản vá PostgreSQL minor, backup tự động, khả năng khôi phục về một thời điểm. Bạn nhận lại một endpoint PostgreSQL chuẩn, nên Npgsql và EF Core của `trip-service` chạy không cần sửa code.
 
@@ -31,7 +31,7 @@ Cái bạn vẫn sở hữu: thiết kế bảng, index (ví dụ `IX_trips_Cust
 | Việc | PostgreSQL tự cài trên VM (bài 7) | Flexible Server |
 | --- | --- | --- |
 | Vá hệ điều hành và PostgreSQL | Bạn lên lịch, bạn chịu rủi ro khi vá | Dịch vụ làm trong cửa sổ bảo trì bạn chọn |
-| Backup và khôi phục | Tự viết script, tự kiểm restore | Có sẵn, PITR về server mới |
+| Backup và khôi phục | Tự viết script, tự kiểm tra restore | Có sẵn, PITR về server mới |
 | Quyền trên máy chủ | Root, cài gì cũng được | Không có shell, chỉ tham số được phép |
 | Khi server hỏng | Bạn dựng lại từ backup của chính bạn | Dịch vụ lo hạ tầng; HA là tuỳ chọn tính tiền thêm |
 
@@ -51,14 +51,14 @@ Khi tạo server bạn chọn ba thứ độc lập: compute tier, dung lượng
 | Tier | Hợp với | Điều cần biết |
 | --- | --- | --- |
 | Burstable | Dev, lab, tải nhẹ và thưa | CPU chạy theo cơ chế credit: đủ credit thì nhanh, cạn credit thì bị kìm lại |
-| General Purpose | Hầu hết workload production | Tỷ lệ CPU/RAM cân bằng, là điểm bắt đầu thường gặp của môi trường staging, prod |
+| General Purpose | Hầu hết workload production | Tỷ lệ CPU/RAM cân bằng, là điểm khởi đầu thường gặp cho môi trường staging và prod |
 | Memory Optimized | Query nặng, working set lớn | RAM nhiều hơn trên mỗi vCore, tính tiền cao hơn tương ứng |
 
 Môi trường `dev` của Tới Nơi chọn Burstable vì chỉ có vài lập trình viên gọi API. Đây là lựa chọn theo tải thật, không theo thói quen: nếu bạn load-test và thấy CPU credit cạn, đó là tín hiệu để lên General Purpose. Tên SKU cụ thể (ví dụ `Standard_B1ms`) và các phiên bản PostgreSQL đang được hỗ trợ thay đổi theo thời gian và theo region. Hãy liệt kê bằng `az postgres flexible-server list-skus` thay vì tin một bài viết.
 
-Storage là dung lượng bạn cấp trước. Nó mở rộng được nhưng không thu nhỏ lại, nên cấp vừa đủ rồi tăng khi cần. IOPS khả dụng phụ thuộc dung lượng cấp và giới hạn của compute tier, vì vậy một server nhỏ có thể nghẽn ở I/O dù CPU còn rảnh. Số cụ thể tra trong tài liệu của dịch vụ.
+Storage là dung lượng bạn cấp trước. Dung lượng này mở rộng được nhưng không thu nhỏ lại được, nên cấp vừa đủ rồi tăng khi cần. IOPS khả dụng phụ thuộc dung lượng cấp và giới hạn của compute tier, vì vậy một server nhỏ có thể nghẽn ở I/O dù CPU còn rảnh. Số cụ thể tra trong tài liệu của dịch vụ.
 
-Về backup: dịch vụ sao lưu tự động và giữ theo retention, mặc định 7 ngày và chỉnh được tới tối đa 35 ngày, lúc tạo hay sau đó đều được. Point-in-time restore (PITR) cho phép bạn khôi phục về một thời điểm trong khoảng retention, nhưng kết quả là **một server mới**, không ghi đè server cũ. Ứng dụng phải được trỏ lại sang server mới. Backup tự động không thay bài tập restore thử định kỳ.
+Về backup: dịch vụ sao lưu tự động và giữ theo retention, mặc định 7 ngày và chỉnh được tới tối đa 35 ngày, lúc tạo hay sau đó đều được. Point-in-time restore (PITR) cho phép bạn khôi phục về một thời điểm trong khoảng retention, nhưng kết quả là **một server mới**, không ghi đè server cũ. Bạn phải trỏ ứng dụng sang server mới. Backup tự động không thay thế được việc diễn tập restore định kỳ.
 
 ## Public access hay private access
 
@@ -67,7 +67,7 @@ Có hai cách để client tới được server:
 - **Public access**: server có hostname công khai dạng `<tên>.postgres.database.azure.com`. Ai cũng phân giải được tên, nhưng chỉ IP nằm trong firewall rule mới được nối vào.
 - **Private access (VNet integration)**: server đặt trong một subnet của VNet ở bài 6, không có đường vào từ Internet. Chỉ resource trong VNet hoặc mạng được nối tới VNet mới gọi được.
 
-Bài này dùng public access với firewall rule cho đúng một IP của máy lab, vì lab cần ít bước nhất. Production của Tới Nơi sẽ không dừng ở đây: Phần 2 đưa database vào mạng riêng để `trip-service` trên Container Apps nói chuyện với nó mà không đi qua Internet. Cần biết một ràng buộc: kiểu kết nối chọn lúc tạo server. Server private access (VNet integration, cần subnet delegate riêng) không chuyển qua lại với public access tại chỗ được. Server public access thì có thể thêm private endpoint sau (bài 17) và tắt public access. Vì vậy hãy quyết kiểu mạng cho prod trước khi tạo server, đừng coi lab này là khuôn cho prod.
+Bài này dùng public access với firewall rule cho đúng một IP của máy lab, vì lab cần ít bước nhất. Production của Tới Nơi sẽ không dừng ở đây: Phần 2 đưa database vào mạng riêng để `trip-service` trên Container Apps nói chuyện với nó mà không đi qua Internet. Cần biết một ràng buộc: kiểu kết nối chọn lúc tạo server. Server private access (VNet integration, cần subnet delegate riêng) không thể chuyển qua lại với public access ngay trên server đang có. Server public access thì có thể thêm private endpoint sau (bài 17) và tắt public access. Vì vậy hãy chốt kiểu mạng cho prod trước khi tạo server, đừng coi lab này là khuôn cho prod.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -80,11 +80,11 @@ Bài này dùng public access với firewall rule cho đúng một IP của máy
 
 Flexible Server mặc định yêu cầu kết nối TLS. Nhưng "có mã hoá" chưa phải "đúng server". Với `sslmode=require`, client mã hoá đường truyền nhưng không kiểm chứng chứng chỉ, nên kẻ đứng giữa vẫn có thể giả mạo server. `verify-full` bắt client kiểm hai điều: chứng chỉ do một CA tin cậy ký, và hostname trong chứng chỉ khớp hostname bạn gọi.
 
-Hệ quả thực tế: client phải có file root CA mà Azure dùng để ký chứng chỉ server. Tại thời điểm viết, tài liệu TLS liệt kê hai root CA (DigiCert Global Root G2 và Microsoft RSA Root CA 2017); file PEM của bạn nên chứa cả hai, và chỉ chứa root, không chứa intermediate. Bộ CA này đã từng đổi và có thể đổi nữa, nên hãy tải theo trang TLS trên Microsoft Learn (xem «Tài liệu gốc») và lưu cùng lịch rà soát. Đó cũng là lý do production API của `trip-service` đòi `SslMode=VerifyFull` (xem [bài 36 của loạt C#](/articles/dotnet10-aws-azure-deployment)).
+Hệ quả thực tế: client phải có file root CA mà Azure dùng để ký chứng chỉ server. Tại thời điểm viết, tài liệu TLS liệt kê hai root CA (DigiCert Global Root G2 và Microsoft RSA Root CA 2017); file PEM của bạn nên chứa cả hai, và chỉ chứa root, không chứa intermediate. Bộ CA này đã từng đổi và có thể đổi nữa, nên hãy tải theo trang TLS trên Microsoft Learn (xem «Tài liệu gốc») và đặt lịch rà soát lại định kỳ. Đó cũng là lý do production API của `trip-service` đòi `SslMode=VerifyFull` (xem [bài 36 của loạt C#](/articles/dotnet10-aws-azure-deployment)).
 
 ## Lab: server, database, firewall và kết nối
 
-Mục tiêu: có `psql-toinoi-dev-sea` chạy tier Burstable, database `toi_noi`, và một đường vào từ IP của bạn. Tên server phải duy nhất trong cả vùng DNS `postgres.database.azure.com`, nên nếu trùng hãy thêm hậu tố. Mật khẩu admin nhập qua `read -s` (cú pháp bash, như Cloud Shell), không gõ thẳng vào lệnh để khỏi nằm trong history. Tránh ký tự `;` trong mật khẩu vì nó làm vỡ connection string ở mục sau.
+Mục tiêu: có `psql-toinoi-dev-sea` chạy tier Burstable, database `toi_noi`, và một đường vào từ IP của bạn. Tên server phải duy nhất trong cả vùng DNS `postgres.database.azure.com`, nên nếu trùng hãy thêm hậu tố. Mật khẩu admin nhập qua `read -s` (cú pháp bash, như Cloud Shell), không gõ thẳng vào lệnh để khỏi nằm trong history. Tránh ký tự `;` trong mật khẩu vì ký tự này làm vỡ connection string ở mục sau.
 
 ```bash
 RG=rg-toinoi-data-dev-sea
@@ -109,7 +109,7 @@ az postgres flexible-server db create \
   --name toi_noi
 ```
 
-Khối này tạo resource group, server và database, đồng thời thêm firewall rule cho `MY_IP` qua `--public-access`. `--version 17` là một major version đang được hỗ trợ lúc viết; danh sách hiện hành nằm trong `--help` của lệnh và `list-skus` cho region của bạn. Nó chưa chứng minh bạn nối được vào server, và tên tham số có thể khác theo bản Azure CLI, hãy chạy `az postgres flexible-server create --help` để đối chiếu. Nếu IP của bạn đổi, thêm rule mới:
+Khối này tạo resource group, server và database, đồng thời thêm firewall rule cho `MY_IP` qua `--public-access`. `--version 17` là một major version đang được hỗ trợ lúc viết; danh sách hiện hành nằm trong `--help` của lệnh và `list-skus` cho region của bạn. Lệnh trên chưa chứng minh bạn nối được vào server, và tên tham số có thể khác tuỳ phiên bản Azure CLI, hãy chạy `az postgres flexible-server create --help` để đối chiếu. Nếu IP của bạn đổi, thêm rule mới:
 
 ```bash
 az postgres flexible-server firewall-rule create \
@@ -130,7 +130,7 @@ Nếu lệnh in ra phiên bản PostgreSQL thì đường mạng, firewall, TLS 
 
 ## Chạy migration của trip-service
 
-Migration của `examples/toi-noi-dotnet/31-38-trip-service` tạo bảng `trips`, `requests` và `outbox`. Repo có sẵn project `Migrator` đọc chuỗi kết nối từ biến môi trường `ConnectionStrings__Trips` và gọi `MigrateAsync`. Nó tương đương `dotnet ef database update` nhưng không cần cài công cụ `dotnet-ef` và không in chuỗi kết nối. Lưu ý không tạo bảng `trips` bằng tay qua psql trước: migration sẽ cố `CREATE TABLE trips` lần nữa và thất bại, còn bảng `__EFMigrationsHistory` không biết bảng bạn tự tạo. psql ở đây chỉ dùng để kiểm kết quả.
+Migration của `examples/toi-noi-dotnet/31-38-trip-service` tạo bảng `trips`, `requests` và `outbox`. Repo có sẵn project `Migrator` đọc chuỗi kết nối từ biến môi trường `ConnectionStrings__Trips` và gọi `MigrateAsync`. Project này tương đương `dotnet ef database update` nhưng không cần cài công cụ `dotnet-ef` và không in chuỗi kết nối. Lưu ý không tạo bảng `trips` bằng tay qua psql trước: migration sẽ cố `CREATE TABLE trips` lần nữa và thất bại, còn bảng `__EFMigrationsHistory` không biết bảng bạn tự tạo. psql ở đây chỉ dùng để kiểm tra kết quả.
 
 ```bash
 export ConnectionStrings__Trips="Host=$SERVER.postgres.database.azure.com;\
@@ -145,11 +145,11 @@ psql "host=$SERVER.postgres.database.azure.com dbname=toi_noi \
   -c '\d trips' -c 'select count(*) from trips;'
 ```
 
-Nếu `\d trips` liệt kê các cột như `Fare`, `Status`, `Version` và chỉ mục `IX_trips_CustomerId_CreatedAt`, migration đã áp dụng. Việc này không chứng minh API chạy được trên Azure và không kiểm quyền của các role: lab dùng tài khoản admin cho nhanh, còn thực tế phải tách role migration và role runtime theo README của service.
+Nếu `\d trips` liệt kê các cột như `Fare`, `Status`, `Version` và chỉ mục `IX_trips_CustomerId_CreatedAt`, migration đã áp dụng. Việc này không chứng minh API chạy được trên Azure và không kiểm tra quyền của các role: lab dùng tài khoản admin cho nhanh, còn thực tế phải tách role migration và role runtime theo README của service.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Server đang chạy là tính tiền theo giờ cho compute và theo dung lượng cấp cho storage, kể cả khi không ai truy vấn. Firewall rule mở cho IP nhà hoặc văn phòng cũng là một cánh cửa Internet thật. Đừng bao giờ thêm rule <code>0.0.0.0 - 255.255.255.255</code> để "chữa" lỗi kết nối. Xong lab, xoá toàn bộ resource group (<code>az group delete --name rg-toinoi-data-dev-sea --yes</code>) và kiểm tra lại danh sách resource. Dừng server (<code>az postgres flexible-server stop</code>) chỉ ngừng tính compute; storage và backup vẫn bị tính, và server tự khởi động lại sau 7 ngày nếu bạn không bật lại sớm hơn.</p>
+<p>Server đang chạy là tính tiền theo giờ cho compute và theo dung lượng cấp cho storage, kể cả khi không ai truy vấn. Firewall rule mở cho IP nhà hoặc văn phòng cũng là một cánh cửa mở ra Internet thật sự. Đừng bao giờ thêm rule <code>0.0.0.0 - 255.255.255.255</code> để "chữa" lỗi kết nối. Xong lab, xoá toàn bộ resource group (<code>az group delete --name rg-toinoi-data-dev-sea --yes</code>) và kiểm tra lại danh sách resource. Dừng server (<code>az postgres flexible-server stop</code>) chỉ ngừng tính compute; storage và backup vẫn bị tính, và server tự khởi động lại sau 7 ngày nếu bạn không bật lại sớm hơn.</p>
 </div>
 
 ## Hai tham số server đáng chỉnh sớm
@@ -165,9 +165,9 @@ az postgres flexible-server parameter set \
   --name log_min_duration_statement --value 500
 ```
 
-Lệnh này đặt ngưỡng 500 ms. Nó không đẩy log về nơi nào cả: muốn truy vấn log tập trung, bạn cấu hình diagnostic setting, việc của bài 10. Một số tham số cần restart server mới có hiệu lực, hãy xem cột trạng thái trước khi đổi giờ cao điểm.
+Lệnh này đặt ngưỡng 500 ms. Lệnh này không đẩy log về nơi nào cả: muốn truy vấn log tập trung, bạn cấu hình diagnostic setting, việc của bài 10. Một số tham số cần restart server mới có hiệu lực, hãy xem cột trạng thái trước khi đổi, nhất là vào giờ cao điểm.
 
-Về `max_connections`, bài toán là phép nhân. `trip-service` trong `cloud/main.bicep` của bài 36 loạt C# chạy tối đa 3 replica, mỗi replica có connection pool của Npgsql với `Maximum Pool Size` riêng. Nếu mỗi pool cho phép 100 connection, 3 replica có thể đòi 300, vượt xa trần của một server Burstable nhỏ. Hậu quả không phải API chậm đi mà là lỗi từ chối connection ngay lúc tải lên. Hãy đặt pool size từ trần của server chia cho số replica tối đa, trừ phần dự phòng cho migration và công cụ quản trị. Chi tiết bộ đệm connection phía server tra trong tài liệu của dịch vụ.
+Về `max_connections`, bài toán là phép nhân. `trip-service` trong `cloud/main.bicep` của bài 36 loạt C# chạy tối đa 3 replica, mỗi replica có connection pool của Npgsql với `Maximum Pool Size` riêng. Nếu mỗi pool cho phép 100 connection, 3 replica có thể đòi 300, vượt xa trần của một server Burstable nhỏ. Hậu quả không phải API chậm đi mà là lỗi từ chối connection ngay lúc tải lên. Hãy tính pool size bằng trần của server chia cho số replica tối đa, sau khi trừ phần dự phòng cho migration và công cụ quản trị. Chi tiết bộ đệm connection phía server tra trong tài liệu của dịch vụ.
 
 **Bài tập:** `trip-service` đặt pool tối đa 40 connection mỗi replica, tối đa 3 replica, và server cho phép 100 connection trong đó có khoảng 15 dành cho dịch vụ và quản trị. Cấu hình này có an toàn khi scale đủ 3 replica không? Sửa thế nào?
 
@@ -177,7 +177,7 @@ Về `max_connections`, bài toán là phép nhân. `trip-service` trong `cloud/
 
 Bạn vừa tạo một PostgreSQL managed ở Southeast Asia, mở firewall tối thiểu, kết nối bằng `verify-full` và đưa schema `trips` của Tới Nơi lên Azure bằng migration có sẵn. Public access chỉ là chỗ đứng tạm của lab. Ở Phần 2 server sẽ chuyển vào mạng riêng.
 
-Còn một câu hỏi chưa có lời: nếu `trips` đầy storage hoặc server cạn connection lúc 2 giờ sáng thì ai biết? [Bài 10](/articles/azure-monitor-metrics-activity-log-alert-dau-tien) dựng Azure Monitor và alert đầu tiên để trả lời. Muốn xem code service, đọc lại [bài 36](/articles/dotnet10-aws-azure-deployment) và [bài 21](/articles/dotnet10-efcore-postgresql-mapping-migration).
+Còn một câu hỏi chưa có lời đáp: nếu `trips` đầy storage hoặc server cạn connection lúc 2 giờ sáng thì ai biết? [Bài 10](/articles/azure-monitor-metrics-activity-log-alert-dau-tien) dựng Azure Monitor và alert đầu tiên để trả lời. Muốn xem code service, đọc lại [bài 36](/articles/dotnet10-aws-azure-deployment) và [bài 21](/articles/dotnet10-efcore-postgresql-mapping-migration).
 
 ## Tài liệu gốc
 

@@ -1,0 +1,10 @@
+{"file":"aws-eks-vpc-cni-load-balancer-controller-ingress.md","edits":[
+{"old":"security group for pods; Service Connect so sánh.","new":"security group for pods; so sánh với Service Connect.","reason":"Trật tự từ kiểu Anh trong summary","severity":"medium"},
+{"old":"Chỉ node tạo mới hưởng cấu hình này, nên sau đó phải luân chuyển node.","new":"Chỉ node tạo mới nhận cấu hình này, nên sau đó phải thay node.","reason":"'hưởng', 'luân chuyển' gượng","severity":"medium"},
+{"old":"Đừng bật nó khi chưa cần: nó đổi cách đếm IP","new":"Đừng bật custom networking khi chưa cần: tính năng này đổi cách đếm IP","reason":"Tránh 'nó' chỉ sự vật, nhắc lại danh từ","severity":"medium"},
+{"old":"cho pod lấy IP từ vùng `100.64.0.0/16` thêm vào VPC.","new":"cho pod lấy IP từ dải `100.64.0.0/16` được thêm vào VPC.","reason":"'vùng' dễ lẫn với region/AZ; câu thiếu động từ","severity":"low"},
+{"old":"Nó cần quyền IAM, và với Pod Identity","new":"Controller cần quyền IAM, và với Pod Identity","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"Helm values đặt `clusterName`, `region` và `vpcId` tường minh vì pod","new":"Helm values đặt `clusterName`, `region` và `vpcId` rõ ràng vì pod","reason":"'tường minh' gượng","severity":"low"},
+{"old":"đội platform sở hữu Gateway, đội service sở hữu route.","new":"đội platform phụ trách Gateway, đội service phụ trách route.","reason":"'sở hữu' là calque của own","severity":"medium"},
+{"old":"Hết IP làm pod Pending.","new":"Hết IP khiến pod bị Pending.","reason":"Trật tự câu gượng","severity":"low"}
+]}

@@ -1,0 +1,18 @@
+{"file":"flutter-hieu-nang-rebuild-isolate-devtools.md","edits":[
+{"old":"cha thành `StatelessWidget` không nghe gì.","new":"cha trở thành `StatelessWidget` không nghe gì.","reason":"Câu lược động từ 'trở thành'","severity":"high"},
+{"old":"nên im lặng đúng lúc, còn","new":"nên không kích hoạt build lại khi giá trị không đổi, còn","reason":"'im lặng đúng lúc' là calque, mơ hồ","severity":"medium"},
+{"old":"Hàng giữa tinh hơn lời khuyên thường nghe:","new":"Hàng giữa tinh tế hơn lời khuyên thường nghe:","reason":"'tinh hơn' là từ ghép gượng (subtler)","severity":"medium"},
+{"old":"`Column` trong `SingleChildScrollView` mất cả hai.","new":"`Column` trong `SingleChildScrollView` chịu cả hai chi phí.","reason":"'mất cả hai' mơ hồ","severity":"medium"},
+{"old":"(hai test cặp đôi trong `rebuild_test.dart`)","new":"(hai test đối chiếu nhau trong `rebuild_test.dart`)","reason":"'cặp đôi' gượng","severity":"medium"},
+{"old":"mà không gắn nhãn tay, ta dùng","new":"mà không gắn nhãn thủ công, ta dùng","reason":"'nhãn tay' gượng","severity":"low"},
+{"old":"Bọc phần tĩnh thay vì phần động cũng giữ bản đồ nguyên (một test riêng).","new":"Bọc phần tĩnh thay vì phần động cũng khiến bản đồ không bị vẽ lại (một test riêng).","reason":"'giữ bản đồ nguyên' mơ hồ","severity":"medium"},
+{"old":"Test chứng minh ngữ nghĩa copy:","new":"Test chứng minh ngữ nghĩa sao chép:","reason":"Thống nhất 'sao chép' trong bài","severity":"low"},
+{"old":"Kết quả bằng bản parse đồng bộ, và","new":"Kết quả giống bản parse đồng bộ, và","reason":"'bằng' gượng, kiểu dịch máy","severity":"medium"},
+{"old":"closure bắt thêm thứ không ngờ.","new":"closure bắt thêm thứ ta không ngờ tới.","reason":"Câu thiếu chủ thể","severity":"low"},
+{"old":"Nó chỉ cho thấy `Isolate.run` trả quyền","new":"Test này chỉ cho thấy `Isolate.run` trả quyền","reason":"Tránh 'Nó' đầu câu, nhắc lại danh từ","severity":"medium"},
+{"old":"in khoảng giá trị của nhiều lần chạy cùng mốc \"không làm gì\"","new":"in khoảng giá trị của nhiều lần chạy, kèm mốc \"không làm gì\"","reason":"'cùng mốc' khó hiểu","severity":"medium"},
+{"old":"Đồng bộ chặn lâu gấp nhiều lần nhiễu nền;","new":"Parse đồng bộ chặn lâu gấp nhiều lần nhiễu nền;","reason":"Câu thiếu danh từ chính","severity":"medium"},
+{"old":"Test dùng `FrameTiming` tổng hợp:","new":"Test dùng `FrameTiming` tự dựng:","reason":"'tổng hợp' là calque của synthetic","severity":"medium"},
+{"old":"chặn hồi quy.","new":"chặn regression.","reason":"Giữ 'regression' theo thuật ngữ quen dùng","severity":"low"},
+{"old":"nên `stop()` gỡ nó cho test sau.","new":"nên `stop()` gỡ nó để test sau không bị ảnh hưởng.","reason":"Câu cụt","severity":"low"}
+]}

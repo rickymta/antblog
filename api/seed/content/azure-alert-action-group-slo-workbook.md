@@ -26,7 +26,7 @@ Cần tách ba khái niệm. **SLI** là phép đo: tỉ lệ request `POST /tri
 
 Định nghĩa SLI quyết định alert có đáng tin không. Chỉ 5xx là lỗi hệ thống; 4xx (token hết hạn, body sai) là lỗi client, không đốt budget. Latency cũng là SLI: "p95 dưới 500 ms" nghĩa là được phép 5% request chậm, và dùng được cùng kiểu alert.
 
-Từ đó ra **burn rate**: tốc độ tiêu budget so với tốc độ "vừa hết đúng cuối tháng". Burn rate 14,4 duy trì một giờ tiêu 2% budget tháng, để nguyên thì hết sạch sau khoảng hai ngày. Burn rate 6 duy trì sáu giờ tiêu 5% budget, hết sau khoảng năm ngày. Hai cặp này là cặp phổ biến trong sách SRE về cảnh báo theo SLO, không phải hằng số của Azure.
+Từ đó suy ra **burn rate**: tốc độ tiêu budget so với tốc độ "vừa hết đúng cuối tháng". Burn rate 14,4 duy trì một giờ tiêu 2% budget tháng, để nguyên thì hết sạch sau khoảng hai ngày. Burn rate 6 duy trì sáu giờ tiêu 5% budget, hết sau khoảng năm ngày. Hai cặp giá trị này phổ biến trong sách SRE về cảnh báo theo SLO, không phải hằng số của Azure.
 
 | Alert | Cửa sổ | Burn rate | Tỉ lệ 5xx kích hoạt (SLO 99,9%) | Severity | Ý nghĩa |
 | --- | --- | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ Lỗi lớn làm fast burn nổ nhanh; lỗi nhỏ rỉ rả làm slow burn nổ
 | Activity log alert | Control plane | Ai đó đổi hoặc xoá resource | Xoá `ca-toinoi-trips-prod` |
 | Smart detection | Application Insights tự học baseline | Bất thường mà bạn chưa nghĩ tới | Tỉ lệ failed request tăng đột biến |
 
-Burn rate cần tỉ lệ trên hai cửa sổ thời gian, metric alert không biểu diễn gọn được, nên bài dùng log alert. Cái giá: mỗi lần đánh giá chạy một truy vấn, chịu độ trễ ingest, và tính tiền theo số rule và tần suất. Smart detection là lưới thứ hai, nhưng nó không biết SLO nên không thay alert burn-rate.
+Burn rate cần tỉ lệ trên hai cửa sổ thời gian, metric alert không biểu diễn gọn được, nên bài dùng log alert. Cái giá phải trả: mỗi lần đánh giá chạy một truy vấn, có độ trễ ingest, và tính tiền theo số rule và tần suất. Smart detection là lưới thứ hai, nhưng nó không biết SLO nên không thay alert burn-rate.
 
 Severity chạy từ 0 (critical) tới 4 (verbose). Azure không tự hành động theo con số này; quy ước của Tới Nơi là 0 và 1 gọi người, 2 mở ticket, 3 và 4 chỉ để xem. Hành động nằm ở action group gắn vào rule: email, SMS, push tới Azure mobile app, voice, webhook, Logic App, Azure Function, ITSM. SMS và voice bị giới hạn tần suất.
 
@@ -61,7 +61,7 @@ Lab dựng trên môi trường dev, giả định bạn đã có Application In
 
 ### Action group tới webhook giả
 
-Webhook giả là một địa chỉ HTTP bạn kiểm soát để xem payload; thực tế đó là công cụ trực hoặc ITSM. Khối dưới tạo action group với một email và một webhook dùng common alert schema để payload thống nhất cho mọi loại alert. Nó không chứng minh webhook nhận được: dùng chức năng test action group trong portal.
+Webhook giả là một địa chỉ HTTP bạn kiểm soát để xem payload; thực tế đó là công cụ trực hoặc ITSM. Khối dưới tạo action group với một email và một webhook dùng common alert schema để payload thống nhất cho mọi loại alert. Khối lệnh này không chứng minh webhook nhận được; hãy dùng chức năng test action group trong portal.
 
 ```bash
 RG=rg-toinoi-monitor-dev-sea
@@ -73,7 +73,7 @@ az monitor action-group create \
   --action webhook fake-pager "https://<fake-webhook-host>/hooks/toinoi" usecommonalertschema
 ```
 
-Coi URL webhook là bí mật: ai biết nó đều gửi được payload giả vào công cụ trực.
+Coi URL webhook là bí mật: ai biết URL đó cũng đều gửi được payload giả vào công cụ trực.
 
 ### Truy vấn burn-rate từ bảng requests
 
@@ -122,7 +122,7 @@ create_burn_alert alert-slo-burn-slow-dev 6h 15m 2 slow-burn.kql
 
 ### Kích hoạt, rồi xem alert nổ và tự đóng
 
-Cách gây 5xx ở dev mà replica vẫn ready là thu quyền INSERT của role app trên bảng `trips` ([bài 46](/articles/azure-database-migration-trong-pipeline)): `/health/ready` chỉ kiểm kết nối và migration nên vẫn xanh, còn `POST /trips` lỗi khi ghi và trả 500. Đừng dừng PostgreSQL: readiness đỏ làm replica bị rút khỏi ingress, request có thể hỏng ngay ở ingress mà không vào `requests`, và alert im lặng. Request thiếu token hay thiếu `Idempotency-Key` chỉ ra 4xx, không đốt budget. Kỳ vọng là hai alert fired sau vài chu kỳ đánh giá, chưa phải kết quả đã chạy.
+Cách gây 5xx ở dev mà replica vẫn ready là thu quyền INSERT của role app trên bảng `trips` ([bài 46](/articles/azure-database-migration-trong-pipeline)): `/health/ready` chỉ kiểm tra kết nối và migration nên vẫn xanh, còn `POST /trips` lỗi khi ghi và trả 500. Đừng dừng PostgreSQL: readiness đỏ làm replica bị rút khỏi ingress, request có thể hỏng ngay ở ingress mà không vào `requests`, và alert im lặng. Request thiếu token hay thiếu `Idempotency-Key` chỉ ra 4xx, không đốt budget. Kỳ vọng là hai alert fired sau vài chu kỳ đánh giá, chưa phải kết quả đã chạy.
 
 ```bash
 # $MIGRATOR_CONN: connection string của toinoi_migrator (chủ bảng) ở dev
@@ -147,11 +147,11 @@ Sau khi GRANT lại và gửi vài chục request thành công, cửa sổ ngắ
 
 ## Thiết kế alert để người trực còn tin nó
 
-Alert tốt ít, hiếm, và cái nào cũng cần hành động.
+Alert tốt thì ít, hiếm khi nổ, và alert nào cũng cần hành động.
 
 - **Cửa sổ và tần suất.** Cửa sổ quyết định cần bao nhiêu bằng chứng, tần suất quyết định bao lâu mới thấy.
 - **Số lần vi phạm.** Log alert cho phép yêu cầu "ít nhất X lần trong Y điểm" trước khi nổ. Dùng cho tín hiệu dao động như độ trễ, để một điểm xấu không đánh thức ai.
-- **Tự đóng.** Alert không tự resolve để lại hàng đống mục mở và người trực học cách phớt lờ. Bật auto-mitigate kèm cửa sổ ngắn như trên.
+- **Tự đóng.** Alert không tự resolve sẽ để lại hàng đống mục mở, và người trực học cách phớt lờ. Bật auto-mitigate kèm cửa sổ ngắn như trên.
 - **Nhóm theo service.** Chia theo dimension như `cloud_RoleName` thì một service lỗi không che service khác, và thông báo vẫn gom về một rule.
 - **Alert processing rule.** Thay vì sửa từng rule, một processing rule ở scope subscription dev có thể tắt mọi thông báo theo lịch ngoài giờ làm việc (suppression), hoặc thêm một action group cho mọi alert trong scope.
 
@@ -163,9 +163,9 @@ Mọi alert phải trả lời được câu "người nhận làm gì". Nếu c
 
 ## Availability test nhìn Tới Nơi từ bên ngoài
 
-Bảng `requests` chỉ có dữ liệu khi request tới được ứng dụng. Nếu DNS, TLS, Front Door hỏng hoặc không replica nào ready, `requests` im lặng và burn-rate alert im theo. **Availability test** gửi request từ nhiều vùng tới URL công khai theo chu kỳ và ghi vào bảng `availabilityResults`. Dùng **standard test** (kiểm status code, TLS, nội dung); URL ping test cổ điển đã có lịch nghỉ hưu.
+Bảng `requests` chỉ có dữ liệu khi request tới được ứng dụng. Nếu DNS, TLS, Front Door hỏng hoặc không replica nào ready, `requests` im lặng và burn-rate alert im theo. **Availability test** gửi request từ nhiều vùng tới URL công khai theo chu kỳ và ghi vào bảng `availabilityResults`. Dùng **standard test** (kiểm tra status code, TLS, nội dung); URL ping test cổ điển đã có lịch ngừng hỗ trợ.
 
-Tới Nơi trỏ test tới `/health/ready` qua endpoint [Front Door](/articles/azure-front-door-cdn-custom-domain-tls), không tới thẳng container app, để test chạm cả đường vào của khách: DNS, TLS, WAF, định tuyến. Readiness kiểm cả database ([bài 36](/articles/dotnet10-aws-azure-deployment)), nên DB hỏng làm test đỏ dù process còn sống. Nó không chứng minh `POST /trips` có xác thực chạy đúng.
+Tới Nơi trỏ test tới `/health/ready` qua endpoint [Front Door](/articles/azure-front-door-cdn-custom-domain-tls), không tới thẳng container app, để test chạm cả đường vào của khách: DNS, TLS, WAF, định tuyến. Readiness kiểm cả database ([bài 36](/articles/dotnet10-aws-azure-deployment)), nên DB hỏng làm test đỏ dù process còn sống. Test này không chứng minh `POST /trips` có xác thực chạy đúng.
 
 Khối dưới tạo standard test từ Southeast Asia, East Asia và Japan East (mã vùng theo danh sách trong tài liệu). Lệnh không tạo alert kèm theo: bạn tự thêm rule trên `availabilityResults`.
 
@@ -193,7 +193,7 @@ Thẻ `hidden-link` nối test với Application Insights. Quy tắc nổ là "t
 
 ## Workbook một trang cho người trực
 
-Alert gọi người dậy, workbook là thứ họ mở ra đầu tiên. Một trang, sáu ô, đọc từ trên xuống. Saturation và replica gộp vào một ô vì chúng giải thích nhau: CPU cao mà replica đã chạm trần nghĩa là autoscale hết đường.
+Alert gọi người dậy, workbook là thứ họ mở ra đầu tiên. Một trang, sáu ô, đọc từ trên xuống. Saturation và replica gộp vào một ô vì chúng giải thích nhau: CPU cao mà replica đã chạm trần nghĩa là autoscale không thể mở rộng thêm.
 
 | Ô | Nguồn | Câu hỏi nó trả lời |
 | --- | --- | --- |
@@ -201,10 +201,10 @@ Alert gọi người dậy, workbook là thứ họ mở ra đầu tiên. Một 
 | 2. Error | Logs: `requests` | Tỉ lệ 5xx và burn rate hiện tại |
 | 3. Latency | Logs: `requests` | p95 so với đường 500 ms |
 | 4. Saturation và replica | Metrics: Container Apps | CPU, memory và số replica có chạm trần không |
-| 5. Dead-letter | Metrics: Service Bus | Message chết có đang tăng không ([Service Bus](/articles/azure-service-bus-queue-topic-session-dead-letter)) |
+| 5. Dead-letter | Metrics: Service Bus | Message dead-letter có đang tăng không ([Service Bus](/articles/azure-service-bus-queue-topic-session-dead-letter)) |
 | 6. DB connections | Metrics: PostgreSQL | `active_connections` còn xa giới hạn không |
 
-Ba ô đầu dùng chung truy vấn dưới, mỗi ô vẽ một cột. Nó đếm bằng `sum(itemCount)` nên chịu được sampling, nhưng không chứng minh telemetry đủ dày để p95 ổn định.
+Ba ô đầu dùng chung truy vấn dưới, mỗi ô vẽ một cột. Truy vấn này đếm bằng `sum(itemCount)` nên vẫn đúng khi có sampling, nhưng không chứng minh telemetry đủ dày để p95 ổn định.
 
 ```kusto
 requests
@@ -223,7 +223,7 @@ Description của alert nên chứa link workbook và runbook: nhận alert, m�
 
 ## Học tiếp từ đây
 
-Bạn vừa đặt SLO cho `POST /trips`, đổi nó thành hai alert burn-rate fast 1h và slow 6h, nối alert tới action group có webhook, thêm availability test từ ba vùng và phác workbook sáu ô. Lab mô tả cách làm; việc alert nổ và tự đóng là kỳ vọng bạn cần tự kiểm trên subscription dev.
+Bạn vừa đặt SLO cho `POST /trips`, chuyển SLO đó thành hai alert burn-rate fast 1h và slow 6h, nối alert tới action group có webhook, thêm availability test từ ba vùng và phác workbook sáu ô. Lab mô tả cách làm; việc alert nổ và tự đóng là kỳ vọng bạn cần tự kiểm tra trên subscription dev.
 
 Bài cuối của Phần 5 là [bài 49](/articles/azure-landing-zone-subscription-vending): khi đã có ba môi trường và cả tá rule như thế này, làm sao dựng môi trường mới bằng một pull request mà vẫn đúng policy, quyền và ngân sách. Nếu cần ôn telemetry ở phía code, xem lại [bài 37 về OpenTelemetry](/articles/dotnet10-opentelemetry-traces-metrics-logs).
 

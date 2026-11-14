@@ -1,0 +1,11 @@
+{"file":"ba-quan-sat-quy-trinh-doc-tai-lieu.md","edits":[
+{"old":"Mức phổ biến toàn bộ người dùng hoặc ý nghĩ bên trong","new":"Mức độ phổ biến trong toàn bộ người dùng hoặc ý nghĩ bên trong","reason":"Thiếu danh từ/giới từ","severity":"medium"},
+{"old":"Ghi hạn chế như môi trường mô phỏng","new":"Ghi lại các hạn chế như môi trường mô phỏng","reason":"Câu cụt, thiếu từ chỉ số nhiều","severity":"low"},
+{"old":"được nhận biết đúng lúc trong các ca khác?","new":"được nhận biết đúng lúc trong các trường hợp khác?","reason":"\"ca\" lược danh từ, dễ lẫn với ca kiểm thử","severity":"medium"},
+{"old":"| Owner, ngày hiệu lực, đối tượng áp dụng, ngoại lệ |","new":"| Người phụ trách, ngày hiệu lực, đối tượng áp dụng, ngoại lệ |","reason":"Owner đã có từ Việt tự nhiên; khớp với văn xuôi","severity":"low"},
+{"old":"Thiếu owner hoặc ngày hiệu lực","new":"Thiếu người phụ trách hoặc ngày hiệu lực","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"CSKH và owner tài liệu","new":"CSKH và người phụ trách tài liệu","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"trong cùng ca có thể kiểm tra không?","new":"trong cùng trường hợp có thể kiểm tra không?","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"nêu hiệu lực, phạm vi/ngoại lệ và owner,","new":"nêu hiệu lực, phạm vi/ngoại lệ và người phụ trách,","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Chúng là hai ca khác nhau.","new":"Chúng là hai trường hợp khác nhau.","reason":"\"ca\" lược danh từ","severity":"medium"}
+]}

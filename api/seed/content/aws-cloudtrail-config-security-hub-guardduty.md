@@ -1,14 +1,14 @@
 ---
 slug: aws-cloudtrail-config-security-hub-guardduty
 title: "CloudTrail, Config, Security Hub, GuardDuty và Inspector: audit và phát hiện cho dữ liệu khách"
-summary: "Bài 54: lớp phát hiện của Tới Nơi: CloudTrail với data event S3 và truy vấn log, Config rule và remediation, Security Hub (phiên bản mới và CSPM), GuardDuty kể cả Extended Threat Detection, Inspector, Macie cho PII, cùng quy trình xử lý sự cố theo NIST với playbook access key lộ."
+summary: "Bài 54: lớp phát hiện của Tới Nơi: CloudTrail với data event S3 và truy vấn log, Config rule và remediation, Security Hub (phiên bản mới và CSPM), GuardDuty kể cả Extended Threat Detection, Inspector, Macie cho PII, cùng quy trình xử lý sự cố theo NIST với playbook cho access key bị lộ."
 category: devops-aws
 level: advanced
 tags: [aws, toi-noi, devops, cloudtrail, aws-config, security-hub, guardduty, inspector, incident-response, macie]
 language: vi
 ---
 
-Đối tác thanh toán hỏi Tới Nơi một câu rất cụ thể: nếu access key của một kỹ sư bị đẩy nhầm lên một repository công khai lúc hai giờ sáng, bao lâu thì các bạn biết, và biết được những gì nó đã làm? Câu trả lời thật thà lúc này là "khi ai đó tình cờ nhìn hoá đơn". Phần 06 đã có quyền tối thiểu ([bài 51](/articles/aws-iam-nang-cao-permission-boundary-abac-access-analyzer)), mã hoá ([bài 52](/articles/aws-kms-envelope-encryption-key-policy)) và mạng riêng ([bài 53](/articles/aws-privatelink-transit-gateway-network-firewall)); còn thiếu **phát hiện và truy vết**.
+Đối tác thanh toán hỏi Tới Nơi một câu rất cụ thể: nếu access key của một kỹ sư bị đẩy nhầm lên một repository công khai lúc hai giờ sáng, bao lâu thì các bạn biết, và biết nó đã làm những gì? Câu trả lời thật thà lúc này là "khi ai đó tình cờ nhìn hoá đơn". Phần 06 đã có quyền tối thiểu ([bài 51](/articles/aws-iam-nang-cao-permission-boundary-abac-access-analyzer)), mã hoá ([bài 52](/articles/aws-kms-envelope-encryption-key-policy)) và mạng riêng ([bài 53](/articles/aws-privatelink-transit-gateway-network-firewall)); còn thiếu **phát hiện và truy vết**.
 
 Đây là **bài 54** của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn cần nắm tài khoản log archive và tài khoản security ở [bài 28](/articles/aws-organizations-scp-control-tower-landing-zone). Bài này đi qua từng dịch vụ theo câu hỏi nó trả lời, rồi ghép thành quy trình xử lý sự cố.
 
@@ -20,7 +20,7 @@ language: vi
 
 ## Năm dịch vụ, năm câu hỏi khác nhau
 
-Dễ nhầm đây là "năm công cụ giám sát"; thực ra mỗi cái trả lời một câu hỏi riêng:
+Bạn dễ nhầm đây là "năm công cụ giám sát"; thực ra mỗi cái trả lời một câu hỏi riêng:
 
 | Dịch vụ | Câu hỏi nó trả lời | Dữ liệu đầu vào | Kết quả |
 |---|---|---|---|
@@ -51,14 +51,14 @@ Dễ nhầm đây là "năm công cụ giám sát"; thực ra mỗi cái trả l
 <path d="M730 135 L768 135" class="f-none s-phys" stroke-width="2" marker-end="url(#aws54-1-a)"/>
 </svg>
 </div>
-<figcaption>Hình 1. Mỗi dịch vụ phát hiện nhìn một loại dữ liệu; Security Hub là nơi hội tụ để người trực không phải mở năm giao diện.</figcaption>
+<figcaption>Hình 1. Mỗi dịch vụ phát hiện nhìn vào một loại dữ liệu; Security Hub là nơi hội tụ để người trực không phải mở năm giao diện.</figcaption>
 </figure>
 
 ## CloudTrail: ai làm gì
 
 **Management event** (tạo, sửa, xoá tài nguyên, `AssumeRole`, `GetSecretValue`) được ghi mặc định vào event history 90 ngày. **Data event** (`GetObject`/`PutObject` của S3, `Invoke` của Lambda) tắt mặc định và tính phí theo số event, nên Tới Nơi chỉ bật cho bucket nhạy cảm như `toinoi-prod-delivery-photos`. Giữ lâu hơn 90 ngày hoặc có data event thì cần **trail**. Với nhiều tài khoản, tạo **organization trail** từ management account để mọi tài khoản đẩy log về bucket ở tài khoản log archive, nơi người vận hành workload không xoá được. Bật **log file validation** để CloudTrail ký digest file, cho phép chứng minh log chưa bị sửa.
 
-Trail lưu file trên S3 nên khó hỏi nhanh. Trước đây câu trả lời là **CloudTrail Lake** (event data store hỏi bằng SQL), nhưng Lake **đóng với khách mới từ 31/05/2026**: tài khoản đã dùng vẫn chạy tiếp, Lake chỉ còn nhận bản vá nghiêm trọng, và AWS khuyên chuyển sang CloudWatch. Tới Nơi vì thế đẩy trail sang CloudWatch Logs và hỏi bằng **Logs Insights**, kiểu "ai đọc secret của VíXanh tuần qua" (lab có `queries/who-read-secret.logsinsights`), đổi lại tính phí theo dung lượng log nạp và lưu. Cùng log group đó phục vụ cảnh báo tức thời: metric filter và alarm cho vài mẫu kinh điển (root đăng nhập, đổi IAM policy, `StopLogging`, `DeleteFlowLogs`), như lab đã dựng.
+Trail lưu file trên S3 nên khó truy vấn nhanh. Trước đây câu trả lời là **CloudTrail Lake** (event data store truy vấn bằng SQL), nhưng Lake **đóng với khách mới từ 31/05/2026**: tài khoản đã dùng vẫn chạy tiếp, Lake chỉ còn nhận bản vá nghiêm trọng, và AWS khuyên chuyển sang CloudWatch. Tới Nơi vì thế đẩy trail sang CloudWatch Logs và truy vấn bằng **Logs Insights**, kiểu "ai đọc secret của VíXanh tuần qua" (lab có `queries/who-read-secret.logsinsights`), đổi lại bị tính phí theo dung lượng log được nạp vào và lưu trữ. Cùng log group đó phục vụ cảnh báo tức thời: metric filter và alarm cho vài mẫu kinh điển (root đăng nhập, đổi IAM policy, `StopLogging`, `DeleteFlowLogs`), như lab đã dựng.
 
 ## Config: trạng thái và tuân thủ
 
@@ -80,7 +80,7 @@ resource "aws_config_remediation_configuration" "s3_public_read" {
 
 ## Security Hub: hai nửa
 
-Từ cuối năm 2025 tên **Security Hub** chỉ phiên bản mới, còn dịch vụ cũ được gọi là **Security Hub CSPM** (cloud security posture management). Hai nửa phục vụ hai việc, và bạn nên tra trang tài liệu gốc để biết tính năng hiện hành vì phần này thay đổi nhanh:
+Từ cuối năm 2025 tên **Security Hub** dùng để chỉ phiên bản mới, còn dịch vụ cũ được gọi là **Security Hub CSPM** (cloud security posture management). Hai nửa phục vụ hai việc, và bạn nên tra trang tài liệu gốc để biết tính năng hiện hành vì phần này thay đổi nhanh:
 
 | | Security Hub CSPM | Security Hub (phiên bản mới) |
 |---|---|---|
@@ -95,13 +95,13 @@ Cả hai hỗ trợ **automation rule**: tự đổi mức độ, thêm ghi chú
 
 **GuardDuty** đọc **CloudTrail management event, VPC Flow Logs và DNS query log** qua đường nội bộ mà bạn không cần bật log. Thêm các **protection plan** khi cần thêm tín hiệu: S3 (data event), EKS audit log, **Runtime Monitoring** (EKS, ECS, EC2), Malware Protection cho EBS và S3, đăng nhập bất thường vào RDS, Lambda network activity. Tên finding cho biết loại hành vi, ví dụ `UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration.OutsideAWS` (credential của instance bị dùng từ ngoài AWS), `CryptoCurrency:EC2/BitcoinTool.B!DNS` (đào coin), `Stealth:IAMUser/CloudTrailLoggingDisabled`.
 
-**Extended Threat Detection** liên kết nhiều tín hiệu rời rạc thành một **attack sequence**, một finding duy nhất mô tả chuỗi hành vi theo thời gian kèm kỹ thuật MITRE ATT&CK (loại finding bắt đầu bằng `AttackSequence:`). Nó tự bật cùng GuardDuty nhưng bao phủ rộng hơn khi bạn bật thêm các protection plan, vì có thêm nguồn để nối. Tra danh sách finding type hiện hành trước khi lọc theo tên.
+**Extended Threat Detection** liên kết nhiều tín hiệu rời rạc thành một **attack sequence**, một finding duy nhất mô tả chuỗi hành vi theo thời gian kèm kỹ thuật MITRE ATT&CK (loại finding bắt đầu bằng `AttackSequence:`). Tính năng này tự bật cùng GuardDuty nhưng bao phủ rộng hơn khi bạn bật thêm các protection plan, vì có thêm nguồn để nối. Tra danh sách finding type hiện hành trước khi lọc theo tên.
 
-**Inspector** quét EC2, image ECR và hàm Lambda tìm lỗ hổng đã biết (CVE) và xếp hạng theo điểm; với ECR nó quét khi push và quét liên tục, bổ sung cho quét cơ bản ở [bài 11](/articles/aws-ecr-image-scan-lifecycle). **Macie** tìm dữ liệu nhạy cảm trong S3 bằng identifier có sẵn và **custom data identifier** do bạn viết bằng regex. Với Tới Nơi, lab thêm hai identifier: số căn cước công dân (12 chữ số bắt đầu bằng 0) và số điện thoại Việt Nam (đầu 0 hoặc +84, theo sau 9 chữ số). Cả hai regex dễ khớp nhầm, nên dùng kèm `keywords` và kiểm trên mẫu thật trước khi tin kết quả.
+**Inspector** quét EC2, image ECR và hàm Lambda để tìm lỗ hổng đã biết (CVE) và xếp hạng theo điểm; với ECR, Inspector quét khi push và quét liên tục, bổ sung cho quét cơ bản ở [bài 11](/articles/aws-ecr-image-scan-lifecycle). **Macie** tìm dữ liệu nhạy cảm trong S3 bằng identifier có sẵn và **custom data identifier** do bạn viết bằng regex. Với Tới Nơi, lab thêm hai identifier: số căn cước công dân (12 chữ số bắt đầu bằng 0) và số điện thoại Việt Nam (đầu 0 hoặc +84, theo sau 9 chữ số). Cả hai regex dễ khớp nhầm, nên dùng kèm `keywords` và kiểm tra trên mẫu thật trước khi tin kết quả.
 
 ## Quy trình xử lý sự cố
 
-Phát hiện chỉ có ý nghĩa khi có người biết làm gì tiếp. Tới Nơi dùng vòng đời của NIST (SP 800-61): chuẩn bị, phát hiện và phân tích, cô lập, diệt, phục hồi, rút kinh nghiệm.
+Phát hiện chỉ có ý nghĩa khi có người biết làm gì tiếp. Tới Nơi dùng vòng đời của NIST (SP 800-61): chuẩn bị, phát hiện và phân tích, cô lập, loại bỏ mối đe doạ, phục hồi, rút kinh nghiệm.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -110,7 +110,7 @@ Phát hiện chỉ có ý nghĩa khi có người biết làm gì tiếp. Tới 
 <rect x="10" y="40" width="130" height="100" rx="10" class="f-surface s-line"/><text x="22" y="66" class="t-b">1 Chuẩn bị</text><text x="22" y="88" class="t-small">alarm, quyền break-glass,</text><text x="22" y="104" class="t-small">playbook, liên lạc</text>
 <rect x="154" y="40" width="130" height="100" rx="10" class="f-pk-soft s-pk"/><text x="166" y="66" class="t-b">2 Phát hiện</text><text x="166" y="88" class="t-small">GuardDuty báo key</text><text x="166" y="104" class="t-small">dùng từ IP lạ</text>
 <rect x="298" y="40" width="130" height="100" rx="10" class="f-warn-soft s-warn"/><text x="310" y="66" class="t-b t-warn">3 Cô lập</text><text x="310" y="88" class="t-small">đặt key Inactive,</text><text x="310" y="104" class="t-small">chặn bằng Deny</text>
-<rect x="442" y="40" width="130" height="100" rx="10" class="f-warn-soft s-warn"/><text x="454" y="66" class="t-b t-warn">4 Diệt</text><text x="454" y="88" class="t-small">xoá user, role, key</text><text x="454" y="104" class="t-small">do kẻ tấn công tạo</text>
+<rect x="442" y="40" width="130" height="100" rx="10" class="f-warn-soft s-warn"/><text x="454" y="66" class="t-b t-warn">4 Loại bỏ</text><text x="454" y="88" class="t-small">xoá user, role, key</text><text x="454" y="104" class="t-small">do kẻ tấn công tạo</text>
 <rect x="586" y="40" width="130" height="100" rx="10" class="f-phys-soft s-phys"/><text x="598" y="66" class="t-b">5 Phục hồi</text><text x="598" y="88" class="t-small">xoay secret, cấp</text><text x="598" y="104" class="t-small">credential mới</text>
 <rect x="730" y="40" width="130" height="100" rx="10" class="f-phys-soft s-phys"/><text x="742" y="66" class="t-b">6 Rút kinh nghiệm</text><text x="742" y="88" class="t-small">postmortem, thu hẹp</text><text x="742" y="104" class="t-small">quyền, thêm rule</text>
 <path d="M140 90 L152 90 M284 90 L296 90 M428 90 L440 90 M572 90 L584 90 M716 90 L728 90" class="f-none s-phys" stroke-width="2" marker-end="url(#aws54-2-a)"/>
@@ -121,21 +121,21 @@ Phát hiện chỉ có ý nghĩa khi có người biết làm gì tiếp. Tới 
 <figcaption>Hình 2. Vòng đời xử lý sự cố; bước 3 thường làm trong vài phút, bước 4 và 5 mới tốn thời gian.</figcaption>
 </figure>
 
-Playbook **access key lộ** theo thứ tự: (1) xác nhận key có thật và của ai bằng `aws iam get-access-key-last-used`; (2) đặt key `Inactive` bằng `aws iam update-access-key`, không xoá; (3) tra CloudTrail theo `AccessKeyId` để biết nó đã gọi gì, từ IP nào, ở region nào, có tạo user, role hay tài nguyên lạ không; (4) gỡ những thứ kẻ tấn công tạo; (5) xoay mọi secret key đó từng đọc được (bài 14); (6) viết postmortem và thu hẹp quyền (bài 51). Mỗi bước cần có chủ, và playbook phải được diễn tập trước một lần.
+Playbook cho **access key bị lộ** gồm các bước sau, theo thứ tự: (1) xác nhận key có thật và của ai bằng `aws iam get-access-key-last-used`; (2) đặt key `Inactive` bằng `aws iam update-access-key`, không xoá; (3) tra CloudTrail theo `AccessKeyId` để biết nó đã gọi gì, từ IP nào, ở region nào, có tạo user, role hay tài nguyên lạ không; (4) gỡ những thứ kẻ tấn công đã tạo; (5) xoay mọi secret mà key đó từng đọc được (bài 14); (6) viết postmortem và thu hẹp quyền (bài 51). Mỗi bước cần có người phụ trách, và phải diễn tập playbook một lần trước khi cần dùng.
 
 ## Cái giá phải trả
 
 - **Log là dữ liệu nhạy cảm**: bucket log ở tài khoản riêng, hạn chế người đọc, bật Object Lock (bài 36) nếu cần bất biến.
 - **Chi phí theo khối lượng**: data event, finding và đánh giá rule đều tính theo số lượng. Bật data event cho bucket cần thiết, không phải mọi bucket.
-- **Finding fatigue**: bật mọi chuẩn và control sẽ tạo hàng nghìn finding không ai đọc. Bắt đầu bằng control nghiêm trọng, giảm ồn bằng automation rule.
-- **Remediation tự động có thể gây sự cố**: để chờ duyệt cho tới khi đã diễn tập.
+- **Finding fatigue**: bật mọi chuẩn và control sẽ tạo hàng nghìn finding không ai đọc. Bắt đầu bằng control nghiêm trọng, giảm bớt nhiễu bằng automation rule.
+- **Remediation tự động có thể gây sự cố**: hãy để ở chế độ chờ duyệt cho tới khi đã diễn tập.
 - **Chỉ bật một region**: kẻ tấn công thích region bạn không nhìn. Bật ở mọi region đang dùng và dùng SCP chặn region không dùng (bài 28).
 
 ## Bài tập
 
-**Bài tập:** sáng nay phát hiện VPC Flow Logs của VPC `prod` đã bị xoá. Tìm ai làm, từ đâu, và đề xuất hai biện pháp để chuyện này không lặp lại.
+**Bài tập:** sáng nay bạn phát hiện VPC Flow Logs của VPC `prod` đã bị xoá. Tìm ai làm, từ đâu, và đề xuất hai biện pháp để chuyện này không lặp lại.
 
-<details><summary>Xem đáp án</summary><p><code>DeleteFlowLogs</code> là management event của EC2. Chạy <code>aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=DeleteFlowLogs</code> ở từng region (hoặc Logs Insights trên log group của trail nếu quá 90 ngày; lab có <code>who-disabled-flow-logs.sh</code> và <code>queries/who-deleted-flow-logs.logsinsights</code>): kết quả cho thời gian, principal, access key, IP nguồn và user agent. Rule Config <code>VPC_FLOW_LOGS_ENABLED</code> cho timeline VPC chuyển sang không tuân thủ lúc nào. Principal quen thì hỏi chủ role; IP và region lạ thì chuyển sang playbook access key lộ. Phòng ngừa: SCP Deny <code>ec2:DeleteFlowLogs</code> trừ role platform (bài 28), alarm CloudTrail cho <code>DeleteFlowLogs</code> như trong lab, và remediation Config bật lại Flow Logs.</p></details>
+<details><summary>Xem đáp án</summary><p><code>DeleteFlowLogs</code> là management event của EC2. Chạy <code>aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=DeleteFlowLogs</code> ở từng region (hoặc Logs Insights trên log group của trail nếu quá 90 ngày; lab có <code>who-disabled-flow-logs.sh</code> và <code>queries/who-deleted-flow-logs.logsinsights</code>): kết quả cho biết thời gian, principal, access key, IP nguồn và user agent. Rule Config <code>VPC_FLOW_LOGS_ENABLED</code> cho biết VPC chuyển sang không tuân thủ vào lúc nào. Principal quen thuộc thì hỏi người phụ trách role; IP và region lạ thì chuyển sang playbook cho access key bị lộ. Phòng ngừa: SCP Deny <code>ec2:DeleteFlowLogs</code> trừ role platform (bài 28), alarm CloudTrail cho <code>DeleteFlowLogs</code> như trong lab, và remediation Config bật lại Flow Logs.</p></details>
 
 ## Lab: lớp phát hiện cho một tài khoản
 

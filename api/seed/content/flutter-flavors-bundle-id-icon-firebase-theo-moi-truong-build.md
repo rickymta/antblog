@@ -24,7 +24,7 @@ Một tester QA cài bản staging của app khách lên chiếc điện thoại
 
 ## 1. Một tên flavor, hai bộ công cụ build
 
-Flutter không biết "staging" nghĩa là gì. Cờ `--flavor staging` chỉ là một chuỗi chuyển cho hai bên. Gradle tìm một `productFlavor` tên `staging`. Xcode tìm một scheme tên `staging` và các build configuration `Debug-staging`, `Profile-staging`, `Release-staging`. Mỗi bên tự quyết ID, tên, icon, file Firebase. Chuỗi đó còn thành `appFlavor` trong Dart, mà bài 25 so với khoá `FLAVOR` của file cấu hình.
+Flutter không biết "staging" nghĩa là gì. Cờ `--flavor staging` chỉ là một chuỗi truyền cho hai bên. Gradle tìm một `productFlavor` tên `staging`. Xcode tìm một scheme tên `staging` và các build configuration `Debug-staging`, `Profile-staging`, `Release-staging`. Mỗi bên tự quyết ID, tên, icon, file Firebase. Chuỗi đó còn trở thành `appFlavor` trong Dart, mà bài 25 so với khoá `FLAVOR` của file cấu hình.
 
 Bảng dưới là ba flavor của app khách theo bảng §3.2 của khung loạt bài:
 
@@ -54,7 +54,7 @@ App tài xế theo đúng khuôn, với `vn.toinoi.driver` làm gốc. ID của 
 <path d="M642 325 L668 325" class="f-none s-pk" stroke-width="2" marker-end="url(#fl50-1-a)"/>
 </svg>
 </div>
-<figcaption>Hình 1. Một lệnh build, ba nơi đọc. Gradle và Xcode độc lập nhau nên mỗi bên phải tự khớp với cùng một tên flavor; chỉ phía Dart thấy được cả hai nguồn, nên phép so appFlavor với FLAVOR nằm ở đó. AppConfig của bài 25 dừng app khi lệch; <code>FlavorScreen</code> của lab chỉ hiện cảnh báo.</figcaption>
+<figcaption>Hình 1. Một lệnh build, ba nơi đọc. Gradle và Xcode độc lập với nhau nên mỗi bên phải tự khớp với cùng một tên flavor; chỉ phía Dart thấy được cả hai nguồn, nên phép so appFlavor với FLAVOR nằm ở đó. AppConfig của bài 25 dừng app khi lệch; <code>FlavorScreen</code> của lab chỉ hiện cảnh báo.</figcaption>
 </figure>
 
 Ba nơi đọc độc lập nên có thể lệch nhau. Lab lập một "hợp đồng" `flavors.json` chứa sáu ID và tên hiển thị, rồi đối chiếu mọi file native với nó. Test gõ lại sáu ID theo §3.2 để hợp đồng không tự xác nhận chính nó.
@@ -95,7 +95,7 @@ Mỗi flavor phải thuộc một dimension (khi chỉ có một, plugin tự g�
 
 Hai khái niệm dễ lẫn: `namespace` là package của code Kotlin và của lớp `R`, `BuildConfig` sinh ra; `applicationId` là danh tính của app trên máy và Google Play. Ta chỉ đổi cái sau theo flavor, nên `MainActivity` vẫn ở `vn.toinoi.customer` cả ba bản. Tài liệu Android khuyên khai `applicationId` tường minh, vì nếu không nó lấy giá trị của `namespace`.
 
-Tên app và icon đi theo **source set**: `src/<flavor>/res` chỉ vào build của flavor đó, và file cùng tên trong đó thắng file trong `main`. Tên app nằm trong `strings.xml` mỗi flavor:
+Tên app và icon đi theo **source set**: `src/<flavor>/res` chỉ có mặt trong build của flavor đó, và file cùng tên trong đó thắng file trong `main`. Tên app nằm trong `strings.xml` mỗi flavor:
 
 ### strings.xml · 50-flavors-build/native-config/customer/android/app/src/dev/res/values/strings.xml
 
@@ -108,7 +108,7 @@ Tên app và icon đi theo **source set**: `src/<flavor>/res` chỉ vào build c
 
 Trong `src/main/AndroidManifest.xml` chỉ còn `android:label="@string/app_name"` và `android:icon="@mipmap/ic_launcher"`. Có người quen đặt `app_name` bằng `resValue(...)` trong Gradle. Với AGP 9, `resValues` bị tắt mặc định; trang flavors của Flutter cảnh báo build sẽ lỗi và khuyên chuyển sang `strings.xml`, nên lab không dùng `resValue` và test chặn nó.
 
-Icon theo cách tương tự: `src/dev/res/mipmap-*/ic_launcher.png` và `src/staging/...` ghi đè icon mặc định ở `main`, mà prod dùng luôn. Ta làm đủ năm mật độ, vì ở mật độ thiếu, file của `main` không bị ghi đè nên vẫn được chọn (`icons_test.dart` kiểm). Icon trong lab là ảnh giữ chỗ do `tool/make-placeholder-icons.mjs` sinh; icon thích ứng (`mipmap-anydpi-v26`) chưa làm.
+Icon theo cách tương tự: `src/dev/res/mipmap-*/ic_launcher.png` và `src/staging/...` ghi đè icon mặc định ở `main`, còn prod dùng thẳng icon mặc định đó. Ta làm đủ năm mật độ, vì ở mật độ thiếu, file của `main` không bị ghi đè nên vẫn được chọn (`icons_test.dart` kiểm). Icon trong lab là ảnh giữ chỗ do `tool/make-placeholder-icons.mjs` sinh; icon thích ứng (`mipmap-anydpi-v26`) chưa làm.
 
 Gõ sai tên flavor thì công cụ Flutter đọc danh sách task của Gradle và in các flavor có thật (hàm `flavorUndefinedHandler` trong `flutter_tools`), kết thúc bằng "You must specify a --flavor option to select one of them".
 
@@ -124,7 +124,7 @@ Xcode không có khái niệm flavor. Theo trang flavors iOS của Flutter, mộ
 
 Template Flutter 3.47.4 dùng Swift Package Manager, không có Podfile. Dự án có Podfile thì tài liệu yêu cầu thêm chín cấu hình vào khối `project 'Runner'` của nó.
 
-Theo `XcodeProjectInfo` trong `flutter_tools`, scheme khớp flavor không phân biệt hoa thường và configuration mong đợi là `Debug-<scheme>`. Không thấy thì nó thử khớp gần đúng, rồi rơi về `Debug` kèm cảnh báo `Unable to find "Debug-dev" build configuration`. Build vẫn chạy, nhưng mang ID mặc định.
+Theo `XcodeProjectInfo` trong `flutter_tools`, scheme khớp flavor không phân biệt hoa thường và configuration mong đợi là `Debug-<scheme>`. Không thấy thì công cụ thử khớp gần đúng, rồi quay về `Debug` kèm cảnh báo `Unable to find "Debug-dev" build configuration`. Build vẫn chạy, nhưng mang ID mặc định.
 
 Giá trị theo flavor nằm trong ba file xcconfig nhỏ; mỗi cấu hình chỉ `#include` base rồi file flavor:
 
@@ -166,7 +166,7 @@ ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon-dev
 <figcaption>Hình 2. Với PRODUCT_BUNDLE_IDENTIFIER, kết quả phụ thuộc vào việc target Runner còn đặt giá trị hay không. Template Flutter 3.47.4 đặt sẵn giá trị này, cùng ASSETCATALOG_COMPILER_APPICON_NAME, ngay trong target.</figcaption>
 </figure>
 
-Đã đọc `project.pbxproj` do `flutter create` sinh: cấu hình Debug của target Runner vừa gắn `Debug.xcconfig` vừa đặt `PRODUCT_BUNDLE_IDENTIFIER` và `ASSETCATALOG_COMPILER_APPICON_NAME`. Sau khi nhân bản cấu hình, ta xoá hai dòng đó trong Build Settings của target. Lab có `tool/check-runner.mjs` đọc `project.pbxproj` và kiểm hai điều: đủ chín cấu hình gắn đúng xcconfig, và target không còn đặt hai khoá kia. Nó chỉ xét khối của target Runner, không xét khối cùng tên ở mức project; trên pbxproj dựng từ template, nó báo hai khoá ghi đè ở mỗi configuration.
+Đã đọc `project.pbxproj` do `flutter create` sinh: cấu hình Debug của target Runner vừa gắn `Debug.xcconfig` vừa đặt `PRODUCT_BUNDLE_IDENTIFIER` và `ASSETCATALOG_COMPILER_APPICON_NAME`. Sau khi nhân bản cấu hình, ta xoá hai dòng đó trong Build Settings của target. Lab có `tool/check-runner.mjs` đọc `project.pbxproj` và kiểm hai điều: đủ chín cấu hình gắn đúng xcconfig, và target không còn đặt hai khoá kia. Script này chỉ xét khối của target Runner, không xét khối cùng tên ở mức project; trên pbxproj dựng từ template, nó báo hai khoá ghi đè ở mỗi configuration.
 
 ## 4. Firebase theo flavor: mỗi bản một app
 
@@ -232,7 +232,7 @@ Repo chỉ chứa bản `.example` với giá trị giả (`FAKE_API_KEY_REPLACE
 
 ## 5. Kiểm bằng script, build bằng một lệnh, áp dụng vào toi-noi-app
 
-Đọc mắt không đủ: sáu ID, sáu tên, hai mươi bốn xcconfig, mười hai file Firebase mẫu, sai một chỗ là cài đè. `tool/verify-flavors.mjs` chỉ cần Node, đối chiếu mọi file với hợp đồng và in hết vấn đề. Phép kiểm Gradle của nó:
+Đọc bằng mắt không đủ: sáu ID, sáu tên, hai mươi bốn xcconfig, mười hai file Firebase mẫu, sai một chỗ là cài đè. `tool/verify-flavors.mjs` chỉ cần Node, đối chiếu mọi file với hợp đồng và in hết vấn đề. Phép kiểm Gradle của nó:
 
 ### verify-flavors.mjs · 50-flavors-build/tool/verify-flavors.mjs (trích)
 
@@ -244,7 +244,7 @@ const expected = contract.apps[app].ids[flavor];
 if (id !== expected) fail(`${where}: flavor ${flavor} ra application ID ${id}, hợp đồng là ${expected}`);
 ```
 
-Nó còn kiểm xcconfig, `Info.plist`, icon khác nhau, file Firebase mẫu không chứa khoá thật và `FLAVOR` trong `config/<flavor>.json`. Test Dart đọc lại các file bằng bộ phân tích riêng, rồi chạy script trên bản sao bị làm hỏng từng chỗ:
+Script còn kiểm xcconfig, `Info.plist`, icon khác nhau, file Firebase mẫu không chứa khoá thật và `FLAVOR` trong `config/<flavor>.json`. Test Dart đọc lại các file bằng bộ phân tích riêng, rồi chạy script trên bản sao bị làm hỏng từng chỗ:
 
 ### verify_script_test.dart · 50-flavors-build/test/verify_script_test.dart (trích)
 
@@ -259,7 +259,7 @@ Nó còn kiểm xcconfig, `Info.plist`, icon khác nhau, file Firebase mẫu kh�
 ),
 ```
 
-Hai mươi ca như vậy đều phải khiến script thoát mã 1 với thông báo nêu đúng chỗ hỏng. Lệnh build thì ghép từ một tên duy nhất, để `--flavor prod` không đi với `config/dev.json`:
+Hai mươi test case như vậy đều phải khiến script thoát mã 1 với thông báo nêu đúng chỗ hỏng. Lệnh build thì ghép từ một tên duy nhất, để `--flavor prod` không đi với `config/dev.json`:
 
 ### flavor-command.mjs · 50-flavors-build/tool/flavor-command.mjs (trích)
 
@@ -281,7 +281,7 @@ flutter build ipa --flavor prod --dart-define-from-file=config/prod.json
 
 `run` và cả ba lệnh `build` đều nhận `--flavor` (đã đọc `--help`); `default-flavor` trong pubspec bị `--flavor` ghi đè. Ký `appbundle` và `ipa` là việc của bài 51 và 52.
 
-**Áp dụng vào `toi-noi-app`.** Workspace thật không commit runner. Ta chạy `node examples/toi-noi-flutter/toi-noi-app/tool/create-runners.mjs`; script dùng `--project-name customer` và `--org vn.toinoi`, nên `namespace` và `applicationId` gốc là `vn.toinoi.customer`, khớp lab. Rồi chép `native-config/customer/android/.` vào `apps/customer/android/` và `native-config/customer/ios/.` vào `apps/customer/ios/`. Trước khi chép `ios/`, xoá các PNG cũ trong `Runner/Assets.xcassets/AppIcon.appiconset`: `Contents.json` mới chỉ nhắc `icon-1024.png`, PNG cũ sẽ nằm thừa. App tài xế làm tương tự với thư mục `driver`; lab sinh cây này từ cây của app khách bằng `tool/derive-driver-config.mjs` (đổi ID gốc, tên, id Firebase giả) và icon hình vuông bằng `make-placeholder-icons.mjs`, còn script kiểm tra cả hai app. Scheme, configuration, file reference và Run Script phase vẫn làm tay trong Xcode. `.gitignore` của workspace đang chặn ruột `android/` và `ios/`, nên chọn commit file nào là việc của bài tích hợp.
+**Áp dụng vào `toi-noi-app`.** Workspace thật không commit runner. Ta chạy `node examples/toi-noi-flutter/toi-noi-app/tool/create-runners.mjs`; script dùng `--project-name customer` và `--org vn.toinoi`, nên `namespace` và `applicationId` gốc là `vn.toinoi.customer`, khớp lab. Rồi chép `native-config/customer/android/.` vào `apps/customer/android/` và `native-config/customer/ios/.` vào `apps/customer/ios/`. Trước khi chép `ios/`, xoá các PNG cũ trong `Runner/Assets.xcassets/AppIcon.appiconset`: `Contents.json` mới chỉ nhắc `icon-1024.png`, PNG cũ sẽ nằm thừa. App tài xế làm tương tự với thư mục `driver`; lab sinh cây này từ cây của app khách bằng `tool/derive-driver-config.mjs` (đổi ID gốc, tên, id Firebase giả) và icon hình vuông bằng `make-placeholder-icons.mjs`, còn script kiểm tra cả hai app. Scheme, configuration, file reference và Run Script phase vẫn làm thủ công trong Xcode. `.gitignore` của workspace đang chặn ruột `android/` và `ios/`, nên việc chọn commit file nào thuộc về bài tích hợp.
 
 ## Lỗi thường gặp
 
@@ -289,7 +289,7 @@ flutter build ipa --flavor prod --dart-define-from-file=config/prod.json
 <span class="tkh-callout-title">Năm lỗi hay gặp khi tách flavor</span>
 <ul>
 <li><strong>Target Runner còn đặt <code>PRODUCT_BUNDLE_IDENTIFIER</code> hay <code>ASSETCATALOG_COMPILER_APPICON_NAME</code>.</strong> Dấu hiệu: ba bản iOS cùng ID hoặc cùng icon dù xcconfig đúng. Nguyên nhân: settings của target áp sau xcconfig. Cách sửa: xoá hai dòng trong target, chạy <code>check-runner.mjs</code>.</li>
-<li><strong>Tên configuration không theo <code>&lt;Chế độ&gt;-&lt;flavor&gt;</code>.</strong> Dấu hiệu: cảnh báo <code>Unable to find "Debug-dev" build configuration</code>, bản build mang ID mặc định. Nguyên nhân: công cụ rơi về configuration gốc. Cách sửa: đổi tên cho đúng, phần flavor viết thường.</li>
+<li><strong>Tên configuration không theo <code>&lt;Chế độ&gt;-&lt;flavor&gt;</code>.</strong> Dấu hiệu: cảnh báo <code>Unable to find "Debug-dev" build configuration</code>, bản build mang ID mặc định. Nguyên nhân: công cụ quay về configuration gốc. Cách sửa: đổi tên cho đúng, phần flavor viết thường.</li>
 <li><strong>Đặt <code>app_name</code> bằng <code>resValue</code> trên AGP 9.</strong> Dấu hiệu: lỗi <code>contains custom resource values, but the feature is disabled</code> (câu trích từ trang flavors của Flutter). Nguyên nhân: <code>resValues</code> tắt mặc định. Cách sửa: <code>strings.xml</code> trong <code>src/&lt;flavor&gt;/res/values</code>.</li>
 <li><strong>Thiếu file hoặc lệch <code>package_name</code> trong <code>google-services.json</code>.</strong> Dấu hiệu: thiếu file thì build Android dừng với <code>File google-services.json is missing.</code>; lệch <code>package_name</code> thì dừng với <code>No matching client found for package name</code>. Nguyên nhân: không có file ở đúng <code>src/&lt;flavor&gt;/</code>, hoặc không client nào trùng application ID của flavor. Cách sửa: đăng ký đúng app trong Firebase, tải file về <code>src/&lt;flavor&gt;/</code>.</li>
 <li><strong>Chép nhầm plist của flavor khác, hoặc commit file thật.</strong> Dấu hiệu: push và analytics của bản dev chảy vào app prod. Nguyên nhân: không bước nào đối chiếu ID. Cách sửa: giữ phép so <code>BUNDLE_ID</code> trong script, và cho <code>.gitignore</code> chặn tên file thật.</li>
@@ -313,7 +313,7 @@ node tool/flavor-command.mjs apk staging --dry-run
 
 - Hợp đồng, Android, iOS: sáu ID khớp §3.2, `app_name`, xcconfig và icon theo flavor, cho cả hai app.
 - Firebase: `package_name` và `BUNDLE_ID` khớp ID, chỉ giá trị giả, `.gitignore` chặn file thật mà không chặn `.example`.
-- Script: `verify-flavors.mjs` bắt hai mươi ca hỏng; `check-runner.mjs` bắt thiếu cấu hình và target ghi đè; script chép plist chạy thật với `PROJECT_DIR` giả.
+- Script: `verify-flavors.mjs` bắt hai mươi trường hợp hỏng; `check-runner.mjs` bắt thiếu cấu hình và target ghi đè; script chép plist chạy thật với `PROJECT_DIR` giả.
 - Dart: `checkFlavors` và `FlavorScreen` cho bốn kết quả của hai nguồn flavor.
 
 Đã chạy thêm ngoài test: sinh runner bằng `flutter create`, chép `native-config/customer` vào đó và `flutter analyze` sạch; `plutil -lint` các plist và `sh -n` script đều đạt. `flutter build apk --flavor staging --dart-define-from-file=config/staging.json` dừng ngay với `No Android SDK found`.
@@ -328,8 +328,8 @@ node tool/flavor-command.mjs apk staging --dry-run
 
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Phải thêm: mục trong <code>flavors.json</code>, <code>create("qa")</code> trong <code>build.gradle.kts</code>, <code>src/qa/res</code> (tên và năm icon), bốn xcconfig, bộ <code>AppIcon-qa</code>, hai file Firebase mẫu, <code>config/qa.json</code>, scheme và ba configuration trong Xcode. Script đỏ ngay vì <code>flavors.json</code> phải liệt kê đúng <code>dev, staging, prod</code>: ba flavor là hợp đồng của loạt bài, nên thêm <code>qa</code> nghĩa là sửa cả script và test.</p>
-<p><strong>2.</strong> (a) Hai flavor cùng ra một ID, vd. hậu tố trùng: <code>verify-flavors.mjs</code> báo "cùng ra application ID". (b) Hai lần cài thực ra cùng một flavor vì lệnh build gõ nhầm tên: xem lệnh thật, dùng <code>flavor-command.mjs</code>. (c) Phía iOS, target Runner còn ghi đè bundle ID: <code>check-runner.mjs</code>. Nhớ rằng đổi hậu tố không đổi <code>namespace</code>, nên đó không phải nguyên nhân.</p>
-<p><strong>3.</strong> Tài liệu Flutter nêu Profile và Release dùng chung base <code>Release.xcconfig</code>. Nếu <code>Profile-dev</code> include <code>Debug.xcconfig</code>, ca <code>Profile-dev quên đổi base sang Release.xcconfig</code> của <code>verify_script_test.dart</code> và test <code>mỗi &lt;Mode&gt;-&lt;flavor&gt;.xcconfig include base rồi file của flavor</code> của <code>ios_config_test.dart</code> đỏ.</p>
+<p><strong>2.</strong> (a) Hai flavor cùng ra một ID, ví dụ do hậu tố trùng: <code>verify-flavors.mjs</code> báo "cùng ra application ID". (b) Hai lần cài thực ra cùng một flavor vì lệnh build gõ nhầm tên: xem lệnh thật, dùng <code>flavor-command.mjs</code>. (c) Phía iOS, target Runner còn ghi đè bundle ID: <code>check-runner.mjs</code>. Nhớ rằng đổi hậu tố không đổi <code>namespace</code>, nên đó không phải nguyên nhân.</p>
+<p><strong>3.</strong> Tài liệu Flutter nêu Profile và Release dùng chung base <code>Release.xcconfig</code>. Nếu <code>Profile-dev</code> include <code>Debug.xcconfig</code>, test case <code>Profile-dev quên đổi base sang Release.xcconfig</code> của <code>verify_script_test.dart</code> và test <code>mỗi &lt;Mode&gt;-&lt;flavor&gt;.xcconfig include base rồi file của flavor</code> của <code>ios_config_test.dart</code> đỏ.</p>
 </details>
 
 Bài trước: [Bài tổng hợp: đặt chuyến end-to-end giữa app khách, app tài xế và trip-service](/articles/flutter-tong-hop-phan-6-dat-chuyen-end-to-end-app-khach-tai-xe). Bài tiếp: [Ký ứng dụng Android: keystore, Play App Signing, AAB và versionCode](/articles/flutter-ky-ung-dung-android-keystore-play-app-signing-aab).

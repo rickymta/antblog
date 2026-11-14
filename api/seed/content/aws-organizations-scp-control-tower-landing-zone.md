@@ -10,7 +10,7 @@ language: vi
 
 Giả sử Tới Nơi vẫn chạy mọi thứ trong một tài khoản AWS: ba VPC cho dev, staging và prod, mọi kỹ sư dùng chung một nhóm role. Một chiều thứ Sáu, ai đó chạy `terraform destroy` với profile sai và bucket ảnh chứng từ của môi trường prod đi cùng. Không có lỗ hổng nào bị khai thác, chỉ có một ranh giới quá mỏng: ranh giới giữa các môi trường chỉ là một tên tag và một dòng trong file cấu hình.
 
-Đây là **bài 28** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bài này không có lab vì cần nhiều tài khoản, và đưa ra chính sách ở cấp tổ chức, nên mọi JSON dưới đây **chưa được thử trên một AWS Organizations thật**. Bạn nên nắm IAM (bài 03) và role cho CI ([bài 25](/articles/aws-github-actions-oidc-ecr-deploy)) trước.
+Đây là **bài 28** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bài này không có lab vì cần nhiều tài khoản và các chính sách áp ở cấp tổ chức, nên mọi JSON dưới đây **chưa được thử trên một AWS Organizations thật**. Bạn nên nắm IAM (bài 03) và role cho CI ([bài 25](/articles/aws-github-actions-oidc-ecr-deploy)) trước.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -28,7 +28,7 @@ Tài khoản AWS là ranh giới cứng nhất mà AWS cung cấp: ranh giới q
 | Quota | Dev chạy thử tải và ăn quota của prod | Mỗi tài khoản có quota riêng theo region |
 | Hoá đơn | Phải tách chi phí bằng tag, tag thiếu là mất dấu | Mỗi tài khoản có dòng chi phí riêng |
 | IAM | Policy ngày càng phức tạp với điều kiện theo tag | Role đơn giản, mỗi tài khoản một việc |
-| Kiểm toán | Log chung với dữ liệu người dùng cuối | Log archive nằm ở tài khoản người vận hành không sửa được |
+| Kiểm toán | Log chung với dữ liệu người dùng cuối | Log archive nằm ở tài khoản mà người vận hành không sửa được |
 
 Với Tới Nơi, cây OU đề xuất gồm: **Security** (log archive, audit), **Infrastructure** (network, shared services), **Workloads** (dev, staging, prod; khi lớn thì tách theo nhóm service, ví dụ thanh toán riêng) và **Sandbox** cho thử nghiệm cá nhân có budget.
 
@@ -41,9 +41,9 @@ Với Tới Nơi, cây OU đề xuất gồm: **Security** (log archive, audit),
 
 ## SCP: guardrail đặt trần quyền
 
-**Service control policy** áp lên mọi principal trong tài khoản thành viên, kể cả root user của tài khoản đó, nhưng không áp lên tài khoản quản lý và không áp lên service-linked role. Quyền hiệu lực là giao của SCP và IAM policy; SCP không bao giờ cấp quyền. Điều kiện để dùng là tổ chức bật đủ tính năng (all features).
+**Service control policy** áp lên mọi principal trong tài khoản thành viên, kể cả root user của tài khoản đó, nhưng không áp lên tài khoản quản lý và không áp lên service-linked role. Quyền hiệu lực là giao của SCP và IAM policy; SCP không bao giờ cấp quyền. Điều kiện là tổ chức phải bật đủ tính năng (all features).
 
-SCP đầu tiên nên có là chặn region ngoài `ap-southeast-1` và `us-east-1` (CloudFront và ACM của CloudFront nằm ở `us-east-1`). Dịch vụ toàn cầu được loại bằng `NotAction`; danh sách bên dưới là ví dụ cần đối chiếu với các dịch vụ bạn dùng. Nếu dùng Control Tower (phần sau), bật control Region deny có sẵn thay vì tự viết SCP này, vì control đó đã chừa sẵn các role quản trị của landing zone:
+SCP đầu tiên nên có là chặn region ngoài `ap-southeast-1` và `us-east-1` (CloudFront và ACM của CloudFront nằm ở `us-east-1`). Ta loại trừ dịch vụ toàn cầu bằng `NotAction`; danh sách bên dưới chỉ là ví dụ, bạn cần đối chiếu với các dịch vụ mình dùng. Nếu dùng Control Tower (phần sau), bật control Region deny có sẵn thay vì tự viết SCP này, vì control đó đã chừa sẵn các role quản trị của landing zone:
 
 ```json
 {
@@ -59,7 +59,7 @@ SCP đầu tiên nên có là chặn region ngoài `ap-southeast-1` và `us-east
 }
 ```
 
-SCP thứ hai bảo vệ dấu vết và chặn root user. Nó phải loại trừ role mà Control Tower dùng để quản lý, nếu không chính landing zone sẽ bị chặn:
+SCP thứ hai bảo vệ dấu vết và chặn root user. SCP này phải loại trừ role mà Control Tower dùng để quản lý, nếu không chính landing zone sẽ bị chặn:
 
 ```json
 {
@@ -85,7 +85,7 @@ SCP thứ hai bảo vệ dấu vết và chặn root user. Nó phải loại tr�
 }
 ```
 
-Tạo, bật và gắn bằng CLI (ID dưới đây là giá trị minh hoạ):
+Tạo, bật và gắn SCP bằng CLI (ID dưới đây là giá trị minh hoạ):
 
 ```bash
 aws organizations list-roots
@@ -95,11 +95,11 @@ aws organizations create-policy --name toinoi-deny-outside-regions --type SERVIC
 aws organizations attach-policy --policy-id p-EXAMPLE1 --target-id r-ab12
 ```
 
-Hãy gắn thử lên OU Sandbox trước. Một SCP sai có thể khoá cả đội ra khỏi tài khoản; luôn giữ một đường vào qua tài khoản quản lý và kiểm bằng IAM policy simulator hoặc thử trên tài khoản thử nghiệm.
+Hãy gắn thử lên OU Sandbox trước. Một SCP sai có thể khoá cả đội ra khỏi tài khoản; luôn giữ một đường vào qua tài khoản quản lý và kiểm tra bằng IAM policy simulator hoặc thử trên tài khoản thử nghiệm.
 
 ## Resource Control Policy
 
-**Resource control policy (RCP)** là nửa còn lại: nếu SCP đặt trần cho principal, RCP đặt trần cho **tài nguyên** trong tài khoản thành viên, kể cả khi principal gọi từ ngoài tổ chức. RCP cần được bật bằng `enable-policy-type` với `RESOURCE_CONTROL_POLICY`. Danh sách dịch vụ hỗ trợ RCP mở rộng dần (ban đầu gồm S3, STS, KMS, SQS, Secrets Manager); hãy kiểm trang user guide trước khi dựa vào.
+**Resource control policy (RCP)** là nửa còn lại: nếu SCP đặt trần cho principal, RCP đặt trần cho **tài nguyên** trong tài khoản thành viên, kể cả khi principal gọi từ ngoài tổ chức. Bạn cần bật RCP bằng `enable-policy-type` với `RESOURCE_CONTROL_POLICY`. Danh sách dịch vụ hỗ trợ RCP mở rộng dần (ban đầu gồm S3, STS, KMS, SQS, Secrets Manager); hãy kiểm tra trang user guide trước khi dựa vào danh sách này.
 
 | | SCP | RCP |
 |---|---|---|
@@ -122,7 +122,7 @@ Hãy gắn thử lên OU Sandbox trước. Một SCP sai có thể khoá cả đ
 }
 ```
 
-RCP đòi `Principal` là `*` và chỉ dùng `Deny`. Một RCP kiểu perimeter theo `aws:PrincipalOrgID` phải chừa đường cho service principal của AWS, nếu không CloudTrail hay Config sẽ không ghi được vào bucket.
+RCP yêu cầu `Principal` là `*` và chỉ dùng `Deny`. Một RCP kiểu perimeter theo `aws:PrincipalOrgID` phải chừa đường cho service principal của AWS, nếu không CloudTrail hay Config sẽ không ghi được vào bucket.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -139,7 +139,7 @@ Control Tower triển khai ba loại **control**: *preventive* (thực thi bằn
 
 ## Truy cập chéo tài khoản
 
-Con người vào bằng **IAM Identity Center**: mỗi permission set gán cho nhóm với từng tài khoản, và Identity Center tạo một role tương ứng trong tài khoản đó. Máy vào bằng role: mỗi tài khoản có role CI tin cậy OIDC của GitHub (bài 25) hoặc một role triển khai cho phép pipeline từ tài khoản shared services assume. **AWS RAM** chia sẻ subnet và Transit Gateway từ tài khoản network cho tài khoản workload. Với hoá đơn, tài khoản quản lý nhận hoá đơn gộp; tag phân bổ chi phí phải được kích hoạt ở đó.
+Con người vào bằng **IAM Identity Center**: mỗi permission set được gán cho một nhóm trên từng tài khoản, và Identity Center tạo một role tương ứng trong tài khoản đó. Máy vào bằng role: mỗi tài khoản có role CI tin cậy OIDC của GitHub (bài 25) hoặc một role triển khai cho phép pipeline từ tài khoản shared services assume. **AWS RAM** chia sẻ subnet và Transit Gateway từ tài khoản network cho tài khoản workload. Với hoá đơn, tài khoản quản lý nhận hoá đơn gộp; phải kích hoạt tag phân bổ chi phí ở đó.
 
 ## Lỗi thường gặp
 
@@ -149,7 +149,7 @@ Con người vào bằng **IAM Identity Center**: mỗi permission set gán cho 
 - **Nhầm SCP với quyền**: cần cả Allow ở IAM; SCP chỉ là trần.
 - **Quên kiểm tra service-linked role và dịch vụ toàn cầu** khi viết deny theo region.
 
-**Bài tập:** muốn chặn `s3:PutObject` khi không mã hoá thì gắn SCP đó ở OU nào, và nó có gì cần thận trọng?
+**Bài tập:** muốn chặn `s3:PutObject` khi không mã hoá thì gắn SCP đó ở OU nào, và cần thận trọng điều gì?
 
 <details><summary>Xem đáp án</summary><p>Gắn ở OU Workloads (kế thừa xuống dev, staging, prod), thử trước ở OU Sandbox hoặc nhóm non-prod, không gắn Root để tránh chặn dịch vụ ghi log của tài khoản log archive. Cần thận trọng: từ năm 2023 S3 tự mã hoá object mới bằng SSE-S3, nên điều kiện kiểu "thiếu header mã hoá" có thể chặn cả client vốn dựa vào mã hoá mặc định. Thường tốt hơn là yêu cầu khoá KMS cụ thể hoặc bắt buộc bằng RCP, bucket policy và Config rule.</p></details>
 

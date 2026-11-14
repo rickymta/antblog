@@ -1,7 +1,7 @@
 ---
 slug: azure-ha-dr-zone-region-rto-rpo
 title: "HA và DR: zone, region pair, RTO/RPO và failover"
-summary: "Bài 51: phân biệt HA và DR cho Tới Nơi, đặt RTO/RPO cho sáu service, dựng PostgreSQL geo-replica ở East Asia cùng Front Door hai origin group rồi mô phỏng tắt origin chính để đo thời gian chuyển."
+summary: "Bài 51: phân biệt HA và DR cho Tới Nơi, đặt RTO/RPO cho sáu service, dựng PostgreSQL geo-replica ở East Asia cùng Front Door hai origin group rồi mô phỏng tắt origin chính để đo thời gian failover."
 category: devops-azure
 level: advanced
 tags: [azure, cloud, devops, toi-noi, high-availability, disaster-recovery, front-door, postgresql]
@@ -10,7 +10,7 @@ language: vi
 
 Đây là **bài 51** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 6 · Kiến trúc nâng cao và vận hành (bài 2/9 của phần).
 
-Bài 50 chỉ ra khoảng trống lớn nhất của Tới Nơi: mọi thứ nằm trong Southeast Asia. Bài này lấp nó bằng bảng RTO/RPO, thiết kế zone-redundant, phương án DR sang East Asia và một buổi mô phỏng sự cố có đo thời gian. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
+Bài 50 chỉ ra khoảng trống lớn nhất của Tới Nơi: mọi thứ nằm trong Southeast Asia. Bài này lấp khoảng trống đó bằng bảng RTO/RPO, thiết kế zone-redundant, phương án DR sang East Asia và một buổi mô phỏng sự cố có đo thời gian. *Lệnh và cấu hình trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn và xoá resource sau lab.*
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,13 +20,13 @@ Bài 50 chỉ ra khoảng trống lớn nhất của Tới Nơi: mọi thứ n�
 
 ## HA là tự động trong vài phút, DR là quyết định trong vài giờ
 
-**HA** (high availability) giữ dịch vụ chạy khi một máy, một replica hay một zone hỏng. Nó tự động, trong một region, đo bằng phút. **DR** (disaster recovery) dựng lại dịch vụ khi cả region hỏng, hoặc khi bạn xoá nhầm cả resource group. Nó thường có bước thủ công, nằm ở region khác, đo bằng giờ trừ khi bạn trả tiền để rút ngắn.
+**HA** (high availability) giữ dịch vụ chạy khi một máy, một replica hay một zone hỏng. HA tự động, diễn ra trong một region, đo bằng phút. **DR** (disaster recovery) dựng lại dịch vụ khi cả region hỏng, hoặc khi bạn xoá nhầm cả resource group. DR thường có bước thủ công, nằm ở region khác, đo bằng giờ trừ khi bạn trả tiền để rút ngắn.
 
 Hai con số quyết định thiết kế. **RTO** là thời gian tối đa chấp nhận được từ lúc sự cố đến lúc dịch vụ chạy lại. **RPO** là lượng dữ liệu tối đa chấp nhận mất, tính bằng thời gian: RPO 5 phút nghĩa là mất tối đa 5 phút giao dịch cuối. Hai con số này do nghiệp vụ chốt; kỹ sư nói cái giá của từng mức. Đặt xe cần RTO 15 phút vì mỗi phút gián đoạn là khách bỏ đi. Báo cáo thu nhập tài xế chịu được RTO 24 giờ, dựng lại từ backup là đủ.
 
 ## Bảng RTO/RPO cho sáu service của Tới Nơi
 
-Bảng dưới là mục tiêu đề xuất, không phải cam kết của Azure, cho hai kịch bản: mất một zone và mất cả Southeast Asia. Pricing & Quote không có dòng riêng vì không giữ dữ liệu gốc; DR của nó chỉ là chạy lại IaC.
+Bảng dưới là mục tiêu đề xuất, không phải cam kết của Azure, cho hai kịch bản: mất một zone và mất cả Southeast Asia. Pricing & Quote không có dòng riêng vì không giữ dữ liệu chính; DR của service này chỉ là chạy lại IaC.
 
 | Service | Dữ liệu chính | Mất một zone (RTO / RPO) | Mất cả region (RTO / RPO) | Cách đạt |
 | --- | --- | --- | --- | --- |
@@ -55,11 +55,11 @@ Availability zone là các nhóm datacenter tách nhau trong một region, có �
 | Container Apps | Environment bật zone redundancy, replica trải qua các zone | Chỉ chọn lúc tạo environment, cần VNet; min replica từ 2 |
 | AKS | Node pool trải qua các zone | Disk LRS khoá pod vào một zone; cân nhắc disk ZRS |
 | PostgreSQL Flexible Server | HA zone-redundant, standby đồng bộ ở zone khác | HA không hỗ trợ tier Burstable; chi tiết ở bài 30 |
-| Service Bus | Tier Premium, zone redundancy bật sẵn ở region có zone | Kiểm tài liệu hiện hành cho tier khác và region của bạn |
+| Service Bus | Tier Premium, zone redundancy bật sẵn ở region có zone | Kiểm tra tài liệu hiện hành cho tier khác và region của bạn |
 | Storage | Redundancy ZRS | Đổi LRS sang ZRS là quá trình chuyển đổi chạy nền, có điều kiện, không tức thì |
-| Redis | Azure Managed Redis có zone redundancy ở region có zone | Azure Cache for Redis đang nghỉ hưu (bài về Redis); SKU kiểm tài liệu |
+| Redis | Azure Managed Redis có zone redundancy ở region có zone | Azure Cache for Redis đang ngừng hỗ trợ (bài về Redis); với SKU, hãy kiểm tra tài liệu |
 
-Với mỗi dòng, kiểm SKU đó có hỗ trợ zone tại Southeast Asia lúc bạn đọc không. Nếu không, ghi lại lựa chọn: chấp nhận rủi ro, đổi SKU, hoặc bù bằng thiết kế.
+Với mỗi dòng, hãy kiểm tra xem SKU đó có hỗ trợ zone tại Southeast Asia lúc bạn đọc không. Nếu không, ghi lại lựa chọn: chấp nhận rủi ro, đổi SKU, hoặc bù bằng thiết kế.
 
 ## DR sang East Asia: mỗi lớp một cơ chế, và dữ liệu là phần khó
 
@@ -75,7 +75,7 @@ Cặp region của Southeast Asia là East Asia. Compute dễ vì không giữ t
 
 Có hai kiểu vận hành. **Active/passive**: region phụ giữ bản sao dữ liệu, compute tắt hoặc chạy tối thiểu, mọi traffic về region chính cho tới khi chuyển. Rẻ và đơn giản, đổi lại RTO dài hơn. **Active/active**: cả hai region nhận traffic. RTO thấp nhưng phải giải bài toán ghi ở hai nơi: xung đột dữ liệu, thứ tự sự kiện, một chuyến không bị ghép tài xế hai lần. Với `trips` nằm trong một PostgreSQL có một primary, active/active chưa làm được nếu không đổi kiến trúc dữ liệu (bài 57).
 
-Hai cạm bẫy hay bị bỏ qua. Thứ nhất, **Service Bus geo-disaster recovery (tier Premium) chỉ sao chép metadata** (queue, topic, subscription, rule), không sao chép message đang chờ. Tin chưa xử lý ở namespace chính không sang region phụ, nên producer phải gửi lại được từ Outbox và consumer phải chịu trùng (bài 53). Tính năng **geo-replication** mới hơn sao chép cả message; kiểm trạng thái hỗ trợ trong tài liệu trước khi dựa vào. Thứ hai, **DNS và TTL**: sau khi promote, PostgreSQL ở East Asia có hostname khác. Hoặc cập nhật connection string, hoặc dùng virtual endpoint của Flexible Server (endpoint ghi đi theo primary khi promote kiểu switchover), hoặc CNAME TTL ngắn trong Private DNS; pool kết nối phải bỏ connection cũ. TTL 1 giờ nghĩa là một phần client còn tìm server cũ cả giờ sau khi chuyển.
+Hai cạm bẫy hay bị bỏ qua. Thứ nhất, **Service Bus geo-disaster recovery (tier Premium) chỉ sao chép metadata** (queue, topic, subscription, rule), không sao chép message đang chờ. Tin chưa xử lý ở namespace chính không sang region phụ, nên producer phải gửi lại được từ Outbox và consumer phải xử lý được tin trùng lặp (bài 53). Tính năng **geo-replication** mới hơn sao chép cả message; kiểm tra trạng thái hỗ trợ trong tài liệu trước khi dựa vào. Thứ hai, **DNS và TTL**: sau khi promote, PostgreSQL ở East Asia có hostname khác. Hoặc cập nhật connection string, hoặc dùng virtual endpoint của Flexible Server (endpoint ghi tự trỏ về primary mới khi promote kiểu switchover), hoặc CNAME TTL ngắn trong Private DNS; pool kết nối phải bỏ connection cũ. TTL 1 giờ nghĩa là một phần client còn tìm server cũ cả giờ sau khi chuyển.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -84,11 +84,11 @@ Hai cạm bẫy hay bị bỏ qua. Thứ nhất, **Service Bus geo-disaster reco
 <figcaption>Hình 2. DR active/passive: Front Door dùng health probe để chuyển từ origin Southeast Asia sang East Asia, còn PostgreSQL sao chép bất đồng bộ sang replica.</figcaption>
 </figure>
 
-Hình 2 cho thấy điểm lệch: Front Door tự chuyển traffic, PostgreSQL thì không. Database còn là replica chỉ đọc thì mọi lệnh ghi đều lỗi. Bước promote phải nằm trong runbook và thường chậm nhất.
+Hình 2 cho thấy điểm khác biệt: Front Door tự chuyển traffic, PostgreSQL thì không. Khi database vẫn là replica chỉ đọc thì mọi lệnh ghi đều lỗi. Bước promote phải nằm trong runbook và thường chậm nhất.
 
 ## Chưa tập thì chưa có RTO
 
-RTO trong bảng mới là lời hứa; RTO thật là con số đo được khi tập. Một buổi DR drill có bốn phần: kịch bản («Southeast Asia không tới được từ phút 0»), runbook từng bước có người thực hiện, bấm giờ tới lúc một chuyến đặt thử thành công ở region phụ, và biên bản so mục tiêu với số đo. Tập mỗi quý trên `staging` và sau mỗi thay đổi kiến trúc lớn. Số đo vượt mục tiêu thì chọn: trả tiền để rút ngắn (standby ấm hơn, tự động hoá promote) hoặc thương lượng lại RTO với nghiệp vụ.
+RTO trong bảng mới là lời hứa; RTO thật là con số đo được khi tập. Một buổi DR drill có bốn phần: kịch bản («Southeast Asia không tới được từ phút 0»), runbook từng bước có người thực hiện, bấm giờ tới lúc một chuyến đặt thử thành công ở region phụ, và biên bản so sánh mục tiêu với kết quả đo. Tập mỗi quý trên `staging` và sau mỗi thay đổi kiến trúc lớn. Nếu kết quả đo vượt mục tiêu thì chọn một trong hai hướng: trả tiền để rút ngắn (standby ấm hơn, tự động hoá promote) hoặc thương lượng lại RTO với nghiệp vụ.
 
 Standby là khoản chi thường trực: replica, ACR nhân bản, storage GRS và compute tối thiểu ở region phụ đều tính tiền cả khi không có sự cố. Tra Pricing Calculator và để người giữ ngân sách ký quyết định.
 
@@ -113,7 +113,7 @@ az postgres flexible-server show \
   --query "{state:state, role:replicationRole}" --output table
 ```
 
-Lệnh trên không chứng minh replica đã bắt kịp primary: theo dõi metric replica lag trước khi tin vào RPO. Bước 3 là Front Door. Một route chỉ trỏ tới một origin group, và failover tự động chạy giữa các origin trong cùng group theo priority. Vì vậy `og-trips` chứa cả hai origin (priority 1 ở SEA, 2 ở EA) và nhận traffic thật. Group thứ hai `og-trips-standby` chỉ có origin EA, để kiểm standby qua một route riêng.
+Lệnh trên không chứng minh replica đã bắt kịp primary: theo dõi metric replica lag trước khi tin vào RPO. Bước 3 là Front Door. Một route chỉ trỏ tới một origin group, và failover tự động chạy giữa các origin trong cùng group theo priority. Vì vậy `og-trips` chứa cả hai origin (priority 1 ở SEA, 2 ở EA) và nhận traffic thật. Group thứ hai `og-trips-standby` chỉ có origin EA, để kiểm tra standby qua một route riêng.
 
 ```bash
 FD_RG=rg-toinoi-edge-staging-sea
@@ -158,7 +158,7 @@ az afd route create -g "$FD_RG" --profile-name "$P" --endpoint-name ep-toinoi-st
   --origin-path /
 ```
 
-`https://<endpoint>/standby-check/health/ready` luôn đi vào East Asia, nên bạn kiểm standby mà không chờ sự cố. Hai route chưa chứng minh certificate, tên miền riêng hay WAF đã đúng (bài 28). Bước 4 mô phỏng sự cố: tắt ingress của origin chính để probe thất bại, rồi đo. Giả định mỗi bản deploy trả header `x-toinoi-region` từ biến môi trường (middleware vài dòng, không trình bày ở đây).
+`https://<endpoint>/standby-check/health/ready` luôn đi vào East Asia, nên bạn kiểm tra standby mà không phải chờ sự cố. Hai route chưa chứng minh certificate, tên miền riêng hay WAF đã đúng (bài 28). Bước 4 mô phỏng sự cố: tắt ingress của origin chính để probe thất bại, rồi đo. Giả định mỗi bản deploy trả header `x-toinoi-region` từ biến môi trường (middleware vài dòng, không trình bày ở đây).
 
 ```bash
 HOST=$(az afd endpoint show -g "$FD_RG" --profile-name "$P" \

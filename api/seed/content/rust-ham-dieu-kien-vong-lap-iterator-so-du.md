@@ -34,7 +34,7 @@ fn fare(distance_km: u32) -> i64 {
 
 Hai điều khác với C# cần nhớ:
 
-- Không có tham số mặc định. Muốn "tùy chọn" thì nói trong kiểu, ví dụ `surcharge: Option<i64>` và gọi `fare_with_surcharge(5, None)`. Phụ phí trong lab chỉ minh họa chữ ký, chưa là quy tắc nghiệp vụ của Tới Nơi.
+- Không có tham số mặc định. Muốn "tuỳ chọn" thì nói trong kiểu, ví dụ `surcharge: Option<i64>` và gọi `fare_with_surcharge(5, None)`. Phụ phí trong lab chỉ minh hoạ chữ ký, chưa là quy tắc nghiệp vụ của Tới Nơi.
 - Không có overload theo số hay kiểu tham số cho hàm thường. Hai hàm khác nhau thì khác tên. Đa hình theo kiểu dùng trait, nằm ở phần sau của loạt bài.
 
 ## Dòng cuối không có dấu chấm phẩy nghĩa là gì?
@@ -238,7 +238,7 @@ Output thật: `sau khi chỉ dựng filter: closure đã chạy 0 lần`. Sau k
 | --- | --- | --- |
 | `for p in &postings { if … { total += p.amount } }` | `.iter().filter(…).map(…).sum::<i64>()` | Tính một giá trị từ cả dãy: iterator ngắn và không cần biến `mut` |
 | `for` kèm `return` hay `break` sớm | `.all(…)`, `.any(…)` | Kiểm tra điều kiện trên dãy: dùng hàm có sẵn, dừng ngay khi đủ kết luận |
-| `loop { … break giá_trị }` | không có tương đương gọn | Chưa biết số vòng, cần thử tới khi thỏa |
+| `loop { … break giá_trị }` | không có tương đương gọn | Chưa biết số vòng, cần thử tới khi thoả |
 | `for` có tác dụng phụ (in, ghi log) | tránh nhồi vào closure của `map` | Việc cần thứ tự và hiệu ứng rõ ràng: viết bằng `for` |
 
 <div class="tkh-callout tkh-callout--warn">

@@ -114,7 +114,7 @@ Ngoài testing, syllabus kể thêm các hình thức QC khác: **formal methods
 
 ### 3.1. Yêu cầu nghiệp vụ: chất lượng nghĩa là gì với Tới Nơi
 
-Tài liệu kiến trúc Tới Nơi (§1) đặt các đích: không mất đơn, **không tạo giao dịch trùng**, xử lý được retry/timeout, cập nhật trạng thái nhanh, bảo vệ dữ liệu cá nhân, có khả năng kiểm thử. §14.1 cho số khởi tạo (để thảo luận, chưa phải cam kết):
+Tài liệu kiến trúc Tới Nơi (§1) đặt ra các mục tiêu: không mất đơn, **không tạo giao dịch trùng**, xử lý được retry/timeout, cập nhật trạng thái nhanh, bảo vệ dữ liệu cá nhân, có khả năng kiểm thử. §14.1 đưa ra các con số khởi tạo (để thảo luận, chưa phải cam kết):
 
 | Capability | SLO khởi tạo | Mã trong lab |
 |---|---|---|
@@ -189,7 +189,7 @@ Danh sách lấy từ bảng rủi ro kiến trúc §14: request trùng tạo gi
 | Có hạn | Đạt trước mốc nào? | (không có) | «Trước buổi quyết định phát hành thứ Năm» |
 | Dẫn tới quyết định | Không đạt thì làm gì? | (không có) | «Không đạt ⇒ giữ VíXanh ở chế độ tắt, chỉ nhận tiền mặt» |
 
-Ba thuộc tính cuối nối trực tiếp với **exit criteria** (5.1.3): đo độ kỹ lưỡng (bao phủ, số defect chưa xử lý…) hoặc tiêu chí yes/no (đã chạy hết test dự kiến…). Hết thời gian hoặc ngân sách cũng là exit criteria hợp lệ — nếu các bên liên quan đã xem và **chấp nhận rủi ro** phát hành mà không test thêm.
+Ba thuộc tính cuối nối trực tiếp với **exit criteria** (5.1.3): đo độ kỹ lưỡng (bao phủ, số defect chưa xử lý…) hoặc tiêu chí yes/no (đã chạy hết test dự kiến…). Hết thời gian hoặc ngân sách cũng là exit criteria hợp lệ — nếu các bên liên quan đã xem xét và **chấp nhận rủi ro** phát hành mà không test thêm.
 
 ### 4.2. Đừng nhầm ba tầng mục tiêu
 
@@ -199,7 +199,7 @@ Ba thuộc tính cuối nối trực tiếp với **exit criteria** (5.1.3): đo
 | Mục tiêu kiểm thử | Người lập kế hoạch test | Cung cấp số đo p95 dưới tải tham chiếu để quyết định phát hành | Đặt «hệ thống đạt 500 ms» làm mục tiêu test — test không làm hệ thống nhanh lên |
 | Chỉ số / exit criteria | Đội test cùng các bên liên quan | Có báo cáo đo ≥ 3 lần chạy, ghi cấu hình máy | Đo một lần trên máy dev rồi kết luận |
 
-Testing **đo và báo cáo** chất lượng; nó không tự tạo ra chất lượng. Chất lượng tạo ra bởi cách cả đội làm việc — đó là phạm vi của QA.
+Testing **đo và báo cáo** chất lượng; bản thân testing không tạo ra chất lượng. Chất lượng do cách cả đội làm việc tạo ra — đó là phạm vi của QA.
 
 ### 4.3. Testing và QA trong một sự cố
 
@@ -212,13 +212,13 @@ Giả định: ba sprint liên tiếp, đội tìm 11 defect ở luồng voucher
 | Cả đội trong retrospective | Thấy 7/11 cùng nguồn: đặc tả thứ tự lỗi khó đọc ⇒ thêm bước example mapping cho mọi quy tắc «nhiều lỗi cùng lúc» vào Definition of Ready | QA |
 | Test lead | Theo dõi số defect voucher mỗi sprint sau thay đổi | QA dùng metric của testing |
 
-Đây đúng là câu của syllabus: cùng kết quả test, testing dùng để sửa defect, QA dùng để biết quy trình chạy tốt tới đâu.
+Đây đúng là ý của syllabus: cùng kết quả test, testing dùng để sửa defect, QA dùng để biết quy trình chạy tốt tới đâu.
 
 ## 5. Thực hành
 
 ### 5.1. Bảng mục tiêu chất lượng Tới Nơi — bản 1 (phạm vi lab)
 
-Bảng tính một dòng một mục tiêu. Số ngưỡng của R-NFR lấy từ §14.1; các ngưỡng khác là **giả định** để minh hoạ, đội thật phải thống nhất với các bên liên quan.
+Bảng tính một dòng một mục tiêu. Các ngưỡng của R-NFR lấy từ §14.1; các ngưỡng khác là **giả định** để minh hoạ, đội thật phải thống nhất với các bên liên quan.
 
 | ID | Mục tiêu chất lượng (bên liên quan) | Mục tiêu kiểm thử (loại 1.1.1) | Đo bằng · ngưỡng | Không đạt thì |
 |---|---|---|---|---|
@@ -266,7 +266,7 @@ Kết quả thực tế: bài giấy — chưa đo. Cột «Không đạt thì»
 
 **Mục tiêu xung đột.** «Ra thị trường trước đối thủ» và «bao phủ đủ» kéo ngược nhau. Không có công thức; việc của người test là làm rõ đánh đổi bằng số — điều kiện nào chưa test, rủi ro nào còn lại — để người có quyền chấp nhận rủi ro ký tên (5.1.3).
 
-**QC không chỉ có testing.** Ở Tới Nơi: máy trạng thái chuyến R-STATE-02 có thể được kiểm bằng model checking (formal methods); tải giờ cao điểm 70 chuyến/giây được ước bằng mô phỏng trước khi dựng hạ tầng; màn hình báo giá được thử bằng prototype giấy trước khi code. Cả ba là QC mà không phải testing theo nghĩa hẹp.
+**QC không chỉ có testing.** Ở Tới Nơi: máy trạng thái chuyến R-STATE-02 có thể kiểm bằng model checking (formal methods); tải giờ cao điểm 70 chuyến/giây ước lượng bằng mô phỏng trước khi dựng hạ tầng; màn hình báo giá thử bằng prototype giấy trước khi code. Cả ba đều là QC nhưng không phải testing theo nghĩa hẹp.
 
 **Phạm vi lab.** Mục tiêu về event trùng/sai thứ tự (Kafka), mất cache Redis, webhook thanh toán không đặt được trên lab — lab không có các thành phần này (R-ARCH-02). Ghi chúng vào bảng với cột «Môi trường: riêng (Series 11)» thay vì bỏ đi.
 

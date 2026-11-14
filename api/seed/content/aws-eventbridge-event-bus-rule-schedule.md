@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, eventbridge, event-bus, event-pattern, scheduler, e
 language: vi
 ---
 
-Một chuyến ở HCM vừa hoàn thành. Service `booking` phải báo cho bộ phận đối soát để chốt tiền, báo cho dịch vụ gửi hoá đơn, và gọi webhook của vài quán đối tác. Chuyến bị huỷ do tài xế thì còn thêm một đường khác: ghi nhận để chấm điểm tài xế. Ở bài 16, SNS cho ta fan-out theo vài attribute. Nhưng khi mỗi loại sự kiện có luật định tuyến riêng, theo nội dung chứ không chỉ theo nhãn, và 02:00 sáng còn cần một job đối soát chạy đúng giờ Việt Nam, ta cần một công cụ giỏi định tuyến hơn: **Amazon EventBridge**.
+Một chuyến ở HCM vừa hoàn thành. Service `booking` phải báo cho bộ phận đối soát để chốt tiền, báo cho dịch vụ gửi hoá đơn, và gọi webhook của vài quán đối tác. Chuyến bị huỷ do tài xế thì còn thêm một đường khác: ghi nhận để chấm điểm tài xế. Ở bài 16, SNS cho ta fan-out theo vài attribute. Nhưng khi mỗi loại sự kiện có luật định tuyến riêng, theo nội dung chứ không chỉ theo nhãn, và 02:00 sáng còn cần một job đối soát chạy đúng giờ Việt Nam, ta cần một công cụ định tuyến mạnh hơn: **Amazon EventBridge**.
 
 Đây là **bài 17** của lộ trình **AWS qua Tới Nơi · Phần 02: Container, serverless và dịch vụ ứng dụng**. Bạn cần xong bài 16 (SQS và SNS) và biết đọc JSON.
 
@@ -31,7 +31,7 @@ Mọi sự kiện có cùng phong bì (envelope):
 | `detail` | Nội dung nghiệp vụ, JSON tự do | `{"tripId":"1001","city":"HCM","fareVnd":52500}` |
 | `id`, `time`, `account`, `region` | Do EventBridge điền | dùng cho log và truy vết |
 
-Quy ước đặt tên cần chốt sớm: `source` theo service (không phải theo team), `detail-type` là động từ quá khứ, và `detail` có `eventId` ổn định để consumer idempotent giống bài 16. Gửi sự kiện bằng `aws events put-events`, mỗi lần chứa nhiều entry; request có thể thành công một phần nên luôn kiểm `FailedEntryCount`. PutEvents có hạn mức theo region; ở 70 chuyến/giây cộng các sự kiện phụ, hãy gom entry theo lô và kiểm Quotas.
+Quy ước đặt tên cần chốt sớm: `source` theo service (không phải theo team), `detail-type` là động từ quá khứ, và `detail` có `eventId` ổn định để consumer idempotent giống bài 16. Gửi sự kiện bằng `aws events put-events`, mỗi lần chứa nhiều entry; request có thể thành công một phần nên luôn kiểm tra `FailedEntryCount`. PutEvents có hạn mức theo region; ở 70 chuyến/giây cộng các sự kiện phụ, hãy gom entry theo lô và kiểm tra Quotas.
 
 ## Event pattern: định tuyến theo nội dung
 
@@ -48,14 +48,14 @@ Một **rule** gắn vào một bus và giữ một **event pattern**. Sự ki�
 }
 ```
 
-Pattern này khớp chuyến hoàn thành ở HCM có giá từ 50.000 trở lên. Ngoài `numeric`, còn `prefix` (`{"prefix":"driver_"}` cho lý do huỷ do tài xế), `anything-but` và `exists`. Có thể thử không tốn tài nguyên bằng `aws events test-event-pattern`, và nên làm trước khi đưa rule lên môi trường.
+Pattern này khớp chuyến hoàn thành ở HCM có giá từ 50.000 trở lên. Ngoài `numeric`, còn `prefix` (`{"prefix":"driver_"}` cho lý do huỷ do tài xế), `anything-but` và `exists`. Có thể thử mà không tốn tài nguyên bằng `aws events test-event-pattern`, và nên làm trước khi đưa rule lên môi trường.
 
 Khác SNS, nơi filter chỉ nhìn attribute, EventBridge khớp trực tiếp vào nội dung `detail`. Đổi lại, pattern chỉ cho khớp, không cho tính toán. Điều kiện phức tạp hơn vẫn phải nằm trong consumer.
 
 **Target** có thể là SQS, Lambda, Step Functions, API destination, một bus khác và nhiều dịch vụ AWS. Hai tính năng đáng dùng:
 
-- **Input transformer** cắt phong bì: lấy `$.detail.tripId` và vài trường consumer cần để tạo message gọn. Consumer không phụ thuộc vào cấu trúc phong bì.
-- **API destination** gọi HTTPS ngoài AWS, ví dụ webhook của quán đối tác. Nó đi kèm **connection** giữ phương thức xác thực (API key, Basic, OAuth), secret lưu trong Secrets Manager, cùng giới hạn tốc độ gọi để không dội đối tác. Đối tác chậm hoặc lỗi thì rule thử lại theo retry policy.
+- **Input transformer** cắt gọn phong bì: lấy `$.detail.tripId` và vài trường consumer cần để tạo message gọn. Consumer không phụ thuộc vào cấu trúc phong bì.
+- **API destination** gọi HTTPS ngoài AWS, ví dụ webhook của quán đối tác. API destination đi kèm **connection** để giữ phương thức xác thực (API key, Basic, OAuth), secret lưu trong Secrets Manager, cùng giới hạn tốc độ gọi để không làm quá tải đối tác. Đối tác chậm hoặc lỗi thì rule thử lại theo retry policy.
 
 **Retry policy và DLQ của rule** quyết định số phận khi target lỗi: `maximum_event_age_in_seconds` và `maximum_retry_attempts` (mặc định thử tới 24 giờ), rồi chuyển sự kiện sang một SQS DLQ. Nếu không đặt DLQ, sự kiện quá hạn bị bỏ và bạn chỉ thấy metric lỗi. Queue đích và DLQ đều cần resource policy cho phép `events.amazonaws.com` gửi vào, giới hạn bằng `aws:SourceArn` của rule.
 
@@ -79,20 +79,20 @@ EventBridge có hai cách đặt lịch. **Rule schedule** là kiểu cũ: rule 
 | Đích | Target của rule | Nhiều đích AWS, kể cả gọi API tổng quát |
 | Số lượng | Giới hạn theo bus | Rất lớn |
 
-Job đối soát lúc 02:00 là `cron(0 2 * * ? *)` kèm `schedule_expression_timezone = "Asia/Ho_Chi_Minh"`. Việt Nam không có giờ mùa hè nên viết bằng UTC vẫn đúng, nhưng múi giờ khai báo tường minh giúp người đọc bớt phải quy đổi. Flexible window 15 phút dàn nhẹ tải khi nhiều schedule cùng điểm. Lịch một lần hợp với việc kiểu "nhắc quán xác nhận đơn sau 10 phút"; schedule đặt một lần rồi có thể tự xoá sau khi chạy. Scheduler cần một IAM role riêng mà `scheduler.amazonaws.com` được assume để gọi đích.
+Job đối soát lúc 02:00 là `cron(0 2 * * ? *)` kèm `schedule_expression_timezone = "Asia/Ho_Chi_Minh"`. Việt Nam không có giờ mùa hè nên viết bằng UTC vẫn đúng, nhưng khai báo múi giờ rõ ràng giúp người đọc bớt phải quy đổi. Flexible window 15 phút dàn nhẹ tải khi nhiều schedule cùng chạy một giờ. Lịch một lần hợp với việc kiểu "nhắc quán xác nhận đơn sau 10 phút"; schedule đặt một lần rồi có thể tự xoá sau khi chạy. Scheduler cần một IAM role riêng mà `scheduler.amazonaws.com` được assume để gọi đích.
 
 ## Schema, archive, replay và Pipes
 
 **Schema registry** lưu mô tả cấu trúc sự kiện. Bật **schema discovery** trên bus thì EventBridge tự suy schema từ sự kiện thật đi qua. Nhờ đó nhóm khác tìm được cấu trúc `TripCompleted` thay vì đọc code, và có thể sinh code binding. Discovery tính phí theo lượng sự kiện; tra bảng giá trước khi bật ở prod.
 
-**Archive** lưu sự kiện của một bus theo thời hạn giữ (đặt số ngày, có thể kèm pattern để chỉ lưu một phần). **Replay** phát lại sự kiện trong một khoảng thời gian về chính bus nguồn. Ví dụ consumer `settlement` lỗi trong một giờ: sửa lỗi xong thì replay 1 giờ đó bằng `aws events start-replay`. Lưu ý quan trọng: replay đi qua đúng các rule hiện tại, và theo mặc định nó tới mọi rule khớp nên các consumer khác cũng nhận lại. Hãy dùng `FilterArns` để giới hạn theo rule khi cần, và đảm bảo consumer idempotent.
+**Archive** lưu sự kiện của một bus theo thời hạn giữ (đặt số ngày, có thể kèm pattern để chỉ lưu một phần). **Replay** phát lại sự kiện trong một khoảng thời gian về chính bus nguồn. Ví dụ consumer `settlement` lỗi trong một giờ: sửa lỗi xong thì replay 1 giờ đó bằng `aws events start-replay`. Lưu ý quan trọng: replay đi qua đúng các rule hiện tại, và theo mặc định sự kiện phát lại tới mọi rule khớp nên các consumer khác cũng nhận lại. Hãy dùng `FilterArns` để giới hạn theo rule khi cần, và đảm bảo consumer idempotent.
 
-**EventBridge Pipes** nối một nguồn (SQS, stream, ...) tới đích có thể kèm bước lọc và làm giàu. Với Tới Nơi: queue `settlement` → bước enrichment gọi Lambda bổ sung thông tin quán → đẩy lại lên bus dưới dạng `SettlementReady`. Pipes thay phần "keo" hay phải tự viết giữa hai dịch vụ.
+**EventBridge Pipes** nối một nguồn (SQS, stream, ...) tới đích có thể kèm bước lọc và làm giàu. Với Tới Nơi: queue `settlement` → bước enrichment gọi Lambda bổ sung thông tin quán → đẩy lại lên bus dưới dạng `SettlementReady`. Pipes thay phần code "keo" mà ta thường phải tự viết giữa hai dịch vụ.
 
 ## Cái giá phải trả
 
-- **At-least-once và không bảo đảm thứ tự**: sự kiện có thể tới trùng hoặc đảo; cần `eventId`, và không dùng bus để ép thứ tự trạng thái chuyến (dùng SQS FIFO hoặc kiểm số phiên bản trong `detail`).
-- **Mọi thay đổi pattern không hồi tố**; sai pattern là sự kiện lặng lẽ không khớp rule nào. Hãy cấu hình một rule bắt-mọi-thứ gửi vào CloudWatch Logs ở môi trường dev để nhìn thấy sự kiện đi qua.
+- **At-least-once và không bảo đảm thứ tự**: sự kiện có thể tới trùng lặp hoặc sai thứ tự; cần `eventId`, và không dùng bus để ép thứ tự trạng thái chuyến (dùng SQS FIFO hoặc kiểm số phiên bản trong `detail`).
+- **Mọi thay đổi pattern không hồi tố**; sai pattern thì sự kiện không khớp rule nào mà không báo lỗi. Hãy cấu hình một rule bắt mọi sự kiện, gửi vào CloudWatch Logs ở môi trường dev để nhìn thấy sự kiện đi qua.
 - **Replay là con dao hai lưỡi**: phát lại có thể gửi trùng hoá đơn, trùng push.
 - **API destination phụ thuộc đối tác**: đặt giới hạn tốc độ và retry hợp lý, nếu không rule làm nghẽn hoặc dội webhook của quán.
 - **Hạn mức** (PutEvents, số target mỗi rule, kích thước sự kiện) nằm trong Service Quotas, kiểm trước khi chốt thiết kế.

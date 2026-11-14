@@ -1,0 +1,12 @@
+{"file":"muc-tieu-kiem-thu-va-quality-assurance.md","edits":[
+{"old":"đặt các đích:","new":"đặt ra các mục tiêu:","reason":"'đích' dùng như danh từ là calque của goals","severity":"medium"},
+{"old":"§14.1 cho số khởi tạo","new":"§14.1 đưa ra các con số khởi tạo","reason":"'cho số khởi tạo' cụt, giọng dịch máy","severity":"medium"},
+{"old":"đã xem và **chấp nhận rủi ro**","new":"đã xem xét và **chấp nhận rủi ro**","reason":"'xem' thiếu chữ 'xét', gượng","severity":"low"},
+{"old":"nó không tự tạo ra chất lượng. Chất lượng tạo ra bởi cách cả đội làm việc","new":"bản thân testing không tạo ra chất lượng. Chất lượng do cách cả đội làm việc tạo ra","reason":"Tránh 'nó' chỉ khái niệm và câu bị động 'tạo ra bởi'","severity":"medium"},
+{"old":"Đây đúng là câu của syllabus:","new":"Đây đúng là ý của syllabus:","reason":"'câu của syllabus' gượng; đây là ý, không phải một câu trích","severity":"low"},
+{"old":"Số ngưỡng của R-NFR lấy từ §14.1","new":"Các ngưỡng của R-NFR lấy từ §14.1","reason":"'Số ngưỡng' cụt, tự ghép","severity":"low"},
+{"old":"có thể được kiểm bằng model checking","new":"có thể kiểm bằng model checking","reason":"Bỏ bị động kiểu tiếng Anh","severity":"low"},
+{"old":"được ước bằng mô phỏng","new":"ước lượng bằng mô phỏng","reason":"Bỏ bị động kiểu tiếng Anh","severity":"low"},
+{"old":"được thử bằng prototype giấy","new":"thử bằng prototype giấy","reason":"Bỏ bị động kiểu tiếng Anh","severity":"low"},
+{"old":"Cả ba là QC mà không phải testing theo nghĩa hẹp.","new":"Cả ba đều là QC nhưng không phải testing theo nghĩa hẹp.","reason":"Câu cụt, 'là ... mà không phải' gượng","severity":"low"}
+]}

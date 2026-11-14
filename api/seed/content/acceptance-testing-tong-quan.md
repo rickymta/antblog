@@ -29,13 +29,13 @@ Tới Nơi chuẩn bị mở dịch vụ ở Đà Nẵng. System test đã xong,
 
 ## 1. Giới thiệu
 
-Acceptance testing (kiểm thử chấp nhận, hay «nghiệm thu») là test level cuối trong danh sách năm level của CTFL. Nó giải quyết một vấn đề mà các level trước không giải được: **một hệ thống đúng đặc tả vẫn có thể không dùng được, không vận hành được, hoặc không được phép đưa vào sử dụng**. Vài ví dụ ở Tới Nơi:
+Acceptance testing (kiểm thử chấp nhận, hay «nghiệm thu») là test level cuối trong danh sách năm level của CTFL. Level này giải quyết một vấn đề mà các level trước không giải quyết được: **một hệ thống đúng đặc tả vẫn có thể không dùng được, không vận hành được, hoặc không được phép đưa vào sử dụng**. Vài ví dụ ở Tới Nơi:
 
 - Phí huỷ tính đúng R-CANCEL từng đồng, nhưng tài xế không hiểu vì sao khách huỷ mà mình không được gì — và bỏ app.
 - Mọi API đạt p95 dưới 500 ms, nhưng chưa ai từng khôi phục database từ backup; ngày có sự cố mới biết bản backup không dùng được.
 - Admin Portal chạy tốt, nhưng thiếu luồng duyệt hai người cho hoàn tiền mà hợp đồng với nhà thầu đã ghi.
 
-Acceptance testing được dùng trước quyết định triển khai — một bản phát hành, một thành phố mới, một ứng dụng giao từ nhà thầu. Trong Agile nó còn xuất hiện ở mức từng user story (qua acceptance criteria). Vì nó trả lời câu hỏi «có đúng thứ người dùng cần không», nó gắn chặt với **validation** ở [TEST-005](/articles/verification-va-validation).
+Acceptance testing được dùng trước quyết định triển khai — một bản phát hành, một thành phố mới, một ứng dụng giao từ nhà thầu. Trong Agile, acceptance testing còn xuất hiện ở mức từng user story (qua acceptance criteria). Vì trả lời câu hỏi «có đúng thứ người dùng cần không», acceptance testing gắn chặt với **validation** ở [TEST-005](/articles/verification-va-validation).
 
 ## 2. Lý thuyết theo ISTQB
 
@@ -43,7 +43,7 @@ Acceptance testing được dùng trước quyết định triển khai — mộ
 
 Theo CTFL v4.0.1, acceptance testing **tập trung vào validation và vào việc chứng minh hệ thống sẵn sàng để triển khai** — tức là hệ thống đáp ứng nhu cầu nghiệp vụ của người dùng. Syllabus nói thêm: lý tưởng nhất, acceptance testing **do chính những người dùng dự kiến thực hiện**. Syllabus liệt kê các dạng chính: user acceptance testing (UAT), operational acceptance testing, contractual acceptance testing, regulatory acceptance testing, alpha testing và beta testing.
 
-Mục 1.1.1 của CTFL cũng có một mục tiêu test liên quan trực tiếp: kiểm đối tượng test tuân thủ yêu cầu hợp đồng, pháp lý và quy định — đó chính là đất của hai dạng nghiệm thu hợp đồng và quy định.
+Mục 1.1.1 của CTFL cũng có một mục tiêu test liên quan trực tiếp: kiểm tra xem đối tượng test có tuân thủ yêu cầu hợp đồng, pháp lý và quy định hay không — đó chính là phạm vi của hai dạng nghiệm thu hợp đồng và quy định.
 
 ### 2.2. Acceptance testing qua năm thuộc tính phân biệt test level
 
@@ -172,7 +172,7 @@ Thêm một câu hỏi phụ khi phân vân: **ai có quyền nói «đạt»?**
 | Alpha | 15 nhân viên vận hành và 10 tài xế mời tới văn phòng dùng app Driver bản mới trên thiết bị của công ty trong 1 tuần; không còn lỗi chặn | — |
 | Beta | 200 tài xế Đà Nẵng dùng bản thử qua kênh phát hành thử của cửa hàng ứng dụng 2 tuần; phản hồi được phân loại, tỉ lệ app bị đóng đột ngột dưới ngưỡng đã thống nhất | — |
 
-Hai lưu ý: các con số là giả định; SLO §14.1 (99,9%/tháng, p95 dưới 500 ms) là **mục tiêu khởi tạo để thảo luận**, nên muốn dùng làm tiêu chí OAT phải được chốt thành cam kết trước.
+Hai lưu ý: các con số là giả định; SLO §14.1 (99,9%/tháng, p95 dưới 500 ms) là **mục tiêu khởi tạo để thảo luận**, nên nếu muốn dùng làm tiêu chí OAT thì phải chốt thành cam kết trước.
 
 ### 4.3. Điều kiện trước khi bắt đầu nghiệm thu
 
@@ -189,7 +189,7 @@ Phân loại mỗi hoạt động vào UAT, OAT, hợp đồng, quy định, alp
 | A1 | 20 khách quen được mời thử đặt xe, đặt giao bưu kiện và huỷ chuyến trên staging với tài khoản và dữ liệu tổng hợp |
 | A2 | Đội vận hành khôi phục database từ backup vào một môi trường riêng và đo thời gian khôi phục |
 | A3 | 200 tài xế Đà Nẵng cài bản beta của app Driver trên điện thoại của mình và dùng khi chạy chuyến thật |
-| A4 | Pháp chế cùng tester kiểm tuân thủ dữ liệu cá nhân: log che số điện thoại, có thời hạn lưu dữ liệu GPS, trang tra cứu công khai không lộ PII |
+| A4 | Pháp chế cùng tester kiểm tra tuân thủ dữ liệu cá nhân: log che số điện thoại, có thời hạn lưu dữ liệu GPS, trang tra cứu công khai không lộ PII |
 | A5 | 10 tài xế được mời tới văn phòng Tới Nơi dùng app Driver bản mới trên máy của công ty, có QA ngồi cạnh ghi nhận |
 | A6 | Đối chiếu Admin Portal nhà thầu bàn giao với phụ lục tiêu chí nghiệm thu trước khi thanh toán đợt cuối |
 | A7 | Nhân viên Finance thử luồng hoàn tiền có duyệt hai người và đối soát cuối ngày trên staging |
@@ -235,18 +235,18 @@ Tester gần như luôn ở cột H. Đó là điểm khác lớn nhất giữa 
 - **Acceptance không nhất thiết là pha cuối.** Trong Agile, mỗi user story có acceptance criteria kiểm trong sprint (ATDD), còn UAT/OAT cấp bản phát hành diễn ra trước khi ra mắt thành phố. Test level không phải thứ tự thời gian cứng.
 - **Validation là trọng tâm, nhưng không duy nhất.** Nghiệm thu hợp đồng và quy định đối chiếu với tiêu chí đã viết sẵn — bản chất gần verification. Đừng dùng câu «acceptance là validation» để bỏ qua việc kiểm từng điều khoản.
 - **UAT tìm ra nhiều defect là tín hiệu xấu cho các level trước**, không phải thành công của UAT. Nhận xét này là kinh nghiệm ngành, không phải câu chữ của CTFL v4.0.1.
-- **Beta có thiên lệch.** Người tự nguyện tham gia thường rành công nghệ hơn số đông; số đo từ beta cần sự đồng ý của người dùng — lại là chuyện quy định.
+- **Beta có thiên lệch.** Người tự nguyện tham gia thường rành công nghệ hơn số đông; số liệu đo từ beta cần sự đồng ý của người dùng — đây lại là chuyện quy định.
 - **Sai lầm thường gặp:** để tester chạy lại kịch bản system test rồi gọi là UAT; ký nghiệm thu khi chưa có tiêu chí viết ra; quên OAT tới ngày ra mắt; gọi bài test nội bộ của đội QA là «alpha»; dùng dữ liệu khách thật để «UAT cho giống».
 
 ## 7. Bài tập và câu hỏi ôn tập
 
 ### Bài tập
 
-**Bài 1.** Viết ba tiêu chí OAT cho luồng thu tiền VíXanh của Tới Nơi (gợi ý: kiến trúc §8.3 có đối soát định kỳ, §15.2 có số đo tỉ lệ thu tiền thất bại).
+**Bài 1.** Viết ba tiêu chí OAT cho luồng thu tiền VíXanh của Tới Nơi (gợi ý: kiến trúc §8.3 có đối soát định kỳ, §15.2 có chỉ số tỉ lệ thu tiền thất bại).
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>(1) Job đối soát cuối ngày chạy được trên môi trường vận hành, phát hiện giao dịch lệch giữa sổ của Tới Nơi và báo cáo VíXanh, và runbook xử lý lệch được đội vận hành diễn tập thành công. (2) Khi tỉ lệ thu tiền thất bại vượt ngưỡng đã thống nhất trong 10 phút, cảnh báo tới người trực (§15.2 có số đo «payment authorization/capture/failure rate»). (3) Đổi khoá bí mật dùng để gọi VíXanh (lưu trong Vault/KMS, §13.2) mà không làm gián đoạn thu tiền. Cả ba do đội vận hành thực hiện và quyết định — nên là OAT, không phải UAT.</p>
+<p>(1) Job đối soát cuối ngày chạy được trên môi trường vận hành, phát hiện giao dịch lệch giữa sổ của Tới Nơi và báo cáo VíXanh, và runbook xử lý lệch được đội vận hành diễn tập thành công. (2) Khi tỉ lệ thu tiền thất bại vượt ngưỡng đã thống nhất trong 10 phút, cảnh báo tới người trực (§15.2 có chỉ số «payment authorization/capture/failure rate»). (3) Đổi khoá bí mật dùng để gọi VíXanh (lưu trong Vault/KMS, §13.2) mà không làm gián đoạn thu tiền. Cả ba do đội vận hành thực hiện và quyết định — nên là OAT, không phải UAT.</p>
 </details>
 
 **Bài 2.** Nhà thầu Admin Portal nói: «System test của chúng tôi đạt 100%, Tới Nơi phải ký nghiệm thu». Viết ba ý phản biện.
@@ -294,7 +294,7 @@ Tester gần như luôn ở cột H. Đó là điểm khác lớn nhất giữa 
 <p><b>a) đúng</b>: người ngoài đội phát triển thử tại môi trường do bên phát triển kiểm soát. b) sai: beta diễn ra ở nơi và trên thiết bị của người dùng. c) sai: không đối chiếu hợp đồng. d) sai: không phải test level kỹ thuật bên trong hệ thống.</p>
 </details>
 
-**Câu 4 (K2).** Kiểm Tới Nơi không lưu số thẻ và mã CVV, log che dữ liệu cá nhân theo quy định hiện hành thuộc dạng nào là chính?
+**Câu 4 (K2).** Việc kiểm tra Tới Nơi không lưu số thẻ và mã CVV, đồng thời log che dữ liệu cá nhân, theo quy định hiện hành thuộc dạng nào là chính?
 
 - a) Operational acceptance testing
 - b) User acceptance testing

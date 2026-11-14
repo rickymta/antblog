@@ -10,13 +10,13 @@ language: vi
 
 Lần review thứ ba trong tháng, Lan lại để cùng một bình luận: "presentation import thẳng data rồi". Tuần trước có thêm một PR trộn logic với hai trăm dòng chỉ khác cách xuống dòng, và một hàm đọc `fareVnd` từ JSON nhận `dynamic` mà không ai kiểm. Cả ba việc máy làm đều đặn hơn người.
 
-Bài này dựng cổng chất lượng cho Tới Nơi: `analysis_options.yaml` chặt, một lint tự viết cấm presentation import data, `dart format`, `dart fix`, `// ignore` có lý do, pre-commit và ngân sách cảnh báo bằng 0. Đây là bài 32 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 31 về integration test và patrol](/articles/flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi) trước, và [bài 21 về Clean Architecture](/articles/flutter-clean-architecture-domain-data-presentation-mobile), vì lint mới thay giới hạn mà test regex ở bài đó đã ghi lại. Phần lint đầu tiên nằm ở [bài 06](/articles/dart-package-pubspec-lint-test-toi-noi-core).
+Bài này dựng cổng chất lượng cho Tới Nơi: `analysis_options.yaml` chặt, một lint tự viết cấm presentation import data, `dart format`, `dart fix`, `// ignore` có lý do, pre-commit và ngân sách cảnh báo bằng 0. Đây là bài 32 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 31 về integration test và patrol](/articles/flutter-integration-test-patrol-luong-dat-chuyen-tren-thiet-bi) trước, và [bài 21 về Clean Architecture](/articles/flutter-clean-architecture-domain-data-presentation-mobile), vì lint mới thay giới hạn mà test regex ở bài đó đã ghi lại. Lần đầu ta nói tới lint là ở [bài 06](/articles/dart-package-pubspec-lint-test-toi-noi-core).
 
-Một điểm lệch so với khung loạt bài: khung ghi `custom_lint`, nhưng cuối năm 2026 đó không còn là đường khuyên dùng. Bài đi theo analyzer plugin chính thức của Dart; bằng chứng nằm ở phần "Plugin chính thức".
+Một điểm lệch so với khung loạt bài: khung ghi `custom_lint`, nhưng đến cuối năm 2026 cách này không còn được khuyên dùng. Bài đi theo analyzer plugin chính thức của Dart; bằng chứng nằm ở phần "Plugin chính thức".
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Dự án bật <code>plugins: riverpod_lint</code>. Một file có <code>Notifier</code> với field công khai (lint của riverpod_lint, mức info), một file khác import lớp data từ presentation (lint ta tự viết, mức warning). Ta chạy <code>flutter analyze</code>. Nó báo gì?</p>
+<p>Dự án bật <code>plugins: riverpod_lint</code>. Một file có <code>Notifier</code> với field công khai (lint của riverpod_lint, mức info), một file khác import lớp data từ presentation (lint ta tự viết, mức warning). Ta chạy <code>flutter analyze</code>. Lệnh này báo gì?</p>
 <details><summary>Xem đáp án</summary><p>Không báo gì: với Flutter 3.47.4, <code>flutter analyze</code> in <code>No issues found!</code> dù hai vi phạm có thật. <code>dart analyze</code> trong cùng thư mục báo cả hai, nên cổng chặn của lab là <code>dart analyze --fatal-infos</code>.</p></details>
 </div>
 
@@ -28,7 +28,7 @@ Ba thứ hay bị gọi chung là "lint" nằm ở ba tầng:
 - **Linter** là tập rule đi kèm SDK, bật bằng `include` hoặc `linter: rules:`. Phần lớn ở mức info.
 - **Plugin** là code ngoài SDK, do analysis server khởi chạy riêng và nói chuyện qua giao thức plugin, khai báo ở khối `plugins:`. `riverpod_lint` và lint tự viết thuộc tầng này.
 
-Cả ba cho cùng dạng kết quả: chẩn đoán có mức và mã rule. Mã thoát của `dart analyze` phản ánh mức đó: 0 khi sạch, 1 khi chỉ còn info và ta thêm `--fatal-infos`, 2 khi có warning, 3 khi có error, và 4 khi không dựng được plugin (ví dụ khi không với tới pub.dev). Lab đo cả năm giá trị bằng test.
+Cả ba cho cùng dạng kết quả: chẩn đoán có mức và mã rule. Mã thoát của `dart analyze` phản ánh mức đó: 0 khi sạch, 1 khi chỉ còn info và ta thêm `--fatal-infos`, 2 khi có warning, 3 khi có error, và 4 khi không dựng được plugin (ví dụ khi không truy cập được pub.dev). Lab đo cả năm giá trị bằng test.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -98,9 +98,9 @@ plugins:
 
 `flutter_lints` 6.0.0 là `lints/recommended` cộng 10 rule riêng cho Flutter và không có biến thể "strict". "Mức strict" của lab là ba cờ cộng 9 rule ta chọn.
 
-## Ba cờ strict: dynamic không lọt qua âm thầm
+## Ba cờ strict: dynamic không thể lọt vào mà không bị báo
 
-Ba cờ nằm ở `analyzer.language`, mỗi cờ chặn một kẽ hở để `dynamic` chui vào mà không ai thấy. Việc quen thuộc của Tới Nơi, đọc cước từ body JSON, viết hai lần. Bản "trước":
+Ba cờ nằm ở `analyzer.language`, mỗi cờ chặn một kẽ hở để `dynamic` chui vào mà không ai thấy. Ta lấy việc quen thuộc của Tới Nơi, đọc cước từ body JSON, rồi viết hai lần. Bản "trước":
 
 ### before.dart · 32-lint-analyzer/fixtures/strict_before/lib/before.dart
 
@@ -159,7 +159,7 @@ Cast `as Map<String, dynamic>` vẫn có thể ném `TypeError` khi body không 
 
 ## Plugin chính thức, và vì sao không dùng custom_lint
 
-`custom_lint` từng là cách phổ biến nhất để viết lint theo gói. Cuối năm 2026, bằng chứng cho thấy đó không còn là đường khuyên dùng. Gói chưa bị đánh dấu discontinued và pub.dev không ghi deprecated; chỉ là:
+`custom_lint` từng là cách phổ biến nhất để viết lint theo gói. Cuối năm 2026, bằng chứng cho thấy hướng này không còn được khuyên dùng. Gói chưa bị đánh dấu discontinued và pub.dev không ghi deprecated; tuy vậy có những dấu hiệu sau:
 
 - `custom_lint` 0.8.1 (09/2025) là bản mới nhất trên pub.dev và buộc `analyzer ^8.0.0`; bản analyzer hiện hành là 14.7.0.
 - Trong một project trống, `dart pub add dev:custom_lint` rồi `dev:riverpod_generator` cho `riverpod_generator 4.0.0+1` (mới nhất 4.0.10) và `analyzer 8.4.0`: cả chuỗi generator bị kéo lùi.
@@ -167,7 +167,7 @@ Cast `as Map<String, dynamic>` vẫn có thể ném `TypeError` khi body không 
 
 Vì vậy lab dùng đường chính thức cho cả `riverpod_lint` (3.2.0, phát hành 06/11/2026, nên kiểm lại khi đọc) lẫn plugin tự viết. Ta ghim đúng `3.2.0` thay vì `^3.2.0`: plugin không có lockfile, nên bản mới thêm lint có thể làm đỏ ngân sách bằng 0 mà không ai đổi dòng code nào. Theo dart.dev, warning của plugin bật mặc định còn lint rule của plugin tắt mặc định, nên `toi_noi_lints` bật rule dưới `diagnostics:`. Sửa khối `plugins:` xong phải khởi động lại analysis server.
 
-Trong `~/.dartServer/.plugin_manager/`, mỗi tổ hợp plugin được dựng thành một package `plugin_entrypoint` rồi biên dịch AOT, nên lần đầu hoặc lần đầu sau khi sửa plugin chậm hơn hẳn. Bước resolve phụ thuộc thì chạy lại ở mỗi lần phân tích: ta trỏ `PUB_HOSTED_URL` vào một cổng chết và `dart analyze` thoát 4 kèm stack trace dù cache đã ấm. Vậy pre-commit và CI có plugin đều cần với tới pub.dev. Với `riverpod_lint`, ta thử tay một `Notifier` có field công khai và `dart analyze` báo `avoid_public_notifier_properties` (info); lab không có test tự động cho nó.
+Trong `~/.dartServer/.plugin_manager/`, mỗi tổ hợp plugin được dựng thành một package `plugin_entrypoint` rồi biên dịch AOT, nên lần chạy đầu tiên và lần chạy đầu tiên sau khi sửa plugin chậm hơn hẳn. Bước resolve phụ thuộc thì chạy lại ở mỗi lần phân tích: ta trỏ `PUB_HOSTED_URL` vào một cổng chết và `dart analyze` thoát 4 kèm stack trace dù cache đã có sẵn. Vậy pre-commit và CI có dùng plugin đều cần truy cập được pub.dev. Với `riverpod_lint`, ta thử tay một `Notifier` có field công khai và `dart analyze` báo `avoid_public_notifier_properties` (info); lab không có test tự động cho nó.
 
 Còn `flutter analyze`? Trên Flutter 3.47.4 nó báo lỗi của analyzer (ta thêm `int y = 'a';` và nó bắt) nhưng không in chẩn đoán của plugin, lệch với dart.dev vốn mô tả plugin chạy cùng analyzer. Giả thuyết của ta, từ log giao thức: `flutter analyze` dùng language server và kết thúc ngay sau khi plugin báo đang phân tích, trước khi chẩn đoán của plugin về tới. Đó mới là giả thuyết và có thể đổi ở bản Flutter khác; ta chọn `dart analyze` làm cổng, lệnh này chạy được trong project Flutter.
 
@@ -290,7 +290,7 @@ class NoDataImportInPresentation extends AnalysisRule {
   }
 ```
 
-Rule không đụng tới chuỗi URI. `DirectiveUriWithSource` đã mang đường dẫn file đích, nên import tương đối, `package:` về chính package, `export` và URI trong `if (...)` đều quy về một phép so: lớp của file đang phân tích (thư mục con đầu tiên dưới `lib/`) có là `presentation` và lớp của đích có là `data` không.
+Rule không đụng tới chuỗi URI. `DirectiveUriWithSource` đã mang đường dẫn file đích, nên import tương đối, `package:` về chính package, `export` và URI trong `if (...)` đều quy về một phép so sánh: lớp của file đang phân tích (thư mục con đầu tiên dưới `lib/`) có là `presentation` và lớp của đích có là `data` không.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -354,7 +354,7 @@ class NoDataImportInPresentationTest extends AnalysisRuleTest {
   }
 ```
 
-Một ca đáng xem là import có điều kiện, đúng chỗ regex của bài 21 bó tay:
+Một test case đáng xem là import có điều kiện, đúng chỗ regex của bài 21 không xử lý được:
 
 ### no_data_import_in_presentation_test.dart · 32-lint-analyzer/lint_plugin/test/no_data_import_in_presentation_test.dart (trích)
 
@@ -367,7 +367,7 @@ Một ca đáng xem là import có điều kiện, đúng chỗ regex của bài
   );
 ```
 
-Mười một test phủ các cách viết import, `export`, hai vi phạm một file, thư mục con của presentation, và các ca không được báo (domain, `dart:`, data, composition root, package khác có `lib/data`). Ta cũng phá thật: đổi `'data'` trong rule thành chuỗi khác thì test đỏ. Một nhóm test khác chạy `dart analyze` thật trên `fixtures/layers`: plugin được nạp, warning ra đúng file, mã thoát 2; còn `layers_off` khai báo plugin mà không bật rule thì im lặng.
+Mười một test phủ các cách viết import, `export`, hai vi phạm một file, thư mục con của presentation, và các trường hợp không được báo (domain, `dart:`, data, composition root, package khác có `lib/data`). Ta cũng thử phá rule thật: đổi `'data'` trong rule thành chuỗi khác thì test đỏ. Một nhóm test khác chạy `dart analyze` thật trên `fixtures/layers`: plugin được nạp, warning ra đúng file, mã thoát 2; còn `layers_off` khai báo plugin mà không bật rule thì im lặng.
 
 ## dart format, dart fix và ignore có lý do
 
@@ -468,8 +468,8 @@ Bản đầu của script từng lọt cổng ba cách, và test bằng `git com
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Năm lỗi hay gặp với lint</span>
 <ul>
-<li><strong>Dùng <code>flutter analyze</code> làm cổng khi có plugin.</strong> Dấu hiệu: IDE đỏ, CI xanh. Nguyên nhân: trên Flutter 3.47.4, nó không in chẩn đoán của plugin. Cách sửa: chạy <code>dart analyze --fatal-infos</code> ở CI và pre-commit.</li>
-<li><strong>Thêm <code>custom_lint</code> theo hướng dẫn cũ.</strong> Dấu hiệu: pub kéo <code>riverpod_generator</code> và <code>analyzer</code> về bản cũ, hoặc báo xung đột. Nguyên nhân: nó buộc <code>analyzer ^8.0.0</code>. Cách sửa: bỏ nó, dùng khối <code>plugins:</code>.</li>
+<li><strong>Dùng <code>flutter analyze</code> làm cổng khi có plugin.</strong> Dấu hiệu: IDE đỏ, CI xanh. Nguyên nhân: trên Flutter 3.47.4, lệnh này không in chẩn đoán của plugin. Cách sửa: chạy <code>dart analyze --fatal-infos</code> ở CI và pre-commit.</li>
+<li><strong>Thêm <code>custom_lint</code> theo hướng dẫn cũ.</strong> Dấu hiệu: pub kéo <code>riverpod_generator</code> và <code>analyzer</code> về bản cũ, hoặc báo xung đột. Nguyên nhân: gói này buộc <code>analyzer ^8.0.0</code>. Cách sửa: bỏ nó, dùng khối <code>plugins:</code>.</li>
 <li><strong>Lint của plugin im lặng.</strong> Dấu hiệu: vi phạm rõ ràng mà <code>dart analyze</code> sạch và thoát 0. Nguyên nhân: lint rule của plugin tắt mặc định, thiếu <code>diagnostics:</code>; chưa khởi động lại server sau khi sửa <code>plugins:</code>; hoặc ta chỉ định thư mục con, vì <code>dart analyze --fatal-infos lib</code> không báo chẩn đoán của plugin còn không đối số, <code>.</code> và đường dẫn một file thì báo (test kiểm). Cách sửa: bật rule, khởi động lại, chạy không đối số hoặc <code>.</code> ở thư mục package.</li>
 <li><strong>Ignore thiếu tiền tố cho lint của plugin.</strong> Dấu hiệu: đã viết <code>// ignore: tên_rule</code> mà vẫn bị báo. Nguyên nhân: rule của plugin cần dạng <code>plugin/rule</code>. Cách sửa: <code>// ignore: toi_noi_lints/no_data_import_in_presentation</code> kèm lý do.</li>
 <li><strong>Format khác nhau giữa các máy.</strong> Dấu hiệu: pre-commit chặn vì chưa format, nhưng <code>dart format .</code> ở máy khác không đổi gì. Nguyên nhân: đổi <code>sdk</code> mà chưa <code>pub get</code> thì <code>package_config.json</code> giữ language version cũ. Cách sửa: <code>pub get</code> sau khi đổi SDK constraint.</li>
@@ -493,7 +493,7 @@ dart analyze --fatal-infos
 dart test
 ```
 
-Đã kiểm với Flutter 3.47.4 và Dart 3.13.3: lab và `lint_plugin` đều `No issues found!` với `--fatal-infos`, `flutter test` 41 test xanh, `dart test` trong `lint_plugin` 11 test xanh. Mức kiểm chứng: **Kiểm chứng tự động**, không cần thiết bị, nhưng cần pub.dev: mỗi lần phân tích có plugin cần với tới nó, nên bộ test không chạy offline. Phiên bản: `flutter_lints` 6.0.0, `riverpod_lint` 3.2.0, `analysis_server_plugin` 0.3.26, `analyzer` 14.7.0, `analyzer_testing` 0.4.5, `flutter_riverpod` 3.5.0.
+Đã kiểm với Flutter 3.47.4 và Dart 3.13.3: lab và `lint_plugin` đều `No issues found!` với `--fatal-infos`, `flutter test` 41 test xanh, `dart test` trong `lint_plugin` 11 test xanh. Mức kiểm chứng: **Kiểm chứng tự động**, không cần thiết bị, nhưng cần pub.dev: mỗi lần phân tích có plugin đều cần truy cập được pub.dev, nên bộ test không chạy offline. Phiên bản: `flutter_lints` 6.0.0, `riverpod_lint` 3.2.0, `analysis_server_plugin` 0.3.26, `analyzer` 14.7.0, `analyzer_testing` 0.4.5, `flutter_riverpod` 3.5.0.
 
 - App (`quote_screen_test`): theo bảng giá minh hoạ, 25.500 VND ở 5 km, 30.000 VND ở 6 km, 453.000 VND ở 100 km; ngoài miền là lỗi.
 - Ba cờ strict (`strict_analysis_test`): 5 chẩn đoán cho mã "trước", 0 cho mã "sau" và cho mã "trước" khi không có cờ.

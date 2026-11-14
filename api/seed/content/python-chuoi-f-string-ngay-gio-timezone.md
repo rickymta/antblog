@@ -14,7 +14,7 @@ Email của [Tới Nơi](/articles/du-an-mau-toi-noi) xác nhận một chuyến
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p><code>"Tới Nơi"</code> có 7 ký tự. Khi mã hóa UTF-8, nó có bao nhiêu byte, và vì sao con số khác 7?</p>
+<p><code>"Tới Nơi"</code> có 7 ký tự. Khi mã hoá UTF-8, nó có bao nhiêu byte, và vì sao con số khác 7?</p>
 <details><summary>Xem đáp án</summary><p>10 byte. UTF-8 dùng 1 đến 4 byte cho mỗi ký tự: chữ ASCII như <code>T</code>, <code>N</code>, <code>i</code> mất 1 byte, còn <code>ớ</code> mất 3 byte và <code>ơ</code> mất 2 byte. <code>len(str)</code> đếm ký tự (code point), <code>len(bytes)</code> đếm byte.</p></details>
 </div>
 
@@ -54,7 +54,7 @@ Dòng `decode sai (latin-1)` là lỗi hiển thị trong mở bài: byte UTF-8 
 
 Tham số `errors=` quyết định điều gì xảy ra khi byte không hợp lệ: mặc định `"strict"` ném `UnicodeDecodeError` (tốt cho dữ liệu cần chính xác, vì lỗi hiện ra sớm), còn `"replace"` thay chỗ hỏng bằng ký tự thay thế `�` để chương trình chạy tiếp (chỉ hợp với log hay hiển thị, vì thông tin đã mất). Với file, hãy luôn nêu `encoding="utf-8"` ở cả đọc lẫn ghi thay vì tin mặc định của máy, như hàm `file_roundtrip` của lab (`write_text(..., encoding="utf-8")` rồi `read_text(..., encoding="utf-8")`, in lại đúng `Tới Nơi`).
 
-Tiếng Việt còn một chi tiết nữa: chữ `ớ` có thể là **một** code point dựng sẵn (NFC) hoặc `ơ` cộng dấu sắc rời (NFD). Hai chuỗi trông giống hệt nhưng so sánh `==` ra `False`. Chuẩn hóa trước khi so sánh hoặc làm khóa tìm kiếm:
+Tiếng Việt còn một chi tiết nữa: chữ `ớ` có thể là **một** code point dựng sẵn (NFC) hoặc `ơ` cộng dấu sắc rời (NFD). Hai chuỗi trông giống hệt nhưng so sánh `==` ra `False`. Chuẩn hoá trước khi so sánh hoặc làm khoá tìm kiếm:
 
 ```python
 import unicodedata
@@ -65,7 +65,7 @@ def normalized_forms(text: str) -> tuple[bool, str]:
     return text == nfd, nfc
 ```
 
-Với `"Tới Nơi"`, lab in `NFC == NFD? False; NFC: Tới Nơi`. Chuỗi nhập từ bàn phím, từ macOS hay từ file Word có thể mang dạng khác nhau; quy ước của ta là chuẩn hóa về NFC ở cửa vào.
+Với `"Tới Nơi"`, lab in `NFC == NFD? False; NFC: Tới Nơi`. Chuỗi nhập từ bàn phím, từ macOS hay từ file Word có thể mang dạng khác nhau; quy ước của ta là chuẩn hoá về NFC ở cửa vào.
 
 ## f-string, format spec và số tiền VND
 
@@ -128,7 +128,7 @@ Dòng `[p.strip() for p in ...]` là list comprehension, sẽ được giải th
 
 ## datetime: naive, aware và múi giờ
 
-`datetime` có hai dạng. **Naive** không mang thông tin múi giờ: `datetime(2026, 11, 6, 8, 30)` chỉ nói «8:30» mà không nói ở đâu. **Aware** mang `tzinfo`, nên xác định một thời điểm duy nhất trên trục thời gian. Python xử lý hai dạng này khác nhau tùy phép toán, và đó là chỗ dễ sai:
+`datetime` có hai dạng. **Naive** không mang thông tin múi giờ: `datetime(2026, 11, 6, 8, 30)` chỉ nói «8:30» mà không nói ở đâu. **Aware** mang `tzinfo`, nên xác định một thời điểm duy nhất trên trục thời gian. Python xử lý hai dạng này khác nhau tuỳ phép toán, và đó là chỗ dễ sai:
 
 - So sánh thứ tự (`<`, `>`) hoặc trừ giữa naive và aware ném `TypeError`.
 - Nhưng `==` giữa naive và aware **không** ném lỗi: nó trả `False` một cách âm thầm, vì theo tài liệu, naive không bao giờ bằng aware.
@@ -362,7 +362,7 @@ OK 39/39
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
 | Chữ tiếng Việt thành `Tá»i NÆ¡i` | Nơi ghi và nơi đọc có cùng `encoding="utf-8"` không |
-| Hai chuỗi trông giống nhưng `==` là `False` | Có khác dạng NFC và NFD không; chuẩn hóa về NFC |
+| Hai chuỗi trông giống nhưng `==` là `False` | Có khác dạng NFC và NFD không; chuẩn hoá về NFC |
 | `TypeError` khi so sánh hai datetime | Một vế naive, một vế aware; đưa cả hai về aware |
 | `==` luôn `False` dù cùng giờ | Có đang so naive với aware không (không có lỗi nào báo) |
 | Giờ lệch 7 tiếng giữa máy này và máy kia | Có `astimezone()` trên datetime naive, hoặc `replace(tzinfo=UTC)` lên giờ địa phương không |

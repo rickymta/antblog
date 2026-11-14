@@ -1,0 +1,13 @@
+{"file":"aws-tai-khoan-iam-identity-center-cli.md","edits":[
+{"old":"để không giật mình khi có hoá đơn","new":"để không bất ngờ khi nhận hoá đơn","reason":"'giật mình' gượng (khảo sát)","severity":"low"},
+{"old":"Dùng **email dùng chung của nhóm**","new":"Dùng **email chung của nhóm**","reason":"Lặp 'dùng' trong cùng câu","severity":"medium"},
+{"old":"Dữ liệu chi phí được cập nhật chậm (vài giờ)","new":"Dữ liệu chi phí cập nhật chậm (vài giờ)","reason":"Bỏ bị động kiểu Anh","severity":"low"},
+{"old":"vẫn không xem được trang Billing, kiểm cài đặt","new":"vẫn không xem được trang Billing, hãy kiểm tra cài đặt","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"Chọn region cẩn thận vì Identity Center có một region chính và đổi về sau rất phiền.","new":"Chọn region cẩn thận vì Identity Center có một region chính và đổi region này về sau rất phiền.","reason":"'đổi' thiếu tân ngữ, dễ hiểu nhầm","severity":"medium"},
+{"old":"Chọn bật kèm **AWS Organizations**","new":"Chọn bật cùng với **AWS Organizations**","reason":"'bật kèm' gượng","severity":"low"},
+{"old":"Lệnh này liệt kê các region đang được bật trong tài khoản; thêm `--all-regions` để thấy cả region opt-in chưa bật. Nó chỉ đọc nên không tính tiền.","new":"Lệnh này liệt kê các region đang được bật trong tài khoản; thêm `--all-regions` để thấy cả region opt-in chưa bật. Lệnh chỉ đọc nên không tính tiền.","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"kiểm `aws sts get-caller-identity` và `aws configure list` trước mọi lệnh tạo tài nguyên","new":"chạy `aws sts get-caller-identity` và `aws configure list` để kiểm tra trước mọi lệnh tạo tài nguyên","reason":"'kiểm' cụt, thiếu động từ","severity":"medium"},
+{"old":"biến này thắng `AWS_PROFILE`","new":"biến này được ưu tiên hơn `AWS_PROFILE`","reason":"'thắng' calque của 'wins over'","severity":"medium"},
+{"old":"Script đã được kiểm cú pháp bằng","new":"Script đã được kiểm tra cú pháp bằng","reason":"'kiểm' cụt","severity":"low"},
+{"old":"chỉ đọc (kiểm CLI v2, profile","new":"chỉ đọc (kiểm tra CLI v2, profile","reason":"'kiểm' cụt","severity":"low"}
+]}

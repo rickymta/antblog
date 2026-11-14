@@ -1,0 +1,18 @@
+{"file":"postgresql-btree-index-co-ban.md","edits":[
+{"old":"Mổ cây gốc → nhánh → lá → heap và xem vì sao có index planner vẫn chọn Seq Scan.","new":"Đi từ gốc → nhánh → lá → heap của cây và xem vì sao có index mà planner vẫn chọn Seq Scan.","reason":"'Mổ' gượng; thiếu 'mà'","severity":"medium"},
+{"old":"mổ từng tầng của cây","new":"đi qua từng tầng của cây","reason":"'mổ' gượng","severity":"low"},
+{"old":"khi có và chưa có index bằng số page đọc","new":"khi có index và khi chưa có index bằng số page đọc","reason":"Câu lược danh từ","severity":"low"},
+{"old":"Số thời gian trong bài lấy từ","new":"Các số đo thời gian trong bài lấy từ","reason":"'Số thời gian' tự ghép","severity":"medium"},
+{"old":"hồ sơ ước ≈ 30.000 truy vấn","new":"hồ sơ ước tính ≈ 30.000 truy vấn","reason":"'ước' lược động từ","severity":"medium"},
+{"old":"quét cả bảng là đủ nghẽn","new":"quét cả bảng là đủ gây nghẽn","reason":"Thiếu động từ","severity":"medium"},
+{"old":"So với 65,4 ms là chênh ba bậc độ lớn.","new":"So với 65,4 ms thì chênh nhau ba bậc độ lớn.","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Nó là một tệp riêng, cũng chia page 8 KB như heap, gồm ba loại page:","new":"B-tree lưu trong một tệp riêng, cũng chia page 8 KB như heap, gồm ba loại page:","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"ghi page gốc ở đâu và cây cao mấy tầng","new":"ghi lại page gốc nằm ở đâu và cây cao mấy tầng","reason":"Câu lược động từ","severity":"low"},
+{"old":"đi Index Scan chỉ chạm","new":"đọc bằng Index Scan mà chỉ chạm","reason":"Câu lược giới từ","severity":"medium"},
+{"old":"cột ngẫu nhiên đổi giữa 26,6 % và 55,5 %","new":"cột ngẫu nhiên đổi kế hoạch trong khoảng từ 26,6 % đến 55,5 %","reason":"'đổi giữa' cụt, thiếu tân ngữ","severity":"medium"},
+{"old":"dùng lâu ngày nó lại xốp dần theo lối chèn","new":"dùng lâu ngày cây lại xốp dần theo cách chèn","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"**Chỗ trên đĩa và trong bộ nhớ:**","new":"**Dung lượng trên đĩa và trong bộ nhớ:**","reason":"'Chỗ' khẩu ngữ","severity":"low"},
+{"old":"Vì sao cùng một index mà khác nhau?","new":"Vì sao cùng một index mà hai kế hoạch lại khác nhau?","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"5 % số dòng nhưng chuyến của B1 rải đều theo thời gian, nên","new":"Chuyến của B1 chiếm 5 % số dòng nhưng rải đều theo thời gian, nên","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"cần đọc tối thiểu mấy page? Kiểm bằng","new":"cần đọc tối thiểu mấy page? Kiểm tra bằng","reason":"'Kiểm' đứng một mình gượng","severity":"low"}
+]}

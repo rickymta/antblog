@@ -17,7 +17,7 @@ Blog chưa có loạt Go riêng, nên bài này dạy Go vừa đủ để đọ
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Tám goroutine chạy song song, mỗi goroutine thực hiện <code>count++</code> một trăm nghìn lần trên cùng một biến <code>int</code>. Kết quả mong đợi là 800.000. Chạy thật sẽ ra gì, và chương trình có báo lỗi nào không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không đoán được, và không có lỗi nào.</b> Trong lần chạy của lab, kết quả là 270.093, mất 529.907 lần cộng, chương trình vẫn thóat bình thường. Chạy lại sẽ ra số khác. Chỉ khi thêm cờ <code>-race</code> thì Go mới in <code>WARNING: DATA RACE</code> và thóat với mã 66.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không đoán được, và không có lỗi nào.</b> Trong lần chạy của lab, kết quả là 270.093, mất 529.907 lần cộng, chương trình vẫn thoát bình thường. Chạy lại sẽ ra số khác. Chỉ khi thêm cờ <code>-race</code> thì Go mới in <code>WARNING: DATA RACE</code> và thoát với mã 66.</p></details>
 </div>
 
 ## Go xuất hiện ở đâu trong service định vị
@@ -31,9 +31,9 @@ Mô hình của Go cho loại bài toán này là **mỗi kết nối một goro
 | Chạy một việc song song | `go f()` | `tokio::spawn(f())` |
 | Hàng đợi giữa hai việc | `make(chan T, 64)` | `mpsc::channel::<T>(64)` |
 | Chờ nhiều sự kiện | `select` | `tokio::select!` |
-| Hủy cả cây việc | `context.Context` | `CancellationToken` (tokio-util), hoặc drop future |
+| Huỷ cả cây việc | `context.Context` | `CancellationToken` (tokio-util), hoặc drop future |
 | Chờ một nhóm xong | `sync.WaitGroup` | `JoinSet` |
-| Nhóm có lỗi và hủy lan | `errgroup` | `JoinSet` cộng tự hủy |
+| Nhóm có lỗi và huỷ lan | `errgroup` | `JoinSet` cộng tự huỷ |
 | Dọn dẹp cuối hàm | `defer` | `Drop` (gắn theo biến, không theo hàm) |
 | Lỗi | giá trị `error` trả về | `Result<T, E>` |
 | An toàn dữ liệu chung | quy ước, kiểm lúc chạy bằng `-race` | `Send`/`Sync`, kiểm lúc biên dịch |
@@ -46,7 +46,7 @@ Lab của bài là một pipeline ba stage, chạy trên dữ liệu do simulato
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Hình 1. Pipeline ba stage nối bằng channel có đệm 64: một goroutine sinh điểm, bốn worker kiểm tra, một goroutine gom theo thành phố; errgroup hủy context dùng chung khi một stage lỗi hoặc hết hạn, stage 1 và 2 nghe context đó, stage 3 dừng khi channel đóng."><defs><marker id="location-go-goroutine-channel-nhap-mon-cho-ingest-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="170" height="100" rx="8" class="f-phys-soft s-phys"/><text x="105" y="52" class="t-b" text-anchor="middle">Stage 1 · sinh điểm</text><text x="105" y="70" text-anchor="middle">1 goroutine</text><text x="105" y="88" class="t-small" text-anchor="middle">200 tài xế × 50 điểm</text><rect x="222" y="55" width="96" height="50" rx="8" class="f-surface s-muted"/><text x="270" y="75" class="t-mono" text-anchor="middle">ch1</text><text x="270" y="91" class="t-small" text-anchor="middle">đệm 64</text><rect x="350" y="30" width="190" height="100" rx="8" class="f-phys-soft s-phys"/><text x="445" y="52" class="t-b" text-anchor="middle">Stage 2 · kiểm tra</text><text x="445" y="70" text-anchor="middle">4 goroutine worker</text><text x="445" y="88" class="t-small" text-anchor="middle">đọc ch1, ghi ch2</text><rect x="572" y="55" width="96" height="50" rx="8" class="f-surface s-muted"/><text x="620" y="75" class="t-mono" text-anchor="middle">ch2</text><text x="620" y="91" class="t-small" text-anchor="middle">đệm 64</text><rect x="700" y="30" width="160" height="100" rx="8" class="f-phys-soft s-phys"/><text x="780" y="52" class="t-b" text-anchor="middle">Stage 3 · gom</text><text x="780" y="70" text-anchor="middle">1 goroutine</text><text x="780" y="88" class="t-small" text-anchor="middle">sở hữu map, không khóa</text><path d="M190 80 L220 80" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><path d="M318 80 L348 80" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><path d="M540 80 L570 80" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><path d="M668 80 L698 80" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><rect x="20" y="190" width="840" height="70" rx="8" class="f-warn-soft s-warn"/><text x="440" y="216" class="t-b" text-anchor="middle">errgroup.WithContext tạo ctx dùng chung; stage 1 và 2 nghe nó trong select</text><text x="440" y="234" class="t-small" text-anchor="middle">Một stage trả lỗi hoặc hết hạn thì ctx.Done() đóng; stage 1 và 2 thóat, ch1 rồi ch2 đóng, nên stage 3 hết vòng range</text><path d="M105 190 L105 134" class="f-none s-warn dash" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><path d="M445 190 L445 134" class="f-none s-warn dash" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><text x="440" y="286" class="t-mono" text-anchor="middle">select { case ch &lt;- ev: ...  case &lt;-ctx.Done(): return ctx.Err() }</text></svg>
+<svg viewBox="0 0 880 300" role="img" aria-label="Hình 1. Pipeline ba stage nối bằng channel có đệm 64: một goroutine sinh điểm, bốn worker kiểm tra, một goroutine gom theo thành phố; errgroup huỷ context dùng chung khi một stage lỗi hoặc hết hạn, stage 1 và 2 nghe context đó, stage 3 dừng khi channel đóng."><defs><marker id="location-go-goroutine-channel-nhap-mon-cho-ingest-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="170" height="100" rx="8" class="f-phys-soft s-phys"/><text x="105" y="52" class="t-b" text-anchor="middle">Stage 1 · sinh điểm</text><text x="105" y="70" text-anchor="middle">1 goroutine</text><text x="105" y="88" class="t-small" text-anchor="middle">200 tài xế × 50 điểm</text><rect x="222" y="55" width="96" height="50" rx="8" class="f-surface s-muted"/><text x="270" y="75" class="t-mono" text-anchor="middle">ch1</text><text x="270" y="91" class="t-small" text-anchor="middle">đệm 64</text><rect x="350" y="30" width="190" height="100" rx="8" class="f-phys-soft s-phys"/><text x="445" y="52" class="t-b" text-anchor="middle">Stage 2 · kiểm tra</text><text x="445" y="70" text-anchor="middle">4 goroutine worker</text><text x="445" y="88" class="t-small" text-anchor="middle">đọc ch1, ghi ch2</text><rect x="572" y="55" width="96" height="50" rx="8" class="f-surface s-muted"/><text x="620" y="75" class="t-mono" text-anchor="middle">ch2</text><text x="620" y="91" class="t-small" text-anchor="middle">đệm 64</text><rect x="700" y="30" width="160" height="100" rx="8" class="f-phys-soft s-phys"/><text x="780" y="52" class="t-b" text-anchor="middle">Stage 3 · gom</text><text x="780" y="70" text-anchor="middle">1 goroutine</text><text x="780" y="88" class="t-small" text-anchor="middle">sở hữu map, không khoá</text><path d="M190 80 L220 80" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><path d="M318 80 L348 80" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><path d="M540 80 L570 80" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><path d="M668 80 L698 80" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><rect x="20" y="190" width="840" height="70" rx="8" class="f-warn-soft s-warn"/><text x="440" y="216" class="t-b" text-anchor="middle">errgroup.WithContext tạo ctx dùng chung; stage 1 và 2 nghe nó trong select</text><text x="440" y="234" class="t-small" text-anchor="middle">Một stage trả lỗi hoặc hết hạn thì ctx.Done() đóng; stage 1 và 2 thoát, ch1 rồi ch2 đóng, nên stage 3 hết vòng range</text><path d="M105 190 L105 134" class="f-none s-warn dash" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><path d="M445 190 L445 134" class="f-none s-warn dash" stroke-width="2" marker-end="url(#location-go-goroutine-channel-nhap-mon-cho-ingest-1-a)"/><text x="440" y="286" class="t-mono" text-anchor="middle">select { case ch &lt;- ev: ...  case &lt;-ctx.Done(): return ctx.Err() }</text></svg>
 </div>
 
 <figcaption>Hình 1. Ba stage nối bằng hai channel có đệm 64. Stage 1 và 2 nghe chung một <code>ctx</code>; stage 3 chỉ dừng khi <code>ch2</code> đóng. Nhờ vậy một lỗi ở đâu đó vẫn dừng được cả cây.</figcaption>
@@ -91,7 +91,7 @@ Vài điểm cần nhớ khi đọc đoạn trên nếu bạn đến từ Rust:
 - **`go func() { ... }()`** (ở đây qua `g.Go`) khởi một goroutine; không có `JoinHandle` trả về, nên việc chờ phải dùng `WaitGroup` hoặc `errgroup`.
 - **Channel có đệm 64** là hàng đợi giới hạn: khi đầy, `ch1 <- ev` chặn goroutine gửi. Đây chính là backpressure ở mức nhỏ nhất, giống `mpsc::channel(64)` gọi `send().await`. Bài 13 sẽ nói vì sao ở cổng vào của ingest ta **không** muốn chặn kiểu này.
 - **Người gửi đóng channel**, không phải người nhận. `defer close(ch1)` chạy khi hàm kết thúc dù bằng `return nil` hay `return ctx.Err()`. Gửi vào channel đã đóng là panic, nên mỗi channel chỉ nên có một chủ đóng.
-- **`select`** chờ nhiều khả năng cùng lúc. Ở đây: hoặc gửi được `ev`, hoặc `ctx.Done()` đóng. Thiếu nhánh thứ hai thì khi stage sau đã thóat, stage này kẹt vĩnh viễn ở `ch1 <- ev` (goroutine bị rò, không ai thu hồi).
+- **`select`** chờ nhiều khả năng cùng lúc. Ở đây: hoặc gửi được `ev`, hoặc `ctx.Done()` đóng. Thiếu nhánh thứ hai thì khi stage sau đã thoát, stage này kẹt vĩnh viễn ở `ch1 <- ev` (goroutine bị rò, không ai thu hồi).
 - **Biến vòng lặp** `step`, `d` được cấp mới cho mỗi vòng từ Go 1.22 (module của lab khai báo `go 1.27.1`), nên closure bên trong an toàn khi chạy sau vòng lặp. Trước 1.22 đây là một cái bẫy kinh điển.
 
 Stage 2 và 3 cho thấy hai cách sở hữu dữ liệu khác nhau:
@@ -136,7 +136,7 @@ Tệp `examples/toi-noi-location/go/cmd/loc11_nhap_mon/pipeline.go` (dòng 69–
 	})
 ```
 
-Bốn worker cùng đọc `ch1` (`for ev := range ch1` tự thóat khi `ch1` đóng và cạn). Các bộ đếm `seen`, `res.validated` dùng `atomic` vì nhiều goroutine cùng cộng. Còn `res.perCity`, một `map` bình thường, **không có khóa** vì chỉ goroutine ở stage 3 đụng vào nó: dữ liệu có một chủ duy nhất, những người khác gửi tin nhắn tới chủ đó qua channel. Đây là cách mà Go khuyên (chia sẻ bộ nhớ bằng cách giao tiếp, đừng giao tiếp bằng cách chia sẻ bộ nhớ), và `location-ingest` dùng đúng kiểu này: trạng thái kiểm tra của mỗi tài xế sống trong biến cục bộ của goroutine giữ kết nối đó (bài 12).
+Bốn worker cùng đọc `ch1` (`for ev := range ch1` tự thoát khi `ch1` đóng và cạn). Các bộ đếm `seen`, `res.validated` dùng `atomic` vì nhiều goroutine cùng cộng. Còn `res.perCity`, một `map` bình thường, **không có khoá** vì chỉ goroutine ở stage 3 đụng vào nó: dữ liệu có một chủ duy nhất, những người khác gửi tin nhắn tới chủ đó qua channel. Đây là cách mà Go khuyên (chia sẻ bộ nhớ bằng cách giao tiếp, đừng giao tiếp bằng cách chia sẻ bộ nhớ), và `location-ingest` dùng đúng kiểu này: trạng thái kiểm tra của mỗi tài xế sống trong biến cục bộ của goroutine giữ kết nối đó (bài 12).
 
 Một chi tiết khác với Rust: gửi con trỏ `ev` qua channel **không chuyển quyền sở hữu**. Sau `ch2 <- ev`, worker vẫn còn cầm con trỏ và compiler không cấm nó ghi tiếp. Quy ước "gửi xong là không đụng nữa" chỉ nằm trong đầu người viết, và đó là loại lỗi mà mục race detector bên dưới sinh ra để bắt.
 
@@ -144,7 +144,7 @@ Dòng `g.Go(func() error { wg.Wait(); close(ch2); return nil })` ở giữa đá
 
 ## context và errgroup: dừng cả cây việc
 
-`context.Context` mang hai thứ qua mọi hàm: hạn chót và tín hiệu hủy. Lab chạy cùng pipeline này ba lần để xem ba cách kết thúc. `errgroup.WithContext` trả một nhóm goroutine và một `ctx` mới bị hủy khi **bất kỳ** goroutine nào trong nhóm trả lỗi; `g.Wait()` chờ tất cả và trả lỗi đầu tiên.
+`context.Context` mang hai thứ qua mọi hàm: hạn chót và tín hiệu huỷ. Lab chạy cùng pipeline này ba lần để xem ba cách kết thúc. `errgroup.WithContext` trả một nhóm goroutine và một `ctx` mới bị huỷ khi **bất kỳ** goroutine nào trong nhóm trả lỗi; `g.Wait()` chờ tất cả và trả lỗi đầu tiên.
 
 Tệp `examples/toi-noi-location/go/cmd/loc11_nhap_mon/pipeline.go` (dòng 32–44):
 
@@ -182,10 +182,10 @@ kết thúc vì lỗi, errgroup huỷ các stage còn lại: điểm hỏng ở 
 
 Hai điều rút ra:
 
-1. **Hết hạn và lỗi đi cùng một đường.** Ở `timeout`, `context.WithTimeout` đóng `ctx.Done()` sau 40 ms; ở `fail`, worker trả lỗi ở điểm thứ 700 và `errgroup` hủy `ctx`. Trong cả hai, stage 1 thóat qua nhánh `<-ctx.Done()` và `defer close(ch1)` đóng channel; worker thóat ở `select` của mình hoặc khi `ch1` cạn; goroutine chờ `wg.Wait()` đóng `ch2`, và stage 3 hết vòng `range` mà không hề nhìn `ctx`. `g.Wait()` trả lỗi đầu tiên để `report` phân biệt bằng `errors.Is(r.err, context.DeadlineExceeded)`. Không stage nào cần biết lý do dừng.
-2. **Số điểm đã qua mỗi stage khi bị hủy là không xác định.** Lần `fail` có `sinh=729 kiểm=704 gom=701`: 28 điểm đã sinh mà không tới cuối, gồm 25 điểm chưa qua bước kiểm (còn trong `ch1` hoặc trong tay worker) và 3 điểm đã kiểm nhưng rơi vào nhánh `ctx.Done()` thay vì `ch2`. Số này đổi mỗi lần chạy, nên test của lab (`main_test.go`) chỉ khẳng định `generated < 10000` và có lỗi, không khẳng định một con số. Bài viết cũng không được coi số này là hằng số.
+1. **Hết hạn và lỗi đi cùng một đường.** Ở `timeout`, `context.WithTimeout` đóng `ctx.Done()` sau 40 ms; ở `fail`, worker trả lỗi ở điểm thứ 700 và `errgroup` huỷ `ctx`. Trong cả hai, stage 1 thoát qua nhánh `<-ctx.Done()` và `defer close(ch1)` đóng channel; worker thoát ở `select` của mình hoặc khi `ch1` cạn; goroutine chờ `wg.Wait()` đóng `ch2`, và stage 3 hết vòng `range` mà không hề nhìn `ctx`. `g.Wait()` trả lỗi đầu tiên để `report` phân biệt bằng `errors.Is(r.err, context.DeadlineExceeded)`. Không stage nào cần biết lý do dừng.
+2. **Số điểm đã qua mỗi stage khi bị huỷ là không xác định.** Lần `fail` có `sinh=729 kiểm=704 gom=701`: 28 điểm đã sinh mà không tới cuối, gồm 25 điểm chưa qua bước kiểm (còn trong `ch1` hoặc trong tay worker) và 3 điểm đã kiểm nhưng rơi vào nhánh `ctx.Done()` thay vì `ch2`. Số này đổi mỗi lần chạy, nên test của lab (`main_test.go`) chỉ khẳng định `generated < 10000` và có lỗi, không khẳng định một con số. Bài viết cũng không được coi số này là hằng số.
 
-So với C# thì `ctx` đóng vai `CancellationToken`, nhưng Go quy ước ctx là tham số đầu tiên của mọi hàm có thể chặn, nên không có hàm nào quên nhận tín hiệu hủy nếu tuân thủ quy ước. Nhận `ctx` thôi chưa đủ: hủy trong Go là hợp tác, hàm phải tự kiểm `ctx.Done()` hoặc gọi thứ có kiểm. `time.Sleep` hay một lệnh `ch <- ev` trần không dừng giữa chừng.
+So với C# thì `ctx` đóng vai `CancellationToken`, nhưng Go quy ước ctx là tham số đầu tiên của mọi hàm có thể chặn, nên không có hàm nào quên nhận tín hiệu huỷ nếu tuân thủ quy ước. Nhận `ctx` thôi chưa đủ: huỷ trong Go là hợp tác, hàm phải tự kiểm `ctx.Done()` hoặc gọi thứ có kiểm. `time.Sleep` hay một lệnh `ch <- ev` trần không dừng giữa chừng.
 
 ## Data race: lỗi không báo gì
 
@@ -240,10 +240,10 @@ Previous write at 0x00c0001140b8 by goroutine 14:
       .../cmd/loc11_nhap_mon/race.go:25 +0x98
 ```
 
-Báo cáo chỉ đúng dòng 25, hai goroutine liên quan, và nơi chúng được tạo. Một lần chạy `-race` khác cho `Found 2 data race(s)` (một khối đọc với ghi, một khối ghi với ghi) và `exit status 66`. Chương trình thóat mã 66, còn `go run` bọc ngoài trả mã 1; đằng nào cũng khác không, nên CI thất bại khi có race. Hai lưu ý khi dùng:
+Báo cáo chỉ đúng dòng 25, hai goroutine liên quan, và nơi chúng được tạo. Một lần chạy `-race` khác cho `Found 2 data race(s)` (một khối đọc với ghi, một khối ghi với ghi) và `exit status 66`. Chương trình thoát mã 66, còn `go run` bọc ngoài trả mã 1; đằng nào cũng khác không, nên CI thất bại khi có race. Hai lưu ý khi dùng:
 
 - `-race` chỉ báo race **xảy ra trong lần chạy đó**. Đường code không được test chạm tới thì không được kiểm, nên một lần chạy sạch không chứng minh là không có race. Vì vậy lab đặt `-race` cho `go test`, và test của hàng đợi, hub, ingest đều chạy với cờ này.
-- `-race` chỉ bắt truy cập bộ nhớ không đồng bộ. Lỗi logic như kiểm tra rồi hành động qua hai lần khóa riêng, deadlock hay goroutine rò đều nằm ngoài tầm của nó.
+- `-race` chỉ bắt truy cập bộ nhớ không đồng bộ. Lỗi logic như kiểm tra rồi hành động qua hai lần khoá riêng, deadlock hay goroutine rò đều nằm ngoài tầm của nó.
 - Tài liệu của Go ghi rằng cờ này làm tăng đáng kể bộ nhớ và thời gian chạy, nên bản dựng dùng để đo hiệu năng ở các bài sau **không** bật `-race`; nó chỉ dùng cho test và cho lab bài này.
 
 Ba cách sửa, đều chạy dưới `-race` và đều ra đúng 800.000:
@@ -325,7 +325,7 @@ channel: đếm được 800000, muốn 800000
 
 **Bài 3.** Trong `runPipeline`, stage 1 có `case <-ctx.Done(): return ctx.Err()`. Bỏ nhánh này và để chỉ có `ch1 <- ev` thì kịch bản `fail` kết thúc ra sao?
 
-<details><summary>Xem lời giải</summary><p>Khi worker báo lỗi và thóat, các worker còn lại cũng thóat qua <code>ctx.Done()</code> nên không còn ai đọc <code>ch1</code>. Stage 1 gửi tiếp cho tới khi đệm 64 đầy rồi kẹt vĩnh viễn ở <code>ch1 &lt;- ev</code>; <code>g.Wait()</code> không bao giờ trả về vì chờ stage 1. Chương trình treo thay vì dừng. Đây là lý do mọi thao tác gửi hay nhận có thể chặn đều phải đi cùng <code>select</code> với <code>ctx.Done()</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>Khi worker báo lỗi và thoát, các worker còn lại cũng thoát qua <code>ctx.Done()</code> nên không còn ai đọc <code>ch1</code>. Stage 1 gửi tiếp cho tới khi đệm 64 đầy rồi kẹt vĩnh viễn ở <code>ch1 &lt;- ev</code>; <code>g.Wait()</code> không bao giờ trả về vì chờ stage 1. Chương trình treo thay vì dừng. Đây là lý do mọi thao tác gửi hay nhận có thể chặn đều phải đi cùng <code>select</code> với <code>ctx.Done()</code>.</p></details>
 
 Bài trước: [bài 10](/articles/location-tong-hop-geo-core-kiem-thu-hinh-hoc). Bài tiếp: [bài 12](/articles/location-go-ingest-websocket-batch-gps-tai-xe).
 

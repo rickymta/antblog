@@ -31,7 +31,7 @@ Bài 043 cho thấy 100% câu lệnh vẫn để lọt defect. Bước kế ti�
 
 **Branch testing** (kiểm thử nhánh) và **decision testing** (kiểm thử quyết định) là hai cách gọi gần như cùng một kỹ thuật white-box: thiết kế test sao cho **mọi hướng rẽ** của code được đi ít nhất một lần. Với một câu `if`, đó là cả hướng đúng lẫn hướng sai; với `switch`, mọi `case`; với vòng lặp, cả «vào thân vòng» lẫn «thoát».
 
-Vấn đề nó giải quyết: statement coverage chỉ ép đi hướng có câu lệnh. Một `if` không có `else` chạy đúng hướng `true` là đủ 100% câu lệnh — hướng `false` (không làm gì) không bao giờ bị kiểm, dù đó chính là chỗ hay sai: quên gán, quên huỷ, quên thu tiền.
+Vấn đề mà kỹ thuật này giải quyết: statement coverage chỉ ép đi hướng có câu lệnh. Một `if` không có `else` chạy đúng hướng `true` là đủ 100% câu lệnh — hướng `false` (không làm gì) không bao giờ bị kiểm, dù đó chính là chỗ hay sai: quên gán, quên huỷ, quên thu tiền.
 
 Khi nào dùng: cho code **quan trọng hoặc tối quan trọng** (CTAL-TTA 2.3) — ở Tới Nơi là mọi thứ dính tới tiền (cước, phí huỷ, voucher, thu tiền); cho mô hình có điểm quyết định như sơ đồ quy trình nghiệp vụ; và như ngưỡng CI mạnh hơn statement coverage. Khi một quyết định gồm nhiều điều kiện và tổ hợp của chúng quan trọng, cần tiếp condition/MC/DC (bài 045–047).
 
@@ -42,7 +42,7 @@ Khi nào dùng: cho code **quan trọng hoặc tối quan trọng** (CTAL-TTA 2.
 - **Branch** (nhánh) là một lần **chuyển điều khiển giữa hai nút** của control flow graph. Chuyển điều khiển có thể **không điều kiện** (code chạy thẳng) hoặc **có điều kiện** (một kết quả của quyết định).
 - **Coverage item** là các nhánh; **branch coverage = số nhánh đã đi ÷ tổng số nhánh × 100%**.
 - Nhánh có điều kiện thường ứng với kết quả đúng/sai của `if … then`, một kết quả của `switch/case`, hoặc quyết định thoát/tiếp tục vòng lặp.
-- Giới hạn: đi qua một nhánh không đủ phát hiện defect cần **một đường đi cụ thể** (tổ hợp nhánh) mới lộ.
+- Giới hạn: đi qua một nhánh chưa đủ để phát hiện defect cần **một đường đi cụ thể** (tổ hợp nhánh) mới lộ.
 - **Branch coverage bao hàm (subsumes) statement coverage**: mọi bộ test đạt 100% nhánh cũng đạt 100% câu lệnh, chiều ngược lại không đúng.
 
 ### 2.2. Decision testing trong CTAL-TTA v4.0 (mục 2.3)
@@ -135,7 +135,7 @@ Trong kiến trúc mục tiêu, huỷ chuyến chạm ba bounded context: **Book
 | Lý do sai dù số tiền đúng | Giao diện giải thích sai, hỗ trợ đối soát nhầm |
 | Cho huỷ ở trạng thái `in_transit`/`completed` | Chuyến đã chạy bị huỷ, phá vòng đời chuyến |
 
-Ước lượng (giả định, để thấy độ lớn): bộ dữ liệu mẫu của hồ sơ dự án có 6% chuyến bị huỷ; áp tỉ lệ đó cho 2 triệu chuyến/ngày ⇒ 120.000 lượt huỷ/ngày. Nếu 5% trong đó là ca tài xế trễ bị thu nhầm 10.000 đ: 120.000 × 0,05 × 10.000 = **60 triệu đ thu oan mỗi ngày**, chưa kể chi phí xử lý khiếu nại.
+Ước lượng (giả định, để thấy độ lớn): bộ dữ liệu mẫu của hồ sơ dự án có 6% chuyến bị huỷ; áp tỉ lệ đó cho 2 triệu chuyến/ngày ⇒ 120.000 lượt huỷ/ngày. Nếu 5% trong số đó là trường hợp tài xế trễ bị thu nhầm 10.000 đ: 120.000 × 0,05 × 10.000 = **60 triệu đ thu oan mỗi ngày**, chưa kể chi phí xử lý khiếu nại.
 
 ## 4. Phân tích kỹ thuật
 
@@ -186,11 +186,11 @@ Trong kiến trúc mục tiêu, huỷ chuyến chạm ba bounded context: **Book
 | D4 | `status === 'accepted' && since < 2 phút` | 0 đ, `grace_period` | D5 | R-CANCEL-01, 02 |
 | D5 | `since > ETA + 10 phút` | 0 đ, `driver_late` | `charged` | R-CANCEL-04, 06 |
 
-D3 là **guard bất biến**: chuyến ở `accepted`/`arriving` luôn phải có `acceptedAt` và ETA; SPEC không nói gì vì đó là ràng buộc dữ liệu nội bộ. Kết quả mong đợi của ca D3-T («ném lỗi, không trả phí») lấy từ thiết kế — vẫn là nguồn ngoài code theo TTA 2.1, nhưng nên ghi rõ nguồn.
+D3 là **guard bất biến**: chuyến ở `accepted`/`arriving` luôn phải có `acceptedAt` và ETA; SPEC không nói gì vì đó là ràng buộc dữ liệu nội bộ. Kết quả mong đợi của test case D3-T («ném lỗi, không trả phí») lấy từ thiết kế — vẫn là nguồn ngoài code theo TTA 2.1, nhưng nên ghi rõ nguồn.
 
 ### 4.2. Xuất phát từ bộ test hộp đen
 
-Bốn ca đầu viết thẳng từ bảng R-CANCEL-01, giá trị thời gian lấy từ BVA quanh mốc 2 phút (bài 032). Ánh xạ sang decision outcome:
+Bốn test case đầu viết thẳng từ bảng R-CANCEL-01, giá trị thời gian lấy từ BVA quanh mốc 2 phút (bài 032). Ánh xạ sang decision outcome:
 
 | Ca | Đầu vào (nhận 09:00, ETA 5') | Mong đợi (SPEC) | Outcome đi qua |
 |---|---|---|---|
@@ -209,29 +209,29 @@ Bốn ca đầu viết thẳng từ bảng R-CANCEL-01, giá trị thời gian l
 | BC-06 | `accepted`, `acceptedAt = null` | ném `Error` | D3-T |
 | BC-07 | `accepted`, +15'01" (ETA 5 + 10 = 15') | 0 đ, `driver_late` | D5-T |
 
-Bảy ca ⇒ **10/10 = 100%**. Có thể ít hơn không? D1-T, D2-T, D3-T, D4-T, D5-T là năm lối ra loại trừ nhau, và cần thêm một ca đi D5-F (lối `charged`) ⇒ tối thiểu **6 ca**. Bộ của ta có 7 vì giữ cả BC-03 lẫn BC-04 (hai lớp tương đương trạng thái khác nhau của R-CANCEL-01).
+Bảy test case ⇒ **10/10 = 100%**. Có thể ít hơn không? D1-T, D2-T, D3-T, D4-T, D5-T là năm lối ra loại trừ nhau, và cần thêm một test case đi D5-F (lối `charged`) ⇒ tối thiểu **6 test case**. Bộ của ta có 7 vì giữ cả BC-03 lẫn BC-04 (hai lớp tương đương trạng thái khác nhau của R-CANCEL-01).
 
 ### 4.4. Vì sao branch coverage bao hàm statement coverage
 
-**Lập luận.** Trong control flow graph của một hàm, mỗi câu lệnh nằm trong một nút; mỗi nút (trừ nút vào) có ít nhất một cạnh đi vào. Bộ test đi qua **mọi cạnh** thì đi tới **mọi nút** đầu cạnh, tức chạy mọi câu lệnh. Câu lệnh ở nút vào chạy ngay khi có một ca bất kỳ. Vậy 100% nhánh ⇒ 100% câu lệnh. (Nút không có cạnh nào đi vào là mã không tới được — nó cũng không có nhánh nào để phủ, nên không phá lập luận; nó chỉ làm cả hai số đo không đạt 100%.)
+**Lập luận.** Trong control flow graph của một hàm, mỗi câu lệnh nằm trong một nút; mỗi nút (trừ nút vào) có ít nhất một cạnh đi vào. Bộ test đi qua **mọi cạnh** thì đi tới **mọi nút** đầu cạnh, tức chạy mọi câu lệnh. Câu lệnh ở nút vào chạy ngay khi có một test case bất kỳ. Vậy 100% nhánh ⇒ 100% câu lệnh. (Nút không có cạnh nào đi vào là mã không tới được — nó cũng không có nhánh nào để phủ, nên không phá lập luận; nó chỉ làm cả hai số đo không đạt 100%.)
 
-**Chiều ngược lại sai.** Chỉ cần một `if` không có `else`: một ca đi hướng đúng chạy hết mọi câu lệnh nhưng chưa đi cạnh «sai». Với `cancel.ts`, điều này **không lộ ra**: mỗi `if` kết thúc bằng `return`/`throw`, nên muốn chạy các câu lệnh phía sau buộc phải đi hướng F — ở hàm viết kiểu guard clause, 100% câu lệnh tình cờ kéo theo 100% quyết định. Đổi cách viết là mất «tình cờ» đó — mục 5.4 dựng đúng phản ví dụ.
+**Chiều ngược lại sai.** Chỉ cần một `if` không có `else`: một test case đi hướng đúng chạy hết mọi câu lệnh nhưng chưa đi cạnh «sai». Với `cancel.ts`, điều này **không lộ ra**: mỗi `if` kết thúc bằng `return`/`throw`, nên muốn chạy các câu lệnh phía sau buộc phải đi hướng F — ở hàm viết kiểu guard clause, 100% câu lệnh tình cờ kéo theo 100% quyết định. Đổi cách viết là mất «tình cờ» đó — mục 5.4 dựng đúng phản ví dụ.
 
 ### 4.5. Những gì nhánh không nhìn thấy
 
-- **Xe máy hay ô tô** không phải một quyết định: `CANCELLATION_FEE[input.vehicle]` là tra bảng. 100% nhánh đạt được chỉ với xe máy; R-CANCEL-03 cho ô tô cần ca riêng (**BC-08**, 20.000 đ) theo phân vùng tương đương.
-- **Biên của phép so sánh**: D5 dùng `>` (lớn hơn hẳn). Đi D5-T bằng +15'01" và D5-F bằng +3' là đủ nhánh, nhưng không ca nào thử **đúng mốc** 15'00" — nếu ai đổi thành `>=`, bộ 7 ca vẫn xanh. Cần **BC-09** (+15'00" ⇒ vẫn thu) từ BVA.
+- **Xe máy hay ô tô** không phải một quyết định: `CANCELLATION_FEE[input.vehicle]` là tra bảng. 100% nhánh đạt được chỉ với xe máy; R-CANCEL-03 cho ô tô cần test case riêng (**BC-08**, 20.000 đ) theo phân vùng tương đương.
+- **Biên của phép so sánh**: D5 dùng `>` (lớn hơn hẳn). Đi D5-T bằng +15'01" và D5-F bằng +3' là đủ nhánh, nhưng không test case nào thử **đúng mốc** 15'00" — nếu ai đổi thành `>=`, bộ 7 test case vẫn xanh. Cần **BC-09** (+15'00" ⇒ vẫn thu) từ BVA.
 
 ## 5. Thực hành
 
-Chạy từ gốc lab `examples/toi-noi-testing` (Node 22.18, vitest 3.2.7, coverage v8). Mã bài trong `articles/branch-coverage-decision-coverage/`; chín ca BC-01…BC-09 là một bảng dữ liệu trong `ca-huy.ts`, chạy trên mã thật (`phu-nhanh.test.ts`) và trên bản lỗi (`ban-v2.test.ts`). Như bài 043, bật đếm theo cây cú pháp và ghi báo cáo vào thư mục riêng.
+Chạy từ gốc lab `examples/toi-noi-testing` (Node 22.18, vitest 3.2.7, coverage v8). Mã bài trong `articles/branch-coverage-decision-coverage/`; chín test case BC-01…BC-09 là một bảng dữ liệu trong `ca-huy.ts`, chạy trên mã thật (`phu-nhanh.test.ts`) và trên bản lỗi (`ban-v2.test.ts`). Như bài 043, bật đếm theo cây cú pháp và ghi báo cáo vào thư mục riêng.
 
 ```bash
 COV="--coverage.enabled --coverage.reporter=text --coverage.reportsDirectory=reports/coverage-branch-coverage"
 INC="--coverage.include=src/domain/cancel.ts --coverage.experimentalAstAwareRemapping"
 ```
 
-### 5.1. Bước 1 — bốn ca theo bảng R-CANCEL-01
+### 5.1. Bước 1 — bốn test case theo bảng R-CANCEL-01
 
 ```bash
 npx vitest run articles/branch-coverage-decision-coverage/phu-nhanh.test.ts -t "BC-0[1-4]" $COV $INC
@@ -259,7 +259,7 @@ B7 if          dòng 42  [0, 2]   D5: T chưa đi
 
 Công cụ ra **13/16 = 81,25%**, đếm tay theo decision outcome ra **7/10 = 70%**. Chênh lệch vì coverage-v8 coi **mỗi vế của `&&`/`||` là một nhánh** (B2, B4, B6), và cả sáu vế đó đều đã chạy. Muốn báo «decision coverage» đúng nghĩa TTA, đọc riêng các mục `if`/`switch` (B0, B1, B3, B5, B7).
 
-### 5.2. Bước 2 — thêm ca cho từng outcome còn thiếu
+### 5.2. Bước 2 — thêm test case cho từng outcome còn thiếu
 
 ```bash
 npx vitest run articles/branch-coverage-decision-coverage/phu-nhanh.test.ts -t "BC-0[1-7]" $COV $INC
@@ -270,7 +270,7 @@ npx vitest run articles/branch-coverage-decision-coverage/phu-nhanh.test.ts -t "
  cancel.ts |     100 |      100 |     100 |     100 |
 ```
 
-16/16 nhánh theo công cụ, 10/10 outcome đếm tay. Thêm BC-08 (ô tô) và BC-09 (đúng mốc 15') — `-t "BC-0[1-9]"` — số đo **không đổi** (vẫn 100%), nhưng hai ca này kiểm R-CANCEL-03 và biên R-CANCEL-04 mà nhánh không nhìn thấy (mục 4.5). Toàn bộ chín ca xanh trên mã thật.
+16/16 nhánh theo công cụ, 10/10 outcome đếm tay. Thêm BC-08 (ô tô) và BC-09 (đúng mốc 15') — `-t "BC-0[1-9]"` — chỉ số **không đổi** (vẫn 100%), nhưng hai test case này kiểm R-CANCEL-03 và biên R-CANCEL-04 mà nhánh không nhìn thấy (mục 4.5). Toàn bộ chín test case xanh trên mã thật.
 
 ### 5.3. Bản tái cấu trúc: 100% câu lệnh, lỗi vẫn lọt
 
@@ -287,7 +287,7 @@ if (input.status === 'accepted' && sinceAcceptedMs < FREE_CANCEL_MINUTES * MINUT
 return { fee, reason };
 ```
 
-Ca «tài xế trễ» là đường mà **cả hai quyết định đều sai** — nó không có câu lệnh riêng nào. Bộ năm ca BC-01, 02, 03, 05, 06 (bỏ BC-04 vì trùng đường với BC-03, bỏ BC-07) đã đủ chạy mọi câu lệnh của v2:
+Trường hợp «tài xế trễ» đi theo đường mà **cả hai quyết định đều sai** — đường này không có câu lệnh riêng nào. Bộ năm test case BC-01, 02, 03, 05, 06 (bỏ BC-04 vì trùng đường với BC-03, bỏ BC-07) đã đủ chạy mọi câu lệnh của v2:
 
 ```bash
 npx vitest run articles/branch-coverage-decision-coverage/ban-v2.test.ts -t "BC-0[12356]" $COV \
@@ -300,7 +300,7 @@ File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
  cancel-v2.ts |     100 |    93.75 |     100 |     100 | 27
 ```
 
-**100% câu lệnh (15/15), năm ca xanh**, defect lọt. Báo cáo nhánh thì không im lặng: 15/16, dòng 27 (`else if`) có hướng F chưa đi — JSON ghi `if dòng 27 [1, 0]`. Viết ca cho đúng hướng đó là BC-07:
+**100% câu lệnh (15/15), năm test case xanh**, defect lọt. Báo cáo nhánh thì không im lặng: 15/16, dòng 27 (`else if`) có hướng F chưa đi — JSON ghi `if dòng 27 [1, 0]`. Viết test case cho đúng hướng đó là BC-07:
 
 ```bash
 SHOW_RED=1 npx vitest run articles/branch-coverage-decision-coverage/ban-v2.test.ts
@@ -346,25 +346,25 @@ Phần «vế phải đã chạy» của v8 giống một nửa condition covera
 
 ### 6.2. Giới hạn: tổ hợp điều kiện và đường đi
 
-- **Tổ hợp điều kiện.** D4 = `status === 'accepted' && since < 2'`. Bộ 7 ca đi D4-F bằng (accepted, 2'00") và (arriving, 3'). Nếu ai xoá vế `status === 'accepted'`, khách huỷ `arriving` trong 2 phút đầu sẽ được miễn phí sai — nhưng không ca nào có (arriving, &lt; 2'), nên bộ 100% nhánh vẫn xanh. Đúng giới hạn TTA 2.3 nêu; bài 047 (MC/DC) đòi chứng minh từng điều kiện ảnh hưởng độc lập tới kết quả.
-- **Đường đi cụ thể.** CTFL 4.3.2: defect cần một chuỗi nhánh nhất định sẽ lọt. Hàm có k quyết định nối tiếp có tới 2^k đường; phủ nhánh chỉ cần cỡ k+1 ca. Path testing ở bài 048.
+- **Tổ hợp điều kiện.** D4 = `status === 'accepted' && since < 2'`. Bộ 7 test case đi D4-F bằng (accepted, 2'00") và (arriving, 3'). Nếu ai xoá vế `status === 'accepted'`, khách huỷ `arriving` trong 2 phút đầu sẽ được miễn phí sai — nhưng không test case nào có (arriving, &lt; 2'), nên bộ 100% nhánh vẫn xanh. Đúng giới hạn TTA 2.3 nêu; bài 047 (MC/DC) đòi chứng minh từng điều kiện ảnh hưởng độc lập tới kết quả.
+- **Đường đi cụ thể.** CTFL 4.3.2: defect cần một chuỗi nhánh nhất định sẽ lọt. Hàm có k quyết định nối tiếp có tới 2^k đường; phủ nhánh chỉ cần cỡ k+1 test case. Path testing ở bài 048.
 - **Vòng lặp.** Thoát/tiếp tục là hai outcome, nhưng 0 lần, 1 lần, nhiều lần lặp là chuyện khác — bài 049.
 
 ### 6.3. Sai lầm thường gặp
 
 - **Đọc «% Branch» của công cụ như decision coverage.** Ở bước 1, 81,25% của v8 so với 70% đếm tay — chênh hơn 11 điểm trên một hàm 16 dòng.
-- **Viết ca chỉ để «tô xanh» nhánh.** BC-07 có giá trị vì kiểm *lý do* lẫn *số tiền* theo SPEC; một ca chỉ gọi hàm mà không assert cũng tô xanh dòng 43.
+- **Viết test case chỉ để «tô xanh» nhánh.** BC-07 có giá trị vì kiểm *lý do* lẫn *số tiền* theo SPEC; một test case chỉ gọi hàm mà không assert cũng tô xanh dòng 43.
 - **Coi nhánh không tới được là lỗi test.** Như dòng 66 của `pricing.ts` (bài 043): ghi lý do, đừng ép bằng dữ liệu không thể có.
-- **Bỏ qua dữ liệu không thành nhánh.** Tra bảng (`CANCELLATION_FEE`), cấu hình, hằng số — phải có ca theo EP/BVA (BC-08, BC-09).
+- **Bỏ qua dữ liệu không thành nhánh.** Tra bảng (`CANCELLATION_FEE`), cấu hình, hằng số — phải có test case theo EP/BVA (BC-08, BC-09).
 
 ## 7. Bài tập và câu hỏi ôn tập
 
-**Bài tập 1 (K3).** Thêm vào bộ BC-01…BC-09 **một** ca bắt được bản đột biến «xoá vế `status === 'accepted'` của D4» (mục 6.2). Ca đó đi decision outcome nào? Có làm tăng số đo nhánh không?
+**Bài tập 1 (K3).** Thêm vào bộ BC-01…BC-09 **một** test case bắt được bản đột biến «xoá vế `status === 'accepted'` của D4» (mục 6.2). Test case đó đi decision outcome nào? Có làm tăng chỉ số nhánh không?
 
 <details>
 <summary><b>Lời giải</b></summary>
-<p>Ca <b>BC-10</b>: <code>arriving</code>, xe máy, nhận 09:00, ETA 5', huỷ lúc +1' ⇒ SPEC R-CANCEL-01: <code>arriving</code> luôn có phí ⇒ mong đợi 10.000 đ, <code>charged</code>. Chạy trên lab: <code>{"fee":10000,"reason":"charged"}</code>. Bản đột biến chỉ còn <code>since &lt; 2'</code> ⇒ D4 đúng ⇒ trả <code>grace_period</code> ⇒ ca đỏ.</p>
-<p>Ca đi D1-F, D2-F, D3-F, D4-F, D5-F — đều là outcome đã phủ, nên số đo nhánh <b>không tăng</b> (đã 100%). Đây là ca của condition/MC/DC (vế đầu của D4 sai, vế sau đúng), không phải của decision testing.</p>
+<p>Test case <b>BC-10</b>: <code>arriving</code>, xe máy, nhận 09:00, ETA 5', huỷ lúc +1' ⇒ SPEC R-CANCEL-01: <code>arriving</code> luôn có phí ⇒ mong đợi 10.000 đ, <code>charged</code>. Chạy trên lab: <code>{"fee":10000,"reason":"charged"}</code>. Bản đột biến chỉ còn <code>since &lt; 2'</code> ⇒ D4 đúng ⇒ trả <code>grace_period</code> ⇒ ca đỏ.</p>
+<p>Test case này đi D1-F, D2-F, D3-F, D4-F, D5-F — đều là outcome đã phủ, nên chỉ số nhánh <b>không tăng</b> (đã 100%). Đây là test case của condition/MC/DC (vế đầu của D4 sai, vế sau đúng), không phải của decision testing.</p>
 </details>
 
 **Bài tập 2 (K3).** Với `cancel-v2.ts`, liệt kê decision outcome (theo TTA, không tính vế `&&`/`||`) mà bộ BC-01, 02, 03, 05, 06 đi qua, và tính decision coverage.
@@ -423,7 +423,7 @@ Bộ test có `phiCho(10, true)` và `phiCho(3, false)`. Decision coverage là b
 <p><b>c)</b> Ca 1 đi (phut&gt;5)=T, vip=T; ca 2 đi (phut&gt;5)=F, vip=F ⇒ 4/4. Lưu ý: 100% decision vẫn chưa thử tổ hợp (10, false) — chỗ phí 2.000 đ thực sự được trả về; đó là giới hạn «đường đi cụ thể» (mục 6.2). a), b), d) đếm sai.</p>
 </details>
 
-**Câu 4 (K3).** Với hàm ở câu 3, số ca tối thiểu để đạt 100% statement coverage là?
+**Câu 4 (K3).** Với hàm ở câu 3, số test case tối thiểu để đạt 100% statement coverage là?
 
 - a) 1
 - b) 2
@@ -432,14 +432,14 @@ Bộ test có `phiCho(10, true)` và `phiCho(3, false)`. Decision coverage là b
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>a)</b> <code>phiCho(10, true)</code> chạy cả hai phép gán và <code>return</code>. Muốn 100% decision cần 2 ca — minh hoạ chiều «không ngược lại» của quan hệ bao hàm.</p>
+<p><b>a)</b> <code>phiCho(10, true)</code> chạy cả hai phép gán và <code>return</code>. Muốn 100% decision cần 2 test case — minh hoạ chiều «không ngược lại» của quan hệ bao hàm.</p>
 </details>
 
 **Câu 5 (K2).** Theo CTAL-TTA v4.0, hạn chế chính của decision testing là gì?
 
 - a) Không áp dụng được cho mô hình quy trình nghiệp vụ
 - b) Không xét cách một quyết định nhiều điều kiện được tạo thành, nên có thể sót defect do tổ hợp điều kiện
-- c) Cần số ca bằng 2 mũ số quyết định
+- c) Cần số test case bằng 2 mũ số quyết định
 - d) Không đo được bằng công cụ
 
 <details>

@@ -1,7 +1,7 @@
 ---
 slug: rust-aggregate-invariant-optimistic-locking-for-update
 title: "Aggregate, invariant và concurrency: version, optimistic locking, FOR UPDATE"
-summary: "Bài 53: aggregate Account giữ hạn mức rút trong domain; optimistic locking bằng version so với SELECT FOR UPDATE, retry có giới hạn và jitter, thứ tự khóa theo id tránh deadlock 40P01, kiểm bằng N task Barrier trên PostgreSQL."
+summary: "Bài 53: aggregate Account giữ hạn mức rút trong domain; optimistic locking bằng version so với SELECT FOR UPDATE, retry có giới hạn và jitter, thứ tự khoá theo id tránh deadlock 40P01, kiểm bằng N task Barrier trên PostgreSQL."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, concurrency, aggregate]
@@ -10,11 +10,11 @@ language: vi
 
 Tài xế `DR-001` có 150.000 VND trong ví và hạn mức rút 100.000 mỗi kỳ. Hai thiết bị gần như cùng lúc gửi lệnh rút 20.400 (phần tiền chuyến `TN-0001`); mỗi lệnh đọc ví, kiểm hạn mức, rồi ghi. Chạy lần lượt thì đúng. Chồng nhau thì mỗi bút toán vẫn cân, nhưng ví đã sai.
 
-Đây là bài 53 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài 52 đặt [command handler](/articles/rust-command-handler-pipeline-domain-event-khong-framework) quanh một transaction, chưa thử lại khi xung đột. Bài 24 cho thấy [write skew phá hạn mức rút](/articles/rust-transaction-isolation-append-only-idempotency-key) và để ngỏ hướng khóa dòng; bài 42 dùng `FOR UPDATE` cho [hold](/articles/rust-hold-capture-void-so-du-kha-dung). Bài này đặt cạnh nhau: invariant sống ở đâu, version hay khóa, và hai ví thì khóa theo thứ tự nào.
+Đây là bài 53 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài 52 đặt [command handler](/articles/rust-command-handler-pipeline-domain-event-khong-framework) quanh một transaction, chưa thử lại khi xung đột. Bài 24 cho thấy [write skew phá hạn mức rút](/articles/rust-transaction-isolation-append-only-idempotency-key) và để ngỏ hướng khoá dòng; bài 42 dùng `FOR UPDATE` cho [hold](/articles/rust-hold-capture-void-so-du-kha-dung). Bài này đặt cạnh nhau: invariant sống ở đâu, version hay khoá, và hai ví thì khoá theo thứ tự nào.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Tám task cùng rút 20.400 từ ví 150.000 có hạn mức 100.000. Mỗi task đọc ví, tính số dư mới trong bộ nhớ rồi ghi đè vào cột số dư; không khóa, không version. Tổng thực rút theo sổ là bao nhiêu, và cột số dư cuối ghi bao nhiêu?</p>
+<p>Tám task cùng rút 20.400 từ ví 150.000 có hạn mức 100.000. Mỗi task đọc ví, tính số dư mới trong bộ nhớ rồi ghi đè vào cột số dư; không khoá, không version. Tổng thực rút theo sổ là bao nhiêu, và cột số dư cuối ghi bao nhiêu?</p>
 <details><summary>Xem đáp án</summary><p>Cả tám bút toán được ghi, tổng rút 163.200 VND, vượt hạn mức. Cột số dư chỉ ghi 129.600 VND (trừ đúng một lần 20.400) vì mỗi task ghi đè kết quả của bên kia.</p></details>
 </div>
 
@@ -61,19 +61,19 @@ Lịch đầu là lịch cố định dựng bằng `Notify`, không phải may 
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Hình 1. A nạp ví với số dư 150.000 và version 1. B nạp thêm 50.000 và commit, ví thành 200.000, version 2. A ghi đè số dư 129.600 tính từ bản cũ. Không khóa: số dư lưu 129.600, theo posting 179.600, mất 50.000. Optimistic: UPDATE với WHERE version = 1 trúng 0 dòng, A nạp lại version 2 và ghi 179.600."><defs><marker id="rust-aggregate-invariant-optimistic-locking-for-update-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="18" class="t-small">Thời gian chạy từ trên xuống</text><rect x="20" y="28" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="55" class="t-b">A · nạp: số dư 150.000, version 1</text><rect x="460" y="88" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="474" y="115" class="t-b">B · nạp 50.000, COMMIT: 200.000, version 2</text><rect x="20" y="148" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="175" class="t-b">A · ghi số dư 150.000 − 20.400 = 129.600</text><path d="M220 72 L220 148" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-0-a)"/><path d="M460 110 L420 164" class="f-none s-warn dash" stroke-width="2"/><rect x="20" y="214" width="400" height="72" rx="10" class="f-warn-soft s-warn"/><text x="34" y="240" class="t-b">Không khóa: ghi đè</text><text x="34" y="264" class="t-small">số dư lưu 129.600, theo posting 179.600: mất 50.000</text><rect x="460" y="214" width="400" height="72" rx="10" class="f-pk-soft s-pk"/><text x="474" y="240" class="t-b">Optimistic: WHERE version = 1</text><text x="474" y="264" class="t-small">0 dòng, nạp lại version 2, ghi 179.600</text></svg>
+<svg viewBox="0 0 880 300" role="img" aria-label="Hình 1. A nạp ví với số dư 150.000 và version 1. B nạp thêm 50.000 và commit, ví thành 200.000, version 2. A ghi đè số dư 129.600 tính từ bản cũ. Không khoá: số dư lưu 129.600, theo posting 179.600, mất 50.000. Optimistic: UPDATE với WHERE version = 1 trúng 0 dòng, A nạp lại version 2 và ghi 179.600."><defs><marker id="rust-aggregate-invariant-optimistic-locking-for-update-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="18" class="t-small">Thời gian chạy từ trên xuống</text><rect x="20" y="28" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="55" class="t-b">A · nạp: số dư 150.000, version 1</text><rect x="460" y="88" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="474" y="115" class="t-b">B · nạp 50.000, COMMIT: 200.000, version 2</text><rect x="20" y="148" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="175" class="t-b">A · ghi số dư 150.000 − 20.400 = 129.600</text><path d="M220 72 L220 148" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-0-a)"/><path d="M460 110 L420 164" class="f-none s-warn dash" stroke-width="2"/><rect x="20" y="214" width="400" height="72" rx="10" class="f-warn-soft s-warn"/><text x="34" y="240" class="t-b">Không khoá: ghi đè</text><text x="34" y="264" class="t-small">số dư lưu 129.600, theo posting 179.600: mất 50.000</text><rect x="460" y="214" width="400" height="72" rx="10" class="f-pk-soft s-pk"/><text x="474" y="240" class="t-b">Optimistic: WHERE version = 1</text><text x="474" y="264" class="t-small">0 dòng, nạp lại version 2, ghi 179.600</text></svg>
 </div>
 <figcaption>Hình 1. Lost update: câu UPDATE của A hợp lệ nên không có lỗi nào để bắt; chỉ điều kiện trên version cho A biết bản đã đọc đã cũ.</figcaption>
 </figure>
 
-Kết quả của bản không khóa, cạnh bản optimistic (mục sau):
+Kết quả của bản không khoá, cạnh bản optimistic (mục sau):
 
 ```text
 không khóa : 1 lần thử, rút được; số dư lưu 129.600 VND, số dư theo posting 179.600 VND; tổng số dư mọi tài khoản -50.000 VND, lệch projection ["driver:DR-001"]
 optimistic : 2 lần thử, rút được; số dư lưu 179.600 VND, số dư theo posting 179.600 VND; tổng số dư mọi tài khoản 0 VND, lệch projection []
 ```
 
-Sổ đóng kín nên tổng số dư mọi tài khoản phải bằng 0, và `account_balances` phải bằng tổng posting của từng tài khoản. Bản không khóa phá cả hai: 50.000 của B còn trong posting nhưng biến khỏi projection. Cùng lỗi ở quy mô tám task:
+Sổ đóng kín nên tổng số dư mọi tài khoản phải bằng 0, và `account_balances` phải bằng tổng posting của từng tài khoản. Bản không khoá phá cả hai: 50.000 của B còn trong posting nhưng biến khỏi projection. Cùng lỗi ở quy mô tám task:
 
 ```text
 không khóa : 8 ok, 0 bị từ chối, 0 hết lượt; số lần thử [1, 1, 1, 1, 1, 1, 1, 1]; số dư 129.600 VND, đã rút 20.400 VND, version 9
@@ -84,7 +84,7 @@ không khóa : 8 ok, 0 bị từ chối, 0 hết lượt; số lần thử [1, 1
 
 ## Optimistic locking: 0 dòng là xung đột, rồi thử lại
 
-Cách sửa thứ nhất không khóa khi đọc, chỉ thêm điều kiện lúc ghi: hàng phải còn ở đúng phiên bản đã đọc.
+Cách sửa thứ nhất không khoá khi đọc, chỉ thêm điều kiện lúc ghi: hàng phải còn ở đúng phiên bản đã đọc.
 
 ```rust
 // src/store.rs, hàm save, nhánh Mode::Optimistic (rút gọn: bỏ chú thích)
@@ -103,7 +103,7 @@ if done.rows_affected() == 0 {
 }
 ```
 
-`rows_affected() == 0` là toàn bộ cơ chế phát hiện. Ở READ COMMITTED nó đúng vì: nếu bên kia đã sửa hàng nhưng chưa commit, `UPDATE` của ta chờ khóa hàng; khi bên kia commit, PostgreSQL đánh giá lại `WHERE` trên bản mới, thấy `version` không khớp và trả 0 dòng. Ở [loạt C#](/articles/dotnet10-transaction-concurrency-idempotency), EF đưa concurrency token vào `WHERE` thay ta; không ORM thì tự viết. Nguyên tắc giống nhau: mọi đường ghi tăng version, và sau xung đột phải đọc lại chứ không ghi đè cho hết lỗi.
+`rows_affected() == 0` là toàn bộ cơ chế phát hiện. Ở READ COMMITTED nó đúng vì: nếu bên kia đã sửa hàng nhưng chưa commit, `UPDATE` của ta chờ khoá hàng; khi bên kia commit, PostgreSQL đánh giá lại `WHERE` trên bản mới, thấy `version` không khớp và trả 0 dòng. Ở [loạt C#](/articles/dotnet10-transaction-concurrency-idempotency), EF đưa concurrency token vào `WHERE` thay ta; không ORM thì tự viết. Nguyên tắc giống nhau: mọi đường ghi tăng version, và sau xung đột phải đọc lại chứ không ghi đè cho hết lỗi.
 
 Đường ghi chuẩn của bài 25 cộng dồn `account_balances` bằng upsert và tăng `version`, nên writer ngoài aggregate như lệnh nạp ví của B vẫn bị phát hiện. Writer nào quên tăng `version` thì cơ chế này mất tác dụng trong im lặng.
 
@@ -175,7 +175,7 @@ Số đo trên máy viết bài (load average khoảng 100 đến 207, rất t�
 
 ## FOR UPDATE: xếp hàng thay vì thử lại
 
-Cách thứ hai khóa hàng ngay lúc đọc. Task sau chờ task trước kết thúc nên không đọc bản cũ, và không có retry.
+Cách thứ hai khoá hàng ngay lúc đọc. Task sau chờ task trước kết thúc nên không đọc bản cũ, và không có retry.
 
 ```rust
 // src/store.rs, hàm load, nhánh lock = true (rút gọn: bỏ chú thích)
@@ -195,7 +195,7 @@ let limits = sqlx::query(
 .ok_or_else(|| StoreError::NoAccount(id.to_string()))?;
 ```
 
-Hàm đọc hai câu thay vì một `JOIN`, và có lý do. Bản đầu của lab gộp thành `account_balances b JOIN account_limits l ... FOR UPDATE OF b` và tám task cho ra bảy lần rút thành công, tổng 142.800, vượt hạn mức; lần thứ tám chỉ bị chặn vì thiếu số dư (thí nghiệm riêng, chạy lại đều ra bảy, không nằm trong `--verify`). Lab giữ lại lỗi ở dạng một người chờ: A khóa ví và rút 20.400 nhưng chưa commit, B nạp bằng từng cách và bị chặn (lab đợi tới khi `pg_stat_activity` báo B đang chờ khóa, không đoán bằng thời gian), rồi A commit.
+Hàm đọc hai câu thay vì một `JOIN`, và có lý do. Bản đầu của lab gộp thành `account_balances b JOIN account_limits l ... FOR UPDATE OF b` và tám task cho ra bảy lần rút thành công, tổng 142.800, vượt hạn mức; lần thứ tám chỉ bị chặn vì thiếu số dư (thí nghiệm riêng, chạy lại đều ra bảy, không nằm trong `--verify`). Lab giữ lại lỗi ở dạng một người chờ: A khoá ví và rút 20.400 nhưng chưa commit, B nạp bằng từng cách và bị chặn (lab đợi tới khi `pg_stat_activity` báo B đang chờ khoá, không đoán bằng thời gian), rồi A commit.
 
 ```text
 đúng là: số dư 129.600 VND, đã rút 20.400 VND (A vừa commit)
@@ -204,20 +204,20 @@ JOIN, FOR UPDATE OF b, l  : người chờ thấy số dư 129.600 VND, đã rú
 hai câu (lock rồi đọc)    : người chờ thấy số dư 129.600 VND, đã rút 20.400 VND
 ```
 
-[Tài liệu READ COMMITTED](https://www.postgresql.org/docs/current/transaction-iso.html#XACT-READ-COMMITTED) nói đúng chuyện này: sau khi chờ, câu lệnh đánh giá lại `WHERE`, khóa và trả bản mới của chính hàng đó, nhưng không thấy tác động của bên kia lên hàng khác. Mã nguồn PostgreSQL gọi bước này là EvalPlanQual: bảng không có trong `FOR UPDATE OF` giữ nguyên hàng đã đọc từ snapshot cũ. Nên số dư mới đi cùng số đã rút cũ, và hạn mức thủng. Khóa cả hai bảng thì hàng `l` cũng được đọc lại. Khóa trước rồi đọc ở câu riêng cũng đúng, vì ở READ COMMITTED câu thứ hai có snapshot mới; lab chọn cách này cho dễ nhìn. Bài 42 từng gặp đúng hiện tượng này với `SUM` đi cùng khóa.
+[Tài liệu READ COMMITTED](https://www.postgresql.org/docs/current/transaction-iso.html#XACT-READ-COMMITTED) nói đúng chuyện này: sau khi chờ, câu lệnh đánh giá lại `WHERE`, khoá và trả bản mới của chính hàng đó, nhưng không thấy tác động của bên kia lên hàng khác. Mã nguồn PostgreSQL gọi bước này là EvalPlanQual: bảng không có trong `FOR UPDATE OF` giữ nguyên hàng đã đọc từ snapshot cũ. Nên số dư mới đi cùng số đã rút cũ, và hạn mức thủng. Khoá cả hai bảng thì hàng `l` cũng được đọc lại. Khoá trước rồi đọc ở câu riêng cũng đúng, vì ở READ COMMITTED câu thứ hai có snapshot mới; lab chọn cách này cho dễ nhìn. Bài 42 từng gặp đúng hiện tượng này với `SUM` đi cùng khoá.
 
-Thí nghiệm `FOR UPDATE` không đặt được `Barrier` sau bước nạp, vì task đầu giữ khóa nên các task sau không bao giờ tới barrier; nó chỉ kiểm bất biến sau khi chạy.
+Thí nghiệm `FOR UPDATE` không đặt được `Barrier` sau bước nạp, vì task đầu giữ khoá nên các task sau không bao giờ tới barrier; nó chỉ kiểm bất biến sau khi chạy.
 
-Chọn cái nào tùy đặc điểm hàng:
+Chọn cái nào tuỳ đặc điểm hàng:
 
 | Tình huống | Optimistic (`version`) | `FOR UPDATE` |
 |---|---|---|
-| Ít tranh chấp (đa số ví không bị chạm đồng thời) | Không giữ khóa, hầu như không có retry | Khóa không tốn, nhưng giữ khóa suốt transaction |
+| Ít tranh chấp (đa số ví không bị chạm đồng thời) | Không giữ khoá, hầu như không có retry | Khoá không tốn, nhưng giữ khoá suốt transaction |
 | Một hàng nóng nhiều người cùng chạm | Retry tăng nhanh, có thể hết lượt | Xếp hàng, không retry, thông lượng một hàng tuần tự |
-| Transaction gọi dịch vụ ngoài khi đang giữ hàng | Không treo ai, nhưng làm lại cả việc khi xung đột | Giữ khóa suốt lúc gọi, chặn mọi người sau |
-| Hai ví trong một bút toán | Hai điều kiện version, retry cả hai; `UPDATE` vẫn giữ khóa hàng tới commit nên ghi ngược thứ tự vẫn có thể `40P01` | Phải khóa đúng thứ tự (mục sau) |
+| Transaction gọi dịch vụ ngoài khi đang giữ hàng | Không treo ai, nhưng làm lại cả việc khi xung đột | Giữ khoá suốt lúc gọi, chặn mọi người sau |
+| Hai ví trong một bút toán | Hai điều kiện version, retry cả hai; `UPDATE` vẫn giữ khoá hàng tới commit nên ghi ngược thứ tự vẫn có thể `40P01` | Phải khoá đúng thứ tự (mục sau) |
 
-`NOWAIT` và `SKIP LOCKED` trả lời câu hỏi khác: khi hàng đang bị khóa thì làm gì. Lab giữ khóa `customer:CU-001` và thử trên kết nối khác:
+`NOWAIT` và `SKIP LOCKED` trả lời câu hỏi khác: khi hàng đang bị khoá thì làm gì. Lab giữ khoá `customer:CU-001` và thử trên kết nối khác:
 
 ```text
 SELECT thường        : ["customer:CU-001", "customer:CU-002"]
@@ -225,11 +225,11 @@ FOR UPDATE SKIP LOCKED: ["customer:CU-002"]
 FOR UPDATE NOWAIT    : SQLSTATE 55P03
 ```
 
-`SELECT` thường không bị khóa chặn (MVCC). `NOWAIT` báo `55P03` ngay thay vì chờ. `SKIP LOCKED` lặng lẽ bỏ hàng đang bị khóa: đúng cho job nhặt việc như job hết hạn hold ở bài 42, vì dòng bị bỏ lại sẽ được lượt sau nhặt; sai cho lệnh rút, vì ví đang bận nghĩa là lệnh bị bỏ qua trong im lặng.
+`SELECT` thường không bị khoá chặn (MVCC). `NOWAIT` báo `55P03` ngay thay vì chờ. `SKIP LOCKED` lặng lẽ bỏ hàng đang bị khoá: đúng cho job nhặt việc như job hết hạn hold ở bài 42, vì dòng bị bỏ lại sẽ được lượt sau nhặt; sai cho lệnh rút, vì ví đang bận nghĩa là lệnh bị bỏ qua trong im lặng.
 
-## Khóa hai ví: deadlock thật và thứ tự khóa
+## Khoá hai ví: deadlock thật và thứ tự khoá
 
-Chuyển ví sang ví đổi cả hai aggregate trong một bút toán, vì tổng bằng 0 là invariant của sổ chứ không của ví nào. Lời khuyên quen thuộc của DDD là mỗi transaction chỉ đổi một aggregate; ở đây nó nhường chỗ, và cái giá là phải khóa hai hàng. [Lab DDD của loạt C#](/articles/dotnet10-ddd-bounded-context-aggregate) không gặp cảnh này vì chỉ có một root và tham chiếu tài xế bằng ID. `transfer_once` khóa bằng `FOR UPDATE` theo `LockOrder`:
+Chuyển ví sang ví đổi cả hai aggregate trong một bút toán, vì tổng bằng 0 là invariant của sổ chứ không của ví nào. Lời khuyên quen thuộc của DDD là mỗi transaction chỉ đổi một aggregate; ở đây nó nhường chỗ, và cái giá là phải khoá hai hàng. [Lab DDD của loạt C#](/articles/dotnet10-ddd-bounded-context-aggregate) không gặp cảnh này vì chỉ có một root và tham chiếu tài xế bằng ID. `transfer_once` khoá bằng `FOR UPDATE` theo `LockOrder`:
 
 ```rust
 // src/store.rs, hàm transfer_once (rút gọn: bỏ chú thích và đoạn ghi)
@@ -243,13 +243,13 @@ gate.reach().await; // lab: dừng sau khi khóa hàng đầu tiên
 let b = load(conn, second, true).await?;
 ```
 
-Hai lệnh ngược chiều (CU-001 sang CU-002 và ngược lại) với `AsGiven` và một `Barrier` sau khóa đầu tiên: mỗi bên giữ ví nguồn rồi xin ví của bên kia.
+Hai lệnh ngược chiều (CU-001 sang CU-002 và ngược lại) với `AsGiven` và một `Barrier` sau khoá đầu tiên: mỗi bên giữ ví nguồn rồi xin ví của bên kia.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Hình 3. Bên trái: T1 giữ CU-001 và chờ CU-002, T2 giữ CU-002 và chờ CU-001, tạo vòng chờ nên PostgreSQL huỷ một bên bằng 40P01. Bên phải: khóa theo id, cả hai cùng xin CU-001 trước, bên đến sau xếp hàng nên không có vòng."><defs><marker id="rust-aggregate-invariant-optimistic-locking-for-update-2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="22" class="t-b">Khóa theo thứ tự nhận được</text><rect x="20" y="50" width="130" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="77" class="t-b">T1</text><rect x="20" y="190" width="130" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="217" class="t-b">T2</text><rect x="290" y="50" width="130" height="44" rx="10" class="f-pk-soft s-pk"/><text x="304" y="77" class="t-b">CU-001</text><rect x="290" y="190" width="130" height="44" rx="10" class="f-pk-soft s-pk"/><text x="304" y="217" class="t-b">CU-002</text><path d="M150 72 L290 72" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><text x="190" y="64" class="t-small">giữ</text><path d="M150 212 L290 212" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><text x="190" y="228" class="t-small">giữ</text><path d="M120 94 L300 190" class="f-none s-warn dash" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><path d="M120 190 L300 94" class="f-none s-warn dash" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><text x="140" y="146" class="t-small">chờ</text><text x="240" y="146" class="t-small">chờ</text><rect x="20" y="256" width="400" height="34" rx="10" class="f-warn-soft s-warn"/><text x="34" y="278" class="t-small">vòng chờ: sau 1 giây PostgreSQL huỷ một bên bằng 40P01</text><text x="470" y="22" class="t-b">Khóa theo id nhỏ trước</text><rect x="470" y="50" width="390" height="44" rx="10" class="f-phys-soft s-phys"/><text x="484" y="77" class="t-small">T1: khóa CU-001, khóa CU-002, commit</text><rect x="470" y="110" width="390" height="44" rx="10" class="f-phys-soft s-phys"/><text x="484" y="137" class="t-small">T2: xin CU-001, xếp hàng sau T1</text><rect x="470" y="170" width="390" height="44" rx="10" class="f-phys-soft s-phys"/><text x="484" y="197" class="t-small">T2: được CU-001, khóa CU-002, commit</text><path d="M665 94 L665 110" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><path d="M665 154 L665 170" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><rect x="470" y="256" width="390" height="34" rx="10" class="f-pk-soft s-pk"/><text x="484" y="278" class="t-small">thứ tự toàn phần thì không thể có vòng chờ</text></svg>
+<svg viewBox="0 0 880 300" role="img" aria-label="Hình 3. Bên trái: T1 giữ CU-001 và chờ CU-002, T2 giữ CU-002 và chờ CU-001, tạo vòng chờ nên PostgreSQL huỷ một bên bằng 40P01. Bên phải: khoá theo id, cả hai cùng xin CU-001 trước, bên đến sau xếp hàng nên không có vòng."><defs><marker id="rust-aggregate-invariant-optimistic-locking-for-update-2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="22" class="t-b">Khoá theo thứ tự nhận được</text><rect x="20" y="50" width="130" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="77" class="t-b">T1</text><rect x="20" y="190" width="130" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="217" class="t-b">T2</text><rect x="290" y="50" width="130" height="44" rx="10" class="f-pk-soft s-pk"/><text x="304" y="77" class="t-b">CU-001</text><rect x="290" y="190" width="130" height="44" rx="10" class="f-pk-soft s-pk"/><text x="304" y="217" class="t-b">CU-002</text><path d="M150 72 L290 72" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><text x="190" y="64" class="t-small">giữ</text><path d="M150 212 L290 212" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><text x="190" y="228" class="t-small">giữ</text><path d="M120 94 L300 190" class="f-none s-warn dash" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><path d="M120 190 L300 94" class="f-none s-warn dash" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><text x="140" y="146" class="t-small">chờ</text><text x="240" y="146" class="t-small">chờ</text><rect x="20" y="256" width="400" height="34" rx="10" class="f-warn-soft s-warn"/><text x="34" y="278" class="t-small">vòng chờ: sau 1 giây PostgreSQL huỷ một bên bằng 40P01</text><text x="470" y="22" class="t-b">Khoá theo id nhỏ trước</text><rect x="470" y="50" width="390" height="44" rx="10" class="f-phys-soft s-phys"/><text x="484" y="77" class="t-small">T1: khoá CU-001, khoá CU-002, commit</text><rect x="470" y="110" width="390" height="44" rx="10" class="f-phys-soft s-phys"/><text x="484" y="137" class="t-small">T2: xin CU-001, xếp hàng sau T1</text><rect x="470" y="170" width="390" height="44" rx="10" class="f-phys-soft s-phys"/><text x="484" y="197" class="t-small">T2: được CU-001, khoá CU-002, commit</text><path d="M665 94 L665 110" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><path d="M665 154 L665 170" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-aggregate-invariant-optimistic-locking-for-update-2-a)"/><rect x="470" y="256" width="390" height="34" rx="10" class="f-pk-soft s-pk"/><text x="484" y="278" class="t-small">thứ tự toàn phần thì không thể có vòng chờ</text></svg>
 </div>
-<figcaption>Hình 3. Deadlock cần một vòng chờ. Khi mọi giao dịch khóa cùng thứ tự, bên đến sau chỉ xếp hàng ở khóa đầu.</figcaption>
+<figcaption>Hình 3. Deadlock cần một vòng chờ. Khi mọi giao dịch khoá cùng thứ tự, bên đến sau chỉ xếp hàng ở khoá đầu.</figcaption>
 </figure>
 
 ```text
@@ -260,9 +260,9 @@ khóa theo id, không retry:                2 ok, 0 deadlock; số lần thử [
 nạn nhân chưa ROLLBACK: 1 bên vẫn khóa đủ hai hàng; nạn nhân nhận 40P01, lệnh kế của nó SQLSTATE 25P02
 ```
 
-Đây là `40P01` thật. PostgreSQL chỉ kiểm vòng chờ sau khi một phiên đã chờ khóa đủ `deadlock_timeout` (1 giây, giá trị mặc định, trên server của lab), rồi huỷ một bên để bên kia đi tiếp. Tài liệu nói bên nào bị huỷ thì khó đoán: chạy lại lab, dòng đầu ra cả 45.000/55.000 lẫn 53.000/47.000, nên `--verify` chỉ kiểm «một ok, một deadlock». Dòng ba là cách sửa gốc: khóa id nhỏ trước, bất kể chiều chuyển.
+Đây là `40P01` thật. PostgreSQL chỉ kiểm vòng chờ sau khi một phiên đã chờ khoá đủ `deadlock_timeout` (1 giây, giá trị mặc định, trên server của lab), rồi huỷ một bên để bên kia đi tiếp. Tài liệu nói bên nào bị huỷ thì khó đoán: chạy lại lab, dòng đầu ra cả 45.000/55.000 lẫn 53.000/47.000, nên `--verify` chỉ kiểm «một ok, một deadlock». Dòng ba là cách sửa gốc: khoá id nhỏ trước, bất kể chiều chuyển.
 
-Dòng năm tách hai việc hay bị gộp. Khóa của nạn nhân được nhả ngay lúc server huỷ transaction: bên kia khóa đủ hai hàng trong khi nạn nhân chưa gửi gì. Nhưng kết nối của nạn nhân nhận `25P02` cho tới khi có `ROLLBACK`, nên `in_tx` vẫn phải `ROLLBACK`. Vòng thử lại coi `40P01` là lỗi tạm thời và mở transaction mới.
+Dòng năm tách hai việc hay bị gộp. Khoá của nạn nhân được nhả ngay lúc server huỷ transaction: bên kia khoá đủ hai hàng trong khi nạn nhân chưa gửi gì. Nhưng kết nối của nạn nhân nhận `25P02` cho tới khi có `ROLLBACK`, nên `in_tx` vẫn phải `ROLLBACK`. Vòng thử lại coi `40P01` là lỗi tạm thời và mở transaction mới.
 
 Dòng bốn không có `Barrier`, không retry. «0 deadlock» chỉ nói lần chạy đó không gặp; cái chứng minh là lập luận ở Hình 3: thứ tự toàn phần không tạo được vòng chờ.
 

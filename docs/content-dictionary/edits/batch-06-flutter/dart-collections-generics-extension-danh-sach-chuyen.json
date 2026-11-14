@@ -1,0 +1,83 @@
+{
+"file": "dart-collections-generics-extension-danh-sach-chuyen.md",
+"edits": [
+{
+"old": "Khác biệt: List và Set giữ dữ liệu thật,",
+"new": "Điểm khác nhau là List và Set giữ dữ liệu thật,",
+"reason": "Câu cụt kiểu 'Difference:'",
+"severity": "low"
+},
+{
+"old": "Nếu hàm lọc đắt, hoặc có side effect như ghi log, nó chạy gấp đôi.",
+"new": "Nếu hàm lọc tốn kém, hoặc có side effect như ghi log, hàm đó chạy gấp đôi.",
+"reason": "'đắt' là calque của expensive; 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Điều này ảnh hưởng thiết kế chữ ký hàm.",
+"new": "Điều này ảnh hưởng tới cách thiết kế chữ ký hàm.",
+"reason": "Thiếu giới từ, giọng dịch máy",
+"severity": "low"
+},
+{
+"old": "và hiểu rằng nó chưa chạy.",
+"new": "và hiểu rằng pipeline đó chưa chạy.",
+"reason": "Tránh đại từ 'nó' mơ hồ",
+"severity": "low"
+},
+{
+"old": "bẫy duyệt hai lần cũng hệt như vậy.",
+"new": "bẫy duyệt hai lần cũng giống hệt.",
+"reason": "Cách nói gượng",
+"severity": "low"
+},
+{
+"old": "Rỗng thì trả `initial`: tổng cước của danh sách rỗng là 0.",
+"new": "Danh sách rỗng thì trả `initial`: tổng cước của danh sách rỗng là 0.",
+"reason": "Câu thiếu chủ ngữ",
+"severity": "medium"
+},
+{
+"old": "vì có bẫy ổn định. Sắp xếp **ổn định** nghĩa là hai phần tử bằng khoá giữ nguyên thứ tự ban đầu.",
+"new": "vì có bẫy về tính ổn định. Sắp xếp **ổn định** nghĩa là hai phần tử có khoá bằng nhau giữ nguyên thứ tự ban đầu.",
+"reason": "Cụm từ tự ghép 'bẫy ổn định', 'bằng khoá' gượng",
+"severity": "medium"
+},
+{
+"old": "và `page.items[0].fareVnd` thành lỗi chỉ bắt được lúc chạy.",
+"new": "và `page.items[0].fareVnd` trở thành lỗi chỉ bắt được lúc chạy.",
+"reason": "Thiếu 'trở' trong 'thành'",
+"severity": "medium"
+},
+{
+"old": "sẽ lỗi ngay khi biên dịch.",
+"new": "sẽ báo lỗi ngay khi biên dịch.",
+"reason": "Thiếu động từ",
+"severity": "low"
+},
+{
+"old": "và người dùng thường cần chỉ số.",
+"new": "và người gọi thường cần chỉ số.",
+"reason": "'người dùng' sai đối tượng: đây là người gọi hàm",
+"severity": "medium"
+},
+{
+"old": "Nếu file nào import cả hai rồi viết `trips.summary`,",
+"new": "Nếu một file import cả hai rồi viết `trips.summary`,",
+"reason": "'file nào' kiểu tiếng Anh 'any file', dễ hiểu sai",
+"severity": "medium"
+},
+{
+"old": "kết quả đổi theo nguồn mà không ai hay.",
+"new": "kết quả đổi theo nguồn mà không ai nhận ra.",
+"reason": "'không ai hay' khẩu ngữ gượng",
+"severity": "low"
+},
+{
+"old": ": `Paged<Trip>` thành `Paged<String>` mà giữ `page`",
+"new": ": đổi `Paged<Trip>` thành `Paged<String>` mà giữ `page`",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+}
+]
+}

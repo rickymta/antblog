@@ -178,7 +178,7 @@ fn replay_does_not_double_count() -> Result<(), LedgerError> {
 | `cargo test ledger::` | Chỉ chạy test có tên chứa chuỗi đó | Đang sửa một module |
 | `cargo test -- --nocapture` | Hiện `println!` của test đang pass | Gỡ lỗi một ca |
 | `cargo test --doc` | Chỉ chạy doc test | Sau khi sửa comment `///` |
-| `cargo test --release` | Chạy test với tối ưu hóa | Trước khi phát hành |
+| `cargo test --release` | Chạy test với tối ưu hoá | Trước khi phát hành |
 | `cargo clippy --all-targets -- -D warnings` | Lint, mọi cảnh báo thành lỗi | Trước commit, trong CI |
 | `cargo fmt --check` | Báo nếu code chưa đúng định dạng (không sửa) | CI; ở máy dùng `cargo fmt` |
 | `cargo doc --open` | Sinh tài liệu từ `///` và mở trình duyệt | Xem API `pub` mà người dùng thấy |
@@ -192,7 +192,7 @@ Lọc theo tên: `cargo test --lib ledger::` cho kết quả `5 passed; 0 failed
 
 `--release` đáng chạy riêng vì overflow của `i64` panic ở chế độ debug nhưng quay vòng ở release (bài 03). Một test `#[should_panic]` dựa vào panic tràn số (`i64::MAX + 1`, giá trị đi qua `std::hint::black_box` để compiler không phát hiện sớm) pass ở `cargo test` và fail ở `cargo test --release` với `test did not panic as expected`; ta đã thử trong một project nháp. Vì vậy lab dùng `checked_add` và `Err(Overflow)`, hành vi giống nhau ở cả hai chế độ.
 
-Ghim phiên bản công cụ cho cả nhóm bằng file `rust-toolchain.toml` (khóa `channel`, `components`). Lab không dùng file này vì không bắt buộc.
+Ghim phiên bản công cụ cho cả nhóm bằng file `rust-toolchain.toml` (khoá `channel`, `components`). Lab không dùng file này vì không bắt buộc.
 
 ## clippy bắt gì mà compiler để qua?
 

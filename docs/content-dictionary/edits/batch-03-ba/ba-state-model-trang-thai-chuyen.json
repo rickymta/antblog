@@ -1,0 +1,77 @@
+{
+ "file": "ba-state-model-trang-thai-chuyen.md",
+ "edits": [
+  {
+   "old": "tài xế khác không được điều khiển chuyến được gán cho người khác.",
+   "new": "tài xế khác không được thao tác trên chuyến đã gán cho người khác.",
+   "reason": "'điều khiển' sai nghĩa, lặp 'được'",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu muốn trạng thái arrived riêng,",
+   "new": "Nếu muốn có trạng thái arrived riêng,",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Bảng tóm tắt không thay toàn bộ R-ACCEPT",
+   "new": "Bảng tóm tắt không thay thế toàn bộ R-ACCEPT",
+   "reason": "Thiếu chữ 'thế'",
+   "severity": "medium"
+  },
+  {
+   "old": "Các effect cần được review cùng transaction/nhất quán dữ liệu với nhóm kỹ thuật,",
+   "new": "Cần cùng nhóm kỹ thuật review các effect về transaction và tính nhất quán dữ liệu,",
+   "reason": "Bị động và cụm 'transaction/nhất quán dữ liệu' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Hệ thống kiểm tra tìm tài xế quá hạn theo chu kỳ 15 giây",
+   "new": "Hệ thống kiểm tra các chuyến tìm tài xế quá hạn theo chu kỳ 15 giây",
+   "reason": "Thiếu danh từ chính 'chuyến'",
+   "severity": "medium"
+  },
+  {
+   "old": "không tự là completed của chuyến.",
+   "new": "không đồng nghĩa với completed của chuyến.",
+   "reason": "'không tự là' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "## 6. Xem xét sự kiện đến cạnh tranh và replay",
+   "new": "## 6. Xem xét sự kiện đến đồng thời và replay",
+   "reason": "'cạnh tranh' là calque của 'race'",
+   "severity": "medium"
+  },
+  {
+   "old": "gần đồng thời là ca cần thống nhất kết quả",
+   "new": "gần đồng thời là tình huống cần thống nhất kết quả",
+   "reason": "'ca' không rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "mâu thuẫn cho cùng lượt chuyển;",
+   "new": "mâu thuẫn cho cùng một lần chuyển trạng thái;",
+   "reason": "'lượt chuyển' là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Giữ distinction này để không thu phí lặp.",
+   "new": "Giữ sự phân biệt này để không thu phí lặp.",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "Đi qua ba ca: tài xế rời",
+   "new": "Đi qua ba tình huống: tài xế rời",
+   "reason": "'ca' không rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "dữ liệu phải thay và nguồn SPEC.",
+   "new": "dữ liệu phải thay đổi và nguồn SPEC.",
+   "reason": "Thiếu chữ 'đổi'",
+   "severity": "medium"
+  }
+ ]
+}

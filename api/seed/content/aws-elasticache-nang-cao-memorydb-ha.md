@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, elasticache, memorydb, redis, valkey, high-availabi
 language: vi
 ---
 
-17:03, một node ElastiCache của Tới Nơi bị AWS thay do bảo trì hạ tầng. Trong khoảng nửa phút, bộ đếm rate limit và cache báo giá ở [bài 15](/articles/aws-elasticache-redis-cache-rate-limit) ngừng trả lời. Cache lúc này không còn là món tối ưu có cũng được: nó nằm trên đường đi của mọi request, và nếu nó chết thì API chậm hoặc mở toang. Bài này đưa cache lên mức "phụ thuộc quan trọng": chịu mất node, chia nhiều shard, hết bộ nhớ thì loại khoá nào, và khi nào nên đổi sang **Amazon MemoryDB** vì dữ liệu không được phép mất.
+17:03, một node ElastiCache của Tới Nơi bị AWS thay do bảo trì hạ tầng. Trong khoảng nửa phút, bộ đếm rate limit và cache báo giá ở [bài 15](/articles/aws-elasticache-redis-cache-rate-limit) ngừng trả lời. Cache lúc này không còn là món tối ưu có cũng được: nó nằm trên đường đi của mọi request, và nếu nó chết thì API chậm hoặc mở toang. Bài này đưa cache lên mức "phụ thuộc quan trọng": chịu được việc mất node, chia nhiều shard, hết bộ nhớ thì loại khoá nào, và khi nào nên đổi sang **Amazon MemoryDB** vì dữ liệu không được phép mất.
 
 Đây là **bài 33** của lộ trình **AWS qua Tới Nơi · Phần 04: Dữ liệu, lưu trữ và messaging**. Bạn cần xong bài 15 và [bài 32](/articles/aws-dynamodb-single-table-gsi-ttl-streams) (để so sánh nơi lưu trạng thái dispatch).
 
@@ -22,13 +22,13 @@ language: vi
 
 Một **replication group** gồm một primary nhận ghi và tới 5 replica mỗi shard. Hai cờ quan trọng: `automatic_failover_enabled` cho phép ElastiCache tự nâng replica khi primary hỏng, và `multi_az_enabled` buộc các node nằm ở nhiều AZ. Thiếu replica thì hai cờ vô nghĩa: lab bắt `replicas_per_node_group >= 1`.
 
-Khi failover xảy ra, ElastiCache chọn replica, nâng lên primary, rồi cập nhật DNS của endpoint. Tài liệu nêu mức vài chục giây tới khoảng một phút; số của bạn phải tự đo bằng `scripts/test-failover.sh` kèm `scripts/probe.sh`. Tác động phía client gồm: connection tới node cũ đứt, ghi tới khi primary mới sẵn sàng bị lỗi, và nếu client cache kết quả DNS quá lâu thì tiếp tục gõ vào địa chỉ cũ. Client đáng dùng phải có timeout ngắn, tự reconnect có backoff và, với cluster mode, tự làm mới bản đồ slot.
+Khi failover xảy ra, ElastiCache chọn replica, nâng lên primary, rồi cập nhật DNS của endpoint. Tài liệu nêu mức vài chục giây tới khoảng một phút; số của bạn phải tự đo bằng `scripts/test-failover.sh` kèm `scripts/probe.sh`. Tác động phía client gồm: connection tới node cũ đứt, lệnh ghi bị lỗi cho tới khi primary mới sẵn sàng, và nếu client cache kết quả DNS quá lâu thì tiếp tục gọi vào địa chỉ cũ. Client tốt phải có timeout ngắn, tự reconnect có backoff và, với cluster mode, tự làm mới bản đồ slot.
 
 Replica còn để đọc: **reader endpoint** (ở chế độ không cluster) chia kết nối giữa các replica, đổi lại có độ trễ replication. **Snapshot** của ElastiCache lấy từ một node và cần bộ nhớ dự trữ để thực hiện, nên cache thuần như báo giá thường đặt `snapshot_retention_limit = 0`.
 
 ## Cluster mode: slot, shard và hash tag
 
-Ở chế độ **cluster mode disabled**, một replication group chỉ có một shard: toàn bộ dữ liệu phải nằm gọn trong bộ nhớ một node. **Cluster mode enabled** chia keyspace thành **16.384 slot** phân cho nhiều shard; mỗi khoá thuộc slot `CRC16(khoá) mod 16384`. Bộ nhớ và thông lượng ghi giờ cộng dồn theo số shard.
+Ở chế độ **cluster mode disabled**, một replication group chỉ có một shard: toàn bộ dữ liệu phải nằm gọn trong bộ nhớ một node. **Cluster mode enabled** chia keyspace thành **16.384 slot** phân cho nhiều shard; mỗi khoá thuộc slot `CRC16(khoá) mod 16384`. Bộ nhớ và thông lượng ghi giờ tăng theo số shard.
 
 | | Cluster mode disabled | Cluster mode enabled |
 |---|---|---|
@@ -40,7 +40,7 @@ Replica còn để đọc: **reader endpoint** (ở chế độ không cluster) 
 
 Hệ quả thực tế là lỗi `CROSSSLOT`: `MGET`, `MULTI` hay script Lua chạm nhiều khoá khác slot đều bị từ chối. Giải pháp là **hash tag**: chỉ phần trong `{...}` được băm. Khoá `{trip:42}:driver` và `{trip:42}:status` luôn cùng slot (đo bằng `CLUSTER KEYSLOT`, lab có `keyslot.sh`: cả hai ra slot 9610), nên một script có thể đụng cả hai. Đừng đặt tag chung cho quá nhiều khoá, như `{hcm}`: cả thành phố dồn vào một shard, đúng lỗi đã cảnh báo ở bài 15.
 
-**Resharding online** thêm hoặc bớt shard mà không dừng dịch vụ: slot được di chuyển dần, client nhận `MOVED` hoặc `ASK` và cập nhật. Trong lúc di chuyển, độ trễ tăng; làm ngoài khung 11:00 và 17:00. Với Terraform, đổi `num_node_groups` thực hiện việc này. Nếu không muốn quản lý shard, **ElastiCache Serverless** tự co giãn nhưng bạn mất quyền điều khiển các tham số bên dưới.
+**Resharding online** thêm hoặc bớt shard mà không dừng dịch vụ: slot được di chuyển dần, client nhận `MOVED` hoặc `ASK` và cập nhật. Trong lúc di chuyển, độ trễ tăng; tránh các khung 11:00 và 17:00. Với Terraform, đổi `num_node_groups` thực hiện việc này. Nếu không muốn quản lý shard, **ElastiCache Serverless** tự co giãn nhưng bạn không còn chỉnh được các tham số bên dưới.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -90,18 +90,18 @@ Hai loại khoá hay gây sự cố. **Big key** (một danh sách hay hash hàn
 | Khoá chào chuyến đang chờ tài xế trả lời | Chào trùng cho hai tài xế | MemoryDB hoặc DynamoDB (bài 32) |
 | Trạng thái chuyến, thanh toán | Mất tiền | PostgreSQL (bài 31) |
 
-MemoryDB không bắt buộc, vì conditional write của DynamoDB đã giải quyết "ai thắng". Nó đáng cân nhắc khi cần cấu trúc dữ liệu kiểu Redis (sorted set làm hàng đợi chào chuyến) với độ trễ cực thấp và vẫn không được mất dữ liệu. **Global Datastore** của ElastiCache nhân dữ liệu sang region khác, thuộc bài 56.
+MemoryDB không bắt buộc, vì conditional write của DynamoDB đã giải quyết "ai thắng". MemoryDB đáng cân nhắc khi cần cấu trúc dữ liệu kiểu Redis (sorted set làm hàng đợi chào chuyến) với độ trễ cực thấp và vẫn không được mất dữ liệu. **Global Datastore** của ElastiCache sao chép dữ liệu sang region khác, thuộc bài 56.
 
 ## Pub/sub và Streams cho realtime
 
 **Pub/sub** (`PUBLISH`, `SUBSCRIBE`) phát thông điệp tới người đang nghe ngay lúc đó; không lưu, không xác nhận. Người nghe offline hay đang reconnect sau failover sẽ **mất** thông điệp, và sau failover phải đăng ký lại kênh. Hợp với việc đẩy vị trí tài xế tới các server WebSocket ([bài 19](/articles/aws-api-gateway-authorizer-websocket)), nơi mất một bản tin chỉ lệch 4 giây. Trong cluster mode, `PUBLISH` thông thường lan ra mọi node; engine mới có pub/sub theo shard (`SPUBLISH`, `SSUBSCRIBE`) để giới hạn trong shard.
 
-**Streams** (`XADD`, `XREADGROUP`, `XACK`) giữ thông điệp, có consumer group và theo dõi thông điệp chờ xác nhận bằng `XPENDING`. Dùng cho việc không được rơi: hàng đợi chào chuyến, sự kiện cần xử lý lại. Nhớ giới hạn độ dài bằng `MAXLEN ~`. Trên ElastiCache, stream chịu cùng rủi ro mất ghi cuối khi failover; trên MemoryDB thì bền. Cần retention dài và nhiều consumer thì dùng Kafka (bài 34) hay Kinesis (bài 35).
+**Streams** (`XADD`, `XREADGROUP`, `XACK`) giữ thông điệp, có consumer group và theo dõi thông điệp chờ xác nhận bằng `XPENDING`. Dùng cho dữ liệu không được để rơi mất: hàng đợi chào chuyến, sự kiện cần xử lý lại. Nhớ giới hạn độ dài bằng `MAXLEN ~`. Trên ElastiCache, stream chịu cùng rủi ro mất ghi cuối khi failover; trên MemoryDB thì bền. Cần retention dài và nhiều consumer thì dùng Kafka (bài 34) hay Kinesis (bài 35).
 
 ## Cái giá phải trả
 
 - **Fail-open hoặc fail-closed chưa quyết.** Cache chết mà code không có chính sách, request treo tới hết timeout.
-- **Client không hỗ trợ cluster.** Gặp `MOVED` mà không theo là lỗi; kiểm thư viện trước.
+- **Client không hỗ trợ cluster.** Client gặp `MOVED` mà không chuyển hướng theo sẽ báo lỗi; kiểm thư viện trước.
 - **Hash tag quá rộng.** Dồn tải vào một shard, mất ý nghĩa của sharding.
 - **Resharding giờ cao điểm.** Di chuyển slot tốn CPU và băng thông.
 - **MemoryDB cho mọi thứ.** Trả tiền cho độ bền mà cache báo giá không cần.

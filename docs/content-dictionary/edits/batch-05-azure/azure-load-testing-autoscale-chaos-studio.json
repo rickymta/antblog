@@ -1,0 +1,21 @@
+{"file":"azure-load-testing-autoscale-chaos-studio.md","edits":[
+{"old":"chỉnh scale rule của Container Apps theo số đo, rồi","new":"chỉnh scale rule của Container Apps theo kết quả đo, rồi","reason":"'số đo' sai nghĩa, ý là kết quả đo (metric/kết quả test run)","severity":"medium"},
+{"old":"nên không kiểm xác thực từng người dùng","new":"nên không kiểm tra xác thực từng người dùng","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"thành cổng kiểm. Khối YAML","new":"thành cổng kiểm tra. Khối YAML","reason":"'cổng kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"Kiểm một lần bằng cách cố ý hạ ngưỡng.","new":"Kiểm tra một lần bằng cách cố ý hạ ngưỡng.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"| Núm cần chỉnh |","new":"| Tham số cần chỉnh |","reason":"'núm' là calque của knob","severity":"medium"},
+{"old":"Hết đường scale","new":"Không còn chỗ để scale","reason":"'Hết đường scale' là calque, gượng","severity":"medium"},
+{"old":"Nâng max, nhưng kiểm connection trước","new":"Nâng max, nhưng kiểm tra connection trước","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Hai núm thời gian là","new":"Hai tham số thời gian là","reason":"'núm' là calque của knob","severity":"medium"},
+{"old":"kiểm giá trị mặc định trong schema","new":"kiểm tra giá trị mặc định trong schema","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"có thể rẻ hơn chịu p95 xấu.","new":"có thể rẻ hơn so với việc chịu p95 xấu.","reason":"Câu so sánh thiếu 'so với', cụt","severity":"medium"},
+{"old":"## Chaos Studio phá có kiểm soát để kiểm giả định","new":"## Chaos Studio phá có kiểm soát để kiểm tra giả định","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nó không chạm vào `ca-toinoi-trips-staging`.","new":"Experiment này không chạm vào `ca-toinoi-trips-staging`.","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"Cả hai thô hơn Chaos Studio nhưng kiểm được cùng giả định","new":"Cả hai thô hơn Chaos Studio nhưng kiểm tra được cùng giả định","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Chỉnh một núm.** Ví dụ","new":"Chỉnh một tham số.** Ví dụ","reason":"'núm' là calque của knob","severity":"medium"},
+{"old":"Đổi hai núm cùng lúc thì không biết núm nào có tác dụng.","new":"Đổi hai tham số cùng lúc thì không biết tham số nào có tác dụng.","reason":"'núm' là calque của knob","severity":"medium"},
+{"old":"## Load test và chaos là cách kiểm error budget trước khi khách kiểm giúp","new":"## Load test và chaos là cách kiểm tra error budget trước khi khách hàng kiểm tra giúp bạn","reason":"'kiểm' thiếu 'tra', 'kiểm giúp' cụt","severity":"medium"},
+{"old":"thì khách hàng sẽ kiểm thay bạn vào","new":"thì khách hàng sẽ kiểm tra thay bạn vào","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"là alert chưa được kiểm.","new":"là alert chưa được kiểm tra.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Bạn vừa có cách kiểm mục tiêu","new":"Bạn vừa có cách kiểm tra mục tiêu","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

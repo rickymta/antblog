@@ -1,0 +1,22 @@
+{"file":"azure-database-postgresql-flexible-server-co-ban.md","edits":[
+{"old":"Single Server, mô hình cũ, đã nghỉ hưu, nên","new":"Single Server, mô hình cũ, đã ngừng hỗ trợ, nên","reason":"'nghỉ hưu' là calque của retire","severity":"high"},
+{"old":"vá hệ điều hành, nâng bản PostgreSQL,","new":"vá hệ điều hành, nâng phiên bản PostgreSQL,","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"Làm đúng thì rẻ và toàn quyền.","new":"Làm đúng thì rẻ và có toàn quyền kiểm soát.","reason":"Câu cụt, thiếu động từ","severity":"low"},
+{"old":"Tự viết script, tự kiểm restore","new":"Tự viết script, tự kiểm tra restore","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"là điểm bắt đầu thường gặp của môi trường staging, prod","new":"là điểm khởi đầu thường gặp cho môi trường staging và prod","reason":"Giới từ 'của' và dấu phẩy gượng","severity":"low"},
+{"old":"Nó mở rộng được nhưng không thu nhỏ lại","new":"Dung lượng này mở rộng được nhưng không thu nhỏ lại được","reason":"Tránh 'Nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Ứng dụng phải được trỏ lại sang server mới. Backup tự động không thay bài tập restore thử định kỳ.","new":"Bạn phải trỏ ứng dụng sang server mới. Backup tự động không thay thế được việc diễn tập restore định kỳ.","reason":"Bị động; 'bài tập restore thử' gượng","severity":"medium"},
+{"old":"không chuyển qua lại với public access tại chỗ được","new":"không thể chuyển qua lại với public access ngay trên server đang có","reason":"'tại chỗ được' là calque của in-place","severity":"medium"},
+{"old":"hãy quyết kiểu mạng cho prod","new":"hãy chốt kiểu mạng cho prod","reason":"'quyết' thiếu tự nhiên","severity":"low"},
+{"old":"và lưu cùng lịch rà soát.","new":"và đặt lịch rà soát lại định kỳ.","reason":"'lưu cùng lịch rà soát' không rõ nghĩa (suy đoán theo ngữ cảnh)","severity":"medium"},
+{"old":"Tránh ký tự `;` trong mật khẩu vì nó làm vỡ connection string ở mục sau.","new":"Tránh ký tự `;` trong mật khẩu vì ký tự này làm vỡ connection string ở mục sau.","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"Nó chưa chứng minh bạn nối được vào server, và tên tham số có thể khác theo bản Azure CLI,","new":"Lệnh trên chưa chứng minh bạn nối được vào server, và tên tham số có thể khác tuỳ phiên bản Azure CLI,","reason":"'Nó' mơ hồ ở đầu câu; thống nhất 'phiên bản'","severity":"medium"},
+{"old":"Nó tương đương `dotnet ef database update` nhưng","new":"Project này tương đương `dotnet ef database update` nhưng","reason":"'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"psql ở đây chỉ dùng để kiểm kết quả.","new":"psql ở đây chỉ dùng để kiểm tra kết quả.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"và không kiểm quyền của các role","new":"và không kiểm tra quyền của các role","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"cũng là một cánh cửa Internet thật.","new":"cũng là một cánh cửa mở ra Internet thật sự.","reason":"Cụm tự ghép, thiếu động từ","severity":"medium"},
+{"old":"Nó không đẩy log về nơi nào cả:","new":"Lệnh này không đẩy log về nơi nào cả:","reason":"'Nó' mơ hồ ở đầu câu","severity":"medium"},
+{"old":"hãy xem cột trạng thái trước khi đổi giờ cao điểm.","new":"hãy xem cột trạng thái trước khi đổi, nhất là vào giờ cao điểm.","reason":"Câu cụt, 'đổi giờ cao điểm' dễ hiểu nhầm (viết lại theo ngữ cảnh)","severity":"medium"},
+{"old":"Hãy đặt pool size từ trần của server chia cho số replica tối đa, trừ phần dự phòng","new":"Hãy tính pool size bằng trần của server chia cho số replica tối đa, sau khi trừ phần dự phòng","reason":"'đặt ... từ' là calque, thiếu động từ","severity":"medium"},
+{"old":"Còn một câu hỏi chưa có lời:","new":"Còn một câu hỏi chưa có lời đáp:","reason":"Thiếu 'đáp'","severity":"medium"}
+]}

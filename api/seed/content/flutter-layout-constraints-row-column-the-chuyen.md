@@ -14,7 +14,7 @@ Lỗi không nằm ở địa chỉ quá dài mà ở chỗ ta chưa hiểu widg
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Một ô vuông viết <code>SizedBox(width: 100, height: 100)</code> nằm trong <code>SizedBox(width: 300, height: 300)</code> đặt trong một <code>Center</code>. Ô vuông trên màn hình rộng 100 hay 300 pixel? Và nếu chen một <code>Align</code> giữa hai widget này thì sao?</p>
+<p>Một ô vuông dựng bằng <code>SizedBox(width: 100, height: 100)</code> nằm trong <code>SizedBox(width: 300, height: 300)</code> đặt trong một <code>Center</code>. Ô vuông trên màn hình rộng 100 hay 300 pixel? Và nếu chen một <code>Align</code> giữa hai widget này thì sao?</p>
 <details><summary>Xem đáp án</summary><p>Rộng 300 pixel. <code>SizedBox</code> đưa cho con một ràng buộc chặt 300x300, và con chỉ được chọn kích thước trong ràng buộc đó, nên lời đòi 100 bị bỏ qua. Chen <code>Align</code> vào thì ô vuông rộng đúng 100 pixel, vì <code>Align</code> nới lỏng ràng buộc trước khi chuyển xuống cho con. Lab chạy đúng hai trường hợp này bằng test.</p></details>
 </div>
 
@@ -47,7 +47,7 @@ Hình 1 vẽ ba bước trên một đoạn của thẻ chuyến.
 <figcaption>Hình 1. Constraints đi xuống (mũi tên xanh dương), kích thước đi lên (mũi tên xanh ngọc). Vị trí do cha quyết định. Số đo là ví dụ giản lược: Row thật trong thẻ hẹp hơn 288 vì còn lề của thẻ.</figcaption>
 </figure>
 
-Hệ quả: widget **không** tự ý chọn kích thước, chỉ chọn trong khoảng cha cho phép. Flutter đo layout trong một lượt nên chạy nhanh; đổi lại, con không biết vị trí tuyệt đối của mình và không quyết định nó.
+Hệ quả: widget **không** tự ý chọn kích thước, chỉ chọn trong khoảng cha cho phép. Flutter đo layout trong một lượt nên chạy nhanh; đổi lại, con không biết vị trí tuyệt đối của mình và không tự quyết định vị trí đó.
 
 Ràng buộc **chặt** (tight) có min bằng max, con chỉ còn một lựa chọn; ràng buộc **lỏng** (loose) có min bằng 0, con chọn từ 0 tới max. Đoạn dưới đo cả hai dạng:
 
@@ -82,7 +82,7 @@ class TightParentDemo extends StatelessWidget {
 
 Khi `loosen` là `false`, `SizedBox` ngoài **biến** constraints lỏng của cha thành ràng buộc chặt 300x300 cho con. `SizedBox(width: 100, height: 100)` bên trong đòi 100, nhưng 100 nằm ngoài khoảng chặt `[300, 300]` nên bị kéo về 300. Khi `loosen` là `true`, `Align` đổi 300x300 chặt thành `0..300` rồi mới chuyển xuống, nên ô vuông được 100x100 và `Align` đặt nó vào giữa. Test đo `getSize` và `getCenter`: 300x300, 100x100, và tâm ô trùng tâm của cha.
 
-Ở gốc cây, màn hình ép widget gốc đúng bằng kích thước của nó. Lab tận dụng điều đó: `tester.view.physicalSize` đổi cửa sổ giả.
+Ở gốc cây, màn hình ép widget gốc đúng bằng kích thước của nó. Lab tận dụng điều đó: dùng `tester.view.physicalSize` để đổi kích thước cửa sổ giả.
 
 ## Row và Column: đo con cố định trước, chia phần còn lại theo flex
 
@@ -205,7 +205,7 @@ Trip tripAt(
 }
 ```
 
-Chuyến 5 km hiện `25.500 VND`, 2,001 km hiện `12.005 VND`, 100 km hiện `453.000 VND`; test kiểm cả ba chuỗi. Khung thẻ là một `LayoutBuilder` chọn một trong hai thân, mục cuối quay lại:
+Chuyến 5 km hiện `25.500 VND`, 2,001 km hiện `12.005 VND`, 100 km hiện `453.000 VND`; test kiểm cả ba chuỗi. Khung thẻ là một `LayoutBuilder` chọn một trong hai thân, mục cuối sẽ nói lại về nó:
 
 ### trip_card.dart · 08-layout-constraints/lib/trip_card.dart (trích)
 
@@ -316,7 +316,7 @@ class _AddressLine extends StatelessWidget {
 }
 ```
 
-`Expanded` cho `Text` bề rộng hữu hạn; `maxLines: 2` và `TextOverflow.ellipsis` quyết định việc cần làm khi vẫn dài: cắt ở dòng hai và thêm "...".
+`Expanded` cho `Text` bề rộng hữu hạn; `maxLines: 2` và `TextOverflow.ellipsis` quy định cách xử lý khi chữ vẫn còn dài: cắt ở dòng hai và thêm "...".
 
 Biểu tượng dịch vụ dùng `Stack` để đặt chấm trạng thái đè lên góc dưới phải:
 
@@ -399,7 +399,7 @@ class BrokenTripCard extends StatelessWidget {
 }
 ```
 
-Đây là ca sai có chủ đích. `Text(pickup)` không nằm trong `Expanded`, nên theo bước 1 của thuật toán, `Row` đo nó với bề rộng **không giới hạn**. Địa chỉ dài cho ra `Text` rộng hơn cả màn hình; tổng bề rộng các con vượt bề rộng `Row`, và phần thừa gọi là **overflow**. Hình 3 đặt hai cách viết cạnh nhau với cùng dữ liệu.
+Đây là trường hợp sai có chủ đích. `Text(pickup)` không nằm trong `Expanded`, nên theo bước 1 của thuật toán, `Row` đo nó với bề rộng **không giới hạn**. Địa chỉ dài cho ra `Text` rộng hơn cả màn hình; tổng bề rộng các con vượt bề rộng `Row`, và phần thừa gọi là **overflow**. Hình 3 đặt hai cách viết cạnh nhau với cùng dữ liệu.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -463,7 +463,7 @@ void setScreen(WidgetTester tester, double width, [double height = 900]) {
     });
 ```
 
-`pumpWidget` dựng và vẽ một khung hình, lúc đó lỗi overflow được báo; `flutter_test` giữ lại để ta lấy bằng `takeException`, gọi lần hai thì trả `null`. Ca sai nhờ vậy tái hiện **ổn định**. Ca đúng là nửa kia của bằng chứng: `TripCard` trong cùng cửa sổ 320 pixel, cả hai địa chỉ đều dài.
+`pumpWidget` dựng và vẽ một khung hình, lúc đó lỗi overflow được báo; `flutter_test` giữ lại để ta lấy bằng `takeException`, gọi lần hai thì trả `null`. Trường hợp sai nhờ vậy tái hiện **ổn định**. Trường hợp đúng là nửa kia của bằng chứng: `TripCard` trong cùng cửa sổ 320 pixel, cả hai địa chỉ đều dài.
 
 ### trip_card_test.dart · 08-layout-constraints/test/trip_card_test.dart (trích)
 
@@ -496,7 +496,7 @@ void setScreen(WidgetTester tester, double width, [double height = 900]) {
     );
 ```
 
-`takeException` trả `null` nghĩa là không overflow. Test còn đo thẻ rộng 288 và rìa phải mọi `Text` nằm trong 320. Để chắc test có răng, ta thử phá mã: bỏ `Expanded` ở `_AddressLine` thì phần lớn test (18 trên 31 lúc thử) của lab chuyển đỏ. Lưu ý: dưới `flutter test`, mọi chữ dùng font test mặc định (FlutterTest), mỗi ký tự là một ô vuông cạnh bằng cỡ chữ, nên chữ trong test thường rộng hơn chữ thật. Phép thử hẹp vì vậy khắt khe, nhưng không thay được việc nhìn thẻ trên máy thật.
+`takeException` trả `null` nghĩa là không overflow. Test còn đo thẻ rộng 288 và rìa phải mọi `Text` nằm trong 320. Để chắc test thật sự bắt được lỗi, ta thử phá mã: bỏ `Expanded` ở `_AddressLine` thì phần lớn test của lab (18 trên 31 lúc thử) chuyển sang đỏ. Lưu ý: dưới `flutter test`, mọi chữ dùng font test mặc định (FlutterTest), mỗi ký tự là một ô vuông cạnh bằng cỡ chữ, nên chữ trong test thường rộng hơn chữ thật. Phép thử hẹp vì vậy khắt khe, nhưng không thay được việc nhìn thẻ trên máy thật.
 
 Hai lỗi kinh điển khác (`ListView` trong `Column`, `Expanded` trong khung cuộn ngang) cùng gốc: cha cho con **không giới hạn** ở trục đó. Phần "Lỗi thường gặp" nêu cách sửa.
 
@@ -563,7 +563,7 @@ Test breakpoint đặt cửa sổ 631 và 632 pixel (thẻ rộng 599 và 600 sa
 <li><strong><code>ListView</code> đặt trực tiếp trong <code>Column</code>.</strong> Dấu hiệu: <code>Vertical viewport was given unbounded height</code>. Nguyên nhân: <code>Column</code> cho con chiều cao không giới hạn, <code>ListView</code> cần hữu hạn. Cách sửa: bọc <code>ListView</code> trong <code>Expanded</code> như <code>ListInColumnFixed</code>.</li>
 <li><strong><code>Expanded</code> trong <code>Row</code> nằm trong khung cuộn ngang.</strong> Dấu hiệu: <code>RenderFlex children have non-zero flex but incoming width constraints are unbounded</code>. Nguyên nhân: khung cuộn ngang cho <code>Row</code> bề rộng không giới hạn, không còn gì để chia. Cách sửa: bỏ <code>Expanded</code>, cho con bề rộng cụ thể.</li>
 <li><strong>Đặt <code>width</code> mà widget không đổi.</strong> Dấu hiệu: ô đòi 100 vẫn rộng bằng cha. Nguyên nhân: cha truyền ràng buộc chặt. Cách sửa: chen <code>Align</code> hoặc <code>Center</code>.</li>
-<li><strong>Chọn bố cục bằng <code>MediaQuery</code> khi câu hỏi là "được cấp bao nhiêu chỗ".</strong> Dấu hiệu: đúng trên cả màn hình nhưng sai trong cột hẹp. Cách sửa: dùng <code>LayoutBuilder</code> ở chính widget cần quyết định và test cả ô hẹp trong màn hình rộng.</li>
+<li><strong>Chọn bố cục bằng <code>MediaQuery</code> khi câu hỏi là "được cấp bao nhiêu chỗ".</strong> Dấu hiệu: bố cục đúng khi xét cả màn hình nhưng sai trong cột hẹp. Cách sửa: dùng <code>LayoutBuilder</code> ở chính widget cần quyết định và test cả ô hẹp trong màn hình rộng.</li>
 </ul>
 </div>
 

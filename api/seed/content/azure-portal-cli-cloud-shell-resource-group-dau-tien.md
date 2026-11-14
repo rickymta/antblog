@@ -49,7 +49,7 @@ Cloud Shell có một điều cần biết từ đầu: lần đầu mở, nó h
 
 Lệnh đầu tiên luôn là đăng nhập. Trên máy cá nhân, `az login` mở trình duyệt để bạn xác thực bằng Microsoft Entra ID. Nếu máy không có trình duyệt, dùng `--use-device-code` và nhập mã trên máy khác. Đăng nhập kiểu này là **danh tính của một người**: mọi lệnh sau đó chạy với quyền của bạn. Pipeline và ứng dụng thì không dùng cách này; chúng dùng service principal và managed identity, chủ đề của Phần 2 và Phần 5.
 
-Một tài khoản có thể thấy nhiều subscription, và lệnh `az` chạy trên subscription đang là mặc định. Đây là nguồn nhầm lẫn phổ biến nhất của người mới: tạo resource ở một subscription không định tạo. Hãy xem và chọn rõ ràng.
+Một tài khoản có thể thấy nhiều subscription, và lệnh `az` chạy trên subscription đang là mặc định. Đây là nguồn nhầm lẫn phổ biến nhất của người mới: tạo resource ở một subscription mà bạn không định dùng. Hãy xem và chọn rõ ràng.
 
 ```bash
 az login
@@ -63,7 +63,7 @@ az account show \
   --output table
 ```
 
-Khối này đăng nhập, liệt kê subscription bạn thấy được, đặt một subscription làm mặc định rồi in lại để kiểm. Nó không chứng minh bạn có quyền tạo resource trong subscription đó; việc ấy chỉ biết khi lệnh tạo chạy. Nếu bạn thuộc nhiều tenant, thêm `--tenant <tenant-id>` vào `az login`.
+Khối này đăng nhập, liệt kê subscription bạn thấy được, đặt một subscription làm mặc định rồi in lại để kiểm tra. Khối này không chứng minh bạn có quyền tạo resource trong subscription đó; việc ấy chỉ biết khi lệnh tạo chạy. Nếu bạn thuộc nhiều tenant, thêm `--tenant <tenant-id>` vào `az login`.
 
 Để bớt gõ lặp lại, `az configure` lưu giá trị mặc định cho các tham số hay dùng như `group` và `location`.
 
@@ -94,7 +94,7 @@ az group list --output table
 az group show --name rg-toinoi-lab-dev-sea --output json
 ```
 
-Khối này tạo resource group, liệt kê tất cả resource group của subscription rồi in đầy đủ một cái dưới dạng JSON. Nó chưa tạo resource nào bên trong, nên chưa phát sinh tiền cho tới khi bạn thêm resource.
+Khối này tạo resource group, liệt kê tất cả resource group của subscription rồi in đầy đủ một cái dưới dạng JSON. Resource group này chưa chứa resource nào, nên chưa phát sinh tiền cho tới khi bạn thêm resource.
 
 Có hai điểm cơ chế nên nhớ. Thứ nhất, **location của resource group chỉ là nơi lưu metadata** của nhóm đó. Resource bên trong có thể nằm ở region khác. Nhưng Tới Nơi vẫn đặt resource group cùng region với phần lớn resource để dễ đọc và dễ phân tích sự cố. Thứ hai, location của resource group không đổi được sau khi tạo; chạy lại `az group create` cùng tên với location khác sẽ báo lỗi, vì request là PUT lên cùng một resource.
 
@@ -119,7 +119,7 @@ SUB_ID=$(az account show --query id --output tsv)
 echo "$SUB_ID"
 ```
 
-Truy vấn đầu lọc resource group có tag `env=dev` và in bốn cột. Tag `cost-center` có dấu gạch nối nên tên phải đặt trong dấu nháy kép, và ta phải escape chúng bên trong chuỗi bash. Chuỗi cố định trong JMESPath dùng dấu nháy đơn. Phần sau lấy subscription ID ở dạng tsv để gán vào biến. Khối này không kiểm tra bạn có tag viết sai chính tả; lọc theo `tags.env` bỏ sót resource group nào gõ nhầm thành `Env` hay `environment`, một lý do để bắt buộc tag bằng policy ở bài sau.
+Truy vấn đầu lọc resource group có tag `env=dev` và in bốn cột. Tag `cost-center` có dấu gạch nối nên tên phải đặt trong dấu nháy kép, và ta phải escape chúng bên trong chuỗi bash. Chuỗi cố định trong JMESPath dùng dấu nháy đơn. Phần sau lấy subscription ID ở dạng tsv để gán vào biến. Khối này không kiểm tra xem có tag nào bị viết sai chính tả hay không; lọc theo `tags.env` bỏ sót resource group nào gõ nhầm thành `Env` hay `environment`, một lý do để bắt buộc tag bằng policy ở bài sau.
 
 ## Mỗi lệnh az là một request tới ARM
 
@@ -132,9 +132,9 @@ az rest --method get \
   --url "https://management.azure.com/subscriptions/<subscription-id>/resourcegroups/rg-toinoi-lab-dev-sea?api-version=2021-04-01"
 ```
 
-Lệnh đầu in phần đầu của log debug; dòng request có URL tới `management.azure.com` và `api-version` có thể nằm sâu hơn 20 dòng, nên bỏ `head` hoặc lọc bằng `grep management.azure.com` nếu chưa thấy. Lệnh thứ hai lấy cùng resource group bằng một GET thuần. Nhìn vào log không chứng minh mọi dịch vụ đều dùng API version giống nhau; mỗi resource provider có phiên bản riêng, nội dung bài 4. Hãy cẩn thận khi dán log debug lên chat hay issue, vì nó chứa subscription ID, tên resource và có thể lộ thông tin nhạy cảm khác.
+Lệnh đầu in phần đầu của log debug; dòng request có URL tới `management.azure.com` và `api-version` có thể nằm sâu hơn 20 dòng, nên bỏ `head` hoặc lọc bằng `grep management.azure.com` nếu chưa thấy. Lệnh thứ hai lấy cùng resource group bằng một GET thuần. Nhìn vào log không chứng minh mọi dịch vụ đều dùng API version giống nhau; mỗi resource provider có phiên bản riêng, bài 4 sẽ nói về điều này. Hãy cẩn thận khi dán log debug lên chat hay issue, vì nó chứa subscription ID, tên resource và có thể lộ thông tin nhạy cảm khác.
 
-Hiểu điều này giúp bạn xử lý hai tình huống. Khi một thao tác Portal lỗi mơ hồ, chạy lại bằng CLI với `--debug` thường cho thông báo rõ hơn. Khi cần tự động hoá một việc mà `az` chưa có lệnh tiện, `az rest` là lối thoát chính thống.
+Hiểu điều này giúp bạn xử lý hai tình huống. Khi một thao tác Portal lỗi mơ hồ, chạy lại bằng CLI với `--debug` thường cho thông báo rõ hơn. Khi cần tự động hoá một việc mà `az` chưa có lệnh tiện, `az rest` là cách xử lý chính thức.
 
 ## Lab: tạo, liệt kê, rồi xoá, và vì sao xoá là việc nặng
 
@@ -149,7 +149,7 @@ Lab gồm ba bước bạn đã gặp: tạo `rg-toinoi-lab-dev-sea` với ba ta
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Xoá resource group là xoá <strong>toàn bộ</strong> resource bên trong, kể cả database. Cờ <code>--yes</code> bỏ qua câu hỏi xác nhận, <code>--no-wait</code> trả quyền điều khiển về ngay trong khi việc xoá vẫn chạy phía sau. Trước khi xoá, đọc lại tên group và chạy <code>az resource list --resource-group &lt;tên&gt; --output table</code>. Lỗi gõ tên group trên subscription thật có thể mất dữ liệu mà không có đường quay lại.</p>
+<p>Xoá resource group là xoá <strong>toàn bộ</strong> resource bên trong, kể cả database. Cờ <code>--yes</code> bỏ qua câu hỏi xác nhận, <code>--no-wait</code> trả quyền điều khiển về ngay trong khi việc xoá vẫn chạy phía sau. Trước khi xoá, đọc lại tên group và chạy <code>az resource list --resource-group &lt;tên&gt; --output table</code>. Gõ nhầm tên group trên subscription thật có thể làm mất dữ liệu mà không có đường quay lại.</p>
 </div>
 
 ```bash
@@ -165,7 +165,7 @@ Khối này liệt kê những gì sắp mất (lab trống sẽ không có dòn
 
 **Bài tập:** bạn chạy `az group create` hai lần với cùng tên và cùng location nhưng ở lần hai bỏ hết `--tags`. Resource group có còn ba tag của lần đầu không? Làm sao kiểm chứng mà không cần đoán?
 
-<details><summary>Xem lời giải</summary><p>Lần hai không báo lỗi, vì resource group đã có cùng location. Nhưng <code>az group create</code> gửi một PUT mô tả toàn bộ trạng thái mong muốn, và request này không mang tag nào, nên hãy dự tính tag cũ bị thay bằng «không có tag» chứ không được giữ lại (cùng cơ chế khiến một template Bicep thiếu khối <code>tags</code> xoá tag đang có). Kiểm chứng bằng <code>az group show --name rg-toinoi-lab-dev-sea --query tags</code>. Muốn thêm hoặc sửa tag mà không đụng tag khác, dùng <code>az tag update --resource-id &lt;id-của-group&gt; --operation Merge --tags ...</code> thay vì chạy lại lệnh tạo.</p></details>
+<details><summary>Xem lời giải</summary><p>Lần hai không báo lỗi, vì resource group đã có cùng location. Nhưng <code>az group create</code> gửi một PUT mô tả toàn bộ trạng thái mong muốn, và request này không mang tag nào, nên cần dự đoán rằng tag cũ bị thay bằng «không có tag» chứ không được giữ lại (cùng cơ chế khiến một template Bicep thiếu khối <code>tags</code> xoá tag đang có). Kiểm chứng bằng <code>az group show --name rg-toinoi-lab-dev-sea --query tags</code>. Muốn thêm hoặc sửa tag mà không đụng tag khác, dùng <code>az tag update --resource-id &lt;id-của-group&gt; --operation Merge --tags ...</code> thay vì chạy lại lệnh tạo.</p></details>
 
 ## Học tiếp từ đây
 

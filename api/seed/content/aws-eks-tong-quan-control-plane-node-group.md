@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, eks, kubernetes, control-plane, node-group, pod-ide
 language: vi
 ---
 
-Đội platform của [Tới Nơi](/articles/du-an-mau-toi-noi) đang chạy `booking` trên ECS Fargate, và nó chạy ổn. Rồi danh sách mong muốn dài ra: GitOps, scale worker theo độ sâu hàng đợi SQS, canary theo metric, một bộ công cụ chung cho hàng chục service, phần lớn có sẵn trong hệ sinh thái Kubernetes. Trước khi bỏ công dựng, ta cần biết EKS cho cái gì, bắt gánh cái gì, và khi nào vẫn nên ở lại ECS.
+Đội platform của [Tới Nơi](/articles/du-an-mau-toi-noi) đang chạy `booking` trên ECS Fargate, và nó chạy ổn. Rồi danh sách mong muốn dài ra: GitOps, scale worker theo độ sâu hàng đợi SQS, canary theo metric, một bộ công cụ chung cho hàng chục service, phần lớn có sẵn trong hệ sinh thái Kubernetes. Trước khi bỏ công dựng, ta cần biết EKS mang lại gì, bắt ta gánh thêm gì, và khi nào vẫn nên ở lại ECS.
 
 Đây là **bài 41** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bài cần bạn đã xong Phần 01–04, đặc biệt [bài 12 về ECS Fargate](/articles/aws-ecs-fargate-task-definition-roles) để so sánh. Bài không có lab tốn tiền; nó dựng bản đồ cho chín bài còn lại của phần.
 
@@ -34,7 +34,7 @@ Người đã làm ECS chỉ cần ánh xạ khái niệm; chỗ nào lạ, đ�
 
 ## EKS quản lý gì, bạn quản lý gì
 
-EKS chạy **control plane** trong tài khoản do AWS quản lý: API server và etcd được dàn trên nhiều AZ, tự thay khi hỏng và có cam kết SLA riêng. Bạn không thấy máy nào, không vá hay backup etcd. Bạn trả phí theo giờ cho mỗi cluster, cộng chi phí node. EKS đặt các ENI của control plane vào subnet bạn chọn để node trong VPC gọi API server.
+EKS chạy **control plane** trong tài khoản do AWS quản lý: API server và etcd được trải trên nhiều AZ, tự thay khi hỏng và có cam kết SLA riêng. Bạn không thấy máy nào, không vá hay backup etcd. Bạn trả phí theo giờ cho mỗi cluster, cộng chi phí node. EKS đặt các ENI của control plane vào subnet bạn chọn để node trong VPC gọi API server.
 
 Phần còn lại, **data plane**, là nơi pod chạy và nằm trong VPC của bạn. Kubernetes ra khoảng ba minor version mỗi năm; EKS hỗ trợ mỗi bản 14 tháng **standard support** kể từ ngày phát hành trên EKS, rồi thêm 12 tháng **extended support** tính phí theo giờ cluster. Hết extended support, EKS tự nâng control plane lên bản kế tiếp. Vì vậy nâng cấp là việc định kỳ chứ không làm một lần (bài 50). Bản nào đang được hỗ trợ thì xem trang Kubernetes versions của EKS hoặc chạy `aws eks describe-cluster-versions`.
 
@@ -75,11 +75,11 @@ Phần còn lại, **data plane**, là nơi pod chạy và nằm trong VPC của
 
 **Managed node group** là điểm xuất phát hợp lý và là thứ bài 42 dựng. **Fargate profile** bỏ được node nhưng không chạy DaemonSet (agent log, Pod Identity Agent) và không gắn EBS; ở Tới Nơi, ECS Fargate đã làm tốt vai trò này.
 
-**EKS Auto Mode** đẩy ranh giới trách nhiệm lên cao hơn: EKS tạo và thay node, cài sẵn các thành phần cho mạng, DNS, block storage và load balancing, scale node theo pod đang chờ. Bù lại bạn trả thêm phí quản lý theo instance, không SSH vào node, node bị thay định kỳ, và vài thành phần mang tên khác bản tự cài (như provisioner `ebs.csi.eks.amazonaws.com`). Bài 43–45 tự dựng Load Balancer Controller và Karpenter vì hiểu cơ chế giúp gỡ lỗi cả khi dùng Auto Mode.
+**EKS Auto Mode** đẩy ranh giới trách nhiệm lên cao hơn: EKS tạo và thay node, cài sẵn các thành phần cho mạng, DNS, block storage và load balancing, scale node theo pod đang chờ. Bù lại, bạn trả thêm phí quản lý theo instance, không SSH vào được node, và node bị thay định kỳ, và vài thành phần mang tên khác bản tự cài (như provisioner `ebs.csi.eks.amazonaws.com`). Bài 43–45 tự dựng Load Balancer Controller và Karpenter vì hiểu cơ chế sẽ giúp gỡ lỗi, kể cả khi dùng Auto Mode.
 
 ## Ai được gọi API: access entries thay aws-auth
 
-Trước đây quyền vào cluster nằm trong ConfigMap `aws-auth`, sửa sai một dòng là cả đội mất kubectl. Cách hiện hành là **access entries**: khai báo bằng API của EKS IAM principal nào được vào cluster, kèm **access policy** (tập quyền Kubernetes do AWS quản lý, như `AmazonEKSClusterAdminPolicy`, `AmazonEKSEditPolicy`, `AmazonEKSViewPolicy`) và phạm vi là cả cluster hoặc vài namespace. Với cluster mới, nên chọn chế độ xác thực chỉ dùng API; chuyển sang chế độ này là một chiều, không quay lại ConfigMap được.
+Trước đây quyền vào cluster nằm trong ConfigMap `aws-auth`, sửa sai một dòng là cả đội mất kubectl. Cách hiện hành là **access entries**: dùng API của EKS để khai báo IAM principal nào được vào cluster, kèm **access policy** (tập quyền Kubernetes do AWS quản lý, như `AmazonEKSClusterAdminPolicy`, `AmazonEKSEditPolicy`, `AmazonEKSViewPolicy`) và phạm vi là cả cluster hoặc vài namespace. Với cluster mới, nên chọn chế độ xác thực chỉ dùng API; chuyển sang chế độ này là một chiều, không quay lại ConfigMap được.
 
 ```bash
 aws eks create-access-entry \
@@ -114,7 +114,7 @@ Pod `booking` ghi ảnh chứng từ vào S3 cần credential AWS, không phải
 | Liên kết role với pod | Annotation `eks.amazonaws.com/role-arn` trên ServiceAccount | Resource *association* tạo bằng API EKS: cluster, namespace, service account, role |
 | Chạy trên Fargate | Có | Không |
 
-Hướng đi hiện nay là Pod Identity cho workload trên node EC2, giữ IRSA cho pod trên Fargate. Khi pod dùng service account có association khởi động, EKS thêm biến môi trường `AWS_CONTAINER_CREDENTIALS_FULL_URI` trỏ tới agent trên node; SDK gọi agent, agent đổi lấy credential tạm của role qua EKS Auth.
+Hướng đi hiện nay là Pod Identity cho workload trên node EC2, giữ IRSA cho pod trên Fargate. Khi một pod khởi động với service account có association, EKS thêm biến môi trường `AWS_CONTAINER_CREDENTIALS_FULL_URI` trỏ tới agent trên node; SDK gọi agent, agent đổi lấy credential tạm của role qua EKS Auth.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -148,7 +148,7 @@ Hướng đi hiện nay là Pod Identity cho workload trên node EC2, giữ IRSA
 <figcaption>Hình 2. Đường đi của credential với Pod Identity. Quyền S3 nằm trong role; association chỉ nối role đó với một service account cụ thể.</figcaption>
 </figure>
 
-Phần AWS cho pod `booking` ghi S3 chỉ gồm một trust policy và ba lệnh. Trust policy (tệp `trust.json`) dùng principal dịch vụ của Pod Identity:
+Phần cấu hình phía AWS để pod `booking` ghi được vào S3 chỉ gồm một trust policy và ba lệnh. Trust policy (tệp `trust.json`) dùng principal dịch vụ của Pod Identity:
 
 ```json
 {
@@ -186,7 +186,7 @@ Với giả định 12 service và một đội platform ba người, ECS vẫn 
 
 ## Cái giá phải trả
 
-- **Nâng cấp là việc định kỳ.** Mỗi bản mới phải xem lại add-on, controller và API bị gỡ; trôi vào extended support là trả thêm tiền cho việc hoãn.
+- **Nâng cấp là việc định kỳ.** Mỗi bản mới phải xem lại add-on, controller và API bị gỡ; để cluster rơi vào extended support là trả thêm tiền cho việc trì hoãn.
 - **Hai lớp quyền.** IAM chỉ trả lời "bạn là ai"; được làm gì trong cluster do RBAC quyết định (access policy là RBAC đóng gói sẵn). Lỗi `Forbidden` phải kiểm cả hai.
 - **Chi phí ẩn.** Ngoài phí cluster còn node, NAT gateway, load balancer, log control plane và dữ liệu qua AZ (bài 50).
 - **Mặc định chưa an toàn.** Pod mặc định nói chuyện được với mọi pod khác; network policy, Pod Security Standards và quyền tối thiểu là việc của bạn (bài 48).

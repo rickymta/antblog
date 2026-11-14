@@ -1,7 +1,7 @@
 ---
 slug: ba-ai-ho-tro-kiem-chung-nguon-du-lieu
 title: "AI hỗ trợ BA: kiểm chứng nguồn và giữ quyền quyết định"
-summary: "Dùng AI để tạo nháp từ dữ liệu giả, kiểm từng nhận định về nguồn và logic; tránh biến giả thuyết thành yêu cầu đã duyệt hoặc đưa dữ liệu nhạy cảm vào công cụ không phù hợp."
+summary: "Dùng AI để tạo nháp từ dữ liệu giả, kiểm tra từng nhận định về nguồn và logic; tránh biến giả thuyết thành yêu cầu đã duyệt hoặc đưa dữ liệu nhạy cảm vào công cụ không phù hợp."
 category: business-analysis
 level: intermediate
 tags: [business-analysis, ba-062, ai, verification, toi-noi]
@@ -14,13 +14,13 @@ Một bản tóm tắt trôi chảy có thể nói “80 khách phàn nàn vì k
 
 ## 1. Chọn việc có thể kiểm lại
 
-AI có thể hỗ trợ nhóm câu hỏi, tạo cấu trúc tài liệu, phát hiện thuật ngữ không nhất quán hoặc đề xuất case biên. Kết quả là đầu vào để BA review. AI không tự có quyền duyệt yêu cầu, đại diện stakeholder hoặc biến nguồn thiếu thành bằng chứng.
+AI có thể hỗ trợ gom nhóm câu hỏi, tạo cấu trúc tài liệu, phát hiện thuật ngữ không nhất quán hoặc đề xuất test case biên. Kết quả là đầu vào để BA review. AI không có quyền tự duyệt yêu cầu, đại diện stakeholder hoặc biến nguồn thiếu thành bằng chứng.
 
-Chọn phạm vi nhỏ với nguồn rõ giúp kiểm nhanh hơn yêu cầu “viết toàn bộ BRD” từ một câu mô tả mơ hồ.
+Chọn phạm vi nhỏ với nguồn rõ giúp kiểm tra nhanh hơn so với yêu cầu “viết toàn bộ BRD” từ một câu mô tả mơ hồ.
 
 ## 2. Chuẩn bị dữ liệu tối thiểu
 
-Dùng bản giả lập hoặc dữ liệu đã được xử lý theo quy định tổ chức. Kiểm quyền sử dụng công cụ, nơi lưu và phạm vi chia sẻ trước khi đưa dữ liệu dự án vào. Xóa tên chưa chắc đủ: địa chỉ, lịch sử chuyến hoặc tổ hợp thông tin vẫn có thể nhận diện người.
+Dùng bản giả lập hoặc dữ liệu đã được xử lý theo quy định tổ chức. Kiểm tra quyền sử dụng công cụ, nơi lưu và phạm vi chia sẻ trước khi đưa dữ liệu dự án vào. Xoá tên chưa chắc đủ: địa chỉ, lịch sử chuyến hoặc tổ hợp thông tin vẫn có thể nhận diện người.
 
 Không dán token, mật khẩu hoặc dữ liệu khách thật chỉ vì muốn bản tóm tắt chi tiết hơn. Khi không có quyền phù hợp, tạo tình huống giả giữ cấu trúc cần phân tích.
 
@@ -47,7 +47,7 @@ Prompt tốt giảm mơ hồ nhưng không bảo đảm kết quả đúng. Ngư
 | Chat chắc chắn giảm huỷ | Không có nguồn | Đổi thành giả thuyết cần so phương án |
 | Mục tiêu 9% đã được duyệt | Sai trạng thái P01 | Ghi đề xuất chờ quyết định |
 
-Source ID do AI tạo ra cũng cần kiểm xem có tồn tại và thực sự hỗ trợ câu đó không. Dẫn nguồn đúng tên nhưng sai nội dung vẫn là lỗi.
+Source ID do AI tạo ra cũng cần kiểm tra xem có tồn tại và thực sự hỗ trợ câu đó không. Dẫn nguồn đúng tên nhưng sai nội dung vẫn là lỗi.
 
 ## 5. Kiểm logic ngoài câu chữ
 
@@ -59,10 +59,10 @@ Giữ nguồn và phiên bản đầu vào, công cụ/model nếu được phé
 
 ## 7. Thực hành
 
-Tạo một bản nháp cố ý có ba lỗi: đếm cuộc gọi thành người, đổi giả thuyết thành kết luận, đổi đề xuất thành approval. Nhờ người khác dùng claim ledger sửa mà không thêm dữ kiện mới.
+Tạo một bản nháp cố ý có ba lỗi: đếm cuộc gọi thành người, đổi giả thuyết thành kết luận, đổi đề xuất thành phê duyệt. Nhờ người khác dùng claim ledger sửa mà không thêm dữ kiện mới.
 
 <details><summary>Tiêu chí đạt</summary><p>Mọi nhận định quan trọng có nguồn hoặc được gắn nhãn chưa biết; số liệu tính lại được; rule không đổi; dữ liệu sử dụng phù hợp và người review chịu trách nhiệm bản cuối.</p></details>
 
 ## 8. Nguồn và bài tiếp
 
-[NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework) cung cấp hướng tiếp cận quản lý rủi ro AI tự nguyện; quy trình bài tập trên là đề xuất riêng. Tiếp: [trade-off giao hàng nhiều điểm](/articles/ba-trade-off-giao-hang-nhieu-diem).
+[NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework) cung cấp hướng tiếp cận tự nguyện áp dụng để quản lý rủi ro AI; quy trình bài tập trên là đề xuất riêng. Tiếp: [trade-off giao hàng nhiều điểm](/articles/ba-trade-off-giao-hang-nhieu-diem).

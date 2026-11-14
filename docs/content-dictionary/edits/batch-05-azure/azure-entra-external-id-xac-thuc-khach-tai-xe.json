@@ -1,0 +1,89 @@
+{
+"file": "azure-entra-external-id-xac-thuc-khach-tai-xe.md",
+"edits": [
+{
+"old": "và app đối diện họ.",
+"new": "và các app dành cho họ.",
+"reason": "'đối diện' là calque của customer-facing",
+"severity": "medium"
+},
+{
+"old": "Authority chép từ ví dụ cũ phải kiểm lại loại nào.",
+"new": "Khi chép authority từ ví dụ cũ, hãy kiểm tra lại nó thuộc loại nào.",
+"reason": "Câu thiếu động từ, mơ hồ",
+"severity": "medium"
+},
+{
+"old": "API kiểm bằng chữ ký chứ không hỏi lại tenant, nên khoá tài khoản hay thu hồi refresh token không làm access token đang lưu hành chết ngay",
+"new": "API kiểm tra bằng chữ ký chứ không hỏi lại tenant, nên khoá tài khoản hay thu hồi refresh token không làm access token đang lưu hành mất hiệu lực ngay",
+"reason": "'chết' ẩn dụ gượng; 'kiểm' thiếu 'tra'",
+"severity": "medium"
+},
+{
+"old": "nên API phải kiểm `aud`: token",
+"new": "nên API phải kiểm tra `aud`: token",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "medium"
+},
+{
+"old": "Tin claim",
+"new": "Nếu tin claim",
+"reason": "Câu thiếu 'Nếu' nên mất mệnh đề điều kiện",
+"severity": "high"
+},
+{
+"old": "## ASP.NET Core chỉ cần kiểm token, không cần biết đăng nhập diễn ra thế nào",
+"new": "## ASP.NET Core chỉ cần kiểm tra token, không cần biết đăng nhập diễn ra thế nào",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "Nó không chứng minh ownership: khách A có xem được chuyến của khách B hay không vẫn kiểm trong handler nghiệp vụ như bài 19 loạt C#.",
+"new": "Bước này không chứng minh ownership: khách A có xem được chuyến của khách B hay không vẫn do handler nghiệp vụ kiểm tra, như bài 19 loạt C#.",
+"reason": "'Nó' mơ hồ; 'kiểm' thiếu 'tra'",
+"severity": "medium"
+},
+{
+"old": "và nhầm chúng là nguồn lỗi phổ biến:",
+"new": "và nhầm lẫn giữa chúng là nguồn lỗi phổ biến:",
+"reason": "'nhầm chúng' thiếu 'lẫn giữa'",
+"severity": "low"
+},
+{
+"old": "nên cần chặn ở biên (bài 18)",
+"new": "nên cần chặn ngay ở lớp ngoài cùng (bài 18)",
+"reason": "'biên' là calque của edge",
+"severity": "medium"
+},
+{
+"old": "hoặc migration dần khi người dùng đăng nhập lần đầu bằng custom authentication extension",
+"new": "hoặc chuyển dần từng người dùng khi họ đăng nhập lần đầu bằng custom authentication extension",
+"reason": "'migration dần' dùng như động từ, gượng",
+"severity": "medium"
+},
+{
+"old": "in URL authorize; nó chưa lấy token, và trang localhost báo lỗi kết nối sau khi đăng nhập là bình thường:",
+"new": "in URL authorize; khối này chưa lấy token, và việc trang localhost báo lỗi kết nối sau khi đăng nhập là bình thường:",
+"reason": "'nó' mơ hồ; câu thiếu 'việc' nên chủ ngữ chưa rõ",
+"severity": "medium"
+},
+{
+"old": "thiếu role: kiểm claim `roles`.",
+"new": "thiếu role: kiểm tra claim `roles`.",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "medium"
+},
+{
+"old": "đừng để nó trong lịch sử lệnh máy dùng chung",
+"new": "đừng để token nằm trong lịch sử lệnh của máy dùng chung",
+"reason": "Câu cụt, 'nó' mơ hồ",
+"severity": "low"
+},
+{
+"old": "để mở quyền nhận chuyến thì ai cũng tự nhận mình là tài xế.",
+"new": "để mở quyền nhận chuyến thì ai cũng có thể tự nhận mình là tài xế.",
+"reason": "Thiếu 'có thể'",
+"severity": "low"
+}
+]
+}

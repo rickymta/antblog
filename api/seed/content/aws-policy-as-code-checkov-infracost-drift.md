@@ -8,19 +8,19 @@ tags: [aws, toi-noi, devops, policy-as-code, checkov, cfn-guard, infracost, tfli
 language: vi
 ---
 
-Một pull request thêm bucket ảnh chứng từ giao hàng cho Tới Nơi kèm vài trăm dòng `terraform plan`. Người review lướt qua, bấm approve, và hai ngày sau mới có người nhận ra một RDS PostgreSQL có `publicly_accessible = true` cùng một bucket S3 không mã hoá. Không ai cẩu thả: con người đọc plan dài rất dở trong việc tìm điều vắng mặt. Việc lặp đi lặp lại và có luật rõ ràng nên giao cho máy.
+Một pull request thêm bucket ảnh chứng từ giao hàng cho Tới Nơi kèm vài trăm dòng `terraform plan`. Người review lướt qua, bấm approve, và hai ngày sau mới có người nhận ra một RDS PostgreSQL có `publicly_accessible = true` cùng một bucket S3 không mã hoá. Không ai cẩu thả: con người rất kém trong việc tìm ra điều còn thiếu khi đọc một plan dài. Việc lặp đi lặp lại và có luật rõ ràng nên giao cho máy.
 
 Đây là **bài 30**, bài cuối của **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bạn nên đã dùng Terraform (bài 22–23), CloudFormation (bài 21) và pipeline GitHub Actions với OIDC (bài 25). Bài này khép lại phần IaC bằng các cổng kiểm tự động.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p><code>terraform validate</code> báo thành công thì hạ tầng đã an toàn chưa?</p>
-<details><summary>Xem đáp án</summary><p>Chưa. <code>validate</code> chỉ kiểm cú pháp và kiểu dữ liệu. Một RDS mở ra Internet vẫn là cấu hình hợp lệ; cần công cụ kiểm luật riêng.</p></details>
+<details><summary>Xem đáp án</summary><p>Chưa. <code>validate</code> chỉ kiểm cú pháp và kiểu dữ liệu. Một RDS mở ra Internet vẫn là cấu hình hợp lệ; cần công cụ kiểm tra theo luật riêng.</p></details>
 </div>
 
 ## Pipeline IaC: từ file tới apply
 
-Mỗi bước trong chuỗi sau chặn một loại sai khác nhau, và bước sau tin vào bước trước:
+Mỗi bước trong chuỗi sau chặn một loại sai khác nhau, và bước sau dựa vào kết quả của bước trước:
 
 | Bước | Công cụ | Bắt được gì | Cần quyền AWS? |
 |---|---|---|---|
@@ -32,7 +32,7 @@ Mỗi bước trong chuỗi sau chặn một loại sai khác nhau, và bước 
 | review | Con người, Infracost | Tác động nghiệp vụ và chi phí | Không |
 | apply | `terraform apply tfplan` | Áp dụng | Ghi |
 
-Hai nguyên tắc quan trọng. Thứ nhất, **apply đúng plan đã review**: plan được lưu thành tệp, upload làm artifact, và job apply tải đúng tệp đó, không tự plan lại. Terraform từ chối plan cũ nếu state đã đổi, nên không ai vô tình áp dụng thay đổi chưa được duyệt. Plan có thể chứa giá trị nhạy cảm, vì vậy giữ artifact ngắn ngày. Thứ hai, **tách quyền**: role plan chỉ đọc, role apply mới được ghi, và chỉ job chạy trên nhánh chính sau khi người duyệt bấm môi trường mới được assume role apply. Chi tiết nhỏ nhưng dễ vấp: với khoá `use_lockfile` của backend S3 (bài 22), role plan cần ghi được đúng đối tượng khoá, hoặc plan phải chạy với `-lock=false`.
+Có hai nguyên tắc quan trọng. Thứ nhất, **apply đúng plan đã review**: plan được lưu thành tệp, upload làm artifact, và job apply tải đúng tệp đó, không tự plan lại. Terraform từ chối plan cũ nếu state đã đổi, nên không ai vô tình áp dụng thay đổi chưa được duyệt. Plan có thể chứa giá trị nhạy cảm, vì vậy giữ artifact ngắn ngày. Thứ hai, **tách quyền**: role plan chỉ đọc, role apply mới được ghi, và chỉ job chạy trên nhánh chính sau khi người duyệt phê duyệt environment mới được assume role apply. Chi tiết nhỏ nhưng dễ vấp: với khoá `use_lockfile` của backend S3 (bài 22), role plan cần ghi được đúng đối tượng khoá, hoặc plan phải chạy với `-lock=false`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -77,7 +77,7 @@ rule rds_must_not_be_public when %rds_instances !empty {
 }
 ```
 
-Lab có đủ bốn rule (S3 mã hoá, RDS không public, không mở 5432 cho `0.0.0.0/0`, đủ tag) kèm tệp test; `cfn-guard test` chạy các ca "phải FAIL" và "phải PASS" để chính rule cũng được kiểm như code.
+Lab có đủ bốn rule (S3 mã hoá, RDS không public, không mở 5432 cho `0.0.0.0/0`, đủ tag) kèm tệp test; `cfn-guard test` chạy các test case "phải FAIL" và "phải PASS" để chính rule cũng được kiểm thử như code.
 
 Không rule nào hoàn hảo, nên cần **suppress có kỷ luật**. Skip theo từng tài nguyên, ghi lý do và hạn, để một lần dọn dẹp định kỳ gỡ được:
 
@@ -92,7 +92,7 @@ Skip không lý do hoặc skip toàn cục trong file cấu hình là cách rule
 
 ## Chi phí và drift
 
-**Infracost** ước chi phí từ mã Terraform và đăng bình luận vào pull request: người review thấy một thay đổi nâng `db.t4g.micro` lên instance lớn kéo chi phí đi lên bao nhiêu trước khi merge. Mẫu workflow chạy `infracost breakdown` trên nhánh gốc, rồi `infracost diff` trên nhánh PR. Nó cần API key (`INFRACOST_API_KEY`) và ước tính theo bảng giá công khai nên không tính được mức dùng thực (lưu lượng, số truy vấn).
+**Infracost** ước chi phí từ mã Terraform và đăng bình luận vào pull request: người review thấy một thay đổi nâng `db.t4g.micro` lên instance lớn làm chi phí tăng bao nhiêu trước khi merge. Mẫu workflow chạy `infracost breakdown` trên nhánh gốc, rồi `infracost diff` trên nhánh PR. Infracost cần API key (`INFRACOST_API_KEY`) và ước tính theo bảng giá công khai, nên không tính được mức dùng thực (lưu lượng, số truy vấn).
 
 **Drift** là khoảng cách giữa code và hạ tầng thật sau khi apply, thường do ai đó sửa tay trong console lúc xử lý sự cố. Ba nguồn phát hiện bổ sung cho nhau:
 
@@ -130,7 +130,7 @@ cd examples/toi-noi-aws/p03-30-policy-as-code
 ./run-local.sh checkov
 ```
 
-Lệnh thứ nhất chạy `terraform validate` cho các mẫu; lệnh thứ hai chạy Checkov và tự báo lỗi nếu bản `bad` lọt qua hoặc bản `good` có finding. Khi review (11/2026), Checkov 3.4.3 bắt bản `bad` (gồm `CKV_AWS_17` và hai rule riêng), bản `good` qua hết với năm skip có lý do; cfn-guard 3.2.1 qua cả năm ca test. Hai workflow mẫu chỉ được kiểm là YAML hợp lệ, **chưa chạy trên GitHub thật**. README ghi các bước tflint, cfn-guard, Infracost và tài nguyên nào tính tiền.
+Lệnh thứ nhất chạy `terraform validate` cho các mẫu; lệnh thứ hai chạy Checkov và tự báo lỗi nếu bản `bad` lọt qua hoặc bản `good` có finding. Khi review (11/2026), Checkov 3.4.3 bắt bản `bad` (gồm `CKV_AWS_17` và hai rule riêng), bản `good` qua hết với năm skip có lý do; cfn-guard 3.2.1 qua cả năm test case. Hai workflow mẫu chỉ được kiểm là YAML hợp lệ, **chưa chạy trên GitHub thật**. README ghi các bước tflint, cfn-guard, Infracost và tài nguyên nào tính tiền.
 
 Bài trước: [bài 29](/articles/aws-appconfig-feature-flag-cau-hinh-dong). Bài tiếp: [bài 31](/articles/aws-aurora-postgresql-rds-proxy-failover).
 

@@ -1,0 +1,10 @@
+{"file":"aws-eks-tong-quan-control-plane-node-group.md","edits":[
+{"old":"ta cần biết EKS cho cái gì, bắt gánh cái gì, và","new":"ta cần biết EKS mang lại gì, bắt ta gánh thêm gì, và","reason":"Câu thiếu chủ thể và tân ngữ","severity":"medium"},
+{"old":"API server và etcd được dàn trên nhiều AZ, tự thay khi hỏng","new":"API server và etcd được trải trên nhiều AZ, tự thay khi hỏng","reason":"'dàn' gượng","severity":"low"},
+{"old":"Bù lại bạn trả thêm phí quản lý theo instance, không SSH vào node, node bị thay định kỳ","new":"Bù lại, bạn trả thêm phí quản lý theo instance, không SSH vào được node, và node bị thay định kỳ","reason":"Liệt kê lủng củng, thiếu động từ","severity":"medium"},
+{"old":"vì hiểu cơ chế giúp gỡ lỗi cả khi dùng Auto Mode.","new":"vì hiểu cơ chế sẽ giúp gỡ lỗi, kể cả khi dùng Auto Mode.","reason":"Câu thiếu chủ ngữ, trật tự kiểu Anh","severity":"medium"},
+{"old":"khai báo bằng API của EKS IAM principal nào được vào cluster, kèm","new":"dùng API của EKS để khai báo IAM principal nào được vào cluster, kèm","reason":"Trật tự từ kiểu Anh, khó đọc","severity":"medium"},
+{"old":"Khi pod dùng service account có association khởi động, EKS thêm","new":"Khi một pod khởi động với service account có association, EKS thêm","reason":"Câu mơ hồ về chủ ngữ","severity":"medium"},
+{"old":"Phần AWS cho pod `booking` ghi S3 chỉ gồm một trust policy và ba lệnh.","new":"Phần cấu hình phía AWS để pod `booking` ghi được vào S3 chỉ gồm một trust policy và ba lệnh.","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"trôi vào extended support là trả thêm tiền cho việc hoãn.","new":"để cluster rơi vào extended support là trả thêm tiền cho việc trì hoãn.","reason":"'trôi vào' là calque (drift into)","severity":"medium"}
+]}

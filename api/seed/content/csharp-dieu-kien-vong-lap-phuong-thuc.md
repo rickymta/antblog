@@ -61,7 +61,7 @@ Sau guard clause, `if (distanceKm <= IncludedKm)` trả ngay giá cơ bản. Ph�
 
 `decimal[]` là mảng các giá trị decimal. Cú pháp `[-1m, 0m, ...]` là collection expression, được hỗ trợ trong cấu hình C# của .NET 10. `foreach` lần lượt lấy mỗi phần tử, gán vào biến vòng lặp `distance`, rồi thực hiện khối lệnh.
 
-Trong chương trình minh họa, tầng điều phối kiểm tra khoảng cách trước. Nếu sai, in `REJECT` rồi `continue` để đi tới phần tử tiếp theo. Hàm vẫn có guard riêng để bảo vệ hợp đồng khi một nơi khác gọi trực tiếp. Với sản phẩm lớn hơn, tránh sao chép rule khắp nơi; bài mô hình domain sẽ gom rule và thiết kế kiểu kết quả validation phù hợp.
+Trong chương trình minh hoạ, tầng điều phối kiểm tra khoảng cách trước. Nếu sai, in `REJECT` rồi `continue` để đi tới phần tử tiếp theo. Hàm vẫn có guard riêng để bảo vệ hợp đồng khi một nơi khác gọi trực tiếp. Với sản phẩm lớn hơn, tránh sao chép rule khắp nơi; bài mô hình domain sẽ gom rule và thiết kế kiểu kết quả validation phù hợp.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -165,7 +165,7 @@ for (int i = 0; i < distances.Length; i++)
 }
 ```
 
-Chỉ số bắt đầu bằng 0, nên điều kiện phải là `< distances.Length`, không phải `<=`. Đoạn trên minh họa duyệt chỉ số, không thay thế validation của chương trình tính cước.
+Chỉ số bắt đầu bằng 0, nên điều kiện phải là `< distances.Length`, không phải `<=`. Đoạn trên minh hoạ duyệt chỉ số, không thay thế validation của chương trình tính cước.
 
 ## Bài tập
 

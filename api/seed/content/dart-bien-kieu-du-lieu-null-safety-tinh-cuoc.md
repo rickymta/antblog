@@ -1,7 +1,7 @@
 ---
 slug: dart-bien-kieu-du-lieu-null-safety-tinh-cuoc
 title: "Dart cơ bản: biến, kiểu dữ liệu và null safety khi tính cước Tới Nơi"
-summary: "Bài 02: chọn kiểu cho tiền VND, khoảng cách và trạng thái; hiểu var, final, const, late, phép chia và làm tròn; dùng null safety để phân biệt chưa có tài xế với dữ liệu lỗi. Có bộ test ca biên chạy bằng dart test."
+summary: "Bài 02: chọn kiểu cho tiền VND, khoảng cách và trạng thái; hiểu var, final, const, late, phép chia và làm tròn; dùng null safety để phân biệt chưa có tài xế với dữ liệu lỗi. Có bộ test case biên chạy bằng dart test."
 category: flutter
 level: beginner
 tags: [flutter, dart, mobile, toi-noi, null-safety]
@@ -53,7 +53,7 @@ Chuỗi nội suy dùng `$`: `'$name'` chèn biến, `'${a + b}'` chèn biểu t
 
 ## var, final, const và late
 
-`var` không làm Dart thành ngôn ngữ kiểu động. Nó nhờ compiler suy ra kiểu từ giá trị khởi tạo, rồi kiểu đó cố định. Đoạn dưới là `main.dart` của lab:
+`var` không làm Dart thành ngôn ngữ kiểu động. Từ khoá này nhờ compiler suy ra kiểu từ giá trị khởi tạo, rồi kiểu đó cố định. Đoạn dưới là `main.dart` của lab:
 
 ### main.dart · 02-dart-bien-kieu-null-safety/bin/main.dart
 
@@ -82,11 +82,11 @@ void main() {
 Bốn từ khoá trả lời bốn câu hỏi khác nhau:
 
 - **`var`**: biến gán lại được, kiểu do compiler suy ra. Dùng khi giá trị đổi.
-- **`final`**: gán đúng một lần, giá trị có thể chỉ biết lúc chạy (ví dụ kết quả `Quote.fromDistance`). Sau đó biến không trỏ sang giá trị khác. Lưu ý `final` không làm đối tượng bất biến: ta phải tự thiết kế lớp như vậy, như `Quote` có toàn trường `final` và `withDriver` trả bản sao.
-- **`const`**: hằng biết từ lúc biên dịch, như `5.0` hay các hằng giá ở đầu `fare.dart`. `DateTime.now()` không thể là `const` vì chỉ có giá trị khi chạy. `const [1, 2]` là danh sách bất biến sâu; `final list = [1, 2]` chỉ khoá biến, ta vẫn `add` được.
+- **`final`**: gán đúng một lần, giá trị có thể chỉ biết lúc chạy (ví dụ kết quả `Quote.fromDistance`). Sau đó biến không trỏ sang giá trị khác. Lưu ý `final` không làm đối tượng bất biến: ta phải tự thiết kế lớp như vậy, như `Quote` có tất cả trường là `final` và `withDriver` trả về bản sao.
+- **`const`**: hằng biết từ lúc biên dịch, như `5.0` hay các hằng giá khai báo ở đầu `fare.dart`. `DateTime.now()` không thể là `const` vì chỉ có giá trị khi chạy. `const [1, 2]` là danh sách bất biến tới từng phần tử; `final list = [1, 2]` chỉ khoá biến, ta vẫn `add` được.
 - **`late`**: hứa với compiler rằng biến sẽ có giá trị trước khi đọc, dù lúc khai báo chưa gán.
 
-Quy tắc chọn đơn giản: ưu tiên `final` cho biến cục bộ, `const` cho hằng thật sự, `var` khi buộc phải gán lại. Lint `prefer_final_locals` nhắc đổi `var` thành `final` khi biến không bị gán lại; nó không kiểm `const`.
+Quy tắc chọn đơn giản: ưu tiên `final` cho biến cục bộ, `const` cho hằng thật sự, `var` khi buộc phải gán lại. Lint `prefer_final_locals` nhắc đổi `var` thành `final` khi biến không bị gán lại; lint này không kiểm `const`.
 
 `late` là từ khoá cần dè dặt nhất, vì nó chuyển một lỗi biên dịch thành lỗi lúc chạy. Có hai cách dùng. Cách nguy hiểm là `late String id;` không có giá trị khởi tạo: nếu đọc trước khi gán, chương trình ném lỗi `has not been initialized`. Cách an toàn hơn là `late final` kèm initializer, như `Quote.fareText` ở phần null safety: giá trị chỉ được tính khi đọc lần đầu, đúng một lần. Test trong lab kiểm chứng cả hai:
 
@@ -174,7 +174,7 @@ test('2.001 - 2 không đúng bằng 0.001', () {
 });
 ```
 
-Điều này ảnh hưởng thật tới cước. Với 2,001 km, phần vượt lý thuyết là 4,5 đồng, nhưng `(2.001 - 2) * 4500` ra 4,499999999999504. Làm tròn riêng phần vượt bằng `double` cho 4, và cước thành 12.004 thay vì 12.005:
+Điều này ảnh hưởng thật tới cước. Với 2,001 km, phần vượt lý thuyết là 4,5 đồng, nhưng `(2.001 - 2) * 4500` ra 4,499999999999504. Làm tròn riêng phần vượt bằng `double` ra 4, nên cước thành 12.004 thay vì 12.005:
 
 ```dart
 test('làm tròn riêng phần vượt bằng double cho 12004 thay vì 12005', () {
@@ -204,7 +204,7 @@ test('NaN không bằng chính nó và mọi so sánh thứ tự đều false', 
 
 ## Null safety: null là một phần của hợp đồng
 
-Từ Dart 3, null safety luôn bật. Quy tắc cốt lõi: kiểu bình thường **không chứa null**. `String` luôn là một chuỗi thật. Muốn cho phép "chưa có", ta thêm `?`: `String?` là chuỗi hoặc null. Compiler từ chối cho bạn gọi `.length` trên `String?` cho tới khi chắc chắn nó không null.
+Từ Dart 3, null safety luôn bật. Quy tắc cốt lõi: kiểu bình thường **không chứa null**. `String` luôn là một chuỗi thật. Muốn cho phép "chưa có", ta thêm `?`: `String?` là chuỗi hoặc null. Compiler không cho bạn gọi `.length` trên `String?` cho tới khi nó chắc chắn giá trị đó không null.
 
 Vì sao `Quote` có `driverName` nullable còn `fareVnd` thì không? Vì đó là hợp đồng nghiệp vụ. Báo giá nào cũng có giá, nên `int fareVnd` không bao giờ null. Còn tài xế chỉ có sau khi ai đó nhận chuyến, nên `String? driverName` mang đúng ý "chưa có". 
 
@@ -289,7 +289,7 @@ Công cụ quan trọng nhất không có ký hiệu: **flow analysis**, cơ ch�
 <figcaption>Hình 2. Promotion: sau phép kiểm null, kiểu của biến được thu hẹp từ String? thành String ở nhánh có giá trị. Nhánh null phải được xử lý (dùng giá trị mặc định, báo lỗi hoặc thoát), nếu không compiler không cho gọi member của String.</figcaption>
 </figure>
 
-Promotion chỉ hoạt động trên biến mà compiler chắc chắn không bị đổi giữa lúc kiểm và lúc dùng: biến cục bộ, tham số, và trường `final` **private**. Trường public như `driverName` thì không, vì một lớp con có thể ghi đè getter. Đó là lý do constructor của `Quote` chép `driverName` ra biến cục bộ `name` trước khi kiểm. Hàm nhỏ sau trong test minh hoạ promotion:
+Promotion chỉ hoạt động trên biến mà compiler chắc chắn không bị đổi giữa lúc kiểm và lúc dùng: biến cục bộ, tham số, và trường `final` **private**. Trường public như `driverName` thì không, vì một lớp con có thể ghi đè getter. Đó là lý do constructor của `Quote` chép `driverName` ra biến cục bộ `name` trước khi kiểm. Hàm nhỏ dưới đây trong test minh hoạ promotion:
 
 ```dart
 String _labelOf(String? text) {
@@ -303,7 +303,7 @@ String _labelOf(String? text) {
 
 Constructor của `Quote` từ chối chuỗi rỗng bằng `ArgumentError`, vì ta quy ước: `null` nghĩa là "chưa có tài xế", còn `""` là dữ liệu hỏng. Đây là câu trả lời cho tình huống đầu bài: hai trạng thái khác nhau có hai biểu diễn khác nhau, và biểu diễn lỗi bị chặn ngay ở biên.
 
-## Hàm tính cước và các ca biên
+## Hàm tính cước và các test case biên
 
 ### fare.dart · 02-dart-bien-kieu-null-safety/lib/fare.dart
 
@@ -368,15 +368,15 @@ final extraMeters = max(0, meters - includedMeters);
 return baseFareVnd + (extraMeters * pricePerExtraKmVnd + 500) ~/ metersPerKm;
 ```
 
-- `round()` chỉ xuất hiện một lần, ở biên km sang mét (nửa làm tròn ra xa số 0). Đầu vào có độ phân giải 1 m: 2,0004 km là 2.000 m, 2,0006 km là 2.001 m.
-- Sau đó toàn `int`, không còn sai số nhị phân. Mỗi mét vượt giá 4,5 đồng; cộng 500 rồi `~/ 1000` là làm tròn nửa lên cho số không âm: 1 m vượt cho (4.500 + 500) `~/` 1000 = 5 đồng.
+- `round()` chỉ xuất hiện một lần, ở biên km sang mét (điểm giữa làm tròn ra xa số 0). Đầu vào có độ phân giải 1 m: 2,0004 km là 2.000 m, 2,0006 km là 2.001 m.
+- Sau đó toàn `int`, không còn sai số nhị phân. Mỗi mét vượt tính 4,5 đồng; cộng 500 rồi `~/ 1000` là làm tròn nửa lên cho số không âm: 1 m vượt cho (4.500 + 500) `~/` 1000 = 5 đồng.
 - Guard đứng trước `round()`, vì `NaN.round()` và `Infinity.round()` ném `UnsupportedError`.
 
-Các hằng giá là `const` ở mức file, và `max(0, meters - includedMeters)` bảo đảm đi 1 km thì phần vượt bằng 0 thay vì âm.
+Các hằng giá là `const` ở mức file, và `max(0, meters - includedMeters)` bảo đảm với quãng đường 1 km thì phần vượt bằng 0 thay vì số âm.
 
-`formatVnd` đếm từ **cuối** chuỗi: dấu chấm được viết trước chữ số nào còn lại số chữ số chia hết cho 3. Đếm từ đầu sẽ đặt sai chỗ với số 4, 5 chữ số. Lab chưa dùng `intl`; định dạng theo locale để dành cho bài 14.
+`formatVnd` đếm từ **cuối** chuỗi: dấu chấm được viết trước chữ số mà số chữ số còn lại chia hết cho 3. Đếm từ đầu sẽ đặt sai chỗ với số có 4 hoặc 5 chữ số. Lab chưa dùng `intl`; định dạng theo locale để dành cho bài 14.
 
-Các ca biên trong `test/fare_test.dart`:
+Các test case biên trong `test/fare_test.dart`:
 
 | Đầu vào (km) | Kết quả mong đợi | Chứng minh điều gì |
 | --- | --- | --- |
@@ -385,7 +385,7 @@ Các ca biên trong `test/fare_test.dart`:
 | 2,001 | 12.005 | 1 m vượt là 4,5 đồng, làm tròn nửa lên |
 | 2,0004 và 2,0006 | 12.000 và 12.005 | Độ phân giải 1 m ở biên km sang mét |
 | 2,3 | 13.350 | 300 m vượt, khớp `main.dart` |
-| 5 | 25.500 | Ca thông thường, khớp Hình 1 |
+| 5 | 25.500 | Test case thông thường, khớp Hình 1 |
 | 100 | 453.000 | Cận trên hợp lệ |
 | -1, 100,5 | `ArgumentError` | Ngoài miền |
 | `double.nan` | `ArgumentError` | Guard viết đúng chiều |
@@ -411,11 +411,11 @@ test('độ phân giải 1 m: 2.0004 km tính là 2000 m, 2.0006 km là 2001 m',
 });
 ```
 
-Để chắc test NaN có giá trị, ta thử đổi guard thành `!(distanceKm < 0 || distanceKm > maxDistanceKm)`. NaN lọt qua, nổ ở `round()` bằng `UnsupportedError` thay vì `ArgumentError`, và test NaN đỏ. Cách sửa là viết guard dạng điều kiện hợp lệ, hoặc thêm `distanceKm.isNaN ||`.
+Để chắc chắn test NaN có tác dụng, ta thử đổi guard thành `!(distanceKm < 0 || distanceKm > maxDistanceKm)`. NaN lọt qua, nổ ở `round()` bằng `UnsupportedError` thay vì `ArgumentError`, và test NaN đỏ. Cách sửa là viết guard dạng điều kiện hợp lệ, hoặc thêm `distanceKm.isNaN ||`.
 
 ## dynamic và Object: hai lối thoát nên đóng lại
 
-Gặp kiểu khó, người mới hay thả `dynamic` cho hết lỗi. `dynamic` tắt kiểm tra kiểu: compiler cho gọi bất cứ thứ gì, lỗi chỉ lộ ra khi chạy. `Object` thì khác: compiler chỉ cho gọi những gì `Object` có.
+Khi vướng lỗi về kiểu, người mới hay thả `dynamic` để compiler hết báo lỗi. `dynamic` tắt kiểm tra kiểu: compiler cho gọi bất cứ thứ gì, lỗi chỉ lộ ra khi chạy. `Object` thì khác: compiler chỉ cho gọi những gì `Object` có.
 
 ```dart
 test('dynamic dời lỗi sang lúc chạy', () {
@@ -474,7 +474,7 @@ Ba file test chứng minh ba nhóm điều khác nhau:
 
 | File | Chứng minh |
 | --- | --- |
-| `test/fare_test.dart` | Ca biên của cước (0, 1, 2, 2,001, 2,0004, 2,0006, 5, 100, ngoài miền, NaN, Infinity) và `formatVnd` |
+| `test/fare_test.dart` | Test case biên của cước (0, 1, 2, 2,001, 2,0004, 2,0006, 5, 100, ngoài miền, NaN, Infinity) và `formatVnd` |
 | `test/quote_test.dart` | null và chuỗi rỗng khác nhau, `withDriver` không sửa bản cũ, `late` |
 | `test/basics_test.dart` | Các khẳng định về `/`, `~/`, `%`, `round()` (kể cả 12.004 khi làm tròn phần vượt bằng double), NaN, `!`, `dynamic`, `Object` |
 

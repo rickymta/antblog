@@ -1,0 +1,83 @@
+{
+"file": "flutter-thanh-toan-vi-xanh-webview-deep-link-idempotency.md",
+"edits": [
+{
+"old": "Chọn trình duyệt trong app thay WebView,",
+"new": "Chọn trình duyệt trong app thay vì WebView,",
+"reason": "Thiếu 'vì'",
+"severity": "medium"
+},
+{
+"old": "chứng minh state không thành công trong ca đó.",
+"new": "chứng minh state không phải thành công trong trường hợp đó.",
+"reason": "'ca' là calque; làm rõ nghĩa",
+"severity": "medium"
+},
+{
+"old": "Nó xin server một **phiên thanh toán**",
+"new": "App xin server một **phiên thanh toán**",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "medium"
+},
+{
+"old": "ta không thuộc hai ca đó.",
+"new": "ta không thuộc hai trường hợp đó.",
+"reason": "'ca' là calque của 'case'",
+"severity": "medium"
+},
+{
+"old": "đổi lỗi của plugin thành `false`.",
+"new": "chuyển lỗi của plugin thành giá trị `false`.",
+"reason": "Câu lược, 'đổi ... thành' gượng",
+"severity": "low"
+},
+{
+"old": "Hình 2 vẽ ca đó và cách khoá chặn nó.",
+"new": "Hình 2 vẽ trường hợp đó và cách khoá chặn lỗi này.",
+"reason": "'ca' là calque; 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Lab theo ba quy tắc.",
+"new": "Lab tuân theo ba quy tắc.",
+"reason": "Thiếu động từ",
+"severity": "low"
+},
+{
+"old": "nên mã phiên không được đủ để xem kết quả",
+"new": "nên chỉ có mã phiên thì chưa đủ để xem kết quả",
+"reason": "'không được đủ' là calque",
+"severity": "medium"
+},
+{
+"old": "Bài 23 cũng chỉ cho custom scheme dùng với việc không nhạy cảm.",
+"new": "Bài 23 cũng chỉ khuyên dùng custom scheme cho việc không nhạy cảm.",
+"reason": "Câu mơ hồ, trật tự gượng",
+"severity": "medium"
+},
+{
+"old": "thì app nhận link là không xác định",
+"new": "thì không xác định được app nào nhận link",
+"reason": "Trật tự từ kiểu tiếng Anh",
+"severity": "medium"
+},
+{
+"old": "Test sau là ca đầu bài.",
+"new": "Test sau chính là test case ở đầu bài.",
+"reason": "Thống nhất 'test case', bỏ 'ca'",
+"severity": "medium"
+},
+{
+"old": "Cách sửa: kết quả cuối không thành công kết thúc lần đó; lần sau dùng khoá mới.",
+"new": "Cách sửa: khi có kết quả cuối không thành công thì kết thúc lần thanh toán đó; lần sau dùng khoá mới.",
+"reason": "Câu thiếu liên kết, khó đọc",
+"severity": "medium"
+},
+{
+"old": "nên <code>authorized</code> mặc nhiên thành trạng thái cuối",
+"new": "nên <code>authorized</code> mặc nhiên trở thành trạng thái cuối",
+"reason": "Thiếu 'trở' trong 'X thành Y'",
+"severity": "low"
+}
+]
+}

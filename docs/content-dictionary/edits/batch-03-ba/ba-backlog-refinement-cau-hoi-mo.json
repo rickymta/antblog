@@ -1,0 +1,47 @@
+{
+ "file": "ba-backlog-refinement-cau-hoi-mo.md",
+ "edits": [
+  {
+   "old": "nên trả lời vấn đề gì, ai hưởng lợi",
+   "new": "nên cho biết vấn đề gì, ai hưởng lợi",
+   "reason": "'trả lời vấn đề' sai kết hợp",
+   "severity": "medium"
+  },
+  {
+   "old": "Driver có đọc được",
+   "new": "Tài xế có đọc được",
+   "reason": "Thống nhất 'tài xế'",
+   "severity": "medium"
+  },
+  {
+   "old": "Không bỏ kiểm quyền để",
+   "new": "Không bỏ bước kiểm tra quyền để",
+   "reason": "'kiểm quyền' tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Mẫu nhóm tự chọn: có mục tiêu, actor, phạm vi, ví dụ chính/ngoại lệ, phụ thuộc và câu hỏi có owner.",
+   "new": "Nhóm có thể tự chọn mẫu sau: có mục tiêu, actor, phạm vi, ví dụ chính/ngoại lệ, phụ thuộc và câu hỏi có người phụ trách.",
+   "reason": "Câu thiếu động từ; owner",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là hỗ trợ trao đổi, không phải",
+   "new": "Mẫu này hỗ trợ trao đổi, không phải",
+   "reason": "Giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Nếu thay đổi làm ảnh hưởng estimate hoặc thứ tự",
+   "new": "Nếu thay đổi ảnh hưởng tới ước lượng hoặc thứ tự",
+   "reason": "'làm ảnh hưởng' thừa; estimate có từ Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "nên cần owner quyết định",
+   "new": "nên cần người phụ trách quyết định",
+   "reason": "owner có từ Việt tự nhiên",
+   "severity": "medium"
+  }
+ ]
+}

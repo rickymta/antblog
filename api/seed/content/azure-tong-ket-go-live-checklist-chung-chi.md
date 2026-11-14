@@ -10,7 +10,7 @@ language: vi
 
 Đây là **bài 58** của loạt **Azure từ cơ bản tới nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)** · Phần 6 · Kiến trúc nâng cao và vận hành (bài 9/9 của phần).
 
-Bài cuối không dựng thêm resource. Nó gom những gì đã dựng thành checklist go-live, bốn runbook cho sự cố hay gặp, bản đồ chứng chỉ, và nói thẳng loạt bài chưa làm gì. Vài lệnh `az` trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn, trước hết ở staging.
+Bài cuối không dựng thêm resource mà gom những gì đã dựng thành checklist go-live, bốn runbook cho sự cố hay gặp, bản đồ chứng chỉ, và nói thẳng loạt bài chưa làm gì. Vài lệnh `az` trong bài được soạn theo tài liệu Microsoft Learn tại thời điểm viết (11/2026); hãy chạy trên subscription của bạn, trước hết ở staging.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Bài cuối không dựng thêm resource. Nó gom những gì đã dựng thành
 
 ## Từ một máy ảo tới canary: mỗi phần gỡ đi một việc làm tay
 
-Ở bài 7, `trip-service` chạy trên một máy ảo: SSH vào để cài, chép file để deploy, nhìn log bằng mắt, và Tới Nơi tự vá hệ điều hành. Năm mươi bài sau, cùng service đó chạy thành revision trong Container Apps, đọc secret qua managed identity, gọi PostgreSQL qua private endpoint và được pipeline OIDC đẩy lên. Mỗi phần thay một việc làm tay bằng một cơ chế kiểm được.
+Ở bài 7, `trip-service` chạy trên một máy ảo: SSH vào để cài, chép file để deploy, nhìn log bằng mắt, và Tới Nơi tự vá hệ điều hành. Năm mươi bài sau, cùng service đó chạy thành revision trong Container Apps, đọc secret qua managed identity, gọi PostgreSQL qua private endpoint và được pipeline OIDC đẩy lên. Mỗi phần thay một việc làm tay bằng một cơ chế kiểm tra được.
 
 | Phần | Trip-service trông thế nào khi xong phần | Bài tiêu biểu |
 | --- | --- | --- |
@@ -38,11 +38,11 @@ Bài cuối không dựng thêm resource. Nó gom những gì đã dựng thành
 <figcaption>Hình 1. Sáu phần của loạt xếp thành một đường: mỗi phần thêm một lớp lên cùng trip-service, và phần cuối là thứ phải kiểm trước go-live.</figcaption>
 </figure>
 
-Cái giá là số bộ phận chuyển động. Máy ảo đơn lẻ chỉ có vài thứ hỏng; hệ thống cuối có identity, private DNS, revision, hàng đợi, pipeline, alert, mỗi thứ hỏng theo cách riêng. Checklist dưới đây là phần trách nhiệm chia sẻ còn lại của Tới Nơi sau khi Azure đã lo hạ tầng.
+Cái giá là hệ thống có nhiều bộ phận chuyển động hơn. Máy ảo đơn lẻ chỉ có vài thứ hỏng; hệ thống cuối có identity, private DNS, revision, hàng đợi, pipeline, alert, mỗi thứ hỏng theo cách riêng. Checklist dưới đây là phần trách nhiệm chia sẻ còn lại của Tới Nơi sau khi Azure đã lo hạ tầng.
 
 ## Bốn mươi mục go-live, mỗi mục phải có bằng chứng chứ không phải cảm giác
 
-Checklist theo năm trụ cột của [Well-Architected Framework](/articles/azure-well-architected-framework-5-tru-cot): bảo mật, độ tin cậy, vận hành, chi phí và hiệu năng. Các nhóm identity, network, data, deploy, observe, runbook, on-call, DR drill và security review được xếp vào trụ cột gần nhất. Một mục chỉ được tick khi có thứ để chỉ vào: đầu ra lệnh, link pipeline, báo cáo, biên bản diễn tập. Bằng chứng đặc thù ghi trong ngoặc.
+Checklist theo năm trụ cột của [Well-Architected Framework](/articles/azure-well-architected-framework-5-tru-cot): bảo mật, độ tin cậy, vận hành, chi phí và hiệu năng. Các nhóm identity, network, data, deploy, observe, runbook, on-call, DR drill và security review được xếp vào trụ cột gần nhất. Một mục chỉ được tick khi có thứ để chỉ vào: đầu ra lệnh, link pipeline, báo cáo, biên bản diễn tập. Bằng chứng riêng của từng mục ghi trong ngoặc.
 
 ### Bảo mật (mục 1 đến 8)
 
@@ -50,7 +50,7 @@ Checklist theo năm trụ cột của [Well-Architected Framework](/articles/azu
 | --- | --- |
 | 1 | Workload dùng managed identity, quét repo và biến môi trường không thấy secret |
 | 2 | Quyền người dùng cấp theo RBAC, quyền admin qua PIM, role assignment đã rà theo scope |
-| 3 | API kiểm issuer, audience và chữ ký JWT (test từ chối token sai audience) |
+| 3 | API kiểm tra issuer, audience và chữ ký JWT (test từ chối token sai audience) |
 | 4 | PostgreSQL và Key Vault chỉ qua private endpoint (`publicNetworkAccess` tắt, DNS private đúng) |
 | 5 | Traffic vào đi qua Front Door, WAF ở chế độ Prevention chứ không chỉ Detection |
 | 6 | Egress của subnet ứng dụng được kiểm soát, route và rule firewall đã review |
@@ -63,23 +63,23 @@ Checklist theo năm trụ cột của [Well-Architected Framework](/articles/azu
 | --- | --- |
 | 9 | PostgreSQL bật HA zone-redundant ở prod |
 | 10 | Thời gian giữ backup khớp RPO, đã restore thử và đo thời gian |
-| 11 | RTO và RPO từng service được viết ra và chủ sở hữu đồng ý |
+| 11 | RTO và RPO từng service được viết ra và người phụ trách đồng ý |
 | 12 | Failover đã diễn tập ở staging (biên bản kèm thời gian gián đoạn thực tế) |
 | 13 | Kế hoạch DR sang East Asia đã review, nêu rõ phần nào chưa tự động |
 | 14 | Migration theo mẫu expand rồi contract, rollback code không cần rollback schema |
 | 15 | Consumer idempotent, hàng đợi có dead-letter, alert và người theo dõi |
-| 16 | Probe liveness và readiness tách nhau, readiness kiểm database |
+| 16 | Probe liveness và readiness tách nhau, readiness kiểm tra database |
 
 ### Vận hành (mục 17 đến 24)
 
 | # | Mục |
 | --- | --- |
-| 17 | Hạ tầng hoàn toàn bằng Bicep hoặc Terraform, what-if hoặc plan trước khi áp |
+| 17 | Toàn bộ hạ tầng được dựng bằng Bicep hoặc Terraform, what-if hoặc plan trước khi áp |
 | 18 | Pipeline đăng nhập OIDC bằng federated credential, không secret dài hạn |
 | 19 | Deploy theo canary, lệnh rollback đã thử ở staging |
 | 20 | Trace, metric, log nối bằng correlation qua OpenTelemetry, một request truy được tới database |
-| 21 | SLO có alert burn-rate, đã bắn thử |
-| 22 | Ít nhất bốn runbook, mỗi cái có chủ sở hữu và người trực đã đọc |
+| 21 | SLO có alert burn-rate, đã kích hoạt thử |
+| 22 | Ít nhất bốn runbook, mỗi cái có người phụ trách và người trực đã đọc |
 | 23 | Lịch on-call có người thay thế và kênh leo thang |
 | 24 | Có mẫu post-incident review, đã dùng cho một sự cố giả lập |
 
@@ -88,7 +88,7 @@ Checklist theo năm trụ cột của [Well-Architected Framework](/articles/azu
 | # | Mục |
 | --- | --- |
 | 25 | Budget có alert cho từng subscription |
-| 26 | Tag `env`, `workload`, `owner` bắt buộc bằng Policy, báo cáo compliance sạch |
+| 26 | Tag `env`, `workload`, `owner` bắt buộc bằng Policy, báo cáo compliance không còn vi phạm |
 | 27 | Dev và staging tự tắt hoặc scale về tối thiểu ngoài giờ |
 | 28 | Reservation hay savings plan chỉ mua sau khi có baseline nhiều tuần |
 | 29 | Log Analytics có retention và daily cap |
@@ -103,7 +103,7 @@ Checklist theo năm trụ cột của [Well-Architected Framework](/articles/azu
 | 33 | Đã load test với mô hình đặt xe thật, không chỉ một endpoint |
 | 34 | Autoscale có min và max, đã quan sát replica khi tải đổi |
 | 35 | Tổng connection PostgreSQL của mọi replica dưới giới hạn server (phép tính kèm số đo) |
-| 36 | Index cho truy vấn nóng trên `trips` đã kiểm bằng `EXPLAIN` trên dữ liệu đủ lớn |
+| 36 | Index cho truy vấn nóng trên `trips` đã kiểm tra bằng `EXPLAIN` trên dữ liệu đủ lớn |
 | 37 | Báo giá lặp lại được cache, có TTL và cách vô hiệu |
 | 38 | p95 của đường đặt chuyến có mục tiêu và đang được đo |
 | 39 | Quota subscription ở Southeast Asia đủ cho đỉnh dự kiến |
@@ -111,22 +111,22 @@ Checklist theo năm trụ cột của [Well-Architected Framework](/articles/azu
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Tick vì «chắc là có rồi» tệ hơn không có checklist, vì nó tạo cảm giác an toàn giả. Mục 10, 12, 33 và 40 chỉ có bằng chứng khi bạn thật sự restore, failover, tạo tải và gây lỗi. Làm ở staging trước; failover cưỡng bức hay chaos ở prod giữa giờ cao điểm là tự tạo sự cố.</p>
+<p>Tick vì «chắc là có rồi» tệ hơn không có checklist, vì cách này tạo cảm giác an toàn giả. Mục 10, 12, 33 và 40 chỉ có bằng chứng khi bạn thật sự restore, failover, tạo tải và gây lỗi. Làm ở staging trước; failover cưỡng bức hay chaos ở prod giữa giờ cao điểm là tự tạo sự cố.</p>
 </div>
 
 ## Bốn runbook mẫu cho bốn sự cố hay gặp nhất
 
-Runbook tốt đủ ngắn để đọc lúc hai giờ sáng và trả lời bốn câu: dấu hiệu, kiểm gì trước, làm gì, không làm gì. Sửa tên resource và ngưỡng theo hệ thống của bạn.
+Runbook tốt đủ ngắn để đọc lúc hai giờ sáng và trả lời bốn câu: dấu hiệu, kiểm tra gì trước, làm gì, không làm gì. Sửa tên resource và ngưỡng theo hệ thống của bạn.
 
-**1. PostgreSQL failover.** Dấu hiệu: lỗi kết nối tăng vọt, readiness trả 503. Kiểm trạng thái HA, Resource Health và Activity Log. Chờ pool mở kết nối mới, vì tên host giữ nguyên sau failover. Không restart đồng loạt mọi replica ứng dụng, không đổi connection string sang IP. Sau đó ghi thời gian gián đoạn và so với RTO ở mục 11.
+**1. PostgreSQL failover.** Dấu hiệu: lỗi kết nối tăng vọt, readiness trả 503. Kiểm tra trạng thái HA, Resource Health và Activity Log. Chờ pool mở kết nối mới, vì tên host giữ nguyên sau failover. Không restart đồng loạt mọi replica ứng dụng, không đổi connection string sang IP. Sau đó ghi thời gian gián đoạn và so với RTO ở mục 11.
 
-**2. Dead-letter tăng.** Dấu hiệu: alert dead-letter vượt ngưỡng. Đọc `DeadLetterReason` và `DeliveryCount` của vài message. Dependency tạm hỏng thì gửi lại sau khi sửa; message độc thì sửa consumer trước. Chỉ gửi lại khi consumer idempotent theo [bài 26 của loạt C#](/articles/dotnet10-outbox-inbox-idempotent-consumer), nếu không một khoản thanh toán có thể bị xử lý hai lần. Không xoá dead-letter trước khi xuất bản sao.
+**2. Dead-letter tăng.** Dấu hiệu: alert dead-letter vượt ngưỡng. Đọc `DeadLetterReason` và `DeliveryCount` của vài message. Dependency tạm hỏng thì gửi lại sau khi sửa; poison message (message không thể xử lý thành công) thì sửa consumer trước. Chỉ gửi lại khi consumer idempotent theo [bài 26 của loạt C#](/articles/dotnet10-outbox-inbox-idempotent-consumer), nếu không một khoản thanh toán có thể bị xử lý hai lần. Không xoá dead-letter trước khi xuất một bản sao.
 
 **3. Revision lỗi cần rollback.** Dấu hiệu: canary đốt error budget nhanh. Đưa 100% traffic về revision ổn định rồi mới điều tra. Giữ revision lỗi (0% traffic) để đọc log, đừng xoá ngay. Rollback code không hoàn tác schema; nếu migration đã chạy, xem mục 14 và [bài 46](/articles/azure-database-migration-trong-pipeline).
 
 **4. Secret hết hạn.** Dấu hiệu: lỗi xác thực tới một dependency, đúng ngày hết hạn. Xem `expires` trong Key Vault, tạo phiên bản mới, rồi restart hoặc tạo revision mới vì replica đang chạy có thể chưa đọc giá trị mới ([bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment)). Lâu dài, đổi sang managed identity, và nhận sự kiện `SecretNearExpiry` qua [Event Grid](/articles/azure-event-grid-system-custom-topic) để được báo trước.
 
-Khối lệnh sau gom bước kiểm đầu tiên của bốn runbook. Nó chỉ đọc trạng thái và đổi traffic, không chứng minh runbook đúng; phải diễn tập từng cái ở staging.
+Khối lệnh sau gom bước kiểm tra đầu tiên của bốn runbook. Khối lệnh này chỉ đọc trạng thái và đổi traffic, không chứng minh runbook đúng; phải diễn tập từng cái ở staging.
 
 ```bash
 # 1) PostgreSQL: trạng thái server và HA
@@ -158,11 +158,11 @@ az keyvault secret list --vault-name kv-toinoi-prod-sea \
 
 **Bài tập:** lúc 2 giờ sáng alert dead-letter nổ. Đồng nghiệp muốn gửi lại toàn bộ message vào queue chính ngay cho nhanh. Bạn hỏi lại hai điều gì trước khi đồng ý?
 
-<details><summary>Xem lời giải</summary><p>Hỏi message chết vì lý do gì (dependency tạm thời hay message độc, xem `DeadLetterReason` và `DeliveryCount`), và consumer đã idempotent chưa. Gửi lại message độc sẽ quay lại dead-letter, còn gửi lại vào consumer không idempotent có thể nhân đôi tác dụng phụ như trừ tiền hai lần. Xuất bản sao dead-letter trước khi làm gì tiếp.</p></details>
+<details><summary>Xem lời giải</summary><p>Hỏi message chết vì lý do gì (dependency tạm thời hay poison message, xem `DeadLetterReason` và `DeliveryCount`), và consumer đã idempotent chưa. Gửi lại poison message sẽ quay lại dead-letter, còn gửi lại vào consumer không idempotent có thể nhân đôi tác dụng phụ như trừ tiền hai lần. Xuất một bản sao dead-letter trước khi làm gì tiếp.</p></details>
 
 ## Bản đồ chứng chỉ chỉ ra bài nào gần mục thi nào, không thay tài liệu thi
 
-Chứng chỉ Azure đo kiến thức theo vai trò, còn loạt bài đi theo một hệ thống. Hai thứ giao nhau nhiều nhưng không trùng. Mã thi và nội dung đổi theo thời gian, có kỳ thi được thay hoặc nghỉ, nên trước khi ôn hãy đọc study guide hiện hành trên Microsoft Learn. AZ-305 và AZ-400 dẫn tới chứng chỉ Expert, cần thêm một chứng chỉ Associate làm điều kiện (AZ-104 cho AZ-305; AZ-104 hoặc AZ-204 cho AZ-400).
+Chứng chỉ Azure đo kiến thức theo vai trò, còn loạt bài đi theo một hệ thống. Hai thứ giao nhau nhiều nhưng không trùng. Mã thi và nội dung đổi theo thời gian, có kỳ thi được thay thế hoặc ngừng, nên trước khi ôn hãy đọc study guide hiện hành trên Microsoft Learn. AZ-305 và AZ-400 dẫn tới chứng chỉ Expert, cần thêm một chứng chỉ Associate làm điều kiện (AZ-104 cho AZ-305; AZ-104 hoặc AZ-204 cho AZ-400).
 
 | Chứng chỉ | Vai trò | Phần của loạt | Chủ đề thi loạt chưa phủ sâu |
 | --- | --- | --- | --- |

@@ -26,7 +26,7 @@ Amazon S3 (Simple Storage Service) lưu **object** trong **bucket**. Một objec
 | --- | --- | --- |
 | Đơn vị | File trong cây thư mục | Object trong bucket, định danh bằng key |
 | Sửa một phần | Ghi đè vài byte được | Thay cả object bằng bản mới |
-| Truy cập | Mount, đọc ghi qua hệ điều hành | HTTPS API (PUT, GET, DELETE, LIST) |
+| Truy cập | Mount, đọc và ghi qua hệ điều hành | HTTPS API (PUT, GET, DELETE, LIST) |
 | Dung lượng | Cấp trước theo ổ | Không giới hạn tổng; mỗi object tối đa 50 TB (từ 12/2025, trước đó 5 TB) |
 | Tính nhất quán | Tuỳ hệ thống | Strong read-after-write: PUT xong là GET và LIST thấy ngay |
 
@@ -47,11 +47,11 @@ aws s3api put-bucket-encryption --bucket "$BUCKET" \
   'Rules=[{ApplyServerSideEncryptionByDefault={SSEAlgorithm=AES256}}]'
 ```
 
-Ngoài `us-east-1`, `create-bucket` bắt buộc có `LocationConstraint`. Bốn cờ Block Public Access ghi đè mọi policy và ACL dại dột sau này: dù ai đó dán một bucket policy `Principal: "*"`, S3 vẫn từ chối. Lớp bảo vệ này không tốn tiền; cái giá là khi thật sự cần public, ta phải tắt có chủ đích.
+Ngoài `us-east-1`, `create-bucket` bắt buộc có `LocationConstraint`. Bốn cờ Block Public Access ghi đè mọi policy và ACL cấu hình sai sau này: dù ai đó dán một bucket policy `Principal: "*"`, S3 vẫn từ chối. Lớp bảo vệ này không tốn tiền; cái giá là khi thật sự cần public, ta phải tắt có chủ đích.
 
 ## Versioning: xoá không còn là xoá
 
-Khi bật **versioning**, mỗi lần PUT vào cùng key tạo một **version** mới có `VersionId` riêng. Lệnh DELETE không kèm version id không xoá gì cả: S3 thêm một **delete marker** làm bản mới nhất, nên GET trả 404 nhưng mọi version cũ vẫn còn và vẫn tính tiền lưu trữ. Chỉ lệnh DELETE chỉ rõ `--version-id` mới xoá vĩnh viễn một bản. Đã bật versioning thì chỉ có thể tạm dừng (suspended), không quay về trạng thái chưa từng bật.
+Khi bật **versioning**, mỗi lần PUT vào cùng key tạo một **version** mới có `VersionId` riêng. Lệnh DELETE không kèm version id không xoá gì cả: S3 thêm một **delete marker** làm bản mới nhất, nên GET trả 404 nhưng mọi phiên bản cũ vẫn còn và vẫn tính tiền lưu trữ. Chỉ lệnh DELETE chỉ rõ `--version-id` mới xoá vĩnh viễn một bản. Đã bật versioning thì chỉ có thể tạm dừng (suspended), không quay về trạng thái chưa từng bật.
 
 Với Tới Nơi, tài xế lỡ upload đè ảnh sai thì bản đúng vẫn còn. Cái giá là dung lượng nhân lên, nên cần lifecycle đi kèm.
 
@@ -66,7 +66,7 @@ Với Tới Nơi, tài xế lỡ upload đè ảnh sai thì bản đúng vẫn c
 | Glacier Instant Retrieval | Lưu lâu, đọc vài lần mỗi quý, vẫn cần mili giây | Tối thiểu 90 ngày; phí lấy dữ liệu cao hơn IA |
 | Intelligent-Tiering | Không biết mẫu truy cập | S3 tự chuyển tầng; có phí giám sát theo số object, không có phí lấy dữ liệu |
 
-Quy tắc trong lab (áp cho prefix `proof/`, như policy ở bài 03): sau 30 ngày chuyển Standard-IA, sau 90 ngày chuyển Glacier Instant Retrieval; version cũ giữ tối đa 3 bản mới nhất, các bản còn lại xoá sau 30 ngày không còn là bản hiện hành; dọn delete marker mồ côi và upload multipart dang dở sau 7 ngày.
+Quy tắc trong lab (áp cho prefix `proof/`, như policy ở bài 03): sau 30 ngày chuyển Standard-IA, sau 90 ngày chuyển Glacier Instant Retrieval; phiên bản cũ giữ tối đa 3 bản mới nhất, các bản còn lại bị xoá sau 30 ngày kể từ khi không còn là bản hiện hành; dọn delete marker mồ côi và upload multipart dang dở sau 7 ngày.
 
 ```json
 {
@@ -85,18 +85,18 @@ Quy tắc trong lab (áp cho prefix `proof/`, như policy ở bài 03): sau 30 n
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Vòng đời một ảnh chứng từ: Standard từ ngày 0, Standard-IA từ ngày 30, Glacier Instant Retrieval từ ngày 90; phiên bản cũ chỉ giữ ba bản mới nhất và bị xoá sau 30 ngày."><rect x="20" y="40" width="270" height="70" rx="10" class="f-phys-soft s-phys"/><text x="34" y="70" class="t-b">Standard</text><text x="34" y="92" class="t-small">ngày 0 đến 30: khách và hỗ trợ hay xem</text><rect x="305" y="40" width="270" height="70" rx="10" class="f-pk-soft s-pk"/><text x="319" y="70" class="t-b">Standard-IA</text><text x="319" y="92" class="t-small">ngày 30 đến 90: hiếm đọc, có phí lấy dữ liệu</text><rect x="590" y="40" width="270" height="70" rx="10" class="f-pk-soft s-pk"/><text x="604" y="70" class="t-b">Glacier Instant Retrieval</text><text x="604" y="92" class="t-small">từ ngày 90: lưu lâu, vẫn đọc trong mili giây</text><text x="20" y="30" class="t-small t-mono">ngày 0</text><text x="305" y="30" class="t-small t-mono">ngày 30</text><text x="590" y="30" class="t-small t-mono">ngày 90</text><text x="20" y="150" class="t-b">Phiên bản cũ (noncurrent)</text><rect x="20" y="162" width="570" height="56" rx="10" class="f-warn-soft s-warn dash"/><text x="34" y="187" class="t-small">Giữ 3 bản cũ mới nhất; bản cũ hơn bị xoá sau 30 ngày không còn là bản hiện hành</text><text x="34" y="206" class="t-small">Delete marker mồ côi cũng được dọn</text><rect x="605" y="162" width="255" height="56" rx="10" class="f-surface s-line"/><text x="619" y="187" class="t-small">Thời gian chỉ minh hoạ,</text><text x="619" y="206" class="t-small">thanh không theo đúng tỉ lệ</text></svg>
+<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Vòng đời một ảnh chứng từ: Standard từ ngày 0, Standard-IA từ ngày 30, Glacier Instant Retrieval từ ngày 90; phiên bản cũ chỉ giữ ba bản mới nhất và bị xoá sau 30 ngày."><rect x="20" y="40" width="270" height="70" rx="10" class="f-phys-soft s-phys"/><text x="34" y="70" class="t-b">Standard</text><text x="34" y="92" class="t-small">ngày 0 đến 30: khách và hỗ trợ hay xem</text><rect x="305" y="40" width="270" height="70" rx="10" class="f-pk-soft s-pk"/><text x="319" y="70" class="t-b">Standard-IA</text><text x="319" y="92" class="t-small">ngày 30 đến 90: hiếm đọc, có phí lấy dữ liệu</text><rect x="590" y="40" width="270" height="70" rx="10" class="f-pk-soft s-pk"/><text x="604" y="70" class="t-b">Glacier Instant Retrieval</text><text x="604" y="92" class="t-small">từ ngày 90: lưu lâu, vẫn đọc trong mili giây</text><text x="20" y="30" class="t-small t-mono">ngày 0</text><text x="305" y="30" class="t-small t-mono">ngày 30</text><text x="590" y="30" class="t-small t-mono">ngày 90</text><text x="20" y="150" class="t-b">Phiên bản cũ (noncurrent)</text><rect x="20" y="162" width="570" height="56" rx="10" class="f-warn-soft s-warn dash"/><text x="34" y="187" class="t-small">Giữ 3 bản cũ mới nhất; bản cũ hơn bị xoá sau 30 ngày kể từ khi không còn là bản hiện hành</text><text x="34" y="206" class="t-small">Delete marker mồ côi cũng được dọn</text><rect x="605" y="162" width="255" height="56" rx="10" class="f-surface s-line"/><text x="619" y="187" class="t-small">Thời gian chỉ minh hoạ,</text><text x="619" y="206" class="t-small">thanh không theo đúng tỉ lệ</text></svg>
 </div>
 <figcaption>Hình 1. Lifecycle của prefix <code>proof/</code> trong lab. Lifecycle chạy bất đồng bộ nên ngày chuyển lớp không chính xác đến từng giờ.</figcaption>
 </figure>
 
-Mỗi lần chuyển lớp là một request tính phí. Với 1,2 triệu ảnh mỗi ngày và hai lần chuyển, đó là hàng triệu request mỗi ngày; hãy dùng Pricing Calculator để chắc tiền tiết kiệm lưu trữ lớn hơn phí request. Nếu chưa biết mẫu truy cập, Intelligent-Tiering tự quyết thay bạn. Lifecycle mặc định cũng bỏ qua object nhỏ hơn 128 KB.
+Mỗi lần chuyển lớp là một request tính phí. Với 1,2 triệu ảnh mỗi ngày và hai lần chuyển, đó là hàng triệu request mỗi ngày; hãy dùng Pricing Calculator để chắc rằng khoản tiết kiệm từ lưu trữ lớn hơn phí request. Nếu chưa biết mẫu truy cập, Intelligent-Tiering tự quyết thay bạn. Lifecycle mặc định cũng bỏ qua object nhỏ hơn 128 KB.
 
 ## Presigned URL: cho phép mà không trao credential
 
-Ứng dụng tài xế không nên cầm credential AWS. Cách thường dùng: app tài xế hỏi service `delivery-photo`, service này dùng **role** của mình (`toinoi-lab-delivery-photo` ở bài 03) để **ký** một URL cho đúng một thao tác trên đúng một key trong thời gian ngắn, rồi tài xế gọi thẳng S3. Ảnh không đi qua server của Tới Nơi, nên không tốn băng thông và CPU của service.
+Ứng dụng tài xế không nên giữ credential AWS. Cách thường dùng: app tài xế hỏi service `delivery-photo`, service này dùng **role** của mình (`toinoi-lab-delivery-photo` ở bài 03) để **ký** một URL cho đúng một thao tác trên đúng một key trong thời gian ngắn, rồi tài xế gọi thẳng S3. Ảnh không đi qua server của Tới Nơi, nên không tốn băng thông và CPU của service.
 
-Presigned URL là URL thường kèm chữ ký (SigV4) trong query string. Chữ ký phủ phương thức (GET hay PUT), bucket, key, thời điểm hết hạn và các header đã ký như `Content-Type`. URL không chứa secret của role, nhưng **ai giữ URL thì dùng được tới lúc hết hạn**, với đúng quyền của người ký tại thời điểm dùng. Một ràng buộc hay bị quên: nếu ký bằng credential tạm (role, SSO) thì URL chết cùng phiên, kể cả khi `Expires` còn dài.
+Presigned URL là URL thường kèm chữ ký (SigV4) trong query string. Chữ ký bao gồm phương thức (GET hay PUT), bucket, key, thời điểm hết hạn và các header đã ký như `Content-Type`. URL không chứa secret của role, nhưng **ai giữ URL thì dùng được tới lúc hết hạn**, với đúng quyền của người ký tại thời điểm dùng. Một ràng buộc hay bị quên: nếu ký bằng credential tạm (role, SSO) thì URL hết hiệu lực khi phiên hết hạn, kể cả khi `Expires` còn dài.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -146,15 +146,15 @@ Script đã qua kiểm tra cú pháp và shellcheck, JSON đã parse được, n
 
 ## Cái giá phải trả
 
-- **Version cũ vẫn tính tiền.** Bật versioning mà không có lifecycle cho `NoncurrentVersionExpiration` thì dung lượng chỉ tăng, không bao giờ giảm.
+- **Phiên bản cũ vẫn tính tiền.** Bật versioning mà không có lifecycle cho `NoncurrentVersionExpiration` thì dung lượng chỉ tăng, không bao giờ giảm.
 - **Presigned URL là chìa khoá tạm.** URL lọt vào log, ảnh chụp màn hình hoặc chat thì ai nhặt được cũng dùng được tới khi hết hạn. Giữ hạn ngắn, không ghi URL đầy đủ vào log.
-- **Xoá bucket không đơn giản.** Bucket có versioning phải xoá hết version và delete marker mới xoá được bucket; `aws s3 rb --force` không đủ.
+- **Xoá bucket không đơn giản.** Bucket có versioning phải xoá hết phiên bản và delete marker mới xoá được bucket; `aws s3 rb --force` không đủ.
 - **Chuyển lớp có phí request và phí lấy dữ liệu.** Object nhỏ hoặc hay đọc lại có thể rẻ hơn nếu để ở Standard.
 - **Tên bucket là tài nguyên chung toàn cầu.** Tên đẹp có thể đã bị người khác dùng, và đừng nhúng thông tin nhạy cảm vào tên.
 
 **Bài tập:** trong bucket đã bật versioning, `aws s3api delete-object --bucket B --key proof/100123/delivered.jpg` (không có `--version-id`) làm gì? Làm sao lấy lại ảnh, và làm sao xoá ảnh vĩnh viễn?
 
-<details><summary>Xem đáp án</summary><p>Lệnh chỉ thêm một delete marker nên GET key đó trả 404, các version cũ vẫn còn và vẫn tính tiền. Để lấy lại ảnh, xoá chính delete marker bằng <code>delete-object</code> kèm <code>--version-id</code> của marker (xem version bằng <code>list-object-versions</code>). Để xoá vĩnh viễn, xoá từng version bằng <code>--version-id</code> hoặc để lifecycle <code>NoncurrentVersionExpiration</code> làm việc đó.</p></details>
+<details><summary>Xem đáp án</summary><p>Lệnh chỉ thêm một delete marker nên GET key đó trả 404, các phiên bản cũ vẫn còn và vẫn tính tiền. Để lấy lại ảnh, xoá chính delete marker bằng <code>delete-object</code> kèm <code>--version-id</code> của marker (xem version bằng <code>list-object-versions</code>). Để xoá vĩnh viễn, xoá từng version bằng <code>--version-id</code> hoặc để lifecycle <code>NoncurrentVersionExpiration</code> làm việc đó.</p></details>
 
 Bài trước: [bài 05](/articles/aws-ec2-ami-ebs-user-data). Bài tiếp: [bài 07](/articles/aws-rds-postgresql-multi-az-backup).
 

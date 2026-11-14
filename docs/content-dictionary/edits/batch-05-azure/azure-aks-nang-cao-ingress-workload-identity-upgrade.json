@@ -1,0 +1,23 @@
+{"file":"azure-aks-nang-cao-ingress-workload-identity-upgrade.md","edits":[
+{"old":"Bài này làm cho nó chạy đáng tin:","new":"Bài này làm cho service đó chạy đáng tin:","reason":"Tránh đại từ 'nó' mơ hồ ở đầu mệnh đề","severity":"low"},
+{"old":"Nó thêm node khi có pod ở trạng thái Pending","new":"Autoscaler thêm node khi có pod ở trạng thái Pending","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"CPU thực dùng không phải tín hiệu của nó.","new":"CPU thực dùng không phải tín hiệu mà autoscaler dựa vào.","reason":"'tín hiệu của nó' gượng","severity":"medium"},
+{"old":"Có một chi tiết cần kiểm trước khi chọn","new":"Có một chi tiết cần kiểm tra trước khi chọn","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Key Vault phải kiểm riêng,","new":"Key Vault phải kiểm tra riêng,","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"không có đường tới nó, chỉ workload","new":"không có đường tới controller này, chỉ workload","reason":"Tránh đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"để kiểm chữ ký token do cluster ký.","new":"để kiểm tra chữ ký token do cluster ký.","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"một token ngắn hạn ký bởi cluster, trong đó","new":"một token ngắn hạn do cluster ký, trong đó","reason":"Bị động 'ký bởi' kiểu tiếng Anh","severity":"medium"},
+{"old":"Entra kiểm 3 trường","new":"Entra kiểm tra 3 trường","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Kiểm role Secrets User","new":"Kiểm tra role Secrets User","reason":"'Kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"rồi đăng ký niềm tin cho đúng ServiceAccount","new":"rồi đăng ký quan hệ tin cậy cho đúng ServiceAccount","reason":"'niềm tin' là calque của trust","severity":"medium"},
+{"old":"Khối lệnh này chỉ thiết lập niềm tin;","new":"Khối lệnh này chỉ thiết lập quan hệ tin cậy;","reason":"Thống nhất cách gọi trust","severity":"medium"},
+{"old":"Phía Kubernetes cần hai thứ nối ServiceAccount với identity. Annotation chứa client-id của identity, và nhãn trên pod để webhook của workload identity tiêm token vào.","new":"Phía Kubernetes cần hai thứ nối ServiceAccount với identity: annotation chứa client-id của identity, và nhãn trên pod để webhook của workload identity inject token vào.","reason":"Câu thứ hai thiếu động từ; 'tiêm' là dịch từng chữ của inject","severity":"high"},
+{"old":"đổi lại giá trị nằm thêm trong etcd.","new":"cái giá là giá trị secret nằm thêm trong etcd.","reason":"Câu lược chủ ngữ, 'đổi lại' lửng","severity":"medium"},
+{"old":"Pool hệ thống giữ","new":"System pool giữ","reason":"Thống nhất 'system pool'","severity":"medium"},
+{"old":"Pool user cho","new":"User pool cho","reason":"Thống nhất 'user pool'","severity":"medium"},
+{"old":"drain có thể đuổi cả hai replica","new":"drain có thể evict cả hai replica","reason":"'đuổi' là dịch từng chữ của evict","severity":"medium"},
+{"old":"Có PDB, Kubernetes chỉ đuổi khi vẫn còn đủ pod phục vụ.","new":"Khi có PDB, Kubernetes chỉ evict pod khi vẫn còn đủ pod phục vụ.","reason":"Thống nhất 'evict'; câu thiếu liên từ","severity":"medium"},
+{"old":"Nó không cứu bạn khỏi node chết đột ngột","new":"PDB không cứu bạn khỏi node chết đột ngột","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"chỉ áp cho kênh Kubernetes;","new":"chỉ áp dụng cho kênh Kubernetes;","reason":"Thiếu động từ 'dụng'","severity":"low"},
+{"old":"không thể đuổi pod nào khỏi node","new":"không thể evict pod nào khỏi node","reason":"Thống nhất 'evict'","severity":"medium"}
+]}

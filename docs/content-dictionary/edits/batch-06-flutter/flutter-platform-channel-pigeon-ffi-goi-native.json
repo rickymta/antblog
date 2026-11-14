@@ -1,0 +1,35 @@
+{
+"file": "flutter-platform-channel-pigeon-ffi-goi-native.md",
+"edits": [
+{
+"old": "lab chỉ hạ mức (gửi mỗi 10 giây, không đoán bừa 5 hay 30) chứ không nuốt nó im lặng.",
+"new": "lab chỉ lùi về mức an toàn (gửi mỗi 10 giây, không đoán bừa 5 hay 30) chứ không nuốt lỗi này mà không báo.",
+"reason": "'hạ mức' mơ hồ, 'im lặng' là calque của 'silently'",
+"severity": "medium"
+},
+{
+"old": "Chiều ngược lại: native gọi Dart phải gọi từ platform thread.",
+"new": "Chiều ngược lại: lời gọi từ native sang Dart phải xuất phát từ platform thread.",
+"reason": "Lặp 'gọi', câu nặng nề",
+"severity": "medium"
+},
+{
+"old": "Kiểu dữ liệu giờ là thật:",
+"new": "Dữ liệu giờ có kiểu rõ ràng:",
+"reason": "'kiểu dữ liệu là thật' là cách nói gượng",
+"severity": "medium"
+},
+{
+"old": "Nhưng kiểu đúng chưa là giá trị đúng: gateway vẫn kiểm 0..100, và test có ca native trả 250.",
+"new": "Nhưng kiểu đúng chưa phải là giá trị đúng: gateway vẫn kiểm 0..100, và test có trường hợp native trả 250.",
+"reason": "Thiếu 'phải'; 'ca' cụt",
+"severity": "medium"
+},
+{
+"old": "**FFI**: các ca của `calculateFare`",
+"new": "**FFI**: các trường hợp lấy từ `calculateFare`",
+"reason": "'ca' cụt, dễ lẫn với test case",
+"severity": "low"
+}
+]
+}

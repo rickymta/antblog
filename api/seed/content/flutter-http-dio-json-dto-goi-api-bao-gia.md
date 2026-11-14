@@ -12,12 +12,12 @@ Màn hình báo giá của Tới Nơi đến giờ tự tính cước ngay trên
 
 Ba chuyện xảy ra ngay lần chạy đầu. Service .NET trả trạng thái `Requested`, còn enum Dart tên là `requested`. Một backend khác serialize cước thành `25500.0`, và một dòng `as int` làm app sập. Mạng chập chờn khiến một lần bấm "Đặt chuyến" có thể tạo hai chuyến. Cả ba nằm ở ranh giới giữa app và server, nơi dữ liệu không còn do ta kiểm soát.
 
-Đây là bài 19 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 18 về Riverpod](/articles/flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen), vì màn hình dùng `AsyncNotifier`, và [bài 06 về package](/articles/dart-package-pubspec-lint-test-toi-noi-core). Fake API bám theo service đặt chuyến của [bài tổng hợp .NET](/articles/dotnet10-tong-hop-service-dat-chuyen). Bảng giá là số minh hoạ của hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi). Retry, xác thực và realtime để các bài 20, 24 và 36.
+Đây là bài 19 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 18 về Riverpod](/articles/flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen), vì màn hình dùng `AsyncNotifier`, và [bài 06 về package](/articles/dart-package-pubspec-lint-test-toi-noi-core). Fake API bám theo service đặt chuyến của [bài tổng hợp .NET](/articles/dotnet10-tong-hop-service-dat-chuyen). Bảng giá là số minh hoạ của hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi). Retry, xác thực và realtime dành cho các bài 20, 24 và 36.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Server trả <code>{"fare": 25500.0}</code> và app đọc bằng <code>final fare = json['fare'] as int;</code>. Trên iOS và Android, dòng này làm gì?</p>
-<details><summary>Xem đáp án</summary><p>Nó ném <code>TypeError</code>. <code>jsonDecode</code> đọc <code>25500.0</code> thành <code>double</code>, còn <code>as int</code> không đổi kiểu mà chỉ khẳng định kiểu (đã chạy với Dart 3.13.3: <em>type 'double' is not a subtype of type 'int' in type cast</em>). Lỗi nổ ở chỗ cast, xa nơi dữ liệu đi vào, và không nói trường nào sai. Mục 3 viết bộ đọc báo đúng tên DTO và tên trường.</p></details>
+<details><summary>Xem đáp án</summary><p>Dòng này ném <code>TypeError</code>. <code>jsonDecode</code> đọc <code>25500.0</code> thành <code>double</code>, còn <code>as int</code> không đổi kiểu mà chỉ khẳng định kiểu (đã chạy với Dart 3.13.3: <em>type 'double' is not a subtype of type 'int' in type cast</em>). Lỗi nổ ở chỗ cast, xa nơi dữ liệu đi vào, và không nói trường nào sai. Mục 3 viết bộ đọc báo lỗi kèm đúng tên DTO và tên trường.</p></details>
 </div>
 
 ## Client dio với baseUrl truyền vào
@@ -73,7 +73,7 @@ dev_dependencies:
     path: ../../tools/fake_api
 ```
 
-Địa chỉ gốc do người tạo client truyền vào; bài 25 chọn giá trị theo flavor. Dio ghép `baseUrl` với `path` bằng cộng chuỗi (xem `RequestOptions.uri`), nên client từ chối địa chỉ có query (`http://x/api?y=1` ghép `/trips/z` thành `?y=1/trips/z`) và luôn bỏ `/` cuối của base, dùng path bắt đầu bằng `/`; không thì `http://x/api/v1` và `quotes` dính thành `v1quotes` (đã chạy thử).
+Địa chỉ gốc do người tạo client truyền vào; bài 25 chọn giá trị theo flavor. Dio ghép `baseUrl` với `path` bằng cách nối chuỗi (xem `RequestOptions.uri`), nên client từ chối địa chỉ có query (`http://x/api?y=1` ghép `/trips/z` thành `?y=1/trips/z`) và luôn bỏ `/` cuối của base, dùng path bắt đầu bằng `/`; không thì `http://x/api/v1` và `quotes` dính thành `v1quotes` (đã chạy thử).
 
 ### client.dart · packages/toi_noi_api/lib/src/client.dart (trích)
 
@@ -140,7 +140,7 @@ for (final extra in middleware) {
 return pipeline.addHandler(router.call);
 ```
 
-Lỗi ném trong route được bắt thành `application/problem+json` trước lớp tiêm lỗi và độ trễ (cờ `--fail-first`, `--latency-ms`, cho bài 20). Route nằm trong các module:
+Lỗi ném trong route được bắt thành `application/problem+json` trước lớp inject lỗi và độ trễ (cờ `--fail-first`, `--latency-ms`, cho bài 20). Route nằm trong các module:
 
 ### module.dart · tools/fake_api/lib/src/module.dart (trích)
 
@@ -152,7 +152,7 @@ abstract interface class FakeApiModule {
 
 Bài 24 thêm module OTP và middleware kiểm token, bài 36 thêm WebSocket, không sửa `createFakeApiHandler`. Báo giá gọi chính `calculateFare` của `toi_noi_core`, nên không có công thức thứ hai để lệch: 5 km ra 25.500 VND, 2,001 km ra 12.005 VND, 100 km ra 453.000 VND (test kiểm cả ba).
 
-Bốn endpoint: `POST /quotes`, `POST /trips`, `GET /trips/{id}`, `POST /trips/{id}/accept`, cùng các lỗi có chủ đích 400, 403, 404, 409, 422 và 500 tiêm bằng cờ (bảng đầy đủ ở README của `tools/fake_api`).
+Bốn endpoint: `POST /quotes`, `POST /trips`, `GET /trips/{id}`, `POST /trips/{id}/accept`, cùng các lỗi có chủ đích 400, 403, 404, 409, 422 và 500 được inject bằng cờ (bảng đầy đủ ở README của `tools/fake_api`).
 
 Đây là JSON thật từ một lần chạy curl:
 
@@ -204,7 +204,7 @@ Hai điểm giống nhau: `Idempotency-Key` (mục 6) và `expectedVersion` khi 
 
 ## DTO viết tay: mỗi trường một lần kiểm
 
-**DTO** (data transfer object) là đối tượng có hình dạng đúng như dữ liệu trên dây: tên trường, kiểu và đơn vị theo hợp đồng API, chưa mang quy tắc nghiệp vụ. Bài 26 sẽ sinh mã bằng `json_serializable`; ở đây ta viết tay để thấy từng quyết định.
+**DTO** (data transfer object) là đối tượng có hình dạng đúng như dữ liệu trên đường truyền: tên trường, kiểu và đơn vị theo hợp đồng API, chưa mang quy tắc nghiệp vụ. Bài 26 sẽ sinh mã bằng `json_serializable`; ở đây ta viết tay để thấy từng quyết định.
 
 Quy tắc của ta: `fromJson` nhận `Object?`, kiểm từng trường và ném `DtoFormatException(dto, field, problem)` khi sai. Phần kiểm nằm trong một lớp nhỏ tên `JsonReader`:
 
@@ -339,7 +339,7 @@ factory TripDto.fromJson(Object? json) {
 }
 ```
 
-Đổi lại vài dòng, mọi lỗi payload có địa chỉ (`TripDto.fare: số đồng phải là số nguyên`) thay cho `TypeError` vô danh.
+Tốn thêm vài dòng, nhưng mọi lỗi payload đều chỉ rõ vị trí (`TripDto.fare: số đồng phải là số nguyên`) thay vì `TypeError` vô danh.
 
 ## Từ DTO sang domain, và ba loại lỗi
 
@@ -347,9 +347,9 @@ DTO đổi khi server đổi hợp đồng, `Trip` đổi khi nghiệp vụ đ�
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 372" role="img" aria-label="Hình 3. Bảng chuyển đổi của TripDto. Cột trái là JSON trên dây, cột giữa là TripDto sau fromJson, cột phải là Trip của domain sau toDomain: mét thành km, đồng thành Money, tên trạng thái thành enum, chuỗi thời gian thành DateTime UTC. Trạng thái accepted mà driverId null làm toDomain ném DtoFormatException.">
+<svg viewBox="0 0 880 372" role="img" aria-label="Hình 3. Bảng chuyển đổi của TripDto. Cột trái là JSON trên đường truyền, cột giữa là TripDto sau fromJson, cột phải là Trip của domain sau toDomain: mét đổi thành km, đồng đổi thành Money, tên trạng thái đổi thành enum, chuỗi thời gian đổi thành DateTime UTC. Trạng thái accepted mà driverId null làm toDomain ném DtoFormatException.">
 <defs><marker id="fl19-3-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl19-3-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs>
-<text x="20" y="28" class="t-b">JSON trên dây</text><text x="315" y="28" class="t-b">TripDto</text><text x="610" y="28" class="t-b">Trip (domain)</text>
+<text x="20" y="28" class="t-b">JSON trên đường truyền</text><text x="315" y="28" class="t-b">TripDto</text><text x="610" y="28" class="t-b">Trip (domain)</text>
 <rect x="20" y="40" width="250" height="38" rx="8" class="f-surface s-muted"/><text x="34" y="64" class="t-mono">"distanceMeters": 5000</text>
 <rect x="315" y="40" width="250" height="38" rx="8" class="f-pk-soft s-pk"/><text x="329" y="64" class="t-mono">int distanceMeters</text>
 <rect x="610" y="40" width="250" height="38" rx="8" class="f-phys-soft s-phys"/><text x="624" y="64" class="t-mono">double distanceKm = 5.0</text>
@@ -375,7 +375,7 @@ DTO đổi khi server đổi hợp đồng, `Trip` đổi khi nghiệp vụ đ�
 <text x="20" y="352" class="t-small">fromJson: kiểm kiểu từng trường</text><text x="330" y="352" class="t-small">toDomain: đổi đơn vị, kiểm bất biến của Trip</text>
 </svg>
 </div>
-<figcaption>Hình 3. DTO giữ hình dạng của dây dẫn; domain giữ hình dạng của nghiệp vụ. Mọi thay đổi hợp đồng dừng ở hai hàm chuyển đổi này.</figcaption>
+<figcaption>Hình 3. DTO giữ hình dạng dữ liệu trên đường truyền; domain giữ hình dạng của nghiệp vụ. Mọi thay đổi hợp đồng dừng ở hai hàm chuyển đổi này.</figcaption>
 </figure>
 
 `toDomain` làm ba việc: đổi mét sang km, đổi đồng sang `Money.fromVnd` (luôn kiểm số âm), và gọi constructor `Trip`. Constructor đó giữ một bất biến: `accepted` phải có `driverId`, còn `searching` thì không. Nếu server vi phạm, ta đổi `ArgumentError` của domain thành `DtoFormatException` thay vì để nó lọt ra như lỗi lập trình:
@@ -400,7 +400,7 @@ Trip toDomain() {
 }
 ```
 
-Test chạy vòng domain, DTO, JSON, DTO, domain cho cả 8 trạng thái và nhận lại đúng `Trip`. Một test khác chứng minh `accepted` không tài xế bị báo ở trường `driverId`:
+Test chạy vòng domain, DTO, JSON, DTO, domain cho cả 8 trạng thái và nhận lại đúng `Trip`. Một test khác chứng minh trạng thái `accepted` mà không có tài xế bị báo lỗi ở trường `driverId`:
 
 ### dto_test.dart · packages/toi_noi_api/test/dto_test.dart (trích)
 
@@ -420,13 +420,13 @@ test('accepted mà không có tài xế -> DtoFormatException, không phải Arg
 });
 ```
 
-Một phát hiện thật: `TripDto.fromJson` từ chối view hiện tại của service .NET vì thiếu `serviceKind`, `distanceMeters` và `requestedAt` (test nêu đúng trường `serviceKind`). Muốn gọi service thật cần mở rộng nó hoặc đặt BFF ở giữa. `TripDto` còn `version`, thứ domain không có: `toSnapshot()` trả `TripSnapshot` gồm `Trip` và `version`, để app tài xế dùng làm `expectedVersion` khi nhận chuyến (bài 45 dùng lại). `acceptTrip` không có tham số tài xế vì danh tính là việc của header hoặc token; lab gắn `x-fake-driver-id` bằng một interceptor ở client của tài xế.
+Một phát hiện thật: `TripDto.fromJson` từ chối view hiện tại của service .NET vì thiếu `serviceKind`, `distanceMeters` và `requestedAt` (test nêu đúng trường `serviceKind`). Muốn gọi service thật cần mở rộng view đó hoặc đặt BFF ở giữa. `TripDto` còn `version`, thứ domain không có: `toSnapshot()` trả `TripSnapshot` gồm `Trip` và `version`, để app tài xế dùng làm `expectedVersion` khi nhận chuyến (bài 45 dùng lại). `acceptTrip` không có tham số tài xế vì danh tính là việc của header hoặc token; lab gắn `x-fake-driver-id` bằng một interceptor ở client của tài xế.
 
 Client phân biệt ba loại lỗi, vì mỗi loại cần cách xử lý khác nhau:
 
 | Lỗi | Khi nào |
 |---|---|
-| `ApiException` | server trả mã không phải 2xx, dù body là gì (kể cả chữ thường hay JSON cụt) |
+| `ApiException` | server trả mã không phải 2xx, dù body là gì (kể cả văn bản thuần hay JSON cụt) |
 | `DtoFormatException` | 2xx nhưng body không phải JSON hoặc sai hợp đồng (thiếu trường, trang HTML của captive portal) |
 | `DioException` | không có response: hết thời gian chờ, mất kết nối, `SocketException` |
 
@@ -471,7 +471,7 @@ Future<T> _send<T>(
 }
 ```
 
-Client dùng `ResponseType.plain` rồi tự `jsonDecode`. Để dio giải JSON thì một body hỏng ở mã 200 ra `DioException` của bộ giải mã, không phải `DtoFormatException`. `ApiException` đọc body `problem+json` (xem [bài về Problem Details](/articles/dotnet10-validation-problem-details-openapi)): `title`, `fieldErrors`, `traceId`; body không phải JSON vẫn cho tiêu đề chung. `title` của server là tiếng Anh viết cho lập trình viên nên không lên giao diện; ta chỉ hiện `traceId` thành "mã hỗ trợ". Lỗi tầng mạng để nguyên `DioException`: gom chúng thành `sealed ApiFailure` có hành động là bài 20.
+Client dùng `ResponseType.plain` rồi tự `jsonDecode`. Nếu để dio giải JSON thì một body hỏng ở mã 200 sẽ ra `DioException` của bộ giải mã, không phải `DtoFormatException`. `ApiException` đọc body `problem+json` (xem [bài về Problem Details](/articles/dotnet10-validation-problem-details-openapi)): `title`, `fieldErrors`, `traceId`; body không phải JSON vẫn cho tiêu đề chung. `title` của server là tiếng Anh viết cho lập trình viên nên không lên giao diện; ta chỉ hiện `traceId` dưới tên "mã hỗ trợ". Lỗi tầng mạng để nguyên `DioException`: việc gom chúng thành `sealed ApiFailure` có hành động xử lý đi kèm thuộc về bài 20.
 
 ## Interceptor log không lộ dữ liệu nhạy cảm
 
@@ -527,9 +527,9 @@ Logger chỉ thấy header đã có lúc nó chạy: đặt sau interceptor toke
 
 ## Test không cần socket, và nối vào Riverpod
 
-Khi binding của `flutter_test` khởi tạo, nó cài một `HttpClient` giả: theo comment trong source, mọi request sau đó nhận mã 400 và không mở kết nối nào. Điều kiện là binding đã khởi tạo: `testWidgets` làm việc đó, còn `test()` thuần phải gọi `TestWidgetsFlutterBinding.ensureInitialized()`. Chưa khởi tạo thì `dio` vẫn mở socket thật (một test trong lab chứng minh với server loopback). Sau khi khởi tạo, quên override adapter ở provider thật cho `ApiException` 400 (cũng có test).
+Khi binding của `flutter_test` khởi tạo, nó cài một `HttpClient` giả: theo comment trong source, mọi request sau đó nhận mã 400 và không mở kết nối nào. Điều kiện là binding đã khởi tạo: `testWidgets` làm việc đó, còn `test()` thuần phải gọi `TestWidgetsFlutterBinding.ensureInitialized()`. Chưa khởi tạo thì `dio` vẫn mở socket thật (một test trong lab chứng minh với server loopback). Sau khi khởi tạo, quên override adapter ở provider thật sẽ cho ra `ApiException` 400 (cũng có test).
 
-Lối ra là thay đường truyền, không thay client. `InProcessAdapter` (trong `package:toi_noi_fake_api/testing.dart`, vì cần shelf) đổi `RequestOptions` của dio thành `Request` của shelf, gọi handler, rồi đổi `Response` về `ResponseBody`. Nó ghi lại request, tôn trọng `receiveTimeout`, và đổi `SocketException` thành `DioException.connectionError` như socket thật:
+Lối ra là thay đường truyền, không thay client. `InProcessAdapter` (trong `package:toi_noi_fake_api/testing.dart`, vì cần shelf) đổi `RequestOptions` của dio thành `Request` của shelf, gọi handler, rồi đổi `Response` về `ResponseBody`. Adapter này ghi lại request, tuân theo `receiveTimeout`, và đổi `SocketException` thành `DioException.connectionError` như socket thật:
 
 ### in_process_adapter.dart · tools/fake_api/lib/src/in_process_adapter.dart (trích)
 
@@ -681,7 +681,7 @@ Future<void> book() async {
 }
 ```
 
-Test mạnh nhất mô phỏng ca xấu nhất: server đã tạo chuyến nhưng kết nối đứt trước khi khách nhận được response. Khách bấm lại, và vẫn chỉ có một chuyến. Giới hạn: khoá chỉ sống trong RAM và gắn với form đã gửi. Lỗi mập mờ rồi đổi quãng đường thì khoá mới ra đời và có thể có hai chuyến (có test ghi lại); tắt app thì mất khoá. Lưu khoá bền là việc của outbox, bài 46.
+Test mạnh nhất mô phỏng trường hợp xấu nhất: server đã tạo chuyến nhưng kết nối đứt trước khi khách nhận được response. Khách bấm lại, và vẫn chỉ có một chuyến. Giới hạn: khoá chỉ sống trong RAM và gắn với form đã gửi. Lỗi mập mờ rồi đổi quãng đường thì khoá mới ra đời và có thể có hai chuyến (có test ghi lại); tắt app thì mất khoá. Lưu khoá bền là việc của outbox, bài 46.
 
 ### controllers_test.dart · 19-http-dio-json/test/controllers_test.dart (trích)
 
@@ -758,7 +758,7 @@ Ta thử phá để chắc test bắt được lỗi: bỏ dòng tăng `_generat
 3. `SafeLogInterceptor` đứng trước một interceptor thêm header `X-Session`. Dòng log có hiện `x-session` không?
 
 <details><summary>Xem lời giải</summary>
-<p><strong>1.</strong> Ném <code>DtoFormatException</code> ở trường <code>status</code>. Các <code>switch</code> vét cạn dựa vào enum đóng, nên chấp nhận bừa trạng thái lạ là phá đảm bảo ấy. Muốn app cũ không sập cần quyết định nghiệp vụ (hiện "Hãy cập nhật ứng dụng"), việc của bài 59.</p>
+<p><strong>1.</strong> Ném <code>DtoFormatException</code> ở trường <code>status</code>. Các <code>switch</code> vét cạn dựa vào enum đóng, nên chấp nhận bừa trạng thái lạ là phá vỡ bảo đảm đó. Muốn app cũ không sập cần quyết định nghiệp vụ (hiện "Hãy cập nhật ứng dụng"), việc của bài 59.</p>
 <p><strong>2.</strong> Khoá mới, vì <code>_attempt</code> lưu cả khoá lẫn form (khoá cũ với 6 km sẽ ra 409). Giá phải trả: nếu lần đầu đã tới server mà response mất, khách có thể có hai chuyến; khoá lại chỉ ở RAM nên tắt app là mất. Cách làm thật là outbox, bài 46.</p>
 <p><strong>3.</strong> Không: logger chạy trước nên chưa thấy header đó, và không có giá trị nào để lộ. Đặt logger sau thì ra <code>x-session: [redacted]</code>, trừ khi thêm vào <code>visibleHeaders</code>.</p>
 </details>

@@ -1,0 +1,18 @@
+{"file":"ba-change-request-impact-analysis.md","edits":[
+{"old":"Lập hồ sơ thay đổi có delta, tác động","new":"Lập hồ sơ thay đổi có phần chênh lệch, tác động","reason":"delta thành phần chênh lệch","severity":"low"},
+{"old":"chỉ mô tả một phần delta. Nó chưa nói chuyến nào","new":"chỉ mô tả một phần chênh lệch. Yêu cầu đó chưa nói chuyến nào","reason":"delta thành chênh lệch; tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"## 1. Viết delta có giới hạn","new":"## 1. Viết phần chênh lệch có giới hạn","reason":"Thống nhất delta thành phần chênh lệch","severity":"low"},
+{"old":"Baseline miễn phí khách huỷ ở accepted khi elapsed","new":"Baseline miễn phí cho khách huỷ ở accepted khi elapsed","reason":"Thiếu giới từ, câu cụt","severity":"medium"},
+{"old":"Hỏi có phương án thông báo rõ hơn hoặc giữ nguyên kèm discovery không.","new":"Hỏi xem có phương án thông báo rõ hơn, hoặc giữ nguyên kèm discovery, hay không.","reason":"Câu hỏi cụt, khó tách vế","severity":"medium"},
+{"old":"Mục tiêu giảm huỷ 12% xuống 9% của P01","new":"Mục tiêu giảm tỷ lệ huỷ của P01 từ 12% xuống 9%","reason":"Thiếu danh từ chính, trật tự từ","severity":"medium"},
+{"old":"| Rule | Chính xác 180 giây tính phí? |","new":"| Rule | Đúng 180 giây có tính phí không? |","reason":"Câu hỏi cụt","severity":"medium"},
+{"old":"| Contract, case idempotency |","new":"| Contract, test case idempotency |","reason":"Thống nhất test case","severity":"low"},
+{"old":"| CS | Giải thích chuyến qua mốc thế nào? |","new":"| CS | Giải thích thế nào cho chuyến vượt qua mốc? |","reason":"Câu cụt","severity":"low"},
+{"old":"Mỗi hàng cần owner trả lời.","new":"Mỗi hàng cần có người phụ trách trả lời.","reason":"owner thành người phụ trách","severity":"medium"},
+{"old":"## 4. Case biên cụ thể","new":"## 4. Test case biên cụ thể","reason":"Thống nhất test case","severity":"low"},
+{"old":"Ở accepted, không thuộc miễn do trễ: 119 giây","new":"Ở accepted, khi không thuộc diện miễn do trễ: 119 giây","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Thêm ca đúng ngưỡng trễ","new":"Thêm test case đúng ngưỡng trễ","reason":"Thống nhất test case","severity":"medium"},
+{"old":"Khi tài xế rời rồi nhận lại, mốc","new":"Khi tài xế rời chuyến rồi nhận lại, mốc","reason":"Thiếu tân ngữ","severity":"medium"},
+{"old":"## 5. So phương án thay đổi","new":"## 5. So sánh các phương án thay đổi","reason":"'So phương án' cụt","severity":"low"},
+{"old":"Chỉ sửa case 120 giây mà quên","new":"Chỉ sửa test case 120 giây mà quên","reason":"Thống nhất test case","severity":"low"}
+]}

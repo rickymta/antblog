@@ -1,16 +1,16 @@
 ---
 slug: postgresql-schema-migration-tuong-thich
 title: "Thay đổi schema mà dữ liệu cũ vẫn đọc được"
-summary: "Tới Nơi cần lưu biển số xe bắt buộc cho tài xế, trong khi bảng đã có dữ liệu và app cũ vẫn chạy. Làm migration theo expand–contract, NOT VALID rồi VALIDATE, siết NOT NULL không quét bảng, kèm kế hoạch khôi phục."
+summary: "Tới Nơi cần bắt buộc phải lưu biển số xe của tài xế, trong khi bảng đã có dữ liệu và app cũ vẫn chạy. Làm migration theo expand–contract, NOT VALID rồi VALIDATE, siết NOT NULL không quét bảng, kèm kế hoạch khôi phục."
 category: postgresql
 level: advanced
 tags: [postgresql, pg-009, migration, alter-table, constraint, expand-contract, toi-noi]
 language: vi
 ---
 
-Bộ phận an toàn của Tới Nơi chốt một yêu cầu mới: khách phải thấy **biển số xe** của tài xế trước khi lên xe, nên mọi tài xế đều phải có biển số đúng định dạng. Nghe như một dòng SQL: thêm cột `vehicle_plate text NOT NULL` vào bảng `drivers`. Nhưng bảng đã có tài xế đang chạy chuyến, biển số của họ nằm trong một file bộ phận tuyển dụng gửi sang, và app đăng ký tài xế bản cũ — chưa biết gì về biển số — vẫn đang chạy trên máy chủ cho tới khi bản mới được triển khai hết.
+Bộ phận an toàn của Tới Nơi chốt một yêu cầu mới: khách phải thấy **biển số xe** của tài xế trước khi lên xe, nên mọi tài xế đều phải có biển số đúng định dạng. Nghe như một dòng SQL: thêm cột `vehicle_plate text NOT NULL` vào bảng `drivers`. Nhưng bảng đã có tài xế đang chạy chuyến, biển số của họ nằm trong một file do bộ phận tuyển dụng gửi sang, và app đăng ký tài xế bản cũ — chưa biết gì về biển số — vẫn đang chạy trên máy chủ cho tới khi bản mới được triển khai hết.
 
-Câu `ADD COLUMN … NOT NULL` một phát lỗi ngay vì dòng cũ không có giá trị; kể cả ép được, app cũ sẽ không thêm được tài xế mới. Bài này đổi schema theo từng bước mà ở mỗi bước dữ liệu cũ vẫn đọc được, ứng dụng cũ vẫn chạy, và luôn có đường lùi.
+Câu `ADD COLUMN … NOT NULL` chạy thẳng sẽ lỗi ngay vì dòng cũ không có giá trị; kể cả ép được, app cũ sẽ không thêm được tài xế mới. Bài này đổi schema theo từng bước mà ở mỗi bước dữ liệu cũ vẫn đọc được, ứng dụng cũ vẫn chạy, và luôn có đường lùi.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-009 · Phần 1/6 · Nâng cao</span>
@@ -91,7 +91,7 @@ FROM drivers
 ORDER BY code;
 ```
 
-Kết quả vẫn 6 dòng, 4 cột như trước. Code nào viết `SELECT *` thì bỗng nhận thêm một cột — lý do ứng dụng không nên phụ thuộc `SELECT *`. Bước B2 giả lập app cũ đăng ký tài xế 8007 **không gửi biển số**; câu lệnh chạy được:
+Kết quả vẫn 6 dòng, 4 cột như trước. Code nào viết `SELECT *` thì bỗng nhận thêm một cột — đó là lý do ứng dụng không nên phụ thuộc vào `SELECT *`. Bước B2 giả lập app cũ đăng ký tài xế 8007 **không gửi biển số**; câu lệnh chạy được:
 
 ```sql
 INSERT INTO drivers (id, code, full_name, city_id, vehicle_type, status, created_at)
@@ -104,7 +104,7 @@ WHERE NOT EXISTS (SELECT 1 FROM drivers WHERE code = 8007);
 INSERT 0 1
 ```
 
-Dạng `INSERT … SELECT … WHERE NOT EXISTS` (Phần 2 giải thích) chỉ để chạy lại file không lỗi trùng mã. Tài xế 8007 là dòng **mới** nhưng chưa có biển số — backfill phải xử lý cả dòng sinh ra trong giai đoạn expand.
+Dạng `INSERT … SELECT … WHERE NOT EXISTS` (Phần 2 giải thích) chỉ để file chạy lại được mà không lỗi trùng mã. Tài xế 8007 là dòng **mới** nhưng chưa có biển số — backfill phải xử lý cả dòng sinh ra trong giai đoạn expand.
 
 ## 4. Backfill: điền biển số từ nguồn
 
@@ -145,9 +145,9 @@ SELECT code, full_name FROM drivers WHERE vehicle_plate IS NULL;
 (0 rows)
 ```
 
-File nguồn có **một dòng sai định dạng** cố ý — tài xế 8006 với `43a 67890` (chữ thường, thiếu gạch). Backfill không biết điều đó; bước sau sẽ bắt.
+File nguồn cố ý có **một dòng sai định dạng** — tài xế 8006 với `43a 67890` (chữ thường, thiếu gạch). Backfill không biết điều đó; bước sau sẽ bắt.
 
-Với bảng lớn, đừng điền bằng một câu `UPDATE` khổng lồ: chia lô (ví dụ theo khoảng `code`). Lý do nằm ở giao dịch dài, khoá dòng và việc dọn phiên bản dòng cũ — Phần 4 và Phần 5 sẽ đo; ở đây chỉ cần nhớ "nhiều câu nhỏ".
+Với bảng lớn, đừng điền bằng một câu `UPDATE` khổng lồ: chia lô (ví dụ theo khoảng `code`). Lý do nằm ở giao dịch dài, khoá dòng và việc dọn các tuple cũ — Phần 4 và Phần 5 sẽ đo; ở đây chỉ cần nhớ "nhiều câu nhỏ".
 
 ## 5. NOT VALID → VALIDATE: chặn dữ liệu mới trước, rà dữ liệu cũ sau
 
@@ -189,7 +189,7 @@ WHERE vehicle_plate !~ '^[0-9]{2}[A-Z][A-Z0-9]?-[0-9]{3}\.[0-9]{2}$';
 (1 row)
 ```
 
-Hai điểm cần đọc kỹ. Thứ nhất, CHECK đạt khi biểu thức ra true **hoặc NULL** (đã gặp ở [PG-005](/articles/postgresql-create-table-constraints)), nên app cũ ghi biển số NULL vẫn qua — đúng ý ở giai đoạn này. Thứ hai, PostgreSQL ghi nhận ràng buộc chưa được tin cho toàn bảng: cột `convalidated` trong catalog `pg_constraint` là `f`.
+Hai điểm cần đọc kỹ. Thứ nhất, CHECK đạt khi biểu thức ra true **hoặc NULL** (đã gặp ở [PG-005](/articles/postgresql-create-table-constraints)), nên app cũ ghi biển số NULL vẫn qua — đúng ý ở giai đoạn này. Thứ hai, PostgreSQL ghi nhận rằng ràng buộc chưa được tin cậy trên toàn bảng: cột `convalidated` trong catalog `pg_constraint` là `f`.
 
 Bước B5 rà dữ liệu cũ bằng `VALIDATE CONSTRAINT`:
 
@@ -201,7 +201,7 @@ ALTER TABLE drivers VALIDATE CONSTRAINT ck_drivers_vehicle_plate_format;
 ERROR:  check constraint "ck_drivers_vehicle_plate_format" of relation "drivers" is violated by some row
 ```
 
-Thông báo **không nói dòng nào** sai — phải tự truy vấn như câu `!~` ở trên. Vì thế nên tìm dòng vi phạm **trước** khi validate bảng lớn: `VALIDATE` thất bại là một lần quét toàn bảng bỏ phí. Hỏi lại bộ phận tuyển dụng, sửa dòng gốc rồi validate lại:
+Thông báo **không nói dòng nào** sai — phải tự truy vấn như câu `!~` ở trên. Vì thế nên tìm dòng vi phạm **trước** khi validate bảng lớn: `VALIDATE` thất bại là một lần quét toàn bảng uổng phí. Hỏi lại bộ phận tuyển dụng, sửa dòng gốc rồi validate lại:
 
 ```sql
 UPDATE drivers SET vehicle_plate = '43A-678.90'
@@ -225,7 +225,7 @@ Vì sao tách hai bước? Không phải để bớt lần quét — `VALIDATE` 
 
 ## 6. Contract: siết NOT NULL mà không quét bảng dưới khoá nặng
 
-Đây là bước **phá vỡ** app v1, chỉ chạy khi mọi phiên bản đã gửi biển số. `SET NOT NULL` bình thường quét cả bảng để chứng minh không còn NULL, trong lúc giữ khoá `ACCESS EXCLUSIVE`. Theo tài liệu `ALTER TABLE`, nếu có sẵn một `CHECK` **đã validate** chứng minh cột không thể NULL thì lần quét được bỏ qua (từ PostgreSQL 12). Lab tận dụng điều này bằng một CHECK phụ:
+Đây là bước **phá vỡ** app v1, chỉ chạy khi mọi phiên bản app đã gửi biển số. `SET NOT NULL` bình thường quét cả bảng để chứng minh không còn NULL, trong lúc giữ khoá `ACCESS EXCLUSIVE`. Theo tài liệu `ALTER TABLE`, nếu có sẵn một `CHECK` **đã validate** chứng minh cột không thể NULL thì lần quét được bỏ qua (từ PostgreSQL 12). Lab tận dụng điều này bằng một CHECK phụ:
 
 ```sql
 ALTER TABLE drivers
@@ -343,7 +343,7 @@ Ba chi tiết đáng học trong tệp này:
 - **Sao lưu dùng `ON CONFLICT … DO UPDATE`** (UPSERT, Phần 2 giải thích): chạy lại không nhân đôi — vẫn đúng 7 dòng.
 - **Kiểm chứng sau rollback**: cột và ràng buộc `ck_drivers_vehicle_plate%` đã biến mất. `npm test` chạy chuỗi rollback → rollback → `06` → `07` để chứng minh migration làm lại được sau khi lùi.
 
-Thứ tự triển khai cũng phải lùi theo: trước khi gỡ cột ở mức 2, mọi phiên bản app đọc/ghi `vehicle_plate` phải được gỡ trước — nếu không, chính rollback là thay đổi phá vỡ.
+Thứ tự triển khai cũng phải lùi theo: trước khi gỡ cột ở mức 2, phải gỡ mọi phiên bản app còn đọc/ghi `vehicle_plate` — nếu không, chính rollback là thay đổi phá vỡ.
 
 ## 9. Lỗi thường gặp và đánh đổi
 
@@ -353,7 +353,7 @@ Thứ tự triển khai cũng phải lùi theo: trước khi gỡ cột ở mứ
 - **Đổi tên hoặc đổi kiểu cột trực tiếp.** `RENAME COLUMN` phá vỡ mọi truy vấn dùng tên cũ; `ALTER COLUMN TYPE` thường viết lại bảng dưới khoá nặng. Làm theo kiểu cột mới → ghi cả hai → backfill → chuyển đọc → gỡ cột cũ (bài tập 3).
 - **Rollback chưa từng chạy thử.** Kịch bản khôi phục chỉ đáng tin khi đã chạy trên dữ liệu giống thật, và chạy được hai lần liên tiếp.
 
-Đánh đổi: expand–contract tốn **nhiều lần triển khai** và một khoảng thời gian schema "lửng" (cột có nhưng chưa bắt buộc). Đổi lại, không lúc nào hệ thống phải dừng và bước nào cũng có đường lùi rẻ. Với bảng nhỏ, được phép bảo trì có báo trước, làm một bước có thể chấp nhận — nhưng đó phải là quyết định có ý thức.
+Đánh đổi: expand–contract tốn **nhiều lần triển khai** và một khoảng thời gian schema "lửng" (cột có nhưng chưa bắt buộc). Đổi lại, không lúc nào hệ thống phải dừng và bước nào cũng có đường lùi rẻ. Với bảng nhỏ, được phép bảo trì có báo trước, làm gộp trong một bước vẫn có thể chấp nhận được — nhưng đó phải là quyết định có ý thức.
 
 ## 10. Bài tập
 
@@ -380,7 +380,7 @@ UPDATE drivers AS d
 SET vehicle_plate = b.vehicle_plate
 FROM drivers_vehicle_plate_backup AS b
 WHERE b.driver_id = d.id;</code></pre>
-<p>Kết quả <code>UPDATE 7</code>, cả 7 tài xế có lại biển số (8006 là <code>43A-678.90</code> đã sửa, vì bản sao lưu lấy dữ liệu sau migration). Đây chính là B1 + B3 với nguồn là bảng sao lưu thay cho file tuyển dụng. Tiếp theo: kiểm <code>WHERE vehicle_plate IS NULL</code> (tài xế đăng ký trong lúc cột vắng mặt cần nguồn khác), rồi B4–B6. Nếu không có bản sao lưu, dữ liệu đã mất cùng <code>DROP COLUMN</code> — lý do mức 1 là mặc định.</p>
+<p>Kết quả <code>UPDATE 7</code>, cả 7 tài xế có lại biển số (8006 là <code>43A-678.90</code> đã sửa, vì bản sao lưu lấy dữ liệu sau migration). Đây chính là B1 + B3 với nguồn là bảng sao lưu thay cho file tuyển dụng. Tiếp theo: kiểm <code>WHERE vehicle_plate IS NULL</code> (tài xế đăng ký trong lúc cột đã bị gỡ cần nguồn khác), rồi B4–B6. Nếu không có bản sao lưu, dữ liệu đã mất cùng <code>DROP COLUMN</code> — lý do mức 1 là mặc định.</p>
 </details>
 
 **Bài 3.** Tới Nơi muốn đổi tên `drivers.full_name` thành `display_name`. Lập kế hoạch expand–contract (không dùng `RENAME COLUMN` một phát), ghi rõ phiên bản app nào chạy được ở mỗi bước và đường lùi.

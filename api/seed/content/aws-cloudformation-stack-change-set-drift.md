@@ -10,17 +10,17 @@ language: vi
 
 Ở Phần 01, bạn dựng VPC của Tới Nơi bằng cách bấm console: chọn CIDR, tạo bốn subnet, gắn route table, nhớ bật versioning cho bucket ảnh chứng từ. Tuần sau đội tạo môi trường staging và một người quên gắn tag, người khác chọn nhầm AZ. Sáng thứ Hai không ai nhớ ai đã bấm gì, vào lúc nào, vì sao.
 
-Đây là **bài 21** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bạn cần xong Phần 01 (đặc biệt bài 04 về VPC và bài 06 về S3) và biết đọc YAML. Bài này giải thích CloudFormation, dịch vụ IaC gốc của AWS, và là nền để so sánh với Terraform ở bài 22 và CDK ở bài 24.
+Đây là **bài 21** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bạn cần học xong Phần 01 (đặc biệt bài 04 về VPC và bài 06 về S3) và biết đọc YAML. Bài này giải thích CloudFormation, dịch vụ IaC gốc của AWS, và là nền để so sánh với Terraform ở bài 22 và CDK ở bài 24.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Bạn đổi tên logical ID của một tài nguyên RDS trong template rồi cập nhật stack. CloudFormation đổi tên cái database đang chạy, đúng hay sai?</p>
-<details><summary>Xem đáp án</summary><p><b>Sai.</b> Với CloudFormation, logical ID là danh tính của tài nguyên trong stack. ID mới nghĩa là một tài nguyên mới cần tạo, còn ID cũ biến mất khỏi template nên bị xoá theo <code>DeletionPolicy</code> của nó. Nếu policy đó là <code>Delete</code>, dữ liệu mất. Phần "Vòng đời stack" và bài tập cuối bài đi sâu hơn.</p></details>
+<p>Bạn đổi tên logical ID của một tài nguyên RDS trong template rồi cập nhật stack. CloudFormation đổi tên database đang chạy, đúng hay sai?</p>
+<details><summary>Xem đáp án</summary><p><b>Sai.</b> Với CloudFormation, logical ID là danh tính của tài nguyên trong stack. ID mới nghĩa là phải tạo một tài nguyên mới, còn ID cũ biến mất khỏi template nên bị xoá theo <code>DeletionPolicy</code> của nó. Nếu policy đó là <code>Delete</code>, dữ liệu mất. Phần "Vòng đời stack" và bài tập cuối bài đi sâu hơn.</p></details>
 </div>
 
 ## Vì sao hạ tầng phải là code
 
-Click console cho kết quả nhanh nhưng không để lại dấu vết có thể đọc lại. IaC đổi bốn thứ:
+Thao tác trên console cho kết quả nhanh nhưng không để lại dấu vết có thể đọc lại. IaC thay đổi bốn điều:
 
 - **Lặp lại được:** cùng một template tạo `dev`, `staging` và `prod`, khác nhau ở tham số chứ không ở trí nhớ của người bấm.
 - **Review được:** thay đổi hạ tầng đi qua pull request như code, có người đọc trước khi chạy.
@@ -65,11 +65,11 @@ Resources:
       CidrBlock: !Select [2, !Cidr [!GetAtt Vpc.CidrBlock, 4, 8]]
 ```
 
-Khi template phình to, có hai cách chia. **Nested stack** (`AWS::CloudFormation::Stack` với `TemplateURL` trỏ tới S3) biến template con thành một tài nguyên của stack cha; vòng đời đi cùng nhau. **Cross-stack reference** dùng `Export` ở stack mạng và `!ImportValue` ở stack service; stack nào còn import thì không thể sửa hay xoá giá trị export đó. Tên export phải duy nhất trong một region của một tài khoản, vì vậy lab đặt dạng `toinoi-${Env}-network-VpcId`.
+Khi template phình to, có hai cách chia. **Nested stack** (`AWS::CloudFormation::Stack` với `TemplateURL` trỏ tới S3) biến template con thành một tài nguyên của stack cha, và hai bên có chung vòng đời. **Cross-stack reference** dùng `Export` ở stack mạng và `!ImportValue` ở stack service; stack nào còn import thì không thể sửa hay xoá giá trị export đó. Tên export phải duy nhất trong một region của một tài khoản, vì vậy lab đặt dạng `toinoi-${Env}-network-VpcId`.
 
 ## Vòng đời stack và change set
 
-Stack có ba thao tác chính là create, update và delete. Quy tắc quan trọng nhất: **đừng update thẳng, hãy tạo change set trước**. Change set là bản xem trước: với mỗi tài nguyên, nó nói `Add`, `Modify` hay `Remove`, và với `Modify` nó nói `Replacement` là `True`, `False` hay `Conditional`. `Replacement: True` cho RDS hay bucket nghĩa là tài nguyên cũ sẽ bị thay bằng cái mới.
+Stack có ba thao tác chính là create, update và delete. Quy tắc quan trọng nhất: **đừng update thẳng, hãy tạo change set trước**. Change set là bản xem trước: với mỗi tài nguyên, nó cho biết `Add`, `Modify` hay `Remove`, và với `Modify` nó cho biết `Replacement` là `True`, `False` hay `Conditional`. `Replacement: True` cho RDS hay bucket nghĩa là tài nguyên cũ sẽ bị thay bằng tài nguyên mới.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -78,7 +78,7 @@ Stack có ba thao tác chính là create, update và delete. Quy tắc quan tr�
 <figcaption>Hình 1. Template vào Git, change set cho xem trước, người review chốt rồi mới execute. Drift là phần thực tế lệch khỏi template do sửa ngoài luồng.</figcaption>
 </figure>
 
-Khi lỗi giữa chừng, CloudFormation rollback về trạng thái trước. Với **create** thất bại, stack kết thúc ở `ROLLBACK_COMPLETE` và chỉ còn cách xoá rồi tạo lại (tuỳ chọn `--disable-rollback` giữ lại để điều tra). Với **update** thất bại, stack về `UPDATE_ROLLBACK_COMPLETE`. Trường hợp xấu là `UPDATE_ROLLBACK_FAILED`: chính bước rollback không hoàn tác được một tài nguyên, thường vì ai đó đã xoá tay tài nguyên đó hoặc thiếu quyền. Cách thoát là sửa nguyên nhân rồi chạy `continue-update-rollback`; nếu không sửa được, thêm `--resources-to-skip` để bỏ qua tài nguyên kẹt, chấp nhận stack và thực tế lệch nhau ở đó.
+Khi lỗi giữa chừng, CloudFormation rollback về trạng thái trước. Với **create** thất bại, stack kết thúc ở `ROLLBACK_COMPLETE` và chỉ còn cách xoá rồi tạo lại (tuỳ chọn `--disable-rollback` giữ lại để điều tra). Với **update** thất bại, stack về `UPDATE_ROLLBACK_COMPLETE`. Trường hợp xấu là `UPDATE_ROLLBACK_FAILED`: chính bước rollback không hoàn tác được một tài nguyên, thường vì ai đó đã xoá tay tài nguyên đó hoặc thiếu quyền. Cách thoát là sửa nguyên nhân rồi chạy `continue-update-rollback`; nếu không sửa được, thêm `--resources-to-skip` để bỏ qua tài nguyên kẹt, chấp nhận để stack lệch với thực tế ở tài nguyên đó.
 
 ## Không để mất dữ liệu
 
@@ -88,7 +88,7 @@ Có ba lớp bảo vệ, mỗi lớp trả lời một câu hỏi khác nhau:
 |---|---|---|
 | `DeletionPolicy: Retain` hoặc `Snapshot` | Tài nguyên bị xoá khi **xoá stack** hoặc bỏ khỏi template | `Snapshot` chỉ áp dụng cho một số loại (RDS, EBS, ElastiCache và vài loại khác) |
 | `UpdateReplacePolicy` | Tài nguyên cũ bị xoá khi **update đổi thuộc tính buộc replacement** (ví dụ `Engine`) | Phải khai báo riêng, không tự theo `DeletionPolicy`; không áp dụng khi đổi logical ID |
-| Stack policy | Cập nhật lên tài nguyên chỉ định (`Update:Replace`, `Update:Delete`) | Chỉ áp dụng cho update, không ngăn xoá cả stack; xoá cả stack cần termination protection |
+| Stack policy | Cập nhật trên các tài nguyên được chỉ định (`Update:Replace`, `Update:Delete`) | Chỉ áp dụng cho update, không ngăn xoá cả stack; xoá cả stack cần termination protection |
 
 Bucket ảnh chứng từ trong lab dùng cả `DeletionPolicy` lẫn `UpdateReplacePolicy` là `Retain`; một RDS PostgreSQL production nên dùng `Snapshot` cho cả hai (đoạn dưới rút gọn, thiếu các thuộc tính bắt buộc khác như class và subnet group):
 
@@ -102,11 +102,11 @@ TripsDb:
     ManageMasterUserPassword: true
 ```
 
-Mặc định không giống nhau giữa các loại: `DeletionPolicy` của `AWS::RDS::DBInstance` (không thuộc cluster) mặc định là `Snapshot`, còn `UpdateReplacePolicy` mặc định là `Delete` cho mọi loại. Đừng dựa vào mặc định: ghi tường minh để người review thấy, và bật thêm `DeletionProtection: true` trên chính DB để lệnh xoá bị từ chối. Stack policy nằm trong `stack-policy.json` của lab, cho phép mọi update nhưng từ chối replace và delete bucket. Khi thật sự cần đổi, bạn chỉ định một policy tạm thời cho lần update đó thay vì gỡ policy.
+Mặc định không giống nhau giữa các loại: `DeletionPolicy` của `AWS::RDS::DBInstance` (không thuộc cluster) mặc định là `Snapshot`, còn `UpdateReplacePolicy` mặc định là `Delete` cho mọi loại. Đừng dựa vào mặc định: ghi rõ để người review thấy, và bật thêm `DeletionProtection: true` trên chính DB để lệnh xoá bị từ chối. Stack policy nằm trong `stack-policy.json` của lab, cho phép mọi update nhưng từ chối replace và delete bucket. Khi thật sự cần đổi, bạn chỉ định một policy tạm thời cho lần update đó thay vì gỡ policy.
 
 ## Drift: khi thực tế lệch template
 
-Drift là khi tài nguyên thật khác với những gì stack ghi nhận, thường vì có người vào console "sửa nhanh" lúc sự cố: mở thêm một rule security group, tắt versioning bucket. Lúc đó template không còn là sự thật. Lần deploy sau có thể ghi đè bản sửa tay (và gây lại sự cố), hoặc lỗi vì trạng thái không như dự kiến.
+Drift là khi tài nguyên thật khác với những gì stack ghi nhận, thường vì có người vào console "sửa nhanh" lúc sự cố: mở thêm một rule security group, tắt versioning bucket. Lúc đó template không còn là nguồn dữ liệu gốc. Lần deploy sau có thể ghi đè bản sửa tay (và gây lại sự cố), hoặc báo lỗi vì trạng thái không như dự kiến.
 
 `detect-stack-drift` so thuộc tính khai báo trong template với tài nguyên thật và đánh dấu `IN_SYNC`, `MODIFIED` hay `DELETED`. Hai giới hạn: không phải loại tài nguyên nào cũng hỗ trợ drift (tra danh sách trước khi tin kết quả "không drift"), và drift detection chỉ báo cáo, không tự sửa; bạn sửa tài nguyên về như template hoặc cập nhật template cho khớp thực tế rồi deploy.
 
@@ -134,7 +134,7 @@ aws cloudformation deploy \
 
 `deploy` tạo stack nếu chưa có hoặc tạo change set nếu đã có; `--no-execute-changeset` dừng ở bước xem trước. Bạn đọc change set trong console hoặc bằng `describe-change-set`, rồi chạy lại lệnh không có cờ đó để áp dụng. Đừng bật `EnableNat=true` nếu chỉ học: NAT Gateway tính tiền theo giờ ngay khi tồn tại.
 
-Template đã qua `cfn-lint` nhưng **chưa được chạy trên tài khoản thật**; thứ tự tạo, thời gian và thông báo lỗi hãy tự xác nhận khi chạy.
+Template đã qua `cfn-lint` nhưng **chưa được chạy trên tài khoản thật**; hãy tự xác nhận thứ tự tạo, thời gian và thông báo lỗi khi chạy.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -146,8 +146,8 @@ Template đã qua `cfn-lint` nhưng **chưa được chạy trên tài khoản t
 ## Lỗi thường gặp
 
 - **Sửa tay rồi quên:** mở port trong console lúc sự cố và không cập nhật template; lần deploy sau xoá mất rule hoặc gây xung đột.
-- **Đặt tên cố định cho tài nguyên:** thuộc tính như `BucketName` hay `DBInstanceIdentifier` làm replacement thất bại vì tên đã tồn tại. Để CloudFormation sinh tên, trừ khi tên là hợp đồng với hệ thống ngoài.
-- **Export bị khoá:** stack mạng không đổi được giá trị export vì stack service còn import. Cân nhắc tham số hoặc SSM Parameter thay vì export khi hai stack đổi với nhịp khác nhau.
+- **Đặt tên cố định cho tài nguyên:** thuộc tính như `BucketName` hay `DBInstanceIdentifier` làm replacement thất bại vì tên đã tồn tại. Hãy để CloudFormation tự sinh tên, trừ khi tên đó là cam kết với hệ thống bên ngoài.
+- **Export bị khoá:** stack mạng không đổi được giá trị export vì stack service còn import. Cân nhắc tham số hoặc SSM Parameter thay vì export khi hai stack thay đổi theo nhịp khác nhau.
 - **Bỏ qua change set:** `update-stack` thẳng vào production, không thấy `Replacement: True`.
 - **Một stack khổng lồ:** template có giới hạn kích thước và số tài nguyên; chia theo vòng đời (mạng, dữ liệu, service).
 

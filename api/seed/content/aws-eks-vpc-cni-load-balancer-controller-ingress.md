@@ -1,7 +1,7 @@
 ---
 slug: aws-eks-vpc-cni-load-balancer-controller-ingress
 title: "Mạng EKS: VPC CNI, prefix delegation, AWS Load Balancer Controller, Ingress và Gateway API"
-summary: "Bài 43: pod nhận IP thật trong VPC qua VPC CNI, giới hạn ENI/IP và prefix delegation, custom networking khi hết IP; AWS Load Balancer Controller tạo ALB từ Ingress và NLB từ Service, IngressGroup, target type ip, TLS bằng ACM, Gateway API; security group for pods; Service Connect so sánh."
+summary: "Bài 43: pod nhận IP thật trong VPC qua VPC CNI, giới hạn ENI/IP và prefix delegation, custom networking khi hết IP; AWS Load Balancer Controller tạo ALB từ Ingress và NLB từ Service, IngressGroup, target type ip, TLS bằng ACM, Gateway API; security group for pods; so sánh với Service Connect."
 category: devops-aws
 level: advanced
 tags: [aws, toi-noi, devops, eks, vpc-cni, load-balancer-controller, ingress, gateway-api, networking]
@@ -60,13 +60,13 @@ aws eks update-addon --cluster-name toinoi-lab-eks --addon-name vpc-cni \
   --resolve-conflicts OVERWRITE
 ```
 
-Chỉ node tạo mới hưởng cấu hình này, nên sau đó phải luân chuyển node. Tệp JSON bật cả `enableNetworkPolicy`, dùng ở phần sau. Số pod thực tế còn bị `maxPods` của kubelet chặn: managed node group không dùng AMI tuỳ biến tự áp trần 110 cho instance dưới 30 vCPU (250 cho instance lớn hơn), nên `m7g.large` dừng ở 110 dù khối `/28` cho phép nhiều hơn; AMI tuỳ biến thì tự đặt `maxPods`. Lab chưa kiểm chứng trên node thật; hãy đọc `allocatable pods` của node sau khi thay.
+Chỉ node tạo mới nhận cấu hình này, nên sau đó phải thay node. Tệp JSON bật cả `enableNetworkPolicy`, dùng ở phần sau. Số pod thực tế còn bị `maxPods` của kubelet chặn: managed node group không dùng AMI tuỳ biến tự áp trần 110 cho instance dưới 30 vCPU (250 cho instance lớn hơn), nên `m7g.large` dừng ở 110 dù khối `/28` cho phép nhiều hơn; AMI tuỳ biến thì tự đặt `maxPods`. Lab chưa kiểm chứng trên node thật; hãy đọc `allocatable pods` của node sau khi thay.
 
-Nếu VPC dùng `10.10.0.0/16` đã gần cạn, custom networking cho pod lấy IP từ vùng `100.64.0.0/16` thêm vào VPC. Đừng bật nó khi chưa cần: nó đổi cách đếm IP và làm gỡ lỗi phức tạp hơn.
+Nếu VPC dùng `10.10.0.0/16` đã gần cạn, custom networking cho pod lấy IP từ dải `100.64.0.0/16` được thêm vào VPC. Đừng bật custom networking khi chưa cần: tính năng này đổi cách đếm IP và làm gỡ lỗi phức tạp hơn.
 
 ## AWS Load Balancer Controller: ALB từ Ingress
 
-Controller là một Deployment trong cluster, theo dõi `Ingress` và `Service` rồi gọi API của ELB để tạo, sửa, xoá load balancer thật. Nó cần quyền IAM, và với Pod Identity (bài 41) ta gắn role cho service account `aws-load-balancer-controller` trong `kube-system`. Terraform của lab tạo role cùng association; Helm values đặt `clusterName`, `region` và `vpcId` tường minh vì pod không phải lúc nào cũng dò được từ metadata của instance.
+Controller là một Deployment trong cluster, theo dõi `Ingress` và `Service` rồi gọi API của ELB để tạo, sửa, xoá load balancer thật. Controller cần quyền IAM, và với Pod Identity (bài 41) ta gắn role cho service account `aws-load-balancer-controller` trong `kube-system`. Terraform của lab tạo role cùng association; Helm values đặt `clusterName`, `region` và `vpcId` rõ ràng vì pod không phải lúc nào cũng dò được từ metadata của instance.
 
 ```bash
 helm repo add eks https://aws.github.io/eks-charts
@@ -134,7 +134,7 @@ Controller tự quản lý rule security group giữa ALB và pod. **IngressGrou
 
 ## Từ Ingress sang Gateway API
 
-Ingress chỉ mô tả HTTP đơn giản; mọi thứ khác nằm trong annotation riêng của từng controller. **Gateway API** (`GatewayClass`, `Gateway`, `HTTPRoute`) tách vai trò rõ hơn: đội platform sở hữu Gateway, đội service sở hữu route. Tài liệu Kubernetes mô tả đây là hướng thay thế dài hạn cho Ingress. Theo tài liệu của controller, `HTTPRoute` và `GRPCRoute` với ALB cần bản từ v2.14.0 (TCP, UDP, TLS với NLB từ v2.13.3); controller tự bật khi thấy CRD của Gateway API cùng CRD riêng của AWS trong cluster, và `GatewayClass` dùng `controllerName: gateway.k8s.aws/alb`. Chứng chỉ ACM và thuộc tính ALB khai qua CRD `LoadBalancerConfiguration` (`gateway.k8s.aws/v1`). Tệp Gateway API trong lab chỉ là tham khảo, **chưa được chạy**; với Tới Nơi, Ingress vẫn là lựa chọn chạy được hôm nay.
+Ingress chỉ mô tả HTTP đơn giản; mọi thứ khác nằm trong annotation riêng của từng controller. **Gateway API** (`GatewayClass`, `Gateway`, `HTTPRoute`) tách vai trò rõ hơn: đội platform phụ trách Gateway, đội service phụ trách route. Tài liệu Kubernetes mô tả đây là hướng thay thế dài hạn cho Ingress. Theo tài liệu của controller, `HTTPRoute` và `GRPCRoute` với ALB cần bản từ v2.14.0 (TCP, UDP, TLS với NLB từ v2.13.3); controller tự bật khi thấy CRD của Gateway API cùng CRD riêng của AWS trong cluster, và `GatewayClass` dùng `controllerName: gateway.k8s.aws/alb`. Chứng chỉ ACM và thuộc tính ALB khai qua CRD `LoadBalancerConfiguration` (`gateway.k8s.aws/v1`). Tệp Gateway API trong lab chỉ là tham khảo, **chưa được chạy**; với Tới Nơi, Ingress vẫn là lựa chọn chạy được hôm nay.
 
 Hai công cụ đi kèm: **ExternalDNS** đọc host của Ingress và tạo record Route 53 (role riêng, giới hạn trong đúng hosted zone, `upsert-only` để không xoá record của người khác). **cert-manager** không cần khi ALB kết thúc TLS bằng ACM: chứng chỉ ACM gắn thẳng vào ALB và tự gia hạn; chỉ dùng cert-manager nếu cần chứng chỉ bên trong pod, ví dụ mTLS.
 
@@ -155,7 +155,7 @@ Với người đến từ ECS: Service Connect gọi service theo tên qua prox
 ## Cái giá phải trả
 
 - **Mỗi Ingress một ALB nếu quên `group.name`.** Mười service mười ALB tính tiền theo giờ; gộp bằng IngressGroup.
-- **Hết IP làm pod Pending.** Thấy `failed to assign an IP` hoặc `Too many pods`, kiểm số ENI, subnet còn IP và prefix delegation trước khi tăng node.
+- **Hết IP khiến pod bị Pending.** Thấy `failed to assign an IP` hoặc `Too many pods`, kiểm số ENI, subnet còn IP và prefix delegation trước khi tăng node.
 - **Gỡ controller trước khi xoá Ingress.** ALB và security group trở thành tài nguyên mồ côi, chặn việc xoá VPC.
 - **Rolling update làm rớt request.** Với `target-type: ip`, pod được gỡ khỏi target group lúc đang tắt; đặt `preStop` ngắn, `deregistration_delay` hợp lý và bật readiness gate bằng nhãn namespace `elbv2.k8s.aws/pod-readiness-gate-inject: enabled` để pod chỉ được coi là Ready khi ALB đã thấy nó healthy.
 

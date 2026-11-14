@@ -10,11 +10,11 @@ language: vi
 
 Điều phối Tới Nơi có một quy tắc cứng: **mỗi khu lúc nào cũng còn ít nhất một tài xế trực**, để khách đặt xe giờ thấp điểm vẫn có người nhận. Ứng dụng tài xế có nút «Xin nghỉ»: server đếm số người đang trực trong khu, còn từ 2 trở lên thì tắt trực của người xin. Khu SG-TT-01 (mã 111) có hai người trực, tài xế 9101 và 9102. Một trưa mưa, cả hai bấm «Xin nghỉ» cách nhau vài mili giây. Cả hai được duyệt. Khu 111 trống trơn — và không một dòng log lỗi nào.
 
-Hai giao dịch không sửa cùng một dòng, nên không ai chờ ai, không có `lost update` như PG-034. Mỗi giao dịch, chạy một mình, đều đúng. Đây là **write skew** — loại bất thường mà Repeatable Read để lọt. Bài này tái hiện nó, cho mức **SERIALIZABLE** bắt nó, rồi đi vào phần khó thật sự: vòng **retry toàn giao dịch** có giới hạn, và cái giá của «báo động giả».
+Hai giao dịch không sửa cùng một dòng, nên không ai chờ ai, không có `lost update` như PG-034. Mỗi giao dịch, chạy một mình, đều đúng. Đây là **write skew** — loại bất thường mà Repeatable Read để lọt. Bài này tái hiện nó, để mức **SERIALIZABLE** bắt nó, rồi đi vào phần khó thật sự: vòng **retry toàn giao dịch** có giới hạn, và cái giá của «báo động giả».
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-038 · Phần 4/6 · Nâng cao</span>
-<p>Đọc trước: <a href="/articles/postgresql-isolation-read-committed-repeatable-read">PG-034 · Read Committed và Repeatable Read</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>38-serializable-retry.sql</code>, phép thử đồng thời K038 trong <code>DO-DAC.md</code>, hàm thử lại <code>giaoDich()</code> trong <code>pg/lib/dong-thoi.mjs</code>) và thí nghiệm <code>p04/thu-nghiem/pg038-siread-retry-sai-muc-tron.sql</code>. Sau bài này, bạn tái hiện được xung đột tuần tự hoá, viết và kiểm vòng retry có giới hạn, và chứng minh bất biến vẫn đúng khi nhiều phiên chạy đua.</p>
+<p>Đọc trước: <a href="/articles/postgresql-isolation-read-committed-repeatable-read">PG-034 · Read Committed và Repeatable Read</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>38-serializable-retry.sql</code>, phép thử đồng thời K038 trong <code>DO-DAC.md</code>, hàm thử lại <code>giaoDich()</code> trong <code>pg/lib/dong-thoi.mjs</code>) và thí nghiệm <code>p04/thu-nghiem/pg038-siread-retry-sai-muc-tron.sql</code>. Sau bài này, bạn tái hiện được xung đột tuần tự hoá, viết và kiểm tra vòng retry có giới hạn, và chứng minh bất biến vẫn đúng khi nhiều phiên chạy đua.</p>
 </div>
 
 ## 1. Dữ liệu và cách chạy
@@ -82,7 +82,7 @@ Ba điều cần khắc vào code ứng dụng:
 
 1. **Lỗi rơi ở `COMMIT`.** Câu `UPDATE` của B chạy xong ngay; chỉ khi B commit, sau A, mới bị từ chối. Code coi `COMMIT` là «chắc chắn thành công» sẽ bỏ sót lỗi này.
 2. **Lỗi cũng có thể rơi ở câu lệnh.** Thí nghiệm §2: hai giao dịch Serializable **cùng sửa** dòng 9101 ⇒ B chờ A, A commit ⇒ câu `UPDATE` của B lỗi `40001 could not serialize access due to concurrent update` — giống Repeatable Read. Mọi câu trong giao dịch đều có thể ném `40001`.
-3. **Mã lỗi luôn là `40001`** cho mọi lỗi tuần tự hoá, theo tài liệu — đó là thứ duy nhất ứng dụng cần so.
+3. **Mã lỗi luôn là `40001`** cho mọi lỗi tuần tự hoá, theo tài liệu — đó là thứ duy nhất ứng dụng cần so sánh.
 
 ## 4. Retry: chạy lại TOÀN BỘ giao dịch
 
@@ -133,12 +133,12 @@ export async function giaoDich(w, fn, {
 - **`COMMIT` nằm trong `try`**: lỗi `40001` ở COMMIT đi đúng đường thử lại.
 - **Chỉ thử lại `40001` và `40P01`**: mọi SQLSTATE khác (vi phạm ràng buộc, lỗi cú pháp) trả về ngay. Tài liệu cho phép cân nhắc thử lại cả `23505`/`23P01` trong một số trường hợp, nhưng cảnh báo chúng có thể là lỗi lâu dài.
 - **Giới hạn số lần** (`toi_da`): hết lượt thì trả lỗi lên trên (đếm `het_luot_thu`) thay vì quay vô hạn. Tài liệu lưu ý một lần thử lại không bảo đảm thành công, tranh chấp cao có thể cần nhiều lần.
-- **Backoff «full jitter»**: chờ ngẫu nhiên trong [0, min(trần, cơ_số · 2^lần)]. Phần luỹ thừa giãn dần các lần thử; phần ngẫu nhiên làm các phiên vừa đâm nhau không cùng quay lại đúng một thời điểm để đâm nhau lần nữa. K038 dùng cơ số 2 ms, trần 50 ms, tối đa 10 lần.
-- **Không gì ngoài database trong `fn`**: gửi SMS hay gọi API trong giao dịch rồi thử lại là gửi hai lần. Tác dụng phụ ra ngoài thuộc về PG-039.
+- **Backoff «full jitter»**: chờ ngẫu nhiên trong [0, min(trần, cơ_số · 2^lần)]. Phần luỹ thừa giãn dần khoảng cách giữa các lần thử; phần ngẫu nhiên khiến các phiên vừa xung đột nhau không cùng quay lại đúng một thời điểm rồi lại xung đột lần nữa. K038 dùng cơ số 2 ms, trần 50 ms, tối đa 10 lần.
+- **Trong `fn` không làm gì ngoài database**: gửi SMS hay gọi API trong giao dịch rồi thử lại là gửi hai lần. Tác dụng phụ ra ngoài được xử lý ở PG-039.
 
 ## 5. Báo động giả: Seq Scan khoá cả bảng
 
-SSI bảo thủ: nó có thể huỷ giao dịch mà chạy tuần tự thật cũng không hề xung đột. Lab §3 cho A xin nghỉ ở khu **112** (9103), B ở khu **113** (9105) — hai khu không liên quan.
+SSI thận trọng quá mức: có thể nó huỷ một giao dịch dù nếu chạy tuần tự thật thì chúng không hề xung đột. Lab §3 cho A xin nghỉ ở khu **112** (9103), B ở khu **113** (9105) — hai khu không liên quan.
 
 | Bước | Phiên | Câu lệnh | Kết quả |
 |---|---|---|---|
@@ -189,11 +189,11 @@ Phép thử K038 (trích `p04/DO-DAC.md`): i7-10700 (16 luồng), 64 GB RAM, NVM
 
 Đọc số:
 
-- **Repeatable Read** vi phạm ở **mọi** khu, mọi vòng (4 × 200 = 800): cả 1.600 yêu cầu đều được duyệt. Con số tuyệt đối do «rào» ép mọi phiên cùng lúc — ngoài đời bấm không đồng thời đến vậy, đó cũng là lý do lỗi kiểu này lọt qua test tay.
+- **Repeatable Read** vi phạm ở **mọi** khu, mọi vòng (4 × 200 = 800): cả 1.600 yêu cầu đều được duyệt. Con số tuyệt đối do «rào» ép mọi phiên cùng lúc — ngoài đời không ai bấm đồng thời đến mức đó, đó cũng là lý do lỗi kiểu này lọt qua test tay.
 - **Serializable + retry** đúng ở mọi lần: 0 vi phạm, 0 giao dịch bỏ cuộc, mỗi khu mỗi vòng đúng một người được nghỉ (800) và một người bị từ chối **sau khi thử lại** (800).
 - **Ép index**: đúng 800 lần `40001` = một xung đột **thật** mỗi khu mỗi vòng. **Seq Scan**: ~2.500 lần — khoảng 1.700 lần là báo động giả giữa các khu, và mỗi vòng chậm hơn tương ứng.
 
-Thời gian chỉ để so tương đối trong cùng bảng, trên một máy; không phải thông lượng thật.
+Thời gian chỉ dùng để so sánh tương đối trong cùng bảng, trên một máy; không phải thông lượng thật.
 
 ## 7. Cách khác: vật chất hoá xung đột bằng khoá dòng
 
@@ -210,10 +210,10 @@ B đếm **sau** khi A commit (Read Committed: mỗi câu một snapshot mới) 
 
 | | SERIALIZABLE + retry | Khoá dòng khu |
 |---|---|---|
-| Bắt được write skew ở đường code bạn **quên** | Có, nếu mọi giao dịch liên quan đều Serializable | Không — đường nào quên khoá là lọt |
+| Bắt được write skew ở đường code bạn **quên xử lý** | Có, nếu mọi giao dịch liên quan đều Serializable | Không — đường nào quên khoá là lọt |
 | Cần vòng retry | Có (bắt buộc) | Không cho xung đột này (vẫn nên có cho `40P01`) |
 | Chi phí khi tranh chấp | Làm lại giao dịch, báo động giả | Xếp hàng chờ trên dòng khu |
-| Kiểu lỗi | `40001` ồn ào | Quên khoá ⇒ sai im lặng |
+| Kiểu lỗi | `40001` ồn ào | Quên khoá ⇒ sai mà không báo lỗi |
 
 ## 8. Bẫy: trộn mức cô lập
 
@@ -226,7 +226,7 @@ Bảo đảm của SSI nói về tập giao dịch **Serializable**. Thí nghi�
 | T3 | A tắt trực 9101, `COMMIT` | `UPDATE 1` · **`COMMIT`** |
 | T4 | C đếm khu 111 | **0** |
 
-Không lỗi nào: B không để lại dấu vết đọc–ghi cho SSI kiểm. Muốn dựa vào SERIALIZABLE thì mọi đường ghi liên quan phải chạy ở mức đó — cách chắc nhất là đặt `default_transaction_isolation = 'serializable'` cho role hoặc database của ứng dụng (PG-034), và kiểm bằng `SHOW transaction_isolation` trong test.
+Không có lỗi nào: B không để lại dấu vết đọc–ghi nào để SSI kiểm tra. Muốn dựa vào SERIALIZABLE thì mọi đường ghi liên quan phải chạy ở mức đó — cách chắc nhất là đặt `default_transaction_isolation = 'serializable'` cho role hoặc database của ứng dụng (PG-034), và kiểm bằng `SHOW transaction_isolation` trong test.
 
 ## 9. Lỗi thường gặp
 
@@ -241,7 +241,7 @@ Không lỗi nào: B không để lại dấu vết đọc–ghi cho SSI kiểm.
 
 ## 10. Đánh đổi
 
-- **Đúng đắn rộng hay chi phí thấp:** SERIALIZABLE bảo vệ cả bất biến bạn chưa liệt kê, đổi lại mọi giao dịch ghi phải chịu được `40001` và chậm hơn khi tranh chấp. Khoá dòng đại diện rẻ hơn nhưng chỉ bảo vệ chỗ bạn nhớ khoá.
+- **Phạm vi bảo vệ rộng hay chi phí thấp:** SERIALIZABLE bảo vệ cả bất biến bạn chưa liệt kê, đổi lại mọi giao dịch ghi phải chịu được `40001` và chậm hơn khi tranh chấp. Khoá dòng đại diện rẻ hơn nhưng chỉ bảo vệ chỗ bạn nhớ khoá.
 - **Giới hạn retry:** quá thấp thì người dùng nhận lỗi khi tranh chấp ngắn; quá cao thì một điểm nóng kéo dài độ trễ. Với trần 50 ms và 10 lần, tổng thời gian chờ tối đa là 310 ms (bài tập 2) — cộng thời gian chạy lại giao dịch.
 - **Giao dịch nhỏ:** tài liệu PostgreSQL khuyên khai báo `READ ONLY` khi có thể, giới hạn số kết nối đang chạy (pool), không đưa vào giao dịch nhiều hơn mức cần cho toàn vẹn, không để kết nối «idle in transaction». Lab chưa chạy `SERIALIZABLE READ ONLY DEFERRABLE` (chờ tới khi snapshot an toàn để không bao giờ bị huỷ) — chưa có số đo.
 

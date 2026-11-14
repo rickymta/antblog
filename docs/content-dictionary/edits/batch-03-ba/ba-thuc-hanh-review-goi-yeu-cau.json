@@ -1,0 +1,8 @@
+{"file":"ba-thuc-hanh-review-goi-yeu-cau.md","edits":[
+{"old":"Nó chưa phải baseline sản phẩm được duyệt.","new":"Hồ sơ này chưa phải baseline sản phẩm được duyệt.","reason":"Tránh 'Nó' chỉ vật trừu tượng đầu câu","severity":"medium"},
+{"old":"không có approval và ngoài scope","new":"không có phê duyệt và ngoài scope","reason":"approval có từ Việt tự nhiên","severity":"low"},
+{"old":"kiểm cùng nghĩa và version.","new":"kiểm tra cùng nghĩa và cùng phiên bản.","reason":"Động từ cụt; version trong văn xuôi","severity":"medium"},
+{"old":"Với mỗi ca nêu trạng thái cuối","new":"Với mỗi trường hợp nêu trạng thái cuối","reason":"Thống nhất thuật ngữ, tránh 'ca'","severity":"low"},
+{"old":"Đề nghị review ba mục với owner trước khi baseline","new":"Đề nghị review ba mục với người phụ trách trước khi baseline","reason":"owner đã có từ Việt","severity":"low"},
+{"old":"kế hoạch kiểm có luồng lỗi","new":"kế hoạch kiểm thử có luồng lỗi","reason":"Động từ cụt","severity":"medium"}
+]}

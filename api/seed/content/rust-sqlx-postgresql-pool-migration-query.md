@@ -252,7 +252,7 @@ error occurred while decoding column 0: mismatched types; Rust type `i32` (as SQ
 
 Cái bẫy `NUMERIC` thường gặp là `sum()`: tổng của cột `bigint` trong PostgreSQL có kiểu `numeric`, không phải `bigint`. Số dư cần quay lại `Money`, nên lab ép `sum(amount_dong)::bigint` để nhận `i64`; tổng giá trị luân chuyển giữ nguyên `numeric` và đọc thành `Decimal`, in ra `51000` (25.500 + 5.100 + 20.400).
 
-`TIMESTAMPTZ` thì khác: PostgreSQL luôn lưu UTC, và sqlx 0.9 đọc nó thành `time::OffsetDateTime` hoặc `chrono::DateTime<Utc>`. Cả hai crate đều là tùy chọn qua feature; sqlx không có feature `jiff`, trong khi cả loạt dùng `jiff` cho thời gian ([bài 8](/articles/rust-string-str-ngay-gio-dinh-dang-tien)). Cách gọn là đổi ở biên, một hàm nhỏ qua nano giây epoch:
+`TIMESTAMPTZ` thì khác: PostgreSQL luôn lưu UTC, và sqlx 0.9 đọc nó thành `time::OffsetDateTime` hoặc `chrono::DateTime<Utc>`. Cả hai crate đều là tuỳ chọn qua feature; sqlx không có feature `jiff`, trong khi cả loạt dùng `jiff` cho thời gian ([bài 8](/articles/rust-string-str-ngay-gio-dinh-dang-tien)). Cách gọn là đổi ở biên, một hàm nhỏ qua nano giây epoch:
 
 ```rust
 // src/mapping.rs
@@ -303,7 +303,7 @@ int4 tràn ở 2.147.483.647, bigint thì không: true
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Pool 5 kết nối là con số minh họa, chưa đo với tải thật; production chọn theo số instance và trần kết nối của máy chủ. Kết nối không dùng TLS (<code>tls-none</code>) vì chỉ chạy trên <code>127.0.0.1</code>. Thư mục <code>.sqlx</code> phản ánh schema <code>lab_23_prepare</code> lúc prepare; DB thật lệch migration thì lỗi nằm ở lúc chạy chứ không ở lúc biên dịch. Chưa có <code>account_balances</code>, index, partition (bài 25), chưa có retry khi serialization failure (bài 24).</p></div>
+<p>Pool 5 kết nối là con số minh hoạ, chưa đo với tải thật; production chọn theo số instance và trần kết nối của máy chủ. Kết nối không dùng TLS (<code>tls-none</code>) vì chỉ chạy trên <code>127.0.0.1</code>. Thư mục <code>.sqlx</code> phản ánh schema <code>lab_23_prepare</code> lúc prepare; DB thật lệch migration thì lỗi nằm ở lúc chạy chứ không ở lúc biên dịch. Chưa có <code>account_balances</code>, index, partition (bài 25), chưa có retry khi serialization failure (bài 24).</p></div>
 
 **Bài tập:** bổ sung cột ghi chú `memo text` (cho phép NULL) cho `journal_entries`. Cần làm gì với migration? Câu `query!("select idempotency_key, memo from journal_entries")` cho `memo` kiểu gì? Sau khi sửa, build offline ở CI còn xanh không?
 

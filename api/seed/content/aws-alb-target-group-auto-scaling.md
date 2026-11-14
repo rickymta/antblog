@@ -48,7 +48,7 @@ Lệnh trên tạo target group với health check `/health/ready` mỗi 15 giâ
 
 ## Launch template và Auto Scaling Group
 
-**Launch template** là công thức tạo một instance: AMI, instance type, security group, instance profile, user data, thẻ tag, và `HttpTokens=required` để bắt buộc IMDSv2. Mỗi lần sửa tạo một version mới. Nó thay thế **launch configuration**: tài khoản tạo từ 10/2024 không còn tạo được launch configuration mới, và AWS khuyên chuyển hết sang launch template.
+**Launch template** là công thức tạo một instance: AMI, instance type, security group, instance profile, user data, tag, và `HttpTokens=required` để bắt buộc IMDSv2. Mỗi lần sửa tạo một version mới. Launch template thay thế **launch configuration**: tài khoản tạo từ 10/2024 không còn tạo được launch configuration mới, và AWS khuyên chuyển hết sang launch template.
 
 **Auto Scaling Group (ASG)** giữ số instance trong khoảng `min` đến `max`, quanh mức `desired`, trải đều qua các subnet ở nhiều AZ và thay instance hỏng. Lab đặt `min 2, desired 2, max 4`: tối thiểu mỗi AZ một máy. ASG gắn với target group nên instance mới tự đăng ký và bị gỡ khi scale-in. Hai chi tiết dễ sai: `--health-check-type ELB` để ASG tin kết quả health check của ALB (kiểu mặc định EC2 chỉ nhìn trạng thái máy), và `--health-check-grace-period` đủ dài để máy kịp boot trước khi bị đánh giá.
 
@@ -61,15 +61,15 @@ Lệnh trên tạo target group với health check `/health/ready` mỗi 15 giâ
 
 Khi đổi AMI hoặc launch template, **instance refresh** thay dần instance cũ bằng bản mới với `MinHealthyPercentage` và `InstanceWarmup`, để luôn còn đủ máy khoẻ phục vụ khách trong lúc thay.
 
-## Scaling policy: ba cách giãn
+## Scaling policy: ba cách co giãn
 
 | Loại | Cách hoạt động | Dùng cho |
 | --- | --- | --- |
-| Target tracking | Giữ một số liệu (CPU, request mỗi target) quanh giá trị đích | Tải thay đổi liên tục; là lựa chọn mặc định |
+| Target tracking | Giữ một chỉ số (CPU, request mỗi target) quanh giá trị đích | Tải thay đổi liên tục; là lựa chọn mặc định |
 | Step | Mỗi ngưỡng cảnh báo CloudWatch ứng với một bước thêm hoặc bớt | Khi cần phản ứng tuỳ mức vi phạm |
 | Scheduled | Đổi `min`, `max`, `desired` theo lịch | Tải có giờ biết trước, như 11:00 và 17:00 |
 
-Với `quote`, số liệu hợp lý nhất là `ALBRequestCountPerTarget`: số request ALB gửi cho mỗi target **mỗi phút**. Công thức chọn giá trị đích: lấy số request mỗi giây một máy xử lý thoải mái (đo bằng load test), nhân 60, rồi nhân khoảng 0,6 để chừa dư. Ví dụ giả định một máy chịu được 100 request/giây: 100 × 60 × 0,6 = 3.600 request/phút/target. Với 10.000 request/giây, tức 600.000 request/phút, ASG cần khoảng 167 máy lúc cao điểm. Con số này cho thấy hai việc: `max 4` của lab chỉ để thử, production phải nâng `max` và xin tăng quota vCPU On-Demand.
+Với `quote`, chỉ số hợp lý nhất là `ALBRequestCountPerTarget`: số request ALB gửi cho mỗi target **mỗi phút**. Công thức chọn giá trị đích: lấy số request mỗi giây một máy xử lý thoải mái (đo bằng load test), nhân 60, rồi nhân khoảng 0,6 để chừa dư. Ví dụ giả định một máy chịu được 100 request/giây: 100 × 60 × 0,6 = 3.600 request/phút/target. Với 10.000 request/giây, tức 600.000 request/phút, ASG cần khoảng 167 máy lúc cao điểm. Con số này cho thấy hai việc: `max 4` của lab chỉ để thử, production phải nâng `max` và xin tăng quota vCPU On-Demand.
 
 Có thể gắn thêm policy CPU (`ASGAverageCPUUtilization`, lab đặt 50%). Khi có nhiều policy, ASG scale out nếu **bất kỳ** policy nào cần, và chỉ scale in khi **tất cả** đồng ý.
 
@@ -95,7 +95,7 @@ Hành động "hết cao điểm" chỉ hạ `min`, không đặt `desired`: s�
 
 **Sticky session** (`stickiness.enabled=true`, kiểu `lb_cookie`) ghim một khách vào một máy bằng cookie. Nghe tiện nhưng gây tải lệch, mất phiên khi máy bị scale in và làm scale chậm. Service `quote` nên **stateless**: không giữ trạng thái trong bộ nhớ máy; phiên và cache để ở nơi dùng chung (Redis ở bài 15) hoặc trong token. Lab tắt sticky.
 
-**Access log** của ALB ghi từng request vào một bucket S3: thời gian, đường dẫn, mã trạng thái, độ trễ. Bật bằng `access_logs.s3.enabled`, `access_logs.s3.bucket` và `access_logs.s3.prefix`; bucket phải có policy cho phép dịch vụ ELB ghi, mẫu policy nằm trong user guide và chưa được kiểm trong lab này. Log có dung lượng lớn và tính tiền lưu như mọi object S3, nên đặt lifecycle như bài 06.
+**Access log** của ALB ghi từng request vào một bucket S3: thời gian, đường dẫn, mã trạng thái, độ trễ. Bật bằng `access_logs.s3.enabled`, `access_logs.s3.bucket` và `access_logs.s3.prefix`; bucket phải có policy cho phép dịch vụ ELB ghi, mẫu policy nằm trong user guide và chưa được kiểm tra trong lab này. Log có dung lượng lớn và tính tiền lưu như mọi object S3, nên đặt lifecycle như bài 06.
 
 ## Lab: dựng, thử và làm hỏng một instance
 
@@ -108,13 +108,13 @@ cp env.sh.example env.sh      # để trống ID: tự tra theo tag của bài 0
 ./04-test.sh                  # trường host phải xuất hiện từ hai instance
 ```
 
-Chi phí: ALB tính theo giờ tồn tại và LCU, mỗi instance tính theo giây, NAT Gateway ở bài 04 vẫn đang tính theo giờ. Script mặc định chỉ cho IP của bạn gọi ALB. Script đã qua kiểm tra cú pháp và kiểm tên tham số ở chế độ không mạng, nhưng chưa chạy trên tài khoản thật; thời gian healthy, giá trị đích của policy và quota vCPU cần bạn xác nhận.
+Chi phí: ALB tính theo giờ tồn tại và LCU, mỗi instance tính theo giây, NAT Gateway ở bài 04 vẫn đang tính theo giờ. Script mặc định chỉ cho IP của bạn gọi ALB. Script đã qua kiểm tra cú pháp và kiểm tra tên tham số khi chạy mà không cần kết nối mạng, nhưng chưa chạy trên tài khoản thật; thời gian healthy, giá trị đích của policy và quota vCPU cần bạn xác nhận.
 
 ## Cái giá phải trả
 
 - **ALB tính tiền ngay cả khi không có khách.** Quên xoá ALB lab là khoản phí cố định theo giờ.
-- **Health check kiểm phụ thuộc ngoài gây dây chuyền.** Nếu `/health/ready` gọi cả database và database chậm, mọi target cùng unhealthy; ALB fail-open còn ASG kiểu ELB có thể thay hàng loạt máy đúng lúc cần ổn định nhất. Hãy cân nhắc để health check của ALB và ASG chỉ kiểm điều kiện cục bộ, còn tình trạng database thì cảnh báo riêng.
-- **Grace period quá ngắn** khiến ASG giết máy còn đang boot rồi tạo lại, lặp vô hạn.
+- **Health check kiểm tra dịch vụ phụ thuộc bên ngoài có thể gây lỗi dây chuyền.** Nếu `/health/ready` gọi cả database và database chậm, mọi target cùng unhealthy; ALB fail-open còn ASG kiểu ELB có thể thay hàng loạt máy đúng lúc cần ổn định nhất. Hãy cân nhắc để health check của ALB và ASG chỉ kiểm tra điều kiện cục bộ, còn tình trạng database thì đặt cảnh báo riêng.
+- **Grace period quá ngắn** khiến ASG dừng máy còn đang boot rồi tạo lại, cứ lặp lại như vậy mãi.
 - **Scale out cần vài phút**: boot, user data, health check. Target tracking đo rồi mới phản ứng, nên cao điểm có giờ cố định thì nên có lịch làm nóng.
 - **`max` và quota vCPU là trần cứng.** Chạm trần thì ASG không thêm được máy, và bạn chỉ biết khi khách đã chậm.
 

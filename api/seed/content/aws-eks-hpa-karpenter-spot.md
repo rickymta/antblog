@@ -10,7 +10,7 @@ language: vi
 
 Lúc 10:55, hàng đợi điều phối của Tới Nơi bắt đầu dài ra: khung giờ cao điểm 11:00 sắp tới, 70 chuyến mỗi giây sẽ đổ vào. Nếu đợi tới lúc hàng đợi dài mới tăng worker, khách đã chờ. Nếu giữ sẵn số worker của giờ cao điểm cả ngày, đội trả tiền cho máy rỗi 20 tiếng. Autoscaling giải bài toán này, nhưng trên Kubernetes có hai tầng cần scale cùng nhau: số pod, rồi số node chứa pod.
 
-Đây là **bài 45** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bài cần bạn đã xong [bài 44](/articles/aws-eks-ebs-efs-csi-statefulset); lab dùng cluster ở [bài 42](/articles/aws-eks-terraform-eksctl-kubectl-namespace) và hàng đợi SQS ở [bài 16](/articles/aws-sqs-sns-dlq-fan-out).
+Đây là **bài 45** của lộ trình **AWS qua Tới Nơi · Phần 05: Kubernetes trên AWS với EKS**. Bài này yêu cầu bạn đã học xong [bài 44](/articles/aws-eks-ebs-efs-csi-statefulset); lab dùng cluster ở [bài 42](/articles/aws-eks-terraform-eksctl-kubectl-namespace) và hàng đợi SQS ở [bài 16](/articles/aws-sqs-sns-dlq-fan-out).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -42,7 +42,7 @@ Pod và node do hai bộ điều khiển khác nhau lo. **Tầng pod** (HPA, KED
 <text x="32" y="228" class="t-mono">scale pod nhanh (giây) · scale node chậm hơn (vài chục giây tới vài phút) · cron giữ sẵn trước giờ cao điểm</text>
 </svg>
 </div>
-<figcaption>Hình 1. Chuỗi scale từ tải tới node. Mỗi bước có một chủ rõ ràng; khi chuỗi kẹt, bước nào đang đứng yên cho biết bộ điều khiển nào phải kiểm.</figcaption>
+<figcaption>Hình 1. Chuỗi scale từ tải tới node. Mỗi bước do một bộ điều khiển phụ trách rõ ràng; khi chuỗi kẹt, bước nào đang đứng yên cho biết cần kiểm tra bộ điều khiển nào.</figcaption>
 </figure>
 
 ## HPA, VPA và KEDA
@@ -70,9 +70,9 @@ spec:
     scaleDown: { stabilizationWindowSeconds: 300 }
 ```
 
-`booking` bị giới hạn bởi CPU nên HPA theo CPU là hợp. Bỏ `replicas` khỏi Deployment khi dùng HPA, nếu không mỗi lần `apply` sẽ đặt lại số bản sao. **VPA** lo phía còn lại: số `requests` đúng là gốc của mọi thứ ở bài này. Lab dùng VPA chỉ ở chế độ gợi ý, vì VPA tự đổi CPU request cùng lúc HPA scale theo CPU của cùng Deployment sẽ đánh nhau.
+`booking` bị giới hạn ở CPU nên cho HPA scale theo CPU là hợp lý. Bỏ `replicas` khỏi Deployment khi dùng HPA, nếu không mỗi lần `apply` sẽ đặt lại số bản sao. **VPA** lo phía còn lại: đặt `requests` đúng là nền tảng của mọi thứ ở bài này. Lab dùng VPA chỉ ở chế độ gợi ý, vì nếu VPA tự đổi CPU request trong lúc HPA scale theo CPU của cùng Deployment thì hai bên sẽ đánh nhau.
 
-Worker điều phối thì khác: CPU của nó không phản ánh việc chờ. Cái đáng đo là **độ sâu hàng đợi**. **KEDA** làm cầu nối: `ScaledObject` khai nguồn (SQS) và mục tiêu, KEDA sinh HPA và cấp metric ngoài cho nó. Cách tính: số replica ≈ số message chờ chia cho `queueLength`.
+Worker điều phối thì khác: CPU của worker không phản ánh việc chờ. Cái đáng đo là **độ sâu hàng đợi**. **KEDA** làm cầu nối: `ScaledObject` khai nguồn (SQS) và mục tiêu, KEDA sinh HPA và cấp metric ngoài cho nó. Cách tính: số replica ≈ số message chờ chia cho `queueLength`.
 
 ```yaml
 apiVersion: keda.sh/v1alpha1
@@ -97,7 +97,7 @@ Trigger SQS giữ số worker theo tải thật; trigger `cron` giữ sẵn 10 w
 
 ## Karpenter: node theo nhu cầu của pod
 
-Cluster Autoscaler làm việc với các node group có sẵn: bạn định nghĩa nhóm theo kiểu instance, nó chỉ đổi số lượng. **Karpenter** đi ngược lại: nhìn các pod đang Pending, tính xem cần instance cỡ nào, rồi tạo thẳng EC2 (qua EC2 Fleet) đúng cỡ đó, không cần node group. Nó cũng gom và xoá node dư. Ở bản v1, hai API chính là `NodePool` (chính sách) và `EC2NodeClass` (cấu hình AWS).
+Cluster Autoscaler làm việc với các node group có sẵn: bạn định nghĩa nhóm theo kiểu instance, nó chỉ đổi số lượng. **Karpenter** đi ngược lại: nhìn các pod đang Pending, tính xem cần instance cỡ nào, rồi tạo thẳng EC2 (qua EC2 Fleet) đúng cỡ đó, không cần node group. Karpenter cũng gom và xoá node dư. Ở bản v1, hai API chính là `NodePool` (chính sách) và `EC2NodeClass` (cấu hình AWS).
 
 | | Cluster Autoscaler | Karpenter | EKS Auto Mode |
 |---|---|---|---|
@@ -106,7 +106,7 @@ Cluster Autoscaler làm việc với các node group có sẵn: bạn định ng
 | Gom node dư | Có, kém linh hoạt hơn | Consolidation theo chính sách | Có sẵn |
 | Bạn vận hành | Controller và các node group | Controller, NodePool, EC2NodeClass, hàng đợi gián đoạn | Gần như không, trả thêm phí quản lý |
 
-Cho Tới Nơi, lab dùng hai NodePool. `spot-workers` chỉ Spot, chỉ Graviton (arm64), cho phép nhiều họ `c`, `m`, `r` thế hệ mới để có nhiều vùng giá; nó gắn taint `toinoi.example/capacity=spot` để chỉ pod khai tolerations mới lên. `on-demand-fallback` có `weight` thấp hơn, nhận pod không chịu được gián đoạn như `booking`.
+Cho Tới Nơi, lab dùng hai NodePool. `spot-workers` chỉ Spot, chỉ Graviton (arm64), cho phép nhiều họ `c`, `m`, `r` thế hệ mới để có nhiều vùng giá; nó gắn taint `toinoi.example/capacity=spot` để chỉ pod có khai báo tolerations mới được xếp lên node này. `on-demand-fallback` có `weight` thấp hơn, nhận pod không chịu được gián đoạn như `booking`.
 
 ```yaml
 apiVersion: karpenter.sh/v1
@@ -132,7 +132,7 @@ spec:
       - { nodes: "0", schedule: "0 4 * * *", duration: 2h, reasons: [Underutilized, Empty] }
 ```
 
-`limits.cpu` chặn trần: quá tay với một deployment lỗi thì chi phí không vô hạn. `consolidationPolicy` bảo Karpenter dồn pod sang ít node hơn rồi xoá node thừa, tiết kiệm nhưng gây gián đoạn. `budgets` giới hạn mức gián đoạn đồng thời; budget thứ hai cấm gom node trong giờ cao điểm (cron theo UTC: 04:00 UTC là 11:00 giờ Việt Nam). `EC2NodeClass` chọn AMI (`al2023@latest` cho lab, nên ghim ở production), subnet và security group theo tag `karpenter.sh/discovery` mà Terraform đã gắn. Karpenter cần chính nó chạy ở node không do nó quản lý, nên controller nằm ở node group `base` của bài 42.
+`limits.cpu` đặt trần: nếu một deployment lỗi scale quá tay thì chi phí vẫn không tăng vô hạn. `consolidationPolicy` bảo Karpenter dồn pod sang ít node hơn rồi xoá node thừa, tiết kiệm nhưng gây gián đoạn. `budgets` giới hạn mức gián đoạn đồng thời; budget thứ hai cấm gom node trong giờ cao điểm (cron theo UTC: 04:00 UTC là 11:00 giờ Việt Nam). `EC2NodeClass` chọn AMI (`al2023@latest` cho lab, nên ghim ở production), subnet và security group theo tag `karpenter.sh/discovery` mà Terraform đã gắn. Bản thân Karpenter phải chạy trên node không do nó quản lý, nên controller nằm ở node group `base` của bài 42.
 
 ## Spot an toàn cho worker
 
@@ -160,18 +160,18 @@ Spot rẻ vì EC2 có thể thu hồi với thông báo trước khoảng hai ph
 <figcaption>Hình 2. Một lần thu hồi Spot. Cửa sổ chỉ khoảng hai phút nên <code>terminationGracePeriodSeconds</code> của worker Spot phải nhỏ hơn thời gian đó.</figcaption>
 </figure>
 
-Bốn thói quen làm Spot an toàn. Một, **đa dạng hoá**: nhiều họ, nhiều cỡ, nhiều AZ; một loại instance duy nhất làm Spot dễ cạn. Hai, **taint** cho node Spot và `tolerations` chỉ ở worker chịu được gián đoạn; `booking` ở lại on-demand. Ba, **dừng gọn**: worker nhận `SIGTERM`, ngừng nhận message mới, xử lý nốt phần đang cầm trong `terminationGracePeriodSeconds` (lab đặt 90 giây). Với SQS, message chưa xoá sẽ quay lại hàng đợi sau visibility timeout nên handler phải idempotent (bài 16); với consumer Kafka, commit offset khi tắt. Bốn, **PodDisruptionBudget** giúp lúc Karpenter drain chủ động (gom node, thay AMI); nó không cản được EC2 thu hồi, vì máy bị lấy đi dù PDB nói gì.
+Bốn thói quen làm Spot an toàn. Một, **đa dạng hoá**: nhiều họ, nhiều cỡ, nhiều AZ; chỉ dùng một loại instance cho Spot thì dễ cạn. Hai, gắn **taint** cho node Spot và chỉ khai `tolerations` ở worker chịu được gián đoạn; `booking` ở lại on-demand. Ba, **dừng gọn**: worker nhận `SIGTERM`, ngừng nhận message mới, xử lý nốt phần đang cầm trong `terminationGracePeriodSeconds` (lab đặt 90 giây). Với SQS, message chưa xoá sẽ quay lại hàng đợi sau visibility timeout nên handler phải idempotent (bài 16); với consumer Kafka, commit offset khi tắt. Bốn, **PodDisruptionBudget** giúp lúc Karpenter drain chủ động (gom node, thay AMI); nó không cản được EC2 thu hồi, vì máy bị lấy đi dù PDB nói gì.
 
 ## Trải đều qua AZ và giữ sẵn giờ cao điểm
 
-Scale pod mà dồn cả vào một AZ thì mất AZ đó là mất hết. `topologySpreadConstraints` với `topologyKey: topology.kubernetes.io/zone` và `maxSkew: 1` buộc pod phân đều giữa các AZ; Karpenter tôn trọng ràng buộc này khi chọn nơi tạo node. `whenUnsatisfiable: DoNotSchedule` là cứng (pod Pending nếu không đều được), `ScheduleAnyway` là mềm. Pod anti-affinity theo hostname cũng làm được việc tương tự cho từng node, đắt hơn về tính toán khi cluster lớn.
+Scale pod mà dồn cả vào một AZ thì mất AZ đó là mất hết. `topologySpreadConstraints` với `topologyKey: topology.kubernetes.io/zone` và `maxSkew: 1` buộc pod phân đều giữa các AZ; Karpenter tôn trọng ràng buộc này khi chọn nơi tạo node. `whenUnsatisfiable: DoNotSchedule` là ràng buộc cứng (pod Pending nếu không phân đều được), `ScheduleAnyway` là ràng buộc mềm. Pod anti-affinity theo hostname cũng làm được việc tương tự cho từng node, đắt hơn về tính toán khi cluster lớn.
 
 Để không phải chờ node mới giữa lúc tải đổ vào, lịch (trigger `cron` của KEDA) tăng worker trước khung giờ cao điểm 15 phút; Karpenter nhận pod Pending và tạo node sẵn. Về chi phí: Karpenter gắn tag `karpenter.sh/nodepool` lên EC2 (kích hoạt thành cost allocation tag để Cost Explorer lọc theo NodePool); Compute Optimizer đề xuất cỡ instance cho EC2 và Auto Scaling group theo số liệu CloudWatch, dùng cho node group `base`, còn `requests` của pod thì đọc từ VPA. Bài 59 quay lại chủ đề này.
 
 ## Cái giá phải trả
 
 - **Consolidation gây gián đoạn.** Karpenter dồn pod sang node khác; không có PDB và graceful shutdown thì khách thấy lỗi. Đặt `budgets` quanh giờ cao điểm.
-- **Spot cạn.** Chỉ một họ instance hoặc một AZ thì khi cạn, pod Pending; có NodePool on-demand dự phòng cho pod quan trọng.
+- **Spot cạn.** Nếu chỉ dùng một họ instance hoặc một AZ thì khi Spot cạn, pod sẽ Pending; có NodePool on-demand dự phòng cho pod quan trọng.
 - **Quên `limits` của NodePool.** Một deployment lỗi lặp vô hạn có thể tạo hàng trăm node.
 
 **Bài tập:** HPA của `booking` đã tăng từ 4 lên 12 pod nhưng 8 pod nằm ở `Pending`. Việc tiếp theo thuộc về ai và bạn kiểm gì?
@@ -180,9 +180,9 @@ Scale pod mà dồn cả vào một AZ thì mất AZ đó là mất hết. `topo
 
 ## Lab: HPA, KEDA và NodePool
 
-Mã ở `examples/toi-noi-aws/p05-45-eks-autoscaling`: Terraform dựng phần AWS cho Karpenter (module con `eks//modules/karpenter`: role controller qua Pod Identity, role node, hàng đợi gián đoạn, rule EventBridge) và tag discovery, cùng role KEDA; manifest gồm HPA `booking`, Deployment/PDB/ScaledObject của `dispatch-worker`, VPA chế độ gợi ý và hai NodePool cùng `EC2NodeClass`. README ghi phần tính tiền và thứ tự dọn bắt buộc: xoá NodePool, đợi hết NodeClaim rồi mới `destroy`, vì node Karpenter tạo nằm ngoài Terraform.
+Mã ở `examples/toi-noi-aws/p05-45-eks-autoscaling`: Terraform dựng phần AWS cho Karpenter (module con `eks//modules/karpenter`: role controller qua Pod Identity, role node, hàng đợi gián đoạn, rule EventBridge) và tag discovery, cùng role KEDA; manifest gồm HPA `booking`, Deployment/PDB/ScaledObject của `dispatch-worker`, VPA chế độ gợi ý và hai NodePool cùng `EC2NodeClass`. README ghi cách tính chi phí và thứ tự dọn bắt buộc: xoá NodePool, đợi hết NodeClaim rồi mới `destroy`, vì node Karpenter tạo nằm ngoài Terraform.
 
-Kiểm trên máy: `fmt`, `init -backend=false`, `validate` qua Docker (đã sạch với module `~> 21.0`) và parse YAML. **Chưa kiểm chứng trên tài khoản thật:** schema CRD của Karpenter, KEDA, VPA ở phiên bản bạn cài, cách KEDA dùng Pod Identity của operator, hành vi consolidation và budget, quyền của các role, và việc Spot còn khả dụng. `kubectl apply --dry-run=client` cần cluster nên không dùng ở đây.
+Kiểm tra trên máy cục bộ: `fmt`, `init -backend=false`, `validate` qua Docker (đã sạch với module `~> 21.0`) và parse YAML. **Chưa kiểm chứng trên tài khoản thật:** schema CRD của Karpenter, KEDA, VPA ở phiên bản bạn cài, cách KEDA dùng Pod Identity của operator, hành vi consolidation và budget, quyền của các role, và việc Spot còn khả dụng. `kubectl apply --dry-run=client` cần cluster nên không dùng ở đây.
 
 Bài trước: [bài 44](/articles/aws-eks-ebs-efs-csi-statefulset). Bài tiếp: [bài 46](/articles/aws-eks-gitops-argocd-helm-kustomize).
 

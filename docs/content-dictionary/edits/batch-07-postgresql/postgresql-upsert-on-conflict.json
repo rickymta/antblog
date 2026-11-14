@@ -1,0 +1,14 @@
+{"file":"postgresql-upsert-on-conflict.md","edits":[
+{"old":"chạy lại không đổi gì.","new":"chạy lại không làm thay đổi dữ liệu.","reason":"'không đổi gì' cụt, giọng khẩu ngữ trong summary","severity":"medium"},
+{"old":"kiểm từng quy tắc bằng một lô dữ liệu","new":"kiểm tra từng quy tắc bằng một lô dữ liệu","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"PostgreSQL viết nó thành một mệnh đề của","new":"PostgreSQL biểu diễn thao tác này bằng một mệnh đề của","reason":"Tránh 'nó'; 'viết thành' gượng","severity":"medium"},
+{"old":"chưa chứng minh được ý này; để Phần 4.","new":"chưa chứng minh được ý này; ý đó để dành cho Phần 4.","reason":"Câu lược động từ","severity":"medium"},
+{"old":"và ta phải tự viết nó.","new":"và ta phải tự viết quy tắc này.","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"dòng 7 biến mất lặng lẽ với <code>INSERT 0 0</code>","new":"dòng 7 biến mất mà không báo lỗi, chỉ trả về <code>INSERT 0 0</code>","reason":"'lặng lẽ' là calque (silently)","severity":"medium"},
+{"old":"rồi khử trùng lặp trong lô","new":"rồi loại dòng trùng trong lô","reason":"'khử trùng lặp' gượng","severity":"medium"},
+{"old":"Khử trùng lặp trước (","new":"Loại dòng trùng trước (","reason":"'khử trùng lặp' gượng","severity":"low"},
+{"old":"BB-01 bị bỏ qua lặng lẽ (giá vẫn","new":"BB-01 bị bỏ qua mà không báo lỗi (giá vẫn","reason":"'lặng lẽ' là calque (silently)","severity":"medium"},
+{"old":"với dữ liệu đổi theo thời gian như giá, nó làm mất cập nhật thật","new":"với dữ liệu đổi theo thời gian như giá, cách này làm mất cập nhật thật","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"nói nó theo luật cô lập giao dịch thông thường khi chạy đồng thời","new":"nói MERGE tuân theo các luật cô lập giao dịch thông thường khi chạy đồng thời","reason":"Tránh 'nó'; 'theo luật' gượng","severity":"medium"},
+{"old":"Idempotent: gửi lại lô không đổi gì","new":"Idempotent: gửi lại lô không làm thay đổi dữ liệu","reason":"'không đổi gì' cụt","severity":"low"}
+]}

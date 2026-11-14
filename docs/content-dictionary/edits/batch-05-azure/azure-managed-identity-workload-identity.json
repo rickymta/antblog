@@ -1,0 +1,12 @@
+{"file":"azure-managed-identity-workload-identity.md","edits":[
+{"old":"một lỗ SSRF hay một thư viện độc","new":"một lỗ hổng SSRF hay một thư viện độc hại","reason":"'lỗ SSRF', 'thư viện độc' là cách nói gượng","severity":"medium"},
+{"old":"Chạy local, nó rơi xuống phiên `az login` của bạn.","new":"Chạy local, nó chuyển sang dùng phiên `az login` của bạn.","reason":"'rơi xuống' là calque của 'fall back to'","severity":"medium"},
+{"old":"là cái lợi, nhưng chuỗi fallback cũng là cái hại:","new":"là ưu điểm, nhưng chuỗi fallback cũng là nhược điểm:","reason":"'cái lợi/cái hại' gượng","severity":"low"},
+{"old":"vẫn đứng: identity này là danh tính","new":"vẫn còn hiệu lực: identity này là danh tính","reason":"'vẫn đứng' là calque của 'still stands'","severity":"medium"},
+{"old":"bản ghi mồ côi hiện là «Unknown» trong danh sách","new":"bản ghi mồ côi, hiển thị là «Unknown» trong danh sách","reason":"'hiện là' mơ hồ, dễ đọc thành 'hiện nay là'","severity":"medium"},
+{"old":"Nó chỉ đăng ký niềm tin; pipeline vẫn cần","new":"Lệnh này chỉ đăng ký niềm tin; pipeline vẫn cần","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"ngay sau khi identity vừa sinh, vốn dễ lỗi","new":"ngay sau khi identity vừa được tạo, vốn dễ lỗi","reason":"'vừa sinh' gượng, thiếu bị động","severity":"low"},
+{"old":"Hãy thử thêm hai phép âm tính để biết quyền đúng cỡ:","new":"Hãy thử thêm hai phép thử âm tính để biết quyền có đúng phạm vi hay không:","reason":"'phép âm tính', 'đúng cỡ' là calque","severity":"medium"},
+{"old":"nên kiểm `az login --help` nếu lệnh trên báo lỗi.","new":"nên kiểm tra `az login --help` nếu lệnh trên báo lỗi.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"để không để lại assignment mồ côi.","new":"để không còn assignment mồ côi nào.","reason":"Lặp 'để không để'","severity":"low"}
+]}

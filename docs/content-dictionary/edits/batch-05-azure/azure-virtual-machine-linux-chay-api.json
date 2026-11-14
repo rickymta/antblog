@@ -1,0 +1,18 @@
+{"file":"azure-virtual-machine-linux-chay-api.md","edits":[
+{"old":"VM là cách chạy API dễ hiểu nhất vì nó giống một máy chủ bạn đã quen. Đó cũng là lý do nó để lộ rõ","new":"VM là cách chạy API dễ hiểu nhất vì VM giống một máy chủ bạn đã quen. Đó cũng là lý do VM để lộ rõ","reason":"Tránh đại từ 'nó' lặp, nhắc lại danh từ","severity":"low"},
+{"old":"Mỗi thứ có resource ID, vòng đời và dòng tiền riêng.","new":"Mỗi thứ có resource ID, vòng đời và chi phí riêng.","reason":"'dòng tiền' là calque của cash flow, sai nghĩa","severity":"medium"},
+{"old":"nên hãy kiểm bằng `az vm list-sizes` hoặc trang sizes","new":"nên hãy kiểm tra bằng `az vm list-sizes` hoặc trang sizes","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Nó **không** copy code của trip-service lên máy.","new":"Cloud-init **không** copy code của trip-service lên máy.","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"Host production kiểm cấu hình lúc khởi động","new":"Host production kiểm tra cấu hình lúc khởi động","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Nó không kết nối tới database nào, và JWT handler","new":"Process này không kết nối tới database nào, và JWT handler","reason":"'Nó' mơ hồ","severity":"medium"},
+{"old":"không thấy thì lặng lẽ tạo một VNet mới với dải mặc định","new":"không thấy thì tự tạo một VNet mới với dải mặc định mà không báo lỗi","reason":"'lặng lẽ' là calque của silently","severity":"medium"},
+{"old":"Kiểm bằng effective security rules của NIC","new":"Hãy kiểm tra bằng effective security rules của NIC","reason":"'Kiểm' thiếu 'tra', câu cụt","severity":"high"},
+{"old":"Lab chặn bằng hai lớp rẻ:","new":"Lab chặn bằng hai lớp bảo vệ đơn giản, ít tốn kém:","reason":"'lớp rẻ' thiếu danh từ chính","severity":"medium"},
+{"old":"## Đưa trip-service lên và kiểm /health/live","new":"## Đưa trip-service lên và kiểm tra /health/live","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Nginx là điểm duy nhất nhìn thấy từ ngoài.","new":"Nginx là điểm duy nhất truy cập được từ bên ngoài.","reason":"'nhìn thấy' là dịch từng chữ của visible","severity":"low"},
+{"old":"đừng đẩy dữ liệu chuyến thật qua nó.","new":"đừng cho dữ liệu chuyến thật đi qua đó.","reason":"'đẩy qua nó' gượng","severity":"low"},
+{"old":"Availability zone là thứ bài 1 đã nói về region.","new":"Availability zone là khái niệm bài 1 đã giới thiệu cùng với region.","reason":"Câu cụt, khó hiểu","severity":"medium"},
+{"old":"và bạn phải bỏ trạng thái ra khỏi VM.","new":"và bạn phải tách trạng thái ra khỏi VM.","reason":"'bỏ trạng thái ra' là calque của make stateless","severity":"medium"},
+{"old":"Với Tới Nơi, câu hỏi thật sự là Container Apps đã giải quyết phần lớn bài toán này rồi, nên bạn không nên tự xây lại nó trên VM.","new":"Với Tới Nơi, câu hỏi thật sự là có nên tự làm việc này hay không. Container Apps đã giải quyết phần lớn bài toán này rồi, nên bạn không nên tự xây lại trên VM.","reason":"Câu lược vị ngữ, viết lại theo ý suy ra từ ngữ cảnh","severity":"high"},
+{"old":"nên nó thực sự cắt tiền compute.","new":"nên cách này thực sự cắt được tiền compute.","reason":"Tránh 'nó' mơ hồ","severity":"low"}
+]}

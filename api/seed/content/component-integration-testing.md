@@ -1,6 +1,6 @@
 ---
 slug: component-integration-testing
-title: "Component Integration Testing: kiểm chỗ các component ghép với nhau"
+title: "Component Integration Testing: kiểm thử chỗ các component ghép với nhau"
 summary: "Test level thứ hai của CTFL v4.0.1: kiểm interface và tương tác giữa các component trong cùng hệ thống. Năm defect giao tiếp thật giữa quote.ts, pricing.ts và voucher.ts của lab Tới Nơi, kèm test chạy được."
 category: testing
 level: beginner
@@ -39,11 +39,11 @@ Bài dừng ở mức **test level**: mục tiêu, đối tượng, defect đi�
 
 ### 2.1. Định nghĩa
 
-CTFL v4.0.1 (mục 2.2.1) mô tả component integration testing — còn gọi là *unit integration testing* — là test level **tập trung vào interface và tương tác giữa các component**, và nhấn mạnh nó **phụ thuộc nhiều vào chiến lược tích hợp** như bottom-up, top-down hay big-bang. ISTQB Glossary định nghĩa tương tự: test item là các interface và tương tác giữa những component đã được tích hợp.
+CTFL v4.0.1 (mục 2.2.1) mô tả component integration testing — còn gọi là *unit integration testing* — là test level **tập trung vào interface và tương tác giữa các component**, và nhấn mạnh rằng test level này **phụ thuộc nhiều vào chiến lược tích hợp** như bottom-up, top-down hay big-bang. ISTQB Glossary định nghĩa tương tự: test item là các interface và tương tác giữa những component đã được tích hợp.
 
 Hai ý cần giữ:
 
-1. **Đối tượng là chỗ nối, không phải từng component.** Nếu một ca test chỉ chạy đúng một hàm với đầu vào giả, đó là component test, dù nó nằm trong thư mục tên `integration/`.
+1. **Đối tượng là chỗ nối, không phải từng component.** Nếu một test case chỉ chạy đúng một hàm với đầu vào giả, đó là component test, dù nó nằm trong thư mục tên `integration/`.
 2. **«Component» là khái niệm tương đối.** Trong lab, component là một module TypeScript. Trong kiến trúc đích của Tới Nơi, Booking Service và Pricing Service là hai component của **cùng một hệ thống** — gọi gRPC giữa chúng vẫn là component integration. Ranh giới chuyển sang system integration khi interface đi ra **ngoài** hệ thống: VíXanh, MapViet, TinNhanh ([TEST-015](/articles/system-integration-testing)).
 
 ### 2.2. Năm thuộc tính phân biệt test level, áp vào component integration
@@ -194,7 +194,7 @@ Ghép khung «defect tích hợp điển hình» (callout mục 2.4) với bản
 
 ### 4.3. Test condition và dữ liệu chọn để lộ defect
 
-Ca integration tốt chọn dữ liệu sao cho **kết quả đúng và sai khác nhau**. Với GIAM20 ở 7,4 km, làm tròn sớm hay muộn đều ra 52.000 đ vì bước làm tròn cuối «nuốt» chênh lệch — không bắt được D2. Phải chọn ca ngay biên `minAmount` của HN10: 6,1 km xe máy ở Hà Nội ngoài cao điểm = 12.000 + 4.500 × 6,1 = **39.450 đ** &lt; 40.000 đ; làm tròn sớm thành 40.000 đ là vượt biên.
+Test case integration tốt chọn dữ liệu sao cho **kết quả đúng và sai khác nhau**. Với GIAM20 ở 7,4 km, làm tròn sớm hay muộn đều ra 52.000 đ vì bước làm tròn cuối «nuốt» chênh lệch — không bắt được D2. Phải chọn test case ngay biên `minAmount` của HN10: 6,1 km xe máy ở Hà Nội ngoài cao điểm = 12.000 + 4.500 × 6,1 = **39.450 đ** &lt; 40.000 đ; làm tròn sớm thành 40.000 đ là vượt biên.
 
 | Ca | Interface | Test condition | Dữ liệu | Kết quả mong đợi |
 |---|---|---|---|---|
@@ -208,11 +208,11 @@ Ca integration tốt chọn dữ liệu sao cho **kết quả đúng và sai kh�
 
 ### 5.1. Đề bài
 
-*Liệt kê interface giữa `quote.ts` và `pricing.ts`/`voucher.ts`, rồi viết 5 defect giao tiếp có thể xảy ra* (đơn vị tiền, làm tròn giữa chừng trái R-GEN-01, voucher rỗng, sai giờ VN R-GEN-02, một defect tự chọn). Lời giải: bảng GD-1…GD-7 (mục 4.1) và D1–D5 (mục 4.2). Phần dưới đi thêm một bước: cài đặt từng defect và chứng minh ca integration bắt được.
+*Liệt kê interface giữa `quote.ts` và `pricing.ts`/`voucher.ts`, rồi viết 5 defect giao tiếp có thể xảy ra* (đơn vị tiền, làm tròn giữa chừng trái R-GEN-01, voucher rỗng, sai giờ VN R-GEN-02, một defect tự chọn). Lời giải: bảng GD-1…GD-7 (mục 4.1) và D1–D5 (mục 4.2). Phần dưới đi thêm một bước: cài đặt từng defect và chứng minh test case integration bắt được.
 
 ### 5.2. Năm bản «ghép lỗi»
 
-Tệp `buggy-quote.ts` trong thư mục bài chứa năm phiên bản của `priceQuote`. **Không component nào của `src/domain` bị sửa** — mỗi bản chỉ ghép sai một mắt xích. Ví dụ D1, một lần «tái cấu trúc» chuyển việc trừ voucher lên tầng ứng dụng:
+Tệp `buggy-quote.ts` trong thư mục bài chứa năm phiên bản của `priceQuote`. **Không component nào của `src/domain` bị sửa** — mỗi bản chỉ ghép sai một mắt xích. Ví dụ D1, một lần «refactor» chuyển việc trừ voucher lên tầng ứng dụng:
 
 ```ts
 const { fare } = priceRequest(request, { peak, raining, voucher: null });
@@ -264,7 +264,7 @@ npx vitest run articles/component-integration-testing --reporter=verbose
 ## 6. Góc nhìn nâng cao
 
 - **«Integration test» trong mã nguồn không đồng nghĩa với test level này.** Kiến trúc §17.1 dùng chữ «Component» cho «Booking service + PostgreSQL/Redis test instance» — đó là cách gọi ngành (kiểm một service cùng hạ tầng của nó), khác component testing của ISTQB. Khi trao đổi, hỏi lại: test object là gì, interface nào được kiểm?
-- **Mock quá nhiều thì không còn tích hợp.** Thay `priceRequest` bằng mock trả sẵn 52.000 đ là D1, D2 biến mất. Bản giả chỉ dùng cho phần **ngoài** phạm vi tích hợp đang kiểm (ở đây: kho, thời tiết).
+- **Mock quá nhiều thì không còn tích hợp.** Thay `priceRequest` bằng mock trả sẵn 52.000 đ thì D1, D2 biến mất. Bản giả chỉ dùng cho phần **ngoài** phạm vi tích hợp đang kiểm (ở đây: kho, thời tiết).
 - **Chiến lược tích hợp quyết định thứ tự và bản giả.** Big-bang ghép tất cả rồi mới test — khó định vị lỗi. Top-down bắt đầu từ `quote.ts`, thay domain chưa xong bằng stub; bottom-up bắt đầu từ `fare.ts`/`voucher.ts`, cần driver gọi chúng. Syllabus chỉ nêu tên; cách chọn và ưu nhược ở Series 07 (TEST-066 … TEST-069).
 - **Microservices làm interface thành hợp đồng.** Trong lab, đặt kiểu tiền riêng (`Milli`, `Dong`) sẽ biến D1 thành lỗi biên dịch. Qua gRPC thì không: đổi nghĩa trường `fare` từ đồng sang nghìn đồng trong `.proto` vẫn biên dịch được — lý do pipeline §17 có contract test (TEST-074, Series 11).
 - **Lỗi giao tiếp không chỉ là dữ liệu sai.** Ở hệ thống đích còn có Pricing quá deadline, hay Booking chỉ xử lý `INVALID_ARGUMENT` mà quên `FAILED_PRECONDITION`. Lab không có mạng nên không minh hoạ được — đây là giới hạn của lab.
@@ -326,7 +326,7 @@ npx vitest run articles/component-integration-testing --reporter=verbose
 <p><b>b) đúng</b> — giả định sai về đơn vị dữ liệu qua interface. a) sai: lỗi nằm trong mã ghép nối. c) sai: system hay acceptance testing có thể thấy failure, nhưng muộn và khó định vị hơn. d) sai: unit test kiểm từng component cô lập, không kiểm chỗ nối.</p>
 </details>
 
-**Câu 4 (K2).** Ca integration nào phù hợp NHẤT để phát hiện defect «đưa số tiền đã làm tròn lên 1.000 đ cho bước voucher»?
+**Câu 4 (K2).** Test case integration nào phù hợp NHẤT để phát hiện defect «đưa số tiền đã làm tròn lên 1.000 đ cho bước voucher»?
 
 - a) GIAM20, 7,4 km, cao điểm, mưa — kỳ vọng 52.000 đ
 - b) Không voucher, 7,4 km — kỳ vọng 46.000 đ

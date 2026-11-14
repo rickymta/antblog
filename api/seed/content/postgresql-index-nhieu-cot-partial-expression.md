@@ -1,7 +1,7 @@
 ---
 slug: postgresql-index-nhieu-cot-partial-expression
 title: "Index nhiều cột, partial index và expression index"
-summary: "Ba đội của Tới Nơi cùng xin thêm index cho bảng trips 1 triệu chuyến đang nhận 560 UPDATE/giây. Đọc thứ tự cột, skip scan của PostgreSQL 18, partial và expression index bằng kế hoạch thật, rồi tính giá ghi bằng WAL."
+summary: "Ba đội của Tới Nơi cùng xin thêm index cho bảng trips 1 triệu chuyến đang nhận 560 UPDATE/giây. Bài này đọc thứ tự cột, skip scan của PostgreSQL 18, partial và expression index bằng kế hoạch thật, rồi tính giá ghi bằng WAL."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-025, index, btree, partial-index, expression-index, skip-scan, toi-noi]
@@ -93,9 +93,9 @@ Skip scan đáng giá khi cột đầu **ít** giá trị. Thí nghiệm tạm x
          Buffers: shared hit=34 read=4616
 ```
 
-Planner vẫn chọn index, nhưng đọc **khoảng 4.650 page** — gần hết 4.959 page của nó. Chỉ vì `count(*)` không cần heap nên vẫn rẻ hơn quét 19.441 page bảng. Đổi sang `SELECT code` (cột ngoài index) thì planner bỏ index, `Seq Scan … Buffers: shared read=19441`. Skip scan là lưới đỡ khi thứ tự cột chưa khớp câu hỏi, không thay được thứ tự cột đúng: 50 page so với 4.650 page.
+Planner vẫn chọn index, nhưng đọc **khoảng 4.650 page** — gần hết 4.959 page của nó. Chỉ nhờ `count(*)` không cần đọc heap nên cách này vẫn rẻ hơn quét 19.441 page bảng. Đổi sang `SELECT code` (cột ngoài index) thì planner bỏ index, `Seq Scan … Buffers: shared read=19441`. Skip scan là lưới an toàn khi thứ tự cột chưa khớp câu hỏi, không thay được thứ tự cột đúng: 50 page so với 4.650 page.
 
-## 4. Partial index: chỉ đánh index phần hay hỏi
+## 4. Partial index: chỉ đánh index phần hay được truy vấn
 
 **Partial index** (index một phần) chỉ chứa mục cho các dòng thoả một điều kiện — gọi là **predicate** của index. Màn điều phối chỉ hỏi 6 trạng thái chưa kết thúc:
 
@@ -141,7 +141,7 @@ Tài liệu nói rõ hệ thống chỉ nhận ra những suy luận đơn giả
 
 Ở chế độ mặc định `auto`, prepared statement được lập kế hoạch riêng cho 5 lần thực thi đầu rồi mới cân nhắc chuyển sang kế hoạch chung — nên màn hình có thể nhanh lúc thử và chậm sau vài phút chạy thật. Bài tập 2 có cách sửa.
 
-### Partial UNIQUE: index làm luật nghiệp vụ
+### Partial UNIQUE: dùng index để thực thi luật nghiệp vụ
 
 Partial index còn giữ được luật mà `UNIQUE` thường không diễn đạt nổi: **mỗi tài xế có tối đa một chuyến đang chở**. Thí nghiệm cho thấy fixture đã vi phạm luật này trước khi có index:
 
@@ -241,7 +241,7 @@ Bẫy riêng của partial index: cột chỉ nằm trong **predicate** cũng ch
 
 - **Một index nhiều cột hay nhiều index một cột:** `(city_id, requested_at)` phục vụ «thành phố + ngày», «thành phố», và nhờ skip scan cả «chỉ ngày»; hai index một cột tốn hai lần ghi và phải ghép bằng `BitmapAnd`.
 - **Partial:** nhỏ, rẻ khi ghi dòng ngoài predicate, nhưng chỉ phục vụ câu chứng minh được predicate, và chặn HOT cho cột trong predicate.
-- **Expression:** đúng câu hỏi khó viết lại, nhưng tính biểu thức ở mỗi lần ghi và chỉ khớp đúng một cách viết.
+- **Expression:** đáp ứng đúng câu hỏi khó viết lại, nhưng tính biểu thức ở mỗi lần ghi và chỉ khớp đúng một cách viết.
 - **Index mới nói chung:** trả lời bằng số — page đọc giảm bao nhiêu cho câu nào, WAL và HOT mất bao nhiêu cho tải ghi nào. Không có số thì chưa nên thêm.
 
 ## 9. Bài tập
@@ -249,7 +249,7 @@ Bẫy riêng của partial index: cột chỉ nằm trong **predicate** cũng ch
 **Bài 1.** Sau khi có `ix_trips_ngay_vn`, một nhân viên viết `WHERE date_trunc('day', requested_at AT TIME ZONE 'Asia/Ho_Chi_Minh') = TIMESTAMP '2026-10-15 00:00'`. Kết quả đúng không, có dùng index không, sửa thế nào?
 
 <details><summary><b>Lời giải</b></summary>
-<p>Kết quả đúng (5.896 dòng, bằng cách viết <code>::date</code>) nhưng kế hoạch là <code>Seq Scan</code>: planner chỉ khớp biểu thức index theo dạng cây biểu thức, không suy ra hai cách viết tương đương. Hai cách sửa:</p>
+<p>Kết quả đúng (5.896 dòng, giống kết quả của cách viết <code>::date</code>) nhưng kế hoạch là <code>Seq Scan</code>: planner chỉ khớp biểu thức index theo dạng cây biểu thức, không suy ra hai cách viết tương đương. Hai cách sửa:</p>
 <pre><code class="language-sql">-- đúng biểu thức của index
 WHERE (requested_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date = DATE '2026-10-15'
 -- hoặc khoảng nửa mở trên cột gốc, không cần index biểu thức
@@ -277,7 +277,7 @@ WHERE requested_at &gt;= TIMESTAMPTZ '2026-10-15 00:00+07'
 <pre><code class="language-sql">SELECT array_agg(code ORDER BY code), array_agg(status ORDER BY code)
 FROM trips WHERE status IN ('accepted', 'arriving', 'picked_up', 'in_transit')
 GROUP BY driver_id HAVING count(*) &gt; 1;</code></pre>
-<p>Ra 3 cặp {1099751,1099860}, {1099873,1099885}, {1099890,1099909}. Sau khi nghiệp vụ quyết (lab huỷ chuyến nhận sau, 3 dòng), <code>CREATE UNIQUE INDEX uq_trips_tai_xe_dang_cho ON trips (driver_id) WHERE status IN (…4 trạng thái…)</code> thành công, 16.384 byte. Gán chuyến <code>searching</code> cho tài xế đang <code>in_transit</code> ⇒ <code>duplicate key value violates unique constraint "uq_trips_tai_xe_dang_cho"</code>; tài xế đó vẫn có chuyến <code>completed</code> trong bảng mà không vướng. Mục C của tệp thí nghiệm.</p>
+<p>Ra 3 cặp {1099751,1099860}, {1099873,1099885}, {1099890,1099909}. Sau khi bên nghiệp vụ quyết định xử lý (lab huỷ chuyến nhận sau, 3 dòng), <code>CREATE UNIQUE INDEX uq_trips_tai_xe_dang_cho ON trips (driver_id) WHERE status IN (…4 trạng thái…)</code> thành công, 16.384 byte. Gán chuyến <code>searching</code> cho tài xế đang <code>in_transit</code> ⇒ <code>duplicate key value violates unique constraint "uq_trips_tai_xe_dang_cho"</code>; tài xế đó vẫn có chuyến <code>completed</code> trong bảng mà không vướng. Mục C của tệp thí nghiệm.</p>
 </details>
 
 ## 10. Đọc tiếp

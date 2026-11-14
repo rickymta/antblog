@@ -1,0 +1,10 @@
+{"file":"ba-customer-journey-service-blueprint.md","edits":[
+{"old":"Dùng cả hai, BA có thể chỉ ra","new":"Khi dùng cả hai, BA có thể chỉ ra","reason":"Mệnh đề đầu thiếu liên kết","severity":"low"},
+{"old":"từ xác định điểm chờ tới gặp tài xế hoặc tìm hỗ trợ","new":"từ lúc xác định điểm chờ tới lúc gặp tài xế hoặc tìm hỗ trợ","reason":"Động từ làm danh từ, cụt","severity":"medium"},
+{"old":"| Kết quả cụ thể các case và nguyên nhân |","new":"| Kết quả cụ thể của các case và nguyên nhân |","reason":"Thiếu giới từ","severity":"low"},
+{"old":"giả thuyết cần dev xác nhận","new":"giả thuyết cần nhóm kỹ thuật xác nhận","reason":"Thống nhất 'nhóm kỹ thuật' như trong bài","severity":"low"},
+{"old":"Một ứng dụng có giao diện không khiến mọi hoạt động của nó đều nằm phía trước","new":"Dù ứng dụng có giao diện, không phải mọi hoạt động của nó đều nằm phía trước","reason":"Câu dịch sát, gượng","severity":"medium"},
+{"old":"vận hành có người cập nhật; tài xế nhận","new":"bộ phận vận hành có người cập nhật; tài xế nhận","reason":"Thiếu chủ thể bộ phận","severity":"medium"},
+{"old":"- Journey là danh sách màn hình, bỏ hoạt động ngoài app","new":"- Coi journey chỉ là danh sách màn hình, bỏ sót hoạt động ngoài app","reason":"Câu thiếu động từ","severity":"low"},
+{"old":"không có owner cho việc hỗ trợ","new":"không có người phụ trách việc hỗ trợ","reason":"owner thành người phụ trách","severity":"medium"}
+]}

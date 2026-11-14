@@ -1,0 +1,13 @@
+{"file":"azure-storage-account-blob-tier-sas.md","edits":[
+{"old":"Nó thành một phần địa chỉ","new":"Tên này trở thành một phần địa chỉ","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu; thêm động từ 'trở thành'","severity":"medium"},
+{"old":"| Sống sót khi |","new":"| Vẫn còn dữ liệu khi |","reason":"'Sống sót' là calque của 'survives'","severity":"medium"},
+{"old":"Policy này chỉ mô tả luật chuyển tier. Nó không xoá blob","new":"Policy này chỉ mô tả luật chuyển tier. Policy không xoá blob","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"bài này không là tư vấn pháp lý","new":"bài này không phải tư vấn pháp lý","reason":"Thiếu 'phải' trước danh từ","severity":"medium"},
+{"old":"Bất kỳ request nào tới Blob cũng phải chứng minh nó được phép.","new":"Bất kỳ request nào tới Blob cũng phải chứng minh mình được phép.","reason":"'nó' mơ hồ, dùng 'mình' tự nhiên hơn","severity":"low"},
+{"old":"Nó cần một thứ ngắn hạn, hẹp quyền, đưa bằng URL.","new":"App cần một thứ ngắn hạn, hẹp quyền, đưa bằng URL.","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"Phiên bản nên dùng là user delegation SAS","new":"Loại nên dùng là user delegation SAS","reason":"'Phiên bản' sai nghĩa: đây là biến thể (loại) SAS, không phải version","severity":"medium"},
+{"old":"Nó không chứng minh API đã xác thực tài xế trước đó","new":"Đoạn code này không chứng minh API đã xác thực tài xế trước đó","reason":"Tránh 'Nó' chỉ đoạn code","severity":"medium"},
+{"old":"Tên blob do API chọn, là GUID, không chứa","new":"Tên blob do API chọn, dùng GUID, không chứa","reason":"Câu mượt hơn","severity":"low"},
+{"old":"Cả hai cứu bạn khỏi thao tác nhầm, và cả hai có giá.","new":"Cả hai giúp bạn tránh hậu quả của thao tác nhầm, và cả hai đều tốn tiền.","reason":"'cứu khỏi' và 'có giá' gượng, dịch từng chữ","severity":"medium"},
+{"old":"Nó cũng chưa thử CORS hay thu hồi key.","new":"Lab cũng chưa thử CORS hay thu hồi key.","reason":"Tránh 'Nó' đầu câu","severity":"medium"}
+]}

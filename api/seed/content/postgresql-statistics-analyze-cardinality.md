@@ -1,7 +1,7 @@
 ---
 slug: postgresql-statistics-analyze-cardinality
 title: "Statistics, ANALYZE và ước lượng cardinality: khi planner đoán sai số dòng"
-summary: "Tới Nơi nạp 30.000 chuyến khuyến mãi ngày 01/11, planner vẫn tin ngày đó có 1 chuyến và chọn Nested Loop. Đọc pg_stats, MCV, histogram, thống kê mở rộng để tìm và sửa chỗ ước lượng lệch thực tế trên dữ liệu phân bố không đều."
+summary: "Tới Nơi nạp 30.000 chuyến khuyến mãi ngày 01/11, planner vẫn tin ngày đó có 1 chuyến và chọn Nested Loop. Đọc pg_stats, MCV, histogram, thống kê mở rộng để tìm và sửa chỗ ước lượng lệch so với thực tế trên dữ liệu phân bố không đều."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-027, statistics, analyze, cardinality, pg-stats, explain, toi-noi]
@@ -14,7 +14,7 @@ Sáng 01/11, đội tăng trưởng của Tới Nơi chạy khuyến mãi «đ�
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-027 · Phần 3/6 · Trung bình</span>
-<p>Đọc trước: <a href="/articles/postgresql-explain-ke-hoach-thuc-thi">PG-021 · Đọc EXPLAIN từ truy vấn tìm chuyến</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>27-statistics.sql</code>) và thí nghiệm <code>p03/thu-nghiem/pg027-cong-thuc-uoc-luong.sql</code>. Sau bài này, bạn tìm được chỗ ước lượng lệch thực tế trên dữ liệu phân bố không đều, đọc được <code>pg_stats</code> và chọn cách sửa phù hợp: tăng mức thống kê, thống kê mở rộng hay chạy lại ANALYZE.</p>
+<p>Đọc trước: <a href="/articles/postgresql-explain-ke-hoach-thuc-thi">PG-021 · Đọc EXPLAIN từ truy vấn tìm chuyến</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>27-statistics.sql</code>) và thí nghiệm <code>p03/thu-nghiem/pg027-cong-thuc-uoc-luong.sql</code>. Sau bài này, bạn tìm được chỗ ước lượng lệch so với thực tế trên dữ liệu phân bố không đều, đọc được <code>pg_stats</code> và chọn cách sửa phù hợp: tăng mức thống kê, thống kê mở rộng hay chạy lại ANALYZE.</p>
 </div>
 
 ## 1. Dữ liệu và cách chạy
@@ -36,7 +36,7 @@ Bảng `trips` có **1.000.000 chuyến** (19.441 page), phân bố cố ý lệ
 
 ## 2. Planner lấy số liệu ở đâu?
 
-**Cardinality** (bản số, ở đây là số dòng) mà mỗi nút kế hoạch trả ra được planner *ước lượng* từ hai nguồn:
+Planner *ước lượng* **cardinality** (bản số, ở đây là số dòng) mà mỗi nút kế hoạch trả ra, dựa trên hai nguồn:
 
 - `pg_class.reltuples` và `relpages`: số dòng và số page của bảng, cập nhật khi VACUUM, ANALYZE hay CREATE INDEX chạy, không cập nhật theo từng câu ghi.
 - `pg_statistic`, đọc qua view `pg_stats`: thống kê từng cột do **ANALYZE** thu thập.
@@ -170,7 +170,7 @@ Cột được gọi bằng số thứ tự (attnum): 4 = `city_id`, 14 = `picku
 | `ndistinct` | số tổ hợp giá trị khác nhau | GROUP BY, DISTINCT trên nhiều cột |
 | `mcv` | danh sách tổ hợp phổ biến và tần suất | điều kiện kết hợp, kể cả loại `dependencies` không hỗ trợ |
 
-Giới hạn theo tài liệu: phụ thuộc hàm không áp cho so sánh khoảng, `LIKE` hay so sánh hai cột; thống kê mở rộng **không** dùng cho điều kiện JOIN. Chỉ tạo trên tổ hợp cột thật sự đi cùng nhau trong truy vấn.
+Giới hạn theo tài liệu: phụ thuộc hàm không áp dụng cho so sánh khoảng, `LIKE` hay so sánh hai cột; thống kê mở rộng **không** dùng cho điều kiện JOIN. Chỉ tạo trên tổ hợp cột thật sự đi cùng nhau trong truy vấn.
 
 ## 6. Điều kiện trên biểu thức: không có thống kê, planner đoán
 
@@ -208,7 +208,7 @@ Histogram chỉ đúng tới **lần ANALYZE gần nhất**. Lab nạp 30.000 ch
  30000.0
 ```
 
-Mốc cuối của histogram vẫn ở 31/10, nên planner tin ngày 01/11 gần như trống: ước **1**, lệch 30.000 lần. Hệ quả lên câu báo cáo:
+Mốc cuối của histogram vẫn ở 31/10, nên planner tin ngày 01/11 gần như trống: ước **1**, lệch 30.000 lần. Hệ quả đối với câu báo cáo:
 
 ```text
  GroupAggregate
@@ -225,7 +225,7 @@ Có một điều thú vị: planner **không** mù hoàn toàn với dòng mớ
 
 ### 7.1. Autovacuum có tự cứu không?
 
-Cluster lab tắt autovacuum để tái lập. Trên server thật, autovacuum ANALYZE một bảng khi số dòng thêm/sửa/xoá kể từ lần ANALYZE trước vượt ngưỡng:
+Cluster lab tắt autovacuum để tái lập. Trên server thật, autovacuum chạy ANALYZE cho một bảng khi số dòng thêm/sửa/xoá kể từ lần ANALYZE trước vượt ngưỡng:
 
 ```text
 ngưỡng = autovacuum_analyze_threshold + autovacuum_analyze_scale_factor × reltuples
@@ -243,8 +243,8 @@ ngưỡng = autovacuum_analyze_threshold + autovacuum_analyze_scale_factor × re
 ## 8. Quy trình tìm chỗ ước lượng lệch
 
 1. `EXPLAIN (ANALYZE)` (câu được thực thi thật, PG-021): đặt `rows=` cạnh `actual rows × loops` ở **từng nút**, từ nút lá lên.
-2. Tìm nút **thấp nhất** lệch từ khoảng 10 lần; nút cha thường chỉ kế thừa sai số của con.
-3. Kiểm độ tươi: `last_analyze`, `last_autoanalyze`, `n_mod_since_analyze` trong `pg_stat_user_tables`.
+2. Tìm nút **thấp nhất** có độ lệch từ khoảng 10 lần; nút cha thường chỉ kế thừa sai số của con.
+3. Kiểm tra xem thống kê còn mới không: `last_analyze`, `last_autoanalyze`, `n_mod_since_analyze` trong `pg_stat_user_tables`.
 4. Đọc `pg_stats` của cột: giá trị có trong MCV không, `n_distinct` so với `count(DISTINCT …)`.
 5. Sửa theo nguyên nhân:
 
@@ -267,7 +267,7 @@ Hàm `uoc_luong(sql)` của nền lab làm sẵn bước 1 cho nút gốc.
 
 ## 10. Đánh đổi
 
-Thống kê chi tiết hơn tốn thời gian ANALYZE, dung lượng `pg_statistic` và chút thời gian lập kế hoạch. Thống kê lấy mẫu còn khiến hai lần ANALYZE trên cùng dữ liệu có thể cho hai kế hoạch khác nhau khi chi phí hai phương án sát nhau; lab gặp thật ở PG-030 (kế hoạch chung lúc Index Scan + Limit, lúc Bitmap + Sort). Target cao giảm dao động nhưng không xoá hẳn. Truy vấn quan trọng chỉ đúng nhờ «may mắn của mẫu» thì nên sửa cấu trúc (index, viết lại câu).
+Thống kê chi tiết hơn tốn thời gian ANALYZE, dung lượng `pg_statistic` và chút thời gian lập kế hoạch. Thống kê lấy mẫu còn khiến hai lần ANALYZE trên cùng dữ liệu có thể cho hai kế hoạch khác nhau khi chi phí hai phương án sát nhau; lab gặp thật ở PG-030 (kế hoạch chung lúc Index Scan + Limit, lúc Bitmap + Sort). Target cao giảm dao động nhưng không xoá hẳn. Truy vấn quan trọng mà chỉ có kế hoạch tốt nhờ «may mắn của mẫu» thì nên sửa cấu trúc (index, viết lại câu).
 
 ## 11. Bài tập
 

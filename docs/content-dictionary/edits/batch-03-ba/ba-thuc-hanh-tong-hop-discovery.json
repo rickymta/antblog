@@ -1,0 +1,13 @@
+{"file":"ba-thuc-hanh-tong-hop-discovery.md","edits":[
+{"old":"hoặc làm bước nào tiếp.","new":"hoặc nên làm bước nào tiếp theo.","reason":"Câu cụt","severity":"medium"},
+{"old":"| Mẫu thuận tiện, độc lập tập cuộc gọi P01 |","new":"| Mẫu thuận tiện, độc lập với tập cuộc gọi P01 |","reason":"Thiếu giới từ","severity":"medium"},
+{"old":"| WS-01 | Vận hành muốn xem","new":"| WS-01 | Bộ phận vận hành muốn xem","reason":"Thiếu chủ thể bộ phận","severity":"medium"},
+{"old":"Cần kiểm cùng lượt, phiên bản","new":"Cần kiểm tra cùng lượt, phiên bản","reason":"Động từ cụt","severity":"low"},
+{"old":"Cần owner tài liệu và dữ liệu xác nhận","new":"Cần người phụ trách tài liệu và dữ liệu xác nhận","reason":"owner","severity":"low"},
+{"old":"| Owner quy trình CSKH |","new":"| Người phụ trách quy trình CSKH |","reason":"owner","severity":"low"},
+{"old":"CSKH và owner dữ liệu/truy cập","new":"CSKH và người phụ trách dữ liệu/truy cập","reason":"owner","severity":"low"},
+{"old":"Kiểm liên kết ticket/lượt","new":"Kiểm tra liên kết ticket/lượt","reason":"Động từ cụt","severity":"low"},
+{"old":"cần kiểm khả năng nối dữ liệu trước khi dùng cho đo theo lượt","new":"cần kiểm tra khả năng nối dữ liệu trước khi dùng để đo theo lượt","reason":"Động từ cụt, giới từ","severity":"medium"},
+{"old":"Kế hoạch tiếp cần owner, nguồn lực","new":"Kế hoạch tiếp theo cần người phụ trách, nguồn lực","reason":"Câu cụt; owner","severity":"medium"},
+{"old":"Nếu chọn kiểm dữ liệu,","new":"Nếu chọn kiểm tra dữ liệu,","reason":"Động từ cụt","severity":"low"}
+]}

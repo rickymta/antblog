@@ -1,0 +1,11 @@
+{"file":"azure-policy-deny-audit-initiative.md","edits":[
+{"old":"đều bị đối xử như nhau.","new":"đều được xử lý như nhau.","reason":"'bị đối xử' sai sắc thái, calque 'treated'","severity":"medium"},
+{"old":"Nó biết storage account bật public access hay không, nhưng","new":"Policy biết storage account có bật public access hay không, nhưng","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu; thiếu 'có'","severity":"low"},
+{"old":"Khi đã tin cậy, cùng định nghĩa đó","new":"Khi đã yên tâm, cùng định nghĩa đó","reason":"'tin cậy' thiếu đối tượng, gượng","severity":"medium"},
+{"old":"chúng không chứng minh policy cover được mọi resource type","new":"chúng không chứng minh policy bao phủ được mọi resource type","reason":"'cover' tiếng Anh lọt vào văn xuôi","severity":"medium"},
+{"old":"sửa các resource hợp lệ hoặc tạo exemption, rồi","new":"sửa các resource vi phạm thật hoặc tạo exemption, rồi","reason":"'resource hợp lệ' mâu thuẫn: resource hợp lệ không cần sửa; ý là các trường hợp vi phạm thật","severity":"medium"},
+{"old":"Nó không kiểm tra tên hiển thị còn đúng hay không:","new":"Khối này không kiểm tra tên hiển thị còn đúng hay không:","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"Nó cũng không kiểm `allowedValues` của tham số effect","new":"Khối này cũng không kiểm tra `allowedValues` của tham số effect","reason":"'kiểm' thiếu 'tra'; tránh 'Nó'","severity":"medium"},
+{"old":"Kiểm `allowBlobPublicAccess` (truy cập blob ẩn danh)","new":"Kiểm tra `allowBlobPublicAccess` (truy cập blob ẩn danh)","reason":"'Kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Đọc danh sách, xử lý resource hợp lệ rồi bật enforcement","new":"Đọc danh sách, xử lý các resource vi phạm thật rồi bật enforcement","reason":"'resource hợp lệ' mâu thuẫn, ý là các trường hợp vi phạm thật","severity":"medium"}
+]}

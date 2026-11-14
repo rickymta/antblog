@@ -35,7 +35,7 @@ Story «chặn khách tạo chuyến quá nhanh» chỉ có một dòng: *tối 
 - **Shift left bằng test-first** — tiêu chí chấp nhận (acceptance criteria) được viết thành test trước khi có code.
 - **Shift left bằng công cụ** — static analysis (bài 029) và test tự động chạy ở mỗi lần nộp code.
 
-Vấn đề nó giải quyết: defect trong yêu cầu đắt nhất khi phát hiện muộn, vì thiết kế, code, test, dữ liệu phía sau đều dựng trên nó. Câu hỏi «yêu cầu dữ liệu sai có bị đếm không?» tốn hai phút ở refinement; trả lời sau khi lên production tốn một sự cố, một bản vá, một đợt regression. Dùng được trong mọi mô hình — Waterfall bằng review đặc tả và thiết kế test sớm, Agile bằng refinement, ATDD, CI — và **không** có nghĩa bỏ kiểm thử ở giai đoạn sau.
+Vấn đề shift left giải quyết: defect trong yêu cầu đắt nhất khi phát hiện muộn, vì thiết kế, code, test, dữ liệu phía sau đều dựng trên nó. Câu hỏi «yêu cầu dữ liệu sai có bị đếm không?» tốn hai phút ở refinement; trả lời sau khi lên production tốn một sự cố, một bản vá, một đợt regression. Shift left dùng được trong mọi mô hình — Waterfall bằng review đặc tả và thiết kế test sớm, Agile bằng refinement, ATDD, CI — và **không** có nghĩa bỏ kiểm thử ở giai đoạn sau.
 
 ## 2. Lý thuyết theo ISTQB
 
@@ -63,7 +63,7 @@ Ba cách tiếp cận dùng test để dẫn dắt phát triển, đều theo sh
 | **ATDD** | Suy test từ acceptance criteria trong lúc thiết kế, trước khi phát triển phần đó; cả đội cùng viết |
 | **BDD** | Mô tả hành vi bằng ngôn ngữ tự nhiên dạng Given/When/Then, rồi chuyển thành test chạy được |
 
-Bài này dùng ATDD (CTFL 4.5.3) vì nó nối refinement với test: bước đầu phân tích, viết story và AC — **giải quyết chỗ thiếu, mơ hồ ngay lúc đó**; bước sau mới tạo test từ AC. Viết AC và tổ chức nghiệm thu chi tiết thuộc TEST-092 (Series 08).
+Bài này dùng ATDD (CTFL 4.5.3) vì ATDD nối refinement với test: bước đầu phân tích, viết story và AC — **giải quyết chỗ thiếu, mơ hồ ngay lúc đó**; bước sau mới tạo test từ AC. Viết AC và tổ chức nghiệm thu chi tiết thuộc TEST-092 (Series 08).
 
 ### 2.3. Phản hồi sớm và thường xuyên từ stakeholder (FL-3.2.1, K1)
 
@@ -232,11 +232,11 @@ Tính năng: Giới hạn tạo chuyến (S-RL-01, R-API-13)
         Then chỉ yêu cầu thứ 6 bị 429
 ```
 
-Theo CTFL 4.5.3, ca dương tính trước (AC-1, AC-7), rồi tới ca âm và ca biên (AC-2…AC-6, AC-8). Mỗi AC mô tả một đặc điểm, không hai AC trùng nhau, không đi quá phạm vi story (không có AC cho Gateway hay IP).
+Theo CTFL 4.5.3, test case dương tính đi trước (AC-1, AC-7), rồi tới test case âm tính và test case biên (AC-2…AC-6, AC-8). Mỗi AC mô tả một đặc điểm, không hai AC trùng nhau, không đi quá phạm vi story (không có AC cho Gateway hay IP).
 
 ### 5.3. Test viết từ AC — chạy trên lab
 
-`gioi-han-tao-chuyen.acceptance.test.ts` chuyển 8 AC thành 7 ca vitest + supertest (AC-5 và AC-6 chung một ca vì cùng dòng thời gian). Đồng hồ giả `FixedClock` cho phép nhảy tới giây 40,5 hay 59,9 mà không phải chờ. Trích AC-4:
+`gioi-han-tao-chuyen.acceptance.test.ts` chuyển 8 AC thành 7 test case vitest + supertest (AC-5 và AC-6 chung một test case vì cùng dòng thời gian). Đồng hồ giả `FixedClock` cho phép nhảy tới giây 40,5 hay 59,9 mà không phải chờ. Trích AC-4:
 
 ```ts
 it('AC-4 · Retry-After = số giây tới khi yêu cầu cũ nhất rời cửa sổ, làm tròn LÊN, tối thiểu 1', async () => {
@@ -265,7 +265,7 @@ npx vitest run articles/shift-left-testing --reporter=verbose
       Tests  11 passed (11)
 ```
 
-(Tên ca dài được lược bằng «…»; bốn ca của tệp thứ hai ở mục 5.4.) Một phát hiện nhỏ khi viết test: khoá `Idempotency-Key` phải dài 8–128 ký tự (R-IDEM-01) — bản đầu dùng khoá `k-1` nhận 400 thay vì kết quả mong đợi. Viết test sớm cũng là đọc đặc tả kỹ hơn.
+(Tên test case dài được lược bằng «…»; bốn test case của tệp thứ hai ở mục 5.4.) Một phát hiện nhỏ khi viết test: khoá `Idempotency-Key` phải dài 8–128 ký tự (R-IDEM-01) — bản đầu dùng khoá `k-1` nhận 400 thay vì kết quả mong đợi. Viết test sớm cũng là đọc đặc tả kỹ hơn.
 
 ### 5.4. Nếu bỏ qua refinement: bản «hiểu theo bản nháp»
 
@@ -283,7 +283,7 @@ npx vitest run articles/shift-left-testing --reporter=verbose
 | 5 yêu cầu ở giây 58,0–58,4 + 5 ở giây 60,0–60,4 | 5/10 qua | **10/10** qua | Spam lọt gấp đôi ngưỡng ở mỗi ranh giới phút |
 | 5 yêu cầu ở giây 0–40, yêu cầu thứ 6 ở giây 59,9 | `Retry-After: 1` | **`Retry-After: 0`** | App thử lại ngay ⇒ vòng lặp 429, tải tăng đúng lúc đang bị lạm dụng |
 
-Chi phí giả định để so sánh (số tự đặt, không phải số đo): sửa ở refinement ≈ 2 câu hỏi × 2 phút = **4 phút**; sửa sau khi lên production ≈ điều tra sự cố 4 giờ + bản vá và review 2 giờ + regression và deploy 2 giờ = **8 giờ**, chưa kể chuyến «ma» tài xế phải chạy. Tỉ lệ ≈ 8 × 60 / 4 = **120 lần** cho riêng ca này — con số chỉ để minh hoạ cách tính, không phải hằng số.
+Chi phí giả định để so sánh (số tự đặt, không phải số đo): sửa ở refinement ≈ 2 câu hỏi × 2 phút = **4 phút**; sửa sau khi lên production ≈ điều tra sự cố 4 giờ + bản vá và review 2 giờ + regression và deploy 2 giờ = **8 giờ**, chưa kể chuyến «ma» tài xế phải chạy. Tỉ lệ ≈ 8 × 60 / 4 = **120 lần** cho riêng trường hợp này — con số chỉ để minh hoạ cách tính, không phải hằng số.
 
 ### 5.5. Definition of Ready dùng cho story này
 

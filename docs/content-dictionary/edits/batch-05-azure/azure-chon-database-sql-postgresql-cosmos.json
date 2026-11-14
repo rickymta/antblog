@@ -1,0 +1,14 @@
+{"file":"azure-chon-database-sql-postgresql-cosmos.md","edits":[
+{"old":"đang trên lộ trình nghỉ hưu và không còn được khuyên dùng","new":"đang trong lộ trình ngừng hỗ trợ và không còn được khuyên dùng","reason":"'nghỉ hưu' là calque của retire","severity":"high"},
+{"old":"Hai cái tên hay gặp trong tài liệu cũ đã đổi chỗ.","new":"Hai cái tên hay gặp trong tài liệu cũ nay đã thay đổi.","reason":"'đổi chỗ' sai nghĩa; ý thật là tên/trạng thái đã đổi","severity":"medium"},
+{"old":"trả giá ở join và chi phí đoán","new":"trả giá ở join và chi phí khó dự đoán","reason":"Thiếu từ 'khó', câu cụt","severity":"high"},
+{"old":"hai quan hệ, một lý do chọn đã có sẵn","new":"hai database quan hệ, lý do chọn đã có sẵn","reason":"Thiếu danh từ sau 'hai'","severity":"medium"},
+{"old":"Thao tác trải qua nhiều partition key không có ACID","new":"Thao tác liên quan tới nhiều partition key không có ACID","reason":"'trải qua' là calque của spanning","severity":"medium"},
+{"old":"ai chịu hậu quả khi nó sai","new":"ai chịu hậu quả khi dữ liệu sai","reason":"Tránh đại từ 'nó' chỉ sự vật","severity":"low"},
+{"old":"Đọc theo cột của Tới Nơi:","new":"Đọc theo nhu cầu của Tới Nơi:","reason":"Bảng không có cột riêng cho Tới Nơi","severity":"medium"},
+{"old":"Ghi dày, dữ liệu ngắn hạn","new":"Ghi nhiều, dữ liệu ngắn hạn","reason":"'ghi dày' là calque của write-heavy","severity":"medium"},
+{"old":"Polyglot persistence và hoá đơn ngầm của nó","new":"Polyglot persistence và chi phí ẩn của nó","reason":"'hoá đơn ngầm' gượng, calque của hidden cost","severity":"medium"},
+{"old":"Hoá đơn ngầm là vận hành nhân lên theo số loại: ba loại database nghĩa là ba kiểu backup và restore, ba cách sinh sự cố,","new":"Chi phí ẩn là công sức vận hành nhân lên theo số loại: ba loại database nghĩa là ba kiểu backup và restore, ba kiểu sự cố,","reason":"Câu thiếu danh từ ('là vận hành'); 'ba cách sinh sự cố' gượng","severity":"high"},
+{"old":"khi dữ liệu chia nhiều nơi, giao dịch xuyên service không còn.","new":"khi dữ liệu chia ra nhiều nơi, không còn giao dịch xuyên service nữa.","reason":"Câu cụt, 'không còn' đứng cuối thiếu mạch","severity":"low"},
+{"old":"Đặt chuyến ghi PostgreSQL rồi cần cập nhật tracking trên Cosmos DB thì phải dùng Outbox","new":"Nếu đặt chuyến ghi vào PostgreSQL rồi còn phải cập nhật tracking trên Cosmos DB thì phải dùng Outbox","reason":"Câu thiếu giới từ và chủ ngữ rõ ràng, khó đọc","severity":"medium"}
+]}

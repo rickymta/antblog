@@ -1,0 +1,22 @@
+{"file":"azure-application-insights-opentelemetry-kql.md","edits":[
+{"old":"Nó thay khối","new":"Đoạn này thay khối","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu, đã có 'Khối này' câu trước","severity":"medium"},
+{"old":"nó là thứ tạo ra dependency PostgreSQL, thiếu nó bạn chỉ thấy span","new":"package này tạo ra dependency PostgreSQL, thiếu package này bạn chỉ thấy span","reason":"Đại từ 'nó' lặp và mơ hồ, văn nói","severity":"medium"},
+{"old":"Connection string đến từ biến","new":"Connection string lấy từ biến","reason":"'đến từ' là calque của comes from","severity":"low"},
+{"old":"tắt local auth, kiểm cấu hình theo tài liệu","new":"tắt local auth, kiểm tra cấu hình theo tài liệu","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"Chúng không cho biết nguyên nhân, và","new":"Hai truy vấn này không cho biết nguyên nhân, và","reason":"'Chúng' mơ hồ, nhắc lại danh từ","severity":"low"},
+{"old":"revision cũ, cái bạn cần để quyết định tăng traffic","new":"revision cũ, thông tin bạn cần để quyết định tăng traffic","reason":"'cái bạn cần' gượng, thiếu danh từ","severity":"medium"},
+{"old":"Hãy kiểm bằng cách gửi một request thật","new":"Hãy kiểm tra bằng cách gửi một request thật","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"có thể cần được bật rõ ràng tuỳ phiên bản SDK","new":"có thể phải bật thủ công tuỳ phiên bản SDK","reason":"Calque của 'explicitly enabled', bị động gượng","severity":"medium"},
+{"old":"Query này không chứng minh log đã đủ","new":"Truy vấn này không chứng minh log đã đầy đủ","reason":"Thống nhất 'truy vấn'; 'đủ' lửng","severity":"medium"},
+{"old":"cho thấy request, lỗi, CPU gần thời gian thực","new":"cho thấy request, lỗi và CPU gần như theo thời gian thực","reason":"Thiếu liên từ, 'gần thời gian thực' cụt","severity":"medium"},
+{"old":"Có ba núm: sampling","new":"Có ba thông số điều chỉnh: sampling","reason":"'núm' là dịch từng chữ của knob","severity":"medium"},
+{"old":"bao gồm lúc có sự cố","new":"kể cả lúc có sự cố","reason":"'bao gồm' là calque của including","severity":"low"},
+{"old":"cùng ba núm kiểm soát chi phí","new":"cùng ba thông số kiểm soát chi phí","reason":"'núm' là dịch từng chữ của knob","severity":"medium"},
+{"old":"Lọc trước khi gửi, không sau khi nạp.","new":"Hãy lọc trước khi gửi, đừng đợi đến khi đã nạp.","reason":"Câu cụt, thiếu động từ ở vế sau","severity":"medium"},
+{"old":"Kiểm các thuộc tính tự động","new":"Kiểm tra các thuộc tính tự động","reason":"Thiếu 'tra' sau 'kiểm'","severity":"medium"},
+{"old":"Nó không tạo lỗi 5xx; muốn có, bạn phải gây ra nó có chủ đích","new":"Vòng lặp này không tạo lỗi 5xx; muốn có, bạn phải gây lỗi này có chủ đích","reason":"Đại từ 'nó' mơ hồ, nhắc lại danh từ","severity":"medium"},
+{"old":"Function sống trong workspace, nên nó dùng tên bảng","new":"Function nằm trong workspace, nên dùng tên bảng","reason":"'sống trong' gượng, thừa 'nó'","severity":"low"},
+{"old":"; tham số nên được kiểm bằng","new":"; hãy kiểm tra tham số bằng","reason":"Thiếu 'tra', bị động gượng","severity":"medium"},
+{"old":"Lệnh lưu một truy vấn thành function gọi được là `toinoi_p95_post_trips()`","new":"Lệnh lưu một truy vấn thành function, gọi được bằng `toinoi_p95_post_trips()`","reason":"Câu lủng củng, 'gọi được là' khó hiểu","severity":"medium"},
+{"old":"nếu cần đào lại phần rollout","new":"nếu cần xem lại phần rollout","reason":"'đào lại' gượng","severity":"low"}
+]}

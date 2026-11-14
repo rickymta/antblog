@@ -221,7 +221,7 @@ Còn một bẫy đã cắn ngay trong lúc viết lab: kiểu số nguyên hẹ
     Tổng cước chuyến completed (VND): ép Int32 -> -547,871,422; Int64 -> 46,696,768,834
 ```
 
-Dòng đầu là minh họa tối thiểu. Dòng thứ hai nguy hiểm hơn: **kết quả sai là một số dương trông hợp lý** (1,69 tỷ mét thay vì 10,28 tỷ) và không có dấu hiệu nào báo sai; nó chỉ là phần dư của tổng đúng khi chia cho 2^32. Cách phòng: `cast(pl.Int64)` trước khi cộng, như `df["distance_m"].cast(pl.Int64).sum()`, hoặc chọn `Int64` ngay từ đầu cho cột có thể bị cộng (`fare_vnd` là `Int64` vì lý do đó). pandas không mắc bẫy này vì tự nâng kiểu khi cộng (ta đã thử `Series` `int32` hai số 2 tỷ: ra 4.000.000.000); đó là khác biệt về mặc định, và nó dễ bị bỏ sót khi chuyển pipeline từ pandas sang polars. `--verify` kiểm cả hai tổng: bản `Int64` so với tổng tính độc lập bằng numpy, bản `Int32` so với phần dư theo modulo 2^32.
+Dòng đầu là minh hoạ tối thiểu. Dòng thứ hai nguy hiểm hơn: **kết quả sai là một số dương trông hợp lý** (1,69 tỷ mét thay vì 10,28 tỷ) và không có dấu hiệu nào báo sai; nó chỉ là phần dư của tổng đúng khi chia cho 2^32. Cách phòng: `cast(pl.Int64)` trước khi cộng, như `df["distance_m"].cast(pl.Int64).sum()`, hoặc chọn `Int64` ngay từ đầu cho cột có thể bị cộng (`fare_vnd` là `Int64` vì lý do đó). pandas không mắc bẫy này vì tự nâng kiểu khi cộng (ta đã thử `Series` `int32` hai số 2 tỷ: ra 4.000.000.000); đó là khác biệt về mặc định, và nó dễ bị bỏ sót khi chuyển pipeline từ pandas sang polars. `--verify` kiểm cả hai tổng: bản `Int64` so với tổng tính độc lập bằng numpy, bản `Int32` so với phần dư theo modulo 2^32.
 
 ## Chạy và kiểm chứng
 

@@ -22,7 +22,7 @@ Ba trạng thái này đi ba đường khác nhau trong plugin, và mỗi nền 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>App Tới Nơi đang mở, backend gửi một tin FCM có khối <code>notification</code> kèm <code>data</code>. Hệ điều hành có hiện banner không? <code>onMessageOpenedApp</code> có chạy không?</p>
-<details><summary>Xem đáp án</summary><p>Mặc định <strong>không</strong> cả hai. Tài liệu Firebase nói tin dạng notification nhận lúc foreground không hiện thông báo trên Android lẫn iOS; app nhận nó ở <code>FirebaseMessaging.onMessage</code> và tự quyết định. <code>onMessageOpenedApp</code> chỉ phát khi người dùng chạm vào một thông báo đã hiện và app đang ở nền. Mục 3 xử lý ca này.</p></details>
+<details><summary>Xem đáp án</summary><p>Mặc định <strong>không</strong> cả hai. Tài liệu Firebase nói tin dạng notification nhận lúc foreground không hiện thông báo trên Android lẫn iOS; app nhận nó ở <code>FirebaseMessaging.onMessage</code> và tự quyết định. <code>onMessageOpenedApp</code> chỉ phát khi người dùng chạm vào một thông báo đã hiện và app đang ở nền. Mục 3 xử lý trường hợp này.</p></details>
 </div>
 
 ## 1. Đường đi của một tin push và thứ không nên đặt trong nó
@@ -128,7 +128,7 @@ Phía iOS, `Info.plist` thêm khoá FID và background mode:
 
 Test `native_config_test.dart` đọc các file này và kiểm quyền `POST_NOTIFICATIONS`, id kênh **trùng** hằng số Dart, khoá FID, `aps-environment`, `AppDelegate.swift`, đoạn Gradle, và không có dạng khoá thật. Test chỉ biết giá trị trong file, không biết Gradle hay Xcode có chấp nhận.
 
-**Quyền trên Android 13.** Từ Android 13 (API 33), thông báo của app mới cài bị tắt cho tới khi người dùng cho phép. App nhắm API 33 trở lên tự chọn lúc hiện hộp thoại; tài liệu Android khuyên chọn lúc người dùng hiểu lợi ích, nên Tới Nơi hỏi ngay sau khi đặt chuyến. Quyền đã được SDK và plugin tự khai, nhưng vẫn phải xin lúc chạy. Ở `firebase_messaging` 17.0.1, `requestPermission()` trên Android 13 trở lên hiện đúng hộp thoại này (ta đọc mã Android của plugin để chắc). `deniedPermanently` chỉ có trên Android; iOS báo `denied` cả khi hệ điều hành sẽ không hỏi nữa, nên với cả hai trạng thái UI hiện hướng dẫn mở Cài đặt.
+**Quyền trên Android 13.** Từ Android 13 (API 33), thông báo của app mới cài bị tắt cho tới khi người dùng cho phép. App nhắm API 33 trở lên tự chọn thời điểm hiện hộp thoại; tài liệu Android khuyên chọn thời điểm người dùng hiểu lợi ích, nên Tới Nơi hỏi ngay sau khi đặt chuyến. Quyền đã được SDK và plugin tự khai báo, nhưng vẫn phải xin lúc chạy. Ở `firebase_messaging` 17.0.1, `requestPermission()` trên Android 13 trở lên hiện đúng hộp thoại này (ta đọc mã Android của plugin để chắc). `deniedPermanently` chỉ có trên Android; iOS báo `denied` cả khi hệ điều hành sẽ không hỏi nữa, nên với cả hai trạng thái UI hiện hướng dẫn mở Cài đặt.
 
 **Kênh thông báo.** Từ Android 8.0 mọi thông báo phải thuộc một kênh; đăng không kèm kênh thì không hiện. Tạo xong, app không đổi được độ ưu tiên (quyền đó thuộc người dùng); tạo lại với đúng giá trị gốc thì không làm gì, nên tạo lúc khởi động là an toàn. Thông báo foreground cần kênh mức cao để có banner:
 
@@ -217,7 +217,7 @@ abstract interface class PushSource {
 }
 ```
 
-Phần nối nằm ở `PushNavigator`. Nó nghe ba luồng rồi mới hỏi tin khởi chạy, và cuối cùng mọi đường đều qua cùng `open(location)`:
+Phần nối nằm ở `PushNavigator`. Lớp này nghe ba luồng rồi mới hỏi tin khởi chạy, và cuối cùng mọi đường đều qua cùng `open(location)`:
 
 ### push_navigator.dart · 37-push-notification/lib/push_navigator.dart (trích)
 
@@ -270,7 +270,7 @@ Future<void> _showForeground(PushMessage message) async {
 }
 ```
 
-**Thứ hai**, `getInitialMessage` chỉ trả tin một lần (chú thích trong mã plugin), nên `start()` gọi nó đúng một lần. Chú thích đó còn nói: trên Android, tin nhận lúc app ở foreground rồi bị chạm lúc app ở nền hoặc bị tắt cũng cho `null`. Thông báo cục bộ ta tự hiện rơi đúng ca này, nên `LocalNotifier` có `launchPayload()` để vớt. **Thứ ba**, `/trip/:id` lồng trong `/` ở router của lab, nên Back từ thông báo về Trang chủ thay vì thoát app.
+**Thứ hai**, `getInitialMessage` chỉ trả tin một lần (chú thích trong mã plugin), nên `start()` gọi nó đúng một lần. Chú thích đó còn nói: trên Android, tin nhận lúc app ở foreground rồi bị chạm lúc app ở nền hoặc bị tắt cũng cho `null`. Thông báo cục bộ ta tự hiện rơi đúng trường hợp này, nên `LocalNotifier` có `launchPayload()` để vớt. **Thứ ba**, `/trip/:id` lồng trong `/` ở router của lab, nên Back từ thông báo về Trang chủ thay vì thoát app.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -371,7 +371,7 @@ testWidgets('cách sai: nối thẳng tripId "../admin" thì tới route /admin'
 });
 ```
 
-Payload `tripId: "../admin"` nhảy sang `/admin` nếu ta nối chuỗi. Với `PushRouter` thì không: `IgnorePush` mang lý do nhưng **không** mang giá trị, để log không rò dữ liệu. Test đi qua 18 payload lạ: thiếu hoặc sai `type`, `tripId` là số hoặc `null`, có `/`, `?`, `%`, khoảng trắng, dài 65 ký tự, xuống dòng cuối. Khoá thừa bị bỏ qua và không lọt vào payload thông báo cục bộ, vì `toPayload()` chỉ ghi hai trường ta hiểu.
+Payload `tripId: "../admin"` nhảy sang `/admin` nếu ta nối chuỗi. Với `PushRouter` thì không: `IgnorePush` mang lý do nhưng **không** mang giá trị, để log không rò dữ liệu. Test đi qua 18 payload lạ: thiếu hoặc sai `type`, `tripId` là số hoặc `null`, có `/`, `?`, `%`, khoảng trắng, dài 65 ký tự, có ký tự xuống dòng ở cuối. Khoá thừa bị bỏ qua và không lọt vào payload thông báo cục bộ, vì `toPayload()` chỉ ghi hai trường ta hiểu.
 
 ## 5. Đăng ký thiết bị với backend, và huỷ khi đăng xuất
 
@@ -397,7 +397,7 @@ Future<void> _begin() async {
 }
 ```
 
-Ta **nghe `onRegistered` trước khi gọi `register()`**, đúng như tài liệu dặn. Tài liệu nói `register()` xin quyền nếu chưa có, nên `resume()` (chạy mỗi lần mở app) chỉ gọi `_begin` khi quyền đã cấp; hộp thoại chỉ hiện từ nút **Bật thông báo**. FID mới vào hàng đợi và gửi theo thứ tự, FID trùng không gửi lại, lỗi thì `failed` và `retry()` gửi lại đúng FID đang chờ.
+Ta **nghe `onRegistered` trước khi gọi `register()`**, đúng như tài liệu dặn. Tài liệu nói `register()` xin quyền nếu chưa có, nên `resume()` (chạy mỗi lần mở app) chỉ gọi `_begin` khi quyền đã cấp; hộp thoại chỉ hiện từ nút **Bật thông báo**. FID mới vào hàng đợi và gửi theo thứ tự, FID trùng không gửi lại, gửi lỗi thì chuyển sang `failed` và `retry()` gửi lại đúng FID đang chờ.
 
 FID đi trong **body** (`PUT /devices/{deviceId}`), không bao giờ trong URL vì URL hay lọt vào log proxy; `http_device_api_test.dart` kiểm điều đó và kiểm `404` khi xoá được coi là đã xoá.
 
@@ -486,7 +486,7 @@ test('xoá ở backend TRƯỚC, rồi mới unregister ở FCM', () async {
 <span class="tkh-callout-title">Năm lỗi hay gặp với push</span>
 <ul>
 <li><strong>Handler nền là closure, method, hoặc thiếu pragma.</strong> Dấu hiệu: <code>ArgumentError</code> khi đăng ký (tài liệu plugin nói thế với hàm ẩn danh), hoặc handler im lặng chỉ ở bản release. Cách sửa: hàm top-level có <code>@pragma('vm:entry-point')</code>.</li>
-<li><strong>Chờ banner ở foreground.</strong> Dấu hiệu: tin tới mà không hiện gì, hoặc tự chuyển màn hình làm khách mất việc đang làm. Cách sửa: nghe <code>onMessage</code>, hiện thông báo cục bộ, mở màn hình khi người dùng chạm.</li>
+<li><strong>Mong đợi banner tự hiện ở foreground.</strong> Dấu hiệu: tin tới mà không hiện gì, hoặc tự chuyển màn hình làm khách mất việc đang làm. Cách sửa: nghe <code>onMessage</code>, hiện thông báo cục bộ, mở màn hình khi người dùng chạm.</li>
 <li><strong>Gọi <code>getInitialMessage</code> hai lần.</strong> Dấu hiệu: mở từ trạng thái bị tắt nhưng không vào đúng màn hình. Nguyên nhân: tin chỉ trả một lần. Cách sửa: gọi một lần lúc khởi động, vớt thông báo cục bộ bằng <code>launchPayload</code>.</li>
 <li><strong>Nối <code>tripId</code> thẳng vào đường dẫn.</strong> Dấu hiệu: <code>../admin</code> đưa tới route khác (test ở mục 4). Cách sửa: kiểm bằng biểu thức hẹp trong <code>PushRouter</code>.</li>
 <li><strong>Đăng xuất mà không huỷ đăng ký.</strong> Dấu hiệu: người dùng mới nhận thông báo chuyến của người cũ. Cách sửa: xoá dòng ở backend rồi <code>unregister()</code>.</li>

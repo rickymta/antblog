@@ -24,7 +24,7 @@ Nói thẳng: repository này không có tài khoản Firebase, nên **chưa có
 
 ## Project, app và nhóm tester
 
-Khung chương trình chia flavor theo kênh: `dev` chạy trên máy lập trình viên, `prod` đi qua cửa hàng, chỉ `staging` qua App Distribution. Firebase project có mỗi flavor một app Android và một app iOS (bài 50), nên ở đây chỉ app `vn.toinoi.customer.staging` trên hai nền tảng, cộng cặp của app tài xế, nhận bản build.
+Khung chương trình chia flavor theo kênh: `dev` chạy trên máy lập trình viên, `prod` đi qua cửa hàng, chỉ `staging` qua App Distribution. Firebase project có mỗi flavor một app Android và một app iOS (bài 50), nên ở đây chỉ app `vn.toinoi.customer.staging` trên hai nền tảng, cộng với cặp app tương ứng của tài xế, nhận bản build.
 
 Người nhận được gom vào **nhóm** với một alias, lab dùng `qa-noi-bo`. Theo tài liệu (kiểm tại 11/2026), một project có tối đa 500 tester, một nhóm tối đa 200, có thể xin tăng không mất phí; lời mời hết hạn sau 30 ngày.
 
@@ -66,7 +66,7 @@ Workflow và fastlane cùng đọc một file định danh. App ID không phải
     }
 ```
 
-Hàm đọc còn kiểm dạng App ID và Application ID (qua `applicationId` của lab 53). Test chứng minh ca `dev` và `prod`:
+Hàm đọc còn kiểm dạng App ID và Application ID (qua `applicationId` của lab 53). Test chứng minh hai test case `dev` và `prod` đều bị từ chối:
 
 ### distribution_config_test.dart · 55-app-distribution/test/distribution_config_test.dart (trích)
 
@@ -89,7 +89,7 @@ Hàm đọc còn kiểm dạng App ID và Application ID (qua `applicationId` c�
     });
 ```
 
-Giới hạn khác (kiểm tại 11/2026): file tối đa 2.048 MiB, tối đa 1.000 release mỗi app, mỗi release có mặt 150 ngày.
+Giới hạn khác (kiểm tại 11/2026): file tối đa 2.048 MiB, tối đa 1.000 release mỗi app, mỗi release tồn tại 150 ngày.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -114,7 +114,7 @@ Giới hạn khác (kiểm tại 11/2026): file tối đa 2.048 MiB, tối đa 1
 
 ## Phân phối từ CI bằng firebase CLI
 
-Android trước. App Distribution nhận cả APK lẫn AAB, nhưng AAB đòi liên kết Firebase với Google Play: app phải có trên Play Console cùng package name và đã xuất bản trên một track (Internal testing, không phải Draft). Play còn ký lại APK bằng một chứng chỉ thử riêng, nên dịch vụ gắn với chữ ký (đăng nhập Google, Maps) phải đăng ký thêm vân tay đó. Với staging ta chọn APK. Bài 54 chỉ dựng AAB cho Play (bài 57), nên ta dán thêm bước dựng APK vào job `android` của nó:
+Android trước. App Distribution nhận cả APK lẫn AAB, nhưng AAB đòi liên kết Firebase với Google Play: app phải có trên Play Console cùng package name và đã xuất bản trên một track (Internal testing, không phải Draft). Play còn ký lại APK bằng một chứng chỉ thử riêng, nên dịch vụ gắn với chữ ký (đăng nhập Google, Maps) phải đăng ký thêm vân tay đó. Với staging ta chọn APK. Bài 54 chỉ dựng AAB cho Play (bài 57), nên ta thêm bước dựng APK vào job `android` của nó:
 
 ### build-apk-steps.example.yml · 55-app-distribution/native-config/.github/workflows/build-apk-steps.example.yml (trích)
 
@@ -185,11 +185,11 @@ Bước phân phối là phần có bí mật: khoá đi qua `env`, được ki�
 
 Service account có vai trò **Firebase App Distribution Admin**; khoá JSON của nó cấp quyền quản trị App Distribution, nên chỉ nằm trong environment secret `staging` và bị xoá ở bước cuối với `if: always()`. Ta **không** dùng `FIREBASE_TOKEN`, `login:ci` hay `--token`: trang CLI của Firebase ghi `login:ci` là deprecated và `FIREBASE_TOKEN` không còn được khuyên dùng (kiểm tại 11/2026); trang hướng dẫn App Distribution vẫn còn `--token`, đừng lấy làm chuẩn. Khoá JSON là thông tin dài hạn nên vẫn là đánh đổi: ai lấy được nó dùng được tới khi ta thu hồi. Workload Identity Federation với Application Default Credentials là hướng cần thử; ta chưa kiểm Firebase CLI nhận kiểu đăng nhập đó.
 
-Test chạy script này với `firebase` giả và kiểm điều lệnh giả thấy lúc bị gọi: khoá đúng nội dung, quyền `600`, nằm trong `RUNNER_TEMP`, không lộ ra log; thiếu file nhị phân thì dừng trước khi ghi khoá; APK lỗi thì IPA không được gửi. IPA tải lên từ runner ubuntu, không tốn phút macOS: mã nguồn CLI chỉ kiểm đuôi file rồi gọi API, ta chưa chạy thật.
+Test chạy script này với `firebase` giả và kiểm những gì lệnh giả nhận được khi bị gọi: khoá đúng nội dung, quyền `600`, nằm trong `RUNNER_TEMP`, không lộ ra log; thiếu file nhị phân thì dừng trước khi ghi khoá; APK lỗi thì IPA không được gửi. IPA tải lên từ runner ubuntu, không tốn phút macOS: mã nguồn CLI chỉ kiểm đuôi file rồi gọi API, ta chưa chạy thật.
 
 ## Release notes tự sinh từ commit
 
-Tester không đọc `git log`, họ cần vài dòng tiếng Việt. Lớp `ReleaseNotes` lọc theo danh sách trắng: chỉ `feat`, `fix`, `perf` của Conventional Commits được vào. Kiểu khác (`chore`, `ci`, `test`...), commit merge và commit không theo quy ước là nội bộ. Thẻ `[skip-notes]` loại cả một `feat`, và với app khách, scope `driver` bị loại (ngược lại với app tài xế).
+Tester không đọc `git log`, họ cần vài dòng tiếng Việt. Lớp `ReleaseNotes` lọc theo danh sách trắng: chỉ `feat`, `fix`, `perf` của Conventional Commits được vào. Kiểu khác (`chore`, `ci`, `test`...), commit merge và commit không theo quy ước bị coi là thay đổi nội bộ. Thẻ `[skip-notes]` loại cả một `feat`, và với app khách, scope `driver` bị loại (ngược lại với app tài xế).
 
 ### release_notes.dart · 55-app-distribution/lib/src/release_notes.dart (trích)
 
@@ -215,7 +215,7 @@ NoteItem? classifyCommit(Commit commit, {required AppKind app}) {
 }
 ```
 
-Danh sách trắng không để commit tên lạ lọt ra ngoài; cái giá là commit thiếu tiền tố bị bỏ trong im lặng, nên log CI in dòng tóm tắt. SHA và tác giả không vào notes. Dữ liệu mẫu có 13 commit và cho 4 dòng; số cước do `calculateFare(2.001)` của `toi_noi_core` tính:
+Danh sách trắng không để commit có tiền tố lạ lọt ra ngoài; cái giá là commit thiếu tiền tố bị bỏ mà không báo gì, nên log CI in dòng tóm tắt. SHA và tác giả không vào notes. Dữ liệu mẫu có 13 commit và cho 4 dòng; số cước do `calculateFare(2.001)` của `toi_noi_core` tính:
 
 ```text
 Tới Nơi khách · staging 1.4.0 (build 42)
@@ -265,7 +265,7 @@ Cắt độ dài là chỗ dễ sai. Mức 500 ký tự là lựa chọn biên t
         expect(runes.last, 0x2026, reason: 'limit=$limit');
 ```
 
-Job `notes` lấy commit từ tag `staging-v*` gần nhất trước commit đã dựng: `SHA^` bỏ qua tag đứng ngay trên commit đó; chưa có tag thì lấy 30 commit cuối. Test tạo repo git tạm cho cả ba ca:
+Job `notes` lấy commit từ tag `staging-v*` gần nhất trước commit đã dựng: `SHA^` bỏ qua tag đứng ngay trên commit đó; chưa có tag thì lấy 30 commit cuối. Test tạo repo git tạm cho cả ba test case:
 
 ### workflow_scripts_test.dart · 55-app-distribution/test/workflow_scripts_test.dart (trích)
 
@@ -282,7 +282,7 @@ Job `notes` lấy commit từ tag `staging-v*` gần nhất trước commit đã
 
 IPA ad-hoc chỉ chạy trên máy có UDID trong provisioning profile. Ta không dùng Enterprise: chương trình đó dành cho tổ chức từ 100 nhân viên trở lên, phân phối ứng dụng nội bộ cho nhân viên (kiểm tại 11/2026).
 
-App Distribution gỡ phần khó nhất là thu UDID: tester mở email mời bằng Safari, cài Firebase profile và đăng ký thiết bị; App Distribution lấy UDID rồi gửi email cho thành viên project có quyền `firebase.projects.update`. Phần còn lại là việc của ta, và Hình 3 vẽ cả vòng.
+App Distribution lo luôn phần khó nhất là thu thập UDID: tester mở email mời bằng Safari, cài Firebase profile và đăng ký thiết bị; App Distribution lấy UDID rồi gửi email cho thành viên project có quyền `firebase.projects.update`. Phần còn lại là việc của ta, và Hình 3 vẽ cả vòng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -356,7 +356,7 @@ Plugin 1.0.0 đánh dấu `app:` của `download_udids` là deprecated (dùng `p
 
 Trên Android, App Distribution có SDK feedback (bản beta): tester chạm vào thông báo hoặc nút do ta tự làm, SDK chụp màn hình rồi mở form, và phản hồi hiện ở tab Tester feedback của release. Trên iOS, trang feedback hiện hành chỉ mô tả SDK Android (kiểm tại 11/2026). Flutter không có plugin chính thức cho SDK này: gói `firebase_app_distribution` trên pub.dev do bên thứ ba duy trì và chỉ lo cập nhật trong app, nên lab không dùng.
 
-Bản đầy đủ của SDK Android chứa tính năng tự cập nhật, và tài liệu cảnh báo nó có thể vi phạm chính sách Google Play dù mã không chạy: app có nó gửi lên Play có thể bị gỡ. Vì vậy bản "api" vào mọi variant, bản đầy đủ chỉ vào `staging`:
+Bản đầy đủ của SDK Android chứa tính năng tự cập nhật, và tài liệu cảnh báo nó có thể vi phạm chính sách Google Play dù mã không chạy: app có nó gửi lên Play có thể bị gỡ. Vì vậy ta đưa bản "api" vào mọi variant, còn bản đầy đủ chỉ đưa vào `staging`:
 
 ### app-distribution.gradle.kts.example · 55-app-distribution/native-config/android/app-distribution.gradle.kts.example
 
@@ -369,7 +369,7 @@ dependencies {
 
 Test khẳng định bản đầy đủ chỉ xuất hiện một lần, qua `stagingImplementation`. Test không build nên chưa chứng minh Gradle nhận cú pháp; việc gọi `showFeedbackNotification()` cần source set riêng cho `staging`, lab chưa làm.
 
-Crash đi đường khác: theo tài liệu, app có Crashlytics thì có số liệu ổn định cho mọi bản build phân phối; bản `staging` cần bật nó (bài 48) và giữ symbols như ở bài 54. Bảng dưới so với TestFlight (kiểm tại 11/2026); bài 56 đi sâu hơn.
+Crash đi đường khác: theo tài liệu, app có Crashlytics thì có số liệu về độ ổn định cho mọi bản build phân phối; bản `staging` cần bật nó (bài 48) và giữ symbols như ở bài 54. Bảng dưới so với TestFlight (kiểm tại 11/2026); bài 56 đi sâu hơn.
 
 | | App Distribution | TestFlight |
 |---|---|---|
@@ -381,7 +381,7 @@ Crash đi đường khác: theo tài liệu, app có Crashlytics thì có số l
 | Cài đặt | Firebase profile, web clip hoặc tester app | App TestFlight, email mời hoặc link |
 | Feedback | SDK Android (beta), iOS không có | Qua app TestFlight hoặc chụp màn hình |
 
-Quy tắc của Tới Nơi: App Distribution cho vòng nhanh của đội QA; TestFlight cho tester ngoài và bản đi đúng đường App Store. Hai IPA khác nhau vì khác phương thức export.
+Quy tắc của Tới Nơi: Dùng App Distribution cho vòng kiểm thử nhanh của đội QA; dùng TestFlight cho tester ngoài và bản đi đúng đường App Store. Hai IPA khác nhau vì khác phương thức export.
 
 ## Lỗi thường gặp
 
@@ -390,9 +390,9 @@ Quy tắc của Tới Nơi: App Distribution cho vòng nhanh của đội QA; Te
 <ul>
 <li><strong>IPA không cài được.</strong> Dấu hiệu: cài lỗi, hoặc báo "Developer Mode Required". Nguyên nhân: UDID chưa có trong profile của build đó, hoặc iOS 16+ chưa bật Developer Mode. Cách sửa: đi hết vòng Hình 3, rồi bật Developer Mode.</li>
 <li><strong>Sai tài khoản hoặc token cũ.</strong> Dấu hiệu: CLI cảnh báo token deprecated, hoặc lane chạy trên máy bạn mà lỗi quyền trên CI. Nguyên nhân: còn token, hoặc plugin lấy đăng nhập CLI có sẵn. Cách sửa: service account qua <code>GOOGLE_APPLICATION_CREDENTIALS</code>, truyền <code>service_credentials_file</code>.</li>
-<li><strong>Tải AAB bị từ chối.</strong> Dấu hiệu: CLI báo project chưa liên kết Google Play. Nguyên nhân: AAB cần liên kết Play. Cách sửa: dùng APK cho staging, hoặc hoàn tất liên kết.</li>
+<li><strong>Tải lên AAB bị từ chối.</strong> Dấu hiệu: CLI báo project chưa liên kết Google Play. Nguyên nhân: AAB cần liên kết Play. Cách sửa: dùng APK cho staging, hoặc hoàn tất liên kết.</li>
 <li><strong>Release biến mất khỏi dashboard.</strong> Dấu hiệu: tester không thấy bản cũ. Nguyên nhân: quá 150 ngày, hoặc vượt 1.000 release mỗi app. Cách sửa: phân phối bản mới, hoặc tải bản cũ về trước hạn.</li>
-<li><strong>SDK đầy đủ lọt vào bản đưa lên Play.</strong> Dấu hiệu: bản prod có thư viện <code>firebase-appdistribution</code>. Nguyên nhân: khai báo bằng <code>implementation</code> thay vì <code>stagingImplementation</code>. Cách sửa: chỉ bản api cho mọi variant; test của lab bắt đúng lỗi này.</li>
+<li><strong>SDK đầy đủ lọt vào bản đưa lên Play.</strong> Dấu hiệu: bản prod có thư viện <code>firebase-appdistribution</code>. Nguyên nhân: khai báo bằng <code>implementation</code> thay vì <code>stagingImplementation</code>. Cách sửa: chỉ dùng bản api cho mọi variant; test của lab bắt đúng lỗi này.</li>
 </ul>
 </div>
 

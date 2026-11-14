@@ -28,7 +28,7 @@ Ta cố ý tạo bản sai UnsafeTrip để tái hiện bằng lịch xác đị
 
 Hai UnsafeAccept cùng đọc điều kiện trước khi await một TaskCompletionSource. Interlocked.Increment tăng bộ đếm reader một cách nguyên tử; reader thứ hai mở gate. Cả hai đã chụp available=true rồi mới được ghi. Khi WhenAll xong, cả hai kết quả đều true.
 
-Điểm đồng bộ giúp test fail ổn định nếu suy luận bị đổi, thay vì vòng lặp ngẫu nhiên có khi không thấy lỗi. TaskCompletionSource được cấu hình RunContinuationsAsynchronously để không thực thi continuation tùy ý ngay trong đoạn phát tín hiệu.
+Điểm đồng bộ giúp test fail ổn định nếu suy luận bị đổi, thay vì vòng lặp ngẫu nhiên có khi không thấy lỗi. TaskCompletionSource được cấu hình RunContinuationsAsynchronously để không thực thi continuation tuỳ ý ngay trong đoạn phát tín hiệu.
 
 Đừng dùng thứ tự Driver cuối cùng làm assertion ở bản sai; đó là kết quả của lịch chạy và không phải invariant cần chứng minh. Điều quan trọng là hai phản hồi thành công cho một chỗ nhận duy nhất.
 
@@ -41,9 +41,9 @@ Hai UnsafeAccept cùng đọc điều kiện trước khi await một TaskComple
 
 ## Lock phải bao cả kiểm tra và thay đổi
 
-GuardedTrip dùng một object gate private và readonly. Trong lock, nó đọc driver, từ chối nếu đã có, hoặc gán driver và trả true. Tất cả đường đọc Driver của demo cũng dùng cùng gate. Nếu mỗi method khóa một object khác nhau thì không có cùng vùng bảo vệ.
+GuardedTrip dùng một object gate private và readonly. Trong lock, nó đọc driver, từ chối nếu đã có, hoặc gán driver và trả true. Tất cả đường đọc Driver của demo cũng dùng cùng gate. Nếu mỗi method khoá một object khác nhau thì không có cùng vùng bảo vệ.
 
-Không lock trên string, this hoặc một object công khai mà caller khác có thể giữ khóa ngoài dự kiến. Giữ vùng lock ngắn, không gọi mạng hoặc chạy công việc chậm trong đó. C# không cho await trực tiếp trong thân lock; nếu cần phối hợp bất đồng bộ, phải chọn primitive và phạm vi khác thay vì chặn thread chờ I/O.
+Không lock trên string, this hoặc một object công khai mà caller khác có thể giữ khoá ngoài dự kiến. Giữ vùng lock ngắn, không gọi mạng hoặc chạy công việc chậm trong đó. C# không cho await trực tiếp trong thân lock; nếu cần phối hợp bất đồng bộ, phải chọn primitive và phạm vi khác thay vì chặn thread chờ I/O.
 
 20 task thử nhận cùng một GuardedTrip; sau WhenAll chỉ có một true. Ta không khẳng định driver số 1 sẽ thắng hoặc lock công bằng. Thuộc tính cần giữ là số người thắng, dữ liệu tài xế được ghi và lần nhận sau bị từ chối.
 
@@ -64,9 +64,9 @@ Thread-safe collection cũng không tự làm nhiều bước nghiệp vụ thà
 
 ## Bài tập và ca cần bảo vệ
 
-Bộ --verify xác nhận race bản sai có 2 người thắng, bản khóa có 1, Driver không thiếu và lời gọi đến sau bị từ chối. Task.Run ở đây dùng để tạo contention cho đoạn đồng bộ ngắn; không phải khuyến cáo bọc mọi API async bằng Task.Run.
+Bộ --verify xác nhận race bản sai có 2 người thắng, bản khoá có 1, Driver không thiếu và lời gọi đến sau bị từ chối. Task.Run ở đây dùng để tạo contention cho đoạn đồng bộ ngắn; không phải khuyến cáo bọc mọi API async bằng Task.Run.
 
-**Bài tập:** dời kiểm tra driver ra ngoài lock, chỉ khóa phép gán. Invariant có còn được bảo vệ không? Hai container có cùng source code và gate private có chia sẻ gate không?
+**Bài tập:** dời kiểm tra driver ra ngoài lock, chỉ khoá phép gán. Invariant có còn được bảo vệ không? Hai container có cùng source code và gate private có chia sẻ gate không?
 
 <details><summary>Xem đáp án</summary><p>Không: cả hai vẫn có thể kiểm tra trước khi một người ghi. Gate là object riêng trong mỗi process, không có tác dụng đồng bộ dữ liệu giữa container.</p></details>
 
@@ -78,7 +78,7 @@ Từ thư mục gốc repository:
 dotnet run --project examples/toi-noi-dotnet/13-concurrency -- --verify
 ```
 
-Lệnh --verify chạy các ca cố định trên chính code minh họa; sai kỳ vọng sẽ trả exit code thất bại. Không cần package NuGet bổ sung.
+Lệnh --verify chạy các ca cố định trên chính code minh hoạ; sai kỳ vọng sẽ trả exit code thất bại. Không cần package NuGet bổ sung.
 
 ### Program.cs — 13-concurrency/Program.cs
 

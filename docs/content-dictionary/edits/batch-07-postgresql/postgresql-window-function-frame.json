@@ -1,0 +1,22 @@
+{"file":"postgresql-window-function-frame.md","edits":[
+{"old":"so sánh chuyến trước có đúng một nghĩa.","new":"so sánh với chuyến trước mang đúng một nghĩa.","reason":"Câu thiếu giới từ, dịch sát","severity":"medium"},
+{"old":"Sau bài này, bạn tính được luỹ kế, xếp hạng và so sánh chuyến trước với frame ghi rõ.","new":"Sau bài này, bạn tính được luỹ kế, xếp hạng và so sánh với chuyến trước, trong đó frame được ghi rõ.","reason":"Cụm 'với frame ghi rõ' cụt, thiếu quan hệ","severity":"medium"},
+{"old":"Tỉ trọng doanh thu cần cả số của dòng lẫn tổng mọi dòng:","new":"Tỉ trọng doanh thu cần cả giá trị của dòng lẫn tổng của mọi dòng:","reason":"'số của dòng' gượng","severity":"low"},
+{"old":"**Bẫy lọc cùng cấp.**","new":"**Bẫy lọc ở cùng cấp truy vấn.**","reason":"'lọc cùng cấp' là cụm tự ghép, thiếu danh từ","severity":"medium"},
+{"old":"`ROWS` đếm **dòng vật lý**; nó chỉ trùng «ngày» khi mỗi ngày có đúng một dòng.","new":"`ROWS` đếm **dòng vật lý**; số dòng này chỉ trùng với số «ngày» khi mỗi ngày có đúng một dòng.","reason":"Tránh 'nó', làm rõ ý","severity":"medium"},
+{"old":"Dòng **ngang hàng** (peer) bằng nhau trên mọi khoá `ORDER BY` — ở đây sáu chuyến cùng giây.","new":"Các dòng **ngang hàng** (peer) là những dòng bằng nhau trên mọi khoá `ORDER BY` — ở đây là sáu chuyến cùng giây.","reason":"Câu thiếu động từ 'là'","severity":"high"},
+{"old":"Không có `ORDER BY` thì mọi dòng ngang hàng, nên","new":"Không có `ORDER BY` thì mọi dòng đều ngang hàng nhau, nên","reason":"Câu thiếu từ, khó đọc","severity":"medium"},
+{"old":"nên lỗi hay lọt qua kiểm «tổng cuối kỳ».","new":"nên lỗi này hay lọt qua bước kiểm tra «tổng cuối kỳ».","reason":"'kiểm' đứng một mình, thiếu danh từ","severity":"medium"},
+{"old":"nhưng thứ tự trong lô tuỳ PostgreSQL (cùng lý do","new":"nhưng thứ tự trong lô do PostgreSQL tự quyết (cùng lý do","reason":"'tuỳ PostgreSQL' cụt, thiếu động từ","severity":"medium"},
+{"old":"mọi dòng có **giá trị** khoá cách ≤ 1 giờ","new":"mọi dòng có **giá trị** khoá cách dòng hiện tại không quá 1 giờ","reason":"Câu lược, thiếu mốc so sánh","severity":"low"},
+{"old":"Lần thử đầu của «top 3 tài xế mỗi thành phố» hay là lọc hạng trong `WHERE`:","new":"Lần thử đầu cho «top 3 tài xế mỗi thành phố» thường là lọc hạng ngay trong `WHERE`:","reason":"'hay là' gây hiểu nhầm với 'hoặc', trật tự gượng","severity":"medium"},
+{"old":"(`row_number`, cần quy tắc phân xử hoà thành văn bản)","new":"(`row_number`, cần quy tắc phân xử khi hoà, ghi thành văn bản)","reason":"Cụm 'phân xử hoà thành văn bản' khó hiểu","severity":"medium"},
+{"old":"— ghi quy tắc cạnh báo cáo.","new":"— ghi quy tắc bên cạnh báo cáo.","reason":"'cạnh' đứng một mình gượng","severity":"low"},
+{"old":"— `WHERE` thì không (mục 3).","new":"— còn `WHERE` thì không (mục 3).","reason":"Thiếu từ nối đối lập","severity":"low"},
+{"old":"và phần trăm thay đổi thành chia cho 0","new":"và phần trăm thay đổi trở thành phép chia cho 0","reason":"Câu lược động từ 'thành'","severity":"high"},
+{"old":"Muốn chuyến cuối tháng (103123) phải mở frame:","new":"Muốn lấy chuyến cuối tháng (103123) thì phải mở frame:","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Lọc theo hạng cùng cấp","new":"Lọc theo hạng ở cùng cấp truy vấn","reason":"Thống nhất với 'bẫy lọc ở cùng cấp truy vấn'","severity":"low"},
+{"old":"nhưng chỉ một cột sắp xếp và gộp dòng ngang hàng.","new":"nhưng chỉ nhận một cột sắp xếp và gộp các dòng ngang hàng.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Chỉ số cuối đúng nghĩa","new":"Con số cuối cùng đúng nghĩa","reason":"'Chỉ số' dành cho metric; ở đây là một giá trị","severity":"low"},
+{"old":"So <code>luy_ke * 2 &gt;= tong_thang</code> để khỏi lo chia nguyên.","new":"So sánh <code>luy_ke * 2 &gt;= tong_thang</code> để khỏi lo về phép chia nguyên.","reason":"'So' đứng một mình, 'chia nguyên' cụt","severity":"medium"}
+]}

@@ -1,0 +1,16 @@
+{"file":"aws-cloudfront-waf-shield.md","edits":[
+{"old":"Bạn cần xong bài 09","new":"Bạn cần đọc xong bài 09","reason":"Thiếu động từ","severity":"medium"},
+{"old":"Origin cần header mà phản hồi không phụ thuộc vào nó thì đặt vào origin request policy.","new":"Nếu origin cần một header nhưng phản hồi không phụ thuộc vào header đó thì đặt nó vào origin request policy.","reason":"Câu lược chủ ngữ, trật tự kiểu Anh","severity":"medium"},
+{"old":"xoá cache ngay, vượt hạn mức miễn phí thì tính theo đường dẫn, và không thay được việc đặt tên tệp có hash.","new":"xoá cache ngay, tính phí theo đường dẫn khi vượt hạn mức miễn phí, và không thay thế được cách đặt tên tệp có hash.","reason":"Câu lược danh từ ('tính' không rõ tính gì)","severity":"medium"},
+{"old":"Rule tham chiếu prefix list được tính vào hạn mức rule của security group theo số mục tối đa của prefix list, và prefix list của CloudFront chiếm gần hết hạn mức mặc định, nên hãy kiểm quota trước.","new":"Rule tham chiếu prefix list tính vào hạn mức rule của security group theo số mục tối đa của prefix list, mà prefix list của CloudFront chiếm gần hết hạn mức mặc định, nên hãy kiểm tra quota trước.","reason":"Bỏ bị động kiểu Anh; 'kiểm quota' cụt","severity":"medium"},
+{"old":"HSTS và các header bảo mật đã do response headers policy lo.","new":"HSTS và các header bảo mật đã có response headers policy đảm nhiệm.","reason":"'lo' quá khẩu ngữ","severity":"low"},
+{"old":"nếu muốn CDN thay vì presigned URL của S3 (bài 06), dùng","new":"nếu muốn phục vụ qua CDN thay vì presigned URL của S3 (bài 06), hãy dùng","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"nhiều khách mạng di động dùng chung một IP nên","new":"nhiều khách dùng mạng di động chung một địa chỉ IP nên","reason":"'khách mạng di động' cụt","severity":"medium"},
+{"old":"**Log WAF** vào S3, CloudWatch Logs hoặc Firehose","new":"**Log WAF** có thể gửi tới S3, CloudWatch Logs hoặc Firehose","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Che trường nhạy cảm như header `Authorization` bằng `redacted_fields`.","new":"Hãy che các trường nhạy cảm như header `Authorization` bằng `redacted_fields`.","reason":"Câu cụt thiếu chủ ngữ","severity":"low"},
+{"old":"bật tự động, không phí thêm,","new":"bật tự động, không tính thêm phí,","reason":"'không phí thêm' là calque","severity":"medium"},
+{"old":"Phí cố định đáng kể nên đây là quyết định rủi ro: so thiệt hại","new":"Phí cố định khá lớn nên đây là quyết định về rủi ro: hãy so thiệt hại","reason":"'quyết định rủi ro' tự ghép; câu thiếu động từ","severity":"medium"},
+{"old":"tính tiền theo thời gian tồn tại ngoài phí theo request.","new":"tính tiền theo thời gian tồn tại, ngoài phí tính theo request.","reason":"Trật tự từ kiểu Anh","severity":"low"},
+{"old":"`Cache-Control` nào của một API trả về khiến","new":"`Cache-Control` nào mà một API trả về sẽ khiến","reason":"'của một API trả về' trật tự kiểu Anh","severity":"medium"},
+{"old":"Kiểm trên máy:","new":"Kiểm tra trên máy:","reason":"'Kiểm' đứng một mình cụt","severity":"low"}
+]}

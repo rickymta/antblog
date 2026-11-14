@@ -1,7 +1,7 @@
 ---
 slug: system-testing-data-integrity-test
 title: "Data Integrity Test: dữ liệu đúng từ request đến bảng cuối cùng"
-summary: "Kiểm bất biến dữ liệu của Tới Nơi thay vì tin vào HTTP 201: ràng buộc PRIMARY/FOREIGN KEY, UNIQUE, CHECK, NOT NULL; rollback khi lỗi giữa giao dịch; tiền lẻ đi qua numeric/JSON; và câu SQL đối soát được chứng minh biết bắt lỗi. Lab PGlite 6 ca chạy lại được, kèm giới hạn về concurrency, migration và ledger."
+summary: "Kiểm bất biến dữ liệu của Tới Nơi thay vì tin vào HTTP 201: ràng buộc PRIMARY/FOREIGN KEY, UNIQUE, CHECK, NOT NULL; rollback khi lỗi giữa giao dịch; tiền lẻ đi qua numeric/JSON; và câu SQL đối soát được chứng minh biết bắt lỗi. Lab PGlite gồm 6 test case chạy lại được, kèm giới hạn về concurrency, migration và ledger."
 category: testing
 level: advanced
 tags: [testing, sys-13, data-integrity, postgresql, transaction, constraints, reconciliation, pglite, vitest, test-oracle]
@@ -18,7 +18,7 @@ API trả 201, giao diện hiện "Đang tìm tài xế", test E2E xanh. Ba tu�
 <tr><th scope="row">Cấp độ</th><td>Advanced — QA/SDET, backend developer; cần SELECT/JOIN, khoá chính/khoá ngoại, transaction</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Kiểm ở cấp tích hợp API + repository + database; hướng kiểm là toàn vẹn dữ liệu (một đặc tính chất lượng), oracle là trạng thái cuối trong DB chứ không phải response</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-integration-test">SYS-04 Integration Test</a> · <a href="/articles/system-testing-functional-test">SYS-03 Functional Test</a> · <a href="/articles/system-testing-usability-test">SYS-12 Usability Test</a> (bài liền trước) · <a href="/articles/postgresql-transaction-commit-rollback">Transaction, COMMIT và ROLLBACK</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 6 ca DI-01…06 — đối soát snapshot và nhật ký, UNIQUE, rollback khi lỗi event thứ hai, CHECK/NOT NULL, round-trip tiền lẻ, phát hiện fare bị sửa (R-QUOTE-02/03/04, R-STATE-01/06, R-GEN-01, R-FARE-03/10) — <code>examples/toi-noi-testing/articles/system-testing-data-integrity-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 6 test case DI-01…06 — đối soát snapshot và nhật ký, UNIQUE, rollback khi lỗi event thứ hai, CHECK/NOT NULL, round-trip tiền lẻ, phát hiện fare bị sửa (R-QUOTE-02/03/04, R-STATE-01/06, R-GEN-01, R-FARE-03/10) — <code>examples/toi-noi-testing/articles/system-testing-data-integrity-test/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>PostgreSQL 18 docs: Constraints, Transactions, Error Codes; <code>SPEC.md</code> và <code>schema.sql</code> của lab</td></tr>
 </tbody>
 </table>
@@ -140,7 +140,7 @@ if (!(await deps.quotes.markUsed(quote.id, tripId))) throw quoteUsed();
 <text x="460" y="282" text-anchor="middle" class="t-small">DI-06 đối soát trips ↔ quotes sau khi mọi bước xong; DI-04 ghi thẳng vào trips để thử CHECK/NOT NULL</text>
 </svg>
 </div>
-<figcaption><b>Hình 1 · Đường ghi khi đặt chuyến và vị trí của các ca DI.</b> Khung nét đứt là ranh giới atomicity mà DI-03 chứng minh. Câu đánh dấu báo giá nằm ngoài khung: nếu bước sau thất bại, báo giá có thể bị đánh dấu "đã dùng" mà không có chuyến — bài không chạy kịch bản này, chỉ chỉ ra từ code.</figcaption>
+<figcaption><b>Hình 1 · Đường ghi khi đặt chuyến và vị trí của các test case DI.</b> Khung nét đứt là ranh giới atomicity mà DI-03 chứng minh. Câu đánh dấu báo giá nằm ngoài khung: nếu bước sau thất bại, báo giá có thể bị đánh dấu "đã dùng" mà không có chuyến — bài không chạy kịch bản này, chỉ chỉ ra từ code.</figcaption>
 </figure>
 
 Hệ quả cho thiết kế test: DI-03 chứng minh **transaction của repository**, không chứng minh cả use case đặt chuyến là nguyên tử. Kết luận "đặt chuyến không bao giờ để lại ghi dở" sẽ vượt quá bằng chứng. Đây là ví dụ điển hình của nguyên tắc: **phạm vi kết luận phải nhỏ hơn hoặc bằng phạm vi đã đo.**
@@ -149,7 +149,7 @@ Hệ quả cho thiết kế test: DI-03 chứng minh **transaction của reposit
 
 ### 4.1. Test basis
 
-Nguồn nghiệp vụ là `SPEC.md` của lab; nguồn kỹ thuật là `schema.sql` và code repository. Các phép kiểm ràng buộc schema (DI-02, DI-04) lấy chính schema hiện tại làm test basis: chúng khoá lại hành vi mong muốn để một migration sau này không lặng lẽ bỏ ràng buộc. Bài không tự đặt mã yêu cầu mới vào SPEC; chỗ nào chỉ dựa trên schema, bảng case ghi rõ.
+Nguồn nghiệp vụ là `SPEC.md` của lab; nguồn kỹ thuật là `schema.sql` và code repository. Các phép kiểm ràng buộc schema (DI-02, DI-04) lấy chính schema hiện tại làm test basis: chúng khoá lại hành vi mong muốn để một migration sau này không bỏ mất ràng buộc mà không ai hay. Bài không tự đặt mã yêu cầu mới vào SPEC; chỗ nào chỉ dựa trên schema, bảng test case ghi rõ.
 
 Các yêu cầu được dùng:
 
@@ -168,7 +168,7 @@ Các yêu cầu được dùng:
 | Một báo giá sinh hai chuyến | Hai tài xế, hai lần thu | DI-02 (tuần tự) |
 | Ghi dở khi lỗi giữa chừng | Chuyến không nhật ký, báo cáo sai | DI-03 |
 | Ghi giá trị ngoài miền | Máy trạng thái hỏng, báo cáo không phân loại được | DI-04 |
-| Mất tiền lẻ khi chuyển kiểu | Lệch đối soát, công thức sai âm thầm | DI-05 |
+| Mất tiền lẻ khi chuyển kiểu | Lệch đối soát, công thức sai mà không báo lỗi | DI-05 |
 | Câu đối soát "luôn trả 0" | Báo cáo "không sai lệch" giả | DI-06 |
 
 ### 4.3. Oracle độc lập
@@ -183,15 +183,15 @@ Oracle là căn cứ để nói đúng hay sai. Ở đây có ba lớp, và mỗ
 ### 4.4. Tiêu chí bắt đầu và kết thúc
 
 - **Bắt đầu:** dependency cài theo `package-lock.json`; schema và seed đúng phiên bản của commit; database là database tạm của test; đồng hồ cố định 09:00 giờ Việt Nam ngày 04/11/2026.
-- **Kết thúc (tiêu chí bài tập, không phải gate production):** 6/6 ca pass, không skip; DI-03 không để lại ghi dở; DI-06 trả đúng ID chuyến bị sửa; `npm run typecheck` pass.
+- **Kết thúc (tiêu chí bài tập, không phải gate production):** 6/6 test case pass, không skip; DI-03 không để lại ghi dở; DI-06 trả đúng ID chuyến bị sửa; `npm run typecheck` pass.
 
-## 5. Thiết kế ca kiểm
+## 5. Thiết kế test case
 
 ### 5.1. Tiền điều kiện chung
 
-Mỗi ca: đặt đồng hồ về 09:00, `system.reset()` nạp lại seed, dựng Express app mới. Cuối suite đóng database. Khách là `C001`, xác thực mô phỏng bằng header `x-user` — chỉ là cơ chế lab, không nói gì về bảo mật production. Mỗi lần đặt dùng `Idempotency-Key: sys13-book-001`; reset giữa các ca nên không xung đột.
+Mỗi test case: đặt đồng hồ về 09:00, `system.reset()` nạp lại seed, dựng Express app mới. Cuối suite đóng database. Khách là `C001`, xác thực mô phỏng bằng header `x-user` — chỉ là cơ chế lab, không nói gì về bảo mật production. Mỗi lần đặt dùng `Idempotency-Key: sys13-book-001`; reset giữa các test case nên không xung đột.
 
-### 5.2. Bảng case
+### 5.2. Bảng test case
 
 | ID | Yêu cầu / rủi ro | Tiền điều kiện | Kích thích | Kết quả bắt buộc | Dọn dẹp |
 |---|---|---|---|---|---|
@@ -204,7 +204,7 @@ Mỗi ca: đặt đồng hồ về 09:00, `system.reset()` nạp lại seed, d�
 
 Vài lựa chọn thiết kế đáng giải thích:
 
-- **DI-02 gọi thẳng repository, không qua API.** Nếu đi qua API, use case đã chặn ở bước `quote.usedByTripId !== null` và trả `QUOTE_ALREADY_USED` (409) trước khi chạm UNIQUE. Ca này muốn kiểm *lớp phòng thủ cuối* — ràng buộc database — nên đi vòng qua lớp trên. Hành vi 409 của API thuộc test chức năng/integration.
+- **DI-02 gọi thẳng repository, không qua API.** Nếu đi qua API, use case đã chặn ở bước `quote.usedByTripId !== null` và trả `QUOTE_ALREADY_USED` (409) trước khi chạm UNIQUE. Test case này muốn kiểm *lớp phòng thủ cuối* — ràng buộc database — nên đi vòng qua lớp trên. Hành vi 409 của API thuộc test chức năng/integration.
 - **DI-03 tạo báo giá mới cho chuyến thử.** Nếu dùng lại `quoteId` của chuyến gốc, INSERT trips sẽ vấp UNIQUE (23505) ngay câu đầu tiên và event lỗi không bao giờ được chạy — test vẫn "đỏ đúng kiểu" nhưng không còn kiểm rollback.
 - **DI-03 giữ một chuyến gốc làm đối chứng.** Rollback đúng phải xoá phần ghi dở *và* không đụng dữ liệu đã có. Một cài đặt sai kiểu "xoá mọi thứ khi lỗi" sẽ bị bắt.
 - **DI-06 kiểm chính oracle.** Một câu đối soát chưa từng bắt được lỗi nào chưa có giá trị bằng chứng.
@@ -254,7 +254,7 @@ Ba quyết định trong câu này:
 - **LEFT JOIN thay vì JOIN.** Chuyến không có báo giá sẽ biến mất khỏi INNER JOIN; LEFT JOIN giữ nó lại với `q.id IS NULL`. Hiện FK `trips.quote_id REFERENCES quotes` chặn trường hợp này trên đường ghi thường, nhưng câu đối soát không nên phụ thuộc vào việc ràng buộc luôn còn đó.
 - **Chỉ trả `t.id`.** Đủ để truy vết, không kéo dữ liệu cá nhân của khách vào evidence.
 
-Giới hạn của câu: nó đi từ `trips` sang `quotes`, nên **không** thấy báo giá đã đánh dấu dùng mà không có chuyến (khoảng trống ở Hình 1). Nó cũng không so `discount`, `fare_breakdown`, trạng thái cuối với event cuối, hay tiền thực thu ở ví. Mỗi nhóm bất biến nên là một câu riêng có mã lỗi riêng để báo cáo dễ phân loại.
+Giới hạn của câu: truy vấn này đi từ `trips` sang `quotes`, nên **không** thấy báo giá đã đánh dấu dùng mà không có chuyến (khoảng trống ở Hình 1). Truy vấn này cũng không so `discount`, `fare_breakdown`, trạng thái cuối với event cuối, hay tiền thực thu ở ví. Mỗi nhóm bất biến nên là một câu riêng có mã lỗi riêng để báo cáo dễ phân loại.
 
 ### 6.3. Bước 3 — Kiểm trạng thái sau thao tác thành công
 
@@ -328,7 +328,7 @@ it('DI-06 · reconciliation detects deliberately corrupted fare', async () => {
 });
 ```
 
-Assertion trước khi làm hỏng (0 dòng) quan trọng ngang assertion sau: nó chứng minh câu không báo sai ở dữ liệu tốt. Assertion sau dùng `toEqual([{ id }])` — đúng một dòng, đúng ID — chứ không phải "có ít nhất một dòng", để bắt cả trường hợp câu đối soát báo tràn lan.
+Assertion trước khi làm hỏng (0 dòng) quan trọng ngang assertion sau: đó là bằng chứng câu không báo sai ở dữ liệu tốt. Assertion sau dùng `toEqual([{ id }])` — đúng một dòng, đúng ID — chứ không phải "có ít nhất một dòng", để bắt cả trường hợp câu đối soát báo tràn lan.
 
 ### 6.7. Kết quả: mong đợi và thực tế
 
@@ -365,7 +365,7 @@ Lượt chạy lại không chạy typecheck; kết quả typecheck lấy từ b
 | DI-05 `exact: false` | Cột đổi sang integer hoặc ứng dụng làm tròn sớm | Diff `schema.sql`; bảng R-FARE-10 trong response |
 | DI-05 `json_agrees: false` | Hai biểu diễn được tính từ hai nguồn khác nhau | Code map `discount` và `fareBreakdown` |
 | DI-06 vẫn trả `[]` sau khi làm hỏng | Câu đối soát hỏng (ép kiểu, điều kiện NULL) | Chạy từng điều kiện riêng; **ngừng tin** báo cáo "không sai lệch" của câu đó |
-| Chạy riêng pass, chạy chung fail | Trạng thái rò giữa ca, reset thiếu | Thứ tự `beforeEach`, khoá idempotency |
+| Chạy riêng pass, chạy chung fail | Trạng thái rò giữa các test case, thiếu reset | Thứ tự `beforeEach`, khoá idempotency |
 
 Phân loại kết quả theo năm nhóm: lỗi setup/môi trường (báo *blocked*), lỗi nghiệp vụ, lỗi bảo vệ schema, lỗi transaction, lỗi của chính câu đối soát. Nhóm cuối nghiêm trọng hơn vẻ ngoài: mọi báo cáo "0 sai lệch" trước đó từ câu này mất giá trị.
 
@@ -386,7 +386,7 @@ Câu "kể cả khi hai yêu cầu tới cùng lúc" cần PostgreSQL server và
 
 ### 8.2. Migration không làm đổi nghĩa dữ liệu
 
-Dựng dữ liệu "phiên bản cũ": NULL ở cột từng cho phép, biên numeric (giá trị có ,5; giá trị lớn nhất cột chứa được), trạng thái từng hợp lệ. Trước migration chụp baseline theo khoá: số dòng, quan hệ, tổng tiền theo nhóm, hash snapshot. Chạy migration, đối chiếu từng mục. Nếu rollout có giai đoạn phiên bản cũ và mới cùng chạy, kiểm cả hai đọc/ghi được dữ liệu của nhau. Một migration "chạy xong không lỗi" không đồng nghĩa dữ liệu giữ nghĩa — ví dụ đổi `discount` sang integer chạy trơn tru và âm thầm làm hỏng DI-05. Tham khảo [Thay đổi schema mà dữ liệu cũ vẫn đọc được](/articles/postgresql-schema-migration-tuong-thich).
+Dựng dữ liệu "phiên bản cũ": NULL ở cột từng cho phép, biên numeric (giá trị có ,5; giá trị lớn nhất mà cột chứa được), trạng thái từng hợp lệ. Trước migration chụp baseline theo khoá: số dòng, quan hệ, tổng tiền theo nhóm, hash snapshot. Chạy migration, đối chiếu từng mục. Nếu rollout có giai đoạn phiên bản cũ và mới cùng chạy, kiểm cả hai đọc/ghi được dữ liệu của nhau. Một migration "chạy xong không lỗi" không đồng nghĩa dữ liệu giữ nghĩa — ví dụ đổi `discount` sang integer chạy trơn tru nhưng làm hỏng DI-05 mà không báo lỗi. Tham khảo [Thay đổi schema mà dữ liệu cũ vẫn đọc được](/articles/postgresql-schema-migration-tuong-thich).
 
 ### 8.3. Đối soát thanh toán với ledger
 
@@ -411,9 +411,9 @@ Trên hàng triệu chuyến, chia đối soát theo partition hoặc khoảng k
 - **Ép tiền về integer quá sớm.** R-GEN-01 yêu cầu trung gian chính xác; chỉ bước cuối làm tròn.
 - **Sắp event theo timestamp khi timestamp trùng.**
 - **Checksum thay cho oracle nghiệp vụ.** Checksum bằng nhau chỉ nói dữ liệu không đổi, không nói dữ liệu đúng công thức.
-- **Tin câu đối soát chưa từng bắt lỗi.** Luôn có một ca kiểu DI-06.
+- **Tin câu đối soát chưa từng bắt lỗi.** Luôn có một test case kiểu DI-06.
 
-Đánh đổi chi phí: ràng buộc database rẻ, chạy mọi lúc, nhưng chỉ diễn đạt được bất biến trong một bảng hoặc qua khoá; bất biến liên bảng phức tạp (fare khớp JSON báo giá) đắt hơn nếu làm bằng trigger và có thể chậm đường ghi. Câu đối soát định kỳ rẻ hơn nhưng chỉ *phát hiện sau*. Lựa chọn tuỳ chi phí của một sai lệch tồn tại vài giờ: với tiền, thường cần cả hai — ngăn ở đường ghi chính và đối soát định kỳ làm lưới an toàn.
+Đánh đổi chi phí: ràng buộc database rẻ, chạy mọi lúc, nhưng chỉ diễn đạt được bất biến trong một bảng hoặc qua khoá; bất biến liên bảng phức tạp (fare khớp JSON báo giá) đắt hơn nếu làm bằng trigger và có thể chậm đường ghi. Câu đối soát định kỳ rẻ hơn nhưng chỉ *phát hiện sau*. Lựa chọn còn tuỳ vào chi phí khi một sai lệch tồn tại vài giờ: với tiền, thường cần cả hai — ngăn ở đường ghi chính và đối soát định kỳ làm lưới an toàn.
 
 ## 10. Bài tập và câu hỏi tự kiểm
 
@@ -477,7 +477,7 @@ Trên hàng triệu chuyến, chia đối soát theo partition hoặc khoảng k
 <p>Không nói gì về việc <b>ngăn</b>. Test chính nó đã sửa giá thành công bằng UPDATE — schema cho phép. DI-06 chỉ chứng minh câu đối soát <b>phát hiện</b> được loại sai lệch này. Muốn ngăn cần thiết kế khác (quyền, trigger, cột chỉ ghi một lần) và phép kiểm khác.</p>
 </details>
 
-**Câu 4.** DI-02 kiểm UNIQUE tuần tự. Nó có thay được kiểm R-QUOTE-03 "kể cả khi hai yêu cầu tới cùng lúc" không?
+**Câu 4.** DI-02 kiểm UNIQUE tuần tự. Test case này có thay được phép kiểm R-QUOTE-03 "kể cả khi hai yêu cầu tới cùng lúc" không?
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>

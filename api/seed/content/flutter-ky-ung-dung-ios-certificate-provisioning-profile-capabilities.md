@@ -89,7 +89,7 @@ Có ba loại profile, khác nhau ở thiết bị và certificate:
 | Ad hoc | thiết bị đã chọn | một Distribution | bản staging cho QA ngoài TestFlight |
 | App Store | không có | một Distribution | TestFlight và App Store |
 
-Apple không ghi loại profile thành một khoá. Lab suy ra từ nội dung; đó là heuristic, không phải quy tắc Apple công bố:
+Apple không có khoá riêng nào ghi loại profile. Lab suy ra từ nội dung; đó là heuristic, không phải quy tắc Apple công bố:
 
 ### provisioning_profile.dart · 52-ios-signing/lib/src/provisioning_profile.dart (trích)
 
@@ -202,7 +202,7 @@ Test chứng minh: profile mới đủ quyền, profile cũ thiếu đúng hai k
 
 ## 4. Ký tự động hay thủ công, theo flavor
 
-Build setting `CODE_SIGN_STYLE` chọn cách tìm tài sản ký. Theo tài liệu build settings của Apple, `Automatic` để Xcode tự tạo và cập nhật profile, App ID và certificate; `Manual` để ta tự làm trên trang developer, và tự cấu hình các bước của capability. `DEVELOPMENT_TEAM` là Team ID, `CODE_SIGN_IDENTITY` là tên certificate trong keychain, `PROVISIONING_PROFILE_SPECIFIER` là tên hoặc UUID của profile; profile thiếu hay sai thì build lỗi.
+Build setting `CODE_SIGN_STYLE` chọn cách lấy các thành phần dùng để ký. Theo tài liệu build settings của Apple, `Automatic` để Xcode tự tạo và cập nhật profile, App ID và certificate; `Manual` để ta tự làm trên trang developer, và tự cấu hình các bước của capability. `DEVELOPMENT_TEAM` là Team ID, `CODE_SIGN_IDENTITY` là tên certificate trong keychain, `PROVISIONING_PROFILE_SPECIFIER` là tên hoặc UUID của profile; profile thiếu hay sai thì build lỗi.
 
 Tài liệu Flutter nói automatic signing đủ cho hầu hết app. Tới Nơi chọn theo flavor; đó là quyết định của đội, không phải luật của Apple:
 
@@ -239,7 +239,7 @@ Test khoá quy ước này: flavor Manual phải có profile, flavor Automatic t
     });
 ```
 
-Có một điểm nối với Flutter, đã đọc trong source Flutter 3.47.4. Với build release hoặc profile, `CODE_SIGN_STYLE = Manual` và đủ `DEVELOPMENT_TEAM` lẫn `PROVISIONING_PROFILE_SPECIFIER`, lệnh `flutter build ipa` không kèm `--export-options-plist` tự dựng file export, tìm profile theo tên hoặc UUID trong `~/Library/Developer/Xcode/UserData/Provisioning Profiles/`. Không thấy thì nó quay về file chỉ có `method`. Vì vậy ta chủ động viết ExportOptions riêng.
+Có một điểm nối với Flutter, đã đọc trong source Flutter 3.47.4. Với build release hoặc profile mà `CODE_SIGN_STYLE = Manual` và có đủ `DEVELOPMENT_TEAM` lẫn `PROVISIONING_PROFILE_SPECIFIER`, lệnh `flutter build ipa` không kèm `--export-options-plist` tự dựng file export, tìm profile theo tên hoặc UUID trong `~/Library/Developer/Xcode/UserData/Provisioning Profiles/`. Không thấy thì nó quay về file chỉ có `method`. Vì vậy ta chủ động viết ExportOptions riêng.
 
 ## 5. ExportOptions.plist và flutter build ipa
 
@@ -278,7 +278,7 @@ Flutter 3.47.4 chỉ nhận tên cũ ở `--export-method` (`app-store`, `ad-hoc
     <true/>
 ```
 
-Bản App Store cùng khuôn, khác `method`, bundle ID, tên profile và có `uploadSymbols`. Lệnh build (cần macOS, Xcode và chứng chỉ thật; chưa chạy ở đây):
+Bản App Store có cùng cấu trúc, khác ở `method`, bundle ID, tên profile, và có thêm `uploadSymbols`. Lệnh build (cần macOS, Xcode và chứng chỉ thật; chưa chạy ở đây):
 
 ```bash
 flutter build ipa --flavor staging \
@@ -330,7 +330,7 @@ List<ConfigIssue> lintExportOptions(
 }
 ```
 
-Test duyệt từng tên cũ và đòi gợi ý đúng tên mới:
+Test duyệt từng tên cũ và kiểm thông báo gợi ý đúng tên mới:
 
 ### native_config_test.dart · 52-ios-signing/test/native_config_test.dart (trích)
 
@@ -346,7 +346,7 @@ Test duyệt từng tên cũ và đòi gợi ý đúng tên mới:
 
 ## 6. Đọc profile bằng Dart: hạn dùng, thiết bị, entitlement
 
-File `.mobileprovision` thật là một plist bọc trong lớp CMS. TN3125 hướng dẫn gỡ lớp đó bằng `security cms -D -i`, và cảnh báo định dạng profile không phải tài liệu ổn định; profile mới còn mang khoá `DER-Encoded-Profile` làm nguồn chân lý. Vì thế công cụ của lab dành cho học và gỡ lỗi, không để dựng sản phẩm. Nó đọc plist đã giải; Flutter tool cũng đọc `Name`, `UUID`, `TeamIdentifier` và `ExpirationDate` theo đúng tên đó.
+File `.mobileprovision` thật là một plist bọc trong lớp CMS. TN3125 hướng dẫn gỡ lớp đó bằng `security cms -D -i`, và cảnh báo định dạng profile không phải tài liệu ổn định; profile mới còn mang khoá `DER-Encoded-Profile` làm nguồn dữ liệu gốc. Vì thế công cụ của lab dành cho việc học và gỡ lỗi, không dùng để dựng sản phẩm. Công cụ này đọc plist đã giải mã; Flutter tool cũng đọc `Name`, `UUID`, `TeamIdentifier` và `ExpirationDate` theo đúng tên đó.
 
 Hạn dùng nằm trong `statusAt`; thời điểm hiện tại được truyền vào để test không phụ thuộc đồng hồ:
 
@@ -366,7 +366,7 @@ Hạn dùng nằm trong `statusAt`; thời điểm hiện tại được truyề
   }
 ```
 
-Test khoá các ca biên: đúng 30 ngày trước hạn thì cảnh báo, 31 ngày thì chưa, đúng giây hết hạn thì coi là hết hạn.
+Test khoá các trường hợp biên: đúng 30 ngày trước hạn thì cảnh báo, 31 ngày thì chưa, đúng giây hết hạn thì coi là hết hạn.
 
 ### profile_test.dart · 52-ios-signing/test/profile_test.dart (trích)
 
@@ -425,7 +425,7 @@ Mã thoát 1 khi có cảnh báo, nên CI có thể chặn build trước khi t�
 <li><strong>Certificate có mà không ký được.</strong> Dấu hiệu: thông báo kiểu (diễn đạt lại) "No ... signing certificate matching team ID ... with a private key was found". Nguyên nhân: certificate nằm trên trang Apple nhưng khoá riêng ở máy khác, thường là Mac của người đã tạo. Cách sửa: xuất certificate kèm khoá riêng từ máy gốc sang CI, hoặc để <code>match</code> giữ (bài 53). Tạo mới có thể đụng giới hạn số certificate Distribution của team.</li>
 <li><strong>Profile thiếu entitlement.</strong> Dấu hiệu: lỗi kiểu (diễn đạt lại) "Provisioning profile ... doesn't include the aps-environment entitlement". Nguyên nhân: bật capability sau khi tạo profile (Hình 2), hoặc khai sai tên khoá như <code>com.apple.developer.push-notifications</code> (test của lab chặn tên này). Cách sửa: bật trên App ID, tạo lại profile, tải về, ký lại; kiểm bằng <code>--entitlements</code>.</li>
 <li><strong>IPA không cài hoặc không mở được trên máy tester.</strong> Dấu hiệu: cài lỗi, hoặc cài xong không chạy. Kiểm theo thứ tự: UDID có trong profile không (<code>--device</code>); profile còn hạn không; máy đã bật Developer Mode chưa (Apple ghi riêng cho IPA cài từ tệp); với thành viên tạo sau 6/6/2021, app development và ad hoc phải có mạng lần mở đầu để kiểm tra chữ ký. Sửa: thêm thiết bị, tạo lại profile, export lại.</li>
-<li><strong>Cảnh báo method deprecated.</strong> Dấu hiệu: log hoặc công cụ CI báo tên <code>ad-hoc</code> đã deprecated (<code>xcodebuild -help</code> ghi "ad-hoc (deprecated: use release-testing)"), hoặc công cụ cũ từ chối giá trị mới. Cách sửa: dùng <code>release-testing</code>, <code>app-store-connect</code>, <code>debugging</code> và nâng công cụ cũ; <code>lintExportOptions</code> bắt ca này sớm.</li>
+<li><strong>Cảnh báo method deprecated.</strong> Dấu hiệu: log hoặc công cụ CI báo tên <code>ad-hoc</code> đã deprecated (<code>xcodebuild -help</code> ghi "ad-hoc (deprecated: use release-testing)"), hoặc công cụ cũ từ chối giá trị mới. Cách sửa: dùng <code>release-testing</code>, <code>app-store-connect</code>, <code>debugging</code> và nâng công cụ cũ; <code>lintExportOptions</code> bắt trường hợp này sớm.</li>
 </ul>
 </div>
 
@@ -443,7 +443,7 @@ dart test
 Đã kiểm với Flutter 3.47.4, Dart 3.13.3: `dart analyze` 0 issue, `dart test` 69 test xanh. Các nhóm test chứng minh:
 
 - **Đọc plist và xcconfig**: các kiểu dữ liệu, XML hỏng, khoá thiếu giá trị, khoá có điều kiện `[sdk=...]`.
-- **Profile mẫu**: loại, hạn dùng ở các ca biên, thiết bị, wildcard bundle ID, allowlist entitlement.
+- **Profile mẫu**: loại, hạn dùng ở các trường hợp biên, thiết bị, wildcard bundle ID, allowlist entitlement.
 - **`native-config/`**: giá trị entitlements, `UIBackgroundModes`, xcconfig ba flavor, hai `ExportOptions`, và đối chiếu chéo tên profile, bundle ID, Team ID với nhau và với profile mẫu.
 - **Dòng lệnh**: mã thoát 0, 1, 2 và nhận ra file CMS.
 - **Bí mật**: không khoá riêng, không chứng chỉ; mọi Team ID và UDID là số giả.

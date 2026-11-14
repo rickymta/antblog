@@ -1,0 +1,17 @@
+{"file":"flutter-flavors-dart-define-cau-hinh-moi-truong-dev-staging-prod.md","edits":[
+{"old":"Vì độc lập nên chúng có thể lệch:","new":"Vì hai đường độc lập nên chúng có thể lệch nhau:","reason":"Thiếu chủ ngữ rõ ràng, 'lệch' thiếu bổ ngữ","severity":"medium"},
+{"old":"Mọi giá trị thành chuỗi: `15000` thành `\"15000\"`, `true` thành `\"true\"`.","new":"Mọi giá trị đều trở thành chuỗi: `15000` thành `\"15000\"`, `true` thành `\"true\"`.","reason":"Câu thiếu động từ 'trở'","severity":"medium"},
+{"old":"`null` trong JSON thành chuỗi `\"null\"`, không phải \"không có giá trị\". Một đối tượng lồng nhau thành `\"{x: 1}\"`.","new":"`null` trong JSON trở thành chuỗi `\"null\"`, không phải \"không có giá trị\". Một đối tượng lồng nhau trở thành `\"{x: 1}\"`.","reason":"Câu thiếu động từ 'trở'","severity":"medium"},
+{"old":"chỉ nhận đúng chữ `true`: `True` cho `false`.","new":"chỉ nhận đúng chữ `true`: `True` cho ra `false`.","reason":"'cho false' thiếu động từ, dễ hiểu sai","severity":"medium"},
+{"old":"trình biên dịch tính nó lúc dịch và thay bằng chuỗi cố định.","new":"trình biên dịch tính giá trị đó ngay lúc biên dịch và thay bằng chuỗi cố định.","reason":"'tính nó lúc dịch' dịch máy","severity":"medium"},
+{"old":"Khoá API của bên thứ ba, `client_secret`, mật khẩu ở server;","new":"Khoá API của bên thứ ba, `client_secret` và mật khẩu phải nằm ở server;","reason":"Câu thiếu vị ngữ","severity":"medium"},
+{"old":"test được mọi ca mà không cần build lại:","new":"test được mọi trường hợp mà không cần build lại:","reason":"'ca' cụt","severity":"low"},
+{"old":"### appFlavor khác dart-define chỗ nào","new":"### appFlavor khác dart-define ở chỗ nào","reason":"Thiếu giới từ","severity":"low"},
+{"old":"Ném ngoại lệ trước `runApp` không giúp tester cầm bản TestFlight vì họ không có console.","new":"Ném ngoại lệ trước `runApp` không giúp được tester cầm bản TestFlight vì tester không có console.","reason":"Đại từ 'họ' mơ hồ","severity":"medium"},
+{"old":"Ta không sửa `dev.json` mà chồng một define nhờ quy tắc","new":"Ta không sửa `dev.json` mà thêm một define ghi đè nhờ quy tắc","reason":"'chồng một define' tự ghép","severity":"medium"},
+{"old":"sao thành `config/local.json`","new":"sao chép thành `config/local.json`","reason":"'sao thành' thiếu từ","severity":"low"},
+{"old":"Nguyên nhân: giá trị define thành hằng nằm trong app.","new":"Nguyên nhân: giá trị define trở thành hằng nằm trong app.","reason":"Thiếu động từ 'trở'","severity":"medium"},
+{"old":"thiếu khoá, biên timeout, https,","new":"thiếu khoá, giá trị biên của timeout, https,","reason":"'biên timeout' tự ghép, cụt","severity":"medium"},
+{"old":"lời gọi không `const` cho rỗng trong `flutter test`","new":"lời gọi không `const` cho ra chuỗi rỗng trong `flutter test`","reason":"'cho rỗng' lược danh từ","severity":"medium"},
+{"old":"chúng chỉ là chỗ để test chen vào.","new":"chúng chỉ là điểm để test inject bản thay thế vào.","reason":"'chen vào' gượng","severity":"low"}
+]}

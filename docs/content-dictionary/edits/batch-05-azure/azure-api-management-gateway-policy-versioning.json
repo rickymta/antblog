@@ -1,0 +1,20 @@
+{"file":"azure-api-management-gateway-policy-versioning.md","edits":[
+{"old":"quota và kiểm JWT ở cổng thay vì","new":"quota và kiểm tra JWT ở cổng thay vì","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Đã có API Management kiểm JWT ở cổng","new":"Đã có API Management kiểm tra JWT ở cổng","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"cho đỡ kiểm hai lần?","new":"cho đỡ phải kiểm tra hai lần?","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Kiểm hai lần rẻ hơn nhiều","new":"Kiểm tra hai lần rẻ hơn nhiều","reason":"'Kiểm' thiếu 'tra'","severity":"high"},
+{"old":"là trộn luật thương mại với luật nghiệp vụ","new":"là trộn quy tắc thương mại với quy tắc nghiệp vụ","reason":"'luật nghiệp vụ' gượng, dùng 'quy tắc'","severity":"low"},
+{"old":"mà không có lỗi nào báo.","new":"mà không báo lỗi.","reason":"Trật tự từ kiểu tiếng Anh, gượng","severity":"medium"},
+{"old":"Nó kiểm JWT của Entra External ID","new":"Policy này kiểm tra JWT của Entra External ID","reason":"Tránh 'Nó' đầu câu; 'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"cho tự chọn","new":"cho phép tự chọn","reason":"Thiếu động từ 'phép'","severity":"medium"},
+{"old":"kiểm dòng Gateways trên trang từng policy","new":"kiểm tra dòng Gateways trên trang từng policy","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"sau một khoảng, không cần sửa policy","new":"sau một khoảng thời gian, không cần sửa policy","reason":"'một khoảng' lửng, thiếu danh từ","severity":"low"},
+{"old":"Nó kiểm key, token và đếm lượt","new":"Dịch vụ này kiểm tra key, token và đếm lượt","reason":"Tránh 'Nó' đầu câu; 'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"công bố ngày ngừng, thêm header","new":"công bố ngày ngừng hỗ trợ, thêm header","reason":"'ngày ngừng' lược danh từ","severity":"medium"},
+{"old":"chỉ gỡ khi lượt gọi về gần không.","new":"chỉ gỡ khi lượt gọi về gần bằng 0.","reason":"'gần không' gượng","severity":"low"},
+{"old":"cho trace từng request kèm phụ thuộc;","new":"cho trace từng request kèm các dependency;","reason":"'phụ thuộc' là dịch từng chữ của dependency","severity":"medium"},
+{"old":"nó không cho biết lỗi nằm ở gateway hay backend","new":"khối này không cho biết lỗi nằm ở gateway hay backend","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"Nó chưa gắn policy và chưa tạo subscription:","new":"Khối này chưa gắn policy và chưa tạo subscription:","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"Rồi kiểm bốn tình huống bằng","new":"Rồi kiểm tra bốn tình huống bằng","reason":"'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Kiểm quota bằng cách tạm hạ","new":"Kiểm tra quota bằng cách tạm hạ","reason":"'Kiểm' thiếu 'tra'","severity":"high"}
+]}

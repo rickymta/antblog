@@ -18,7 +18,7 @@ language: vi
 
 ## Cú pháp mới chỉ có ích khi giữ ý nghĩa rõ
 
-C# 14 đi cùng SDK .NET 10, không cần bật preview cho các tính năng dùng trong bài. Ta lấy một QuoteView để hiển thị và một DisplayLabel để chuẩn hóa nhãn, không viết lại toàn bộ domain chỉ để đưa từ khóa mới vào.
+C# 14 đi cùng SDK .NET 10, không cần bật preview cho các tính năng dùng trong bài. Ta lấy một QuoteView để hiển thị và một DisplayLabel để chuẩn hoá nhãn, không viết lại toàn bộ domain chỉ để đưa từ khoá mới vào.
 
 Ba thí nghiệm là extension property IsHighFare, setter dùng field do compiler hỗ trợ và phép gán `receiver?.Property = value`. Chúng giúp code ngắn hơn ở một số nơi, nhưng không làm validation, ownership hay persistence tự xuất hiện.
 
@@ -30,7 +30,7 @@ Trong static class QuoteExtensions, `extension(QuoteView quote)` khai báo recei
 
 Đưa now vào tham số làm hành vi kiểm chứng được, không đọc DateTime.Now kín bên trong. Property không giữ state mới trên QuoteView và không phải override một member ảo. Member instance thật được ưu tiên theo quy tắc phân giải; import namespace và xung đột extension vẫn cần được quản lý.
 
-Tên IsHighFare thể hiện một ngưỡng minh họa của view. Nếu đó là rule quyết định tiền/phê duyệt quan trọng, nó cần sống trong nơi sở hữu nghiệp vụ phù hợp, có version/chính sách chứ không rải extension helper ở mọi module.
+Tên IsHighFare thể hiện một ngưỡng minh hoạ của view. Nếu đó là rule quyết định tiền/phê duyệt quan trọng, nó cần sống trong nơi sở hữu nghiệp vụ phù hợp, có version/chính sách chứ không rải extension helper ở mọi module.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -64,7 +64,7 @@ Các cải tiến span/overload resolution của C# 14 có thể làm lựa ch�
 
 ## Bảy kiểm tra và bài tập
 
-Bộ kiểm tra chuẩn hóa nhãn, từ chối whitespace, giữ giá trị cũ, ngưỡng extension property, biên hết hạn và hai nhánh receiver null/không null. Không assert Guid hoặc thời gian hệ thống ngẫu nhiên.
+Bộ kiểm tra chuẩn hoá nhãn, từ chối whitespace, giữ giá trị cũ, ngưỡng extension property, biên hết hạn và hai nhánh receiver null/không null. Không assert Guid hoặc thời gian hệ thống ngẫu nhiên.
 
 **Bài tập:** QuoteView hết hạn đúng tại ExpiresAt có được xem là expired theo code không? Nếu ComputeLabel có thao tác trừ tiền, việc nó bị short-circuit có còn là chi tiết cú pháp vô hại không?
 

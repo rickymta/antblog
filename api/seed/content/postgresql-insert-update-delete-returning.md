@@ -1,14 +1,14 @@
 ---
 slug: postgresql-insert-update-delete-returning
 title: "Thêm, sửa, xoá và đọc kết quả với RETURNING: một chuyến đi trọn vòng đời"
-summary: "Hai tài xế Tới Nơi cùng bấm nhận một chuyến, app phải báo đúng người thắng. Dùng INSERT, UPDATE, DELETE … RETURNING và thẻ lệnh để đưa một chuyến qua 7 trạng thái, hiểu UPDATE 0 và giữ fixture chạy lại được."
+summary: "Hai tài xế Tới Nơi cùng bấm nhận một chuyến, app phải báo đúng người thắng. Bài dùng INSERT, UPDATE, DELETE … RETURNING và thẻ lệnh để đưa một chuyến qua 7 trạng thái, giải thích UPDATE 0 và giữ fixture chạy lại được."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-006, dml, insert, update, delete, returning, toi-noi]
 language: vi
 ---
 
-09:00 ngày 03/11, chị Phạm Thu Dung đặt một chuyến xe máy ở Hà Nội. Ngay khi bấm «Đặt», app phải hiện **mã chuyến** — con số do database cấp, app không tự biết. Một phút sau, tài xế 8003 bấm «Nhận»; một giây sau nữa, tài xế 8001 cũng bấm «Nhận» cùng chuyến. App tài xế 8001 phải báo «chuyến đã có người nhận», không được âm thầm cướp chuyến của 8003.
+09:00 ngày 03/11, chị Phạm Thu Dung đặt một chuyến xe máy ở Hà Nội. Ngay khi bấm «Đặt», app phải hiện **mã chuyến** — con số do database cấp, app không tự biết. Một phút sau, tài xế 8003 bấm «Nhận»; một giây sau nữa, tài xế 8001 cũng bấm «Nhận» cùng chuyến. App tài xế 8001 phải báo «chuyến đã có người nhận», không được cướp chuyến của 8003 mà không ai hay.
 
 Cả hai yêu cầu quy về một câu hỏi: sau mỗi câu lệnh ghi, **database cho ứng dụng biết những gì?** Bài này đưa một chuyến đi hết vòng đời bằng `INSERT`, `UPDATE`, `DELETE` kèm `RETURNING`, đọc thẻ lệnh để biết bao nhiêu dòng thực sự đổi, và giữ bộ dữ liệu thử chạy lại được bao nhiêu lần cũng ra cùng kết quả.
 
@@ -50,7 +50,7 @@ cd examples/toi-noi-postgresql
 node run.mjs p01/00-reset.sql p01/01-schema.sql p01/02-fixture-valid.sql p01/03-fixture-invalid.sql p01/04-lifecycle.sql
 ```
 
-Lần đầu, `DROP SCHEMA IF EXISTS` chỉ báo `NOTICE:  schema "toinoi" does not exist, skipping`. Chạy lại `00` trong cùng phiên (ví dụ chuỗi `00 → 01 → 02 → 04` hai lần liên tiếp), nó xoá sạch lần trước:
+Lần đầu, `DROP SCHEMA IF EXISTS` chỉ báo `NOTICE:  schema "toinoi" does not exist, skipping`. Chạy lại `00` trong cùng phiên (ví dụ chuỗi `00 → 01 → 02 → 04` hai lần liên tiếp), tệp này xoá sạch kết quả lần chạy trước:
 
 ```text
 NOTICE:  drop cascades to 6 other objects
@@ -64,7 +64,7 @@ và lượt thứ hai in ra **đúng** những mã chuyến, mốc thời gian n
 
 1. **Dựng lại từ trống**, kể cả sequence của IDENTITY, nên mã chuyến lại bắt đầu từ 100000.
 2. **UUID và mốc thời gian ghi sẵn** (`b0000000-…-000000000001` cho chuyến của chị Dung) thay cho `gen_random_uuid()`, `now()` mà ứng dụng thật dùng — để so kết quả từng byte.
-3. **Chạy lại mà quên reset thì lỗi to**, không lặng lẽ nhân đôi dữ liệu: chạy `02` lần nữa mà không qua `00`, câu đầu tiên đã gặp `duplicate key value violates unique constraint "pk_cities"`. Khoá chính cố định biến «chạy nhầm hai lần» thành lỗi nhìn thấy được.
+3. **Chạy lại mà quên reset thì báo lỗi ngay**, không nhân đôi dữ liệu mà không ai hay: chạy `02` lần nữa mà không qua `00`, câu đầu tiên đã gặp `duplicate key value violates unique constraint "pk_cities"`. Khoá chính cố định biến «chạy nhầm hai lần» thành lỗi nhìn thấy được.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỉ chạy trên database lab</span>
@@ -166,7 +166,7 @@ RETURNING code, status, driver_id;
 UPDATE 0
 ```
 
-Không có lỗi nào. Tài liệu `UPDATE` ghi rõ số dòng bằng 0 nghĩa là không dòng nào được sửa và **không bị coi là lỗi**. Chuyến đã `accepted` nên `status = 'searching'` sai, không dòng nào khớp `WHERE`. Ứng dụng phải tự đọc số dòng (hoặc thấy `RETURNING` rỗng) để báo «chuyến đã có người nhận». Code chỉ bắt exception sẽ tưởng đây là thành công.
+Không có lỗi nào. Tài liệu `UPDATE` ghi rõ số dòng bằng 0 nghĩa là không dòng nào được sửa và **không bị coi là lỗi**. Chuyến đã `accepted` nên điều kiện `status = 'searching'` không còn đúng, không dòng nào khớp `WHERE`. Ứng dụng phải tự đọc số dòng (hoặc thấy `RETURNING` rỗng) để báo «chuyến đã có người nhận». Code chỉ bắt exception sẽ tưởng đây là thành công.
 
 **UPDATE 0 có hai nguyên nhân** khác hẳn nhau: không có dòng nào mang `id` đó, hoặc dòng có nhưng đang ở trạng thái khác. Muốn phân biệt, đọc lại theo `id` (câu thử thêm, chạy sau `04`):
 
@@ -187,7 +187,7 @@ Có dòng ⇒ trạng thái đã đi tiếp; 0 dòng ⇒ `id` sai. Đọc lại 
 
 ### Nếu bỏ điều kiện trạng thái
 
-Cùng câu nhận chuyến nhưng chỉ có `WHERE code = 100012` — chuyến 100012 của fixture đang `accepted` bởi tài xế 8001. Thử trong `BEGIN … ROLLBACK` để không để lại dấu vết (giao dịch học ở Phần 4):
+Cùng câu nhận chuyến nhưng chỉ có `WHERE code = 100012` — chuyến 100012 của fixture đang ở trạng thái `accepted` do tài xế 8001 nhận. Thử trong `BEGIN … ROLLBACK` để không để lại dấu vết (giao dịch học ở Phần 4):
 
 ```sql
 BEGIN;
@@ -347,7 +347,7 @@ Cuối tệp:
 - **UPDATE/DELETE quên `WHERE`.** Câu đúng cú pháp, sửa mọi dòng. Thử trong giao dịch rồi huỷ trên lab: `UPDATE trips SET fare = 0;` trả `UPDATE 16`. Luôn chạy SELECT với cùng `WHERE` trước, và đọc số dòng sau.
 - **Bỏ qua số dòng.** Coi «không có exception» là thành công thì tài xế 8001 được báo nhận chuyến dù `UPDATE 0`.
 - **Đọc rồi mới ghi.** `SELECT status` thấy `searching` rồi `UPDATE … WHERE id = …` không kèm trạng thái: giữa hai câu, trạng thái có thể đã đổi. Đưa điều kiện vào chính câu UPDATE.
-- **Coi mã IDENTITY là liên tục.** Lỗi ràng buộc, rollback, xoá đều để lại lỗ. Đếm chuyến bằng `count(*)`, không bằng hiệu hai mã.
+- **Coi mã IDENTITY là liên tục.** Lỗi ràng buộc, rollback, xoá đều để lại khoảng trống trong dãy mã. Đếm chuyến bằng `count(*)`, không bằng hiệu hai mã.
 - **`RETURNING *` cho tiện.** Trả mọi cột, và đổi theo khi bảng thêm cột. Liệt kê cột cần dùng.
 - **Xoá cứng hay giữ trạng thái huỷ.** Xoá làm bảng gọn nhưng mất dấu vết và đụng khoá ngoại; giữ `cancelled` tốn chỗ nhưng trả lời được câu hỏi đối soát. Với chuyến, Tới Nơi chọn giữ.
 

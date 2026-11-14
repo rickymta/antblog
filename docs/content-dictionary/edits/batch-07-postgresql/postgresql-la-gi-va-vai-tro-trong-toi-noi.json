@@ -1,0 +1,17 @@
+{"file":"postgresql-la-gi-va-vai-tro-trong-toi-noi.md","edits":[
+{"old":"Phân biệt DBMS, database, schema, bảng và xác định","new":"Bài này phân biệt DBMS, database, schema, bảng và xác định","reason":"Câu cụt thiếu chủ ngữ trong summary","severity":"medium"},
+{"old":"## 1. Nguồn sự thật của Tới Nơi","new":"## 1. Nguồn dữ liệu gốc của Tới Nơi","reason":"'nguồn sự thật' là calque của source of truth","severity":"medium"},
+{"old":"(nguồn sự thật, còn gọi là","new":"(nguồn dữ liệu gốc, còn gọi là","reason":"'nguồn sự thật' là calque","severity":"medium"},
+{"old":"có thể có nhiều nguồn sự thật cho nhiều loại dữ liệu","new":"có thể có nhiều nguồn dữ liệu gốc cho nhiều loại dữ liệu","reason":"'nguồn sự thật' là calque","severity":"medium"},
+{"old":"Trả lời rõ câu này cho ta danh sách","new":"Trả lời rõ câu này sẽ cho ta danh sách","reason":"Câu thiếu động từ nối, đọc vấp","severity":"low"},
+{"old":"đồng thời ở Phần 4, độ bền","new":"xử lý đồng thời ở Phần 4, độ bền","reason":"Thiếu động từ, 'đồng thời' dễ hiểu thành liên từ","severity":"medium"},
+{"old":"nhận câu lệnh, kiểm luật, điều phối","new":"nhận câu lệnh, kiểm tra luật, điều phối","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"giữ dữ liệu, kiểm luật, trả kết quả","new":"giữ dữ liệu, kiểm tra luật, trả kết quả","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"còn đặt luật service sở hữu dữ liệu của mình,","new":"còn đặt ra luật: service sở hữu dữ liệu của mình,","reason":"Câu thiếu liên kết, khó đọc","severity":"medium"},
+{"old":"Cách khai báo `uq_customers_phone` học ở","new":"Cách khai báo `uq_customers_phone` được trình bày ở","reason":"'học ở' gượng cho tài liệu","severity":"low"},
+{"old":"kể cả khi ứng dụng quên kiểm (trích","new":"kể cả khi ứng dụng quên kiểm tra (trích","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"\"PostgreSQL là nguồn sự thật\" không có nghĩa dồn hết logic","new":"\"PostgreSQL là nguồn dữ liệu gốc\" không có nghĩa là dồn hết logic","reason":"Calque 'nguồn sự thật'; thiếu 'là' sau 'có nghĩa'","severity":"medium"},
+{"old":"Kiểm `current_database()` và `SHOW search_path` trước khi hoảng.","new":"Kiểm tra `current_database()` và `SHOW search_path` trước khi hoảng.","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Luật đã kiểm ở ứng dụng thì database không cần kiểm.","new":"Luật đã kiểm tra ở ứng dụng thì database không cần kiểm tra.","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"câu lệnh để kiểm từng khả năng.","new":"câu lệnh để kiểm tra từng khả năng.","reason":"'kiểm' đứng một mình gượng","severity":"low"}
+]}

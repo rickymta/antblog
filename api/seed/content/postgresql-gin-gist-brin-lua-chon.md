@@ -1,7 +1,7 @@
 ---
 slug: postgresql-gin-gist-brin-lua-chon
 title: "Khi nào cân nhắc GIN, GiST và BRIN? Ma trận workload, toán tử và giới hạn"
-summary: "Tới Nơi cần tìm quán theo một mẩu tên, lọc thuộc tính jsonb, chặn ca tài xế chồng giờ và đọc GPS vài phút gần nhất — bốn việc B-tree không làm được. Lập ma trận workload × toán tử × loại index kèm giới hạn đo trên PostgreSQL 18."
+summary: "Tới Nơi cần tìm quán theo một mẩu tên, lọc thuộc tính jsonb, chặn ca tài xế chồng giờ và đọc GPS vài phút gần nhất — bốn việc B-tree không làm được. Bài lập ma trận workload × toán tử × loại index kèm giới hạn, đo trên PostgreSQL 18."
 category: postgresql
 level: advanced
 tags: [postgresql, pg-028, gin, gist, brin, pg-trgm, jsonb, toi-noi]
@@ -14,7 +14,7 @@ Người viết migration thêm B-tree cho cả bốn, rồi `EXPLAIN` vẫn ra 
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-028 · Phần 3/6 · Nâng cao</span>
-<p>Đọc trước: <a href="/articles/postgresql-btree-index-co-ban">PG-023 · B-tree index</a>, <a href="/articles/postgresql-index-nhieu-cot-partial-expression">PG-025 · Index nhiều cột, partial và expression</a>, <a href="/articles/postgresql-statistics-analyze-cardinality">PG-027 · Statistics và ước lượng</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>28-gin-gist-brin.sql</code>, số đo ở <code>DO-DAC.md</code>) và thí nghiệm <code>p03/thu-nghiem/pg028-gioi-han-tung-loai-index.sql</code>. Sau bài này, bạn lập được ma trận workload → toán tử → loại index → giới hạn, và kiểm từng ô của ma trận bằng EXPLAIN trước khi đưa index vào migration.</p>
+<p>Đọc trước: <a href="/articles/postgresql-btree-index-co-ban">PG-023 · B-tree index</a>, <a href="/articles/postgresql-index-nhieu-cot-partial-expression">PG-025 · Index nhiều cột, partial và expression</a>, <a href="/articles/postgresql-statistics-analyze-cardinality">PG-027 · Statistics và ước lượng</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>28-gin-gist-brin.sql</code>, số đo ở <code>DO-DAC.md</code>) và thí nghiệm <code>p03/thu-nghiem/pg028-gioi-han-tung-loai-index.sql</code>. Sau bài này, bạn lập được ma trận workload → toán tử → loại index → giới hạn, và kiểm tra từng ô của ma trận bằng EXPLAIN trước khi đưa index vào migration.</p>
 </div>
 
 ## 1. Dữ liệu, cách chạy và máy đo
@@ -31,7 +31,7 @@ Thời gian chỉ lấy từ `p03/DO-DAC.md`: Intel i7-10700 (16 luồng), 64 GB
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Kiểm locale trước khi dùng pg_trgm với tiếng Việt</span>
-<p>pg_trgm phân loại «ký tự chữ» theo LC_CTYPE của database. Cluster lab dùng provider builtin <code>C.UTF-8</code> nhưng đặt <code>LC_CTYPE=en-US</code> (Windows), nên <code>show_trgm('Cơm Tấm')</code> cho 8 trigram. Thí nghiệm tạo một database <code>LC_CTYPE=C</code>: cùng chuỗi chỉ còn <code>{"  c","  m","  t"," c "," m "," t "}</code>, mọi chữ có dấu thành dấu cách, và <code>similarity('Cơm Tấm', 'Cám Tôm')</code> bằng <b>1,00</b> (database lab: 0,14). Chạy <code>SELECT show_trgm('Cơm Tấm')</code> trên database của bạn trước khi tin bất kỳ số nào dưới đây. Release notes PostgreSQL 18 cũng khuyên REINDEX index pg_trgm sau pg_upgrade với cluster dùng provider không phải libc.</p>
+<p>pg_trgm phân loại «ký tự chữ» theo LC_CTYPE của database. Cluster lab dùng provider builtin <code>C.UTF-8</code> nhưng đặt <code>LC_CTYPE=en-US</code> (Windows), nên <code>show_trgm('Cơm Tấm')</code> cho 8 trigram. Thí nghiệm tạo một database <code>LC_CTYPE=C</code>: cùng chuỗi chỉ còn <code>{"  c","  m","  t"," c "," m "," t "}</code>, mọi chữ có dấu đều biến thành dấu cách, và <code>similarity('Cơm Tấm', 'Cám Tôm')</code> bằng <b>1,00</b> (database lab: 0,14). Chạy <code>SELECT show_trgm('Cơm Tấm')</code> trên database của bạn trước khi tin bất kỳ số nào dưới đây. Release notes PostgreSQL 18 cũng khuyên REINDEX index pg_trgm sau pg_upgrade với cluster dùng provider không phải libc.</p>
 </div>
 
 ## 2. Câu hỏi đúng: toán tử nào, operator class nào?
@@ -115,7 +115,7 @@ Bẫy hay gặp nhất nằm ở cách viết điều kiện. Thí nghiệm tìm
          ->  Bitmap Index Scan on ix_merchants_attrs
 ```
 
-`->>` trả `text`, và `text = text` không phải toán tử của operator class jsonb nào, nên index GIN bị bỏ qua. Muốn so sánh khoảng (`attrs ->> 'gio_mo' < '06:00'`), GIN jsonb hoàn toàn bất lực: cần B-tree trên biểu thức `((attrs ->> 'gio_mo'))` như PG-025. Khoá được lọc thường xuyên bằng so sánh thứ tự là dấu hiệu nên tách thành cột riêng.
+`->>` trả `text`, và `text = text` không phải toán tử của operator class jsonb nào, nên index GIN bị bỏ qua. Muốn so sánh khoảng (`attrs ->> 'gio_mo' < '06:00'`), GIN jsonb không làm được gì: cần B-tree trên biểu thức `((attrs ->> 'gio_mo'))` như PG-025. Khoá được lọc thường xuyên bằng so sánh thứ tự là dấu hiệu nên tách thành cột riêng.
 
 ## 5. GiST: quy tắc «không chồng giờ» giữa nhiều dòng
 
@@ -132,7 +132,7 @@ DETAIL:  Key (driver_id, shift)=(bfd06b3f-…, ["2026-10-15 13:53:00+07","2026-1
 -- [lab] SQLSTATE 23P01 · constraint ex_driver_shifts_khong_chong · table driver_shifts
 ```
 
-Dữ liệu cũ đã vi phạm. Tìm bằng self-join theo đúng toán tử của ràng buộc (ra 3 cặp của tài xế 20007, 23605, 25401, ca sau nhập lúc 2026-10-20 10:00), xoá 3 ca nhập sau, rồi thêm lại thành công. Ràng buộc tự tạo index `gist` cùng tên. Sau đó ca chồng giờ bị chặn ngay khi INSERT (`23P01` kèm DETAIL chỉ ra ca đang có). Ca **liền sau**, bắt đầu đúng lúc ca trước kết thúc, hợp lệ, vì `tstzrange` mặc định nửa mở `[bắt đầu, kết thúc)`.
+Dữ liệu cũ đã vi phạm. Tìm bằng self-join theo đúng toán tử của ràng buộc (ra 3 cặp của tài xế 20007, 23605, 25401, ca sau nhập lúc 2026-10-20 10:00), xoá 3 ca nhập sau, rồi thêm lại thành công. Ràng buộc tự tạo một index `gist` cùng tên. Sau đó ca chồng giờ bị chặn ngay khi INSERT (`23P01` kèm DETAIL chỉ ra ca đang có). Ca **liền sau**, bắt đầu đúng lúc ca trước kết thúc, hợp lệ, vì `tstzrange` mặc định nửa mở `[bắt đầu, kết thúc)`.
 
 Index của ràng buộc phục vụ luôn câu điều phối «ai đang trong ca lúc 09:00 ngày 15/10»: `shift @> TIMESTAMPTZ '…'` ra **1.713** ca qua `Index Only Scan using ex_driver_shifts_khong_chong`.
 
@@ -140,7 +140,7 @@ Giới hạn và đối chiếu (thí nghiệm, phần C):
 
 - **B-tree trên `tstzrange`** tạo được (sắp theo cận dưới rồi cận trên) nhưng cả `@>` lẫn `&&` đều Seq Scan. GiST `range_ops` có sẵn trong lõi phục vụ cả hai, không cần extension.
 - **PostgreSQL 18** thêm khoá chính/UNIQUE «theo thời gian» (release notes 18: `WITHOUT OVERLAPS` cho cột cuối của `PRIMARY KEY`/`UNIQUE`). `PRIMARY KEY (driver_id, shift WITHOUT OVERLAPS)` tạo index **gist**, ca chồng giờ bị chặn với cùng mã `23P01`; khoảng rỗng bị từ chối bằng `23514`. Với cột `uuid` vẫn cần btree_gist.
-- Tài liệu btree_gist: operator class của nó thường **không nhanh hơn** B-tree tương ứng và không tự cưỡng chế uniqueness. Dùng nó để ghép cột thường vào index GiST, không để thay B-tree.
+- Tài liệu btree_gist: operator class của nó thường **không nhanh hơn** B-tree tương ứng và không tự bảo đảm tính duy nhất (uniqueness). Dùng nó để ghép cột thường vào index GiST, không để thay B-tree.
 
 ## 6. BRIN: bảng chỉ-chèn theo thời gian
 
@@ -152,7 +152,7 @@ Giới hạn và đối chiếu (thí nghiệm, phần C):
 | B-tree `recorded_at` (đã gộp khoá trùng) | 14.655.488 B |
 | BRIN `recorded_at` | **24.576 B** |
 
-BRIN nhỏ hơn B-tree khoảng 600 lần. Nhưng nó chỉ có ích khi giá trị **đi cùng thứ tự vật lý**. Lab tạo bản sao xáo trộn thứ tự dòng (`correlation` 1,000 so với 0,0) rồi đọc bản tóm tắt bằng `brin_page_items` (extension pageinspect):
+BRIN nhỏ hơn B-tree khoảng 600 lần. Nhưng BRIN chỉ có ích khi thứ tự giá trị **trùng với thứ tự vật lý** của dòng trong bảng. Lab tạo bản sao xáo trộn thứ tự dòng (`correlation` 1,000 so với 0,0) rồi đọc bản tóm tắt bằng `brin_page_items` (extension pageinspect):
 
 ```text
 -- bảng THEO THỨ TỰ: các dải nối tiếp, không chồng
@@ -173,7 +173,7 @@ Câu «5 phút gần nhất» (61.000 điểm, khoảng 3 % bảng), cache nóng
 | Bảng xáo trộn, planner chọn Seq Scan | 16.704 page | 90,11 ms |
 | Bảng xáo trộn, **ép** BRIN | `lossy=16704`, Recheck bỏ **1.939.000** dòng | **140,96 ms** |
 
-Trên dữ liệu đúng thứ tự, BRIN 24 KB đạt cùng bậc tốc độ với B-tree 14 MB. Trên dữ liệu xáo trộn, BRIN tệ hơn cả Seq Scan. Planner biết điều đó nhờ `correlation` (PG-027) nên tự chọn Seq Scan; chỉ khi ép (`enable_seqscan = off`) mới thấy cái giá.
+Trên dữ liệu đúng thứ tự, BRIN 24 KB cho tốc độ ngang tầm B-tree 14 MB. Trên dữ liệu xáo trộn, BRIN tệ hơn cả Seq Scan. Planner biết điều đó nhờ `correlation` (PG-027) nên tự chọn Seq Scan; chỉ khi ép (`enable_seqscan = off`) mới thấy cái giá.
 
 Hai giới hạn nữa từ thí nghiệm (phần D, bảng 500.000 điểm, 3.677 page, câu «5 phút đầu» 60.000 điểm, ép dùng BRIN):
 
@@ -182,7 +182,7 @@ Hai giới hạn nữa từ thí nghiệm (phần D, bảng 500.000 điểm, 3.6
 
 ## 7. Ma trận lựa chọn
 
-Đây là sản phẩm của bài. Mỗi dòng có bằng chứng ở lab hoặc thí nghiệm; ô «không phục vụ» là những câu bạn sẽ viết nhầm.
+Đây là kết quả chính của bài. Mỗi dòng có bằng chứng ở lab hoặc thí nghiệm; ô «không phục vụ» là những câu bạn sẽ viết nhầm.
 
 | Workload Tới Nơi | Toán tử trong WHERE | Index | Không phục vụ / giới hạn | Bằng chứng |
 |---|---|---|---|---|
@@ -198,8 +198,8 @@ Hai giới hạn nữa từ thí nghiệm (phần D, bảng 500.000 điểm, 3.6
 
 ## 8. Chi phí ghi và vận hành
 
-- **GIN**: một dòng sinh nhiều khoá, nên chèn chậm. Tài liệu GIN khuyên với lô nạp lớn hãy xoá index rồi tạo lại sau. Hàng chờ `fastupdate` làm ghi nhanh hơn nhưng dồn việc vào lúc dọn: câu ghi đẩy hàng chờ vượt `gin_pending_list_limit` sẽ tự dọn và chậm hẳn. Cần thời gian phản hồi đều thì `fastupdate = off`.
-- **GiST** của exclusion constraint chạy trên **mọi** INSERT/UPDATE `driver_shifts`: đó là cái giá của một bất biến mà ứng dụng không tự kiểm an toàn được khi có nhiều phiên ghi đồng thời (Phần 4).
+- **GIN**: một dòng sinh nhiều khoá, nên chèn chậm. Tài liệu GIN khuyên với lô nạp lớn hãy xoá index rồi tạo lại sau. Hàng chờ `fastupdate` làm ghi nhanh hơn nhưng dồn việc vào lúc dọn: câu lệnh ghi làm hàng chờ vượt `gin_pending_list_limit` sẽ tự dọn hàng chờ và chậm hẳn. Cần thời gian phản hồi đều thì `fastupdate = off`.
+- **GiST** của exclusion constraint chạy trên **mọi** INSERT/UPDATE `driver_shifts`: đó là cái giá của một bất biến mà ứng dụng không tự kiểm tra đáng tin cậy được khi có nhiều phiên ghi đồng thời (Phần 4).
 - **BRIN** gần như không tốn khi ghi theo thứ tự, nhưng cần lịch tóm tắt (autovacuum hoặc `autosummarize = on`). Dữ liệu cũ bị UPDATE/xoá rồi chèn lại lung tung sẽ làm dải «loang» dần, giống bản xáo trộn.
 - Mỗi index mới còn làm mất HOT update khi cột của nó bị sửa (PG-024, PG-026). `driver_locations` chỉ chèn nên không chịu chi phí này; `merchants` ít sửa nên chịu được index trigram lớn.
 
@@ -217,7 +217,7 @@ Hai giới hạn nữa từ thí nghiệm (phần D, bảng 500.000 điểm, 3.6
 **Bài 1.** Màn hình CSKH lọc «quán mở cửa trước 06:00» bằng `attrs ->> 'gio_mo' < '06:00'`, bảng đã có `CREATE INDEX … USING gin (attrs)`. Kế hoạch ra sao? Sửa thế nào?
 
 <details><summary><b>Lời giải</b></summary>
-<p>Seq Scan: index GIN jsonb không hiểu so sánh <code>text &lt; text</code>, kể cả phép <code>=</code> viết bằng <code>-&gt;&gt;</code> cũng không. Viết lại bằng <code>@&gt;</code> chỉ được cho phép bằng (2.467 quán mở lúc 07:00 qua Bitmap Index Scan). Phép so sánh khoảng cần B-tree biểu thức:</p>
+<p>Seq Scan: index GIN jsonb không hiểu so sánh <code>text &lt; text</code>, kể cả phép <code>=</code> viết bằng <code>-&gt;&gt;</code> cũng không. Viết lại bằng <code>@&gt;</code> chỉ áp dụng được cho phép so sánh bằng (2.467 quán mở lúc 07:00 qua Bitmap Index Scan). Phép so sánh khoảng cần B-tree biểu thức:</p>
 <pre><code class="language-sql">CREATE INDEX ix_merchants_gio_mo ON merchants ((attrs -&gt;&gt; 'gio_mo'));
 EXPLAIN (COSTS OFF) SELECT count(*) FROM merchants WHERE attrs -&gt;&gt; 'gio_mo' &lt; '06:00';
 -- Bitmap Index Scan on ix_merchants_gio_mo</code></pre>
@@ -227,7 +227,7 @@ EXPLAIN (COSTS OFF) SELECT count(*) FROM merchants WHERE attrs -&gt;&gt; 'gio_mo
 **Bài 2.** Sau một đêm nạp bù GPS, câu «điểm của ca sáng hôm qua» trên index BRIN chậm hẳn dù kết quả không đổi. `EXPLAIN (ANALYZE)` cho thấy `lossy` tăng. Giải thích và sửa.
 
 <details><summary><b>Lời giải</b></summary>
-<p>Page mới nạp nằm ở các dải chưa có bản tóm tắt; BRIN không biết trong đó có gì nên mọi câu hỏi đều phải đọc chúng. Thí nghiệm: 512 page lossy thành 1.212 sau khi nạp 100.000 điểm mới (700 page chưa tóm tắt), bỏ 104.800 dòng khi Recheck.</p>
+<p>Page mới nạp nằm ở các dải chưa có bản tóm tắt; BRIN không biết trong đó có gì nên mọi câu hỏi đều phải đọc chúng. Thí nghiệm: lossy tăng từ 512 lên 1.212 page sau khi nạp 100.000 điểm mới (700 page chưa tóm tắt), bỏ 104.800 dòng khi Recheck.</p>
 <pre><code class="language-sql">SELECT brin_summarize_new_values('ix_gps_brin128');   -- 6 dải
 -- hoặc lâu dài: CREATE INDEX … USING brin (recorded_at) WITH (autosummarize = on);</code></pre>
 <p>Sau khi tóm tắt, <code>lossy</code> về 512. Nếu bản nạp bù chèn điểm <i>cũ</i> vào cuối bảng thì dải mới phủ khoảng thời gian rộng; khi đó tóm tắt không cứu được, phải sắp lại dữ liệu hoặc dùng B-tree.</p>

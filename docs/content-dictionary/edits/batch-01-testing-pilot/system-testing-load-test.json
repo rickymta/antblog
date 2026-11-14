@@ -1,0 +1,101 @@
+{
+  "file": "system-testing-load-test.md",
+  "edits": [
+    {
+      "old": "kế toán planned = sent + dropped, gate đặt trước phép đo",
+      "new": "đối soát planned = sent + dropped, gate đặt trước khi đo",
+      "reason": "'kế toán' dùng ẩn dụ gây khó hiểu; 'đặt trước phép đo' là cụm gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "mà không suy ra capacity production",
+      "new": "mà không suy ra công suất (capacity) của môi trường production",
+      "reason": "thiếu danh từ chính, kiểu danh từ làm định ngữ tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Kiểm bất biến kế toán ",
+      "new": "Kiểm tra bất biến đối soát ",
+      "reason": "'kế toán' là ẩn dụ khó hiểu; 'kiểm' cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Đọc báo cáo theo thứ tự đúng và phân loại «generator không đạt tải» khác với «hệ thống không chịu nổi».",
+      "new": "Đọc báo cáo theo thứ tự đúng và phân biệt «generator không đạt tải» với «hệ thống không chịu nổi».",
+      "reason": "trật tự từ/cấu trúc kiểu tiếng Anh, thiếu động từ phân biệt",
+      "severity": "medium"
+    },
+    {
+      "old": "Kiểm tiền trên **mọi** response",
+      "new": "Kiểm tra số tiền trên **mọi** response",
+      "reason": "'kiểm tiền' là cụm tự ghép, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "sẽ làm đổi mix lỗi giữa chừng",
+      "new": "sẽ làm thay đổi cơ cấu lỗi giữa chừng",
+      "reason": "'đổi mix' là cụm tự ghép Anh-Việt",
+      "severity": "medium"
+    },
+    {
+      "old": "phản ánh ghi tích luỹ trong lượt này",
+      "new": "phản ánh lượng dữ liệu ghi tích luỹ trong lượt này",
+      "reason": "câu thiếu danh từ sau 'phản ánh'",
+      "severity": "medium"
+    },
+    {
+      "old": "**không bắn bù** thành burst",
+      "new": "**không gửi bù** thành burst",
+      "reason": "calque 'bắn', 'burst' có từ Việt tự nhiên (đã chỉnh khi duyệt)",
+      "severity": "low"
+    },
+    {
+      "old": "Không bắn bù slot trễ",
+      "new": "Không gửi bù slot trễ",
+      "reason": "thống nhất 'gửi bù'",
+      "severity": "low"
+    },
+    {
+      "old": "nó tạo ra một spike nhân tạo",
+      "new": "nó tạo ra một đỉnh tải nhân tạo",
+      "reason": "từ Việt tự nhiên thay cho 'spike'",
+      "severity": "low"
+    },
+    {
+      "old": "kế toán khớp, chạy đủ profile",
+      "new": "đối soát khớp, chạy đủ profile",
+      "reason": "'kế toán' là ẩn dụ khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "tái hiện bằng functional case",
+      "new": "tái hiện bằng test case chức năng",
+      "reason": "thống nhất 'test case'; 'functional case' lai tạp",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ làm nhiễu đo được",
+      "new": "chỉ làm cho nhiễu đo được",
+      "reason": "câu cụt, khó hiểu",
+      "severity": "low"
+    },
+    {
+      "old": "tải thực tế giảm âm thầm",
+      "new": "tải thực tế giảm đi mà không ai hay",
+      "reason": "calque 'silently' (style guide mục 4)",
+      "severity": "medium"
+    },
+    {
+      "old": "Vì sao script không bắn bù slot bị trễ",
+      "new": "Vì sao script không gửi bù slot bị trễ",
+      "reason": "thống nhất 'gửi bù'",
+      "severity": "low"
+    },
+    {
+      "old": "Bắn bù dồn nhiều request",
+      "new": "Gửi bù dồn nhiều request",
+      "reason": "thống nhất 'gửi bù'",
+      "severity": "low"
+    }
+  ]
+}

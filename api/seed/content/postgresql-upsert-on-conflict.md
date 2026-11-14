@@ -1,7 +1,7 @@
 ---
 slug: postgresql-upsert-on-conflict
 title: "UPSERT và xung đột khoá duy nhất: nhập thực đơn quán theo lô"
-summary: "Quán Bún Bò Lab 101 gửi lại file thực đơn, cả lô bị từ chối vì một món lặp hai lần, còn lô cũ gửi muộn thì ghi đè giá mới. Dùng INSERT … ON CONFLICT, EXCLUDED và WHERE để nhập dữ liệu có quy tắc, chạy lại không đổi gì."
+summary: "Quán Bún Bò Lab 101 gửi lại file thực đơn, cả lô bị từ chối vì một món lặp hai lần, còn lô cũ gửi muộn thì ghi đè giá mới. Dùng INSERT … ON CONFLICT, EXCLUDED và WHERE để nhập dữ liệu có quy tắc, chạy lại không làm thay đổi dữ liệu."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-017, upsert, on-conflict, merge, unique, idempotency, toi-noi]
@@ -10,7 +10,7 @@ language: vi
 
 Quán đối tác của Tới Nơi cập nhật thực đơn bằng cách tải lên một file: mỗi dòng một món, có mã món (`sku`), tên, giá, còn bán hay không. Tới Nơi nạp file vào bảng nhập rồi hợp nhất sang bảng thực đơn mà app khách đang đọc. Tuần trước, quán **Bún Bò Lab 101** gửi lô thứ hai — tăng giá, báo hết trà đá, thêm món — và **cả lô bị từ chối** vì món bún bò giò xuất hiện hai lần trong file. Sửa xong thì gặp lỗi khác: một dòng trùng tên món. Còn nếu hệ thống của quán gửi lại một file cũ, câu nhập «có rồi thì cập nhật» sẽ ghi giá cũ đè lên giá mới.
 
-Không lỗi nào trong số đó là lỗi của PostgreSQL. Chúng là những quy tắc nhập dữ liệu mà câu lệnh chưa nói ra. Bài này viết các quy tắc đó thành SQL bằng **UPSERT** — `INSERT … ON CONFLICT` — và kiểm từng quy tắc bằng một lô dữ liệu cố ý trùng khoá.
+Không lỗi nào trong số đó là lỗi của PostgreSQL. Chúng là những quy tắc nhập dữ liệu mà câu lệnh chưa nói ra. Bài này viết các quy tắc đó thành SQL bằng **UPSERT** — `INSERT … ON CONFLICT` — và kiểm tra từng quy tắc bằng một lô dữ liệu cố ý trùng khoá.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-017 · Phần 2/6 · Trung bình</span>
@@ -46,7 +46,7 @@ Lô 1 có 5 món ban đầu của quán (`e1000000-…-000000000101`), sửa lú
 
 ## 2. UPSERT: INSERT … ON CONFLICT DO UPDATE
 
-**UPSERT** (ghép từ *update* và *insert*) là thao tác «chưa có thì thêm, có rồi thì cập nhật». PostgreSQL viết nó thành một mệnh đề của `INSERT`:
+**UPSERT** (ghép từ *update* và *insert*) là thao tác «chưa có thì thêm, có rồi thì cập nhật». PostgreSQL biểu diễn thao tác này bằng một mệnh đề của `INSERT`:
 
 ```sql
 INSERT INTO menu_items AS m (merchant_id, sku, name, price, is_available, source_updated_at, updated_by_batch)
@@ -69,7 +69,7 @@ Ba thành phần cần đọc đúng:
 - **`EXCLUDED`** là bảng ảo chứa **dòng định chèn** (dòng bị xung đột). Dòng đang có trong bảng gọi bằng tên bảng hoặc bí danh — ở đây `m`. `SET price = EXCLUDED.price` nghĩa là «lấy giá trong file».
 - **Thẻ lệnh** `INSERT 0 5`: theo tài liệu `INSERT`, con số cuối là số dòng **được chèn hoặc được cập nhật**. Lô 1 vào bảng trống nên cả 5 đều là chèn.
 
-Vì sao không «SELECT xem có chưa, rồi INSERT hoặc UPDATE»? Giữa lúc đọc và lúc ghi, một phiên khác có thể chèn cùng khoá. Tài liệu PostgreSQL 17 cam kết `ON CONFLICT DO UPDATE` cho ra một trong hai kết cục — chèn hoặc cập nhật — một cách nguyên tử, kể cả khi nhiều phiên chạy đồng thời. Lab chỉ có một kết nối nên chưa chứng minh được ý này; để Phần 4.
+Vì sao không «SELECT xem có chưa, rồi INSERT hoặc UPDATE»? Giữa lúc đọc và lúc ghi, một phiên khác có thể chèn cùng khoá. Tài liệu PostgreSQL 17 cam kết `ON CONFLICT DO UPDATE` cho ra một trong hai kết cục — chèn hoặc cập nhật — một cách nguyên tử, kể cả khi nhiều phiên chạy đồng thời. Lab chỉ có một kết nối nên chưa chứng minh được ý này; ý đó để dành cho Phần 4.
 
 ## 3. Lỗi thứ nhất: một lô tự trùng khoá
 
@@ -82,7 +82,7 @@ HINT:  Ensure that no rows proposed for insertion within the same command have d
 
 SQLSTATE `21000` (*cardinality violation* — vi phạm số lượng). Dòng 5 và 6 cùng khoá `(…101, BB-04)`: dòng 5 vừa được chèn thì dòng 6 xung đột với **chính dòng vừa chèn**. Tài liệu gọi câu lệnh này là «tất định»: không được tác động lên cùng một dòng hai lần, vì kết quả sẽ phụ thuộc thứ tự xử lý. PostgreSQL không đoán hộ dòng nào thắng — nó từ chối cả câu, kể cả 6 dòng không liên quan.
 
-Quyết định «dòng nào thắng» là quy tắc R4, và ta phải tự viết nó. Cách gọn trong PostgreSQL là **`DISTINCT ON (biểu thức)`**: giữ **dòng đầu tiên** của mỗi nhóm cùng giá trị biểu thức, theo thứ tự của `ORDER BY`. `ORDER BY` phải bắt đầu bằng đúng các biểu thức trong `DISTINCT ON`, phần sau quyết định dòng nào đứng đầu:
+Quyết định «dòng nào thắng» là quy tắc R4, và ta phải tự viết quy tắc này. Cách gọn trong PostgreSQL là **`DISTINCT ON (biểu thức)`**: giữ **dòng đầu tiên** của mỗi nhóm cùng giá trị biểu thức, theo thứ tự của `ORDER BY`. `ORDER BY` phải bắt đầu bằng đúng các biểu thức trong `DISTINCT ON`, phần sau quyết định dòng nào đứng đầu:
 
 ```sql
 SELECT DISTINCT ON (merchant_id, sku)
@@ -109,7 +109,7 @@ Hai câu lỗi không để lại gì — lỗi thì huỷ cả câu, `SELECT co
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Đừng «chữa» bằng ON CONFLICT DO NOTHING không có target</span>
-<p>Bỏ target, <code>ON CONFLICT DO NOTHING</code> coi <b>mọi</b> UNIQUE và khoá chính là trọng tài: dòng 7 biến mất lặng lẽ với <code>INSERT 0 0</code>, quán không biết món không lên app. FK thì không bao giờ là trọng tài — dòng 8 vẫn gây <code>23503</code>. <code>DO UPDATE</code> thiếu target là lỗi <code>42601</code>. Thí nghiệm <code>pg017-do-nothing-khong-target.sql</code> (không có trong lab chính, nằm ở <code>p02/thu-nghiem/</code>) chạy cả ba.</p>
+<p>Bỏ target, <code>ON CONFLICT DO NOTHING</code> coi <b>mọi</b> UNIQUE và khoá chính là trọng tài: dòng 7 biến mất mà không báo lỗi, chỉ trả về <code>INSERT 0 0</code>, quán không biết món không lên app. FK thì không bao giờ là trọng tài — dòng 8 vẫn gây <code>23503</code>. <code>DO UPDATE</code> thiếu target là lỗi <code>42601</code>. Thí nghiệm <code>pg017-do-nothing-khong-target.sql</code> (không có trong lab chính, nằm ở <code>p02/thu-nghiem/</code>) chạy cả ba.</p>
 </div>
 
 ## 5. Xem trước: biên bản nhập từng dòng
@@ -155,7 +155,7 @@ ORDER BY i.line_no;
 (8 rows)
 ```
 
-Thứ tự nhánh `CASE` là thứ tự ưu tiên: từ chối trước, rồi khử trùng trong lô, rồi mới so với dữ liệu đang có. `first_value(...) OVER (...)` ([PG-015](/articles/postgresql-window-function-frame)) chọn dòng mới nhất mỗi nhóm (quán, sku) — cùng tiêu chí với `DISTINCT ON`. So ba cột bằng **`IS NOT DISTINCT FROM`** để NULL được coi là bằng nhau ([PG-011](/articles/postgresql-null-case-coalesce)).
+Thứ tự nhánh `CASE` là thứ tự ưu tiên: từ chối trước, rồi loại dòng trùng trong lô, rồi mới so với dữ liệu đang có. `first_value(...) OVER (...)` ([PG-015](/articles/postgresql-window-function-frame)) chọn dòng mới nhất mỗi nhóm (quán, sku) — cùng tiêu chí với `DISTINCT ON`. So ba cột bằng **`IS NOT DISTINCT FROM`** để NULL được coi là bằng nhau ([PG-011](/articles/postgresql-null-case-coalesce)).
 
 Kỳ vọng đã rõ trước khi ghi: **1 thêm, 2 cập nhật, 3 bỏ qua, 2 từ chối**.
 
@@ -199,9 +199,9 @@ Khớp biên bản: `INSERT 0 3` = 1 thêm (BB-04, giá 52.000 của dòng 6) + 
 
 Một chi tiết của tài liệu cần biết trước Phần 4: dòng bị `WHERE` loại vẫn **bị khoá** trong lúc câu lệnh chạy, chỉ là không bị sửa. «Không ghi» không có nghĩa là «không chạm».
 
-## 7. Idempotent: gửi lại lô không đổi gì
+## 7. Idempotent: gửi lại lô không làm thay đổi dữ liệu
 
-Một thao tác **idempotent** (lũy đẳng) là thao tác chạy một lần hay nhiều lần cho cùng kết quả. Cổng đối tác thật sẽ gửi lại lô khi mạng chập chờn hoặc khi quán bấm «Tải lên» hai lần. Chạy lại đúng câu ở mục 6:
+Một thao tác **idempotent** (luỹ đẳng) là thao tác chạy một lần hay nhiều lần cho cùng kết quả. Cổng đối tác thật sẽ gửi lại lô khi mạng chập chờn hoặc khi quán bấm «Tải lên» hai lần. Chạy lại đúng câu ở mục 6:
 
 ```text
 INSERT 0 0
@@ -232,7 +232,7 @@ RETURNING sku, price, updated_by_batch;
 INSERT 0 1
 ```
 
-BB-01 bị bỏ qua lặng lẽ (giá vẫn `59000`); `RETURNING` chỉ trả dòng thật sự được chèn. `DO NOTHING` hợp với dữ liệu «ghi một lần» như sự kiện có mã duy nhất; với dữ liệu đổi theo thời gian như giá, nó làm mất cập nhật thật.
+BB-01 bị bỏ qua mà không báo lỗi (giá vẫn `59000`); `RETURNING` chỉ trả dòng thật sự được chèn. `DO NOTHING` hợp với dữ liệu «ghi một lần» như sự kiện có mã duy nhất; với dữ liệu đổi theo thời gian như giá, cách này làm mất cập nhật thật.
 
 ## 9. Conflict target phải khớp một ràng buộc
 
@@ -275,13 +275,13 @@ SELECT * FROM ket_qua ORDER BY sku;
 (3 rows)
 ```
 
-Cùng 1 thêm, 2 cập nhật như UPSERT. `MERGE` diễn đạt được nhiều nhánh hơn (xoá món không còn trong file bằng `WHEN NOT MATCHED BY SOURCE`), nhưng hai câu **không thay thế cho nhau**: tài liệu `MERGE` nói nó theo luật cô lập giao dịch thông thường khi chạy đồng thời, và gợi ý `INSERT … ON CONFLICT` nếu cần chuyển sang UPDATE khi phiên khác vừa chèn cùng khoá (Phần 4). Mỗi dòng đích cũng chỉ được khớp một dòng nguồn, nên R4 vẫn cần.
+Cùng 1 thêm, 2 cập nhật như UPSERT. `MERGE` diễn đạt được nhiều nhánh hơn (xoá món không còn trong file bằng `WHEN NOT MATCHED BY SOURCE`), nhưng hai câu **không thay thế cho nhau**: tài liệu `MERGE` nói MERGE tuân theo các luật cô lập giao dịch thông thường khi chạy đồng thời, và gợi ý `INSERT … ON CONFLICT` nếu cần chuyển sang UPDATE khi phiên khác vừa chèn cùng khoá (Phần 4). Mỗi dòng đích cũng chỉ được khớp một dòng nguồn, nên R4 vẫn cần.
 
 ## 11. Lỗi thường gặp và đánh đổi
 
 | Triệu chứng | Nguyên nhân | Cách sửa |
 |---|---|---|
-| `21000 … cannot affect row a second time`, cả lô bị từ chối | Lô có hai dòng cùng khoá | Khử trùng trước (`DISTINCT ON` với thứ tự xác định) |
+| `21000 … cannot affect row a second time`, cả lô bị từ chối | Lô có hai dòng cùng khoá | Loại dòng trùng trước (`DISTINCT ON` với thứ tự xác định) |
 | `23505` dù đã có `ON CONFLICT` | Vi phạm một UNIQUE khác trọng tài | Lọc dòng vi phạm ra, ghi vào biên bản |
 | `23514`, một dòng giá 0 làm hỏng cả lô | CHECK không phải việc của `ON CONFLICT` | Đưa luật CHECK vào bộ lọc nguồn (bài tập 1) |
 | Giá mới bị giá cũ đè | `DO UPDATE` không có điều kiện thời điểm | `WHERE EXCLUDED.<giờ nguồn> > <bảng>.<giờ nguồn>` |

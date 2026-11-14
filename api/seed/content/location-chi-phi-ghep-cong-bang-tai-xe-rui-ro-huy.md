@@ -1,14 +1,14 @@
 ---
 slug: location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy
-title: "Chi phí ghép ngoài quãng đường: công bằng cho tài xế và rủi ro hủy"
-summary: "Bài 45: thêm rủi ro hủy, thưởng chờ, thưởng xe rảnh và giới hạn đón xa vào chi phí ghép. Khi ghép ngay, hai số hạng không có gì để tác động; giới hạn đón xa làm đẹp số trung bình, ngoại vi hoàn thành −0,031. Trên dữ liệu mô phỏng."
+title: "Chi phí ghép ngoài quãng đường: công bằng cho tài xế và rủi ro huỷ"
+summary: "Bài 45: thêm rủi ro huỷ, thưởng chờ, thưởng xe rảnh và giới hạn đón xa vào chi phí ghép. Khi ghép ngay, hai số hạng không có gì để tác động; giới hạn đón xa làm đẹp số trung bình, ngoại vi hoàn thành −0,031. Trên dữ liệu mô phỏng."
 category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dispatch, matching, fairness, policy, cancellation]
 language: vi
 ---
 
-Hãy hình dung (tình huống minh họa, không phải dữ liệu): tài xế DR-040 vừa trả khách xong ở rìa thành phố và đã đứng đó bốn mươi phút. Cùng lúc, một khách ở rìa bên kia đặt xe, ETA tới DR-040 là 11 phút. Một hệ thống chỉ biết ETA sẽ để DR-040 đứng tiếp và đưa khách cho một tài xế khác vừa bắt khách ở gần đó, vì chi phí chỉ là số giây. Một dispatcher tử tế sẽ muốn chi phí biết thêm điều gì đó: tài xế này đã rảnh quá lâu, khách kia đã chờ quá lâu, đón xa quá 10 phút thì khách hay hủy. Bài này thêm các số hạng đó vào hàm chi phí, đặt trọng số trước khi đo, và đo cái gì thật sự đổi.
+Hãy hình dung (tình huống minh hoạ, không phải dữ liệu): tài xế DR-040 vừa trả khách xong ở rìa thành phố và đã đứng đó bốn mươi phút. Cùng lúc, một khách ở rìa bên kia đặt xe, ETA tới DR-040 là 11 phút. Một hệ thống chỉ biết ETA sẽ để DR-040 đứng tiếp và đưa khách cho một tài xế khác vừa bắt khách ở gần đó, vì chi phí chỉ là số giây. Một dispatcher tử tế sẽ muốn chi phí biết thêm điều gì đó: tài xế này đã rảnh quá lâu, khách kia đã chờ quá lâu, đón xa quá 10 phút thì khách hay huỷ. Bài này thêm các số hạng đó vào hàm chi phí, đặt trọng số trước khi đo, và đo cái gì thật sự đổi.
 
 Kết quả không như một bản ghi chú phát hành. Hai trong bốn số hạng cho nhật ký chuyến **giống hệt** baseline khi ghép ngay, và lý do là cách thí nghiệm được dựng: chúng chưa hề được thử. Khi cho chúng cơ hội, trong lô 10 s ở cao điểm, chúng cũng gần như không đổi gì. Số hạng thứ ba làm tài xế công bằng hơn bằng cách bắt khách chờ lâu hơn. Số hạng thứ tư, giới hạn đón xa, làm các con số trung bình đẹp lên và đẩy thiệt hại vào khách ở xa trung tâm.
 
@@ -16,8 +16,8 @@ Kết quả không như một bản ghi chú phát hành. Hai trong bốn số h
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Thêm vào chi phí ghép một số hạng «xác suất khách hủy × 600 s» (khách hủy thì mất 10 phút tương đương). Theo bạn việc này làm đổi những cặp được ghép đến mức nào? Và nếu mô hình hủy mà chính sách tin là sai, hậu quả ra sao?</p>
-<details><summary>Xem đáp án</summary><p>Không đổi gì cả. Nhật ký chuyến giống <b>hệt</b> baseline (hiệu 0,0 ở mọi chỉ số, khoảng [0,0; 0,0]), ở mọi bộ giả định đã chạy, kể cả khi simulator dùng mô hình hủy khác với mô hình chính sách tin. Lý do: khi ghép ngay, mỗi lô chỉ có một khách hoặc chỉ có một xe, và xác suất hủy chỉ phụ thuộc ETA và tăng theo ETA, nên cộng thêm nó không đổi lựa chọn nào. Điều đó nói về cách thí nghiệm được dựng, không nói rằng số hạng này an toàn để triển khai.</p></details>
+<p>Thêm vào chi phí ghép một số hạng «xác suất khách huỷ × 600 s» (khách huỷ thì mất 10 phút tương đương). Theo bạn việc này làm đổi những cặp được ghép đến mức nào? Và nếu mô hình huỷ mà chính sách tin là sai, hậu quả ra sao?</p>
+<details><summary>Xem đáp án</summary><p>Không đổi gì cả. Nhật ký chuyến giống <b>hệt</b> baseline (hiệu 0,0 ở mọi chỉ số, khoảng [0,0; 0,0]), ở mọi bộ giả định đã chạy, kể cả khi simulator dùng mô hình huỷ khác với mô hình chính sách tin. Lý do: khi ghép ngay, mỗi lô chỉ có một khách hoặc chỉ có một xe, và xác suất huỷ chỉ phụ thuộc ETA và tăng theo ETA, nên cộng thêm nó không đổi lựa chọn nào. Điều đó nói về cách thí nghiệm được dựng, không nói rằng số hạng này an toàn để triển khai.</p></details>
 </div>
 
 ## Hàm chi phí có phiên bản
@@ -59,12 +59,12 @@ pub struct CostPolicy {
 
 - `w_eta · ETA`: thời gian tài xế tới điểm đón, như mọi bài trước.
 - `soft_w · max(0, ETA − mềm)`: đón xa bị phạt thêm phần vượt ngưỡng mềm.
-- `risk_ms · P(hủy)`: xác suất hủy là **đầu vào** lấy từ mô hình hủy của kịch bản, nhân với «giá» một lần hủy.
+- `risk_ms · P(hủy)`: xác suất huỷ là **đầu vào** lấy từ mô hình huỷ của kịch bản, nhân với «giá» một lần huỷ.
 - `− age_bonus · (khách đã chờ)`: khách chờ lâu được ưu tiên khi thiếu xe.
 - `− idle_bonus · (tài xế đã rảnh)`: tài xế rảnh lâu được ưu tiên khi thừa xe.
 - Cặp bị cấm nếu `ETA > hard_pickup_ms`: giới hạn đón xa **cứng**.
 
-Xác suất hủy lấy từ chính công thức của simulator ([bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed)). Chiến lược «biết» mô hình, điều này làm thí nghiệm có lợi cho số hạng rủi ro; phần dưới có thí nghiệm khi chiến lược tin sai.
+Xác suất huỷ lấy từ chính công thức của simulator ([bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed)). Chiến lược «biết» mô hình, điều này làm thí nghiệm có lợi cho số hạng rủi ro; phần dưới có thí nghiệm khi chiến lược tin sai.
 
 `examples/toi-noi-location/rust/crates/matcher/src/batch.rs`
 
@@ -110,7 +110,7 @@ Sáu chính sách, trọng số **đặt trước khi đo**, in ở đầu outpu
         ),
 ```
 
-`v1-all` gộp mọi số hạng: rủi ro hủy ×600 s, thưởng chờ 0,5, thưởng rảnh 0,1, ngưỡng mềm 300 s, ngưỡng cứng 600 s. Đây là điều §3.4 của tài liệu lộ trình (`docs/location-master-curriculum.md`) đã đặt ra: bộ trọng số là một **chính sách có `policy_version`**, lưu cùng quyết định để sau này tái lập và so sánh. Trong lab, `version` (`v0-eta`, `v1-risk`, …) đi cùng mọi bảng kết quả. Tất cả chạy với Hungarian ghép ngay (không cửa sổ), 20 seed, ba bộ giả định: `thường` (120 xe, 3,5 khách/phút), `thưa xe` (60 xe), `huỷ nặng` (hủy tối đa 0,8 từ ETA 120 s).
+`v1-all` gộp mọi số hạng: rủi ro huỷ ×600 s, thưởng chờ 0,5, thưởng rảnh 0,1, ngưỡng mềm 300 s, ngưỡng cứng 600 s. Đây là điều §3.4 của tài liệu lộ trình (`docs/location-master-curriculum.md`) đã đặt ra: bộ trọng số là một **chính sách có `policy_version`**, lưu cùng quyết định để sau này tái lập và so sánh. Trong lab, `version` (`v0-eta`, `v1-risk`, …) đi cùng mọi bảng kết quả. Tất cả chạy với Hungarian ghép ngay (không cửa sổ), 20 seed, ba bộ giả định: `thường` (120 xe, 3,5 khách/phút), `thưa xe` (60 xe), `huỷ nặng` (huỷ tối đa 0,8 từ ETA 120 s).
 
 ## Hai số hạng cho kết quả y hệt: không phải lỗi nối dây, mà là chưa được thử
 
@@ -129,7 +129,7 @@ Không có lô nào vừa nhiều khách vừa nhiều xe, và đó là tất y�
 
 **`v1-age` nhận đầu vào bằng 0.** Số hạng `−age_bonus · wait` chỉ phụ thuộc hàng (khách), nên trong một lô 1 × m nó không đổi được xe nào. Nó chỉ có tác dụng khi phải chọn **khách nào** được phục vụ, tức lô n × 1. Ở `thường` lô đó không tồn tại, và mọi khách đều được ghép ngay lúc đặt: thời gian đã chờ luôn là 0 ms, nên `age_bonus × 0 = 0`. Ở `thưa xe` có 927 lô n × 1, và `v1-age` đổi nhẹ (`wait_s` +2,8 s [−0,3; 5,8], không phân biệt được).
 
-**`v1-risk` là một hàm tăng của ETA.** Mô hình hủy của kịch bản có `walk_extra_per_100m = 0`: xác suất hủy chỉ phụ thuộc ETA, và tăng (rồi phẳng) theo ETA.
+**`v1-risk` là một hàm tăng của ETA.** Mô hình huỷ của kịch bản có `walk_extra_per_100m = 0`: xác suất huỷ chỉ phụ thuộc ETA, và tăng (rồi phẳng) theo ETA.
 
 `examples/toi-noi-location/rust/crates/simulator/src/scenario.rs`
 
@@ -140,7 +140,7 @@ Không có lô nào vừa nhiều khách vừa nhiều xe, và đó là tất y�
     }
 ```
 
-Cộng `risk_ms · P(ETA)` vào `ETA` cho một hàm **tăng nghiêm ngặt** của ETA, và hàm đó giống nhau cho mọi ô. Trong lô 1 × m, tài xế có chi phí nhỏ nhất vẫn là tài xế có ETA nhỏ nhất. Trong lô n × 1, khách có chi phí nhỏ nhất vẫn là khách có ETA nhỏ nhất. Vậy với mọi seed và mọi đường cong hủy chỉ phụ thuộc ETA, `v1-risk` khi ghép ngay **không thể** khác `v0-eta`. Kết quả ở thí nghiệm «tin sai mô hình» (simulator dùng `huỷ nặng`, chính sách tin mô hình mặc định, hiệu vẫn 0,0) cũng từ đó mà ra: mô hình sai nhưng vẫn là một hàm tăng của ETA, nên thí nghiệm đó không kiểm được gì.
+Cộng `risk_ms · P(ETA)` vào `ETA` cho một hàm **tăng nghiêm ngặt** của ETA, và hàm đó giống nhau cho mọi ô. Trong lô 1 × m, tài xế có chi phí nhỏ nhất vẫn là tài xế có ETA nhỏ nhất. Trong lô n × 1, khách có chi phí nhỏ nhất vẫn là khách có ETA nhỏ nhất. Vậy với mọi seed và mọi đường cong huỷ chỉ phụ thuộc ETA, `v1-risk` khi ghép ngay **không thể** khác `v0-eta`. Kết quả ở thí nghiệm «tin sai mô hình» (simulator dùng `huỷ nặng`, chính sách tin mô hình mặc định, hiệu vẫn 0,0) cũng từ đó mà ra: mô hình sai nhưng vẫn là một hàm tăng của ETA, nên thí nghiệm đó không kiểm được gì.
 
 **Điều này có nghĩa là gì.** Ở cấu hình ghép ngay, hai biến thể này **chưa được thử**. Không phải «an toàn khi triển khai», cũng không phải lỗi: nối dây đúng, vì mục dưới cho thấy chúng đổi kết quả ngay khi lô có nhiều khách, nhiều xe. Số hạng rủi ro còn có thể đổi quyết định khi `P(hủy)` phụ thuộc điều gì đó mà ETA không biết: quãng khách phải đi bộ (hệ số `walk_extra_per_100m` khác 0), đặc điểm của từng khách hay tài xế, giờ trong ngày. Lab chưa thử bất kỳ mô hình nào như vậy.
 
@@ -183,7 +183,7 @@ Bài 42 đặt câu hỏi cho chính bài này: thưởng chờ lâu có chữa 
 | `wait_s` p95 (s) | **−56,8 [−85,2; −28,4]** | **−65,5 [−95,4; −35,6]** |
 | `deadhead_m` trung bình (m) | **−181,0 [−255,1; −106,9]** | **−143,9 [−213,9; −73,9]** |
 | Chuyến hoàn thành | −0,9 [−2,3; 0,4] | **−2,1 [−3,6; −0,7] XẤU HƠN** |
-| Hủy (`cancel_rate`) | +0,0041 [−0,0020; 0,0102] | **+0,0097 [0,0032; 0,0162] XẤU HƠN** |
+| Huỷ (`cancel_rate`) | +0,0041 [−0,0020; 0,0102] | **+0,0097 [0,0032; 0,0162] XẤU HƠN** |
 | Khách hết kiên nhẫn | không in riêng | **0,0000 → 0,0287 [0,0210; 0,0365] XẤU HƠN** |
 | Gini số chuyến/xe | **+0,013 [0,006; 0,021]** | −0,013 [−0,023; −0,002] |
 
@@ -211,7 +211,7 @@ Nhìn riêng nửa trên, `v1-limit` là chính sách thắng: ETA, chờ ở đ
 <figcaption>Hình 2. Cùng chính sách `v1-all`, hai mật độ. Ở `thưa xe` khoản giảm km rỗng lớn gấp 12 lần, nhưng khoản bỏ rơi khách lớn gấp 6 lần và Gini số chuyến đảo chiều sang tệ hơn, kèm khoảng rảnh dài nhất của tài xế tăng 1.904 s. Trên dữ liệu mô phỏng.</figcaption>
 </figure>
 
-Ở `thưa xe`, khách hết kiên nhẫn đi từ 0,0733 lên 0,2441 (+0,1708 [0,1503; 0,1912], 20/20 seed), số chuyến hoàn thành giảm 6,9 trên 150,5, hủy tăng 0,0307, Gini số chuyến tăng +0,057 [0,047; 0,067], và khoảng rảnh dài nhất của tài xế tăng lên tới **+1.904 s** ở giá trị lớn nhất: xe đứng chờ trong khi khách bị từ chối vì quá xa. Không phải tài xế nào cũng được lợi từ chính sách đón xa: hai thứ tác động ngược nhau.
+Ở `thưa xe`, khách hết kiên nhẫn đi từ 0,0733 lên 0,2441 (+0,1708 [0,1503; 0,1912], 20/20 seed), số chuyến hoàn thành giảm 6,9 trên 150,5, huỷ tăng 0,0307, Gini số chuyến tăng +0,057 [0,047; 0,067], và khoảng rảnh dài nhất của tài xế tăng lên tới **+1.904 s** ở giá trị lớn nhất: xe đứng chờ trong khi khách bị từ chối vì quá xa. Không phải tài xế nào cũng được lợi từ chính sách đón xa: hai thứ tác động ngược nhau.
 
 Theo vùng ở `thưa xe` (`v1-all`): trung tâm hoàn thành −0,028 (có ý nghĩa), **vành trong −0,039 (có ý nghĩa)**, ngoại vi −0,018 (không phân biệt được). Nên đừng nhớ máy móc «ngoại vi trả giá»: ở mật độ thường đó là ngoại vi, ở xe thưa và ở lô 10 s cao điểm thiệt hại nằm ở vùng trong, có lẽ vì ETA điển hình đã gần ngưỡng cứng 600 s ở mọi nơi (ETA trung bình `v0` ở `thưa xe` là 555,9 s). Cái nhất quán xuyên hai mật độ không phải «vùng nào», mà là: **hiệu ứng của một ngưỡng cứng phụ thuộc mật độ xe, và con số trung bình toàn cục không cho biết điều đó.**
 
@@ -243,8 +243,8 @@ Tham số: `--seeds N` (20), `--jobs N`, `--hinh-dang-lo` (đếm hình dạng l
 
 ## Giới hạn của ví dụ
 
-- **Mô phỏng, và chiến lược biết mô hình hủy.** Xác suất hủy lấy từ chính công thức của kịch bản. Mô hình hủy không phụ thuộc quãng đi bộ, nên khi ghép ngay số hạng rủi ro bị vô hiệu hóa **do thiết kế của thí nghiệm**, không phải do ý tưởng.
-- **Chưa chạy:** `cao điểm` khi ghép ngay, `dày xe` và `huỷ theo chờ` cho bài này; trọng số `age_bonus` khác 0,5; `v1-age`, `v1-idle`, `v1-limit` ở bộ `huỷ nặng` (ở đó chỉ chạy `v1-risk` và `v1-all`); mô hình hủy phụ thuộc quãng đi bộ hoặc đặc điểm khách.
+- **Mô phỏng, và chiến lược biết mô hình huỷ.** Xác suất huỷ lấy từ chính công thức của kịch bản. Mô hình huỷ không phụ thuộc quãng đi bộ, nên khi ghép ngay số hạng rủi ro bị vô hiệu hoá **do thiết kế của thí nghiệm**, không phải do ý tưởng.
+- **Chưa chạy:** `cao điểm` khi ghép ngay, `dày xe` và `huỷ theo chờ` cho bài này; trọng số `age_bonus` khác 0,5; `v1-age`, `v1-idle`, `v1-limit` ở bộ `huỷ nặng` (ở đó chỉ chạy `v1-risk` và `v1-all`); mô hình huỷ phụ thuộc quãng đi bộ hoặc đặc điểm khách.
 - **Không thử** bản giới hạn đón xa chỉ có phần mềm (không cấm cứng), nên chưa biết phần nào của thiệt hại đến từ ngưỡng cứng.
 - **Công bằng cho tài xế đo bằng số chuyến và khoảng rảnh,** không phải thu nhập, không phải mức hài lòng; vùng đo theo khoảng cách tới một tâm quy chiếu, không phải khu vực hành chính.
 - **Trọng số đặt tay** (600 s, 0,5, 0,1, 300 s, 600 s), không dò lưới, nên có thể có bộ khác tốt hơn; lab chọn không dò để không chọn theo may rủi của seed.

@@ -1,21 +1,21 @@
 ---
 slug: aws-observability-nang-cao-xray-adot-logs-insights-slo
 title: "Quan sát nâng cao: X-Ray và ADOT, Logs Insights, anomaly detection, Application Signals và SLO"
-summary: "Bài 55: từ metric sang câu hỏi vận hành: trace yêu cầu đặt chuyến chậm qua ALB, ECS, Lambda, Aurora bằng X-Ray và ADOT; log JSON có trace_id, Logs Insights, metric filter và Embedded Metric Format; anomaly detection và composite alarm giảm ồn; Application Signals định nghĩa SLO, error budget và burn rate; Synthetics, RUM và chi phí log."
+summary: "Bài 55: từ metric sang câu hỏi vận hành: trace yêu cầu đặt chuyến chậm qua ALB, ECS, Lambda, Aurora bằng X-Ray và ADOT; log JSON có trace_id, Logs Insights, metric filter và Embedded Metric Format; anomaly detection và composite alarm giảm cảnh báo nhiễu; Application Signals định nghĩa SLO, error budget và burn rate; Synthetics, RUM và chi phí log."
 category: devops-aws
 level: advanced
 tags: [aws, toi-noi, devops, observability, x-ray, opentelemetry, logs-insights, slo, application-signals, synthetics]
 language: vi
 ---
 
-17:10 chiều thứ sáu, giờ cao điểm. Khách ở TP.HCM nhắn "đặt xe quay vòng tám giây rồi mới ra tài xế". Bảng điều khiển hiển thị CPU của service `booking` ở 45%, tỉ lệ 5xx 0,05%, mọi alarm đều xanh. Metric cho biết *có chuyện*, nhưng không cho biết request nào chậm, chậm ở đâu, và có đủ tệ để gọi người dậy hay không. Bài này dựng ba thứ còn thiếu: truy vết một request, hỏi log một câu cụ thể, và định nghĩa "đủ tệ" bằng SLO.
+17:10 chiều thứ sáu, giờ cao điểm. Khách ở TP.HCM nhắn "đặt xe quay vòng tám giây rồi mới ra tài xế". Bảng điều khiển hiển thị CPU của service `booking` ở 45%, tỉ lệ 5xx 0,05%, mọi alarm đều xanh. Metric cho biết *có chuyện*, nhưng không cho biết request nào chậm, chậm ở đâu, và có đủ nghiêm trọng để gọi người dậy hay không. Bài này dựng ba thứ còn thiếu: truy vết một request, hỏi log một câu cụ thể, và định nghĩa thế nào là "đủ nghiêm trọng" bằng SLO.
 
 Đây là **bài 55** của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn cần xong [bài 10](/articles/aws-cloudwatch-budgets-tagging-co-ban) (alarm, metric filter) và nên đọc [bài 37 loạt .NET](/articles/dotnet10-opentelemetry-traces-metrics-logs) cùng [bài 47](/articles/aws-eks-observability-container-insights-adot-prometheus), vì bài này không lặp lại cách service phát trace mà tập trung vào phía AWS.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Alarm "CPU lớn hơn 80%" kêu mỗi giờ cao điểm nhưng khách không phàn nàn. Nên làm gì với nó?</p>
-<details><summary>Xem đáp án</summary><p>Đừng dùng nó để gọi người. CPU là <b>nguyên nhân tiềm năng</b>, không phải <b>triệu chứng</b> khách nhìn thấy. Giữ nó trên dashboard để chẩn đoán, và gọi on-call theo triệu chứng: lỗi hoặc chậm đo từ góc nhìn khách, tức SLO.</p></details>
+<details><summary>Xem đáp án</summary><p>Đừng dùng nó để gọi người. CPU là <b>nguyên nhân có thể có</b>, không phải <b>triệu chứng</b> khách nhìn thấy. Giữ nó trên dashboard để chẩn đoán, và gọi on-call theo triệu chứng: lỗi hoặc chậm đo từ góc nhìn khách, tức SLO.</p></details>
 </div>
 
 ## Trace: một request đi qua những đâu
@@ -45,9 +45,9 @@ Service phát span bằng **OpenTelemetry SDK**; **ADOT (AWS Distro for OpenTele
 | Client tới ALB tới service | ALB thêm header `X-Amzn-Trace-Id`; OpenTelemetry mặc định dùng `traceparent` (W3C) | Cấu hình propagator X-Ray của OpenTelemetry để đọc header của ALB |
 | Service tới service (HTTP) | `traceparent` hoặc header X-Ray | SDK HTTP client tự gắn khi đã instrument |
 | Service tới SQS tới Lambda | Thuộc tính hệ thống `AWSTraceHeader` của message | Lambda cần bật active tracing |
-| Lambda tới Aurora | Span của driver hoặc span thủ công | Không có propagation vào database; đoạn này nằm trong span của Lambda |
+| Lambda tới Aurora | Span của driver hoặc span thủ công | Không có truyền ngữ cảnh vào database; đoạn này nằm trong span của Lambda |
 
-**Sampling rule** của X-Ray quyết định giữ bao nhiêu trace, tập trung ở một chỗ thay vì sửa code. Với 70 chuyến mỗi giây, ghi mọi trace là phí tiền: lab đặt thanh toán 100% (luồng không được mất dấu), đặt chuyến 1 trace chắc chắn mỗi giây cộng 5% phần còn lại. Chọn **annotation** (được đánh chỉ mục, lọc được) cho thuộc tính cần tìm như `city`, `service_type`; để thứ khác ở metadata. Với ADOT, khai báo chúng bằng `indexed_attributes` của exporter. `trip_id` có hàng triệu giá trị nên để ở log, nối với trace qua `trace_id`.
+**Sampling rule** của X-Ray quyết định giữ bao nhiêu trace, tập trung ở một chỗ thay vì sửa code. Với 70 chuyến mỗi giây, ghi mọi trace thì tốn kém: lab đặt thanh toán 100% (luồng không được mất dấu), đặt chuyến 1 trace chắc chắn mỗi giây cộng 5% phần còn lại. Chọn **annotation** (được đánh chỉ mục, lọc được) cho thuộc tính cần tìm như `city`, `service_type`; để thứ khác ở metadata. Với ADOT, khai báo chúng bằng `indexed_attributes` của exporter. `trip_id` có hàng triệu giá trị nên để ở log, nối với trace qua `trace_id`.
 
 ## Log: hỏi một câu cụ thể
 
@@ -73,13 +73,13 @@ Log chứa dữ liệu khách. **Data protection policy** của log group tự p
 | Ngưỡng tĩnh trên percentile | Latency p99 vượt ngưỡng SLO (`extended_statistic = p99`) | Dùng trung bình sẽ che mất đuôi chậm |
 | Anomaly detection | Lưu lượng có chu kỳ ngày và tuần; báo khi vọt ra ngoài **dải bình thường** học từ lịch sử | Cần vài tuần dữ liệu; sự kiện đặc biệt (Tết, khuyến mãi) làm dải lệch |
 | Burn rate | Mức độ đốt error budget của SLO | Cần SLO đã định nghĩa rõ |
-| Composite | Chỉ báo khi cả lỗi lẫn chậm cùng xấu: `ALARM(a) AND ALARM(b)` | Điều kiện quá chặt có thể bỏ sót sự cố một chiều |
+| Composite | Chỉ báo khi cả lỗi lẫn độ chậm cùng vượt ngưỡng: `ALARM(a) AND ALARM(b)` | Điều kiện quá chặt có thể bỏ sót sự cố một chiều |
 
 **Composite alarm** ghép nhiều alarm con bằng biểu thức logic; chỉ composite gửi SNS tới on-call, còn alarm con chỉ đổi trạng thái. Đây là công cụ chính chống **alert fatigue**: ba alarm con cùng nháy khi một dependency chết sẽ thành một cuộc gọi. Nguyên tắc: gọi người theo triệu chứng khách thấy, mỗi alarm gọi người phải có runbook và chủ, và alarm không ai hành động thì sửa hoặc xoá.
 
 ## SLO với Application Signals
 
-**CloudWatch Application Signals** thu metric chuẩn của từng service và operation (`Latency`, `Error`, `Fault`) từ service đã instrument bằng ADOT hoặc CloudWatch agent, dựng service map và cho phép định nghĩa SLO trực tiếp trên chúng. Một **SLI** (service level indicator) là phép đo, ví dụ tỉ lệ request tạo chuyến thành công. **SLO** là mục tiêu cho SLI trong một cửa sổ, ví dụ 99,9% trong 30 ngày. **Error budget** là phần còn lại để được phép hỏng: 100% trừ mục tiêu.
+**CloudWatch Application Signals** thu metric chuẩn của từng service và operation (`Latency`, `Error`, `Fault`) từ service đã instrument bằng ADOT hoặc CloudWatch agent, dựng service map và cho phép định nghĩa SLO trực tiếp trên chúng. Một **SLI** (service level indicator) là phép đo, ví dụ tỉ lệ request tạo chuyến thành công. **SLO** là mục tiêu cho SLI trong một cửa sổ, ví dụ 99,9% trong 30 ngày. **Error budget** là phần được phép hỏng, bằng 100% trừ đi mục tiêu.
 
 Application Signals có hai kiểu SLO: **request-based** (tỉ lệ request tốt trên tổng request) và **period-based** (tỉ lệ khoảng thời gian trong đó SLI đạt ngưỡng). Lab dùng request-based cho availability và period-based cho latency p99 dưới 800 ms:
 
@@ -101,7 +101,7 @@ Application Signals có hai kiểu SLO: **request-based** (tỉ lệ request t�
 }
 ```
 
-Tệp này (cắt bớt) tạo qua `aws application-signals create-service-level-objective --cli-input-json file://...`. `Environment` phải khớp thuộc tính `deployment.environment` mà task ECS khai báo trong `OTEL_RESOURCE_ATTRIBUTES` (không khai báo thì CloudWatch agent tự lấy theo tên cluster), nên lab đặt rõ giá trị này thay vì đoán. `BurnRateConfigurations` cho Application Signals tính metric burn rate trên các cửa sổ 1 giờ và 6 giờ; alarm trên các metric đó tạo riêng (console cho tạo cùng lúc với SLO). Với SLI availability, chỉ lỗi 5xx bị tính là hỏng, 4xx vẫn là thành công. **Burn rate** bằng 1 nghĩa là đốt hết budget đúng vào cuối cửa sổ; bằng 14,4 nghĩa là hết sau 30 ngày chia 14,4, tức khoảng 50 giờ.
+Bạn tạo SLO từ tệp này (đã cắt bớt) qua `aws application-signals create-service-level-objective --cli-input-json file://...`. `Environment` phải khớp thuộc tính `deployment.environment` mà task ECS khai báo trong `OTEL_RESOURCE_ATTRIBUTES` (không khai báo thì CloudWatch agent tự lấy theo tên cluster), nên lab đặt rõ giá trị này thay vì đoán. `BurnRateConfigurations` cho Application Signals tính metric burn rate trên các cửa sổ 1 giờ và 6 giờ; alarm trên các metric đó tạo riêng (console cho phép tạo cùng lúc với SLO). Với SLI availability, chỉ lỗi 5xx bị tính là hỏng, 4xx vẫn là thành công. **Burn rate** bằng 1 nghĩa là đốt hết budget đúng vào cuối cửa sổ; bằng 14,4 nghĩa là hết sau 30 ngày chia 14,4, tức khoảng 50 giờ.
 
 | Cửa sổ | Burn rate | Budget bị đốt trong cửa sổ | Hành động |
 |---|---|---|---|
@@ -119,23 +119,23 @@ Các con số là mức khởi điểm phổ biến trong cộng đồng SRE, h�
 <rect x="165" y="50" width="130" height="80" rx="10" class="f-phys-soft s-phys"/><text x="177" y="80" class="t-b">SLO 99,9%</text><text x="177" y="102" class="t-small">cửa sổ 30 ngày</text>
 <rect x="320" y="50" width="130" height="80" rx="10" class="f-pk-soft s-pk"/><text x="332" y="80" class="t-b">Error budget</text><text x="332" y="102" class="t-small">43,2 phút</text>
 <rect x="475" y="50" width="130" height="80" rx="10" class="f-pk-soft s-pk"/><text x="487" y="80" class="t-b">Burn rate</text><text x="487" y="102" class="t-small">1 giờ, 6 giờ</text>
-<rect x="630" y="50" width="130" height="80" rx="10" class="f-warn-soft s-warn"/><text x="642" y="80" class="t-b t-warn">Composite</text><text x="642" y="102" class="t-small">gom, giảm ồn</text>
+<rect x="630" y="50" width="130" height="80" rx="10" class="f-warn-soft s-warn"/><text x="642" y="80" class="t-b t-warn">Composite</text><text x="642" y="102" class="t-small">gom, giảm nhiễu</text>
 <rect x="780" y="50" width="90" height="80" rx="10" class="f-warn-soft s-warn"/><text x="792" y="80" class="t-b t-warn">On-call</text><text x="792" y="102" class="t-small">SNS</text>
 <path d="M140 90 L163 90 M295 90 L318 90 M450 90 L473 90 M605 90 L628 90 M760 90 L778 90" class="f-none s-phys" stroke-width="2" marker-end="url(#aws55-2-a)"/>
 <text x="10" y="170" class="t-small">Synthetics canary (đặt chuyến thử mỗi 5 phút) và RUM (người dùng thật trên web) bổ sung SLI từ phía khách,</text>
 <text x="10" y="190" class="t-small">bắt được cả lỗi nằm ngoài tầm nhìn của service như DNS, chứng chỉ, CDN.</text>
 </svg>
 </div>
-<figcaption>Hình 2. Chuỗi từ phép đo tới người trực; mỗi khâu giảm bớt tiếng ồn trước khi tới người.</figcaption>
+<figcaption>Hình 2. Chuỗi từ phép đo tới người trực; mỗi khâu lọc bớt cảnh báo nhiễu trước khi tới người trực.</figcaption>
 </figure>
 
-**Synthetics canary** là script chạy theo lịch từ bên ngoài, gọi API như một khách: lab có canary `POST /v1/quotes` mỗi 5 phút kiểm `price > 0`, cho biết ngay cả khi không có khách nào đang dùng. **RUM** thu dữ liệu từ trình duyệt thật (thời gian tải, lỗi JavaScript) cho web đặt chuyến. Cả hai tính phí theo lần chạy hoặc event.
+**Synthetics canary** là script chạy theo lịch từ bên ngoài, gọi API như một khách: lab có canary `POST /v1/quotes` mỗi 5 phút kiểm `price > 0`, giúp phát hiện sự cố ngay cả khi không có khách nào đang dùng. **RUM** thu dữ liệu từ trình duyệt thật (thời gian tải, lỗi JavaScript) cho web đặt chuyến. Cả hai tính phí theo lần chạy hoặc event.
 
 ## Cái giá phải trả
 
 - **Log là khoản lớn nhất**: đặt retention, giảm mức log, dùng log class phù hợp, và sampling log `Information` (giữ mọi lỗi).
-- **Cardinality**: dimension EMF hoặc nhãn metric như `trip_id`, `driver_id` nổ số metric (bài 47).
-- **SLO quá chặt hoặc đo sai**: health check của ALB và canary chiếm phần lớn request có thể làm SLI đẹp giả; loại chúng khỏi SLI hoặc đo theo operation thật.
+- **Cardinality**: dimension EMF hoặc nhãn metric như `trip_id`, `driver_id` làm số lượng metric tăng vọt (bài 47).
+- **SLO quá chặt hoặc đo sai**: health check của ALB và canary chiếm phần lớn request có thể làm SLI trông tốt hơn thực tế; loại chúng khỏi SLI hoặc đo theo operation thật.
 - **Trace không nối**: một chặng không truyền header là trace đứt đôi; kiểm propagator trước khi tin service map.
 
 ## Bài tập

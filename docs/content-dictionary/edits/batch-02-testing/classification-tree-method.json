@@ -1,0 +1,11 @@
+{"file":"classification-tree-method.md","edits":[
+{"old":"Vấn đề nó giải quyết:","new":"Vấn đề CTM giải quyết:","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"quan hệ cha–con, ràng buộc ghi cạnh cây.","new":"quan hệ cha–con, còn ràng buộc ghi bên cạnh cây.","reason":"'ghi cạnh cây' gượng, thiếu giới từ","severity":"low"},
+{"old":"thì số dòng thay đổi có thể giải thích được.","new":"thì số dòng thay đổi theo cách giải thích được.","reason":"Câu lủng củng, trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"đồng nghĩa không bao giờ kiểm R-FOOD-06.","new":"đồng nghĩa với việc không bao giờ kiểm R-FOOD-06.","reason":"Thiếu quan hệ từ","severity":"low"},
+{"old":"test được chúng nghĩa là điều khiển được đồng hồ và thời tiết","new":"muốn test được chúng thì phải điều khiển được đồng hồ và thời tiết","reason":"Câu thiếu quan hệ từ, khó đọc","severity":"medium"},
+{"old":"chạy hết không phải «test kỹ hơn».","new":"chạy hết cũng không có nghĩa là «test kỹ hơn».","reason":"Câu cụt, giọng dịch máy","severity":"medium"},
+{"old":"nên ngây thơ ta nghĩ 3 dòng là đủ.","new":"nên nếu nghĩ ngây thơ thì 3 dòng là đủ.","reason":"Trật tự từ kiểu tiếng Anh, thiếu quan hệ từ","severity":"medium"},
+{"old":"**Thêm tay tổ hợp biết là nguy hiểm** — CTAL-TA nêu","new":"**Thêm tay các tổ hợp đã biết hay gây lỗi** — CTAL-TA nêu","reason":"Cụm 'biết là nguy hiểm' tự ghép, lệch ý với mục 2.1","severity":"medium"},
+{"old":"Vẽ cây buộc hỏi với từng cặp class","new":"Vẽ cây buộc ta hỏi về từng cặp class","reason":"Câu thiếu chủ thể, 'hỏi với' sai giới từ","severity":"medium"}
+]}

@@ -1,7 +1,7 @@
 ---
 slug: flutter-ci-github-actions-analyze-test-golden-cache
 title: "CI với GitHub Actions: analyze, test, golden và cache pub"
-summary: "Bài 33: đưa các lệnh của bài 27 đến 32 vào workflow GitHub Actions cho Tới Nơi: trigger theo path, quyền chỉ đọc, ghim Flutter 3.47.4 và action, cache pub đúng khoá, golden trên macOS, dart analyze --fatal-infos, coverage không ngưỡng; test Dart đọc chính workflow. Workflow chưa chạy trên GitHub."
+summary: "Bài 33: đưa các lệnh của bài 27 đến 32 vào workflow GitHub Actions cho Tới Nơi: trigger theo path, quyền chỉ đọc, ghim Flutter 3.47.4 và action, cache pub đúng khoá, golden trên macOS, dart analyze --fatal-infos, coverage không đặt ngưỡng; test Dart đọc chính workflow. Workflow chưa chạy trên GitHub."
 category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, ci, github-actions, testing]
@@ -51,11 +51,11 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 ```
 
-**Trigger theo path.** Theo tài liệu, workflow chạy khi ít nhất một file đổi khớp một pattern trong `paths`. Trong pattern, `*` khớp mọi ký tự trừ `/`, còn `**` khớp mọi ký tự kể cả `/`. Vì thế `examples/toi-noi-flutter/**` bắt cả `29-golden-semantics/lib/trip_card.dart`, còn `examples/toi-noi-flutter/*` thì không. Sửa một bài viết trong `api/seed/content/` không đốt phút CI; sửa chính workflow thì có, nên đường dẫn của nó nằm trong `paths`.
+**Trigger theo path.** Theo tài liệu, workflow chạy khi ít nhất một file đổi khớp một pattern trong `paths`. Trong pattern, `*` khớp mọi ký tự trừ `/`, còn `**` khớp mọi ký tự kể cả `/`. Vì thế `examples/toi-noi-flutter/**` bắt cả `29-golden-semantics/lib/trip_card.dart`, còn `examples/toi-noi-flutter/*` thì không. Sửa một bài viết trong `api/seed/content/` không tốn phút CI; sửa chính workflow thì có, nên đường dẫn của nó nằm trong `paths`.
 
 **Push chỉ cho `main`.** Nếu `push` không lọc nhánh, mỗi lần đẩy commit vào nhánh đã có PR sinh hai run (một `push`, một `pull_request`), và job macOS tốn gấp đôi. Vì vậy `push` có `branches: [main]`; nhánh PR chạy qua `pull_request`.
 
-Cái giá của `paths`: khi bộ lọc bỏ qua workflow, check của nó ở trạng thái "Pending", và PR bắt buộc check đó có thể không merge được.
+Cái giá của `paths`: khi bộ lọc bỏ qua workflow, check của nó ở trạng thái "Pending", và PR đã đặt check đó là bắt buộc có thể không merge được.
 
 **Quyền tối thiểu.** `permissions: contents: read` chỉ cho token đọc mã; theo tài liệu, quyền nào không liệt kê là `none`. Workflow chỉ checkout, build và upload artifact, nên không cần ghi gì; tài liệu bảo mật của GitHub khuyên mặc định chỉ đọc rồi nâng riêng từng job.
 
@@ -104,9 +104,9 @@ final _exactRef = RegExp(r'^(v\d+\.\d+\.\d+|[0-9a-f]{40})$');
   }
 ```
 
-`v7` hay `main` không khớp nên bị báo; `v7.0.1` và SHA 40 ký tự thì qua. Test "ca sai" thử cả `master`, `latest`, `HEAD`, thiếu `@` và SHA 7 ký tự.
+`v7` hay `main` không khớp nên bị báo; `v7.0.1` và SHA 40 ký tự thì qua. Test case sai thử cả `master`, `latest`, `HEAD`, thiếu `@` và SHA 7 ký tự.
 
-**Dependency pub là chỗ ghim thứ tư, và lab chưa ghim.** Lab không commit `pubspec.lock`, nên CI có thể resolve bản mới hơn máy dev. Điều này đã xảy ra: `flutter_riverpod` 3.5.0 đánh dấu `container.exists` là deprecated và làm `flutter analyze` thoát 1 ở nơi resolve bản mới. Dự án thật commit `pubspec.lock` và chạy `dart pub get --enforce-lockfile`, lệnh hỏng khi lockfile không khớp `pubspec.yaml`. Lab là ví dụ nên ta chấp nhận lệch này và coi CI là nơi báo trôi.
+**Dependency pub là chỗ ghim thứ tư, và lab chưa ghim.** Lab không commit `pubspec.lock`, nên CI có thể resolve bản mới hơn máy dev. Điều này đã xảy ra: `flutter_riverpod` 3.5.0 đánh dấu `container.exists` là deprecated và làm `flutter analyze` thoát 1 ở nơi resolve bản mới. Dự án thật commit `pubspec.lock` và chạy `dart pub get --enforce-lockfile`, lệnh hỏng khi lockfile không khớp `pubspec.yaml`. Lab là ví dụ nên ta chấp nhận lệch này và coi CI là nơi phát hiện việc phiên bản bị trôi.
 
 ## Cache pub: khoá mặc định không thấy dependency đổi
 
@@ -151,7 +151,7 @@ Tham số `pub-cache-key` cho ta khoá riêng; phần băm lockfile vẫn đư�
           pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('examples/toi-noi-flutter/**/pubspec.yaml') }}
 ```
 
-Theo tài liệu GitHub (kiểm tại 11/2026), một run chỉ khôi phục cache của nhánh hiện tại, nhánh mặc định và với PR là nhánh gốc của PR, không phải nhánh anh em; cache không truy cập quá 7 ngày bị xoá, mặc định mỗi repository có 10 GB. Test của lab kiểm khoá có băm `pubspec.yaml` và `.gitignore` của lab 28, 29 vẫn liệt kê `pubspec.lock`. Cache pub cũng không phải mọi thứ: lab 22 phụ thuộc `sqlite3`, có build hook tải binary SQLite khi build, mà cache chỉ giữ `~/.pub-cache`. Lab này chưa chạy trên Linux nên chưa biết mỗi job có tải lại không.
+Theo tài liệu GitHub (kiểm tại 11/2026), một run chỉ khôi phục cache của nhánh hiện tại, nhánh mặc định và với PR là nhánh gốc của PR, không phải nhánh anh em; cache không được truy cập quá 7 ngày thì bị xoá, còn mỗi repository mặc định có 10 GB. Test của lab kiểm khoá có băm `pubspec.yaml` và `.gitignore` của lab 28, 29 vẫn liệt kê `pubspec.lock`. Cache pub cũng không phải mọi thứ: lab 22 phụ thuộc `sqlite3`, có build hook tải binary SQLite khi build, mà cache chỉ giữ `~/.pub-cache`. Lab này chưa chạy trên Linux nên chưa biết mỗi job có tải lại không.
 
 ## Hai runner: golden trên macOS, phần còn lại trên Linux
 
@@ -182,7 +182,7 @@ Theo tài liệu GitHub (kiểm tại 11/2026), một run chỉ khôi phục cac
           retention-days: 7
 ```
 
-Khi golden trượt, `flutter_test` ghi ảnh diff vào thư mục `failures` cạnh file test (đọc trong `_goldens_io.dart`); lab 29 ghi bốn ảnh mỗi lần trượt. Bước upload cần `if: failure()` vì mặc định một step chỉ chạy khi các step trước thành công. `if-no-files-found: ignore` giữ nó yên lặng khi lỗi không phải golden; `retention-days: 7` là lựa chọn của ta.
+Khi golden test không đạt, `flutter_test` ghi ảnh diff vào thư mục `failures` cạnh file test (đọc trong `_goldens_io.dart`); lab 29 ghi bốn ảnh mỗi lần không đạt. Bước upload cần `if: failure()` vì mặc định một step chỉ chạy khi các step trước thành công. `if-no-files-found: ignore` để bước upload không báo gì khi lỗi không phải golden; `retention-days: 7` là lựa chọn của ta.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -225,7 +225,7 @@ Khi golden trượt, `flutter_test` ghi ảnh diff vào thư mục `failures` c�
 <figcaption>Hình 3. Mỗi phút macOS bằng khoảng mười phút Linux, nên chỉ việc cần macOS mới nên chạy ở đó.</figcaption>
 </figure>
 
-Minh hoạ: job golden 6 phút, 100 lần chạy mỗi tháng (số do ta đặt, chưa đo) là 600 phút, khoảng 37,2 USD ở macOS và 3,6 USD ở Linux. Gói Free có 12 USD mỗi tháng (kiểm tại 11/2026). Vì vậy chỉ lệnh golden lên macOS, và `paths` cắt những lần chạy không cần.
+Minh hoạ: job golden 6 phút, 100 lần chạy mỗi tháng (số do ta đặt, chưa đo) là 600 phút, khoảng 37,2 USD ở macOS và 3,6 USD ở Linux. Gói Free có 12 USD mỗi tháng (kiểm tại 11/2026). Vì vậy ta chỉ đưa lệnh golden lên macOS, và `paths` cắt những lần chạy không cần.
 
 Ta chưa biết ảnh sinh trên macOS của máy tác giả có khớp runner `macos-latest` không. Nếu lần đầu golden đỏ, hãy xem `test/failures` và có thể phải sinh lại ảnh chuẩn trên đúng loại máy đó.
 
@@ -257,7 +257,7 @@ Job `verify` chạy trên Ubuntu. Hai bước mới nằm trước các bước 
           retention-days: 14
 ```
 
-**Timeout 120 phút.** Ở máy tác giả (Mac 10 nhân, có cache), lab 01 đến 26 chạy khoảng 20 phút. Runner chậm hơn 2 đến 3 lần là 40 đến 60 phút, và nhóm 27 đến 33 cùng các lab sau còn cộng thêm. Mặc định của GitHub là 360 phút, quá rộng cho một job treo; 45 thì sát. Ta đặt 120, số minh hoạ chưa đo trên runner. Khi vượt, hãy chia `verify` thành vài job theo nhóm bài hoặc dùng `matrix`, đừng nâng mãi timeout.
+**Timeout 120 phút.** Ở máy tác giả (Mac 10 nhân, có cache), lab 01 đến 26 chạy khoảng 20 phút. Runner chậm hơn 2 đến 3 lần thì mất 40 đến 60 phút, và nhóm 27 đến 33 cùng các lab sau còn cộng thêm. Mặc định của GitHub là 360 phút, quá rộng cho một job treo; 45 thì sát. Ta đặt 120, số minh hoạ chưa đo trên runner. Khi job vượt mức này, hãy chia `verify` thành vài job theo nhóm bài hoặc dùng `matrix`, đừng nâng mãi timeout.
 
 **Vì sao `dart analyze`.** Bài 32 đã thử: với Flutter 3.47.4, `flutter analyze` không in chẩn đoán của analyzer plugin, còn `dart analyze` có. Các script `verify-*.mjs` hiện có chạy `flutter analyze`, nên lint tự viết của lab 32 sẽ lọt qua nếu chỉ dựa vào chúng. Cờ `--fatal-infos` đổi mã thoát thành 1 khi chỉ còn info: ngân sách cảnh báo bằng 0. Lần đầu cần mạng để tải `riverpod_lint` và biên dịch plugin; ở máy tác giả lệnh mất từ khoảng 30 giây (máy rảnh) tới 72 giây (máy tải nặng, build sạch).
 
@@ -265,7 +265,7 @@ Job `verify` chạy trên Ubuntu. Hai bước mới nằm trước các bước 
 
 ## Kiểm chính workflow bằng test
 
-Lab 33 đọc workflow thật bằng package `yaml` và khẳng định các tính chất ở trên. Package này đọc khoá `on` là chuỗi `on`, không thành `true` như YAML 1.1, và một test khẳng định điều đó. Để mỗi kiểm tra thật sự đỏ khi cần, các "ca sai" sửa workflow thật đúng một chỗ:
+Lab 33 đọc workflow thật bằng package `yaml` và khẳng định các tính chất ở trên. Package này đọc khoá `on` là chuỗi `on`, không chuyển thành `true` như YAML 1.1, và một test khẳng định điều đó. Để mỗi kiểm tra thật sự đỏ khi cần, các test case sai sửa workflow thật đúng một chỗ:
 
 ### support.dart · 33-ci-github-actions/test/support.dart (trích)
 
@@ -282,7 +282,7 @@ WorkflowAudit mutated(String from, String to, {bool all = false}) {
 }
 ```
 
-Nếu đoạn `from` biến mất, test ném lỗi thay vì lặng lẽ thành no-op. Ví dụ: đổi `**` thành `*` trong `paths` phải làm kiểm tra đỏ.
+Nếu đoạn `from` biến mất, test ném lỗi thay vì bỏ qua mà không báo lỗi (no-op). Ví dụ: đổi `**` thành `*` trong `paths` phải làm kiểm tra đỏ.
 
 ### audit_rules_test.dart · 33-ci-github-actions/test/audit_rules_test.dart (trích)
 
@@ -297,7 +297,7 @@ Nếu đoạn `from` biến mất, test ném lỗi thay vì lặng lẽ thành n
     });
 ```
 
-Các nhóm test còn lại: Flutter ghim đúng 3.47.4; có `permissions` chỉ đọc; mọi `working-directory` và script `node` tồn tại; không có chuỗi giống bí mật (giá trị giả trong test ghép từ mảnh); và các job đúng như bài mô tả. Test không chứng minh workflow đúng schema của GitHub; việc đó thuộc về `actionlint`, mà máy kiểm không có.
+Các nhóm test còn lại: Flutter ghim đúng 3.47.4; có `permissions` chỉ đọc; mọi `working-directory` và script `node` tồn tại; không có chuỗi giống bí mật (giá trị giả trong test ghép từ mảnh); và các job đúng như bài mô tả. Test không chứng minh workflow đúng schema của GitHub; việc đó thuộc về `actionlint`, mà máy chạy kiểm chứng không có.
 
 ## Khép Phần 4: mục tiêu và đối chiếu
 
@@ -305,7 +305,7 @@ Mục tiêu của Phần 4 là: mỗi lớp của app có loại test phù hợp
 
 | Mục tiêu | Đã có | Còn thiếu |
 |---|---|---|
-| Mỗi lớp một loại test | Bài 27 đến 31: domain, widget, golden, Riverpod, integration | Bài 31 cần thiết bị, chưa chạy ở máy kiểm |
+| Mỗi lớp một loại test | Bài 27 đến 31: domain, widget, golden, Riverpod, integration | Bài 31 cần thiết bị, chưa chạy ở máy chạy kiểm chứng |
 | Xanh trên CI | Workflow analyze, test, golden riêng trên macOS | Chưa chạy trên GitHub; integration test chưa nằm trong CI |
 | Lint đồng nhất | Cổng `dart analyze --fatal-infos` ở CI, pre-commit ở bài 32 | Pre-commit bỏ qua được; CI là cổng cuối |
 
@@ -336,7 +336,7 @@ dart analyze --fatal-infos
 dart test
 ```
 
-Đã kiểm với Flutter 3.47.4 và Dart 3.13.3 trên macOS Apple silicon: `dart analyze --fatal-infos` báo `No issues found!`, `dart test` chạy 55 test xanh (24 trên workflow thật, 31 ca sai). Mức: **Kiểm chứng tự động**, không cần thiết bị. Test không dùng mạng, cần repository đầy đủ vì đọc workflow và vài file lab khác. Ta cũng chạy tay từng lệnh của workflow trong lab tương ứng, và cả ba đều xanh: `flutter test --tags golden` (lab 29), `dart analyze --fatal-infos` (lab 32), `flutter test --coverage` (lab 28).
+Đã kiểm với Flutter 3.47.4 và Dart 3.13.3 trên macOS Apple silicon: `dart analyze --fatal-infos` báo `No issues found!`, `dart test` chạy 55 test xanh (24 trên workflow thật, 31 test case sai). Mức: **Kiểm chứng tự động**, không cần thiết bị. Test không dùng mạng, cần repository đầy đủ vì đọc workflow và vài file lab khác. Ta cũng chạy tay từng lệnh của workflow trong lab tương ứng, và cả ba đều xanh: `flutter test --tags golden` (lab 29), `dart analyze --fatal-infos` (lab 32), `flutter test --coverage` (lab 28).
 
 **Chưa làm**:
 
@@ -353,8 +353,8 @@ dart test
 
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Chỉ PR thứ hai. <code>docs/</code> không khớp pattern nào trong <code>paths</code>, còn <code>examples/toi-noi-flutter/**</code> khớp mọi file ở độ sâu bất kỳ vì <code>**</code> vượt qua dấu <code>/</code>.</p>
-<p><strong>2.</strong> Artifact <code>golden-failures-lab29</code>, chứa <code>test/failures/</code> với bốn ảnh cho mỗi golden trượt: <code>masterImage</code>, <code>testImage</code>, <code>isolatedDiff</code>, <code>maskedDiff</code>. Mở <code>isolatedDiff</code> trước. Nếu chủ ý, sinh lại ảnh chuẩn bằng <code>flutter test --update-goldens --tags golden</code> trên macOS và commit cùng PR; nếu không, sửa code.</p>
-<p><strong>3.</strong> Với khoá của workflow, băm các <code>pubspec.yaml</code> đổi nên khoá mới trượt cache, <code>pub get</code> tải gói rồi cache mới được lưu cho lần sau. Với khoá mặc định, khoá không đổi (không có lockfile), nên vẫn trúng cache cũ không có gói mới và gói đó phải tải lại ở mọi lần chạy.</p>
+<p><strong>2.</strong> Artifact <code>golden-failures-lab29</code>, chứa <code>test/failures/</code> với bốn ảnh cho mỗi golden test không đạt: <code>masterImage</code>, <code>testImage</code>, <code>isolatedDiff</code>, <code>maskedDiff</code>. Mở <code>isolatedDiff</code> trước. Nếu chủ ý, sinh lại ảnh chuẩn bằng <code>flutter test --update-goldens --tags golden</code> trên macOS và commit cùng PR; nếu không, sửa code.</p>
+<p><strong>3.</strong> Với khoá của workflow, băm các <code>pubspec.yaml</code> đổi nên kết quả băm đổi và khoá mới bị cache miss, <code>pub get</code> tải gói rồi cache mới được lưu cho lần sau. Với khoá mặc định, khoá không đổi (không có lockfile), nên vẫn trúng cache cũ không có gói mới và gói đó phải tải lại ở mọi lần chạy.</p>
 </details>
 
 Bài trước: [Lint, analyzer, dart format và analyzer plugin: chất lượng code có kiểm chứng](/articles/flutter-lint-analyzer-format-analyzer-plugin-chat-luong-code). Bài tiếp: [Bản đồ với flutter_map: marker, polyline và chọn điểm đón](/articles/flutter-ban-do-flutter-map-marker-polyline-chon-diem-don).

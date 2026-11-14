@@ -30,7 +30,7 @@ Người đã đọc loạt C# có thể đối chiếu như sau.
 | --- | --- | --- |
 | Cách đến CPU | Build ra IL, runtime dùng JIT dịch sang mã máy khi cần | Source dịch sang bytecode, máy ảo thông dịch từng lệnh bytecode |
 | Bước build | Có (`dotnet build`), lỗi kiểu bắt lúc build | Không có lệnh build riêng; lỗi cú pháp bắt khi nạp file, lỗi kiểu thường chỉ lộ lúc chạy |
-| Kiểu dữ liệu | Khai báo, kiểm tra lúc biên dịch | Gắn với đối tượng lúc chạy; type hint là chú thích tùy chọn |
+| Kiểu dữ liệu | Khai báo, kiểm tra lúc biên dịch | Gắn với đối tượng lúc chạy; type hint là chú thích tuỳ chọn |
 | Môi trường | SDK + runtime cài trên máy | Interpreter + virtual environment cho từng project |
 | Công cụ | `dotnet` (SDK) | `uv` (loạt này chọn), cùng `pip`, `venv` và nhiều công cụ khác |
 
@@ -64,7 +64,7 @@ Bạn có thể nhìn bytecode bằng module `dis` trong thư viện chuẩn. Đ
 
 Máy ảo dùng một ngăn xếp: nạp `base`, `extra`, `price`, nhân hai số trên cùng, cộng, rồi gán vào `total`. Tên lệnh bytecode là chi tiết của CPython và thay đổi giữa các phiên bản; ta đọc để hiểu cơ chế, không phải để học thuộc.
 
-**`__pycache__`** liên quan thế nào? Khi một file được `import` từ file khác (bài 07), CPython có thể lưu bytecode đã biên dịch thành `.pyc` trong thư mục `__pycache__`, lần sau nạp nhanh hơn nếu source không đổi. Với tên như `main.cpython-314.pyc`, phần `cpython-314` cho biết bytecode thuộc phiên bản nào. Đây chỉ là bộ nhớ đệm: xóa đi thì được sinh lại; ta không sửa file `.pyc` và không commit thư mục này vào Git. File script chạy trực tiếp (`main.py`) thì thường không được lưu `.pyc`; bạn thấy `__pycache__` chủ yếu khi có module được import.
+**`__pycache__`** liên quan thế nào? Khi một file được `import` từ file khác (bài 07), CPython có thể lưu bytecode đã biên dịch thành `.pyc` trong thư mục `__pycache__`, lần sau nạp nhanh hơn nếu source không đổi. Với tên như `main.cpython-314.pyc`, phần `cpython-314` cho biết bytecode thuộc phiên bản nào. Đây chỉ là bộ nhớ đệm: xoá đi thì được sinh lại; ta không sửa file `.pyc` và không commit thư mục này vào Git. File script chạy trực tiếp (`main.py`) thì thường không được lưu `.pyc`; bạn thấy `__pycache__` chủ yếu khi có module được import.
 
 ## Cài Python 3.14 bằng uv
 
@@ -119,7 +119,7 @@ Mục `[project]` là phần chuẩn của hệ sinh thái Python: tên, phiên 
 
 ## Chương trình tính cước đầu tiên
 
-Quy tắc minh họa: 12.000 VND bao gồm 2 km đầu, mỗi km vượt thêm 4.500 VND. Chưa có phụ phí, thuế, giảm giá hoặc làm tròn. Đây là giả định để học, không phải bảng giá thực tế của sản phẩm. Đây là phần chính của `main.py` trong lab:
+Quy tắc minh hoạ: 12.000 VND bao gồm 2 km đầu, mỗi km vượt thêm 4.500 VND. Chưa có phụ phí, thuế, giảm giá hoặc làm tròn. Đây là giả định để học, không phải bảng giá thực tế của sản phẩm. Đây là phần chính của `main.py` trong lab:
 
 ```python
 # examples/toi-noi-python/01-python-va-uv/main.py (rút gọn)
@@ -183,7 +183,7 @@ Giới hạn của ví dụ: khoảng cách đến từ dòng lệnh chứ khôn
 | Báo không tìm thấy Python 3.14 | Chạy `uv python install 3.14`; kiểm tra `requires-python` trong `pyproject.toml` |
 | `python` ra phiên bản khác với bài | Đang gọi Python hệ thống; dùng `uv run` thay vì gọi `python` trực tiếp |
 | `No such file or directory` khi chạy | Đang đứng sai thư mục; lệnh trong bài chạy từ gốc repository |
-| Sửa file nhưng kết quả không đổi | Có chạy đúng file không; thử xóa `__pycache__` nếu có module được import |
+| Sửa file nhưng kết quả không đổi | Có chạy đúng file không; thử xoá `__pycache__` nếu có module được import |
 
 ### Tự kiểm tra bằng tay
 

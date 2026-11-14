@@ -1,0 +1,14 @@
+{"file":"aws-s3-bucket-versioning-presigned-url.md","edits":[
+{"old":"Mount, đọc ghi qua hệ điều hành","new":"Mount, đọc và ghi qua hệ điều hành","reason":"'đọc ghi' lược liên từ","severity":"medium"},
+{"old":"ghi đè mọi policy và ACL dại dột sau này","new":"ghi đè mọi policy và ACL cấu hình sai sau này","reason":"'dại dột' gượng khi nói về cấu hình","severity":"medium"},
+{"old":"mọi version cũ vẫn còn và vẫn tính tiền lưu trữ","new":"mọi phiên bản cũ vẫn còn và vẫn tính tiền lưu trữ","reason":"Thống nhất 'phiên bản' trong văn xuôi","severity":"medium"},
+{"old":"version cũ giữ tối đa 3 bản mới nhất, các bản còn lại xoá sau 30 ngày không còn là bản hiện hành","new":"phiên bản cũ giữ tối đa 3 bản mới nhất, các bản còn lại bị xoá sau 30 ngày kể từ khi không còn là bản hiện hành","reason":"Thống nhất 'phiên bản'; vế sau thiếu 'kể từ khi', khó hiểu","severity":"medium"},
+{"old":"bản cũ hơn bị xoá sau 30 ngày không còn là bản hiện hành","new":"bản cũ hơn bị xoá sau 30 ngày kể từ khi không còn là bản hiện hành","reason":"Câu thiếu 'kể từ khi', khó hiểu","severity":"medium"},
+{"old":"hãy dùng Pricing Calculator để chắc tiền tiết kiệm lưu trữ lớn hơn phí request","new":"hãy dùng Pricing Calculator để chắc rằng khoản tiết kiệm từ lưu trữ lớn hơn phí request","reason":"Cụm 'tiền tiết kiệm lưu trữ' cụt, thiếu quan hệ","severity":"low"},
+{"old":"Ứng dụng tài xế không nên cầm credential AWS","new":"Ứng dụng tài xế không nên giữ credential AWS","reason":"'cầm' quá khẩu ngữ","severity":"low"},
+{"old":"Chữ ký phủ phương thức","new":"Chữ ký bao gồm phương thức","reason":"'phủ' là calque của 'covers'","severity":"medium"},
+{"old":"thì URL chết cùng phiên, kể cả khi","new":"thì URL hết hiệu lực khi phiên hết hạn, kể cả khi","reason":"'URL chết' gượng","severity":"low"},
+{"old":"**Version cũ vẫn tính tiền.**","new":"**Phiên bản cũ vẫn tính tiền.**","reason":"Thống nhất 'phiên bản'","severity":"medium"},
+{"old":"phải xoá hết version và delete marker mới xoá được bucket","new":"phải xoá hết phiên bản và delete marker mới xoá được bucket","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"các version cũ vẫn còn và vẫn tính tiền. Để lấy lại ảnh","new":"các phiên bản cũ vẫn còn và vẫn tính tiền. Để lấy lại ảnh","reason":"Thống nhất 'phiên bản'","severity":"low"}
+]}

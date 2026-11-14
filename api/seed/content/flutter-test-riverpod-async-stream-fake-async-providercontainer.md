@@ -1,16 +1,16 @@
 ---
 slug: flutter-test-riverpod-async-stream-fake-async-providercontainer
 title: "Kiểm thử Riverpod, async và Stream: ProviderContainer, fakeAsync, fake clock"
-summary: "Bài 30: test provider Riverpod bằng ProviderContainer.test và container.listen, tắt hoặc chạy retry trên fake_async, tiêm Clock cho hạn báo giá và đếm ngược nhận cuốc, test Stream vị trí tài xế với emitsInOrder, timeout, huỷ subscription; phân biệt fakeAsync với testWidgets."
+summary: "Bài 30: test provider Riverpod bằng ProviderContainer.test và container.listen, tắt hoặc chạy retry trên fake_async, inject Clock cho hạn báo giá và đếm ngược nhận cuốc, test Stream vị trí tài xế với emitsInOrder, timeout, huỷ subscription; phân biệt fakeAsync với testWidgets."
 category: flutter
 level: intermediate
 tags: [flutter, dart, mobile, toi-noi, testing, riverpod, fake-async]
 language: vi
 ---
 
-App tài xế Tới Nơi nhận một cuốc mới và cho tài xế 15 giây để bấm **Nhận**. Hết giờ, cuốc chuyển cho người khác. Bên app khách, báo giá chỉ có hiệu lực 2 phút, và nếu vị trí tài xế im quá 10 giây thì bản đồ phải báo mất tín hiệu. Cả ba chuyện đều là chuyện của thời gian, và cả ba có thể sai theo kiểu rất khó thấy: nút vẫn bấm được ở giây thứ 16, báo giá hết hạn nhưng vẫn đặt chuyến được, bản đồ im lặng mà không báo gì.
+App tài xế Tới Nơi nhận một cuốc mới và cho tài xế 15 giây để bấm **Nhận**. Hết thời gian chờ, cuốc chuyển cho người khác. Bên app khách, báo giá chỉ có hiệu lực 2 phút, và nếu vị trí tài xế không cập nhật quá 10 giây thì bản đồ phải báo mất tín hiệu. Cả ba chuyện đều là chuyện của thời gian, và cả ba có thể sai theo kiểu rất khó thấy: nút vẫn bấm được ở giây thứ 16, báo giá hết hạn nhưng vẫn đặt chuyến được, bản đồ đứng yên mà không báo gì.
 
-Kiểm bằng tay nghĩa là ngồi đợi 15 giây, 2 phút, 10 giây, lần nào cũng vậy. Test tự động chỉ có ích khi nó không đợi thật và không lệ thuộc giờ của máy. Bài này dựng bộ công cụ đó: `ProviderContainer` để chạy provider không cần widget, `fake_async` để thời gian trôi theo lệnh, `Clock` để giờ tiêm được, và cách thử một `Stream`.
+Kiểm bằng tay nghĩa là ngồi đợi 15 giây, 2 phút, 10 giây, lần nào cũng vậy. Test tự động chỉ có ích khi nó không đợi thật và không lệ thuộc giờ của máy. Bài này dựng bộ công cụ đó: `ProviderContainer` để chạy provider không cần widget, `fake_async` để thời gian trôi theo lệnh, `Clock` để giờ có thể inject được, và cách thử một `Stream`.
 
 Đây là bài 30 của lộ trình **Flutter qua Tới Nơi**. Ta nên đọc [bài 18 về Riverpod](/articles/flutter-riverpod-provider-notifier-asyncnotifier-dat-chuyen), [bài 20 về retry và timeout](/articles/flutter-xu-ly-loi-retry-timeout-connectivity-mang-di-dong) và [bài 29 về golden test](/articles/flutter-golden-test-semantics-test-giao-dien-on-dinh) trước. Hai bài [27](/articles/flutter-unit-test-mocktail-fake-quy-tac-cuoc-use-case) và [28](/articles/flutter-widget-test-pumpwidget-finder-matcher-man-hinh-bao-gia) cho nền về test double và `WidgetTester`. Ví dụ lấy từ hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi); mọi thời hạn trong bài (2 phút, 15 giây, 10 giây) là số minh hoạ.
 
@@ -22,7 +22,7 @@ Kiểm bằng tay nghĩa là ngồi đợi 15 giây, 2 phút, 10 giây, lần n�
 
 ## ProviderContainer.test: chạy provider không cần widget
 
-Provider không phụ thuộc cây widget. `ProviderContainer` giữ state của chúng, còn `ProviderContainer.test` dựng một container và tự đăng ký `dispose` khi test kết thúc. Lab dựng sẵn một `ApiHarness`: fake API của bài 19 chạy trong tiến trình qua `InProcessAdapter`, bọc `FaultyAdapter` để tiêm lỗi mạng theo kịch bản. `overrides` thay `apiClientProvider` bằng client của harness, nên không có socket nào được mở.
+Provider không phụ thuộc cây widget. `ProviderContainer` giữ state của chúng, còn `ProviderContainer.test` dựng một container và tự đăng ký `dispose` khi test kết thúc. Lab dựng sẵn một `ApiHarness`: fake API của bài 19 chạy trong tiến trình qua `InProcessAdapter`, bọc `FaultyAdapter` để inject lỗi mạng theo kịch bản. `overrides` thay `apiClientProvider` bằng client của harness, nên không có socket nào được mở.
 
 ### quote_provider_test.dart · 30-test-riverpod-async/test/quote_provider_test.dart
 
@@ -89,7 +89,7 @@ Hàm này có hai tác dụng. `fireImmediately` ghi lại state đầu tiên, m
     });
 ```
 
-Ta so từng phần tử bằng matcher `isA` thay vì `==`, vì `AsyncError` còn mang dấu vết ngăn xếp mà test không cần. Ca thất bại cùng cấu trúc: `AsyncLoading` rồi `AsyncError` mang `ClientFailure`.
+Ta so từng phần tử bằng matcher `isA` thay vì `==`, vì `AsyncError` còn mang dấu vết ngăn xếp mà test không cần. Test case thất bại có cùng cấu trúc: `AsyncLoading` rồi `AsyncError` mang `ClientFailure`.
 
 Còn chuyện autoDispose. `container.read(p)` thực chất là `listen` rồi đóng người nghe ngay, nên khi không ai giữ, provider bị bỏ và lần đọc sau tính lại từ đầu. Hai lần đọc liên tiếp là hai request; giữ một `listen` thì chỉ một.
 
@@ -131,7 +131,7 @@ Duration? retryTransient(int retryCount, Object error) {
 }
 ```
 
-Từ đó có hai kiểu test. Test không quan tâm retry thì tắt bằng `retry: (_, _) => null`, như `setUp` ở mục trước; lỗi tới ngay, không cần đồng hồ giả. Test kiểm chính chính sách thì giữ `retry: retryTransient` và để `fakeAsync` đẩy thời gian (Hình 1).
+Từ đó có hai kiểu test. Test không quan tâm retry thì tắt bằng `retry: (_, _) => null`, như `setUp` ở mục trước; lỗi tới ngay, không cần đồng hồ giả. Test kiểm tra bản thân chính sách thì giữ `retry: retryTransient` và để `fakeAsync` đẩy thời gian (Hình 1).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -194,7 +194,7 @@ void settle(FakeAsync async) => async.elapse(Duration.zero);
         expect(states.last, isA<AsyncData<ValidQuote>>());
 ```
 
-Test kiểm cả hai phía của mỗi mốc: 499 ms chưa có lần gọi mới, 500 ms thì có. Đổi lịch 500, 1000, 2000 ms là một dòng đỏ. Các ca còn lại kiểm hết lượt (4 lần gọi rồi `AsyncError`) và 422 (một request, lỗi ngay).
+Test kiểm cả hai phía của mỗi mốc: 499 ms chưa có lần gọi mới, 500 ms thì có. Đổi lịch 500, 1000, 2000 ms thì test đỏ ngay ở dòng kiểm tra đó. Các test case còn lại kiểm hết lượt (4 lần gọi rồi `AsyncError`) và 422 (một request, lỗi ngay).
 
 ## fakeAsync: thời gian do ta quay
 
@@ -238,7 +238,7 @@ Test kiểm cả hai phía của mỗi mốc: 499 ms chưa có lần gọi mới
 
 Đây cũng là lý do mọi test gọi API bằng `fakeAsync` ở mục trước phải có `settle`, kể cả khi ta không tự thêm interceptor nào. Chuỗi interceptor của dio chạy trong `Future(() async {...})` (xem `dio_mixin.dart` của `dio` 5.11.1), tức qua một Timer. Sau `flushMicrotasks`, request vẫn chưa tới adapter; test `request của dio cần elapse(zero)` đếm `api.attempts` bằng 0 rồi 1 để chứng minh.
 
-**Hai: chỉ Timer tạo trong zone mới bị điều khiển.** Timer dựng trước khi vào `fakeAsync` (ở `setUpAll`, trong một biến toàn cục) chạy theo giờ thật, nên một giờ giả không làm nó nổ.
+**Hai: chỉ Timer tạo trong zone mới bị điều khiển.** Timer dựng trước khi vào `fakeAsync` (ở `setUpAll`, trong một biến toàn cục) chạy theo giờ thật, nên một giờ giả không làm nó chạy.
 
 ### fake_async_pitfalls_test.dart · 30-test-riverpod-async/test/fake_async_pitfalls_test.dart
 
@@ -255,13 +255,13 @@ Test kiểm cả hai phía của mỗi mốc: 499 ms chưa có lần gọi mới
 
 **Ba: I/O thật không chạy.** Kết quả của `File.exists()` hay socket tới từ vòng lặp sự kiện thật, mà thân `fakeAsync` là hàm đồng bộ, chưa nhường cho vòng lặp đó lần nào. Test `I/O thật (đọc file)` cho thấy `done` vẫn `false` sau một giờ giả. Muốn dùng I/O thật trong test widget, bọc nó vào `tester.runAsync`; trong test thuần thì đừng đặt nó trong `fakeAsync`, mà thay bằng fake như mọi bài trước.
 
-**Bốn: `fakeAsync` không phàn nàn Timer còn sót.** Test vẫn xanh dù `Timer.periodic` chưa huỷ; ta phải tự kiểm `async.pendingTimers`. Và `async.flushTimers()` với một periodic chưa huỷ sẽ không bao giờ hết việc: nó ném `StateError` sau 1 giờ giả (mặc định của tham số `timeout`).
+**Bốn: `fakeAsync` không báo lỗi khi còn Timer sót.** Test vẫn xanh dù `Timer.periodic` chưa huỷ; ta phải tự kiểm `async.pendingTimers`. Và `async.flushTimers()` với một periodic chưa huỷ sẽ không bao giờ hết việc: nó ném `StateError` sau 1 giờ giả (mặc định của tham số `timeout`).
 
-**Khác `testWidgets` ở đâu?** `testWidgets` đã chạy thân test trong một `FakeAsync` do binding tạo, nên ta không gói thêm `fakeAsync`; `tester.pump(d)` với `d` khác 0 đóng vai `async.elapse(d)`. `pump()` không đối số chỉ rút microtask và vẽ frame nếu có, giống `flushMicrotasks`, nên Timer 0 giây chỉ chạy sau `pump(Duration.zero)`. Khác nữa: cuối mỗi `testWidgets`, binding khẳng định không còn Timer nào ("A Timer is still pending even after the widget tree was disposed"), còn `fakeAsync` trần thì im lặng. Test provider thuần dùng `fakeAsync`; test có widget dùng `testWidgets`; cả hai chung nguyên lý hai hàng đợi.
+**Khác `testWidgets` ở đâu?** `testWidgets` đã chạy thân test trong một `FakeAsync` do binding tạo, nên ta không gói thêm `fakeAsync`; `tester.pump(d)` với `d` khác 0 đóng vai `async.elapse(d)`. `pump()` không đối số chỉ rút microtask và vẽ frame nếu có, giống `flushMicrotasks`, nên Timer 0 giây chỉ chạy sau `pump(Duration.zero)`. Khác nữa: cuối mỗi `testWidgets`, binding khẳng định không còn Timer nào ("A Timer is still pending even after the widget tree was disposed"), còn `fakeAsync` trần thì không báo gì. Test provider thuần dùng `fakeAsync`; test có widget dùng `testWidgets`; cả hai chung nguyên lý hai hàng đợi.
 
-## Đồng hồ tiêm được với package clock
+## Đồng hồ inject được với package clock
 
-`DateTime.now()` không thay được: `fakeAsync` bẻ Timer, nhưng không bẻ được hàm đọc giờ hệ điều hành. Code cần hỏi giờ qua một cửa mà test thay được. Package `clock` cho cửa đó: getter toàn cục `clock` trả `Clock` của zone hiện tại, và `withClock(c, () => ...)` chạy một đoạn code với đồng hồ khác. Báo giá của lab đóng dấu hạn bằng `clock.now()`:
+`DateTime.now()` không thay được: `fakeAsync` điều khiển được Timer, nhưng không can thiệp được vào hàm đọc giờ hệ điều hành. Code cần hỏi giờ qua một cửa mà test thay được. Package `clock` cho cửa đó: getter toàn cục `clock` trả `Clock` của zone hiện tại, và `withClock(c, () => ...)` chạy một đoạn code với đồng hồ khác. Báo giá của lab đóng dấu hạn bằng `clock.now()`:
 
 ### quote_providers.dart · 30-test-riverpod-async/lib/quote_providers.dart (trích)
 
@@ -322,7 +322,7 @@ Trong `testWidgets`, ta dùng `clock`, không dùng `tester.binding.clock`: đó
   }
 ```
 
-Test dùng `_collect` (nghe stream, gom giá trị vào danh sách) để dựng ca "máy ngủ": đồng hồ nhảy 7 giây trong lúc Timer chưa kịp chạy.
+Test dùng `_collect` (nghe stream, gom giá trị vào danh sách) để dựng test case "máy ngủ": đồng hồ nhảy 7 giây trong lúc Timer chưa kịp chạy.
 
 ### countdown_test.dart · 30-test-riverpod-async/test/countdown_test.dart (trích)
 
@@ -335,7 +335,7 @@ Test dùng `_collect` (nghe stream, gom giá trị vào danh sách) để dựng
         expect(result.values.last, const Duration(seconds: 2));
 ```
 
-Cũng ở file này có ca cảnh báo: bọc đếm ngược trong `withClock(Clock.fixed(...))` bên trong `fakeAsync` thì Timer vẫn tick 10 lần nhưng `clock` đứng yên, nên màn hình mãi còn 3 giây. Hai nguồn thời gian trong một test phải khớp; muốn đồng hồ đi thì để `fakeAsync` tự đặt.
+Cũng ở file này có một test case cảnh báo: bọc đếm ngược trong `withClock(Clock.fixed(...))` bên trong `fakeAsync` thì Timer vẫn tick 10 lần nhưng `clock` đứng yên, nên màn hình mãi còn 3 giây. Hai nguồn thời gian trong một test phải khớp; muốn đồng hồ đi thì để `fakeAsync` tự đặt.
 
 ## Test Stream: thứ tự, timeout và huỷ subscription
 
@@ -425,7 +425,7 @@ Cuối cùng là huỷ subscription, chỗ rò rỉ hay gặp nhất. Khi contai
         expect(async.pendingTimers, isEmpty);
 ```
 
-Cùng nhóm còn ca đóng người nghe cuối của một provider autoDispose, và ca còn một người nghe thì chưa được huỷ.
+Cùng nhóm còn test case đóng người nghe cuối của một provider autoDispose, và test case còn một người nghe thì chưa được huỷ.
 
 ## Lỗi thường gặp
 
@@ -453,7 +453,7 @@ flutter test
 
 Đã kiểm với Flutter 3.47.4 và Dart 3.13.3, `flutter_riverpod` 3.5.0 (ràng buộc `^3.4.3`), `fake_async` 1.3.3, `clock` 1.1.3: `flutter analyze` báo 0 issue, `flutter test` chạy 68 test xanh trong vài giây. Mức: **Kiểm chứng tự động**; không test nào chờ thời gian thật hay gọi mạng.
 
-Nhóm báo giá (18 test) chứng minh chuỗi state, `read(p.future)`, autoDispose cần người nghe và ba kiểu retry. Nhóm đồng hồ và đếm ngược (22 test) chứng minh `withClock`, biên hết hạn, `fakeAsync(initialTime:)`, ca máy ngủ và việc huỷ Timer. Nhóm vị trí tài xế (12 test) chứng minh thứ tự, biên timeout, retry mặc định và huỷ subscription. Nhóm cạm bẫy (9 test) và nhóm `testWidgets` (7 test) chứng minh hai mục "fakeAsync: thời gian do ta quay" và "Đồng hồ tiêm được với package clock".
+Nhóm báo giá (18 test) chứng minh chuỗi state, `read(p.future)`, autoDispose cần người nghe và ba kiểu retry. Nhóm đồng hồ và đếm ngược (22 test) chứng minh `withClock`, biên hết hạn, `fakeAsync(initialTime:)`, test case máy ngủ và việc huỷ Timer. Nhóm vị trí tài xế (12 test) chứng minh thứ tự, biên timeout, retry mặc định và huỷ subscription. Nhóm cạm bẫy (9 test) và nhóm `testWidgets` (7 test) chứng minh hai mục "fakeAsync: thời gian do ta quay" và "Đồng hồ inject được với package clock".
 
 **Chưa làm**: nguồn vị trí thật bằng WebSocket có reconnect (bài 36); test tích hợp trên thiết bị (bài tiếp theo); `ProviderObserver` ghi log; `riverpod_generator`. Lab chỉ có logic và test, không có `main.dart` hay thư mục `android/`, `ios/`.
 

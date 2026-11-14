@@ -1,0 +1,23 @@
+{"file":"postgresql-thuc-hanh-sql-doi-soat.md","edits":[
+{"old":"lời giải thích cho từng đồng chênh +268.000 đ","new":"lời giải thích cho từng khoản chênh lệch +268.000 đ","reason":"'đồng chênh' gượng","severity":"medium"},
+{"old":"Chênh **+268.000 đ** — nhỏ so với doanh thu","new":"Mức chênh là **+268.000 đ** — nhỏ so với doanh thu","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"Chênh nằm ở những chuyến nào, mỗi chuyến thuộc loại sai gì?","new":"Chênh lệch nằm ở những chuyến nào, mỗi chuyến thuộc loại sai lệch nào?","reason":"Câu cụt, trật tự kiểu Anh","severity":"low"},
+{"old":"**Chốt hạt của sổ trước** (grain — một dòng đại diện cho cái gì)","new":"**Chốt grain của sổ trước** (mỗi dòng đại diện cho cái gì)","reason":"'hạt' là calque của grain, giữ thuật ngữ gốc","severity":"medium"},
+{"old":"| 2 | Đúng hạt |","new":"| 2 | Đúng grain |","reason":"Thống nhất thuật ngữ grain","severity":"low"},
+{"old":"chứng minh sổ đúng hạt:","new":"chứng minh sổ đúng grain:","reason":"Thống nhất thuật ngữ grain","severity":"low"},
+{"old":"là nhân tiền như [PG-013]","new":"làm tiền bị nhân lên như ở [PG-013]","reason":"'nhân tiền' tự ghép, khó hiểu","severity":"medium"},
+{"old":"theo phiên là đếm sai ở phiên UTC.","new":"theo múi giờ của phiên sẽ đếm sai khi phiên chạy ở UTC.","reason":"Câu cụt, thiếu rõ nghĩa","severity":"medium"},
+{"old":"để máy so chứ không phải mắt.","new":"để máy tự so sánh thay cho việc đọc bằng mắt.","reason":"Cụm cụt kiểu dịch máy","severity":"medium"},
+{"old":"có bằng chứng không nở/mất dòng","new":"có bằng chứng số dòng không bị nhân lên hay mất đi","reason":"'nở dòng' tự ghép","severity":"medium"},
+{"old":"kỳ vọng ghi bằng máy kiểm được","new":"kỳ vọng để máy kiểm tra được","reason":"Câu gượng","severity":"low"},
+{"old":"lấy loại <b>đầu tiên</b> đúng","new":"lấy loại <b>đầu tiên</b> khớp điều kiện","reason":"'đúng' mơ hồ","severity":"low"},
+{"old":"một chuyến có thể đúng nhiều mô tả cùng lúc","new":"một chuyến có thể khớp nhiều mô tả cùng lúc","reason":"'đúng mô tả' gượng","severity":"medium"},
+{"old":"không dùng để tính; nó là bằng chứng đọc được","new":"không dùng để tính; đó là bằng chứng đọc được","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"<b>Quy tắc ngây thơ</b>","new":"<b>Quy tắc quá đơn giản</b>","reason":"'ngây thơ' là calque của naive","severity":"medium"},
+{"old":"nếu cổng chuyển nó sang <code>succeeded</code>, 103162 sẽ thành THU TRÙNG","new":"nếu cổng chuyển giao dịch này sang <code>succeeded</code>, 103162 sẽ trở thành THU TRÙNG","reason":"Tránh 'nó'; thiếu 'trở'","severity":"medium"},
+{"old":"một kết nối nên chưa có gì về hai phiên cùng ghi giao dịch","new":"dùng một kết nối nên chưa kiểm được gì về hai phiên cùng ghi giao dịch","reason":"Câu lược động từ","severity":"medium"},
+{"old":"mất khỏi cột bằng chứng","new":"biến mất khỏi cột bằng chứng","reason":"Gượng","severity":"low"},
+{"old":"không có thứ tự là đếm hai lần hoặc tuỳ hứng","new":"nếu không có thứ tự thì sẽ đếm hai lần hoặc phân loại tuỳ hứng","reason":"Câu lược động từ","severity":"medium"},
+{"old":"Đối soát báo gì mỗi cách?","new":"Mỗi cách làm khiến đối soát báo kết quả gì?","reason":"Trật tự kiểu Anh","severity":"low"},
+{"old":"phép kiểm hai nơi đó nhất quán","new":"phép kiểm tra xem hai nơi đó có nhất quán hay không","reason":"Câu cụt","severity":"medium"}
+]}

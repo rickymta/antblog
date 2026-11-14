@@ -1,0 +1,22 @@
+{"file":"azure-event-hubs-stream-gps-consumer-group.md","edits":[
+{"old":"Đổi lại, nó nuốt được lượng event lớn","new":"Đổi lại, Event Hubs tiếp nhận được lượng event lớn","reason":"'nuốt' khẩu ngữ; 'nó' mơ hồ","severity":"medium"},
+{"old":"Một TU là một khoản ingress và egress cố định","new":"Một TU là một mức ingress và egress cố định","reason":"'khoản' gượng với băng thông","severity":"low"},
+{"old":"xem trang quota hiện hành trên Microsoft Learn, đừng nhớ theo bài.","new":"xem trang quota hiện hành trên Microsoft Learn, đừng lấy số trong bài làm căn cứ.","reason":"'đừng nhớ theo bài' gượng","severity":"low"},
+{"old":"Nó không làm đầy đủ mọi tính năng Kafka, nên kiểm bảng tương thích trước khi di chuyển ứng dụng lớn.","new":"Endpoint này không hỗ trợ đầy đủ mọi tính năng Kafka, nên kiểm tra bảng tương thích trước khi chuyển ứng dụng lớn sang.","reason":"'Nó không làm đầy đủ' là calque; 'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"và kiểm tính tương thích giữa phiên bản, hữu ích","new":"và kiểm tra tính tương thích giữa các phiên bản, hữu ích","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"trong một consumer group, tối đa bằng số partition reader hoạt động cùng lúc.","new":"trong một consumer group, số reader hoạt động cùng lúc tối đa bằng số partition.","reason":"Câu cụt, trật tự rối, khó hiểu","severity":"high"},
+{"old":"bạn không thể có 10 instance Dispatch cùng đọc có ích.","new":"bạn không thể có 10 instance Dispatch cùng đọc mà đều có ích.","reason":"Câu gượng, thiếu liên kết","severity":"medium"},
+{"old":"thứ tự toàn event hub. Nó chỉ bảo đảm","new":"thứ tự trên toàn event hub. Event Hubs chỉ bảo đảm","reason":"Thiếu giới từ; tránh 'Nó'","severity":"medium"},
+{"old":"Một điều không đổi được: không chia nhỏ được một key.","new":"Có một giới hạn không đổi được: một key không chia nhỏ được.","reason":"Câu cụt, thiếu chủ ngữ","severity":"medium"},
+{"old":"Dispatch cần độ trễ thấp và Analytics đọc theo lô dày;","new":"Dispatch cần độ trễ thấp còn Analytics đọc theo từng lô lớn;","reason":"'lô dày' là calque","severity":"medium"},
+{"old":"Checkpoint là lời nói \"tôi đã xử lý tới sequence number này\", nên đặt sau khi hiệu ứng đã xong.","new":"Checkpoint là lời khẳng định \"tôi đã xử lý tới sequence number này\", nên đặt sau khi các tác dụng phụ đã hoàn tất.","reason":"'hiệu ứng' là calque của side effect; 'lời nói' gượng","severity":"high"},
+{"old":"handler của Dispatch phải chịu được việc nhận lại một điểm GPS cũ.","new":"handler của Dispatch phải xử lý được việc nhận lại một điểm GPS cũ.","reason":"'chịu được' là calque","severity":"high"},
+{"old":"Điểm đáng ghi nhớ là Event Hubs không có chỗ cho một event hỏng. Event JSON sai định dạng không bị đẩy sang dead-letter, nó nằm trong partition và consumer","new":"Điểm đáng ghi nhớ là Event Hubs không có nơi xử lý riêng cho event hỏng. Event JSON sai định dạng không bị đẩy sang dead-letter mà vẫn nằm trong partition, và consumer","reason":"'không có chỗ cho' là calque; câu ghép nối bằng dấu phẩy, 'nó' mơ hồ","severity":"medium"},
+{"old":"kiểm `az eventhubs eventhub create --help`.","new":"kiểm tra `az eventhubs eventhub create --help`.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"kiểm cấu hình quyền của namespace trên storage","new":"kiểm tra cấu hình quyền của namespace trên storage","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"chưa tính cân bằng khi nhiều instance và chưa dọn","new":"chưa tính tới việc cân bằng partition khi chạy nhiều instance và chưa dọn","reason":"Câu lược động từ và danh từ","severity":"medium"},
+{"old":"chọn cho production phải tính cả tải 2 đến 3 năm tới","new":"còn chọn số partition cho production thì phải tính cả tải 2 đến 3 năm tới","reason":"Thiếu danh từ chính, câu cụt","severity":"medium"},
+{"old":"thường đồng nghĩa dựng event hub mới rồi chuyển dần.","new":"thường đồng nghĩa với việc dựng event hub mới rồi chuyển dần.","reason":"Thiếu 'với việc'","severity":"low"},
+{"old":"Muốn đọc nhanh hơn, hoặc làm handler nhanh hơn, hoặc tạo event hub mới","new":"Muốn đọc nhanh hơn, hoặc phải làm handler nhanh hơn, hoặc phải tạo event hub mới","reason":"Cấu trúc 'hoặc' thiếu động từ, khó đọc","severity":"low"},
+{"old":"Phần còn lại cần bạn tự kiểm: tải thật","new":"Phần còn lại cần bạn tự kiểm tra: tải thật","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

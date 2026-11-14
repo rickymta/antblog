@@ -10,19 +10,19 @@ language: vi
 
 Trong một buổi dọn code, ai đó đổi `km <= 100` thành `km < 100` ở guard của công thức cước. Mọi test hiện có vẫn xanh vì chúng thử 1 km, 5 km và 50 km. Tuần sau, khách đặt chuyến liên tỉnh đúng 100 km bị từ chối, và không ai hiểu vì sao.
 
-Phần 4 của lộ trình dạy cách chặn chuyện đó từ sớm. Bài mở đầu này đứng ở lớp thấp nhất và nhanh nhất: unit test thuần Dart, không widget, không mạng. Ta làm ba việc. Chọn ca cho quy tắc cước. Lặp đủ mọi cặp (trạng thái, sự kiện) của chuyến. Test use case `RequestTrip` với các loại test double, rồi so fake với mock.
+Phần 4 của lộ trình dạy cách chặn chuyện đó từ sớm. Bài mở đầu này đứng ở lớp thấp nhất và nhanh nhất: unit test thuần Dart, không widget, không mạng. Ta làm ba việc. Chọn test case cho quy tắc cước. Lặp đủ mọi cặp (trạng thái, sự kiện) của chuyến. Test use case `RequestTrip` với các loại test double, rồi so fake với mock.
 
 Đây là bài 27 của lộ trình **Flutter qua Tới Nơi**, bài đầu của Phần 4. Ta nên đọc [bài 26 về code generation](/articles/flutter-code-generation-freezed-json-serializable-riverpod-generator) trước; use case lấy từ [bài 21 về Clean Architecture](/articles/flutter-clean-architecture-domain-data-presentation-mobile), còn quy tắc cước và máy trạng thái nằm trong `toi_noi_core` của [bài 06](/articles/dart-package-pubspec-lint-test-toi-noi-core). Thuật ngữ kiểm thử theo chuyên mục Kiểm thử, ví dụ [Equivalence Partitioning](/articles/equivalence-partitioning) và [Component Testing](/articles/component-testing-unit-testing-tong-quan). Bài dựa trên Flutter 3.47.4, Dart 3.13.3, `test` 1.33.0 và `mocktail` 1.0.5. Bảng giá là số minh hoạ.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Bộ test cước chỉ có sáu ca: -5, 1, 5, 50 và 150 km, cộng NaN (mỗi phân vùng quãng đường ít nhất một đại diện). Ta đổi guard thành <code>km &lt; 100</code>. Test nào đỏ?</p>
-<details><summary>Xem đáp án</summary><p>Không test nào. 100 km là biên của phân vùng tính theo km vượt, còn các đại diện nằm giữa phân vùng nên không chạm tới nó. Mục 1 cài đúng lỗi này cùng bốn lỗi khác rồi đếm: ba trong năm lỗi lọt qua bộ đại diện, và một lỗi khác lọt qua bộ ca biên.</p></details>
+<p>Bộ test cước chỉ có sáu test case: -5, 1, 5, 50 và 150 km, cộng NaN (mỗi phân vùng quãng đường ít nhất một đại diện). Ta đổi guard thành <code>km &lt; 100</code>. Test nào đỏ?</p>
+<details><summary>Xem đáp án</summary><p>Không test nào. 100 km là biên của phân vùng tính theo km vượt, còn các đại diện nằm giữa phân vùng nên không chạm tới nó. Mục 1 cài đúng lỗi này cùng bốn lỗi khác rồi đếm: ba trong năm lỗi lọt qua bộ đại diện, và một lỗi khác lọt qua bộ test case biên.</p></details>
 </div>
 
 ## 1. Quy tắc cước: phân vùng tương đương rồi giá trị biên
 
-`calculateFareVnd` là hàm thuần: cùng đầu vào thì cùng đầu ra, không đọc đồng hồ, không gọi mạng. Test nó không cần test double nào. Việc khó duy nhất là chọn ca, vì quãng đường là số thực và ta không thử hết được.
+`calculateFareVnd` là hàm thuần: cùng đầu vào thì cùng đầu ra, không đọc đồng hồ, không gọi mạng. Test nó không cần test double nào. Việc khó duy nhất là chọn test case, vì quãng đường là số thực và ta không thử hết được.
 
 Cách chọn có hai bước. **Phân vùng tương đương** (EP) chia miền đầu vào thành các phân vùng mà quy tắc xử lý giống nhau, rồi chọn ít nhất một đại diện cho mỗi phân vùng. **Giá trị biên** (BVA) thêm các giá trị sát hai phía mỗi đường ranh, vì lỗi hay sống ở đó. Hình 1 vẽ bốn phân vùng, ba đường ranh và phân vùng NaN của quãng đường.
 
@@ -53,10 +53,10 @@ Cách chọn có hai bước. **Phân vùng tương đương** (EP) chia miền 
 <text x="36" y="270" class="t-small">Không có biên để đặt ca sát hai phía. Vô cực dương và âm là ca biên của hai phân vùng ngoài miền.</text>
 </svg>
 </div>
-<figcaption>Hình 1. Bốn phân vùng trên trục quãng đường, ba đường ranh với hai ca biên mỗi đường, và NaN là phân vùng riêng không có biên.</figcaption>
+<figcaption>Hình 1. Bốn phân vùng trên trục quãng đường, ba đường ranh với hai test case biên mỗi đường, và NaN là phân vùng riêng không có biên.</figcaption>
 </figure>
 
-Mỗi ca là một dòng dữ liệu kèm loại ca và kết quả kỳ vọng. Kỳ vọng được tính tay từ bảng giá, không gọi `calculateFare`. Với 100 km: 12.000 + 98 × 4.500 = 453.000 VND. Với 2,001 km: phần vượt đúng 1 mét là 4,5 đồng, làm tròn nửa lên thành 5, tổng 12.005 VND.
+Mỗi test case là một dòng dữ liệu kèm loại test case và kết quả kỳ vọng. Kỳ vọng được tính tay từ bảng giá, không gọi `calculateFare`. Với 100 km: 12.000 + 98 × 4.500 = 453.000 VND. Với 2,001 km: phần vượt đúng 1 mét là 4,5 đồng, làm tròn nửa lên thành 5, tổng 12.005 VND.
 
 ### fare_cases.dart · 27-unit-test-mocktail/test/support/fare_cases.dart (trích)
 
@@ -81,7 +81,7 @@ const fareCases = <FareCase>[
 ];
 ```
 
-Ca nào bắt được lỗi nào? Ta không đoán mà cài thử. `fare_mutants_test.dart` viết lại công thức với từng tham số là một chỗ có thể sai, tạo ra năm lỗi, rồi chạy riêng bộ đại diện và bộ biên qua chúng.
+Test case nào bắt được lỗi nào? Ta không đoán mà cài thử. `fare_mutants_test.dart` viết lại công thức với từng tham số là một chỗ có thể sai, tạo ra năm lỗi, rồi chạy riêng bộ đại diện và bộ biên qua chúng.
 
 ### fare_mutants_test.dart · 27-unit-test-mocktail/test/fare_mutants_test.dart (trích)
 
@@ -107,9 +107,9 @@ final mutants = <String, FareFn>{
 | guard dạng phủ định, NaN lọt qua | có (ca NaN) | không |
 | giá km vượt viết nhầm 4.000 | có | có |
 
-Lỗi làm tròn lọt qua bộ đại diện vì 5 km và 50 km có phần vượt chẵn mét (3.000 và 48.000), nên 4,5 đồng mỗi mét luôn ra số nguyên; chỉ phần vượt lẻ mét như 2,001 km mới lộ. Lỗi NaN lọt qua bộ biên vì NaN không có biên. Công thức bị lỗi này vẫn ném, nhưng là `UnsupportedError` ("Infinity or NaN toInt") chứ không phải `ArgumentError`. Ca kiểm yêu cầu đúng `ArgumentError` nên vẫn đỏ; test chỉ kiểm "có ném gì đó" sẽ cho lỗi này qua. Hai kỹ thuật bổ sung nhau chứ không thay nhau.
+Lỗi làm tròn lọt qua bộ đại diện vì 5 km và 50 km có phần vượt chẵn mét (3.000 và 48.000), nên 4,5 đồng mỗi mét luôn ra số nguyên; chỉ phần vượt lẻ mét như 2,001 km mới lộ. Lỗi NaN lọt qua bộ biên vì NaN không có biên. Công thức bị lỗi này vẫn ném, nhưng là `UnsupportedError` ("Infinity or NaN toInt") chứ không phải `ArgumentError`. Test case kiểm yêu cầu đúng `ArgumentError` nên vẫn đỏ; test chỉ kiểm "có ném gì đó" sẽ cho lỗi này qua. Hai kỹ thuật bổ sung nhau chứ không thay nhau.
 
-Còn một cách chọn ca nữa: không chọn. Nếu chỉ xét quãng đường tròn mét, miền hợp lệ có 100.001 giá trị và ta chạy hết. Test so cước từng mét với `oracleFareVnd`, một cách tính độc lập dùng `(extra * 9 + 1) ~/ 2` thay vì nhân 4.500 rồi chia 1.000.
+Còn một cách chọn test case nữa: không chọn. Nếu chỉ xét quãng đường tròn mét, miền hợp lệ có 100.001 giá trị và ta chạy hết. Test so cước từng mét với `oracleFareVnd`, một cách tính độc lập dùng `(extra * 9 + 1) ~/ 2` thay vì nhân 4.500 rồi chia 1.000.
 
 ### fare_rule_test.dart · 27-unit-test-mocktail/test/fare_rule_test.dart (trích)
 
@@ -125,11 +125,11 @@ test('mọi mét từ 0 đến 100.000 khớp phép tính độc lập', () {
 });
 ```
 
-Test thứ hai cạnh nó kiểm đồng giá tới 2.000 m, sau đó mỗi mét thêm 4 hoặc 5 đồng. Oracle không thay được ca biên: nó chia sẻ cùng cách hiểu bảng giá, nên hiểu sai bảng thì cả hai cùng sai. Vì thế các ca biên có kỳ vọng tính tay.
+Test thứ hai cạnh nó kiểm đồng giá tới 2.000 m, sau đó mỗi mét thêm 4 hoặc 5 đồng. Oracle không thay được test case biên: nó chia sẻ cùng cách hiểu bảng giá, nên hiểu sai bảng thì cả hai cùng sai. Vì thế các test case biên có kỳ vọng tính tay.
 
 ## 2. Máy trạng thái: lặp đủ 56 cặp
 
-Chuyến có 8 trạng thái và 7 sự kiện, tức 56 cặp. Chỉ 9 cặp hợp lệ: sáu bước của đường đi bình thường và huỷ ở `searching`, `accepted`, `arriving`. 47 cặp còn lại phải ném `StateError`. Viết tay từng ca thì thế nào cũng quên vài cặp ném lỗi, mà đó lại là chỗ lỗi hay sống, chẳng hạn cho huỷ khi khách đã lên xe. Ta để vòng lặp sinh đủ.
+Chuyến có 8 trạng thái và 7 sự kiện, tức 56 cặp. Chỉ 9 cặp hợp lệ: sáu bước của đường đi bình thường và huỷ ở `searching`, `accepted`, `arriving`. 47 cặp còn lại phải ném `StateError`. Viết tay từng test case thì thế nào cũng quên vài cặp ném lỗi, mà đó lại là chỗ lỗi hay sống, chẳng hạn cho huỷ khi khách đã lên xe. Ta để vòng lặp sinh đủ.
 
 Bảng 9 cặp được viết tay một lần, từ hồ sơ Tới Nơi, và là nguồn duy nhất:
 
@@ -391,7 +391,7 @@ final class SpyBookingLog implements BookingLog {
 }
 ```
 
-Dummy nổ bằng `StateError` khi bị gọi, nên ca "ngoài miền không chạm repository" xanh thật: use case lỡ gọi thì ta thấy `StateError` chứ không phải `Rejected`. Một `Mock` trống dùng làm dummy sẽ im lặng cho qua với phương thức `void` như `booked`, nên không canh được điều đó.
+Dummy nổ bằng `StateError` khi bị gọi, nên test case "ngoài miền không chạm repository" xanh thật: use case lỡ gọi thì ta thấy `StateError` chứ không phải `Rejected`. Một `Mock` trống dùng làm dummy sẽ cho qua mà không báo gì với phương thức `void` như `booked`, nên không canh được điều đó.
 
 Fake là phần đáng đầu tư nhất. `InMemoryTripRepository` cư xử như server ở đúng điều use case dựa vào: cùng `intentId` và cùng nội dung thì trả lại đúng chuyến đã tạo, khác nội dung thì từ chối `conflict`. Hàm `failNext(afterStore: true)` dựng tình huống khó nhất của bài 21, server đã tạo chuyến rồi mới mất response:
 
@@ -467,14 +467,14 @@ test('TripFailure: ghi failed với đúng yêu cầu rồi ném lại', () asyn
 Ba cái bẫy đã gặp khi viết lab, mỗi bẫy có một test trong `mocktail_traps_test.dart`:
 
 1. **`thenThrow` trên phương thức trả `Future` ném đồng bộ**, ngay lúc gọi, trước khi có `Future` nào. Repository thật là hàm `async` nên lỗi luôn nằm trong `Future`. Code dùng `.catchError` bắt được bản `thenAnswer((_) => Future.error(...))` nhưng không bắt được bản `thenThrow`. Use case của ta dùng `await` trong `try` nên cả hai bản đều qua; bẫy nằm ở code khác.
-2. **Phương thức chưa stub trả `null`.** Với `Future<Trip>` đó là `TypeError` ("'Null' is not a subtype of type 'Future<Trip>'") ngay chỗ gọi, chứ không phải thông báo "chưa stub". Với phương thức `void` thì im lặng.
+2. **Phương thức chưa stub trả `null`.** Với `Future<Trip>` đó là `TypeError` ("'Null' is not a subtype of type 'Future<Trip>'") ngay chỗ gọi, chứ không phải thông báo "chưa stub". Với phương thức `void` thì không báo gì.
 3. **Mỗi lời gọi chỉ verify được một lần.** Sau `verify`, lời gọi bị đánh dấu VERIFIED, và `verify` lần hai cho cùng lời gọi ném `TestFailure`.
 
 ## 5. registerFallbackValue: viết ca thiếu rồi xem lỗi thật
 
 `any()` phải trả về một giá trị đúng kiểu để dòng `repository.requestTrip(any(), ...)` biên dịch với tham số không nullable. Mocktail không tự dựng được `QuoteRequest`, nên ta đưa nó một bản dự phòng bằng `registerFallbackValue`. Theo source `mocktail` 1.0.5, kiểu có sẵn (bool, int, double, String, List, Map, Set, DateTime, hàm) đã được đăng ký, và kiểu nullable không cần. Kiểu của ta thì cần.
 
-Ta viết đúng ca thiếu. File `missing_fallback_test.dart` cố ý không gọi `registerFallbacks()`:
+Ta viết đúng test case thiếu khai báo đó. File `missing_fallback_test.dart` cố ý không gọi `registerFallbacks()`:
 
 ### missing_fallback_test.dart · 27-unit-test-mocktail/test/missing_fallback_test.dart (trích)
 
@@ -553,7 +553,7 @@ Future<void> _mockScenario(
 
 Test mock không sai. Nó đang làm đúng việc của mock là khoá cách làm. Nhưng cách làm là chi tiết nội bộ: khi nó đổi mà hành vi quan sát được không đổi, test gãy chỉ sinh việc sửa test, tức là giòn. Fake khoá điều khách và server nhìn thấy nên qua cả hai bản.
 
-Điều ngược lại cũng đúng, fake không luôn thắng:
+Điều ngược lại cũng đúng, fake không phải lúc nào cũng thắng:
 
 | Tình huống | Chọn | Vì sao |
 |---|---|---|
@@ -578,8 +578,8 @@ Cả hai bộ bắt đủ bốn lỗi. Bộ fake báo bằng kết quả ("serve
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Năm lỗi hay gặp khi viết unit test</span>
 <ul>
-<li><strong>Kỳ vọng sao chép từ công thức đang test.</strong> Dấu hiệu: đổi công thức mà test vẫn xanh. Nguyên nhân: kỳ vọng được tính bằng chính hàm cần kiểm. Cách sửa: tính tay từ bảng giá cho ca biên, và dùng oracle độc lập cho vòng lặp.</li>
-<li><strong>Chỉ có ca giữa phân vùng.</strong> Dấu hiệu: đổi <code>&lt;=</code> thành <code>&lt;</code> không test nào đỏ. Cách sửa: thêm giá trị sát hai phía mỗi đường ranh và một ca NaN, vì NaN không có biên.</li>
+<li><strong>Kỳ vọng sao chép từ công thức đang test.</strong> Dấu hiệu: đổi công thức mà test vẫn xanh. Nguyên nhân: kỳ vọng được tính bằng chính hàm cần kiểm. Cách sửa: tính tay từ bảng giá cho test case biên, và dùng oracle độc lập cho vòng lặp.</li>
+<li><strong>Chỉ có test case nằm giữa phân vùng.</strong> Dấu hiệu: đổi <code>&lt;=</code> thành <code>&lt;</code> không test nào đỏ. Cách sửa: thêm giá trị sát hai phía mỗi đường ranh và một test case NaN, vì NaN không có biên.</li>
 <li><strong><code>thenThrow</code> cho <code>Future</code>, hoặc quên stub.</strong> Dấu hiệu: lỗi ném ngay chỗ gọi, hoặc <code>TypeError</code> về <code>Null</code>. Cách sửa: <code>thenAnswer((_) =&gt; Future.error(...))</code>, và stub mọi phương thức trả <code>Future</code> mà mã dưới test gọi.</li>
 <li><strong>Quên <code>registerFallbackValue</code>, hoặc nhờ test khác đăng ký hộ.</strong> Dấu hiệu: <code>StateError</code> nêu tên kiểu, hoặc test xanh cả bộ nhưng đỏ khi chạy riêng. Cách sửa: <code>setUpAll(registerFallbacks)</code> trong mỗi file.</li>
 <li><strong>Khoá cách làm thay vì kết quả.</strong> Dấu hiệu: refactor không đổi hành vi mà nhiều test gãy; <code>verifyNoMoreInteractions</code> rải khắp nơi. Cách sửa: dùng fake cho phụ thuộc có trạng thái, chỉ dùng <code>verify</code> khi lời gọi chính là hành vi.</li>
@@ -599,7 +599,7 @@ dart test
 
 Đã kiểm với Flutter 3.47.4, Dart 3.13.3: `dart analyze` báo `No issues found!`, `dart test` chạy **131 test xanh**, kể cả khi đảo thứ tự ngẫu nhiên (`--test-randomize-ordering-seed=random`, thử 6 lần). Mức: **Kiểm chứng tự động**, không cần thiết bị hay mạng. Phiên bản: `test` 1.33.0, `mocktail` 1.0.5, `lints` 6.1.0, `toi_noi_core` 0.1.0.
 
-Mỗi nhóm test chứng minh một điều. `fare_rule_test` (18) kiểm cước ở mọi ca đại diện, ca biên và từng mét. `fare_mutants_test` (6) chứng minh bộ ca bắt được lỗi cài vào. `trip_state_machine_test` (64) kiểm 56 cặp và bảng của chính nó. Hai file `request_trip_fake_test` (13) và `request_trip_mock_test` (8) kiểm cùng use case bằng hai kiểu double, còn `in_memory_repository_test` (7) kiểm chính fake. `mocktail_traps_test` (7), `missing_fallback_test` (2) và `refactor_brittle_test` (6) chứng minh các khẳng định ở mục 4, 5 và 6.
+Mỗi nhóm test chứng minh một điều. `fare_rule_test` (18) kiểm cước ở mọi test case đại diện, test case biên và từng mét. `fare_mutants_test` (6) chứng minh bộ ca bắt được lỗi cài vào. `trip_state_machine_test` (64) kiểm 56 cặp và bảng của chính nó. Hai file `request_trip_fake_test` (13) và `request_trip_mock_test` (8) kiểm cùng use case bằng hai kiểu double, còn `in_memory_repository_test` (7) kiểm chính fake. `mocktail_traps_test` (7), `missing_fallback_test` (2) và `refactor_brittle_test` (6) chứng minh các khẳng định ở mục 4, 5 và 6.
 
 **Chưa làm**: `RequestTrip` ở lab là bản rút gọn của lab 21 để thực hành test double, chưa nối vào app; chưa có contract test chạy chung trên fake và repository thật (lab 21 kiểm repository thật bằng fake API trong tiến trình); chưa đo coverage (bài 33); widget test và Riverpod nằm ở bài 28 và 30.
 
@@ -611,7 +611,7 @@ Mỗi nhóm test chứng minh một điều. `fare_rule_test` (18) kiểm cướ
 
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Ta đã thử: 6 test đỏ. Test <code>(inTransit, Cancelled) sang cancelled</code> đỏ vì <code>apply</code> ném <code>StateError</code> (bảng nói hợp lệ, code nói không). Test đếm cặp đỏ vì có 10 cặp hợp lệ thay vì 9, test khớp <code>canCancel</code> đỏ, và ba test <code>transitionFailures</code> đỏ vì lưới giờ lệch một cặp. Bảng sai thì bộ test báo ngay; sửa bảng hoặc sửa <code>Trip.apply</code> là quyết định về nghiệp vụ, không phải về test.</p>
-<p><strong>2.</strong> Vẫn xanh (đã thử), vì <code>RequestTrip.call</code> là hàm <code>async</code> và lời gọi nằm trong <code>try</code>: lỗi đồng bộ trong thân hàm <code>async</code> thành lỗi của <code>Future</code>. Hai bản khác nhau ở code không <code>async</code>, như <code>describe</code> trong <code>mocktail_traps_test.dart</code>: <code>r.requestTrip(...).then(...).catchError(...)</code> bắt được lỗi của <code>Future.error</code> nhưng để lỗi của <code>thenThrow</code> thoát ra ngoài.</p>
+<p><strong>2.</strong> Vẫn xanh (đã thử), vì <code>RequestTrip.call</code> là hàm <code>async</code> và lời gọi nằm trong <code>try</code>: lỗi đồng bộ trong thân hàm <code>async</code> trở thành lỗi của <code>Future</code>. Hai bản khác nhau ở code không <code>async</code>, như <code>describe</code> trong <code>mocktail_traps_test.dart</code>: <code>r.requestTrip(...).then(...).catchError(...)</code> bắt được lỗi của <code>Future.error</code> nhưng để lỗi của <code>thenThrow</code> thoát ra ngoài.</p>
 <p><strong>3.</strong> Fallback được chọn theo kiểu (<code>element is T</code>): <code>QuoteRequest</code> và <code>Trip</code> là hai kiểu nên cần hai lần đăng ký. Còn <code>Trip</code> là <code>final class</code>, không thể <code>implements</code> hay <code>extends</code> ngoài library của nó (<code>invalid_use_of_type_outside_library</code>), nên ta đưa một <code>Trip</code> thật, như <code>registerFallbacks</code> làm.</p>
 </details>
 

@@ -1,0 +1,22 @@
+{"file":"azure-front-door-cdn-custom-domain-tls.md","edits":[
+{"old":"Azure có ba thứ hay bị nhầm cho việc «đứng trước ứng dụng».","new":"Azure có ba dịch vụ hay bị nhầm lẫn khi cần «đứng trước ứng dụng».","reason":"'ba thứ' mơ hồ, 'nhầm cho việc' gượng","severity":"medium"},
+{"old":"Front Door giữ kết nối dùng lại trên mạng backbone","new":"Front Door giữ sẵn kết nối để dùng lại trên mạng backbone","reason":"Thiếu động từ, câu cụt","severity":"medium"},
+{"old":"Hai thứ ghép được với nhau:","new":"Hai dịch vụ này ghép được với nhau:","reason":"'thứ' mơ hồ","severity":"low"},
+{"old":"đều đã có lịch nghỉ hưu;","new":"đều đã có lịch ngừng hỗ trợ;","reason":"'nghỉ hưu' là calque của retire","severity":"high"},
+{"old":"Kiểm thông báo retirement trong tài liệu","new":"Kiểm tra thông báo retirement trong tài liệu","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Origin trượt probe bị loại khỏi vòng chọn.","new":"Origin không qua được probe sẽ bị loại khỏi danh sách được chọn.","reason":"'trượt probe', 'vòng chọn' là cụm tự ghép","severity":"medium"},
+{"old":"nếu cả group cùng trượt, Front Door","new":"nếu cả group cùng không qua được probe, Front Door","reason":"Thống nhất cách diễn đạt với câu trước","severity":"low"},
+{"old":"Hai thiết lập cuối làm TLS có nghĩa:","new":"Hai thiết lập cuối làm cho TLS thực sự có tác dụng:","reason":"'có nghĩa' là calque của meaningful","severity":"medium"},
+{"old":"kiểm bảng trong tài liệu; có bước phê duyệt kết nối","new":"kiểm tra bảng trong tài liệu; có bước phê duyệt kết nối","reason":"'kiểm' thiếu 'tra'","severity":"low"},
+{"old":"nên phải kèm kiểm ID","new":"nên phải kèm kiểm tra ID","reason":"'kiểm' thiếu 'tra'","severity":"low"},
+{"old":"Kiểm `X-Azure-FDID` loại những profile khác.","new":"Kiểm tra `X-Azure-FDID` loại những profile khác.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"cần kế hoạch cập nhật định kỳ và kiểm giới hạn số rule.","new":"cần kế hoạch cập nhật định kỳ và kiểm tra giới hạn số rule.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Phần kiểm header đặt trong ứng dụng.","new":"Phần kiểm tra header nằm trong ứng dụng.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"trừ path `/health` để có thể kiểm sức khoẻ trực tiếp khi chẩn đoán. Nó dừng app","new":"trừ path `/health` để có thể kiểm tra sức khoẻ trực tiếp khi chẩn đoán. Đoạn này dừng app","reason":"'kiểm' thiếu 'tra'; tránh 'Nó' chỉ đoạn code","severity":"medium"},
+{"old":"vì kiểm so với giá trị rỗng là không kiểm gì; nó không thay IP restriction.","new":"vì so sánh với giá trị rỗng thì chẳng kiểm tra được gì; đoạn này không thay thế IP restriction.","reason":"'kiểm so với' là cụm tự ghép, thiếu 'tra'","severity":"high"},
+{"old":"Cache theo cơ chế: Front Door lưu response","new":"Cơ chế cache như sau: Front Door lưu response","reason":"'Cache theo cơ chế' là câu cụt, không rõ nghĩa","severity":"medium"},
+{"old":"ảnh cũ nằm ở POP đến hết hạn,","new":"ảnh cũ nằm lại ở POP cho đến khi hết hạn,","reason":"Thiếu từ, câu cụt","severity":"low"},
+{"old":"không chứng minh origin đã khoẻ: sau khi chạy, kiểm trạng thái probe","new":"không chứng minh origin đã khoẻ: sau khi chạy, kiểm tra trạng thái probe","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"kiểm bảng so sánh tier trước khi quyết định.","new":"kiểm tra bảng so sánh tier trước khi quyết định.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"bạn cần tự kiểm probe, validation và việc origin","new":"bạn cần tự kiểm tra probe, validation và việc origin","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

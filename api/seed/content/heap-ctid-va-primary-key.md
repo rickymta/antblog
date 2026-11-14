@@ -1,7 +1,7 @@
 ---
 slug: heap-ctid-va-primary-key
 title: "Clustered index thật và clustered index nhìn thấy trong PostgreSQL"
-summary: "Lược đồ trips của Tới Nơi mở đầu bằng id uuid PRIMARY KEY, dễ tưởng primary key quyết định chuyến nằm ở đâu trên đĩa. Mổ heap, ctid, HOT update và CLUSTER trên PostgreSQL 18.1 để thấy dòng thật sự nằm ở đâu."
+summary: "Lược đồ trips của Tới Nơi mở đầu bằng id uuid PRIMARY KEY, dễ khiến ta tưởng primary key quyết định chuyến nằm ở đâu trên đĩa. Đi sâu vào heap, ctid, HOT update và CLUSTER trên PostgreSQL 18.1 để thấy dòng thật sự nằm ở đâu."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-024, heap, ctid, primary-key, hot-update, cluster, mvcc]
@@ -13,7 +13,7 @@ Mở lược đồ bảng `trips` của [Tới Nơi](/articles/du-an-mau-toi-noi
 - **Clustered index thật — lớp vật lý:** tệp **heap** chia thành các **page** 8 KB, mỗi phiên bản dòng có một địa chỉ vật lý gọi là **`ctid`**. Đây là nơi duy nhất cất dữ liệu dòng.
 - **Clustered index nhìn thấy — primary key:** `trips_pkey` chỉ là một cây B-tree riêng ánh xạ `id → ctid`. Về cấu trúc, nó ngang hàng với mọi index khác của bảng.
 
-Nhầm hai lớp này dẫn tới những lỗi rất cụ thể: tin rằng `SELECT` không `ORDER BY` trả theo `id`, lưu `ctid` làm khoá, hoặc chạy `CLUSTER` lúc cao điểm. Bài này đi qua hai lớp bằng chính bảng `trips`.
+Nhầm hai lớp này dẫn tới những lỗi rất cụ thể: tin rằng `SELECT` không có `ORDER BY` sẽ trả dòng theo `id`, lưu `ctid` làm khoá, hoặc chạy `CLUSTER` lúc cao điểm. Bài này lần lượt xem từng lớp trên chính bảng `trips`.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-024 · Phần 3/6 · Trung bình</span>
@@ -31,7 +31,7 @@ node pg/run-pg.mjs --nen p03/lab.json:p03 p03/thu-nghiem/pg024-cluster-hang-doi-
 node pg/run-pg.mjs --nen p03/lab.json:p03 p03/thu-nghiem/pg024-ctid-hot-bai-tap.sql
 ```
 
-Hai tệp thí nghiệm không có trong lab chính, nằm ở `p03/thu-nghiem/`. Kết quả dưới đây chép từ lần chạy thật, lược bằng `…`.
+Hai tệp thí nghiệm không có trong lab chính, nằm ở `p03/thu-nghiem/`. Kết quả dưới đây chép từ lần chạy thật, chỗ lược bỏ ghi bằng `…`.
 
 ## 2. Hai lớp của bảng trips
 
@@ -155,7 +155,7 @@ EXPLAIN (COSTS OFF) SELECT * FROM trips WHERE id = 'ab31fe65-42a9-425f-8abd-48b3
    Index Cond: (id = 'ab31fe65-42a9-425f-8abd-48b358eb8098'::uuid)
 ```
 
-Cost `0.29..8.30 rows=1 width=125` khớp từng chữ số với bản trước của bài. Nhiều dòng khớp (chuyến của một thành phố trong một ngày) thì planner chọn **Bitmap Heap Scan**: gom ctid từ index, sắp theo page, đọc mỗi page heap một lần. Lab thay `now()` của bản trước bằng mốc chụp cố định:
+Cost `0.29..8.30 rows=1 width=125` khớp từng chữ số với bản trước của bài. Nhiều dòng khớp (chuyến của một thành phố trong một ngày) thì planner chọn **Bitmap Heap Scan**: gom ctid từ index, sắp theo page, đọc mỗi page heap một lần. Lab thay `now()` của bản trước bằng một mốc thời gian cố định:
 
 ```text
 EXPLAIN SELECT * FROM trips
@@ -195,12 +195,12 @@ ORDER BY abs(correlation) DESC, attname;
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">uuid v4 hay uuid v7?</span>
-<p><code>gen_random_uuid()</code> sinh uuid version 4 ngẫu nhiên nên <code>correlation</code> của <code>id</code> ≈ 0. Heap không bị ảnh hưởng (heap không xếp theo khoá), nhưng mỗi chuyến mới chèn vào một chỗ ngẫu nhiên trong cây <code>trips_pkey</code>: PG-023 đo cây primary key của bảng 1 triệu chuyến chỉ đầy 71 % so với 90 % của cây mã tăng dần. PostgreSQL 18 thêm <code>uuidv7()</code> — uuid sắp được theo thời gian — nếu bạn muốn primary key cũng chèn ở mép phải cây như <code>code</code>.</p>
+<p><code>gen_random_uuid()</code> sinh uuid version 4 ngẫu nhiên nên <code>correlation</code> của <code>id</code> ≈ 0. Heap không bị ảnh hưởng (heap không xếp theo khoá), nhưng mỗi chuyến mới chèn vào một chỗ ngẫu nhiên trong cây <code>trips_pkey</code>: PG-023 đo cây primary key của bảng 1 triệu chuyến chỉ đầy 71 % so với 90 % của cây mã tăng dần. PostgreSQL 18 thêm <code>uuidv7()</code> — uuid có thể sắp xếp theo thời gian — nếu bạn muốn primary key cũng chèn ở mép phải cây như <code>code</code>.</p>
 </div>
 
 ## 6. id không đổi, ctid thì đổi
 
-PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mới** của dòng (MVCC — điều khiển đồng thời đa phiên bản), và phiên bản mới có địa chỉ mới. Với ≈ 560 UPDATE/giây vào `trips` lúc cao điểm theo hồ sơ, đây là chi tiết đáng giá nhất của bài. Ba UPDATE chạy trong một giao dịch, đếm bằng `pg_stat_xact_user_tables` (thống kê của riêng giao dịch đang chạy):
+PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mới** của dòng (MVCC — điều khiển đồng thời đa phiên bản), và phiên bản mới có địa chỉ mới. Hồ sơ cho biết `trips` nhận ≈ 560 UPDATE/giây lúc cao điểm, nên đây là chi tiết đáng chú ý nhất của bài. Ba UPDATE chạy trong một giao dịch, đếm bằng `pg_stat_xact_user_tables` (thống kê của riêng giao dịch đang chạy):
 
 | Bước | Câu lệnh | ctid | HOT? | upd / hot |
 |---|---|---|---|---|
@@ -209,7 +209,7 @@ PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mớ
 | ② | sửa giá ngay sau đó: `SET fare = fare + 5000` | `(373,48)` | **Có** — `fare` không có index, page còn chỗ | 2 / 1 |
 | ③ | sửa giá chuyến cũ 110000 ở `(186,54)`: `SET fare = fare + 1000` | `(373,49)` | Không — page 186 đầy, phải dời page | 3 / 1 |
 
-Ở lớp nhìn thấy, mỗi chuyến vẫn là chính nó (`id` không đổi). Ở lớp vật lý, cả ba đều sinh phiên bản mới ở địa chỉ mới; phiên bản cũ nằm lại, đã "chết", chờ dọn. Soi page 373 bằng `pageinspect` (`heap_page_items`) thấy chuỗi phiên bản — `t_ctid` của phiên bản cũ trỏ sang phiên bản mới:
+Ở lớp nhìn thấy, mỗi chuyến vẫn là cùng một chuyến (`id` không đổi). Ở lớp vật lý, cả ba đều sinh phiên bản mới ở địa chỉ mới; phiên bản cũ nằm lại, đã "chết", chờ dọn. Soi page 373 bằng `pageinspect` (`heap_page_items`) thấy chuỗi phiên bản — `t_ctid` của phiên bản cũ trỏ sang phiên bản mới:
 
 ```text
  lp |  t_ctid  | hot_updated
@@ -243,7 +243,7 @@ WHERE relid = 'bai_cu.trips'::regclass;
  ff90    |     448 |      2000 |          2000 |   100.0
 ```
 
-(Ghép từ hai câu của lab; `CREATE TABLE AS` ghi bằng đường chèn hàng loạt nên ra 384 page chứ không đúng 374 như bảng gốc.) Đổi thêm 17 % dung lượng heap lấy 100 % HOT với kiểu UPDATE này. Đánh đổi đó đáng với bảng bị sửa nhiều như `trips`; bảng chỉ chèn như `trip_events` thì giữ 100.
+(Ghép từ hai câu của lab; `CREATE TABLE AS` ghi bằng đường chèn hàng loạt nên ra 384 page chứ không đúng 374 như bảng gốc.) Ta tốn thêm 17 % dung lượng heap để đổi lấy 100 % HOT với kiểu UPDATE này. Đánh đổi đó đáng với bảng bị sửa nhiều như `trips`; bảng chỉ chèn như `trip_events` thì giữ 100.
 
 ## 8. Primary key chỉ là một B-tree UNIQUE
 
@@ -254,7 +254,7 @@ WHERE relid = 'bai_cu.trips'::regclass;
  uq_trips_code | btree  | t           | f            | u
 ```
 
-Primary key = một index B-tree **UNIQUE** + ràng buộc **NOT NULL** + đánh dấu "primary" (mỗi bảng tối đa một). Về cấu trúc, `trips_pkey` ngang hàng `uq_trips_code`. Khoá ngoại cũng tham chiếu được cột UNIQUE: bảng `ghi_chu_chuyen (trip_code bigint REFERENCES trips (code))` từ chối mã không tồn tại với `23503 … violates foreign key constraint`.
+Primary key gồm một index B-tree **UNIQUE**, ràng buộc **NOT NULL** và cờ "primary" (mỗi bảng tối đa một). Về cấu trúc, `trips_pkey` ngang hàng `uq_trips_code`. Khoá ngoại cũng tham chiếu được cột UNIQUE: bảng `ghi_chu_chuyen (trip_code bigint REFERENCES trips (code))` từ chối mã không tồn tại với `23503 … violates foreign key constraint`.
 
 Mỗi index là thêm một cây trỏ xuống heap. Trên bộ 20.000 chuyến, 5 index của `trips` chiếm **3,3 MB**, nhiều hơn chính bảng **2,9 MB** (374 page × 8.192 byte = 2,92 MiB; bản trước ghi 3,4 và 3,0 MB do làm tròn lên) — và mỗi UPDATE không HOT ghi vào cả 5.
 
@@ -274,7 +274,7 @@ Mỗi index là thêm một cây trỏ xuống heap. Trên bộ 20.000 chuyến,
  requested_at |       0.009
 ```
 
-Heap thẳng hàng với `id` và **mất** sự thẳng hàng tự nhiên với thời gian đặt mà báo cáo đang hưởng — với `trips`, xếp theo uuid ngẫu nhiên là phản tác dụng. Mọi ctid đều đổi. PostgreSQL chỉ **ghi nhớ** index đã dùng (cờ `pg_index.indisclustered = t`) để lần sau gõ `CLUSTER trips` không cần `USING`; `\d trips` in `"trips_pkey" PRIMARY KEY, btree (id) CLUSTER` (thí nghiệm `pg024-ctid-hot-bai-tap.sql`). Đó là "clustered index nhìn thấy" theo nghĩa thứ hai: có chữ CLUSTER, nhưng không gì được duy trì. Lab chèn tiếp 500 chuyến mới (id ngẫu nhiên): tất cả nằm ở **page 373–380**, cuối heap, không chen vào chỗ theo id; `correlation` của `id` tụt về khoảng 0,95 sau một lần `ANALYZE` (số lấy mẫu, dao động giữa các lần chạy). Tài liệu nói thẳng: "Clustering is a one-time operation".
+Heap thẳng hàng với `id` và **mất** sự thẳng hàng tự nhiên với thời gian đặt, thứ mà các báo cáo đang tận dụng — với `trips`, xếp theo uuid ngẫu nhiên là phản tác dụng. Mọi ctid đều đổi. PostgreSQL chỉ **ghi nhớ** index đã dùng (cờ `pg_index.indisclustered = t`) để lần sau gõ `CLUSTER trips` không cần `USING`; `\d trips` in `"trips_pkey" PRIMARY KEY, btree (id) CLUSTER` (thí nghiệm `pg024-ctid-hot-bai-tap.sql`). Đó là "clustered index nhìn thấy" theo nghĩa thứ hai: có chữ CLUSTER, nhưng không có gì được duy trì. Lab chèn tiếp 500 chuyến mới (id ngẫu nhiên): tất cả nằm ở **page 373–380**, cuối heap, không chen vào đúng vị trí theo id; `correlation` của `id` tụt về khoảng 0,95 sau một lần `ANALYZE` (số lấy mẫu, dao động giữa các lần chạy). Tài liệu nói thẳng: "Clustering is a one-time operation".
 
 `CLUSTER` giữ khoá **ACCESS EXCLUSIVE** suốt thời gian chạy. Thí nghiệm `pg024-cluster-hang-doi-khoa.sql` cho thấy hệ quả còn tệ hơn "không ai đọc được trong lúc chạy":
 
@@ -286,7 +286,7 @@ Heap thẳng hàng với `id` và **mất** sự thẳng hàng tự nhiên với
 | T4 | D | đọc `pg_locks` | `lab-A AccessShareLock t` · `lab-B AccessExclusiveLock f` · `lab-C AccessShareLock f` |
 | T5 | A | `COMMIT;` | B chạy xong `CLUSTER`, rồi C mới trả 20000 |
 
-Yêu cầu khoá xếp hàng: một lệnh cần ACCESS EXCLUSIVE **đang chờ** đã chặn mọi `SELECT` đến sau nó. Với Tới Nơi lúc cao điểm, chỉ cần một giao dịch đọc chạy lâu là `CLUSTER` biến thành "không ai mở được lịch sử chuyến" cho tới khi giao dịch đó xong và `CLUSTER` chạy hết. Khoá và hàng đợi khoá là chủ đề của Phần 4.
+Các yêu cầu khoá xếp thành hàng đợi: một lệnh cần ACCESS EXCLUSIVE **đang chờ** đã chặn mọi `SELECT` đến sau nó. Với Tới Nơi lúc cao điểm, chỉ cần một giao dịch đọc chạy lâu là `CLUSTER` khiến không ai mở được lịch sử chuyến cho tới khi giao dịch đó xong và `CLUSTER` chạy hết. Khoá và hàng đợi khoá là chủ đề của Phần 4.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Những lúc mọi ctid cùng đổi</span>
@@ -302,7 +302,7 @@ Yêu cầu khoá xếp hàng: một lệnh cần ACCESS EXCLUSIVE **đang chờ*
 | Quyết định thứ tự trên đĩa | Có: dòng nằm theo chỗ trống lúc ghi (ở Tới Nơi ≈ theo `requested_at`) | Không: chỉ có thứ tự trong cây của chính nó |
 | Ổn định | Không: đổi sau UPDATE, `VACUUM FULL`, `CLUSTER` | Có: `id` không đổi |
 | Ai dùng | Bộ máy PostgreSQL: mọi index, Bitmap Heap Scan, Tid Scan | Ứng dụng: khoá ngoại, API, URL |
-| Code có nên dựa vào | Không lưu, không so sánh ctid | Luôn dùng `id` làm danh tính |
+| Có nên dựa vào trong code không | Không lưu, không so sánh ctid | Luôn dùng `id` làm danh tính |
 
 ## 11. Hiểu sai thường gặp
 
@@ -347,7 +347,7 @@ FROM heap_page_items(get_raw_page('bai_cu.trips', 373)) WHERE lp IN (32, 47, 48)
 
 - [PostgreSQL 18 · System Columns](https://www.postgresql.org/docs/18/ddl-system-columns.html): định nghĩa `ctid` và cảnh báo không dùng làm định danh.
 - [PostgreSQL 18 · Heap-Only Tuples (HOT)](https://www.postgresql.org/docs/18/storage-hot.html): điều kiện HOT, `fillfactor`, theo dõi HOT.
-- [PostgreSQL 18 · CLUSTER](https://www.postgresql.org/docs/18/sql-cluster.html) và [VACUUM](https://www.postgresql.org/docs/18/sql-vacuum.html) (`FULL`): khoá, bản sao bảng, chỉ sắp một lần.
+- [PostgreSQL 18 · CLUSTER](https://www.postgresql.org/docs/18/sql-cluster.html) và [VACUUM](https://www.postgresql.org/docs/18/sql-vacuum.html) (`FULL`): khoá, bản sao bảng, chỉ sắp xếp một lần.
 - [PostgreSQL 18 · UUID Functions](https://www.postgresql.org/docs/18/functions-uuid.html) (`uuidv7()`, thêm ở bản 18 theo [release notes](https://www.postgresql.org/docs/release/18.0/)) · [pageinspect](https://www.postgresql.org/docs/18/pageinspect.html) (`heap_page_items`).
 - Lab: `p03/24-heap-ctid-hot.sql` (kết quả ở `p03/OUTPUT.txt`, bảng đối chiếu với bản trước ở `p03/README.md`), thí nghiệm `p03/thu-nghiem/pg024-*.sql`.
 

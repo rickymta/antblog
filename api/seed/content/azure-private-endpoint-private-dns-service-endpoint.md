@@ -1,7 +1,7 @@
 ---
 slug: azure-private-endpoint-private-dns-service-endpoint
 title: "Private Endpoint, Private DNS và service endpoint"
-summary: "Bài 17: đưa Key Vault và PostgreSQL của Tới Nơi khỏi Internet công cộng. So sánh service endpoint, private endpoint và VNet integration, rồi làm lab private endpoint kèm private DNS zone cho kv-toinoi-dev-sea."
+summary: "Bài 17: đưa Key Vault và PostgreSQL của Tới Nơi ra khỏi Internet công cộng. So sánh service endpoint, private endpoint và VNet integration, rồi làm lab private endpoint kèm private DNS zone cho kv-toinoi-dev-sea."
 category: devops-azure
 level: intermediate
 tags: [azure, cloud, devops, toi-noi, networking, private-link, dns, security]
@@ -20,7 +20,7 @@ Bài này giải thích ba cách để một dịch vụ PaaS như Key Vault hay
 
 ## Firewall theo IP chưa đủ để gọi là riêng tư
 
-Hiện tại `psql-toinoi-dev-sea` và `kv-toinoi-dev-sea` đều có endpoint công cộng, đứng sau firewall cho phép vài dải IP. Cấu hình này chạy được, nhưng bề mặt tấn công vẫn là Internet: ai biết tên, ai thử được mật khẩu hay token bị lộ đều chạm được vào cổng dịch vụ. Danh sách IP còn phải bảo trì, vì outbound IP của Container Apps hay của máy dev đều có thể đổi.
+Hiện tại `psql-toinoi-dev-sea` và `kv-toinoi-dev-sea` đều có endpoint công cộng, đứng sau firewall cho phép vài dải IP. Cấu hình này chạy được, nhưng bề mặt tấn công vẫn là Internet: bất kỳ ai biết tên dịch vụ, hoặc thử được mật khẩu hay token bị lộ, đều chạm được vào cổng dịch vụ. Danh sách IP còn phải bảo trì, vì outbound IP của Container Apps hay của máy dev đều có thể đổi.
 
 Mục tiêu của bài là một mệnh đề đơn giản: **chỉ client trong VNet (hoặc mạng nối vào VNet) mới tới được dịch vụ**. Azure có ba cách tiến gần mục tiêu đó, khác nhau ở chỗ tài nguyên còn địa chỉ công cộng hay không, và ở việc DNS có phải đổi hay không.
 
@@ -28,7 +28,7 @@ Mục tiêu của bài là một mệnh đề đơn giản: **chỉ client trong
 
 Service endpoint bật trên **một subnet** cho một loại dịch vụ, ví dụ `Microsoft.KeyVault`. Hai việc xảy ra. Traffic từ subnet đó tới dịch vụ đi thẳng trên mạng backbone của Azure thay vì vòng ra Internet. Và dịch vụ nhận ra gói tin đến từ subnet nào, nên bạn có thể viết rule firewall «cho phép subnet `snet-app`» thay vì liệt kê IP.
 
-Cái nó **không** làm: tài nguyên vẫn có địa chỉ công cộng, tên miền vẫn phân giải ra IP công cộng, và ai nằm ngoài rule vẫn thấy cổng, chỉ bị từ chối ở tầng dịch vụ. Traffic từ on-premises qua VPN hay ExpressRoute cũng không hưởng lợi theo cách tự nhiên, vì nó không xuất phát từ subnet có bật endpoint. Service endpoint không tốn thêm tiền riêng và không đụng DNS. Đó là lý do nó hợp với những chỗ cần «đủ tốt, ít thay đổi», không hợp với chỗ yêu cầu tắt hẳn public access.
+Điều service endpoint **không** làm: tài nguyên vẫn có địa chỉ công cộng, tên miền vẫn phân giải ra IP công cộng, và ai nằm ngoài rule vẫn thấy cổng, chỉ bị từ chối ở tầng dịch vụ. Traffic từ on-premises qua VPN hay ExpressRoute cũng không hưởng lợi theo cách tự nhiên, vì traffic đó không xuất phát từ subnet có bật endpoint. Service endpoint không tốn thêm tiền riêng và không đụng DNS. Đó là lý do nó hợp với những chỗ cần «đủ tốt, ít thay đổi», không hợp với chỗ yêu cầu tắt hẳn public access.
 
 ## Private endpoint đặt tài nguyên vào một địa chỉ trong subnet của bạn
 
@@ -45,7 +45,7 @@ Hệ quả cần nhớ. NSG và UDR chỉ áp lên private endpoint khi subnet b
 
 ## Private DNS quyết định bạn đang nói chuyện với IP nào
 
-Ứng dụng không bao giờ gọi địa chỉ IP của private endpoint. Nó gọi `kv-toinoi-dev-sea.vault.azure.net`, và DNS mới là thứ chọn đường. Khi vault có private endpoint, tên công cộng được trỏ (CNAME) sang `kv-toinoi-dev-sea.privatelink.vaultcore.azure.net`. Nếu VNet của bạn nhìn thấy một **private DNS zone** tên `privatelink.vaultcore.azure.net` chứa bản ghi A của tên đó trỏ tới `10.10.8.4`, client nhận IP private. Nếu không, nó nhận IP công cộng như chưa có gì xảy ra.
+Ứng dụng không bao giờ gọi địa chỉ IP của private endpoint. Ứng dụng gọi `kv-toinoi-dev-sea.vault.azure.net`, và DNS mới là thứ chọn đường. Khi vault có private endpoint, tên công cộng được trỏ (CNAME) sang `kv-toinoi-dev-sea.privatelink.vaultcore.azure.net`. Nếu VNet của bạn nhìn thấy một **private DNS zone** tên `privatelink.vaultcore.azure.net` chứa bản ghi A của tên đó trỏ tới `10.10.8.4`, client nhận IP private. Nếu không, client nhận IP công cộng như chưa có gì xảy ra.
 
 Hai zone dùng trong Tới Nơi:
 
@@ -71,7 +71,7 @@ Khi nghi ngờ, đừng đoán: chạy `nslookup` từ **bên trong** VNet và �
 
 Với PostgreSQL, ngoài private endpoint còn có **VNet integration**: server được gắn thẳng vào một subnet dành riêng (delegated subnet), nhận IP trong subnet đó, và dùng một private DNS zone có tên kết thúc bằng `.postgres.database.azure.com` (ví dụ `toinoi-dev.private.postgres.database.azure.com`). Không có endpoint công cộng nào để tắt, vì ngay từ đầu server không có.
 
-Chế độ mạng được chọn **lúc tạo server**. Private endpoint chỉ gắn được vào server tạo ở chế độ public access; server đã VNet integration thì không thêm private endpoint và không chuyển sang public tại chỗ. Muốn đổi mô hình thường phải tạo server mới rồi chuyển dữ liệu, nên hãy chốt từ đầu và kiểm lại trang networking trong tài liệu vì Microsoft có thể bổ sung đường chuyển đổi.
+Chế độ mạng được chọn **lúc tạo server**. Private endpoint chỉ gắn được vào server tạo ở chế độ public access; server đã VNet integration thì không thêm private endpoint và không chuyển sang public tại chỗ. Muốn đổi mô hình thường phải tạo server mới rồi chuyển dữ liệu, nên hãy chốt từ đầu và kiểm tra lại trang networking trong tài liệu vì Microsoft có thể bổ sung đường chuyển đổi.
 
 | Tiêu chí | Service endpoint | Private endpoint | PostgreSQL VNet integration |
 | --- | --- | --- | --- |
@@ -84,7 +84,7 @@ Chế độ mạng được chọn **lúc tạo server**. Private endpoint chỉ
 | Chi phí | Không phát sinh riêng | Theo giờ endpoint và theo GB xử lý | Không có phí endpoint riêng |
 | Dùng ở Tới Nơi | Dev, tạm thời | Key Vault, ACR, storage ở staging/prod | `psql-toinoi-prod-sea` nếu chốt từ đầu |
 
-Trade-off thực tế: VNet integration đơn giản và rẻ hơn khi bạn **chắc chắn** server chỉ phục vụ workload trong cùng VNet, nhưng subnet bị delegate không dùng cho thứ khác và không đổi mô hình tại chỗ được. Private endpoint linh hoạt hơn (nhiều VNet, nhiều region qua peering), đổi lại thêm DNS zone và chi phí endpoint. Hạn chế và tính khả dụng của từng lựa chọn theo từng SKU thay đổi theo thời gian; kiểm trang networking của PostgreSQL Flexible Server trước khi chốt.
+Trade-off thực tế: VNet integration đơn giản và rẻ hơn khi bạn **chắc chắn** server chỉ phục vụ workload trong cùng VNet, nhưng subnet bị delegate không dùng cho thứ khác và không đổi mô hình tại chỗ được. Private endpoint linh hoạt hơn (nhiều VNet, nhiều region qua peering), đổi lại thêm DNS zone và chi phí endpoint. Hạn chế và tính khả dụng của từng lựa chọn theo từng SKU thay đổi theo thời gian; kiểm tra trang networking của PostgreSQL Flexible Server trước khi chốt.
 
 ## Private endpoint tốn tiền, không phải resource dev nào cũng cần
 
@@ -94,12 +94,12 @@ Cách phân tầng thực dụng cho Tới Nơi: dev dùng firewall theo IP ho�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Tắt public network access của Key Vault trước khi DNS đúng sẽ khoá luôn chính bạn và pipeline CI chạy ngoài VNet khỏi secret. Control plane (tạo, xoá vault) vẫn qua Azure Resource Manager, nhưng thao tác dữ liệu như đọc secret thì chỉ qua private endpoint. Luôn kiểm tra `nslookup` trong VNet trước, rồi mới tắt public access. Đừng quên runner CI cần một đường riêng.</p>
+<p>Tắt public network access của Key Vault trước khi DNS đúng sẽ khoá luôn quyền truy cập secret của chính bạn và của pipeline CI chạy ngoài VNet. Control plane (tạo, xoá vault) vẫn qua Azure Resource Manager, nhưng thao tác dữ liệu như đọc secret thì chỉ qua private endpoint. Luôn kiểm tra `nslookup` trong VNet trước, rồi mới tắt public access. Đừng quên runner CI cần một đường riêng.</p>
 </div>
 
 ## Lab: Key Vault chỉ còn đi qua VNet
 
-Giả sử đã có `rg-toinoi-net-dev-sea`, `vnet-toinoi-dev-sea` và vault `kv-toinoi-dev-sea` ở Southeast Asia. Khối dưới tạo subnet cho endpoint, private endpoint, zone, link và zone group. Nó mô tả cách làm; nó không chứng minh DNS đã phân giải đúng, việc đó nằm ở bước kiểm sau.
+Giả sử đã có `rg-toinoi-net-dev-sea`, `vnet-toinoi-dev-sea` và vault `kv-toinoi-dev-sea` ở Southeast Asia. Khối dưới tạo subnet cho endpoint, private endpoint, zone, link và zone group. Khối này mô tả cách làm, chưa chứng minh DNS đã phân giải đúng, việc đó nằm ở bước kiểm sau.
 
 ```bash
 RG=rg-toinoi-net-dev-sea
@@ -128,7 +128,7 @@ az network private-endpoint dns-zone-group create -g $RG \
   --private-dns-zone privatelink.vaultcore.azure.net --zone-name vault
 ```
 
-Tiếp theo, từ một VM lab nhỏ trong VNet (ví dụ `snet-app`), kiểm tên phân giải ra đâu. Kỳ vọng là IP trong `10.10.8.0/24`:
+Tiếp theo, từ một VM lab nhỏ trong VNet (ví dụ `snet-app`), kiểm tra xem tên phân giải ra IP nào. Kỳ vọng là IP trong `10.10.8.0/24`:
 
 ```bash
 nslookup kv-toinoi-dev-sea.vault.azure.net
@@ -143,9 +143,9 @@ az keyvault update --name kv-toinoi-dev-sea \
 
 Cuối cùng chạy lại `nslookup` từ máy ngoài, như laptop của bạn. DNS công cộng vẫn có thể trả IP công cộng của vault, vì tên công cộng chỉ CNAME sang `privatelink`. Điều bạn cần thấy là truy cập dữ liệu (ví dụ `az keyvault secret show`) bị từ chối thay vì thành công. Hai kiểm tra này chứng minh DNS và chặn truy cập từ ngoài; chúng chưa chứng minh `trip-service` đọc được secret, vì quyền RBAC của managed identity (bài 13) là một lớp khác. Dọn lab theo thứ tự ngược: bật lại public access (nếu vault còn dùng), rồi xoá private endpoint, zone group, VNet link và zone để dừng tính tiền theo giờ.
 
-**Bài tập:** Container Apps environment `cae-toinoi-prod` nằm trong `snet-app`, còn private endpoint ở `snet-pe`. Sau khi tắt public access, `trip-service` nhận lỗi khi đọc secret dù RBAC đúng. Bạn kiểm theo thứ tự nào?
+**Bài tập:** Container Apps environment `cae-toinoi-prod` nằm trong `snet-app`, còn private endpoint ở `snet-pe`. Sau khi tắt public access, `trip-service` nhận lỗi khi đọc secret dù RBAC đúng. Bạn kiểm tra theo thứ tự nào?
 
-<details><summary>Xem lời giải</summary><p>Đầu tiên kiểm DNS: chạy `nslookup` từ bên trong VNet (hoặc console của container) và xem tên vault có ra IP trong `snet-pe` không. Nếu không, kiểm link của private DNS zone với VNet và custom DNS có forward `privatelink.vaultcore.azure.net` không. Sau đó kiểm trạng thái kết nối của private endpoint (Approved) và NSG của subnet. RBAC chỉ đáng nghi khi DNS và kết nối đã đúng.</p></details>
+<details><summary>Xem lời giải</summary><p>Đầu tiên kiểm tra DNS: chạy `nslookup` từ bên trong VNet (hoặc console của container) và xem tên vault có ra IP trong `snet-pe` không. Nếu không, kiểm tra link của private DNS zone với VNet và custom DNS có forward `privatelink.vaultcore.azure.net` không. Sau đó kiểm tra trạng thái kết nối của private endpoint (Approved) và NSG của subnet. RBAC chỉ đáng nghi khi DNS và kết nối đã đúng.</p></details>
 
 ## Học tiếp từ đây
 

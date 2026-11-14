@@ -28,8 +28,8 @@ Data race là hai luồng cùng truy cập một vùng nhớ, ít nhất một b
 | `Rc<T>` | không | không | bộ đếm không nguyên tử |
 | `RefCell<T>` | khi `T: Send` | không | đếm mượn không nguyên tử |
 | `Arc<T>` | khi `T: Send + Sync` | khi `T: Send + Sync` | bộ đếm nguyên tử, nhưng `T` vẫn bị chia sẻ |
-| `Mutex<T>` | khi `T: Send` | khi `T: Send` | khóa tuần tự hóa truy cập |
-| `MutexGuard<T>` | không | khi `T: Sync` | phải nhả khóa ở đúng luồng đã khóa |
+| `Mutex<T>` | khi `T: Send` | khi `T: Send` | khoá tuần tự hoá truy cập |
+| `MutexGuard<T>` | không | khi `T: Sync` | phải nhả khoá ở đúng luồng đã khoá |
 
 Lab chốt dòng đầu bằng kiểm tra lúc biên dịch: ai đó thêm một `Rc` vào `Ledger` thì crate không build được (`src/send_sync.rs`, rút gọn):
 
@@ -64,9 +64,9 @@ Tới điểm `.await`, task tạm dừng và có thể được worker khác nh
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 262" role="img" aria-label="Hình 1. Task khóa Mutex ở worker 1, gặp await và tạm dừng, rồi chạy tiếp ở worker 2 mang theo guard. Guard của std Mutex không Send nên tokio spawn từ chối lúc biên dịch."><defs><marker id="rs22-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="16" width="380" height="156" rx="12" class="f-none s-line dash"/><text x="36" y="40" class="t-b">Worker thread 1</text><rect x="40" y="56" width="340" height="46" rx="8" class="f-phys-soft s-phys"/><text x="56" y="76" class="t-b">1. shared.lock()</text><text x="56" y="93" class="t-small">task giữ guard của std::sync::Mutex</text><rect x="40" y="112" width="340" height="46" rx="8" class="f-warn-soft s-warn"/><text x="56" y="132" class="t-b">2. sleep(..).await</text><text x="56" y="149" class="t-small">task tạm dừng, guard vẫn sống</text><rect x="480" y="16" width="380" height="156" rx="12" class="f-none s-line dash"/><text x="496" y="40" class="t-b">Worker thread 2</text><rect x="500" y="112" width="340" height="46" rx="8" class="f-warn-soft s-warn"/><text x="516" y="132" class="t-b">3. task chạy tiếp ở đây</text><text x="516" y="149" class="t-small">guard bị mang sang luồng khác</text><path d="M380 135 L498 135" class="f-none s-warn dash" stroke-width="2" marker-end="url(#rs22-0-a)"/><text x="392" y="126" class="t-small">chuyển task</text><rect x="20" y="192" width="840" height="56" rx="10" class="f-pk-soft s-pk"/><text x="36" y="215" class="t-b">MutexGuard của std không Send, nên future giữ nó qua .await không Send</text><text x="36" y="235" class="t-small">tokio::spawn từ chối lúc biên dịch. Cho guard hết sống trước .await, hoặc dùng tokio::sync::Mutex.</text></svg>
+<svg viewBox="0 0 880 262" role="img" aria-label="Hình 1. Task khoá Mutex ở worker 1, gặp await và tạm dừng, rồi chạy tiếp ở worker 2 mang theo guard. Guard của std Mutex không Send nên tokio spawn từ chối lúc biên dịch."><defs><marker id="rs22-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="16" width="380" height="156" rx="12" class="f-none s-line dash"/><text x="36" y="40" class="t-b">Worker thread 1</text><rect x="40" y="56" width="340" height="46" rx="8" class="f-phys-soft s-phys"/><text x="56" y="76" class="t-b">1. shared.lock()</text><text x="56" y="93" class="t-small">task giữ guard của std::sync::Mutex</text><rect x="40" y="112" width="340" height="46" rx="8" class="f-warn-soft s-warn"/><text x="56" y="132" class="t-b">2. sleep(..).await</text><text x="56" y="149" class="t-small">task tạm dừng, guard vẫn sống</text><rect x="480" y="16" width="380" height="156" rx="12" class="f-none s-line dash"/><text x="496" y="40" class="t-b">Worker thread 2</text><rect x="500" y="112" width="340" height="46" rx="8" class="f-warn-soft s-warn"/><text x="516" y="132" class="t-b">3. task chạy tiếp ở đây</text><text x="516" y="149" class="t-small">guard bị mang sang luồng khác</text><path d="M380 135 L498 135" class="f-none s-warn dash" stroke-width="2" marker-end="url(#rs22-0-a)"/><text x="392" y="126" class="t-small">chuyển task</text><rect x="20" y="192" width="840" height="56" rx="10" class="f-pk-soft s-pk"/><text x="36" y="215" class="t-b">MutexGuard của std không Send, nên future giữ nó qua .await không Send</text><text x="36" y="235" class="t-small">tokio::spawn từ chối lúc biên dịch. Cho guard hết sống trước .await, hoặc dùng tokio::sync::Mutex.</text></svg>
 </div>
-<figcaption>Hình 1. Lỗi không nằm ở lúc khóa mà ở chỗ guard sống qua điểm tạm dừng.</figcaption>
+<figcaption>Hình 1. Lỗi không nằm ở lúc khoá mà ở chỗ guard sống qua điểm tạm dừng.</figcaption>
 </figure>
 
 Thông điệp thật khi giữ guard qua `sleep(..).await` rồi `spawn` (rút gọn):
@@ -81,7 +81,7 @@ note: future is not `Send` as this value is used across an await
     |                                                      ^^^^^ await occurs here, with `ledger` maybe used later
 ```
 
-Lỗi hiện ra ở chỗ gọi `tokio::spawn`, không phải ở hàm giữ guard: hàm `async` tự nó vẫn biên dịch được, chỉ future của nó không `Send`. Vì thế nơi không đòi `Send`, như `join!` trong `block_on` của runtime một luồng, compiler không chặn, và chương trình kẹt thật: nhánh đầu giữ khóa rồi nhường thread, nhánh sau gọi `lock()` chặn luôn thread đó, nên nhánh đầu không còn cơ hội nhả khóa (`src/deadlock.rs`, rút gọn):
+Lỗi hiện ra ở chỗ gọi `tokio::spawn`, không phải ở hàm giữ guard: hàm `async` tự nó vẫn biên dịch được, chỉ future của nó không `Send`. Vì thế nơi không đòi `Send`, như `join!` trong `block_on` của runtime một luồng, compiler không chặn, và chương trình kẹt thật: nhánh đầu giữ khoá rồi nhường thread, nhánh sau gọi `lock()` chặn luôn thread đó, nên nhánh đầu không còn cơ hội nhả khoá (`src/deadlock.rs`, rút gọn):
 
 ```rust
 tokio::join!(
@@ -125,7 +125,7 @@ pub async fn post_then_notify(
 
 ## `Arc<Mutex<Ledger>>`: nhiều task ghi cùng key chỉ ra một bút toán
 
-`Arc` cho nhiều task cùng sở hữu, `Mutex` cho `&mut Ledger` từng task một. Phần «kiểm key rồi ghi» nằm trọn trong `Ledger::post(&mut self)`, nên khóa bao cả hai bước: không có khoảng hở giữa lúc task A thấy key mới và lúc A ghi. 50 task `tokio::spawn` cùng ghi `trip:TN-0001:capture` (`src/shared.rs`, rút gọn):
+`Arc` cho nhiều task cùng sở hữu, `Mutex` cho `&mut Ledger` từng task một. Phần «kiểm key rồi ghi» nằm trọn trong `Ledger::post(&mut self)`, nên khoá bao cả hai bước: không có khoảng hở giữa lúc task A thấy key mới và lúc A ghi. 50 task `tokio::spawn` cùng ghi `trip:TN-0001:capture` (`src/shared.rs`, rút gọn):
 
 ```rust
 for _ in 0..tasks {
@@ -140,11 +140,11 @@ for _ in 0..tasks {
   bút toán trong sổ = 1, ghi mới = 1, trả lại bút toán cũ = 49, mã = ["JE-000001"]
 ```
 
-Một task ghi mới, 49 task nhận lại `JE-000001` với `replayed = true`. Cùng key mà nội dung khác thì `Ledger::post` trả `IdempotencyConflict`, không ghi thêm. Nếu một task panic khi giữ khóa, mọi `lock()` sau đó trả `Err` (poisoning, như bài 16); lab đổi nó thành `SharedError::Poisoned` thay vì `unwrap`.
+Một task ghi mới, 49 task nhận lại `JE-000001` với `replayed = true`. Cùng key mà nội dung khác thì `Ledger::post` trả `IdempotencyConflict`, không ghi thêm. Nếu một task panic khi giữ khoá, mọi `lock()` sau đó trả `Err` (poisoning, như bài 16); lab đổi nó thành `SharedError::Poisoned` thay vì `unwrap`.
 
 ## `std::sync::Mutex` hay `tokio::sync::Mutex`, và khi nào `RwLock`?
 
-**Mặc định dùng `std::sync::Mutex`** khi phần giữ khóa ngắn và đồng bộ, đúng như `post_shared`. Chỉ khi buộc phải giữ khóa qua `.await` mới dùng `tokio::sync::Mutex`: `lock()` của nó là `async` (task chờ khóa nhường worker, không chặn luồng) và guard là `Send` (`src/shared.rs`):
+**Mặc định dùng `std::sync::Mutex`** khi phần giữ khoá ngắn và đồng bộ, đúng như `post_shared`. Chỉ khi buộc phải giữ khoá qua `.await` mới dùng `tokio::sync::Mutex`: `lock()` của nó là `async` (task chờ khoá nhường worker, không chặn luồng) và guard là `Send` (`src/shared.rs`):
 
 ```rust
 pub async fn post_holding_across_await(
@@ -158,7 +158,7 @@ pub async fn post_holding_across_await(
 }
 ```
 
-Giá phải trả: lock của tokio đắt hơn lock của std, và mọi task khác xếp hàng suốt thời gian `.await` đó. 20 task chạy hàm này cho đúng 1 bút toán, nhưng tuần tự hóa cả lời gọi VíXanh. Thường nên giữ khóa thật ngắn, hoặc dùng actor ở mục sau.
+Giá phải trả: lock của tokio đắt hơn lock của std, và mọi task khác xếp hàng suốt thời gian `.await` đó. 20 task chạy hàm này cho đúng 1 bút toán, nhưng tuần tự hoá cả lời gọi VíXanh. Thường nên giữ khoá thật ngắn, hoặc dùng actor ở mục sau.
 
 `RwLock` cho nhiều reader cùng lúc hoặc một writer. Nó không tự nhanh hơn. Lab đo `std::sync::Mutex` với `std::sync::RwLock` trên sổ 2.000 bút toán, 8 worker thread, 8 task, mỗi task 2.000 thao tác, trung vị 5 lần, build `--release`:
 
@@ -170,9 +170,9 @@ kịch bản                              Mutex ms   RwLock ms   tỉ lệ
 đọc nhẹ (len, 100% đọc)                    0.3         0.5    0.5x
 ```
 
-Máy đo là MacBook Pro 10 lõi, đang chạy nhiều việc khác nên số dao động; đọc tỉ lệ, không đọc số tuyệt đối. Qua 9 lần chạy lệnh đo (mỗi lần đã là trung vị của 5), tỉ lệ `Mutex`/`RwLock` nằm trong khoảng 4,3 đến 7,1 lần với đọc nặng, 1,1 đến 3,1 lần khi kèm ghi, 0,2 đến 0,7 lần với đọc nhẹ (dưới 1 nghĩa là `Mutex` nhanh hơn). Phần việc trong khóa lớn mà gần như toàn đọc (`balance` duyệt cả sổ) thì `RwLock` thắng rõ. Chỉ cần 1 thao tác ghi trên 20, dù việc ghi rất rẻ, lợi thế đã co lại. Phần việc gần bằng 0 (`len()`) thì `RwLock` không giúp gì, đôi khi chậm hơn. Std không cam kết thứ tự ưu tiên giữa reader và writer (tùy hệ điều hành). Và nếu `balance` đắt vì duyệt cả sổ, sửa phép tính (số dư là projection, bài 25) đáng hơn đổi loại khóa.
+Máy đo là MacBook Pro 10 lõi, đang chạy nhiều việc khác nên số dao động; đọc tỉ lệ, không đọc số tuyệt đối. Qua 9 lần chạy lệnh đo (mỗi lần đã là trung vị của 5), tỉ lệ `Mutex`/`RwLock` nằm trong khoảng 4,3 đến 7,1 lần với đọc nặng, 1,1 đến 3,1 lần khi kèm ghi, 0,2 đến 0,7 lần với đọc nhẹ (dưới 1 nghĩa là `Mutex` nhanh hơn). Phần việc trong khoá lớn mà gần như toàn đọc (`balance` duyệt cả sổ) thì `RwLock` thắng rõ. Chỉ cần 1 thao tác ghi trên 20, dù việc ghi rất rẻ, lợi thế đã co lại. Phần việc gần bằng 0 (`len()`) thì `RwLock` không giúp gì, đôi khi chậm hơn. Std không cam kết thứ tự ưu tiên giữa reader và writer (tuỳ hệ điều hành). Và nếu `balance` đắt vì duyệt cả sổ, sửa phép tính (số dư là projection, bài 25) đáng hơn đổi loại khoá.
 
-## Mẫu actor: một task sở hữu `Ledger`, không cần khóa
+## Mẫu actor: một task sở hữu `Ledger`, không cần khoá
 
 Thay vì chia sẻ `Ledger`, đặt nó vào đúng một task. Mọi nơi khác gửi lệnh vào một `mpsc` bounded; mỗi lệnh mang một `oneshot::Sender` để nhận kết quả.
 
@@ -180,7 +180,7 @@ Thay vì chia sẻ `Ledger`, đặt nó vào đúng một task. Mọi nơi khác
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 296" role="img" aria-label="Hình 2. Ba task gửi lệnh vào hàng đợi mpsc bounded; một actor sở hữu Ledger xử lý lần lượt từng lệnh và trả kết quả qua oneshot về đúng task đã gửi."><defs><marker id="rs22-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="24" width="210" height="44" rx="8" class="f-phys-soft s-phys"/><text x="36" y="44" class="t-b">task A</text><text x="36" y="60" class="t-small">handle.post(entry)</text><rect x="20" y="84" width="210" height="44" rx="8" class="f-phys-soft s-phys"/><text x="36" y="104" class="t-b">task B</text><text x="36" y="120" class="t-small">handle.post(entry)</text><rect x="20" y="144" width="210" height="44" rx="8" class="f-phys-soft s-phys"/><text x="36" y="164" class="t-b">task C</text><text x="36" y="180" class="t-small">handle.balance(account)</text><path d="M230 46 L318 100" class="f-none s-phys" stroke-width="2" marker-end="url(#rs22-1-a)"/><path d="M230 106 L318 116" class="f-none s-phys" stroke-width="2" marker-end="url(#rs22-1-a)"/><path d="M230 166 L318 132" class="f-none s-phys" stroke-width="2" marker-end="url(#rs22-1-a)"/><rect x="320" y="52" width="190" height="130" rx="10" class="f-pk-soft s-pk"/><text x="336" y="82" class="t-b">mpsc bounded</text><text x="336" y="104" class="t-small">dung lượng 8 lệnh</text><text x="336" y="124" class="t-small">đầy: send().await chờ</text><text x="336" y="144" class="t-small">đầy: try_send trả Full</text><text x="336" y="164" class="t-small">thứ tự vào trước ra trước</text><path d="M510 117 L578 117" class="f-none s-phys" stroke-width="2" marker-end="url(#rs22-1-a)"/><rect x="580" y="32" width="280" height="160" rx="12" class="f-phys-soft s-phys"/><text x="596" y="58" class="t-b">actor: một task duy nhất</text><text x="596" y="78" class="t-small">xử lý lần lượt từng lệnh</text><rect x="596" y="94" width="248" height="82" rx="8" class="f-surface s-phys"/><text x="612" y="120" class="t-b">Ledger</text><text x="612" y="140" class="t-small">chỉ task này chạm vào, &amp;mut thuần</text><text x="612" y="160" class="t-small">không Arc, không Mutex</text><rect x="20" y="226" width="840" height="48" rx="10" class="f-none s-pk dash"/><text x="36" y="248" class="t-b">oneshot: mỗi lệnh kèm một Sender, actor trả kết quả về đúng task đã gửi</text><text x="36" y="265" class="t-small">Actor dừng khi mọi tay cầm bị drop, rồi trả Ledger về cho nơi đã spawn nó.</text><path d="M720 192 L720 226" class="f-none s-pk dash" stroke-width="2" marker-end="url(#rs22-1-a)"/><path d="M125 226 L125 190" class="f-none s-pk dash" stroke-width="2" marker-end="url(#rs22-1-a)"/></svg>
 </div>
-<figcaption>Hình 2. Một chủ sở hữu, nhiều người gửi lệnh. Quyền ghi tuần tự nằm ở hàng đợi, không ở khóa.</figcaption>
+<figcaption>Hình 2. Một chủ sở hữu, nhiều người gửi lệnh. Quyền ghi tuần tự nằm ở hàng đợi, không ở khoá.</figcaption>
 </figure>
 
 Phía người gọi (`src/actor.rs`, rút gọn):
@@ -208,7 +208,7 @@ Phía actor: vòng `while let Some(command) = rx.recv().await`, gọi `post_outc
   số bút toán trong sổ = 2
 ```
 
-Lệnh bị từ chối vì `Full` và lệnh bị `timeout` bỏ giữa chừng đều chưa vào hàng đợi (`send` hủy an toàn), nên sổ chỉ có 2 bút toán. Điều khác hẳn xảy ra nếu lệnh đã vào hàng đợi rồi người gọi mới hết kiên nhẫn: actor vẫn xử lý lệnh đó. Timeout lúc chờ `oneshot` nghĩa là «không biết kết quả», và cách đúng là gửi lại với cùng `idempotency_key`. `mpsc::unbounded_channel` không có backpressure, hàng đợi lớn dần tới khi hết bộ nhớ, nên lab không dùng.
+Lệnh bị từ chối vì `Full` và lệnh bị `timeout` bỏ giữa chừng đều chưa vào hàng đợi (`send` huỷ an toàn), nên sổ chỉ có 2 bút toán. Điều khác hẳn xảy ra nếu lệnh đã vào hàng đợi rồi người gọi mới hết kiên nhẫn: actor vẫn xử lý lệnh đó. Timeout lúc chờ `oneshot` nghĩa là «không biết kết quả», và cách đúng là gửi lại với cùng `idempotency_key`. `mpsc::unbounded_channel` không có backpressure, hàng đợi lớn dần tới khi hết bộ nhớ, nên lab không dùng.
 
 ## `broadcast`: một sự kiện, nhiều người nghe
 
@@ -244,7 +244,7 @@ Ba subscriber cho `TN-0001`, sau 50 lần ghi cùng key chỉ có một sự ki�
 
 Kênh dung lượng 2, ghi 5 bút toán, người nghe chưa đọc gì, thì `recv()` trả `Err(Lagged(3))` rồi mới tới `JE-000004` và `JE-000005`. Kênh này nằm trong bộ nhớ, mất khi process dừng. Phát sự kiện bền ra ngoài cho Booking và Payment là việc của Kafka ở bài 36.
 
-## Giới hạn: khóa và channel trong process không phải bảo đảm của hệ thống
+## Giới hạn: khoá và channel trong process không phải bảo đảm của hệ thống
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
@@ -255,8 +255,8 @@ Kênh dung lượng 2, ghi 5 bút toán, người nghe chưa đọc gì, thì `r
 
 | C# / .NET | Rust |
 | --- | --- |
-| `lock (obj)`: khóa tách khỏi dữ liệu, quên khóa vẫn biên dịch được | `Mutex<T>`: dữ liệu nằm trong khóa; chia sẻ sai kiểu bị từ chối lúc biên dịch |
-| `SemaphoreSlim(1, 1)` + `await WaitAsync()` để giữ khóa qua `await` | `tokio::sync::Mutex` (và `tokio::sync::Semaphore` để giới hạn số task cùng chạy) |
+| `lock (obj)`: khoá tách khỏi dữ liệu, quên khoá vẫn biên dịch được | `Mutex<T>`: dữ liệu nằm trong khoá; chia sẻ sai kiểu bị từ chối lúc biên dịch |
+| `SemaphoreSlim(1, 1)` + `await WaitAsync()` để giữ khoá qua `await` | `tokio::sync::Mutex` (và `tokio::sync::Semaphore` để giới hạn số task cùng chạy) |
 | `Channel.CreateBounded<T>`, `WriteAsync` chờ khi đầy, `TryWrite` | `mpsc::channel(n)`, `send().await`, `try_send` |
 | `TaskCompletionSource<T>` làm ô trả lời | `oneshot` |
 | Không có kênh phát sẵn; tự giữ danh sách `Channel` cho mỗi subscriber | `broadcast`, mỗi subscriber một bản sao, có `Lagged` |
@@ -272,7 +272,7 @@ cargo test --manifest-path examples/toi-noi-rust/22-send-sync-channel/Cargo.toml
 cargo run --release --manifest-path examples/toi-noi-rust/22-send-sync-channel/Cargo.toml -- --bench
 ```
 
-`--verify` kiểm các giá trị ở trên (một bút toán, 49 lần trả lại, kẹt ở `std::sync::Mutex`, 20.400 VND, `Full`, `Lagged(3)`), in `VERIFY OK` và thoát 0; sai thì in `SAI: ...` và thoát 1. `cargo test` chạy 11 test tích hợp (khóa, kẹt khóa, actor, hàng đợi đầy, `Lagged`, actor đã dừng, mutex poisoned) và 3 doc test `compile_fail`. `--bench` không nằm trong `--verify` vì thời gian phụ thuộc máy.
+`--verify` kiểm các giá trị ở trên (một bút toán, 49 lần trả lại, kẹt ở `std::sync::Mutex`, 20.400 VND, `Full`, `Lagged(3)`), in `VERIFY OK` và thoát 0; sai thì in `SAI: ...` và thoát 1. `cargo test` chạy 11 test tích hợp (khoá, kẹt khoá, actor, hàng đợi đầy, `Lagged`, actor đã dừng, mutex poisoned) và 3 doc test `compile_fail`. `--bench` không nằm trong `--verify` vì thời gian phụ thuộc máy.
 
 **Bài tập:** (1) Trong `post_then_notify`, bỏ cặp ngoặc nhọn quanh guard để `call_vixanh().await` chạy khi guard còn sống. Lỗi hiện ra ở đâu và nói gì? (2) Muốn endpoint trả «đang bận» thay vì chờ khi hàng đợi actor đầy, gọi hàm nào và xử lý kết quả ra sao?
 

@@ -1,14 +1,14 @@
 ---
 slug: ba-thuc-hanh-thay-doi-chinh-sach-huy
 title: "Thực hành: thay đổi chính sách huỷ trên nhiều luồng"
-summary: "Phân tích đề xuất mở rộng khoảng miễn phí huỷ từ hai lên ba phút: tác động tới rule, quy trình, trạng thái, thông báo, version và replay. Tạo hồ sơ thay đổi có bằng chứng và tiêu chí review."
+summary: "Phân tích đề xuất mở rộng khoảng miễn phí huỷ từ hai lên ba phút: tác động tới rule, quy trình, trạng thái, thông báo, phiên bản và replay. Tạo hồ sơ thay đổi có bằng chứng và tiêu chí review."
 category: business-analysis
 level: advanced
 tags: [business-analysis, ba-024, change-impact, case-study, toi-noi]
 language: vi
 ---
 
-“Cho khách thêm một phút miễn phí, chắc chỉ sửa một con số.” Đề xuất nghe nhỏ nhưng lập tức nảy sinh câu hỏi: áp dụng cho chuyến đang chạy hay chỉ lượt nhận mới, tài xế đã chuyển arriving có được hưởng không, gửi lại yêu cầu huỷ cũ có tính theo chính sách mới không?
+“Cho khách thêm một phút miễn phí, chắc chỉ sửa một con số.” Đề xuất nghe nhỏ nhưng lập tức nảy sinh câu hỏi: áp dụng cho chuyến đang chạy hay chỉ lượt nhận mới, tài xế đã chuyển sang arriving có được hưởng không, gửi lại yêu cầu huỷ cũ có tính theo chính sách mới không?
 
 Bài thực hành khép phần 3 yêu cầu lập hồ sơ tác động cho CR-BA-01. Bạn không sửa lab hoặc tự duyệt chính sách; bạn làm cho thay đổi đủ rõ để người có thẩm quyền xem xét và nhóm kỹ thuật hiểu phần cần thực hiện.
 
@@ -28,7 +28,7 @@ Không lấy target giảm huỷ 9% của P01 làm bằng chứng chính sách n
 | arriving | Có phí cơ sở, xét miễn do trễ | Không đổi | arriving dù elapsed < 180 |
 | Mốc trễ | Lớn hơn acceptedAt + ETA + 10 phút | Không đổi | Đúng mốc và vượt mốc |
 | Tài xế rời | Về searching, không thu khách | Không đổi | Reset mốc nhận/tìm theo SPEC |
-| Replay | Trả kết quả đã xử lý | Không đổi | Gửi lại sau khi version thay đổi |
+| Replay | Trả kết quả đã xử lý | Không đổi | Gửi lại sau khi phiên bản thay đổi |
 | Ví declined | cancelled/failed, không retry | Không đổi | Không phục hồi chuyến |
 
 Đơn vị giây ở đây để đọc case; khi triển khai phải giữ độ chính xác của phép so sánh và thống nhất thời điểm dùng để quyết định. Không làm tròn 179,9 thành 180 trước khi so nếu chưa có chính sách đó.
@@ -51,13 +51,13 @@ Không chỉ tìm chuỗi số “2” trong code/tài liệu. Có nơi dùng di
 
 Hai phương án minh hoạ: dùng chính sách hiện hành tại lúc huỷ; hoặc gắn version tại một mốc đã xác định, chẳng hạn lần nhận chuyến. Mỗi phương án có đánh đổi về trải nghiệm, dữ liệu và khả năng giải thích.
 
-Nếu chọn gắn version theo lần nhận, phải nói rõ tài xế rời rồi người khác nhận có chọn version mới không. Vì baseline xoá acceptedAt/ETA lúc rời chuyến, không thể dùng mốc nhận cũ để tính khoảng miễn cho lần nhận mới. Việc thêm trường policyVersion là thiết kế đề xuất, chưa có sẵn trong SPEC.
+Nếu chọn gắn version theo lần nhận, phải nói rõ: khi tài xế rời chuyến và người khác nhận chuyến, người nhận có dùng phiên bản mới không. Vì baseline xoá acceptedAt/ETA lúc rời chuyến, không thể dùng mốc nhận cũ để tính khoảng miễn cho lần nhận mới. Việc thêm trường policyVersion là thiết kế đề xuất, chưa có sẵn trong SPEC.
 
 Hồ sơ có thể khuyến nghị một phương án nhưng giữ trạng thái chờ phê duyệt. Không tự chọn giờ hiệu lực hoặc tuyên bố điều khoản đã được khách chấp nhận; đó là quyết định cần người phụ trách phù hợp xem xét.
 
 ## 5. Bộ case review và đáp án mẫu
 
-Các ca độc lập dùng xe máy, acceptedAt 10:00:00, ETA 5 phút, khách đúng quyền:
+Các case độc lập dùng xe máy, acceptedAt 10:00:00, ETA 5 phút, khách đúng quyền:
 
 | Ca | State / thời điểm | v1 | v2 đề xuất |
 |---|---|---|---|
@@ -76,9 +76,9 @@ Nếu yêu cầu đã xử lý dưới v1 có phí, gửi lại đúng khoá và
 
 ## 6. Gói đề xuất và điều kiện được phép triển khai
 
-Nộp: baseline, mô tả delta, bảng quyết định v2, process có điểm chọn version/replay, transition/effect được giữ, impact log và bộ case. Ghi quyết định còn mở về hiệu lực, nhận lại, dữ liệu version, nội dung và quyền phê duyệt.
+Nộp: baseline, mô tả delta, bảng quyết định v2, process có điểm chọn version/replay, transition/effect được giữ, impact log và bộ case. Ghi quyết định còn mở về hiệu lực, nhận lại, dữ liệu phiên bản, nội dung và quyền phê duyệt.
 
-Điều kiện đề xuất trước triển khai: rule được chốt; dữ liệu đủ giải thích version; UI/API/hỗ trợ cùng hiểu; kiểm case thay đổi và regression; có owner theo dõi. Đây là tiêu chí review của bài tập, không phải lời xác nhận hệ thống đang đạt.
+Điều kiện đề xuất trước triển khai: rule được chốt; dữ liệu đủ giải thích version; UI/API/hỗ trợ cùng hiểu; kiểm thử các case thay đổi và regression; có người phụ trách theo dõi. Đây là tiêu chí review của bài tập, không phải lời xác nhận hệ thống đang đạt.
 
 Rollback cũng cần phân tích: dừng áp dụng cho lượt mới không đồng nghĩa sửa lại lịch sử hoặc tính lại mọi lượt đã huỷ. Nếu giữ version cho lượt đang chạy, cách rút thay đổi phải tôn trọng quyết định hiệu lực đã duyệt hoặc có quyết định thay thế rõ ràng.
 
@@ -90,7 +90,7 @@ Tự trả lời ba câu trước review: arriving có thay không; khách huỷ
 
 **Câu hỏi:** Vì sao chưa thể kết luận thay đổi miễn phí sẽ giảm huỷ?
 
-<details><summary>Gợi ý trả lời</summary><p>Phân tích tác động cho biết hệ thống phải thay đổi thế nào để thực thi chính sách. Nó chưa chứng minh phản ứng người dùng hoặc giá trị kinh doanh; cần giả thuyết, đo lường và đánh giá thích hợp.</p></details>
+<details><summary>Gợi ý trả lời</summary><p>Phân tích tác động cho biết hệ thống phải thay đổi thế nào để thực thi chính sách. Phân tích đó chưa chứng minh phản ứng người dùng hoặc giá trị kinh doanh; cần giả thuyết, đo lường và đánh giá thích hợp.</p></details>
 
 ## 8. Tham khảo và bước tiếp theo
 

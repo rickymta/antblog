@@ -10,11 +10,11 @@ language: vi
 
 Sáng 31/10, kế toán Tới Nơi mở dashboard mới «Doanh thu tháng 10 theo phương thức thanh toán». Ô tổng ghi **191.644.000 đ**; bảng đối chiếu của PG-012 — cùng database, cùng điều kiện «chuyến đã hoàn thành» — ghi **182.287.000 đ**. Người làm dashboard không đổi công thức doanh thu, chỉ thêm một dòng `JOIN payments` để lấy phương thức thanh toán. Không lỗi, không cảnh báo.
 
-Vấn đề: một chuyến có thể có **nhiều** dòng thanh toán, và sau khi nối, mỗi dòng thanh toán kéo theo một bản sao của chuyến — và của cước. Bài này giải thích vì sao số dòng sau khi nối có thể lớn hơn hoặc nhỏ hơn số chuyến, và quy trình kiểm để tổng tiền sau JOIN không bị nhân đôi.
+Vấn đề: một chuyến có thể có **nhiều** dòng thanh toán, và sau khi nối, mỗi dòng thanh toán kéo theo một bản sao của chuyến — và của cước. Bài này giải thích vì sao số dòng sau khi nối có thể lớn hơn hoặc nhỏ hơn số chuyến, và quy trình kiểm tra để tổng tiền sau JOIN không bị nhân đôi.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-013 · Phần 2/6 · Cơ bản</span>
-<p>Đọc trước: <a href="/articles/postgresql-bang-dong-cot-primary-foreign-key">PG-003 · Bảng, dòng, cột và khoá</a>, <a href="/articles/postgresql-aggregate-group-by-having">PG-012 · COUNT, SUM, GROUP BY và HAVING</a>. Lab: <code>examples/toi-noi-postgresql/p02</code> (tệp <code>13-join-cardinality.sql</code>) và thí nghiệm thêm ở <code>p02/thu-nghiem/pg013-*.sql</code>. Sau bài này, bạn kiểm được quan hệ một–nhiều trước khi nối và cộng tiền mà không nhân đôi.</p>
+<p>Đọc trước: <a href="/articles/postgresql-bang-dong-cot-primary-foreign-key">PG-003 · Bảng, dòng, cột và khoá</a>, <a href="/articles/postgresql-aggregate-group-by-having">PG-012 · COUNT, SUM, GROUP BY và HAVING</a>. Lab: <code>examples/toi-noi-postgresql/p02</code> (tệp <code>13-join-cardinality.sql</code>) và thí nghiệm thêm ở <code>p02/thu-nghiem/pg013-*.sql</code>. Sau bài này, bạn biết cách kiểm tra quan hệ một–nhiều trước khi nối, để cộng tiền mà không bị nhân đôi.</p>
 </div>
 
 ## 1. Dữ liệu dùng trong bài
@@ -27,7 +27,7 @@ node run.mjs p01/00-reset.sql p01/01-schema.sql p02/00-mo-rong-schema.sql \
   p02/01-fixture.sql p02/02-kiem-tra-fixture.sql p02/13-join-cardinality.sql
 ```
 
-Thí nghiệm `p02/thu-nghiem/pg013-bon-chuyen-no-dong.sql` và `p02/thu-nghiem/pg013-bai-tap.sql` chạy trên cùng nền: thay tệp cuối. Kết quả chép từ lần chạy thật trên PGlite 0.3.16 (PostgreSQL 17.5), bỏ dòng `-- [lab]`; chưa chạy trên server thật.
+Thí nghiệm `p02/thu-nghiem/pg013-bon-chuyen-no-dong.sql` và `p02/thu-nghiem/pg013-bai-tap.sql` chạy trên cùng nền, chỉ cần thay tệp cuối. Kết quả chép từ lần chạy thật trên PGlite 0.3.16 (PostgreSQL 17.5), bỏ dòng `-- [lab]`; chưa chạy trên server thật.
 
 | Quan hệ | Mỗi chuyến có | Vì sao biết |
 |---|---|---|
@@ -36,7 +36,7 @@ Thí nghiệm `p02/thu-nghiem/pg013-bon-chuyen-no-dong.sql` và `p02/thu-nghiem/
 | `trips` → `trip_ratings` | 0 hoặc 1 dòng | `trip_id` là **khoá chính** của `trip_ratings` |
 | `trips` → `cities`, `drivers`, `merchants` | 1 (hoặc 0 khi khoá ngoại NULL) | khoá ngoại trỏ tới khoá chính |
 
-Đây là toàn bộ bí mật của bài: trước khi nối, biết phía bên kia có **tối đa mấy dòng** cho mỗi chuyến.
+Đây là toàn bộ bí mật của bài: trước khi nối, phải biết phía bên kia có **tối đa mấy dòng** cho mỗi chuyến.
 
 ## 2. JOIN ghép dòng theo cặp
 
@@ -63,7 +63,7 @@ ORDER BY t.code, p.id;
 (5 rows)
 ```
 
-Bốn chuyến thành năm dòng. Đổi sang `LEFT JOIN` thì 100724 quay lại với ba cột NULL — 6 dòng. Cộng `t.fare`: đúng là **404.000**, sau INNER JOIN **529.000**, sau LEFT JOIN **605.000**.
+Bốn chuyến nở thành năm dòng. Đổi sang `LEFT JOIN` thì 100724 quay lại với ba cột NULL — 6 dòng. Cộng `t.fare`: đúng là **404.000**, nhưng sau INNER JOIN thành **529.000** và sau LEFT JOIN thành **605.000**.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -110,7 +110,7 @@ Thói quen đầu tiên: đếm phía bạn quan tâm, rồi đếm lại sau kh
 
 ## 4. Tổng tiền bị nhân như thế nào
 
-Câu của dashboard, rút gọn (câu 2 của lab):
+Câu truy vấn của dashboard, rút gọn (câu 2 của lab):
 
 ```sql
 SELECT count(*)                AS so_dong,
@@ -139,7 +139,7 @@ Thêm `DISTINCT` không cứu được: `sum(DISTINCT t.fare)` loại trùng the
 
 **Đọc ràng buộc.** Cột nối bên phải là khoá chính hoặc `UNIQUE` thì câu trả lời là «tối đa 1», cho cả dữ liệu tương lai. `trip_ratings` có khoá chính `trip_id`, nên `trips LEFT JOIN trip_ratings` giữ nguyên 2.707 dòng. Chiều **nhiều–một** an toàn vì cùng lý do: câu 8 của lab nối `trips` với `cities`, `drivers`, `merchants`, trước và sau đều 2.707 dòng (chuyến hoàn thành luôn có tài xế nhờ CHECK của PG-005; chuyến chưa có tài xế sẽ rơi khỏi `JOIN drivers`).
 
-**Đếm dữ liệu.** `payments.trip_id` không duy nhất — một chuyến *được phép* có nhiều giao dịch. Câu 3 của lab đếm phân bố trong chuyến hoàn thành: **2.550** chuyến có 1 dòng, **125** chuyến có 2 dòng. Đây chỉ là bằng chứng *tạm thời*: hôm nay tối đa 2, ngày mai một khách có thể trả bằng ba phương thức. Mẫu kiểm nhanh cho mọi khoá nối:
+**Đếm dữ liệu.** `payments.trip_id` không duy nhất — một chuyến *được phép* có nhiều giao dịch. Câu 3 của lab đếm phân bố trong chuyến hoàn thành: **2.550** chuyến có 1 dòng, **125** chuyến có 2 dòng. Đây chỉ là bằng chứng *tạm thời*: hôm nay tối đa 2, ngày mai một khách có thể trả bằng ba phương thức. Mẫu kiểm tra nhanh cho mọi khoá nối:
 
 ```sql
 SELECT trip_id FROM payments GROUP BY trip_id HAVING count(*) > 1;
@@ -174,9 +174,9 @@ WHERE t.status = 'completed';
 (1 row)
 ```
 
-Subquery trong `FROM` (bảng dẫn xuất `g`) có `GROUP BY trip_id` nên mỗi chuyến xuất hiện tối đa một lần; `LEFT JOIN` giữ 32 chuyến không có giao dịch, `coalesce(…, 0)` đọc chúng là 0 đ (PG-011). Bằng chứng nằm ngay trong kết quả: `so_dong` = `so_chuyen` = 2.707 và `tong_cuoc` khớp PG-012.
+Subquery trong `FROM` (bảng dẫn xuất `g`) có `GROUP BY trip_id` nên mỗi chuyến xuất hiện tối đa một lần; `LEFT JOIN` giữ 32 chuyến không có giao dịch, `coalesce(…, 0)` coi chúng là 0 đ (PG-011). Bằng chứng nằm ngay trong kết quả: `so_dong` = `so_chuyen` = 2.707 và `tong_cuoc` khớp PG-012.
 
-Thực thu của Tới Nơi là Σ charge − Σ refund + Σ adjustment, chỉ tính `succeeded` (adjustment đã mang dấu). Nó lớn hơn cước 244.000 đ — không còn là lỗi JOIN mà là **sai lệch thật** của vài chuyến; tìm từng chuyến là việc của PG-014 và PG-020.
+Thực thu của Tới Nơi là Σ charge − Σ refund + Σ adjustment, chỉ tính `succeeded` (adjustment đã mang dấu). Con số này lớn hơn cước 244.000 đ — không còn là lỗi JOIN mà là **sai lệch thật** của vài chuyến; tìm từng chuyến là việc của PG-014 và PG-020.
 
 ## 7. Dòng bị rơi, và điều kiện ở ON hay WHERE
 
@@ -191,11 +191,11 @@ WHERE t.status = 'completed' AND p.id IS NULL;
 
 Kết quả: **31** chuyến cước 0 đ (đúng nghiệp vụ) và **2** chuyến có cước mà chưa thu — 100724 và 101084 (chỉ có lần thu thẻ `failed`). `p.id` là khoá chính, nên NULL ở đó chỉ có thể do LEFT JOIN sinh ra.
 
-Để ý `p.status = 'succeeded'` nằm trong **`ON`**. Theo tài liệu PostgreSQL, điều kiện ở `ON` được xử lý *trước* khi nối, ở `WHERE` *sau* khi nối — khác biệt chỉ lộ ra với outer join. Câu 6 của lab: đặt ở `WHERE` ra **2.674** chuyến, ở `ON` ra **2.707**. Ở `WHERE`, dòng NULL do LEFT JOIN sinh ra gặp `NULL = 'succeeded'` (ra NULL, không phải `true`) nên bị loại; LEFT JOIN âm thầm thành INNER JOIN. Quy tắc nhớ: **điều kiện chọn dòng của bảng bên phải đặt ở `ON`, của bảng bên trái đặt ở `WHERE`**.
+Để ý `p.status = 'succeeded'` nằm trong **`ON`**. Theo tài liệu PostgreSQL, điều kiện ở `ON` được xử lý *trước* khi nối, ở `WHERE` *sau* khi nối — khác biệt chỉ lộ ra với outer join. Câu 6 của lab: đặt ở `WHERE` ra **2.674** chuyến, ở `ON` ra **2.707**. Ở `WHERE`, dòng NULL do LEFT JOIN sinh ra gặp `NULL = 'succeeded'` (ra NULL, không phải `true`) nên bị loại; LEFT JOIN biến thành INNER JOIN mà không báo lỗi. Quy tắc nhớ: **điều kiện chọn dòng của bảng bên phải đặt ở `ON`, của bảng bên trái đặt ở `WHERE`**.
 
 ## 8. Hai quan hệ một–nhiều trong cùng một câu
 
-Nối `trips` với cả `payments` lẫn `trip_events` thì hai phía «nhiều» **nhân** với nhau: mỗi giao dịch × mỗi dòng lịch sử. Chuyến 100042 có 2 giao dịch và 7 sự kiện nên ra 2 × 7 = **14** dòng, và `sum(p.amount)` thành 82.000 × 2 × 7 = 1.148.000 đ (câu 7 của lab). Trên cả tháng, tổng thu thành công 183.640.000 đ (dòng `charge`, mọi chuyến) thành **1.283.272.000 đ** — gần gấp 7. Cách sửa vẫn là mục 6: gom **từng** phía nhiều trong subquery riêng, rồi mới nối với `trips`.
+Nối `trips` với cả `payments` lẫn `trip_events` thì hai phía «nhiều» **nhân** với nhau: mỗi giao dịch × mỗi dòng lịch sử. Chuyến 100042 có 2 giao dịch và 7 sự kiện nên ra 2 × 7 = **14** dòng, và `sum(p.amount)` phình thành 82.000 × 2 × 7 = 1.148.000 đ (câu 7 của lab). Trên cả tháng, tổng thu thành công 183.640.000 đ (dòng `charge`, mọi chuyến) phình thành **1.283.272.000 đ** — gần gấp 7. Cách sửa vẫn là mục 6: gom **từng** phía nhiều trong subquery riêng, rồi mới nối với `trips`.
 
 ## 9. Câu hỏi «có hay không»: đừng JOIN rồi đếm
 
@@ -220,7 +220,7 @@ Nối `trips` với cả `payments` lẫn `trip_events` thì hai phía «nhiều
 
 - **Gom trước hay `count(DISTINCT …)` sau:** `count(DISTINCT khoá)` đủ để đếm nhưng không cứu được `sum` của phía «một»; gom trước dài hơn vài dòng và đúng cho mọi phép tổng hợp.
 - **INNER hay LEFT:** INNER ngắn và đúng khi phía phải chắc chắn có dòng; LEFT an toàn hơn nhưng phải xử lý NULL ở mọi cột bên phải.
-- **Một câu lớn hay nhiều bước:** một câu nhiều JOIN tiện cho dashboard nhưng khó kiểm; PG-014 tách nó thành các bước CTE có số dòng để đối chiếu.
+- **Một câu lớn hay nhiều bước:** một câu nhiều JOIN tiện cho dashboard nhưng khó kiểm tra; PG-014 tách nó thành các bước CTE có số dòng để đối chiếu.
 
 ## 12. Bài tập
 

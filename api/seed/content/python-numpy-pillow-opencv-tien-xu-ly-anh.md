@@ -8,14 +8,14 @@ tags: [python, toi-noi, numpy, pillow, opencv]
 language: vi
 ---
 
-Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) chụp căn cước bằng điện thoại, thường ở chỗ đèn không đều: một bên thẻ sáng, bên kia nằm trong bóng của bàn tay. Ảnh này đi vào `kyc-ocr`, và OCR đọc kém ở vùng tối. Trước khi gọi bất kỳ công cụ nhận dạng chữ nào, ta phải biến ảnh thành thứ máy xử lý tốt: kích thước thống nhất, thang xám, và ranh giới rõ giữa chữ với nền. Ở bài 22, vòng lặp Python nhị phân hóa một ảnh mất khoảng 0,2 giây, và để nhanh hơn ta phải tìm cách chạy song song. Bài này đi đường khác: nhìn ảnh như một **mảng số**, để cả phép tính chạy trong mã C của NumPy và OpenCV.
+Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) chụp căn cước bằng điện thoại, thường ở chỗ đèn không đều: một bên thẻ sáng, bên kia nằm trong bóng của bàn tay. Ảnh này đi vào `kyc-ocr`, và OCR đọc kém ở vùng tối. Trước khi gọi bất kỳ công cụ nhận dạng chữ nào, ta phải biến ảnh thành thứ máy xử lý tốt: kích thước thống nhất, thang xám, và ranh giới rõ giữa chữ với nền. Ở bài 22, vòng lặp Python nhị phân hoá một ảnh mất khoảng 0,2 giây, và để nhanh hơn ta phải tìm cách chạy song song. Bài này đi đường khác: nhìn ảnh như một **mảng số**, để cả phép tính chạy trong mã C của NumPy và OpenCV.
 
 Đây là bài 30 của lộ trình **Python trung bình qua Tới Nơi**, bài cuối của phần 03. Bạn cần biết hàm, list và module (phần 01); bài 29 đứng ngay trước theo lộ trình, nhưng bài này không dùng DataFrame.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Hai mảng <code>uint8</code> chứa <code>[[200, 100]]</code> và <code>[[100, 100]]</code>. Phần tử đầu của tổng <code>a + b</code> là 300, 255 hay một số khác? Nếu cộng hai ảnh theo cách này để làm sáng ảnh thì điều gì xảy ra với điểm đã gần trắng?</p>
-<details><summary>Xem đáp án</summary><p>Là <b>44</b>: <code>uint8</code> chỉ chứa 0 đến 255, 300 bị cắt vòng thành 300 − 256. Điểm gần trắng cộng thêm độ sáng sẽ <b>quay về gần đen</b> thay vì dừng ở trắng. <code>cv2.add</code> thì «bão hòa» ở 255. Bài sẽ in cả hai kết quả.</p></details>
+<details><summary>Xem đáp án</summary><p>Là <b>44</b>: <code>uint8</code> chỉ chứa 0 đến 255, 300 bị cắt vòng thành 300 − 256. Điểm gần trắng cộng thêm độ sáng sẽ <b>quay về gần đen</b> thay vì dừng ở trắng. <code>cv2.add</code> thì «bão hoà» ở 255. Bài sẽ in cả hai kết quả.</p></details>
 </div>
 
 ## Ảnh là một mảng ba chiều
@@ -74,7 +74,7 @@ cv2.add(a, b) (bão hòa)        = [[255, 200]]
 clip(int16(a) + b, 0, 255)     = [[255, 200]]
 ```
 
-NumPy giữ nguyên kiểu `uint8` và cắt vòng không báo lỗi; OpenCV có hàm số học riêng bão hòa về 255. Khi tự viết công thức, hoặc nhấc sang kiểu rộng hơn (`int16`, `float32`) trước khi tính rồi `clip` về 0 đến 255, hoặc dùng hàm của OpenCV. Cái giá của kiểu rộng là bộ nhớ: đổi ảnh `uint8` sang `int32` làm 1.936.968 byte thành 7.747.872 byte (ta gặp lại ở phần vectorize).
+NumPy giữ nguyên kiểu `uint8` và cắt vòng không báo lỗi; OpenCV có hàm số học riêng bão hoà về 255. Khi tự viết công thức, hoặc nhấc sang kiểu rộng hơn (`int16`, `float32`) trước khi tính rồi `clip` về 0 đến 255, hoặc dùng hàm của OpenCV. Cái giá của kiểu rộng là bộ nhớ: đổi ảnh `uint8` sang `int32` làm 1.936.968 byte thành 7.747.872 byte (ta gặp lại ở phần vectorize).
 
 ## Broadcasting: phép tính chạy khắp mảng không cần vòng lặp
 
@@ -112,9 +112,9 @@ def add_shadow(rgb: np.ndarray, strength: float = 0.55) -> np.ndarray:
 
 Hai thuật toán thu nhỏ cho ảnh gần giống nhau (lệch trung bình 1,628 trên thang 255); lab không kết luận cái nào làm OCR tốt hơn, vì câu đó chỉ trả lời được bằng số đo trên ảnh thật với chính công cụ OCR (phần 05).
 
-## Ngưỡng hóa: một ngưỡng hay mỗi vùng một ngưỡng
+## Ngưỡng hoá: một ngưỡng hay mỗi vùng một ngưỡng
 
-Nhị phân hóa biến ảnh xám thành đen trắng: điểm sáng hơn ngưỡng là nền (255), còn lại là mực (0). **Otsu** (`cv2.THRESH_OTSU`) chọn một ngưỡng duy nhất cho cả ảnh, tối ưu khi lược đồ xám có hai đỉnh rõ. **Ngưỡng thích nghi** so từng điểm với trung bình Gauss của lân cận `block_size × block_size` rồi trừ hằng số `c`, nên mỗi vùng tự có ngưỡng của mình.
+Nhị phân hoá biến ảnh xám thành đen trắng: điểm sáng hơn ngưỡng là nền (255), còn lại là mực (0). **Otsu** (`cv2.THRESH_OTSU`) chọn một ngưỡng duy nhất cho cả ảnh, tối ưu khi lược đồ xám có hai đỉnh rõ. **Ngưỡng thích nghi** so từng điểm với trung bình Gauss của lân cận `block_size × block_size` rồi trừ hằng số `c`, nên mỗi vùng tự có ngưỡng của mình.
 
 ```python
 # main.py (trích)
@@ -128,7 +128,7 @@ def adaptive(gray, block_size=31, c=10):
                                  cv2.THRESH_BINARY, block_size, c)
 ```
 
-Thí nghiệm: nhị phân hóa thẻ sáng đều bằng Otsu làm chuẩn, rồi nhị phân hóa thẻ bị bóng (hệ số nhân giảm từ 1,00 xuống 0,45 từ trái sang phải) bằng cả hai cách. Để thấy ngưỡng hỏng ở đâu, lab đếm tỉ lệ điểm đen ở ba dải dọc của ảnh:
+Thí nghiệm: nhị phân hoá thẻ sáng đều bằng Otsu làm chuẩn, rồi nhị phân hoá thẻ bị bóng (hệ số nhân giảm từ 1,00 xuống 0,45 từ trái sang phải) bằng cả hai cách. Để thấy ngưỡng hỏng ở đâu, lab đếm tỉ lệ điểm đen ở ba dải dọc của ảnh:
 
 ```text
 Otsu, ảnh sáng đều: ngưỡng 150
@@ -181,7 +181,7 @@ Có ba điều để đọc từ bảng.
 - **Vectorize không đồng nghĩa với tối ưu.** Bản NumPy chuyển ảnh sang `int32` nên tạm dùng gấp bốn lần bộ nhớ (như đã tính ở phần dtype), và `@` trên số nguyên không dùng thư viện đại số tuyến tính tối ưu. OpenCV, với một hàm được viết riêng cho đúng việc này, nhanh hơn bản NumPy cỡ một bậc độ lớn (0,12 so với 2,16 ms).
 - **Số đo ở đây chỉ nói về một phép đơn giản trên một ảnh nhỏ.** Với ảnh lớn hoặc lô ảnh, bộ nhớ trung gian và việc có nhả GIL hay không (bài 22) mới là thứ quyết định; cần đo lại trên đúng dữ liệu của mình.
 
-Phép nhị phân hóa ở bài 22 nằm trong `binarize_page`. Bài 22 hứa rằng khi vòng lặp được thay bằng phép toán mảng thì câu hỏi «process hay thread» đổi hẳn, nên lab đo luôn: một lô thẻ (8 thẻ khác seed, lặp lại cho đủ số lượng) chạy tuần tự và qua `ThreadPoolExecutor(10)` với ba phép trên, in load trước và sau mỗi hàng. Output thật (trích):
+Phép nhị phân hoá ở bài 22 nằm trong `binarize_page`. Bài 22 hứa rằng khi vòng lặp được thay bằng phép toán mảng thì câu hỏi «process hay thread» đổi hẳn, nên lab đo luôn: một lô thẻ (8 thẻ khác seed, lặp lại cho đủ số lượng) chạy tuần tự và qua `ThreadPoolExecutor(10)` với ba phép trên, in load trước và sau mỗi hàng. Output thật (trích):
 
 ```text
 [7] Thread trên một lô thẻ (bài 22: GIL chỉ nhả khi mã C chủ động nhả)
@@ -203,7 +203,7 @@ uv run --project examples/toi-noi-python/30-numpy-pillow-opencv examples/toi-noi
 uv run --project examples/toi-noi-python/30-numpy-pillow-opencv examples/toi-noi-python/30-numpy-pillow-opencv/main.py --verify
 ```
 
-`--verify` in lại toàn bộ các bước rồi kiểm 21 điều. Nhóm ảnh và dữ liệu: shape `(638, 1012, 3)`, dtype `uint8`, cùng seed cùng ảnh, bộ trường chung, số thẻ khớp giới tính và năm sinh (40 seed), `cv2.imread` bằng RGB đảo kênh. Nhóm số học: `200 + 100 = 44` và `cv2.add` ra 255, xám broadcasting lệch không quá 1 mức, kích thước sau resize. Nhóm ngưỡng: Otsu ảnh sáng đều trong 100 đến 200, dải phải ảnh bị bóng đen trên 90% với Otsu và dưới hai lần chuẩn với ngưỡng thích nghi. Nhóm tốc độ: ba bản nhị phân hóa trùng nhau, vectorized nhanh hơn vòng lặp ít nhất 5 lần (đo được cỡ 50 lần, nên không trượt khi máy bận), kết quả thread trùng tuần tự. Số liệu thread ở bước [7] chỉ được in, không bị kiểm ngưỡng.
+`--verify` in lại toàn bộ các bước rồi kiểm 21 điều. Nhóm ảnh và dữ liệu: shape `(638, 1012, 3)`, dtype `uint8`, cùng seed cùng ảnh, bộ trường chung, số thẻ khớp giới tính và năm sinh (40 seed), `cv2.imread` bằng RGB đảo kênh. Nhóm số học: `200 + 100 = 44` và `cv2.add` ra 255, xám broadcasting lệch không quá 1 mức, kích thước sau resize. Nhóm ngưỡng: Otsu ảnh sáng đều trong 100 đến 200, dải phải ảnh bị bóng đen trên 90% với Otsu và dưới hai lần chuẩn với ngưỡng thích nghi. Nhóm tốc độ: ba bản nhị phân hoá trùng nhau, vectorized nhanh hơn vòng lặp ít nhất 5 lần (đo được cỡ 50 lần, nên không trượt khi máy bận), kết quả thread trùng tuần tự. Số liệu thread ở bước [7] chỉ được in, không bị kiểm ngưỡng.
 
 ```text
 OK 21/21
@@ -215,14 +215,14 @@ OK 21/21
 | Điểm gần trắng bỗng thành tối sau khi cộng | `dtype` là `uint8` nên tràn vòng; dùng `int16` rồi `clip`, hoặc `cv2.add` |
 | `ValueError: assignment destination is read-only` | `np.asarray(img)` là mảng chỉ đọc; dùng `np.array(img)` để có bản sao ghi được |
 | Ảnh sau resize méo hoặc `shape` đảo ngược | Kích thước đích là `(rộng, cao)`, còn `shape` là `(cao, rộng, kênh)` |
-| Nhị phân hóa làm cả vùng tối thành đen | Ngưỡng toàn cục với ánh sáng không đều; thử ngưỡng thích nghi và tinh chỉnh `block_size`, `c` |
+| Nhị phân hoá làm cả vùng tối thành đen | Ngưỡng toàn cục với ánh sáng không đều; thử ngưỡng thích nghi và tinh chỉnh `block_size`, `c` |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Thẻ là ảnh vẽ bằng code: nền phẳng, chữ thẳng, nét sạch, bóng là một dải sáng tối tuyến tính. Ảnh chụp thật có nhiễu, mờ, lóa, nghiêng, phối cảnh và nén JPEG; các thứ này không có ở đây, và bài 42 sẽ xử lý nghiêng và phối cảnh. Các tỉ lệ điểm đen như 4,52% và 99,96% là số của thẻ giả này, không phải chất lượng OCR; ta chưa chạy OCR nào. Kết quả tiền xử lý và OCR chỉ là đầu vào cho người duyệt hồ sơ, không tự động là quyết định xác minh. Lab ghim <code>opencv-python-headless&gt;=4.14</code>: ta chạy <code>--verify</code> với cả 4.14.0 và 5.0.0.93 (bản trong <code>uv.lock</code>) và cả hai ra <code>OK 21/21</code> với đúng các tỉ lệ ngưỡng như trên; bản khác thì hãy tự chạy lại.</p>
+<p>Thẻ là ảnh vẽ bằng code: nền phẳng, chữ thẳng, nét sạch, bóng là một dải sáng tối tuyến tính. Ảnh chụp thật có nhiễu, mờ, loá, nghiêng, phối cảnh và nén JPEG; các thứ này không có ở đây, và bài 42 sẽ xử lý nghiêng và phối cảnh. Các tỉ lệ điểm đen như 4,52% và 99,96% là số của thẻ giả này, không phải chất lượng OCR; ta chưa chạy OCR nào. Kết quả tiền xử lý và OCR chỉ là đầu vào cho người duyệt hồ sơ, không tự động là quyết định xác minh. Lab ghim <code>opencv-python-headless&gt;=4.14</code>: ta chạy <code>--verify</code> với cả 4.14.0 và 5.0.0.93 (bản trong <code>uv.lock</code>) và cả hai ra <code>OK 21/21</code> với đúng các tỉ lệ ngưỡng như trên; bản khác thì hãy tự chạy lại.</p>
 </div>
 
-**Bài tập 1:** Đổi `strength` của `add_shadow` từ 0,55 xuống 0,20 rồi chạy lại phần ngưỡng hóa. Dự đoán Otsu còn hỏng ở dải phải không, và vì sao? Sau đó kiểm bằng lab.
+**Bài tập 1:** Đổi `strength` của `add_shadow` từ 0,55 xuống 0,20 rồi chạy lại phần ngưỡng hoá. Dự đoán Otsu còn hỏng ở dải phải không, và vì sao? Sau đó kiểm bằng lab.
 
 **Bài tập 2:** `binarize_vectorized` chuyển ảnh sang `int32` để khỏi tràn. Hãy nêu một cách tránh bộ nhớ gấp bốn lần mà vẫn không tràn `uint8`, và nói cái giá của nó.
 

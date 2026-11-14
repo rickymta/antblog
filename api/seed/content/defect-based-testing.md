@@ -29,9 +29,9 @@ Sáu tháng chạy bản MVP, Tới Nơi sửa 30 defect. Sửa xong cái nào �
 
 ## 1. Giới thiệu
 
-**Defect-based testing** (kiểm thử dựa trên defect) là cách thiết kế test bắt đầu từ **loại defect** chứ không từ đặc tả hay cấu trúc code: «chỗ nào có làm tròn tiền?», «chỗ nào có so ngày?» — rồi viết test nhắm đúng cách loại lỗi đó từng xảy ra. Nguyên liệu là **taxonomy** (bảng phân loại defect) và **lịch sử defect** của chính dự án.
+**Defect-based testing** (kiểm thử dựa trên defect) là cách thiết kế test bắt đầu từ **loại defect** chứ không từ đặc tả hay cấu trúc code: «chỗ nào có làm tròn tiền?», «chỗ nào có so ngày?» — rồi viết test nhắm đúng cách mà loại lỗi đó từng xảy ra. Nguyên liệu là **taxonomy** (bảng phân loại defect) và **lịch sử defect** của chính dự án.
 
-Vấn đề nó giải quyết: bộ test thiết kế theo đặc tả phủ đều mọi quy tắc, nhưng defect thì không rải đều. Chúng **tụ thành cụm** và **lặp lại** — cùng một kiểu sai xuất hiện ở module khác, ở người khác, sau bản sửa chỉ vá một chỗ. Dùng khi:
+Vấn đề mà kỹ thuật này giải quyết: bộ test thiết kế theo đặc tả phủ đều mọi quy tắc, nhưng defect thì không rải đều. Chúng **tụ thành cụm** và **lặp lại** — cùng một kiểu sai xuất hiện ở module khác, ở người khác, sau bản sửa chỉ vá một chỗ. Dùng khi:
 
 - Đã có dữ liệu defect đủ nhiều (vài chục trở lên) và nhất quán.
 - Một loại lỗi lặp lại hoặc lọt production dù đã «sửa».
@@ -78,7 +78,7 @@ Vấn đề nó giải quyết: bộ test thiết kế theo đặc tả phủ đ
 </ul>
 </div>
 
-Quy trình bài dùng: **phân loại** (nhiều trục độc lập) → **gom cụm, xếp hạng** theo số lượng, mức độ, lọt production, tái diễn → với mỗi cụm chọn, viết **mô hình lỗi** → suy ra **ca kiểm** và **oracle** → chạy với mã hiện tại và với **bản tái tạo defect cũ** → đưa kết quả sang **RCA** và **checklist**.
+Quy trình bài dùng: **phân loại** (nhiều trục độc lập) → **gom cụm, xếp hạng** theo số lượng, mức độ, lọt production, tái diễn → với mỗi cụm chọn, viết **mô hình lỗi** → suy ra **test case** và **oracle** → chạy với mã hiện tại và với **bản tái tạo defect cũ** → đưa kết quả sang **RCA** và **checklist**.
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
 
@@ -169,7 +169,7 @@ Ba quan sát từ bảng in ra (mục 5.2):
 
 Hai điều cần thấy ở bảng: luật thiết kế đến từ **mô hình lỗi**, không từ đặc tả — đặc tả chỉ nói «cao điểm là [11:00; 13:00)», còn mô hình T1 bảo phải thử ở **nhiều ngày** và quanh **07:00 VN** (nửa đêm UTC), chỗ không ai thử nếu chỉ đọc R-FARE-04. Và oracle phải **độc lập**: so `calculateFare` với chính công thức của nó thì lỗi R2 không bao giờ lộ.
 
-Ba defect critical D-03, D-14, D-28 thuộc cụm trạng thái nhưng là lỗi **đồng thời** (Timing/Serialization). Mô hình S1–S4 kiểm từng thao tác tuần tự nên không bắt được — chúng cần kiểm thử đồng thời ở Series 08 ([TEST-085](/articles/concurrent-testing-hai-tai-xe-cung-nhan), [TEST-086](/articles/race-condition-testing)). Đây là lý do trục ODC có giá trị: nó tách một cụm «trạng thái» thành hai mô hình lỗi cần hai cách test khác nhau.
+Ba defect critical D-03, D-14, D-28 thuộc cụm trạng thái nhưng là lỗi **đồng thời** (Timing/Serialization). Mô hình S1–S4 kiểm từng thao tác tuần tự nên không bắt được — chúng cần kiểm thử đồng thời ở Series 08 ([TEST-085](/articles/concurrent-testing-hai-tai-xe-cung-nhan), [TEST-086](/articles/race-condition-testing)). Đây là lý do trục ODC có giá trị: trục này tách một cụm «trạng thái» thành hai mô hình lỗi cần hai cách test khác nhau.
 
 ## 5. Thực hành
 
@@ -225,7 +225,7 @@ const before = afterPeak + (rain ? 8_000n * U : 0n);
 // … tiền giảm min(percent% × before, trần), nâng lên cước tối thiểu, rồi làm tròn LÊN 1.000 đ
 ```
 
-Mô hình giờ VN dựng thời điểm bằng `vnTime(y, m, d, h, mi, s)` và kiểm cả hai phía mỗi mốc; với voucher hiệu lực đúng một ngày, ca «ngoài» là 1 giây trước 00:00:00 và 1 giây sau 23:59:59 giờ VN.
+Mô hình giờ VN dựng thời điểm bằng `vnTime(y, m, d, h, mi, s)` và kiểm cả hai phía mỗi mốc; với voucher hiệu lực đúng một ngày, test case «ngoài» là 1 giây trước 00:00:00 và 1 giây sau 23:59:59 giờ VN.
 
 ```bash
 npx vitest run articles/defect-based-testing --reporter=verbose
@@ -255,7 +255,7 @@ D-18 huỷ nhận sau hoàn thành: 1 ca sai — vd completed + driver_cancel �
 |---|---|
 | `src` 0 ca sai ở cả ba mô hình | Mã lab hiện tại sạch với ba loại lỗi — giờ đây có bằng chứng, không chỉ là «đã sửa» |
 | 8 bản tái tạo defect cũ đều bị bắt | Bộ test nhắm **đúng loại** lỗi: lần sau D-09 quay lại ở nhánh nào cũng đỏ |
-| D-02 bị bắt dù máy chạy test đặt giờ Việt Nam | Ca kiểm không dựa vào múi giờ máy — sửa luôn nguyên nhân của D-29 |
+| D-02 bị bắt dù máy chạy test đặt giờ Việt Nam | Test case không dựa vào múi giờ máy — sửa luôn nguyên nhân của D-29 |
 | Biến thể «làm tròn về đồng sau ×1,25» 0 ca sai | Xem 5.4 |
 
 ### 5.4. Một biến thể không bắt được — và vì sao đó là tin tốt
@@ -278,7 +278,7 @@ Kết quả còn quay về kỹ thuật kinh nghiệm: mục SM-18 «giờ hiể
 
 **Chất lượng dữ liệu quyết định tất cả.** 30 defect là mẫu nhỏ; hai người gắn nhãn khác nhau là thống kê vô nghĩa. Cách giảm: định nghĩa từng giá trị kèm ví dụ, gắn nhãn hai lần (lúc báo và lúc sửa — ODC làm vậy), đo mức đồng thuận giữa người phân loại trên một mẫu.
 
-**Cụm dự đoán và cụm thực tế (TA-5.3.1).** Trước khi đếm, nhóm dự đoán Pricing và Payment là vùng nhiều lỗi ([TEST-003](/articles/bay-nguyen-ly-kiem-thu)). Thực tế Payment không có defect nào trong mẫu — hoặc nó tốt, hoặc test chưa chạm tới nó (lab chưa có webhook, đối soát). Chênh lệch dự đoán – thực tế là câu hỏi cần trả lời, không phải tin tốt mặc nhiên.
+**Cụm dự đoán và cụm thực tế (TA-5.3.1).** Trước khi đếm, nhóm dự đoán Pricing và Payment là vùng nhiều lỗi ([TEST-003](/articles/bay-nguyen-ly-kiem-thu)). Thực tế Payment không có defect nào trong mẫu — hoặc Payment tốt, hoặc test chưa chạm tới Payment (lab chưa có webhook, đối soát). Chênh lệch dự đoán – thực tế là câu hỏi cần trả lời, không phải tin tốt mặc nhiên.
 
 **Giới hạn.**
 
@@ -293,7 +293,7 @@ Kết quả còn quay về kỹ thuật kinh nghiệm: mục SM-18 «giờ hiể
 
 - Một trục duy nhất trộn «ở đâu» và «sai kiểu gì».
 - Chỉ đếm, không trọng số mức độ và lọt production.
-- Viết test cho **defect** (một ca tái hiện) thay vì cho **loại defect** (cả miền). Test tái hiện D-09 chỉ thử bưu kiện; FM-R thử mọi nhánh.
+- Viết test cho **defect** (một test case tái hiện) thay vì cho **loại defect** (cả miền). Test tái hiện D-09 chỉ thử bưu kiện; FM-R thử mọi nhánh.
 - Oracle mượn từ chính code đang kiểm.
 - Phân loại xong để đó, không làm RCA, không cập nhật checklist.
 
@@ -355,14 +355,14 @@ Một vòng test mới có 12 defect: 9 minor ở Web, 3 critical ở Payment. T
 
 <details><summary><b>Đáp án: b</b></summary><ul><li>a) Sai — bỏ qua mức độ, trái ý «cụm nhỏ nhưng critical quan trọng hơn».</li><li>b) Đúng — B nghiêm trọng; C cho thấy test hiện tại không bắt được (DDP thấp ở cấp test trước).</li><li>c) Sai — dữ liệu cho phép tập trung, chia đều là bỏ phí.</li><li>d) Sai — bỏ qua B có 3 critical.</li></ul></details>
 
-**Câu 5 (K3).** Cụm «giờ VN» có lỗi dùng giờ máy chủ. Bộ ca nào nhắm đúng mô hình lỗi này nhất?
+**Câu 5 (K3).** Cụm «giờ VN» có lỗi dùng giờ máy chủ. Bộ test case nào nhắm đúng mô hình lỗi này nhất?
 
-- a) Một ca lúc 12:00 giờ VN chạy trên máy dev
+- a) Một test case lúc 12:00 giờ VN chạy trên máy dev
 - b) Các mốc 10:59:59, 11:00:00, 12:59:59, 13:00:00 giờ VN dựng từ UTC, ở nhiều ngày, không phụ thuộc múi giờ máy chạy test
-- c) Một ca với giờ ngẫu nhiên
+- c) Một test case với giờ ngẫu nhiên
 - d) Chạy lại bộ test hiện có nhiều lần
 
-<details><summary><b>Đáp án: b</b></summary><ul><li>a) Sai — máy dev ở Việt Nam che đúng lỗi này (D-29).</li><li>b) Đúng — mỗi mốc ±1 giây, dựng tường minh theo UTC+7.</li><li>c) Sai — khó trúng mốc, không lặp lại được.</li><li>d) Sai — tests wear out; chạy lại không thêm khả năng phát hiện.</li></ul></details>
+<details><summary><b>Đáp án: b</b></summary><ul><li>a) Sai — máy dev ở Việt Nam che đúng lỗi này (D-29).</li><li>b) Đúng — mỗi mốc ±1 giây, dựng tường minh theo UTC+7.</li><li>c) Sai — khó trúng mốc, không lặp lại được.</li><li>d) Sai — test lặp lại mãi sẽ mòn; chạy lại không thêm khả năng phát hiện.</li></ul></details>
 
 **Câu 6 (K2).** Bộ test thiết kế từ mô hình lỗi không bắt được một biến thể tái tạo defect cũ. Kết luận nào cần kiểm trước?
 

@@ -24,7 +24,7 @@ Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) nộp hồ sơ q
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 250" role="img" aria-label="Payload từ bên ngoài đi qua BaseModel ở biên để được kiểm tra, ép kiểu và chuẩn hóa; đạt thì vào domain bên trong, sai thì dừng với ValidationError."><defs><marker id="py15-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker><marker id="py15-0-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><rect x="20" y="50" width="230" height="100" rx="10" class="f-warn-soft s-warn"/><text x="36" y="86" class="t-b">Payload ngoài</text><text x="36" y="114" class="t-small">dict, JSON, biến môi trường</text><path d="M250 100 L290 100" class="f-none s-phys" stroke-width="2" marker-end="url(#py15-0-arrow)"/><rect x="290" y="50" width="300" height="100" rx="10" class="f-pk-soft s-pk"/><text x="306" y="86" class="t-b">Biên: BaseModel</text><text x="306" y="114" class="t-small">kiểm tra, ép kiểu, chuẩn hóa</text><path d="M590 100 L630 100" class="f-none s-phys" stroke-width="2" marker-end="url(#py15-0-arrow)"/><rect x="630" y="50" width="230" height="100" rx="10" class="f-phys-soft s-phys"/><text x="646" y="86" class="t-b">Domain bên trong</text><text x="646" y="114" class="t-small">dataclass, giả định đã đúng</text><path d="M440 150 L440 185" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py15-0-warn)"/><rect x="290" y="185" width="300" height="46" rx="10" class="f-warn-soft s-warn"/><text x="306" y="213" class="t-small">ValidationError: dừng ngay tại biên</text></svg>
+<svg viewBox="0 0 880 250" role="img" aria-label="Payload từ bên ngoài đi qua BaseModel ở biên để được kiểm tra, ép kiểu và chuẩn hoá; đạt thì vào domain bên trong, sai thì dừng với ValidationError."><defs><marker id="py15-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker><marker id="py15-0-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><rect x="20" y="50" width="230" height="100" rx="10" class="f-warn-soft s-warn"/><text x="36" y="86" class="t-b">Payload ngoài</text><text x="36" y="114" class="t-small">dict, JSON, biến môi trường</text><path d="M250 100 L290 100" class="f-none s-phys" stroke-width="2" marker-end="url(#py15-0-arrow)"/><rect x="290" y="50" width="300" height="100" rx="10" class="f-pk-soft s-pk"/><text x="306" y="86" class="t-b">Biên: BaseModel</text><text x="306" y="114" class="t-small">kiểm tra, ép kiểu, chuẩn hoá</text><path d="M590 100 L630 100" class="f-none s-phys" stroke-width="2" marker-end="url(#py15-0-arrow)"/><rect x="630" y="50" width="230" height="100" rx="10" class="f-phys-soft s-phys"/><text x="646" y="86" class="t-b">Domain bên trong</text><text x="646" y="114" class="t-small">dataclass, giả định đã đúng</text><path d="M440 150 L440 185" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py15-0-warn)"/><rect x="290" y="185" width="300" height="46" rx="10" class="f-warn-soft s-warn"/><text x="306" y="213" class="t-small">ValidationError: dừng ngay tại biên</text></svg>
 </div>
 <figcaption>Hình 1. Kiểm tra một lần ở biên. Dữ liệu qua được cửa này mới được vào các hàm nghiệp vụ; lỗi dừng ở nơi có đủ ngữ cảnh để báo cho người gửi.</figcaption>
 </figure>
@@ -99,9 +99,9 @@ class DriverProfile(BaseModel):
 
 Mỗi dòng trong cấu hình có lý do riêng:
 
-- `extra="forbid"` làm khóa lạ thành lỗi `extra_forbidden`. Mặc định pydantic bỏ qua khóa thừa, nên gõ nhầm `licence_number` chỉ báo thiếu trường chứ không báo «khóa này không tồn tại».
+- `extra="forbid"` làm khoá lạ thành lỗi `extra_forbidden`. Mặc định pydantic bỏ qua khoá thừa, nên gõ nhầm `licence_number` chỉ báo thiếu trường chứ không báo «khoá này không tồn tại».
 - `validate_assignment=True` kiểm lại khi gán `profile.phone = "abc"`; mặc định pydantic chỉ kiểm lúc dựng. Giới hạn của nó ở mục «Gán lại thuộc tính».
-- `Field(repr=False)` giấu số CCCD và GPLX khỏi `repr()`, nhưng **chỉ** khỏi `repr()`: `model_dump()` vẫn xuất đủ. `hide_input_in_errors=True` ngăn `str(ValidationError)` in giá trị đầu vào. Cả hai chỉ giảm rò rỉ vô ý, không phải mã hóa.
+- `Field(repr=False)` giấu số CCCD và GPLX khỏi `repr()`, nhưng **chỉ** khỏi `repr()`: `model_dump()` vẫn xuất đủ. `hide_input_in_errors=True` ngăn `str(ValidationError)` in giá trị đầu vào. Cả hai chỉ giảm rò rỉ vô ý, không phải mã hoá.
 - `[0-9]` thay cho `\d`: với `^DR-\d{3}$`, pydantic cho qua `driver_id="DR-٠٠١"` (chữ số Ả Rập-Ấn Độ), vì `\d` khớp cả chữ số Unicode. Lab thử ba trường hợp (CCCD, `driver_id`, điện thoại) và `[0-9]` từ chối cả ba.
 - `City` là `Literal[...]` với sáu thành phố của Tới Nơi, nên «Huế» bị từ chối với mã `literal_error`.
 
@@ -134,7 +134,7 @@ Quy tắc phức tạp hơn regex dùng `@field_validator`, viết thành classm
         return digits
 ```
 
-Validator không chỉ kiểm mà còn **chuẩn hóa**: giá trị hàm trả về mới là giá trị được lưu. `PydanticCustomError(mã, mẫu thông báo, ngữ cảnh)` báo lỗi với **mã ổn định**; `raise ValueError("...")` vẫn được bắt nhưng mã luôn là `value_error`, thông báo có tiền tố «Value error, » và ngữ cảnh chứa đối tượng exception, không chuyển được sang JSON.
+Validator không chỉ kiểm mà còn **chuẩn hoá**: giá trị hàm trả về mới là giá trị được lưu. `PydanticCustomError(mã, mẫu thông báo, ngữ cảnh)` báo lỗi với **mã ổn định**; `raise ValueError("...")` vẫn được bắt nhưng mã luôn là `value_error`, thông báo có tiền tố «Value error, » và ngữ cảnh chứa đối tượng exception, không chuyển được sang JSON.
 
 Quy tắc liên quan nhiều trường đặt ở `@model_validator(mode="after")`, chạy khi từng trường đã hợp lệ:
 
@@ -153,7 +153,7 @@ Quy tắc liên quan nhiều trường đặt ở `@model_validator(mode="after"
 
 ### Xuất dữ liệu: model_dump
 
-`model_dump()` đổi model thành `dict`, `model_dump_json()` thành chuỗi JSON. Với hồ sơ hợp lệ (đã chuẩn hóa tên và số điện thoại), lab in:
+`model_dump()` đổi model thành `dict`, `model_dump_json()` thành chuỗi JSON. Với hồ sơ hợp lệ (đã chuẩn hoá tên và số điện thoại), lab in:
 
 ```text
 model_dump đầy đủ: {'driver_id': 'DR-001', 'full_name': 'Nguyễn Văn A', 'id_number': '099000000001', 'license_number': '990000000001', 'phone': '0900000001', 'city': 'Hà Nội'}
@@ -196,7 +196,7 @@ def error_report(exc: ValidationError) -> list[dict[str, str]]:
     ]
 ```
 
-`include_url=False` và `include_context=False` bỏ đường link tài liệu và phần `ctx`. Lỗi cấp model như `documents_same` có `loc` rỗng, nên cột `field` là chuỗi rỗng. Thử với hồ sơ sai năm chỗ (`DR-1`, CCCD 5 chữ số, điện thoại `12`, thành phố `Huế`, khóa lạ `extra_field`):
+`include_url=False` và `include_context=False` bỏ đường link tài liệu và phần `ctx`. Lỗi cấp model như `documents_same` có `loc` rỗng, nên cột `field` là chuỗi rỗng. Thử với hồ sơ sai năm chỗ (`DR-1`, CCCD 5 chữ số, điện thoại `12`, thành phố `Huế`, khoá lạ `extra_field`):
 
 ```text
 5 lỗi
@@ -240,7 +240,7 @@ id_number
 errors()[0]['input']: 099000000
 ```
 
-Chuỗi lỗi không còn `input_value`, nhưng `errors()` vẫn giữ khóa `input`, nên `error_report` cố ý chỉ lấy `field`, `code`, `message`: đưa nguyên `errors()` ra log hay phản hồi thì số giấy tờ vẫn lộ.
+Chuỗi lỗi không còn `input_value`, nhưng `errors()` vẫn giữ khoá `input`, nên `error_report` cố ý chỉ lấy `field`, `code`, `message`: đưa nguyên `errors()` ra log hay phản hồi thì số giấy tờ vẫn lộ.
 
 ## Ép kiểu lax, strict và JSON
 
@@ -296,7 +296,7 @@ strict, JSON, chuỗi        : distance_km=Decimal('2.5') service=<ServiceKind.R
 strict + validator before, JSON, chuỗi: [{'field': 'distance_km', 'code': 'is_instance_of', 'message': 'Input should be an instance of Decimal'}]
 ```
 
-Điều cần nhớ: **strict không chặn đường JSON**. Với dữ liệu Python, chuỗi `"2.5"` bị từ chối và phải đưa đúng `Decimal`; nhưng `model_validate_json` vẫn đổi chuỗi `"2.5"` thành `Decimal`. Muốn từ chối chuỗi ở đường JSON, hãy tự viết validator `mode="before"`. Dòng cuối chỉ là quan sát ở pydantic 2.14.3 (strict cộng validator `before` thì JSON chuỗi cũng bị từ chối), không phải hợp đồng đã tài liệu hóa. Strict hợp với dữ liệu nội bộ có kiểu rõ; lax hợp với dữ liệu text từ ngoài.
+Điều cần nhớ: **strict không chặn đường JSON**. Với dữ liệu Python, chuỗi `"2.5"` bị từ chối và phải đưa đúng `Decimal`; nhưng `model_validate_json` vẫn đổi chuỗi `"2.5"` thành `Decimal`. Muốn từ chối chuỗi ở đường JSON, hãy tự viết validator `mode="before"`. Dòng cuối chỉ là quan sát ở pydantic 2.14.3 (strict cộng validator `before` thì JSON chuỗi cũng bị từ chối), không phải hợp đồng đã tài liệu hoá. Strict hợp với dữ liệu nội bộ có kiểu rõ; lax hợp với dữ liệu text từ ngoài.
 
 ## BaseSettings: cấu hình cũng là dữ liệu từ ngoài
 
@@ -385,12 +385,12 @@ Bản đã chạy dùng Python 3.14.7, pydantic 2.14.3 và pydantic-settings 2.1
 | Gán `profile.phone = "abc"` mà không lỗi | Model có `validate_assignment=True` chưa; mặc định pydantic chỉ kiểm lúc dựng |
 | Gán báo `documents_same` nhưng thuộc tính vẫn đổi | `validate_assignment` không hoàn tác lỗi cấp model; dùng `frozen=True` hoặc dựng bản mới |
 | `strict=True` mà `model_validate_json` vẫn nhận `"2.5"` | Strict không chặn đường JSON; thêm validator `mode="before"` nếu muốn từ chối |
-| Số giấy tờ vẫn lộ trong log lỗi | Đã đặt `hide_input_in_errors=True` chưa; đừng log nguyên `errors()` vì khóa `input` vẫn còn |
+| Số giấy tờ vẫn lộ trong log lỗi | Đã đặt `hide_input_in_errors=True` chưa; đừng log nguyên `errors()` vì khoá `input` vẫn còn |
 | Biến `TOINOI_*` bị bỏ qua | Tên có đúng tiền tố cộng tên trường không; `_env_file` có đúng đường dẫn không |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Validator chỉ kiểm hình dạng dữ liệu giả: số CCCD 12 chữ số, điện thoại 10 chữ số, thành phố trong danh sách. Nó không biết số có thật, giấy tờ còn hạn hay người đó có đúng là chủ giấy tờ không; kết quả OCR và so khớp khuôn mặt ở các bài sau cũng chỉ là đầu vào cho người duyệt. Production còn cần kiểm tra trùng hồ sơ, giới hạn kích thước payload, kho bí mật thay vì biến môi trường thuần, và mã hóa dữ liệu cá nhân khi lưu. <code>SecretStr</code>, <code>repr=False</code> và <code>hide_input_in_errors</code> chỉ ngăn lộ vô ý trong log: <code>model_dump()</code> và khóa <code>input</code> của <code>errors()</code> vẫn trả giá trị thật.</p>
+<p>Validator chỉ kiểm hình dạng dữ liệu giả: số CCCD 12 chữ số, điện thoại 10 chữ số, thành phố trong danh sách. Nó không biết số có thật, giấy tờ còn hạn hay người đó có đúng là chủ giấy tờ không; kết quả OCR và so khớp khuôn mặt ở các bài sau cũng chỉ là đầu vào cho người duyệt. Production còn cần kiểm tra trùng hồ sơ, giới hạn kích thước payload, kho bí mật thay vì biến môi trường thuần, và mã hoá dữ liệu cá nhân khi lưu. <code>SecretStr</code>, <code>repr=False</code> và <code>hide_input_in_errors</code> chỉ ngăn lộ vô ý trong log: <code>model_dump()</code> và khoá <code>input</code> của <code>errors()</code> vẫn trả giá trị thật.</p>
 </div>
 
 **Bài tập 1:** Trong `DriverProfile`, bỏ dòng `validate_assignment=True`. Chạy `profile.city = "Huế"`. Điều gì xảy ra, và vì sao điều này nguy hiểm hơn một lỗi `ValidationError`?

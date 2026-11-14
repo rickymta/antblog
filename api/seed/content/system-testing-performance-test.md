@@ -28,7 +28,7 @@ Khách mở Tới Nơi, bấm «Báo giá», chờ, rồi bấm lại. API báo 
 
 ### 1.1. Vì sao «nhanh trên máy tôi» không phải kết luận
 
-Một câu khẳng định hiệu năng chỉ có nghĩa khi trả lời được năm câu hỏi: **đo cái gì** (endpoint nào, ranh giới thời gian từ đâu tới đâu), **dưới tải nào** (bao nhiêu request, gửi theo mô hình nào), **trên môi trường nào** (máy, DB, mạng), **đúng hay sai** (bao nhiêu response đạt oracle nghiệp vụ) và **so với mục tiêu nào** (ngưỡng đặt trước hay đặt sau khi thấy số). «2.000 request/giây» thiếu cả năm. Nó có thể là 2.000 response lỗi 500 trả rất nhanh, đo trong 0,2 giây, trên một máy dev không có DB.
+Một câu khẳng định hiệu năng chỉ có nghĩa khi trả lời được năm câu hỏi: **đo cái gì** (endpoint nào, ranh giới thời gian từ đâu tới đâu), **dưới tải nào** (bao nhiêu request, gửi theo mô hình nào), **trên môi trường nào** (máy, DB, mạng), **đúng hay sai** (bao nhiêu response đạt oracle nghiệp vụ) và **so với mục tiêu nào** (ngưỡng đặt trước hay đặt sau khi thấy số). «2.000 request/giây» thiếu cả năm. Con số đó có thể là 2.000 response lỗi 500 trả rất nhanh, đo trong 0,2 giây, trên một máy dev không có DB.
 
 Ở [SYS-06](/articles/system-testing-regression-test) ta bảo vệ hành vi đúng sau thay đổi. Bài này giữ nguyên nguyên tắc đó và thêm một chiều: **đúng và trong bao lâu**. Một response nhanh nhưng tổng tiền sai không phải thành công.
 
@@ -48,7 +48,7 @@ Sau bài này, bạn có thể:
 
 ## 2. Khái niệm: performance là một nhóm câu hỏi
 
-Performance testing đánh giá đặc tính thời gian, thông lượng và sử dụng tài nguyên **dưới điều kiện xác định**. Nó là tên chung; các biến thể khác nhau ở câu hỏi:
+Performance testing đánh giá đặc tính thời gian, thông lượng và sử dụng tài nguyên **dưới điều kiện xác định**. Đây là tên chung; các biến thể khác nhau ở câu hỏi mà chúng trả lời:
 
 | Biến thể | Câu hỏi | Ở series này |
 |---|---|---|
@@ -79,7 +79,7 @@ SPEC cũng nói thẳng: bản lab chạy một tiến trình trên một máy n
 
 Một con số hiệu năng chỉ có nghĩa khi định nghĩa đi kèm. Bài chốt các định nghĩa sau và script tuân theo chúng.
 
-**Latency** là thời gian một lần thực hiện trong ranh giới đã chọn. Trong lab, đồng hồ bắt đầu ngay trước `fetch` và dừng sau khi đọc/parse JSON và kiểm oracle. Vì vậy nó gồm client, loopback, server và xử lý response — không chỉ thời gian hàm backend, và không trùng hoàn toàn `http_req_duration` của k6.
+**Latency** là thời gian một lần thực hiện trong ranh giới đã chọn. Trong lab, đồng hồ bắt đầu ngay trước `fetch` và dừng sau khi đọc/parse JSON và kiểm oracle. Vì vậy latency gồm client, loopback, server và xử lý response — không chỉ thời gian hàm backend, và không trùng hoàn toàn `http_req_duration` của k6.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -111,7 +111,7 @@ Một con số hiệu năng chỉ có nghĩa khi định nghĩa đi kèm. Bài c
 
 **Throughput hoàn tất** = số attempt hoàn tất / thời gian cửa sổ đo. **Goodput** — trong script là `validRps` — = số request đạt oracle / thời gian cửa sổ đo. **Error rate** = số attempt không đạt oracle / tổng attempt đo. Khi không có lỗi, throughput bằng goodput; khi server trả lỗi nhanh, throughput cao có thể che chất lượng thấp. Báo cáo luôn cần cả hai.
 
-**Percentile** p95 là giá trị mà khoảng 95% mẫu không vượt quá, theo một phương pháp tính cụ thể. Script dùng *nearest-rank*: sắp N mẫu tăng dần, lấy phần tử ở vị trí ⌈0,95 × N⌉ (đánh số từ 1). Với N = 300: p95 là phần tử thứ 285, p99 là phần tử thứ 297. p99 trên 300 mẫu chỉ dựa vào 3 mẫu phía đuôi — nên nó dao động mạnh giữa các lượt và không ổn định như một thí nghiệm dài.
+**Percentile** p95 là giá trị mà khoảng 95% mẫu không vượt quá, theo một phương pháp tính cụ thể. Script dùng *nearest-rank*: sắp N mẫu tăng dần, lấy phần tử ở vị trí ⌈0,95 × N⌉ (đánh số từ 1). Với N = 300: p95 là phần tử thứ 285, p99 là phần tử thứ 297. p99 trên 300 mẫu chỉ dựa vào 3 mẫu phía đuôi — nên p99 dao động mạnh giữa các lượt, kém ổn định hơn so với một thí nghiệm dài.
 
 Hai quy tắc đi kèm:
 
@@ -148,7 +148,7 @@ Hai quy tắc đi kèm:
 
 ### 4.3. Warm-up và reset: loại bỏ gì, giữ lại gì
 
-Warm-up cho đường code, kết nối và JIT chạy nóng trước khi đo. Reset sau warm-up loại 50 quote của warm-up khỏi dataset đo. Nhưng reset **không** reset JIT, heap hay cache của tiến trình. Ba vòng là ba cửa sổ trong *cùng* một tiến trình, không phải ba lần khởi động độc lập. Điều này phải được ghi khi diễn giải xu hướng «vòng sau nhanh hơn».
+Warm-up cho đường code, kết nối và JIT chạy nóng trước khi đo. Reset sau warm-up loại 50 quote của warm-up khỏi dataset đo. Nhưng reset **không** reset JIT, heap hay cache của tiến trình. Ba vòng là ba cửa sổ trong *cùng* một tiến trình, không phải ba lần khởi động độc lập. Cần ghi rõ điều này khi diễn giải xu hướng «vòng sau nhanh hơn».
 
 ### 4.4. Entry và exit criteria
 
@@ -218,7 +218,7 @@ async function sample() {
 Ba chi tiết đáng chú ý:
 
 - `performance.now()` là đồng hồ đơn điệu cho khoảng thời gian, không bị ảnh hưởng khi giờ hệ thống bị chỉnh.
-- Lỗi transport rơi vào `catch` nhưng **vẫn trả về một mẫu** có `ms`, `valid: false` và tên lỗi. Request timeout không bị âm thầm bỏ khỏi phân bố.
+- Lỗi transport rơi vào `catch` nhưng **vẫn trả về một mẫu** có `ms`, `valid: false` và tên lỗi. Request timeout không bị bỏ khỏi phân bố mà không báo lỗi.
 - `AbortSignal.timeout(2_000)` là deadline, không phải trần của số đo. Nếu event loop nghẽn, thời gian quan sát có thể vượt 2.000 ms; script không «kẹp» số đo về 2.000.
 
 ### 6.3. Warm-up có oracle, reset, rồi đo

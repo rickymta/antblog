@@ -1,7 +1,7 @@
 ---
 slug: postgresql-thuc-hanh-runbook-phuc-hoi
 title: "Thực hành: bàn giao runbook vận hành và phục hồi PostgreSQL"
-summary: "Bài thực hành cuối Phần 5: biến toàn bộ lab P05 thành hồ sơ bàn giao — báo cáo nghiệm thu, cổng phục hồi 101 chuyến / 3.045.000 đ / digest / tenant, kết thúc recovery sang timeline 2, bằng chứng cần giữ, bảng xử lý lỗi, vai trò và RPO/RTO phân rã trung thực."
+summary: "Bài thực hành cuối Phần 5: biến toàn bộ lab P05 thành hồ sơ bàn giao — báo cáo nghiệm thu, cổng phục hồi 101 chuyến / 3.045.000 đ / digest / tenant, kết thúc recovery và chuyển sang timeline 2, bằng chứng cần giữ, bảng xử lý lỗi, vai trò và RPO/RTO tách thành từng mốc một cách trung thực."
 category: postgresql
 level: advanced
 tags: [postgresql, pg-050, thuc-hanh, runbook, recovery, pitr, timeline, rpo-rto, toi-noi]
@@ -23,7 +23,7 @@ Họ cần biết: backup nào dùng được, WAL có đủ không, phục hồ
 
 ### Bối cảnh
 
-Lab P05 dựng **hai cluster PostgreSQL 18.1 tạm**, chỉ nghe localhost: *source* đóng vai production, *đích* là nơi phục hồi. `ops.trips` có 100 chuyến, hai tenant mỗi bên 50, mỗi chuyến 30.000 đ, tổng 3.000.000 đ. Thứ tự: 041 → 047, rồi **049 trước 048** để base backup chứa policy RLS, cuối cùng 050.
+Lab P05 dựng **hai cluster PostgreSQL 18.1 tạm**, chỉ lắng nghe trên localhost: *source* đóng vai production, *đích* là nơi phục hồi. `ops.trips` có 100 chuyến, hai tenant mỗi bên 50, mỗi chuyến 30.000 đ, tổng 3.000.000 đ. Thứ tự: 041 → 047, rồi **049 trước 048** để base backup chứa policy RLS, cuối cùng 050.
 
 ```bash
 cd examples/toi-noi-postgresql
@@ -41,7 +41,7 @@ Yêu cầu và biến `PG_BIN`/`OPENSSL_BIN` ở `p05/README.md`. Chỉ chạy t
 | D3 | Timeline | Giải thích dòng `selected new timeline ID: 2` và tệp `00000002.history` |
 | D4 | Bằng chứng cần giữ | Danh sách, nơi lưu, thứ không được lưu |
 | D5 | Xử lý lỗi và vai trò | Mỗi cổng thất bại: kiểm gì, làm gì, ai quyết |
-| D6 | RPO/RTO | Phân rã thành từng mốc; tách số **đã đo** khỏi số **chưa đo** |
+| D6 | RPO/RTO | Tách thành từng mốc; tách số **đã đo** khỏi số **chưa đo** |
 
 Nguyên tắc chung: **không viết vào hồ sơ điều gì không có trong `OUTPUT.txt`**. Bước nào chưa chạy thì ghi «chưa chạy», không ghi «dự kiến đạt».
 
@@ -236,7 +236,7 @@ Chuyến 102 (tenant 2, 40.000 đ) được INSERT thành công: đích đã ghi
 <li><b>Không tới pause</b> (runner chờ 30 giây): tìm <code>restored log file</code> cuối trong log đích; thiếu segment thì quay về bước 3, không hạ target cho «vừa» với WAL đang có.</li>
 <li><b>G1–G3 lệch</b>: không resume; thiếu dữ liệu thường là target quá sớm hoặc thiếu WAL. Dựng đích mới với target khác — cluster đã kết thúc recovery không «lùi» được.</li>
 <li><b>G4 lệch</b>: kiểm <code>pg_policies</code>, <code>relforcerowsecurity</code>, <code>rolbypassrls</code>; không mở API.</li>
-<li><b>G5 ghi được</b>: đích đã thoát recovery trước khi kiểm; kết luận về target vô hiệu, dựng lại.</li>
+<li><b>G5 ghi được</b>: đích đã thoát recovery trước khi kiểm; kết luận về target là vô hiệu, hãy dựng lại.</li>
 </ul>
 <p>Vai trò tối thiểu (lab chạy một mình, nên đây là đề xuất):</p>
 <table>
@@ -244,9 +244,9 @@ Chuyến 102 (tenant 2, 40.000 đ) được INSERT thành công: đích đã ghi
 <tbody>
 <tr><td>Chỉ huy sự cố</td><td>Tuyên bố sự cố, dừng ghi, giữ nhật ký quyết định</td></tr>
 <tr><td>Người thực thi DB</td><td>Bước 1–6; không tự quyết resume</td></tr>
-<tr><td>Người kiểm thứ hai</td><td>Chạy lại G1–G5 độc lập trước resume</td></tr>
-<tr><td>Chủ nghiệp vụ</td><td>Chấp nhận target, mức dữ liệu mất, kế hoạch nhập bù</td></tr>
-<tr><td>Chủ ứng dụng</td><td>Routing sang đích, xác nhận API sau mở ghi</td></tr>
+<tr><td>Người kiểm tra thứ hai</td><td>Chạy lại G1–G5 độc lập trước resume</td></tr>
+<tr><td>Người phụ trách nghiệp vụ</td><td>Chấp nhận target, mức dữ liệu mất, kế hoạch nhập bù</td></tr>
+<tr><td>Người phụ trách ứng dụng</td><td>Routing sang đích, xác nhận API sau mở ghi</td></tr>
 <tr><td>Bảo mật</td><td>Credential, TLS, RLS trên đích trước khi mở ra ngoài</td></tr>
 </tbody>
 </table>
@@ -271,7 +271,7 @@ Chuyến 102 (tenant 2, 40.000 đ) được INSERT thành công: đích đã ghi
 <tr><td>Routing, xác nhận nghiệp vụ</td><td>Không làm</td></tr>
 </tbody>
 </table>
-<p>Số 4.284,1 ms dao động giữa các lần chạy (lab không assert millisecond; một lần chạy trước của cùng lab ghi 4.175,1 ms). Nó cho biết bước kỹ thuật ở quy mô đồ chơi tốn vài giây. Nó <b>không</b> cho biết RTO: base backup production lớn hơn hàng nghìn lần, WAL cần replay tỉ lệ với khối lượng ghi từ base backup tới target, và các mốc «không đo» thường chiếm phần lớn thời gian thật. Ghi số vào hồ sơ kèm đúng câu «excludes base-copy and incident detection».</p>
+<p>Số 4.284,1 ms dao động giữa các lần chạy (lab không assert millisecond; một lần chạy trước của cùng lab ghi 4.175,1 ms). Số này cho biết bước kỹ thuật ở quy mô đồ chơi tốn vài giây. Nó <b>không</b> cho biết RTO: base backup production lớn hơn hàng nghìn lần, WAL cần replay tỉ lệ với khối lượng ghi từ base backup tới target, và các mốc «không đo» thường chiếm phần lớn thời gian thật. Ghi số vào hồ sơ kèm đúng câu «excludes base-copy and incident detection».</p>
 </details>
 
 ## 9. Tiêu chí tự chấm
@@ -305,14 +305,14 @@ Mỗi tiêu chí 10 điểm; từ 80 điểm là đạt; tiêu chí 1, 3 và 7 b
 | [PG-048 · PITR với base backup và WAL](/articles/postgresql-pitr-base-backup-wal) | Base + archive + restore point + pause |
 | [PG-049 · Row-level security](/articles/postgresql-rls-tenant-security) | Ma trận tenant; policy sống qua PITR (G4) |
 
-Sản phẩm của phần đúng như khung: runbook phân quyền, giám sát, bảo trì và restore đã đối soát. **Chưa** có: standby và failover, partition, replication logic, nâng phiên bản — Phần 6.
+Sản phẩm của phần này đúng như khung đã đặt ra: runbook phân quyền, giám sát, bảo trì và restore đã đối soát. **Chưa** có: standby và failover, partition, logical replication, nâng phiên bản — Phần 6.
 
 ## 11. Hồ sơ production còn thiếu
 
-Câu kết của `RUNBOOK.md`: «Thiết kế storage offsite, encryption, retention, role mapping, kiểm extension và phục hồi định kỳ; các mục này chưa được lab local chứng nhận.» Thành việc cụ thể trước khi dùng cho production:
+Câu kết của `RUNBOOK.md`: «Thiết kế storage offsite, encryption, retention, role mapping, kiểm extension và phục hồi định kỳ; các mục này chưa được lab local chứng nhận.» Cần chuyển các mục này thành việc cụ thể trước khi dùng cho production:
 
 - **Archive và backup ngoài vùng lỗi**, mã hoá, có retention, quyền xoá tách khỏi quyền ghi. Archive của lab nằm cùng thư mục tạm với source.
-- **Đích archive ngay khi mở ghi**, có base backup mới (mục 5).
+- **Bật archive trên đích ngay khi mở ghi**, có base backup mới (mục 5).
 - **Role mapping và extension**: phục hồi vật lý mang role theo; phục hồi logic sang cluster khác thì không.
 - **Phục hồi định kỳ có lịch**, người chạy, nơi lưu output. Backup chưa từng restore thì chưa phải backup.
 - **Mốc thời gian và quyết định** dừng/mở ghi, giao dịch cần bù; **phương án quay lại** khi đích đã nhận ghi mới — trỏ connection string về source cũ tạo hai lịch sử lệch nhau.

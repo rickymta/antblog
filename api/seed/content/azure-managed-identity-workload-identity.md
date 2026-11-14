@@ -22,7 +22,7 @@ Bài này giải thích cách một workload như `trip-service` chứng minh m�
 
 `trip-service` cần đọc connection string trong Key Vault và giấy tờ tài xế trong container Blob `driver-docs`. Cách cũ là tạo một app registration, sinh client secret, dán vào biến môi trường. Secret đó hết hạn, bị copy vào pipeline, lọt vào log, và không ai nhớ ai đang giữ bản nào.
 
-Managed identity bỏ bước đó. Về bản chất nó là một **service principal trong Entra ID do Azure tạo và quản lý**: Azure tự sinh và tự xoay credential, bạn không bao giờ nhìn thấy nó. Khi code cần token, nó gọi một endpoint nội bộ của nền tảng (IMDS trên VM, endpoint do runtime cung cấp trong Container Apps). Endpoint này chỉ truy cập được từ bên trong workload, nên kẻ bên ngoài không lấy được token bằng cách biết tên identity. Mặt trái: mọi tiến trình chạy trong VM hay container đều xin được token đó, nên một lỗ SSRF hay một thư viện độc trong workload là đủ để mượn quyền của identity. Token trả về có hạn ngắn, SDK tự cache và tự xin lại.
+Managed identity bỏ bước đó. Về bản chất nó là một **service principal trong Entra ID do Azure tạo và quản lý**: Azure tự sinh và tự xoay credential, bạn không bao giờ nhìn thấy nó. Khi code cần token, nó gọi một endpoint nội bộ của nền tảng (IMDS trên VM, endpoint do runtime cung cấp trong Container Apps). Endpoint này chỉ truy cập được từ bên trong workload, nên kẻ bên ngoài không lấy được token bằng cách biết tên identity. Mặt trái: mọi tiến trình chạy trong VM hay container đều xin được token đó, nên một lỗ hổng SSRF hay một thư viện độc hại trong workload là đủ để mượn quyền của identity. Token trả về có hạn ngắn, SDK tự cache và tự xin lại.
 
 Điều cần nhớ: managed identity giải quyết bài toán **chứng minh danh tính** (authentication). Còn **được làm gì** (authorization) vẫn do RBAC quyết định, nên bài 12 là điều kiện đọc trước.
 
@@ -51,12 +51,12 @@ Cái giá là phạm vi quyền. Nếu bạn gắn `id-toinoi-trips-prod` cho c�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Xoá user-assigned identity không dọn role assignment của nó. Assignment trở thành bản ghi mồ côi hiện là «Unknown» trong danh sách, và nếu sau này có identity khác trùng tên thì nó vẫn là principal mới, không thừa hưởng quyền cũ. Gán quyền ở scope nhỏ nhất đủ dùng, ở đây là container `driver-docs` chứ không phải cả storage account.</p>
+<p>Xoá user-assigned identity không dọn role assignment của nó. Assignment trở thành bản ghi mồ côi, hiển thị là «Unknown» trong danh sách, và nếu sau này có identity khác trùng tên thì nó vẫn là principal mới, không thừa hưởng quyền cũ. Gán quyền ở scope nhỏ nhất đủ dùng, ở đây là container `driver-docs` chứ không phải cả storage account.</p>
 </div>
 
 ## Trong code .NET chỉ cần credential, không cần secret
 
-Với thư viện Azure.Identity, `DefaultAzureCredential` thử lần lượt nhiều nguồn: biến môi trường, workload identity, managed identity, Visual Studio, Azure CLI và vài nguồn khác. Chạy local, nó rơi xuống phiên `az login` của bạn. Chạy trên Azure, nó dùng managed identity. Cùng một dòng code cho cả hai nơi là cái lợi, nhưng chuỗi fallback cũng là cái hại: khi lỗi, rất khó biết nguồn nào đã được thử và vì sao thất bại, và trên production có thể vô tình dùng một nguồn bạn không định dùng.
+Với thư viện Azure.Identity, `DefaultAzureCredential` thử lần lượt nhiều nguồn: biến môi trường, workload identity, managed identity, Visual Studio, Azure CLI và vài nguồn khác. Chạy local, nó chuyển sang dùng phiên `az login` của bạn. Chạy trên Azure, nó dùng managed identity. Cùng một dòng code cho cả hai nơi là ưu điểm, nhưng chuỗi fallback cũng là nhược điểm: khi lỗi, rất khó biết nguồn nào đã được thử và vì sao thất bại, và trên production có thể vô tình dùng một nguồn bạn không định dùng.
 
 Với user-assigned identity, bạn phải nói rõ **client ID**. Nếu không, SDK không biết chọn identity nào khi resource gắn nhiều identity. Với `DefaultAzureCredential`, client ID đi qua `DefaultAzureCredentialOptions.ManagedIdentityClientId` hoặc biến môi trường `AZURE_CLIENT_ID`; với `ManagedIdentityCredential`, nó đi thẳng vào constructor như dưới.
 
@@ -80,7 +80,7 @@ var docs = new BlobContainerClient(
 
 Đoạn này cho thấy cách chọn credential, nhưng nó không chứng minh identity có role đúng; quyền chỉ lộ ra khi lần gọi đầu tiên trả 403 hoặc 200. Production dùng `ManagedIdentityCredential` hẹp vì lỗi đọc là lỗi identity, không bị che bởi chuỗi fallback. Client ID không phải secret, nên để trong cấu hình thường là được.
 
-Ranh giới đã nêu ở [bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment) vẫn đứng: identity này là danh tính của **workload**. Nó không thay JWT của khách hay tài xế. API vẫn xác thực người dùng bằng token riêng của họ, còn managed identity chỉ để service nói chuyện với Blob, Key Vault, ACR.
+Ranh giới đã nêu ở [bài 36 loạt C#](/articles/dotnet10-aws-azure-deployment) vẫn còn hiệu lực: identity này là danh tính của **workload**. Nó không thay JWT của khách hay tài xế. API vẫn xác thực người dùng bằng token riêng của họ, còn managed identity chỉ để service nói chuyện với Blob, Key Vault, ACR.
 
 ## Workload identity federation: đổi token bên ngoài lấy token Entra
 
@@ -103,7 +103,7 @@ Subject là phần quan trọng nhất về bảo mật. Entra so khớp subject
 <figcaption>Hình 2. Token OIDC từ GitHub Actions hoặc pod AKS được Entra kiểm issuer, subject, audience rồi đổi lấy token Entra để gọi Azure.</figcaption>
 </figure>
 
-Lệnh tạo federated credential trên identity cho pipeline môi trường `prod` có dạng sau. Nó chỉ đăng ký niềm tin; pipeline vẫn cần role assignment cho identity mới làm được gì.
+Lệnh tạo federated credential trên identity cho pipeline môi trường `prod` có dạng sau. Lệnh này chỉ đăng ký niềm tin; pipeline vẫn cần role assignment cho identity mới làm được gì.
 
 ```bash
 az identity federated-credential create \
@@ -140,7 +140,7 @@ az role assignment create \
   --scope "$SCOPE"
 ```
 
-Gán quyền theo `--assignee-object-id` kèm `ServicePrincipal` tránh việc CLI phải tra Graph ngay sau khi identity vừa sinh, vốn dễ lỗi do độ trễ replicate. Role assignment cũng có thể mất vài phút mới có hiệu lực. Tiếp theo gắn identity vào VM, SSH vào VM, rồi đăng nhập bằng chính identity đó.
+Gán quyền theo `--assignee-object-id` kèm `ServicePrincipal` tránh việc CLI phải tra Graph ngay sau khi identity vừa được tạo, vốn dễ lỗi do độ trễ replicate. Role assignment cũng có thể mất vài phút mới có hiệu lực. Tiếp theo gắn identity vào VM, SSH vào VM, rồi đăng nhập bằng chính identity đó.
 
 ```bash
 # Trên máy của bạn
@@ -153,7 +153,7 @@ az storage blob list --account-name sttoinoidriverdocsdev \
   --container-name driver-docs --auth-mode login -o table
 ```
 
-Kỳ vọng: lệnh `blob list` thành công. Hãy thử thêm hai phép âm tính để biết quyền đúng cỡ: tải lên một blob phải bị từ chối vì chỉ có role Reader, và đọc một container khác trong cùng storage account cũng bị từ chối vì assignment chỉ ở scope `driver-docs`. `--client-id` là cờ của Azure CLI hiện hành; bản CLI cũ dùng `--username <client-id>` cho cùng việc, nên kiểm `az login --help` nếu lệnh trên báo lỗi. `--auth-mode login` bắt buộc ở đây vì account bài 8 đã tắt shared key. Dọn lab theo đúng thứ tự: `az role assignment delete` cho assignment ở `$SCOPE`, `az vm identity remove` để gỡ identity khỏi VM, rồi mới `az identity delete`, để không để lại assignment mồ côi.
+Kỳ vọng: lệnh `blob list` thành công. Hãy thử thêm hai phép thử âm tính để biết quyền có đúng phạm vi hay không: tải lên một blob phải bị từ chối vì chỉ có role Reader, và đọc một container khác trong cùng storage account cũng bị từ chối vì assignment chỉ ở scope `driver-docs`. `--client-id` là cờ của Azure CLI hiện hành; bản CLI cũ dùng `--username <client-id>` cho cùng việc, nên kiểm tra `az login --help` nếu lệnh trên báo lỗi. `--auth-mode login` bắt buộc ở đây vì account bài 8 đã tắt shared key. Dọn lab theo đúng thứ tự: `az role assignment delete` cho assignment ở `$SCOPE`, `az vm identity remove` để gỡ identity khỏi VM, rồi mới `az identity delete`, để không còn assignment mồ côi nào.
 
 **Bài tập:** pipeline deploy dev và prod dùng chung một federated credential với subject `repo:<org>/<repo>:ref:refs/heads/main`. Vấn đề nằm ở đâu, và sửa thế nào?
 

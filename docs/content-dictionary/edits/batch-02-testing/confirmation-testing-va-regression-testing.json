@@ -1,0 +1,11 @@
+{"file":"confirmation-testing-va-regression-testing.md","edits":[
+{"old":"Tester chạy lại đúng ca từng đỏ: xanh.","new":"Tester chạy lại đúng test case từng đỏ: xanh.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"hoặc chỉ hết ở đúng ca đã báo","new":"hoặc chỉ hết ở đúng test case đã báo","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"ca xe máy 7,35 km lúc 09:00 ra","new":"test case xe máy 7,35 km lúc 09:00 ra","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Phí giao đồ ăn đổi âm thầm","new":"Phí giao đồ ăn thay đổi mà không ai hay","reason":"Calque 'âm thầm'","severity":"medium"},
+{"old":"Nó chỉ chứng minh failure cũ không còn.","new":"Kết quả này chỉ chứng minh failure cũ không còn.","reason":"Tránh 'Nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Nhưng nó cũng đẩy 0,44 và 100,04","new":"Nhưng hàm này cũng đẩy 0,44 và 100,04","reason":"Tránh 'nó' đầu vế câu, nêu rõ chủ thể","severity":"low"},
+{"old":"gọi «chạy lại ca vừa sửa» là regression","new":"gọi «chạy lại test case vừa sửa» là regression","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"tester chạy lại đúng ca 5,05 kg và kiểm","new":"tester chạy lại đúng test case 5,05 kg và kiểm","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Với test thủ công, hay dùng: theo rủi ro, theo lịch sử lỗi","new":"Với test thủ công, các cách hay dùng là chọn theo rủi ro, theo lịch sử lỗi","reason":"Câu cụt, thiếu động từ","severity":"low"}
+]}

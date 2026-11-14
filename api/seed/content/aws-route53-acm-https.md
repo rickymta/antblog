@@ -8,13 +8,13 @@ tags: [aws, toi-noi, devops, route53, acm, https, dns, tls]
 language: vi
 ---
 
-Hôm nay khách gọi API báo giá bằng một địa chỉ khó nhớ kiểu `toinoi-lab-quote-alb-123456.ap-southeast-1.elb.amazonaws.com`, qua HTTP thường. Bộ phận pháp chế không chấp nhận: dữ liệu vị trí và thanh toán qua cổng giả lập VíXanh không được đi trần qua Internet, và đối tác muốn một tên cố định `api.toinoi.example` mà ta đổi được hạ tầng phía sau bất cứ lúc nào. Bài này bọc ALB của [bài 08](/articles/aws-alb-target-group-auto-scaling) bằng một tên miền và chứng chỉ TLS.
+Hôm nay khách gọi API báo giá bằng một địa chỉ khó nhớ kiểu `toinoi-lab-quote-alb-123456.ap-southeast-1.elb.amazonaws.com`, qua HTTP không mã hoá. Bộ phận pháp chế không chấp nhận: dữ liệu vị trí và thanh toán qua cổng giả lập VíXanh không được truyền không mã hoá qua Internet, và đối tác muốn một tên cố định `api.toinoi.example` mà ta đổi được hạ tầng phía sau bất cứ lúc nào. Bài này bọc ALB của [bài 08](/articles/aws-alb-target-group-auto-scaling) bằng một tên miền và chứng chỉ TLS.
 
 Đây là **bài 09** của lộ trình **AWS qua Tới Nơi · Phần 01: Nền tảng AWS**. Bạn cần ALB đang chạy ở bài 08 và hiểu HTTP ở mức cơ bản.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Chứng chỉ TLS của <code>api.toinoi.example</code> có hạn dùng hữu hạn và thời hạn tối đa của chứng chỉ công khai ngày càng ngắn. Làm sao để không bao giờ phải nhớ gia hạn bằng tay?</p>
+<p>Chứng chỉ TLS của <code>api.toinoi.example</code> có thời hạn, và thời hạn tối đa của chứng chỉ công khai ngày càng ngắn. Làm sao để không bao giờ phải nhớ gia hạn bằng tay?</p>
 <details><summary>Xem đáp án</summary><p>Dùng chứng chỉ ACM xác thực bằng DNS và giữ nguyên bản ghi CNAME xác thực trong hosted zone. ACM tự gia hạn miễn là bản ghi đó còn đó.</p></details>
 </div>
 
@@ -29,7 +29,7 @@ Hôm nay khách gọi API báo giá bằng một địa chỉ khó nhớ kiểu 
 | **Alias** (riêng của Route 53) | Tài nguyên AWS: ALB, CloudFront, S3 website... | Dùng được ở apex; truy vấn tới tài nguyên AWS không tính phí; không có TTL riêng |
 | TXT, MX, NS | Xác thực, thư, uỷ quyền | NS cho biết ai trả lời cho zone |
 
-**TTL** là số giây trình phân giải được cache câu trả lời. TTL dài giảm số truy vấn nhưng đổi bản ghi sẽ lan chậm; trước đợt chuyển hạ tầng, hạ TTL xuống trước một chu kỳ. Với alias, Route 53 dùng TTL của tài nguyên đích. Một hosted zone tính tiền theo tháng cộng phí truy vấn tuỳ loại; xem trang pricing.
+**TTL** là số giây mà trình phân giải giữ câu trả lời trong cache. TTL dài giảm số truy vấn nhưng đổi bản ghi sẽ lan chậm; trước đợt chuyển hạ tầng, hạ TTL xuống trước một chu kỳ. Với alias, Route 53 dùng TTL của tài nguyên đích. Một hosted zone tính tiền theo tháng cộng phí truy vấn tuỳ loại; xem trang pricing.
 
 **Về `toinoi.example`:** `.example` là tên miền dành riêng để minh hoạ (RFC 2606), không đăng ký và không phân giải trên Internet thật. Vì vậy mọi lệnh dưới đây là **mẫu**, bài này không có thư mục lab chạy được. Để chạy thật bạn cần một tên miền bạn sở hữu (mua ở Route 53 Domains hoặc nhà đăng ký khác) và thay `toinoi.example` trong các lệnh.
 
@@ -39,7 +39,7 @@ Hôm nay khách gọi API báo giá bằng một địa chỉ khó nhớ kiểu 
 
 1. Yêu cầu chứng chỉ cho `api.toinoi.example` với `--validation-method DNS`.
 2. ACM trả về một bản ghi CNAME dạng `_abc123.api.toinoi.example` trỏ tới `_xyz.acm-validations.aws.`. Tạo đúng bản ghi đó trong hosted zone.
-3. ACM thấy bản ghi, đổi trạng thái sang `ISSUED`, và tự gia hạn trước hạn miễn là bản ghi còn tồn tại.
+3. ACM phát hiện bản ghi, chuyển trạng thái sang `ISSUED`, và tự gia hạn trước hạn miễn là bản ghi còn tồn tại.
 
 Xác thực bằng email cũng có nhưng dựa vào hộp thư người thật, nên bỏ qua. **Region của chứng chỉ phải trùng region của ALB**: ALB ở `ap-southeast-1` thì chứng chỉ cũng ở `ap-southeast-1`. CloudFront (bài 20) là ngoại lệ, đòi chứng chỉ ở `us-east-1`.
 
@@ -98,7 +98,7 @@ aws elbv2 modify-listener --listener-arn "$LISTENER_80" \
   --default-actions 'Type=redirect,RedirectConfig={Protocol=HTTPS,Port=443,StatusCode=HTTP_301}'
 ```
 
-Lệnh đầu tạo listener 443 với **security policy** cho phép TLS 1.3 và 1.2 và loại bỏ phiên bản cũ; danh sách policy hiện hành nằm trong user guide, hãy chọn theo yêu cầu bảo mật thay vì copy mù. Lệnh thứ hai biến listener 80 thành chuyển hướng 301 sang HTTPS. `sg-alb` của bài 04 đã mở cổng 443 cho Internet nên listener mới nhận traffic ngay; luật cổng 80 chỉ cho IP của bạn ở bài 08 giờ chỉ còn để chuyển hướng. ALB hỗ trợ **SNI**: một listener gắn nhiều chứng chỉ (`aws elbv2 add-listener-certificates`) để phục vụ nhiều tên miền, và ALB chọn chứng chỉ theo tên khách yêu cầu.
+Lệnh đầu tạo listener 443 với **security policy** cho phép TLS 1.3 và 1.2 và loại bỏ phiên bản cũ; danh sách policy hiện hành nằm trong user guide, hãy chọn theo yêu cầu bảo mật thay vì sao chép nguyên xi. Lệnh thứ hai biến listener 80 thành chuyển hướng 301 sang HTTPS. `sg-alb` của bài 04 đã mở cổng 443 cho Internet nên listener mới nhận traffic ngay; quy tắc cổng 80 chỉ cho phép IP của bạn ở bài 08 giờ chỉ còn dùng để chuyển hướng. ALB hỗ trợ **SNI**: một listener gắn nhiều chứng chỉ (`aws elbv2 add-listener-certificates`) để phục vụ nhiều tên miền, và ALB chọn chứng chỉ theo tên miền mà khách yêu cầu.
 
 Mã hoá "end-to-end" còn một đoạn nữa: ALB tới target. Giữ HTTP trong VPC là hợp lý với nhiều hệ thống; nếu quy định (ví dụ với dữ liệu thanh toán VíXanh) đòi mã hoá cả đoạn này, đặt target group dùng HTTPS với chứng chỉ trên máy, đổi lại tốn CPU và phải quản lý thêm chứng chỉ.
 
@@ -126,7 +126,7 @@ Weighted dùng `SetIdentifier` và `Weight` cho mỗi bản ghi cùng tên:
 
 Bản ghi thứ hai cùng `Name` và `Type` đặt `SetIdentifier: canary`, `Weight: 5`. Weighted chỉ chia theo lượt phân giải DNS, không theo từng request, và bị trình phân giải cache theo TTL, nên không thay thế được traffic shifting chính xác của ALB hay CodeDeploy (bài 26).
 
-**Health check của Route 53** là các checker ngoài VPC gọi vào endpoint (HTTP, HTTPS hoặc TCP) theo chu kỳ; endpoint phải truy cập được từ Internet công khai. Điều này va chạm với lab bài 08, nơi security group của ALB chỉ cho IP của bạn: bật health check Route 53 thì phải mở đúng dải checker hoặc dùng `EvaluateTargetHealth` của alias, vì khi đó Route 53 dựa vào health của chính ALB.
+**Health check của Route 53** là các checker ngoài VPC gọi vào endpoint (HTTP, HTTPS hoặc TCP) theo chu kỳ; endpoint phải truy cập được từ Internet công khai. Điều này mâu thuẫn với lab bài 08, nơi security group của ALB chỉ cho IP của bạn: bật health check Route 53 thì phải mở đúng dải checker hoặc dùng `EvaluateTargetHealth` của alias, vì khi đó Route 53 dựa vào health của chính ALB.
 
 ## Cái giá phải trả
 

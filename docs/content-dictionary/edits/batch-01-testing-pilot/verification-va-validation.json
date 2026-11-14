@@ -1,0 +1,59 @@
+{
+  "file": "verification-va-validation.md",
+  "edits": [
+    {
+      "old": "ví dụ kiểm trong đặc tả ra đúng 52.000 đ",
+      "new": "ví dụ trong đặc tả cho ra đúng 52.000 đ",
+      "reason": "\"ví dụ kiểm\" là cụm tự ghép, thiếu động từ \"cho\"",
+      "severity": "medium"
+    },
+    {
+      "old": "(6 ca vitest) · bài tập 2 kiểm tra verification",
+      "new": "(6 test case vitest) · bài tập 2 kiểm tra verification",
+      "reason": "Thống nhất \"test case\"; \"bài tập 2 kiểm tra\" dễ đọc nhầm thành \"bài tập số 2\" (đã chỉnh khi duyệt)",
+      "severity": "medium"
+    },
+    {
+      "old": "Sáu ca: V1–V4",
+      "new": "Sáu test case: V1–V4",
+      "reason": "Thống nhất \"test case\" thay cho \"ca\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca Q1, rút gọn:",
+      "new": "Test case Q1, rút gọn:",
+      "reason": "Thống nhất \"test case\"",
+      "severity": "medium"
+    },
+    {
+      "old": "bỏ 6 dòng ✓ V1…Q2",
+      "new": "đã lược 6 dòng ✓ V1…Q2",
+      "reason": "Diễn đạt tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Sáu ca **đều xanh**.",
+      "new": "Sáu test case **đều xanh**.",
+      "reason": "Thống nhất \"test case\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó đi vào backlog",
+      "new": "Phát hiện này đi vào backlog",
+      "reason": "Tránh \"Nó\" chỉ sự vật trừu tượng ở đầu câu",
+      "severity": "low"
+    },
+    {
+      "old": "không đọc SPEC mà trả lời được.",
+      "new": "người này không cần đọc SPEC vẫn trả lời được.",
+      "reason": "Mệnh đề thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "nên ca này phân biệt được",
+      "new": "nên test case này phân biệt được",
+      "reason": "Thống nhất \"test case\"",
+      "severity": "medium"
+    }
+  ]
+}

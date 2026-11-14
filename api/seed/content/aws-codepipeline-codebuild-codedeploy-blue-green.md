@@ -10,7 +10,7 @@ language: vi
 
 Lúc 10:55, đội Tới Nơi đẩy bản mới của service `booking` đúng trước khung cao điểm 11:00, khi hệ thống nhận khoảng 70 chuyến mỗi giây. Với rolling deploy ở bài 13, task cũ và task mới trộn lẫn trên cùng một target group: nếu bản mới có lỗi, một phần khách đã dính lỗi trước khi ai đó kịp nhìn dashboard. Ta muốn bản mới chạy song song, được thử bằng một đường riêng, rồi mới nhận 10% khách, sau đó mới tới 100%.
 
-Đây là **bài 26** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bài giả định bạn đã có ECS Fargate và ALB ở bài 12–13, ECR ở bài 11, và đã thấy một pipeline CI bằng GitHub Actions ở [bài 25](/articles/aws-github-actions-oidc-ecr-deploy).
+Đây là **bài 26** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bài giả định bạn đã có ECS Fargate và ALB ở bài 12–13, ECR ở bài 11, và đã làm quen với một pipeline CI bằng GitHub Actions ở [bài 25](/articles/aws-github-actions-oidc-ecr-deploy).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -30,7 +30,7 @@ Pipeline native của AWS tách rõ ba trách nhiệm. **CodePipeline** là bộ
 
 Nguồn mã là GitHub, kết nối qua **CodeConnections** (trước đây là CodeStar Connections): bạn cài một GitHub App cho tổ chức, pipeline lấy mã qua connection đó. CodeCommit không còn mở cho khách hàng mới nên bài này không dùng. Một điểm hay vấp: connection tạo bằng CLI hoặc Terraform ở trạng thái `PENDING`, và chỉ một người có quyền trên GitHub mới hoàn tất được bước cài App trong console.
 
-Giữa các stage, artifact nằm trong một bucket S3. Hãy bật mã hoá mặc định, chặn public access và đặt lifecycle xoá artifact cũ, vì artifact chứa mã nguồn và `imageDetail.json`. Pipeline loại V2 hỗ trợ trigger lọc theo branch và đường dẫn tệp, hữu ích cho monorepo; chi phí tính theo từng loại, xem trang Pricing thay vì nhớ con số.
+Giữa các stage, artifact nằm trong một bucket S3. Hãy bật mã hoá mặc định, chặn public access và đặt lifecycle xoá artifact cũ, vì artifact chứa mã nguồn và `imageDetail.json`. Pipeline loại V2 hỗ trợ trigger lọc theo branch và đường dẫn tệp, hữu ích cho monorepo; chi phí tính theo từng loại pipeline, xem trang Pricing thay vì nhớ con số.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,7 +41,7 @@ Giữa các stage, artifact nằm trong một bucket S3. Hãy bật mã hoá m�
 
 ## CodeBuild: build một lần, trỏ vào digest
 
-CodeBuild chạy `buildspec.yml` trong một container build. Với job cần `docker build`, bạn phải bật **privileged mode** để container build chạy được Docker daemon; đây là quyền mạnh, nên project này chỉ được dùng cho repository tin cậy và role của nó chỉ được đẩy một repository ECR. Compute type `BUILD_GENERAL1_SMALL` đủ cho image .NET nhỏ; khi build chậm vì tải layer, thử bật cache layer cục bộ (`LOCAL_DOCKER_LAYER_CACHE`) trước khi tăng compute type.
+CodeBuild chạy `buildspec.yml` trong một container build. Với job cần `docker build`, bạn phải bật **privileged mode** để container build chạy được Docker daemon; đây là quyền mạnh, nên project này chỉ dùng cho repository tin cậy và role của nó chỉ có quyền đẩy vào một repository ECR. Compute type `BUILD_GENERAL1_SMALL` đủ cho image .NET nhỏ; khi build chậm vì tải layer, hãy thử bật cache layer cục bộ (`LOCAL_DOCKER_LAYER_CACHE`) trước khi tăng compute type.
 
 ```yaml
 phases:
@@ -58,13 +58,13 @@ artifacts:
     - imageDetail.json
 ```
 
-Đoạn trên rút từ `buildspec.yml` trong lab. Điều đáng chú ý là tệp `imageDetail.json`: stage Deploy đọc `ImageURI` từ đó và thay vào chỗ `<IMAGE1_NAME>` trong `taskdef.json`. Nhờ vậy task definition trỏ tới image bằng digest bất biến, đúng nguyên tắc build một lần, đưa cùng artifact đi qua các môi trường như ở loạt .NET ([bài 35](/articles/dotnet10-container-ci-cd)).
+Đoạn trên rút từ `buildspec.yml` trong lab. Điều đáng chú ý là tệp `imageDetail.json`: stage Deploy đọc `ImageURI` từ đó và thay vào chỗ `<IMAGE1_NAME>` trong `taskdef.json`. Nhờ vậy task definition trỏ tới image bằng digest bất biến, đúng nguyên tắc build một lần, đưa cùng một artifact đi qua các môi trường như ở loạt bài .NET ([bài 35](/articles/dotnet10-container-ci-cd)).
 
 ## CodeDeploy cho ECS: hai target group và hai listener
 
 Với ECS, CodeDeploy không thay task tại chỗ. Nó tạo một **task set** mới gắn vào target group thứ hai (green), cho phép bạn thử task set này qua **test listener**, rồi mới đổi trọng số của **production listener**. Service phải được tạo với `deploymentController = CODE_DEPLOY` (lab có `ecs-service.json`); khi đó circuit breaker của rolling deploy không áp dụng, và Terraform nên bỏ qua thay đổi `task_definition` và `load_balancer` của service vì CodeDeploy mới là bên quản lý chúng.
 
-Hai tệp nằm trong repository của service. `taskdef.json` là template task definition với placeholder `<IMAGE1_NAME>`. `appspec.yaml` nói task definition nào, container nào nhận traffic và hook nào chạy:
+Hai tệp nằm trong repository của service. `taskdef.json` là template task definition với placeholder `<IMAGE1_NAME>`. `appspec.yaml` cho biết task definition nào, container nào nhận traffic và hook nào chạy:
 
 ```yaml
 version: 0.0
@@ -80,7 +80,7 @@ Hooks:
   - AfterAllowTestTraffic: toinoi-lab-booking-smoke
 ```
 
-CodeDeploy thay `<TASK_DEFINITION>` bằng revision vừa đăng ký. Hook `AfterAllowTestTraffic` chạy khi task set green đã nhận traffic ở test listener nhưng khách thật chưa tới; hàm Lambda gọi `/health/ready` và một request nghiệp vụ có xác thực, rồi báo `Succeeded` hoặc `Failed` bằng `PutLifecycleEventHookExecutionStatus`. Hook không báo kịp thì deployment thất bại. Các hook khác cho ECS gồm `BeforeInstall`, `AfterInstall`, `BeforeAllowTraffic`, `AfterAllowTraffic`.
+CodeDeploy thay `<TASK_DEFINITION>` bằng revision vừa đăng ký. Hook `AfterAllowTestTraffic` chạy khi task set green đã nhận traffic ở test listener nhưng khách thật chưa tới; hàm Lambda gọi `/health/ready` và một request nghiệp vụ có xác thực, rồi báo `Succeeded` hoặc `Failed` bằng `PutLifecycleEventHookExecutionStatus`. Nếu hook không báo kết quả kịp thời thì deployment thất bại. Các hook khác cho ECS gồm `BeforeInstall`, `AfterInstall`, `BeforeAllowTraffic`, `AfterAllowTraffic`.
 
 Cách dịch chuyển traffic do **deployment config** quyết định:
 
@@ -102,7 +102,7 @@ Với 70 chuyến mỗi giây lúc cao điểm, 10% tương đương khoảng 7 
 
 ## ECS blue/green tích hợp so với CodeDeploy
 
-Tháng 7/2025, ECS thêm blue/green ngay trong service: bạn khai báo chiến lược trong deployment configuration của service, ECS tự quản lý hai target group (qua alternate target group và listener rule) với bake time và lifecycle hook Lambda, không cần ứng dụng CodeDeploy hay `appspec.yaml`. Tháng 10/2025, ECS bổ sung tiếp chiến lược linear và canary tích hợp, chạy với ALB và Service Connect; hãy đối chiếu Developer Guide của ECS về load balancer và tuỳ chọn được hỗ trợ trước khi quyết định.
+Tháng 7/2025, ECS thêm blue/green ngay trong service: bạn khai báo chiến lược trong deployment configuration của service, ECS tự quản lý hai target group (qua alternate target group và listener rule) với bake time và lifecycle hook Lambda, không cần dùng CodeDeploy hay `appspec.yaml`. Tháng 10/2025, ECS bổ sung tiếp chiến lược linear và canary tích hợp, chạy với ALB và Service Connect; hãy xem lại Developer Guide của ECS để biết load balancer và tuỳ chọn nào được hỗ trợ trước khi quyết định.
 
 | Tiêu chí | CodeDeploy cho ECS | Blue/green tích hợp của ECS |
 |---|---|---|
@@ -118,25 +118,25 @@ Quy tắc chọn tạm thời: service mới và yêu cầu vừa đủ thì ch�
 
 ## Vận hành quanh pipeline
 
-Stage **Approval** thủ công đặt giữa Build và Deploy cho môi trường prod, kèm thông báo SNS tới người duyệt. Nếu muốn duyệt sau khi đã thử test listener, đặt `deployment_ready_option` của deployment group ở chế độ chờ để CodeDeploy dừng trước khi chuyển traffic thật và chờ người bấm tiếp tục. Thông báo kết quả đi qua **EventBridge**: rule bắt sự kiện `CodePipeline Pipeline Execution State Change` rồi gửi tới SNS hoặc Amazon Q Developer in chat applications (tên mới của AWS Chatbot) cho Slack.
+Stage **Approval** thủ công đặt giữa Build và Deploy cho môi trường prod, kèm thông báo SNS tới người duyệt. Nếu muốn duyệt sau khi đã thử test listener, hãy đặt `deployment_ready_option` của deployment group ở chế độ chờ để CodeDeploy dừng trước khi chuyển traffic thật và chờ người bấm tiếp tục. Thông báo kết quả đi qua **EventBridge**: rule bắt sự kiện `CodePipeline Pipeline Execution State Change` rồi gửi tới SNS hoặc Amazon Q Developer in chat applications (tên mới của AWS Chatbot) cho Slack.
 
-Về tổ chức, mỗi service một pipeline là mặc định dễ hiểu: `quote`, `booking`, `dispatch`, `tracking` có nhịp deploy riêng và role riêng. Monorepo vẫn dùng được nếu pipeline V2 lọc theo đường dẫn, nhưng đừng để một lần đổi thư viện chung kích hoạt bốn pipeline cùng lúc vào giờ cao điểm.
+Về tổ chức, mỗi service một pipeline là lựa chọn mặc định dễ hiểu: `quote`, `booking`, `dispatch`, `tracking` có nhịp deploy riêng và role riêng. Monorepo vẫn dùng được nếu pipeline V2 lọc theo đường dẫn, nhưng đừng để một lần đổi thư viện chung kích hoạt bốn pipeline cùng lúc vào giờ cao điểm.
 
 ## Lỗi thường gặp và cái giá phải trả
 
 - **Connection còn `PENDING`**: pipeline lỗi ngay stage Source. Hoàn tất connection trong console trước khi chạy.
 - **CodePipeline có PassRole quá rộng**: chỉ cho phép đúng execution role và task role của service, kèm điều kiện `iam:PassedToService`.
 - **Smoke test chỉ gọi `/health`**: bản lỗi nghiệp vụ vẫn qua. Thêm một request có xác thực tới endpoint báo giá.
-- **Hai bản cùng ghi một database**: blue/green chỉ nhân đôi tầng ứng dụng, schema vẫn dùng chung. Cần expand/contract ở bài 27.
-- **Chi phí và thời gian**: lúc deploy có thêm một bộ task chạy song song, và canary 5 phút cộng thời gian chờ làm một lần deploy chậm hơn rolling.
+- **Hai bản cùng ghi một database**: blue/green chỉ nhân đôi tầng ứng dụng, schema vẫn dùng chung. Cần dùng expand/contract, xem bài 27.
+- **Chi phí và thời gian**: lúc deploy có thêm một bộ task chạy song song, và canary 5 phút cộng với thời gian chờ khiến một lần deploy chậm hơn rolling.
 
 **Bài tập:** khi canary 10% báo lỗi 5xx tăng, ai là bên rollback, và dữ liệu mà bản mới (green) đã ghi trong lúc đó đi đâu?
 
-<details><summary>Xem đáp án</summary><p>Nếu deployment group có alarm gắn <code>DEPLOYMENT_STOP_ON_ALARM</code>, CodeDeploy tự dừng và trả traffic về blue; nếu không, người trực phải dừng deployment (ví dụ <code>aws deploy stop-deployment --auto-rollback-enabled</code>). Dữ liệu green đã ghi nằm trong cùng database, không bị rollback theo traffic: schema phải tương thích hai bản, và cần có cách nhận diện cùng sửa các dòng do bản lỗi ghi (ví dụ cột phiên bản hoặc <code>trip_events</code>).</p></details>
+<details><summary>Xem đáp án</summary><p>Nếu deployment group có alarm gắn <code>DEPLOYMENT_STOP_ON_ALARM</code>, CodeDeploy tự dừng và trả traffic về blue; nếu không, người trực phải dừng deployment (ví dụ <code>aws deploy stop-deployment --auto-rollback-enabled</code>). Dữ liệu green đã ghi nằm trong cùng database, không bị rollback theo traffic: schema phải tương thích hai bản, và cần có cách nhận diện và sửa các dòng do bản lỗi ghi (ví dụ cột phiên bản hoặc <code>trip_events</code>).</p></details>
 
 ## Lab và kiểm chứng
 
-Mã nằm ở `examples/toi-noi-aws/p03-26-codedeploy-blue-green`: `buildspec.yml`, `appspec.yaml`, `taskdef.json`, `ecs-service.json`, hàm Lambda hook và Terraform dựng CodePipeline, CodeBuild, CodeDeploy và thông báo. Trên máy chỉ kiểm cú pháp, không tạo tài nguyên:
+Mã nằm ở `examples/toi-noi-aws/p03-26-codedeploy-blue-green`: `buildspec.yml`, `appspec.yaml`, `taskdef.json`, `ecs-service.json`, hàm Lambda hook và Terraform dựng CodePipeline, CodeBuild, CodeDeploy và thông báo. Trên máy chỉ kiểm tra cú pháp, không tạo tài nguyên:
 
 ```bash
 cd examples/toi-noi-aws/p03-26-codedeploy-blue-green

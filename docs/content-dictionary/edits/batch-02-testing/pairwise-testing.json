@@ -1,0 +1,11 @@
+{"file":"pairwise-testing.md","edits":[
+{"old":"mọi cặp giá trị của mọi hai tham số** xuất hiện","new":"mọi cặp giá trị của mọi cặp tham số** xuất hiện","reason":"'mọi hai tham số' sai ngữ pháp","severity":"medium"},
+{"old":"**Lỗi riêng một nền tảng mà chỉ đo trên nền tảng khác**","new":"**Lỗi riêng một nền tảng mà chỉ test trên nền tảng khác**","reason":"'đo' sai nghĩa, ở đây là test","severity":"medium"},
+{"old":"Nó vẫn đi qua iOS và VíXanh,","new":"Bộ này vẫn đi qua iOS và VíXanh,","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"và nó **không bảo đảm tối thiểu**","new":"và kiểu này **không bảo đảm bộ tối thiểu**","reason":"'nó' mơ hồ; câu thiếu danh từ","severity":"medium"},
+{"old":"Nó phải bị loại khỏi cả bộ test","new":"Cặp này phải bị loại khỏi cả bộ test","reason":"'Nó' mơ hồ, nhắc lại danh từ","severity":"medium"},
+{"old":"chỉ vì ba hàng tình cờ đặt đúng giá trị cạnh nhau; nó chỉ phủ 29/67 cặp.","new":"chỉ vì ba hàng tình cờ đặt đúng giá trị cạnh nhau; bộ này chỉ phủ 29/67 cặp.","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"các cặp còn lại của hàng coi như **chưa được thử**","new":"các cặp còn lại của hàng đó được coi như **chưa được thử**","reason":"Câu thiếu chủ thể và từ nối","severity":"low"},
+{"old":"Thêm một giá trị là công cụ có thể sinh bộ khác hẳn,","new":"Chỉ thêm một giá trị, công cụ cũng có thể sinh ra bộ khác hẳn,","reason":"Câu lủng củng, kiểu dịch máy","severity":"medium"},
+{"old":"hiếm hơn chứ không không tồn tại.","new":"hiếm hơn chứ không phải không tồn tại.","reason":"Lặp 'không không', thiếu 'phải'","severity":"medium"}
+]}

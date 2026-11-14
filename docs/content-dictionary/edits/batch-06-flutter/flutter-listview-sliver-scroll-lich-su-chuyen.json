@@ -1,0 +1,41 @@
+{
+"file": "flutter-listview-sliver-scroll-lich-su-chuyen.md",
+"edits": [
+{
+"old": "Nhờ mỗi sliver tự quyết phần nào của nó cần dựng, `SliverList` mới lười được.",
+"new": "Nhờ mỗi sliver tự quyết phần nào của nó cần dựng, `SliverList` mới có thể dựng từng phần theo nhu cầu (lazy).",
+"reason": "'lười được' gượng, calque của 'lazy'",
+"severity": "medium"
+},
+{
+"old": "Còn dưới 300 dp, tức khoảng bốn dòng, thì tải trang kế.",
+"new": "Khi nội dung phía dưới còn dưới 300 dp, tức khoảng bốn dòng, màn hình tải trang kế.",
+"reason": "Câu thiếu chủ ngữ, 'Còn' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Có hai ca biên khác đã có test.",
+"new": "Có hai trường hợp biên khác đã có test.",
+"reason": "'ca biên' cụt, dễ lẫn với test case",
+"severity": "medium"
+},
+{
+"old": "nhận cả hai thì danh sách thành trang đầu mới nối với một trang cũ.",
+"new": "nhận cả hai thì danh sách sẽ là trang đầu mới nối với một trang cũ.",
+"reason": "Thiếu động từ 'trở thành'/'là'",
+"severity": "medium"
+},
+{
+"old": "Việc đó do `findChildIndexCallback` làm",
+"new": "Việc đó thuộc về `findChildIndexCallback`",
+"reason": "'do ... làm' kiểu dịch máy",
+"severity": "low"
+},
+{
+"old": "nên danh sách rất lớn nên giữ một",
+"new": "nên với danh sách rất lớn ta nên giữ một",
+"reason": "Câu lặp 'nên', thiếu chủ ngữ",
+"severity": "medium"
+}
+]
+}

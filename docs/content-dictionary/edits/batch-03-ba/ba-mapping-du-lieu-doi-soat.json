@@ -1,0 +1,10 @@
+{"file":"ba-mapping-du-lieu-doi-soat.md","edits":[
+{"old":"Mapping có phiên bản và owner |","new":"Mapping có phiên bản và người phụ trách |","reason":"owner có từ Việt tự nhiên","severity":"low"},
+{"old":"Trường không biết mapping đi vào ngoại lệ,","new":"Trường chưa biết cách mapping được đưa vào ngoại lệ,","reason":"Câu mơ hồ, trật tự gượng","severity":"medium"},
+{"old":"cần thống nhất với đối tác và vận hành.","new":"cần thống nhất với đối tác và bộ phận vận hành.","reason":"Thiếu chủ thể bộ phận","severity":"medium"},
+{"old":"Tra cứu, xác nhận rồi cập nhật theo rule |","new":"Tra cứu, xác nhận rồi cập nhật theo quy tắc |","reason":"Thống nhất 'quy tắc'","severity":"low"},
+{"old":"Lệch tiền, chuyển owner điều tra |","new":"Lệch tiền, chuyển người phụ trách điều tra |","reason":"owner có từ Việt tự nhiên","severity":"low"},
+{"old":"Chưa đủ kết luận; kiểm khoá/cửa sổ |","new":"Chưa đủ kết luận; kiểm tra khoá/cửa sổ |","reason":"'kiểm' cụt","severity":"low"},
+{"old":"Kiểm số lượng, tổng theo currency, khoá trùng và chênh từng refund.","new":"Kiểm tra số lượng, tổng theo currency, khoá trùng và chênh lệch của từng refund.","reason":"Lược động từ/danh từ","severity":"medium"},
+{"old":"Đề xuất owner vận hành nhận RF-C, kỹ thuật hỗ trợ truy vết,","new":"Đề xuất bộ phận vận hành nhận RF-C, bộ phận kỹ thuật hỗ trợ truy vết,","reason":"Thiếu chủ thể bộ phận; owner không rõ","severity":"high"}
+]}

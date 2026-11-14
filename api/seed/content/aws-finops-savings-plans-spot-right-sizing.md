@@ -27,13 +27,13 @@ Cùng một tải có thể trả theo nhiều cách:
 | On-demand | Không | Mọi thứ | Linh hoạt nhất, đắt nhất |
 | Compute Savings Plans | 1 hoặc 3 năm, theo $/giờ | EC2 mọi family và region, Fargate, Lambda | Giảm nhiều, giữ linh hoạt đổi kiến trúc |
 | EC2 Instance Savings Plans | 1 hoặc 3 năm | Một family trong một region | Giảm sâu hơn, kém linh hoạt |
-| Database Savings Plans (từ 12/2025) | 1 năm, theo $/giờ, no upfront | Aurora, RDS, DynamoDB, ElastiCache Valkey và vài DB khác | Linh hoạt giữa engine, cỡ và region; không cộng dồn với Reserved cho cùng tải |
+| Database Savings Plans (từ 12/2025) | 1 năm, theo $/giờ, no upfront | Aurora, RDS, DynamoDB, ElastiCache Valkey và vài DB khác | Linh hoạt giữa engine, cỡ và region; không kết hợp được với Reserved cho cùng tải |
 | Reserved (RDS, ElastiCache, OpenSearch, Redshift) | 1 hoặc 3 năm | Đúng loại và cỡ node | Giảm sâu hơn nhưng gắn chặt engine và cỡ |
-| Spot | Không | EC2, Fargate Spot, worker chịu gián đoạn | Giảm rất lớn nhưng có thể bị thu hồi sau khoảng 2 phút báo trước |
+| Spot | Không | EC2, Fargate Spot, worker chịu được gián đoạn | Giảm rất mạnh nhưng có thể bị thu hồi sau khoảng 2 phút báo trước |
 
 Compute, EC2 Instance Savings Plans và Reserved có ba cách trả: **no upfront**, **partial upfront**, **all upfront**; trả trước nhiều thì giảm nhiều hơn nhưng khoá vốn. Hai chỉ số theo dõi sau khi mua:
 
-- **Coverage**: phần chi tiêu đủ điều kiện được cam kết chi trả.
+- **Coverage**: phần chi tiêu đủ điều kiện được cam kết phủ.
 - **Utilization**: phần cam kết thực sự được dùng. Dưới 100% nghĩa là đang trả cho thứ không dùng.
 
 Ví dụ với đơn vị quy ước (tính theo giá on-demand, đơn giản hoá). Tải của `booking` và `quote` là **20 đơn vị/giờ** cả ngày, cộng thêm 30 đơn vị trong 4 giờ cao điểm. Tổng một ngày: `20×24 + 30×4 = 600`.
@@ -92,11 +92,11 @@ Truy vấn cộng chi phí của mọi tài nguyên gắn `Project=ToiNoi` theo 
 | Ổ đĩa gp2 | Cost Explorer theo usage type | `modify-volume --volume-type gp3`, không cần dừng |
 | Log không retention, snapshot cũ | Trusted Advisor, script | Retention theo loại log; lifecycle cho snapshot và S3 (bài 36) |
 | NAT Gateway xử lý traffic S3/DynamoDB | Cost Explorer theo usage type | Gateway endpoint (không tính tiền theo giờ), interface endpoint khi cần (bài 53) |
-| Truyền dữ liệu giữa AZ và region | CUR theo `usage_type` | Gom thành phần hay nói chuyện cùng AZ khi chịu được, cache |
+| Truyền dữ liệu giữa AZ và region | CUR theo `usage_type` | Đặt các thành phần hay gọi nhau vào cùng AZ khi chịu được, cache |
 | Load balancer, public IPv4 và EBS không dùng | Hub, Trusted Advisor | Xoá; mọi public IPv4 đều tính phí theo giờ |
 | Môi trường dev chạy 24/7 | Tag `Env=dev` theo giờ | Scheduled scaling về 0 ngoài giờ, tắt DB tạm thời |
 
-**Compute Optimizer** phân tích metric (EC2, EBS, Lambda, ECS trên Fargate, RDS, và nhiều loại khác) rồi đề xuất cỡ phù hợp; cần bật opt-in và vài ngày đến vài tuần dữ liệu. **Cost Optimization Hub** (endpoint `us-east-1`, cần opt-in) gom khuyến nghị của nhiều dịch vụ vào một danh sách, ước tính tiết kiệm sau giảm giá của bạn, kể cả khuyến nghị mua Savings Plans và Reserved; đó là điểm xuất phát, không phải lệnh. Với Aurora Serverless v2, DynamoDB on-demand hay Lambda, "right-size" là giới hạn dung lượng và cấu hình bộ nhớ, không phải đổi instance.
+**Compute Optimizer** phân tích metric (EC2, EBS, Lambda, ECS trên Fargate, RDS, và nhiều loại khác) rồi đề xuất cỡ phù hợp; cần bật opt-in và vài ngày đến vài tuần dữ liệu. **Cost Optimization Hub** (endpoint `us-east-1`, cần opt-in) gom khuyến nghị của nhiều dịch vụ vào một danh sách, ước tính mức tiết kiệm đã tính cả giảm giá áp dụng cho tài khoản của bạn, kể cả khuyến nghị mua Savings Plans và Reserved; đó là điểm xuất phát, không phải lệnh. Với Aurora Serverless v2, DynamoDB on-demand hay Lambda, "right-size" là giới hạn dung lượng và cấu hình bộ nhớ, không phải đổi instance.
 
 Kiến trúc tiết kiệm có hai mặt: giảm lượng việc (cache báo giá ở bài 15, nén Parquet và phân vùng toạ độ lịch sử ở bài 35, lifecycle dữ liệu cũ) và chọn dịch vụ khớp mẫu tải. Kinesis hay MSK, ECS hay EKS còn là quyết định chi phí vận hành: con người cũng là chi phí.
 
@@ -111,17 +111,17 @@ Kiến trúc tiết kiệm có hai mặt: giảm lượng việc (cache báo gi�
 
 FinOps là thói quen, không phải một dự án: **Inform** (nhìn thấy), **Optimize** (giảm), **Operate** (giữ kỷ luật). Với Tới Nơi:
 
-- **Owner theo service**: con số không có người nhận sẽ không giảm.
+- **Owner theo service**: con số không có người chịu trách nhiệm thì sẽ không giảm.
 - **Budgets** theo `Project` và theo môi trường với cảnh báo 80% thực tế, 100% dự báo (bài 10). Thêm budget cho **Savings Plans utilization** và **coverage** sau khi đã mua.
-- **Cost Anomaly Detection** dùng học máy báo chi tiêu bất thường theo dịch vụ hoặc tag (NAT tăng gấp ba vì một service gọi S3 qua Internet): lưới bắt lỗi cấu hình, còn Budgets chỉ báo khi tổng vượt ngưỡng.
-- **Review hằng tháng** 30 phút: đọc chi phí mỗi chuyến, xem anomaly, chốt hai ba việc giảm. Mua cam kết mới chỉ ở buổi review, kèm giả định (nền tải, thời hạn), vì mua xong khó huỷ.
+- **Cost Anomaly Detection** dùng học máy để báo chi tiêu bất thường theo dịch vụ hoặc tag (NAT tăng gấp ba vì một service gọi S3 qua Internet): lớp phát hiện lỗi cấu hình, còn Budgets chỉ báo khi tổng vượt ngưỡng.
+- **Review hằng tháng** 30 phút: đọc chi phí mỗi chuyến, xem anomaly, chốt hai ba việc giảm. Mua cam kết mới chỉ ở buổi review, kèm giả định (mức tải nền, thời hạn), vì mua xong khó huỷ.
 
 ## Cái giá phải trả
 
 - **Cam kết là khoản nợ**: Savings Plans và Reserved gần như không huỷ được; đổi kiến trúc lớn (đổi engine DB, đổi họ instance với EC2 Instance SP) có thể bỏ phí cam kết.
-- **Cắt giảm quá tay làm hại độ tin cậy**: bỏ dư thừa của bài 56 để "tiết kiệm" thì lần sự cố sau trả giá đắt hơn. Một số "lãng phí" là bảo hiểm.
-- **Tag thiếu nghĩa là báo cáo sai**: tài nguyên không có tag rơi vào nhóm "không rõ", và con số mỗi chuyến vô nghĩa.
-- **Spot không có SLA**: worker phải chịu bị ngắt giữa chừng và xử lý idempotent.
+- **Cắt giảm quá tay làm hại độ tin cậy**: bỏ phần dự phòng của bài 56 để "tiết kiệm" thì lần sự cố sau trả giá đắt hơn. Một số "lãng phí" là bảo hiểm.
+- **Thiếu tag nghĩa là báo cáo sai**: tài nguyên không có tag rơi vào nhóm "không rõ", và con số mỗi chuyến vô nghĩa.
+- **Spot không có SLA**: worker phải chịu được việc bị ngắt giữa chừng và xử lý idempotent.
 
 **Bài tập:** tải 24/7 là 20 đơn vị/giờ, cộng 30 đơn vị trong 4 giờ cao điểm mỗi ngày. Tính coverage và utilization nếu cam kết 30 đơn vị/giờ, và cho biết bạn có chọn mức đó không.
 

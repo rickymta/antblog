@@ -1,0 +1,10 @@
+{"file":"static-analysis-phan-tich-code-tinh.md","edits":[
+{"old":"Nó giải quyết ba vấn đề:","new":"Static analysis giải quyết ba vấn đề:","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng ở đầu câu","severity":"medium"},
+{"old":"phải **có cấu trúc để kiểm**","new":"phải **có cấu trúc để kiểm tra**","reason":"'để kiểm' cụt","severity":"low"},
+{"old":"mục tiêu là phát hiện defect **thật hoặc tiềm ẩn** trong code, kiến trúc và **cải thiện maintainability**, qua ba kỹ thuật:","new":"mục tiêu là phát hiện defect **thật hoặc tiềm ẩn** trong code và kiến trúc, đồng thời **cải thiện maintainability**, qua ba kỹ thuật:","reason":"Câu sai cấu trúc: 'phát hiện ... cải thiện' đặt ngang hàng với danh từ","severity":"medium"},
+{"old":"Kiểu tĩnh là một lớp kiểm tra vặn to nhỏ được","new":"Kiểu tĩnh là một lớp kiểm tra có thể điều chỉnh độ chặt","reason":"'vặn to nhỏ' là cách nói khẩu ngữ, tự ghép","severity":"medium"},
+{"old":"chạy cùng ca trên mã thật (phải đạt)","new":"chạy cùng test case trên mã thật (phải đạt)","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"4 ca trên mã thật đạt, 4 ca `it.fails` trên bản smelly","new":"4 test case trên mã thật đạt, 4 test case `it.fails` trên bản smelly","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"**Độ phức tạp thấp chưa chắc đúng.**","new":"**Độ phức tạp thấp chưa chắc là code đúng.**","reason":"Thiếu chủ thể: cái gì 'đúng'","severity":"medium"},
+{"old":"viết một ca test động như mục 5.4","new":"viết một test case động như mục 5.4","reason":"'ca test' là cụm tự ghép; thống nhất 'test case'","severity":"low"}
+]}

@@ -1,7 +1,7 @@
 ---
 slug: aws-tai-khoan-iam-identity-center-cli
 title: "Tài khoản AWS, IAM Identity Center và AWS CLI: thiết lập an toàn ngày đầu"
-summary: "Bài 02: khoá root user bằng MFA, tạo người dùng qua IAM Identity Center, đặt Budgets để không giật mình khi có hoá đơn, cài AWS CLI v2 và đăng nhập bằng aws configure sso; kiểm tra bằng aws sts get-caller-identity."
+summary: "Bài 02: khoá root user bằng MFA, tạo người dùng qua IAM Identity Center, đặt Budgets để không bất ngờ khi nhận hoá đơn, cài AWS CLI v2 và đăng nhập bằng aws configure sso; kiểm tra bằng aws sts get-caller-identity."
 category: devops-aws
 level: beginner
 tags: [aws, toi-noi, devops, iam-identity-center, aws-cli, mfa, budgets, root-user]
@@ -26,7 +26,7 @@ Việc cần làm ngay sau khi tạo tài khoản:
 
 1. **Bật MFA** (xác thực nhiều lớp) cho root, tốt nhất bằng passkey hoặc khoá FIDO2; ứng dụng authenticator là phương án thay thế. Từ 2024 AWS đã bắt đầu buộc root đăng ký MFA khi đăng nhập console (mở rộng dần theo loại tài khoản); dù tài khoản của bạn đã bị yêu cầu hay chưa, hãy bật ngay.
 2. **Không tạo access key cho root.** Nếu đã lỡ tạo, xoá đi.
-3. Dùng **email dùng chung của nhóm** (ví dụ `aws-root@toinoi.example`, địa chỉ minh hoạ) thay vì email cá nhân, để khi một người nghỉ việc, quyền khôi phục tài khoản không mất theo.
+3. Dùng **email chung của nhóm** (ví dụ `aws-root@toinoi.example`, địa chỉ minh hoạ) thay vì email cá nhân, để khi một người nghỉ việc, quyền khôi phục tài khoản không mất theo.
 4. Lưu mật khẩu root trong trình quản lý mật khẩu và đừng dùng nó ngoài các việc buộc phải dùng root.
 
 Chỉ một nhóm nhỏ việc cần root: đổi email hoặc mật khẩu root, đóng tài khoản, bật quyền xem Billing cho IAM, sửa một bucket policy S3 lỡ chặn mọi principal, khôi phục khi tự khoá mình khỏi IAM… Danh sách đầy đủ có trong tài liệu "Tasks that require root user credentials" ở cuối bài.
@@ -35,9 +35,9 @@ Chỉ một nhóm nhỏ việc cần root: đổi email hoặc mật khẩu root
 
 Với tài khoản học, rủi ro lớn nhất là quên tắt tài nguyên. **AWS Budgets** cho bạn đặt hạn mức chi tiêu hằng tháng và gửi email khi chi phí thực tế hoặc dự báo vượt ngưỡng. Với tài khoản lab, đặt ngưỡng nhỏ và thêm cảnh báo ở 80% hạn mức.
 
-Có hai giới hạn cần biết. Dữ liệu chi phí được cập nhật chậm (vài giờ), nên Budgets là chuông báo chứ không phải phanh: nó không tự tắt tài nguyên trừ khi bạn cấu hình riêng budget action. Ngoài ra, ưu đãi cho tài khoản mới (free tier, credit) thay đổi theo thời gian; hãy đọc điều kiện hiện hành trên trang Free Tier thay vì dựa vào trí nhớ.
+Có hai giới hạn cần biết. Dữ liệu chi phí cập nhật chậm (vài giờ), nên Budgets là chuông báo chứ không phải phanh: nó không tự tắt tài nguyên trừ khi bạn cấu hình riêng budget action. Ngoài ra, ưu đãi cho tài khoản mới (free tier, credit) thay đổi theo thời gian; hãy đọc điều kiện hiện hành trên trang Free Tier thay vì dựa vào trí nhớ.
 
-Bạn có thể tạo budget bằng console hoặc bằng script trong lab của bài (xem cuối bài). Nếu sau này user đăng nhập qua Identity Center đã có quyền mà vẫn không xem được trang Billing, kiểm cài đặt "IAM user and role access to Billing information" trong Account; chỉ root đổi được cài đặt này.
+Bạn có thể tạo budget bằng console hoặc bằng script trong lab của bài (xem cuối bài). Nếu sau này user đăng nhập qua Identity Center đã có quyền mà vẫn không xem được trang Billing, hãy kiểm tra cài đặt "IAM user and role access to Billing information" trong Account; chỉ root đổi được cài đặt này.
 
 ## IAM Identity Center: danh tính tạm thời cho người
 
@@ -59,7 +59,7 @@ Người dùng đăng nhập vào một **AWS access portal** (địa chỉ dạ
 
 Các bước làm trên console, trong tài khoản lab của bạn:
 
-1. Đăng nhập bằng root, chuyển console sang region `ap-southeast-1`, vào **IAM Identity Center** và chọn **Enable**. Chọn region cẩn thận vì Identity Center có một region chính và đổi về sau rất phiền. Chọn bật kèm **AWS Organizations** (lựa chọn được khuyến nghị): nếu chưa có, AWS tạo một Organization với tài khoản của bạn làm management account (bài 28 quay lại). Kiểu còn lại, *account instance*, không cấp được quyền vào tài khoản AWS nên không dùng cho loạt bài này.
+1. Đăng nhập bằng root, chuyển console sang region `ap-southeast-1`, vào **IAM Identity Center** và chọn **Enable**. Chọn region cẩn thận vì Identity Center có một region chính và đổi region này về sau rất phiền. Chọn bật cùng với **AWS Organizations** (lựa chọn được khuyến nghị): nếu chưa có, AWS tạo một Organization với tài khoản của bạn làm management account (bài 28 quay lại). Kiểu còn lại, *account instance*, không cấp được quyền vào tài khoản AWS nên không dùng cho loạt bài này.
 2. Tạo group `toinoi-lab-admins` và một user cho chính bạn, thêm vào group, bật MFA cho user.
 3. Tạo permission set `ToiNoiLabAdmin` gắn managed policy `AdministratorAccess`, thời lượng phiên ngắn (ví dụ 4 giờ). Đây là quyền rộng, chỉ chấp nhận được trong tài khoản lab cá nhân; bài 03 sẽ nói vì sao workload thật không dùng nó.
 4. Gán group `toinoi-lab-admins` với permission set đó vào tài khoản `123456789012`.
@@ -163,7 +163,7 @@ Output mặc định là `json`; thêm `--output table` để dễ đọc, hoặ
 aws ec2 describe-regions --query 'Regions[].RegionName' --output text
 ```
 
-Lệnh này liệt kê các region đang được bật trong tài khoản; thêm `--all-regions` để thấy cả region opt-in chưa bật. Nó chỉ đọc nên không tính tiền.
+Lệnh này liệt kê các region đang được bật trong tài khoản; thêm `--all-regions` để thấy cả region opt-in chưa bật. Lệnh chỉ đọc nên không tính tiền.
 
 ## Quy ước của cả loạt bài
 
@@ -179,8 +179,8 @@ Không bao giờ dán access key, secret hay token vào bài viết, issue, comm
 ## Lỗi thường gặp
 
 - **Token hết hạn** (`The SSO session associated with this profile has expired`): chạy lại `aws sso login`.
-- **Chạy nhầm tài khoản hoặc region**: kiểm `aws sts get-caller-identity` và `aws configure list` trước mọi lệnh tạo tài nguyên.
-- **Giữ `AWS_ACCESS_KEY_ID` cũ trong shell**: biến này thắng `AWS_PROFILE` (chỉ thua `--profile` ghi trên dòng lệnh); kết quả là danh tính không như bạn nghĩ.
+- **Chạy nhầm tài khoản hoặc region**: chạy `aws sts get-caller-identity` và `aws configure list` để kiểm tra trước mọi lệnh tạo tài nguyên.
+- **Giữ `AWS_ACCESS_KEY_ID` cũ trong shell**: biến này được ưu tiên hơn `AWS_PROFILE` (chỉ thua `--profile` ghi trên dòng lệnh); kết quả là danh tính không như bạn nghĩ.
 - **Dùng `AdministratorAccess` ở mọi nơi**: tiện cho lab, nhưng là thói quen xấu; bài 03 viết quyền hẹp hơn.
 - **Tin rằng Budgets sẽ chặn chi tiêu**: nó chỉ cảnh báo, chậm vài giờ.
 
@@ -192,7 +192,7 @@ Không bao giờ dán access key, secret hay token vào bài viết, issue, comm
 
 ## Lab: kiểm tra thiết lập và đặt budget
 
-Lab ở `examples/toi-noi-aws/p01-02-cli-setup` gồm tệp cấu hình mẫu, script `check-setup.sh` chỉ đọc (kiểm CLI v2, profile, danh tính, biến môi trường nguy hiểm, danh sách region) và script `create-budget.sh` tạo một budget hằng tháng. Script tạo budget **mặc định chỉ in lệnh**; phải thêm `--apply` mới tạo thật, và `delete-budget.sh` dọn lại. Phí của AWS Budgets (nếu có) xem trên trang giá hiện hành, đừng giả định là miễn phí.
+Lab ở `examples/toi-noi-aws/p01-02-cli-setup` gồm tệp cấu hình mẫu, script `check-setup.sh` chỉ đọc (kiểm tra CLI v2, profile, danh tính, biến môi trường nguy hiểm, danh sách region) và script `create-budget.sh` tạo một budget hằng tháng. Script tạo budget **mặc định chỉ in lệnh**; phải thêm `--apply` mới tạo thật, và `delete-budget.sh` dọn lại. Phí của AWS Budgets (nếu có) xem trên trang giá hiện hành, đừng giả định là miễn phí.
 
 ```bash
 cd examples/toi-noi-aws/p01-02-cli-setup
@@ -200,7 +200,7 @@ cd examples/toi-noi-aws/p01-02-cli-setup
 BUDGET_EMAIL=lab-owner@toinoi.example ./create-budget.sh toinoi-lab
 ```
 
-Script đã được kiểm cú pháp bằng `bash -n` và shellcheck, chạy thử với CLI giả lập, và tham số của các lệnh `aws budgets` được đối chiếu với bộ mô hình dịch vụ của AWS CLI; **chưa được chạy trên tài khoản AWS thật**. Đọc kỹ phần in ra trước khi thêm `--apply`.
+Script đã được kiểm tra cú pháp bằng `bash -n` và shellcheck, chạy thử với CLI giả lập, và tham số của các lệnh `aws budgets` được đối chiếu với bộ mô hình dịch vụ của AWS CLI; **chưa được chạy trên tài khoản AWS thật**. Đọc kỹ phần in ra trước khi thêm `--apply`.
 
 Bài trước: [bài 01](/articles/aws-la-gi-region-az-shared-responsibility). Bài tiếp: [bài 03](/articles/aws-iam-user-role-policy).
 

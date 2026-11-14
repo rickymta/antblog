@@ -1,7 +1,7 @@
 ---
 slug: postgresql-btree-index-co-ban
 title: "B-tree index giúp tìm chuyến như thế nào?"
-summary: "Màn «Chuyến của tôi» của Tới Nơi tìm 40 chuyến của một khách mà phải đọc cả 19.441 page của bảng 1 triệu chuyến. Thêm một B-tree index: 43 page. Mổ cây gốc → nhánh → lá → heap và xem vì sao có index planner vẫn chọn Seq Scan."
+summary: "Màn «Chuyến của tôi» của Tới Nơi tìm 40 chuyến của một khách mà phải đọc cả 19.441 page của bảng 1 triệu chuyến. Thêm một B-tree index: 43 page. Đi từ gốc → nhánh → lá → heap của cây và xem vì sao có index mà planner vẫn chọn Seq Scan."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-023, index, btree, seq-scan, bitmap-scan, toi-noi]
@@ -10,16 +10,16 @@ language: vi
 
 Khách `0910000500` mở màn «Chuyến của tôi» trên app Tới Nơi. Họ mới đi 40 chuyến từ tháng 5, nhưng bảng `trips` đã có **1.000.000** chuyến. Nếu database không có cách nào biết 40 chuyến đó nằm ở đâu, nó chỉ còn một đường: đọc từng chuyến một, giữ lại 40, bỏ 999.960.
 
-Hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi) đã khai sẵn `ix_trips_customer_requested` cho đúng truy vấn này. Bài này cố ý **bỏ** index đó để thấy bảng không có index trông ra sao, rồi tạo lại một **B-tree index** đơn giản trên `customer_id`, đếm số page đọc trước và sau, mổ từng tầng của cây, và kết thúc bằng câu hỏi hay gặp nhất: có index rồi, vì sao planner vẫn đọc cả bảng?
+Hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi) đã khai sẵn `ix_trips_customer_requested` cho đúng truy vấn này. Bài này cố ý **bỏ** index đó để thấy bảng không có index trông ra sao, rồi tạo lại một **B-tree index** đơn giản trên `customer_id`, đếm số page đọc trước và sau, đi qua từng tầng của cây, và kết thúc bằng câu hỏi hay gặp nhất: có index rồi, vì sao planner vẫn đọc cả bảng?
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-023 · Phần 3/6 · Cơ bản</span>
-<p>Đọc trước: <a href="/articles/page-don-vi-doc-ghi">PG-022 · Đơn vị đọc ghi nhỏ nhất của cơ sở dữ liệu là gì?</a> (page, buffer) và <a href="/articles/postgresql-explain-ke-hoach-thuc-thi">PG-021 · Đọc EXPLAIN</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>23-btree.sql</code>, phép đo ở <code>DO-DAC.md</code>). Sau bài này, bạn so sánh được đường tìm dữ liệu khi có và chưa có index bằng số page đọc, và giải thích vì sao planner vẫn chọn Seq Scan khi điều kiện khớp nhiều dòng.</p>
+<p>Đọc trước: <a href="/articles/page-don-vi-doc-ghi">PG-022 · Đơn vị đọc ghi nhỏ nhất của cơ sở dữ liệu là gì?</a> (page, buffer) và <a href="/articles/postgresql-explain-ke-hoach-thuc-thi">PG-021 · Đọc EXPLAIN</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>23-btree.sql</code>, phép đo ở <code>DO-DAC.md</code>). Sau bài này, bạn so sánh được đường tìm dữ liệu khi có index và khi chưa có index bằng số page đọc, và giải thích vì sao planner vẫn chọn Seq Scan khi điều kiện khớp nhiều dòng.</p>
 </div>
 
 ## 1. Dữ liệu và cách chạy
 
-Từ Phần 3, lab chạy trên **PostgreSQL 18.1 thật** (Phần 1–2 chạy PGlite 17.5). Bảng `trips` có 1.000.000 chuyến từ 01/05 đến 31/10/2026, chèn theo thứ tự thời gian, chiếm **19.441 page = 152 MB** — lớn hơn `shared_buffers` 128 MB của cluster lab. Mỗi tệp bài chạy trên một database mới chép từ nền, nên lúc bắt đầu `shared_buffers` chưa có page nào của bảng. Số thời gian trong bài lấy từ `p03/DO-DAC.md`: máy i7-10700 (16 luồng), 64 GB RAM, NVMe, Windows 11 Pro; parallel query, JIT, autovacuum tắt để tái lập; trung vị 7 lần (5 lần với câu nặng); máy có tải nền nên số tuyệt đối dao động khoảng ±20 %.
+Từ Phần 3, lab chạy trên **PostgreSQL 18.1 thật** (Phần 1–2 chạy PGlite 17.5). Bảng `trips` có 1.000.000 chuyến từ 01/05 đến 31/10/2026, chèn theo thứ tự thời gian, chiếm **19.441 page = 152 MB** — lớn hơn `shared_buffers` 128 MB của cluster lab. Mỗi tệp bài chạy trên một database mới chép từ nền, nên lúc bắt đầu `shared_buffers` chưa có page nào của bảng. Các số đo thời gian trong bài lấy từ `p03/DO-DAC.md`: máy i7-10700 (16 luồng), 64 GB RAM, NVMe, Windows 11 Pro; parallel query, JIT, autovacuum tắt để tái lập; trung vị 7 lần (5 lần với câu nặng); máy có tải nền nên số tuyệt đối dao động khoảng ±20 %.
 
 ```bash
 cd examples/toi-noi-postgresql
@@ -49,7 +49,7 @@ SELECT code, requested_at, fare FROM trips WHERE customer_id = :'kh';
 
 **Seq Scan** (quét tuần tự) đọc heap từ page đầu tới page cuối và thử điều kiện trên từng dòng. `Buffers: shared read=19441` đúng bằng số page của bảng: để trả 40 dòng, PostgreSQL đã chạm **mọi** page. `read` nghĩa là page chưa có trong `shared_buffers` — PostgreSQL phải xin hệ điều hành, và ở máy lab page đó thường đã nằm trong cache của hệ điều hành chứ chưa chắc là đọc đĩa thật.
 
-Thời gian đo trong `DO-DAC.md` (G1-c): trung vị **65,4 ms** cho một lần mở màn «Chuyến của tôi». Không chậm với một người, nhưng mỗi lần là một lượt quét 152 MB và một CPU bận 65 ms; hồ sơ ước ≈ 30.000 truy vấn đọc mỗi giây lúc cao điểm (mọi loại câu), nên chỉ cần một phần nhỏ trong đó quét cả bảng là đủ nghẽn — và bảng còn lớn thêm 2 triệu chuyến mỗi ngày.
+Thời gian đo trong `DO-DAC.md` (G1-c): trung vị **65,4 ms** cho một lần mở màn «Chuyến của tôi». Không chậm với một người, nhưng mỗi lần là một lượt quét 152 MB và một CPU bận 65 ms; hồ sơ ước tính ≈ 30.000 truy vấn đọc mỗi giây lúc cao điểm (mọi loại câu), nên chỉ cần một phần nhỏ trong đó quét cả bảng là đủ gây nghẽn — và bảng còn lớn thêm 2 triệu chuyến mỗi ngày.
 
 ## 3. Thêm một B-tree: 43 page
 
@@ -70,17 +70,17 @@ CREATE INDEX ix_trips_customer ON trips (customer_id);
 
 Từ **19.441** xuống **43** page: 3 page của index (nút con dưới cùng) cộng 40 page heap (`Heap Blocks: exact=40` — 40 chuyến nằm ở 40 page khác nhau, vì khách đặt rải rác trong 6 tháng). Dòng `Buffers` của nút cha là tổng, gồm cả nút con.
 
-Phép đo thời gian của lab dùng index hai cột có sẵn của nền (`customer_id, requested_at DESC`), không phải index một cột vừa tạo, nhưng cùng đường đi — 44 page: trung vị **0,04 ms** khi page đã nằm trong `shared_buffers`, **0,32 ms** khi đẩy bảng và index ra khỏi `shared_buffers` trước mỗi lần (G1-a, G1-b, 7 lần đo). So với 65,4 ms là chênh ba bậc độ lớn. Giới hạn: một máy, cache hệ điều hành luôn nóng ("lạnh" chỉ là `shared_buffers` rỗng), dữ liệu tổng hợp — tin vào **tỉ lệ page** hơn là con số mili-giây.
+Phép đo thời gian của lab dùng index hai cột có sẵn của nền (`customer_id, requested_at DESC`), không phải index một cột vừa tạo, nhưng cùng đường đi — 44 page: trung vị **0,04 ms** khi page đã nằm trong `shared_buffers`, **0,32 ms** khi đẩy bảng và index ra khỏi `shared_buffers` trước mỗi lần (G1-a, G1-b, 7 lần đo). So với 65,4 ms thì chênh nhau ba bậc độ lớn. Giới hạn: một máy, cache hệ điều hành luôn nóng ("lạnh" chỉ là `shared_buffers` rỗng), dữ liệu tổng hợp — tin vào **tỉ lệ page** hơn là con số mili-giây.
 
 Cái giá: một cấu trúc nữa trên đĩa, `ix_trips_customer` = **12,7 MB**, và mỗi lần ghi chuyến phải cập nhật thêm nó (PG-025 đo chi phí ghi).
 
 ## 4. Bên trong cây B-tree
 
-**B-tree** (cây cân bằng) là loại index mặc định của `CREATE INDEX`. Nó là một tệp riêng, cũng chia page 8 KB như heap, gồm ba loại page:
+**B-tree** (cây cân bằng) là loại index mặc định của `CREATE INDEX`. B-tree lưu trong một tệp riêng, cũng chia page 8 KB như heap, gồm ba loại page:
 
 - **Page lá** (leaf): mỗi mục là một khoá đã sắp thứ tự kèm **ctid** — địa chỉ `(page, ô)` của dòng trong heap. Mọi page cùng tầng nối với page kề hai chiều, nên đọc một khoảng khoá là đi xuống một lần rồi đi ngang.
 - **Page nhánh** (internal): mỗi mục là một khoá phân cách kèm số page con.
-- **Page gốc** (root): page nhánh trên cùng. Ngoài ra có một **metapage** ở block 0 ghi page gốc ở đâu và cây cao mấy tầng.
+- **Page gốc** (root): page nhánh trên cùng. Ngoài ra có một **metapage** ở block 0 ghi lại page gốc nằm ở đâu và cây cao mấy tầng.
 
 Extension `pageinspect` và `pgstattuple` cho xem từng phần (cần quyền superuser):
 
@@ -200,9 +200,9 @@ Thời gian đo (`DO-DAC.md`, G2, trung vị 5 lần, cache nóng):
 
 Dòng giữa đáng chú ý: ở 55 %, Bitmap bị ép lại **nhanh hơn** kế hoạch planner chọn trên máy này. Planner không đo thời gian; nó so **chi phí ước tính** theo mô hình mặc định coi đọc page ngẫu nhiên đắt gấp 4 lần đọc tuần tự (`random_page_cost = 4`), trong khi máy lab dùng NVMe và cache hệ điều hành nóng. Đây là một quan sát trên một máy, không phải lời khuyên chỉnh tham số — PG-027 và PG-030 quay lại chuyện ước lượng.
 
-Dòng cuối cho thấy điều quan trọng hơn: **cột thẳng hàng với heap** đổi hẳn kết quả. Chuyến được chèn theo giờ đặt, nên các chuyến của một khoảng thời gian nằm liền một dải page (hệ số `correlation` của `requested_at` = 1,000). Với index trên `requested_at`, planner chọn Index Scan cho 1, 7, 30, 60 và cả **120 ngày (~72 % bảng)**; tới 180 ngày mới chuyển Seq Scan. Cả tháng 10 — 184.396 chuyến — đi Index Scan chỉ chạm **4.212** page (`hit=3707 read=505`).
+Dòng cuối cho thấy điều quan trọng hơn: **cột thẳng hàng với heap** đổi hẳn kết quả. Chuyến được chèn theo giờ đặt, nên các chuyến của một khoảng thời gian nằm liền một dải page (hệ số `correlation` của `requested_at` = 1,000). Với index trên `requested_at`, planner chọn Index Scan cho 1, 7, 30, 60 và cả **120 ngày (~72 % bảng)**; tới 180 ngày mới chuyển Seq Scan. Cả tháng 10 — 184.396 chuyến — đọc bằng Index Scan mà chỉ chạm **4.212** page (`hit=3707 read=505`).
 
-Nên nhớ hai điều: **không có ngưỡng phần trăm cố định** kiểu "trên 10–20 % thì Seq Scan" (ở đây cột ngẫu nhiên đổi giữa 26,6 % và 55,5 %, cột thẳng hàng vượt 72 %), và cái quyết định là **số page heap phải chạm**, không phải số dòng. Vì sao heap thẳng hàng với thời gian mà không thẳng hàng với khoá chính là chủ đề của PG-024.
+Nên nhớ hai điều: **không có ngưỡng phần trăm cố định** kiểu "trên 10–20 % thì Seq Scan" (ở đây cột ngẫu nhiên đổi kế hoạch trong khoảng từ 26,6 % đến 55,5 %, cột thẳng hàng vượt 72 %), và cái quyết định là **số page heap phải chạm**, không phải số dòng. Vì sao heap thẳng hàng với thời gian mà không thẳng hàng với khoá chính là chủ đề của PG-024.
 
 ## 7. Cây cũng có hình dạng: chèn tăng dần hay ngẫu nhiên
 
@@ -215,7 +215,7 @@ Cả `pk_trips` (khoá uuid ngẫu nhiên) và `uq_trips_code` (mã tăng dần)
  uq_trips_code |       2733 |            90.01
 ```
 
-Mã tăng dần luôn chèn ở mép phải cây: page lá được lấp tới 90 % (fillfactor mặc định của B-tree) rồi mở page mới. Uuid ngẫu nhiên chèn vào giữa cây: page lá đầy thì **tách đôi**, mỗi nửa còn trống, nên cây xốp hơn (71 %). `REINDEX INDEX pk_trips` dựng lại cây từ dữ liệu đã sắp ⇒ **3.832** lá, đầy 89,98 %. Cây xốp nghĩa là nhiều page hơn cho cùng số khoá — tốn chỗ và tốn buffer hơn; dùng lâu ngày nó lại xốp dần theo lối chèn.
+Mã tăng dần luôn chèn ở mép phải cây: page lá được lấp tới 90 % (fillfactor mặc định của B-tree) rồi mở page mới. Uuid ngẫu nhiên chèn vào giữa cây: page lá đầy thì **tách đôi**, mỗi nửa còn trống, nên cây xốp hơn (71 %). `REINDEX INDEX pk_trips` dựng lại cây từ dữ liệu đã sắp ⇒ **3.832** lá, đầy 89,98 %. Cây xốp nghĩa là nhiều page hơn cho cùng số khoá — tốn chỗ và tốn buffer hơn; dùng lâu ngày cây lại xốp dần theo cách chèn.
 
 ## 8. Lỗi thường gặp
 
@@ -231,11 +231,11 @@ Mã tăng dần luôn chèn ở mép phải cây: page lá được lấp tới 
 
 - **Đọc chọn lọc nhanh hơn, ghi chậm hơn:** mỗi index là một cây phải cập nhật khi chèn/sửa (trừ trường hợp HOT ở PG-024). `trips` của hồ sơ có 5 index và bị sửa ≈ 560 lần/giây lúc cao điểm — thêm index phải có truy vấn thật cần nó.
 - **Một index cho một kiểu truy cập:** index trên `customer_id` không giúp lọc theo `fare`; index hai cột, partial và expression là PG-025.
-- **Chỗ trên đĩa và trong bộ nhớ:** 12,7 MB nhờ gộp khoá trùng; khoá ít trùng như cặp `(customer_id, requested_at)` thì 40,6 MB. Page index cũng tranh chỗ trong `shared_buffers` với page heap.
+- **Dung lượng trên đĩa và trong bộ nhớ:** 12,7 MB nhờ gộp khoá trùng; khoá ít trùng như cặp `(customer_id, requested_at)` thì 40,6 MB. Page index cũng tranh chỗ trong `shared_buffers` với page heap.
 
 ## 10. Bài tập
 
-**Bài 1.** Tạo `CREATE INDEX ix_trips_status ON trips (status)`. Dự đoán kế hoạch cho `status = 'completed'` và `status = 'searching'`. Vì sao cùng một index mà khác nhau?
+**Bài 1.** Tạo `CREATE INDEX ix_trips_status ON trips (status)`. Dự đoán kế hoạch cho `status = 'completed'` và `status = 'searching'`. Vì sao cùng một index mà hai kế hoạch lại khác nhau?
 
 <details><summary><b>Lời giải</b></summary>
 <p><code>completed</code> có 880.042 dòng (88 %) ⇒ <code>Seq Scan on trips</code>. <code>searching</code> chỉ có 50 chuyến (đang tìm tài xế lúc 01:00 ngày 31/10) ⇒ <code>Index Scan using ix_trips_status</code>, 50 dòng, <code>Buffers: shared hit=8 read=2</code> — chỉ 10 page. Planner dùng thống kê tần suất của từng giá trị (PG-027) nên quyết định theo giá trị, không theo cột. Lời giải: <code>p03/thu-nghiem/pg023-btree-bai-tap.sql</code>, mục 4.</p>
@@ -246,10 +246,10 @@ Mã tăng dần luôn chèn ở mép phải cây: page lá được lấp tới 
 <details><summary><b>Lời giải</b></summary>
 <pre><code class="language-sql">EXPLAIN (ANALYZE, COSTS OFF, TIMING OFF, SUMMARY OFF)
 SELECT code, fare FROM trips WHERE customer_id = :'b1';</code></pre>
-<p>Bitmap Heap Scan, <code>Heap Blocks: exact=18139</code> — 93 % số page của bảng — trong khi index chỉ tốn 47 page. 5 % số dòng nhưng chuyến của B1 rải đều theo thời gian, nên gần như page nào cũng có. Màn hình chỉ cần 20 chuyến gần nhất thì đừng lấy cả 51.151 dòng: index <code>(customer_id, requested_at DESC)</code> + <code>LIMIT</code> đọc 10 page (PG-021, PG-025).</p>
+<p>Bitmap Heap Scan, <code>Heap Blocks: exact=18139</code> — 93 % số page của bảng — trong khi index chỉ tốn 47 page. Chuyến của B1 chiếm 5 % số dòng nhưng rải đều theo thời gian, nên gần như page nào cũng có. Màn hình chỉ cần 20 chuyến gần nhất thì đừng lấy cả 51.151 dòng: index <code>(customer_id, requested_at DESC)</code> + <code>LIMIT</code> đọc 10 page (PG-021, PG-025).</p>
 </details>
 
-**Bài 3.** Bảng 1 triệu chuyến. Tra `WHERE code = 600000` qua `uq_trips_code` cần đọc tối thiểu mấy page? Kiểm bằng `bt_metap` và `EXPLAIN (ANALYZE)`.
+**Bài 3.** Bảng 1 triệu chuyến. Tra `WHERE code = 600000` qua `uq_trips_code` cần đọc tối thiểu mấy page? Kiểm tra bằng `bt_metap` và `EXPLAIN (ANALYZE)`.
 
 <details><summary><b>Lời giải</b></summary>
 <p><code>bt_metap('uq_trips_code').level</code> = 2 ⇒ 3 tầng ⇒ 3 page index + 1 page heap = <b>4</b>. Chạy lần hai trong cùng phiên: <code>Index Scan using uq_trips_code … Buffers: shared hit=4</code>. Lần đầu của phiên mới ra 7 page (có page chỉ đọc một lần mỗi phiên) — lý do nên đọc <code>Buffers</code> của lần chạy lặp lại. Mục 6 của tệp thí nghiệm.</p>

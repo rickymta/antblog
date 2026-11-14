@@ -10,7 +10,7 @@ language: vi
 
 Fraud-scoring của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận ba loại event qua Kafka: `BookingCreated` lúc đặt, `TripCompleted` lúc kết thúc, `PaymentCaptured` lúc thu tiền. Một event riêng lẻ nói rất ít: chuyến 4,5 km giá 23.250 đồng là sạch hay không? Dấu vết gian lận nằm ở chỗ khác, ở bộ ba event nối với nhau và với lịch sử: chuyến thứ ba của cùng một điện thoại trong 40 phút, tài xế «bay» hơn 100 km giữa hai chuyến, năm tài khoản chung một thiết bị cùng ăn mã giảm một nửa. **Đặc trưng** (feature) là con số rút từ chuỗi event để luật và mô hình đọc được. Bài này dựng chúng, rồi chỉ ra lỗi đắt nhất khi dựng: dùng thông tin mà lúc chấm điểm thật chưa có, gọi là **leakage**.
 
-Đây là bài 55 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần bộ dữ liệu tổng hợp và nhãn trễ của [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric), event Kafka ở [bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema) và polars ở [bài 29](/articles/python-polars-pandas-parquet-phan-tich-chuyen). Dữ liệu là tổng hợp, số đo chỉ nói về bộ này; điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khóa tài khoản.
+Đây là bài 55 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần bộ dữ liệu tổng hợp và nhãn trễ của [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric), event Kafka ở [bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema) và polars ở [bài 29](/articles/python-polars-pandas-parquet-phan-tich-chuyen). Dữ liệu là tổng hợp, số đo chỉ nói về bộ này; điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khoá tài khoản.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -39,7 +39,7 @@ def trip_table(events: pl.DataFrame) -> pl.DataFrame:
 trip_table: nối 3 loại event theo trip_id -> 200,000 chuyến x 22 cột trong 0.84 giây
 ```
 
-Chuyến được chấm điểm ở thời điểm `PaymentCaptured`, nên gọi `paid_at` là **thời điểm chấm** (as-of time). Quy tắc xuyên suốt: đặc trưng của một chuyến chỉ được dùng ba event của chính nó và các event **xảy ra trước** `paid_at`. Lab đơn giản hóa thêm một bước: chỉ đếm những chuyến trước đã thu tiền, chuyến đang chạy chưa tính. Mọi leakage trong bài này là một cách vi phạm quy tắc đó. Hình 1 minh họa cho một thiết bị.
+Chuyến được chấm điểm ở thời điểm `PaymentCaptured`, nên gọi `paid_at` là **thời điểm chấm** (as-of time). Quy tắc xuyên suốt: đặc trưng của một chuyến chỉ được dùng ba event của chính nó và các event **xảy ra trước** `paid_at`. Lab đơn giản hoá thêm một bước: chỉ đếm những chuyến trước đã thu tiền, chuyến đang chạy chưa tính. Mọi leakage trong bài này là một cách vi phạm quy tắc đó. Hình 1 minh hoạ cho một thiết bị.
 
 Trong luồng thật có hai đồng hồ. **Event time** là `occurred_at`, lúc sự việc xảy ra; **processing time** là lúc consumer nhận được event. Mọi cửa sổ trong bài dùng event time, vì processing time đổi theo độ trễ mạng, độ trễ consumer và cả việc xử lý lại sau sự cố. Mục cuối đo hậu quả của thứ tự đọc nhiều topic.
 
@@ -52,7 +52,7 @@ Trong luồng thật có hai đồng hồ. **Event time** là `occurred_at`, lú
 
 ## Cửa sổ thời gian: đếm theo thiết bị, khách, tài xế
 
-Với bảng đã sắp theo `paid_at`, polars cho cửa sổ trượt theo thời gian ngay trong biểu thức: `Expr.rolling(index_column, period=..., closed=...)` kết hợp `.over(khóa)` để mỗi khóa có cửa sổ riêng. Có một cái bẫy: `rolling(...).over(khóa)` của polars 2.1.0 **không báo lỗi** khi bảng chưa sắp theo cột chỉ mục, nó trả giá trị sai âm thầm (còn `rolling` không có `over` ném `InvalidOperationError`, `group_by_dynamic` có `group_by` ném `ComputeError`). Vì vậy `add_features` tự kiểm `is_sorted` và ném `ValueError`; phần chạy bên dưới đo cái giá khi không có hàng rào. Hai hàm nhỏ của `add_features` phủ gần hết các đặc trưng cửa sổ:
+Với bảng đã sắp theo `paid_at`, polars cho cửa sổ trượt theo thời gian ngay trong biểu thức: `Expr.rolling(index_column, period=..., closed=...)` kết hợp `.over(khóa)` để mỗi khoá có cửa sổ riêng. Có một cái bẫy: `rolling(...).over(khóa)` của polars 2.1.0 **không báo lỗi** khi bảng chưa sắp theo cột chỉ mục, nó trả giá trị sai âm thầm (còn `rolling` không có `over` ném `InvalidOperationError`, `group_by_dynamic` có `group_by` ném `ComputeError`). Vì vậy `add_features` tự kiểm `is_sorted` và ném `ValueError`; phần chạy bên dưới đo cái giá khi không có hàng rào. Hai hàm nhỏ của `add_features` phủ gần hết các đặc trưng cửa sổ:
 
 ```python
 def count(key: str | list[str], period: str) -> pl.Expr:
@@ -66,7 +66,7 @@ def distinct(col: str, key: str, period: str) -> pl.Expr:
 
 `closed="left"` quyết định chuyện sống còn: cửa sổ là `[t - period, t)`, không có `t`, nên chuyến đang chấm không tự đếm mình và chuyến trùng đúng thời điểm không lọt vào. Số khách khác nhau trên một thiết bị dùng `closed="both"` vì ta muốn thấy «khách thứ ba xuất hiện trên máy này», nên chuyến hiện tại phải được tính. Danh sách đặc trưng nhóm cửa sổ:
 
-| Đặc trưng | Khóa | Cửa sổ | Nhắm tới |
+| Đặc trưng | Khoá | Cửa sổ | Nhắm tới |
 |---|---|---|---|
 | `dev_trips_1h`, `dev_trips_24h` | thiết bị | 1 giờ, 24 giờ | chuyến ảo dồn dập |
 | `cust_trips_*`, `drv_trips_*` | khách, tài xế | 1 giờ, 24 giờ | tài khoản hoặc tài xế chạy dồn |
@@ -110,7 +110,7 @@ TN-0076399         25/03 00:15:21             2                  2              
 
 ## Haversine, tốc độ phi lý và nhảy vị trí
 
-GPS giả để lại hai dấu vết hình học. Một là **trong chuyến**: điểm bắt đầu cách điểm kết thúc quá xa so với thời lượng, tức tốc độ trung bình `speed_kmh` phi lý. Hai là **giữa các chuyến**: điểm bắt đầu cách xa điểm kết thúc của chuyến trước của cùng tài xế mà khoảng cách thời gian không đủ để đi (`drv_jump_speed_kmh`). Cả hai cần khoảng cách giữa hai tọa độ. **Haversine** cho khoảng cách đường chim bay trên mặt cầu bán kính 6.371 km; viết bằng biểu thức polars thì chạy được trên cả cột:
+GPS giả để lại hai dấu vết hình học. Một là **trong chuyến**: điểm bắt đầu cách điểm kết thúc quá xa so với thời lượng, tức tốc độ trung bình `speed_kmh` phi lý. Hai là **giữa các chuyến**: điểm bắt đầu cách xa điểm kết thúc của chuyến trước của cùng tài xế mà khoảng cách thời gian không đủ để đi (`drv_jump_speed_kmh`). Cả hai cần khoảng cách giữa hai toạ độ. **Haversine** cho khoảng cách đường chim bay trên mặt cầu bán kính 6.371 km; viết bằng biểu thức polars thì chạy được trên cả cột:
 
 ```python
 def haversine_expr(lat1: str, lng1: str, lat2: str, lng2: str) -> pl.Expr:
@@ -213,7 +213,7 @@ mô hình (HistGradientBoosting)                      PR-AUC offline  PR-AUC ph�
 mô hình sạch: ROC-AUC 0.995
 ```
 
-Chuyến gian lận ở valid có lịch sử gian lận trên thiết bị theo hai cách đếm, và bảng 2×2 đổi từng biến một (cùng HistGradientBoosting và hồi quy logistic chuẩn hóa, cùng train và valid):
+Chuyến gian lận ở valid có lịch sử gian lận trên thiết bị theo hai cách đếm, và bảng 2×2 đổi từng biến một (cùng HistGradientBoosting và hồi quy logistic chuẩn hoá, cùng train và valid):
 
 ```text
 chuyến gian lận ở valid có dev_fraud_naive > 0: 62.7%; có dev_fraud_known > 0: 42.8%
@@ -224,7 +224,7 @@ PR-AUC trên valid:                          13 đặc trưng theo từng chuy�
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 400" role="img" aria-label="Năm mô hình, mỗi mô hình hai thanh PR-AUC, offline và phục vụ. Đặc trưng sạch 0,886 và 0,886; thêm cửa sổ nhìn trước 0,888 và 0,879; thêm tổng hợp cả bảng 0,924 và 0,890; thêm lịch sử gian lận tính nhãn ngay 0,940 và 0,835; thêm lịch sử chỉ nhãn đã biết 0,914 và 0,914."><rect x="360" y="14" width="14" height="14" class="f-phys-soft s-phys"/><text x="382" y="26" class="t-small">offline: như lúc huấn luyện</text><rect x="620" y="14" width="14" height="14" class="f-warn-soft s-warn"/><text x="642" y="26" class="t-small">phục vụ: chỉ thấy quá khứ</text><text x="20" y="84" class="t-small">đặc trưng sạch (30)</text><rect x="360" y="64" width="425" height="18" rx="3" class="f-phys-soft s-phys"/><text x="793" y="78" class="t-small">0,886</text><rect x="360" y="88" width="425" height="18" rx="3" class="f-warn-soft s-warn"/><text x="793" y="102" class="t-small">0,886</text><text x="20" y="146" class="t-small">+ cửa sổ nhìn trước</text><rect x="360" y="126" width="426" height="18" rx="3" class="f-phys-soft s-phys"/><text x="794" y="140" class="t-small">0,888</text><rect x="360" y="150" width="422" height="18" rx="3" class="f-warn-soft s-warn"/><text x="790" y="164" class="t-small">0,879</text><text x="20" y="208" class="t-small">+ tổng hợp cả bảng theo khóa</text><rect x="360" y="188" width="444" height="18" rx="3" class="f-phys-soft s-phys"/><text x="812" y="202" class="t-small">0,924</text><rect x="360" y="212" width="427" height="18" rx="3" class="f-warn-soft s-warn"/><text x="795" y="226" class="t-small">0,89</text><text x="20" y="270" class="t-small">+ lịch sử gian lận, nhãn tính ngay</text><rect x="360" y="250" width="451" height="18" rx="3" class="f-phys-soft s-phys"/><text x="819" y="264" class="t-small">0,94</text><rect x="360" y="274" width="401" height="18" rx="3" class="f-warn-soft s-warn"/><text x="769" y="288" class="t-small">0,835</text><text x="20" y="332" class="t-small">+ lịch sử gian lận, nhãn đã biết</text><rect x="360" y="312" width="439" height="18" rx="3" class="f-phys-soft s-phys"/><text x="807" y="326" class="t-small">0,914</text><rect x="360" y="336" width="439" height="18" rx="3" class="f-warn-soft s-warn"/><text x="807" y="350" class="t-small">0,914</text></svg>
+<svg viewBox="0 0 880 400" role="img" aria-label="Năm mô hình, mỗi mô hình hai thanh PR-AUC, offline và phục vụ. Đặc trưng sạch 0,886 và 0,886; thêm cửa sổ nhìn trước 0,888 và 0,879; thêm tổng hợp cả bảng 0,924 và 0,890; thêm lịch sử gian lận tính nhãn ngay 0,940 và 0,835; thêm lịch sử chỉ nhãn đã biết 0,914 và 0,914."><rect x="360" y="14" width="14" height="14" class="f-phys-soft s-phys"/><text x="382" y="26" class="t-small">offline: như lúc huấn luyện</text><rect x="620" y="14" width="14" height="14" class="f-warn-soft s-warn"/><text x="642" y="26" class="t-small">phục vụ: chỉ thấy quá khứ</text><text x="20" y="84" class="t-small">đặc trưng sạch (30)</text><rect x="360" y="64" width="425" height="18" rx="3" class="f-phys-soft s-phys"/><text x="793" y="78" class="t-small">0,886</text><rect x="360" y="88" width="425" height="18" rx="3" class="f-warn-soft s-warn"/><text x="793" y="102" class="t-small">0,886</text><text x="20" y="146" class="t-small">+ cửa sổ nhìn trước</text><rect x="360" y="126" width="426" height="18" rx="3" class="f-phys-soft s-phys"/><text x="794" y="140" class="t-small">0,888</text><rect x="360" y="150" width="422" height="18" rx="3" class="f-warn-soft s-warn"/><text x="790" y="164" class="t-small">0,879</text><text x="20" y="208" class="t-small">+ tổng hợp cả bảng theo khoá</text><rect x="360" y="188" width="444" height="18" rx="3" class="f-phys-soft s-phys"/><text x="812" y="202" class="t-small">0,924</text><rect x="360" y="212" width="427" height="18" rx="3" class="f-warn-soft s-warn"/><text x="795" y="226" class="t-small">0,89</text><text x="20" y="270" class="t-small">+ lịch sử gian lận, nhãn tính ngay</text><rect x="360" y="250" width="451" height="18" rx="3" class="f-phys-soft s-phys"/><text x="819" y="264" class="t-small">0,94</text><rect x="360" y="274" width="401" height="18" rx="3" class="f-warn-soft s-warn"/><text x="769" y="288" class="t-small">0,835</text><text x="20" y="332" class="t-small">+ lịch sử gian lận, nhãn đã biết</text><rect x="360" y="312" width="439" height="18" rx="3" class="f-phys-soft s-phys"/><text x="807" y="326" class="t-small">0,914</text><rect x="360" y="336" width="439" height="18" rx="3" class="f-warn-soft s-warn"/><text x="807" y="350" class="t-small">0,914</text></svg>
 </div>
 <figcaption>Hình 2. PR-AUC trên valid với và không có rò rỉ. Thanh dưới là số hệ thống phục vụ thật sẽ đạt; thanh trên là số offline hứa.</figcaption>
 </figure>
@@ -233,7 +233,7 @@ Có bốn điều đọc ra được. **Một**, đặc trưng sạch cho PR-AUC
 
 ## Cùng đặc trưng ở hai nơi: online từ envelope Kafka
 
-Huấn luyện chạy theo lô trên bảng, còn phục vụ nhận từng event. Hai đường code cho cùng một đặc trưng là nơi sinh **train/serve skew**: hai bản tính khác nhau ở những chuyến hiếm mà ta không để ý. Cách phòng là viết đường online theo đúng định nghĩa rồi kiểm bằng so sánh, trên cả 30 đặc trưng. `online.py` giữ cho mỗi khóa một danh sách thời điểm sắp xếp, chèn đúng chỗ bằng `bisect`, và chỉ ghi chuyến vào trạng thái sau khi đã đọc xong đặc trưng:
+Huấn luyện chạy theo lô trên bảng, còn phục vụ nhận từng event. Hai đường code cho cùng một đặc trưng là nơi sinh **train/serve skew**: hai bản tính khác nhau ở những chuyến hiếm mà ta không để ý. Cách phòng là viết đường online theo đúng định nghĩa rồi kiểm bằng so sánh, trên cả 30 đặc trưng. `online.py` giữ cho mỗi khoá một danh sách thời điểm sắp xếp, chèn đúng chỗ bằng `bisect`, và chỉ ghi chuyến vào trạng thái sau khi đã đọc xong đặc trưng:
 
 ```python
 def count_before(self, t: int, width: int) -> int:
@@ -285,7 +285,7 @@ Kafka giao đủ 100.013 bản ghi, nhưng 32.503 trên 33.331 chuyến bị đ�
 
 ## Chạy và kiểm chứng
 
-Cần uv, Python 3.14 và Kafka trong hạ tầng dùng chung (`localhost:9094`, ghi đè bằng `TOINOI_KAFKA_BOOTSTRAP`); lần đầu cần mạng để tải polars, scikit-learn, aiokafka. Lab tạo ba topic `lab55.*`, xóa khi chạy xong, và không tạo consumer group. Từ thư mục gốc repository:
+Cần uv, Python 3.14 và Kafka trong hạ tầng dùng chung (`localhost:9094`, ghi đè bằng `TOINOI_KAFKA_BOOTSTRAP`); lần đầu cần mạng để tải polars, scikit-learn, aiokafka. Lab tạo ba topic `lab55.*`, xoá khi chạy xong, và không tạo consumer group. Từ thư mục gốc repository:
 
 ```bash
 docker compose -f examples/toi-noi-python/infra/compose.yml up -d --wait

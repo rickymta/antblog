@@ -10,7 +10,7 @@ language: vi
 
 Trang giới thiệu và web app của Tới Nơi nằm trên S3, khách ở Hà Nội mở trang phải đi tới Singapore. Mỗi sáng, có kẻ chạy script thử hàng nghìn mật khẩu vào `/auth/login`. Còn ảnh chứng từ giao hàng thì tải chậm ở vùng xa. Ba vấn đề, một câu trả lời chung: đặt một lớp ở biên mạng, gần người dùng, nơi lưu lượng được cache, lọc và chặn trước khi chạm vào hạ tầng của ta.
 
-Đây là **bài 20**, bài cuối của lộ trình **AWS qua Tới Nơi · Phần 02: Container, serverless và dịch vụ ứng dụng**. Bạn cần xong bài 09 (Route 53 và ACM) và bài 19 (API Gateway).
+Đây là **bài 20**, bài cuối của lộ trình **AWS qua Tới Nơi · Phần 02: Container, serverless và dịch vụ ứng dụng**. Bạn cần đọc xong bài 09 (Route 53 và ACM) và bài 19 (API Gateway).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -31,9 +31,9 @@ Với Tới Nơi, một distribution phục vụ cả web và API: mặc định
 | Response headers policy | Header CloudFront thêm vào phản hồi | HSTS, `X-Content-Type-Options`, `X-Frame-Options` |
 | Behavior | Nối đường dẫn với origin và các policy trên | `/api/*` khác `*` |
 
-Mỗi header thêm vào cache key nhân số bản cache theo số giá trị của nó và làm hit ratio giảm. Origin cần header mà phản hồi không phụ thuộc vào nó thì đặt vào origin request policy.
+Mỗi header thêm vào cache key nhân số bản cache theo số giá trị của nó và làm hit ratio giảm. Nếu origin cần một header nhưng phản hồi không phụ thuộc vào header đó thì đặt nó vào origin request policy.
 
-**Invalidation** (`aws cloudfront create-invalidation`) xoá cache ngay, vượt hạn mức miễn phí thì tính theo đường dẫn, và không thay được việc đặt tên tệp có hash. **Chứng chỉ ACM cho CloudFront phải nằm ở `us-east-1`**, dù origin ở Singapore.
+**Invalidation** (`aws cloudfront create-invalidation`) xoá cache ngay, tính phí theo đường dẫn khi vượt hạn mức miễn phí, và không thay thế được cách đặt tên tệp có hash. **Chứng chỉ ACM cho CloudFront phải nằm ở `us-east-1`**, dù origin ở Singapore.
 
 ## Origin: S3 qua OAC và ALB chỉ nhận từ CloudFront
 
@@ -49,7 +49,7 @@ condition {
 
 Truy cập thẳng URL S3 bị `403`, chỉ đi qua CloudFront mới được; bucket vẫn bật Block Public Access.
 
-Với API qua ALB, vấn đề là ai cũng có thể gọi thẳng DNS của ALB và bỏ qua WAF. Giải pháp truyền thống gồm hai lớp: security group của ALB chỉ cho **managed prefix list** `com.amazonaws.global.cloudfront.origin-facing` vào cổng 443, và listener rule chỉ chuyển tiếp khi có header bí mật `X-Origin-Verify` do CloudFront thêm (custom header của origin). Rule tham chiếu prefix list được tính vào hạn mức rule của security group theo số mục tối đa của prefix list, và prefix list của CloudFront chiếm gần hết hạn mức mặc định, nên hãy kiểm quota trước. Rule mặc định của listener phải trả `403` khi thiếu header. Cách mới hơn là **VPC origin**: ALB nằm trong subnet private, không có IP công khai, CloudFront đi vào qua kết nối riêng do AWS quản lý, nên không cần header bí mật.
+Với API qua ALB, vấn đề là ai cũng có thể gọi thẳng DNS của ALB và bỏ qua WAF. Giải pháp truyền thống gồm hai lớp: security group của ALB chỉ cho **managed prefix list** `com.amazonaws.global.cloudfront.origin-facing` vào cổng 443, và listener rule chỉ chuyển tiếp khi có header bí mật `X-Origin-Verify` do CloudFront thêm (custom header của origin). Rule tham chiếu prefix list tính vào hạn mức rule của security group theo số mục tối đa của prefix list, mà prefix list của CloudFront chiếm gần hết hạn mức mặc định, nên hãy kiểm tra quota trước. Rule mặc định của listener phải trả `403` khi thiếu header. Cách mới hơn là **VPC origin**: ALB nằm trong subnet private, không có IP công khai, CloudFront đi vào qua kết nối riêng do AWS quản lý, nên không cần header bí mật.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -70,9 +70,9 @@ Hai cách chạy code ở edge, phù hợp việc khác nhau:
 | Chi phí và độ trễ | Rẻ nhất, độ trễ thấp nhất | Cao hơn |
 | Dùng cho | Redirect, viết lại URL, thêm header bảo mật | Xác thực tuỳ chỉnh, gọi dịch vụ ngoài, sửa phản hồi từ origin |
 
-Việc của Tới Nơi thuộc loại đầu: hàm `redirect.js` trong lab chuyển `toinoi.example` sang `www`, đổi đường dẫn cũ `/dat-xe` sang `/ride/` và thêm `index.html` cho URI kết thúc bằng dấu `/` (S3 qua OAC không tự phục vụ index của thư mục con). HSTS và các header bảo mật đã do response headers policy lo.
+Việc của Tới Nơi thuộc loại đầu: hàm `redirect.js` trong lab chuyển `toinoi.example` sang `www`, đổi đường dẫn cũ `/dat-xe` sang `/ride/` và thêm `index.html` cho URI kết thúc bằng dấu `/` (S3 qua OAC không tự phục vụ index của thư mục con). HSTS và các header bảo mật đã có response headers policy đảm nhiệm.
 
-Với nội dung riêng tư như ảnh chứng từ giao hàng, nếu muốn CDN thay vì presigned URL của S3 (bài 06), dùng **signed URL** hoặc **signed cookie** của CloudFront: behavior khai báo **key group** tin cậy, ứng dụng ký URL bằng private key với thời hạn ngắn (`aws cloudfront sign` ký URL từ dòng lệnh, hoặc ký trong code). Private key nằm trong Secrets Manager, không bao giờ nằm trong repo.
+Với nội dung riêng tư như ảnh chứng từ giao hàng, nếu muốn phục vụ qua CDN thay vì presigned URL của S3 (bài 06), hãy dùng **signed URL** hoặc **signed cookie** của CloudFront: behavior khai báo **key group** tin cậy, ứng dụng ký URL bằng private key với thời hạn ngắn (`aws cloudfront sign` ký URL từ dòng lệnh, hoặc ký trong code). Private key nằm trong Secrets Manager, không bao giờ nằm trong repo.
 
 ## WAF: chặn ở biên trước khi tới ứng dụng
 
@@ -81,7 +81,7 @@ Với nội dung riêng tư như ảnh chứng từ giao hàng, nếu muốn CDN
 Ba loại rule Tới Nơi dùng:
 
 - **Managed rule group** do AWS bảo trì: Core rule set (chống các dạng tấn công web phổ biến), Known Bad Inputs, SQL database. Khi mới bật, đặt ở chế độ **count**, xem log vài ngày để loại false positive rồi mới chuyển sang chặn;
-- **Rate-based rule**: đếm request theo khoá (mặc định IP) trong cửa sổ thời gian, vượt ngưỡng thì chặn. Dùng `scope_down_statement` để chỉ đếm `/auth/login`. Ngưỡng 100 request trong 5 phút của lab là giả định; nhiều khách mạng di động dùng chung một IP nên đừng đặt quá thấp.
+- **Rate-based rule**: đếm request theo khoá (mặc định IP) trong cửa sổ thời gian, vượt ngưỡng thì chặn. Dùng `scope_down_statement` để chỉ đếm `/auth/login`. Ngưỡng 100 request trong 5 phút của lab là giả định; nhiều khách dùng mạng di động chung một địa chỉ IP nên đừng đặt quá thấp.
 - **Geo match**: đếm hoặc chặn theo quốc gia. Khách du lịch dùng SIM nước ngoài vẫn đặt xe ở 6 thành phố của Tới Nơi, nên rule geo của lab chỉ đếm.
 
 ```hcl
@@ -105,7 +105,7 @@ rate_based_statement {
 
 Action `block` kèm `custom_response` 429 và header `Retry-After` nằm ở khối rule bên ngoài (xem lab). Rate-based rule đánh giá có độ trễ, không chặn tức thì.
 
-**Log WAF** vào S3, CloudWatch Logs hoặc Firehose (tên đích phải bắt đầu `aws-waf-logs-`). Bucket S3 phải cùng account với web ACL; với web ACL scope `CLOUDFRONT`, log group CloudWatch phải ở `us-east-1`. Che trường nhạy cảm như header `Authorization` bằng `redacted_fields`. Mỗi web ACL có giới hạn **WCU** (capacity units) và mỗi rule tốn một số WCU. WAF **không** gắn trực tiếp vào HTTP API của bài 19: nếu cần WAF cho nhánh đó, đặt CloudFront phía trước hoặc dùng REST API.
+**Log WAF** có thể gửi tới S3, CloudWatch Logs hoặc Firehose (tên đích phải bắt đầu `aws-waf-logs-`). Bucket S3 phải cùng account với web ACL; với web ACL scope `CLOUDFRONT`, log group CloudWatch phải ở `us-east-1`. Hãy che các trường nhạy cảm như header `Authorization` bằng `redacted_fields`. Mỗi web ACL có giới hạn **WCU** (capacity units) và mỗi rule tốn một số WCU. WAF **không** gắn trực tiếp vào HTTP API của bài 19: nếu cần WAF cho nhánh đó, đặt CloudFront phía trước hoặc dùng REST API.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -116,24 +116,24 @@ Action `block` kèm `custom_response` 429 và header `Retry-After` nằm ở kh�
 
 ## Shield: Standard có sẵn, Advanced khi rủi ro đủ lớn
 
-**AWS Shield Standard** bật tự động, không phí thêm, bảo vệ chống các dạng tấn công DDoS phổ biến ở lớp mạng và giao vận (lớp 3 và 4) cho tài nguyên AWS, hiệu quả nhất khi lưu lượng đi qua CloudFront và Route 53. Vì vậy CloudFront phía trước ALB cũng là một biện pháp chống DDoS, không chỉ là CDN.
+**AWS Shield Standard** bật tự động, không tính thêm phí, bảo vệ chống các dạng tấn công DDoS phổ biến ở lớp mạng và giao vận (lớp 3 và 4) cho tài nguyên AWS, hiệu quả nhất khi lưu lượng đi qua CloudFront và Route 53. Vì vậy CloudFront phía trước ALB cũng là một biện pháp chống DDoS, không chỉ là CDN.
 
-**Shield Advanced** là subscription trả phí: phát hiện chi tiết hơn, tự giảm thiểu tấn công lớp ứng dụng khi đi cùng WAF, **Shield Response Team (SRT)** hỗ trợ (cần gói Support phù hợp) và bảo vệ chi phí khi tài nguyên phình ra do tấn công. Phí cố định đáng kể nên đây là quyết định rủi ro: so thiệt hại của một giờ ngừng dịch vụ lúc 17:30 với phí subscription.
+**Shield Advanced** là subscription trả phí: phát hiện chi tiết hơn, tự giảm thiểu tấn công lớp ứng dụng khi đi cùng WAF, **Shield Response Team (SRT)** hỗ trợ (cần gói Support phù hợp) và bảo vệ chi phí khi tài nguyên phình ra do tấn công. Phí cố định khá lớn nên đây là quyết định về rủi ro: hãy so thiệt hại của một giờ ngừng dịch vụ lúc 17:30 với phí subscription.
 
 ## Cái giá phải trả
 
 - **Cache nhầm dữ liệu cá nhân** là rủi ro lớn nhất; luôn cho API đi behavior riêng, mặc định không cache, và chỉ bật cache có chủ đích cho endpoint công khai như menu quán.
 - **Rule WAF chặn nhầm** gây lỗi khó chẩn đoán vì server không có log. Mới bật thì để count và đặt alarm theo số request bị chặn.
-- **Chi phí cố định của WAF**: mỗi web ACL và rule tính tiền theo thời gian tồn tại ngoài phí theo request. Đừng để web ACL thử nghiệm chạy quên.
+- **Chi phí cố định của WAF**: mỗi web ACL và rule tính tiền theo thời gian tồn tại, ngoài phí tính theo request. Đừng để web ACL thử nghiệm chạy quên.
 - **Header bí mật lộ ra** nếu nằm trong repo hoặc log; lưu trong Secrets Manager (bài 14) và xoay vòng định kỳ.
 
-**Bài tập:** `Cache-Control` nào của một API trả về khiến CloudFront cache nhầm phản hồi của khách này cho khách khác? Cách phòng?
+**Bài tập:** `Cache-Control` nào mà một API trả về sẽ khiến CloudFront cache nhầm phản hồi của khách này cho khách khác? Cách phòng?
 
 <details><summary>Xem đáp án</summary><p>Phản hồi như <code>Cache-Control: public, max-age=60</code> hoặc <code>s-maxage</code> cho endpoint theo người dùng (ví dụ <code>GET /api/v1/trips/me</code>), đi qua behavior dùng cache policy tôn trọng header của origin mà cache key không chứa <code>Authorization</code>. Khi đó CloudFront có thể trả cùng bản cache cho nhiều khách. Cách phòng: behavior <code>/api/*</code> dùng cache policy tắt cache; service trả <code>Cache-Control: private, no-store</code> cho dữ liệu cá nhân; chỉ cho phép <code>public</code> ở endpoint công khai thật sự (menu quán, bảng giá chung) trên behavior riêng; kiểm lại bằng header <code>X-Cache</code> trong phản hồi.</p></details>
 
 ## Lab và kiểm chứng
 
-Mã nằm ở `examples/toi-noi-aws/p02-20-cloudfront-waf`: distribution trước S3 web tĩnh qua OAC, response headers policy, CloudFront Function và test của nó, web ACL ở `us-east-1` với rate-based rule, managed rule group và log S3, cùng phần khoá ALB tuỳ chọn. Kiểm trên máy:
+Mã nằm ở `examples/toi-noi-aws/p02-20-cloudfront-waf`: distribution trước S3 web tĩnh qua OAC, response headers policy, CloudFront Function và test của nó, web ACL ở `us-east-1` với rate-based rule, managed rule group và log S3, cùng phần khoá ALB tuỳ chọn. Kiểm tra trên máy:
 
 ```bash
 cd examples/toi-noi-aws/p02-20-cloudfront-waf

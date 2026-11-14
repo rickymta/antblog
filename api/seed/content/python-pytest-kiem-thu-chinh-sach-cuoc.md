@@ -263,7 +263,7 @@ Bài C# có 9 ca; ở đây 36 là số ca pytest đếm sau khi mở `parametri
 
 <details><summary>Xem lời giải</summary><p>(1) Ba ca <code>test_fare_at_boundaries[100km-…]</code> đỏ (<code>3 failed, 33 passed</code>): đúng 100 km bị từ chối với <code>ValueError</code>. Ca 100,001 bị từ chối ở cả hai phiên bản, và các khoảng cách nhỏ hơn 100 hợp lệ ở cả hai, nên chỉ ca <b>nằm đúng trên biên</b> mới phân biệt <code>&lt;</code> với <code>&lt;=</code>; đó là lý do người ta kiểm giá trị biên. (2) Phần vượt là 4 − 3 = 1 km, cước = 12.000 + 1 × 4.500 = <b>16.500</b>: <code>assert calculate_fare(D("4"), FarePolicy(included_km=D("3"))) == D("16500")</code>.</p></details>
 
-Bài trước: [bài 09](/articles/python-file-json-csv-pathlib). Bài tiếp: bài 11, mở đầu phần 02 (mô hình hóa nghiệp vụ bằng Python).
+Bài trước: [bài 09](/articles/python-file-json-csv-pathlib). Bài tiếp: bài 11, mở đầu phần 02 (mô hình hoá nghiệp vụ bằng Python).
 
 ## Tài liệu gốc
 

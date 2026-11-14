@@ -10,7 +10,7 @@ language: vi
 
 Rule engine ở [bài 56](/articles/python-rule-engine-scoring-strategy-explainability) cho điểm đọc được lý do, nhưng bỏ sót nhiều chuyến mà dấu vết nằm ở tổ hợp nhiều tín hiệu yếu. Mô hình học trên 30 đặc trưng của bài 55 là bước tiếp theo, và «chạy được trên notebook» chưa phải thứ [Tới Nơi](/articles/du-an-mau-toi-noi) đưa lên production. Service fraud-scoring cần huấn luyện lại định kỳ, lưu thành file, nạp lại ở nơi phục vụ, và trả ra một con số mà người duyệt và người vận hành đọc được. Trên dữ liệu 98 % chuyến sạch, ba câu hỏi nảy ra ngay: chia dữ liệu thế nào để số đo đáng tin, có cần «cân bằng» hai lớp không, và con số mô hình trả về có phải xác suất không.
 
-Đây là bài 57 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen luật chấm điểm ở bài 56, 30 đặc trưng ở [bài 55](/articles/python-feature-engineering-tu-event-kafka) và PR-AUC ở [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric). Dữ liệu là tổng hợp nên số đo chỉ nói về bộ này; điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khóa tài khoản. LightGBM có wheel cho Python 3.14 (kiểm ngày 06/11/2026, bản 4.7.0); riêng macOS cần thêm `brew install libomp`. Mọi bước dùng nhãn **cuối cùng**, trừ một bước nói rõ; kết luận về thứ bậc được lặp trên ba seed của bộ sinh.
+Đây là bài 57 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen luật chấm điểm ở bài 56, 30 đặc trưng ở [bài 55](/articles/python-feature-engineering-tu-event-kafka) và PR-AUC ở [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric). Dữ liệu là tổng hợp nên số đo chỉ nói về bộ này; điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khoá tài khoản. LightGBM có wheel cho Python 3.14 (kiểm ngày 06/11/2026, bản 4.7.0); riêng macOS cần thêm `brew install libomp`. Mọi bước dùng nhãn **cuối cùng**, trừ một bước nói rõ; kết luận về thứ bậc được lặp trên ba seed của bộ sinh.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -31,7 +31,7 @@ def make_pipeline(estimator, *, scale: bool = False, features: Sequence[str] = F
     return Pipeline([("select", select), ("model", estimator)])
 ```
 
-`scale=True` thêm `log1p` và chuẩn hóa cho mô hình tuyến tính; cây quyết định không cần vì `log1p` đơn điệu. Hồi quy logistic qua pipeline này là mốc so sánh của bài, và cũng là lúc kiểm pipeline giữ lời hứa «chọn theo tên» (trích):
+`scale=True` thêm `log1p` và chuẩn hoá cho mô hình tuyến tính; cây quyết định không cần vì `log1p` đơn điệu. Hồi quy logistic qua pipeline này là mốc so sánh của bài, và cũng là lúc kiểm pipeline giữ lời hứa «chọn theo tên» (trích):
 
 ```text
 hồi quy logistic (log1p + StandardScaler, 30 đặc trưng, 0.4 giây): PR-AUC 0.836, ROC-AUC 0.991 trên valid
@@ -236,7 +236,7 @@ nạp lại: 66,704 dự đoán giống hệt lúc huấn luyện = True; score_
 Metadata có `model_version` (`fraud-lgbm-` cộng tám ký tự đầu của sha256), `feature_list` theo đúng thứ tự, khoảng ngày của từng phần dữ liệu và loại nhãn, siêu tham số, ngưỡng và giả định chi phí, `metrics_valid` và `metrics_valid_by_type`, phiên bản thư viện, và `reference_distribution`: với mỗi đặc trưng, các mốc phân vị và tỉ lệ dòng mỗi khoảng trên dữ liệu huấn luyện, để bài 60 tính PSI mà không cần giữ lại dữ liệu. `load_model` trả `ScoringModel`:
 
 - `predict_proba(df)` chọn cột theo `meta["feature_list"]` chứ không theo `FEATURES` hiện tại, nên mô hình cũ với bộ đặc trưng khác vẫn nạp được; cột thừa bị bỏ.
-- `score_one(dict)` và `predict_proba` từ chối `None`, `NaN`, vô cực, chuỗi và thiếu khóa bằng `ModelInputError`, thay vì để LightGBM âm thầm coi `NaN` là «thiếu».
+- `score_one(dict)` và `predict_proba` từ chối `None`, `NaN`, vô cực, chuỗi và thiếu khoá bằng `ModelInputError`, thay vì để LightGBM âm thầm coi `NaN` là «thiếu».
 - `threshold` (ngưỡng chọn trên bộ hiệu chỉnh) và `flag(p, amount)` (quy tắc chi phí kỳ vọng).
 - `booster` và `preprocess` cho SHAP ở bài 61; `contributions(df)` cho tổng mỗi dòng khớp điểm thô (log-odds) **trước hiệu chỉnh**, nên SHAP giải thích điểm thô chứ không phải `p`.
 
@@ -249,7 +249,7 @@ score_one từ chối đầu vào xấu (ModelInputError):
   thiếu khóa: thiếu đặc trưng: speed_kmh
 ```
 
-Mọi lỗi nạp đều là `ModelLoadError`, kể cả JSON hỏng, meta thiếu khóa và joblib cắt cụt; phiên bản scikit-learn và LightGBM phải **cùng minor** (lệch patch chỉ cảnh báo):
+Mọi lỗi nạp đều là `ModelLoadError`, kể cả JSON hỏng, meta thiếu khoá và joblib cắt cụt; phiên bản scikit-learn và LightGBM phải **cùng minor** (lệch patch chỉ cảnh báo):
 
 ```text
 nạp file bị sửa (mọi lỗi đều là ModelLoadError):
@@ -297,7 +297,7 @@ Kiểm chứng: OK 45/45
 
 **Bài tập:** (1) Theo quy tắc chi phí kỳ vọng, ngưỡng `p` để gắn cờ một chuyến 30.000 VND là bao nhiêu? Một chuyến 120.000 VND thì sao, và vì sao ngưỡng đổi theo giá chuyến? (2) Bộ hiệu chỉnh có 2,39 % gian lận. Nếu ngoài đời tỉ lệ đó tăng gấp đôi, thành 4,78 %, một chuyến mô hình cho `p = 0,1` thực sự đáng nghi bao nhiêu, giả sử mô hình vẫn xếp hạng như cũ và chỉ tỉ lệ nền đổi?
 
-<details><summary>Xem lời giải</summary><p>(1) Gắn cờ tốn 8.000 chắc chắn, bỏ sót tốn tiền chuyến cộng 20.000, nên gắn cờ khi p × (tiền + 20.000) &gt; 8.000, tức p &gt; 8.000 / (tiền + 20.000). Chuyến 30.000 VND: 8.000 / 50.000 = <b>0,16</b>. Chuyến 120.000 VND: 8.000 / 140.000 = <b>0,057</b>. Chuyến đắt thì bỏ sót tốn hơn nên chấp nhận gắn cờ ở xác suất thấp hơn. Ngưỡng chung chọn trên bộ hiệu chỉnh (0,149 trong lab) là trung bình hóa của việc đó. (2) Odds ban đầu: 0,0239 / 0,9761 = 0,0245; odds mới: 0,0478 / 0,9522 = 0,0502, gấp <b>2,05</b> lần. Với <code>p = 0,1</code> (odds 0,111), odds mới là 0,111 × 2,05 = 0,228, tức p ≈ <b>0,19</b>. Mô hình đã hiệu chỉnh trên tỉ lệ cũ sẽ đánh giá thấp mọi chuyến; sửa bằng hiệu chỉnh lại trên dữ liệu gần, hoặc nhân odds theo tỉ lệ nền mới, và theo dõi tỉ lệ nền để biết lúc nào phải làm (bài 60).</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Gắn cờ tốn 8.000 chắc chắn, bỏ sót tốn tiền chuyến cộng 20.000, nên gắn cờ khi p × (tiền + 20.000) &gt; 8.000, tức p &gt; 8.000 / (tiền + 20.000). Chuyến 30.000 VND: 8.000 / 50.000 = <b>0,16</b>. Chuyến 120.000 VND: 8.000 / 140.000 = <b>0,057</b>. Chuyến đắt thì bỏ sót tốn hơn nên chấp nhận gắn cờ ở xác suất thấp hơn. Ngưỡng chung chọn trên bộ hiệu chỉnh (0,149 trong lab) là trung bình hoá của việc đó. (2) Odds ban đầu: 0,0239 / 0,9761 = 0,0245; odds mới: 0,0478 / 0,9522 = 0,0502, gấp <b>2,05</b> lần. Với <code>p = 0,1</code> (odds 0,111), odds mới là 0,111 × 2,05 = 0,228, tức p ≈ <b>0,19</b>. Mô hình đã hiệu chỉnh trên tỉ lệ cũ sẽ đánh giá thấp mọi chuyến; sửa bằng hiệu chỉnh lại trên dữ liệu gần, hoặc nhân odds theo tỉ lệ nền mới, và theo dõi tỉ lệ nền để biết lúc nào phải làm (bài 60).</p></details>
 
 Bài trước: [bài 56](/articles/python-rule-engine-scoring-strategy-explainability). Bài tiếp: [bài 58](/articles/python-networkx-graph-cau-ket-tai-xe-khach).
 

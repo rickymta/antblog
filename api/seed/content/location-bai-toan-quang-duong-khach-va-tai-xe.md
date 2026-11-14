@@ -20,7 +20,7 @@ Hai người ở gần nhau trên bản đồ nhưng xa nhau trên mặt đườ
 
 ## Ghim ở đâu và xe dừng được ở đâu là hai chuyện khác nhau
 
-Khách chạm vào bản đồ và để lại một **tọa độ**. Điều khách muốn là **một chỗ đứng có xe tới**. Giữa hai thứ này có ba khoảng hở, và cả ba đều có mặt trong tình huống mở bài.
+Khách chạm vào bản đồ và để lại một **toạ độ**. Điều khách muốn là **một chỗ đứng có xe tới**. Giữa hai thứ này có ba khoảng hở, và cả ba đều có mặt trong tình huống mở bài.
 
 1. **Phía đường.** Đại lộ có dải phân cách chia thành hai chiều chạy riêng. Ghim nằm bên chiều nào thì xe phải đi trên chiều đó mới dừng sát lề được. Ghim bên phía bắc mà xe đang ở làn phía nam là sai phía.
 2. **Hướng tiếp cận.** Ở Việt Nam xe chạy bên phải, nên xe thường đón khách ở lề phải của chiều đang chạy. Cùng một điểm trên bản đồ, đi từ đông sang tây là tiện, đi từ tây sang đông là phải quay đầu.
@@ -49,7 +49,7 @@ Quãng đường tài xế đi tới ghim P0 là 1.000 m để tới chỗ hở,
 
 *Bảng tự dựng với các số đơn giản (đi bộ 1 m/s, xe 5 m/s, bỏ qua thời gian quay đầu), không phải kết quả đo.* «Gặp nhau» là thời điểm cả hai có mặt, tức giá trị lớn hơn trong hai cột «tới». `meet_gap_s` là chênh lệch giữa hai cột đó: ai tới sớm thì đứng chờ người kia. Ở P0 khách là người chờ (440 s); ở P3 và P4 thì tài xế chờ.
 
-Bảng có hai điểm đáng chú ý. Thứ nhất, cột `walk_m` cộng với `deadhead_m` luôn bằng 2.200 m ở mọi dòng. Cộng mét thì năm phương án **hòa nhau**, và đó là lý do hàm mục tiêu của loạt bài tính bằng **thời gian**, không bằng mét: một mét đi bộ tốn nhiều giây hơn một mét xe chạy, nên hai thứ mét không cộng thẳng vào nhau được. Thứ hai, thời điểm gặp nhau không nhỏ nhất ở hai đầu mà ở giữa.
+Bảng có hai điểm đáng chú ý. Thứ nhất, cột `walk_m` cộng với `deadhead_m` luôn bằng 2.200 m ở mọi dòng. Cộng mét thì năm phương án **hoà nhau**, và đó là lý do hàm mục tiêu của loạt bài tính bằng **thời gian**, không bằng mét: một mét đi bộ tốn nhiều giây hơn một mét xe chạy, nên hai thứ mét không cộng thẳng vào nhau được. Thứ hai, thời điểm gặp nhau không nhỏ nhất ở hai đầu mà ở giữa.
 
 ## Hai cách tối ưu một phía, và vì sao cả hai đều sai
 
@@ -89,7 +89,7 @@ Nói «tối ưu hơn» mà không có thước thì chỉ là cảm giác. Mọ
 | `pickup_eta_s` | Thời gian xe tới điểm đón kể từ lúc gán chuyến; báo p50 và p95 | Khách | Trung bình đẹp nhưng đuôi dài bị che |
 | `meet_gap_s` | Chênh lệch giữa lúc khách và lúc xe tới điểm hẹn | Cả hai: ai tới sớm thì chờ | Gặp nhau đúng giờ nhưng đường đi dài |
 | `trip_m`, `u_turns` | Quãng đường và số lần quay đầu ở đoạn có khách | Khách (cước) và tài xế | Tối ưu đoạn đi tìm khách mà quên đoạn có khách: cước và số lần quay đầu của khách tăng |
-| Tỷ lệ hủy mô phỏng | Phần chuyến bị hủy trong simulator vì chờ hoặc đi bộ quá ngưỡng | Cả hai và doanh thu | Con số đẹp che nguyên nhân: khách bỏ vì chờ hay vì phải đi bộ |
+| Tỷ lệ huỷ mô phỏng | Phần chuyến bị huỷ trong simulator vì chờ hoặc đi bộ quá ngưỡng | Cả hai và doanh thu | Con số đẹp che nguyên nhân: khách bỏ vì chờ hay vì phải đi bộ |
 
 Hai ghi chú về cách dùng. Một là `pickup_eta_s` luôn đi kèm p95 cạnh p50: khách nhớ chuyến chờ quá lâu, không nhớ trung bình. Hai là ở ví dụ trên `meet_gap_s` lấy giá trị tuyệt đối; cách tính chính thức của các chỉ số sẽ được chốt khi có simulator (LOC-30), và `meet_gap_s` sẽ quay lại ở bài về điểm hẹn động.
 
@@ -120,7 +120,7 @@ Bộ trọng số `a, b, c, d` không phải chân lý vật lý. Nó là **chí
 
 ## Bản đồ loạt bài
 
-Loạt bài gồm ba lộ trình, bảy phần, 64 bài (Hình 3). Lộ trình đầu xây nền: tọa độ, khoảng cách, đồ thị đường bộ, chỉ mục không gian, nhận và làm sạch GPS, bám đường, định tuyến, và kết thúc ở một simulator làm thước đo. Lộ trình hai là trọng tâm: chọn điểm đón, điểm trả, ghép chuyến, giảm km rỗng, mọi cải thiện có số đo so với baseline. Lộ trình ba đưa Python vào huấn luyện ETA và dự báo nhu cầu rồi đưa mô hình sang Rust, và hoàn thiện workspace, tải, quan sát, triển khai.
+Loạt bài gồm ba lộ trình, bảy phần, 64 bài (Hình 3). Lộ trình đầu xây nền: toạ độ, khoảng cách, đồ thị đường bộ, chỉ mục không gian, nhận và làm sạch GPS, bám đường, định tuyến, và kết thúc ở một simulator làm thước đo. Lộ trình hai là trọng tâm: chọn điểm đón, điểm trả, ghép chuyến, giảm km rỗng, mọi cải thiện có số đo so với baseline. Lộ trình ba đưa Python vào huấn luyện ETA và dự báo nhu cầu rồi đưa mô hình sang Rust, và hoàn thiện workspace, tải, quan sát, triển khai.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -129,13 +129,13 @@ Loạt bài gồm ba lộ trình, bảy phần, 64 bài (Hình 3). Lộ trình �
 <figcaption>Hình 3. Bản đồ loạt bài. Teal là lộ trình nền tảng, xanh dương là lộ trình tối ưu, vàng là lộ trình dữ liệu và vận hành.</figcaption>
 </figure>
 
-Lab của loạt là một workspace tích lũy, bài sau dùng crate của bài trước, đặt trong `examples/toi-noi-location/`. Ngôn ngữ chính là Rust, vì phần định vị nhạy với độ trễ và bộ nhớ; Go và Python được dùng ở những chỗ chúng có lợi thế thật, và bài kế tiếp (ADR) giải thích ranh giới đó. Các loạt Rust, Python và Flutter qua Tới Nơi là phần đọc kèm, chưa nằm trên nhánh này nên bài chỉ nhắc tên mà không liên kết.
+Lab của loạt là một workspace tích luỹ, bài sau dùng crate của bài trước, đặt trong `examples/toi-noi-location/`. Ngôn ngữ chính là Rust, vì phần định vị nhạy với độ trễ và bộ nhớ; Go và Python được dùng ở những chỗ chúng có lợi thế thật, và bài kế tiếp (ADR) giải thích ranh giới đó. Các loạt Rust, Python và Flutter qua Tới Nơi là phần đọc kèm, chưa nằm trên nhánh này nên bài chỉ nhắc tên mà không liên kết.
 
-Ai chỉ quan tâm tới tối ưu có thể đọc theo đường tắt: bài 01 này, bài [ADR](/articles/location-adr-rust-go-python-csharp-ranh-gioi-service) về ranh giới các ngôn ngữ, rồi bài về chi phí rẽ và quay đầu (LOC-23), ma trận chi phí (LOC-26), bộ mô phỏng (LOC-30), và vào P04. Ai đi từ đầu thì bắt đầu ở [tọa độ WGS84 và lỗi đảo lat/lng](/articles/location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac), lỗi đầu tiên mà một service bản đồ dễ mắc.
+Ai chỉ quan tâm tới tối ưu có thể đọc theo đường tắt: bài 01 này, bài [ADR](/articles/location-adr-rust-go-python-csharp-ranh-gioi-service) về ranh giới các ngôn ngữ, rồi bài về chi phí rẽ và quay đầu (LOC-23), ma trận chi phí (LOC-26), bộ mô phỏng (LOC-30), và vào P04. Ai đi từ đầu thì bắt đầu ở [toạ độ WGS84 và lỗi đảo lat/lng](/articles/location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac), lỗi đầu tiên mà một service bản đồ dễ mắc.
 
 ## Giới hạn của ví dụ
 
-Ví dụ trong bài này chỉ minh họa cho cơ chế. Nó có đúng một con đường thẳng, một dải phân cách, một chỗ quay đầu, tốc độ đi bộ và tốc độ xe là hai hằng số tự đặt, và bỏ qua hoàn toàn thời gian quay đầu, tắc nghẽn, đèn đỏ, việc khách có thật sự đứng chờ ở ghim hay không. Bảng năm ứng viên không có trong lab: nó không do simulator sinh ra và không nên được trích như một kết quả. Số duy nhất đến từ máy đo là hệ số vòng, và nó chỉ đúng với đồ thị OSM trong khung TP.HCM của lab, bỏ qua cấm rẽ. Ở thời điểm viết bài này lab chưa có simulator, chưa có baseline, chưa có con số «tối ưu hơn» nào; những thứ đó là việc của P03 và P04.
+Ví dụ trong bài này chỉ minh hoạ cho cơ chế. Nó có đúng một con đường thẳng, một dải phân cách, một chỗ quay đầu, tốc độ đi bộ và tốc độ xe là hai hằng số tự đặt, và bỏ qua hoàn toàn thời gian quay đầu, tắc nghẽn, đèn đỏ, việc khách có thật sự đứng chờ ở ghim hay không. Bảng năm ứng viên không có trong lab: nó không do simulator sinh ra và không nên được trích như một kết quả. Số duy nhất đến từ máy đo là hệ số vòng, và nó chỉ đúng với đồ thị OSM trong khung TP.HCM của lab, bỏ qua cấm rẽ. Ở thời điểm viết bài này lab chưa có simulator, chưa có baseline, chưa có con số «tối ưu hơn» nào; những thứ đó là việc của P03 và P04.
 
 ## Bài tập
 

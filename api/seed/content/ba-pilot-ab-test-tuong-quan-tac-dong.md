@@ -1,7 +1,7 @@
 ---
 slug: ba-pilot-ab-test-tuong-quan-tac-dong
 title: "Pilot và A/B test: phân biệt tương quan với tác động"
-summary: "Chọn câu hỏi và đơn vị thử nghiệm, nhận diện tự chọn và ảnh hưởng chéo; đọc chênh lệch tỷ lệ với giới hạn thay vì tuyên bố nhân quả quá sớm."
+summary: "Chọn câu hỏi và đơn vị thử nghiệm, nhận diện hiện tượng tự chọn và ảnh hưởng chéo; đọc chênh lệch tỷ lệ kèm giới hạn thay vì tuyên bố nhân quả quá sớm."
 category: business-analysis
 level: advanced
 tags: [business-analysis, ba-055, experiment, causality, toi-noi]
@@ -16,31 +16,31 @@ Trong dữ liệu giả lập P07, nhóm xác nhận điểm đón huỷ ít hơ
 
 Trong 240 chuyến xác nhận có 18 huỷ: 7,5%. Trong 760 chuyến còn lại có 100 huỷ: khoảng 13,16%. Tổng vẫn là 118/1.000. Chênh lệch khoảng 5,66 điểm phần trăm không phải tác động được chứng minh, vì hai nhóm được hình thành bởi hành vi người dùng.
 
-Không dùng chính sự hoàn thành tính năng để chọn nhóm treatment sau khi kết quả đã bị ảnh hưởng. Nhóm xác nhận có thể khác về mạng, khu vực, mức quen thuộc hoặc độ khó điểm đón.
+Không chọn nhóm treatment dựa trên việc đã hoàn thành các bước của tính năng, vì lúc đó kết quả đã bị ảnh hưởng. Nhóm xác nhận có thể khác về mạng, khu vực, mức quen thuộc hoặc độ khó điểm đón.
 
 ## 2. Pilot giải đáp điều gì?
 
-Pilot giới hạn giúp tìm vấn đề vận hành, khả năng dùng và chất lượng dữ liệu. Nó có thể cung cấp tín hiệu giá trị, nhưng không tự là thí nghiệm có đối chứng. Muốn ước lượng tác động cần thiết kế so sánh phù hợp và nêu giả định nhận diện nhân quả.
+Pilot giới hạn giúp tìm vấn đề vận hành, khả năng dùng và chất lượng dữ liệu. Pilot có thể cung cấp tín hiệu có giá trị, nhưng bản thân pilot không phải là thí nghiệm có đối chứng. Muốn ước lượng tác động cần thiết kế so sánh phù hợp và nêu giả định nhận diện nhân quả.
 
 ## 3. Chọn đơn vị phân nhóm trước
 
-Đề xuất phân nhóm khách đủ điều kiện trước exposure, giữ phân nhóm ổn định trong thời gian thử. Phân tích theo nhóm được gán giúp tránh chỉ chọn người đã dùng thành công. Nếu đo theo trip, phải xét một khách có nhiều trip và phụ thuộc giữa các quan sát.
+Đề xuất phân nhóm khách đủ điều kiện trước exposure, giữ phân nhóm ổn định trong thời gian thử. Phân tích theo nhóm được gán giúp tránh chỉ chọn người đã dùng thành công. Nếu đo theo chuyến, phải xét việc một khách có nhiều chuyến và phụ thuộc giữa các quan sát.
 
-Với marketplace, một tài xế phục vụ cả hai nhóm có thể học thói quen mới rồi áp sang nhóm đối chứng. Randomize theo khách không tự loại ảnh hưởng chéo này. Có thể cần thiết kế theo cụm hoặc thời gian, với phân tích phù hợp và đánh đổi về công suất thống kê.
+Với marketplace, một tài xế phục vụ cả hai nhóm có thể học thói quen mới rồi áp sang nhóm đối chứng. Phân nhóm ngẫu nhiên theo khách không tự loại bỏ ảnh hưởng chéo này. Có thể cần thiết kế theo cụm hoặc thời gian, với phân tích phù hợp và đánh đổi về công suất thống kê.
 
-## 4. Chọn outcome không bị đổi mẫu số tùy tiện
+## 4. Chọn outcome sao cho mẫu số không bị đổi tuỳ tiện
 
-Nếu tính năng xuất hiện trước accepted, chỉ phân tích chuyến đã accepted có thể bỏ qua tác động lên khả năng được nhận. Experiment brief nên chốt cohort từ lúc đủ điều kiện, rồi theo dõi cả accepted rate và huỷ. Có thể giữ metric P01 cho mục đích so vận hành nhưng phải nêu giới hạn chọn mẫu.
+Nếu tính năng xuất hiện trước accepted, chỉ phân tích chuyến đã accepted có thể bỏ qua tác động lên khả năng được nhận. Experiment brief nên chốt cohort từ lúc đủ điều kiện, rồi theo dõi cả accepted rate và huỷ. Có thể giữ metric P01 cho mục đích so sánh vận hành nhưng phải nêu giới hạn chọn mẫu.
 
 ## 5. Metric, guardrail và thời gian
 
-Chọn metric chính, hiệu ứng tối thiểu đáng quan tâm, guardrail và kế hoạch phân tích trước. Cỡ mẫu phụ thuộc baseline, mức biến thiên, đơn vị phân nhóm, công suất mong muốn và thiết kế; không mặc định 1.000 chuyến là đủ. Cần thời gian bao phủ chu kỳ hành vi và độ trễ outcome.
+Chọn metric chính, hiệu ứng tối thiểu đáng quan tâm, guardrail và kế hoạch phân tích trước. Cỡ mẫu phụ thuộc baseline, mức biến thiên, đơn vị phân nhóm, công suất mong muốn và thiết kế; không mặc định 1.000 chuyến là đủ. Thời gian chạy cần bao phủ chu kỳ hành vi và độ trễ của outcome.
 
-Kiểm phân bổ nhóm và telemetry trước khi đọc effect. Không dừng tùy hứng ngay khi đồ thị có màu xanh; quy tắc dừng phải tương thích phương pháp phân tích đã chọn.
+Kiểm phân bổ nhóm và telemetry trước khi đọc effect. Không dừng tuỳ hứng ngay khi đồ thị có màu xanh; quy tắc dừng phải tương thích phương pháp phân tích đã chọn.
 
 ## 6. Đọc kết quả có độ bất định
 
-Trình bày effect cùng khoảng bất định và ý nghĩa thực tiễn. Kết quả chưa phân biệt được với không hiệu ứng không chứng minh chắc chắn tính năng vô dụng. Ngược lại, khác biệt có ý nghĩa thống kê có thể quá nhỏ để bù chi phí vận hành.
+Trình bày effect cùng khoảng bất định và ý nghĩa thực tiễn. Kết quả chưa phân biệt được với trường hợp không có hiệu ứng thì không chứng minh chắc chắn rằng tính năng vô dụng. Ngược lại, khác biệt có ý nghĩa thống kê có thể quá nhỏ để bù chi phí vận hành.
 
 ## 7. Thực hành
 

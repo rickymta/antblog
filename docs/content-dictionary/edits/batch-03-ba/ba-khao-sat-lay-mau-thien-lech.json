@@ -1,0 +1,15 @@
+{"file":"ba-khao-sat-lay-mau-thien-lech.md","edits":[
+{"old":"giới hạn suy rộng.","new":"giới hạn khi khái quát kết quả.","reason":"'suy rộng' cụt","severity":"low"},
+{"old":"ở chỗ từ “người trả lời form” đã biến thành “khách hàng”","new":"ở chỗ “người trả lời form” đã biến thành “khách hàng”","reason":"Thừa chữ 'từ', câu rối","severity":"medium"},
+{"old":"nhưng nhiều phản hồi không tự làm kết luận đại diện.","new":"nhưng nhiều phản hồi không tự khiến kết luận mang tính đại diện.","reason":"'làm kết luận đại diện' gượng","severity":"medium"},
+{"old":"phù hợp hơn hỏi trí nhớ người dùng.","new":"phù hợp hơn việc hỏi trí nhớ của người dùng.","reason":"Thiếu danh từ hoá","severity":"low"},
+{"old":"nên nêu ngay quyết định nào kết quả đủ sức hỗ trợ","new":"nên nêu ngay kết quả đủ sức hỗ trợ quyết định nào","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"kết quả không tự là tỷ lệ trên mọi lượt đặt xe.","new":"kết quả không tự trở thành tỷ lệ trên mọi lượt đặt xe.","reason":"Thiếu động từ","severity":"medium"},
+{"old":"Nó chưa chứng minh 70% khách tại A cần chat","new":"Con số này chưa chứng minh 70% khách tại A cần chat","reason":"Tránh 'Nó' chỉ khái niệm","severity":"medium"},
+{"old":"## 5. Đọc 70/100 mà không suy rộng sai","new":"## 5. Đọc 70/100 mà không khái quát sai","reason":"'suy rộng' cụt","severity":"low"},
+{"old":"tới các người duy nhất và 100 người","new":"tới những người không trùng nhau và 100 người","reason":"'các người duy nhất' dịch máy","severity":"medium"},
+{"old":"chưa dùng ước lượng nhu cầu của toàn bộ khách.","new":"chưa dùng để ước lượng nhu cầu của toàn bộ khách.","reason":"Thiếu 'để'","severity":"medium"},
+{"old":"Lời chọn chat là phản ứng","new":"Việc chọn chat là phản ứng","reason":"'Lời chọn' gượng","severity":"medium"},
+{"old":"không đặt trọng lượng lớn hơn bằng chứng cho phép.","new":"không đặt trọng lượng lớn hơn mức bằng chứng cho phép.","reason":"Thiếu 'mức'","severity":"low"},
+{"old":"không được thay thế nếu 40 người còn lại","new":"không được dùng thay thế nếu 40 người còn lại","reason":"Thiếu động từ","severity":"low"}
+]}

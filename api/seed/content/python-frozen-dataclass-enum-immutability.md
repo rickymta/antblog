@@ -14,8 +14,8 @@ Khách mở ứng dụng [Tới Nơi](/articles/du-an-mau-toi-noi), thấy báo 
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p><code>Money(Decimal("12000")) == Money(Decimal("12000.0"))</code> cho <code>True</code> hay <code>False</code>? Và có dùng một đối tượng thay cho đối tượng kia làm khóa của dict được không?</p>
-<details><summary>Xem đáp án</summary><p><b>Cả hai đều có.</b> Với frozen dataclass, Python sinh <code>__eq__</code> so từng field và <code>__hash__</code> tính từ chính các field đó. <code>Decimal("12000")</code> và <code>Decimal("12000.0")</code> bằng nhau và cùng hash, nên hai <code>Money</code> cũng vậy. Lab còn chuẩn hóa <code>12000.0</code> về <code>12000</code> ngay lúc tạo; mục «Frozen dataclass» chỉ cách làm khi field bị khóa.</p></details>
+<p><code>Money(Decimal("12000")) == Money(Decimal("12000.0"))</code> cho <code>True</code> hay <code>False</code>? Và có dùng một đối tượng thay cho đối tượng kia làm khoá của dict được không?</p>
+<details><summary>Xem đáp án</summary><p><b>Cả hai đều có.</b> Với frozen dataclass, Python sinh <code>__eq__</code> so từng field và <code>__hash__</code> tính từ chính các field đó. <code>Decimal("12000")</code> và <code>Decimal("12000.0")</code> bằng nhau và cùng hash, nên hai <code>Money</code> cũng vậy. Lab còn chuẩn hoá <code>12000.0</code> về <code>12000</code> ngay lúc tạo; mục «Frozen dataclass» chỉ cách làm khi field bị khoá.</p></details>
 </div>
 
 ## Enum: đặt tên cho một tập giá trị đóng
@@ -47,9 +47,9 @@ class TripStatus(StrEnum):
 Code trong `main.py` của lab 13 (các đoạn dưới đây cũng vậy, rút gọn). Có bốn điều cần nhớ:
 
 - **Mỗi thành viên là một singleton.** `TripStatus("requested")` không tạo đối tượng mới mà trả đúng `TripStatus.REQUESTED`, nên so bằng `is` hoặc `==` đều được. Giá trị lạ như `"flying"` bị từ chối bằng `ValueError: 'flying' is not a valid TripStatus`. Đó chính là chỗ gõ nhầm bị bắt: một lần, ở biên (khi đọc chuỗi từ JSON hoặc database), thay vì rải rác khắp nơi.
-- **`StrEnum` hòa hợp với dữ liệu ngoài.** `TripStatus.PICKED_UP == "picked_up"` là `True`; `f"{TripStatus.PICKED_UP}"` ra `picked_up`; `json.dumps({"status": TripStatus.REQUESTED})` ra `{"status": "requested"}`. Enum thường (`PlainService(Enum)` trong lab) thì không: `PlainService.RIDE == "ride"` là `False`, và đưa nó cho JSON sẽ lỗi. Dữ liệu Tới Nơi luôn đi qua JSON, Kafka, database nên `StrEnum` là lựa chọn mặc định hợp lý; phiên bản `IntEnum` chỉ dùng khi giá trị thật sự là số.
+- **`StrEnum` hoà hợp với dữ liệu ngoài.** `TripStatus.PICKED_UP == "picked_up"` là `True`; `f"{TripStatus.PICKED_UP}"` ra `picked_up`; `json.dumps({"status": TripStatus.REQUESTED})` ra `{"status": "requested"}`. Enum thường (`PlainService(Enum)` trong lab) thì không: `PlainService.RIDE == "ride"` là `False`, và đưa nó cho JSON sẽ lỗi. Dữ liệu Tới Nơi luôn đi qua JSON, Kafka, database nên `StrEnum` là lựa chọn mặc định hợp lý; phiên bản `IntEnum` chỉ dùng khi giá trị thật sự là số.
 - **Thành viên không gán lại được**: `setattr(TripStatus, "REQUESTED", "x")` ném `AttributeError: cannot reassign member 'REQUESTED'`.
-- **Enum là class thường**, nên có phương thức và property. Thay vì rải điều kiện `status in ("completed", "cancelled")`, ta hỏi `status.is_final`. Bảng chuyển của bài 11 giữ nguyên hình dạng, chỉ đổi khóa và giá trị từ chuỗi sang thành viên:
+- **Enum là class thường**, nên có phương thức và property. Thay vì rải điều kiện `status in ("completed", "cancelled")`, ta hỏi `status.is_final`. Bảng chuyển của bài 11 giữ nguyên hình dạng, chỉ đổi khoá và giá trị từ chuỗi sang thành viên:
 
 ```python
 ALLOWED_TRANSITIONS: dict[TripStatus, tuple[TripStatus, ...]] = {
@@ -68,7 +68,7 @@ Trình soạn code giờ gợi ý `TripStatus.` và báo ngay khi bạn gõ sai 
 
 ## Frozen dataclass: Money là giá trị, không phải đối tượng có đời sống
 
-Chuyến có **định danh**: `TN-0001` vẫn là nó dù trạng thái đổi. Số tiền thì khác: 14.250 VND chỉ là 14.250 VND, không có «đời sống» hay lịch sử. Hai khoản tiền cùng số và cùng loại tiền là **một giá trị**. Kiểu như vậy gọi là **value object**: so sánh theo nội dung, và nên **bất biến**, vì nếu `Money` đổi được thì cùng một đối tượng được chia sẻ giữa báo giá và hóa đơn có thể bị sửa từ chỗ này làm sai chỗ kia.
+Chuyến có **định danh**: `TN-0001` vẫn là nó dù trạng thái đổi. Số tiền thì khác: 14.250 VND chỉ là 14.250 VND, không có «đời sống» hay lịch sử. Hai khoản tiền cùng số và cùng loại tiền là **một giá trị**. Kiểu như vậy gọi là **value object**: so sánh theo nội dung, và nên **bất biến**, vì nếu `Money` đổi được thì cùng một đối tượng được chia sẻ giữa báo giá và hoá đơn có thể bị sửa từ chỗ này làm sai chỗ kia.
 
 `@dataclass(frozen=True)` đặt `__setattr__` và `__delattr__` thành lỗi, nên không gán lại được field sau khi tạo:
 
@@ -97,9 +97,9 @@ class Money:
             object.__setattr__(self, "amount", self.amount.quantize(Decimal("1")))
 ```
 
-Thứ tự kiểm tra phản ánh bài 02: từ chối `float` (mất chính xác), `NaN` và `Infinity`, số âm (bản học tập này chưa mô hình hóa hoàn tiền), và với VND không cho đồng lẻ. Vì đối tượng bất biến, **validation chỉ cần chạy một lần lúc tạo**: nếu `Money(...)` tạo được thì mọi nơi nhận được nó đều có thể tin nó hợp lệ. Dòng `object.__setattr__` là cách chính thức để gán trong `__post_init__` khi lớp bị khóa; nó dùng để chuẩn hóa chứ không để lách quy tắc.
+Thứ tự kiểm tra phản ánh bài 02: từ chối `float` (mất chính xác), `NaN` và `Infinity`, số âm (bản học tập này chưa mô hình hoá hoàn tiền), và với VND không cho đồng lẻ. Vì đối tượng bất biến, **validation chỉ cần chạy một lần lúc tạo**: nếu `Money(...)` tạo được thì mọi nơi nhận được nó đều có thể tin nó hợp lệ. Dòng `object.__setattr__` là cách chính thức để gán trong `__post_init__` khi lớp bị khoá; nó dùng để chuẩn hoá chứ không để lách quy tắc.
 
-Từ `@dataclass(frozen=True)`, Python sinh sẵn hai phương thức đi cùng nhau. `__eq__` so từng field và chỉ coi hai đối tượng bằng nhau khi **cùng lớp** và các field bằng nhau. `__hash__` tính từ chính các field đó. Hai phương thức phải nhất quán: **hai đối tượng bằng nhau thì hash phải bằng nhau**, nếu không `dict` và `set` hoạt động sai. Vì đối tượng không đổi nên hash không đổi theo thời gian, và ta dùng được `Money` làm khóa dict hoặc phần tử set. Đây là điểm đối lập với dataclass thường ở bài 11, nơi `eq=True` mà không `frozen` làm `__hash__` thành `None`.
+Từ `@dataclass(frozen=True)`, Python sinh sẵn hai phương thức đi cùng nhau. `__eq__` so từng field và chỉ coi hai đối tượng bằng nhau khi **cùng lớp** và các field bằng nhau. `__hash__` tính từ chính các field đó. Hai phương thức phải nhất quán: **hai đối tượng bằng nhau thì hash phải bằng nhau**, nếu không `dict` và `set` hoạt động sai. Vì đối tượng không đổi nên hash không đổi theo thời gian, và ta dùng được `Money` làm khoá dict hoặc phần tử set. Đây là điểm đối lập với dataclass thường ở bài 11, nơi `eq=True` mà không `frozen` làm `__hash__` thành `None`.
 
 `__add__` định nghĩa phép `+`, kiểm tra cùng loại tiền, và trả `Money` **mới** thay vì sửa tại chỗ. Trả `NotImplemented` khi `other` không phải `Money` để Python báo `TypeError` đúng chuẩn thay vì ta tự ném lỗi. Còn muốn «sửa» một giá trị, ta tạo bản mới bằng `dataclasses.replace`, và quan trọng là nó chạy lại `__post_init__`, nên bản mới cũng được kiểm tra:
 
@@ -182,7 +182,7 @@ Người đọc loạt C# sẽ nhận ra đây là chỗ `record` chiếm vị t
 
 ## Giới hạn của frozen
 
-**Frozen chỉ khóa chính các field, không khóa những gì bên trong.** Nếu field là list thì list vẫn sửa được, và hash bị hỏng:
+**Frozen chỉ khoá chính các field, không khoá những gì bên trong.** Nếu field là list thì list vẫn sửa được, và hash bị hỏng:
 
 ```python
 @dataclass(frozen=True)
@@ -193,7 +193,7 @@ class LabelledQuote:
 
 `lq.labels.append("priority")` chạy bình thường, `hash(lq)` ném `TypeError: unhashable type: 'list'` (hash của đối tượng cần hash của mọi field), và `replace(lq, quote=q).labels is lq.labels` là `True`: `replace` không sao chép sâu, bản mới dùng chung đúng list đó. Cách sửa là chọn kiểu bất biến cho field, như `labels: tuple[str, ...]`. `Money` và `Quote` an toàn vì mọi field của chúng (`Decimal`, `str`, `datetime`, `Money`) đều bất biến.
 
-**Frozen cũng không chống người cố tình.** `object.__setattr__(victim, "amount", Decimal("-1"))` vòng qua `__setattr__` bị khóa và để lại `Money` âm, bỏ qua mọi kiểm tra của `__post_init__`. Frozen ngăn **lỡ tay**, như một dòng `quote.fare = ...` ở nơi xa, chứ không phải rào bảo mật. Đó là cùng bài học với dấu gạch dưới ở bài 11: bất biến trong Python là thỏa thuận được cấu trúc hỗ trợ, và code review cùng test phải giữ phần còn lại.
+**Frozen cũng không chống người cố tình.** `object.__setattr__(victim, "amount", Decimal("-1"))` vòng qua `__setattr__` bị khoá và để lại `Money` âm, bỏ qua mọi kiểm tra của `__post_init__`. Frozen ngăn **lỡ tay**, như một dòng `quote.fare = ...` ở nơi xa, chứ không phải rào bảo mật. Đó là cùng bài học với dấu gạch dưới ở bài 11: bất biến trong Python là thoả thuận được cấu trúc hỗ trợ, và code review cùng test phải giữ phần còn lại.
 
 ## Chạy và kiểm chứng
 
@@ -257,7 +257,7 @@ hash(LabelledQuoteSafe) chạy được: True
 object.__setattr__ vòng qua frozen: Money(amount=Decimal('-1'), currency='VND')
 ```
 
-Cách đọc vài dòng đáng chú ý. `is: False` cùng `dùng làm khóa dict: cơ bản` cho thấy `a` và `b` là hai đối tượng khác nhau (`is`) mà thay nhau làm khóa được, vì `==` và hash theo nội dung. `12000.0` được chuẩn hóa nên `repr b` in `Decimal('12000')`. Dòng `replace chỉ tạo bản sao` cho thấy `replace` đổi `expires_at` mà giá vẫn là giá cũ: nó là công cụ sao chép, không phải cách gia hạn báo giá. Gia hạn đúng nghĩa là phát hành báo giá mới bằng `Quote.issue`, để giá được tính lại. `đến 08:35:00 +0700` là `expires_at` (01:35 UTC) hiển thị theo giờ Việt Nam, và đúng 5 phút sau `T0` báo giá đã hết hạn.
+Cách đọc vài dòng đáng chú ý. `is: False` cùng `dùng làm khóa dict: cơ bản` cho thấy `a` và `b` là hai đối tượng khác nhau (`is`) mà thay nhau làm khoá được, vì `==` và hash theo nội dung. `12000.0` được chuẩn hoá nên `repr b` in `Decimal('12000')`. Dòng `replace chỉ tạo bản sao` cho thấy `replace` đổi `expires_at` mà giá vẫn là giá cũ: nó là công cụ sao chép, không phải cách gia hạn báo giá. Gia hạn đúng nghĩa là phát hành báo giá mới bằng `Quote.issue`, để giá được tính lại. `đến 08:35:00 +0700` là `expires_at` (01:35 UTC) hiển thị theo giờ Việt Nam, và đúng 5 phút sau `T0` báo giá đã hết hạn.
 
 Chế độ `--verify` so toàn bộ các kết quả này, gồm cả thông báo lỗi, ba ca biên của `Quote`, ca loại tiền có ký hiệu lạ như `U$D` và giá 0, 2, 2,5, 5 km (12.000, 12.000, 14.250, 25.500 như mọi bài trước):
 
@@ -272,9 +272,9 @@ OK 64/64
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
 | `FrozenInstanceError: cannot assign to field ...` | Đúng thiết kế; tạo bản mới bằng `dataclasses.replace(obj, field=...)` |
-| `ValueError: 'x' is not a valid TripStatus` | Chuỗi đầu vào sai tên hoặc sai chữ hoa chữ thường; kiểm nguồn dữ liệu trước khi chuẩn hóa |
+| `ValueError: 'x' is not a valid TripStatus` | Chuỗi đầu vào sai tên hoặc sai chữ hoa chữ thường; kiểm nguồn dữ liệu trước khi chuẩn hoá |
 | `TypeError: unhashable type: 'list'` khi hash một frozen dataclass | Field chứa list/dict/set; đổi sang `tuple` hoặc `frozenset` |
-| `Money` này bằng `Money` kia nhưng `repr` khác | Equality theo giá trị `Decimal`; chuẩn hóa trong `__post_init__` nếu cần cùng dạng |
+| `Money` này bằng `Money` kia nhưng `repr` khác | Equality theo giá trị `Decimal`; chuẩn hoá trong `__post_init__` nếu cần cùng dạng |
 | Hai kiểu khác nghĩa lại `==` nhau | Có phải `NamedTuple`? So như tuple; đổi sang frozen dataclass nếu cần phân biệt kiểu |
 
 <div class="tkh-callout tkh-callout--warn">
@@ -286,7 +286,7 @@ OK 64/64
 
 **Bài tập 2:** dữ liệu từ một hệ thống cũ gửi `"Requested"` (viết hoa chữ đầu). `TripStatus("Requested")` cho kết quả gì, và bạn nên xử lý ở đâu?
 
-<details><summary>Xem lời giải</summary><p>(1) Viết giống <code>__add__</code> nhưng dùng <code>self.amount - other.amount</code> rồi trả <code>Money(...)</code>. Không cần kiểm tra thêm: <code>Money.__post_init__</code> đã từ chối số âm, nên <code>Money(Decimal("2250")) - Money(Decimal("12000"))</code> tự ném <code>ValueError: amount không được âm: -9750</code>, còn <code>12000 - 2250</code> ra <code>9.750 VND</code>. Đây là lợi ích của việc đặt quy tắc ở constructor: mọi đường tạo <code>Money</code> đều đi qua nó. Nhưng hãy cân nhắc: «không âm» là quy tắc đúng với giá cước, chưa chắc đúng với số dư hay khoản hoàn tiền, và khi đó có thể cần kiểu khác thay vì nới lỏng <code>Money</code>. (2) <code>TripStatus("Requested")</code> ném <code>ValueError: 'Requested' is not a valid TripStatus</code>, vì Enum phân biệt chữ hoa chữ thường. Nên chuẩn hóa ở <b>biên tiếp nhận</b> (bộ chuyển đổi dữ liệu từ hệ thống cũ, ví dụ <code>TripStatus(raw.lower())</code>) và ghi lại nguồn gốc, chứ không nới lỏng chính <code>TripStatus</code> để nó nhận mọi dạng viết; nếu không, mọi nơi khác sẽ phải đoán dữ liệu nào đã được làm sạch.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Viết giống <code>__add__</code> nhưng dùng <code>self.amount - other.amount</code> rồi trả <code>Money(...)</code>. Không cần kiểm tra thêm: <code>Money.__post_init__</code> đã từ chối số âm, nên <code>Money(Decimal("2250")) - Money(Decimal("12000"))</code> tự ném <code>ValueError: amount không được âm: -9750</code>, còn <code>12000 - 2250</code> ra <code>9.750 VND</code>. Đây là lợi ích của việc đặt quy tắc ở constructor: mọi đường tạo <code>Money</code> đều đi qua nó. Nhưng hãy cân nhắc: «không âm» là quy tắc đúng với giá cước, chưa chắc đúng với số dư hay khoản hoàn tiền, và khi đó có thể cần kiểu khác thay vì nới lỏng <code>Money</code>. (2) <code>TripStatus("Requested")</code> ném <code>ValueError: 'Requested' is not a valid TripStatus</code>, vì Enum phân biệt chữ hoa chữ thường. Nên chuẩn hoá ở <b>biên tiếp nhận</b> (bộ chuyển đổi dữ liệu từ hệ thống cũ, ví dụ <code>TripStatus(raw.lower())</code>) và ghi lại nguồn gốc, chứ không nới lỏng chính <code>TripStatus</code> để nó nhận mọi dạng viết; nếu không, mọi nơi khác sẽ phải đoán dữ liệu nào đã được làm sạch.</p></details>
 
 Bài trước: [bài 12](/articles/python-type-hints-mypy-protocol-generics). Bài tiếp: [bài 14](/articles/python-abc-protocol-composition-dependency-injection).
 

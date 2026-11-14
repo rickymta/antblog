@@ -1,7 +1,7 @@
 ---
 slug: system-testing-load-test
 title: "Load Test: tải dự kiến có thực sự được tạo ra và xử lý đúng?"
-summary: "Load testing qua API báo giá của Tới Nơi: dựng workload từ nghiệp vụ, phân biệt arrival rate, request rate, concurrency và VU, viết scheduler open-model không chờ response, kế toán planned = sent + dropped, gate đặt trước phép đo và đọc một lượt 300 request thực đo trên PGlite mà không suy ra capacity production."
+summary: "Load testing qua API báo giá của Tới Nơi: dựng workload từ nghiệp vụ, phân biệt arrival rate, request rate, concurrency và VU, viết scheduler open-model không chờ response, đối soát planned = sent + dropped, gate đặt trước khi đo và đọc một lượt 300 request thực đo trên PGlite mà không suy ra công suất (capacity) của môi trường production."
 category: testing
 level: advanced
 tags: [testing, sys-08, load-testing, performance-testing, arrival-rate, workload-model, open-model, k6, pglite, test-oracle]
@@ -47,8 +47,8 @@ Sau bài, bạn có thể:
 - Viết workload model cho một endpoint từ dữ liệu nghiệp vụ, ghi rõ phần nào là giả định.
 - Phân biệt arrival rate, request rate, concurrency, VU, throughput; ước lượng concurrency từ arrival rate và thời gian một iteration.
 - Đọc và sửa một scheduler open-model: gửi theo lịch, không `await` response trong vòng slot, đo scheduler lag, ghi drop có lý do.
-- Kiểm bất biến kế toán `planned = sent + dropped` và đặt gate gồm cả drop, lỗi nghiệp vụ lẫn latency trước khi chạy.
-- Đọc báo cáo theo thứ tự đúng và phân loại «generator không đạt tải» khác với «hệ thống không chịu nổi».
+- Kiểm tra bất biến đối soát `planned = sent + dropped` và đặt gate gồm cả drop, lỗi nghiệp vụ lẫn latency trước khi chạy.
+- Đọc báo cáo theo thứ tự đúng và phân biệt «generator không đạt tải» với «hệ thống không chịu nổi».
 
 ## 2. Khái niệm và những điều dễ nhầm
 
@@ -85,7 +85,7 @@ Workload model bắt đầu từ dữ liệu nghiệp vụ, không từ «cho 10
 - Phân bố theo dịch vụ (ride/parcel/food), thành phố, loại xe, quãng đường.
 - Tỷ lệ đọc/ghi: một chuyến kéo theo nhiều lần hỏi lại trạng thái (trang khách hỏi mỗi 2 giây theo R-NFR-04).
 
-Từ đó suy ra arrival rate **cho từng endpoint**, không chia đều tải tùy ý. Ví dụ giả định: 3 lần báo giá cho mỗi chuyến đặt ⇒ báo giá chiếm phần lớn request ghi, còn polling chiếm phần lớn request đọc.
+Từ đó suy ra arrival rate **cho từng endpoint**, không chia đều tải tuỳ ý. Ví dụ giả định: 3 lần báo giá cho mỗi chuyến đặt ⇒ báo giá chiếm phần lớn request ghi, còn polling chiếm phần lớn request đọc.
 
 ### 3.2. Thiết kế lab và giới hạn của nó
 
@@ -98,12 +98,12 @@ Từ đó suy ra arrival rate **cho từng endpoint**, không chia đều tải 
 | Clock/weather | 09:00 giờ VN cố định, không mưa | Không có biến thiên theo giờ |
 | Profile | 10/s × 3 s → 30/s × 8 s → 10/s × 3 s | Ngắn, theo bước, không phải soak |
 
-Oracle 35.000 tính tay từ SPEC, không gọi lại calculator: xe máy 12.000 + 4.500 × 5 = 34.500 (R-FARE-01), 09:00 không phải cao điểm (R-FARE-04), không mưa, không voucher, trên mức tối thiểu 15.000 (R-FARE-07), làm tròn lên bội 1.000 ⇒ 35.000 (R-FARE-08). Kiểm tiền trên **mọi** response dưới tải để bắt loại lỗi «nhanh nhưng sai».
+Oracle 35.000 tính tay từ SPEC, không gọi lại calculator: xe máy 12.000 + 4.500 × 5 = 34.500 (R-FARE-01), 09:00 không phải cao điểm (R-FARE-04), không mưa, không voucher, trên mức tối thiểu 15.000 (R-FARE-07), làm tròn lên bội 1.000 ⇒ 35.000 (R-FARE-08). Kiểm tra số tiền trên **mọi** response dưới tải để bắt loại lỗi «nhanh nhưng sai».
 
 Ba lựa chọn có chủ đích:
 
-- **Không reset giữa các bước**: sau warm-up 20 request, dữ liệu được reset một lần; sau đó số quote tăng từ 0 lên 300 qua ba bước, phản ánh ghi tích lũy trong lượt này.
-- **Không dùng voucher**: voucher có giới hạn lượt, sẽ làm đổi mix lỗi giữa chừng.
+- **Không reset giữa các bước**: sau warm-up 20 request, dữ liệu được reset một lần; sau đó số quote tăng từ 0 lên 300 qua ba bước, phản ánh lượng dữ liệu ghi tích luỹ trong lượt này.
+- **Không dùng voucher**: voucher có giới hạn lượt, sẽ làm thay đổi cơ cấu lỗi giữa chừng.
 - **Không đặt chuyến**: R-API-13 giới hạn 5 lần `POST /api/trips`/60 giây/khách; R-API-07 ghi rõ endpoint báo giá «không bị giới hạn tần suất». Chọn endpoint không có limiter là chọn đúng đối tượng cho câu hỏi này, **không phải** tắt limiter để kết quả đẹp.
 
 ## 4. Scheduler open-model: gửi theo lịch, không đợi response
@@ -158,13 +158,13 @@ Lab đặt các giới hạn sau, tất cả cố định **trước** khi chạ
 | Rào | Giá trị | Khi chạm |
 |---|---|---|
 | In-flight cap | 20 request đang chạy | Slot ghi `in-flight-cap`, không gửi |
-| Lag tối đa | 100 ms | Slot ghi `scheduler-late`, **không bắn bù** thành burst |
+| Lag tối đa | 100 ms | Slot ghi `scheduler-late`, **không gửi bù** thành burst |
 | Dừng khi lỗi | Đã có 10 failure | Slot ghi `failure-stop` cho phần còn lại |
 | Timeout/request | 2 giây (deadline phía client) | Request tính là failure, lỗi `TimeoutError` |
 
 Thứ tự xét trong code là `failure-stop` → `scheduler-late` → `in-flight-cap`. Lịch vẫn đi tới hết profile kể cả khi đã dừng gửi, để bất biến `planned = sent + dropped` luôn đúng — không giả vờ các slot đó đã hoàn tất, cũng không lặng lẽ biến mất khỏi mẫu số.
 
-Không bắn bù slot trễ là một quyết định quan trọng: nếu generator khựng 300 ms rồi gửi dồn 9 request cùng lúc, nó tạo ra một spike nhân tạo mà workload model không hề mô tả.
+Không gửi bù slot trễ là một quyết định quan trọng: nếu generator khựng 300 ms rồi gửi dồn 9 request cùng lúc, nó tạo ra một đỉnh tải nhân tạo mà workload model không hề mô tả.
 
 ### 4.3. Scheduler này không phải k6
 
@@ -209,7 +209,7 @@ Không đổi ngưỡng sau khi xem số đo. Nếu ngưỡng sai, sửa nó tro
 
 **Entry**: functional smoke của endpoint đúng ([SYS-01](/articles/system-testing-smoke-test)); dataset, endpoint và mức tải mục tiêu đã ghi; môi trường thuộc quyền kiểm thử; không có benchmark khác chạy cùng máy nếu muốn giảm nhiễu.
 
-**Exit của bài tập**: kế toán khớp, chạy đủ profile, gate đạt, raw evidence được lưu, giới hạn được công bố. Nếu fail do generator, kết luận là *thí nghiệm chưa đạt tải yêu cầu* — chưa được nói server không chịu nổi.
+**Exit của bài tập**: đối soát khớp, chạy đủ profile, gate đạt, raw evidence được lưu, giới hạn được công bố. Nếu fail do generator, kết luận là *thí nghiệm chưa đạt tải yêu cầu* — chưa được nói server không chịu nổi.
 
 ## 6. Thực hành có thể chạy lại
 
@@ -326,7 +326,7 @@ Thứ tự đọc: **planned/sent/drop → lỗi HTTP và nghiệp vụ → late
 |---|---|---|
 | Drop ngay đầu bước | Cap quá nhỏ hoặc generator bận | Xem `active` count, lag, tài nguyên máy sinh tải |
 | Drop tăng cùng latency | Hệ thống chậm giữ slot lâu | Xem hàng đợi DB, CPU; tách client/server |
-| 200 nhưng sai `total` | Sai nghiệp vụ dưới tải | Dừng tối ưu, tái hiện bằng functional case ([SYS-03](/articles/system-testing-functional-test)) |
+| 200 nhưng sai `total` | Sai nghiệp vụ dưới tải | Dừng tối ưu, tái hiện bằng test case chức năng ([SYS-03](/articles/system-testing-functional-test)) |
 | Nhiều 429 | Đụng rate limit hoặc workload không hợp | Đối chiếu R-API-13 và account mix; không tự tắt limiter |
 | Lag lớn, latency nhỏ | Generator là nút cổ chai | Chuyển generator sang process/máy khác trước khi kết luận |
 | Sau giảm tải vẫn chậm | Backlog, GC, tài nguyên giữ lại | Theo dõi lâu hơn, thu metrics để xác định nguyên nhân |
@@ -363,7 +363,7 @@ So baseline với candidate trên cùng máy, dữ liệu, profile, chính sách
 
 ### 8.6. Tách generator khỏi hệ thống
 
-Trong lab, client, server và PGlite cùng một process, cùng CPU và event loop. Request của client và xử lý của server tranh cùng tài nguyên; lag của generator và latency của server không tách được hoàn toàn. Bước tiếp theo hợp lý: server một process, generator process/máy khác, đồng bộ cấu hình, đo CPU/mạng ở cả hai phía. Tách process không tự động xoá nhiễu — chỉ làm nhiễu đo được.
+Trong lab, client, server và PGlite cùng một process, cùng CPU và event loop. Request của client và xử lý của server tranh cùng tài nguyên; lag của generator và latency của server không tách được hoàn toàn. Bước tiếp theo hợp lý: server một process, generator process/máy khác, đồng bộ cấu hình, đo CPU/mạng ở cả hai phía. Tách process không tự động xoá nhiễu — chỉ làm cho nhiễu đo được.
 
 ## 9. Anti-pattern, giới hạn và đánh đổi
 
@@ -414,7 +414,7 @@ Những cách làm tạo kết luận thiếu căn cứ:
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Với latency ~3 ms và khoảng slot 33 ms, request luôn xong trước slot sau, nên closed loop và open model cho kết quả gần như giống nhau ở lab này (peak in-flight = 1). Nhưng khi server chậm hơn khoảng slot, <code>await send()</code> sẽ đẩy lùi lịch: slot đến muộn, lag vượt 100 ms và bị drop là <code>scheduler-late</code> — hoặc tệ hơn, nếu bỏ cả rào lag, tải thực tế giảm âm thầm. Thay đổi phá mô hình workload; test xanh chỉ vì điều kiện hiện tại không phơi lỗi.</p>
+<p>Với latency ~3 ms và khoảng slot 33 ms, request luôn xong trước slot sau, nên closed loop và open model cho kết quả gần như giống nhau ở lab này (peak in-flight = 1). Nhưng khi server chậm hơn khoảng slot, <code>await send()</code> sẽ đẩy lùi lịch: slot đến muộn, lag vượt 100 ms và bị drop là <code>scheduler-late</code> — hoặc tệ hơn, nếu bỏ cả rào lag, tải thực tế giảm đi mà không ai hay. Thay đổi phá mô hình workload; test xanh chỉ vì điều kiện hiện tại không phơi lỗi.</p>
 </details>
 
 **Bài 5 (nâng cao).** Thiết kế lại thí nghiệm để generator và server ở hai process (hoặc hai máy).
@@ -454,11 +454,11 @@ Những cách làm tạo kết luận thiếu căn cứ:
 <p>Đã kiểm: hệ thống xử lý đúng 30 arrival/s khi request không chồng nhau. Chưa kiểm: hành vi khi có overlap thật, tranh chấp DB, cap và các nhánh drop. Open model đúng về thiết kế nhưng điều kiện chưa phơi ra khác biệt với closed loop.</p>
 </details>
 
-**Câu 5.** Vì sao script không bắn bù slot bị trễ quá 100 ms?
+**Câu 5.** Vì sao script không gửi bù slot bị trễ quá 100 ms?
 
 <details>
 <summary><b>Đáp án</b></summary>
-<p>Bắn bù dồn nhiều request vào một thời điểm, tạo spike nhân tạo không có trong workload model. Ghi drop kèm lý do giữ thí nghiệm trung thực: báo cáo cho thấy generator đã không theo kịp lịch.</p>
+<p>Gửi bù dồn nhiều request vào một thời điểm, tạo spike nhân tạo không có trong workload model. Ghi drop kèm lý do giữ thí nghiệm trung thực: báo cáo cho thấy generator đã không theo kịp lịch.</p>
 </details>
 
 ## 11. Tài liệu tham khảo

@@ -1,0 +1,18 @@
+{"file":"azure-multi-region-data-residency-multi-tenant.md","edits":[
+{"old":"chọn mức cách ly multi-tenant cho khách đội xe, rồi","new":"chọn mức cách ly multi-tenant cho khách hàng là đội xe, rồi","reason":"'khách đội xe' lược mất danh từ","severity":"medium"},
+{"old":"thì hạ tầng nhân thế nào, và","new":"thì hạ tầng nhân bản thế nào, và","reason":"'nhân' thiếu 'bản', dễ hiểu nhầm","severity":"medium"},
+{"old":"phải kiểm region cặp nằm ở đâu","new":"phải kiểm tra region cặp nằm ở đâu","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"nên hãy kiểm lại. Tới Nơi hiện chạy","new":"nên hãy kiểm tra lại. Tới Nơi hiện chạy","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"như đặt chuyến chịu tác động nhân lên.","new":"như đặt chuyến bị ảnh hưởng nhân lên nhiều lần.","reason":"'chịu tác động nhân lên' là calque","severity":"medium"},
+{"old":"cho cả hai kết quả, nó không thay câu trả lời pháp lý.","new":"cho cả hai kết quả, nhưng kiến trúc này không thay câu trả lời pháp lý.","reason":"Nối hai mệnh đề bằng dấu phẩy thiếu liên từ; tránh 'nó'","severity":"low"},
+{"old":"cần chịu mất cả region |","new":"cần chịu được việc mất cả region |","reason":"'chịu mất' thiếu động từ, calque","severity":"medium"},
+{"old":"Nó tránh bài toán nhất quán xuyên region","new":"Mô hình này tránh bài toán nhất quán xuyên region","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"Phần chịu mất cả region (bài","new":"Phần chịu được việc mất cả region (bài","reason":"'chịu mất' thiếu động từ, calque","severity":"medium"},
+{"old":"Log hay chứa PII không được chủ ý |","new":"Log hay vô tình chứa PII |","reason":"'không được chủ ý' là bị động kiểu Anh (unintentionally)","severity":"medium"},
+{"old":"bán kính hỏng khi có sự cố hoặc lỗi bảo mật","new":"phạm vi ảnh hưởng khi có sự cố hoặc lỗi bảo mật","reason":"'bán kính hỏng' là calque của blast radius","severity":"medium"},
+{"old":"Rẻ, bán kính lỗi lớn","new":"Rẻ, phạm vi ảnh hưởng lớn","reason":"Thống nhất 'bán kính' calque của blast radius","severity":"low"},
+{"old":"kiểm vị trí lưu dữ liệu trước khi tạo","new":"kiểm tra vị trí lưu dữ liệu trước khi tạo","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nhân tay thì stamp thứ hai","new":"Làm thủ công thì stamp thứ hai","reason":"'Nhân tay' là calque","severity":"medium"},
+{"old":"khai báo bằng tham số. Nó không chứng minh","new":"khai báo bằng tham số. Khối này không chứng minh","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"low"},
+{"old":"Bạn vừa có khung nghĩ về mở rộng:","new":"Bạn vừa có khung tư duy về việc mở rộng:","reason":"'khung nghĩ' là cụm tự ghép","severity":"medium"}
+]}

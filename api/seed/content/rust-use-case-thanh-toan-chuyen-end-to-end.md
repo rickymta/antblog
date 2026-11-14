@@ -33,15 +33,15 @@ Hình 1 là đường đi của một chuyến. Bảng dưới nói mỗi bướ
 | --- | --- | --- |
 | Chia crate | `domain` ← `application` ← `infrastructure` ← `api`; port là trait trả `impl Future + Send`; test đọc `Cargo.toml` để chặn `tokio`, `sqlx` vào `domain` (chỉ thấy phụ thuộc trực tiếp; bài 51 đọc `cargo metadata`). Một port `PaymentStore` thay ba port. Bỏ feature `kafka`, `Clock`, `EventPublisher` (outbox nằm trong `commit`); kho bộ nhớ chỉ còn trong unit test | [51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter) |
 | Lệnh và handler | Giữ dispatch generic và sự kiện domain do aggregate sinh, rút còn enum `Command` và một hàm `handle` generic trên `PaymentStore`. Bỏ trait `Command`/`CommandHandler` với `Output` liên kết và ba lớp `Validated`, `Traced`, `Transactional` | [52](/articles/rust-command-handler-pipeline-domain-event-khong-framework) |
-| Khóa lạc quan | Chỉ lấy mẫu, không lấy `Account` hay `account_limits`: `trip_payments.version`, `UPDATE ... WHERE version = $n`, thêm nhánh tạo bằng `unique_violation` mà bài 53 không có. Đọc lại ngay, tối đa 8 lần, không có jitter như `with_retry`; `40P01` thì consumer xử lý lại message. Số dư vẫn cộng dồn kiểu bài 25 | [53](/articles/rust-aggregate-invariant-optimistic-locking-for-update) |
+| Khoá lạc quan | Chỉ lấy mẫu, không lấy `Account` hay `account_limits`: `trip_payments.version`, `UPDATE ... WHERE version = $n`, thêm nhánh tạo bằng `unique_violation` mà bài 53 không có. Đọc lại ngay, tối đa 8 lần, không có jitter như `with_retry`; `40P01` thì consumer xử lý lại message. Số dư vẫn cộng dồn kiểu bài 25 | [53](/articles/rust-aggregate-invariant-optimistic-locking-for-update) |
 | Tính phí | `default_policy()` 20%, nửa ra xa 0: 5.100 và 20.400 | [11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron), [20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) |
 | Hai bút toán | `JournalEntryBuilder`, dấu dòng tiền, key `capture` rồi `split` qua clearing | [13](/articles/rust-double-entry-journal-entry-posting), [41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen) |
 | Ghi idempotent | `ON CONFLICT DO NOTHING` rồi so nội dung; trigger cấm UPDATE và DELETE | [24](/articles/rust-transaction-isolation-append-only-idempotency-key) |
 | Schema | bốn bảng chuẩn, `02_balance_check.sql` giống từng byte bản lab 25, `account_balances` là projection | [25](/articles/rust-schema-so-cai-accounts-journal-postings-partition) |
 | Kafka | tạo topic rồi chờ có leader, commit offset sau khi DB commit | [36](/articles/rust-kafka-rdkafka-consumer-producer-schema) |
 | Outbox | ghi cùng transaction, relay `SKIP LOCKED`, at-least-once. Bỏ inbox | [37](/articles/rust-outbox-inbox-idempotent-consumer) |
-| Khung đủ vòng | Kafka vào, PostgreSQL, Kafka ra. Đổi ba dòng thành hai bước; bài 40 giả lập cái chết bằng cách hủy task, ở đây là tiến trình con `abort` thật | [40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end) |
-| Khuyến mãi | `platform:treasury`, `platform:promo-wallet`, khóa dòng ngân sách campaign | [45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach) |
+| Khung đủ vòng | Kafka vào, PostgreSQL, Kafka ra. Đổi ba dòng thành hai bước; bài 40 giả lập cái chết bằng cách huỷ task, ở đây là tiến trình con `abort` thật | [40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end) |
+| Khuyến mãi | `platform:treasury`, `platform:promo-wallet`, khoá dòng ngân sách campaign | [45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach) |
 | Hoàn một phần | chia theo tổng luỹ kế, key `trip:<id>:refund:<n>`, không đặt `reversal_of`. Bỏ maker-checker, đảo toàn phần, chargeback | [43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker) |
 | Đối soát | so theo dòng clearing và `external_ref` qua `psp_refs`, bốn loại kết luận. Bỏ `DATE_SHIFT` và đọc CSV | [47](/articles/rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao) |
 | Không dùng | hold ([42](/articles/rust-hold-capture-void-so-du-kha-dung)): chuyến trả qua VíXanh, không giữ chỗ trong ví; payout ([44](/articles/rust-vi-tai-xe-chia-tien-payout-theo-lo)); chia nhiều bên ([46](/articles/rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong)); đóng kỳ ([48](/articles/rust-so-du-theo-thoi-diem-snapshot-dong-ky)); rebuild projection ([49](/articles/rust-event-sourcing-co-chung-muc-projection-replay)), lab chỉ đối chiếu số dư với posting; hash chain và role ([50](/articles/rust-audit-append-only-hash-chain-phan-quyen-pii)) | 42, 44, 46, 48, 49, 50 |
@@ -84,13 +84,13 @@ Cả hai lần cho `JE-000001` (`capture`) rồi `JE-000002` (`split`); test so 
 
 Phép so số thu với cước trừ khuyến mãi có hệ quả cố ý: số thu lệch thì không ghi gì. `TN-0004` có cước 25.500, VíXanh báo thu 24.000: sổ không đổi, aggregate nói rõ nó chờ gì. `TN-0002` thu 20.500 vì có mã giảm 5.000, quyết định khuyến mãi đến sau hai sự kiện kia và chính nó làm hai vế bằng nhau. Đoán «chắc là có khuyến mãi» thì một khoản thu sai sẽ thành doanh thu sai.
 
-Lab không có bảng `inbox` của [bài 37](/articles/rust-outbox-inbox-idempotent-consumer): aggregate nhớ dữ kiện nào đã nhận nên tự nhận ra bản trùng, kể cả bản khác nội dung mà inbox khóa theo `event_id` bỏ qua im lặng (bài tập cuối bài 40).
+Lab không có bảng `inbox` của [bài 37](/articles/rust-outbox-inbox-idempotent-consumer): aggregate nhớ dữ kiện nào đã nhận nên tự nhận ra bản trùng, kể cả bản khác nội dung mà inbox khoá theo `event_id` bỏ qua im lặng (bài tập cuối bài 40).
 
 Aggregate chờ này có giá: thêm một bảng trạng thái, thêm jsonb phải đọc được qua các lần đổi cấu trúc, và thêm trạng thái kẹt phải theo dõi. Nếu Payment gộp sẵn mã khách, mã tài xế và cước vào `PaymentCaptured`, ledger chỉ cần một sự kiện và không nên dựng nó.
 
 ## Hai dữ kiện cùng đến thì ai thắng?
 
-Hai task nhận hai dữ kiện của một chuyến, cùng đọc aggregate, mỗi bên chỉ thấy dữ kiện của mình. Không có khóa thì bên commit sau ghi đè bên trước và dữ kiện kia biến mất. Lab dùng khóa lạc quan của bài 53, hai nhánh vì có hai cách thua:
+Hai task nhận hai dữ kiện của một chuyến, cùng đọc aggregate, mỗi bên chỉ thấy dữ kiện của mình. Không có khoá thì bên commit sau ghi đè bên trước và dữ kiện kia biến mất. Lab dùng khoá lạc quan của bài 53, hai nhánh vì có hai cách thua:
 
 ```rust
 // crates/infrastructure/src/pg.rs (rút gọn: bỏ chú thích)
@@ -188,7 +188,7 @@ doanh thu 5.100 - chi phí khuyến mãi 5.000 = 100; ngân sách còn 5.000; cl
 TN-0003 xin 6.000 khi ngân sách còn 5.000: BudgetExhausted, không có aggregate, không có bút toán
 ```
 
-Bút toán dùng ngân sách khóa dòng số dư campaign (`FOR UPDATE`) trong cùng transaction, nên hết ngân sách thì không để lại dấu vết nào. Hoàn một phần theo tổng luỹ kế của [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker): hoàn 10.000 là 2.000 phí cộng 8.000 từ tài xế, key `trip:TN-0001:refund:1`, không đặt `reversal_of` vì nó không phải ảnh gương của bút toán nào; gửi lại không ghi thêm, xin 16.000 khi chỉ còn 15.500 thì từ chối. Chuyến có khuyến mãi chưa hoàn được.
+Bút toán dùng ngân sách khoá dòng số dư campaign (`FOR UPDATE`) trong cùng transaction, nên hết ngân sách thì không để lại dấu vết nào. Hoàn một phần theo tổng luỹ kế của [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker): hoàn 10.000 là 2.000 phí cộng 8.000 từ tài xế, key `trip:TN-0001:refund:1`, không đặt `reversal_of` vì nó không phải ảnh gương của bút toán nào; gửi lại không ghi thêm, xin 16.000 khi chỉ còn 15.500 thì từ chối. Chuyến có khuyến mãi chưa hoàn được.
 
 ## Chết giữa chừng và sự kiện trùng: chuyện gì còn lại?
 
@@ -261,7 +261,7 @@ cargo test --manifest-path examples/toi-noi-rust/54-trip-payment-use-case/Cargo.
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
 <p>Luồng để học, không phải service deploy được. Hai điểm chết là hai điểm chọn trước, tiến trình tự <code>abort</code>, không phải kill ngẫu nhiên; khe hở khác quanh hai điểm đó chưa được thử. Chưa có HTTP hay gRPC.</p></div>
 
-## Lab đơn giản hóa điều gì so với production?
+## Lab đơn giản hoá điều gì so với production?
 
 - **Không DLQ.** Message hỏng, đổi nội dung hay vi phạm key chỉ bị ghi log rồi bỏ; dữ kiện mất khỏi luồng.
 - **Chờ không có hạn.** Aggregate chờ vô thời hạn và không ai báo; production cần metric «chờ quá N phút» như bốn metric của bài 41. Domain cũng không có đồng hồ: `postedAt` do database gán.

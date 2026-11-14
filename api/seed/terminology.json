@@ -1,0 +1,359 @@
+{
+  "version": 1,
+  "terms": [
+    {
+      "id": "in-depth-testing",
+      "use": "kiểm thử chuyên sâu",
+      "english": "in-depth testing",
+      "note": "\"kiểm sâu\" là dịch từng chữ, người đọc không hiểu",
+      "avoid": [
+        {
+          "text": "kiểm sâu",
+          "severity": "high",
+          "autofix": true
+        }
+      ]
+    },
+    {
+      "id": "retirement",
+      "use": "ngừng hỗ trợ",
+      "english": "retirement (dịch vụ, SKU)",
+      "note": "\"nghỉ hưu\" là calque của retire; dùng \"ngừng hỗ trợ\" hoặc \"khai tử\"",
+      "avoid": [
+        {
+          "text": "nghỉ hưu",
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "id": "reporting-period-boundary",
+      "use": "ranh giới kỳ báo cáo",
+      "english": "period boundary",
+      "note": "\"biên kỳ\" là từ tự ghép",
+      "avoid": [
+        {
+          "text": "biên kỳ",
+          "severity": "high",
+          "autofix": true
+        }
+      ]
+    },
+    {
+      "id": "downgrade",
+      "use": "hạ phiên bản",
+      "english": "downgrade / rollback trên thiết bị",
+      "avoid": [
+        {
+          "text": "hạ máy",
+          "severity": "high"
+        }
+      ]
+    },
+    {
+      "id": "deduplication",
+      "use": "khử trùng lặp",
+      "english": "deduplication",
+      "glossary": true,
+      "definition": "Loại bỏ các bản ghi hoặc thông điệp bị lặp, thường dựa vào một khoá định danh như mã giao dịch hay mã sự kiện.",
+      "note": "\"khử trùng\" nghĩa là diệt khuẩn — sai nghĩa",
+      "avoid": [
+        {
+          "text": "khử trùng",
+          "severity": "high",
+          "notFollowedBy": "lặp",
+          "autofix": true
+        }
+      ]
+    },
+    {
+      "id": "source-of-truth",
+      "use": "nguồn dữ liệu gốc",
+      "english": "source of truth",
+      "glossary": true,
+      "definition": "Nơi lưu bản dữ liệu được coi là đúng và có thẩm quyền; mọi bản sao khác (cache, báo cáo) phải đồng bộ theo nó.",
+      "note": "\"nguồn sự thật\" là calque; có thể giữ \"source of truth\" kèm giải nghĩa lần đầu",
+      "avoid": [
+        {
+          "text": "nguồn sự thật",
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "id": "circuit-breaker",
+      "use": "circuit breaker",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cơ chế tạm ngừng gọi một dịch vụ đang lỗi liên tục, để hệ thống không bị kéo sập theo và dịch vụ kia có thời gian phục hồi.",
+      "avoid": [
+        {
+          "text": "cầu dao",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "id": "smoke-test",
+      "use": "smoke test",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Bộ kiểm thử nhỏ, chạy nhanh trên các luồng sống còn để quyết định một bản build có đủ ổn định để kiểm thử chuyên sâu hay không."
+    },
+    {
+      "id": "sanity-test",
+      "use": "sanity test",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Lượt kiểm thử hẹp, tập trung vào một thay đổi vừa sửa, để xác nhận thay đổi đó hợp lý trước khi đưa vào các vòng kiểm thử lớn hơn."
+    },
+    {
+      "id": "regression-test",
+      "use": "regression test",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kiểm thử lại các chức năng đã chạy đúng, để phát hiện lỗi mới phát sinh do một thay đổi ở chỗ khác."
+    },
+    {
+      "id": "test-case",
+      "use": "test case",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Một tình huống kiểm thử cụ thể gồm điều kiện đầu, dữ liệu vào, các bước thực hiện và kết quả mong đợi.",
+      "note": "Thống nhất \"test case\" (chốt 11/2026); không xen \"ca kiểm thử\", \"ca\", \"case\" trong cùng bài",
+      "avoid": [
+        { "text": "ca kiểm thử", "severity": "low" }
+      ]
+    },
+    {
+      "id": "injected-clock",
+      "use": "đồng hồ được inject",
+      "english": "injected clock",
+      "glossary": true,
+      "definition": "Nguồn thời gian được truyền vào mã nghiệp vụ từ bên ngoài (dependency injection) thay vì gọi trực tiếp giờ hệ thống, để test có thể cố định thời điểm.",
+      "note": "\"tiêm vào\" là dịch từng chữ của inject",
+      "avoid": [
+        { "text": "đồng hồ tiêm vào", "severity": "medium" },
+        { "text": "đồng hồ được tiêm", "severity": "medium" }
+      ]
+    },
+    {
+      "id": "race-condition",
+      "use": "race condition",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Lỗi xảy ra khi kết quả phụ thuộc vào thứ tự chạy của các thao tác đồng thời, ví dụ hai yêu cầu cùng nhận một chuyến và cả hai đều tưởng mình thành công.",
+      "note": "Chỉ sửa khi \"cuộc đua\" mang nghĩa race condition; giữ các cách nói tự nhiên như \"thua cuộc đua\"",
+      "avoid": [
+        { "text": "cuộc đua", "severity": "low" }
+      ]
+    },
+    {
+      "id": "version",
+      "use": "phiên bản",
+      "english": "version",
+      "note": "Văn xuôi dùng \"phiên bản\" (chốt 11/2026); giữ \"version\" trong tên trường, cấu hình, tên sản phẩm. Không có rule lint vì cần ngữ cảnh"
+    }
+  ],
+  "patterns": [
+    {
+      "id": "typo-thoat",
+      "pattern": "thóat",
+      "flags": "i",
+      "suggest": "thoát",
+      "replace": "thoát",
+      "severity": "high",
+      "note": "lỗi gõ dấu"
+    },
+    {
+      "id": "phu-phi-mua",
+      "pattern": "phụ phí mưa",
+      "flags": "i",
+      "suggest": "phụ phí trời mưa",
+      "replace": "phụ phí trời mưa",
+      "severity": "medium",
+      "note": "cụm từ cụt, thiếu danh từ"
+    },
+    {
+      "id": "kiem-tai-lieu",
+      "pattern": "kiểm tài liệu",
+      "flags": "i",
+      "suggest": "kiểm tra tài liệu",
+      "replace": "kiểm tra tài liệu",
+      "severity": "medium",
+      "note": "lược mất chữ \"tra\""
+    },
+    {
+      "id": "khong-am-tham",
+      "pattern": "không âm thầm",
+      "flags": "i",
+      "suggest": "không lặng lẽ bỏ qua / phải báo lỗi rõ ràng",
+      "severity": "medium",
+      "note": "calque của \"not silently\"; viết lại theo nghĩa cụ thể của câu"
+    },
+    {
+      "id": "van-hanh-de-nghi",
+      "pattern": "Vận hành đề nghị",
+      "suggest": "Bộ phận vận hành đề nghị",
+      "severity": "medium",
+      "note": "thiếu chủ thể"
+    },
+    {
+      "id": "output-that",
+      "pattern": "output thật",
+      "flags": "i",
+      "suggest": "kết quả chạy thật",
+      "severity": "low"
+    },
+    {
+      "id": "tai-tay",
+      "pattern": "tải tay",
+      "flags": "i",
+      "suggest": "cập nhật thủ công",
+      "severity": "low"
+    },
+    {
+      "id": "so-do",
+      "pattern": "số đo",
+      "flags": "i",
+      "suggest": "chỉ số / số liệu đo",
+      "severity": "low",
+      "note": "chỉ sửa khi nghĩa là metric; giữ nếu đúng nghĩa đo đạc"
+    },
+    {
+      "id": "chinh-ta-oa-huyen",
+      "pattern": "òa(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oà",
+      "replace": "oà",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oe-huyen",
+      "pattern": "òe(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oè",
+      "replace": "oè",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-uy-huyen",
+      "pattern": "ùy(?!\\p{L})",
+      "flags": "i",
+      "suggest": "uỳ",
+      "replace": "uỳ",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oa-sac",
+      "pattern": "óa(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oá",
+      "replace": "oá",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oe-sac",
+      "pattern": "óe(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oé",
+      "replace": "oé",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-uy-sac",
+      "pattern": "úy(?!\\p{L})",
+      "flags": "i",
+      "suggest": "uý",
+      "replace": "uý",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oa-hoi",
+      "pattern": "ỏa(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oả",
+      "replace": "oả",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oe-hoi",
+      "pattern": "ỏe(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oẻ",
+      "replace": "oẻ",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-uy-hoi",
+      "pattern": "ủy(?!\\p{L})",
+      "flags": "i",
+      "suggest": "uỷ",
+      "replace": "uỷ",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oa-nga",
+      "pattern": "õa(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oã",
+      "replace": "oã",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oe-nga",
+      "pattern": "õe(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oẽ",
+      "replace": "oẽ",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-uy-nga",
+      "pattern": "ũy(?!\\p{L})",
+      "flags": "i",
+      "suggest": "uỹ",
+      "replace": "uỹ",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oa-nang",
+      "pattern": "ọa(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oạ",
+      "replace": "oạ",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-oe-nang",
+      "pattern": "ọe(?!\\p{L})",
+      "flags": "i",
+      "suggest": "oẹ",
+      "replace": "oẹ",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    },
+    {
+      "id": "chinh-ta-uy-nang",
+      "pattern": "ụy(?!\\p{L})",
+      "flags": "i",
+      "suggest": "uỵ",
+      "replace": "uỵ",
+      "severity": "low",
+      "note": "Chính tả: giữ kiểu đặt dấu cũ (huỷ, khoá, hoà, thuỷ) — style guide §7"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{"file":"aws-kinesis-data-streams-firehose-gps.md","edits":[
+{"old":"nuốt 6.250 toạ độ GPS mỗi giây","new":"tiếp nhận 6.250 toạ độ GPS mỗi giây","reason":"'nuốt' là cách nói khẩu ngữ, gượng trong tiêu đề kỹ thuật","severity":"low"},
+{"old":"Hai nhóm cùng cần dòng đó.","new":"Hai nhóm đều cần luồng dữ liệu này.","reason":"'dòng đó' mơ hồ; dùng 'luồng dữ liệu' thống nhất","severity":"medium"},
+{"old":"Bài này dựng nguồn đó bằng","new":"Bài này dựng luồng dữ liệu đó bằng","reason":"'nguồn đó' mơ hồ, dùng cùng tên gọi với câu trước","severity":"medium"},
+{"old":"hệt hot partition ở bài 32","new":"giống hệt hot partition ở bài 32","reason":"Câu thiếu động từ so sánh","severity":"low"},
+{"old":"Hai chi tiết dễ hiểu nhầm. Một, `dt` và","new":"Hai chi tiết dễ hiểu nhầm. Thứ nhất, `dt` và","reason":"'Một' đứng đầu câu là trật tự kiểu liệt kê tiếng Anh","severity":"medium"},
+{"old":"không phải thời điểm tài xế gửi; muốn theo thời gian sự kiện phải trích từ bản ghi. Hai, \"ghi theo giờ\"","new":"không phải thời điểm tài xế gửi; muốn theo thời gian sự kiện phải trích từ bản ghi. Thứ hai, \"ghi theo giờ\"","reason":"Thống nhất cách liệt kê với 'Thứ nhất'","severity":"medium"},
+{"old":"Toạ độ cũ vô giá trị, nên lab","new":"Toạ độ cũ không còn giá trị, nên lab","reason":"'vô giá trị' gượng","severity":"medium"},
+{"old":"Không có giới hạn thử lại và đích lỗi, một bản ghi","new":"Nếu không đặt giới hạn thử lại và đích lỗi, một bản ghi","reason":"Câu thiếu động từ và quan hệ điều kiện","severity":"medium"},
+{"old":"chặn cả shard tới khi hết retention.","new":"sẽ chặn cả shard tới khi hết retention.","reason":"Đi cùng câu điều kiện","severity":"low"},
+{"old":"Bản đầy đủ có thêm mã hoá và số liệu theo shard.","new":"Bản đầy đủ có thêm mã hoá và chỉ số theo shard.","reason":"metric dịch là 'chỉ số'","severity":"low"},
+{"old":"| Mô hình tiền |","new":"| Mô hình tính tiền |","reason":"'Mô hình tiền' là cụm tự ghép, thiếu động từ; khớp với hàng 'Tính tiền' ở bảng trên","severity":"medium"},
+{"old":"**Shard bị đếm sai.** Chỉ tính băng thông","new":"**Tính sai số shard.** Chỉ tính băng thông","reason":"'Shard bị đếm sai' gượng, kiểu bị động","severity":"low"},
+{"old":"Số bản ghi quyết định: cần ít nhất 7 shard","new":"Giới hạn số bản ghi là yếu tố quyết định: cần ít nhất 7 shard","reason":"Câu thiếu danh từ, 'Số bản ghi quyết định' khó hiểu","severity":"medium"}
+]}

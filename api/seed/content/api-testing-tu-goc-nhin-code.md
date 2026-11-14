@@ -8,7 +8,7 @@ tags: [testing, istqb, ctal-tta, test-050, api-testing, white-box, supertest, id
 language: vi
 ---
 
-Kiểm API từ bên ngoài, bạn so mã trạng thái với đặc tả. Nhưng đặc tả không nói middleware nào chạy trước, nhánh nào chỉ chạy khi kho dữ liệu lỗi, hay chuyện gì xảy ra khi hai yêu cầu cùng khoá chồng nhau — những thứ chỉ đọc được trong code. Bài này mở handler đặt chuyến `POST /api/trips` của lab Tới Nơi, liệt kê **21 nhánh**, viết test cho từng nhánh và tìm ra hai chỗ mà kiểm thử hộp đen khó thấy.
+Khi kiểm thử API từ bên ngoài, bạn so mã trạng thái với đặc tả. Nhưng đặc tả không nói middleware nào chạy trước, nhánh nào chỉ chạy khi kho dữ liệu lỗi, hay chuyện gì xảy ra khi hai yêu cầu cùng khoá chồng nhau — những thứ chỉ đọc được trong code. Bài này mở handler đặt chuyến `POST /api/trips` của lab Tới Nơi, liệt kê **21 nhánh**, viết test cho từng nhánh và tìm ra hai chỗ mà kiểm thử hộp đen khó thấy.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-050</span>
@@ -44,7 +44,7 @@ Bài này là tiền đề của [TEST-070 · API Testing Fundamentals](/article
 
 Diễn đạt lại các ý chính của mục 2.7:
 
-- **API** là giao diện được định nghĩa để một chương trình gọi một hệ thống khác lấy dịch vụ (web service, cơ sở dữ liệu, RPC…).
+- **API** là giao diện được định nghĩa để một chương trình gọi dịch vụ của một hệ thống khác (web service, cơ sở dữ liệu, RPC…).
 - API testing là một **loại kiểm thử (test type)**, không phải một kỹ thuật thiết kế test. Trọng tâm: **giá trị đầu vào** và **dữ liệu trả về**.
 - **Negative testing thường là then chốt**: bên gọi có thể dùng API theo cách không ai định trước, nên xử lý lỗi phải chắc chắn.
 - API thường **ghép lỏng**, nên có nguy cơ thật về **giao dịch bị mất** và **lỗi thời điểm (timing)** ⇒ phải kiểm kỹ cơ chế phục hồi và thử lại.
@@ -56,7 +56,7 @@ LO tương ứng là **TTA-2.7.1 (K2)**: hiểu phạm vi áp dụng của API t
 
 ### 2.2 Ghép với decision testing
 
-Mục 2.7 không quy định cách chọn ca. Bài này ghép nó với **decision testing** (mục 2.3, TTA-2.3.1): coi chuỗi xử lý của handler là đồ thị luồng điều khiển; mỗi lối thoát ra một mã trạng thái là một outcome cần phủ. Tiêu chí đầu ra «sinh ra mọi mã trạng thái» của mục 2.7 khi đó trở thành một tiêu chí white-box đo được bằng branch coverage. Mục 2.8 nhắc thêm: thường áp kỹ thuật hộp đen trước, đo coverage, rồi mới dùng kỹ thuật white-box cho phần còn thiếu — đúng trình tự của TEST-070 → bài này khi làm thực tế.
+Mục 2.7 không quy định cách chọn test case. Bài này ghép nó với **decision testing** (mục 2.3, TTA-2.3.1): coi chuỗi xử lý của handler là đồ thị luồng điều khiển; mỗi lối thoát trả về một mã trạng thái là một outcome cần phủ. Tiêu chí đầu ra «sinh ra mọi mã trạng thái» của mục 2.7 khi đó trở thành một tiêu chí white-box đo được bằng branch coverage. Mục 2.8 nhắc thêm: thường áp kỹ thuật hộp đen trước, đo coverage, rồi mới dùng kỹ thuật white-box cho phần còn thiếu — đúng trình tự của TEST-070 → bài này khi làm thực tế.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB</span>
@@ -193,7 +193,7 @@ Hai nhánh đáng chú ý nhất là **N17 và N18**: cùng một mã lỗi `QUO
 
 ### 4.4 Hai chỗ lệch tìm ra khi đọc code
 
-**Lệch thứ tự (N02b).** `express.json()` đăng ký bằng `app.use` nên chạy trước `authenticate`. Yêu cầu không có `x-user` mà thân hỏng nhận **400 `INVALID_JSON`**, trong khi R-VALID-02 đặt xác thực (401) lên đầu. Ảnh hưởng nhỏ — không lộ dữ liệu — nhưng là lệch đặc tả. Trong kiến trúc đích, giới hạn kích thước thường đặt ở Gateway (§3.2), cũng trước xác thực; nên có thể **đặc tả** mới là chỗ cần sửa. Ghi nhận dạng «cần chủ đặc tả quyết».
+**Lệch thứ tự (N02b).** `express.json()` đăng ký bằng `app.use` nên chạy trước `authenticate`. Yêu cầu không có `x-user` mà thân hỏng nhận **400 `INVALID_JSON`**, trong khi R-VALID-02 đặt xác thực (401) lên đầu. Ảnh hưởng nhỏ — không lộ dữ liệu — nhưng là lệch đặc tả. Trong kiến trúc đích, giới hạn kích thước thường đặt ở Gateway (§3.2), cũng trước xác thực; nên có thể **đặc tả** mới là chỗ cần sửa. Ghi nhận ở dạng «cần chủ đặc tả quyết định».
 
 **Ghi dở dang (N21).** Thứ tự trong `createTrip`:
 
@@ -263,7 +263,7 @@ hold.open();
 expect((await first).status).toBe(201);
 ```
 
-Hai ca ghi nhận defect (N02b, N21) khẳng định hành vi **đúng theo SPEC**, đánh dấu `it.fails`; `SHOW_RED=1` chạy chúng như test thường.
+Hai test case ghi nhận defect (N02b, N21) khẳng định hành vi **đúng theo SPEC**, đánh dấu `it.fails`; `SHOW_RED=1` chạy chúng như test thường.
 
 ### 5.2 Chạy thật
 
@@ -336,11 +336,11 @@ Kết luận: mọi outcome **của handler đặt chuyến** đã được ph�
 
 **Cùng mã lỗi, khác nhánh.** N17 và N18 cho thấy bảng «mã lỗi → HTTP» (R-API-06) không đủ làm tiêu chí phủ. Hai dòng code khác nhau, rủi ro khác nhau (nhánh N18 là hàng rào chống trùng giao dịch).
 
-**Bản thay thế cũng có lỗi.** Phiên bản đầu của test N13 dựng repository giả bằng `{ ...system.deps.quotes, findById }`. Toán tử trải chỉ chép **thuộc tính riêng** của object, không chép phương thức trên prototype của lớp ⇒ `save` biến mất, báo giá trả 500. Test đỏ nhưng lỗi nằm ở test double, không ở sản phẩm. Bài học: khi một nhánh lỗi xuất hiện bất ngờ, kiểm test double trước khi mở defect.
+**Test double cũng có thể có lỗi.** Phiên bản đầu của test N13 dựng repository giả bằng `{ ...system.deps.quotes, findById }`. Toán tử trải chỉ chép **thuộc tính riêng** của object, không chép phương thức trên prototype của lớp ⇒ `save` biến mất, báo giá trả 500. Test đỏ nhưng lỗi nằm ở test double, không ở sản phẩm. Bài học: khi một nhánh lỗi xuất hiện bất ngờ, kiểm test double trước khi mở defect.
 
-**Xen kẽ tất định ≠ đồng thời thật.** Cổng chờ chứng minh **logic** của N13/N18 đúng khi các bước xen nhau ở mức `await`. Nó không chứng minh câu `UPDATE … WHERE used_by_trip_id IS NULL` an toàn dưới hai kết nối PostgreSQL thật — PGlite chỉ có một kết nối (giới hạn của lab). Phần đó thuộc concurrency testing ([TEST-085](/articles/concurrent-testing-hai-tai-xe-cung-nhan)).
+**Xen kẽ tất định ≠ đồng thời thật.** Cổng chờ chứng minh **logic** của N13/N18 đúng khi các bước xen nhau ở mức `await`. Cách này không chứng minh câu `UPDATE … WHERE used_by_trip_id IS NULL` an toàn dưới hai kết nối PostgreSQL thật — PGlite chỉ có một kết nối (giới hạn của lab). Phần đó thuộc concurrency testing ([TEST-085](/articles/concurrent-testing-hai-tai-xe-cung-nhan)).
 
-**Thứ tự là quyết định kiến trúc.** Ở hệ thống đích, xác thực, giới hạn tần suất, kích thước thân nằm ở Gateway; idempotency ở Booking Service. Test từ code của một service không thấy Gateway — thứ tự R-VALID-02 đầu–cuối cần một lớp test hệ thống.
+**Thứ tự là quyết định kiến trúc.** Ở hệ thống đích, xác thực, giới hạn tần suất, kích thước thân nằm ở Gateway; idempotency ở Booking Service. Test từ code của một service không thấy Gateway — muốn kiểm thứ tự R-VALID-02 từ đầu đến cuối thì cần một lớp test hệ thống.
 
 **Sai lầm thường gặp.** Dừng ở «mỗi mã trạng thái một test»; giả lỗi hạ tầng bằng `DomainError` (đi sai đường, không vào nhánh 500); dùng `setTimeout` để «đợi yêu cầu kia» (chập chờn); đòi thông điệp 500 chứa chi tiết lỗi «cho dễ debug» (ngược R-API-06, R-NFR-06); đọc coverage tổng của thư mục thay vì từng nhánh trong phạm vi.
 
@@ -357,7 +357,7 @@ Kết luận: mọi outcome **của handler đặt chuyến** đã được ph�
 
 <details>
 <summary><b>Lời giải</b></summary>
-<p>Bọc <code>idempotency</code> bằng bản có <code>complete</code> ném lỗi một lần. Lỗi bay ra khỏi <code>runIdempotent</code> ⇒ 500 <code>INTERNAL_ERROR</code>, nhưng khoá <b>không</b> được nhả (<code>release</code> chỉ gọi trong nhánh handler lỗi) ⇒ lần gửi lại cùng khoá gặp bản ghi «đang xử lý» ⇒ 409 <code>IDEMPOTENCY_IN_PROGRESS</code> mãi mãi (lab giữ khoá suốt vòng đời tiến trình). Trong khi đó chuyến đã tồn tại. SPEC không nói rõ ca này ⇒ ghi thành câu hỏi cho chủ đặc tả; kỳ vọng hợp lý: gửi lại trả đúng chuyến đã tạo, hoặc có cơ chế hết hạn bản ghi đang xử lý.</p>
+<p>Bọc <code>idempotency</code> bằng bản có <code>complete</code> ném lỗi một lần. Lỗi bay ra khỏi <code>runIdempotent</code> ⇒ 500 <code>INTERNAL_ERROR</code>, nhưng khoá <b>không</b> được nhả (<code>release</code> chỉ gọi trong nhánh handler lỗi) ⇒ lần gửi lại cùng khoá gặp bản ghi «đang xử lý» ⇒ 409 <code>IDEMPOTENCY_IN_PROGRESS</code> mãi mãi (lab giữ khoá suốt vòng đời tiến trình). Trong khi đó chuyến đã tồn tại. SPEC không nói rõ tình huống này ⇒ ghi thành câu hỏi cho chủ đặc tả; kỳ vọng hợp lý: gửi lại trả đúng chuyến đã tạo, hoặc có cơ chế hết hạn bản ghi đang xử lý.</p>
 </details>
 
 **Câu hỏi trắc nghiệm** (tự soạn theo phong cách ISTQB, mỗi câu một đáp án đúng).
@@ -367,7 +367,7 @@ Kết luận: mọi outcome **của handler đặt chuyến** đã được ph�
 - a) Là một kỹ thuật thiết kế test có tiêu chí phủ riêng
 - b) Là một loại kiểm thử, tập trung vào giá trị đầu vào và dữ liệu trả về, không tự quy định mức coverage
 - c) Chỉ áp dụng cho REST
-- d) Chủ yếu là positive testing vì API được gọi bởi chương trình khác
+- d) Chủ yếu là positive testing vì API do chương trình khác gọi
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>

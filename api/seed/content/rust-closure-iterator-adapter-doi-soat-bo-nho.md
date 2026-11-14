@@ -18,22 +18,22 @@ Cuối ngày, VíXanh gửi sao kê năm dòng; sổ cái của Tới Nơi có b
 <details><summary>Xem đáp án</summary><p><b>Không in gì.</b> <code>map</code> chỉ dựng một iterator mới, chưa ai kéo phần tử nào. Compiler cảnh báo <code>unused `Map` that must be used</code>, ghi chú <code>iterators are lazy and do nothing unless consumed</code>. Đổi sang <code>for_each</code>, như compiler gợi ý, thì <code>println!</code> mới chạy.</p></details>
 </div>
 
-## Đối soát là so hai danh sách theo khóa, không theo vị trí
+## Đối soát là so hai danh sách theo khoá, không theo vị trí
 
-Khóa khớp là `external_ref`, mã giao dịch của VíXanh. Lab đặt nó vào `idempotency_key` của bút toán thu qua VíXanh, dạng `psp:vixanh:<external_ref>`, để có sẵn khóa mà chưa cần thêm trường mới. Đây là quy ước riêng của lab đối soát, không thay `trip:TN-0001:capture` của các bài khác; sổ thật giữ key theo chuyến và lưu `external_ref` ở trường riêng. Dấu giữ như bước capture của [bài 13](/articles/rust-double-entry-journal-entry-posting): ví khách âm, `psp:vixanh:clearing` dương. Bút toán chia `trip:TN-0001:split` (bước 2 của bài 13) là chuyển nội bộ, sao kê VíXanh không có, nên không đối soát.
+Khoá khớp là `external_ref`, mã giao dịch của VíXanh. Lab đặt nó vào `idempotency_key` của bút toán thu qua VíXanh, dạng `psp:vixanh:<external_ref>`, để có sẵn khoá mà chưa cần thêm trường mới. Đây là quy ước riêng của lab đối soát, không thay `trip:TN-0001:capture` của các bài khác; sổ thật giữ key theo chuyến và lưu `external_ref` ở trường riêng. Dấu giữ như bước capture của [bài 13](/articles/rust-double-entry-journal-entry-posting): ví khách âm, `psp:vixanh:clearing` dương. Bút toán chia `trip:TN-0001:split` (bước 2 của bài 13) là chuyển nội bộ, sao kê VíXanh không có, nên không đối soát.
 
-Thuật toán có ba bước (Hình 1): cộng tiền theo khóa ở từng phía, hợp hai tập khóa, phân loại từng khóa. Phải cộng trước khi so vì sao kê có thể chia một khóa thành nhiều dòng: `VX-1002` là 25.000 và 15.000.
+Thuật toán có ba bước (Hình 1): cộng tiền theo khoá ở từng phía, hợp hai tập khoá, phân loại từng khoá. Phải cộng trước khi so vì sao kê có thể chia một khoá thành nhiều dòng: `VX-1002` là 25.000 và 15.000.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 330" role="img" aria-label="Hình 1. Đối soát gồm ba bước: cộng tiền theo external_ref ở từng phía, hợp hai tập khóa rồi phân loại; kết quả có hai ref khớp, một ref lệch số tiền, một ref thiếu bên PSP và một ref thiếu bên ta."><defs><marker id="rust-closure-iterator-adapter-doi-soat-bo-nho-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="230" height="140" rx="10" class="f-phys-soft s-phys"/><text x="36" y="46" class="t-b">Sổ cái · 4 dòng</text><text x="36" y="72" class="t-mono">VX-1001  25.500</text><text x="36" y="92" class="t-mono">VX-1002  40.000</text><text x="36" y="112" class="t-mono">VX-1003  31.500</text><text x="36" y="132" class="t-mono">VX-1004  18.000</text><rect x="20" y="175" width="230" height="140" rx="10" class="f-phys-soft s-phys"/><text x="36" y="201" class="t-b">Sao kê VíXanh · 5 dòng</text><text x="36" y="224" class="t-mono">VX-1001  25.500</text><text x="36" y="242" class="t-mono">VX-1002  25.000</text><text x="36" y="260" class="t-mono">VX-1002  15.000</text><text x="36" y="278" class="t-mono">VX-1003  31.000</text><text x="36" y="296" class="t-mono">VX-1005  52.000</text><rect x="300" y="20" width="210" height="140" rx="10" class="f-surface s-phys"/><text x="316" y="46" class="t-b">Theo ref · sổ cái</text><text x="316" y="72" class="t-mono">VX-1001 → 25.500</text><text x="316" y="92" class="t-mono">VX-1002 → 40.000</text><text x="316" y="112" class="t-mono">VX-1003 → 31.500</text><text x="316" y="132" class="t-mono">VX-1004 → 18.000</text><rect x="300" y="175" width="210" height="140" rx="10" class="f-surface s-phys"/><text x="316" y="201" class="t-b">Theo ref · sao kê</text><text x="316" y="224" class="t-mono">VX-1001 → 25.500</text><text x="316" y="242" class="t-mono">VX-1002 → 40.000</text><text x="316" y="260" class="t-mono">VX-1003 → 31.000</text><text x="316" y="278" class="t-mono">VX-1005 → 52.000</text><text x="316" y="302" class="t-small">VX-1002 gộp từ 2 dòng</text><rect x="560" y="20" width="300" height="295" rx="10" class="f-pk-soft s-pk"/><text x="576" y="44" class="t-b">Phân loại từng ref → BTreeMap</text><rect x="576" y="58" width="268" height="58" rx="8" class="f-warn-soft s-warn"/><text x="590" y="80" class="t-b">VX-1003 · lệch số tiền</text><text x="590" y="100" class="t-small">sổ 31.500, sao kê 31.000, chênh 500</text><rect x="576" y="126" width="268" height="58" rx="8" class="f-warn-soft s-warn"/><text x="590" y="148" class="t-b">VX-1004 · thiếu bên PSP</text><text x="590" y="168" class="t-small">sổ ghi 18.000, sao kê không có</text><rect x="576" y="194" width="268" height="58" rx="8" class="f-warn-soft s-warn"/><text x="590" y="216" class="t-b">VX-1005 · thiếu bên ta</text><text x="590" y="236" class="t-small">sao kê có 52.000, sổ chưa ghi</text><text x="576" y="282" class="t-small">VX-1001, VX-1002: bằng nhau, 2 ref khớp</text><path d="M250 90 L298 90" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-0-a)"/><path d="M250 245 L298 245" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-0-a)"/><path d="M510 90 L558 140" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-0-a)"/><path d="M510 245 L558 190" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-0-a)"/></svg>
+<svg viewBox="0 0 880 330" role="img" aria-label="Hình 1. Đối soát gồm ba bước: cộng tiền theo external_ref ở từng phía, hợp hai tập khoá rồi phân loại; kết quả có hai ref khớp, một ref lệch số tiền, một ref thiếu bên PSP và một ref thiếu bên ta."><defs><marker id="rust-closure-iterator-adapter-doi-soat-bo-nho-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="230" height="140" rx="10" class="f-phys-soft s-phys"/><text x="36" y="46" class="t-b">Sổ cái · 4 dòng</text><text x="36" y="72" class="t-mono">VX-1001  25.500</text><text x="36" y="92" class="t-mono">VX-1002  40.000</text><text x="36" y="112" class="t-mono">VX-1003  31.500</text><text x="36" y="132" class="t-mono">VX-1004  18.000</text><rect x="20" y="175" width="230" height="140" rx="10" class="f-phys-soft s-phys"/><text x="36" y="201" class="t-b">Sao kê VíXanh · 5 dòng</text><text x="36" y="224" class="t-mono">VX-1001  25.500</text><text x="36" y="242" class="t-mono">VX-1002  25.000</text><text x="36" y="260" class="t-mono">VX-1002  15.000</text><text x="36" y="278" class="t-mono">VX-1003  31.000</text><text x="36" y="296" class="t-mono">VX-1005  52.000</text><rect x="300" y="20" width="210" height="140" rx="10" class="f-surface s-phys"/><text x="316" y="46" class="t-b">Theo ref · sổ cái</text><text x="316" y="72" class="t-mono">VX-1001 → 25.500</text><text x="316" y="92" class="t-mono">VX-1002 → 40.000</text><text x="316" y="112" class="t-mono">VX-1003 → 31.500</text><text x="316" y="132" class="t-mono">VX-1004 → 18.000</text><rect x="300" y="175" width="210" height="140" rx="10" class="f-surface s-phys"/><text x="316" y="201" class="t-b">Theo ref · sao kê</text><text x="316" y="224" class="t-mono">VX-1001 → 25.500</text><text x="316" y="242" class="t-mono">VX-1002 → 40.000</text><text x="316" y="260" class="t-mono">VX-1003 → 31.000</text><text x="316" y="278" class="t-mono">VX-1005 → 52.000</text><text x="316" y="302" class="t-small">VX-1002 gộp từ 2 dòng</text><rect x="560" y="20" width="300" height="295" rx="10" class="f-pk-soft s-pk"/><text x="576" y="44" class="t-b">Phân loại từng ref → BTreeMap</text><rect x="576" y="58" width="268" height="58" rx="8" class="f-warn-soft s-warn"/><text x="590" y="80" class="t-b">VX-1003 · lệch số tiền</text><text x="590" y="100" class="t-small">sổ 31.500, sao kê 31.000, chênh 500</text><rect x="576" y="126" width="268" height="58" rx="8" class="f-warn-soft s-warn"/><text x="590" y="148" class="t-b">VX-1004 · thiếu bên PSP</text><text x="590" y="168" class="t-small">sổ ghi 18.000, sao kê không có</text><rect x="576" y="194" width="268" height="58" rx="8" class="f-warn-soft s-warn"/><text x="590" y="216" class="t-b">VX-1005 · thiếu bên ta</text><text x="590" y="236" class="t-small">sao kê có 52.000, sổ chưa ghi</text><text x="576" y="282" class="t-small">VX-1001, VX-1002: bằng nhau, 2 ref khớp</text><path d="M250 90 L298 90" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-0-a)"/><path d="M250 245 L298 245" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-0-a)"/><path d="M510 90 L558 140" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-0-a)"/><path d="M510 245 L558 190" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-0-a)"/></svg>
 </div>
-<figcaption>Hình 1. Cộng theo khóa ở từng phía, rồi phân loại. <code>VX-1002</code> khớp sau khi cộng hai dòng sao kê.</figcaption>
+<figcaption>Hình 1. Cộng theo khoá ở từng phía, rồi phân loại. <code>VX-1002</code> khớp sau khi cộng hai dòng sao kê.</figcaption>
 </figure>
 
 ## `Fn`, `FnMut`, `FnOnce`: closure làm gì với biến nó bắt?
 
-Closure là hàm vô danh dùng được biến ở quanh nó (biến được bắt, captured). Compiler cài trait cho closure tùy cách nó dùng các biến đó:
+Closure là hàm vô danh dùng được biến ở quanh nó (biến được bắt, captured). Compiler cài trait cho closure tuỳ cách nó dùng các biến đó:
 
 | Trait | Closure làm gì với biến bắt được | Gọi được | Trong lab |
 | --- | --- | --- | --- |
@@ -88,7 +88,7 @@ note: this value implements `FnOnce`, which causes it to be moved when called
 
 ## Bắt theo tham chiếu hay `move`?
 
-Mặc định closure bắt biến theo cách nhẹ nhất đủ dùng: đọc thì mượn `&`, sửa thì mượn `&mut`, move ra thì lấy luôn. Từ khóa `move` ép mọi biến thành bản sở hữu của closure. Nó **không** quyết định `Fn`, `FnMut` hay `FnOnce`, chỉ quyết định biến được mượn hay được lấy đi. Cần `move` khi closure sống lâu hơn hàm tạo ra nó, như khi trả closure về:
+Mặc định closure bắt biến theo cách nhẹ nhất đủ dùng: đọc thì mượn `&`, sửa thì mượn `&mut`, move ra thì lấy luôn. Từ khoá `move` ép mọi biến thành bản sở hữu của closure. Nó **không** quyết định `Fn`, `FnMut` hay `FnOnce`, chỉ quyết định biến được mượn hay được lấy đi. Cần `move` khi closure sống lâu hơn hàm tạo ra nó, như khi trả closure về:
 
 ```rust
 // src/reconcile.rs
@@ -185,7 +185,7 @@ fn sum_groups<T>(
 }
 ```
 
-Lab có ba đích `collect`: `Result<Vec<_>, _>` cho kết quả có thể lỗi, `Result<HashMap<_, _>, _>` cho tổng theo ref, `BTreeMap` cho báo cáo cần thứ tự ổn định. Báo cáo dùng `BTreeSet` hợp hai tập khóa nên luôn sắp theo `external_ref`:
+Lab có ba đích `collect`: `Result<Vec<_>, _>` cho kết quả có thể lỗi, `Result<HashMap<_, _>, _>` cho tổng theo ref, `BTreeMap` cho báo cáo cần thứ tự ổn định. Báo cáo dùng `BTreeSet` hợp hai tập khoá nên luôn sắp theo `external_ref`:
 
 ```rust
 // src/reconcile.rs (rút gọn)
@@ -204,7 +204,7 @@ let findings: BTreeMap<String, Finding> = refs
     .collect();
 ```
 
-`collect` vào `HashMap` từ dữ liệu có khóa trùng thì giá trị sau âm thầm thay giá trị trước, không có lỗi. Test `collect_into_hashmap_keeps_last_duplicate_key` ghi lại hành vi này; vì vậy ta gom nhóm rồi cộng, không `collect` thẳng dòng sao kê vào map.
+`collect` vào `HashMap` từ dữ liệu có khoá trùng thì giá trị sau âm thầm thay giá trị trước, không có lỗi. Test `collect_into_hashmap_keeps_last_duplicate_key` ghi lại hành vi này; vì vậy ta gom nhóm rồi cộng, không `collect` thẳng dòng sao kê vào map.
 
 Còn `zip`. Hàm `positional_ref_clashes` ghép sổ và sao kê theo vị trí để cho thấy cách làm sai: sao kê có thêm một dòng `VX-1002` nên các cặp sau đó lệch một bước, và `VX-1005` không có cặp vì `zip` dừng ở danh sách ngắn hơn:
 
@@ -298,7 +298,7 @@ LINQ và iterator adapter cùng một ý tưởng. Phía C#, xem [bài generics 
 | Lọc | `Where(r => r.Amount >= min)` | `.filter(\|r\| r.amount >= min)` |
 | Biến đổi | `Select` | `.map` |
 | Gom nhóm | `GroupBy(r => r.ExternalRef)`, hoãn chạy | `group_by` viết tay, chạy ngay, trả `HashMap<K, Vec<T>>` |
-| Ra từ điển | `ToDictionary`, ném `ArgumentException` khi trùng khóa | `collect::<HashMap<_, _>>()`, giữ giá trị cuối |
+| Ra từ điển | `ToDictionary`, ném `ArgumentException` khi trùng khoá | `collect::<HashMap<_, _>>()`, giữ giá trị cuối |
 | Gom một giá trị | `Aggregate` | `fold`, `try_fold` |
 
 Giống nhau: `Where`/`Select` hoãn chạy đến `foreach` hay `ToList()`, như adapter đến `collect`. Khác nhau: Rust bắt chọn mượn hay `move`, còn lambda C# bắt chính biến nên mọi nơi cùng thấy thay đổi; iterator Rust đi một lượt (bước tiêu thụ nhận `self`), còn truy vấn LINQ duyệt lại sẽ chạy lại từ đầu; lỗi trong đường ống là `Result`, không phải exception.
@@ -349,7 +349,7 @@ inspect chạy: dựng = 0, next đầu tiên = 2, collect = 4
   dòng 3: số tiền không hợp lệ ("12a")
 ```
 
-`JE-000002` (`trip:TN-0001:split`) vắng ở phía sổ cái vì `filter_map` bỏ nó: khóa không có tiền tố `psp:vixanh:`. `-- --verify` kiểm các giá trị trên, in `VERIFY OK` với exit code 0; sai thì thoát mã 1. `cargo test` chạy 30 unit test, 4 integration test và 2 doc test.
+`JE-000002` (`trip:TN-0001:split`) vắng ở phía sổ cái vì `filter_map` bỏ nó: khoá không có tiền tố `psp:vixanh:`. `-- --verify` kiểm các giá trị trên, in `VERIFY OK` với exit code 0; sai thì thoát mã 1. `cargo test` chạy 30 unit test, 4 integration test và 2 doc test.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

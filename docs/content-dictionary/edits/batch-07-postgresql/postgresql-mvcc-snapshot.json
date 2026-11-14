@@ -1,0 +1,15 @@
+{"file":"postgresql-mvcc-snapshot.md","edits":[
+{"old":"Màn có phải đứng chờ giao dịch kia xong không?","new":"Màn hình có phải đứng chờ giao dịch kia xong không?","reason":"'Màn' đứng một mình cụt, thống nhất với câu trước","severity":"low"},
+{"old":"Bài này mở nắp cơ chế đứng sau:","new":"Bài này đi vào cơ chế phía sau:","reason":"'mở nắp' là calque của 'under the hood'","severity":"medium"},
+{"old":"Mọi thứ được chứng minh bằng hai phiên chạy thật,","new":"Bài chứng minh mọi điều trên bằng hai phiên chạy thật,","reason":"Bỏ bị động kiểu Anh","severity":"medium"},
+{"old":"Lab in **tương đối**:","new":"Lab in số **tương đối**:","reason":"Thiếu danh từ chính","severity":"medium"},
+{"old":"Bản mới cùng page và không cột có index nào bị đổi nên đây là","new":"Bản mới nằm cùng page và không có cột nào có index bị đổi, nên đây là","reason":"Câu thiếu động từ, khó hiểu (khảo sát)","severity":"medium"},
+{"old":"cơ chế và điều kiện của nó đã có ở","new":"cơ chế và điều kiện của HOT update đã được trình bày ở","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"low"},
+{"old":"Vẽ sơ đồ kiểu «xmax = xid mới nhất + 1, mọi giao dịch đang chạy đều trong danh sách» là sai","new":"Hiểu snapshot theo kiểu «xmax = xid mới nhất + 1, mọi giao dịch đang chạy đều trong danh sách» là sai","reason":"Câu cụt, thiếu rõ đối tượng bị hiểu sai","severity":"medium"},
+{"old":"Nó chỉ ghi X+3 là","new":"Lệnh này chỉ ghi nhận X+3 là","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Từ đó, người đọc tra trạng thái và hiểu:","new":"Từ đó, phiên đọc tra trạng thái và biết:","reason":"'người đọc' gượng, ở đây là phiên đọc dữ liệu","severity":"medium"},
+{"old":"nó còn có thể là giao dịch đang chạy, giao dịch đã huỷ, hoặc chỉ là khoá dòng","new":"giá trị đó còn có thể do giao dịch đang chạy, giao dịch đã huỷ, hoặc chỉ là khoá dòng","reason":"'nó' mơ hồ, câu thiếu chủ thể rõ ràng","severity":"medium"},
+{"old":"Đa phiên bản đổi lấy chỗ trống tạm thời và việc dọn dẹp; giao dịch mở lâu làm việc dọn bị chặn.","new":"Giữ nhiều phiên bản phải trả giá bằng dung lượng tạm thời và việc dọn dẹp; giao dịch mở lâu khiến việc dọn bị chặn.","reason":"Cụm 'đa phiên bản đổi lấy' gượng, câu 'làm việc dọn bị chặn' sai cấu trúc","severity":"medium"},
+{"old":"PG-033 (khoá dòng), PG-035 (cập nhật có điều kiện) xử lý.","new":"PG-033 (khoá dòng) và PG-035 (cập nhật có điều kiện) giải quyết trường hợp này.","reason":"Câu thiếu chủ ngữ rõ, lược động từ","severity":"medium"},
+{"old":"## 3. Giao dịch chỉ đọc chưa có xid","new":"## 3. Giao dịch chỉ đọc chưa được cấp xid","reason":"'chưa có xid' cụt","severity":"low"}
+]}

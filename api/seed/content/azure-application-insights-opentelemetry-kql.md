@@ -53,9 +53,9 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(m => m.AddMeter("ToiNoi.Trips"));
 ```
 
-Khối này chỉ khai báo exporter, nguồn đo và sampling. Nó thay khối `AddOpenTelemetry()` hiện có trong `Api/Program.cs` (vốn chỉ xuất OTLP khi bật `Telemetry:Export`), giữ tên service `toi-noi-trips` để `cloud_RoleName` không đổi. `AddNpgsql()` đến từ package `Npgsql.OpenTelemetry`, repo hiện chưa tham chiếu nên phải thêm; nó là thứ tạo ra dependency PostgreSQL, thiếu nó bạn chỉ thấy span `db.commit` tự viết của bài 37. Connection string đến từ biến `APPLICATIONINSIGHTS_CONNECTION_STRING`, không hard-code trong source. `SamplingRatio = 0.5f` ở đây chỉ để minh hoạ; các bản distro mới có thêm sampler giới hạn số trace mỗi giây và mặc định sampling có thể đổi giữa các phiên bản, hãy đọc changelog của bản bạn dùng.
+Khối này chỉ khai báo exporter, nguồn đo và sampling. Đoạn này thay khối `AddOpenTelemetry()` hiện có trong `Api/Program.cs` (vốn chỉ xuất OTLP khi bật `Telemetry:Export`), giữ tên service `toi-noi-trips` để `cloud_RoleName` không đổi. `AddNpgsql()` đến từ package `Npgsql.OpenTelemetry`, repo hiện chưa tham chiếu nên phải thêm; package này tạo ra dependency PostgreSQL, thiếu package này bạn chỉ thấy span `db.commit` tự viết của bài 37. Connection string lấy từ biến `APPLICATIONINSIGHTS_CONNECTION_STRING`, không hard-code trong source. `SamplingRatio = 0.5f` ở đây chỉ để minh hoạ; các bản distro mới có thêm sampler giới hạn số trace mỗi giây và mặc định sampling có thể đổi giữa các phiên bản, hãy đọc changelog của bản bạn dùng.
 
-Connection string cho phép *gửi* telemetry vào resource, không cho đọc ra. Vẫn nên đưa nó vào Container App qua secret tham chiếu Key Vault hoặc lấy từ App Configuration (xem các bài Key Vault và App Configuration), để mỗi môi trường trỏ vào resource của mình và xoay được mà không build lại image. Muốn chặt hơn, bật xác thực Entra cho ingestion bằng identity của app và tắt local auth, kiểm cấu hình theo tài liệu.
+Connection string cho phép *gửi* telemetry vào resource, không cho đọc ra. Vẫn nên đưa nó vào Container App qua secret tham chiếu Key Vault hoặc lấy từ App Configuration (xem các bài Key Vault và App Configuration), để mỗi môi trường trỏ vào resource của mình và xoay được mà không build lại image. Muốn chặt hơn, bật xác thực Entra cho ingestion bằng identity của app và tắt local auth, kiểm tra cấu hình theo tài liệu.
 
 ## Năm bảng dữ liệu và cái giá của sampling
 
@@ -95,7 +95,7 @@ requests
 | order by error_rate_pct desc
 ```
 
-Q1 cho đường p95 và số request mỗi bucket; Q2 so error rate giữa revision đang canary và revision cũ, cái bạn cần để quyết định tăng traffic ở bài 44. Chúng không cho biết nguyên nhân, và `appVersion` chỉ có giá trị khi bạn đã đặt `service.version`. Bài dùng `toint(resultCode) >= 500` thay vì `success == false` vì `success` có thể gồm cả các mã 4xx do client gửi sai.
+Q1 cho đường p95 và số request mỗi bucket; Q2 so error rate giữa revision đang canary và revision cũ, thông tin bạn cần để quyết định tăng traffic ở bài 44. Hai truy vấn này không cho biết nguyên nhân, và `appVersion` chỉ có giá trị khi bạn đã đặt `service.version`. Bài dùng `toint(resultCode) >= 500` thay vì `success == false` vì `success` có thể gồm cả các mã 4xx do client gửi sai.
 
 ## Dependency PostgreSQL chậm và lần theo operation_Id
 
@@ -130,7 +130,7 @@ Giá trị `type` do exporter đặt; chạy `dependencies | summarize count() b
 <figcaption>Hình 1. Một operation_Id nối request, message Service Bus và dependency PostgreSQL; message chỉ nối được khi propagation được bật.</figcaption>
 </figure>
 
-Việc nối xuyên Service Bus (bài 26 của loạt C#, outbox rồi consumer) không tự xảy ra. Context phải đi theo message qua thuộc tính của nó, và nguồn tracing của Azure SDK có thể cần được bật rõ ràng tuỳ phiên bản SDK. Hãy kiểm bằng cách gửi một request thật và chạy truy vấn sau với `operation_Id` của nó; nếu consumer ra `operation_Id` khác, propagation chưa nối.
+Việc nối xuyên Service Bus (bài 26 của loạt C#, outbox rồi consumer) không tự xảy ra. Context phải đi theo message qua thuộc tính của nó, và nguồn tracing của Azure SDK có thể phải bật thủ công tuỳ phiên bản SDK. Hãy kiểm tra bằng cách gửi một request thật và chạy truy vấn sau với `operation_Id` của nó; nếu consumer ra `operation_Id` khác, propagation chưa nối.
 
 ```kusto
 // Q5a: toàn bộ dấu vết của một request
@@ -156,7 +156,7 @@ ContainerAppConsoleLogs_CL
 | take 100
 ```
 
-Tên bảng phụ thuộc đích log của Container Apps environment. Đích **Log Analytics** ghi vào `ContainerAppConsoleLogs_CL` với cột có hậu tố kiểu (`ContainerAppName_s`, `Log_s`) như truy vấn trên. Đích **Azure Monitor** (định tuyến bằng diagnostic settings) ghi vào bảng `ContainerAppConsoleLogs` với cột không hậu tố (`ContainerAppName`, `RevisionName`, `Log`), nên phải sửa truy vấn theo. Log PostgreSQL vào `AzureDiagnostics` (lọc theo `ResourceProvider` và `Category`) hoặc bảng riêng nếu bạn chọn chế độ resource-specific. Query này không chứng minh log đã đủ: console log bị cắt khi container bị kill sớm.
+Tên bảng phụ thuộc đích log của Container Apps environment. Đích **Log Analytics** ghi vào `ContainerAppConsoleLogs_CL` với cột có hậu tố kiểu (`ContainerAppName_s`, `Log_s`) như truy vấn trên. Đích **Azure Monitor** (định tuyến bằng diagnostic settings) ghi vào bảng `ContainerAppConsoleLogs` với cột không hậu tố (`ContainerAppName`, `RevisionName`, `Log`), nên phải sửa truy vấn theo. Log PostgreSQL vào `AzureDiagnostics` (lọc theo `ResourceProvider` và `Category`) hoặc bảng riêng nếu bạn chọn chế độ resource-specific. Truy vấn này không chứng minh log đã đầy đủ: console log bị cắt khi container bị kill sớm.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -165,18 +165,18 @@ Tên bảng phụ thuộc đích log của Container Apps environment. Đích **
 <figcaption>Hình 2. Ba nguồn dữ liệu vào cùng một Log Analytics workspace, nơi KQL, Application Map và function đọc chung.</figcaption>
 </figure>
 
-Ngoài truy vấn, portal có ba công cụ đọc nhanh. **Application Map** vẽ service và dependency từ `cloud_RoleName` và `target`, nên phải đặt tên role đúng. **Transaction search** tìm một request và mở cây span của nó. **Live Metrics** cho thấy request, lỗi, CPU gần thời gian thực khi bạn vừa deploy canary, nhưng không thay truy vấn lịch sử.
+Ngoài truy vấn, portal có ba công cụ đọc nhanh. **Application Map** vẽ service và dependency từ `cloud_RoleName` và `target`, nên phải đặt tên role đúng. **Transaction search** tìm một request và mở cây span của nó. **Live Metrics** cho thấy request, lỗi và CPU gần như theo thời gian thực khi bạn vừa deploy canary, nhưng không thay truy vấn lịch sử.
 
 ## Daily cap, retention và không log PII
 
-Chi phí telemetry tỷ lệ với lượng dữ liệu nạp vào workspace. Có ba núm: sampling (ở app), **daily cap** (ở workspace) và retention. Khi đạt cap, workspace ngừng nhận dữ liệu cho tới chu kỳ sau, bao gồm lúc có sự cố. Resource Application Insights còn có daily cap riêng; đặt cả hai thì cap thấp hơn quyết định. Nếu lượng dữ liệu ổn định ở mức cao, **commitment tier** tính theo dung lượng cam kết thay cho trả theo từng GB; so sánh bằng Pricing Calculator.
+Chi phí telemetry tỷ lệ với lượng dữ liệu nạp vào workspace. Có ba thông số điều chỉnh: sampling (ở app), **daily cap** (ở workspace) và retention. Khi đạt cap, workspace ngừng nhận dữ liệu cho tới chu kỳ sau, kể cả lúc có sự cố. Resource Application Insights còn có daily cap riêng; đặt cả hai thì cap thấp hơn quyết định. Nếu lượng dữ liệu ổn định ở mức cao, **commitment tier** tính theo dung lượng cam kết thay cho trả theo từng GB; so sánh bằng Pricing Calculator.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
-<p>Daily cap thấp làm mất đúng dữ liệu bạn cần nhất khi lỗi bùng lên, vì sự cố cũng làm tăng lượng log. Hãy đặt cảnh báo khi dùng gần hết cap (bài 48). Và số điện thoại khách hay địa chỉ đón lọt vào log hoặc tag span thì đã nằm trong workspace, xoá lại rất khó. Lọc trước khi gửi, không sau khi nạp.</p>
+<p>Daily cap thấp làm mất đúng dữ liệu bạn cần nhất khi lỗi bùng lên, vì sự cố cũng làm tăng lượng log. Hãy đặt cảnh báo khi dùng gần hết cap (bài 48). Và số điện thoại khách hay địa chỉ đón lọt vào log hoặc tag span thì đã nằm trong workspace, xoá lại rất khó. Hãy lọc trước khi gửi, đừng đợi đến khi đã nạp.</p>
 </div>
 
-Cách lọc PII: không log số điện thoại, không gắn nó thành tag; nếu cần nối sự kiện với khách, dùng trace id và id nội bộ. Kiểm các thuộc tính tự động như URL có query string và câu SQL (Npgsql dùng tham số, nhưng log tự viết thì không có gì bảo vệ). Retention đặt ở workspace, mặc định theo tài liệu và có thể chỉnh theo bảng; giữ ngắn cho bảng nhiều dữ liệu.
+Cách lọc PII: không log số điện thoại, không gắn nó thành tag; nếu cần nối sự kiện với khách, dùng trace id và id nội bộ. Kiểm tra các thuộc tính tự động như URL có query string và câu SQL (Npgsql dùng tham số, nhưng log tự viết thì không có gì bảo vệ). Retention đặt ở workspace, mặc định theo tài liệu và có thể chỉnh theo bảng; giữ ngắn cho bảng nhiều dữ liệu.
 
 ## Lab: gửi tải, lưu truy vấn thành function, lần theo một lỗi
 
@@ -196,7 +196,7 @@ for i in $(seq 1 200); do
 done | sort | uniq -c
 ```
 
-Script chỉ cho thấy phân bố mã HTTP; `$TOKEN` bạn tự lấy từ identity provider của lab. Mỗi request thứ 20 gửi `distanceKm` âm nên validation trả 400, đủ để thấy request lỗi phía client trong `requests`. Nó không tạo lỗi 5xx; muốn có, bạn phải gây ra nó có chủ đích ở staging (ví dụ chặn tạm kết nối database) và nhớ khôi phục. Bước 3: chạy Q1 đến Q5, rồi lưu mỗi truy vấn thành function trong workspace để cả đội gọi lại bằng tên.
+Script chỉ cho thấy phân bố mã HTTP; `$TOKEN` bạn tự lấy từ identity provider của lab. Mỗi request thứ 20 gửi `distanceKm` âm nên validation trả 400, đủ để thấy request lỗi phía client trong `requests`. Vòng lặp này không tạo lỗi 5xx; muốn có, bạn phải gây lỗi này có chủ đích ở staging (ví dụ chặn tạm kết nối database) và nhớ khôi phục. Bước 3: chạy Q1 đến Q5, rồi lưu mỗi truy vấn thành function trong workspace để cả đội gọi lại bằng tên.
 
 ```bash
 az monitor log-analytics workspace saved-search create \
@@ -208,7 +208,7 @@ az monitor log-analytics workspace saved-search create \
   --saved-query 'AppRequests | where Name == "POST /trips" | summarize p95_ms = percentile(DurationMs, 95) by bin(TimeGenerated, 5m)'
 ```
 
-Lệnh lưu một truy vấn thành function gọi được là `toinoi_p95_post_trips()`. Function sống trong workspace, nên nó dùng tên bảng và cột của workspace (`AppRequests`, `Name`, `DurationMs`, `TimeGenerated`), không dùng `requests` như ở màn Application Insights. Lệnh không lưu các truy vấn còn lại; tham số nên được kiểm bằng `-h` trên phiên bản CLI của bạn. Bước 4: lấy một `operation_Id` từ Q4, chạy Q5a, đọc cây từ request tới dependency PostgreSQL và ghi lại phần nào chiếm nhiều thời gian nhất.
+Lệnh lưu một truy vấn thành function, gọi được bằng `toinoi_p95_post_trips()`. Function nằm trong workspace, nên dùng tên bảng và cột của workspace (`AppRequests`, `Name`, `DurationMs`, `TimeGenerated`), không dùng `requests` như ở màn Application Insights. Lệnh không lưu các truy vấn còn lại; hãy kiểm tra tham số bằng `-h` trên phiên bản CLI của bạn. Bước 4: lấy một `operation_Id` từ Q4, chạy Q5a, đọc cây từ request tới dependency PostgreSQL và ghi lại phần nào chiếm nhiều thời gian nhất.
 
 **Bài tập:** sampling cố định 10%, một bucket 5 phút trả `count() = 120` còn `sum(itemCount)` trả khoảng 1200. Con số nào phản ánh tải thật, và tại sao một lỗi hiếm vẫn có thể không thấy?
 
@@ -216,7 +216,7 @@ Lệnh lưu một truy vấn thành function gọi được là `toinoi_p95_post
 
 ## Học tiếp từ đây
 
-Bạn vừa có telemetry của `trip-service` trong Application Insights, năm truy vấn KQL cho latency, lỗi theo revision, database chậm, correlation và log container, cùng ba núm kiểm soát chi phí: sampling, daily cap, retention. Dữ liệu này là nền cho việc đặt ngưỡng. [Bài 48](/articles/azure-alert-action-group-slo-workbook) biến chúng thành alert, action group, SLO và workbook; nếu cần đào lại phần rollout, quay về [bài 46](/articles/azure-database-migration-trong-pipeline).
+Bạn vừa có telemetry của `trip-service` trong Application Insights, năm truy vấn KQL cho latency, lỗi theo revision, database chậm, correlation và log container, cùng ba thông số kiểm soát chi phí: sampling, daily cap, retention. Dữ liệu này là nền cho việc đặt ngưỡng. [Bài 48](/articles/azure-alert-action-group-slo-workbook) biến chúng thành alert, action group, SLO và workbook; nếu cần xem lại phần rollout, quay về [bài 46](/articles/azure-database-migration-trong-pipeline).
 
 ## Tài liệu gốc
 

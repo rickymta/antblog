@@ -1,0 +1,21 @@
+{"file":"aws-rds-postgresql-multi-az-backup.md","edits":[
+{"old":"kiểm backup xem còn dùng được không và vá bản minor chậm ba tháng","new":"kiểm tra xem backup còn dùng được không và vá bản minor đã chậm ba tháng","reason":"Trật tự từ kiểu Anh, thiếu động từ","severity":"medium"},
+{"old":"bạn vẫn là người chủ của dữ liệu và hiệu năng","new":"bạn vẫn là người chịu trách nhiệm về dữ liệu và hiệu năng","reason":"'người chủ' gượng","severity":"low"},
+{"old":"Số liệu cơ bản trong CloudWatch","new":"Chỉ số cơ bản trong CloudWatch","reason":"'số liệu' cho metric nên dùng 'chỉ số'","severity":"medium"},
+{"old":"hiệu năng cơ sở của gp3","new":"hiệu năng baseline của gp3","reason":"'cơ sở' là calque của baseline","severity":"medium"},
+{"old":"không chọn theo đoán, hãy load test","new":"đừng chọn theo cảm tính, hãy load test","reason":"'chọn theo đoán' gượng","severity":"low"},
+{"old":"Khi nguồn là security group chứ không phải dải IP, máy app mới tăng giảm số lượng mà rule không đổi.","new":"Khi nguồn là security group chứ không phải dải IP, số máy app có tăng giảm thì rule vẫn không đổi.","reason":"Trật tự từ kiểu Anh, khó hiểu","severity":"medium"},
+{"old":"không bao giờ cần biết mật khẩu bằng mắt thường","new":"không bao giờ cần nhìn thấy mật khẩu","reason":"Cụm tự ghép gượng","severity":"medium"},
+{"old":"Chỉ một AZ (Single-AZ) thì mất AZ là mất database tới khi bạn restore.","new":"Nếu chỉ có một AZ (Single-AZ) thì mất AZ là mất database cho tới khi bạn restore.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"sang máy mới, mất khoảng vài chục giây tới vài phút.","new":"sang máy mới, việc này mất khoảng vài chục giây tới vài phút.","reason":"Câu thiếu chủ ngữ cho 'mất'","severity":"medium"},
+{"old":"Muốn dùng, bạn phải đổi cấu hình ứng dụng","new":"Muốn dùng instance mới, bạn phải đổi cấu hình ứng dụng","reason":"Câu thiếu tân ngữ","severity":"medium"},
+{"old":"Sao chép backup sang region khác thuộc bài 37.","new":"Việc sao chép backup sang region khác được trình bày ở bài 37.","reason":"'thuộc bài' gượng, câu thiếu chủ ngữ","severity":"medium"},
+{"old":"bốn số nên có alarm","new":"bốn chỉ số nên đặt alarm","reason":"'số' cho metric nên dùng 'chỉ số'","severity":"medium"},
+{"old":"AWS từng dùng Performance Insights và đang chuyển các tính năng đó","new":"ta từng dùng Performance Insights, nay AWS đang chuyển các tính năng đó","reason":"Câu đổi chủ ngữ giữa chừng, khó hiểu","severity":"medium"},
+{"old":"ID của VPC, subnet và security group được tra theo tag Name mà lab bài 04 đã đặt","new":"Script tra ID của VPC, subnet và security group theo tag Name mà lab bài 04 đã đặt","reason":"Bỏ bị động kiểu Anh","severity":"low"},
+{"old":"cửa sổ bảo trì","new":"maintenance window","reason":"Thống nhất một tên cho một khái niệm","severity":"low"},
+{"old":"tên tham số của lệnh `aws rds` cần được bạn xác nhận trên tài khoản lab","new":"bạn cần xác nhận tên tham số của lệnh `aws rds` trên tài khoản lab","reason":"Bỏ bị động kiểu Anh","severity":"medium"},
+{"old":"**Version PostgreSQL có ngày hết hỗ trợ.**","new":"**Phiên bản PostgreSQL có ngày hết hỗ trợ.**","reason":"Dùng 'phiên bản' trong văn xuôi","severity":"low"},
+{"old":"Cách khôi phục nào dùng được và nó tạo ra gì?","new":"Cách khôi phục nào dùng được và cách đó tạo ra gì?","reason":"Tránh 'nó' chỉ sự vật","severity":"medium"},
+{"old":"kiểm dữ liệu rồi trích bảng cần thiết","new":"kiểm tra dữ liệu rồi trích bảng cần thiết","reason":"'kiểm' đứng một mình gượng","severity":"low"}
+]}

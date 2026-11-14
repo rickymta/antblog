@@ -1,0 +1,77 @@
+{
+ "file": "ba-as-is-to-be-quy-trinh.md",
+ "edits": [
+  {
+   "old": "ở các ca khác nhau",
+   "new": "ở các tình huống khác nhau",
+   "reason": "'ca' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Giá trị của nó phụ thuộc việc nói rõ",
+   "new": "Giá trị của mô hình phụ thuộc vào việc nói rõ",
+   "reason": "Tránh 'nó', thiếu 'vào'",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa đủ nguồn dựng một hành trình",
+   "new": "chưa đủ nguồn để dựng một hành trình",
+   "reason": "Thiếu 'để'",
+   "severity": "medium"
+  },
+  {
+   "old": "Phạm vi bản đầu chỉ là khách chủ chuyến huỷ",
+   "new": "Phạm vi bản đầu chỉ gồm trường hợp khách chủ chuyến huỷ",
+   "reason": "Phạm vi không 'là' một hành động; thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó mô tả khách huỷ theo baseline",
+   "new": "Sơ đồ mô tả khách huỷ theo baseline",
+   "reason": "Tránh 'Nó' đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Cả hai nhánh cần nhìn thấy trong tài liệu",
+   "new": "Cả hai nhánh cần xuất hiện trong tài liệu",
+   "reason": "Giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Một điểm quan trọng khác là tài xế rời chuyến",
+   "new": "Một điểm quan trọng khác là việc tài xế rời chuyến",
+   "reason": "Thiếu danh từ 'việc'",
+   "severity": "medium"
+  },
+  {
+   "old": "Có thay đổi là bỏ thao tác dư",
+   "new": "Thay đổi có thể chỉ là bỏ thao tác dư",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nối với nhu cầu, owner và cách đánh giá",
+   "new": "nối với nhu cầu, người phụ trách và cách đánh giá",
+   "reason": "owner có từ Việt tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "một ca thuận và một ca lỗi",
+   "new": "một tình huống thuận lợi và một tình huống lỗi",
+   "reason": "'ca thuận' tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Lưu version riêng cho as-is và to-be",
+   "new": "Lưu phiên bản riêng cho as-is và to-be",
+   "reason": "Thống nhất 'phiên bản'",
+   "severity": "medium"
+  },
+  {
+   "old": "Không. Nó là mô hình của đặc tả.",
+   "new": "Không. Đó là mô hình của đặc tả.",
+   "reason": "Tránh 'Nó'",
+   "severity": "low"
+  }
+ ]
+}

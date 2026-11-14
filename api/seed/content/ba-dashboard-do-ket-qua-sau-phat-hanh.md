@@ -18,9 +18,9 @@ Nhóm cần biết khách có thấy tính năng, có xác nhận, tài xế có
 
 ## 2. Chốt cohort và cửa sổ
 
-P07 dùng 1.000 chuyến đủ điều kiện có lần accepted đầu tiên trong tuần B theo Asia/Ho_Chi_Minh. Snapshot lấy sau cuối tuần bảy ngày; giả định tất cả đã có outcome quan sát đầy đủ. Huỷ trước pickup tính một lần cho mỗi trip trong cohort. Event xem/xác nhận trước accepted được nối về cùng trip.
+P07 dùng 1.000 chuyến đủ điều kiện có lần accepted đầu tiên trong tuần B theo Asia/Ho_Chi_Minh. Snapshot lấy bảy ngày sau khi tuần kết thúc; giả định tất cả đã có outcome quan sát đầy đủ. Huỷ trước pickup tính một lần cho mỗi trip trong cohort. Event xem/xác nhận trước accepted được nối về cùng trip.
 
-Định nghĩa này loại chuyến chưa từng accepted. Vì vậy không dùng tỷ lệ của cohort để kết luận về mọi booking hoặc việc tính năng có ảnh hưởng khả năng được nhận hay không.
+Định nghĩa này loại chuyến chưa từng accepted. Vì vậy không dùng tỷ lệ của cohort để kết luận về mọi booking, hoặc kết luận tính năng có ảnh hưởng tới khả năng được nhận chuyến hay không.
 
 ## 3. Đọc funnel đúng mẫu số
 
@@ -31,25 +31,25 @@ P07 dùng 1.000 chuyến đủ điều kiện có lần accepted đầu tiên tr
 | Chuyến có tài xế đọc sau xác nhận | 180/240 | 75% chuyến xác nhận |
 | Chuyến huỷ trước pickup | 118/1.000 | 11,8% cohort |
 
-240/1.000 = 24% là adoption trên toàn cohort, khác 40%. 720 event mở thuộc 600 trip, nên không dùng 720 làm số chuyến thấy. Tài xế mở màn hình cũng chưa chứng minh họ hiểu hoặc làm theo thông tin.
+240/1.000 = 24% là adoption trên toàn cohort, khác với 40%. 720 event mở thuộc 600 trip, nên không dùng 720 làm số chuyến thấy. Tài xế mở màn hình cũng chưa chứng minh họ hiểu hoặc làm theo thông tin.
 
 ## 4. Metric dictionary tối thiểu
 
-Ghi tên, mục đích, đơn vị, grain, tử số, mẫu số, bộ lọc, timezone, thời gian quan sát, nguồn và owner. Event schema cần version và quy tắc dedup. Nếu có late event, mô tả dashboard cập nhật lại số cũ hay chốt snapshot để người đọc hiểu chênh lệch.
+Ghi tên, mục đích, đơn vị, grain, tử số, mẫu số, bộ lọc, timezone, thời gian quan sát, nguồn và người phụ trách. Event schema cần phiên bản và quy tắc khử trùng lặp. Nếu có late event, mô tả rõ dashboard cập nhật lại số cũ hay chốt snapshot, để người đọc hiểu chênh lệch.
 
 ## 5. Kiểm chất lượng dữ liệu
 
-Đối chiếu vài trip từ log đến dashboard; tìm event thiếu tripId, duplicate, timestamp sai và sự kiện phát trước khi dữ liệu được lưu. Phân biệt không có sự kiện đọc với chưa đo được sự kiện đọc. Một tỷ lệ đẹp từ telemetry lỗi không phải bằng chứng sản phẩm tốt.
+Đối chiếu vài trip từ log đến dashboard; tìm event thiếu tripId, duplicate, timestamp sai và sự kiện phát trước khi dữ liệu được lưu. Phân biệt không có sự kiện đọc với chưa đo được sự kiện đọc. Một tỷ lệ đẹp từ telemetry lỗi không phải là bằng chứng cho thấy sản phẩm tốt.
 
-## 6. So baseline có giới hạn
+## 6. So sánh với baseline có giới hạn
 
-P01 tuần A có 120/1.000 = 12%; tuần B là 11,8%, thấp hơn 0,2 điểm phần trăm. Hai tuần không được phân nhóm ngẫu nhiên, có thể khác thời tiết, khu vực hoặc nguồn tài xế. Chưa thể quy chênh lệch cho tính năng. Guardrail khiếu nại chưa có baseline đáng tin thì ghi chưa đủ đánh giá.
+P01 tuần A có 120/1.000 = 12%; tuần B là 11,8%, thấp hơn 0,2 điểm phần trăm. Hai tuần không được phân nhóm ngẫu nhiên, có thể khác thời tiết, khu vực hoặc nguồn tài xế. Chưa thể quy chênh lệch cho tính năng. Với guardrail khiếu nại chưa có baseline đáng tin, ghi là chưa đủ để đánh giá.
 
 ## 7. Thực hành
 
 Viết ba chú thích cho dashboard để tránh đọc nhầm 720 event, 40% adoption và mức giảm 0,2 điểm phần trăm.
 
-<details><summary>Gợi ý</summary><p>Hiển thị 600 unique trip thay vì gọi event là chuyến; ghi 40% trong nhóm đã thấy và 24% toàn cohort; mô tả so tuần chỉ là quan sát, chưa phải ước lượng tác động nhân quả.</p></details>
+<details><summary>Gợi ý</summary><p>Hiển thị 600 unique trip thay vì gọi event là chuyến; ghi 40% trong nhóm đã thấy và 24% toàn cohort; mô tả việc so sánh hai tuần chỉ là quan sát, chưa phải ước lượng tác động nhân quả.</p></details>
 
 ## 8. Nguồn và bài tiếp
 

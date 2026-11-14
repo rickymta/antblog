@@ -1,0 +1,17 @@
+{"file":"aws-api-gateway-authorizer-websocket.md","edits":[
+{"old":"HTTP API vs REST API, JWT authorizer","new":"HTTP API so với REST API, JWT authorizer","reason":"'vs' trong văn xuôi","severity":"low"},
+{"old":"nó kiểm danh tính, chặn lưu lượng quá mức,","new":"nó kiểm tra danh tính, chặn lưu lượng vượt hạn mức,","reason":"'kiểm' cụt; 'quá mức' mơ hồ","severity":"medium"},
+{"old":"vì nó cần VPC và ALB của Phần 01.","new":"vì VPC link cần VPC và ALB của Phần 01.","reason":"Tránh 'nó' chỉ sự vật trừu tượng, nhắc lại danh từ","severity":"medium"},
+{"old":"rồi kiểm chữ ký,","new":"rồi kiểm tra chữ ký,","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"hàm không phải tự kiểm chữ ký token,","new":"hàm không cần tự kiểm tra chữ ký token,","reason":"'không phải' dễ hiểu nhầm là phủ định kiểu khác; 'kiểm' cụt","severity":"medium"},
+{"old":"kiểm tài khoản bị khoá)","new":"kiểm tra tài khoản bị khoá)","reason":"'kiểm' cụt","severity":"low"},
+{"old":"(request/giây bền vững) và `burst` (dung lượng xô).","new":"(request/giây duy trì được) và `burst` (dung lượng bucket).","reason":"'xô' là calque của bucket; 'bền vững' gượng","severity":"medium"},
+{"old":"để một route bị dội không ăn hết ngân sách chung.","new":"để một route bị gọi dồn dập không dùng hết hạn mức chung.","reason":"'dội', 'ăn hết ngân sách' khẩu ngữ, gượng","severity":"medium"},
+{"old":"là manh mối tách lỗi của API Gateway khỏi lỗi của service.","new":"là manh mối để phân biệt lỗi của API Gateway với lỗi của service.","reason":"'tách lỗi ... khỏi' gượng, trật tự kiểu Anh","severity":"low"},
+{"old":"HTTP là hỏi-đáp; muốn khách thấy","new":"HTTP hoạt động theo kiểu hỏi-đáp; muốn khách thấy","reason":"Câu thiếu động từ","severity":"low"},
+{"old":"`$default` cho thông điệp không khớp route nào;","new":"`$default` cho message không khớp route nào;","reason":"Thống nhất 'message' với các đoạn sau","severity":"low"},
+{"old":"**Throttle của API Gateway là thô**:","new":"**Throttle của API Gateway chỉ ở mức thô**:","reason":"'là thô' gượng","severity":"low"},
+{"old":"kiểm trạng thái ở service với thao tác nhạy cảm.","new":"kiểm tra lại trạng thái ở service khi thực hiện thao tác nhạy cảm.","reason":"'kiểm' cụt; 'với thao tác' sai giới từ","severity":"medium"},
+{"old":"Kiểm cú pháp bằng Docker:","new":"Kiểm tra cú pháp bằng Docker:","reason":"'kiểm' cụt","severity":"low"},
+{"old":"chỉ chứng minh hợp lệ về cấu hình.","new":"chỉ chứng minh cấu hình hợp lệ.","reason":"Trật tự từ kiểu Anh","severity":"low"}
+]}

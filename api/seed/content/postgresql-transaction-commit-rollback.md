@@ -14,7 +14,7 @@ Hai câu lệnh đúng cú pháp, mỗi câu đều thành công hoặc thất b
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-031 · Phần 4/6 · Cơ bản</span>
-<p>Đọc trước: <a href="/articles/postgresql-thuc-hanh-toi-uu-truy-van">PG-030 · Thực hành: tối ưu truy vấn bằng bằng chứng</a> (bài cuối Phần 3) và <a href="/articles/postgresql-insert-update-delete-returning">PG-006 · INSERT, UPDATE, DELETE và RETURNING</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>31-transaction-commit-rollback.sql</code>; thí nghiệm <code>thu-nghiem/pg031-nhan-chuyen-nguyen-tu-now.sql</code>). Sau bài này, bạn chứng minh được việc ghi chuyến và sự kiện cùng thành công hoặc cùng bị huỷ.</p>
+<p>Đọc trước: <a href="/articles/postgresql-thuc-hanh-toi-uu-truy-van">PG-030 · Thực hành: tối ưu truy vấn dựa trên bằng chứng</a> (bài cuối Phần 3) và <a href="/articles/postgresql-insert-update-delete-returning">PG-006 · INSERT, UPDATE, DELETE và RETURNING</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>31-transaction-commit-rollback.sql</code>; thí nghiệm <code>thu-nghiem/pg031-nhan-chuyen-nguyen-tu-now.sql</code>). Sau bài này, bạn chứng minh được việc ghi chuyến và sự kiện cùng thành công hoặc cùng bị huỷ.</p>
 </div>
 
 ## 1. Dữ liệu và cách chạy
@@ -37,7 +37,7 @@ Runner gửi từng bước theo thứ tự trong tệp — đó là **lịch ch
 - `COMMIT` chốt: mọi thay đổi trở thành vĩnh viễn và phiên khác bắt đầu thấy.
 - `ROLLBACK` huỷ: mọi thay đổi từ `BEGIN` biến mất như chưa từng có.
 
-Bốn tính chất **ACID**: nguyên tử (atomicity), nhất quán (consistency — ràng buộc vẫn đúng sau giao dịch), cô lập (isolation — giao dịch dở không lộ ra), bền vững (durability — đã báo COMMIT thì sập máy cũng không mất; WAL thuộc Phần 5). Bài này tập trung vào **A** và một phần **I**; PG-032, PG-034 đi sâu phần cô lập.
+Bốn tính chất **ACID**: nguyên tử (atomicity), nhất quán (consistency — ràng buộc vẫn đúng sau giao dịch), cô lập (isolation — giao dịch dở không lộ ra), bền vững (durability — đã báo COMMIT thì sập máy cũng không mất; WAL được trình bày ở Phần 5). Bài này tập trung vào **A** và một phần **I**; PG-032, PG-034 đi sâu phần cô lập.
 
 Không gõ `BEGIN` thì sao? PostgreSQL vẫn bọc **mỗi câu lệnh** trong một giao dịch ngầm và tự `COMMIT` nếu câu đó thành công. Đó là lý do bug ở phần mở bài xảy ra: hai câu `INSERT` chạy riêng là **hai** giao dịch, câu thứ nhất đã commit trước khi câu thứ hai bắt đầu.
 
@@ -69,9 +69,9 @@ SELECT (SELECT count(*) FROM trips WHERE id = 'a4000000-…-000000400201') AS ch
 | T6 | `COMMIT` | | `COMMIT` |
 | T7 | | đếm lại | **`1 \| 1`** |
 
-Ở T4, dữ liệu đã nằm trong bảng nhưng chưa commit, nên chỉ A thấy. B không bị chặn, chỉ được trả lời theo trạng thái đã commit — PG-032 giải thích B «nhìn» bằng cách nào. PostgreSQL không cho đọc dữ liệu chưa commit của phiên khác ở mức cô lập nào; `READ UNCOMMITTED`, theo tài liệu, hoạt động như Read Committed.
+Ở T4, dữ liệu đã nằm trong bảng nhưng chưa commit, nên chỉ A thấy. B không bị chặn, chỉ được trả lời theo trạng thái đã commit — PG-032 giải thích B «nhìn» bằng cách nào. PostgreSQL không cho đọc dữ liệu chưa commit của phiên khác ở bất kỳ isolation level nào; `READ UNCOMMITTED`, theo tài liệu, hoạt động như Read Committed.
 
-T5 là một chi tiết nhỏ nhưng hay gây thắc mắc: `requested_at` của chuyến và `occurred_at` của sự kiện **bằng nhau tuyệt đối** dù chèn bằng hai câu khác nhau. Cả hai lấy mặc định `now()`, mà `now()` trả về **thời điểm bắt đầu giao dịch**, đứng yên suốt giao dịch. Muốn giờ thật đang trôi, dùng `clock_timestamp()` (bài tập 3).
+T5 là một chi tiết nhỏ nhưng hay gây thắc mắc: `requested_at` của chuyến và `occurred_at` của sự kiện **bằng nhau tuyệt đối** dù chèn bằng hai câu khác nhau. Cả hai lấy mặc định `now()`, mà `now()` trả về **thời điểm bắt đầu giao dịch**, đứng yên suốt giao dịch. Muốn lấy giờ thực tế đang chạy, dùng `clock_timestamp()` (bài tập 3).
 
 ## 4. Một câu lỗi làm hỏng cả giao dịch
 
@@ -122,7 +122,7 @@ COMMIT;
 
 Server trả `ROLLBACK` cho dòng `ROLLBACK TO` (chỉ là tên lệnh — giao dịch vẫn sống), `INSERT 0 1` cho sự kiện đúng, rồi `COMMIT`. Phiên B thấy `400202 | 1`: chuyến có, đúng một sự kiện.
 
-Biến **`ON_ERROR_ROLLBACK`** của psql (`\set ON_ERROR_ROLLBACK on`) **tự** đặt savepoint ngầm trước mỗi câu trong giao dịch và lùi về đó khi câu lỗi. Lab chạy lại kịch bản lỗi với biến này: chuyến **400203**, câu `'dang_tim'` lỗi, câu `'requested'` vẫn chạy, không còn `25P02`, `COMMIT` trả `COMMIT`. Đây là tính năng của **psql**, không phải server: app dùng driver không có nó, và mỗi savepoint là một giao dịch con có chi phí.
+Biến **`ON_ERROR_ROLLBACK`** của psql (`\set ON_ERROR_ROLLBACK on`) **tự** đặt savepoint ngầm trước mỗi câu trong giao dịch và lùi về đó khi câu lỗi. Lab chạy lại kịch bản lỗi với biến này: chuyến **400203**, câu `'dang_tim'` lỗi, câu `'requested'` vẫn chạy, không còn `25P02`, `COMMIT` trả `COMMIT`. Đây là tính năng của **psql**, không phải server: app dùng driver không có tính năng này, và mỗi savepoint là một giao dịch con có chi phí.
 
 ## 6. Autocommit của psql
 
@@ -135,7 +135,7 @@ Mặc định psql ở chế độ **autocommit bật**: câu nào không nằm 
 | T3 | | đếm chuyến `…400205` | **0** |
 | T4 | `COMMIT` | đếm lại | `COMMIT`, rồi **1** |
 
-`pg_current_xact_id_if_assigned()` trả mã giao dịch nếu đã được cấp (sau câu ghi đầu tiên), NULL nếu chưa — PG-032 dùng nhiều. Bật lại autocommit, cùng câu kiểm `IS NULL` ra `t`: câu lẻ không để giao dịch nào mở. Tắt autocommit mà thoát phiên chưa commit thì mất việc đã làm. Driver và ORM mỗi loại có mặc định riêng; đọc tài liệu thư viện bạn dùng thay vì đoán.
+`pg_current_xact_id_if_assigned()` trả mã giao dịch nếu đã được cấp (sau câu ghi đầu tiên), NULL nếu chưa — PG-032 dùng hàm này nhiều. Bật lại autocommit, cùng câu kiểm `IS NULL` ra `t`: câu lẻ không để giao dịch nào mở. Tắt autocommit mà thoát phiên chưa commit thì mất việc đã làm. Driver và ORM mỗi loại có mặc định riêng; đọc tài liệu thư viện bạn dùng thay vì đoán.
 
 ## 7. Mã chuyến nhảy cóc: sequence không quay lui
 
@@ -161,7 +161,7 @@ Không có «nửa chuyến»: khi backend chết, giao dịch đang mở của 
 
 Trường hợp khó hơn là mất kết nối **sau khi** gửi `COMMIT`: server có thể đã commit xong rồi mới đứt mạng, client chỉ thấy lỗi kết nối. Lab chưa tái hiện được tình huống này một cách tất định (cần cắt mạng đúng sau lúc server commit) — đây là lập luận, không phải kết quả chạy: client **không biết** kết quả, nên đừng mặc định «thất bại, gửi lại». Cách an toàn là kết nối lại và đọc trạng thái như T7, hoặc gửi kèm idempotency key để gửi lại không tạo chuyến trùng (PG-039).
 
-Lỗi ngược lại là **quên COMMIT**: code mở giao dịch, ghi, rồi đi gọi một API ngoài và treo. Phiên đó ở trạng thái «idle in transaction», giữ khoá và giữ snapshot cũ làm VACUUM không dọn được phiên bản chết (thí nghiệm hai phiên ở [PG-026](/articles/postgresql-index-only-scan-visibility-map)). Tham số `idle_in_transaction_session_timeout` cắt các phiên như vậy:
+Lỗi ngược lại là **quên COMMIT**: code mở giao dịch, ghi, rồi đi gọi một API ngoài và treo. Phiên đó ở trạng thái «idle in transaction», giữ khoá và giữ snapshot cũ làm VACUUM không dọn được tuple chết (thí nghiệm hai phiên ở [PG-026](/articles/postgresql-index-only-scan-visibility-map)). Tham số `idle_in_transaction_session_timeout` cắt các phiên như vậy:
 
 | Bước | Phiên A | Phiên B | Kết quả |
 |---|---|---|---|
@@ -171,16 +171,16 @@ Lỗi ngược lại là **quên COMMIT**: code mở giao dịch, ghi, rồi đi
 | T4 | `COMMIT` | | mất kết nối |
 | T5 | | đếm chuyến `…400207` | **0** |
 
-Mặc định tham số này bằng 0 (tắt). Có thể đặt riêng cho vai trò mà app dùng (`ALTER ROLE … SET …`) để không ảnh hưởng phiên quản trị; giá trị 200 ms chỉ để lab chạy nhanh. PG-033 so nó với `lock_timeout`, `statement_timeout`, `transaction_timeout`.
+Mặc định tham số này bằng 0 (tắt). Có thể đặt riêng cho vai trò mà app dùng (`ALTER ROLE … SET …`) để không ảnh hưởng phiên quản trị; giá trị 200 ms chỉ để lab chạy nhanh. PG-033 so sánh tham số này với `lock_timeout`, `statement_timeout`, `transaction_timeout`.
 
-Bất biến cuối bài (B kiểm): đếm sự kiện `requested` theo chuyến mã ≥ 400200 ra đúng bốn dòng `400200 | 1`, `400202 | 1`, `400203 | 1`, `400204 | 1`; câu đếm chuyến **không** có sự kiện `requested` (`NOT EXISTS`) trên cả 44 chuyến của bảng ra **0**. Đó là bằng chứng bàn giao của bài: bốn chuyến được lưu trọn vẹn, ba lần huỷ (lỗi, rút dây, quên COMMIT) không để lại gì ngoài ba mã bị đốt.
+Bất biến cuối bài (phiên B kiểm tra): đếm sự kiện `requested` theo chuyến mã ≥ 400200 ra đúng bốn dòng `400200 | 1`, `400202 | 1`, `400203 | 1`, `400204 | 1`; câu đếm chuyến **không** có sự kiện `requested` (`NOT EXISTS`) trên cả 44 chuyến của bảng ra **0**. Đó là bằng chứng bàn giao của bài: bốn chuyến được lưu trọn vẹn, ba lần huỷ (lỗi, rút dây, quên COMMIT) không để lại gì ngoài ba mã bị đốt.
 
 ## 9. Lỗi thường gặp
 
 | Triệu chứng | Nguyên nhân | Cách sửa |
 |---|---|---|
 | Chuyến có mà lịch sử trống | Hai câu chạy autocommit riêng | Bọc trong một `BEGIN … COMMIT` |
-| App báo «đặt thành công» mà DB không có | Không kiểm kết quả COMMIT (thẻ `ROLLBACK`) | Kiểm thẻ/trạng thái hoặc để driver ném lỗi; `ROLLBACK` chủ động khi có lỗi |
+| App báo «đặt thành công» mà DB không có | Không kiểm tra kết quả COMMIT (thẻ `ROLLBACK`) | Kiểm tra thẻ/trạng thái hoặc để driver ném lỗi; `ROLLBACK` chủ động khi có lỗi |
 | Sau một lỗi, mọi câu báo `25P02` | Giao dịch đã hỏng | `ROLLBACK` (hoặc `ROLLBACK TO SAVEPOINT`) |
 | Script psql chạy «êm» nhưng thiếu dữ liệu | `ON_ERROR_ROLLBACK on` nuốt câu lỗi | Chỉ bật khi gõ tay; script dùng `ON_ERROR_STOP` |
 | Mã chuyến nhảy cóc | Sequence không quay lui khi huỷ | Bình thường; không dùng sequence cho số liên tục |
@@ -189,7 +189,7 @@ Bất biến cuối bài (B kiểm): đếm sự kiện `requested` theo chuyế
 ## 10. Đánh đổi
 
 - **Giao dịch rộng hay hẹp.** Gom càng nhiều câu càng an toàn về nguyên tử, nhưng giao dịch càng dài càng giữ khoá lâu (PG-033) và giữ snapshot cũ. Giữ giao dịch ngắn: tính toán, gọi API ngoài trước; trong giao dịch chỉ đọc–ghi database.
-- **Thứ không rollback được.** SMS đã gửi, tiền đã trừ ở hệ khác không quay lui theo `ROLLBACK`. Đừng gọi chúng giữa giao dịch; ghi «việc cần làm» vào bảng trong cùng giao dịch rồi xử lý sau (outbox, PG-039).
+- **Thứ không rollback được.** SMS đã gửi, tiền đã trừ ở hệ khác không quay lui theo `ROLLBACK`. Đừng thực hiện các việc đó giữa giao dịch; ghi «việc cần làm» vào bảng trong cùng giao dịch rồi xử lý sau (outbox, PG-039).
 - **SAVEPOINT.** Hữu ích khi thật sự muốn bỏ qua một phần (thử chèn, lỗi thì làm cách khác). Dùng cho mọi câu như `ON_ERROR_ROLLBACK` thì tốn giao dịch con và dễ che lỗi.
 
 ## 11. Bài tập

@@ -10,13 +10,13 @@ language: vi
 
 Chuyến 400101 ở khu 112 vừa được đặt. Hệ thống gửi nó cho vài tài xế gần nhất cùng lúc; ai bấm «Nhận» trước thì được. Tài xế 9101 bấm, app báo «Bạn đã nhận chuyến», anh quay đầu xe. Tài xế 9102 bấm sau nửa giây, app **cũng** báo «Bạn đã nhận chuyến». Trong database chỉ còn tên 9102. Một người chạy tới điểm đón vô ích, và khách thấy tên tài xế đổi giữa chừng.
 
-Hồ sơ Tới Nơi đã ghi bài toán này từ đầu: nhiều tài xế có thể cùng bấm nhận một chuyến trong cùng một giây, và chỉ một người được nhận. Test bằng tay gần như không bao giờ thấy lỗi, vì hai người bấm cách nhau đủ xa. Thứ cần bàn giao là **lịch chạy** chỉ ra cơ chế, **bất biến** viết thành SQL kiểm được, và **bằng chứng** khi các phiên chạy đua thật.
+Hồ sơ Tới Nơi đã ghi bài toán này từ đầu: nhiều tài xế có thể cùng bấm nhận một chuyến trong cùng một giây, và chỉ một người được nhận. Test bằng tay gần như không bao giờ thấy lỗi, vì hai người bấm cách nhau đủ xa. Thứ cần bàn giao là **lịch chạy** chỉ ra cơ chế, **bất biến** viết thành SQL kiểm được, và **bằng chứng** khi các phiên thật sự chạy đua với nhau.
 
 Đây là bài thực hành cuối Phần 4. Bạn nhận đề, tự làm, rồi mới mở lời giải mẫu và tự chấm theo mục 4.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-040 · Phần 4/6 · Nâng cao</span>
-<p>Đọc trước: toàn bộ PG-031 … PG-039 (danh sách ở mục 6), đặc biệt <a href="/articles/postgresql-optimistic-version-conditional-update">PG-035 · Cập nhật có điều kiện</a>, <a href="/articles/postgresql-for-update-skip-locked">PG-036 · FOR UPDATE, NOWAIT và SKIP LOCKED</a> và <a href="/articles/postgresql-serializable-retry">PG-038 · Serializable và retry</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>40-thuc-hanh-nhan-chuyen.sql</code>, phép thử K040 ở <code>DO-DAC.md</code>) và thí nghiệm <code>p04/thu-nghiem/pg040-nhan-chuyen-bai-tap.sql</code>. Sau bài này, bạn bàn giao được lịch chạy, invariant và bằng chứng chỉ một người thắng.</p>
+<p>Đọc trước: toàn bộ PG-031 … PG-039 (danh sách ở mục 6), đặc biệt <a href="/articles/postgresql-optimistic-version-conditional-update">PG-035 · Cập nhật có điều kiện</a>, <a href="/articles/postgresql-for-update-skip-locked">PG-036 · FOR UPDATE, NOWAIT và SKIP LOCKED</a> và <a href="/articles/postgresql-serializable-retry">PG-038 · Serializable và retry</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>40-thuc-hanh-nhan-chuyen.sql</code>, phép thử K040 ở <code>DO-DAC.md</code>) và thí nghiệm <code>p04/thu-nghiem/pg040-nhan-chuyen-bai-tap.sql</code>. Sau bài này, bạn bàn giao được lịch chạy, bất biến và bằng chứng rằng chỉ một người thắng.</p>
 </div>
 
 ## 1. Đề bài
@@ -40,7 +40,7 @@ Lab rút gọn vòng đời: chuyến đi thẳng `requested` → `accepted` (h�
 | D1 | Đặc tả bất biến | Viết bằng lời trước khi viết SQL: «thắng» là gì, kiểm ở đâu |
 | D2 | Lịch chạy | Ít nhất bốn cách nhận chuyến, mỗi cách một lịch hai–ba phiên **tất định**, đặt kết quả của bước bị chặn đúng chỗ nó thực sự xong |
 | D3 | Kiểm bất biến | Một câu SQL cho mọi cách, có expected output |
-| D4 | Phép thử đồng thời | Nhiều phiên chạy đua thật, lặp nhiều lần, đếm vi phạm; ghi máy và giới hạn |
+| D4 | Phép thử đồng thời | Nhiều phiên chạy đua thật, lặp nhiều lần, đếm vi phạm; ghi rõ máy đo và giới hạn |
 | D5 | Lựa chọn | Cách nào dùng, vì sao, cái giá |
 | D6 | Bằng chứng | Chạy từ database mới, kỳ vọng do máy kiểm, điều **chưa** kiểm |
 
@@ -48,10 +48,10 @@ Chỉ dùng kiến thức P01–P04. Không sửa `trip_claims` thành UNIQUE tr
 
 ## 2. Gợi ý trước khi làm
 
-- Cách sai phổ biến nhất là **đọc rồi ghi** ở hai câu: đọc `status`, thấy `requested`, rồi `UPDATE` không điều kiện. Viết nó trước, để có đối chứng.
-- Read Committed đọc lại dòng khi UPDATE gặp khoá ([PG-034](/articles/postgresql-isolation-read-committed-repeatable-read)) — dùng nó thế nào cho đúng? ([PG-035](/articles/postgresql-optimistic-version-conditional-update))
+- Cách sai phổ biến nhất là **đọc rồi ghi** ở hai câu: đọc `status`, thấy `requested`, rồi `UPDATE` không điều kiện. Hãy viết cách này trước để có đối chứng.
+- Read Committed đọc lại dòng khi UPDATE gặp khoá ([PG-034](/articles/postgresql-isolation-read-committed-repeatable-read)) — dùng cơ chế này thế nào cho đúng? ([PG-035](/articles/postgresql-optimistic-version-conditional-update))
 - Khoá dòng trước khi đọc ([PG-033](/articles/postgresql-lock-row-table), [PG-036](/articles/postgresql-for-update-skip-locked)), và ràng buộc duy nhất làm trọng tài ([PG-039](/articles/postgresql-idempotency-outbox-transaction)).
-- Lịch chạy là thứ tự **gửi**; bước có ⏳ chưa xong. Kết quả của nó thuộc về sau bước nhả khoá.
+- Lịch chạy là thứ tự **gửi**; bước có ⏳ chưa xong. Kết quả của bước đó xuất hiện sau bước nhả khoá.
 - «Không vi phạm trong N lần» không chứng minh cách đó đúng; chỉ cần **một** lần vi phạm để bác bỏ.
 
 ```bash
@@ -69,7 +69,7 @@ Lời giải là `40-thuc-hanh-nhan-chuyen.sql`; số đo là `DO-DAC.md`. Mở 
 
 <details><summary><b>Lời giải</b></summary>
 <p>Với mỗi chuyến đã có người nhận: <b>đúng một</b> tài xế được báo «bạn đã nhận chuyến» (đúng một dòng <code>trip_claims</code>), và người đó <b>chính là</b> <code>trips.driver_id</code>. Thêm điều kiện ngược cho phép thử: chuyến được tranh không bao giờ rơi vào cảnh <b>không ai</b> thắng.</p>
-<p>Bất biến đặt trên <code>trip_claims</code>, không chỉ trên <code>trips</code>, vì lỗi người dùng thấy là <i>app báo nhầm</i>. Ở cách sai, <code>trips</code> luôn trông «hợp lệ» — một chuyến, một <code>driver_id</code> — trong khi hai người đã được báo nhận. Kiểm mỗi <code>trips</code> sẽ không bao giờ thấy lỗi.</p>
+<p>Bất biến đặt trên <code>trip_claims</code>, không chỉ trên <code>trips</code>, vì lỗi người dùng thấy là <i>app báo nhầm</i>. Ở cách sai, <code>trips</code> luôn trông «hợp lệ» — một chuyến, một <code>driver_id</code> — trong khi hai người đã được báo nhận. Chỉ kiểm tra <code>trips</code> thì sẽ không bao giờ thấy lỗi.</p>
 </details>
 
 ### 3.2 D2 — Lịch (a): đọc rồi ghi, không khoá
@@ -140,13 +140,13 @@ GROUP BY t.code, c.method ORDER BY t.code;</code></pre>
  400102 | b_co_dieu_kien |              1 |              1 | đạt
  400103 | c_for_update   |              1 |              1 | đạt
  400104 | d_unique       |              1 |              1 | đạt</code></pre>
-<p>Thêm cho (d): <code>trip_assignments</code> khớp <code>trips</code> — <code>400104 | 9101 | 9101</code>. Mỗi dòng có chỉ thị <code>expect-line</code> trong tệp lab, nên đổi lịch mà kết quả đổi là runner báo <code>FAIL</code>.</p>
+<p>Thêm cho (d): <code>trip_assignments</code> khớp <code>trips</code> — <code>400104 | 9101 | 9101</code>. Mỗi dòng có chỉ thị <code>expect-line</code> trong tệp lab, nên nếu đổi lịch mà kết quả đổi thì runner báo <code>FAIL</code>.</p>
 </details>
 
 ### 3.5 D4 — Phép thử đồng thời
 
 <details><summary><b>Lời giải</b></summary>
-<p>Kịch bản K040 (<code>p04/dong-thoi.mjs</code>): <b>1.000 chuyến × 8 tài xế</b>, mỗi chuyến cả 8 phiên psql thật cùng bấm; các phiên chờ nhau xong chuyến này mới sang chuyến sau («rào»), 3 lần, mỗi lần một database mới. Cách (e) là <b>đúng code sai của (a)</b> nhưng chạy Repeatable Read, thử lại toàn giao dịch khi <code>40001</code> (tối đa 10 lần). Máy: Intel Core i7-10700 (16 luồng), 64 GB RAM, NVMe Kingston SA2000, Windows 11 Pro, Node 22.18, PostgreSQL 18.1, tải CPU nền ~6 %.</p>
+<p>Kịch bản K040 (<code>p04/dong-thoi.mjs</code>): <b>1.000 chuyến × 8 tài xế</b>, mỗi chuyến cả 8 phiên psql thật cùng bấm; các phiên chờ nhau xong chuyến này mới sang chuyến sau («rào»), 3 lần, mỗi lần một database mới. Cách (e) dùng <b>chính code sai của (a)</b> nhưng chạy Repeatable Read, thử lại toàn giao dịch khi <code>40001</code> (tối đa 10 lần). Máy: Intel Core i7-10700 (16 luồng), 64 GB RAM, NVMe Kingston SA2000, Windows 11 Pro, Node 22.18, PostgreSQL 18.1, tải CPU nền ~6 %.</p>
 <table>
 <thead><tr><th>Cách</th><th>Giây/lần (min–max)</th><th>Lượt thắng / thua</th><th>Chuyến &gt; 1 người thắng</th><th>Ghi chú</th></tr></thead>
 <tbody>
@@ -167,9 +167,9 @@ GROUP BY t.code, c.method ORDER BY t.code;</code></pre>
 <ul>
 <li><b>Mặc định: (b).</b> Một câu, không có khoảng hở giữa đọc và ghi ở ứng dụng, đúng ở Read Committed nhờ đánh giá lại điều kiện. Nhanh nhất trong phép thử. Nhớ đọc số dòng: 0 dòng là «đã có người nhận» — hoặc chính mình đã nhận (bài tập 2).</li>
 <li><b>Lưới an toàn: (d).</b> Đặt bất biến vào schema: code sau này có quên điều kiện, PK vẫn chặn. Kết hợp (b) trong code với một ràng buộc duy nhất là cách phòng thủ hai lớp.</li>
-<li><b>Khi phải quyết định trong ứng dụng: (c).</b> Ví dụ kiểm thêm điều kiện nghiệp vụ trước khi nhận. Giữ khoá trong lúc ứng dụng nghĩ ⇒ giữ giao dịch ngắn, không gọi mạng ở giữa; không xoá/đổi khoá chính thì dùng <code>FOR NO KEY UPDATE</code> để không chặn INSERT dòng con (PG-033).</li>
-<li><b>Khi không sửa được đoạn đọc–ghi: (e).</b> Hợp lệ, nhưng mọi người thua đều phải chạy lại cả giao dịch, và code thử lại phải có trần + backoff (PG-038).</li>
-<li><b>Không dùng SKIP LOCKED ở đây.</b> Nó hợp cho hàng đợi «lấy việc nào cũng được» (PG-036); nhận <i>đúng chuyến này</i> mà bỏ qua dòng đang khoá là trả lời «còn trống» trong khi người khác sắp nhận.</li>
+<li><b>Khi phải quyết định trong ứng dụng: (c).</b> Ví dụ kiểm thêm điều kiện nghiệp vụ trước khi nhận. Khoá bị giữ suốt lúc ứng dụng xử lý, nên hãy giữ giao dịch ngắn, không gọi mạng ở giữa; nếu không xoá hay đổi khoá chính thì dùng <code>FOR NO KEY UPDATE</code> để không chặn INSERT dòng con (PG-033).</li>
+<li><b>Khi không sửa được đoạn đọc–ghi: (e).</b> Cách này hợp lệ, nhưng mọi người thua đều phải chạy lại cả giao dịch, và code thử lại phải có trần + backoff (PG-038).</li>
+<li><b>Không dùng SKIP LOCKED ở đây.</b> SKIP LOCKED hợp với hàng đợi «lấy việc nào cũng được» (PG-036); nhận <i>đúng chuyến này</i> mà bỏ qua dòng đang khoá là trả lời «còn trống» trong khi người khác sắp nhận.</li>
 </ul>
 </details>
 
@@ -193,14 +193,14 @@ Mỗi tiêu chí 10 điểm; từ 80 điểm là đạt để sang Phần 5; ti�
 | 5 | Xếp hàng | Nói được vì sao C chờ B ở (b) nhưng chờ A ở (d) |
 | 6 | Kiểm bằng máy | SQL bất biến có expected output, runner báo ĐẠT |
 | 7 | Phép thử | Nhiều phiên, nhiều lần, có máy, min–max |
-| 8 | Không trích sai số | Không coi 1.000/1.000 của (a) là tỉ lệ production |
+| 8 | Không dùng số sai ngữ cảnh | Không coi 1.000/1.000 của (a) là tỉ lệ production |
 | 9 | Lựa chọn có giá | Nêu cái giá của (c) và (e), vai trò lưới an toàn của (d) |
 | 10 | Trung thực | Liệt kê điều chưa kiểm |
 
 ## 5. Bẫy hay gặp khi tự làm
 
 - **Kiểm bất biến chỉ trên `trips`.** Cách (a) để lại một dòng `trips` hoàn toàn hợp lệ.
-- **Tưởng `BEGIN … COMMIT` là đủ.** Lịch (a) có giao dịch đầy đủ; giao dịch không làm hai lần đọc–ghi của hai người thành tuần tự.
+- **Tưởng `BEGIN … COMMIT` là đủ.** Lịch (a) có giao dịch đầy đủ; giao dịch không biến hai lần đọc–ghi của hai người thành tuần tự.
 - **Đọc lịch theo thứ tự gửi.** Ở (b), «0 dòng» của B xảy ra sau COMMIT của A, không phải lúc B gửi câu.
 - **UPDATE có điều kiện nhưng không đọc số dòng.** Database đã từ chối đúng, app vẫn báo «Bạn đã nhận chuyến».
 - **Coi 23505 ở (d) là lỗi hệ thống.** Đó là «người khác đã nhận»; dùng `ON CONFLICT DO NOTHING` nếu không muốn giao dịch hỏng.
@@ -220,7 +220,7 @@ Mỗi tiêu chí 10 điểm; từ 80 điểm là đạt để sang Phần 5; ti�
 | [PG-038 · Serializable và retry](/articles/postgresql-serializable-retry) | Cách (e); thử lại toàn giao dịch có trần và backoff |
 | [PG-039 · Idempotency và outbox](/articles/postgresql-idempotency-outbox-transaction) | Cách (d) — ràng buộc duy nhất làm trọng tài; bấm lại không trùng |
 
-Sản phẩm của phần đúng như khung: kịch bản tranh chấp nhận chuyến với kiểm tra bất biến và retry. **Chưa** có: VACUUM dọn phiên bản cũ mà 560 UPDATE/giây để lại, quyền truy cập, sao lưu và khôi phục (Phần 5); mất mạng thật, nhiều máy chủ, broker thật (Phần 6).
+Sản phẩm của phần đúng như khung: kịch bản tranh chấp nhận chuyến với kiểm tra bất biến và retry. **Chưa** có: VACUUM dọn phiên bản cũ mà 560 UPDATE/giây để lại, quyền truy cập, backup và restore (Phần 5); mất mạng thật, nhiều máy chủ, broker thật (Phần 6).
 
 ## 7. Bài tập mở rộng
 

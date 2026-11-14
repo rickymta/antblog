@@ -1,0 +1,89 @@
+{
+"file": "decision-table-testing.md",
+"edits": [
+{
+"old": "chạy 64 ca vitest.",
+"new": "chạy 64 test case vitest.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "biến từng cột thành một ca kiểm thử chạy thật",
+"new": "biến từng cột thành một test case chạy thật",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Nó giải quyết hai vấn đề:",
+"new": "Kỹ thuật này giải quyết hai vấn đề:",
+"reason": "Tránh 'Nó' chỉ sự vật trừu tượng",
+"severity": "medium"
+},
+{
+"old": "tới 13 ca kiểm thử.",
+"new": "tới 13 test case.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Nó chỉ có tác dụng nếu ETA được phép bằng 0",
+"new": "Thứ tự này chỉ có tác dụng nếu ETA được phép bằng 0",
+"reason": "Tránh 'Nó', nêu rõ chủ thể",
+"severity": "medium"
+},
+{
+"old": "thêm một cột là thêm một ca test.",
+"new": "thêm một cột là thêm một test case.",
+"reason": "'ca test' là cụm tự ghép; dùng 'test case'",
+"severity": "medium"
+},
+{
+"old": "Mỗi ca so **cả ba hành động**",
+"new": "Mỗi test case so **cả ba hành động**",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Ca từ chối còn kiểm số dòng",
+"new": "Test case từ chối còn kiểm số dòng",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "64 ca = 4 ca kiểm bảng + 13 ca bảng rút gọn + 40 ca bảng đầy đủ + 2 ca biên + 5 ca về defect.",
+"new": "64 test case = 4 test case kiểm bảng + 13 test case bảng rút gọn + 40 test case bảng đầy đủ + 2 test case biên + 5 test case về defect.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "lab thêm 2 ca kết hợp BVA",
+"new": "lab thêm 2 test case kết hợp BVA",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Nó không trả lời «tài xế huỷ rồi",
+"new": "Bảng này không trả lời «tài xế huỷ rồi",
+"reason": "Tránh 'Nó', nêu rõ chủ thể",
+"severity": "low"
+},
+{
+"old": "Bộ test gồm 12 ca, trong đó hai ca cùng chạy cột DT-03, các ca còn lại",
+"new": "Bộ test gồm 12 test case, trong đó hai test case cùng chạy cột DT-03, các test case còn lại",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "12 ca nhưng chỉ 11 cột khác nhau",
+"new": "12 test case nhưng chỉ 11 cột khác nhau",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+},
+{
+"old": "a đếm số ca thay vì số cột",
+"new": "a đếm số test case thay vì số cột",
+"reason": "Thống nhất 'test case'",
+"severity": "low"
+}
+]
+}

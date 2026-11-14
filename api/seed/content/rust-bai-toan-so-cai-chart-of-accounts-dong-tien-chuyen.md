@@ -58,7 +58,7 @@ Slice pattern trên `&[&str]` vừa tách mã vừa bắt phần `<id>`. Chạy 
   wallet:CU-001           (ngoài sơ đồ, không mở được)
 ```
 
-Vì sao đáng chặn? `store::post` tự mở tài khoản khi gặp mã mới nên khóa ngoại không cản được: gõ nhầm `custmer:CU-001` sẽ mở một tài khoản mới và tiền nằm đó, không ai nhìn. Chart từ chối mã ngoài sơ đồ; test `account_outside_the_chart_is_rejected_without_trace` kiểm không còn dòng nào trong `accounts` hay `journal_entries`.
+Vì sao đáng chặn? `store::post` tự mở tài khoản khi gặp mã mới nên khoá ngoại không cản được: gõ nhầm `custmer:CU-001` sẽ mở một tài khoản mới và tiền nằm đó, không ai nhìn. Chart từ chối mã ngoài sơ đồ; test `account_outside_the_chart_is_rejected_without_trace` kiểm không còn dòng nào trong `accounts` hay `journal_entries`.
 
 ## Số dư của mỗi loại đọc sang ngôn ngữ kế toán thế nào?
 
@@ -282,7 +282,7 @@ Thử phá để thấy test đỏ đúng chỗ. Đổi `<=` thành `<` trong `S
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Số liệu, tên và tỷ lệ thuế đều hư cấu; thuế là mô hình học tập, không phải tư vấn thuế, và sơ đồ tài khoản thật do kế toán duyệt. Luồng chính bỏ qua nạp ví nên ví khách mang số âm; mục 10 chỉ minh họa cách đọc clearing. Chưa có dữ liệu nhiều tháng, chưa đo bốn truy vấn trên bảng lớn, chưa có chỉ mục riêng cho chúng. Hold, hoàn tiền, payout và đối soát sao kê chưa có.</p></div>
+<p>Số liệu, tên và tỷ lệ thuế đều hư cấu; thuế là mô hình học tập, không phải tư vấn thuế, và sơ đồ tài khoản thật do kế toán duyệt. Luồng chính bỏ qua nạp ví nên ví khách mang số âm; mục 10 chỉ minh hoạ cách đọc clearing. Chưa có dữ liệu nhiều tháng, chưa đo bốn truy vấn trên bảng lớn, chưa có chỉ mục riêng cho chúng. Hold, hoàn tiền, payout và đối soát sao kê chưa có.</p></div>
 
 ## Bài tập
 

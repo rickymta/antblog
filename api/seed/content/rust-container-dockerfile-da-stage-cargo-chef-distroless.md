@@ -10,7 +10,7 @@ language: vi
 
 Đây là bài 63 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Service sổ cái ở [bài 58](/articles/rust-tong-hop-kien-truc-ledger-service-workspace) chạy được bằng `cargo run`, nhưng nơi chạy thật nhận một image. Bài này không dạy Docker từ đầu; nó trả lời bằng số đo năm câu vận hành: image nặng bao nhiêu, sửa một dòng code thì build lại những gì, tiến trình chạy bằng ai, ai kiểm nó còn sống, và nó có tắt đúng khi nhận SIGTERM không.
 
-Lab đóng gói một `ledger-service` nhỏ tự chứa, chép tối thiểu từ lab 58: axum với `/healthz`, `/readyz`, `GET /v1/fare?km=5` và PostgreSQL tùy chọn qua `LEDGER_PG_URL`.
+Lab đóng gói một `ledger-service` nhỏ tự chứa, chép tối thiểu từ lab 58: axum với `/healthz`, `/readyz`, `GET /v1/fare?km=5` và PostgreSQL tuỳ chọn qua `LEDGER_PG_URL`.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -106,7 +106,7 @@ cargo-chef:        4 / 8 bước RUN/COPY lấy từ cache, 1 crate được bi�
   cargo build:     chạy lại, 30s, 1 crate biên dịch
 ```
 
-Số crate biên dịch lại không phụ thuộc tải máy: một stage 150, cargo-chef 1. Thời gian chỉ cho hướng: load average lúc đo trên 300, và qua ba lần chạy lab, tổng thời gian build lại của cargo-chef là 26, 44 và 94 giây, của một stage là 155 đến 162 giây. Phần 30 giây còn lại là biên dịch crate của mình cộng fat LTO tối ưu lại toàn bộ dependency lúc liên kết; cargo-chef không xóa được phần này.
+Số crate biên dịch lại không phụ thuộc tải máy: một stage 150, cargo-chef 1. Thời gian chỉ cho hướng: load average lúc đo trên 300, và qua ba lần chạy lab, tổng thời gian build lại của cargo-chef là 26, 44 và 94 giây, của một stage là 155 đến 162 giây. Phần 30 giây còn lại là biên dịch crate của mình cộng fat LTO tối ưu lại toàn bộ dependency lúc liên kết; cargo-chef không xoá được phần này.
 
 ### Quên `.dockerignore` thì context nặng cỡ nào?
 
@@ -117,7 +117,7 @@ không .dockerignore: 930.3 MB (7771 file)
 có .dockerignore:    0.1 MB (11 file)
 ```
 
-`.dockerignore` của lab loại `target`, `.git`, `.env` và các Dockerfile. Con số tùy `target/` lúc đó chứa gì.
+`.dockerignore` của lab loại `target`, `.git`, `.env` và các Dockerfile. Con số tuỳ `target/` lúc đó chứa gì.
 
 ## Non-root, HEALTHCHECK và hai loại probe
 

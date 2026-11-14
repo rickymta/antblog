@@ -1,39 +1,39 @@
 ---
 slug: ba-event-dong-bo-trang-thai-cho
 title: "Event, đồng bộ và trạng thái chờ: khi kết quả đến sau response"
-summary: "Mô hình hóa hoàn tiền bất đồng bộ với callback trễ, lặp và sai thứ tự; thiết kế thông báo chờ cùng đường xử lý ngoại lệ."
+summary: "Mô hình hoá hoàn tiền bất đồng bộ với callback trễ, lặp và sai thứ tự; thiết kế thông báo chờ cùng đường xử lý ngoại lệ."
 category: business-analysis
 level: intermediate
 tags: [business-analysis, ba-038, event, state-model, toi-noi]
 language: vi
 ---
 
-Khách thấy vòng quay kết thúc không có nghĩa ngân hàng đã hoàn tiền. Giữa thao tác của khách và kết quả cuối còn có nhiều lần giao tiếp, mỗi lần đều có thể chậm hoặc bị mất.
+Việc khách thấy vòng quay kết thúc không có nghĩa là ngân hàng đã hoàn tiền. Giữa thao tác của khách và kết quả cuối còn có nhiều lần giao tiếp, mỗi lần đều có thể chậm hoặc bị mất.
 
-<div class="tkh-callout"><span class="tkh-callout-title">BA-038 · Phần 5/8 · Trung bình</span><p>Đầu ra: timeline và bảng xử lý sự kiện cho refund đề xuất. Không mặc định Tới Nơi đang dùng nhà cung cấp cụ thể.</p></div>
+<div class="tkh-callout"><span class="tkh-callout-title">BA-038 · Phần 5/8 · Trung bình</span><p>Đầu ra: timeline và bảng xử lý sự kiện cho refund đề xuất. Không mặc định rằng Tới Nơi đang dùng nhà cung cấp cụ thể.</p></div>
 
 ## 1. Tách tiếp nhận và hoàn tất
 
-Luồng đề xuất: nội bộ tạo refund requested, gửi sang đối tác rồi theo dõi processing, sau đó xác nhận succeeded hoặc rejected bằng bằng chứng hợp lệ. Danh sách này chưa phải state machine đầy đủ: quyền chuyển, trạng thái khi gửi thất bại và nguồn có thẩm quyền vẫn cần review.
+Luồng đề xuất: hệ thống nội bộ tạo refund requested, gửi sang đối tác rồi theo dõi processing, sau đó xác nhận succeeded hoặc rejected bằng bằng chứng hợp lệ. Danh sách này chưa phải state machine đầy đủ: quyền chuyển, trạng thái khi gửi thất bại và nguồn có thẩm quyền vẫn cần review.
 
-HTTP 202 diễn đạt yêu cầu đã được tiếp nhận, chưa hoàn tất. Nếu dùng mã này, response nên giúp khách tra cứu tiến độ thay vì chỉ trả một thông báo chung.
+HTTP 202 cho biết yêu cầu đã được tiếp nhận, chưa hoàn tất. Nếu dùng mã này, response nên giúp khách tra cứu tiến độ thay vì chỉ trả một thông báo chung.
 
 ## 2. Timeline bộc lộ khoảng trống
 
 | Thời điểm giả lập | Sự kiện | Điều có thể kết luận |
 |---|---|---|
-| 10:00:00 | Nội bộ lưu refundId | Có yêu cầu nội bộ |
+| 10:00:00 | Hệ thống nội bộ lưu refundId | Có yêu cầu nội bộ |
 | 10:00:01 | Gửi yêu cầu đối tác | Đã thử gửi |
 | 10:00:06 | Hết thời gian đợi response | Chưa biết đối tác đã xử lý chưa |
 | 10:00:20 | Callback succeeded hợp lệ | Có bằng chứng cần kiểm tra và ghi nhận |
 
-Khoảng 14 giây cuối không phải một lần hoàn tiền thất bại. Nếu UI tạo yêu cầu mới trong khoảng này, có thể phát sinh hai ý định hoàn tiền.
+Khoảng 14 giây cuối không có nghĩa là hoàn tiền thất bại. Nếu UI tạo yêu cầu mới trong khoảng này, có thể phát sinh hai ý định hoàn tiền.
 
 ## 3. Callback là đầu vào cần kiểm chứng
 
-Đề xuất kiểm xác thực callback theo hợp đồng, liên kết refundId/providerRef, số tiền/currency và event ID. Callback hợp lệ về chữ ký vẫn có thể không khớp giao dịch nội bộ; khi đó không cập nhật bừa.
+Đề xuất kiểm tra xác thực callback theo hợp đồng, đối chiếu với refundId/providerRef, số tiền/currency và event ID. Callback hợp lệ về chữ ký vẫn có thể không khớp giao dịch nội bộ; khi đó không cập nhật bừa.
 
-Tài liệu webhook của Stripe là ví dụ thực tế về giao nhận lặp và không bảo đảm thứ tự. Điều này gợi câu hỏi review; không có nghĩa hợp đồng của mọi đối tác giống Stripe.
+Tài liệu webhook của Stripe là ví dụ thực tế về giao nhận lặp và không bảo đảm thứ tự. Điều này gợi ra câu hỏi cho buổi review; không có nghĩa là hợp đồng của mọi đối tác giống Stripe.
 
 ## 4. Trễ và sai thứ tự
 
@@ -52,11 +52,11 @@ Chỉ so timestamp có thể không đủ khi đồng hồ hai bên khác nhau. 
 
 ## 6. Ai xử lý yêu cầu chờ lâu?
 
-Đặt owner cho hàng đợi quá hạn và quy tắc tra cứu/đối soát. Ngưỡng chờ, chu kỳ kiểm tra và quyền can thiệp là quyết định còn mở. Nếu thiếu các quyết định này, hệ thống có thể “không mất dữ liệu” nhưng khách vẫn mắc kẹt vô thời hạn.
+Đặt người phụ trách cho hàng đợi quá hạn và quy tắc tra cứu/đối soát. Ngưỡng chờ, chu kỳ kiểm tra và quyền can thiệp là quyết định còn mở. Nếu thiếu các quyết định này, hệ thống có thể “không mất dữ liệu” nhưng khách vẫn mắc kẹt vô thời hạn.
 
 ## 7. Thực hành
 
-Vẽ lại timeline khi callback đến trước response, rồi thêm callback lặp sau một giờ. Với mỗi bước ghi trạng thái, thông báo UI và tác động tiền.
+Vẽ lại timeline khi callback đến trước response, rồi thêm callback lặp sau một giờ. Với mỗi bước, ghi trạng thái, thông báo trên UI và tác động tiền.
 
 <details><summary>Điểm phải giữ</summary><p>Response đến muộn không ghi đè kết quả cuối đã được xác nhận. Callback lặp không tạo tác động tiền lần hai. Mâu thuẫn cần lưu dấu và đối soát.</p></details>
 

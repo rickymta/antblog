@@ -10,7 +10,7 @@ language: vi
 
 Trên màn hình tìm tài xế của bản đầu tiên, chip "Đang tìm tài xế" bị thay bằng "Tài xế đã nhận" trong đúng một khung hình. Thẻ tài xế bật ra, vòng tiến độ nhảy từ 17% lên 33%. Mọi thứ đều đúng, nhưng mắt không kịp thấy cái gì vừa đổi.
 
-Animation cho mắt thời gian theo kịp một thay đổi. Nhưng có người bật cài đặt giảm chuyển động, và với họ chuyển động phải bớt hoặc tắt hẳn. Bài này dựng bốn hiệu ứng ngầm định và một Hero cho màn hình tìm tài xế và gom quyết định "có chuyển động hay không" vào một chỗ. Mọi con số trong ví dụ (thời lượng, đánh giá, số phút) là minh hoạ.
+Animation cho mắt có thời gian theo kịp một thay đổi. Nhưng có người bật cài đặt giảm chuyển động, và với họ chuyển động phải bớt hoặc tắt hẳn. Bài này dựng bốn hiệu ứng ngầm định và một Hero cho màn hình tìm tài xế và gom quyết định "có chuyển động hay không" vào một chỗ. Mọi con số trong ví dụ (thời lượng, đánh giá, số phút) là minh hoạ.
 
 Đây là bài 15 của lộ trình **Flutter qua Tới Nơi**, nối tiếp [bài 14 về asset, intl và localization](/articles/flutter-asset-intl-localization-tien-vnd-ngay-gio). Bạn cần biết `setState` ([bài 10](/articles/flutter-statefulwidget-lifecycle-setstate-chon-dich-vu)), `TripStatus` và `Trip.apply` của `toi_noi_core` ([bài 06](/articles/dart-package-pubspec-lint-test-toi-noi-core)), và `TripStatusChip` của `toi_noi_ui` ([bài 13](/articles/flutter-theme-material-3-dark-mode-design-system-toi-noi)). Bối cảnh nghiệp vụ: hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi).
 
@@ -31,7 +31,7 @@ Widget animation ngầm định (implicit) có `duration`, thường kèm `curve
 | `AnimatedSwitcher` | Từ widget con cũ sang widget con mới | Nội dung khung trạng thái |
 | `TweenAnimationBuilder<T>` | Một giá trị `T` bất kỳ có `Tween` | Vòng tiến độ |
 
-Khi đích đổi, mã nguồn của `ImplicitlyAnimatedWidgetState` lấy giá trị đang hiển thị làm `begin`, đặt đích mới làm `end`, rồi chạy controller lại từ 0 trong đủ `duration`. Hệ quả: đổi đích giữa chừng không nhảy, và lượt mới luôn chạy đủ thời lượng. Hình 1 vẽ vòng đang đi từ 50% lên 100% thì khách huỷ chuyến.
+Khi đích đổi, mã nguồn của `ImplicitlyAnimatedWidgetState` lấy giá trị đang hiển thị làm `begin`, đặt đích mới làm `end`, rồi chạy controller lại từ 0 trong đủ `duration`. Hệ quả: đổi đích giữa chừng không nhảy, và lượt mới luôn chạy đủ thời lượng. Hình 1 vẽ lúc vòng đang đi từ 50% lên 100% thì khách huỷ chuyến.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -95,7 +95,7 @@ Vòng tiến độ dùng `TweenAnimationBuilder`, widget cho phép animate một
   }
 ```
 
-`Tween<double>(end: progress)` không có `begin`. Ở lần dựng đầu, `TweenAnimationBuilder` đặt `begin` bằng `end` nên vòng hiện đúng đích ngay, không chạy từ 0. Nó gán `begin` vào chính `Tween` ta truyền vào, nên ta tạo `Tween` mới ở mỗi lần build thay vì giữ chung một hằng.
+`Tween<double>(end: progress)` không có `begin`. Ở lần dựng đầu, `TweenAnimationBuilder` đặt `begin` bằng `end` nên vòng hiện đúng đích ngay, không chạy từ 0. Widget này gán `begin` vào chính `Tween` ta truyền vào, nên ta tạo `Tween` mới ở mỗi lần build thay vì giữ chung một hằng.
 
 `progress` lấy từ `TripStatus`: sáu bước của đường đi bình thường chia đều từ 0 đến 1, huỷ thì về 0, bằng một `switch` vét cạn không có nhánh `_`. Test của hình 1 chạy đúng kịch bản: đổi đích sang 1, cho 300 ms trôi, đổi tiếp sang 0, rồi kiểm giá trị ngay khung đổi đích:
 
@@ -115,11 +115,11 @@ Vòng tiến độ dùng `TweenAnimationBuilder`, widget cho phép animate một
       expect(_ringValue(tester), 0);
 ```
 
-Cách đọc test animation: `pump()` dựng một khung và bắt đầu animation, `pump(d)` cho thời gian trôi thêm `d`, nên ta kiểm được giá trị trung gian mà không đợi thật. Chỗ dễ sai là đúng bằng `duration`: giá trị đã tới đích nhưng controller chỉ báo hoàn tất khi thời gian trôi quá `duration` (mã nguồn `_InterpolationSimulation.isDone` dùng `>`). Vì thế test cộng thêm 1 ms, và `onEnd` chỉ chạy sau mốc đó.
+Cách đọc test animation: `pump()` dựng một khung và bắt đầu animation, `pump(d)` cho thời gian trôi thêm `d`, nên ta kiểm được giá trị trung gian mà không đợi thật. Chỗ dễ sai là mốc thời gian đúng bằng `duration`: giá trị đã tới đích nhưng controller chỉ báo hoàn tất khi thời gian trôi quá `duration` (mã nguồn `_InterpolationSimulation.isDone` dùng `>`). Vì thế test cộng thêm 1 ms, và `onEnd` chỉ chạy sau mốc đó.
 
 ## AnimatedContainer và AnimatedOpacity: thẻ tài xế khi tới điểm đón
 
-Khi chuyến sang `arriving`, thẻ tài xế cần nổi lên: nền chuyển sang `primaryContainer`, viền dày từ 1 lên 2, và dòng "tới điểm đón sau khoảng 3 phút" hiện dần. Ta chỉ tính `highlighted` từ `status` rồi đưa giá trị đích vào `AnimatedContainer`:
+Khi chuyến chuyển sang `arriving`, thẻ tài xế cần nổi lên: nền chuyển sang `primaryContainer`, viền dày từ 1 lên 2, và dòng "tới điểm đón sau khoảng 3 phút" hiện dần. Ta chỉ tính `highlighted` từ `status` rồi đưa giá trị đích vào `AnimatedContainer`:
 
 ### driver_card.dart · 15-animation-co-ban/lib/driver_card.dart (trích)
 
@@ -173,11 +173,11 @@ Hai điều kiểm được bằng test. Một, ở 150 ms của 300 ms màu hi�
 
 Đường cong mặc định của `ImplicitlyAnimatedWidget` và `AnimatedSwitcher` là `Curves.linear`, nhìn khá cơ học. Lab chọn theo quy ước riêng, không phải luật: 150, 300 và 600 ms cho thay đổi nhỏ, thường và cần được thấy; `easeInOut` cho phần tử đổi tại chỗ, `easeOutCubic` cho vòng tiến độ.
 
-Một cái bẫy với thẻ bấm được: `InkWell` vẽ hiệu ứng chạm lên `Material` gần nhất phía trên nó, và tài liệu của `Material` nói hiệu ứng bị che nếu giữa hai bên có widget tô nền như `BoxDecoration.color`. Vì vậy `Material` trong suốt nằm bên trong `AnimatedContainer`.
+Một cái bẫy với thẻ có thể bấm: `InkWell` vẽ hiệu ứng chạm lên `Material` gần nhất phía trên nó, và tài liệu của `Material` nói hiệu ứng bị che nếu giữa hai bên có widget tô nền như `BoxDecoration.color`. Vì vậy `Material` trong suốt nằm bên trong `AnimatedContainer`.
 
 ## AnimatedSwitcher: đổi nội dung theo TripStatus
 
-Màu và độ mờ là giá trị liên tục. Khi cả nội dung đổi, từ chip "Đang tìm tài xế" sang chip "Tài xế đã nhận", không có giá trị nào để nội suy. `AnimatedSwitcher` giữ cả widget cũ lẫn mới trong cây lúc chuyển: cái cũ mờ đi, cái mới hiện lên.
+Màu và độ mờ là giá trị liên tục. Khi đổi cả nội dung, từ chip "Đang tìm tài xế" sang chip "Tài xế đã nhận", không có giá trị nào để nội suy. `AnimatedSwitcher` giữ cả widget cũ lẫn mới trong cây lúc chuyển: cái cũ mờ đi, cái mới hiện lên.
 
 ### search_status_panel.dart · 15-animation-co-ban/lib/search_status_panel.dart (trích)
 
@@ -230,11 +230,11 @@ Sau khung dựng và 150 ms, cả hai chữ cùng có trong cây, độ mờ m�
       expect(find.text(accepted), findsOneWidget);
 ```
 
-Test thiếu key chứng minh điều ở "Thử trước khi đọc": với `Text(value)` không key, sau 150 ms chữ cũ đã mất; thêm `ValueKey(value)` thì cả hai cùng có. Khung này cũng tránh `CircularProgressIndicator` không có `value`, vì nó quay mãi và `pumpAndSettle` không bao giờ xong.
+Test không có key chứng minh điều nêu trong phần "Thử trước khi đọc": với `Text(value)` không key, sau 150 ms chữ cũ đã mất; thêm `ValueKey(value)` thì cả hai cùng có. Khung này cũng tránh `CircularProgressIndicator` không có `value`, vì nó quay mãi và `pumpAndSettle` không bao giờ xong.
 
 ## Hero: thẻ tài xế bay sang màn chi tiết
 
-Khi khách bấm vào thẻ tài xế để xem biển số, ta muốn thẻ "bay" từ vị trí của nó sang đầu màn chi tiết. Đó là việc của `Hero`: bọc một widget ở màn nguồn và một widget ở màn đích bằng cùng `tag`. Khi `Navigator` đẩy một `PageRoute`, `HeroController` ghép các cặp cùng tag và bay một bản sao qua `Overlay` của Navigator, còn hai bản gốc tạm là chỗ giữ chỗ cùng cỡ (child của chúng vẫn nằm trong `Offstage`, theo `heroes.dart`). Test lab thấy đúng vậy: giữa chặng, `find.byKey` chỉ ra đúng một thẻ, nằm giữa vị trí đầu và cuối; bản trong `Offstage` không được tính vì `find` mặc định bỏ qua widget offstage.
+Khi khách bấm vào thẻ tài xế để xem biển số, ta muốn thẻ "bay" từ vị trí của nó sang đầu màn chi tiết. Đó là việc của `Hero`: bọc một widget ở màn nguồn và một widget ở màn đích bằng cùng `tag`. Khi `Navigator` đẩy một `PageRoute`, `HeroController` ghép các cặp cùng tag và bay một bản sao qua `Overlay` của Navigator, còn hai bản gốc tạm là chỗ giữ chỗ cùng cỡ (child của chúng vẫn nằm trong `Offstage`, theo `heroes.dart`). Test của lab xác nhận điều đó: giữa chặng, `find.byKey` chỉ ra đúng một thẻ, nằm giữa vị trí đầu và cuối; bản trong `Offstage` không được tính vì `find` mặc định bỏ qua widget offstage.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -280,7 +280,7 @@ Route<void> driverDetailRoute(
 
 Màn chi tiết dùng lại chính `DriverCard`, nên hai `Hero` có sẵn cùng tag `'driver-card-${driver.id}'`. Bản bay nằm trong `Overlay` của Navigator chứ không dưới `Scaffold` của hai màn, nên `Material` trong suốt nằm ngay trong child của `Hero` để chữ vẫn có kiểu chữ mặc định.
 
-Tag trùng là lỗi hay gặp nhất và chỉ lộ khi chuyển trang. Màn hình có hai thẻ cùng một tài xế dựng không lỗi, nhưng bấm vào thẻ là `FlutterError` "There are multiple heroes that share the same tag within a subtree":
+Tag trùng là lỗi hay gặp nhất và chỉ lộ khi chuyển trang. Màn hình có hai thẻ cùng một tài xế dựng không lỗi, nhưng bấm vào thẻ thì ném `FlutterError` "There are multiple heroes that share the same tag within a subtree":
 
 ### hero_test.dart · 15-animation-co-ban/test/hero_test.dart (trích)
 
@@ -382,7 +382,7 @@ flutter test
 | Test | Chứng minh điều gì |
 |---|---|
 | `motion_test.dart` | Helper trả `Duration.zero` khi bật; đọc cờ nền tảng thật và đổi khi đang chạy; `reduceMotion` của iOS chưa được đọc; framework rút còn 5% (1 giây thành 50 ms) |
-| `progress_ring_test.dart` | Lần dựng đầu không chạy; giá trị trung gian nằm giữa cũ và mới; đổi đích giữa chừng chạy tiếp từ giá trị đang hiển thị; huỷ lúc 50% sau 300 ms hiện 6%; `onEnd` đúng lúc; vòng không `value` làm `pumpAndSettle` hết hạn |
+| `progress_ring_test.dart` | Lần dựng đầu không chạy; giá trị trung gian nằm giữa cũ và mới; đổi đích giữa chừng chạy tiếp từ giá trị đang hiển thị; huỷ lúc 50% sau 300 ms hiện 6%; `onEnd` đúng lúc; vòng không `value` làm `pumpAndSettle` hết thời gian chờ |
 | `search_status_panel_test.dart` | Giữa chừng có hai nội dung với độ mờ dở dang; xong thì chỉ còn một; tắt animation thì đổi trong khung đầu; thiếu key thì không chuyển cảnh |
 | `driver_card_test.dart` | Màu và viền trung gian đúng đường cong; ETA mờ dần và vào/ra khỏi semantics; tắt animation thì đổi ngay |
 | `hero_test.dart` | Tag đôi một khác nhau; tag trùng ném lỗi khi chuyển trang (kể cả khi tắt animation); giữa chuyến bay thẻ nằm giữa hai vị trí; tắt animation thì không bay; quay lại về đúng chỗ cũ |

@@ -1,18 +1,18 @@
 ---
 slug: flutter-background-work-workmanager-vi-tri-nen-app-tai-xe
 title: "Tác vụ nền: workmanager, vị trí nền cho app tài xế và chính sách store"
-summary: "Bài 38: giới hạn nền của iOS và Android, workmanager cho việc chờ được, DriverLocationPolicy chỉ cho gửi vị trí nền khi chuyến từ accepted tới inTransit, bộ đệm giới hạn khi mất mạng, foreground service location, chỉ báo xanh dương iOS và điều khoản Google Play, App Store. Chưa chạy trên thiết bị."
+summary: "Bài 38: giới hạn nền của iOS và Android, workmanager cho việc chờ được, DriverLocationPolicy chỉ cho gửi vị trí nền khi chuyến từ accepted tới inTransit, bộ đệm có giới hạn khi mất mạng, foreground service location, chỉ báo xanh dương iOS và điều khoản Google Play, App Store. Chưa chạy trên thiết bị."
 category: flutter
 level: advanced
 tags: [flutter, dart, mobile, toi-noi, android, ios, background, location, workmanager, store]
 language: vi
 ---
 
-Đội QA của Tới Nơi chạy thử app tài xế trên một máy Android và báo lỗi: tài xế nhận chuyến rồi chuyển sang app bản đồ để dẫn đường, vài chục giây sau trên app khách chiếc xe đứng yên rồi nhảy một đoạn dài. App tài xế không sai; khi rời màn hình, nó thôi là việc ưu tiên của hệ điều hành. Tình huống là minh hoạ.
+Đội QA của Tới Nơi chạy thử app tài xế trên một máy Android và báo lỗi: tài xế nhận chuyến rồi chuyển sang app bản đồ để dẫn đường, vài chục giây sau trên app khách chiếc xe đứng yên rồi nhảy một đoạn dài. App tài xế không sai; khi rời màn hình, nó không còn là việc được hệ điều hành ưu tiên. Tình huống là minh hoạ.
 
-Bài này xếp việc nền thành ba loại: việc chờ được dùng `workmanager`; việc người dùng thấy, như chia sẻ vị trí trong chuyến, dùng foreground service (Android) và background mode `location` (iOS); loại thứ ba, chạy ngầm mãi mà không ai thấy, không có cách nào. Ta viết `DriverLocationPolicy` để chỉ thu vị trí khi có chuyến hợp lệ, thêm bộ đệm giới hạn khi mất mạng, rồi đối chiếu điều khoản Google Play và Apple.
+Bài này xếp việc nền thành ba loại: việc chờ được dùng `workmanager`; việc người dùng thấy, như chia sẻ vị trí trong chuyến, dùng foreground service (Android) và background mode `location` (iOS); loại thứ ba là chạy ngầm mãi mà không ai thấy, và loại này không có cách nào làm được. Ta viết `DriverLocationPolicy` để chỉ thu vị trí khi có chuyến hợp lệ, thêm bộ đệm có giới hạn khi mất mạng, rồi đối chiếu điều khoản Google Play và Apple.
 
-Đây là bài 38 của lộ trình **Flutter qua Tới Nơi**. Nên đọc trước [bài 35 về vị trí và quyền](/articles/flutter-vi-tri-geolocator-permission-foreground-background), [bài 36 về realtime](/articles/flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe) và [bài 37 về push notification](/articles/flutter-push-notification-fcm-apns-deep-link). Lab dùng Flutter 3.47.4, Dart 3.13.3, `workmanager` 0.10.10, `geolocator` 14.1.2, trên hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi).
+Đây là bài 38 của lộ trình **Flutter qua Tới Nơi**. Bạn nên đọc trước [bài 35 về vị trí và quyền](/articles/flutter-vi-tri-geolocator-permission-foreground-background), [bài 36 về realtime](/articles/flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe) và [bài 37 về push notification](/articles/flutter-push-notification-fcm-apns-deep-link). Lab dùng Flutter 3.47.4, Dart 3.13.3, `workmanager` 0.10.10, `geolocator` 14.1.2, trên hồ sơ [Tới Nơi](/articles/du-an-mau-toi-noi).
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Điều bài này chưa kiểm chứng</span>
@@ -150,9 +150,9 @@ Cấu hình iOS có ba điểm dễ sai. Một, identifier của `BGTaskSchedule
 	</array>
 ```
 
-Thiếu một trong hai thì iOS báo `notPermitted` (`BGTaskSchedulerErrorDomain` code 3); trang Apple của lỗi này xác nhận đúng hai nguyên nhân đó (kiểm tại 11/2026). Trên iOS `registerPeriodicTask` bỏ qua `frequency`; `initialDelay` chỉ thành `earliestBeginDate`, tức cận dưới.
+Thiếu một trong hai thì iOS báo `notPermitted` (`BGTaskSchedulerErrorDomain` code 3); trang Apple của lỗi này xác nhận đúng hai nguyên nhân đó (kiểm tại 11/2026). Trên iOS `registerPeriodicTask` bỏ qua `frequency`; `initialDelay` chỉ trở thành `earliestBeginDate`, tức cận dưới.
 
-Điều đáng nhớ nhất là bộ nhớ. Trên Android mỗi worker dựng một `FlutterEngine` nền riêng (`BackgroundWorker.kt`), nên `LocationBuffer` của giao diện không tồn tại ở đó (Hình 2). Trên iOS, task một lần chạy trên engine chính khi app còn sống, còn task định kỳ do `BGTaskScheduler` giao thì chạy trên engine nền (`WorkmanagerPlugin.swift`). Không đoán trước được đường nào, nên code phải giả định hai bên **không** chung bộ nhớ và chỉ tin dữ liệu trên đĩa.
+Điều đáng nhớ nhất là bộ nhớ. Trên Android mỗi worker dựng một `FlutterEngine` nền riêng (`BackgroundWorker.kt`), nên `LocationBuffer` của giao diện không tồn tại ở đó (Hình 2). Trên iOS, task một lần chạy trên engine chính khi app còn sống, còn task định kỳ do `BGTaskScheduler` giao thì chạy trên engine nền (`WorkmanagerPlugin.swift`). Không đoán trước được task sẽ chạy theo đường nào, nên code phải giả định hai bên **không** chung bộ nhớ và chỉ tin dữ liệu trên đĩa.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -196,7 +196,7 @@ Thiếu một trong hai thì iOS báo `notPermitted` (`BGTaskSchedulerErrorDomai
   });
 ```
 
-Mỗi lần ghi dùng file tạm riêng (test cho 3 isolate ghi 100 lần, không lỗi), vì dùng chung một tên tạm thì các isolate đổi tên mất file của nhau. Hai lần ghi đồng thời không hợp nhất: bản sau cùng thắng, bản kia mất. Hai bên còn có thể gửi trùng một mẫu; `LocationSample.dedupeKey` để server khử trùng (lab chưa kiểm).
+Mỗi lần ghi dùng file tạm riêng (test cho 3 isolate ghi 100 lần, không lỗi), vì dùng chung một tên tạm thì các isolate đổi tên mất file của nhau. Hai lần ghi đồng thời không hợp nhất: bản sau cùng thắng, bản kia mất. Hai bên còn có thể gửi trùng một mẫu; `LocationSample.dedupeKey` giúp server khử trùng lặp (lab chưa kiểm).
 
 ## 3. DriverLocationPolicy: chỉ gửi khi có chuyến hợp lệ
 
@@ -312,7 +312,7 @@ Test lặp trên `TripStatus.values`, đối chiếu với một bảng đặc t
 
 ## 4. Bộ đệm có giới hạn khi mất mạng
 
-Xe qua hầm thì mất mạng nhưng GPS vẫn có vị trí. Ta giữ mẫu để gửi bù, **có giới hạn** theo hai trục: tối đa 120 mẫu (đầy thì bỏ mẫu cũ nhất, vì mẫu mới mô tả xe đúng hơn) và tối đa 10 phút tuổi (vị trí cũ hơn không còn giúp khách). Hai số này là minh hoạ: mỗi 5 giây một mẫu thì 120 mẫu đúng 10 phút. Giữ vô hạn còn để lại trên máy dữ liệu vị trí không còn lý do tồn tại.
+Xe qua hầm thì mất mạng nhưng GPS vẫn có vị trí. Ta giữ mẫu để gửi bù, **có giới hạn** theo hai trục: tối đa 120 mẫu (đầy thì bỏ mẫu cũ nhất, vì mẫu mới mô tả xe đúng hơn) và mẫu không cũ quá 10 phút (vị trí cũ hơn không còn giúp khách). Hai số này là minh hoạ: mỗi 5 giây một mẫu thì 120 mẫu đúng 10 phút. Giữ vô hạn còn để lại trên máy dữ liệu vị trí không còn lý do tồn tại.
 
 ### location_buffer.dart · 38-background-work/lib/location_buffer.dart (trích)
 
@@ -371,7 +371,7 @@ Bộ gửi lấy mẫu theo lô nhưng **chỉ xoá sau khi server đã nhận**
   }
 ```
 
-Việc xoá theo danh tính mẫu (`removeSent`), không theo số lượng: lúc đang gửi, mẫu mới có thể đẩy một mẫu cũ ra khỏi bộ đệm đầy, và xoá "n mẫu đầu" sẽ xoá nhầm mẫu chưa gửi (có test). Khi chuyến kết thúc, `discardPending` xoá cả bộ đệm lẫn file.
+Ta xoá theo danh tính mẫu (`removeSent`), không theo số lượng: lúc đang gửi, mẫu mới có thể đẩy một mẫu cũ ra khỏi bộ đệm đầy, và xoá "n mẫu đầu" sẽ xoá nhầm mẫu chưa gửi (có test). Khi chuyến kết thúc, `discardPending` xoá cả bộ đệm lẫn file.
 
 Test bộ điều khiển dựng kịch bản hầm: bộ đệm 3 mẫu, năm mẫu đến lúc mất mạng, mẫu thứ sáu khi có mạng. Server nhận ba mẫu mới nhất (3, 4, 5), `droppedCount` ghi 3.
 
@@ -422,9 +422,9 @@ LocationSettings buildBackgroundLocationSettings(TargetPlatform platform) {
 
 **Android.** Khi `foregroundNotificationConfig` có giá trị, plugin chạy luồng vị trí trong foreground service của nó; huỷ subscription thì dừng service (đọc `StreamHandlerImpl.java`, `geolocator_android` 5.2.1). Tài liệu Android đặt các điều kiện: từ Android 14 phải khai loại `location` cùng `FOREGROUND_SERVICE_LOCATION` và một quyền vị trí lúc chạy; service phải có thông báo (nếu người dùng từ chối `POST_NOTIFICATIONS` thì thông báo chỉ hiện trong Task Manager); và service loại `location` chỉ được tạo khi app đang hiển thị, trừ khi app có `ACCESS_BACKGROUND_LOCATION`.
 
-Ta chọn **không** khai `ACCESS_BACKGROUND_LOCATION`: service khởi động lúc tài xế bấm nhận chuyến, khi activity đang hiện, rồi chạy tiếp lúc app sang nền. Đây là suy ra từ tài liệu, chưa chạy trên máy; Logcat không được có dòng "Foreground service started from background can not have location/camera/microphone access". Nếu cần bắt đầu khi app đã ở nền (ví dụ tự gán chuyến), quyền này thành bắt buộc. `geolocator` ghi thêm rằng foreground service không ngăn Android huỷ activity.
+Ta chọn **không** khai `ACCESS_BACKGROUND_LOCATION`: service khởi động lúc tài xế bấm nhận chuyến, khi activity đang hiện, rồi chạy tiếp lúc app sang nền. Đây là kết luận suy ra từ tài liệu, chưa chạy trên máy; Logcat không được có dòng "Foreground service started from background can not have location/camera/microphone access". Nếu cần bắt đầu khi app đã ở nền (ví dụ tự gán chuyến), quyền này trở thành bắt buộc. `geolocator` ghi thêm rằng foreground service không ngăn Android huỷ activity.
 
-**iOS.** Theo Apple, `allowsBackgroundLocationUpdates` cần `UIBackgroundModes` có `location`; bật luồng vị trí lúc app đang ở foreground thì cập nhật tiếp tục khi app sang nền. Chỉ báo xanh dương không phải lý do để xin quyền "luôn luôn": với quyền "khi đang dùng" hệ thống tự đổi thanh trạng thái, còn `showBackgroundLocationIndicator` chỉ tác động app đã có quyền "luôn luôn". Tài xế bắt đầu chia sẻ lúc app đang mở, nên app chỉ xin "khi đang dùng", và mô tả quyền nói rõ chỉ thu trong chuyến.
+**iOS.** Theo Apple, `allowsBackgroundLocationUpdates` cần `UIBackgroundModes` có `location`; bật luồng vị trí lúc app đang ở foreground thì cập nhật tiếp tục khi app sang nền. Chỉ báo xanh dương không phải lý do để xin quyền "luôn luôn": với quyền "khi đang dùng" hệ thống tự đổi thanh trạng thái, còn `showBackgroundLocationIndicator` chỉ có tác dụng với app đã có quyền "luôn luôn". Tài xế bắt đầu chia sẻ lúc app đang mở, nên app chỉ xin "khi đang dùng", và mô tả quyền nói rõ chỉ thu trong chuyến.
 
 **App khách khác app tài xế ở đâu.** Mỗi quyền thừa là một câu hỏi của người dùng và của đội duyệt store, nên hai app có cấu hình riêng và test kiểm sự khác biệt:
 
@@ -482,7 +482,7 @@ Các điều dưới đây tra tại 11/2026; kiểm lại lúc phát hành.
 
 Lý do bị từ chối hay gặp, suy ra từ các điều trên chứ không phải thống kê của store:
 
-- Mô tả mục đích chung chung, không nói rõ ngoài chuyến app không thu.
+- Mô tả mục đích chung chung, không nêu rõ việc app không thu vị trí ngoài chuyến.
 - Khai background mode `location` mà người duyệt không thấy tính năng nào cần tới, hoặc khai hơn một tính năng cho vị trí nền trên Play.
 - Thu vị trí cả ngoài chuyến, hoặc xin quyền nền ngay màn hình đầu (5.1.5, 5.1.1 iii và iv).
 - `ACCESS_BACKGROUND_LOCATION` bị plugin kéo vào mà không ai biết (tài liệu Android tính vị trí do SDK truy cập cho app): đọc merged manifest sau mỗi lần thêm plugin; lab chưa build nên chưa kiểm.
@@ -515,7 +515,7 @@ flutter test
 - **Chạy tự động, xanh:** chính sách trên tám trạng thái, bộ đệm, bộ gửi, bộ điều khiển với tracker giả, việc của task, `native-config/` của hai app và các điều đọc từ source plugin đã pin.
 - **Chỉ biên dịch:** `WorkmanagerScheduler`, `callbackDispatcher`, `GeolocatorLocationTracker` với stream thật, `main.dart`.
 - **Chưa chạy:** foreground service và thông báo, chỉ báo xanh dương, task `workmanager` thật, `AppDelegate.swift`, merged manifest, thủ tục Play và App Review.
-- **Chưa làm:** gửi thật qua `toi_noi_api` (sink chỉ ghi log), xin quyền lúc chạy, màn hình giải thích quyền, server khử trùng mẫu. README của lab hướng dẫn thử trên máy thật.
+- **Chưa làm:** gửi thật qua `toi_noi_api` (sink chỉ ghi log), xin quyền lúc chạy, màn hình giải thích quyền, server khử trùng lặp mẫu. README của lab hướng dẫn thử trên máy thật.
 
 ## Bài tập
 
@@ -524,7 +524,7 @@ flutter test
 3. Sản phẩm muốn thu vị trí cả lúc tài xế online chờ cuốc, kể cả khi app ở nền. Chính sách hiện tại trả gì và store đòi thêm gì?
 
 <details><summary>Xem lời giải</summary>
-<p><strong>1.</strong> <code>tracksStatus</code> là <code>switch</code> vét cạn nên <code>dart analyze</code> báo <code>non_exhaustive_switch_expression</code>. Ta quyết định trạng thái mới có được theo dõi không (nhiều khả năng <code>true</code>) và thêm nó vào bảng đặc tả của test, nếu không test "phủ đủ tám trạng thái" đỏ.</p>
+<p><strong>1.</strong> <code>tracksStatus</code> là <code>switch</code> vét cạn nên <code>dart analyze</code> báo <code>non_exhaustive_switch_expression</code>. Ta quyết định trạng thái mới có được theo dõi không (nhiều khả năng <code>true</code>) và thêm nó vào bảng đặc tả của test, nếu không test "phủ đủ tám trạng thái" sẽ không đạt.</p>
 <p><strong>2.</strong> 240 mẫu sinh ra nhưng bộ đệm chỉ giữ 120 mẫu cuối, đúng 10 phút gần nhất; 120 mẫu cũ bị bỏ và <code>droppedCount</code> ghi 120.</p>
 <p><strong>3.</strong> Trả <code>false</code>, vì <code>searching</code> không nằm trong bốn trạng thái. Cho phép thì mô tả quyền không còn là "chỉ trong chuyến", phải qua 5.1.5 và 5.1.1 (iii) của Apple và khai trên Play. Rẻ hơn: chỉ thu khi app đang mở.</p>
 </details>

@@ -1,0 +1,101 @@
+{
+"file": "flutter-flavors-bundle-id-icon-firebase-theo-moi-truong-build.md",
+"edits": [
+{
+"old": "Cờ `--flavor staging` chỉ là một chuỗi chuyển cho hai bên.",
+"new": "Cờ `--flavor staging` chỉ là một chuỗi truyền cho hai bên.",
+"reason": "'chuyển cho' gượng",
+"severity": "low"
+},
+{
+"old": "Chuỗi đó còn thành `appFlavor` trong Dart,",
+"new": "Chuỗi đó còn trở thành `appFlavor` trong Dart,",
+"reason": "Thiếu động từ 'trở'",
+"severity": "medium"
+},
+{
+"old": "Gradle và Xcode độc lập nhau nên",
+"new": "Gradle và Xcode độc lập với nhau nên",
+"reason": "Thiếu 'với'",
+"severity": "low"
+},
+{
+"old": "chỉ vào build của flavor đó,",
+"new": "chỉ có mặt trong build của flavor đó,",
+"reason": "'chỉ vào build' thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "ghi đè icon mặc định ở `main`, mà prod dùng luôn.",
+"new": "ghi đè icon mặc định ở `main`, còn prod dùng thẳng icon mặc định đó.",
+"reason": "'mà prod dùng luôn' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Không thấy thì nó thử khớp gần đúng, rồi rơi về `Debug` kèm cảnh báo",
+"new": "Không thấy thì công cụ thử khớp gần đúng, rồi quay về `Debug` kèm cảnh báo",
+"reason": "Đại từ 'nó' mơ hồ; 'rơi về' calque",
+"severity": "medium"
+},
+{
+"old": "Nguyên nhân: công cụ rơi về configuration gốc.",
+"new": "Nguyên nhân: công cụ quay về configuration gốc.",
+"reason": "'rơi về' calque",
+"severity": "low"
+},
+{
+"old": "Nó chỉ xét khối của target Runner,",
+"new": "Script này chỉ xét khối của target Runner,",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "medium"
+},
+{
+"old": "Đọc mắt không đủ:",
+"new": "Đọc bằng mắt không đủ:",
+"reason": "Thiếu giới từ",
+"severity": "medium"
+},
+{
+"old": "Nó còn kiểm xcconfig, `Info.plist`, icon khác nhau,",
+"new": "Script còn kiểm xcconfig, `Info.plist`, icon khác nhau,",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "medium"
+},
+{
+"old": "Hai mươi ca như vậy đều phải khiến script",
+"new": "Hai mươi test case như vậy đều phải khiến script",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Scheme, configuration, file reference và Run Script phase vẫn làm tay trong Xcode.",
+"new": "Scheme, configuration, file reference và Run Script phase vẫn làm thủ công trong Xcode.",
+"reason": "'làm tay' gượng",
+"severity": "low"
+},
+{
+"old": "nên chọn commit file nào là việc của bài tích hợp.",
+"new": "nên việc chọn commit file nào thuộc về bài tích hợp.",
+"reason": "Rõ ý hơn",
+"severity": "low"
+},
+{
+"old": "`verify-flavors.mjs` bắt hai mươi ca hỏng;",
+"new": "`verify-flavors.mjs` bắt hai mươi trường hợp hỏng;",
+"reason": "'ca' cụt",
+"severity": "low"
+},
+{
+"old": "Hai flavor cùng ra một ID, vd. hậu tố trùng:",
+"new": "Hai flavor cùng ra một ID, ví dụ do hậu tố trùng:",
+"reason": "Viết tắt 'vd.'",
+"severity": "low"
+},
+{
+"old": "include <code>Debug.xcconfig</code>, ca <code>Profile-dev quên đổi base sang Release.xcconfig</code> của",
+"new": "include <code>Debug.xcconfig</code>, test case <code>Profile-dev quên đổi base sang Release.xcconfig</code> của",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+}
+]
+}

@@ -1,0 +1,83 @@
+{
+ "file": "postgresql-rls-tenant-security.md",
+ "edits": [
+  {
+   "old": "Nó không có cách nào nói",
+   "new": "GRANT không có cách nào nói",
+   "reason": "Dùng 'Nó' ở đầu câu thay cho danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Dòng không thoả bị loại **âm thầm**.",
+   "new": "Dòng không thoả bị loại mà không báo lỗi.",
+   "reason": "'âm thầm' là calque của silently",
+   "severity": "medium"
+  },
+  {
+   "old": "Lỗi đáng có: ứng dụng truyền rác vào ngữ cảnh tenant thì nên vỡ to.",
+   "new": "Đây là lỗi nên có: nếu ứng dụng truyền giá trị rác vào ngữ cảnh tenant thì nên báo lỗi rõ ràng.",
+   "reason": "'vỡ to' khẩu ngữ, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "hoặc phiên bản mới sau `UPDATE`",
+   "new": "hoặc nội dung mới của dòng sau `UPDATE`",
+   "reason": "'phiên bản mới' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "nhưng phiên bản mới không thoả `WITH CHECK`",
+   "new": "nhưng dòng sau khi sửa không thoả `WITH CHECK`",
+   "reason": "'phiên bản mới' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "sẽ biến một middleware lỗi thành rò toàn bộ",
+   "new": "sẽ khiến một middleware lỗi dẫn tới rò toàn bộ dữ liệu",
+   "reason": "Câu 'X thành Y' thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và nó đọc dữ liệu tenant 1",
+   "new": "và request này đọc được dữ liệu của tenant 1",
+   "reason": "'nó' chỉ không rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "cấp phiên vừa rò sang client khác vừa có thể mất với client hiện tại",
+   "new": "cấp phiên vừa có thể rò sang client khác, vừa có thể mất ngữ cảnh với client hiện tại",
+   "reason": "Câu thiếu động từ, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "đây là suy ra từ ngữ nghĩa chế độ pool",
+   "new": "đây là điều suy ra từ ngữ nghĩa của chế độ pool",
+   "reason": "Câu thiếu danh từ, trật tự kiểu Anh",
+   "severity": "low"
+  },
+  {
+   "old": "## 6. Default-deny: job báo cáo lặng lẽ hỏng",
+   "new": "## 6. Default-deny: job báo cáo hỏng mà không báo lỗi",
+   "reason": "'lặng lẽ' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm khoá chính bỏ qua RLS.",
+   "new": "Việc kiểm tra khoá chính không chịu RLS.",
+   "reason": "Câu cụt; thống nhất với 'không chịu RLS' ở bảng mục 1",
+   "severity": "medium"
+  },
+  {
+   "old": "dump bằng role không vượt được RLS thất bại to thay vì thiếu dữ liệu âm thầm",
+   "new": "dump bằng role không vượt được RLS sẽ báo lỗi rõ ràng thay vì thiếu dữ liệu mà không ai biết",
+   "reason": "'thất bại to', 'âm thầm' là calque",
+   "severity": "high"
+  },
+  {
+   "old": "Job báo cáo im lặng ra 0.",
+   "new": "Job báo cáo trả về 0 mà không báo lỗi.",
+   "reason": "'im lặng ra 0' gượng",
+   "severity": "medium"
+  }
+ ]
+}

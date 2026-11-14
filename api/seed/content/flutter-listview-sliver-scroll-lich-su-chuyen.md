@@ -133,7 +133,7 @@ Có một ngoại lệ đáng biết: nhảy xa một phát. Khi dòng có chi�
 
 `ListView` và `CustomScrollView` đều là `ScrollView`. `ListView` tự xếp sẵn đúng một **sliver** danh sách: `SliverList`, hoặc `SliverFixedExtentList` khi có `itemExtent` (đọc ở `buildChildLayout`). `CustomScrollView` để ta tự xếp các sliver. Sliver là một mảnh có thể cuộn của viewport. Màn hình lịch sử cần nhiều loại mảnh cùng cuộn như một khối: app bar co lại khi kéo, dòng tóm tắt, danh sách, chân trang. Nếu xếp `ListView` trong `Column`, mỗi mảnh sẽ tự cuộn kiểu riêng, hoặc không cuộn được (xem mục lỗi thường gặp).
 
-Cơ chế của sliver giống "constraints đi xuống, kích thước đi lên" ở bài 08, nhưng tính theo trục cuộn (Hình 2). Viewport gửi xuống mỗi sliver một `SliverConstraints`, trong đó có `scrollOffset` (mảnh này đã bị cuộn qua bao nhiêu) và `remainingPaintExtent` (còn bao nhiêu chỗ để vẽ). Sliver trả lên một `SliverGeometry` với `scrollExtent` (mảnh này dài bao nhiêu trong tổng chiều dài cuộn) và `paintExtent` (hiện được bao nhiêu). Nhờ mỗi sliver tự quyết phần nào của nó cần dựng, `SliverList` mới lười được.
+Cơ chế của sliver giống "constraints đi xuống, kích thước đi lên" ở bài 08, nhưng tính theo trục cuộn (Hình 2). Viewport gửi xuống mỗi sliver một `SliverConstraints`, trong đó có `scrollOffset` (mảnh này đã bị cuộn qua bao nhiêu) và `remainingPaintExtent` (còn bao nhiêu chỗ để vẽ). Sliver trả lên một `SliverGeometry` với `scrollExtent` (mảnh này dài bao nhiêu trong tổng chiều dài cuộn) và `paintExtent` (hiện được bao nhiêu). Nhờ mỗi sliver tự quyết phần nào của nó cần dựng, `SliverList` mới có thể dựng từng phần theo nhu cầu (lazy).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -318,7 +318,7 @@ void _loadMore() {
 }
 ```
 
-Còn dưới 300 dp, tức khoảng bốn dòng, thì tải trang kế. Phần khó nằm ở ba điều kiện trong `_loadMore`. Khi ngón tay trượt, listener chạy hàng chục lần mỗi giây, và nguồn trả lời mất vài trăm mili giây. Nếu không chặn, mỗi lần chạy đều thấy "còn dưới 300 dp" và gọi nguồn thêm một lần với cùng `offset`, và trang đó sẽ xuất hiện nhiều lần trong danh sách. Cờ `_loading` được đặt đồng bộ, trước `await` đầu tiên, nên lần listener kế tiếp đã thấy nó (Hình 3). `_hasMore` ngăn gọi sau trang cuối. `_error` ngăn vòng lặp "lỗi, gọi lại, lỗi": sau một lần lỗi, chỉ nút "Thử lại" mới gọi tiếp, và nó gọi lại đúng trang đó.
+Khi nội dung phía dưới còn dưới 300 dp, tức khoảng bốn dòng, màn hình tải trang kế. Phần khó nằm ở ba điều kiện trong `_loadMore`. Khi ngón tay trượt, listener chạy hàng chục lần mỗi giây, và nguồn trả lời mất vài trăm mili giây. Nếu không chặn, mỗi lần chạy đều thấy "còn dưới 300 dp" và gọi nguồn thêm một lần với cùng `offset`, và trang đó sẽ xuất hiện nhiều lần trong danh sách. Cờ `_loading` được đặt đồng bộ, trước `await` đầu tiên, nên lần listener kế tiếp đã thấy nó (Hình 3). `_hasMore` ngăn gọi sau trang cuối. `_error` ngăn vòng lặp "lỗi, gọi lại, lỗi": sau một lần lỗi, chỉ nút "Thử lại" mới gọi tiếp, và nó gọi lại đúng trang đó.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -385,7 +385,7 @@ testWidgets('cuộn tới cuối gọi đúng một lần cho dù có rất nhi�
 });
 ```
 
-Có hai ca biên khác đã có test. Thứ nhất, trang đầu có thể chưa lấp đầy màn hình (ví dụ `pageSize` nhỏ): khi ấy không có gì để cuộn, nên cũng không có sự kiện cuộn nào gọi `_onScroll`. Màn hình tự hỏi lại sau khi build xong bằng `addPostFrameCallback`, và test với `pageSize: 2` thấy các offset 0, 2, 4, ... nối tiếp nhau không trùng cho tới khi đủ dài. Thứ hai, ngưỡng bằng 0 không bao giờ kích hoạt, vì `extentAfter` không âm nên điều kiện `extentAfter < 0` không bao giờ đúng (bài tập 1).
+Có hai trường hợp biên khác đã có test. Thứ nhất, trang đầu có thể chưa lấp đầy màn hình (ví dụ `pageSize` nhỏ): khi ấy không có gì để cuộn, nên cũng không có sự kiện cuộn nào gọi `_onScroll`. Màn hình tự hỏi lại sau khi build xong bằng `addPostFrameCallback`, và test với `pageSize: 2` thấy các offset 0, 2, 4, ... nối tiếp nhau không trùng cho tới khi đủ dài. Thứ hai, ngưỡng bằng 0 không bao giờ kích hoạt, vì `extentAfter` không âm nên điều kiện `extentAfter < 0` không bao giờ đúng (bài tập 1).
 
 ## Kéo để làm mới với RefreshIndicator
 
@@ -404,7 +404,7 @@ body: RefreshIndicator(
 
 Dòng `physics` có lý do dễ bỏ sót. Một `ScrollView` dọc không truyền `controller` được tự gán `AlwaysScrollableScrollPhysics` (constructor của `ScrollView`), nên danh sách ngắn vẫn kéo để làm mới được. Lab có truyền `controller` để tải thêm, nên mất phần tự gán đó và rơi về physics mặc định của nền tảng (`BouncingScrollPhysics` trên iOS, `ClampingScrollPhysics` trên Android), vốn từ chối kéo khi nội dung ngắn hơn màn hình. Ta phải đặt lại `AlwaysScrollableScrollPhysics`. `refresh_physics_test.dart` chạy cả Android lẫn iOS: không controller thì `onRefresh` chạy 1 lần, có controller mà thiếu physics thì 0 lần, thêm physics thì lại 1 lần.
 
-Làm mới và tải thêm có thể chạy chồng nhau. Hình dung: người dùng đang chờ trang `offset: 20`, kéo làm mới, và hai câu trả lời về lệch thứ tự: nhận cả hai thì danh sách thành trang đầu mới nối với một trang cũ. Biến `_generation` giải quyết việc này: mỗi lần làm mới tăng nó lên một, và mọi câu trả lời mang số cũ bị bỏ ở dòng `generation != _generation` trong `_fetch`. Test dựng đúng kịch bản này bằng `ManualSource` (test tự quyết lúc nào nguồn trả lời) và kiểm câu trả lời quá hạn không được nối vào.
+Làm mới và tải thêm có thể chạy chồng nhau. Hình dung: người dùng đang chờ trang `offset: 20`, kéo làm mới, và hai câu trả lời về lệch thứ tự: nhận cả hai thì danh sách sẽ là trang đầu mới nối với một trang cũ. Biến `_generation` giải quyết việc này: mỗi lần làm mới tăng nó lên một, và mọi câu trả lời mang số cũ bị bỏ ở dòng `generation != _generation` trong `_fetch`. Test dựng đúng kịch bản này bằng `ManualSource` (test tự quyết lúc nào nguồn trả lời) và kiểm câu trả lời quá hạn không được nối vào.
 
 Lỗi khi làm mới khác lỗi khi tải trang đầu: nếu đã có danh sách, ta giữ nguyên nó và báo bằng một `SnackBar`, không xoá cả danh sách chỉ vì một lần mất mạng.
 
@@ -507,7 +507,7 @@ Không key thì vị trí 1 vẫn đang mở, nhưng nó đã hiển thị T-004
 <figcaption>Hình 4. Cùng một lần đảo thứ tự: không key thì state ở lại vị trí và hiện sai chuyến, ValueKey cùng findChildIndexCallback thì state đi theo chuyến.</figcaption>
 </figure>
 
-Thêm `ValueKey(trip.id)` là chưa đủ. `ListView.builder` và `SliverList` tạo dòng theo chỉ số, nên khi thứ tự đổi, framework cần biết dòng mang key này giờ nằm ở chỉ số nào. Việc đó do `findChildIndexCallback` làm (với `separated` là `findItemIndexCallback`, vì `findChildIndexCallback` của `separated` đã bị đánh dấu deprecated trong source). Tài liệu của `SliverChildBuilderDelegate` nói rõ thiếu nó thì state có thể mất, và test xác nhận: chỉ có `ValueKey`, T-0046 đổi vị trí nên bị dựng lại và gập. May là không "mở nhầm" T-0044 như trường hợp không key. Có cả hai thì state đi theo chuyến (Hình 4, cột phải). Lab truyền key và callback như sau:
+Thêm `ValueKey(trip.id)` là chưa đủ. `ListView.builder` và `SliverList` tạo dòng theo chỉ số, nên khi thứ tự đổi, framework cần biết dòng mang key này giờ nằm ở chỉ số nào. Việc đó thuộc về `findChildIndexCallback` (với `separated` là `findItemIndexCallback`, vì `findChildIndexCallback` của `separated` đã bị đánh dấu deprecated trong source). Tài liệu của `SliverChildBuilderDelegate` nói rõ thiếu nó thì state có thể mất, và test xác nhận: chỉ có `ValueKey`, T-0046 đổi vị trí nên bị dựng lại và gập. May là không "mở nhầm" T-0044 như trường hợp không key. Có cả hai thì state đi theo chuyến (Hình 4, cột phải). Lab truyền key và callback như sau:
 
 ### trip_history_screen.dart · 09-listview-sliver/lib/trip_history_screen.dart (trích)
 
@@ -535,7 +535,7 @@ SliverList.separated(
 ),
 ```
 
-Key phải ổn định và duy nhất: dùng `trip.id`, đừng dùng chỉ số trong danh sách. `indexWhere` duyệt tuyến tính mỗi lần được hỏi, nên danh sách rất lớn nên giữ một `Map<String, int>`. Test ở mức màn hình thật mở hai dòng, ghim một dòng lên đầu và kiểm cả hai vẫn mở đúng chuyến.
+Key phải ổn định và duy nhất: dùng `trip.id`, đừng dùng chỉ số trong danh sách. `indexWhere` duyệt tuyến tính mỗi lần được hỏi, nên với danh sách rất lớn ta nên giữ một `Map<String, int>`. Test ở mức màn hình thật mở hai dòng, ghim một dòng lên đầu và kiểm cả hai vẫn mở đúng chuyến.
 
 ## Lỗi thường gặp
 
@@ -572,7 +572,7 @@ flutter test
 | `trip_history_source_test.dart` | Trang 20, 20, 7; cước 25.500, 12.005, 453.000 VND; ca biên offset và limit; phân trang theo offset bị lặp khi có chuyến chen vào đầu |
 | `app_test.dart` | `ToiNoiApp` mở thẳng màn hình lịch sử và tải trang đầu |
 
-**Chưa làm**: chạy trên iOS Simulator, Android emulator hay thiết bị thật (máy kiểm chưa có Android SDK và Xcode đầy đủ), nên cảm giác cuộn thật của iOS và Android chưa được kiểm; phân trang theo con trỏ và khử trùng theo `id`; định dạng ngày giờ và tiền theo locale (bài 14); điều hướng sang chi tiết chuyến (bài 12); nguồn gọi HTTP thật (bài 19). Để chạy trên máy, sinh runner một lần bằng `flutter create --platforms=ios,android --project-name toi_noi_09 --org vn.toinoi .` trong thư mục lab, như ghi trong README.
+**Chưa làm**: chạy trên iOS Simulator, Android emulator hay thiết bị thật (máy kiểm chưa có Android SDK và Xcode đầy đủ), nên cảm giác cuộn thật của iOS và Android chưa được kiểm; phân trang theo con trỏ và khử trùng lặp theo `id`; định dạng ngày giờ và tiền theo locale (bài 14); điều hướng sang chi tiết chuyến (bài 12); nguồn gọi HTTP thật (bài 19). Để chạy trên máy, sinh runner một lần bằng `flutter create --platforms=ios,android --project-name toi_noi_09 --org vn.toinoi .` trong thư mục lab, như ghi trong README.
 
 ## Bài tập
 
@@ -583,7 +583,7 @@ flutter test
 <details><summary>Xem lời giải</summary>
 <p><strong>1.</strong> Việc tải thêm không bao giờ chạy. <code>extentAfter</code> không bao giờ âm (source dùng <code>max(..., 0.0)</code>), nên điều kiện <code>extentAfter &lt; 0</code> luôn sai. Test <code>ngưỡng 0 không bao giờ kích hoạt</code> kiểm đúng điều này: nguồn chỉ bị gọi với <code>offset</code> 0.</p>
 <p><strong>2.</strong> T-0047. Không key thì Element ghép theo vị trí: Element ở vị trí 1 giữ <code>_expanded = true</code>, và sau khi đổi, vị trí 1 hiển thị T-0047. Chuyến T-0046 được mở lúc đầu lại nằm ở vị trí 2 và đóng. Có <code>ValueKey</code> cùng <code>findChildIndexCallback</code> thì T-0046 vẫn mở dù chuyển sang vị trí 2.</p>
-<p><strong>3.</strong> Chuyến chen vào đẩy mọi chuyến cũ xuống một vị trí, nên trang 2 (<code>offset: 20</code>) bắt đầu bằng đúng chuyến cuối của trang 1: danh sách có một chuyến hiện hai lần (test <code>phân trang theo offset</code> trong <code>trip_history_source_test.dart</code> tái hiện điều này). Cách sửa: một là phân trang theo con trỏ (gửi id hoặc thời điểm của chuyến cuối đã có, nguồn trả những chuyến cũ hơn nó); hai là khử trùng theo <code>id</code> khi nối trang mới vào danh sách.</p>
+<p><strong>3.</strong> Chuyến chen vào đẩy mọi chuyến cũ xuống một vị trí, nên trang 2 (<code>offset: 20</code>) bắt đầu bằng đúng chuyến cuối của trang 1: danh sách có một chuyến hiện hai lần (test <code>phân trang theo offset</code> trong <code>trip_history_source_test.dart</code> tái hiện điều này). Cách sửa: một là phân trang theo con trỏ (gửi id hoặc thời điểm của chuyến cuối đã có, nguồn trả những chuyến cũ hơn nó); hai là khử trùng lặp theo <code>id</code> khi nối trang mới vào danh sách.</p>
 </details>
 
 Bài trước: [Layout và constraints: Row, Column, Expanded và thẻ chuyến](/articles/flutter-layout-constraints-row-column-the-chuyen). Bài tiếp: [StatefulWidget, lifecycle và setState: chọn dịch vụ và đếm ngược tìm tài xế](/articles/flutter-statefulwidget-lifecycle-setstate-chon-dich-vu).

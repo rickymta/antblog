@@ -1,0 +1,14 @@
+{"file":"aws-ec2-ami-ebs-user-data.md","edits":[
+{"old":"nên hãy kiểm danh sách hiện hành trước khi chọn.","new":"nên hãy kiểm tra danh sách hiện hành trước khi chọn.","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"phải do load test quyết định, không đoán.","new":"phải dựa trên kết quả load test, không phải suy đoán.","reason":"Câu cụt, lược chủ ngữ ở vế sau","severity":"medium"},
+{"old":"Cả loạt dùng **Amazon Linux 2023**","new":"Cả loạt bài dùng **Amazon Linux 2023**","reason":"'Cả loạt' thiếu danh từ chính","severity":"medium"},
+{"old":"lưu bởi AWS (tăng dần: chỉ lưu phần thay đổi","new":"do AWS lưu (theo kiểu tăng dần: chỉ lưu phần thay đổi","reason":"Bỏ bị động kiểu Anh","severity":"medium"},
+{"old":"Máy đã cài sẵn phần mềm rồi chụp thành AMI gọi là","new":"AMI chụp từ máy đã cài sẵn phần mềm gọi là","reason":"Chủ ngữ mơ hồ (máy hay AMI được gọi là golden AMI)","severity":"medium"},
+{"old":"nhưng phải xây lại khi muốn đổi. Cách còn lại là dùng AMI sạch cộng","new":"nhưng phải dựng lại AMI mỗi khi muốn thay đổi. Cách còn lại là dùng AMI sạch kết hợp với","reason":"Thiếu tân ngữ; 'cộng' là calque của plus","severity":"medium"},
+{"old":"ta cho nó cơ chế riêng ở các bài ECS và EKS","new":"ta cấp cho nó cơ chế riêng ở các bài ECS và EKS","reason":"'cho' gượng khi nói về cấp quyền","severity":"low"},
+{"old":"kiểm IAM, ghi lại phiên","new":"kiểm tra IAM, ghi lại phiên","reason":"'kiểm' cụt","severity":"low"},
+{"old":"**User data lỗi âm thầm**","new":"**User data lỗi mà không có cảnh báo**","reason":"'âm thầm' là calque; viết theo nghĩa cụ thể","severity":"medium"},
+{"old":"kiểm kiến trúc image trước.","new":"hãy kiểm tra kiến trúc image trước.","reason":"'kiểm' cụt; câu thiếu chủ ngữ/mệnh lệnh","severity":"low"},
+{"old":"và script kiểm bằng Session Manager","new":"và script kiểm tra bằng Session Manager","reason":"'kiểm' cụt","severity":"low"},
+{"old":"tham số lệnh được kiểm bằng bộ mô hình dịch vụ của AWS CLI","new":"tham số lệnh đã được kiểm tra bằng bộ mô hình dịch vụ của AWS CLI","reason":"'kiểm' cụt; thiếu thì hoàn thành","severity":"low"}
+]}

@@ -1,0 +1,10 @@
+{"file":"aws-kms-envelope-encryption-key-policy.md","edits":[
+{"old":"Mã hoá mặc định của S3 trả lời được câu đầu một nửa, còn hai câu sau","new":"Mã hoá mặc định của S3 chỉ trả lời được một nửa câu đầu, còn hai câu sau","reason":"Trật tự từ kiểu Anh (half answers the first)","severity":"medium"},
+{"old":"ghi từng lần giải mã vào CloudTrail, và có nút thu hồi.","new":"ghi từng lần giải mã vào CloudTrail, và có thể thu hồi quyền dùng khoá.","reason":"'nút thu hồi' là cách nói ẩn dụ gượng","severity":"low"},
+{"old":"Quyền dùng key đến theo ba đường:","new":"Quyền dùng key có thể đến từ ba đường:","reason":"'đến theo ba đường' gượng","severity":"medium"},
+{"old":"Chia sẻ snapshot RDS hay EBS mã hoá sang tài khoản khác chỉ làm được khi nó dùng CMK","new":"Chia sẻ snapshot RDS hay EBS mã hoá sang tài khoản khác chỉ làm được khi snapshot đó dùng CMK","reason":"'nó' mơ hồ, nhắc lại danh từ","severity":"medium"},
+{"old":"Giới hạn ai sửa policy qua SCP hoặc bài 51.","new":"Giới hạn người được sửa policy bằng SCP hoặc theo cách ở bài 51.","reason":"'ai sửa policy' như đại từ nghi vấn, thiếu danh từ; 'qua ... bài 51' lược động từ","severity":"medium"},
+{"old":"là tên ổn định để code và policy tham chiếu; đổi key phía sau mà không sửa code.","new":"là tên ổn định để code và policy tham chiếu, nên bạn đổi key phía sau mà không phải sửa code.","reason":"Câu thiếu chủ ngữ cho vế sau","severity":"medium"},
+{"old":"bucket policy chặn upload chọn thuật toán hoặc key khác","new":"bucket policy chặn upload chỉ định thuật toán hoặc key khác","reason":"'upload chọn' thiếu chủ thể, dùng 'chỉ định' cho rõ","severity":"low"},
+{"old":"**Khoá nhầm thì không mở lại**:","new":"**Tự khoá mình ngoài key**:","reason":"Tiêu mục mơ hồ; nội dung là tự mất quyền quản trị key","severity":"low"}
+]}

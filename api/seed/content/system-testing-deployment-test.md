@@ -1,7 +1,7 @@
 ---
 slug: system-testing-deployment-test
 title: "Deployment Test: bản vừa triển khai có đúng cấu hình, sẵn sàng và còn quay lui được?"
-summary: "SYS-16, bài cuối của series kiểm thử hệ thống: khởi động máy chủ Tới Nơi như một bản triển khai thật, chờ readiness có hạn chót, kiểm cấu hình an toàn và chứng minh phép kiểm biết đỏ, chạy post-deploy smoke qua HTTP thật, rồi kiểm migration expand/contract để rollback mã không làm hỏng dữ liệu — kèm phát hiện đọc trả 200 nhưng âm thầm mất trường."
+summary: "SYS-16, bài cuối của series kiểm thử hệ thống: khởi động máy chủ Tới Nơi như một bản triển khai thật, chờ readiness có hạn chót, kiểm cấu hình an toàn và chứng minh phép kiểm biết đỏ, chạy post-deploy smoke qua HTTP thật, rồi kiểm migration expand/contract để rollback mã không làm hỏng dữ liệu — kèm phát hiện một lệnh đọc trả 200 nhưng mất trường mà không báo lỗi."
 category: testing
 level: advanced
 tags: [testing, sys-16, deployment-testing, post-deploy-smoke, readiness, configuration, schema-migration, rollback, expand-contract, vitest]
@@ -18,7 +18,7 @@ Thứ Sáu, 17:40. Bản mới của Tới Nơi vừa lên. Pipeline xanh từ �
 <tr><th scope="row">Cấp độ</th><td>Advanced — QA/SDET, kỹ sư release/vận hành đã nắm smoke, SQL và khái niệm rollback</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Cuối system testing, giáp operational acceptance: kiểm hành động triển khai, cấu hình đang chạy và khả năng rollback; không kiểm lại logic nghiệp vụ</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-smoke-test">SYS-01 · Smoke Test</a> · <a href="/articles/system-testing-recovery-test">SYS-14 · Recovery Test</a> · <a href="/articles/system-testing-uat">SYS-15 · UAT</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 5 ca DP-01…05 khởi động <code>src/server.ts</code> thành tiến trình riêng và kiểm qua HTTP thật (R-API-15, R-TEST-01, R-NFR-06, R-FARE-01/08); 3 ca MG-01…03 kiểm migration expand/contract với mã đang chạy — <code>examples/toi-noi-testing/articles/system-testing-deployment-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 5 test case DP-01…05 khởi động <code>src/server.ts</code> thành tiến trình riêng và kiểm qua HTTP thật (R-API-15, R-TEST-01, R-NFR-06, R-FARE-01/08); 3 test case MG-01…03 kiểm migration expand/contract với mã đang chạy — <code>examples/toi-noi-testing/articles/system-testing-deployment-test/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 (test level/type, maintenance testing); PostgreSQL 18 · ALTER TABLE; <code>SPEC.md</code>, <code>src/server.ts</code>, <code>src/infra/pglite/pg-trip-repository.ts</code> của lab</td></tr>
 </tbody>
 </table>
@@ -64,7 +64,7 @@ Sau bài này, bạn có thể:
 
 ### 2.2. Deployment test khác smoke của SYS-01 ở đâu
 
-SYS-01 chạy smoke trên ứng dụng **lắp ráp trong tiến trình test** bằng supertest: không có cổng mạng, không có biến môi trường, không có bước khởi động. Nó trả lời "mã của build này có đủ tốt để kiểm sâu". Deployment test chạy trên **bản đang chạy**: một tiến trình riêng, đọc cấu hình từ môi trường như khi triển khai, nghe một cổng, và được kiểm qua HTTP thật. Nó trả lời "chính bản triển khai này có đúng cấu hình, sẵn sàng, và dùng được không".
+SYS-01 chạy smoke trên ứng dụng **lắp ráp trong tiến trình test** bằng supertest: không có cổng mạng, không có biến môi trường, không có bước khởi động. Smoke test trả lời "mã của build này có đủ tốt để kiểm thử chuyên sâu không". Deployment test chạy trên **bản đang chạy**: một tiến trình riêng, đọc cấu hình từ môi trường như khi triển khai, nghe một cổng, và được kiểm qua HTTP thật. Deployment test trả lời "chính bản triển khai này có đúng cấu hình, sẵn sàng, và dùng được không".
 
 Deployment test không phải một test level của ISTQB. Nó thường nằm cuối system testing và chồng lấn với operational acceptance testing (mục kiểm tra khả năng cài đặt, cấu hình, backup/restore trong acceptance). Ghi rõ phạm vi trong test plan quan trọng hơn tranh luận tên gọi.
 
@@ -81,7 +81,7 @@ SYS-14 restore **dữ liệu** từ bản sao. Rollback trong bài này đưa **
 - **R-TEST-01** — các endpoint `/api/test/*` chỉ tồn tại khi `NODE_ENV=test` hoặc `TOINOI_TEST_API=1`; mặc định (kể cả `npm start`) trả 404 `NOT_FOUND`.
 - **R-NFR-06** — API kiểm thử tắt mặc định; lỗi 500 không lộ stack trace.
 - **R-FARE-01…08** — oracle tiền cho post-deploy smoke.
-- `schema.sql` và `pg-trip-repository.ts` — cách mã hiện tại đọc/ghi bảng `trips`, nền cho các ca migration.
+- `schema.sql` và `pg-trip-repository.ts` — cách mã hiện tại đọc/ghi bảng `trips`, nền cho các test case migration.
 
 ### 3.2. Rủi ro và nơi kiểm
 
@@ -102,11 +102,11 @@ SYS-14 restore **dữ liệu** từ bản sao. Rollback trong bài này đưa **
 
 ### 3.4. Tiêu chí bắt đầu và kết thúc
 
-Entry: dependency cài theo lockfile; cổng do hệ điều hành cấp; không có dữ liệu thật. Exit của bài tập: 8/8 ca pass, typecheck pass, và không còn tiến trình máy chủ nào sau suite. Đây là điều kiện **đạt bài tập**, không phải phê duyệt release production.
+Entry: dependency cài theo lockfile; cổng do hệ điều hành cấp; không có dữ liệu thật. Exit của bài tập: 8/8 test case pass, typecheck pass, và không còn tiến trình máy chủ nào sau suite. Đây là điều kiện **đạt bài tập**, không phải phê duyệt release production.
 
-## 4. Thiết kế ca kiểm
+## 4. Thiết kế test case
 
-### 4.1. Bảng case
+### 4.1. Bảng test case
 
 | ID | Basis / rủi ro | Tiền điều kiện và hành động | Expected | Cleanup |
 |---|---|---|---|---|
@@ -121,11 +121,11 @@ Entry: dependency cài theo lockfile; cổng do hệ điều hành cấp; không
 
 ### 4.2. Một mã, hai vai
 
-Lab chỉ có **một** phiên bản mã. Để kiểm rollback, các ca MG áp migration trước, rồi dùng mã hiện tại trong `src/` đóng vai **bản cũ** — bản đội sẽ quay về. Đây là mô phỏng trung thực của câu hỏi "mã cũ có chạy trên schema mới không", nhưng không phải triển khai hai phiên bản thật; mục 9 nói cách làm phần đó trên staging.
+Lab chỉ có **một** phiên bản mã. Để kiểm rollback, các test case MG áp migration trước, rồi dùng mã hiện tại trong `src/` đóng vai **bản cũ** — bản đội sẽ quay về. Đây là mô phỏng trung thực của câu hỏi "mã cũ có chạy trên schema mới không", nhưng không phải triển khai hai phiên bản thật; mục 9 nói cách làm phần đó trên staging.
 
-### 4.3. Vì sao DP-05 là một ca kiểm, không phải ca lỗi
+### 4.3. Vì sao DP-05 là một test case, không phải một lỗi
 
-DP-05 không "muốn" hệ thống tốt. Nó cố ý khởi động một bản sai để chứng minh rằng phép kiểm của DP-02 **phân biệt được** cấu hình đúng và cấu hình sai. Một phép kiểm chưa từng đỏ trên một đầu vào sai thì chưa chứng minh được nó có kiểm gì. Đây cùng tinh thần với thí nghiệm inject lỗi được đề xuất ở SYS-01.
+DP-05 không "muốn" hệ thống tốt. Test case này cố ý khởi động một bản sai để chứng minh rằng phép kiểm của DP-02 **phân biệt được** cấu hình đúng và cấu hình sai. Một phép kiểm chưa từng đỏ trên một đầu vào sai thì chưa chứng minh được nó có kiểm gì. Đây cùng tinh thần với thí nghiệm inject lỗi mà SYS-01 đề xuất.
 
 ## 5. Kiến trúc lab
 
@@ -183,7 +183,7 @@ async function deploy(extraEnv: Record<string, string>): Promise<Deployment> {
   const child = spawn(process.execPath, ['--import', 'tsx', 'src/server.ts'], { cwd: LAB_ROOT, env });
 ```
 
-Hai lựa chọn khác cũng có lý do. `freePort()` xin hệ điều hành một cổng trống thay vì cố định 3100, để không đụng máy chủ lab bạn đang chạy và để hai ca không tranh cổng. `node --import tsx` chạy mã TypeScript trong **một** tiến trình node; dùng lệnh `tsx` trực tiếp có thể sinh tiến trình con, khi bị dừng trên Windows dễ để lại tiến trình mồ côi giữ cổng.
+Hai lựa chọn khác cũng có lý do. `freePort()` xin hệ điều hành một cổng trống thay vì cố định 3100, để không đụng máy chủ lab bạn đang chạy và để hai test case không tranh cổng. `node --import tsx` chạy mã TypeScript trong **một** tiến trình node; dùng lệnh `tsx` trực tiếp có thể sinh tiến trình con, khi bị dừng trên Windows dễ để lại tiến trình mồ côi giữ cổng.
 
 ### 6.3. Bước 2 — Chờ readiness có hạn chót
 
@@ -207,10 +207,10 @@ Hai lựa chọn khác cũng có lý do. `freePort()` xin hệ điều hành m�
 Ba điểm phân biệt vòng chờ này với `sleep(5000)`:
 
 - **Thoát sớm khi chắc chắn hỏng.** Tiến trình đã chết thì chờ thêm vô ích; thông điệp lỗi mang theo log để điều tra ngay.
-- **Có hạn chót.** 15 giây là giả định thiết kế của bài, đủ rộng cho máy chậm. Nó không phải SLO khởi động; một hệ thật cần hạn chót có căn cứ từ đo đạc.
+- **Có hạn chót.** 15 giây là giả định thiết kế của bài, đủ rộng cho máy chậm. Con số này không phải SLO khởi động; một hệ thật cần hạn chót có căn cứ từ đo đạc.
 - **Đo được.** `readyAfterMs` được ghi lại để theo dõi xu hướng, nhưng không assert ngưỡng chặt — thời gian khởi động trên máy dev dao động.
 
-### 6.4. Bước 3 — Bốn ca trên bản prod-like
+### 6.4. Bước 3 — Bốn test case trên bản prod-like
 
 Cấu hình triển khai của lab:
 
@@ -233,7 +233,7 @@ DP-02 kiểm điều R-TEST-01 hứa:
   }, 30_000);
 ```
 
-DP-03 đọc bằng chứng cấu hình từ log khởi động. Lab không có endpoint version, nên dòng log in bởi `src/server.ts` là nơi duy nhất bản đang chạy "tự khai" nó dùng kho nào, giờ nào, API test bật hay tắt:
+DP-03 đọc bằng chứng cấu hình từ log khởi động. Lab không có endpoint version, nên dòng log do `src/server.ts` in ra là nơi duy nhất bản đang chạy "tự khai" nó dùng kho nào, giờ nào, API test bật hay tắt:
 
 ```ts
     expect(d.log()).toContain('kho: pglite');
@@ -265,7 +265,7 @@ DP-04 là post-deploy smoke: cùng đường tiền như SYS-01 nhưng đi qua `
   }, 30_000);
 ```
 
-Cùng `NODE_ENV=production`, chỉ thêm một cờ, và cửa hậu mở. Đó đúng là kịch bản mở bài. DP-05 pass có nghĩa: nếu DP-02 được chạy trên bản này, nó sẽ đỏ. Ta có bằng chứng phép kiểm của mình có răng.
+Cùng `NODE_ENV=production`, chỉ thêm một cờ, và cửa hậu mở. Đó đúng là kịch bản mở bài. DP-05 pass có nghĩa: nếu DP-02 được chạy trên bản này, nó sẽ đỏ. Ta có bằng chứng rằng phép kiểm của mình bắt được lỗi thật.
 
 ### 6.6. Bước 5 — Dọn dẹp
 
@@ -281,13 +281,13 @@ afterEach(async () => {
 });
 ```
 
-Chờ sự kiện `exit` trước khi sang ca sau, không chỉ gửi tín hiệu rồi đi tiếp. Báo cáo ghi lại việc kiểm bằng `Get-CimInstance Win32_Process` rằng không còn tiến trình `node … src/server.ts` nào sau các lượt chạy. Trên Windows `kill()` dừng cưỡng bức, nên lab **không** kiểm graceful shutdown dù `src/server.ts` có xử lý `SIGTERM`.
+Chờ sự kiện `exit` trước khi sang test case sau, không chỉ gửi tín hiệu rồi đi tiếp. Báo cáo ghi lại kết quả kiểm bằng `Get-CimInstance Win32_Process`: không còn tiến trình `node … src/server.ts` nào sau các lượt chạy. Trên Windows `kill()` dừng cưỡng bức, nên lab **không** kiểm graceful shutdown dù `src/server.ts` có xử lý `SIGTERM`.
 
 ## 7. Thực hành B — migration và khả năng rollback
 
-### 7.1. Đọc mã trước khi thiết kế ca
+### 7.1. Đọc mã trước khi thiết kế test case
 
-Hai chi tiết trong `pg-trip-repository.ts` quyết định cách mã hiện tại phản ứng với schema mới. Ghi dùng danh sách cột tường minh:
+Hai chi tiết trong `pg-trip-repository.ts` quyết định cách mã hiện tại phản ứng với schema mới. Phần ghi dùng danh sách cột liệt kê rõ ràng:
 
 ```ts
 const INSERT_SQL = `INSERT INTO trips (${COLUMNS.join(', ')}) VALUES (${COLUMNS.map((_, i) => `$${i + 1}`).join(', ')})`;
@@ -335,7 +335,7 @@ Hai assertion này là hai nửa của hợp đồng expand: bản cũ không xo
     expect(res.body).toEqual({ error: { code: 'INTERNAL_ERROR', message: 'Lỗi hệ thống, vui lòng thử lại sau.' } });
 ```
 
-Migration "chỉ thêm cột" vẫn có thể phá bản cũ: cột NOT NULL không default khiến mọi `INSERT` không biết cột đó vi phạm ràng buộc. Ca này còn xác nhận R-NFR-06 trên đường lỗi: phản hồi 500 là thông điệp chung, không lộ tên cột hay câu SQL. Bảng `trips` trống sau đó — không có dòng dở dang.
+Migration "chỉ thêm cột" vẫn có thể phá bản cũ: cột NOT NULL không default khiến mọi `INSERT` không biết cột đó vi phạm ràng buộc. Test case này còn xác nhận R-NFR-06 trên đường lỗi: phản hồi 500 là thông điệp chung, không lộ tên cột hay câu SQL. Bảng `trips` trống sau đó — không có dòng dở dang.
 
 ### 7.4. MG-03 — contract quá sớm và phát hiện quan trọng nhất của bài
 
@@ -350,10 +350,10 @@ Migration "chỉ thêm cột" vẫn có thể phá bản cũ: cột NOT NULL kh�
     expect(afterRead.body.trip).not.toHaveProperty('cancelReason');
 ```
 
-Ghi hỏng, như dự đoán. Nhưng **đọc trả 200**. `SELECT *` không còn cột `cancel_reason`, `r.cancel_reason` thành `undefined`, và JSON bỏ trường `undefined` — trước migration, cùng chuyến đó có `cancelReason: null`. Khách không thấy lỗi; ứng dụng khách chỉ thấy thiếu một trường.
+Phần ghi hỏng, đúng như dự đoán. Nhưng **đọc trả 200**. `SELECT *` không còn cột `cancel_reason`, `r.cancel_reason` thành `undefined`, và JSON bỏ trường `undefined` — trước migration, cùng chuyến đó có `cancelReason: null`. Khách không thấy lỗi; ứng dụng khách chỉ thấy thiếu một trường.
 
 <div class="tkh-callout tkh-callout--warn">
-<span class="tkh-callout-title">Đọc sai âm thầm qua mặt monitor chỉ đếm 5xx</span>
+<span class="tkh-callout-title">Đọc sai mà không báo lỗi, qua mặt monitor chỉ đếm 5xx</span>
 <p>Sau rollback trong tình huống MG-03, dashboard tỷ lệ 5xx sẽ đỏ ở đường ghi — nhưng đường đọc vẫn "khoẻ" trong khi trả dữ liệu thiếu. Một post-deploy smoke chỉ kiểm status code cũng bỏ sót. Phép kiểm sau triển khai phải assert <b>nội dung</b> theo hợp đồng (tập trường kỳ vọng, kể cả trường có thể null), và migration contract chỉ được chạy khi không còn phiên bản nào dùng cột cũ. Đây là hành vi quan sát được của mã lab, ghi lại làm ví dụ; bài không sửa <code>src/</code>.</p>
 </div>
 
@@ -382,7 +382,7 @@ Nguyên tắc rút ra: tách một thay đổi phá vỡ thành các release mà
 
 ### 8.1. Mong đợi
 
-8/8 ca pass như bảng mục 4.1; typecheck exit 0; không còn tiến trình máy chủ sau suite. `readyAfterMs` không có ngưỡng ngoài hạn chót 15 giây.
+8/8 test case pass như bảng mục 4.1; typecheck exit 0; không còn tiến trình máy chủ sau suite. `readyAfterMs` không có ngưỡng ngoài hạn chót 15 giây.
 
 ### 8.2. Thực tế — báo cáo ngày 13/11/2026
 
@@ -404,7 +404,7 @@ Cùng máy và phiên bản: 8/8 pass, duration 9,66 s, `readyAfterMs` 1.846 ms 
 
 ### 8.4. Một ghi nhận ngoài phạm vi
 
-Khi chạy toàn bộ `npm test` của lab, 85/86 file pass; 3 test của bài TEST-040 (domain testing) đỏ cả khi chạy riêng, theo cùng một kiểu mỗi lần. Bộ test đó và `src/` không bị thay đổi trong đợt viết bài này, nên đây là lỗi sẵn có cần điều tra riêng. Nó minh hoạ một nguyên tắc của deployment gate: ghi rõ phần đỏ không thuộc thay đổi đang xét, thay vì im lặng bỏ qua hoặc chặn toàn bộ mà không phân loại.
+Khi chạy toàn bộ `npm test` của lab, 85/86 file pass; 3 test của bài TEST-040 (domain testing) đỏ cả khi chạy riêng, theo cùng một kiểu mỗi lần. Bộ test đó và `src/` không bị thay đổi trong đợt viết bài này, nên đây là lỗi sẵn có cần điều tra riêng. Trường hợp này minh hoạ một nguyên tắc của deployment gate: ghi rõ phần đỏ không thuộc thay đổi đang xét, thay vì bỏ qua mà không nói gì, hoặc chặn toàn bộ mà không phân loại.
 
 ## 9. Đọc thất bại và ra quyết định
 
@@ -419,7 +419,7 @@ Khi chạy toàn bộ `npm test` của lab, 85/86 file pass; 3 test của bài T
 
 Quyết định mẫu:
 
-- **Giữ bản mới:** DP-01…04 pass trên bản đang chạy, DP-05 đã chứng minh phép kiểm cấu hình có răng, migration của release chỉ là expand đã qua MG-01.
+- **Giữ bản mới:** DP-01…04 pass trên bản đang chạy, DP-05 đã chứng minh phép kiểm cấu hình bắt được lỗi thật, migration của release chỉ là expand đã qua MG-01.
 - **Rollback:** lỗi trong mã mới, migration của release là expand ⇒ quay về an toàn; chạy lại post-deploy smoke trên bản cũ.
 - **Roll-forward:** migration đã contract (tình huống MG-03) ⇒ rollback mã sẽ gây 500 và đọc sai; sửa bằng bản mới hoặc chạy migration bù đã diễn tập.
 
@@ -527,7 +527,7 @@ Diễn tập trên staging trước release có migration: triển khai v2, tạ
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p>Sau expand, schema mới là tập lớn hơn của schema cũ — mã cũ vẫn đọc/ghi được (MG-01). Sau contract, schema thiếu thứ mã cũ cần — ghi lỗi và có thể đọc sai âm thầm (MG-03). Vì vậy contract chỉ chạy khi cửa sổ rollback đã đóng; sau đó lựa chọn là roll-forward.</p>
+<p>Sau expand, schema mới là tập lớn hơn của schema cũ — mã cũ vẫn đọc/ghi được (MG-01). Sau contract, schema thiếu thứ mã cũ cần — ghi lỗi và có thể đọc sai mà không báo lỗi (MG-03). Vì vậy contract chỉ chạy khi cửa sổ rollback đã đóng; sau đó lựa chọn là roll-forward.</p>
 </details>
 
 **Câu 4.** Một dashboard chỉ theo dõi tỷ lệ 5xx có phát hiện được tình huống MG-03 không?

@@ -1,0 +1,9 @@
+{"file":"postgresql-insert-update-delete-returning.md","edits":[
+{"old":"Dùng INSERT, UPDATE, DELETE … RETURNING và thẻ lệnh để đưa một chuyến qua 7 trạng thái, hiểu UPDATE 0 và giữ fixture chạy lại được.","new":"Bài dùng INSERT, UPDATE, DELETE … RETURNING và thẻ lệnh để đưa một chuyến qua 7 trạng thái, giải thích UPDATE 0 và giữ fixture chạy lại được.","reason":"Câu cụt thiếu chủ ngữ","severity":"medium"},
+{"old":"không được âm thầm cướp chuyến của 8003.","new":"không được cướp chuyến của 8003 mà không ai hay.","reason":"'âm thầm' là calque của silently","severity":"medium"},
+{"old":"nó xoá sạch lần trước:","new":"tệp này xoá sạch kết quả lần chạy trước:","reason":"'nó' chỉ sự vật, thiếu tân ngữ","severity":"low"},
+{"old":"**Chạy lại mà quên reset thì lỗi to**, không lặng lẽ nhân đôi dữ liệu:","new":"**Chạy lại mà quên reset thì báo lỗi ngay**, không nhân đôi dữ liệu mà không ai hay:","reason":"'lỗi to' và 'lặng lẽ' gượng, calque","severity":"medium"},
+{"old":"nên `status = 'searching'` sai, không dòng nào khớp `WHERE`.","new":"nên điều kiện `status = 'searching'` không còn đúng, không dòng nào khớp `WHERE`.","reason":"Câu thiếu danh từ chính, cụt","severity":"medium"},
+{"old":"đang `accepted` bởi tài xế 8001.","new":"đang ở trạng thái `accepted` do tài xế 8001 nhận.","reason":"Bị động 'bởi' kiểu Anh, thiếu danh từ","severity":"medium"},
+{"old":"rollback, xoá đều để lại lỗ.","new":"rollback, xoá đều để lại khoảng trống trong dãy mã.","reason":"'lỗ' là calque của gaps","severity":"medium"}
+]}

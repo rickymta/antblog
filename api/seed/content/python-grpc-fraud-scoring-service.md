@@ -10,12 +10,12 @@ language: vi
 
 Mỗi lần khách bấm đặt chuyến, Dispatch của [Tới Nơi](/articles/du-an-mau-toi-noi) muốn biết một điều trước khi ghép tài xế: chuyến này có đáng để người duyệt xem lại không. Câu trả lời đến từ service fraud-scoring viết bằng Python, vì đặc trưng và mô hình nằm ở đó. Ở giờ cao điểm (khoảng 70 chuyến mỗi giây) lời gọi này nằm ngay trên đường đặt chuyến, nên nó cần ba thứ mà một endpoint JSON ghép vội không cho sẵn: hợp đồng kiểu chặt dùng chung giữa C# và Python, giới hạn chờ rõ ràng, và mã lỗi phân biệt «đầu vào sai» với «service đang tắc».
 
-Đây là bài 37 của lộ trình **Python trung bình qua Tới Nơi**. Bài 31 đến 33 dựng service HTTP bằng FastAPI; bài này làm đường gọi nội bộ bằng gRPC rồi so hai cách. Bạn cần quen `async`/`await` và hủy task ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)), cùng `Semaphore` ([bài 23](/articles/python-concurrency-lock-queue-semaphore)). Điểm trả về là đầu vào cho người duyệt, không phải quyết định hay kết luận gian lận: Dispatch không từ chối khách chỉ vì một con số.
+Đây là bài 37 của lộ trình **Python trung bình qua Tới Nơi**. Bài 31 đến 33 dựng service HTTP bằng FastAPI; bài này làm đường gọi nội bộ bằng gRPC rồi so hai cách. Bạn cần quen `async`/`await` và huỷ task ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)), cùng `Semaphore` ([bài 23](/articles/python-concurrency-lock-queue-semaphore)). Điểm trả về là đầu vào cho người duyệt, không phải quyết định hay kết luận gian lận: Dispatch không từ chối khách chỉ vì một con số.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Dispatch gọi <code>Score</code> với giới hạn chờ 200 ms. Phía server, bước tra cứu đặc trưng mất 1 giây. Sau 200 ms client nhận lỗi. Server có tiếp tục chạy hết 1 giây rồi vứt kết quả không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Hết hạn thì handler bị hủy: nó nhận <code>asyncio.CancelledError</code> ngay tại chỗ đang <code>await</code> và không bao giờ chạy tới dòng chấm điểm. Điều đáng để ý: client nhận <code>DEADLINE_EXCEEDED</code>, còn handler chỉ thấy <code>CancelledError</code>, không thấy mã đó. Bài chạy đúng ca này và đếm.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Hết hạn thì handler bị huỷ: nó nhận <code>asyncio.CancelledError</code> ngay tại chỗ đang <code>await</code> và không bao giờ chạy tới dòng chấm điểm. Điều đáng để ý: client nhận <code>DEADLINE_EXCEEDED</code>, còn handler chỉ thấy <code>CancelledError</code>, không thấy mã đó. Bài chạy đúng ca này và đếm.</p></details>
 </div>
 
 ## gRPC khác gì một endpoint REST
@@ -91,11 +91,11 @@ driver_id chưa gán: HasField=False; gán chuỗi rỗng: HasField=True
 thêm field số 15 lạ vào cuối: vẫn đọc được, trip_id=TN-0001, 42 byte
 ```
 
-Mỗi field là một cặp (số hiệu và kiểu, độ dài) rồi nội dung: `0a 07` là «field 1, dài 7 byte», theo sau là `TN-0001`. JSON gọn của cùng dữ liệu là 108 byte vì lặp tên field mỗi bản ghi; ở khoảng 70 chuyến mỗi giây (hơn 250.000 mỗi giờ) khoảng chênh này có nghĩa, nhưng đừng kỳ vọng thần kỳ: nội dung chuỗi chiếm phần lớn cả hai. Dòng cuối là điểm mạnh về tiến hóa: bên gửi phiên bản mới thêm field số 15, bên nhận cũ vẫn đọc được phần nó biết, và còn giữ field lạ khi ghi lại.
+Mỗi field là một cặp (số hiệu và kiểu, độ dài) rồi nội dung: `0a 07` là «field 1, dài 7 byte», theo sau là `TN-0001`. JSON gọn của cùng dữ liệu là 108 byte vì lặp tên field mỗi bản ghi; ở khoảng 70 chuyến mỗi giây (hơn 250.000 mỗi giờ) khoảng chênh này có nghĩa, nhưng đừng kỳ vọng thần kỳ: nội dung chuỗi chiếm phần lớn cả hai. Dòng cuối là điểm mạnh về tiến hoá: bên gửi phiên bản mới thêm field số 15, bên nhận cũ vẫn đọc được phần nó biết, và còn giữ field lạ khi ghi lại.
 
 ## Server grpc.aio
 
-Bộ luật chấm điểm của lab là luật viết tay, đủ để minh họa hợp đồng, không phải mô hình thật. Phần tính nằm trong một hàm thuần để test riêng (trích `service.py`):
+Bộ luật chấm điểm của lab là luật viết tay, đủ để minh hoạ hợp đồng, không phải mô hình thật. Phần tính nằm trong một hàm thuần để test riêng (trích `service.py`):
 
 ```python
 def score_trip(request, distance, store):
@@ -184,10 +184,10 @@ deadline 3 giây: score=0.0, interceptor ghi OK sau 1003 ms
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 270" role="img" aria-label="Trục thời gian từ 0 đến 1000 mili giây. Client chờ 200 mili giây rồi nhận DEADLINE_EXCEEDED. Server cũng đếm 200 mili giây từ header grpc-timeout; hết hạn thì handler nhận CancelledError nên 800 mili giây còn lại không bao giờ chạy."><text x="20" y="62" class="t-b">Client</text><rect x="140" y="40" width="140" height="36" rx="6" class="f-pk-soft s-pk"/><text x="150" y="63" class="t-small">chờ 200 ms</text><text x="20" y="152" class="t-b">Server</text><rect x="140" y="130" width="140" height="36" rx="6" class="f-phys-soft s-phys"/><text x="150" y="153" class="t-small">tra cứu đặc trưng</text><rect x="280" y="130" width="560" height="36" rx="6" class="f-none s-dead dash"/><text x="292" y="153" class="t-small t-dead">800 ms còn lại: không bao giờ chạy</text><path d="M280 20 L280 190" class="f-none s-warn" stroke-width="2"/><text x="292" y="28" class="t-small t-warn">200 ms: client hết hạn, nhận DEADLINE_EXCEEDED</text><text x="292" y="104" class="t-small t-warn">hai đầu cùng đếm 200 ms (server nhận grpc-timeout)</text><text x="292" y="188" class="t-small t-warn">handler nhận CancelledError; nhãn CANCELLED do interceptor của lab gán</text><path d="M140 224 L840 224" class="f-none s-muted"/><text x="132" y="248" class="t-mono">0</text><text x="266" y="248" class="t-mono">200</text><text x="470" y="248" class="t-mono">500</text><text x="826" y="248" class="t-mono">1000</text></svg>
 </div>
-<figcaption>Hình 2. Deadline chạy ở hai đầu. Client ngừng chờ ở 200 ms; handler ở server cũng bị hủy quanh mốc đó nên không tốn tiếp 800 ms cho một kết quả không ai nhận.</figcaption>
+<figcaption>Hình 2. Deadline chạy ở hai đầu. Client ngừng chờ ở 200 ms; handler ở server cũng bị huỷ quanh mốc đó nên không tốn tiếp 800 ms cho một kết quả không ai nhận.</figcaption>
 </figure>
 
-Ba điều rút ra. Một: cả hai đầu cùng đếm giờ. Client giữ đồng hồ riêng; server nhận `grpc-timeout` và tự hủy handler khi hết hạn (tài liệu Deadlines, mục «Deadlines on the Server»), rồi tự gửi trạng thái `DEADLINE_EXCEEDED`. Handler không thấy mã đó, chỉ thấy `CancelledError`; nhãn `CANCELLED` trong nhật ký là quy ước của interceptor lab (nó gán khi bắt `CancelledError`), không phải mã nhận từ dây. Hai: việc hủy chỉ dừng được code có điểm `await` (bài 21); nếu handler bận tính CPU hoặc gọi thư viện đồng bộ, nó chạy hết rồi mới biết. Ba: phương thức `context.time_remaining()` cho server biết còn bao nhiêu thời gian, để bỏ qua việc đắt tiền khi ngân sách đã quá ngắn.
+Ba điều rút ra. Một: cả hai đầu cùng đếm giờ. Client giữ đồng hồ riêng; server nhận `grpc-timeout` và tự huỷ handler khi hết hạn (tài liệu Deadlines, mục «Deadlines on the Server»), rồi tự gửi trạng thái `DEADLINE_EXCEEDED`. Handler không thấy mã đó, chỉ thấy `CancelledError`; nhãn `CANCELLED` trong nhật ký là quy ước của interceptor lab (nó gán khi bắt `CancelledError`), không phải mã nhận từ dây. Hai: việc huỷ chỉ dừng được code có điểm `await` (bài 21); nếu handler bận tính CPU hoặc gọi thư viện đồng bộ, nó chạy hết rồi mới biết. Ba: phương thức `context.time_remaining()` cho server biết còn bao nhiêu thời gian, để bỏ qua việc đắt tiền khi ngân sách đã quá ngắn.
 
 Mã trạng thái cho Dispatch biết nên làm gì tiếp, nên lab kiểm cả bốn nhóm thường gặp:
 
@@ -196,7 +196,7 @@ Mã trạng thái cho Dispatch biết nên làm gì tiếp, nên lab kiểm cả
 | `INVALID_ARGUMENT` | đầu vào sai (km ngoài miền, thiếu `trip_id`) | Không, vẫn sai |
 | `DEADLINE_EXCEEDED` | hết giờ chờ, server chậm hoặc quá tải | Có thể, nếu còn ngân sách và lời gọi idempotent |
 | `UNAVAILABLE` | không nối được (không ai nghe ở cổng) | Có thể, với lùi dần |
-| `CANCELLED` | một bên chủ động hủy; server cũng trả khi hàng chờ quá tải | Tùy lý do hủy; với quá tải thì chỉ sau khi giảm tải |
+| `CANCELLED` | một bên chủ động huỷ; server cũng trả khi hàng chờ quá tải | Tuỳ lý do huỷ; với quá tải thì chỉ sau khi giảm tải |
 
 `Score` không có tác dụng phụ nên gọi lại an toàn. gRPC có chính sách retry khai báo trong service config; lab không dùng, để ta thấy trọn từng mã. Còn một quan sát đo được, và nó nằm ở server chứ không phải client. Lõi gRPC của server giữ một hàng chờ cho các lời gọi chưa được giao cho handler: vượt ngưỡng mềm `grpc.server.max_pending_requests` (mặc định 1000) thì từ chối theo xác suất, chạm ngưỡng cứng `grpc.server.max_pending_requests_hard_limit` (mặc định 3000) thì từ chối hết. Lời gọi bị từ chối kết thúc `CANCELLED` ngay tại lõi gRPC, trước handler nên interceptor cũng không thấy. Bắn cùng lúc lên một channel, chạy trên máy này (grpcio 1.85.1): 1.000 lời gọi không mất cái nào, 1.500 mất 61, 2.000 mất 218, 3.000 mất 738. Đây là cơ chế bảo vệ server; mã nguồn gRPC ghi chú không nên đổi hai ngưỡng này nếu chưa hiểu hết hệ quả vận hành.
 
@@ -240,7 +240,7 @@ client gắn x-request-id=7fb63a4a2929; server ghi /toinoi.fraud.v1.FraudScoring
 tổng 13 lời gọi server đã ghi: {'CANCELLED': 1, 'INVALID_ARGUMENT': 5, 'OK': 7}
 ```
 
-Tổng 13 gồm 7 lời gọi thành công, 5 lời gọi bị từ chối vì đầu vào và 1 lời gọi bị hủy do deadline: mọi kết cục đều để lại dấu vết, kể cả cái server không bao giờ trả lời.
+Tổng 13 gồm 7 lời gọi thành công, 5 lời gọi bị từ chối vì đầu vào và 1 lời gọi bị huỷ do deadline: mọi kết cục đều để lại dấu vết, kể cả cái server không bao giờ trả lời.
 
 ## Chạy và kiểm chứng
 
@@ -295,7 +295,7 @@ Hai file `_pb2` lệch, file `_pb2_grpc` không đổi vì service không đổi
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Kênh không mã hóa (<code>insecure</code>): production dùng TLS hoặc mTLS và xác thực qua metadata (bài 34 nói về token). Bộ luật và <code>FeatureStore</code> là đồ chơi để minh họa hợp đồng; mô hình thật, đặc trưng online và việc đo độ chính xác nằm ở các bài sau. gRPC giữ kết nối HTTP/2 lâu dài, nên bộ cân bằng tải tầng 4 có thể dồn mọi lời gọi của một client vào một pod; cần cân bằng phía client hoặc proxy hiểu HTTP/2. Lab thiếu health check, reflection và retry khai báo (bài 52 sẽ thêm health). Thời gian đo trên một máy đang bận, chỉ để thấy bậc độ lớn.</p>
+<p>Kênh không mã hoá (<code>insecure</code>): production dùng TLS hoặc mTLS và xác thực qua metadata (bài 34 nói về token). Bộ luật và <code>FeatureStore</code> là đồ chơi để minh hoạ hợp đồng; mô hình thật, đặc trưng online và việc đo độ chính xác nằm ở các bài sau. gRPC giữ kết nối HTTP/2 lâu dài, nên bộ cân bằng tải tầng 4 có thể dồn mọi lời gọi của một client vào một pod; cần cân bằng phía client hoặc proxy hiểu HTTP/2. Lab thiếu health check, reflection và retry khai báo (bài 52 sẽ thêm health). Thời gian đo trên một máy đang bận, chỉ để thấy bậc độ lớn.</p>
 </div>
 
 **Bài tập 1:** Thêm `string service = 6;` (ride, food hoặc parcel) vào `ScoreRequest`. Cần làm gì với mã sinh? Một client cũ chưa biết field 6 gọi server mới thì `request.service` bằng gì, và server nên xử lý ra sao?

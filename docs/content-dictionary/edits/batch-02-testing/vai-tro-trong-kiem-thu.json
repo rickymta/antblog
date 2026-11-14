@@ -1,0 +1,9 @@
+{"file":"vai-tro-trong-kiem-thu.md","edits":[
+{"old":"có người tên chức danh là «QA Engineer»","new":"có người mang chức danh «QA Engineer»","reason":"'tên chức danh là' gượng","severity":"low"},
+{"old":"QA chưa test ca huỷ»","new":"QA chưa test test case huỷ chuyến»","reason":"Thống nhất 'test case'; bổ sung danh từ cho rõ nghĩa","severity":"medium"},
+{"old":"«ca này không có trong ticket»","new":"«test case này không có trong ticket»","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Dùng khi lập đội cho tính năng mới,","new":"Bạn dùng chủ đề này khi lập đội cho tính năng mới,","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"việc trải qua nhiều đội thì do test manager","new":"việc xuyên suốt nhiều đội thì do test manager","reason":"'trải qua nhiều đội' gượng, sai nghĩa","severity":"medium"},
+{"old":"kiểm hai lần (khi báo giá và khi tạo chuyến)","new":"kiểm tra hai lần (khi báo giá và khi tạo chuyến)","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"Cách kiểm ma trận:","new":"Cách kiểm tra ma trận:","reason":"'kiểm' cụt","severity":"medium"}
+]}

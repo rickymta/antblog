@@ -254,7 +254,7 @@ error[E0277]: `Rc<std::sync::Mutex<Ledger>>` cannot be sent between threads safe
    = help: within `{closure@src/main.rs:13:27: 13:34}`, the trait `Send` is not implemented for `Rc<std::sync::Mutex<Ledger>>`
 ```
 
-`Arc` chỉ cho `&T`, nên để ghi cần thêm `Mutex<T>`: dữ liệu nằm *bên trong* khóa, chỉ chạm được qua `lock()` trả guard, và guard nhả khóa khi hết phạm vi. Bốn chuyến, mỗi chuyến ghi từ một luồng (`src/threads.rs`, bỏ chú thích):
+`Arc` chỉ cho `&T`, nên để ghi cần thêm `Mutex<T>`: dữ liệu nằm *bên trong* khoá, chỉ chạm được qua `lock()` trả guard, và guard nhả khoá khi hết phạm vi. Bốn chuyến, mỗi chuyến ghi từ một luồng (`src/threads.rs`, bỏ chú thích):
 
 ```rust
 pub fn capture_in_threads(trips: usize) -> Result<Ledger, LedgerError> {
@@ -277,7 +277,7 @@ pub fn capture_in_threads(trips: usize) -> Result<Ledger, LedgerError> {
 }
 ```
 
-`lock()` trả `Err` nếu luồng khác từng panic khi giữ khóa (poisoning); lab đổi nó thành `LedgerError::Poisoned`. Kết quả không phụ thuộc thứ tự luồng: 4 bút toán, `platform:revenue` bằng 20.400 VND (4 × 5.100), tổng toàn sổ bằng 0; mã `JE-00000x` tùy luồng nào vào trước.
+`lock()` trả `Err` nếu luồng khác từng panic khi giữ khoá (poisoning); lab đổi nó thành `LedgerError::Poisoned`. Kết quả không phụ thuộc thứ tự luồng: 4 bút toán, `platform:revenue` bằng 20.400 VND (4 × 5.100), tổng toàn sổ bằng 0; mã `JE-00000x` tuỳ luồng nào vào trước.
 
 ## Chọn loại nào: ba câu hỏi và đối chiếu với C#
 
@@ -298,12 +298,12 @@ Với người từ C#, xem thêm [bài về allocation, GC và dọn tài nguy�
 | --- | --- |
 | `class` là tham chiếu do GC quản, chia sẻ tự do, không phải nghĩ ai là chủ | Mặc định một chủ; chia sẻ phải ghi ra kiểu (`Rc`, `Arc`) |
 | GC truy vết, dọn được cả chu trình | `Rc` chỉ đếm, chu trình bị rò; `Weak<T>` gần `WeakReference<T>` |
-| `lock (obj)`: khóa tách khỏi dữ liệu | `Mutex<T>`: dữ liệu nằm trong khóa |
+| `lock (obj)`: khoá tách khỏi dữ liệu | `Mutex<T>`: dữ liệu nằm trong khoá |
 | `IDisposable` + `using`: người gọi phải viết `using`; bộ nhớ thường do GC dọn | `Drop` tự chạy khi chủ cuối buông; chu trình `Rc` thì không chạy |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p><code>Rc&lt;RefCell&lt;Ledger&gt;&gt;</code> và bốn luồng ghi cùng một <code>Mutex</code> là minh họa cơ chế, không phải thiết kế production. Service thật nên cho đúng một nơi sở hữu <code>Ledger</code> và truyền <code>&amp;mut Ledger</code> hoặc nhận lệnh qua hàng đợi. Phí ở đây là phần trăm nguyên, làm tròn nửa lên, chưa dùng <code>rust_decimal</code> như bài 03; sổ cái chỉ nằm trong bộ nhớ.</p>
+<p><code>Rc&lt;RefCell&lt;Ledger&gt;&gt;</code> và bốn luồng ghi cùng một <code>Mutex</code> là minh hoạ cơ chế, không phải thiết kế production. Service thật nên cho đúng một nơi sở hữu <code>Ledger</code> và truyền <code>&amp;mut Ledger</code> hoặc nhận lệnh qua hàng đợi. Phí ở đây là phần trăm nguyên, làm tròn nửa lên, chưa dùng <code>rust_decimal</code> như bài 03; sổ cái chỉ nằm trong bộ nhớ.</p>
 </div>
 
 ## Chạy ví dụ và kiểm chứng

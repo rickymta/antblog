@@ -1,0 +1,8 @@
+{"file":"ba-wireframe-prototype-kiem-tra-hieu-biet.md","edits":[
+{"old":"bản giấy có thể đủ kiểm bố cục/câu chữ; tương tác thực tế hơn cần khi kiểm luồng và phản hồi.","new":"bản giấy có thể đủ để kiểm tra bố cục và câu chữ; khi kiểm tra luồng và phản hồi thì cần bản tương tác sát thực tế hơn.","reason":"Câu đảo trật tự, lược động từ","severity":"medium"},
+{"old":"| accepted thắng trước |","new":"| accepted xảy ra trước |","reason":"'thắng trước' là calque của 'wins the race'","severity":"low"},
+{"old":"quyết định thao tác tiếp và có thể tạo lặp nếu hiểu sai.","new":"quyết định thao tác tiếp theo và có thể thao tác lặp đi lặp lại nếu hiểu sai.","reason":"'tạo lặp' thiếu danh từ","severity":"medium"},
+{"old":"Nếu phải trợ giúp, ghi mức trợ giúp;","new":"Nếu phải giúp người tham gia, ghi mức trợ giúp;","reason":"Thiếu đối tượng","severity":"low"},
+{"old":"Nếu thiết kế thêm nút sửa sau accepted, nó đã mở rộng scope và phải review rule, quyền, đồng bộ, dữ liệu.","new":"Nếu thiết kế thêm nút sửa sau accepted, thiết kế đó đã mở rộng scope và phải rà soát lại rule, quyền, đồng bộ, dữ liệu.","reason":"Tránh 'nó'; review → rà soát","severity":"medium"},
+{"old":"Không để một thao tác thêm trên prototype âm thầm trở thành yêu cầu đã duyệt.","new":"Không để một thao tác thêm trên prototype trở thành yêu cầu đã duyệt mà không qua xem xét.","reason":"Calque 'âm thầm'","severity":"medium"}
+]}

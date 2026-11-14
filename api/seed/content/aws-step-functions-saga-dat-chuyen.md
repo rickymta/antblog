@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, step-functions, saga, serverless, workflow, compens
 language: vi
 ---
 
-Khách bấm "Đặt xe". Tới Nơi phải giữ trước tiền trong ví VíXanh, tìm tài xế (có thể mất tới hai phút), xác nhận chuyến, rồi thu tiền. Nếu bước tìm tài xế hết giờ mà không ai nhận, tiền đã giữ phải được trả lại; nếu thu tiền lỗi sau khi tài xế đã nhận, chuyến phải bị huỷ và tài xế được giải phóng. Viết điều này bằng chuỗi `try/catch` trong service `booking` thì chỉ cần một lần deploy giữa chừng hay một lần crash là mất dấu vết: tiền đã giữ nhưng không ai nhớ phải trả.
+Khách bấm "Đặt xe". Tới Nơi phải giữ trước tiền trong ví VíXanh, tìm tài xế (có thể mất tới hai phút), xác nhận chuyến, rồi thu tiền. Nếu bước tìm tài xế hết giờ mà không ai nhận, tiền đã giữ phải được trả lại; nếu thu tiền lỗi sau khi tài xế đã nhận, chuyến phải bị huỷ và tài xế được giải phóng. Viết điều này bằng chuỗi `try/catch` trong service `booking` thì chỉ cần một lần deploy giữa chừng hay một lần crash là mất dấu vết: tiền đã giữ nhưng không ai nhớ phải trả lại.
 
 Đây là **bài 57** của lộ trình **AWS qua Tới Nơi · Phần 06: Bảo mật, resilience và vận hành ở quy mô**. Bạn cần biết SQS và DLQ ([bài 16](/articles/aws-sqs-sns-dlq-fan-out)), EventBridge ([bài 17](/articles/aws-eventbridge-event-bus-rule-schedule)) và idempotency ở phía ứng dụng (xem [Outbox và Inbox](/articles/dotnet10-outbox-inbox-idempotent-consumer) cùng [transaction và idempotency](/articles/dotnet10-transaction-concurrency-idempotency)).
 
@@ -29,7 +29,7 @@ Khách bấm "Đặt xe". Tới Nơi phải giữ trước tiền trong ví VíX
 | 3 | Xác nhận chuyến | Huỷ chuyến | `bookingId#confirm` |
 | 4 | Thu tiền | (hoàn tiền, ngoài phạm vi bài) | `bookingId#capture` |
 
-Mỗi bước phải **idempotent**, vì retry và callback đều có thể chạy bước hai lần. Nên mỗi lần gọi mang một khoá bắt nguồn từ `bookingId`, và service ví kiểm khoá bằng ràng buộc unique như bài về idempotency. Bù trừ cũng phải idempotent: hoàn giữ tiền hai lần vẫn chỉ hoàn một lần.
+Mỗi bước phải **idempotent**, vì retry và callback đều có thể chạy bước hai lần. Vì vậy mỗi lần gọi mang một khoá suy ra từ `bookingId`, và service ví kiểm khoá bằng ràng buộc unique như bài về idempotency. Bù trừ cũng phải idempotent: hoàn giữ tiền hai lần vẫn chỉ hoàn một lần.
 
 Ai điều phối các bước đó? Có hai cách:
 
@@ -52,9 +52,9 @@ Tới Nơi dùng cả hai: saga đặt chuyến chạy bằng Step Functions, c�
 
 ## State machine ASL: Task, Retry, Catch và chờ callback
 
-Step Functions định nghĩa luồng bằng **Amazon States Language (ASL)**, JSON gồm các state: `Task` (làm việc), `Choice`, `Parallel`, `Wait`, `Map`, `Pass`, `Succeed`, `Fail`. Một `Task` gọi Lambda, hoặc gọi trực tiếp hàng trăm API AWS qua **SDK integration** (DynamoDB `updateItem`, SQS `sendMessage`, EventBridge `putEvents`). Gọi trực tiếp bớt một Lambda keo dán, bớt một chỗ phải vá lỗi và trả tiền. Ba kiểu tích hợp: request-response (gọi rồi đi tiếp), `.sync` (đợi job xong, như ECS task) và `.waitForTaskToken` (đợi callback).
+Step Functions định nghĩa luồng bằng **Amazon States Language (ASL)**, JSON gồm các state: `Task` (làm việc), `Choice`, `Parallel`, `Wait`, `Map`, `Pass`, `Succeed`, `Fail`. Một `Task` gọi Lambda, hoặc gọi trực tiếp hàng trăm API AWS qua **SDK integration** (DynamoDB `updateItem`, SQS `sendMessage`, EventBridge `putEvents`). Gọi trực tiếp bớt một Lambda trung gian, bớt một chỗ phải vá lỗi và trả tiền. Ba kiểu tích hợp: request-response (gọi rồi đi tiếp), `.sync` (đợi job xong, như ECS task) và `.waitForTaskToken` (đợi callback).
 
-**JSONata** (hỗ trợ từ cuối 2024) thay các trường `Parameters`, `ResultSelector`, `InputPath`, `OutputPath` bằng ba thứ: `Arguments` cho đầu vào của lời gọi, `Output` cho kết quả, và biểu thức viết trong `{% ... %}`. **Variables** lưu giá trị bằng `Assign` rồi dùng ở bất kỳ state sau, không cần chuyền qua từng input và output như JSONPath. Biến và payload đều có giới hạn kích thước (payload mỗi state cỡ 256 KiB), nên dữ liệu lớn nằm ở S3, saga chỉ giữ khoá.
+**JSONata** (hỗ trợ từ cuối 2024) thay các trường `Parameters`, `ResultSelector`, `InputPath`, `OutputPath` bằng ba thứ: `Arguments` cho đầu vào của lời gọi, `Output` cho kết quả, và biểu thức viết trong `{% ... %}`. **Variables** lưu giá trị bằng `Assign` rồi dùng ở bất kỳ state nào phía sau, không cần chuyền qua input và output của từng state như JSONPath. Biến và payload đều có giới hạn kích thước (payload mỗi state cỡ 256 KiB), nên dữ liệu lớn nằm ở S3, saga chỉ giữ khoá.
 
 ```json
 "HoldFunds": {
@@ -77,7 +77,7 @@ Step Functions định nghĩa luồng bằng **Amazon States Language (ASL)**, J
 
 State này gọi Lambda giữ tiền với khoá idempotency suy ra từ `$bookingId`, lưu `holdId` thành biến, retry lỗi hạ tầng có jitter (như bài 56) và chuyển sang bước đánh dấu thất bại khi hết cách. Chỉ retry lỗi **tạm thời**; lỗi nghiệp vụ như "không đủ số dư" phải đi thẳng sang `Catch`, nếu không bạn thử lại vô ích. `TimeoutSeconds` bắt buộc đặt cho mọi bước gọi bên ngoài, vì mặc định một task có thể chờ rất lâu.
 
-**Chờ tài xế** là bước dài nhất. `.waitForTaskToken` gửi một message có `$states.context.Task.Token` vào queue của dispatch rồi dừng, không tốn gì trong lúc chờ. Khi tài xế bấm nhận, dispatch gọi `SendTaskSuccess` kèm token và `driverId`; hết người nhận thì gọi `SendTaskFailure` với lỗi `NoDriverAvailable`. `HeartbeatSeconds` buộc worker của dispatch gửi `SendTaskHeartbeat` định kỳ; mất heartbeat thì state nhận `States.HeartbeatTimeout` thay vì chờ đến hết timeout tổng. Hãy coi token như secret: chỉ role của dispatch được `SendTask*`.
+**Chờ tài xế** là bước dài nhất. `.waitForTaskToken` gửi một message có `$states.context.Task.Token` vào queue của dispatch rồi dừng, không tốn gì trong lúc chờ. Khi tài xế bấm nhận, dispatch gọi `SendTaskSuccess` kèm token và `driverId`; hết người nhận thì gọi `SendTaskFailure` với lỗi `NoDriverAvailable`. `HeartbeatSeconds` buộc worker của dispatch gửi `SendTaskHeartbeat` định kỳ; mất heartbeat thì state nhận `States.HeartbeatTimeout` thay vì chờ đến hết timeout tổng. Hãy coi token như secret: chỉ role của dispatch mới được gọi `SendTask*`.
 
 ## Standard, Express, version và redrive
 
@@ -85,17 +85,17 @@ State này gọi Lambda giữ tiền với khoá idempotency suy ra từ `$booki
 | --- | --- | --- |
 | Thời lượng tối đa | Tới một năm | Tới 5 phút |
 | Ngữ nghĩa | Chạy đúng một lần theo workflow | Ít nhất một lần (bất đồng bộ) |
-| Tính tiền | Theo state transition | Theo số lượt và thời lượng, bộ nhớ |
+| Tính tiền | Theo state transition | Theo số lượt gọi, thời lượng và bộ nhớ |
 | Lịch sử | Console, API, redrive được | Chỉ qua CloudWatch Logs |
 | Hợp với | Saga có chờ, quy trình có tiền | Luồng ngắn, tần suất cao, xử lý dữ liệu |
 
 Saga chạy lâu và cần dấu vết nên dùng Standard; một luồng ngắn như chuẩn hoá một lô sự kiện tracking hợp Express. Execution Standard giới hạn 25.000 sự kiện lịch sử, nên vòng lặp dài phải đẩy sang `Map` hoặc execution con. Tên execution Standard là duy nhất trong 90 ngày, nên đặt tên theo `bookingId` biến chính `start-execution` thành idempotent: gọi lại không mở saga thứ hai mà trả về execution đang chạy hoặc lỗi `ExecutionAlreadyExists`.
 
-Khi một execution Standard thất bại hoặc hết giờ, **redrive** chạy lại từ bước lỗi (trong 14 ngày sau khi đóng, dùng cùng execution ARN), không phải làm lại từ đầu. Điều đó chỉ an toàn nếu các bước trước đó idempotent, một lý do nữa để khoá idempotency không phải là tuỳ chọn. Để đổi định nghĩa mà không làm rối execution đang chạy: `publish` tạo **version** bất biến, **alias** `live` trỏ vào version và có thể chia trọng số giữa hai version để canary. Execution đã bắt đầu giữ nguyên version của nó, và `start-execution` nên trỏ vào ARN của alias.
+Khi một execution Standard thất bại hoặc hết giờ, **redrive** chạy lại từ bước lỗi (trong 14 ngày sau khi đóng, dùng cùng execution ARN), không phải làm lại từ đầu. Điều đó chỉ an toàn nếu các bước trước đó idempotent, một lý do nữa để khoá idempotency không phải là tuỳ chọn. Để đổi định nghĩa mà không làm rối execution đang chạy: `publish` tạo **phiên bản** bất biến, **alias** `live` trỏ vào một phiên bản và có thể chia trọng số giữa hai phiên bản để canary. Execution đã bắt đầu giữ nguyên phiên bản của nó, và `start-execution` nên trỏ vào ARN của alias.
 
 ## Distributed map: đối soát đêm 2 triệu chuyến
 
-Mỗi đêm Tới Nơi đối chiếu khoảng 2 triệu chuyến của ngày với sổ cái VíXanh. Một Lambda một mình sẽ hết giờ. **Distributed map** đọc dữ liệu từ S3, chia lô, rồi chạy hàng nghìn **execution con** song song:
+Mỗi đêm Tới Nơi đối chiếu khoảng 2 triệu chuyến của ngày với sổ cái VíXanh. Một Lambda đơn lẻ sẽ bị timeout. **Distributed map** đọc dữ liệu từ S3, chia lô, rồi chạy hàng nghìn **execution con** song song:
 
 - `ItemReader` đọc tệp CSV, JSON hoặc danh sách object trong S3 (hoặc manifest của S3 Inventory); `ItemBatcher` gom mỗi lô 500 dòng thành một item.
 - `MaxConcurrency` giới hạn số lô chạy cùng lúc, bảo vệ Lambda và database phía sau.
@@ -115,7 +115,7 @@ Mỗi đêm Tới Nơi đối chiếu khoảng 2 triệu chuyến của ngày v�
 
 - **Tiền theo transition**: saga ít bước thì rẻ, nhưng vòng lặp trong Standard nhân transition rất nhanh. Xem Pricing Calculator trước khi chạy với 70 chuyến mỗi giây.
 - **Orchestrator là điểm phụ thuộc**: mọi luồng đặt chuyến đi qua nó, nên phải có alarm cho `ExecutionsFailed` và `ExecutionsTimedOut`.
-- **ASL là code**: cần review, version, test. Kiểm tĩnh bằng `validate-state-machine-definition`; công cụ như Step Functions Local hoặc TestState API giúp thử từng state.
+- **ASL là code**: cần review, quản lý phiên bản, test. Kiểm tĩnh bằng `validate-state-machine-definition`; công cụ như Step Functions Local hoặc TestState API giúp thử từng state.
 - **Bù trừ không phải rollback**: tiền đã thu rồi hoàn lại vẫn để lại hai bút toán, và khách có thể đã thấy trạng thái trung gian.
 - **At-least-once ở rìa**: callback và retry có thể làm một bước chạy hai lần; không có idempotency thì saga tạo bút toán trùng.
 

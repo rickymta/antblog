@@ -1,0 +1,12 @@
+{"file":"aws-iam-user-role-policy.md","edits":[
+{"old":"từ nay có thể xoá database hay tắt cả hệ thống.","new":"có thể dẫn tới việc xoá database hay tắt cả hệ thống.","reason":"'từ nay có thể' gượng, thiếu logic nhân quả","severity":"medium"},
+{"old":"Hạn chế dùng; người nên đi qua Identity Center","new":"Hạn chế dùng; người dùng nên đăng nhập qua Identity Center","reason":"'người' đứng cụt, lược danh từ","severity":"medium"},
+{"old":"**người dùng SSO, workload dùng role,","new":"**người dùng đăng nhập bằng SSO, workload dùng role,","reason":"Câu cụt, lược động từ","severity":"low"},
+{"old":"Chỉ thiếu việc liệt kê object.","new":"Policy này chỉ thiếu quyền liệt kê object.","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Thông báo hiện đại thường nói rõ vì sao","new":"Thông báo lỗi của AWS hiện nay thường nói rõ vì sao","reason":"'hiện đại' là calque (modern)","severity":"medium"},
+{"old":"2. **CloudTrail event history** tìm sự kiện có `errorCode` là `AccessDenied`, xem chính xác","new":"2. **CloudTrail event history** giúp tìm sự kiện có `errorCode` là `AccessDenied`, để xem chính xác","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"**IAM Access Analyzer** kiểm policy và gợi ý","new":"**IAM Access Analyzer** kiểm tra policy và gợi ý","reason":"Lược động từ 'kiểm tra'","severity":"low"},
+{"old":"**Dán policy đồng nghiệp chia sẻ mà không đọc**: kiểm từng","new":"**Dán policy do đồng nghiệp chia sẻ mà không đọc**: kiểm tra từng","reason":"Thiếu 'do', lược động từ","severity":"medium"},
+{"old":"Script tạo role mặc định chỉ in lệnh; thêm `--apply` mới tạo,","new":"Script tạo role mặc định chỉ in lệnh; chỉ khi thêm `--apply` thì mới tạo,","reason":"Câu cụt","severity":"low"},
+{"old":"Script đã được kiểm cú pháp, shellcheck, chạy thử với CLI giả lập,","new":"Script đã được kiểm tra cú pháp, chạy shellcheck, chạy thử với CLI giả lập,","reason":"Lược động từ, danh sách không song song","severity":"medium"}
+]}

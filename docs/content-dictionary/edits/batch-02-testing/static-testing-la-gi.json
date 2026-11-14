@@ -1,0 +1,4 @@
+{"file":"static-testing-la-gi.md","edits":[
+{"old":"Qua việc kiểm yêu cầu, stakeholder chắc chắn yêu cầu mô tả đúng","new":"Qua việc kiểm tra yêu cầu, stakeholder bảo đảm được yêu cầu mô tả đúng","reason":"'chắc chắn' dùng như động từ, câu thiếu vị ngữ rõ; 'kiểm' cụt","severity":"medium"},
+{"old":"Văn tự do khó phân tích bằng công cụ.","new":"Văn bản tự do khó phân tích bằng công cụ.","reason":"'Văn tự do' là cụm tự ghép từ free text","severity":"medium"}
+]}

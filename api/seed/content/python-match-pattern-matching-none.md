@@ -1,7 +1,7 @@
 ---
 slug: python-match-pattern-matching-none
 title: "Pattern matching và xử lý None: chuyển trạng thái chuyến rõ ràng"
-summary: "Bài 16: dùng match/case với class, sequence và mapping pattern, guard để mô tả chuyến và định tuyến sự kiện; tách None, chuỗi rỗng và khóa vắng; sentinel, TypeIs và mypy kiểm tra đủ trường hợp. Có output thật."
+summary: "Bài 16: dùng match/case với class, sequence và mapping pattern, guard để mô tả chuyến và định tuyến sự kiện; tách None, chuỗi rỗng và khoá vắng; sentinel, TypeIs và mypy kiểm tra đủ trường hợp. Có output thật."
 category: python-beginner
 level: beginner
 tags: [python, toi-noi, pattern-matching, none]
@@ -63,7 +63,7 @@ Mỗi thành phần có một việc:
 - `driver_id=str()` ở case thứ tư tách «có tài xế» khỏi «chưa có» mà không cần so với một giá trị cụ thể.
 - Hai case có guard (`if not driver.strip()`, `if km > 20`) dùng giá trị vừa bắt được để quyết định thêm.
 
-Thứ tự ở đây có chủ đích: chuyến `cancelled` được xử lý trước, vì chuyến bị hủy khi đang tìm tài xế có `driver_id` là `None` mà hoàn toàn hợp lệ. Nếu đặt `case Trip(driver_id=None)` lên trước case `CANCELLED`, chuyến hủy đó sẽ bị báo lỗi dữ liệu. Kết quả chạy trên mười chuyến mẫu:
+Thứ tự ở đây có chủ đích: chuyến `cancelled` được xử lý trước, vì chuyến bị huỷ khi đang tìm tài xế có `driver_id` là `None` mà hoàn toàn hợp lệ. Nếu đặt `case Trip(driver_id=None)` lên trước case `CANCELLED`, chuyến huỷ đó sẽ bị báo lỗi dữ liệu. Kết quả chạy trên mười chuyến mẫu:
 
 ```text
 không có chuyến            -> Không tìm thấy chuyến
@@ -112,7 +112,7 @@ Mỗi `case` đọc như một dòng của bảng chuyển trạng thái: «đan
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 230" role="img" aria-label="Bảy trạng thái đi tuần tự từ requested tới completed; từ bốn trạng thái đầu có thể chuyển sang cancelled."><defs><marker id="py16-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker><marker id="py16-0-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><rect x="20" y="40" width="104" height="50" rx="8" class="f-pk-soft s-pk"/><text x="30" y="70" class="t-mono">requested</text><path d="M124 65 L144 65" class="f-none s-phys" stroke-width="2" marker-end="url(#py16-0-arrow)"/><rect x="144" y="40" width="104" height="50" rx="8" class="f-pk-soft s-pk"/><text x="154" y="70" class="t-mono">searching</text><path d="M248 65 L268 65" class="f-none s-phys" stroke-width="2" marker-end="url(#py16-0-arrow)"/><rect x="268" y="40" width="104" height="50" rx="8" class="f-pk-soft s-pk"/><text x="278" y="70" class="t-mono">accepted</text><path d="M372 65 L392 65" class="f-none s-phys" stroke-width="2" marker-end="url(#py16-0-arrow)"/><rect x="392" y="40" width="104" height="50" rx="8" class="f-pk-soft s-pk"/><text x="402" y="70" class="t-mono">arriving</text><path d="M496 65 L516 65" class="f-none s-phys" stroke-width="2" marker-end="url(#py16-0-arrow)"/><rect x="516" y="40" width="104" height="50" rx="8" class="f-phys-soft s-phys"/><text x="526" y="70" class="t-mono">picked_up</text><path d="M620 65 L640 65" class="f-none s-phys" stroke-width="2" marker-end="url(#py16-0-arrow)"/><rect x="640" y="40" width="104" height="50" rx="8" class="f-phys-soft s-phys"/><text x="650" y="70" class="t-mono">in_transit</text><path d="M744 65 L764 65" class="f-none s-phys" stroke-width="2" marker-end="url(#py16-0-arrow)"/><rect x="764" y="40" width="104" height="50" rx="8" class="f-phys-soft s-phys"/><text x="774" y="70" class="t-mono">completed</text><path d="M72 90 L72 125 L444 125" class="f-none s-warn dash" stroke-width="2"/><path d="M196 90 L196 125" class="f-none s-warn dash" stroke-width="2"/><path d="M320 90 L320 125" class="f-none s-warn dash" stroke-width="2"/><path d="M444 90 L444 125" class="f-none s-warn dash" stroke-width="2"/><path d="M140 125 L140 160" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py16-0-warn)"/><rect x="20" y="160" width="240" height="50" rx="8" class="f-warn-soft s-warn"/><text x="30" y="190" class="t-mono">cancelled</text><text x="290" y="180" class="t-small">cancel hợp lệ từ bốn trạng thái đầu</text><text x="290" y="202" class="t-small">assign chỉ nhận driver_id không trống</text></svg>
 </div>
-<figcaption>Hình 1. Bảy trạng thái đi tuần tự và nhánh hủy. Mỗi mũi tên là một case trong apply_command; cặp (trạng thái, lệnh) không có case nào thì rơi vào case cuối và bị từ chối.</figcaption>
+<figcaption>Hình 1. Bảy trạng thái đi tuần tự và nhánh huỷ. Mỗi mũi tên là một case trong apply_command; cặp (trạng thái, lệnh) không có case nào thì rơi vào case cuối và bị từ chối.</figcaption>
 </figure>
 
 Hai chi tiết của sequence pattern đáng nhớ. Pattern `("search",)` khớp **mọi sequence** có đúng một phần tử `"search"`, nên danh sách `["search"]` cũng khớp. Ngược lại, **chuỗi `str` không bao giờ được coi là sequence** trong `match`, nên `match "cancel"` không khớp `("cancel",)`; nếu không, mỗi chuỗi sẽ thành dãy ký tự và gây những khớp rất khó hiểu. Chạy thử đường đi hợp lệ và bốn lệnh bị từ chối:
@@ -165,7 +165,7 @@ def handle_event(envelope: dict[str, Any]) -> str:
             return "cách ly: không phải envelope"
 ```
 
-(Đoạn trích bỏ case `TripCompleted` bình thường; xem `matching.py`.) Quy tắc của mapping pattern: dict phải **có đủ các khóa** được nêu, giá trị khớp pattern con, và **khóa thừa bị bỏ qua**. Vì vậy `note` trong payload không làm hỏng case đầu. Muốn gom phần thừa thì dùng `**rest`. Tám envelope mẫu cho kết quả:
+(Đoạn trích bỏ case `TripCompleted` bình thường; xem `matching.py`.) Quy tắc của mapping pattern: dict phải **có đủ các khoá** được nêu, giá trị khớp pattern con, và **khoá thừa bị bỏ qua**. Vì vậy `note` trong payload không làm hỏng case đầu. Muốn gom phần thừa thì dùng `**rest`. Tám envelope mẫu cho kết quả:
 
 ```text
 BookingCreated v1    -> tạo chuyến TN-0001 (food)
@@ -178,17 +178,17 @@ version là True      -> tạo chuyến TN-0005 (ride)
 không có event_type  -> cách ly: không phải envelope
 ```
 
-Hai dòng đáng đọc kỹ. Dòng «driver_id là null» và «driver_id vắng mặt» đi hai nhánh khác nhau, vì mapping pattern phân biệt khóa có giá trị `None` với khóa không có mặt. Dòng «version là True» là một cái bẫy: literal `1` trong pattern được so bằng `==`, mà `True == 1`, nên `"version": True` đi qua như phiên bản 1. Lab chạy thêm `match True: case 1:` và `match 1.0: case 1:`: cả hai đều khớp.
+Hai dòng đáng đọc kỹ. Dòng «driver_id là null» và «driver_id vắng mặt» đi hai nhánh khác nhau, vì mapping pattern phân biệt khoá có giá trị `None` với khoá không có mặt. Dòng «version là True» là một cái bẫy: literal `1` trong pattern được so bằng `==`, mà `True == 1`, nên `"version": True` đi qua như phiên bản 1. Lab chạy thêm `match True: case 1:` và `match 1.0: case 1:`: cả hai đều khớp.
 
 Bẫy này nhắc đúng phạm vi của `match`: nó **định tuyến** theo hình dạng, không thay việc **kiểm tra** dữ liệu. Envelope phải được validate trước (bài 15 giới thiệu validate và strict mode ở biên); `match` sau đó chỉ chọn nhánh xử lý. Đừng viết hàng chục `case` để thay cho một model.
 
 ## None: ba trạng thái, sentinel và thu hẹp kiểu
 
-`None` là giá trị duy nhất của kiểu `NoneType`, và Python dùng nó cho mọi nghĩa của «không có». Nghĩa nào cũng thành `None` thì code khó đoán. Với `driver_id` có bốn khả năng (Hình 2): khóa vắng mặt trong payload, `None`, chuỗi trống, và mã hợp lệ. Cách viết truthiness quen thuộc sẽ gộp ba ô đầu:
+`None` là giá trị duy nhất của kiểu `NoneType`, và Python dùng nó cho mọi nghĩa của «không có». Nghĩa nào cũng thành `None` thì code khó đoán. Với `driver_id` có bốn khả năng (Hình 2): khoá vắng mặt trong payload, `None`, chuỗi trống, và mã hợp lệ. Cách viết truthiness quen thuộc sẽ gộp ba ô đầu:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 240" role="img" aria-label="Bốn trường hợp của driver_id: khóa vắng mặt, None, chuỗi trống và mã hợp lệ có ý nghĩa khác nhau; truthiness gộp ba trường hợp đầu thành một nhánh."><defs><marker id="py16-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="40" width="190" height="110" rx="10" class="f-warn-soft s-warn"/><text x="34" y="76" class="t-b">Khóa vắng mặt</text><text x="34" y="104" class="t-small">payload thiếu driver_id</text><text x="34" y="124" class="t-small">hợp đồng bị vi phạm</text><rect x="230" y="40" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="244" y="76" class="t-b">None</text><text x="244" y="104" class="t-small">chưa có tài xế</text><text x="244" y="124" class="t-small">trạng thái hợp lệ</text><rect x="440" y="40" width="190" height="110" rx="10" class="f-warn-soft s-warn"/><text x="454" y="76" class="t-b">Chuỗi trống</text><text x="454" y="104" class="t-small">dữ liệu lỗi cần ghi</text><text x="454" y="124" class="t-small">không phải «chưa có»</text><rect x="650" y="40" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="664" y="76" class="t-b">DR-001</text><text x="664" y="104" class="t-small">tài xế hợp lệ</text><text x="664" y="124" class="t-small">hiển thị bình thường</text><rect x="20" y="180" width="610" height="44" rx="10" class="f-surface s-line dash"/><text x="34" y="207" class="t-small">driver_id or "chưa có": một nhánh duy nhất cho ba ô đầu, mất ranh giới giữa chúng</text></svg>
+<svg viewBox="0 0 880 240" role="img" aria-label="Bốn trường hợp của driver_id: khoá vắng mặt, None, chuỗi trống và mã hợp lệ có ý nghĩa khác nhau; truthiness gộp ba trường hợp đầu thành một nhánh."><defs><marker id="py16-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="40" width="190" height="110" rx="10" class="f-warn-soft s-warn"/><text x="34" y="76" class="t-b">Khoá vắng mặt</text><text x="34" y="104" class="t-small">payload thiếu driver_id</text><text x="34" y="124" class="t-small">hợp đồng bị vi phạm</text><rect x="230" y="40" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="244" y="76" class="t-b">None</text><text x="244" y="104" class="t-small">chưa có tài xế</text><text x="244" y="124" class="t-small">trạng thái hợp lệ</text><rect x="440" y="40" width="190" height="110" rx="10" class="f-warn-soft s-warn"/><text x="454" y="76" class="t-b">Chuỗi trống</text><text x="454" y="104" class="t-small">dữ liệu lỗi cần ghi</text><text x="454" y="124" class="t-small">không phải «chưa có»</text><rect x="650" y="40" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="664" y="76" class="t-b">DR-001</text><text x="664" y="104" class="t-small">tài xế hợp lệ</text><text x="664" y="124" class="t-small">hiển thị bình thường</text><rect x="20" y="180" width="610" height="44" rx="10" class="f-surface s-line dash"/><text x="34" y="207" class="t-small">driver_id or "chưa có": một nhánh duy nhất cho ba ô đầu, mất ranh giới giữa chúng</text></svg>
 </div>
 <figcaption>Hình 2. Bốn trường hợp của driver_id. Chỉ ô thứ hai và thứ tư là trạng thái hợp lệ; truthiness không phân biệt được ba ô đầu.</figcaption>
 </figure>
@@ -218,11 +218,11 @@ DR-001      truthy='DR-001'             match='DR-001'
 
 Dòng thứ hai là điểm khác: truthiness che mất dữ liệu lỗi. Ở bài 03 ta đã gặp cùng cái bẫy với `Decimal("0")`; nguyên tắc vẫn là so sánh tường minh khi các giá trị rơi vào cùng nhánh có nghĩa khác nhau.
 
-Vài điều về kiểu. `X | None` (PEP 604, Python 3.10) là cách viết hiện đại của `Optional[X]`; ở Python 3.14, `Optional[int] == (int | None)` là `True`. Chữ «Optional» dễ gây hiểu nhầm: nó **không** có nghĩa «tham số tùy chọn». Một tham số có thể bỏ trống vẫn cần giá trị mặc định, và kiểu của nó chỉ chứa `None` khi `None` là giá trị hợp lệ. Còn so sánh với `None`, hãy viết `is None` thay `== None`: `is` kiểm đúng đối tượng duy nhất đó và không bị `__eq__` tự định nghĩa của lớp khác can thiệp.
+Vài điều về kiểu. `X | None` (PEP 604, Python 3.10) là cách viết hiện đại của `Optional[X]`; ở Python 3.14, `Optional[int] == (int | None)` là `True`. Chữ «Optional» dễ gây hiểu nhầm: nó **không** có nghĩa «tham số tuỳ chọn». Một tham số có thể bỏ trống vẫn cần giá trị mặc định, và kiểu của nó chỉ chứa `None` khi `None` là giá trị hợp lệ. Còn so sánh với `None`, hãy viết `is None` thay `== None`: `is` kiểm đúng đối tượng duy nhất đó và không bị `__eq__` tự định nghĩa của lớp khác can thiệp.
 
 ### Khi None đã mang nghĩa: sentinel
 
-Khi `None` là giá trị hợp lệ, nó không thể đồng thời đóng vai «không truyền gì». Hàm `patch_trip` cập nhật từng phần một chuyến: `driver_id=None` nghĩa là **bỏ tài xế** (tài xế hủy, chuyến quay về tìm người khác), còn không truyền `driver_id` nghĩa là **giữ nguyên**. Ta cần một giá trị thứ ba, gọi là **sentinel**:
+Khi `None` là giá trị hợp lệ, nó không thể đồng thời đóng vai «không truyền gì». Hàm `patch_trip` cập nhật từng phần một chuyến: `driver_id=None` nghĩa là **bỏ tài xế** (tài xế huỷ, chuyến quay về tìm người khác), còn không truyền `driver_id` nghĩa là **giữ nguyên**. Ta cần một giá trị thứ ba, gọi là **sentinel**:
 
 ```python
 class _Unset(Enum):
@@ -303,7 +303,7 @@ chuỗi KHÔNG khớp sequence pattern
 list khớp pattern viết bằng tuple
 ```
 
-Lệnh `--verify` chạy 56 ca (10 mô tả chuyến, đường đi bảy trạng thái, bốn ca hủy hợp lệ, chín ca bị từ chối, tám envelope, rồi các ca về bẫy cú pháp, `None` và sentinel) và kết thúc bằng:
+Lệnh `--verify` chạy 56 ca (10 mô tả chuyến, đường đi bảy trạng thái, bốn ca huỷ hợp lệ, chín ca bị từ chối, tám envelope, rồi các ca về bẫy cú pháp, `None` và sentinel) và kết thúc bằng:
 
 ```text
 OK 56/56
@@ -321,14 +321,14 @@ OK 56/56
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Ví dụ chỉ chạy trong bộ nhớ với dữ liệu giả: không có database, không có hai tiến trình cùng đổi trạng thái một chuyến. Production phải bảo đảm chuyển trạng thái nguyên tử (transaction, khóa lạc quan) và thường lưu lịch sử chuyển; <code>apply_command</code> trả một <code>Trip</code> mới không thay cho việc đó. <code>match</code> làm bảng chuyển dễ đọc nhưng không thay validation đầu vào, và danh sách lệnh dạng tuple chuỗi ở đây chỉ để minh họa: service thật nên có kiểu lệnh riêng. mypy chỉ kiểm tra khi ta chạy nó, và <code>assert_never</code> chỉ hữu ích nếu CI thật sự chạy mypy.</p>
+<p>Ví dụ chỉ chạy trong bộ nhớ với dữ liệu giả: không có database, không có hai tiến trình cùng đổi trạng thái một chuyến. Production phải bảo đảm chuyển trạng thái nguyên tử (transaction, khoá lạc quan) và thường lưu lịch sử chuyển; <code>apply_command</code> trả một <code>Trip</code> mới không thay cho việc đó. <code>match</code> làm bảng chuyển dễ đọc nhưng không thay validation đầu vào, và danh sách lệnh dạng tuple chuỗi ở đây chỉ để minh hoạ: service thật nên có kiểu lệnh riêng. mypy chỉ kiểm tra khi ta chạy nó, và <code>assert_never</code> chỉ hữu ích nếu CI thật sự chạy mypy.</p>
 </div>
 
 **Bài tập 1:** Thêm trạng thái mới `EXPIRED = "expired"` vào `TripStatus`. Lệnh nào báo cho bạn những chỗ cần sửa, và chương trình có tự phát hiện lúc chạy `main.py` không?
 
 **Bài tập 2:** Trong `describe`, đổi vị trí hai case: đưa `case Trip(driver_id=None)` lên ngay sau `case None`. Chuyến nào được mô tả sai?
 
-<details><summary>Xem lời giải</summary><p><b>Bài 1.</b> <code>mypy --strict</code> báo <code>assert_never</code> nhận <code>Literal[TripStatus.EXPIRED]</code> thay vì <code>Never</code> ở <code>next_step_label</code> (và ở mọi <code>match</code> kết thúc bằng <code>assert_never</code> theo trạng thái). Khi chạy, <code>main.py</code> vẫn thoát mã 0 vì không gọi <code>next_step_label</code>; còn <code>main.py --verify</code> gọi hàm đó cho mọi trạng thái nên dừng bằng traceback <code>AssertionError</code> (không in <code>FAIL n/m</code>). Không chạy mypy thì lỗi chỉ lộ khi có dữ liệu thật đi vào nhánh đó. Với <code>describe</code>, nó vẫn rơi vào case tổng quát <code>Trip(status=status, driver_id=driver)</code> nên không lỗi; hãy tự quyết xem trạng thái mới cần mô tả riêng không. <b>Bài 2.</b> Ba chuyến bị gắn nhãn «thiếu tài xế» sai: <code>requested</code> và <code>searching</code> chưa có tài xế (đúng ra là «Đang tìm tài xế»), và <code>cancelled</code> không có tài xế (đúng ra là «Chuyến đã hủy»). Lý do là case rộng nằm trước các case hẹp, mà case đầu tiên khớp thắng. <code>--verify</code> báo đúng ba ca đó đỏ.</p></details>
+<details><summary>Xem lời giải</summary><p><b>Bài 1.</b> <code>mypy --strict</code> báo <code>assert_never</code> nhận <code>Literal[TripStatus.EXPIRED]</code> thay vì <code>Never</code> ở <code>next_step_label</code> (và ở mọi <code>match</code> kết thúc bằng <code>assert_never</code> theo trạng thái). Khi chạy, <code>main.py</code> vẫn thoát mã 0 vì không gọi <code>next_step_label</code>; còn <code>main.py --verify</code> gọi hàm đó cho mọi trạng thái nên dừng bằng traceback <code>AssertionError</code> (không in <code>FAIL n/m</code>). Không chạy mypy thì lỗi chỉ lộ khi có dữ liệu thật đi vào nhánh đó. Với <code>describe</code>, nó vẫn rơi vào case tổng quát <code>Trip(status=status, driver_id=driver)</code> nên không lỗi; hãy tự quyết xem trạng thái mới cần mô tả riêng không. <b>Bài 2.</b> Ba chuyến bị gắn nhãn «thiếu tài xế» sai: <code>requested</code> và <code>searching</code> chưa có tài xế (đúng ra là «Đang tìm tài xế»), và <code>cancelled</code> không có tài xế (đúng ra là «Chuyến đã huỷ»). Lý do là case rộng nằm trước các case hẹp, mà case đầu tiên khớp thắng. <code>--verify</code> báo đúng ba ca đó đỏ.</p></details>
 
 Bài trước: [bài 15](/articles/python-pydantic-validation-settings). Bài tiếp: [bài 17](/articles/python-decorator-context-manager).
 

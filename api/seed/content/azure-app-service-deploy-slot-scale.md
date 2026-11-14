@@ -74,9 +74,9 @@ Khối này chưa chứng minh app đã chạy. Nếu `id-toinoi-trips-dev` chư
 
 App setting có thể là một tham chiếu dạng `@Microsoft.KeyVault(SecretUri=...)`. Nền tảng tự phân giải tham chiếu bằng identity của app, rồi đưa giá trị thật vào biến môi trường. Code của trip-service thấy một connection string bình thường tại `ConnectionStrings__Trips`, không biết Key Vault tồn tại. Hai điều kiện: identity phải có quyền đọc secret (**Key Vault Secrets User** ở bài 14), và app phải biết dùng identity nào. Mặc định App Service dùng identity hệ thống, nên với identity do người dùng tạo bạn đặt thêm thuộc tính `keyVaultReferenceIdentity`.
 
-Có một thất bại khó nhìn: nếu tham chiếu không phân giải được, app nhận chuỗi `@Microsoft.KeyVault(...)` nguyên văn làm giá trị. Host production sẽ từ chối khởi động vì chuỗi đó không phải connection string hợp lệ. Secret `Postgres--Trips` phải là connection string đầy đủ với `SslMode=VerifyFull`. URI không kèm version thì nền tảng lấy phiên bản mới nhất, nhưng không tức thì. Bài 29 quay lại chu kỳ làm mới.
+Có một kiểu lỗi khó nhận ra: nếu tham chiếu không phân giải được, app nhận chuỗi `@Microsoft.KeyVault(...)` nguyên văn làm giá trị. Host production sẽ từ chối khởi động vì chuỗi đó không phải connection string hợp lệ. Secret `Postgres--Trips` phải là connection string đầy đủ với `SslMode=VerifyFull`. URI không kèm phiên bản thì nền tảng lấy phiên bản mới nhất, nhưng không tức thì. Bài 29 quay lại chu kỳ refresh.
 
-Health check nói cho nền tảng biết app nào đang khoẻ. App Service gọi định kỳ vào path bạn khai báo. Với plan có từ hai instance trở lên, instance trả lỗi liên tiếp bị loại khỏi vòng chia tải và có thể bị thay. Với một instance thì không còn chỗ để chuyển traffic, nên health check chỉ mang tính báo hiệu. Tới Nơi dùng `/health/ready`, vì đó là endpoint kiểm kết nối PostgreSQL và migration. Cái giá: khi database sập, mọi instance cùng báo lỗi một lúc. Hãy đọc tài liệu Health check để biết nền tảng làm gì khi mọi instance cùng fail. Đây cũng là cuộc tranh luận liveness và readiness ở bài 36.
+Health check nói cho nền tảng biết app nào đang khoẻ. App Service gọi định kỳ vào path bạn khai báo. Với plan có từ hai instance trở lên, instance trả lỗi liên tiếp bị loại khỏi vòng chia tải và có thể bị thay. Với một instance thì không còn chỗ để chuyển traffic, nên health check chỉ mang tính báo hiệu. Tới Nơi dùng `/health/ready`, vì đó là endpoint kiểm tra kết nối PostgreSQL và migration. Cái giá: khi database sập, mọi instance cùng báo lỗi một lúc. Hãy đọc tài liệu Health check để biết nền tảng làm gì khi mọi instance cùng báo lỗi. Đây cũng là cuộc tranh luận liveness và readiness ở bài 36.
 
 Khối dưới đặt setting còn lại, bật health check, Always On và tắt ARR affinity:
 
@@ -105,12 +105,12 @@ Deployment slot là một web app đầy đủ với hostname riêng, ví dụ `
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Luồng swap: staging chạy bản mới và warm-up, swap đổi hướng traffic, bản cũ nằm lại staging nên rollback là swap ngược."><defs><marker id="az20-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="185" height="85" rx="10" class="f-pk-soft s-pk"/><text x="34" y="95" class="t-b">Staging: digest mới</text><text x="34" y="123" class="t-small">Kiểm bằng hostname riêng</text><path d="M205 108 L235 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az20-1-a)"/><rect x="235" y="65" width="185" height="85" rx="10" class="f-phys-soft s-phys"/><text x="249" y="95" class="t-b">Warm-up</text><text x="249" y="123" class="t-small">Gọi /health/ready</text><path d="M420 108 L450 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az20-1-a)"/><rect x="450" y="65" width="185" height="85" rx="10" class="f-pk-soft s-pk"/><text x="464" y="95" class="t-b">Swap</text><text x="464" y="123" class="t-small">Đổi hướng traffic</text><path d="M635 108 L665 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az20-1-a)"/><rect x="665" y="65" width="185" height="85" rx="10" class="f-warn-soft s-warn"/><text x="679" y="95" class="t-b">Bản cũ ở staging</text><text x="679" y="123" class="t-small">Rollback = swap ngược</text></svg>
+<svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Luồng swap: staging chạy bản mới và warm-up, swap đổi hướng traffic, bản cũ nằm lại staging nên rollback là swap ngược."><defs><marker id="az20-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="185" height="85" rx="10" class="f-pk-soft s-pk"/><text x="34" y="95" class="t-b">Staging: digest mới</text><text x="34" y="123" class="t-small">Kiểm tra bằng hostname riêng</text><path d="M205 108 L235 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az20-1-a)"/><rect x="235" y="65" width="185" height="85" rx="10" class="f-phys-soft s-phys"/><text x="249" y="95" class="t-b">Warm-up</text><text x="249" y="123" class="t-small">Gọi /health/ready</text><path d="M420 108 L450 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az20-1-a)"/><rect x="450" y="65" width="185" height="85" rx="10" class="f-pk-soft s-pk"/><text x="464" y="95" class="t-b">Swap</text><text x="464" y="123" class="t-small">Đổi hướng traffic</text><path d="M635 108 L665 108" class="f-none s-phys" stroke-width="2" marker-end="url(#az20-1-a)"/><rect x="665" y="65" width="185" height="85" rx="10" class="f-warn-soft s-warn"/><text x="679" y="95" class="t-b">Bản cũ ở staging</text><text x="679" y="123" class="t-small">Rollback = swap ngược</text></svg>
 </div>
 <figcaption>Hình 2. Luồng swap: staging chạy bản mới và warm-up, swap đổi hướng traffic, bản cũ nằm lại staging nên rollback là swap ngược.</figcaption>
 </figure>
 
-Cấu hình đi theo slot theo hai kiểu. Setting thường **đi theo code** khi swap: giá trị ở staging sang production cùng bản mới. Setting đánh dấu **slot setting** (hay sticky) thì **ở lại slot**. Ví dụ, staging nên tắt xuất telemetry, và cờ đó không được theo code sang production. Chi tiết dễ quên: slot là một app riêng, nên identity do người dùng tạo và `keyVaultReferenceIdentity` phải được đặt cho slot (URI `${APP_ID}/slots/staging`). Hãy kiểm lại, đừng giả định nó thừa kế.
+Cấu hình đi theo slot theo hai kiểu. Setting thường **đi theo code** khi swap: giá trị ở staging sang production cùng bản mới. Setting đánh dấu **slot setting** (hay sticky) thì **ở lại slot**. Ví dụ, staging nên tắt xuất telemetry, và cờ đó không được theo code sang production. Chi tiết dễ quên: slot là một app riêng, nên identity do người dùng tạo và `keyVaultReferenceIdentity` phải được đặt cho slot (URI `${APP_ID}/slots/staging`). Hãy kiểm tra lại, đừng giả định slot thừa kế.
 
 ```bash
 az webapp deployment slot create -g $RG -n $APP --slot staging \
@@ -126,7 +126,7 @@ az webapp deployment slot swap -g $RG -n $APP \
   --slot staging --target-slot production
 ```
 
-Lệnh `swap` cuối cũng là lệnh rollback: chạy lại đúng nó sẽ đưa bản cũ trở lại production. Khối này không chứng minh swap không làm rớt request, và nó càng không đụng tới database. Dữ liệu và schema dùng chung cho cả hai slot.
+Lệnh `swap` cuối cũng là lệnh rollback: chạy lại đúng nó sẽ đưa bản cũ trở lại production. Khối này không chứng minh swap không làm rớt request, và swap càng không đụng tới database. Dữ liệu và schema dùng chung cho cả hai slot.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -155,7 +155,7 @@ Hai hướng scale giải hai bài toán khác nhau:
 | --- | --- | --- |
 | Thay đổi gì | SKU của plan (CPU, RAM mỗi instance) | Số instance của plan |
 | Gỡ nút thắt nào | Một request cần nhiều CPU hoặc RAM | Quá nhiều request đồng thời |
-| Điều kiện | Có thể gián đoạn ngắn khi đổi SKU, hãy kiểm tài liệu | App phải stateless, ARR affinity tắt |
+| Điều kiện | Có thể gián đoạn ngắn khi đổi SKU, hãy kiểm tra tài liệu | App phải stateless, ARR affinity tắt |
 | Chi phí | Đơn giá mỗi instance tăng | Nhân số instance |
 
 Autoscale là một tập luật chạy trên metric, thường là metric của plan (`CpuPercentage`, `MemoryPercentage`, `HttpQueueLength`). Luật scale out và scale in phải có ngưỡng cách nhau đủ xa, nếu không plan sẽ dao động liên tục. `trip-service` chủ yếu chờ PostgreSQL, nên CPU có thể thấp trong khi latency đã tăng. Khối dưới thử `HttpQueueLength`, nhưng hãy xem metric này có dữ liệu thật trên plan Linux của bạn trước khi dựa vào nó; nếu không, quay về CPU kèm cảnh báo latency.
@@ -188,7 +188,7 @@ Bài 26 đặt từng service Tới Nơi lên một bảng so sánh đầy đủ
 
 **Bài tập:** staging đặt `Auth__Audience=toinoi-trips-staging` nhưng bạn quên đánh dấu slot setting. Sau swap, production dùng audience nào và điều gì xảy ra với JWT của khách? Rollback bằng swap ngược có sửa được toàn bộ không?
 
-<details><summary>Xem lời giải</summary><p>Setting thường đi theo code, nên production nhận `toinoi-trips-staging`. Token cấp cho audience `toinoi-trips` sẽ bị API từ chối, và khách thấy 401 cho tới khi bạn swap lại. Swap ngược trả lại setting cũ cùng code cũ, nên sửa được lỗi cấu hình này. Nó không sửa được dữ liệu hay schema nếu bản mới đã ghi thay đổi không tương thích.</p></details>
+<details><summary>Xem lời giải</summary><p>Setting thường đi theo code, nên production nhận `toinoi-trips-staging`. Token cấp cho audience `toinoi-trips` sẽ bị API từ chối, và khách thấy 401 cho tới khi bạn swap lại. Swap ngược trả lại setting cũ cùng code cũ, nên sửa được lỗi cấu hình này. Swap ngược không sửa được dữ liệu hay schema nếu bản mới đã ghi thay đổi không tương thích.</p></details>
 
 ## Học tiếp từ đây
 

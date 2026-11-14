@@ -217,7 +217,7 @@ Hai cột thứ tự rút từ chính bảng đo (hàm `matrix::rollout`, in ở
 | thêm giá trị enum | thứ tự nào cũng được | consumer trước | consumer có nhánh mặc định cho giá trị lạ trước khi producer dùng |
 | gỡ trường | thứ tự nào cũng được | producer trước | producer thôi ghi, rồi mới gỡ khỏi consumer; `reserved` số và tên |
 | đổi tên | thứ tự nào cũng được | không có thứ tự an toàn | thêm trường mới, ghi cả hai, chuyển consumer, `reserved` tên cũ |
-| đổi số, đổi kiểu, dùng lại số | không có thứ tự an toàn | tùy | topic mới (Hình 3) |
+| đổi số, đổi kiểu, dùng lại số | không có thứ tự an toàn | tuỳ | topic mới (Hình 3) |
 
 "Thứ tự nào cũng được" ở nhị phân nghĩa là thư viện không báo lỗi, không phải nghiệp vụ không đổi: consumer cũ đọc giá trị mặc định cho trường chưa biết. Với JSON, cho consumer bỏ qua trường lạ ngay từ đầu thì ô `ERR` của thêm trường biến mất.
 
@@ -276,7 +276,7 @@ Build của .NET ghi `bin/` và `obj/` vào `target/dotnet/` (đã gitignore) nh
 
 ## Bài tập
 
-Đổi `int64 amount_dong = 2` thành `sint64 amount_dong = 2` (cùng số field) vì "sint64 mã hóa số âm gọn hơn". Dự đoán `OK`, `LOSS` hay `ERR` ở nhị phân và JSON chặt, và checker của lab sẽ nói gì.
+Đổi `int64 amount_dong = 2` thành `sint64 amount_dong = 2` (cùng số field) vì "sint64 mã hoá số âm gọn hơn". Dự đoán `OK`, `LOSS` hay `ERR` ở nhị phân và JSON chặt, và checker của lab sẽ nói gì.
 
 <details><summary>Xem lời giải</summary>
 <p>Nhị phân: <code>LOSS</code> ở cả hai chiều, không có lỗi nào. Hai kiểu cùng kiểu dây (varint) nhưng <code>sint64</code> dùng zigzag: -25.500 ghi bằng <code>sint64</code> thành varint của 50.999, nên reader <code>int64</code> cũ thấy 50999; byte <code>int64</code> đọc bằng reader <code>sint64</code> mới ra 9223372036854763058 (hai số này lấy từ một script Python ngoài lab). JSON: tên và dạng chuỗi không đổi nên <code>OK</code>. Checker so loại trường nên báo <code>TYPE_CHANGED</code> và chặn cả bốn ô, kể cả hai ô JSON vốn an toàn: dương tính giả, nhưng tốt hơn bỏ sót. Cách đúng: thêm trường mới <code>sint64 amount_zigzag = 3</code>, ghi cả hai, chuyển consumer, rồi <code>reserved</code> số cũ, hoặc mở topic <code>.v2</code>.</p>

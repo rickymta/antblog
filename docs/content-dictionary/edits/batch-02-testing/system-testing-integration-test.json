@@ -1,0 +1,22 @@
+{"file":"system-testing-integration-test.md","edits":[
+{"old":"Lab PGlite 7 ca chạy lại được.","new":"Lab PGlite gồm 7 test case chạy lại được.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"và bảy ca chạy được trên lab Tới Nơi","new":"và bảy test case chạy được trên lab Tới Nơi","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Nhưng các ca đó chủ yếu nhìn **response HTTP**.","new":"Nhưng các test case đó chủ yếu chỉ nhìn vào **response HTTP**.","reason":"Thống nhất 'test case'; 'nhìn' thiếu giới từ","severity":"medium"},
+{"old":"bảy ca xanh *không* chứng minh","new":"bảy test case xanh *không* chứng minh","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Nó kiểm tích hợp nội bộ","new":"Lab này kiểm tích hợp nội bộ","reason":"Tránh 'Nó' mơ hồ","severity":"medium"},
+{"old":"Stub trả lời đóng hộp;","new":"Stub trả về kết quả dựng sẵn;","reason":"'trả lời đóng hộp' là calque (canned)","severity":"medium"},
+{"old":"dữ liệu mỗi ca độc lập","new":"dữ liệu mỗi test case độc lập","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"## 5. Thiết kế ca kiểm","new":"## 5. Thiết kế test case","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Các ca chạy **tuần tự** trong file","new":"Các test case chạy **tuần tự** trong file","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"sẽ phá ca khác.","new":"sẽ phá test case khác.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"### 5.2. Bảng case","new":"### 5.2. Bảng test case","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"hai ca riêng và năm dataset thanh toán","new":"hai test case riêng và năm dataset thanh toán","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"không rò giữa các ca.","new":"không rò giữa các test case.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"IN-01 không insert trip trực tiếp; nó gọi báo giá và đặt chuyến thật","new":"IN-01 không insert trip trực tiếp mà gọi báo giá và đặt chuyến thật","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"Khoá được dựng từ `id` của chính ca đó, không hardcode.","new":"Khoá dựng từ `id` của chính test case đó, không hardcode.","reason":"Thống nhất 'test case'; bỏ bị động","severity":"medium"},
+{"old":"Khi ca đỏ, ghi: commit, ca/dataset,","new":"Khi test case đỏ, ghi: commit, test case/dataset,","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"rồi cả bảy ca.»","new":"rồi cả bảy test case.»","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"xác minh provider trên sandbox với version cụ thể","new":"xác minh provider trên sandbox với phiên bản cụ thể","reason":"'phiên bản' thay 'version'","severity":"low"},
+{"old":"không phải số ca nhiều hơn,","new":"không phải số test case nhiều hơn,","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Về chi phí: bảy ca chạy vài giây","new":"Về chi phí: bảy test case chạy vài giây","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

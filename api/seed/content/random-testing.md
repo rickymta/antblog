@@ -8,7 +8,7 @@ tags: [testing, istqb, ctal-ta, test-041, random-testing, property-based-testing
 language: vi
 ---
 
-Lõi định giá của Tới Nơi nhận ba dịch vụ, hai loại xe, sáu thành phố, quãng đường và khối lượng là số thực, giờ cao điểm, trời mưa, voucher. Không ai liệt kê hết tổ hợp được. Bài này dùng **random testing**: để máy chọn ngẫu nhiên hàng nghìn đầu vào theo một phân phối có chủ đích, rồi để một **oracle tự động** phán đúng/sai. Câu hỏi khó không nằm ở bước «sinh», mà ở hai chỗ: sinh theo phân phối nào, và lấy gì làm kết quả mong đợi cho một đầu vào chưa ai tính tay.
+Lõi định giá của Tới Nơi nhận đầu vào gồm ba dịch vụ, hai loại xe, sáu thành phố, quãng đường và khối lượng là số thực, giờ cao điểm, trời mưa, voucher. Không ai liệt kê hết tổ hợp được. Bài này dùng **random testing**: để máy chọn ngẫu nhiên hàng nghìn đầu vào theo một phân phối có chủ đích, rồi để một **oracle tự động** phán đúng/sai. Câu hỏi khó không nằm ở bước «sinh», mà ở hai chỗ: sinh theo phân phối nào, và lấy gì làm kết quả mong đợi cho một đầu vào chưa ai tính tay.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-041</span>
@@ -31,7 +31,7 @@ Lõi định giá của Tới Nơi nhận ba dịch vụ, hai loại xe, sáu th
 
 [Equivalence Partitioning](/articles/equivalence-partitioning), [BVA](/articles/boundary-value-analysis) và [domain testing](/articles/data-based-test-techniques-domain-testing) chọn **ít** giá trị bằng **lập luận**: chia miền, lấy đại diện, lấy biên. Chúng mạnh khi đặc tả rõ, nhưng chỉ tìm được lỗi ở chỗ người thiết kế nghĩ tới.
 
-Random testing chọn **nhiều** giá trị bằng **xác suất**, không cần biết lỗi ở đâu nên tránh được thiên kiến «chỗ này chắc đúng rồi». Đổi lại, nó cần hai thứ:
+Random testing chọn **nhiều** giá trị bằng **xác suất**, không cần biết lỗi ở đâu nên tránh được thiên kiến «chỗ này chắc đúng rồi». Đổi lại, kỹ thuật này cần hai thứ:
 
 - một **phân phối xác suất** mô tả «ngẫu nhiên» nghĩa là gì;
 - một **oracle tự động**, vì không ai tính tay kết quả mong đợi cho 10.000 đầu vào.
@@ -59,13 +59,13 @@ Diễn đạt lại định nghĩa của mục 3.1.3: random testing chọn dữ
 
 | Lợi ích | Giới hạn |
 |---|---|
-| Đặc biệt có giá trị khi hiểu biết về miền còn hạn chế hoặc cần rất nhiều dữ liệu test | Bỏ qua **ngữ nghĩa** của dữ liệu ⇒ có thể bỏ lót defect gắn với ý nghĩa của dữ liệu |
+| Đặc biệt có giá trị khi hiểu biết về miền còn hạn chế hoặc cần rất nhiều dữ liệu test | Bỏ qua **ngữ nghĩa** của dữ liệu ⇒ có thể bỏ lọt defect gắn với ý nghĩa của dữ liệu |
 | Rẻ: sinh và chạy tự động | Có thể bỏ sót một số defect (vùng lỗi quá nhỏ so với miền) |
 | Cho cái nhìn **theo xác suất** về độ tin cậy của test object | Sinh nhiều test **thừa** (trùng hoặc cùng phân vùng) |
 | Tránh thiên kiến, vd bỏ qua defect vì quá tin một đoạn code | **Phụ thuộc vào oracle tự động** |
 | | Đầu ra ngẫu nhiên ⇒ kết quả test **không nhất quán** giữa các lần chạy |
 
-Syllabus còn ghi nhận: random testing từng bị coi là kém hiệu quả, nhưng nghiên cứu thực nghiệm cho thấy trong các điều kiện trên nó có thể hiệu quả hơn các kỹ thuật data-based khác. Nó cũng được dùng trong **fuzz testing** và **chaos engineering**.
+Syllabus còn ghi nhận: random testing từng bị coi là kém hiệu quả, nhưng nghiên cứu thực nghiệm cho thấy trong các điều kiện trên nó có thể hiệu quả hơn các kỹ thuật data-based khác. Random testing cũng được dùng trong **fuzz testing** và **chaos engineering**.
 
 ### 2.4 Test oracle problem (TA-1.3.4)
 
@@ -96,7 +96,7 @@ Mục 1.3.4 của CTAL-TA gọi tình huống «không có oracle đủ rẻ» l
 <p>Syllabus nêu property-based testing như một lời giải oracle. Trong ngành, từ này còn chỉ một <b>họ công cụ</b>, bắt đầu từ QuickCheck (Haskell, Claessen &amp; Hughes, 2000); ở TypeScript là <b>fast-check</b>. Ba khái niệm của công cụ, không có trong syllabus:</p>
 <ul>
 <li><b>Arbitrary</b> (bộ sinh): mô tả cách sinh một kiểu giá trị, ghép được với nhau.</li>
-<li><b>Shrinking</b> (thu nhỏ): khi một ca thất bại, công cụ thử các giá trị «nhỏ hơn» để tìm phản ví dụ đơn giản nhất vẫn thất bại.</li>
+<li><b>Shrinking</b> (thu nhỏ): khi một test case thất bại, công cụ thử các giá trị «nhỏ hơn» để tìm phản ví dụ đơn giản nhất vẫn thất bại.</li>
 <li><b>Seed</b>: giá trị khởi đầu của bộ sinh số giả ngẫu nhiên; cùng seed ⇒ cùng chuỗi đầu vào. Đây là cách khử giới hạn «kết quả không nhất quán».</li>
 </ul>
 <p>fast-check <b>không sinh đều tuyệt đối</b>: nó cố ý thiên về giá trị nhỏ và mép khoảng — định hướng bằng kinh nghiệm, khác adaptive random testing.</p>
@@ -126,7 +126,7 @@ Mục 1.3.4 của CTAL-TA gọi tình huống «không có oracle đủ rẻ» l
 
 ### 4.1 Chọn test item: ranh giới hợp đồng
 
-Câu hỏi đầu tiên không phải «sinh gì» mà «sinh vào **đâu**». Nếu sinh JSON thô vào `POST /api/quotes`, gần như mọi ca bị zod chặn ở `VALIDATION_ERROR` (R-API-07) — đúng giới hạn «test thừa, bỏ qua ngữ nghĩa». Bài chọn test item là **lõi định giá sau lớp kiểm định dạng**: kiểu dữ liệu đã đúng (số là số, món ăn có đơn giá bội số 1.000 đ như R-FOOD-02), còn **giá trị** thì ngẫu nhiên trên toàn miền, kể cả vùng không hợp lệ về nghiệp vụ.
+Câu hỏi đầu tiên không phải «sinh gì» mà «sinh vào **đâu**». Nếu sinh JSON thô vào `POST /api/quotes`, gần như mọi test case bị zod chặn ở `VALIDATION_ERROR` (R-API-07) — đúng giới hạn «test thừa, bỏ qua ngữ nghĩa». Bài chọn test item là **lõi định giá sau lớp kiểm định dạng**: kiểu dữ liệu đã đúng (số là số, món ăn có đơn giá bội số 1.000 đ như R-FOOD-02), còn **giá trị** thì ngẫu nhiên trên toàn miền, kể cả vùng không hợp lệ về nghiệp vụ.
 
 Sinh ngoài hợp đồng cho ra «failure giả»: đơn giá `NaN` truyền thẳng vào `priceFood` ra tổng `NaN`, nhưng hàm chỉ nhận dữ liệu đã qua zod — test sai, không phải lỗi sản phẩm.
 
@@ -301,7 +301,7 @@ và phần chẩn đoán của test BG-01:
   bản lỗi ra 14000 đ; bản đúng ra 15000 đ
 ```
 
-Sau 36 bước thu nhỏ, phản ví dụ như một ca do người viết: xe máy, quãng đường **nhỏ nhất hợp lệ** (0,45 ⇒ 0,5 km), không cao điểm, không mưa, voucher yếu nhất. Kiểm tay: cước cơ bản 12.000 + 4.500 × 0,5 = 14.250 đ; tiền giảm min(8% × 14.250; 1.000) = 1.000 đ. Bản lỗi: max(14.250; 15.000) − 1.000 = 14.000 đ. Đúng SPEC: max(14.250 − 1.000; 15.000) = 15.000 đ. `seed + path` cho phép chạy lại đúng ca này; sau đó chép nó thành test ví dụ cố định (Bài tập 3).
+Sau 36 bước thu nhỏ, phản ví dụ như một test case do người viết: xe máy, quãng đường **nhỏ nhất hợp lệ** (0,45 ⇒ 0,5 km), không cao điểm, không mưa, voucher yếu nhất. Kiểm tay: cước cơ bản 12.000 + 4.500 × 0,5 = 14.250 đ; tiền giảm min(8% × 14.250; 1.000) = 1.000 đ. Bản lỗi: max(14.250; 15.000) − 1.000 = 14.000 đ. Đúng SPEC: max(14.250 − 1.000; 15.000) = 15.000 đ. `seed + path` cho phép chạy lại đúng ca này; sau đó chép nó thành test ví dụ cố định (Bài tập 3).
 
 ### 5.5 BG-02 và BG-04 — phát hiện là chuyện xác suất
 
@@ -345,7 +345,7 @@ BG-04 thu miền quãng đường về 0–3 km bằng hiểu biết nghiệp v�
 BG-03 · 10.000 ca: failed=false. R-FARE-09: bản lỗi 54000 đ, bản đúng 52000 đ (oracle 52.000 đ)
 ```
 
-Bản `rain-times-peak` cộng 8.000 đ phụ phí mưa **trước** khi nhân 1,25 (vi phạm R-FARE-05). Kết quả vẫn là bội số 1.000 đ, vẫn không dưới tối thiểu, vẫn làm tròn đúng một bậc — O1–O6 không có lý do gì để đỏ. Chỉ một oracle **cụ thể** (ví dụ R-FARE-09 do người tính: 52.000 đ) mới lộ ra: bản lỗi thu 54.000 đ. Đây chính là giới hạn «phụ thuộc oracle» và «bỏ qua ngữ nghĩa»: tính chất chung không biết rằng mưa phải cộng sau cao điểm. [TEST-042](/articles/metamorphic-testing) sẽ bắt lỗi này bằng một quan hệ giữa hai lần chạy — có mưa và không mưa.
+Bản `rain-times-peak` cộng 8.000 đ phụ phí trời mưa **trước** khi nhân 1,25 (vi phạm R-FARE-05). Kết quả vẫn là bội số 1.000 đ, vẫn không dưới tối thiểu, vẫn làm tròn đúng một bậc — O1–O6 không có lý do gì để đỏ. Chỉ một oracle **cụ thể** (ví dụ R-FARE-09 do người tính: 52.000 đ) mới lộ ra: bản lỗi thu 54.000 đ. Đây chính là giới hạn «phụ thuộc oracle» và «bỏ qua ngữ nghĩa»: tính chất chung không biết rằng mưa phải cộng sau cao điểm. [TEST-042](/articles/metamorphic-testing) sẽ bắt lỗi này bằng một quan hệ giữa hai lần chạy — có mưa và không mưa.
 
 ## 6. Góc nhìn nâng cao
 
@@ -364,7 +364,7 @@ Cách kết hợp hay dùng: **random trong từng phân vùng** — dùng EP/BV
 
 - Sinh ngoài hợp đồng của test item ⇒ failure giả, đội mất niềm tin vào bộ test.
 - Oracle quá yếu (chỉ «không crash») ⇒ bộ test xanh vĩnh viễn. Đếm xem mỗi tính chất **đã từng đỏ** với bản lỗi nào chưa — giống ý tưởng [mutation testing](/articles/mutation-testing).
-- Phân phối dồn ca vào một phân vùng (29,1% ca thừa ở RT-01) — luôn in thống kê kết cục.
+- Phân phối dồn test case vào một phân vùng (29,1% ca thừa ở RT-01) — luôn in thống kê kết cục.
 - Không ghi seed ⇒ test «chập chờn» trong CI; không chép phản ví dụ thành test cố định ⇒ seed khác có thể không gặp lại.
 
 **Sai lầm thường gặp.**

@@ -8,21 +8,21 @@ tags: [aws, toi-noi, devops, lambda, serverless, webhook, cold-start, event-sour
 language: vi
 ---
 
-Khách thanh toán xong, cổng VíXanh (giả lập của dự án) gọi ngược vào Tới Nơi bằng một **webhook**: `payment.succeeded` cho chuyến 1001. Nếu server không trả `2xx` trong vài giây, VíXanh gửi lại, và gửi lại nữa. Giờ cao điểm có khoảng 70 chuyến/giây, nhưng ngoài giờ cao điểm endpoint này gần như im lặng. Chạy một service luôn bật chỉ để chờ webhook thì phí; **AWS Lambda** tính tiền theo lần gọi và thời gian chạy, hợp với tải lúc dày lúc thưa như vậy.
+Khách thanh toán xong, cổng VíXanh (giả lập của dự án) gọi ngược vào Tới Nơi bằng một **webhook**: `payment.succeeded` cho chuyến 1001. Nếu server không trả `2xx` trong vài giây, VíXanh gửi lại, và gửi lại nữa. Giờ cao điểm có khoảng 70 chuyến/giây, nhưng ngoài giờ cao điểm endpoint này gần như không có request nào. Chạy một service luôn bật chỉ để chờ webhook thì lãng phí; **AWS Lambda** tính tiền theo lần gọi và thời gian chạy, hợp với tải lúc dày lúc thưa như vậy.
 
 Đây là **bài 18** của lộ trình **AWS qua Tới Nơi · Phần 02: Container, serverless và dịch vụ ứng dụng**. Bạn cần xong Phần 01 và bài 16 (SQS), nên có sẵn khái niệm queue và DLQ.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một lần gọi Lambda vừa kết thúc. Lần gọi kế tiếp có luôn bắt đầu từ môi trường trống, không còn biến nào của lần trước?</p>
-<details><summary>Xem đáp án</summary><p>Không chắc. Lambda thường tái dùng execution environment cho các lần gọi gần nhau, nên biến khai báo ngoài handler có thể còn. Nhưng nó cũng có thể tạo môi trường mới bất kỳ lúc nào, nên không được dựa vào trạng thái còn sót làm logic nghiệp vụ.</p></details>
+<details><summary>Xem đáp án</summary><p>Không chắc. Lambda thường tái dùng execution environment cho các lần gọi gần nhau, nên biến khai báo ngoài handler có thể còn. Nhưng Lambda cũng có thể tạo môi trường mới bất kỳ lúc nào, nên không được dựa vào trạng thái còn sót làm logic nghiệp vụ.</p></details>
 </div>
 
 ## Mô hình Lambda: handler, execution environment và cold start
 
 Bạn đóng gói code cùng một **handler**, chọn **runtime** (Node.js, Python, .NET, Java...) và Lambda chạy hàm trong **execution environment**: một micro VM cô lập. Lần gọi đầu tiên (hoặc khi tăng tải) Lambda phải dựng môi trường mới: tải code, khởi động runtime, chạy phần code ngoài handler (pha **init**). Đó là **cold start**. Các lần gọi sau trên cùng môi trường chỉ chạy handler (**warm**). Môi trường không tồn tại mãi: Lambda thu hồi khi nhàn rỗi hoặc khi bảo trì.
 
-Hệ quả thiết kế: khởi tạo thứ đắt (SDK client, đọc secret) ngoài handler để warm tái dùng; mọi thứ trong biến toàn cục chỉ là cache, mất đi vẫn phải đúng. Một hàm chỉ xử lý **một request tại một thời điểm** trong mỗi môi trường, nên số môi trường đồng thời (concurrency) xấp xỉ **tốc độ gọi nhân thời gian chạy**. Giả định webhook xử lý 50 ms ở 70 lần/giây: cần khoảng 3,5 môi trường; VíXanh gửi lại gấp ba lúc sự cố thì khoảng 10,5.
+Hệ quả thiết kế là nên khởi tạo những thứ tốn kém (SDK client, đọc secret) ngoài handler để các lần warm tái dùng; mọi thứ trong biến toàn cục chỉ là cache, mất đi vẫn phải đúng. Một hàm chỉ xử lý **một request tại một thời điểm** trong mỗi môi trường, nên số môi trường đồng thời (concurrency) xấp xỉ **tốc độ gọi nhân thời gian chạy**. Giả định webhook xử lý 50 ms ở 70 lần/giây: cần khoảng 3,5 môi trường; VíXanh gửi lại gấp ba lúc sự cố thì khoảng 10,5.
 
 **Memory** từ 128 MB đến 10.240 MB và quyết định luôn CPU: CPU tỉ lệ với memory, cỡ một vCPU ở khoảng 1.769 MB. Tăng memory đôi khi giảm tổng chi phí vì hàm xong nhanh hơn; hãy đo thay vì đoán. **Timeout** tối đa 15 phút, nhưng webhook nên đặt vài giây.
 
@@ -41,7 +41,7 @@ Hệ quả thiết kế: khởi tạo thứ đắt (SDK client, đọc secret) n
 
 ## Webhook VíXanh: xác minh chữ ký rồi ghi hàng đợi
 
-Endpoint webhook công khai trên Internet, nên mọi request phải bị nghi ngờ tới khi chứng minh được. VíXanh ký mỗi request bằng HMAC-SHA256 với secret dùng chung, gửi trong header `x-vixanh-signature: t=<giây>,v1=<hex>`. Chuỗi được ký là `t`, dấu chấm, rồi **đúng byte body gốc**. Hàm làm ba việc theo thứ tự và không làm gì hơn:
+Endpoint webhook công khai trên Internet, nên mọi request đều phải bị coi là chưa đáng tin cho tới khi xác minh được. VíXanh ký mỗi request bằng HMAC-SHA256 với secret dùng chung, gửi trong header `x-vixanh-signature: t=<giây>,v1=<hex>`. Chuỗi được ký là `t`, dấu chấm, rồi **đúng byte body gốc**. Hàm làm ba việc theo thứ tự và không làm thêm gì khác:
 
 1. Tính lại HMAC từ body nhận được, so sánh bằng hàm so sánh hằng thời gian (`timingSafeEqual`), từ chối nếu `t` lệch quá 5 phút để chặn phát lại.
 2. Ghi sự kiện vào SQS cùng `eventId` làm message attribute.
@@ -55,9 +55,9 @@ if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
 }
 ```
 
-Đoạn trên so sánh chữ ký trên byte thô; parse JSON rồi dựng lại chuỗi thì chữ ký sẽ không khớp. Mã đầy đủ và bộ test chạy bằng `node --test` nằm trong lab. Secret được đọc từ Secrets Manager một lần ở pha init rồi giữ trong biến toàn cục, thay vì nhét vào biến môi trường dạng chữ thường (xem bài [Secrets Manager và Parameter Store](/articles/aws-secrets-manager-parameter-store)).
+Đoạn trên so sánh chữ ký trên byte thô; parse JSON rồi dựng lại chuỗi thì chữ ký sẽ không khớp. Mã đầy đủ và bộ test chạy bằng `node --test` nằm trong lab. Secret được đọc từ Secrets Manager một lần ở pha init rồi giữ trong biến toàn cục, thay vì nhét vào biến môi trường dưới dạng văn bản thuần (plaintext) (xem bài [Secrets Manager và Parameter Store](/articles/aws-secrets-manager-parameter-store)).
 
-Trả lời nhanh là có chủ đích: bắt VíXanh chờ đối soát thì request chậm sẽ hết hạn và bị gửi lại, tăng tải đúng lúc hệ thống đang chậm.
+Trả lời nhanh là có chủ đích: nếu bắt VíXanh chờ đối soát, request chậm sẽ hết hạn và bị gửi lại, tăng tải đúng lúc hệ thống đang chậm.
 
 ## Trigger: Function URL, S3 và SQS
 
@@ -82,11 +82,11 @@ aws lambda create-event-source-mapping \
 
 **Execution role** là danh tính của hàm. Webhook chỉ cần `sqs:SendMessage` lên đúng một queue và `secretsmanager:GetSecretValue` trên đúng một secret, cộng quyền ghi log. Consumer chỉ cần `ReceiveMessage`, `DeleteMessage`, `GetQueueAttributes`. Mỗi hàm một role, vì webhook công khai bị khai thác thì kẻ tấn công chỉ mượn được quyền ghi queue, không đọc được dữ liệu.
 
-**Concurrency** có ba lớp: hạn mức account theo region (mặc định 1.000, tài khoản mới có thể thấp hơn) dùng chung mọi hàm; **reserved concurrency** dành riêng và cũng chặn trần một hàm; **provisioned concurrency** giữ sẵn môi trường đã init để triệt cold start, tính tiền cả khi nhàn rỗi. Reserved quá thấp khiến hàm bị throttle; với consumer SQS, ưu tiên `MaximumConcurrency` của mapping hơn là reserved.
+**Concurrency** có ba lớp: hạn mức account theo region (mặc định 1.000, tài khoản mới có thể thấp hơn) dùng chung mọi hàm; **reserved concurrency** dành riêng và cũng chặn trần một hàm; **provisioned concurrency** giữ sẵn môi trường đã init để loại bỏ cold start, tính tiền cả khi nhàn rỗi. Reserved quá thấp khiến hàm bị throttle; với consumer SQS, ưu tiên `MaximumConcurrency` của mapping hơn là reserved.
 
 ## Cold start: đo trước, rồi mới chữa
 
-Cold start tệ khi hàm nặng init (SDK lớn, nhiều dependency, runtime khởi động chậm) và nằm trên đường đồng bộ có người chờ. Với webhook, vài trăm ms thêm lúc cold hiếm khi quan trọng vì VíXanh chờ vài giây; với API cho app khách thì có. Cách giảm, từ rẻ tới đắt: gói code nhỏ và chỉ import module cần; arm64; khởi tạo ngoài handler; tăng memory; **SnapStart** (chụp ảnh môi trường sau init, hỗ trợ một số runtime như Java, Python và .NET, không phải Node.js); cuối cùng provisioned concurrency. Đo bằng log `REPORT` (có `Init Duration` ở lần cold) trước khi tối ưu. Từ 08/2025, thời gian pha init của hàm đóng gói zip dùng runtime managed cũng được tính phí như thời gian chạy, nên init nặng giờ tốn cả tiền lẫn độ trễ.
+Cold start ảnh hưởng nặng khi hàm nặng init (SDK lớn, nhiều dependency, runtime khởi động chậm) và nằm trên đường đồng bộ có người chờ. Với webhook, vài trăm ms thêm lúc cold hiếm khi quan trọng vì VíXanh chờ vài giây; với API cho app khách thì có. Cách giảm, từ rẻ tới đắt: gói code nhỏ và chỉ import module cần; arm64; khởi tạo ngoài handler; tăng memory; **SnapStart** (chụp ảnh môi trường sau init, hỗ trợ một số runtime như Java, Python và .NET, không phải Node.js); cuối cùng provisioned concurrency. Đo bằng log `REPORT` (có `Init Duration` ở lần cold) trước khi tối ưu. Từ 08/2025, thời gian pha init của hàm đóng gói zip dùng runtime managed cũng được tính phí như thời gian chạy, nên init nặng giờ tốn cả tiền lẫn độ trễ.
 
 ## Lambda trong VPC
 
@@ -101,8 +101,8 @@ Mặc định hàm chạy ngoài VPC của bạn. Để vào RDS ở private sub
 
 ## Cái giá phải trả
 
-- **Throttle làm mất webhook**: reserved concurrency quá thấp trả `429`/`5xx` cho VíXanh; nó gửi lại, và nếu hết lượt gửi lại thì đơn thanh toán không bao giờ tới Tới Nơi. Đặt trần theo tính toán và có alarm.
-- **Hàm có thể chạy nhiều lần cho một sự kiện** (retry của S3, SQS, VíXanh). Đừng gây hiệu ứng không idempotent.
+- **Throttle làm mất webhook**: reserved concurrency quá thấp trả `429`/`5xx` cho VíXanh; VíXanh sẽ gửi lại, và nếu hết lượt gửi lại thì đơn thanh toán không bao giờ tới Tới Nơi. Đặt trần theo tính toán và có alarm.
+- **Hàm có thể chạy nhiều lần cho một sự kiện** (retry của S3, SQS, VíXanh). Đừng tạo tác dụng phụ không idempotent.
 - **Function URL công khai không có WAF hay throttling riêng**; coi chữ ký là bắt buộc, không phải tuỳ chọn.
 - **Lambda trong VPC mà thiếu NAT hoặc endpoint** treo tới timeout khi gọi AWS API, nhìn như lỗi mạng ngẫu nhiên.
 - **Không log body webhook**: có dữ liệu thanh toán. Log `eventId` và kết quả xác minh.

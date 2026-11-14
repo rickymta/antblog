@@ -1,16 +1,16 @@
 ---
 slug: postgresql-kieu-du-lieu-tien-thoi-gian-uuid
 title: "Chọn kiểu dữ liệu cho tiền, thời gian và định danh"
-summary: "Kế toán Tới Nơi hỏi tổng cước ngày 02/11: cước lưu bằng float sẽ lệch, ngày lấy theo UTC sẽ gom nhầm chuyến 00:10 sáng 03/11. Chọn kiểu cho tiền, thời điểm, định danh và lập data dictionary."
+summary: "Kế toán Tới Nơi hỏi tổng cước ngày 02/11: cước lưu bằng float sẽ lệch, ngày lấy theo UTC sẽ gom nhầm chuyến 00:10 sáng 03/11. Bài này chọn kiểu cho tiền, thời điểm, định danh rồi lập data dictionary."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-004, data-type, timestamptz, uuid, money, toi-noi]
 language: vi
 ---
 
-Kế toán Tới Nơi hỏi một câu tưởng đơn giản: «Tổng cước các chuyến đặt trong ngày 02/11 là bao nhiêu?». Có hai cách trả lời sai mà không ai nhận ra. Nếu cước được lưu bằng số thực theo đơn vị nghìn đồng, phép cộng sinh ra những sai lệch cực nhỏ — đủ để đối soát với cổng thanh toán không bao giờ khớp tuyệt đối. Nếu «ngày» được tính theo giờ UTC, chuyến 100008 khách đặt lúc 00:10 sáng 03/11 giờ Việt Nam sẽ bị gom vào ngày 02/11.
+Kế toán Tới Nơi hỏi một câu tưởng đơn giản: «Tổng cước các chuyến đặt trong ngày 02/11 là bao nhiêu?». Có hai cách trả lời sai mà không ai nhận ra. Nếu cước được lưu bằng số thực theo đơn vị nghìn đồng, phép cộng sinh ra những sai lệch cực nhỏ — đủ để khiến việc đối soát với cổng thanh toán không bao giờ khớp tuyệt đối. Nếu «ngày» được tính theo giờ UTC, chuyến 100008 khách đặt lúc 00:10 sáng 03/11 giờ Việt Nam sẽ bị gom vào ngày 02/11.
 
-Cả hai đều **không phát sinh thông báo lỗi nào**. Chọn kiểu dữ liệu là quyết định database chặn sai sót nào và để lọt sai sót nào. Bài này chọn kiểu cho tiền, thời gian, định danh của bảng `trips`, rồi gom quyết định vào một data dictionary.
+Cả hai đều **không phát sinh thông báo lỗi nào**. Chọn kiểu dữ liệu là quyết định xem database chặn sai sót nào và để lọt sai sót nào. Bài này chọn kiểu cho tiền, thời gian, định danh của bảng `trips`, rồi gom quyết định vào một data dictionary.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-004 · Phần 1/6 · Trung bình</span>
@@ -19,7 +19,7 @@ Cả hai đều **không phát sinh thông báo lỗi nào**. Chọn kiểu dữ
 
 ## 1. Chọn kiểu là chọn miền giá trị, đơn vị và nghĩa của NULL
 
-Trước khi gõ tên kiểu cho một cột, trả lời ba câu:
+Trước khi gõ tên kiểu cho một cột, hãy trả lời ba câu:
 
 1. **Miền giá trị** (domain) là gì? Số nguyên hay có phần lẻ, lớn tới đâu, có âm không?
 2. **Đơn vị** là gì? Đồng hay nghìn đồng, giờ Việt Nam hay UTC, giây hay phút?
@@ -98,7 +98,7 @@ SELECT 100000 / 3 AS chia_integer, 100000 % 3 AS phan_du, 100000::numeric / 3 AS
 
 Chia `integer` cho `integer` cắt phần lẻ: ba phần 33.333 đ cộng lại thiếu 1 đ. `numeric` cũng không giải quyết — không ai trả 33.333,33 đ. Quy tắc nghiệp vụ phải nói phần dư thuộc về phần nào.
 
-**Vì sao không dùng `money`?** Tài liệu cho biết phần lẻ của nó do thiết lập `lc_monetary` quyết định, và dữ liệu có thể không nạp được vào database có `lc_monetary` khác. Trên lab:
+**Vì sao không dùng `money`?** Tài liệu cho biết phần lẻ của kiểu này do thiết lập `lc_monetary` quyết định, và dữ liệu có thể không nạp được vào database có `lc_monetary` khác. Trên lab:
 
 ```text
 SELECT current_setting('lc_monetary') AS lc_monetary, 45000::money AS cuoc_money;
@@ -140,7 +140,7 @@ SELECT '2026-11-03 00:10:00+07'::timestamptz AS co_mui_gio,
 (1 row)
 ```
 
-Cột `timestamptz` hiển thị khác nhau nhưng là **cùng một khoảnh khắc** (00:10 giờ VN = 17:10 UTC hôm trước). Cột `timestamp` đã bỏ `+07` mà không báo gì: «00:10» không còn biết là giờ ở đâu. Hai nguồn ghi theo hai múi giờ vào cùng cột `timestamp` sẽ lệch 7 tiếng mà không cách nào tách lại.
+Cột `timestamptz` hiển thị khác nhau nhưng là **cùng một khoảnh khắc** (00:10 giờ VN = 17:10 UTC hôm trước). Cột `timestamp` đã bỏ `+07` mà không báo gì: không ai biết «00:10» là giờ ở đâu nữa. Hai nguồn ghi theo hai múi giờ vào cùng cột `timestamp` sẽ lệch 7 tiếng và không có cách nào tách lại.
 
 Vì vậy mọi mốc sự kiện của Tới Nơi đều là `timestamptz`. Lab ghi mọi mốc trong fixture kèm `+07` và đặt `SET TIME ZONE 'Asia/Ho_Chi_Minh'` đầu mỗi tệp — **tên múi giờ đầy đủ** mang theo quy tắc lịch sử của vùng, còn chữ viết tắt chỉ là một độ lệch cố định. Chuỗi không ghi offset là chuỗi «đoán» theo phiên đang chạy: cùng một script nạp dữ liệu, chạy ở phiên UTC và phiên giờ VN sẽ ghi hai khoảnh khắc cách nhau 7 tiếng (bài tập 2).
 
@@ -167,7 +167,7 @@ ORDER BY code;
 (2 rows)
 ```
 
-Chuyến 100008 thuộc ngày 03/11 theo giờ VN nhưng ngày 02/11 theo phiên UTC. Tệp `05-select.sql` đếm cả fixture theo hai cách và ra **9** chuyến «ngày 02/11» ở phiên UTC so với **8** theo giờ Việt Nam. Đó chính là câu trả lời sai thứ hai của kế toán ở đầu bài. Cách viết bộ lọc khoảng thời gian đúng (khoảng nửa mở `[00:00 ngày 02/11, 00:00 ngày 03/11)` theo giờ VN) là bài [PG-007](/articles/postgresql-select-filter-order-limit).
+Chuyến 100008 thuộc ngày 03/11 theo giờ VN nhưng ngày 02/11 theo phiên UTC. Tệp `05-select.sql` đếm cả fixture theo hai cách và ra **9** chuyến «ngày 02/11» ở phiên UTC so với **8** theo giờ Việt Nam. Đó chính là câu trả lời sai thứ hai của kế toán ở đầu bài. Cách viết bộ lọc khoảng thời gian đúng (khoảng nửa mở `[00:00 ngày 02/11, 00:00 ngày 03/11)` theo giờ VN) được trình bày ở bài [PG-007](/articles/postgresql-select-filter-order-limit).
 
 Một bẫy khác cũng không báo lỗi: định dạng ngày khi nhập chuỗi. Kết quả thật ở cuối `03-fixture-invalid.sql`:
 
@@ -193,9 +193,9 @@ SELECT pg_typeof(gen_random_uuid()) AS kieu, pg_column_size(gen_random_uuid()) A
 (1 row)
 ```
 
-`gen_random_uuid()` có sẵn trong lõi PostgreSQL (từ bản 13, không cần extension) và theo tài liệu trả về UUID **phiên bản 4 — ngẫu nhiên**. Lợi ích: ứng dụng tự sinh id trước khi ghi, id không lộ số lượng chuyến, gộp dữ liệu nhiều nguồn không lo trùng. Cái giá: gấp đôi `bigint`, khó đọc, giá trị ngẫu nhiên rải khắp index (đo ở Phần 3). PostgreSQL 18 bổ sung `uuidv7()` có thành phần thời gian; lab ghim bản 17 nên chưa dùng.
+`gen_random_uuid()` có sẵn trong lõi PostgreSQL (từ bản 13, không cần extension) và theo tài liệu trả về UUID **phiên bản 4 — ngẫu nhiên**. Lợi ích: ứng dụng tự sinh id trước khi ghi, id không lộ số lượng chuyến, gộp dữ liệu nhiều nguồn không lo trùng. Cái giá phải trả: dung lượng gấp đôi `bigint`, khó đọc, giá trị ngẫu nhiên rải khắp index (đo ở Phần 3). PostgreSQL 18 bổ sung `uuidv7()` có thành phần thời gian; lab ghim bản 17 nên chưa dùng.
 
-**Identity cho `code`.** `code bigint GENERATED ALWAYS AS IDENTITY (START WITH 100000)` là cột **identity**: theo tài liệu, nó gắn với một sequence ngầm, tự nhận giá trị khi thêm dòng, mặc nhiên `NOT NULL`. Với `ALWAYS`, giá trị ghi tay chỉ được nhận kèm `OVERRIDING SYSTEM VALUE` (với `BY DEFAULT` thì giá trị người dùng được ưu tiên). Lab chọn `ALWAYS` để không ai vô tình tự đặt mã chuyến:
+**Identity cho `code`.** `code bigint GENERATED ALWAYS AS IDENTITY (START WITH 100000)` là cột **identity**: theo tài liệu, nó gắn với một sequence ngầm, tự nhận giá trị khi thêm dòng, mặc định `NOT NULL`. Với `ALWAYS`, giá trị ghi tay chỉ được nhận kèm `OVERRIDING SYSTEM VALUE` (với `BY DEFAULT` thì giá trị người dùng được ưu tiên). Lab chọn `ALWAYS` để không ai vô tình tự đặt mã chuyến:
 
 ```text
 ERROR:  cannot insert a non-DEFAULT value into column "code"
@@ -219,13 +219,13 @@ Bảng vẫn chỉ có 15 chuyến (100000–100014), nhưng sequence đã cấp
 
 ## 6. NULL: «chưa có», không phải 0
 
-NULL không phải 0 hay chuỗi rỗng; nó nói giá trị **không có**. Mỗi cột cho phép NULL phải ghi rõ nghĩa:
+NULL không phải 0 hay chuỗi rỗng; NULL cho biết giá trị **không có**. Mỗi cột cho phép NULL phải ghi rõ nghĩa:
 
 - `accepted_at IS NULL` = **chưa có ai nhận**. Đừng thay bằng ngày giả như `1970-01-01`: mọi phép tính thời gian chờ sẽ sai.
 - `fare` là `NOT NULL`, và **0 đ là giá trị hợp lệ** — chuyến 100008 miễn phí do khuyến mãi. «Cước 0 đ» và «chưa biết cước» là hai sự thật khác nhau.
 - `merchant_id IS NULL` = **không áp dụng** (không phải đơn đồ ăn), khác «chưa biết quán».
 
-NULL còn ảnh hưởng tới ràng buộc: `CHECK (accepted_at >= requested_at)` cho qua chuyến chưa có `accepted_at`, vì biểu thức ra NULL chứ không ra false. Lab vì vậy viết các quy tắc «phải có» bằng `IS NULL` / `IS NOT NULL` — chi tiết ở [PG-005](/articles/postgresql-create-table-constraints); logic ba giá trị của NULL trong truy vấn thuộc Phần 2.
+NULL còn ảnh hưởng tới ràng buộc: `CHECK (accepted_at >= requested_at)` cho qua chuyến chưa có `accepted_at`, vì biểu thức ra NULL chứ không ra false. Lab vì vậy viết các quy tắc «phải có» bằng `IS NULL` / `IS NOT NULL` — chi tiết ở [PG-005](/articles/postgresql-create-table-constraints); logic ba giá trị của NULL trong truy vấn được trình bày ở Phần 2.
 
 ## 7. Data dictionary có đơn vị, NULL và múi giờ
 

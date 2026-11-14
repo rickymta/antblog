@@ -20,7 +20,7 @@ Việc đẩy sang worker tạo ba bài toán. Dịch vụ chấm điểm có th
 
 ## Vì sao cần worker, và chọn arq hay taskiq
 
-BackgroundTasks của FastAPI (bài 35) chạy việc trong chính tiến trình API: tiến trình chết là việc biến mất, không có retry, không có lịch, không có chỗ xem việc nào thất bại. Worker với hàng đợi bền giải các vấn đề đó: job nằm ở Redis, sống sót qua lần khởi động lại của API, và nhiều worker cùng lấy việc. Đổi lại, hàng đợi chỉ bảo đảm **ít nhất một lần**: job có thể chạy lại vì retry, bị hủy khi worker dừng, hoặc worker chết giữa chừng.
+BackgroundTasks của FastAPI (bài 35) chạy việc trong chính tiến trình API: tiến trình chết là việc biến mất, không có retry, không có lịch, không có chỗ xem việc nào thất bại. Worker với hàng đợi bền giải các vấn đề đó: job nằm ở Redis, sống sót qua lần khởi động lại của API, và nhiều worker cùng lấy việc. Đổi lại, hàng đợi chỉ bảo đảm **ít nhất một lần**: job có thể chạy lại vì retry, bị huỷ khi worker dừng, hoặc worker chết giữa chừng.
 
 Lab dùng **arq**: thư viện job queue bất đồng bộ, nhỏ, nói chuyện với Redis qua redis-py. Hai điều cần nói rõ, kiểm ngày 6/11/2026. Một: arq 0.28.0 (phát hành 16/4/2026) khai báo hỗ trợ Python 3.14 và lab chạy đủ cả bài trên 3.14.7. Hai: README của dự án ghi arq đang ở **chế độ chỉ bảo trì**; nó vẫn chạy tốt nhưng cần cân nhắc cho dự án dài hạn. Hướng thay thế là **taskiq** với `taskiq-redis`; lab này **không chạy taskiq**, nên bài không đưa mã của nó, còn khái niệm thì áp dụng nguyên.
 
@@ -122,7 +122,7 @@ for raw in await redis.lrange(DLQ, 0, -1):
         await redis.lrem(DLQ, 1, raw)  # chỉ gỡ khỏi dead-letter khi đã enqueue được
 ```
 
-Hai chi tiết. Job đưa lại mang `job_id` **mới** (hậu tố `:redrive`), vì arq từ chối enqueue khi còn khóa job hoặc khóa kết quả của `job_id` cũ. Thứ tự «enqueue rồi mới gỡ» chọn trùng hơn mất: chết giữa hai bước thì job có thể được đưa lại hai lần, và ta nhờ tính idempotent ở phần dưới. Lab xóa cờ lỗi của backend giả rồi redrive: `dead-letter còn ['TN-0012', 'TN-0013', 'TN-0004']`, không còn `TN-0003`. Một job cron ghi độ dài DLQ vào Redis mỗi 30 giây để cảnh báo «DLQ khác 0» có chỗ đọc.
+Hai chi tiết. Job đưa lại mang `job_id` **mới** (hậu tố `:redrive`), vì arq từ chối enqueue khi còn khoá job hoặc khoá kết quả của `job_id` cũ. Thứ tự «enqueue rồi mới gỡ» chọn trùng hơn mất: chết giữa hai bước thì job có thể được đưa lại hai lần, và ta nhờ tính idempotent ở phần dưới. Lab xoá cờ lỗi của backend giả rồi redrive: `dead-letter còn ['TN-0012', 'TN-0013', 'TN-0004']`, không còn `TN-0003`. Một job cron ghi độ dài DLQ vào Redis mỗi 30 giây để cảnh báo «DLQ khác 0» có chỗ đọc.
 
 ## Lịch, job hoãn và job idempotent
 
@@ -168,7 +168,7 @@ Dòng đầu là lớp 1, dòng hai là bước 2a. Dòng ba là bước 2b, ca 
 
 ## Graceful shutdown: SIGTERM không được làm mất job
 
-Mỗi lần triển khai, hệ thống điều phối gửi SIGTERM cho worker. Mặc định arq **hủy ngay** các job đang chạy. `job_completion_wait` đổi hành vi đó: sau tín hiệu, worker ngừng nhận job mới và cho job đang chạy tối đa ngần ấy giây, hết hạn mới hủy. Tài liệu arq gợi ý đặt nó cùng `terminationGracePeriodSeconds` của Kubernetes: hệ thống chỉ cho sống 30 giây thì chờ 60 giây là vô nghĩa. Lab đọc giá trị từ `LAB40_GRACE_S` (mặc định 10) và khởi động worker thật bằng đúng lệnh `arq app.worker.WorkerSettings` hai lần.
+Mỗi lần triển khai, hệ thống điều phối gửi SIGTERM cho worker. Mặc định arq **huỷ ngay** các job đang chạy. `job_completion_wait` đổi hành vi đó: sau tín hiệu, worker ngừng nhận job mới và cho job đang chạy tối đa ngần ấy giây, hết hạn mới huỷ. Tài liệu arq gợi ý đặt nó cùng `terminationGracePeriodSeconds` của Kubernetes: hệ thống chỉ cho sống 30 giây thì chờ 60 giây là vô nghĩa. Lab đọc giá trị từ `LAB40_GRACE_S` (mặc định 10) và khởi động worker thật bằng đúng lệnh `arq app.worker.WorkerSettings` hai lần.
 
 Lần một chờ 10 giây. Job `TN-0008` được cấu hình chậm 1,5 giây; ngay khi nó bắt đầu chạy, lab gửi SIGTERM, đợi dòng log shutdown, rồi enqueue thêm `TN-0010` (đến **sau** tín hiệu):
 
@@ -179,7 +179,7 @@ SIGTERM khi TN-0008 đang chạy (chờ tối đa 10 giây): worker thoát mã 0
   TN-0008: success=True, lần thử 1; TN-0010 gửi sau SIGTERM: runs=None
 ```
 
-Job đang chạy hoàn thành trong 1,57 giây rồi worker thoát với mã 0. `TN-0010` không được nhận (`runs=None`): nó ở lại hàng đợi cho worker khác. Lần hai đặt `LAB40_GRACE_S=0`, tức là hủy ngay:
+Job đang chạy hoàn thành trong 1,57 giây rồi worker thoát với mã 0. `TN-0010` không được nhận (`runs=None`): nó ở lại hàng đợi cho worker khác. Lần hai đặt `LAB40_GRACE_S=0`, tức là huỷ ngay:
 
 ```text
 SIGTERM không chờ: worker thoát mã 0; job TN-0009 xếp lại hàng đợi=True, chưa có kết quả=True, chưa có điểm=True
@@ -188,7 +188,7 @@ SIGTERM không chờ: worker thoát mã 0; job TN-0009 xếp lại hàng đợi=
 Worker mới: TN-0009 success=True, lần thử 2; TN-0010 success=True; hiệu ứng tổng = 9
 ```
 
-Job bị hủy giữa chừng không mất: arq xếp nó lại hàng đợi (`will be run again`), và worker khởi động sau chạy nó ở lần thử 2. Việc này an toàn nhờ idempotent: lần bị hủy chưa kịp ghi điểm (`SET NX` ở cuối hàm), nên lần chạy lại chỉ tạo một hiệu ứng.
+Job bị huỷ giữa chừng không mất: arq xếp nó lại hàng đợi (`will be run again`), và worker khởi động sau chạy nó ở lần thử 2. Việc này an toàn nhờ idempotent: lần bị huỷ chưa kịp ghi điểm (`SET NX` ở cuối hàm), nên lần chạy lại chỉ tạo một hiệu ứng.
 
 ## Tổng kết P03 và P04
 
@@ -196,7 +196,7 @@ P03 và P04 dựng dần các mảnh mà nhóm service Python của [Tới Nơi]
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 250" role="img" aria-label="Năm lớp của P03 và P04 từ trái sang phải: nền bất đồng bộ bài 21 đến 23, dữ liệu bài 24 đến 30, API bài 31 đến 37, thông điệp bài 38 và 39, việc nền bài 40. Dưới mỗi lớp là các chủ đề của lớp đó."><defs><marker id="py40-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="10" y="20" width="160" height="44" rx="10" class="f-bg s-line"/><text x="24" y="47" class="t-b">Nền async (21-23)</text><path d="M170 42 L183 42" class="f-none s-phys" stroke-width="2" marker-end="url(#py40-1-arrow)"/><rect x="10" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="24" y="108" class="t-small">asyncio, timeout (21)</text><text x="24" y="134" class="t-small">GIL, thread (22)</text><text x="24" y="160" class="t-small">Lock, Queue (23)</text><rect x="185" y="20" width="160" height="44" rx="10" class="f-phys-soft s-phys"/><text x="199" y="47" class="t-b">Dữ liệu (24-30)</text><path d="M345 42 L358 42" class="f-none s-phys" stroke-width="2" marker-end="url(#py40-1-arrow)"/><rect x="185" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="199" y="108" class="t-small">PostgreSQL (24, 25)</text><text x="199" y="134" class="t-small">MongoDB (26)</text><text x="199" y="160" class="t-small">Redis (27)</text><text x="199" y="186" class="t-small">test thật (28)</text><text x="199" y="212" class="t-small">polars, numpy (29-30)</text><rect x="360" y="20" width="160" height="44" rx="10" class="f-pk-soft s-pk"/><text x="374" y="47" class="t-b">API (31-37)</text><path d="M520 42 L533 42" class="f-none s-phys" stroke-width="2" marker-end="url(#py40-1-arrow)"/><rect x="360" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="374" y="108" class="t-small">hợp đồng API (31-32)</text><text x="374" y="134" class="t-small">dependency (33)</text><text x="374" y="160" class="t-small">JWT (34), test (36)</text><text x="374" y="186" class="t-small">upload (35)</text><text x="374" y="212" class="t-small">gRPC (37)</text><rect x="535" y="20" width="160" height="44" rx="10" class="f-phys-soft s-phys"/><text x="549" y="47" class="t-b">Thông điệp (38-39)</text><path d="M695 42 L708 42" class="f-none s-phys" stroke-width="2" marker-end="url(#py40-1-arrow)"/><rect x="535" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="549" y="108" class="t-small">Kafka consumer (38)</text><text x="549" y="134" class="t-small">commit sau xử lý (38)</text><text x="549" y="160" class="t-small">outbox, lease (39)</text><text x="549" y="186" class="t-small">inbox khử trùng (39)</text><rect x="710" y="20" width="160" height="44" rx="10" class="f-pk-soft s-pk"/><text x="724" y="47" class="t-b">Việc nền (40)</text><rect x="710" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="724" y="108" class="t-small">arq trên Redis</text><text x="724" y="134" class="t-small">backoff, dead-letter</text><text x="724" y="160" class="t-small">SET NX theo trip_id</text><text x="724" y="186" class="t-small">SIGTERM không mất job</text></svg>
+<svg viewBox="0 0 880 250" role="img" aria-label="Năm lớp của P03 và P04 từ trái sang phải: nền bất đồng bộ bài 21 đến 23, dữ liệu bài 24 đến 30, API bài 31 đến 37, thông điệp bài 38 và 39, việc nền bài 40. Dưới mỗi lớp là các chủ đề của lớp đó."><defs><marker id="py40-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="10" y="20" width="160" height="44" rx="10" class="f-bg s-line"/><text x="24" y="47" class="t-b">Nền async (21-23)</text><path d="M170 42 L183 42" class="f-none s-phys" stroke-width="2" marker-end="url(#py40-1-arrow)"/><rect x="10" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="24" y="108" class="t-small">asyncio, timeout (21)</text><text x="24" y="134" class="t-small">GIL, thread (22)</text><text x="24" y="160" class="t-small">Lock, Queue (23)</text><rect x="185" y="20" width="160" height="44" rx="10" class="f-phys-soft s-phys"/><text x="199" y="47" class="t-b">Dữ liệu (24-30)</text><path d="M345 42 L358 42" class="f-none s-phys" stroke-width="2" marker-end="url(#py40-1-arrow)"/><rect x="185" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="199" y="108" class="t-small">PostgreSQL (24, 25)</text><text x="199" y="134" class="t-small">MongoDB (26)</text><text x="199" y="160" class="t-small">Redis (27)</text><text x="199" y="186" class="t-small">test thật (28)</text><text x="199" y="212" class="t-small">polars, numpy (29-30)</text><rect x="360" y="20" width="160" height="44" rx="10" class="f-pk-soft s-pk"/><text x="374" y="47" class="t-b">API (31-37)</text><path d="M520 42 L533 42" class="f-none s-phys" stroke-width="2" marker-end="url(#py40-1-arrow)"/><rect x="360" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="374" y="108" class="t-small">hợp đồng API (31-32)</text><text x="374" y="134" class="t-small">dependency (33)</text><text x="374" y="160" class="t-small">JWT (34), test (36)</text><text x="374" y="186" class="t-small">upload (35)</text><text x="374" y="212" class="t-small">gRPC (37)</text><rect x="535" y="20" width="160" height="44" rx="10" class="f-phys-soft s-phys"/><text x="549" y="47" class="t-b">Thông điệp (38-39)</text><path d="M695 42 L708 42" class="f-none s-phys" stroke-width="2" marker-end="url(#py40-1-arrow)"/><rect x="535" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="549" y="108" class="t-small">Kafka consumer (38)</text><text x="549" y="134" class="t-small">commit sau xử lý (38)</text><text x="549" y="160" class="t-small">outbox, lease (39)</text><text x="549" y="186" class="t-small">inbox khử trùng lặp (39)</text><rect x="710" y="20" width="160" height="44" rx="10" class="f-pk-soft s-pk"/><text x="724" y="47" class="t-b">Việc nền (40)</text><rect x="710" y="80" width="160" height="150" rx="10" class="f-bg s-line"/><text x="724" y="108" class="t-small">arq trên Redis</text><text x="724" y="134" class="t-small">backoff, dead-letter</text><text x="724" y="160" class="t-small">SET NX theo trip_id</text><text x="724" y="186" class="t-small">SIGTERM không mất job</text></svg>
 </div>
 <figcaption>Hình 2. P03 và P04 theo năm lớp, từ nền bất đồng bộ đến việc nền; số trong ngoặc là số bài. Các lab bài 24 đến 28 và 38 đến 40 cần dịch vụ ngoài (PostgreSQL, MongoDB, Redis, Kafka); các lab còn lại chạy trong tiến trình hoặc trên file cục bộ.</figcaption>
 </figure>
@@ -273,9 +273,9 @@ OK 26/26
 | --- | --- |
 | Job thất bại mà không được thử lại | Hàm có `raise Retry(...)` không; arq không thử lại exception thường |
 | Job thất bại nhưng DLQ trống | Dead-letter chỉ được ghi ở code của ta; kiểm nhánh lần thử cuối, lỗi vĩnh viễn, exception lạ, và job chạm `job_timeout` |
-| `enqueue_job` trả `None` | Còn khóa job hoặc kết quả của `job_id` đó (`keep_result`); dùng id mới khi đưa lại |
+| `enqueue_job` trả `None` | Còn khoá job hoặc kết quả của `job_id` đó (`keep_result`); dùng id mới khi đưa lại |
 | Job chạy hai lần, hiệu ứng hai lần | Hiệu ứng có thao tác nguyên tử kiểu `SET NX` không |
-| Sau khi deploy, job đang chạy bị hủy | `job_completion_wait` có lớn hơn job dài nhất không, và nhỏ hơn grace period của hệ thống không |
+| Sau khi deploy, job đang chạy bị huỷ | `job_completion_wait` có lớn hơn job dài nhất không, và nhỏ hơn grace period của hệ thống không |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
@@ -293,7 +293,7 @@ Bài trước: [bài 39](/articles/python-outbox-inbox-idempotent-consumer). Bà
 - [arq: tài liệu chính thức](https://arq-docs.helpmanual.io/).
 - [arq trên GitHub (README ghi chế độ chỉ bảo trì)](https://github.com/python-arq/arq).
 - [taskiq: tài liệu chính thức](https://taskiq-python.github.io/).
-- [Redis: lệnh SET (tùy chọn NX)](https://redis.io/docs/latest/commands/set/).
+- [Redis: lệnh SET (tuỳ chọn NX)](https://redis.io/docs/latest/commands/set/).
 - [Redis: lệnh LPUSH](https://redis.io/docs/latest/commands/lpush/).
 - [redis-py: tài liệu chính thức](https://redis.readthedocs.io/en/stable/).
 - [Python 3.14: module signal](https://docs.python.org/3.14/library/signal.html).

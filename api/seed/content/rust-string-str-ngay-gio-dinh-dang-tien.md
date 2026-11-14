@@ -65,7 +65,7 @@ Muốn không panic, dùng `get(0..2)` (trả `None`) hoặc `is_char_boundary`,
 error[E0277]: the type `str` cannot be indexed by `{integer}`
 ```
 
-Hai giới hạn cần biết. Một: `chars()` đếm Unicode scalar value, không phải «chữ người đọc thấy». Hai: `à` gõ dạng một code point và `a` cộng dấu huyền là hai chuỗi byte khác nhau. Lab kiểm `"\u{e0}" != "a\u{300}"`. std không chuẩn hóa; việc đó cần crate ngoài như `unicode-normalization`, bài này không dùng, nên chuẩn hóa ở biên nhập trước khi so sánh hoặc dùng làm khóa.
+Hai giới hạn cần biết. Một: `chars()` đếm Unicode scalar value, không phải «chữ người đọc thấy». Hai: `à` gõ dạng một code point và `a` cộng dấu huyền là hai chuỗi byte khác nhau. Lab kiểm `"\u{e0}" != "a\u{300}"`. std không chuẩn hoá; việc đó cần crate ngoài như `unicode-normalization`, bài này không dùng, nên chuẩn hoá ở biên nhập trước khi so sánh hoặc dùng làm khoá.
 
 ## Tách mã tài khoản và đọc số mà không sao chép
 
@@ -181,7 +181,7 @@ Lệnh thứ hai in `VERIFY OK` khi `format_vnd(25_500) == "25.500 VND"`, `forma
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Lab chỉ làm VND một ngôn ngữ, không có locale, không chuẩn hóa Unicode, không xử lý múi giờ khác, và <code>Line</code> chỉ là dòng sổ rút gọn để minh họa hiển thị. Dữ liệu múi giờ đến từ hệ điều hành; môi trường container tối giản có thể thiếu tzdata, khi đó cài gói <code>tzdata</code> hoặc bật feature <code>tzdb-bundle-always</code> của <code>jiff</code> để gói dữ liệu IANA vào binary. Chuỗi hiển thị không bao giờ quay lại thành dữ liệu lưu. Tên và số liệu là hư cấu của Tới Nơi.</p>
+<p>Lab chỉ làm VND một ngôn ngữ, không có locale, không chuẩn hoá Unicode, không xử lý múi giờ khác, và <code>Line</code> chỉ là dòng sổ rút gọn để minh hoạ hiển thị. Dữ liệu múi giờ đến từ hệ điều hành; môi trường container tối giản có thể thiếu tzdata, khi đó cài gói <code>tzdata</code> hoặc bật feature <code>tzdb-bundle-always</code> của <code>jiff</code> để gói dữ liệu IANA vào binary. Chuỗi hiển thị không bao giờ quay lại thành dữ liệu lưu. Tên và số liệu là hư cấu của Tới Nơi.</p>
 </div>
 
 **Bài tập:** `Money(-25_500)` in thế nào bằng `{:>14}`? Và `"2026-11-06T17:30:00Z"` hiển thị ngày nào ở Việt Nam, vì sao khác ngày UTC?

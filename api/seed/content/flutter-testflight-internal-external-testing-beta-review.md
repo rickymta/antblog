@@ -10,7 +10,7 @@ language: vi
 
 Thứ Sáu, bản staging của app tài xế Tới Nơi lên được App Store Connect. Thứ Bảy, chị PM mở TestFlight và thấy build ở trạng thái **Missing Compliance**: chưa ai trả lời câu hỏi về mã hoá. Thứ Hai, mười hai tài xế thử nghiệm bên ngoài công ty là tester external, nên build còn phải qua **Beta App Review**. Tình huống là minh hoạ, nhưng cả hai trở ngại đều có thật.
 
-Bài này đi hết đường của một build lên TestFlight: tải lên, trạng thái, nhóm internal và external, Beta App Review, export compliance, hạn 90 ngày, feedback và crash. Lab `56-testflight` là Dart thuần: `BetaChecklist` kiểm `Info.plist` trước khi tải lên, `TesterGroups` kiểm kế hoạch nhóm tester, cùng vài công cụ nhỏ cho thông tin test và trạng thái build.
+Bài này đi hết đường của một build lên TestFlight: tải lên, trạng thái, nhóm internal và external, Beta App Review, export compliance, hạn 90 ngày, feedback và crash. Lab `56-testflight` là Dart thuần: `BetaChecklist` kiểm tra `Info.plist` trước khi tải lên, `TesterGroups` kiểm tra kế hoạch nhóm tester, cùng vài công cụ nhỏ cho thông tin test và trạng thái build.
 
 Đây là bài 56 của lộ trình **Flutter qua Tới Nơi**. Bạn cần biết cách phân phối nội bộ ở [bài 55](/articles/flutter-firebase-app-distribution-phan-phoi-noi-bo-tester), lệnh `pilot` ở [bài 53](/articles/flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build) và profile ký iOS ở [bài 52](/articles/flutter-ky-ung-dung-ios-certificate-provisioning-profile-capabilities). Mọi con số của Apple trong bài kiểm tại 11/2026; chính sách đổi theo thời gian, hãy kiểm lại trước khi dựa vào.
 
@@ -35,7 +35,7 @@ Hình 1 vẽ đường đi từ IPA tới tester. Hai điểm dễ vấp: hộp 
 <defs><marker id="fl56-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker><marker id="fl56-1-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs>
 <rect x="15" y="30" width="190" height="90" rx="10" class="f-phys-soft s-phys"/><text x="31" y="62" class="t-b">IPA staging</text><text x="31" y="90" class="t-small">profile App Store</text>
 <rect x="245" y="30" width="190" height="90" rx="10" class="f-pk-soft s-pk"/><text x="261" y="62" class="t-b">Tải lên</text><text x="261" y="86" class="t-small">Xcode · Transporter</text><text x="261" y="106" class="t-small">altool · pilot</text>
-<rect x="475" y="30" width="190" height="90" rx="10" class="f-phys-soft s-phys"/><text x="491" y="62" class="t-b">Xử lý bởi Apple</text><text x="491" y="90" class="t-small">có email khi xong</text>
+<rect x="475" y="30" width="190" height="90" rx="10" class="f-phys-soft s-phys"/><text x="491" y="62" class="t-b">Apple xử lý</text><text x="491" y="90" class="t-small">có email khi xong</text>
 <rect x="705" y="30" width="160" height="90" rx="10" class="f-warn-soft s-warn"/><text x="721" y="62" class="t-b">Export</text><text x="721" y="82" class="t-b">compliance</text><text x="721" y="106" class="t-small">đã khai chưa?</text>
 <path d="M207 75 L243 75" class="f-none s-pk" stroke-width="2" marker-end="url(#fl56-1-a)"/>
 <path d="M437 75 L473 75" class="f-none s-pk" stroke-width="2" marker-end="url(#fl56-1-a)"/>
@@ -90,7 +90,7 @@ Theo Apple, profile thiếu application identifier thì build ở trạng thái 
 | Ready to Test, Testing | Thêm nhóm vào build |
 | Rejected, Invalid Binary, Expired | Sửa rồi tải build mới |
 
-`BuildStatus.parse` đọc đúng tên Apple và ném `FormatException` với tên lạ, kể cả "Processing", vì trạng thái đó không có trong trang của Apple.
+`BuildStatus.parse` đọc đúng tên Apple và ném `FormatException` khi gặp tên lạ, kể cả "Processing", vì trạng thái đó không có trong trang của Apple.
 
 ## Kiểm Info.plist trước khi tải lên
 
@@ -176,7 +176,7 @@ String? resolveBuildSettings(String value, Map<String, String> settings) {
       }
 ```
 
-Apple đòi tối thiểu là build khác nhau; "phải tăng" là luật của lab, cùng tinh thần với `versionCode` ở bài 51. `compareBuilds` so theo số, nên 10 lớn hơn 9 và 1.10 lớn hơn 1.9. Công cụ dòng lệnh gói checklist lại:
+Yêu cầu tối thiểu của Apple là số build khác nhau; "phải tăng" là luật của lab, cùng tinh thần với `versionCode` ở bài 51. `compareBuilds` so theo số, nên 10 lớn hơn 9 và 1.10 lớn hơn 1.9. Công cụ dòng lệnh gói checklist lại:
 
 ```bash
 dart run bin/beta_check.dart driver native-config/driver/ios/Info.plist \
@@ -188,11 +188,11 @@ error build-not-increasing [CFBundleVersion]: Build 42 không lớn hơn bản �
 1 lỗi, 0 cảnh báo.
 ```
 
-Mã thoát là 0 khi không có lỗi (cảnh báo vẫn in), 1 khi có lỗi, 2 khi dùng sai. Checklist chỉ đọc file, không thấy mã đã biên dịch: `Package.swift` của `geolocator_apple` ghi rằng app chỉ-khi-đang-dùng có thể gặp lỗi ITMS-90683 khi tải lên, trừ khi build với `BYPASS_PERMISSION_LOCATION_ALWAYS=1` (bài 35). Checklist sạch chưa đảm bảo bản tải lên sạch.
+Mã thoát là 0 khi không có lỗi (cảnh báo vẫn in), 1 khi có lỗi, 2 khi dùng sai. Checklist chỉ đọc file, không thấy mã đã biên dịch: `Package.swift` của `geolocator_apple` ghi rằng app chỉ xin quyền vị trí khi đang dùng có thể gặp lỗi ITMS-90683 khi tải lên, trừ khi build với `BYPASS_PERMISSION_LOCATION_ALWAYS=1` (bài 35). Checklist sạch chưa đảm bảo bản tải lên sạch.
 
 ## Export compliance và ITSAppUsesNonExemptEncryption
 
-Apple coi app có dùng mã hoá là phần mềm xuất khẩu, nên chịu quy định xuất khẩu của Mỹ và quy định nhập khẩu của nước phân phối. Khoá `ITSAppUsesNonExemptEncryption` trả lời ngay trong file: `NO` nghĩa là app, kể cả thư viện bên thứ ba, không dùng mã hoá hoặc chỉ dùng loại được miễn tài liệu; `YES` là ngược lại, thường kèm `ITSEncryptionExportComplianceCode`, mã Apple cấp sau khi duyệt tài liệu. Thiếu khoá, App Store Connect hỏi bộ câu hỏi ở mỗi bản tải lên, và build dừng ở Missing Compliance cho tới khi có người trả lời.
+Apple coi app có dùng mã hoá là phần mềm xuất khẩu, nên chịu quy định xuất khẩu của Mỹ và quy định nhập khẩu của nước phân phối. Khoá `ITSAppUsesNonExemptEncryption` trả lời sẵn câu hỏi đó ngay trong file: `NO` nghĩa là app, kể cả thư viện bên thứ ba, không dùng mã hoá hoặc chỉ dùng loại được miễn tài liệu; `YES` là ngược lại, thường kèm `ITSEncryptionExportComplianceCode`, mã Apple cấp sau khi duyệt tài liệu. Thiếu khoá, App Store Connect hỏi bộ câu hỏi ở mỗi bản tải lên, và build dừng ở Missing Compliance cho tới khi có người trả lời.
 
 Lab dùng `false` cho cả hai app, và ba điều cần nói thẳng. Một, ví dụ miễn trừ trong tài liệu Apple là HTTPS qua `URLSession`, tức mã hoá có sẵn trong hệ điều hành. Hai, `dio` mặc định dùng `HttpClient` của `dart:io` (đọc trong mã nguồn dio 5.11.1), và theo thông báo của nhóm Dart, `dart:io` dùng BoringSSL cho TLS từ năm 2015, nên đường đó không đi qua `URLSession`. Ba, Apple nói trách nhiệm phân loại là của nhà phát triển, và app dùng mã hoá được miễn vẫn có thể phải nộp báo cáo tự phân loại hằng năm cho chính phủ Mỹ.
 
@@ -222,7 +222,7 @@ Vì vậy "app chỉ dùng HTTPS thì khai `NO`" là một lập trường cần
     }
 ```
 
-Khoá thiếu là cảnh báo, kiểu sai là lỗi, `true` không có mã là lỗi, `false` mà vẫn có mã là cảnh báo mâu thuẫn. Build đã ở Missing Compliance thì trả lời ngay trong TestFlight (nút Manage của build), cần vai trò Account Holder, Admin hoặc App Manager.
+Thiếu khoá thì cảnh báo, sai kiểu thì báo lỗi, `true` mà không có mã cũng là lỗi, còn `false` mà vẫn có mã thì cảnh báo mâu thuẫn. Build đã ở Missing Compliance thì trả lời ngay trong TestFlight (nút Manage của build), cần vai trò Account Holder, Admin hoặc App Manager.
 
 ## Nhóm tester: internal, external và public link
 
@@ -245,7 +245,7 @@ Mỗi app trên App Store Connect có nhóm riêng, nên app khách và app tài
 <figcaption>Hình 3. Hai loại nhóm của một app. Mũi tên vàng đứt: phải có nhóm internal trước khi tạo nhóm external. Mũi tên xanh: hai cách mời vào nhóm external.</figcaption>
 </figure>
 
-Theo Apple, internal là người dùng App Store Connect trong đội, tối đa 100 người, giữ một trong năm vai trò ở hình; external tối đa 10.000 mỗi app. Public link mở cho mọi người hoặc lọc theo thiết bị và phiên bản hệ điều hành, có thể đặt giới hạn từ 1 đến 10.000 tester. Link ai cũng chia sẻ được và người vào bằng link hiện ẩn danh. Vì vậy ta mời tài xế từng người bằng email, còn khách thử dùng link:
+Theo Apple, internal là người dùng App Store Connect trong đội, tối đa 100 người, giữ một trong năm vai trò ở hình; external tối đa 10.000 mỗi app. Public link mở cho mọi người hoặc lọc theo thiết bị và phiên bản hệ điều hành, có thể đặt giới hạn từ 1 đến 10.000 tester. Link ai cũng chia sẻ được và người vào bằng link là ẩn danh. Vì vậy ta mời tài xế từng người bằng email, còn khách thử dùng link:
 
 ### tester_groups.dart · 56-testflight/lib/src/tester_groups.dart (trích)
 
@@ -390,7 +390,7 @@ Phản hồi đi theo hai đường. Tester dùng TestFlight 2.3 trở lên gử
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Năm lỗi hay gặp với TestFlight</span>
 <ul>
-<li><strong>Build kẹt ở Missing Compliance mỗi lần tải lên.</strong> Dấu hiệu: bản nào cũng chờ có người bấm trả lời. Nguyên nhân: Info.plist thiếu <code>ITSAppUsesNonExemptEncryption</code>. Cách sửa: khai khoá sau khi chủ sản phẩm chốt câu trả lời; <code>encryption-key-missing</code> bắt ca này.</li>
+<li><strong>Build kẹt ở Missing Compliance mỗi lần tải lên.</strong> Dấu hiệu: bản nào cũng chờ có người bấm trả lời. Nguyên nhân: Info.plist thiếu <code>ITSAppUsesNonExemptEncryption</code>. Cách sửa: khai khoá sau khi chủ sản phẩm chốt câu trả lời; <code>encryption-key-missing</code> bắt trường hợp này.</li>
 <li><strong>Không gửi được cho tester external.</strong> Dấu hiệu: App Store Connect đòi thêm thông tin trước khi gửi review. Nguyên nhân: mô tả beta hoặc thông tin review còn trống, hoặc thiếu tài khoản demo. Cách sửa: điền Test Information; <code>validateForExternal</code> liệt kê trường thiếu.</li>
 <li><strong>Build number trùng hoặc không tăng.</strong> Dấu hiệu: bản tải lên bị từ chối. Nguyên nhân: số build gõ tay hoặc lấy từ nguồn không tăng. Cách sửa: CI truyền số tăng đơn điệu (bài 54); <code>build-not-increasing</code> bắt sớm.</li>
 <li><strong>Thiếu hoặc để trống mô tả quyền.</strong> Dấu hiệu: email báo lỗi sau khi tải lên, ví dụ ITMS-90683 với app khách. Nguyên nhân: khoá mô tả thiếu, hoặc mã đã biên dịch của plugin tham chiếu API cần khoá đó. Cách sửa: khai đủ khoá, và với app khách build có cờ bỏ quyền Always của <code>geolocator_apple</code>.</li>
@@ -414,7 +414,7 @@ dart run bin/beta_check.dart customer native-config/customer/ios/Info.plist \
 
 Đã kiểm với Dart 3.13.3 (Flutter 3.47.4): `dart analyze` 0 issue, **128 test xanh**, lệnh cuối thoát mã 0. Mức: **Kiểm chứng cấu hình**. Test không dùng mạng, không cần thiết bị, và thời điểm luôn được truyền vào, không đọc đồng hồ thật.
 
-Test của checklist chứng minh từng luật: mô tả vị trí thiếu, rỗng hoặc còn giữ chỗ, khác biệt khách và tài xế, push, khoá mã hoá, thay biến build, và so số build ở các ca biên (10 so với 9, 1.10 so với 1.9, "043" so với 43). Test nhóm tester chứng minh các biên 100, 101, 10.000, 10.001; test review chứng minh mốc đúng 24 giờ, `retryAt` và hạn 90 ngày. `native_config_test.dart` đọc file thật trong `native-config/` và chạy `ruby -c` trên lane mẫu (bỏ qua khi máy không có Ruby). Ta cũng thử đổi bảy chỗ trong mã nguồn (như `<=` thành `<`, các mốc 100, 10.000, giới hạn Notes 4.000 byte, biên cửa sổ 24 giờ) và mỗi lần đều có test đỏ.
+Test của checklist chứng minh từng luật: mô tả vị trí thiếu, rỗng hoặc còn giữ chỗ, khác biệt khách và tài xế, push, khoá mã hoá, thay biến build, và so số build ở các trường hợp biên (10 so với 9, 1.10 so với 1.9, "043" so với 43). Test nhóm tester chứng minh các biên 100, 101, 10.000, 10.001; test review chứng minh mốc đúng 24 giờ, `retryAt` và hạn 90 ngày. `native_config_test.dart` đọc file thật trong `native-config/` và chạy `ruby -c` trên lane mẫu (bỏ qua khi máy không có Ruby). Ta cũng thử đổi bảy chỗ trong mã nguồn (như `<=` thành `<`, các mốc 100, 10.000, giới hạn Notes 4.000 byte, biên cửa sổ 24 giờ) và mỗi lần đều có test đỏ.
 
 **Chưa làm**, nói thẳng: chưa tải lên TestFlight, chưa chạy `flutter build ipa`, `altool`, `pilot` hay Transporter; chưa tạo nhóm, mời tester, gửi Beta App Review, và chưa thấy trạng thái nào của Apple thật. Lane `beta_external` chỉ được kiểm cú pháp Ruby (bản 2.6.10 của hệ thống) và nội dung file; tên tham số `pilot` đối chiếu với docs.fastlane.tools, chưa với bản cài thật. Danh sách trường Test Information riêng của TestFlight chưa đối chiếu được trên form. Build tăng dần, ngưỡng 14 ngày và cách đếm 100 internal là quyết định của lab, không phải luật Apple.
 

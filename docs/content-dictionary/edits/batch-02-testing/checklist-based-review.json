@@ -1,0 +1,71 @@
+{
+"file": "checklist-based-review.md",
+"edits": [
+{
+"old": "(tài liệu review + 2 ca vitest làm bằng chứng)",
+"new": "(tài liệu review + 2 test vitest làm bằng chứng)",
+"reason": "'ca vitest' là cụm tự ghép",
+"severity": "low"
+},
+{
+"old": "là checklist được tổ chức **tự xây dần**, vì nó phản ánh",
+"new": "là checklist do chính tổ chức **tự xây dần**, vì checklist đó phản ánh",
+"reason": "Bị động gượng, 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "thiếu chuẩn bị thì review thành sửa câu chữ.",
+"new": "thiếu chuẩn bị thì buổi review chỉ còn là sửa câu chữ.",
+"reason": "Câu cụt, dịch sát",
+"severity": "low"
+},
+{
+"old": "Thiếu ca nguy hiểm nhất",
+"new": "Thiếu tình huống nguy hiểm nhất",
+"reason": "'ca' mơ hồ",
+"severity": "low"
+},
+{
+"old": "PAY-09 không tự nghĩ ra: nó đến từ việc đọc R-TEST-03",
+"new": "PAY-09 không phải tự nghĩ ra mà đến từ việc đọc R-TEST-03",
+"reason": "Tránh 'nó', câu rõ chủ ngữ",
+"severity": "medium"
+},
+{
+"old": "luôn > 0; ca 0 đ và số âm?",
+"new": "luôn > 0; tình huống 0 đ và số âm thì sao?",
+"reason": "Cụm 'ca 0 đ' cụt, khó hiểu",
+"severity": "medium"
+},
+{
+"old": "Phát hiện C-1 tìm ra **chỉ bằng đọc**:",
+"new": "Phát hiện C-1 có được **chỉ nhờ đọc**:",
+"reason": "'tìm ra chỉ bằng đọc' gượng, thiếu thành phần",
+"severity": "medium"
+},
+{
+"old": "Dùng hằng có tên thay số «ma thuật»?",
+"new": "Dùng hằng có tên thay magic number?",
+"reason": "Thuật ngữ quen dùng, giữ tiếng Anh",
+"severity": "low"
+},
+{
+"old": "<b>Số ma thuật, sai giới hạn</b>",
+"new": "<b>Magic number, sai giới hạn</b>",
+"reason": "Thuật ngữ quen dùng, giữ tiếng Anh",
+"severity": "low"
+},
+{
+"old": "«không dùng số ma thuật»",
+"new": "«không dùng magic number»",
+"reason": "Thuật ngữ quen dùng, giữ tiếng Anh",
+"severity": "low"
+},
+{
+"old": "và một ca kiểm thử đồng thời cho Series 08.",
+"new": "và một test case đồng thời cho Series 08.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+}
+]
+}

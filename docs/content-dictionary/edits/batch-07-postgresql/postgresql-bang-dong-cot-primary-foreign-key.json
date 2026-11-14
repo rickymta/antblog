@@ -1,0 +1,18 @@
+{"file":"postgresql-bang-dong-cot-primary-foreign-key.md","edits":[
+{"old":"«chuyến đồ ăn lúc 12 giờ trưa qua»","new":"«chuyến đồ ăn lúc 12 giờ trưa hôm qua»","reason":"'trưa qua' không tự nhiên; khớp với đoạn mở bài","severity":"high"},
+{"old":"«Làm sao chỉ đúng **một** chuyến, rồi từ đó tới đúng **một** khách, **một** tài xế» chính là câu hỏi về khoá","new":"Câu hỏi «Làm sao chỉ ra đúng **một** chuyến, rồi từ đó tới đúng **một** khách, **một** tài xế?» chính là câu hỏi về khoá","reason":"Câu thiếu động từ 'chỉ ra' và chủ ngữ","severity":"high"},
+{"old":"Một bảng có thể có vài ứng viên: với","new":"Một bảng có thể có vài khoá ứng viên (candidate key): với","reason":"Lược mất danh từ chính","severity":"medium"},
+{"old":"Ta chọn **một** ứng viên làm **primary key**","new":"Ta chọn **một** khoá ứng viên làm **primary key**","reason":"Lược mất danh từ chính","severity":"medium"},
+{"old":"Một bảng có nhiều nhất một primary key","new":"Một bảng có tối đa một primary key","reason":"'nhiều nhất một' gượng","severity":"low"},
+{"old":"Viết các câu lệnh này là việc của [PG-005]","new":"Cách viết các câu lệnh này nằm ở [PG-005]","reason":"'là việc của' gượng","severity":"medium"},
+{"old":"do quản trị đặt vì danh mục nhỏ, gần như không đổi","new":"do quản trị viên đặt, vì danh mục nhỏ và gần như không đổi","reason":"'quản trị' lược danh từ","severity":"medium"},
+{"old":"Ba truy vấn chạy trên lab sau `00`→`02`,","new":"Ba truy vấn dưới đây chạy trên lab sau khi chạy các tệp `00`→`02`,","reason":"Câu cụt","severity":"low"},
+{"old":"Trong hệ thật <code>id</code> ngẫu nhiên","new":"Trong hệ thống thật, <code>id</code> ngẫu nhiên","reason":"'hệ thật' cụt","severity":"medium"},
+{"old":"Thêm chuyến cho khách không tồn tại, và xoá thành phố Đà Nẵng","new":"Hai ví dụ dưới đây là thêm chuyến cho khách không tồn tại, và xoá thành phố Đà Nẵng","reason":"Câu thiếu động từ chính","severity":"high"},
+{"old":"không bị foreign key kiểm.","new":"không bị foreign key kiểm tra.","reason":"'kiểm' đứng một mình gượng","severity":"medium"},
+{"old":"Đọc thành câu: một khách nhiều chuyến (khách `0900000001` có 3 chuyến trong fixture), một tài xế nhiều chuyến theo thời gian, một chuyến nhiều sự kiện.","new":"Đọc thành câu: một khách có nhiều chuyến (khách `0900000001` có 3 chuyến trong fixture), một tài xế có nhiều chuyến theo thời gian, một chuyến có nhiều sự kiện.","reason":"Câu lược động từ","severity":"medium"},
+{"old":"lab kiểm bằng B3 của","new":"lab kiểm tra bằng B3 của","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Chi phí đó được đo ở Phần 3 — không phải lý do bỏ foreign key.","new":"Phần 3 sẽ đo chi phí này, và đây không phải lý do để bỏ foreign key.","reason":"Bỏ bị động, câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Không chạy, đoán mã lỗi và tên ràng buộc","new":"Không chạy lệnh, hãy đoán mã lỗi và tên ràng buộc","reason":"Câu cụt","severity":"low"},
+{"old":"Tự kiểm: chép câu lệnh","new":"Tự kiểm tra: chép câu lệnh","reason":"'kiểm' đứng một mình gượng","severity":"low"}
+]}

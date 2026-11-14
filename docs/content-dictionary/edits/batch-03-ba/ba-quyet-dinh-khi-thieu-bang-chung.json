@@ -1,0 +1,17 @@
+{"file":"ba-quyet-dinh-khi-thieu-bang-chung.md","edits":[
+{"old":"P01, vận hành muốn giảm khó khăn","new":"P01, bộ phận vận hành muốn giảm khó khăn","reason":"Thiếu chủ thể khi nhắc tới bộ phận","severity":"medium"},
+{"old":"cần được ghi riêng với bằng chứng về hiệu quả giải pháp.","new":"cần được ghi riêng, tách biệt với bằng chứng về hiệu quả giải pháp.","reason":"\"ghi riêng với\" mơ hồ","severity":"low"},
+{"old":"không có nghĩa nhóm được kéo dài discovery vô hạn.","new":"không có nghĩa là nhóm được phép kéo dài discovery vô hạn.","reason":"Thiếu \"là\", làm rõ nghĩa","severity":"medium"},
+{"old":"Mình có thể đưa quyết định cho bước tiếp theo trong một tuần","new":"Mình có thể đưa ra quyết định về bước tiếp theo trong một tuần","reason":"Giọng dịch máy, thiếu động từ","severity":"medium"},
+{"old":"Trong thời gian đó, vận hành xem xét biện pháp","new":"Trong thời gian đó, bộ phận vận hành xem xét biện pháp","reason":"Thiếu chủ thể khi nhắc tới bộ phận","severity":"medium"},
+{"old":"| Ca thất bại tập trung ở địa điểm nhiều cổng;","new":"| Lượt thất bại tập trung ở địa điểm nhiều cổng;","reason":"\"ca\" lược danh từ, thống nhất \"lượt\"","severity":"medium"},
+{"old":"Xem lại một số ca có bối cảnh,","new":"Xem lại một số lượt có bối cảnh,","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"Đối chiếu ca cho thấy lý do khác với nhãn","new":"Đối chiếu từng lượt cho thấy lý do khác với nhãn","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"cùng đúng ở các nhóm ca.","new":"cùng đúng ở các nhóm lượt khác nhau.","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"Nếu nhiều ca cần trao đổi phát sinh","new":"Nếu nhiều lượt cần trao đổi phát sinh","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"phụ thuộc nó có giảm được rủi ro chọn sai đáng kể","new":"phụ thuộc vào việc nó có giảm được rủi ro chọn sai đáng kể","reason":"Thiếu từ nối","severity":"medium"},
+{"old":"để chọn ca và đo mục tiêu?","new":"để chọn lượt và đo mục tiêu?","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"Với ca P01, bảng định tính","new":"Với tình huống P01, bảng định tính","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"hoặc chưa có owner vận hành.","new":"hoặc chưa có người phụ trách vận hành.","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Không. Nó có thể hỗ trợ giả thuyết về hiểu và sử dụng;","new":"Không. Prototype có thể hỗ trợ giả thuyết về hiểu và sử dụng;","reason":"Tránh \"Nó\" ở đầu câu","severity":"medium"}
+]}

@@ -1,0 +1,95 @@
+{
+"file": "dart-package-pubspec-lint-test-toi-noi-core.md",
+"edits": [
+{
+"old": "Bạn đã đọc bài C# về [record, struct và Money](/articles/csharp-record-struct-money-quote) sẽ thấy cùng ý tưởng value object, chỉ khác cú pháp.",
+"new": "Nếu đã đọc bài C# về [record, struct và Money](/articles/csharp-record-struct-money-quote), bạn sẽ thấy cùng ý tưởng value object, chỉ khác cú pháp.",
+"reason": "Câu thiếu quan hệ từ, chủ ngữ lẫn với mệnh đề phụ",
+"severity": "medium"
+},
+{
+"old": "Hai lối vào kiểm tra khác nhau.",
+"new": "Hai đường vào có cách kiểm tra khác nhau.",
+"reason": "Câu cụt, 'lối vào kiểm tra khác nhau' khó hiểu",
+"severity": "medium"
+},
+{
+"old": "khớp bảng biên của bài 02",
+"new": "khớp bảng test case biên của bài 02",
+"reason": "'bảng biên' tự ghép; thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "Nó đọc `analysis_options.yaml`, nơi ta chọn",
+"new": "Lệnh này đọc `analysis_options.yaml`, nơi ta chọn",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "low"
+},
+{
+"old": "lọt vào mà không ai hay: ép kiểu ngầm",
+"new": "lọt vào mà không ai biết: ép kiểu ngầm",
+"reason": "'không ai hay' khẩu ngữ",
+"severity": "low"
+},
+{
+"old": "(bài 05) là lỗi âm thầm.",
+"new": "(bài 05) là lỗi mà compiler không báo.",
+"reason": "'âm thầm' là calque của silent",
+"severity": "medium"
+},
+{
+"old": "`test` cho một ca, `group` gom các ca cùng chủ đề",
+"new": "`test` cho một test case, `group` gom các test case cùng chủ đề",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "để mỗi ca có dữ liệu mới.",
+"new": "để mỗi test case có dữ liệu mới.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "ta không viết tay 64 ca.",
+"new": "ta không viết tay 64 test case.",
+"reason": "Thống nhất 'test case'",
+"severity": "medium"
+},
+{
+"old": "một trong 64 ca sẽ đỏ",
+"new": "một trong 64 test sẽ đỏ",
+"reason": "Thống nhất cách gọi test",
+"severity": "medium"
+},
+{
+"old": "Nó khai báo `toi_noi_core` bằng **path dependency**:",
+"new": "Project này khai báo `toi_noi_core` bằng **path dependency**:",
+"reason": "Tránh 'Nó' đầu câu",
+"severity": "low"
+},
+{
+"old": "vẫn bị compiler bắt buộc đủ nhánh",
+"new": "vẫn bị compiler buộc phải đủ nhánh",
+"reason": "Thiếu 'phải', câu cụt",
+"severity": "low"
+},
+{
+"old": "Thử xoá một nhánh, ví dụ `PickedUp() => ...`, `dart analyze` báo",
+"new": "Nếu thử xoá một nhánh, ví dụ `PickedUp() => ...`, `dart analyze` sẽ báo",
+"reason": "Câu điều kiện thiếu 'nếu'",
+"severity": "low"
+},
+{
+"old": "Mức: **Kiểm chứng tự động**, không cần thiết bị.",
+"new": "Mức kiểm chứng: **kiểm chứng tự động**, không cần thiết bị.",
+"reason": "Cụm 'Mức:' thiếu danh từ",
+"severity": "low"
+},
+{
+"old": "`implements Comparable<Money>` cho `list.sort()` chạy trên danh sách `Money`;",
+"new": "`implements Comparable<Money>` giúp `list.sort()` chạy được trên danh sách `Money`;",
+"reason": "'cho ... chạy' gượng",
+"severity": "low"
+}
+]
+}

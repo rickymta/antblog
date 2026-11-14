@@ -1,0 +1,59 @@
+{
+"file": "azure-well-architected-framework-5-tru-cot.md",
+"edits": [
+{
+"old": "Nó đo thiết kế và quy trình, thứ không có trong telemetry.",
+"new": "Review đo thiết kế và quy trình, những thứ không có trong telemetry.",
+"reason": "Tránh 'Nó' chỉ sự vật ở đầu câu",
+"severity": "medium"
+},
+{
+"old": "Mức bảo vệ theo hậu quả của việc mất môi trường đó, không theo thói quen",
+"new": "Mức bảo vệ phải tương xứng với hậu quả khi mất môi trường đó, không dựa theo thói quen",
+"reason": "Câu thiếu động từ",
+"severity": "medium"
+},
+{
+"old": "min/max đã kiểm với tải;",
+"new": "min/max đã được kiểm tra với tải;",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "và nó được đo liên tục?",
+"new": "và được đo liên tục?",
+"reason": "Bỏ 'nó' thừa",
+"severity": "low"
+},
+{
+"old": "Truy vấn nóng đã kiểm bằng `EXPLAIN`",
+"new": "Truy vấn nóng đã kiểm tra bằng `EXPLAIN`",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "Nó yếu ở bối cảnh nghiệp vụ.",
+"new": "Advisor yếu ở bối cảnh nghiệp vụ.",
+"reason": "Tránh 'Nó' chỉ sự vật ở đầu câu",
+"severity": "medium"
+},
+{
+"old": "là tự bắn vào chân:",
+"new": "là tự làm hại mình:",
+"reason": "Calque thành ngữ 'shoot yourself in the foot'",
+"severity": "medium"
+},
+{
+"old": "Lệnh này ẩn gợi ý 30 ngày rồi nó xuất hiện lại.",
+"new": "Lệnh này ẩn gợi ý 30 ngày, sau đó gợi ý xuất hiện lại.",
+"reason": "Câu thiếu liên kết, đại từ 'nó' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "sẽ âm thầm nuốt tin.",
+"new": "sẽ nuốt tin mà không báo lỗi.",
+"reason": "Calque 'silently'",
+"severity": "medium"
+}
+]
+}

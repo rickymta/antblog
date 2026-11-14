@@ -1,0 +1,16 @@
+{"file":"azure-entra-id-tenant-user-group-app-registration.md","edits":[
+{"old":"Mọi thứ bắt đầu từ câu hỏi nằm dưới cùng: ai đang gọi?","new":"Mọi thứ bắt đầu từ câu hỏi nền tảng nhất: ai đang gọi?","reason":"'nằm dưới cùng' là cụm gượng, dịch từng chữ","severity":"medium"},
+{"old":"Câu hỏi nó trả lời là «đây là ai».","new":"Entra ID trả lời câu hỏi «đây là ai».","reason":"Tránh 'nó' ở đầu mệnh đề, nhắc lại chủ thể","severity":"medium"},
+{"old":"Thành viên được quyết định bởi","new":"Cách xác định thành viên","reason":"Bị động 'được ... bởi' kiểu tiếng Anh","severity":"medium"},
+{"old":"Khi một ứng dụng cần nhận hoặc kiểm token, nó phải","new":"Khi một ứng dụng cần nhận hoặc kiểm tra token, ứng dụng đó phải","reason":"'kiểm' thiếu 'tra'; làm rõ chủ ngữ","severity":"medium"},
+{"old":"Client không nên đọc ruột access token của API khác","new":"Client không nên đọc nội dung bên trong access token của API khác","reason":"'đọc ruột' quá khẩu ngữ, gượng","severity":"low"},
+{"old":"API phải kiểm chữ ký bằng khoá công khai của tenant, rồi kiểm các claim sau:","new":"API phải kiểm tra chữ ký bằng khoá công khai của tenant, rồi kiểm tra các claim sau:","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Giải mã payload không bằng kiểm chứng token.","new":"Giải mã payload không đồng nghĩa với xác minh token.","reason":"'không bằng kiểm chứng' là câu gượng, dễ hiểu nhầm","severity":"high"},
+{"old":"Cách kiểm trong ASP.NET Core nằm ở","new":"Cách kiểm tra trong ASP.NET Core nằm ở","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Khối đầu chỉ dựng object; nó không chứng minh","new":"Khối đầu chỉ dựng object; khối này không chứng minh","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"nên client gọi endpoint nào thì định dạng token vẫn do nó quyết định.","new":"nên client gọi endpoint nào thì định dạng token vẫn do thuộc tính này quyết định.","reason":"'nó' mơ hồ","severity":"medium"},
+{"old":"Mặc định nó chưa được consent","new":"Mặc định Azure CLI chưa được consent","reason":"'nó' mơ hồ, nhắc lại chủ thể","severity":"low"},
+{"old":"API cấu hình kiểm sai phiên bản sẽ từ chối token hợp lệ","new":"API kiểm tra theo sai phiên bản sẽ từ chối token hợp lệ","reason":"Câu lược, 'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"một lỗi an toàn nhưng làm hỏng tính năng.","new":"một lỗi theo hướng an toàn nhưng làm hỏng tính năng.","reason":"'lỗi an toàn' dịch từng chữ của fail-safe","severity":"low"},
+{"old":"kiểm sai theo hướng ngược lại (chỉ kiểm `aud`) nguy hiểm ở đâu?","new":"kiểm tra sai theo hướng ngược lại (chỉ kiểm tra `aud`) nguy hiểm ở đâu?","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

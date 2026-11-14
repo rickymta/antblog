@@ -1,0 +1,15 @@
+{"file":"postgresql-cai-dat-lab-psql-ket-noi.md","edits":[
+{"old":"cách nhanh nhất để để lại một dòng rác","new":"cách nhanh nhất để bỏ lại một dòng rác","reason":"Lặp 'để để'","severity":"medium"},
+{"old":"ghi lại chỗ khác.","new":"ghi lại chỗ khác biệt.","reason":"'chỗ khác' cụt","severity":"medium"},
+{"old":"bộ test so `OUTPUT.txt` từng byte","new":"bộ test đối chiếu `OUTPUT.txt` từng byte","reason":"'so' đứng một mình gượng","severity":"low"},
+{"old":"Kết quả thật (lược phần lặp lại câu lệnh):","new":"Kết quả thật (đã lược phần in lại câu lệnh):","reason":"Câu cụt","severity":"low"},
+{"old":"hiện giá trị hiện tại của một tham số cấu hình","new":"cho thấy giá trị hiện tại của một tham số cấu hình","reason":"Lặp 'hiện'","severity":"low"},
+{"old":"Bỏ thiết lập của runner, PGlite quay về","new":"Khi bỏ thiết lập của runner, PGlite quay về","reason":"Câu thiếu quan hệ từ","severity":"medium"},
+{"old":"Trên máy viết bài thư mục này nặng khoảng 27 MB.","new":"Trên máy viết bài, thư mục này có dung lượng khoảng 27 MB.","reason":"'nặng' khẩu ngữ","severity":"low"},
+{"old":"Lệnh dưới theo README của lab,","new":"Lệnh dưới đây lấy theo README của lab,","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Ví dụ minh hoạ (chưa chạy) cho `\\conninfo` qua socket trong container; với `\\dt toinoi.*` bạn sẽ thấy","new":"Dưới đây là ví dụ minh hoạ (chưa chạy) cho `\\conninfo` qua socket trong container; còn với `\\dt toinoi.*` bạn sẽ thấy","reason":"Câu cụt, thiếu động từ chính","severity":"medium"},
+{"old":"(mật khẩu giữ chỗ trong `docker-compose.yml`, đừng dùng mật khẩu thật)","new":"(mật khẩu mẫu trong `docker-compose.yml`, đừng dùng mật khẩu thật)","reason":"'giữ chỗ' là calque của placeholder","severity":"low"},
+{"old":"Dọn là một phần của thí nghiệm","new":"Dọn dẹp là một phần của thí nghiệm","reason":"'Dọn' đứng một mình cụt","severity":"low"},
+{"old":"Đếm lại ở lần chạy sau thì nhận `ERROR:  relation \"toinoi.cities\" does not exist` — schema đã đi cùng sáu bảng.","new":"Đếm lại ở lần chạy sau thì nhận được `ERROR:  relation \"toinoi.cities\" does not exist`, vì schema đã biến mất cùng sáu bảng.","reason":"'nhận' thiếu 'được'; 'đã đi cùng' gượng","severity":"medium"},
+{"old":"nhờ thư mục lưu.","new":"nhờ thư mục lưu dữ liệu.","reason":"'thư mục lưu' cụt","severity":"low"}
+]}

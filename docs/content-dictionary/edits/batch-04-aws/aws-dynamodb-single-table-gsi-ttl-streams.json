@@ -1,0 +1,17 @@
+{"file":"aws-dynamodb-single-table-gsi-ttl-streams.md","edits":[
+{"old":"Bài này dựng chỗ ở riêng cho dữ liệu nóng của dispatch","new":"Bài này dựng nơi lưu trữ riêng cho dữ liệu nóng của dispatch","reason":"'chỗ ở' gượng, nghe như dịch từ 'home'","severity":"low"},
+{"old":"dồn nhiều ghi vào một giá trị","new":"dồn nhiều lượt ghi vào một giá trị","reason":"'nhiều ghi' thiếu danh từ; thống nhất 'lượt ghi'","severity":"medium"},
+{"old":"có thể xin đọc strongly consistent","new":"có thể yêu cầu đọc strongly consistent","reason":"'xin' gượng (request)","severity":"low"},
+{"old":"nhưng sai: toàn bộ tài xế rảnh của một thành phố cùng một khoá. Cả thành phố dùng chung một khoá index nghĩa là mọi lượt đổi trạng thái","new":"nhưng sai: toàn bộ tài xế rảnh của một thành phố dùng chung một khoá. Việc cả thành phố dùng chung một khoá index nghĩa là mọi lượt đổi trạng thái","reason":"Câu thiếu động từ; chủ ngữ của 'nghĩa là' chưa rõ","severity":"high"},
+{"old":"Cái giá là sau query index cần","new":"Cái giá là sau khi query index, ta cần","reason":"Câu cụt, thiếu liên từ và chủ ngữ","severity":"medium"},
+{"old":"và \"tài xế rảnh\" kiểm `updated_at` còn mới.","new":"và với \"tài xế rảnh\" thì phải kiểm tra `updated_at` còn mới.","reason":"Câu lược động từ/liên từ","severity":"medium"},
+{"old":"giải quyết bằng một điều kiện kiểm tra và ghi nguyên tử:","new":"giải quyết việc này bằng một thao tác kiểm tra điều kiện và ghi nguyên tử:","reason":"Thiếu tân ngữ; trật tự từ kiểu Anh","severity":"medium"},
+{"old":"Nhưng nhận chuyến đổi cả hai item","new":"Nhưng nhận chuyến làm thay đổi cả hai item","reason":"'đổi' dùng như ngoại động từ, gượng","severity":"low"},
+{"old":"thành một transaction tất cả hoặc không:","new":"thành một transaction được thực hiện trọn vẹn hoặc không thực hiện gì:","reason":"Calque của all-or-nothing; câu cụt","severity":"medium"},
+{"old":"retry muộn hơn được chặn bởi item `IDEMP#` sống 24 giờ.","new":"item `IDEMP#` sống 24 giờ sẽ chặn retry muộn hơn.","reason":"Bỏ bị động kiểu Anh","severity":"medium"},
+{"old":"giữ 24 giờ, đúng thứ tự theo từng item.","new":"giữ 24 giờ và giữ đúng thứ tự theo từng item.","reason":"Câu lược động từ","severity":"low"},
+{"old":"giới hạn số lần thử và đích lỗi","new":"giới hạn số lần thử lại và đích lỗi","reason":"'số lần thử' thiếu 'lại' (retry)","severity":"low"},
+{"old":"vị trí đổi mỗi 4 giây nên không hợp.","new":"vị trí đổi mỗi 4 giây nên DAX không phù hợp.","reason":"Thiếu chủ ngữ","severity":"medium"},
+{"old":"nếu cần Scan, access pattern còn thiếu.","new":"nếu phải dùng Scan thì access pattern còn thiếu.","reason":"Câu cụt, thiếu liên từ","severity":"low"},
+{"old":"Kiểm trên máy: `terraform fmt`","new":"Đã kiểm tra trên máy: `terraform fmt`","reason":"'Kiểm' cụt, thiếu chủ thể/thì","severity":"medium"}
+]}

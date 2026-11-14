@@ -1,0 +1,125 @@
+{
+  "file": "ba-giai-quyet-yeu-cau-xung-dot.md",
+  "edits": [
+    {
+      "old": "Dùng đề nghị xem lịch sử trao đổi của CSKH để lập conflict log",
+      "new": "Dựa vào đề nghị xem lịch sử trao đổi của CSKH để lập conflict log",
+      "reason": "Câu thiếu động từ rõ nghĩa, 'dùng đề nghị' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Vận hành muốn xem toàn bộ lịch sử trao đổi",
+      "new": "Bộ phận vận hành muốn xem toàn bộ lịch sử trao đổi",
+      "reason": "Thiếu chủ thể bộ phận",
+      "severity": "high"
+    },
+    {
+      "old": "là đề nghị giả lập từ vận hành;",
+      "new": "là đề nghị giả lập từ bộ phận vận hành;",
+      "reason": "Thiếu chủ thể bộ phận",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó giúp nhóm thấy nhóm đó chưa có tiếng nói đầy đủ",
+      "new": "Việc này giúp nhóm thấy khách chưa có tiếng nói đầy đủ",
+      "reason": "Tránh 'Nó' và lặp 'nhóm'",
+      "severity": "medium"
+    },
+    {
+      "old": "phải được ghi nguồn và owner;",
+      "new": "phải được ghi nguồn và người phụ trách;",
+      "reason": "owner có từ Việt tự nhiên",
+      "severity": "low"
+    },
+    {
+      "old": "Trong bài tập chưa có chính sách chi tiết hoặc chat được triển khai.",
+      "new": "Trong bài tập chưa có chính sách chi tiết, cũng chưa triển khai chat.",
+      "reason": "Câu lược động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Ghi mục tiêu chung ở mức có thể kiểm:",
+      "new": "Ghi mục tiêu chung ở mức có thể kiểm chứng:",
+      "reason": "'kiểm' cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Chờ chuyển cấp, owner và lịch trực phải rõ",
+      "new": "Chờ chuyển cấp, người phụ trách và lịch trực phải rõ",
+      "reason": "owner có từ Việt tự nhiên",
+      "severity": "low"
+    },
+    {
+      "old": "Người review đánh giá: thông tin có đủ ra quyết định không",
+      "new": "Người review đánh giá: thông tin có đủ để ra quyết định không",
+      "reason": "Thiếu 'để'",
+      "severity": "low"
+    },
+    {
+      "old": "điều kiện khiến thứ hạng đổi.",
+      "new": "điều kiện khiến thứ hạng thay đổi.",
+      "reason": "'đổi' cụt",
+      "severity": "low"
+    },
+    {
+      "old": "“Vận hành ưu tiên tốc độ xử lý;",
+      "new": "“Bộ phận vận hành ưu tiên tốc độ xử lý;",
+      "reason": "Thiếu chủ thể bộ phận",
+      "severity": "medium"
+    },
+    {
+      "old": "WS-01 đòi phạm vi dữ liệu rộng, nhu cầu từng loại ca và quyền chưa chốt",
+      "new": "WS-01 đòi phạm vi dữ liệu rộng, trong khi nhu cầu từng loại ca và quyền chưa chốt",
+      "reason": "Câu rối, thiếu liên kết",
+      "severity": "medium"
+    },
+    {
+      "old": "Owner nghiệp vụ, dữ liệu/truy cập và kỹ thuật review; kiểm bằng case giả",
+      "new": "Người phụ trách nghiệp vụ, dữ liệu/truy cập và kỹ thuật review; kiểm bằng test case giả",
+      "reason": "owner thành người phụ trách; thống nhất 'ca' (đã chỉnh khi duyệt)",
+      "severity": "medium"
+    },
+    {
+      "old": "ghi việc cần quyết định và ảnh hưởng chờ,",
+      "new": "ghi việc cần quyết định và ảnh hưởng của việc phải chờ,",
+      "reason": "'ảnh hưởng chờ' lược từ",
+      "severity": "medium"
+    },
+    {
+      "old": "vận hành muốn bắt buộc khách chọn cổng",
+      "new": "bộ phận vận hành muốn bắt buộc khách chọn cổng",
+      "reason": "Thiếu chủ thể bộ phận",
+      "severity": "medium"
+    },
+    {
+      "old": "Cần kiểm khả năng hiểu, owner dữ liệu, cách fallback và ảnh hưởng tới hoàn thành đặt xe.",
+      "new": "Cần kiểm tra khả năng hiểu, người phụ trách dữ liệu, cách fallback và ảnh hưởng tới việc hoàn tất đặt xe.",
+      "reason": "Lược từ; owner thành người phụ trách",
+      "severity": "medium"
+    },
+    {
+      "old": "| Đối chiếu case, thời điểm, phiên bản và nguồn |",
+      "new": "| Đối chiếu ca, thời điểm, phiên bản và nguồn |",
+      "reason": "Thống nhất 'ca' (bài dùng 'ca' nhiều hơn)",
+      "severity": "low"
+    },
+    {
+      "old": "Chỉ thông tin điểm đón của case đang xử lý",
+      "new": "Chỉ thông tin điểm đón của ca đang xử lý",
+      "reason": "Thống nhất 'ca'",
+      "severity": "low"
+    },
+    {
+      "old": "Làm rõ case hỗ trợ và mapping trước;",
+      "new": "Làm rõ ca hỗ trợ và mapping trước;",
+      "reason": "Thống nhất 'ca'",
+      "severity": "low"
+    },
+    {
+      "old": "Các hoạt động độc lập như phân loại case và sửa",
+      "new": "Các hoạt động độc lập như phân loại ca và sửa",
+      "reason": "Thống nhất 'ca'",
+      "severity": "low"
+    }
+  ]
+}

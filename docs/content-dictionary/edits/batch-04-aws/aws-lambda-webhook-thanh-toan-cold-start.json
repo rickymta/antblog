@@ -1,0 +1,14 @@
+{"file":"aws-lambda-webhook-thanh-toan-cold-start.md","edits":[
+{"old":"endpoint này gần như im lặng.","new":"endpoint này gần như không có request nào.","reason":"'im lặng' là calque (quiet)","severity":"medium"},
+{"old":"chỉ để chờ webhook thì phí;","new":"chỉ để chờ webhook thì lãng phí;","reason":"'thì phí' lược mất từ, khó hiểu","severity":"medium"},
+{"old":"Nhưng nó cũng có thể tạo môi trường mới bất kỳ lúc nào","new":"Nhưng Lambda cũng có thể tạo môi trường mới bất kỳ lúc nào","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"Hệ quả thiết kế: khởi tạo thứ đắt (SDK client, đọc secret) ngoài handler để warm tái dùng;","new":"Hệ quả thiết kế là nên khởi tạo những thứ tốn kém (SDK client, đọc secret) ngoài handler để các lần warm tái dùng;","reason":"Câu thiếu chủ ngữ và động từ; 'thứ đắt' gượng","severity":"medium"},
+{"old":"nên mọi request phải bị nghi ngờ tới khi chứng minh được.","new":"nên mọi request đều phải bị coi là chưa đáng tin cho tới khi xác minh được.","reason":"Câu bị động kiểu Anh, 'chứng minh được' thiếu đối tượng","severity":"medium"},
+{"old":"Hàm làm ba việc theo thứ tự và không làm gì hơn:","new":"Hàm làm ba việc theo thứ tự và không làm thêm gì khác:","reason":"'không làm gì hơn' là calque","severity":"low"},
+{"old":"thay vì nhét vào biến môi trường dạng chữ thường","new":"thay vì nhét vào biến môi trường dưới dạng văn bản thuần (plaintext)","reason":"'chữ thường' dễ hiểu thành lowercase","severity":"medium"},
+{"old":"Trả lời nhanh là có chủ đích: bắt VíXanh chờ đối soát thì request chậm sẽ hết hạn","new":"Trả lời nhanh là có chủ đích: nếu bắt VíXanh chờ đối soát, request chậm sẽ hết hạn","reason":"Câu điều kiện thiếu từ nối, trật tự khó đọc","severity":"medium"},
+{"old":"giữ sẵn môi trường đã init để triệt cold start,","new":"giữ sẵn môi trường đã init để loại bỏ cold start,","reason":"'triệt' gượng","severity":"low"},
+{"old":"Cold start tệ khi hàm nặng init","new":"Cold start ảnh hưởng nặng khi hàm nặng init","reason":"'tệ' khẩu ngữ, calque của 'bad'","severity":"low"},
+{"old":"cho VíXanh; nó gửi lại, và nếu hết lượt","new":"cho VíXanh; VíXanh sẽ gửi lại, và nếu hết lượt","reason":"'nó' mơ hồ giữa Lambda và VíXanh","severity":"medium"},
+{"old":"Đừng gây hiệu ứng không idempotent.","new":"Đừng tạo tác dụng phụ không idempotent.","reason":"'hiệu ứng' là calque của side effect","severity":"medium"}
+]}

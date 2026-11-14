@@ -1,0 +1,8 @@
+{"file":"quy-trinh-kiem-thu-test-process.md","edits":[
+{"old":"đó là kiểm thử không có quy trình. Nó không trả lời được","new":"đó là kiểm thử không có quy trình. Cách làm này không trả lời được","reason":"'Nó' chỉ sự vật trừu tượng, mơ hồ","severity":"medium"},
+{"old":"không phải ca hiếm.","new":"không phải trường hợp hiếm.","reason":"'ca' là cách gọi tự ghép; dùng 'trường hợp' để khỏi lẫn với test case","severity":"medium"},
+{"old":"ta sẽ thấy ma trận truy vết lộ ra điều đó.","new":"ma trận truy vết sẽ cho ta thấy điều đó.","reason":"Câu lủng củng, kiểu dịch máy","severity":"medium"},
+{"old":"sắp lịch chạy (ca rủi ro cao trước)","new":"sắp lịch chạy (test case rủi ro cao trước)","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"— nó không nói đã test đủ. Câu đó thuộc về truy vết.","new":"— chứ không cho biết đã test đủ chưa. Câu hỏi đó thuộc về truy vết.","reason":"'nó' mơ hồ; 'Câu đó' gượng","severity":"medium"},
+{"old":"và nó chỉ hiện ra nhờ ma trận.","new":"và thông tin này chỉ hiện ra nhờ ma trận.","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"medium"}
+]}

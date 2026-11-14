@@ -1,0 +1,16 @@
+{"file":"flutter-google-play-internal-closed-open-production-staged-rollout.md","edits":[
+{"old":"cho các sự thật làm nền.","new":"nêu các dữ kiện làm nền.","reason":"'sự thật' là calque của 'facts'","severity":"medium"},
+{"old":"Ta tự chọn phần trăm và nó không tự tăng.","new":"Ta tự chọn phần trăm, và mức này không tự tăng.","reason":"Tránh 'nó' mơ hồ","severity":"medium"},
+{"old":"để tránh hạ cấp nhầm (bài 51)","new":"để tránh hạ phiên bản nhầm (bài 51)","reason":"Thống nhất 'hạ phiên bản' theo bảng thuật ngữ","severity":"medium"},
+{"old":"Không áp cho internal và lần phát hành đầu của một track.","new":"Cách này không áp dụng cho internal và lần phát hành đầu của một track.","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"ở dự án Flutter ta chờ thấy nó tại","new":"ở dự án Flutter ta kỳ vọng thấy report này tại","reason":"'chờ thấy' là calque của 'expect'; 'nó' mơ hồ","severity":"medium"},
+{"old":"khi promote, `rollout` nằm giữa 0 và 1 đặt bản ở `inProgress` với tỉ lệ đó;","new":"khi promote, nếu `rollout` nằm giữa 0 và 1 thì bản được đặt ở `inProgress` với tỉ lệ đó;","reason":"Câu thiếu quan hệ điều kiện, khó hiểu","severity":"high"},
+{"old":"thì người phát hành vẫn gọi `halt()` tay.","new":"thì người phát hành vẫn gọi `halt()` thủ công.","reason":"'tay' là khẩu ngữ gượng","severity":"low"},
+{"old":"cũng làm tay.","new":"cũng làm thủ công.","reason":"'làm tay' gượng","severity":"low"},
+{"old":"Hãy mời dư vài tài xế phòng người rời.","new":"Hãy mời dư vài tài xế để đề phòng có người rời.","reason":"Câu cụt, thiếu từ nối","severity":"medium"},
+{"old":"chỉ phủ hai loại vị trí","new":"chỉ bao gồm hai loại vị trí","reason":"'phủ' là calque của 'cover'","severity":"low"},
+{"old":"lệch có thể kéo theo chặn cập nhật hoặc gỡ app.","new":"khai lệch có thể dẫn đến việc bị chặn cập nhật hoặc gỡ app.","reason":"Câu thiếu chủ ngữ, 'kéo theo chặn' gượng","severity":"medium"},
+{"old":"Cỡ mẫu có chỗ riêng vì","new":"Cỡ mẫu có ngưỡng riêng vì","reason":"'chỗ riêng' mơ hồ","severity":"medium"},
+{"old":"để so ngưỡng không dính sai số `double`.","new":"để so sánh với ngưỡng mà không bị sai số `double`.","reason":"'dính sai số' gượng, thiếu từ nối","severity":"low"},
+{"old":"danh sách email, nhập tay hoặc CSV","new":"danh sách email, nhập thủ công hoặc CSV","reason":"'nhập tay' gượng","severity":"low"}
+]}

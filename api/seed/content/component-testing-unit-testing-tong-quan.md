@@ -33,7 +33,7 @@ Giả sử system test báo: chuyến xe máy 7,4 km lúc 11:30 trời mưa có 
 
 Component testing đặt câu hỏi ở tầng thấp nhất: **từng phần nhỏ có tự làm đúng việc của nó không**, khi được kiểm riêng, không qua API, không database, không mạng. Lợi ích:
 
-- **Khoanh lỗi ngay:** test đỏ chỉ thẳng vào bước «cộng phụ phí mưa trước khi nhân 1,25».
+- **Khoanh lỗi ngay:** test đỏ chỉ thẳng vào bước «cộng phụ phí trời mưa trước khi nhân 1,25».
 - **Rẻ và nhanh:** hàng trăm test chạy trong vài mili giây, chạy được sau mỗi lần lưu file và ở bước 2 của pipeline (xem [TEST-008](/articles/kiem-thu-trong-sdlc-agile-waterfall)).
 - **Kiểm được các biên khó chạm từ ngoài:** 0,45 km, 100,05 km, đúng 13:00:00.
 
@@ -43,11 +43,11 @@ Dùng khi component có **logic**: công thức cước, máy trạng thái chuy
 
 ### 2.1. Định nghĩa
 
-CTFL v4.0.1 (mục 2.2.1) mô tả component testing — **còn gọi là unit testing** — là level tập trung **kiểm các component một cách tách riêng**. Nó thường cần hỗ trợ đặc thù như **test harness** hoặc **unit test framework**, và **thường do developer thực hiện trong môi trường phát triển của họ**.
+CTFL v4.0.1 (mục 2.2.1) mô tả component testing — **còn gọi là unit testing** — là level tập trung **kiểm các component một cách tách riêng**. Test level này thường cần hỗ trợ đặc thù như **test harness** hoặc **unit test framework**, và **thường do developer thực hiện trong môi trường phát triển của họ**.
 
 Ba chữ cần đọc kỹ:
 
-- **«Tách riêng» (in isolation):** component được kiểm mà không cần phần còn lại của hệ thống. Không có nghĩa là thay mọi thứ bằng đồ giả — xem 2.3.
+- **«Tách riêng» (in isolation):** component được kiểm mà không cần phần còn lại của hệ thống. Điều này không có nghĩa là thay mọi thứ bằng đồ giả — xem 2.3.
 - **«Thường» do developer:** không phải luật. Tester vẫn góp test condition, dữ liệu biên, review bộ test.
 - **«Component»:** theo ISTQB Glossary, là một phần của hệ thống có thể kiểm riêng. Kích cỡ do ngữ cảnh quyết định: một hàm, một class, một module.
 
@@ -114,7 +114,7 @@ Bốn test type của mục 2.2.2 đều làm được ở level này, với tr�
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
 
-**Yêu cầu nghiệp vụ.** Pricing & Quote tính giá theo bảng giá từng loại xe (R-FARE-01), làm tròn quãng đường 0,1 km half-up và kiểm khoảng [0,5; 100] km (R-FARE-02), tính theo thứ tự cố định sáu bước: cước cơ bản → cao điểm ×1,25 → phụ phí mưa 8.000 đ → voucher → cước tối thiểu → làm tròn lên 1.000 đ (R-FARE-03…08). Mọi bước trung gian không làm tròn (R-GEN-01). Kết quả trả kèm bảng chi tiết từng bước (R-FARE-10).
+**Yêu cầu nghiệp vụ.** Pricing & Quote tính giá theo bảng giá từng loại xe (R-FARE-01), làm tròn quãng đường 0,1 km half-up và kiểm khoảng [0,5; 100] km (R-FARE-02), tính theo thứ tự cố định sáu bước: cước cơ bản → cao điểm ×1,25 → phụ phí trời mưa 8.000 đ → voucher → cước tối thiểu → làm tròn lên 1.000 đ (R-FARE-03…08). Mọi bước trung gian không làm tròn (R-GEN-01). Kết quả trả kèm bảng chi tiết từng bước (R-FARE-10).
 
 **System context.** Trong kiến trúc đích, Pricing & Quote là một service riêng (§4.3): Booking gọi nó qua gRPC, nó lấy quãng đường từ MapViet, lưu quote có `pricing_version` và breakdown. Trong lab, Pricing là module `src/domain/fare.ts`, `pricing.ts` và `src/app/quote.ts` (SPEC R-ARCH-01). Lõi `calculateFare` là **hàm thuần**: không I/O, không đọc giờ hệ thống.
 
@@ -122,7 +122,7 @@ Bốn test type của mục 2.2.2 đều làm được ở level này, với tr�
 
 | Rủi ro | Thuộc level |
 |---|---|
-| Cộng phụ phí mưa trước khi nhân 1,25 (sai R-FARE-03/05) | Component |
+| Cộng phụ phí trời mưa trước khi nhân 1,25 (sai R-FARE-03/05) | Component |
 | Làm tròn tiền ở giữa công thức ⇒ lệch 1.000 đ (R-GEN-01) | Component |
 | 0,45 km bị từ chối, 100,05 km được chấp nhận (R-FARE-02) | Component |
 | Voucher kéo giá xuống dưới cước tối thiểu (R-FARE-07) | Component |
@@ -145,7 +145,7 @@ Bảng này là kết quả quan trọng của tư duy test level: **không ph�
 | `priceRequest` trong `pricing.ts` | Không gì | Thêm bưu kiện, đồ ăn; rộng hơn đề bài |
 | `priceQuote` trong `quote.ts` | Đồng hồ, thời tiết, kho voucher, kho chuyến (`ports.ts`) | Ranh giới với component integration: ghép domain với các cổng |
 
-Không có đáp án «đúng duy nhất». Điều cần là **ghi rõ** test object và lý do, để không ai tưởng test `calculateFare` đã kiểm luôn giờ cao điểm.
+Không có đáp án «đúng duy nhất». Điều cần làm là **ghi rõ** test object và lý do, để không ai tưởng test `calculateFare` đã kiểm luôn giờ cao điểm.
 
 ### 4.2. Phụ thuộc và cách cô lập
 
@@ -217,7 +217,7 @@ Từ test basis, các test condition (chưa phải test case) cho `calculateFare
 2. Quãng đường làm tròn half-up trước mọi bước; biên 0,44 / 0,45 và 100,04 / 100,05 (R-FARE-02).
 3. Ngoài khoảng ⇒ lỗi `DISTANCE_OUT_OF_RANGE`, không trả giá (R-FARE-02).
 4. Hệ số cao điểm áp lên cước cơ bản kể cả phụ phí bưu kiện (R-FARE-04, R-PARCEL-04).
-5. Phụ phí mưa cộng sau hệ số, không bị nhân (R-FARE-05).
+5. Phụ phí trời mưa cộng sau hệ số, không bị nhân (R-FARE-05).
 6. Voucher tính trên số sau bước 3, theo min(percent × A, trần); dưới `minAmount` ⇒ `VOUCHER_MIN_AMOUNT` (R-FARE-06, R-VOUCHER-06).
 7. Cước tối thiểu áp sau voucher (R-FARE-07).
 8. Làm tròn lên 1.000 đ chỉ ở bước cuối; giá trị trung gian giữ phần lẻ (R-FARE-08, R-GEN-01, R-FARE-10).
@@ -257,7 +257,7 @@ Kỹ thuật biến các condition này thành test case (EP, BVA, decision tabl
 | D9 | bike, 2 km, cao điểm, phụ phí bưu kiện 2.000 | (12.000 + 9.000 + 2.000) × 1,25 = 28.750 | 29.000 đ |
 | D10 | car, 100,04 / 100,05 km | ⇒ 100,0 km: 1.125.000 / ⇒ 100,1 km | 1.125.000 đ / lỗi |
 
-**Quan sát: vì sao component test rẻ.** Lab có sẵn ba tệp test khói ở `tests/smoke/` (không phải code của bài này), mỗi tệp ở một tầng. Chạy từng tệp:
+**Quan sát: vì sao component test rẻ.** Lab có sẵn ba tệp smoke test ở `tests/smoke/` (không phải code của bài này), mỗi tệp ở một tầng. Chạy từng tệp:
 
 ```bash
 cd examples/toi-noi-testing
@@ -294,7 +294,7 @@ Số đo của một lần chạy trên máy viết bài (Windows 11, Node 22.18
 <p><b>Test object:</b> ba hàm export và các hằng <code>MAX_PARCEL_KG</code>, <code>BIKE_MAX_KG</code>, <code>FREE_KG</code>. <b>Test basis:</b> R-PARCEL-01 (làm tròn 0,1 kg, 0 &lt; w ≤ 30), R-PARCEL-02 (&gt; 20 kg phải ô tô), R-PARCEL-03 (2.000 đ mỗi kg bắt đầu vượt 5 kg). R-PARCEL-04 (phụ phí bị nhân hệ số) thuộc <code>calculateFare</code>, không thuộc tệp này. <b>Dữ liệu:</b> 0,04 / 0,05 / 30,04 / 30,05 kg; 20,0 kg với <code>bike</code> (được) và 20,1 kg với <code>bike</code> (lỗi <code>VEHICLE_TOO_SMALL</code>); 5 / 5,1 / 6,0 / 6,1 / 30 kg ⇒ 0 / 2.000 / 2.000 / 4.000 / 50.000 đ. <b>Cô lập:</b> không phụ thuộc nào cần thay. <b>Rủi ro đáng chú ý:</b> 6,1 − 5 trong dấu phẩy động — code tính trên số phần mười kg để tránh.</p>
 </details>
 
-**Bài 2.** `customerCancellationFee` trong `src/domain/cancel.ts` phụ thuộc thời gian («đúng 2 phút sau khi nhận»). Nó cô lập phụ thuộc này thế nào? Nếu hàm tự gọi `Date.now()`, việc kiểm ở level component khó hơn ra sao?
+**Bài 2.** `customerCancellationFee` trong `src/domain/cancel.ts` phụ thuộc thời gian («đúng 2 phút sau khi nhận»). Hàm này cô lập phụ thuộc đó thế nào? Nếu hàm tự gọi `Date.now()`, việc kiểm ở level component khó hơn ra sao?
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
@@ -353,7 +353,7 @@ Số đo của một lần chạy trên máy viết bài (Windows 11, Node 22.18
 
 **Câu 5 (K2).** Lỗi nào ít khả năng được phát hiện nhất bởi component test của `calculateFare`?
 
-- a) Phụ phí mưa bị nhân 1,25
+- a) Phụ phí trời mưa bị nhân 1,25
 - b) 100,05 km được chấp nhận
 - c) Giá bị làm tròn ở bước cao điểm
 - d) MapViet trả quãng đường bằng mét thay vì km
@@ -372,7 +372,7 @@ Số đo của một lần chạy trên máy viết bài (Windows 11, Node 22.18
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>c) đúng.</b> «Component» trong cộng đồng microservices thường là cả service; ISTQB nhấn vào kiểm tách riêng. a) bỏ qua khác biệt. b) acceptance nhằm validation nhu cầu người dùng. d) database riêng của service là một phần của hệ thống Tới Nơi, không phải hệ bên ngoài.</p>
+<p><b>c) đúng.</b> «Component» trong cộng đồng microservices thường là cả service; ISTQB nhấn mạnh việc kiểm tách riêng. a) bỏ qua khác biệt. b) acceptance nhằm validation nhu cầu người dùng. d) database riêng của service là một phần của hệ thống Tới Nơi, không phải hệ bên ngoài.</p>
 </details>
 
 ## 8. Tài liệu tham khảo

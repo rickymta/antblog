@@ -15,12 +15,12 @@ Lần đầu thử EKS, một kỹ sư của Tới Nơi dựng cluster bằng co
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Bạn chạy <code>terraform apply</code> bằng một role SSO và cluster tạo xong. Máy bạn chạy <code>kubectl get nodes</code> và nhận <code>Unauthorized</code>. Bạn là người tạo cluster, vậy vì sao?</p>
-<details><summary>Xem đáp án</summary><p>Với cluster dùng access entries, quyền không đến từ việc "ai tạo". Nó chỉ đến từ một access entry cho đúng IAM principal. Hoặc cluster chưa có entry admin cho role của bạn (module cần <code>enable_cluster_creator_admin_permissions = true</code>), hoặc <code>kubectl</code> đang dùng profile khác với profile chạy Terraform.</p></details>
+<details><summary>Xem đáp án</summary><p>Với cluster dùng access entries, quyền không đến từ việc "ai tạo". Quyền chỉ đến từ một access entry cho đúng IAM principal. Hoặc cluster chưa có entry admin cho role của bạn (module cần <code>enable_cluster_creator_admin_permissions = true</code>), hoặc <code>kubectl</code> đang dùng profile khác với profile chạy Terraform.</p></details>
 </div>
 
 ## Cluster bằng module eks
 
-Resource thuần cần khoảng chục thành phần chỉ để có một cluster chạy được: IAM role, security group, log group, KMS, add-on, node group. Module `terraform-aws-modules/eks` gói chúng lại. Lab ghim bản `~> 21.0` (lúc soạn bài resolve ra 21.29.0). Bản 21 đổi tên nhiều biến so với bản 20 (`name` thay `cluster_name`, `kubernetes_version` thay `cluster_version`, `addons` thay `cluster_addons`), nên đừng chép ví dụ cũ trên mạng mà không đối chiếu phiên bản.
+Nếu viết bằng resource thuần, bạn cần khoảng chục thành phần chỉ để có một cluster chạy được: IAM role, security group, log group, KMS, add-on, node group. Module `terraform-aws-modules/eks` gói chúng lại. Lab ghim bản `~> 21.0` (lúc soạn bài resolve ra 21.29.0). Bản 21 đổi tên nhiều biến so với bản 20 (`name` thay `cluster_name`, `kubernetes_version` thay `cluster_version`, `addons` thay `cluster_addons`), nên đừng chép ví dụ cũ trên mạng mà không đối chiếu phiên bản.
 
 ```hcl
 module "eks" {
@@ -62,7 +62,7 @@ Add-on khai báo ngay trong module. Hai add-on cần có **trước** khi node k
 
 ## Node group Graviton, Spot và on-demand
 
-Lab có hai managed node group. `base` luôn chạy hai node on-demand cho add-on và service không chịu gián đoạn. `spot` dùng capacity type `SPOT`, mặc định không có node nào được bảo đảm, và gắn taint để chỉ pod nào khai `tolerations` mới lên đó.
+Lab có hai managed node group. `base` luôn chạy hai node on-demand cho add-on và service không chịu gián đoạn. `spot` dùng capacity type `SPOT`, không bảo đảm node nào được giữ lại, và gắn taint để chỉ pod nào khai `tolerations` mới lên đó.
 
 ```hcl
   eks_managed_node_groups = {
@@ -89,7 +89,7 @@ Lab có hai managed node group. `base` luôn chạy hai node on-demand cho add-o
   }
 ```
 
-Graviton (`m7g`, kiến trúc arm64) thường rẻ hơn x86 cùng cỡ, nhưng **image phải build cho arm64**, đúng lỗi `exec format error` ở bài 12. Cụm Spot liệt kê nhiều loại instance cùng cỡ (2 vCPU, 8 GiB) để có nhiều vùng giá và ít bị thu hồi đồng loạt; một danh sách chỉ một loại làm Spot rất dễ cạn.
+Graviton (`m7g`, kiến trúc arm64) thường rẻ hơn x86 cùng cỡ, nhưng **image phải build cho arm64**, đúng lỗi `exec format error` ở bài 12. Node group Spot liệt kê nhiều loại instance cùng cỡ (2 vCPU, 8 GiB) để có nhiều vùng giá và ít bị thu hồi đồng loạt; danh sách chỉ có một loại khiến Spot rất dễ hết capacity.
 
 ## Mạng và bảo mật của cluster
 
@@ -150,7 +150,7 @@ Hai nhóm người cần vào cluster, và lab khai cả hai bằng `access_entr
   }
 ```
 
-Role CI giờ không sửa được namespace `tracking` nên một pipeline bị lỗi cấu hình không đụng được service khác. Cái giá: mỗi lần thêm bounded context, bạn phải cập nhật danh sách namespace ở đây. Role do IAM Identity Center tạo có path `aws-reserved/sso.amazonaws.com/`; access entry nhận ARN có path, khác `aws-auth` buộc bỏ path.
+Role CI giờ không sửa được namespace `tracking` nên một pipeline bị lỗi cấu hình không đụng được service khác. Cái giá: mỗi lần thêm bounded context, bạn phải cập nhật danh sách namespace ở đây. Role do IAM Identity Center tạo có path `aws-reserved/sso.amazonaws.com/`; access entry nhận ARN có path, khác với `aws-auth` là nơi buộc phải bỏ path.
 
 Sau khi cluster có, ghi context và kiểm tra:
 
@@ -161,7 +161,7 @@ kubectl config use-context toinoi-lab-eks
 kubectl get nodes -L toinoi.example/capacity
 ```
 
-`--alias` đặt tên context dễ nhớ; khi có thêm `toinoi-staging-eks` và `toinoi-prod-eks`, luôn xem `kubectl config current-context` trước khi chạy lệnh có tác dụng phụ. Một lệnh `delete` trên nhầm cluster là sự cố kinh điển.
+`--alias` đặt tên context dễ nhớ; khi có thêm `toinoi-staging-eks` và `toinoi-prod-eks`, luôn xem `kubectl config current-context` trước khi chạy lệnh có tác dụng phụ. Chạy lệnh `delete` nhầm cluster là sự cố kinh điển.
 
 ## Namespace theo bounded context
 
@@ -226,8 +226,8 @@ managedNodeGroups:
 | | Terraform (module eks) | eksctl |
 |---|---|---|
 | State | Terraform state | CloudFormation stack do eksctl tạo |
-| Phạm vi | Cluster cùng IAM, tag subnet, mọi resource AWS khác | Chủ yếu cluster và phụ kiện |
-| Sửa sau khi tạo | `plan` cho thấy khác biệt | Có lệnh cho từng việc, ít cái nhìn tổng thể |
+| Phạm vi | Cluster cùng IAM, tag subnet, mọi resource AWS khác | Chủ yếu cluster và add-on |
+| Sửa sau khi tạo | `plan` cho thấy khác biệt | Có lệnh riêng cho từng việc, khó nhìn tổng thể |
 | Hợp với | Hạ tầng lâu dài, review qua PR, nhiều môi trường | Thử nghiệm nhanh, demo, học |
 
 Với Tới Nơi, Terraform thắng vì cluster cùng state, cùng quy trình review với VPC. Mỗi cluster chỉ dùng một công cụ.
@@ -264,13 +264,13 @@ Lệnh trên đưa node group `base` lên AMI mới nhất của phiên bản Ku
 ## Cái giá phải trả
 
 - **Chi phí không nằm một chỗ.** Cluster tính theo giờ kể cả khi rỗng; cộng thêm node, EBS, NAT gateway, log và dữ liệu qua AZ. Hai node `base` và một NAT chạy cả tuần đã là khoản đáng kể.
-- **Spot không phải on-demand rẻ hơn.** Node Spot có thể bị thu hồi sau thông báo ngắn; chỉ đặt service chịu được gián đoạn lên đó.
-- **PDB quá chặt chặn cập nhật.** `minAvailable` bằng số replica nghĩa là không bao giờ drain được. Để dư chỗ cho ít nhất một pod nghỉ.
+- **Spot không đơn giản là on-demand với giá rẻ hơn.** Node Spot có thể bị thu hồi sau thông báo ngắn; chỉ đặt service chịu được gián đoạn lên đó.
+- **PDB quá chặt chặn cập nhật.** `minAvailable` bằng số replica nghĩa là không bao giờ drain được. Hãy để dư chỗ cho ít nhất một pod được phép ngừng hoạt động.
 - **Quên taint, quên toleration.** Pod không có tolerations không bao giờ lên node Spot; pod có tolerations mà chưa có node Spot thì ở trạng thái Pending.
 
 **Bài tập:** một node Spot đang chạy pod `dispatch` bị thu hồi. Pod đi đâu, và bạn chuẩn bị gì trước để giảm thiệt hại?
 
-<details><summary>Xem đáp án</summary><p>Managed node group nhận khuyến nghị cân bằng hoặc thông báo thu hồi, nên EKS dựng node thay thế và drain node cũ. Pod bị evict, rồi Deployment tạo pod mới và scheduler đặt nó lên node còn chỗ có tolerations phù hợp: node Spot khác nếu còn, hoặc đứng Pending cho tới khi có node mới. Muốn giảm thiệt hại: chạy nhiều hơn một replica trải qua các AZ, đặt PDB, cho pod xử lý <code>SIGTERM</code> gọn (đóng consumer, trả message về hàng đợi) trong <code>terminationGracePeriodSeconds</code>, và dùng nhiều loại instance cho cụm Spot. Pod không chịu được gián đoạn thì không gắn tolerations để nó ở node <code>base</code>.</p></details>
+<details><summary>Xem đáp án</summary><p>Managed node group nhận khuyến nghị rebalance hoặc thông báo thu hồi, nên EKS dựng node thay thế và drain node cũ. Pod bị evict, rồi Deployment tạo pod mới và scheduler đặt nó lên node còn chỗ có tolerations phù hợp: node Spot khác nếu còn, hoặc đứng Pending cho tới khi có node mới. Muốn giảm thiệt hại: chạy nhiều hơn một replica trải qua các AZ, đặt PDB, cho pod xử lý <code>SIGTERM</code> gọn (đóng consumer, trả message về hàng đợi) trong <code>terminationGracePeriodSeconds</code>, và dùng nhiều loại instance cho cụm Spot. Pod không chịu được gián đoạn thì không gắn tolerations để nó ở node <code>base</code>.</p></details>
 
 ## Lab: Terraform, manifest và kiểm chứng
 

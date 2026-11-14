@@ -16,7 +16,7 @@ language: vi
 
 US-P04-01 đề xuất: “Là khách đặt xe, tôi muốn xem và xác nhận thông tin điểm đón mình cung cấp để biết thông tin nào đang được dùng cho lượt đặt xe.” Giá trị ở đây là sự rõ ràng, chưa phải lời hứa giảm huỷ hoặc bảo đảm tài xế đã đọc.
 
-Vai trò cần đủ cụ thể để xét quyền và bối cảnh. “Người dùng” có thể là khách, tài xế hoặc CSKH với quyền khác nhau. “Hệ thống” đôi lúc xuất hiện trong công việc nền, nhưng không nên dùng nó để che câu hỏi ai nhận lợi ích.
+Vai trò cần đủ cụ thể để xét quyền và bối cảnh. “Người dùng” có thể là khách, tài xế hoặc CSKH với quyền khác nhau. “Hệ thống” đôi lúc xuất hiện trong công việc nền, nhưng không nên dùng vai trò này để che câu hỏi ai nhận lợi ích.
 
 ## 2. Card, Conversation, Confirmation
 
@@ -28,7 +28,7 @@ Vai trò cần đủ cụ thể để xét quyền và bối cảnh. “Người
 | Conversation | Khi nào được sửa, xác nhận nghĩa là gì, dữ liệu cũ thì sao? |
 | Confirmation | Chủ lượt, searching, revision khớp thì ghi nhận đúng bản; state/revision đổi thì không xác nhận bản cũ |
 
-Đừng hoàn thiện câu văn rồi coi refinement xong. Nếu developer và tester còn hiểu “xác nhận” thành hai trạng thái khác nhau, story vẫn chưa đủ rõ.
+Đừng hoàn thiện câu văn rồi coi như refinement đã xong. Nếu developer và tester còn hiểu “xác nhận” thành hai trạng thái khác nhau, story vẫn chưa đủ rõ.
 
 ## 3. Phân biệt story, task và rule
 
@@ -43,21 +43,21 @@ Task kỹ thuật có giá trị trong kế hoạch, không cần ép tất cả
 
 ## 4. Làm rõ phạm vi đầu tiên
 
-P04 giới hạn ghi trước khi tài xế nhận. Sau accepted, sửa điểm đón chưa thuộc lát cắt đầu; tài xế được gán xem dữ liệu là story liên quan. Đây là đề xuất phạm vi để học đặc tả, chưa được duyệt sản phẩm.
+P04 giới hạn ghi trước khi tài xế nhận. Sau accepted, việc sửa điểm đón chưa thuộc lát cắt đầu; việc tài xế được phân công xem dữ liệu là story liên quan. Đây là đề xuất phạm vi để học đặc tả, chưa được duyệt sản phẩm.
 
-Xác nhận thông tin không đổi chuyến sang picked_up. Nó chỉ ghi khách đã xác nhận revision nào. Nếu khách sửa, revision mới cần được xem/xác nhận theo rule mới; không giữ dấu xác nhận cũ cho dữ liệu khác.
+Xác nhận thông tin không đổi chuyến sang picked_up. Thao tác này chỉ ghi lại khách đã xác nhận revision nào. Nếu khách sửa, revision mới cần được xem/xác nhận theo rule mới; không giữ dấu xác nhận cũ cho dữ liệu khác.
 
 ## 5. Kiểm story có đủ để trao đổi không
 
-Hỏi: ai hưởng lợi; kết quả quan sát được là gì; có thể trình diễn một luồng trọn không; điều gì nằm ngoài phạm vi; câu hỏi nào chặn ước lượng hoặc kiểm thử? Không dùng checklist như cách chấm điểm cơ học để ép mọi story độc lập tuyệt đối.
+Hỏi: ai hưởng lợi; kết quả quan sát được là gì; có thể trình diễn một luồng trọn vẹn không; điều gì nằm ngoài phạm vi; câu hỏi nào chặn ước lượng hoặc kiểm thử? Không dùng checklist như cách chấm điểm cơ học để ép mọi story độc lập tuyệt đối.
 
 Ví dụ quyền truy cập, dữ liệu chuẩn và xử lý state đổi là các phụ thuộc thật. Story vẫn hữu ích khi phụ thuộc được nêu, nhưng không nên tuyên bố “sẵn sàng phát triển” nếu chưa có quyết định về ý nghĩa xác nhận.
 
 ## 6. Những lời hứa cần tránh
 
-“Để không bao giờ nhầm điểm đón” vượt bằng chứng P02. “Để tài xế nhìn thấy ngay” trộn kỳ vọng đồng bộ chưa được định nghĩa. Viết lợi ích gần với kết quả story kiểm được, rồi nối tới giả thuyết giá trị rộng hơn trong brief.
+“Để không bao giờ nhầm điểm đón” vượt bằng chứng P02. “Để tài xế nhìn thấy ngay” trộn kỳ vọng đồng bộ chưa được định nghĩa. Viết lợi ích sát với kết quả kiểm được của story, rồi nối tới giả thuyết giá trị rộng hơn trong brief.
 
-Với các nhóm stakeholder khác nhau, có thể cần story riêng. Không dùng một story “mọi người quản lý điểm đón” khiến quyền của khách, tài xế và hỗ trợ bị gộp.
+Với các nhóm stakeholder khác nhau, có thể cần story riêng. Không dùng một story “mọi người quản lý điểm đón” vì như vậy quyền của khách, tài xế và hỗ trợ sẽ bị gộp.
 
 ## 7. Bài tập và tự kiểm tra
 

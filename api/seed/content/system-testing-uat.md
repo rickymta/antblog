@@ -65,9 +65,9 @@ Khái niệm acceptance testing theo ISTQB đã có ở bài [Acceptance Testing
 
 Ba điều hay bị nhầm:
 
-- **Automation trong UAT.** UAT có thể dùng automation để thu evidence, nhưng một suite xanh không thay người ra quyết định. Automation trả lời "dữ liệu có đúng tiêu chí không"; nó không trả lời "khách có hiểu", "vận hành có nhận trách nhiệm".
+- **Automation trong UAT.** UAT có thể dùng automation để thu evidence, nhưng một suite xanh không thay người ra quyết định. Automation trả lời "dữ liệu có đúng tiêu chí không"; automation không trả lời "khách có hiểu", "vận hành có nhận trách nhiệm".
 - **Demo khác UAT.** Demo là trình diễn do người làm sản phẩm điều khiển. UAT cần tiêu chí đã thống nhất trước, dữ liệu xác định, actual result do người dùng tạo ra, evidence và cách xử lý sai lệch.
-- **Không phải mọi thứ gần ngày release đều là UAT.** Alpha/beta, nghiệm thu hợp đồng, nghiệm thu theo quy định có mục đích và phạm vi riêng. Gọi tất cả là "UAT" làm mất câu hỏi mỗi hoạt động đang trả lời.
+- **Không phải mọi thứ gần ngày release đều là UAT.** Alpha/beta, nghiệm thu hợp đồng, nghiệm thu theo quy định có mục đích và phạm vi riêng. Gọi tất cả là "UAT" làm mờ câu hỏi mà mỗi hoạt động đang trả lời.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -150,7 +150,7 @@ UA-06 là **đề xuất** tiêu chí bàn giao vận hành, chưa phải chức
 
 | Vai trò | Làm gì | Không được làm gì |
 |---|---|---|
-| Business owner | Chốt tiêu chí, phạm vi, ra quyết định | Ủy quyền ngầm cho pipeline |
+| Business owner | Chốt tiêu chí, phạm vi, ra quyết định | Uỷ quyền ngầm cho pipeline |
 | Đại diện khách/tài xế | Thực hiện công việc, mô tả điều thấy và hiểu | Đọc kịch bản từng click do QA soạn |
 | QA | Chuẩn bị dữ liệu, clock, ghi evidence, hỗ trợ tái hiện | Sửa dữ liệu ngầm để luồng "đẹp" |
 | Developer | Điều tra lỗi | Tự quyết sai lệch là "không đáng kể" |
@@ -158,7 +158,7 @@ UA-06 là **đề xuất** tiêu chí bàn giao vận hành, chưa phải chức
 
 Một người có thể giữ nhiều vai trò trong nhóm nhỏ, nhưng biên bản phải ghi rõ người đang ký **với trách nhiệm nào**. Không bao giờ tự điền tên hoặc chữ ký cho người chưa tham gia — kể cả "để điền cho đủ mẫu".
 
-**Trước phiên:** đóng băng build và bộ tiêu chí; chọn dữ liệu đại diện; xác nhận môi trường và giới hạn; chạy [smoke](/articles/system-testing-smoke-test) để không dành thời gian của người dùng cho lỗi khởi động. **Trong phiên:** đưa mục tiêu công việc trước ("hãy đặt một chuyến xe máy 5 km và trả tiền mặt"), để người dùng tự thao tác; nếu QA phải hướng dẫn, ghi rõ mức hỗ trợ. Ghi expected/actual theo scenario, không chỉ "OK". Gặp lỗi cản trở thì phần chưa làm được là **BLOCKED**, tách khỏi **FAIL** của phần đã kiểm và không đạt. **Sau phiên:** triage sai lệch, chốt retest, cập nhật quyết định trên đúng build.
+**Trước phiên:** đóng băng build và bộ tiêu chí; chọn dữ liệu đại diện; xác nhận môi trường và giới hạn; chạy [smoke](/articles/system-testing-smoke-test) để không dành thời gian của người dùng cho lỗi khởi động. **Trong phiên:** đưa mục tiêu công việc trước ("hãy đặt một chuyến xe máy 5 km và trả tiền mặt"), để người dùng tự thao tác; nếu QA phải hướng dẫn, ghi rõ mức hỗ trợ. Ghi expected/actual theo scenario, không chỉ "OK". Gặp lỗi cản trở thì ghi **BLOCKED** cho phần chưa làm được, tách khỏi **FAIL** của phần đã kiểm và không đạt. **Sau phiên:** triage sai lệch, chốt retest, cập nhật quyết định trên đúng build.
 
 ## 6. Thực hành 1 — supporting checks tự động
 
@@ -172,7 +172,7 @@ npm test -- articles/system-testing-uat
 npm run typecheck
 ```
 
-Suite có bốn case: UA-01, UA-02 với hai mốc thời gian, UA-03. API Express nối PGlite; `FixedClock` cố định 09:00 giờ VN ngày 04/11/2026, seed reset trước từng test, DB đóng cuối suite. Không cần browser hay server ngoài.
+Suite có bốn test case: UA-01, UA-02 với hai mốc thời gian, UA-03. API Express nối PGlite; `FixedClock` cố định 09:00 giờ VN ngày 04/11/2026, seed reset trước từng test, DB đóng cuối suite. Không cần browser hay server ngoài.
 
 ### 6.2. Đọc assertion
 
@@ -290,7 +290,7 @@ Cuối scenario, hỏi khách giải thích trạng thái cuối và số tiền
 
 **UA-02 — Huỷ trước và đúng mốc tính phí.** Vai trò: khách + tài xế. Basis: R-CANCEL-01/02/03/06/07. Hai chuyến độc lập, reset giữa lượt; QA đặt clock 1 phút hoặc đúng 2 phút sau khi tài xế nhận. Khách huỷ, quan sát phí/lý do: lượt 1 miễn phí, lượt 2 phí 10.000 đ. Kiểm trạng thái cancelled, tài xế tiếp tục nhận việc được. Ghi khách có hiểu phí và lý do không; UI dùng chữ khác mã API (`grace_period`, `charged`) là bình thường nếu ý nghĩa đúng. Không đòi màn preview chưa có trong SPEC. Kết quả: **NOT RUN**.
 
-**UA-03 — Báo giá hết hạn.** Vai trò: khách. Basis: R-QUOTE-01/03. Lấy báo giá, QA đưa clock tới đúng hạn 5 phút, khách đặt. Kỳ vọng lỗi hết hạn, không có chuyến; khách tự lấy báo giá mới và đặt lại. Phần tự động chỉ kiểm việc từ chối quote cũ; bước khách *tự hiểu và báo giá lại* phải quan sát riêng. Kết quả: **NOT RUN**.
+**UA-03 — Báo giá hết hạn.** Vai trò: khách. Basis: R-QUOTE-01/03. Lấy báo giá, QA đưa clock tới đúng hạn 5 phút, khách đặt. Kỳ vọng hệ thống trả lỗi hết hạn và không tạo chuyến; khách tự lấy báo giá mới và đặt lại. Phần tự động chỉ kiểm việc từ chối quote cũ; bước khách *tự hiểu và báo giá lại* phải quan sát riêng. Kết quả: **NOT RUN**.
 
 **UA-04 — Khoản thu chưa xác nhận.** Vai trò: nghiệp vụ thanh toán/vận hành. Basis: R-PAY-04/06 và [SYS-14](/articles/system-testing-recovery-test) RC-03 (ví mất phản hồi cả ba lần: ví đã trừ một lần nhưng DB ghi `failed`). Xem evidence mô phỏng, mô tả cách tra cứu, đối soát, tránh thu trùng và cập nhật có kiểm toán. Kết quả: **BLOCKED cho xử lý end-to-end** — lab chưa có console, ledger thật hay worker reconciliation. Có thể review evidence kỹ thuật, nhưng không đánh dấu workflow xử lý tiền là đạt. Owner: **chưa chỉ định**.
 
@@ -347,7 +347,7 @@ Hai nguyên tắc đi kèm bảng:
 
 ### 9.1. Ba lựa chọn
 
-**Chấp nhận**, **chấp nhận có điều kiện**, **chưa chấp nhận**. Chấp nhận có điều kiện phải ghi phạm vi, ngoại lệ, owner, hạn xử lý và **điều kiện làm quyết định hết hiệu lực** (ví dụ: "hết hiệu lực nếu chưa có quy trình đối soát UAR-01 trước khi bật VíXanh"). Nó không phải cách đổi lỗi chặn thành PASS. Gate cụ thể do dự án thống nhất; đừng đặt một tỷ lệ pass để thay quyết định.
+**Chấp nhận**, **chấp nhận có điều kiện**, **chưa chấp nhận**. Chấp nhận có điều kiện phải ghi phạm vi, ngoại lệ, owner, hạn xử lý và **điều kiện làm quyết định hết hiệu lực** (ví dụ: "hết hiệu lực nếu chưa có quy trình đối soát UAR-01 trước khi bật VíXanh"). Đây không phải cách đổi lỗi chặn thành PASS. Gate cụ thể do dự án thống nhất; đừng đặt một tỷ lệ pass để thay quyết định.
 
 ### 9.2. Biên bản — để trống có chủ đích
 
@@ -374,13 +374,13 @@ Hiện trạng đọc theo các chỉ số này: 6 scenario, 0 PASS từ phiên 
 
 ## 10. Mở rộng nâng cao
 
-**ATDD (Acceptance Test-Driven Development).** Thống nhất ví dụ trước khi triển khai, dùng chính ví dụ đó làm acceptance check. Cái bẫy: để fixture kỹ thuật (tên bảng, mã lỗi) dần thay ngôn ngữ nghiệp vụ. UA-02 nên được viết "khách huỷ đúng 2 phút sau khi tài xế nhận thì trả 10.000 đ", còn `feeReason: 'charged'` là chi tiết của supporting check.
+**ATDD (Acceptance Test-Driven Development).** Thống nhất ví dụ trước khi triển khai, dùng chính ví dụ đó làm acceptance check. Cái bẫy: để fixture kỹ thuật (tên bảng, mã lỗi) dần thay thế ngôn ngữ nghiệp vụ. UA-02 nên được viết "khách huỷ đúng 2 phút sau khi tài xế nhận thì trả 10.000 đ", còn `feeReason: 'charged'` là chi tiết của supporting check.
 
 **Risk-based UAT.** Ưu tiên tiền, huỷ, quyền truy cập, xử lý gián đoạn và vai trò ít được kiểm (ở đây là vận hành). Biến thể dữ liệu chọn bằng bảng quyết định như [SYS-03](/articles/system-testing-functional-test); không nhân mọi tổ hợp thành phố × xe × phương thức nếu không có lý do rủi ro. Ghi rõ nhóm bị loại khỏi phạm vi.
 
 **Nghiệm thu nhiều bên có mục tiêu xung đột.** Hoàn thành chuyến dù ví lỗi (R-PAY-06) giúp tài xế làm tiếp nhưng tạo khoản cần đối soát cho vận hành. Biên bản phải ghi ai sở hữu quyết định từng tiêu chí; không lấy lợi ích của một bên để che rủi ro của bên kia.
 
-**Continuous delivery.** Pipeline có thể tự thu evidence và áp dụng cơ chế phê duyệt đã được tổ chức ủy quyền (ví dụ: owner phê duyệt trên một change request gắn build ID). Vẫn phải truy được build → tiêu chí → evidence → quyết định. Pipeline xanh không tự sinh ra thẩm quyền nghiệm thu.
+**Continuous delivery.** Pipeline có thể tự thu evidence và áp dụng cơ chế phê duyệt đã được tổ chức uỷ quyền (ví dụ: owner phê duyệt trên một change request gắn build ID). Vẫn phải truy được build → tiêu chí → evidence → quyết định. Pipeline xanh không tự sinh ra thẩm quyền nghiệm thu.
 
 **Release dossier.** Nối bằng chứng [security](/articles/system-testing-security-pentest), [performance](/articles/system-testing-performance-test), [compatibility](/articles/system-testing-compatibility-test), [usability](/articles/system-testing-usability-test), [integrity](/articles/system-testing-data-integrity-test) và [recovery](/articles/system-testing-recovery-test) với phạm vi UAT. Không gom mọi kết quả lịch sử thành một "chứng nhận hiện tại": mỗi dòng ghi build, ngày, môi trường, và thay đổi nào làm evidence phải chạy lại. [SYS-16](/articles/system-testing-deployment-test) kiểm chính bản triển khai đó.
 

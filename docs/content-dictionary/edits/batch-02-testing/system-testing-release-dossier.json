@@ -1,0 +1,15 @@
+{"file":"system-testing-release-dossier.md","edits":[
+{"old":"với 8 ca RD-01…08","new":"với 8 test case RD-01…08","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"## 4. Thiết kế luật và ca kiểm","new":"## 4. Thiết kế luật và test case","reason":"'ca kiểm' là cụm tự ghép; thống nhất 'test case'","severity":"medium"},
+{"old":"### 4.2. Bảng ca kiểm","new":"### 4.2. Bảng test case","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"RD-08 là ca dễ bị bỏ qua nhất.","new":"RD-08 là test case dễ bị bỏ qua nhất.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Hai ca đại diện từ","new":"Hai test case đại diện từ","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"**Gộp baseline vào cột đạt.** Đẹp báo cáo, sai bằng chứng.","new":"**Gộp baseline vào cột đạt.** Báo cáo trông đẹp nhưng bằng chứng thì sai.","reason":"Câu cụt, kiểu dịch máy","severity":"medium"},
+{"old":"thì bằng chứng bị coi là còn mới sai.","new":"thì bằng chứng bị coi nhầm là còn mới.","reason":"Cụm 'còn mới sai' khó hiểu","severity":"medium"},
+{"old":"mà không có ca failed thì","new":"mà không có test case failed thì","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Kèm ca kiểm mới: bằng chứng staging","new":"Kèm test case mới: bằng chứng staging","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"và một ca kiểm bắt được độ lệch.","new":"và một test case bắt được độ lệch.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Ca kiểm: tạo tệp kết quả","new":"Test case: tạo tệp kết quả","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Thêm một ca nữa: tệp kết quả","new":"Thêm một test case nữa: tệp kết quả","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"một tiến trình, một máy lab, kho memory","new":"một tiến trình, một máy lab, kho bộ nhớ","reason":"Thống nhất cách gọi 'kho bộ nhớ' trong series","severity":"low"}
+]}

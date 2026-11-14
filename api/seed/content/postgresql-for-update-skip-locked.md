@@ -1,7 +1,7 @@
 ---
 slug: postgresql-for-update-skip-locked
 title: "FOR UPDATE, NOWAIT và SKIP LOCKED: hàng đợi worker và những dòng bị bỏ qua"
-summary: "Tới Nơi chạy nhiều worker gửi thông báo từ một bảng jobs: lúc thì worker xếp hàng chờ nhau, lúc thì khách nhận hai SMS, có lúc việc gấp nằm im. So FOR UPDATE, NOWAIT, SKIP LOCKED và ghi rõ khi nào dòng bị bỏ qua."
+summary: "Tới Nơi chạy nhiều worker gửi thông báo từ một bảng jobs: lúc thì worker xếp hàng chờ nhau, lúc thì khách nhận hai SMS, có lúc việc gấp nằm im. Bài so sánh FOR UPDATE, NOWAIT, SKIP LOCKED và chỉ rõ khi nào dòng bị bỏ qua."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-036, for-update, skip-locked, nowait, job-queue, row-lock, toi-noi]
@@ -44,7 +44,7 @@ Câu lấy việc:
 SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE …;
 ```
 
-`FOR UPDATE` là **locking clause** (mệnh đề khoá): khoá dòng được trả về như thể sắp sửa nó. Ba biến thể ở cuối câu quyết định khi gặp dòng đang bị khoá thì làm gì: chờ (mặc định), `NOWAIT` (báo lỗi ngay), `SKIP LOCKED` (bỏ qua dòng đó). Chạy lab:
+`FOR UPDATE` là **locking clause** (mệnh đề khoá): khoá dòng được trả về như thể sắp sửa chính các dòng đó. Ba biến thể ở cuối câu quyết định khi gặp dòng đang bị khoá thì làm gì: chờ (mặc định), `NOWAIT` (báo lỗi ngay), `SKIP LOCKED` (bỏ qua dòng đó). Chạy lab:
 
 ```bash
 cd examples/toi-noi-postgresql
@@ -52,7 +52,7 @@ node pg/run-pg.mjs p04 --only 36
 node pg/run-pg.mjs --nen p04/lab.json:p04 p04/thu-nghiem/pg036-lease-fencing-lo-viec-idle-timeout.sql
 ```
 
-Ba phiên psql `[A]`, `[B]`, `[C]` là ba worker. Lịch in trong `OUTPUT.txt` là thứ tự *gửi*; bảng dưới xếp theo thứ tự *xảy ra*, bước bị chặn ghi ⏳ và kết quả của nó ở dòng ✔.
+Ba phiên psql `[A]`, `[B]`, `[C]` là ba worker. Lịch in trong `OUTPUT.txt` là thứ tự *gửi*; bảng dưới xếp theo thứ tự *xảy ra*, bước bị chặn ghi ⏳ còn kết quả của bước đó nằm ở dòng ✔.
 
 ## 2. FOR UPDATE: đúng, nhưng xếp hàng
 
@@ -65,9 +65,9 @@ Ba phiên psql `[A]`, `[B]`, `[C]` là ba worker. Lịch in trong `OUTPUT.txt` l
 | T5 | | ✔ → **2** |
 | T6 | | xử lý việc 2, `COMMIT` |
 
-B nhắm cùng dòng đầu hàng (việc 1) nên phải chờ suốt thời gian A xử lý. Khi A commit, B có khoá dòng 1, kiểm lại điều kiện trên phiên bản mới (`done` ⇒ loại) rồi đi tiếp tới việc 2 — cùng cơ chế «đọc lại dòng» của Read Committed ở PG-035. Không ai nhận nhầm việc đã xong, nhưng worker nối đuôi nhau: tám worker nhắm cùng một dòng thì chỉ một người làm, bảy người chờ.
+B nhắm cùng dòng đầu hàng (việc 1) nên phải chờ suốt thời gian A xử lý. Khi A commit, B giành được khoá dòng 1, kiểm tra lại điều kiện trên phiên bản mới (`done` ⇒ loại) rồi đi tiếp tới việc 2 — cùng cơ chế «đọc lại dòng» của Read Committed ở PG-035. Không ai nhận nhầm việc đã xong, nhưng worker nối đuôi nhau: tám worker nhắm cùng một dòng thì chỉ một người làm, bảy người chờ.
 
-Tài liệu còn cảnh báo một chi tiết: ở Read Committed, `SELECT` có `ORDER BY` kèm locking clause có thể trả dòng *lệch thứ tự*, vì `ORDER BY` được áp trước, dòng bị đổi trong lúc chờ khoá thì không được sắp lại. Với `LIMIT 1` hàng đợi, hệ quả là «việc kế tiếp» không luôn đúng là việc đứng đầu — chấp nhận được, nhưng đừng hứa thứ tự tuyệt đối.
+Tài liệu còn cảnh báo một chi tiết: ở Read Committed, `SELECT` có `ORDER BY` kèm locking clause có thể trả dòng *lệch thứ tự*, vì `ORDER BY` được áp trước, dòng bị đổi trong lúc chờ khoá thì không được sắp lại. Với hàng đợi dùng `LIMIT 1`, hệ quả là «việc kế tiếp» không phải lúc nào cũng là việc đứng đầu — chấp nhận được, nhưng đừng hứa thứ tự tuyệt đối.
 
 ## 3. NOWAIT: lỗi ngay
 
@@ -90,7 +90,7 @@ SQLSTATE **`55P03`** (lock_not_available — cùng mã với `lock_timeout` ở 
 SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE SKIP LOCKED;
 ```
 
-A nhận **4**, B nhận **5**, C nhận **6** — không bước nào chờ. Mỗi worker bỏ qua dòng đã bị người trước khoá và lấy dòng kế tiếp; xử lý xong (ghi `job_runs`, đánh dấu `done`) trong cùng giao dịch rồi commit. Tài liệu PostgreSQL nói thẳng cái giá: bỏ qua dòng bị khoá cho một cái nhìn **không nhất quán** về dữ liệu, «not suitable for general purpose work», nhưng dùng được để tránh tranh chấp khi nhiều consumer cùng đọc một bảng kiểu hàng đợi. Mục 7 đi vào những chỗ «không nhất quán» đó.
+A nhận **4**, B nhận **5**, C nhận **6** — không bước nào chờ. Mỗi worker bỏ qua dòng đã bị người trước khoá và lấy dòng kế tiếp; xử lý xong (ghi `job_runs`, đánh dấu `done`) trong cùng giao dịch rồi commit. Tài liệu PostgreSQL nói thẳng cái giá: bỏ qua dòng bị khoá khiến dữ liệu hiện ra một cách **không nhất quán**, «not suitable for general purpose work», nhưng dùng được để tránh tranh chấp khi nhiều consumer cùng đọc một bảng kiểu hàng đợi. Mục 7 đi vào những chỗ «không nhất quán» đó.
 
 `NOWAIT` và `SKIP LOCKED` chỉ áp cho khoá *dòng*; khoá mức bảng `ROW SHARE` mà câu lệnh cần vẫn chờ như thường (DDL đang giữ `ACCESS EXCLUSIVE` vẫn chặn được worker).
 
@@ -106,10 +106,10 @@ Máy đo: Intel i7-10700 (16 luồng), 64 GB RAM, NVMe Kingston SA2000, Windows 
 | `FOR UPDATE` (chờ) | 9,36–9,42 | 64 | 0–2 / 115–159 | chia rất lệch |
 | `NOWAIT` + thử lại sau 1 ms | 9,30–9,31 | 64–65 | 56–70 / 78–91 | **25.317–26.774** lỗi `55P03` |
 
-Cả ba cách đều giữ bất biến ở mọi lần: 600/600 việc `done`, **0** việc có số dòng `job_runs` khác 1. Khác nhau ở chỗ ai được làm và tốn gì:
+Cả ba cách đều giữ bất biến ở mọi lần: 600/600 việc `done`, **0** việc có số dòng `job_runs` khác 1. Khác nhau ở chỗ worker nào được làm việc và cái giá phải trả:
 
 - **FOR UPDATE** xử lý gần như tuần tự: 600 việc trong ~9,4 s. Việc chia lệch tới mức có worker chỉ làm 0–2 việc.
-- **NOWAIT** cũng chậm như vậy và tốn hơn 25 nghìn lỗi cho 600 việc: các worker liên tục va vào cùng dòng đầu hàng.
+- **NOWAIT** cũng chậm như vậy và phát sinh hơn 25 nghìn lỗi cho 600 việc: các worker liên tục va vào cùng dòng đầu hàng.
 - **SKIP LOCKED** chia đều 74–76 việc/worker và nhanh gấp khoảng 7–8 lần. `rong_gia` đếm số lần SKIP LOCKED trả rỗng *trong khi vẫn còn việc* (mọi việc còn lại đang bị worker khác khoá) — worker phải hỏi lại.
 
 <div class="tkh-callout tkh-callout--warn">
@@ -119,7 +119,7 @@ Cả ba cách đều giữ bất biến ở mọi lần: 600/600 việc `done`, 
 
 ## 6. Việc có tác dụng ngoài database: thời hạn thuê và việc chạy hai lần
 
-Ở mục 2–4, «xử lý» và «đánh dấu done» nằm cùng một giao dịch: commit thì cả hai cùng có, worker chết thì cả hai cùng mất và việc tự về hàng. Đó là **đúng một lần** — nhưng chỉ cho tác dụng *trong* database. Gửi SMS là gọi API bên ngoài, có thể mất vài giây; giữ giao dịch và khoá dòng suốt thời gian chờ mạng là điều PG-031/PG-033 khuyên tránh.
+Ở mục 2–4, «xử lý» và «đánh dấu done» nằm cùng một giao dịch: commit thì cả hai cùng có hiệu lực, worker chết thì cả hai cùng mất và việc tự về hàng. Đó là **đúng một lần** — nhưng chỉ cho tác dụng *trong* database. Gửi SMS là gọi API bên ngoài, có thể mất vài giây; giữ giao dịch và khoá dòng suốt thời gian chờ mạng là điều PG-031/PG-033 khuyên tránh.
 
 Mẫu thay thế (§4 của lab): **nhận việc bằng một câu ngắn**, commit ngay, xử lý *ngoài* giao dịch, rồi một câu thứ hai đánh dấu xong. Worker chết giữa chừng để lại việc `running` mãi ⇒ cần **thời hạn thuê** (lease): việc `running` quá hạn được tiến trình dọn dẹp trả về hàng.
 
@@ -138,7 +138,7 @@ RETURNING id, status, attempts;
 | T5 | B | gửi SMS, `UPDATE … SET status = 'done' … WHERE id = 7 AND locked_by = 'B'` | `UPDATE 1` |
 | T6 | C | `job_runs` của việc 7 | **`7 \| A,B`** |
 
-Khách nhận hai SMS. Lease biến «việc kẹt mãi» thành «việc có thể chạy hai lần»: tác dụng ngoài database chỉ đạt **ít nhất một lần** (at-least-once). Bên nhận phải chống trùng bằng khoá idempotency (PG-039); hạn thuê chỉ chọn được *xác suất* chạy trùng (hạn ngắn ⇒ trùng nhiều, hạn dài ⇒ việc của worker chết chờ lâu).
+Khách nhận hai SMS. Lease biến «việc kẹt mãi» thành «việc có thể chạy hai lần»: tác dụng ngoài database chỉ đạt **ít nhất một lần** (at-least-once). Bên nhận phải chống trùng bằng khoá idempotency (PG-039); hạn thuê chỉ điều chỉnh được *xác suất* chạy trùng (hạn ngắn ⇒ trùng nhiều, hạn dài ⇒ việc của worker chết chờ lâu).
 
 Có một điều database làm được: giữ đúng *trạng thái* việc. Thí nghiệm §1 dùng `attempts` trả về lúc nhận làm **vé** (fencing token) của lượt thuê. A chậm, hết hạn, B nhận lại với `attempts = 2`; A tỉnh dậy đánh dấu done kèm vé cũ:
 
@@ -153,7 +153,7 @@ WHERE id = 1 AND status = 'running' AND attempts = 1;   -- UPDATE 0
 
 ### 7.1. Việc gấp bị bỏ đói
 
-§5 của lab: thêm việc **11** ưu tiên 1. A nhận nó rồi **treo** trong giao dịch mở (chờ một API không trả lời).
+§5 của lab: thêm việc **11** ưu tiên 1. A nhận việc này rồi **treo** trong giao dịch mở (chờ một API không trả lời).
 
 | Bước | Phiên | Câu | Kết quả |
 |---|---|---|---|
@@ -164,9 +164,9 @@ WHERE id = 1 AND status = 'running' AND attempts = 1;   -- UPDATE 0
 | T5 | C | `pg_terminate_backend(pid)` của A | `t` — giao dịch A rollback, khoá nhả |
 | T6 | B | lấy việc | **11** |
 
-Việc ưu tiên cao nhất bị mọi worker khác vượt mặt, và hàng đợi trông như rỗng. Không có lỗi, không ai chờ — đúng là thứ SKIP LOCKED được thiết kế để làm.
+Việc ưu tiên cao nhất bị mọi worker khác vượt mặt, và hàng đợi trông như rỗng. Không có lỗi, không ai chờ — đúng là điều SKIP LOCKED được thiết kế để làm.
 
-Khó ở chỗ *nhìn thấy* nó: khoá dòng không nằm trong `pg_locks` (PG-033 — chỉ hiện khi có người *chờ*, mà SKIP LOCKED không chờ). Thí nghiệm §3 dùng extension contrib **`pgrowlocks`**, đọc dấu khoá trong từng dòng của bảng:
+Khó ở chỗ *nhìn thấy* tình trạng này: khoá dòng không nằm trong `pg_locks` (PG-033 — chỉ hiện khi có người *chờ*, mà SKIP LOCKED không chờ). Thí nghiệm §3 dùng extension contrib **`pgrowlocks`**, đọc dấu khoá trong từng dòng của bảng:
 
 ```sql
 SELECT j.id, j.status, p.modes, lab_nhan(p.pids[1]) AS phien
@@ -180,15 +180,15 @@ FROM jobs AS j JOIN pgrowlocks('jobs') AS p ON p.locked_row = j.ctid;
 (1 row)
 ```
 
-(`lab_nhan` là hàm tiện ích của lab, đổi PID thành nhãn phiên.) `pgrowlocks` đọc cả bảng và không cho ảnh chụp nhất quán — dùng để điều tra, không đặt trong vòng lặp giám sát mỗi giây trên bảng lớn. Giám sát thường xuyên rẻ hơn: việc `queued` có `created_at` quá cũ, hoặc `pg_stat_activity` có phiên `idle in transaction` lâu.
+(`lab_nhan` là hàm tiện ích của lab, đổi PID thành nhãn phiên.) `pgrowlocks` đọc cả bảng và không cho ảnh chụp nhất quán — dùng để điều tra, không đặt trong vòng lặp giám sát mỗi giây trên bảng lớn. Cách giám sát thường xuyên rẻ hơn là tìm việc `queued` có `created_at` quá cũ, hoặc `pg_stat_activity` có phiên `idle in transaction` lâu.
 
-Cách gỡ tự động là đặt hạn cho phía worker. Cùng thí nghiệm, A chạy `SET idle_in_transaction_session_timeout = '1s'` trước khi nhận việc 11; C ngủ 1,5 giây:
+Cách gỡ tự động là đặt giới hạn thời gian ở phía worker. Cùng thí nghiệm, A chạy `SET idle_in_transaction_session_timeout = '1s'` trước khi nhận việc 11; C ngủ 1,5 giây:
 
 ```text
 -- [lab] nhật ký server: [A] FATAL:  terminating connection due to idle-in-transaction timeout
 ```
 
-Ngay sau đó B lấy được **11**; câu kế tiếp của A báo mất kết nối, `pgrowlocks('jobs')` còn **0** dòng. Tham số này chỉ cắt phiên *ngồi yên* trong giao dịch; worker kẹt giữa một câu lệnh dài cần `statement_timeout`, và tốt nhất là đừng giữ giao dịch qua lời gọi mạng (mục 6).
+Ngay sau đó B lấy được **11**; câu kế tiếp của A báo mất kết nối, `pgrowlocks('jobs')` còn **0** dòng. Tham số này chỉ cắt phiên *ngồi yên* trong giao dịch; worker kẹt giữa một câu lệnh dài thì cần `statement_timeout`, và tốt nhất là đừng giữ giao dịch qua lời gọi mạng (mục 6).
 
 ### 7.2. Đếm bằng SKIP LOCKED
 
@@ -206,11 +206,11 @@ SELECT (SELECT count(*) FROM jobs WHERE status = 'queued') AS dem_thuong,
 (1 row)
 ```
 
-SKIP LOCKED trả về «những dòng tôi khoá được ngay lúc này», không phải «những dòng đang có» — và câu đếm kiểu đó còn khoá mọi việc nó đếm được trong lúc chạy. Dùng nó để *lấy* việc; đếm và giám sát bằng `SELECT` thường.
+SKIP LOCKED trả về «những dòng tôi khoá được ngay lúc này», không phải «những dòng đang có» — và câu đếm kiểu đó còn khoá mọi việc nó đếm được trong lúc chạy. Hãy dùng SKIP LOCKED để *lấy* việc; đếm và giám sát bằng `SELECT` thường.
 
 ### 7.3. Bẫy khoá ngoại: FOR UPDATE quá mạnh
 
-`job_runs.job_id` tham chiếu `jobs.id`. Khi một giao dịch chèn dòng con, PostgreSQL kiểm khoá ngoại bằng khoá **FOR KEY SHARE** trên dòng cha (PG-033). Bảng xung đột khoá dòng trong tài liệu:
+`job_runs.job_id` tham chiếu `jobs.id`. Khi một giao dịch chèn dòng con, PostgreSQL kiểm tra khoá ngoại bằng khoá **FOR KEY SHARE** trên dòng cha (PG-033). Bảng xung đột khoá dòng trong tài liệu:
 
 | Đang giữ → / Xin ↓ | FOR KEY SHARE | FOR SHARE | FOR NO KEY UPDATE | FOR UPDATE |
 |---|---|---|---|---|
@@ -224,11 +224,11 @@ SKIP LOCKED trả về «những dòng tôi khoá được ngay lúc này», kh�
 … FOR NO KEY UPDATE SKIP LOCKED;   → 12
 ```
 
-Với `FOR UPDATE`, chỉ một lần ghi nhật ký trỏ tới việc là đủ làm việc «biến mất» khỏi hàng đợi. `FOR NO KEY UPDATE` là khoá mà chính câu UPDATE bình thường (không đổi khoá) tự lấy — đủ để không hai worker nhận cùng việc, không chặn dòng con. Worker không xoá việc và không đổi `id` thì dùng `FOR NO KEY UPDATE`. Bất biến cuối §6 của lab: 12/12 việc `done`; việc duy nhất có số lần chạy khác 1 là **`7 | 2`** (mục 6).
+Với `FOR UPDATE`, chỉ một lần ghi nhật ký trỏ tới việc là đủ khiến việc đó «biến mất» khỏi hàng đợi. `FOR NO KEY UPDATE` là khoá mà chính câu UPDATE bình thường (không đổi khoá) tự lấy — đủ để không hai worker nhận cùng việc, không chặn dòng con. Worker không xoá việc và không đổi `id` thì dùng `FOR NO KEY UPDATE`. Bất biến cuối §6 của lab: 12/12 việc `done`; việc duy nhất có số lần chạy khác 1 là **`7 | 2`** (mục 6).
 
 ### 7.4. Hết hạn thuê
 
-Trường hợp thứ tư làm việc chạy *thêm* một lần: lease dùng cột trạng thái, không dùng khoá dòng, nên worker khác nhận lại việc trong khi worker cũ có thể vẫn đang chạy (mục 6: `7 | A,B`).
+Trường hợp thứ tư khiến việc chạy *thêm* một lần: lease dùng cột trạng thái, không dùng khoá dòng, nên worker khác nhận lại việc trong khi worker cũ có thể vẫn đang chạy (mục 6: `7 | A,B`).
 
 | Trường hợp | SKIP LOCKED làm gì | Hệ quả | Xử lý |
 |---|---|---|---|
@@ -239,7 +239,7 @@ Trường hợp thứ tư làm việc chạy *thêm* một lần: lease dùng c�
 
 ## 8. Lấy theo lô
 
-Thí nghiệm §2: `… LIMIT 3 FOR NO KEY UPDATE SKIP LOCKED` trong hai giao dịch mở — A nhận **2, 3, 4**, B nhận **5, 6, 7**, không chờ. Lô lớn giảm số lượt hỏi nhưng giữ nhiều dòng lâu hơn và làm tệ hơn mọi vấn đề ở mục 7: một worker treo giữ cả lô. Tài liệu cũng lưu ý `LIMIT` dừng khoá khi đủ dòng, nhưng dòng bị `OFFSET` bỏ qua vẫn bị khoá — đừng dùng `OFFSET` trong câu lấy việc.
+Thí nghiệm §2: `… LIMIT 3 FOR NO KEY UPDATE SKIP LOCKED` trong hai giao dịch mở — A nhận **2, 3, 4**, B nhận **5, 6, 7**, không chờ. Lô lớn giảm số lượt hỏi nhưng giữ nhiều dòng lâu hơn và khiến mọi vấn đề ở mục 7 tệ hơn: một worker treo giữ cả lô. Tài liệu cũng lưu ý `LIMIT` dừng khoá khi đủ dòng, nhưng dòng bị `OFFSET` bỏ qua vẫn bị khoá — đừng dùng `OFFSET` trong câu lấy việc.
 
 ## 9. Lỗi thường gặp
 
@@ -255,12 +255,12 @@ Thí nghiệm §2: `… LIMIT 3 FOR NO KEY UPDATE SKIP LOCKED` trong hai giao d�
 
 ## 10. Đánh đổi
 
-- **Giữ giao dịch hay nhận ngắn.** Giữ giao dịch suốt lúc xử lý cho «đúng một lần» với tác dụng trong database và tự về hàng khi worker chết; nhận ngắn + lease hợp với việc gọi mạng nhưng chỉ «ít nhất một lần».
-- **Hàng đợi trong PostgreSQL hay broker riêng.** Một bảng `jobs` cho phép tạo việc *cùng giao dịch* với dữ liệu nghiệp vụ (nền của outbox, PG-039) và không thêm hệ thống mới. Mỗi việc là vài lần UPDATE tạo phiên bản dòng chết; tải lớn cần chăm VACUUM (PG-032, Phần 5).
+- **Giữ giao dịch hay nhận ngắn.** Giữ giao dịch suốt lúc xử lý thì được «đúng một lần» với tác dụng trong database và tự về hàng khi worker chết; nhận ngắn + lease hợp với việc gọi mạng nhưng chỉ «ít nhất một lần».
+- **Hàng đợi trong PostgreSQL hay broker riêng.** Một bảng `jobs` cho phép tạo việc *cùng giao dịch* với dữ liệu nghiệp vụ (nền tảng của outbox, PG-039) và không thêm hệ thống mới. Mỗi việc là vài lần UPDATE tạo phiên bản dòng chết; tải lớn cần chăm VACUUM (PG-032, Phần 5).
 
 ## 11. Bài tập
 
-**Bài 1.** Viết câu «lấy, xử lý và đánh dấu xong một việc» bằng một câu lệnh, không chặn được bởi dòng con chèn đồng thời.
+**Bài 1.** Viết câu «lấy, xử lý và đánh dấu xong một việc» bằng một câu lệnh, không thể bị chặn bởi dòng con được chèn đồng thời.
 
 <details><summary><b>Lời giải</b></summary>
 <pre><code class="language-sql">WITH v AS (SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1
@@ -279,7 +279,7 @@ WHERE id = 1 AND status = 'running' AND attempts = 1;   -- attempts = vé A nh�
 <p>Thí nghiệm §1 ra <code>UPDATE 0</code> cho A, <code>UPDATE 1</code> cho B (vé 2); cuối cùng <code>done | 2 | A,B</code>. Vé chỉ bảo vệ trạng thái — SMS của A đã gửi, bên nhận vẫn phải chống trùng. Dùng <code>locked_by</code> làm vé không đủ khi cùng một worker nhận lại việc ở lượt sau.</p>
 </details>
 
-**Bài 3.** Bảng điều khiển hỏi «còn bao nhiêu việc gấp chưa ai làm, và việc nào đang bị giữ». Viết hai câu, nói rõ câu nào được chạy thường xuyên.
+**Bài 3.** Bảng điều khiển hỏi «còn bao nhiêu việc gấp chưa ai làm, và việc nào đang bị giữ». Viết hai câu, nói rõ câu nào có thể chạy thường xuyên.
 
 <details><summary><b>Lời giải</b></summary>
 <pre><code class="language-sql">-- thường xuyên: không khoá, không bỏ dòng

@@ -1,0 +1,11 @@
+{"file":"ba-doc-api-request-response-loi.md","edits":[
+{"old":"nhưng thu ví failed. BA đọc API cần nối","new":"nhưng việc thu tiền qua ví failed. Khi đọc API, BA cần nối","reason":"Cụm thu ví failed cụt; chủ ngữ rõ hơn","severity":"medium"},
+{"old":"| Vượt lượt voucher |","new":"| Vượt số lượt dùng voucher |","reason":"Cụm tự ghép, thiếu danh từ","severity":"medium"},
+{"old":"Với refund đề xuất, nếu chọn 202","new":"Với refund đang được đề xuất, nếu chọn 202","reason":"Câu cụt","severity":"low"},
+{"old":"không nói API refund 202 đã có trong lab.","new":"không có nghĩa là API refund 202 đã có trong lab.","reason":"Calque không nói","severity":"medium"},
+{"old":"Tạo chuyến yêu cầu Idempotency-Key theo lab.","new":"Theo lab, tạo chuyến yêu cầu có Idempotency-Key.","reason":"Trật tự từ, dễ đọc nhầm","severity":"medium"},
+{"old":"Gửi lại cùng key/payload trả kết quả đã lưu","new":"Gửi lại với cùng key và payload sẽ trả kết quả đã lưu","reason":"Câu cụt, thiếu quan hệ điều kiện","severity":"medium"},
+{"old":"Thời hạn đo theo nguồn nào?","new":"Thời hạn tính theo nguồn thời gian nào?","reason":"đo gượng với thời hạn","severity":"low"},
+{"old":"kết quả nào nên hệ thống tự phục hồi?","new":"kết quả nào hệ thống nên tự phục hồi?","reason":"Trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"khi khách bấm đặt đúng expiresAt, và khi mất response sau tạo chuyến.","new":"khi khách bấm đặt đúng thời điểm expiresAt, và khi mất response sau khi tạo chuyến.","reason":"Thiếu danh từ và liên từ","severity":"medium"}
+]}

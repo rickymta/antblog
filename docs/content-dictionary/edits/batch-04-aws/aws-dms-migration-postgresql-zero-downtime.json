@@ -1,0 +1,17 @@
+{"file":"aws-dms-migration-postgresql-zero-downtime.md","edits":[
+{"old":"table mapping, kiểm đối soát, runbook","new":"table mapping, kiểm tra dữ liệu, runbook","reason":"'đối soát' là thuật ngữ tài chính; ý là validation","severity":"medium"},
+{"old":"không có công cụ đối soát;","new":"không có công cụ kiểm tra dữ liệu;","reason":"'đối soát' sai nghĩa (validation)","severity":"medium"},
+{"old":"Cần công cụ managed, đối soát, nhiều engine","new":"Cần công cụ managed, có kiểm tra dữ liệu, nhiều engine","reason":"'đối soát' sai nghĩa; câu lược động từ","severity":"medium"},
+{"old":"SQL chuẩn bị nguồn, đối soát, sửa sequence","new":"SQL chuẩn bị nguồn, kiểm tra dữ liệu, sửa sequence","reason":"'đối soát' sai nghĩa (validation)","severity":"medium"},
+{"old":"Nó chạy được nhiều năm, nhưng đĩa gần đầy, việc vá bản minor luôn bị hoãn và ai đó phải thức khi nó hỏng.","new":"Cụm này chạy được nhiều năm, nhưng đĩa gần đầy, việc vá bản minor luôn bị hoãn và ai đó phải thức khi cụm hỏng.","reason":"Tránh 'Nó' chỉ sự vật","severity":"low"},
+{"old":"là điều nghiệp vụ không chấp nhận.","new":"là điều mà nghiệp vụ không chấp nhận được.","reason":"Câu cụt, giọng dịch máy","severity":"medium"},
+{"old":"Trong ngôn ngữ chuyển lên cloud, đây là","new":"Theo thuật ngữ chuyển lên cloud, đây là","reason":"'ngôn ngữ' gượng, ý là thuật ngữ","severity":"low"},
+{"old":"chỉ đặt tên slot có sẵn khi dùng điểm bắt đầu CDC gốc cho task chỉ-CDC.","new":"chỉ cần đặt tên slot có sẵn khi task chỉ-CDC dùng điểm bắt đầu CDC gốc.","reason":"Trật tự từ kiểu Anh, khó hiểu","severity":"medium"},
+{"old":"Có bốn lớp kiểm:","new":"Có bốn lớp kiểm tra:","reason":"'kiểm' đứng một mình là từ cụt","severity":"medium"},
+{"old":"nó quét nhiều nên đừng chạy","new":"câu này quét nhiều dữ liệu nên đừng chạy","reason":"Tránh 'nó' chỉ sự vật; thiếu danh từ","severity":"low"},
+{"old":"theo hồ sơ tải)","new":"theo mẫu tải đã ghi nhận)","reason":"'hồ sơ tải' là calque (load profile)","severity":"medium"},
+{"old":"Mọi bước ở giữa phải được diễn tập để biết nó mất bao lâu.","new":"Phải diễn tập mọi bước ở giữa để biết chúng mất bao lâu.","reason":"Bỏ bị động kiểu Anh; 'nó' không khớp số nhiều","severity":"medium"},
+{"old":"Quên một trong số đó là lỗi ở production sau cutover.","new":"Quên một thứ trong số đó sẽ gây lỗi ở production sau cutover.","reason":"Câu thiếu vị ngữ rõ ràng","severity":"low"},
+{"old":"chọn cỡ theo số đo của staging, không theo cảm tính.","new":"chọn cỡ theo số liệu đo được ở staging, không theo cảm tính.","reason":"'số đo' dùng sai nghĩa","severity":"medium"},
+{"old":"Cần kiểm khi chạy: tính hợp lệ của task settings khai báo một phần, plugin","new":"Cần kiểm tra khi chạy thật: task settings khai báo một phần có hợp lệ không, plugin","reason":"'kiểm' cụt; cụm danh từ tự ghép khó hiểu","severity":"medium"}
+]}

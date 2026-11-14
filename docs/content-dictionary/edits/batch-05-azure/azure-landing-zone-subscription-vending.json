@@ -1,0 +1,18 @@
+{"file":"azure-landing-zone-subscription-vending.md","edits":[
+{"old":"Azure Landing Zone là phần hiện thực hoá nó:","new":"Azure Landing Zone là phần hiện thực hoá khung đó:","reason":"Đại từ 'nó' mơ hồ, nhắc lại danh từ","severity":"low"},
+{"old":"thay vì mỗi VNet tự xoay.","new":"thay vì mỗi VNet tự xoay xở.","reason":"'tự xoay' cụt, thiếu 'xở'","severity":"medium"},
+{"old":"Điểm yếu là kích thước. Bản tham chiếu","new":"Điểm yếu nằm ở quy mô. Bản tham chiếu","reason":"'kích thước' là dịch từng chữ của size","severity":"low"},
+{"old":"Cái giá của bản nhỏ là khi lớn lên bạn phải tách nhóm","new":"Cái giá của bản nhỏ là khi hệ thống mở rộng, bạn phải tách nhóm","reason":"'lớn lên' là calque của grow","severity":"medium"},
+{"old":"bạn không vận hành mười MG chưa có việc làm.","new":"bạn không phải vận hành mười MG chưa có workload nào.","reason":"'MG chưa có việc làm' là calque, nghĩa không rõ","severity":"medium"},
+{"old":"Nó tạo `mg-toinoi` (management group là resource","new":"Template này tạo `mg-toinoi` (management group là resource","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Hai điểm khi đọc what-if. Thứ nhất, nó cho thấy MG","new":"Hai điểm cần lưu ý khi đọc what-if. Thứ nhất, what-if cho thấy MG","reason":"Câu thiếu vị ngữ; tránh đại từ 'nó'","severity":"medium"},
+{"old":"Module dưới chạy ở scope subscription. Nó tạo ba resource group,","new":"Module dưới chạy ở scope subscription. Module này tạo ba resource group,","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Module chưa kiểm tên group đúng object ID và chưa chứng minh","new":"Module chưa kiểm tra object ID của group có đúng hay không và chưa chứng minh","reason":"'kiểm tên group đúng object ID' thiếu động từ, khó hiểu","severity":"medium"},
+{"old":"Đó là điều làm ba môi trường giống nhau có chủ đích: khác nhau ở tham số nằm trong Git, không ở cái ai đó đã click.","new":"Nhờ vậy ba môi trường giống nhau có chủ đích: mọi khác biệt nằm ở tham số trong Git, không phải ở thứ ai đó đã click.","reason":"Câu gượng, trật tự kiểu tiếng Anh","severity":"medium"},
+{"old":"tài khoản bị chiếm là kẻ tấn công có quyền ghi.","new":"tài khoản bị chiếm đồng nghĩa kẻ tấn công có quyền ghi.","reason":"Quan hệ 'là' sai logic","severity":"medium"},
+{"old":"hãy kiểm yêu cầu license của PIM","new":"hãy kiểm tra yêu cầu license của PIM","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Landing zone mục ruỗng nếu không ai nhìn.","new":"Landing zone sẽ xuống cấp nếu không ai theo dõi.","reason":"'mục ruỗng' và 'nhìn' là calque của rot/watch","severity":"medium"},
+{"old":"Nó cho bạn một con số để theo dõi theo thời gian","new":"Lệnh này cho bạn một con số để theo dõi theo thời gian","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"kết quả what-if và compliance bạn cần tự kiểm trên tenant của mình.","new":"kết quả what-if và compliance bạn cần tự kiểm tra trên tenant của mình.","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nếu cần ôn việc kiểm trước khi deploy,","new":"Nếu cần ôn việc kiểm tra trước khi deploy,","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

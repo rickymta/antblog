@@ -1,0 +1,17 @@
+{
+  "file": "azure-multi-region-data-residency-multi-tenant.md",
+  "edits": [
+    {
+      "old": "aria-label=\"Hình 2. Thang cách ly tenant: càng xuống dưới càng rẻ nhưng bán kính sự cố",
+      "new": "aria-label=\"Hình 2. Thang cách ly tenant: càng xuống dưới càng rẻ nhưng phạm vi ảnh hưởng của sự cố",
+      "reason": "Thống nhất với văn xuôi và nhãn SVG đã đổi \"bán kính\" (blast radius) thành \"phạm vi ảnh hưởng\"; trước đây công cụ chưa cho sửa aria-label",
+      "severity": "medium"
+    },
+    {
+      "old": "<figcaption>Hình 2. Thang cách ly tenant: càng xuống dưới càng rẻ nhưng bán kính sự cố",
+      "new": "<figcaption>Hình 2. Thang cách ly tenant: càng xuống dưới càng rẻ nhưng phạm vi ảnh hưởng của sự cố",
+      "reason": "Như trên, cho chú thích hình",
+      "severity": "medium"
+    }
+  ]
+}

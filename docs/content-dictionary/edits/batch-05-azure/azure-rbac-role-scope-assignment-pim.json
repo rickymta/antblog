@@ -1,0 +1,11 @@
+{"file":"azure-rbac-role-scope-assignment-pim.md","edits":[
+{"old":"Vì vậy nó không phải công cụ phân quyền hằng ngày","new":"Vì vậy deny assignment không phải công cụ phân quyền hằng ngày","reason":"'nó' mơ hồ, nhiều danh từ đứng trước","severity":"medium"},
+{"old":"Vì vậy hãy xem nó nguy hiểm ngang Owner.","new":"Vì vậy hãy xem role này nguy hiểm ngang Owner.","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"nên nó quản lý được vault mà không đọc được secret","new":"nên role này quản lý được vault mà không đọc được secret","reason":"Tránh 'nó' mơ hồ","severity":"low"},
+{"old":"Nếu một resource đưa ra khoá truy cập","new":"Nếu một resource cung cấp khoá truy cập","reason":"'đưa ra' là calque của expose","severity":"low"},
+{"old":"thứ đoạn JSON trên cố tình bỏ ra","new":"phần mà đoạn JSON trên cố tình bỏ qua","reason":"'thứ ... bỏ ra' gượng","severity":"medium"},
+{"old":"tài khoản bị chiếm thì kẻ tấn công thừa hưởng ngay Owner","new":"tài khoản bị chiếm thì kẻ tấn công có ngay quyền Owner","reason":"'thừa hưởng Owner' gượng, Owner là role","severity":"medium"},
+{"old":"có thể bị bắt MFA","new":"có thể phải xác thực MFA","reason":"'bị bắt MFA' dịch máy","severity":"medium"},
+{"old":"gỡ những assignment không ai nhận","new":"gỡ những assignment không còn ai cần","reason":"'không ai nhận' gượng, khó hiểu","severity":"medium"},
+{"old":"nếu khác, kiểm assignment kế thừa bằng","new":"nếu khác, kiểm tra assignment kế thừa bằng","reason":"'kiểm' thiếu 'tra'","severity":"medium"}
+]}

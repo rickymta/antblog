@@ -1,7 +1,7 @@
 ---
 slug: rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao
 title: "Đối soát với VíXanh: nhập sao kê, khớp theo external ref, báo lệch"
-summary: "Bài 47: đọc sao kê CSV streaming với csv crate, hash SHA-256 làm khóa idempotent, COPY vào bảng tạm rồi khớp bằng SQL, phân loại lệch, job định kỳ với clock truyền vào, báo cáo CSV cho Finance."
+summary: "Bài 47: đọc sao kê CSV streaming với csv crate, hash SHA-256 làm khoá idempotent, COPY vào bảng tạm rồi khớp bằng SQL, phân loại lệch, job định kỳ với clock truyền vào, báo cáo CSV cho Finance."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, csv, reconciliation, postgresql]
@@ -61,9 +61,9 @@ Hai giới hạn có chủ ý. Chỉ giữ chi tiết 1.000 dòng hỏng đầu 
 
 ## Vì sao băm file trước khi đọc nó?
 
-Job có thể chạy lại, VíXanh có thể gửi lại cùng file. Tạo lần đối soát thứ hai cho cùng file, cùng kỳ thì Finance nhận hai bộ việc giống hệt. Khóa idempotent ở đây là **SHA-256 của nội dung file** cộng với kỳ: `UNIQUE (file_sha256, period_start, period_end)` của `reconciliation_runs`. Tên file không đáng tin vì tên không đổi khi nội dung đổi. Kỳ phải nằm trong khóa: chỉ có hash thì đối soát cùng file cho kỳ khác sẽ nhận nhầm kết quả của kỳ trước.
+Job có thể chạy lại, VíXanh có thể gửi lại cùng file. Tạo lần đối soát thứ hai cho cùng file, cùng kỳ thì Finance nhận hai bộ việc giống hệt. Khoá idempotent ở đây là **SHA-256 của nội dung file** cộng với kỳ: `UNIQUE (file_sha256, period_start, period_end)` của `reconciliation_runs`. Tên file không đáng tin vì tên không đổi khi nội dung đổi. Kỳ phải nằm trong khoá: chỉ có hash thì đối soát cùng file cho kỳ khác sẽ nhận nhầm kết quả của kỳ trước.
 
-Băm là một lượt đọc riêng (`sha256_file`, khối 64 KiB, không nạp cả file; file sinh 41 MiB mất 33–116 ms trên máy viết bài). Trùng khóa thì trả kết quả cũ ngay, không nạp lại một triệu dòng. Chưa có thì mở transaction, `INSERT ... ON CONFLICT (file_sha256, period_start, period_end) DO NOTHING RETURNING id`, cùng kỹ thuật với `idempotency_key` ở [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key). Hai job chạy cùng lúc: job sau chờ job trước commit rồi nhận 0 dòng. Lượt đọc chính băm lại bằng `HashingReader` và so với hash đã tính; file bị thay giữa hai lượt thì lỗi và rollback, không lưu gì.
+Băm là một lượt đọc riêng (`sha256_file`, khối 64 KiB, không nạp cả file; file sinh 41 MiB mất 33–116 ms trên máy viết bài). Trùng khoá thì trả kết quả cũ ngay, không nạp lại một triệu dòng. Chưa có thì mở transaction, `INSERT ... ON CONFLICT (file_sha256, period_start, period_end) DO NOTHING RETURNING id`, cùng kỹ thuật với `idempotency_key` ở [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key). Hai job chạy cùng lúc: job sau chờ job trước commit rồi nhận 0 dòng. Lượt đọc chính băm lại bằng `HashingReader` và so với hash đã tính; file bị thay giữa hai lượt thì lỗi và rollback, không lưu gì.
 
 ```text
 chạy lại cùng file    : AlreadyDone run 1 ; runs = 1, items = 9
@@ -75,7 +75,7 @@ File thêm một dòng là run khác: VíXanh gửi bản sửa thì phải đ�
 
 ## COPY vào bảng tạm: đưa một triệu dòng vào PostgreSQL mà Rust không giữ lại
 
-Khớp theo khóa là việc của cơ sở dữ liệu; việc của Rust là đưa sao kê vào đó. `INSERT` từng bản ghi tốn một round trip, `COPY ... FROM STDIN` đẩy cả luồng. `copy_in_raw` của sqlx trả một đối tượng nhận từng khối byte; ta định dạng sẵn dòng CSV vào bộ đệm 64 KiB rồi gửi:
+Khớp theo khoá là việc của cơ sở dữ liệu; việc của Rust là đưa sao kê vào đó. `INSERT` từng bản ghi tốn một round trip, `COPY ... FROM STDIN` đẩy cả luồng. `copy_in_raw` của sqlx trả một đối tượng nhận từng khối byte; ta định dạng sẵn dòng CSV vào bộ đệm 64 KiB rồi gửi:
 
 ```rust
 // src/reconcile.rs (rút gọn: bỏ xử lý lỗi và đo thời gian)
@@ -108,7 +108,7 @@ Run, các bảng tạm và ngoại lệ nằm trong **một transaction**: lỗi
 
 Ghép từng dòng không được: một giao dịch có thể là hai bút toán ở ta và một dòng ở VíXanh. Lab gom **mỗi phía theo `external_ref`**, cộng tiền, rồi so hai tổng (`FULL JOIN`, nên ref chỉ có một phía vẫn hiện ra).
 
-Phía ta lấy từ bảng `psp_refs(entry_id, external_ref)` nối `postings` của `psp:vixanh:clearing`. Bảng này do lab tự đặt, vì hai cách nối trước không dùng lại được. [Bài 15](/articles/rust-closure-iterator-adapter-doi-soat-bo-nho) đặt ref vào `idempotency_key` (`psp:vixanh:<external_ref>`), mà key chuẩn từ bài 41 là `trip:TN-0001:capture`. Bài 38 có `psp_webhooks` với `external_ref` là khóa chính và một `entry_id`, nên một ref chỉ trỏ được một bút toán, không diễn đạt được n-1. Chỉ bút toán capture có dòng trong `psp_refs`; bút toán chia `trip:TN-0001:split` là chuyển nội bộ, sao kê không có. Lab so từng dòng clearing theo ref, không so số dư: như bài 41 đã chốt, số dư clearing không phải tiền thật ở VíXanh và có thể âm.
+Phía ta lấy từ bảng `psp_refs(entry_id, external_ref)` nối `postings` của `psp:vixanh:clearing`. Bảng này do lab tự đặt, vì hai cách nối trước không dùng lại được. [Bài 15](/articles/rust-closure-iterator-adapter-doi-soat-bo-nho) đặt ref vào `idempotency_key` (`psp:vixanh:<external_ref>`), mà key chuẩn từ bài 41 là `trip:TN-0001:capture`. Bài 38 có `psp_webhooks` với `external_ref` là khoá chính và một `entry_id`, nên một ref chỉ trỏ được một bút toán, không diễn đạt được n-1. Chỉ bút toán capture có dòng trong `psp_refs`; bút toán chia `trip:TN-0001:split` là chuyển nội bộ, sao kê không có. Lab so từng dòng clearing theo ref, không so số dư: như bài 41 đã chốt, số dư clearing không phải tiền thật ở VíXanh và có thể âm.
 
 Dòng 1-1, 1-n (ta một bút toán, VíXanh hai dòng), n-1 đều khớp nếu tổng bằng nhau:
 

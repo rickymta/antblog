@@ -1,0 +1,119 @@
+{
+"file": "azure-zero-trust-network-segmentation-sentinel.md",
+"edits": [
+{
+"old": "Nó không phải một dịch vụ để mua mà là ba câu hỏi",
+"new": "Đây không phải một dịch vụ để mua mà là ba câu hỏi",
+"reason": "Tránh 'Nó' chỉ khái niệm ở đầu câu",
+"severity": "medium"
+},
+{
+"old": "API kiểm issuer và audience",
+"new": "API kiểm tra issuer và audience",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "cần license phù hợp, kiểm trang tài liệu",
+"new": "cần license phù hợp, hãy kiểm tra trang tài liệu",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "Ba câu hỏi độc lập nhau.",
+"new": "Ba câu hỏi này không thay thế được nhau.",
+"reason": "'độc lập nhau' gượng; ý đoạn sau là thiếu một câu thì các câu còn lại không đủ",
+"severity": "medium"
+},
+{
+"old": "ở đây ta nhìn chúng như một chuỗi chặn bước.",
+"new": "ở đây ta nhìn chúng như một chuỗi các lớp chặn liên tiếp.",
+"reason": "'chuỗi chặn bước' là cụm tự ghép",
+"severity": "medium"
+},
+{
+"old": "Dữ liệu nghỉ trong PostgreSQL, Storage",
+"new": "Dữ liệu lưu trữ (data at rest) trong PostgreSQL, Storage",
+"reason": "Calque 'data at rest'",
+"severity": "high"
+},
+{
+"old": "kiểm danh sách nguồn trước khi lên kế hoạch",
+"new": "kiểm tra danh sách nguồn trước khi lên kế hoạch",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "và kiểm chữ ký ở bước deploy.",
+"new": "và kiểm tra chữ ký ở bước deploy.",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "nên bước kiểm nằm trong pipeline",
+"new": "nên bước kiểm tra nằm trong pipeline",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "Tag có thể bị đẩy đè, digest thì không",
+"new": "Tag có thể bị ghi đè, digest thì không",
+"reason": "'đẩy đè' là calque",
+"severity": "medium"
+},
+{
+"old": "chúng khiến việc chèn thay đổi độc hại không thể im lặng.",
+"new": "chúng khiến việc chèn thay đổi độc hại không thể diễn ra mà không bị phát hiện.",
+"reason": "Calque 'silent'",
+"severity": "high"
+},
+{
+"old": "khi rule trả hàng, nó tạo",
+"new": "khi rule trả về dòng kết quả, rule đó tạo",
+"reason": "'trả hàng' là calque của 'returns rows'; tránh 'nó'",
+"severity": "medium"
+},
+{
+"old": "nên kiểm trang giá trước khi bật connector",
+"new": "nên kiểm tra trang giá trước khi bật connector",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "kiểm `az sentinel onboarding-state create -h` trước khi chạy",
+"new": "hãy kiểm tra `az sentinel onboarding-state create -h` trước khi chạy",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "Kiểm dữ liệu bằng `AzureActivity | take 5`",
+"new": "Kiểm tra dữ liệu bằng `AzureActivity | take 5`",
+"reason": "'Kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "lọc thêm `Succeeded` để chịu được dữ liệu cũ",
+"new": "lọc thêm `Succeeded` để xử lý được dữ liệu cũ",
+"reason": "'chịu được' là calque",
+"severity": "medium"
+},
+{
+"old": "điều kiện `ingestion_time()` bằng tần suất để mỗi event chỉ bắn một lần",
+"new": "điều kiện `ingestion_time()` có độ rộng bằng tần suất chạy để mỗi event chỉ bắn một lần",
+"reason": "Câu lược danh từ ('bằng tần suất')",
+"severity": "medium"
+},
+{
+"old": "đã được uỷ quyền; kiểm bằng cách chạy thử",
+"new": "đã được uỷ quyền; hãy kiểm tra bằng cách chạy thử",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+},
+{
+"old": "để kiểm hệ thống chịu tải và chịu lỗi như thế nào.",
+"new": "để kiểm tra hệ thống chịu tải và chịu lỗi ra sao.",
+"reason": "'kiểm' thiếu 'tra'",
+"severity": "low"
+}
+]
+}

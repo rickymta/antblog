@@ -16,7 +16,7 @@ Khách nhìn nhãn “Đã xác nhận” và nghĩ tài xế đã biết mình 
 
 Giả thuyết P04: khách phân biệt “tôi đã xác nhận nội dung” với “tài xế đã đọc”. Câu hỏi thử: sau thao tác, người tham gia nghĩ ai biết thông tin gì? Đừng hỏi dẫn dắt “Bạn hiểu tài xế chưa đọc đúng không?”.
 
-[GOV.UK mô tả nhiều cách làm prototype](https://www.gov.uk/service-manual/design/making-prototypes). Độ chi tiết nên phục vụ câu hỏi: bản giấy có thể đủ kiểm bố cục/câu chữ; tương tác thực tế hơn cần khi kiểm luồng và phản hồi.
+[GOV.UK mô tả nhiều cách làm prototype](https://www.gov.uk/service-manual/design/making-prototypes). Độ chi tiết nên phục vụ câu hỏi: bản giấy có thể đủ để kiểm tra bố cục và câu chữ; khi kiểm tra luồng và phản hồi thì cần bản tương tác sát thực tế hơn.
 
 ## 2. Wireframe trạng thái thường
 
@@ -28,16 +28,16 @@ Giả thuyết P04: khách phân biệt “tôi đã xác nhận nội dung” v
 |---|---|---|
 | Đang gửi | Đang xử lý thao tác | Chưa báo đã lưu |
 | Revision đổi | Cần xem lại nội dung mới | Không giữ dấu xác nhận cho bản khác |
-| accepted thắng trước | Không còn ghi trong phạm vi hiện tại | Không giả vờ lưu rồi bỏ qua |
+| accepted xảy ra trước | Không còn ghi trong phạm vi hiện tại | Không giả vờ lưu rồi bỏ qua |
 | Timeout | Chưa biết kết quả, đang/có thể kiểm lại | Không khẳng định thất bại hoặc thành công khi chưa biết |
 
-Không chỉ vẽ màn hình đẹp nhất. Phản hồi lỗi là nơi người dùng quyết định thao tác tiếp và có thể tạo lặp nếu hiểu sai.
+Không chỉ vẽ màn hình đẹp nhất. Phản hồi lỗi là nơi người dùng quyết định thao tác tiếp theo và có thể thao tác lặp đi lặp lại nếu hiểu sai.
 
 ## 4. Thử bằng nhiệm vụ, không bằng lời khen
 
 Giao nhiệm vụ: “Bạn đang chờ xe ở cổng số 2. Hãy kiểm tra app đang dùng thông tin nào và làm điều bạn cho là cần.” Sau đó hỏi người tham gia giải thích trạng thái họ thấy. Ghi thao tác, câu nói, lời nhắc và chỗ họ dừng.
 
-Không cho biết trước nút nào cần bấm. Nếu phải trợ giúp, ghi mức trợ giúp; hoàn thành nhờ hướng dẫn không giống tự hoàn thành. Dùng dữ liệu giả và nói rõ prototype có giới hạn.
+Không cho biết trước nút nào cần bấm. Nếu phải giúp người tham gia, ghi mức trợ giúp; hoàn thành nhờ hướng dẫn không giống tự hoàn thành. Dùng dữ liệu giả và nói rõ prototype có giới hạn.
 
 ## 5. Ghi kết quả theo giả thuyết
 
@@ -47,7 +47,7 @@ Prototype dùng được không chứng minh giảm huỷ, đáp ứng hiệu n�
 
 ## 6. Liên kết quyết định thiết kế
 
-Mỗi trạng thái wireframe nối tới AC/use case. Nếu thiết kế thêm nút sửa sau accepted, nó đã mở rộng scope và phải review rule, quyền, đồng bộ, dữ liệu. Không để một thao tác thêm trên prototype âm thầm trở thành yêu cầu đã duyệt.
+Mỗi trạng thái wireframe nối tới AC/use case. Nếu thiết kế thêm nút sửa sau accepted, thiết kế đó đã mở rộng scope và phải rà soát lại rule, quyền, đồng bộ, dữ liệu. Không để một thao tác thêm trên prototype trở thành yêu cầu đã duyệt mà không qua xem xét.
 
 ## 7. Bài tập và tự kiểm tra
 

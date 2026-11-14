@@ -15,7 +15,7 @@ Lúc 3 giờ sáng, chuyến từ góc này của thành phố sang góc kia m�
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>CH của cả thành phố dựng trong khoảng 1,1–1,3 giây (bài 25). Trọng số đổi theo 24 giờ. Bạn chọn cách nào: dựng sẵn 24 CH, hay dùng Customizable CH để chỉ tính lại trọng số khi giờ đổi? Dự đoán Customizable CH nhanh hơn bao nhiêu lần ở bước đổi trọng số và chậm hơn bao nhiêu ở truy vấn.</p>
-<details><summary>Xem đáp án</summary><p>Ở lab này, tùy biến trọng số mất trung bình 355 ms mỗi giờ, so với 1.614 ms dựng lại CH thường: nhanh hơn 3,7–4,5 lần qua hai lần chạy, không phải vài bậc độ lớn. Cái giá: truy vấn khoảng cách chậm hơn CH thường <b>31,1–34,8 lần</b> (234,2 µs so với 7,5 µs ở lần chạy chính). Với bản đồ cỡ này và 24 giờ cố định, dựng sẵn một CH cho mỗi giờ đơn giản hơn và truy vấn nhanh hơn nhiều; Customizable CH chỉ đáng dùng khi trọng số đổi liên tục và có thứ tự nút tốt hơn thứ tự của lab.</p></details>
+<details><summary>Xem đáp án</summary><p>Ở lab này, tuỳ biến trọng số mất trung bình 355 ms mỗi giờ, so với 1.614 ms dựng lại CH thường: nhanh hơn 3,7–4,5 lần qua hai lần chạy, không phải vài bậc độ lớn. Cái giá: truy vấn khoảng cách chậm hơn CH thường <b>31,1–34,8 lần</b> (234,2 µs so với 7,5 µs ở lần chạy chính). Với bản đồ cỡ này và 24 giờ cố định, dựng sẵn một CH cho mỗi giờ đơn giản hơn và truy vấn nhanh hơn nhiều; Customizable CH chỉ đáng dùng khi trọng số đổi liên tục và có thứ tự nút tốt hơn thứ tự của lab.</p></details>
 </div>
 
 ## Hồ sơ tốc độ theo giờ, và vì sao nó là tổng hợp
@@ -104,9 +104,9 @@ Chi phí đó nhỏ, nên phương án «dựng sẵn một CH cho mỗi khung g
 
 Customizable Contraction Hierarchies (CCH) tách việc dựng thành ba pha, và chỉ pha cuối phụ thuộc trọng số:
 
-1. **Thứ tự** (một lần, chỉ phụ thuộc hình dạng đồ thị): chia đệ quy theo tọa độ, kiểu chia lồng nhau đơn giản. Mỗi lần cắt đôi theo trục dài, rồi lấy một «vách ngăn» là tập phủ đỉnh nhỏ nhất của các cạnh cắt (tìm bằng ghép cặp cực đại và định lý Kőnig) và xếp vách ngăn *sau* hai nửa. Bỏ vách ngăn thì hai nửa không còn cạnh nối nhau, nên co nút trong một nửa không bao giờ sinh shortcut sang nửa kia; shortcut chỉ dồn về vách ngăn. Vì vậy cỡ vách ngăn quyết định số cung.
+1. **Thứ tự** (một lần, chỉ phụ thuộc hình dạng đồ thị): chia đệ quy theo toạ độ, kiểu chia lồng nhau đơn giản. Mỗi lần cắt đôi theo trục dài, rồi lấy một «vách ngăn» là tập phủ đỉnh nhỏ nhất của các cạnh cắt (tìm bằng ghép cặp cực đại và định lý Kőnig) và xếp vách ngăn *sau* hai nửa. Bỏ vách ngăn thì hai nửa không còn cạnh nối nhau, nên co nút trong một nửa không bao giờ sinh shortcut sang nửa kia; shortcut chỉ dồn về vách ngăn. Vì vậy cỡ vách ngăn quyết định số cung.
 2. **Cấu trúc** (một lần): co nút theo thứ tự đó **không cần tìm nhân chứng**, nên tập shortcut không phụ thuộc trọng số.
-3. **Tùy biến** (mỗi lần đổi trọng số): duyệt các tam giác theo hạng và cập nhật `w(y,z) = min(w(y,z), w(y,x) + w(x,z))`.
+3. **Tuỳ biến** (mỗi lần đổi trọng số): duyệt các tam giác theo hạng và cập nhật `w(y,z) = min(w(y,z), w(y,x) + w(x,z))`.
 
 Pha 3 là vòng lặp ba tầng sau: với mỗi nút `x`, mỗi cặp hàng xóm đi lên `(y, z)` tạo một «tam giác» `x, y, z`, và cung `y–z` có thể được cải thiện qua `x`. Vì không bỏ shortcut nào, cung `y–z` luôn tồn tại. Vì duyệt `x` theo hạng tăng dần, khi tới `x` thì `w(y,x)` và `w(x,z)` đã nhận đủ cải thiện từ mọi nút thấp hơn. Sau vòng lặp, mỗi cung mang chi phí tốt nhất qua các nút hạng thấp hơn nó, đúng điều truy vấn đi lên rồi đi xuống của bài 25 cần.
 
@@ -146,7 +146,7 @@ Pha 3 là vòng lặp ba tầng sau: với mỗi nút `x`, mỗi cặp hàng xó
 
 Kết quả của `customize` là một `Ch` thường, dùng được với mọi truy vấn và ma trận của bài 25, 26. Phần đắt được làm một lần: dựng thứ tự và cấu trúc mất 0,08 s (thứ tự 0,06 s, cấu trúc 0,02 s), ra 1.069.409 cung đi lên (8,44 cung mỗi nút), bậc đi lên lớn nhất 299, bộ nhớ cấu trúc 7,1 MB. Mỗi lần đổi trọng số phải duyệt 39.194.426 tam giác.
 
-Engine dùng nó thế nào: `enable_time_of_day` dựng CCH một lần; mỗi lần có yêu cầu cho một giờ chưa có trong bộ nhớ đệm nhỏ (giữ tối đa 4 giờ gần nhất), engine tính trọng số của giờ đó và tùy biến CCH.
+Engine dùng nó thế nào: `enable_time_of_day` dựng CCH một lần; mỗi lần có yêu cầu cho một giờ chưa có trong bộ nhớ đệm nhỏ (giữ tối đa 4 giờ gần nhất), engine tính trọng số của giờ đó và tuỳ biến CCH.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/engine.rs`
 
@@ -163,17 +163,17 @@ Engine dùng nó thế nào: `enable_time_of_day` dựng CCH một lần; mỗi 
             let ch = tod.cch.customize(&costs.w);
 ```
 
-Kết quả đúng: sau mỗi lần tùy biến, CH cho đúng chi phí của Dijkstra trên trọng số giờ đó, **0 khác biệt trên 300 truy vấn** ở mỗi giờ 3, 8, 13 và 18. Đường giải nén dùng lại code của bài 25.
+Kết quả đúng: sau mỗi lần tuỳ biến, CH cho đúng chi phí của Dijkstra trên trọng số giờ đó, **0 khác biệt trên 300 truy vấn** ở mỗi giờ 3, 8, 13 và 18. Đường giải nén dùng lại code của bài 25.
 
 ## Cái giá: truy vấn chậm hơn 31–35 lần
 
-Đây là phần cần đọc thẳng, không làm đẹp. Trong cài đặt này CCH **chậm hơn CH thường 31,1–34,8 lần** ở truy vấn khoảng cách: 234,2 µs so với 7,5 µs ở lần chạy chính (255,9 so với 7,3 µs ở lần hai). Số nút chốt mỗi truy vấn là 789 so với 173, và số cung đi lên sau tùy biến là 1,78 triệu (14,06 cung mỗi nút) so với 0,44 triệu của CH thường (3,49 cung mỗi nút).
+Đây là phần cần đọc thẳng, không làm đẹp. Trong cài đặt này CCH **chậm hơn CH thường 31,1–34,8 lần** ở truy vấn khoảng cách: 234,2 µs so với 7,5 µs ở lần chạy chính (255,9 so với 7,3 µs ở lần hai). Số nút chốt mỗi truy vấn là 789 so với 173, và số cung đi lên sau tuỳ biến là 1,78 triệu (14,06 cung mỗi nút) so với 0,44 triệu của CH thường (3,49 cung mỗi nút).
 
-Ba nguyên nhân chồng nhau. Thứ nhất, và không tránh được ở mọi CCH: thứ tự và cấu trúc không biết trọng số, không có nhân chứng để bỏ shortcut, nên phải giữ mọi shortcut mà thứ tự sinh ra: 899.270 shortcut ở giờ 8, so với 191.118 của CH thường. Thứ hai, thứ tự chia theo tọa độ không bằng các cách chia đồ thị tốt (lab chưa dùng InertialFlow hay METIS), nên vách ngăn lớn và đồ thị đi lên dày hơn mức cần. Thứ ba, chưa có bước «tùy biến hoàn hảo» để bỏ các cung thừa sau khi đã biết trọng số. Lab không tách được phần nào đóng góp bao nhiêu. Từ hai con số ở trên: chốt nhiều nút hơn 4,6 lần và mỗi nút chốt tốn khoảng 6,8 lần thời gian (234,2/789 so với 7,5/173, tính từ chính các số đo), một phần vì đồ thị đi lên dày hơn (14,06 so với 3,49 cung mỗi nút, gấp khoảng 4 lần).
+Ba nguyên nhân chồng nhau. Thứ nhất, và không tránh được ở mọi CCH: thứ tự và cấu trúc không biết trọng số, không có nhân chứng để bỏ shortcut, nên phải giữ mọi shortcut mà thứ tự sinh ra: 899.270 shortcut ở giờ 8, so với 191.118 của CH thường. Thứ hai, thứ tự chia theo toạ độ không bằng các cách chia đồ thị tốt (lab chưa dùng InertialFlow hay METIS), nên vách ngăn lớn và đồ thị đi lên dày hơn mức cần. Thứ ba, chưa có bước «tuỳ biến hoàn hảo» để bỏ các cung thừa sau khi đã biết trọng số. Lab không tách được phần nào đóng góp bao nhiêu. Từ hai con số ở trên: chốt nhiều nút hơn 4,6 lần và mỗi nút chốt tốn khoảng 6,8 lần thời gian (234,2/789 so với 7,5/173, tính từ chính các số đo), một phần vì đồ thị đi lên dày hơn (14,06 so với 3,49 cung mỗi nút, gấp khoảng 4 lần).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 290" role="img" aria-label="Hình 2. Đánh đổi của Customizable CH so với CH thường: đổi trọng số một giờ mất 355 ms thay vì 1.614 ms dựng lại, nhưng một truy vấn khoảng cách mất 234,2 µs thay vì 7,5 µs."><rect x="20" y="20" width="840" height="255" rx="10" class="f-bg s-line" stroke-width="1.5"/><text x="40" y="46" class="t-b">Customizable CH đổi lấy gì và trả giá gì (cùng một lần chạy, HCM, ô tô)</text><text x="40" y="80" class="t-b">Đổi trọng số cho một giờ (trung bình 24 giờ)</text><text x="40" y="106" class="t-mono">CH dựng lại</text><rect x="190" y="92" width="500" height="20" rx="3" class="f-warn s-warn" stroke-width="1.5"/><text x="700" y="106" class="t-mono">1.614 ms</text><text x="40" y="136" class="t-mono">CCH tùy biến</text><rect x="190" y="122" width="110" height="20" rx="3" class="f-phys s-phys" stroke-width="1.5"/><text x="310" y="136" class="t-mono">355 ms (nhanh hơn 4,5 lần)</text><text x="40" y="180" class="t-b">Một truy vấn khoảng cách (trung bình)</text><text x="40" y="206" class="t-mono">CH thường</text><rect x="190" y="192" width="16" height="20" rx="3" class="f-phys s-phys" stroke-width="1.5"/><text x="216" y="206" class="t-mono">7,5 µs (173 nút chốt)</text><text x="40" y="236" class="t-mono">CCH</text><rect x="190" y="222" width="500" height="20" rx="3" class="f-warn s-warn" stroke-width="1.5"/><text x="700" y="236" class="t-mono">234,2 µs (789 nút)</text><text x="40" y="262" class="t-small">Hai nhóm cột có thang riêng. Máy chịu tải nặng: chỉ tỉ lệ có nghĩa. CCH chậm hơn 31,14 lần ở lần này (31,1–34,8 lần qua hai lần chạy).</text></svg>
+<svg viewBox="0 0 880 290" role="img" aria-label="Hình 2. Đánh đổi của Customizable CH so với CH thường: đổi trọng số một giờ mất 355 ms thay vì 1.614 ms dựng lại, nhưng một truy vấn khoảng cách mất 234,2 µs thay vì 7,5 µs."><rect x="20" y="20" width="840" height="255" rx="10" class="f-bg s-line" stroke-width="1.5"/><text x="40" y="46" class="t-b">Customizable CH đổi lấy gì và trả giá gì (cùng một lần chạy, HCM, ô tô)</text><text x="40" y="80" class="t-b">Đổi trọng số cho một giờ (trung bình 24 giờ)</text><text x="40" y="106" class="t-mono">CH dựng lại</text><rect x="190" y="92" width="500" height="20" rx="3" class="f-warn s-warn" stroke-width="1.5"/><text x="700" y="106" class="t-mono">1.614 ms</text><text x="40" y="136" class="t-mono">CCH tuỳ biến</text><rect x="190" y="122" width="110" height="20" rx="3" class="f-phys s-phys" stroke-width="1.5"/><text x="310" y="136" class="t-mono">355 ms (nhanh hơn 4,5 lần)</text><text x="40" y="180" class="t-b">Một truy vấn khoảng cách (trung bình)</text><text x="40" y="206" class="t-mono">CH thường</text><rect x="190" y="192" width="16" height="20" rx="3" class="f-phys s-phys" stroke-width="1.5"/><text x="216" y="206" class="t-mono">7,5 µs (173 nút chốt)</text><text x="40" y="236" class="t-mono">CCH</text><rect x="190" y="222" width="500" height="20" rx="3" class="f-warn s-warn" stroke-width="1.5"/><text x="700" y="236" class="t-mono">234,2 µs (789 nút)</text><text x="40" y="262" class="t-small">Hai nhóm cột có thang riêng. Máy chịu tải nặng: chỉ tỉ lệ có nghĩa. CCH chậm hơn 31,14 lần ở lần này (31,1–34,8 lần qua hai lần chạy).</text></svg>
 </div>
 <figcaption>Hình 2. Customizable CH đổi trọng số nhanh hơn 4,5 lần so với dựng lại CH ở lần chạy chính (3,7–4,5 lần qua hai lần), nhưng mỗi truy vấn chậm hơn 31 lần. Đo khi máy chịu tải nặng.</figcaption>
 </figure>
@@ -183,7 +183,7 @@ Hình 2 gói lại sự đánh đổi. Nên chọn thế nào cho Tới Nơi? Th
 | Tình huống | Chọn | Lý do |
 |---|---|---|
 | Trọng số đổi theo 24 khung giờ cố định, bản đồ một thành phố | Dựng sẵn một CH cho mỗi giờ (hoặc dựng khi giờ đổi) | Dựng 1,1–1,6 s mỗi lần, truy vấn nhanh hơn 31 lần |
-| Trọng số đổi liên tục (kẹt xe trực tiếp), ít truy vấn giữa hai lần đổi | CCH, kèm đầu tư vào thứ tự nút tốt hơn | Tùy biến 355 ms; hòa vốn với dựng lại ở khoảng 5.500 truy vấn giữa hai lần đổi (bài tập 2); truy vấn sẽ nhanh lên khi thứ tự tốt hơn, chưa đo |
+| Trọng số đổi liên tục (kẹt xe trực tiếp), ít truy vấn giữa hai lần đổi | CCH, kèm đầu tư vào thứ tự nút tốt hơn | Tuỳ biến 355 ms; hoà vốn với dựng lại ở khoảng 5.500 truy vấn giữa hai lần đổi (bài tập 2); truy vấn sẽ nhanh lên khi thứ tự tốt hơn, chưa đo |
 | Trọng số đổi liên tục, nhiều truy vấn giữa hai lần đổi | Dựng lại CH trong nền | Bản đồ cỡ này dựng lại cỡ 1–2 s; truy vấn nhanh hơn 31 lần |
 | Mô phỏng và lô nhỏ, ít truy vấn | Tìm kiếm theo cạnh trọng số của giờ (không cần CH) | Simulator của bài 30 tính trước 24 vector trọng số và dùng A* theo cạnh |
 
@@ -213,7 +213,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc27_toc_do_theo_gio
 ```
 
-Cấu hình: 500 cặp nút (300 cặp đầu để kiểm đúng), seed 20261106, hai lần chạy. Output (rút gọn, lần có thời gian tùy biến thấp nhất), **đo khi máy chịu tải nặng**:
+Cấu hình: 500 cặp nút (300 cặp đầu để kiểm đúng), seed 20261106, hai lần chạy. Output (rút gọn, lần có thời gian tuỳ biến thấp nhất), **đo khi máy chịu tải nặng**:
 
 ```text
 DỮ LIỆU KẸT XE Ở ĐÂY LÀ TỔNG HỢP: hệ số do lab tự đặt (xem crates/route-engine/src/traffic.rs), không đo từ xe thật.
@@ -225,21 +225,21 @@ DỮ LIỆU KẸT XE Ở ĐÂY LÀ TỔNG HỢP: hệ số do lab tự đặt (x
   truy vấn khoảng cách, trung bình: CH thường 7.5 µs (173 nút chốt), CCH 234.2 µs (789 nút chốt); CCH chậm hơn 31.14x
 ```
 
-Các số đếm và tỉ lệ ETA tái lập từng chữ số; số thời gian thì không (lần hai: tùy biến 358 ms, dựng lại 1.341 ms, CCH chậm hơn 34,84 lần). `verify-p03.sh` chạy phần kiểm đúng trên đồ thị tổng hợp.
+Các số đếm và tỉ lệ ETA tái lập từng chữ số; số thời gian thì không (lần hai: tuỳ biến 358 ms, dựng lại 1.341 ms, CCH chậm hơn 34,84 lần). `verify-p03.sh` chạy phần kiểm đúng trên đồ thị tổng hợp.
 
 ## Giới hạn của ví dụ
 
 - **Kẹt xe là tổng hợp.** Hệ số do lab đặt, không có dữ liệu xe thật, không có sự cố, mưa, sự kiện. Mọi con số «ETA sai x%» là cỡ hiệu ứng dưới giả định.
 - **Khung giờ, chưa phụ thuộc thời gian.** Cả chuyến dùng trọng số của giờ khởi hành, nên chuyến dài vắt qua hai khung giờ bị tính sai phần sau; chưa có thuật toán phụ thuộc thời gian thật sự.
-- **CCH ở mức học.** Thứ tự theo tọa độ, chưa có tùy biến hoàn hảo; số đo chậm hơn 31–35 lần là của cài đặt này chứ không phải của phương pháp CCH nói chung. Bài này không so với một cài đặt CCH tốt hơn.
-- **Tùy biến toàn bộ.** Mỗi lần tùy biến tính lại mọi cung; chưa có cập nhật cục bộ cho một nhóm cạnh bị kẹt.
+- **CCH ở mức học.** Thứ tự theo toạ độ, chưa có tuỳ biến hoàn hảo; số đo chậm hơn 31–35 lần là của cài đặt này chứ không phải của phương pháp CCH nói chung. Bài này không so với một cài đặt CCH tốt hơn.
+- **Tuỳ biến toàn bộ.** Mỗi lần tuỳ biến tính lại mọi cung; chưa có cập nhật cục bộ cho một nhóm cạnh bị kẹt.
 - **Chỉ một thành phố, ô tô.** Xe máy dùng cùng cơ chế với độ nặng 0,7 lần, chưa đo riêng.
 - **Dịch vụ `geo-engine` chỉ bật hồ sơ giờ khi chạy với `--time-of-day`**; lab đo tải của bài 29 không bật. Simulator baseline ở bài 30 dùng giao thông tự do.
 - **Đo khi máy chịu tải nặng**, hai lần chạy; chưa có lần đo trên máy rảnh.
 
 ## Bài tập
 
-**Bài 1.** Tùy biến nhanh hơn dựng lại 4,54 lần ở lần chạy chính, nhỏ nhất 2,67 lần. Vì sao «nhỏ nhất» quan trọng hơn «trung bình» khi lên kế hoạch dung lượng?
+**Bài 1.** Tuỳ biến nhanh hơn dựng lại 4,54 lần ở lần chạy chính, nhỏ nhất 2,67 lần. Vì sao «nhỏ nhất» quan trọng hơn «trung bình» khi lên kế hoạch dung lượng?
 
 <details><summary>Lời giải bài 1</summary>
 <p>Kế hoạch dung lượng phải chịu được trường hợp bất lợi cho lựa chọn của mình. Trung bình 4,54 lần bị kéo lên bởi một lần dựng lại 5.367 ms, hơn ba lần trung bình; ở lần chạy thứ hai không có giá trị như vậy và trung bình chỉ còn 3,74 lần. Con số 2,67 gần hơn với điều nên trông đợi. Hai lần chạy dưới tải nặng không đủ để kết luận CCH «ổn định hơn»: lần hai, dựng lại cũng chỉ dao động 1.197–1.560 ms. Dù sao lợi thế vẫn cỡ vài lần, chưa phải vài bậc độ lớn.</p>
@@ -248,7 +248,7 @@ Các số đếm và tỉ lệ ETA tái lập từng chữ số; số thời gia
 **Bài 2.** Nếu trọng số chỉ đổi tám lần mỗi ngày (theo bảng cố định) và truy vấn là phần lớn tải, bạn chọn CCH hay CH theo giờ? Tính từ số đo.
 
 <details><summary>Lời giải bài 2</summary>
-<p>CH theo giờ: mỗi lần đổi dựng lại 1,1–1,6 s, truy vấn 7,5 µs. CCH: mỗi lần đổi 355 ms, truy vấn 234,2 µs (chậm hơn khoảng 31 lần). Mỗi truy vấn CH nhanh hơn CCH khoảng 227 µs (234,2 trừ 7,5), còn mỗi lần đổi trọng số CCH rẻ hơn dựng lại khoảng 1.259 ms (1.614 trừ 355). Hòa vốn khi có khoảng 5.500 truy vấn giữa hai lần đổi (1.259 chia 0,227); nhiều hơn thế thì CH theo giờ thắng. Tám lần đổi mỗi ngày với tải truy vấn lớn chắc chắn vượt ngưỡng đó, nên CH theo giờ thắng; cái giá là bộ nhớ nhân lên theo số khung giờ.</p>
+<p>CH theo giờ: mỗi lần đổi dựng lại 1,1–1,6 s, truy vấn 7,5 µs. CCH: mỗi lần đổi 355 ms, truy vấn 234,2 µs (chậm hơn khoảng 31 lần). Mỗi truy vấn CH nhanh hơn CCH khoảng 227 µs (234,2 trừ 7,5), còn mỗi lần đổi trọng số CCH rẻ hơn dựng lại khoảng 1.259 ms (1.614 trừ 355). Hoà vốn khi có khoảng 5.500 truy vấn giữa hai lần đổi (1.259 chia 0,227); nhiều hơn thế thì CH theo giờ thắng. Tám lần đổi mỗi ngày với tải truy vấn lớn chắc chắn vượt ngưỡng đó, nên CH theo giờ thắng; cái giá là bộ nhớ nhân lên theo số khung giờ.</p>
 </details>
 
 **Bài 3.** Vì sao hai chuyến cùng 20.575 m chim bay lúc 3 giờ và 8 giờ có thể đi theo hai tuyến khác nhau?

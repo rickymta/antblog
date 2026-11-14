@@ -22,9 +22,9 @@ Lối ra là **theme**: ta khai báo màu, kiểu chữ và hình dạng compone
 
 ## Theme là dữ liệu đi xuống cây widget
 
-`ThemeData` chứa bộ màu, bộ kiểu chữ và cấu hình của từng component. `MaterialApp` đặt nó vào cây bằng widget `Theme`, một `StatelessWidget` bọc `InheritedWidget` riêng (`_InheritedTheme`). Widget con đọc bằng `Theme.of(context)`, lời gọi này đăng ký phụ thuộc: khi theme đổi, widget đã gọi nó được dựng lại.
+`ThemeData` chứa bộ màu, bộ kiểu chữ và cấu hình của từng component. `MaterialApp` đặt nó vào cây bằng widget `Theme`, một `StatelessWidget` bọc `InheritedWidget` riêng (`_InheritedTheme`). Widget con đọc bằng `Theme.of(context)`, lời gọi này đăng ký phụ thuộc: khi theme đổi, widget đã gọi nó được rebuild.
 
-Ở Hình 1, hệ điều hành báo `platformBrightness`, app giữ `themeMode`, `MaterialApp` chọn đúng một `ThemeData`. `AnimatedTheme` bọc ngoài để chuyển sáng sang tối có nội suy, mặc định 200 ms.
+Ở Hình 1, hệ điều hành báo `platformBrightness`, app giữ `themeMode`, `MaterialApp` chọn đúng một `ThemeData`. `AnimatedTheme` bọc ngoài để chuyển từ sáng sang tối có nội suy, mặc định 200 ms.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -76,7 +76,7 @@ class _ThemeGalleryAppState extends State<ThemeGalleryApp> {
 }
 ```
 
-`ToiNoiTheme.light()` và `dark()` dựng `ThemeData` một lần cho mỗi nền tảng và trả về cùng đối tượng ở các lần gọi sau, nên gọi chúng trong `build` không tốn gì.
+`ToiNoiTheme.light()` và `dark()` dựng `ThemeData` một lần cho mỗi nền tảng và trả về cùng đối tượng ở các lần gọi sau, nên gọi chúng trong `build` không tốn thêm chi phí nào.
 
 Dark mode kiểm được không cần điện thoại: test đổi `platformBrightness` của `platformDispatcher` giả, và `MaterialApp` đọc nó qua `MediaQuery.platformBrightnessOf`. Hai hàm phụ:
 
@@ -148,7 +148,7 @@ Future<void> _choose(WidgetTester tester, String label) async {
 
 ## ColorScheme.fromSeed: một màu gốc, hai bảng màu
 
-Material 3 mô tả màu bằng **vai trò** (role): `primary`, `onPrimary`, `primaryContainer`, `surface`, `error`. Component xin theo vai trò, theme quyết định giá trị. `ColorScheme.fromSeed` sinh cả bộ từ một màu gốc (seed), biến thể `tonalSpot` mặc định; `brightness` chọn bản sáng hay tối.
+Material 3 mô tả màu bằng **vai trò** (role): `primary`, `onPrimary`, `primaryContainer`, `surface`, `error`. Component xin theo vai trò, theme quyết định giá trị. `ColorScheme.fromSeed` sinh cả bộ từ một màu gốc (seed), biến thể mặc định là `tonalSpot`; `brightness` chọn bản sáng hay tối.
 
 ### toi_noi_theme.dart · packages/toi_noi_ui/lib/src/toi_noi_theme.dart (trích)
 
@@ -185,7 +185,7 @@ Material 3 mô tả màu bằng **vai trò** (role): `primary`, `onPrimary`, `pr
 
 Ba điều cần nhớ, đều có test:
 
-- Seed không thành `primary` nguyên xi: `primary` bản sáng sinh ra khác seed `0xFF0F766E`.
+- Seed không trở thành `primary` nguyên xi: `primary` bản sáng sinh ra khác seed `0xFF0F766E`.
 - Sáng và tối sinh từ cùng seed nhưng chọn tông khác (Hình 2): bản tối có `primary` sáng hơn và `surface` tối hơn; test so độ chói.
 - Vai trò `on...` là màu chữ và icon đặt **trên** màu cùng tên. Test kiểm sáu cặp (gồm `error` trên `surface`), ở cả hai theme, đều đạt tương phản tối thiểu 4,5:1.
 
@@ -234,7 +234,7 @@ Quy tắc cho cả dự án: widget không viết `Colors.teal` hay `Color(0xFF.
   );
 ```
 
-Nhờ gộp, `titleLarge` mang `w600` của ta và vẫn có màu `onSurface`, nên sang theme tối chữ đổi màu theo. Chỗ dễ vấp: cỡ chữ chỉ có sau khi theme vào cây, vì `Theme.of(context)` trả bản đã "localize" theo `MaterialLocalizations`; đọc `ToiNoiTheme.light().textTheme.bodyLarge!.fontSize` ngoài cây cho `null` (có test).
+Nhờ gộp, `titleLarge` mang `w600` của ta và vẫn có màu `onSurface`, nên sang theme tối chữ đổi màu theo. Chỗ dễ vấp: cỡ chữ chỉ có sau khi theme vào cây, vì `Theme.of(context)` trả bản đã "localize" theo `MaterialLocalizations`; đọc `ToiNoiTheme.light().textTheme.bodyLarge!.fontSize` ngoài cây thì ra `null` (có test).
 
 Khoảng cách cũng được đặt tên, trong `abstract final class` chỉ chứa hằng như `FarePolicy` ở bài 06:
 
@@ -334,7 +334,7 @@ Dùng nhầm bản sáng trên nền tối là lỗi thật: `success` bản sá
 
 `extension<ToiNoiColors>()` trả `null` nếu `ThemeData` không đăng ký nó (ví dụ `ThemeData()` trơn); thay vì để `!` crash, `of` chọn bản sáng hoặc tối theo `brightness`.
 
-`lerp` có việc thật. Khi theme đổi, `AnimatedTheme` nội suy `ThemeData` cũ sang mới, và `ThemeData.lerp` gọi `lerp` của từng extension. Bỏ sót một trường thì màu đó giữ giá trị cũ rồi nhảy ở cuối chuyển cảnh thay vì trượt dần.
+`lerp` có tác dụng thật. Khi theme đổi, `AnimatedTheme` nội suy `ThemeData` cũ sang mới, và `ThemeData.lerp` gọi `lerp` của từng extension. Bỏ sót một trường thì màu đó giữ giá trị cũ rồi nhảy ở cuối chuyển cảnh thay vì trượt dần.
 
 ### toi_noi_colors.dart · packages/toi_noi_ui/lib/src/toi_noi_colors.dart (trích)
 
@@ -545,7 +545,7 @@ _StatusLook _lookOf(
 };
 ```
 
-Nếu ai thêm một `TripStatus` vào `toi_noi_core`, `flutter analyze` báo `non_exhaustive_switch_expression` ngay chỗ này (ta đã thử bằng cách xoá nhánh `cancelled`). Chip phải được quyết định màu trước khi code build được.
+Nếu ai thêm một `TripStatus` vào `toi_noi_core`, `flutter analyze` báo `non_exhaustive_switch_expression` ngay chỗ này (ta đã thử bằng cách xoá nhánh `cancelled`). Phải quyết định màu cho chip thì code mới build được.
 
 Bốn trạng thái đang diễn ra dùng chung `primaryContainer` nhưng khác icon, có chủ ý: trạng thái không nên chỉ dựa vào màu. Test kiểm tám icon đôi một khác nhau.
 
@@ -604,7 +604,7 @@ const _grey = Color(0xFF8A8A8A);
 <ul>
 <li><strong>Tô màu thẳng bằng <code>Colors.xxx</code> hay <code>Color(0xFF...)</code> trong widget.</strong> Dấu hiệu: bật dark mode thì vài chữ hoặc icon mất tương phản. Nguyên nhân: hằng màu không biết theme. Cách sửa: lấy từ <code>Theme.of(context).colorScheme</code> hoặc <code>ToiNoiColors.of(context)</code>.</li>
 <li><strong>Chỉ truyền <code>theme</code>, quên <code>darkTheme</code>.</strong> Dấu hiệu: điện thoại ở chế độ tối nhưng app luôn sáng, không báo lỗi. Nguyên nhân: <code>darkTheme</code> là <code>null</code> thì Flutter dùng lại <code>theme</code>. Cách sửa: luôn truyền cả hai.</li>
-<li><strong>Test đổi theme nhưng <code>Theme.of</code> vẫn trả theme cũ.</strong> Dấu hiệu: <code>pumpWidget</code> với theme mới mà <code>expect</code> brightness ra giá trị cũ. Nguyên nhân: <code>AnimatedTheme</code> mới đi được đầu đường nội suy. Cách sửa: <code>pumpAndSettle()</code>, hoặc <code>themeAnimationDuration: Duration.zero</code> như <code>pumpThemed</code> ở package.</li>
+<li><strong>Test đổi theme nhưng <code>Theme.of</code> vẫn trả theme cũ.</strong> Dấu hiệu: <code>pumpWidget</code> với theme mới mà <code>expect</code> brightness ra giá trị cũ. Nguyên nhân: <code>AnimatedTheme</code> mới đi được đoạn đầu của quá trình nội suy. Cách sửa: <code>pumpAndSettle()</code>, hoặc <code>themeAnimationDuration: Duration.zero</code> như <code>pumpThemed</code> ở package.</li>
 <li><strong>Đọc <code>textTheme</code> thẳng từ <code>ThemeData</code> rồi gặp <code>null</code>.</strong> Dấu hiệu: <code>fontSize</code> là <code>null</code>, hoặc <code>Null check operator</code> khi gắn <code>!</code>. Nguyên nhân: cỡ chữ chỉ có sau khi <code>Theme.of(context)</code> localize theme. Cách sửa: đọc qua <code>Theme.of(context).textTheme</code> trong cây.</li>
 <li><strong>Gọi <code>extension&lt;T&gt;()!</code> khi theme không đăng ký extension.</strong> Dấu hiệu: widget test crash <code>Null check operator used on a null value</code> vì quên bọc theme. Cách sửa: dùng <code>ToiNoiColors.of(context)</code> có bản dự phòng.</li>
 </ul>

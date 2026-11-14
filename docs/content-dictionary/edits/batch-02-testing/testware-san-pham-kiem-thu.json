@@ -1,0 +1,10 @@
+{"file":"testware-san-pham-kiem-thu.md","edits":[
+{"old":"Tóm lại, truy vết cho thông tin để đánh giá","new":"Tóm lại, truy vết cung cấp thông tin để đánh giá","reason":"'cho thông tin' dịch sát tiếng Anh, gượng","severity":"medium"},
+{"old":"việc kiểm truy vết bằng một test tự động","new":"việc kiểm tra truy vết bằng một test tự động","reason":"'kiểm' cụt, thiếu 'tra'","severity":"low"},
+{"old":"bản dựng chạy được, `npm run typecheck` sạch","new":"build chạy được, `npm run typecheck` sạch","reason":"Giữ 'build' như thuật ngữ quen dùng","severity":"medium"},
+{"old":"đóng vai «bản dựng rc» mà developer","new":"đóng vai «build rc» mà developer","reason":"Giữ 'build' như thuật ngữ quen dùng","severity":"medium"},
+{"old":"Chạy cùng script trên «bản dựng rc» (bản lỗi):","new":"Chạy cùng script trên «build rc» (bản lỗi):","reason":"Giữ 'build' như thuật ngữ quen dùng","severity":"medium"},
+{"old":"bản dựng rc (`buggy-parcel.ts`);","new":"build rc (`buggy-parcel.ts`);","reason":"Giữ 'build' như thuật ngữ quen dùng","severity":"medium"},
+{"old":"để kiểm hồi quy.","new":"để kiểm tra regression.","reason":"Giữ 'regression' như thuật ngữ quen dùng; 'kiểm' cụt","severity":"medium"},
+{"old":"để dùng lại ở đợt sau, và một lessons learned:","new":"để dùng lại ở đợt sau, và ghi thêm một lessons learned:","reason":"Câu thiếu động từ","severity":"medium"}
+]}

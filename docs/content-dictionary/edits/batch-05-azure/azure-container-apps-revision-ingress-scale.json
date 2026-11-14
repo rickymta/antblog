@@ -1,0 +1,18 @@
+{"file":"azure-container-apps-revision-ingress-scale.md","edits":[
+{"old":"bạn trả theo tài nguyên replica dùng.","new":"bạn trả theo tài nguyên mà replica sử dụng.","reason":"Thiếu quan hệ từ, câu cụt","severity":"low"},
+{"old":"Chỉ cân nhắc Dedicated khi có số đo cho thấy cần.","new":"Chỉ cân nhắc Dedicated khi số liệu đo được cho thấy việc đó cần thiết.","reason":"Câu cụt: 'cho thấy cần' thiếu thành phần","severity":"medium"},
+{"old":"ở đây chỉ cần nhớ environment là nơi bạn đặt nó.","new":"ở đây chỉ cần nhớ environment là nơi bạn đưa ra quyết định đó.","reason":"Đại từ 'nó' mơ hồ","severity":"medium"},
+{"old":"Một, bản mới nhất khoẻ","new":"Một, bản mới nhất ở trạng thái healthy","reason":"'khoẻ' là calque của healthy","severity":"medium"},
+{"old":"đừng mặc định cấu hình tự hot reload.","new":"đừng mặc định rằng cấu hình sẽ tự hot reload.","reason":"Câu thiếu động từ, khó đọc","severity":"medium"},
+{"old":"từ phép đo, và tắt revision cũ","new":"dựa trên số liệu đo được, và tắt revision cũ","reason":"'từ phép đo' gượng","severity":"low"},
+{"old":"lúc tải tăng bạn nhận lỗi kết nối chứ không nhận thêm công suất.","new":"lúc tải tăng bạn gặp lỗi kết nối chứ không có thêm công suất.","reason":"'nhận lỗi', 'nhận công suất' là calque","severity":"medium"},
+{"old":"Cổng container thực sự lắng nghe.","new":"Cổng mà container thực sự lắng nghe.","reason":"Câu thiếu quan hệ từ, khó đọc","severity":"medium"},
+{"old":"mà lộ ra thành probe fail hoặc 502 lúc chạy.","new":"mà lộ ra dưới dạng probe fail hoặc 502 lúc chạy.","reason":"'lộ ra thành' gượng","severity":"low"},
+{"old":"Người gọi tới được thì vẫn phải qua kiểm tra token","new":"Dù người gọi đã tới được app thì vẫn phải qua bước kiểm tra token","reason":"Câu thiếu liên kết, đọc khó hiểu","severity":"low"},
+{"old":"Hai là **max replica**: nó là trần chi phí và cũng là trần số connection xuống database","new":"Hai là **max replica**: giá trị này là trần chi phí và cũng là trần số connection tới database","reason":"Tránh 'nó'; 'xuống database' là calque","severity":"medium"},
+{"old":"Nó cần quyền đọc secret trong","new":"Identity này cần quyền đọc secret trong","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"vì cấp quyền được trước khi app tồn tại;","new":"vì có thể cấp quyền trước khi app tồn tại;","reason":"'cấp quyền được' trật tự kiểu máy","severity":"low"},
+{"old":"**Startup** cho .NET thời gian khởi động riêng.","new":"**Startup** dành cho .NET một khoảng thời gian khởi động riêng.","reason":"Câu cụt, thiếu động từ và danh từ","severity":"medium"},
+{"old":"không chỉ định; kiểm","new":"không chỉ định; kiểm tra","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Container Apps che gần hết phần vận hành cluster.","new":"Container Apps ẩn đi gần hết phần vận hành cluster.","reason":"'che' là calque của abstract away","severity":"medium"}
+]}

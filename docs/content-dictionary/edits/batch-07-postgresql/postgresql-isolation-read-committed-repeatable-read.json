@@ -1,0 +1,12 @@
+{"file":"postgresql-isolation-read-committed-repeatable-read.md","edits":[
+{"old":"Chạy cùng bốn lịch tranh chấp dưới Read Committed và Repeatable Read trên PostgreSQL 18.1 để so kết quả.","new":"Bài chạy cùng bốn lịch tranh chấp dưới Read Committed và Repeatable Read trên PostgreSQL 18.1 để so kết quả.","reason":"Câu cụt thiếu chủ ngữ","severity":"medium"},
+{"old":"Bước rơi vào chờ khoá được runner ghi `⏳`;","new":"Runner ghi `⏳` cho bước phải chờ khoá;","reason":"Bị động và 'rơi vào chờ khoá' gượng","severity":"low"},
+{"old":"Read Uncommitted được nhận về cú pháp","new":"Read Uncommitted được chấp nhận về mặt cú pháp","reason":"'nhận về cú pháp' gượng","severity":"medium"},
+{"old":"Cột cuối, Serializable, là chủ đề PG-038.","new":"Cột cuối và mức Serializable là chủ đề của PG-038.","reason":"Câu lỏng, dễ hiểu nhầm 'Cột cuối' là Serializable","severity":"low"},
+{"old":"Đảo ngược S3: ở đây RC cho kết quả đúng","new":"Ngược với S3: ở đây RC cho kết quả đúng","reason":"'Đảo ngược' là calque của reverse","severity":"low"},
+{"old":"Nếu kia COMMIT, nó lấy **phiên bản mới** của dòng","new":"Nếu giao dịch kia COMMIT, câu lệnh lấy **phiên bản mới** của dòng","reason":"Thiếu danh từ ('kia' đứng một mình), 'nó' mơ hồ","severity":"medium"},
+{"old":"dòng cần sửa đã bị giao dịch commit sau snapshot sửa trước ⇒","new":"dòng cần sửa đã bị một giao dịch khác sửa và commit sau snapshot ⇒","reason":"Câu thiếu động từ và chủ thể, khó hiểu","severity":"high"},
+{"old":"§2 nghĩa là `BEGIN ISOLATION LEVEL REPEATABLE READ` chưa «đóng băng» gì:","new":"Kết quả §2 cho thấy `BEGIN ISOLATION LEVEL REPEATABLE READ` chưa «đóng băng» gì:","reason":"Câu cụt, '§2 nghĩa là' gượng","severity":"medium"},
+{"old":"để lọt S3 và mục 7 một cách im lặng","new":"để lọt S3 và mục 7 mà không báo lỗi","reason":"'một cách im lặng' là calque của silently","severity":"medium"},
+{"old":"| Không có gì để được |","new":"| Không được lợi gì |","reason":"'Không có gì để được' là calque của nothing to gain","severity":"medium"}
+]}

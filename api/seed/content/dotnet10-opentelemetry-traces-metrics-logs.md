@@ -41,7 +41,7 @@ Không bật SQL parameter/body/token logging để “trace cho đủ”. Các 
 
 ## Metric cần đơn vị và cardinality rõ
 
-trips.requests là counter số request application, trips.request.duration là histogram ms. Tag operation lấy từ một tập kiểu request được đăng ký, không lấy từ ID chuyến, URL tùy ý hoặc idempotency key.
+trips.requests là counter số request application, trips.request.duration là histogram ms. Tag operation lấy từ một tập kiểu request được đăng ký, không lấy từ ID chuyến, URL tuỳ ý hoặc idempotency key.
 
 Counter có tính cả request bị validator từ chối theo thứ tự behavior hiện tại; không tự là số chuyến đã commit thành công. Nếu cần metric committed trips, đặt nó tại một mốc được định nghĩa khác và test theo semantics đó.
 
@@ -72,7 +72,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xóa database; JWT dùng khóa ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
 
 ### Pipeline.cs — 31-38-trip-service/Application/Pipeline.cs
 

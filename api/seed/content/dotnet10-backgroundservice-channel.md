@@ -28,7 +28,7 @@ Trong .NET 10, cần đọc đúng semantics khởi chạy của BackgroundServi
 
 JobQueue có sức chứa 2 và FullMode.Wait. Khi đầy, WriteAsync chờ chỗ trống thay vì tiếp tục nhận không giới hạn. Producer phải có token/thời hạn và chính sách phản hồi nếu không thể đẩy việc vào queue.
 
-Test riêng dùng capacity 1: ghi phần tử đầu, lần ghi thứ hai chưa hoàn tất; hủy token làm lời ghi chờ kết thúc, phần tử đầu vẫn còn. Đây là kiểm tra backpressure, không đo số request mỗi giây.
+Test riêng dùng capacity 1: ghi phần tử đầu, lần ghi thứ hai chưa hoàn tất; huỷ token làm lời ghi chờ kết thúc, phần tử đầu vẫn còn. Đây là kiểm tra backpressure, không đo số request mỗi giây.
 
 QueueLimit ở một limiter HTTP và capacity Channel là hai hàng khác nhau; không chồng vô hạn hàng chờ rồi gọi đó là resilience. Hợp đồng overload nên rõ: chờ có giới hạn, từ chối hay chuyển sang một hạ tầng bền.
 
@@ -45,11 +45,11 @@ Hosted worker sống lâu; JobHandler lại scoped. Worker nhận IServiceScopeF
 
 Hai job trong test xử lý FIFO với single reader, có ScopeId khác nhau và handler đều được dispose. TaskCompletionSource chỉ là ack quan sát trong lab; caller chờ có watchdog để lỗi không làm test treo vô hạn.
 
-Hoàn thành writer cho phép reader đọc hết rồi kết thúc bình thường. Khi stoppingToken bị hủy, vòng đọc và handler hợp tác dừng. Đừng mặc định mọi job đang trong queue sẽ tự có phản hồi lỗi sau shutdown; lifecycle ack/persistence cần thiết kế nếu đó là yêu cầu sản phẩm.
+Hoàn thành writer cho phép reader đọc hết rồi kết thúc bình thường. Khi stoppingToken bị huỷ, vòng đọc và handler hợp tác dừng. Đừng mặc định mọi job đang trong queue sẽ tự có phản hồi lỗi sau shutdown; lifecycle ack/persistence cần thiết kế nếu đó là yêu cầu sản phẩm.
 
 ## Chọn chính sách khi worker lỗi
 
-Lab ném lỗi bất ngờ lên host sau khi đánh dấu job.Completed lỗi; nó không catch rồi âm thầm bỏ job. Đây là policy minh họa “fail visible”, chưa có retry, dead-letter hoặc poison-message routing.
+Lab ném lỗi bất ngờ lên host sau khi đánh dấu job.Completed lỗi; nó không catch rồi âm thầm bỏ job. Đây là policy minh hoạ “fail visible”, chưa có retry, dead-letter hoặc poison-message routing.
 
 Nếu job đã gây hiệu ứng ngoài rồi process dừng trước ack, chạy lại có thể lặp hiệu ứng. Scoped handler và FIFO không giải idempotency. Bài Outbox tiếp theo sẽ đưa intent và nhận diện thông điệp vào database để quan sát khoảng trống đó.
 
@@ -68,7 +68,7 @@ FIFO ở một reader cũng không có nghĩa mọi tác vụ nền nhiều work
 
 <details><summary>Xem đáp án</summary><p>Không có bảo đảm thứ tự hoàn thành khi xử lý song song. Tăng RAM queue không tạo durability; cần lưu intent bền cùng transaction nghiệp vụ và cơ chế chuyển giao như Outbox/broker theo hợp đồng.</p></details>
 
-Hai test hiện tại kiểm scoped disposal/FIFO và hủy lần ghi bị backpressure. Chúng không chứng minh shutdown drain mọi job hoặc phục hồi sau process crash; đó là các yêu cầu cần test riêng.
+Hai test hiện tại kiểm scoped disposal/FIFO và huỷ lần ghi bị backpressure. Chúng không chứng minh shutdown drain mọi job hoặc phục hồi sau process crash; đó là các yêu cầu cần test riêng.
 
 ## Chạy ví dụ và kiểm chứng
 

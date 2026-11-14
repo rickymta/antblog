@@ -1,0 +1,47 @@
+{
+"file": "ba-business-rule-chinh-sach-nghiep-vu.md",
+"edits": [
+{
+"old": "điều kiện biên và version.",
+"new": "điều kiện biên và phiên bản.",
+"reason": "version -> phiên bản",
+"severity": "medium"
+},
+{
+"old": "nó không phải nguồn duy nhất định nghĩa rule",
+"new": "giao diện không phải nguồn duy nhất định nghĩa rule",
+"reason": "Tránh 'nó' chỉ khái niệm ở đầu vế",
+"severity": "low"
+},
+{
+"old": "Một rule đơn lẻ cũng chưa là toàn bộ quyết định",
+"new": "Một rule đơn lẻ cũng chưa phải toàn bộ quyết định",
+"reason": "Thiếu 'phải'",
+"severity": "low"
+},
+{
+"old": "Quản lý thay đổi bằng version",
+"new": "Quản lý thay đổi bằng phiên bản",
+"reason": "version -> phiên bản",
+"severity": "medium"
+},
+{
+"old": "chuyến đang chạy theo version nào, nhận lại tài xế có đổi version không",
+"new": "chuyến đang chạy theo phiên bản nào, khi chuyến được tài xế khác nhận lại thì có đổi phiên bản không",
+"reason": "version -> phiên bản",
+"severity": "medium"
+},
+{
+"old": "Hai outcome dẫn tới hành vi khác nhau",
+"new": "Hai kết quả này dẫn tới hành vi khác nhau",
+"reason": "outcome -> kết quả",
+"severity": "low"
+},
+{
+"old": "Ghi đây là dữ liệu bất thường và câu hỏi xử lý:",
+"new": "Ghi lại rằng đây là dữ liệu bất thường, kèm câu hỏi về cách xử lý:",
+"reason": "Câu thiếu tân ngữ",
+"severity": "medium"
+}
+]
+}

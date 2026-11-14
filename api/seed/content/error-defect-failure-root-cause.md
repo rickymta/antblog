@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-004, error, defect, failure, root-cause, vites
 language: vi
 ---
 
-Tài xế Tới Nơi phàn nàn: khách huỷ chuyến sau khi họ đã chạy được hai phút mà họ không nhận được đồng phí bù nào. Đó là «lỗi» gì? Một dòng code sai, một yêu cầu viết mơ hồ, hay một người đọc nhầm đặc tả? Tiếng Việt gọi chung tất cả là «lỗi», còn ISTQB tách thành bốn khái niệm: **error**, **defect**, **failure** và **root cause**. Bài này tách bốn khái niệm đó trên một ví dụ chạy được và phân biệt hai loại hay bị lẫn: lỗi trong code và lỗi trong nghiệp vụ (đặc tả).
+Tài xế Tới Nơi phàn nàn: khách huỷ chuyến sau khi tài xế đã chạy được hai phút, vậy mà tài xế không nhận được đồng phí bù nào. Đó là «lỗi» gì? Một dòng code sai, một yêu cầu viết mơ hồ, hay một người đọc nhầm đặc tả? Tiếng Việt gọi chung tất cả là «lỗi», còn ISTQB tách thành bốn khái niệm: **error**, **defect**, **failure** và **root cause**. Bài này tách bốn khái niệm đó trên một ví dụ chạy được và phân biệt hai loại hay bị lẫn: lỗi trong code và lỗi trong nghiệp vụ (đặc tả).
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-004</span>
@@ -164,7 +164,7 @@ Phòng lab gộp tất cả vào một tiến trình: hàm thuần `customerCanc
 | Sai mốc 2 phút (`<=` thay vì `<`) | Tài xế (không được bù), bộ phận đối soát | Defect trong code |
 | Đặc tả bỏ sót một quy tắc khách cần (ví dụ trả lại lượt voucher khi chuyến bị huỷ) | Khách | Defect trong đặc tả |
 | Đồng hồ giữa các máy lệch vài giây | Khách bị thu oan, hoặc tài xế mất phí | Môi trường |
-| Ca test viết sai kỳ vọng ở mốc 2:00 | Đội phát triển (báo lỗi giả, hoặc bỏ lọt) | Defect trong test script |
+| Test case viết sai kỳ vọng ở mốc 2:00 | Đội phát triển (báo lỗi giả, hoặc bỏ lọt) | Defect trong test script |
 | Thu phí huỷ hai lần khi thử lại cổng thanh toán | Khách | Defect trong code tích hợp — R-PAY-04 |
 
 ## 4. Phân tích kỹ thuật
@@ -176,11 +176,11 @@ Câu chuyện giả định: bản phát hành đầu của tính năng phí hu�
 | Tầng | Câu hỏi | Trả lời trong sự cố | Ai xử lý | Hành động |
 |---|---|---|---|---|
 | Failure | Hệ thống đã làm sai điều gì, ai thấy? | Chuyến `accepted`, khách huỷ ở `acceptedAt + 120 giây` ⇒ phí 0 đ, lý do `grace_period`; đặc tả đòi 10.000 đ, `charged` | Tester, vận hành | Tái hiện, ghi defect report, đánh giá ảnh hưởng (bao nhiêu chuyến bị tính sai) |
-| Defect | Khiếm khuyết nằm ở sản phẩm nào, chỗ nào? | `cancel.ts`, điều kiện miễn phí viết `<=` | Lập trình viên (debugging) | Sửa thành `<`, thêm ca test ở mốc 2:00 |
+| Defect | Khiếm khuyết nằm ở sản phẩm nào, chỗ nào? | `cancel.ts`, điều kiện miễn phí viết `<=` | Lập trình viên (debugging) | Sửa thành `<`, thêm test case ở mốc 2:00 |
 | Error | Ai đã làm sai điều gì? | Hiểu «trong vòng 2 phút» là tính cả mốc 2:00 | Nhóm (không đổ lỗi cá nhân) | Thống nhất cách đọc mốc thời gian |
 | Root cause | Hoàn cảnh nào khiến error xảy ra và lọt qua? | Đặc tả cũ chỉ viết «trong vòng 2 phút», không có ví dụ mốc; không review đặc tả; không có quy ước test giá trị biên | Trưởng nhóm, BA, QA | Viết lại đặc tả có ví dụ mốc (như R-CANCEL-02 hiện tại), thêm bước review, đưa «test biên» vào checklist |
 
-Điểm quan trọng: sửa dòng code chỉ xử lý **một** defect. Nếu root cause là «đặc tả không có ví dụ mốc», cùng lỗi sẽ quay lại ở R-CANCEL-04 (`>` hay `≥` ở mốc tài xế trễ), R-QUOTE-01 (báo giá hết hạn đúng lúc `expiresAt`), R-STATE-05 (huỷ tìm tài xế đúng mốc 5 phút)… SPEC hiện tại của lab ghi rõ mốc cho từng chỗ đó — đó là kiểu biện pháp chặn ở tầng root cause.
+Điểm quan trọng: sửa dòng code chỉ xử lý **một** defect. Nếu root cause là «đặc tả không có ví dụ mốc», cùng lỗi sẽ quay lại ở R-CANCEL-04 (`>` hay `≥` ở mốc tài xế trễ), R-QUOTE-01 (báo giá hết hạn đúng lúc `expiresAt`), R-STATE-05 (huỷ tìm tài xế đúng mốc 5 phút)… SPEC hiện tại của lab ghi rõ mốc cho từng chỗ đó — đó là biện pháp chặn ở tầng root cause.
 
 ### 4.2 Lỗi code và lỗi nghiệp vụ
 
@@ -192,12 +192,12 @@ Câu chuyện giả định: bản phát hành đầu của tính năng phí hu�
 | Failure | Huỷ đúng 2:00 không bị tính phí | Khách bị hệ thống huỷ vì không có tài xế (`no_driver`), đặt lại thì `GIAM20` báo `VOUCHER_USAGE_LIMIT` | Khách huỷ ở 1:57 thực tế bị thu 10.000 đ |
 | Test theo đặc tả có bắt được? | **Có** — ca biên 2:00 đỏ | **Không** — mọi ca theo đặc tả đều xanh vì đặc tả sai từ gốc | Thường **không** trên một máy; cần môi trường giống production |
 | Cách phát hiện hiệu quả | Dynamic testing với giá trị biên; review code | Review đặc tả với người dùng/nghiệp vụ (static testing), validation, phản hồi của khách | Kiểm thử trên môi trường nhiều máy, giám sát vận hành |
-| Sửa ở đâu | Code + ca test | Đặc tả trước, rồi code và test suy ra từ nó | Môi trường (đồng bộ thời gian) hoặc thiết kế (một nguồn thời gian duy nhất) |
+| Sửa ở đâu | Code + test case | Đặc tả trước, rồi code và test suy ra từ nó | Môi trường (đồng bộ thời gian) hoặc thiết kế (một nguồn thời gian duy nhất) |
 
 Nhận xét:
 
 - **Lỗi nghiệp vụ nguy hiểm hơn với tester**: test viết từ đặc tả sai sẽ «xác nhận» luôn cái sai. Đây là một lý do syllabus nói defect ở sản phẩm làm sớm thường dẫn tới defect ở sản phẩm làm sau — kể cả bộ test. Cặp verification/validation ở [TEST-005](/articles/verification-va-validation) giải thích vì sao phải có góc nhìn thứ hai.
-- **Cùng một failure có thể đến từ A, B hoặc C.** Khi tài xế báo «không được bù phí», chưa thể kết luận ngay đó là lỗi code. Phải đọc lại đặc tả, đọc code, kiểm cả môi trường.
+- **Cùng một failure có thể đến từ A, B hoặc C.** Khi tài xế báo «không được bù phí», chưa thể kết luận ngay đó là lỗi code. Phải đọc lại đặc tả, đọc code, kiểm tra cả môi trường.
 - Ranh giới A/B không phải lúc nào cũng rõ. Nếu đặc tả chỉ ghi «trong vòng 2 phút», việc lập trình viên chọn `<=` là error do đặc tả mơ hồ — defect có mặt ở **cả hai** sản phẩm: một câu đặc tả không kiểm chứng được và một dòng code sai so với ý định nghiệp vụ.
 
 ### 4.3 Khi nào defect không gây failure
@@ -346,7 +346,7 @@ Người viết báo cáo ban đầu (tester) thường chỉ điền chắc ch�
 
 ## 6. Góc nhìn nâng cao
 
-**Defect trong chính bộ test.** Syllabus nói defect có thể nằm trong test script. Nếu ca test TC-02 viết kỳ vọng `0 đ` (người viết test cũng hiểu nhầm «trong vòng 2 phút»), bản lỗi sẽ **đạt** và bản đúng sẽ **đỏ**. Test đỏ trên bản đúng là một **false-positive result** (báo lỗi giả); test xanh trên bản lỗi là bỏ lọt (thường gọi false negative). Cả hai đều do defect trong testware. CTFL mục 5.5 nhắc rằng một anomaly được báo cáo, sau khi phân tích, có thể hoá ra là báo lỗi giả hoặc một yêu cầu thay đổi chứ không phải defect.
+**Defect trong chính bộ test.** Syllabus nói defect có thể nằm trong test script. Nếu test case TC-02 viết kỳ vọng `0 đ` (người viết test cũng hiểu nhầm «trong vòng 2 phút»), bản lỗi sẽ **đạt** và bản đúng sẽ **đỏ**. Test đỏ trên bản đúng là một **false-positive result** (báo lỗi giả); test xanh trên bản lỗi là bỏ lọt (thường gọi false negative). Cả hai đều do defect trong testware. CTFL mục 5.5 nhắc rằng một anomaly được báo cáo, sau khi phân tích, có thể hoá ra là báo lỗi giả hoặc một yêu cầu thay đổi chứ không phải defect.
 
 **Một-nhiều trong cả hai chiều.** Một defect có thể gây nhiều failure khác nhau (`<=` vừa làm sai phí, vừa làm sai thống kê «tỉ lệ huỷ có phí»). Một failure có thể cần nhiều defect cùng lúc mới xảy ra, hoặc defect này che defect kia (sửa defect A xong mới lộ failure của defect B).
 
@@ -354,7 +354,7 @@ Người viết báo cáo ban đầu (tester) thường chỉ điền chắc ch�
 
 **Root cause không phải «người gây lỗi».** RCA tìm hoàn cảnh (đặc tả mơ hồ, áp lực thời gian, thiếu đào tạo), không tìm người để phạt. Đổ lỗi cá nhân làm mọi người giấu error, và root cause thật không bao giờ được gỡ. Kỹ thuật RCA chi tiết thuộc Series 12.
 
-**Môi trường trong hệ phân tán.** Ngoài lệch đồng hồ, hệ thống đích của Tới Nơi có những failure kiểu «môi trường» khác: Kafka giao sự kiện trễ hoặc trùng, VíXanh trả lời chậm hơn 3 giây, mạng điện thoại tài xế chập chờn. Nhiều trường hợp ranh giới «môi trường hay defect thiết kế» không rõ: code không chịu được sự kiện trùng là defect, vì kiến trúc đã nói sự kiện trùng là điều chắc chắn xảy ra (anti-pattern «exactly-once assumption»). Lab chưa có Kafka nên chỉ thảo luận ở mức thiết kế.
+**Môi trường trong hệ phân tán.** Ngoài lệch đồng hồ, hệ thống đích của Tới Nơi có những failure kiểu «môi trường» khác: Kafka giao sự kiện trễ hoặc trùng, VíXanh trả lời chậm hơn 3 giây, mạng điện thoại tài xế chập chờn. Trong nhiều trường hợp, ranh giới giữa «môi trường» và «defect thiết kế» không rõ: code không chịu được sự kiện trùng là defect, vì kiến trúc đã nói sự kiện trùng là điều chắc chắn xảy ra (anti-pattern «exactly-once assumption»). Lab chưa có Kafka nên chỉ thảo luận ở mức thiết kế.
 
 **Sai lầm thường gặp:**
 
@@ -380,10 +380,10 @@ Người viết báo cáo ban đầu (tester) thường chỉ điền chắc ch�
 
 **Bài tập 2 — lỗi code hay lỗi nghiệp vụ?** Phân loại mỗi trường hợp: (A) lỗi code, (B) defect trong đặc tả, (C) môi trường/dữ liệu, (D) defect trong test.
 
-1. SPEC đúng; code tính phụ phí mưa trước hệ số cao điểm nên phụ phí bị nhân 1,25.
+1. SPEC đúng; code tính phụ phí trời mưa trước hệ số cao điểm nên phụ phí bị nhân 1,25.
 2. Đặc tả bản nháp quên nói đơn đồ ăn luôn đi xe máy; code cho chọn ô tô; khách chọn ô tô cho đơn trà sữa và bị tính cước ô tô.
 3. Máy chủ production đặt múi giờ UTC, code dùng giờ của máy để xét cao điểm.
-4. Ca test kỳ vọng cước 7,4 km cao điểm mưa `GIAM20` là 51.700 đ; hệ thống trả 52.000 đ.
+4. Test case kỳ vọng cước 7,4 km cao điểm mưa `GIAM20` là 51.700 đ; hệ thống trả 52.000 đ.
 
 <details>
 <summary><b>Đáp án</b></summary>
@@ -452,10 +452,10 @@ Người viết báo cáo ban đầu (tester) thường chỉ điền chắc ch�
 <p><b>a)</b> đúng — syllabus nêu failure có thể do điều kiện môi trường. b) mã tính phí đúng với đầu vào nó nhận. c) khách không làm sai gì. d) failure là hành vi sai quan sát được; khách bị thu oan là failure, bất kể nguyên nhân.</p>
 </details>
 
-**Câu 6 (K2).** Ca test của Tới Nơi kỳ vọng phí 0 đ khi khách huỷ đúng 2:00. Hệ thống trả 10.000 đ và ca test đỏ. Đặc tả nói đúng 2:00 là có phí. Nhận định nào đúng?
+**Câu 6 (K2).** Test case của Tới Nơi kỳ vọng phí 0 đ khi khách huỷ đúng 2:00. Hệ thống trả 10.000 đ và test case đỏ. Đặc tả nói đúng 2:00 là có phí. Nhận định nào đúng?
 
 - a) Hệ thống có defect, vì test đỏ.
-- b) Đây là báo lỗi giả (false-positive result): defect nằm trong ca test, hệ thống đúng.
+- b) Đây là báo lỗi giả (false-positive result): defect nằm trong test case, hệ thống đúng.
 - c) Đây là failure do môi trường.
 - d) Đây là root cause của sự cố.
 

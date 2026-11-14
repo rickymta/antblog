@@ -90,7 +90,7 @@ Lưu ý: `Form` chỉ biết các field **đang được dựng**; field ngoài 
 
 ## Validator là hàm thuần: tách ra và kiểm bằng unit test
 
-Validator không cần `BuildContext` hay widget, nên ta viết thành hàm thuần Dart trong `validators.dart`, không import Flutter. Test chạy tức thì và ca biên liệt kê bằng một danh sách thay vì dựng cây widget.
+Validator không cần `BuildContext` hay widget, nên ta viết thành hàm thuần Dart trong `validators.dart`, không import Flutter. Test chạy tức thì, và các test case biên chỉ cần liệt kê trong một danh sách thay vì dựng cây widget.
 
 Điểm đến cần nhìn sang ô khác, nên `validateDestination` nhận thêm tham số `pickup`:
 
@@ -162,7 +162,7 @@ Vài lựa chọn đáng nói:
 
 - `\d` trong Dart chỉ khớp chữ số ASCII, nên chữ số Ả Rập như "٣" bị từ chối.
 - Chuỗi có nhiều hơn một dấu phân cách (`1,2,3`, `1.234,5`) bị từ chối vì không rõ dấu nào là phân cách. Ngược lại `1.500` được đọc là 1,5 km. Với miền 0 đến 100 km ta chấp nhận điều này và ghi vào phần chưa làm.
-- `parseDistanceKm` chỉ đọc số, `validateDistance` mới kiểm miền. Một chuỗi 400 chữ số vẫn qua được biểu thức chính quy và `double.parse` ra vô cực; điều kiện miền viết dưới dạng "hợp lệ" rồi phủ định (giống `calculateFareVnd`) chặn nó, và test có ca này.
+- `parseDistanceKm` chỉ đọc số, `validateDistance` mới kiểm miền. Một chuỗi 400 chữ số vẫn qua được biểu thức chính quy và `double.parse` ra vô cực; điều kiện miền viết dưới dạng "hợp lệ" rồi phủ định (giống `calculateFareVnd`) chặn nó, và có test case cho trường hợp này.
 
 | Người dùng gõ | `parseDistanceKm` | `validateDistance` |
 |---|---|---|
@@ -186,11 +186,11 @@ test('tryParse nhận NaN, Infinity, 1e3 nhưng không nhận dấu phẩy', () 
 });
 ```
 
-Một test nối form với domain: mọi chuỗi `validateDistance` cho qua đều đưa được vào `calculateFare` mà không ném `ArgumentError`. Nếu ai đó gõ cứng một miền riêng (ví dụ 120) cho form, ca biên `100,01` đỏ.
+Một test nối form với domain: mọi chuỗi `validateDistance` cho qua đều đưa được vào `calculateFare` mà không ném `ArgumentError`. Nếu ai đó gõ cứng một miền riêng (ví dụ 120) cho form, test case biên `100,01` đỏ.
 
 ## AutovalidateMode: khi nào nên hiện lỗi
 
-Hiện lỗi quá sớm thì khách thấy mình bị la ngay chữ đầu; quá muộn thì họ chỉ biết sai lúc bấm gửi. `AutovalidateMode` quyết định thời điểm; source Flutter 3.47.4 có năm chế độ:
+Hiện lỗi quá sớm thì khách thấy mình bị báo lỗi ngay từ ký tự đầu tiên; quá muộn thì họ chỉ biết sai lúc bấm gửi. `AutovalidateMode` quyết định thời điểm; mã nguồn Flutter 3.47.4 có năm chế độ:
 
 | Chế độ | Khi nào tự kiểm |
 |---|---|
@@ -228,7 +228,7 @@ Các ô còn tác động lẫn nhau theo hai chiều, và test ghi lại cả h
 
 Cái giá của "chỉ kiểm lại khi đã có lỗi" rộng hơn thế: sửa hết lỗi rồi gõ sai lại (chỉ "a", hoặc xoá trắng) thì ô cũng im lặng cho tới lần gửi sau. Test `sửa hết lỗi rồi gõ sai lại` ghi lại điều này.
 
-Đặt `autovalidateMode` ở `Form` khác ở từng field: với `Form(autovalidateMode: onUserInteraction)`, gõ một ô là `Form` kiểm mọi ô, kể cả ô chưa chạm (test `đặt ở cấp Form`). Vì vậy lab đặt chế độ ở từng `TextFormField`.
+Đặt `autovalidateMode` ở `Form` khác với đặt ở từng field: với `Form(autovalidateMode: onUserInteraction)`, gõ một ô là `Form` kiểm mọi ô, kể cả ô chưa chạm (test `đặt ở cấp Form`). Vì vậy lab đặt chế độ ở từng `TextFormField`.
 
 ## Controller, FocusNode và TextInputAction
 
@@ -360,7 +360,7 @@ TextFormField(
 ),
 ```
 
-Tiếp theo là `textInputAction`, phím hành động trên bàn phím. Với `TextInputAction.next`, nếu không đặt `onEditingComplete`, ô nhập gọi `focusNode.nextFocus()` (source `EditableText`). Thứ tự focus theo `ReadingOrderTraversalPolicy`, chính sách `WidgetsApp` đặt mặc định: từ trên xuống dưới theo vị trí (Hình 3), nên ta chỉ cần xếp ba ô đúng thứ tự trong `Column`. Ô cuối dùng `TextInputAction.done`: bỏ focus rồi gọi `onFieldSubmitted`, ta nối nó vào `_submit`.
+Tiếp theo là `textInputAction`, phím hành động trên bàn phím. Với `TextInputAction.next`, nếu không đặt `onEditingComplete`, ô nhập gọi `focusNode.nextFocus()` (mã nguồn `EditableText`). Thứ tự focus theo `ReadingOrderTraversalPolicy`, chính sách `WidgetsApp` đặt mặc định: từ trên xuống dưới theo vị trí (Hình 3), nên ta chỉ cần xếp ba ô đúng thứ tự trong `Column`. Ô cuối dùng `TextInputAction.done`: bỏ focus rồi gọi `onFieldSubmitted`, ta nối nó vào `_submit`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -482,7 +482,7 @@ return Scaffold(
 );
 ```
 
-Ô nhận focus trong vùng cuộn được `EditableText` cuộn vào vùng nhìn thấy, chừa `scrollPadding` (mặc định 20 điểm ảnh); `keyboardDismissBehavior: onDrag` cho kéo để hạ bàn phím.
+Khi một ô nhận focus trong vùng cuộn được, `EditableText` cuộn ô đó vào vùng nhìn thấy, chừa `scrollPadding` (mặc định 20 điểm ảnh); `keyboardDismissBehavior: onDrag` cho phép kéo để hạ bàn phím.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

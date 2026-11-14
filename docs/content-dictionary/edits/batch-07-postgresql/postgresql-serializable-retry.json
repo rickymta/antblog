@@ -1,0 +1,16 @@
+{"file":"postgresql-serializable-retry.md","edits":[
+{"old":"Bài này tái hiện nó, cho mức **SERIALIZABLE** bắt nó, rồi","new":"Bài này tái hiện nó, để mức **SERIALIZABLE** bắt nó, rồi","reason":"'cho ... bắt' kiểu Anh (let), dùng 'để'","severity":"medium"},
+{"old":"viết và kiểm vòng retry có giới hạn","new":"viết và kiểm tra vòng retry có giới hạn","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"đó là thứ duy nhất ứng dụng cần so.","new":"đó là thứ duy nhất ứng dụng cần so sánh.","reason":"'so' cụt","severity":"medium"},
+{"old":"làm các phiên vừa đâm nhau không cùng quay lại đúng một thời điểm để đâm nhau lần nữa.","new":"khiến các phiên vừa xung đột nhau không cùng quay lại đúng một thời điểm rồi lại xung đột lần nữa.","reason":"'đâm nhau' gượng","severity":"medium"},
+{"old":"Phần luỹ thừa giãn dần các lần thử;","new":"Phần luỹ thừa giãn dần khoảng cách giữa các lần thử;","reason":"Thiếu danh từ, nghĩa mơ hồ","severity":"medium"},
+{"old":"**Không gì ngoài database trong `fn`**","new":"**Trong `fn` không làm gì ngoài database**","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"Tác dụng phụ ra ngoài thuộc về PG-039.","new":"Tác dụng phụ ra ngoài được xử lý ở PG-039.","reason":"'thuộc về' gượng","severity":"low"},
+{"old":"SSI bảo thủ: nó có thể huỷ giao dịch mà chạy tuần tự thật cũng không hề xung đột.","new":"SSI thận trọng quá mức: có thể nó huỷ một giao dịch dù nếu chạy tuần tự thật thì chúng không hề xung đột.","reason":"Câu dịch máy, 'mà ... cũng' khó hiểu","severity":"medium"},
+{"old":"ngoài đời bấm không đồng thời đến vậy","new":"ngoài đời không ai bấm đồng thời đến mức đó","reason":"Trật tự từ kiểu Anh","severity":"low"},
+{"old":"**Đúng đắn rộng hay chi phí thấp:**","new":"**Phạm vi bảo vệ rộng hay chi phí thấp:**","reason":"'Đúng đắn' là calque của correctness, không rõ nghĩa","severity":"medium"},
+{"old":"| Bắt được write skew ở đường code bạn **quên** |","new":"| Bắt được write skew ở đường code bạn **quên xử lý** |","reason":"Thiếu động từ/tân ngữ","severity":"low"},
+{"old":"Quên khoá ⇒ sai im lặng","new":"Quên khoá ⇒ sai mà không báo lỗi","reason":"Calque 'silent', theo style guide","severity":"medium"},
+{"old":"Không lỗi nào: B không để lại dấu vết đọc–ghi cho SSI kiểm.","new":"Không có lỗi nào: B không để lại dấu vết đọc–ghi nào để SSI kiểm tra.","reason":"'kiểm' cụt, câu thiếu động từ","severity":"medium"},
+{"old":"Thời gian chỉ để so tương đối trong cùng bảng","new":"Thời gian chỉ dùng để so sánh tương đối trong cùng bảng","reason":"'so' cụt","severity":"low"}
+]}

@@ -1,0 +1,13 @@
+{"file":"ba-idempotency-retry-giao-dich-loi.md","edits":[
+{"old":"liệu hai nhân viên có hoàn vượt tiền đã thu hay không","new":"liệu hai nhân viên có thể hoàn quá số tiền đã thu hay không","reason":"'hoàn vượt tiền' gượng, lược từ","severity":"medium"},
+{"old":"Khách hoặc nhân viên gửi hoàn 30.000 cho payment P","new":"Khách hoặc nhân viên gửi yêu cầu hoàn 30.000 cho payment P","reason":"Thiếu danh từ 'yêu cầu'","severity":"medium"},
+{"old":"lưu qua reload thế nào","new":"giữ lại thế nào sau khi tải lại trang","reason":"'lưu qua reload' gượng","severity":"medium"},
+{"old":"không âm thầm đổi yêu cầu","new":"không tự ý đổi yêu cầu","reason":"Calque 'silently'","severity":"medium"},
+{"old":"không đủ để suy mọi lần retry trả cùng body hoặc tự chữa mọi lỗi","new":"không đủ để suy ra mọi lần retry đều trả cùng body, hay tự khắc phục mọi lỗi","reason":"Thiếu 'ra', 'tự chữa' gượng","severity":"medium"},
+{"old":"gắn với trải nghiệm chờ và owner ngoại lệ.","new":"gắn với trải nghiệm chờ và người phụ trách xử lý ngoại lệ.","reason":"owner có từ Việt tự nhiên","severity":"low"},
+{"old":"Hết retry budget không chứng minh tiền chưa chuyển.","new":"Hết số lần thử lại cho phép không chứng minh tiền chưa được chuyển.","reason":"'retry budget' chưa Việt hoá, câu cụt","severity":"medium"},
+{"old":"tổng đã hoàn thành cộng tiền đang giữ cho refund processing không vượt capturedAmount.","new":"tổng số tiền đã hoàn xong cộng số tiền đang giữ cho refund đang xử lý không vượt capturedAmount.","reason":"Lược danh từ","severity":"medium"},
+{"old":"Kiểm và giữ hạn mức phải nhất quán khi cạnh tranh đồng thời;","new":"Việc kiểm tra và giữ hạn mức phải nhất quán khi có cạnh tranh đồng thời;","reason":"Câu thiếu danh từ hoá","severity":"medium"},
+{"old":"Chỉ giải phóng theo transition có bằng chứng và rule được duyệt.","new":"Chỉ giải phóng khi có bằng chứng về chuyển trạng thái và quy tắc đã được duyệt.","reason":"Cụm tự ghép, trật tự kiểu Anh","severity":"medium"},
+{"old":"Mỗi ngoại lệ có owner và cách xác minh.","new":"Mỗi ngoại lệ có người phụ trách và cách xác minh.","reason":"owner có từ Việt tự nhiên","severity":"low"}
+]}

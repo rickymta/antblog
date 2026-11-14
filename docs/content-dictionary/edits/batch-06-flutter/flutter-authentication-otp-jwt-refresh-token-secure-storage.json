@@ -1,0 +1,18 @@
+{"file":"flutter-authentication-otp-jwt-refresh-token-secure-storage.md","edits":[
+{"old":"server thu hồi cả họ, và code ngây thơ xoá kho.","new":"server thu hồi cả họ token, và code ngây thơ xoá kho.","reason":"'họ' đứng một mình mơ hồ ở lần nhắc đầu","severity":"medium"},
+{"old":"chuỗi đục, chỉ gửi tới","new":"chuỗi opaque, chỉ gửi tới","reason":"'chuỗi đục' là calque của opaque","severity":"medium"},
+{"old":"Token đã dùng mà xuất hiện lại nghĩa là hai bên cùng cầm nó;","new":"Token đã dùng mà xuất hiện lại thì có nghĩa là hai bên cùng cầm nó;","reason":"Câu thiếu quan hệ từ","severity":"medium"},
+{"old":"sau lần đọc kho đầu và là nơi duy nhất được đổi nó.","new":"sau lần đọc kho đầu tiên và là nơi duy nhất thay đổi cặp token đó.","reason":"'kho đầu' cụt, 'nó' mơ hồ, bị động gượng","severity":"medium"},
+{"old":"nên không ai chen vào được; vì thế token nằm trong bộ nhớ, còn đọc kho (bất đồng bộ) thì hai request có thể cùng qua kiểm tra.","new":"nên không ai chen vào được; vì thế token được giữ trong bộ nhớ: nếu phải đọc kho (bất đồng bộ) thì hai request có thể cùng qua kiểm tra.","reason":"Quan hệ nhân quả không rõ (suy từ ngữ cảnh)","severity":"medium"},
+{"old":"cứu ca 401 bay về chậm,","new":"cứu trường hợp 401 về chậm,","reason":"'ca', 'bay về' gượng","severity":"medium"},
+{"old":"Mất sóng, quá hạn hay 5xx","new":"Mất sóng, timeout hay 5xx","reason":"'quá hạn' sai nghĩa với timeout","severity":"high"},
+{"old":"Refresh về muộn sau khi khách bấm Đăng xuất bị bỏ (test","new":"Kết quả refresh về muộn sau khi khách bấm Đăng xuất bị bỏ qua (test","reason":"Câu thiếu danh từ chính và 'bị bỏ' cụt","severity":"medium"},
+{"old":"Refresh không lặp lại được an toàn:","new":"Lời gọi refresh không an toàn để lặp lại:","reason":"Trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"Với cả hai thứ tự, test chạy ba ca:","new":"Với cả hai thứ tự, test chạy ba test case:","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"thì khách không có sóng bấm Đăng xuất mà app đứng im,","new":"thì khách không có sóng sẽ bấm Đăng xuất mà app đứng im,","reason":"Câu thiếu động từ, khó hiểu","severity":"low"},
+{"old":"rồi cả người dùng bị đăng xuất.","new":"rồi người dùng cũng bị đăng xuất.","reason":"Trật tự từ gượng","severity":"low"},
+{"old":"trừ ca mất response đã nói ở mục 4.","new":"trừ trường hợp mất response đã nói ở mục 4.","reason":"'ca' gượng","severity":"low"},
+{"old":"làm test năm request song song đỏ,","new":"làm test năm request song song không đạt,","reason":"'đỏ' mơ hồ","severity":"low"},
+{"old":"Ca nào trong bài hết đáng sợ hơn,","new":"Trường hợp nào trong bài bớt đáng sợ hơn,","reason":"'hết đáng sợ hơn' tự mâu thuẫn, 'ca' gượng","severity":"medium"},
+{"old":"Ca \"mất response refresh\" hết kéo theo thu hồi cả họ:","new":"Trường hợp \"mất response refresh\" không còn kéo theo việc thu hồi cả họ:","reason":"'hết kéo theo' gượng","severity":"medium"}
+]}

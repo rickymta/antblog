@@ -15,7 +15,7 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Sau <code>let b = a;</code>, biến <code>a</code> còn dùng được không?</p>
-<details><summary>Xem đáp án</summary><p>Tùy kiểu. Với <code>i64</code> thì còn, vì giá trị được sao chép. Với <code>String</code> thì không: quyền sở hữu đã chuyển sang <code>b</code> và compiler báo lỗi nếu bạn dùng lại <code>a</code>.</p></details>
+<details><summary>Xem đáp án</summary><p>Tuỳ kiểu. Với <code>i64</code> thì còn, vì giá trị được sao chép. Với <code>String</code> thì không: quyền sở hữu đã chuyển sang <code>b</code> và compiler báo lỗi nếu bạn dùng lại <code>a</code>.</p></details>
 </div>
 
 ## Ba quy tắc ownership là gì?
@@ -240,7 +240,7 @@ Lệnh `--verify` assert số dư `psp:vixanh:clearing` sau khi post `JE-000001`
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Sổ cái ở đây chỉ nằm trong bộ nhớ một tiến trình. Chưa có PostgreSQL, chưa kiểm <code>idempotency_key</code> trùng, <code>post</code> chưa kiểm tổng bút toán bằng 0 (chỉ <code>--verify</code> kiểm) và chưa trả <code>Result</code> khi lỗi. Ownership chống alias trong một tiến trình; nó không thay transaction hay khóa idempotency khi nhiều instance cùng ghi sổ.</p>
+<p>Sổ cái ở đây chỉ nằm trong bộ nhớ một tiến trình. Chưa có PostgreSQL, chưa kiểm <code>idempotency_key</code> trùng, <code>post</code> chưa kiểm tổng bút toán bằng 0 (chỉ <code>--verify</code> kiểm) và chưa trả <code>Result</code> khi lỗi. Ownership chống alias trong một tiến trình; nó không thay transaction hay khoá idempotency khi nhiều instance cùng ghi sổ.</p>
 </div>
 
 **Bài tập:** (1) Bỏ comment khối E0502 trong `demo_borrow`, sửa để build xanh mà không đổi `post`. (2) Vì sao lab không derive `Clone` cho `JournalEntry`?

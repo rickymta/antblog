@@ -1,0 +1,20 @@
+{"file":"flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build.md","edits":[
+{"old":"máy kiểm không cài fastlane. Vì vậy **chưa lane nào được chạy thật**.","new":"máy chạy kiểm chứng không cài fastlane. Vì vậy **chưa có lane nào được chạy thật**.","reason":"'máy kiểm' là cụm tự ghép; câu thiếu 'có'","severity":"medium"},
+{"old":"fastlane là công cụ Ruby. Nó không thay","new":"fastlane là công cụ Ruby. Công cụ này không thay","reason":"Tránh 'Nó' đầu câu","severity":"low"},
+{"old":"và số build. Đây là quyết định","new":"và build number. Đây là quyết định","reason":"Thống nhất 'build number'","severity":"medium"},
+{"old":"tập biến mã đọc bằng đúng tập khai trong","new":"tập biến mà mã đọc phải trùng đúng với tập khai báo trong","reason":"Câu thiếu động từ, trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"và chỉ tác dụng khi chạy trên CI","new":"và chỉ có tác dụng khi chạy trên CI","reason":"Thiếu 'có'","severity":"low"},
+{"old":"thêm lệnh ghi thứ hai vào `beta` là test đỏ.","new":"thêm lệnh ghi thứ hai vào `beta` thì test đỏ.","reason":"Câu lược quan hệ từ","severity":"low"},
+{"old":"Có bốn chi tiết đáng đọc. Một, chữ ký.","new":"Có bốn chi tiết đáng đọc. Một là chữ ký.","reason":"Trật tự kiểu tiếng Anh 'One, ...'","severity":"low"},
+{"old":"Hai, `flutter build ipa` tạo","new":"Hai là `flutter build ipa` tạo","reason":"Trật tự kiểu tiếng Anh","severity":"low"},
+{"old":"Ba, tuỳ chọn `ipa:` bỏ qua","new":"Ba là tuỳ chọn `ipa:` bỏ qua","reason":"Trật tự kiểu tiếng Anh","severity":"low"},
+{"old":"Bốn, `skip_waiting_for_build_processing: true` không chờ","new":"Bốn là `skip_waiting_for_build_processing: true` không chờ","reason":"Trật tự kiểu tiếng Anh","severity":"low"},
+{"old":"Quên dòng này là đẩy thẳng lên người dùng thật.","new":"Quên dòng này thì bản build bị đẩy thẳng lên người dùng thật.","reason":"Câu lược chủ ngữ và động từ","severity":"medium"},
+{"old":"mô tả và ảnh cửa hàng để bài 58.","new":"mô tả và ảnh cửa hàng dành cho bài 58.","reason":"'để bài 58' thiếu động từ","severity":"medium"},
+{"old":"kiểm tại trang trợ giúp Play Console khi phát hành.","new":"hãy xem trang trợ giúp Play Console khi phát hành.","reason":"'kiểm tại' là calque","severity":"low"},
+{"old":"CI truyền số tăng đơn điệu","new":"CI truyền số tăng dần","reason":"'đơn điệu' là calque của monotonic","severity":"medium"},
+{"old":"số build lấy tay hoặc từ nguồn không tăng","new":"build number nhập thủ công hoặc lấy từ nguồn không tăng","reason":"'lấy tay' gượng; thống nhất 'build number'","severity":"medium"},
+{"old":"action chạy ở thư mục chứa nó","new":"action chạy ở gốc dự án, tức thư mục cha của nó","reason":"'thư mục chứa nó' mơ hồ; theo đoạn trên action chạy ở gốc dự án","severity":"medium"},
+{"old":"trong Xcode project thật có nhận profile của match.","new":"trong Xcode project thật có nhận profile của match hay không.","reason":"Câu thiếu 'hay không'","severity":"low"},
+{"old":"Build thường xuyên chỉ cần","new":"Các lần build thường ngày chỉ cần","reason":"'Build thường xuyên' mơ hồ, câu thiếu danh từ chính","severity":"medium"}
+]}

@@ -1,0 +1,7 @@
+{"file":"ba-capability-map-nang-luc-to-chuc.md","edits":[
+{"old":"Đánh giá bằng bằng chứng","new":"Đánh giá dựa trên bằng chứng","reason":"Lặp 'bằng bằng' gượng","severity":"low"},
+{"old":"bằng chứng như owner, hướng dẫn","new":"bằng chứng như người phụ trách, hướng dẫn","reason":"owner -> người phụ trách","severity":"medium"},
+{"old":"Khoảng trống là ownership và quy trình ngoại lệ","new":"Khoảng trống là người phụ trách và quy trình ngoại lệ","reason":"ownership -> từ Việt tự nhiên","severity":"low"},
+{"old":"chưa có owner nhận giao dịch chờ quá hạn","new":"chưa có người phụ trách nhận giao dịch chờ quá hạn","reason":"owner -> người phụ trách","severity":"medium"},
+{"old":"Cần owner có quyền","new":"Cần người phụ trách có quyền","reason":"owner -> người phụ trách","severity":"medium"}
+]}

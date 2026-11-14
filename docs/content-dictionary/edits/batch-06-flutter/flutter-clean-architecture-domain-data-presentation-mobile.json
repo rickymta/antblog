@@ -1,0 +1,131 @@
+{
+"file": "flutter-clean-architecture-domain-data-presentation-mobile.md",
+"edits": [
+{
+"old": "DTO và ApiFailure được đổi ở lớp data",
+"new": "DTO và ApiFailure được chuyển đổi ở lớp data",
+"reason": "'đổi' mơ hồ, dùng 'chuyển đổi' cho mapping",
+"severity": "low"
+},
+{
+"old": "Đội mở màn hình bài 20 xem phải sửa gì.",
+"new": "Đội mở code màn hình ở bài 20 để xem phải sửa gì.",
+"reason": "Câu thiếu giới từ, đọc cụt",
+"severity": "medium"
+},
+{
+"old": "data import domain để thực thi nó, và mũi tên quay vào lõi.",
+"new": "data import domain để triển khai nó, và mũi tên quay vào lõi.",
+"reason": "'thực thi' là execute; implement dịch 'triển khai'",
+"severity": "medium"
+},
+{
+"old": "và cắm thực thi vào chỗ cắm",
+"new": "và cắm bản triển khai thật vào chỗ cắm",
+"reason": "'thực thi' sai nghĩa cho implementation",
+"severity": "medium"
+},
+{
+"old": "Ta đổi sự gọn của UI import thẳng repository cụ thể lấy ranh giới mà test khoá được.",
+"new": "Ta đánh đổi sự gọn khi UI import thẳng repository cụ thể để lấy ranh giới mà test khoá được.",
+"reason": "Câu thiếu quan hệ từ, đọc khó hiểu",
+"severity": "medium"
+},
+{
+"old": "Nó nằm trong domain, và thân hàm không tồn tại:",
+"new": "Interface này nằm trong domain và không có thân hàm:",
+"reason": "Tránh 'Nó' đầu câu; 'thân hàm không tồn tại' gượng",
+"severity": "medium"
+},
+{
+"old": "người dùng cổng phải import",
+"new": "code dùng cổng phải import",
+"reason": "'người dùng cổng' dễ nhầm với người dùng cuối",
+"severity": "medium"
+},
+{
+"old": "cho bấm tay (Wi-Fi công cộng đôi khi",
+"new": "cho phép người dùng bấm Thử lại bằng tay (Wi-Fi công cộng đôi khi",
+"reason": "Thiếu động từ 'cho phép', 'cho bấm tay' cụt",
+"severity": "medium"
+},
+{
+"old": "Mỗi phương thức làm ba việc: đổi domain sang DTO, gọi client, đổi DTO về domain.",
+"new": "Mỗi phương thức làm ba việc: chuyển domain sang DTO, gọi client, rồi chuyển DTO về domain.",
+"reason": "'đổi' mơ hồ; thiếu 'rồi' nối bước",
+"severity": "low"
+},
+{
+"old": "của domain thành header",
+"new": "của domain trở thành header",
+"reason": "Câu lược động từ 'trở thành'",
+"severity": "medium"
+},
+{
+"old": "chồng hai lớp:",
+"new": "xếp chồng hai lớp:",
+"reason": "'chồng' đứng một mình gượng",
+"severity": "low"
+},
+{
+"old": "422 trên `distanceKm` thành `invalidDistance`, 404 `notFound`, 409 `conflict`, còn lại `other`",
+"new": "422 trên `distanceKm` thành `invalidDistance`, 404 thành `notFound`, 409 thành `conflict`, các mã còn lại thành `other`",
+"reason": "Câu lược động từ",
+"severity": "medium"
+},
+{
+"old": "Chỉ `traceId` đi qua, thành `supportCode`; `title` tiếng Anh của server thì không.",
+"new": "Chỉ `traceId` đi qua và trở thành `supportCode`; còn `title` tiếng Anh của server thì không.",
+"reason": "Câu lược động từ 'trở thành'",
+"severity": "medium"
+},
+{
+"old": "nên app không lặng lẽ chạy với thực thi sai.",
+"new": "nên app không chạy tiếp mà không báo lỗi với bản triển khai sai.",
+"reason": "'lặng lẽ' là calque của silently; 'thực thi' sai nghĩa",
+"severity": "medium"
+},
+{
+"old": "không kèm thực thi:",
+"new": "không kèm bản triển khai:",
+"reason": "'thực thi' sai nghĩa cho implementation",
+"severity": "medium"
+},
+{
+"old": "cắm thực thi thật vào chỗ cắm,",
+"new": "cắm bản triển khai thật vào chỗ cắm,",
+"reason": "'thực thi' sai nghĩa cho implementation",
+"severity": "medium"
+},
+{
+"old": "TripRepositoryImpl thuộc data thực thi interface đó",
+"new": "TripRepositoryImpl thuộc data triển khai interface đó",
+"reason": "'thực thi' sai nghĩa cho implementation",
+"severity": "low"
+},
+{
+"old": "kiểm chính bộ kiểm: nó bắt",
+"new": "kiểm chính bộ kiểm: bộ kiểm này bắt",
+"reason": "Tránh đại từ 'nó' mơ hồ",
+"severity": "low"
+},
+{
+"old": "Một test chặn thư mục rỗng cho kết quả xanh giả.",
+"new": "Một test chặn lỗi thư mục rỗng khiến kết quả xanh giả.",
+"reason": "Câu cụt, thiếu quan hệ nhân quả",
+"severity": "medium"
+},
+{
+"old": "test import bắt khi quay lại.",
+"new": "test import sẽ bắt nếu lỗi này tái diễn.",
+"reason": "'bắt khi quay lại' thiếu chủ thể",
+"severity": "medium"
+},
+{
+"old": "quay lại yêu cầu đầu thành ba",
+"new": "quay lại yêu cầu đầu thì thành ba chuyến",
+"reason": "Câu lược động từ",
+"severity": "medium"
+}
+]
+}

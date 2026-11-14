@@ -10,7 +10,7 @@ language: vi
 
 Một test màu xanh chỉ chứng minh điều đã được kiểm trong điều kiện cụ thể. Muốn biết test đó bảo vệ nhu cầu nào, nhóm cần đường nối về yêu cầu và mục tiêu.
 
-<div class="tkh-callout"><span class="tkh-callout-title">BA-043 · Phần 6/8 · Cơ bản</span><p>Đọc P04 về điểm đón. Đầu ra: ma trận truy vết nhỏ, có loại quan hệ và trạng thái bằng chứng. Các test UAT dưới đây mới là ca đề xuất.</p></div>
+<div class="tkh-callout"><span class="tkh-callout-title">BA-043 · Phần 6/8 · Cơ bản</span><p>Đọc P04 về điểm đón. Đầu ra: ma trận truy vết nhỏ, có loại quan hệ và trạng thái bằng chứng. Các test UAT dưới đây mới là test case đề xuất.</p></div>
 
 ## 1. Truy vết hai chiều
 
@@ -20,7 +20,7 @@ Liên kết không nhất thiết một-một. Một rule có nhiều test, mộ
 
 ## 2. Bảng mẫu có giới hạn rõ
 
-| Nhu cầu/giả thuyết | Yêu cầu P04 | Ví dụ kiểm đề xuất | Trạng thái |
+| Nhu cầu/giả thuyết | Yêu cầu P04 | Ví dụ kiểm thử đề xuất | Trạng thái |
 |---|---|---|---|
 | Giảm hiểu sai điểm đón | US-P04-01 xác nhận | UAT-P07-01 đúng revision | Chưa chạy |
 | Bảo vệ quyền chủ chuyến | RULE-P04-01 | UAT-P07-02 người khác xác nhận | Chưa chạy |
@@ -37,7 +37,7 @@ Có thể bắt đầu bằng Markdown hoặc bảng tính. Công cụ chuyên d
 
 ## 4. Tìm mục bị mồ côi
 
-Một nút “chia sẻ mọi ghi chú với CS” chưa có nhu cầu được chấp nhận không nên tự trở thành phạm vi. Ngược lại, yêu cầu kiểm revision chưa có ca kiểm chứng là lỗ hổng coverage. Báo cáo hai loại này riêng vì cách xử lý khác nhau: tìm căn cứ hoặc bổ sung kiểm chứng.
+Một nút “chia sẻ mọi ghi chú với CS” chưa có nhu cầu được chấp nhận không nên tự trở thành phạm vi. Ngược lại, yêu cầu kiểm tra revision chưa có test case kiểm chứng là lỗ hổng coverage. Báo cáo hai loại này riêng vì cách xử lý khác nhau: tìm căn cứ hoặc bổ sung kiểm chứng.
 
 ## 5. Áp dụng khi đổi rule
 
@@ -45,13 +45,13 @@ Nếu đề xuất cho phép sửa sau accepted, từ RULE-P04-01 lần theo use
 
 ## 6. Tránh tỷ lệ coverage gây hiểu nhầm
 
-“100% yêu cầu có test” có thể chỉ nghĩa đã tạo tên test. Phân biệt designed, executed, passed và accepted; gắn phiên bản build/dữ liệu khi có kết quả. Ngoài ra kiểm chiều sâu: một happy path không bao phủ đầy đủ rule cạnh tranh hoặc ngoại lệ.
+“100% yêu cầu có test” có thể chỉ nghĩa đã tạo tên test. Phân biệt designed, executed, passed và accepted; gắn phiên bản build/dữ liệu khi có kết quả. Ngoài ra cần kiểm tra chiều sâu: một happy path không bao phủ đầy đủ rule cạnh tranh hoặc ngoại lệ.
 
 ## 7. Thực hành
 
-Thêm AC-P04-05 về timeout vào ma trận. Tạo hai ca: response mất nhưng xác nhận đã lưu, và yêu cầu chưa tới server. Ghi điều UI có thể nói trước khi tra cứu.
+Thêm AC-P04-05 về timeout vào ma trận. Tạo hai test case: response mất nhưng xác nhận đã lưu, và yêu cầu chưa tới server. Ghi điều UI có thể nói trước khi tra cứu.
 
-<details><summary>Gợi ý tự kiểm</summary><p>Cả hai ca đều có thể trông giống timeout ở client. UI chưa được tuyên bố thất bại chắc chắn; traceability phải nối hành vi tra cứu với yêu cầu xử lý kết quả chưa rõ.</p></details>
+<details><summary>Gợi ý tự kiểm</summary><p>Cả hai test case đều có thể trông giống timeout ở client. UI chưa được tuyên bố thất bại chắc chắn; traceability phải nối hành vi tra cứu với yêu cầu xử lý kết quả chưa rõ.</p></details>
 
 ## 8. Đọc tiếp
 

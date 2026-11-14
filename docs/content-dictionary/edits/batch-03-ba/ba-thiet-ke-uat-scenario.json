@@ -1,0 +1,89 @@
+{
+ "file": "ba-thiet-ke-uat-scenario.md",
+ "edits": [
+  {
+   "old": "Các ca là thiết kế đề xuất, chưa có execution result thật.",
+   "new": "Các test case là thiết kế đề xuất, chưa có kết quả thực thi thật.",
+   "reason": "Thống nhất 'test case'; từ Anh lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "## 1. Từ hành trình đến ca kiểm tra",
+   "new": "## 1. Từ hành trình đến test case",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "tài xế được phân công đọc, CS giải thích khi có vướng mắc.",
+   "new": "tài xế được phân công đọc thông tin, CSKH giải thích khi có vướng mắc.",
+   "reason": "Lược danh từ; 'CS' chưa định nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "hoặc mất response.",
+   "new": "hoặc mất phản hồi.",
+   "reason": "Từ Anh lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Chi tiết validation vẫn có thể được QA kiểm ở lớp phù hợp, rồi UAT tập trung vào outcome nghiệp vụ.",
+   "new": "QA vẫn có thể kiểm chi tiết validation ở lớp phù hợp, còn UAT tập trung vào kết quả nghiệp vụ.",
+   "reason": "Bị động, từ Anh lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "Bằng chứng cần trạng thái sau thao tác",
+   "new": "Bằng chứng gồm trạng thái sau thao tác",
+   "reason": "'cần' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "làm expected duy nhất. Nó không giúp phát hiện",
+   "new": "làm expected duy nhất, vì dòng này không giúp phát hiện",
+   "reason": "Tránh 'Nó' trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "## 3. Bộ ca nối traceability",
+   "new": "## 3. Bộ test case nối với traceability",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "| Hiển thị chưa rõ và tra cứu theo thiết kế |",
+   "new": "| Hiển thị trạng thái chưa rõ và tra cứu theo thiết kế |",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Thêm ca accepted thắng cuộc đua trước xác nhận",
+   "new": "Thêm test case accepted thắng race condition trước xác nhận",
+   "reason": "'cuộc đua' là calque; thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "để kiểm đúng/sai quyền. Giữ được trạng thái searching đủ lâu cho thao tác; có cách tạo revision mới hoặc đổi state có kiểm soát. Không dùng dữ liệu đã bị ca trước sửa",
+   "new": "để kiểm tra trường hợp đúng quyền và sai quyền. Cần giữ được trạng thái searching đủ lâu cho thao tác và có cách tạo revision mới hoặc đổi state có kiểm soát. Không dùng dữ liệu đã bị test case trước sửa",
+   "reason": "Câu lược động từ; thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy lại ca lỗi và xem phạm vi regression",
+   "new": "chạy lại test case lỗi và xem xét phạm vi regression",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Viết scenario cho cuộc đua giữa accepted",
+   "new": "Viết scenario cho race condition giữa accepted",
+   "reason": "'cuộc đua' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "Cần kiểm nhất quán, không chỉ hai thao tác tuần tự không có cạnh tranh.",
+   "new": "Cần kiểm tra tính nhất quán, không chỉ hai thao tác tuần tự không xảy ra đồng thời.",
+   "reason": "'cạnh tranh' là calque; 'kiểm' cụt",
+   "severity": "medium"
+  }
+ ]
+}

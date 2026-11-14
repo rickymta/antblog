@@ -1,0 +1,11 @@
+{"file":"multiple-condition-testing.md","edits":[
+{"old":"Với N điều kiện độc lập là 2^N tổ hợp.","new":"Với N điều kiện độc lập sẽ có 2^N tổ hợp.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Vấn đề nó giải quyết:","new":"Vấn đề mà kỹ thuật này giải quyết:","reason":"Tránh 'nó' chỉ khái niệm; cụm cụt","severity":"medium"},
+{"old":"Với N điều kiện duy nhất, độc lập nhau, đạt đầy đủ bằng cách","new":"Với N điều kiện duy nhất, độc lập nhau, có thể đạt đầy đủ bằng cách","reason":"Câu thiếu động từ/chủ thể","severity":"medium"},
+{"old":"phần mềm nhúng phải chạy tin cậy rất lâu không sập","new":"phần mềm nhúng phải chạy ổn định rất lâu mà không sập","reason":"Cụm 'chạy tin cậy' tự ghép, giọng dịch máy","severity":"medium"},
+{"old":"**nhân đôi** bộ test multiple condition, chỉ **cộng một** test MC/DC","new":"**nhân đôi** bộ test multiple condition, nhưng chỉ **thêm một** test MC/DC","reason":"'cộng một' là calque; thiếu quan hệ từ","severity":"low"},
+{"old":"Không xoá dòng một cách im lặng","new":"Không lặng lẽ xoá dòng","reason":"Calque 'in a silent way'","severity":"low"},
+{"old":"Bài test ở **component level**, kho trong bộ nhớ.","new":"Bài này kiểm thử ở **component level**, với kho trong bộ nhớ.","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"Nó chứng minh từng điều kiện **có tác dụng**","new":"Bộ này chứng minh từng điều kiện **có tác dụng**","reason":"Tránh 'Nó' chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"giả định «một trạng thái» yếu hơn trong lab","new":"nên giả định «một trạng thái» kém vững hơn so với trong lab","reason":"Câu cụt, thiếu quan hệ từ","severity":"medium"}
+]}

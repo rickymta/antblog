@@ -1,0 +1,16 @@
+{"file":"aws-eks-van-hanh-upgrade-addon-chi-phi.md","edits":[
+{"old":"có lịch, có chặng thử và có người sở hữu.","new":"có lịch, có chặng thử và có người phụ trách.","reason":"'người sở hữu' là calque của owner","severity":"medium"},
+{"old":"ngoài các khung cao điểm 11:00 và 17:00.","new":"tránh các khung cao điểm 11:00 và 17:00.","reason":"'ngoài các khung' gượng, dễ hiểu sai","severity":"low"},
+{"old":"PDB đặt `minAvailable` bằng số replica làm node không bao giờ drain được, nâng cấp treo.","new":"PDB đặt `minAvailable` bằng số replica khiến node không bao giờ drain được và nâng cấp bị treo.","reason":"Câu cụt, thiếu liên từ","severity":"medium"},
+{"old":"Thay `1.N+1` bằng version cụ thể;","new":"Thay `1.N+1` bằng phiên bản cụ thể;","reason":"Dùng 'phiên bản' trong văn xuôi","severity":"low"},
+{"old":"lấy danh sách version hợp với bản Kubernetes bằng","new":"lấy danh sách phiên bản hợp với bản Kubernetes bằng","reason":"Dùng 'phiên bản' trong văn xuôi","severity":"low"},
+{"old":"Thất bại nếu có cấu hình tự sửa lệch","new":"Báo lỗi nếu có cấu hình bạn đã tự sửa","reason":"'tự sửa lệch' là cụm tự ghép, khó hiểu","severity":"medium"},
+{"old":"EKS add-on cho bạn một nơi biết version, cập nhật bằng API,","new":"EKS add-on cho bạn một nơi để biết phiên bản, cập nhật bằng API,","reason":"Thiếu 'để'; dùng 'phiên bản'","severity":"medium"},
+{"old":"Cái giá là phụ thuộc danh sách và lịch của EKS.","new":"Cái giá là bạn phụ thuộc vào danh sách và lịch của EKS.","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"nên mỗi lần nâng minor phải kiểm chart có hỗ trợ version mới.","new":"nên mỗi lần nâng minor phải kiểm xem chart có hỗ trợ phiên bản mới không.","reason":"Câu thiếu 'không'; dùng 'phiên bản'","severity":"medium"},
+{"old":"Retention, sampling, bỏ label nổ (bài 47)","new":"Retention, sampling, bỏ label làm số series bùng nổ (bài 47)","reason":"'label nổ' là cụm tự ghép","severity":"medium"},
+{"old":"request quá cao thì namespace bị tính nhiều và node bị giữ chỗ phí.","new":"request quá cao thì namespace bị tính nhiều tiền và node bị giữ chỗ lãng phí.","reason":"'giữ chỗ phí' thiếu nghĩa","severity":"medium"},
+{"old":"chi phí control plane và công nâng cấp càng nhân lên","new":"chi phí control plane và công sức nâng cấp càng nhân lên","reason":"'công nâng cấp' lược danh từ","severity":"medium"},
+{"old":"EKS quản lý etcd nhưng không miễn nhiễm với số object quá lớn;","new":"EKS quản lý etcd nhưng etcd vẫn có thể gặp sự cố khi số object quá lớn;","reason":"'miễn nhiễm' là calque (immune)","severity":"medium"},
+{"old":"Subnet cạn IP.","new":"Subnet hết IP.","reason":"'cạn IP' gượng","severity":"low"}
+]}

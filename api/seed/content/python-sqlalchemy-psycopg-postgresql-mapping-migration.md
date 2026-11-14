@@ -74,7 +74,7 @@ Một vài quyết định đáng nhìn kỹ, vì chúng là chỗ mapping thư�
 - **Tiền và khoảng cách dùng `Numeric`, tương ứng `Decimal`**, không dùng `Float` (bài 02). Lab đọc lại `fare` ra `Decimal('14250')` và `distance_km` ra `Decimal('2.500')`: scale của cột được giữ.
 - **`StrEnum` lưu thành VARCHAR chứa giá trị** (`"picked_up"`), không lưu tên thành viên (`"PICKED_UP"`). `values_callable` làm việc này, và `native_enum=False` tránh kiểu `ENUM` của PostgreSQL vốn khó sửa bằng migration khi thêm trạng thái. Đổi lại cột chỉ là VARCHAR(16) **không có ràng buộc CHECK**: ORM chặn giá trị lạ ở phía Python, nhưng một câu `INSERT` ghi thẳng `status = 'bogus'` vẫn lọt (lab thử và PostgreSQL nhận). Muốn database cũng chặn, ta thêm `CheckConstraint` riêng.
 - **`DateTime(timezone=True)` là `timestamptz`**: PostgreSQL lưu một thời điểm tuyệt đối và trả về `datetime` có offset. Ta luôn ghi giờ UTC aware (bài 04); khi hiển thị đổi sang `Asia/Ho_Chi_Minh`.
-- **Schema `lab24` đặt ở `MetaData`**, nên không class nào phải lặp lại. Khóa ngoại ta ghi đủ tên có schema (`lab24.customers.customer_id`).
+- **Schema `lab24` đặt ở `MetaData`**, nên không class nào phải lặp lại. Khoá ngoại ta ghi đủ tên có schema (`lab24.customers.customer_id`).
 
 `Trip` ở đây là **mô hình lưu trữ**, không phải `Trip` dataclass có hành vi và máy trạng thái của [bài 11](/articles/python-class-dataclass-property-encapsulation). Gộp hai thứ làm một là một lựa chọn kiến trúc; [bài 69](/articles/python-repository-unit-of-work-sqlalchemy) sẽ bàn việc tách repository khỏi domain.
 
@@ -111,10 +111,10 @@ Giá trị không bao giờ nằm trong chuỗi SQL mà đi riêng dưới dạn
 
 Hai hành vi của `Session` mà người mới hay vấp:
 
-- **Identity map.** Trong một session, cùng khóa chính là cùng một object. Gọi `session.get(Trip, "TN-0001")` lần hai trả về chính object cũ và không phát thêm câu SQL nào (lab đếm: 0 câu).
+- **Identity map.** Trong một session, cùng khoá chính là cùng một object. Gọi `session.get(Trip, "TN-0001")` lần hai trả về chính object cũ và không phát thêm câu SQL nào (lab đếm: 0 câu).
 - **Unit of Work.** Đổi `first.status = TripStatus.SEARCHING` chưa chạm database. Đến lúc `flush` (tự động trước truy vấn kế tiếp hoặc lúc commit), ORM so với trạng thái ban đầu và phát đúng một `UPDATE lab24.trips SET status=%(status)s WHERE lab24.trips.trip_id = ...`, chỉ có cột đã đổi.
 
-Cuối cùng là bẫy kinh điển **N+1**. Quan hệ `Customer.trips` mặc định tải lười: chạm `.trips` mới phát SQL. Với 3 khách, vòng lặp đọc `.trips` từng người tốn `1 + 3 = 4` câu; thêm `.options(selectinload(Customer.trips))` còn 2 câu (một lấy khách, một lấy mọi chuyến của họ). `selectinload` không phải một câu duy nhất: nó chia khóa thành lô tối đa 500 giá trị mỗi câu `IN`. Lab thêm 1.498 khách để có 1.501 và đếm được `1 + 4 = 5` câu (một lấy khách, bốn lô). Với 25.000 tài xế trực tuyến, đó là khoảng 51 câu thay vì 25.001 vòng khứ hồi của tải lười.
+Cuối cùng là bẫy kinh điển **N+1**. Quan hệ `Customer.trips` mặc định tải lười: chạm `.trips` mới phát SQL. Với 3 khách, vòng lặp đọc `.trips` từng người tốn `1 + 3 = 4` câu; thêm `.options(selectinload(Customer.trips))` còn 2 câu (một lấy khách, một lấy mọi chuyến của họ). `selectinload` không phải một câu duy nhất: nó chia khoá thành lô tối đa 500 giá trị mỗi câu `IN`. Lab thêm 1.498 khách để có 1.501 và đếm được `1 + 4 = 5` câu (một lấy khách, bốn lô). Với 25.000 tài xế trực tuyến, đó là khoảng 51 câu thay vì 25.001 vòng khứ hồi của tải lười.
 
 ## Alembic: migration là lịch sử lược đồ có thể review
 
@@ -150,14 +150,14 @@ def _configure(**kwargs) -> None:
     )
 ```
 
-Ba tùy chọn cùng làm một việc: giữ Alembic trong đúng schema `lab24`. Database dùng chung có schema của các lab khác, và nếu thiếu `include_name`, autogenerate sẽ so cả chúng và đề xuất xóa những bảng không thuộc về ta. Revision đầu tiên được sinh bằng `alembic revision --autogenerate -m "create customers and trips" --rev-id 0001`; log cho thấy nó phát hiện đúng hai bảng mới:
+Ba tuỳ chọn cùng làm một việc: giữ Alembic trong đúng schema `lab24`. Database dùng chung có schema của các lab khác, và nếu thiếu `include_name`, autogenerate sẽ so cả chúng và đề xuất xoá những bảng không thuộc về ta. Revision đầu tiên được sinh bằng `alembic revision --autogenerate -m "create customers and trips" --rev-id 0001`; log cho thấy nó phát hiện đúng hai bảng mới:
 
 ```text
 INFO  [alembic.autogenerate.compare.tables] Detected added table 'lab24.customers'
 INFO  [alembic.autogenerate.compare.tables] Detected added table 'lab24.trips'
 ```
 
-File sinh ra được đọc lại và gọn hóa, vì autogenerate chỉ là **bản nháp**. Nó không đoán được ý định (đổi tên cột trông giống xóa một cột rồi thêm cột khác), không thấy mọi thay đổi (ví dụ giá trị `server_default` mặc định không được so sánh), và không biết dữ liệu hiện có. Revision `0001` (trích):
+File sinh ra được đọc lại và gọn hoá, vì autogenerate chỉ là **bản nháp**. Nó không đoán được ý định (đổi tên cột trông giống xoá một cột rồi thêm cột khác), không thấy mọi thay đổi (ví dụ giá trị `server_default` mặc định không được so sánh), và không biết dữ liệu hiện có. Revision `0001` (trích):
 
 ```python
 def upgrade() -> None:
@@ -235,7 +235,7 @@ upgrade head -> revision 0002, index còn: ['ix_trips_customer_created']
 OK 27/27
 ```
 
-Vài điểm đáng đọc. Phần «Cột trips trong PostgreSQL» là kết quả hỏi **catalog của database** (`inspect(engine)`), không hỏi lại model: đây là cách chứng minh mapping và bảng thật khớp. Khóa ngoại sai (`CU-999`) không bị Python chặn mà bị PostgreSQL từ chối với SQLSTATE `23503`, và `exc.orig.sqlstate` cho ta mã đó; ràng buộc nằm ở database chứ không chỉ ở code. Cặp `downgrade -1` rồi `upgrade head` cho thấy migration đi được hai chiều và dữ liệu còn nguyên (lab đếm lại 4 chuyến). `--verify` chạy 27 kiểm tra; đạt thì in `OK 27/27`, sai thì in tên ca và `FAIL n/m` (n là số ca đạt) với exit 1. Nếu chưa bật PostgreSQL, nó in `FAIL: không nối được PostgreSQL tại <url> ...` và exit 1. Phiên bản đã chạy: Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, Alembic 1.20.1, PostgreSQL 17.11.
+Vài điểm đáng đọc. Phần «Cột trips trong PostgreSQL» là kết quả hỏi **catalog của database** (`inspect(engine)`), không hỏi lại model: đây là cách chứng minh mapping và bảng thật khớp. Khoá ngoại sai (`CU-999`) không bị Python chặn mà bị PostgreSQL từ chối với SQLSTATE `23503`, và `exc.orig.sqlstate` cho ta mã đó; ràng buộc nằm ở database chứ không chỉ ở code. Cặp `downgrade -1` rồi `upgrade head` cho thấy migration đi được hai chiều và dữ liệu còn nguyên (lab đếm lại 4 chuyến). `--verify` chạy 27 kiểm tra; đạt thì in `OK 27/27`, sai thì in tên ca và `FAIL n/m` (n là số ca đạt) với exit 1. Nếu chưa bật PostgreSQL, nó in `FAIL: không nối được PostgreSQL tại <url> ...` và exit 1. Phiên bản đã chạy: Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, Alembic 1.20.1, PostgreSQL 17.11.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -247,12 +247,12 @@ Vài điểm đáng đọc. Phần «Cột trips trong PostgreSQL» là kết qu
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Lab dựng và xóa schema <code>lab24</code> mỗi lần chạy, còn production không bao giờ <code>DROP SCHEMA</code>: migration chỉ đi tới, có kế hoạch rollback và được review SQL, đặc biệt với bảng <code>trips</code> hàng trăm triệu dòng, nơi một <code>ALTER TABLE</code> hay <code>CREATE INDEX</code> thông thường có thể khóa bảng (<code>CREATE INDEX CONCURRENTLY</code> không chạy được trong một transaction nên phải đặt trong <code>autocommit_block()</code> của Alembic). Ví dụ này cũng chưa tinh chỉnh pool kết nối cho tải 70 chuyến mỗi giây, chưa quản lý quyền (tài khoản <code>toinoi</code> chỉ dùng cho lab), và để migration chạy một lần trước khi các replica khởi động chứ không để mỗi replica tự chạy lúc start. Dữ liệu khách và chuyến là dữ liệu giả.</p>
+<p>Lab dựng và xoá schema <code>lab24</code> mỗi lần chạy, còn production không bao giờ <code>DROP SCHEMA</code>: migration chỉ đi tới, có kế hoạch rollback và được review SQL, đặc biệt với bảng <code>trips</code> hàng trăm triệu dòng, nơi một <code>ALTER TABLE</code> hay <code>CREATE INDEX</code> thông thường có thể khoá bảng (<code>CREATE INDEX CONCURRENTLY</code> không chạy được trong một transaction nên phải đặt trong <code>autocommit_block()</code> của Alembic). Ví dụ này cũng chưa tinh chỉnh pool kết nối cho tải 70 chuyến mỗi giây, chưa quản lý quyền (tài khoản <code>toinoi</code> chỉ dùng cho lab), và để migration chạy một lần trước khi các replica khởi động chứ không để mỗi replica tự chạy lúc start. Dữ liệu khách và chuyến là dữ liệu giả.</p>
 </div>
 
 **Bài tập:** (1) Thêm cột `rating` (`SmallInteger`, cho phép NULL) vào `Trip`, sinh revision `0003` bằng autogenerate và cho biết `downgrade()` phải làm gì. (2) Nếu thay vào đó muốn `rating` là `NOT NULL` trên bảng đã có 200.000 chuyến, migration an toàn gồm những bước nào?
 
-<details><summary>Xem lời giải</summary><p>(1) Autogenerate sinh <code>op.add_column('trips', sa.Column('rating', sa.SmallInteger(), nullable=True), schema='lab24')</code> cho <code>upgrade()</code>, và <code>op.drop_column('trips', 'rating', schema='lab24')</code> cho <code>downgrade()</code>: ta đã chạy thí nghiệm này trong bản sao của lab. Cần lưu ý downgrade xóa cột là mất dữ liệu cột đó. (2) Thêm cột <code>NOT NULL</code> ngay sẽ lỗi vì 200.000 dòng cũ chưa có giá trị. Cách an toàn: thêm cột cho phép NULL; điền giá trị cho dòng cũ (<code>UPDATE</code>, với bảng lớn thì theo lô); khi đã không còn NULL mới đặt <code>NOT NULL</code> (<code>op.alter_column(..., nullable=False)</code>), hoặc đặt <code>server_default</code> nếu có một giá trị mặc định đúng nghiệp vụ. Mỗi bước là một thay đổi nhỏ có thể review.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Autogenerate sinh <code>op.add_column('trips', sa.Column('rating', sa.SmallInteger(), nullable=True), schema='lab24')</code> cho <code>upgrade()</code>, và <code>op.drop_column('trips', 'rating', schema='lab24')</code> cho <code>downgrade()</code>: ta đã chạy thí nghiệm này trong bản sao của lab. Cần lưu ý downgrade xoá cột là mất dữ liệu cột đó. (2) Thêm cột <code>NOT NULL</code> ngay sẽ lỗi vì 200.000 dòng cũ chưa có giá trị. Cách an toàn: thêm cột cho phép NULL; điền giá trị cho dòng cũ (<code>UPDATE</code>, với bảng lớn thì theo lô); khi đã không còn NULL mới đặt <code>NOT NULL</code> (<code>op.alter_column(..., nullable=False)</code>), hoặc đặt <code>server_default</code> nếu có một giá trị mặc định đúng nghiệp vụ. Mỗi bước là một thay đổi nhỏ có thể review.</p></details>
 
 Bài trước: [bài 23](/articles/python-concurrency-lock-queue-semaphore). Bài tiếp: [bài 25](/articles/python-transaction-optimistic-concurrency-idempotency).
 

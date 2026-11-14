@@ -8,7 +8,7 @@ tags: [business-analysis, ba-008, workshop, case-study, decision-log, toi-noi]
 language: vi
 ---
 
-Bạn có mười phút trước PO, vận hành và Tech Lead. Họ không cần nghe lại toàn bộ định nghĩa BA. Họ cần biết có nên dành nguồn lực để giải quyết vấn đề điểm đón, bước tiếp theo là gì và dựa vào đâu để chốt.
+Bạn có mười phút trước PO, bộ phận vận hành và Tech Lead. Họ không cần nghe lại toàn bộ định nghĩa BA. Họ cần biết có nên dành nguồn lực để giải quyết vấn đề điểm đón, bước tiếp theo là gì và dựa vào đâu để chốt.
 
 Bài thực hành này gom sản phẩm của bảy bài trước thành một hồ sơ có thể review. Mục tiêu là bảo vệ lập luận và chỉ rõ giới hạn, không phải thuyết phục mọi người chọn một tính năng bằng mọi giá.
 
@@ -19,7 +19,7 @@ Bài thực hành này gom sản phẩm của bảy bài trước thành một h
 
 ## 1. Đề bài: xin quyết định nào?
 
-Vận hành đề nghị thêm chat để khách và tài xế tìm nhau dễ hơn. PO muốn quyết định bước tiếp, còn Tech Lead cần hiểu nhu cầu và giới hạn trước khi ước lượng giải pháp. Bạn là BA chuẩn bị buổi review.
+Bộ phận vận hành đề nghị thêm chat để khách và tài xế tìm nhau dễ hơn. PO muốn quyết định bước tiếp, còn Tech Lead cần hiểu nhu cầu và giới hạn trước khi ước lượng giải pháp. Bạn là BA chuẩn bị buổi review.
 
 Dữ kiện ban đầu, chỉ áp dụng cho khu vực A trong một tuần giả lập:
 
@@ -43,7 +43,7 @@ Chưa xác nhận nguyên nhân, chất lượng nhãn, khả năng nối cuộc
 | Chuỗi yêu cầu | Một BR, hai SHR và yêu cầu giải pháp minh hoạ có trạng thái | BA-003 |
 | BACCM | Sáu khái niệm và ít nhất ba mối liên hệ quan trọng | BA-004 |
 | Metric card | Chỉ số chính, guardrail, cohort, mẫu số và cách xử lý kết quả chưa đủ | BA-005 |
-| Scope và sổ giả định | In/out, giả định, ràng buộc, phụ thuộc; có owner đề xuất | BA-006 |
+| Scope và sổ giả định | In/out, giả định, ràng buộc, phụ thuộc; có người phụ trách đề xuất | BA-006 |
 | So sánh phương án | Giữ nguyên/đo thêm, thay quy trình, thay sản phẩm; điều kiện đổi lựa chọn | BA-007 |
 | Recommendation và decision log | Khuyến nghị, điều kiện bắt đầu/dừng, người quyết định và mốc xem lại | BA-002, BA-007 |
 
@@ -55,19 +55,19 @@ Không cần viết nhiều trang cho mỗi sản phẩm. Một bảng có ID th
 
 Tính 120/1.000, 50/1.000 và 50/120; ghi bên cạnh câu hỏi mà mỗi tỷ lệ trả lời. Đánh dấu 80 là cuộc gọi, chưa phải số khách hoặc số lượt duy nhất. Viết problem statement không dùng cụm “do thiếu chat”.
 
-Sau đó tách ghi chép thành dữ kiện giả lập, giả thuyết và đề xuất. Các mức mục tiêu, owner và lịch chưa được xác nhận phải giữ nhãn đề xuất.
+Sau đó tách ghi chép thành dữ kiện giả lập, giả thuyết và đề xuất. Các mức mục tiêu, người phụ trách và lịch chưa được xác nhận phải giữ nhãn đề xuất.
 
 ### Vòng 2 — Nối nhu cầu với lựa chọn
 
-Lập BACCM, ghi khách/tài xế/CSKH có thể được lợi và chịu chi phí gì. Viết ít nhất hai nhu cầu stakeholder trước khi ghi giải pháp. Với mỗi phương án, chỉ ra giả thuyết nó xử lý và bằng chứng nào còn thiếu.
+Lập BACCM, ghi khách/tài xế/CSKH có thể được lợi và chịu chi phí gì. Viết ít nhất hai nhu cầu stakeholder trước khi ghi giải pháp. Với mỗi phương án, chỉ ra giả thuyết mà phương án đó xử lý và bằng chứng nào còn thiếu.
 
-Ví dụ, cải thiện ghi chú có thể phục vụ nhu cầu tài xế nhận biết đúng cổng. Nó chưa chắc giải quyết tình huống cổng vừa đóng và khách phải di chuyển. Cần thể hiện giới hạn đó trong bảng so sánh.
+Ví dụ, cải thiện ghi chú có thể phục vụ nhu cầu nhận biết đúng cổng của tài xế. Phương án này chưa chắc giải quyết tình huống cổng vừa đóng và khách phải di chuyển. Cần thể hiện giới hạn đó trong bảng so sánh.
 
 ### Vòng 3 — Thiết kế cách học và cách đo
 
-Chọn hoạt động discovery theo câu hỏi có thể thay đổi quyết định. Đừng biến một tuần thành lịch kín các cuộc họp không có đầu ra. Nếu muốn quan sát người dùng, ghi cách chọn ca và giới hạn suy rộng. Nếu cần dữ liệu, ghi điều kiện chất lượng phải kiểm tra.
+Chọn hoạt động discovery theo câu hỏi có thể thay đổi quyết định. Đừng biến một tuần thành lịch kín các cuộc họp không có đầu ra. Nếu muốn quan sát người dùng, ghi cách chọn ca và giới hạn khi suy rộng kết quả. Nếu cần dữ liệu, ghi điều kiện chất lượng phải kiểm tra.
 
-Metric card phải phân biệt số liệu tạm thời với kết quả đã đủ điều kiện đánh giá. Chưa có baseline guardrail thì ghi công việc phải làm trước pilot, không đánh dấu “đạt”.
+Metric card phải phân biệt số liệu tạm thời với kết quả đã đủ điều kiện đánh giá. Nếu chưa có baseline cho guardrail thì ghi lại công việc phải làm trước pilot, không đánh dấu “đạt”.
 
 ### Vòng 4 — Chuẩn bị quyết định và phản biện
 
@@ -81,9 +81,9 @@ Viết khuyến nghị tối đa một trang. Nêu việc cần duyệt ngay, vi
 
 **Phạm vi:** kiểm tra dữ liệu lượt huỷ, quan sát một số kiểu điểm đón, xác nhận cách vận hành hỗ trợ và lấy đánh giá kỹ thuật sơ bộ. Chưa bao gồm triển khai chat, giao hàng nhiều điểm hoặc thay chính sách phí huỷ.
 
-**Đầu ra:** brief được cập nhật; bảng bằng chứng theo giả thuyết; metric card được review; phương án và khoảng ước lượng có giả định; đề xuất bước tiếp. Không cam kết discovery tự làm tỷ lệ huỷ giảm.
+**Đầu ra:** brief được cập nhật; bảng bằng chứng theo giả thuyết; metric card được review; phương án và khoảng ước lượng có giả định; đề xuất bước tiếp. Không cam kết discovery tự làm giảm tỷ lệ huỷ.
 
-**Điều kiện:** PO xác nhận ưu tiên trong thẩm quyền; người tham gia xác nhận khả năng hỗ trợ; dữ liệu chia sẻ được chuẩn bị phù hợp. Nếu không đủ điều kiện, thu hẹp discovery hoặc chuyển quyết định lên người có thẩm quyền, ghi ảnh hưởng rõ ràng.
+**Điều kiện:** PO xác nhận ưu tiên trong thẩm quyền; người tham gia xác nhận khả năng hỗ trợ; dữ liệu chia sẻ được chuẩn bị phù hợp. Nếu không đủ điều kiện, thu hẹp discovery hoặc chuyển quyết định lên người có thẩm quyền, ghi rõ ảnh hưởng.
 
 **Mốc xem lại:** cuối tuần discovery, trình kết quả và một trong ba lựa chọn: thử nhỏ một phương án, xác minh thêm một câu hỏi quan trọng với thời hạn mới, hoặc dừng/đổi ưu tiên. Gia hạn cần quyết định mới, không tự động.
 
@@ -109,15 +109,15 @@ Chuỗi này không biến FR-01 thành giải pháp đã duyệt. Nếu chọn 
 | “Prototype mọi người đều dùng được thì rollout?” | Prototype hỗ trợ kết luận về khả năng sử dụng trong mẫu; chưa chứng minh hiệu quả nghiệp vụ hoặc vận hành |
 | “Ai chấp nhận mục tiêu 9%?” | Sponsor/đại diện nghiệp vụ theo uỷ quyền sau khi review baseline, guardrail và nguồn lực |
 
-Trong vai BA, bạn có thể nói “chưa đủ bằng chứng” nhưng phải nối với bước xử lý. Nếu người quyết định vẫn chọn xây ngay, ghi rõ căn cứ, bất định đã nêu, thẩm quyền, điều kiện theo dõi và quyết định thực tế; không sửa lịch sử để làm như mọi giả định đã được xác minh.
+Trong vai BA, bạn có thể nói “chưa đủ bằng chứng” nhưng phải nối với bước xử lý. Nếu người quyết định vẫn chọn xây ngay, ghi rõ căn cứ, những điểm bất định đã nêu, thẩm quyền, điều kiện theo dõi và quyết định thực tế; không sửa lịch sử để làm như mọi giả định đã được xác minh.
 
 ## 6. Tiêu chí dừng và điều kiện chuyển bước
 
 Với discovery, nên xem lại hoặc dừng hướng hiện tại khi không tiếp cận được nguồn bằng chứng quan trọng, vấn đề ưu tiên đã đổi, hoặc kết quả bác bỏ giả thuyết cốt lõi. “Dừng hướng chat” không nhất thiết “dừng giải quyết điểm đón”.
 
-Trước pilot cần có định nghĩa metric, baseline có thể sử dụng, owner hỗ trợ, phạm vi, cơ chế ngừng và điều kiện review đã thống nhất. Không có một ngưỡng số lượng chung cho mọi tình huống. Nếu phát hiện thông tin hiển thị sai người, cần dừng luồng bị ảnh hưởng và điều tra theo kế hoạch đã chốt; không chờ hết bốn tuần để xem tỷ lệ huỷ.
+Trước pilot cần có định nghĩa metric, baseline có thể sử dụng, người phụ trách hỗ trợ, phạm vi, cơ chế ngừng và điều kiện review đã thống nhất. Không có một ngưỡng số lượng chung cho mọi tình huống. Nếu phát hiện thông tin hiển thị sai người, cần dừng luồng bị ảnh hưởng và điều tra theo kế hoạch đã chốt; không chờ hết bốn tuần để xem tỷ lệ huỷ.
 
-Sau pilot, chỉ xem xét mở rộng khi dữ liệu đủ, guardrail được đánh giá và giới hạn của kết luận được nêu rõ. Đạt target trong một khu vực không tự chứng minh hiệu quả tại mọi khu vực.
+Sau pilot, chỉ xem xét mở rộng khi dữ liệu đủ, guardrail được đánh giá và giới hạn của kết luận được nêu rõ. Đạt mục tiêu trong một khu vực không tự chứng minh hiệu quả tại mọi khu vực.
 
 ## 7. Rubric tự đánh giá và biến thể nâng cao
 
@@ -128,16 +128,16 @@ Chấm mỗi tiêu chí 0–2: **0** thiếu/sai; **1** có nhưng còn mơ hồ
 | Bằng chứng | Đúng mẫu số, phân biệt dữ kiện và giả thuyết, nêu giới hạn |
 | Nhu cầu và phương án | Không chốt chat từ đầu; có ít nhất ba lựa chọn và đánh đổi |
 | Đo lường | Cohort, pending, guardrail và baseline thiếu được xử lý rõ |
-| Phạm vi và trách nhiệm | Có in/out, owner đề xuất, quyền chốt và phụ thuộc |
+| Phạm vi và trách nhiệm | Có in/out, người phụ trách đề xuất, quyền chốt và phụ thuộc |
 | Khuyến nghị | Quyết định cần xin rõ, có điều kiện, mốc review và cách đổi hướng |
 
-Mốc tự học đề xuất: đạt từ 8/10, đồng thời không có tiêu chí nào bằng 0. Nếu dùng 80 cuộc gọi thành 80 khách hoặc biến target thành kết quả đạt được, sửa bằng chứng trước khi trình bày dù tổng điểm có vẻ cao. Đây là rubric của bài tập, không phải đánh giá chứng chỉ BA.
+Mốc tự học đề xuất: đạt từ 8/10, đồng thời không có tiêu chí nào bằng 0. Nếu coi 80 cuộc gọi là 80 khách hoặc biến mục tiêu thành kết quả đạt được, sửa bằng chứng trước khi trình bày dù tổng điểm có vẻ cao. Đây là rubric của bài tập, không phải đánh giá chứng chỉ BA.
 
-**Biến thể:** giữa buổi review, PO yêu cầu thêm khu vực B. Viết impact note thay vì sửa tên khu vực ngay. Cần kiểm tra tính đại diện, khác biệt điểm đón, owner vận hành, dữ liệu đo và nguồn lực. Bạn có thể đề xuất tách B thành discovery tiếp theo với lý do cụ thể.
+**Biến thể:** giữa buổi review, PO yêu cầu thêm khu vực B. Viết impact note thay vì sửa tên khu vực ngay. Cần kiểm tra tính đại diện, khác biệt điểm đón, người phụ trách vận hành, dữ liệu đo và nguồn lực. Bạn có thể đề xuất tách B thành discovery tiếp theo với lý do cụ thể.
 
 **Câu hỏi kết bài:** Đầu ra có giá trị nhất của P01 là gì?
 
-<details><summary>Gợi ý trả lời</summary><p>Một quyết định được hỗ trợ bởi lập luận, bằng chứng và các giới hạn rõ ràng. Tài liệu giúp nhóm phối hợp và xem lại quyết định khi thông tin đổi; số lượng trang hoặc tên kỹ thuật không tự tạo giá trị.</p></details>
+<details><summary>Gợi ý trả lời</summary><p>Một quyết định có lập luận, bằng chứng và các giới hạn rõ ràng làm cơ sở. Tài liệu giúp nhóm phối hợp và xem lại quyết định khi thông tin đổi; số lượng trang hoặc tên kỹ thuật không tự tạo giá trị.</p></details>
 
 ## 8. Tài liệu và bước tiếp theo
 

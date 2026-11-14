@@ -39,7 +39,7 @@ Bảy nguyên lý kiểm thử không phải kỹ thuật thiết kế test. Ch�
 - «Bộ test hồi quy năm ngoái vẫn chạy tốt, không cần đụng.»
 - «Đúng đặc tả 100% thì khách chắc chắn hài lòng.»
 
-Khi nào dùng: mỗi lần lập kế hoạch test, ước lượng, chọn phạm vi, báo cáo kết quả hay quyết định release. Một kế hoạch test vi phạm một trong bảy nguyên lý thường có lỗ hổng mà nhìn vào số ca test không thấy được.
+Khi nào dùng: mỗi lần lập kế hoạch test, ước lượng, chọn phạm vi, báo cáo kết quả hay quyết định release. Một kế hoạch test vi phạm một trong bảy nguyên lý thường có lỗ hổng mà nhìn vào số test case không thấy được.
 
 ## 2. Lý thuyết theo ISTQB
 
@@ -51,7 +51,7 @@ Syllabus CTFL v4.0.1 mục 1.3 liệt kê bảy nguyên lý, kèm learning objec
 | 2 | Exhaustive testing is impossible | Thử mọi tổ hợp đầu vào và điều kiện chỉ khả thi với đối tượng tầm thường | Dùng test technique, ưu tiên test case (test case prioritization) và kiểm thử dựa trên rủi ro (risk-based testing) để dồn sức |
 | 3 | Early testing saves time and money | Defect gỡ sớm không sinh thêm defect ở các sản phẩm làm sau; ít failure muộn hơn nên chi phí chất lượng giảm | Bắt đầu cả static testing (review đặc tả, review code) lẫn dynamic testing càng sớm càng tốt |
 | 4 | Defects cluster together | Phần lớn defect thường tập trung ở một số ít thành phần — một biểu hiện của nguyên lý Pareto | Dùng cụm defect dự đoán và cụm defect thực tế làm đầu vào cho risk-based testing |
-| 5 | Tests wear out | Lặp lại mãi cùng một bộ test thì nó ngày càng kém trong việc tìm defect **mới** | Sửa test và dữ liệu cũ, viết test mới; nhưng hồi quy tự động lặp lại vẫn có ích cho mục đích của nó |
+| 5 | Tests wear out | Lặp lại mãi cùng một bộ test thì bộ test đó ngày càng kém trong việc tìm defect **mới** | Sửa test và dữ liệu cũ, viết test mới; nhưng hồi quy tự động lặp lại vẫn có ích cho mục đích của nó |
 | 6 | Testing is context dependent | Không có một cách kiểm thử dùng cho mọi nơi | Chọn cách test theo rủi ro, ngành, quy định, công nghệ, mô hình phát triển |
 | 7 | Absence-of-defects fallacy | Ngộ nhận rằng chỉ cần verification kỹ là hệ thống thành công | Ngoài verification phải có validation: hệ thống có đáp ứng nhu cầu người dùng và mục tiêu kinh doanh không |
 
@@ -70,7 +70,7 @@ Syllabus dẫn nguồn cho từng nguyên lý (Buxton 1970, Manna 1978, Boehm 19
 | defect (bug, fault) | khiếm khuyết, lỗi trong sản phẩm | Chi tiết ở [TEST-004](/articles/error-defect-failure-root-cause) |
 | exhaustive testing | kiểm thử toàn bộ / vét cạn | Thử mọi tổ hợp đầu vào và điều kiện tiên quyết |
 | test technique | kỹ thuật kiểm thử | Phân vùng tương đương, giá trị biên… (CTFL chương 4) |
-| test case prioritization | ưu tiên ca kiểm thử | CTFL mục 5.1.5 |
+| test case prioritization | ưu tiên test case | CTFL mục 5.1.5 |
 | risk-based testing | kiểm thử dựa trên rủi ro | CTFL mục 5.2 |
 | static testing / dynamic testing | kiểm thử tĩnh / kiểm thử động | Không chạy code / có chạy code |
 | defect clustering | sự tập trung defect | Hiện tượng Pareto |
@@ -93,7 +93,7 @@ Syllabus dẫn nguồn cho từng nguyên lý (Buxton 1970, Manna 1978, Boehm 19
 Tính năng đang xét là **luồng đặt chuyến**: khách xin báo giá, đặt chuyến từ báo giá, tài xế nhận, khách có thể huỷ, hệ thống thu tiền. Theo đặc tả phòng lab ([SPEC v1.1](https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing)):
 
 - **Báo giá** `POST /api/quotes` (R-API-07): ba dịch vụ `ride`, `parcel`, `food`; sáu thành phố (R-GEN-03); xe máy hoặc ô tô (R-GEN-04); quãng đường làm tròn 0,1 km, hợp lệ trong [0,5; 100] km (R-FARE-02).
-- **Thứ tự tính cước cố định 6 bước** (R-FARE-03): cước cơ bản → hệ số cao điểm 1,25 trong [11:00; 13:00) và [17:00; 19:00) (R-FARE-04) → phụ phí mưa 8.000 đ (R-FARE-05) → trừ voucher → nâng lên cước tối thiểu → làm tròn lên 1.000 đ.
+- **Thứ tự tính cước cố định 6 bước** (R-FARE-03): cước cơ bản → hệ số cao điểm 1,25 trong [11:00; 13:00) và [17:00; 19:00) (R-FARE-04) → phụ phí trời mưa 8.000 đ (R-FARE-05) → trừ voucher → nâng lên cước tối thiểu → làm tròn lên 1.000 đ.
 - **Voucher** (R-VOUCHER): thời hạn, phạm vi dịch vụ/thành phố, số tiền tối thiểu, lượt dùng mỗi ngày, thứ tự báo lỗi cố định.
 - **Báo giá có hạn 5 phút** và mỗi báo giá đặt tối đa một chuyến (R-QUOTE-01, R-QUOTE-03).
 - **Tài xế nhận**: đúng một người thắng khi nhiều người cùng bấm (R-ACCEPT-03).
@@ -126,17 +126,17 @@ Bảy nguyên lý giúp quyết định nên đổ công sức vào hàng nào c
 | 4 | Nhật ký defect của bản MVP dồn vào hai module | Toàn hệ thống |
 | 5 | Bộ hồi quy voucher chỉ dùng mã `GIAM20` ở TP. Hồ Chí Minh | Promotion |
 | 6 | Kiểm thử thanh toán VíXanh khác kiểm thử trang tra cứu đơn | Payment vs Public Tracking |
-| 7 | Báo giá đúng đặc tả nhưng khách bỏ đặt vì không thấy phụ phí mưa | Booking UI |
+| 7 | Báo giá đúng đặc tả nhưng khách bỏ đặt vì không thấy phụ phí trời mưa | Booking UI |
 
 ## 4. Phân tích kỹ thuật
 
 ### 4.1 Nguyên lý 1 — test chỉ ra có defect, không chứng minh hết defect
 
-Đội Pricing viết 150 ca test cho hàm tính cước. Tất cả chạy trên máy lập trình viên đặt múi giờ UTC+7 và đều xanh. Lên máy chủ đặt múi giờ UTC, chuyến đặt lúc 11:30 giờ Việt Nam bị coi là 04:30 — không cao điểm — nên tính thiếu 25%.
+Đội Pricing viết 150 test case cho hàm tính cước. Tất cả chạy trên máy lập trình viên đặt múi giờ UTC+7 và đều xanh. Lên máy chủ đặt múi giờ UTC, chuyến đặt lúc 11:30 giờ Việt Nam bị coi là 04:30 — không cao điểm — nên tính thiếu 25%.
 
-150 ca xanh không sai. Chúng chỉ không bao giờ chạy trong điều kiện «máy chạy ở múi giờ khác». Đây là lý do SPEC viết hẳn R-GEN-02 («giờ nghiệp vụ là giờ Việt Nam, bất kể múi giờ của máy chủ») và lab tính giờ tường minh từ mốc UTC trong `src/domain/time.ts`.
+150 test case xanh không sai. Chúng chỉ không bao giờ chạy trong điều kiện «máy chạy ở múi giờ khác». Đây là lý do SPEC viết hẳn R-GEN-02 («giờ nghiệp vụ là giờ Việt Nam, bất kể múi giờ của máy chủ») và lab tính giờ tường minh từ mốc UTC trong `src/domain/time.ts`.
 
-**Quyết định:** báo cáo test ghi rõ phạm vi đã thử («cước đúng với 150 ca, chạy ở UTC+7») thay vì «module cước không còn lỗi». Thêm ít nhất một ca chạy với đồng hồ tiêm vào ở thời điểm UTC khác ngày Việt Nam.
+**Quyết định:** báo cáo test ghi rõ phạm vi đã thử («cước đúng với 150 test case, chạy ở UTC+7») thay vì «module cước không còn lỗi». Thêm ít nhất một test case chạy với đồng hồ tiêm vào ở thời điểm UTC khác ngày Việt Nam.
 
 ### 4.2 Nguyên lý 2 — kiểm thử toàn bộ là bất khả thi
 
@@ -196,11 +196,11 @@ Cụm này không ngẫu nhiên: hai module đứng đầu là nơi có nhiều 
 
 ### 4.5 Nguyên lý 5 — test bị mòn
 
-Bộ hồi quy tự động của Promotion có 30 ca, chạy mỗi lần merge. Mọi ca đều dùng `GIAM20` (mọi dịch vụ, mọi thành phố) ở `SG`. Một thay đổi làm sai kiểm tra phạm vi thành phố: `HN10` (chỉ `ride`, chỉ `HN`) nay dùng được ở `SG`. Bộ 30 ca vẫn xanh suốt ba tháng, vì không ca nào chạm vào nhánh «sai thành phố» của R-VOUCHER-05.
+Bộ hồi quy tự động của Promotion có 30 test case, chạy mỗi lần merge. Mọi test case đều dùng `GIAM20` (mọi dịch vụ, mọi thành phố) ở `SG`. Một thay đổi làm sai kiểm tra phạm vi thành phố: `HN10` (chỉ `ride`, chỉ `HN`) nay dùng được ở `SG`. Bộ 30 test case vẫn xanh suốt ba tháng, vì không test case nào chạm vào nhánh «sai thành phố» của R-VOUCHER-05.
 
-Bộ test không hỏng — nó đã «nhờn». Nó vẫn làm tốt việc của nó (bắt lỗi hồi quy trên `GIAM20`) nhưng không còn khả năng tìm defect mới ở chỗ khác.
+Bộ test không hỏng — chỉ là đã «nhờn». Bộ test vẫn làm tốt việc của mình (bắt lỗi hồi quy trên `GIAM20`) nhưng không còn khả năng tìm defect mới ở chỗ khác.
 
-**Quyết định:** định kỳ rà bộ hồi quy theo mã yêu cầu: R-VOUCHER-03…08 mỗi mã có ít nhất một ca; xoay dữ liệu (thêm `HN10`, `FOOD15`, `XMAS50` đã hết hạn, mã chữ thường có khoảng trắng hai đầu «␣giam20␣»). Giữ các ca cũ vì chúng vẫn bảo vệ hồi quy.
+**Quyết định:** định kỳ rà bộ hồi quy theo mã yêu cầu: R-VOUCHER-03…08 mỗi mã có ít nhất một test case; xoay dữ liệu (thêm `HN10`, `FOOD15`, `XMAS50` đã hết hạn, mã chữ thường có khoảng trắng hai đầu «␣giam20␣»). Giữ các test case cũ vì chúng vẫn bảo vệ hồi quy.
 
 ### 4.6 Nguyên lý 6 — kiểm thử phụ thuộc ngữ cảnh
 
@@ -218,15 +218,15 @@ Ngữ cảnh còn gồm giai đoạn: bản lab MVP một tiến trình không c
 
 ### 4.7 Nguyên lý 7 — ngộ nhận «không có defect là thành công»
 
-Màn hình báo giá qua hết các ca test R-FARE và R-UI. Không còn defect mở. Sau một tuần, tỉ lệ khách bấm «Báo giá» rồi bỏ không đặt tăng lên trong những ngày mưa. Phỏng vấn nhanh cho thấy khách chỉ thấy **tổng tiền**, còn phụ phí mưa 8.000 đ nằm trong bảng chi tiết phải mở ra mới thấy (R-FARE-10 có trả bảng chi tiết, nhưng đặc tả không bắt hiển thị nổi bật). Khách thấy giá «tự nhiên tăng» và nghĩ ứng dụng ăn gian.
+Màn hình báo giá qua hết các test case R-FARE và R-UI. Không còn defect mở. Sau một tuần, tỉ lệ khách bấm «Báo giá» rồi bỏ không đặt tăng lên trong những ngày mưa. Phỏng vấn nhanh cho thấy khách chỉ thấy **tổng tiền**, còn phụ phí trời mưa 8.000 đ nằm trong bảng chi tiết phải mở ra mới thấy (R-FARE-10 có trả bảng chi tiết, nhưng đặc tả không bắt hiển thị nổi bật). Khách thấy giá «tự nhiên tăng» và nghĩ ứng dụng ăn gian.
 
-Phần mềm đúng đặc tả — verification đạt. Nhưng nó không đáp ứng kỳ vọng của người dùng — validation chưa từng được làm. [TEST-005](/articles/verification-va-validation) đi sâu vào cặp khái niệm này.
+Phần mềm đúng đặc tả — verification đạt. Nhưng phần mềm không đáp ứng kỳ vọng của người dùng — validation chưa từng được làm. [TEST-005](/articles/verification-va-validation) đi sâu vào cặp khái niệm này.
 
 **Quyết định:** kế hoạch test có ít nhất một hoạt động validation: cho vài khách thật dùng thử, đo tỉ lệ bỏ đặt, hỏi «bạn có hiểu vì sao giá là 52.000 đ không?».
 
 ## 5. Thực hành
 
-Bài thực hành dùng SPEC của lab, không cần chạy code. Mục tiêu: thấy bằng số vì sao nguyên lý 2 đúng, rồi biến «không thể test hết» thành một tập ca test có chủ đích.
+Bài thực hành dùng SPEC của lab, không cần chạy code. Mục tiêu: thấy bằng số vì sao nguyên lý 2 đúng, rồi biến «không thể test hết» thành một tập test case có chủ đích.
 
 ### 5.1 Đếm không gian đầu vào của `POST /api/quotes`
 
@@ -290,7 +290,7 @@ Giả định chạy 1.000 ca mỗi giây:
 
 Và đó mới là phần dễ. Kết quả báo giá còn phụ thuộc **ngày** (hạn voucher R-VOUCHER-04), **lịch sử** của khách (lượt voucher trong ngày R-VOUCHER-07), và các yêu cầu sai định dạng (thành phố `DL`, quãng đường âm, chuỗi thay số) — những thứ không đếm được thành con số hữu hạn.
 
-### 5.2 Từ «không thể thử hết» tới một tập ca có chủ đích
+### 5.2 Từ «không thể thử hết» tới một tập test case có chủ đích
 
 Bước 1 — **chọn giá trị đại diện** cho từng yếu tố bằng phân vùng tương đương và giá trị biên (kỹ thuật của Series 04, ở đây chỉ dùng kết quả):
 
@@ -303,13 +303,13 @@ Bước 1 — **chọn giá trị đại diện** cho từng yếu tố bằng p
 | Đang mưa | có, không | | 2 |
 | Voucher | không mã · `GIAM20` · `HN10` · `FOOD15` · `XMAS50` · `ABC` · «␣giam20␣» | đủ mỗi mã lỗi của R-VOUCHER-08 + chuẩn hoá mã | 7 |
 
-Bước 2 — **đừng nhân hết**. Nhân các giá trị đại diện cho riêng `ride` vẫn ra 3 × 2 × 5 × 9 × 2 × 7 = **3.780** ca. Thay vào đó:
+Bước 2 — **đừng nhân hết**. Nhân các giá trị đại diện cho riêng `ride` vẫn ra 3 × 2 × 5 × 9 × 2 × 7 = **3.780** test case. Thay vào đó:
 
-- Mỗi giá trị đại diện xuất hiện ít nhất một lần: tối thiểu **9 ca** (bằng yếu tố nhiều giá trị nhất).
+- Mỗi giá trị đại diện xuất hiện ít nhất một lần: tối thiểu **9 test case** (bằng yếu tố nhiều giá trị nhất).
 - Thêm các tổ hợp mà quy tắc nghiệp vụ cho thấy **có tương tác**: cao điểm × phụ phí bưu kiện (R-PARCEL-04 — phụ phí bị nhân 1,25), voucher × cước tối thiểu (R-FARE-07), voucher × thành phố (R-VOUCHER-05), nhiều lỗi cùng lúc × thứ tự báo lỗi (R-VALID-01).
 - Thêm tổ hợp theo rủi ro ở bảng mục 3 và theo cụm defect ở Hình 1.
 
-Kết quả là vài chục ca thay cho 10<sup>15</sup> — và mỗi ca có lý do để tồn tại. Đây chính là điều nguyên lý 2 yêu cầu: dùng kỹ thuật, ưu tiên và rủi ro để dồn sức, không «thử thật nhiều cho chắc».
+Kết quả là vài chục test case thay cho 10<sup>15</sup> — và mỗi test case có lý do để tồn tại. Đây chính là điều nguyên lý 2 yêu cầu: dùng kỹ thuật, ưu tiên và rủi ro để dồn sức, không «thử thật nhiều cho chắc».
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài CTFL</span>
@@ -375,7 +375,7 @@ Kết quả là vài chục ca thay cho 10<sup>15</sup> — và mỗi ca có lý
 <tr><td>10</td><td>ride, <code>DL</code>, bike, 200 km, <code>XMAS50</code></td><td><code>CITY_NOT_SUPPORTED</code></td><td>Nhiều lỗi cùng lúc, chỉ báo lỗi đầu tiên R-VALID-01</td></tr>
 </tbody>
 </table>
-<p>Số tiền ở ca 1, 3, 5, 6 đã kiểm bằng hàm <code>calculateFare</code> của lab. Tổ hợp ngoài danh sách (ví dụ <code>XMAS50</code> đơn lẻ, chuẩn hoá mã «␣giam20␣») vẫn cần test — chúng chỉ không lọt vào top 10 theo rủi ro.</p>
+<p>Số tiền ở tổ hợp 1, 3, 5, 6 đã kiểm bằng hàm <code>calculateFare</code> của lab. Tổ hợp ngoài danh sách (ví dụ <code>XMAS50</code> đơn lẻ, chuẩn hoá mã «␣giam20␣») vẫn cần test — chúng chỉ không lọt vào top 10 theo rủi ro.</p>
 </details>
 
 **Bài tập 2 — nhận diện nguyên lý.** Mỗi câu nói của thành viên đội Tới Nơi dưới đây liên quan nguyên lý nào?
@@ -404,10 +404,10 @@ Kết quả là vài chục ca thay cho 10<sup>15</sup> — và mỗi ca có lý
 <p><b>b)</b> đúng — tên nguyên lý 5 trong v4.0.1 (bản cũ gọi là pesticide paradox). a) ngược với nguyên lý 1. c) ngược với nguyên lý 6. d) sai: nguyên lý 2 nói kiểm thử toàn bộ không khả thi trừ trường hợp tầm thường, kể cả với hệ thống quan trọng về an toàn.</p>
 </details>
 
-**Câu 2 (K2).** Bộ test cước của Tới Nơi có 150 ca, tất cả đều đạt. Câu nào trong báo cáo test phù hợp nhất với các nguyên lý kiểm thử?
+**Câu 2 (K2).** Bộ test cước của Tới Nơi có 150 test case, tất cả đều đạt. Câu nào trong báo cáo test phù hợp nhất với các nguyên lý kiểm thử?
 
 - a) Module cước không còn defect.
-- b) Không phát hiện defect trong 150 ca đã chạy; khả năng còn defect chưa phát hiện đã giảm nhưng không loại trừ được.
+- b) Không phát hiện defect trong 150 test case đã chạy; khả năng còn defect chưa phát hiện đã giảm nhưng không loại trừ được.
 - c) Vì không có defect nên không cần kiểm thử hồi quy cho module cước nữa.
 - d) Vì không có defect nên module cước chắc chắn đáp ứng nhu cầu khách hàng.
 
@@ -419,7 +419,7 @@ Kết quả là vài chục ca thay cho 10<sup>15</sup> — và mỗi ca có lý
 **Câu 3 (K2).** Đội test Tới Nơi nhận thấy 26/40 defect nằm ở Pricing &amp; Voucher và Payment adapter. Cách dùng thông tin này phù hợp nhất là gì?
 
 - a) Ngừng test bốn module còn lại.
-- b) Dùng nó làm đầu vào cho kiểm thử dựa trên rủi ro, tăng trọng tâm vào hai module đó.
+- b) Dùng thông tin này làm đầu vào cho kiểm thử dựa trên rủi ro, tăng trọng tâm vào hai module đó.
 - c) Kết luận hai module đó do lập trình viên kém viết, đề nghị thay người.
 - d) Chia đều thời gian cho cả sáu module để công bằng.
 
@@ -432,7 +432,7 @@ Kết quả là vài chục ca thay cho 10<sup>15</sup> — và mỗi ca có lý
 
 - a) Chạy bộ hồi quy nhiều lần hơn mỗi ngày.
 - b) Xoá toàn bộ bộ hồi quy và viết lại từ đầu.
-- c) Rà và bổ sung ca test, đổi dữ liệu (thêm mã chỉ áp ở một thành phố), giữ các ca cũ còn giá trị hồi quy.
+- c) Rà và bổ sung test case, đổi dữ liệu (thêm mã chỉ áp ở một thành phố), giữ các test case cũ còn giá trị hồi quy.
 - d) Chuyển bộ hồi quy từ tự động sang chạy tay.
 
 <details>
@@ -445,14 +445,14 @@ Kết quả là vài chục ca thay cho 10<sup>15</sup> — và mỗi ca có lý
 - a) Tester chạy bộ E2E mỗi đêm sau khi phát hành.
 - b) Trong buổi review đặc tả, tester hỏi voucher áp trước hay sau cước tối thiểu, và đặc tả được sửa trước khi viết code.
 - c) Đội vận hành theo dõi tỉ lệ lỗi trên production.
-- d) Tester tăng số ca test hồi quy trước ngày phát hành.
+- d) Tester tăng số test case hồi quy trước ngày phát hành.
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
 <p><b>b)</b> đúng — defect trong đặc tả được gỡ bằng static testing trước khi lan sang code và test. a), c), d) đều là hoạt động ở giai đoạn muộn; có ích nhưng không minh hoạ nguyên lý 3.</p>
 </details>
 
-**Câu 6 (K2).** Màn hình báo giá của Tới Nơi qua mọi ca test theo đặc tả, nhưng khách bỏ đặt vì không thấy phụ phí mưa. Nguyên lý nào mô tả đúng nhất tình huống này?
+**Câu 6 (K2).** Màn hình báo giá của Tới Nơi qua mọi test case theo đặc tả, nhưng khách bỏ đặt vì không thấy phụ phí trời mưa. Nguyên lý nào mô tả đúng nhất tình huống này?
 
 - a) Exhaustive testing is impossible
 - b) Defects cluster together

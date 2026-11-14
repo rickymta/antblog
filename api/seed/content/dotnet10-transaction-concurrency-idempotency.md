@@ -1,7 +1,7 @@
 ---
 slug: dotnet10-transaction-concurrency-idempotency
 title: "Transaction, optimistic concurrency và idempotency: đặt chuyến an toàn với PostgreSQL"
-summary: "Bài 23: kiểm rollback thật, phát hiện version cũ bằng EF Core và dùng khóa idempotency kèm unique constraint để một ý định đặt chuyến có một kết quả bền."
+summary: "Bài 23: kiểm rollback thật, phát hiện version cũ bằng EF Core và dùng khoá idempotency kèm unique constraint để một ý định đặt chuyến có một kết quả bền."
 category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, postgresql, ef-core]
@@ -26,7 +26,7 @@ Lab chưa dựng giao dịch phân tán với dịch vụ tài chính Rust hoặ
 
 ## SaveChanges và transaction tường minh
 
-Với provider quan hệ hỗ trợ transaction, một SaveChanges chứa nhiều thay đổi được áp dụng nguyên tử theo cơ chế EF/provider. BookTrip thêm TripRow cùng BookingRequestRow trong một lần SaveChanges: không được commit khóa xử lý nhưng mất chuyến, hoặc commit chuyến mà mất khóa.
+Với provider quan hệ hỗ trợ transaction, một SaveChanges chứa nhiều thay đổi được áp dụng nguyên tử theo cơ chế EF/provider. BookTrip thêm TripRow cùng BookingRequestRow trong một lần SaveChanges: không được commit khoá xử lý nhưng mất chuyến, hoặc commit chuyến mà mất khoá.
 
 Test rollback mở transaction tường minh, sửa fare, SaveChanges rồi Rollback. Context mới đọc lại phải không thấy fare=1. Dùng context mới quan trọng vì rollback database không có nghĩa mọi object trong tracker tự khôi phục trạng thái ban đầu cho bạn.
 
@@ -34,9 +34,9 @@ Transaction càng kéo dài càng giữ tài nguyên/phiên bản và có thể 
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 220" role="img" aria-label="Hình 1. Khóa xử lý request và dữ liệu chuyến cùng transaction, không có một commit riêng dễ tạo khoảng trống."><defs><marker id="cs23-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Một SaveChanges</text><text x="34" y="123" class="t-small">Trip + request key</text><path d="M280 115 L305 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs23-0-arrow)"/><rect x="305" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="319" y="95" class="t-b">Transaction local</text><text x="319" y="123" class="t-small">Cùng commit / rollback</text><path d="M565 115 L590 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs23-0-arrow)"/><rect x="590" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Kết quả bền</text><text x="604" y="123" class="t-small">Một ý định request</text></svg>
+<svg viewBox="0 0 880 220" role="img" aria-label="Hình 1. Khoá xử lý request và dữ liệu chuyến cùng transaction, không có một commit riêng dễ tạo khoảng trống."><defs><marker id="cs23-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Một SaveChanges</text><text x="34" y="123" class="t-small">Trip + request key</text><path d="M280 115 L305 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs23-0-arrow)"/><rect x="305" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="319" y="95" class="t-b">Transaction local</text><text x="319" y="123" class="t-small">Cùng commit / rollback</text><path d="M565 115 L590 115" class="f-none s-phys" stroke-width="2" marker-end="url(#cs23-0-arrow)"/><rect x="590" y="65" width="260" height="100" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Kết quả bền</text><text x="604" y="123" class="t-small">Một ý định request</text></svg>
 </div>
-<figcaption>Hình 1. Khóa xử lý request và dữ liệu chuyến cùng transaction, không có một commit riêng dễ tạo khoảng trống.</figcaption>
+<figcaption>Hình 1. Khoá xử lý request và dữ liệu chuyến cùng transaction, không có một commit riêng dễ tạo khoảng trống.</figcaption>
 </figure>
 
 ## Version phải tham gia điều kiện UPDATE
@@ -47,11 +47,11 @@ Mọi đường ghi cần đổi version theo chính sách đã chọn; IsConcur
 
 Sau xung đột, application phải đọc trạng thái mới và giải quyết: chuyến đã có driver thì từ chối ý định nhận thứ hai. Không tự động retry ghi đè bằng version mới chỉ để exception biến mất. Token này khác Idempotency-Key của request.
 
-## Idempotency cần khóa bền và so khớp nội dung
+## Idempotency cần khoá bền và so khớp nội dung
 
-BookTrip nhận customerId, key và distance. Khóa chính ghép customerId/key phân vùng theo chủ thể. Nếu đã có, cùng khoảng cách trả TripId cũ; khác input bị từ chối. Các field tham gia ý định phải được so đầy đủ khi mở rộng hợp đồng, không chỉ giữ mỗi khoảng cách như lab.
+BookTrip nhận customerId, key và distance. Khoá chính ghép customerId/key phân vùng theo chủ thể. Nếu đã có, cùng khoảng cách trả TripId cũ; khác input bị từ chối. Các field tham gia ý định phải được so đầy đủ khi mở rộng hợp đồng, không chỉ giữ mỗi khoảng cách như lab.
 
-Hai request có thể cùng không thấy bản ghi ban đầu. Unique constraint là lớp quyết định cuối; candidate thua bị rollback trong SaveChanges. Code chỉ bắt SQLSTATE 23505 rồi đọc lại kết quả đã commit bằng context mới; nếu không tìm thấy khóa request đúng phạm vi thì ném lại, không nuốt mọi lỗi database.
+Hai request có thể cùng không thấy bản ghi ban đầu. Unique constraint là lớp quyết định cuối; candidate thua bị rollback trong SaveChanges. Code chỉ bắt SQLSTATE 23505 rồi đọc lại kết quả đã commit bằng context mới; nếu không tìm thấy khoá request đúng phạm vi thì ném lại, không nuốt mọi lỗi database.
 
 Giới hạn độ dài key và độ chia nhỏ distance được kiểm để mapping numeric(12,6) không âm thầm đổi ý nghĩa fingerprint. Key lấy từ hợp đồng request, không từ một chuỗi nối có thể xung đột. Retention, quyền truy cập và response snapshot đầy đủ cần thiết kế tiếp cho service thật.
 
@@ -66,9 +66,9 @@ Giới hạn độ dài key và độ chia nhỏ distance được kiểm để 
 
 Test đối chiếu rollback, stale update và hai lời đặt cùng key cho cùng TripId; lần lặp sau cũng trả cùng kết quả, input khác bị từ chối. Hai lời gọi Task.WhenAll là yêu cầu chồng lấp, không khẳng định một lịch lock PostgreSQL cụ thể được ép tại từng bước.
 
-**Bài tập:** nếu kiểm key bằng SELECT nhưng không có unique constraint, hai server có thể tạo hai chuyến không? Nếu cùng key nhưng đổi khách, phạm vi khóa nên thế nào?
+**Bài tập:** nếu kiểm key bằng SELECT nhưng không có unique constraint, hai server có thể tạo hai chuyến không? Nếu cùng key nhưng đổi khách, phạm vi khoá nên thế nào?
 
-<details><summary>Xem đáp án</summary><p>Có: khoảng giữa kiểm tra và ghi vẫn race. Phạm vi khóa phải theo hợp đồng chủ thể/use case; lab dùng customerId/key nên hai khách không chia sẻ một request record. Authentication phía API vẫn phải xác định customerId đáng tin cậy.</p></details>
+<details><summary>Xem đáp án</summary><p>Có: khoảng giữa kiểm tra và ghi vẫn race. Phạm vi khoá phải theo hợp đồng chủ thể/use case; lab dùng customerId/key nên hai khách không chia sẻ một request record. Authentication phía API vẫn phải xác định customerId đáng tin cậy.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 

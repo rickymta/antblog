@@ -1,0 +1,53 @@
+{
+"file": "flutter-navigator-route-truyen-du-lieu-xac-nhan-chuyen.md",
+"edits": [
+{
+"old": "Rồi tay chạm nhầm vào nút back.",
+"new": "Rồi khách chạm nhầm vào nút back.",
+"reason": "'tay chạm' thiếu chủ ngữ rõ ràng",
+"severity": "low"
+},
+{
+"old": "Chỉ thông báo nằm trong `assert`.",
+"new": "Chỉ có thông báo là nằm trong `assert`.",
+"reason": "Câu thiếu từ nối, khó hiểu",
+"severity": "low"
+},
+{
+"old": "mặc định là đồng hồ thật và được test thay bằng một giờ cố định",
+"new": "mặc định là đồng hồ thật, còn trong test ta thay bằng một giờ cố định",
+"reason": "Bị động 'được test thay' mơ hồ",
+"severity": "medium"
+},
+{
+"old": "Một chi tiết cho khi có nhiều `Navigator` lồng nhau",
+"new": "Một chi tiết cần nhớ khi có nhiều `Navigator` lồng nhau",
+"reason": "'chi tiết cho khi' là cụm tự ghép",
+"severity": "medium"
+},
+{
+"old": "Lý do còn nằm ở cử chỉ back:",
+"new": "Gốc của vấn đề nằm ở cử chỉ back:",
+"reason": "'Lý do còn nằm ở' mơ hồ",
+"severity": "low"
+},
+{
+"old": "Trên iOS có một khác biệt đáng biết. Trên iOS, `MaterialPageRoute` dùng",
+"new": "Trên iOS có một khác biệt đáng biết. Ở đó `MaterialPageRoute` dùng",
+"reason": "Lặp 'Trên iOS' trong hai câu liền nhau",
+"severity": "medium"
+},
+{
+"old": "bài 23 của loạt chuyển sang `go_router`",
+"new": "bài 23 của loạt bài chuyển sang `go_router`",
+"reason": "Thiếu danh từ 'bài'",
+"severity": "medium"
+},
+{
+"old": "trên iOS vuốt từ mép trái cũng im lặng.",
+"new": "trên iOS vuốt từ mép trái cũng không có phản ứng nào.",
+"reason": "'im lặng' là calque",
+"severity": "low"
+}
+]
+}

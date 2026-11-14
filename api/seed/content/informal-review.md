@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-023, static-testing, review, informal-review, 
 language: vi
 ---
 
-«Xem giúp mình cái story này 15 phút được không?» là kiểu review phổ biến nhất ở mọi đội phần mềm, kể cả ở Tới Nơi. Nó không có tên trên lịch họp, không có biên bản, nhưng vẫn là một review đúng nghĩa ISTQB: **informal review** (review không chính thức). Bài này trả lời ba câu: informal review là gì theo CTFL v4.0.1, làm một buổi 15 phút sao cho ra được phát hiện có giá trị, và khi nào nó **không đủ** — phải chuyển sang review hình thức hơn.
+«Xem giúp mình cái story này 15 phút được không?» là kiểu review phổ biến nhất ở mọi đội phần mềm, kể cả ở Tới Nơi. Buổi review này không có tên trên lịch họp, không có biên bản, nhưng vẫn là một review đúng nghĩa ISTQB: **informal review** (review không chính thức). Bài này trả lời ba câu: informal review là gì theo CTFL v4.0.1, làm một buổi 15 phút sao cho ra được phát hiện có giá trị, và khi nào nó **không đủ** — phải chuyển sang review hình thức hơn.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-023</span>
@@ -31,7 +31,7 @@ language: vi
 
 Review hình thức tốn kém: phải lập kế hoạch, mời người, chờ mọi người chuẩn bị, họp, ghi nhật ký. Với một user story vừa viết xong trong buổi refinement, chờ ba ngày để có review hình thức nghĩa là dev bắt đầu code theo bản nháp còn lỗi. Informal review lấp khoảng trống đó: **một hai người, vài phút, ngay khi có bản nháp**.
 
-Vấn đề nó giải quyết là **phát hiện sớm** những chỗ mơ hồ, thiếu, mâu thuẫn rõ ràng — loại lỗi mà chỉ cần một người thứ hai đọc là thấy. Dùng khi:
+Vấn đề mà informal review giải quyết là **phát hiện sớm** những chỗ mơ hồ, thiếu, mâu thuẫn rõ ràng — loại lỗi mà chỉ cần một người thứ hai đọc là thấy. Dùng khi:
 
 - Work product **nhỏ** (một user story, một đoạn đặc tả, một hàm), vừa viết xong.
 - Mục tiêu chỉ là **tìm anomaly**, không cần đồng thuận cả đội hay đào tạo người mới.
@@ -249,7 +249,7 @@ Kết quả: 8 ghi chú ⇒ 4 lỗi rõ ràng được sửa trước khi vào s
 **Giới hạn của informal review:**
 
 - **Phụ thuộc người đọc.** Không có checklist hay góc nhìn được giao, độ phủ bằng đúng kinh nghiệm của người được nhờ.
-- **Không chuẩn bị ⇒ nông.** Đọc lần đầu trong lúc nói chuyện, người ta thấy chỗ mơ hồ câu chữ hơn là chỗ thiếu.
+- **Không chuẩn bị ⇒ nông.** Đọc lần đầu trong lúc nói chuyện, người ta thấy chỗ mơ hồ về câu chữ hơn là chỗ thiếu.
 - **Dễ mất dấu.** Không bắt buộc ghi chép nên phát hiện nói miệng hay bị quên; không có audit trail để giải thích khi khách khiếu nại phí.
 - **Áp lực xã giao.** Nhờ bạn thân xem giúp thì ngại chê; ngược lại, người được nhờ có thể «LGTM» cho xong.
 - **Không đo được.** Không có metric nên không biết review của đội có hiệu quả hay không — khác với inspection.
@@ -268,7 +268,7 @@ Kết quả: 8 ghi chú ⇒ 4 lỗi rõ ràng được sửa trước khi vào s
 
 ## 7. Bài tập và câu hỏi ôn tập
 
-**Bài tập 1.** Tự làm lại buổi 15 phút với một đồng nghiệp trên bản nháp US-CANCEL-07, nhưng thêm một ràng buộc: người đọc thứ hai đóng vai **nhân viên chăm sóc khách hàng**. Ghi ít nhất 3 ghi chú mà góc nhìn đó tìm ra còn bảng ở 5.1 không có.
+**Bài tập 1.** Tự làm lại buổi 15 phút với một đồng nghiệp trên bản nháp US-CANCEL-07, nhưng thêm một ràng buộc: người đọc thứ hai đóng vai **nhân viên chăm sóc khách hàng**. Ghi ít nhất 3 ghi chú mà góc nhìn đó tìm ra nhưng bảng ở 5.1 chưa có.
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>

@@ -1,0 +1,59 @@
+{
+ "file": "ba-baseline-version-approval.md",
+ "edits": [
+  {
+   "old": "Baseline, version và approval: biết",
+   "new": "Baseline, phiên bản và phê duyệt: biết",
+   "reason": "Thống nhất 'phiên bản', 'phê duyệt'",
+   "severity": "medium"
+  },
+  {
+   "old": "Version nhận diện nội dung cụ thể. Approval ghi người",
+   "new": "Phiên bản nhận diện nội dung cụ thể. Phê duyệt ghi người",
+   "reason": "Thống nhất thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "có version mới nhưng chưa được duyệt",
+   "new": "có phiên bản mới nhưng chưa được duyệt",
+   "reason": "Thống nhất 'phiên bản'",
+   "severity": "medium"
+  },
+  {
+   "old": "tự nó không thay chữ ký",
+   "new": "tự nó không thay thế chữ ký",
+   "reason": "Thiếu 'thế'",
+   "severity": "low"
+  },
+  {
+   "old": "## 3. Approval phải có nội dung",
+   "new": "## 3. Phê duyệt phải có nội dung",
+   "reason": "Thống nhất 'phê duyệt'",
+   "severity": "medium"
+  },
+  {
+   "old": "thông báo, case biên",
+   "new": "thông báo, trường hợp biên",
+   "reason": "Thuật ngữ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "sẽ khác kết quả giữa hai phương án",
+   "new": "sẽ cho kết quả khác nhau giữa hai phương án",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Gán owner và hạn chốt",
+   "new": "Gán người phụ trách và hạn chốt",
+   "reason": "owner có từ Việt tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "thành approval toàn bộ",
+   "new": "thành phê duyệt toàn bộ",
+   "reason": "Có từ Việt tự nhiên",
+   "severity": "medium"
+  }
+ ]
+}

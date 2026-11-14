@@ -8,7 +8,7 @@ tags: [python, toi-noi, liveness, opencv, fft]
 language: vi
 ---
 
-Một tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) nộp ảnh selfie để đối chiếu với ảnh trên CCCD. Có ba kiểu ảnh làm bước so khớp khuôn mặt mất nghĩa: ảnh chụp trong phòng tối, ảnh nhòe vì tay run, và ảnh của người khác được chụp lại từ màn hình điện thoại hay một tờ giấy in. Hai kiểu đầu là lỗi của người dùng thật, chữa bằng cách yêu cầu chụp lại. Kiểu thứ ba là giả mạo và cần một người xem. Bài này đo cả hai bằng vài chục dòng NumPy và OpenCV, rồi nói rõ phần nó không làm được.
+Một tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) nộp ảnh selfie để đối chiếu với ảnh trên CCCD. Có ba kiểu ảnh làm bước so khớp khuôn mặt mất nghĩa: ảnh chụp trong phòng tối, ảnh nhoè vì tay run, và ảnh của người khác được chụp lại từ màn hình điện thoại hay một tờ giấy in. Hai kiểu đầu là lỗi của người dùng thật, chữa bằng cách yêu cầu chụp lại. Kiểu thứ ba là giả mạo và cần một người xem. Bài này đo cả hai bằng vài chục dòng NumPy và OpenCV, rồi nói rõ phần nó không làm được.
 
 Đây là bài 50 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần biết ảnh là mảng và cách lọc ảnh (bài 30, [NumPy, Pillow và OpenCV](/articles/python-numpy-pillow-opencv-tien-xu-ly-anh)), và biết hộp bao khuôn mặt đến từ đâu ([bài 48](/articles/python-face-detection-landmarks-mediapipe-opencv)).
 
@@ -50,7 +50,7 @@ def to_camera(scene, rng, *, gain=1.0, blur=0.5):
     return cv2.imdecode(buf, cv2.IMREAD_GRAYSCALE)
 ```
 
-Chín kiểu ảnh khác nhau ở cách dựng cảnh và tham số đưa vào `to_camera`: `genuine` chỉ biến thiên phơi sáng và độ nhòe thường ngày; `blur` nhòe sigma 3 đến 4; `dark` nhân 0,3; `bright` nhân 2,0 rồi cắt ở 255; `small_face` đặt mặt 56 px; `screen_moire` và `screen_weak` nhân lưới điểm ảnh sâu 25 đến 40% hay 5 đến 12%; `print_halftone` thay ảnh bằng chấm in nghiêng 45 độ với mực không đen hẳn; `screen_clean` là «màn hình phân giải cao, không dấu vết», chỉ thêm gain 1,1 và nhòe nhẹ. Lưới màn hình là tích của hai dải tuần hoàn, lấy trung bình 3 × 3 mẫu con mỗi điểm ảnh (trích):
+Chín kiểu ảnh khác nhau ở cách dựng cảnh và tham số đưa vào `to_camera`: `genuine` chỉ biến thiên phơi sáng và độ nhoè thường ngày; `blur` nhoè sigma 3 đến 4; `dark` nhân 0,3; `bright` nhân 2,0 rồi cắt ở 255; `small_face` đặt mặt 56 px; `screen_moire` và `screen_weak` nhân lưới điểm ảnh sâu 25 đến 40% hay 5 đến 12%; `print_halftone` thay ảnh bằng chấm in nghiêng 45 độ với mực không đen hẳn; `screen_clean` là «màn hình phân giải cao, không dấu vết», chỉ thêm gain 1,1 và nhoè nhẹ. Lưới màn hình là tích của hai dải tuần hoàn, lấy trung bình 3 × 3 mẫu con mỗi điểm ảnh (trích):
 
 ```python
 # capture.py, screen_grid (trích)
@@ -107,7 +107,7 @@ return Thresholds(
 
 ## Mẫu lặp trong phổ tần số
 
-Ảnh chụp trực tiếp có phổ tần số trơn: năng lượng giảm dần khi tần số tăng, không có đỉnh nhọn riêng lẻ. Lưới điểm ảnh của màn hình và chấm in của halftone là mẫu lặp, nên phổ có những đỉnh nhọn ở tần số tương ứng, khi lệch bước với lưới điểm ảnh của camera còn sinh vân moiré. `moire_peak` đi năm bước (Hình 2): cắt một vùng vuông tối đa 128 px ở tâm mặt, *không thu nhỏ* vì thu nhỏ xóa mất mẫu mịn; nhân cửa sổ Hann để mép cắt không tạo vạch giả; FFT 2 chiều; chia công suất mỗi ô cho trung vị của vành tần số chứa nó rồi lấy đỉnh cao nhất ở dải 0,06 đến 0,5 chu kỳ trên điểm ảnh.
+Ảnh chụp trực tiếp có phổ tần số trơn: năng lượng giảm dần khi tần số tăng, không có đỉnh nhọn riêng lẻ. Lưới điểm ảnh của màn hình và chấm in của halftone là mẫu lặp, nên phổ có những đỉnh nhọn ở tần số tương ứng, khi lệch bước với lưới điểm ảnh của camera còn sinh vân moiré. `moire_peak` đi năm bước (Hình 2): cắt một vùng vuông tối đa 128 px ở tâm mặt, *không thu nhỏ* vì thu nhỏ xoá mất mẫu mịn; nhân cửa sổ Hann để mép cắt không tạo vạch giả; FFT 2 chiều; chia công suất mỗi ô cho trung vị của vành tần số chứa nó rồi lấy đỉnh cao nhất ở dải 0,06 đến 0,5 chu kỳ trên điểm ảnh.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -218,7 +218,7 @@ Hai bước tiếp theo của output nói về độ vững của ngưỡng (bư
   sigma 3.0: cờ moire   0.0%   gắn cờ bất kỳ lý do 100.0%
 ```
 
-Bước 4: đừng suy kết luận từ một cách chia người. Cách chia theo thứ tự (hiệu chỉnh trên người 0 đến 19, thử trên 20 đến 39) cho 28,0% ảnh genuine bị gắn cờ, nhưng đảo chiều chỉ 8,5%. Qua 200 cách chia ngẫu nhiên, nếu hiệu chỉnh và thử đều có đủ 40 người (5 ảnh mỗi bên) thì trung vị 6,0%, p90 10,0%; nếu rời người (20 người hiệu chỉnh, 20 người thử) thì trung vị 7,0%, p90 13,0%, lớn nhất 23,0%. Vậy trường hợp điển hình là 6 đến 7%, còn 28,0% là ngoại lệ do cách chia: ba người có mặt tối nhất (21, 33 và 38) đều rơi vào nhóm 20 đến 39, nên nhiều khả năng ngưỡng học từ nhóm kia đặt độ sáng và độ nét tối thiểu quá cao cho họ (lab chưa tách riêng nguyên nhân). Bài học: hiệu chỉnh trên ít người thì vài người cực đoan kéo lệch ngưỡng, và ai bị gắn cờ nhiều hơn thì phải chụp lại nhiều hơn. Kiểm theo nhóm là chủ đề của bài 53 (trên dữ liệu công khai chỉ có nhóm giả định, nên bài đó không kết luận về nhóm người thật). Bước 5: cùng một ảnh màn hình lưới rõ, chỉ cần tổng độ nhòe sigma 1,5 là cờ mẫu lặp còn 7,5% và gắn cờ bất kỳ còn 33,5%; nhòe nhiều hơn thì cờ `blur` bắt lại (100,0% ở sigma 3,0). Có một khoảng nhòe vừa phải mà ảnh lọt: tại sigma 1,5 là 66,5% ảnh qua.
+Bước 4: đừng suy kết luận từ một cách chia người. Cách chia theo thứ tự (hiệu chỉnh trên người 0 đến 19, thử trên 20 đến 39) cho 28,0% ảnh genuine bị gắn cờ, nhưng đảo chiều chỉ 8,5%. Qua 200 cách chia ngẫu nhiên, nếu hiệu chỉnh và thử đều có đủ 40 người (5 ảnh mỗi bên) thì trung vị 6,0%, p90 10,0%; nếu rời người (20 người hiệu chỉnh, 20 người thử) thì trung vị 7,0%, p90 13,0%, lớn nhất 23,0%. Vậy trường hợp điển hình là 6 đến 7%, còn 28,0% là ngoại lệ do cách chia: ba người có mặt tối nhất (21, 33 và 38) đều rơi vào nhóm 20 đến 39, nên nhiều khả năng ngưỡng học từ nhóm kia đặt độ sáng và độ nét tối thiểu quá cao cho họ (lab chưa tách riêng nguyên nhân). Bài học: hiệu chỉnh trên ít người thì vài người cực đoan kéo lệch ngưỡng, và ai bị gắn cờ nhiều hơn thì phải chụp lại nhiều hơn. Kiểm theo nhóm là chủ đề của bài 53 (trên dữ liệu công khai chỉ có nhóm giả định, nên bài đó không kết luận về nhóm người thật). Bước 5: cùng một ảnh màn hình lưới rõ, chỉ cần tổng độ nhoè sigma 1,5 là cờ mẫu lặp còn 7,5% và gắn cờ bất kỳ còn 33,5%; nhoè nhiều hơn thì cờ `blur` bắt lại (100,0% ở sigma 3,0). Có một khoảng nhoè vừa phải mà ảnh lọt: tại sigma 1,5 là 66,5% ảnh qua.
 
 ```text
 == 6. Thời gian mỗi ảnh 320x320 (lượt nhanh nhất trong 7)
@@ -235,11 +235,11 @@ Thời gian đo trên máy macOS Apple Silicon đang rất bận (load average 1
 | Ảnh genuine bị gắn cờ nhiều ở một nhóm người dùng | Ngưỡng hiệu chỉnh từ nhóm nhỏ hay thiên về một nhóm; hiệu chỉnh lại trên dữ liệu thật rộng hơn và đo gắn nhầm theo nhóm |
 | `moire_peak` cao với mọi ảnh | Cắt ảnh có bị thu nhỏ trước FFT không, ảnh có nén JPEG khác mức đã hiệu chỉnh không |
 | Ảnh màn hình sáng, nét vẫn qua | Đây là giới hạn của heuristic, không phải lỗi; cần PAD thật |
-| Cờ mẫu lặp biến mất khi ảnh hơi nhòe | Mẫu mịn bị ống kính làm mất; đừng coi vắng cờ là bằng chứng ảnh thật |
+| Cờ mẫu lặp biến mất khi ảnh hơi nhoè | Mẫu mịn bị ống kính làm mất; đừng coi vắng cờ là bằng chứng ảnh thật |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Ảnh là mô phỏng của chính lab: màn hình và ảnh in là những mẫu tuần hoàn lý tưởng, khuôn mặt Olivetti xám 64 × 64 phóng to. Màn hình, giấy in và camera thật cho vân phức tạp hơn, và kẻ tấn công chọn được góc, khoảng cách, độ nhòe. Vì thế 100,0% ở trên chỉ chứng minh chỉ số phản ứng đúng với dấu vết ta vẽ, không phải tỉ lệ chặn tấn công thật. Một hệ thống tin được cần nhà cung cấp PAD đã được đánh giá độc lập (xem trang FATE PAD của NIST trong phần tài liệu), tín hiệu chủ động như thử thách quay đầu, và kiểm soát thiết bị chống camera ảo. Dữ liệu khuôn mặt của người dùng là dữ liệu cá nhân nhạy cảm: nhắc tới lưu trữ, đồng ý và quyền xóa ở bài 53. Lab dùng ảnh công khai và dữ liệu tổng hợp; không có ảnh người nào được commit.</p>
+<p>Ảnh là mô phỏng của chính lab: màn hình và ảnh in là những mẫu tuần hoàn lý tưởng, khuôn mặt Olivetti xám 64 × 64 phóng to. Màn hình, giấy in và camera thật cho vân phức tạp hơn, và kẻ tấn công chọn được góc, khoảng cách, độ nhoè. Vì thế 100,0% ở trên chỉ chứng minh chỉ số phản ứng đúng với dấu vết ta vẽ, không phải tỉ lệ chặn tấn công thật. Một hệ thống tin được cần nhà cung cấp PAD đã được đánh giá độc lập (xem trang FATE PAD của NIST trong phần tài liệu), tín hiệu chủ động như thử thách quay đầu, và kiểm soát thiết bị chống camera ảo. Dữ liệu khuôn mặt của người dùng là dữ liệu cá nhân nhạy cảm: nhắc tới lưu trữ, đồng ý và quyền xoá ở bài 53. Lab dùng ảnh công khai và dữ liệu tổng hợp; không có ảnh người nào được commit.</p>
 </div>
 
 **Bài tập 1:** Trong `main.py`, gọi `calibrate(cal_metrics, quantile=0.05)` thay vì mặc định 0,01 và đo lại tỉ lệ gắn cờ trên ảnh genuine, `blur` và `screen_clean`. Có nên siết ngưỡng như vậy không?

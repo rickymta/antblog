@@ -1,0 +1,12 @@
+{"file":"ba-event-dong-bo-trang-thai-cho.md","edits":[
+{"old":"Khách thấy vòng quay kết thúc không có nghĩa ngân hàng","new":"Việc khách thấy vòng quay kết thúc không có nghĩa là ngân hàng","reason":"Câu thiếu chủ ngữ và từ là","severity":"high"},
+{"old":"Không mặc định Tới Nơi đang dùng","new":"Không mặc định rằng Tới Nơi đang dùng","reason":"Câu cụt","severity":"low"},
+{"old":"Luồng đề xuất: nội bộ tạo refund requested","new":"Luồng đề xuất: hệ thống nội bộ tạo refund requested","reason":"Thiếu chủ thể","severity":"medium"},
+{"old":"HTTP 202 diễn đạt yêu cầu đã được tiếp nhận","new":"HTTP 202 cho biết yêu cầu đã được tiếp nhận","reason":"Calque diễn đạt","severity":"low"},
+{"old":"| 10:00:00 | Nội bộ lưu refundId |","new":"| 10:00:00 | Hệ thống nội bộ lưu refundId |","reason":"Thiếu chủ thể","severity":"low"},
+{"old":"Khoảng 14 giây cuối không phải một lần hoàn tiền thất bại.","new":"Khoảng 14 giây cuối không có nghĩa là hoàn tiền thất bại.","reason":"Câu gượng","severity":"medium"},
+{"old":"Đề xuất kiểm xác thực callback theo hợp đồng, liên kết refundId/providerRef","new":"Đề xuất kiểm tra xác thực callback theo hợp đồng, đối chiếu với refundId/providerRef","reason":"Lược tra; liên kết sai sắc thái","severity":"medium"},
+{"old":"Điều này gợi câu hỏi review; không có nghĩa hợp đồng","new":"Điều này gợi ra câu hỏi cho buổi review; không có nghĩa là hợp đồng","reason":"Câu cụt","severity":"medium"},
+{"old":"Đặt owner cho hàng đợi quá hạn","new":"Đặt người phụ trách cho hàng đợi quá hạn","reason":"owner thành người phụ trách","severity":"medium"},
+{"old":"Với mỗi bước ghi trạng thái, thông báo UI và tác động tiền.","new":"Với mỗi bước, ghi trạng thái, thông báo trên UI và tác động tiền.","reason":"Dấu phẩy gây hiểu nhầm","severity":"medium"}
+]}

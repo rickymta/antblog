@@ -20,13 +20,13 @@ language: vi
 
 Khách gửi distanceKm và Idempotency-Key. API lấy sub đã xác thực, map sang Guid theo hợp đồng lab rồi tạo CreateTrip. Pipeline kiểm dữ liệu; handler tìm receipt cũ hoặc tạo DistanceKm/Money/Trip mới, thêm receipt và commit qua UoW.
 
-Fare dùng cùng quy tắc minh họa từ đầu loạt: 12.000 gồm 2 km, vượt 4.500/km, làm tròn cuối tới 1 VND AwayFromZero. CreatedAt lấy từ TimeProvider, không từ trường tùy ý của client. Test thay đồng hồ để assert thời điểm cố định.
+Fare dùng cùng quy tắc minh hoạ từ đầu loạt: 12.000 gồm 2 km, vượt 4.500/km, làm tròn cuối tới 1 VND AwayFromZero. CreatedAt lấy từ TimeProvider, không từ trường tuỳ ý của client. Test thay đồng hồ để assert thời điểm cố định.
 
-Một API bind xong chưa là một command hợp lệ. Validation hình thức, policy quyền, invariant domain và constraint database đều có phần việc riêng; không xóa lớp sau chỉ vì lớp trước đã kiểm.
+Một API bind xong chưa là một command hợp lệ. Validation hình thức, policy quyền, invariant domain và constraint database đều có phần việc riêng; không xoá lớp sau chỉ vì lớp trước đã kiểm.
 
 ## Replay và xung đột nội dung
 
-Receipt khóa theo CustomerId/key chứa input chuẩn hóa và kết quả TripId/Fare. Replay cùng ý định trả cùng kết quả, lab dùng 201 và cùng Location cho cả lần đầu/lần lặp. Cùng key mà đổi distance trả 409.
+Receipt khoá theo CustomerId/key chứa input chuẩn hoá và kết quả TripId/Fare. Replay cùng ý định trả cùng kết quả, lab dùng 201 và cùng Location cho cả lần đầu/lần lặp. Cùng key mà đổi distance trả 409.
 
 Nếu hai request đều chưa thấy receipt, constraint phân xử cuối. Candidate thua rollback cả Trip và Outbox của nó, rồi handler đọc kết quả đã commit. AsNoTracking của đường đọc receipt tránh identity map trả lại object candidate còn trong tracker sau failure.
 
@@ -49,11 +49,11 @@ Policy driver ở lab chưa kiểm hồ sơ/khu vực/khả năng nhận thêm c
 
 ## Bằng chứng chạy qua ranh giới thật
 
-Test dùng WebApplicationFactory, JWT handler thật với khóa fixture và PostgreSQL thật trong schema GUID. Không fake nguyên HTTP response hoặc thay EF bằng một dictionary rồi gọi đó là kiểm transaction.
+Test dùng WebApplicationFactory, JWT handler thật với khoá fixture và PostgreSQL thật trong schema GUID. Không fake nguyên HTTP response hoặc thay EF bằng một dictionary rồi gọi đó là kiểm transaction.
 
-Các ca gồm thiếu/ngoài miền/precision sai, key lỗi, duplicate/replay, key đổi input, ownership, role, nhận trùng, rehydrate và hủy trước command. Khi validation thất bại, database phải không có Trip/Outbox mới. Health/architecture/telemetry được kiểm trong cùng suite nhưng có tiêu chí riêng.
+Các ca gồm thiếu/ngoài miền/precision sai, key lỗi, duplicate/replay, key đổi input, ownership, role, nhận trùng, rehydrate và huỷ trước command. Khi validation thất bại, database phải không có Trip/Outbox mới. Health/architecture/telemetry được kiểm trong cùng suite nhưng có tiêu chí riêng.
 
-Không có user/token/password production trong fixture. Việc test trust dùng khóa trong memory không chứng minh identity provider thật, metadata rotation hoặc TLS của môi trường triển khai.
+Không có user/token/password production trong fixture. Việc test trust dùng khoá trong memory không chứng minh identity provider thật, metadata rotation hoặc TLS của môi trường triển khai.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -76,7 +76,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xóa database; JWT dùng khóa ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
 
 ### Handlers.cs — 31-38-trip-service/Application/Handlers.cs
 

@@ -1,0 +1,13 @@
+{"file":"flutter-state-inheritedwidget-changenotifier-bao-gia.md","edits":[
+{"old":"Quy ước bọc chúng trong hàm tĩnh `of` và `maybeOf`.","new":"Theo quy ước, ta bọc chúng trong hàm tĩnh `of` và `maybeOf`.","reason":"Câu thiếu chủ ngữ và động từ","severity":"medium"},
+{"old":"thay cho cái cũ. Nó so hai ảnh chụp theo giá trị","new":"thay cho cái cũ. Hàm này so hai ảnh chụp theo giá trị","reason":"Tránh 'Nó' đầu câu chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"lab thêm một `StatefulWidget` đóng vai chủ:","new":"lab thêm một `StatefulWidget` đóng vai host:","reason":"'chủ' mơ hồ; khớp tên `QuoteSnapshotHost` và bảng ở cuối bài","severity":"medium"},
+{"old":"bỏ phần chủ viết tay","new":"bỏ phần host viết tay","reason":"'chủ' mơ hồ; thống nhất 'host'","severity":"medium"},
+{"old":"là tham số tên cho thành viên private","new":"là tham số có tên cho thành viên private","reason":"'tham số tên' cụt","severity":"low"},
+{"old":"Source `InheritedNotifier` trong Flutter 3.47","new":"Mã nguồn `InheritedNotifier` trong Flutter 3.47","reason":"'Source' tiếng Anh thừa trong văn xuôi","severity":"low"},
+{"old":"nên không ai nghe cước bị gọi.","new":"nên listener của cước không bị gọi.","reason":"'không ai nghe cước bị gọi' khó hiểu","severity":"medium"},
+{"old":"kết quả của ba ca thay đổi.","new":"kết quả của ba tình huống thay đổi.","reason":"'ca' gượng","severity":"low"},
+{"old":"tải lười, `Consumer`","new":"lazy loading, `Consumer`","reason":"'tải lười' dịch từng chữ; giữ lazy loading","severity":"medium"},
+{"old":"khi dịch vụ thành food)","new":"khi dịch vụ đổi thành food)","reason":"Thiếu động từ 'đổi'","severity":"medium"},
+{"old":"gồm hai ca của ma trận;","new":"gồm hai test của ma trận;","reason":"Thống nhất 'test' thay cho 'ca'","severity":"medium"}
+]}

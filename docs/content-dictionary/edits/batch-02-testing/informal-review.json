@@ -1,0 +1,6 @@
+{"file":"informal-review.md","edits":[
+{"old":"Nó không có tên trên lịch họp","new":"Buổi review này không có tên trên lịch họp","reason":"Tránh 'Nó' chỉ sự vật trừu tượng, chủ ngữ mơ hồ","severity":"medium"},
+{"old":"Vấn đề nó giải quyết là **phát hiện sớm**","new":"Vấn đề mà informal review giải quyết là **phát hiện sớm**","reason":"Câu thiếu chủ ngữ rõ, 'nó' mơ hồ","severity":"medium"},
+{"old":"người ta thấy chỗ mơ hồ câu chữ hơn là chỗ thiếu","new":"người ta thấy chỗ mơ hồ về câu chữ hơn là chỗ thiếu","reason":"Cụm 'mơ hồ câu chữ' thiếu giới từ","severity":"low"},
+{"old":"mà góc nhìn đó tìm ra còn bảng ở 5.1 không có","new":"mà góc nhìn đó tìm ra nhưng bảng ở 5.1 chưa có","reason":"'còn' dùng sai quan hệ từ, câu khó hiểu","severity":"medium"}
+]}

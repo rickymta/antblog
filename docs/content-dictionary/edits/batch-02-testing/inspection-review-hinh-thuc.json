@@ -1,0 +1,14 @@
+{"file":"inspection-review-hinh-thuc.md","edits":[
+{"old":"nhưng mỗi dòng của nó quyết định tiền của khách","new":"nhưng mỗi dòng trong đó quyết định tiền của khách","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"chạy nó ra sao, và số đo của nó dùng vào việc gì","new":"chạy inspection ra sao, và số đo của inspection dùng vào việc gì","reason":"Nhắc lại danh từ thay vì 'nó'","severity":"low"},
+{"old":"Vấn đề nó giải quyết: defect trong đặc tả","new":"Vấn đề mà inspection giải quyết: defect trong đặc tả","reason":"Câu thiếu chủ ngữ rõ, 'nó' mơ hồ","severity":"medium"},
+{"old":"Kiểm entry criteria; ai cũng","new":"Kiểm tra entry criteria; ai cũng","reason":"'Kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"leader kiểm từng sửa đổi","new":"leader kiểm tra từng sửa đổi","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"kiểm tiêu chí vào","new":"kiểm tra tiêu chí vào","reason":"'kiểm' cụt, thiếu 'tra'","severity":"medium"},
+{"old":"Nó phải khớp với:","new":"Bản nháp phải khớp với:","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"thêm một vòng kiểm | Đo được","new":"thêm một vòng kiểm tra lại | Đo được","reason":"'vòng kiểm' cụt, thiếu từ","severity":"medium"},
+{"old":"thêm một vòng kiểm (leader + Tester 1)","new":"thêm một vòng kiểm tra lại (leader + Tester 1)","reason":"'vòng kiểm' cụt, thiếu từ","severity":"medium"},
+{"old":"Không dòng nào nói «ai tìm được nhiều nhất»","new":"Không dòng nào trong bảng nói «ai tìm được nhiều nhất»","reason":"Câu thiếu phạm vi, khó hiểu","severity":"low"},
+{"old":"Một tuần là 504 ca.","new":"Một tuần là 504 ticket.","reason":"'ca' dễ nhầm với test case; thống nhất với 'ticket' trong câu trước","severity":"medium"},
+{"old":"hiện ra; nó bổ sung cho inspection","new":"hiện ra, và bổ sung cho inspection","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"low"}
+]}

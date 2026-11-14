@@ -1,14 +1,14 @@
 ---
 slug: non-functional-testing-tong-quan
 title: "Non-functional Testing: tổng quan theo ISO/IEC 25010"
-summary: "Non-functional testing hỏi «hệ thống hoạt động tốt tới mức nào». Bài đi qua 9 đặc tính chất lượng của ISO/IEC 25010:2023 theo CTFL v4.0.1, gán 7 yêu cầu R-NFR của Tới Nơi và giải thích vì sao phải kiểm từ sớm."
+summary: "Non-functional testing hỏi «hệ thống hoạt động tốt tới mức nào». Bài đi qua 9 đặc tính chất lượng của ISO/IEC 25010:2023 theo CTFL v4.0.1, gán 7 yêu cầu R-NFR của Tới Nơi và giải thích vì sao phải kiểm thử từ sớm."
 category: testing
 level: intermediate
 tags: [testing, istqb, ctfl, test-018, non-functional-testing, iso-25010, quality-characteristics, toi-noi]
 language: vi
 ---
 
-Báo giá của Tới Nơi ra đúng 62.000 đ cho bưu kiện 6,1 kg — [TEST-017](/articles/functional-testing) đã kiểm điều đó. Nhưng nếu báo giá mất 4 giây mới hiện, hoặc một khách khác xem được chuyến của bạn, sản phẩm vẫn hỏng dù mọi test chức năng xanh. Bài này trả lời ba câu: non-functional testing kiểm những đặc tính nào theo ISO/IEC 25010, gán một yêu cầu cụ thể vào đặc tính nào, và vì sao không nên đợi tới cuối dự án mới kiểm.
+Báo giá của Tới Nơi ra đúng 62.000 đ cho bưu kiện 6,1 kg — [TEST-017](/articles/functional-testing) đã kiểm thử điều đó. Nhưng nếu báo giá mất 4 giây mới hiện, hoặc một khách khác xem được chuyến của bạn, sản phẩm vẫn hỏng dù mọi test chức năng xanh. Bài này trả lời ba câu: non-functional testing kiểm những đặc tính nào theo ISO/IEC 25010, gán một yêu cầu cụ thể vào đặc tính nào, và vì sao không nên đợi tới cuối dự án mới kiểm thử.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-018</span>
@@ -31,7 +31,7 @@ Báo giá của Tới Nơi ra đúng 62.000 đ cho bưu kiện 6,1 kg — [TEST-
 
 Functional testing hỏi «hệ thống làm **gì**». Non-functional testing hỏi «hệ thống làm điều đó **tốt tới mức nào**»: đủ nhanh không, có sẵn sàng khi khách cần không, có giữ kín dữ liệu không, có chạy trên điện thoại của tài xế không, có sửa được mà không vỡ chỗ khác không.
 
-Vấn đề nó giải quyết có hai mặt. Thứ nhất, yêu cầu phi chức năng hay bị viết mơ hồ («phải nhanh», «phải an toàn») hoặc không được viết ra — CTAL-TTA mục 4.2.1 nói thẳng điều này. Không có chuẩn phân loại, đội sẽ chỉ nghĩ tới performance và bỏ quên cả nhóm đặc tính còn lại. Thứ hai, CTFL cảnh báo: phát hiện muộn defect phi chức năng có thể đe doạ cả dự án — vì sửa thường là sửa kiến trúc, không phải sửa một dòng code.
+Vấn đề mà non-functional testing giải quyết có hai mặt. Thứ nhất, yêu cầu phi chức năng hay bị viết mơ hồ («phải nhanh», «phải an toàn») hoặc không được viết ra — CTAL-TTA mục 4.2.1 nói thẳng điều này. Không có chuẩn phân loại, đội sẽ chỉ nghĩ tới performance và bỏ quên cả nhóm đặc tính còn lại. Thứ hai, CTFL cảnh báo: phát hiện defect phi chức năng muộn có thể đe doạ cả dự án — vì sửa thường là sửa kiến trúc, không phải sửa một dòng code.
 
 Khi nào dùng: ở mọi test level, theo mức ưu tiên rủi ro. Mỗi đặc tính có cách kiểm, môi trường và công cụ riêng — phần đi sâu nằm ở Series 09.
 
@@ -199,7 +199,7 @@ Kiến trúc đích dàn trải các đặc tính lên nhiều thành phần: AP
 
 1. **Yêu cầu nói về «làm gì» hay «làm tốt tới mức nào»?** «Không lộ chuyến của khách khác» có thể viết như một quy tắc chức năng (R-API-05 trả 404) nhưng thuộc đặc tính security. Một yêu cầu có thể có mặt ở cả hai.
 2. **Đo bằng gì?** Phân vị độ trễ ⇒ time behaviour. Tỉ lệ thời gian phục vụ được ⇒ availability. Số lần thử lại khi bên thứ ba lỗi ⇒ fault tolerance.
-3. **Đặc tính con nào khớp nhất?** Chọn **một đặc tính chính** để biết bài kiểm, môi trường và người phụ trách; ghi **đặc tính phụ** khi yêu cầu chạm nhiều nơi. Đừng nhét một yêu cầu vào năm đặc tính — mất tác dụng phân loại.
+3. **Đặc tính con nào khớp nhất?** Chọn **một đặc tính chính** để biết dùng test nào, môi trường nào và ai phụ trách; ghi **đặc tính phụ** khi yêu cầu chạm nhiều nơi. Đừng nhét một yêu cầu vào năm đặc tính — mất tác dụng phân loại.
 
 ### 4.2. Một yêu cầu phi chức năng tốt có gì?
 
@@ -213,11 +213,11 @@ Mổ xẻ R-NFR-03:
 | Điều kiện | — | ở mức tải nào (R-NFR-07?), cửa sổ đo bao lâu |
 | Phần loại trừ | «phụ thuộc MapViet» | MapViet chậm thì tính vào hay loại ra? |
 
-So với «báo giá phải nhanh», R-NFR-03 đã kiểm được — nhưng chưa đủ để đặt tiêu chí đạt/không đạt. Viết lại NFR cho đo được là nội dung của TEST-093 (Series 09).
+So với «báo giá phải nhanh», R-NFR-03 đã kiểm thử được — nhưng chưa đủ để đặt tiêu chí đạt/không đạt. Viết lại NFR cho đo được là nội dung của TEST-093 (Series 09).
 
 ### 4.3. Phân loại xong, nhìn chỗ trống
 
-Gán xong bảy yêu cầu, đếm ngược: **đặc tính nào chưa có yêu cầu nào?** Đây là bài toán completeness của chính bộ NFR (giống completeness chức năng ở TEST-017). Chỗ trống không tự động là lỗi — nó là **câu hỏi** đưa vào buổi review với Product Owner:
+Gán xong bảy yêu cầu, xét ngược lại: **đặc tính nào chưa có yêu cầu nào?** Đây là bài toán completeness của chính bộ NFR (giống completeness chức năng ở TEST-017). Chỗ trống không mặc nhiên là lỗi — nó là **câu hỏi** đưa vào buổi review với Product Owner:
 
 | Đặc tính chưa có R-NFR | Câu hỏi cho buổi review |
 |---|---|
@@ -245,11 +245,11 @@ Gán xong bảy yêu cầu, đếm ngược: **đặc tính nào chưa có yêu 
 
 Ba điểm hay sai: (1) xếp R-NFR-07 như một mục tiêu — SPEC ghi rõ «không phải mục tiêu»; (2) xếp R-NFR-05 vào Security vì «tiền» — cơ chế được mô tả là chịu lỗi khi bên thứ ba hết giờ; (3) bỏ qua phần loại trừ MapViet của R-NFR-03 — không có nó, một sự cố của MapViet sẽ bị tính là Tới Nơi vi phạm.
 
-Lời giải cũng nằm trong lab dạng dữ liệu (`phan-loai-r-nfr.ts`), kèm một test kiểm nó phủ **đủ** mọi mã `R-NFR-xx` trong `SPEC.md` và chỉ dùng tên 9 đặc tính bản 2023 — SPEC thêm R-NFR-08 là test đỏ.
+Lời giải cũng nằm trong lab dạng dữ liệu (`phan-loai-r-nfr.ts`), kèm một test kiểm tra lời giải có phủ **đủ** mọi mã `R-NFR-xx` trong `SPEC.md` và chỉ dùng tên 9 đặc tính bản 2023 — nếu SPEC thêm R-NFR-08 thì test sẽ đỏ.
 
 ### 5.2. Dựng kiểm tra phi chức năng từ một test chức năng
 
-Minh hoạ ý «nhiều test phi chức năng dựng từ test chức năng» của CTFL: lấy ca FC-04 của TEST-017 (bưu kiện ô tô 3 km, 6,1 kg ⇒ 62.000 đ) và thêm ràng buộc:
+Minh hoạ ý «nhiều test phi chức năng dựng từ test chức năng» của CTFL: lấy test case FC-04 của TEST-017 (bưu kiện ô tô 3 km, 6,1 kg ⇒ 62.000 đ) và thêm ràng buộc:
 
 | Mã | Từ test chức năng | Ràng buộc thêm | Đặc tính |
 |---|---|---|---|
@@ -291,14 +291,14 @@ NF-01: n=200 p50=1.1 ms p95=1.9 ms max=26.4 ms
 ### 5.3. Đọc kết quả cho đúng
 
 - p95 = 1,9 ms **không** chứng minh R-NFR-03 đạt. Lab chạy một tiến trình, tuần tự, không mạng, không MapViet, không tải song song. NF-01 chỉ là **cảnh báo sớm**: nếu một thay đổi làm p95 của chính phép đo này nhảy từ 2 ms lên 200 ms, nhóm biết ngay ở pipeline, trước khi tới môi trường đo tải.
-- `max = 26,4 ms` gấp 14 lần p95 — lần gọi đầu khởi động kết nối. Ví dụ nhỏ cho thấy vì sao các phép đo hiệu năng dùng phân vị và bỏ giai đoạn khởi động; chi tiết ở TEST-094.
+- `max = 26,4 ms` gấp 14 lần p95 vì lần gọi đầu phải khởi động kết nối. Ví dụ nhỏ cho thấy vì sao các phép đo hiệu năng dùng phân vị và bỏ giai đoạn khởi động; chi tiết ở TEST-094.
 - NF-02, NF-03 chỉ là kiểm tra bảo mật **cơ bản** ở mức API; security testing thật ở Series 09 (TEST-101…104).
 
 ## 6. Góc nhìn nâng cao
 
 **Non-functional ≠ performance.** Performance chỉ là một trong tám đặc tính. Đội chỉ đo tải sẽ bỏ sót yêu cầu bảo mật, khôi phục, khả năng bảo trì — đúng loại lỗi phát hiện muộn đắt nhất.
 
-**Ranh giới chức năng / phi chức năng không sắc.** Kiểm soát truy cập vừa là quy tắc chức năng (R-API-05: trả 404) vừa là đặc tính security. «Không trừ tiền hai lần» nằm trong R-NFR-05 nhưng kiểm như một quy tắc chức năng. Quan trọng không phải xếp nhãn đúng tuyệt đối, mà không để yêu cầu nào rơi khỏi cả hai bộ test.
+**Ranh giới chức năng / phi chức năng không rạch ròi.** Kiểm soát truy cập vừa là quy tắc chức năng (R-API-05: trả 404) vừa là đặc tính security. «Không trừ tiền hai lần» nằm trong R-NFR-05 nhưng kiểm như một quy tắc chức năng. Quan trọng không phải xếp nhãn đúng tuyệt đối, mà là không để yêu cầu nào rơi khỏi cả hai bộ test.
 
 **Đo trên lab khác đo trên production.** CTAL-TTA lưu ý performance và reliability có thể cho kết quả khác ở production. Availability 99,9%/tháng chỉ đo được bằng giám sát thật; test trước phát hành chỉ giảm rủi ro (ví dụ kiểm thử chịu lỗi, failover).
 

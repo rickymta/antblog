@@ -20,7 +20,7 @@ Một service phân tích của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận
 
 ## Từ dict đến class: `__init__` và `self`
 
-**Class** gom dữ liệu và hành vi vào một kiểu. Khi gọi `TripPlain("TN-0001", ...)`, Python tạo đối tượng rồi chạy `__init__` để gán thuộc tính. `self` là chính đối tượng đang được tạo (tên `self` là quy ước, không phải từ khóa); mỗi dòng `self.x = ...` tạo một thuộc tính riêng của đối tượng đó. `trip.advance(s)` thực chất là `Trip.advance(trip, s)`, và `trip` được truyền vào tham số `self`.
+**Class** gom dữ liệu và hành vi vào một kiểu. Khi gọi `TripPlain("TN-0001", ...)`, Python tạo đối tượng rồi chạy `__init__` để gán thuộc tính. `self` là chính đối tượng đang được tạo (tên `self` là quy ước, không phải từ khoá); mỗi dòng `self.x = ...` tạo một thuộc tính riêng của đối tượng đó. `trip.advance(s)` thực chất là `Trip.advance(trip, s)`, và `trip` được truyền vào tham số `self`.
 
 ```python
 class TripPlain:
@@ -79,7 +79,7 @@ Năm điều đáng nhớ:
 - **Thứ tự field.** Trong số các field nhận qua constructor, field không có mặc định phải đứng trước field có mặc định, nếu không Python báo `TypeError: non-default argument ... follows default argument`.
 - **Annotation là cách dataclass nhận ra field, không phải ép kiểu.** `str` hay `Decimal` ở đây không bị kiểm lúc chạy; bài 12 nói về công cụ kiểm tra kiểu.
 
-Hành vi `__eq__` cũng thay đổi: hai `Trip` bằng nhau khi **mọi field** bằng nhau, kể cả `_status`. Hệ quả đi kèm là dataclass có `eq=True` mà không `frozen` sẽ đặt `__hash__` thành `None`, nghĩa là `hash(trip)` ném `TypeError: unhashable type: 'Trip'`. Điều này hợp lý: đối tượng đổi được thì hash cũng sẽ đổi, mà phần tử của `set` và khóa của `dict` không được phép đổi hash. Vì vậy ta dùng `trip.trip_id` làm khóa trong `dict[str, Trip]`, giống dict tài xế ở bài 05, và bài 13 giải thích cách có đối tượng hash được bằng `frozen=True`.
+Hành vi `__eq__` cũng thay đổi: hai `Trip` bằng nhau khi **mọi field** bằng nhau, kể cả `_status`. Hệ quả đi kèm là dataclass có `eq=True` mà không `frozen` sẽ đặt `__hash__` thành `None`, nghĩa là `hash(trip)` ném `TypeError: unhashable type: 'Trip'`. Điều này hợp lý: đối tượng đổi được thì hash cũng sẽ đổi, mà phần tử của `set` và khoá của `dict` không được phép đổi hash. Vì vậy ta dùng `trip.trip_id` làm khoá trong `dict[str, Trip]`, giống dict tài xế ở bài 05, và bài 13 giải thích cách có đối tượng hash được bằng `frozen=True`.
 
 ## `@property` và «riêng theo quy ước»
 
@@ -98,7 +98,7 @@ Hành vi `__eq__` cũng thay đổi: hai `Trip` bằng nhau khi **mọi field** 
 
 `fare` là **giá trị suy ra**: không lưu, mỗi lần đọc tính lại từ `distance_km` và `service`, nên không thể lệch khỏi chúng. `status` là **lối đọc chỉ đọc** vào `_status`. Property không khai báo setter thì phép gán bị từ chối. `driver_id` làm tương tự, còn `history` trả `tuple(self._history)`, một bản sao bất biến, để bên ngoài không cầm được list nội bộ mà sửa.
 
-Còn dấu gạch dưới? Tên bắt đầu bằng `_` là quy ước PEP 8 cho «phần bên trong, đừng đụng từ ngoài». Python không có `private` như C# hay Java: nếu bạn viết `trip._status = "completed"` thì nó chạy. Tên bắt đầu bằng hai gạch dưới (`self.__x`) cũng không khóa gì; Python chỉ đổi tên thuộc tính thành `_TênLớp__x` để tránh trùng tên khi kế thừa, và ai biết tên đã đổi vẫn truy cập được. Tức là encapsulation trong Python là **thỏa thuận giữa những người viết code**, được hỗ trợ bởi cấu trúc: không có setter, chỉ có một cửa vào để đổi trạng thái. Nếu bạn quen `private set` của C# ở [bài C# về class và property](/articles/csharp-class-property-encapsulation), đây là phần khác biệt đáng chú ý nhất.
+Còn dấu gạch dưới? Tên bắt đầu bằng `_` là quy ước PEP 8 cho «phần bên trong, đừng đụng từ ngoài». Python không có `private` như C# hay Java: nếu bạn viết `trip._status = "completed"` thì nó chạy. Tên bắt đầu bằng hai gạch dưới (`self.__x`) cũng không khoá gì; Python chỉ đổi tên thuộc tính thành `_TênLớp__x` để tránh trùng tên khi kế thừa, và ai biết tên đã đổi vẫn truy cập được. Tức là encapsulation trong Python là **thoả thuận giữa những người viết code**, được hỗ trợ bởi cấu trúc: không có setter, chỉ có một cửa vào để đổi trạng thái. Nếu bạn quen `private set` của C# ở [bài C# về class và property](/articles/csharp-class-property-encapsulation), đây là phần khác biệt đáng chú ý nhất.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -111,7 +111,7 @@ Hình 1 tóm lại: nếu mọi code trong dự án tuân thủ quy ước, mọ
 
 ## Máy trạng thái 8 trạng thái trong `advance()`
 
-Chuyến Tới Nơi đi qua bảy trạng thái theo thứ tự (`requested`, `searching`, `accepted`, `arriving`, `picked_up`, `in_transit`, `completed`) và có thể bị hủy (`cancelled`) từ bốn trạng thái đầu trước khi đón khách. Ta biểu diễn bằng một dict: khóa là trạng thái hiện tại, giá trị là các trạng thái được phép đi tới.
+Chuyến Tới Nơi đi qua bảy trạng thái theo thứ tự (`requested`, `searching`, `accepted`, `arriving`, `picked_up`, `in_transit`, `completed`) và có thể bị huỷ (`cancelled`) từ bốn trạng thái đầu trước khi đón khách. Ta biểu diễn bằng một dict: khoá là trạng thái hiện tại, giá trị là các trạng thái được phép đi tới.
 
 ```python
 ALLOWED_TRANSITIONS: dict[str, tuple[str, ...]] = {
@@ -132,7 +132,7 @@ Trạng thái ở đây là chuỗi thường. Bài 13 sẽ thay bằng `Enum`, 
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 270" role="img" aria-label="Bảy trạng thái nối tiếp từ requested đến completed; bốn trạng thái đầu đều có mũi tên đứt nét xuống cancelled; completed và cancelled là trạng thái cuối."><defs><marker id="py11-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker><marker id="py11-1-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><rect x="18" y="40" width="100" height="70" rx="8" class="f-phys-soft s-phys"/><text x="28" y="80" class="t-mono">requested</text><rect x="142" y="40" width="100" height="70" rx="8" class="f-phys-soft s-phys"/><text x="152" y="80" class="t-mono">searching</text><rect x="266" y="40" width="100" height="70" rx="8" class="f-phys-soft s-phys"/><text x="276" y="80" class="t-mono">accepted</text><rect x="390" y="40" width="100" height="70" rx="8" class="f-phys-soft s-phys"/><text x="400" y="80" class="t-mono">arriving</text><rect x="514" y="40" width="100" height="70" rx="8" class="f-phys-soft s-phys"/><text x="524" y="80" class="t-mono">picked_up</text><rect x="638" y="40" width="100" height="70" rx="8" class="f-phys-soft s-phys"/><text x="648" y="80" class="t-mono">in_transit</text><rect x="762" y="40" width="100" height="70" rx="8" class="f-phys-soft s-phys"/><text x="772" y="80" class="t-mono">completed</text><path d="M118 75 L142 75" class="f-none s-phys" stroke-width="2" marker-end="url(#py11-1-arrow)"/><path d="M242 75 L266 75" class="f-none s-phys" stroke-width="2" marker-end="url(#py11-1-arrow)"/><path d="M366 75 L390 75" class="f-none s-phys" stroke-width="2" marker-end="url(#py11-1-arrow)"/><path d="M490 75 L514 75" class="f-none s-phys" stroke-width="2" marker-end="url(#py11-1-arrow)"/><path d="M614 75 L638 75" class="f-none s-phys" stroke-width="2" marker-end="url(#py11-1-arrow)"/><path d="M738 75 L762 75" class="f-none s-phys" stroke-width="2" marker-end="url(#py11-1-arrow)"/><path d="M68 110 L68 170" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py11-1-warn)"/><path d="M192 110 L192 170" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py11-1-warn)"/><path d="M316 110 L316 170" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py11-1-warn)"/><path d="M440 110 L440 170" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py11-1-warn)"/><rect x="18" y="170" width="496" height="56" rx="8" class="f-warn-soft s-warn"/><text x="34" y="203" class="t-small">cancelled (từ requested, searching, accepted, arriving)</text><rect x="560" y="170" width="302" height="56" rx="8" class="f-bg s-muted dash"/><text x="574" y="194" class="t-small">completed, cancelled: trạng thái cuối</text><text x="574" y="214" class="t-mono">ALLOWED_TRANSITIONS[...] == ()</text></svg>
 </div>
-<figcaption>Hình 2. Tám trạng thái và các chuyển hợp lệ. Từ khi đón khách (picked_up) trở đi không còn đường hủy.</figcaption>
+<figcaption>Hình 2. Tám trạng thái và các chuyển hợp lệ. Từ khi đón khách (picked_up) trở đi không còn đường huỷ.</figcaption>
 </figure>
 
 Phương thức `advance` là **cửa duy nhất** được sửa `_status`. Nguyên tắc chính là **kiểm tra hết trước, sửa sau**: nếu bất kỳ kiểm tra nào thất bại, ta ném `ValueError` khi đối tượng chưa bị đụng tới, nên không bao giờ có trạng thái dở dang.
@@ -158,7 +158,7 @@ Phương thức `advance` là **cửa duy nhất** được sửa `_status`. Ngu
 
 Ba lớp kiểm tra tương ứng ba loại lỗi: tên trạng thái không tồn tại, chuyển không có trong dict, và dữ liệu đi kèm không khớp (nhận chuyến mà không nói ai nhận). Điều kiện cuối giữ một **bất biến** của mô hình: từ `accepted` trở đi chuyến luôn có `driver_id`. Bất biến ấy chỉ giữ được vì `driver_id` không có setter; nếu ai gán `trip.driver_id = None` được, mọi kiểm tra trên mất ý nghĩa.
 
-Chuyển sang `cancelled` ghi nhận ở đây là một bước thường như các bước khác; hồ sơ thật còn cần lý do hủy và ai hủy (khách, tài xế hay hệ thống), mà bài này cố ý chưa mô hình hóa.
+Chuyển sang `cancelled` ghi nhận ở đây là một bước thường như các bước khác; hồ sơ thật còn cần lý do huỷ và ai huỷ (khách, tài xế hay hệ thống), mà bài này cố ý chưa mô hình hoá.
 
 ## `__slots__`: đo trước khi tin
 
@@ -225,7 +225,7 @@ thêm thuộc tính lạ: AttributeError: 'TripRowSlots' object has no attribute
 
 Cách đọc. Phần 1 cho thấy lỗ hổng của class thường: chuyến nhảy thẳng sang `completed` mà không ai hỏi. Phần 2: `==` của dataclass so nội dung, `hash` bị từ chối, list mặc định bị chặn từ lúc khai báo. Phần 3: gán vào property thì lỗi, nhưng `t1._status = 'completed'` chạy được, đúng như đáp án câu hỏi đầu bài. Phần 4: `advance` từ chối chuyển sai và nhận chuyến thiếu tài xế, và đối tượng giữ nguyên. Dòng `trạng thái sau lỗi: searching` không mâu thuẫn: bước `searching` trước đó hợp lệ, chỉ bước `accepted` thiếu `driver_id` bị từ chối.
 
-Chế độ `--verify` so các kết quả này (cùng cước 0, 2, 2,5, 5 km là 12.000, 12.000, 14.250, 25.500; mọi chuyển hợp lệ; bốn trạng thái hủy được; hai trạng thái cuối; các ca từ chối ở `__post_init__`) với giá trị kỳ vọng:
+Chế độ `--verify` so các kết quả này (cùng cước 0, 2, 2,5, 5 km là 12.000, 12.000, 14.250, 25.500; mọi chuyển hợp lệ; bốn trạng thái huỷ được; hai trạng thái cuối; các ca từ chối ở `__post_init__`) với giá trị kỳ vọng:
 
 ```bash
 uv run --project examples/toi-noi-python/11-class-dataclass-property examples/toi-noi-python/11-class-dataclass-property/main.py --verify
@@ -238,14 +238,14 @@ OK 36/36
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
 | `ValueError: mutable default <class 'list'> ... use default_factory` | List, dict, set làm giá trị mặc định của field: dùng `field(default_factory=list)` |
-| `TypeError: unhashable type: 'Trip'` khi bỏ vào `set` hoặc làm khóa dict | Dataclass có `eq` mà không `frozen` thì không hash được; dùng `trip.trip_id` làm khóa |
+| `TypeError: unhashable type: 'Trip'` khi bỏ vào `set` hoặc làm khoá dict | Dataclass có `eq` mà không `frozen` thì không hash được; dùng `trip.trip_id` làm khoá |
 | `AttributeError: property '...' has no setter` | Đúng thiết kế; đổi trạng thái qua `advance()`, hoặc thêm setter có kiểm tra nếu thật sự cần |
 | `TypeError: non-default argument 'b' follows default argument 'a'` | Trong các field nhận qua constructor, field không mặc định phải đứng trước field có mặc định (hoặc dùng `kw_only=True`) |
 | Trạng thái chuyến «nhảy» dù đã có `advance()` | Tìm `_status =` ngoài thân lớp `Trip`; ai đó gán thẳng thuộc tính gạch dưới |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Mọi bảo vệ ở đây nằm trong bộ nhớ của một process. Hai request ở hai server có thể nạp cùng một chuyến <code>requested</code>, mỗi bên gọi <code>advance("searching")</code> thành công trên bản sao riêng của nó; encapsulation không phải khóa phân tán, và <code>advance()</code> cũng không an toàn khi nhiều thread cùng sửa một object. Trạng thái thật phải đi qua database với kiểm tra lúc ghi (bài 25 nói về optimistic concurrency). Mô hình 8 trạng thái là bản học tập: chưa có lý do hủy, chưa có thời điểm của từng bước, và <code>created_at</code> được truyền vào thay vì đọc đồng hồ để lab chạy lặp lại được. Việc thay đồng hồ bằng đối tượng tiêm vào được là chủ đề bài 14.</p>
+<p>Mọi bảo vệ ở đây nằm trong bộ nhớ của một process. Hai request ở hai server có thể nạp cùng một chuyến <code>requested</code>, mỗi bên gọi <code>advance("searching")</code> thành công trên bản sao riêng của nó; encapsulation không phải khoá phân tán, và <code>advance()</code> cũng không an toàn khi nhiều thread cùng sửa một object. Trạng thái thật phải đi qua database với kiểm tra lúc ghi (bài 25 nói về optimistic concurrency). Mô hình 8 trạng thái là bản học tập: chưa có lý do huỷ, chưa có thời điểm của từng bước, và <code>created_at</code> được truyền vào thay vì đọc đồng hồ để lab chạy lặp lại được. Việc thay đồng hồ bằng đối tượng tiêm vào được là chủ đề bài 14.</p>
 </div>
 
 **Bài tập 1:** `trip.history.append("completed")` và `trip._history.append("completed")` khác nhau thế nào về hậu quả?

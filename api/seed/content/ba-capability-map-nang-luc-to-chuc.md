@@ -20,7 +20,7 @@ Phân biệt này giúp nhóm cân nhắc đào tạo hoặc đổi quyền quy�
 
 ## 2. Bản đồ rút gọn cho Tới Nơi
 
-| Nhóm năng lực | Năng lực con minh họa |
+| Nhóm năng lực | Năng lực con minh hoạ |
 |---|---|
 | Phục vụ chuyến | Tiếp nhận nhu cầu, điều phối, hỗ trợ điểm đón |
 | Quản lý giao dịch | Báo giá, thu tiền, xử lý hoàn tiền đề xuất |
@@ -29,17 +29,17 @@ Phân biệt này giúp nhóm cân nhắc đào tạo hoặc đổi quyền quy�
 
 Bản đồ không quy định thứ tự xử lý. Cùng một năng lực có thể xuất hiện trong nhiều quy trình và được nhiều đội cùng hỗ trợ.
 
-## 3. Đánh giá bằng bằng chứng
+## 3. Đánh giá dựa trên bằng chứng
 
-Đề xuất thang học tập: chưa xác định, làm được nhờ cá nhân, có quy trình lặp lại, có đo lường và cải tiến. Muốn chấm “có quy trình” phải có bằng chứng như owner, hướng dẫn và ca diễn tập; không chỉ vì tài liệu đã được viết.
+Đề xuất thang học tập: chưa xác định, làm được nhờ cá nhân, có quy trình lặp lại, có đo lường và cải tiến. Muốn chấm “có quy trình” phải có bằng chứng như người phụ trách, hướng dẫn và ca diễn tập; không chỉ vì tài liệu đã được viết.
 
 Không cộng các mức thành một điểm tổng chính xác giả tạo. Mục đích là tìm chỗ cần đầu tư và căn cứ đánh giá.
 
 ## 4. Tách người, quy trình và công cụ
 
-Với hoàn tiền P05, có thể thiết kế contract tốt nhưng chưa có người xử lý RF-C không khớp đối tác. Khoảng trống là ownership và quy trình ngoại lệ. Ngược lại, có người giỏi nhưng thiếu khóa nối refundId/providerRef thì công cụ và dữ liệu cũng cần thay đổi.
+Với hoàn tiền P05, có thể thiết kế contract tốt nhưng chưa có người xử lý RF-C không khớp đối tác. Khoảng trống là người phụ trách và quy trình ngoại lệ. Ngược lại, có người giỏi nhưng thiếu khoá nối refundId/providerRef thì công cụ và dữ liệu cũng cần thay đổi.
 
-Viết mỗi khoảng trống theo bằng chứng: “chưa có owner nhận giao dịch chờ quá hạn”, thay vì nhận xét chung “vận hành yếu”.
+Viết mỗi khoảng trống theo bằng chứng: “chưa có người phụ trách nhận giao dịch chờ quá hạn”, thay vì nhận xét chung “vận hành yếu”.
 
 ## 5. Đặt ưu tiên theo chiến lược
 
@@ -53,7 +53,7 @@ Một đội có thể sở hữu nhiều năng lực, một năng lực có th�
 
 Chọn năng lực giải quyết ngoại lệ hoàn tiền. Ghi outcome, ba yếu tố hỗ trợ, bằng chứng hiện có và khoảng trống ưu tiên. Chỉ dùng hồ sơ P05, đánh dấu mọi điều chưa biết.
 
-<details><summary>Gợi ý</summary><p>Outcome là ngoại lệ được xác minh và xử lý có dấu vết. Cần owner có quyền, quy trình đối soát và dữ liệu liên kết. Hồ sơ đề xuất chưa chứng minh bất kỳ năng lực nào đã vận hành thật.</p></details>
+<details><summary>Gợi ý</summary><p>Outcome là ngoại lệ được xác minh và xử lý có dấu vết. Cần người phụ trách có quyền, quy trình đối soát và dữ liệu liên kết. Hồ sơ đề xuất chưa chứng minh bất kỳ năng lực nào đã vận hành thật.</p></details>
 
 ## 8. Đọc tiếp
 

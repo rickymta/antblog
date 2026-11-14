@@ -8,7 +8,7 @@ tags: [aws, toi-noi, devops, github-actions, oidc, ci-cd, ecr, ecs, least-privil
 language: vi
 ---
 
-Tới Nơi muốn đẩy bản sửa bảng giá của service `quote` lên production lúc 10:30, trước giờ cao điểm 11:00. Pipeline hiện tại dùng một cặp access key của user IAM `ci-bot`, lưu trong GitHub Secrets từ hai năm trước. Key đó có quyền quản trị "cho tiện", chưa từng được xoay, và ít nhất ba người cũ trong đội từng nhìn thấy nó. Nếu key lộ, kẻ tấn công không cần đợi giờ cao điểm.
+Tới Nơi muốn đẩy bản sửa bảng giá của service `quote` lên production lúc 10:30, trước giờ cao điểm 11:00. Pipeline hiện tại dùng một cặp access key của user IAM `ci-bot`, lưu trong GitHub Secrets từ hai năm trước. Key đó có quyền quản trị "cho tiện", chưa từng được xoay vòng, và ít nhất ba người cũ trong đội từng nhìn thấy nó. Nếu key lộ, kẻ tấn công không cần đợi giờ cao điểm.
 
 Đây là **bài 25** của lộ trình **AWS qua Tới Nơi · Phần 03: Infrastructure as Code và CI/CD**. Bạn cần biết IAM role (bài 03), ECR ([bài 11](/articles/aws-ecr-image-scan-lifecycle)) và ECS service ([bài 12](/articles/aws-ecs-fargate-task-definition-roles)), cùng cú pháp GitHub Actions cơ bản. Bài này thay access key dài hạn bằng OIDC, tách quyền build và deploy, và thêm cổng duyệt cho prod. Loạt .NET có [bài 35](/articles/dotnet10-container-ci-cd) nói về CI quyền tối thiểu ở phía ứng dụng; bài này là phía AWS của cùng nguyên tắc. Lưu ý code ở đâu cũng được, nhưng AWS CodeCommit không còn mở cho khách hàng mới, nên Tới Nơi để code trên GitHub.
 
@@ -20,9 +20,9 @@ Tới Nơi muốn đẩy bản sửa bảng giá của service `quote` lên prod
 
 ## Vì sao không để access key trong secret CI
 
-Access key dài hạn có bốn vấn đề: sống vô thời hạn nếu không xoay, mang một bộ quyền cố định bất kể job nào dùng, nằm ở nơi nhiều người có quyền đọc hoặc đổi (kể cả qua một workflow độc hại), và khi lộ thì không biết lộ từ đâu. OIDC thay bằng credentials tạm thời, sinh ra mỗi lần chạy, gắn với danh tính cụ thể của job.
+Access key dài hạn có bốn vấn đề: tồn tại vô thời hạn nếu không xoay vòng, mang một bộ quyền cố định bất kể job nào dùng, nằm ở nơi nhiều người có quyền đọc hoặc đổi (kể cả qua một workflow độc hại), và khi lộ thì không biết lộ từ đâu. OIDC thay bằng credentials tạm thời, sinh ra mỗi lần chạy, gắn với danh tính cụ thể của job.
 
-Luồng như sau: runner xin GitHub một JWT (cần quyền `id-token: write`), gửi tới AWS STS bằng `AssumeRoleWithWebIdentity`; STS đối chiếu với **IAM OIDC identity provider** `token.actions.githubusercontent.com`, kiểm trust policy của role, rồi trả về credentials tạm thời. Các action `aws-actions/configure-aws-credentials` làm toàn bộ việc này và xuất credentials thành biến môi trường cho các bước sau.
+Luồng như sau: runner xin GitHub một JWT (cần quyền `id-token: write`), gửi tới AWS STS bằng `AssumeRoleWithWebIdentity`; STS đối chiếu với **IAM OIDC identity provider** `token.actions.githubusercontent.com`, kiểm tra trust policy của role, rồi trả về credentials tạm thời. Action `aws-actions/configure-aws-credentials` làm toàn bộ việc này và xuất credentials thành biến môi trường cho các bước sau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -33,7 +33,7 @@ Luồng như sau: runner xin GitHub một JWT (cần quyền `id-token: write`),
 
 ## Provider và trust policy: nơi chặn tấn công
 
-Bước một là tạo OIDC provider một lần cho tài khoản, với URL `https://token.actions.githubusercontent.com` và audience (client ID) `sts.amazonaws.com`. IAM không còn buộc bạn tự tính thumbprint cho GitHub (AWS xác thực qua thư viện CA tin cậy); nếu console hoặc CLI vẫn hỏi, theo tài liệu IAM.
+Bước một là tạo OIDC provider một lần cho tài khoản, với URL `https://token.actions.githubusercontent.com` và audience (client ID) `sts.amazonaws.com`. IAM không còn buộc bạn tự tính thumbprint cho GitHub (AWS xác thực qua thư viện CA tin cậy); nếu console hoặc CLI vẫn hỏi, hãy làm theo tài liệu IAM.
 
 Bước hai, quan trọng hơn, là **trust policy** của từng role. Không có điều kiện, bất kỳ workflow của bất kỳ repo GitHub nào cũng có thể assume role. Hai điều kiện cần có là `aud` và `sub`:
 
@@ -110,20 +110,20 @@ jobs:
           cache-to: type=gha,mode=max
 ```
 
-`permissions: {}` ở cấp workflow rồi mở `id-token: write` ở từng job: không job nào có quyền thừa. Thiếu `id-token: write` là lý do số một khiến bước assume role báo không tải được credentials. Các action được ghim theo major (`configure-aws-credentials@v6`, `build-push-action@v7` là major mới nhất tại thời điểm review 11/2026); ghim theo commit SHA chặt hơn vì tag có thể bị đổi, nhưng cần công cụ như Dependabot để cập nhật SHA. Kiểm major hiện hành của mỗi action trước khi dùng, vì chúng đổi theo runtime Node.
+`permissions: {}` ở cấp workflow rồi mở `id-token: write` ở từng job: không job nào có quyền thừa. Thiếu `id-token: write` là nguyên nhân hàng đầu khiến bước assume role báo không tải được credentials. Các action được ghim theo major (`configure-aws-credentials@v6`, `build-push-action@v7` là major mới nhất tại thời điểm review 11/2026); ghim theo commit SHA chặt hơn vì tag có thể bị đổi, nhưng cần công cụ như Dependabot để cập nhật SHA. Hãy kiểm tra major hiện hành của mỗi action trước khi dùng, vì chúng đổi theo runtime Node.
 
 `cache-from/cache-to` với `type=gha` giữ cache layer giữa các lần chạy để build nhanh hơn, đổi lại phụ thuộc dung lượng cache của GitHub. Sau khi push, bước tiếp lấy `digest` từ output của build và ghép `repo@sha256:...`. Deploy theo digest thay vì tag vì tag trong ECR (nếu không bất biến) có thể bị ghi đè, còn digest luôn trỏ đúng một image đã được kiểm.
 
-Job deploy dùng `amazon-ecs-render-task-definition` để thay trường `image` trong task definition mẫu, rồi `amazon-ecs-deploy-task-definition` với `wait-for-service-stability: true`: bước chỉ thành công khi ECS báo service ổn định, nên pipeline đỏ nếu task mới không lên. Kết hợp deployment circuit breaker ở bài 13 để ECS tự rollback; workflow vẫn nên được coi là thất bại để người trực biết. Lưu ý: nếu Terraform (bài 23) cũng quản task definition, hai bên sẽ giằng co; chọn một bên sở hữu image.
+Job deploy dùng `amazon-ecs-render-task-definition` để thay trường `image` trong task definition mẫu, rồi `amazon-ecs-deploy-task-definition` với `wait-for-service-stability: true`: bước chỉ thành công khi ECS báo service ổn định, nên pipeline đỏ nếu task mới không lên. Kết hợp deployment circuit breaker ở bài 13 để ECS tự rollback; workflow vẫn nên được coi là thất bại để người trực biết. Lưu ý: nếu Terraform (bài 23) cũng quản task definition, hai bên sẽ giằng co; chỉ để một bên quản lý image.
 
-**Environment và approval.** Job `deploy` khai báo `environment: prod`. Trong repo GitHub, bạn bật **required reviewers** cho environment đó; job dừng chờ người duyệt. Cùng cơ chế cho phép giới hạn nhánh được deploy. Chỉ environment (và `sub` của nó) mới được assume role deploy, nên không ai bỏ qua cổng duyệt bằng cách sửa workflow sang nhánh khác. SBOM và provenance được bật ngay ở `build-push-action` (`sbom: true`, `provenance: mode=max`), gắn vào image trong ECR; artifact attestation và ký image sẽ nói ở bài 48.
+**Environment và approval.** Job `deploy` khai báo `environment: prod`. Trong repo GitHub, bạn bật **required reviewers** cho environment đó; job dừng chờ người duyệt. Cơ chế này cũng cho phép giới hạn nhánh được phép deploy. Chỉ environment (và `sub` của nó) mới được assume role deploy, nên không ai bỏ qua cổng duyệt bằng cách sửa workflow sang nhánh khác. SBOM và provenance được bật ngay ở `build-push-action` (`sbom: true`, `provenance: mode=max`), gắn vào image trong ECR; artifact attestation và ký image sẽ nói ở bài 48.
 
 ## Lỗi thường gặp
 
 - **Thiếu `id-token: write`:** bước assume role báo không có credentials. Cấp ở cấp job, không cấp thừa.
 - **`sub` không khớp:** dùng `environment` nhưng trust policy theo nhánh, hoặc ngược lại. Đọc `sub` thật bằng cách in claim token ở repo thử, không đoán.
 - **Trust policy quá rộng:** `StringLike` với `repo:toinoi-org/*` hoặc `:*`. Dùng `StringEquals`, repo và ref cụ thể.
-- **`PassRole` với `*`:** biến role CI thành bước leo thang đặc quyền.
+- **`PassRole` với `*`:** biến role CI thành đường leo thang đặc quyền.
 - **Role CI = admin:** quyền quản trị trên role build thì OIDC chỉ làm credentials ngắn hạn hơn, không làm blast radius nhỏ hơn.
 
 **Bài tập:** đồng nghiệp đổi trust policy thành `"token.actions.githubusercontent.com:sub": "repo:toinoi-org/*"` với `StringLike` để "một role dùng cho mọi repo". Rủi ro gì?
@@ -132,9 +132,9 @@ Job deploy dùng `amazon-ecs-render-task-definition` để thay trường `image
 
 ## Lab và kiểm chứng
 
-Mã ở `examples/toi-noi-aws/p03-25-github-actions-oidc`: workflow `workflows/deploy-quote.yml` (cố ý nằm ngoài `.github/workflows` nên không chạy trong CI của repo blog), hai trust policy và hai policy quyền trong `iam/`, `quote-task-definition.json` và `setup-oidc.sh` (chỉ in lệnh `aws iam`, không gọi AWS). Kiểm trên máy là parse JSON và YAML cùng `bash -n`; README ghi lệnh.
+Mã ở `examples/toi-noi-aws/p03-25-github-actions-oidc`: workflow `workflows/deploy-quote.yml` (cố ý nằm ngoài `.github/workflows` nên không chạy trong CI của repo blog), hai trust policy và hai policy quyền trong `iam/`, `quote-task-definition.json` và `setup-oidc.sh` (chỉ in lệnh `aws iam`, không gọi AWS). Việc kiểm tra trên máy gồm parse JSON và YAML cùng `bash -n`; README ghi lệnh.
 
-Thành thật về phạm vi: workflow **chưa được chạy trên GitHub thật**, trust policy và quyền **chưa được thử trên tài khoản AWS**, và major version các action cần kiểm lại khi dùng. Nên chạy IAM Access Analyzer `validate-policy` hoặc `actionlint` trước khi áp dụng. README có lệnh dọn role và provider.
+Nói rõ về phạm vi kiểm chứng: workflow **chưa được chạy trên GitHub thật**, trust policy và quyền **chưa được thử trên tài khoản AWS**, và major version các action cần kiểm lại khi dùng. Nên chạy IAM Access Analyzer `validate-policy` hoặc `actionlint` trước khi áp dụng. README có lệnh dọn role và provider.
 
 Bài trước: [bài 24](/articles/aws-cdk-construct-synth-diff). Bài tiếp: [bài 26](/articles/aws-codepipeline-codebuild-codedeploy-blue-green).
 

@@ -142,7 +142,7 @@ Hàm toán đúng chưa là một câu hỏi kiểm được: lab xoay mẫu Arc
         40     18.25      0.61               14.82            0.78            19/40
 ```
 
-Có ba điều trong bảng. Một, ở roll 0 cả hai chỉ lệch dưới 1 độ, nên «nền nhiễu» của phép đo khoảng 0,6 đến 0,9 độ. Hai, sai số của YuNet tăng nhanh theo góc: 2,67 độ ở 15, 7,89 ở 30 và 18,25 ở 40, kèm theo số ảnh còn tìm thấy rớt xuống 19/40; với ảnh nghiêng 40 độ, sai số trung vị 18,25 độ nghĩa là YuNet báo chừng 22 độ, và ca nghiêng 35 độ ở mục sau cũng chỉ ra 16,5 độ. Ước lượng của YuNet dường như bão hòa khi góc lớn; lab chưa đo nguyên nhân nên ta chỉ ghi nhận hiện tượng. Ba, căn chỉnh bằng landmark kém thì **mặt vẫn nghiêng sau khi căn chỉnh**: dùng YuNet ở roll 30, crop còn lệch 5,13 độ; dùng FaceLandmarker, còn 0,76 độ, chỉ bằng nền nhiễu. Cách phòng ngừa là đo lại sau căn chỉnh như bảng này, hoặc dùng bộ landmark dày hơn khi YuNet báo roll vượt vài độ. Đo lại bằng chính FaceLandmarker có thiên về nó; vì thế ta ghi cả nền nhiễu 0,6 đến 0,9 độ.
+Có ba điều trong bảng. Một, ở roll 0 cả hai chỉ lệch dưới 1 độ, nên «nền nhiễu» của phép đo khoảng 0,6 đến 0,9 độ. Hai, sai số của YuNet tăng nhanh theo góc: 2,67 độ ở 15, 7,89 ở 30 và 18,25 ở 40, kèm theo số ảnh còn tìm thấy rớt xuống 19/40; với ảnh nghiêng 40 độ, sai số trung vị 18,25 độ nghĩa là YuNet báo chừng 22 độ, và ca nghiêng 35 độ ở mục sau cũng chỉ ra 16,5 độ. Ước lượng của YuNet dường như bão hoà khi góc lớn; lab chưa đo nguyên nhân nên ta chỉ ghi nhận hiện tượng. Ba, căn chỉnh bằng landmark kém thì **mặt vẫn nghiêng sau khi căn chỉnh**: dùng YuNet ở roll 30, crop còn lệch 5,13 độ; dùng FaceLandmarker, còn 0,76 độ, chỉ bằng nền nhiễu. Cách phòng ngừa là đo lại sau căn chỉnh như bảng này, hoặc dùng bộ landmark dày hơn khi YuNet báo roll vượt vài độ. Đo lại bằng chính FaceLandmarker có thiên về nó; vì thế ta ghi cả nền nhiễu 0,6 đến 0,9 độ.
 
 ## Chất lượng ảnh: mờ, tối, cỡ mặt
 
@@ -237,7 +237,7 @@ Lệnh thứ hai chạy lại toàn bộ rồi kiểm các bất biến đã in:
 OK 40/40
 ```
 
-Không ca nào kiểm tốc độ tuyệt đối vì số đo thời gian phụ thuộc tải máy. Ảnh minh họa (`card_detections.png` vẽ hộp bốn bộ phát hiện và 5 landmark lên thẻ, `aligned_roll30.png` so hai crop căn chỉnh) nằm trong `out/`, đã gitignore.
+Không ca nào kiểm tốc độ tuyệt đối vì số đo thời gian phụ thuộc tải máy. Ảnh minh hoạ (`card_detections.png` vẽ hộp bốn bộ phát hiện và 5 landmark lên thẻ, `aligned_roll30.png` so hai crop căn chỉnh) nằm trong `out/`, đã gitignore.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -245,7 +245,7 @@ Không ca nào kiểm tốc độ tuyệt đối vì số đo thời gian phụ 
 | Haar không thấy mặt nghiêng | Đúng hành vi (0/40 ở 30 độ); dùng YuNet hoặc xoay ảnh thử nhiều góc |
 | BlazeFace short range hay FaceLandmarker không thấy mặt nhỏ | Cỡ mặt trong khung (mặt 80 px: 8/40 và 4/40 có hộp); thử BlazeFace full range hoặc cắt vùng quan tâm rồi phóng lớn |
 | Phương sai Laplacian của ảnh thẻ cao bất thường | Đang đo cả crop, có cạnh viền thẻ; đo vùng lõi |
-| Crop căn chỉnh vẫn nghiêng | Landmark YuNet bão hòa ở góc lớn; đo lại roll sau căn chỉnh hoặc dùng landmark dày |
+| Crop căn chỉnh vẫn nghiêng | Landmark YuNet bão hoà ở góc lớn; đo lại roll sau căn chỉnh hoặc dùng landmark dày |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>

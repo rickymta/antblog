@@ -1,6 +1,6 @@
 ---
 slug: loop-testing
-title: "Loop Testing: kiểm vòng cộng tiền món và vòng thử lại thanh toán của Tới Nơi"
+title: "Loop Testing: kiểm thử vòng cộng tiền món và vòng thử lại thanh toán của Tới Nơi"
 summary: "Loop testing kiểu Beizer: chọn số lần lặp 0, 1, 2, điển hình, max−1, max, max+1; mở rộng cho vòng lồng nhau, kết hợp BVA và chạy thật trên vòng cộng tiền món, vòng thử lại VíXanh của lab Tới Nơi."
 category: testing
 level: advanced
@@ -8,7 +8,7 @@ tags: [testing, white-box, loop-testing, test-049, beizer, boundary-value-analys
 language: vi
 ---
 
-Đơn đồ ăn có từ 1 tới 20 dòng món. Hàm cộng tiền món chỉ là một vòng lặp ba dòng code. Đạt 100% branch coverage cho nó chỉ cần **một** test có một món. Vậy đơn 0 món, 20 món, 21 món có ai kiểm chưa? Bài này trình bày **loop testing** — kỹ thuật white-box chọn số lần lặp đặc biệt — rồi áp vào ba vòng lặp thật của lab Tới Nơi. Kết quả chạy có một defect mà mọi test «một món» đều bỏ lọt.
+Đơn đồ ăn có từ 1 tới 20 dòng món. Hàm cộng tiền món chỉ là một vòng lặp ba dòng code. Đạt 100% branch coverage cho nó chỉ cần **một** test có một món. Vậy đơn 0 món, 20 món, 21 món đã có ai kiểm thử chưa? Bài này trình bày **loop testing** — kỹ thuật white-box chọn số lần lặp đặc biệt — rồi áp vào ba vòng lặp thật của lab Tới Nơi. Kết quả chạy lộ ra một defect mà mọi test «một món» đều bỏ lọt.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-049</span>
@@ -70,7 +70,7 @@ Bộ này thực chất là **boundary value analysis áp lên biến «số l�
 
 **Vòng nối tiếp (concatenated loops)** — hai vòng đứng liền nhau. Nếu độc lập: kiểm như hai vòng đơn. Nếu vòng sau phụ thuộc vòng trước (dùng biến đếm hay kết quả của nó): kiểm như vòng lồng nhau.
 
-**Vòng không cấu trúc (unstructured loops)** — nhảy vào giữa vòng, nhiều lối vào. Không thiết kế test cho chúng; đề nghị viết lại code.
+**Vòng không cấu trúc (unstructured loops)** — nhảy vào giữa vòng, nhiều lối vào. Không thiết kế test cho chúng; nên viết lại code.
 
 ### 2.2 Vòng lặp trong syllabus ISTQB
 
@@ -183,7 +183,7 @@ Bước đầu tiên là đọc code để biết **vòng nằm đâu, giới h�
 Nếu mọi dòng cùng giá, «bỏ dòng đầu» và «bỏ dòng cuối» cho cùng một tổng sai; một số lỗi (như «chỉ giữ dòng cuối» với 1 dòng) còn bị che hẳn. Quy tắc chọn dữ liệu:
 
 - Dòng thứ i (tính từ 1) có đơn giá **30.000 + 1.000 × (i − 1)**, số lượng 1. Mỗi dòng góp một số tiền khác nhau; dòng 1 đã đủ tiền món tối thiểu (R-FOOD-03).
-- **Oracle không dùng vòng lặp**: tiền món của n dòng = 30.000·n + 1.000·n(n − 1)/2. Nếu oracle cũng viết bằng `reduce`, nó có thể sai cùng kiểu với code được kiểm.
+- **Oracle không dùng vòng lặp**: tiền món của n dòng = 30.000·n + 1.000·n(n − 1)/2. Nếu oracle cũng viết bằng `reduce`, oracle đó có thể sai cùng kiểu với code đang kiểm.
 
 | n | Tiền món (oracle) | Tổng tại API (phí giao 2,0 km ngoài cao điểm = 21.000 đ) |
 |---:|---:|---:|
@@ -210,7 +210,7 @@ Nếu mọi dòng cùng giá, «bỏ dòng đầu» và «bỏ dòng cuối» ch
 
 ### 4.4 Kết hợp với BVA: biên của biến cộng dồn
 
-Loop testing chọn số lần lặp; BVA chọn giá trị **trong** mỗi lần lặp. Kết hợp hai thứ cho ra câu hỏi: *ở số lần lặp nào, với giá trị trần của mỗi dòng, biến cộng dồn vượt một giới hạn nào đó?*
+Loop testing chọn số lần lặp; BVA chọn giá trị **trong** mỗi lần lặp. Kết hợp hai kỹ thuật sẽ đặt ra câu hỏi: *ở số lần lặp nào, với giá trị trần của mỗi dòng, biến cộng dồn vượt một giới hạn nào đó?*
 
 - Giá trị trần mỗi dòng theo R-FOOD-02: 5.000.000 đ × 50 = **250.000.000 đ**.
 - 20 dòng trần: tiền món **5.000.000.000 đ** — SPEC không đặt trần cho tổng.
@@ -220,7 +220,7 @@ Biên của biến cộng dồn nằm giữa 8 dòng (2.000.000.000 đ) và 9 d�
 
 ### 4.5 Vòng thử lại: số lần lặp do môi trường quyết định
 
-Vòng trong `chargeWithRetry` khác vòng tiền món ở chỗ số lần lặp không do dữ liệu đầu vào mà do **phản hồi của cổng** quyết định, và có **lối thoát sớm** (thành công, bị từ chối). Bộ giá trị Beizer dịch sang:
+Vòng trong `chargeWithRetry` khác vòng tiền món ở chỗ số lần lặp không do dữ liệu đầu vào mà do **phản hồi của cổng** quyết định, và có **lối thoát sớm** (thành công, bị từ chối). Bộ giá trị Beizer áp vào vòng này như sau:
 
 | Lần lặp | Cách gây ra bằng ví giả (`failNext`) | Kỳ vọng |
 |---|---|---|
@@ -231,13 +231,13 @@ Vòng trong `chargeWithRetry` khác vòng tiền món ở chỗ số lần lặp
 | max + 1 | 4 lần `timeout` xếp hàng | Dừng sau **đúng 3** lần gọi, `failed`/`timeout`, không trừ tiền |
 | thoát giữa vòng | `error`, `decline` | Dừng ở lần 2, `declined` |
 
-Max+1 ở đây là «môi trường đòi lần thứ 4, vòng phải từ chối». Ca 0 lần lặp lộ một cấu hình không được kiểm: `maxRetries` âm ⇒ vòng không chạy, trả `failure: null` — thất bại không lý do. SPEC không cho phép cấu hình đó nên đây là quan sát về độ bền, không phải defect theo đặc tả.
+Max+1 ở đây là «môi trường đòi lần thứ 4, vòng phải từ chối». Test case 0 lần lặp lộ một cấu hình chưa được kiểm: `maxRetries` âm ⇒ vòng không chạy, trả `failure: null` — thất bại không lý do. SPEC không cho phép cấu hình đó nên đây là quan sát về độ bền, không phải defect theo đặc tả.
 
 Một hệ quả khác đọc được ngay từ số lần lặp tối đa: thời gian xấu nhất của một lần thu tiền là 3 × 3 giây = **9 giây** (R-PAY-04). Endpoint `/complete` của tài xế chờ chừng ấy khi VíXanh treo — con số cần đưa vào thiết kế timeout của client.
 
 ### 4.6 Vòng lồng nhau: `canonicalJson`
 
-`canonicalJson` gặp mảng thì duyệt từng phần tử (vòng ngoài); gặp object thì sắp xếp rồi duyệt từng khoá (vòng trong). Với thân `{ items: [ {name, unitPrice, quantity}, … ], paymentMethod }`, đặt vòng ngoài = số phần tử (0, 1, 2, 20) và vòng trong = số khoá mỗi phần tử (0, 1, 2, 3). Kiểm đủ tổ hợp là 4 × 4 = 16 ca. Chiến lược Beizer cho 7 ca (Hình 2).
+`canonicalJson` gặp mảng thì duyệt từng phần tử (vòng ngoài); gặp object thì sắp xếp rồi duyệt từng khoá (vòng trong). Với thân `{ items: [ {name, unitPrice, quantity}, … ], paymentMethod }`, đặt vòng ngoài = số phần tử (0, 1, 2, 20) và vòng trong = số khoá mỗi phần tử (0, 1, 2, 3). Kiểm đủ tổ hợp cần 4 × 4 = 16 test case. Chiến lược Beizer cho ra 7 test case (Hình 2).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -258,10 +258,10 @@ Một hệ quả khác đọc được ngay từ số lần lặp tối đa: th�
 <text x="542" y="222" class="t-small">Oracle: đảo thứ tự khoá ⇒ vân tay không đổi (R-IDEM-02)</text>
 </svg>
 </div>
-<figcaption><b>Hình 2 · Chiến lược vòng lồng nhau.</b> Vòng trong được kiểm đủ khi vòng ngoài ở mức tối thiểu; sau đó vòng ngoài được kiểm đủ khi vòng trong ở mức điển hình. 4 + 4 − 1 = 7 ca thay vì 16; với ba tầng lồng, khoản tiết kiệm lớn hơn nhiều.</figcaption>
+<figcaption><b>Hình 2 · Chiến lược vòng lồng nhau.</b> Vòng trong được kiểm đủ khi vòng ngoài ở mức tối thiểu; sau đó vòng ngoài được kiểm đủ khi vòng trong ở mức điển hình. 4 + 4 − 1 = 7 test case thay vì 16; với ba tầng lồng, khoản tiết kiệm lớn hơn nhiều.</figcaption>
 </figure>
 
-Oracle mỗi ô: đảo thứ tự khoá ⇒ vân tay **không đổi**. Thêm hai ca âm: đổi giá trị ở phần tử **cuối** (20 phần tử) ⇒ vân tay phải đổi (bắt vòng ngoài dừng sớm); đảo thứ tự **phần tử** ⇒ vân tay phải đổi (R-IDEM-02 chỉ bỏ qua thứ tự khoá).
+Oracle mỗi ô: đảo thứ tự khoá ⇒ vân tay **không đổi**. Thêm hai test case âm: đổi giá trị ở phần tử **cuối** (20 phần tử) ⇒ vân tay phải đổi (bắt vòng ngoài dừng sớm); đảo thứ tự **phần tử** ⇒ vân tay phải đổi (R-IDEM-02 chỉ bỏ qua thứ tự khoá).
 
 ## 5. Thực hành
 
@@ -273,7 +273,7 @@ Thư mục `examples/toi-noi-testing/articles/loop-testing/`:
 - `vong-thu-lai-va-long-nhau.test.ts` — **LR** vòng thử lại: 0, 1, 2, 3, max+1, thoát sớm (6); **LN** vòng lồng nhau: 7 ô + 2 ca âm (9).
 - `loop-variants.ts` (L1…L4), `fixtures.ts` (dữ liệu + oracle dạng đóng).
 
-Ca biên của biến cộng dồn (`DEFECT · PostgreSQL: 9 dòng giá trần`) khẳng định hành vi đúng theo SPEC — đặt chuyến 201 — và được đánh dấu `it.fails` vì defect còn đó; `SHOW_RED=1` chạy nó như test thường để thấy failure thật.
+Test case biên của biến cộng dồn (`DEFECT · PostgreSQL: 9 dòng giá trần`) khẳng định hành vi đúng theo SPEC — đặt chuyến 201 — và được đánh dấu `it.fails` vì defect còn đó; `SHOW_RED=1` chạy nó như test thường để thấy failure thật.
 
 ### 5.2 Chạy thật
 
@@ -296,7 +296,7 @@ src (bản thật)           · · · · · · ·
       Tests  35 passed (35)
 ```
 
-Ma trận chạy thật khớp từng ô với dự đoán ở mục 4.3. Bản thật `itemsSubtotal` đúng ở cả bảy số lần lặp. Bật failure thật của ca biên:
+Ma trận chạy thật khớp từng ô với dự đoán ở mục 4.3. Bản thật `itemsSubtotal` đúng ở cả bảy số lần lặp. Bật failure thật của test case biên:
 
 ```bash
 SHOW_RED=1 npx vitest run articles/loop-testing
@@ -334,11 +334,11 @@ Defect này không nằm trong vòng lặp mà nằm ở **nơi kết quả củ
 
 ## 6. Góc nhìn nâng cao
 
-**Vòng ẩn trong hàm bậc cao.** `itemsSubtotal` dùng `reduce`, không có `for`: báo cáo branch coverage không có quyết định «còn phần tử?», ca 0 lần lặp chỉ lộ qua function coverage (callback không được gọi). Không thấy nhánh không có nghĩa là không có vòng — đọc code.
+**Vòng ẩn trong hàm bậc cao.** `itemsSubtotal` dùng `reduce`, không có `for`: báo cáo branch coverage không có quyết định «còn phần tử?», test case 0 lần lặp chỉ lộ qua function coverage (callback không được gọi). Không thấy nhánh không có nghĩa là không có vòng — đọc code.
 
 **Vòng không có giới hạn thiết kế.** `expireStaleSearches` (R-STATE-05) duyệt mọi chuyến `searching` quá 5 phút, không có n tối đa trong code. Khi đó «max» lấy từ **operational profile** (giả định: sự cố điều phối lúc cao điểm 70 chuyến/giây ⇒ hàng nghìn chuyến mỗi lượt quét) và trở thành câu hỏi hiệu năng — mỗi lần lặp một câu `UPDATE` — thuộc Series 09.
 
-**Giới hạn không nằm cạnh vòng.** Giới hạn 20 dòng nằm ở lớp API. Một kênh gọi thẳng domain sau này (vd job import đơn đối tác) sẽ cho max+1 đi qua; test max+1 ở tầng domain ghi lại hành vi đó.
+**Giới hạn không nằm cạnh vòng.** Giới hạn 20 dòng nằm ở lớp API. Một kênh gọi thẳng domain sau này (vd job import đơn đối tác) sẽ để max+1 lọt qua; test max+1 ở tầng domain ghi lại hành vi đó.
 
 **Max của vòng × max của mỗi lần lặp.** Như mục 4.4: biến cộng dồn, kích thước bộ đệm, thời gian tổng (3 lần × 3 giây), kích thước thân (`canonicalJson` với 20 phần tử phải nằm trong 10 KB của R-API-01). Mỗi đại lượng tích luỹ theo vòng là một biến mới cần BVA.
 
@@ -354,7 +354,7 @@ Defect này không nằm trong vòng lặp mà nằm ở **nơi kết quả củ
 
 ## 7. Bài tập và câu hỏi ôn tập
 
-**Bài tập 1 — vòng huỷ chuyến hết hạn.** Thiết kế các ca loop testing cho `expireStaleSearches` (`src/app/trips.ts`, R-STATE-05). Vòng có một nhánh bên trong: `updateIfStatus` trả `false` khi chuyến đã đổi trạng thái giữa chừng (ví dụ tài xế vừa nhận).
+**Bài tập 1 — vòng huỷ chuyến hết hạn.** Thiết kế các test case loop testing cho `expireStaleSearches` (`src/app/trips.ts`, R-STATE-05). Vòng có một nhánh bên trong: `updateIfStatus` trả `false` khi chuyến đã đổi trạng thái giữa chừng (ví dụ tài xế vừa nhận).
 
 <details>
 <summary><b>Lời giải</b></summary>
@@ -370,7 +370,7 @@ Defect này không nằm trong vòng lặp mà nằm ở **nơi kết quả củ
 
 **Câu hỏi trắc nghiệm** (tự soạn theo phong cách ISTQB, mỗi câu một đáp án đúng).
 
-**Câu 1 (K2).** Một hàm có vòng `for` duyệt danh sách dòng món. Bộ test hiện có một ca với 3 dòng món và đạt 100% branch coverage. Phát biểu nào đúng?
+**Câu 1 (K2).** Một hàm có vòng `for` duyệt danh sách dòng món. Bộ test hiện có một test case với 3 dòng món và đạt 100% branch coverage. Phát biểu nào đúng?
 
 - a) Vòng đã được kiểm đầy đủ vì cả hai outcome của điều kiện vòng đều được chạy
 - b) Branch coverage 100% không đòi hỏi chạy vòng 0 lần hay ở số lần lặp tối đa
@@ -406,7 +406,7 @@ Defect này không nằm trong vòng lặp mà nằm ở **nơi kết quả củ
 <p><b>c)</b> đúng — ở 0 và 1 lần lặp, «tiền dòng cuối» trùng với tổng đúng; lần lặp thứ hai là lần đầu tiên kết quả cũ bị ghi đè. Đây chính là lý do Beizer giữ giá trị 2. d) cũng phát hiện được nhưng không phải nhỏ nhất.</p>
 </details>
 
-**Câu 4 (K2).** Vòng thử lại thanh toán cho tối đa 3 lần gọi cổng. Ca test nào thể hiện đúng tinh thần «max + 1» của loop testing?
+**Câu 4 (K2).** Vòng thử lại thanh toán cho tối đa 3 lần gọi cổng. Test case nào thể hiện đúng tinh thần «max + 1» của loop testing?
 
 - a) Gọi hàm thu tiền 4 lần liên tiếp từ test
 - b) Cho cổng giả hết giờ 4 lần liên tiếp và kiểm vòng dừng sau đúng 3 lần gọi, không lần thứ 4

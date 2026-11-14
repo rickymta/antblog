@@ -15,12 +15,12 @@ Bài này dựng container Cosmos DB giữ vị trí tài xế của Tới Nơi 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Cosmos DB tự chia dữ liệu ra nhiều máy, vậy có cần quan tâm partition key lúc thiết kế không?</p>
-<details><summary>Xem đáp án</summary><p>Có. Cosmos chia dữ liệu theo giá trị partition key mà bạn chọn, và khoá này không đổi được sau khi tạo container. Khoá tệ làm một partition nóng trong khi phần còn lại ngồi không.</p></details>
+<details><summary>Xem đáp án</summary><p>Có. Cosmos chia dữ liệu theo giá trị partition key mà bạn chọn, và khoá này không đổi được sau khi tạo container. Khoá chọn kém khiến một partition quá tải trong khi phần còn lại nhàn rỗi.</p></details>
 </div>
 
 ## Partition key quyết định ghi trải đều hay dồn vào một chỗ
 
-Bài 31 đã chọn Cosmos DB cho dữ liệu vị trí tài xế vì nó ghi nhiều, đọc theo khoá và không cần join. Cấu trúc bên trong gồm bốn tầng. Một account chứa database, database chứa container, container chứa item (một document JSON). Item có một thuộc tính được chọn làm partition key. Mọi item cùng giá trị khoá thuộc cùng một **logical partition**. Cosmos gom nhiều logical partition vào một **physical partition**, tức đơn vị máy chủ thật có giới hạn throughput và dung lượng. Bạn không thấy hay điều khiển physical partition; Cosmos tự tách khi dữ liệu hoặc throughput lớn lên.
+Bài 31 đã chọn Cosmos DB cho dữ liệu vị trí tài xế vì loại dữ liệu này ghi nhiều, đọc theo khoá và không cần join. Cấu trúc bên trong gồm bốn tầng. Một account chứa database, database chứa container, container chứa item (một document JSON). Item có một thuộc tính được chọn làm partition key. Mọi item cùng giá trị khoá thuộc cùng một **logical partition**. Cosmos gom nhiều logical partition vào một **physical partition**, tức đơn vị máy chủ thật có giới hạn throughput và dung lượng. Bạn không thấy hay điều khiển physical partition; Cosmos tự tách khi dữ liệu hoặc throughput lớn lên.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -36,9 +36,9 @@ Với dữ liệu `driver_location`, có hai ứng viên.
 | `/driverId` | Phân tán tốt: hàng chục nghìn tài xế, mỗi người một logical partition | Đọc vị trí một tài xế nằm gọn trong một partition | Truy vấn "mọi tài xế ở một thành phố" phải quét nhiều partition |
 | `/cityId` + geohash | Dồn theo vùng đông khách | Đọc theo vùng nằm trong một partition | Giờ cao điểm ở quận trung tâm tạo hot partition |
 
-Hot partition là điểm đau chính. Throughput của container chia cho các physical partition, nên một khoá nóng chạm trần của partition đó và bị từ chối dù cả container còn dư. Một logical partition cũng có trần dung lượng riêng (kiểm giá trị hiện hành trong tài liệu), nên khoá có ít giá trị như `cityId` với 6 thành phố là bài toán không có lối ra. Vì vậy Tới Nơi chọn `/driverId`: ghi tài xế nào vào partition của tài xế đó, đọc "tài xế này đang ở đâu" bằng point read.
+Hot partition là điểm đau chính. Throughput của container chia cho các physical partition, nên một khoá nóng chạm trần của partition đó và bị từ chối dù cả container còn dư throughput. Một logical partition cũng có trần dung lượng riêng (kiểm tra giá trị hiện hành trong tài liệu), nên khoá có ít giá trị như `cityId` với 6 thành phố là bài toán không có lối ra. Vì vậy Tới Nơi chọn `/driverId`: dữ liệu ghi của tài xế nào nằm trong partition của tài xế đó, đọc "tài xế này đang ở đâu" bằng point read.
 
-Câu hỏi "tài xế rảnh quanh điểm đón" không do Cosmos trả lời. Đó là việc của Redis geospatial ở bài 33. Cosmos giữ nguồn bền vững, Redis giữ chỉ mục không gian đang nóng.
+Câu hỏi "tài xế rảnh quanh điểm đón" không do Cosmos trả lời. Đó là việc của Redis geospatial ở bài 33. Cosmos giữ dữ liệu gốc bền vững, Redis giữ chỉ mục không gian đang nóng.
 
 Nếu bạn vẫn cần cả hai chiều, **hierarchical partition key** cho phép khai báo tối đa ba cấp, ví dụ `/cityId`, rồi `/driverId`. Truy vấn có tiền tố khoá (một `cityId` cụ thể) được định tuyến tới đúng tập partition thay vì quét toàn bộ, trong khi dữ liệu vẫn trải theo cấp sau. Đổi lại, bạn phải chọn thứ tự cấp ngay từ đầu và mọi truy vấn quan trọng phải mang tiền tố đó.
 
@@ -56,7 +56,7 @@ Ba cách mua throughput:
 
 Tới Nơi dùng serverless cho môi trường dev vì lab và test chạy ngắt quãng. Production của luồng GPS chạy liên tục nên thiên về autoscale; tra Pricing Calculator để so sánh trước khi chốt.
 
-Khi vượt ngân sách RU, Cosmos trả HTTP **429** kèm thời gian chờ gợi ý. SDK .NET tự retry một số lần có giới hạn và đây là cấu hình được. Nếu bạn thấy 429 xuất hiện ở tầng ứng dụng, SDK đã hết lượt thử. Retry không tạo thêm throughput; nó chỉ trì hoãn. Cách chữa thật là giảm RU mỗi thao tác hoặc tăng ngân sách. Chú ý với `trip-service`: một đợt retry 429 kéo dài làm request đặt xe chờ lâu, nên cần timeout tổng ở tầng gọi như bài về timeout và retry của [loạt C#](/articles/dotnet10-cache-timeout-retry-rate-limit).
+Khi vượt ngân sách RU, Cosmos trả HTTP **429** kèm thời gian chờ gợi ý. SDK .NET tự retry một số lần có giới hạn và số lần này có thể cấu hình. Nếu bạn thấy 429 xuất hiện ở tầng ứng dụng, SDK đã hết lượt thử. Retry không tạo thêm throughput; nó chỉ trì hoãn. Cách chữa thật là giảm RU mỗi thao tác hoặc tăng ngân sách. Chú ý với `trip-service`: một đợt retry 429 kéo dài làm request đặt xe chờ lâu, nên cần timeout tổng ở tầng gọi như bài về timeout và retry của [loạt C#](/articles/dotnet10-cache-timeout-retry-rate-limit).
 
 Mặc định Cosmos index mọi thuộc tính của mọi item. Tiện, nhưng mỗi lần ghi phải cập nhật các index đó và tốn RU. Với điểm vị trí chỉ lọc theo `cityId` và `recordedAt`, bạn loại bớt trường bằng index policy:
 
@@ -72,7 +72,7 @@ Mặc định Cosmos index mọi thuộc tính của mọi item. Tiện, nhưng 
 }
 ```
 
-Policy này chỉ index ba đường dẫn khai báo, mọi trường còn lại (ví dụ độ chính xác GPS) không được index. Nó giảm RU ghi nhưng không chứng minh query nào nhanh hơn; hãy đo lại sau khi đổi.
+Policy này chỉ index ba đường dẫn khai báo, mọi trường còn lại (ví dụ độ chính xác GPS) không được index. Cách này giảm RU ghi nhưng không chứng minh query nào nhanh hơn; hãy đo lại sau khi đổi.
 
 ## Năm mức consistency, và Session đủ cho vị trí tài xế
 
@@ -85,15 +85,15 @@ Cosmos cho chọn một trong năm mức, từ mạnh tới yếu: Strong, Bound
 <figcaption>Hình 2. Năm mức consistency: Session là mức mặc định hợp lý cho vị trí tài xế, Strong có giá về độ trễ.</figcaption>
 </figure>
 
-**Session** đảm bảo trong cùng một session client: đọc thấy ghi của chính nó, thứ tự đọc không lùi. Đó đúng là hợp đồng mà điểm vị trí cần. Service Location & Tracking ghi vị trí, rồi đọc lại bằng cùng `CosmosClient` thì không thấy dữ liệu cũ hơn điều nó vừa ghi. Một service khác đọc vị trí vài trăm mili giây trễ vẫn chấp nhận được, vì tài xế đã di chuyển tiếp rồi.
+**Session** đảm bảo trong cùng một session client: đọc thấy ghi của chính nó, thứ tự đọc không lùi. Đó đúng là hợp đồng mà điểm vị trí cần. Service Location & Tracking ghi vị trí, rồi đọc lại bằng cùng `CosmosClient` thì không thấy dữ liệu cũ hơn dữ liệu vừa ghi. Một service khác đọc vị trí trễ vài trăm mili giây vẫn chấp nhận được, vì tài xế đã di chuyển tiếp rồi.
 
-**Strong** cần đồng thuận qua các region trước khi trả về, nên tăng độ trễ ghi theo khoảng cách giữa Southeast Asia và East Asia. Nó cũng không dùng chung được với multi-region write. Tính tiền, quyền hay số dư cần mức mạnh hơn thì không thuộc container vị trí; chúng nằm ở PostgreSQL với transaction.
+**Strong** cần đồng thuận qua các region trước khi trả về, nên tăng độ trễ ghi theo khoảng cách giữa Southeast Asia và East Asia. Mức này cũng không dùng chung được với multi-region write. Dữ liệu tính tiền, quyền hay số dư cần mức mạnh hơn thì không thuộc container vị trí; chúng nằm ở PostgreSQL với transaction.
 
 ## TTL, change feed và multi-region write
 
-Điểm vị trí là dữ liệu cũ nhanh: sau 24 giờ không còn giá trị với điều phối. **TTL** xoá item hết hạn bằng một tác vụ nền, và bạn đặt ở container (`--ttl 86400`, tính bằng giây từ lần sửa cuối). Item hết hạn biến khỏi kết quả query ngay khi quá TTL, kể cả khi việc xoá vật lý bị hoãn vì thiếu RU. Với provisioned throughput, việc xoá dùng RU còn thừa; với serverless, mỗi lần xoá do TTL tính RU như một thao tác delete. Dù vậy TTL vẫn gọn hơn tự viết job dọn. Change feed ở chế độ mặc định (latest version) không phát sự kiện cho item bị xoá, kể cả xoá do TTL.
+Điểm vị trí nhanh mất giá trị: sau 24 giờ không còn giá trị với điều phối. **TTL** xoá item hết hạn bằng một tác vụ nền, và bạn đặt ở container (`--ttl 86400`, tính bằng giây từ lần sửa cuối). Item hết hạn biến mất khỏi kết quả query ngay khi quá TTL, kể cả khi việc xoá vật lý bị hoãn vì thiếu RU. Với provisioned throughput, việc xoá dùng RU còn thừa; với serverless, mỗi lần xoá do TTL tính RU như một thao tác delete. Dù vậy TTL vẫn gọn hơn tự viết job dọn. Change feed ở chế độ mặc định (latest version) không phát sự kiện cho item bị xoá, kể cả xoá do TTL.
 
-**Change feed** là nhật ký các thay đổi theo thứ tự trong từng partition. Tới Nơi dùng nó để đẩy mỗi điểm vị trí mới sang Event Hubs (bài 35) hoặc một Azure Function có Cosmos DB trigger, rồi các service Dispatch, Notification đọc ở đó thay vì quét container. Change feed đảm bảo thứ tự theo partition key, không có thứ tự toàn cục giữa các tài xế; consumer phải chịu được xử lý lặp.
+**Change feed** là nhật ký các thay đổi theo thứ tự trong từng partition. Tới Nơi dùng nó để đẩy mỗi điểm vị trí mới sang Event Hubs (bài 35) hoặc một Azure Function có Cosmos DB trigger, rồi các service Dispatch, Notification đọc ở đó thay vì quét container. Change feed đảm bảo thứ tự theo partition key, không có thứ tự toàn cục giữa các tài xế; consumer phải xử lý được bản ghi trùng lặp.
 
 **Multi-region write** cho phép ghi ở cả Southeast Asia và East Asia, đổi lại phải xử lý xung đột khi hai region cùng sửa một item. Mặc định là last-writer-wins theo timestamp, có thể thay bằng thủ tục tuỳ chỉnh. Với vị trí tài xế (mỗi tài xế chỉ ghi qua một service ở một region) xung đột hiếm, nhưng "hiếm" không phải "không bao giờ": nếu cần, hãy bật có chủ đích và đừng bật chỉ vì có sẵn nút.
 
@@ -120,7 +120,7 @@ var res = await container.ReadItemAsync<DriverLocation>(
 logger.LogInformation("RU: {Charge}", res.RequestCharge);
 ```
 
-Đoạn này cho thấy cách khởi tạo client và đọc một item kèm RU; nó không chứng minh `DefaultAzureCredential` có quyền. Quyền data-plane qua Entra là role assignment riêng của Cosmos DB, không phải Azure RBAC thông thường, nên cần kiểm tài liệu và cấp cho managed identity của `trip-service`.
+Đoạn này cho thấy cách khởi tạo client và đọc một item kèm RU; nó không chứng minh `DefaultAzureCredential` có quyền. Quyền data-plane qua Entra là role assignment riêng của Cosmos DB, không phải Azure RBAC thông thường, nên cần kiểm tra tài liệu và cấp cho managed identity của `trip-service`.
 
 Hai quy tắc đi kèm. Thứ nhất, đường nóng chỉ dùng point read hoặc query có partition key trong điều kiện lọc. Cross-partition query tốn RU theo số partition và tăng theo dữ liệu, nên chỉ hợp cho báo cáo, không hợp cho request đặt xe. Thứ hai, ghi hàng loạt (nạp dữ liệu, replay) bật `AllowBulkExecution = true` để SDK gom các thao tác song song thay vì mỗi item một vòng round trip.
 

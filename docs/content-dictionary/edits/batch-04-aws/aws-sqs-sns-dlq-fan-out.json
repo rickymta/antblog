@@ -1,0 +1,13 @@
+{"file":"aws-sqs-sns-dlq-fan-out.md","edits":[
+{"old":"Message không mất. Nó chỉ ẩn trong visibility timeout;","new":"Message không mất. Message chỉ ẩn trong visibility timeout;","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"consumer phải chịu được việc nhận trùng.","new":"consumer phải xử lý được message trùng lặp.","reason":"'chịu được việc nhận trùng' là calque","severity":"high"},
+{"old":"chỉ che cửa sổ 5 phút ở phía broker. Nó không thay cho idempotency ở consumer","new":"chỉ có tác dụng trong cửa sổ 5 phút ở phía broker. Cơ chế này không thay cho idempotency ở consumer","reason":"'che' là calque của 'covers'; tránh 'Nó'","severity":"medium"},
+{"old":"Cùng nguyên tắc áp cho consumer SQS","new":"Cùng nguyên tắc đó áp dụng cho consumer SQS","reason":"Thiếu động từ 'áp dụng'","severity":"low"},
+{"old":"yêu cầu receive chờ tới 20 giây cho tới khi có message","new":"yêu cầu receive chờ tối đa 20 giây cho đến khi có message","reason":"Lặp 'tới' hai lần, nghĩa rối","severity":"low"},
+{"old":"để mọi consumer được hưởng.","new":"để mọi consumer đều áp dụng.","reason":"'được hưởng' gượng","severity":"low"},
+{"old":"một message lỗi phải được xử lý riêng, không kéo cả mẻ xoá nhầm hoặc retry nhầm","new":"một message lỗi phải được xử lý riêng, để cả lô không bị xoá nhầm hoặc retry nhầm","reason":"'kéo cả mẻ xoá nhầm' thiếu mạch; thống nhất 'lô'","severity":"medium"},
+{"old":"Message độc, ví dụ JSON hỏng","new":"Poison message (message không bao giờ xử lý thành công), ví dụ JSON hỏng","reason":"'Message độc' là dịch từng chữ của poison message","severity":"medium"},
+{"old":"thời gian giữ của message trong DLQ tính từ lúc nó vào queue gốc","new":"thời gian giữ của message trong DLQ tính từ lúc message vào queue gốc","reason":"Tránh đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"nếu không nó thành bãi rác im lặng.","new":"nếu không DLQ thành nơi chứa message hỏng mà không ai hay.","reason":"'bãi rác im lặng' là calque của silent","severity":"medium"},
+{"old":"nên nó chỉ an toàn khi consumer idempotent.","new":"nên chỉ an toàn khi consumer idempotent.","reason":"Bỏ 'nó' thừa","severity":"low"}
+]}

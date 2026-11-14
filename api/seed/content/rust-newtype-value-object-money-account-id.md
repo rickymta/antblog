@@ -108,7 +108,7 @@ Lưu `u64` thay vì chuỗi cũng cho thứ tự đúng: so sánh số thì `JE-
 | `PartialOrd`, `Ord` | có | có | có |
 | `Debug` | viết tay | derive | derive |
 
-`Eq` được vì không có `f64`, nên không có NaN phá quan hệ bằng nhau. `Hash` đi cùng `Eq`: hai giá trị bằng nhau phải cho cùng hash, nên `AccountId` làm khóa `HashMap` được. `Ord` cho phép `BTreeMap<AccountId, Money>` (`Ledger::balances` trả số dư xếp theo mã tài khoản) và sắp xếp `EntryId`.
+`Eq` được vì không có `f64`, nên không có NaN phá quan hệ bằng nhau. `Hash` đi cùng `Eq`: hai giá trị bằng nhau phải cho cùng hash, nên `AccountId` làm khoá `HashMap` được. `Ord` cho phép `BTreeMap<AccountId, Money>` (`Ledger::balances` trả số dư xếp theo mã tài khoản) và sắp xếp `EntryId`.
 
 `Copy` nên dành cho kiểu nhỏ, không sở hữu tài nguyên, sao chép bằng vài byte: `Money` và `EntryId` được. `AccountId` giữ `String` trên heap nên chỉ `Clone`; thử dùng sau khi move thì gặp đúng lỗi của bài 04 (rút gọn):
 
@@ -264,7 +264,7 @@ Lệnh đầu in:
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Sổ cái vẫn nằm trong bộ nhớ. <code>Money</code> chỉ có cộng trừ: chưa có nhân chia (phí 20% dùng <code>rust_decimal</code>, xem bài 03 và bài 11), chưa có đổi tiền theo tỷ giá, và <code>Usd</code> chỉ để minh họa kỹ thuật: số trong <code>Money&lt;Usd&gt;</code> là cent mà <code>Display</code> chưa biết. Quy tắc <code>AccountId</code> chỉ kiểm hình dạng, chưa kiểm loại tài khoản có tồn tại. <code>Add</code> trả <code>Result</code> là lựa chọn của lab, không phải chuẩn của hệ sinh thái.</p>
+<p>Sổ cái vẫn nằm trong bộ nhớ. <code>Money</code> chỉ có cộng trừ: chưa có nhân chia (phí 20% dùng <code>rust_decimal</code>, xem bài 03 và bài 11), chưa có đổi tiền theo tỷ giá, và <code>Usd</code> chỉ để minh hoạ kỹ thuật: số trong <code>Money&lt;Usd&gt;</code> là cent mà <code>Display</code> chưa biết. Quy tắc <code>AccountId</code> chỉ kiểm hình dạng, chưa kiểm loại tài khoản có tồn tại. <code>Add</code> trả <code>Result</code> là lựa chọn của lab, không phải chuẩn của hệ sinh thái.</p>
 </div>
 
 **Bài tập:** viết `checked_neg` cho `Money<C>` (lab 11 có bản cho `Money` không generic) để dựng bút toán đảo ở bài sau. Vì sao `Money::from_dong(i64::MIN)` không phủ định được, và kiểu trả về phải là gì?

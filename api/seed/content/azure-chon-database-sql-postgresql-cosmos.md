@@ -20,7 +20,7 @@ Bài này là bài quyết định: ba loại database của Azure, chín tiêu 
 
 ## Quyết định bắt đầu từ cách dữ liệu được dùng
 
-Chọn database theo tên dịch vụ là sai thứ tự. Câu hỏi đúng là: dữ liệu này được ghi và đọc ra sao, ai chịu hậu quả khi nó sai, và đội mình vận hành được cái gì. Với `trips`, mỗi chuyến có vòng đời nhiều trạng thái (đã đặt, đã nhận, đang chạy, hoàn tất), phải khớp với thanh toán, và bị truy vấn theo khách, thành phố, khoảng ngày. Với vị trí tài xế, mỗi dòng sống vài giây rồi vô giá trị, khối lượng ghi lớn và gần như không bao giờ join.
+Chọn database theo tên dịch vụ là sai thứ tự. Câu hỏi đúng là: dữ liệu này được ghi và đọc ra sao, ai chịu hậu quả khi dữ liệu sai, và đội mình vận hành được cái gì. Với `trips`, mỗi chuyến có vòng đời nhiều trạng thái (đã đặt, đã nhận, đang chạy, hoàn tất), phải khớp với thanh toán, và bị truy vấn theo khách, thành phố, khoảng ngày. Với vị trí tài xế, mỗi dòng sống vài giây rồi vô giá trị, khối lượng ghi lớn và gần như không bao giờ join.
 
 Hai dạng dữ liệu đó khác nhau về bản chất. Ép chúng vào cùng một loại database nghĩa là một bên chịu thiệt.
 
@@ -31,20 +31,20 @@ Hai dạng dữ liệu đó khác nhau về bản chất. Ép chúng vào cùng 
 <figcaption>Hình 1. Dạng dữ liệu quyết định nơi lưu: dữ liệu giao dịch quan hệ vào PostgreSQL, dữ liệu ghi dày theo khoá vào Cosmos DB hoặc Redis, dữ liệu phân tích vào Data Lake.</figcaption>
 </figure>
 
-## Azure SQL và PostgreSQL: hai quan hệ, một lý do chọn đã có sẵn
+## Azure SQL và PostgreSQL: hai database quan hệ, lý do chọn đã có sẵn
 
 Họ Azure SQL có ba hình thức triển khai. Azure SQL Database là database PaaS quản lý hoàn toàn, thường hợp một database cho một service. Managed Instance gần với một SQL Server nguyên bản nhất, hợp để chuyển hệ thống đang chạy SQL Server tại chỗ mà ít sửa code. SQL Server trên Azure VM là IaaS, bạn tự vá và tự vận hành. Hyperscale không phải hình thức thứ tư mà là một service tier của Azure SQL Database: storage tách khỏi compute, cho database rất lớn, thêm replica đọc và backup dựa trên snapshot nhanh; ghi vẫn đi qua một primary. PostgreSQL Flexible Server là PostgreSQL chuẩn, đã quen từ bài 9 và bài 30.
 
 Về năng lực quan hệ, cả hai đều đủ cho `trips` và thanh toán: giao dịch ACID, index, ràng buộc, join. Khác biệt nằm ở những thứ xung quanh.
 
 - **Ecosystem.** EF Core dùng được với cả hai. Nhưng loạt C# của Tới Nơi đã viết migration, mapping và test trên PostgreSQL. Chuyển sang database khác không chỉ là đổi connection string mà là viết lại những chỗ dùng tính năng riêng.
-- **Extension.** PostgreSQL có hệ extension rộng, ví dụ PostGIS cho truy vấn không gian như "tài xế gần điểm đón". Azure SQL có kiểu dữ liệu không gian riêng, nhưng không cùng hệ công cụ. Danh sách extension Flexible Server cho phép thay đổi, nên kiểm tài liệu trước khi dựa vào một cái.
+- **Extension.** PostgreSQL có hệ extension rộng, ví dụ PostGIS cho truy vấn không gian như "tài xế gần điểm đón". Azure SQL có kiểu dữ liệu không gian riêng, nhưng không cùng hệ công cụ. Danh sách extension Flexible Server cho phép thay đổi, nên kiểm tra tài liệu trước khi dựa vào một cái.
 - **Kỹ năng đội.** Đội đã chạy hàng chục bài lab PostgreSQL. Kỹ năng sẵn có là một khoản tiết kiệm thật, không nên xem nhẹ.
 - **Khi nào Azure SQL thắng.** Đội có sẵn T-SQL và SQL Server, cần Managed Instance để lift-and-shift, hoặc cần một tính năng chỉ có ở đó. Tới Nơi không rơi vào các trường hợp này, nên `trips` ở lại PostgreSQL như loạt C# đã chọn.
 
-## Cosmos DB: mạnh ở ghi phân tán, trả giá ở join và chi phí đoán
+## Cosmos DB: mạnh ở ghi phân tán, trả giá ở join và chi phí khó dự đoán
 
-Cosmos DB không phải một database mà là một họ API. API NoSQL là lõi gốc của dịch vụ, bên cạnh các API tương thích MongoDB (RU), Cassandra, Gremlin và Table. Hai cái tên hay gặp trong tài liệu cũ đã đổi chỗ. MongoDB vCore nay là sản phẩm riêng mang tên Azure DocumentDB (with MongoDB compatibility), cho đội muốn dùng driver và công cụ MongoDB. Azure Cosmos DB for PostgreSQL (PostgreSQL phân tán trên Citus) đang trên lộ trình nghỉ hưu và không còn được khuyên dùng cho dự án mới; Microsoft hướng người dùng sang tính năng Elastic Clusters của Azure Database for PostgreSQL. Tới Nơi vì thế chỉ xét Cosmos DB for NoSQL.
+Cosmos DB không phải một database mà là một họ API. API NoSQL là lõi gốc của dịch vụ, bên cạnh các API tương thích MongoDB (RU), Cassandra, Gremlin và Table. Hai cái tên hay gặp trong tài liệu cũ nay đã thay đổi. MongoDB vCore nay là sản phẩm riêng mang tên Azure DocumentDB (with MongoDB compatibility), cho đội muốn dùng driver và công cụ MongoDB. Azure Cosmos DB for PostgreSQL (PostgreSQL phân tán trên Citus) đang trong lộ trình ngừng hỗ trợ và không còn được khuyên dùng cho dự án mới; Microsoft hướng người dùng sang tính năng Elastic Clusters của Azure Database for PostgreSQL. Tới Nơi vì thế chỉ xét Cosmos DB for NoSQL.
 
 Điểm mạnh với Tới Nơi:
 
@@ -55,7 +55,7 @@ Cosmos DB không phải một database mà là một họ API. API NoSQL là lõ
 Điểm yếu cần nhìn thẳng:
 
 - Không có join kiểu quan hệ. Truy vấn nhiều loại thực thể phải thiết kế lại dữ liệu cho từng câu hỏi (denormalize).
-- Giao dịch (transactional batch, stored procedure) chỉ bảo đảm trong phạm vi một logical partition, tức cùng một giá trị partition key. Thao tác trải qua nhiều partition key không có ACID như PostgreSQL.
+- Giao dịch (transactional batch, stored procedure) chỉ bảo đảm trong phạm vi một logical partition, tức cùng một giá trị partition key. Thao tác liên quan tới nhiều partition key không có ACID như PostgreSQL.
 - Chi phí tính bằng request unit (RU), khó đoán khi truy vấn cắt ngang nhiều partition hoặc chọn partition key kém. Một câu query tưởng nhỏ có thể tốn RU gấp nhiều lần dự tính. Bài 32 đi sâu vào chuyện này.
 
 ## Ma trận tiêu chí là chỗ bắt đầu thảo luận
@@ -74,7 +74,7 @@ Bảng dưới là điểm xuất phát để thảo luận, không phải bản
 | Kỹ năng đội | Cần T-SQL | Đã có (loạt C# và PostgreSQL) | Cần học mô hình partition, RU |
 | Ecosystem | EF Core, công cụ SQL Server | EF Core, PostGIS, hệ extension | SDK riêng, change feed |
 
-Đọc theo cột của Tới Nơi: PostgreSQL thắng ở kỹ năng đội, ecosystem và truy vấn. Cosmos DB thắng ở scale ghi và phân tán địa lý, hai tiêu chí chỉ quan trọng khi workload thật sự cần.
+Đọc theo nhu cầu của Tới Nơi: PostgreSQL thắng ở kỹ năng đội, ecosystem và truy vấn. Cosmos DB thắng ở scale ghi và phân tán địa lý, hai tiêu chí chỉ quan trọng khi workload thật sự cần.
 
 ## Database được gán theo bounded context
 
@@ -85,7 +85,7 @@ Ranh giới chọn database nên trùng ranh giới bounded context: mỗi servi
 | Booking, Trip | PostgreSQL | Vòng đời trạng thái, giao dịch, outbox |
 | Payment | PostgreSQL | Cần ACID chặt, đối soát, ràng buộc |
 | Catalog quán | PostgreSQL | Dữ liệu quan hệ, tìm kiếm có cấu trúc, thay đổi chậm |
-| Driver location, live tracking | Cosmos DB, hoặc Redis kết hợp Event Hubs | Ghi dày, dữ liệu ngắn hạn, truy cập theo `driverId` |
+| Driver location, live tracking | Cosmos DB, hoặc Redis kết hợp Event Hubs | Ghi nhiều, dữ liệu ngắn hạn, truy cập theo `driverId` |
 | Pricing và Quote | Redis cho cache, PostgreSQL cho luật giá | Đọc nhiều, tính lại được |
 | Notification | PostgreSQL hoặc queue | Ít dữ liệu, cần trạng thái gửi |
 | Analytics | Data Lake | Quét lớn, không chạm OLTP |
@@ -97,11 +97,11 @@ Cột "đề xuất" là quyết định mặc định cho Tới Nơi, không ph
 <p>Mỗi database thêm vào là thêm một bộ backup cần tập restore, một bộ metric và alert, một runbook sự cố, một loại tài khoản truy cập, và một kỹ năng cần có người trong đội. Đừng tách database vì "service nên có database riêng" khi chưa có áp lực tải hay hình dạng dữ liệu đòi hỏi. Đổi database sau khi có dữ liệu thật là việc đắt nhất trong danh sách này.</p>
 </div>
 
-### Polyglot persistence và hoá đơn ngầm của nó
+### Polyglot persistence và chi phí ẩn của nó
 
-Dùng nhiều loại database cho nhiều bounded context gọi là polyglot persistence. Lợi ích là mỗi dữ liệu nằm đúng chỗ. Hoá đơn ngầm là vận hành nhân lên theo số loại: ba loại database nghĩa là ba kiểu backup và restore, ba cách sinh sự cố, ba cách xoay secret, và ba loại alert phải học đọc.
+Dùng nhiều loại database cho nhiều bounded context gọi là polyglot persistence. Lợi ích là mỗi dữ liệu nằm đúng chỗ. Chi phí ẩn là công sức vận hành nhân lên theo số loại: ba loại database nghĩa là ba kiểu backup và restore, ba kiểu sự cố, ba cách xoay secret, và ba loại alert phải học đọc.
 
-Ngoài ra, khi dữ liệu chia nhiều nơi, giao dịch xuyên service không còn. Đặt chuyến ghi PostgreSQL rồi cần cập nhật tracking trên Cosmos DB thì phải dùng Outbox và consumer idempotent như [bài 26 của loạt C#](/articles/dotnet10-outbox-inbox-idempotent-consumer), chấp nhận độ trễ giữa hai bên. Nên bắt đầu bằng ít loại nhất đủ dùng và chỉ thêm khi một bounded context thật sự không chịu nổi database hiện tại.
+Ngoài ra, khi dữ liệu chia ra nhiều nơi, không còn giao dịch xuyên service nữa. Nếu đặt chuyến ghi vào PostgreSQL rồi còn phải cập nhật tracking trên Cosmos DB thì phải dùng Outbox và consumer idempotent như [bài 26 của loạt C#](/articles/dotnet10-outbox-inbox-idempotent-consumer), chấp nhận độ trễ giữa hai bên. Nên bắt đầu bằng ít loại nhất đủ dùng và chỉ thêm khi một bounded context thật sự không chịu nổi database hiện tại.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">

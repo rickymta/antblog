@@ -1,14 +1,14 @@
 ---
 slug: system-testing-functional-test
 title: "Functional Test thực chiến: biến quy tắc cước Tới Nơi thành bằng chứng hành vi"
-summary: "SYS-03 của series kiểm thử hệ thống: tách yêu cầu cước, voucher và trạng thái chuyến của Tới Nơi thành điều kiện kiểm thử; chọn biên quanh bước làm tròn, lập bảng quyết định cao điểm × mưa × voucher với oracle tính tay, kiểm snapshot giá và chuyển trạng thái bị từ chối. Lab 24 ca qua API, kết quả chạy thật và các khoảng trống được công bố."
+summary: "SYS-03 của series kiểm thử hệ thống: tách yêu cầu cước, voucher và trạng thái chuyến của Tới Nơi thành điều kiện kiểm thử; chọn biên quanh bước làm tròn, lập bảng quyết định cao điểm × mưa × voucher với oracle tính tay, kiểm snapshot giá và chuyển trạng thái bị từ chối. Lab gồm 24 test execution qua API, kết quả chạy thật và các khoảng trống được công bố."
 category: testing
 level: intermediate
 tags: [testing, sys-03, functional-testing, system-testing, boundary-value-analysis, decision-table, state-transition, test-oracle, vitest, toi-noi]
 language: vi
 ---
 
-Khách đặt xe máy 5 km lúc 9 giờ sáng thấy cước 35.000 đ — đúng. Đến trưa, Sài Gòn đổ mưa, cùng quãng đường đó hệ thống báo 54.000 đ thay vì 52.000 đ. Request vẫn trả 200, trang vẫn hiện giá, smoke test xanh, sanity cho thay đổi voucher cũng xanh. Lỗi nằm ở chỗ phụ phí mưa bị cộng **trước** khi nhân hệ số cao điểm. Bài này chỉ cách thiết kế functional test để bắt đúng loại lỗi đó: đi từ quy tắc trong đặc tả tới dữ liệu chọn có chủ đích, tới oracle tính tay độc lập với code, rồi tới một bộ test chạy lại được qua API của Tới Nơi.
+Khách đặt xe máy 5 km lúc 9 giờ sáng thấy cước 35.000 đ — đúng. Đến trưa, Sài Gòn đổ mưa, cùng quãng đường đó hệ thống báo 54.000 đ thay vì 52.000 đ. Request vẫn trả 200, trang vẫn hiện giá, smoke test xanh, sanity cho thay đổi voucher cũng xanh. Lỗi nằm ở chỗ phụ phí trời mưa bị cộng **trước** khi nhân hệ số cao điểm. Bài này chỉ cách thiết kế functional test để bắt đúng loại lỗi đó: đi từ quy tắc trong đặc tả tới dữ liệu chọn có chủ đích, tới oracle tính tay độc lập với code, rồi tới một bộ test chạy lại được qua API của Tới Nơi.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-03</span>
@@ -27,7 +27,7 @@ Khách đặt xe máy 5 km lúc 9 giờ sáng thấy cước 35.000 đ — đún
 
 ## 1. Bài toán và mục tiêu
 
-[SYS-01](/articles/system-testing-smoke-test) trả lời «bản build có đủ tốt để kiểm sâu không», [SYS-02](/articles/system-testing-sanity-test) trả lời «thay đổi vừa sửa có hợp lý không». Cả hai cố tình nhỏ. Chúng không được thiết kế để trả lời câu hỏi khó hơn: **mọi quy tắc tính tiền có cho đúng con số ở những tổ hợp dễ sai nhất không?** Đó là việc của functional test được thiết kế từ đặc tả.
+[SYS-01](/articles/system-testing-smoke-test) trả lời «bản build có đủ tốt để kiểm thử chuyên sâu không», [SYS-02](/articles/system-testing-sanity-test) trả lời «thay đổi vừa sửa có hợp lý không». Cả hai cố tình nhỏ. Chúng không được thiết kế để trả lời câu hỏi khó hơn: **mọi quy tắc tính tiền có cho đúng con số ở những tổ hợp dễ sai nhất không?** Đó là việc của functional test được thiết kế từ đặc tả.
 
 Ví dụ mở đầu là một lỗi tổ hợp: từng điều kiện riêng lẻ (chỉ cao điểm, chỉ mưa, chỉ voucher) có thể đều cho giá đúng, chỉ khi hai điều kiện cùng xảy ra thì thứ tự phép tính mới lộ ra. Một bộ test chọn dữ liệu ngẫu hứng — «5 km, giờ thường» rồi «5 km, có voucher» — sẽ không bao giờ đi vào nhánh đó.
 
@@ -37,7 +37,7 @@ Sau bài này bạn có thể:
 2. Chọn dữ liệu biên khi đặc tả có bước **chuẩn hoá trước validation** (làm tròn quãng đường).
 3. Lập bảng quyết định cho ba điều kiện cước và tính oracle bằng tay, kiểm cả giá trị trung gian.
 4. Kiểm hành vi có trạng thái: thất bại phải **không để lại tác dụng phụ**.
-5. Viết ma trận truy vết requirement → case → kết quả, và nói rõ phần **chưa** được phủ.
+5. Viết ma trận truy vết requirement → test case → kết quả, và nói rõ phần **chưa** được phủ.
 
 Phạm vi lab: cước dịch vụ `ride` bằng xe máy tại SG và một đoạn vòng đời chuyến. Bài không tuyên bố phủ toàn bộ chức năng Tới Nơi; phần cuối liệt kê cụ thể những gì còn thiếu.
 
@@ -56,9 +56,9 @@ Những nhãn hay bị trộn với nhau trong dự án thật:
 | UAT | Giải pháp có đáp ứng nhu cầu và tiêu chí nghiệm thu? | Đại diện vận hành chấp nhận quy trình đặt xe |
 | API testing | Tác động qua giao diện nào? | Gọi `POST /api/quotes` — có thể để kiểm chức năng, bảo mật hay hiệu năng |
 
-Các nhãn **không loại trừ nhau**. Cùng một ca «5 km, mưa, cao điểm, GIAM20» lần đầu chạy để kiểm chức năng; khi được chọn vào bộ chạy lại sau mỗi thay đổi giá, nó là một ca regression. «API test» chỉ nói giao diện được tác động, không nói mục tiêu.
+Các nhãn **không loại trừ nhau**. Cùng một test case «5 km, mưa, cao điểm, GIAM20» lần đầu chạy để kiểm chức năng; khi được chọn vào bộ chạy lại sau mỗi thay đổi giá, nó là một test case regression. «API test» chỉ nói giao diện được tác động, không nói mục tiêu.
 
-Hai hiểu lầm cần bỏ ngay: functional **không** đồng nghĩa với happy path (ca từ chối là ca chức năng), và functional **không** buộc phải đi qua UI (bài này kiểm qua HTTP API vì quy tắc tiền nằm ở backend; UI là chủ đề của [SYS-05](/articles/system-testing-system-test)).
+Hai hiểu lầm cần bỏ ngay: functional **không** đồng nghĩa với happy path (test case từ chối là test case chức năng), và functional **không** buộc phải đi qua UI (bài này kiểm qua HTTP API vì quy tắc tiền nằm ở backend; UI là chủ đề của [SYS-05](/articles/system-testing-system-test)).
 
 ## 3. Từ test basis tới test condition
 
@@ -76,13 +76,13 @@ Test basis trực tiếp là `examples/toi-noi-testing/SPEC.md`. Đọc implemen
 | R-QUOTE-04 | Chuyến giữ ảnh chụp giá của báo giá | Giá đổi sau khi khách đã đồng ý |
 | R-STATE-02, 03 | Chỉ chuyển trạng thái có trong bảng; chuyển sai ⇒ 409 và chuyến giữ nguyên | Hoàn thành chuyến khi chưa chở khách; dữ liệu bị ghi dở |
 
-Các con số cước của xe máy trong bài lấy từ bảng R-FARE-01: phí mở cửa **12.000 đ**, **4.500 đ/km**, cước tối thiểu **15.000 đ**. Hệ số cao điểm **1,25** cho khung [11:00; 13:00) và [17:00; 19:00) (R-FARE-04), phụ phí mưa **8.000 đ** cộng sau hệ số (R-FARE-05). Voucher mẫu `GIAM20`: 20%, trần 30.000 đ, tối thiểu 0 đ, 1 lần/ngày (Phụ lục dữ liệu mẫu).
+Các con số cước của xe máy trong bài lấy từ bảng R-FARE-01: phí mở cửa **12.000 đ**, **4.500 đ/km**, cước tối thiểu **15.000 đ**. Hệ số cao điểm **1,25** cho khung [11:00; 13:00) và [17:00; 19:00) (R-FARE-04), phụ phí trời mưa **8.000 đ** cộng sau hệ số (R-FARE-05). Voucher mẫu `GIAM20`: 20%, trần 30.000 đ, tối thiểu 0 đ, 1 lần/ngày (Phụ lục dữ liệu mẫu).
 
 ### 3.2. Test condition chưa phải test case
 
-«Có cước tối thiểu» là một condition. Nó chỉ thành test case khi có dữ liệu **thực sự đi vào nhánh đó**. Ca 5 km + GIAM20 cho 34.500 × 0,8 = 27.600 — trên sàn, nên không kiểm được R-FARE-07 dù có voucher. Phải hạ xuống 0,5 km: 12.000 + 2.250 = 14.250, giảm 2.850, còn 11.400 < 15.000 ⇒ sàn mới có tác dụng.
+«Có cước tối thiểu» là một condition. Condition này chỉ thành test case khi có dữ liệu **thực sự đi vào nhánh đó**. Test case 5 km + GIAM20 cho 34.500 × 0,8 = 27.600 — trên sàn, nên không kiểm được R-FARE-07 dù có voucher. Phải hạ xuống 0,5 km: 12.000 + 2.250 = 14.250, giảm 2.850, còn 11.400 < 15.000 ⇒ sàn mới có tác dụng.
 
-Đây là lỗi thiết kế hay gặp nhất: ca test được *gắn nhãn* với requirement nhưng dữ liệu không chạm điều kiện của requirement. Ma trận truy vết vẫn «xanh», còn rủi ro vẫn nguyên.
+Đây là lỗi thiết kế hay gặp nhất: test case được *gắn nhãn* với requirement nhưng dữ liệu không chạm điều kiện của requirement. Ma trận truy vết vẫn «xanh», còn rủi ro vẫn nguyên.
 
 ### 3.3. Oracle độc lập
 
@@ -141,11 +141,11 @@ Theo R-FARE-02, quãng đường được làm tròn tới 0,1 km half-up **trư
 | 100,04 | 100 | 200 | Biên thô trên |
 | 100,05 | 100,1 | 422 `DISTANCE_OUT_OF_RANGE` | Ngay trên biên thô |
 
-Tám dòng này là lựa chọn biên và điểm đại diện **theo rủi ro**, không phải tuyên bố đã phủ mọi số thực. Nếu muốn báo cáo coverage biên theo kỹ thuật của [Boundary Value Analysis](/articles/boundary-value-analysis), phải định nghĩa trước độ chính xác của input (client có gửi 0,449 không?) và tập boundary item tương ứng. Còn 7,35 có một bẫy riêng: trong số thực nhị phân, 7,35 không biểu diễn chính xác, nên một implementation `Math.round(x * 10) / 10` ngây thơ có thể cho kết quả khác mong đợi ở vài giá trị. Ca này tồn tại để bắt đúng loại lỗi đó.
+Tám dòng này là lựa chọn biên và điểm đại diện **theo rủi ro**, không phải tuyên bố đã phủ mọi số thực. Nếu muốn báo cáo coverage biên theo kỹ thuật của [Boundary Value Analysis](/articles/boundary-value-analysis), phải định nghĩa trước độ chính xác của input (client có gửi 0,449 không?) và tập boundary item tương ứng. Còn 7,35 có một bẫy riêng: trong số thực nhị phân, 7,35 không biểu diễn chính xác, nên một implementation `Math.round(x * 10) / 10` ngây thơ có thể cho kết quả khác mong đợi ở vài giá trị. Test case này tồn tại để bắt đúng loại lỗi đó.
 
 ### 4.2. Một lỗi mỗi lần, rồi mới kiểm thứ tự lỗi
 
-Ca có nhiều field sai cùng lúc khó chỉ ra field nào gây lỗi. Thứ tự đúng là: trước tiên ca **một vi phạm** để chắc từng quy tắc hoạt động; sau đó mới thêm ca **nhiều vi phạm** với mục đích duy nhất là kiểm **thứ tự** trả lỗi của R-VALID-01 (… → định dạng 400 → `CITY_NOT_SUPPORTED` → `DISTANCE_OUT_OF_RANGE` → … → lỗi voucher).
+Test case có nhiều field sai cùng lúc khó chỉ ra field nào gây lỗi. Thứ tự đúng là: trước tiên là test case **một vi phạm** để chắc từng quy tắc hoạt động; sau đó mới thêm test case **nhiều vi phạm** với mục đích duy nhất là kiểm **thứ tự** trả lỗi của R-VALID-01 (… → định dạng 400 → `CITY_NOT_SUPPORTED` → `DISTANCE_OUT_OF_RANGE` → … → lỗi voucher).
 
 | Input bổ sung vào ca chuẩn | Expected | Ý nghĩa |
 |---|---|---|
@@ -154,7 +154,7 @@ Ca có nhiều field sai cùng lúc khó chỉ ra field nào gây lỗi. Thứ t
 | `cityCode: "XX"`, `distanceKm: 0.1` | 422 `CITY_NOT_SUPPORTED` | Thành phố đứng trước quãng đường |
 | `distanceKm: 0.1`, `voucherCode: "KHONGCO"` | 422 `DISTANCE_OUT_OF_RANGE` | Quãng đường đứng trước lỗi voucher |
 
-Nếu chỉ có hai ca nhiều lỗi mà thiếu ca đơn lỗi, khi test đỏ bạn không biết là thứ tự sai hay quy tắc đơn lẻ sai.
+Nếu chỉ có hai test case nhiều lỗi mà thiếu test case đơn lỗi, khi test đỏ bạn không biết là thứ tự sai hay quy tắc đơn lẻ sai.
 
 ## 5. Bảng quyết định: cao điểm × mưa × voucher
 
@@ -205,9 +205,9 @@ Cố định: xe máy, 5 km, SG, voucher `GIAM20` còn lượt. Cước cơ bả
 
 Thử với lỗi mở bài: cộng mưa trước rồi nhân. Quy tắc 7 sẽ cho (34.500 + 8.000) × 1,25 = 53.125 → làm tròn **54.000** thay vì 52.000 — tổng lệch, test đỏ. Nhưng có những lỗi mà tổng **không** lệch. Giả sử một implementation làm tròn xuống 1.000 *trước* khi áp voucher (vi phạm R-GEN-01). Quy tắc 8: 51.125 → 51.000, giảm 10.200, còn 40.800 → làm tròn lên **41.000** — đúng bằng expected. Quy tắc 6: 43.125 → 43.000, giảm 8.600, còn 34.400 → **35.000** — cũng trùng. Khách không thấy khác biệt ở hai dòng này, nhưng báo cáo khuyến mãi ghi sai tiền giảm, và ở các quãng đường khác sai số sẽ vượt bước làm tròn. Chỉ assert `discount` (10.225, 8.625) mới bắt được. Assert `beforeDiscount`, `discount`, `total` cùng lúc thì bạn biết **bước nào** sai thay vì chỉ biết «tổng lệch» — hoặc tệ hơn, không biết gì.
 
-### 5.3. Hai ca nằm ngoài bảng
+### 5.3. Hai test case nằm ngoài bảng
 
-Tám quy tắc không chạm sàn giá và trần giảm. Lab thêm hai ca chủ đích:
+Tám quy tắc không chạm sàn giá và trần giảm. Lab thêm hai test case chủ đích:
 
 | Ca | Phép tính tay | Expected |
 |---|---|---|
@@ -220,7 +220,7 @@ FN-04 phân biệt «đã giảm rồi nâng lên sàn» với «không áp vouc
 
 ### 6.1. Thất bại phải không ghi gì
 
-Chức năng có trạng thái cần kiểm hai thứ: phản hồi của thao tác, và trạng thái **sau** thao tác. Theo bảng R-STATE-02, từ `accepted` chỉ đi được tới `arriving` (tài xế), `cancelled` (khách huỷ) hoặc `searching` (tài xế huỷ). `complete` chỉ hợp lệ từ `in_transit`. Vậy ca FN-07:
+Chức năng có trạng thái cần kiểm hai thứ: phản hồi của thao tác, và trạng thái **sau** thao tác. Theo bảng R-STATE-02, từ `accepted` chỉ đi được tới `arriving` (tài xế), `cancelled` (khách huỷ) hoặc `searching` (tài xế huỷ). `complete` chỉ hợp lệ từ `in_transit`. Vậy test case FN-07:
 
 1. Báo giá, đặt chuyến — chuẩn bị.
 2. Tài xế D101 nhận chuyến → `accepted` — chuẩn bị.
@@ -232,12 +232,12 @@ Chỉ assert 409 là chưa đủ: một implementation có thể đã ghi `compl
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của assertion «chưa gọi ví»</span>
-<p>Ca FN-07 trong lab đặt chuyến không gửi <code>paymentMethod</code>, nên theo R-API-08 chuyến dùng mặc định <code>cash</code>. Với chuyến tiền mặt, ví VíXanh vốn không được gọi dù trạng thái có bị ghi sai hay không — assertion <code>payments.calls</code> = 0 vì thế gần như không mang thông tin. Bằng chứng chính của FN-07 là 409 cộng trạng thái đọc lại. Muốn assertion về ví có giá trị, đặt chuyến với <code>paymentMethod: 'vixanh'</code> (bài tập 4).</p>
+<p>Test case FN-07 trong lab đặt chuyến không gửi <code>paymentMethod</code>, nên theo R-API-08 chuyến dùng mặc định <code>cash</code>. Với chuyến tiền mặt, ví VíXanh vốn không được gọi dù trạng thái có bị ghi sai hay không — assertion <code>payments.calls</code> = 0 vì thế gần như không mang thông tin. Bằng chứng chính của FN-07 là 409 cộng trạng thái đọc lại. Muốn assertion về ví có giá trị, đặt chuyến với <code>paymentMethod: 'vixanh'</code> (bài tập 4).</p>
 </div>
 
 ### 6.2. Snapshot giá và «điều kiện có thật sự đổi?»
 
-R-QUOTE-04: chuyến giữ ảnh chụp giá của báo giá. FN-06 báo giá lúc không mưa (35.000), bật mưa cho SG, rồi đặt chuyến từ báo giá cũ: expected `fare` = 35.000, `raining` = false. Ca này có thêm một bước tưởng thừa: báo giá **mới** sau khi bật mưa phải là 43.000 và `raining` = true.
+R-QUOTE-04: chuyến giữ ảnh chụp giá của báo giá. FN-06 báo giá lúc không mưa (35.000), bật mưa cho SG, rồi đặt chuyến từ báo giá cũ: expected `fare` = 35.000, `raining` = false. Test case này có thêm một bước tưởng thừa: báo giá **mới** sau khi bật mưa phải là 43.000 và `raining` = true.
 
 Bước đó là **kiểm chứng điều kiện thí nghiệm**. Nếu fake weather không đổi được (sai tên thành phố, setter hỏng), assertion snapshot vẫn xanh — nhưng xanh vô nghĩa, vì giá vốn không có lý do thay đổi. Một test chỉ chứng minh «không đổi» khi nó cũng chứng minh được «lẽ ra có thể đổi».
 
@@ -298,7 +298,7 @@ expect(system.payments.calls).toHaveLength(0);
 | FN-06 | R-QUOTE-04 | 09:00, không mưa | Báo giá → bật mưa → đặt → báo giá mới | Chuyến 35.000/`raining=false`; quote mới 43.000/`raining=true` | 1 | Không cần |
 | FN-07 | R-STATE-02/03 | Chuyến của C001 | Đặt → D101 accept → D101 complete → đọc lại | 409 `INVALID_TRANSITION`; vẫn `accepted` | 1 | Không cần |
 
-Tổng: **24 execution**. Ma trận này là testware có thể đưa thẳng vào báo cáo; nó cũng là thứ bài SYS-06 Regression Test sẽ dùng để chọn ca khi giá thay đổi.
+Tổng: **24 execution**. Ma trận này là testware có thể đưa thẳng vào báo cáo; nó cũng là thứ bài SYS-06 Regression Test sẽ dùng để chọn test case khi giá thay đổi.
 
 ### 7.3. Chạy lại
 
@@ -310,7 +310,7 @@ npm test -- articles/system-testing-functional-test
 npm run typecheck
 ```
 
-Chỉ cần `npm ci` lần đầu. Test gọi Express trong tiến trình qua supertest, dùng kho bộ nhớ, clock cố định, thời tiết và ví giả. Đây là kiểm hành vi qua API của ứng dụng đã lắp ráp — **chưa** phải kiểm một bản triển khai được truy cập qua mạng, chưa có DB thật.
+Chỉ cần `npm ci` lần đầu. Test gọi Express trong tiến trình qua supertest, dùng kho bộ nhớ, clock cố định, thời tiết và ví giả. Đây là kiểm hành vi qua API của ứng dụng đã lắp ráp — **chưa** phải kiểm một bản triển khai truy cập qua mạng, và chưa có DB thật.
 
 ## 8. Kết quả và cách đọc
 
@@ -338,7 +338,7 @@ Kết luận đúng phạm vi: **trong lab bộ nhớ, các hành vi đã chọn
 |---|---|---|
 | 0,45 bị từ chối, 0,5 qua | Kiểm khoảng trước khi làm tròn | Thứ tự normalize/validate trong luồng báo giá |
 | 7,35 thành 7,3 | Làm tròn sai kiểu hoặc sai số dấu phẩy động | Hàm làm tròn, giá trị trung gian |
-| Chỉ quy tắc 7 và 8 sai | Vị trí cộng phụ phí mưa | `fare` breakdown: sau cao điểm, phụ phí mưa |
+| Chỉ quy tắc 7 và 8 sai | Vị trí cộng phụ phí trời mưa | `fare` breakdown: sau cao điểm, phụ phí trời mưa |
 | Tổng đúng nhưng `discount` sai | Làm tròn giữa chừng bị tổng che | `discount`, `afterDiscount` của dòng đó |
 | FN-04 cho `discount` = 0 | Voucher bị bỏ khi chạm sàn thay vì áp rồi nâng | Breakdown R-FARE-10 |
 | Giá chuyến đổi khi mưa đổi | Luồng tạo chuyến tính lại giá | So `fareBreakdown` của chuyến với quote |
@@ -352,7 +352,7 @@ Không sửa expected để test xanh. Nếu expected sai thật, nguyên nhân 
 - **Entry:** SPEC xác định phiên bản; clock và thời tiết kiểm soát được; dependency cài theo lockfile.
 - **Exit của bài tập:** 24/24 pass, typecheck đạt, mọi expected đã đối chiếu bảng tính tay, khoảng trống được liệt kê. Exit này đánh giá lab, **không** thay tiêu chí release.
 
-Coverage bảng quyết định là **8/8 quy tắc của mô hình ba điều kiện cho xe máy 5 km**. Đây không phải 100% chức năng pricing. Một requirement «có ít nhất một ca» cũng không có nghĩa mọi điều kiện của nó đã được kiểm — R-FARE-04 có biên 11:00:00, 12:59:59, 13:00:00 mà suite chưa chạm.
+Coverage bảng quyết định là **8/8 quy tắc của mô hình ba điều kiện cho xe máy 5 km**. Đây không phải 100% chức năng pricing. Một requirement «có ít nhất một test case» cũng không có nghĩa mọi điều kiện của nó đã được kiểm — R-FARE-04 có biên 11:00:00, 12:59:59, 13:00:00 mà suite chưa chạm.
 
 ## 9. Mở rộng nâng cao
 
@@ -366,13 +366,13 @@ Một bất biến khác: tổng cước `ride` là số nguyên và chia hết 
 
 Từ bảng R-STATE-02 có thể viết một mô hình riêng trong test, sinh chuỗi lệnh `accept`/`arrive`/`pickup`/`start`/`complete`/`cancel` và sau mỗi lệnh so trạng thái quan sát với mô hình. Điều kiện bắt buộc: **không import bảng chuyển trạng thái của implementation** làm oracle — nếu bảng sản phẩm sai, mô hình sai theo. Đo cả transition hợp lệ lẫn không hợp lệ: 8 trạng thái của R-STATE-01 × các sự kiện cho nhiều cặp bị cấm hơn cặp hợp lệ, và chúng chính là chỗ R-STATE-03 phải được kiểm. State coverage một mình không chứng minh các cạnh đúng.
 
-### 9.3. Tổ hợp lớn: pairwise và ca chủ đích
+### 9.3. Tổ hợp lớn: pairwise và test case chủ đích
 
-Khi thêm thành phố, loại xe, dịch vụ, điều kiện voucher, phương thức thanh toán và khung giờ, số tổ hợp tăng theo cấp số nhân. [Pairwise](/articles/pairwise-testing) chọn được mọi cặp giá trị với ít ca, nhưng lỗi mở bài là tương tác **ba** yếu tố (cao điểm × mưa × voucher ảnh hưởng tiền giảm) — pairwise không bảo đảm bắt. Chiến lược hợp lý: giữ đầy đủ tổ hợp ở vùng tiền có rủi ro cao, dùng pairwise cho phần còn lại, loại tổ hợp bất khả thi bằng constraint (đồ ăn không đi ô tô — R-FOOD-06) và **công bố** mô hình đã giảm.
+Khi thêm thành phố, loại xe, dịch vụ, điều kiện voucher, phương thức thanh toán và khung giờ, số tổ hợp tăng theo cấp số nhân. [Pairwise](/articles/pairwise-testing) chọn được mọi cặp giá trị với ít test case, nhưng lỗi mở bài là tương tác **ba** yếu tố (cao điểm × mưa × voucher ảnh hưởng tiền giảm) — pairwise không bảo đảm bắt. Chiến lược hợp lý: giữ đầy đủ tổ hợp ở vùng tiền có rủi ro cao, dùng pairwise cho phần còn lại, loại tổ hợp bất khả thi bằng constraint (đồ ăn không đi ô tô — R-FOOD-06) và **công bố** mô hình đã giảm.
 
 ### 9.4. Mutation testing: assertion có biết bắt lỗi không?
 
-Ba đột biến có ý nghĩa nghiệp vụ, và ca được kỳ vọng bắt từng cái:
+Ba đột biến có ý nghĩa nghiệp vụ, và test case được kỳ vọng bắt từng cái:
 
 | Đột biến | Ca phải đỏ |
 |---|---|
@@ -384,7 +384,7 @@ Chạy trên bản sao hoặc qua công cụ mutation, không lưu lỗi vào `s
 
 ### 9.5. Thời gian và concurrency
 
-Clock cố định cho kết quả lặp lại nhưng chưa kiểm biên giờ cao điểm hay ngày hiệu lực voucher theo UTC+7 (R-GEN-02, R-FARE-04, R-VOUCHER-04). Thêm ca 10:59:59, 11:00:00, 12:59:59, 13:00:00 bằng clock của lab, không phụ thuộc múi giờ máy chạy test. Hai tài xế cùng nhận một chuyến, hay hai request cùng tiêu một lượt voucher (R-VOUCHER-07), cần DB và giao dịch thật với nhiều kết nối — suite bộ nhớ chạy tuần tự **không** chứng minh chống race condition. Đó là phần của [SYS-04](/articles/system-testing-integration-test) và bài Data Integrity.
+Clock cố định cho kết quả lặp lại nhưng chưa kiểm biên giờ cao điểm hay ngày hiệu lực voucher theo UTC+7 (R-GEN-02, R-FARE-04, R-VOUCHER-04). Thêm test case 10:59:59, 11:00:00, 12:59:59, 13:00:00 bằng clock của lab, không phụ thuộc múi giờ máy chạy test. Hai tài xế cùng nhận một chuyến, hay hai request cùng tiêu một lượt voucher (R-VOUCHER-07), cần DB và giao dịch thật với nhiều kết nối — suite bộ nhớ chạy tuần tự **không** chứng minh chống race condition. Đó là phần của [SYS-04](/articles/system-testing-integration-test) và bài Data Integrity.
 
 ## 10. Anti-pattern, giới hạn và đánh đổi
 
@@ -395,7 +395,7 @@ Clock cố định cho kết quả lặp lại nhưng chưa kiểm biên giờ c
 - Lấy expected từ response của lần chạy trước — so sánh vòng tròn.
 - Snapshot cả JSON response — field không liên quan đổi là đỏ, nhiễu che tín hiệu.
 - Một test dài phủ mười hành vi — failure đầu tiên che chín hành vi còn lại; bảng dữ liệu độc lập giữ chẩn đoán rõ.
-- Gắn nhãn requirement cho ca mà dữ liệu không chạm điều kiện (mục 3.2).
+- Gắn nhãn requirement cho test case mà dữ liệu không chạm điều kiện (mục 3.2).
 - Gộp lỗi môi trường (thiếu dependency) vào lỗi nghiệp vụ, hoặc rerun cho tới khi xanh.
 
 <div class="tkh-callout tkh-callout--warn">
@@ -403,7 +403,7 @@ Clock cố định cho kết quả lặp lại nhưng chưa kiểm biên giờ c
 <p>Suite dùng kho bộ nhớ, clock/thời tiết/ví giả và HTTP trong tiến trình. Chưa kiểm: UI, PostgreSQL nhiều kết nối, nhà cung cấp thanh toán thật, ô tô/bưu kiện/đồ ăn, voucher hết hạn/sai phạm vi/hết lượt/<code>minAmount</code>, biên giờ và ngày, concurrency, bảo mật, hiệu năng; chưa chạy property hay mutation testing. Header <code>x-user</code> là danh tính giả lập của lab, không phải xác thực production.</p>
 </div>
 
-**Đánh đổi chi phí/phạm vi:** 24 execution chạy dưới một giây phần test, đủ rẻ để chạy ở mọi commit đụng tới pricing. Mở rộng toàn bộ tổ hợp (3 dịch vụ × 2 xe × 2 khung giờ × mưa × trạng thái voucher …) sẽ lên hàng trăm ca, và chi phí thật không nằm ở thời gian chạy mà ở **tính tay và bảo trì oracle**. Ưu tiên theo rủi ro tiền: đầy đủ ở vùng có tương tác, mỏng ở vùng một điều kiện.
+**Đánh đổi chi phí/phạm vi:** 24 execution chạy dưới một giây phần test, đủ rẻ để chạy ở mọi commit đụng tới pricing. Mở rộng toàn bộ tổ hợp (3 dịch vụ × 2 xe × 2 khung giờ × mưa × trạng thái voucher …) sẽ lên hàng trăm test case, và chi phí thật không nằm ở thời gian chạy mà ở **tính tay và bảo trì oracle**. Ưu tiên theo rủi ro tiền: đầy đủ ở vùng có tương tác, mỏng ở vùng một điều kiện.
 
 ## 11. Bài tập và câu hỏi tự kiểm
 

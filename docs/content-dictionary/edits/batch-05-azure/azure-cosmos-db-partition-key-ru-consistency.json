@@ -1,0 +1,17 @@
+{"file":"azure-cosmos-db-partition-key-ru-consistency.md","edits":[
+{"old":"Khoá tệ làm một partition nóng trong khi phần còn lại ngồi không.","new":"Khoá chọn kém khiến một partition quá tải trong khi phần còn lại nhàn rỗi.","reason":"'Khoá tệ', 'làm một partition nóng', 'ngồi không' là cách nói gượng, thiếu tự nhiên","severity":"medium"},
+{"old":"vì nó ghi nhiều, đọc theo khoá và không cần join.","new":"vì loại dữ liệu này ghi nhiều, đọc theo khoá và không cần join.","reason":"Đại từ 'nó' mơ hồ, chỉ dữ liệu","severity":"low"},
+{"old":"bị từ chối dù cả container còn dư.","new":"bị từ chối dù cả container còn dư throughput.","reason":"'còn dư' thiếu danh từ","severity":"medium"},
+{"old":"(kiểm giá trị hiện hành trong tài liệu)","new":"(kiểm tra giá trị hiện hành trong tài liệu)","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"ghi tài xế nào vào partition của tài xế đó, đọc","new":"dữ liệu ghi của tài xế nào nằm trong partition của tài xế đó, đọc","reason":"Câu thiếu danh từ: 'ghi tài xế'","severity":"medium"},
+{"old":"Cosmos giữ nguồn bền vững, Redis giữ chỉ mục không gian đang nóng.","new":"Cosmos giữ dữ liệu gốc bền vững, Redis giữ chỉ mục không gian đang nóng.","reason":"'nguồn bền vững' là cụm tự ghép (source of truth)","severity":"medium"},
+{"old":"và đây là cấu hình được.","new":"và số lần này có thể cấu hình.","reason":"'đây là cấu hình được' mơ hồ, trật tự kiểu dịch máy","severity":"low"},
+{"old":"Nó giảm RU ghi nhưng không chứng minh query nào nhanh hơn","new":"Cách này giảm RU ghi nhưng không chứng minh query nào nhanh hơn","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"thì không thấy dữ liệu cũ hơn điều nó vừa ghi.","new":"thì không thấy dữ liệu cũ hơn dữ liệu vừa ghi.","reason":"Tránh 'điều nó' mơ hồ","severity":"low"},
+{"old":"đọc vị trí vài trăm mili giây trễ vẫn chấp nhận được","new":"đọc vị trí trễ vài trăm mili giây vẫn chấp nhận được","reason":"Trật tự từ kiểu tiếng Anh, khó hiểu","severity":"medium"},
+{"old":"Nó cũng không dùng chung được với multi-region write.","new":"Mức này cũng không dùng chung được với multi-region write.","reason":"Tránh 'Nó' chỉ sự vật ở đầu câu","severity":"medium"},
+{"old":"Tính tiền, quyền hay số dư cần mức mạnh hơn thì không thuộc container vị trí;","new":"Dữ liệu tính tiền, quyền hay số dư cần mức mạnh hơn thì không thuộc container vị trí;","reason":"Câu lược danh từ chính: 'Tính tiền' không phải chủ thể","severity":"medium"},
+{"old":"Điểm vị trí là dữ liệu cũ nhanh:","new":"Điểm vị trí nhanh mất giá trị:","reason":"'dữ liệu cũ nhanh' là cụm tự ghép","severity":"medium"},
+{"old":"Item hết hạn biến khỏi kết quả query","new":"Item hết hạn biến mất khỏi kết quả query","reason":"Câu thiếu động từ 'mất'","severity":"medium"},
+{"old":"consumer phải chịu được xử lý lặp.","new":"consumer phải xử lý được bản ghi trùng lặp.","reason":"'chịu được xử lý lặp' là calque","severity":"high"}
+]}

@@ -49,9 +49,9 @@ Test configuration override có phạm vi trong host test; không sửa appsetti
 
 ## JWT đi qua handler thật trong test
 
-AuthFactory post-configure JwtBearerOptions với khóa ngẫu nhiên, issuer toi-noi-tests, audience toi-noi-api và ClockSkew=0 cho fixture. Token có hạn ngắn và role/sub theo từng ca. Không có secret thật hoặc một token cố định được commit.
+AuthFactory post-configure JwtBearerOptions với khoá ngẫu nhiên, issuer toi-noi-tests, audience toi-noi-api và ClockSkew=0 cho fixture. Token có hạn ngắn và role/sub theo từng ca. Không có secret thật hoặc một token cố định được commit.
 
-Suite kiểm role và owner, token hết hạn, audience sai, chữ ký từ khóa khác. Đây là bằng chứng cho JWT pipeline đã cấu hình trong fixture, không chứng minh identity provider production, rotation metadata hoặc độ lệch đồng hồ thật. Các ranh giới đó cần test và vận hành riêng.
+Suite kiểm role và owner, token hết hạn, audience sai, chữ ký từ khoá khác. Đây là bằng chứng cho JWT pipeline đã cấu hình trong fixture, không chứng minh identity provider production, rotation metadata hoặc độ lệch đồng hồ thật. Các ranh giới đó cần test và vận hành riêng.
 
 Điều không thay là authentication handler và authorization policy của ứng dụng. Điều thay là nguồn trust/config trong host test. Ghi rõ sự thay thế giúp người đọc không nhầm việc ký một token test với dựng hệ thống đăng nhập thật.
 

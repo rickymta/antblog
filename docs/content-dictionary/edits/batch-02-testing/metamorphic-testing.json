@@ -1,0 +1,19 @@
+{"file":"metamorphic-testing.md","edits":[
+{"old":"kiểm thuật toán cước khi không có oracle chính xác","new":"kiểm thử thuật toán tính cước khi không có oracle chính xác","reason":"'kiểm thuật toán cước' cụt, thiếu 'thử' và 'tính'; tiêu đề phải đứng độc lập","severity":"medium"},
+{"old":"định nghĩa và kiểm bằng fast-check ba MR","new":"định nghĩa và kiểm thử bằng fast-check ba MR","reason":"'kiểm' cụt, thiếu 'thử'","severity":"low"},
+{"old":"Nó dùng **quan hệ giữa nhiều lần chạy**","new":"Kỹ thuật này dùng **quan hệ giữa nhiều lần chạy**","reason":"Tránh 'Nó' chỉ khái niệm ở đầu câu","severity":"medium"},
+{"old":"muốn nhân một ca tay thành hàng nghìn ca tự động","new":"muốn nhân một test case tính tay thành hàng nghìn test case tự động","reason":"Thống nhất 'test case'; 'ca tay' cụt","severity":"medium"},
+{"old":"kỹ thuật kiểm hành vi **không phụ thuộc trạng thái**","new":"kỹ thuật kiểm thử hành vi **không phụ thuộc trạng thái**","reason":"'kiểm hành vi' cụt, thiếu 'thử'","severity":"low"},
+{"old":"Khi thất bại, **debugging** phải xác định ca nào trong nhóm thực sự sai.","new":"Khi thất bại, **debugging** phải xác định test case nào trong nhóm thực sự sai.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Nó là kỹ thuật **được ưu tiên** cho hệ thống AI.","new":"MT là kỹ thuật **được ưu tiên** cho hệ thống AI.","reason":"Tránh 'Nó' chỉ khái niệm; bỏ bị động","severity":"medium"},
+{"old":"Hình 1 · MR2 trên ca R-FARE-09.","new":"Hình 1 · MR2 trên test case R-FARE-09.","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Cột «bỏ qua» là các cặp có một ca bị","new":"Cột «bỏ qua» là các cặp có một test case bị","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"ba MR mà curriculum yêu cầu","new":"ba MR mà chương trình học yêu cầu","reason":"Từ tiếng Anh thông thường lọt vào văn xuôi","severity":"medium"},
+{"old":"debugging phải tìm **ca nào** sai","new":"debugging phải tìm **test case nào** sai","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Shrinking đưa về ca tối giản","new":"Shrinking đưa về test case tối giản","reason":"Thống nhất 'test case'","severity":"low"},
+{"old":"Cả hai ca đều sai (bản thật ra 15.000 đ cho cả hai) — MR không chỉ ra ca nào, debugging","new":"Cả hai test case đều sai (bản thật ra 15.000 đ cho cả hai) — MR không chỉ ra test case nào sai, debugging","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Bộ test tốt cho lõi giá = vài ca tay có oracle (R-FARE-09) + oracle tính chất + bộ MR","new":"Bộ test tốt cho lõi giá gồm vài test case tính tay có oracle (R-FARE-09), oracle tính chất và bộ MR","reason":"Ký hiệu '=' và '+' trong văn xuôi gượng; thống nhất 'test case'","severity":"medium"},
+{"old":"tạo chuyến thật tiêu lượt voucher","new":"tạo chuyến thật làm mất một lượt voucher","reason":"'tiêu lượt' gượng","severity":"low"},
+{"old":"(báo giá không tiêu lượt)","new":"(báo giá không làm mất lượt)","reason":"'tiêu lượt' gượng","severity":"low"},
+{"old":"Chỉ chạy mỗi MR một lần trên một ca","new":"Chỉ chạy mỗi MR một lần trên một test case","reason":"Thống nhất 'test case'","severity":"low"}
+]}

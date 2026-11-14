@@ -1,0 +1,12 @@
+{"file":"test-doubles-dummy-stub-fake-mock-spy.md","edits":[
+{"old":"Hai kiểu có thể cùng cần trong một ca.","new":"Hai kiểu có thể cùng cần trong một test case.","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Hai ca trả lời hai câu hỏi khác nhau;","new":"Hai test case trả lời hai câu hỏi khác nhau;","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"thêm guard để lời gọi ngoài dự kiến gây failure.","new":"có thêm guard để lời gọi ngoài dự kiến làm test thất bại.","reason":"Câu thiếu chủ ngữ, 'gây failure' gượng","severity":"medium"},
+{"old":"Đừng dùng bản trả thành công âm thầm:","new":"Đừng dùng bản trả thành công mà không báo gì:","reason":"'âm thầm' là calque của 'silently'","severity":"medium"},
+{"old":"Ca này cho thất bại ngay ở lần đầu","new":"Test case này cho thất bại ngay ở lần đầu","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"Nó kiểm phản ứng với lỗi tạm thời;","new":"Test case này kiểm phản ứng với lỗi tạm thời;","reason":"Tránh 'Nó' đầu câu; nhắc lại danh từ","severity":"medium"},
+{"old":"Các ca trong bài chỉ gọi use case công khai","new":"Các test case trong bài chỉ gọi use case công khai","reason":"Thống nhất 'test case'","severity":"medium"},
+{"old":"thay amount/customer, không có xác thực,","new":"thay amount/customer, và cũng không có xác thực,","reason":"Câu rời rạc, thiếu quan hệ từ nên khó hiểu","severity":"low"},
+{"old":"rồi trông chờ thứ tự chạy.","new":"rồi trông cậy vào thứ tự chạy.","reason":"'trông chờ' sai nghĩa, cần 'trông cậy vào'","severity":"medium"},
+{"old":"tạo fake mới cho mỗi ca và khôi phục spy sau ca;","new":"tạo fake mới cho mỗi test case và khôi phục spy sau mỗi test case;","reason":"Thống nhất 'test case'","severity":"medium"}
+]}

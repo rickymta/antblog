@@ -33,7 +33,7 @@ Tới Nơi chia hệ thống thành nhiều service. Hai service nói chuyện v
 
 **Technical review** là loại review do **người có chuyên môn kỹ thuật** thực hiện, **moderator** dẫn dắt, nhằm **đạt đồng thuận và ra quyết định** về một vấn đề kỹ thuật. Nên dùng khi work product là hợp đồng, thiết kế, lược đồ dữ liệu mà nhiều đội sẽ dựa vào; khi có câu hỏi cần **quyết định** (kiểu tiền, chính sách phiên bản, ai kiểm chủ báo giá) chứ không chỉ cần sửa; và khi cần ý kiến của cả bên cung cấp lẫn bên tiêu thụ.
 
-Không phải lựa chọn tốt khi mục tiêu chính là đào tạo người mới (walkthrough — [TEST-024](/articles/walkthrough)) hay tìm tối đa defect kèm metric quy trình (inspection — TEST-026).
+Technical review không phải lựa chọn tốt khi mục tiêu chính là đào tạo người mới (walkthrough — [TEST-024](/articles/walkthrough)) hay tìm tối đa defect kèm metric quy trình (inspection — TEST-026).
 
 ## 2. Lý thuyết theo ISTQB
 
@@ -307,7 +307,7 @@ Phần OpenAPI sau review (trích):
 
 ### 5.4. Bằng chứng trước khi chốt mức nghiêm trọng
 
-Technical review tìm phát hiện bằng cách **đọc**. Nhưng trước khi gắn «Chặn» hay «Lớn», reviewer nên kiểm nhanh phát hiện có đúng không. Với hợp đồng ①, lab chính là bản cài đặt tham chiếu của SPEC, nên ta đối chiếu thẳng; với PQ-04, ta chứng minh lỗi `float` bằng chính hàm tính cước của lab. Lược đồ zod trong test là hợp đồng **đã sửa** của phản hồi 201; test PQ-04 đưa `Math.fround(7.35)` (giá trị `float` nhận được: 7,3499999…) vào hàm tính cước:
+Technical review tìm ra các phát hiện bằng cách **đọc**. Nhưng trước khi gắn «Chặn» hay «Lớn», reviewer nên kiểm nhanh xem phát hiện có đúng không. Với hợp đồng ①, lab chính là bản cài đặt tham chiếu của SPEC, nên ta đối chiếu thẳng; với PQ-04, ta chứng minh lỗi `float` bằng chính hàm tính cước của lab. Lược đồ zod trong test là hợp đồng **đã sửa** của phản hồi 201; test PQ-04 đưa `Math.fround(7.35)` (giá trị `float` nhận được: 7,3499999…) vào hàm tính cước:
 
 ```bash
 npx vitest run articles/technical-review-api-contract --reporter=verbose
@@ -400,11 +400,11 @@ message CancelTripResponse { bool ok = 1; double cancellation_fee = 2; string er
 - a) Để viết lại work product thay tác giả.
 - b) Để kịp đối chiếu tài liệu tham chiếu, xác định điều còn thiếu; thiếu chuẩn bị thì review dễ thành buổi sửa câu chữ.
 - c) Vì syllabus chỉ cho phép TTA tham gia inspection.
-- d) Để chạy toàn bộ test hồi quy trước buổi họp.
+- d) Để chạy toàn bộ regression test trước buổi họp.
 
 <details>
 <summary><b>Đáp án: b</b></summary>
-<p><b>a sai</b> — sửa là việc của tác giả. <b>b đúng</b> — nội dung TTA-5.1.1: chuẩn bị gồm đọc work product, kiểm tài liệu được tham chiếu, tìm điều thiếu; không chuẩn bị thì thành editing exercise. <b>c sai</b> — TTA thường tham gia cả technical review và inspection. <b>d sai</b> — chạy test là dynamic testing, không phải chuẩn bị review.</p>
+<p><b>a sai</b> — sửa là việc của tác giả. <b>b đúng</b> — nội dung TTA-5.1.1: chuẩn bị gồm đọc work product, kiểm tra tài liệu được tham chiếu, tìm điều thiếu; không chuẩn bị thì thành editing exercise. <b>c sai</b> — TTA thường tham gia cả technical review và inspection. <b>d sai</b> — chạy test là dynamic testing, không phải chuẩn bị review.</p>
 </details>
 
 **Câu 4 (K2).** Khi review bản Protobuf v2 của Pricing, việc nào thể hiện đúng nhất ý «review không cô lập» của CTAL-TTA?

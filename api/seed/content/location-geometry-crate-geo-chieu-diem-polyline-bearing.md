@@ -1,7 +1,7 @@
 ---
 slug: location-geometry-crate-geo-chieu-diem-polyline-bearing
 title: "Hình học với crate geo: chiếu điểm, polyline, bearing và GeoJSON"
-summary: "Bài 05: chiếu điểm GPS lên đoạn và polyline, vị trí dọc tuyến, bearing, hệ độ so với hệ mét trong crate geo, mã hóa polyline và xuất GeoJSON để xem kết quả trên bản đồ như một thói quen debug."
+summary: "Bài 05: chiếu điểm GPS lên đoạn và polyline, vị trí dọc tuyến, bearing, hệ độ so với hệ mét trong crate geo, mã hoá polyline và xuất GeoJSON để xem kết quả trên bản đồ như một thói quen debug."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, geo, polyline, bearing, geojson, projection]
@@ -10,11 +10,11 @@ language: vi
 
 Tài xế DR-001 gửi một điểm GPS nằm lệch tuyến đường 25 m. Hai thứ cần biết ngay: chỗ nào trên đường là chỗ xe đang ở, và xe đã đi được bao xa dọc tuyến, để app khách vẽ marker chạy mượt trên đường thay vì nhảy sang vỉa hè. Cả hai đều là một phép **chiếu**: kéo điểm GPS vuông góc xuống đường, rồi đo quãng đường từ đầu tuyến tới chân vừa tìm ra. Thêm một thứ nữa là **hướng**: xe đang quay mặt về đâu, thứ mà bài chọn phía đường sau này cần để biết khách đứng bên phải hay bên trái xe.
 
-Bài này làm bốn việc hình học nhỏ trên một đường gấp khúc (polyline): chiếu điểm lên đoạn và lên cả polyline, tính bearing, mã hóa polyline để gửi gọn qua mạng, và xuất GeoJSON để nhìn kết quả trên bản đồ. Đây là bài 05 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), đọc sau bài [khoảng cách và sai số](/articles/location-khoang-cach-haversine-equirectangular-sai-so). Bài dùng crate `geo-core` của lab và so sánh với crate `geo` ở một chỗ mà chúng cho kết quả khác nhau.
+Bài này làm bốn việc hình học nhỏ trên một đường gấp khúc (polyline): chiếu điểm lên đoạn và lên cả polyline, tính bearing, mã hoá polyline để gửi gọn qua mạng, và xuất GeoJSON để nhìn kết quả trên bản đồ. Đây là bài 05 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), đọc sau bài [khoảng cách và sai số](/articles/location-khoang-cach-haversine-equirectangular-sai-so). Bài dùng crate `geo-core` của lab và so sánh với crate `geo` ở một chỗ mà chúng cho kết quả khác nhau.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Crate <code>geo</code> có sẵn hàm tìm điểm gần nhất trên đường gấp khúc (<code>ClosestPoint</code>). Nếu đưa vào tọa độ lat/lng trực tiếp (coi độ như x, y phẳng), điểm nó trả về sai bao nhiêu mét so với chân đường vuông góc đo theo mét, ở TP.HCM và ở Hà Nội?</p>
+<p>Crate <code>geo</code> có sẵn hàm tìm điểm gần nhất trên đường gấp khúc (<code>ClosestPoint</code>). Nếu đưa vào toạ độ lat/lng trực tiếp (coi độ như x, y phẳng), điểm nó trả về sai bao nhiêu mét so với chân đường vuông góc đo theo mét, ở TP.HCM và ở Hà Nội?</p>
 <details><summary>Xem đáp án</summary><p>Lab đo 2.000 đoạn 200 m hướng ngẫu nhiên với điểm GPS cách trung điểm 30 m: ở TP.HCM chân lệch <b>trung bình 0,212 m, lớn nhất 0,533 m</b>; ở Hà Nội <b>trung bình 0,821 m, lớn nhất 2,069 m</b>. Lệch tăng theo vĩ độ vì 1° kinh độ chỉ dài bằng 1° vĩ độ nhân cos của vĩ độ. Chân lệch cỡ này làm sai <code>along_m</code> và marker dọc tuyến ngay cả khi vẫn chọn đúng đường.</p></details>
 </div>
 
@@ -30,9 +30,9 @@ t = (Q − A)·d / |d|²
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 330" role="img" aria-label="Hình 1. Chiếu một điểm Q lên đoạn thẳng AB. Điểm Q1 chiếu xuống giữa đoạn với t khoảng 0,44. Điểm Q2 chiếu ra ngoài đầu A với t âm nên chân bị kẹp về A. Điểm Q3 chiếu ra ngoài đầu B với t lớn hơn 1 nên chân bị kẹp về B."><path d="M120 230 L420 150" class="f-none s-phys" stroke-width="4"/><circle cx="120" cy="230" r="5" class="f-phys s-phys"/><circle cx="420" cy="150" r="5" class="f-phys s-phys"/><text x="112" y="252" class="t-b" text-anchor="end">A</text><text x="430" y="170" class="t-b">B</text><circle cx="230" cy="110" r="5" class="f-pk s-pk"/><path d="M230 110 L252.6 194.6" class="f-none s-pk" stroke-width="2"/><circle cx="252.6" cy="194.6" r="4" class="f-warn s-warn"/><circle cx="70" cy="170" r="5" class="f-pk s-pk"/><path d="M70 170 L88.3 238.5" class="f-none s-dead dash" stroke-width="1"/><circle cx="88.3" cy="238.5" r="4" class="f-bg s-dead"/><path d="M70 170 L120 230" class="f-none s-pk" stroke-width="2"/><circle cx="120" cy="230" r="4" class="f-warn s-warn"/><circle cx="480" cy="80" r="5" class="f-pk s-pk"/><path d="M480 80 L493.4 130.4" class="f-none s-dead dash" stroke-width="1"/><circle cx="493.4" cy="130.4" r="4" class="f-bg s-dead"/><path d="M480 80 L420 150" class="f-none s-pk" stroke-width="2"/><circle cx="420" cy="150" r="4" class="f-warn s-warn"/><text x="240" y="96" class="t-b">Q1</text><text x="250" y="112" class="t-small">t = 0,44, chân trong đoạn</text><text x="82" y="166" class="t-b">Q2</text><text x="24" y="142" class="t-small">t = −0,11, kẹp về A</text><text x="490" y="78" class="t-b">Q3</text><text x="380" y="46" class="t-small">t = 1,24, kẹp về B</text><text x="20" y="312" class="t-small">Chấm xanh: Q. Chấm cam: chân sau khi kẹp. Vòng rỗng: chân vuông góc nằm ngoài đoạn.</text><text x="560" y="60" class="t-b">Trong project_to_segment</text><text x="560" y="90" class="t-mono">d = B − A</text><text x="560" y="114" class="t-mono">t = clamp((Q − A)·d / |d|², 0, 1)</text><text x="560" y="138" class="t-mono">chân = A + t·d</text><text x="560" y="162" class="t-mono">dist_m = |Q − chân|</text><text x="560" y="206" class="t-small">Gốc tọa độ đặt tại Q (Q = (0, 0)), đơn vị mét,</text><text x="560" y="222" class="t-small">nên sai số do Trái Đất cong là không đáng kể</text><text x="560" y="238" class="t-small">ở độ dài đoạn đường phố.</text></svg>
+<svg viewBox="0 0 880 330" role="img" aria-label="Hình 1. Chiếu một điểm Q lên đoạn thẳng AB. Điểm Q1 chiếu xuống giữa đoạn với t khoảng 0,44. Điểm Q2 chiếu ra ngoài đầu A với t âm nên chân bị kẹp về A. Điểm Q3 chiếu ra ngoài đầu B với t lớn hơn 1 nên chân bị kẹp về B."><path d="M120 230 L420 150" class="f-none s-phys" stroke-width="4"/><circle cx="120" cy="230" r="5" class="f-phys s-phys"/><circle cx="420" cy="150" r="5" class="f-phys s-phys"/><text x="112" y="252" class="t-b" text-anchor="end">A</text><text x="430" y="170" class="t-b">B</text><circle cx="230" cy="110" r="5" class="f-pk s-pk"/><path d="M230 110 L252.6 194.6" class="f-none s-pk" stroke-width="2"/><circle cx="252.6" cy="194.6" r="4" class="f-warn s-warn"/><circle cx="70" cy="170" r="5" class="f-pk s-pk"/><path d="M70 170 L88.3 238.5" class="f-none s-dead dash" stroke-width="1"/><circle cx="88.3" cy="238.5" r="4" class="f-bg s-dead"/><path d="M70 170 L120 230" class="f-none s-pk" stroke-width="2"/><circle cx="120" cy="230" r="4" class="f-warn s-warn"/><circle cx="480" cy="80" r="5" class="f-pk s-pk"/><path d="M480 80 L493.4 130.4" class="f-none s-dead dash" stroke-width="1"/><circle cx="493.4" cy="130.4" r="4" class="f-bg s-dead"/><path d="M480 80 L420 150" class="f-none s-pk" stroke-width="2"/><circle cx="420" cy="150" r="4" class="f-warn s-warn"/><text x="240" y="96" class="t-b">Q1</text><text x="250" y="112" class="t-small">t = 0,44, chân trong đoạn</text><text x="82" y="166" class="t-b">Q2</text><text x="24" y="142" class="t-small">t = −0,11, kẹp về A</text><text x="490" y="78" class="t-b">Q3</text><text x="380" y="46" class="t-small">t = 1,24, kẹp về B</text><text x="20" y="312" class="t-small">Chấm xanh: Q. Chấm cam: chân sau khi kẹp. Vòng rỗng: chân vuông góc nằm ngoài đoạn.</text><text x="560" y="60" class="t-b">Trong project_to_segment</text><text x="560" y="90" class="t-mono">d = B − A</text><text x="560" y="114" class="t-mono">t = clamp((Q − A)·d / |d|², 0, 1)</text><text x="560" y="138" class="t-mono">chân = A + t·d</text><text x="560" y="162" class="t-mono">dist_m = |Q − chân|</text><text x="560" y="206" class="t-small">Gốc toạ độ đặt tại Q (Q = (0, 0)), đơn vị mét,</text><text x="560" y="222" class="t-small">nên sai số do Trái Đất cong là không đáng kể</text><text x="560" y="238" class="t-small">ở độ dài đoạn đường phố.</text></svg>
 </div>
-<figcaption>Hình 1. Chiếu điểm lên đoạn thẳng. Hình minh họa cơ chế, tọa độ vẽ tay, các giá trị t tính từ chính tọa độ vẽ. Chân vuông góc của Q2 và Q3 nằm ngoài đoạn nên kết quả bị kẹp về đầu mút gần nhất, và khoảng cách báo về là khoảng cách tới đầu mút, không phải tới đường kéo dài.</figcaption>
+<figcaption>Hình 1. Chiếu điểm lên đoạn thẳng. Hình minh hoạ cơ chế, toạ độ vẽ tay, các giá trị t tính từ chính toạ độ vẽ. Chân vuông góc của Q2 và Q3 nằm ngoài đoạn nên kết quả bị kẹp về đầu mút gần nhất, và khoảng cách báo về là khoảng cách tới đầu mút, không phải tới đường kéo dài.</figcaption>
 </figure>
 
 Q2 và Q3 là chỗ người mới hay làm sai: họ chiếu lên đường thẳng rồi quên rằng đoạn có hai đầu. Hệ quả trên bản đồ: một điểm GPS ở ngã tư có thể «dính» vào một đoạn đường chỉ vì đường thẳng kéo dài của đoạn đó đi qua sát điểm. Khoảng cách `dist_m` mà hàm trả về là khoảng cách tới điểm đã kẹp, không phải tới đường kéo dài.
@@ -109,9 +109,9 @@ pub fn project_to_polyline(p: LatLng, points: &[LatLng]) -> Option<PolylineProje
 }
 ```
 
-`along_m` là đại lượng mà app khách cần để đặt marker dọc tuyến: nội suy theo `along_m` thay vì tọa độ thô thì marker chạy trên đường. Hợp đồng theo dõi chuyến của lab cũng có trường `route_offset_m` đúng với ý này: vị trí đã bám đường, tính bằng mét từ đầu route (lab hiện để trống, vì bám đường là việc của phần sau). Hàm ngược của nó, `point_at`, cho điểm cách đầu tuyến `along_m` mét.
+`along_m` là đại lượng mà app khách cần để đặt marker dọc tuyến: nội suy theo `along_m` thay vì toạ độ thô thì marker chạy trên đường. Hợp đồng theo dõi chuyến của lab cũng có trường `route_offset_m` đúng với ý này: vị trí đã bám đường, tính bằng mét từ đầu route (lab hiện để trống, vì bám đường là việc của phần sau). Hàm ngược của nó, `point_at`, cho điểm cách đầu tuyến `along_m` mét.
 
-Lab thử trên một polyline minh họa bốn đỉnh nối ba địa danh ở trung tâm TP.HCM bằng tọa độ gần đúng; đây **không phải tuyến đường thật**. Lab dựng điểm GPS cách đoạn 1 đúng 25 m theo hướng vuông góc, tại 40% đoạn, rồi kiểm tra hàm tìm lại đúng vị trí đó (nguyên văn từ `results/p01.md`):
+Lab thử trên một polyline minh hoạ bốn đỉnh nối ba địa danh ở trung tâm TP.HCM bằng toạ độ gần đúng; đây **không phải tuyến đường thật**. Lab dựng điểm GPS cách đoạn 1 đúng 25 m theo hướng vuông góc, tại 40% đoạn, rồi kiểm tra hàm tìm lại đúng vị trí đó (nguyên văn từ `results/p01.md`):
 
 ```text
 -- 2. chiếu một điểm GPS lên polyline --
@@ -126,9 +126,9 @@ Lab thử trên một polyline minh họa bốn đỉnh nối ba địa danh ở
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 470" role="img" aria-label="Hình 2. Bên trái: đường gấp khúc minh họa bốn đỉnh P0 đến P3 vẽ từ results/geojson/loc05-hinh-hoc.geojson, hướng bắc ở trên, tỉ lệ 0,4 pixel mỗi mét, với ba đoạn dài 819,04, 500,15 và 888,48 mét. Bên phải: phóng to quanh điểm GPS, cách đoạn 1 đúng 25,001 mét, chân đường vuông góc nằm cách đầu polyline 1.019,101 mét dọc tuyến."><defs><marker id="location-geometry-crate-geo-chieu-diem-polyline-bearing-1-m0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-muted"/></marker></defs><path d="M165.2 370.7 L208.9 46 L56 175 L305.1 428.5" class="f-none s-phys" stroke-width="3"/><circle cx="165.2" cy="370.7" r="5" class="f-phys s-phys"/><text x="175.2" y="386.7" class="t-b">P0</text><circle cx="208.9" cy="46" r="5" class="f-phys s-phys"/><text x="218.9" y="38" class="t-b">P1</text><circle cx="56" cy="175" r="5" class="f-phys s-phys"/><text x="46" y="167" class="t-b" text-anchor="end">P2</text><circle cx="305.1" cy="428.5" r="5" class="f-phys s-phys"/><text x="315.1" y="444.5" class="t-b">P3</text><text x="190" y="296" class="t-small">đoạn 0: 819,04 m</text><text x="118" y="100" class="t-small" text-anchor="end">đoạn 1: 500,15 m</text><text x="240" y="346" class="t-small">đoạn 2: 888,48 m</text><circle cx="147.8" cy="97.6" r="4" class="f-pk s-pk"/><rect x="135.8" y="85.6" width="24" height="24" class="f-none s-warn" stroke-width="1"/><rect x="430" y="36" width="432" height="404" rx="8" class="f-surface s-line"/><path d="M159.8 85.6 L430 36" class="f-none s-warn dash" stroke-width="1"/><path d="M159.8 109.6 L430 440" class="f-none s-warn dash" stroke-width="1"/><path d="M810.5 114.6 L489.5 385.4" class="f-none s-phys" stroke-width="4"/><path d="M537.2 116.2 L650 250" class="f-none s-pk dash" stroke-width="2"/><circle cx="537.2" cy="116.2" r="6" class="f-pk s-pk"/><circle cx="650" cy="250" r="5" class="f-warn s-warn"/><text x="549.2" y="112.2" class="t-b">điểm GPS</text><text x="585.6" y="183.1" class="t-small" text-anchor="end">dist = 25,001 m</text><text x="662" y="272" class="t-small">chân vuông góc</text><text x="662" y="288" class="t-small">along = 1.019,101 m</text><text x="444" y="60" class="t-b">Phóng to quanh điểm GPS (7 px mỗi mét)</text><text x="848" y="384" class="t-small" text-anchor="end">đoạn 1 (P1 → P2), bearing 229,85°</text><path d="M470 416 L540 416" class="f-none s-muted" stroke-width="2"/><text x="548" y="420" class="t-small">10 m</text><path d="M56 446 L96 446" class="f-none s-muted" stroke-width="2"/><text x="104" y="450" class="t-small">100 m</text><path d="M380 440 L380 410" class="f-none s-muted" stroke-width="2" marker-end="url(#location-geometry-crate-geo-chieu-diem-polyline-bearing-1-m0)"/><text x="380" y="404" class="t-small" text-anchor="middle">bắc</text></svg>
+<svg viewBox="0 0 880 470" role="img" aria-label="Hình 2. Bên trái: đường gấp khúc minh hoạ bốn đỉnh P0 đến P3 vẽ từ results/geojson/loc05-hinh-hoc.geojson, hướng bắc ở trên, tỉ lệ 0,4 pixel mỗi mét, với ba đoạn dài 819,04, 500,15 và 888,48 mét. Bên phải: phóng to quanh điểm GPS, cách đoạn 1 đúng 25,001 mét, chân đường vuông góc nằm cách đầu polyline 1.019,101 mét dọc tuyến."><defs><marker id="location-geometry-crate-geo-chieu-diem-polyline-bearing-1-m0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-muted"/></marker></defs><path d="M165.2 370.7 L208.9 46 L56 175 L305.1 428.5" class="f-none s-phys" stroke-width="3"/><circle cx="165.2" cy="370.7" r="5" class="f-phys s-phys"/><text x="175.2" y="386.7" class="t-b">P0</text><circle cx="208.9" cy="46" r="5" class="f-phys s-phys"/><text x="218.9" y="38" class="t-b">P1</text><circle cx="56" cy="175" r="5" class="f-phys s-phys"/><text x="46" y="167" class="t-b" text-anchor="end">P2</text><circle cx="305.1" cy="428.5" r="5" class="f-phys s-phys"/><text x="315.1" y="444.5" class="t-b">P3</text><text x="190" y="296" class="t-small">đoạn 0: 819,04 m</text><text x="118" y="100" class="t-small" text-anchor="end">đoạn 1: 500,15 m</text><text x="240" y="346" class="t-small">đoạn 2: 888,48 m</text><circle cx="147.8" cy="97.6" r="4" class="f-pk s-pk"/><rect x="135.8" y="85.6" width="24" height="24" class="f-none s-warn" stroke-width="1"/><rect x="430" y="36" width="432" height="404" rx="8" class="f-surface s-line"/><path d="M159.8 85.6 L430 36" class="f-none s-warn dash" stroke-width="1"/><path d="M159.8 109.6 L430 440" class="f-none s-warn dash" stroke-width="1"/><path d="M810.5 114.6 L489.5 385.4" class="f-none s-phys" stroke-width="4"/><path d="M537.2 116.2 L650 250" class="f-none s-pk dash" stroke-width="2"/><circle cx="537.2" cy="116.2" r="6" class="f-pk s-pk"/><circle cx="650" cy="250" r="5" class="f-warn s-warn"/><text x="549.2" y="112.2" class="t-b">điểm GPS</text><text x="585.6" y="183.1" class="t-small" text-anchor="end">dist = 25,001 m</text><text x="662" y="272" class="t-small">chân vuông góc</text><text x="662" y="288" class="t-small">along = 1.019,101 m</text><text x="444" y="60" class="t-b">Phóng to quanh điểm GPS (7 px mỗi mét)</text><text x="848" y="384" class="t-small" text-anchor="end">đoạn 1 (P1 → P2), bearing 229,85°</text><path d="M470 416 L540 416" class="f-none s-muted" stroke-width="2"/><text x="548" y="420" class="t-small">10 m</text><path d="M56 446 L96 446" class="f-none s-muted" stroke-width="2"/><text x="104" y="450" class="t-small">100 m</text><path d="M380 440 L380 410" class="f-none s-muted" stroke-width="2" marker-end="url(#location-geometry-crate-geo-chieu-diem-polyline-bearing-1-m0)"/><text x="380" y="404" class="t-small" text-anchor="middle">bắc</text></svg>
 </div>
-<figcaption>Hình 2. Kết quả thật của lab, vẽ từ <code>results/geojson/loc05-hinh-hoc.geojson</code>. Đường gấp khúc là tọa độ gần đúng của ba địa danh ở trung tâm TP.HCM để minh họa, <b>không phải tuyến đường thật</b>. Điểm GPS được dựng cách đoạn 1 đúng 25 m vuông góc, tại 40% đoạn. Khung cam bên trái là vùng được phóng to ở khung bên phải.</figcaption>
+<figcaption>Hình 2. Kết quả thật của lab, vẽ từ <code>results/geojson/loc05-hinh-hoc.geojson</code>. Đường gấp khúc là toạ độ gần đúng của ba địa danh ở trung tâm TP.HCM để minh hoạ, <b>không phải tuyến đường thật</b>. Điểm GPS được dựng cách đoạn 1 đúng 25 m vuông góc, tại 40% đoạn. Khung cam bên trái là vùng được phóng to ở khung bên phải.</figcaption>
 </figure>
 
 ## Bearing: xe đang quay mặt về đâu
@@ -154,7 +154,7 @@ pub fn bearing_diff_deg(a: f64, b: f64) -> f64 {
 }
 ```
 
-Điểm cần cẩn thận không nằm ở công thức mà ở chỗ **góc là đại lượng vòng tròn**: 350° và 10° chỉ cách nhau 20°, không phải 340°. Hàm `bearing_diff_deg` xử lý chuyện đó và luôn trả giá trị trong [0, 180]. Lab xác nhận `bearing_diff_deg(350, 10) = 20` và `bearing_diff_deg(90, 270) = 180`. Ba đoạn của polyline minh họa có bearing như sau:
+Điểm cần cẩn thận không nằm ở công thức mà ở chỗ **góc là đại lượng vòng tròn**: 350° và 10° chỉ cách nhau 20°, không phải 340°. Hàm `bearing_diff_deg` xử lý chuyện đó và luôn trả giá trị trong [0, 180]. Lab xác nhận `bearing_diff_deg(350, 10) = 20` và `bearing_diff_deg(90, 270) = 180`. Ba đoạn của polyline minh hoạ có bearing như sau:
 
 | Đoạn | Dài (m) | Bearing | Hướng |
 |---:|---:|---:|---|
@@ -162,7 +162,7 @@ pub fn bearing_diff_deg(a: f64, b: f64) -> f64 {
 | 1 | 500,15 | 229,85° | tây nam |
 | 2 | 888,48 | 135,51° | đông nam |
 
-Ở các bài sau bearing có hai việc. Thứ nhất, so hướng của tài xế (từ hai điểm GPS liên tiếp) với bearing của từng cạnh đường để loại cạnh đi ngược chiều: bài bám đường dùng cách đó, và `bearing_diff_deg` là thước đo. Thứ hai, quyết định điểm đón nằm bên nào của xe: cùng một tọa độ, xe đi hướng này thì khách ở lề phải, xe đi hướng ngược lại thì phải quay đầu. Phần đó là việc của các bài điểm đón ở P04, bài này chưa làm.
+Ở các bài sau bearing có hai việc. Thứ nhất, so hướng của tài xế (từ hai điểm GPS liên tiếp) với bearing của từng cạnh đường để loại cạnh đi ngược chiều: bài bám đường dùng cách đó, và `bearing_diff_deg` là thước đo. Thứ hai, quyết định điểm đón nằm bên nào của xe: cùng một toạ độ, xe đi hướng này thì khách ở lề phải, xe đi hướng ngược lại thì phải quay đầu. Phần đó là việc của các bài điểm đón ở P04, bài này chưa làm.
 
 ## Hệ độ hay hệ mét: chỗ crate `geo` cho kết quả khác
 
@@ -198,9 +198,9 @@ Crate `geo` rất đầy đủ, nhưng nhiều thuật toán hình học của n
 
 Chân đường vuông góc ở hệ độ lệch dưới một mét ở TP.HCM, hơn hai mét ở Hà Nội. Lệch này chủ yếu nằm dọc theo đoạn, nên nó làm sai `along_m` nhiều hơn là làm sai khoảng cách tới đường. Nhưng nếu xếp hạng ứng viên bằng khoảng cách trong hệ độ thì lỗi còn đi xa hơn: cùng 30 m, hướng đông tây được tính dài hơn hướng bắc nam 1,8% ở TP.HCM và 7% ở Hà Nội (1 / cos của vĩ độ), đủ để đổi thứ tự hai cạnh gần như cách đều. Lab không đo số lần đổi thứ tự. Quy tắc của lab: **chiếu sang mét trước, hình học sau**.
 
-## Mã hóa polyline: gửi gọn một tuyến
+## Mã hoá polyline: gửi gọn một tuyến
 
-Một tuyến 442 điểm viết bằng JSON `[lng, lat]` tốn hàng chục nghìn byte. Định dạng *Encoded Polyline* của Google nén bằng ba ý: nhân tọa độ với `10^precision` làm tròn thành số nguyên, lưu **hiệu** so với điểm trước (số nhỏ), rồi mã hóa hiệu kèm bit dấu thành các khối 5 bit, mỗi khối một ký tự in được.
+Một tuyến 442 điểm viết bằng JSON `[lng, lat]` tốn hàng chục nghìn byte. Định dạng *Encoded Polyline* của Google nén bằng ba ý: nhân toạ độ với `10^precision` làm tròn thành số nguyên, lưu **hiệu** so với điểm trước (số nhỏ), rồi mã hoá hiệu kèm bit dấu thành các khối 5 bit, mỗi khối một ký tự in được.
 
 `examples/toi-noi-location/rust/crates/geo-core/src/polyline.rs`
 
@@ -222,7 +222,7 @@ pub fn encode(points: &[LatLng], precision: u32) -> String {
 }
 ```
 
-`precision` thường là 5 (khoảng 1 m, chuẩn của Google) hoặc 6 (khoảng 0,1 m). Lab dày hóa tuyến minh họa thành 442 điểm, mỗi khoảng 5 m, rồi thêm nhiễu 0–1 m (seed 20261106) và đo vòng mã hóa rồi giải mã:
+`precision` thường là 5 (khoảng 1 m, chuẩn của Google) hoặc 6 (khoảng 0,1 m). Lab dày hoá tuyến minh hoạ thành 442 điểm, mỗi khoảng 5 m, rồi thêm nhiễu 0–1 m (seed 20261106) và đo vòng mã hoá rồi giải mã:
 
 | Cách lưu 442 điểm | Kích thước | Sai số lớn nhất sau vòng đi về |
 |---|---:|---:|
@@ -232,11 +232,11 @@ pub fn encode(points: &[LatLng], precision: u32) -> String {
 | Nhị phân `f64` thô | 7.072 byte | 0 |
 | JSON `[lng, lat]` | khoảng 17.511 byte | 0 |
 
-Chuỗi precision 5 nhỏ hơn JSON khoảng 20 lần, nhưng cái giá là sai số gần 0,76 m. Với việc **vẽ tuyến** trên app thì quá thừa; với việc **tính toán** (chiếu, bám đường) thì dùng dữ liệu gốc, đừng dùng bản đã mã hóa. Hàm của lab được kiểm bằng ví dụ có trong tài liệu của Google và so khớp từng ký tự với crate `polyline`.
+Chuỗi precision 5 nhỏ hơn JSON khoảng 20 lần, nhưng cái giá là sai số gần 0,76 m. Với việc **vẽ tuyến** trên app thì quá thừa; với việc **tính toán** (chiếu, bám đường) thì dùng dữ liệu gốc, đừng dùng bản đã mã hoá. Hàm của lab được kiểm bằng ví dụ có trong tài liệu của Google và so khớp từng ký tự với crate `polyline`.
 
 ## GeoJSON: nhìn thấy mới tin
 
-Các lab hình học của loạt đều xuất GeoJSON. Đó là thói quen debug đáng giữ nhất của cả phần: lỗi tọa độ hiếm khi lộ ra ở con số nhưng lộ ngay ở hình. Hàm xuất cũng đi qua `to_lnglat` của bài 03, nên thứ tự `[lng, lat]` chỉ được tạo ra ở một chỗ:
+Các lab hình học của loạt đều xuất GeoJSON. Đó là thói quen debug đáng giữ nhất của cả phần: lỗi toạ độ hiếm khi lộ ra ở con số nhưng lộ ngay ở hình. Hàm xuất cũng đi qua `to_lnglat` của bài 03, nên thứ tự `[lng, lat]` chỉ được tạo ra ở một chỗ:
 
 `examples/toi-noi-location/rust/crates/geo-core/src/geojson.rs`
 
@@ -255,7 +255,7 @@ pub fn line_feature(points: &[LatLng], properties: &[(&str, JsonValue)]) -> Feat
 }
 ```
 
-Lab ghi `results/geojson/loc05-hinh-hoc.geojson` gồm bốn feature: polyline minh họa, đoạn chiếu (kèm `do_dai_m`), điểm GPS và chân vuông góc (kèm `along_m`). Mở file bằng geojson.io hoặc QGIS là thấy ngay đoạn chiếu thẳng góc với đường. Vì vậy các lab sau (snap, ô H3) cũng xuất GeoJSON vào `results/geojson/`.
+Lab ghi `results/geojson/loc05-hinh-hoc.geojson` gồm bốn feature: polyline minh hoạ, đoạn chiếu (kèm `do_dai_m`), điểm GPS và chân vuông góc (kèm `along_m`). Mở file bằng geojson.io hoặc QGIS là thấy ngay đoạn chiếu thẳng góc với đường. Vì vậy các lab sau (snap, ô H3) cũng xuất GeoJSON vào `results/geojson/`.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -291,7 +291,7 @@ Kiểm tra toàn phần `bash examples/toi-noi-location/verify-p01.sh` chạy c�
 
 ## Giới hạn của ví dụ
 
-Đường gấp khúc minh họa dùng tọa độ gần đúng của ba địa danh, không phải tuyến đường thật, và không có dữ liệu đường OSM trong bài này. Phép chiếu chọn đoạn gần nhất rồi kết thúc: nếu tuyến tự cắt hoặc vòng lại (cầu vượt, vòng xoay), `along_m` của một điểm nằm giữa hai nhánh gần nhau có thể sai nhánh. Việc chọn đúng nhánh là bài toán bám đường (map matching) của phần sau. Bearing mới có hướng ban đầu của cung tròn lớn giữa hai điểm; chưa có quyết định trái hay phải. Lab chưa nội suy marker cho app khách và chưa tính VN-2000. Con số nhiễu 0–1 m dùng cho tuyến dày là nhiễu tổng hợp của lab, không phải số đo từ GPS thật.
+Đường gấp khúc minh hoạ dùng toạ độ gần đúng của ba địa danh, không phải tuyến đường thật, và không có dữ liệu đường OSM trong bài này. Phép chiếu chọn đoạn gần nhất rồi kết thúc: nếu tuyến tự cắt hoặc vòng lại (cầu vượt, vòng xoay), `along_m` của một điểm nằm giữa hai nhánh gần nhau có thể sai nhánh. Việc chọn đúng nhánh là bài toán bám đường (map matching) của phần sau. Bearing mới có hướng ban đầu của cung tròn lớn giữa hai điểm; chưa có quyết định trái hay phải. Lab chưa nội suy marker cho app khách và chưa tính VN-2000. Con số nhiễu 0–1 m dùng cho tuyến dày là nhiễu tổng hợp của lab, không phải số đo từ GPS thật.
 
 ## Bài tập
 
@@ -315,7 +315,7 @@ Bearing hướng tây là 270°. Hai hướng 350° và 10° chênh nhau 20°, k
 
 <details><summary>Lời giải</summary>
 
-Để vẽ marker trên màn hình điện thoại thì chấp nhận được, vì nhiễu GPS vài mét lớn hơn nhiều và 0,76 m chỉ bằng vài điểm ảnh ở mức zoom đường phố. Làm đầu vào cho bám đường thì không nên: sai số cộng thêm vào nhiễu GPS, làm xấu việc xếp hạng đường song song. Quy tắc: tính toán dùng dữ liệu gốc (`f64` hoặc E7), chỉ mã hóa polyline ở khâu gửi cho giao diện.
+Để vẽ marker trên màn hình điện thoại thì chấp nhận được, vì nhiễu GPS vài mét lớn hơn nhiều và 0,76 m chỉ bằng vài điểm ảnh ở mức zoom đường phố. Làm đầu vào cho bám đường thì không nên: sai số cộng thêm vào nhiễu GPS, làm xấu việc xếp hạng đường song song. Quy tắc: tính toán dùng dữ liệu gốc (`f64` hoặc E7), chỉ mã hoá polyline ở khâu gửi cho giao diện.
 
 </details>
 

@@ -1,0 +1,17 @@
+{"file":"aws-observability-nang-cao-xray-adot-logs-insights-slo.md","edits":[
+{"old":"anomaly detection và composite alarm giảm ồn;","new":"anomaly detection và composite alarm giảm cảnh báo nhiễu;","reason":"'giảm ồn' là calque của noise reduction","severity":"medium"},
+{"old":"và có đủ tệ để gọi người dậy hay không.","new":"và có đủ nghiêm trọng để gọi người dậy hay không.","reason":"'tệ' khẩu ngữ, calque của 'bad enough'","severity":"medium"},
+{"old":"và định nghĩa \"đủ tệ\" bằng SLO.","new":"và định nghĩa thế nào là \"đủ nghiêm trọng\" bằng SLO.","reason":"Thống nhất với câu trước; câu thiếu động từ","severity":"medium"},
+{"old":"CPU là <b>nguyên nhân tiềm năng</b>,","new":"CPU là <b>nguyên nhân có thể có</b>,","reason":"'tiềm năng' là calque của potential","severity":"low"},
+{"old":"Không có propagation vào database;","new":"Không có truyền ngữ cảnh vào database;","reason":"Thống nhất với 'truyền ngữ cảnh' dùng ở trên","severity":"low"},
+{"old":"ghi mọi trace là phí tiền:","new":"ghi mọi trace thì tốn kém:","reason":"'là phí tiền' cụt, gượng","severity":"medium"},
+{"old":"Chỉ báo khi cả lỗi lẫn chậm cùng xấu:","new":"Chỉ báo khi cả lỗi lẫn độ chậm cùng vượt ngưỡng:","reason":"'cùng xấu' là cụm tự ghép","severity":"medium"},
+{"old":"**Error budget** là phần còn lại để được phép hỏng: 100% trừ mục tiêu.","new":"**Error budget** là phần được phép hỏng, bằng 100% trừ đi mục tiêu.","reason":"'phần còn lại để được phép hỏng' gượng","severity":"medium"},
+{"old":"Tệp này (cắt bớt) tạo qua","new":"Bạn tạo SLO từ tệp này (đã cắt bớt) qua","reason":"Câu thiếu chủ ngữ, kiểu bị động","severity":"medium"},
+{"old":"(console cho tạo cùng lúc với SLO)","new":"(console cho phép tạo cùng lúc với SLO)","reason":"Câu lược động từ","severity":"low"},
+{"old":"<text x=\"642\" y=\"102\" class=\"t-small\">gom, giảm ồn</text>","new":"<text x=\"642\" y=\"102\" class=\"t-small\">gom, giảm nhiễu</text>","reason":"'giảm ồn' là calque (chữ trong SVG)","severity":"low"},
+{"old":"mỗi khâu giảm bớt tiếng ồn trước khi tới người.","new":"mỗi khâu lọc bớt cảnh báo nhiễu trước khi tới người trực.","reason":"'tiếng ồn' là calque của noise","severity":"medium"},
+{"old":"mỗi 5 phút kiểm `price > 0`, cho biết ngay cả khi không có khách nào đang dùng.","new":"mỗi 5 phút kiểm `price > 0`, giúp phát hiện sự cố ngay cả khi không có khách nào đang dùng.","reason":"Câu thiếu chủ ngữ và tân ngữ của 'cho biết'","severity":"medium"},
+{"old":"nhãn metric như `trip_id`, `driver_id` nổ số metric (bài 47).","new":"nhãn metric như `trip_id`, `driver_id` làm số lượng metric tăng vọt (bài 47).","reason":"'nổ số metric' là cụm tự ghép","severity":"medium"},
+{"old":"có thể làm SLI đẹp giả;","new":"có thể làm SLI trông tốt hơn thực tế;","reason":"'đẹp giả' là cụm tự ghép","severity":"medium"}
+]}

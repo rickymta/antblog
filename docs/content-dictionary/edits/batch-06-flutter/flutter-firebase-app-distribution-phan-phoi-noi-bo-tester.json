@@ -1,0 +1,89 @@
+{
+  "file": "flutter-firebase-app-distribution-phan-phoi-noi-bo-tester.md",
+  "edits": [
+    {
+      "old": "nên ở đây chỉ app `vn.toinoi.customer.staging` trên hai nền tảng, cộng cặp của app tài xế, nhận bản build.",
+      "new": "nên ở đây chỉ app `vn.toinoi.customer.staging` trên hai nền tảng, cộng với cặp app tương ứng của tài xế, nhận bản build.",
+      "reason": "Cụm 'cộng cặp của app tài xế' cụt, thiếu từ nối",
+      "severity": "medium"
+    },
+    {
+      "old": "Test chứng minh ca `dev` và `prod`:",
+      "new": "Test chứng minh hai test case `dev` và `prod` đều bị từ chối:",
+      "reason": "Câu thiếu vị ngữ; thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi release có mặt 150 ngày.",
+      "new": "mỗi release tồn tại 150 ngày.",
+      "reason": "'có mặt' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "nên ta dán thêm bước dựng APK vào job `android` của nó:",
+      "new": "nên ta thêm bước dựng APK vào job `android` của nó:",
+      "reason": "'dán thêm' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "và kiểm điều lệnh giả thấy lúc bị gọi:",
+      "new": "và kiểm những gì lệnh giả nhận được khi bị gọi:",
+      "reason": "'điều lệnh giả thấy' tự ghép, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Kiểu khác (`chore`, `ci`, `test`...), commit merge và commit không theo quy ước là nội bộ.",
+      "new": "Kiểu khác (`chore`, `ci`, `test`...), commit merge và commit không theo quy ước bị coi là thay đổi nội bộ.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Danh sách trắng không để commit tên lạ lọt ra ngoài; cái giá là commit thiếu tiền tố bị bỏ trong im lặng,",
+      "new": "Danh sách trắng không để commit có tiền tố lạ lọt ra ngoài; cái giá là commit thiếu tiền tố bị bỏ mà không báo gì,",
+      "reason": "'tên lạ' mơ hồ; 'trong im lặng' là calque",
+      "severity": "medium"
+    },
+    {
+      "old": "Test tạo repo git tạm cho cả ba ca:",
+      "new": "Test tạo repo git tạm cho cả ba test case:",
+      "reason": "Thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "App Distribution gỡ phần khó nhất là thu UDID:",
+      "new": "App Distribution lo luôn phần khó nhất là thu thập UDID:",
+      "reason": "'gỡ phần khó nhất' gượng, dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "Vì vậy bản \"api\" vào mọi variant, bản đầy đủ chỉ vào `staging`:",
+      "new": "Vì vậy ta đưa bản \"api\" vào mọi variant, còn bản đầy đủ chỉ đưa vào `staging`:",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "app có Crashlytics thì có số liệu ổn định cho mọi bản build phân phối;",
+      "new": "app có Crashlytics thì có số liệu về độ ổn định cho mọi bản build phân phối;",
+      "reason": "'số liệu ổn định' nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "App Distribution cho vòng nhanh của đội QA; TestFlight cho tester ngoài và bản đi đúng đường App Store.",
+      "new": "Dùng App Distribution cho vòng kiểm thử nhanh của đội QA; dùng TestFlight cho tester ngoài và bản đi đúng đường App Store.",
+      "reason": "Câu thiếu động từ (đã chỉnh khi duyệt: viết hoa đầu câu)",
+      "severity": "medium"
+    },
+    {
+      "old": "<strong>Tải AAB bị từ chối.</strong>",
+      "new": "<strong>Tải lên AAB bị từ chối.</strong>",
+      "reason": "'Tải' dễ hiểu thành download",
+      "severity": "low"
+    },
+    {
+      "old": "Cách sửa: chỉ bản api cho mọi variant; test của lab bắt đúng lỗi này.",
+      "new": "Cách sửa: chỉ dùng bản api cho mọi variant; test của lab bắt đúng lỗi này.",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    }
+  ]
+}

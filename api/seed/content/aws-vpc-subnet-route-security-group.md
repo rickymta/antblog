@@ -8,9 +8,9 @@ tags: [aws, toi-noi, devops, vpc, subnet, nat-gateway, security-group, nacl, net
 language: vi
 ---
 
-Đến lúc đặt service báo giá và bảng `trips` của [Tới Nơi](/articles/du-an-mau-toi-noi) lên AWS, câu hỏi đầu tiên không phải "dùng máy loại nào" mà là "đặt chúng vào mạng nào". Mỗi tài khoản có sẵn một mạng mặc định với subnet đều ra được Internet, tiện để thử nhưng không phải thứ ta muốn cho database chứa 730 triệu dòng chuyến mỗi năm. Ta cần một mạng riêng, trong đó chỉ load balancer đứng ở cửa, còn ứng dụng và dữ liệu nằm phía sau.
+Đến lúc đặt service báo giá và bảng `trips` của [Tới Nơi](/articles/du-an-mau-toi-noi) lên AWS, câu hỏi đầu tiên không phải "dùng máy loại nào" mà là "đặt chúng vào mạng nào". Mỗi tài khoản có sẵn một mạng mặc định mà mọi subnet đều ra được Internet, tiện để thử nhưng không phải thứ ta muốn cho database chứa 730 triệu dòng chuyến mỗi năm. Ta cần một mạng riêng, trong đó chỉ load balancer đứng ở cửa, còn ứng dụng và dữ liệu nằm phía sau.
 
-Đây là **bài 04** của lộ trình **AWS qua Tới Nơi · Phần 01: Nền tảng AWS**. Bạn cần xong [bài 03](/articles/aws-iam-user-role-policy) và hiểu mạng IP ở mức cơ bản (địa chỉ, subnet mask, cổng TCP). Không cần biết Docker hay Kubernetes.
+Đây là **bài 04** của lộ trình **AWS qua Tới Nơi · Phần 01: Nền tảng AWS**. Bạn cần đọc xong [bài 03](/articles/aws-iam-user-role-policy) và hiểu mạng IP ở mức cơ bản (địa chỉ, subnet mask, cổng TCP). Không cần biết Docker hay Kubernetes.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,7 +22,7 @@ language: vi
 
 **VPC (Virtual Private Cloud)** là mạng ảo riêng của bạn trong một region. Bạn chọn dải địa chỉ cho nó bằng ký hiệu **CIDR**: `10.20.0.0/16` nghĩa là các địa chỉ từ `10.20.0.0` đến `10.20.255.255`, khoảng 65 nghìn địa chỉ. Chọn dải này sao cho **không trùng** với mạng văn phòng hay VPC khác mà sau này ta muốn nối vào; hai mạng trùng CIDR không nối với nhau được.
 
-VPC được chia thành các **subnet**. Mỗi subnet nằm trọn trong **một AZ** và có dải CIDR con. Quy tắc cần nhớ: AWS giữ lại 5 địa chỉ trong mỗi subnet (4 địa chỉ đầu và địa chỉ cuối cùng, dùng cho router, DNS…), nên một subnet `/24` dùng được 251 địa chỉ. Muốn chịu được mất một AZ, ta cần subnet ở ít nhất hai AZ. Tới Nơi dùng ba tầng, mỗi tầng hai subnet:
+VPC được chia thành các **subnet**. Mỗi subnet nằm trọn trong **một AZ** và có dải CIDR con. Quy tắc cần nhớ: AWS giữ lại 5 địa chỉ trong mỗi subnet (4 địa chỉ đầu và địa chỉ cuối cùng, dùng cho router, DNS…), nên một subnet `/24` dùng được 251 địa chỉ. Muốn chịu được khi mất một AZ, ta cần subnet ở ít nhất hai AZ. Tới Nơi dùng ba tầng, mỗi tầng hai subnet:
 
 | Tầng | AZ thứ 1 | AZ thứ 2 | Chứa gì | Ra Internet |
 |---|---|---|---|---|
@@ -30,7 +30,7 @@ VPC được chia thành các **subnet**. Mỗi subnet nằm trọn trong **mộ
 | private-app | `10.20.10.0/24` | `10.20.11.0/24` | Service `booking`, `quote`, `dispatch` | Qua NAT Gateway |
 | private-data | `10.20.20.0/24` | `10.20.21.0/24` | RDS PostgreSQL (bảng `trips`) | Không |
 
-Bảng này cho 6 subnet. Bạn nên chừa chỗ trống trong dải `/16` để thêm tầng hoặc môi trường sau này.
+Bảng này gồm 6 subnet. Bạn nên chừa chỗ trống trong dải `/16` để thêm tầng hoặc môi trường sau này.
 
 ## Public, private, IGW và NAT
 
@@ -41,7 +41,7 @@ Mỗi subnet gắn với đúng một **route table**: danh sách luật "đích
 
 Subnet private-data của ta cố ý **không có luật `0.0.0.0/0`** nào: database không có đường ra Internet, càng không có đường vào.
 
-NAT Gateway là mục đắt nhất bài này. Nó tính tiền theo **giờ tồn tại** và theo **GB dữ liệu đi qua**, cộng thêm địa chỉ IPv4 công khai cũng tính theo giờ; giá cụ thể xem trang giá của VPC. NAT Gateway kiểu truyền thống (zonal) thuộc về một AZ, nên cho môi trường production người ta đặt một cái mỗi AZ để mất AZ này không làm app ở AZ kia mất đường ra; từ 11/2025 AWS có thêm chế độ *regional* NAT Gateway tự mở rộng qua các AZ, nhưng lab vẫn dùng kiểu zonal để bạn thấy rõ cơ chế. Ở lab, ta dùng một cái và xoá ngay sau khi thử. Bạn có thể giảm hoá đơn NAT bằng VPC endpoint tới S3 hoặc DynamoDB (loại *gateway* không tính tiền), được trình bày kỹ hơn ở bài 53. Với IPv6, không cần NAT: dùng *egress-only internet gateway*.
+NAT Gateway là mục đắt nhất bài này. Nó tính tiền theo **giờ tồn tại** và theo **GB dữ liệu đi qua**, cộng thêm địa chỉ IPv4 công khai cũng tính theo giờ; giá cụ thể xem trang giá của VPC. NAT Gateway kiểu truyền thống (zonal) thuộc về một AZ, nên cho môi trường production người ta đặt một cái mỗi AZ để mất AZ này không làm app ở AZ kia mất đường ra; từ 11/2025 AWS có thêm chế độ *regional* NAT Gateway tự mở rộng qua các AZ, nhưng lab vẫn dùng kiểu zonal để bạn thấy rõ cơ chế. Ở lab, ta dùng một cái và xoá ngay sau khi thử. Bạn có thể giảm hoá đơn NAT bằng VPC endpoint tới S3 hoặc DynamoDB (loại *gateway* không tính tiền); bài 53 trình bày kỹ hơn. Với IPv6, không cần NAT: dùng *egress-only internet gateway*.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -129,7 +129,7 @@ Lab có bước NACL này ở dạng tuỳ chọn, và **chưa được kiểm c
 
 Hai công cụ giúp tìm chỗ nghẽn thay vì đoán:
 
-- **VPC Flow Logs** ghi metadata từng luồng (nguồn, đích, cổng, giao thức, `ACCEPT` hay `REJECT`) của một VPC, subnet hoặc ENI vào CloudWatch Logs hoặc S3. Chúng không ghi nội dung gói tin, và một số loại traffic (như DNS tới Amazon DNS) không được ghi. Ghi log tốn tiền theo dung lượng; bắt đầu với `REJECT` ở phạm vi nhỏ. Một dòng `REJECT` cổng 8080 từ IP lạ tới app cho bạn thấy ngay luật security group đã chặn đúng như ý.
+- **VPC Flow Logs** ghi metadata từng luồng (nguồn, đích, cổng, giao thức, `ACCEPT` hay `REJECT`) của một VPC, subnet hoặc ENI vào CloudWatch Logs hoặc S3. Chúng không ghi nội dung gói tin, và một số loại traffic (như DNS tới Amazon DNS) không được ghi. Việc ghi log tốn tiền theo dung lượng; bắt đầu với `REJECT` ở phạm vi nhỏ. Một dòng `REJECT` cổng 8080 từ IP lạ tới app cho bạn thấy ngay luật security group đã chặn đúng như ý.
 - **Reachability Analyzer** phân tích cấu hình (security group, NACL, route table) giữa hai điểm và nói luật nào chặn, mà **không gửi gói tin thật**. Mỗi lần phân tích có tính phí, xem trang giá.
 
 Ví dụ bật Flow Logs chỉ cho traffic bị từ chối của VPC, gửi vào CloudWatch Logs (cần một IAM role cho phép gửi log; không nằm trong script lab, và lệnh dưới đây chưa được chạy trên tài khoản thật):
@@ -144,7 +144,7 @@ aws ec2 create-flow-logs --resource-type VPC --resource-ids vpc-0abc1234def56789
 
 - **Quên NAT thì máy private "treo"**: lệnh tải gói, kéo image hay gọi API ngoài chờ mãi vì không có đường ra.
 - **NAT Gateway bị bỏ quên**: tính tiền từng giờ, kể cả khi không có traffic. Luôn dọn sau lab.
-- **Đặt database vào subnet public "cho tiện"**: nếu thêm security group mở rộng, database tiếp xúc Internet.
+- **Đặt database vào subnet public "cho tiện"**: nếu lại gắn security group mở rộng thì database bị lộ ra Internet.
 - **CIDR trùng**: chọn `/16` giống VPC khác rồi mới biết không nối được. Ghi lại các dải đã dùng.
 - **NACL thiếu cổng tạm**: gói đi được, gói về bị chặn; Flow Logs sẽ hiện `REJECT` ở chiều về.
 - **Một NAT cho mọi AZ**: rẻ nhưng nếu AZ chứa NAT hỏng thì app ở AZ kia mất đường ra.

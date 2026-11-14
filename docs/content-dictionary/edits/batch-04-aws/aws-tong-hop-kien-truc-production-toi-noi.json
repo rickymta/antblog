@@ -1,0 +1,18 @@
+{"file":"aws-tong-hop-kien-truc-production-toi-noi.md","edits":[
+{"old":"một chuyến đi đâu, hỏng ở đâu","new":"một chuyến đi qua những dịch vụ nào, hỏng ở đâu","reason":"'đi đâu' mơ hồ","severity":"medium"},
+{"old":"Bạn nên đã đọc các bài trước","new":"Bạn nên đọc các bài trước","reason":"'nên đã đọc' kiểu dịch máy","severity":"medium"},
+{"old":"Crash chỉ làm sự kiện đến muộn hoặc hai lần","new":"Crash chỉ làm sự kiện đến muộn hoặc đến hai lần","reason":"Câu lược động từ","severity":"medium"},
+{"old":"Kiến trúc đích của Tới Nơi hiện thực trên AWS thành ba lớp.","new":"Kiến trúc đích của Tới Nơi trên AWS gồm ba lớp.","reason":"'hiện thực ... thành' calque","severity":"medium"},
+{"old":"Lớp thứ hai là code và dữ liệu.","new":"Lớp thứ hai là compute và dữ liệu.","reason":"Khớp chú thích Hình 2 (Lớp compute và dữ liệu)","severity":"medium"},
+{"old":"| Độ tươi vị trí tài xế |","new":"| Độ mới của vị trí tài xế |","reason":"'độ tươi' calque của freshness","severity":"medium"},
+{"old":"| Sự cố | Kiểm đầu tiên |","new":"| Sự cố | Kiểm tra đầu tiên |","reason":"'Kiểm' cụt","severity":"low"},
+{"old":"kiểm message độc","new":"kiểm tra poison message","reason":"'message độc' calque của poison message","severity":"medium"},
+{"old":"kiểm migration tương thích hai bản","new":"kiểm tra migration tương thích với cả hai phiên bản","reason":"'hai bản' mơ hồ, 'kiểm' cụt","severity":"medium"},
+{"old":"image có quét và digest bất biến","new":"image được quét và dùng digest bất biến","reason":"'có quét' gượng","severity":"low"},
+{"old":"Dung lượng đọc ghi, số node","new":"Dung lượng đọc và ghi, số node","reason":"'đọc ghi' calque","severity":"medium"},
+{"old":"Phần 01 ứng CLF-C02","new":"Phần 01 ứng với CLF-C02","reason":"'ứng' thiếu 'với'","severity":"medium"},
+{"old":"mỗi khối trong ba hình cần owner, alarm và runbook","new":"mỗi khối trong ba hình cần người phụ trách, alarm và runbook","reason":"'owner' có từ Việt tự nhiên (style guide)","severity":"low"},
+{"old":"Ghi rõ từng bước, bù trừ của nó và khoá idempotency.","new":"Ghi rõ từng bước, bước bù trừ tương ứng và khoá idempotency.","reason":"'bù trừ của nó' cụt, dùng 'nó'","severity":"medium"},
+{"old":"Payment hoàn giữ tiền hoặc thu phí huỷ","new":"Payment nhả khoản tiền đã giữ hoặc thu phí huỷ","reason":"'hoàn giữ tiền' lủng củng; khớp 'chưa nhả' ở câu sau","severity":"medium"},
+{"old":"Bước 3 lỗi sau khi retry thì đẩy vào","new":"Nếu bước 3 vẫn lỗi sau khi retry thì đẩy vào","reason":"Câu thiếu liên từ, khó đọc","severity":"low"}
+]}

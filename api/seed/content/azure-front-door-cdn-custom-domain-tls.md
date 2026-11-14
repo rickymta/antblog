@@ -20,7 +20,7 @@ Bài này đặt một cửa vào toàn cầu trước API của Tới Nơi: Fro
 
 ## Front Door là cửa vào toàn cầu, không phải Application Gateway đặt xa hơn
 
-Azure có ba thứ hay bị nhầm cho việc «đứng trước ứng dụng». Chúng khác nhau ở tầng hoạt động và phạm vi, không ở độ mạnh.
+Azure có ba dịch vụ hay bị nhầm lẫn khi cần «đứng trước ứng dụng». Chúng khác nhau ở tầng hoạt động và phạm vi, không ở độ mạnh.
 
 | | Front Door | Application Gateway | Traffic Manager |
 | --- | --- | --- | --- |
@@ -31,11 +31,11 @@ Azure có ba thứ hay bị nhầm cho việc «đứng trước ứng dụng».
 | WAF | Có | Có | Không |
 | Đi tới origin riêng tư | Có, qua Private Link (Premium) | Có, vì ở trong VNet | Không áp dụng |
 
-Front Door dùng địa chỉ anycast: cùng một IP được quảng bá từ nhiều POP, nên kết nối của khách tự rơi vào POP gần nhất theo định tuyến mạng. TCP và TLS handshake diễn ra ở POP đó. Từ POP về origin, Front Door giữ kết nối dùng lại trên mạng backbone của Microsoft. Với app tài xế ở Đà Nẵng gọi API đặt ở Singapore, phần lợi thường nằm ở handshake ngắn hơn và đường về origin ổn định hơn, không phải ở việc origin chạy nhanh hơn.
+Front Door dùng địa chỉ anycast: cùng một IP được quảng bá từ nhiều POP, nên kết nối của khách tự rơi vào POP gần nhất theo định tuyến mạng. TCP và TLS handshake diễn ra ở POP đó. Từ POP về origin, Front Door giữ sẵn kết nối để dùng lại trên mạng backbone của Microsoft. Với app tài xế ở Đà Nẵng gọi API đặt ở Singapore, phần lợi thường nằm ở handshake ngắn hơn và đường về origin ổn định hơn, không phải ở việc origin chạy nhanh hơn.
 
-Traffic Manager chỉ trả lời truy vấn DNS rồi biến mất khỏi đường đi. Application Gateway (bài 27, [mạng cho ứng dụng](/articles/azure-vnet-integration-application-gateway)) nằm trong VNet nên hợp để đứng trước workload riêng tư trong một region. Hai thứ ghép được với nhau: Front Door ở ngoài cùng, Application Gateway ở trong. Tới Nơi mới có một region chính nên chỉ dùng Front Door là đủ cho bài này.
+Traffic Manager chỉ trả lời truy vấn DNS rồi biến mất khỏi đường đi. Application Gateway (bài 27, [mạng cho ứng dụng](/articles/azure-vnet-integration-application-gateway)) nằm trong VNet nên hợp để đứng trước workload riêng tư trong một region. Hai dịch vụ này ghép được với nhau: Front Door ở ngoài cùng, Application Gateway ở trong. Tới Nơi mới có một region chính nên chỉ dùng Front Door là đủ cho bài này.
 
-Về CDN: các SKU Azure CDN cũ và cả Front Door (classic) đều đã có lịch nghỉ hưu; hướng hiện hành là Front Door Standard/Premium, nơi caching là một tính năng của route. Kiểm thông báo retirement trong tài liệu trước khi tạo profile CDN độc lập mới.
+Về CDN: các SKU Azure CDN cũ và cả Front Door (classic) đều đã có lịch ngừng hỗ trợ; hướng hiện hành là Front Door Standard/Premium, nơi caching là một tính năng của route. Kiểm tra thông báo retirement trong tài liệu trước khi tạo profile CDN độc lập mới.
 
 ## Bốn tầng cấu hình: endpoint, origin group, origin, route
 
@@ -51,7 +51,7 @@ Một request đi qua bốn khái niệm, theo đúng thứ tự dưới đây.
 - **Profile** là vỏ ngoài chứa mọi thứ và quyết định SKU (Standard hoặc Premium).
 - **Endpoint** là tên miền `*.azurefd.net` do Front Door cấp. Domain riêng của bạn được gắn vào route.
 - **Origin** là nơi thật sự xử lý request: Container App, App Service, Blob, hay bất kỳ host nào có địa chỉ công khai.
-- **Origin group** gom các origin cùng vai trò và mang **health probe**. Probe là request định kỳ tới một path, thường `/health/ready` của `trip-service`. Origin trượt probe bị loại khỏi vòng chọn. Probe khác với giám sát của khách: nếu cả group cùng trượt, Front Door vẫn thử gửi request chứ không tự trả lỗi thay bạn.
+- **Origin group** gom các origin cùng vai trò và mang **health probe**. Probe là request định kỳ tới một path, thường `/health/ready` của `trip-service`. Origin không qua được probe sẽ bị loại khỏi danh sách được chọn. Probe khác với giám sát của khách: nếu cả group cùng không qua được probe, Front Door vẫn thử gửi request chứ không tự trả lỗi thay bạn.
 - **Route** nối domain và pattern path với một origin group, quyết định giao thức, redirect HTTP sang HTTPS và có bật cache hay không.
 
 Có hai cấu hình dễ chọn sai. **Session affinity** ghim một khách vào một origin qua cookie. Chỉ bật khi origin giữ state trong bộ nhớ. `trip-service` stateless nên để tắt, nếu không một replica nóng sẽ giữ khách cố định và phá cân bằng tải. **Rule set** là nơi viết rewrite: thêm hoặc đổi header request và response, đổi URL. Một use case hợp lý là thêm header `Strict-Transport-Security` vào mọi response.
@@ -62,7 +62,7 @@ Domain `api.toinoi.example` phải được chứng minh là của bạn trướ
 
 Có hai bản ghi DNS. Bản ghi **CNAME** trỏ `api` về hostname endpoint để traffic đi vào Front Door. Bản ghi **TXT** tên `_dnsauth.api`, giá trị là token do Front Door sinh, để chứng minh quyền sở hữu khi cấp **managed certificate**. Managed certificate do Front Door phát hành và tự gia hạn, bạn không giữ private key. Muốn tự quản chứng chỉ thì dùng certificate trong Key Vault (bài 14, [Key Vault](/articles/azure-key-vault-secret-key-certificate)) và Front Door đọc từ đó. Đổi lại, bạn phải lo gia hạn và quyền truy cập.
 
-Hai thiết lập cuối làm TLS có nghĩa: phiên bản TLS tối thiểu 1.2 (Front Door đã ngừng nhận TLS 1.0 và 1.1, nhưng vẫn nên ghi rõ trong cấu hình), và route redirect HTTP sang HTTPS. Redirect không bảo vệ lần gọi HTTP đầu tiên của một client viết ẩu, nên với API hãy từ chối HTTP hẳn ở client mobile và để redirect chỉ phục vụ trình duyệt.
+Hai thiết lập cuối làm cho TLS thực sự có tác dụng: phiên bản TLS tối thiểu 1.2 (Front Door đã ngừng nhận TLS 1.0 và 1.1, nhưng vẫn nên ghi rõ trong cấu hình), và route redirect HTTP sang HTTPS. Redirect không bảo vệ lần gọi HTTP đầu tiên của một client viết ẩu, nên với API hãy từ chối HTTP hẳn ở client mobile và để redirect chỉ phục vụ trình duyệt.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Chỗ phải trả giá</span>
@@ -84,12 +84,12 @@ Có hai cách, độ chắc khác nhau:
 
 | Cách | Cơ chế | Điểm yếu |
 | --- | --- | --- |
-| Private Link (Premium) | Front Door nối tới origin qua kết nối riêng tư; origin tắt truy cập công khai | Cần SKU Premium; origin phải thuộc loại được hỗ trợ, kiểm bảng trong tài liệu; có bước phê duyệt kết nối |
-| Header `X-Azure-FDID` + IP restriction | Front Door gắn ID profile vào header; origin chỉ nhận IP của Front Door và đúng ID | Header đứng một mình có thể bị giả; IP của Front Door là dải chung, nên phải kèm kiểm ID |
+| Private Link (Premium) | Front Door nối tới origin qua kết nối riêng tư; origin tắt truy cập công khai | Cần SKU Premium; origin phải thuộc loại được hỗ trợ, kiểm tra bảng trong tài liệu; có bước phê duyệt kết nối |
+| Header `X-Azure-FDID` + IP restriction | Front Door gắn ID profile vào header; origin chỉ nhận IP của Front Door và đúng ID | Header đứng một mình có thể bị giả; IP của Front Door là dải chung, nên phải kèm kiểm tra ID |
 
-Hai lớp của cách thứ hai bổ sung cho nhau. IP restriction loại phần lớn Internet nhưng chia sẻ dải với mọi profile Front Door khác trên thế giới. Kiểm `X-Azure-FDID` loại những profile khác. Thiếu một trong hai là chưa khoá. Lấy ID bằng `az afd profile show --query frontDoorId`.
+Hai lớp của cách thứ hai bổ sung cho nhau. IP restriction loại phần lớn Internet nhưng chia sẻ dải với mọi profile Front Door khác trên thế giới. Kiểm tra `X-Azure-FDID` loại những profile khác. Thiếu một trong hai là chưa khoá. Lấy ID bằng `az afd profile show --query frontDoorId`.
 
-Lệnh dưới đặt IP restriction trên ingress của Container Apps. Ingress này nhận CIDR, không nhận tên service tag, nên mỗi dải của `AzureFrontDoor.Backend` là một rule (lấy danh sách bằng `az network list-service-tags --location southeastasia` hoặc file Service Tags tải về). Lệnh không chứng minh dải bạn nhập là dải hiện hành: danh sách thay đổi, cần kế hoạch cập nhật định kỳ và kiểm giới hạn số rule. App Service thì gọn hơn: access restriction nhận thẳng `--service-tag AzureFrontDoor.Backend` kèm `--http-header x-azure-fdid=<id>`.
+Lệnh dưới đặt IP restriction trên ingress của Container Apps. Ingress này nhận CIDR, không nhận tên service tag, nên mỗi dải của `AzureFrontDoor.Backend` là một rule (lấy danh sách bằng `az network list-service-tags --location southeastasia` hoặc file Service Tags tải về). Lệnh không chứng minh dải bạn nhập là dải hiện hành: danh sách thay đổi, cần kế hoạch cập nhật định kỳ và kiểm tra giới hạn số rule. App Service thì gọn hơn: access restriction nhận thẳng `--service-tag AzureFrontDoor.Backend` kèm `--http-header x-azure-fdid=<id>`.
 
 ```bash
 az containerapp ingress access-restriction set \
@@ -98,7 +98,7 @@ az containerapp ingress access-restriction set \
   --action Allow
 ```
 
-Phần kiểm header đặt trong ứng dụng. Đoạn dưới từ chối request không mang đúng ID, trừ path `/health` để có thể kiểm sức khoẻ trực tiếp khi chẩn đoán. Nó dừng app ngay lúc khởi động nếu thiếu `FrontDoor:Id`, vì kiểm so với giá trị rỗng là không kiểm gì; nó không thay IP restriction.
+Phần kiểm tra header nằm trong ứng dụng. Đoạn dưới từ chối request không mang đúng ID, trừ path `/health` để có thể kiểm tra sức khoẻ trực tiếp khi chẩn đoán. Đoạn này dừng app ngay lúc khởi động nếu thiếu `FrontDoor:Id`, vì so sánh với giá trị rỗng thì chẳng kiểm tra được gì; đoạn này không thay thế IP restriction.
 
 ```csharp
 var fdid = builder.Configuration["FrontDoor:Id"]
@@ -122,9 +122,9 @@ Còn một lối vòng nữa: domain mặc định `*.azurefd.net` của endpoin
 
 Logo quán và ảnh món nằm trong Blob (bài [Storage account](/articles/azure-storage-account-blob-tier-sas)) không cần đi qua `trip-service`. Tạo origin group thứ hai trỏ tới `sttoinoiassetsprod.blob.core.windows.net` và một route cho path `/img/*`. Nên dùng storage account riêng chỉ chứa tài nguyên công khai: bật anonymous read trên account chứa dữ liệu nghiệp vụ là một quyết định tồi. Muốn đóng hẳn truy cập công khai thì dùng Private Link của Premium.
 
-Cache theo cơ chế: Front Door lưu response ở POP, trả lại cho khách tiếp theo trong thời gian hết hạn do header `Cache-Control` của origin hoặc do rule của bạn. Hai tham số quyết định hiệu quả là **TTL** và **query string**. Với ảnh bất biến, để query string bị bỏ qua khi tính khoá cache và đặt TTL dài. Với API động thì không cache gì cả; `POST /quotes` không bao giờ nên vào cache.
+Cơ chế cache như sau: Front Door lưu response ở POP, trả lại cho khách tiếp theo trong thời gian hết hạn do header `Cache-Control` của origin hoặc do rule của bạn. Hai tham số quyết định hiệu quả là **TTL** và **query string**. Với ảnh bất biến, để query string bị bỏ qua khi tính khoá cache và đặt TTL dài. Với API động thì không cache gì cả; `POST /quotes` không bao giờ nên vào cache.
 
-Hậu quả của TTL dài là ảnh cũ nằm ở POP đến hết hạn, kể cả khi bạn đã thay file ở origin. Có hai cách: **purge** để xoá cache theo path, hoặc đặt tên file có hash nội dung (`logo.3fa9c1.webp`) để bản mới là URL mới. Cách thứ hai rẻ và chắc hơn, purge nên giữ cho trường hợp khẩn cấp.
+Hậu quả của TTL dài là ảnh cũ nằm lại ở POP cho đến khi hết hạn, kể cả khi bạn đã thay file ở origin. Có hai cách: **purge** để xoá cache theo path, hoặc đặt tên file có hash nội dung (`logo.3fa9c1.webp`) để bản mới là URL mới. Cách thứ hai rẻ và chắc hơn, purge nên giữ cho trường hợp khẩn cấp.
 
 ## Lab: Front Door Standard trước Container App
 
@@ -158,7 +158,7 @@ az afd route create -g $RG --profile-name $P \
   --link-to-default-domain Enabled --patterns-to-match "/*"
 ```
 
-Khối này mô tả cách làm, không chứng minh origin đã khoẻ: sau khi chạy, kiểm trạng thái probe trong portal rồi `curl` endpoint. Tên tham số có thể khác theo phiên bản extension `afd`, nên chạy `az afd route create -h` khi gặp lỗi. Tiếp theo là custom domain:
+Khối này mô tả cách làm, không chứng minh origin đã khoẻ: sau khi chạy, kiểm tra trạng thái probe trong portal rồi `curl` endpoint. Tên tham số có thể khác theo phiên bản extension `afd`, nên chạy `az afd route create -h` khi gặp lỗi. Tiếp theo là custom domain:
 
 ```bash
 az afd custom-domain create -g $RG --profile-name $P \
@@ -198,7 +198,7 @@ az network front-door waf-policy update -g $RG \
   -n waftoinoistddev --mode Prevention
 ```
 
-Về tier: WAF trên Standard chỉ có custom rule như rate limit của bài 18; managed rule set (chặn SQLi, XSS) và bot protection cần Premium, cũng như Private Link tới origin. Nếu Tới Nơi cần managed rule ở prod, chọn Premium và dùng thẳng policy của bài 18; kiểm bảng so sánh tier trước khi quyết định.
+Về tier: WAF trên Standard chỉ có custom rule như rate limit của bài 18; managed rule set (chặn SQLi, XSS) và bot protection cần Premium, cũng như Private Link tới origin. Nếu Tới Nơi cần managed rule ở prod, chọn Premium và dùng thẳng policy của bài 18; kiểm tra bảng so sánh tier trước khi quyết định.
 
 Đo TTFB từ hai vị trí, ví dụ Cloud Shell hoặc một VM ở Southeast Asia và một VM ở region xa như West Europe. Chạy lệnh dưới nhiều lần ở mỗi nơi, so FQDN origin với domain qua Front Door, rồi lấy trung vị. Kết quả phụ thuộc vị trí và thời điểm; với API động bạn kỳ vọng thấy chênh lệch ở máy xa origin, chứ chưa thể đoán trước con số.
 
@@ -217,7 +217,7 @@ Ba cột là thời gian TCP, TLS handshake và byte đầu tiên. Xong lab, xo�
 
 ## Học tiếp từ đây
 
-Bạn đã có đường vào hoàn chỉnh: Front Door nhận request ở POP gần khách, kết thúc TLS với domain `api.toinoi.example`, chạy WAF Prevention, định tuyến theo path, cache ảnh tĩnh và khoá origin để không ai đi vòng. Nhớ rằng lab chỉ mô tả cách làm, bạn cần tự kiểm probe, validation và việc origin từ chối truy cập trực tiếp.
+Bạn đã có đường vào hoàn chỉnh: Front Door nhận request ở POP gần khách, kết thúc TLS với domain `api.toinoi.example`, chạy WAF Prevention, định tuyến theo path, cache ảnh tĩnh và khoá origin để không ai đi vòng. Nhớ rằng lab chỉ mô tả cách làm, bạn cần tự kiểm tra probe, validation và việc origin từ chối truy cập trực tiếp.
 
 Bài kế tiếp là bài cuối của Phần 3, [Bài 29](/articles/azure-app-configuration-feature-flag-key-vault-reference): App Configuration, nơi đặt cờ tính năng và cấu hình đổi được mà không phải build lại image. Bạn có thể xem lại [Bài 18](/articles/azure-firewall-waf-ddos-bao-ve-bien) về WAF và [Bài 22](/articles/azure-container-apps-revision-ingress-scale) về ingress của Container Apps.
 

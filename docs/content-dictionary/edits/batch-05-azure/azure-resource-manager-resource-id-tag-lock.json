@@ -1,0 +1,12 @@
+{"file":"azure-resource-manager-resource-id-tag-lock.md","edits":[
+{"old":"Tới Nơi dùng tag, lock, tên để giữ mọi thứ gọn.","new":"Tới Nơi dùng tag, lock và quy ước đặt tên để giữ mọi thứ gọn gàng.","reason":"'tên' lược mất danh từ chính","severity":"medium"},
+{"old":"request tới ARM và được xử lý theo một chuỗi chung: xác thực danh tính, kiểm quyền RBAC","new":"request được gửi tới ARM và xử lý theo một chuỗi chung: xác thực danh tính, kiểm tra quyền RBAC","reason":"Câu thiếu động từ; 'kiểm' thiếu 'tra'","severity":"high"},
+{"old":"Khối này kiểm trạng thái đăng ký","new":"Khối này kiểm tra trạng thái đăng ký","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"Nâng version có thể thêm hoặc đổi thuộc tính, nên template cũ vẫn chạy ổn định còn template mới dùng được tính năng mới.","new":"Nhờ ghi cố định version, template cũ vẫn chạy ổn định còn template mới dùng được tính năng mới; nâng version có thể thêm hoặc đổi thuộc tính.","reason":"Quan hệ nhân quả sai: ổn định đến từ việc ghi cố định version, không phải từ việc nâng version","severity":"high"},
+{"old":"Chọn version nào nên theo trang schema của resource","new":"Nên chọn version theo trang schema của resource","reason":"Trật tự từ kiểu tiếng Anh, gượng","severity":"low"},
+{"old":"Nó không bắt buộc ai phải gắn tag; muốn ép quy ước, cần policy.","new":"Khối này không bắt buộc ai phải gắn tag; muốn ép quy ước thì cần policy.","reason":"Tránh 'Nó' mơ hồ","severity":"low"},
+{"old":"Nó không bảo vệ dữ liệu bên trong, như đã thấy ở câu hỏi mở đầu.","new":"Lock không bảo vệ dữ liệu bên trong, như đã thấy ở câu hỏi mở đầu.","reason":"Tránh 'Nó' mơ hồ","severity":"low"},
+{"old":"Kiểm trước khi tạo, ví dụ","new":"Kiểm tra trước khi tạo, ví dụ","reason":"'kiểm' thiếu 'tra'","severity":"medium"},
+{"old":"nên tên của vault vừa xoá có thể chưa dùng lại ngay","new":"nên tên của vault vừa xoá có thể chưa dùng lại được ngay","reason":"Thiếu 'được'","severity":"low"},
+{"old":"nên bảng quy ước cần kiểm thật trước khi dùng","new":"nên bảng quy ước cần được kiểm tra thực tế trước khi dùng","reason":"'kiểm thật' tự ghép, thiếu 'tra'","severity":"medium"}
+]}

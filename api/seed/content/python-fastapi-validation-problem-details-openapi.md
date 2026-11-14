@@ -33,7 +33,7 @@ Ca xấu có hai lỗi cùng lúc, gửi tới app chưa đăng ký handler nào
    "input": "bike", "ctx": {"expected": "'ride', 'food' or 'parcel'"}}]}
 ```
 
-(Trích; output thật in thụt dòng từng khóa, ở đây nén lại cho gọn.) Cấu trúc `detail[].loc/msg/type` đủ dùng khi phát triển, nhưng chưa thành hợp đồng:
+(Trích; output thật in thụt dòng từng khoá, ở đây nén lại cho gọn.) Cấu trúc `detail[].loc/msg/type` đủ dùng khi phát triển, nhưng chưa thành hợp đồng:
 
 - **Hai hình dạng.** Lỗi validation có `detail` là danh sách; lỗi `HTTPException` (như 400 ở bài 31, 404) có `detail` là chuỗi. Client phải viết hai nhánh.
 - **Không có định danh ổn định của ta.** `type` như `decimal_max_places` là mã của pydantic. Nó thuộc về thư viện, và nâng phiên bản có thể đổi tên. `msg` là tiếng Anh, so sánh chuỗi thì mong manh.
@@ -42,7 +42,7 @@ Ca xấu có hai lỗi cùng lúc, gửi tới app chưa đăng ký handler nào
 
 ## Problem Details: một hình dạng cho mọi lỗi
 
-RFC 9457 (thay RFC 7807) định nghĩa một đối tượng JSON mô tả lỗi, gửi với media type `application/problem+json`. Năm thành viên chuẩn, đều tùy chọn, cộng với thành viên mở rộng tùy ý:
+RFC 9457 (thay RFC 7807) định nghĩa một đối tượng JSON mô tả lỗi, gửi với media type `application/problem+json`. Năm thành viên chuẩn, đều tuỳ chọn, cộng với thành viên mở rộng tuỳ ý:
 
 | Thành viên | Ý nghĩa | Cách lab dùng |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ Chạy ba lỗi cùng lúc (`distance_km` 4 chữ số thập phân, `service` l
   {"field": "body.x", "code": "extra_forbidden", "message": "trường không có trong hợp đồng"}]}
 ```
 
-Client rẽ nhánh theo `type`, tô đỏ theo `errors[].field`, hiển thị `message`. `code` vẫn là mã của pydantic; muốn tách hẳn khỏi thư viện thì cần bảng đổi riêng. Lab giữ nguyên và verify khóa ba mã của ca ba lỗi, nên nâng pydantic mà đổi mã thì đỏ ngay.
+Client rẽ nhánh theo `type`, tô đỏ theo `errors[].field`, hiển thị `message`. `code` vẫn là mã của pydantic; muốn tách hẳn khỏi thư viện thì cần bảng đổi riêng. Lab giữ nguyên và verify khoá ba mã của ca ba lỗi, nên nâng pydantic mà đổi mã thì đỏ ngay.
 
 Lỗi miền khác lỗi hình dạng. Ở bài 31, route tự `try/except ValueError`. Ở đây miền ném một exception **có kiểu**, vẫn là `ValueError` với thông điệp cũ của loạt bài:
 
@@ -172,7 +172,7 @@ async def create_quote(body: QuoteRequest, request: Request, response: Response)
 
 `responses` đặt ở router áp cho mọi route, nên 422 và 500 khai báo một lần. Riêng 422 có lý do thêm: FastAPI tự gắn 422 mặc định (`HTTPValidationError`) vào mọi route có tham số, kể cả `GET` với `quote_id: str` hiện chưa thể gây 422; khai báo lại để tài liệu không rơi về schema cũ, và không đổi nghĩa khi kiểu tham số đổi sau này; 400 và 404 khai báo ở từng route vì chỉ route đó có. `operation_id` đặt tay cho tên ổn định (`createQuote`) thay vì `create_quote_v1_quotes_post` sinh từ tên hàm và đường dẫn. `tags` kèm mô tả gom route thành nhóm trong `/docs`.
 
-Có một vướng: FastAPI gắn schema của `model` vào `application/json`, trong khi lỗi của ta là `application/problem+json`. Lab đổi tên khóa sau khi sinh, theo mẫu «extending OpenAPI» của FastAPI:
+Có một vướng: FastAPI gắn schema của `model` vào `application/json`, trong khi lỗi của ta là `application/problem+json`. Lab đổi tên khoá sau khi sinh, theo mẫu «extending OpenAPI» của FastAPI:
 
 ```python
 def problem_media_type_in_openapi(app: FastAPI) -> None:
@@ -222,11 +222,11 @@ quên khai báo responses:
 
 ## Version và snapshot: đổi hợp đồng có chủ ý
 
-Tất cả route nằm dưới tiền tố `/v1` của `APIRouter`. `info.version` (`1.0.0`) là phiên bản hợp đồng theo semver, còn `/v1` chỉ là số major trong URL: một thay đổi tương thích, như thêm trường tùy chọn, tăng `1.0.0` lên `1.1.0` mà URL không đổi. Khi cần đổi phá vỡ, ta thêm router `/v2` chạy song song và để `/v1` sống thêm một thời gian cho client cũ. Thế nào là phá vỡ:
+Tất cả route nằm dưới tiền tố `/v1` của `APIRouter`. `info.version` (`1.0.0`) là phiên bản hợp đồng theo semver, còn `/v1` chỉ là số major trong URL: một thay đổi tương thích, như thêm trường tuỳ chọn, tăng `1.0.0` lên `1.1.0` mà URL không đổi. Khi cần đổi phá vỡ, ta thêm router `/v2` chạy song song và để `/v1` sống thêm một thời gian cho client cũ. Thế nào là phá vỡ:
 
 | Thay đổi | Phá client cũ? | Cách làm |
 | --- | --- | --- |
-| Thêm route, thêm trường tùy chọn vào response | Thường không, nếu client bỏ qua trường lạ | Cùng `/v1`, tăng minor |
+| Thêm route, thêm trường tuỳ chọn vào response | Thường không, nếu client bỏ qua trường lạ | Cùng `/v1`, tăng minor |
 | Đổi `fare` từ chuỗi sang số | Có | `/v2` hoặc trường mới |
 | Đổi `type` URI của một lỗi | Có, vì client rẽ nhánh theo `type` | Giữ `type` cũ, thêm `type` mới |
 | Siết validation (từ chối thứ trước đây nhận) | Có | Báo trước, `/v2` |
@@ -263,7 +263,7 @@ uv run --project examples/toi-noi-python/32-fastapi-validation-problem-details e
 OK 51/51
 ```
 
-51 ca gồm: 422 mặc định; bảy ca xấu cho 422 `problem+json` có `errors`, không echo input; ba lỗi cùng lúc; 400 kèm `min_km`, `max_km`; 404 hai loại; 405 giữ `Allow`; 500 không lộ nội dung và có log; 201 vẫn là `application/json`, `"1e2"` chuẩn hóa thành `"100"`; đặc tả khai đúng mã và media type; đối chiếu năm phản hồi thật; cái bẫy quên `responses`; snapshot. Môi trường: Python 3.14.7, FastAPI 0.162.0, Starlette 1.10.0, pydantic 2.14.3, httpx 0.28.1.
+51 ca gồm: 422 mặc định; bảy ca xấu cho 422 `problem+json` có `errors`, không echo input; ba lỗi cùng lúc; 400 kèm `min_km`, `max_km`; 404 hai loại; 405 giữ `Allow`; 500 không lộ nội dung và có log; 201 vẫn là `application/json`, `"1e2"` chuẩn hoá thành `"100"`; đặc tả khai đúng mã và media type; đối chiếu năm phản hồi thật; cái bẫy quên `responses`; snapshot. Môi trường: Python 3.14.7, FastAPI 0.162.0, Starlette 1.10.0, pydantic 2.14.3, httpx 0.28.1.
 
 Server thật ở cổng 8032 (giữ terminal này mở, dừng bằng Ctrl+C):
 
@@ -298,7 +298,7 @@ content-type: application/problem+json
 
 **Bài tập:** (1) Trong `app/main.py`, đổi `status_code=201` thành `status_code=200` rồi chạy `--verify`. Chạy trước khi đọc đáp án: bao nhiêu ca đỏ, và vì sao phép đối chiếu năm phản hồi thật với đặc tả vẫn xanh? (2) Thêm lỗi miền mới: dịch vụ `parcel` chỉ nhận tối đa 30 km, ném `ParcelTooFar` rồi đăng ký handler 400 với `type` riêng, nhưng quên khai báo gì thêm ở route. Ca nào của `--verify` bắt được lỗi tài liệu?
 
-<details><summary>Xem lời giải</summary><p>(1) Lab chạy cho <code>FAIL 46/51</code>: năm ca đỏ là «201 vẫn là application/json», «1e2 nhận được» (ca này cũng đòi 201), «POST khai báo 201, 400, 422, 500», «thành công khai báo application/json» và so snapshot. Phép đối chiếu năm phản hồi vẫn xanh vì hành vi lẫn tài liệu cùng đổi sang 200 nên chúng khớp nhau; cái bắt được là những thứ nhớ hợp đồng <b>cũ</b>: snapshot đã commit và các ca khóa cứng mã 201. Bài học: đối chiếu tài liệu với hành vi và snapshot trả lời hai câu khác nhau («có nhất quán không» và «có đổi không»), cần cả hai. (2) Không ca nào. Snapshot chỉ ghi những gì đã được khai báo, nên tài liệu thiếu thì snapshot cũng thiếu; ma trận đối chiếu chỉ gồm năm phản hồi đã liệt kê, trong đó không có ca <code>parcel</code> quá 30 km. Muốn bắt, phải thêm đúng ca đó vào ma trận: gửi <code>parcel</code> 31 km và kiểm mã trả về có trong <code>responses</code>. Ở route này mã 400 đã được khai báo cho lỗi khoảng cách, nên tài liệu vẫn đúng về mã và media type; cái thiếu là mô tả riêng của loại lỗi mới.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Lab chạy cho <code>FAIL 46/51</code>: năm ca đỏ là «201 vẫn là application/json», «1e2 nhận được» (ca này cũng đòi 201), «POST khai báo 201, 400, 422, 500», «thành công khai báo application/json» và so snapshot. Phép đối chiếu năm phản hồi vẫn xanh vì hành vi lẫn tài liệu cùng đổi sang 200 nên chúng khớp nhau; cái bắt được là những thứ nhớ hợp đồng <b>cũ</b>: snapshot đã commit và các ca khoá cứng mã 201. Bài học: đối chiếu tài liệu với hành vi và snapshot trả lời hai câu khác nhau («có nhất quán không» và «có đổi không»), cần cả hai. (2) Không ca nào. Snapshot chỉ ghi những gì đã được khai báo, nên tài liệu thiếu thì snapshot cũng thiếu; ma trận đối chiếu chỉ gồm năm phản hồi đã liệt kê, trong đó không có ca <code>parcel</code> quá 30 km. Muốn bắt, phải thêm đúng ca đó vào ma trận: gửi <code>parcel</code> 31 km và kiểm mã trả về có trong <code>responses</code>. Ở route này mã 400 đã được khai báo cho lỗi khoảng cách, nên tài liệu vẫn đúng về mã và media type; cái thiếu là mô tả riêng của loại lỗi mới.</p></details>
 
 Bài trước: [bài 31](/articles/python-fastapi-http-endpoint-bao-gia). Bài tiếp: [bài 33](/articles/python-fastapi-dependency-middleware-settings-logging).
 

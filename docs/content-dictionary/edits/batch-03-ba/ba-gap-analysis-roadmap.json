@@ -1,0 +1,9 @@
+{"file":"ba-gap-analysis-roadmap.md","edits":[
+{"old":"| Đánh giá effect phù hợp |","new":"| Đánh giá tác động phù hợp |","reason":"effect thành tác động","severity":"low"},
+{"old":"Đợt A làm dữ liệu đáng tin và xác định rào cản.","new":"Đợt A làm cho dữ liệu đáng tin và xác định rào cản.","reason":"Thiếu làm cho","severity":"medium"},
+{"old":"Không hứa C chắc chắn là rollout: nó là một quyết định","new":"Không hứa chắc đợt C là rollout: đợt này là một quyết định","reason":"Tránh nó trừu tượng","severity":"medium"},
+{"old":"owner và estimate phải được nhóm thực hiện xác nhận.","new":"người phụ trách và ước lượng phải do nhóm thực hiện xác nhận.","reason":"owner, estimate; bị động","severity":"medium"},
+{"old":"trước khi telemetry đáng tin tạo ra học sai.","new":"trước khi telemetry đáng tin sẽ dẫn đến học sai.","reason":"tạo ra học sai gượng","severity":"medium"},
+{"old":"có thể phải làm lại. Dùng dependency","new":"thì có thể phải đào tạo lại. Dùng dependency","reason":"Câu cụt, rõ việc làm lại","severity":"medium"},
+{"old":"Thay roadmap không phải thất bại nếu nó phản ánh","new":"Thay đổi roadmap không phải là thất bại nếu việc đó phản ánh","reason":"Thiếu đổi, là; tránh nó","severity":"medium"}
+]}

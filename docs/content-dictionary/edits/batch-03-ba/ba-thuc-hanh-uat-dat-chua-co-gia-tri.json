@@ -1,0 +1,11 @@
+{"file":"ba-thuc-hanh-uat-dat-chua-co-gia-tri.md","edits":[
+{"old":"Chẩn đoán adoption, chất lượng đo","new":"Chẩn đoán mức sử dụng, chất lượng đo","reason":"Có từ Việt tự nhiên","severity":"low"},
+{"old":"## 2. Kiểm dữ liệu trước giải thích","new":"## 2. Kiểm tra dữ liệu trước khi giải thích","reason":"Động từ cụt, thiếu từ nối","severity":"medium"},
+{"old":"720 event mở nhưng chỉ 600 trip là do có lần mở lặp","new":"720 event mở nhưng chỉ ứng với 600 trip, do có lần mở lặp","reason":"Câu 'là do' gượng, khó hiểu","severity":"medium"},
+{"old":"Kiểm pipeline tương tự trước khi","new":"Kiểm tra pipeline tương tự trước khi","reason":"Động từ cụt","severity":"low"},
+{"old":"## 4. Kiểm giới hạn của giải pháp","new":"## 4. Kiểm tra giới hạn của giải pháp","reason":"Động từ cụt","severity":"low"},
+{"old":"Xây thêm chat không tự là bước đúng","new":"Xây thêm chat không mặc nhiên là bước đúng","reason":"Gượng","severity":"low"},
+{"old":"Chênh lệch bị ảnh hưởng tự chọn,","new":"Chênh lệch bị ảnh hưởng bởi hiện tượng tự chọn,","reason":"Thiếu từ, khó hiểu","severity":"medium"},
+{"old":"hai hoạt động học tiếp có owner.","new":"hai hoạt động học tiếp có người phụ trách.","reason":"owner","severity":"low"},
+{"old":"nhưng adoption toàn cohort mới 24%","new":"nhưng mức sử dụng trên toàn cohort mới đạt 24%","reason":"Có từ Việt; thiếu động từ","severity":"low"}
+]}

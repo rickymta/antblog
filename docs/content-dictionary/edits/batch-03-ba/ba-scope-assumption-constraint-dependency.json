@@ -1,0 +1,16 @@
+{"file":"ba-scope-assumption-constraint-dependency.md","edits":[
+{"old":"lập sổ theo dõi có owner,","new":"lập sổ theo dõi có người phụ trách,","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Nó không phải chỉ nói “ngoài scope” khi có yêu cầu mới.","new":"Quản lý phạm vi không chỉ là nói “ngoài scope” khi có yêu cầu mới.","reason":"Tránh \"Nó\" ở đầu câu; trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"Thuật ngữ có thể được tổ chức sử dụng hơi khác.","new":"Mỗi tổ chức có thể dùng thuật ngữ hơi khác nhau.","reason":"Bị động kiểu tiếng Anh","severity":"low"},
+{"old":"| Owner đề xuất / hạn |","new":"| Người phụ trách đề xuất / hạn |","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Đối chiếu một mẫu ca có nguồn bổ sung","new":"Đối chiếu một mẫu lượt có nguồn bổ sung","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"Nó không tự biến thành “phải xây xong sản phẩm trong một tuần”.","new":"Ràng buộc này không tự biến thành “phải xây xong sản phẩm trong một tuần”.","reason":"Tránh \"Nó\" ở đầu câu","severity":"medium"},
+{"old":"không dùng nó để từ chối mọi câu hỏi mới.","new":"không dùng ràng buộc đó để từ chối mọi câu hỏi mới.","reason":"Tránh đại từ \"nó\" chỉ khái niệm trừu tượng","severity":"low"},
+{"old":"“Chờ đội data” không đủ","new":"“Chờ nhóm dữ liệu” không đủ","reason":"Thống nhất cách gọi \"nhóm dữ liệu\" trong bài","severity":"low"},
+{"old":"Vận hành đề nghị thêm gửi ảnh điểm đón.","new":"Bộ phận vận hành đề nghị thêm tính năng gửi ảnh điểm đón.","reason":"Thiếu chủ thể và danh từ","severity":"high"},
+{"old":"không đồng nghĩa cam kết triển khai.","new":"không đồng nghĩa với cam kết triển khai.","reason":"Thiếu giới từ","severity":"low"},
+{"old":"“Chắc đội data có lịch sử đủ bốn tuần.”","new":"“Chắc nhóm dữ liệu có lịch sử đủ bốn tuần.”","reason":"Thống nhất cách gọi \"nhóm dữ liệu\"","severity":"low"},
+{"old":"cần kiểm nguồn và độ phủ.","new":"cần kiểm tra nguồn và độ phủ.","reason":"\"kiểm\" cụt","severity":"low"},
+{"old":"cần owner và hạn. Câu cuối là đề xuất phạm vi, cần xác nhận và lưu version.","new":"cần người phụ trách và hạn. Câu cuối là đề xuất phạm vi, cần xác nhận và lưu phiên bản.","reason":"Owner, version đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Không. Nó cung cấp thông tin để sửa phương án","new":"Không. Giả định bị bác bỏ cung cấp thông tin để sửa phương án","reason":"Tránh \"Nó\" ở đầu câu","severity":"medium"}
+]}

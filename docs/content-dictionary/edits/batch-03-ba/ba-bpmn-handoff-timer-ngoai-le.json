@@ -1,0 +1,29 @@
+{
+"file": "ba-bpmn-handoff-timer-ngoai-le.md",
+"edits": [
+{
+"old": "Trường hợp failed, thông tin cần giữ và owner cần chốt",
+"new": "Trường hợp failed, thông tin cần giữ và người phụ trách cần chốt",
+"reason": "owner -> người phụ trách",
+"severity": "medium"
+},
+{
+"old": "Bàn giao sau lỗi cần owner và dữ liệu",
+"new": "Bàn giao sau lỗi cần người phụ trách và dữ liệu",
+"reason": "owner -> người phụ trách (khớp bảng câu hỏi mở bên dưới)",
+"severity": "medium"
+},
+{
+"old": "Timeout là trạng thái hiểu biết của bên chờ, không tự là bằng chứng",
+"new": "Timeout chỉ phản ánh điều bên chờ biết được, không tự là bằng chứng",
+"reason": "Câu gượng, giọng dịch máy",
+"severity": "medium"
+},
+{
+"old": "Bên nhận trả thành công, declined",
+"new": "Bên nhận trả về kết quả thành công, declined",
+"reason": "Lược danh từ 'kết quả'",
+"severity": "medium"
+}
+]
+}

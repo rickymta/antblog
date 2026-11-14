@@ -1,0 +1,41 @@
+{
+  "file": "condition-coverage.md",
+  "edits": [
+    {
+      "old": "Nó giải quyết đúng chỗ mù của decision coverage",
+      "new": "Condition coverage giải quyết đúng chỗ mù của decision coverage",
+      "reason": "Tránh 'Nó' chỉ sự vật trừu tượng ở đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "làm tiêu chí cuối; nó là **bậc thang**",
+      "new": "làm tiêu chí cuối; tiêu chí này là **bậc thang**",
+      "reason": "Tránh 'nó' chỉ sự vật trừu tượng",
+      "severity": "low"
+    },
+    {
+      "old": "9 test so oracle SPEC với code thật",
+      "new": "9 test đối chiếu oracle SPEC với code thật",
+      "reason": "'so' cụt, thiếu từ",
+      "severity": "medium"
+    },
+    {
+      "old": "nhánh false của `if` không có `else` không có câu lệnh riêng để đánh dấu",
+      "new": "vì nhánh false của `if` không có `else` thì không có câu lệnh riêng để đánh dấu",
+      "reason": "Câu thiếu quan hệ từ, hai vế dính nhau",
+      "severity": "medium"
+    },
+    {
+      "old": "Điều kiện phải nhất của một quyết định",
+      "new": "Điều kiện ngoài cùng bên phải của một quyết định",
+      "reason": "'phải nhất' là cụm tự ghép, calque của rightmost",
+      "severity": "medium"
+    },
+    {
+      "old": "cho điều kiện phải nhất cả T lẫn F",
+      "new": "cho điều kiện ngoài cùng bên phải cả T lẫn F",
+      "reason": "'phải nhất' là cụm tự ghép",
+      "severity": "medium"
+    }
+  ]
+}

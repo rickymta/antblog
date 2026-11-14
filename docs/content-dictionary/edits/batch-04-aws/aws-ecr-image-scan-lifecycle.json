@@ -1,0 +1,14 @@
+{"file":"aws-ecr-image-scan-lifecycle.md","edits":[
+{"old":"mọi tag bất biến trừ những tag khớp filter wildcard","new":"mọi tag đều bất biến, trừ những tag khớp filter wildcard","reason":"Câu thiếu động từ/ngắt ý","severity":"low"},
+{"old":"vì mỗi tag được loại trừ lại mở đúng rủi ro ở đầu bài.","new":"vì mỗi tag được loại trừ lại mang đúng rủi ro đã nêu ở đầu bài.","reason":"'mở rủi ro' là calque","severity":"low"},
+{"old":"Quy trình tốt nhất vẫn là lấy digest","new":"Cách làm tốt nhất vẫn là lấy digest","reason":"'Quy trình tốt nhất' gượng (best practice)","severity":"low"},
+{"old":"Kết quả `sha256:…` ghép vào tham chiếu `…/toinoi/booking@sha256:…`.","new":"Ghép kết quả `sha256:…` vào tham chiếu `…/toinoi/booking@sha256:…`.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"đều kéo đúng byte đã kiểm.","new":"đều kéo đúng byte đã được kiểm tra.","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"là hướng để tìm hiểu; bài này chỉ nhắc, chưa dựng.","new":"là hướng nên tìm hiểu; bài này chỉ nhắc, chưa dựng.","reason":"Gượng, trật tự kiểu Anh","severity":"low"},
+{"old":"có bản vá, còn lại tạo việc để xử lý.","new":"có bản vá, còn lại thì tạo công việc để xử lý.","reason":"'tạo việc' là cụm tự ghép","severity":"medium"},
+{"old":"Mỗi bản build giữ lại mãi sẽ phình dung lượng và tăng tiền lưu.","new":"Giữ lại mãi mọi bản build sẽ làm phình dung lượng và tăng chi phí lưu trữ.","reason":"Câu thiếu chủ ngữ; 'phình' dùng như ngoại động từ","severity":"medium"},
+{"old":"không phụ thuộc vào nguồn ngoài đang sống hay chết","new":"không phụ thuộc vào việc nguồn ngoài có đang hoạt động hay không","reason":"'sống hay chết' quá khẩu ngữ/calque","severity":"medium"},
+{"old":"Policy của S3 endpoint nếu bị thu hẹp phải vẫn cho phép bucket","new":"Nếu policy của S3 endpoint bị thu hẹp thì vẫn phải cho phép bucket","reason":"Trật tự từ kiểu Anh, câu khó đọc","severity":"medium"},
+{"old":"Kiểm trên máy mà không cần tài khoản AWS:","new":"Đã kiểm tra trên máy mà không cần tài khoản AWS:","reason":"'Kiểm' cụt, thiếu thì","severity":"medium"},
+{"old":"cần bạn tự kiểm trong tài khoản lab","new":"cần bạn tự kiểm tra trong tài khoản lab","reason":"'kiểm' cụt","severity":"low"}
+]}

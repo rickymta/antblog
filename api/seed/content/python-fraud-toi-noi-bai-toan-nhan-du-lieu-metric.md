@@ -10,7 +10,7 @@ language: vi
 
 Service fraud-scoring của [Tới Nơi](/articles/du-an-mau-toi-noi) đã có đường vào: Dispatch gọi nó qua gRPC ([bài 37](/articles/python-grpc-fraud-scoring-service)) và event đi qua Kafka ([bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema)). Còn thiếu phần khó nhất, không phải mô hình: thế nào là gian lận, dữ liệu nào dạy và đo được điều đó, con số nào đáng tin. Tài xế dựng chuyến không có khách thật để lấy thưởng, giả GPS, một người mở hàng chục tài khoản ăn mã chào khách mới, vài tài xế và khách chạy qua lại với nhau. Chưa viết dòng mô hình nào, ta đã vướng ba cái bẫy: nhãn đến rất muộn, 98 % chuyến là sạch nên accuracy vô nghĩa, và «sai» có hai giá khác nhau.
 
-Đây là bài 54 của lộ trình **Python nâng cao qua Tới Nơi**, bài mở đầu phần 07. Bạn cần quen worker nền ([bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter)), event Kafka (bài 38), polars và Parquet ([bài 29](/articles/python-polars-pandas-parquet-phan-tich-chuyen)). Dữ liệu trong bài là **tổng hợp**, sinh bằng seed cố định, kể cả tỉ lệ gian lận; số đo chỉ nói về bộ này. Điểm rủi ro của phần 07 là **đầu vào cho người duyệt**, không phải quyết định khóa tài khoản.
+Đây là bài 54 của lộ trình **Python nâng cao qua Tới Nơi**, bài mở đầu phần 07. Bạn cần quen worker nền ([bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter)), event Kafka (bài 38), polars và Parquet ([bài 29](/articles/python-polars-pandas-parquet-phan-tich-chuyen)). Dữ liệu trong bài là **tổng hợp**, sinh bằng seed cố định, kể cả tỉ lệ gian lận; số đo chỉ nói về bộ này. Điểm rủi ro của phần 07 là **đầu vào cho người duyệt**, không phải quyết định khoá tài khoản.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -29,7 +29,7 @@ Bộ dữ liệu có bốn loại, mỗi loại là một **kiểu hành vi**, k
 | `promo_abuse` | Lạm dụng khuyến mãi: một người mở 3 đến 12 tài khoản mới, có khi chung điện thoại, mỗi tài khoản dùng `NEWUSER50` một lần | Mã giảm một nửa cước; nhiều tài khoản chung một máy |
 | `collusion` | Cấu kết: 2 đến 3 tài xế và 3 đến 6 tài khoản khách mới chạy qua lại 2 đến 5 tuần để nhận thưởng | Cặp khách-tài xế lặp lại; đôi khi khách đặt bằng máy của tài xế |
 
-Dấu vết chia hai tầng. Tầng một nằm trong event của **một** chuyến: tọa độ, quãng đường, mã khuyến mãi, thiết bị. Tầng hai chỉ hiện khi nhìn **nhiều** chuyến: cùng thiết bị trong một giờ, một cặp khách-tài xế lặp lại. Tầng hai đắt hơn (cửa sổ thời gian, trạng thái, đồ thị) nên để bài 55 và 58.
+Dấu vết chia hai tầng. Tầng một nằm trong event của **một** chuyến: toạ độ, quãng đường, mã khuyến mãi, thiết bị. Tầng hai chỉ hiện khi nhìn **nhiều** chuyến: cùng thiết bị trong một giờ, một cặp khách-tài xế lặp lại. Tầng hai đắt hơn (cửa sổ thời gian, trạng thái, đồ thị) nên để bài 55 và 58.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -84,7 +84,7 @@ Mã dùng độ rộng lớn (`TN-0000001`, `CU-00001`...) để chứa 200.000 
 
 ## Nhãn trễ: khi ta biết điều mình đang dạy
 
-Chuyến ảo bị phát hiện khi có khiếu nại hoặc kiểm toán, cấu kết cần điều tra, khuyến mãi bị quét hàng loạt: không loại nào có nhãn ngay lúc thu tiền. Bộ dữ liệu mô hình hóa điều đó bằng `label_known_at`; chuyến sạch chỉ được «xác nhận sạch» khi hết hạn khiếu nại 30 ngày. Độ trễ đo từ lúc thu tiền:
+Chuyến ảo bị phát hiện khi có khiếu nại hoặc kiểm toán, cấu kết cần điều tra, khuyến mãi bị quét hàng loạt: không loại nào có nhãn ngay lúc thu tiền. Bộ dữ liệu mô hình hoá điều đó bằng `label_known_at`; chuyến sạch chỉ được «xác nhận sạch» khi hết hạn khiếu nại 30 ngày. Độ trễ đo từ lúc thu tiền:
 
 ```text
 loại         trung vị (ngày)  p90 (ngày)  <= 7 ngày  <= 14 ngày  <= 30 ngày
@@ -248,7 +248,7 @@ Bộ chấm chỉ có đặc trưng theo từng chuyến nên gần như mù v�
 
 ## Chi phí hai chiều, ngưỡng và người duyệt
 
-Bỏ sót một chuyến gian lận và gắn cờ nhầm một chuyến sạch không đắt như nhau. Lab tính chi phí = số chuyến bị gắn cờ × 8.000 VND (phí duyệt, tính cho mọi chuyến gắn cờ, kể cả gian lận thật) + số chuyến gian lận bị bỏ sót × (tiền chuyến + 20.000 VND xử lý). Đây là giả định minh họa, với hai giả định ngầm: gắn cờ là chặn hết thiệt hại (người duyệt không sai), và `amount_vnd` đại diện cho thiệt hại (với `promo_abuse` thiệt hại thật là phần giảm giá). Lab chọn ngưỡng trên nửa đầu của valid (ngày 40 đến 50) rồi báo cáo trên nửa sau:
+Bỏ sót một chuyến gian lận và gắn cờ nhầm một chuyến sạch không đắt như nhau. Lab tính chi phí = số chuyến bị gắn cờ × 8.000 VND (phí duyệt, tính cho mọi chuyến gắn cờ, kể cả gian lận thật) + số chuyến gian lận bị bỏ sót × (tiền chuyến + 20.000 VND xử lý). Đây là giả định minh hoạ, với hai giả định ngầm: gắn cờ là chặn hết thiệt hại (người duyệt không sai), và `amount_vnd` đại diện cho thiệt hại (với `promo_abuse` thiệt hại thật là phần giảm giá). Lab chọn ngưỡng trên nửa đầu của valid (ngày 40 đến 50) rồi báo cáo trên nửa sau:
 
 ```text
 chọn ngưỡng trên valid nửa đầu (40 đến 50): 0.065; báo cáo trên nửa sau: 33,416 chuyến, 494 gian lận

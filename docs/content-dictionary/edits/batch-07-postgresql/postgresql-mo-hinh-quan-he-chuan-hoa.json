@@ -1,0 +1,14 @@
+{"file":"postgresql-mo-hinh-quan-he-chuan-hoa.md","edits":[
+{"old":"Dùng chuẩn hoá 1NF–3NF để tìm dữ kiện lặp, biết khi nào snapshot là đúng và đặt","new":"Bài này dùng chuẩn hoá 1NF–3NF để tìm dữ kiện lặp, xác định khi nào snapshot là đúng và đặt","reason":"Câu cụt thiếu chủ ngữ trong summary","severity":"medium"},
+{"old":"Dựng bảng CSKH muốn trong schema nháp","new":"Dựng bảng phẳng mà CSKH muốn trong schema nháp","reason":"Lược mất danh từ chính ('bảng CSKH muốn' cụt)","severity":"medium"},
+{"old":"nó chỉ có nghĩa với khoá nhiều cột","new":"dạng chuẩn này chỉ có nghĩa với khoá nhiều cột","reason":"Tránh 'nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"Mỗi chuỗi bắc cầu thành một bảng:","new":"Mỗi chuỗi bắc cầu tách thành một bảng:","reason":"Câu lược động từ 'X thành Y'","severity":"medium"},
+{"old":"FK trên **cặp**","new":"Dùng FK trên **cặp**","reason":"Câu cụt thiếu động từ","severity":"medium"},
+{"old":"không bị kiểm, nên FK này","new":"không bị kiểm tra, nên FK này","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"cả ba từ `city_id = 1` thành **2**","new":"cả ba đều đổi từ `city_id = 1` thành **2**","reason":"Câu lược động từ 'X thành Y'","severity":"medium"},
+{"old":"nên phải kiểm ở bước nhận chuyến","new":"nên phải kiểm tra ở bước nhận chuyến","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Trước khi gọi một cột như vậy, hỏi: nó là","new":"Trước khi gọi một cột như vậy là phi chuẩn hoá, hãy hỏi: nó là","reason":"Câu cụt, thiếu vị ngữ cho 'gọi'","severity":"medium"},
+{"old":"Cùng lập luận áp cho chứng từ — bài tập 2.","new":"Lập luận này cũng áp dụng cho chứng từ — xem bài tập 2.","reason":"Câu thiếu chủ ngữ, giọng dịch","severity":"medium"},
+{"old":"nguồn sự thật xác định (chuyến đang chạy","new":"nguồn dữ liệu gốc xác định (chuyến đang chạy","reason":"'nguồn sự thật' là calque của source of truth","severity":"medium"},
+{"old":"hai bảng có hai kiểu sống","new":"hai bảng có hai vòng đời khác nhau","reason":"'kiểu sống' là cụm tự ghép gượng","severity":"medium"}
+]}

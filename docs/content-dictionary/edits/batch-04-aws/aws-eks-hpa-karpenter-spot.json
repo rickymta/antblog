@@ -1,0 +1,18 @@
+{"file":"aws-eks-hpa-karpenter-spot.md","edits":[
+{"old":"Bài cần bạn đã xong","new":"Bài này yêu cầu bạn đã học xong","reason":"Câu cộc, thiếu chỉ định","severity":"medium"},
+{"old":"Mỗi bước có một chủ rõ ràng; khi chuỗi kẹt, bước nào đang đứng yên cho biết bộ điều khiển nào phải kiểm.","new":"Mỗi bước do một bộ điều khiển phụ trách rõ ràng; khi chuỗi kẹt, bước nào đang đứng yên cho biết cần kiểm tra bộ điều khiển nào.","reason":"'chủ' và 'phải kiểm' gượng, thiếu danh từ","severity":"medium"},
+{"old":"`booking` bị giới hạn bởi CPU nên HPA theo CPU là hợp.","new":"`booking` bị giới hạn ở CPU nên cho HPA scale theo CPU là hợp lý.","reason":"Bị động kiểu Anh, câu cụt","severity":"medium"},
+{"old":"**VPA** lo phía còn lại: số `requests` đúng là gốc của mọi thứ ở bài này.","new":"**VPA** lo phía còn lại: đặt `requests` đúng là nền tảng của mọi thứ ở bài này.","reason":"'số requests đúng là gốc' lủng củng","severity":"medium"},
+{"old":"vì VPA tự đổi CPU request cùng lúc HPA scale theo CPU của cùng Deployment sẽ đánh nhau.","new":"vì nếu VPA tự đổi CPU request trong lúc HPA scale theo CPU của cùng Deployment thì hai bên sẽ đánh nhau.","reason":"Câu thiếu liên từ điều kiện, chủ ngữ mơ hồ","severity":"medium"},
+{"old":"Worker điều phối thì khác: CPU của nó không phản ánh việc chờ.","new":"Worker điều phối thì khác: CPU của worker không phản ánh việc chờ.","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"Nó cũng gom và xoá node dư.","new":"Karpenter cũng gom và xoá node dư.","reason":"Tránh 'Nó' đầu câu chỉ sự vật","severity":"medium"},
+{"old":"để chỉ pod khai tolerations mới lên.","new":"để chỉ pod có khai báo tolerations mới được xếp lên node này.","reason":"Câu cụt thiếu động từ","severity":"medium"},
+{"old":"`limits.cpu` chặn trần: quá tay với một deployment lỗi thì chi phí không vô hạn.","new":"`limits.cpu` đặt trần: nếu một deployment lỗi scale quá tay thì chi phí vẫn không tăng vô hạn.","reason":"Câu thiếu chủ ngữ và liên từ","severity":"medium"},
+{"old":"Karpenter cần chính nó chạy ở node không do nó quản lý,","new":"Bản thân Karpenter phải chạy trên node không do nó quản lý,","reason":"'cần chính nó chạy' kiểu dịch máy","severity":"medium"},
+{"old":"Hai, **taint** cho node Spot và `tolerations` chỉ ở worker chịu được gián đoạn;","new":"Hai, gắn **taint** cho node Spot và chỉ khai `tolerations` ở worker chịu được gián đoạn;","reason":"Câu lược động từ","severity":"medium"},
+{"old":"một loại instance duy nhất làm Spot dễ cạn.","new":"chỉ dùng một loại instance cho Spot thì dễ cạn.","reason":"Câu lược động từ","severity":"low"},
+{"old":"`whenUnsatisfiable: DoNotSchedule` là cứng (pod Pending nếu không đều được), `ScheduleAnyway` là mềm.","new":"`whenUnsatisfiable: DoNotSchedule` là ràng buộc cứng (pod Pending nếu không phân đều được), `ScheduleAnyway` là ràng buộc mềm.","reason":"'là cứng/mềm' lược danh từ","severity":"medium"},
+{"old":"Chỉ một họ instance hoặc một AZ thì khi cạn, pod Pending;","new":"Nếu chỉ dùng một họ instance hoặc một AZ thì khi Spot cạn, pod sẽ Pending;","reason":"Câu thiếu động từ và chủ ngữ","severity":"medium"},
+{"old":"README ghi phần tính tiền và thứ tự dọn bắt buộc","new":"README ghi cách tính chi phí và thứ tự dọn bắt buộc","reason":"Khẩu ngữ","severity":"low"},
+{"old":"Kiểm trên máy: `fmt`","new":"Kiểm tra trên máy cục bộ: `fmt`","reason":"'Kiểm' đứng một mình là từ cụt","severity":"medium"}
+]}

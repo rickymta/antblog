@@ -80,7 +80,7 @@ Bộ kiểm quét mọi chuỗi trong sáu file tìm dạng `user:mật-khẩu@h
 
 Bài 58 tách hai endpoint: `/healthz` chỉ cho biết process còn trả lời, `/readyz` cần database trả lời và consumer đã có partition. Khi PostgreSQL chậm, ta muốn replica ngừng nhận việc chứ không bị khởi động lại hàng loạt.
 
-Container Apps khai báo được đúng ý đó: probe `Startup` và `Liveness` gọi `/healthz`, `Readiness` gọi `/readyz`. Nhưng tài liệu probe còn ghi revision hiện unhealthy khi một replica trượt readiness, và nền tảng có thể khởi động lại replica đó; lab không kiểm được, nên phải thử trên môi trường thật. ECS không có readiness riêng mà có hai tín hiệu: `healthCheck` của container (dạng subcommand `healthcheck` của image bài 63, hỏi `/healthz`) và health check của target group (gọi `/readyz`). Theo tài liệu `DeploymentConfiguration`, task của service có load balancer chỉ được tính khỏe khi target group báo khỏe, nên lúc PostgreSQL mất, mọi target 503 và ECS thay task.
+Container Apps khai báo được đúng ý đó: probe `Startup` và `Liveness` gọi `/healthz`, `Readiness` gọi `/readyz`. Nhưng tài liệu probe còn ghi revision hiện unhealthy khi một replica trượt readiness, và nền tảng có thể khởi động lại replica đó; lab không kiểm được, nên phải thử trên môi trường thật. ECS không có readiness riêng mà có hai tín hiệu: `healthCheck` của container (dạng subcommand `healthcheck` của image bài 63, hỏi `/healthz`) và health check của target group (gọi `/readyz`). Theo tài liệu `DeploymentConfiguration`, task của service có load balancer chỉ được tính khoẻ khi target group báo khoẻ, nên lúc PostgreSQL mất, mọi target 503 và ECS thay task.
 
 Đây là đánh đổi có chủ đích. Target group chỉ gọi `/healthz` thì đợt triển khai có thể xong dù consumer bản mới chưa có partition. Gọi `/readyz` thì rollout chỉ qua khi bản mới làm việc được, không thì circuit breaker quay về bản cũ; cái giá là database chập chờn thì task bị thay. Hãy đo rồi chỉnh `UnhealthyThresholdCount`; lab không đo được.
 
@@ -127,7 +127,7 @@ scale:
 "TargetValue": 500
 ```
 
-(Rút gọn: bỏ `bootstrapServers`, `sasl`, `tls`, `auth` và metric `m2`.) Hai cách quy về một công thức: số replica xấp xỉ `ceil(lag / ngưỡng)`. Tài liệu Container Apps ghi `ceil(currentMetricValue / targetMetricValue)`, thăm dò 30 giây một lần, giảm sau cửa sổ ổn định 300 giây. Lab mô hình hóa đúng vậy:
+(Rút gọn: bỏ `bootstrapServers`, `sasl`, `tls`, `auth` và metric `m2`.) Hai cách quy về một công thức: số replica xấp xỉ `ceil(lag / ngưỡng)`. Tài liệu Container Apps ghi `ceil(currentMetricValue / targetMetricValue)`, thăm dò 30 giây một lần, giảm sau cửa sổ ổn định 300 giây. Lab mô hình hoá đúng vậy:
 
 ```rust
 // src/autoscale.rs
@@ -190,7 +190,7 @@ Ngân sách ứng dụng là 100 − 20 = 80; Container Apps chạm đúng 80, h
 
 ## Relay outbox và migration chạy ở đâu?
 
-Bài 58 chạy relay trong mọi replica. `FOR UPDATE SKIP LOCKED` (bài 37) giữ hai relay không phát trùng một dòng, còn mỗi batch chiếm một kết nối của pool trong lúc chờ Kafka. Nhưng bài 37 cũng đo được hai relay không chia theo key có thể đảo thứ tự trong một key, mà bài 58 chưa chia theo `md5(key)`. Ba lựa chọn: mọi replica chạy relay, bên nhận khử trùng theo `idempotencyKey` và không dựa vào thứ tự; tách relay thành service đúng một bản; hoặc chia theo key, cần chỉ số phần ổn định mà replica autoscale không có. Bản này chọn lựa chọn đầu; muốn tách relay thì bài 58 còn thiếu cờ tắt.
+Bài 58 chạy relay trong mọi replica. `FOR UPDATE SKIP LOCKED` (bài 37) giữ hai relay không phát trùng một dòng, còn mỗi batch chiếm một kết nối của pool trong lúc chờ Kafka. Nhưng bài 37 cũng đo được hai relay không chia theo key có thể đảo thứ tự trong một key, mà bài 58 chưa chia theo `md5(key)`. Ba lựa chọn: mọi replica chạy relay, bên nhận khử trùng lặp theo `idempotencyKey` và không dựa vào thứ tự; tách relay thành service đúng một bản; hoặc chia theo key, cần chỉ số phần ổn định mà replica autoscale không có. Bản này chọn lựa chọn đầu; muốn tách relay thì bài 58 còn thiếu cờ tắt.
 
 Migration không thuộc về lúc khởi động. `PgStore::connect` của bài 58 tự gọi `migrate` khi chưa có bảng `accounts`, không có cờ tắt. Đó là tiện ích của lab; 5 replica khởi động cùng lúc trên database mới sẽ tranh DDL. Theo expand/contract của [bài 56](/articles/rust-feature-flag-config-migration-expand-contract): chạy migration `expand` một lần bằng role riêng (ECS `run-task`, hoặc job của Container Apps), chờ xong rồi mới đổi task definition hoặc revision; `contract` để bản phát hành sau. Rollback image nhờ vậy an toàn vì schema tương thích cả hai bản, nhưng dữ liệu đã ghi không hoàn tác. Lab chưa dựng bước này; muốn làm theo thì phải bỏ lời gọi `migrate` khỏi `connect`.
 
@@ -217,7 +217,7 @@ LỖI: file triển khai vi phạm: [
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Chưa triển khai thật: chưa chạy <code>aws</code> hay <code>az</code>, chưa viết policy IAM hay quyền Key Vault; cú pháp theo tài liệu chính thức nhưng chưa qua CLI. Sáu file khai báo theo biến của bài 58, nhưng workspace đó chưa được build thành image, và <code>main</code> của nó chỉ nhận <code>serve</code> hoặc <code>--verify</code>, nên lệnh <code>healthcheck</code> trong task definition sẽ thoát lỗi tới khi thêm subcommand. Image bài 63 có <code>healthcheck</code> nhưng là binary khác: đọc <code>LEDGER_ADDR</code> và <code>LEDGER_PG_URL</code>, pool 2 kết nối, không có gRPC, Kafka hay relay. Client Kafka của bài 58 chưa có SASL hay TLS: file ECS trỏ 9092 nên cần listener không mã hóa, YAML trỏ 9093 với SCRAM nên service chưa nối được. Pool 8 và relay chưa có biến cấu hình. Cổng gRPC 9090 chưa qua load balancer hay ingress. Các con số <code>max_connections</code>, hệ số 200%, thời gian khởi động, tốc độ xử lý là giả định; mô phỏng không phải KEDA hay Application Auto Scaling.</p>
+<p>Chưa triển khai thật: chưa chạy <code>aws</code> hay <code>az</code>, chưa viết policy IAM hay quyền Key Vault; cú pháp theo tài liệu chính thức nhưng chưa qua CLI. Sáu file khai báo theo biến của bài 58, nhưng workspace đó chưa được build thành image, và <code>main</code> của nó chỉ nhận <code>serve</code> hoặc <code>--verify</code>, nên lệnh <code>healthcheck</code> trong task definition sẽ thoát lỗi tới khi thêm subcommand. Image bài 63 có <code>healthcheck</code> nhưng là binary khác: đọc <code>LEDGER_ADDR</code> và <code>LEDGER_PG_URL</code>, pool 2 kết nối, không có gRPC, Kafka hay relay. Client Kafka của bài 58 chưa có SASL hay TLS: file ECS trỏ 9092 nên cần listener không mã hoá, YAML trỏ 9093 với SCRAM nên service chưa nối được. Pool 8 và relay chưa có biến cấu hình. Cổng gRPC 9090 chưa qua load balancer hay ingress. Các con số <code>max_connections</code>, hệ số 200%, thời gian khởi động, tốc độ xử lý là giả định; mô phỏng không phải KEDA hay Application Auto Scaling.</p>
 </div>
 
 **Bài tập:** đội đổi `maximumPercent` từ 150 lên 200 và nâng `MaxCapacity` lên 6. Lab báo gì, sửa thế nào?

@@ -1,0 +1,9 @@
+{"file":"azure-tenant-subscription-resource-group.md","edits":[
+{"old":"Nó là các **scope**: chỗ bạn gán quyền và policy.","new":"Các cấp trong cây chính là các **scope**: chỗ bạn gán quyền và policy.","reason":"'Nó' mơ hồ, nhắc lại danh từ","severity":"medium"},
+{"old":"Nó cũng là đơn vị của **quota**","new":"Subscription cũng là đơn vị của **quota**","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"| Công vận hành |","new":"| Công sức vận hành |","reason":"'Công vận hành' là cụm cụt","severity":"medium"},
+{"old":"Nó chỉ tạo RG rỗng. Nó không chứng minh bạn có quyền tạo RG","new":"Bicep này chỉ tạo RG rỗng, không chứng minh bạn có quyền tạo RG","reason":"Tránh hai 'Nó' liên tiếp","severity":"medium"},
+{"old":"Nó không chứng minh template sạch với mọi API version, hãy đọc kết quả của lệnh.","new":"Khối này không chứng minh template không có lỗi với mọi API version, nên hãy đọc kết quả của lệnh.","reason":"'template sạch' là calque; 'Nó' mơ hồ","severity":"medium"},
+{"old":"Nó chỉ tiện cho việc gán quyền","new":"RG chỉ tiện cho việc gán quyền","reason":"Tránh 'Nó' đầu câu","severity":"medium"},
+{"old":"Log phải sống sót khi app bị xoá để điều tra","new":"Log phải còn lại khi app bị xoá để điều tra","reason":"'sống sót' là calque","severity":"low"}
+]}

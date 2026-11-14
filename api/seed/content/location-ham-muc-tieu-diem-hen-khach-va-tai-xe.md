@@ -122,7 +122,7 @@ Kiểm bằng tay cho cạnh 403: 52,0 + max(52,0; 79,5) + 79,5 + 138,8 = 349,8.
 
 [Bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed) cho thấy một seed không chứng minh gì: `deadhead_m` p50 của baseline dao động 1.874,9 ± 286,6 m giữa các seed, và seed 20261107 thấp hơn seed 20261106 tới 29,7% mà không đổi gì. Bài này dùng một cách đo chống lại nhiễu đó, và các bài sau của P04, P05 dùng lại.
 
-**So sánh cặp.** Với mỗi seed `i`, chạy baseline và chiến lược mới trên cùng seed, lấy hiệu `Δᵢ = X_mới − X_baseline`. Cùng seed thì cùng chuỗi khách và cùng vị trí tài xế ban đầu, nên phần dao động do nhu cầu bị khử khi lấy hiệu. Khử **một phần**: sau khi hai lần chạy rẽ nhánh (ghép khác nhau), dòng ngẫu nhiên của hủy chuyến và nhiễu tốc độ lệch nhau.
+**So sánh cặp.** Với mỗi seed `i`, chạy baseline và chiến lược mới trên cùng seed, lấy hiệu `Δᵢ = X_mới − X_baseline`. Cùng seed thì cùng chuỗi khách và cùng vị trí tài xế ban đầu, nên phần dao động do nhu cầu bị khử khi lấy hiệu. Khử **một phần**: sau khi hai lần chạy rẽ nhánh (ghép khác nhau), dòng ngẫu nhiên của huỷ chuyến và nhiễu tốc độ lệch nhau.
 
 **Khoảng tin cậy t 95%.** Đơn vị phân tích là một seed (mỗi seed cho một giá trị của mỗi chỉ số), nên `n` = số seed, không phải số chuyến. Khoảng là `trung bình(Δ) ± t · sd(Δ) / √n` với `t` ở bậc tự do `n − 1` (2,093 khi n = 20):
 
@@ -166,11 +166,11 @@ Trên dữ liệu mô phỏng, `p04-v1` (a = b = c = d = 1), xếp hạng hai t�
 | `walk_m + deadhead_m` | 2.421,7 | 2.318,2 | −103,5 [−149,9; −57,1] | tổng quãng hai người |
 | `trip_m` trung bình | 6.856,9 | 6.774,9 | −82,0 [−108,0; −56,0] | cước −368 đồng mỗi chuyến |
 
-Ai được lợi: tài xế (km rỗng, quay đầu) và khách đợi xe (ETA ngắn hơn, hủy ít hơn; trong mô hình hủy gốc của lab, hủy chỉ phụ thuộc ETA và **không** tính quãng đi bộ). Ai chịu thiệt: khách điển hình đi bộ thêm 26,5 m ở p50, và nền tảng thu trung bình ít hơn 368 đồng mỗi chuyến (cước tính từ `trip_m`) vì đoạn có khách ngắn đi.
+Ai được lợi: tài xế (km rỗng, quay đầu) và khách đợi xe (ETA ngắn hơn, huỷ ít hơn; trong mô hình huỷ gốc của lab, huỷ chỉ phụ thuộc ETA và **không** tính quãng đi bộ). Ai chịu thiệt: khách điển hình đi bộ thêm 26,5 m ở p50, và nền tảng thu trung bình ít hơn 368 đồng mỗi chuyến (cước tính từ `trip_m`) vì đoạn có khách ngắn đi.
 
 Hai điều cần kèm theo con số, chi tiết ở [bài 40](/articles/location-cuoc-quote-giai-thich-doi-diem-don-cho-khach):
 
-- **Độ nhạy theo số xe.** Ở bộ «60 tài xế, mật độ giảm một nửa» (kịch bản và seed đánh giá như trên), `deadhead_m` trung bình −111,5 m với khoảng [−289,6; +66,7], tức không khác biệt rõ, trên nền baseline chạy không 5.425,7 m. Giả thuyết (lab chưa kiểm): xe thưa thì đổi điểm đón khó rút ngắn quãng xe chạy, và nhiễu giữa các seed cũng lớn hơn. ETA, hủy và quay đầu vẫn tốt hơn ở cả hai mật độ.
+- **Độ nhạy theo số xe.** Ở bộ «60 tài xế, mật độ giảm một nửa» (kịch bản và seed đánh giá như trên), `deadhead_m` trung bình −111,5 m với khoảng [−289,6; +66,7], tức không khác biệt rõ, trên nền baseline chạy không 5.425,7 m. Giả thuyết (lab chưa kiểm): xe thưa thì đổi điểm đón khó rút ngắn quãng xe chạy, và nhiễu giữa các seed cũng lớn hơn. ETA, huỷ và quay đầu vẫn tốt hơn ở cả hai mật độ.
 - **`walk_m` p50 xấu hơn ở 5 trong 6 bộ giả định**; chỉ bộ «khách đi bộ chậm» là khác, vì J dùng tốc độ đi bộ nên tự giảm đi bộ.
 
 ## Vì sao trung bình đi bộ «không đổi» mà khách điển hình vẫn thiệt
@@ -224,7 +224,7 @@ Chọn một trọng số từ bảng đường đánh đổi cần một quy t�
 
 Cổng mới cũng chưa hết mù. Trung bình `walk_m` vẫn bị đuôi của baseline kéo xuống: trên seed chỉnh, `a/c` = 1 có Δ`walk_m` +11,5 m nên qua cổng, nhưng bỏ khách đuôi thì là **+25,6 m [+20,9; +30,3]**, và Δp95 là **+38,2 m [+18,2; +58,2]**. Nếu hai cổng +25 m tính trên khách không thuộc đuôi, `p04-v1` trượt cả hai, dù trượt cổng trung bình chỉ 0,6 m, nằm gọn trong nhiễu. Phép đo này làm sau khi đã chốt `p04-v1` nên không dùng để đổi chính sách ở đây; nó cho thấy kết quả của quy tắc phụ thuộc vào cách viết cổng tới mức nào.
 
-**Dải seed xác nhận giảm rủi ro, không xóa nó.** Theo các nhật ký còn lại: lần chạy theo v1 lúc 1:40–1:48, sửa quy tắc, lần chạy theo v2 lúc 1:50–1:58, rồi lab bài 40 lúc 2:00–2:21 mới lần đầu chạy dải 20270101–20270120 trên bản đồ thật; `CONFIRM_SEEDS` không có trong lab nào khác của P04 lúc đó. Trên dải này (bài 40 báo đầy đủ), `p04-v1` lặp lại: `deadhead_m` trung bình −115,0 m [−152,8; −77,2] (so với −107,0 [−151,6; −62,4] ở dải đánh giá), `pickup_eta_s` −21,7 s, `cancel_rate` −0,0138, `u_turns` 1,6 → 1,3, `walk_m` p50 +28,4 m, và `walk_m` trung bình **+7,3 m [+2,7; +12,0], tức xấu hơn rõ**. Phân tầng: nhóm đuôi baseline −344,5 m (164 cặp), nhóm còn lại +22,2 m (3.518 cặp). Một lần lặp lại như vậy cho thấy hướng của kết quả không phụ thuộc vào 20 seed đã nhìn. Nó **không** cho biết v2 là quy tắc đúng, vì nó chỉ đo một cấu hình đã được chọn bằng con đường này, và cùng kịch bản, cùng mô hình; các lối rẽ khác (lưới `a/c`, ngưỡng 250 m, 150 m, các khoản phạt 30 s, 20 s, bộ chỉ số dùng làm cổng) vẫn còn nguyên. Dòng «trung bình đi bộ» đổi nhãn từ «không khác biệt rõ» sang khoảng loại 0, nhưng hai khoảng [−1,1; +8,1] và [+2,7; +12,0] chồng nhau rộng: nên đọc là hai lần ước lượng một mức tăng nhỏ, không phải hiệu ứng đã đổi.
+**Dải seed xác nhận giảm rủi ro, không xoá nó.** Theo các nhật ký còn lại: lần chạy theo v1 lúc 1:40–1:48, sửa quy tắc, lần chạy theo v2 lúc 1:50–1:58, rồi lab bài 40 lúc 2:00–2:21 mới lần đầu chạy dải 20270101–20270120 trên bản đồ thật; `CONFIRM_SEEDS` không có trong lab nào khác của P04 lúc đó. Trên dải này (bài 40 báo đầy đủ), `p04-v1` lặp lại: `deadhead_m` trung bình −115,0 m [−152,8; −77,2] (so với −107,0 [−151,6; −62,4] ở dải đánh giá), `pickup_eta_s` −21,7 s, `cancel_rate` −0,0138, `u_turns` 1,6 → 1,3, `walk_m` p50 +28,4 m, và `walk_m` trung bình **+7,3 m [+2,7; +12,0], tức xấu hơn rõ**. Phân tầng: nhóm đuôi baseline −344,5 m (164 cặp), nhóm còn lại +22,2 m (3.518 cặp). Một lần lặp lại như vậy cho thấy hướng của kết quả không phụ thuộc vào 20 seed đã nhìn. Nó **không** cho biết v2 là quy tắc đúng, vì nó chỉ đo một cấu hình đã được chọn bằng con đường này, và cùng kịch bản, cùng mô hình; các lối rẽ khác (lưới `a/c`, ngưỡng 250 m, 150 m, các khoản phạt 30 s, 20 s, bộ chỉ số dùng làm cổng) vẫn còn nguyên. Dòng «trung bình đi bộ» đổi nhãn từ «không khác biệt rõ» sang khoảng loại 0, nhưng hai khoảng [−1,1; +8,1] và [+2,7; +12,0] chồng nhau rộng: nên đọc là hai lần ước lượng một mức tăng nhỏ, không phải hiệu ứng đã đổi.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -262,10 +262,10 @@ Quy tắc v1 và v2 trong mã chỉ là hai biểu thức; cổng thứ hai thê
 
 ## Giới hạn của ví dụ
 
-- **Mọi số là của simulator.** Nhu cầu, hủy chuyến, tốc độ đi bộ và vị trí đứng của khách đều là giả định của lab; không có GPS người thật. Mô hình hủy gốc không phạt quãng đi bộ, nên «khách đi bộ thêm» không làm tăng hủy; con số hủy thấp hơn chỉ đến từ ETA ngắn hơn.
+- **Mọi số là của simulator.** Nhu cầu, huỷ chuyến, tốc độ đi bộ và vị trí đứng của khách đều là giả định của lab; không có GPS người thật. Mô hình huỷ gốc không phạt quãng đi bộ, nên «khách đi bộ thêm» không làm tăng huỷ; con số huỷ thấp hơn chỉ đến từ ETA ngắn hơn.
 - **`walk_m` đo dọc đồ thị đi bộ giữa hai điểm đã snap**, không gồm đoạn từ chỗ đứng ra tới đường, ở cả baseline lẫn `p04-v1`. Con số tuyệt đối vì vậy thấp hơn quãng đi thật.
 - **`p04-v1` trong simulator biết nhiều hơn một hệ thống thật**: thấy mọi tài xế rảnh lúc khách đặt và biết đúng luật của bộ ghép. Bài 34, 35 đo khi điều đó sai.
-- **Trọng số `a = c` là một lập trường**, không phải đo lường. Giá trị thật của một giây của khách so với tài xế (chi phí, rủi ro hủy, công bằng) lab không hiệu chỉnh.
+- **Trọng số `a = c` là một lập trường**, không phải đo lường. Giá trị thật của một giây của khách so với tài xế (chi phí, rủi ro huỷ, công bằng) lab không hiệu chỉnh.
 - **Ca đuôi của baseline chưa tìm ra nguyên nhân cụ thể** và không được sửa; mọi so sánh về đuôi `walk_m` phải đọc kèm bảng bỏ đuôi.
 - **Bảng của lab không hiệu chỉnh nhiều phép so sánh** (phép kiểm Bonferroni ở trên tính tay); ngưỡng +25 m của cổng v2 và lưới `a/c` do người chọn; dải xác nhận chỉ nhân đôi bằng chứng cho đúng một lựa chọn.
 - Quét trọng số chỉ thay `a` (giữ `b = c = d = 1`; riêng cấu hình bỏ qua khách đặt cả `a` và `b` bằng 0); chưa quét đồng thời `b`, `c`, `d` hay các khoản phạt.
@@ -287,7 +287,7 @@ Quy tắc v1 và v2 trong mã chỉ là hai biểu thức; cổng thứ hai thê
 **Bài 3.** Giả sử bạn là người đặt quy tắc v1 và đã thấy `a/c` = 0,25 làm khách điển hình đi thêm 132,3 m. Cách nào sửa quy tắc mà ít rơi vào lối rẽ nhất?
 
 <details><summary>Lời giải bài 3</summary>
-<p>Không có cách nào xóa hẳn lối rẽ, vì bạn đã biết kết quả. Giảm thiểu: (1) ghi quyết định sửa và lý do trước khi chạy lại bất cứ thứ gì; (2) chạy trên một dải seed hoàn toàn mới, chưa dùng để chọn hay đánh giá (dải xác nhận), và chỉ báo kết quả cuối từ dải đó; (3) công bố cả hai quy tắc và cả hai kết quả, như bài này; (4) thay cổng p95 bằng một thước đo phản ánh khách điển hình ngay từ đầu (p50 hoặc trung bình) thay vì thêm cổng chỉ vì thấy một kết quả khó chịu. Vẫn nên ghi rõ rằng ngưỡng mới là lựa chọn của người phân tích.</p>
+<p>Không có cách nào xoá hẳn lối rẽ, vì bạn đã biết kết quả. Giảm thiểu: (1) ghi quyết định sửa và lý do trước khi chạy lại bất cứ thứ gì; (2) chạy trên một dải seed hoàn toàn mới, chưa dùng để chọn hay đánh giá (dải xác nhận), và chỉ báo kết quả cuối từ dải đó; (3) công bố cả hai quy tắc và cả hai kết quả, như bài này; (4) thay cổng p95 bằng một thước đo phản ánh khách điển hình ngay từ đầu (p50 hoặc trung bình) thay vì thêm cổng chỉ vì thấy một kết quả khó chịu. Vẫn nên ghi rõ rằng ngưỡng mới là lựa chọn của người phân tích.</p>
 </details>
 
 Bài trước: [bài 31](/articles/location-geocoding-dia-chi-viet-nam-autocomplete). Bài tiếp: [bài 33](/articles/location-sinh-ung-vien-diem-don-do-thi-di-bo).
