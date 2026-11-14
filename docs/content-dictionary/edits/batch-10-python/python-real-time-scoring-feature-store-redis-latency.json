@@ -1,0 +1,179 @@
+{
+  "file": "python-real-time-scoring-feature-store-redis-latency.md",
+  "edits": [
+    {
+      "old": "cầu dao và từ chối bớt tải. Lab kiểm bằng độ trễ tiêm vào.",
+      "new": "circuit breaker và giảm tải chủ động. Lab kiểm tra bằng cách tiêm độ trễ.",
+      "reason": "Cầu dao là calque của circuit breaker; từ chối bớt tải và độ trễ tiêm vào dịch gượng",
+      "severity": "high"
+    },
+    {
+      "old": "hết hạn mà chưa có điểm thì nó đi tiếp",
+      "new": "hết hạn mà chưa có điểm thì người gọi đi tiếp",
+      "reason": "Nó mơ hồ, nhắc lại chủ thể",
+      "severity": "medium"
+    },
+    {
+      "old": "điểm kém đi mà không có lỗi nào; lab bắt hai nơi so với nhau.",
+      "new": "điểm kém đi mà không có lỗi nào; lab cho hai nơi đối chiếu với nhau.",
+      "reason": "Bắt hai nơi so với nhau dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "nó không phải nguồn sự thật.",
+      "new": "Redis không phải nguồn dữ liệu gốc.",
+      "reason": "Nguồn sự thật là calque; theo terminology.json; nhắc lại danh từ thay Nó",
+      "severity": "high"
+    },
+    {
+      "old": "một chuyến phải đổi sáu khoá cùng lúc. Một script Lua giải cả hai:",
+      "new": "một chuyến phải cập nhật sáu khoá cùng lúc. Một script Lua xử lý cả hai:",
+      "reason": "Giải cả hai dịch gượng từ handle",
+      "severity": "medium"
+    },
+    {
+      "old": "các lần chạy khác của lab trong lúc viết bài cho từ 2.502 đến 12.936",
+      "new": "các lần chạy khác của lab trong lúc viết bài cho kết quả từ 2.502 đến 12.936",
+      "reason": "Thiếu danh từ sau động từ cho",
+      "severity": "medium"
+    },
+    {
+      "old": "mốc `meta` bắt ca này và",
+      "new": "mốc `meta` bắt trường hợp này và",
+      "reason": "Dùng ca như case",
+      "severity": "low"
+    },
+    {
+      "old": "hãy ghi nó ra từ trước.",
+      "new": "hãy ghi rõ quyết định này ngay từ đầu.",
+      "reason": "Nó chỉ sự vật trừu tượng, ghi ra từ trước gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "các số của một máy ồn, không phải máy rảnh",
+      "new": "các số của một máy đang bận, không phải máy rảnh",
+      "reason": "Máy ồn là ẩn dụ khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Thứ ít phụ thuộc tải hơn thời gian trôi qua là CPU tiêu thụ.",
+      "new": "Đại lượng ít phụ thuộc vào tải hơn thời gian trôi qua là CPU tiêu thụ.",
+      "reason": "Thứ gượng, thiếu giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "một tiến trình chỉ phục vụ nổi cỡ 15 chuyến chồng nhau",
+      "new": "một tiến trình chỉ xử lý kịp cỡ 15 chuyến chồng nhau",
+      "reason": "Phục vụ nổi dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "hoặc thêm bản service.",
+      "new": "hoặc thêm bản sao của service.",
+      "reason": "Thêm bản service cụt nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "`FakeClock` thay `time.monotonic` trong cầu dao",
+      "new": "`FakeClock` thay `time.monotonic` trong circuit breaker",
+      "reason": "Theo terminology.json giữ circuit breaker",
+      "severity": "high"
+    },
+    {
+      "old": "Khi hạ tầng hỏng: độ trễ tiêm vào",
+      "new": "Khi hạ tầng hỏng: tiêm độ trễ",
+      "reason": "Độ trễ tiêm vào là trật tự từ kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Cầu dao (`Breaker`) giải bài toán khác:",
+      "new": "Circuit breaker (`Breaker`) giải bài toán khác:",
+      "reason": "Theo terminology.json giữ circuit breaker",
+      "severity": "high"
+    },
+    {
+      "old": "Cầu dao chỉ đếm lời gọi mà **store** không kịp trả lời:",
+      "new": "Circuit breaker chỉ đếm lời gọi mà **store** không kịp trả lời:",
+      "reason": "Thống nhất một tên cho một khái niệm",
+      "severity": "medium"
+    },
+    {
+      "old": "không lần nào mở cầu dao.",
+      "new": "không lần nào mở circuit breaker.",
+      "reason": "Thống nhất thuật ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "đồng hồ hỏng mà không ai biết.",
+      "new": "ngân sách thời gian bị vượt mà không ai biết.",
+      "reason": "Đồng hồ hỏng là ẩn dụ sai ngữ cảnh",
+      "severity": "medium"
+    },
+    {
+      "old": "bắt ca đó và `Scorer` trả `state_ahead`",
+      "new": "bắt trường hợp đó và `Scorer` trả `state_ahead`",
+      "reason": "Dùng ca như case",
+      "severity": "low"
+    },
+    {
+      "old": "mọi hành vi fallback bằng độ trễ tiêm vào và đồng hồ giả;",
+      "new": "mọi hành vi fallback bằng cách tiêm độ trễ và dùng đồng hồ giả;",
+      "reason": "Độ trễ tiêm vào dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "`--verify` kiểm 57 bất biến:",
+      "new": "`--verify` kiểm tra 57 bất biến:",
+      "reason": "Động từ kiểm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Nó không kiểm tốc độ tuyệt đối và không ghim số p50 hay p99.",
+      "new": "Bước này không kiểm tra tốc độ tuyệt đối và không ghim số p50 hay p99.",
+      "reason": "Nó chỉ sự vật trừu tượng ở đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "gom lô, thêm bản service",
+      "new": "gom lô, thêm bản sao của service",
+      "reason": "Thêm bản service cụt nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "không cấu hình giữ dữ liệu hay loại key khi đầy bộ nhớ",
+      "new": "không cấu hình việc giữ dữ liệu hay chính sách loại key khi đầy bộ nhớ",
+      "reason": "Thiếu danh từ chính sách",
+      "severity": "medium"
+    },
+    {
+      "old": "làm đặc trưng biến mất âm thầm mà",
+      "new": "làm đặc trưng biến mất ngầm mà",
+      "reason": "Calque của silently",
+      "severity": "low"
+    },
+    {
+      "old": "phải đặt tên key lại cho cùng slot;",
+      "new": "phải đặt lại tên key để cùng slot;",
+      "reason": "Trật tự từ gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai tạo tác của bộ sinh ảnh hưởng mọi số mô hình trong loạt bài:",
+      "new": "Hai tạo tác của bộ sinh ảnh hưởng đến mọi số của mô hình trong loạt bài:",
+      "reason": "Tạo tác là calque của artifact; thiếu giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "gần như tố «sạch».",
+      "new": "gần như báo hiệu «sạch».",
+      "reason": "Từ tố không đúng ngữ cảnh",
+      "severity": "high"
+    },
+    {
+      "old": "vì chờ và độ ồn của máy",
+      "new": "vì chờ đợi và độ bận của máy",
+      "reason": "Độ ồn là ẩn dụ khó hiểu",
+      "severity": "low"
+    }
+  ]
+}

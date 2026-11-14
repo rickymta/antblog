@@ -20,9 +20,9 @@ Một khách đặt xe trên [Tới Nơi](/articles/du-an-mau-toi-noi), nhập q
 
 ## Python là gì, CPython là gì?
 
-**Python** là ngôn ngữ: cú pháp và quy tắc, được mô tả trong tài liệu ngôn ngữ. **CPython** là bản hiện thực chuẩn viết bằng C, và là thứ `python` trong terminal thường trỏ tới. Có bản hiện thực khác (PyPy, và nhiều bản khác), nhưng cả loạt này dùng CPython 3.14.
+**Python** là ngôn ngữ, gồm cú pháp và quy tắc do tài liệu ngôn ngữ mô tả. **CPython** là bản hiện thực chuẩn viết bằng C, và là thứ `python` trong terminal thường trỏ tới. Có bản hiện thực khác (PyPy, và nhiều bản khác), nhưng cả loạt này dùng CPython 3.14.
 
-Ngôn ngữ này nổi tiếng với cú pháp ngắn: khối lệnh dùng **thụt lề** thay cho dấu ngoặc nhọn, kiểu dữ liệu gắn với giá trị chứ không với biến (bài 02), và thư viện chuẩn rộng. Với Tới Nơi, lý do thực tế hơn: hệ sinh thái xử lý ảnh, học máy và phân tích dữ liệu ở Python là nơi OCR, face matching và fraud scoring dễ tìm công cụ nhất. Ta chọn Python cho các service đó vì thư viện và công cụ, không vì Python nhanh hơn C#. Nhiều thư viện nặng tính toán thực chất chạy mã native bên dưới, còn Python điều phối.
+Ngôn ngữ này nổi tiếng với cú pháp ngắn: khối lệnh dùng **thụt lề** thay cho dấu ngoặc nhọn, kiểu dữ liệu gắn với giá trị chứ không với biến (bài 02), và thư viện chuẩn rộng. Với Tới Nơi, lý do thực tế hơn: hệ sinh thái xử lý ảnh, học máy và phân tích dữ liệu ở Python là nơi OCR, so khớp khuôn mặt và chấm điểm gian lận dễ tìm công cụ nhất. Ta chọn Python cho các service đó vì thư viện và công cụ, không vì Python nhanh hơn C#. Nhiều thư viện nặng tính toán thực chất chạy mã native bên dưới, còn Python điều phối.
 
 Người đã đọc loạt C# có thể đối chiếu như sau.
 
@@ -45,9 +45,9 @@ Bảng này nói về cách chạy mặc định. Cả hai hệ sinh thái có n
 <figcaption>Hình 1. Luồng chạy mặc định của CPython. Bytecode không phải mã máy: CPU chạy chính chương trình interpreter, và interpreter đọc bytecode của ta.</figcaption>
 </figure>
 
-Khi gõ `python main.py`, CPython đọc file, phân tích cú pháp, rồi **biên dịch thành bytecode**: danh sách lệnh đơn giản cho máy ảo của Python. Mỗi lệnh bytecode lại được vòng lặp chính của interpreter thực thi. Vì vậy câu «Python là ngôn ngữ thông dịch» đúng một nửa: có thông dịch, nhưng trên bytecode chứ không trên văn bản gốc.
+Khi gõ `python main.py`, CPython đọc file, phân tích cú pháp, rồi **biên dịch thành bytecode**: danh sách lệnh đơn giản cho máy ảo của Python. Sau đó vòng lặp chính của interpreter thực thi từng lệnh bytecode. Vì vậy câu «Python là ngôn ngữ thông dịch» đúng một nửa: có thông dịch, nhưng trên bytecode chứ không trên văn bản gốc.
 
-Bạn có thể nhìn bytecode bằng module `dis` trong thư viện chuẩn. Đây là kết quả thật khi biên dịch một dòng tính tổng (chạy bằng `uv run --project examples/toi-noi-python/01-python-va-uv python -c "..."` với `dis.dis(compile('total = base + extra * price', 'demo.py', 'exec'))`):
+Bạn có thể nhìn bytecode bằng module `dis` trong thư viện chuẩn. Đây là kết quả chạy thật khi biên dịch một dòng tính tổng (chạy bằng `uv run --project examples/toi-noi-python/01-python-va-uv python -c "..."` với `dis.dis(compile('total = base + extra * price', 'demo.py', 'exec'))`):
 
 ```text
   0           RESUME                   0
@@ -68,7 +68,7 @@ Máy ảo dùng một ngăn xếp: nạp `base`, `extra`, `price`, nhân hai s�
 
 ## Cài Python 3.14 bằng uv
 
-**uv** là công cụ quản lý project và phiên bản Python. Nó cài interpreter, tạo virtual environment, ghi lại phiên bản thư viện trong `uv.lock` và chạy lệnh trong môi trường đó. Loạt này chọn uv để mọi bài có cùng cách chạy và không đụng vào Python hệ thống. Cài uv theo [hướng dẫn chính thức](https://docs.astral.sh/uv/getting-started/installation/), rồi kiểm tra:
+**uv** là công cụ quản lý project và phiên bản Python. uv cài interpreter, tạo virtual environment, ghi lại phiên bản thư viện trong `uv.lock` và chạy lệnh trong môi trường đó. Loạt này chọn uv để mọi bài có cùng cách chạy và không đụng vào Python hệ thống. Cài uv theo [hướng dẫn chính thức](https://docs.astral.sh/uv/getting-started/installation/), rồi kiểm tra:
 
 ```bash
 uv --version
@@ -76,9 +76,9 @@ uv python install 3.14
 uv python find 3.14
 ```
 
-Lệnh `uv --version` cho một dòng dạng `uv 0.12.11 (…)`; số phiên bản trên máy bạn có thể khác. Lệnh thứ hai tải Python 3.14 nếu máy chưa có; nếu đã có, uv báo `Python 3.14 is already installed`. Lệnh thứ ba in đường dẫn interpreter mà uv tìm thấy, thường nằm trong thư mục dữ liệu của uv chứ không phải `/usr/bin`. Đó là điều ta muốn: Python của hệ điều hành vẫn nguyên vẹn.
+Lệnh `uv --version` in ra một dòng dạng `uv 0.12.11 (…)`; số phiên bản trên máy bạn có thể khác. Lệnh thứ hai tải Python 3.14 nếu máy chưa có; nếu đã có, uv báo `Python 3.14 is already installed`. Lệnh thứ ba in đường dẫn interpreter mà uv tìm thấy, thường nằm trong thư mục dữ liệu của uv chứ không phải `/usr/bin`. Đó là điều ta muốn: Python của hệ điều hành vẫn nguyên vẹn.
 
-**Virtual environment** (venv) là một thư mục `.venv` gắn với project, chứa interpreter được chọn và các gói của riêng project đó. Hai project dùng hai phiên bản thư viện khác nhau sẽ không dẫm lên nhau. Với uv bạn hiếm khi phải kích hoạt venv thủ công vì `uv run` làm việc đó.
+**Virtual environment** (venv) là một thư mục `.venv` gắn với project, chứa interpreter được chọn và các gói của riêng project đó. Hai project dùng hai phiên bản thư viện khác nhau sẽ không xung đột với nhau. Với uv bạn hiếm khi phải kích hoạt venv thủ công vì `uv run` làm việc đó.
 
 ## Tạo project và đọc pyproject.toml
 
@@ -87,7 +87,7 @@ uv init fare-demo --app --no-package --python 3.14
 cd fare-demo
 ```
 
-`--app` tạo project dạng ứng dụng; `--no-package` nói rằng ta chưa đóng gói nó thành thư viện cài được (bài 07 và bài 20 quay lại). Ta ghi rõ hai cờ vì mặc định của uv có thể đổi giữa các phiên bản: với uv 0.12.11 mà bài này dùng, chạy `uv init` trơn tạo ra layout có thư mục `src/` và cấu hình build, không có `main.py`. Lệnh trên tạo ra các file sau (cùng một repo Git mới nếu thư mục chưa nằm trong repo nào):
+`--app` tạo project dạng ứng dụng; `--no-package` nói rằng ta chưa đóng gói nó thành thư viện cài được (bài 07 và bài 20 quay lại). Ta ghi rõ hai cờ vì mặc định của uv có thể đổi giữa các phiên bản: với uv 0.12.11 mà bài này dùng, chạy `uv init` không kèm cờ nào tạo ra cấu trúc có thư mục `src/` và cấu hình build, không có `main.py`. Lệnh trên tạo ra các file sau (cùng một repo Git mới nếu thư mục chưa nằm trong repo Git nào):
 
 ```text
 .gitignore  .python-version  README.md  main.py  pyproject.toml
@@ -179,7 +179,7 @@ Giới hạn của ví dụ: khoảng cách đến từ dòng lệnh chứ khôn
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
-| `uv: command not found` | Cài uv chưa; mở terminal mới sau khi cài |
+| `uv: command not found` | Đã cài uv chưa; mở terminal mới sau khi cài |
 | Báo không tìm thấy Python 3.14 | Chạy `uv python install 3.14`; kiểm tra `requires-python` trong `pyproject.toml` |
 | `python` ra phiên bản khác với bài | Đang gọi Python hệ thống; dùng `uv run` thay vì gọi `python` trực tiếp |
 | `No such file or directory` khi chạy | Đang đứng sai thư mục; lệnh trong bài chạy từ gốc repository |
@@ -187,7 +187,7 @@ Giới hạn của ví dụ: khoảng cách đến từ dòng lệnh chứ khôn
 
 ### Tự kiểm tra bằng tay
 
-Mỗi lần chạy với một khoảng cách khác, so với bảng. Dòng `Cước minh họa` phải khớp:
+Chạy lần lượt với từng khoảng cách khác nhau rồi so kết quả với bảng. Dòng `Cước minh họa` phải khớp:
 
 | Khoảng cách | Phần vượt | Giá mong đợi |
 | --- | --- | --- |
@@ -218,9 +218,9 @@ Lộ trình chia làm ba cấp, mỗi cấp có đích rõ:
 
 - **Cơ bản (bài 01 tới 20):** viết, kiểm thử và đóng gói một chương trình Python có kiểu, có mô hình nghiệp vụ; bài này là bài đầu.
 - **Trung bình (bài 21 tới 40):** viết service HTTP, gRPC, Kafka bất đồng bộ, nối PostgreSQL, MongoDB, Redis, có integration test.
-- **Nâng cao (bài 41 tới 79):** xây OCR, face matching, fraud scoring và dự đoán thành service theo kiến trúc đích, có đo đạc và vận hành.
+- **Nâng cao (bài 41 tới 79):** xây OCR, so khớp khuôn mặt, chấm điểm gian lận và dự đoán thành service theo kiến trúc đích, có đo đạc và vận hành.
 
-Ảnh giấy tờ, khuôn mặt ở cấp nâng cao là dữ liệu tổng hợp sinh bằng code; kết quả OCR và điểm fraud là đầu vào cho quy trình nghiệp vụ, không tự động là quyết định xác minh hay kết luận gian lận. Với các backend chính, Tới Nơi hướng tới DDD, Clean Architecture, CQRS, Mediator, Repository và Unit of Work; Python giữ các service OCR, so khớp mặt, fraud và phân tích bên cạnh đó. Xem [hồ sơ Tới Nơi](/articles/du-an-mau-toi-noi) cho bức tranh đầy đủ.
+Ảnh giấy tờ và ảnh khuôn mặt ở cấp nâng cao là dữ liệu tổng hợp sinh bằng code; kết quả OCR và điểm gian lận là đầu vào cho quy trình nghiệp vụ, không mặc nhiên là quyết định xác minh hay kết luận gian lận. Với các backend chính, Tới Nơi hướng tới DDD, Clean Architecture, CQRS, Mediator, Repository và Unit of Work; Python giữ các service OCR, so khớp mặt, fraud và phân tích bên cạnh đó. Xem [hồ sơ Tới Nơi](/articles/du-an-mau-toi-noi) cho bức tranh đầy đủ.
 
 Bài trước: không có. Bài tiếp: [bài 02](/articles/python-bien-kieu-du-lieu-decimal), đi sâu vào biến, kiểu dữ liệu, `float` so với `Decimal` và quy tắc làm tròn tiền.
 

@@ -1,0 +1,15 @@
+{"file":"python-mongodb-pymongo-motor-document-ocr.md","edits":[
+{"old":"Motor đã deprecated. Có lab chạy thật.","new":"Motor đã bị đánh dấu deprecated. Có lab chạy thật.","reason":"«đã deprecated» thiếu động từ trạng thái, đọc cụt.","severity":"medium"},
+{"old":"cần quen asyncio ở bài 21 và đã thấy","new":"bạn cần quen asyncio ở bài 21 và đã thấy","reason":"Câu thiếu chủ ngữ cho «cần quen».","severity":"medium"},
+{"old":"chỉ chuyển từ bảng sang code đọc dữ liệu và sang validator của collection","new":"chỉ là nơi giữ nó chuyển từ bảng sang code đọc dữ liệu và validator của collection","reason":"Câu lủng củng, thiếu chủ thể của «chuyển».","severity":"medium"},
+{"old":"Motor sẽ deprecated từ 14/5/2026","new":"Motor sẽ bị đánh dấu deprecated từ 14/5/2026","reason":"«sẽ deprecated» thiếu động từ, giọng dịch máy.","severity":"medium"},
+{"old":"sẽ nổ.","new":"sẽ báo lỗi.","reason":"«nổ» là khẩu ngữ, không hợp văn kỹ thuật.","severity":"low"},
+{"old":"nên mọi lần ghi đều bị kiểm hình dạng (trích):","new":"nên mọi lần ghi đều được kiểm tra hình dạng (trích):","reason":"«bị kiểm hình dạng» là cụm tự ghép gượng.","severity":"medium"},
+{"old":"gửi cả lô trong ít vòng đi-về.","new":"gửi cả lô qua ít lượt trao đổi với server.","reason":"«vòng đi-về» là calque của round trip.","severity":"low"},
+{"old":"đúng tỷ lệ dữ liệu tổng hợp cố ý tạo ra.","new":"đúng tỷ lệ ta cố ý đặt cho dữ liệu tổng hợp.","reason":"Câu thiếu quan hệ từ, phải đoán ý.","severity":"medium"},
+{"old":"mục index dưới đây cho thấy kế hoạch của nó.","new":"mục index dưới đây cho thấy kế hoạch truy vấn của nó.","reason":"«kế hoạch» thiếu danh từ chính (query plan).","severity":"medium"},
+{"old":"Quy tắc tương tự B-tree trong PostgreSQL.","new":"Quy tắc này tương tự B-tree trong PostgreSQL.","reason":"Câu thiếu chỉ định, cụt.","severity":"medium"},
+{"old":"đã được phục vụ bởi chính unique index ở trên:","new":"đã dùng chính unique index ở trên để trả lời:","reason":"Tránh câu bị động «được ... bởi ...».","severity":"medium"},
+{"old":"Ở đây tỉ lệ chọn lọc là 77 trên 2.006","new":"Ở đây tỷ lệ chọn lọc là 77 trên 2.006","reason":"Thống nhất «tỷ lệ» trong bài.","severity":"low"},
+{"old":"các trường lọc bằng đứng trước, trường sắp xếp đứng sau.","new":"các trường lọc theo điều kiện bằng đứng trước, trường sắp xếp đứng sau.","reason":"«lọc bằng» nghe cụt, dễ hiểu sai.","severity":"high"}
+]}

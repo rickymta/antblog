@@ -1,36 +1,36 @@
 ---
 slug: python-match-pattern-matching-none
 title: "Pattern matching và xử lý None: chuyển trạng thái chuyến rõ ràng"
-summary: "Bài 16: dùng match/case với class, sequence và mapping pattern, guard để mô tả chuyến và định tuyến sự kiện; tách None, chuỗi rỗng và khoá vắng; sentinel, TypeIs và mypy kiểm tra đủ trường hợp. Có output thật."
+summary: "Bài 16: dùng match/case với class, sequence và mapping pattern, guard để mô tả chuyến và định tuyến sự kiện; tách None, chuỗi rỗng và khoá không có trong dict; sentinel, TypeIs và mypy kiểm tra đủ trường hợp. Có kết quả chạy thật."
 category: python-beginner
 level: beginner
 tags: [python, toi-noi, pattern-matching, none]
 language: vi
 ---
 
-Màn hình theo dõi chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) từng hiện dòng «Tài xế: None» cho khách đang chờ ghép tài xế. Bản sửa nhanh là `if trip.driver_id:`, nhưng nó che luôn một lỗi khác: có chuyến đã nhận mà `driver_id` là chuỗi rỗng, và màn hình cũng ghi «chưa có tài xế» như không có gì xảy ra. Ba tình huống khác nghĩa (chưa có tài xế, thiếu tài xế do dữ liệu lỗi, có tài xế) bị gộp vào một nhánh `if`.
+Màn hình theo dõi chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) từng hiện dòng «Tài xế: None» cho khách đang chờ ghép tài xế. Bản sửa nhanh là `if trip.driver_id:`, nhưng bản sửa này che luôn một lỗi khác: có chuyến đã nhận mà `driver_id` là chuỗi rỗng, và màn hình cũng ghi «chưa có tài xế» như không có gì xảy ra. Ba tình huống khác nghĩa (chưa có tài xế, thiếu tài xế do dữ liệu lỗi, có tài xế) bị gộp vào một nhánh `if`.
 
-Đây là bài 16 của lộ trình **Python cơ bản qua Tới Nơi**. Bài dùng `TripStatus(StrEnum)` từ bài 13 và `dataclass` từ bài 11, và đưa vào `match/case` cùng cách đối xử với `None` để mỗi tình huống có một nhánh riêng, có tên.
+Đây là bài 16 của lộ trình **Python cơ bản qua Tới Nơi**. Bài dùng `TripStatus(StrEnum)` từ bài 13 và `dataclass` từ bài 11, và giới thiệu `match/case` cùng cách xử lý `None` để mỗi tình huống có một nhánh riêng, có tên.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Trong <code>match trip.status:</code>, dòng <code>case ACCEPTED:</code> có so trạng thái với <code>TripStatus.ACCEPTED</code> không? Chuyện gì xảy ra nếu bên dưới còn các <code>case</code> khác?</p>
-<details><summary>Xem đáp án</summary><p><b>Không so gì cả.</b> Tên trần trong <code>case</code> là <b>capture</b>: nó khớp với mọi giá trị và gán giá trị đó vào biến tên <code>ACCEPTED</code>. Vì vậy mọi <code>case</code> phía dưới không bao giờ chạy, và Python báo <code>SyntaxError: name capture 'ACCEPTED' makes remaining patterns unreachable</code> nếu còn <code>case</code> sau nó. Muốn so với hằng, hãy viết tên có dấu chấm: <code>case TripStatus.ACCEPTED:</code>. Bài sẽ chạy đúng ca này.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không so gì cả.</b> Tên trần trong <code>case</code> là <b>capture</b>: nó khớp với mọi giá trị và gán giá trị đó vào biến tên <code>ACCEPTED</code>. Vì vậy mọi <code>case</code> phía dưới không bao giờ chạy, và Python báo <code>SyntaxError: name capture 'ACCEPTED' makes remaining patterns unreachable</code> nếu còn <code>case</code> sau nó. Muốn so với hằng, hãy viết tên có dấu chấm: <code>case TripStatus.ACCEPTED:</code>. Bài sẽ chạy đúng trường hợp này.</p></details>
 </div>
 
 ## match/case: so khớp cấu trúc, không chỉ so bằng
 
-`match` (từ Python 3.10, PEP 634) thường bị gọi là «switch của Python». Gọi vậy hơi sai: `switch` ở nhiều ngôn ngữ chỉ so một giá trị với các hằng, còn `match` là **structural pattern matching**: mỗi `case` là một **pattern** mô tả hình dạng dữ liệu, và khi khớp nó có thể gán luôn các phần của dữ liệu vào biến. Ba quy tắc cần thuộc trước khi đọc code:
+`match` (từ Python 3.10, PEP 634) thường bị gọi là «switch của Python». Gọi vậy hơi sai: `switch` ở nhiều ngôn ngữ chỉ so một giá trị với các hằng, còn `match` là **structural pattern matching**: mỗi `case` là một **pattern** mô tả hình dạng dữ liệu, và khi khớp, pattern có thể gán luôn các phần của dữ liệu vào biến. Ba quy tắc cần thuộc trước khi đọc code:
 
 - Các `case` được thử **từ trên xuống**; case đầu tiên khớp thắng, các case sau bị bỏ qua. Thứ tự là một phần của logic.
 - Sau pattern có thể có **guard** `if điều_kiện`; guard chỉ chạy khi pattern đã khớp, và nếu guard sai thì Python thử case kế tiếp.
-- `case _:` khớp mọi thứ và không gán biến. Nó thường đứng cuối để bắt «phần còn lại».
+- `case _:` khớp mọi thứ và không gán biến. Case này thường đứng cuối để bắt «phần còn lại».
 
 `match` và `case` là **soft keyword**: chỉ có nghĩa đặc biệt ở đầu câu lệnh `match`, nên code cũ đặt tên biến `match` vẫn chạy.
 
 ## Class pattern và guard: mô tả chuyến
 
-**Class pattern** viết như gọi constructor: `Trip(status=TripStatus.SEARCHING, driver_id=None)`. Python kiểm `isinstance(subject, Trip)` rồi đọc từng thuộc tính theo tên và so với pattern con. Với `dataclass`, `__match_args__` gồm các field tham gia `__init__`, theo thứ tự khai báo. `Trip` của lab này khai báo đủ bảy trường theo từ điển miền nên dạng theo vị trí `Trip(trip_id, _, None)` hợp lệ; nhưng `Trip` của bài 11 đặt `driver_id` và `status` là `init=False`, nên `__match_args__` của nó chỉ còn năm tên (`trip_id, customer_id, service, distance_km, created_at`) và vị trí thứ ba là `service`. Vì thế dạng có tên an toàn hơn. Hàm `describe` trong `matching.py` biến mọi chuyến thành một câu cho người dùng, kể cả dữ liệu lỗi:
+**Class pattern** viết như gọi constructor: `Trip(status=TripStatus.SEARCHING, driver_id=None)`. Python kiểm tra `isinstance(subject, Trip)` rồi đọc từng thuộc tính theo tên và so với pattern con. Với `dataclass`, `__match_args__` gồm các field tham gia `__init__`, theo thứ tự khai báo. `Trip` của lab này khai báo đủ bảy trường theo từ điển miền nên dạng theo vị trí `Trip(trip_id, _, None)` hợp lệ; nhưng `Trip` của bài 11 đặt `driver_id` và `status` là `init=False`, nên `__match_args__` của nó chỉ còn năm tên (`trip_id, customer_id, service, distance_km, created_at`) và vị trí thứ ba là `service`. Vì thế dạng có tên an toàn hơn. Hàm `describe` trong `matching.py` biến mọi chuyến thành một câu cho người dùng, kể cả dữ liệu lỗi:
 
 ```python
 def describe(trip: Trip | None) -> str:
@@ -58,7 +58,7 @@ def describe(trip: Trip | None) -> str:
 Mỗi thành phần có một việc:
 
 - `case None` dùng so sánh `is None`; PEP 634 quy định `None`, `True`, `False` được so bằng `is`, còn các literal khác so bằng `==`.
-- `TripStatus.REQUESTED | TripStatus.SEARCHING` là **or-pattern**: một trong hai trạng thái. Tên có dấu chấm là **value pattern**, so bằng `==` với hằng enum. Vì `StrEnum` bằng chuỗi cùng giá trị, chuỗi `"accepted"` cũng khớp `case TripStatus.ACCEPTED` (lab có ca kiểm điều này); đó là lý do dữ liệu từ ngoài nên đi qua bước validate ở bài 15 trước khi vào `match`.
+- `TripStatus.REQUESTED | TripStatus.SEARCHING` là **or-pattern**: một trong hai trạng thái. Tên có dấu chấm là **value pattern**, so bằng `==` với hằng enum. Vì `StrEnum` bằng chuỗi cùng giá trị, chuỗi `"accepted"` cũng khớp `case TripStatus.ACCEPTED` (lab có test case kiểm tra điều này); đó là lý do dữ liệu từ ngoài nên đi qua bước validate ở bài 15 trước khi vào `match`.
 - `str()` là class pattern không có đối số: khớp mọi `str`, kể cả chuỗi rỗng. `str() as driver` vừa kiểm kiểu vừa đặt tên cho giá trị.
 - `driver_id=str()` ở case thứ tư tách «có tài xế» khỏi «chưa có» mà không cần so với một giá trị cụ thể.
 - Hai case có guard (`if not driver.strip()`, `if km > 20`) dùng giá trị vừa bắt được để quyết định thêm.
@@ -78,7 +78,7 @@ in_transit 5 km            -> Tài xế DR-001: in_transit
 cancelled                  -> Chuyến đã hủy
 ```
 
-So với câu hỏi mở đầu, màn hình không còn ghi «Tài xế: None»: «chưa có tài xế» và «dữ liệu lỗi» là hai dòng khác nhau. Bài C# [nullable và pattern matching](/articles/csharp-nullable-pattern-matching) dùng switch expression cho đúng ba tình huống này; cú pháp khác nhưng tư duy giống nhau.
+So với tình huống mở đầu, màn hình không còn ghi «Tài xế: None»: «chưa có tài xế» và «dữ liệu lỗi» là hai dòng khác nhau. Bài C# [nullable và pattern matching](/articles/csharp-nullable-pattern-matching) dùng switch expression cho đúng ba tình huống này; cú pháp khác nhưng tư duy giống nhau.
 
 ## Sequence và or-pattern: chuyển trạng thái
 
@@ -106,7 +106,7 @@ def apply_command(trip: Trip, command: tuple[object, ...]) -> Trip:
             raise InvalidTransition(f"{trip.status.value} không nhận lệnh {command!r}")
 ```
 
-Mỗi `case` đọc như một dòng của bảng chuyển trạng thái: «đang ở `searching` và nhận lệnh `assign` kèm một tài xế không trống thì thành `accepted`». Không có nhánh nào cho các cặp còn lại, và `case _` biến chúng thành `InvalidTransition`, nên không thể chuyển sai mà im lặng. Hàm trả `Trip` mới bằng `dataclasses.replace` thay vì sửa chuyến cũ; test dễ viết hơn, và lab kiểm chuyến gốc không đổi.
+Mỗi `case` đọc như một dòng của bảng chuyển trạng thái: «đang ở `searching` và nhận lệnh `assign` kèm một tài xế không trống thì thành `accepted`». Không có nhánh nào cho các cặp còn lại, và `case _` biến chúng thành `InvalidTransition`, nên không thể chuyển sai mà không báo lỗi. Hàm trả `Trip` mới bằng `dataclasses.replace` thay vì sửa chuyến cũ; test dễ viết hơn, và lab kiểm tra chuyến gốc không đổi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -115,7 +115,7 @@ Mỗi `case` đọc như một dòng của bảng chuyển trạng thái: «đan
 <figcaption>Hình 1. Bảy trạng thái đi tuần tự và nhánh huỷ. Mỗi mũi tên là một case trong apply_command; cặp (trạng thái, lệnh) không có case nào thì rơi vào case cuối và bị từ chối.</figcaption>
 </figure>
 
-Hai chi tiết của sequence pattern đáng nhớ. Pattern `("search",)` khớp **mọi sequence** có đúng một phần tử `"search"`, nên danh sách `["search"]` cũng khớp. Ngược lại, **chuỗi `str` không bao giờ được coi là sequence** trong `match`, nên `match "cancel"` không khớp `("cancel",)`; nếu không, mỗi chuỗi sẽ thành dãy ký tự và gây những khớp rất khó hiểu. Chạy thử đường đi hợp lệ và bốn lệnh bị từ chối:
+Hai chi tiết của sequence pattern đáng nhớ. Pattern `("search",)` khớp **mọi sequence** có đúng một phần tử `"search"`, nên danh sách `["search"]` cũng khớp. Ngược lại, **chuỗi `str` không bao giờ được coi là sequence** trong `match`, nên `match "cancel"` không khớp `("cancel",)`; nếu không, mỗi chuỗi sẽ thành dãy ký tự và gây ra những lần khớp rất khó hiểu. Chạy thử đường đi hợp lệ và bốn lệnh bị từ chối:
 
 ```text
 ('search',)            -> searching  driver=None
@@ -130,13 +130,13 @@ từ chối: requested không nhận lệnh ('assign', 'DR-001')
 từ chối: picked_up không nhận lệnh ('cancel',)
 ```
 
-Còn một việc mà `match` giúp công cụ làm hộ: nhắc ta khi thiếu trường hợp. Hàm `next_step_label(status)` duyệt đủ tám trạng thái và kết thúc bằng `case _: assert_never(status)`. Khi kiểu của `status` đã bị loại hết thành viên, mypy thấy đối số là `Never` và im lặng. Nếu ta bỏ sót một trạng thái, mypy báo lỗi ngay lúc kiểm kiểu, không đợi tới lúc chạy. `unsafe_example.py` trong lab cố ý chỉ xử lý hai trạng thái:
+Còn một việc mà `match` giúp công cụ làm hộ: nhắc ta khi thiếu trường hợp. Hàm `next_step_label(status)` duyệt đủ tám trạng thái và kết thúc bằng `case _: assert_never(status)`. Khi kiểu của `status` đã bị loại hết thành viên, mypy thấy đối số là `Never` và không báo gì. Nếu ta bỏ sót một trạng thái, mypy báo lỗi ngay lúc kiểm kiểu, không đợi tới lúc chạy. `unsafe_example.py` trong lab cố ý chỉ xử lý hai trạng thái:
 
 ```text
 examples/toi-noi-python/16-match-pattern-none/unsafe_example.py:23: error: Argument 1 to "assert_never" has incompatible type "Literal[TripStatus.SEARCHING, TripStatus.ACCEPTED, TripStatus.ARRIVING, TripStatus.PICKED_UP, TripStatus.IN_TRANSIT, TripStatus.CANCELLED]"; expected "Never"  [arg-type]
 ```
 
-Thông báo liệt kê đúng sáu trạng thái còn thiếu. Đây là lý do nên thêm trạng thái mới vào `TripStatus` rồi để mypy chỉ ra mọi `match` cần sửa. mypy là nội dung của bài 12; `assert_never` được giới thiệu ngay ở bài này.
+Thông báo liệt kê đúng sáu trạng thái còn thiếu. Đây là lý do nên thêm trạng thái mới vào `TripStatus` rồi để mypy chỉ ra mọi `match` cần sửa. bài 12 đã nói về mypy; còn `assert_never` được giới thiệu ngay ở bài này.
 
 ## Mapping pattern: định tuyến sự kiện
 
@@ -180,11 +180,11 @@ không có event_type  -> cách ly: không phải envelope
 
 Hai dòng đáng đọc kỹ. Dòng «driver_id là null» và «driver_id vắng mặt» đi hai nhánh khác nhau, vì mapping pattern phân biệt khoá có giá trị `None` với khoá không có mặt. Dòng «version là True» là một cái bẫy: literal `1` trong pattern được so bằng `==`, mà `True == 1`, nên `"version": True` đi qua như phiên bản 1. Lab chạy thêm `match True: case 1:` và `match 1.0: case 1:`: cả hai đều khớp.
 
-Bẫy này nhắc đúng phạm vi của `match`: nó **định tuyến** theo hình dạng, không thay việc **kiểm tra** dữ liệu. Envelope phải được validate trước (bài 15 giới thiệu validate và strict mode ở biên); `match` sau đó chỉ chọn nhánh xử lý. Đừng viết hàng chục `case` để thay cho một model.
+Bẫy này nhắc ta nhớ đúng phạm vi của `match`: nó **định tuyến** theo hình dạng, không thay việc **kiểm tra** dữ liệu. Envelope phải được validate trước (bài 15 giới thiệu validate và strict mode ở biên); `match` sau đó chỉ chọn nhánh xử lý. Đừng viết hàng chục `case` để thay cho một model.
 
 ## None: ba trạng thái, sentinel và thu hẹp kiểu
 
-`None` là giá trị duy nhất của kiểu `NoneType`, và Python dùng nó cho mọi nghĩa của «không có». Nghĩa nào cũng thành `None` thì code khó đoán. Với `driver_id` có bốn khả năng (Hình 2): khoá vắng mặt trong payload, `None`, chuỗi trống, và mã hợp lệ. Cách viết truthiness quen thuộc sẽ gộp ba ô đầu:
+`None` là giá trị duy nhất của kiểu `NoneType`, và Python dùng nó cho mọi nghĩa của «không có». Nghĩa nào cũng thành `None` thì code khó đoán. `driver_id` có bốn khả năng (Hình 2): khoá vắng mặt trong payload, `None`, chuỗi trống, và mã hợp lệ. Cách viết dựa vào truthiness (giá trị đúng/sai của đối tượng trong điều kiện) quen thuộc sẽ gộp ba ô đầu:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -218,7 +218,7 @@ DR-001      truthy='DR-001'             match='DR-001'
 
 Dòng thứ hai là điểm khác: truthiness che mất dữ liệu lỗi. Ở bài 03 ta đã gặp cùng cái bẫy với `Decimal("0")`; nguyên tắc vẫn là so sánh tường minh khi các giá trị rơi vào cùng nhánh có nghĩa khác nhau.
 
-Vài điều về kiểu. `X | None` (PEP 604, Python 3.10) là cách viết hiện đại của `Optional[X]`; ở Python 3.14, `Optional[int] == (int | None)` là `True`. Chữ «Optional» dễ gây hiểu nhầm: nó **không** có nghĩa «tham số tuỳ chọn». Một tham số có thể bỏ trống vẫn cần giá trị mặc định, và kiểu của nó chỉ chứa `None` khi `None` là giá trị hợp lệ. Còn so sánh với `None`, hãy viết `is None` thay `== None`: `is` kiểm đúng đối tượng duy nhất đó và không bị `__eq__` tự định nghĩa của lớp khác can thiệp.
+Có vài điều về kiểu cần nói thêm. `X | None` (PEP 604, Python 3.10) là cách viết hiện đại của `Optional[X]`; ở Python 3.14, `Optional[int] == (int | None)` là `True`. Chữ «Optional» dễ gây hiểu nhầm: nó **không** có nghĩa «tham số tuỳ chọn». Một tham số có thể bỏ trống vẫn cần giá trị mặc định, và kiểu của nó chỉ chứa `None` khi `None` là giá trị hợp lệ. Còn khi so sánh với `None`, hãy viết `is None` thay vì `== None`: `is` kiểm tra đúng đối tượng duy nhất đó và không bị `__eq__` do lớp khác tự định nghĩa can thiệp.
 
 ### Khi None đã mang nghĩa: sentinel
 
@@ -257,7 +257,7 @@ Sentinel ở đây là Enum một thành viên: mypy hiểu `is not UNSET` để
 
 ### Thu hẹp kiểu với TypeIs và TypeGuard
 
-Sau `if driver_id is not None`, mypy biết `driver_id` là `str`: đó là **narrowing**. Khi điều kiện nằm trong một hàm riêng, ta nói cho mypy biết hàm đó thu hẹp gì bằng `TypeIs` (PEP 742, Python 3.13) hoặc `TypeGuard`:
+Sau `if driver_id is not None`, mypy biết `driver_id` là `str`: đó là việc **thu hẹp kiểu** (narrowing). Khi điều kiện nằm trong một hàm riêng, ta nói cho mypy biết hàm đó thu hẹp gì bằng `TypeIs` (PEP 742, Python 3.13) hoặc `TypeGuard`:
 
 ```python
 def is_assigned(driver_id: str | None) -> TypeIs[str]:
@@ -279,7 +279,7 @@ unsafe_example.py:32: note: Revealed type is "str"
 unsafe_example.py:34: note: Revealed type is "str | None"
 ```
 
-Bốn dòng lần lượt là nhánh đúng và nhánh `else` của `is_assigned`, rồi nhánh đúng và nhánh `else` của `has_usable_driver`. File này cũng chứa ca `trip.driver_id[0]` mà không kiểm `None`, mypy báo `Value of type "str | None" is not indexable`: lỗi `TypeError` sẽ nổ ở runtime được bắt sớm lúc kiểm kiểu.
+Bốn dòng lần lượt là nhánh đúng và nhánh `else` của `is_assigned`, rồi nhánh đúng và nhánh `else` của `has_usable_driver`. File này cũng chứa trường hợp `trip.driver_id[0]` mà không kiểm tra `None`, và mypy báo `Value of type "str | None" is not indexable`: lỗi `TypeError` vốn sẽ xảy ra ở runtime nay được bắt sớm lúc kiểm kiểu.
 
 ## Chạy và kiểm chứng
 
@@ -303,13 +303,13 @@ chuỗi KHÔNG khớp sequence pattern
 list khớp pattern viết bằng tuple
 ```
 
-Lệnh `--verify` chạy 56 ca (10 mô tả chuyến, đường đi bảy trạng thái, bốn ca huỷ hợp lệ, chín ca bị từ chối, tám envelope, rồi các ca về bẫy cú pháp, `None` và sentinel) và kết thúc bằng:
+Lệnh `--verify` chạy 56 test case (10 mô tả chuyến, đường đi bảy trạng thái, bốn test case huỷ hợp lệ, chín test case bị từ chối, tám envelope, rồi các test case về bẫy cú pháp, `None` và sentinel) và kết thúc bằng:
 
 ```text
 OK 56/56
 ```
 
-`mypy main.py --strict` in `Success: no issues found in 1 source file`; lệnh cuối với `unsafe_example.py` báo hai lỗi và bốn dòng `Revealed type` như trên. Bản đã chạy dùng Python 3.14.7 và mypy 2.4.1 (xem `uv.lock`). Nếu một ca của `--verify` lệch, nó in `SAI: <tên ca>`, rồi `FAIL n/m` (n là số ca đạt, m là tổng) và thoát với mã 1.
+`mypy main.py --strict` in `Success: no issues found in 1 source file`; lệnh cuối với `unsafe_example.py` báo hai lỗi và bốn dòng `Revealed type` như trên. Bản đã chạy dùng Python 3.14.7 và mypy 2.4.1 (xem `uv.lock`). Nếu một test case của `--verify` bị lệch, chương trình in `SAI: <tên ca>`, rồi `FAIL n/m` (n là số test case đạt, m là tổng) và thoát với mã 1.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -328,7 +328,7 @@ OK 56/56
 
 **Bài tập 2:** Trong `describe`, đổi vị trí hai case: đưa `case Trip(driver_id=None)` lên ngay sau `case None`. Chuyến nào được mô tả sai?
 
-<details><summary>Xem lời giải</summary><p><b>Bài 1.</b> <code>mypy --strict</code> báo <code>assert_never</code> nhận <code>Literal[TripStatus.EXPIRED]</code> thay vì <code>Never</code> ở <code>next_step_label</code> (và ở mọi <code>match</code> kết thúc bằng <code>assert_never</code> theo trạng thái). Khi chạy, <code>main.py</code> vẫn thoát mã 0 vì không gọi <code>next_step_label</code>; còn <code>main.py --verify</code> gọi hàm đó cho mọi trạng thái nên dừng bằng traceback <code>AssertionError</code> (không in <code>FAIL n/m</code>). Không chạy mypy thì lỗi chỉ lộ khi có dữ liệu thật đi vào nhánh đó. Với <code>describe</code>, nó vẫn rơi vào case tổng quát <code>Trip(status=status, driver_id=driver)</code> nên không lỗi; hãy tự quyết xem trạng thái mới cần mô tả riêng không. <b>Bài 2.</b> Ba chuyến bị gắn nhãn «thiếu tài xế» sai: <code>requested</code> và <code>searching</code> chưa có tài xế (đúng ra là «Đang tìm tài xế»), và <code>cancelled</code> không có tài xế (đúng ra là «Chuyến đã huỷ»). Lý do là case rộng nằm trước các case hẹp, mà case đầu tiên khớp thắng. <code>--verify</code> báo đúng ba ca đó đỏ.</p></details>
+<details><summary>Xem lời giải</summary><p><b>Bài 1.</b> <code>mypy --strict</code> báo <code>assert_never</code> nhận <code>Literal[TripStatus.EXPIRED]</code> thay vì <code>Never</code> ở <code>next_step_label</code> (và ở mọi <code>match</code> kết thúc bằng <code>assert_never</code> theo trạng thái). Khi chạy, <code>main.py</code> vẫn thoát mã 0 vì không gọi <code>next_step_label</code>; còn <code>main.py --verify</code> gọi hàm đó cho mọi trạng thái nên dừng bằng traceback <code>AssertionError</code> (không in <code>FAIL n/m</code>). Không chạy mypy thì lỗi chỉ lộ khi có dữ liệu thật đi vào nhánh đó. Với <code>describe</code>, chuyến mang trạng thái mới vẫn rơi vào case tổng quát <code>Trip(status=status, driver_id=driver)</code> nên không lỗi; hãy tự quyết xem trạng thái mới cần mô tả riêng không. <b>Bài 2.</b> Ba chuyến bị gắn nhãn «thiếu tài xế» sai: <code>requested</code> và <code>searching</code> chưa có tài xế (đúng ra là «Đang tìm tài xế»), và <code>cancelled</code> không có tài xế (đúng ra là «Chuyến đã huỷ»). Lý do là case rộng nằm trước các case hẹp, mà case đầu tiên khớp thắng. <code>--verify</code> báo đúng ba test case đó không đạt.</p></details>
 
 Bài trước: [bài 15](/articles/python-pydantic-validation-settings). Bài tiếp: [bài 17](/articles/python-decorator-context-manager).
 

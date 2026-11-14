@@ -1,0 +1,137 @@
+{
+  "file": "python-clean-architecture-domain-application-infrastructure.md",
+  "edits": [
+    {
+      "old": "trả JSON. Nó chạy.",
+      "new": "trả JSON. Cách đó chạy được.",
+      "reason": "\"Nó\" chỉ sự vật trừu tượng, mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "đổi cơ sở dữ liệu và kiểm luật nghiệp vụ không kéo nhau theo",
+      "new": "đổi cơ sở dữ liệu và kiểm thử luật nghiệp vụ không kéo nhau theo",
+      "reason": "\"kiểm luật\" lược mất từ",
+      "severity": "medium"
+    },
+    {
+      "old": "và tiêm phụ thuộc (",
+      "new": "và dependency injection (",
+      "reason": "\"tiêm phụ thuộc\" dịch từng chữ của inject",
+      "severity": "medium"
+    },
+    {
+      "old": "(tiêm phụ thuộc, bài 14)",
+      "new": "(dependency injection, bài 14)",
+      "reason": "thống nhất cách gọi, tránh dịch từng chữ",
+      "severity": "medium"
+    },
+    {
+      "old": "hiện thực interface đó",
+      "new": "triển khai interface đó",
+      "reason": "\"hiện thực\" là calque của implement",
+      "severity": "low"
+    },
+    {
+      "old": "mypy kiểm khớp cấu trúc",
+      "new": "mypy kiểm tra xem có khớp cấu trúc không",
+      "reason": "lược mất chữ \"tra\", câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Máy không tự duyệt hay từ chối một người.",
+      "new": "Hệ thống không tự duyệt hay từ chối một người.",
+      "reason": "\"Máy\" làm chủ ngữ là calque của machine",
+      "severity": "medium"
+    },
+    {
+      "old": "nên không ngừng nhận ở `KYC-10000`.",
+      "new": "nên từ `KYC-10000` trở đi mã vẫn hợp lệ.",
+      "reason": "\"không ngừng nhận\" mơ hồ, phải đoán ý",
+      "severity": "high"
+    },
+    {
+      "old": "đã dùng cho chính sách cước:",
+      "new": "đã dùng cho chính sách tính cước:",
+      "reason": "lược mất danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "Điểm khác ABC:",
+      "new": "Điểm khác so với ABC:",
+      "reason": "câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Nó không chứa quy tắc nghiệp vụ, vì quy tắc nằm ở domain",
+      "new": "Use case không chứa quy tắc nghiệp vụ, vì quy tắc nằm ở domain",
+      "reason": "tránh \"Nó\" chỉ sự vật trừu tượng",
+      "severity": "medium"
+    },
+    {
+      "old": "bảng ca nằm ở bài 70",
+      "new": "bảng các trường hợp nằm ở bài 70",
+      "reason": "\"bảng ca\" cụt, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "nên việc dùng adapter giả không được âm thầm.",
+      "new": "nên việc dùng adapter giả không được diễn ra mà không báo gì.",
+      "reason": "calque \"không âm thầm\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Thư mục tách đôi không ngăn ai viết",
+      "new": "Việc chia thư mục không ngăn được ai viết",
+      "reason": "\"tách đôi\" sai (có bốn lớp), câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "ta thêm một dòng đầu `domain/kyc.py` (import kho trong bộ nhớ) và một dòng đầu `application/use_cases.py`",
+      "new": "ta thêm một dòng ở đầu `domain/kyc.py` (import kho trong bộ nhớ) và một dòng ở đầu `application/use_cases.py`",
+      "reason": "thiếu giới từ, \"dòng đầu\" gây hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "cùng thử nghiệm đó cho:",
+      "new": "chạy cùng thử nghiệm đó thì cho kết quả:",
+      "reason": "câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Lệnh kiểm các kết quả trên:",
+      "new": "Lệnh kiểm tra các kết quả trên:",
+      "reason": "lược mất chữ \"tra\"",
+      "severity": "medium"
+    },
+    {
+      "old": "23 ca gồm:",
+      "new": "23 test case gồm:",
+      "reason": "thống nhất thuật ngữ test case",
+      "severity": "medium"
+    },
+    {
+      "old": "và 6 ca qua HTTP (thêm ca `face_consent` gửi dạng chuỗi",
+      "new": "và 6 test case qua HTTP (thêm test case `face_consent` gửi dạng chuỗi",
+      "reason": "thống nhất thuật ngữ test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Một ca trong `--verify` ghi nhận",
+      "new": "Một test case trong `--verify` ghi nhận",
+      "reason": "thống nhất thuật ngữ test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Bốn lớp sạch không tự cho ta transaction.",
+      "new": "Kiến trúc bốn lớp không tự cung cấp transaction.",
+      "reason": "\"bốn lớp sạch\" gượng, thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Không hợp đồng nào phải sửa:",
+      "new": "Không có hợp đồng nào phải sửa:",
+      "reason": "thiếu động từ \"có\"",
+      "severity": "low"
+    }
+  ]
+}

@@ -1,0 +1,197 @@
+{
+ "file": "python-liveness-anti-spoofing-chat-luong-anh.md",
+ "edits": [
+  {
+   "old": "kiểm chất lượng selfie (blur",
+   "new": "kiểm tra chất lượng selfie (blur",
+   "reason": "Thiếu chữ tra",
+   "severity": "medium"
+  },
+  {
+   "old": "Có lab chạy được và số đo thật.",
+   "new": "Có lab chạy được và số liệu đo thật.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "cần một người xem",
+   "new": "cần người duyệt xem",
+   "reason": "Thống nhất thuật ngữ người duyệt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bộ kiểm blur, độ sáng",
+   "new": "Bộ kiểm tra blur, độ sáng",
+   "reason": "Thiếu chữ tra",
+   "severity": "low"
+  },
+  {
+   "old": "bài toán của các nhà cung cấp chuyên:",
+   "new": "bài toán của các nhà cung cấp chuyên về mảng này:",
+   "reason": "Cụm cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Chúng được đánh giá theo chuẩn như",
+   "new": "Người ta đánh giá chúng theo chuẩn như",
+   "reason": "Tránh bị động",
+   "severity": "low"
+  },
+  {
+   "old": "(tải về 4,26 MB, bản cache 1,4 MB",
+   "new": "(dung lượng tải 4,26 MB, bản cache 1,4 MB",
+   "reason": "Lặp từ tải về",
+   "severity": "low"
+  },
+  {
+   "old": "Mỗi khuôn mặt được phóng to 160 px, đặt giữa khung 320 × 320 có nền mềm, rồi đi qua «cảm biến».",
+   "new": "Ta phóng mỗi khuôn mặt lên 160 px, đặt giữa khung 320 × 320 có nền mềm, rồi cho đi qua «cảm biến».",
+   "reason": "Tránh bị động, câu thiếu chủ thể",
+   "severity": "medium"
+  },
+  {
+   "old": "«màn hình phân giải cao, không dấu vết»",
+   "new": "«màn hình độ phân giải cao, không dấu vết»",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Ta đo chỉ số phản ứng với đúng những dấu vết mà ta đã vẽ vào",
+   "new": "Ta đo xem chỉ số có phản ứng với đúng những dấu vết mà ta đã vẽ vào hay không",
+   "reason": "Câu thiếu động từ, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "ở hệ thống thật nó do bước detection",
+   "new": "ở hệ thống thật, hộp này do bước detection",
+   "reason": "Đại từ nó mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "thước đo mờ quen thuộc",
+   "new": "thước đo độ mờ quen thuộc",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab đo trực tiếp (bước 1 của output) và hàm có tham số",
+   "new": "Lab đo trực tiếp điều này (bước 1 của output), và hàm có tham số",
+   "reason": "Câu thiếu tân ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "gấp gần 3 lần ảnh nét sạch (17,77): kiểm ngược.",
+   "new": "gấp gần 3 lần ảnh nét sạch (17,77): kết quả ngược với điều ta mong đợi.",
+   "reason": "Dịch gượng, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "Ta chủ động chấp nhận khoảng 1% mỗi phép đo gắn nhầm ảnh tốt.",
+   "new": "Ta chủ động chấp nhận mỗi phép đo gắn nhầm khoảng 1% ảnh tốt.",
+   "reason": "Trật tự từ gây hiểu nhầm",
+   "severity": "medium"
+  },
+  {
+   "old": "khi lệch bước với lưới điểm ảnh của camera còn sinh vân moiré",
+   "new": "khi lệch bước với lưới điểm ảnh của camera thì còn sinh ra vân moiré",
+   "reason": "Dịch sai nghĩa sinh vân",
+   "severity": "high"
+  },
+  {
+   "old": "đi năm bước (Hình 2)",
+   "new": "gồm năm bước (Hình 2)",
+   "reason": "Dịch gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Số thật của từng kiểu nằm ở mục chạy bên dưới.",
+   "new": "Số liệu thật của từng kiểu nằm ở mục chạy bên dưới.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Mẫu lặp thắng chất lượng: nghi giả mạo thì người duyệt xem, bất kể ảnh còn mờ hay tối.",
+   "new": "Mẫu lặp được ưu tiên hơn chất lượng: nếu nghi giả mạo thì chuyển người duyệt xem, bất kể ảnh còn mờ hay tối.",
+   "reason": "Câu tự ghép nghe cụt",
+   "severity": "high"
+  },
+  {
+   "old": "mục chạy có số đo cho thấy",
+   "new": "mục chạy có số liệu cho thấy",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Ngưỡng hiệu chỉnh trên ảnh 0 đến 4 của mỗi người (200 ảnh genuine), thử trên ảnh 5 đến 9 (200 ảnh mỗi kiểu)",
+   "new": "Ta hiệu chỉnh ngưỡng trên ảnh 0 đến 4 của mỗi người (200 ảnh genuine) và thử trên ảnh 5 đến 9 (200 ảnh mỗi kiểu)",
+   "reason": "Câu thiếu chủ ngữ và động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Điều này hiển nhiên:",
+   "new": "Điều này không có gì bất ngờ:",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Bước 4: đừng suy kết luận từ một cách chia người.",
+   "new": "Bước 4: đừng rút kết luận từ một cách chia theo người.",
+   "reason": "Cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng đảo chiều chỉ 8,5%",
+   "new": "nhưng đảo chiều thì chỉ còn 8,5%",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm theo nhóm là chủ đề của bài 53",
+   "new": "Kiểm tra theo nhóm là chủ đề của bài 53",
+   "reason": "Thiếu chữ tra",
+   "severity": "low"
+  },
+  {
+   "old": "mà ảnh lọt: tại sigma 1,5 là 66,5% ảnh qua.",
+   "new": "mà ảnh lọt lưới: tại sigma 1,5 có 66,5% ảnh qua.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "nên chỉ đọc được bậc lớn:",
+   "new": "nên chỉ đọc được bậc độ lớn:",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Trong 20 ca có hai ca kiểm giới hạn",
+   "new": "Trong 20 test case có hai test case kiểm giới hạn",
+   "reason": "Dùng từ thông thường thay cho ca",
+   "severity": "medium"
+  },
+  {
+   "old": "và đo gắn nhầm theo nhóm",
+   "new": "và đo tỉ lệ gắn nhầm theo nhóm",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Một hệ thống tin được cần nhà cung cấp PAD",
+   "new": "Một hệ thống đáng tin cậy cần nhà cung cấp PAD",
+   "reason": "Cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "nhắc tới lưu trữ, đồng ý và quyền xoá ở bài 53",
+   "new": "chuyện lưu trữ, sự đồng ý và quyền xoá được bàn ở bài 53",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó còn bắt được ảnh mờ không",
+   "new": "Thước đo còn bắt được ảnh mờ không",
+   "reason": "Đại từ nó mơ hồ",
+   "severity": "medium"
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 ---
 slug: python-mongodb-pymongo-motor-document-ocr
 title: "MongoDB với pymongo/motor: lưu kết quả OCR dạng document"
-summary: "Bài 26: lưu kết quả OCR giấy tờ thành document MongoDB bằng AsyncMongoClient của PyMongo: insert, find, unique index, validator, explain và schema_version; Motor đã deprecated. Có lab chạy thật."
+summary: "Bài 26: lưu kết quả OCR giấy tờ thành document MongoDB bằng AsyncMongoClient của PyMongo: insert, find, unique index, validator, explain và schema_version; Motor đã bị đánh dấu deprecated. Có lab chạy thật."
 category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, mongodb, pymongo, ocr]
@@ -10,12 +10,12 @@ language: vi
 
 Tài xế DR-001 nộp ảnh CCCD và GPLX để đăng ký. Dịch vụ `kyc-ocr` của [Tới Nơi](/articles/du-an-mau-toi-noi) đọc ra số giấy tờ, họ tên, ngày sinh và trả về từng trường kèm độ tin cậy. Hồ sơ KYC-0001 vì thế có hai kết quả với hai bộ trường khác nhau: CCCD có quê quán, GPLX có hạng bằng và ngày hết hạn. Tuần sau nhóm đổi mô hình OCR: thêm một trường, đổi tên một trường. Người duyệt hồ sơ vẫn phải mở đúng kết quả của đúng phiên bản mô hình, và hệ thống vẫn phải trả lời được câu «những kết quả nào đọc kém, dưới ngưỡng tin cậy?».
 
-Đây là bài 26 của lộ trình **Python trung bình qua Tới Nơi**. Bài dùng MongoDB 8 trong hạ tầng dùng chung (`infra/README.md` của loạt bài), cần quen asyncio ở bài 21 và đã thấy cách PostgreSQL lưu dữ liệu ở [bài 24](/articles/python-sqlalchemy-psycopg-postgresql-mapping-migration). Dữ liệu hoàn toàn tổng hợp: số CCCD giả bắt đầu bằng `099`, GPLX giả bắt đầu bằng `99`, tên giả. Kết quả OCR và độ tin cậy chỉ là đầu vào cho người duyệt, không tự động là quyết định xác minh.
+Đây là bài 26 của lộ trình **Python trung bình qua Tới Nơi**. Bài dùng MongoDB 8 trong hạ tầng dùng chung (`infra/README.md` của loạt bài), bạn cần quen asyncio ở bài 21 và đã thấy cách PostgreSQL lưu dữ liệu ở [bài 24](/articles/python-sqlalchemy-psycopg-postgresql-mapping-migration). Dữ liệu hoàn toàn tổng hợp: số CCCD giả bắt đầu bằng `099`, GPLX giả bắt đầu bằng `99`, tên giả. Kết quả OCR và độ tin cậy chỉ là đầu vào cho người duyệt, không tự động là quyết định xác minh.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một đồng nghiệp đề xuất: «Dùng MongoDB cho kết quả OCR, vì mỗi loại giấy tờ một kiểu nên khỏi cần schema.» Nhận định này đúng đến đâu?</p>
-<details><summary>Xem đáp án</summary><p><b>Chỉ đúng một nửa.</b> Hình dạng dữ liệu đúng là thay đổi theo loại giấy tờ, và đó là lý do hợp lý để chọn document. Nhưng «khỏi cần schema» thì sai: schema vẫn tồn tại, chỉ chuyển từ bảng sang code đọc dữ liệu và sang validator của collection. Không khai báo, một độ tin cậy 1,7 sẽ lọt vào dữ liệu và chỉ lộ ra lúc đọc; bài chạy đúng tình huống này với validator. Còn trường bị đổi tên giữa hai đời mô hình thì validator của lab chưa chặn (nó chỉ kiểm <code>fields</code> là object), nên được xử lý bằng <code>schema_version</code> ở cuối bài.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Chỉ đúng một nửa.</b> Hình dạng dữ liệu đúng là thay đổi theo loại giấy tờ, và đó là lý do hợp lý để chọn document. Nhưng «khỏi cần schema» thì sai: schema vẫn tồn tại, chỉ là nơi giữ nó chuyển từ bảng sang code đọc dữ liệu và validator của collection. Không khai báo, một độ tin cậy 1,7 sẽ lọt vào dữ liệu và chỉ lộ ra lúc đọc; bài chạy đúng tình huống này với validator. Còn trường bị đổi tên giữa hai đời mô hình thì validator của lab chưa chặn (nó chỉ kiểm <code>fields</code> là object), nên được xử lý bằng <code>schema_version</code> ở cuối bài.</p></details>
 </div>
 
 ## Khi nào chọn document thay vì bảng
@@ -43,7 +43,7 @@ Hai điều kiện đảo ngược lựa chọn. Nếu dữ liệu là tiền, s
 
 ## Kết nối bằng AsyncMongoClient, và chuyện Motor
 
-PyMongo từ bản 4.13 (14/5/2025) có API async ổn định là `pymongo.AsyncMongoClient`. Tài liệu migration của PyMongo mô tả nó là sự hợp nhất của PyMongo và Motor, cài đặt asyncio trực tiếp thay vì đẩy việc mạng sang một thread pool như Motor. Trang chủ tài liệu Motor ghi rõ Motor sẽ deprecated từ 14/5/2026 và chỉ nhận sửa lỗi nghiêm trọng đến 14/5/2027. Kiểm lại ngày 6/11/2026, mốc đầu đã qua, nên **dự án mới dùng `AsyncMongoClient`** và lab này không cài Motor. Dự án cũ đang dùng Motor thì thường chỉ cần đổi `AsyncIOMotorClient` thành `AsyncMongoClient` và đổi câu `import` sang `pymongo`, theo hướng dẫn migration.
+PyMongo từ bản 4.13 (14/5/2025) có API async ổn định là `pymongo.AsyncMongoClient`. Tài liệu migration của PyMongo mô tả nó là sự hợp nhất của PyMongo và Motor, cài đặt asyncio trực tiếp thay vì đẩy việc mạng sang một thread pool như Motor. Trang chủ tài liệu Motor ghi rõ Motor sẽ bị đánh dấu deprecated từ 14/5/2026 và chỉ nhận sửa lỗi nghiêm trọng đến 14/5/2027. Kiểm lại ngày 6/11/2026, mốc đầu đã qua, nên **dự án mới dùng `AsyncMongoClient`** và lab này không cài Motor. Dự án cũ đang dùng Motor thì thường chỉ cần đổi `AsyncIOMotorClient` thành `AsyncMongoClient` và đổi câu `import` sang `pymongo`, theo hướng dẫn migration.
 
 Vài khác biệt nên biết, cũng theo hướng dẫn đó. `AsyncMongoClient` không an toàn trên nhiều thread, chỉ dùng trong một event loop. `cursor.to_list(0)` không hợp lệ, phải gọi `to_list(None)`. `find()` là hàm thường trả về cursor để lặp bằng `async for`, còn các hàm chạm mạng như `insert_one`, `find_one`, `count_documents` là coroutine phải `await`. Lúc viết lab ta vấp đúng chỗ này: `aggregate()` cũng là coroutine trả về cursor, nên `col.aggregate(...).to_list()` báo `'coroutine' object has no attribute 'to_list'`. Nếu codebase đồng bộ và đơn giản, PyMongo đồng bộ vẫn hợp lệ; tài liệu gợi ý dùng nó cùng `run_in_executor` khi chỉ cần tương thích asyncio ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation) đã nói `to_thread`).
 
@@ -65,11 +65,11 @@ async def connect() -> AsyncMongoClient[dict[str, Any]]:
     return client
 ```
 
-Ba điểm. Driver kết nối lười, nên lệnh `ping` ngay đầu buộc lỗi hạ tầng lộ ra sớm. `serverSelectionTimeoutMS=2000` rút thời gian chờ chọn server từ mặc định 30 giây xuống 2 giây. `tz_aware=True` làm `datetime` đọc ra có `tzinfo`; thiếu nó, phép so với `datetime` aware của bài 04 sẽ nổ.
+Ba điểm. Driver kết nối lười, nên lệnh `ping` ngay đầu buộc lỗi hạ tầng lộ ra sớm. `serverSelectionTimeoutMS=2000` rút thời gian chờ chọn server từ mặc định 30 giây xuống 2 giây. `tz_aware=True` làm `datetime` đọc ra có `tzinfo`; thiếu nó, phép so với `datetime` aware của bài 04 sẽ báo lỗi.
 
 ## Ghi và đọc: insert, find, projection, update
 
-Document OCR của lab (mô tả lại `make_document`) gồm phần vỏ cố định và `fields` theo loại. CCCD dùng bộ tên trường chung của loạt bài OCR: `full_name`, `id_number`, `date_of_birth`, `sex`, `hometown_city`. Trên thẻ ngày sinh in `dd/mm/yyyy` và OCR trả đúng chuỗi đó; khi lưu, lab chuyển sang ISO `yyyy-mm-dd` bằng `to_iso_date`. Số CCCD giả có cấu trúc: `099` (mã tỉnh không tồn tại), một số giới tính và thế kỷ (thế kỷ 20: nam 0, nữ 1; thế kỷ 21: nam 2, nữ 3), hai số năm sinh, sáu số ngẫu nhiên; `make_id_number` sinh nó từ `sex` và năm sinh. `confidence` của cả document là **giá trị nhỏ nhất** trong `field_confidence`: một trường đọc kém là đủ để cả hồ sơ cần người xem. Collection được tạo trước kèm validator, nên mọi lần ghi đều bị kiểm hình dạng (trích):
+Document OCR của lab (mô tả lại `make_document`) gồm phần vỏ cố định và `fields` theo loại. CCCD dùng bộ tên trường chung của loạt bài OCR: `full_name`, `id_number`, `date_of_birth`, `sex`, `hometown_city`. Trên thẻ ngày sinh in `dd/mm/yyyy` và OCR trả đúng chuỗi đó; khi lưu, lab chuyển sang ISO `yyyy-mm-dd` bằng `to_iso_date`. Số CCCD giả có cấu trúc: `099` (mã tỉnh không tồn tại), một số giới tính và thế kỷ (thế kỷ 20: nam 0, nữ 1; thế kỷ 21: nam 2, nữ 3), hai số năm sinh, sáu số ngẫu nhiên; `make_id_number` sinh nó từ `sex` và năm sinh. `confidence` của cả document là **giá trị nhỏ nhất** trong `field_confidence`: một trường đọc kém là đủ để cả hồ sơ cần người xem. Collection được tạo trước kèm validator, nên mọi lần ghi đều được kiểm tra hình dạng (trích):
 
 ```python
 OCR_VALIDATOR = {
@@ -90,7 +90,7 @@ OCR_VALIDATOR = {
 #   await col.database.create_collection(COLLECTION, validator=OCR_VALIDATOR)
 ```
 
-Lab sinh 1.000 hồ sơ, mỗi hồ sơ một CCCD và một GPLX, cộng 5 document cũ từ mô hình đời trước (phần cuối bài). `insert_one` trả `inserted_id`; không có `_id` thì driver tự thêm một `ObjectId`. `insert_many` gửi cả lô trong ít vòng đi-về. Đọc hàng đợi duyệt (trích `review_queue`):
+Lab sinh 1.000 hồ sơ, mỗi hồ sơ một CCCD và một GPLX, cộng 5 document cũ từ mô hình đời trước (phần cuối bài). `insert_one` trả `inserted_id`; không có `_id` thì driver tự thêm một `ObjectId`. `insert_many` gửi cả lô qua ít lượt trao đổi với server. Đọc hàng đợi duyệt (trích `review_queue`):
 
 ```python
 async def review_queue(col, limit):
@@ -135,7 +135,7 @@ Hàng đợi duyệt (confidence < 0.8, thấp nhất trước, 3 dòng đầu):
 Tổng số document dưới ngưỡng: 77
 ```
 
-Với 2.005 document, 77 nằm dưới ngưỡng 0,8: khoảng 4%, đúng tỷ lệ dữ liệu tổng hợp cố ý tạo ra. Ngưỡng và tỷ lệ thật do nghiệp vụ và đánh giá mô hình quyết định.
+Với 2.005 document, 77 nằm dưới ngưỡng 0,8: khoảng 4%, đúng tỷ lệ ta cố ý đặt cho dữ liệu tổng hợp. Ngưỡng và tỷ lệ thật do nghiệp vụ và đánh giá mô hình quyết định.
 
 Hai ràng buộc làm cho dữ liệu đáng tin hơn. Thứ nhất, một **unique index** trên `(kyc_id, document_type, model_version)`: cùng một hồ sơ, cùng loại giấy tờ, cùng phiên bản mô hình chỉ có một kết quả. Chèn trùng bị từ chối bằng `DuplicateKeyError` (mã lỗi 11000), tương đương lỗi SQLSTATE 23505 ở bài 25. Chạy lại OCR bằng mô hình mới là **document mới**, không ghi đè kết quả cũ, nên lịch sử còn nguyên để so sánh. Thứ hai, validator từ chối `confidence = 1.7` bằng `WriteError` mã 121.
 
@@ -161,7 +161,7 @@ chèn confidence = 1.7 -> WriteError, code 121 (DocumentValidationFailure)
 bản mới nhất của KYC-0001 cccd: demo-ocr-1.1
 ```
 
-Lấy «bản mới nhất» dùng `find_one({...}, sort=[("created_at", DESCENDING)])`; mục index dưới đây cho thấy kế hoạch của nó.
+Lấy «bản mới nhất» dùng `find_one({...}, sort=[("created_at", DESCENDING)])`; mục index dưới đây cho thấy kế hoạch truy vấn của nó.
 
 ## Index: tin vào explain, không tin cảm giác
 
@@ -198,9 +198,9 @@ bản mới nhất, có ix_latest:      LIMIT -> FETCH -> IXSCAN
 <figcaption>Hình 2. Khối lượng việc của server khi lọc theo độ tin cậy, trước và sau khi có index.</figcaption>
 </figure>
 
-Số 2.006 là 2.005 document ban đầu cộng một bản kết quả mô hình mới chèn ở mục trên. Dòng thứ ba cho thấy truy vấn theo `kyc_id` và `document_type` đã được phục vụ bởi chính unique index ở trên: index ghép dùng được cho truy vấn khớp **tiền tố** của nó (`kyc_id`, rồi `document_type`), nên ta không cần thêm index riêng. Quy tắc tương tự B-tree trong PostgreSQL. Hai dòng cuối là truy vấn «bản mới nhất»: chỉ với unique index, MongoDB tìm đúng các bản của hồ sơ rồi phải `SORT` theo `created_at`; sau khi thêm `ix_latest` (ghép `kyc_id`, `document_type`, `created_at` giảm dần), thứ tự đã nằm sẵn trong index nên `SORT` biến mất và `LIMIT` dừng khi đủ một document.
+Số 2.006 là 2.005 document ban đầu cộng một bản kết quả mô hình mới chèn ở mục trên. Dòng thứ ba cho thấy truy vấn theo `kyc_id` và `document_type` đã dùng chính unique index ở trên để trả lời: index ghép dùng được cho truy vấn khớp **tiền tố** của nó (`kyc_id`, rồi `document_type`), nên ta không cần thêm index riêng. Quy tắc này tương tự B-tree trong PostgreSQL. Hai dòng cuối là truy vấn «bản mới nhất»: chỉ với unique index, MongoDB tìm đúng các bản của hồ sơ rồi phải `SORT` theo `created_at`; sau khi thêm `ix_latest` (ghép `kyc_id`, `document_type`, `created_at` giảm dần), thứ tự đã nằm sẵn trong index nên `SORT` biến mất và `LIMIT` dừng khi đủ một document.
 
-Cái giá của index là mỗi lần ghi phải cập nhật thêm, và index chiếm bộ nhớ. Lab chỉ có 2.005 document nên ta đo **khối lượng việc** (số document kiểm), không đo thời gian. Ở đây tỉ lệ chọn lọc là 77 trên 2.006 (khoảng 4%); khi collection lớn lên, khối lượng phải kiểm của truy vấn không có index lớn lên theo cả collection, còn truy vấn có index chỉ lớn lên theo số document khớp.
+Cái giá của index là mỗi lần ghi phải cập nhật thêm, và index chiếm bộ nhớ. Lab chỉ có 2.005 document nên ta đo **khối lượng việc** (số document kiểm), không đo thời gian. Ở đây tỷ lệ chọn lọc là 77 trên 2.006 (khoảng 4%); khi collection lớn lên, khối lượng phải kiểm của truy vấn không có index lớn lên theo cả collection, còn truy vấn có index chỉ lớn lên theo số document khớp.
 
 ## Thời gian và phiên bản schema
 
@@ -286,7 +286,7 @@ Khi chưa bật MongoDB, `--verify` in `FAIL: không nối được MongoDB tạ
 
 **Bài tập:** (1) Trong `ix_latest`, vì sao `created_at` đứng cuối và giảm dần, thay vì đứng đầu? Nếu đảo thứ tự thì truy vấn «bản mới nhất của một hồ sơ» còn dùng index tốt không? (2) Mô hình OCR kế tiếp tách `full_name` thành `last_name` và `first_name` (schema_version 3). Hãy phác các bước đưa thay đổi này vào mà không dừng hệ thống.
 
-<details><summary>Xem lời giải</summary><p>(1) Quy tắc chung: các trường lọc bằng đứng trước, trường sắp xếp đứng sau. Với <code>(kyc_id, document_type, created_at giảm dần)</code>, hai trường đầu chọn đúng một khoảng liền trong index và trong khoảng đó các bản đã xếp từ mới tới cũ, nên đọc một phần tử là đủ (<code>LIMIT → FETCH → IXSCAN</code> trong output). Nếu đặt <code>created_at</code> đứng đầu, index xếp mọi document của mọi hồ sơ theo thời gian; muốn tìm hồ sơ <code>KYC-0001</code> MongoDB phải duyệt theo thời gian và lọc từng khoá, nên không còn dùng được cho việc chọn hồ sơ. Với vài phiên bản mỗi hồ sơ, lợi ích nhỏ; mỗi index thêm là một khoản chi phí ghi, nên đo trước khi thêm. (2) Nâng <code>maximum</code> của <code>schema_version</code> trong validator lên 3 (dùng lệnh <code>collMod</code>); triển khai code <b>đọc được cả v2 và v3</b> (<code>normalize_to_v3</code>) trước; rồi mới triển khai code ghi v3; cuối cùng chạy <code>update_many</code> với pipeline (hoặc theo lô nếu cần kiểm từng trường hợp). Thứ tự «đọc được trước, ghi sau, migrate cuối» cho bản cũ và bản mới của service sống chung lúc triển khai.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Quy tắc chung: các trường lọc theo điều kiện bằng đứng trước, trường sắp xếp đứng sau. Với <code>(kyc_id, document_type, created_at giảm dần)</code>, hai trường đầu chọn đúng một khoảng liền trong index và trong khoảng đó các bản đã xếp từ mới tới cũ, nên đọc một phần tử là đủ (<code>LIMIT → FETCH → IXSCAN</code> trong output). Nếu đặt <code>created_at</code> đứng đầu, index xếp mọi document của mọi hồ sơ theo thời gian; muốn tìm hồ sơ <code>KYC-0001</code> MongoDB phải duyệt theo thời gian và lọc từng khoá, nên không còn dùng được cho việc chọn hồ sơ. Với vài phiên bản mỗi hồ sơ, lợi ích nhỏ; mỗi index thêm là một khoản chi phí ghi, nên đo trước khi thêm. (2) Nâng <code>maximum</code> của <code>schema_version</code> trong validator lên 3 (dùng lệnh <code>collMod</code>); triển khai code <b>đọc được cả v2 và v3</b> (<code>normalize_to_v3</code>) trước; rồi mới triển khai code ghi v3; cuối cùng chạy <code>update_many</code> với pipeline (hoặc theo lô nếu cần kiểm từng trường hợp). Thứ tự «đọc được trước, ghi sau, migrate cuối» cho bản cũ và bản mới của service sống chung lúc triển khai.</p></details>
 
 Bài trước: [bài 25](/articles/python-transaction-optimistic-concurrency-idempotency). Bài tiếp: [bài 27](/articles/python-redis-cache-rate-limit-geo).
 

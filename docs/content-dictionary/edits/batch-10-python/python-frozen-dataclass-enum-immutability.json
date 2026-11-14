@@ -1,0 +1,149 @@
+{
+ "file": "python-frozen-dataclass-enum-immutability.md",
+ "edits": [
+  {
+   "old": "chỉ ra frozen là bản nông và không chặn người cố tình",
+   "new": "cho thấy frozen chỉ bất biến ở mức nông và không chặn được người cố tình",
+   "reason": "«là bản nông» khó hiểu, viết rõ ý bất biến nông",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng ta đang để chúng là chuỗi và số đổi được",
+   "new": "nhưng ta đang để chúng ở dạng chuỗi và số có thể bị đổi",
+   "reason": "câu gượng, thiếu động từ hợp lý",
+   "severity": "low"
+  },
+  {
+   "old": "mục «Frozen dataclass» chỉ cách làm khi field bị khoá",
+   "new": "mục «Frozen dataclass» trình bày cách làm khi field bị khoá",
+   "reason": "«chỉ cách làm» thiếu chủ ngữ rõ ràng, dễ hiểu nhầm",
+   "severity": "high"
+  },
+  {
+   "old": "Code trong `main.py` của lab 13 (các đoạn dưới đây cũng vậy, rút gọn).",
+   "new": "Code lấy từ `main.py` của lab 13 (các đoạn dưới đây cũng vậy, đã rút gọn).",
+   "reason": "câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "`@dataclass(frozen=True)` đặt `__setattr__` và `__delattr__` thành lỗi, nên không gán lại được field sau khi tạo:",
+   "new": "`@dataclass(frozen=True)` khiến `__setattr__` và `__delattr__` ném lỗi, nên không gán lại được field sau khi tạo:",
+   "reason": "«đặt thành lỗi» là cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "phiên bản `IntEnum` chỉ dùng khi giá trị thật sự là số",
+   "new": "biến thể `IntEnum` chỉ dùng khi giá trị thật sự là số",
+   "reason": "«phiên bản» dễ nhầm với version của phần mềm",
+   "severity": "low"
+  },
+  {
+   "old": "Từ `@dataclass(frozen=True)`, Python sinh sẵn hai phương thức đi cùng nhau.",
+   "new": "Với `@dataclass(frozen=True)`, Python sinh sẵn hai phương thức đi đôi với nhau.",
+   "reason": "«Từ» sai giới từ, giọng dịch",
+   "severity": "low"
+  },
+  {
+   "old": "nơi `eq=True` mà không `frozen` làm `__hash__` thành `None`",
+   "new": "nơi `eq=True` mà không có `frozen` khiến `__hash__` thành `None`",
+   "reason": "thiếu động từ «có», «làm … thành» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "và quan trọng là nó chạy lại `__post_init__`, nên bản mới cũng được kiểm tra:",
+   "new": "và điều quan trọng là hàm này chạy lại `__post_init__`, nên bản mới cũng được kiểm tra:",
+   "reason": "câu thiếu danh từ, dùng «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không nên sửa được: nếu giá đã báo cho khách thay đổi âm thầm thì",
+   "new": "Báo giá không nên sửa được: nếu giá đã báo cho khách bị đổi mà không ai hay thì",
+   "reason": "tránh «Nó» đầu câu và calque «âm thầm»",
+   "severity": "medium"
+  },
+  {
+   "old": "(`__post_init__` của `Quote` kiểm `expires_at` phải aware và khoảng cách trong miền, bị lược ở đây.)",
+   "new": "(`__post_init__` của `Quote` kiểm tra `expires_at` phải aware và khoảng cách nằm trong miền hợp lệ; phần này được lược bớt ở đây.)",
+   "reason": "câu cụt, thiếu động từ và danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "lab kiểm ba điểm 4 phút 59 giây",
+   "new": "lab kiểm tra ba điểm 4 phút 59 giây",
+   "reason": "«kiểm» đứng một mình gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nên cần một tiêu chí chọn.",
+   "new": "nên cần một tiêu chí để chọn.",
+   "reason": "câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "không muốn `Money(Decimal(\"1\"), \"VND\")` bằng một tuple `(1, \"VND\")` vô tình",
+   "new": "không muốn `Money(Decimal(\"1\"), \"VND\")` vô tình bằng một tuple `(1, \"VND\")`",
+   "reason": "trật tự từ kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "đây là chỗ `record` chiếm vị trí:",
+   "new": "đây là chỗ `record` được dùng:",
+   "reason": "«chiếm vị trí» là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "và cùng giới hạn «sao chép nông» sẽ nói ngay dưới đây.",
+   "new": "và có cùng giới hạn «sao chép nông» như phần ngay dưới sẽ nói tới.",
+   "reason": "câu thiếu động từ, mất chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "(hash của đối tượng cần hash của mọi field)",
+   "new": "(muốn hash đối tượng thì phải hash được mọi field)",
+   "reason": "câu cụt, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "**Frozen cũng không chống người cố tình.**",
+   "new": "**Frozen cũng không chặn được người cố tình.**",
+   "reason": "thống nhất cách nói với phần tóm tắt",
+   "severity": "low"
+  },
+  {
+   "old": "Cách đọc vài dòng đáng chú ý.",
+   "new": "Cách đọc một vài dòng đáng chú ý như sau.",
+   "reason": "câu thiếu vị ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Chế độ `--verify` so toàn bộ các kết quả này,",
+   "new": "Chế độ `--verify` đối chiếu toàn bộ các kết quả này,",
+   "reason": "«so» đứng một mình gượng",
+   "severity": "low"
+  },
+  {
+   "old": "ba ca biên của `Quote`, ca loại tiền có ký hiệu lạ như `U$D`",
+   "new": "ba test case biên của `Quote`, test case loại tiền có ký hiệu lạ như `U$D`",
+   "reason": "thống nhất «test case» thay «ca»",
+   "severity": "medium"
+  },
+  {
+   "old": "và giá 0, 2, 2,5, 5 km (12.000",
+   "new": "và giá cước cho các khoảng cách 0, 2, 2,5, 5 km (12.000",
+   "reason": "câu thiếu danh từ, «giá 0» dễ hiểu nhầm là giá bằng 0",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm nguồn dữ liệu trước khi chuẩn hoá",
+   "new": "kiểm tra nguồn dữ liệu trước khi chuẩn hoá",
+   "reason": "«kiểm» đứng một mình gượng",
+   "severity": "low"
+  },
+  {
+   "old": "<code>__add__</code> là tất cả phép toán có.",
+   "new": "<code>__add__</code> là phép toán duy nhất có sẵn.",
+   "reason": "câu gượng, thiếu danh từ",
+   "severity": "medium"
+  }
+ ]
+}

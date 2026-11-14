@@ -1,0 +1,155 @@
+{
+  "file": "python-dong-goi-ruff-pre-commit-cau-truc-du-an.md",
+  "edits": [
+    {
+      "old": "cấu trúc dự án: sẵn sàng cho service\"",
+      "new": "cấu trúc dự án: sẵn sàng để đưa thành service\"",
+      "reason": "«sẵn sàng cho service» cụt, thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "nhưng chưa thứ nào là một thứ mà đồng nghiệp có thể cài vào môi trường của họ,",
+      "new": "nhưng chưa lab nào là một gói mà đồng nghiệp có thể cài vào môi trường của họ,",
+      "reason": "Lặp «thứ», câu rối",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó chép lại `Money` và `Quote`",
+      "new": "Gói này chép lại `Money` và `Quote`",
+      "reason": "Tránh «Nó» chỉ sự vật trừu tượng ở đầu câu",
+      "severity": "low"
+    },
+    {
+      "old": "bảng ca biên 8 × 3;",
+      "new": "bảng test case biên 8 × 3;",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "thay tham số `now` bằng một `Clock` được tiêm vào.",
+      "new": "thay tham số `now` bằng một `Clock` được inject vào.",
+      "reason": "Theo bảng thuật ngữ: «inject», không dịch «tiêm»",
+      "severity": "medium"
+    },
+    {
+      "old": "nó sẽ ngồi chỗ của `cli.py` và gọi cùng `pricing.py`",
+      "new": "vỏ đó sẽ đứng ngang hàng với `cli.py` và gọi cùng `pricing.py`",
+      "reason": "«ngồi chỗ» là calque, «nó» mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Quy tắc nằm một chỗ để test một chỗ.",
+      "new": "Quy tắc nằm ở một chỗ nên chỉ cần test ở một chỗ.",
+      "reason": "Câu cụt, dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "`uv lock --check` kiểm lock còn khớp `pyproject.toml` không, và `uv sync --locked` thất bại thay vì âm thầm cập nhật lock",
+      "new": "`uv lock --check` kiểm tra lock còn khớp `pyproject.toml` không, và `uv sync --locked` dừng với lỗi thay vì lặng lẽ cập nhật lock",
+      "reason": "«âm thầm» là calque của silently, «kiểm lock» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Đóng gói chỉ có ý nghĩa nếu ta nhìn được thứ ra khỏi máy.",
+      "new": "Đóng gói chỉ có ý nghĩa nếu ta xem được sản phẩm sẽ rời khỏi máy mình.",
+      "reason": "Câu khó hiểu, «thứ ra khỏi máy» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "cô lập rồi chạy lệnh :",
+      "new": "cô lập rồi chạy lệnh:",
+      "reason": "Thừa khoảng trắng trước dấu hai chấm",
+      "severity": "low"
+    },
+    {
+      "old": "Thiếu nó thì người dùng gói không được kiểm kiểu.",
+      "new": "Thiếu nó thì mypy sẽ không kiểm tra kiểu cho người dùng gói.",
+      "reason": "Bị động, thiếu chủ thể",
+      "severity": "medium"
+    },
+    {
+      "old": "mypy từ chối phân tích cả gói và không kiểm gì:",
+      "new": "mypy từ chối phân tích cả gói và không kiểm tra gì:",
+      "reason": "«kiểm» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "không thuộc gói, bị loại khỏi lệnh kiểm chung):",
+      "new": "không thuộc gói, bị loại khỏi lệnh kiểm tra chung):",
+      "reason": "«kiểm chung» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "viết cẩu thả, `ruff format --diff` in thứ nó sẽ đổi:",
+      "new": "viết cẩu thả, nên `ruff format --diff` in ra những chỗ ruff sẽ đổi:",
+      "reason": "Hai mệnh đề ghép bằng dấu phẩy, «thứ nó» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "và kiểm bằng ca `pytest.raises(TypeError)`.",
+      "new": "và kiểm thử bằng test case `pytest.raises(TypeError)`.",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "việc ngăn truyền `float` được giao cho mypy,",
+      "new": "mypy đảm nhiệm việc ngăn truyền `float`,",
+      "reason": "Bị động kiểu tiếng Anh",
+      "severity": "low"
+    },
+    {
+      "old": "bật một bộ cờ gồm cấm hàm thiếu annotation, cấm generic thiếu tham số kiểu, cảnh báo `# type: ignore` thừa, và kiểm so sánh vô nghĩa",
+      "new": "bật một bộ cờ: cấm hàm thiếu chú thích kiểu, cấm generic thiếu tham số kiểu, cảnh báo `# type: ignore` thừa, và kiểm tra các phép so sánh vô nghĩa",
+      "reason": "Câu liệt kê sai ngữ pháp, «kiểm» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "mypy chỉ kiểm điều ta đã annotate và chỉ kiểm tại ranh giới giữa các kiểu.",
+      "new": "mypy chỉ kiểm tra những chỗ ta đã chú thích kiểu, và chỉ ở ranh giới giữa các kiểu.",
+      "reason": "Từ tiếng Anh lọt vào văn xuôi, câu gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "và test vẫn có ca `NaN`, `Infinity`.",
+      "new": "và test vẫn có test case `NaN`, `Infinity`.",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "Một bộ kiểm chứng chỉ chứng minh xanh nếu ta cũng chứng minh được nó biết đỏ.",
+      "new": "Một bộ kiểm chứng báo xanh chỉ đáng tin nếu ta cũng chứng minh được nó biết báo đỏ.",
+      "reason": "«chứng minh xanh» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "mypy cần `--config-file` vì nó đọc cấu hình từ thư mục hiện tại:",
+      "new": "mypy cần `--config-file` vì mypy đọc cấu hình từ thư mục hiện tại:",
+      "reason": "Tránh «nó» mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "Output thật (trích, bỏ phần khung của file định dạng):",
+      "new": "Kết quả chạy thật (trích, bỏ phần khung của file định dạng):",
+      "reason": "Từ tiếng Anh lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "24 ca biên là 8 khoảng cách × 3 dịch vụ, 4 ca ngoài miền,",
+      "new": "24 test case biên là 8 khoảng cách × 3 dịch vụ, 4 test case ngoài miền,",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "phần lớn là các ca từ chối đầu vào chép từ lab 13",
+      "new": "phần lớn là các test case từ chối đầu vào chép từ lab 13",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "60 test chứng minh các ca đã chọn chứ không chứng minh mọi khoảng cách đúng,",
+      "new": "60 test chứng minh các test case đã chọn chứ không chứng minh mọi khoảng cách đúng,",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 ---
 slug: python-redis-cache-rate-limit-geo
 title: "Redis: cache, rate limit và GEO cho vị trí tài xế"
-summary: "Bài 27: dùng Redis qua redis-py async cho Tới Nơi: cache-aside báo giá với TTL, token bucket bằng Lua, GEOADD/GEOSEARCH cho 25.000 tài xế, pipeline; Redis không phải nguồn sự thật. Lab chạy thật."
+summary: "Bài 27: dùng Redis qua redis-py async cho Tới Nơi: cache-aside báo giá với TTL, token bucket bằng Lua, GEOADD/GEOSEARCH cho 25.000 tài xế, pipeline; Redis không phải nguồn dữ liệu gốc. Lab chạy thật."
 category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, redis, cache, rate-limit]
@@ -15,21 +15,21 @@ Giờ cao điểm của [Tới Nơi](/articles/du-an-mau-toi-noi) là khoảng 7
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Cache-aside cho báo giá đã chạy ổn. Lúc cache nguội, 20 request cùng cặp (ride, 2,5 km) đến đúng một thời điểm. Dịch vụ báo giá bị gọi bao nhiêu lần?</p>
-<details><summary>Xem đáp án</summary><p><b>20 lần.</b> Mỗi request đọc cache và thấy hụt trước khi có request nào kịp ghi kết quả vào, nên cả 20 cùng đi hỏi nguồn. Cache chỉ giúp những request đến <i>sau</i> khi đã có giá trị. Bài chạy đúng ca này rồi sửa bằng một khoá có hạn.</p></details>
+<details><summary>Xem đáp án</summary><p><b>20 lần.</b> Mỗi request đọc cache và thấy hụt trước khi có request nào kịp ghi kết quả vào, nên cả 20 cùng đi hỏi nguồn. Cache chỉ giúp những request đến <i>sau</i> khi đã có giá trị. Bài chạy đúng test case này rồi sửa bằng một khoá có hạn.</p></details>
 </div>
 
 ## Redis giữ gì và không giữ gì
 
-Redis là kho cấu trúc dữ liệu trong bộ nhớ: chuỗi, hash, sorted set và vài kiểu khác. Server thực thi lệnh lần lượt từng lệnh, nên mỗi lệnh là nguyên tử và một script Lua cũng chạy liền một mạch. Quy tắc đi kèm: **Redis không phải nguồn sự thật**. Mất toàn bộ dữ liệu của nó có thể làm hệ thống chậm đi hoặc kém chính xác tạm thời, nhưng không được làm sai nghiệp vụ hay mất thứ không dựng lại được.
+Redis là kho cấu trúc dữ liệu trong bộ nhớ: chuỗi, hash, sorted set và vài kiểu khác. Server thực thi lần lượt từng lệnh, nên mỗi lệnh là nguyên tử và một script Lua cũng chạy liền một mạch. Quy tắc đi kèm: **Redis không phải nguồn dữ liệu gốc**. Mất toàn bộ dữ liệu của nó có thể làm hệ thống chậm đi hoặc kém chính xác tạm thời, nhưng không được làm sai nghiệp vụ hay mất thứ không dựng lại được.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Ứng dụng Python đọc và ghi Redis gồm ba nhóm key: báo giá có TTL, bộ đếm rate limit và chỉ mục GEO tài xế. Khi cache hụt, ứng dụng hỏi nguồn sự thật; khi Redis mất dữ liệu thì dựng lại từ nguồn sự thật."><defs><marker id="py27-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="110" width="210" height="90" rx="10" class="f-pk-soft s-pk"/><text x="36" y="145" class="t-b">Service Python</text><text x="36" y="170" class="t-small">redis.asyncio</text><rect x="330" y="20" width="330" height="150" rx="10" class="f-phys-soft s-phys"/><text x="346" y="44" class="t-b">Redis</text><rect x="346" y="56" width="298" height="30" rx="6" class="f-surface s-line"/><text x="358" y="76" class="t-small">lab27:quote:v1:... (TTL 30 giây)</text><rect x="346" y="94" width="298" height="30" rx="6" class="f-surface s-line"/><text x="358" y="114" class="t-small">lab27:rl:... (bộ đếm, có TTL)</text><rect x="346" y="132" width="298" height="30" rx="6" class="f-surface s-line"/><text x="358" y="152" class="t-small">lab27:geo:drivers:hanoi (chỉ mục)</text><rect x="330" y="210" width="330" height="72" rx="10" class="f-warn-soft s-warn"/><text x="346" y="236" class="t-b">Nguồn sự thật</text><text x="346" y="260" class="t-small">dịch vụ báo giá, vị trí gốc của tài xế</text><path d="M230 140 L330 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py27-0-arrow)"/><path d="M230 175 L330 240" class="f-none s-phys" stroke-width="2" marker-end="url(#py27-0-arrow)"/><path d="M495 210 L495 172" class="f-none s-phys dash" stroke-width="2" marker-end="url(#py27-0-arrow)"/><text x="508" y="196" class="t-small">dựng lại, làm nóng</text><text x="690" y="60" class="t-b">Mất Redis</text><text x="690" y="84" class="t-small">chậm hơn, ít chính xác</text><text x="690" y="102" class="t-small">hơn, không sai nghiệp vụ</text></svg>
+<svg viewBox="0 0 880 300" role="img" aria-label="Ứng dụng Python đọc và ghi Redis gồm ba nhóm key: báo giá có TTL, bộ đếm rate limit và chỉ mục GEO tài xế. Khi cache hụt, ứng dụng hỏi nguồn dữ liệu gốc; khi Redis mất dữ liệu thì dựng lại từ nguồn dữ liệu gốc."><defs><marker id="py27-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="110" width="210" height="90" rx="10" class="f-pk-soft s-pk"/><text x="36" y="145" class="t-b">Service Python</text><text x="36" y="170" class="t-small">redis.asyncio</text><rect x="330" y="20" width="330" height="150" rx="10" class="f-phys-soft s-phys"/><text x="346" y="44" class="t-b">Redis</text><rect x="346" y="56" width="298" height="30" rx="6" class="f-surface s-line"/><text x="358" y="76" class="t-small">lab27:quote:v1:... (TTL 30 giây)</text><rect x="346" y="94" width="298" height="30" rx="6" class="f-surface s-line"/><text x="358" y="114" class="t-small">lab27:rl:... (bộ đếm, có TTL)</text><rect x="346" y="132" width="298" height="30" rx="6" class="f-surface s-line"/><text x="358" y="152" class="t-small">lab27:geo:drivers:hanoi (chỉ mục)</text><rect x="330" y="210" width="330" height="72" rx="10" class="f-warn-soft s-warn"/><text x="346" y="236" class="t-b">Nguồn dữ liệu gốc</text><text x="346" y="260" class="t-small">dịch vụ báo giá, vị trí gốc của tài xế</text><path d="M230 140 L330 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py27-0-arrow)"/><path d="M230 175 L330 240" class="f-none s-phys" stroke-width="2" marker-end="url(#py27-0-arrow)"/><path d="M495 210 L495 172" class="f-none s-phys dash" stroke-width="2" marker-end="url(#py27-0-arrow)"/><text x="508" y="196" class="t-small">dựng lại, làm nóng</text><text x="690" y="60" class="t-b">Mất Redis</text><text x="690" y="84" class="t-small">chậm hơn, ít chính xác</text><text x="690" y="102" class="t-small">hơn, không sai nghiệp vụ</text></svg>
 </div>
-<figcaption>Hình 1. Redis đứng cạnh nguồn sự thật chứ không thay nó. Ứng dụng hỏi Redis trước; mất hoặc hụt thì quay về nguồn.</figcaption>
+<figcaption>Hình 1. Redis đứng cạnh nguồn dữ liệu gốc chứ không thay nó. Ứng dụng hỏi Redis trước; mất hoặc hụt thì quay về nguồn.</figcaption>
 </figure>
 
-Ba việc của bài đều theo quy tắc ấy. Báo giá: nguồn sự thật là dịch vụ báo giá, mất cache thì nó bị gọi nhiều hơn. Rate limit: bộ đếm vốn tạm thời, mất thì đếm lại từ đầu. Vị trí tài xế: vị trí gốc nằm ở service tiếp nhận vị trí, mất chỉ mục thì phải dựng lại.
+Ba việc của bài đều theo quy tắc ấy. Báo giá: nguồn dữ liệu gốc là dịch vụ báo giá, mất cache thì nó bị gọi nhiều hơn. Rate limit: bộ đếm vốn tạm thời, mất thì đếm lại từ đầu. Vị trí tài xế: vị trí gốc nằm ở service tiếp nhận vị trí, mất chỉ mục thì phải dựng lại.
 
 Một quyết định đi kèm: khi Redis không trả lời, rate limit cho qua (fail-open) hay chặn (fail-closed)? API tra cứu và API thanh toán trả lời khác nhau; hãy ghi lại từ trước.
 
@@ -107,15 +107,15 @@ if time.monotonic() > give_up_at:   # chờ quá wait_ms: báo lỗi, KHÔNG t�
 await asyncio.sleep(0.01)           # rồi quay lại đọc cache
 ```
 
-`token` ngẫu nhiên cùng script `UNLOCK_LUA` (chỉ `DEL` nếu giá trị vẫn là token của ta) tránh việc xoá nhầm khoá của người khác sau khi khoá của ta đã hết hạn. **Kiểm lại cache sau khi giành khoá** là phần bản đầu của lab thiếu: chạy `--verify` nhiều lần, thỉnh thoảng nguồn bị gọi 2 lần, vì một caller đọc hụt trước lúc người giữ khoá ghi xong rồi giành khoá ngay sau khi khoá được nhả. Đó là lỗi «kiểm tra rồi hành động», cùng họ với lỗi nhận trùng chuyến ở [bài 23](/articles/python-concurrency-lock-queue-semaphore), và chỉ lộ khi chạy nhiều lần.
+`token` ngẫu nhiên cùng script `UNLOCK_LUA` (chỉ `DEL` nếu giá trị vẫn là token của ta) tránh việc xoá nhầm khoá của người khác sau khi khoá của ta đã hết hạn. **Kiểm lại cache sau khi giành khoá** là phần mà bản đầu của lab còn thiếu: chạy `--verify` nhiều lần, thỉnh thoảng nguồn bị gọi 2 lần, vì một caller đọc hụt trước lúc người giữ khoá ghi xong rồi giành khoá ngay sau khi khoá được nhả. Đó là lỗi «kiểm tra rồi hành động», cùng loại với lỗi nhận trùng chuyến ở [bài 23](/articles/python-concurrency-lock-queue-semaphore), và chỉ lộ khi chạy nhiều lần.
 
-Thời gian chờ có giới hạn riêng: `wait_ms` (caller chịu chờ bao lâu) khác `lock_ms` (tuổi thọ khoá). Bản đầu của lab cho caller hết kiên nhẫn tự gọi nguồn, và đó là cái bẫy: khi nguồn chậm hơn khoá, mọi caller đã chờ cùng hết hạn một lúc rồi cùng đổ về nguồn, tự tạo đúng stampede mà khoá định chặn. Giờ caller hết `wait_ms` ném `QuoteUnavailable`; tầng API trả 503 kèm `Retry-After`, hoặc giá cũ nếu đã giữ bản cũ. `lock_ms` nên lớn hơn thời gian nguồn trả lời lúc chậm; nếu không, mỗi tuổi thọ khoá chỉ thêm một caller chứ không phải tất cả (dòng cuối khối output trên: 2 lần gọi nguồn, 18 caller nhận lỗi).
+Thời gian chờ có giới hạn riêng: `wait_ms` (caller chịu chờ bao lâu) khác `lock_ms` (tuổi thọ khoá). Bản đầu của lab cho phép caller hết kiên nhẫn tự gọi nguồn, và đó là cái bẫy: khi nguồn chậm hơn khoá, mọi caller đã chờ cùng hết hạn một lúc rồi cùng đổ về nguồn, tự tạo đúng stampede mà khoá định chặn. Giờ caller hết `wait_ms` ném `QuoteUnavailable`; tầng API trả 503 kèm `Retry-After`, hoặc giá cũ nếu đã giữ bản cũ. `lock_ms` nên lớn hơn thời gian nguồn trả lời lúc chậm; nếu không, mỗi tuổi thọ khoá chỉ thêm một caller chứ không phải tất cả (dòng cuối khối output trên: 2 lần gọi nguồn, 18 caller nhận lỗi).
 
-Khoá này đủ cho một Redis đơn lẻ và việc chỉ cần «thường thì một lần», không đủ để bảo vệ tiền hay trạng thái nghiệp vụ (xem phần cảnh báo về distributed locks trong tài liệu Redis); bảo đảm đúng-sai phải nằm ở database như bài 25.
+Khoá này đủ khi dùng một Redis đơn lẻ và chỉ cần «thường thì một lần», nhưng không đủ để bảo vệ tiền hay trạng thái nghiệp vụ (xem phần cảnh báo về distributed locks trong tài liệu Redis); bảo đảm đúng-sai phải nằm ở database như bài 25.
 
 ## Rate limit: cửa sổ cố định và token bucket
 
-Cách đơn giản nhất là **cửa sổ cố định**: mỗi khách một bộ đếm theo từng cửa sổ thời gian, vượt giới hạn thì chặn. Lab dùng `INCR` rồi `EXPIRE ... NX` (TTL chỉ đặt lần đầu của cửa sổ, cần Redis 7.0) trong cùng một MULTI/EXEC; tách ra mà tiến trình chết giữa chừng thì bộ đếm không bao giờ hết hạn. `now` được truyền vào để ca thử lặp lại được:
+Cách đơn giản nhất là **cửa sổ cố định**: mỗi khách một bộ đếm theo từng cửa sổ thời gian, vượt giới hạn thì chặn. Lab dùng `INCR` rồi `EXPIRE ... NX` (TTL chỉ đặt lần đầu của cửa sổ, cần Redis 7.0) trong cùng một MULTI/EXEC; tách ra mà tiến trình chết giữa chừng thì bộ đếm không bao giờ hết hạn. `now` được truyền vào để test case lặp lại được:
 
 ```python
 # (trích)
@@ -173,13 +173,13 @@ trạng thái trong Redis: {'milli': '0', 'ts': '1012000'} | PTTL 5999 ms
 
 Xô đầy cho 5 qua ngay; hai giây sau chỉ có 2 token mới; nghỉ 12 giây thì xô chỉ đầy tới dung lượng 5. Key có TTL bằng thời gian nạp đầy cộng một giây, nên khách nghỉ lâu thì state biến mất và xô mới cũng đầy.
 
-Vì sao phải Lua? 50 coroutine cùng xin token khi xô có 5; bản «`GET` rồi `SET`» (giữa hai lệnh nhường quyền một lần để mô phỏng việc xử lý) và bản Lua cho kết quả:
+Vì sao phải dùng Lua? 50 coroutine cùng xin token khi xô có 5; bản «`GET` rồi `SET`» (giữa hai lệnh nhường quyền một lần để mô phỏng việc xử lý) và bản Lua cho kết quả:
 
 ```text
 50 yêu cầu đồng thời, dung lượng 5: GET rồi SET cho qua 50, Lua cho qua 5
 ```
 
-Đây là lỗi mất cập nhật cùng họ với bài 25: cả 50 cùng đọc «còn 5» rồi cùng trừ; Lua chạy nguyên tử trên server nên đúng 5 qua. Hai hạn chế. Lab truyền `now_ms` từ client để ca thử lặp lại được; production nhiều instance có đồng hồ lệch nên nên đọc `TIME` của Redis trong script, và nếu vẫn nhận giờ từ client thì script không được ghi lùi `ts` (dòng cuối của output: instance chậm 1 giây không làm xô nạp thừa token). Và khoá theo `client_id` chỉ có nghĩa nếu định danh đã được xác thực.
+Đây là lỗi mất cập nhật cùng loại với lỗi ở bài 25: cả 50 cùng đọc «còn 5» rồi cùng trừ; Lua chạy nguyên tử trên server nên đúng 5 qua. Hai hạn chế. Lab truyền `now_ms` từ client để test case lặp lại được; production có nhiều instance với đồng hồ lệch nhau, nên đọc `TIME` của Redis trong script, và nếu vẫn nhận giờ từ client thì script không được ghi lùi `ts` (dòng cuối của output: instance chậm 1 giây không làm xô nạp thừa token). Và khoá theo `client_id` chỉ có nghĩa nếu định danh đã được xác thực.
 
 ## GEO cho 25.000 tài xế
 
@@ -222,7 +222,7 @@ nạp 25000 tài xế, pipeline lô 5.000 lệnh   :      249 ms
 nạp 25000 tài xế, 5 lệnh GEOADD x 5.000    :       95 ms
 ```
 
-Cách đầu `await` từng lệnh: 25.000 vòng đi-về, mỗi vòng cỡ nửa mili giây. **Pipeline** gửi cả lô rồi đọc phản hồi một lượt: vẫn 25.000 lệnh nhưng chỉ 5 vòng đi-về, nhanh hơn hàng chục lần ở đây. Cách thứ ba dùng việc `GEOADD` nhận nhiều bộ ba, nên server chỉ nhận 5 lệnh. Lưu ý `pipeline(transaction=False)` chỉ gom lệnh, **không** nguyên tử; muốn các lệnh liền nhau không bị chen thì dùng `transaction=True` (MULTI/EXEC) như ở `fixed_window_allow`.
+Cách đầu `await` từng lệnh: 25.000 vòng đi-về, mỗi vòng cỡ nửa mili giây. **Pipeline** gửi cả lô rồi đọc phản hồi một lượt: vẫn 25.000 lệnh nhưng chỉ 5 vòng đi-về, nhanh hơn hàng chục lần ở đây. Cách thứ ba tận dụng việc `GEOADD` nhận nhiều bộ ba, nên server chỉ nhận 5 lệnh. Lưu ý `pipeline(transaction=False)` chỉ gom lệnh, **không** nguyên tử; muốn các lệnh liền nhau không bị chen thì dùng `transaction=True` (MULTI/EXEC) như ở `fixed_window_allow`.
 
 ```python
 # (trích)
@@ -261,7 +261,7 @@ Lệnh đầu in các khối output ở trên (trích từng phần, bỏ dòng 
 OK 44/44
 ```
 
-Thời gian chạy tuỳ máy (cỡ 10 đến 25 giây ở đây) vì cách nạp từng lệnh 25.000 vòng đi-về là một phần của phép đo; `--verify` chỉ kiểm số đếm và bất biến, không kiểm số mili giây. Khi chưa bật Redis, `--verify` in `FAIL: không nối được Redis tại redis://localhost:63790/0 (docker compose …)` và thoát mã 1. Môi trường: Python 3.14.7, redis-py 8.1.0, Redis 7.4.12 trong container `redis:7`, macOS 26 trên Apple Silicon (10 CPU), load average 23,81 lúc chạy lần dán output do máy đang bận việc khác, nên số mili giây trong bài chỉ cho thứ bậc độ lớn. Các số đếm (20, 1, 5, 50, 432; 44 ca) lặp lại được.
+Thời gian chạy tuỳ máy (cỡ 10 đến 25 giây ở đây) vì cách nạp từng lệnh 25.000 vòng đi-về là một phần của phép đo; `--verify` chỉ kiểm số đếm và bất biến, không kiểm số mili giây. Khi chưa bật Redis, `--verify` in `FAIL: không nối được Redis tại redis://localhost:63790/0 (docker compose …)` và thoát mã 1. Môi trường: Python 3.14.7, redis-py 8.1.0, Redis 7.4.12 trong container `redis:7`, macOS 26 trên Apple Silicon (10 CPU), load average 23,81 lúc chạy lần cho ra output dán trong bài, do máy đang bận việc khác, nên số mili giây trong bài chỉ cho thứ bậc độ lớn. Các số đếm (20, 1, 5, 50, 432; 44 test case) lặp lại được.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -273,7 +273,7 @@ Thời gian chạy tuỳ máy (cỡ 10 đến 25 giây ở đây) vì cách nạ
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Một Redis đơn lẻ, chưa nói gì về replica, failover hay cluster; khoá <code>SET NX</code> và bộ đếm chỉ đúng trong phạm vi một node. Compose của lab không đặt <code>maxmemory</code> hay chính sách eviction, production phải đặt. Thời gian 50 ms của dịch vụ báo giá là giả lập, và tài xế đứng yên chưa mô phỏng 6.250 dòng vị trí mỗi giây. Bảng giá, vị trí gốc và mọi bảo đảm về tiền nằm ở nơi khác, không phải ở Redis.</p>
+<p>Một Redis đơn lẻ, chưa nói gì về replica, failover hay cluster; khoá <code>SET NX</code> và bộ đếm chỉ đúng trong phạm vi một node. Compose của lab không đặt <code>maxmemory</code> hay chính sách eviction, production phải đặt. Thời gian 50 ms của dịch vụ báo giá là giả lập, và tài xế đứng yên chưa mô phỏng 6.250 bản ghi vị trí mỗi giây. Bảng giá, vị trí gốc và mọi bảo đảm về tiền nằm ở nơi khác, không phải ở Redis.</p>
 </div>
 
 **Bài tập:** Báo giá có thêm tham số `surge` (hệ số giờ cao điểm). `quote_key` cần đổi thế nào, và vì sao đổi phiên bản `v1` thành `v2` thường tốt hơn xoá key cũ?

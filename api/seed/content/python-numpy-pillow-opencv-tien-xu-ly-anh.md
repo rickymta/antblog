@@ -1,7 +1,7 @@
 ---
 slug: python-numpy-pillow-opencv-tien-xu-ly-anh
 title: "NumPy, Pillow và OpenCV: ảnh là mảng, tiền xử lý ảnh giấy tờ"
-summary: "Bài 30: đọc thẻ căn cước giả thành ndarray, hiểu shape, dtype, broadcasting, đổi xám, resize, ngưỡng Otsu và thích nghi, rồi đo vòng lặp Python so với phép toán mảng. Có output thật và lab chạy được."
+summary: "Bài 30: đọc thẻ căn cước giả thành ndarray, hiểu shape, dtype, broadcasting, đổi xám, resize, ngưỡng Otsu và thích nghi, rồi đo vòng lặp Python so với phép toán mảng. Có kết quả chạy thật và lab chạy được."
 category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, numpy, pillow, opencv]
@@ -32,7 +32,7 @@ print(f"ndarray: shape={rgb.shape} (cao, rộng, kênh), dtype={rgb.dtype}, "
       f"base={type(rgb.base).__name__}")
 ```
 
-Output thật (trích):
+Kết quả chạy thật (trích):
 
 ```text
 Pillow: size=(1012, 638) (rộng, cao), mode=RGB
@@ -44,9 +44,9 @@ Ba điều cần đọc kỹ ở đây.
 
 - **Thứ tự trục.** Pillow nói `(rộng, cao)`, `ndarray` nói `(cao, rộng, kênh)`: hàng đứng trước cột, như ma trận.
 - **dtype và kích thước.** `uint8` là số nguyên không dấu 8 bit, một điểm ảnh một kênh một byte: 638 × 1012 × 3 = 1.936.968 byte. `strides=(3036, 3, 1)` nghĩa là đi sang hàng kế tiếp nhảy 3.036 byte, sang cột kế tiếp nhảy 3 byte, sang kênh kế tiếp nhảy 1 byte: ba kênh của một điểm nằm liền nhau.
-- **Mảng từ `np.asarray(card)` chỉ đọc** (`ghi được=False`) vì nó được dựng trên một bản `bytes` của ảnh (`base=bytes`), không phải trên chính bộ nhớ của ảnh; `bytes` thì bất biến, và sửa mảng cũng không làm ảnh đổi theo. Gán `rgb[0, 0, 0] = 1` ném `ValueError: assignment destination is read-only`. Muốn sửa thì sao chép bằng `np.array(card)`.
+- **Mảng từ `np.asarray(card)` chỉ đọc** (`ghi được=False`) vì mảng này dựng trên một bản `bytes` của ảnh (`base=bytes`), không phải trên chính bộ nhớ của ảnh; `bytes` thì bất biến, và sửa mảng cũng không làm ảnh đổi theo. Gán `rgb[0, 0, 0] = 1` ném `ValueError: assignment destination is read-only`. Muốn sửa thì sao chép bằng `np.array(card)`.
 
-Thứ tự kênh là bẫy thứ hai. Pillow lưu RGB; `cv2.imread` trả mảng **BGR**. Lab lưu thẻ ra `out/card.png` rồi đọc lại bằng OpenCV: kết quả bằng đúng `rgb[..., ::-1]`, tức RGB đảo kênh. Đổi màu bằng `cv2.cvtColor`; `[..., ::-1]` chỉ là một view với stride âm, nên khi thư viện đòi mảng liền khối thì dùng `np.ascontiguousarray`.
+Thứ tự kênh là bẫy thứ hai. Pillow lưu RGB; `cv2.imread` trả mảng **BGR**. Lab lưu thẻ ra `out/card.png` rồi đọc lại bằng OpenCV: kết quả bằng đúng `rgb[..., ::-1]`, tức RGB đảo kênh. Muốn đổi thứ tự kênh thì dùng `cv2.cvtColor`; `[..., ::-1]` chỉ là một view với stride âm, nên khi thư viện đòi mảng liền khối thì dùng `np.ascontiguousarray`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -74,7 +74,7 @@ cv2.add(a, b) (bão hòa)        = [[255, 200]]
 clip(int16(a) + b, 0, 255)     = [[255, 200]]
 ```
 
-NumPy giữ nguyên kiểu `uint8` và cắt vòng không báo lỗi; OpenCV có hàm số học riêng bão hoà về 255. Khi tự viết công thức, hoặc nhấc sang kiểu rộng hơn (`int16`, `float32`) trước khi tính rồi `clip` về 0 đến 255, hoặc dùng hàm của OpenCV. Cái giá của kiểu rộng là bộ nhớ: đổi ảnh `uint8` sang `int32` làm 1.936.968 byte thành 7.747.872 byte (ta gặp lại ở phần vectorize).
+NumPy giữ nguyên kiểu `uint8` và cắt vòng không báo lỗi; OpenCV có hàm số học riêng bão hoà về 255. Khi tự viết công thức, hoặc chuyển sang kiểu rộng hơn (`int16`, `float32`) trước khi tính rồi `clip` về 0 đến 255, hoặc dùng hàm của OpenCV. Cái giá của kiểu rộng là bộ nhớ: đổi ảnh `uint8` sang `int32` làm 1.936.968 byte thành 7.747.872 byte (ta gặp lại ở phần vectorize).
 
 ## Broadcasting: phép tính chạy khắp mảng không cần vòng lặp
 
@@ -100,7 +100,7 @@ def add_shadow(rgb: np.ndarray, strength: float = 0.55) -> np.ndarray:
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 330" role="img" aria-label="Hai ví dụ broadcasting: rgb shape 638, 1012, 3 nhân weights shape 3 cho kết quả 638, 1012, 3; rgb nhân factor shape 1, 1012, 1 cũng cho 638, 1012, 3. Chiều thiếu hoặc bằng 1 được kéo giãn."><text x="20" y="22" class="t-b">Đổi xám: rgb * weights</text><text x="20" y="56" class="t-mono">rgb</text><rect x="300" y="38" width="140" height="30" rx="6" class="f-phys-soft s-phys"/><text x="370" y="58" class="t-mono" text-anchor="middle">638</text><rect x="460" y="38" width="140" height="30" rx="6" class="f-phys-soft s-phys"/><text x="530" y="58" class="t-mono" text-anchor="middle">1012</text><rect x="620" y="38" width="140" height="30" rx="6" class="f-phys-soft s-phys"/><text x="690" y="58" class="t-mono" text-anchor="middle">3</text><text x="20" y="96" class="t-mono">weights</text><rect x="300" y="78" width="140" height="30" rx="6" class="f-none s-warn dash"/><text x="370" y="98" class="t-small" text-anchor="middle">(thiếu, coi là 1)</text><rect x="460" y="78" width="140" height="30" rx="6" class="f-none s-warn dash"/><text x="530" y="98" class="t-small" text-anchor="middle">(thiếu, coi là 1)</text><rect x="620" y="78" width="140" height="30" rx="6" class="f-phys-soft s-phys"/><text x="690" y="98" class="t-mono" text-anchor="middle">3</text><text x="20" y="136" class="t-mono">kết quả</text><rect x="300" y="118" width="140" height="30" rx="6" class="f-pk-soft s-pk"/><text x="370" y="138" class="t-mono" text-anchor="middle">638</text><rect x="460" y="118" width="140" height="30" rx="6" class="f-pk-soft s-pk"/><text x="530" y="138" class="t-mono" text-anchor="middle">1012</text><rect x="620" y="118" width="140" height="30" rx="6" class="f-pk-soft s-pk"/><text x="690" y="138" class="t-mono" text-anchor="middle">3</text><text x="20" y="190" class="t-b">Ánh sáng không đều: rgb * factor</text><text x="20" y="224" class="t-mono">rgb</text><rect x="300" y="206" width="140" height="30" rx="6" class="f-phys-soft s-phys"/><text x="370" y="226" class="t-mono" text-anchor="middle">638</text><rect x="460" y="206" width="140" height="30" rx="6" class="f-phys-soft s-phys"/><text x="530" y="226" class="t-mono" text-anchor="middle">1012</text><rect x="620" y="206" width="140" height="30" rx="6" class="f-phys-soft s-phys"/><text x="690" y="226" class="t-mono" text-anchor="middle">3</text><text x="20" y="264" class="t-mono">factor</text><rect x="300" y="246" width="140" height="30" rx="6" class="f-warn-soft s-warn"/><text x="370" y="266" class="t-mono" text-anchor="middle">1</text><rect x="460" y="246" width="140" height="30" rx="6" class="f-phys-soft s-phys"/><text x="530" y="266" class="t-mono" text-anchor="middle">1012</text><rect x="620" y="246" width="140" height="30" rx="6" class="f-warn-soft s-warn"/><text x="690" y="266" class="t-mono" text-anchor="middle">1</text><text x="20" y="304" class="t-mono">kết quả</text><rect x="300" y="286" width="140" height="30" rx="6" class="f-pk-soft s-pk"/><text x="370" y="306" class="t-mono" text-anchor="middle">638</text><rect x="460" y="286" width="140" height="30" rx="6" class="f-pk-soft s-pk"/><text x="530" y="306" class="t-mono" text-anchor="middle">1012</text><rect x="620" y="286" width="140" height="30" rx="6" class="f-pk-soft s-pk"/><text x="690" y="306" class="t-mono" text-anchor="middle">3</text></svg>
 </div>
-<figcaption>Hình 2. NumPy xếp shape thẳng hàng theo trục cuối. Chiều thiếu hoặc bằng 1 được kéo giãn cho khớp, nên cả hai phép nhân cho kết quả (638, 1012, 3) mà không vòng lặp nào.</figcaption>
+<figcaption>Hình 2. NumPy xếp shape thẳng hàng theo trục cuối. Chiều thiếu hoặc bằng 1 được kéo giãn cho khớp, nên cả hai phép nhân cho kết quả (638, 1012, 3) mà không cần vòng lặp nào.</figcaption>
 </figure>
 
 **Đổi xám** là tổ hợp tuyến tính của ba kênh với hệ số 0,299, 0,587, 0,114. Lab so bản broadcasting với hai cách có sẵn, `cv2.cvtColor` và `card.convert("L")` của Pillow: lệch tối đa 1 mức xám, do cách làm tròn khác nhau. **Resize** thì khác ở thứ tự trục: cả `Image.resize` và `cv2.resize` nhận kích thước đích dạng `(rộng, cao)`, trong khi mảng kết quả có shape `(cao, rộng, ...)`.
@@ -114,7 +114,7 @@ Hai thuật toán thu nhỏ cho ảnh gần giống nhau (lệch trung bình 1,6
 
 ## Ngưỡng hoá: một ngưỡng hay mỗi vùng một ngưỡng
 
-Nhị phân hoá biến ảnh xám thành đen trắng: điểm sáng hơn ngưỡng là nền (255), còn lại là mực (0). **Otsu** (`cv2.THRESH_OTSU`) chọn một ngưỡng duy nhất cho cả ảnh, tối ưu khi lược đồ xám có hai đỉnh rõ. **Ngưỡng thích nghi** so từng điểm với trung bình Gauss của lân cận `block_size × block_size` rồi trừ hằng số `c`, nên mỗi vùng tự có ngưỡng của mình.
+Nhị phân hoá biến ảnh xám thành đen trắng: điểm sáng hơn ngưỡng là nền (255), còn lại là mực (0). **Otsu** (`cv2.THRESH_OTSU`) chọn một ngưỡng duy nhất cho cả ảnh, tối ưu khi lược đồ xám có hai đỉnh rõ. **Ngưỡng thích nghi** so từng điểm với trung bình có trọng số Gauss của vùng lân cận `block_size × block_size` rồi trừ hằng số `c`, nên mỗi vùng tự có ngưỡng của mình.
 
 ```python
 # main.py (trích)
@@ -128,7 +128,7 @@ def adaptive(gray, block_size=31, c=10):
                                  cv2.THRESH_BINARY, block_size, c)
 ```
 
-Thí nghiệm: nhị phân hoá thẻ sáng đều bằng Otsu làm chuẩn, rồi nhị phân hoá thẻ bị bóng (hệ số nhân giảm từ 1,00 xuống 0,45 từ trái sang phải) bằng cả hai cách. Để thấy ngưỡng hỏng ở đâu, lab đếm tỉ lệ điểm đen ở ba dải dọc của ảnh:
+Thí nghiệm: nhị phân hoá thẻ sáng đều bằng Otsu làm mốc chuẩn, rồi nhị phân hoá thẻ bị bóng (hệ số nhân giảm từ 1,00 xuống 0,45 từ trái sang phải) bằng cả hai cách. Để thấy ngưỡng hỏng ở đâu, lab đếm tỉ lệ điểm đen ở ba dải dọc của ảnh:
 
 ```text
 Otsu, ảnh sáng đều: ngưỡng 150
@@ -140,7 +140,7 @@ tỉ lệ điểm đen   trái / giữa / phải
   bị bóng,  thích nghi     4.52%    9.77%    2.75%
 ```
 
-Trên thẻ sáng đều, chữ và khung chiếm vài phần trăm. Trên thẻ bị bóng, Otsu vẫn chọn một ngưỡng quanh 154, nên nền ở dải phải, đã tối xuống dưới ngưỡng đó, bị coi là mực: 99,96% dải phải thành đen, mất sạch chữ. Ngưỡng thích nghi giữ tỉ lệ ba dải gần như chuẩn (4,52%, 9,77%, 2,75%, so với 4,39%, 9,17%, 2,74% của Otsu trên ảnh sáng đều), vì nền và chữ ở mỗi vùng được so với lân cận của chính nó.
+Trên thẻ sáng đều, chữ và khung chiếm vài phần trăm. Trên thẻ bị bóng, Otsu vẫn chọn một ngưỡng quanh 154, nên nền ở dải phải, đã tối xuống dưới ngưỡng đó, bị coi là mực: 99,96% dải phải thành đen, mất sạch chữ. Ngưỡng thích nghi giữ tỉ lệ ba dải gần sát mốc chuẩn (4,52%, 9,77%, 2,75%, so với 4,39%, 9,17%, 2,74% của Otsu trên ảnh sáng đều), vì nền và chữ ở mỗi vùng được so với lân cận của chính nó.
 
 Lưu ý hai điều. Thứ nhất, `block_size` và `c` cần hợp với độ dày nét chữ; đổi chúng có thể làm chữ mảnh biến mất hoặc nhiễu hiện lên, và bộ tham số ở đây chỉ được kiểm trên thẻ giả. Thứ hai, ngưỡng thích nghi trên **ảnh sáng đều** cho 4,55%, 9,90% và 2,83% ở ba dải, so với 4,39%, 9,17% và 2,74% của Otsu: gần nhưng không bằng nhau (chênh dưới một điểm phần trăm), nên không có lựa chọn nào đúng tuyệt đối.
 
@@ -163,7 +163,7 @@ def binarize_loop_lists(rgb):     # rgb.tolist() rồi list comprehension
     ...
 ```
 
-Máy đo: MacBook Pro M1 Max, 64 GB RAM, macOS 26.6.2, Python 3.14.7, numpy 2.5.4, pillow 13.0.0, opencv-python-headless 5.0.0.93. Máy chạy việc khác lúc đo (load average 1 phút 25,75 trên 10 lõi): số mili giây tuyệt đối chỉ có giá trị trên lần chạy này; ta chỉ rút ra chênh lệch cỡ một bậc độ lớn. Output thật (trích):
+Máy đo: MacBook Pro M1 Max, 64 GB RAM, macOS 26.6.2, Python 3.14.7, numpy 2.5.4, pillow 13.0.0, opencv-python-headless 5.0.0.93. Máy chạy việc khác lúc đo (load average 1 phút 25,75 trên 10 lõi): số mili giây tuyệt đối chỉ có giá trị trên lần chạy này; ta chỉ rút ra chênh lệch cỡ một bậc độ lớn. Kết quả chạy thật (trích):
 
 ```text
 [6] Vectorize thay vòng lặp (xám + ngưỡng 128 trên ảnh 1012 x 638)
@@ -181,7 +181,7 @@ Có ba điều để đọc từ bảng.
 - **Vectorize không đồng nghĩa với tối ưu.** Bản NumPy chuyển ảnh sang `int32` nên tạm dùng gấp bốn lần bộ nhớ (như đã tính ở phần dtype), và `@` trên số nguyên không dùng thư viện đại số tuyến tính tối ưu. OpenCV, với một hàm được viết riêng cho đúng việc này, nhanh hơn bản NumPy cỡ một bậc độ lớn (0,12 so với 2,16 ms).
 - **Số đo ở đây chỉ nói về một phép đơn giản trên một ảnh nhỏ.** Với ảnh lớn hoặc lô ảnh, bộ nhớ trung gian và việc có nhả GIL hay không (bài 22) mới là thứ quyết định; cần đo lại trên đúng dữ liệu của mình.
 
-Phép nhị phân hoá ở bài 22 nằm trong `binarize_page`. Bài 22 hứa rằng khi vòng lặp được thay bằng phép toán mảng thì câu hỏi «process hay thread» đổi hẳn, nên lab đo luôn: một lô thẻ (8 thẻ khác seed, lặp lại cho đủ số lượng) chạy tuần tự và qua `ThreadPoolExecutor(10)` với ba phép trên, in load trước và sau mỗi hàng. Output thật (trích):
+Phép nhị phân hoá ở bài 22 nằm trong `binarize_page`. Bài 22 hứa rằng khi vòng lặp được thay bằng phép toán mảng thì câu hỏi «process hay thread» đổi hẳn, nên lab đo luôn: một lô thẻ (8 thẻ với các seed khác nhau, lặp lại cho đủ số lượng) chạy tuần tự và qua `ThreadPoolExecutor(10)` với ba phép trên, in load trước và sau mỗi hàng. Kết quả chạy thật (trích):
 
 ```text
 [7] Thread trên một lô thẻ (bài 22: GIL chỉ nhả khi mã C chủ động nhả)
@@ -192,7 +192,7 @@ số thread: 10; OpenCV tự dùng 10 thread nội bộ
 kết quả thread trùng tuần tự: True
 ```
 
-Chỉ có một kết luận đứng vững: **vòng lặp Python thuần không hưởng gì từ thread** (x0,94, đúng như GIL ở bài 22). Hai phép chạy trong mã C có hưởng, nhưng mức hưởng dao động mạnh khi máy bận: qua ba lần chạy của ta (load 23 đến 29), OpenCV ra từ x1,23 đến x2,30 và NumPy từ x2,77 đến x4,55; OpenCV còn tự dùng 10 thread nội bộ trên một lô chỉ khoảng 100 mili giây. Ta không xếp hạng hai phép đó và không suy ra thread luôn đủ cho NumPy hay OpenCV: cần đo trên đúng dữ liệu và máy của mình.
+Chỉ có một kết luận đứng vững: **vòng lặp Python thuần không được lợi gì từ thread** (x0,94, đúng như GIL ở bài 22). Hai phép chạy trong mã C có được lợi, nhưng mức lợi dao động mạnh khi máy bận: qua ba lần chạy của ta (load 23 đến 29), OpenCV ra từ x1,23 đến x2,30 và NumPy từ x2,77 đến x4,55; OpenCV còn tự dùng 10 thread nội bộ trên một lô chỉ khoảng 100 mili giây. Ta không xếp hạng hai phép đó và không suy ra thread luôn đủ cho NumPy hay OpenCV: cần đo trên đúng dữ liệu và máy của mình.
 
 ## Chạy và kiểm chứng
 
@@ -203,7 +203,7 @@ uv run --project examples/toi-noi-python/30-numpy-pillow-opencv examples/toi-noi
 uv run --project examples/toi-noi-python/30-numpy-pillow-opencv examples/toi-noi-python/30-numpy-pillow-opencv/main.py --verify
 ```
 
-`--verify` in lại toàn bộ các bước rồi kiểm 21 điều. Nhóm ảnh và dữ liệu: shape `(638, 1012, 3)`, dtype `uint8`, cùng seed cùng ảnh, bộ trường chung, số thẻ khớp giới tính và năm sinh (40 seed), `cv2.imread` bằng RGB đảo kênh. Nhóm số học: `200 + 100 = 44` và `cv2.add` ra 255, xám broadcasting lệch không quá 1 mức, kích thước sau resize. Nhóm ngưỡng: Otsu ảnh sáng đều trong 100 đến 200, dải phải ảnh bị bóng đen trên 90% với Otsu và dưới hai lần chuẩn với ngưỡng thích nghi. Nhóm tốc độ: ba bản nhị phân hoá trùng nhau, vectorized nhanh hơn vòng lặp ít nhất 5 lần (đo được cỡ 50 lần, nên không trượt khi máy bận), kết quả thread trùng tuần tự. Số liệu thread ở bước [7] chỉ được in, không bị kiểm ngưỡng.
+`--verify` in lại toàn bộ các bước rồi kiểm tra 21 điều. Nhóm ảnh và dữ liệu: shape `(638, 1012, 3)`, dtype `uint8`, cùng seed cùng ảnh, bộ trường chung, số thẻ khớp giới tính và năm sinh (40 seed), `cv2.imread` bằng RGB đảo kênh. Nhóm số học: `200 + 100 = 44` và `cv2.add` ra 255, xám broadcasting lệch không quá 1 mức, kích thước sau resize. Nhóm ngưỡng: Otsu ảnh sáng đều trong 100 đến 200, dải phải ảnh bị bóng đen trên 90% với Otsu và dưới hai lần chuẩn với ngưỡng thích nghi. Nhóm tốc độ: ba bản nhị phân hoá trùng nhau, vectorized nhanh hơn vòng lặp ít nhất 5 lần (đo được cỡ 50 lần, nên phép kiểm vẫn đạt khi máy bận), kết quả thread trùng tuần tự. Số liệu thread ở bước [7] chỉ được in, không bị kiểm tra theo ngưỡng.
 
 ```text
 OK 21/21
@@ -219,14 +219,14 @@ OK 21/21
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Thẻ là ảnh vẽ bằng code: nền phẳng, chữ thẳng, nét sạch, bóng là một dải sáng tối tuyến tính. Ảnh chụp thật có nhiễu, mờ, loá, nghiêng, phối cảnh và nén JPEG; các thứ này không có ở đây, và bài 42 sẽ xử lý nghiêng và phối cảnh. Các tỉ lệ điểm đen như 4,52% và 99,96% là số của thẻ giả này, không phải chất lượng OCR; ta chưa chạy OCR nào. Kết quả tiền xử lý và OCR chỉ là đầu vào cho người duyệt hồ sơ, không tự động là quyết định xác minh. Lab ghim <code>opencv-python-headless&gt;=4.14</code>: ta chạy <code>--verify</code> với cả 4.14.0 và 5.0.0.93 (bản trong <code>uv.lock</code>) và cả hai ra <code>OK 21/21</code> với đúng các tỉ lệ ngưỡng như trên; bản khác thì hãy tự chạy lại.</p>
+<p>Thẻ là ảnh vẽ bằng code: nền phẳng, chữ thẳng, nét sạch, bóng là một dải sáng tối tuyến tính. Ảnh chụp thật có nhiễu, mờ, loá, nghiêng, phối cảnh và nén JPEG; các thứ này không có ở đây, và bài 42 sẽ xử lý nghiêng và phối cảnh. Các tỉ lệ điểm đen như 4,52% và 99,96% là số của thẻ giả này, không phải chất lượng OCR; ta chưa chạy OCR nào. Kết quả tiền xử lý và OCR chỉ là đầu vào cho người duyệt hồ sơ, không tự trở thành quyết định xác minh. Lab ghim <code>opencv-python-headless&gt;=4.14</code>: ta chạy <code>--verify</code> với cả 4.14.0 và 5.0.0.93 (bản trong <code>uv.lock</code>) và cả hai ra <code>OK 21/21</code> với đúng các tỉ lệ ngưỡng như trên; bản khác thì hãy tự chạy lại.</p>
 </div>
 
-**Bài tập 1:** Đổi `strength` của `add_shadow` từ 0,55 xuống 0,20 rồi chạy lại phần ngưỡng hoá. Dự đoán Otsu còn hỏng ở dải phải không, và vì sao? Sau đó kiểm bằng lab.
+**Bài tập 1:** Đổi `strength` của `add_shadow` từ 0,55 xuống 0,20 rồi chạy lại phần ngưỡng hoá. Dự đoán Otsu còn hỏng ở dải phải không, và vì sao? Sau đó kiểm tra lại bằng lab.
 
 **Bài tập 2:** `binarize_vectorized` chuyển ảnh sang `int32` để khỏi tràn. Hãy nêu một cách tránh bộ nhớ gấp bốn lần mà vẫn không tràn `uint8`, và nói cái giá của nó.
 
-<details><summary>Xem lời giải</summary><p>(1) <b>Không còn hỏng.</b> Ta chạy thử: với <code>strength=0.20</code> Otsu chọn ngưỡng 134 và ba tỉ lệ điểm đen là 4,34%, 9,09%, 2,74%; với 0,30 là ngưỡng 126 và 4,32%, 9,03%, 2,75%; với 0,40 là ngưỡng 119 và 4,28%, 9,02%, 2,77%, đều gần như bản sáng đều. Chỗ gãy nằm giữa 0,40 và 0,45: ở 0,45 ngưỡng nhảy lên 162 và dải phải đen 94,33% (ở 0,55 là 99,96%). Bài học: Otsu không hỏng dần, nó hỏng khi bóng đủ nặng để nền tụt xuống dưới ngưỡng. (2) Dùng <code>uint16</code> với hệ số nguyên có tổng 256: <code>rgb.astype(np.uint16) @ np.array([77, 150, 29], dtype=np.uint16)</code>, rồi so với <code>128 * 256</code>. Giá trị lớn nhất 255 × 256 = 65.280 vừa trong <code>uint16</code>, nên không tràn, và mảng tạm chỉ gấp hai lần (3.873.936 byte) thay vì gấp bốn. Cái giá: hệ số bị làm tròn nên kết quả không còn trùng từng điểm; ta chạy thử trên thẻ này và lệch 11 điểm trên 645.656. Hai lựa chọn khác là xử lý từng dải hàng nhỏ, hoặc dùng thẳng <code>cv2.cvtColor</code> làm trong <code>uint8</code> (lệch tối đa 1 mức xám so với công thức tự viết).</p></details>
+<details><summary>Xem lời giải</summary><p>(1) <b>Không còn hỏng.</b> Ta chạy thử: với <code>strength=0.20</code> Otsu chọn ngưỡng 134 và ba tỉ lệ điểm đen là 4,34%, 9,09%, 2,74%; với 0,30 là ngưỡng 126 và 4,32%, 9,03%, 2,75%; với 0,40 là ngưỡng 119 và 4,28%, 9,02%, 2,77%, đều gần như kết quả của ảnh sáng đều. Chỗ gãy nằm giữa 0,40 và 0,45: ở 0,45 ngưỡng nhảy lên 162 và dải phải đen 94,33% (ở 0,55 là 99,96%). Bài học: Otsu không hỏng dần, nó hỏng khi bóng đủ nặng để nền tụt xuống dưới ngưỡng. (2) Dùng <code>uint16</code> với hệ số nguyên có tổng 256: <code>rgb.astype(np.uint16) @ np.array([77, 150, 29], dtype=np.uint16)</code>, rồi so với <code>128 * 256</code>. Giá trị lớn nhất 255 × 256 = 65.280 vừa trong <code>uint16</code>, nên không tràn, và mảng tạm chỉ gấp hai lần (3.873.936 byte) thay vì gấp bốn. Cái giá: hệ số bị làm tròn nên kết quả không còn trùng từng điểm; ta chạy thử trên thẻ này và lệch 11 điểm trên 645.656. Hai lựa chọn khác là xử lý từng dải hàng nhỏ, hoặc dùng thẳng <code>cv2.cvtColor</code> làm trong <code>uint8</code> (lệch tối đa 1 mức xám so với công thức tự viết).</p></details>
 
 Bài trước: [bài 29](/articles/python-polars-pandas-parquet-phan-tich-chuyen). Bài tiếp: [bài 31](/articles/python-fastapi-http-endpoint-bao-gia).
 

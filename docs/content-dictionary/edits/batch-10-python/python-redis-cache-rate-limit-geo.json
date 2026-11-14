@@ -1,0 +1,119 @@
+{
+"file": "python-redis-cache-rate-limit-geo.md",
+"edits": [
+{
+"old": "Redis không phải nguồn sự thật. Lab chạy thật.",
+"new": "Redis không phải nguồn dữ liệu gốc. Lab chạy thật.",
+"reason": "«nguồn sự thật» là calque của source of truth, theo terminology dùng «nguồn dữ liệu gốc».",
+"severity": "medium"
+},
+{
+"old": "**Redis không phải nguồn sự thật**",
+"new": "**Redis không phải nguồn dữ liệu gốc**",
+"reason": "Thống nhất thuật ngữ source of truth.",
+"severity": "medium"
+},
+{
+"old": "ứng dụng hỏi nguồn sự thật; khi Redis mất dữ liệu thì dựng lại từ nguồn sự thật",
+"new": "ứng dụng hỏi nguồn dữ liệu gốc; khi Redis mất dữ liệu thì dựng lại từ nguồn dữ liệu gốc",
+"reason": "Thống nhất thuật ngữ source of truth.",
+"severity": "medium"
+},
+{
+"old": "Redis đứng cạnh nguồn sự thật chứ",
+"new": "Redis đứng cạnh nguồn dữ liệu gốc chứ",
+"reason": "Thống nhất thuật ngữ source of truth.",
+"severity": "medium"
+},
+{
+"old": "Báo giá: nguồn sự thật là dịch vụ báo giá",
+"new": "Báo giá: nguồn dữ liệu gốc là dịch vụ báo giá",
+"reason": "Thống nhất thuật ngữ source of truth.",
+"severity": "medium"
+},
+{
+"old": "Server thực thi lệnh lần lượt từng lệnh",
+"new": "Server thực thi lần lượt từng lệnh",
+"reason": "Lặp từ «lệnh».",
+"severity": "low"
+},
+{
+"old": "Bài chạy đúng ca này rồi sửa",
+"new": "Bài chạy đúng test case này rồi sửa",
+"reason": "Thống nhất «test case».",
+"severity": "medium"
+},
+{
+"old": "là phần bản đầu của lab thiếu:",
+"new": "là phần mà bản đầu của lab còn thiếu:",
+"reason": "Câu lủng củng, thiếu quan hệ từ.",
+"severity": "medium"
+},
+{
+"old": "cùng họ với lỗi nhận trùng chuyến ở",
+"new": "cùng loại với lỗi nhận trùng chuyến ở",
+"reason": "«cùng họ» là calque của same family.",
+"severity": "medium"
+},
+{
+"old": "cho caller hết kiên nhẫn tự gọi nguồn",
+"new": "cho phép caller hết kiên nhẫn tự gọi nguồn",
+"reason": "Thiếu động từ, câu cụt.",
+"severity": "medium"
+},
+{
+"old": "Khoá này đủ cho một Redis đơn lẻ và việc chỉ cần «thường thì một lần», không đủ để bảo vệ",
+"new": "Khoá này đủ khi dùng một Redis đơn lẻ và chỉ cần «thường thì một lần», nhưng không đủ để bảo vệ",
+"reason": "Ghép «đủ cho ... và việc ...» sai cấu trúc; thêm quan hệ từ.",
+"severity": "medium"
+},
+{
+"old": "được truyền vào để ca thử lặp lại được:",
+"new": "được truyền vào để test case lặp lại được:",
+"reason": "Thống nhất «test case».",
+"severity": "medium"
+},
+{
+"old": "Vì sao phải Lua?",
+"new": "Vì sao phải dùng Lua?",
+"reason": "Câu thiếu động từ.",
+"severity": "medium"
+},
+{
+"old": "Đây là lỗi mất cập nhật cùng họ với bài 25:",
+"new": "Đây là lỗi mất cập nhật cùng loại với lỗi ở bài 25:",
+"reason": "«cùng họ với bài 25» sai: so sánh lỗi với lỗi, không phải với bài.",
+"severity": "high"
+},
+{
+"old": "để ca thử lặp lại được; production nhiều instance có đồng hồ lệch nên nên đọc `TIME`",
+"new": "để test case lặp lại được; production có nhiều instance với đồng hồ lệch nhau, nên đọc `TIME`",
+"reason": "Lặp «nên nên»; thống nhất «test case».",
+"severity": "high"
+},
+{
+"old": "dùng việc `GEOADD` nhận nhiều bộ ba",
+"new": "tận dụng việc `GEOADD` nhận nhiều bộ ba",
+"reason": "«dùng việc» gượng.",
+"severity": "low"
+},
+{
+"old": "load average 23,81 lúc chạy lần dán output do máy đang bận việc khác",
+"new": "load average 23,81 lúc chạy lần cho ra output dán trong bài, do máy đang bận việc khác",
+"reason": "«lần dán output» lủng củng.",
+"severity": "medium"
+},
+{
+"old": "(20, 1, 5, 50, 432; 44 ca)",
+"new": "(20, 1, 5, 50, 432; 44 test case)",
+"reason": "Thống nhất «test case».",
+"severity": "medium"
+},
+{
+"old": "6.250 dòng vị trí mỗi giây",
+"new": "6.250 bản ghi vị trí mỗi giây",
+"reason": "«dòng vị trí» dịch sát, nên dùng «bản ghi».",
+"severity": "medium"
+}
+]
+}

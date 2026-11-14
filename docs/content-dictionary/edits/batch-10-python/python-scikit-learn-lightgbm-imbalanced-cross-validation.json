@@ -1,0 +1,197 @@
+{
+  "file": "python-scikit-learn-lightgbm-imbalanced-cross-validation.md",
+  "edits": [
+    {
+      "old": "Đo lặp trên 3 seed.",
+      "new": "Kết quả đo được lặp lại trên 3 seed.",
+      "reason": "Câu cụt, thiếu chủ thể của việc đo",
+      "severity": "medium"
+    },
+    {
+      "old": "kết luận về thứ bậc được lặp trên ba seed của bộ sinh.",
+      "new": "kết luận về thứ bậc được kiểm lại bằng cách chạy lặp trên ba seed của bộ sinh.",
+      "reason": "Làm rõ việc được lặp là phép đo",
+      "severity": "low"
+    },
+    {
+      "old": "nó dịch xác suất, và mục",
+      "new": "nó làm dịch chuyển xác suất, và mục",
+      "reason": "Động từ dịch máy, dễ hiểu nhầm là dịch thuật",
+      "severity": "medium"
+    },
+    {
+      "old": "nếu không nơi phục vụ sẽ đưa nó dữ liệu khác với lúc học.",
+      "new": "nếu không, nơi phục vụ sẽ đưa vào mô hình dữ liệu khác với lúc học.",
+      "reason": "Cấu trúc đưa-nó kiểu tiếng Anh, thiếu dấu ngắt",
+      "severity": "medium"
+    },
+    {
+      "old": "và cũng là lúc kiểm pipeline giữ lời hứa",
+      "new": "và cũng là dịp kiểm tra xem pipeline có giữ đúng lời hứa",
+      "reason": "Câu cụt, thiếu động từ kiểm tra",
+      "severity": "medium"
+    },
+    {
+      "old": "và thiếu một đặc trưng thì lỗi to chứ không đoán.",
+      "new": "và thiếu một đặc trưng thì báo lỗi rõ ràng chứ không tự đoán.",
+      "reason": "Khẩu ngữ gượng, dịch từng chữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai tính chất đó chặn lỗi khó thấy nhất của phục vụ mô hình:",
+      "new": "Hai tính chất đó chặn những lỗi khó thấy nhất khi phục vụ mô hình:",
+      "reason": "Cụm danh từ cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Hai ngày bỏ trống **không** làm nhãn chín:",
+      "new": "Hai ngày bỏ trống **không** giúp nhãn về kịp:",
+      "reason": "Ẩn dụ nhãn chín khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Vì sao mô hình cố định tụt theo thời gian thì lab chưa đo nguyên nhân.",
+      "new": "Lab chưa đo nguyên nhân khiến mô hình cố định tụt theo thời gian.",
+      "reason": "Câu đảo trật tự kiểu dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "nên không so thẳng để kết luận về cách chia; và cũng không so thẳng được",
+      "new": "nên không thể so trực tiếp để kết luận về cách chia, và cũng không so trực tiếp được",
+      "reason": "Dấu chấm phẩy và liên từ thừa, diễn đạt gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Cái đổi là **thang xác suất**",
+      "new": "Thứ thay đổi là **thang xác suất**",
+      "reason": "Cách nói cụt",
+      "severity": "low"
+    },
+    {
+      "old": "lấy từ mô hình **không** trọng số đúng chừng ấy chuyến điểm cao nhất (trích):",
+      "new": "lấy từ mô hình **không** trọng số đúng chừng ấy chuyến có điểm cao nhất (trích):",
+      "reason": "Thiếu động từ trong cụm định ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai cách cho precision và recall khác nhau không quá 0,01",
+      "new": "Precision và recall của hai cách chênh nhau không quá 0,01",
+      "reason": "Trật tự từ kiểu tiếng Anh, khó đọc",
+      "severity": "medium"
+    },
+    {
+      "old": "nên chuyến cuối của phần gốc có nhãn chưa chín và bộ hiệu chỉnh thừa hưởng điều đó.",
+      "new": "nên chuyến cuối của phần gốc có nhãn chưa về đủ và bộ hiệu chỉnh cũng chịu ảnh hưởng đó.",
+      "reason": "Ẩn dụ chưa chín và thừa hưởng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "nên với `p` đã hiệu chỉnh quyết định có công thức:",
+      "new": "nên với `p` đã hiệu chỉnh, quyết định gắn cờ theo công thức sau:",
+      "reason": "Cụm quyết định có công thức dịch gượng",
+      "severity": "high"
+    },
+    {
+      "old": "nhưng 46,6 % số chuyến gian lận thật.",
+      "new": "nhưng 46,6 % số chuyến là gian lận thật.",
+      "reason": "Thiếu động từ là",
+      "severity": "medium"
+    },
+    {
+      "old": "mà chỉ 68,3 % gian lận thật",
+      "new": "mà chỉ 68,3 % số chuyến là gian lận thật",
+      "reason": "Thiếu danh từ và động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Đây là một seed; hướng thì khớp với bài 54.",
+      "new": "Đây là kết quả của một seed; chiều hướng thì khớp với bài 54.",
+      "reason": "Câu cụt, thiếu rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "Công suất cố định 1 % (667 chuyến) tốn 27,72 triệu vì còn 485 chuyến gian lận lọt;",
+      "new": "Công suất duyệt cố định 1 % (667 chuyến) tốn 27,72 triệu vì còn 485 chuyến gian lận lọt lưới;",
+      "reason": "Lược mất danh từ chính, thiếu hoàn chỉnh",
+      "severity": "medium"
+    },
+    {
+      "old": "hiệu chỉnh thường có ích chứ không hứa một con số.",
+      "new": "hiệu chỉnh thường có ích nhưng không đảm bảo một mức cải thiện cố định.",
+      "reason": "Không hứa một con số diễn đạt gượng",
+      "severity": "high"
+    },
+    {
+      "old": "giữ tám ngày cho hiệu chỉnh tốn bao nhiêu so với học trên toàn bộ train",
+      "new": "giữ tám ngày dành cho hiệu chỉnh làm mất bao nhiêu so với học trên toàn bộ train",
+      "reason": "Tốn bao nhiêu gượng, thiếu chủ thể",
+      "severity": "low"
+    },
+    {
+      "old": "Tách theo loại, LightGBM đã hiệu chỉnh so với hồi quy logistic (cùng train ngày dưới 22), trên ba seed:",
+      "new": "Tách theo loại gian lận, ta so LightGBM đã hiệu chỉnh với hồi quy logistic (cùng train ngày dưới 22), trên ba seed:",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Mô hình hơn rõ ở `gps_spoof`",
+      "new": "Mô hình vượt trội rõ ở `gps_spoof`",
+      "reason": "Hơn rõ cụt, thiếu tự nhiên",
+      "severity": "low"
+    },
+    {
+      "old": "mỗi file qua file tạm rồi `os.replace` nên người đọc không thấy file dở.",
+      "new": "mỗi file được ghi qua file tạm rồi `os.replace`, nên người đọc không thấy file ghi dở.",
+      "reason": "Thiếu động từ ghi, file dở khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "các mốc phân vị và tỉ lệ dòng mỗi khoảng trên dữ liệu huấn luyện",
+      "new": "các mốc phân vị và tỉ lệ dòng trong mỗi khoảng trên dữ liệu huấn luyện",
+      "reason": "Thiếu giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "thay vì để LightGBM âm thầm coi `NaN` là «thiếu»",
+      "new": "thay vì để LightGBM ngầm coi `NaN` là «thiếu»",
+      "reason": "Calque của silently",
+      "severity": "medium"
+    },
+    {
+      "old": "cho tổng mỗi dòng khớp điểm thô (log-odds)",
+      "new": "cho ra tổng mỗi dòng khớp với điểm thô (log-odds)",
+      "reason": "Thiếu động từ, câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "ngưỡng chi phí rẻ hơn không làm gì;",
+      "new": "ngưỡng chi phí rẻ hơn so với việc không làm gì;",
+      "reason": "Thiếu từ so sánh, dễ đọc nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "Có ca sai thì lab in tên ca, `FAIL n/m` (n là số ca đạt)",
+      "new": "Có test case sai thì lab in tên test case, `FAIL n/m` (n là số test case đạt)",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó không ghim số tuyệt đối hay tốc độ.",
+      "new": "Bước kiểm chứng không ghim số tuyệt đối hay tốc độ.",
+      "reason": "Nó chỉ sự vật trừu tượng ở đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "hai tạo tác ảnh hưởng mọi valid của phần 07",
+      "new": "hai tạo tác ảnh hưởng đến mọi valid của phần 07",
+      "reason": "Tạo tác là calque của artifact, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "là trung bình hoá của việc đó.",
+      "new": "là mức trung bình của các ngưỡng riêng theo giá chuyến như vậy.",
+      "reason": "Trung bình hoá là từ ghép dịch máy",
+      "severity": "high"
+    }
+  ]
+}

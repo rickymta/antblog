@@ -1,0 +1,287 @@
+{
+ "file": "python-fastapi-jwt-oauth2-authorization.md",
+ "edits": [
+  {
+   "old": "mỗi route kiểm token rồi kiểm quyền",
+   "new": "mỗi route kiểm tra token rồi kiểm tra quyền",
+   "reason": "«Kiểm» đứng cụt, thiếu «tra»",
+   "severity": "low"
+  },
+  {
+   "old": "Lab tự chứa, không cần hạ tầng; nó mang theo",
+   "new": "Lab chạy độc lập, không cần hạ tầng; lab mang theo",
+   "reason": "«Tự chứa» là calque; «nó» chỉ vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên bạn nên đọc nó trước",
+   "new": "nên bạn hãy đọc bài đó trước",
+   "reason": "Lặp «nên», «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài chạy đúng ca này.",
+   "new": "Bài chạy đúng test case này.",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Chúng cho hai mã lỗi khác nhau",
+   "new": "Hai việc này cho hai mã lỗi khác nhau",
+   "reason": "Tránh đại từ chỉ khái niệm trừu tượng đầu câu",
+   "severity": "low"
+  },
+  {
+   "old": "Điều phối `DP-001`",
+   "new": "Điều phối viên `DP-001`",
+   "reason": "Thiếu danh từ chính (điều phối viên)",
+   "severity": "medium"
+  },
+  {
+   "old": "Một **scope** là một quyền ghi trong token.",
+   "new": "Một **scope** là một quyền được ghi trong token.",
+   "reason": "«Quyền ghi» dễ hiểu nhầm là quyền write",
+   "severity": "high"
+  },
+  {
+   "old": "dữ liệu server tin cậy",
+   "new": "dữ liệu mà server tin cậy",
+   "reason": "Thiếu từ nối, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "để kẻ trộm được bảng hash không thử",
+   "new": "để kẻ đánh cắp được bảng hash không thử",
+   "reason": "«Kẻ trộm được» mơ hồ, đọc như «trộm được»",
+   "severity": "medium"
+  },
+  {
+   "old": "`t=3` số vòng, `p=4` mức song song",
+   "new": "`t=3` là số vòng, `p=4` là mức song song",
+   "reason": "Thiếu hệ từ «là»",
+   "severity": "medium"
+  },
+  {
+   "old": "Trả lời ngay khi tài khoản không tồn tại thì kẻ dò thấy",
+   "new": "Nếu trả lời ngay khi tài khoản không tồn tại, kẻ dò sẽ thấy",
+   "reason": "Cấu trúc điều kiện thiếu «nếu»",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab giữ Problem Details của cả loạt",
+   "new": "Lab giữ Problem Details của cả loạt bài",
+   "reason": "Thiếu danh từ «bài»",
+   "severity": "low"
+  },
+  {
+   "old": "Phát và kiểm token do PyJWT làm",
+   "new": "PyJWT lo việc phát và kiểm tra token",
+   "reason": "Câu bị động kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "lúc phát và hết hạn (cách nhau 900 giây)",
+   "new": "thời điểm phát và thời điểm hết hạn (cách nhau 900 giây)",
+   "reason": "Thiếu danh từ «thời điểm»",
+   "severity": "low"
+  },
+  {
+   "old": "dịch vụ được nhận. Không có",
+   "new": "dịch vụ nhận token. Không có",
+   "reason": "«Dịch vụ được nhận» tối nghĩa (audience)",
+   "severity": "medium"
+  },
+  {
+   "old": "**luôn khai danh sách thuật toán** khi kiểm (mục 3.1)",
+   "new": "**luôn khai báo danh sách thuật toán** khi kiểm tra (mục 3.1)",
+   "reason": "«Khai» và «kiểm» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "**đòi đủ claim cần thiết**",
+   "new": "**yêu cầu đủ claim cần thiết**",
+   "reason": "«Đòi» khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "mà không đòi thì token sống mãi",
+   "new": "mà không yêu cầu thì token sống mãi",
+   "reason": "«Đòi» khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "RFC 7518 mục 3.2 đòi khoá ít nhất 32 byte; RFC 8725 mục 3.5 đòi thêm rằng",
+   "new": "RFC 7518 mục 3.2 yêu cầu khoá ít nhất 32 byte; RFC 8725 mục 3.5 yêu cầu thêm rằng",
+   "reason": "«Đòi» khẩu ngữ trong văn bản kỹ thuật",
+   "severity": "low"
+  },
+  {
+   "old": "Cách đúng là sinh ngẫu nhiên",
+   "new": "Cách đúng là sinh khoá ngẫu nhiên",
+   "reason": "Thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "quên đặt biến thì dịch vụ mở ra với khoá cả thế giới biết",
+   "new": "nếu quên đặt biến, dịch vụ sẽ chạy với một khoá mà cả thế giới đều biết",
+   "reason": "Câu cụt, «khoá cả thế giới biết» gượng",
+   "severity": "high"
+  },
+  {
+   "old": "Giờ thiếu biến là không khởi động",
+   "new": "Giờ thiếu biến thì dịch vụ không khởi động",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm «quá đơn điệu»",
+   "new": "Phép kiểm «quá đơn điệu»",
+   "reason": "Thiếu danh từ «phép»",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ chạy được khi đặt tường minh",
+   "new": "chỉ chạy được khi đặt rõ ràng",
+   "reason": "Từ Hán Việt không cần thiết",
+   "severity": "low"
+  },
+  {
+   "old": "và khai với OpenAPI rằng API dùng luồng này",
+   "new": "và khai báo với OpenAPI rằng API dùng luồng này",
+   "reason": "«Khai» thiếu «báo»",
+   "severity": "medium"
+  },
+  {
+   "old": "ghi luồng này **không được dùng**",
+   "new": "ghi rằng luồng này **không được dùng**",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "và nó không đi cùng xác thực hai bước",
+   "new": "và luồng này không đi cùng xác thực hai bước",
+   "reason": "«Nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab chọn nó vì cho thấy trọn vòng mật khẩu, token, kiểm token trong một service",
+   "new": "Lab chọn luồng này vì cho thấy toàn bộ chu trình mật khẩu, token, kiểm tra token trong một service",
+   "reason": "«Trọn vòng» là calque của full cycle; «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ đòi token hợp lệ và **không** đòi scope nào",
+   "new": "chỉ yêu cầu token hợp lệ và **không** yêu cầu scope nào",
+   "reason": "«Đòi» khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "cho phép máy chủ muốn «giấu» tài nguyên bị cấm trả 404",
+   "new": "cho phép máy chủ trả 404 khi muốn «giấu» tài nguyên bị cấm",
+   "reason": "Trật tự từ khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Đổi lại, gỡ lỗi khó hơn; nơi mã chuyến không bí mật và cần thông báo rõ, 403 như bài C# lại hợp hơn.",
+   "new": "Đổi lại, gỡ lỗi khó hơn. Ở nơi mã chuyến không phải bí mật và cần báo lỗi rõ ràng, 403 như trong bài C# lại hợp hơn.",
+   "reason": "Câu ghép dài, thiếu chủ ngữ vế so sánh",
+   "severity": "high"
+  },
+  {
+   "old": "chỉ khách báo giá được (201)",
+   "new": "chỉ khách mới báo giá được (201)",
+   "reason": "Câu cụt, thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ điều phối;",
+   "new": "chỉ điều phối viên xem được;",
+   "reason": "Thiếu danh từ, động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "## Token xấu: mười ca đều ra 401",
+   "new": "## Token xấu: mười test case đều trả 401",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Phần quan trọng nhất của kiểm token là những thứ nó phải từ chối.",
+   "new": "Phần quan trọng nhất khi kiểm tra token là những loại token mà server phải từ chối.",
+   "reason": "Câu cụt, đại từ «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Cả mười ca nhận",
+   "new": "Cả mười test case nhận",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "nên ca «hết hạn» đỏ đúng vì hết hạn",
+   "new": "nên test case «hết hạn» đỏ đúng vì hết hạn",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "TTL 900 giây là cân bằng: ngắn thì token lộ ít hại, nhưng phải lấy lại thường hơn.",
+   "new": "TTL 900 giây là một điểm cân bằng: TTL ngắn thì token bị lộ ít gây hại hơn, nhưng phải lấy token mới thường xuyên hơn.",
+   "reason": "Câu cụt, thiếu chủ ngữ và danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Giữa các máy lệch đồng hồ vài giây",
+   "new": "Khi đồng hồ giữa các máy lệch nhau vài giây",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "(mỗi ca kiểm mã, lý do log",
+   "new": "(mỗi test case kiểm mã, lý do log",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "cấu hình khoá không mặc định và không lộ khoá",
+   "new": "cấu hình khoá không có mặc định và không làm lộ khoá",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Để biết bộ kiểm có thể đỏ, ta phá có chủ ý trên một bản sao",
+   "new": "Để biết bộ kiểm tra có thể báo đỏ, ta cố ý phá một bản sao",
+   "reason": "Trật tự từ kiểu tiếng Anh, cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Phá kiểm scope (",
+   "new": "Phá phần kiểm tra scope (",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "thì ca «không lộ khoá» đỏ",
+   "new": "thì test case «không lộ khoá» đỏ",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "thì ca «không có giá trị mặc định» đỏ",
+   "new": "thì test case «không có giá trị mặc định» đỏ",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "token ký bằng khoá cũ hỏng khi xoay khoá",
+   "new": "token ký bằng khoá cũ không còn dùng được khi xoay khoá",
+   "reason": "«Hỏng» khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đăng nhập chậm, request khác bị treo theo",
+   "new": "Đăng nhập chậm, các request khác cũng bị chặn",
+   "reason": "«Bị treo theo» gượng",
+   "severity": "medium"
+  }
+ ]
+}

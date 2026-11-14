@@ -1,0 +1,215 @@
+{
+ "file": "python-face-embedding-cosine-threshold-far-frr.md",
+ "edits": [
+  {
+   "old": "rồi kiểm ngưỡng với người chưa từng thấy",
+   "new": "rồi kiểm tra ngưỡng với những người mô hình chưa từng thấy",
+   "reason": "Thiếu động từ rõ nghĩa, cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "so ảnh thẻ với selfie và ra một con số",
+   "new": "so ảnh thẻ với selfie rồi cho ra một con số",
+   "reason": "Câu thiếu động từ cho vế sau",
+   "severity": "low"
+  },
+  {
+   "old": "Ngưỡng phải đo trên dữ liệu và riêng cho từng mô hình.",
+   "new": "Ngưỡng phải đo trên dữ liệu, và đo riêng cho từng mô hình.",
+   "reason": "Vế sau thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "làm hàng so sánh; vì sao nó không phải mặc định thì đoạn giấy phép bên dưới nói rõ",
+   "new": "làm mô hình so sánh; lý do nó không phải mặc định được nêu ở đoạn giấy phép bên dưới",
+   "reason": "Dịch gượng từ baseline, trật tự câu kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "GPU hay CoreML đổi qua",
+   "new": "muốn dùng GPU hay CoreML thì đổi qua",
+   "reason": "Câu thiếu chủ ngữ, cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "để số đo lặp lại",
+   "new": "để kết quả đo lặp lại được",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "phép đồng dạng của bài 48",
+   "new": "phép biến đổi đồng dạng của bài 48",
+   "reason": "Ghi đủ thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "tức viền lặp mà mẫu chừa lề",
+   "new": "tức là phần viền lặp, vì mẫu chừa lề",
+   "reason": "Cụm cụt, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "nên đúng hơn là FMR/FNMR, tên bạn sẽ gặp",
+   "new": "nên gọi là FMR/FNMR mới đúng hơn, tên bạn sẽ gặp",
+   "reason": "Trật tự câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "còn tính ảnh không lấy được mặt",
+   "new": "còn tính cả ảnh không lấy được mặt",
+   "reason": "Thiếu từ nối, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "(điểm 1,0 sẽ làm genuine đẹp giả)",
+   "new": "(điểm 1,0 sẽ làm điểm genuine đẹp một cách giả tạo)",
+   "reason": "Thiếu danh từ, cách nói tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "(mọi cặp không thứ tự)",
+   "new": "(mọi cặp, không phân biệt thứ tự)",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Mức bất định của FAR vì thế lớn hơn nhiều so với việc đếm 78 trên 78.000; các mục sau đo nó.",
+   "new": "Vì thế mức bất định của FAR lớn hơn nhiều so với con số đếm 78 trên 78.000 gợi ra; các mục sau sẽ đo mức bất định này.",
+   "reason": "Đại từ nó mơ hồ, so sánh khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "ngưỡng của hai mô hình không dùng chung được",
+   "new": "ngưỡng của hai mô hình không thể dùng chung",
+   "reason": "Cách nói dịch gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nên mục sau mô phỏng ảnh thẻ in và quét kém",
+   "new": "nên mục sau mô phỏng ảnh thẻ được in ra rồi quét chất lượng kém",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "bản đầu lùi âm thầm sang «chỉ resize» rồi vẫn nhúng ảnh",
+   "new": "bản đầu lùi sang «chỉ resize» mà không báo gì rồi vẫn tạo embedding cho ảnh",
+   "reason": "Calque âm thầm, nhúng là dịch từng chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "**không được nhúng**",
+   "new": "**không được tạo embedding**",
+   "reason": "Thống nhất thuật ngữ embedding",
+   "severity": "medium"
+  },
+  {
+   "old": "Cột «FRR hệ thống» là con số đáng nhìn.",
+   "new": "Cột «FRR hệ thống» là con số đáng chú ý nhất.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Chỉ báo EER trên ảnh lấy được mặt là giấu 59 ảnh khó nhất, những ảnh mà bài 48 phải bắt bằng chất lượng và chuyển người duyệt.",
+   "new": "Nếu chỉ báo EER trên ảnh lấy được mặt thì ta đã giấu đi 59 ảnh khó nhất, những ảnh mà bài 48 phải chặn lại theo chất lượng ảnh rồi chuyển cho người duyệt.",
+   "reason": "Câu khó hiểu, thiếu động từ",
+   "severity": "high"
+  },
+  {
+   "old": "ngưỡng chọn ở điều kiện này không mang nguyên sang điều kiện khác",
+   "new": "ngưỡng chọn ở điều kiện này không thể mang nguyên sang điều kiện khác",
+   "reason": "Câu gượng",
+   "severity": "low"
+  },
+  {
+   "old": "lấy ngưỡng làm nó nhỏ nhất",
+   "new": "chọn ngưỡng sao cho chi phí này nhỏ nhất",
+   "reason": "Đại từ nó mơ hồ",
+   "severity": "high"
+  },
+  {
+   "old": "nhầm nhận tốn 100 đơn vị, nhầm từ chối tốn 1; dịch vụ thật phải thay bằng số của vận hành",
+   "new": "mỗi lần nhận nhầm tốn 100 đơn vị, mỗi lần từ chối nhầm tốn 1; dịch vụ thật phải thay bằng số liệu của bộ phận vận hành",
+   "reason": "Thiếu chủ thể, cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "hiếm khi là điều vận hành muốn",
+   "new": "hiếm khi là điều bộ phận vận hành cần",
+   "reason": "Thiếu chủ thể",
+   "severity": "medium"
+  },
+  {
+   "old": "nó chấp nhận FAR 2,10%",
+   "new": "ngưỡng này chấp nhận FAR 2,10%",
+   "reason": "Tránh Nó đầu vế",
+   "severity": "medium"
+  },
+  {
+   "old": "(nhầm nhận đắt hơn hoặc p cao hơn thì ngưỡng bị đẩy lên)",
+   "new": "(nhận nhầm đắt hơn hoặc p cao hơn thì ngưỡng sẽ tăng lên)",
+   "reason": "Calque đẩy lên, thống nhất cách gọi",
+   "severity": "medium"
+  },
+  {
+   "old": "vùng chỉ quyết định thứ tự ưu tiên",
+   "new": "mỗi vùng chỉ quyết định thứ tự ưu tiên",
+   "reason": "Thiếu từ chỉ định",
+   "severity": "medium"
+  },
+  {
+   "old": "Một cách chia 20/20 theo chỉ số cho một con số, đảo chiều cho con số khác",
+   "new": "Một cách chia 20/20 theo chỉ số cho ra một con số, đảo chiều lại cho ra con số khác",
+   "reason": "Thiếu động từ rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "FAR luôn ở mục tiêu theo cách xây dựng",
+   "new": "FAR luôn đạt mục tiêu do cách dựng thí nghiệm",
+   "reason": "Calque, mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "các khoảng này là **ít nhất** mức bất định thật",
+   "new": "mức bất định thật **ít nhất** cũng lớn bằng các khoảng này",
+   "reason": "Câu khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca bất thường:",
+   "new": "Trường hợp bất thường:",
+   "reason": "Dùng từ thông thường thay cho ca",
+   "severity": "medium"
+  },
+  {
+   "old": "(49 ca vì có thêm các ca của ArcFace)",
+   "new": "(49 test case vì có thêm các test case của ArcFace)",
+   "reason": "Thống nhất với verify là kiểm các bất biến",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ đọc thứ bậc lớn vì máy rất bận",
+   "new": "chỉ nên đọc bậc độ lớn vì máy rất bận",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "bài 53 bàn về thời hạn lưu, đồng ý và quyền xoá",
+   "new": "bài 53 bàn về thời hạn lưu, sự đồng ý và quyền xoá",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "và không được suy ra mô hình công bằng với mọi nhóm",
+   "new": "và vì vậy không được suy ra rằng mô hình công bằng với mọi nhóm",
+   "reason": "Câu thiếu liên kết",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm trên nhiều cách chia người. Có số đo thật.",
+   "new": "kiểm trên nhiều cách chia theo người. Có số liệu đo thật.",
+   "reason": "Cụm cụt trong summary",
+   "severity": "medium"
+  }
+ ]
+}

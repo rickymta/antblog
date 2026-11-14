@@ -1,0 +1,143 @@
+{
+"file": "python-exception-debug-logging.md",
+"edits": [
+{
+"old": "4.500 VND mỗi km vượt) và thêm một lớp",
+"new": "4.500 VND cho mỗi km vượt quá) và thêm một lớp",
+"reason": "\"mỗi km vượt\" nghe cụt",
+"severity": "low"
+},
+{
+"old": "Lỗi nằm ở hằng số đổi đơn vị, đúng chỗ một bước nhỏ trước công thức cước; đọc code công thức tính cước một trăm lần cũng không thấy.",
+"new": "Lỗi nằm ở hằng số đổi đơn vị, một bước nhỏ ngay trước công thức cước, nên có đọc code công thức tính cước một trăm lần cũng không thấy.",
+"reason": "câu ghép lỏng, thiếu quan hệ nhân quả",
+"severity": "medium"
+},
+{
+"old": "và thêm một kiểm tra hồi quy cố định: 2500 mét phải ra 14.250. `--verify` của lab giữ cả hai chiều:",
+"new": "và thêm một regression test cố định: 2500 mét phải ra 14.250. `--verify` của lab kiểm tra cả hai chiều:",
+"reason": "thống nhất thuật ngữ regression test; \"giữ cả hai chiều\" gượng",
+"severity": "medium"
+},
+{
+"old": "Dòng cuối cho loại exception và thông điệp;",
+"new": "Dòng cuối ghi loại exception và thông điệp;",
+"reason": "\"cho\" dịch máy từ gives",
+"severity": "low"
+},
+{
+"old": "Các dấu `~` và `^` dưới mỗi dòng là Python chỉ ra biểu thức đang chạy khi lỗi xảy ra;",
+"new": "Các dấu `~` và `^` dưới mỗi dòng do Python thêm vào để chỉ biểu thức đang chạy khi lỗi xảy ra;",
+"reason": "câu lẫn cấu trúc, thiếu chủ thể rõ",
+"severity": "medium"
+},
+{
+"old": "nó bị `raise` ở `calculate_fare`, được gọi từ `quote_from_metres`, được gọi từ `run_once`.",
+"new": "exception bị `raise` ở `calculate_fare`, hàm này do `quote_from_metres` gọi, và hàm đó lại do `run_once` gọi.",
+"reason": "chuỗi \"được gọi\" lặp, \"nó\" mơ hồ",
+"severity": "medium"
+},
+{
+"old": "`except` chọn **đúng loại** exception tầng này biết cách đáp ứng.",
+"new": "`except` chọn **đúng loại** exception mà tầng này biết cách xử lý.",
+"reason": "\"đáp ứng\" là calque của respond; thiếu từ nối",
+"severity": "medium"
+},
+{
+"old": "Nó dành cho dọn dẹp (đóng file, nhả khoá). Nó không đảm bảo chạy khi",
+"new": "Khối này dành cho việc dọn dẹp (đóng file, nhả khoá), nhưng không đảm bảo chạy khi",
+"reason": "tránh hai câu bắt đầu bằng \"Nó\"",
+"severity": "medium"
+},
+{
+"old": "nếu exception không khớp except nào, nó vẫn chạy finally rồi tiếp tục bay lên tầng gọi.",
+"new": "nếu exception không khớp except nào, finally vẫn chạy rồi exception tiếp tục truyền lên tầng gọi.",
+"reason": "\"nó\" mơ hồ, \"bay lên\" gượng",
+"severity": "medium"
+},
+{
+"old": "Hàm tính cước nhận khoảng cách âm là vi phạm hợp đồng,",
+"new": "Khi hàm tính cước nhận khoảng cách âm, đó là vi phạm hợp đồng,",
+"reason": "câu thiếu động từ nối, đọc như danh ngữ",
+"severity": "low"
+},
+{
+"old": "`except DistanceOutOfRangeError` cho một ca cụ thể,",
+"new": "`except DistanceOutOfRangeError` cho một trường hợp cụ thể,",
+"reason": "\"ca\" khẩu ngữ, thống nhất \"trường hợp\"",
+"severity": "low"
+},
+{
+"old": "có thể chọn mức chính xác:",
+"new": "có thể chọn mức độ chi tiết phù hợp:",
+"reason": "\"mức chính xác\" mơ hồ",
+"severity": "low"
+},
+{
+"old": "Thông điệp lỗi ghi giá trị nhìn thấy, không chứa dữ liệu nhạy cảm.",
+"new": "Thông điệp lỗi ghi giá trị quan sát được, không chứa dữ liệu nhạy cảm.",
+"reason": "\"nhìn thấy\" dịch từng chữ của observed",
+"severity": "low"
+},
+{
+"old": "Nó phục vụ khẳng định điều lập trình viên tin là luôn đúng",
+"new": "Lệnh này dùng để khẳng định điều lập trình viên tin là luôn đúng",
+"reason": "thiếu giới từ, \"Nó\" đầu câu",
+"severity": "medium"
+},
+{
+"old": "phải được kiểm bằng `if ... raise` như `calculate_fare()` làm.",
+"new": "phải được kiểm tra bằng `if ... raise` như `calculate_fare()` làm.",
+"reason": "\"kiểm\" cụt",
+"severity": "medium"
+},
+{
+"old": "có thể bật tắt không cần sửa code.",
+"new": "có thể bật tắt mà không cần sửa code.",
+"reason": "thiếu từ nối",
+"severity": "low"
+},
+{
+"old": "thì dòng `quote_from_metres metres=2500 km=5 ...` làm lệch đơn vị lộ ra ngay.",
+"new": "thì dòng `quote_from_metres metres=2500 km=5 ...` cho thấy ngay chỗ lệch đơn vị.",
+"reason": "câu thiếu danh từ, khó hiểu",
+"severity": "high"
+},
+{
+"old": "trả mã kết quả có nghĩa như `REJECT` là hợp lý,",
+"new": "trả mã kết quả có ý nghĩa như `REJECT` là hợp lý,",
+"reason": "\"có nghĩa\" dùng sai, ý là có ý nghĩa rõ ràng",
+"severity": "low"
+},
+{
+"old": "Có dùng `assert` để kiểm đầu vào không;",
+"new": "Có dùng `assert` để kiểm tra đầu vào không;",
+"reason": "\"kiểm\" cụt",
+"severity": "low"
+},
+{
+"old": "Lệnh đầu chạy ba ca: 2500 mét",
+"new": "Lệnh đầu chạy ba trường hợp: 2500 mét",
+"reason": "\"ca\" khẩu ngữ",
+"severity": "low"
+},
+{
+"old": "có ca sai thì in tên ca, dòng `FAIL n/21`",
+"new": "có kiểm tra nào sai thì in tên kiểm tra đó, dòng `FAIL n/21`",
+"reason": "thống nhất \"kiểm tra\" thay cho \"ca\"",
+"severity": "medium"
+},
+{
+"old": "chưa phải kiểm thử có khung: bài 10",
+"new": "chưa phải kiểm thử dùng framework: bài 10",
+"reason": "\"kiểm thử có khung\" tự ghép",
+"severity": "medium"
+},
+{
+"old": "cho các ca ném lỗi) và áp dụng",
+"new": "cho các test case ném lỗi) và áp dụng",
+"reason": "thống nhất test case",
+"severity": "low"
+}
+]
+}

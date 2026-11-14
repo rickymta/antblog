@@ -22,12 +22,12 @@ Bài này gom nghi thức vào một chỗ. Mỗi ý định là một **thông 
 
 ## Command, query và handler
 
-CQRS (Command Query Responsibility Segregation) nghĩa là đường ghi và đường đọc được hiểu như hai việc khác nhau, mỗi việc có mô hình riêng. Nó **không** bắt buộc hai cơ sở dữ liệu hay event sourcing; lab của bài vẫn chạy trên một kho dữ liệu, chỉ khác là hai phía đi qua hai cổng khác nhau.
+CQRS (Command Query Responsibility Segregation) nghĩa là coi đường ghi và đường đọc là hai việc khác nhau, mỗi việc có mô hình riêng. CQRS **không** bắt buộc hai cơ sở dữ liệu hay event sourcing; lab của bài vẫn chạy trên một kho dữ liệu, chỉ khác là hai phía đi qua hai cổng khác nhau.
 
 - **Command** là ý định thay đổi trạng thái: `SubmitDriverApplication` (nộp hồ sơ) và `RecordReviewDecision` (người duyệt quyết định). Command chạy trong transaction, đi qua aggregate `KycApplication`, trả `ApplicationView`.
 - **Query** là nhu cầu đọc: `GetApplication` và `ListReviewQueue`. Query không đổi trạng thái, không mở transaction và trả thẳng view qua port phía đọc `ApplicationReadModel`, không dựng lại aggregate chỉ để hiển thị.
 
-Mỗi thông điệp là một frozen dataclass kế thừa `Command[R]` hoặc `Query[R]`, trong đó `R` là kiểu kết quả (cú pháp generic của PEP 695). Các chú thích kiểu mô tả luôn hình dạng hợp lệ:
+Mỗi thông điệp là một frozen dataclass kế thừa `Command[R]` hoặc `Query[R]`, trong đó `R` là kiểu kết quả (cú pháp generic của PEP 695). Các chú thích kiểu đồng thời mô tả hình dạng hợp lệ:
 
 ```python
 # src/kyc_service/application/commands.py (trích)
@@ -83,11 +83,11 @@ Hình 1 vẽ hai đường. Cùng một mediator, hai phía đi hai hướng: co
 <figcaption>Hình 1. Hai đường qua cùng một mediator: command đi qua aggregate trong transaction, query đi thẳng ra view.</figcaption>
 </figure>
 
-Một chú ý trung thực: trong lab, phía ghi và phía đọc dùng chung một dict trong bộ nhớ, nên `InMemoryReadModel` chỉ dựng view từ chính kho đó. Việc tách thật nằm ở **cổng** (`ApplicationReadModel` là một port riêng); khi lên PostgreSQL ở bài 69, phía đọc có thể là một câu `SELECT` thẳng ra view mà không qua aggregate.
+Một lưu ý thẳng thắn: trong lab, phía ghi và phía đọc dùng chung một dict trong bộ nhớ, nên `InMemoryReadModel` chỉ dựng view từ chính kho đó. Việc tách thật nằm ở **cổng** (`ApplicationReadModel` là một port riêng); khi lên PostgreSQL ở bài 69, phía đọc có thể là một câu `SELECT` thẳng ra view mà không qua aggregate.
 
 ## Mediator: dispatch theo kiểu, chừng 60 dòng
 
-Mediator giữ một dict từ **kiểu thông điệp** sang **pipeline đã dựng sẵn**. Hai kiểu hàm cho bước kế tiếp và lớp bọc, rồi `register` và `send`:
+Mediator giữ một dict từ **kiểu thông điệp** sang **pipeline đã dựng sẵn**. Trước hết là hai kiểu hàm cho bước kế tiếp và lớp bọc, rồi đến `register` và `send`:
 
 ```python
 # src/kyc_service/application/mediator.py (trích)
@@ -141,7 +141,7 @@ Vài chi tiết đáng đọc kỹ:
 - **Pipeline dựng một lần lúc đăng ký**, không dựng lại mỗi lần gửi. Vòng `for` duyệt danh sách behavior từ cuối về đầu để behavior đầu danh sách bọc ngoài cùng.
 - **`_wrap` là hàm riêng, không phải lambda trong vòng `for`.** Closure trong Python bắt *biến*, không bắt *giá trị*: viết `pipeline = lambda m: behavior(m, pipeline)` ngay trong vòng lặp thì cả `behavior` lẫn `pipeline` chỉ được tra lúc gọi. Lúc đó `pipeline` đã là chính lambda ngoài cùng nên nó gọi lại chính nó, và lời gọi đầu tiên kết thúc bằng `RecursionError` (ta thử riêng ngoài lab). Test `test_each_layer_keeps_its_own_next` giữ cho lỗi này không quay lại.
 
-Mediator này là phiên bản giảng giải. Nó không có notification (một thông điệp, nhiều handler), không streaming, không async và không chẩn đoán đăng ký; bản async sẽ cần `await` ở mỗi lớp bọc.
+Mediator này là bản minh hoạ: không có notification (một thông điệp, nhiều handler), không streaming, không async và không chẩn đoán đăng ký; bản async sẽ cần `await` ở mỗi lớp bọc.
 
 ## Pipeline: ba lớp bọc, mỗi lớp một việc
 
@@ -201,7 +201,7 @@ def validation_behavior(
     return behavior
 ```
 
-`TypeAdapter` của pydantic dựng bộ kiểm **đúng một lần** cho mỗi kiểu thông điệp (tra `adapters.get` trước, dựng sau; bản đầu viết `setdefault(kiểu, TypeAdapter(kiểu))` dựng lại bộ kiểm ở mọi lần gửi, và một ca `--verify` đếm số lần dựng để giữ lỗi đó khỏi quay lại). `asdict` đưa dataclass về dict để kiểm, và điểm quan trọng: **handler nhận bản đã validate** (`next_step(validated)`), không phải thông điệp thô của người gọi. Nhờ vậy khoảng trắng thừa quanh đường dẫn ảnh đã được cắt, kiểu đã đúng; nếu chuyển tiếp bản thô, validate chỉ là hình thức, handler vẫn ăn dữ liệu chưa qua kiểm. Lỗi được gom hết một lượt (mã sai và ảnh rỗng cùng lúc cho hai lỗi) và **không** chép giá trị đầu vào vào lỗi, vì đó có thể là dữ liệu nhạy cảm. Behavior này chỉ kiểm *hình dạng*; quy tắc như «hai giấy tờ khác loại» vẫn ở domain. Ưu điểm so với kiểm trong API: worker Kafka và công cụ dòng lệnh gửi cùng command cũng được kiểm giống hệt, vì chúng không đi qua FastAPI. Lớp API chỉ còn kiểm kiểu JSON và từ chối trường lạ (`extra="forbid"`). Trường `face_consent` dùng `StrictBool` ở cả hai nơi: đồng ý là quyết định pháp lý nên chuỗi `"false"` bị từ chối (`bool_type`) chứ không bị đoán thành `False` (hay, tệ hơn, thành `True` vì chuỗi không rỗng).
+`TypeAdapter` của pydantic dựng bộ kiểm tra **đúng một lần** cho mỗi kiểu thông điệp (tra `adapters.get` trước, dựng sau; bản đầu viết `setdefault(kiểu, TypeAdapter(kiểu))` dựng lại bộ kiểm tra ở mọi lần gửi, và một test case `--verify` đếm số lần dựng để giữ lỗi đó khỏi quay lại). `asdict` đưa dataclass về dict để kiểm tra, và điểm quan trọng: **handler nhận bản đã validate** (`next_step(validated)`), không phải thông điệp thô của người gọi. Nhờ vậy khoảng trắng thừa quanh đường dẫn ảnh đã được cắt, kiểu đã đúng; nếu chuyển tiếp bản thô, validate chỉ là hình thức, handler vẫn nhận dữ liệu chưa qua kiểm tra. Lỗi được gom hết một lượt (mã sai và ảnh rỗng cùng lúc cho ra hai lỗi) và **không** chép giá trị đầu vào vào lỗi, vì đó có thể là dữ liệu nhạy cảm. Behavior này chỉ kiểm *hình dạng*; quy tắc như «hai giấy tờ khác loại» vẫn ở domain. Ưu điểm so với việc kiểm tra trong API: worker Kafka và công cụ dòng lệnh gửi cùng command cũng được kiểm tra giống hệt, vì chúng không đi qua FastAPI. Lớp API chỉ còn kiểm kiểu JSON và từ chối trường lạ (`extra="forbid"`). Trường `face_consent` dùng `StrictBool` ở cả hai nơi: đồng ý là quyết định pháp lý nên chuỗi `"false"` bị từ chối (`bool_type`) chứ không bị đoán thành `False` (hay, tệ hơn, thành `True` vì chuỗi không rỗng).
 
 Một cái giá cần nói rõ: `application` giờ import pydantic. Đó là lựa chọn có ý thức của lab, vì pydantic ở đây chỉ mô tả hình dạng dữ liệu, không phải framework web. Hợp đồng import-linter ghi đúng lựa chọn ấy: `domain` bị cấm pydantic, `application` thì được nhưng vẫn bị cấm `fastapi` và `starlette`.
 
@@ -251,7 +251,7 @@ Composition root ghép pipeline bằng một danh sách, và thứ tự trong da
     return Container(mediator, repository, transactions)
 ```
 
-Log ở ngoài cùng nên thấy cả lỗi validate. Hàm `build_container()` còn một việc: port nào không truyền thì dùng adapter giả **và phát `UserWarning`** nêu tên port, để một bản chạy thật quên truyền adapter không âm thầm chạy bằng bảng tra cố định. Validate đứng trước transaction nên thông điệp sai không tốn transaction. Lab chạy một command sai định dạng qua hai thứ tự (trích từ phần demo):
+Lớp log ở ngoài cùng nên thấy được cả lỗi validate. Hàm `build_container()` còn một việc: port nào không truyền thì dùng adapter giả **và phát `UserWarning`** nêu tên port, để một bản chạy thật quên truyền adapter không lặng lẽ chạy bằng bảng tra cố định. Validate đứng trước transaction nên thông điệp sai không tốn transaction. Lab chạy một command sai định dạng qua hai thứ tự (trích từ phần demo):
 
 ```text
 validate -> transaction: transaction=[]
@@ -262,10 +262,10 @@ Với `validate -> transaction` danh sách sự kiện rỗng; đảo lại thì
 
 Hai loại lỗi được xử lý khác nhau có chủ ý:
 
-- **Lỗi lường trước** (`PortFailure`: service ngoài tắt hoặc trả dữ liệu sai miền) do handler bắt, giữ hồ sơ ở trạng thái đã đạt và trả `pending_check`. Handler không ném lên, nên transaction **commit**: hồ sơ đã nhận phải được lưu. Test: OCR tắt cho `['begin', 'commit']` và đúng một hồ sơ trong kho.
-- **Lỗi bất ngờ** (bug) cứ ném lên. Transaction **rollback**, không còn hồ sơ mồ côi. Đây là ca mà bài 67 để lại hồ sơ `submitted`; ở lab này kho trống sau lỗi và log ghi `! SubmitDriverApplication RuntimeError`.
+- **Lỗi lường trước** (`PortFailure`: service ngoài tắt hoặc trả dữ liệu sai miền) do handler bắt, giữ hồ sơ ở trạng thái đã đạt và trả `pending_check`. Handler không ném lên, nên transaction **commit**: hồ sơ đã nhận phải được lưu. Test: khi OCR tắt, kết quả là `['begin', 'commit']` và đúng một hồ sơ trong kho.
+- **Lỗi bất ngờ** (bug) cứ ném lên. Transaction **rollback**, không còn hồ sơ mồ côi. Đây là trường hợp mà bài 67 để lại hồ sơ `submitted`; ở lab này kho trống sau lỗi và log ghi `! SubmitDriverApplication RuntimeError`.
 
-Một chi tiết về rollback: bản trong bộ nhớ hoàn lại các hàng nhưng **không** hoàn lại bộ đếm mã, giống sequence của PostgreSQL vốn không rollback. Sau một lần lỗi, hồ sơ kế tiếp là `KYC-0002`, không phải `KYC-0001`; lab có ca kiểm điều này để ai nối cơ sở dữ liệu thật không bất ngờ vì «lỗ hổng» trong dãy mã.
+Một chi tiết về rollback: bản trong bộ nhớ hoàn lại các hàng nhưng **không** hoàn lại bộ đếm mã, giống sequence của PostgreSQL vốn không rollback. Sau một lần lỗi, hồ sơ kế tiếp là `KYC-0002`, không phải `KYC-0001`; lab có test case kiểm tra điều này để ai chuyển sang cơ sở dữ liệu thật không bất ngờ trước «lỗ hổng» trong dãy mã.
 
 ## So với MediatR bên C#
 
@@ -317,7 +317,7 @@ uv run --project examples/toi-noi-python/68-cqrs-mediator-pipeline examples/toi-
   hàng chờ duyệt: ['KYC-0001']; transaction: []
 ```
 
-Năm đoạn demo cho thấy: command thành công đi qua đủ ba lớp bọc; command sai hình dạng dừng ở validate với hai lỗi, không mở transaction; lỗi bất ngờ rollback và kho trống; đổi thứ tự hai lớp bọc thì thấy transaction mở thừa; query không mở transaction. Kiểm các kết quả trên:
+Năm đoạn demo cho thấy: command thành công đi qua đủ ba lớp bọc; command sai hình dạng dừng ở validate với hai lỗi, không mở transaction; lỗi bất ngờ rollback và kho trống; đổi thứ tự hai lớp bọc thì thấy transaction mở thừa; query không mở transaction. Kiểm tra các kết quả trên:
 
 ```bash
 uv run --project examples/toi-noi-python/68-cqrs-mediator-pipeline examples/toi-noi-python/68-cqrs-mediator-pipeline/main.py --verify
@@ -327,7 +327,7 @@ uv run --project examples/toi-noi-python/68-cqrs-mediator-pipeline examples/toi-
 OK 31/31
 ```
 
-31 ca: 4 ca mediator (dispatch theo kiểu chính xác, thiếu hoặc trùng handler, thứ tự các lớp bọc, lớp bọc chặn `next`), 21 ca pipeline (log và transaction của command, query không transaction, validate gom lỗi và không lộ đầu vào, thứ tự validate–transaction, rollback khi lỗi bất ngờ, bộ đếm mã sau rollback, ba tình huống service tắt hoặc chưa đồng ý khuôn mặt, quyết định của người duyệt kể cả quyết định lần hai và hồ sơ chưa tới `needs_review`, hàng chờ duyệt, handler nhận bản đã validate, `face_consent` dạng chuỗi bị chặn, số lần dựng bộ kiểm, mã hồ sơ `KYC-10000`, cosine âm, cảnh báo adapter giả) và 6 ca qua HTTP. Chuỗi đầy đủ gồm ruff, mypy `--strict`, import-linter với ba hợp đồng, pytest và `--verify`:
+31 test case: 4 test case mediator (dispatch theo kiểu chính xác, thiếu hoặc trùng handler, thứ tự các lớp bọc, lớp bọc chặn `next`), 21 test case pipeline (log và transaction của command, query không transaction, validate gom lỗi và không lộ đầu vào, thứ tự validate–transaction, rollback khi lỗi bất ngờ, bộ đếm mã sau rollback, ba tình huống service tắt hoặc chưa đồng ý khuôn mặt, quyết định của người duyệt kể cả quyết định lần hai và hồ sơ chưa tới `needs_review`, hàng chờ duyệt, handler nhận bản đã validate, `face_consent` dạng chuỗi bị chặn, số lần dựng bộ kiểm, mã hồ sơ `KYC-10000`, cosine âm, cảnh báo adapter giả) và 6 test case qua HTTP. Chuỗi đầy đủ gồm ruff, mypy `--strict`, import-linter với ba hợp đồng, pytest và `--verify`:
 
 ```bash
 sh examples/toi-noi-python/68-cqrs-mediator-pipeline/verify.sh
@@ -374,9 +374,9 @@ Python 3.14.7, FastAPI 0.162.0, pydantic 2.14.3, import-linter 2.16, mypy 2.4.1,
 <p>Mediator đồng bộ, trong một process: nó không phải message broker, không bền, không giao lại, và không tạo transaction chung với service ngoài. Gửi command trong process không đảm bảo một sự kiện được phát ra khi commit; việc đó cần outbox (bài 71). <code>InMemoryTransactions</code> chỉ chụp và hoàn lại một dict, không thay cho transaction cơ sở dữ liệu, không an toàn khi nhiều worker cùng chạy và không chống ghi đồng thời. Số liệu trong demo là dữ liệu tổng hợp.</p>
 </div>
 
-**Bài tập:** (1) Thêm behavior đo thời gian xử lý của mỗi thông điệp vào pipeline. Đặt ở đâu trong danh sách để số đo gồm cả thời gian validate nhưng không gồm thời gian ghi log? (2) `ListReviewQueue` có nên đi qua `transaction_behavior` để «cho chắc» không? Nêu một hậu quả nếu có.
+**Bài tập:** (1) Thêm behavior đo thời gian xử lý của mỗi thông điệp vào pipeline. Đặt ở đâu trong danh sách để số liệu đo bao gồm cả thời gian validate nhưng không gồm thời gian ghi log? (2) `ListReviewQueue` có nên đi qua `transaction_behavior` để «cho chắc» không? Nêu một hậu quả nếu có.
 
-<details><summary>Xem lời giải</summary><p>(1) Đặt <b>ngay sau logging</b>, trước validation: danh sách <code>[logging_behavior(log), timing_behavior(...), validation_behavior(), transaction_behavior(...)]</code>. Behavior đầu danh sách bọc ngoài cùng, nên thời gian đo gồm validate, transaction và handler nhưng không gồm lần ghi log vào và log ra. Dùng <code>time.perf_counter()</code>, ghi trong <code>finally</code> để lỗi cũng được đo. (2) Không nên. Query không đổi trạng thái; bọc transaction chỉ chiếm kết nối và mở rộng phạm vi khoá cho việc không cần, đồng thời làm mờ ranh giới command/query. Đó là lý do <code>transaction_behavior</code> kiểm <code>isinstance(message, Command)</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Đặt <b>ngay sau logging</b>, trước validation: danh sách <code>[logging_behavior(log), timing_behavior(...), validation_behavior(), transaction_behavior(...)]</code>. Behavior đầu danh sách bọc ngoài cùng, nên thời gian đo gồm validate, transaction và handler nhưng không gồm lần ghi log vào và log ra. Dùng <code>time.perf_counter()</code>, ghi trong <code>finally</code> để lỗi cũng được đo. (2) Không nên. Query không đổi trạng thái; bọc transaction chỉ chiếm kết nối và mở rộng phạm vi khoá cho một việc không cần thiết, đồng thời làm mờ ranh giới command/query. Đó là lý do <code>transaction_behavior</code> kiểm <code>isinstance(message, Command)</code>.</p></details>
 
 Bài trước: [bài 67](/articles/python-clean-architecture-domain-application-infrastructure). Bài tiếp: [bài 69](/articles/python-repository-unit-of-work-sqlalchemy).
 

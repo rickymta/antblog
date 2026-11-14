@@ -1,14 +1,14 @@
 ---
 slug: python-repository-unit-of-work-sqlalchemy
 title: "Repository và Unit of Work với SQLAlchemy"
-summary: "Bài 69: repository theo aggregate KycApplication, Unit of Work bao một Session cho mỗi command, optimistic concurrency và bẫy identity map giữ tham chiếu yếu, kiểm bằng PostgreSQL thật. Có lab chạy được."
+summary: "Bài 69: repository theo aggregate KycApplication, Unit of Work bọc một Session cho mỗi command, optimistic concurrency và bẫy identity map giữ tham chiếu yếu, kiểm bằng PostgreSQL thật. Có lab chạy được."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, sqlalchemy, repository, unit-of-work]
 language: vi
 ---
 
-Ở bài 68, hồ sơ KYC của [Tới Nơi](/articles/du-an-mau-toi-noi) sống trong một `dict`, và «transaction» chỉ là chụp ảnh `dict` rồi chép lại khi lỗi. Đủ để chứng minh thứ tự log, validate, transaction. Nhưng hồ sơ phải sống qua lần khởi động lại của service, và có lúc hai người duyệt cùng nạp một hồ sơ `needs_review`. Cần phân biệt hai tình huống: nếu request thứ hai đến *sau khi* request thứ nhất commit, nó nạp bản mới và domain từ chối; chỉ khi hai transaction *chồng nhau* mới cần cơ sở dữ liệu phân xử, và bộ nhớ không trả lời được «ai thắng, ai được báo».
+Ở bài 68, hồ sơ KYC của [Tới Nơi](/articles/du-an-mau-toi-noi) sống trong một `dict`, và «transaction» chỉ là chụp ảnh `dict` rồi chép lại khi lỗi. Cách đó đủ để chứng minh thứ tự log, validate, transaction. Nhưng hồ sơ phải sống qua lần khởi động lại của service, và có lúc hai người duyệt cùng nạp một hồ sơ `needs_review`. Cần phân biệt hai tình huống: nếu request thứ hai đến *sau khi* request thứ nhất commit, nó nạp bản mới và domain từ chối; chỉ khi hai transaction *chồng nhau* mới cần cơ sở dữ liệu phân xử, và bộ nhớ không trả lời được «ai thắng, ai được báo».
 
 Bài này đặt PostgreSQL thật vào chỗ của `dict`. **Repository** là cổng để nạp và lưu cả một aggregate; **Unit of Work** là ranh giới transaction mà mọi kho trong một command cùng dùng. Cả hai được kiểm trên PostgreSQL 17 thật, và một bẫy của identity map trong SQLAlchemy sẽ hiện ra khi test hai transaction chồng nhau chạy lần đầu.
 
@@ -17,12 +17,12 @@ Bài này đặt PostgreSQL thật vào chỗ của `dict`. **Repository** là c
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Hồ sơ <code>KYC-0001</code> đang <code>needs_review</code>. RV-001 và RV-002 cùng nạp nó trong hai transaction đang mở. RV-001 duyệt và commit; RV-002, vẫn cầm bản đã nạp, ghi quyết định từ chối. Domain đã kiểm «chỉ <code>needs_review</code> mới được duyệt», và repository chỉ chạy <code>UPDATE ... WHERE application_id = ?</code>. Trạng thái cuối cùng là gì, và có ai nhận lỗi không?</p>
-<details><summary>Xem đáp án</summary><p><b>Trạng thái cuối là <code>rejected</code> bởi RV-002, và không ai nhận lỗi.</b> Domain kiểm trên bản RV-002 đã nạp, bản đó vẫn ở <code>needs_review</code>; cơ sở dữ liệu không có gì để từ chối câu <code>UPDATE</code>. Quyết định của RV-001 biến mất (lost update). Chữa bằng một cột <code>version</code> đi kèm điều kiện ghi; ở bài này RV-002 nhận <code>ConcurrencyConflict</code> và RV-001 giữ <code>approved</code>. Nếu RV-002 gửi request <i>sau</i> khi RV-001 đã commit thì không có xung đột để bắt: request nạp bản mới và domain trả 409 <code>invalid-status-transition</code>.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Trạng thái cuối là <code>rejected</code> do RV-002 ghi, và không ai nhận lỗi.</b> Domain kiểm trên bản RV-002 đã nạp, bản đó vẫn ở <code>needs_review</code>; cơ sở dữ liệu không có gì để từ chối câu <code>UPDATE</code>. Quyết định của RV-001 biến mất (lost update). Chữa bằng một cột <code>version</code> đi kèm điều kiện ghi; ở bài này RV-002 nhận <code>ConcurrencyConflict</code> và RV-001 giữ <code>approved</code>. Nếu RV-002 gửi request <i>sau</i> khi RV-001 đã commit thì không có xung đột để bắt: request nạp bản mới và domain trả 409 <code>invalid-status-transition</code>.</p></details>
 </div>
 
 ## Repository là cổng của aggregate, không phải bảng
 
-Từ bài 67, application đã có một port `KycRepository`. Nó chỉ có năm thao tác, đúng những gì use case cần:
+Từ bài 67, application đã có một port `KycRepository`. Port này chỉ có năm thao tác, đúng những gì use case cần:
 
 ```python
 # src/kyc_service/application/ports.py (trích)
@@ -72,7 +72,7 @@ Các bảng khai báo bằng ORM kiểu SQLAlchemy 2 (`Mapped`, `mapped_column`)
     )
 ```
 
-`lazy="raise"` nghĩa là chạm vào `row.ocr_results` mà chưa nạp sẽ nổ ngay thay vì âm thầm phát thêm một câu `SELECT`: mọi truy vấn phải nói rõ nó cần hàng con nào bằng `selectinload`, nên không có N+1 mà không hay.
+`lazy="raise"` nghĩa là chạm vào `row.ocr_results` mà chưa nạp sẽ báo lỗi ngay thay vì lặng lẽ phát thêm một câu `SELECT`: mọi truy vấn phải nói rõ nó cần hàng con nào bằng `selectinload`, nên không thể có N+1 mà không ai hay.
 
 Việc dịch nằm trong hai hàm: `to_domain` dựng lại aggregate qua constructor (nên các bất biến của value object vẫn được kiểm), `apply_to_row` chép trạng thái aggregate lên hàng:
 
@@ -104,11 +104,11 @@ Hai quyết định ở đây cần nói thẳng. Thứ nhất là **số giấy
 - Che số chưa làm bảng hết nhạy cảm: bảng vẫn giữ ngày sinh và giới tính rõ, và bài 47 đếm được **10.000** ứng viên còn khớp với mặt nạ ba-hai cộng hai trường đó. Bảng vẫn là dữ liệu cá nhân, cần quyền truy cập và thời hạn lưu.
 - Để nối một hàng với document OCR của bài 47 (khoá `(kyc_id, document_type, model_version, image_sha256)`), `kyc_ocr_results` giữ thêm `model_version` và `image_sha256`.
 
-Thứ hai là **hai mô hình song song** (dataclass và hàng ORM) tốn thêm mã ánh xạ. «Imperative mapping» của SQLAlchemy ánh xạ thẳng dataclass vào bảng và bỏ được hai hàm trên; lab chọn mô hình tách để domain không dính vào cách ORM theo dõi đối tượng, và đó cũng là chỗ bẫy ở mục sau nằm.
+Thứ hai là **hai mô hình song song** (dataclass và hàng ORM) tốn thêm mã ánh xạ. «Imperative mapping» của SQLAlchemy ánh xạ thẳng dataclass vào bảng và bỏ được hai hàm trên; lab chọn mô hình tách để domain không dính vào cách ORM theo dõi đối tượng, và đó cũng là nơi cái bẫy ở mục sau xuất hiện.
 
 ## Unit of Work: một Session cho mỗi command
 
-Port `UnitOfWork` thay `TransactionManager` của bài 68. Nó giữ `begin()` cũ và thêm `applications`, kho gắn với transaction đang mở:
+Port `UnitOfWork` thay `TransactionManager` của bài 68. Port này giữ `begin()` cũ và thêm `applications`, kho gắn với transaction đang mở:
 
 ```python
 # src/kyc_service/application/ports.py (trích)
@@ -145,14 +145,14 @@ Bản SQLAlchemy mở một `Session` mới ở `begin()`, bọc nó trong `sess
 
 Một đối tượng `SqlAlchemyUnitOfWork` được ghép vào mediator một lần và dùng chung cho mọi request, nên nó không giữ Session trong thuộc tính thường. Cặp (Session, kho) nằm trong một `ContextVar`, và phạm vi của nó là **Context**, không phải «thread hay task» nói chung:
 
-- Mỗi request có Context riêng (FastAPI chạy endpoint đồng bộ trong thread pool, mỗi lần gọi trên một bản sao Context), nên hai request đồng thời có hai Session; test cho hai thread cùng đứng trong `begin()` bằng một `Barrier`.
+- Mỗi request có Context riêng (FastAPI chạy endpoint đồng bộ trong thread pool, mỗi lần gọi trên một bản sao Context), nên hai request đồng thời có hai Session; test chạy hai thread cùng đứng trong `begin()` bằng một `Barrier`.
 - `asyncio.create_task` và `asyncio.to_thread` mở **bên trong** `begin()` chép Context, nên **dùng chung** Session của lời gọi cha; Session đồng bộ không an toàn khi chia cho thread khác.
-- `threading.Thread` tự mở bên trong `begin()` không thừa kế Context: `uow.applications` ở đó ném `UnitOfWorkNotStarted`.
+- `threading.Thread` tự mở bên trong `begin()` không kế thừa Context: `uow.applications` ở đó ném `UnitOfWorkNotStarted`.
 - Vào `begin()` ở Context này mà thoát ở Context khác là `ValueError`; `finally` lồng nhau vẫn đóng Session và trả kết nối.
 
 Cả bốn ý có test. Vấn đề của async nằm chỗ khác: Session đồng bộ chặn event loop, nên code async cần `AsyncSession` (lab không đi vào). Tài liệu `contextvars` khuyên tạo `ContextVar` ở cấp module vì biến không được giải phóng cùng đối tượng chứa nó; lab giữ một biến cho mỗi UoW để hai UoW không dùng chung giá trị, và chỉ tạo một UoW lúc khởi động.
 
-Hai chi tiết nữa có test: `begin()` lồng nhau ném `NestedUnitOfWork`, và dùng `uow.applications` ngoài khối `with` ném `UnitOfWorkNotStarted` thay vì âm thầm mở transaction. Phía application chỉ đổi hai chỗ: `transaction_behavior` gọi `uow.begin()`, và handler lấy `self._uow.applications` thay cho `self._repository`.
+Hai chi tiết nữa có test: `begin()` lồng nhau ném `NestedUnitOfWork`, và dùng `uow.applications` ngoài khối `with` ném `UnitOfWorkNotStarted` thay vì lặng lẽ mở transaction. Phía application chỉ đổi hai chỗ: `transaction_behavior` gọi `uow.begin()`, và handler lấy `self._uow.applications` thay cho `self._repository`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -165,7 +165,7 @@ Hai chi tiết nữa có test: `begin()` lồng nhau ném `NestedUnitOfWork`, v�
 
 Mapping có `version_id_col`, nên mỗi `UPDATE` mang điều kiện `WHERE version = <version đã nạp>` và đặt version mới. Nếu số hàng khớp khác một, SQLAlchemy ném `StaleDataError`; repository dịch nó thành `ConcurrencyConflict` của application, và API trả 409 `concurrent-update`. Repository còn gọi `flag_modified(row, "status")` trong `save` để mọi lần ghi aggregate đều tăng version dù chỉ hàng con đổi: aggregate là một đơn vị nhất quán, nên hai người cùng sửa nó, kể cả chỉ phần con, phải xung đột.
 
-Bản đầu của lab mất kiểm tra này mà không báo gì: `save` gọi `session.get(ApplicationRow, id)` để lấy lại hàng, và test hai transaction chồng nhau đỏ với «DID NOT RAISE». Theo tài liệu SQLAlchemy, các đối tượng trong Session được giữ bằng **tham chiếu yếu**. Sau `get`, aggregate dựng xong thì không ai còn cầm hàng ORM, nó bị thu gom, và `session.get` lần hai nạp lại hàng với version **mới**, nên `WHERE version = <mới>` luôn khớp. Test cô lập hiện tượng:
+Bản đầu của lab mất kiểm tra này mà không báo gì: `save` gọi `session.get(ApplicationRow, id)` để lấy lại hàng, và test hai transaction chồng nhau đỏ với «DID NOT RAISE». Theo tài liệu SQLAlchemy, các đối tượng trong Session được giữ bằng **tham chiếu yếu**. Sau `get`, aggregate dựng xong thì không ai còn cầm hàng ORM, nó bị thu gom, và `session.get` lần hai nạp lại hàng với version **mới**, nên `WHERE version = <mới>` luôn khớp. Một test riêng cô lập hiện tượng này:
 
 ```python
 # tests/test_repository.py (trích)
@@ -237,11 +237,11 @@ Từ giờ `save` luôn ghi với version đã đọc. Demo cho hai người duy
 
 Request thứ hai nhận 409 `invalid-status-transition`, không phải `concurrent-update`. Người duyệt nhìn màn hình cũ rồi bấm lúc sau cũng rơi vào trường hợp này, vì bản nạp lúc bấm đã mới. Muốn bắt «quyết định dựa trên bản đã xem», client phải gửi version đã xem (`ETag` và `If-Match`) và command mang theo; lab chưa làm.
 
-Version là 3 vì mỗi lần `flush` ghi hàng là một version: `add` (1), `save` sau khi chấm điểm (2), quyết định của RV-001 (3). Đừng dùng số version làm số đếm nghiệp vụ.
+Version là 3 vì mỗi lần `flush` ghi hàng thì version tăng thêm một: `add` (1), `save` sau khi chấm điểm (2), quyết định của RV-001 (3). Đừng dùng số version làm số đếm nghiệp vụ.
 
 ## Phía đọc, N+1 và ràng buộc ở bảng
 
-Query không đi qua Unit of Work. `SqlAlchemyReadModel` mở một Session ngắn cho mỗi lần đọc và chọn thẳng ra view, không dựng aggregate. Hàng chờ duyệt cần hai câu `SELECT` (hàng gốc, rồi OCR của cả danh sách), vì phía đọc không nạp `documents`; dựng cả aggregate tốn thêm một câu cho bảng giấy tờ. Số câu được đếm bằng event `before_cursor_execute` của engine, ở ba cỡ hàng chờ:
+Query không đi qua Unit of Work. `SqlAlchemyReadModel` mở một Session ngắn cho mỗi lần đọc và chọn thẳng ra view, không dựng aggregate. Hàng chờ duyệt cần hai câu `SELECT` (hàng gốc, rồi OCR của cả danh sách), vì phía đọc không nạp `documents`; dựng cả aggregate tốn thêm một câu cho bảng giấy tờ. Ta đếm số câu bằng event `before_cursor_execute` của engine, ở ba cỡ hàng chờ:
 
 ```text
 == 5. Số câu SELECT để lấy hàng chờ duyệt, theo số hồ sơ
@@ -251,7 +251,7 @@ Query không đi qua Unit of Work. `SqlAlchemyReadModel` mở một Session ng�
     520           3           5
 ```
 
-Số câu tăng theo **lô**, không theo hồ sơ: `selectinload` gửi một câu cho tối đa 500 khoá cha (theo tài liệu), nên 5 và 50 hồ sơ cùng cho 2 và 3 câu, còn 520 hồ sơ vượt một lô và cho 3 và 5. Hai thứ nữa nằm ở bảng, vì code có thể sai còn bảng thì không nên: `CheckConstraint` bắt buộc «có người duyệt khi và chỉ khi đã `approved` hoặc `rejected`», chốt thứ hai cho quy tắc domain đã kiểm; và mã hồ sơ sinh từ một `Sequence`, **không** rollback, nên transaction lỗi để lại lỗ trong dãy (mục 3 của output ở phần «Chạy và kiểm chứng»: hồ sơ kế tiếp là `KYC-0002`). Demo cố ghi `approved` mà không có người duyệt:
+Số câu tăng theo **lô**, không theo hồ sơ: `selectinload` gửi một câu cho tối đa 500 khoá cha (theo tài liệu), nên 5 và 50 hồ sơ cùng cho 2 và 3 câu, còn 520 hồ sơ vượt một lô và cho 3 và 5. Hai thứ nữa nằm ở bảng, vì code có thể sai còn bảng thì không nên: `CheckConstraint` bắt buộc «có người duyệt khi và chỉ khi đã `approved` hoặc `rejected`», chốt thứ hai cho quy tắc domain đã kiểm; và mã hồ sơ sinh từ một `Sequence`, **không** rollback, nên transaction lỗi để lại khoảng trống trong dãy (mục 3 của output ở phần «Chạy và kiểm chứng»: hồ sơ kế tiếp là `KYC-0002`). Demo cố ghi `approved` mà không có người duyệt:
 
 ```text
 == 6. Ràng buộc ở cơ sở dữ liệu: duyệt mà không có người duyệt
@@ -268,7 +268,7 @@ Mã hồ sơ không ngừng ở `KYC-9999`: domain và command nhận `KYC-[0-9]
 
 ## Test bằng PostgreSQL thật, không bằng bản giả
 
-Bản trong bộ nhớ của bài 68 không thể phát hiện bẫy identity map, ràng buộc CHECK hay lỗ trong sequence. Test của bài chạy trên PostgreSQL của hạ tầng chung, trong schema `lab69`; fixture tạo schema một lần cho cả phiên, và nếu không nối được thì báo bằng lệnh khởi động chứ không bỏ qua:
+Bản trong bộ nhớ của bài 68 không thể phát hiện bẫy identity map, ràng buộc CHECK hay khoảng trống trong sequence. Test của bài chạy trên PostgreSQL của hạ tầng chung, trong schema `lab69`; fixture tạo schema một lần cho cả phiên, và nếu không nối được thì báo lỗi kèm lệnh khởi động chứ không bỏ qua:
 
 ```python
 # tests/conftest.py (trích)
@@ -312,7 +312,7 @@ uv run --project examples/toi-noi-python/69-repository-unit-of-work examples/toi
   hồ sơ kế tiếp: KYC-0002
 ```
 
-(trích: các mục 4 tới 8 của output đã in ở các mục trên.) Lab in lời nhắc ba service là adapter giả, và `build_container()` phát `FakeAdapterWarning` (một `UserWarning`) nêu tên port dùng adapter giả. Schema `lab69` bị xoá khi chạy xong. Kiểm các kết quả trên:
+(trích: các mục 4 tới 8 của output đã in ở các mục trên.) Lab in lời nhắc rằng ba service đang dùng adapter giả, và `build_container()` phát `FakeAdapterWarning` (một `UserWarning`) nêu tên port dùng adapter giả. Lab xoá schema `lab69` khi chạy xong. Kiểm tra các kết quả trên:
 
 ```bash
 uv run --project examples/toi-noi-python/69-repository-unit-of-work examples/toi-noi-python/69-repository-unit-of-work/main.py --verify
@@ -322,7 +322,7 @@ uv run --project examples/toi-noi-python/69-repository-unit-of-work examples/toi
 OK 33/33
 ```
 
-33 ca: repository, Unit of Work (kể cả phạm vi Context), xung đột và ràng buộc, pipeline trên PostgreSQL, validation, cảnh báo adapter giả, khoá nối OCR, `KYC-10000`, `pending_check` khi đọc lại và các ca HTTP. Chuỗi đầy đủ gồm ruff, mypy `--strict`, import-linter với bốn hợp đồng (mới: lõi không import `sqlalchemy` hay `psycopg`), pytest và `--verify`:
+33 test case: repository, Unit of Work (kể cả phạm vi Context), xung đột và ràng buộc, pipeline trên PostgreSQL, validation, cảnh báo adapter giả, khoá nối OCR, `KYC-10000`, `pending_check` khi đọc lại và các test case HTTP. Chuỗi đầy đủ gồm ruff, mypy `--strict`, import-linter với bốn hợp đồng (mới: lõi không import `sqlalchemy` hay `psycopg`), pytest và `--verify`:
 
 ```bash
 sh examples/toi-noi-python/69-repository-unit-of-work/verify.sh
@@ -355,7 +355,7 @@ OK 33/33
 OK 6/6
 ```
 
-(trích: bỏ phần hình ASCII in đầu của import-linter.) Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, PostgreSQL 17.11, FastAPI 0.162.0, pydantic 2.14.3, import-linter 2.16, mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 (theo `uv.lock`). Output do một lần chạy chung với nhiều tác vụ khác của máy (load average 1, 5, 15 phút đo bằng `uptime` sau khi chạy: 299,68; 344,73; 374,10), nên các số giây chỉ để tham khảo và bài không dùng chúng làm kết luận.
+(trích: bỏ phần hình ASCII in đầu của import-linter.) Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, PostgreSQL 17.11, FastAPI 0.162.0, pydantic 2.14.3, import-linter 2.16, mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 (theo `uv.lock`). Output này đến từ một lần chạy cùng lúc với nhiều tác vụ khác trên máy (load average 1, 5, 15 phút đo bằng `uptime` sau khi chạy: 299,68; 344,73; 374,10), nên các số giây chỉ để tham khảo và bài không dùng chúng làm kết luận.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -370,7 +370,7 @@ OK 6/6
 <p>Lab dùng <code>create_all</code>, production dùng migration (bài 24). Một PostgreSQL, không đo pool, không read replica. <code>ConcurrencyConflict</code> trả cho client dưới dạng 409 và lab không thử lại; chưa có <code>If-Match</code> cho quyết định dựa trên bản đã xem. Mặt nạ số giấy tờ chưa phải chính sách PII (bài 47), và bảng vẫn giữ ngày sinh, giới tính rõ. <code>ContextVar</code> đúng với code đồng bộ; async cần <code>AsyncSession</code>. Handler vẫn gọi OCR, khuôn mặt, điểm rủi ro bên trong transaction; bài 70 đo hệ quả đó. Chưa có outbox. Dữ liệu là dữ liệu tổng hợp.</p>
 </div>
 
-**Bài tập:** (1) Thêm quy tắc «một tài xế chỉ có một hồ sơ chưa quyết định». Lấy hồ sơ đang mở của một tài xế nên đặt ở repository hay ở read model, và ngoài mã Python còn cần gì ở bảng? (2) `RecordReviewDecisionHandler` gặp `ConcurrencyConflict`. Nên tự nạp lại và thử quyết định lần nữa, hay trả 409? Nêu hậu quả của mỗi lựa chọn.
+**Bài tập:** (1) Thêm quy tắc «một tài xế chỉ có một hồ sơ chưa quyết định». Thao tác lấy hồ sơ đang mở của một tài xế nên đặt ở repository hay ở read model, và ngoài mã Python còn cần gì ở bảng? (2) `RecordReviewDecisionHandler` gặp `ConcurrencyConflict`. Nên tự nạp lại và thử quyết định lần nữa, hay trả 409? Nêu hậu quả của mỗi lựa chọn.
 
 <details><summary>Xem lời giải</summary><p>(1) Quy tắc nằm trong lệnh ghi (nộp hồ sơ phải từ chối khi đã có hồ sơ mở), nên repository cần thêm một thao tác trả <b>aggregate</b> như <code>get_open_for_driver(driver_id)</code>; read model chỉ phục vụ hiển thị. Hai request cùng lúc vẫn lọt qua mã Python, nên bảng cần chỉ mục <b>unique một phần</b> trên <code>driver_id</code> với điều kiện <code>status</code> chưa phải <code>approved</code> hoặc <code>rejected</code>. (2) Trả 409. Tự thử lại sẽ nạp bản mới (đã <code>approved</code>) và domain từ chối, nên chỉ thêm một lượt nạp thừa; thử lại chỉ đáng với lệnh không xung đột về nghiệp vụ và làm lại được an toàn. Người duyệt thứ hai cần biết mình đến sau.</p></details>
 

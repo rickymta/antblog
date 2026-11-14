@@ -10,14 +10,14 @@ language: vi
 
 Hai tài xế và năm tài khoản khách mới của [Tới Nơi](/articles/du-an-mau-toi-noi) chạy qua lại suốt vài tuần, mỗi chuyến 0,8 đến 3 km, GPS khớp điểm đón. Nhìn riêng, không chuyến nào đáng ngờ; đặt cạnh nhau mới thấy ngần ấy tài khoản chạy với ngần ấy tài xế cho đủ chỉ tiêu thưởng. Đó là `collusion` của bài 54, điểm yếu đã ghi sẵn: bộ chấm theo từng chuyến đạt PR-AUC 0,026; 30 đặc trưng cửa sổ của bài 55 kéo lên 0,651, nhưng trong 1 % chuyến điểm cao nhất vẫn chỉ có 36,1 % chuyến cấu kết.
 
-Bài này thêm **đồ thị** (graph) gồm khách, tài xế và thiết bị, dựng bằng `networkx`. Ta chỉ **gắn cờ nhóm** để người duyệt xem, không kết luận cấu kết: khách quen của một tài xế hay gia đình dùng chung điện thoại cũng tạo hình dạng na ná. Dữ liệu là tổng hợp, nên số đo chỉ nói về bộ này.
+Bài này thêm **đồ thị** (graph) gồm khách, tài xế và thiết bị, dựng bằng `networkx`. Ta chỉ **gắn cờ nhóm** để người duyệt xem, không kết luận cấu kết: khách quen của một tài xế hay gia đình dùng chung điện thoại cũng tạo ra hình dạng tương tự. Dữ liệu là tổng hợp, nên số đo chỉ nói về bộ này.
 
 Đây là bài 58 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần dữ liệu và cách đo của [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric), đặc trưng cửa sổ của [bài 55](/articles/python-feature-engineering-tu-event-kafka) và polars ở [bài 29](/articles/python-polars-pandas-parquet-phan-tich-chuyen).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Ta dựng đồ thị khách–tài xế từ mọi chuyến trong 28 ngày rồi coi thành phần liên thông lớn nhất là «nhóm đáng ngờ» nhất. Cách này có dùng được không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Ở ảnh chụp ngày 50, đồ thị mọi cặp khách–tài xế có 88.100 cạnh nhưng chỉ 6 thành phần liên thông, lớn nhất 10.533 nút: một khách đi hai tài xế là đủ nối hai nhóm. Nó chứa 27 trong 60 khách cấu kết của cửa sổ, lẫn với hàng nghìn tài khoản thường. Phải lọc cạnh yếu và tách nhóm trước.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Ở ảnh chụp ngày 50, đồ thị mọi cặp khách–tài xế có 88.100 cạnh nhưng chỉ 6 thành phần liên thông, lớn nhất 10.533 nút: một khách đi với hai tài xế là đủ nối hai nhóm. Thành phần này chứa 27 trong 60 khách cấu kết của cửa sổ, lẫn với hàng nghìn tài khoản thường. Phải lọc cạnh yếu và tách nhóm trước.</p></details>
 </div>
 
 ## Điều đồ thị thấy mà từng chuyến không thấy
@@ -25,7 +25,7 @@ Bài này thêm **đồ thị** (graph) gồm khách, tài xế và thiết bị
 Cấu kết để lại hai dấu vết quan hệ: cặp khách–tài xế lặp lại và thiết bị dùng chung giữa nhiều tài khoản. Đặc trưng cửa sổ ở bài 55 đếm từng dấu vết riêng; đồ thị cho thấy **hình dạng** chung của chúng, thứ phân biệt nhóm cấu kết với tài xế đông khách quen. Lab có ba loại nút (khách `CU-…`, tài xế `DR-…`, thiết bị `DEV-…`); cạnh khách–tài xế mang trọng số là số chuyến (đồ thị hai phía, bipartite), cạnh tài khoản–thiết bị nối khách hoặc tài xế với máy họ dùng. Bốn khái niệm:
 
 - **Thành phần liên thông** (connected component): tập nút đi được tới nhau.
-- **Độ trung tâm** (centrality): bậc (số cạnh), core number (độ sâu của nút trong lõi dày nhất), betweenness (tỉ lệ đường đi ngắn nhất giữa mọi cặp nút đi qua nút đó; hub rất cao).
+- **Độ trung tâm** (centrality): bậc (số cạnh), core number (độ sâu của nút trong lõi dày nhất), betweenness (tỉ lệ đường đi ngắn nhất giữa mọi cặp nút đi qua nút đó; hub có giá trị rất cao).
 - **Mật độ** (density): số cạnh chia số cạnh tối đa.
 - **Số chu trình độc lập** (cycle rank): E − N + C, C là số thành phần liên thông; 0 với cây, lớn khi có nhiều đường nối chéo.
 
@@ -47,11 +47,11 @@ HistGradientBoosting: tối đa 150 vòng, dừng sớm ở 84 (n_iter_); dừng
 tạo tác của bộ sinh: chuyến sạch dùng NEWUSER50: ngày 0-9 7.8%, ngày 50-59 0.9% (quần thể khách gần như cố định); chuyến gian lận không phải promo_abuse có mã khuyến mãi: 0.0%
 ```
 
-HistGradientBoosting chạy tối đa 150 vòng và dừng sớm ở 84 vòng (`n_iter_`; dừng sớm dùng 10 % train tách ngẫu nhiên). 1 % điểm cao nhất của valid là khoảng 667 chuyến, số người duyệt xem được. Đồ thị thêm được bao nhiêu, nếu dựng đúng thời điểm?
+HistGradientBoosting chạy tối đa 150 vòng và dừng sớm ở 84 vòng (`n_iter_`; dừng sớm dùng 10 % train tách ngẫu nhiên). 1 % điểm cao nhất của valid là khoảng 667 chuyến, tức số chuyến người duyệt xem được. Đồ thị thêm được bao nhiêu, nếu dựng đúng thời điểm?
 
 ## Dựng đồ thị theo cửa sổ thời gian
 
-Quy tắc của bài 55 áp dụng nguyên: chuyến được chấm lúc `PaymentCaptured`, đặc trưng chỉ dùng thứ có trước đó. Dựng đồ thị cho từng chuyến là quá đắt, nên lab chụp **mỗi ngày một ảnh chụp**: lúc 00:00 giờ Việt Nam của ngày D, đồ thị gồm các chuyến đã thu tiền trong 28 ngày trước, và mọi chuyến thanh toán trong ngày D dùng ảnh chụp ấy. Không nhãn nào dùng để dựng đồ thị.
+Quy tắc của bài 55 được áp dụng nguyên vẹn: chuyến được chấm lúc `PaymentCaptured`, đặc trưng chỉ dùng thứ có trước đó. Dựng đồ thị cho từng chuyến là quá đắt, nên lab dựng **mỗi ngày một ảnh chụp**: lúc 00:00 giờ Việt Nam của ngày D, đồ thị gồm các chuyến đã thu tiền trong 28 ngày trước, và mọi chuyến thanh toán trong ngày D dùng ảnh chụp ấy. Không dùng nhãn nào để dựng đồ thị.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -60,7 +60,7 @@ Quy tắc của bài 55 áp dụng nguyên: chuyến được chấm lúc `Payme
 <figcaption>Hình 2. Ảnh chụp của ngày D chỉ nhìn thấy 28 ngày đã qua; chuyến đang chấm không bao giờ nằm trong đồ thị phục vụ chính nó. Bốn bước từ chuyến thô đến đặc trưng.</figcaption>
 </figure>
 
-`window_slice` cắt cửa sổ nửa mở `[đầu ngày − 28, đầu ngày)`. Polars lọc cạnh trước khi vào networkx vì networkx tốn bộ nhớ theo số cạnh: chỉ giữ cặp khách–tài xế từ 2 chuyến (`STRONG_MIN_TRIPS`) và thiết bị có từ 2 tài khoản khác nhau (`graph.py`, trích):
+`window_slice` cắt cửa sổ nửa mở `[đầu ngày − 28, đầu ngày)`. Polars lọc cạnh trước khi vào networkx vì bộ nhớ networkx dùng tăng theo số cạnh: chỉ giữ cặp khách–tài xế từ 2 chuyến (`STRONG_MIN_TRIPS`) và thiết bị có từ 2 tài khoản khác nhau (`graph.py`, trích):
 
 ```python
 def window_slice(trips: pl.DataFrame, day: int, window_days: int = WINDOW_DAYS) -> pl.DataFrame:
@@ -78,7 +78,7 @@ def edge_tables(w: pl.DataFrame, strong_min: int = STRONG_MIN_TRIPS) -> tuple[pl
     return pairs, accounts.join(shared, on="device").sort("account", "device")
 ```
 
-`.sort(...)` không để trang trí: `group_by` của polars không giữ thứ tự, mà thứ tự thêm cạnh quyết định thứ tự nút của networkx và kết quả phát hiện cộng đồng; bản đầu của lab thiếu dòng này. Lọc cạnh đáng giá đến đâu? Bước 2, ảnh chụp đầu ngày 50:
+`.sort(...)` không phải để trang trí: `group_by` của polars không giữ thứ tự, mà thứ tự thêm cạnh quyết định thứ tự nút của networkx và kết quả phát hiện cộng đồng; bản đầu của lab thiếu dòng này. Lọc cạnh đáng giá đến đâu? Bước 2, ảnh chụp đầu ngày 50:
 
 ```text
 giai đoạn                                          cạnh      nút  thành phần  lớn nhất  khách ring
@@ -127,7 +127,7 @@ def group_stats(g: nx.Graph, members: frozenset[str]) -> tuple[dict, dict[str, f
     return stats, betw
 ```
 
-`ordered_subgraph` cũng có lý do: bản đầu đưa thẳng `g.subgraph(comp)` (`comp` là `set`) cho Louvain, và dù đã đặt `seed`, nhóm vẫn đổi giữa các lần chạy vì thứ tự duyệt của tập hợp đổi theo `PYTHONHASHSEED`; `--verify` dựng lại ảnh chụp ở hai tiến trình mới để bắt lỗi. Ở ngày 50, sau khi tách 6 thành phần lớn, đồ thị có 912 nhóm, lớn nhất 53 nút. Dùng nhãn (chỉ để đánh giá), ta tách nhóm «cấu kết thật» (từ một nửa khách và tài xế thuộc các nhóm cấu kết thật) khỏi phần còn lại; `top_betweenness` là betweenness lớn nhất trong nhóm, hình sao cho 1,0:
+`ordered_subgraph` cũng có lý do: bản đầu đưa thẳng `g.subgraph(comp)` (`comp` là `set`) cho Louvain, và dù đã đặt `seed`, nhóm vẫn đổi giữa các lần chạy vì thứ tự duyệt của tập hợp đổi theo `PYTHONHASHSEED`; `--verify` dựng lại ảnh chụp ở hai tiến trình mới để bắt lỗi. Ở ngày 50, sau khi tách 6 thành phần lớn, đồ thị có 912 nhóm, lớn nhất 53 nút. Dùng nhãn (chỉ để đánh giá), ta tách nhóm «cấu kết thật» (có ít nhất một nửa số khách và tài xế thuộc các nhóm cấu kết thật) khỏi phần còn lại; `top_betweenness` là betweenness lớn nhất trong nhóm, nhóm hình sao cho giá trị 1,0:
 
 ```text
 loại nhóm         số nhóm             size        customers          drivers          devices          density       cycle_rank  top_betweenness
@@ -135,7 +135,7 @@ còn lại            33,365            3.000            2.000            1.000 
 cấu kết thật          474           11.000            5.000            2.000            4.000            0.280            6.000            0.577
 ```
 
-Nhóm bình thường có trung vị 3 nút, 0 chu trình, betweenness lớn nhất 1,0. Nhóm cấu kết thật lớn hơn (11 nút: 5 khách, 2 tài xế, 4 thiết bị), 6 chu trình, betweenness lớn nhất 0,577, và mật độ thấp hơn (0,280 so với 0,667) vì nhóm tí hon luôn dày, nên mật độ chỉ làm sàn ở bước sau. Bảng chỉ tính nhóm từ 3 nút (33.839 trên 45.057 nhóm-ngày), trung vị theo nhóm-ngày.
+Nhóm bình thường có trung vị 3 nút, 0 chu trình, betweenness lớn nhất 1,0. Nhóm cấu kết thật lớn hơn (11 nút: 5 khách, 2 tài xế, 4 thiết bị), 6 chu trình, betweenness lớn nhất 0,577, và mật độ thấp hơn (0,280 so với 0,667) vì nhóm tí hon luôn dày, nên ở bước sau mật độ chỉ đóng vai trò điều kiện tối thiểu. Bảng chỉ tính nhóm từ 3 nút (33.839 trên 45.057 nhóm-ngày), trung vị theo nhóm-ngày.
 
 ## Gắn cờ nhóm cho người duyệt
 
@@ -155,7 +155,7 @@ def is_suspect(s: dict, rule: Rule = RULE) -> bool:
             and s["density"] >= rule.min_density and s["top_betweenness"] <= rule.max_top_betweenness)
 ```
 
-`tune_rule` quét lưới trên nhóm của train (ảnh chụp ngày 7 đến 29) và chọn luật có F1 cao nhất trên nhóm-ngày; sự thật nền để chọn chỉ lấy từ chuyến thanh toán trước ngày 30 (nhãn cuối). Các cột cuối là kết quả của đúng luật đó trên valid. Nhóm-ngày «đúng» khi từ một nửa khách và tài xế của nó thuộc nhóm cấu kết thật:
+`tune_rule` quét lưới trên nhóm của train (ảnh chụp ngày 7 đến 29) và chọn luật có F1 cao nhất trên nhóm-ngày; ground truth dùng để chọn chỉ lấy từ chuyến thanh toán trước ngày 30 (nhãn cuối). Các cột cuối là kết quả của đúng luật đó trên valid. Nhóm-ngày «đúng» khi có ít nhất một nửa số khách và tài xế của nó thuộc nhóm cấu kết thật:
 
 ```text
  cycle_rank  density  betw<=  F1 train  cờ valid   đúng  precision  recall  F1 valid
@@ -200,7 +200,7 @@ Riêng «từ 2 tài xế và 3 khách» gắn cờ hàng nghìn nhóm-ngày ở
   50-59               101    67      0.821   0.545
 ```
 
-Người vận hành quan tâm hơn: nhóm cấu kết thật bị phát hiện sau bao lâu? Lab nối 15 nhóm cấu kết thật (thành phần liên thông của các chuyến `collusion`) với nhóm bị cờ đầu tiên chứa từ 2 khách của chúng («ngày đầu» là ngày có chuyến cấu kết đầu tiên, tính từ 02/03/2026). Số nhóm do bộ sinh quyết định: nhóm cuối bị cắt bớt cho đủ tổng chuyến (nhóm 14 chỉ 1 khách, 2 chuyến, dùng chung thiết bị với nhóm 12), và seed khác cho số nhóm khác:
+Người vận hành quan tâm hơn đến câu hỏi này: nhóm cấu kết thật bị phát hiện sau bao lâu? Lab nối 15 nhóm cấu kết thật (thành phần liên thông của các chuyến `collusion`) với nhóm bị cờ đầu tiên chứa ít nhất 2 khách của chúng («ngày đầu» là ngày có chuyến cấu kết đầu tiên, tính từ 02/03/2026). Số nhóm do bộ sinh quyết định: nhóm cuối bị cắt bớt cho đủ tổng chuyến (nhóm 14 chỉ 1 khách, 2 chuyến, dùng chung thiết bị với nhóm 12), và seed khác cho số nhóm khác:
 
 ```text
  nhóm  khách  chuyến  ngày đầu  ngày cờ  trễ (ngày)  chuyến sau cờ  train  valid
@@ -224,7 +224,7 @@ nhóm đã có chuyến ở train (ngưỡng được chọn khi đã thấy ch�
 cặp nhóm cấu kết thật dùng chung ít nhất một thiết bị khách: [(12, 14)]
 ```
 
-Luật bắt 12 trên 15 nhóm (khoảng tin cậy Wilson 95 %: 0,548 đến 0,930), độ trễ trung vị 6 ngày; 360 trên 600 chuyến cấu kết (60,0 %) thanh toán từ ngày nhóm bị cờ trở đi. Số này không phải held-out: 13 nhóm đã có chuyến ở train, nơi chọn ngưỡng; 2 nhóm chưa có chuyến nào ở train đều bị bắt; valid có 9 nhóm còn hoạt động, 7 đã có ở train. Với ba nhóm không bị cờ và hai nhóm bị cờ muộn, mỗi ngày ta lấy nhóm chứa nhiều khách của nó nhất và đếm điều kiện làm nó trượt:
+Luật bắt 12 trên 15 nhóm (khoảng tin cậy Wilson 95 %: 0,548 đến 0,930), độ trễ trung vị 6 ngày; 360 trên 600 chuyến cấu kết (60,0 %) thanh toán từ ngày nhóm bị cờ trở đi. Số này không phải held-out: 13 nhóm đã có chuyến ở train, nơi chọn ngưỡng; 2 nhóm chưa có chuyến nào ở train đều bị bắt; valid có 9 nhóm còn hoạt động, 7 đã có ở train. Với ba nhóm không bị cờ và hai nhóm bị cờ muộn, mỗi ngày ta lấy nhóm chứa nhiều khách của nó nhất và đếm điều kiện khiến nó không đạt:
 
 ```text
  nhóm  chuyến  ngày có nhóm  đạt luật  chỉ density  chỉ betw  density+betw  khác
@@ -235,7 +235,7 @@ Luật bắt 12 trên 15 nhóm (khoảng tin cậy Wilson 95 %: 0,548 đến 0,9
    14       2             0         0            0         0             0     0
 ```
 
-Nhóm 4 (5 khách, 42 chuyến) chưa lần nào bị cờ. Qua 43 ngày có nhóm chứa nó, mật độ trượt ở 32 ngày (10 chỉ mật độ, 22 cùng betweenness), betweenness một mình chưa lần nào: nguyên nhân chính là mật độ của nhóm Louvain đã gộp nó với khách thường, không phải ngưỡng betweenness. Nhóm 7 thì ngược lại: 29 trong 38 ngày chỉ trượt betweenness, nên ngưỡng 0,6 là cạnh sắc ở đó. Nhóm 12 (9 chuyến) và 14 (2 chuyến) quá nhỏ để thành lưới. Hạ ngưỡng không chữa được: betweenness 0,7 nâng recall trên valid lên 0,729 nhưng kéo precision từ 0,863 xuống 0,729.
+Nhóm 4 (5 khách, 42 chuyến) chưa lần nào bị cờ. Qua 43 ngày có nhóm chứa nó, mật độ trượt ở 32 ngày (10 chỉ mật độ, 22 cùng betweenness), betweenness một mình chưa lần nào: nguyên nhân chính là mật độ của nhóm Louvain đã gộp nó với khách thường, không phải ngưỡng betweenness. Nhóm 7 thì ngược lại: 29 trong 38 ngày chỉ trượt betweenness, nên chính ngưỡng 0,6 loại nhóm này ra. Nhóm 12 (9 chuyến) và 14 (2 chuyến) quá nhỏ để thành lưới. Hạ ngưỡng không chữa được: betweenness 0,7 nâng recall trên valid lên 0,729 nhưng kéo precision từ 0,863 xuống 0,729.
 
 Cuối cùng, hàng đợi người duyệt nhận bản ghi nêu bằng chứng và thành viên, không nêu kết luận (mã nhóm lấy theo thành viên có ID nhỏ nhất, vì số hiệu trong ảnh chụp đổi mỗi ngày). Đây là nhóm có nhiều chuyến nhất ở ảnh chụp ngày 59:
 
@@ -276,7 +276,7 @@ Cuối cùng, hàng đợi người duyệt nhận bản ghi nêu bằng chứng
 
 ## Đưa đặc trưng đồ thị vào mô hình, và rò rỉ
 
-`add_graph_features` gắn 14 đặc trưng vào mỗi chuyến từ ảnh chụp của ngày chuyến được thanh toán: trọng số cạnh khách–tài xế (`g_edge_trips`), cùng nhóm không, nhóm có bị cờ không, và với mỗi bên (`gc_` khách, `gd_` tài xế) kích thước nhóm, số chu trình, mật độ, core number, betweenness (tài xế thêm bậc). Nút chưa có trong đồ thị nhận 0. Trung bình trên valid:
+`add_graph_features` gắn 14 đặc trưng vào mỗi chuyến từ ảnh chụp của ngày chuyến được thanh toán: trọng số cạnh khách–tài xế (`g_edge_trips`), hai bên có cùng nhóm hay không, nhóm có bị cờ hay không, và với mỗi bên (`gc_` khách, `gd_` tài xế) kích thước nhóm, số chu trình, mật độ, core number, betweenness (tài xế thêm bậc). Nút chưa có trong đồ thị nhận 0. Trung bình trên valid:
 
 ```text
 loại             gc_group_size     gc_cycle_rank    gd_betweenness      g_edge_trips   g_suspect_group
@@ -297,7 +297,7 @@ chỉ 14 đặc trưng đồ thị              0.235      0.951      96.8%     
 luật nhóm một mình, không mô hình: gắn cờ 125 chuyến; 99/155 chuyến collusion (recall 63.9%); 79.2% số chuyến bị cờ là gian lận (mọi loại), 79.2% là collusion
 ```
 
-PR-AUC tổng tăng từ 0,886 lên 0,915; với `collusion`, PR-AUC theo loại tăng từ 0,651 lên 0,963 và recall trong 1 % điểm cao nhất từ 36,1 % lên 80,6 % (hình 3). Đặc trưng đồ thị một mình cho `collusion` 0,951 nhưng chỉ 0,235 tổng thể: nó bổ sung, không thay thế. Luật nhóm chạy một mình gắn cờ 125 chuyến: 99 trên 155 chuyến `collusion` nằm trong đó (63,9 %), 26 chuyến còn lại là chuyến sạch, tức 79,2 % chuyến bị cờ là `collusion`.
+PR-AUC tổng tăng từ 0,886 lên 0,915; với `collusion`, PR-AUC theo loại tăng từ 0,651 lên 0,963 và recall trong 1 % điểm cao nhất từ 36,1 % lên 80,6 % (hình 3). Đặc trưng đồ thị một mình cho `collusion` 0,951 nhưng chỉ 0,235 tổng thể: đặc trưng đồ thị bổ sung chứ không thay thế được. Luật nhóm chạy một mình gắn cờ 125 chuyến: 99 trên 155 chuyến `collusion` nằm trong đó (63,9 %), 26 chuyến còn lại là chuyến sạch, tức 79,2 % chuyến bị cờ là `collusion`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -306,7 +306,7 @@ PR-AUC tổng tăng từ 0,886 lên 0,915; với `collusion`, PR-AUC theo loại
 <figcaption>Hình 3. Với loại collusion, đặc trưng đồ thị nâng PR-AUC theo loại và recall trong 1 % điểm cao nhất; một mình chúng đã vượt 30 đặc trưng cửa sổ.</figcaption>
 </figure>
 
-Đồ thị rò rỉ rất dễ vì «dựng một lần cho cả kỳ» trông tự nhiên. Thứ nhất, phép thử cắt cụt như bài 55: ảnh chụp ngày D dựng từ event cắt ở đầu ngày D phải giống ảnh chụp dựng từ toàn bộ dữ liệu. Lab thử ba ngày, cả bảng chuyến bỏ cột nhãn, và một lỗi cố ý (cửa sổ dài thêm 3 ngày về tương lai):
+Đồ thị rất dễ gây rò rỉ vì «dựng một lần cho cả kỳ» trông tự nhiên. Thứ nhất, phép thử cắt cụt như bài 55: ảnh chụp ngày D dựng từ event cắt ở đầu ngày D phải giống ảnh chụp dựng từ toàn bộ dữ liệu. Lab thử ba ngày, cả bảng chuyến bỏ cột nhãn, và một lỗi cố ý (cửa sổ dài thêm 3 ngày về tương lai):
 
 ```text
 ảnh chụp ngày (45, 50, 55): dựng từ event cắt ở đầu ngày giống dựng từ toàn bộ? [True, True, True]
@@ -315,7 +315,7 @@ PR-AUC tổng tăng từ 0,886 lên 0,915; với `collusion`, PR-AUC theo loại
 ảnh chụp ngày 50 dựng lại trong tiến trình mới với PYTHONHASHSEED=1 và 2: dấu vân tay cd6eef9ea024a72c, cd6eef9ea024a72c; tiến trình này cd6eef9ea024a72c
 ```
 
-Thứ hai, lỗi hay gặp nhất: dựng đồ thị MỘT lần trên cả 60 ngày rồi gắn cho mọi chuyến, đếm cả chuyến đang chấm và chuyến sau nó. Lab huấn luyện trên nó, đo offline (valid cũng dùng đồ thị toàn kỳ) và phục vụ (valid dùng ảnh chụp theo ngày):
+Thứ hai, lỗi hay gặp nhất: dựng đồ thị MỘT lần trên cả 60 ngày rồi gắn cho mọi chuyến, đếm cả chuyến đang chấm và chuyến sau nó. Lab huấn luyện trên nó, đo theo hai cách: offline (valid cũng dùng đồ thị toàn kỳ) và phục vụ (valid dùng ảnh chụp theo ngày):
 
 ```text
 mô hình                                       PR-AUC  collusion PR-AUC
@@ -337,7 +337,7 @@ Số offline 0,950 đẹp hơn số trung thực 0,915, và khi phục vụ th�
 
 ## Quy mô: khi 730 triệu cạnh không vừa bộ nhớ
 
-networkx giữ đồ thị bằng dict thuần Python: tiện cho thí nghiệm, nặng cho quy mô. Lab dựng đồ thị thô (mọi cặp khách–tài xế) ở bốn độ dài cửa sổ tính đến ngày 58, đúng như `build_graph` (chuỗi ID, thuộc tính `weight`, `kind`), đo thời gian và bộ nhớ Python (`tracemalloc`, chuỗi ID sinh trong phiên đo), rồi đo betweenness trên thành phần lớn nhất của ảnh chụp ngày 58:
+networkx giữ đồ thị bằng dict thuần Python: tiện cho thí nghiệm, nhưng nặng khi chạy ở quy mô lớn. Lab dựng đồ thị thô (mọi cặp khách–tài xế) ở bốn độ dài cửa sổ tính đến ngày 58, đúng theo cách `build_graph` dựng (chuỗi ID, thuộc tính `weight`, `kind`), đo thời gian và bộ nhớ Python (`tracemalloc`, chuỗi ID sinh trong phiên đo), rồi đo betweenness trên thành phần lớn nhất của ảnh chụp ngày 58:
 
 ```text
 đồ thị dựng như build_graph (chuỗi ID, thuộc tính trên cạnh và nút), đo bộ nhớ bằng tracemalloc:
@@ -355,7 +355,7 @@ betweenness trên thành phần lớn nhất (472 nút, 514 cạnh): chính xác
 
 Thời gian đo khi máy còn bận (load average 58,69 trên 10 lõi) nên chỉ để biết cỡ. Bộ nhớ là 416 đến 583 byte mỗi cạnh của đồ thị thô và 724 của đồ thị đã lọc. Bản đo đầu của lab chỉ đếm cấu trúc, không đếm chuỗi ID và thuộc tính, và báo 170 byte, thấp hơn thực tế gần ba lần. Ngoại suy (phép nhân, không phải phép đo): 2 triệu chuyến mỗi ngày cho cửa sổ 28 ngày tối đa 56 triệu cạnh, 22 đến 24 GiB; 730 triệu cạnh của cả năm, 283 đến 316 GiB; đồ thị đã lọc ở 56 triệu cạnh thô còn khoảng 3,1 triệu cạnh, cỡ 2,1 GiB.
 
-Ba hướng thu nhỏ, theo thứ tự nên thử: lọc bằng polars trước networkx (giữ lại 3,4 đến 7,1 % tuỳ cửa sổ; tỉ lệ đó có giữ ở quy mô lớn hay không là giả định chưa kiểm), dựng riêng từng thành phố, và khi đồ thị không vừa một máy thì dùng cơ sở dữ liệu đồ thị (graph database) hay engine phân tán (lab không đo hướng này). Betweenness chính xác đắt nhất (thuật toán Brandes, O(V·E)): thành phần lớn nhất chỉ 472 nút đã mất 0,98 giây; lấy mẫu 50 nút nguồn mất 0,35 giây nhưng chỉ giữ 18 trong 20 nút đứng đầu, nên lab chỉ tính betweenness trong từng nhóm đã tách.
+Ba hướng giảm kích thước đồ thị, theo thứ tự nên thử: lọc bằng polars trước networkx (giữ lại 3,4 đến 7,1 % tuỳ cửa sổ; tỉ lệ đó có giữ ở quy mô lớn hay không là giả định chưa kiểm), dựng riêng từng thành phố, và khi đồ thị không vừa một máy thì dùng cơ sở dữ liệu đồ thị (graph database) hay engine phân tán (lab không đo hướng này). Betweenness chính xác đắt nhất (thuật toán Brandes, O(V·E)): thành phần lớn nhất chỉ 472 nút đã mất 0,98 giây; lấy mẫu 50 nút nguồn mất 0,35 giây nhưng chỉ trùng 18 trong 20 nút đứng đầu, nên lab chỉ tính betweenness trong từng nhóm đã tách.
 
 ## Chạy và kiểm chứng
 
@@ -376,7 +376,7 @@ Hai hình mẫu dựng bằng tay (không qua dữ liệu):
 Kiểm chứng: OK 53/53
 ```
 
-`--verify` in `OK 53/53`, kiểm bất biến chứ không kiểm tốc độ: thành phần khổng lồ của đồ thị thô, lọc cạnh dưới 10 %, ảnh chụp không đổi khi cắt event, bỏ cột nhãn hay đổi `PYTHONHASHSEED`, `g_edge_trips` khớp phép đếm lại độc lập, luật cố định là luật tốt nhất của lưới trên train, và ở cả ba seed đặc trưng đồ thị nâng `collusion`, đồ thị toàn kỳ đẹp offline hơn phục vụ. Lần chạy `--verify` cuối: 58 phút 8 giây (load average 279,91 327,13 347,87 lúc kết thúc).
+`--verify` in `OK 53/53`, kiểm tra bất biến chứ không đo tốc độ: thành phần khổng lồ của đồ thị thô, lọc cạnh dưới 10 %, ảnh chụp không đổi khi cắt event, bỏ cột nhãn hay đổi `PYTHONHASHSEED`, `g_edge_trips` khớp phép đếm lại độc lập, luật cố định là luật tốt nhất của lưới trên train, và ở cả ba seed đặc trưng đồ thị nâng `collusion`, đồ thị toàn kỳ đẹp offline hơn phục vụ. Lần chạy `--verify` cuối: 58 phút 8 giây (load average 279,91 327,13 347,87 lúc kết thúc).
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -388,12 +388,12 @@ Kiểm chứng: OK 53/53
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Dữ liệu là tổng hợp, và bộ sinh có hai tạo tác ảnh hưởng mọi valid của phần 07: (a) tỉ lệ chuyến sạch dùng `NEWUSER50` giảm từ 7,8 % (ngày 0 đến 9) xuống 0,9 % (ngày 50 đến 59) vì quần thể khách gần như cố định; (b) chuyến gian lận không phải `promo_abuse` có mã khuyến mãi ở 0,0 % trường hợp, nên đặc trưng như `cust_promo_share_30d` lớn hơn 0 tố «sạch» dễ hơn ngoài đời. Chỉ có 15 nhóm cấu kết, do chính ta sinh theo một khuôn (2 đến 3 tài xế, khách mới, thiết bị dùng chung), một nhóm bị cắt cụt: «bắt được 12» có khoảng tin cậy rộng và luật chọn trên chúng sẽ không giữ nguyên với cấu kết thật. Precision đếm theo nhóm-ngày. Cấu kết bắt đầu trong ngày chỉ được thấy từ hôm sau; đồ thị nằm trong RAM của một tiến trình; lab dùng nhãn cuối, ngoài đời nhãn đến trễ hàng tuần. Đồ thị tài khoản–thiết bị là dữ liệu cá nhân, cần cơ sở pháp lý và retention riêng. Nhóm bị cờ là gợi ý cho người duyệt, không phải kết luận, và không tự khoá tài khoản.</p>
+<p>Dữ liệu là tổng hợp, và bộ sinh có hai tạo tác ảnh hưởng đến mọi valid của phần 07: (a) tỉ lệ chuyến sạch dùng `NEWUSER50` giảm từ 7,8 % (ngày 0 đến 9) xuống 0,9 % (ngày 50 đến 59) vì quần thể khách gần như cố định; (b) chuyến gian lận không phải `promo_abuse` có mã khuyến mãi ở 0,0 % trường hợp, nên đặc trưng như `cust_promo_share_30d` lớn hơn 0 báo hiệu «sạch» dễ hơn ngoài đời. Chỉ có 15 nhóm cấu kết, do chính ta sinh theo một khuôn (2 đến 3 tài xế, khách mới, thiết bị dùng chung), một nhóm bị cắt cụt: «bắt được 12» có khoảng tin cậy rộng và luật chọn trên chúng sẽ không giữ nguyên với cấu kết thật. Precision đếm theo nhóm-ngày. Cấu kết bắt đầu trong ngày chỉ được thấy từ hôm sau; đồ thị nằm trong RAM của một tiến trình; lab dùng nhãn cuối, ngoài đời nhãn đến trễ hàng tuần. Đồ thị tài khoản–thiết bị là dữ liệu cá nhân, cần cơ sở pháp lý và retention riêng. Nhóm bị cờ là gợi ý cho người duyệt, không phải kết luận, và không tự khoá tài khoản.</p>
 </div>
 
-**Bài tập:** (1) Hai tài xế và ba khách, mỗi khách đi mỗi tài xế đúng 2 chuyến trong 28 ngày, không thiết bị chung: tính số nút, cạnh, chu trình độc lập, mật độ; `RULE` có gắn cờ không, và điều đó nói gì về luật? (2) Với 2 triệu chuyến mỗi ngày, cửa sổ 28 ngày, mỗi chuyến một cặp mới, 465 byte mỗi cạnh (đồ thị thô 28 ngày của lab), networkx cần bao nhiêu GiB; nếu polars giữ 5,6 % cạnh với 724 byte mỗi cạnh thì sao?
+**Bài tập:** (1) Hai tài xế và ba khách, mỗi khách đi với mỗi tài xế đúng 2 chuyến trong 28 ngày, không thiết bị chung: tính số nút, cạnh, chu trình độc lập, mật độ; `RULE` có gắn cờ không, và điều đó nói gì về luật? (2) Với 2 triệu chuyến mỗi ngày, cửa sổ 28 ngày, mỗi chuyến một cặp mới, 465 byte mỗi cạnh (đồ thị thô 28 ngày của lab), networkx cần bao nhiêu GiB; nếu polars giữ 5,6 % cạnh với 724 byte mỗi cạnh thì sao?
 
-<details><summary>Xem lời giải</summary><p>(1) 5 nút, 6 cạnh, chu trình độc lập 6 − 5 + 1 = <b>2</b>, mật độ 6 / 10 = <b>0,6</b>, betweenness lớn nhất 0,25. Cả năm điều kiện của <code>RULE</code> đều đạt nên nhóm <b>bị gắn cờ</b> (lab dựng đúng ca này, kết quả ở trên), dù đó cũng có thể là hai tài xế có ba khách quen chung hợp lệ: luật chỉ nói «hãy xem», phân biệt cần tín hiệu khác. Hình sao 1 tài xế × 5 khách có 0 chu trình nên không bị cờ. (2) 56 triệu cạnh × 465 byte ≈ 2,6 × 10<sup>10</sup> byte, khoảng <b>24 GiB</b>; giữ 5,6 % còn khoảng 3,14 triệu cạnh × 724 byte ≈ <b>2,1 GiB</b>, với điều kiện dữ liệu thật cũng giữ tỉ lệ cạnh lặp lại như dữ liệu tổng hợp và byte mỗi cạnh không đổi khi đồ thị dày hơn.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) 5 nút, 6 cạnh, chu trình độc lập 6 − 5 + 1 = <b>2</b>, mật độ 6 / 10 = <b>0,6</b>, betweenness lớn nhất 0,25. Cả năm điều kiện của <code>RULE</code> đều đạt nên nhóm <b>bị gắn cờ</b> (lab dựng đúng trường hợp này, kết quả ở trên), dù đó cũng có thể là hai tài xế có ba khách quen chung hợp lệ: luật chỉ nói «hãy xem», phân biệt cần tín hiệu khác. Hình sao 1 tài xế × 5 khách có 0 chu trình nên không bị cờ. (2) 56 triệu cạnh × 465 byte ≈ 2,6 × 10<sup>10</sup> byte, khoảng <b>24 GiB</b>; giữ 5,6 % còn khoảng 3,14 triệu cạnh × 724 byte ≈ <b>2,1 GiB</b>, với điều kiện dữ liệu thật cũng giữ tỉ lệ cạnh lặp lại như dữ liệu tổng hợp và byte mỗi cạnh không đổi khi đồ thị dày hơn.</p></details>
 
 Bài trước: [bài 57](/articles/python-scikit-learn-lightgbm-imbalanced-cross-validation). Bài tiếp: [bài 59](/articles/python-real-time-scoring-feature-store-redis-latency).
 

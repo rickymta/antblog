@@ -1,14 +1,14 @@
 ---
 slug: python-dieu-kien-vong-lap-ham
 title: "Điều kiện, vòng lặp và hàm: tách quy tắc tính cước"
-summary: "Bài 03: dùng if/elif/else, for, while, tham số mặc định và keyword-only để tách calculate_fare(distance_km, *, service) cho ride, food, parcel; từ chối ngoài miền bằng ValueError, kiểm bằng --verify."
+summary: "Bài 03: dùng if/elif/else, for, while, tham số mặc định và keyword-only để tách calculate_fare(distance_km, *, service) cho ride, food, parcel; từ chối giá trị ngoài miền bằng ValueError, kiểm tra bằng --verify."
 category: python-beginner
 level: beginner
 tags: [python, toi-noi, control-flow, functions]
 language: vi
 ---
 
-Khi thêm dịch vụ giao đồ ăn, bộ phận vận hành của [Tới Nơi](/articles/du-an-mau-toi-noi) hỏi một câu tưởng đơn giản: «Công thức này có đang nhận cả đơn đồ ăn và bưu kiện không, hay chỉ tính cho xe?». Ở hai bài trước ta đã có hàm tính cước, nhưng nó còn mỏng: chưa kiểm miền khoảng cách, chưa có docstring ghi hợp đồng, chỉ biết một loại chuyến. Hôm nay ta bổ sung rẽ nhánh, vòng lặp, tham số có tên và một bộ kiểm tra để hàm ấy đủ tin cậy làm lõi cho các bài sau.
+Khi thêm dịch vụ giao đồ ăn, bộ phận vận hành của [Tới Nơi](/articles/du-an-mau-toi-noi) hỏi một câu tưởng đơn giản: «Công thức này có đang nhận cả đơn đồ ăn và bưu kiện không, hay chỉ tính cho xe?». Ở hai bài trước ta đã có hàm tính cước, nhưng hàm ấy còn mỏng: chưa kiểm tra miền khoảng cách, chưa có docstring ghi hợp đồng, chỉ biết một loại chuyến. Hôm nay ta bổ sung rẽ nhánh, vòng lặp, tham số có tên và một bộ kiểm tra để hàm ấy đủ tin cậy mà làm lõi cho các bài sau.
 
 Đây là bài 03 của lộ trình **Python cơ bản qua Tới Nơi**. Bài tiếp nối [kiểu dữ liệu và Decimal](/articles/python-bien-kieu-du-lieu-decimal); ta vẫn dùng `Decimal` cho tiền và khoảng cách.
 
@@ -20,7 +20,7 @@ Khi thêm dịch vụ giao đồ ăn, bộ phận vận hành của [Tới Nơi]
 
 ## Rẽ nhánh với if, elif, else
 
-Khối lệnh trong Python được xác định bằng **thụt lề**, không có dấu `{}`. Sau dòng kết thúc bằng `:`, mọi dòng thụt vào cùng mức thuộc về cùng khối. Thụt sai mức gây `IndentationError`; trộn tab với khoảng trắng trong cùng khối gây `TabError` (một lớp con của `IndentationError`). Hãy để editor chèn 4 khoảng trắng cho mỗi mức.
+Python xác định khối lệnh bằng **thụt lề**, không có dấu `{}`. Sau dòng kết thúc bằng `:`, mọi dòng thụt vào cùng mức thuộc về cùng khối. Thụt sai mức gây `IndentationError`; trộn tab với khoảng trắng trong cùng khối gây `TabError` (một lớp con của `IndentationError`). Hãy để trình soạn thảo chèn 4 khoảng trắng cho mỗi mức.
 
 ```python
 def classify_fare(total: Decimal) -> str:
@@ -33,7 +33,7 @@ def classify_fare(total: Decimal) -> str:
         return "đường dài"
 ```
 
-Các nhánh được thử từ trên xuống; nhánh đầu tiên có điều kiện đúng chạy và các nhánh sau bị bỏ qua. Vì vậy thứ tự `elif` quan trọng: nếu đặt điều kiện rộng lên trước, nhánh hẹp phía sau sẽ không bao giờ chạy.
+Python thử các nhánh từ trên xuống; nhánh đầu tiên có điều kiện đúng chạy và các nhánh sau bị bỏ qua. Vì vậy thứ tự `elif` quan trọng: nếu đặt điều kiện rộng lên trước, nhánh hẹp phía sau sẽ không bao giờ chạy.
 
 Điều kiện ghép dùng `and`, `or`, `not`, đọc gần như tiếng Anh. `and` và `or` có short-circuit: vế phải chỉ được đánh giá khi cần. Python còn cho phép **chained comparison** để viết miền như toán học:
 
@@ -44,9 +44,9 @@ if not MIN_KM <= distance_km <= MAX_KM:
 
 `MIN_KM <= distance_km <= MAX_KM` là miền đóng 0 đến 100 km. Ta chủ động từ chối giá trị ngoài miền thay vì sửa lén thành 0 hay 100: một báo giá cho -1 km cần được người gọi biết là sai, không được trở thành một chuyến miễn phí.
 
-Câu `if` ở trên là một **guard clause**: kiểm đầu vào ngay đầu hàm và thoát sớm bằng `raise` hoặc `return`, để phần còn lại của hàm chỉ phải nghĩ tới dữ liệu hợp lệ. Cách viết này tránh được chuỗi `if` lồng nhau ba bốn tầng thụt lề, khó đọc và khó kiểm thử.
+Câu `if` ở trên là một **guard clause**: kiểm tra đầu vào ngay đầu hàm và thoát sớm bằng `raise` hoặc `return`, để phần còn lại của hàm chỉ phải nghĩ tới dữ liệu hợp lệ. Cách viết này tránh được chuỗi `if` lồng nhau ba bốn tầng thụt lề, khó đọc và khó kiểm thử.
 
-Một lưu ý về «truthiness»: `Decimal("0")` được coi là sai trong điều kiện, như `0`, chuỗi rỗng hay list rỗng. Vì vậy `if not distance_km:` sẽ lẫn «chưa nhập» với «0 km hợp lệ». Khi cần phân biệt, hãy so sánh tường minh (`is None`, `== 0`) thay vì dựa vào truthiness.
+Một lưu ý về «truthiness»: `Decimal("0")` được coi là sai trong điều kiện, như `0`, chuỗi rỗng hay list rỗng. Vì vậy `if not distance_km:` sẽ nhầm lẫn «chưa nhập» với «0 km hợp lệ». Khi cần phân biệt, hãy so sánh tường minh (`is None`, `== 0`) thay vì dựa vào truthiness.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -114,7 +114,7 @@ def print_fare_table() -> None:
 
 `format_vnd` là hàm nhỏ đổi `12000` thành `12.000` để dễ đọc; bài 04 sẽ giải thích kỹ vì sao nó phải làm tròn HALF_UP trước (spec `.0f` của f-string làm tròn HALF_EVEN) và vì sao không dùng `locale`. Ở bài này cứ xem nó là hàm định dạng.
 
-`continue` bỏ phần còn lại của lần lặp hiện tại để sang phần tử kế tiếp; `break` thoát cả vòng; `return` thoát cả hàm. Một yêu cầu sai khoảng cách chỉ làm dòng đó bị từ chối, các dòng còn lại vẫn được tính. Đừng nhầm `continue` với `break`: nhầm lẫn này sẽ khiến một dòng lỗi làm mất cả lô.
+`continue` bỏ phần còn lại của lần lặp hiện tại để sang phần tử kế tiếp; `break` thoát cả vòng; `return` thoát cả hàm. Một yêu cầu có khoảng cách sai chỉ làm dòng đó bị từ chối, các dòng còn lại vẫn được tính. Đừng nhầm `continue` với `break`: nhầm lẫn này sẽ khiến một dòng lỗi làm mất cả lô.
 
 `while` lặp khi điều kiện còn đúng và hợp với bài toán không biết trước số bước. Ví dụ: một khách có ngân sách 30.000 VND hỏi đi được xa nhất bao nhiêu km, ta tăng từng 0,5 km tới khi bước kế tiếp vượt ngân sách:
 
@@ -130,11 +130,11 @@ def max_distance_for_budget(budget: Decimal, *, service: str = "ride") -> Decima
     return distance
 ```
 
-Mỗi vòng `while` phải làm điều kiện tiến dần về sai (ở đây `distance` tăng, hoặc `break` thoát). Quên cập nhật biến là nguyên nhân thường gặp nhất của vòng lặp vô hạn. Với ngân sách 30.000 VND, khách đi tối đa 6 km (12.000 + 4 × 4.500 = 30.000); với 20.000 VND chỉ đi được tối đa 3,5 km (4 km đã tốn 21.000). Vì bước nhảy là 0,5 km, kết quả luôn là bội của 0,5.
+Mỗi vòng `while` phải khiến điều kiện tiến dần về sai (ở đây `distance` tăng, hoặc `break` thoát). Quên cập nhật biến là nguyên nhân thường gặp nhất của vòng lặp vô hạn. Với ngân sách 30.000 VND, khách đi tối đa 6 km (12.000 + 4 × 4.500 = 30.000); với 20.000 VND chỉ đi được tối đa 3,5 km (4 km đã tốn 21.000). Vì bước nhảy là 0,5 km, kết quả luôn là bội của 0,5.
 
 ## Hàm: nhận tham số, trả kết quả, không in
 
-Hàm được khai báo bằng `def`, kết quả đi ra qua `return`. Một hàm không có `return` sẽ trả `None`. Quy tắc tính cước nên là một hàm **thuần**: cùng đầu vào cho cùng kết quả, không `print`, không đọc file, không hỏi người dùng. Lúc nào cần hiển thị, người gọi quyết định in ra console, trả JSON hay vẽ lên app.
+Hàm được khai báo bằng `def`, kết quả đi ra qua `return`. Một hàm không có `return` sẽ trả `None`. Quy tắc tính cước nên là một hàm **thuần**: cùng đầu vào cho cùng kết quả, không `print`, không đọc file, không hỏi người dùng. Khi cần hiển thị, người gọi quyết định in ra màn hình, trả JSON hay vẽ lên app.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -195,7 +195,7 @@ Mặc định list bị dùng chung:
 
 Lần gọi thứ hai của `append_bad` thấy lại `'a'` của lần đầu vì cả hai dùng cùng một list. Quy ước an toàn: mặc định là `None`, tạo đối tượng mới trong thân hàm. Trong một service đặt chuyến chạy lâu ngày, đây là kiểu lỗi làm «đơn của khách này lẫn vào đơn của khách trước» và chỉ lộ ra sau nhiều giờ chạy.
 
-### Keyword-only với dấu `*`
+### Tham số keyword-only với dấu `*`
 
 Trong chữ ký `calculate_fare(distance_km, *, service="ride")`, dấu `*` nghĩa là mọi tham số đứng sau nó **chỉ** được truyền theo tên. Ta dùng nó cho `service` vì ba giá trị `ride`, `food`, `parcel` là chuỗi, dễ truyền nhầm vị trí nếu sau này hàm có thêm tham số:
 
@@ -204,11 +204,11 @@ calculate_fare(Decimal("5"), service="food")   # đúng
 calculate_fare(Decimal("5"), "food")           # TypeError
 ```
 
-Lời gọi thứ hai báo `TypeError: calculate_fare() takes 1 positional argument but 2 were given`. Lỗi rõ ràng này tốt hơn việc âm thầm chạy sai.
+Lời gọi thứ hai báo `TypeError: calculate_fare() takes 1 positional argument but 2 were given`. Lỗi rõ ràng này tốt hơn việc chạy sai mà không báo gì.
 
 ### Trả về nhiều giá trị và docstring
 
-Python cho phép trả về một **tuple**, rồi người gọi «bung» ra nhiều biến. `fare_breakdown` trả hai phần: giá cơ bản và tiền phần vượt. Nó cũng giữ miền cho mọi nhánh: ngoài 0 đến 100 km hoặc dịch vụ lạ đều ném `ValueError`.
+Python cho phép trả về một **tuple**, rồi người gọi «bung» ra nhiều biến. `fare_breakdown` trả hai phần: giá cơ bản và tiền phần vượt. Hàm này cũng giữ miền hợp lệ cho mọi nhánh: ngoài 0 đến 100 km hoặc dịch vụ lạ đều ném `ValueError`.
 
 ```python
 def fare_breakdown(
@@ -231,9 +231,9 @@ def fare_breakdown(
     return BASE_FARE, extra
 ```
 
-Chuỗi ba dấu nháy ngay dưới dòng `def` là **docstring**: nó đi theo hàm, đọc được bằng `help(fare_breakdown)` hay `fare_breakdown.__doc__`, và là nơi tốt nhất để ghi hợp đồng của hàm (nhận gì, trả gì, khi nào lỗi). Kiểu gợi ý `-> tuple[Decimal, Decimal]` chỉ là tài liệu cho người đọc và công cụ; bài 12 sẽ đi sâu vào type hints.
+Chuỗi ba dấu nháy ngay dưới dòng `def` là **docstring**: chuỗi này đi theo hàm, đọc được bằng `help(fare_breakdown)` hay `fare_breakdown.__doc__`, và là nơi tốt nhất để ghi hợp đồng của hàm (nhận gì, trả gì, khi nào lỗi). Type hint `-> tuple[Decimal, Decimal]` chỉ là tài liệu cho người đọc và công cụ; bài 12 sẽ đi sâu vào type hint.
 
-Một chi tiết về **phạm vi** (scope): biến `extra`, `base` tạo trong hàm chỉ sống trong hàm đó và biến mất khi hàm trả về. Hằng số `BASE_FARE` ở đầu file thì đọc được từ trong hàm. Nhờ vậy hai lần gọi hàm không ảnh hưởng nhau, trừ khi ta chủ động dùng đối tượng mutable dùng chung, như cái bẫy ở trên.
+Một chi tiết về **phạm vi** (scope): biến `extra`, `base` tạo trong hàm chỉ sống trong hàm đó và biến mất khi hàm trả về. Hằng số `BASE_FARE` ở đầu file thì đọc được từ trong hàm. Nhờ vậy hai lần gọi hàm không ảnh hưởng nhau, trừ khi ta chủ động chia sẻ một đối tượng mutable, như cái bẫy ở trên.
 
 `calculate_fare` bọc ngoài, cộng hai phần rồi làm tròn **một lần ở cuối**:
 
@@ -288,7 +288,7 @@ Ngân sách 20.000 VND đi tối đa 3.5 km (ride)
 
 ## Kiểm chứng với --verify
 
-Một vài lần chạy bằng mắt chưa đủ để tin một quy tắc tiền. Lab có chế độ `--verify`: hàm `verify()` so kết quả thực với giá trị kỳ vọng, đếm số ca, in `OK n/n` khi đúng hết; nếu có ca sai, nó in tên ca, in `FAIL n/m` và thoát với mã 1. Các ca được chọn sát biên:
+Một vài lần chạy bằng mắt chưa đủ để tin một quy tắc tiền. Lab có chế độ `--verify`: hàm `verify()` so kết quả thực với giá trị kỳ vọng, đếm số test case, in `OK n/n` khi đúng hết; nếu có test case sai, hàm này in tên test case, in `FAIL n/m` và thoát với mã 1. Các test case được chọn sát biên:
 
 | Đầu vào | Kỳ vọng | Vì sao chọn |
 | --- | --- | --- |
@@ -301,7 +301,7 @@ Một vài lần chạy bằng mắt chưa đủ để tin một quy tắc tiề
 | 100 km ride | 453000 | Cận trên |
 | -0,001 km, 100,001 km, dịch vụ `taxi` | `ValueError` | Ngoài miền, kèm thông điệp lỗi |
 
-Ngoài các ca tiền, `verify()` còn kiểm `TypeError` khi truyền `service` theo vị trí, tuple của `fare_breakdown`, hai lần gọi độc lập của `append_good`, việc `append_bad` trả về chính một list dùng chung (`['a', 'b']`), kết quả vòng `while` với hai ngân sách (6 km và 3,5 km) và `format_vnd(Decimal("12004.5"))` ra `12.005`.
+Ngoài các test case về tiền, `verify()` còn kiểm tra `TypeError` khi truyền `service` theo vị trí, tuple của `fare_breakdown`, hai lần gọi độc lập của `append_good`, việc `append_bad` trả về chính một list dùng chung (`['a', 'b']`), kết quả vòng `while` với hai ngân sách (6 km và 3,5 km) và `format_vnd(Decimal("12004.5"))` ra `12.005`.
 
 ```bash
 uv run --project examples/toi-noi-python/03-dieu-kien-vong-lap-ham examples/toi-noi-python/03-dieu-kien-vong-lap-ham/main.py --verify
@@ -321,7 +321,7 @@ OK 22/22
 
 ## Giới hạn của ví dụ
 
-Đây là mô hình để học hàm và rẽ nhánh, không phải hệ thống giá. Khoảng cách được gõ sẵn dưới dạng chuỗi rồi đổi sang `Decimal`; ta chưa đọc đầu vào người dùng và chưa xử lý chuỗi sai định dạng (`Decimal("abc")` cũng ném lỗi, nhưng đó là việc của bài 08). Ba dịch vụ cùng giá là giả định, chưa có thuế, khuyến mãi, hệ số giờ cao điểm. Miền 0 đến 100 km là giới hạn để luyện kiểm tra, không phải giới hạn thật. Bài 10 sẽ chuyển các ca `--verify` thành `pytest` có cấu trúc.
+Đây là mô hình để học hàm và rẽ nhánh, không phải hệ thống giá. Khoảng cách được gõ sẵn dưới dạng chuỗi rồi đổi sang `Decimal`; ta chưa đọc đầu vào người dùng và chưa xử lý chuỗi sai định dạng (`Decimal("abc")` cũng ném lỗi, nhưng đó là việc của bài 08). Ba dịch vụ cùng giá là giả định, chưa có thuế, khuyến mãi, hệ số giờ cao điểm. Miền 0 đến 100 km là giới hạn để luyện kiểm tra, không phải giới hạn thật. Bài 10 sẽ chuyển các test case `--verify` thành `pytest` có cấu trúc.
 
 **Bài tập 1 (thử nghiệm ngoài mô hình):** giả sử một đợt thử nghiệm cộng 5.000 VND phí lấy món cho `food` và 3.000 VND cho `parcel`. Bạn sửa ở đâu trong lab để thử, và `food` 5 km sẽ có giá bao nhiêu? Vì sao nên làm trên bản sao thay vì sửa thẳng lab?
 

@@ -20,13 +20,13 @@ Email của [Tới Nơi](/articles/du-an-mau-toi-noi) xác nhận một chuyến
 
 ## str và bytes: văn bản khác với chuỗi byte
 
-Kiểu `str` của Python 3 là dãy ký tự **Unicode** và là kiểu **bất biến**: mọi phương thức như `upper()`, `strip()`, `casefold()` đều trả chuỗi mới và không sửa chuỗi cũ. Gán vào một vị trí sẽ lỗi:
+Kiểu `str` của Python 3 là dãy ký tự **Unicode** và là kiểu **bất biến**: mọi phương thức như `upper()`, `strip()`, `casefold()` đều trả chuỗi mới và không sửa chuỗi cũ. Gán giá trị vào một vị trí trong chuỗi sẽ gây lỗi:
 
 ```text
 TypeError: 'str' object does not support item assignment
 ```
 
-Bất biến không có nghĩa biến không gán lại được. `s = "A"; s = "B"` vẫn hợp lệ: biến trỏ sang một giá trị chuỗi khác. Để so sánh không phân biệt hoa thường, dùng `casefold()` thay vì `lower()`: nó xử lý đúng cả những chữ mà `lower()` bỏ sót, và `"Tới Nơi".casefold()` cho `tới nơi`.
+Bất biến không có nghĩa là biến không thể gán lại. `s = "A"; s = "B"` vẫn hợp lệ: biến trỏ sang một giá trị chuỗi khác. Để so sánh không phân biệt hoa thường, dùng `casefold()` thay vì `lower()`: nó xử lý đúng cả những chữ mà `lower()` bỏ sót, và `"Tới Nơi".casefold()` cho `tới nơi`.
 
 Khác với `str`, `bytes` là dãy byte thô. Điểm dễ nhầm: lấy một phần tử của `bytes` cho ra **số nguyên** từ 0 đến 255, không phải chuỗi một ký tự. Khi ghi file, gửi qua mạng hay lưu database, chữ phải đi qua một **encoding** để thành byte, và khi đọc lại phải dùng đúng encoding đó:
 
@@ -52,7 +52,7 @@ decode ascii replace: 'T���i N��i'
 
 Dòng `decode sai (latin-1)` là lỗi hiển thị trong mở bài: byte UTF-8 bị đọc như Latin-1 nên mỗi byte thành một ký tự riêng (hiện tượng **mojibake**). Ký tự `\x9b` là một ký tự điều khiển vô hình khi in, nên trên màn hình ta chỉ thấy `Tá»i NÆ¡i`. Dữ liệu byte không hỏng; chỉ cần decode đúng là có lại chữ.
 
-Tham số `errors=` quyết định điều gì xảy ra khi byte không hợp lệ: mặc định `"strict"` ném `UnicodeDecodeError` (tốt cho dữ liệu cần chính xác, vì lỗi hiện ra sớm), còn `"replace"` thay chỗ hỏng bằng ký tự thay thế `�` để chương trình chạy tiếp (chỉ hợp với log hay hiển thị, vì thông tin đã mất). Với file, hãy luôn nêu `encoding="utf-8"` ở cả đọc lẫn ghi thay vì tin mặc định của máy, như hàm `file_roundtrip` của lab (`write_text(..., encoding="utf-8")` rồi `read_text(..., encoding="utf-8")`, in lại đúng `Tới Nơi`).
+Tham số `errors=` quyết định điều gì xảy ra khi byte không hợp lệ: mặc định `"strict"` ném `UnicodeDecodeError` (tốt cho dữ liệu cần chính xác, vì lỗi hiện ra sớm), còn `"replace"` thay chỗ hỏng bằng ký tự thay thế `�` để chương trình chạy tiếp (chỉ hợp với log hay hiển thị, vì thông tin đã mất). Với file, hãy luôn nêu `encoding="utf-8"` ở cả khi đọc lẫn khi ghi thay vì tin vào mặc định của máy, như hàm `file_roundtrip` của lab (`write_text(..., encoding="utf-8")` rồi `read_text(..., encoding="utf-8")`, in lại đúng `Tới Nơi`).
 
 Tiếng Việt còn một chi tiết nữa: chữ `ớ` có thể là **một** code point dựng sẵn (NFC) hoặc `ơ` cộng dấu sắc rời (NFD). Hai chuỗi trông giống hệt nhưng so sánh `==` ra `False`. Chuẩn hoá trước khi so sánh hoặc làm khoá tìm kiếm:
 
@@ -81,7 +81,7 @@ f-string (`f"..."`) chèn biểu thức vào `{}` và nhận thêm **format spec
 
 Ba cú pháp phụ hay gặp: `{x!r}` chèn `repr(x)` thay vì `str(x)` (hữu ích khi gỡ lỗi, như `'Tới Nơi'` có cả dấu nháy); `{n=}` in cả tên biểu thức lẫn giá trị (`n=14250`); và muốn in dấu ngoặc nhọn thật thì viết đôi: `f"{{n}}"` cho ra `{n}`. Độ rộng cũng có thể lồng vào spec, như `{label:<{width}}`.
 
-Còn dấu phân cách tiền Việt. Spec `,` luôn dùng dấu phẩy kiểu Mỹ, trong khi người Việt đọc `14.250`. Có hai lối đi: module `locale` (kết quả phụ thuộc cấu hình máy và locale đã cài, nên không đáng tin trong container) hoặc tự viết một hàm nhỏ có kết quả xác định. Lab chọn cách thứ hai.
+Giờ đến dấu phân cách trong số tiền Việt. Spec `,` luôn dùng dấu phẩy kiểu Mỹ, trong khi người Việt đọc `14.250`. Có hai lối đi: module `locale` (kết quả phụ thuộc cấu hình máy và locale đã cài, nên không đáng tin trong container) hoặc tự viết một hàm nhỏ có kết quả xác định. Lab chọn cách thứ hai.
 
 Có một cái bẫy trước khi viết hàm: spec `.0f` **không** chỉ «bỏ phần thập phân» mà làm tròn, và với `Decimal` nó làm tròn theo context hiện hành (mặc định HALF_EVEN, làm tròn về số chẵn gần nhất). Lab in ra:
 
@@ -131,14 +131,14 @@ Dòng `[p.strip() for p in ...]` là list comprehension, sẽ được giải th
 `datetime` có hai dạng. **Naive** không mang thông tin múi giờ: `datetime(2026, 11, 6, 8, 30)` chỉ nói «8:30» mà không nói ở đâu. **Aware** mang `tzinfo`, nên xác định một thời điểm duy nhất trên trục thời gian. Python xử lý hai dạng này khác nhau tuỳ phép toán, và đó là chỗ dễ sai:
 
 - So sánh thứ tự (`<`, `>`) hoặc trừ giữa naive và aware ném `TypeError`.
-- Nhưng `==` giữa naive và aware **không** ném lỗi: nó trả `False` một cách âm thầm, vì theo tài liệu, naive không bao giờ bằng aware.
+- Nhưng `==` giữa naive và aware **không** ném lỗi: nó trả `False` mà không báo gì, vì theo tài liệu, naive không bao giờ bằng aware.
 
 ```text
 naive < aware lỗi? True
 naive == aware là: False
 ```
 
-Dòng đầu là `TypeError: can't compare offset-naive and offset-aware datetimes`. Dòng sau nguy hiểm hơn: một câu `if started == expected` có thể sai mãi mà không có thông báo nào. Cách phòng là không để naive lọt vào trong hệ thống: kiểm một lần ở biên bằng một hàm dùng chung.
+Dòng đầu là `TypeError: can't compare offset-naive and offset-aware datetimes`. Dòng sau nguy hiểm hơn: một câu `if started == expected` có thể sai mãi mà không có thông báo nào. Cách phòng là không để naive lọt vào trong hệ thống: kiểm tra một lần ở ranh giới hệ thống bằng một hàm dùng chung.
 
 ```python
 def require_aware(value: datetime) -> datetime:
@@ -154,7 +154,7 @@ Quy ước của loạt bài: mọi thời điểm trong hệ thống là **awar
 utcnow() deprecated và naive? True
 ```
 
-Để kết quả tái lập, lab dùng thời điểm cố định `2026-11-06 01:30 UTC` thay vì giờ chạy. Múi giờ Việt Nam lấy từ `zoneinfo.ZoneInfo("Asia/Ho_Chi_Minh")`; ta dùng tên IANA thay vì cộng tay 7 giờ, vì tên này mang theo quy tắc lịch sử của vùng:
+Để kết quả tái lập, lab dùng thời điểm cố định `2026-11-06 01:30 UTC` thay vì giờ chạy. Múi giờ Việt Nam lấy từ `zoneinfo.ZoneInfo("Asia/Ho_Chi_Minh")`; ta dùng tên IANA thay vì cộng thủ công 7 giờ, vì tên này mang theo quy tắc lịch sử của vùng đó:
 
 ```python
 from datetime import UTC, datetime, timedelta
@@ -169,9 +169,9 @@ def to_local(instant: datetime) -> datetime:
 
 Ta từ chối naive một cách chủ động vì `astimezone()` trên datetime naive sẽ *giả định* đó là giờ của máy đang chạy: máy ở Hà Nội và máy trong container UTC cho hai kết quả khác nhau.
 
-### replace và astimezone: gắn nhãn khác đổi giờ
+### replace và astimezone: gắn nhãn khác với đổi giờ
 
-Hai phương thức này hay bị dùng lẫn. `astimezone(tz)` **đổi** cùng một thời điểm sang cách viết ở múi giờ khác (giờ trên đồng hồ thay đổi, thời điểm không đổi). `replace(tzinfo=tz)` chỉ **gắn nhãn** múi giờ lên con số giờ đã có, không đổi con số (thời điểm đổi theo). Dùng `replace` khi ta *biết chắc* một datetime naive đang ở múi giờ nào, chẳng hạn khách gõ 08:30 theo giờ Việt Nam:
+Hai phương thức này hay bị dùng lẫn lộn. `astimezone(tz)` **đổi** cùng một thời điểm sang cách viết ở múi giờ khác (giờ trên đồng hồ thay đổi, thời điểm không đổi). `replace(tzinfo=tz)` chỉ **gắn nhãn** múi giờ lên con số giờ đã có, không đổi con số (thời điểm đổi theo). Dùng `replace` khi ta *biết chắc* một datetime naive đang ở múi giờ nào, chẳng hạn khách gõ 08:30 theo giờ Việt Nam:
 
 ```python
 def attach_vs_convert() -> tuple[str, str]:
@@ -239,7 +239,7 @@ lưu    : 2026-11-06T01:30:00+00:00
 đọc lại: 2026-11-06T01:30:00+00:00
 ```
 
-Hai giá trị `01:30 +00:00` và `08:30 +07:00` khác nhau về cách viết nhưng **bằng nhau** (`==` là `True`) vì là cùng một thời điểm. Ta lưu UTC để so sánh, sắp xếp và nhóm dữ liệu không phụ thuộc người nhìn; ta không lưu `"06/11/2026 08:30"` bỏ mất offset.
+Hai giá trị `01:30 +00:00` và `08:30 +07:00` khác nhau về cách viết nhưng **bằng nhau** (`==` là `True`) vì là cùng một thời điểm. Ta lưu UTC để so sánh, sắp xếp và nhóm dữ liệu không phụ thuộc người nhìn; ta không lưu `"06/11/2026 08:30"`, vì dạng này bỏ mất offset.
 
 Nửa còn lại của «hiển thị đúng» là định dạng cho người đọc. `isoformat()` dành cho máy: ổn định, sắp xếp được. Với khách, ta dùng spec của datetime ngay trong f-string (`strftime` cho kết quả tương đương) và `strptime` để đọc giờ khách gõ:
 
@@ -258,7 +258,7 @@ hiển thị: 06/11/2026 08:30
 đọc giờ khách gõ: 2026-11-06T08:30:00+07:00
 ```
 
-`strptime` luôn trả datetime *naive* nên ta gắn nhãn bằng `replace` ngay trong hàm đọc, đúng như mục trên. Trừ hai datetime aware cho `timedelta`, một thời lượng. Với chuyến TN-0001 trả khách sau 22 phút 15 giây:
+`strptime` luôn trả datetime *naive* nên ta gắn nhãn bằng `replace` ngay trong hàm đọc, đúng như mục trên. Trừ hai datetime aware cho ra `timedelta`, một thời lượng. Với chuyến TN-0001 trả khách sau 22 phút 15 giây:
 
 ```python
 def duration_text(start: datetime, end: datetime) -> str:
@@ -292,7 +292,7 @@ TN-0002  05/11 17:00  06/11 00:00  2026-11-05  2026-11-06
 TN-0003  05/11 16:59  05/11 23:59  2026-11-05  2026-11-05
 ```
 
-TN-0001 chính là chuyến 06:30 sáng ở mở bài: nếu báo cáo gọi `.date()` trên giá trị UTC, nó thành ngày 5/11. TN-0003 chỉ sớm hơn TN-0002 một phút nhưng nằm ở ngày khác theo giờ Việt Nam. Báo cáo theo ngày cần chọn rõ ngày nào (ngày địa phương của thành phố hay ngày UTC) và đổi múi giờ **trước** khi lấy `.date()`.
+TN-0001 chính là chuyến 06:30 sáng ở mở bài: nếu báo cáo gọi `.date()` trên giá trị UTC, chuyến này bị xếp vào ngày 5/11. TN-0003 chỉ sớm hơn TN-0002 một phút nhưng nằm ở ngày khác theo giờ Việt Nam. Báo cáo theo ngày cần chọn rõ ngày nào (ngày địa phương của thành phố hay ngày UTC) và đổi múi giờ **trước** khi lấy `.date()`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -320,7 +320,7 @@ TN-0001 chính là chuyến 06:30 sáng ở mở bài: nếu báo cáo gọi `.d
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Mở rộng: template string (t-string) trong Python 3.14</span>
-<p>Python 3.14 thêm template string literal (PEP 750), viết như f-string nhưng tiền tố <code>t</code>. Khác với f-string trả ngay một <code>str</code>, t-string trả một đối tượng <code>Template</code> tách phần văn bản tĩnh và phần nội suy, để hàm xử lý do bạn viết quyết định cách ghép (ví dụ escape). Bản thân t-string không tự escape gì. Lab có ví dụ nhỏ ngay dưới đây; không cần nó để làm bài tập.</p>
+<p>Python 3.14 thêm template string literal (PEP 750), viết như f-string nhưng tiền tố <code>t</code>. Khác với f-string trả ngay một <code>str</code>, t-string trả một đối tượng <code>Template</code> tách phần văn bản tĩnh và phần nội suy, để hàm xử lý do bạn viết quyết định cách ghép (ví dụ escape). Bản thân t-string không tự escape gì. Lab có ví dụ nhỏ ngay dưới đây; bạn không cần đến ví dụ này để làm bài tập.</p>
 </div>
 
 ```python
@@ -353,7 +353,7 @@ uv run --project examples/toi-noi-python/04-chuoi-ngay-gio-timezone examples/toi
 uv run --project examples/toi-noi-python/04-chuoi-ngay-gio-timezone examples/toi-noi-python/04-chuoi-ngay-gio-timezone/main.py --verify
 ```
 
-Lệnh thứ hai chạy `verify()` với 39 ca: độ dài và index của `bytes`, decode đúng và sai, `errors="strict"` và `"replace"`, `casefold`, file round-trip, NFC/NFD; `.0f` làm tròn HALF_EVEN so với `format_vnd`, bảng format spec; `parse_trip_line`, `join`; UTC sang +07:00, round-trip ISO, `strftime`/`strptime`, thời lượng, `naive < aware` lỗi và `naive == aware` là `False`, `utcnow()`, `replace` khác `astimezone`, bảng ba chuyến, t-string; và ba ca bị từ chối bằng `ValueError`. Hai đáp án của bài tập dưới đây cũng nằm trong số đó. Nếu có ca sai, lab in tên ca rồi `FAIL n/m` và thoát với mã 1. Khi đúng hết:
+Lệnh thứ hai chạy `verify()` với 39 test case: độ dài và index của `bytes`, decode đúng và sai, `errors="strict"` và `"replace"`, `casefold`, ghi rồi đọc lại file (round-trip), NFC/NFD; `.0f` làm tròn HALF_EVEN so với `format_vnd`, bảng format spec; `parse_trip_line`, `join`; UTC sang +07:00, round-trip ISO, `strftime`/`strptime`, thời lượng, `naive < aware` lỗi và `naive == aware` là `False`, `utcnow()`, `replace` khác `astimezone`, bảng ba chuyến, t-string; và ba test case bị từ chối bằng `ValueError`. Hai đáp án của bài tập dưới đây cũng nằm trong số đó. Nếu có test case sai, lab in tên test case rồi `FAIL n/m` và thoát với mã 1. Khi đúng hết:
 
 ```text
 OK 39/39
@@ -365,13 +365,13 @@ OK 39/39
 | Hai chuỗi trông giống nhưng `==` là `False` | Có khác dạng NFC và NFD không; chuẩn hoá về NFC |
 | `TypeError` khi so sánh hai datetime | Một vế naive, một vế aware; đưa cả hai về aware |
 | `==` luôn `False` dù cùng giờ | Có đang so naive với aware không (không có lỗi nào báo) |
-| Giờ lệch 7 tiếng giữa máy này và máy kia | Có `astimezone()` trên datetime naive, hoặc `replace(tzinfo=UTC)` lên giờ địa phương không |
+| Giờ lệch 7 tiếng giữa hai máy | Có `astimezone()` trên datetime naive, hoặc `replace(tzinfo=UTC)` lên giờ địa phương không |
 | Chuyến nằm sai ngày trong báo cáo | Lấy `.date()` trước hay sau khi đổi sang múi giờ địa phương |
 | Số tiền `12.004` thay vì `12.005` | Có dùng `.0f` mà quên `quantize` HALF_UP trước không |
 
 ## Giới hạn của ví dụ
 
-Lab dùng thời điểm cố định, dữ liệu giả, và mới chỉ xét một múi giờ không có giờ mùa hè (Asia/Ho_Chi_Minh). `zoneinfo` đọc cơ sở dữ liệu múi giờ của hệ điều hành; trên Windows hoặc image container tối giản có thể cần gói `tzdata`. Lab không cài thêm gì, nên chạy trên macOS và Linux có sẵn tzdata. Lịch hẹn trong tương lai (đặt trước chuyến) cần thêm tên múi giờ riêng vì quy tắc múi giờ có thể đổi; `format_vnd` chưa xử lý số âm hay tiền tệ khác VND. Ta cũng đọc «bây giờ» trực tiếp bằng `datetime.now`; muốn kiểm thử logic hết hạn báo giá thì cần một đồng hồ thay thế được truyền vào qua constructor, và bài 14 (dependency injection) sẽ làm việc đó.
+Lab dùng thời điểm cố định, dữ liệu giả, và mới chỉ xét một múi giờ không có giờ mùa hè (Asia/Ho_Chi_Minh). `zoneinfo` đọc cơ sở dữ liệu múi giờ của hệ điều hành; trên Windows hoặc container image tối giản có thể cần gói `tzdata`. Lab không cài thêm gì, nên chạy trên macOS và Linux có sẵn tzdata. Lịch hẹn trong tương lai (đặt trước chuyến) cần thêm tên múi giờ riêng vì quy tắc múi giờ có thể đổi; `format_vnd` chưa xử lý số âm hay tiền tệ khác VND. Ta cũng đọc «bây giờ» trực tiếp bằng `datetime.now`; muốn kiểm thử logic hết hạn báo giá thì cần một đồng hồ thay thế được truyền vào qua constructor, và bài 14 (dependency injection) sẽ làm việc đó.
 
 **Bài tập 1:** đổi thời điểm gốc thành `2026-11-06T23:30:00+00:00`. Giờ Việt Nam và ngày địa phương là gì? **Bài tập 2:** `format_vnd(Decimal("1234567.5"))` trả gì?
 

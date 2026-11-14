@@ -1,0 +1,22 @@
+{"file":"python-kafka-aiokafka-producer-consumer-schema.md","edits":[
+{"old":"thì thêm một bên là sửa Dispatch,","new":"thì thêm một bên là phải sửa Dispatch,","reason":"Câu cụt, thiếu động từ","severity":"low"},
+{"old":"và hàng đợi cùng xử lý đồng thời (","new":"và hàng đợi cùng việc xử lý đồng thời (","reason":"«cùng xử lý» thiếu danh từ, dễ hiểu nhầm","severity":"medium"},
+{"old":"mọi sự kiện của một khách nằm cùng chỗ và đến theo thứ tự đặt.","new":"mọi sự kiện của một khách nằm trong cùng một partition và đến theo thứ tự đặt.","reason":"«cùng chỗ» mơ hồ","severity":"low"},
+{"old":"không thay được khử trùng lặp ở consumer.","new":"không thay thế được việc khử trùng lặp ở consumer.","reason":"Thiếu danh từ hoá «việc»","severity":"medium"},
+{"old":"đo cho thấy `send_and_wait` từng cái chậm hơn nhiều so với gửi theo lô:","new":"đo cho thấy gọi `send_and_wait` cho từng sự kiện chậm hơn nhiều so với gửi theo lô:","reason":"«từng cái» cụt, thiếu danh từ","severity":"medium"},
+{"old":"một «độc dược» không đọc nổi mà không bao giờ được commit sẽ chặn cả partition.","new":"một poison message không đọc nổi mà không bao giờ được commit sẽ chặn cả partition.","reason":"«độc dược» là dịch gượng của poison message; thống nhất với bài 39","severity":"high"},
+{"old":"nơi cất thông điệp độc dược (ví dụ một topic riêng cho thông điệp hỏng) bạn tự thiết kế,","new":"nơi lưu poison message (ví dụ một topic riêng cho thông điệp hỏng) do bạn tự thiết kế,","reason":"Thống nhất tên poison message; câu thiếu từ nối","severity":"high"},
+{"old":"consumer phải **commit qua chúng và đi tiếp**","new":"consumer phải **commit vượt qua chúng và đi tiếp**","reason":"«commit qua» cụt","severity":"low"},
+{"old":"Kiểm kiểu phải đi trước tra cứu:","new":"Phải kiểm tra kiểu trước khi tra cứu:","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"Tắt đi và tự commit mới kiểm soát được thời điểm.","new":"Phải tắt đi và tự commit thì mới kiểm soát được thời điểm commit.","reason":"Câu thiếu chủ ngữ, nghĩa phải đoán","severity":"medium"},
+{"old":"sập trong khoảng đó thì hoặc lặp (commit sau) hoặc mất (commit trước).","new":"sập trong khoảng đó thì sự kiện hoặc bị lặp (commit sau) hoặc bị mất (commit trước).","reason":"Thiếu chủ ngữ cho «lặp», «mất»","severity":"medium"},
+{"old":"Không mất cái nào; đổi lại 5 lượt trùng.","new":"Không mất sự kiện nào; đổi lại là có 5 lượt trùng.","reason":"«cái nào» mơ hồ; thiếu động từ","severity":"medium"},
+{"old":"Một chi tiết thật: lab «sập» bằng cách","new":"Một chi tiết sát thực tế: lab «sập» bằng cách","reason":"«chi tiết thật» cụt","severity":"low"},
+{"old":"Tiến trình bị kill thật thì broker chỉ biết","new":"Nếu tiến trình bị kill thật thì broker chỉ biết","reason":"Thiếu liên từ điều kiện","severity":"low"},
+{"old":"gồm partition 2 là partition nóng, nên nhận nhiều gấp đôi.","new":"trong đó có partition 2 là partition nóng, nên nhận nhiều gấp đôi.","reason":"«gồm» sai sắc thái","severity":"low"},
+{"old":"thêm consumer không cứu được một partition nóng","new":"thêm consumer không giải quyết được vấn đề của một partition nóng","reason":"«cứu» khẩu ngữ, thiếu tân ngữ","severity":"low"},
+{"old":"group **cân bằng lại** và việc đọc dừng một nhịp;","new":"group **cân bằng lại** và việc đọc tạm dừng;","reason":"«dừng một nhịp» là calque","severity":"high"},
+{"old":"broker chờ thêm một nhịp trước khi chia việc","new":"broker chờ thêm một khoảng thời gian trước khi chia việc","reason":"«một nhịp» là calque","severity":"medium"},
+{"old":"Cùng với việc chờ vài giây không còn tin mới để biết đã đọc hết, đó là lý do","new":"Cộng thêm vài giây chờ không còn tin mới để biết đã đọc hết, đó là lý do","reason":"Câu thiếu động từ chính","severity":"high"},
+{"old":"Một partition không bao giờ tiến | có thông điệp «độc dược» chưa được commit qua;","new":"Offset của một partition không bao giờ tăng | có poison message chưa được commit vượt qua;","reason":"«tiến» chưa rõ nghĩa; thống nhất poison message","severity":"high"}
+]}

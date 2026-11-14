@@ -1,7 +1,7 @@
 ---
 slug: python-design-pattern-strategy-state-adapter
 title: "Design pattern kiểu Python: Strategy, State, Adapter cho Tới Nơi"
-summary: "Bài 19: Strategy bằng hàm và Protocol, State bằng bảng hay lớp, Adapter bọc SDK bản đồ trả mét. Khi nào pattern GoF rút gọn thành vài dòng Python, khi nào cần class. Có lab chạy được."
+summary: "Bài 19: Strategy bằng hàm và Protocol, State bằng bảng hay lớp, Adapter bọc SDK bản đồ trả khoảng cách theo mét. Khi nào pattern GoF rút gọn thành vài dòng Python, khi nào cần class. Có lab chạy được."
 category: python-beginner
 level: beginner
 tags: [python, toi-noi, design-pattern, strategy, adapter]
@@ -20,9 +20,9 @@ Ba việc nhỏ cùng đến với nhóm backend của [Tới Nơi](/articles/du
 
 ## Pattern là từ vựng, Python chỉ rút ngắn hình dạng
 
-Loạt bài Design Pattern của blog giải thích pattern ở mức tổng quát, bằng TypeScript: [bản đồ 23 pattern GoF](/articles/design-pattern-la-gi), [nhóm Hành vi với Strategy và State](/articles/nhom-hanh-vi-dong-goi-hanh-vi), [nhóm Cấu trúc với Adapter](/articles/nhom-cau-truc-structural). Bài này không lặp lại lý thuyết đó, mà trả lời một câu hẹp hơn: với một ngôn ngữ có hàm first-class, `dict` và `Protocol`, mỗi pattern co lại còn gì.
+Loạt bài Design Pattern của blog giải thích pattern ở mức tổng quát, bằng TypeScript: [bản đồ 23 pattern GoF](/articles/design-pattern-la-gi), [nhóm Hành vi với Strategy và State](/articles/nhom-hanh-vi-dong-goi-hanh-vi), [nhóm Cấu trúc với Adapter](/articles/nhom-cau-truc-structural). Bài này không lặp lại lý thuyết đó, mà trả lời một câu hẹp hơn: với một ngôn ngữ có hàm first-class, `dict` và `Protocol`, mỗi pattern còn lại gì sau khi rút gọn.
 
-Điều không đổi là vấn đề và cái giá. Strategy giải quyết «nhiều cách làm một việc, chọn lúc chạy». State giải quyết «luật được làm gì phụ thuộc trạng thái hiện tại». Adapter giải quyết «thứ ta không sửa được có interface khác thứ ta cần». Mỗi pattern thêm một tầng gián tiếp, nên nó chỉ đáng giá khi có chỗ đau thật; nếu không, một hàm thẳng thắn dễ đọc hơn. Điều thay đổi là hình dạng: trong Python, nhiều chỗ ta thay lớp bằng hàm, interface bằng `Protocol` và `if` dài bằng bảng tra.
+Điều không đổi là vấn đề và cái giá. Strategy giải quyết «nhiều cách làm một việc, chọn lúc chạy». State giải quyết «việc được phép làm gì phụ thuộc vào trạng thái hiện tại». Adapter giải quyết «thứ ta không sửa được có interface khác thứ ta cần». Mỗi pattern thêm một tầng gián tiếp, nên nó chỉ đáng giá khi có chỗ đau thật; nếu không, một hàm đơn giản, viết thẳng sẽ dễ đọc hơn. Điều thay đổi là hình dạng: trong Python, nhiều chỗ ta thay lớp bằng hàm, interface bằng `Protocol` và `if` dài bằng bảng tra.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -66,7 +66,7 @@ def audited(inner: FareStrategy, log: list[str]) -> FareStrategy:
     return strategy
 ```
 
-Khi strategy cần **trạng thái riêng**, class mới có lý do tồn tại. `CachedFare` giữ một `dict` và một bộ đếm trúng cache; nhờ `__call__`, instance của nó dùng được ở mọi chỗ cần `FareStrategy`:
+Khi strategy cần **trạng thái riêng**, class mới có lý do tồn tại. `CachedFare` giữ một `dict` và một bộ đếm số lần trúng cache; nhờ `__call__`, instance của nó dùng được ở mọi chỗ cần `FareStrategy`:
 
 ```python
 class CachedFare:
@@ -111,11 +111,11 @@ def as_strategy(calculator: FareCalculator) -> FareStrategy:
 
 Hai dạng không loại trừ nhau, vì method gắn với một instance (`calculator.calculate`) tự nó là một callable. Quy tắc chọn: bắt đầu bằng hàm; sang class khi có trạng thái; sang `Protocol` khi có nhiều thành viên hoặc khi cần đặt tên rõ hợp đồng cho người khác hiện thực.
 
-Điều đáng kiểm nhất là **hợp đồng**, không phải từng strategy. Lab chạy cả tám ca biên của bài 10 qua cả ba dịch vụ và đòi cùng bảng giá. Strategy đổi chế độ làm tròn sẽ đỏ ngay ở ca 2,001 km, vì cước thô 12.004,5 làm tròn half-up ra 12.005 nhưng half-even ra 12.004. Cho nên «strategy làm tròn» không còn là strategy cùng giá nữa; đó là quyết định nghiệp vụ, không phải chi tiết hiện thực.
+Điều đáng kiểm thử nhất là **hợp đồng**, không phải từng strategy. Lab chạy cả tám test case biên của bài 10 qua cả ba dịch vụ và đòi cùng bảng giá. Strategy đổi chế độ làm tròn sẽ báo đỏ ngay ở test case 2,001 km, vì cước thô 12.004,5 làm tròn half-up ra 12.005 nhưng half-even ra 12.004. Cho nên «strategy làm tròn» không còn là strategy cùng giá nữa; đó là quyết định nghiệp vụ, không phải chi tiết hiện thực.
 
 ## State: bảng chuyển hay mỗi trạng thái một lớp
 
-Vòng đời chuyến có 8 trạng thái: sáu bước thuận từ `requested` đến `completed`, cộng `cancelled` đạt được từ bốn trạng thái đầu. Cách nhỏ nhất là một bảng: mỗi trạng thái ánh xạ tới tập trạng thái kế tiếp được phép (bài 11 đã giới thiệu cách này với chuỗi; bài 13 đổi sang `StrEnum`):
+Vòng đời chuyến có 8 trạng thái: sáu bước thuận từ `requested` đến `completed`, cộng `cancelled` mà ta đến được từ bốn trạng thái đầu. Cách nhỏ nhất là một bảng: mỗi trạng thái ánh xạ tới tập trạng thái kế tiếp được phép (bài 11 đã giới thiệu cách này với chuỗi; bài 13 đổi sang `StrEnum`):
 
 ```python
 # state.py (trích: lớp cha và một trong tám lớp con)
@@ -131,7 +131,7 @@ ALLOWED_TRANSITIONS: dict[TripStatus, frozenset[TripStatus]] = {
 }
 ```
 
-Bảng này đã là một máy trạng thái. Nhưng nó bắt đầu gượng khi một trạng thái có **luật riêng**. Chuyển `searching` sang `accepted` cần có tài xế, và luật đó chen vào `move_to` dưới dạng một `if` đứng ngoài bảng:
+Bảng này đã là một máy trạng thái. Nhưng bảng bắt đầu tỏ ra gượng gạo khi một trạng thái có **luật riêng**. Chuyển `searching` sang `accepted` cần có tài xế, và luật đó chen vào `move_to` dưới dạng một `if` đứng ngoài bảng:
 
 ```python
     def move_to(self, new_status: TripStatus) -> None:
@@ -143,7 +143,7 @@ Bảng này đã là một máy trạng thái. Nhưng nó bắt đầu gượng 
         self.status = new_status
 ```
 
-Mỗi luật mới thêm một `if` ở đây, và các `if` ấy không nằm cạnh trạng thái mà chúng nói về. Pattern State đảo ngược việc đó: mỗi trạng thái là một lớp, mang theo luật của chính nó. Lớp cha cho mặc định của cả tám trạng thái, lớp con chỉ ghi đè điều khác biệt:
+Mỗi luật mới thêm một `if` ở đây, và các `if` ấy không nằm cạnh trạng thái mà chúng nói về. Pattern State đảo ngược việc đó: mỗi trạng thái là một lớp, mang theo luật của chính nó. Lớp cha đặt giá trị mặc định cho cả tám trạng thái, lớp con chỉ ghi đè điều khác biệt:
 
 ```python
 class TripState:
@@ -174,7 +174,7 @@ class Searching(TripState):
         return super().advance(trip)
 ```
 
-Một chi tiết nhỏ của Python 3.14: chữ ký `advance(self, trip: Trip)` nhắc tới `Trip` dù lớp `Trip` khai báo ở cuối file, và ta không cần ngoặc kép. Annotation được tính khi có ai cần (PEP 649 và 749), không phải lúc `def` chạy; `annotationlib.get_annotations` trả về lớp `Trip` thật khi ta hỏi sau khi module đã nạp xong. `Trip` giữ một trạng thái hiện tại và **uỷ quyền** cho nó, nên bên ngoài chỉ thấy `trip.advance()` và `trip.cancel()`:
+Một chi tiết nhỏ của Python 3.14: chữ ký `advance(self, trip: Trip)` nhắc tới `Trip` dù lớp `Trip` khai báo ở cuối file, và ta không cần ngoặc kép. Annotation được tính khi có nơi cần đến (PEP 649 và 749), không phải lúc `def` chạy; `annotationlib.get_annotations` trả về lớp `Trip` thật khi ta hỏi sau khi module đã nạp xong. `Trip` giữ một trạng thái hiện tại và **uỷ quyền** cho nó, nên bên ngoài chỉ thấy `trip.advance()` và `trip.cancel()`:
 
 ```python
 @dataclass
@@ -196,13 +196,13 @@ class Trip:
 <figcaption>Hình 2. Vòng đời chuyến: sáu bước thuận và bốn đường huỷ, tổng cộng 10 cặp (từ, tới) được phép. Cả bảng chuyển lẫn bộ lớp trạng thái trong lab đều sinh ra đúng tập cặp này.</figcaption>
 </figure>
 
-Hai cách có cho **cùng một tập chuyển** hay không là câu hỏi kiểm được, không phải câu hỏi niềm tin. `--verify` hỏi từng trạng thái trong tám trạng thái xem lớp cho phép đi tới đâu (thử `advance` rồi `cancel`) và so với bảng: 8 × 8 = 64 cặp (từ, tới), 10 cặp được phép, kết quả khớp.
+Hai cách có cho **cùng một tập chuyển** hay không là câu hỏi kiểm chứng được, không phải câu hỏi của niềm tin. `--verify` hỏi từng trạng thái trong tám trạng thái xem lớp cho phép đi tới đâu (thử `advance` rồi `cancel`) và so với bảng: 8 × 8 = 64 cặp (từ, tới), 10 cặp được phép, kết quả khớp.
 
-Chọn cái nào? Hãy trung thực với chính ví dụ này: phần luật của hầu hết lớp trạng thái trong lab chỉ là dữ liệu (`forward`, `cancellable`), tức một bảng nằm trong lớp; cả tám lớp đều ghi đè `message`, nhưng lời nhắn cho khách cũng chỉ là một chuỗi mà một `dict[TripStatus, str]` chứa được. Thứ mà bảng khó chứa là **luật có logic**: chỉ `Searching` có luật cần tài xế, và luật đó đọc dữ liệu của chuyến. Lớp xứng đáng khi số luật kiểu đó tăng dần. Bảng đủ dùng khi trạng thái chỉ khác nhau ở «đi tiếp được tới đâu». Nếu có một luật như «chỉ huỷ được trong 3 phút sau khi tài xế nhận», lớp tiện hơn, nhưng nó cần đồng hồ để kiểm thời gian; ta sẽ phải truyền một `Clock` vào như bài 14.
+Chọn cái nào? Hãy trung thực với chính ví dụ này: phần luật của hầu hết lớp trạng thái trong lab chỉ là dữ liệu (`forward`, `cancellable`), tức một bảng nằm trong lớp; cả tám lớp đều ghi đè `message`, nhưng lời nhắn cho khách cũng chỉ là một chuỗi mà một `dict[TripStatus, str]` chứa được. Thứ mà bảng khó chứa là **luật có logic**: chỉ `Searching` có luật cần tài xế, và luật đó đọc dữ liệu của chuyến. Lớp xứng đáng khi số luật kiểu đó tăng dần. Bảng đủ dùng khi trạng thái chỉ khác nhau ở «đi tiếp được tới đâu». Nếu có một luật như «chỉ huỷ được trong 3 phút sau khi tài xế nhận», lớp tiện hơn, nhưng lớp này cần đồng hồ để kiểm tra thời gian; ta sẽ phải truyền một `Clock` vào như bài 14.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">State không chống được hai tài xế cùng bấm nhận</span>
-<p>Lớp <code>Searching</code> kiểm luật trên bản sao trong bộ nhớ của một tiến trình. Hai tài xế bấm nhận cùng một giây thì hai tiến trình đều thấy <code>searching</code> và đều cho đi tiếp. Chốt chặn cuối cùng phải ở database (cập nhật có điều kiện <code>WHERE status = 'searching'</code>) và sẽ được bàn ở <a href="/articles/python-transaction-optimistic-concurrency-idempotency">bài 25</a> (transaction và optimistic concurrency). State giữ luật nghiệp vụ gọn một chỗ; tính đúng khi chạy đồng thời là việc của giao dịch.</p>
+<p>Lớp <code>Searching</code> kiểm tra luật trên bản sao trong bộ nhớ của một tiến trình. Hai tài xế bấm nhận cùng một giây thì hai tiến trình đều thấy <code>searching</code> và đều cho đi tiếp. Chốt chặn cuối cùng phải ở database (cập nhật có điều kiện <code>WHERE status = 'searching'</code>) và sẽ được bàn ở <a href="/articles/python-transaction-optimistic-concurrency-idempotency">bài 25</a> (transaction và optimistic concurrency). State giữ luật nghiệp vụ gọn một chỗ; tính đúng khi chạy đồng thời là việc của giao dịch.</p>
 </div>
 
 ## Adapter: SDK trả mét, ta cần km Decimal
@@ -248,13 +248,13 @@ class MapVietAdapter:
 <figcaption>Hình 3. Adapter nằm giữa use case và SDK. Phần còn lại của hệ thống chỉ thấy hợp đồng của Tới Nơi; ba phép dịch nằm gọn trong một lớp.</figcaption>
 </figure>
 
-Có một chi tiết dễ sai nằm trong hàm lõi `meters_to_km`: ta bọc `Decimal(str(meters))`, không viết `Decimal(meters)`. Số `float` 2000,1 không biểu diễn chính xác trong nhị phân; `Decimal(2000.1)` nhận đúng cái giá trị gần đúng đó, kèm một chuỗi chữ số rác (bài 02), còn `Decimal("2000.1")` nhận đúng văn bản. Ví dụ này không làm đổi giá cuối cùng, nhưng ta không muốn kết quả tiền phụ thuộc vào cách máy tính xấp xỉ số thực, và phép so sánh bằng trên `Decimal(float)` đã sai: `--verify` kiểm đúng điều đó (`Decimal(2000.1) != Decimal("2000.1")`). Với tiền, ta luôn đưa dữ liệu vào bằng chuỗi hoặc số nguyên.
+Có một chi tiết dễ sai nằm trong hàm lõi `meters_to_km`: ta dùng `Decimal(str(meters))`, không viết `Decimal(meters)`. Số `float` 2000,1 không biểu diễn chính xác trong nhị phân; `Decimal(2000.1)` nhận đúng cái giá trị gần đúng đó, kèm một chuỗi chữ số rác (bài 02), còn `Decimal("2000.1")` nhận đúng văn bản. Ví dụ này không làm đổi giá cuối cùng, nhưng ta không muốn kết quả tiền phụ thuộc vào cách máy tính xấp xỉ số thực, và phép so sánh bằng trên `Decimal(float)` đã sai: `--verify` kiểm đúng điều đó (`Decimal(2000.1) != Decimal("2000.1")`). Với tiền, ta luôn đưa dữ liệu vào bằng chuỗi hoặc số nguyên.
 
 Adapter cũng có giới hạn: nó dịch **cú pháp**, không dịch **ngữ nghĩa**. «Quãng đường» của MapViet là tuyến nhanh nhất hay ngắn nhất, có tính đường cấm hay không, adapter không biết. Nếu khác biệt đó ảnh hưởng tới tiền khách trả, nó phải hiện lên trong interface (một trường, một tham số), không được giấu sau lớp bọc.
 
 ## Khi nào không cần class, khi nào không cần pattern
 
-Phần lõi của adapter là hàm `meters_to_km`, thuần và dễ kiểm. Nếu Tới Nơi chỉ có một chỗ gọi một SDK, một hàm bọc vài dòng đã đủ, chưa cần đặt tên «Adapter» hay dựng `Protocol`. Class bắt đầu có giá trị khi ta cần giữ client (kết nối, API key), muốn thay nhà cung cấp lúc chạy, hoặc muốn đưa một đối tượng giả vào lúc test.
+Phần lõi của adapter là hàm `meters_to_km`, thuần và dễ kiểm thử. Nếu Tới Nơi chỉ có một chỗ gọi một SDK, một hàm bọc vài dòng đã đủ, chưa cần đặt tên «Adapter» hay dựng `Protocol`. Class bắt đầu có giá trị khi ta cần giữ client (kết nối, API key), muốn thay nhà cung cấp lúc chạy, hoặc muốn đưa một đối tượng giả vào lúc test.
 
 Đối tượng giả cho test không cần framework mock. Lab có `FixedRouting` chỉ với một method; vì `Protocol` khớp theo cấu trúc nên `quote_trip` nhận nó mà không cần kế thừa hay đăng ký:
 
@@ -277,7 +277,7 @@ class FixedRouting:
 | Thứ có sẵn khác interface ta cần, có nhiều nơi gọi | Adapter |
 | Chỉ một nơi gọi, không cần thay | Hàm bọc vài dòng |
 
-Dấu hiệu lạm dụng cũng quen: một `Protocol` chỉ có một lớp hiện thực và không ai thay; năm lớp trạng thái mà luật của chúng chỉ là dữ liệu và bảng đã nói đủ; một «Strategy» thật ra chỉ là một `if`. Pattern phải trả được tiền cho tầng gián tiếp nó thêm vào.
+Dấu hiệu lạm dụng cũng quen: một `Protocol` chỉ có một lớp hiện thực và không ai thay; năm lớp trạng thái mà luật của chúng chỉ là dữ liệu, trong khi một bảng chuyển đã đủ để mô tả; một «Strategy» thật ra chỉ là một `if`. Pattern phải đáng giá so với tầng gián tiếp mà nó thêm vào.
 
 ## Chạy và kiểm chứng
 
@@ -316,18 +316,18 @@ Decimal('2000.1')    = 2000.1
 meters_to_km(2000.1) = 2.0001
 ```
 
-Cước 5,23 km là 12.000 + 3,23 × 4.500 = 26.535, tính tay khớp với output. Lệnh thứ hai chạy 26 kiểm tra (bảng giá cả ba dịch vụ, nhật ký, cache, Protocol, vòng đời, 64 cặp trạng thái, luật cần tài xế, adapter, lỗi, đối tượng giả), lệnh thứ ba kiểm kiểu:
+Cước 5,23 km là 12.000 + 3,23 × 4.500 = 26.535, con số tính tay này khớp với kết quả chương trình in ra. Lệnh thứ hai chạy 26 kiểm tra (bảng giá cả ba dịch vụ, nhật ký, cache, Protocol, vòng đời, 64 cặp trạng thái, luật cần tài xế, adapter, lỗi, đối tượng giả), lệnh thứ ba kiểm tra kiểu dữ liệu:
 
 ```text
 OK 26/26
 Success: no issues found in 5 source files
 ```
 
-Có ca sai thì `--verify` in `SAI: <tên ca>`, dòng `FAIL n/26` (n là số ca đạt) và thoát với mã 1. Lab dùng Python 3.14.7 và mypy 2.4.1 (ghi trong `uv.lock`).
+Có test case sai thì `--verify` in `SAI: <tên ca>`, dòng `FAIL n/26` (n là số test case đạt) và thoát với mã 1. Lab dùng Python 3.14.7 và mypy 2.4.1 (ghi trong `uv.lock`).
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
-| Hai dịch vụ cho giá khác nhau dù không có phụ phí | Có strategy nào đổi cách làm tròn hoặc thứ tự phép tính; chạy lại bảng ca biên |
+| Hai dịch vụ cho giá khác nhau dù không có phụ phí | Có strategy nào đổi cách làm tròn hoặc thứ tự phép tính; chạy lại bảng test case biên |
 | Cache trả giá cũ sau khi đổi chính sách | `CachedFare` bọc một `policy` cố định; tạo instance mới khi đổi chính sách |
 | `Decimal` có hàng chục chữ số lẻ sau khi đổi mét sang km | Có dùng `Decimal(float)` thay vì `Decimal(str(...))` không |
 | Lớp trạng thái cho phép bước mà bảng cấm | So hai tập chuyển bằng đúng phép so 64 cặp của `--verify` |

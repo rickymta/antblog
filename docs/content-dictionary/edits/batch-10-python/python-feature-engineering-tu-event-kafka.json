@@ -1,0 +1,137 @@
+{
+ "file": "python-feature-engineering-tu-event-kafka.md",
+ "edits": [
+  {
+   "old": "và tính online khớp tính theo lô",
+   "new": "và cách tính online khớp với cách tính theo lô",
+   "reason": "Câu cụt, thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "năm tài khoản chung một thiết bị cùng ăn mã giảm một nửa",
+   "new": "năm tài khoản chung một thiết bị cùng dùng mã giảm một nửa",
+   "reason": "'ăn mã' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó có dùng thông tin tương lai không?",
+   "new": "Đặc trưng này có dùng thông tin tương lai không?",
+   "reason": "Tránh 'Nó' chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nó trả giá trị sai âm thầm",
+   "new": "nó trả về giá trị sai mà không báo gì",
+   "reason": "Calque 'âm thầm'",
+   "severity": "medium"
+  },
+  {
+   "old": "Các cột tách loại nhưng không sạch sẽ.",
+   "new": "Các cột phân biệt được các loại gian lận nhưng chưa tách bạch hoàn toàn.",
+   "reason": "'không sạch sẽ' mang nghĩa đen, câu cụt",
+   "severity": "high"
+  },
+  {
+   "old": "vì thế tố «sạch»",
+   "new": "vì thế cho thấy chuyến đó có vẻ «sạch»",
+   "reason": "'tố sạch' dịch gượng, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "<code>cust_promo_share_30d &gt; 0</code> tố «sạch»",
+   "new": "<code>cust_promo_share_30d &gt; 0</code> cho thấy chuyến đó có vẻ «sạch»",
+   "reason": "'tố sạch' dịch gượng, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "Một thiết bị gian lận cụ thể, tám chuyến đầu (giờ Việt Nam):",
+   "new": "Xét một thiết bị gian lận cụ thể, với tám chuyến đầu của nó (giờ Việt Nam):",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "mà khoảng cách thời gian không đủ để đi",
+   "new": "mà khoảng thời gian giữa hai chuyến không đủ để đi",
+   "reason": "'khoảng cách thời gian' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "chia khoảng cách thời gian, và hai cờ",
+   "new": "chia khoảng thời gian giữa hai chuyến, và hai cờ",
+   "reason": "'khoảng cách thời gian' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "nên các số nhảy bằng 0.",
+   "new": "nên các giá trị nhảy vị trí bằng 0.",
+   "reason": "Cụm 'số nhảy' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Luật tốc độ gần như chỉ sáng ở",
+   "new": "Luật tốc độ gần như chỉ kích hoạt ở",
+   "reason": "'sáng' không tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "Chốt khoảng cách thời gian tối thiểu",
+   "new": "Chốt khoảng thời gian tối thiểu",
+   "reason": "'khoảng cách thời gian' là calque",
+   "severity": "low"
+  },
+  {
+   "old": "là đặc trưng nhìn trước. Biến thể",
+   "new": "là ta có đặc trưng nhìn trước. Biến thể",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "không có cửa sổ thời gian đếm trên cả 60 ngày, gồm những chuyến chưa xảy ra",
+   "new": "vì không có cửa sổ thời gian nên đếm trên cả 60 ngày, gồm những chuyến chưa xảy ra",
+   "reason": "Câu thiếu liên kết, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Một cách phát hiện không phụ thuộc metric là nhìn **bất biến**",
+   "new": "Một cách phát hiện không phụ thuộc metric là kiểm tra **bất biến**",
+   "reason": "'nhìn bất biến' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "PR-AUC tăng 0,603 lên 0,886 (cây tăng cường) và 0,508 lên 0,778",
+   "new": "PR-AUC tăng từ 0,603 lên 0,886 (cây tăng cường) và từ 0,508 lên 0,778",
+   "reason": "Thiếu 'từ'; 'cây tăng cường' là dịch gượng, thống nhất tên với phần trên",
+   "severity": "medium"
+  },
+  {
+   "old": "Một PR-AUC không đẹp bất thường không chứng minh pipeline sạch",
+   "new": "Một PR-AUC không đẹp một cách bất thường cũng không chứng minh pipeline sạch",
+   "reason": "Phủ định chồng, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "một danh sách thời điểm sắp xếp,",
+   "new": "một danh sách thời điểm đã sắp xếp,",
+   "reason": "Thiếu 'đã'",
+   "severity": "low"
+  },
+  {
+   "old": "verify chỉ đòi lô nhỏ cho lệch lớn hơn 0.",
+   "new": "bước kiểm chứng chỉ đòi lô nhỏ cho số chuyến lệch lớn hơn 0.",
+   "reason": "Câu cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không kiểm số tuyệt đối hay tốc độ, và đạt ở seed 1 và 2 của bộ sinh.",
+   "new": "Lệnh này không kiểm tra số tuyệt đối hay tốc độ, và đạt ở seed 1 và 2 của bộ sinh.",
+   "reason": "Tránh 'Nó' đầu câu; 'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "(lab có ca kiểm cho giá trị 0)",
+   "new": "(lab có test case cho giá trị 0)",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  }
+ ]
+}

@@ -8,27 +8,27 @@ tags: [python, toi-noi, fastapi, jwt, security]
 language: vi
 ---
 
-Ở bài 33, API của [Tới Nơi](/articles/du-an-mau-toi-noi) biết «khách hiện tại» là ai bằng một header `X-Customer-Id` do chính client gửi: ai gõ `CU-001` cũng đọc được chuyến của khách 1. Trong khi đó API có ba loại người gọi: khách báo giá và xem chuyến của mình, tài xế xem chuyến được gán, điều phối viên xem hàng đợi và mọi chuyến. Bài này thay «tin header» bằng danh tính đã được chứng minh: đăng nhập bằng mật khẩu, nhận một token có chữ ký, mỗi route kiểm token rồi kiểm quyền.
+Ở bài 33, API của [Tới Nơi](/articles/du-an-mau-toi-noi) biết «khách hiện tại» là ai bằng một header `X-Customer-Id` do chính client gửi: ai gõ `CU-001` cũng đọc được chuyến của khách 1. Trong khi đó API có ba loại người gọi: khách báo giá và xem chuyến của mình, tài xế xem chuyến được gán, điều phối viên xem hàng đợi và mọi chuyến. Bài này thay «tin header» bằng danh tính đã được chứng minh: đăng nhập bằng mật khẩu, nhận một token có chữ ký, mỗi route kiểm tra token rồi kiểm tra quyền.
 
-Đây là bài 34 của lộ trình **Python trung bình qua Tới Nơi**. Bài dựng trên `Depends` và `Settings` của [bài 33](/articles/python-fastapi-dependency-middleware-settings-logging), nên bạn nên đọc nó trước. Lab tự chứa, không cần hạ tầng; nó mang theo Problem Details và hợp đồng `POST /v1/quotes` của [bài 32](/articles/python-fastapi-validation-problem-details-openapi) và `request_id` của bài 33.
+Đây là bài 34 của lộ trình **Python trung bình qua Tới Nơi**. Bài dựng trên `Depends` và `Settings` của [bài 33](/articles/python-fastapi-dependency-middleware-settings-logging), nên bạn hãy đọc bài đó trước. Lab chạy độc lập, không cần hạ tầng; lab mang theo Problem Details và hợp đồng `POST /v1/quotes` của [bài 32](/articles/python-fastapi-validation-problem-details-openapi) và `request_id` của bài 33.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Token của khách <code>CU-001</code> có payload <code>"scope": "customer"</code>. Khách này giải mã phần payload bằng base64, sửa thành <code>"scope": "dispatcher"</code>, ghép lại với phần chữ ký cũ rồi gửi. Server có chấp nhận không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Chữ ký được tính trên header và payload, sửa một ký tự là chữ ký không còn khớp, và server trả 401. Nhưng chiều ngược lại đáng chú ý: <b>đọc</b> payload thì ai cũng làm được, vì JWT mặc định chỉ ký chứ không mã hoá. Bài chạy đúng ca này.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Chữ ký được tính trên header và payload, sửa một ký tự là chữ ký không còn khớp, và server trả 401. Nhưng chiều ngược lại đáng chú ý: <b>đọc</b> payload thì ai cũng làm được, vì JWT mặc định chỉ ký chứ không mã hoá. Bài chạy đúng test case này.</p></details>
 </div>
 
 ## Ba người gọi, ba quyền khác nhau
 
-**Authentication** (xác thực) trả lời «bạn là ai»: server kiểm một bằng chứng (mật khẩu, token) rồi mới tin danh tính. **Authorization** (phân quyền) trả lời «bạn được làm gì». Chúng cho hai mã lỗi khác nhau: **401** khi chưa chứng minh được danh tính, **403** khi biết là ai nhưng không đủ quyền.
+**Authentication** (xác thực) trả lời «bạn là ai»: server kiểm một bằng chứng (mật khẩu, token) rồi mới tin danh tính. **Authorization** (phân quyền) trả lời «bạn được làm gì». Hai việc này cho hai mã lỗi khác nhau: **401** khi chưa chứng minh được danh tính, **403** khi biết là ai nhưng không đủ quyền.
 
 | Người gọi | Scope trong token | Được làm |
 | --- | --- | --- |
 | Khách `CU-001` | `customer` | Báo giá, xem chuyến của mình |
 | Tài xế `DR-001` | `driver` | Xem khả năng nhận chuyến, xem chuyến được gán |
-| Điều phối `DP-001` | `dispatcher` | Xem hàng đợi và mọi chuyến |
+| Điều phối viên `DP-001` | `dispatcher` | Xem hàng đợi và mọi chuyến |
 
-Một **scope** là một quyền ghi trong token. Lab đặt tên scope trùng tên vai trò cho gọn; hệ thống lớn tách vai trò (người này là ai) khỏi scope (token này được làm gì).
+Một **scope** là một quyền được ghi trong token. Lab đặt tên scope trùng tên vai trò cho gọn; hệ thống lớn tách vai trò (người này là ai) khỏi scope (token này được làm gì).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -37,11 +37,11 @@ Một **scope** là một quyền ghi trong token. Lab đặt tên scope trùng 
 <figcaption>Hình 1. Bốn cổng một request phải qua, mỗi cổng có mã lỗi riêng. Cổng 4 là lớp kiểm theo từng chuyến, bên cạnh lớp kiểm theo vai trò.</figcaption>
 </figure>
 
-Cổng 4 cần giải thích. Scope `customer` chỉ nói «được xem chuyến», không nói chuyến nào; thiếu cổng này, mọi khách có token hợp lệ đọc được chuyến của khách khác (lỗi kiểm soát truy cập cấp đối tượng, rất hay gặp). Cổng 3 dựa vào token, cổng 4 dựa vào dữ liệu server tin cậy (chủ chuyến lưu ở kho, không do client khai). Phía C#: [bài authentication và authorization](/articles/dotnet10-authentication-authorization).
+Cổng 4 cần giải thích. Scope `customer` chỉ nói «được xem chuyến», không nói chuyến nào; thiếu cổng này, mọi khách có token hợp lệ đọc được chuyến của khách khác (lỗi kiểm soát truy cập cấp đối tượng, rất hay gặp). Cổng 3 dựa vào token, cổng 4 dựa vào dữ liệu mà server tin cậy (chủ chuyến lưu ở kho, không do client khai). Phía C#: [bài authentication và authorization](/articles/dotnet10-authentication-authorization).
 
 ## Mật khẩu: băm bằng argon2, không tự viết mật mã
 
-Server không lưu mật khẩu, chỉ lưu **hash**. Hàm băm phải *cố ý chậm* và tốn bộ nhớ, để kẻ trộm được bảng hash không thử hàng tỷ mật khẩu mỗi giây như với SHA-256. Lab dùng `pwdlib` với cấu hình khuyến nghị, tức **argon2id**, thay vì tự ghép hàm băm:
+Server không lưu mật khẩu, chỉ lưu **hash**. Hàm băm phải *cố ý chậm* và tốn bộ nhớ, để kẻ đánh cắp được bảng hash không thử hàng tỷ mật khẩu mỗi giây như với SHA-256. Lab dùng `pwdlib` với cấu hình khuyến nghị, tức **argon2id**, thay vì tự ghép hàm băm:
 
 ```python
 hasher = PasswordHash.recommended()  # argon2id
@@ -55,7 +55,7 @@ hash lưu trữ : $argon2id$v=19$m=65536,t=3,p=4$…
 verify một mật khẩu: khoảng 32 ms (cố ý chậm; máy của bạn sẽ khác)
 ```
 
-`m=65536` là 64 MiB bộ nhớ mỗi lần băm, `t=3` số vòng, `p=4` mức song song; kế đó là muối ngẫu nhiên rồi tới hash, nên cùng mật khẩu băm hai lần cho hai chuỗi khác nhau (lab kiểm). Hai chi tiết trong `POST /v1/auth/token` (trích `app/routes.py`):
+`m=65536` là 64 MiB bộ nhớ mỗi lần băm, `t=3` là số vòng, `p=4` là mức song song; kế đó là muối ngẫu nhiên rồi tới hash, nên cùng mật khẩu băm hai lần cho hai chuỗi khác nhau (lab kiểm). Hai chi tiết trong `POST /v1/auth/token` (trích `app/routes.py`):
 
 ```python
     user = users.get(form.username)
@@ -68,9 +68,9 @@ verify một mật khẩu: khoảng 32 ms (cố ý chậm; máy của bạn sẽ
         raise OAuthError("invalid_grant", "sai tên đăng nhập hoặc mật khẩu")  # không log tên và mật khẩu đã gõ
 ```
 
-Trả lời ngay khi tài khoản không tồn tại thì kẻ dò thấy «không có tài khoản» nhanh hơn «sai mật khẩu» và liệt kê được người dùng; nên băm một hash giả và dùng **cùng một thông báo** cho hai trường hợp (lab kiểm). `asyncio.to_thread` cần vì `verify` tốn CPU: gọi thẳng trong `async def` sẽ chặn event loop (bài 21). Log chỉ ghi `known_user=True/False`, vì tên gõ vào ô đăng nhập đôi khi là mật khẩu gõ nhầm chỗ.
+Nếu trả lời ngay khi tài khoản không tồn tại, kẻ dò sẽ thấy «không có tài khoản» nhanh hơn «sai mật khẩu» và liệt kê được người dùng; nên băm một hash giả và dùng **cùng một thông báo** cho hai trường hợp (lab kiểm). `asyncio.to_thread` cần vì `verify` tốn CPU: gọi thẳng trong `async def` sẽ chặn event loop (bài 21). Log chỉ ghi `known_user=True/False`, vì tên gõ vào ô đăng nhập đôi khi là mật khẩu gõ nhầm chỗ.
 
-Lỗi đăng nhập là 400, không phải 401: RFC 6749 mục 5.2 quy định sai thông tin đăng nhập của người dùng là `invalid_grant`, trả 400 kèm thành viên `error`; 401 dành cho việc xác thực *client* OAuth (ở đây không có). Lab giữ Problem Details của cả loạt và thêm đúng thành viên `error`.
+Lỗi đăng nhập là 400, không phải 401: RFC 6749 mục 5.2 quy định sai thông tin đăng nhập của người dùng là `invalid_grant`, trả 400 kèm thành viên `error`; 401 dành cho việc xác thực *client* OAuth (ở đây không có). Lab giữ Problem Details của cả loạt bài và thêm đúng thành viên `error`.
 
 ## JWT: chữ ký chống sửa, không chống đọc
 
@@ -92,7 +92,7 @@ payload: {'iss': 'toinoi-lab34', 'aud': 'toinoi-api', 'sub': 'CU-001', 'iat': 17
 (đọc được bằng base64: chữ ký chống SỬA, không chống ĐỌC)
 ```
 
-Sáu claim, không hơn: `sub` chủ thể, `scope` quyền (chuỗi cách nhau bằng dấu cách theo RFC 6749), `iat` và `exp` lúc phát và hết hạn (cách nhau 900 giây), `iss` bên phát, `aud` dịch vụ được nhận. Không có tên, số điện thoại, giấy tờ hay hash, vì ai cũng đọc được payload. Phát và kiểm token do PyJWT làm (trích `app/security.py`):
+Sáu claim, không hơn: `sub` chủ thể, `scope` quyền (chuỗi cách nhau bằng dấu cách theo RFC 6749), `iat` và `exp` thời điểm phát và thời điểm hết hạn (cách nhau 900 giây), `iss` bên phát, `aud` dịch vụ nhận token. Không có tên, số điện thoại, giấy tờ hay hash, vì ai cũng đọc được payload. PyJWT lo việc phát và kiểm tra token (trích `app/security.py`):
 
 ```python
     def decode(self, token: str) -> Principal:
@@ -115,9 +115,9 @@ Sáu claim, không hơn: `sub` chủ thể, `scope` quyền (chuỗi cách nhau 
         return Principal(claims["sub"], frozenset(scope.split()))
 ```
 
-Ba chi tiết cần nhớ. Hai chi tiết đầu là khuyến nghị của RFC 8725 (JWT Best Current Practices): **luôn khai danh sách thuật toán** khi kiểm (mục 3.1), vì header do người gửi viết; và **kiểm `iss`, `aud`** (mục 3.8, 3.9), vì token phát cho dịch vụ khác không được dùng ở đây dù chữ ký đúng. Chi tiết thứ ba là quyết định của bài, không phải của RFC: **đòi đủ claim cần thiết** (`require`), vì thiếu `exp` mà không đòi thì token sống mãi. Lab còn từ chối token có `scope` không phải chuỗi.
+Ba chi tiết cần nhớ. Hai chi tiết đầu là khuyến nghị của RFC 8725 (JWT Best Current Practices): **luôn khai báo danh sách thuật toán** khi kiểm tra (mục 3.1), vì header do người gửi viết; và **kiểm `iss`, `aud`** (mục 3.8, 3.9), vì token phát cho dịch vụ khác không được dùng ở đây dù chữ ký đúng. Chi tiết thứ ba là quyết định của bài, không phải của RFC: **yêu cầu đủ claim cần thiết** (`require`), vì thiếu `exp` mà không yêu cầu thì token sống mãi. Lab còn từ chối token có `scope` không phải chuỗi.
 
-**Khoá ký là chỗ dễ sai nhất.** HS256 dùng một khoá chung để ký và kiểm. RFC 7518 mục 3.2 đòi khoá ít nhất 32 byte; RFC 8725 mục 3.5 đòi thêm rằng mật khẩu con người nhớ được **không** được dùng trực tiếp làm khoá HS256. Cách đúng là sinh ngẫu nhiên, ví dụ `secrets.token_urlsafe(32)` (43 ký tự). `Settings` của lab bắt cả ba lỗi và **không có giá trị mặc định** cho `environment` lẫn `jwt_secret`. Bản đầu của bài mặc định là khoá công khai của lab và chỉ báo lỗi khi đặt `environment="prod"`: quên đặt biến thì dịch vụ mở ra với khoá cả thế giới biết. Giờ thiếu biến là không khởi động (output của `uvicorn --factory` thật):
+**Khoá ký là chỗ dễ sai nhất.** HS256 dùng một khoá chung để ký và kiểm. RFC 7518 mục 3.2 yêu cầu khoá ít nhất 32 byte; RFC 8725 mục 3.5 yêu cầu thêm rằng mật khẩu con người nhớ được **không** được dùng trực tiếp làm khoá HS256. Cách đúng là sinh khoá ngẫu nhiên, ví dụ `secrets.token_urlsafe(32)` (43 ký tự). `Settings` của lab bắt cả ba lỗi và **không có giá trị mặc định** cho `environment` lẫn `jwt_secret`. Bản đầu của bài mặc định là khoá công khai của lab và chỉ báo lỗi khi đặt `environment="prod"`: nếu quên đặt biến, dịch vụ sẽ chạy với một khoá mà cả thế giới đều biết. Giờ thiếu biến thì dịch vụ không khởi động (output của `uvicorn --factory` thật):
 
 ```text
 pydantic_core._pydantic_core.ValidationError: 2 validation errors for Settings
@@ -138,11 +138,11 @@ dev + khóa của lab   -> OK
 prod + khóa sinh bằng secrets.token_urlsafe(32) (43 ký tự) -> OK, repr=SecretStr('**********')
 ```
 
-Kiểm «quá đơn điệu» (dưới 12 ký tự khác nhau) chỉ chặn khoá kiểu `xxxx…`, không chứng minh được entropy. Khoá `lab34-dev-secret-not-for-production` là khoá công khai: chỉ chạy được khi đặt tường minh `TOINOI_ENVIRONMENT=dev`, còn `--verify` dùng khoá sinh mới mỗi lần.
+Phép kiểm «quá đơn điệu» (dưới 12 ký tự khác nhau) chỉ chặn khoá kiểu `xxxx…`, không chứng minh được entropy. Khoá `lab34-dev-secret-not-for-production` là khoá công khai: chỉ chạy được khi đặt rõ ràng `TOINOI_ENVIRONMENT=dev`, còn `--verify` dùng khoá sinh mới mỗi lần.
 
 ## OAuth2 password flow và Bearer trong FastAPI
 
-FastAPI có sẵn hai mảnh ghép của OAuth2. `OAuth2PasswordRequestForm` đọc form `application/x-www-form-urlencoded` với các trường `username`, `password`, `scope` (cần gói `python-multipart` để parse form). `OAuth2PasswordBearer` đọc header `Authorization: Bearer <token>` và khai với OpenAPI rằng API dùng luồng này, nên nút **Authorize** của `/docs` hoạt động:
+FastAPI có sẵn hai mảnh ghép của OAuth2. `OAuth2PasswordRequestForm` đọc form `application/x-www-form-urlencoded` với các trường `username`, `password`, `scope` (cần gói `python-multipart` để parse form). `OAuth2PasswordBearer` đọc header `Authorization: Bearer <token>` và khai báo với OpenAPI rằng API dùng luồng này, nên nút **Authorize** của `/docs` hoạt động:
 
 ```python
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token", scopes=SCOPES, auto_error=False)
@@ -183,7 +183,7 @@ cache-control: no-store
 
 Header `WWW-Authenticate` là một phần của hợp đồng HTTP, không phải trang trí: theo RFC 6750, 401 phải kèm nó để client biết cần gửi bearer token. `OAuth2PasswordBearer` còn chấp nhận đúng scheme `Bearer`; một header `Basic …` bị coi như không có token (lab kiểm điều này).
 
-Một lưu ý về luồng: «password flow» bắt client nhận mật khẩu của người dùng rồi đổi lấy token. RFC 9700 (OAuth 2.0 Security BCP, mục 2.4) ghi luồng này **không được dùng**, vì client nhìn thấy mật khẩu và nó không đi cùng xác thực hai bước. Lab chọn nó vì cho thấy trọn vòng mật khẩu, token, kiểm token trong một service. Hệ thống thật dùng IdP với authorization code kèm PKCE; API chỉ còn việc kiểm token của IdP.
+Một lưu ý về luồng: «password flow» bắt client nhận mật khẩu của người dùng rồi đổi lấy token. RFC 9700 (OAuth 2.0 Security BCP, mục 2.4) ghi rằng luồng này **không được dùng**, vì client nhìn thấy mật khẩu và luồng này không đi cùng xác thực hai bước. Lab chọn luồng này vì cho thấy toàn bộ chu trình mật khẩu, token, kiểm tra token trong một service. Hệ thống thật dùng IdP với authorization code kèm PKCE; API chỉ còn việc kiểm token của IdP.
 
 ## Scope và require_scope: chọn 401 hay 403
 
@@ -204,7 +204,7 @@ def require_scope(*scopes: str):
     return Security(current_principal, scopes=list(scopes))
 ```
 
-Route chỉ cần `principal: Annotated[Principal, require_scope("dispatcher")]`. Vì FastAPI biết scope qua `Security`, OpenAPI tự ghi route này yêu cầu `dispatcher` (`security: [{"OAuth2PasswordBearer": ["dispatcher"]}]`, lab kiểm). Route `get_trip` khác: nó dùng `Authenticated`, chỉ đòi token hợp lệ và **không** đòi scope nào (không có cổng 3), vì quyền ở đây phụ thuộc quan hệ giữa người gọi và từng chuyến (cổng 4):
+Route chỉ cần `principal: Annotated[Principal, require_scope("dispatcher")]`. Vì FastAPI biết scope qua `Security`, OpenAPI tự ghi route này yêu cầu `dispatcher` (`security: [{"OAuth2PasswordBearer": ["dispatcher"]}]`, lab kiểm). Route `get_trip` khác: nó dùng `Authenticated`, chỉ yêu cầu token hợp lệ và **không** yêu cầu scope nào (không có cổng 3), vì quyền ở đây phụ thuộc quan hệ giữa người gọi và từng chuyến (cổng 4):
 
 ```python
     trip = request.app.state.trips.get(trip_id)
@@ -219,7 +219,7 @@ Route chỉ cần `principal: Annotated[Principal, require_scope("dispatcher")]`
         raise HTTPException(status_code=404, detail="không tìm thấy chuyến")
 ```
 
-Chuyến của người khác trả 404 thay vì 403 là quyết định có cân nhắc. RFC 9110 mục 15.5.4 cho phép máy chủ muốn «giấu» tài nguyên bị cấm trả 404: với 403, kẻ dò `TN-0001`, `TN-0002`… biết chuyến nào có thật; với 404, chuyến của người khác và chuyến không có là một. Đổi lại, gỡ lỗi khó hơn; nơi mã chuyến không bí mật và cần thông báo rõ, 403 như bài C# lại hợp hơn. Vì 404 xoá dấu vết với client, lab **ghi log** `auth.trip.denied` cho chuyến có thật bị từ chối. `--verify` kiểm body 404 của `TN-0002` (khách khác) và `TN-9999` (không có) trùng nhau, và chỉ chuyến có thật có dòng log từ chối. Bảng quyền (output của `main.py`; hàng là người gọi, cột là route; `TN-0001` của `CU-001` do `DR-001` chạy, `TN-0002` của `CU-002`):
+Chuyến của người khác trả 404 thay vì 403 là quyết định có cân nhắc. RFC 9110 mục 15.5.4 cho phép máy chủ trả 404 khi muốn «giấu» tài nguyên bị cấm: với 403, kẻ dò `TN-0001`, `TN-0002`… biết chuyến nào có thật; với 404, chuyến của người khác và chuyến không có là một. Đổi lại, gỡ lỗi khó hơn. Ở nơi mã chuyến không phải bí mật và cần báo lỗi rõ ràng, 403 như trong bài C# lại hợp hơn. Vì 404 xoá dấu vết với client, lab **ghi log** `auth.trip.denied` cho chuyến có thật bị từ chối. `--verify` kiểm body 404 của `TN-0002` (khách khác) và `TN-9999` (không có) trùng nhau, và chỉ chuyến có thật có dòng log từ chối. Bảng quyền (output của `main.py`; hàng là người gọi, cột là route; `TN-0001` của `CU-001` do `DR-001` chạy, `TN-0002` của `CU-002`):
 
 ```text
                me   quotes  TN-0001  TN-0002   driver    queue
@@ -231,11 +231,11 @@ WWW-Authenticate của 401: Bearer
 WWW-Authenticate của 403: Bearer error="insufficient_scope", scope="dispatcher"
 ```
 
-Đọc bảng theo cột: `quotes` chỉ khách báo giá được (201); `queue` chỉ điều phối; `TN-0002` khách và tài xế không liên quan nhận 404, điều phối nhận 200. Phần lớn giá trị của bảng nằm ở các ô bị từ chối, nên `--verify` kiểm đủ cả 24 ô.
+Đọc bảng theo cột: `quotes` chỉ khách mới báo giá được (201); `queue` chỉ điều phối viên xem được; `TN-0002` khách và tài xế không liên quan nhận 404, điều phối nhận 200. Phần lớn giá trị của bảng nằm ở các ô bị từ chối, nên `--verify` kiểm đủ cả 24 ô.
 
-## Token xấu: mười ca đều ra 401
+## Token xấu: mười test case đều trả 401
 
-Phần quan trọng nhất của kiểm token là những thứ nó phải từ chối. Lab dựng mười token xấu từ một token hợp lệ, gọi `/v1/me` với từng cái, và đọc lý do thật trong log của server:
+Phần quan trọng nhất khi kiểm tra token là những loại token mà server phải từ chối. Lab dựng mười token xấu từ một token hợp lệ, gọi `/v1/me` với từng cái, và đọc lý do thật trong log của server:
 
 ```text
 hết hạn 1 giây             -> 401 | log: auth.token.rejected reason=expired
@@ -251,9 +251,9 @@ không phải JWT             -> 401 | log: auth.token.rejected reason=malformed
 còn 30 giây hạn            -> 200
 ```
 
-Dòng thứ hai trả lời câu hỏi đầu bài. `alg=none` là tấn công kinh điển (token tự khai «không cần chữ ký»); nhờ `algorithms=[ALGORITHM]`, PyJWT từ chối ngay. Cả mười ca nhận **cùng một** response (401, `invalid_token`, cùng `detail`): lý do chi tiết chỉ nằm trong log, vì nói «chữ ký sai» hay «sai audience» chỉ giúp kẻ tấn công chỉnh token. Dòng cuối là phép đối chứng: token còn 30 giây hạn vẫn dùng được, nên ca «hết hạn» đỏ đúng vì hết hạn.
+Dòng thứ hai trả lời câu hỏi đầu bài. `alg=none` là tấn công kinh điển (token tự khai «không cần chữ ký»); nhờ `algorithms=[ALGORITHM]`, PyJWT từ chối ngay. Cả mười test case nhận **cùng một** response (401, `invalid_token`, cùng `detail`): lý do chi tiết chỉ nằm trong log, vì nói «chữ ký sai» hay «sai audience» chỉ giúp kẻ tấn công chỉnh token. Dòng cuối là phép đối chứng: token còn 30 giây hạn vẫn dùng được, nên test case «hết hạn» đỏ đúng vì hết hạn.
 
-Lab còn kiểm: log không chứa token hay mật khẩu nào, và xin scope ngoài quyền (khách xin `dispatcher`) trả 400 với `error=invalid_scope`. TTL 900 giây là cân bằng: ngắn thì token lộ ít hại, nhưng phải lấy lại thường hơn. Giữa các máy lệch đồng hồ vài giây, PyJWT có tham số `leeway`; lab để 0.
+Lab còn kiểm: log không chứa token hay mật khẩu nào, và xin scope ngoài quyền (khách xin `dispatcher`) trả 400 với `error=invalid_scope`. TTL 900 giây là một điểm cân bằng: TTL ngắn thì token bị lộ ít gây hại hơn, nhưng phải lấy token mới thường xuyên hơn. Khi đồng hồ giữa các máy lệch nhau vài giây, PyJWT có tham số `leeway`; lab để 0.
 
 ## Chạy và kiểm chứng
 
@@ -264,28 +264,28 @@ uv run --project examples/toi-noi-python/34-fastapi-jwt-authorization examples/t
 uv run --project examples/toi-noi-python/34-fastapi-jwt-authorization examples/toi-noi-python/34-fastapi-jwt-authorization/main.py --verify
 ```
 
-Lệnh đầu in các khối ở trên (trích từng phần). `--verify` chạy cùng kịch bản và so 73 kết quả kỳ vọng: argon2 và token, `Cache-Control`, `invalid_grant`, bảng quyền 4 hàng 6 cột, hợp đồng `quotes` và Problem Details, mười token xấu (mỗi ca kiểm mã, lý do log, nội dung response và việc token không lọt vào log), cấu hình khoá không mặc định và không lộ khoá:
+Lệnh đầu in các khối ở trên (trích từng phần). `--verify` chạy cùng kịch bản và so 73 kết quả kỳ vọng: argon2 và token, `Cache-Control`, `invalid_grant`, bảng quyền 4 hàng 6 cột, hợp đồng `quotes` và Problem Details, mười token xấu (mỗi test case kiểm mã, lý do log, nội dung response và việc token không lọt vào log), cấu hình khoá không có mặc định và không làm lộ khoá:
 
 ```text
 OK 73/73
 ```
 
-Để biết bộ kiểm có thể đỏ, ta phá có chủ ý trên một bản sao: thêm `"verify_signature": False` vào `options` của `jwt.decode`. `--verify` báo (trích dòng đầu và dòng cuối):
+Để biết bộ kiểm tra có thể báo đỏ, ta cố ý phá một bản sao: thêm `"verify_signature": False` vào `options` của `jwt.decode`. `--verify` báo (trích dòng đầu và dòng cuối):
 
 ```text
 SAI: token xấu 'hết hạn 1 giây': 401 và lý do log: nhận (200, ''), kỳ vọng (401, 'auth.token.rejected reason=expired')
 FAIL 61/73
 ```
 
-Phá kiểm scope (`if False`) cho `SAI: ma trận quyền: CU-001: …` rồi `FAIL 68/73`; bỏ `hide_input_in_errors` thì ca «không lộ khoá» đỏ; cho `jwt_secret` một mặc định thì ca «không có giá trị mặc định» đỏ. Môi trường: Python 3.14.7, FastAPI 0.162.0, PyJWT 2.15.1, pwdlib 0.3.1, python-multipart 0.0.33, pydantic-settings 2.16.2 (`uv.lock`). Lần chạy cuối in `load average 32.64 / 47.56` (máy Apple M1 Max đang bận), nên 32 ms của argon2 chỉ để tham khảo; mã trạng thái và lý do từ chối lặp lại được.
+Phá phần kiểm tra scope (`if False`) cho `SAI: ma trận quyền: CU-001: …` rồi `FAIL 68/73`; bỏ `hide_input_in_errors` thì test case «không lộ khoá» đỏ; cho `jwt_secret` một mặc định thì test case «không có giá trị mặc định» đỏ. Môi trường: Python 3.14.7, FastAPI 0.162.0, PyJWT 2.15.1, pwdlib 0.3.1, python-multipart 0.0.33, pydantic-settings 2.16.2 (`uv.lock`). Lần chạy cuối in `load average 32.64 / 47.56` (máy Apple M1 Max đang bận), nên 32 ms của argon2 chỉ để tham khảo; mã trạng thái và lý do từ chối lặp lại được.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
 | Service không lên, báo `Field required` | Đã đặt `TOINOI_ENVIRONMENT` và `TOINOI_JWT_SECRET` chưa; không có mặc định là chủ ý |
-| Mọi token đều bị 401 sau khi đổi khoá | Mọi replica có cùng khoá không; token ký bằng khoá cũ hỏng khi xoay khoá |
+| Mọi token đều bị 401 sau khi đổi khoá | Mọi replica có cùng khoá không; token ký bằng khoá cũ không còn dùng được khi xoay khoá |
 | 401 dù token vừa phát | `aud`, `iss` trong token và trong `Settings` có khớp không; `exp` có tính theo UTC không |
 | Token hợp lệ nhưng 403 | Claim `scope` là chuỗi cách nhau bằng dấu cách; route cần đủ **mọi** scope được liệt kê |
-| Đăng nhập chậm, request khác bị treo theo | `verify` argon2 đang chạy thẳng trong `async def`; dùng `asyncio.to_thread` |
+| Đăng nhập chậm, các request khác cũng bị chặn | `verify` argon2 đang chạy thẳng trong `async def`; dùng `asyncio.to_thread` |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>

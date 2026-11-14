@@ -8,14 +8,14 @@ tags: [python, toi-noi, opencv, ocr, deskew]
 language: vi
 ---
 
-Tài xế của [Tới Nơi](/articles/du-an-mau-toi-noi) hiếm khi chụp thẻ như máy quét: thẻ đặt trên bàn, điện thoại cầm chếch. Ở bài 41, Tesseract trần đọc ảnh xoay 6 đến 14 độ với CER 0,761, gần như không đọc được. Ảnh chụp thật còn có thêm phối cảnh, bóng và đôi khi thẻ ra khỏi khung. Bài này đưa ảnh về dạng OCR đọc được: tìm bốn góc của thẻ, kéo thẻ về hình chữ nhật, và đo xem từng bước giúp được bao nhiêu. Mọi số đo dùng cấu hình `-l vie --psm 4` của bài 41; mục cuối đo lại bằng `vie+eng --psm 6`, và hai cấu hình cho kết luận khác nhau.
+Tài xế của [Tới Nơi](/articles/du-an-mau-toi-noi) hiếm khi chụp thẻ như máy quét: thẻ đặt trên bàn, điện thoại cầm chếch. Ở bài 41, Tesseract nguyên bản đọc ảnh xoay 6 đến 14 độ với CER 0,761, gần như không đọc được. Ảnh chụp thật còn có thêm phối cảnh, bóng và đôi khi thẻ ra khỏi khung. Bài này đưa ảnh về dạng OCR đọc được: tìm bốn góc của thẻ, kéo thẻ về hình chữ nhật, và đo xem từng bước giúp được bao nhiêu. Mọi số đo dùng cấu hình `-l vie --psm 4` của bài 41; mục cuối đo lại bằng `vie+eng --psm 6`, và hai cấu hình cho kết luận khác nhau.
 
 Đây là bài 42 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần bộ dữ liệu và metric CER ở [bài 41](/articles/python-kyc-tai-xe-bai-toan-du-lieu-metric) và cách OpenCV đọc ảnh thành mảng ở [bài 30](/articles/python-numpy-pillow-opencv-tien-xu-ly-anh).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Thẻ bị chụp chếch nên hình chữ nhật thành hình thang: cạnh trên ngắn hơn cạnh dưới. Ta có thể xoay ảnh một góc nào đó để đưa nó về hình chữ nhật không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Xoay giữ nguyên độ dài và độ song song, nên hai cạnh bên không bao giờ song song trở lại. Cần phép biến đổi phối cảnh (ma trận 3x3, tám ẩn) xác định từ bốn cặp điểm: bốn góc của thẻ trong ảnh và bốn góc của hình chữ nhật đích. Bài làm đúng việc đó và đo kết quả.</p></details>
+<p>Thẻ bị chụp chếch nên hình chữ nhật biến thành hình thang: cạnh trên ngắn hơn cạnh dưới. Ta có thể xoay ảnh một góc nào đó để đưa nó về hình chữ nhật không?</p>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Xoay giữ nguyên độ dài và độ song song, nên hai cạnh bên không bao giờ song song trở lại. Cần phép biến đổi phối cảnh (ma trận 3x3, tám ẩn) xác định từ bốn cặp điểm: bốn góc của thẻ trong ảnh và bốn góc của hình chữ nhật đích. Bài này làm đúng việc đó rồi đo kết quả.</p></details>
 </div>
 
 ## Ảnh chụp không giống ảnh quét
@@ -33,7 +33,7 @@ def homography_coeffs(dst: np.ndarray, src: np.ndarray) -> list[float]:
     return np.linalg.solve(np.array(rows, dtype=np.float64), np.array(rhs, dtype=np.float64)).tolist()
 ```
 
-Mỗi cặp điểm cho hai phương trình tuyến tính trong tám ẩn của ma trận 3x3 (phần tử cuối cố định bằng 1), nên bốn cặp góc đủ giải; OpenCV làm đúng việc này khi nắn ảnh ở mục sau. Ảnh có bốn điều kiện (lược bớt dòng cuối của ví dụ):
+Mỗi cặp điểm cho hai phương trình tuyến tính trong tám ẩn của ma trận 3x3 (phần tử cuối cố định bằng 1), nên bốn cặp góc đủ giải; OpenCV làm đúng việc này khi nắn ảnh ở mục sau. Ảnh chia theo bốn điều kiện chụp (output đã bỏ bớt dòng cuối):
 
 ```text
 điều kiện   cccd  gplx  cộng  mô tả
@@ -43,11 +43,11 @@ hard           7     7    14  như tilt nhưng tối (x0,55), bóng chạy ngang
 cutoff         4     3     7  nghiêng nhẹ, thẻ bị đẩy sang phải nên mép phải ra ngoài khung
 ```
 
-`skew` gần với ảnh quét; `tilt` thêm phối cảnh trên ba mặt bàn; `hard` thêm tối, bóng, mờ và nhiễu mạnh; `cutoff` đẩy thẻ để mép phải ra ngoài khung. Mỗi ảnh là JPEG 1600 x 1200, kèm bốn góc thật trong `out/manifest.json`. Cột `raw` của bảng CER ở cuối bài là Tesseract trên nguyên ảnh: 0,972 ở `skew`, 0,337 ở `tilt`, 0,661 ở `hard`, 0,336 ở `cutoff`, trong khi chính 50 giấy tờ đó khi ảnh sạch cho 0,024.
+`skew` gần với ảnh quét; `tilt` thêm phối cảnh trên ba mặt bàn; `hard` thêm tối, bóng, mờ và nhiễu mạnh; `cutoff` đẩy thẻ để mép phải ra ngoài khung. Mỗi ảnh là JPEG 1600 x 1200, kèm bốn góc thật trong `out/manifest.json`. Cột `raw` của bảng CER ở cuối bài là kết quả của Tesseract chạy trên ảnh nguyên bản: 0,972 ở `skew`, 0,337 ở `tilt`, 0,661 ở `hard`, 0,336 ở `cutoff`, trong khi cùng 50 giấy tờ đó ở dạng ảnh sạch cho 0,024.
 
 ## Canny, đường bao và tứ giác lớn nhất
 
-Thẻ nổi lên khỏi mặt bàn nhờ cạnh của nó. Ta làm mờ Gaussian trước (Canny không tự làm bước này). **Canny** tính gradient, giữ cực đại cục bộ theo hướng gradient (**non-maximum suppression**) để cạnh mỏng một điểm ảnh, rồi lọc theo hai ngưỡng (**hysteresis**): trên `high` chắc chắn là cạnh, giữa `low` và `high` chỉ giữ nếu nối với điểm chắc chắn. Ta dãn cạnh bằng nhân 3x3 hai lần để nối các đoạn đứt (`vision.py`, trích):
+Thẻ nổi lên khỏi mặt bàn nhờ cạnh của nó. Ta làm mờ Gaussian trước (Canny không tự làm bước này). **Canny** tính gradient, giữ cực đại cục bộ theo hướng gradient (**non-maximum suppression**) để cạnh mỏng còn một điểm ảnh, rồi lọc theo hai ngưỡng (**hysteresis**): trên `high` chắc chắn là cạnh, giữa `low` và `high` chỉ giữ nếu nối với điểm chắc chắn. Ta dãn cạnh bằng kernel 3x3 hai lần để nối các đoạn đứt (`vision.py`, trích):
 
 ```python
 def edge_map(bgr, low=40, high=120):
@@ -95,16 +95,16 @@ hard          14/14            6.3 px    19.7             20.0 px
 cutoff         0/7                  -       -                   -
 ```
 
-Ở `skew`, tứ giác bám khung xanh in trên thẻ (lệch 4,0 px) chứ không phải mép thẻ (16,6 px); thẻ xanh nhạt trên nền gần trắng nên nhiều khả năng mép thẻ có gradient yếu hơn khung. Hệ quả vô hại cho OCR: nắn theo khung chỉ cắt lề 13 điểm ảnh (tính trên thẻ gốc), và CER sau nắn là 0,016. Ở `tilt`, trên nền bàn, tứ giác bám đúng mép thẻ (2,4 px). `hard` lệch tới 19,7 px ở ảnh xấu nhất; ta không tách từng ảnh nên không giải thích.
+Ở `skew`, tứ giác bám khung xanh in trên thẻ (lệch 4,0 px) chứ không phải mép thẻ (16,6 px); thẻ xanh nhạt trên nền gần trắng nên nhiều khả năng mép thẻ có gradient yếu hơn khung. Hệ quả vô hại cho OCR: nắn theo khung chỉ cắt lề 13 điểm ảnh (tính trên thẻ gốc), và CER sau nắn là 0,016. Ở `tilt`, trên nền bàn, tứ giác bám đúng mép thẻ (2,4 px). `hard` lệch tới 19,7 px ở ảnh xấu nhất; ta không xét riêng từng ảnh nên không giải thích được.
 
-`cutoff` ra 0 trên 7, do kiểm tra góc sát mép khung: khi thẻ vượt ra ngoài khung, bao lồi của phần còn lại vẫn có thể là tứ giác, nhưng hai góc của nó nằm trên mép khung chứ không phải góc thẻ. Lab thử tắt kiểm tra đó (`edge_margin=None`) trên bảy ảnh:
+`cutoff` cho kết quả 0 trên 7, do kiểm tra góc sát mép khung: khi thẻ vượt ra ngoài khung, bao lồi của phần còn lại vẫn có thể là tứ giác, nhưng hai góc của nó nằm trên mép khung chứ không phải góc thẻ. Lab thử tắt kiểm tra đó (`edge_margin=None`) trên bảy ảnh:
 
 ```text
 [3] Bỏ kiểm tra góc sát mép khung trên ảnh cutoff
 tìm thấy 7/7 tứ giác, lệch góc thật từ 35.7 đến 77.7 px; CER sau nắn = 0.020
 ```
 
-Cả bảy ảnh ra tứ giác lệch 35,7 đến 77,7 px, và CER sau nắn là 0,020, tốt hơn 0,336 khi ta từ chối. Giải thích hợp lý, ta không đo riêng: chữ của mẫu thẻ này nằm trong cột giá trị cách mép phải khá xa, phần bị cắt là vùng trống. Ta vẫn giữ kiểm tra vì lý do thiết kế chứ không do số đo: tứ giác lệch cỡ đó sẽ nắn sai thẻ có chữ ở phần bị cắt mà không báo. Cách trung gian hợp lý hơn là dùng tứ giác đó nhưng chuyển hồ sơ sang `needs_review`; bài tập 1 quay lại ý này.
+Cả bảy ảnh đều cho tứ giác lệch 35,7 đến 77,7 px, và CER sau nắn là 0,020, tốt hơn 0,336 khi ta từ chối. Có một cách giải thích hợp lý nhưng ta không đo riêng: chữ của mẫu thẻ này nằm trong cột giá trị cách mép phải khá xa, phần bị cắt là vùng trống. Ta vẫn giữ kiểm tra vì lý do thiết kế chứ không do số đo: tứ giác lệch cỡ đó sẽ nắn sai thẻ có chữ ở phần bị cắt mà không báo gì. Cách trung gian hợp lý hơn là dùng tứ giác đó nhưng chuyển hồ sơ sang `needs_review`; bài tập 1 quay lại ý này.
 
 ## Nắn phối cảnh bằng warpPerspective
 
@@ -118,7 +118,7 @@ def warp_card(image, quad, size=CARD_SIZE):
     return cv2.warpPerspective(image, matrix, size, flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 ```
 
-Kích thước đích là 1012 x 638, cỡ ảnh sạch của bài 41. Thứ tự góc quan trọng: đảo hai góc là ảnh bị lật hoặc xoắn, vì mỗi góc nguồn phải đi đúng góc đích.
+Kích thước đích là 1012 x 638, cỡ ảnh sạch của bài 41. Thứ tự góc rất quan trọng: đảo chỗ hai góc thì ảnh bị lật hoặc xoắn, vì mỗi góc nguồn phải đi đúng góc đích.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -138,7 +138,7 @@ Sai khác xám trung bình 6,4 trên thang 255 gồm cả nhiễu, nén JPEG và
 
 ## Deskew bằng minAreaRect
 
-Khi ảnh không có tứ giác để nắn (nền phẳng, ảnh quét xoay), ta chỉ cần xoay: gom các điểm «mực» (tối hơn ngưỡng Otsu), tìm hình chữ nhật xoay nhỏ nhất bao chúng bằng `minAreaRect`, lấy góc của nó. Có một cái bẫy: góc thô mà `minAreaRect` trả về không phải góc nghiêng, và quy ước đổi theo bản OpenCV. Lab vẽ hình chữ nhật xoay theo góc đã biết rồi hỏi hàm:
+Khi ảnh không có tứ giác để nắn (nền phẳng, ảnh quét xoay), ta chỉ cần xoay: gom các điểm «mực» (tối hơn ngưỡng Otsu), tìm hình chữ nhật xoay nhỏ nhất bao chúng bằng `minAreaRect`, lấy góc của nó. Có một cái bẫy: góc thô mà `minAreaRect` trả về không phải góc nghiêng, và quy ước này thay đổi theo từng bản OpenCV. Lab vẽ hình chữ nhật xoay theo góc đã biết rồi hỏi hàm:
 
 ```text
 hình chữ nhật vẽ sẵn xoay theo góc đã biết (dương = theo chiều kim đồng hồ):
@@ -165,7 +165,7 @@ elif angle <= -45.0:
     angle += 90.0
 ```
 
-`deskew` rồi xoay ngược góc đó quanh tâm bằng `getRotationMatrix2D` và `warpAffine`. Trên bộ ảnh:
+`deskew` lấy góc đó rồi xoay ngược lại quanh tâm bằng `getRotationMatrix2D` và `warpAffine`. Trên bộ ảnh:
 
 ```text
 điều kiện   |góc ước lượng| TB   |góc xoay thật| TB  sai số TB  «mực» chiếm
@@ -175,11 +175,11 @@ hard                      0.00                 4.47       4.47        47.1%
 cutoff                    0.00                 5.12       5.12        60.7%
 ```
 
-Ở `skew` góc ước lượng sai trung bình 0,01 độ so với góc xoay thật (trung bình 14,53 độ). Ở ba điều kiện còn lại, góc ước lượng đúng 0,00: không phải vì thẻ thẳng (góc xoay thật trung bình khoảng 4,5 đến 5,1 độ). «Mực» chiếm 47 đến 61% khung, nên đám điểm đó không còn là chữ mà nhiều khả năng gồm cả mặt bàn, và hình chữ nhật bao nó thẳng theo khung ảnh. Chỉ ở `skew`, mực chiếm 3,5% (chữ và khung thẻ trên nền sáng) thì phép đo có nghĩa. Deskew bằng đám điểm mực vì vậy giả định nền sáng và phẳng; trên ảnh có mặt bàn nó không làm gì (CER cột `deskew` bằng cột `raw`).
+Ở `skew` góc ước lượng sai trung bình 0,01 độ so với góc xoay thật (trung bình 14,53 độ). Ở ba điều kiện còn lại, góc ước lượng bằng đúng 0,00: không phải vì thẻ thẳng (góc xoay thật trung bình khoảng 4,5 đến 5,1 độ). «Mực» chiếm 47 đến 61% khung, nên đám điểm đó không còn là chữ mà nhiều khả năng gồm cả mặt bàn, và hình chữ nhật bao nó thẳng theo khung ảnh. Chỉ ở `skew`, mực chiếm 3,5% (chữ và khung thẻ trên nền sáng) thì phép đo có nghĩa. Deskew bằng đám điểm mực vì vậy giả định nền sáng và phẳng; trên ảnh có mặt bàn thì bước này không làm gì (CER cột `deskew` bằng cột `raw`).
 
 ## Đo trước và sau: hình học, CLAHE và ngưỡng
 
-Ta tách việc đo làm ba bảng, mỗi bảng đổi một nhóm biến. Bảng đầu so ba đường hình học (nguyên ảnh, chỉ xoay, nắn phối cảnh) với Tesseract `-l vie --psm 4`; hàng «không cutoff» bỏ bảy ảnh bị cắt mép:
+Ta chia phép đo thành ba bảng, mỗi bảng thay đổi một nhóm biến. Bảng đầu so ba đường hình học (nguyên ảnh, chỉ xoay, nắn phối cảnh) với Tesseract `-l vie --psm 4`; hàng «không cutoff» bỏ bảy ảnh bị cắt mép:
 
 ```text
 [7] Hình học: CER gộp theo trường, Tesseract -l vie --psm 4 (ảnh sạch không biến dạng: 0.024)
@@ -221,13 +221,13 @@ def denoise_median(gray, size=3):
     return cv2.medianBlur(gray, size)
 ```
 
-Lab đo nhiễu hạt bằng độ lệch chuẩn của phần «tần số cao» (ảnh trừ bản làm mờ hộp 5x5) trong vùng trống bên phải thẻ, ở ảnh `hard` sau khi nắn:
+Lab đo nhiễu hạt bằng độ lệch chuẩn của phần «tần số cao» (ảnh trừ bản làm mờ box 5x5) trong vùng trống bên phải thẻ, ở ảnh `hard` sau khi nắn:
 
 ```text
 14 ảnh hard nắn được: xám sau nắn 5.50, sau CLAHE 14.85, sau lọc trung vị 1.82
 ```
 
-CLAHE làm số đo nhiễu tăng gấp khoảng 2,7 lần, lọc trung vị làm nó còn 1,82. Đó là số đo nhiễu, không phải lời giải thích cho CER: ta chưa tách phần đóng góp của nhiễu. Mỗi cột dưới đây đổi một thứ (`thr10`, `thr15` là ngưỡng với C = 10 và C = 15; `med` là lọc trung vị):
+CLAHE làm số đo nhiễu tăng gấp khoảng 2,7 lần, lọc trung vị làm số đo này còn 1,82. Đó là số đo nhiễu, không phải lời giải thích cho CER: ta chưa tách phần đóng góp của nhiễu. Mỗi cột dưới đây đổi một thứ (`thr10`, `thr15` là ngưỡng với C = 10 và C = 15; `med` là lọc trung vị):
 
 ```text
 [8] Tăng cường ảnh sau nắn (Tesseract -l vie --psm 4), mỗi cột đổi một thứ
@@ -255,7 +255,7 @@ tất cả         50        0.562        0.428        0.465
 không cutoff   43        0.628        0.472        0.514
 ```
 
-Kết luận đổi. Ở `skew` và `tilt`, `warp` vẫn không tệ hơn `raw`, nhưng CER ở `skew` là 0,263 chứ không phải 0,016; ở `hard`, `warp` (1,094) tệ hơn `raw` (0,901). Câu «`warp` giảm CER nhiều nhất» vì vậy chỉ đúng với `vie --psm 4` của bài này; ta chưa tìm nguyên nhân của chênh lệch giữa hai cấu hình. Bài 43 dùng cấu hình thứ hai trên thẻ phẳng chưa qua bước nắn, nên CER của hai bài không so với nhau được.
+Kết luận thay đổi. Ở `skew` và `tilt`, `warp` vẫn không tệ hơn `raw`, nhưng CER ở `skew` là 0,263 chứ không phải 0,016; ở `hard`, `warp` (1,094) tệ hơn `raw` (0,901). Câu «`warp` giảm CER nhiều nhất» vì vậy chỉ đúng với `vie --psm 4` của bài này; ta chưa tìm nguyên nhân của chênh lệch giữa hai cấu hình. Bài 43 dùng cấu hình thứ hai trên thẻ phẳng chưa qua bước nắn, nên CER của hai bài không so sánh với nhau được.
 
 ## Chạy và kiểm chứng
 
@@ -266,13 +266,13 @@ uv run --project examples/toi-noi-python/42-opencv-canh-perspective-deskew examp
 uv run --project examples/toi-noi-python/42-opencv-canh-perspective-deskew examples/toi-noi-python/42-opencv-canh-perspective-deskew/main.py --verify
 ```
 
-Lệnh đầu in bảy bước ở trên; lệnh sau kiểm 33 điều và kết thúc bằng:
+Lệnh đầu in bảy bước ở trên; lệnh sau kiểm tra 33 điều và kết thúc bằng:
 
 ```text
 OK 33/33
 ```
 
-Các ca kiểm là bất biến và thứ bậc lớn: homography, thứ tự góc, góc `minAreaRect` chuẩn hoá sai dưới 1 độ, tìm được tứ giác ở ít nhất 90% ảnh không bị cắt, ảnh bị cắt mép bị từ chối, ảnh không có thẻ trả `None`, và `warp` hoặc `deskew` giảm CER ít nhất một nửa ở điều kiện tương ứng (cấu hình `vie --psm 4`). Số trong bài đo trên macOS với font Arial, Tesseract 5.5.4, opencv-python-headless 5.0.0, trên máy đang rất bận (load average 241,6 lúc bắt đầu), mất 9 phút 1 giây.
+Các test case kiểm tra những bất biến và bậc độ lớn: homography, thứ tự góc, góc `minAreaRect` chuẩn hoá sai dưới 1 độ, tìm được tứ giác ở ít nhất 90% ảnh không bị cắt, ảnh bị cắt mép bị từ chối, ảnh không có thẻ trả `None`, và `warp` hoặc `deskew` giảm CER ít nhất một nửa ở điều kiện tương ứng (cấu hình `vie --psm 4`). Số trong bài đo trên macOS với font Arial, Tesseract 5.5.4, opencv-python-headless 5.0.0, trên máy đang rất bận (load average 241,6 lúc bắt đầu), mất 9 phút 1 giây.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -283,10 +283,10 @@ Các ca kiểm là bất biến và thứ bậc lớn: homography, thứ tự g�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Ảnh sinh bằng code: thẻ phẳng tuyệt đối, một font, bốn điều kiện cố định, không có ngón tay che, loá, nếp gấp hay thẻ úp ngược. 50 ảnh là bộ nhỏ và tham số thử trên chính bộ này, nên số CER lạc quan hơn ảnh thật. Canny giả định thẻ có mép rõ; với ảnh thật nên cân nhắc mô hình phát hiện góc. Dù ảnh nắn thẳng đến đâu, kết quả OCR vẫn là đầu vào cho người duyệt, không tự động là quyết định xác minh.</p>
+<p>Ảnh sinh bằng code: thẻ phẳng tuyệt đối, một font, bốn điều kiện cố định, không có ngón tay che, loá, nếp gấp hay thẻ úp ngược. 50 ảnh là bộ nhỏ và tham số thử trên chính bộ này, nên số CER lạc quan hơn ảnh thật. Canny giả định thẻ có mép rõ; với ảnh thật nên cân nhắc mô hình phát hiện góc. Dù ảnh nắn thẳng đến đâu, kết quả OCR vẫn là đầu vào cho người duyệt, không tự thành quyết định xác minh.</p>
 </div>
 
-**Bài tập 1:** Với bảy ảnh `cutoff`, tắt kiểm tra sát mép cho CER 0,020 thay vì 0,336. Có nên tắt hẳn không? Đề xuất một cách dùng tứ giác đó mà vẫn an toàn.
+**Bài tập 1:** Với bảy ảnh `cutoff`, nếu tắt kiểm tra sát mép thì CER là 0,020 thay vì 0,336. Có nên tắt hẳn không? Đề xuất một cách dùng tứ giác đó mà vẫn an toàn.
 
 **Bài tập 2:** Nếu dùng thẳng góc thô -90 của `minAreaRect` (hình nằm ngang đúng) để gọi `getRotationMatrix2D` rồi xoay ảnh, ảnh ra sao?
 

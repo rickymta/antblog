@@ -1,7 +1,7 @@
 ---
 slug: python-use-case-ho-so-tai-xe-end-to-end
 title: "Use case nộp hồ sơ tài xế end-to-end: OCR → face → điểm rủi ro → quyết định"
-summary: "Bài 70: ghép OCR, khuôn mặt, điểm rủi ro thành một use case. Máy luôn dừng ở needs_review, ngưỡng chỉ chọn lý do vào hàng chờ, người duyệt mới quyết định. Có domain event KycApplicationScored và test toàn luồng."
+summary: "Bài 70: ghép OCR, khuôn mặt, điểm rủi ro thành một use case. Hệ thống luôn dừng ở needs_review, ngưỡng chỉ chọn lý do vào hàng chờ, người duyệt mới quyết định. Có domain event KycApplicationScored và test toàn luồng."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, use-case, kyc, domain-event]
@@ -10,14 +10,14 @@ language: vi
 
 Ba service Python của [Tới Nơi](/articles/du-an-mau-toi-noi) đã có từng mảnh: `kyc-ocr` đọc chữ trên CCCD và GPLX, `kyc-face` so ảnh trên thẻ với selfie, `fraud-scoring` chấm điểm rủi ro. Mỗi service trả một con số, còn tài xế chỉ nộp một hồ sơ. Ai đó phải ghép ba con số thành một trạng thái, và cám dỗ rất lớn: một dòng `if ocr >= 0.9 and face >= 0.6: approve()` trông gọn và tiết kiệm sức người duyệt.
 
-Bài này viết phần ghép đó thành một use case và chứng minh bằng test rằng dòng `approve()` ấy **không tồn tại**. Máy chạy OCR, khuôn mặt, điểm rủi ro rồi dừng ở `needs_review`; các ngưỡng chỉ quyết định hồ sơ vào hàng chờ **vì lý do gì**; `approved` và `rejected` chỉ đến từ người duyệt `RV-001`. Hồ sơ phát một domain event `KycApplicationScored`, và các chỗ hở của thiết kế được đo bằng PostgreSQL thật để dẫn sang bài 71.
+Bài này viết phần ghép đó thành một use case và chứng minh bằng test rằng dòng `approve()` ấy **không tồn tại**. Máy chạy OCR, khuôn mặt, điểm rủi ro rồi dừng ở `needs_review`; các ngưỡng chỉ quyết định hồ sơ vào hàng chờ **vì lý do gì**; `approved` và `rejected` chỉ đến từ người duyệt `RV-001`. Hồ sơ phát một domain event `KycApplicationScored`, và ta đo các chỗ hở của thiết kế bằng PostgreSQL thật để dẫn sang bài 71.
 
-Đây là bài 70 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần đã đọc [bài 69](/articles/python-repository-unit-of-work-sqlalchemy), mặt nạ số giấy tờ ở [bài 47](/articles/python-luu-ket-qua-ocr-mongodb-pii-retention) và nguyên tắc «hệ thống chỉ gợi ý, người quyết định» ở [bài 53](/articles/python-face-matching-danh-gia-bias-privacy-consent); hàng đợi người duyệt được nói kỹ hơn ở [bài 61](/articles/python-shap-explainability-audit-human-review). Bài C# cùng họ là [Use case đặt chuyến end-to-end](/articles/dotnet10-use-case-dat-chuyen-end-to-end): cùng ý «một đường xử lý lần theo được», khác nghiệp vụ.
+Đây là bài 70 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần đã đọc [bài 69](/articles/python-repository-unit-of-work-sqlalchemy), mặt nạ số giấy tờ ở [bài 47](/articles/python-luu-ket-qua-ocr-mongodb-pii-retention) và nguyên tắc «hệ thống chỉ gợi ý, người quyết định» ở [bài 53](/articles/python-face-matching-danh-gia-bias-privacy-consent); hàng đợi người duyệt được nói kỹ hơn ở [bài 61](/articles/python-shap-explainability-audit-human-review). Bài C# tương ứng là [Use case đặt chuyến end-to-end](/articles/dotnet10-use-case-dat-chuyen-end-to-end): cùng ý «một đường xử lý lần theo được», khác nghiệp vụ.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một hồ sơ có độ tin cậy OCR 1,00, điểm khuôn mặt 1,00 và điểm rủi ro 0,00: không ngưỡng nào bị vượt. Use case có nên chuyển hồ sơ này sang <code>approved</code> không? Nếu không, ngưỡng còn dùng để làm gì?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Hồ sơ vẫn vào <code>needs_review</code>, với lý do <code>routine</code> («không ngưỡng nào bị vượt, quy trình vẫn cần người duyệt»). Điểm tốt chỉ nói máy chưa thấy gì bất thường: OCR đọc đúng chữ trên thẻ giả vẫn đọc đúng. Ngưỡng chỉ chọn <b>lý do</b> để sắp việc cho người duyệt, không chọn kết quả.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Hồ sơ vẫn vào <code>needs_review</code>, với lý do <code>routine</code> («không ngưỡng nào bị vượt, quy trình vẫn cần người duyệt»). Điểm tốt chỉ nói máy chưa thấy gì bất thường: OCR vẫn đọc đúng chữ trên thẻ giả. Ngưỡng chỉ chọn <b>lý do</b> để sắp xếp việc cho người duyệt, không chọn kết quả.</p></details>
 </div>
 
 ## Một use case, ba service, một đích
@@ -77,11 +77,11 @@ Ba service là ba port (`OcrPort`, `FaceMatchPort`, `RiskScorePort`) của bài 
             if application.status is KycStatus.FACE_CHECKED:
 ```
 
-Nhờ vậy một đoạn mã phục vụ hai command: `SubmitDriverApplication` tạo hồ sơ ở `submitted` rồi chạy chuỗi; `ResumeScreening` nạp hồ sơ đã dừng giữa chừng và chạy tiếp từ đúng bước đó. Service tắt (`ServiceUnavailable`) hay trả lời sai (`InvalidServiceResponse`) đều là `PortFailure`: chuỗi dừng, hồ sơ giữ các kết quả đã đạt, và `pending_check` cho biết service nào chưa kiểm được. Giá trị này **suy từ trạng thái** (`submitted` chờ `kyc-ocr`, `ocr_done` chờ `kyc-face`, `face_checked` chờ `fraud-scoring`) nên `GET` đọc lại cũng thấy, không chỉ phản hồi 202 đầu tiên. Không có điểm «giả định» nào được điền vào chỗ trống. Lỗi được bắt ở handler nên transaction **commit** (hồ sơ đã nhận phải được lưu); lỗi bất ngờ vẫn rollback như bài 68.
+Nhờ vậy một đoạn mã phục vụ hai command: `SubmitDriverApplication` tạo hồ sơ ở `submitted` rồi chạy chuỗi; `ResumeScreening` nạp hồ sơ đã dừng giữa chừng và chạy tiếp từ đúng bước đó. Service tắt (`ServiceUnavailable`) hay trả lời sai (`InvalidServiceResponse`) đều là `PortFailure`: chuỗi dừng, hồ sơ giữ các kết quả đã đạt, và `pending_check` cho biết service nào chưa kiểm được. Giá trị này **suy từ trạng thái** (`submitted` chờ `kyc-ocr`, `ocr_done` chờ `kyc-face`, `face_checked` chờ `fraud-scoring`) nên `GET` đọc lại cũng thấy, không chỉ phản hồi 202 đầu tiên. Không có giá trị «giả định» nào được điền vào chỗ trống. Lỗi được bắt ở handler nên transaction **commit** (hồ sơ đã nhận phải được lưu); lỗi bất ngờ vẫn rollback như bài 68.
 
-«Trả lời sai» gồm cả adapter trả đối tượng hợp lệ về kiểu nhưng sai nghĩa, ví dụ OCR trả hai CCCD cho hồ sơ gồm CCCD và GPLX. Domain từ chối bằng `DomainError`; không dịch thì lỗi đó rollback cả hồ sơ và thành 422 cho người nộp dù lỗi ở service. Vì vậy `Screening._accept` dịch `DomainError` của mỗi kết quả thành `InvalidServiceResponse` (demo mục 12: hồ sơ ở `submitted`, 202, một hàng trong bảng). Ở cửa vào, `face_consent` là `StrictBool`: chuỗi `"false"` không bị đoán thành `False`, vì đồng ý là quyết định pháp lý.
+«Trả lời sai» gồm cả adapter trả đối tượng hợp lệ về kiểu nhưng sai nghĩa, ví dụ OCR trả hai CCCD cho hồ sơ gồm CCCD và GPLX. Domain từ chối bằng `DomainError`; nếu không dịch thì lỗi đó làm rollback cả hồ sơ và thành 422 cho người nộp dù lỗi ở service. Vì vậy `Screening._accept` dịch `DomainError` của mỗi kết quả thành `InvalidServiceResponse` (demo mục 12: hồ sơ ở `submitted`, 202, một hàng trong bảng). Ở cửa vào, `face_consent` là `StrictBool`: chuỗi `"false"` không bị đoán thành `False`, vì đồng ý là quyết định pháp lý.
 
-Tài xế chưa đồng ý so khớp khuôn mặt là nhánh thứ hai: `kyc-face` không được gọi (có ca kiểm số lần gọi bằng 0), hồ sơ đi thẳng từ `ocr_done` sang `needs_review` với lý do `no_face_consent`. Demo cho `kyc-face` tắt rồi sống lại:
+Tài xế chưa đồng ý so khớp khuôn mặt là nhánh thứ hai: `kyc-face` không được gọi (có test case kiểm tra số lần gọi bằng 0), hồ sơ đi thẳng từ `ocr_done` sang `needs_review` với lý do `no_face_consent`. Demo cho `kyc-face` tắt rồi sống lại:
 
 ```text
 == 4. kyc-face tắt rồi sống lại: dừng ở ocr_done, ResumeScreening làm tiếp
@@ -91,7 +91,7 @@ Tài xế chưa đồng ý so khớp khuôn mặt là nhánh thứ hai: `kyc-fac
 
 OCR chỉ được gọi hai lần cho cả hai lệnh: bước đã xong không chạy lại. Nhưng `ResumeScreening` **chỉ idempotent một phần**:
 
-- Hồ sơ đã tới `needs_review` thì làm tiếp bị từ chối (`InvalidStatusTransition`, HTTP 409); hồ sơ lạ là 404.
+- Hồ sơ đã tới `needs_review` thì làm tiếp bị từ chối (`InvalidStatusTransition`, HTTP 409); hồ sơ không tồn tại thì trả 404.
 - Khi service vẫn tắt, mỗi lần làm tiếp vẫn gọi service thêm một lần và vẫn ghi lại hồ sơ, nên version tăng dù không có gì mới.
 - Hai lần làm tiếp **cùng lúc** đều gọi service, rồi chỉ một lần ghi được; lần kia nhận `ConcurrencyConflict` (409 `concurrent-update`). Xung đột chặn việc ghi, không chặn việc gọi.
 
@@ -106,7 +106,7 @@ OCR chỉ được gọi hai lần cho cả hai lệnh: bước đã xong không
   kyc-face bị gọi 4 lần
 ```
 
-Không có worker tự gọi `ResumeScreening` khi service sống lại: hồ sơ dừng giữa chừng nằm yên cho tới khi có người hoặc tiến trình gọi. Production cần một việc nền quét hồ sơ chưa tới `needs_review` quá lâu (bài 40) và báo động theo tuổi hồ sơ.
+Không có worker tự gọi `ResumeScreening` khi service sống lại: hồ sơ dừng giữa chừng nằm yên cho tới khi có người hoặc tiến trình gọi. Production cần một tác vụ nền quét hồ sơ chưa tới `needs_review` quá lâu (bài 40) và báo động theo tuổi hồ sơ.
 
 ## Ngưỡng chọn lý do, không chọn quyết định
 
@@ -143,7 +143,7 @@ Hàm luôn trả ít nhất một lý do (không ngưỡng nào bị vượt th�
   approved/rejected do máy: 0
 ```
 
-Cả năm hồ sơ đều là `needs_review`, số hồ sơ do máy `approved` hoặc `rejected` là 0. `DR-001` là ca «mọi thứ tốt» và vẫn vào hàng chờ với `routine`; `DR-003` chưa đồng ý khuôn mặt nên không có điểm khuôn mặt hay rủi ro. Ca biên: OCR 0,80 và khuôn mặt 0,75 chưa bị gắn cờ (so sánh `<`), rủi ro 0,30 thì bị gắn cờ (so sánh `>=`):
+Cả năm hồ sơ đều là `needs_review`, số hồ sơ do máy `approved` hoặc `rejected` là 0. `DR-001` là trường hợp «mọi thứ tốt» và vẫn vào hàng chờ với `routine`; `DR-003` chưa đồng ý khuôn mặt nên không có điểm khuôn mặt hay rủi ro. Ca biên: OCR 0,80 và khuôn mặt 0,75 chưa bị gắn cờ (so sánh `<`), rủi ro 0,30 thì bị gắn cờ (so sánh `>=`):
 
 ```text
 == 3. Ca biên của ngưỡng (ocr 0,80; khuôn mặt 0,75; rủi ro từ 0,30)
@@ -161,15 +161,15 @@ Cả năm hồ sơ đều là `needs_review`, số hồ sơ do máy `approved` h
   0.50          -       -  không   no_face_consent, ocr_low_confidence
 ```
 
-Điểm khuôn mặt là cosine, miền -1..1 như SFace ở bài 49, nên có thể âm: điểm âm vẫn tới người duyệt (demo mục 13; `FakeRiskScore` kẹp cosine âm về 0 nên rủi ro vẫn trong 0..1), còn điểm ngoài -1..1 là lỗi của service. Điểm rủi ro của domain nằm trong 0..1; engine bài 56 chấm thang 0..100, nên `review_at: 40` ở đó là 0,40 ở đây.
+Điểm khuôn mặt là cosine, miền -1..1 như SFace ở bài 49, nên có thể âm: điểm âm vẫn tới người duyệt (demo mục 13; `FakeRiskScore` đưa cosine âm về 0 nên rủi ro vẫn trong 0..1), còn điểm ngoài -1..1 là lỗi của service. Điểm rủi ro của domain nằm trong 0..1; engine bài 56 chấm thang 0..100, nên `review_at: 40` ở đó là 0,40 ở đây.
 
 Ba ngưỡng 0,80, 0,75 và 0,30 là **ví dụ cho lab**, không rút ra từ dữ liệu nào của bài; không có tỉ lệ hàng chờ nào ở đây đại diện cho production. Ngưỡng thật phải đo trên đúng nguồn điểm của adapter thật: bài 45 cho OCR, bài 49 cho cosine của SFace (0,567 ở FAR 0,1% trên bộ Olivetti), bài 56 cho engine rule. Mỗi ngưỡng chỉ đúng cho điểm của adapter đã đo nó.
 
-Với OCR còn một điều nữa. Nếu bạn thay `FakeOcr` bằng adapter đọc ảnh đã nắn ở bài 42, **đừng thừa kế cấu hình Tesseract** từ bài khác. Trên bộ thẻ phẳng của bài 43, `--psm 6` cho CER thấp nhất (lab đó giữ `vie+eng --psm 6`); nhưng trên ảnh đã nắn của bài 42 qua parser bài 44, `vie+eng --psm 6` chỉ đúng 161 trên 250 trường, `vie --psm 6` đúng 162, còn `vie --psm 4` đúng 229. Bài 43 ghi nguyên nhân chưa tìm ra, nên cấu hình OCR phải đo lại trên đúng đường xử lý ảnh của service. Độ tin cậy cũng phải định nghĩa lại: Tesseract trả theo từ, `OcrResult.confidence` là một số theo giấy tờ, và ngưỡng 0,80 chỉ có nghĩa với cách gộp của adapter.
+Với OCR còn một điều nữa. Nếu bạn thay `FakeOcr` bằng adapter đọc ảnh đã nắn ở bài 42, **đừng dùng lại cấu hình Tesseract** từ bài khác. Trên bộ thẻ phẳng của bài 43, `--psm 6` cho CER thấp nhất (lab đó giữ `vie+eng --psm 6`); nhưng trên ảnh đã nắn của bài 42 qua parser bài 44, `vie+eng --psm 6` chỉ đúng 161 trên 250 trường, `vie --psm 6` đúng 162, còn `vie --psm 4` đúng 229. Bài 43 ghi nguyên nhân chưa tìm ra, nên cấu hình OCR phải đo lại trên đúng đường xử lý ảnh của service. Độ tin cậy cũng phải định nghĩa lại: Tesseract trả theo từ, `OcrResult.confidence` là một số tính riêng cho từng giấy tờ, và ngưỡng 0,80 chỉ có nghĩa với cách gộp của adapter.
 
 ## Domain event: «hồ sơ đã được chấm điểm»
 
-Khi hồ sơ đã có đủ ba kết quả và vào hàng chờ, aggregate ghi lại một **domain event**: sự kiện đặt tên ở thì quá khứ, thuộc về miền, do chính aggregate tạo khi đổi trạng thái hợp lệ. Nó không gửi sự kiện đi đâu, chỉ cất trong danh sách chờ:
+Khi hồ sơ đã có đủ ba kết quả và vào hàng chờ, aggregate ghi lại một **domain event**: sự kiện đặt tên ở thì quá khứ, thuộc về miền, do chính aggregate tạo khi đổi trạng thái hợp lệ. Aggregate không gửi sự kiện đi đâu, chỉ cất trong danh sách chờ:
 
 ```python
 # src/kyc_service/domain/kyc.py (trích)
@@ -274,7 +274,7 @@ class ProbingOcr(FakeOcr):
   kết nối idle in transaction thấy được trong hai lần gọi OCR: [1, 1]
 ```
 
-Cả hai lần gọi thấy một kết nối `idle in transaction`: chính command đang chờ service. Với adapter giả vô hại, nhưng với service thật mỗi lần chờ giữ một kết nối trong pool và một transaction mở. Hướng chữa là tách bước gọi service khỏi transaction. **Lab chưa làm**, và `ResumeScreening` cũng chưa: nó nạp hồ sơ đã lưu nhưng vẫn chạy cả chuỗi trong **một** transaction (demo mục 8, đo lúc làm tiếp gọi `kyc-face`):
+Cả hai lần gọi thấy một kết nối `idle in transaction`: chính command đang chờ service. Với adapter giả thì chuyện này vô hại, nhưng với service thật mỗi lần chờ giữ một kết nối trong pool và một transaction mở. Hướng chữa là tách bước gọi service khỏi transaction. **Lab chưa làm**, và `ResumeScreening` cũng chưa: nó nạp hồ sơ đã lưu nhưng vẫn chạy cả chuỗi trong **một** transaction (demo mục 8, đo lúc làm tiếp gọi `kyc-face`):
 
 ```text
 == 8. Làm tiếp vẫn chạy cả chuỗi trong MỘT transaction
@@ -303,7 +303,7 @@ def commit_fails(engine: Engine) -> Callable[[], None]:
   hồ sơ trong bảng: 0; event đã nhận: 1
 ```
 
-Hồ sơ không tồn tại nhưng một sự kiện nói nó đã được chấm điểm: «sự kiện ma». Giao sau commit thì khe hở đổi chiều: commit xong, tiến trình chết trước khi giao, và sự kiện mất. Không thứ tự nào sửa được vì cơ sở dữ liệu và nơi nhận không có transaction chung. Đó là bài toán outbox của bài 39, và bài 71 ghi sự kiện vào một bảng trong **cùng transaction** với hồ sơ.
+Hồ sơ không tồn tại nhưng một sự kiện nói nó đã được chấm điểm: «sự kiện ma». Giao sau commit thì khe hở đổi chiều: commit xong, tiến trình chết trước khi giao, và sự kiện mất. Không thứ tự nào giải quyết được vấn đề, vì cơ sở dữ liệu và nơi nhận không có transaction chung. Đó là bài toán outbox của bài 39, và bài 71 ghi sự kiện vào một bảng trong **cùng transaction** với hồ sơ.
 
 Một giới hạn nữa: lệnh nộp chưa có khoá idempotency (bài 25), nên client nộp lại sau khi mất phản hồi tạo hồ sơ thứ hai:
 
@@ -312,7 +312,7 @@ Một giới hạn nữa: lệnh nộp chưa có khoá idempotency (bài 25), n�
   mã hồ sơ: ['KYC-0001', 'KYC-0002']
 ```
 
-Ca verify giữ hành vi này như giới hạn đã biết; muốn chặn, lệnh cần mang một khoá và bảng cần ràng buộc duy nhất trên khoá.
+Test case trong phần verify giữ hành vi này như một giới hạn đã biết; muốn chặn, lệnh cần mang một khoá và bảng cần ràng buộc duy nhất trên khoá.
 
 ## Chạy và kiểm chứng
 
@@ -339,7 +339,7 @@ uv run --project examples/toi-noi-python/70-use-case-ho-so-tai-xe-end-to-end exa
   khuôn mặt -0.4, rủi ro 0.53, lý do ('face_low_score', 'risk_high')
 ```
 
-Mười ba đoạn demo cho thấy: năm hồ sơ qua use case, sự kiện sinh ra, ca biên của ngưỡng, service tắt và làm tiếp (một transaction, hai lần làm tiếp cùng lúc, service vẫn tắt), sự kiện ma, nộp hai lần, OCR trả lời sai nghĩa, điểm khuôn mặt âm, và người duyệt là bên duy nhất tới `approved`. Lab in lời nhắc ba service là adapter giả, và `build_container()` phát `UserWarning` nêu tên port dùng adapter giả. Kiểm các kết quả trên:
+Mười ba đoạn demo cho thấy: năm hồ sơ qua use case, sự kiện sinh ra, ca biên của ngưỡng, service tắt và làm tiếp (một transaction, hai lần làm tiếp cùng lúc, service vẫn tắt), sự kiện ma, nộp hai lần, OCR trả lời sai nghĩa, điểm khuôn mặt âm, và người duyệt là bên duy nhất tới `approved`. Lab in lời nhắc rằng ba service đang dùng adapter giả, và `build_container()` phát `UserWarning` nêu tên port dùng adapter giả. Kiểm tra các kết quả trên:
 
 ```bash
 uv run --project examples/toi-noi-python/70-use-case-ho-so-tai-xe-end-to-end examples/toi-noi-python/70-use-case-ho-so-tai-xe-end-to-end/main.py --verify
@@ -349,7 +349,7 @@ uv run --project examples/toi-noi-python/70-use-case-ho-so-tai-xe-end-to-end exa
 OK 39/39
 ```
 
-39 ca: bảng hồ sơ, ngưỡng và máy không tự duyệt, domain event, service tắt và làm tiếp (kể cả song song, version tăng, trả lời sai nghĩa, điểm âm), đường biên của transaction và sự kiện, nộp hai lần, `pending_check`, `face_consent` dạng chuỗi, `KYC-10000`, cảnh báo adapter giả, lưu trữ, người duyệt và ca HTTP. Chuỗi đầy đủ gồm ruff, mypy `--strict`, import-linter với bốn hợp đồng, pytest và `--verify`:
+39 test case: bảng hồ sơ, ngưỡng và máy không tự duyệt, domain event, service tắt và làm tiếp (kể cả song song, version tăng, trả lời sai nghĩa, điểm âm), đường biên của transaction và sự kiện, nộp hai lần, `pending_check`, `face_consent` dạng chuỗi, `KYC-10000`, cảnh báo adapter giả, lưu trữ, người duyệt và test case HTTP. Chuỗi đầy đủ gồm ruff, mypy `--strict`, import-linter với bốn hợp đồng, pytest và `--verify`:
 
 ```bash
 sh examples/toi-noi-python/70-use-case-ho-so-tai-xe-end-to-end/verify.sh
@@ -383,7 +383,7 @@ OK 39/39
 OK 6/6
 ```
 
-(trích: bỏ phần hình ASCII in đầu của import-linter.) Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, PostgreSQL 17.11, FastAPI 0.162.0, pydantic 2.14.3, import-linter 2.16, mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 (theo `uv.lock`). Output do một lần chạy chung với nhiều tác vụ khác của máy (load average 1, 5, 15 phút đo bằng `uptime` sau khi chạy: 336,90; 334,81; 362,57), nên các số giây của pytest chỉ để tham khảo. Kết quả OCR, điểm khuôn mặt và điểm rủi ro trong mọi view vẫn chỉ là đầu vào cho người duyệt `RV-001`.
+(trích: bỏ phần hình ASCII in đầu của import-linter.) Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, PostgreSQL 17.11, FastAPI 0.162.0, pydantic 2.14.3, import-linter 2.16, mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 (theo `uv.lock`). Output này đến từ một lần chạy cùng lúc với nhiều tác vụ khác trên máy (load average 1, 5, 15 phút đo bằng `uptime` sau khi chạy: 336,90; 334,81; 362,57), nên các số giây của pytest chỉ để tham khảo. Kết quả OCR, điểm khuôn mặt và điểm rủi ro trong mọi view vẫn chỉ là đầu vào cho người duyệt `RV-001`.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |

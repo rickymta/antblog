@@ -8,9 +8,9 @@ tags: [python, toi-noi, face-matching, bias, privacy]
 language: vi
 ---
 
-Service so khớp khuôn mặt của [Tới Nơi](/articles/du-an-mau-toi-noi) chạy ổn trên bộ ảnh thử: cùng người thì điểm cao, khác người thì điểm thấp. Trước khi bật nó cho hồ sơ tài xế thật, có ba câu hỏi mà một con số «độ chính xác» không trả lời. Nó sai bao nhiêu, và sai nhiều hơn với ai? Ta giữ gì về khuôn mặt của tài xế, trong bao lâu, và họ rút lại được không? Và khi điểm nói «khớp», ai là người quyết định hồ sơ được duyệt? Đây là bài 53 của lộ trình **Python nâng cao qua Tới Nơi**, bài cuối của phần so khớp khuôn mặt. Bạn cần nắm FAR, FRR và ngưỡng ở [bài 49](/articles/python-face-embedding-cosine-threshold-far-frr) và service ở [bài 52](/articles/python-face-match-grpc-service-batching-model-loading).
+Service so khớp khuôn mặt của [Tới Nơi](/articles/du-an-mau-toi-noi) chạy ổn trên bộ ảnh thử: cùng người thì điểm cao, khác người thì điểm thấp. Trước khi bật nó cho hồ sơ tài xế thật, có ba câu hỏi mà một con số «độ chính xác» không trả lời. Service sai bao nhiêu, và sai nhiều hơn với ai? Ta giữ gì về khuôn mặt của tài xế, trong bao lâu, và họ rút lại được không? Và khi điểm nói «khớp», ai là người quyết định hồ sơ được duyệt? Đây là bài 53 của lộ trình **Python nâng cao qua Tới Nơi**, bài cuối của phần so khớp khuôn mặt. Bạn cần nắm FAR, FRR và ngưỡng ở [bài 49](/articles/python-face-embedding-cosine-threshold-far-frr) và service ở [bài 52](/articles/python-face-match-grpc-service-batching-model-loading).
 
-Bài này không chứng minh hệ thống «công bằng» hay «không thiên lệch», vì với dữ liệu ta có, điều đó không làm được. Nó chỉ ra cách đo để một chênh lệch giữa các nhóm có nghĩa, và dựng các cơ chế (lưu tối thiểu, đồng ý, hết hạn, xoá, người quyết định) thành code có kiểm chứng. Phần pháp lý thuộc về pháp chế của Tới Nơi; bài chỉ nói ở mức nguyên tắc kỹ thuật, không phải tư vấn pháp lý.
+Bài này không chứng minh hệ thống «công bằng» hay «không thiên lệch», vì với dữ liệu ta có, điều đó không làm được. Bài chỉ ra cách đo để một chênh lệch giữa các nhóm có ý nghĩa, và dựng các cơ chế (lưu tối thiểu, đồng ý, hết hạn, xoá, người quyết định) thành code có kiểm chứng. Phần pháp lý thuộc về pháp chế của Tới Nơi; bài chỉ nói ở mức nguyên tắc kỹ thuật, không phải tư vấn pháp lý.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,9 +20,9 @@ Bài này không chứng minh hệ thống «công bằng» hay «không thiên 
 
 ## Đo trước, chia nhóm sau
 
-Mọi so sánh theo nhóm đứng trên một phép đo chung. Lab dùng đúng đường ống của bài 49 và 52: 400 ảnh Olivetti (40 người, mỗi người 10 ảnh, xám 64×64, do AT&T Laboratories Cambridge thu thập, xem tài liệu scikit-learn), YuNet căn chỉnh về crop 112×112, SFace cho vector 128 chiều. Ảnh YuNet không lấy được mặt bị loại và đếm riêng; lần chạy này không ảnh nào bị loại, nhưng đó là kết quả chứ không phải điều bảo đảm. Mô hình là SFace (OpenCV Zoo ghi Apache 2.0) và YuNet (MIT); giấy phép của InsightFace và lý do bài không dùng nó nằm ở bài 49.
+Mọi so sánh theo nhóm dựa trên một phép đo chung. Lab dùng đúng đường ống của bài 49 và 52: 400 ảnh Olivetti (40 người, mỗi người 10 ảnh, xám 64×64, do AT&T Laboratories Cambridge thu thập, xem tài liệu scikit-learn), YuNet căn chỉnh về crop 112×112, SFace cho vector 128 chiều. Ảnh YuNet không lấy được mặt bị loại và đếm riêng; lần chạy này không ảnh nào bị loại, nhưng đó là kết quả chứ không phải điều bảo đảm. Mô hình là SFace (OpenCV Zoo ghi Apache 2.0) và YuNet (MIT); giấy phép của InsightFace và lý do bài không dùng nó nằm ở bài 49.
 
-Ta lập mọi cặp ảnh: 1.800 cặp cùng người và 78.000 cặp khác người, điểm là cosine. Ta chấp nhận khi điểm không nhỏ hơn ngưỡng; **FAR** là tỉ lệ cặp khác người bị chấp nhận (nhận nhầm), **FRR** là tỉ lệ cặp cùng người bị từ chối (bỏ sót). Đo trên từng cặp ảnh nên đúng hơn là FMR/FNMR, tên bạn sẽ gặp ở báo cáo NIST; FAR/FRR của cả hệ thống còn tính ảnh không lấy được mặt. Chọn ngưỡng là chọn điểm đánh đổi giữa hai lỗi. Output của lab (trích):
+Ta lập mọi cặp ảnh: 1.800 cặp cùng người và 78.000 cặp khác người, điểm là cosine. Ta chấp nhận khi điểm không nhỏ hơn ngưỡng; **FAR** là tỉ lệ cặp khác người bị chấp nhận (nhận nhầm), **FRR** là tỉ lệ cặp cùng người bị từ chối (bỏ sót). Vì đo trên từng cặp ảnh, nói chính xác thì đây là FMR/FNMR, tên bạn sẽ gặp ở báo cáo NIST; FAR/FRR của cả hệ thống còn tính ảnh không lấy được mặt. Chọn ngưỡng là chọn điểm đánh đổi giữa hai lỗi. Output của lab (trích):
 
 ```text
 400 ảnh 64x64 của 40 người; YuNet lấy được mặt ở 400 ảnh, không lấy được ở 0 ảnh (bị loại và đếm riêng, không lùi âm thầm sang resize)
@@ -51,9 +51,9 @@ tỉ lệ lần chia ngẫu nhiên có |hiệu| lớn bằng hiệu quan sát: F
 1000 cách chia ngẫu nhiên rời người, học ngưỡng FAR 1% ở một nửa, đo ở nửa kia: FAR đo được trung vị 1.1%, khoảng 95% [0.1%, 4.0%]; FRR trung vị 0.3%, khoảng 95% [0.0%, 1.6%]
 ```
 
-Nhóm A có FAR 1,6% và nhóm B 0,2%. Hiệu +1,44 điểm nằm trong khoảng ±1,68 của các lần chia ngẫu nhiên nhưng không xa mép: cứ 10 lần chia ngẫu nhiên có 1 lần chênh lớn bằng hoặc hơn (với FRR là 62%). Kết luận trung thực: với 20 người mỗi nhóm, bộ đo này **không đủ mạnh** để phân biệt «có chênh lệch thật» với «nhiễu lấy mẫu», và điều đó không có nghĩa là không có thiên lệch. Hai chiều học ngưỡng cho thấy một cách chia không đủ: học ở A đo ở B ra FAR 0,1%, học ở B đo ở A ra 3,9%. Qua 1.000 cách chia rời người, FAR đo trên nửa chưa thấy có trung vị 1,1% nhưng khoảng 95% rộng từ 0,1% tới 4,0%: ngưỡng chọn rồi đo ngay trên tập đó cho FAR lạc quan.
+Nhóm A có FAR 1,6% và nhóm B 0,2%. Hiệu +1,44 điểm nằm trong khoảng ±1,68 của các lần chia ngẫu nhiên nhưng không xa mép: cứ 10 lần chia ngẫu nhiên có 1 lần chênh lệch lớn bằng hoặc hơn (với FRR, tỉ lệ này là 62%). Kết luận trung thực: với 20 người mỗi nhóm, bộ đo này **không đủ mạnh** để phân biệt «có chênh lệch thật» với «nhiễu lấy mẫu», và điều đó không có nghĩa là không có thiên lệch. Hai chiều học ngưỡng cho thấy dùng một cách chia là không đủ: học ở A đo ở B ra FAR 0,1%, học ở B đo ở A ra 3,9%. Qua 1.000 cách chia rời người, FAR đo trên nửa dữ liệu chưa thấy có trung vị 1,1% nhưng khoảng 95% rộng từ 0,1% tới 4,0%: ngưỡng chọn rồi đo ngay trên tập đó cho FAR lạc quan.
 
-Nhóm thứ hai đo được trên ảnh, không phải trên người: độ sáng trung bình của mỗi ảnh, chia ba phần bằng nhau (tối, vừa, sáng). Đây là một lát cắt chất lượng ảnh, loại lát cắt bạn dùng được khi chưa có nhãn nhân khẩu học.
+Nhóm thứ hai đo được trên ảnh, không phải trên người: độ sáng trung bình của mỗi ảnh, chia ba phần bằng nhau (tối, vừa, sáng). Đây là một lát cắt theo chất lượng ảnh, loại lát cắt bạn dùng được khi chưa có nhãn nhân khẩu học.
 
 ```text
 độ sáng trung bình mỗi ảnh (0..1): nhỏ nhất 0.382, lớn nhất 0.725; ranh giới ba phần 0.534 và 0.578; khoảng tin cậy: 1000 lần lấy lại mẫu theo người
@@ -62,7 +62,7 @@ vừa (133 ảnh)      8408 cặp khác người,  370 cặp cùng người | FA
 sáng (134 ảnh)     8499 cặp khác người,  412 cặp cùng người | FAR   1.8% [0.2%, 5.1%] | FRR   1.2% [0.0%, 3.8%]
 ```
 
-Nhóm sáng có FAR 1,8%, cao nhất ba nhóm, nhưng khoảng [0,2%, 5,1%] rộng gấp nhiều lần chênh lệch. Bảng như vậy là lý do để **thu thêm dữ liệu** hoặc theo dõi lát cắt này khi vận hành, không phải bằng chứng để kết luận. Ngưỡng riêng theo nhóm là quyết định chính sách với đánh đổi riêng (đối xử khác nhau giữa người dùng), không phải thứ code tự quyết.
+Nhóm sáng có FAR 1,8%, cao nhất trong ba nhóm, nhưng khoảng [0,2%, 5,1%] rộng gấp nhiều lần chênh lệch. Bảng như vậy là lý do để **thu thêm dữ liệu** hoặc theo dõi lát cắt này khi vận hành, không phải bằng chứng để kết luận. Ngưỡng riêng theo nhóm là quyết định chính sách với đánh đổi riêng (đối xử khác nhau giữa người dùng), không phải thứ code tự quyết.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -81,11 +81,11 @@ cả 40 người: 78000 cặp khác người; không thấy nhận nhầm nào t
 nhưng các cặp dùng chung ảnh và chung người: đơn vị độc lập thực sự là NGƯỜI, ở đây 20 hoặc 40, nên con số trên là cận lạc quan
 ```
 
-Dòng cuối là điểm chính: 78.000 cặp nghe nhiều nhưng chỉ có 40 người, và các cặp dùng chung ảnh nên không phải 78.000 quan sát độc lập. Một nhóm nhỏ ở dữ liệu thật (một thành phố, một độ tuổi) có thể chỉ vài chục người. Báo cáo NISTIR 8280 (2019) của NIST ghi rằng chênh lệch ở tỉ lệ nhận nhầm «exist broadly, across many, but not all, algorithms tested», thường khác nhau theo hệ số từ 10 tới hơn 100 giữa các nhóm: kết quả phụ thuộc thuật toán nên phải đo với đúng mô hình mình dùng, ở quy mô mà bộ 40 người không thay thế được.
+Dòng cuối là điểm chính: 78.000 cặp là con số lớn nhưng chỉ có 40 người, và các cặp dùng chung ảnh nên không phải 78.000 quan sát độc lập. Một nhóm nhỏ trong dữ liệu thật (một thành phố, một độ tuổi) có thể chỉ vài chục người. Báo cáo NISTIR 8280 (2019) của NIST ghi rằng chênh lệch ở tỉ lệ nhận nhầm «exist broadly, across many, but not all, algorithms tested», thường chênh nhau từ 10 tới hơn 100 lần giữa các nhóm: kết quả phụ thuộc thuật toán nên phải đo với đúng mô hình mình dùng, ở quy mô mà bộ 40 người không thay thế được.
 
 ## Lưu embedding thay ảnh, đồng ý, hết hạn và quyền xoá
 
-Nguyên tắc tối thiểu hoá: không lưu thứ mình không cần. Để so khớp sau này ta cần vector, không cần ảnh. Ảnh selfie không nằm lại sau khi đã lấy vector, ngoại trừ phần người duyệt cần để xem hồ sơ `needs_review`: ảnh đó nên được giữ ngắn hạn, mã hoá, tới khi có quyết định thì xoá (lab không dựng kho ảnh này; nơi lưu kết quả OCR có ở [bài 47](/articles/python-luu-ket-qua-ocr-mongodb-pii-retention)). Thứ lưu dài hạn là vector. Bảng `face_template` không có cột ảnh, và `--verify` kiểm đúng danh sách cột. Nhưng vector **vẫn là dữ liệu sinh trắc học**: chính vector đó nhận ra một người từ ảnh khác. Output của lab:
+Nguyên tắc tối thiểu hoá: không lưu thứ mình không cần. Để so khớp sau này ta cần vector, không cần ảnh. Ảnh selfie không nằm lại sau khi đã lấy vector, ngoại trừ ảnh người duyệt cần để xem hồ sơ `needs_review`: ảnh đó nên được giữ ngắn hạn, mã hoá, tới khi có quyết định thì xoá (lab không dựng kho ảnh này; nơi lưu kết quả OCR có ở [bài 47](/articles/python-luu-ket-qua-ocr-mongodb-pii-retention)). Thứ lưu dài hạn là vector. Bảng `face_template` không có cột ảnh, và `--verify` kiểm đúng danh sách cột. Nhưng vector **vẫn là dữ liệu sinh trắc học**: chính vector đó nhận ra một người từ ảnh khác. Output của lab:
 
 ```text
 bảng face_template: ['driver_id', 'embedding', 'model_version', 'created_at', 'expires_at']
@@ -96,9 +96,9 @@ lưu mẫu khi chưa có đồng ý: DR-001: chưa có đồng ý cho mục đí
 
 Kích thước không phải điểm chính; điểm chính là vector không đọc được bằng mắt nhưng vẫn nhận ra người, nên nó cần cùng mức bảo vệ với ảnh: kiểm soát truy cập, mã hoá lúc lưu, không ghi vào log. Đã có nghiên cứu dựng lại ảnh mặt gần giống từ vector trong một số điều kiện; lab không đo điều này nên bài không khẳng định mức rủi ro.
 
-**Đồng ý** được mô hình hoá theo mục đích (`kyc_face_match`), có phiên bản nội dung đồng ý và thời điểm cấp, rút. Mỗi lần cấp và rút là một dòng lịch sử, không ghi đè. Hàm `enroll` ném `ConsentRequired` khi không có đồng ý còn hiệu lực. **Rút đồng ý phải xoá mẫu**: hết căn cứ xử lý thì không giữ vector tới hạn lưu. Một ràng buộc khác: đồng ý ở đây là cho so khớp 1:1 selfie với ảnh giấy tờ của chính tài xế. `FaceIndex` đóng vai chỉ mục tìm kiếm của [bài 51](/articles/python-vector-search-pgvector-faiss-trung-tai-xe), một nhiều (phát hiện một người nhiều tài khoản), là mục đích khác: cần căn cứ riêng, thời hạn riêng và do pháp chế của Tới Nơi quyết định; lab không coi đồng ý 1:1 là đủ cho 1:N.
+**Đồng ý** được mô hình hoá theo mục đích (`kyc_face_match`), có phiên bản nội dung đồng ý và thời điểm cấp, thời điểm rút. Mỗi lần cấp và rút là một dòng lịch sử, không ghi đè. Hàm `enroll` ném `ConsentRequired` khi không có đồng ý còn hiệu lực. **Rút đồng ý phải xoá mẫu**: hết căn cứ xử lý thì không giữ vector tới hạn lưu. Một ràng buộc khác: đồng ý ở đây là cho so khớp 1:1 selfie với ảnh giấy tờ của chính tài xế. `FaceIndex` đóng vai chỉ mục tìm kiếm của [bài 51](/articles/python-vector-search-pgvector-faiss-trung-tai-xe), kiểu một-nhiều (phát hiện một người dùng nhiều tài khoản), là một mục đích khác: cần căn cứ riêng, thời hạn riêng và do pháp chế của Tới Nơi quyết định; lab không coi đồng ý 1:1 là đủ cho 1:N.
 
-**Hết hạn (retention)** là một hàm định kỳ xoá mẫu quá `expires_at` (cùng kiểu việc nền ở [bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter); thời gian lấy từ Clock như [bài 14](/articles/python-abc-protocol-composition-dependency-injection), lab cố định giờ để output lặp lại). **Quyền xoá** là `erase`: rút đồng ý (kéo theo xoá mẫu) và ghi một dòng kiểm toán chỉ có biệt danh. Cái khó nằm ở bản sao dẫn xuất, như Hình 1:
+**Hết hạn (retention)** là một hàm chạy định kỳ, xoá mẫu quá hạn `expires_at` (cùng kiểu việc nền ở [bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter); thời gian lấy từ Clock như [bài 14](/articles/python-abc-protocol-composition-dependency-injection), lab cố định giờ để output lặp lại). **Quyền xoá** là `erase`: rút đồng ý (kéo theo xoá mẫu) và ghi một dòng nhật ký kiểm toán chỉ có biệt danh. Cái khó nằm ở bản sao dẫn xuất, như Hình 1:
 
 ```text
 DR-004 rút đồng ý: xóa 1 mẫu; get -> None; lịch sử đồng ý 1 dòng, đã rút: True; cấp lại thì lịch sử có 2 dòng
@@ -108,7 +108,7 @@ nhật ký kiểm toán có 19 dòng, ví dụ ('template_erased', '39dd60707afa
 đổi phiên bản mô hình: mẫu lưu bằng sface_2021dec@opencv-zoo/rgb112, mô hình hiện tại sface_2021dec@opencv-zoo/rgb112-v2
 ```
 
-Dòng thứ ba là lỗi ta cố tình dựng: bảng gốc đã xoá DR-002 nhưng chỉ mục vẫn trả về DR-002 cho tới khi dựng lại. Trong hệ thống thật, «xoá» phải đi qua mọi nơi giữ vector: chỉ mục, bản sao lưu (xoá theo chu kỳ của chúng, cần nói rõ với người dùng), log, cache, bản export. Nhật ký kiểm toán dùng biệt danh (băm có muối của mã tài xế), không phải ẩn danh: mã tài xế ít khả năng nên ai biết muối vẫn dò ngược được. Dòng cuối là một đánh đổi của «chỉ lưu vector»: khi nâng cấp mô hình, vector cũ không so được với vector mới (`ModelVersionMismatch`), và vì không giữ ảnh nên cách duy nhất là xin tài xế chụp lại. Đó là cái giá của tối thiểu hoá, và nên được chấp nhận có chủ ý.
+Dòng thứ ba là lỗi ta cố tình dựng: bảng gốc đã xoá DR-002 nhưng chỉ mục vẫn trả về DR-002 cho tới khi dựng lại. Trong hệ thống thật, «xoá» phải đi qua mọi nơi giữ vector: chỉ mục, bản sao lưu (xoá theo chu kỳ của chúng, cần nói rõ với người dùng), log, cache, bản export. Nhật ký kiểm toán dùng biệt danh (băm có muối của mã tài xế), không phải ẩn danh: mã tài xế có ít giá trị khả dĩ nên ai biết muối vẫn dò ngược được. Dòng cuối là một đánh đổi của «chỉ lưu vector»: khi nâng cấp mô hình, vector cũ không so được với vector mới (`ModelVersionMismatch`), và vì không giữ ảnh nên cách duy nhất là xin tài xế chụp lại. Đó là cái giá của tối thiểu hoá, và nên được chấp nhận có chủ ý.
 
 ## Hệ thống gợi ý, người quyết định
 
@@ -121,7 +121,7 @@ Dòng thứ ba là lỗi ta cố tình dựng: bảng gốc đã xoá DR-002 nh�
 <figcaption>Hình 2. Hệ thống dừng ở ranh giới dọc. Hai trạng thái quyết định chỉ đạt được qua một hành động có người ký tên, từ hồ sơ đang chờ duyệt.</figcaption>
 </figure>
 
-Dải điểm cho biết khối lượng việc của người duyệt, và cả hai ngưỡng ở đây chọn trên chính dữ liệu đo nên lạc quan (xem phân bố ở mục trên). Trên 79.800 cặp ảnh:
+Dải điểm cho biết khối lượng việc của người duyệt, và cả hai ngưỡng ở đây được chọn trên chính dữ liệu đo nên kết quả lạc quan (xem phân bố ở mục trên). Trên 79.800 cặp ảnh:
 
 ```text
 ngưỡng review 0.407 (FAR 5%), ngưỡng strong 0.567 (FAR 0,1%); cả hai chọn trên chính dữ liệu đo nên lạc quan, xem mục 3
@@ -129,14 +129,14 @@ cùng người  strong 1747 (97.1%), review 53 (2.9%), weak 0 (0.0%)
 khác người  strong 78 (0.1%), review 3822 (4.9%), weak 74100 (95.0%)
 ```
 
-Cặp khác người rơi vào `strong` chiếm 0,1% (78 cặp): ngay ở dải cao nhất vẫn có người lạ, nên dải `strong` cũng chỉ đẩy hồ sơ tới `face_checked` chứ không tự duyệt. Cặp cùng người rơi vào `weak` là 0% trên bộ sạch này, nhưng bài 49 cho thấy ảnh xuống cấp làm FRR tăng vọt; để dải `weak` tự động từ chối là từ chối người thật vì lỗi của mô hình, nên dải đó cũng đi tới người. Các ca kiểm còn lại: tác nhân `system:face-match` và thiếu lý do bị từ chối, hồ sơ ở `face_checked` hay `submitted` không nhận quyết định của người, ảnh không lấy được mặt đi tới `needs_review`.
+Cặp khác người rơi vào `strong` chiếm 0,1% (78 cặp): ngay ở dải cao nhất vẫn có người lạ, nên dải `strong` cũng chỉ đẩy hồ sơ tới `face_checked` chứ không tự duyệt. Cặp cùng người rơi vào `weak` là 0% trên bộ sạch này, nhưng bài 49 cho thấy ảnh xuống cấp làm FRR tăng vọt; để dải `weak` tự động từ chối là từ chối người thật vì lỗi của mô hình, nên dải đó cũng đi tới người. Các test case còn lại: tác nhân `system:face-match` và thiếu lý do bị từ chối, hồ sơ ở `face_checked` hay `submitted` không nhận quyết định của người, ảnh không lấy được mặt đi tới `needs_review`.
 
 ## Danh sách kiểm trước khi bật
 
 | Mục | Câu hỏi | Lab thể hiện ở |
 | --- | --- | --- |
 | Đo | FAR/FRR báo kèm khoảng tin cậy và số người, không chỉ số cặp; ngưỡng đo trên người chưa thấy | `bootstrap_ci`, `threshold_transfer`, mục 3 |
-| Nhóm | Có nhãn nhóm thật, thu có đồng ý, đủ người mỗi nhóm; nếu không, nói rõ là chưa đo | mục 3, 4, 5 |
+| Nhóm | Có nhãn nhóm thật, thu thập khi có đồng ý, đủ người mỗi nhóm; nếu không, nói rõ là chưa đo | mục 3, 4, 5 |
 | Lưu | Chỉ lưu thứ cần; vector được bảo vệ như dữ liệu sinh trắc học | `face_template` không cột ảnh |
 | Đồng ý | Theo mục đích (1:1 khác 1:N), có phiên bản, rút được, rút thì xoá mẫu | `ConsentRequired`, `withdraw_consent` |
 | Hết hạn, xoá | Có hạn lưu; xoá tới cả bản sao dẫn xuất; có dấu vết kiểm toán | `purge_expired`, `erase`, `FaceIndex` |
@@ -163,7 +163,7 @@ tải máy lúc chạy (load average 1 phút): 126.8
 embedding (400, 128), float32, mô hình sface_2021dec@opencv-zoo/rgb112; tính mới bằng ONNX Runtime, lưu vào out/embeddings.npz: 51.6 giây
 ```
 
-`--verify` kiểm các bất biến: số cặp theo số ảnh mỗi người, FAR không vượt mục tiêu, tổng cặp trong nhóm cộng cặp chéo nhóm bằng tổng, cùng seed cho cùng khoảng tin cậy, khoảng 95% của hiệu giữa hai nửa ngẫu nhiên bao quanh 0, khoảng 95% của FAR trên người chưa thấy bao quanh mục tiêu 1%, bảng không có cột ảnh, rút đồng ý xoá mẫu và giữ lịch sử, hết hạn, xoá, cổng quyết định. Nó không kiểm một kết luận nào về thiên lệch.
+`--verify` kiểm các bất biến: số cặp theo số ảnh mỗi người, FAR không vượt mục tiêu, tổng cặp trong nhóm cộng cặp chéo nhóm bằng tổng, cùng seed cho cùng khoảng tin cậy, khoảng 95% của hiệu giữa hai nửa ngẫu nhiên bao quanh 0, khoảng 95% của FAR trên người chưa thấy bao quanh mục tiêu 1%, bảng không có cột ảnh, rút đồng ý xoá mẫu và giữ lịch sử, hết hạn, xoá, cổng quyết định. Lệnh này không kiểm tra kết luận nào về thiên lệch.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -171,11 +171,11 @@ embedding (400, 128), float32, mô hình sface_2021dec@opencv-zoo/rgb112; tính 
 | Khoảng tin cậy rất rộng | số người mỗi nhóm; nhớ đơn vị độc lập là người, không phải cặp |
 | Mẫu đã xoá vẫn xuất hiện ở kết quả tìm kiếm | chỉ mục, cache, bản sao lưu có được dựng lại hoặc xoá theo chưa |
 | `ModelVersionMismatch` sau khi nâng mô hình | mẫu cũ không dùng được; cần quy trình chụp lại, không trộn phiên bản |
-| Hồ sơ ở `approved` mà không có người ký | đường nào đã gọi trạng thái mà không qua `apply_decision` |
+| Hồ sơ ở `approved` mà không có người ký | đường nào đã chuyển hồ sơ sang trạng thái mà không qua `apply_decision` |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Olivetti là 40 người chụp trong phòng thí nghiệm, ảnh xám 64×64, không có nhãn nhân khẩu học; các «nhóm» ở trên là giả định hoặc lát cắt ảnh, và mọi tỉ lệ chỉ đúng cho 40 người này, không suy ra cho tài xế của Tới Nơi. Bài không chứng minh hệ thống không thiên lệch. Đánh giá thật cần dữ liệu có nhãn nhóm thu hợp lệ, đủ lớn, ảnh selfie thật qua pipeline đầy đủ, và theo dõi sau khi bật. Kho mẫu ở đây là SQLite trong bộ nhớ; production dùng kho có mã hoá, kiểm soát truy cập, TTL và quy trình xoá tới bản sao lưu. Danh tính người duyệt chỉ kiểm tiền tố <code>RV-</code>; production lấy từ xác thực. Đồng ý, mục đích, số ngày lưu là giá trị minh hoạ. Bài không phải tư vấn pháp lý.</p></div>
+<p>Olivetti là 40 người chụp trong phòng thí nghiệm, ảnh xám 64×64, không có nhãn nhân khẩu học; các «nhóm» ở trên là giả định hoặc lát cắt ảnh, và mọi tỉ lệ chỉ đúng cho 40 người này, không suy ra cho tài xế của Tới Nơi. Bài không chứng minh hệ thống không thiên lệch. Đánh giá thật cần dữ liệu có nhãn nhóm được thu thập hợp lệ, đủ lớn, ảnh selfie thật qua pipeline đầy đủ, và theo dõi sau khi bật. Kho mẫu ở đây là SQLite trong bộ nhớ; production dùng kho có mã hoá, kiểm soát truy cập, TTL và quy trình xoá tới bản sao lưu. Danh tính người duyệt chỉ kiểm tiền tố <code>RV-</code>; production lấy từ xác thực. Đồng ý, mục đích, số ngày lưu là giá trị minh hoạ. Bài không phải tư vấn pháp lý.</p></div>
 
 **Bài tập:** Trong mục 3 của `main.py` (hàm `part_assumed_groups`), thêm phép thử cho nhóm giả định thứ ba: người chẵn so với người lẻ, cả hai chiều học ngưỡng. Bạn kỳ vọng hiệu FAR rơi vào đâu so với khoảng của các lần chia ngẫu nhiên, và vì sao? Rồi sửa `erase` để chỉ mục không còn trả DR-002 mà không cần gọi `rebuild` bằng tay.
 

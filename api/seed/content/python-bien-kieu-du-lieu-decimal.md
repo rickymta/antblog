@@ -38,7 +38,7 @@ Hàm `type()` cho biết kiểu của đối tượng mà một tên đang gắn
 4. a=[1, 2, 3], a is b: True
 ```
 
-Đó là **dynamic typing**: kiểu được kiểm tra khi chương trình chạy, và cùng một tên có thể gắn với đối tượng khác kiểu ở các thời điểm khác nhau. Dòng 4 cho thấy hệ quả: sửa qua tên `b` làm đổi cả những gì `a` nhìn thấy, vì chỉ có một list. Toán tử `is` hỏi hai tên có cùng một đối tượng hay không; `==` hỏi hai giá trị có bằng nhau không. Danh sách và các kiểu thay đổi được sẽ quay lại ở bài 05.
+Đó là **dynamic typing**: kiểu được kiểm tra khi chương trình chạy, và cùng một tên có thể gắn với đối tượng khác kiểu ở các thời điểm khác nhau. Dòng 4 cho thấy hệ quả: sửa qua tên `b` làm đổi cả những gì `a` nhìn thấy, vì chỉ có một list. Toán tử `is` hỏi hai tên có cùng một đối tượng hay không; `==` hỏi hai giá trị có bằng nhau không. Danh sách và các kiểu có thể thay đổi sẽ quay lại ở bài 05.
 
 Tự do này có giá: Python không báo lỗi khi bạn gắn nhầm chuỗi vào chỗ cần số, cho đến lúc dòng đó chạy. Cách giảm rủi ro là đặt tên có đơn vị (`distance_km`) và thêm **type hint**, chú thích kiểu mà công cụ như mypy đọc được:
 
@@ -47,20 +47,20 @@ def raw_fare(distance_km: Decimal) -> Decimal:
     ...
 ```
 
-Interpreter bỏ qua type hint khi chạy; nó là hợp đồng cho người đọc và công cụ kiểm tra. Ta dùng nhẹ nhàng từ giờ, và bài 12 sẽ đi sâu vào type hint, mypy và Protocol.
+Interpreter bỏ qua type hint khi chạy; type hint là hợp đồng cho người đọc và công cụ kiểm tra. Từ giờ ta dùng ở mức vừa phải, và bài 12 sẽ đi sâu vào type hint, mypy và Protocol.
 
 ## Số nguyên, phép chia và float
 
-`int` trong Python **không có giới hạn 32 hay 64 bit**: giá trị lớn tới đâu thì dùng bộ nhớ tới đó. Phép chia có hai dạng, khác điều nhiều người quen từ C#:
+`int` trong Python **không có giới hạn 32 hay 64 bit**: giá trị lớn tới đâu thì dùng bộ nhớ tới đó. Phép chia có hai dạng, khác với điều nhiều người đã quen từ C#:
 
 ```python
 print(2**100)       # 1267650600228229401496703205376
 print(5 / 2, 5 // 2)  # 2.5 2
 ```
 
-Toán tử `/` luôn trả số thực (`2.5`), còn `//` là phép chia lấy phần nguyên (`2`). Cái bẫy chia hai số int ra số nguyên (`5 / 2` ra 2 trong C#) không có ở Python 3, nhưng nó đổi lấy một bẫy khác: `5 / 2` trả `float`, và `float` không dành cho tiền.
+Toán tử `/` luôn trả số thực (`2.5`), còn `//` là phép chia lấy phần nguyên (`2`). Cái bẫy chia hai số int ra số nguyên (`5 / 2` ra 2 trong C#) không có ở Python 3, nhưng đổi lại có một bẫy khác: `5 / 2` trả `float`, và `float` không dành cho tiền.
 
-`float` biểu diễn số theo cơ số 2. Giống mọi ngôn ngữ dùng chuẩn IEEE 754, nhiều phân số thập phân như 0,1 không có biểu diễn nhị phân hữu hạn, nên chương trình lưu giá trị gần đúng:
+`float` biểu diễn số theo cơ số 2. Như ở mọi ngôn ngữ dùng chuẩn IEEE 754, nhiều phân số thập phân như 0,1 không có biểu diễn nhị phân hữu hạn, nên chương trình lưu giá trị gần đúng:
 
 ```python
 print(0.1 + 0.2)           # 0.30000000000000004
@@ -74,7 +74,7 @@ print(0.1 + 0.2 == 0.3)    # False
 <figcaption>Hình 1. Cùng phép cộng, hai cách biểu diễn. Decimal chỉ giữ đúng chữ số thập phân khi được tạo từ chuỗi; tạo từ float sẽ mang theo xấp xỉ của ô bên trái.</figcaption>
 </figure>
 
-Đây là hành vi của biểu diễn, không phải lỗi của Python. float vẫn đúng chỗ cho đo đạc, toạ độ GPS, điểm mô hình; bạn so sánh bằng ngưỡng sai số (`math.isclose`) thay vì `==`. Nhưng với tiền và khoảng cách cộng dồn vào tiền, ta cần kiểu thập phân.
+Đây là hệ quả của cách biểu diễn số, không phải lỗi của Python. float vẫn phù hợp cho đo đạc, toạ độ GPS, điểm số của mô hình; bạn so sánh bằng ngưỡng sai số (`math.isclose`) thay vì `==`. Nhưng với tiền và khoảng cách cộng dồn vào tiền, ta cần kiểu thập phân.
 
 ## Decimal: tạo từ chuỗi, không từ float
 
@@ -90,7 +90,7 @@ Kết quả của hai dòng `print` này chính là dòng 9 và 10 của lab. `D
 
 Vài tính chất cần biết:
 
-- `Decimal` cộng, trừ, nhân được với `int` (`Decimal("2.5") * 4500` ra `11250.0`) nhưng **ném `TypeError` khi cộng, trừ, nhân, chia với float**. Python cố tình từ chối thay vì âm thầm làm hỏng độ chính xác. Riêng phép so sánh thì không báo lỗi mà so đúng giá trị: `Decimal("0.1") == 0.1` cho `False`, vì float `0.1` là giá trị xấp xỉ khác.
+- `Decimal` cộng, trừ, nhân được với `int` (`Decimal("2.5") * 4500` ra `11250.0`) nhưng **ném `TypeError` khi cộng, trừ, nhân, chia với float**. Python cố tình từ chối, thay vì để độ chính xác bị hỏng mà không báo gì. Riêng phép so sánh thì không báo lỗi mà so đúng giá trị: `Decimal("0.1") == 0.1` cho `False`, vì float `0.1` là giá trị xấp xỉ khác.
 - Kết quả giữ số chữ số thập phân theo phép tính: `Decimal("2.501") - 2` cho `0.501`, và `0.501 * 4500` cho `2254.500`. Đây là lý do bài 01 in `14250.0` cho 2,5 km.
 - Độ chính xác do **context** của module `decimal` quy định: mặc định 28 chữ số có nghĩa, chế độ làm tròn mặc định là `ROUND_HALF_EVEN`. Khác với `decimal` của C# vốn là kiểu 128 bit cố định (khoảng 28 đến 29 chữ số), ở Python độ chính xác là cấu hình có thể đổi. Ví dụ chia `Decimal(1) / Decimal(3)` ra 28 chữ số 3 và vẫn là xấp xỉ.
 
@@ -98,7 +98,7 @@ Hai bên giống nhau ở ý chính: cả hai là kiểu thập phân, đều m�
 
 ## Làm tròn tiền bằng quantize
 
-Giữ nguyên quy tắc bài 01: 12.000 VND gồm 2 km đầu, phần vượt 4.500 VND/km. Bổ sung một quy tắc **chỉ cho mô hình minh hoạ**: làm tròn tiền cuối cùng đến 1 VND, điểm giữa làm tròn ra xa số 0 (`ROUND_HALF_UP`). Mô hình có ba giá trị khác nhau: khoảng cách, cước thô và tiền phải trả.
+Giữ nguyên quy tắc bài 01: 12.000 VND gồm 2 km đầu, phần vượt 4.500 VND/km. Bổ sung một quy tắc **chỉ dùng cho mô hình minh hoạ**: làm tròn tiền cuối cùng đến 1 VND, điểm giữa làm tròn ra xa số 0 (`ROUND_HALF_UP`). Mô hình có ba giá trị khác nhau: khoảng cách, cước thô và tiền phải trả.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -118,7 +118,7 @@ half.quantize(ONE_VND)                              # 14254, theo mặc định 
 half.quantize(ONE_VND, rounding=ROUND_HALF_UP)      # 14255
 ```
 
-Hai dòng này trong lab (dòng 11 và 12) in `14254` rồi `14255`. Bài học: khi hợp đồng nghiệp vụ đã chọn quy tắc làm tròn, **ghi rõ `rounding=`**, đừng dựa vào mặc định của context. Hàm dựng sẵn `round(Decimal("14254.5"))` cũng làm tròn điểm giữa về số chẵn và trả 14254, một lý do khác để tránh nó cho tiền. Với giá trị không phải điểm giữa, `ROUND_HALF_UP` vẫn làm tròn về số gần nhất.
+Hai dòng này trong lab (dòng 11 và 12) in `14254` rồi `14255`. Bài học: khi hợp đồng nghiệp vụ đã chọn quy tắc làm tròn, **ghi rõ `rounding=`**, đừng dựa vào mặc định của context. Hàm có sẵn `round(Decimal("14254.5"))` cũng làm tròn điểm giữa về số chẵn và trả 14254, một lý do khác để không dùng nó cho tiền. Với giá trị không phải điểm giữa, `ROUND_HALF_UP` vẫn làm tròn về số gần nhất.
 
 ```python
 # examples/toi-noi-python/02-bien-kieu-du-lieu-decimal/main.py (rút gọn)
@@ -189,7 +189,7 @@ Dòng 18 và 19 của lab xác nhận cả hai. Cái bẫy kinh điển: chuỗi
 uv run --project examples/toi-noi-python/02-bien-kieu-du-lieu-decimal examples/toi-noi-python/02-bien-kieu-du-lieu-decimal/main.py
 ```
 
-Kết quả thật (trích; chương trình in 30 dòng đánh số):
+Kết quả chạy thật (trích; chương trình in 30 dòng đánh số):
 
 ```text
 1. TN-0001 -> str
@@ -213,7 +213,7 @@ Kết quả thật (trích; chương trình in 30 dòng đánh số):
 30. 2.499 km: raw=14245.500, fare=14246
 ```
 
-Chế độ kiểm tự động so từng dòng với kết quả kỳ vọng:
+Chế độ kiểm tra tự động so từng dòng với kết quả kỳ vọng:
 
 ```bash
 uv run --project examples/toi-noi-python/02-bien-kieu-du-lieu-decimal examples/toi-noi-python/02-bien-kieu-du-lieu-decimal/main.py --verify
@@ -223,7 +223,7 @@ uv run --project examples/toi-noi-python/02-bien-kieu-du-lieu-decimal examples/t
 OK 30/30
 ```
 
-Bảng kiểm bằng tay (dòng 22 tới 25), sau `quantize`:
+Bảng kiểm tra bằng tay (dòng 22 tới 25), sau `quantize`:
 
 | Khoảng cách | Phần vượt | Tiền phải trả |
 | --- | --- | --- |
@@ -242,13 +242,13 @@ Khác với bài 01, 2,5 km giờ in `14250` chứ không còn `14250.0`, vì `q
 | `except ValueError` không bắt lỗi `Decimal("abc")` | `InvalidOperation` là `ArithmeticError`; bắt riêng hoặc dùng hàm bọc |
 | Tiền ra 14254 thay vì 14255 | Quên `rounding=ROUND_HALF_UP`; mặc định là `ROUND_HALF_EVEN` |
 
-Giới hạn của ví dụ: giá trị gán sẵn hoặc tạo từ chuỗi cố định; hằng số bảng giá đặt trong code thay vì cấu hình có hiệu lực theo thời điểm; chỉ một tiền tệ (VND, không có đơn vị nhỏ hơn 1 đồng); chưa có kiểu `Money`, chưa kiểm miền giá trị, chưa xử lý ngoại lệ cho người dùng. Đây là mô hình để học, không phải lõi tính tiền của sản phẩm.
+Giới hạn của ví dụ: giá trị gán sẵn hoặc tạo từ chuỗi cố định; hằng số bảng giá đặt trong code thay vì cấu hình có hiệu lực theo thời điểm; chỉ một tiền tệ (VND, không có đơn vị nhỏ hơn 1 đồng); chưa có kiểu `Money`, chưa kiểm tra miền giá trị, chưa xử lý ngoại lệ cho người dùng. Đây là mô hình để học, không phải lõi tính tiền của sản phẩm.
 
 **Bài tập:**
 
 1. Với đơn giá 4.500, đổi khoảng cách thành 2,499 km. Cước thô và tiền phải trả là bao nhiêu?
 2. Vì sao `Decimal(2.501)` không nên dùng để thay cho `Decimal("2.501")`?
-3. Một người sửa code thành `int(distance_km)` trước khi tính. Hãy tìm đầu vào bộc lộ sai lệch.
+3. Một người sửa code thành `int(distance_km)` trước khi tính. Hãy tìm một đầu vào làm lộ ra sai lệch.
 
 <details><summary>Xem lời giải</summary><p>1. Phần vượt 0,499 km, tiền vượt 2.245,5 VND, cước thô <code>14245.500</code>, phải trả <b>14.246 VND</b> theo <code>ROUND_HALF_UP</code>. <code>HALF_EVEN</code> cũng ra 14.246 vì 14.246 là số chẵn, nên bài này chưa phân biệt được hai chế độ; cần điểm giữa như 14.254,5 của 2,501 km. Dòng 30 của lab kiểm lại đáp án này. 2. Literal <code>2.501</code> là float nhị phân đã xấp xỉ, nên <code>Decimal(2.501)</code> mang theo cả dãy chữ số thừa; chuỗi giữ đúng những gì bạn gõ. 3. Ví dụ 2,5 km: ép thành 2 khiến giá còn 12.000 thay vì 14.250 VND.</p></details>
 

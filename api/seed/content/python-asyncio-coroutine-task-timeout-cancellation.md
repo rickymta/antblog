@@ -8,7 +8,7 @@ tags: [python, toi-noi, asyncio, concurrency]
 language: vi
 ---
 
-Màn hình xác nhận chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) hiện báo giá cho mười điểm đến gợi ý cùng lúc. Mỗi báo giá là một lời gọi sang service `pricing`, mất khoảng 0,15 đến 0,25 giây qua mạng. Gọi lần lượt thì mười lời gọi mất gần 2 giây, đủ để khách thấy vòng quay rồi thoát app. Gọi cả mười cùng lúc thì chỉ mất bằng lời gọi chậm nhất. Nhưng «cùng lúc» kéo theo những câu hỏi mới: một lời gọi lỗi thì chín lời còn lại ra sao, service treo thì chờ tới bao giờ, khách đóng màn hình giữa chừng thì ai dọn phần đang giữ? Và nguy hiểm nhất, một dòng code chặn có thể làm đứng cả service, không riêng một yêu cầu.
+Màn hình xác nhận chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) hiện báo giá cho mười điểm đến gợi ý cùng lúc. Mỗi báo giá là một lời gọi sang service `pricing`, mất khoảng 0,15 đến 0,25 giây qua mạng. Gọi lần lượt thì mười lời gọi mất gần 2 giây, đủ để khách thấy vòng quay rồi thoát app. Gọi cả mười cùng lúc thì thời gian chỉ bằng lời gọi chậm nhất. Nhưng «cùng lúc» kéo theo những câu hỏi mới: một lời gọi lỗi thì chín lời còn lại ra sao, service treo thì chờ tới bao giờ, khách đóng màn hình giữa chừng thì ai dọn phần đang giữ? Và nguy hiểm nhất, một dòng code chặn có thể làm đứng cả service, không riêng một yêu cầu.
 
 Đây là bài 21 của lộ trình **Python trung bình qua Tới Nơi**. Bạn cần quen [exception](/articles/python-exception-debug-logging) (bài 08) và khối `with` (bài 09). Bài này mở đầu phần 03; bài trước, [đóng gói và cấu trúc dự án](/articles/python-dong-goi-ruff-pre-commit-cau-truc-du-an), kết thúc phần 02.
 
@@ -39,7 +39,7 @@ async def fetch_quote(distance_km: Decimal, latency: float) -> Quote:
 
 `await asyncio.sleep(latency)` trả quyền điều khiển cho loop trong lúc chờ, nên loop chạy được các coroutine khác. Điểm vào chuẩn của chương trình là `asyncio.run(main())`: nó tạo loop, chạy `main()` tới hết rồi đóng loop. Ta không cần tới `asyncio.get_event_loop()` kiểu cũ.
 
-**Task** là coroutine đã được loop nhận và chạy nền. `asyncio.create_task(coro)` tạo Task; tài liệu nhắc phải giữ tham chiếu tới nó, vì loop chỉ giữ tham chiếu yếu và một Task không ai giữ có thể bị thu gom giữa chừng. Cách thường dùng không cần tự giữ là `gather` hoặc `TaskGroup`.
+**Task** là coroutine đã được loop nhận và chạy nền. `asyncio.create_task(coro)` tạo Task; tài liệu nhắc phải giữ tham chiếu tới nó, vì loop chỉ giữ tham chiếu yếu và một Task không ai giữ có thể bị thu gom giữa chừng. Cách dùng thông thường mà không cần tự giữ tham chiếu là `gather` hoặc `TaskGroup`.
 
 ## gather và TaskGroup: mười lời gọi cùng lúc
 
@@ -60,7 +60,7 @@ async def quotes_taskgroup(latencies):
     return [t.result() for t in tasks]
 ```
 
-Bản đầu `await` từng lời gọi một nên thời gian xấp xỉ tổng độ trễ. `gather` bọc mỗi coroutine thành Task rồi chờ tất cả, trả kết quả theo thứ tự đầu vào. `TaskGroup` (Python 3.11 trở lên) làm cùng việc nhưng ràng vòng đời các Task vào khối `async with`: ra khỏi khối là mọi Task đã xong. Số đo thật từ lab (một lần chạy, giây dao động theo máy):
+Bản đầu `await` từng lời gọi một nên thời gian xấp xỉ tổng độ trễ. `gather` bọc mỗi coroutine thành Task rồi chờ tất cả, trả kết quả theo thứ tự đầu vào. `TaskGroup` (Python 3.11 trở lên) làm cùng việc nhưng gắn vòng đời của các Task vào khối `async with`: ra khỏi khối là mọi Task đã xong. Số đo thật từ lab (một lần chạy, số giây dao động theo máy):
 
 ```text
 độ trễ giả: tổng 1.90 s, lớn nhất 0.24 s
@@ -76,11 +76,11 @@ TaskGroup : 0.24 s
 <figcaption>Hình 1. Mười lời gọi với đúng các độ trễ của lab. Chờ nối đuôi thì cộng dồn độ trễ; chờ chồng lên nhau thì tổng thời gian chỉ còn bằng lời gọi lâu nhất.</figcaption>
 </figure>
 
-Tổng độ trễ là 1,90 giây, tuần tự mất 1,92 giây (phần dư là chi phí của loop). Đồng thời mất 0,24 giây, đúng bằng độ trễ lớn nhất. Cả ba cách trả cùng danh sách cước, từ 12.000 cho 0 km tới 57.000 cho 12 km. Chênh lệch thời gian không đến từ việc tính cước nhanh hơn mà từ việc **chờ** chồng lên nhau: loop không có gì làm trong lúc một Task chờ thì chuyển sang Task khác.
+Tổng độ trễ là 1,90 giây, tuần tự mất 1,92 giây (phần dư là chi phí của loop). Đồng thời mất 0,24 giây, đúng bằng độ trễ lớn nhất. Cả ba cách trả cùng danh sách cước, từ 12.000 cho 0 km tới 57.000 cho 12 km. Chênh lệch thời gian không đến từ việc tính cước nhanh hơn mà từ việc **chờ** chồng lên nhau: khi một Task chờ, loop chuyển sang chạy Task khác.
 
 ## Một lời gọi lỗi: gather khác TaskGroup thế nào
 
-Thêm vào hai lời gọi chậm 0,3 giây và một lời gọi hỏng: khoảng cách 150 km nằm ngoài miền 0 đến 100 km của bài 03 nên `calculate_fare` ném `ValueError` sau 0,05 giây. Hai lời gọi chậm ghi lại chúng chạy xong hay bị huỷ (`main.py`, rút gọn: bỏ docstring):
+Thêm vào hai lời gọi chậm 0,3 giây và một lời gọi hỏng: khoảng cách 150 km nằm ngoài miền 0 đến 100 km của bài 03 nên `calculate_fare` ném `ValueError` sau 0,05 giây. Hai lời gọi chậm ghi lại việc chúng chạy xong hay bị huỷ (`main.py`, rút gọn: bỏ docstring):
 
 ```python
 async def slow_sibling(events: list[str], name: str) -> str:
@@ -123,7 +123,7 @@ async def taskgroup_failure() -> list[str]:
     return lines + sorted(sibling_events)  # sắp xếp: thứ tự hủy A, B không được bảo đảm
 ```
 
-Thứ tự hai Task anh em kết thúc hoặc bị huỷ **không** được asyncio bảo đảm (khi review, thứ tự bị huỷ đã ra «B trước A»), nên lab sắp xếp các dòng này trước khi in; nội dung từng dòng mới là điều cần so sánh. Kết quả (trích):
+Thứ tự hai Task anh em kết thúc hoặc bị huỷ **không** được asyncio bảo đảm (khi review, có lần thứ tự huỷ ra «B trước A»), nên lab sắp xếp các dòng này trước khi in; nội dung từng dòng mới là điều cần so sánh. Kết quả (trích):
 
 ```text
 gather:
@@ -173,7 +173,7 @@ dịch vụ chậm  (2,00 s): nguồn=fallback, cước=25500, mất 0.30 s
 
 Cơ chế: hết hạn, `timeout` huỷ Task đang chạy khối bên trong; Task nhận `CancelledError` tại `await` đang treo, và khi `CancelledError` ra tới `async with`, `timeout` đổi nó thành `TimeoutError`. Hệ quả cần nhớ: `TimeoutError` chỉ bắt được **bên ngoài** khối `async with`, không bắt được ở bên trong. Lời gọi chậm 2 giây mất đúng 0,30 giây, không phải 2 giây. Hai nguồn cho cùng cước 25.500 vì cả hai dùng chung công thức; trong thực tế fallback nên được đánh dấu là «ước tính» để người dùng và hệ thống biết.
 
-Thời hạn nên đặt ở **biên** của một thao tác trọn vẹn (một yêu cầu của khách), không rải từng lời gọi nhỏ mà quên tổng. Ngoài ra `asyncio.timeout` chỉ có tác dụng nếu đoạn bên trong thực sự nhường quyền ở `await`: một vòng lặp tính toán không có `await` không bị ngắt giữa chừng (mục «Không chặn event loop»).
+Thời hạn nên đặt **bao quanh** cả một thao tác trọn vẹn (một yêu cầu của khách), không rải ở từng lời gọi nhỏ rồi quên mất tổng thời gian. Ngoài ra `asyncio.timeout` chỉ có tác dụng nếu đoạn bên trong thực sự nhường quyền ở `await`: một vòng lặp tính toán không có `await` không bị ngắt giữa chừng (mục «Không chặn event loop»).
 
 ## Huỷ: CancelledError, dọn dẹp và điều không được làm
 
@@ -205,7 +205,7 @@ nuốt CancelledError -> vẫn trả kết quả | cancelled() = False
 timeout 0,10 s bọc coroutine nuốt hủy -> TimeoutError: False, expired(): True, kết quả: chạy tiếp sau hạn, mất 0.20 s
 ```
 
-Phần dọn dẹp thuộc `finally`, vì nó chạy trong mọi trường hợp. Quy tắc quan trọng nhất: **bắt `CancelledError` để dọn thì phải ném lại** (`raise`). Dòng áp chót của output là phản ví dụ trong lab: một coroutine nuốt `CancelledError` rồi chạy tiếp thì Task vẫn trả kết quả và `cancelled()` là `False`. `timeout` và `TaskGroup` đều giả định huỷ có hiệu lực; một coroutine nuốt nó thì việc vẫn tiếp tục chạy sau hạn chót. Dòng cuối của output là thí nghiệm trong lab (`stubborn_quote`, bọc trong `asyncio.timeout(0.1)`): không có `TimeoutError` dù `expired()` là `True`, và khối chạy 0,20 s thay vì 0,10 s. Tài liệu cũng nói: nếu thực sự cần chặn huỷ thì phải gọi thêm `uncancel()`, và việc này không khuyến khích. Đoạn dọn trong `finally` cũng không nên kéo dài hay chờ mạng vô hạn, vì Task đang bị huỷ mà vẫn chờ lâu thì cả nhóm chờ theo.
+Phần dọn dẹp thuộc `finally`, vì khối này chạy trong mọi trường hợp. Quy tắc quan trọng nhất: **bắt `CancelledError` để dọn thì phải ném lại** (`raise`). Dòng áp chót của kết quả in ra là phản ví dụ trong lab: một coroutine nuốt `CancelledError` rồi chạy tiếp thì Task vẫn trả kết quả và `cancelled()` là `False`. `timeout` và `TaskGroup` đều giả định huỷ có hiệu lực; một coroutine nuốt nó thì công việc vẫn tiếp tục chạy sau hạn chót. Dòng cuối là kết quả của thí nghiệm trong lab (`stubborn_quote`, bọc trong `asyncio.timeout(0.1)`): không có `TimeoutError` dù `expired()` là `True`, và khối chạy 0,20 s thay vì 0,10 s. Tài liệu cũng nói: nếu thực sự cần chặn huỷ thì phải gọi thêm `uncancel()`, và việc này không được khuyến khích. Đoạn dọn trong `finally` cũng không nên kéo dài hay chờ mạng vô hạn, vì Task đang bị huỷ mà vẫn chờ lâu thì cả nhóm chờ theo.
 
 Thí nghiệm trong lab (`main.py`, rút gọn: bỏ docstring và phần đo giờ):
 
@@ -230,7 +230,7 @@ async def timeout_vs_swallow() -> dict[str, object]:
     return {"raised": raised, "expired": scope.expired(), "result": result}
 ```
 
-Người đã đọc [bài C# về async/await và cancellation](/articles/csharp-async-await-cancellation) sẽ thấy cùng ý: C# truyền `CancellationToken` tường minh qua từng lời gọi, còn asyncio huỷ bằng exception bắn vào Task tại điểm `await`, nên không có tham số nào để quên truyền nhưng có exception không được nuốt.
+Người đã đọc [bài C# về async/await và cancellation](/articles/csharp-async-await-cancellation) sẽ thấy cùng một ý tưởng: C# truyền `CancellationToken` tường minh qua từng lời gọi, còn asyncio huỷ bằng exception bắn vào Task tại điểm `await`, nên không có tham số nào để quên truyền nhưng có exception không được nuốt.
 
 ## Không chặn event loop
 
@@ -256,9 +256,9 @@ asyncio.to_thread 0,5 s  : khoảng cách tick lớn nhất 0.05 s
 cảnh báo slow callback (debug): trực tiếp [0.503], to_thread []
 ```
 
-Gọi trực tiếp, nhịp tim đứng 0,55 giây: trong khoảng đó mọi yêu cầu khác của service đều chờ, kể cả những yêu cầu chỉ cần 1 mili giây. `asyncio.to_thread` đưa hàm sang thread của thread pool, loop tự do nên nhịp tim giữ nguyên 0,05 giây. Lab chạy phần này riêng với `asyncio.run(..., debug=True)`; ở chế độ debug, asyncio ghi cảnh báo mức WARNING dạng `Executing <Task ...> took 0.503 seconds` cho callback chạy quá 0,1 giây, một cách tìm ra chỗ chặn trong code thật mà không cần đoán.
+Gọi trực tiếp, nhịp tim đứng 0,55 giây: trong khoảng đó mọi yêu cầu khác của service đều chờ, kể cả những yêu cầu chỉ cần 1 mili giây. `asyncio.to_thread` đưa hàm sang thread của thread pool, loop vẫn rảnh nên nhịp tim giữ nguyên 0,05 giây. Lab chạy phần này riêng với `asyncio.run(..., debug=True)`; ở chế độ debug, asyncio ghi cảnh báo mức WARNING dạng `Executing <Task ...> took 0.503 seconds` cho callback chạy quá 0,1 giây, một cách tìm ra chỗ chặn trong code thật mà không cần đoán.
 
-`to_thread` chỉ hợp với việc **chờ** (I/O đồng bộ, thư viện chưa có bản async). Theo tài liệu, do GIL nó thường chỉ giúp hàm I/O-bound không chặn loop; việc tính toán CPU nặng bằng Python thuần trong thread vẫn tranh GIL. Chọn thread hay process cho việc CPU-bound là chủ đề của bài 22.
+`to_thread` chỉ phù hợp với việc **chờ** (I/O đồng bộ, thư viện chưa có bản async). Theo tài liệu, do GIL nó thường chỉ giúp hàm I/O-bound không chặn loop; việc tính toán CPU nặng bằng Python thuần trong thread vẫn tranh GIL. Chọn thread hay process cho việc CPU-bound là chủ đề của bài 22.
 
 ## Chạy và kiểm chứng
 
@@ -268,7 +268,7 @@ Từ thư mục gốc repository (cần uv và Python 3.14, lab chỉ dùng thư
 uv run --project examples/toi-noi-python/21-asyncio-task-timeout examples/toi-noi-python/21-asyncio-task-timeout/main.py --verify
 ```
 
-Output đầy đủ của lần chạy cuối cùng, Python 3.14.7 trên macOS Apple Silicon:
+Kết quả in ra đầy đủ của lần chạy cuối cùng, Python 3.14.7 trên macOS Apple Silicon:
 
 ```text
 == 1. Tuần tự và đồng thời (10 lời gọi báo giá) ==
@@ -310,7 +310,7 @@ cảnh báo slow callback (debug): trực tiếp [0.503], to_thread []
 OK 20/20
 ```
 
-20 ca của `--verify` chia hai nhóm. Nhóm logic lặp lại tuyệt đối: cước 0, 2, 2,5 và 5 km là 12.000, 12.000, 14.250 và 25.500; ba cách gọi cho cùng kết quả; `gather` để Task còn lại chạy xong, `TaskGroup` huỷ chúng; timeout rơi vào fallback; giữ chỗ được nhả; nuốt `CancelledError` làm Task không còn `cancelled`, và `asyncio.timeout` bọc coroutine nuốt huỷ không ném `TimeoutError`. Nhóm thời gian so theo tỉ lệ hoặc ngưỡng rộng, không so số giây tuyệt đối: `gather` nhanh hơn tuần tự ít nhất 3 lần, timeout dừng sau 0,28 giây và xa độ trễ 2 giây của dịch vụ, lời gọi chặn làm tick lớn nhất từ 0,45 giây trở lên, `to_thread` giữ tick lớn nhất dưới nửa lúc bị chặn. Ngưỡng vẫn có thể trượt trên máy rất bận; khi đó chạy lại.
+20 test case của `--verify` chia hai nhóm. Nhóm logic lặp lại tuyệt đối: cước 0, 2, 2,5 và 5 km là 12.000, 12.000, 14.250 và 25.500; ba cách gọi cho cùng kết quả; `gather` để Task còn lại chạy xong, `TaskGroup` huỷ chúng; timeout rơi vào fallback; giữ chỗ được nhả; nuốt `CancelledError` làm Task không còn `cancelled`, và `asyncio.timeout` bọc coroutine nuốt huỷ không ném `TimeoutError`. Nhóm thời gian so theo tỉ lệ hoặc ngưỡng rộng, không so số giây tuyệt đối: `gather` nhanh hơn tuần tự ít nhất 3 lần, timeout dừng sau 0,28 giây và xa độ trễ 2 giây của dịch vụ, lời gọi chặn làm tick lớn nhất từ 0,45 giây trở lên, `to_thread` giữ tick lớn nhất dưới nửa lúc bị chặn. Ngưỡng vẫn có thể không đạt trên máy rất bận; khi đó chạy lại.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -322,14 +322,14 @@ OK 20/20
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>«Service báo giá» ở đây chỉ là <code>asyncio.sleep</code>, chưa có kết nối mạng, retry, circuit breaker hay giới hạn số lời gọi đồng thời (bài 23 bàn tới <code>Semaphore</code>). Mười lời gọi cùng lúc không phải bài học chung: 10.000 lời gọi cùng lúc có thể làm sập chính dịch vụ phía sau. Số giây là của một máy, một lần chạy; chỉ tỉ lệ giữa các cách gọi mới đáng tin. Fallback ở đây dùng cùng công thức nên cho cùng giá; trong thực tế fallback thường kém chính xác hơn và phải được ghi nhận rõ.</p>
+<p>«Service báo giá» ở đây chỉ là <code>asyncio.sleep</code>, chưa có kết nối mạng, retry, circuit breaker hay giới hạn số lời gọi đồng thời (bài 23 bàn tới <code>Semaphore</code>). Mười lời gọi cùng lúc không phải bài học tổng quát: 10.000 lời gọi cùng lúc có thể làm sập chính dịch vụ phía sau. Số giây là của một máy, một lần chạy; chỉ tỉ lệ giữa các cách gọi mới đáng tin. Fallback ở đây dùng cùng công thức nên cho cùng giá; trong thực tế fallback thường kém chính xác hơn và phải được ghi nhận rõ.</p>
 </div>
 
 **Bài tập 1:** Trong `quotes_taskgroup`, thêm tham số `limit` và bọc cả khối `async with asyncio.TaskGroup()` trong `asyncio.timeout(limit)`. Với `limit = 0.2`, kết quả là gì khi độ trễ lớn nhất là 0,24 giây, và Task nào bị huỷ?
 
 **Bài tập 2:** Trong `hold_quote`, xoá dòng `raise` sau `log.append(...)`. `task.cancelled()` đổi thế nào, và vì sao đó là lỗi?
 
-<details><summary>Xem lời giải</summary><p>(1) Khối <code>asyncio.timeout(0.2)</code> hết hạn khi vẫn còn các Task có độ trễ 0,214 đến 0,239 giây (bốn trong mười lời gọi: 0,214; 0,224; 0,218; 0,239). Timeout huỷ Task đang chạy khối <code>async with</code>, <code>TaskGroup</code> huỷ tiếp các Task con, và <code>TimeoutError</code> ra ngoài; không có kết quả nào được trả vì <code>t.result()</code> nằm sau khối. Muốn lấy kết quả một phần phải thu thập trong từng Task thay vì sau khối. (2) <code>cancelled()</code> thành <code>False</code> vì Task kết thúc bình thường, và <code>await task</code> không còn ném <code>CancelledError</code>. Đó là lỗi vì người huỷ (timeout, TaskGroup, người dùng) tưởng Task đã dừng do bị huỷ trong khi nó vẫn chạy tiếp những gì sau <code>except</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Khối <code>asyncio.timeout(0.2)</code> hết hạn khi vẫn còn các Task có độ trễ 0,214 đến 0,239 giây (bốn trong mười lời gọi: 0,214; 0,224; 0,218; 0,239). Timeout huỷ Task đang chạy khối <code>async with</code>, <code>TaskGroup</code> huỷ tiếp các Task con, và <code>TimeoutError</code> ra ngoài; không có kết quả nào được trả vì <code>t.result()</code> nằm sau khối. Muốn lấy kết quả một phần phải thu thập trong từng Task thay vì sau khối. (2) <code>cancelled()</code> thành <code>False</code> vì Task kết thúc bình thường, và <code>await task</code> không còn ném <code>CancelledError</code>. Đó là lỗi vì người huỷ (timeout, TaskGroup, người dùng) tưởng Task đã dừng vì bị huỷ, trong khi Task vẫn chạy tiếp các lệnh nằm sau khối <code>except</code>.</p></details>
 
 Bài trước: [bài 20](/articles/python-dong-goi-ruff-pre-commit-cau-truc-du-an). Bài tiếp: [bài 22](/articles/python-gil-threading-multiprocessing-free-threaded).
 

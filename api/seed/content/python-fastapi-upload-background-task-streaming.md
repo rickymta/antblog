@@ -1,7 +1,7 @@
 ---
 slug: python-fastapi-upload-background-task-streaming
 title: "Upload ảnh giấy tờ, background task và streaming"
-summary: "Bài 35: nhận ảnh CCCD/GPLX bằng UploadFile qua ba lớp kiểm, lưu object storage giả, xử lý nền bằng BackgroundTasks (và khi nào cần worker), báo tiến độ qua SSE. Lab chạy cả uvicorn thật."
+summary: "Bài 35: nhận ảnh CCCD/GPLX bằng UploadFile qua ba lớp kiểm tra, lưu vào object storage giả, xử lý nền bằng BackgroundTasks (và khi nào cần worker), báo tiến độ qua SSE. Lab chạy cả uvicorn thật."
 category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, fastapi, upload, sse]
@@ -22,18 +22,18 @@ Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) đăng ký bằn
 
 Với `file: UploadFile`, FastAPI cần `python-multipart` để phân tích `multipart/form-data`; thiếu gói này, app báo `RuntimeError: Form data requires "python-multipart" to be installed.` ngay lúc khai báo route. Phân tích xong, handler nhận một `UploadFile`: đối tượng giống file có `filename`, `content_type`, `size`, hàm `read` bất đồng bộ, bên dưới là file tạm.
 
-Điểm dễ hiểu nhầm là thứ tự: Starlette đọc cả body, ghi phần file vào `SpooledTemporaryFile` (ngưỡng RAM 1 MiB) rồi mới gọi code của ta. Trong mã nguồn starlette 1.10, `max_part_size` chỉ giới hạn các trường chữ của form; phần file không có trần. Vì vậy ta chồng ba lớp, mỗi lớp trả lời một câu hỏi khác nhau.
+Điểm dễ hiểu nhầm là thứ tự: Starlette đọc cả body, ghi phần file vào `SpooledTemporaryFile` (ngưỡng RAM 1 MiB) rồi mới gọi code của ta. Trong mã nguồn starlette 1.10, `max_part_size` chỉ giới hạn các trường văn bản của form; phần file không có trần. Vì vậy ta chồng ba lớp, mỗi lớp trả lời một câu hỏi khác nhau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 290" role="img" aria-label="Năm khối nối tiếp: lớp 1 là middleware đọc Content-Length và từ chối sớm; Starlette phân tích multipart vào file tạm; lớp 2 kiểm file.size hoặc đọc tối đa limit cộng một byte; lớp 3 để Pillow kiểm định dạng và số điểm ảnh; cuối cùng lưu object và tạo job. Chú thích cho biết chỉ lớp 1 chặn trước khi body vào đĩa."><defs><marker id="py35-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="15" y="30" width="150" height="120" rx="10" class="f-pk-soft s-pk"/><text x="29" y="56" class="t-b">Lớp 1</text><text x="29" y="82" class="t-small">Content-Length</text><text x="29" y="100" class="t-small">quá lớn: 413 sớm</text><text x="29" y="118" class="t-small">(chưa đọc body)</text><path d="M165 90 L190 90" class="f-none s-phys" stroke-width="2" marker-end="url(#py35-0-arrow)"/><rect x="190" y="30" width="150" height="120" rx="10" class="f-warn-soft s-warn"/><text x="204" y="56" class="t-b">Starlette</text><text x="204" y="82" class="t-small">phân tích multipart</text><text x="204" y="100" class="t-small">RAM tới 1 MiB,</text><text x="204" y="118" class="t-small">quá thì file tạm</text><path d="M340 90 L365 90" class="f-none s-phys" stroke-width="2" marker-end="url(#py35-0-arrow)"/><rect x="365" y="30" width="150" height="120" rx="10" class="f-pk-soft s-pk"/><text x="379" y="56" class="t-b">Lớp 2</text><text x="379" y="82" class="t-small">file.size, hoặc đọc</text><text x="379" y="100" class="t-small">tối đa limit + 1 byte</text><text x="379" y="118" class="t-small">thừa: 413</text><path d="M515 90 L540 90" class="f-none s-phys" stroke-width="2" marker-end="url(#py35-0-arrow)"/><rect x="540" y="30" width="150" height="120" rx="10" class="f-pk-soft s-pk"/><text x="554" y="56" class="t-b">Lớp 3</text><text x="554" y="82" class="t-small">Pillow đọc header:</text><text x="554" y="100" class="t-small">định dạng, điểm ảnh</text><text x="554" y="118" class="t-small">sai: 415 hoặc 400</text><path d="M690 90 L715 90" class="f-none s-phys" stroke-width="2" marker-end="url(#py35-0-arrow)"/><rect x="715" y="30" width="150" height="120" rx="10" class="f-phys-soft s-phys"/><text x="729" y="56" class="t-b">Lưu và xếp job</text><text x="729" y="82" class="t-small">put theo sha256</text><text x="729" y="100" class="t-small">tạo job, trả 202</text><text x="729" y="118" class="t-small">việc nặng chạy sau</text><rect x="15" y="185" width="850" height="80" rx="10" class="f-bg s-warn dash"/><text x="31" y="212" class="t-b">Chỉ lớp 1 chặn trước khi body vào đĩa</text><text x="31" y="236" class="t-small">Client gửi chunked (không có Content-Length) thì lớp 1 không thấy gì; lớp 2 mới là chốt cuối trong ứng dụng.</text><text x="31" y="254" class="t-small">Giới hạn thật nằm ở reverse proxy (ví dụ client_max_body_size của nginx), trước cả uvicorn.</text></svg>
 </div>
-<figcaption>Hình 1. Ba lớp kiểm của một upload. Starlette đứng giữa và đã nhận đủ body khi lớp 2 và lớp 3 chạy.</figcaption>
+<figcaption>Hình 1. Ba lớp kiểm tra của một upload. Starlette đứng giữa và đã nhận đủ body khi lớp 2 và lớp 3 chạy.</figcaption>
 </figure>
 
-Lớp 1 là middleware đọc `Content-Length` rồi từ chối ngay, rẻ nhưng chỉ ngăn được client ngay thẳng: header có thể vắng (chunked) hoặc nói dối. Lớp 2 đếm byte thật của phần file. Lớp 3 xem nội dung có thật là ảnh không.
+Lớp 1 là middleware đọc `Content-Length` rồi từ chối ngay, rẻ nhưng chỉ ngăn được client ngay thẳng: header có thể không có (chunked) hoặc khai sai. Lớp 2 đếm byte thật của phần file. Lớp 3 xem nội dung có thật là ảnh không.
 
-## UploadFile và ba lớp kiểm
+## UploadFile và ba lớp kiểm tra
 
 Lớp 1 trong `app/main.py` (trích); ngưỡng là giới hạn ảnh cộng 64 KiB «phần thừa» của multipart:
 
@@ -61,7 +61,7 @@ async def read_limited(file: UploadFile, limit: int) -> bytes:
     return data
 ```
 
-Lớp 3 là `inspect_image` trong `app/images.py`. `Content-Type` và `filename` do client tự khai, đáng tin ngang một lời nói; thứ đáng tin là byte, nên ta để Pillow đọc phần đầu file và tự báo định dạng (trích):
+Lớp 3 là `inspect_image` trong `app/images.py`. `Content-Type` và `filename` do client tự khai, chỉ đáng tin ngang một lời tự khai; thứ đáng tin là byte, nên ta để Pillow đọc phần đầu file và tự báo định dạng (trích):
 
 ```python
 ALLOWED_FORMATS = {"JPEG": "jpg", "MPO": "jpg", "PNG": "png"}
@@ -84,19 +84,19 @@ def inspect_image(data: bytes, max_pixels: int) -> ImageInfo:
     return ImageInfo(fmt, ALLOWED_FORMATS[fmt], width, height)
 ```
 
-`Image.open` là lười: nó chỉ đọc header, còn giải nén điểm ảnh xảy ra ở `load()`. Điều đó mở hai cửa mà giới hạn dung lượng không thấy. Cửa thứ nhất là ảnh nhỏ trên đĩa nhưng khổng lồ trong RAM: một PNG 8000 x 8000 một màu nặng 62 KB, giải nén ra 64 triệu điểm ảnh. Trần mặc định của Pillow (`Image.MAX_IMAGE_PIXELS`, khoảng 89 triệu) chỉ cảnh báo ở mức đó và chỉ ném `DecompressionBombError` từ gấp đôi, khoảng 179 triệu. Ta đặt trần riêng 50 triệu điểm ảnh (đủ cho camera 48 MP) và kiểm từ header; một PNG 66 byte khai 20000 x 20000 thì Pillow tự từ chối ngay lúc `open`, nên phải bắt `DecompressionBombError`.
+`Image.open` chạy theo kiểu lazy: hàm chỉ đọc header, còn việc giải nén điểm ảnh xảy ra ở `load()`. Điều đó mở hai cửa mà giới hạn dung lượng không thấy. Cửa thứ nhất là ảnh nhỏ trên đĩa nhưng khổng lồ trong RAM: một PNG 8000 x 8000 một màu nặng 62 KB, giải nén ra 64 triệu điểm ảnh. Trần mặc định của Pillow (`Image.MAX_IMAGE_PIXELS`, khoảng 89 triệu) chỉ cảnh báo ở mức đó và chỉ ném `DecompressionBombError` từ mức gấp đôi, khoảng 179 triệu. Ta đặt trần riêng 50 triệu điểm ảnh (đủ cho camera 48 MP) và kiểm tra theo header; một PNG 66 byte khai 20000 x 20000 thì Pillow tự từ chối ngay lúc `open`, nên phải bắt `DecompressionBombError`.
 
-Cửa thứ hai là file hỏng. `verify()` kiểm cấu trúc mà không giải nén và chỉ PNG có checksum: PNG cắt đôi ném `OSError`, PNG sai một byte ném `SyntaxError`, cả hai thành 400 `image-corrupt`. Bản đầu của lab chỉ bắt `UnidentifiedImageError` nên ba ca này ra 500 `text/plain`. Với JPEG, `verify()` gần như không kiểm gì; lỗi lộ ở job.
+Cửa thứ hai là file hỏng. `verify()` kiểm cấu trúc mà không giải nén và chỉ PNG có checksum: PNG cắt đôi ném `OSError`, PNG sai một byte ném `SyntaxError`, cả hai đều trả 400 `image-corrupt`. Bản đầu của lab chỉ bắt `UnidentifiedImageError` nên ba ca này ra 500 `text/plain`. Với JPEG, `verify()` gần như không kiểm gì; lỗi lộ ở job.
 
 Khoá lưu không bao giờ dựa vào `filename` mà là `kyc/<mã tài xế>/<16 ký tự đầu của sha256>.<đuôi suy từ định dạng thật>`, nên `../../evil.jpg` chỉ còn là một chuỗi hiển thị lại trong response.
 
-Giới hạn phải khớp với ảnh thật: điện thoại thường chụp JPEG 12 MP (4032 x 3024, 1 đến 5 MB), có máy ghi MPO (JPEG nhiều khung); mức 10 MiB, 50 triệu điểm ảnh và danh sách `JPEG`, `MPO`, `PNG` cho chúng đi qua. HEIC của iPhone không có sẵn trong Pillow, client phải đổi sang JPEG. Giải nén ảnh 50 MP tốn khoảng 150 MB RAM mỗi job, nên số job song song cần giới hạn (bài 40). Mã tài xế và loại giấy tờ đi qua `Form(...)` với `pattern=r"^DR-\d{3}$"` và một `StrEnum`; sai thì 422 dạng Problem Details của bài 32, không phản chiếu giá trị đã gửi.
+Giới hạn phải khớp với ảnh thật: điện thoại thường chụp JPEG 12 MP (4032 x 3024, 1 đến 5 MB), có máy ghi MPO (JPEG nhiều khung); mức 10 MiB, 50 triệu điểm ảnh và danh sách `JPEG`, `MPO`, `PNG` cho chúng đi qua. HEIC của iPhone không có sẵn trong Pillow, client phải đổi sang JPEG. Giải nén ảnh 50 MP tốn khoảng 150 MB RAM mỗi job, nên số job song song cần giới hạn (bài 40). Mã tài xế và loại giấy tờ đi qua `Form(...)` với `pattern=r"^DR-\d{3}$"` và một `StrEnum`; sai thì 422 dạng Problem Details của bài 32, không lặp lại giá trị đã gửi.
 
 ## Lưu vào kho và trả 202
 
-«Object storage» của lab là một thư mục sau giao diện hai hàm `put` và `get` (một `Protocol`, bài 14), để thay bằng S3 hay GCS mà không đụng handler. Hai chi tiết đáng giữ: ghi qua file tạm rồi `os.replace` để không ai thấy file ghi dở, và kiểm đường dẫn cuối nằm trong thư mục gốc (`is_relative_to`) phòng khi một khoá xấu lọt qua.
+«Object storage» của lab là một thư mục sau giao diện hai hàm `put` và `get` (một `Protocol`, bài 14), để thay bằng S3 hay GCS mà không đụng handler. Hai chi tiết đáng giữ: ghi qua file tạm rồi `os.replace` để không ai thấy file ghi dở, và kiểm tra đường dẫn cuối có nằm trong thư mục gốc (`is_relative_to`) phòng khi một khoá xấu lọt qua.
 
-Khoá suy từ nội dung nên tải cùng ảnh hai lần ra cùng khoá và ghi lại là vô hại, ý tưởng idempotency của bài 25; lab kiểm: ảnh gửi lại với tên khác ra cùng khoá, nhưng tạo job mới.
+Khoá suy từ nội dung nên tải cùng một ảnh hai lần cho ra cùng khoá, và việc ghi lại là vô hại, ý tưởng idempotency của bài 25; lab kiểm: ảnh gửi lại với tên khác cho ra cùng khoá, nhưng tạo job mới.
 
 Phần cuối của handler là chỗ phân biệt «nhận» với «xử lý» (trích):
 
@@ -112,11 +112,11 @@ response.headers["Location"] = f"/v1/kyc/jobs/{job.job_id}"
 return UploadAccepted(job_id=job.job_id, status=job.status, document=DocumentOut(...))
 ```
 
-Status là `202 Accepted`, không phải 201: kết quả xử lý chưa tồn tại, chỉ có lời hứa và địa chỉ để hỏi (`Location`). `asyncio.to_thread` đẩy việc ghi đĩa đồng bộ sang thread để vòng lặp sự kiện không bị chặn (bài 21, 22).
+Mã trạng thái là `202 Accepted`, không phải 201: kết quả xử lý chưa tồn tại, chỉ có lời hứa và địa chỉ để hỏi (`Location`). `asyncio.to_thread` đẩy việc ghi đĩa đồng bộ sang thread để vòng lặp sự kiện không bị chặn (bài 21, 22).
 
 ## BackgroundTasks: chạy sau khi trả lời
 
-`BackgroundTasks` của FastAPI chạy hàm ta thêm vào *sau khi* response đã gửi, trong cùng tiến trình: hàm `async` chạy trên vòng lặp sự kiện, hàm thường chạy trong thread pool. Hai quy tắc: việc nặng CPU không đặt thẳng trong hàm `async` vì nó chặn mọi request khác (`run_job` gọi `asyncio.to_thread(process_image, data)`); và không ai bắt ngoại lệ hộ, vì client đã nhận 202, nên `run_job` tự bắt `Exception`, ghi log và đặt trạng thái `failed` (`app/jobs.py`, trích):
+`BackgroundTasks` của FastAPI chạy hàm ta thêm vào *sau khi* response đã gửi, trong cùng tiến trình: hàm `async` chạy trên vòng lặp sự kiện, hàm thường chạy trong thread pool. Hai quy tắc: việc nặng CPU không đặt thẳng trong hàm `async` vì việc ấy chặn mọi request khác (`run_job` gọi `asyncio.to_thread(process_image, data)`); và không ai bắt ngoại lệ thay, vì client đã nhận 202, nên `run_job` tự bắt `Exception`, ghi log và đặt trạng thái `failed` (`app/jobs.py`, trích):
 
 ```python
 async def run_job(job: Job, store: ObjectStore, stage_delay: float) -> None:
@@ -132,7 +132,7 @@ async def run_job(job: Job, store: ObjectStore, stage_delay: float) -> None:
         await job.publish("failed", JobStatus.FAILED, 100, "Không xử lý được ảnh; hãy gửi lại ảnh khác.")
 ```
 
-Ca này có thật: JPEG cắt đôi vẫn qua cửa, và `OSError: image file is truncated` chỉ lộ ở `load()` trong job. Sự kiện `failed` gửi client chỉ là một câu chung, loại lỗi và stack nằm trong log (nguyên tắc của bài 32); lab kiểm cả hai phía.
+Tình huống này có thật: JPEG cắt đôi vẫn qua cửa, và `OSError: image file is truncated` chỉ lộ ở `load()` trong job. Sự kiện `failed` gửi cho client chỉ là một câu chung, loại lỗi và stack nằm trong log (nguyên tắc của bài 32); lab kiểm cả hai phía.
 
 `BackgroundTasks` là tiện ích, không phải hàng đợi, và đó là điều phân biệt nó với worker.
 
@@ -141,17 +141,17 @@ Ca này có thật: JPEG cắt đôi vẫn qua cửa, và `OSError: image file i
 | Sống ở đâu | Cùng tiến trình với API | Tiến trình riêng, đọc hàng đợi |
 | Tiến trình chết giữa chừng | Việc và trạng thái mất | Việc còn trong hàng đợi |
 | Nhiều bản API (`--workers`, nhiều pod) | Mỗi tiến trình thấy dict job của riêng mình | Trạng thái nằm ở kho chung |
-| Hợp với | Việc ngắn, mất cũng không sao | Việc đắt hoặc phải chạy chắc chắn, cần retry: OCR, face match |
+| Hợp với | Việc ngắn, mất cũng không sao | Việc tốn nhiều tài nguyên hoặc phải bảo đảm chạy được, cần retry: OCR, face match |
 
 Dòng áp chót chạy thật trong lab bằng hai cách. Trong `--verify`, hai app riêng đóng vai hai tiến trình: job tạo ở app A thì app B trả 404. Với uvicorn thật `--workers 2`, upload một lần rồi gọi lại job 20 lần bằng vòng lặp `curl` trong README: một lần đo trên macOS lúc máy bận (load average khoảng 45) cho 5 lần `200` và 15 lần `404`; con số đổi theo từng lần chạy vì hệ điều hành tự chia kết nối. Lỗi này không lộ khi chạy thử một tiến trình, đúng loại lỗi chỉ xuất hiện khi triển khai.
 
-Mã job cũng liên quan. Bản đầu của lab đánh số `JOB-0001`...; mỗi tiến trình có bộ đếm riêng nên hai worker phát trùng mã và một `GET` có thể đọc nhầm job của tài xế khác. Lab giờ dùng mã ngẫu nhiên (`JOB-` cộng 16 ký tự hex) và `--verify` kiểm hai tiến trình không phát trùng. Trạng thái chung cần kho chung và worker riêng, vì vậy OCR thật (bài 46) tách API khỏi worker. Bên .NET, cùng khái niệm là [BackgroundService và Channel](/articles/dotnet10-backgroundservice-channel).
+Mã job cũng có liên quan đến vấn đề này. Bản đầu của lab đánh số `JOB-0001`...; mỗi tiến trình có bộ đếm riêng nên hai worker phát trùng mã và một `GET` có thể đọc nhầm job của tài xế khác. Lab giờ dùng mã ngẫu nhiên (`JOB-` cộng 16 ký tự hex) và `--verify` kiểm hai tiến trình không phát trùng. Trạng thái chung cần kho chung và worker riêng, vì vậy OCR thật (bài 46) tách API khỏi worker. Bên .NET, cùng khái niệm là [BackgroundService và Channel](/articles/dotnet10-backgroundservice-channel).
 
 ## SSE: báo tiến độ từng bước
 
-Client cần thấy tiến độ: hỏi lặp, WebSocket, hoặc **Server-Sent Events** (SSE). Với luồng một chiều như tiến độ job, SSE đơn giản nhất: HTTP thường, `GET` giữ kết nối mở, server ghi dần các khối `text/event-stream`; trình duyệt có sẵn `EventSource` và tự nối lại khi đứt.
+Client cần thấy tiến độ thì có ba cách: polling, WebSocket, hoặc **Server-Sent Events** (SSE). Với luồng một chiều như tiến độ job, SSE là cách đơn giản nhất: HTTP thường, `GET` giữ kết nối mở, server ghi dần các khối `text/event-stream`; trình duyệt có sẵn `EventSource` và tự nối lại khi đứt.
 
-Định dạng trên dây là các dòng `id:`, `event:`, `data:`, kết thúc một sự kiện bằng **một dòng trống**; dòng bắt đầu bằng `:` là chú thích. `JobEvent.to_sse` trong `app/jobs.py` viết đúng thế:
+Định dạng truyền qua mạng là các dòng `id:`, `event:`, `data:`, kết thúc một sự kiện bằng **một dòng trống**; dòng bắt đầu bằng `:` là chú thích. `JobEvent.to_sse` trong `app/jobs.py` viết đúng thế:
 
 ```python
 def to_sse(self) -> str:
@@ -159,7 +159,7 @@ def to_sse(self) -> str:
     return f"id: {self.id}\nevent: {name}\ndata: {json.dumps(asdict(self), ensure_ascii=False)}\n\n"
 ```
 
-Hai ý khiến luồng dùng được ngoài đời. Mỗi job giữ danh sách sự kiện có `id` tăng dần, nên client nối lại với `Last-Event-ID: 2` nhận tiếp từ sự kiện 3, không mất và không lặp. Khi chưa có gì mới, server gửi `: ping` sau mỗi 15 giây để proxy không cắt kết nối vì im lặng. Vòng lặp phát (`app/jobs.py`):
+Hai chi tiết giúp luồng này dùng được ngoài thực tế. Mỗi job giữ danh sách sự kiện có `id` tăng dần, nên client nối lại với `Last-Event-ID: 2` nhận tiếp từ sự kiện 3, không mất và không lặp. Khi chưa có gì mới, server gửi `: ping` sau mỗi 15 giây để proxy không cắt kết nối vì im lặng. Vòng lặp phát (`app/jobs.py`):
 
 ```python
 async def event_stream(job: Job, last_id: int, heartbeat: float) -> AsyncIterator[str]:
@@ -179,7 +179,7 @@ async def event_stream(job: Job, last_id: int, heartbeat: float) -> AsyncIterato
 
 Dòng `if job.finished: return` sửa một lỗi nặng của bản đầu. `EventSource` tự nối lại mỗi khi luồng đóng, nên client vừa nhận `done` nối lại với `Last-Event-ID: 4`; bản đầu chờ một sự kiện thứ 5 không bao giờ tới và treo vĩnh viễn (`Last-Event-ID: 99` cũng vậy). Bản sửa: `events_after` thức dậy khi job kết thúc; luồng đóng khi không còn gì để phát; endpoint trả `204 No Content` nếu job đã xong và client đã nhận hết, vì theo đặc tả SSE, 204 báo `EventSource` ngừng nối lại. Client nên `close()` ngay khi nhận `done`. `Last-Event-ID: -3` bị `Header(ge=0)` từ chối bằng 422.
 
-Endpoint bọc vòng lặp trong `StreamingResponse(..., media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})`; header thứ hai báo nginx đừng đệm luồng. FastAPI 0.162 của lab còn có sẵn `EventSourceResponse` và `ServerSentEvent`: một hàm sinh `yield ServerSentEvent(data=event, event=..., id=...)` là đủ, framework tự định dạng và chèn ping. Lab có cả hai endpoint (`/events` viết tay, `/events-native`) và `--verify` kiểm chúng phát cùng chuỗi bước. Bản native không trả được 204: nối lại sau khi xong cho ra luồng rỗng rồi đóng. FastAPI cũ chưa có lớp này thì bản viết tay vẫn chạy.
+Endpoint bọc vòng lặp trong `StreamingResponse(..., media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})`; header thứ hai báo cho nginx đừng đệm luồng. FastAPI 0.162 của lab còn có sẵn `EventSourceResponse` và `ServerSentEvent`: một hàm sinh `yield ServerSentEvent(data=event, event=..., id=...)` là đủ, framework tự định dạng và chèn ping. Lab có cả hai endpoint (`/events` viết tay, `/events-native`) và `--verify` kiểm chúng phát cùng chuỗi bước. Bản native không trả được 204: nối lại sau khi xong cho ra luồng rỗng rồi đóng. FastAPI cũ chưa có lớp này thì bản viết tay vẫn chạy.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -188,11 +188,11 @@ Endpoint bọc vòng lặp trong `StreamingResponse(..., media_type="text/event-
 <figcaption>Hình 2. Sau khi trả 202, job nền và luồng SSE chạy độc lập. Luồng chỉ là một cách nhìn vào job; đóng nó không dừng job.</figcaption>
 </figure>
 
-Ba giới hạn của SSE. `EventSource` chỉ gọi được `GET` và không đặt được header `Authorization`, nên khi gắn xác thực của bài 34, client dùng `fetch` đọc stream hoặc cookie. Mỗi người xem giữ một kết nối; nhiều người xem một job trên nhiều bản API thì sự kiện phải đi qua kho hoặc kênh pub/sub chung. Và `httpx.ASGITransport` (bài 36) không trả response từng phần, nên kiểm «sự kiện đầu đến trước khi job xong» cần server thật.
+Ba giới hạn của SSE. `EventSource` chỉ gọi được `GET` và không đặt được header `Authorization`, nên khi gắn xác thực của bài 34, client dùng `fetch` đọc stream hoặc dùng cookie. Mỗi người xem giữ một kết nối; nhiều người xem một job trên nhiều bản API thì sự kiện phải đi qua kho hoặc kênh pub/sub chung. Và `httpx.ASGITransport` (bài 36) không trả response từng phần, nên kiểm «sự kiện đầu đến trước khi job xong» cần server thật.
 
 ## Chạy và kiểm chứng
 
-Mọi lệnh chạy từ gốc repository; lab cần uv, mạng ở lần đầu, không cần Docker. Lệnh sinh ảnh mẫu cho `curl`:
+Mọi lệnh chạy từ gốc repository; lab cần uv, cần có mạng ở lần chạy đầu, không cần Docker. Lệnh sinh ảnh mẫu cho `curl`:
 
 ```bash
 uv run --project examples/toi-noi-python/35-fastapi-upload-background-streaming examples/toi-noi-python/35-fastapi-upload-background-streaming/main.py --samples
@@ -244,7 +244,7 @@ Năm ca bị từ chối ở cửa (cùng lần chạy):
   ảnh 15,9 MB                          -> 413 upload-too-large
 ```
 
-Chạy thành service riêng thì thử bằng `curl` với ảnh từ `--samples` (lệnh nằm trong README của lab). Ca file chữ cho `415` với `application/problem+json`, ca ảnh thật cho `202` kèm `location` (trích, bỏ các header `date`, `server`, `content-length`):
+Chạy thành service riêng thì thử bằng `curl` với ảnh từ `--samples` (lệnh nằm trong README của lab). Test case file chữ cho `415` với `application/problem+json`, test case ảnh thật cho `202` kèm `location` (trích, bỏ các header `date`, `server`, `content-length`):
 
 ```text
 HTTP/1.1 202 Accepted
@@ -293,9 +293,9 @@ Nhóm 2: uvicorn thật trên cổng ngẫu nhiên
 OK 42/42
 ```
 
-Ca thứ ba của nhóm 1 đáng chú ý: trong `ASGITransport`, `POST` trả về chỉ sau khi cả background task chạy xong, vì transport chờ app hoàn tất lời gọi ASGI và background task nằm trong đó. Ngay sau `POST` ta đã thấy job `done`, không bao giờ thấy `queued`; chỉ uvicorn thật cho thấy 202 về trước khi job xong (bài 36 dùng lại điều này). Các ca đo thời gian chỉ kiểm bất biến, không kiểm số tuyệt đối.
+Ca thứ ba của nhóm 1 đáng chú ý: trong `ASGITransport`, `POST` trả về chỉ sau khi cả background task chạy xong, vì transport chờ app hoàn tất lời gọi ASGI và background task nằm trong đó. Ngay sau `POST` ta đã thấy job `done`, không bao giờ thấy `queued`; chỉ uvicorn thật cho thấy 202 về trước khi job xong (bài 36 dùng lại điều này). Các test case đo thời gian chỉ kiểm các điều kiện bất biến, không kiểm giá trị tuyệt đối.
 
-Phá có chủ ý để biết ca có thể đỏ. Đổi thân `read_limited` thành `return await file.read()`: lớp 1 vẫn bắt client có `Content-Length`, nhưng ca chunked lọt qua và handler nhận đủ 15.894.937 byte rồi mới lưu, đúng đáp án của câu hỏi đầu bài (trích):
+Cố ý phá để biết test case có thể báo đỏ. Đổi thân `read_limited` thành `return await file.read()`: lớp 1 vẫn bắt client có `Content-Length`, nhưng test case chunked lọt qua và handler nhận đủ 15.894.937 byte rồi mới lưu, đúng đáp án của câu hỏi đầu bài (trích):
 
 ```text
   SAI  chunked, không Content-Length: lớp 1 bỏ qua, lớp 2 trả 413  [{"job_id":"JOB-6284266edf42423d","status":"queued","document":{"key":"kyc/DR-001/0f197dee3956064b.png","kind":"id_card","size":15894937,...
@@ -313,14 +313,14 @@ Bỏ các nhánh `except` của Pillow và nhánh trả 204 thì `--verify` báo
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Job nằm trong một <code>dict</code>: khởi động lại là mất hết, nhiều bản API không chia sẻ được. Kho đối tượng là một thư mục, không mã hoá, không quét virus. Không có xác thực (bài 34) hay giới hạn tốc độ, và ai biết mã job đều đọc được trạng thái. <code>MIN_SHARPNESS = 1000</code> chọn theo thẻ giả và phải đo lại trên ảnh thật; chất lượng ảnh chỉ là gợi ý cho người duyệt, không phải quyết định xác minh danh tính. Số liệu chạy trên một máy macOS, Python 3.14.7, fastapi 0.162.0, starlette 1.10.0, uvicorn 0.54.0, pillow 13.0.0, lúc load average khoảng 45 nên thời gian tuyệt đối chỉ để tham khảo.</p>
+<p>Job nằm trong một <code>dict</code>: khởi động lại là mất hết, nhiều bản API không chia sẻ được. Object storage là một thư mục, không mã hoá, không quét virus. Không có xác thực (bài 34) hay giới hạn tốc độ, và ai biết mã job đều đọc được trạng thái. <code>MIN_SHARPNESS = 1000</code> chọn theo thẻ giả và phải đo lại trên ảnh thật; chất lượng ảnh chỉ là gợi ý cho người duyệt, không phải quyết định xác minh danh tính. Số liệu chạy trên một máy macOS, Python 3.14.7, fastapi 0.162.0, starlette 1.10.0, uvicorn 0.54.0, pillow 13.0.0, lúc load average khoảng 45 nên thời gian tuyệt đối chỉ để tham khảo.</p>
 </div>
 
 **Bài tập 1:** Client gửi một JPEG hợp lệ với tên `cccd.PNG` và `Content-Type: application/octet-stream`. Service xử lý thế nào, có cần sửa gì không?
 
-**Bài tập 2:** Muốn job sống sót qua việc khởi động lại API mà đổi ít nhất, bạn đổi gì, và SSE đọc trạng thái từ đâu?
+**Bài tập 2:** Muốn job sống sót qua việc khởi động lại API mà ít phải đổi nhất, bạn đổi gì, và SSE đọc trạng thái từ đâu?
 
-<details><summary>Xem lời giải</summary><p><b>1.</b> Nhận bình thường: lab trả <code>202</code> với khoá <code>kyc/DR-001/12ae24e6e6b1f448.jpg</code> và <code>format: "JPEG"</code>, vì không dòng code nào dùng <code>filename</code> hay <code>content_type</code> để quyết định; đuôi file đến từ định dạng Pillow đọc từ byte. Không cần sửa. <b>2.</b> Ghi job và sự kiện vào PostgreSQL (bài 24) hoặc Redis (bài 27) thay cho <code>JobRegistry</code>; handler ghi dòng job rồi đưa <code>job_id</code> vào hàng đợi của worker (bài 40) thay cho <code>add_task</code>; worker cập nhật trạng thái ở kho chung. SSE đọc cùng kho: hỏi lặp theo <code>Last-Event-ID</code> mỗi giây, hoặc nghe kênh pub/sub rồi đọc phần còn thiếu.</p></details>
+<details><summary>Xem lời giải</summary><p><b>1.</b> Nhận bình thường: lab trả <code>202</code> với khoá <code>kyc/DR-001/12ae24e6e6b1f448.jpg</code> và <code>format: "JPEG"</code>, vì không dòng code nào dùng <code>filename</code> hay <code>content_type</code> để quyết định; đuôi file đến từ định dạng Pillow đọc từ byte. Không cần sửa. <b>2.</b> Ghi job và sự kiện vào PostgreSQL (bài 24) hoặc Redis (bài 27) thay cho <code>JobRegistry</code>; handler ghi dòng job rồi đưa <code>job_id</code> vào hàng đợi của worker (bài 40) thay cho <code>add_task</code>; worker cập nhật trạng thái ở kho chung. SSE đọc cùng kho: polling theo <code>Last-Event-ID</code> mỗi giây, hoặc nghe kênh pub/sub rồi đọc phần còn thiếu.</p></details>
 
 Bài trước: [bài 34](/articles/python-fastapi-jwt-oauth2-authorization). Bài tiếp: [bài 36](/articles/python-fastapi-api-test-httpx).
 

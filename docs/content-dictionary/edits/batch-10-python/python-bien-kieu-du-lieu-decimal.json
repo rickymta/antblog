@@ -1,0 +1,18 @@
+{"file":"python-bien-kieu-du-lieu-decimal.md","edits":[
+{"old":"Danh sách và các kiểu thay đổi được sẽ quay lại ở bài 05.","new":"Danh sách và các kiểu có thể thay đổi sẽ quay lại ở bài 05.","reason":"Cụm kiểu thay đổi được nghe gượng","severity":"low"},
+{"old":"nó là hợp đồng cho người đọc và công cụ kiểm tra. Ta dùng nhẹ nhàng từ giờ,","new":"type hint là hợp đồng cho người đọc và công cụ kiểm tra. Từ giờ ta dùng ở mức vừa phải,","reason":"Nó mơ hồ (interpreter hay type hint); dùng nhẹ nhàng gượng","severity":"medium"},
+{"old":"khác điều nhiều người quen từ C#:","new":"khác với điều nhiều người đã quen từ C#:","reason":"Câu thiếu giới từ, nghe cụt","severity":"low"},
+{"old":"nhưng nó đổi lấy một bẫy khác:","new":"nhưng đổi lại có một bẫy khác:","reason":"Tránh Nó chỉ sự vật trừu tượng; đổi lấy là calque","severity":"medium"},
+{"old":"Giống mọi ngôn ngữ dùng chuẩn IEEE 754,","new":"Như ở mọi ngôn ngữ dùng chuẩn IEEE 754,","reason":"Câu tự nhiên hơn, tránh so sánh sai chủ ngữ","severity":"low"},
+{"old":"Đây là hành vi của biểu diễn, không phải lỗi của Python.","new":"Đây là hệ quả của cách biểu diễn số, không phải lỗi của Python.","reason":"Cụm hành vi của biểu diễn gượng, thiếu danh từ","severity":"medium"},
+{"old":"float vẫn đúng chỗ cho đo đạc, toạ độ GPS, điểm mô hình;","new":"float vẫn phù hợp cho đo đạc, toạ độ GPS, điểm số của mô hình;","reason":"Điểm mô hình là cụm cụt, đọc phải đoán ý","severity":"medium"},
+{"old":"Python cố tình từ chối thay vì âm thầm làm hỏng độ chính xác.","new":"Python cố tình từ chối, thay vì để độ chính xác bị hỏng mà không báo gì.","reason":"Calque âm thầm (style guide mục 4)","severity":"medium"},
+{"old":"Bổ sung một quy tắc **chỉ cho mô hình minh hoạ**:","new":"Bổ sung một quy tắc **chỉ dùng cho mô hình minh hoạ**:","reason":"Thiếu động từ, cụm nghe cụt","severity":"low"},
+{"old":"Hàm dựng sẵn","new":"Hàm có sẵn","reason":"Dựng sẵn là dịch từng chữ của built-in","severity":"medium"},
+{"old":"một lý do khác để tránh nó cho tiền.","new":"một lý do khác để không dùng nó cho tiền.","reason":"Thiếu động từ dùng","severity":"low"},
+{"old":"Kết quả thật (trích; chương trình in 30 dòng đánh số):","new":"Kết quả chạy thật (trích; chương trình in 30 dòng đánh số):","reason":"Dùng cách nói chuẩn theo bảng thuật ngữ","severity":"low"},
+{"old":"Chế độ kiểm tự động so từng dòng","new":"Chế độ kiểm tra tự động so từng dòng","reason":"Lược mất chữ tra","severity":"medium"},
+{"old":"Bảng kiểm bằng tay (dòng 22 tới 25),","new":"Bảng kiểm tra bằng tay (dòng 22 tới 25),","reason":"Lược mất chữ tra","severity":"medium"},
+{"old":"chưa có kiểu `Money`, chưa kiểm miền giá trị,","new":"chưa có kiểu `Money`, chưa kiểm tra miền giá trị,","reason":"Lược mất chữ tra","severity":"medium"},
+{"old":"Hãy tìm đầu vào bộc lộ sai lệch.","new":"Hãy tìm một đầu vào làm lộ ra sai lệch.","reason":"Bộc lộ không hợp chủ thể là đầu vào","severity":"low"}
+]}

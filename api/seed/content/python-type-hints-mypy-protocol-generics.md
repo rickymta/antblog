@@ -10,12 +10,12 @@ language: vi
 
 Một service phân tích của [Tới Nơi](/articles/du-an-mau-toi-noi) đọc sự kiện `BookingCreated` từ Kafka. Ở bài 11, ta đã bảo vệ `Trip` bằng dataclass và máy trạng thái, nhưng dữ liệu đi vào service vẫn là dict từ JSON. Một đêm, producer bên kia gửi khoảng cách dưới dạng số thực `2.5` thay vì chuỗi `"2.5"`, và một chuyến chưa có tài xế (`driver_id` là `None`) đi qua đoạn mã gọi `.upper()` trên mã tài xế. Cả hai lỗi chỉ lộ ra khi đúng dòng đó chạy trên đúng dữ liệu đó, có thể là hai giờ sáng. Python vốn không hỏi «giá trị này có đúng kiểu không» trước khi chạy.
 
-Hai lỗi này khác bản chất. Lỗi `None` nằm trong **code của ta**: một công cụ đọc kiểu có thể thấy nó trước khi chương trình chạy. Lỗi số thực là **dữ liệu từ bên ngoài**: không công cụ tĩnh nào biết producer sẽ gửi gì, nên phải kiểm lúc chạy (bài 15 giới thiệu cách làm). Bài này đưa vào **type hint** và công cụ đọc chúng, **mypy**, để chặn loại lỗi thứ nhất và nói rõ ranh giới với loại thứ hai. Đây là bài 12 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn cần quen dataclass (bài 11) và `Decimal` (bài 02).
+Hai lỗi này khác bản chất. Lỗi `None` nằm trong **code của ta**: một công cụ đọc kiểu có thể thấy nó trước khi chương trình chạy. Lỗi số thực là **dữ liệu từ bên ngoài**: không công cụ tĩnh nào biết producer sẽ gửi gì, nên phải kiểm tra lúc chạy (bài 15 giới thiệu cách làm). Bài này đưa vào **type hint** và công cụ đọc chúng, **mypy**, để chặn loại lỗi thứ nhất và nói rõ ranh giới với loại thứ hai. Đây là bài 12 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn cần quen dataclass (bài 11) và `Decimal` (bài 02).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Hàm <code>km_label(distance: Decimal)</code> khai báo tham số là <code>Decimal</code>. Nếu gọi <code>km_label(2.5)</code> với số thực, Python 3.14 có ném lỗi không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Annotation chỉ được ghi vào hàm, interpreter không dùng nó để kiểm đối số. Lời gọi trên trả về <code>"2.5 km"</code> bình thường. Người bắt được lỗi là mypy, chạy trước khi chương trình khởi động. Bài sẽ chạy đúng dòng này ở cả hai phía.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Annotation chỉ được ghi vào hàm, interpreter không dùng nó để kiểm tra đối số. Lời gọi trên trả về <code>"2.5 km"</code> bình thường. Người bắt được lỗi là mypy, chạy trước khi chương trình khởi động. Bài sẽ chạy đúng dòng này ở cả hai phía.</p></details>
 </div>
 
 ## Type hint là lời khai, ai đọc nó mới có tác dụng
@@ -42,9 +42,9 @@ class Trip:
     created_at: datetime
 ```
 
-`Trip` ở đây là bản rút gọn để tập trung vào kiểu: `status` chỉ là `str` và các field công khai, không mang máy trạng thái 8 trạng thái của bài 11. Ba chi tiết đáng đọc. `str | None` nói thẳng rằng chuyến có thể chưa có tài xế, nên mọi nơi dùng `driver_id` phải xử lý trường hợp `None`. `Literal["ride", "food", "parcel"]` thu hẹp `str` thành đúng ba giá trị hợp lệ. Câu lệnh `type TripId = str` (cú pháp từ Python 3.12) đặt tên cho một kiểu để mã đọc theo nghiệp vụ hơn.
+`Trip` ở đây là bản rút gọn để tập trung vào kiểu: `status` chỉ là `str`, các field đều công khai, và lớp không mang máy trạng thái 8 trạng thái của bài 11. Ba chi tiết đáng đọc. `str | None` nói thẳng rằng chuyến có thể chưa có tài xế, nên mọi nơi dùng `driver_id` phải xử lý trường hợp `None`. `Literal["ride", "food", "parcel"]` thu hẹp `str` thành đúng ba giá trị hợp lệ. Câu lệnh `type TripId = str` (cú pháp từ Python 3.12) đặt tên cho một kiểu để mã đọc theo nghiệp vụ hơn.
 
-Điều cần nhớ nhất: **interpreter lưu annotation nhưng không kiểm**. Hai đường đi của cùng một mã nguồn:
+Điều cần nhớ nhất: **interpreter lưu annotation nhưng không kiểm tra**. Hai đường đi của cùng một mã nguồn:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -53,11 +53,11 @@ class Trip:
 <figcaption>Hình 1. Cùng một mã nguồn đi hai đường. Interpreter chỉ ghi lại annotation; công cụ kiểm tra tĩnh đọc chúng để đối chiếu và báo lỗi trước khi chương trình chạy.</figcaption>
 </figure>
 
-Vì vậy type hint có ba người đọc: mypy hoặc pyright (kiểm tra tĩnh), trình soạn thảo (gợi ý, đổi tên an toàn) và đồng nghiệp (chữ ký nói rõ hợp đồng). Từ bài 02, ta đã dùng hint nhẹ nhàng; bài này là lúc cho một công cụ thực sự dùng chúng.
+Vì vậy type hint có ba người đọc: mypy hoặc pyright (kiểm tra tĩnh), trình soạn thảo (gợi ý, đổi tên an toàn) và đồng nghiệp (chữ ký nói rõ hợp đồng). Từ bài 02, ta đã dùng hint ở mức đơn giản; bài này là lúc để một công cụ thực sự khai thác chúng.
 
 ## Chạy mypy: từ lỗi thật đến `--strict`
 
-**mypy** là trình kiểm tra kiểu tĩnh phổ biến nhất của Python. Nó không thuộc bản cài Python mà là gói riêng; lab khai báo nó là phụ thuộc phát triển (`[dependency-groups] dev = ["mypy>=2.4"]`) và `uv.lock` ghi phiên bản đã chạy (2.4.1). Lab có file `broken.py` chứa 9 lỗi cố ý, mỗi dòng lỗi kết thúc bằng chú thích «E:». Chạy từ gốc repository:
+**mypy** là trình kiểm tra kiểu tĩnh phổ biến nhất của Python. mypy không thuộc bản cài Python mà là gói riêng; lab khai báo nó là phụ thuộc phát triển (`[dependency-groups] dev = ["mypy>=2.4"]`) và `uv.lock` ghi phiên bản đã chạy (2.4.1). Lab có file `broken.py` chứa 9 lỗi cố ý, mỗi dòng lỗi kết thúc bằng chú thích «E:». Chạy từ gốc repository:
 
 ```bash
 uv run --project examples/toi-noi-python/12-type-hints-mypy-protocol mypy examples/toi-noi-python/12-type-hints-mypy-protocol/broken.py --strict
@@ -82,7 +82,7 @@ Hai kiểu lỗi mở đầu bài đều có mặt: dòng 16 là `km_label(2.5)`
 
 Cờ `--strict` là gói nhiều tuỳ chọn nghiêm ngặt: nó bật, trong số khác, `--disallow-untyped-defs` (mọi hàm phải có annotation), `--warn-return-any` và `--warn-unused-ignores`. Lỗi ở dòng 35 chỉ xuất hiện nhờ nó: chạy `mypy broken.py` không có `--strict` chỉ báo 8 lỗi, hàm `helper(x)` không annotation lọt qua. Với mã mới, ta nên bật `--strict` ngay từ đầu; kéo một dự án cũ lên strict từng bước thì khó hơn nhiều.
 
-**pyright** của Microsoft là công cụ kiểm tra thứ hai, cũng đọc các annotation này (Pylance trong VS Code dựa trên nó). Hai công cụ có thể không đồng ý ở một số ca biên. Bài này chỉ chạy mypy; lab không cài pyright, nên ta không đưa số liệu nào về nó.
+**pyright** của Microsoft là công cụ kiểm tra thứ hai, cũng đọc các annotation này (Pylance trong VS Code dựa trên nó). Hai công cụ có thể cho kết quả khác nhau ở một số trường hợp biên. Bài này chỉ chạy mypy; lab không cài pyright, nên ta không đưa số liệu nào về nó.
 
 Một điều dễ hiểu lầm: mypy xanh không có nghĩa chương trình đúng. Nó chứng minh các lời gọi **khớp với lời khai kiểu**, không chứng minh lời khai khớp với dữ liệu thật. Các phần sau sẽ quay lại điểm này.
 
@@ -116,11 +116,11 @@ Hàm cũng có tham số kiểu: `def first[T](items: Sequence[T]) -> T` nói r�
 <figcaption>Hình 2. Generics giữ thông tin kiểu qua một cấu trúc dùng chung. Kiểu đóng vai trò hợp đồng: thêm sai loại đối tượng bị báo ngay trên dòng gọi.</figcaption>
 </figure>
 
-Có hai điểm tinh tế. Thứ nhất là **cận trên** `T: SupportsFare` (ở phần Protocol bên dưới): T phải thoả một hợp đồng nhưng kết quả vẫn mang đúng kiểu T, không bị «nới» thành kiểu của hợp đồng. Thứ hai là **variance**. Dòng 30 của `broken.py` truyền `list[Trip]` vào tham số `list[object]` và bị từ chối, vì `list` đổi được: nếu cho phép, hàm kia có thể nhét một `str` vào danh sách chuyến. mypy gợi ý dùng `Sequence`, kiểu chỉ đọc nên là covariant (hợp biến) và chấp nhận danh sách của kiểu con. Quy tắc thực hành: **tham số nhận kiểu rộng và chỉ đọc (`Sequence`), kết quả trả kiểu cụ thể (`list`)**. Với cú pháp PEP 695, trình kiểm tra tự suy ra variance từ cách T được dùng, nên không cần khai `covariant=True` bằng tay.
+Có hai điểm tinh tế. Thứ nhất là **giới hạn trên (upper bound)** `T: SupportsFare` (ở phần Protocol bên dưới): T phải thoả một hợp đồng nhưng kết quả vẫn mang đúng kiểu T, không bị «nới» thành kiểu của hợp đồng. Thứ hai là **variance**. Dòng 30 của `broken.py` truyền `list[Trip]` vào tham số `list[object]` và bị từ chối, vì `list` đổi được: nếu cho phép, hàm kia có thể nhét một `str` vào danh sách chuyến. mypy gợi ý dùng `Sequence`, kiểu chỉ đọc nên là covariant (hợp biến) và chấp nhận danh sách của kiểu con. Quy tắc thực hành: **tham số nhận kiểu rộng và chỉ đọc (`Sequence`), kết quả trả kiểu cụ thể (`list`)**. Với cú pháp PEP 695, trình kiểm tra tự suy ra variance từ cách T được dùng, nên không cần khai `covariant=True` bằng tay.
 
 ## Protocol: khớp theo cấu trúc, không cần kế thừa
 
-Muốn tìm chuyến rẻ nhất, ta cần phần tử có thuộc tính `fare`. Không muốn buộc `Trip` và `QuoteLine` (dòng báo giá) cùng kế thừa một lớp cha. Python có sẵn duck typing; **Protocol** (PEP 544) cho phép khai báo duck typing đó để mypy kiểm:
+Muốn tìm chuyến rẻ nhất, ta cần phần tử có thuộc tính `fare`. Ta không muốn buộc `Trip` và `QuoteLine` (dòng báo giá) cùng kế thừa một lớp cha. Python có sẵn duck typing; **Protocol** (PEP 544) cho phép khai báo duck typing đó để mypy kiểm:
 
 ```python
 class SupportsFare(Protocol):
@@ -139,11 +139,11 @@ class QuoteLine(NamedTuple):
     fare: Decimal
 ```
 
-`Trip` có `fare` là property, `QuoteLine` có `fare` là field của NamedTuple; không lớp nào nhắc tới `SupportsFare`, nhưng cả hai đều thoả vì có thành viên đúng tên và đúng kiểu. `Driver` không có `fare`, nên `cheapest([driver])` bị báo `type-var` ở dòng 21. Sự khác biệt so với lớp cha thường: hợp đồng nằm ở **nơi dùng**, người viết `Trip` không cần biết nó sẽ được dùng theo cách nào. Bài 14 đi tiếp: so Protocol với lớp trừu tượng `abc.ABC` và dùng nó để tiêm phụ thuộc.
+`Trip` có `fare` là property, `QuoteLine` có `fare` là field của NamedTuple; không lớp nào nhắc tới `SupportsFare`, nhưng cả hai đều thoả vì có thành viên đúng tên và đúng kiểu. `Driver` không có `fare`, nên `cheapest([driver])` bị báo `type-var` ở dòng 21. Khác với kế thừa lớp cha thông thường, hợp đồng nằm ở **nơi dùng**: người viết `Trip` không cần biết nó sẽ được dùng theo cách nào. Bài 14 đi tiếp: so Protocol với lớp trừu tượng `abc.ABC` và dùng nó để inject phụ thuộc.
 
 ## TypedDict: hình dạng dict từ JSON, và giới hạn của lời khai
 
-Sự kiện Kafka đến dưới dạng dict. `TypedDict` (PEP 589) mô tả khoá nào có, kiểu giá trị là gì. Kèm cú pháp generics, ta khai báo được bì thư dùng chung cho mọi loại sự kiện:
+Sự kiện Kafka đến dưới dạng dict. `TypedDict` (PEP 589) mô tả khoá nào có, kiểu giá trị là gì. Kèm cú pháp generics, ta khai báo được một envelope dùng chung cho mọi loại sự kiện:
 
 ```python
 class BookingCreatedPayload(TypedDict):
@@ -167,18 +167,18 @@ def parse_booking_created(raw: str) -> Envelope[BookingCreatedPayload]:
     return event
 ```
 
-Viết `event["payload"]["distance"]` thay vì `distance_km` bị mypy bắt (dòng 32, kèm gợi ý «Did you mean "distance_km"?»). Nhưng nhìn kỹ hàm `parse_booking_created`: `json.loads` trả `Any`, và gán `Any` cho biến có kiểu là hợp lệ. Ta đã **khai** rằng chuỗi này là `Envelope[BookingCreatedPayload]`; không có dòng nào kiểm điều đó lúc chạy. Lab thử bằng một sự kiện thiếu `distance_km` (trích output của `main.py`):
+Viết `event["payload"]["distance"]` thay vì `distance_km` bị mypy bắt (dòng 32, kèm gợi ý «Did you mean "distance_km"?»). Nhưng nhìn kỹ hàm `parse_booking_created`: `json.loads` trả `Any`, và gán `Any` cho biến có kiểu là hợp lệ. Ta đã **khai** rằng chuỗi này là `Envelope[BookingCreatedPayload]`; không có dòng nào kiểm tra điều đó lúc chạy. Lab thử bằng một sự kiện thiếu `distance_km` (trích output của `main.py`):
 
 ```text
 BookingCreated v1: TN-0001 5 km
 parse không lỗi, dùng mới lỗi: KeyError 'distance_km'
 ```
 
-Đó là lý do mypy xanh không thay được việc kiểm dữ liệu tại biên hệ thống. Thử không gán biến trung gian mà trả thẳng `json.loads(raw)`, `--strict` sẽ báo `no-any-return`: tín hiệu nhắc rằng mypy không tự biết nội dung. Cách làm thật là kiểm dữ liệu ngay khi nhận, bằng thư viện chuyên dụng; bài 15 dùng pydantic cho việc đó, còn `TypedDict` vẫn hữu ích cho phần mã **sau** bước kiểm.
+Đó là lý do mypy xanh không thay được việc kiểm tra dữ liệu tại biên hệ thống. Nếu thử không gán biến trung gian mà trả thẳng `json.loads(raw)`, `--strict` sẽ báo `no-any-return`: tín hiệu nhắc rằng mypy không tự biết nội dung. Cách làm thật là kiểm tra dữ liệu ngay khi nhận, bằng thư viện chuyên dụng; bài 15 dùng pydantic cho việc đó, còn `TypedDict` vẫn hữu ích cho phần mã **sau** bước kiểm.
 
 ## Annotation lười trong Python 3.14
 
-Python 3.14 đổi cách đánh giá annotation (PEP 649, bổ sung bởi PEP 749). Trước đây annotation của hàm được tính ngay khi `def` chạy, nên tham chiếu tới tên chưa khai báo (kể cả chính lớp đang định nghĩa) gây `NameError`, và người ta phải đặt tên kiểu trong dấu nháy. Giờ annotation được **đánh giá lười**: biểu thức chỉ được tính khi có ai đọc `__annotations__`. Trong `domain.py`, `Trip.with_driver` nhận `Driver` (khai báo sau `Trip`) và trả `Trip` (chính lớp đang định nghĩa), không có dấu nháy nào:
+Python 3.14 đổi cách đánh giá annotation (PEP 649, được PEP 749 bổ sung). Trước đây annotation của hàm được tính ngay khi `def` chạy, nên tham chiếu tới tên chưa khai báo (kể cả chính lớp đang định nghĩa) gây `NameError`, và người ta phải đặt tên kiểu trong dấu nháy. Giờ annotation được **đánh giá lười**: biểu thức chỉ được tính khi có ai đọc `__annotations__`. Trong `domain.py`, `Trip.with_driver` nhận `Driver` (khai báo sau `Trip`) và trả `Trip` (chính lớp đang định nghĩa), không có dấu nháy nào:
 
 ```python
     def with_driver(self, driver: Driver) -> Trip:
@@ -199,7 +199,7 @@ Python 3.14: định nghĩa xong, không lỗi
 NameError: name 'Driver' is not defined
 ```
 
-(Dòng thứ hai là dòng cuối của traceback khi chạy bằng Python 3.13.) Lười không có nghĩa tên không cần tồn tại: khi đọc mà tên vẫn chưa có thì `NameError` xuất hiện tại điểm đọc. Module `annotationlib` cho chọn dạng đọc. `main.py` dựng một hàm tham chiếu tên `Voucher` chưa từng khai báo bằng `exec` trên chuỗi cố định (để mypy không phàn nàn về chính nó), và kết quả:
+(Dòng thứ hai là dòng cuối của traceback khi chạy bằng Python 3.13.) «Lười» không có nghĩa là tên không cần tồn tại: khi đọc mà tên vẫn chưa có thì `NameError` xuất hiện tại điểm đọc. Module `annotationlib` cho phép chọn dạng đọc. `main.py` dựng một hàm tham chiếu tên `Voucher` chưa từng khai báo bằng `exec` trên chuỗi cố định (để mypy không phàn nàn về chính nó), và kết quả:
 
 ```text
 def apply_voucher(voucher: Voucher) chạy qua; đọc __annotations__ -> NameError: name 'Voucher' is not defined
@@ -250,7 +250,7 @@ Success: no issues found in 1 source file
 
 Lệnh chỉ nêu `main.py`, nhưng mypy đi theo `import domain` và kiểm cả `domain.py`; con số «1 source file» đếm file ta chỉ định, không đếm file được kéo vào qua import.
 
-Chế độ `--verify` kiểm các kết quả trên (cước, `Registry`, `cheapest`, TypedDict thiếu khoá, annotation lười đọc bằng `Format.VALUE`, `km_label(2.5)` vẫn chạy được) và còn chạy mypy thật hai lần: `main.py` phải xanh, `broken.py` phải báo đúng 9 lỗi tại đúng các dòng đánh dấu:
+Chế độ `--verify` kiểm các kết quả trên (cước, `Registry`, `cheapest`, TypedDict thiếu khoá, annotation lười được đọc bằng `Format.VALUE`, `km_label(2.5)` vẫn chạy được) và còn chạy mypy thật hai lần: `main.py` phải xanh, `broken.py` phải báo đúng 9 lỗi tại đúng các dòng đánh dấu:
 
 ```bash
 uv run --project examples/toi-noi-python/12-type-hints-mypy-protocol examples/toi-noi-python/12-type-hints-mypy-protocol/main.py --verify
@@ -267,7 +267,7 @@ Lab chạy bằng CPython 3.14.7 và mypy 2.4.1.
 | `Library stubs not installed for "yaml"  [import-untyped]` | Thư viện chưa có kiểu: cài gói `types-...` mypy gợi ý, hoặc tắt riêng module đó trong `[tool.mypy]`, đừng tắt toàn cục |
 | `Returning Any from function declared to return "str"  [no-any-return]` | Giá trị đến từ `json.loads` hoặc hàm không annotation: kiểm tra thật, hoặc gán vào biến có kiểu rồi mới trả |
 | mypy xanh nhưng chạy vẫn `KeyError` | `TypedDict` và `Any` là lời khai: dữ liệu ngoài hệ thống phải được kiểm lúc chạy (bài 15) |
-| `Incompatible return value type (got "str \| None", expected "str")` | Quên xử lý `None`: kiểm `is None` trước khi trả, hoặc đổi kiểu trả về cho đúng sự thật |
+| `Incompatible return value type (got "str \| None", expected "str")` | Quên xử lý `None`: kiểm tra `is None` trước khi trả, hoặc đổi kiểu trả về cho đúng sự thật |
 | `"list" is invariant` | Tham số chỉ đọc nên khai `Sequence[...]` thay vì `list[...]` |
 
 <div class="tkh-callout tkh-callout--warn">

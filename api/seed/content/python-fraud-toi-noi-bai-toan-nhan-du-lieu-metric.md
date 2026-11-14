@@ -1,14 +1,14 @@
 ---
 slug: python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric
 title: "Gian lận trong Tới Nơi: loại hình, nhãn, dữ liệu và metric"
-summary: "Bài 54: bốn loại gian lận của Tới Nơi và dấu vết của chúng, bộ dữ liệu tổng hợp dùng chung cả phần 07, nhãn trễ, chia train/valid theo thời gian, PR-AUC so với ROC-AUC và chi phí hai chiều. Có số đo thật."
+summary: "Bài 54: bốn loại gian lận của Tới Nơi và dấu vết của chúng, bộ dữ liệu tổng hợp dùng chung cả phần 07, nhãn trễ, chia train/valid theo thời gian, PR-AUC so với ROC-AUC và chi phí của hai loại sai sót. Có số đo thật."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, metric, imbalanced-data]
 language: vi
 ---
 
-Service fraud-scoring của [Tới Nơi](/articles/du-an-mau-toi-noi) đã có đường vào: Dispatch gọi nó qua gRPC ([bài 37](/articles/python-grpc-fraud-scoring-service)) và event đi qua Kafka ([bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema)). Còn thiếu phần khó nhất, không phải mô hình: thế nào là gian lận, dữ liệu nào dạy và đo được điều đó, con số nào đáng tin. Tài xế dựng chuyến không có khách thật để lấy thưởng, giả GPS, một người mở hàng chục tài khoản ăn mã chào khách mới, vài tài xế và khách chạy qua lại với nhau. Chưa viết dòng mô hình nào, ta đã vướng ba cái bẫy: nhãn đến rất muộn, 98 % chuyến là sạch nên accuracy vô nghĩa, và «sai» có hai giá khác nhau.
+Service fraud-scoring của [Tới Nơi](/articles/du-an-mau-toi-noi) đã có đường vào: Dispatch gọi nó qua gRPC ([bài 37](/articles/python-grpc-fraud-scoring-service)) và event đi qua Kafka ([bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema)). Còn thiếu phần khó nhất, không phải mô hình: thế nào là gian lận, dữ liệu nào dùng để dạy và đo điều đó, con số nào đáng tin. Tài xế dựng chuyến không có khách thật để lấy thưởng, giả GPS, một người mở hàng chục tài khoản để hưởng mã khuyến mãi cho khách mới, vài tài xế và khách chạy qua lại với nhau. Chưa viết một dòng code nào cho mô hình, ta đã vướng ba cái bẫy: nhãn đến rất muộn, 98 % chuyến là sạch nên accuracy vô nghĩa, và «sai» kéo theo hai cái giá khác nhau.
 
 Đây là bài 54 của lộ trình **Python nâng cao qua Tới Nơi**, bài mở đầu phần 07. Bạn cần quen worker nền ([bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter)), event Kafka (bài 38), polars và Parquet ([bài 29](/articles/python-polars-pandas-parquet-phan-tich-chuyen)). Dữ liệu trong bài là **tổng hợp**, sinh bằng seed cố định, kể cả tỉ lệ gian lận; số đo chỉ nói về bộ này. Điểm rủi ro của phần 07 là **đầu vào cho người duyệt**, không phải quyết định khoá tài khoản.
 
@@ -29,7 +29,7 @@ Bộ dữ liệu có bốn loại, mỗi loại là một **kiểu hành vi**, k
 | `promo_abuse` | Lạm dụng khuyến mãi: một người mở 3 đến 12 tài khoản mới, có khi chung điện thoại, mỗi tài khoản dùng `NEWUSER50` một lần | Mã giảm một nửa cước; nhiều tài khoản chung một máy |
 | `collusion` | Cấu kết: 2 đến 3 tài xế và 3 đến 6 tài khoản khách mới chạy qua lại 2 đến 5 tuần để nhận thưởng | Cặp khách-tài xế lặp lại; đôi khi khách đặt bằng máy của tài xế |
 
-Dấu vết chia hai tầng. Tầng một nằm trong event của **một** chuyến: toạ độ, quãng đường, mã khuyến mãi, thiết bị. Tầng hai chỉ hiện khi nhìn **nhiều** chuyến: cùng thiết bị trong một giờ, một cặp khách-tài xế lặp lại. Tầng hai đắt hơn (cửa sổ thời gian, trạng thái, đồ thị) nên để bài 55 và 58.
+Dấu vết chia hai tầng. Tầng một nằm trong event của **một** chuyến: toạ độ, quãng đường, mã khuyến mãi, thiết bị. Tầng hai chỉ hiện khi nhìn **nhiều** chuyến: cùng thiết bị trong một giờ, một cặp khách-tài xế lặp lại. Tầng hai đắt hơn (cửa sổ thời gian, trạng thái, đồ thị) nên dành cho bài 55 và 58.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -52,7 +52,7 @@ Không luật nào hoàn hảo, mỗi cái hỏng một kiểu: luật GPS bắt
 
 ## Bộ dữ liệu tổng hợp: schema và vì sao nhãn nằm riêng
 
-`synthetic_fraud.py` là nguồn dữ liệu của bảy bài sau; mỗi lab copy nguyên file này. Hàm vào là `make_events(seed, n_trips)`:
+`synthetic_fraud.py` là nguồn dữ liệu của bảy bài sau; mỗi lab sao chép nguyên tệp này. Hàm vào là `make_events(seed, n_trips)`:
 
 ```python
 data = make_events(seed=42, n_trips=200_000)   # FraudData(events, labels)
@@ -60,7 +60,7 @@ data.events   # log sự kiện, 600.000 dòng, sắp theo occurred_at tăng d�
 data.labels   # nhãn, 200.000 dòng, một dòng mỗi chuyến
 ```
 
-Bộ sinh dựng 60 ngày của sáu thành phố (từ 02/03/2026, giờ Việt Nam), cao điểm sáng và chiều, 8 % khách có tài xế quen, vài phần trăm khách dùng chung thiết bị, khoảng 0,4 % chuyến sạch thuộc đợt đặt xe cho cả nhóm. Chuyến sạch cũng nhiễu: GPS sai vài chục mét, khoảng 0,55 % chuyến lệch vị trí từ nửa km đến hàng trăm km. Mỗi chuyến phát ba event, theo envelope của từ điển miền:
+Bộ sinh dựng dữ liệu 60 ngày cho sáu thành phố (từ 02/03/2026, giờ Việt Nam), cao điểm sáng và chiều, 8 % khách có tài xế quen, vài phần trăm khách dùng chung thiết bị, khoảng 0,4 % chuyến sạch thuộc đợt đặt xe cho cả nhóm. Chuyến sạch cũng nhiễu: GPS sai vài chục mét, khoảng 0,55 % chuyến lệch vị trí từ nửa km đến hàng trăm km. Mỗi chuyến phát ba event, theo envelope của từ điển miền:
 
 ```text
 {"event_id": "75004414-…", "event_type": "BookingCreated", "occurred_at": "2026-03-01T17:06:12.547557+00:00", "version": 1, "payload": {…}}
@@ -80,7 +80,7 @@ Bảng `events` có 22 cột; mỗi loại event điền một nhóm và để n
 | `duration_s` | Int32 | `TripCompleted` |
 | `amount_vnd`, `discount_vnd` | Int64 (VND nguyên) | `PaymentCaptured` |
 
-Mã dùng độ rộng lớn (`TN-0000001`, `CU-00001`...) để chứa 200.000 chuyến; các bài trước dùng mã ngắn như `TN-0001`. Bảng `labels` có `trip_id`, `fraud_type` (`none` hoặc một trong bốn loại), `is_fraud` (Boolean) và `label_known_at` (Datetime UTC). Nhãn tách riêng vì pipeline đặc trưng chỉ nhận `events` nên không thể vô tình thấy nhãn (lab có ca kiểm), và vì nhãn thật chỉ **biết sau chuyến**. Số trong ID đã xáo ngẫu nhiên: dùng số trong `customer_id` làm điểm gian lận cho ROC-AUC 0,502, tức là không biết gì.
+Mã dài hơn, nhiều chữ số hơn (`TN-0000001`, `CU-00001`...) để chứa 200.000 chuyến; các bài trước dùng mã ngắn như `TN-0001`. Bảng `labels` có `trip_id`, `fraud_type` (`none` hoặc một trong bốn loại), `is_fraud` (Boolean) và `label_known_at` (Datetime UTC). Nhãn tách riêng vì pipeline đặc trưng chỉ nhận `events` nên không thể vô tình thấy nhãn (lab có test case kiểm tra điều đó), và vì nhãn thật chỉ **biết sau chuyến**. Số trong ID đã xáo ngẫu nhiên: dùng số trong `customer_id` làm điểm gian lận cho ROC-AUC 0,502, tức là không biết gì.
 
 ## Nhãn trễ: khi ta biết điều mình đang dạy
 
@@ -95,7 +95,7 @@ collusion               16.1        34.9       7.3%       39.5%       84.2%
 none                    30.0   (chuyến sạch chỉ được xác nhận sạch khi hết hạn khiếu nại 30 ngày)
 ```
 
-Các tham số độ trễ do bộ sinh chọn; điều đáng học là hệ quả. Giả sử ta huấn luyện vào ngày 40 (hình 2): nhãn của chuyến thanh toán ngày 33 đến sau khoảng 3 ngày với `promo_abuse` nhưng 16 ngày với `collusion`, nên lúc huấn luyện nhãn loại sau chưa có.
+Các tham số độ trễ do bộ sinh chọn; điều đáng học là hệ quả. Giả sử ta huấn luyện vào ngày 40 (hình 2): nhãn của chuyến thanh toán ngày 33 đến sau khoảng 3 ngày với `promo_abuse` nhưng 16 ngày với `collusion`, nên lúc huấn luyện chưa có nhãn của loại sau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -122,7 +122,7 @@ train (trước ngày 30), độ chín của nhãn gian lận ở ngày 40 theo 
 chuyến sạch chưa hết hạn khiếu nại 30 ngày vẫn mang nhãn 0 lúc đó, nên khoảng chờ 10 ngày không chữa loại điều tra lâu
 ```
 
-Bảy ngày gần nhất chỉ có 27,7 % nhãn, và khoảng chờ 10 ngày không chữa đều: với train trước ngày 30, nhãn `collusion` mới chín 61,7 % ở ngày 40, `promo_abuse` đã đủ; chuyến sạch chưa hết hạn 30 ngày vẫn mang nhãn 0. Hệ quả thứ nhất là **đo sai**. Tập valid có 1.141 chuyến gian lận thật, nhưng khi dữ liệu kết thúc (ngày 60,3) mới biết 763 (66,9 %). Chuyến gian lận chưa có nhãn bị tính là sạch nên gắn cờ đúng lại thành dương tính giả. Giữ nguyên mô hình, chỉ đổi nhãn chấm:
+Bảy ngày gần nhất chỉ có 27,7 % nhãn, và khoảng chờ 10 ngày không khắc phục đồng đều cho mọi loại: với train trước ngày 30, nhãn `collusion` mới chín 61,7 % ở ngày 40, `promo_abuse` đã đủ; chuyến sạch chưa hết hạn 30 ngày vẫn mang nhãn 0. Hệ quả thứ nhất là **đo sai**. Tập valid có 1.141 chuyến gian lận thật, nhưng khi dữ liệu kết thúc (ngày 60,3) mới biết 763 (66,9 %). Chuyến gian lận chưa có nhãn bị tính là sạch nên việc gắn cờ đúng chuyến này lại bị tính là dương tính giả. Giữ nguyên mô hình, chỉ đổi nhãn dùng để đo:
 
 ```text
 nhãn dùng để đo           PR-AUC  precision@0.5  recall@0.5
@@ -140,7 +140,7 @@ PR-AUC trên valid ngày 50 trở đi (nhãn cuối), khi huấn luyện bằng:
   train < ngày 40, nhãn biết ở ngày 40     0.556
 ```
 
-Bốn kết quả cách nhau 0,013. Đừng suy ra nhãn trễ vô hại: mô hình dùng lịch sử gian lận làm đặc trưng nhạy hơn nhiều, và bài 55 đo trường hợp đó (rò rỉ nhãn). Khoảng chờ trong hình 2 loại chuyến chưa chín khỏi train, nhưng không chữa được loại điều tra lâu.
+Bốn kết quả chênh nhau tối đa 0,013. Đừng suy ra nhãn trễ vô hại: mô hình dùng lịch sử gian lận làm đặc trưng thì nhạy hơn nhiều, và bài 55 đo trường hợp đó (rò rỉ nhãn). Khoảng chờ trong hình 2 loại các chuyến chưa chín ra khỏi train, nhưng không chữa được loại điều tra lâu.
 
 ## Chia train/valid theo thời gian
 
@@ -156,7 +156,7 @@ train: thanh toán trước ngày 30 (02/03/2026 00:00 đến 01/04/2026 00:00):
 valid: từ ngày 40 (11/04/2026 00:00): 66,704 chuyến, 1,141 gian lận (1.71%); ngày 30 đến 40 bỏ trống làm khoảng chờ nhãn
 ```
 
-Chia ngẫu nhiên làm số đẹp giả vì người gian lận lặp lại: một điện thoại xuất hiện trong nhiều chuyến. Thử một «bộ phát hiện» chỉ biết nhớ: thiết bị nào từng có gian lận ở train thì gắn cờ mọi chuyến của nó ở test.
+Chia ngẫu nhiên cho kết quả đẹp một cách giả tạo vì người gian lận lặp lại: một điện thoại xuất hiện trong nhiều chuyến. Thử một «bộ phát hiện» chỉ biết nhớ: thiết bị nào từng có gian lận ở train thì gắn cờ mọi chuyến của nó ở test.
 
 ```python
 def blacklist_eval(train: pl.DataFrame, test: pl.DataFrame) -> tuple[int, float, float]:
@@ -193,7 +193,7 @@ tỉ lệ chuyến sạch dùng NEWUSER50 và PR-AUC (LR, train < 30 chấm trê
 bỏ hai cột has_newuser_promo, discount_ratio: PR-AUC (LR) ngẫu nhiên 0.418, theo thời gian 0.408
 ```
 
-Bỏ hai cột `has_newuser_promo` và `discount_ratio`, hai cách chia cho 0,418 và 0,408, chiều đảo biến mất. Hồi quy logistic không nhớ định danh nên không được lợi từ chia ngẫu nhiên, và 0,488 so với 0,543 không chứng minh chia ngẫu nhiên bi quan. Mọi valid của phần 07 hưởng cùng dịch phân phối này.
+Bỏ hai cột `has_newuser_promo` và `discount_ratio`, hai cách chia cho 0,418 và 0,408, tức là chiều đảo ngược biến mất. Hồi quy logistic không nhớ định danh nên không được lợi từ chia ngẫu nhiên, và 0,488 so với 0,543 không chứng minh chia ngẫu nhiên bi quan. Mọi tập valid của phần 07 đều chịu cùng sự dịch chuyển phân phối này.
 
 ## Metric trên dữ liệu mất cân bằng
 
@@ -202,7 +202,7 @@ Với khoảng 1,7 % chuyến gian lận ở valid, bộ chấm luôn trả «s�
 - **precision**: trong các chuyến bị gắn cờ, bao nhiêu phần gian lận thật. Thấp nghĩa là người duyệt xem nhiều chuyến sạch.
 - **recall**: trong các chuyến gian lận, bao nhiêu phần bị gắn cờ. Thấp nghĩa là gian lận lọt qua.
 
-Đổi ngưỡng thì hai số đổi ngược chiều. **PR-AUC** (ở đây là average precision) gom cả đường đó thành một số: trung bình precision tại mọi ngưỡng, trọng số theo mức tăng recall. Lab tự viết nó, rồi đối chiếu scikit-learn:
+Đổi ngưỡng thì hai số đổi ngược chiều. **PR-AUC** (ở đây là average precision) gom cả đường đó thành một số: trung bình precision tại mọi ngưỡng, có trọng số là mức tăng recall. Lab tự viết nó, rồi đối chiếu scikit-learn:
 
 ```python
 def average_precision(y: np.ndarray, score: np.ndarray) -> float:
@@ -228,7 +228,7 @@ hồi quy logistic:  PR-AUC 0.5374, ROC-AUC 0.9332
 ngưỡng 0.5: TP 304, FP 77, FN 837, TN 65,486; precision 0.798, recall 0.266, F1 0.399, accuracy 0.9863
 ```
 
-Điểm ngẫu nhiên cho PR-AUC xấp xỉ tỉ lệ gian lận (0,0171), còn ROC-AUC 0,504: PR-AUC có **mốc cơ sở bằng tỉ lệ dương**, nên 0,537 là gấp khoảng 31 lần mốc đó, trong khi ROC-AUC 0,933 trông «gần tối đa». ROC-AUC lạc quan vì chia số dương tính giả cho tổng số chuyến sạch: 77 chuyến sạch bị gắn cờ nhầm chỉ là 0,12 % mẫu số. Thử bỏ 90 % chuyến sạch khỏi tập valid, giữ nguyên mọi chuyến gian lận và điểm số:
+Điểm ngẫu nhiên cho PR-AUC xấp xỉ tỉ lệ gian lận (0,0171), còn ROC-AUC 0,504: PR-AUC có **mốc cơ sở bằng tỉ lệ dương**, nên 0,537 gấp khoảng 31 lần mốc đó, trong khi ROC-AUC 0,933 trông «gần tối đa». ROC-AUC lạc quan vì chia số dương tính giả cho tổng số chuyến sạch: 77 chuyến sạch bị gắn cờ nhầm chỉ là 0,12 % mẫu số. Thử bỏ 90 % chuyến sạch khỏi tập valid, giữ nguyên mọi chuyến gian lận và điểm số:
 
 ```text
 cùng điểm, chỉ giữ 10% chuyến sạch (7,717 dòng, tỉ lệ gian lận 14.8%): PR-AUC 0.8243, ROC-AUC 0.9322
@@ -262,7 +262,7 @@ mốc lý thuyết nếu điểm là xác suất đã hiệu chỉnh: phí duy�
 người duyệt chỉ xem được 1% chuyến (334 chuyến điểm cao nhất): bắt 205 trong 494 gian lận, precision 61.4%
 ```
 
-Ngưỡng chọn theo chi phí, 0,065, gắn cờ 885 chuyến thay vì 189, bắt 335 chuyến gian lận thay vì 155, với 550 chuyến sạch bị xem nhầm thay vì 34. Chi phí 15,09 triệu VND, thấp hơn 17,17 triệu ở ngưỡng 0,5 và 24,50 triệu nếu không làm gì; «gắn cờ tất cả» tốn 267,33 triệu. Ngưỡng 0,065 xa mốc lý thuyết 0,161 (8.000 chia 49.585, chi phí bỏ sót trung bình) vì điểm của hồi quy logistic chưa hiệu chỉnh. Dòng cuối là hướng thực tế hơn: người duyệt có công suất cố định, nên câu hỏi là «với 1 % chuyến mỗi ngày, 334 chuyến đầu bắt được bao nhiêu», ở đây 205 trên 494 gian lận, precision 61,4 %. Điểm xếp hàng cho người duyệt, người quyết định. Hàng đợi, tỉ lệ sai cho phép và thời hạn duyệt là việc của [bài 61](/articles/python-shap-explainability-audit-human-review).
+Ngưỡng chọn theo chi phí, 0,065, gắn cờ 885 chuyến thay vì 189, bắt 335 chuyến gian lận thay vì 155, với 550 chuyến sạch bị xem nhầm thay vì 34. Chi phí 15,09 triệu VND, thấp hơn 17,17 triệu ở ngưỡng 0,5 và 24,50 triệu nếu không làm gì; «gắn cờ tất cả» tốn 267,33 triệu. Ngưỡng 0,065 cách xa mốc lý thuyết 0,161 (8.000 chia 49.585, chi phí bỏ sót trung bình) vì điểm của hồi quy logistic chưa hiệu chỉnh. Dòng cuối là hướng thực tế hơn: người duyệt có công suất cố định, nên câu hỏi là «với 1 % chuyến mỗi ngày, 334 chuyến đầu bắt được bao nhiêu», ở đây 205 trên 494 gian lận, precision 61,4 %. Điểm dùng để xếp hàng cho người duyệt, còn người duyệt là người quyết định. Hàng đợi, tỉ lệ sai cho phép và thời hạn duyệt là việc của [bài 61](/articles/python-shap-explainability-audit-human-review).
 
 ## Chạy và kiểm chứng
 
@@ -293,11 +293,11 @@ envelope đầu tiên (topic booking.created.v1):
 ROC-AUC khi dùng số thứ tự trong customer_id làm điểm gian lận: 0.502 (0.5 là không biết gì)
 ```
 
-`--verify` kiểm 43 bất biến và in `OK 43/43`: schema khớp, `events` không có cột nhãn, thời gian tăng dần, tỉ lệ gian lận 1,8 đến 2,2 %, hai hàm metric khớp scikit-learn, ROC-AUC cao hơn hẳn PR-AUC, nhãn chưa chín làm PR-AUC thấp hơn, chia ngẫu nhiên làm danh sách đen đẹp hơn. Nó không kiểm số tuyệt đối hay tốc độ.
+`--verify` kiểm 43 bất biến và in `OK 43/43`: schema khớp, `events` không có cột nhãn, thời gian tăng dần, tỉ lệ gian lận 1,8 đến 2,2 %, hai hàm metric khớp scikit-learn, ROC-AUC cao hơn hẳn PR-AUC, nhãn chưa chín làm PR-AUC thấp hơn, chia ngẫu nhiên làm danh sách đen đẹp hơn. Lệnh này không kiểm tra số tuyệt đối hay tốc độ.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
-| PR-AUC trên valid cao khác thường so với train | Kiểm chia theo thời gian, có chuyến cùng thiết bị hay khách ở cả hai bên không |
+| PR-AUC trên valid cao khác thường so với train | Kiểm tra cách chia theo thời gian, xem có chuyến chung thiết bị hay chung khách ở cả hai phía không |
 | PR-AUC tụt dần khi theo dõi hàng tuần dù mô hình không đổi | Nhãn của tuần gần nhất chưa chín; so trên nhãn đã chín, hoặc đo độ chín trước |
 | ROC-AUC 0,97 nhưng người duyệt kêu quá nhiều chuyến sạch | Xem precision ở ngưỡng đang dùng, đừng chỉ nhìn ROC-AUC |
 | Hai mô hình có PR-AUC khác nhau trên hai tập khác nhau | PR-AUC phụ thuộc tỉ lệ dương; so trên cùng một tập |
@@ -305,12 +305,12 @@ ROC-AUC khi dùng số thứ tự trong customer_id làm điểm gian lận: 0.5
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Mọi số đo trên dữ liệu tổng hợp: tỉ lệ 2 %, bốn loại gian lận, độ trễ nhãn, chi phí 8.000 và 20.000 VND đều là giả định của bộ sinh; bộ này nhỏ hơn nhiều so với 2 triệu chuyến mỗi ngày của Tới Nơi. Gian lận thật thích nghi với cách ta bắt, và nhãn thật nhiễu. Hai tạo tác của bộ sinh ảnh hưởng mọi con số: tỉ lệ chuyến sạch dùng <code>NEWUSER50</code> giảm từ 7,8 % xuống 0,9 % theo thời gian (valid dễ hơn train), và tài khoản gian lận không dùng mã nào ngoài <code>NEWUSER50</code> của <code>promo_abuse</code>. Các kết luận thứ bậc đo ở một seed (42); chạy lại <code>--verify</code> ở seed 1, 2, 7 vẫn đạt. Một lần chia theo thời gian là quá ít cho production. Bộ sinh số của numpy không cam kết giữ dòng số giữa các phiên bản (đã chạy với Python 3.14.7, numpy 2.5.4, polars 2.1.0, scikit-learn 1.9.1).</p>
+<p>Mọi số đo lấy trên dữ liệu tổng hợp: tỉ lệ 2 %, bốn loại gian lận, độ trễ nhãn, chi phí 8.000 và 20.000 VND đều là giả định của bộ sinh; bộ này nhỏ hơn nhiều so với 2 triệu chuyến mỗi ngày của Tới Nơi. Gian lận thật thích nghi với cách ta bắt, và nhãn thật nhiễu. Hai tạo tác của bộ sinh ảnh hưởng mọi con số: tỉ lệ chuyến sạch dùng <code>NEWUSER50</code> giảm từ 7,8 % xuống 0,9 % theo thời gian (valid dễ hơn train), và tài khoản gian lận không dùng mã nào ngoài <code>NEWUSER50</code> của <code>promo_abuse</code>. Các kết luận về thứ hạng được đo ở một seed (42); chạy lại <code>--verify</code> ở seed 1, 2, 7 vẫn đạt. Một lần chia theo thời gian là quá ít cho production. Bộ sinh số ngẫu nhiên của numpy không cam kết giữ nguyên dãy số giữa các phiên bản (đã chạy với Python 3.14.7, numpy 2.5.4, polars 2.1.0, scikit-learn 1.9.1).</p>
 </div>
 
 **Bài tập:** (1) Một bộ phát hiện bắt 50 % chuyến gian lận và gắn cờ nhầm 1 % chuyến sạch. Trên 100.000 chuyến có 2 % gian lận, precision là bao nhiêu? Nếu chỉ 0,2 % gian lận, với cùng hai tỉ lệ đó thì sao? (2) Một chuyến `collusion` thanh toán ngày 33 có `label_known_at` vào ngày 49. Huấn luyện vào ngày 40, nhãn của nó là gì, và đưa nó vào train thì mô hình học điều gì?
 
-<details><summary>Xem lời giải</summary><p>(1) Với 2 %: 2.000 gian lận, 98.000 sạch; TP = 1.000, FP = 980; precision = 1.000 / 1.980 = <b>50,5 %</b>. Với 0,2 %: 200 gian lận, 99.800 sạch; TP = 100, FP = 998; precision = 100 / 1.098 = <b>9,1 %</b>. Cùng một điểm trên đường ROC mà precision tụt từ 50 % xuống 9 %. (2) Nhãn là <b>0 (sạch)</b>, vì ngày 49 chưa tới ngày 40; đưa vào train như chuyến sạch là dạy mô hình rằng dấu vết của <code>collusion</code> bình thường. Cách phòng: khoảng chờ, loại chuyến chưa chín khỏi train, hoặc đánh dấu «chưa biết» thay vì «sạch».</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Với 2 %: 2.000 gian lận, 98.000 sạch; TP = 1.000, FP = 980; precision = 1.000 / 1.980 = <b>50,5 %</b>. Với 0,2 %: 200 gian lận, 99.800 sạch; TP = 100, FP = 998; precision = 100 / 1.098 = <b>9,1 %</b>. Cùng một điểm trên đường ROC mà precision tụt từ 50 % xuống 9 %. (2) Nhãn là <b>0 (sạch)</b>, vì ngày 49 chưa tới ngày 40; đưa vào train như chuyến sạch là dạy mô hình rằng dấu vết của <code>collusion</code> là bình thường. Cách phòng: khoảng chờ, loại chuyến chưa chín khỏi train, hoặc đánh dấu «chưa biết» thay vì «sạch».</p></details>
 
 Bài trước: [bài 53](/articles/python-face-matching-danh-gia-bias-privacy-consent). Bài tiếp: [bài 55](/articles/python-feature-engineering-tu-event-kafka).
 

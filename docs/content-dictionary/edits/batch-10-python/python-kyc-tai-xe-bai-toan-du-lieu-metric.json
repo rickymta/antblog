@@ -1,0 +1,173 @@
+{
+  "file": "python-kyc-tai-xe-bai-toan-du-lieu-metric.md",
+  "edits": [
+    {
+      "old": "Ba việc đó thuộc ba service Python, và cuối cùng vẫn là một người duyệt.",
+      "new": "Ba việc đó do ba service Python đảm nhận, và quyết định cuối cùng vẫn thuộc về một người duyệt.",
+      "reason": "Câu thiếu động từ, cuối câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "chạy Tesseract trần lấy một mốc.",
+      "new": "chạy Tesseract nguyên bản để lấy một mốc so sánh.",
+      "reason": "Cụm ghép gượng, thiếu từ nối",
+      "severity": "medium"
+    },
+    {
+      "old": "và ảnh là mảng ở [bài 30]",
+      "new": "và biết ảnh là một mảng số ở [bài 30]",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab đặt nó cùng bảng chuyển hợp lệ trong",
+      "new": "Lab đặt nó cùng bảng chuyển trạng thái hợp lệ trong",
+      "reason": "Lược mất danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "nên hồ sơ không kẹt mà đi tới người.",
+      "new": "nên hồ sơ không bị kẹt mà đi tới người duyệt.",
+      "reason": "Lược mất danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Người đọc cả ba kết quả rồi gọi `advance` là use case nộp hồ sơ (bài 70).",
+      "new": "Bên đọc cả ba kết quả rồi gọi `advance` là use case nộp hồ sơ (bài 70).",
+      "reason": "Dễ hiểu nhầm 'người đọc'; từ tiếng Anh lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab copy `synthetic_card.py` của bài 30",
+      "new": "Lab sao chép `synthetic_card.py` của bài 30",
+      "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "còn gán đáp án tay thì đắt.",
+      "new": "còn gán đáp án thủ công thì tốn kém.",
+      "reason": "Cách nói gượng",
+      "severity": "low"
+    },
+    {
+      "old": "đặt thẻ lên mặt bàn có xoay và phối cảnh",
+      "new": "đặt thẻ lên mặt bàn, có xoay và phối cảnh",
+      "reason": "Cụm dài thiếu ngắt, khó đọc",
+      "severity": "low"
+    },
+    {
+      "old": "mỗi phép giá 1)",
+      "new": "mỗi phép tính giá 1)",
+      "reason": "Cụm cụt thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "ba dòng sau dòng `ref=` là câu hỏi đầu bài:",
+      "new": "ba dòng ngay sau dòng `ref=` chính là đáp án cho câu hỏi đầu bài:",
+      "reason": "Câu mơ hồ, nối sai với câu hỏi đầu bài",
+      "severity": "medium"
+    },
+    {
+      "old": "Nên ta đo thêm theo trường, với khớp chính xác sau `normalize`.",
+      "new": "Nên ta đo thêm theo trường, bằng cách khớp chính xác sau `normalize`.",
+      "reason": "Cụm cụt thiếu từ nối",
+      "severity": "low"
+    },
+    {
+      "old": "khi OCR dám nói, đáng tin tới đâu.",
+      "new": "khi OCR đã đưa ra giá trị thì giá trị đó đáng tin tới đâu.",
+      "reason": "Câu thiếu chủ ngữ, giọng dịch",
+      "severity": "medium"
+    },
+    {
+      "old": "nên tỉ lệ cần duyệt một mình không nói được cổng tốt hay xấu: chuyển hết về người thì không bao giờ sai.",
+      "new": "nên riêng tỉ lệ cần duyệt chưa cho biết cổng tốt hay xấu: chuyển hết cho người duyệt thì không bao giờ sai.",
+      "reason": "Cách nói gượng, lược danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "(công của người)",
+      "new": "(công sức của người duyệt)",
+      "reason": "Lược mất danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Độ tin cậy của Tesseract chưa hiệu chỉnh thành xác suất",
+      "new": "Độ tin cậy của Tesseract chưa được hiệu chỉnh thành xác suất",
+      "reason": "Câu cụt, thiếu từ bị động tự nhiên",
+      "severity": "low"
+    },
+    {
+      "old": "gom từ của TSV thành dòng cùng độ tin cậy nhỏ nhất,",
+      "new": "gom các từ trong TSV thành dòng, kèm độ tin cậy nhỏ nhất của các từ đó,",
+      "reason": "Câu mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "ngưỡng giống 0,7)",
+      "new": "ngưỡng độ giống 0,7)",
+      "reason": "Cụm tự ghép nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "bước tìm nhãn hoặc dòng giá trị hỏng trước khi nói tới đọc sai chữ;",
+      "new": "bước tìm nhãn hoặc dòng giá trị đã hỏng từ trước khi tới chuyện đọc sai chữ;",
+      "reason": "Câu gượng, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "một ca như vậy kéo cả cột.",
+      "new": "một ca như vậy kéo cao cả cột.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Hạ ngưỡng xuống 0,50 giảm tỉ lệ cần duyệt từ 58% còn 32% giấy tờ",
+      "new": "Hạ ngưỡng xuống 0,50 làm tỉ lệ cần duyệt giảm từ 58% xuống 32% giấy tờ",
+      "reason": "Giọng dịch máy",
+      "severity": "low"
+    },
+    {
+      "old": "Ảnh xoay bị chuyển người hết (12 trên 12), đúng việc;",
+      "new": "Ảnh xoay bị chuyển hết cho người duyệt (12 trên 12), đúng như mong muốn;",
+      "reason": "Cụm cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "quá ít để đọc thứ bậc sít sao.",
+      "new": "quá ít để so chính xác thứ tự giữa các mức gần nhau.",
+      "reason": "Cụm dịch gượng, khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "lệnh sau kiểm 43 điều",
+      "new": "lệnh sau kiểm tra 43 điều",
+      "reason": "Động từ cụt",
+      "severity": "low"
+    },
+    {
+      "old": "không kiểm số tuyệt đối (phụ thuộc font và phiên bản Tesseract) mà kiểm bất biến và thứ bậc lớn.",
+      "new": "không kiểm tra số tuyệt đối (phụ thuộc font và phiên bản Tesseract) mà kiểm tra các bất biến và thứ bậc lớn.",
+      "reason": "Động từ cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Viết hai ca `--verify` cho trường hợp",
+      "new": "Viết hai test case `--verify` cho trường hợp",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "low"
+    },
+    {
+      "old": "Hai ca kiểm: <code>",
+      "new": "Hai test case: <code>",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "low"
+    },
+    {
+      "old": "đừng lẫn hai đơn vị.",
+      "new": "đừng nhầm lẫn hai đơn vị.",
+      "reason": "Cách nói tự nhiên hơn",
+      "severity": "low"
+    }
+  ]
+}

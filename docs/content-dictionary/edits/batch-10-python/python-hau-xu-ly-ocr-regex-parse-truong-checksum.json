@@ -1,0 +1,179 @@
+{
+ "file": "python-hau-xu-ly-ocr-regex-parse-truong-checksum.md",
+ "edits": [
+  {
+   "old": "confidence là min các từ.",
+   "new": "confidence lấy giá trị nhỏ nhất trong các từ.",
+   "reason": "Dịch ép, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và nó sai được theo hai hướng:",
+   "new": "và bước này có thể sai theo hai hướng:",
+   "reason": "Cách nói gượng, dùng 'nó'",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi đo từng bước thực sự làm được gì trên 64 ảnh.",
+   "new": "rồi đo xem từng bước thực sự giúp được gì trên 64 ảnh.",
+   "reason": "Câu thiếu từ",
+   "severity": "low"
+  },
+  {
+   "old": "Bạn cần biết chạy Tesseract (bài 43).",
+   "new": "Bạn cần biết cách chạy Tesseract (bài 43).",
+   "reason": "Câu thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "cố tình đưa ảnh nghiêng vào thẳng để",
+   "new": "cố tình đưa thẳng ảnh nghiêng vào để",
+   "reason": "Trật tự từ",
+   "severity": "medium"
+  },
+  {
+   "old": "mà chữ OCR thô sai còn bản hậu xử lý đúng",
+   "new": "mà chữ OCR thô sai nhưng bản hậu xử lý đúng",
+   "reason": "Từ nối sai sắc thái",
+   "severity": "low"
+  },
+  {
+   "old": "Thẻ seed 7 bị nghiêng cho ra kết quả từ đầu đến cuối như sau",
+   "new": "Với thẻ seed 7 bị nghiêng, kết quả từ đầu đến cuối như sau",
+   "reason": "Giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Dấu cách trong số thẻ được bỏ, thành phố về dạng chuẩn có dấu, ngày `43/03/1990` bị cờ vì không có ngày 43, và tên có `confidence` thấp nhất thẻ (0,62).",
+   "new": "Dấu cách trong số thẻ được bỏ, thành phố được đưa về dạng chuẩn có dấu, ngày `43/03/1990` bị cờ vì không có ngày 43, và tên có `confidence` thấp nhất trong thẻ (0,62).",
+   "reason": "Câu thiếu động từ và giới từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Mắt người không thấy khác, `==` và regex thì có:",
+   "new": "Mắt người không thấy khác, còn `==` và regex thì thấy khác:",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "khoảng trắng không ngắt về dấu cách và xoá ký tự rộng bằng 0.",
+   "new": "khoảng trắng không ngắt về dấu cách và xoá ký tự có độ rộng bằng 0.",
+   "reason": "Cụm diễn đạt gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "khớp chuỗi NFC nhưng trượt chuỗi NFD",
+   "new": "khớp chuỗi NFC nhưng không khớp chuỗi NFD",
+   "reason": "Dùng 'trượt' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Hàm dưới đây không tính chữ số kiểm tra nào, nó kiểm sự nhất quán:",
+   "new": "Hàm dưới đây không tính chữ số kiểm tra nào, mà kiểm tra sự nhất quán:",
+   "reason": "Dùng 'nó' chỉ sự vật",
+   "severity": "low"
+  },
+  {
+   "old": "rồi đo năng lực phát hiện bằng cách",
+   "new": "rồi đo khả năng phát hiện bằng cách",
+   "reason": "Dịch máy 'năng lực phát hiện'",
+   "severity": "low"
+  },
+  {
+   "old": "Nó chỉ bắt được sai ở nửa đầu của số,",
+   "new": "Phép kiểm này chỉ bắt được sai sót ở nửa đầu của số,",
+   "reason": "Dùng 'Nó' đầu câu chỉ sự vật",
+   "severity": "medium"
+  },
+  {
+   "old": "còn không, phần số không kiểm được",
+   "new": "nếu không, phần số không kiểm được",
+   "reason": "Khẩu ngữ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ nhận ứng viên đầu khi nó **đủ cao",
+   "new": "chỉ nhận ứng viên đứng đầu khi điểm của nó **đủ cao",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "không sửa được thiếu từ điển**",
+   "new": "không sửa được việc từ điển bị thiếu mục**",
+   "reason": "Câu cụt thiếu chủ vị",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca chênh lớn nhất trong bộ:",
+   "new": "Ca có độ chênh lớn nhất trong bộ:",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "bài không đổi cấu hình cho số khớp bài khác.",
+   "new": "bài không đổi cấu hình để số liệu khớp với các bài khác.",
+   "reason": "Câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "đáp án là chính các chuỗi hàm sinh thẻ đã vẽ.",
+   "new": "đáp án là chính các chuỗi mà hàm sinh thẻ đã vẽ lên ảnh.",
+   "reason": "Câu thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "ảnh nghiêng hưởng nhiều nhất (48 lên 58)",
+   "new": "ảnh nghiêng được lợi nhiều nhất (48 lên 58)",
+   "reason": "Dùng 'hưởng' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Năm ca `confidence` dưới 0,80 sẽ bị chặn bởi ngưỡng ở bài sau.",
+   "new": "Ngưỡng ở bài sau sẽ chặn năm ca có `confidence` dưới 0,80.",
+   "reason": "Câu bị động kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "`--verify` kiểm 40 điều: các ca Unicode, mười ca sửa theo ngữ cảnh",
+   "new": "`--verify` kiểm tra 40 điều: các test case Unicode, mười test case sửa theo ngữ cảnh",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Luhn, các ca fuzzy, và các bất biến",
+   "new": "Luhn, các test case fuzzy, và các bất biến",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Nó không kiểm số tuyệt đối của OCR (252, 266...),",
+   "new": "Lệnh này không kiểm tra số tuyệt đối của OCR (252, 266...),",
+   "reason": "Dùng 'Nó' đầu câu chỉ sự vật",
+   "severity": "medium"
+  },
+  {
+   "old": "NFD hoặc ký tự rộng bằng 0; gọi",
+   "new": "NFD hoặc ký tự có độ rộng bằng 0; gọi",
+   "reason": "Cụm diễn đạt gượng",
+   "severity": "low"
+  },
+  {
+   "old": "`fullmatch` trượt dù chuỗi trông đúng",
+   "new": "`fullmatch` không khớp dù chuỗi trông đúng",
+   "reason": "Dùng 'trượt' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Danh sách 6 thành phố nhỏ hơn nhiều so với quê quán thật;",
+   "new": "Danh sách 6 thành phố ngắn hơn nhiều so với danh sách quê quán thật;",
+   "reason": "Cụm so sánh sai đối tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Đề xuất một kiểm tra rẻ dựa trên số từ, và nói nó bỏ sót ca nào",
+   "new": "Đề xuất một phép kiểm tra rẻ dựa trên số từ, và cho biết phép này bỏ sót ca nào",
+   "reason": "Cụm cụt, dùng 'nó'",
+   "severity": "medium"
+  }
+ ]
+}

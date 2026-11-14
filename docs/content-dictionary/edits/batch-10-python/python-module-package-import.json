@@ -1,0 +1,21 @@
+{"file":"python-module-package-import.md","edits":[
+{"old":"và thêm cận trên 100 km.","new":"và thêm giới hạn trên 100 km.","reason":"\"cận trên\" là cách nói toán học, gượng trong ngữ cảnh cước","severity":"low"},
+{"old":"4.500 VND mỗi km vượt,","new":"4.500 VND cho mỗi km vượt quá,","reason":"\"mỗi km vượt\" nghe cụt, thiếu từ","severity":"low"},
+{"old":"Python gỡ module khỏi `sys.modules` và lỗi bay tiếp lên nơi import.","new":"Python gỡ module khỏi `sys.modules` và lỗi tiếp tục truyền lên nơi import.","reason":"\"bay tiếp\" là cách nói gượng","severity":"low"},
+{"old":"là chi tiết quan trọng, vì nó giải thích lỗi import vòng ở mục sau.","new":"là chi tiết quan trọng, vì chi tiết này giải thích lỗi import vòng ở mục sau.","reason":"tránh \"nó\" chỉ sự vật trừu tượng, nhắc lại danh từ","severity":"low"},
+{"old":"Việc mở file dữ liệu bằng `open(\"data.csv\")` là chuyện khác hẳn: nó đi theo thư mục hiện tại của tiến trình,","new":"Việc mở file dữ liệu bằng `open(\"data.csv\")` là chuyện khác hẳn: lệnh này đi theo thư mục hiện tại của tiến trình,","reason":"\"nó\" mơ hồ, nêu rõ chủ thể","severity":"low"},
+{"old":"Nó rõ ràng, đọc ở đâu cũng hiểu, và là lựa chọn mặc định theo PEP 8.","new":"Kiểu này rõ ràng, đọc ở đâu cũng hiểu, và là lựa chọn mặc định theo PEP 8.","reason":"tránh \"Nó\" đầu câu chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Nó chỉ dùng được bên trong một package, và giúp đổi tên gói","new":"Kiểu này chỉ dùng được bên trong một package, và giúp đổi tên gói","reason":"tránh \"Nó\" đầu câu chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Còn một lựa chọn nữa: `import x` hay `from x import y`.","new":"Còn một lựa chọn nữa là viết `import x` hay `from x import y`.","reason":"câu cụt, thiếu động từ dẫn","severity":"low"},
+{"old":"Với `from toinoi_fare import calculate_fare`, ngắn hơn, nhưng bạn nhận","new":"Với `from toinoi_fare import calculate_fare`, dòng lệnh ngắn hơn, nhưng bạn nhận","reason":"câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Tránh `from x import *` vì nó làm không ai biết tên đến từ đâu.","new":"Tránh `from x import *` vì cách này khiến không ai biết tên đến từ đâu.","reason":"\"nó làm không ai biết\" là giọng dịch máy","severity":"medium"},
+{"old":"đưa phần dùng chung ra **module thứ ba** mà cả hai cùng import một chiều","new":"tách phần dùng chung thành **module thứ ba** mà cả hai cùng import một chiều","reason":"calque \"đưa ra\"","severity":"medium"},
+{"old":"khác tên package để `import` (`toinoi_fare`),","new":"khác tên package dùng để `import` (`toinoi_fare`),","reason":"thiếu động từ, cụm \"tên package để import\" cụt","severity":"medium"},
+{"old":"Phiên bản được chọn phụ thuộc thời điểm bạn chạy lệnh.","new":"Phiên bản được chọn phụ thuộc vào thời điểm bạn chạy lệnh.","reason":"thiếu giới từ","severity":"low"},
+{"old":"Lab 07 không có phụ thuộc nào ngoài chính nó,","new":"Lab 07 không có phụ thuộc bên ngoài nào,","reason":"\"ngoài chính nó\" cụt, dễ hiểu sai","severity":"medium"},
+{"old":"Nó chưa có kiểu tĩnh kiểm bằng mypy,","new":"Gói chưa được kiểm tra kiểu tĩnh bằng mypy,","reason":"cụm \"kiểu tĩnh kiểm bằng mypy\" tự ghép, thiếu động từ","severity":"high"},
+{"old":"cấu trúc dự án sẵn sàng cho service.","new":"cấu trúc dự án sẵn sàng để đưa thành service.","reason":"câu cụt, thiếu động từ","severity":"low"},
+{"old":"Lệnh đầu in bảng cước, thí nghiệm `sys.modules`, hai lỗi import.","new":"Lệnh đầu in bảng cước, kết quả thí nghiệm `sys.modules` và hai lỗi import.","reason":"liệt kê thiếu từ nối, \"thí nghiệm\" không phải thứ được in","severity":"medium"},
+{"old":"có ca sai thì in tên ca, dòng `FAIL n/18`","new":"có kiểm tra nào sai thì in tên kiểm tra đó, dòng `FAIL n/18`","reason":"thống nhất \"kiểm tra\" thay cho \"ca\" trong cùng đoạn","severity":"medium"},
+{"old":"Bốn dòng bảng cước từ lab:","new":"Bốn dòng bảng cước do lab in ra:","reason":"\"từ lab\" cụt","severity":"low"}
+]}

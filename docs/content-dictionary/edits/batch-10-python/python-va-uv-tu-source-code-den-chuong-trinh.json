@@ -1,0 +1,16 @@
+{"file":"python-va-uv-tu-source-code-den-chuong-trinh.md","edits":[
+{"old":"OCR, face matching và fraud scoring dễ tìm công cụ nhất","new":"OCR, so khớp khuôn mặt và chấm điểm gian lận dễ tìm công cụ nhất","reason":"Thống nhất cách gọi với đoạn mở đầu bài (so khớp khuôn mặt, chấm điểm gian lận)","severity":"medium"},
+{"old":"là ngôn ngữ: cú pháp và quy tắc, được mô tả trong tài liệu ngôn ngữ.","new":"là ngôn ngữ, gồm cú pháp và quy tắc do tài liệu ngôn ngữ mô tả.","reason":"Bỏ câu bị động kiểu tiếng Anh","severity":"low"},
+{"old":"Mỗi lệnh bytecode lại được vòng lặp chính của interpreter thực thi.","new":"Sau đó vòng lặp chính của interpreter thực thi từng lệnh bytecode.","reason":"Chuyển bị động sang chủ động","severity":"medium"},
+{"old":"Đây là kết quả thật khi biên dịch một dòng tính tổng","new":"Đây là kết quả chạy thật khi biên dịch một dòng tính tổng","reason":"Dùng cách nói chuẩn theo bảng thuật ngữ","severity":"low"},
+{"old":"Nó cài interpreter, tạo virtual environment","new":"uv cài interpreter, tạo virtual environment","reason":"Tránh dùng Nó cho sự vật trừu tượng ở đầu câu","severity":"medium"},
+{"old":"Lệnh `uv --version` cho một dòng dạng","new":"Lệnh `uv --version` in ra một dòng dạng","reason":"Calque từ gives; dùng động từ tự nhiên","severity":"medium"},
+{"old":"sẽ không dẫm lên nhau.","new":"sẽ không xung đột với nhau.","reason":"Cụm nói miệng, không hợp văn bản kỹ thuật","severity":"medium"},
+{"old":"chạy `uv init` trơn tạo ra layout có thư mục `src/`","new":"chạy `uv init` không kèm cờ nào tạo ra cấu trúc có thư mục `src/`","reason":"Trơn là cách nói thông tục, không rõ nghĩa","severity":"medium"},
+{"old":"nếu thư mục chưa nằm trong repo nào)","new":"nếu thư mục chưa nằm trong repo Git nào)","reason":"Làm rõ danh từ, tránh cụm cụt","severity":"low"},
+{"old":"| Cài uv chưa; mở terminal mới sau khi cài |","new":"| Đã cài uv chưa; mở terminal mới sau khi cài |","reason":"Câu hỏi thiếu từ Đã nên nghe cụt","severity":"medium"},
+{"old":"Mỗi lần chạy với một khoảng cách khác, so với bảng.","new":"Chạy lần lượt với từng khoảng cách khác nhau rồi so kết quả với bảng.","reason":"Câu thiếu động từ chính","severity":"medium"},
+{"old":"Ảnh giấy tờ, khuôn mặt ở cấp nâng cao là dữ liệu tổng hợp","new":"Ảnh giấy tờ và ảnh khuôn mặt ở cấp nâng cao là dữ liệu tổng hợp","reason":"Lược mất danh từ chính","severity":"medium"},
+{"old":"điểm fraud là đầu vào cho quy trình nghiệp vụ, không tự động là quyết định xác minh","new":"điểm gian lận là đầu vào cho quy trình nghiệp vụ, không mặc nhiên là quyết định xác minh","reason":"Thống nhất thuật ngữ gian lận; không tự động dễ hiểu thành tự động hoá","severity":"medium"},
+{"old":"xây OCR, face matching, fraud scoring và dự đoán","new":"xây OCR, so khớp khuôn mặt, chấm điểm gian lận và dự đoán","reason":"Thống nhất thuật ngữ trong cả bài","severity":"medium"}
+]}

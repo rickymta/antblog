@@ -1,0 +1,173 @@
+{
+  "file": "python-shap-explainability-audit-human-review.md",
+  "edits": [
+    {
+      "old": "ghi nhật ký quyết định khó sửa, chỉ RV-001 được chốt",
+      "new": "ghi nhật ký quyết định theo kiểu khó bị sửa lại, chỉ RV-001 được chốt",
+      "reason": "cụm \"khó sửa\" cụt, thiếu chủ thể",
+      "severity": "medium"
+    },
+    {
+      "old": "Con số không nói vì sao.",
+      "new": "Con số này không cho biết vì sao.",
+      "reason": "\"không nói\" gượng khi chủ ngữ là con số",
+      "severity": "low"
+    },
+    {
+      "old": "(kiểm ngày 07/11/2026)",
+      "new": "(đã kiểm tra ngày 07/11/2026)",
+      "reason": "câu cụt, thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "nhân một đóng góp SHAP với 0,943 được đóng góp ở thang",
+      "new": "nhân một đóng góp SHAP với 0,943 thì ra đóng góp ở thang",
+      "reason": "câu lặp \"đóng góp\" và sai cấu trúc",
+      "severity": "high"
+    },
+    {
+      "old": "Hai bảng xếp hạng chỉ đồng ý ở mức khá",
+      "new": "Hai bảng xếp hạng chỉ khớp nhau ở mức khá",
+      "reason": "\"đồng ý\" gượng với bảng xếp hạng",
+      "severity": "low"
+    },
+    {
+      "old": "chỉ từ số của đặc trưng, không bao giờ từ số giấy tờ",
+      "new": "chỉ lấy từ giá trị của đặc trưng, không bao giờ lấy từ số giấy tờ",
+      "reason": "câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "so với bộ top-1 và top-3 xếp theo gain (cố định cho mọi chuyến) và bốc ngẫu nhiên:",
+      "new": "so với bộ top-1 và top-3 xếp theo gain (cố định cho mọi chuyến) và so với cách bốc ngẫu nhiên:",
+      "reason": "câu thiếu động từ, khó theo dõi",
+      "severity": "medium"
+    },
+    {
+      "old": "chênh lớn với khoảng tin cậy rất xa số 0.",
+      "new": "chênh rất lớn, khoảng tin cậy nằm xa số 0.",
+      "reason": "câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "khoảng tin cậy chỉ vừa qua số 0.",
+      "new": "khoảng tin cậy chỉ vừa đủ nằm trên số 0.",
+      "reason": "\"vừa qua số 0\" khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "không ở một số trúng cao hơn hẳn.",
+      "new": "không nằm ở tỉ lệ trúng cao hơn hẳn.",
+      "reason": "\"một số trúng\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "nên chuyến sạch hay có lịch sử khuyến mãi còn chuyến gian lận thì hầu như không:",
+      "new": "nên chuyến sạch hay có lịch sử khuyến mãi, còn chuyến gian lận thì hầu như không:",
+      "reason": "thiếu dấu phẩy, câu khó đọc",
+      "severity": "high"
+    },
+    {
+      "old": "Mỗi chuyến vào hàng đợi mang theo điều người duyệt và kiểm toán cần:",
+      "new": "Mỗi chuyến vào hàng đợi mang theo những thông tin người duyệt và kiểm toán cần:",
+      "reason": "\"điều ... cần\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Ưu tiên là chi phí kỳ vọng của bỏ sót",
+      "new": "Mức ưu tiên là chi phí kỳ vọng của việc bỏ sót",
+      "reason": "thiếu danh hoá, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "tạo lúc đầu và xoá khi xong, kể cả khi lỗi",
+      "new": "tạo lúc đầu và xoá khi xong, kể cả khi gặp lỗi",
+      "reason": "\"khi lỗi\" cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Lab ghi tuần tự cho đủ ví dụ;",
+      "new": "Lab ghi tuần tự để có đủ ví dụ;",
+      "reason": "\"cho đủ ví dụ\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "mô phỏng làm 70 đề xuất mỗi ngày",
+      "new": "mô phỏng duyệt 70 đề xuất mỗi ngày",
+      "reason": "\"làm đề xuất\" mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "Quy tắc «chỉ người duyệt mới chốt» mà chỉ nằm trong mã Python thì",
+      "new": "Nếu quy tắc «chỉ người duyệt mới chốt» chỉ nằm trong mã Python thì",
+      "reason": "câu thiếu liên từ điều kiện",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai mươi ca thử, mỗi ca phải bị chặn:",
+      "new": "Hai mươi test case, mỗi test case phải bị chặn:",
+      "reason": "thống nhất thuật ngữ test case",
+      "severity": "medium"
+    },
+    {
+      "old": "hai lỗ mà ca thử bắt được.",
+      "new": "hai lỗ hổng mà test case bắt được.",
+      "reason": "thống nhất test case; \"lỗ\" cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "thiếu trigger INSERT và kiểm khớp log.",
+      "new": "thiếu trigger INSERT và bước kiểm tra log có khớp hàng đợi.",
+      "reason": "lược mất danh từ và chữ \"tra\"",
+      "severity": "medium"
+    },
+    {
+      "old": "kho chỉ ghi thêm ngoài tầm với của quản trị cơ sở dữ liệu",
+      "new": "kho chỉ ghi thêm, nằm ngoài quyền của quản trị cơ sở dữ liệu",
+      "reason": "\"ngoài tầm với\" dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "`pii.py` cất đi ngày giờ và tiền",
+      "new": "`pii.py` bỏ qua ngày giờ và tiền",
+      "reason": "\"cất đi\" dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "(còn che thêm được gì thì là rò)",
+      "new": "(nếu còn che thêm được thì đó là chỗ rò)",
+      "reason": "câu cụt, khó hiểu",
+      "severity": "low"
+    },
+    {
+      "old": "«Tỉ lệ sai cho phép» rơi ra từ chi phí",
+      "new": "«Tỉ lệ sai cho phép» được suy ra từ chi phí",
+      "reason": "\"rơi ra\" dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "nên bị cắt khi còn tồn đọng:",
+      "new": "nên bị chệch khi còn tồn đọng:",
+      "reason": "\"bị cắt\" khó hiểu",
+      "severity": "low"
+    },
+    {
+      "old": "(khoảng tin cậy dưới lớn hơn 0)",
+      "new": "(cận dưới của khoảng tin cậy lớn hơn 0)",
+      "reason": "thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "hai mươi ca chặn của cơ sở dữ liệu",
+      "new": "hai mươi test case bị cơ sở dữ liệu chặn",
+      "reason": "thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "kiểm CHECK và trigger bằng ca thử như ở mục",
+      "new": "kiểm tra CHECK và trigger bằng test case như ở mục",
+      "reason": "lược chữ \"tra\"; thống nhất test case",
+      "severity": "medium"
+    }
+  ]
+}

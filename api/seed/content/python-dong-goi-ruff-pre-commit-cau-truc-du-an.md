@@ -1,6 +1,6 @@
 ---
 slug: python-dong-goi-ruff-pre-commit-cau-truc-du-an
-title: "Đóng gói, ruff, mypy và cấu trúc dự án: sẵn sàng cho service"
+title: "Đóng gói, ruff, mypy và cấu trúc dự án: sẵn sàng để đưa thành service"
 summary: "Bài 20: gom P01 và P02 thành gói toinoi_pricing có src layout, entry point, ruff, mypy strict, pytest và pre-commit. Chạy từng công cụ, xem nó bắt gì và không bắt gì, rồi build wheel thật."
 category: python-beginner
 level: beginner
@@ -8,7 +8,7 @@ tags: [python, toi-noi, ruff, mypy, packaging]
 language: vi
 ---
 
-Sau mười chín bài, mã tính cước của [Tới Nơi](/articles/du-an-mau-toi-noi) nằm rải ở nhiều thư mục lab. Mỗi lab chạy được, nhưng chưa thứ nào là một thứ mà đồng nghiệp có thể cài vào môi trường của họ, gõ một lệnh để biết «có hỏng gì không», rồi mở pull request mà không bị nhắc ba lần vì import thừa. Sắp tới nhóm bắt đầu viết service đầu tiên bằng Python, và nếu móng không chắc thì mọi bài sau sẽ dựng trên cát. Bài này gom lại những gì đã học thành một gói hoàn chỉnh, rồi thêm lớp công cụ giữ nó sạch.
+Sau mười chín bài, mã tính cước của [Tới Nơi](/articles/du-an-mau-toi-noi) nằm rải ở nhiều thư mục lab. Mỗi lab chạy được, nhưng chưa lab nào là một gói mà đồng nghiệp có thể cài vào môi trường của họ, gõ một lệnh để biết «có hỏng gì không», rồi mở pull request mà không bị nhắc ba lần vì import thừa. Sắp tới nhóm bắt đầu viết service đầu tiên bằng Python, và nếu móng không chắc thì mọi bài sau sẽ dựng trên cát. Bài này gom lại những gì đã học thành một gói hoàn chỉnh, rồi thêm lớp công cụ giữ nó sạch.
 
 Đây là bài 20 của lộ trình **Python cơ bản qua Tới Nơi**, bài tổng hợp của phần 01 và phần 02. Bạn cần quen `src` layout và import (bài 07), pytest (bài 10) và type hints (bài 12). Lab là gói `toinoi_pricing`, dùng lại đúng mô hình cước đã quen: 12.000 VND cho 2 km đầu, 4.500 VND mỗi km vượt, không phụ phí.
 
@@ -20,7 +20,7 @@ Sau mười chín bài, mã tính cước của [Tới Nơi](/articles/du-an-mau
 
 ## Từ các bài trước tới một gói
 
-Gói `toinoi_pricing` không thêm luật nghiệp vụ nào: giá, miền 0 đến 100 km, tám trạng thái chuyến đều là của các bài trước. Nó chép lại `Money` và `Quote` cùng toàn bộ phần kiểm tra đầu vào từ lab 13 (kiểu `Decimal`, số hữu hạn, không âm, VND không có đồng lẻ, thời điểm phải aware) và sắp xếp mọi thứ theo một cấu trúc mà service có thể bám vào. Bảng dưới liệt kê các bài góp trực tiếp vào lab này, không phải mọi bài từ 01 đến 19.
+Gói `toinoi_pricing` không thêm luật nghiệp vụ nào: giá, miền 0 đến 100 km, tám trạng thái chuyến đều là của các bài trước. Gói này chép lại `Money` và `Quote` cùng toàn bộ phần kiểm tra đầu vào từ lab 13 (kiểu `Decimal`, số hữu hạn, không âm, VND không có đồng lẻ, thời điểm phải aware) và sắp xếp mọi thứ theo một cấu trúc mà service có thể bám vào. Bảng dưới liệt kê các bài góp trực tiếp vào lab này, không phải mọi bài từ 01 đến 19.
 
 | Bài | Kiến thức | Chỗ nó xuất hiện trong lab |
 | --- | --- | --- |
@@ -29,12 +29,12 @@ Gói `toinoi_pricing` không thêm luật nghiệp vụ nào: giá, miền 0 đ�
 | 04 | `datetime` aware, UTC | `Quote.expires_at` phải aware |
 | 07 | Package, `src` layout | `src/toinoi_pricing/`, `[build-system]` |
 | 08 | Exception | `ValueError` có thông báo; CLI đổi thành mã thoát 2 |
-| 10 | pytest, `parametrize`; `FarePolicy` | `tests/`, bảng ca biên 8 × 3; `FarePolicy` (`NamedTuple`) giữ nguyên từ bài 10 |
+| 10 | pytest, `parametrize`; `FarePolicy` | `tests/`, bảng test case biên 8 × 3; `FarePolicy` (`NamedTuple`) giữ nguyên từ bài 10 |
 | 11 | Máy trạng thái chuyến bằng `dict` | `ALLOWED_TRANSITIONS` |
 | 12 | Type hints, mypy | `distance_km: Decimal`, `mypy --strict` |
 | 13 | `frozen` dataclass, `StrEnum`, `Money`, `Quote` | `Money`, `Quote`, `TripStatus` (khoá của `ALLOWED_TRANSITIONS` là `StrEnum`); `make_quote(now=...)` nhận thời điểm từ ngoài vào |
 
-Bài 14 đi tiếp một bước: thay tham số `now` bằng một `Clock` được tiêm vào.
+Bài 14 đi tiếp một bước: thay tham số `now` bằng một `Clock` được inject vào.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -43,7 +43,7 @@ Bài 14 đi tiếp một bước: thay tham số `now` bằng một `Clock` đư
 <figcaption>Hình 1. Cây thư mục của lab. Mã nằm dưới <code>src/</code>; <code>tests/</code> và <code>demo-errors/</code> nằm ngoài gói nên không vào wheel (README.md vào sdist vì <code>[project]</code> khai <code>readme</code>).</figcaption>
 </figure>
 
-Việc tách ba tầng có chủ đích. `models.py` chứa kiểu dữ liệu cùng phần tự kiểm tra của chúng, `pricing.py` chứa quy tắc tính cước, `cli.py` là vỏ mỏng: đọc đối số, gọi quy tắc, đổi lỗi thành mã thoát. Khi sau này có thêm vỏ HTTP, nó sẽ ngồi chỗ của `cli.py` và gọi cùng `pricing.py`, không phải sao chép luật tính tiền. Quy tắc nằm một chỗ để test một chỗ.
+Việc tách ba tầng có chủ đích. `models.py` chứa kiểu dữ liệu cùng phần tự kiểm tra của chúng, `pricing.py` chứa quy tắc tính cước, `cli.py` là vỏ mỏng: đọc đối số, gọi quy tắc, đổi lỗi thành mã thoát. Khi sau này có thêm vỏ HTTP, vỏ đó sẽ đứng ngang hàng với `cli.py` và gọi cùng `pricing.py`, không phải sao chép luật tính tiền. Quy tắc nằm ở một chỗ nên chỉ cần test ở một chỗ.
 
 ## pyproject.toml đầy đủ
 
@@ -90,7 +90,7 @@ Mỗi mục có một việc. `[project]` là metadata chuẩn (PEP 621): tên, 
 
 `[project.scripts]` là entry point: khi cài gói, công cụ cài đặt tạo lệnh `toinoi-fare` gọi hàm `main` trong `toinoi_pricing.cli`. Ta không tự viết file shell hay dòng `#!` nào. `[dependency-groups]` (PEP 735) chứa công cụ **chỉ dành cho người phát triển**: ruff, mypy, pytest. Chúng không đi vào wheel; `METADATA` của wheel không có dòng `Requires-Dist` nào, còn `uv run` mặc định cài nhóm `dev`. Cuối cùng `[build-system]` cho biết dùng `uv_build` để dựng gói và `module-name` nối tên project (có gạch) với tên package import (`toinoi_pricing`), như bài 07 đã giải thích.
 
-`uv.lock` ghim phiên bản chính xác của toàn bộ cây phụ thuộc: ở lần chạy này mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 trên Python 3.14.7. Hãy commit nó. `uv lock --check` kiểm lock còn khớp `pyproject.toml` không, và `uv sync --locked` thất bại thay vì âm thầm cập nhật lock khi chúng lệch nhau, đúng điều ta muốn ở CI:
+`uv.lock` ghim phiên bản chính xác của toàn bộ cây phụ thuộc: ở lần chạy này mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 trên Python 3.14.7. Hãy commit nó. `uv lock --check` kiểm tra lock còn khớp `pyproject.toml` không, và `uv sync --locked` dừng với lỗi thay vì lặng lẽ cập nhật lock khi chúng lệch nhau, đúng điều ta muốn ở CI:
 
 ```text
 $ uv lock --check
@@ -102,7 +102,7 @@ Checked 13 packages in 0.43ms
 
 ## src layout, entry point và wheel thật
 
-Đóng gói chỉ có ý nghĩa nếu ta nhìn được thứ ra khỏi máy. `uv build` dựng cả sdist và wheel; ta xem bên trong wheel (trích):
+Đóng gói chỉ có ý nghĩa nếu ta xem được sản phẩm sẽ rời khỏi máy mình. `uv build` dựng cả sdist và wheel; ta xem bên trong wheel (trích):
 
 ```bash
 L=examples/toi-noi-python/20-dong-goi-ruff-cau-truc-du-an
@@ -132,7 +132,7 @@ toinoi_pricing/py.typed
 toinoi-fare = toinoi_pricing.cli:main
 ```
 
-Để chắc chắn wheel dùng được ngoài thư mục dự án, cài nó vào một môi trường cô lập rồi chạy lệnh :
+Để chắc chắn wheel dùng được ngoài thư mục dự án, cài nó vào một môi trường cô lập rồi chạy lệnh:
 
 ```bash
 uv run --no-project --isolated --with $L/out/*.whl toinoi-fare 2.5
@@ -142,13 +142,13 @@ uv run --no-project --isolated --with $L/out/*.whl toinoi-fare 2.5
 2.5 km => 14250 VND
 ```
 
-Tệp `py.typed` là một file rỗng, theo PEP 561: nó nói với mypy rằng «gói này có kiểu, hãy tin các chú thích của nó». Thiếu nó thì người dùng gói không được kiểm kiểu. Ta thử trên hai bản wheel, có và không có `py.typed`, bằng `demo-errors/consumer.py`: một file «khách» gọi `calculate_fare` rồi gán kết quả cho biến kiểu `str` (README của lab ghi từng lệnh tái lập). Với `py.typed`, mypy thấy lỗi thật trong code của khách:
+Tệp `py.typed` là một file rỗng, theo PEP 561: nó nói với mypy rằng «gói này có kiểu, hãy tin các chú thích của nó». Thiếu nó thì mypy sẽ không kiểm tra kiểu cho người dùng gói. Ta thử trên hai bản wheel, có và không có `py.typed`, bằng `demo-errors/consumer.py`: một file «khách» gọi `calculate_fare` rồi gán kết quả cho biến kiểu `str` (README của lab ghi từng lệnh tái lập). Với `py.typed`, mypy thấy lỗi thật trong code của khách:
 
 ```text
 demo-errors/consumer.py:7: error: Incompatible types in assignment (expression has type "Decimal", variable has type "str")  [assignment]
 ```
 
-Bỏ `py.typed`, mypy từ chối phân tích cả gói và không kiểm gì:
+Bỏ `py.typed`, mypy từ chối phân tích cả gói và không kiểm tra gì:
 
 ```text
 demo-errors/consumer.py:5: error: Skipping analyzing "toinoi_pricing": module is installed, but missing library stubs or py.typed marker  [import-untyped]
@@ -181,7 +181,7 @@ select = ["E", "W", "F", "I", "UP", "B", "SIM", "RUF", "PT", "DTZ", "S"]
 
 Ta không chọn «mọi quy tắc». Mỗi nhóm chữ cái là một họ quy tắc, và bật hết thì lần đầu chạy sẽ ra hàng trăm cảnh báo mà không ai đọc. Bắt đầu từ vài họ có lợi rõ, rồi thêm khi cả nhóm đồng ý. Hai họ ở đây gắn với quy ước của Tới Nơi: `DTZ` cảnh báo `datetime` không có múi giờ (đúng điều bài 04 dặn), và `S` cảnh báo mẫu code nguy hiểm. Ta tắt `S101` (dùng `assert`) riêng cho `tests/`, vì assert trong test là việc đúng.
 
-Để xem ruff bắt gì, lab có file `demo-errors/bad_lint.py` cố ý sai (không thuộc gói, bị loại khỏi lệnh kiểm chung):
+Để xem ruff bắt gì, lab có file `demo-errors/bad_lint.py` cố ý sai (không thuộc gói, bị loại khỏi lệnh kiểm tra chung):
 
 ```python
 # demo-errors/bad_lint.py
@@ -219,7 +219,7 @@ Found 5 errors.
 
 Năm lỗi, mỗi lỗi một mã. `B006` là cái bẫy kinh điển: giá trị mặc định `[]` được tạo **một lần** lúc định nghĩa hàm và dùng chung cho mọi lần gọi, nên danh sách `stops` tích dần giữa các lần gọi. Dấu `[*]` nghĩa là ruff sửa được tự động bằng `--fix`. Còn «unsafe fix» là bản sửa có thể đổi hành vi: thay `== None` bằng `is None` đổi kết quả nếu lớp có `__eq__` tuỳ biến, nên ruff không tự làm khi chưa được phép. Với những bản sửa an toàn, `ruff check --fix` dọn được import thừa và thứ tự import; phần còn lại cần người quyết định.
 
-`ruff format` thì không báo «lỗi», nó chỉ cho thấy khác biệt. File `demo-errors/bad_format.py` viết cẩu thả, `ruff format --diff` in thứ nó sẽ đổi:
+`ruff format` thì không báo «lỗi», nó chỉ cho thấy khác biệt. File `demo-errors/bad_format.py` viết cẩu thả, nên `ruff format --diff` in ra những chỗ ruff sẽ đổi:
 
 ```text
 -def total(a:Decimal,b:Decimal)->Decimal:
@@ -233,7 +233,7 @@ Năm lỗi, mỗi lỗi một mã. `B006` là cái bẫy kinh điển: giá tr�
 
 ## mypy strict: kiểu là hợp đồng kiểm được
 
-Bài 10 chặn đầu vào sai kiểu bằng `isinstance` lúc chạy và kiểm bằng ca `pytest.raises(TypeError)`. Ở gói này `calculate_fare` chỉ khai `distance_km: Decimal`, không còn nhánh kiểm kiểu nào: việc ngăn truyền `float` được giao cho mypy, **trước khi chạy**. Cấu hình ngắn:
+Bài 10 chặn đầu vào sai kiểu bằng `isinstance` lúc chạy và kiểm thử bằng test case `pytest.raises(TypeError)`. Ở gói này `calculate_fare` chỉ khai `distance_km: Decimal`, không còn nhánh kiểm kiểu nào: mypy đảm nhiệm việc ngăn truyền `float`, **trước khi chạy**. Cấu hình ngắn:
 
 ```toml
 [tool.mypy]
@@ -243,7 +243,7 @@ mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
 exclude = ["demo-errors/"]
 ```
 
-`strict = true` bật một bộ cờ gồm cấm hàm thiếu annotation, cấm generic thiếu tham số kiểu, cảnh báo `# type: ignore` thừa, và kiểm so sánh vô nghĩa (`strict_equality`). File `demo-errors/bad_types.py` có ba lỗi kiểu điển hình:
+`strict = true` bật một bộ cờ: cấm hàm thiếu chú thích kiểu, cấm generic thiếu tham số kiểu, cảnh báo `# type: ignore` thừa, và kiểm tra các phép so sánh vô nghĩa (`strict_equality`). File `demo-errors/bad_types.py` có ba lỗi kiểu điển hình:
 
 ```python
 # demo-errors/bad_types.py
@@ -270,7 +270,7 @@ Found 3 errors in 1 file (checked 1 source file)
 
 Lỗi đầu là chính cái bẫy `float` của bài 02. Lỗi cuối là kiểu «quên xử lý `None`» (bài 16 đi sâu vào). Có ba điều đáng biết về cách dùng. Thứ nhất, mypy cũng bắt lỗi trong test: khi viết `test_models.py`, dòng `assert TripStatus.PICKED_UP == "picked_up"` bị báo `Non-overlapping equality check`, vì mypy coi hai literal đó không bao giờ bằng nhau dù lúc chạy `StrEnum` so sánh bằng chuỗi. Ta đổi sang `TripStatus.PICKED_UP.value == "picked_up"`. Thứ hai, với `Money(2.5)` trong test, mypy báo `arg-type` nên dòng test phải ghi `# type: ignore[arg-type]`; ngược lại, khi ta ghi nhầm ignore cho `Money(D("1")) + 1` (vì `__add__` nhận `object`, không có lỗi), mypy phản ứng bằng `Unused "type: ignore" comment  [unused-ignore]`. Thứ ba, khi buộc phải bỏ qua một lỗi, hãy ghi mã cụ thể (`# type: ignore[misc]` ở test gán vào dataclass frozen) chứ không để `# type: ignore` trần; cờ `warn_unused_ignores` của strict sẽ báo ngay khi dòng đó không còn cần.
 
-`Money` vẫn giữ `isinstance(self.amount, Decimal)` chép từ lab 13: giá trị đi vào từ JSON hay database không qua mypy, nên ranh giới dữ liệu ngoài vẫn cần kiểm lúc chạy. Hàm `calculate_fare` thì chỉ khai kiểu, vì mọi lời gọi trong dự án đều qua mypy. mypy chỉ kiểm điều ta đã annotate và chỉ kiểm tại ranh giới giữa các kiểu. `Decimal` đúng kiểu vẫn có thể là `Decimal("NaN")`, nên `calculate_fare` vẫn kiểm `is_finite()` và miền 0 đến 100 lúc chạy, và test vẫn có ca `NaN`, `Infinity`. Kiểu và test bổ sung cho nhau, không thay nhau.
+`Money` vẫn giữ `isinstance(self.amount, Decimal)` chép từ lab 13: giá trị đi vào từ JSON hay database không qua mypy, nên ranh giới dữ liệu ngoài vẫn cần kiểm lúc chạy. Hàm `calculate_fare` thì chỉ khai kiểu, vì mọi lời gọi trong dự án đều qua mypy. mypy chỉ kiểm tra những chỗ ta đã chú thích kiểu, và chỉ ở ranh giới giữa các kiểu. `Decimal` đúng kiểu vẫn có thể là `Decimal("NaN")`, nên `calculate_fare` vẫn kiểm `is_finite()` và miền 0 đến 100 lúc chạy, và test vẫn có test case `NaN`, `Infinity`. Kiểu và test bổ sung cho nhau, không thay nhau.
 
 ## pre-commit: chạy công cụ trước khi commit
 
@@ -343,7 +343,7 @@ Các lệnh ở trên xếp theo thứ tự rẻ trước, đắt sau: định d
 <figcaption>Hình 2. Năm lớp kiểm chứng. Pre-commit giữ ba lớp rẻ ở máy từng người; CI chạy đủ cả năm để không phụ thuộc vào việc ai đó có chạy hook hay không.</figcaption>
 </figure>
 
-`verify.sh` của lab gói cả năm lớp (bước build dựng wheel, kiểm `py.typed` và entry point, rồi cài vào môi trường cô lập) và thêm một bước đảo ngược: nó đòi các công cụ **phải bắt được** ba file trong `demo-errors/` với đúng số lỗi (5 lỗi ruff, 1 file cần định dạng lại, 3 lỗi mypy). Một bộ kiểm chứng chỉ chứng minh xanh nếu ta cũng chứng minh được nó biết đỏ.
+`verify.sh` của lab gói cả năm lớp (bước build dựng wheel, kiểm `py.typed` và entry point, rồi cài vào môi trường cô lập) và thêm một bước đảo ngược: nó đòi các công cụ **phải bắt được** ba file trong `demo-errors/` với đúng số lỗi (5 lỗi ruff, 1 file cần định dạng lại, 3 lỗi mypy). Một bộ kiểm chứng báo xanh chỉ đáng tin nếu ta cũng chứng minh được nó biết báo đỏ.
 
 Từ thư mục gốc repository (lần đầu cần mạng để uv tải ruff, mypy, pytest và build backend):
 
@@ -357,7 +357,7 @@ uv run --project $L toinoi-fare 2.5
 sh $L/verify.sh
 ```
 
-mypy cần `--config-file` vì nó đọc cấu hình từ thư mục hiện tại: chạy từ gốc repository mà thiếu cờ này, `mypy` trên `bad_lint.py` báo `Success: no issues found` vì không đọc `strict` của lab (chạy trong thư mục lab thì báo hai lỗi `no-untyped-def`). Ruff và pytest thì tự tìm `pyproject.toml` gần file nhất. `verify.sh` kết thúc bằng `OK 7/7`; khi một bước đỏ, nó in `FAIL n/7` (n là số bước đạt) và thoát mã khác 0. Output thật (trích, bỏ phần khung của file định dạng):
+mypy cần `--config-file` vì mypy đọc cấu hình từ thư mục hiện tại: chạy từ gốc repository mà thiếu cờ này, `mypy` trên `bad_lint.py` báo `Success: no issues found` vì không đọc `strict` của lab (chạy trong thư mục lab thì báo hai lỗi `no-untyped-def`). Ruff và pytest thì tự tìm `pyproject.toml` gần file nhất. `verify.sh` kết thúc bằng `OK 7/7`; khi một bước đỏ, nó in `FAIL n/7` (n là số bước đạt) và thoát mã khác 0. Kết quả chạy thật (trích, bỏ phần khung của file định dạng):
 
 ```text
 == 1. ruff format --check
@@ -382,7 +382,7 @@ Found 3 errors in 1 file (checked 1 source file)
 OK 7/7
 ```
 
-Con số 60 test gồm 33 test của `test_pricing.py` (24 ca biên là 8 khoảng cách × 3 dịch vụ, 4 ca ngoài miền, dịch vụ lạ, chính sách thay thế và báo giá), 22 test của `models` (`Money`, `Quote` và bảng chuyển trạng thái, trong đó phần lớn là các ca từ chối đầu vào chép từ lab 13) và 5 test của CLI. Lệnh `toinoi-fare 100.001` in `lỗi: khoảng cách ngoài miền 0..100 km: 100.001` ra stderr và thoát với mã 2; lỗi đi qua `stderr`, nên `stdout` chỉ chứa kết quả. Lab dùng Python 3.14.7, ruff 0.17.4, mypy 2.4.1, pytest 9.2.0, `uv_build` kèm uv 0.12.11.
+Con số 60 test gồm 33 test của `test_pricing.py` (24 test case biên là 8 khoảng cách × 3 dịch vụ, 4 test case ngoài miền, dịch vụ lạ, chính sách thay thế và báo giá), 22 test của `models` (`Money`, `Quote` và bảng chuyển trạng thái, trong đó phần lớn là các test case từ chối đầu vào chép từ lab 13) và 5 test của CLI. Lệnh `toinoi-fare 100.001` in `lỗi: khoảng cách ngoài miền 0..100 km: 100.001` ra stderr và thoát với mã 2; lỗi đi qua `stderr`, nên `stdout` chỉ chứa kết quả. Lab dùng Python 3.14.7, ruff 0.17.4, mypy 2.4.1, pytest 9.2.0, `uv_build` kèm uv 0.12.11.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -394,7 +394,7 @@ Con số 60 test gồm 33 test của `test_pricing.py` (24 ca biên là 8 khoả
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Gói chưa được phát hành lên registry (PyPI hay registry nội bộ), chưa có chiến lược đánh số phiên bản, changelog hay build trong CI; repository này cũng không cài pre-commit hook. Bộ quy tắc ruff chỉ là điểm xuất phát nhỏ, mỗi nhóm nên chọn lại theo thực tế. 60 test chứng minh các ca đã chọn chứ không chứng minh mọi khoảng cách đúng, và <code>mypy --strict</code> chỉ bảo đảm hợp đồng kiểu, không bảo đảm nghiệp vụ. Mô hình cước vẫn là bản học tập: không phụ phí, thuế hay giảm giá, và các con số 12.000, 4.500 không phải bảng giá thật.</p>
+<p>Gói chưa được phát hành lên registry (PyPI hay registry nội bộ), chưa có chiến lược đánh số phiên bản, changelog hay build trong CI; repository này cũng không cài pre-commit hook. Bộ quy tắc ruff chỉ là điểm xuất phát nhỏ, mỗi nhóm nên chọn lại theo thực tế. 60 test chứng minh các test case đã chọn chứ không chứng minh mọi khoảng cách đúng, và <code>mypy --strict</code> chỉ bảo đảm hợp đồng kiểu, không bảo đảm nghiệp vụ. Mô hình cước vẫn là bản học tập: không phụ phí, thuế hay giảm giá, và các con số 12.000, 4.500 không phải bảng giá thật.</p>
 </div>
 
 **Bài tập 1:** Thêm họ `T20` (cấm lệnh `print`) vào `select` của ruff. Lệnh nào đỏ, ở đâu, và bạn xử lý thế nào cho `cli.py`?

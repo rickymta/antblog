@@ -1,0 +1,149 @@
+{
+  "file": "python-design-pattern-strategy-state-adapter.md",
+  "edits": [
+    {
+      "old": "Adapter bọc SDK bản đồ trả mét. Khi nào",
+      "new": "Adapter bọc SDK bản đồ trả khoảng cách theo mét. Khi nào",
+      "reason": "Cụm cụt, thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi pattern co lại còn gì.",
+      "new": "mỗi pattern còn lại gì sau khi rút gọn.",
+      "reason": "«co lại còn gì» gượng, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "State giải quyết «luật được làm gì phụ thuộc trạng thái hiện tại».",
+      "new": "State giải quyết «việc được phép làm gì phụ thuộc vào trạng thái hiện tại».",
+      "reason": "Câu thiếu động từ, phải đoán ý",
+      "severity": "medium"
+    },
+    {
+      "old": "một hàm thẳng thắn dễ đọc hơn.",
+      "new": "một hàm đơn giản, viết thẳng sẽ dễ đọc hơn.",
+      "reason": "«thẳng thắn» là calque của straightforward",
+      "severity": "medium"
+    },
+    {
+      "old": "giữ một `dict` và một bộ đếm trúng cache;",
+      "new": "giữ một `dict` và một bộ đếm số lần trúng cache;",
+      "reason": "Cụm cụt, thiếu danh từ",
+      "severity": "low"
+    },
+    {
+      "old": "Điều đáng kiểm nhất là **hợp đồng**",
+      "new": "Điều đáng kiểm thử nhất là **hợp đồng**",
+      "reason": "«kiểm» cụt, thiếu chữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab chạy cả tám ca biên của bài 10 qua cả ba dịch vụ",
+      "new": "Lab chạy cả tám test case biên của bài 10 qua cả ba dịch vụ",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "sẽ đỏ ngay ở ca 2,001 km,",
+      "new": "sẽ báo đỏ ngay ở test case 2,001 km,",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "cộng `cancelled` đạt được từ bốn trạng thái đầu.",
+      "new": "cộng `cancelled` mà ta đến được từ bốn trạng thái đầu.",
+      "reason": "«đạt được» gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Nhưng nó bắt đầu gượng khi một trạng thái có **luật riêng**.",
+      "new": "Nhưng bảng bắt đầu tỏ ra gượng gạo khi một trạng thái có **luật riêng**.",
+      "reason": "Tránh «Nó» chỉ sự vật trừu tượng ở đầu câu",
+      "severity": "low"
+    },
+    {
+      "old": "Lớp cha cho mặc định của cả tám trạng thái,",
+      "new": "Lớp cha đặt giá trị mặc định cho cả tám trạng thái,",
+      "reason": "«cho mặc định» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Annotation được tính khi có ai cần (PEP 649 và 749),",
+      "new": "Annotation được tính khi có nơi cần đến (PEP 649 và 749),",
+      "reason": "«có ai cần» khó hiểu với đối tượng là mã",
+      "severity": "low"
+    },
+    {
+      "old": "là câu hỏi kiểm được, không phải câu hỏi niềm tin.",
+      "new": "là câu hỏi kiểm chứng được, không phải câu hỏi của niềm tin.",
+      "reason": "Cụm «kiểm được» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "lớp tiện hơn, nhưng nó cần đồng hồ để kiểm thời gian;",
+      "new": "lớp tiện hơn, nhưng lớp này cần đồng hồ để kiểm tra thời gian;",
+      "reason": "Tránh «nó», bổ sung chữ «tra»",
+      "severity": "low"
+    },
+    {
+      "old": "Lớp <code>Searching</code> kiểm luật trên bản sao",
+      "new": "Lớp <code>Searching</code> kiểm tra luật trên bản sao",
+      "reason": "«kiểm luật» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "ta bọc `Decimal(str(meters))`, không viết `Decimal(meters)`.",
+      "new": "ta dùng `Decimal(str(meters))`, không viết `Decimal(meters)`.",
+      "reason": "«bọc» dễ lẫn với Adapter bọc SDK",
+      "severity": "low"
+    },
+    {
+      "old": "Phần lõi của adapter là hàm `meters_to_km`, thuần và dễ kiểm.",
+      "new": "Phần lõi của adapter là hàm `meters_to_km`, thuần và dễ kiểm thử.",
+      "reason": "«dễ kiểm» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "năm lớp trạng thái mà luật của chúng chỉ là dữ liệu và bảng đã nói đủ;",
+      "new": "năm lớp trạng thái mà luật của chúng chỉ là dữ liệu, trong khi một bảng chuyển đã đủ để mô tả;",
+      "reason": "Câu khó hiểu, thiếu chủ ngữ cho «nói đủ»",
+      "severity": "high"
+    },
+    {
+      "old": "Pattern phải trả được tiền cho tầng gián tiếp nó thêm vào.",
+      "new": "Pattern phải đáng giá so với tầng gián tiếp mà nó thêm vào.",
+      "reason": "Calque của «pay for»",
+      "severity": "medium"
+    },
+    {
+      "old": "tính tay khớp với output.",
+      "new": "con số tính tay này khớp với kết quả chương trình in ra.",
+      "reason": "Câu thiếu chủ ngữ, từ tiếng Anh lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "lệnh thứ ba kiểm kiểu:",
+      "new": "lệnh thứ ba kiểm tra kiểu dữ liệu:",
+      "reason": "«kiểm kiểu» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Có ca sai thì `--verify` in",
+      "new": "Có test case sai thì `--verify` in",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "(n là số ca đạt) và thoát với mã 1.",
+      "new": "(n là số test case đạt) và thoát với mã 1.",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "chạy lại bảng ca biên |",
+      "new": "chạy lại bảng test case biên |",
+      "reason": "Thống nhất «test case»",
+      "severity": "low"
+    }
+  ]
+}

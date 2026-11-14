@@ -1,14 +1,14 @@
 ---
 slug: python-face-detection-landmarks-mediapipe-opencv
 title: "Face detection và landmarks: tìm khuôn mặt trong ảnh giấy tờ và selfie"
-summary: "Bài 48: so Haar, YuNet (OpenCV DNN) và MediaPipe trên ảnh thẻ, selfie tổng hợp; căn chỉnh theo 5 landmark về mẫu 112x112; đo mờ, tối; gom lý do chuyển người duyệt. Có số đo thật và lab chạy được."
+summary: "Bài 48: so Haar, YuNet (OpenCV DNN) và MediaPipe trên ảnh thẻ, selfie tổng hợp; căn chỉnh theo 5 landmark về mẫu 112x112; đo độ mờ, độ tối; gom lý do chuyển cho người duyệt. Có số đo thật và lab chạy được."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, opencv, mediapipe, face-detection]
 language: vi
 ---
 
-Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) nộp hồ sơ KYC gồm ảnh căn cước và một ảnh selfie chụp bằng điện thoại. Service `kyc-face` sẽ phải trả lời câu hỏi «người trong selfie có phải người trên thẻ không», nhưng trước đó có bốn câu nhỏ hơn mà nếu bỏ qua thì điểm so khớp chẳng có nghĩa gì: ảnh có mặt không, có đúng một mặt không, mặt có đủ rõ không, và mặt có được đặt vào khung giống như mặt mà mô hình so khớp đã học không. Bài này làm bốn việc đó, rồi quyết định ảnh nào đi tiếp và ảnh nào sang người duyệt.
+Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) nộp hồ sơ KYC gồm ảnh căn cước và một ảnh selfie chụp bằng điện thoại. Service `kyc-face` sẽ phải trả lời câu hỏi «người trong selfie có phải người trên thẻ không», nhưng trước đó có bốn câu nhỏ hơn mà nếu bỏ qua thì điểm so khớp chẳng có nghĩa gì: ảnh có mặt không, có đúng một mặt không, mặt có đủ rõ không, và mặt có được đặt vào khung giống với khung mà mô hình so khớp đã học không. Bài này làm bốn việc đó, rồi quyết định ảnh nào đi tiếp và ảnh nào sang người duyệt.
 
 Đây là bài 48 của lộ trình **Python nâng cao qua Tới Nơi**, bài đầu của phần 06 (so khớp khuôn mặt). Bạn cần quen mảng ảnh và OpenCV ở [bài 30](/articles/python-numpy-pillow-opencv-tien-xu-ly-anh) và luồng KYC ở [bài 41](/articles/python-kyc-tai-xe-bai-toan-du-lieu-metric).
 
@@ -20,7 +20,7 @@ Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) nộp hồ sơ K
 
 ## Bốn câu hỏi trước khi so khớp
 
-Hình 1 là chuỗi bước của lab `48-face-detection-landmarks`. Mỗi bước có thể dừng chuỗi: không có mặt thì không có gì để căn chỉnh, mặt mờ thì embedding ở bài 49 không đáng tin. Điểm cần chốt từ đầu là ảnh dừng lại **không bị từ chối**; nó được chuyển sang người duyệt kèm lý do, đúng tinh thần của loạt bài: máy chuẩn bị đầu vào, người quyết định.
+Hình 1 là chuỗi bước của lab `48-face-detection-landmarks`. Mỗi bước có thể dừng chuỗi: không có mặt thì không có gì để căn chỉnh, mặt mờ thì embedding ở bài 49 không đáng tin. Điểm cần chốt từ đầu là ảnh bị dừng lại thì **không bị từ chối**; nó được chuyển sang người duyệt kèm lý do, đúng tinh thần của loạt bài: hệ thống chuẩn bị đầu vào, người quyết định.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -29,9 +29,9 @@ Hình 1 là chuỗi bước của lab `48-face-detection-landmarks`. Mỗi bư�
 <figcaption>Hình 1. Chuỗi xử lý ảnh khuôn mặt trước khi so khớp. Hai bước có thể chuyển hồ sơ sang người duyệt; bước cuối là bài sau.</figcaption>
 </figure>
 
-Dữ liệu là điểm khó nhất của loạt bài này vì ta không được commit ảnh người. Lab dùng bộ **Olivetti faces** qua `sklearn.datasets.fetch_olivetti_faces`: 400 ảnh xám 64 × 64 của 40 người (10 ảnh mỗi người), chụp trong phòng thí nghiệm năm 1992 đến 1994. Bộ khuôn mặt Olivetti do AT&T Laboratories Cambridge thu thập; xem tài liệu scikit-learn. Lần đầu sklearn tải về khoảng 4,26 MB và lưu bản cache 1,4 MB (1.405.392 byte) trong `~/scikit_learn_data`, không nằm trong repository. Từ đó `synth.py` sinh hai loại ảnh. Ảnh **chân dung trên thẻ**: dán khuôn mặt vào ô ảnh của thẻ căn cước giả của bài 30. Ảnh **selfie**: dán khuôn mặt lên nền «phòng» 640 × 480 (dải màu, vài mảng sáng tối, nhiễu), có mặt nạ tròn mềm để không có cạnh vuông, với kích thước và góc xoay chọn được. Vì ta tự dán nên biết ô «đáp án» và biết góc xoay thêm vào. «Góc thật» trong bài là góc xoay ta thêm vào; ảnh Olivetti gốc có thể đã nghiêng nhẹ sẵn, nên ở roll 0 độ lệch đo được (0,85 độ với YuNet, 0,59 độ với FaceLandmarker) gồm cả độ nghiêng sẵn có lẫn sai số của bộ ước lượng, và ta không tách được hai phần. Cái giá là trung thực: đây không phải ảnh chụp bằng điện thoại, mà ảnh xám của một bộ dữ liệu cũ; phần giới hạn ở cuối bài nói tiếp.
+Dữ liệu là điểm khó nhất của loạt bài này vì ta không được commit ảnh người. Lab dùng bộ **Olivetti faces** qua `sklearn.datasets.fetch_olivetti_faces`: 400 ảnh xám 64 × 64 của 40 người (10 ảnh mỗi người), chụp trong phòng thí nghiệm năm 1992 đến 1994. Bộ khuôn mặt Olivetti do AT&T Laboratories Cambridge thu thập; xem tài liệu scikit-learn. Lần đầu sklearn tải về khoảng 4,26 MB và lưu bản cache 1,4 MB (1.405.392 byte) trong `~/scikit_learn_data`, không nằm trong repository. Từ đó `synth.py` sinh hai loại ảnh. Ảnh **chân dung trên thẻ**: dán khuôn mặt vào ô ảnh của thẻ căn cước giả của bài 30. Ảnh **selfie**: dán khuôn mặt lên nền «phòng» 640 × 480 (dải màu, vài mảng sáng tối, nhiễu), có mặt nạ tròn mềm để không có cạnh vuông, với kích thước và góc xoay chọn được. Vì ta tự dán nên biết ô «đáp án» và biết góc xoay thêm vào. «Góc thật» trong bài là góc xoay ta thêm vào; ảnh Olivetti gốc có thể đã nghiêng nhẹ sẵn, nên ở roll 0 độ lệch đo được (0,85 độ với YuNet, 0,59 độ với FaceLandmarker) gồm cả độ nghiêng sẵn có lẫn sai số của bộ ước lượng, và ta không tách được hai phần. Nói thẳng cái giá phải trả: đây không phải ảnh chụp bằng điện thoại, mà là ảnh xám của một bộ dữ liệu cũ; phần giới hạn ở cuối bài nói tiếp.
 
-Mô hình tải lần đầu vào `~/.cache/toinoi-python/models`, lab in URL và kích thước, rồi kiểm SHA-256. Haar thì có sẵn trong gói OpenCV nên không tải.
+Mô hình tải lần đầu vào `~/.cache/toinoi-python/models`, lab in URL và kích thước, rồi kiểm tra SHA-256. Haar thì có sẵn trong gói OpenCV nên không tải.
 
 ```text
   yunet_2023mar.onnx                 232,589 byte  https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
@@ -43,7 +43,7 @@ Về phiên bản, đã thử ngày 2026-11-06 trên Python 3.14.7: MediaPipe 1.
 
 ## Ba bộ phát hiện: Haar, YuNet và BlazeFace
 
-Mọi bộ phát hiện của lab (cùng với FaceLandmarker ở mục sau) cài theo một giao diện để so cho công bằng: nhận ảnh BGR, trả danh sách `Detection` gồm hộp, điểm tin cậy và landmark nếu có.
+Mọi bộ phát hiện của lab (cùng với FaceLandmarker ở mục sau) cài đặt theo cùng một giao diện để so sánh công bằng: nhận ảnh BGR, trả danh sách `Detection` gồm hộp, điểm tin cậy và landmark nếu có.
 
 ```python
 # faces.py (trích)
@@ -89,11 +89,11 @@ mờ Gauss sigma 3              38/38/0        40/40/0        38/38/0        38/
 tối gamma 3                   34/35/0        40/40/0        40/40/0        37/37/0        40/40/0
 ```
 
-Đọc bảng theo từng cột. **Haar** bắt được mặt thẳng từ 80 px trở lên (37 đến 39/40) và còn 31/40 ở 40 px, nhưng chỉ có hộp ở 1/40 ảnh khi nghiêng 30 độ và yếu hơn khi ảnh tối (34/40); trên thẻ nó là bộ duy nhất báo mặt thừa (2 hộp). **YuNet** giữ được mặt 80 px (40/40) và nghiêng đến 30 độ (37/40); ở 60 độ nó có hộp ở 11/40 ảnh nhưng chỉ 5/40 trúng. **BlazeFace** short range chỉ có hộp ở 8/40 ảnh khi mặt 80 px trên khung 640 × 480 (trúng 4/40): mô hình này dành cho mặt chiếm phần lớn khung, như selfie cầm gần; đổi lại ở 60 độ nó có hộp ở 39/40 ảnh. Bản **full range** bắt mặt nhỏ tốt hơn (80 px: 18/40, 40 px: 5/40) nhưng kém ở mặt nghiêng (60 độ chỉ 6/40 có hộp) và hơi kém ở mặt lớn (200 px: 37/40 so với 39/40). **FaceLandmarker** cùng họ MediaPipe nên cùng điểm yếu cỡ mặt, nhưng có hộp ở 39/40 ảnh nghiêng 60 độ. Không bộ nào thắng mọi hàng. Lab dùng YuNet làm mặc định vì kết quả trên bộ ghép này: mặt nhỏ và nghiêng vừa phải đều giữ được, đúng kiểu ảnh thẻ chụp bằng điện thoại mà ta hình dung; ảnh điện thoại thật thì ta chưa đo, và lựa chọn đó phải kiểm lại bằng ảnh thật.
+Đọc bảng theo từng cột. **Haar** bắt được mặt thẳng từ 80 px trở lên (37 đến 39/40) và còn 31/40 ở 40 px, nhưng chỉ có hộp ở 1/40 ảnh khi nghiêng 30 độ và yếu hơn khi ảnh tối (34/40); trên thẻ nó là bộ duy nhất báo mặt thừa (2 hộp). **YuNet** giữ được mặt 80 px (40/40) và nghiêng đến 30 độ (37/40); ở 60 độ nó có hộp ở 11/40 ảnh nhưng chỉ 5/40 trúng. **BlazeFace** short range chỉ có hộp ở 8/40 ảnh khi mặt 80 px trên khung 640 × 480 (trúng 4/40): mô hình này dành cho mặt chiếm phần lớn khung, như selfie cầm gần; đổi lại ở 60 độ nó có hộp ở 39/40 ảnh. Bản **full range** bắt mặt nhỏ tốt hơn (80 px: 18/40, 40 px: 5/40) nhưng kém ở mặt nghiêng (60 độ chỉ 6/40 có hộp) và hơi kém ở mặt lớn (200 px: 37/40 so với 39/40). **FaceLandmarker** cùng họ MediaPipe nên có cùng điểm yếu về cỡ mặt, nhưng có hộp ở 39/40 ảnh nghiêng 60 độ. Không bộ nào thắng mọi hàng. Lab dùng YuNet làm mặc định vì kết quả trên bộ ghép này: mặt nhỏ và nghiêng vừa phải đều giữ được, đúng kiểu ảnh thẻ chụp bằng điện thoại mà ta hình dung; ảnh điện thoại thật thì ta chưa đo, và lựa chọn đó phải kiểm lại bằng ảnh thật.
 
-Hai con số kiểm khác. Trên 40 ảnh không có mặt (thẻ để trống ô ảnh, nền phòng thuần) Haar, YuNet, BlazeFace full range và FaceLandmarker không báo nhầm lần nào, BlazeFace short range báo nhầm 1 hộp. Trên 39 ảnh có hai người đứng cạnh nhau, YuNet báo đúng 2 mặt ở cả 39. Thời gian trung vị mỗi ảnh 640 × 480 trên CPU, một luồng gọi: Haar 11,2 ms, YuNet 16,4 ms, BlazeFace short range 2,6 ms, BlazeFace full range 6,5 ms, FaceLandmarker 12,7 ms. Con số này đo khi load average 1 phút của máy là khoảng 153 trên 10 lõi (máy đang bận việc khác), nên chỉ đọc thứ bậc lớn: BlazeFace short range nhanh nhất cỡ vài lần; đừng suy ra hơn kém giữa các bộ còn lại.
+Hai con số kiểm tra khác. Trên 40 ảnh không có mặt (thẻ để trống ô ảnh, nền phòng thuần) Haar, YuNet, BlazeFace full range và FaceLandmarker không báo nhầm lần nào, BlazeFace short range báo nhầm 1 hộp. Trên 39 ảnh có hai người đứng cạnh nhau, YuNet báo đúng 2 mặt ở cả 39. Thời gian trung vị cho mỗi ảnh 640 × 480 trên CPU, gọi từ một luồng: Haar 11,2 ms, YuNet 16,4 ms, BlazeFace short range 2,6 ms, BlazeFace full range 6,5 ms, FaceLandmarker 12,7 ms. Con số này đo khi load average 1 phút của máy là khoảng 153 trên 10 lõi (máy đang bận việc khác), nên chỉ đọc bậc độ lớn: BlazeFace short range nhanh nhất, cỡ vài lần; đừng suy ra hơn kém giữa các bộ còn lại.
 
-Về ô đáp án: hộp của bộ phát hiện không trùng khít ô đã dán, và mỗi bộ vẽ hộp theo một cách khác (lab không đo từng bộ rộng hơn hay hẹp hơn ô dán bao nhiêu). Vì vậy IoU không thể tiến sát 1 và ngưỡng trúng đặt ở 0,4 thay vì 0,5 hay cao hơn; mục đích là biết bộ nào tìm ra mặt, không phải bộ nào vẽ hộp «đúng hơn».
+Về ô đáp án: hộp của bộ phát hiện không trùng khít ô đã dán, và mỗi bộ vẽ hộp theo một cách khác (lab không đo từng bộ rộng hơn hay hẹp hơn ô dán bao nhiêu). Vì vậy IoU không thể gần bằng 1 và ngưỡng trúng đặt ở 0,4 thay vì 0,5 hay cao hơn; mục đích là biết bộ nào tìm ra mặt, không phải bộ nào vẽ hộp «đúng hơn».
 
 ## Landmark và căn chỉnh
 
@@ -130,7 +130,7 @@ def align_face(bgr, landmarks, size=112):
                           borderMode=cv2.BORDER_REPLICATE)
 ```
 
-Hàm toán đúng chưa là một câu hỏi kiểm được: lab xoay mẫu ArcFace 25 độ, co 0,7 lần, dịch rồi nhờ `similarity_transform` đưa về; sai số lớn nhất còn `2.8e-14` điểm ảnh. Câu hỏi khó hơn là landmark đầu vào có đúng không. Lab đo bằng cách xoay ảnh theo góc thật đã biết, ước lượng góc nghiêng từ đường nối hai mắt (YuNet 5 điểm, và FaceLandmarker 478 điểm rút 5 điểm: tâm mống mắt, đỉnh mũi, hai khoé miệng), rồi căn chỉnh và **đo lại** độ nghiêng còn lại trên crop bằng FaceLandmarker (crop phóng gấp đôi). Bảng là trung vị của |sai số|, đơn vị độ:
+Hàm toán có đúng hay không là câu hỏi kiểm chứng được: lab xoay mẫu ArcFace 25 độ, co 0,7 lần, dịch rồi nhờ `similarity_transform` đưa về; sai số lớn nhất còn `2.8e-14` điểm ảnh. Câu hỏi khó hơn là landmark đầu vào có đúng không. Lab đo bằng cách xoay ảnh theo góc thật đã biết, ước lượng góc nghiêng từ đường nối hai mắt (YuNet 5 điểm, và FaceLandmarker 478 điểm rút 5 điểm: tâm mống mắt, đỉnh mũi, hai khoé miệng), rồi căn chỉnh và **đo lại** độ nghiêng còn lại trên crop bằng FaceLandmarker (crop phóng gấp đôi). Bảng là trung vị của |sai số|, đơn vị độ:
 
 ```text
  roll thật     yunet    mp 478     còn lại (YuNet)    còn lại (MP)   YuNet tìm thấy
@@ -142,7 +142,7 @@ Hàm toán đúng chưa là một câu hỏi kiểm được: lab xoay mẫu Arc
         40     18.25      0.61               14.82            0.78            19/40
 ```
 
-Có ba điều trong bảng. Một, ở roll 0 cả hai chỉ lệch dưới 1 độ, nên «nền nhiễu» của phép đo khoảng 0,6 đến 0,9 độ. Hai, sai số của YuNet tăng nhanh theo góc: 2,67 độ ở 15, 7,89 ở 30 và 18,25 ở 40, kèm theo số ảnh còn tìm thấy rớt xuống 19/40; với ảnh nghiêng 40 độ, sai số trung vị 18,25 độ nghĩa là YuNet báo chừng 22 độ, và ca nghiêng 35 độ ở mục sau cũng chỉ ra 16,5 độ. Ước lượng của YuNet dường như bão hoà khi góc lớn; lab chưa đo nguyên nhân nên ta chỉ ghi nhận hiện tượng. Ba, căn chỉnh bằng landmark kém thì **mặt vẫn nghiêng sau khi căn chỉnh**: dùng YuNet ở roll 30, crop còn lệch 5,13 độ; dùng FaceLandmarker, còn 0,76 độ, chỉ bằng nền nhiễu. Cách phòng ngừa là đo lại sau căn chỉnh như bảng này, hoặc dùng bộ landmark dày hơn khi YuNet báo roll vượt vài độ. Đo lại bằng chính FaceLandmarker có thiên về nó; vì thế ta ghi cả nền nhiễu 0,6 đến 0,9 độ.
+Bảng cho thấy ba điều. Một, ở roll 0 cả hai chỉ lệch dưới 1 độ, nên «nền nhiễu» của phép đo khoảng 0,6 đến 0,9 độ. Hai, sai số của YuNet tăng nhanh theo góc: 2,67 độ ở 15, 7,89 ở 30 và 18,25 ở 40, kèm theo số ảnh còn tìm thấy rớt xuống 19/40; với ảnh nghiêng 40 độ, sai số trung vị 18,25 độ nghĩa là YuNet báo chừng 22 độ, và trường hợp nghiêng 35 độ ở mục sau cũng chỉ ra 16,5 độ. Ước lượng của YuNet dường như bão hoà khi góc lớn; lab chưa đo nguyên nhân nên ta chỉ ghi nhận hiện tượng. Ba, căn chỉnh bằng landmark kém thì **mặt vẫn nghiêng sau khi căn chỉnh**: dùng YuNet ở roll 30, crop còn lệch 5,13 độ; dùng FaceLandmarker, còn 0,76 độ, chỉ bằng nền nhiễu. Cách phòng ngừa là đo lại sau căn chỉnh như bảng này, hoặc dùng bộ landmark dày hơn khi YuNet báo roll vượt vài độ. Đo lại bằng chính FaceLandmarker thì có thiên lệch về phía nó; vì thế ta ghi cả nền nhiễu 0,6 đến 0,9 độ.
 
 ## Chất lượng ảnh: mờ, tối, cỡ mặt
 
@@ -167,7 +167,7 @@ def face_quality(aligned_bgr, *, core=True):
                    brightness=float(gray.mean()), contrast=float(gray.std()))
 ```
 
-Ngưỡng chọn thế nào? Lab không lấy số trong sách mà đặt dưới mức nhỏ nhất của ảnh sạch: phương sai nhỏ nhất ở selfie là 72,6 và ở thẻ là 78,3, nên `MIN_BLUR_VAR = 60`; độ sáng ảnh sạch nằm trong [108,9; 172,7], nên cho phép 60 đến 200. Vì ngưỡng được đặt ngay trên tập sạch này nên ảnh sạch không bị gắn nhầm (0%) là hệ quả của cách chọn, chứ không phải bằng chứng ngưỡng đúng với ảnh mới; ta xem phần ảnh đã xuống cấp mà bị bắt:
+Ngưỡng chọn thế nào? Lab không lấy số trong sách mà đặt dưới mức nhỏ nhất của ảnh sạch: phương sai nhỏ nhất ở selfie là 72,6 và ở thẻ là 78,3, nên `MIN_BLUR_VAR = 60`; độ sáng ảnh sạch nằm trong [108,9; 172,7], nên cho phép 60 đến 200. Vì ngưỡng được đặt ngay trên tập sạch này nên ảnh sạch không bị gắn nhầm (0%) là hệ quả của cách chọn, chứ không phải bằng chứng ngưỡng đúng với ảnh mới; ta xem tỉ lệ ảnh đã xuống cấp bị bắt được:
 
 ```text
 làm mờ Gauss      sigma    trung vị blur selfie   bị gắn mờ     trung vị blur thẻ   bị gắn mờ
@@ -204,7 +204,7 @@ if abs(roll) > MAX_ROLL_DEG:
 quality = face_quality(align_face(bgr, face.landmarks))
 ```
 
-Hàm không bao giờ trả «giả mạo» hay «sai người», và `to_bgr` từ chối ảnh rỗng, sai dtype hay số kênh lạ bằng `ValueError` thay vì để OpenCV lỗi khó đọc. Kết quả với mười ca dùng YuNet (cùng một thẻ hoặc một selfie) và một dòng thêm dùng FaceLandmarker:
+Hàm không bao giờ trả «giả mạo» hay «sai người», và `to_bgr` từ chối ảnh rỗng, sai dtype hay số kênh lạ bằng `ValueError` thay vì để OpenCV báo một lỗi khó đọc. Kết quả với mười trường hợp dùng YuNet (cùng một thẻ hoặc một selfie) và một dòng thêm dùng FaceLandmarker:
 
 ```text
   thẻ sạch                face_checked  -                         roll -3.9
@@ -220,7 +220,7 @@ Hàm không bao giờ trả «giả mạo» hay «sai người», và `to_bgr` t
   nghiêng 35 độ, dùng FaceLandmarker  needs_review  tilted (roll 35.4)
 ```
 
-Hai dòng cuối nói lên điều của mục trước. Với ảnh nghiêng 35 độ YuNet báo 16,5 độ, thấp hơn thật hơn 18 độ; chỉ nhờ `MAX_ROLL_DEG = 15` đặt thấp mà ca này vẫn bị gắn `tilted`, trong khi FaceLandmarker báo 35,4 độ. Ngưỡng 15 thay vì 30 là hệ quả của đo đạc chứ không phải thói quen. Ca «mặt bị cắt mép» cho thấy một lỗi thật: ảnh mà khuôn mặt chỉ còn một nửa trong khung, YuNet vẫn trả hộp và đủ 5 landmark (hộp thò ra ngoài khung); lúc đầu lab để ca này đi qua, và chỉ khi có ca kiểm này mới thêm điều kiện hộp nằm trọn trong ảnh. Trên 40 thẻ sạch, cả 40 đạt `face_checked`. Ngưỡng cỡ mặt cũng có giá: `MIN_FACE_PX = 80` (cạnh ngắn của hộp) gắn `face_too_small` cho 31 trong 40 selfie mặt 80 px, dù YuNet tìm đủ 40/40 ảnh đó (lab in `{'face_too_small': 31, '(không lý do)': 9, 'blurry': 1}`); hộp YuNet thường hẹp hơn cạnh ô dán, nên một khuôn mặt «80 px» của ta thường có hộp dưới 80. Ngưỡng này phải chọn theo cỡ crop mà bước embedding cần, không phải theo con số tròn.
+Hai dòng cuối minh hoạ điều đã nêu ở mục trước. Với ảnh nghiêng 35 độ YuNet báo 16,5 độ, thấp hơn góc thật hơn 18 độ; chỉ nhờ `MAX_ROLL_DEG = 15` đặt thấp mà trường hợp này vẫn bị gắn `tilted`, trong khi FaceLandmarker báo 35,4 độ. Ngưỡng 15 thay vì 30 là hệ quả của đo đạc chứ không phải thói quen. Trường hợp «mặt bị cắt mép» cho thấy một lỗi thật: ảnh mà khuôn mặt chỉ còn một nửa trong khung, YuNet vẫn trả hộp và đủ 5 landmark (hộp thò ra ngoài khung); lúc đầu lab để trường hợp này đi qua, và chỉ khi có test case này mới thêm điều kiện hộp nằm trọn trong ảnh. Trên 40 thẻ sạch, cả 40 đạt `face_checked`. Ngưỡng cỡ mặt cũng có giá: `MIN_FACE_PX = 80` (cạnh ngắn của hộp) gắn `face_too_small` cho 31 trong 40 selfie mặt 80 px, dù YuNet tìm đủ 40/40 ảnh đó (lab in `{'face_too_small': 31, '(không lý do)': 9, 'blurry': 1}`); hộp YuNet thường hẹp hơn cạnh ô dán, nên một khuôn mặt «80 px» của ta thường có hộp dưới 80. Ngưỡng này phải chọn theo cỡ crop mà bước embedding cần, không phải theo con số tròn.
 
 ## Chạy và kiểm chứng
 
@@ -231,13 +231,13 @@ uv run --project examples/toi-noi-python/48-face-detection-landmarks examples/to
 uv run --project examples/toi-noi-python/48-face-detection-landmarks examples/toi-noi-python/48-face-detection-landmarks/main.py --verify
 ```
 
-Lệnh thứ hai chạy lại toàn bộ rồi kiểm các bất biến đã in: số ảnh Olivetti, độ chính xác của phép đồng dạng, YuNet tìm đủ mặt trên thẻ và selfie, Haar mất ở 30 độ nghiêng còn YuNet thì không, BlazeFace short range mất ở mặt 80 px còn YuNet thì không, BlazeFace full range bắt mặt 80 px tốt hơn bản short range, sai số roll của FaceLandmarker dưới 3 độ, ngưỡng mờ nằm dưới mức nhỏ nhất của ảnh sạch, các ca `check_portrait` ở trên, ảnh đen, ảnh xám một kênh, và ba kiểu ảnh không hợp lệ bị từ chối. Dòng cuối của lần chạy mới nhất:
+Lệnh thứ hai chạy lại toàn bộ rồi kiểm các bất biến đã in: số ảnh Olivetti, độ chính xác của phép đồng dạng, YuNet tìm đủ mặt trên thẻ và selfie, Haar mất ở 30 độ nghiêng còn YuNet thì không, BlazeFace short range mất ở mặt 80 px còn YuNet thì không, BlazeFace full range bắt mặt 80 px tốt hơn bản short range, sai số roll của FaceLandmarker dưới 3 độ, ngưỡng mờ nằm dưới mức nhỏ nhất của ảnh sạch, các trường hợp `check_portrait` ở trên, ảnh đen, ảnh xám một kênh, và ba kiểu ảnh không hợp lệ bị từ chối. Dòng cuối của lần chạy mới nhất:
 
 ```text
 OK 40/40
 ```
 
-Không ca nào kiểm tốc độ tuyệt đối vì số đo thời gian phụ thuộc tải máy. Ảnh minh hoạ (`card_detections.png` vẽ hộp bốn bộ phát hiện và 5 landmark lên thẻ, `aligned_roll30.png` so hai crop căn chỉnh) nằm trong `out/`, đã gitignore.
+Không test case nào kiểm tra tốc độ tuyệt đối vì số đo thời gian phụ thuộc tải máy. Ảnh minh hoạ (`card_detections.png` vẽ hộp bốn bộ phát hiện và 5 landmark lên thẻ, `aligned_roll30.png` so hai crop căn chỉnh) nằm trong `out/`, đã gitignore.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -249,14 +249,14 @@ Không ca nào kiểm tốc độ tuyệt đối vì số đo thời gian phụ 
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Olivetti là ảnh xám 64 × 64 của 40 người, hầu hết chụp thẳng trong phòng thí nghiệm; «thẻ» và «selfie» là ảnh ghép, nên các tỉ lệ trên đo hành vi của từng bước trên dữ liệu này, không phải tỉ lệ lỗi với ảnh điện thoại ngoài đời (ánh sáng ngược, khẩu trang, kính, nhiều màu da và tuổi). «Trúng» tính theo ô dán nên chỉ so sánh tương đối; YuNet là mặc định vì kết quả trên bộ ghép này, chưa kiểm bằng ảnh điện thoại thật. Số đo thời gian được đo khi máy rất bận và chỉ cho thứ bậc lớn. Ngưỡng 60, 60 đến 200, 15 độ và `MIN_FACE_PX` 80 lấy từ chính tập sạch này; dịch vụ thật phải chọn lại bằng ảnh của mình và theo dõi tỉ lệ ảnh bị chuyển người duyệt. Bài này chưa đánh giá chất lượng phát hiện theo nhóm người; việc đó thuộc bài 53.</p>
+<p>Olivetti là ảnh xám 64 × 64 của 40 người, hầu hết chụp thẳng trong phòng thí nghiệm; «thẻ» và «selfie» là ảnh ghép, nên các tỉ lệ trên đo hành vi của từng bước trên dữ liệu này, không phải tỉ lệ lỗi với ảnh điện thoại ngoài đời (ánh sáng ngược, khẩu trang, kính, nhiều màu da và tuổi). «Trúng» tính theo ô dán nên chỉ so sánh tương đối; YuNet là mặc định vì kết quả trên bộ ghép này, chưa kiểm bằng ảnh điện thoại thật. Thời gian được đo khi máy đang rất bận nên chỉ cho biết bậc độ lớn. Ngưỡng 60, 60 đến 200, 15 độ và `MIN_FACE_PX` 80 lấy từ chính tập sạch này; dịch vụ thật phải chọn lại bằng ảnh của mình và theo dõi tỉ lệ ảnh bị chuyển người duyệt. Bài này chưa đánh giá chất lượng phát hiện theo nhóm người; việc đó thuộc bài 53.</p>
 </div>
 
 **Bài tập 1:** Hai mắt trên ảnh gốc cách nhau 160 px. Hệ số co của phép đồng dạng căn chỉnh về mẫu ArcFace 112 × 112 xấp xỉ bao nhiêu, và crop 112 × 112 phủ khoảng bao nhiêu px của ảnh gốc theo cạnh?
 
 **Bài tập 2:** Hạ `MIN_BLUR_VAR` từ 60 xuống 30. Theo bảng sigma, tỉ lệ ảnh selfie bị gắn mờ ở sigma 3 thay đổi theo hướng nào, và điều đó đổi gì cho người duyệt?
 
-<details><summary>Xem lời giải</summary><p><b>1.</b> Khoảng cách hai mắt của mẫu là √((73,5318 − 38,2946)² + (51,5014 − 51,6963)²) ≈ 35,24 px, nên hệ số co ≈ 35,24 / 160 ≈ <b>0,22</b>. Crop 112 px phủ 112 / 0,22 ≈ <b>509 px</b> của ảnh gốc theo mỗi cạnh: rộng hơn khuôn mặt nhiều, vì mẫu ArcFace chừa lề quanh mặt. <b>2.</b> Trung vị blur ở sigma 3 là 36,2, cao hơn 30, nên <b>dưới một nửa</b> ảnh còn bị gắn (so với 82% ở ngưỡng 60): hàng đợi người duyệt ngắn đi, nhưng nhiều ảnh mờ vừa lọt sang bước embedding hơn. Giảm ngưỡng đổi gánh nặng từ người duyệt sang độ tin cậy của điểm so khớp.</p></details>
+<details><summary>Xem lời giải</summary><p><b>1.</b> Khoảng cách hai mắt của mẫu là √((73,5318 − 38,2946)² + (51,5014 − 51,6963)²) ≈ 35,24 px, nên hệ số co ≈ 35,24 / 160 ≈ <b>0,22</b>. Crop 112 px phủ 112 / 0,22 ≈ <b>509 px</b> của ảnh gốc theo mỗi cạnh: rộng hơn khuôn mặt nhiều, vì mẫu ArcFace chừa lề quanh mặt. <b>2.</b> Trung vị blur ở sigma 3 là 36,2, cao hơn 30, nên <b>dưới một nửa</b> ảnh còn bị gắn (so với 82% ở ngưỡng 60): hàng đợi người duyệt ngắn đi, nhưng nhiều ảnh mờ vừa lọt sang bước embedding hơn. Giảm ngưỡng chuyển gánh nặng từ người duyệt sang độ tin cậy của điểm so khớp.</p></details>
 
 Bài trước: [bài 47](/articles/python-luu-ket-qua-ocr-mongodb-pii-retention). Bài tiếp: [bài 49](/articles/python-face-embedding-cosine-threshold-far-frr).
 

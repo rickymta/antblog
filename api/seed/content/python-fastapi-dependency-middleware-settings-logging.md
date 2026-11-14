@@ -8,14 +8,14 @@ tags: [python, toi-noi, fastapi, dependency-injection, logging]
 language: vi
 ---
 
-Một khách của [Tới Nơi](/articles/du-an-mau-toi-noi) nhắn cho bộ phận hỗ trợ: «19 giờ tối qua tôi bấm báo giá, ứng dụng quay mãi rồi báo lỗi». Thứ duy nhất hỗ trợ cầm được là mã yêu cầu hiện trên màn hình lỗi. Giờ cao điểm có khoảng 70 chuyến mỗi giây; nếu không có một mã đi xuyên suốt, dòng log «mở phiên kho chuyến» và dòng «lỗi» không ai nối lại được. Bài này dựng khung đó quanh API báo giá: cấu hình kiểm ngay lúc khởi động, thứ handler cần được đưa vào qua `Depends`, một middleware gán mã cho mọi request, và log JSON mà dòng nào cũng mang mã ấy.
+Một khách của [Tới Nơi](/articles/du-an-mau-toi-noi) nhắn cho bộ phận hỗ trợ: «19 giờ tối qua tôi bấm báo giá, ứng dụng quay mãi rồi báo lỗi». Bộ phận hỗ trợ chỉ có trong tay mã yêu cầu hiện trên màn hình lỗi. Giờ cao điểm có khoảng 70 chuyến mỗi giây; nếu không có một mã đi xuyên suốt, dòng log «mở phiên kho chuyến» và dòng «lỗi» không ai nối lại được. Bài này dựng khung đó quanh API báo giá: cấu hình được kiểm tra ngay lúc khởi động, thứ handler cần được đưa vào qua `Depends`, một middleware gán mã cho mọi request, và log JSON mà dòng nào cũng mang mã ấy.
 
-Đây là bài 33 của lộ trình **Python trung bình qua Tới Nơi**. Bạn nên đọc [bài 31](/articles/python-fastapi-http-endpoint-bao-gia) (endpoint báo giá, uvicorn), [bài 15](/articles/python-pydantic-validation-settings) (`BaseSettings`) và [bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation) (`async`/`await`). Lab của bài này tự chứa: nó mang theo hợp đồng `POST /v1/quotes` và Problem Details của [bài 32](/articles/python-fastapi-validation-problem-details-openapi) (201 kèm `Location` và `quote_id`, lỗi `application/problem+json`) và không cần chạy lab 31 hay 32.
+Đây là bài 33 của lộ trình **Python trung bình qua Tới Nơi**. Bạn nên đọc [bài 31](/articles/python-fastapi-http-endpoint-bao-gia) (endpoint báo giá, uvicorn), [bài 15](/articles/python-pydantic-validation-settings) (`BaseSettings`) và [bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation) (`async`/`await`). Lab của bài này chạy độc lập: lab mang theo hợp đồng `POST /v1/quotes` và Problem Details của [bài 32](/articles/python-fastapi-validation-problem-details-openapi) (201 kèm `Location` và `quote_id`, lỗi `application/problem+json`) và không cần chạy lab 31 hay 32.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Một handler khai ba tham số: <code>a</code> và <code>b</code> đều là <code>Depends(get_session)</code>, còn <code>c</code> là <code>Depends(get_session, use_cache=False)</code>, cả ba cùng scope. Hàm <code>get_session</code> mở một phiên kho chuyến mới mỗi lần được gọi. Một request làm mở bao nhiêu phiên? Và nếu bỏ <code>use_cache=False</code>?</p>
-<details><summary>Xem đáp án</summary><p><b>Hai phiên</b> với <code>use_cache=False</code>, và <b>một phiên</b> nếu bỏ nó. FastAPI nhớ kết quả của một dependency trong phạm vi một request, nên <code>a</code> và <code>b</code> là cùng một đối tượng; <code>use_cache=False</code> buộc <code>c</code> gọi lại <code>get_session</code>. Bài chạy cả hai ca, và thêm một bẫy: cùng hàm nhưng <b>khác scope</b> thì cache không dùng chung.</p></details>
+<p>Một handler khai ba tham số: <code>a</code> và <code>b</code> đều là <code>Depends(get_session)</code>, còn <code>c</code> là <code>Depends(get_session, use_cache=False)</code>, cả ba cùng scope. Hàm <code>get_session</code> mở một phiên kho chuyến mới mỗi lần được gọi. Một request mở ra bao nhiêu phiên? Và nếu bỏ <code>use_cache=False</code>?</p>
+<details><summary>Xem đáp án</summary><p><b>Hai phiên</b> với <code>use_cache=False</code>, và <b>một phiên</b> nếu bỏ nó. FastAPI nhớ kết quả của một dependency trong phạm vi một request, nên <code>a</code> và <code>b</code> là cùng một đối tượng; <code>use_cache=False</code> buộc <code>c</code> gọi lại <code>get_session</code>. Bài chạy cả hai test case, và thêm một bẫy: cùng hàm nhưng <b>khác scope</b> thì cache không dùng chung.</p></details>
 </div>
 
 ## Một request đi qua những lớp nào
@@ -24,16 +24,16 @@ Một khách của [Tới Nơi](/articles/du-an-mau-toi-noi) nhắn cho bộ ph�
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Request đi từ client qua middleware, router, dependency tới handler; response quay ngược qua middleware, nơi ghi dòng log request.completed. Bên dưới, cấu hình Settings và lifespan chạy một lần ngoài chuỗi request."><defs><marker id="py33-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="50" width="110" height="90" rx="10" class="f-bg s-line"/><text x="36" y="86" class="t-b">Client</text><text x="36" y="110" class="t-small">curl, ứng dụng</text><path d="M130 95 L150 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py33-0-arrow)"/><rect x="150" y="50" width="210" height="90" rx="10" class="f-pk-soft s-pk"/><text x="166" y="86" class="t-b">Middleware</text><text x="166" y="110" class="t-small">gán request_id, đo giờ</text><path d="M360 95 L380 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py33-0-arrow)"/><rect x="380" y="50" width="120" height="90" rx="10" class="f-pk-soft s-pk"/><text x="396" y="86" class="t-b">Router</text><text x="396" y="110" class="t-small">khớp route</text><path d="M500 95 L520 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py33-0-arrow)"/><rect x="520" y="50" width="180" height="90" rx="10" class="f-pk-soft s-pk"/><text x="536" y="86" class="t-b">Depends</text><text x="536" y="110" class="t-small">Session, Customer</text><path d="M700 95 L720 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py33-0-arrow)"/><rect x="720" y="50" width="140" height="90" rx="10" class="f-pk-soft s-pk"/><text x="736" y="86" class="t-b">Handler</text><text x="736" y="110" class="t-mono">get_trip</text><path d="M790 140 L790 172 L255 172 L255 142" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py33-0-arrow)"/><text x="290" y="192" class="t-small">response đi ngược: middleware ghi request.completed, thêm X-Request-Id</text><text x="20" y="226" class="t-small">Chạy một lần, ngoài chuỗi request</text><rect x="20" y="236" width="410" height="52" rx="10" class="f-phys-soft s-phys"/><text x="36" y="257" class="t-b">Settings</text><text x="36" y="276" class="t-small">đọc TOINOI_* ở create_app, sai thì service không lên</text><rect x="450" y="236" width="410" height="52" rx="10" class="f-phys-soft s-phys"/><text x="466" y="257" class="t-b">lifespan</text><text x="466" y="276" class="t-small">mở Database khi lên, đóng khi tắt, log ngoài request</text></svg>
+<svg viewBox="0 0 880 300" role="img" aria-label="Request đi từ client qua middleware, router, dependency tới handler; response quay ngược qua middleware, nơi ghi dòng log request.completed. Bên dưới, cấu hình Settings và lifespan chạy một lần ngoài chuỗi request."><defs><marker id="py33-0-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="50" width="110" height="90" rx="10" class="f-bg s-line"/><text x="36" y="86" class="t-b">Client</text><text x="36" y="110" class="t-small">curl, ứng dụng</text><path d="M130 95 L150 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py33-0-arrow)"/><rect x="150" y="50" width="210" height="90" rx="10" class="f-pk-soft s-pk"/><text x="166" y="86" class="t-b">Middleware</text><text x="166" y="110" class="t-small">gán request_id, đo thời gian</text><path d="M360 95 L380 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py33-0-arrow)"/><rect x="380" y="50" width="120" height="90" rx="10" class="f-pk-soft s-pk"/><text x="396" y="86" class="t-b">Router</text><text x="396" y="110" class="t-small">khớp route</text><path d="M500 95 L520 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py33-0-arrow)"/><rect x="520" y="50" width="180" height="90" rx="10" class="f-pk-soft s-pk"/><text x="536" y="86" class="t-b">Depends</text><text x="536" y="110" class="t-small">Session, Customer</text><path d="M700 95 L720 95" class="f-none s-phys" stroke-width="2" marker-end="url(#py33-0-arrow)"/><rect x="720" y="50" width="140" height="90" rx="10" class="f-pk-soft s-pk"/><text x="736" y="86" class="t-b">Handler</text><text x="736" y="110" class="t-mono">get_trip</text><path d="M790 140 L790 172 L255 172 L255 142" class="f-none s-warn dash" stroke-width="2" marker-end="url(#py33-0-arrow)"/><text x="290" y="192" class="t-small">response đi ngược: middleware ghi request.completed, thêm X-Request-Id</text><text x="20" y="226" class="t-small">Chạy một lần, ngoài chuỗi request</text><rect x="20" y="236" width="410" height="52" rx="10" class="f-phys-soft s-phys"/><text x="36" y="257" class="t-b">Settings</text><text x="36" y="276" class="t-small">đọc TOINOI_* ở create_app, sai thì service không lên</text><rect x="450" y="236" width="410" height="52" rx="10" class="f-phys-soft s-phys"/><text x="466" y="257" class="t-b">lifespan</text><text x="466" y="276" class="t-small">mở Database khi lên, đóng khi tắt, log ngoài request</text></svg>
 </div>
 <figcaption>Hình 1. Đường đi của một request qua khung FastAPI. Nét đứt là chiều response; hai khối dưới chạy một lần, không thuộc request nào.</figcaption>
 </figure>
 
-Quy tắc chọn chỗ đặt code: việc áp cho mọi request mà handler không cần biết (mã yêu cầu, đo giờ, một dòng log) thuộc **middleware**; thứ riêng handler cần để làm việc (phiên kho chuyến, cấu hình, khách hiện tại) thuộc **`Depends`**. Phía C# xem [bài middleware, DI, options và logging](/articles/dotnet10-middleware-di-options-logging); khác biệt là `Depends` không có container đăng ký trước. «Cache trong một request» gần với scoped, `app.state` gần với singleton.
+Quy tắc chọn chỗ đặt code: việc áp cho mọi request mà handler không cần biết (mã yêu cầu, đo thời gian, một dòng log) thuộc **middleware**; thứ riêng handler cần để làm việc (phiên kho chuyến, cấu hình, khách hiện tại) thuộc **`Depends`**. Phía C# xem [bài middleware, DI, options và logging](/articles/dotnet10-middleware-di-options-logging); khác biệt là `Depends` không có container đăng ký trước. «Cache trong một request» gần với scoped, `app.state` gần với singleton.
 
 Lab (`examples/toi-noi-python/33-fastapi-dependency-middleware-logging/`) gồm `app/settings.py`, `logs.py`, `middleware.py`, `deps.py`, `routes.py`, `schemas.py` và `problems.py` (copy từ bài 32, thêm `request_id`), `app/main.py`; `main.py` ở gốc lab là kịch bản chạy và `--verify`.
 
-## Cấu hình: đọc một lần, kiểm ngay
+## Cấu hình: đọc một lần, kiểm tra ngay
 
 Cấu hình cũng là dữ liệu từ ngoài, nên dùng cơ chế của bài 15. Lớp `Settings` của lab (trích `app/settings.py`):
 
@@ -76,7 +76,7 @@ quote_ttl_seconds
   Input should be greater than or equal to 30 [type=greater_than_equal, input_value='5', input_type=str]
 ```
 
-Chết ngay khi khởi động tốt hơn chạy với TTL báo giá 5 giây. Lab chưa có bí mật nào. Khi có (bài 34 có khoá ký), `SecretStr` che giá trị trong `repr` và log, nhưng **không** che trong thông báo `ValidationError` khi cấu hình sai; bài 34 xử lý chỗ đó.
+Dừng ngay khi khởi động còn tốt hơn chạy với TTL báo giá 5 giây. Lab chưa có giá trị bí mật nào. Khi có (bài 34 có khoá ký), `SecretStr` che giá trị trong `repr` và log, nhưng **không** che trong thông báo `ValidationError` khi cấu hình sai; bài 34 xử lý chỗ đó.
 
 ## Depends: cache, yield và scope
 
@@ -101,7 +101,7 @@ dependency-cache-control   : {"session_nos": [3, 3, 3], "distinct": 1, "opened_t
 dependency-scope-mismatch  : {"session_nos": [4, 5], "distinct": 2, "opened_total": 5}
 ```
 
-Dòng đầu là ca có `use_cache=False` ở tham số `c`: hai phiên. Dòng hai là đối chứng, cùng ba tham số nhưng không có `use_cache=False`: một phiên; thiếu ca này thì chưa chứng minh được `use_cache=False` tạo ra khác biệt. Dòng ba là **bẫy**: một tham số là `Depends(get_session, scope="function")`, tham số kia là `Depends(get_session)` (scope mặc định). Cùng hàm nhưng khác scope thì FastAPI không dùng chung kết quả, nên mở hai phiên mà không ai đặt `use_cache=False`. Vì vậy hãy dùng một bí danh duy nhất như `SessionDep`. Cache chỉ tồn tại trong một request; request sau dựng lại từ đầu. Mặc định có lợi vì nhiều dependency con cùng cần «khách hiện tại» thì chỉ kiểm một lần.
+Dòng đầu là test case có `use_cache=False` ở tham số `c`: hai phiên. Dòng hai là đối chứng, cùng ba tham số nhưng không có `use_cache=False`: một phiên; thiếu test case này thì chưa chứng minh được `use_cache=False` tạo ra khác biệt. Dòng ba là **bẫy**: một tham số là `Depends(get_session, scope="function")`, tham số kia là `Depends(get_session)` (scope mặc định). Cùng hàm nhưng khác scope thì FastAPI không dùng chung kết quả, nên mở hai phiên mà không ai đặt `use_cache=False`. Vì vậy hãy dùng một bí danh duy nhất như `SessionDep`. Cache chỉ tồn tại trong một request; request sau dựng lại từ đầu. Mặc định này có lợi: khi nhiều dependency con cùng cần «khách hiện tại», chỉ phải kiểm một lần.
 
 **Dependency có `yield`** là cách mở rồi dọn tài nguyên theo request (trích `app/deps.py`):
 
@@ -116,14 +116,14 @@ async def get_session(request: Request) -> AsyncIterator[TripSession]:
         log.debug("db.session.closed", extra={"session_no": session.session_no})
 ```
 
-`try/finally` là bắt buộc: nếu handler ném lỗi, exception được ném vào đúng chỗ `yield`, và đoạn dọn dẹp không có `finally` sẽ bị bỏ qua. Để chắc chắn lab thật sự kiểm điều này, ta bỏ `try/finally` trên một bản sao và chạy `--verify`; nó báo (trích, còn hai dòng `SAI` khác cùng nguyên nhân rồi `FAIL 53/56`):
+`try/finally` là bắt buộc: nếu handler ném lỗi, exception được ném vào đúng chỗ `yield`, và đoạn dọn dẹp không có `finally` sẽ bị bỏ qua. Để chắc chắn lab thật sự kiểm điều này, ta bỏ `try/finally` trên một bản sao và chạy `--verify`; lệnh này báo (trích, còn hai dòng `SAI` khác cùng nguyên nhân rồi `FAIL 53/56`):
 
 ```text
 SAI: commit lỗi: phiên vẫn được đóng ở cả hai scope: nhận 1, kỳ vọng 0
 SAI: 500: phiên dependency vẫn được đóng (try/finally): nhận 1, kỳ vọng 0
 ```
 
-Mỗi lỗi 500 rò một phiên là kiểu sự cố làm cạn pool kết nối sau vài giờ.
+Mỗi lỗi 500 làm rò một phiên là kiểu sự cố khiến pool kết nối cạn sau vài giờ.
 
 **Scope quyết định phần dọn chạy lúc nào.** Mặc định (`scope="request"`), phần sau `yield` chạy **sau khi response đã gửi**. `Depends(…, scope="function")` cho nó chạy ngay khi handler trả về, **trước khi response được gửi**. Route `/v1/diagnostics/scope-order` khai một dependency mỗi loại và ghi log lúc vào, lúc ra:
 
@@ -151,7 +151,7 @@ commit lỗi, scope function: 500; scope request: 201
 
 Với scope `function`, client thấy 500. Với scope `request`, response 201 đã đi rồi mới tới commit: khách tưởng thành công trong khi dữ liệu không được lưu, và lỗi **không để lại dòng nào** trong log JSON của lab (chỉ có `request.completed` 201). Lab đặt `SessionDep` là `scope="function"` vì lý do này. Hai là phần dọn chạy sau cùng không nằm trong thời gian middleware đo. Đổi lại, response stream dữ liệu có dùng dependency đó thì cần scope mặc định.
 
-Còn `current_customer` trong `app/deps.py` là chỗ **tạm**: nó tin header `X-Customer-Id` do client gửi, nên không phải xác thực (thiếu hoặc sai thì 401 kèm `WWW-Authenticate: Bearer`). Giá trị của nó ở đây là cho thấy chỗ cắm: bài 34 đổi nguồn của dependency thành token đã ký, và handler chỉ bổ sung kiểm theo vai trò.
+Còn `current_customer` trong `app/deps.py` là chỗ **tạm**: nó tin header `X-Customer-Id` do client gửi, nên không phải xác thực (thiếu hoặc sai thì 401 kèm `WWW-Authenticate: Bearer`). Giá trị của nó ở đây là cho thấy điểm thay thế: bài 34 đổi nguồn của dependency thành token đã ký, và handler chỉ bổ sung bước kiểm tra theo vai trò.
 
 ## Lifespan: việc chạy một lần
 
@@ -172,7 +172,7 @@ Còn `current_customer` trong `app/deps.py` là chỗ **tạm**: nó tin header 
             restore_logging()
 ```
 
-Hai dòng log vòng đời có `request_id` là `-` vì ngoài mọi request; `open_sessions` làm rò rỉ phiên hiện ngay lúc tắt. Gửi SIGINT (Ctrl+C) cho uvicorn đang chạy thật:
+Hai dòng log vòng đời có `request_id` là `-` vì nằm ngoài mọi request; `open_sessions` cho thấy các phiên bị rò rỉ ngay lúc tắt. Gửi SIGINT (Ctrl+C) cho uvicorn đang chạy thật:
 
 ```text
 INFO:     Shutting down
@@ -185,7 +185,7 @@ Bẫy khi kiểm thử: `httpx.ASGITransport` không chạy lifespan, nên khôn
 
 ## Middleware: request id, thời gian và lỗi
 
-Middleware của lab (trích `app/middleware.py`) làm bốn việc: chọn request id, đặt vào contextvar, đo giờ, ghi một dòng log.
+Middleware của lab (trích `app/middleware.py`) làm bốn việc: chọn request id, đặt vào contextvar, đo thời gian, ghi một dòng log.
 
 ```python
     @app.middleware("http")
@@ -210,7 +210,7 @@ Middleware của lab (trích `app/middleware.py`) làm bốn việc: chọn requ
             request_id_var.reset(token)
 ```
 
-**Đừng phản chiếu bừa header của client.** Gateway phía trước thường gửi sẵn `X-Request-Id` để cả chuỗi dịch vụ dùng chung một mã, nên ta nhận nó, nhưng chỉ khi khớp mẫu `[A-Za-z0-9._-]{8,64}`; không thì tự sinh `uuid4().hex`. Chuỗi 200 ký tự hay có dấu cách đưa thẳng vào log và header có thể chèn dòng log giả hoặc làm phình header. Kết quả với ba đầu vào:
+**Đừng dùng lại bừa header của client.** Gateway phía trước thường gửi sẵn `X-Request-Id` để cả chuỗi dịch vụ dùng chung một mã, nên ta nhận nó, nhưng chỉ khi khớp mẫu `[A-Za-z0-9._-]{8,64}`; không thì tự sinh `uuid4().hex`. Chuỗi 200 ký tự hoặc chuỗi có dấu cách mà đưa thẳng vào log và header thì có thể chèn dòng log giả hoặc làm phình header. Kết quả với ba đầu vào:
 
 ```text
 X-Request-Id hợp lệ  -> web-0001-abcdef
@@ -227,7 +227,7 @@ x-request-id: curl-demo-0001
 server-timing: app;dur=5.78
 ```
 
-**Đường lỗi.** Mọi lỗi của lab đi theo Problem Details của bài 32 (`app/problems.py`), chỉ thêm một thành viên `request_id` lấy từ `request.state`. Lỗi chưa bắt đi lên qua `call_next`; middleware ghi `request.failed` kèm traceback rồi ném lại. Response 500 không do middleware tạo ra mà do một lớp ngoài cùng của Starlette, nên header `X-Request-Id` của middleware không tới được nó; exception handler của `Exception` tự đặt header từ `request.state`. Câu cho client là câu chung, tên lớp và traceback chỉ ở log:
+**Đường lỗi.** Mọi lỗi của lab đi theo Problem Details của bài 32 (`app/problems.py`), chỉ thêm một thành viên `request_id` lấy từ `request.state`. Lỗi chưa bắt đi lên qua `call_next`; middleware ghi `request.failed` kèm traceback rồi ném lại. Response 500 không do middleware tạo ra mà do một lớp ngoài cùng của Starlette, nên header `X-Request-Id` của middleware không tới được nó; exception handler của `Exception` tự đặt header từ `request.state`. Thông báo gửi cho client là câu chung chung; tên lớp và traceback chỉ nằm trong log:
 
 ```text
 boom: 500 application/problem+json X-Request-Id=boom-0001-xyz body={"type":"https://toinoi.example/problems/internal-error","title":"Lỗi nội bộ","status":500,"detail":"Có lỗi ở phía máy chủ; hãy thử lại sau, kèm mã yêu cầu khi liên hệ hỗ trợ.","instance":"/v1/diagnostics/boom","request_id":"boom-0001-xyz"}
@@ -235,15 +235,15 @@ request.failed: level=ERROR status=500 request_id=boom-0001-xyz
   exc (dòng cuối của traceback): RuntimeError: lỗi giả lập khi phiên 1 đang mở
 ```
 
-Khách đọc mã `boom-0001-xyz` trên màn hình lỗi, hỗ trợ tìm đúng mã đó trong log. Dưới uvicorn, lớp ngoài cùng ném lại lỗi sau khi đã gửi 500, nên uvicorn tự in thêm `Exception in ASGI application`: một sự cố thành hai bản ghi, một JSON và một văn bản; hãy chọn giữ cái nào trước khi lên production. Lỗi 400, 422, 404 và 405 cũng mang `request_id` trùng header, kiểm bằng `--verify`.
+Khách đọc mã `boom-0001-xyz` trên màn hình lỗi, hỗ trợ tìm đúng mã đó trong log. Dưới uvicorn, lớp ngoài cùng ném lại lỗi sau khi đã gửi 500, nên uvicorn tự in thêm `Exception in ASGI application`: một sự cố sinh ra hai bản ghi, một dạng JSON và một dạng văn bản thuần; hãy chọn giữ bản nào trước khi lên production. Lỗi 400, 422, 404 và 405 cũng mang `request_id` trùng với header, kiểm bằng `--verify`.
 
-**Giới hạn của `@app.middleware("http")`.** Decorator này dựng trên `BaseHTTPMiddleware`: `call_next` chạy phần còn lại của ứng dụng trong một task con, với bản sao của ngữ cảnh hiện tại. Giá trị `set` trước `call_next` được task con thừa hưởng; giá trị `set` trong task con ở lại đó. Tài liệu Starlette nêu giới hạn này và đề nghị pure ASGI middleware nếu cần. Lab chứng minh bằng một app riêng (output của `main.py`):
+**Giới hạn của `@app.middleware("http")`.** Decorator này dựng trên `BaseHTTPMiddleware`: `call_next` chạy phần còn lại của ứng dụng trong một task con, với bản sao của ngữ cảnh hiện tại. Giá trị `set` trước `call_next` được task con thừa hưởng; giá trị `set` trong task con ở lại đó. Tài liệu Starlette nêu giới hạn này và khuyên dùng pure ASGI middleware khi cần. Lab chứng minh bằng một app riêng (output của `main.py`):
 
 ```text
 middleware đọc lại sau call_next: ContextVar -> 'chưa đặt'; request.state -> 'đã đặt trong handler'
 ```
 
-Do đó, muốn `request.completed` có `customer_id` mà dependency mới biết, ta ghi vào `request.state`, như `current_customer` làm. Thời gian đo cũng chỉ tới lúc response bắt đầu gửi, chưa gồm truyền thân response; đo đủ cần pure ASGI middleware, còn lab giữ dạng decorator cho dễ đọc.
+Do đó, muốn `request.completed` có `customer_id` mà dependency mới biết, ta ghi vào `request.state`, như `current_customer` làm. Thời gian đo cũng chỉ tới lúc response bắt đầu gửi, chưa gồm thời gian truyền thân response; muốn đo đủ thì cần pure ASGI middleware, còn lab giữ dạng decorator cho dễ đọc.
 
 ## Structured logging và correlation id
 
@@ -292,15 +292,15 @@ Một request đọc chuyến trong log (đủ bốn dòng, `TOINOI_LOG_LEVEL=DE
 {"ts": "2026-11-06T11:50:20.064+00:00", "level": "INFO", "logger": "toinoi.access", "service": "quote-api", "request_id": "web-0001-abcdef", "event": "request.completed", "method": "GET", "route": "/v1/trips/{trip_id}", "status": 200, "duration_ms": 13.47, "customer_id": "CU-001"}
 ```
 
-Vài quyết định nằm trong dòng cuối. `route` là **mẫu** `/v1/trips/{trip_id}`, không phải đường dẫn thật, nên số giá trị có hạn và làm nhãn dashboard được (404 không khớp route thì là `-`). Mức log thay đổi theo kết quả: `INFO` bình thường, `WARNING` khi chậm hơn `slow_request_ms`, `ERROR` khi 5xx. `ts` luôn UTC (bài 04). Và thứ **không** được ghi: header `Authorization`, thân request, số giấy tờ. Lab gửi một request có `Authorization: Bearer bi-mat-khong-duoc-log` rồi kiểm không dòng log nào chứa chuỗi đó.
+Vài quyết định nằm trong dòng cuối. `route` là **mẫu** `/v1/trips/{trip_id}`, không phải đường dẫn thật, nên số giá trị có hạn và dùng làm nhãn trên dashboard được (404 không khớp route thì là `-`). Mức log thay đổi theo kết quả: `INFO` bình thường, `WARNING` khi chậm hơn `slow_request_ms`, `ERROR` khi 5xx. `ts` luôn UTC (bài 04). Và thứ **không** được ghi: header `Authorization`, thân request, số giấy tờ. Lab gửi một request có `Authorization: Bearer bi-mat-khong-duoc-log` rồi kiểm không dòng log nào chứa chuỗi đó.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
-| Dòng log của request mang `request_id` là `-` | Log phát sinh trong thread tạo bằng `run_in_executor` hoặc executor tự dựng, không sao chép ngữ cảnh; dùng `asyncio.to_thread` |
+| Dòng log của request mang `request_id` là `-` | Log phát sinh trong thread tạo bằng `run_in_executor` hoặc executor tự dựng; hai cách này không sao chép ngữ cảnh; dùng `asyncio.to_thread` |
 | Phiên kho chuyến tăng dần, không về 0 | Dependency có `yield` đã bọc phần dọn trong `try/finally` chưa |
 | Giá trị đặt bằng `ContextVar.set` trong handler không thấy ở `request.completed` | Middleware là `BaseHTTPMiddleware`; chuyển sang `request.state` hoặc pure ASGI middleware |
 | Test báo `AttributeError` trên `app.state.db` | Client `ASGITransport` không chạy lifespan; bọc bằng `app.router.lifespan_context(app)` |
-| Mỗi sự cố ra hai traceback | Uvicorn log thêm `Exception in ASGI application`; chọn giữ log nào |
+| Mỗi sự cố sinh ra hai traceback | Uvicorn log thêm `Exception in ASGI application`; chọn giữ log nào |
 
 ## Chạy và kiểm chứng
 
@@ -317,11 +317,11 @@ Lệnh đầu in các khối output ở trên (trích từng phần); `--verify`
 OK 56/56
 ```
 
-Server thật: `TOINOI_LOG_LEVEL=DEBUG uv run --project examples/toi-noi-python/33-fastapi-dependency-middleware-logging uvicorn app.main:app --app-dir examples/toi-noi-python/33-fastapi-dependency-middleware-logging --port 8033 --no-access-log` (`--no-access-log` vì middleware đã ghi một dòng mỗi request), rồi `curl` như README. Môi trường: Python 3.14.7, FastAPI 0.162.0, Starlette 1.10.0, uvicorn 0.54.0, pydantic-settings 2.16.2, httpx 0.28.1 (`uv.lock`). Các mili giây trong log phụ thuộc máy; lần chạy cuối in `load average 89.80 / 58.69` (máy Apple M1 Max đang bận nhiều tiến trình khác), nên đừng so tuyệt đối. Thứ tự dòng, mã và số đếm lặp lại được.
+Server thật: `TOINOI_LOG_LEVEL=DEBUG uv run --project examples/toi-noi-python/33-fastapi-dependency-middleware-logging uvicorn app.main:app --app-dir examples/toi-noi-python/33-fastapi-dependency-middleware-logging --port 8033 --no-access-log` (`--no-access-log` vì middleware đã ghi một dòng mỗi request), rồi `curl` như README. Môi trường: Python 3.14.7, FastAPI 0.162.0, Starlette 1.10.0, uvicorn 0.54.0, pydantic-settings 2.16.2, httpx 0.28.1 (`uv.lock`). Các mili giây trong log phụ thuộc máy; lần chạy cuối in `load average 89.80 / 58.69` (máy Apple M1 Max đang bận nhiều tiến trình khác), nên đừng so sánh số tuyệt đối. Thứ tự dòng, mã và số đếm lặp lại được.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Kho chuyến, kho báo giá và bộ đếm <code>quote_id</code> nằm trong bộ nhớ một tiến trình; chạy nhiều worker thì mỗi worker có bản riêng và có thể cùng sinh <code>QT-0001</code>. Log đi ra stdout, chưa có bộ thu gom hay khử thông tin cá nhân. <code>X-Request-Id</code> là quy ước tự đặt; truy vết xuyên service dùng W3C <code>traceparent</code> qua OpenTelemetry (bài 77). <code>X-Customer-Id</code> không phải xác thực. Route <code>/v1/diagnostics/*</code> chỉ nên có ở môi trường phát triển.</p>
+<p>Kho chuyến, kho báo giá và bộ đếm <code>quote_id</code> nằm trong bộ nhớ một tiến trình; chạy nhiều worker thì mỗi worker có bản riêng và có thể cùng sinh <code>QT-0001</code>. Log đi ra stdout, chưa có bộ thu gom log hay bước loại bỏ thông tin cá nhân. <code>X-Request-Id</code> là quy ước tự đặt; truy vết xuyên service dùng W3C <code>traceparent</code> qua OpenTelemetry (bài 77). <code>X-Customer-Id</code> không phải xác thực. Route <code>/v1/diagnostics/*</code> chỉ nên có ở môi trường phát triển.</p>
 </div>
 
 **Bài tập:** (1) Trong `/v1/diagnostics/context`, thêm một giá trị đọc `request_id_var.get()` bên trong `await asyncio.get_running_loop().run_in_executor(None, request_id_var.get)`. Kết quả là gì và sửa thế nào? (2) Đổi `SessionDep` sang scope mặc định (bỏ `scope="function"`) rồi chạy lại `/v1/trips/TN-0001` với `TOINOI_LOG_LEVEL=DEBUG`. Dòng `db.session.closed` nằm ở đâu so với `request.completed`, và vì sao điều đó đáng quan tâm với commit?

@@ -1,0 +1,161 @@
+{
+  "file": "python-model-registry-ab-drift-retraining.md",
+  "edits": [
+    {
+      "old": "ai đăng ký, bản cha, sha256",
+      "new": "ai đăng ký, phiên bản cha, sha256",
+      "reason": "\"bản cha\" là cách dịch gượng của parent version",
+      "severity": "medium"
+    },
+    {
+      "old": "và nếu hỏng thì lui mất bao lâu.",
+      "new": "và nếu hỏng thì quay lại bản cũ mất bao lâu.",
+      "reason": "\"lui\" thiếu tân ngữ, nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Lab thử các lần từ chối trên một bản sao registry",
+      "new": "Lab thử từng trường hợp bị từ chối trên một bản sao registry",
+      "reason": "\"các lần từ chối\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "một rollback «tin lịch sử» sẽ về v1, sai.",
+      "new": "một rollback «tin lịch sử» sẽ quay về v1, và đó là sai.",
+      "reason": "câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "hai ca trước dòng đăng ký lại",
+      "new": "hai trường hợp trước dòng đăng ký lại",
+      "reason": "\"ca\" dùng như case, gượng",
+      "severity": "low"
+    },
+    {
+      "old": "ai được ghi vào thư mục registry là việc của hạ tầng",
+      "new": "việc ai được quyền ghi vào thư mục registry thuộc về hạ tầng",
+      "reason": "câu thiếu động từ, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Cổng chỉ là một lớp: ",
+      "new": "Cổng chỉ là một lớp bảo vệ: ",
+      "reason": "lược mất danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Ba ca biên có verify:",
+      "new": "Ba trường hợp biên có kiểm tra (verify):",
+      "reason": "\"ca biên\" gượng, lẫn tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Tỉ lệ cờ và p99 đo thẳng vào chỗ quyết định xảy ra.",
+      "new": "Tỉ lệ cờ và p99 phản ánh trực tiếp kết quả tại nơi quyết định được đưa ra.",
+      "reason": "giọng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "Trong bộ này lỗi đến từ nhãn chưa chín, không từ việc thêm dữ liệu.",
+      "new": "Trong bộ này lỗi đến từ nhãn chưa chín, không phải từ việc thêm dữ liệu.",
+      "reason": "thiếu từ nối, câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Về v2 thì không vững:",
+      "new": "Với v2 thì kết luận không vững:",
+      "reason": "thiếu chủ ngữ, phải đoán ý",
+      "severity": "medium"
+    },
+    {
+      "old": "dấu ngược với chênh thật trên toàn cửa sổ",
+      "new": "ngược dấu với chênh thật trên toàn cửa sổ",
+      "reason": "trật tự từ",
+      "severity": "low"
+    },
+    {
+      "old": "Thêm nhiễu giao thoa:",
+      "new": "Còn có thêm nhiễu giao thoa:",
+      "reason": "câu thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "chứa cả số 0 lẫn dấu sai",
+      "new": "chứa cả số 0 lẫn chênh sai dấu",
+      "reason": "\"dấu sai\" thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Khoảng mở bên phải cho PSI bằng 0 khi cờ hiếm đổi từ 0,1 % lên 50 %;",
+      "new": "Nếu dùng khoảng mở bên phải thì PSI bằng 0 khi cờ hiếm đổi từ 0,1 % lên 50 %;",
+      "reason": "câu khó hiểu, thiếu điều kiện",
+      "severity": "medium"
+    },
+    {
+      "old": "Test và dòng này của lab giữ cả hai phía:",
+      "new": "Test và dòng kết quả này của lab kiểm cả hai phía:",
+      "reason": "\"giữ cả hai phía\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Hai nửa ngẫu nhiên của chính tập tham chiếu cho PSI lớn nhất rất nhỏ.",
+      "new": "PSI lớn nhất giữa hai nửa ngẫu nhiên của chính tập tham chiếu rất nhỏ.",
+      "reason": "câu khó hiểu, trật tự từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Độ quan trọng cần đo bằng thứ phản ánh tác động lên điểm",
+      "new": "Độ quan trọng cần đo bằng chỉ số phản ánh tác động lên điểm",
+      "reason": "\"thứ\" quá khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "mô hình dựa vào một bộ đếm tự trôi",
+      "new": "mô hình dựa vào một bộ đếm tự thay đổi theo thời gian",
+      "reason": "\"tự trôi\" là cách ghép tự chế",
+      "severity": "medium"
+    },
+    {
+      "old": "tạo tác (b) cho mô hình một lối tắt không có ngoài đời",
+      "new": "tạo tác (b) cho mô hình một lối tắt mà ngoài đời không có",
+      "reason": "trật tự từ kiểu tiếng Anh",
+      "severity": "low"
+    },
+    {
+      "old": "Số đo đẹp lại không có nghĩa nguồn ổn:",
+      "new": "Số đo hồi phục không có nghĩa là nguồn dữ liệu đã ổn:",
+      "reason": "câu thiếu chủ ngữ, gượng",
+      "severity": "high"
+    },
+    {
+      "old": "hai lần liên tiếp đi lùi hai bản",
+      "new": "hai lần liên tiếp lùi về hai bản trước",
+      "reason": "\"đi lùi\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Kiểm ngày 07/11/2026:",
+      "new": "Đã kiểm tra ngày 07/11/2026:",
+      "reason": "câu cụt, thiếu chủ ngữ/động từ",
+      "severity": "low"
+    },
+    {
+      "old": "cổng promote từ chối đúng các ca (kể cả",
+      "new": "cổng promote từ chối đúng các trường hợp (kể cả",
+      "reason": "\"ca\" dùng như case",
+      "severity": "low"
+    },
+    {
+      "old": "kiểm nhãn lúc huấn luyện đã chín chưa",
+      "new": "kiểm tra xem nhãn lúc huấn luyện đã chín chưa",
+      "reason": "lược mất chữ \"tra\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Sau huấn luyện lại số đo đẹp trở lại nhưng PSI nguồn vẫn cao",
+      "new": "Sau khi huấn luyện lại, số đo hồi phục nhưng PSI của nguồn vẫn cao",
+      "reason": "câu cụt, \"số đo đẹp\" gượng",
+      "severity": "medium"
+    }
+  ]
+}

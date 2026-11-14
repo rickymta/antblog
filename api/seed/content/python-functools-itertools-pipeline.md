@@ -1,14 +1,14 @@
 ---
 slug: python-functools-itertools-pipeline
 title: "functools, itertools và pipeline hàm: xử lý lô chuyến"
-summary: "Bài 18: partial, reduce, lru_cache, groupby phải sort trước, chain, batched, accumulate; pipeline generator lọc, tính cước, nhóm theo thành phố cho lô 10.000 chuyến giả; đối chiếu LINQ, không dùng pandas."
+summary: "Bài 18: partial, reduce, lru_cache, groupby cần sắp xếp trước, chain, batched, accumulate; pipeline generator lọc, tính cước, nhóm theo thành phố cho lô 10.000 chuyến giả; đối chiếu LINQ, không dùng pandas."
 category: python-beginner
 level: beginner
 tags: [python, toi-noi, functools, itertools]
 language: vi
 ---
 
-Cuối mỗi khung giờ, bộ phận vận hành của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận một lô chuyến và hỏi: mỗi thành phố có bao nhiêu chuyến đã hoàn thành, doanh thu bao nhiêu, cước trung bình thế nào? Cách quen tay là ba vòng `for` nối tiếp, mỗi vòng dựng một list: lọc chuyến, tính cước, rồi gom nhóm. Với 10.000 chuyến thì chạy được, nhưng mỗi list trung gian giữ cả lô trong bộ nhớ, và ba vòng lặp trộn ba mối quan tâm vào nhau. Bài này dựng cùng việc đó thành một **pipeline** các bước nhỏ nối bằng generator, dùng những mảnh ghép của `functools` và `itertools`.
+Cuối mỗi khung giờ, bộ phận vận hành của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận một lô chuyến và hỏi: mỗi thành phố có bao nhiêu chuyến đã hoàn thành, doanh thu bao nhiêu, cước trung bình thế nào? Cách quen tay là ba vòng `for` nối tiếp, mỗi vòng dựng một list: lọc chuyến, tính cước, rồi gom nhóm. Với 10.000 chuyến thì chạy được, nhưng mỗi list trung gian giữ cả lô trong bộ nhớ, và ba vòng lặp trộn lẫn ba việc khác nhau vào cùng một chỗ. Bài này dựng cùng việc đó thành một **pipeline** các bước nhỏ nối bằng generator, dùng những mảnh ghép của `functools` và `itertools`.
 
 Đây là bài 18 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn cần quen generator và `itertools` ở bài 06, và decorator ở bài 17, vì `lru_cache` là một decorator. Ta không dùng pandas: loại công cụ đó thuộc bài 29.
 
@@ -51,9 +51,9 @@ fare_food.keywords                 # {'service': <ServiceKind.FOOD: 'food'>}
 per_service = [partial(calculate_fare, service=s) for s in ServiceKind]
 ```
 
-Đối tượng `partial` giữ lại `func`, `args`, `keywords` để soi được, và không có `__name__` (lab kiểm `hasattr(fare_food, "__name__")` ra `False`), nên nếu cần log tên thì tự đặt. CPython cũng làm phẳng `partial` của `partial` thành một lớp (lab kiểm `nested.func is calculate_fare`), nhưng đó là chi tiết cài đặt, đừng dựa vào. Từ Python 3.14, `functools.Placeholder` cho phép cố định đối số vị trí ở giữa (`partial(pow, Placeholder, 2)` là hàm bình phương). So với `lambda`, `partial` hơn ở chỗ **chốt giá trị ngay lúc tạo**, tránh lỗi late binding của bài 17: dòng `per_service` ở trên cho ba hàm với `service` lần lượt là `ride`, `food`, `parcel`, đúng như mong đợi, trong khi `[lambda: s for s in ServiceKind]` sẽ cho cả ba cùng `parcel`.
+Đối tượng `partial` giữ lại `func`, `args`, `keywords` để soi được, và không có `__name__` (lab kiểm `hasattr(fare_food, "__name__")` ra `False`), nên nếu cần ghi tên vào log thì phải tự đặt. CPython cũng làm phẳng `partial` của `partial` thành một lớp (lab kiểm `nested.func is calculate_fare`), nhưng đó là chi tiết cài đặt, đừng dựa vào. Từ Python 3.14, `functools.Placeholder` cho phép cố định đối số vị trí ở giữa (`partial(pow, Placeholder, 2)` là hàm bình phương). So với `lambda`, ưu điểm của `partial` là **chốt giá trị ngay lúc tạo**, tránh lỗi late binding của bài 17: dòng `per_service` ở trên cho ba hàm với `service` lần lượt là `ride`, `food`, `parcel`, đúng như mong đợi, trong khi `[lambda: s for s in ServiceKind]` sẽ cho cả ba cùng `parcel`.
 
-`functools.reduce(f, iterable, initial)` gộp dần một dãy thành một giá trị bằng cách áp `f(acc, x)` lặp lại. Lab kiểm: `reduce(add, fares, Decimal(0))` bằng `sum(fares, Decimal(0))`, và `reduce(max, fares)` bằng `max(fares)`. Vì `sum`, `max`, `min`, `any`, `all` đã bao các phép gộp phổ biến và đọc dễ hơn, `reduce` hiếm khi cần. Nó hợp lý khi phép gộp là hàm tự định nghĩa, và khi dựng một chuỗi hàm:
+`functools.reduce(f, iterable, initial)` gộp dần một dãy thành một giá trị bằng cách áp `f(acc, x)` lặp lại. Lab kiểm: `reduce(add, fares, Decimal(0))` bằng `sum(fares, Decimal(0))`, và `reduce(max, fares)` bằng `max(fares)`. Vì `sum`, `max`, `min`, `any`, `all` đã đủ cho các phép gộp phổ biến và đọc dễ hơn, `reduce` hiếm khi cần. Nó hợp lý khi phép gộp là hàm tự định nghĩa, và khi dựng một chuỗi hàm:
 
 ```python
 def compose(*steps):
@@ -63,7 +63,7 @@ def compose(*steps):
 compose(lambda x: x + 1, lambda x: x * 10)(1)   # 20, tức (1 + 1) * 10
 ```
 
-Hai điều cần nhớ về `reduce`: gọi trên dãy rỗng mà không có `initial` ném `TypeError: reduce() of empty iterable with no initial value` (lab kiểm đúng thông báo đó), và phép gộp phải được đọc theo thứ tự trái sang phải.
+Hai điều cần nhớ về `reduce`: gọi trên dãy rỗng mà không có `initial` ném `TypeError: reduce() of empty iterable with no initial value` (lab kiểm đúng thông báo đó), và phải đọc phép gộp theo thứ tự trái sang phải.
 
 ## `lru_cache` và `cache`: nhớ kết quả của hàm thuần
 
@@ -90,7 +90,7 @@ distinct_keys             : 811
 
 `hits + misses` bằng số lần gọi, và `misses` bằng đúng số khoá khác nhau: mỗi khoá tính một lần, 7.554 lần còn lại lấy từ cache. Về thời gian, hai con số cuối là của một lần chạy trên máy tác giả (lab lấy giá trị nhỏ nhất của 5 lần đo) và thay đổi theo máy; điều đáng nhớ là tỷ lệ và chi phí tuyệt đối. Với một hàm chỉ tính số học như `calculate_fare`, cache tiết kiệm cỡ vài chục mili giây cho cả lô. Cache đáng giá hơn nhiều khi hàm đắt (gọi mạng, đọc đĩa, tính nặng), và nó luôn tốn bộ nhớ cho các khoá đã nhớ; phần bộ nhớ đó được đo riêng ở mục cuối.
 
-`lru_cache` chỉ đúng với **hàm thuần**: kết quả chỉ phụ thuộc vào đối số. Bẫy thật là hàm đọc thêm biến nằm ngoài khoá:
+`lru_cache` chỉ đúng với **hàm thuần**: kết quả chỉ phụ thuộc vào đối số. Bẫy thực tế là hàm đọc thêm một biến không nằm trong khoá:
 
 ```python
 @cache
@@ -102,7 +102,7 @@ def quote_with_policy(km, policy):          # ĐÚNG: mọi đầu vào đều l
     return calculate_fare(km, policy)
 ```
 
-Đổi `ACTIVE_POLICY` từ chính sách chuẩn sang 5.000 VND/km giữa chừng, `quote_active(Decimal("5"))` vẫn trả **25.500** (giá cũ, lấy từ cache) dù đáng lẽ 27.000, còn `quote_with_policy` trả đúng 25.500 và 27.000 cho hai chính sách. Ở production đây là lỗi «đổi bảng giá mà giá cũ vẫn hiện». Các lưu ý còn lại của `lru_cache`: đối số phải hashable (`fare_cached([Decimal("5")])` ném `TypeError: unhashable type: 'list'`; `Decimal` và `NamedTuple` chứa `Decimal` thì hashable), lời gọi bằng vị trí và bằng từ khoá được coi là các khoá khác nhau, hàm trả về đối tượng khả biến thì mọi người gọi dùng chung một đối tượng, và dùng trên phương thức sẽ giữ tham chiếu tới `self` suốt đời cache.
+Đổi `ACTIVE_POLICY` từ chính sách chuẩn sang 5.000 VND/km giữa chừng, `quote_active(Decimal("5"))` vẫn trả **25.500** (giá cũ, lấy từ cache) dù đáng lẽ 27.000, còn `quote_with_policy` trả đúng 25.500 và 27.000 cho hai chính sách. Ở production đây là lỗi «đổi bảng giá mà giá cũ vẫn hiện». Các lưu ý còn lại của `lru_cache`: đối số phải hashable (`fare_cached([Decimal("5")])` ném `TypeError: unhashable type: 'list'`; `Decimal` và `NamedTuple` chứa `Decimal` thì hashable), lời gọi bằng vị trí và bằng từ khoá được coi là các khoá khác nhau, hàm trả về đối tượng khả biến thì mọi nơi gọi hàm đều dùng chung một đối tượng, và dùng trên phương thức sẽ giữ tham chiếu tới `self` suốt đời cache.
 
 ## Pipeline generator: lọc, tính cước, nhóm
 
@@ -163,7 +163,7 @@ def by_city_groupby(priced):
 <figcaption>Hình 2. groupby chỉ gom các chuyến liền nhau cùng thành phố: dữ liệu chưa sắp xếp tạo ra nhiều nhóm trùng khoá, sắp xếp trước thì mỗi khoá đúng một nhóm (tám chuyến minh hoạ, không phải dữ liệu của lab).</figcaption>
 </figure>
 
-Có ba điều nên biết. Một, `sorted` trả về list nên bước này **phá tính lười**: pipeline phải nạp hết dữ liệu để sắp xếp. Hai, nhóm con `rows` dùng chung iterator với `groupby`: khi `groupby` đã đi sang nhóm kế tiếp, nhóm cũ cạn. Lab chứng minh bằng `held = list(groupby(...))` rồi `list(held[0][1])` ra `[]`; vì vậy phải dùng `rows` ngay trong vòng lặp, như `list(rows)` ở trên. Ba, cách gom một lượt không cần sort thường hợp hơn với luồng lớn: giữ số chuyến và doanh thu theo khoá trong `defaultdict`, bộ nhớ tỷ lệ với số khoá (6), không phải số chuyến.
+Có ba điều nên biết. Một, `sorted` trả về list nên bước này **phá tính lười**: pipeline phải nạp hết dữ liệu để sắp xếp. Hai, nhóm con `rows` dùng chung iterator với `groupby`: khi `groupby` đã đi sang nhóm kế tiếp, nhóm cũ cạn. Lab chứng minh bằng `held = list(groupby(...))` rồi `list(held[0][1])` ra `[]`; vì vậy phải dùng `rows` ngay trong vòng lặp, như `list(rows)` ở trên. Ba, cách gom một lượt không cần sắp xếp thường phù hợp hơn với luồng lớn: giữ số chuyến và doanh thu theo khoá trong `defaultdict`, bộ nhớ tỷ lệ với số khoá (6), không phải số chuyến.
 
 ```python
 def by_city_one_pass(priced):
@@ -176,7 +176,7 @@ def by_city_one_pass(priced):
             for city in count}
 ```
 
-(Rút gọn: `round_vnd` là `quantize(Decimal("1"), ROUND_HALF_UP)` viết tắt.) Hai cách cho kết quả bằng nhau (lab kiểm `grouped == one_pass`), đây là bảng thật của lô 8.365 chuyến:
+(Rút gọn: `round_vnd` là `quantize(Decimal("1"), ROUND_HALF_UP)` viết tắt.) Hai cách cho kết quả bằng nhau (lab kiểm `grouped == one_pass`); đây là bảng kết quả thật của lô 8.365 chuyến:
 
 ```text
 thành phố   số chuyến      doanh thu   cước TB
@@ -193,7 +193,7 @@ Cộng sáu dòng ra đúng 338.740.950 VND và 8.365 chuyến.
 
 ## Đối chiếu LINQ, bộ nhớ và giới hạn
 
-Pipeline này cùng tinh thần với LINQ to Objects, đã nói ở bài [LINQ và deferred execution](/articles/csharp-linq-deferred-execution) của loạt C#: khai báo các bước, chưa chạy cho tới khi có người duyệt. Bảng dưới là ánh xạ gần đúng; cột phải ghi chỗ khác nhau cần cẩn thận.
+Pipeline này cùng tinh thần với LINQ to Objects, đã nói ở bài [LINQ và deferred execution](/articles/csharp-linq-deferred-execution) của loạt C#: khai báo các bước, chưa chạy cho tới khi có người duyệt. Bảng dưới là ánh xạ gần đúng; cột bên phải ghi những chỗ khác nhau cần thận trọng.
 
 | LINQ | Python | Khác biệt đáng nhớ |
 | --- | --- | --- |
@@ -209,9 +209,9 @@ Pipeline này cùng tinh thần với LINQ to Objects, đã nói ở bài [LINQ 
 | `First()` / `FirstOrDefault()` | `next(iter(xs))` / `next(iter(xs), None)` | Rỗng ném `StopIteration`, không phải `InvalidOperationException` |
 | `ToList()` | `list(xs)` | Tương đương |
 
-Khác biệt lớn nhất không nằm trong bảng: query LINQ duyệt lại sẽ chạy lại từ nguồn, còn generator của Python đã cạn thì duyệt lại ra rỗng; muốn duyệt nhiều lần phải tạo lại generator hoặc `list`.
+Khác biệt lớn nhất không nằm trong bảng: query LINQ khi duyệt lại sẽ chạy lại từ nguồn, còn generator của Python đã cạn thì duyệt lại ra rỗng; muốn duyệt nhiều lần phải tạo lại generator hoặc `list`.
 
-Lợi ích bộ nhớ của pipeline, đo bằng `tracemalloc` với cùng việc «gom doanh thu theo thành phố» trên 10.000 chuyến. Phép đo phải tách bộ nhớ của cache ra, vì `lru_cache` giữ khoá và kết quả suốt đời process: nếu đo khi cache đã ấm hoặc không dọn, con số của pipeline sẽ đẹp giả tạo. Lab đo hai chế độ, ở chế độ có cache thì gọi `cache_clear()` trước mỗi lần đo:
+Ta đo lợi ích bộ nhớ của pipeline bằng `tracemalloc`, với cùng việc «gom doanh thu theo thành phố» trên 10.000 chuyến. Phép đo phải tách bộ nhớ của cache ra, vì `lru_cache` giữ khoá và kết quả suốt đời process: nếu đo khi cache đã ấm hoặc không dọn, con số của pipeline sẽ đẹp hơn thực tế. Lab đo hai chế độ, ở chế độ có cache thì gọi `cache_clear()` trước mỗi lần đo:
 
 ```text
 đỉnh bộ nhớ (tracemalloc), 10.000 chuyến:
@@ -220,7 +220,7 @@ Lợi ích bộ nhớ của pipeline, đo bằng `tracemalloc` với cùng việ
   chi phí riêng của cache (811 khóa): khoảng 270 KiB
 ```
 
-Không cache, pipeline chỉ giữ vài KiB cho các dict gom nhóm, còn bản dựng `list` cho từng bước (`trips`, `billable`, `priced`) giữ cả lô. Có cache lạnh, 811 khoá nhớ thêm khoảng 270 KiB, nên tỷ lệ chỉ còn cỡ 14 lần; cache đổi bộ nhớ lấy thời gian. Con số cụ thể thay đổi theo máy và phiên bản Python; ở 10.000 dòng chưa đáng kể, nhưng lợi thế của streaming là thứ nhân lên khi lô lớn lên, còn kích thước cache bị chặn bởi số khoá khác nhau (hoặc `maxsize`).
+Không cache, pipeline chỉ giữ vài KiB cho các dict gom nhóm, còn bản dựng `list` cho từng bước (`trips`, `billable`, `priced`) giữ cả lô. Có cache lạnh, 811 khoá nhớ thêm khoảng 270 KiB, nên tỷ lệ chỉ còn cỡ 14 lần; cache đổi bộ nhớ lấy thời gian. Con số cụ thể thay đổi theo máy và phiên bản Python; ở 10.000 dòng chưa đáng kể, nhưng lợi thế của streaming tăng theo kích thước lô, còn kích thước cache bị chặn bởi số khoá khác nhau (hoặc `maxsize`).
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -232,7 +232,7 @@ Không cache, pipeline chỉ giữ vài KiB cho các dict gom nhóm, còn bản 
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn so với production</span>
-<p>Lô 10.000 chuyến do generator tự sinh trong cùng process; dữ liệu thật đến từ Kafka hoặc database với thứ tự đảo, trùng lặp và dòng lỗi mà ta mới chỉ loại bằng một bộ lọc. Pipeline chạy trong một luồng, không retry, không đánh dấu chuyến bị loại để điều tra, và không nằm trong transaction (bài 17 bàn phần đó). <code>lru_cache</code> chỉ nhớ trong bộ nhớ của một process, không chia sẻ giữa nhiều worker. Hai cách gom nhóm chỉ đúng khi mọi khoá vừa trong bộ nhớ; với 2 triệu chuyến mỗi ngày, việc tổng hợp thường làm ở database hoặc công cụ chuyên cho bảng dữ liệu (bài 29). Số đo thời gian và bộ nhớ là của một lần chạy trên một máy.</p>
+<p>Lô 10.000 chuyến do generator tự sinh trong cùng process; dữ liệu thật đến từ Kafka hoặc database với thứ tự bị đảo lộn, bản ghi trùng lặp và dòng lỗi mà ta mới chỉ loại bằng một bộ lọc. Pipeline chạy trong một luồng, không retry, không đánh dấu chuyến bị loại để điều tra, và không nằm trong transaction (bài 17 bàn phần đó). <code>lru_cache</code> chỉ nhớ trong bộ nhớ của một process, không chia sẻ giữa nhiều worker. Hai cách gom nhóm chỉ dùng được khi mọi khoá vừa trong bộ nhớ; với 2 triệu chuyến mỗi ngày, việc tổng hợp thường làm ở database hoặc công cụ chuyên cho bảng dữ liệu (bài 29). Số liệu đo thời gian và bộ nhớ là của một lần chạy trên một máy.</p>
 </div>
 
 ## Chạy và kiểm chứng
@@ -244,13 +244,13 @@ uv run --project examples/toi-noi-python/18-functools-itertools-pipeline example
 uv run --project examples/toi-noi-python/18-functools-itertools-pipeline examples/toi-noi-python/18-functools-itertools-pipeline/main.py --verify
 ```
 
-Lệnh đầu in các nhóm kết quả mà bài đã trích (`partial`, `reduce`, cache, pipeline, bảng thành phố, đo bộ nhớ) và chạy trong vài giây (phần đo thời gian lặp lại 5 lần). Lệnh thứ hai kiểm 21 ca: dữ liệu giả lặp lại được theo seed, `partial` (kể cả trong comprehension), `reduce` và `compose`, pipeline bằng với viết tay và lười, ba bẫy của cache, `groupby` cần sort và nhóm con cạn, hai cách gom nhóm bằng nhau, tổng doanh thu, `batched`, `accumulate`, `chain.from_iterable`, và bộ nhớ của pipeline streaming so với list từng bước, có và không có cache. Kết quả cuối:
+Lệnh đầu in các nhóm kết quả mà bài đã trích (`partial`, `reduce`, cache, pipeline, bảng thành phố, đo bộ nhớ) và chạy trong vài giây (phần đo thời gian lặp lại 5 lần). Lệnh thứ hai kiểm 21 test case: dữ liệu giả lặp lại được theo seed, `partial` (kể cả trong comprehension), `reduce` và `compose`, pipeline bằng với viết tay và lười, ba bẫy của cache, `groupby` cần sort và nhóm con cạn, hai cách gom nhóm bằng nhau, tổng doanh thu, `batched`, `accumulate`, `chain.from_iterable`, và bộ nhớ của pipeline streaming so với list từng bước, có và không có cache. Kết quả cuối:
 
 ```text
 OK 21/21
 ```
 
-Sai ca nào, chương trình in tên ca đó cùng `FAIL n/21` (n là số ca đạt) và thoát với mã 1.
+Test case nào sai, chương trình in tên test case đó cùng `FAIL n/21` (n là số test case đạt) và thoát với mã 1.
 
 **Bài tập 1:** Viết biểu thức tính doanh thu riêng của dịch vụ `food` trên cả lô mà không dựng list nào. **Bài tập 2:** Thêm một bước vào `make_pipeline` để chỉ giữ chuyến trên 10 km, dùng `compose` và `partial`, không sửa các bước cũ. Có cần đổi `by_city_one_pass` không?
 

@@ -1,28 +1,28 @@
 ---
 slug: python-vector-search-pgvector-faiss-trung-tai-xe
 title: "Vector search với pgvector và FAISS: phát hiện một người nhiều tài khoản"
-summary: "Bài 51: lưu embedding khuôn mặt trong PostgreSQL pgvector và FAISS, tìm top-k cùng người khác tài khoản. So HNSW, IVFFlat về recall, độ trễ, kích thước; bẫy khi kèm WHERE. Có số đo thật."
+summary: "Bài 51: lưu embedding khuôn mặt trong PostgreSQL pgvector và FAISS, tìm top-k ảnh của cùng một người ở tài khoản khác. So sánh HNSW và IVFFlat về recall, độ trễ, kích thước; bẫy khi kèm WHERE. Có số liệu đo thật."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, pgvector, faiss, vector-search]
 language: vi
 ---
 
-[Tới Nơi](/articles/du-an-mau-toi-noi) có 60.000 tài xế đăng ký, và một tài xế bị khoá vì gian lận quay lại sau vài tuần, đăng ký bằng số điện thoại và CCCD khác. Không ai nhớ nổi 60.000 gương mặt, nhưng một cơ sở dữ liệu thì hỏi được: trong các tài khoản đã có, ảnh nào gần ảnh này nhất? Bài này lưu embedding khuôn mặt và trả lời câu hỏi đó bằng pgvector trong PostgreSQL và bằng FAISS, đo xem chỉ mục gần đúng đổi độ chính xác lấy thời gian thế nào, và chỉ ra chỗ nó trả thiếu mà không báo lỗi.
+[Tới Nơi](/articles/du-an-mau-toi-noi) có 60.000 tài xế đăng ký, và một tài xế bị khoá vì gian lận quay lại sau vài tuần, đăng ký bằng số điện thoại và CCCD khác. Không ai nhớ nổi 60.000 gương mặt, nhưng một cơ sở dữ liệu thì hỏi được: trong các tài khoản đã có, ảnh nào gần ảnh này nhất? Bài này lưu embedding khuôn mặt và trả lời câu hỏi đó bằng pgvector trong PostgreSQL và bằng FAISS, đo xem chỉ mục gần đúng đổi độ chính xác lấy thời gian thế nào, và chỉ ra trường hợp nó trả thiếu kết quả mà không báo lỗi.
 
 Đây là bài 51 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần biết embedding và cosine ([bài 49](/articles/python-face-embedding-cosine-threshold-far-frr)) và cách làm việc với PostgreSQL qua psycopg ([bài 24](/articles/python-sqlalchemy-psycopg-postgresql-mapping-migration)).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Tìm 10 vector gần nhất trong 100.000 vector 128 chiều bằng NumPy: vét cạn, không chỉ mục, mỗi lần một truy vấn. Mất cỡ micro giây, mili giây hay giây?</p>
-<details><summary>Xem đáp án</summary><p><b>Cỡ mili giây.</b> Lab đo p50 là 2,76 ms (một luồng BLAS) trên một máy đang rất bận; các lần chạy khác cho 1,97 đến 2,88 ms. Ở quy mô này chỉ mục gần đúng không phải để cứu thời gian; lý do dùng pgvector là dữ liệu đã nằm trong PostgreSQL, và lý do dùng chỉ mục là khi số dòng lớn hơn nhiều. Phần so sánh bên dưới cho thấy chỉ mục còn làm gì cho recall.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Cỡ mili giây.</b> Lab đo p50 là 2,76 ms (một luồng BLAS) trên một máy đang rất bận; các lần chạy khác cho 1,97 đến 2,88 ms. Ở quy mô này chỉ mục gần đúng không giúp tiết kiệm thời gian; lý do dùng pgvector là dữ liệu đã nằm trong PostgreSQL, còn chỉ mục có lợi khi số dòng lớn hơn nhiều. Phần so sánh bên dưới cho thấy chỉ mục còn ảnh hưởng gì đến recall.</p></details>
 </div>
 
 ## Từ khuôn mặt tới vector: phương án embedding của lab
 
-Lab này tự chứa, không dùng kết quả lab 49. Embedding là **PCA** (kiểu «eigenfaces») 128 chiều, fit trên 200 ảnh Olivetti (ảnh 0 đến 4 của mỗi người trong 40 người), rồi chuẩn hoá L2. Đây không phải mô hình nhận diện khuôn mặt hiện đại như InsightFace; nó chỉ cho vector có cấu trúc thật để tìm kiếm. Độ chính xác nhận diện trong bài là của PCA. Bộ khuôn mặt Olivetti do AT&T Laboratories Cambridge thu thập; xem tài liệu scikit-learn (tải về 4,26 MB, bản cache 1,4 MB). Chỉ với 200 tài khoản thật, tìm chính xác cho `top1` cùng người là 0,855.
+Lab này độc lập, không dùng kết quả của lab 49. Embedding là **PCA** (kiểu «eigenfaces») 128 chiều, fit trên 200 ảnh Olivetti (ảnh 0 đến 4 của mỗi người trong 40 người), rồi chuẩn hoá L2. Đây không phải mô hình nhận diện khuôn mặt hiện đại như InsightFace; nó chỉ cho vector có cấu trúc thật để tìm kiếm. Độ chính xác nhận diện trong bài là của PCA. Bộ khuôn mặt Olivetti do AT&T Laboratories Cambridge thu thập; xem tài liệu scikit-learn (tải về 4,26 MB, bản cache 1,4 MB). Chỉ với 200 tài khoản thật, tìm chính xác cho `top1` cùng người là 0,855.
 
-Năm ảnh đầu mỗi người là 5 «tài khoản» đã đăng ký; năm ảnh còn lại là 200 truy vấn, mỗi truy vấn là ảnh của một lần đăng ký mới cần kiểm tra trùng. Để có quy mô, lab thêm 100.000 **tài khoản nền** tổng hợp: vector Gaussian cùng trung bình và hiệp phương sai với embedding thật, chuẩn hoá L2. Chúng không phải người thật, chỉ để đủ số dòng đo thời gian và recall.
+Năm ảnh đầu mỗi người là 5 «tài khoản» đã đăng ký; năm ảnh còn lại là 200 truy vấn, mỗi truy vấn là ảnh của một lần đăng ký mới cần kiểm tra trùng. Để có quy mô, lab thêm 100.000 **tài khoản nền** tổng hợp: vector Gaussian cùng trung bình và hiệp phương sai với embedding thật, chuẩn hoá L2. Chúng không phải người thật, chỉ để có đủ số dòng cho việc đo thời gian và recall.
 
 ```python
 # embedding.py
@@ -35,7 +35,7 @@ def synthetic_distractors(real: np.ndarray, n: int, seed: int = 51) -> np.ndarra
     ...  # chuẩn hóa L2
 ```
 
-Vì mọi vector có độ dài 1, cosine bằng tích vô hướng, và toán tử `<=>` của pgvector (khoảng cách cosine) bằng 1 trừ cosine; `--verify` kiểm đẳng thức này trên một truy vấn. Mã tài khoản dùng 6 chữ số (`DR-000001`) vì lab cần hơn trăm nghìn dòng, dài hơn `DR-001` của các bài trước.
+Vì mọi vector có độ dài 1, cosine bằng tích vô hướng, và toán tử `<=>` của pgvector (khoảng cách cosine) bằng 1 trừ cosine; `--verify` kiểm tra đẳng thức này trên một truy vấn. Mã tài khoản dùng 6 chữ số (`DR-000001`) vì lab cần hơn trăm nghìn dòng, dài hơn `DR-001` của các bài trước.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -74,9 +74,9 @@ CREATE INDEX driver_faces_ivf ON lab51.driver_faces USING ivfflat (embedding vec
     WITH (lists = 100)
 ```
 
-Một bẫy hạ tầng đo được khi viết lab: dựng chỉ mục song song với `maintenance_work_mem = 512MB` làm PostgreSQL báo `No space left on device`, vì `/dev/shm` của container Docker mặc định chỉ 64 MB. Cách sửa gốc là tăng `/dev/shm` của container (tuỳ chọn `--shm-size` hoặc `shm_size` trong compose, lớn hơn `maintenance_work_mem`); lab không đổi compose dùng chung nên chọn cách lách `max_parallel_maintenance_workers = 0` (xem `prepare_index_build`), chậm hơn dựng song song.
+Một bẫy hạ tầng mà ta gặp và đo được khi viết lab: dựng chỉ mục song song với `maintenance_work_mem = 512MB` làm PostgreSQL báo `No space left on device`, vì `/dev/shm` của container Docker mặc định chỉ 64 MB. Cách sửa gốc là tăng `/dev/shm` của container (tuỳ chọn `--shm-size` hoặc `shm_size` trong compose, lớn hơn `maintenance_work_mem`); lab không đổi compose dùng chung nên chọn cách lách `max_parallel_maintenance_workers = 0` (xem `prepare_index_build`), chậm hơn dựng song song.
 
-**FAISS** là thư viện chạy trong tiến trình Python, không phải cơ sở dữ liệu: không SQL, không transaction, không lọc theo cột, lưu ra đĩa chỉ khi ta tự gọi. Đổi lại nó nhanh. Với vector đã chuẩn hoá, độ đo tích vô hướng cho cùng thứ hạng cosine:
+**FAISS** là thư viện chạy trong tiến trình Python, không phải cơ sở dữ liệu: không SQL, không transaction, không lọc theo cột, lưu ra đĩa chỉ khi ta tự gọi. Đổi lại, FAISS nhanh. Với vector đã chuẩn hoá, độ đo tích vô hướng cho cùng thứ hạng cosine:
 
 ```python
 # ann.py
@@ -88,7 +88,7 @@ index.add(base)
 
 ## So sánh: recall, độ trễ, kích thước
 
-Mỗi cấu hình trả lời 200 truy vấn, từng truy vấn một như yêu cầu đăng ký thật. **recall@10** là tỉ lệ top-10 của cấu hình trùng với top-10 chính xác tính bằng NumPy. Lab chạy với PostgreSQL 17.11 và pgvector 0.8.6 trong Docker, mọi phía một luồng tính toán: `max_parallel_workers_per_gather = 0` cho PostgreSQL, `omp_set_num_threads(1)` cho faiss-cpu 1.15.1, `threadpool_limits(1)` cho BLAS của NumPy. Output (trích):
+Mỗi cấu hình trả lời 200 truy vấn, từng truy vấn một như yêu cầu đăng ký thật. **recall@10** là tỉ lệ top-10 của cấu hình trùng với top-10 chính xác tính bằng NumPy. Lab chạy với PostgreSQL 17.11 và pgvector 0.8.6 trong Docker, mọi phía đều chạy một luồng tính toán: `max_parallel_workers_per_gather = 0` cho PostgreSQL, `omp_set_num_threads(1)` cho faiss-cpu 1.15.1, `threadpool_limits(1)` cho BLAS của NumPy. Output (trích):
 
 ```text
   cấu hình                            p50 ms  p95 ms recall@10 found@10    top1
@@ -110,11 +110,11 @@ Mỗi cấu hình trả lời 200 truy vấn, từng truy vấn một như yêu 
   load average lúc kết thúc phép đo 137.40 151.23 180.93
 ```
 
-Cách đọc. **Recall đổi bằng thời gian ở cả hai họ chỉ mục**: HNSW pgvector từ 0,819 (`ef_search=10`) lên 0,970 (40) rồi 0,999 (400); IVFFlat từ 0,425 (`probes=1`) lên 0,970 (10) rồi 1,000 khi quét hết 100 ô, lúc này nó chậm cỡ quét tuần tự (33,20 so với 35,98 ms). **Chi phí dựng và kích thước khác hẳn**: IVFFlat dựng trong 2,0 s và nặng 55,2 MB, HNSW dựng 49,3 s và nặng 83,4 MB; qua các lần chạy HNSW luôn lâu hơn IVFFlat hàng chục lần. **Thứ bậc thời gian**: FAISS HNSW trong tiến trình cỡ vài chục micro giây đến dưới một mili giây, pgvector (HNSW, IVFFlat) cỡ vài đến hơn chục mili giây, quét tuần tự cỡ ba chục mili giây. Khoảng cách với pgvector gồm cả vòng đi về qua mạng và giải mã kết quả, nên đây không phải so thuật toán thuần.
+Cách đọc. **Ở cả hai họ chỉ mục, muốn recall cao hơn thì phải trả bằng thời gian**: HNSW pgvector từ 0,819 (`ef_search=10`) lên 0,970 (40) rồi 0,999 (400); IVFFlat từ 0,425 (`probes=1`) lên 0,970 (10) rồi 1,000 khi quét hết 100 ô, lúc này IVFFlat chậm cỡ quét tuần tự (33,20 so với 35,98 ms). **Chi phí dựng và kích thước khác hẳn**: IVFFlat dựng trong 2,0 s và nặng 55,2 MB, HNSW dựng 49,3 s và nặng 83,4 MB; qua các lần chạy HNSW luôn lâu hơn IVFFlat hàng chục lần. **Thứ bậc thời gian**: FAISS HNSW trong tiến trình cỡ vài chục micro giây đến dưới một mili giây, pgvector (HNSW, IVFFlat) cỡ vài đến hơn chục mili giây, quét tuần tự cỡ ba chục mili giây. Khoảng cách giữa FAISS và pgvector gồm cả vòng đi về qua mạng và giải mã kết quả, nên đây không phải phép so sánh thuần về thuật toán.
 
-**Mức dao động giữa các lần chạy.** Recall của HNSW pgvector gần như đứng yên (`ef_search=40` từ 0,968 đến 0,971 qua các lần chạy); FAISS và quét chính xác hoàn toàn lặp lại. IVFFlat thì không: k-means của nó chọn tâm ngẫu nhiên nên mỗi lần dựng ra một phân ô khác, `probes=1` có recall từ 0,39 đến 0,45 và `probes=10` từ 0,963 đến 0,978, `top1` cũng dịch theo. Về thời gian, máy lúc đo có load average hơn 100: quét tuần tự pgvector đo được 36,0 và 36,6 ms ở hai lần chạy cuối (một luồng), còn 15 đến 36 ms ở các lần chạy trước khi tắt song song; HNSW `ef_search=40` từ 1,9 đến 6,5 ms. Ta chỉ khẳng định thứ bậc lớn; IVFFlat `probes=10` và HNSW `ef_search=40` cùng recall cỡ 0,97 và thời gian chồng lên nhau nên không xếp hạng. NumPy vét cạn (2,76 ms) cùng bậc với FAISS `IndexFlatIP` (1,66 ms): ở 100.000 vector, vét cạn trong bộ nhớ là một đối thủ nghiêm túc.
+**Mức dao động giữa các lần chạy.** Recall của HNSW pgvector gần như đứng yên (`ef_search=40` từ 0,968 đến 0,971 qua các lần chạy); FAISS và quét chính xác cho kết quả lặp lại hoàn toàn. IVFFlat thì không: k-means của nó chọn tâm ngẫu nhiên nên mỗi lần dựng cho ra một cách phân ô khác, `probes=1` có recall từ 0,39 đến 0,45 và `probes=10` từ 0,963 đến 0,978, `top1` cũng dịch theo. Về thời gian, máy lúc đo có load average hơn 100: quét tuần tự pgvector đo được 36,0 và 36,6 ms ở hai lần chạy cuối (một luồng), còn 15 đến 36 ms ở các lần chạy trước khi tắt song song; HNSW `ef_search=40` từ 1,9 đến 6,5 ms. Ta chỉ khẳng định bậc độ lớn; IVFFlat `probes=10` và HNSW `ef_search=40` cùng recall cỡ 0,97 và thời gian chồng lấn nhau nên không xếp hạng. NumPy vét cạn (2,76 ms) cùng bậc với FAISS `IndexFlatIP` (1,66 ms): ở 100.000 vector, vét cạn trong bộ nhớ là một đối thủ nghiêm túc.
 
-Cột `found@10` là chỉ số khác hẳn: tỉ lệ 5 tài khoản cùng người nằm trong top-10. Chỉ với 200 tài khoản thật, tìm chính xác cho 0,668 và `top1` 0,855; thêm 100.000 tài khoản nền, ngay cả đáp án chính xác (NumPy, quét tuần tự, `probes=100`) chỉ còn 0,299 và 0,670. Chỉ mục gần đúng chỉ tiến sát đáp án chính xác (recall → 1), không vượt được nó. Phần còn lại phụ thuộc chất lượng embedding, tức là bài 49.
+Cột `found@10` là chỉ số khác hẳn: tỉ lệ tài khoản (trong 5 tài khoản cùng người) nằm trong top-10. Chỉ với 200 tài khoản thật, tìm chính xác cho 0,668 và `top1` 0,855; thêm 100.000 tài khoản nền, ngay cả đáp án chính xác (NumPy, quét tuần tự, `probes=100`) chỉ còn 0,299 và 0,670. Chỉ mục gần đúng chỉ tiến sát đáp án chính xác (recall → 1), không vượt được nó. Phần còn lại phụ thuộc chất lượng embedding, tức là nội dung của bài 49.
 
 ## Lọc kèm vector search: bẫy WHERE
 
@@ -131,7 +131,7 @@ Với chỉ mục gần đúng, điều kiện `WHERE` được áp *sau khi* qu
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 250" role="img" aria-label="Mặc định: chỉ mục trả 40 ứng viên, WHERE giữ khoảng một phần trăm, kết quả trung bình 0,61 dòng. Với iterative scan: quét theo lô, lọc rồi quét tiếp cho tới khi đủ dòng hoặc chạm giới hạn hnsw.max_scan_tuples, kết quả 10 dòng."><defs><marker id="py51-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="22" class="t-b">Mặc định</text><rect x="20" y="34" width="250" height="84" rx="10" class="f-pk-soft s-pk"/><text x="36" y="62" class="t-b">Quét chỉ mục</text><text x="36" y="86" class="t-small">lấy 40 ứng viên gần nhất</text><text x="36" y="104" class="t-small">hnsw.ef_search = 40</text><path d="M270 76 L315 76" class="f-none s-phys" stroke-width="2" marker-end="url(#py51-1-arrow)"/><rect x="315" y="34" width="250" height="84" rx="10" class="f-pk-soft s-pk"/><text x="331" y="62" class="t-b">Lọc sau</text><text x="331" y="86" class="t-small">WHERE status = 'banned'</text><text x="331" y="104" class="t-small">giữ khoảng 1% ứng viên</text><path d="M565 76 L610 76" class="f-none s-phys" stroke-width="2" marker-end="url(#py51-1-arrow)"/><rect x="610" y="34" width="250" height="84" rx="10" class="f-warn-soft s-warn"/><text x="626" y="62" class="t-b">Kết quả</text><text x="626" y="86" class="t-small">trung bình 0,61 dòng</text><text x="626" y="104" class="t-small">yêu cầu 10 dòng, recall 0,061</text><text x="20" y="144" class="t-b">Có hnsw.iterative_scan = relaxed_order</text><rect x="20" y="156" width="250" height="84" rx="10" class="f-pk-soft s-pk"/><text x="36" y="184" class="t-b">Quét chỉ mục</text><text x="36" y="208" class="t-small">lấy ứng viên theo từng lô</text><text x="36" y="226" class="t-small">tiếp tục, có giới hạn</text><path d="M270 198 L315 198" class="f-none s-phys" stroke-width="2" marker-end="url(#py51-1-arrow)"/><rect x="315" y="156" width="250" height="84" rx="10" class="f-pk-soft s-pk"/><text x="331" y="184" class="t-b">Lọc rồi lặp</text><text x="331" y="208" class="t-small">thiếu 10 dòng thì quét</text><text x="331" y="226" class="t-small">thêm lô kế tiếp</text><path d="M565 198 L610 198" class="f-none s-phys" stroke-width="2" marker-end="url(#py51-1-arrow)"/><rect x="610" y="156" width="250" height="84" rx="10" class="f-phys-soft s-phys"/><text x="626" y="184" class="t-b">Kết quả</text><text x="626" y="208" class="t-small">10,00 dòng, recall 0,996</text><text x="626" y="226" class="t-small">thứ tự có thể lệch nhẹ</text></svg>
 </div>
-<figcaption>Hình 2. Cùng một câu truy vấn có WHERE, hai hành vi. Kế hoạch thực thi dùng chỉ mục trong cả hai trường hợp, nên không có cảnh báo nào.</figcaption>
+<figcaption>Hình 2. Cùng một câu truy vấn có WHERE nhưng cho hai hành vi. Kế hoạch thực thi dùng chỉ mục trong cả hai trường hợp, nên không có cảnh báo nào.</figcaption>
 </figure>
 
 ```text
@@ -148,9 +148,9 @@ Với chỉ mục gần đúng, điều kiện `WHERE` được áp *sau khi* qu
   (kế hoạch với HNSW toàn bảng: Index Scan using driver_faces_hnsw on driver_faces; B-tree: Bitmap Heap Scan on driver_faces; một phần: Index Scan using driver_faces_hnsw_banned on driver_faces)
 ```
 
-Cách đọc (hai lần chạy cuối đều cho 10 trên 20 ở hàng HNSW mặc định; các lần chạy trước cho 9 hoặc 10). HNSW mặc định trả trung bình 0,61 dòng thay vì 10 (kỳ vọng ngây thơ 40 × 1% = 0,4), recall 0,061, và bắt được người bị khoá ở 10 trên 20 truy vấn của họ, trong khi tìm chính xác bắt 16 trên 20. Bật `iterative_scan` đưa lại 10,00 dòng với recall 0,996 (`relaxed_order`) hoặc 0,971 (`strict_order`, đúng thứ tự, bắt 14 trên 20). Giới hạn là có thật: với `hnsw.max_scan_tuples = 200` chỉ còn 8,80 dòng và recall 0,501. Nhưng với bài toán này iterative scan không phải khuyến nghị chính. Danh sách khoá nhỏ và ổn định, nên chỉ mục hợp với đúng tập đó tốt hơn: **HNSW một phần** (`CREATE INDEX … WHERE status = 'banned'`) dựng 0,31 s, trả đủ 10 dòng với recall 1,000; hoặc **B-tree trên `status` rồi sắp xếp chính xác** (1.020 dòng là rẻ) cũng recall 1,000. Iterative scan hợp hơn khi điều kiện lọc đa dạng đến mức không dựng nổi chỉ mục riêng.
+Cách đọc (hai lần chạy cuối đều cho 10 trên 20 ở hàng HNSW mặc định; các lần chạy trước cho 9 hoặc 10). HNSW mặc định trả trung bình 0,61 dòng thay vì 10 (kỳ vọng ngây thơ 40 × 1% = 0,4), recall 0,061, và bắt được người bị khoá ở 10 trên 20 truy vấn của họ, trong khi tìm chính xác bắt 16 trên 20. Bật `iterative_scan` đưa số dòng trả về trở lại 10,00 với recall 0,996 (`relaxed_order`) hoặc 0,971 (`strict_order`, đúng thứ tự, bắt 14 trên 20). Giới hạn này có thật: với `hnsw.max_scan_tuples = 200` chỉ còn 8,80 dòng và recall 0,501. Nhưng với bài toán này iterative scan không phải khuyến nghị chính. Danh sách khoá nhỏ và ổn định, nên dựng chỉ mục riêng cho đúng tập đó thì tốt hơn: **HNSW một phần** (`CREATE INDEX … WHERE status = 'banned'`) dựng 0,31 s, trả đủ 10 dòng với recall 1,000; hoặc **B-tree trên `status` rồi sắp xếp chính xác** (1.020 dòng thì rất rẻ) cũng recall 1,000. Iterative scan hợp hơn khi điều kiện lọc đa dạng đến mức không dựng nổi chỉ mục riêng.
 
-Muốn thứ tự chặt với `relaxed_order`, README của pgvector gợi ý CTE `AS MATERIALIZED` rồi `ORDER BY distance + 0` (`+ 0` cần cho PostgreSQL 17 trở lên). Điều kiện kém chọn lọc thì không sao: hàng đối chứng `status = 'active'` (99% số dòng) với HNSW mặc định vẫn trả đủ 10,00 dòng, recall 0,966 so với đáp án chính xác trên tập đó. Cái bẫy là điều kiện hẹp mà không ai kiểm: kế hoạch thực thi dùng `Index Scan` trong cả hai trường hợp nên không có cảnh báo, lỗi không ném exception, chỉ làm hệ thống bỏ sót người. Ngược lại, với bảng nhỏ hoặc điều kiện rất hẹp, planner có thể tự chọn `Seq Scan` (lab gặp ở `--distractors 5000`) và kết quả lại chính xác.
+Muốn thứ tự chặt với `relaxed_order`, README của pgvector gợi ý CTE `AS MATERIALIZED` rồi `ORDER BY distance + 0` (`+ 0` cần cho PostgreSQL 17 trở lên). Điều kiện kém chọn lọc thì không sao: hàng đối chứng `status = 'active'` (99% số dòng) với HNSW mặc định vẫn trả đủ 10,00 dòng, recall 0,966 so với đáp án chính xác trên tập đó. Cái bẫy là điều kiện hẹp mà không ai kiểm tra: kế hoạch thực thi dùng `Index Scan` trong cả hai trường hợp nên không có cảnh báo, lỗi này không ném exception mà chỉ làm hệ thống bỏ sót người. Ngược lại, với bảng nhỏ hoặc điều kiện rất hẹp, planner có thể tự chọn `Seq Scan` (lab gặp ở `--distractors 5000`) và kết quả lại chính xác.
 
 ## Từ top-k tới quyết định: ngưỡng và người duyệt
 
@@ -163,7 +163,7 @@ Top-k luôn trả đủ k dòng dù không dòng nào đáng nghi, nên phải c
       0.8                 0.197                                   4.9                        0.12
 ```
 
-Ở ngưỡng 0,7 chỉ còn tìm được 0,324 số tài khoản cùng người, mà vẫn có trung bình 129,6 tài khoản nền vượt ngưỡng mỗi truy vấn. Đừng đọc số này như tỉ lệ chấp nhận nhầm của hệ thống thật: 100.000 vector nền là Gaussian cùng phân bố với PCA 128 chiều, chưa đo với embedding thật nên không biết chúng khó hay dễ hơn người thật. Điều đáng mang đi là cơ chế: quy mô nhân số ứng viên đáng ngờ, nên cần embedding tách người tốt hơn (bài 49) và ngưỡng chọn từ ROC trên dữ liệu thật, không thể chọn bằng cảm giác.
+Ở ngưỡng 0,7 chỉ còn tìm được 0,324 số tài khoản cùng người, mà vẫn có trung bình 129,6 tài khoản nền vượt ngưỡng mỗi truy vấn. Đừng đọc số này như tỉ lệ chấp nhận nhầm của hệ thống thật: 100.000 vector nền là Gaussian cùng phân bố với PCA 128 chiều, chưa đo với embedding thật nên không biết chúng khó hay dễ hơn người thật. Điều đáng mang đi là cơ chế: quy mô càng lớn thì số ứng viên đáng ngờ càng tăng, nên cần embedding tách người tốt hơn (bài 49) và ngưỡng chọn từ ROC trên dữ liệu thật, không thể chọn bằng cảm giác.
 
 Quy trình hợp lý: lấy top-k, giữ các dòng vượt ngưỡng, đẩy sang hàng đợi người duyệt cùng ảnh và lý do, không tự động khoá hay từ chối. Khoảng cách cosine là một điểm số để người duyệt xem, không phải kết luận về danh tính. Vector khuôn mặt là dữ liệu sinh trắc, thuộc dữ liệu cá nhân nhạy cảm; lưu, xoá khi rút lại đồng ý và đánh giá theo nhóm là chủ đề của bài 53.
 
@@ -182,7 +182,7 @@ Lab tạo schema `lab51` và xoá khi chạy xong (chạy lại không để l�
 OK 27/27
 ```
 
-27 ca là bất biến, không có ngưỡng tốc độ. Các ca chính: kế hoạch thực thi thật sự dùng `driver_faces_hnsw` / `driver_faces_ivf` và quét tuần tự khi tắt chỉ mục; pgvector chính xác, FAISS flat và IVFFlat quét hết đều recall 1,000 so với NumPy; recall HNSW tăng theo `ef_search`; `probes=1` thấp hơn quét hết; các ca về `WHERE` (HNSW mặc định trả ít hơn nửa số dòng, `iterative_scan` trả đủ dòng nhưng bị `max_scan_tuples` chặn được, chỉ mục một phần và B-tree cho recall 1,000); thêm tài khoản nền làm giảm `found@10`; khoảng cách pgvector bằng 1 trừ tích vô hướng; schema bị xoá; và không nối được PostgreSQL thì in `FAIL: không nối được PostgreSQL tại <url> (docker compose …)` rồi thoát mã 1 (ca này chạy lại lab với URL sai).
+27 test case đều là bất biến, không có ngưỡng tốc độ. Các test case chính: kế hoạch thực thi thật sự dùng `driver_faces_hnsw` / `driver_faces_ivf` và quét tuần tự khi tắt chỉ mục; pgvector chính xác, FAISS flat và IVFFlat quét hết đều recall 1,000 so với NumPy; recall HNSW tăng theo `ef_search`; `probes=1` thấp hơn quét hết; các test case về `WHERE` (HNSW mặc định trả ít hơn nửa số dòng, `iterative_scan` trả đủ dòng nhưng bị `max_scan_tuples` chặn được, chỉ mục một phần và B-tree cho recall 1,000); thêm tài khoản nền làm giảm `found@10`; khoảng cách pgvector bằng 1 trừ tích vô hướng; schema bị xoá; và không nối được PostgreSQL thì in `FAIL: không nối được PostgreSQL tại <url> (docker compose …)` rồi thoát mã 1 (test case này chạy lại lab với URL sai).
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -190,11 +190,11 @@ OK 27/27
 | Dựng chỉ mục lỗi `No space left on device` | `/dev/shm` của container; giảm `maintenance_work_mem` hoặc đặt `max_parallel_maintenance_workers = 0` |
 | Recall IVFFlat thấp bất thường | Chỉ mục dựng khi bảng còn trống hay ít dữ liệu; `lists` và `probes` có hợp lý không |
 | Có chỉ mục mà truy vấn vẫn quét tuần tự | Toán tử trong `ORDER BY` có khớp `vector_cosine_ops` không (`<=>` cho cosine) |
-| Cùng truy vấn chậm nhanh thất thường | Máy bận (xem load average); đo nhiều lần, so thứ bậc chứ không so từng ms |
+| Cùng một truy vấn lúc nhanh lúc chậm, thất thường | Máy bận (xem load average); đo nhiều lần, so thứ bậc chứ không so từng ms |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Embedding là PCA trên 200 ảnh, tài khoản nền là vector tổng hợp, nên mọi con số về nhận diện (<code>top1</code>, <code>found@10</code>, số tài khoản nền vượt ngưỡng) chỉ minh hoạ cơ chế, không phải độ chính xác của hệ thống. Dữ liệu 128 chiều với cấu trúc Gaussian có thể dễ hơn hoặc khó hơn vector 512 chiều từ mô hình thật cho chỉ mục gần đúng; ta chưa đo nên không khẳng định. Production còn phải lo ghi liên tục vào chỉ mục (IVFFlat cần dựng lại khi dữ liệu trôi), xoá vector khi người dùng rút lại đồng ý, mã hoá và phân quyền cột embedding, và đo trên dữ liệu thật theo từng nhóm người dùng.</p>
+<p>Embedding là PCA trên 200 ảnh, tài khoản nền là vector tổng hợp, nên mọi con số về nhận diện (<code>top1</code>, <code>found@10</code>, số tài khoản nền vượt ngưỡng) chỉ minh hoạ cơ chế, không phải độ chính xác của hệ thống. Dữ liệu 128 chiều với cấu trúc Gaussian có thể dễ hơn hoặc khó hơn vector 512 chiều từ mô hình thật đối với chỉ mục gần đúng; ta chưa đo nên không khẳng định. Production còn phải lo ghi liên tục vào chỉ mục (IVFFlat cần dựng lại khi dữ liệu trôi), xoá vector khi người dùng rút lại đồng ý, mã hoá và phân quyền cột embedding, và đo trên dữ liệu thật theo từng nhóm người dùng.</p>
 </div>
 
 **Bài tập 1:** Chạy `main.py --distractors 5000`. So `found@10` của tìm chính xác và recall của HNSW `ef_search=10` với lần chạy 100.000. Chỉ mục gần đúng còn đáng để dựng không?

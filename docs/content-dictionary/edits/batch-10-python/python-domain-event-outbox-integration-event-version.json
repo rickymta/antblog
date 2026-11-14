@@ -1,0 +1,185 @@
+{
+  "file": "python-domain-event-outbox-integration-event-version.md",
+  "edits": [
+    {
+      "old": "một dịch vụ phía C# muốn",
+      "new": "một service phía C# muốn",
+      "reason": "Thống nhất 'service'",
+      "severity": "low"
+    },
+    {
+      "old": "(Chưa đủ để dựng bảng hàng chờ:",
+      "new": "(Các sự kiện này chưa đủ để dựng bảng hàng chờ:",
+      "reason": "Câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "và không bao giờ xoá dòng.)",
+      "new": "và không bao giờ xoá được dòng nào.)",
+      "reason": "Diễn đạt tối nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "đều phải được chốt và kiểm chứng",
+      "new": "đều phải chốt và kiểm chứng",
+      "reason": "Bỏ bị động",
+      "severity": "low"
+    },
+    {
+      "old": "Bài làm cả hai: outbox",
+      "new": "Bài này làm cả hai: outbox",
+      "reason": "Thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "chưa nâng cấp kiểm <code>version in {1}</code> trước",
+      "new": "chưa nâng cấp kiểm tra <code>version in {1}</code> trước",
+      "reason": "Lược chữ 'tra'",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó đổi tự do khi ta refactor miền.",
+      "new": "Domain event này đổi tự do khi ta refactor miền.",
+      "reason": "Tránh 'Nó' đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ làm hàm này sửa một dòng",
+      "new": "chỉ khiến hàm này phải sửa một dòng",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "hiện thực port `EventPublisher`",
+      "new": "triển khai port `EventPublisher`",
+      "reason": "Calque của implement",
+      "severity": "low"
+    },
+    {
+      "old": "Đó là phần thưởng của việc để port ở lớp application.",
+      "new": "Đó là lợi ích của việc để port ở lớp application.",
+      "reason": "Dịch gượng 'reward'",
+      "severity": "medium"
+    },
+    {
+      "old": "(cả ba ca có test)",
+      "new": "(cả ba trường hợp đều có test)",
+      "reason": "'ca' khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "thuê dòng chưa phát bằng một câu",
+      "new": "giữ tạm (lease) dòng chưa phát bằng một câu",
+      "reason": "'thuê dòng' dịch từng chữ của lease",
+      "severity": "medium"
+    },
+    {
+      "old": "thì chỉ một dispatcher cho mỗi khoá",
+      "new": "thì chỉ được có một dispatcher cho mỗi khoá",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Trong ca chết giữa chừng",
+      "new": "Trong trường hợp chết giữa chừng",
+      "reason": "'ca' khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "hệ có Schema Registry kiểm",
+      "new": "hệ thống có Schema Registry thì kiểm",
+      "reason": "Cụm cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "không âm thầm phát bản cũ hay mới",
+      "new": "không lặng lẽ phát bản cũ hay mới",
+      "reason": "Calque 'silently'",
+      "severity": "medium"
+    },
+    {
+      "old": "chi phí chuyển sang đầu C#, nơi nó rẻ và được kiểm:",
+      "new": "chi phí chuyển sang đầu C#, nơi chi phí đó rẻ và được kiểm tra:",
+      "reason": "Câu lủng củng, dùng 'nó' mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "và nổ `NullReferenceException`",
+      "new": "và ném `NullReferenceException`",
+      "reason": "'nổ' khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "Các thông điệp đã đi qua Kafka được đưa cho chương trình; sau đó nó thử đọc lại **không** đặt naming policy:",
+      "new": "Ta đưa cho chương trình các thông điệp đã đi qua Kafka; sau đó chương trình thử đọc lại khi **không** đặt naming policy:",
+      "reason": "Bỏ bị động, bỏ 'nó', thiếu 'khi'",
+      "severity": "medium"
+    },
+    {
+      "old": "consumer âm thầm xử lý",
+      "new": "consumer lặng lẽ xử lý",
+      "reason": "Calque 'silently'",
+      "severity": "medium"
+    },
+    {
+      "old": "Test C# giữ cả ca này.",
+      "new": "Test C# giữ cả trường hợp này.",
+      "reason": "'ca' khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "Verify còn so từng trường",
+      "new": "Phần verify còn so từng trường",
+      "reason": "Tiếng Anh làm chủ ngữ trần",
+      "severity": "medium"
+    },
+    {
+      "old": "Schema `lab71` và các topic `lab71.*` bị xoá khi chạy xong. Kiểm các kết quả trên:",
+      "new": "Lab xoá schema `lab71` và các topic `lab71.*` khi chạy xong. Kiểm tra các kết quả trên:",
+      "reason": "Bỏ bị động; lược chữ 'tra'",
+      "severity": "medium"
+    },
+    {
+      "old": "21 ca: outbox",
+      "new": "21 test case: outbox",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "hai dispatcher, thuê dòng, thứ tự",
+      "new": "hai dispatcher, giữ tạm dòng, thứ tự",
+      "reason": "Thống nhất cách gọi lease",
+      "severity": "low"
+    },
+    {
+      "old": "một ca HTTP và ba ca C#",
+      "new": "một test case HTTP và ba test case C#",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "mặc định âm thầm khi thiếu naming policy",
+      "new": "mặc định lặng lẽ khi thiếu naming policy",
+      "reason": "Calque 'silently'",
+      "severity": "low"
+    },
+    {
+      "old": "Output do một lần chạy chung với nhiều tác vụ khác của máy",
+      "new": "Output này đến từ một lần chạy cùng lúc với nhiều tác vụ khác trên máy",
+      "reason": "Dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "để bỏ ba ca C#",
+      "new": "để bỏ ba test case C#",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "Nó là version 3 hay vẫn là 2",
+      "new": "Thay đổi đó là version 3 hay vẫn là 2",
+      "reason": "Tránh 'Nó' mơ hồ",
+      "severity": "medium"
+    }
+  ]
+}

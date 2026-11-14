@@ -1,0 +1,107 @@
+{
+  "file": "python-outbox-inbox-idempotent-consumer.md",
+  "edits": [
+    {
+      "old": "Ở cao điểm khoảng 70 chuyến mỗi giây,",
+      "new": "Vào giờ cao điểm, khoảng 70 chuyến mỗi giây,",
+      "reason": "Giới từ và dấu câu tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Muốn khởi động lại phát được phần còn thiếu,",
+      "new": "Muốn tiến trình sau khi khởi động lại phát được phần còn thiếu,",
+      "reason": "Câu thiếu chủ ngữ cho «phát»",
+      "severity": "medium"
+    },
+    {
+      "old": "mô phỏng cái chết bằng một exception",
+      "new": "mô phỏng việc tiến trình chết bằng một exception",
+      "reason": "«cái chết» là calque",
+      "severity": "low"
+    },
+    {
+      "old": "vì retry chỉ cứu lỗi mạng chớp nhoáng;",
+      "new": "vì retry chỉ xử lý được lỗi mạng thoáng qua;",
+      "reason": "«cứu», «chớp nhoáng» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Điều này cốt lõi cho inbox ở phần sau.",
+      "new": "Điều này là cốt lõi cho inbox ở phần sau.",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Ba chi tiết đáng nhìn.",
+      "new": "Ba chi tiết đáng chú ý.",
+      "reason": "«đáng nhìn» gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Nó có hai yêu cầu mâu thuẫn nhau:",
+      "new": "Dispatcher có hai yêu cầu mâu thuẫn nhau:",
+      "reason": "Tránh «Nó» ở đầu câu",
+      "severity": "low"
+    },
+    {
+      "old": "Lab giải bằng **lease**: một câu `UPDATE` ngắn «thuê» một lô dòng,",
+      "new": "Lab giải bằng cách **thuê (lease)** dòng: một câu `UPDATE` ngắn thuê một lô dòng,",
+      "reason": "Một khái niệm hai tên: giới thiệu một lần «thuê (lease)»",
+      "severity": "medium"
+    },
+    {
+      "old": "`SKIP LOCKED` cho một góc nhìn không nhất quán về dữ liệu,",
+      "new": "`SKIP LOCKED` cho kết quả không nhất quán về dữ liệu,",
+      "reason": "«góc nhìn» là calque của view",
+      "severity": "high"
+    },
+    {
+      "old": "đúng lỗi ta đang chạy trốn.",
+      "new": "đúng lỗi ta đang cố tránh.",
+      "reason": "«chạy trốn» là calque",
+      "severity": "medium"
+    },
+    {
+      "old": "Không có cách dispatcher nào tự loại bỏ chuyện này;",
+      "new": "Dispatcher không có cách nào tự loại bỏ chuyện này;",
+      "reason": "Trật tự từ kiểu tiếng Anh, khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "một dispatcher có thể vẫn đang sống chỉ là chậm.",
+      "new": "một dispatcher có thể vẫn đang chạy, chỉ là chậm.",
+      "reason": "«đang sống» gượng, thiếu ngắt câu",
+      "severity": "medium"
+    },
+    {
+      "old": "một hàng inbox không đủ: dependency đó cần idempotency key của riêng nó,",
+      "new": "một dòng inbox không đủ: hệ thống bên ngoài đó cần idempotency key của riêng nó,",
+      "reason": "«dependency» lọt vào văn xuôi; thống nhất «dòng inbox»",
+      "severity": "medium"
+    },
+    {
+      "old": "mà dựng chúng bằng điểm chèn và thời gian truyền vào.",
+      "new": "mà dựng chúng bằng điểm gây lỗi cài sẵn và thời gian truyền vào.",
+      "reason": "«điểm chèn» là calque của injection point",
+      "severity": "medium"
+    },
+    {
+      "old": "cho tới khi có chỗ cất nó (ví dụ một topic dead-letter riêng).",
+      "new": "cho tới khi có nơi lưu nó (ví dụ một topic dead-letter riêng).",
+      "reason": "«chỗ cất» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "và chưa kiểm hợp đồng <code>version</code> của envelope",
+      "new": "và chưa kiểm tra hợp đồng <code>version</code> của envelope",
+      "reason": "«kiểm» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "trong khi inbox cho phép bỏ qua êm.",
+      "new": "trong khi inbox cho phép bỏ qua mà không gây lỗi.",
+      "reason": "«bỏ qua êm» là calque của silently",
+      "severity": "medium"
+    }
+  ]
+}

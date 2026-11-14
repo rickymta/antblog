@@ -1,0 +1,173 @@
+{
+ "file": "python-danh-gia-ocr-cer-wer-threshold.md",
+ "edits": [
+  {
+   "old": "phân tích thay/xoá/chèn theo trường, chọn ngưỡng đưa người duyệt từ số liệu",
+   "new": "phân tích lỗi thay/xoá/chèn theo trường, chọn ngưỡng chuyển cho người duyệt dựa trên số liệu",
+   "reason": "Thiếu danh từ, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "canh chừng thoái lui (regression)",
+   "new": "canh chừng hồi quy (regression)",
+   "reason": "Dùng thuật ngữ quen hơn",
+   "severity": "low"
+  },
+  {
+   "old": "lab mang theo bản copy `ocr.py`, `postprocess.py`, `synthetic_card.py` của lab 44 để tự chứa",
+   "new": "lab mang theo bản sao `ocr.py`, `postprocess.py`, `synthetic_card.py` của lab 44 để chạy độc lập",
+   "reason": "Từ tiếng Anh thông thường, cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Các số ở đây không so được với bài 41",
+   "new": "Các số ở đây không so sánh được với bài 41",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "CER cho ta so hai cấu hình OCR",
+   "new": "CER giúp ta so sánh hai cấu hình OCR",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "**WER** y hệt nhưng đơn vị là từ",
+   "new": "**WER** tính giống hệt nhưng đơn vị là từ",
+   "reason": "Văn nói",
+   "severity": "low"
+  },
+  {
+   "old": "tức CER 41,7% cho một lỗi không có",
+   "new": "tức CER 41,7% dù thực ra không có lỗi nào",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Ta luôn gộp **corpus-level** (cộng S, D, I, N rồi chia một lần), vì trung bình các CER riêng để chuỗi ngắn lấn át chuỗi dài",
+   "new": "Ta luôn gộp theo toàn tập (**corpus-level**: cộng S, D, I, N rồi chia một lần), vì trung bình các CER riêng khiến chuỗi ngắn lấn át chuỗi dài",
+   "reason": "Sai quan hệ nhân quả (\"để\"), thuật ngữ giữa câu",
+   "severity": "high"
+  },
+  {
+   "old": "còn luật hậu xử lý ở bài 44 được chỉnh khi nhìn seed 1 đến 8",
+   "new": "còn luật hậu xử lý ở bài 44 ta chỉnh khi xem seed 1 đến 8",
+   "reason": "Bị động kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "CER toàn bộ 0,0943 là số trộn",
+   "new": "CER toàn bộ 0,0943 là số hỗn hợp",
+   "reason": "Cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "đáp án có nằm đâu đó trong chữ cả trang không",
+   "new": "đáp án có nằm đâu đó trong chữ của cả trang không",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Trường trống tốn CER bằng cả độ dài",
+   "new": "Trường trống bị tính CER bằng cả độ dài",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Mất dấu làm tên đắt.",
+   "new": "Mất dấu làm CER của tên tăng rõ rệt.",
+   "reason": "Câu cụt, nghĩa không rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "ảnh tối tệ nhất",
+   "new": "ảnh tối cho kết quả tệ nhất",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Một đường đổi chác",
+   "new": "Một đường đánh đổi",
+   "reason": "Từ khẩu ngữ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên số này lạc quan; làm thật thì chọn trên một bộ, kiểm trên bộ khác",
+   "new": "nên con số này lạc quan; khi làm thật thì chọn ngưỡng trên một bộ, kiểm trên bộ khác",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "gần như không do ngưỡng.",
+   "new": "gần như không phụ thuộc vào ngưỡng.",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "một ngày hợp lệ nên không kiểm tra nào bắt được",
+   "new": "ngày bị đọc sai vẫn hợp lệ nên không kiểm tra nào bắt được",
+   "reason": "Câu thiếu ý, phải đoán",
+   "severity": "high"
+  },
+  {
+   "old": "Phần còn lại phải đến từ nguồn thứ hai",
+   "new": "Phần còn lại phải nhờ một nguồn kiểm tra thứ hai",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "lỗi ở bước tìm trường, sửa hoặc kiểm tra",
+   "new": "lỗi ở bước tìm trường, sửa ký tự hoặc kiểm tra",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "được kiểm tách bằng `check_environment`",
+   "new": "được kiểm tra riêng bằng `check_environment`",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai ca cho hai bài học",
+   "new": "Hai lần thử này cho hai bài học",
+   "reason": "Dùng \"ca\" thay cho trường hợp",
+   "severity": "medium"
+  },
+  {
+   "old": "số đo lặp lại y hệt",
+   "new": "số đo lặp lại giống hệt",
+   "reason": "Văn nói",
+   "severity": "low"
+  },
+  {
+   "old": "dung sai 0,02 dành cho thay đổi hợp pháp",
+   "new": "dung sai 0,02 dành cho thay đổi chính đáng",
+   "reason": "Từ dùng sai sắc thái",
+   "severity": "medium"
+  },
+  {
+   "old": "máy rất tải lúc chạy",
+   "new": "máy đang chịu tải nặng lúc chạy",
+   "reason": "Cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm 33 điều và pytest",
+   "new": "kiểm 33 điều kiện và pytest",
+   "reason": "Lược danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Test chia bốn nhóm",
+   "new": "Các test chia thành bốn nhóm",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "bị bỏ qua lặng lẽ thì không bảo vệ được gì",
+   "new": "bị bỏ qua mà không báo gì thì không bảo vệ được gì",
+   "reason": "Calque \"silently\"",
+   "severity": "medium"
+  }
+ ]
+}

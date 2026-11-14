@@ -1,21 +1,21 @@
 ---
 slug: python-shap-explainability-audit-human-review
 title: "SHAP, audit và quy trình người duyệt"
-summary: "Bài 61: giải thích từng điểm gian lận bằng SHAP thành reasons[], đưa chuyến bị gắn cờ vào hàng đợi PostgreSQL, ghi nhật ký quyết định khó sửa, chỉ RV-001 được chốt, và đo công suất, SLA, dải điểm đáng duyệt."
+summary: "Bài 61: giải thích từng điểm gian lận bằng SHAP thành reasons[], đưa chuyến bị gắn cờ vào hàng đợi PostgreSQL, ghi nhật ký quyết định theo kiểu khó bị sửa lại, chỉ RV-001 được chốt, và đo công suất, SLA, dải điểm đáng duyệt."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, shap, audit]
 language: vi
 ---
 
-Người duyệt của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận một chuyến bị gắn cờ với p = 0,46 và phải quyết định giữ tiền hay thả. Con số không nói vì sao. Kiểm toán hỏi ngược lại, vài tháng sau: ai chốt chuyến này, theo mô hình và bộ rule phiên bản nào, đã thấy lý do gì, và có ai sửa quyết định về sau không. Bài 56 hứa nhật ký ghi phiên bản cấu hình rule; bài này làm phần đó cùng phần còn lại: giải thích **từng** dự đoán, hàng đợi người duyệt, và một nhật ký mà service chấm điểm không viết lại được.
+Người duyệt của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận một chuyến bị gắn cờ với p = 0,46 và phải quyết định giữ tiền hay thả. Con số này không cho biết vì sao. Kiểm toán hỏi ngược lại, vài tháng sau: ai chốt chuyến này, theo mô hình và bộ rule phiên bản nào, đã thấy lý do gì, và có ai sửa quyết định về sau không. Bài 56 hứa nhật ký ghi phiên bản cấu hình rule; bài này làm phần đó cùng phần còn lại: giải thích **từng** dự đoán, hàng đợi người duyệt, và một nhật ký mà service chấm điểm không viết lại được.
 
-Đây là bài 61 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen mô hình đã hiệu chỉnh ở [bài 57](/articles/python-scikit-learn-lightgbm-imbalanced-cross-validation), rule engine ở [bài 56](/articles/python-rule-engine-scoring-strategy-explainability), phiên bản mô hình ở [bài 60](/articles/python-model-registry-ab-drift-retraining) và PostgreSQL ở [bài 24](/articles/python-sqlalchemy-psycopg-postgresql-mapping-migration). Chỉ `RV-001` mới chốt `confirmed_fraud` (xác nhận gian lận) hoặc `cleared` (bác đề xuất); ta không dùng `approved` vì ở bài 70 nó là hồ sơ KYC đạt. `RV-001` trong lab là **mô phỏng** (chốt theo nhãn cuối, luôn đúng), nên lab kiểm đường ống và ràng buộc, không đo độ chính xác của người thật. Hàng đợi dùng quy tắc chung của bài 59 đến 61: gắn cờ khi `p × (tiền chuyến + 20.000) > 8.000`. `shap` 0.54.1 chạy được trên Python 3.14.7 (kiểm ngày 07/11/2026).
+Đây là bài 61 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen mô hình đã hiệu chỉnh ở [bài 57](/articles/python-scikit-learn-lightgbm-imbalanced-cross-validation), rule engine ở [bài 56](/articles/python-rule-engine-scoring-strategy-explainability), phiên bản mô hình ở [bài 60](/articles/python-model-registry-ab-drift-retraining) và PostgreSQL ở [bài 24](/articles/python-sqlalchemy-psycopg-postgresql-mapping-migration). Chỉ `RV-001` mới chốt `confirmed_fraud` (xác nhận gian lận) hoặc `cleared` (bác đề xuất); ta không dùng `approved` vì ở bài 70 nó là hồ sơ KYC đạt. `RV-001` trong lab là **mô phỏng** (chốt theo nhãn cuối, luôn đúng), nên lab kiểm đường ống và ràng buộc, không đo độ chính xác của người thật. Hàng đợi dùng quy tắc chung của bài 59 đến 61: gắn cờ khi `p × (tiền chuyến + 20.000) > 8.000`. `shap` 0.54.1 chạy được trên Python 3.14.7 (đã kiểm tra ngày 07/11/2026).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>SHAP cho đóng góp của 30 đặc trưng cho một chuyến bị gắn cờ. Cộng chúng với hằng số nền, bạn được con số nào: xác suất p gửi cho người duyệt, log-odds của p, hay con số khác?</p>
-<details><summary>Xem đáp án</summary><p><b>Một con số khác: điểm thô (margin) chưa hiệu chỉnh của LightGBM.</b> Ở chuyến ví dụ, điểm thô là −1,317 còn p gửi cho người duyệt là 0,4577, có log-odds −0,169. Với bộ hiệu chỉnh sigmoid của bài 57, log-odds của p bằng 1,073 + 0,943 × điểm thô (đúng tới 1e-12): nhân một đóng góp SHAP với 0,943 được đóng góp ở thang <b>log-odds của p</b> (không phải xác suất), và nền ở thang đó là 1,073 + 0,943 × base_value. Isotonic sẽ khác.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Một con số khác: điểm thô (margin) chưa hiệu chỉnh của LightGBM.</b> Ở chuyến ví dụ, điểm thô là −1,317 còn p gửi cho người duyệt là 0,4577, có log-odds −0,169. Với bộ hiệu chỉnh sigmoid của bài 57, log-odds của p bằng 1,073 + 0,943 × điểm thô (đúng tới 1e-12): nhân một đóng góp SHAP với 0,943 thì ra đóng góp ở thang <b>log-odds của p</b> (không phải xác suất), và nền ở thang đó là 1,073 + 0,943 × base_value. Isotonic sẽ khác.</p></details>
 </div>
 
 ## SHAP giải thích điều gì
@@ -64,11 +64,11 @@ thời gian: từng chuyến 19.4 ms (trung bình 200 lần gọi); cả lô 547
 tương quan hạng giữa hai cách xếp (30 đặc trưng): 0.70
 ```
 
-Hai bảng xếp hạng chỉ đồng ý ở mức khá (tương quan hạng 0,70); hai đặc trưng đầu bảng SHAP đều dựa vào lịch sử khách, và mục sau cho thấy một trong hai mang một tạo tác của dữ liệu.
+Hai bảng xếp hạng chỉ khớp nhau ở mức khá (tương quan hạng 0,70); hai đặc trưng đầu bảng SHAP đều dựa vào lịch sử khách, và mục sau cho thấy một trong hai mang một tạo tác của dữ liệu.
 
 ## reasons[]: từ đóng góp đến câu cho người duyệt
 
-Người duyệt không đọc 30 con số. Ta lấy tối đa ba đặc trưng đẩy điểm **lên** nhiều nhất (đóng góp dương, lớn hơn 0,05) và điền giá trị thật vào câu mẫu, chỉ từ số của đặc trưng, không bao giờ từ số giấy tờ. Có 30 câu mẫu, và test của lab kiểm mỗi đặc trưng có đúng một câu và một họ tín hiệu. Bốn chuyến bị gắn cờ:
+Người duyệt không đọc 30 con số. Ta lấy tối đa ba đặc trưng đẩy điểm **lên** nhiều nhất (đóng góp dương, lớn hơn 0,05) và điền giá trị thật vào câu mẫu, chỉ lấy từ giá trị của đặc trưng, không bao giờ lấy từ số giấy tờ. Có 30 câu mẫu, và test của lab kiểm mỗi đặc trưng có đúng một câu và một họ tín hiệu. Bốn chuyến bị gắn cờ:
 
 ```text
 ví dụ ghost_trip, p = 0.857:
@@ -91,7 +91,7 @@ ví dụ chuyến sạch bị gắn cờ nhầm, p = 0.102:
 
 Chuyến `gps_spoof` có lý do rõ và đúng cơ chế; chuyến sạch bị gắn cờ không có dấu vết cụ thể nào, cũng là thông tin cho người duyệt. Lý do **mô tả điều mô hình dựa vào**, không phải điều gây ra gian lận.
 
-Lý do có chỉ đúng cơ chế không? Ta so với bản đồ dấu vết của từng loại gian lận ở hình 1 bài 54, dịch thành tập đặc trưng mong đợi (bản «rộng» thêm vài đặc trưng phụ như `speed_kmh`, `amount_vnd`; bản «hẹp» chỉ gồm đặc trưng nêu thẳng trong hình). Với 407 chuyến gian lận bị gắn cờ, top-1 hoặc top-3 theo SHAP có nằm trong tập đó không, so với bộ top-1 và top-3 xếp theo gain (cố định cho mọi chuyến) và bốc ngẫu nhiên:
+Lý do có chỉ đúng cơ chế không? Ta so với bản đồ dấu vết của từng loại gian lận ở hình 1 bài 54, dịch thành tập đặc trưng mong đợi (bản «rộng» thêm vài đặc trưng phụ như `speed_kmh`, `amount_vnd`; bản «hẹp» chỉ gồm đặc trưng nêu thẳng trong hình). Với 407 chuyến gian lận bị gắn cờ, top-1 hoặc top-3 theo SHAP có nằm trong tập đó không, so với bộ top-1 và top-3 xếp theo gain (cố định cho mọi chuyến) và so với cách bốc ngẫu nhiên:
 
 ```text
 lý do có chỉ đúng cơ chế? Chuyến gian lận bị gắn cờ: 407. Đặc trưng SHAP đứng đầu (top-1) hoặc trong ba đứng đầu (top-3) có nằm trong dấu vết mong đợi của loại đó (hình 1 bài 54)?
@@ -106,7 +106,7 @@ dấu vết «mong đợi» là bản đồ ta viết từ hình 1 bài 54, rộ
 bản đồ HẸP (chỉ đặc trưng nêu thẳng trong hình 1 bài 54, bỏ speed_kmh, duration_s, amount_vnd...): top-1 SHAP 81.6%, top-3 SHAP 95.6%, top-3 ngẫu nhiên 37.5%
 ```
 
-Ở top-1, SHAP trúng 83,0 % so với 21,9 % của bộ gain cố định, chênh lớn với khoảng tin cậy rất xa số 0. Ở top-3, bộ gain cố định trúng 94,8 % vì ba đặc trưng đầu theo gain tình cờ trùng dấu vết của ba trong bốn loại, nhưng 0 % ở `collusion` (21 chuyến); SHAP hơn nó 3,2 điểm phần trăm, khoảng tin cậy chỉ vừa qua số 0. Bản đồ hẹp cho top-3 95,6 % so với 37,5 % ngẫu nhiên. Giá trị của SHAP nằm ở **tính theo từng chuyến**, không ở một số trúng cao hơn hẳn. Xoá lý do có làm điểm tụt không? Ta đặt đặc trưng về trung vị dữ liệu huấn luyện rồi chấm lại, so với xoá đặc trưng ngẫu nhiên:
+Ở top-1, SHAP trúng 83,0 % so với 21,9 % của bộ gain cố định, chênh rất lớn, khoảng tin cậy nằm xa số 0. Ở top-3, bộ gain cố định trúng 94,8 % vì ba đặc trưng đầu theo gain tình cờ trùng dấu vết của ba trong bốn loại, nhưng 0 % ở `collusion` (21 chuyến); SHAP hơn nó 3,2 điểm phần trăm, khoảng tin cậy chỉ vừa đủ nằm trên số 0. Bản đồ hẹp cho top-3 95,6 % so với 37,5 % ngẫu nhiên. Giá trị của SHAP nằm ở **tính theo từng chuyến**, không nằm ở tỉ lệ trúng cao hơn hẳn. Xoá lý do có làm điểm tụt không? Ta đặt đặc trưng về trung vị dữ liệu huấn luyện rồi chấm lại, so với xoá đặc trưng ngẫu nhiên:
 
 ```text
 xóa lý do (đặt về trung vị train), trên 407 chuyến gian lận bị gắn cờ; p trung bình trước khi xóa 0.875, còn bị gắn cờ 100%:
@@ -128,7 +128,7 @@ promo_abuse            0           0          86           2           1
 collusion              0           0           0          18           3
 ```
 
-Cuối cùng là phát hiện về chính mô hình: SHAP cho thấy **hướng và mức** ảnh hưởng của một đặc trưng theo từng chuyến, thứ mà gain không cho thấy. Bộ sinh có một tạo tác: khách gian lận không dùng mã khuyến mãi nào ngoài NEWUSER50, nên chuyến sạch hay có lịch sử khuyến mãi còn chuyến gian lận thì hầu như không:
+Cuối cùng là phát hiện về chính mô hình: SHAP cho thấy **hướng và mức** ảnh hưởng của một đặc trưng theo từng chuyến, thứ mà gain không cho thấy. Bộ sinh có một tạo tác: khách gian lận không dùng mã khuyến mãi nào ngoài NEWUSER50, nên chuyến sạch hay có lịch sử khuyến mãi, còn chuyến gian lận thì hầu như không:
 
 ```text
 cust_promo_share_30d trong cửa sổ: > 0 ở 38.3% chuyến sạch và 3.4% chuyến gian lận (khách gian lận không dùng mã nào ngoài NEWUSER50 của promo_abuse: tạo tác của bộ sinh);
@@ -139,7 +139,7 @@ Mô hình đã học lối tắt này: khi `cust_promo_share_30d > 0`, đóng g�
 
 ## Hàng đợi và nhật ký trên PostgreSQL
 
-Mỗi chuyến vào hàng đợi mang theo điều người duyệt và kiểm toán cần: điểm, **phiên bản mô hình** và **phiên bản cấu hình rule**, lý do của mô hình (SHAP) cộng lý do của rule engine, mức ưu tiên và hạn duyệt. Ưu tiên là chi phí kỳ vọng của bỏ sót `p × (tiền chuyến + 20.000)`; hạn duyệt (SLA) là 24 giờ. Hàng đợi nằm ở schema `lab61` của PostgreSQL hạ tầng chung, tạo lúc đầu và xoá khi xong, kể cả khi lỗi (`review.py`, trích):
+Mỗi chuyến vào hàng đợi mang theo những thông tin người duyệt và kiểm toán cần: điểm, **phiên bản mô hình** và **phiên bản cấu hình rule**, lý do của mô hình (SHAP) cộng lý do của rule engine, mức ưu tiên và hạn duyệt. Mức ưu tiên là chi phí kỳ vọng của việc bỏ sót `p × (tiền chuyến + 20.000)`; hạn duyệt (SLA) là 24 giờ. Hàng đợi nằm ở schema `lab61` của PostgreSQL hạ tầng chung, tạo lúc đầu và xoá khi xong, kể cả khi gặp lỗi (`review.py`, trích):
 
 ```sql
 CREATE TABLE lab61.review_queue (
@@ -178,7 +178,7 @@ một dòng review_queue (ưu tiên cao nhất, rút gọn lý do):
   model  +0.57 distance_km=43.08: quãng đường khai báo 43.1 km
 ```
 
-Lab ghi tuần tự cho đủ ví dụ; production gom theo lô. Rồi `RV-001` mô phỏng làm 70 đề xuất mỗi ngày 08:00 đến 17:00 (mọi ngày dương lịch, kể cả cuối tuần), lấy đề xuất ưu tiên cao nhất đã vào hàng đợi:
+Lab ghi tuần tự để có đủ ví dụ; production gom theo lô. Rồi `RV-001` mô phỏng duyệt 70 đề xuất mỗi ngày 08:00 đến 17:00 (mọi ngày dương lịch, kể cả cuối tuần), lấy đề xuất ưu tiên cao nhất đã vào hàng đợi:
 
 ```text
 RV-001 (mô phỏng, 70 đề xuất mỗi ngày làm việc 08:00-17:00, ưu tiên theo chi phí kỳ vọng) chốt 542 đề xuất trong 34.4 giây: {'confirmed_fraud': 406, 'needs_review': 5, 'cleared': 136}
@@ -186,7 +186,7 @@ RV-001 (mô phỏng, 70 đề xuất mỗi ngày làm việc 08:00-17:00, ưu ti
 
 ## Ai được chốt: ràng buộc và che số giấy tờ
 
-Quy tắc «chỉ người duyệt mới chốt» mà chỉ nằm trong mã Python thì một câu `UPDATE` viết vội phá được. Lab ép nó ở cơ sở dữ liệu: khoá ngoại `decided_by` tới bảng `reviewer` (chỉ có `RV-001`, trigger kiểm người đó đang hoạt động), CHECK ràng buộc trạng thái với người chốt và thời điểm chốt, trigger chặn INSERT đề xuất đã ở trạng thái chốt, sửa dòng đã chốt, xoá dòng và mọi thay đổi `decision_log`. Mỗi dòng log còn phải **khớp hàng đợi** (cùng chuyến, phiên bản, điểm; sự kiện chốt đúng với trạng thái, người chốt, thời điểm hiện có), nên không ghi được log «giả mạo». Hai mươi ca thử, mỗi ca phải bị chặn:
+Nếu quy tắc «chỉ người duyệt mới chốt» chỉ nằm trong mã Python thì một câu `UPDATE` viết vội phá được. Lab ép nó ở cơ sở dữ liệu: khoá ngoại `decided_by` tới bảng `reviewer` (chỉ có `RV-001`, trigger kiểm người đó đang hoạt động), CHECK ràng buộc trạng thái với người chốt và thời điểm chốt, trigger chặn INSERT đề xuất đã ở trạng thái chốt, sửa dòng đã chốt, xoá dòng và mọi thay đổi `decision_log`. Mỗi dòng log còn phải **khớp hàng đợi** (cùng chuyến, phiên bản, điểm; sự kiện chốt đúng với trạng thái, người chốt, thời điểm hiện có), nên không ghi được log «giả mạo». Hai mươi test case, mỗi test case phải bị chặn:
 
 ```text
   dịch vụ chấm điểm tự chốt confirmed_fraud: người duyệt svc:fraud-scoring không hoạt động
@@ -211,9 +211,9 @@ Quy tắc «chỉ người duyệt mới chốt» mà chỉ nằm trong mã Pyth
   hai lần chốt cùng đề xuất qua store.decide: AlreadyDecided: đề xuất 1 không còn ở needs_review
 ```
 
-Bản DDL đầu của lab có hai lỗ mà ca thử bắt được. Một: CHECK viết `(status = 'needs_review') = (decided_by IS NULL AND decided_at IS NULL)`, và câu `UPDATE` đặt chốt với `decided_by` rỗng nhưng có `decided_at` lọt qua, vì vế phải `false` khớp vế trái `false`. Hai: thiếu trigger INSERT và kiểm khớp log. Giới hạn: người có quyền chủ bảng hoặc superuser vẫn `DISABLE TRIGGER`, `DROP TABLE` hay sửa dữ liệu được, nên «không viết lại được» chỉ đúng với người không có quyền đó. Production cần vai trò riêng cho service chấm điểm (chỉ INSERT), `REVOKE` các quyền còn lại, `reviewer_id` lấy từ phiên đăng nhập đã xác thực (bài 34), và một bản sao nhật ký ở kho chỉ ghi thêm ngoài tầm với của quản trị cơ sở dữ liệu.
+Bản DDL đầu của lab có hai lỗ hổng mà test case bắt được. Một: CHECK viết `(status = 'needs_review') = (decided_by IS NULL AND decided_at IS NULL)`, và câu `UPDATE` đặt chốt với `decided_by` rỗng nhưng có `decided_at` lọt qua, vì vế phải `false` khớp vế trái `false`. Hai: thiếu trigger INSERT và bước kiểm tra log có khớp hàng đợi. Giới hạn: người có quyền chủ bảng hoặc superuser vẫn `DISABLE TRIGGER`, `DROP TABLE` hay sửa dữ liệu được, nên «không viết lại được» chỉ đúng với người không có quyền đó. Production cần vai trò riêng cho service chấm điểm (chỉ INSERT), `REVOKE` các quyền còn lại, `reviewer_id` lấy từ phiên đăng nhập đã xác thực (bài 34), và một bản sao nhật ký ở kho chỉ ghi thêm, nằm ngoài quyền của quản trị cơ sở dữ liệu.
 
-Ghi chú tự do của người duyệt có thể chứa số giấy tờ mà người gõ dán vào. `pii.py` cất đi ngày giờ và tiền có dấu chấm ngăn nghìn (số bắt đầu bằng 0 không bao giờ là tiền), rồi tìm mọi dãy chữ số xen một dấu cách, chấm, gạch hoặc gạch chéo và che dãy từ 9 chữ số trở lên theo quy ước `099*******89`. Mọi trường văn bản đều qua hàm che, kể cả mã chuyến và tên phiên bản. Lab thử một ghi chú có hai kiểu số, rồi quét mọi trường văn bản của cả hai bảng bằng chính hàm che (còn che thêm được gì thì là rò):
+Ghi chú tự do của người duyệt có thể chứa số giấy tờ mà người gõ dán vào. `pii.py` bỏ qua ngày giờ và tiền có dấu chấm ngăn nghìn (số bắt đầu bằng 0 không bao giờ là tiền), rồi tìm mọi dãy chữ số xen một dấu cách, chấm, gạch hoặc gạch chéo và che dãy từ 9 chữ số trở lên theo quy ước `099*******89`. Mọi trường văn bản đều qua hàm che, kể cả mã chuyến và tên phiên bản. Lab thử một ghi chú có hai kiểu số, rồi quét mọi trường văn bản của cả hai bảng bằng chính hàm che (nếu còn che thêm được thì đó là chỗ rò):
 
 ```text
 ghi chú người duyệt gõ:  CCCD 099123456789 dùng ở hai tài khoản, khách gọi từ 0900 000 001 hoặc 09 91 23 45 67 89, cước 125.000.000 VND ngày 2026-03-02 10:00
@@ -225,7 +225,7 @@ quét 2,184 trường văn bản của cả hai bảng bằng chính hàm che (k
 
 ## Công suất, SLA và tỉ lệ sai cho phép
 
-«Tỉ lệ sai cho phép» rơi ra từ chi phí, công suất người duyệt và hạn duyệt. Phí duyệt (8.000 VND) trả cho **mọi** đề xuất, nên chuyến đáng duyệt khi `p × (tiền chuyến + 20.000) > 8.000`. Lab chia đề xuất theo dải điểm và đếm lãi ròng bằng nhãn cuối, với hai giả định: gắn cờ chặn hết thiệt hại (kể cả duyệt trễ), và `amount_vnd` đại diện cho thiệt hại (với promo_abuse thiệt hại thật là phần giảm):
+«Tỉ lệ sai cho phép» được suy ra từ chi phí, công suất người duyệt và hạn duyệt. Phí duyệt (8.000 VND) trả cho **mọi** đề xuất, nên chuyến đáng duyệt khi `p × (tiền chuyến + 20.000) > 8.000`. Lab chia đề xuất theo dải điểm và đếm lãi ròng bằng nhãn cuối, với hai giả định: gắn cờ chặn hết thiệt hại (kể cả duyệt trễ), và `amount_vnd` đại diện cho thiệt hại (với promo_abuse thiệt hại thật là phần giảm):
 
 ```text
 dải điểm của các đề xuất (nhãn cuối; phí duyệt 8,000 VND cho MỌI đề xuất, bỏ sót = tiền chuyến + 20,000 VND):
@@ -236,7 +236,7 @@ dải điểm của các đề xuất (nhãn cuối; phí duyệt 8,000 VND cho 
 điểm hòa vốn p* = phí duyệt / (tiền chuyến + xử lý), vì phí duyệt trả cho mọi cờ: chuyến 30,000 VND -> 0.160, chuyến 120,000 VND -> 0.057, chuyến 500,000 VND -> 0.015
 ```
 
-Dải thấp nhất (precision 0,200, 80 đề xuất) lãi ròng 336.281 VND trên 640.000 VND phí duyệt: 80 % đề xuất ở đó là gắn cờ nhầm mà tổng vẫn chưa lỗ; ở ba seed lãi ròng dải này là 0,34, 0,05 và 0,30 triệu VND, sát hoà vốn. Công suất người duyệt mới là giới hạn thật. Lab mô phỏng cùng 547 đề xuất với nhiều mức công suất và hai chính sách chọn việc (ưu tiên theo chi phí kỳ vọng, hoặc FIFO). «Tiền bắt được» giả sử duyệt trễ vẫn chặn đủ thiệt hại; «chờ p95» chỉ tính đề xuất đã được duyệt nên bị cắt khi còn tồn đọng:
+Dải thấp nhất (precision 0,200, 80 đề xuất) lãi ròng 336.281 VND trên 640.000 VND phí duyệt: 80 % đề xuất ở đó là gắn cờ nhầm mà tổng vẫn chưa lỗ; ở ba seed lãi ròng dải này là 0,34, 0,05 và 0,30 triệu VND, sát hoà vốn. Công suất người duyệt mới là giới hạn thật. Lab mô phỏng cùng 547 đề xuất với nhiều mức công suất và hai chính sách chọn việc (ưu tiên theo chi phí kỳ vọng, hoặc FIFO). «Tiền bắt được» giả sử duyệt trễ vẫn chặn đủ thiệt hại; «chờ p95» chỉ tính đề xuất đã được duyệt nên bị chệch khi còn tồn đọng:
 
 ```text
  công suất/ngày chính sách đã duyệt tồn đọng vi phạm SLA  chờ p95 đã duyệt (giờ) gian lận bắt tiền bắt được
@@ -291,7 +291,7 @@ bản đồ HẸP (chỉ đặc trưng nêu thẳng trong hình 1 bài 54): top-
   123     79.8%     96.0%     37.2%     99.1%
 ```
 
-Ở cả ba seed top-1 SHAP trúng nhiều hơn top-1 gain cố định (khoảng tin cậy dưới lớn hơn 0), xoá ba lý do hạ p sâu hơn nhiều so với xoá ba đặc trưng ngẫu nhiên, và ở 50 mỗi ngày ưu tiên bắt nhiều tiền hơn FIFO (98,5, 94,5, 95,2 % so với 94,4, 83,0, 85,7 %). Ở seed 123 bộ gain cố định trúng tới 77,1 % nên chênh còn [+11,9 %, +21,1 %]: vững về chiều, không vững về độ lớn. SLA ở 65 mỗi ngày không đồng đều: FIFO ít quá hạn hơn rõ ở seed 42 (5 so với 24) và 123 (11 so với 62), nhưng ở seed 7 FIFO 44 và ưu tiên 42 (p95 chờ 25,5 so với 44,5 giờ). Công suất nên tính theo lượng đề xuất mỗi ngày (54,7, 63,0, 60,1 ở ba seed), không theo một con số cố định.
+Ở cả ba seed top-1 SHAP trúng nhiều hơn top-1 gain cố định (cận dưới của khoảng tin cậy lớn hơn 0), xoá ba lý do hạ p sâu hơn nhiều so với xoá ba đặc trưng ngẫu nhiên, và ở 50 mỗi ngày ưu tiên bắt nhiều tiền hơn FIFO (98,5, 94,5, 95,2 % so với 94,4, 83,0, 85,7 %). Ở seed 123 bộ gain cố định trúng tới 77,1 % nên chênh còn [+11,9 %, +21,1 %]: vững về chiều, không vững về độ lớn. SLA ở 65 mỗi ngày không đồng đều: FIFO ít quá hạn hơn rõ ở seed 42 (5 so với 24) và 123 (11 so với 62), nhưng ở seed 7 FIFO 44 và ưu tiên 42 (p95 chờ 25,5 so với 44,5 giờ). Công suất nên tính theo lượng đề xuất mỗi ngày (54,7, 63,0, 60,1 ở ba seed), không theo một con số cố định.
 
 ## Chạy và kiểm chứng
 
@@ -312,14 +312,14 @@ Kiểm chứng: OK 61/61
 30 passed in 15.95s
 ```
 
-`--verify` kiểm 61 bất biến, không ghim số tuyệt đối hay tốc độ: SHAP cộng ra điểm thô, log-odds của p là hàm affine của điểm thô, hai mươi ca chặn của cơ sở dữ liệu, che số giấy tờ, nhật ký khớp hàng đợi, schema đã xoá, khoảng tin cậy top-1 ở ba seed.
+`--verify` kiểm 61 bất biến, không ghim số tuyệt đối hay tốc độ: SHAP cộng ra điểm thô, log-odds của p là hàm affine của điểm thô, hai mươi test case bị cơ sở dữ liệu chặn, che số giấy tờ, nhật ký khớp hàng đợi, schema đã xoá, khoảng tin cậy top-1 ở ba seed.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
 | Tổng SHAP không khớp log-odds của p | SHAP giải thích điểm thô chưa hiệu chỉnh; đổi sang thang của p bằng bộ hiệu chỉnh, đừng cộng thẳng |
 | Lý do trùng lặp hoặc đổi theo lần chạy | Đặc trưng tương quan có thể chia nhau công; giữ nền tham chiếu cố định và so lại trên cùng dữ liệu |
 | Lý do dựa vào đặc trưng vô nghĩa với người duyệt | Có thể là tạo tác của dữ liệu; đưa ra review mô hình trước khi hiển thị |
-| `UPDATE` chốt dòng nhưng nhật ký thiếu sự kiện, hoặc log không ghi được | Chốt và ghi log phải cùng một giao dịch, log phải khớp hàng đợi; kiểm CHECK và trigger bằng ca thử như ở mục «Ai được chốt» |
+| `UPDATE` chốt dòng nhưng nhật ký thiếu sự kiện, hoặc log không ghi được | Chốt và ghi log phải cùng một giao dịch, log phải khớp hàng đợi; kiểm tra CHECK và trigger bằng test case như ở mục «Ai được chốt» |
 | Hàng đợi tồn đọng, nhiều đề xuất quá hạn | So công suất với lượng đề xuất mỗi ngày; chỉnh ngưỡng hoặc thêm người trước khi đổi chính sách chọn việc |
 
 <div class="tkh-callout tkh-callout--warn">

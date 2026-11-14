@@ -1,0 +1,167 @@
+{
+ "file": "python-decorator-context-manager.md",
+ "edits": [
+  {
+   "old": "Kiểm thử bằng FakeTimer, không ngủ thật.",
+   "new": "Kiểm thử bằng FakeTimer, không dùng sleep thật.",
+   "reason": "«ngủ thật» là cách nói ẩn dụ gượng ở phần tóm tắt",
+   "severity": "medium"
+  },
+  {
+   "old": "tức là «tạm thời không phục vụ»,.",
+   "new": "tức là «tạm thời không phục vụ».",
+   "reason": "dấu phẩy thừa trước dấu chấm",
+   "severity": "high"
+  },
+  {
+   "old": "Điều phối muốn thử lại vài lần",
+   "new": "Bộ phận điều phối muốn thử lại vài lần",
+   "reason": "lược mất danh từ chính «bộ phận»",
+   "severity": "medium"
+  },
+  {
+   "old": "thì dữ liệu hỏng âm thầm.",
+   "new": "thì dữ liệu hỏng mà không ai hay.",
+   "reason": "«âm thầm» là calque của silently",
+   "severity": "medium"
+  },
+  {
+   "old": "; nó khả thi vì hàm là đối tượng bình thường",
+   "new": "; cách này khả thi vì hàm là đối tượng bình thường",
+   "reason": "«nó» mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Bây giờ là decorator đầu tiên:",
+   "new": "Bây giờ đến decorator đầu tiên:",
+   "reason": "câu thiếu động từ phù hợp",
+   "severity": "low"
+  },
+  {
+   "old": "giúp trình kiểm kiểu biết hàm sau khi bọc",
+   "new": "giúp công cụ kiểm tra kiểu biết hàm sau khi bọc",
+   "reason": "«trình kiểm kiểu» là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "ta thấy khác biệt:",
+   "new": "ta thấy sự khác biệt:",
+   "reason": "thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Nó sao chép `__module__`,",
+   "new": "Hàm này sao chép `__module__`,",
+   "reason": "«Nó» đầu câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "kết quả phải là một decorator thật sự, rồi mới áp lên hàm.",
+   "new": "kết quả đó phải là một decorator thật sự, rồi Python mới áp nó lên hàm.",
+   "reason": "câu thiếu chủ ngữ ở vế sau",
+   "severity": "low"
+  },
+  {
+   "old": "bản lab có docstring và kiểm `times >= 1`.)",
+   "new": "bản lab có docstring và kiểm tra `times >= 1`.)",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "nên `times=3` là một lần gọi và tối đa hai lần thử lại.",
+   "new": "nên `times=3` là một lần gọi đầu cộng với tối đa hai lần thử lại.",
+   "reason": "«một lần gọi» dễ hiểu nhầm là chỉ gọi một lần",
+   "severity": "medium"
+  },
+  {
+   "old": "lỗi chỉ bung ra xa chỗ gây ra; có dòng đó, nó bung ngay lúc import.",
+   "new": "lỗi chỉ xuất hiện ở xa chỗ gây ra; có dòng đó, lỗi xuất hiện ngay lúc import.",
+   "reason": "«bung ra» khẩu ngữ, «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Ba ca chạy tức thì vì `FakeTimer` không ngủ;",
+   "new": "Ba test case chạy tức thì vì `FakeTimer` không ngủ;",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "riêng hai ca đầu đã tốn 2,5 giây",
+   "new": "riêng hai test case đầu đã tốn 2,5 giây",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó dùng `finally` để vẫn ghi khi hàm ném lỗi:",
+   "new": "Decorator này dùng `finally` để vẫn ghi cả khi hàm ném lỗi:",
+   "reason": "«Nó» đầu câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "(Bỏ chú thích kiểu và cả `[**P, R]` cho vừa khổ; bản lab có đủ.)",
+   "new": "(Đoạn code này bỏ chú thích kiểu và cả `[**P, R]` cho vừa khổ; bản lab có đủ.)",
+   "reason": "câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Về retry: nó chỉ an toàn khi thao tác",
+   "new": "Về retry: cơ chế này chỉ an toàn khi thao tác",
+   "reason": "«nó» mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "nó được ném lại ngay tại dòng `yield`, nên",
+   "new": "exception đó được ném lại ngay tại dòng `yield`, nên",
+   "reason": "«nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "«cả khối hoặc không gì»",
+   "new": "«hoặc cả khối, hoặc không gì cả»",
+   "reason": "cụm cụt, thiếu từ",
+   "severity": "low"
+  },
+  {
+   "old": "mô tả exception đang bay (cả ba",
+   "new": "mô tả exception đang lan truyền (cả ba",
+   "reason": "«bay» là calque của propagate",
+   "severity": "low"
+  },
+  {
+   "old": "thì nó tiếp tục bay.",
+   "new": "thì exception tiếp tục truyền lên.",
+   "reason": "«bay» là calque, «nó» mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "còn `ValueError` vẫn bay lên.",
+   "new": "còn `ValueError` vẫn truyền lên.",
+   "reason": "«bay lên» là calque",
+   "severity": "low"
+  },
+  {
+   "old": "tài nguyên rò.",
+   "new": "tài nguyên bị rò rỉ.",
+   "reason": "cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "không cách ly giữa hai người ghi,",
+   "new": "không có cách ly giữa hai bên cùng ghi,",
+   "reason": "«người ghi» là dịch từng chữ từ writer",
+   "severity": "medium"
+  },
+  {
+   "old": "Lệnh thứ hai kiểm 21 ca gồm đúng những hành vi trên:",
+   "new": "Lệnh thứ hai kiểm tra 21 test case gồm đúng những hành vi trên:",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "Sai ca nào, chương trình in tên ca đó cùng `FAIL n/21`",
+   "new": "Test case nào sai, chương trình in tên test case đó cùng `FAIL n/21`",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  }
+ ]
+}

@@ -8,7 +8,7 @@ tags: [python, toi-noi, fraud, mlops, drift]
 language: vi
 ---
 
-Bộ chấm điểm gian lận v1 của [Tới Nơi](/articles/du-an-mau-toi-noi) chạy được vài tuần thì đội dữ liệu đưa ra hai bản huấn luyện lại: v2 học thêm 10 ngày dữ liệu, v3 «học trên dữ liệu mới nhất». Cả hai đều có PR-AUC không thấp hơn v1. Câu hỏi vận hành: ai đổi phiên bản đang phục vụ, thử bản mới thế nào mà không để nó quyết định, khi nào đáng huấn luyện lại, và nếu hỏng thì lui mất bao lâu.
+Bộ chấm điểm gian lận v1 của [Tới Nơi](/articles/du-an-mau-toi-noi) chạy được vài tuần thì đội dữ liệu đưa ra hai bản huấn luyện lại: v2 học thêm 10 ngày dữ liệu, v3 «học trên dữ liệu mới nhất». Cả hai đều có PR-AUC không thấp hơn v1. Câu hỏi vận hành: ai đổi phiên bản đang phục vụ, thử bản mới thế nào mà không để nó quyết định, khi nào đáng huấn luyện lại, và nếu hỏng thì quay lại bản cũ mất bao lâu.
 
 Đây là bài 60 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen cách lưu mô hình kèm metadata ở [bài 57](/articles/python-scikit-learn-lightgbm-imbalanced-cross-validation), dùng lại cho cả ba phiên bản, và đường phục vụ ở [bài 59](/articles/python-real-time-scoring-feature-store-redis-latency). Dữ liệu là tổng hợp; điểm rủi ro là đầu vào cho người duyệt. Bài 59 đến 61 dùng một quy tắc gắn cờ: `p × (tiền chuyến + 20.000) > 8.000`. Hai kịch bản do lab đặt vào dữ liệu luôn được gọi là «kịch bản».
 
@@ -20,7 +20,7 @@ Bộ chấm điểm gian lận v1 của [Tới Nơi](/articles/du-an-mau-toi-noi
 
 ## Registry: thư mục, manifest và con trỏ
 
-Registry ở đây là một thư mục có quy ước. Mỗi phiên bản là một thư mục bất biến `out/registry/<model_version>/` gồm `model.joblib` và `model_meta.json` do `save_model` của bài 57 ghi, cộng `manifest.json`: ai đăng ký, bản cha, sha256, số đo holdout. Chỉ hai thứ đổi theo thời gian: `current.json` (bản đang phục vụ) và `history.jsonl` (sự kiện chỉ ghi thêm).
+Registry ở đây là một thư mục có quy ước. Mỗi phiên bản là một thư mục bất biến `out/registry/<model_version>/` gồm `model.joblib` và `model_meta.json` do `save_model` của bài 57 ghi, cộng `manifest.json`: ai đăng ký, phiên bản cha, sha256, số đo holdout. Chỉ hai thứ đổi theo thời gian: `current.json` (bản đang phục vụ) và `history.jsonl` (sự kiện chỉ ghi thêm).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -59,7 +59,7 @@ Ba bản dùng cùng công thức bài 57 (LightGBM 100 vòng, hiệu chỉnh si
   v3         ngày 50   known  166,584     2,890   0.157          0.8874           có   346  fraud-lgbm-6fec401c
 ```
 
-v3 là bản duy nhất dùng nhãn «known»: chuyến gian lận có `label_known_at` sau ngày 50 vẫn là 0, đúng lỗi nhãn chưa chín của bài 54. Train của v3 gồm cả ngày 40 đến 50 nên holdout chồng lên dữ liệu học, manifest ghi `overlaps_train`, và cổng chặn thay vì đoán. Lab thử các lần từ chối trên một bản sao registry:
+v3 là bản duy nhất dùng nhãn «known»: chuyến gian lận có `label_known_at` sau ngày 50 vẫn là 0, đúng lỗi nhãn chưa chín của bài 54. Train của v3 gồm cả ngày 40 đến 50 nên holdout chồng lên dữ liệu học, manifest ghi `overlaps_train`, và cổng chặn thay vì đoán. Lab thử từng trường hợp bị từ chối trên một bản sao registry:
 
 ```text
   promote v3 (holdout chồng train): fraud-lgbm-6fec401c không qua cổng: holdout chồng lên dữ liệu huấn luyện, số đo không đáng tin
@@ -75,7 +75,7 @@ v3 là bản duy nhất dùng nhãn «known»: chuyến gian lận có `label_kn
   đăng ký lại cùng mô hình (cùng sha256): phiên bản fraud-lgbm-f81991ad đã có; registry không ghi đè
 ```
 
-Con trỏ và lịch sử là hai file, ghi hai bước. Nếu tiến trình chết giữa hai bước, `current.json` có thể trỏ v3 trong khi lịch sử còn [v1, v2], và một rollback «tin lịch sử» sẽ về v1, sai. Vì thế `promote` và `rollback` từ chối khi hai nguồn lệch (hai ca trước dòng đăng ký lại) và để người vận hành xem `history.jsonl`. Con trỏ ghi qua `fsync` trước `os.replace`; lab không `fsync` thư mục chứa và không xử lý nhiều máy. `joblib` là pickle: nạp file lạ là chạy mã của người ghi, sha256 chỉ phát hiện file hỏng hoặc nhầm file; ai được ghi vào thư mục registry là việc của hạ tầng. Cổng chỉ là một lớp: `force=True` vẫn đi qua, nhưng buộc có lý do và lịch sử ghi lại.
+Con trỏ và lịch sử là hai file, ghi hai bước. Nếu tiến trình chết giữa hai bước, `current.json` có thể trỏ v3 trong khi lịch sử còn [v1, v2], và một rollback «tin lịch sử» sẽ quay về v1, và đó là sai. Vì thế `promote` và `rollback` từ chối khi hai nguồn lệch (hai trường hợp trước dòng đăng ký lại) và để người vận hành xem `history.jsonl`. Con trỏ ghi qua `fsync` trước `os.replace`; lab không `fsync` thư mục chứa và không xử lý nhiều máy. `joblib` là pickle: nạp file lạ là chạy mã của người ghi, sha256 chỉ phát hiện file hỏng hoặc nhầm file; việc ai được quyền ghi vào thư mục registry thuộc về hạ tầng. Cổng chỉ là một lớp bảo vệ: `force=True` vẫn đi qua, nhưng buộc có lý do và lịch sử ghi lại.
 
 ## Shadow mode: chấm điểm mà không quyết định
 
@@ -100,7 +100,7 @@ def decide(self, batch):
     return flag
 ```
 
-Lab phát lại ngày 50 đến 60 (33.416 chuyến) theo lô 1.000, v1 quyết định, v2 và v3 chỉ ghi điểm. Ba ca biên có verify: quyết định giống hệt khi champion chạy một mình; một mô hình thử ném lỗi, hoặc trả sai độ dài, hoặc log không ghi được thì quyết định vẫn không đổi:
+Lab phát lại ngày 50 đến 60 (33.416 chuyến) theo lô 1.000, v1 quyết định, v2 và v3 chỉ ghi điểm. Ba trường hợp biên có kiểm tra (verify): quyết định giống hệt khi champion chạy một mình; một mô hình thử ném lỗi, hoặc trả sai độ dài, hoặc log không ghi được thì quyết định vẫn không đổi:
 
 ```text
 quyết định của router có shadow giống hệt quyết định của champion chạy một mình: True (547 cờ theo quy tắc chi phí kỳ vọng)
@@ -126,7 +126,7 @@ quyết định và chi phí (triệu VND; phí duyệt 8,000 cho mọi cờ, b�
   v3         8.9     11.46                9.0     12.12             0.157       8.9     12.23
 ```
 
-PR-AUC của v3 (0,8891) không thấp hơn v1 (0,8864): chỉ số xếp hạng không thấy lỗi. Cái hỏng là thang xác suất: p trung bình của v3 là 0,0056 so với tỉ lệ nền 0,0148, kéo theo số cờ giảm một nửa và chi phí tăng; đổi cách đặt ngưỡng không chữa được. Cột «PSI điểm» (phân phối điểm so với v1) không phân biệt được bản hỏng: seed 42 cho v2 0,374 và v3 0,194, nhưng ở seed 123 thứ tự đảo (bảng cuối mục drift). Tỉ lệ cờ và p99 đo thẳng vào chỗ quyết định xảy ra.
+PR-AUC của v3 (0,8891) không thấp hơn v1 (0,8864): chỉ số xếp hạng không thấy lỗi. Cái hỏng là thang xác suất: p trung bình của v3 là 0,0056 so với tỉ lệ nền 0,0148, kéo theo số cờ giảm một nửa và chi phí tăng; đổi cách đặt ngưỡng không chữa được. Cột «PSI điểm» (phân phối điểm so với v1) không phân biệt được bản hỏng: seed 42 cho v2 0,374 và v3 0,194, nhưng ở seed 123 thứ tự đảo (bảng cuối mục drift). Tỉ lệ cờ và p99 phản ánh trực tiếp kết quả tại nơi quyết định được đưa ra.
 
 v3 khác v2 ở hai biến cùng lúc (thêm 10 ngày dữ liệu và nhãn chưa chín), nên lab thêm bản đối chứng v3f đổi đúng một biến: cùng dữ liệu đến ngày 50 nhưng nhãn cuối. Một seed cũng quá ít, nên lab lặp lại với seed 42, 7 và 123 (đánh giá bằng nhãn cuối):
 
@@ -146,7 +146,7 @@ v3 khác v2 ở hai biến cùng lúc (thêm 10 ngày dữ liệu và nhãn chư
   123 v3f  0.9024     19.7     8.41                20.9     8.76     18.5     8.82
 ```
 
-Ở cả ba seed v3 gắn cờ chừng một nửa so với v1 theo quy tắc chi phí kỳ vọng (8,9 so với 16,4; 9,9 so với 19,0; 9,4 so với 18,1 trên 1.000 chuyến) và đắt hơn 1,36 đến 1,48 lần. Bản đối chứng v3f cho biết biến nào gây ra: chỉ đổi nhãn sang nhãn cuối, số cờ về 16,9, 19,8 và 19,7 trên 1.000 chuyến, chi phí 7,88, 9,66 và 8,41 triệu VND, không đắt hơn v1 ở seed nào. Trong bộ này lỗi đến từ nhãn chưa chín, không từ việc thêm dữ liệu. Về v2 thì không vững: PR-AUC cao hơn v1 ở 2 trong 3 seed (+0,0064, −0,0319, +0,0095) và chi phí chênh −0,08, +0,26, −0,13 triệu VND, đổi dấu theo seed.
+Ở cả ba seed v3 gắn cờ chừng một nửa so với v1 theo quy tắc chi phí kỳ vọng (8,9 so với 16,4; 9,9 so với 19,0; 9,4 so với 18,1 trên 1.000 chuyến) và đắt hơn 1,36 đến 1,48 lần. Bản đối chứng v3f cho biết biến nào gây ra: chỉ đổi nhãn sang nhãn cuối, số cờ về 16,9, 19,8 và 19,7 trên 1.000 chuyến, chi phí 7,88, 9,66 và 8,41 triệu VND, không đắt hơn v1 ở seed nào. Trong bộ này lỗi đến từ nhãn chưa chín, không phải từ việc thêm dữ liệu. Với v2 thì kết luận không vững: PR-AUC cao hơn v1 ở 2 trong 3 seed (+0,0064, −0,0319, +0,0095) và chi phí chênh −0,08, +0,26, −0,13 triệu VND, đổi dấu theo seed.
 
 ## A/B theo hash khách
 
@@ -176,13 +176,13 @@ nửa độ rộng khoảng tin cậy 59,645 so với chênh thật 2,247: nửa
 thiết bị có từ 2 khách trở lên: 157; trong đó 90 thiết bị (57%) có khách ở cả hai nhóm
 ```
 
-Nhóm treatment đắt hơn control 24.478 VND trên 1.000 chuyến, dấu ngược với chênh thật trên toàn cửa sổ (v2 rẻ hơn 2.247 VND; trong lab ta biết điểm của cả hai mô hình cho mọi chuyến, điều A/B thật không có). Khoảng tin cậy (bootstrap theo khách, vì chuyến của một khách không độc lập) là [−36.321, +82.970] và phép A/A cho chênh trong [−68.331, +64.000]: riêng việc ai rơi vào nhóm nào đã gây nhiễu lớn hơn hiệu ứng của v2 hàng chục lần. Power: nửa độ rộng bằng chênh (power chừng 50 %) cần chừng 705 lần lưu lượng 10 ngày này, power 80 % cần chừng 1.440 lần, tức 48,1 triệu chuyến (ngoại suy thô, chênh thật còn đổi dấu theo seed). Thêm nhiễu giao thoa: trong 157 thiết bị có từ hai khách trở lên, 90 (57 %) có khách ở cả hai nhóm, mà gian lận cấu kết chính là nhiều tài khoản trên một thiết bị.
+Nhóm treatment đắt hơn control 24.478 VND trên 1.000 chuyến, ngược dấu với chênh thật trên toàn cửa sổ (v2 rẻ hơn 2.247 VND; trong lab ta biết điểm của cả hai mô hình cho mọi chuyến, điều A/B thật không có). Khoảng tin cậy (bootstrap theo khách, vì chuyến của một khách không độc lập) là [−36.321, +82.970] và phép A/A cho chênh trong [−68.331, +64.000]: riêng việc ai rơi vào nhóm nào đã gây nhiễu lớn hơn hiệu ứng của v2 hàng chục lần. Power: nửa độ rộng bằng chênh (power chừng 50 %) cần chừng 705 lần lưu lượng 10 ngày này, power 80 % cần chừng 1.440 lần, tức 48,1 triệu chuyến (ngoại suy thô, chênh thật còn đổi dấu theo seed). Còn có thêm nhiễu giao thoa: trong 157 thiết bị có từ hai khách trở lên, 90 (57 %) có khách ở cả hai nhóm, mà gian lận cấu kết chính là nhiều tài khoản trên một thiết bị.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 270" role="img" aria-label="Trục chi phí chênh trên 1.000 chuyến từ âm 80 nghìn đến dương 80 nghìn VND. Dòng A/A: khoảng 95 phần trăm từ âm 68,3 nghìn đến dương 64,0 nghìn. Dòng A/B v2 so với v1: khoảng tin cậy từ âm 36,3 nghìn đến dương 83,0 nghìn, điểm ước lượng dương 24,5 nghìn. Dòng chênh thật nếu mọi khách dùng v2: âm 2,2 nghìn. Đường nét đứt đánh dấu số 0."><defs></defs><path d="M440 40 L440 200" class="f-none s-muted dash"/><text x="440" y="30" class="t-small" text-anchor="middle">0</text><path d="M100 200 L780 200" class="f-none s-line"/><path d="M100 196 L100 204" class="f-none s-line"/><text x="100" y="220" class="t-small" text-anchor="middle">-80.000</text><path d="M270 196 L270 204" class="f-none s-line"/><text x="270" y="220" class="t-small" text-anchor="middle">-40.000</text><path d="M440 196 L440 204" class="f-none s-line"/><text x="440" y="220" class="t-small" text-anchor="middle">0</text><path d="M610 196 L610 204" class="f-none s-line"/><text x="610" y="220" class="t-small" text-anchor="middle">+40.000</text><path d="M780 196 L780 204" class="f-none s-line"/><text x="780" y="220" class="t-small" text-anchor="middle">+80.000</text><text x="440" y="244" class="t-small" text-anchor="middle">chênh chi phí trên 1.000 chuyến (VND)</text><text x="100" y="58" class="t-small">A/A: cả hai nhóm dùng v1, 95 % trong 100 cách chia</text><path d="M150 70 L712 70" class="f-none s-warn" stroke-width="6"/><text x="100" y="118" class="t-small">A/B v2 so v1: khoảng tin cậy 95 %, điểm +24.478</text><path d="M286 130 L793 130" class="f-none s-pk" stroke-width="6"/><circle cx="544" cy="130" r="6" class="f-pk s-pk"/><text x="100" y="168" class="t-small">chênh thật khi mọi khách dùng v2: -2.247</text><circle cx="430" cy="180" r="6" class="f-phys s-phys"/></svg>
 </div>
-<figcaption>Hình 2. Chênh chi phí do chia khách ngẫu nhiên (A/A) rộng hơn nhiều so với chênh thật giữa v2 và v1, nên khoảng tin cậy của A/B chứa cả số 0 lẫn dấu sai. Khoảng tin cậy vượt mép phải của trục (+82.970).</figcaption>
+<figcaption>Hình 2. Chênh chi phí do chia khách ngẫu nhiên (A/A) rộng hơn nhiều so với chênh thật giữa v2 và v1, nên khoảng tin cậy của A/B chứa cả số 0 lẫn chênh sai dấu. Khoảng tin cậy vượt mép phải của trục (+82.970).</figcaption>
 </figure>
 
 ## Drift: PSI hai phía và những điều nó không nói
@@ -198,13 +198,13 @@ e, a = np.clip(e, EPS, None), np.clip(a, EPS, None)      # khoảng rỗng khôn
 return float(np.sum((a - e) * np.log(a / e)))
 ```
 
-Khoảng mở bên phải cho PSI bằng 0 khi cờ hiếm đổi từ 0,1 % lên 50 %; chỉ đóng bên phải thì vẫn mù khi khối giá trị trùng ở đầu trên (cờ 99,9 % số 1 tụt xuống 50 %). Test và dòng này của lab giữ cả hai phía:
+Nếu dùng khoảng mở bên phải thì PSI bằng 0 khi cờ hiếm đổi từ 0,1 % lên 50 %; chỉ đóng bên phải thì vẫn mù khi khối giá trị trùng ở đầu trên (cờ 99,9 % số 1 tụt xuống 50 %). Test và dòng kết quả này của lab kiểm cả hai phía:
 
 ```text
 PSI hai phía cho cờ hiếm: tham chiếu 99,9 % số 0, hiện tại 50 % số 1: 3.45; tham chiếu 99,9 % số 1, hiện tại 50 % số 0: 3.45
 ```
 
-PSI «bình thường» lớn cỡ nào? Hai nửa ngẫu nhiên của chính tập tham chiếu cho PSI lớn nhất rất nhỏ. Lab so ba tuần phục vụ (ngày 40 đến 60) với dữ liệu huấn luyện của v1, kèm PR-AUC của v1 trên nhãn cuối của từng tuần và độ quan trọng của đặc trưng:
+PSI «bình thường» lớn cỡ nào? PSI lớn nhất giữa hai nửa ngẫu nhiên của chính tập tham chiếu rất nhỏ. Lab so ba tuần phục vụ (ngày 40 đến 60) với dữ liệu huấn luyện của v1, kèm PR-AUC của v1 trên nhãn cuối của từng tuần và độ quan trọng của đặc trưng:
 
 ```text
 nhiễu nền: PSI lớn nhất giữa hai nửa ngẫu nhiên 23.000 dòng của chính tập tham chiếu = 0.0019
@@ -217,7 +217,7 @@ cust_prior_trips đếm số chuyến trước đó của khách từ đầu log
 tỉ lệ chuyến đầu tiên của khách (cust_prior_trips = 0): 30.9% ở tập tham chiếu, 8.6%, 6.9%, 5.9% ở ba tuần
 ```
 
-`cust_prior_trips` là bộ đếm tích luỹ từ đầu log nên chỉ tăng khi log dài ra (PSI 0,65, 0,83, 0,99); tỉ lệ chuyến đầu tiên của khách giảm từ 30,9 % xuống 5,9 % vì quần thể khách gần như cố định, một giả định của bộ sinh. Độ quan trọng cần đo bằng thứ phản ánh tác động lên điểm: theo gain đặc trưng này chỉ 3,2 %, theo mean|SHAP| nó đứng **đầu** (15,3 %; hạng 1 ở cả ba seed, 15,3 đến 20,4 %), nên drift của nó đáng điều tra: mô hình dựa vào một bộ đếm tự trôi. PR-AUC của v1 dao động 0,878, 0,903, 0,864 giữa các tuần (cùng mô hình, khác mẫu), nên một tuần PR-AUC không đủ để nói «tụt» hay «không tụt». `cust_promo_share_30d` lệch nhẹ (khoảng 0,11); lab chưa tách nó khỏi tạo tác dưới đây.
+`cust_prior_trips` là bộ đếm tích luỹ từ đầu log nên chỉ tăng khi log dài ra (PSI 0,65, 0,83, 0,99); tỉ lệ chuyến đầu tiên của khách giảm từ 30,9 % xuống 5,9 % vì quần thể khách gần như cố định, một giả định của bộ sinh. Độ quan trọng cần đo bằng chỉ số phản ánh tác động lên điểm: theo gain đặc trưng này chỉ 3,2 %, theo mean|SHAP| nó đứng **đầu** (15,3 %; hạng 1 ở cả ba seed, 15,3 đến 20,4 %), nên drift của nó đáng điều tra: mô hình dựa vào một bộ đếm tự thay đổi theo thời gian. PR-AUC của v1 dao động 0,878, 0,903, 0,864 giữa các tuần (cùng mô hình, khác mẫu), nên một tuần PR-AUC không đủ để nói «tụt» hay «không tụt». `cust_promo_share_30d` lệch nhẹ (khoảng 0,11); lab chưa tách nó khỏi tạo tác dưới đây.
 
 Bộ sinh còn hai tạo tác ảnh hưởng mọi phép đo drift và mọi valid của phần 07:
 
@@ -227,7 +227,7 @@ hai tạo tác của bộ sinh dữ liệu (không phải hiện tượng thật
   (b) cust_promo_share_30d > 0 ở cửa sổ ngày 50+: 38.3% chuyến sạch, 3.4% chuyến gian lận (khách gian lận không dùng mã nào ngoài NEWUSER50 của promo_abuse)
 ```
 
-Tạo tác (a) làm phân phối khuyến mãi tự đổi theo thời gian; tạo tác (b) cho mô hình một lối tắt không có ngoài đời (bài 61 thấy nó trong đóng góp SHAP). Kịch bản: từ ngày 50 nguồn GPS đổi và `start_pickup_gap_km` lớn gấp 3 ở mọi chuyến (chỉ cột này, để PSI chỉ đúng nó). Chi phí theo quy tắc chi phí kỳ vọng; hai dòng cuối đo xem huấn luyện lại có cứu được không:
+Tạo tác (a) làm phân phối khuyến mãi tự đổi theo thời gian; tạo tác (b) cho mô hình một lối tắt mà ngoài đời không có (bài 61 thấy nó trong đóng góp SHAP). Kịch bản: từ ngày 50 nguồn GPS đổi và `start_pickup_gap_km` lớn gấp 3 ở mọi chuyến (chỉ cột này, để PSI chỉ đúng nó). Chi phí theo quy tắc chi phí kỳ vọng; hai dòng cuối đo xem huấn luyện lại có cứu được không:
 
 ```text
 kịch bản (đặt vào dữ liệu, không quan sát): từ ngày 50 nguồn GPS đổi, start_pickup_gap_km của mọi chuyến lớn gấp 3
@@ -239,7 +239,7 @@ huấn luyện lại thì sao? vx học đến ngày 50 (nhãn cuối) trên d�
 (v2 học trước lúc nguồn đổi nên không cứu được; vx học luôn dữ liệu lỗi nên số đo hồi phục, nhưng nó đã học một nguồn sai: vẫn phải tìm và sửa nguồn)
 ```
 
-PSI của cột này vọt lên 2,45 trong khi nó chỉ chiếm 3,8 % mean|SHAP| (mục sau): nếu chỉ báo động khi đặc trưng quan trọng thì lỗi này bị bỏ lọt, nên lab báo động theo PSI ở **mọi** đặc trưng và dùng độ quan trọng chỉ để xếp thứ tự. Về huấn luyện lại: v2, học trước lúc nguồn đổi, không cứu được (17,37 so với 8,02 triệu VND). Bản vx, học đến ngày 50 trên dữ liệu có lỗi nguồn từ ngày 30 và nhãn cuối, **hồi phục** số đo (7,99), vì nó học luôn dữ liệu lỗi; ở ba seed là 7,99, 9,97, 8,41 so với 8,02, 10,09, 8,89 của v1 trên nguồn cũ. Số đo đẹp lại không có nghĩa nguồn ổn: mô hình đã học một nguồn sai, nên vẫn phải tìm và sửa nguồn.
+PSI của cột này vọt lên 2,45 trong khi nó chỉ chiếm 3,8 % mean|SHAP| (mục sau): nếu chỉ báo động khi đặc trưng quan trọng thì lỗi này bị bỏ lọt, nên lab báo động theo PSI ở **mọi** đặc trưng và dùng độ quan trọng chỉ để xếp thứ tự. Về huấn luyện lại: v2, học trước lúc nguồn đổi, không cứu được (17,37 so với 8,02 triệu VND). Bản vx, học đến ngày 50 trên dữ liệu có lỗi nguồn từ ngày 30 và nhãn cuối, **hồi phục** số đo (7,99), vì nó học luôn dữ liệu lỗi; ở ba seed là 7,99, 9,97, 8,41 so với 8,02, 10,09, 8,89 của v1 trên nguồn cũ. Số đo hồi phục không có nghĩa là nguồn dữ liệu đã ổn: mô hình đã học một nguồn sai, nên vẫn phải tìm và sửa nguồn.
 
 ```text
  seed  PSI cust_prior_trips  hạng mean|SHAP|  tác động  PSI lớn nhất còn lại  PSI GPS x3  cờ v1 x lần  chi phí v1 x lần
@@ -311,11 +311,11 @@ Rollback chỉ đổi con trỏ, kiểm bản đích và nạp lại từ đĩa 
   rolled_back ...6fec401c -> 4b482d65 bởi oncall-ml: tỉ lệ cờ giảm hơn một nửa sau promote v3; nghi nhãn chưa chín trong huấn luyện
 ```
 
-(Trích.) Rollback là ngăn xếp: hai lần liên tiếp đi lùi hai bản, và pytest của lab kiểm cả promote lại sau rollback.
+(Trích.) Rollback là ngăn xếp: hai lần liên tiếp lùi về hai bản trước, và pytest của lab kiểm cả promote lại sau rollback.
 
 ## MLflow thì sao
 
-`mlflow_demo.py` đăng ký hai bản của lab vào MLflow Model Registry (SQLite cục bộ, không cần server), gán alias `champion`, và rollback bằng cách đưa alias về bản cũ. Kiểm ngày 07/11/2026: MLflow 3.18.0 chạy được trên Python 3.14.7 nhưng kéo theo nhiều phụ thuộc, nên lab đặt nó vào nhóm `--group mlflow`:
+`mlflow_demo.py` đăng ký hai bản của lab vào MLflow Model Registry (SQLite cục bộ, không cần server), gán alias `champion`, và rollback bằng cách đưa alias về bản cũ. Đã kiểm tra ngày 07/11/2026: MLflow 3.18.0 chạy được trên Python 3.14.7 nhưng kéo theo nhiều phụ thuộc, nên lab đặt nó vào nhóm `--group mlflow`:
 
 ```text
 mlflow 3.18.0, Python 3.14.7
@@ -350,15 +350,15 @@ Kiểm chứng: OK 88/88
 26 passed in 11.88s
 ```
 
-`--verify` kiểm 88 bất biến, không ghim số tuyệt đối hay tốc độ: shadow lỗi không đổi quyết định, cổng promote từ chối đúng các ca (kể cả con trỏ lệch lịch sử), PSI hai phía, kịch bản GPS bị PSI bắt, rollback cho điểm giống hệt, và ở cả ba seed v3 gắn cờ ít hơn 0,75 lần v1 còn v3f thì không.
+`--verify` kiểm 88 bất biến, không ghim số tuyệt đối hay tốc độ: shadow lỗi không đổi quyết định, cổng promote từ chối đúng các trường hợp (kể cả con trỏ lệch lịch sử), PSI hai phía, kịch bản GPS bị PSI bắt, rollback cho điểm giống hệt, và ở cả ba seed v3 gắn cờ ít hơn 0,75 lần v1 còn v3f thì không.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
 | PSI của một đặc trưng vọt lên nhưng PR-AUC trên nhãn đã chín không đổi | Đặc trưng có phải bộ đếm tích luỹ hoặc phụ thuộc lịch sử khách không; đừng bỏ qua vì gain thấp, xem trung bình trị tuyệt đối SHAP |
-| PR-AUC của bản mới bằng hoặc cao hơn nhưng số cờ lệch hẳn | So tỉ lệ cờ và p99 với bản đang chạy cùng khoảng thời gian; kiểm nhãn lúc huấn luyện đã chín chưa |
+| PR-AUC của bản mới bằng hoặc cao hơn nhưng số cờ lệch hẳn | So tỉ lệ cờ và p99 với bản đang chạy cùng khoảng thời gian; kiểm tra xem nhãn lúc huấn luyện đã chín chưa |
 | Nhóm A/B treatment đắt hơn dù mô hình mới tốt hơn trên shadow | Chạy A/A trước để biết nhiễu chia khách; kiểm khoảng tin cậy bootstrap theo khách |
 | `RegistryError` «con trỏ lệch lịch sử» | Tiến trình chết giữa hai bước ghi; xem `history.jsonl`, sửa tay, rồi mới promote hay rollback |
-| Sau huấn luyện lại số đo đẹp trở lại nhưng PSI nguồn vẫn cao | Mô hình đã học dữ liệu lỗi; tìm và sửa nguồn rồi huấn luyện lại bằng dữ liệu sạch |
+| Sau khi huấn luyện lại, số đo hồi phục nhưng PSI của nguồn vẫn cao | Mô hình đã học dữ liệu lỗi; tìm và sửa nguồn rồi huấn luyện lại bằng dữ liệu sạch |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>

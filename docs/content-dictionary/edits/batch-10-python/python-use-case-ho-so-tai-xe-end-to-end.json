@@ -1,0 +1,143 @@
+{
+  "file": "python-use-case-ho-so-tai-xe-end-to-end.md",
+  "edits": [
+    {
+      "old": "Máy luôn dừng ở needs_review, ngưỡng",
+      "new": "Hệ thống luôn dừng ở needs_review, ngưỡng",
+      "reason": "'Máy' làm chủ ngữ cụt, gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "và các chỗ hở của thiết kế được đo bằng PostgreSQL thật để dẫn sang bài 71",
+      "new": "và ta đo các chỗ hở của thiết kế bằng PostgreSQL thật để dẫn sang bài 71",
+      "reason": "Bỏ bị động",
+      "severity": "medium"
+    },
+    {
+      "old": "Bài C# cùng họ là",
+      "new": "Bài C# tương ứng là",
+      "reason": "'cùng họ' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "OCR đọc đúng chữ trên thẻ giả vẫn đọc đúng.",
+      "new": "OCR vẫn đọc đúng chữ trên thẻ giả.",
+      "reason": "Lặp từ 'đọc đúng'",
+      "severity": "medium"
+    },
+    {
+      "old": "để sắp việc cho người duyệt",
+      "new": "để sắp xếp việc cho người duyệt",
+      "reason": "Cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Không có điểm «giả định» nào được điền vào chỗ trống.",
+      "new": "Không có giá trị «giả định» nào được điền vào chỗ trống.",
+      "reason": "'điểm' không hợp ngữ cảnh chung",
+      "severity": "medium"
+    },
+    {
+      "old": "không dịch thì lỗi đó rollback cả hồ sơ",
+      "new": "nếu không dịch thì lỗi đó làm rollback cả hồ sơ",
+      "reason": "Câu thiếu liên từ",
+      "severity": "medium"
+    },
+    {
+      "old": "có ca kiểm số lần gọi bằng 0",
+      "new": "có test case kiểm tra số lần gọi bằng 0",
+      "reason": "Thống nhất 'test case'; lược chữ 'tra'",
+      "severity": "low"
+    },
+    {
+      "old": "hồ sơ lạ là 404",
+      "new": "hồ sơ không tồn tại thì trả 404",
+      "reason": "Cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Production cần một việc nền quét",
+      "new": "Production cần một tác vụ nền quét",
+      "reason": "Từ quen dùng",
+      "severity": "low"
+    },
+    {
+      "old": "là ca «mọi thứ tốt» và vẫn",
+      "new": "là trường hợp «mọi thứ tốt» và vẫn",
+      "reason": "'ca' khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "`FakeRiskScore` kẹp cosine âm về 0",
+      "new": "`FakeRiskScore` đưa cosine âm về 0",
+      "reason": "'kẹp' khó hiểu",
+      "severity": "low"
+    },
+    {
+      "old": "đừng thừa kế cấu hình Tesseract",
+      "new": "đừng dùng lại cấu hình Tesseract",
+      "reason": "'thừa kế' sai nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "`OcrResult.confidence` là một số theo giấy tờ",
+      "new": "`OcrResult.confidence` là một số tính riêng cho từng giấy tờ",
+      "reason": "Cụm cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó không gửi sự kiện đi đâu",
+      "new": "Aggregate không gửi sự kiện đi đâu",
+      "reason": "Tránh 'Nó' đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Với adapter giả vô hại, nhưng",
+      "new": "Với adapter giả thì chuyện này vô hại, nhưng",
+      "reason": "Thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Không thứ tự nào sửa được vì",
+      "new": "Không thứ tự nào giải quyết được vấn đề, vì",
+      "reason": "Câu thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca verify giữ hành vi này như giới hạn đã biết",
+      "new": "Test case trong phần verify giữ hành vi này như một giới hạn đã biết",
+      "reason": "'Ca verify' cụt; thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab in lời nhắc ba service là adapter giả",
+      "new": "Lab in lời nhắc rằng ba service đang dùng adapter giả",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Kiểm các kết quả trên:",
+      "new": "Kiểm tra các kết quả trên:",
+      "reason": "Lược chữ 'tra'",
+      "severity": "medium"
+    },
+    {
+      "old": "39 ca: bảng hồ sơ",
+      "new": "39 test case: bảng hồ sơ",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "người duyệt và ca HTTP",
+      "new": "người duyệt và test case HTTP",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "Output do một lần chạy chung với nhiều tác vụ khác của máy",
+      "new": "Output này đến từ một lần chạy cùng lúc với nhiều tác vụ khác trên máy",
+      "reason": "Dịch máy",
+      "severity": "medium"
+    }
+  ]
+}

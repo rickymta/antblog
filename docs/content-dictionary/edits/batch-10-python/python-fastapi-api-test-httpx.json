@@ -1,0 +1,257 @@
+{
+ "file": "python-fastapi-api-test-httpx.md",
+ "edits": [
+  {
+   "old": "dựng PostgreSQL và server thật cho mỗi ca thì chậm",
+   "new": "dựng PostgreSQL và server thật cho mỗi test case thì chậm",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "lab tự chứa, có một API nhỏ gom đủ thứ cần kiểm",
+   "new": "lab chạy độc lập, có một API nhỏ gồm đủ những thứ cần kiểm",
+   "reason": "«Tự chứa» là calque; «gom đủ thứ» khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bên .NET, cùng việc này là",
+   "new": "Bên .NET, việc tương đương là",
+   "reason": "Câu cụt, gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài chạy đúng ca này rồi cách mở lifespan trong fixture",
+   "new": "Bài chạy đúng test case này, rồi đến cách mở lifespan trong fixture",
+   "reason": "Thống nhất test case; câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "| Kiểm | Unit test",
+   "new": "| Nội dung kiểm | Unit test",
+   "reason": "Tiêu đề cột cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "như bài 35 thấy với",
+   "new": "như bài 35 đã gặp với",
+   "reason": "Động từ «thấy» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "URL chỉ là chỗ điền cho đủ",
+   "new": "URL chỉ để điền cho đủ",
+   "reason": "«Chỗ điền cho đủ» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "thì cái của test này sống sang test sau",
+   "new": "thì thiết lập của test này còn tồn tại sang test sau",
+   "reason": "«Cái của test này sống sang» khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Chế độ `strict` đòi đánh dấu từng test",
+   "new": "Chế độ `strict` yêu cầu đánh dấu từng test",
+   "reason": "«Đòi» khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Một: nó ném lại ngoại lệ chưa xử lý của app vào test",
+   "new": "Thứ nhất, transport này ném lại ngoại lệ chưa xử lý của app vào test",
+   "reason": "«Một:» và «nó» gượng, thiếu chủ ngữ rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai: nó chờ app hoàn tất lời gọi ASGI và gom body",
+   "new": "Thứ hai, transport này chờ app hoàn tất lời gọi ASGI và gom body",
+   "reason": "«Hai:» và «nó» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó là cầu nối đồng bộ: chạy app trong thread riêng",
+   "new": "Đây là cầu nối đồng bộ: chạy app trong thread riêng",
+   "reason": "Tránh «Nó» chỉ vật trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab kiểm cả hai ca trên",
+   "new": "Lab kiểm cả hai test case trên",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Starlette 1.10 đòi gói",
+   "new": "Starlette 1.10 yêu cầu gói",
+   "reason": "«Đòi» khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "giữ một bảng ca lỗi và một test kiểm chung",
+   "new": "giữ một bảng test case lỗi và một test kiểm tra chung",
+   "reason": "Thống nhất test case; thiếu «tra»",
+   "severity": "medium"
+  },
+  {
+   "old": "Tám ca (thiếu token 401",
+   "new": "Tám test case (thiếu token 401",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": ") cùng phải ra",
+   "new": ") đều phải ra",
+   "reason": "Từ «cùng» thiếu tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "Hai ca cuối là lỗi của framework",
+   "new": "Hai test case cuối là lỗi của framework",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "bảng chỉ bảo vệ các ca đã liệt kê",
+   "new": "bảng chỉ bảo vệ các test case đã liệt kê",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "mà quên thêm ca thì không test nào đỏ",
+   "new": "mà quên thêm test case thì không test nào đỏ",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Những ca không thể dựng bằng kho thật",
+   "new": "Những test case không thể dựng bằng kho thật",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "test thấy 500 generic không chứa",
+   "new": "test thấy 500 với thông báo chung, không chứa",
+   "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ cho client biết token sai ở đâu là giúp kẻ dò token",
+   "new": "nói rõ cho client biết token sai ở đâu là giúp kẻ dò token",
+   "reason": "«Chỉ cho» dễ đọc nhầm là «chỉ» giới hạn",
+   "severity": "medium"
+  },
+  {
+   "old": "Cần «ít nhất một» thì đó là hàm khác tên khác (",
+   "new": "Muốn «ít nhất một» scope thì cần một hàm riêng (",
+   "reason": "Câu lặp, gượng: «hàm khác tên khác»",
+   "severity": "medium"
+  },
+  {
+   "old": "Chọn chỗ ghi đè quyết định test còn kiểm được gì.",
+   "new": "Chọn ghi đè ở tầng nào sẽ quyết định test còn kiểm được những gì.",
+   "reason": "Câu cụt, thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "ghi đè ở tầng thấp nhất còn giữ được quy tắc cần kiểm",
+   "new": "ghi đè ở tầng thấp nhất mà vẫn giữ được quy tắc cần kiểm",
+   "reason": "Câu dài thiếu liên kết",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ buộc ai đó nhìn vào nó",
+   "new": "chỉ buộc ai đó phải xem xét thay đổi ấy",
+   "reason": "«Nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "(`createQuote` đòi `customer`, `cancelTrip` đòi `dispatcher`, `getTrip` chỉ đòi token)",
+   "new": "(`createQuote` yêu cầu `customer`, `cancelTrip` yêu cầu `dispatcher`, `getTrip` chỉ yêu cầu token)",
+   "reason": "«Đòi» khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "FastAPI mặc định tả 422",
+   "new": "FastAPI mặc định mô tả 422",
+   "reason": "«Tả» không tự nhiên trong văn bản kỹ thuật",
+   "severity": "medium"
+  },
+  {
+   "old": "Và quan trọng nhất, response thật khớp schema đã tài liệu hoá",
+   "new": "Và quan trọng nhất là response thật khớp với schema đã ghi trong tài liệu",
+   "reason": "«Tài liệu hoá» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "lab chỉ làm thủ công bốn ca để thấy cơ chế",
+   "new": "lab chỉ làm thủ công bốn test case để thấy cơ chế",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "nên ta phá có chủ ý ba lần rồi khôi phục",
+   "new": "nên ta cố ý phá ba lần rồi khôi phục",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "pytest in tên ca tiếng Việt",
+   "new": "pytest in tên test case tiếng Việt",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Ca `[thiếu token]` đỏ dù",
+   "new": "Test case `[thiếu token]` đỏ dù",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Triệu chứng xa nguyên nhân là lý do app mới mỗi test đáng vài mili giây.",
+   "new": "Triệu chứng xuất hiện xa nguyên nhân, nên dựng app mới cho mỗi test là cái giá đáng trả dù tốn thêm vài mili giây.",
+   "reason": "Câu tối nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "Chỗ thay bản giả chỉ là các dependency; phần còn lại là code thật.",
+   "new": "Chỉ các dependency được thay bằng bản giả; phần còn lại là code thật.",
+   "reason": "Trật tự từ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "bốn ca kiểm schema chạy bằng tay",
+   "new": "bốn test case kiểm schema chạy bằng tay",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "có ca token hết hạn bằng",
+   "new": "có test case token hết hạn bằng",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Ca này có thể chập chờn",
+   "new": "Test case này có thể chập chờn",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "<b>1.</b> Ca <code>-1s</code> không chập chờn",
+   "new": "<b>1.</b> Test case <code>-1s</code> không chập chờn",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "low"
+  },
+  {
+   "old": "Ca <code>+1s</code> rồi ngủ chậm và vẫn dựa",
+   "new": "Test case <code>+1s</code> rồi ngủ thì chậm và vẫn dựa",
+   "reason": "Thống nhất test case; thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "Muốn điều khiển thời gian của việc kiểm token phải đóng băng",
+   "new": "Muốn điều khiển thời gian khi kiểm tra token thì phải đóng băng",
+   "reason": "Câu cụt, thiếu từ nối",
+   "severity": "medium"
+  }
+ ]
+}

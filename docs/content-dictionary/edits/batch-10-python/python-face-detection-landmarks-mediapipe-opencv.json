@@ -1,0 +1,173 @@
+{
+ "file": "python-face-detection-landmarks-mediapipe-opencv.md",
+ "edits": [
+  {
+   "old": "đo mờ, tối; gom lý do chuyển người duyệt",
+   "new": "đo độ mờ, độ tối; gom lý do chuyển cho người duyệt",
+   "reason": "Thiếu danh từ, thiếu giới từ",
+   "severity": "medium"
+  },
+  {
+   "old": "khung giống như mặt mà mô hình so khớp đã học không",
+   "new": "khung giống với khung mà mô hình so khớp đã học không",
+   "reason": "So sánh sai đối tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Điểm cần chốt từ đầu là ảnh dừng lại **không bị từ chối**",
+   "new": "Điểm cần chốt từ đầu là ảnh bị dừng lại thì **không bị từ chối**",
+   "reason": "Câu cụt, thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "máy chuẩn bị đầu vào, người quyết định",
+   "new": "hệ thống chuẩn bị đầu vào, người quyết định",
+   "reason": "Dùng \"máy\" làm chủ ngữ (calque)",
+   "severity": "low"
+  },
+  {
+   "old": "Cái giá là trung thực: đây không phải ảnh chụp bằng điện thoại, mà ảnh xám",
+   "new": "Nói thẳng cái giá phải trả: đây không phải ảnh chụp bằng điện thoại, mà là ảnh xám",
+   "reason": "Cụm lạ, thiếu động từ",
+   "severity": "high"
+  },
+  {
+   "old": "lab in URL và kích thước, rồi kiểm SHA-256",
+   "new": "lab in URL và kích thước, rồi kiểm tra SHA-256",
+   "reason": "Lược danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "cài theo một giao diện để so cho công bằng",
+   "new": "cài đặt theo cùng một giao diện để so sánh công bằng",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "cùng họ MediaPipe nên cùng điểm yếu cỡ mặt",
+   "new": "cùng họ MediaPipe nên có cùng điểm yếu về cỡ mặt",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai con số kiểm khác.",
+   "new": "Hai con số kiểm tra khác.",
+   "reason": "Lược danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Thời gian trung vị mỗi ảnh 640 × 480 trên CPU, một luồng gọi:",
+   "new": "Thời gian trung vị cho mỗi ảnh 640 × 480 trên CPU, gọi từ một luồng:",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "BlazeFace short range nhanh nhất cỡ vài lần",
+   "new": "BlazeFace short range nhanh nhất, cỡ vài lần",
+   "reason": "Thiếu dấu ngắt, nghĩa không rõ",
+   "severity": "low"
+  },
+  {
+   "old": "Vì vậy IoU không thể tiến sát 1",
+   "new": "Vì vậy IoU không thể gần bằng 1",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Hàm toán đúng chưa là một câu hỏi kiểm được",
+   "new": "Hàm toán có đúng hay không là câu hỏi kiểm chứng được",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Có ba điều trong bảng. Một, ở roll 0",
+   "new": "Bảng cho thấy ba điều. Một, ở roll 0",
+   "reason": "Trật tự kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "ca nghiêng 35 độ ở mục sau cũng chỉ ra",
+   "new": "trường hợp nghiêng 35 độ ở mục sau cũng chỉ ra",
+   "reason": "Dùng \"ca\" thay cho trường hợp",
+   "severity": "low"
+  },
+  {
+   "old": "Đo lại bằng chính FaceLandmarker có thiên về nó",
+   "new": "Đo lại bằng chính FaceLandmarker thì có thiên lệch về phía nó",
+   "reason": "Dịch gượng \"biased toward\"",
+   "severity": "medium"
+  },
+  {
+   "old": "ta xem phần ảnh đã xuống cấp mà bị bắt",
+   "new": "ta xem tỉ lệ ảnh đã xuống cấp bị bắt được",
+   "reason": "Câu khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Kết quả với mười ca dùng YuNet",
+   "new": "Kết quả với mười trường hợp dùng YuNet",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "để OpenCV lỗi khó đọc",
+   "new": "để OpenCV báo một lỗi khó đọc",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai dòng cuối nói lên điều của mục trước.",
+   "new": "Hai dòng cuối minh hoạ điều đã nêu ở mục trước.",
+   "reason": "Dùng sai cụm từ",
+   "severity": "high"
+  },
+  {
+   "old": "thấp hơn thật hơn 18 độ",
+   "new": "thấp hơn góc thật hơn 18 độ",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "đặt thấp mà ca này vẫn bị gắn",
+   "new": "đặt thấp mà trường hợp này vẫn bị gắn",
+   "reason": "Dùng \"ca\" thay cho trường hợp",
+   "severity": "low"
+  },
+  {
+   "old": "Ca «mặt bị cắt mép» cho thấy một lỗi thật",
+   "new": "Trường hợp «mặt bị cắt mép» cho thấy một lỗi thật",
+   "reason": "Dùng \"ca\" thay cho trường hợp",
+   "severity": "low"
+  },
+  {
+   "old": "lúc đầu lab để ca này đi qua, và chỉ khi có ca kiểm này mới thêm",
+   "new": "lúc đầu lab để trường hợp này đi qua, và chỉ khi có test case này mới thêm",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "các ca `check_portrait` ở trên",
+   "new": "các trường hợp `check_portrait` ở trên",
+   "reason": "Dùng \"ca\" thay cho trường hợp",
+   "severity": "low"
+  },
+  {
+   "old": "Không ca nào kiểm tốc độ tuyệt đối",
+   "new": "Không test case nào kiểm tra tốc độ tuyệt đối",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Số đo thời gian được đo khi máy rất bận và chỉ cho thứ bậc lớn",
+   "new": "Thời gian được đo khi máy đang rất bận nên chỉ cho biết thứ bậc lớn",
+   "reason": "Lặp từ, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Giảm ngưỡng đổi gánh nặng",
+   "new": "Giảm ngưỡng chuyển gánh nặng",
+   "reason": "Dùng sai động từ",
+   "severity": "low"
+  }
+ ]
+}

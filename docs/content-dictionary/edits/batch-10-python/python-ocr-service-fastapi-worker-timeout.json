@@ -1,0 +1,221 @@
+{
+ "file": "python-ocr-service-fastapi-worker-timeout.md",
+ "edits": [
+  {
+   "old": "tải thử p50/p95 bằng httpx",
+   "new": "kiểm thử tải, đo p50/p95 bằng httpx",
+   "reason": "Từ dễ hiểu nhầm là tải về",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài dựa vào ba lớp kiểm khi nhận ảnh",
+   "new": "Bài dựa vào ba lớp kiểm tra khi nhận ảnh",
+   "reason": "Lược danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "vì lab tự chứa và bài chỉ cần",
+   "new": "vì lab chạy độc lập và bài chỉ cần",
+   "reason": "Cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "không tự động là quyết định xác minh",
+   "new": "không tự động trở thành quyết định xác minh",
+   "reason": "Câu gượng, dễ hiểu sai",
+   "severity": "medium"
+  },
+  {
+   "old": "trong khi CPU vẫn phục vụ nó; với một ảnh treo thì nó phục vụ mãi",
+   "new": "trong khi Tesseract vẫn chiếm CPU; với một ảnh treo thì nó chiếm mãi",
+   "reason": "Ẩn dụ khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "**API** nhận ảnh, kiểm, lưu vào kho",
+   "new": "**API** nhận ảnh, kiểm tra, lưu vào kho",
+   "reason": "Lược danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Lý do tách là điều bài 35 đã chạm tới",
+   "new": "Lý do tách là điều bài 35 đã đề cập",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "và nhiều bản API cho `GET` job vừa tạo trả `404`",
+   "new": "và khi chạy nhiều bản API thì `GET` job vừa tạo trả `404`",
+   "reason": "Câu thiếu mạch, trật tự kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab này không dict, không bộ đếm",
+   "new": "Lab này không dùng dict, không dùng bộ đếm",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "thì dừng cả pool, tức mọi yêu cầu khác",
+   "new": "thì dừng cả pool, tức là dừng luôn mọi yêu cầu khác",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "dùng lại ba lớp kiểm của bài 35",
+   "new": "dùng lại ba lớp kiểm tra của bài 35",
+   "reason": "Lược danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Mọi lỗi theo đúng một dạng Problem Details",
+   "new": "Mọi lỗi đều theo đúng một dạng Problem Details",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "và lab kiểm đúng ranh giới đó",
+   "new": "và lab kiểm tra đúng ranh giới đó",
+   "reason": "Lược danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Phần cuối của handler phân biệt nhận với xử lý.",
+   "new": "Phần cuối của handler tách việc nhận ra khỏi việc xử lý.",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên `GET` job phải kiểm quyền người gọi với hồ sơ",
+   "new": "nên `GET` job phải kiểm tra quyền của người gọi đối với hồ sơ",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "cùng hồ sơ ảnh khác, hoặc cùng ảnh hồ sơ khác, đều cho",
+   "new": "cùng hồ sơ nhưng ảnh khác, hoặc cùng ảnh nhưng hồ sơ khác, đều cho",
+   "reason": "Cụm ghép khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "đó cũng là thời hạn số giấy tờ rõ nằm trong Redis nên ta giữ ngắn",
+   "new": "đó cũng là khoảng thời gian số giấy tờ rõ nằm trong Redis, nên ta giữ ngắn",
+   "reason": "Dùng sai từ (thời hạn)",
+   "severity": "medium"
+  },
+  {
+   "old": "cũng bị nhớ trong cửa sổ mà lab chưa có endpoint thử lại: đó là giới hạn",
+   "new": "cũng bị nhớ trong cửa sổ đó, còn lab chưa có endpoint thử lại: đây là một giới hạn",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "ca quan sát trạng thái báo",
+   "new": "test case quan sát trạng thái báo",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "bắt được một lỗi đua",
+   "new": "bắt được một race condition",
+   "reason": "Dịch gượng thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hàm job trả thất bại có phân loại bằng giá trị trả về",
+   "new": "Hàm job báo thất bại có phân loại qua giá trị trả về",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Ngoại lệ không lường trước thoát ra và API",
+   "new": "Ngoại lệ không lường trước sẽ lan ra ngoài, và API",
+   "reason": "Dịch sát từ propagate",
+   "severity": "medium"
+  },
+  {
+   "old": "luôn thấy trước lỗi chung của framework",
+   "new": "luôn xuất hiện trước lỗi chung của framework",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Cách thứ nhất là lỗi của câu hỏi đầu bài.",
+   "new": "Cách thứ nhất chính là tình huống của câu hỏi đầu bài.",
+   "reason": "Câu cụt, nghĩa không rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên biến không có tác dụng ở đây",
+   "new": "nên biến này không có tác dụng ở đây",
+   "reason": "Thiếu từ chỉ định",
+   "severity": "low"
+  },
+  {
+   "old": "Khi máy bận, CPU tin được hơn thời gian thực.",
+   "new": "Khi máy bận, thời gian CPU đáng tin hơn thời gian thực.",
+   "reason": "Câu cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "vốn không nằm trên đường đo, nhưng không phải lần chạy cuối",
+   "new": "các sửa này vốn không nằm trên đường đo, nhưng đây không phải lần chạy cuối",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Số giấy tờ đúng cả 40 thẻ ở mỗi mức",
+   "new": "Số giấy tờ đọc đúng ở cả 40 thẻ trong mỗi mức",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "42 ca, gồm 29 ca gọi app",
+   "new": "42 test case, gồm 29 test case gọi app",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "6 ca về bộ tách trường và timeout, 7 ca trên tiến trình thật",
+   "new": "6 test case về bộ tách trường và timeout, 7 test case trên tiến trình thật",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca đo thời gian chỉ kiểm bất biến",
+   "new": "Test case đo thời gian chỉ kiểm bất biến",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai ca đỏ:",
+   "new": "Hai test case đỏ:",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "production là S3 hoặc GCS có mã hoá, vòng đời, quét virus",
+   "new": "production dùng S3 hoặc GCS, có mã hoá, vòng đời, quét virus",
+   "reason": "Từ tiếng Anh thông thường, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "lab không thử ca này",
+   "new": "lab không thử trường hợp này",
+   "reason": "Dùng \"ca\" thay cho trường hợp",
+   "severity": "low"
+  },
+  {
+   "old": "hay phân quyền (bài 34) và giới hạn tốc độ theo tài xế",
+   "new": "hay phân quyền (bài 34), cũng không có giới hạn tốc độ theo tài xế",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và trả giá bằng phức tạp",
+   "new": "và đổi lại là độ phức tạp cao hơn",
+   "reason": "Cụm gượng",
+   "severity": "medium"
+  }
+ ]
+}
