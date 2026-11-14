@@ -1,7 +1,7 @@
 ---
 slug: location-bidirectional-alt-landmark-tang-toc-truy-van
 title: "Bidirectional và ALT: giảm số nút duyệt mà vẫn đúng"
-summary: "Bài 22: Dijkstra hai chiều với điều kiện dừng đúng, lỗi dừng ở nút gặp đầu tiên cho chi phí sai ở 29/300 truy vấn HCM, ALT với landmark và bất đẳng thức tam giác, tiền xử lý đổi lấy số nút đã duyệt."
+summary: "Bài 22: Dijkstra hai chiều với điều kiện dừng đúng, lỗi dừng ở nút gặp đầu tiên cho chi phí sai ở 29/300 truy vấn HCM, ALT với landmark và bất đẳng thức tam giác, đánh đổi bằng chi phí tiền xử lý để có số nút duyệt ít hơn."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, bidirectional, alt, landmark, a-star, openstreetmap]
@@ -10,7 +10,7 @@ language: vi
 
 Hai nút cách nhau 335 m chim bay trên đồ thị HCM: nút 97043 và nút 2643. Dijkstra cho đáp án 78,7 s. Một bản Dijkstra hai chiều «gặp nhau ở giữa là dừng» cho 83,1 s, chậm hơn 5,69%, và không có dòng log nào báo lỗi. Trên 300 cặp ngẫu nhiên, bản dừng sai trả chi phí sai ở 29 cặp, gần một phần mười. Đây là lỗi kinh điển của tìm hai chiều, và nó chỉ lộ ra khi so từng đáp án với Dijkstra một chiều.
 
-Đây là bài 22 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr): từ Dijkstra và A* trên CSR, giảm số nút phải duyệt bằng hai cách (tìm từ cả hai đầu, và heuristic landmark) mà vẫn giữ đúng chi phí. Số liệu là số đếm nút đã duyệt trên đồ thị HCM; số thời gian đo khi máy đang chịu tải nặng nên chỉ dùng làm tỉ lệ trong cùng một lần chạy.
+Đây là bài 22 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr): từ Dijkstra và A* trên CSR, giảm số nút phải duyệt bằng hai cách (tìm từ cả hai đầu, và heuristic landmark) mà vẫn giữ đúng chi phí. Số liệu là số đếm nút đã duyệt trên đồ thị HCM; số đo thời gian lấy khi máy đang chịu tải nặng nên chỉ dùng làm tỉ lệ trong cùng một lần chạy.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,9 +20,9 @@ Hai nút cách nhau 335 m chim bay trên đồ thị HCM: nút 97043 và nút 26
 
 ## Tìm hai chiều: hai vòng tròn nhỏ thay cho một vòng lớn
 
-Dijkstra từ xe lan thành một «vòng tròn» chi phí tăng dần quanh xe và chỉ dừng khi chạm khách. Nếu khách cách xe khoảng cách `D`, vòng đó phủ diện tích cỡ `D²`. Tìm hai chiều chạy hai Dijkstra cùng lúc: một từ xe theo chiều cạnh, một từ khách theo **chiều ngược** của cạnh, mỗi bên chỉ cần lan tới khoảng `D/2`. Hai vòng bán kính `D/2` có tổng diện tích cỡ một nửa vòng lớn, tức phép tính thô hứa hẹn giảm khoảng 2 lần số nút. Phần đo bên dưới sẽ kiểm lại con số này.
+Dijkstra từ xe lan thành một «vòng tròn» chi phí tăng dần quanh xe và chỉ dừng khi chạm khách. Nếu khách cách xe khoảng cách `D`, vòng đó phủ diện tích cỡ `D²`. Tìm hai chiều chạy hai Dijkstra cùng lúc: một từ xe theo chiều cạnh, một từ khách theo **chiều ngược** của cạnh, mỗi bên chỉ cần lan tới khoảng `D/2`. Hai vòng bán kính `D/2` có tổng diện tích cỡ một nửa vòng lớn, tức phép tính thô cho thấy có thể giảm khoảng 2 lần số nút. Phần đo bên dưới sẽ kiểm lại con số này.
 
-Chiều ngược cần CSR ngược: với mỗi nút `v`, danh sách cạnh đi **vào** `v`. `Rev` dựng nó một lần, không phụ thuộc profile, còn `View::inn` trả cạnh vào đã lọc theo trọng số của profile (bài 21). Hai bên có hai bộ nhãn và hai hàng đợi riêng; mỗi vòng lặp mở rộng bên có khoá nhỏ nhất ở đỉnh hàng đợi.
+Chiều ngược cần CSR ngược: với mỗi nút `v`, danh sách cạnh đi **vào** `v`. `Rev` dựng nó một lần, không phụ thuộc profile, còn `View::inn` trả cạnh vào đã lọc theo trọng số của profile (bài 21). Hai bên có hai bộ nhãn và hai hàng đợi riêng; mỗi vòng lặp mở rộng bên nào có khoá nhỏ nhất ở đỉnh hàng đợi.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/bidir.rs`
 
@@ -54,7 +54,7 @@ Chiều ngược cần CSR ngược: với mỗi nút `v`, danh sách cạnh đi
 
 Hai thứ nằm ngoài vòng lặp mở rộng quen thuộc. Một: `mu`, chi phí của đường s→t tốt nhất đã thấy, được cập nhật **mỗi khi nới một cạnh chạm vào nút mà chiều kia đã có nhãn**, không đợi tới lúc chốt. Hai: `first_meet`, nút đầu tiên được cả hai chiều chốt, chỉ để bản dừng sai dùng. Phía ngược lại (`else`) là hình gương: lấy từ hàng đợi ngược, duyệt `view.inn(u)`, so với nhãn xuôi.
 
-Còn một chi tiết cài đặt: sau khi nhãn của một nút giảm, hàng đợi giữ cả mục cũ. `clean_top` bỏ các mục đã chốt hoặc có khoá khác nhãn hiện tại, để «khoá nhỏ nhất ở đỉnh» luôn là khoá thật. Điều này quan trọng vì điều kiện dừng đọc đúng hai khoá này.
+Còn một chi tiết cài đặt: sau khi nhãn của một nút giảm, hàng đợi giữ cả mục cũ. `clean_top` bỏ các mục đã chốt hoặc có khoá khác nhãn hiện tại, để «khoá nhỏ nhất ở đỉnh» luôn là khoá thật. Điều này quan trọng vì điều kiện dừng dựa vào đúng hai khoá này.
 
 ## Lỗi kinh điển: dừng ở nút gặp đầu tiên
 
@@ -66,7 +66,7 @@ Trực giác sai là «khi hai bên gặp nhau thì đáp án nằm ở chỗ g�
     let es: [(u32, u32, u32); 5] = [(0, 1, 1), (1, 3, 10), (3, 4, 1), (0, 2, 6), (2, 4, 7)];
 ```
 
-Đặt tên cho dễ nhớ: `s` là xe, `t` là khách, `a` và `b` là hai ngã ba trên một đường dài, `m` là đường vòng qua nút giữa. Đường s→a→b→t có cạnh ở giữa dài 10, tổng 12. Đường s→m→t tổng 13. Chạy từng bước (Hình 1): xuôi chốt `s`, ngược chốt `t` và chạm `m` (μ = 13), xuôi chốt `a` và chạm `b` (μ = 12), ngược chốt `b`. Đến đây khoá nhỏ nhất của hai bên là 6 (nút `m` chiều xuôi) và 7 (nút `m` chiều ngược). Bản dừng sai tiếp tục: xuôi chốt `m` với khoảng cách 6, ngược chốt `m` với khoảng cách 7, và bây giờ `m` đã chốt ở cả hai chiều. Nó dừng và trả `6 + 7 = 13`, đường qua `m`.
+Đặt tên cho dễ nhớ: `s` là xe, `t` là khách, `a` và `b` là hai ngã ba trên một đường dài, `m` là đường vòng qua nút giữa. Đường s→a→b→t có cạnh ở giữa dài 10, tổng 12. Đường s→m→t tổng 13. Chạy từng bước (Hình 1): xuôi chốt `s`, ngược chốt `t` và chạm `m` (μ = 13), xuôi chốt `a` và chạm `b` (μ = 12), ngược chốt `b`. Đến đây khoá nhỏ nhất của hai bên là 6 (nút `m` chiều xuôi) và 7 (nút `m` chiều ngược). Bản dừng sai tiếp tục: xuôi chốt `m` với khoảng cách 6, ngược chốt `m` với khoảng cách 7, và bây giờ `m` đã chốt ở cả hai chiều. Bản này dừng và trả `6 + 7 = 13`, đường qua `m`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -79,11 +79,11 @@ Mấu chốt là đường tối ưu **vắt qua biên** của hai vùng đã ch
 
 Lưu ý chỗ sai thật sự. Sau bước 6, `μ` đã bằng 12 từ bước 3, nên nếu dừng ở đó mà trả `μ` thì đáp án vẫn đúng: một nút `m` đã chốt ở cả hai chiều có `top_f ≥ d_F(m)` và `top_b ≥ d_B(m)`, mà `μ ≤ d_F(m) + d_B(m)`, tức điều kiện đúng ở mục sau đã thoả. Thời điểm đó không sai, chỉ muộn hơn cần thiết; cái sai là đáp án lấy từ nút gặp thay vì từ `μ`. Bản không giữ `μ` thì không có gì khác để trả.
 
-Lab chạy cùng lỗi trên bản đồ thật: 300 truy vấn ngẫu nhiên, seed 20261106. Bản trả tổng tại nút gặp đầu tiên cho chi phí sai ở **29/300 truy vấn (9,7%)**. Đường sai dài hơn đường đúng trung bình 0,71%, trung vị 0,20%, lớn nhất 5,69%: ca tệ nhất là cặp mở đầu bài, 83,1 s thay vì 78,7 s. Đây chính là loại lỗi nguy hiểm: sai ít, ở khá nhiều truy vấn, và trung vị 0,20% đủ nhỏ để chẳng ai thấy khi chạy thử bằng mắt.
+Lab chạy cùng lỗi trên bản đồ thật: 300 truy vấn ngẫu nhiên, seed 20261106. Bản trả tổng tại nút gặp đầu tiên cho chi phí sai ở **29/300 truy vấn (9,7%)**. Đường sai dài hơn đường đúng trung bình 0,71%, trung vị 0,20%, lớn nhất 5,69%: ca tệ nhất là cặp mở đầu bài, 83,1 s thay vì 78,7 s. Đây chính là loại lỗi nguy hiểm: sai ít, ở khá nhiều truy vấn, và trung vị 0,20% đủ nhỏ để không ai nhận ra khi chạy thử bằng mắt.
 
 ## Điều kiện dừng đúng: top_f + top_b ≥ μ
 
-Điều kiện đúng đọc: giữ `μ` là chi phí đường tốt nhất đã thấy; gọi `top_f` và `top_b` là khoá nhỏ nhất còn trong hai hàng đợi. **Dừng khi `top_f + top_b ≥ μ`, rồi trả μ.**
+Điều kiện đúng như sau: giữ `μ` là chi phí đường tốt nhất đã thấy; gọi `top_f` và `top_b` là khoá nhỏ nhất còn trong hai hàng đợi. **Dừng khi `top_f + top_b ≥ μ`, rồi trả μ.**
 
 `examples/toi-noi-location/rust/crates/route-engine/src/bidir.rs`
 
@@ -104,11 +104,11 @@ Lab chạy cùng lỗi trên bản đồ thật: 300 truy vấn ngẫu nhiên, s
 
 Vì sao đúng? Gọi `P` là đường ngắn nhất, dài `L*`, và giả sử lúc dừng `L* < μ`, tức `top_f + top_b ≥ μ > L*`. Trong Dijkstra, mọi nút có khoảng cách thật nhỏ hơn khoá nhỏ nhất của hàng đợi đều đã được chốt. Đi dọc `P` từ `s`, gọi `x` là nút cuối cùng có `d(s, x) < top_f`, và `y` là nút kế tiếp, có `d(s, y) ≥ top_f`. Vì `P` là đường ngắn nhất nên `d(y, t) = L* − d(s, y) ≤ L* − top_f < top_b`, nên `y` đã được chiều ngược chốt, tức có nhãn ngược bằng `d(y, t)`. Còn `x` đã được chiều xuôi chốt, nên cạnh `x → y` đã được nới và `y` có nhãn xuôi bằng `d(s, y)`. Nhãn nào đến sau thì lần nới gắn nhãn đó thấy nhãn kia đã có, và dòng `if db != INF && nd + db < mu` (hoặc hình gương của nó ở chiều ngược) đã cập nhật `μ ≤ d(s, y) + d(y, t) = L*`, mâu thuẫn với `L* < μ`. Chứng minh này giải thích vì sao `μ` phải cập nhật lúc **nới cạnh** chứ không đợi một nút được chốt ở cả hai chiều: cạnh `a → b` ở Hình 1 là chính cạnh làm lộ ra đường 12.
 
-Trên 300 truy vấn HCM, điều kiện đúng cho **0 khác biệt** so với Dijkstra một chiều. Trong ví dụ năm nút, `top_f + top_b = 6 + 7 = 13 ≥ 12` đúng sau bước 4, hai bước trước khi bản sai dừng. Rút ra quy tắc cho mọi thuật toán «tìm từ hai đầu» về sau: **đáp án là `μ`, không phải nút chạm nhau; dừng khi tổng hai khoá nhỏ nhất không còn nhỏ hơn `μ`**.
+Trên 300 truy vấn HCM, điều kiện đúng cho **0 khác biệt** so với Dijkstra một chiều. Trong ví dụ năm nút, `top_f + top_b = 6 + 7 = 13 ≥ 12` đúng sau bước 4, hai bước trước khi bản sai dừng. Rút ra quy tắc cho mọi thuật toán «tìm từ hai đầu» về sau: **đáp án là `μ`, không phải nút gặp nhau; dừng khi tổng hai khoá nhỏ nhất không còn nhỏ hơn `μ`**.
 
 ## ALT: A* với landmark và bất đẳng thức tam giác
 
-Bài 21 để lại một vấn đề: với trọng số thời gian, heuristic chim bay lỏng (A* giảm chỉ 1,43–2,15 lần số nút) vì phải giả định xe chạy 80 km/h khắp nơi. ALT (A*, Landmarks, Triangle inequality) thay chim bay bằng một chặn dưới **học từ chính đồ thị**.
+Bài 21 để lại một vấn đề: với trọng số thời gian, heuristic chim bay quá lỏng (A* chỉ giảm 1,43–2,15 lần số nút) vì phải giả định xe chạy 80 km/h khắp nơi. ALT (A*, Landmarks, Triangle inequality) thay chim bay bằng một chặn dưới **học từ chính đồ thị**.
 
 Chọn `k` nút làm landmark `L`. Với mỗi landmark, tính trước hai mảng: `d(v, L)` (từ mọi nút tới `L`) và `d(L, v)` (từ `L` tới mọi nút), bằng hai Dijkstra, một trên CSR xuôi và một trên CSR ngược. Bất đẳng thức tam giác cho `d(u, L) ≤ d(u, t) + d(t, L)`, suy ra `d(u, t) ≥ d(u, L) − d(t, L)`; tương tự `d(u, t) ≥ d(L, t) − d(L, u)`. Hình 2 minh hoạ với số tự đặt: nếu `u` cách `L` 900 s còn `t` cách `L` 700 s thì đường từ `u` tới `t` không thể ngắn hơn 200 s.
 
@@ -119,7 +119,7 @@ Chọn `k` nút làm landmark `L`. Với mỗi landmark, tính trước hai mả
 <figcaption>Hình 2. Chặn dưới bằng một landmark L. Số 900 s và 700 s là số tự đặt để minh hoạ công thức, không phải số đo trên bản đồ. Với k landmark, lấy lớn nhất của các chặn dưới (cả hai vế) thì được một heuristic hợp lệ.</figcaption>
 </figure>
 
-Heuristic của ALT là lớn nhất của các chặn dưới trên mọi landmark và cả hai vế. Mỗi chặn dưới riêng lẻ là một heuristic nhất quán, mà lớn nhất của các heuristic nhất quán vẫn nhất quán, nên A* vẫn tối ưu và mỗi nút vẫn chốt một lần.
+Heuristic của ALT là lớn nhất của các chặn dưới trên mọi landmark và cả hai vế. Mỗi chặn dưới riêng lẻ là một heuristic nhất quán, và giá trị lớn nhất của các heuristic nhất quán vẫn nhất quán, nên A* vẫn tối ưu và mỗi nút vẫn chốt một lần.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/alt.rs`
 
@@ -155,9 +155,9 @@ Dữ liệu xếp xen kẽ theo nút: `data[(v * k + i) * 2]` là `d(v → Lᵢ)
             let (x, xs) = uni.run(view, a, b, |u| lm.lower_bound(u, b));
 ```
 
-Chọn landmark thế nào cho tốt? Lab dùng chiến lược «xa nhất» (farthest): landmark đầu là nút xa nhất so với một nút hạt giống, các landmark sau là nút xa nhất so với tập đã chọn, tất cả trong thành phần liên thông mạnh lớn nhất của ô tô. Landmark ở rìa thành phố hay nằm «phía sau» một đầu của truy vấn: khi đường ngắn nhất từ `u` tới `L` đi qua `t`, chặn dưới `d(u, L) − d(t, L)` bằng đúng `d(u, t)`, còn lệch hướng bao nhiêu thì lỏng bấy nhiêu. Bài này không so các chiến lược chọn khác, và `k` cũng chưa tinh chỉnh ngoài ba giá trị 4, 8 và 16.
+Chọn landmark thế nào cho tốt? Lab dùng chiến lược «xa nhất» (farthest): landmark đầu là nút xa nhất so với một nút khởi đầu (seed), các landmark sau là nút xa nhất so với tập đã chọn, tất cả trong thành phần liên thông mạnh lớn nhất của ô tô. Landmark ở rìa thành phố thường nằm «phía sau» một đầu của truy vấn: khi đường ngắn nhất từ `u` tới `L` đi qua `t`, chặn dưới `d(u, L) − d(t, L)` bằng đúng `d(u, t)`, còn lệch hướng bao nhiêu thì lỏng bấy nhiêu. Bài này không so các chiến lược chọn khác, và `k` cũng chưa tinh chỉnh ngoài ba giá trị 4, 8 và 16.
 
-Tiền xử lý là `2k` Dijkstra toàn đồ thị, mỗi landmark chạy song song hai chiều bằng `rayon::join`, rồi `par_chunks_mut` xếp dữ liệu. Với `k = 4`, đó là tám Dijkstra, chưa kể một lần từ nút hạt giống.
+Tiền xử lý là `2k` Dijkstra toàn đồ thị, mỗi landmark chạy song song hai chiều bằng `rayon::join`, rồi `par_chunks_mut` xếp dữ liệu. Với `k = 4`, đó là tám Dijkstra, chưa kể một lần chạy từ nút khởi đầu.
 
 ## Số nút duyệt, bộ nhớ và tiền xử lý
 
@@ -172,7 +172,7 @@ Trên cùng 300 truy vấn ô tô, trọng số thời gian, lab chạy sáu thu
 | ALT k=8 | 9.638 | 8,99 |
 | ALT k=16 | 7.393 | 11,72 |
 
-Tính trên mọi nhóm khoảng cách, lab báo A* ít hơn Dijkstra 1,61 lần, hai chiều 1,97 lần, ALT 6,39 lần (k=4), 10,72 lần (k=8) và 13,76 lần (k=16). Có hai điều bất ngờ nên nói rõ.
+Tính trên mọi nhóm khoảng cách, lab báo A* ít hơn Dijkstra 1,61 lần, hai chiều 1,97 lần, ALT 6,39 lần (k=4), 10,72 lần (k=8) và 13,76 lần (k=16). Có hai điều bất ngờ cần nói rõ.
 
 **Một: tìm hai chiều chỉ đáng khoảng 2 lần.** 1,97 lần gần đúng bằng phép tính diện tích ở đầu bài, không hơn. Theo nhóm khoảng cách, tỉ lệ này giảm dần: 2,97 lần (dưới 2 km), 2,61, 2,25, rồi 1,77 lần (trên 10 km), vì truy vấn dài thì vòng của Dijkstra đã chạm biên thành phố (86.656 trên 111.441 nút) nên không còn nhiều để tiết kiệm. Phần lớn lợi ích tới từ landmark, không phải từ việc chạy từ hai đầu. Lab không kết hợp hai kỹ thuật (ALT hai chiều); bài này không đo thứ chưa chạy.
 
@@ -185,9 +185,9 @@ Tính trên mọi nhóm khoảng cách, lab báo A* ít hơn Dijkstra 1,61 lần
 <figcaption>Hình 3. Trái: số nút đã chốt của sáu thuật toán trong nhóm trên 10 km (số đếm, không phụ thuộc tải máy). Phải: bộ nhớ landmark và thời gian tiền xử lý so với đồ thị gốc. Đồ thị HCM 126.699 nút, ô tô, trọng số thời gian, seed 20261106. © OpenStreetMap contributors (ODbL).</figcaption>
 </figure>
 
-Nút đã chốt ít hơn không tự động là nhanh hơn: mỗi lần nới được nhãn, ALT còn phải gọi `lower_bound`, đọc `4k` số của `u` và `t`. Trong nhóm trên 10 km, ALT k=16 duyệt ít hơn Dijkstra 11,72 lần nhưng thời gian trung bình chỉ giảm khoảng 5 lần (5.348 µs xuống 1.064 µs, cùng một lần chạy, khi máy tải 1 phút 24,26). Số µs này nhiễu và chỉ đáng tin ở cỡ tỉ lệ.
+Nút đã chốt ít hơn không tự động là nhanh hơn: mỗi lần nới được nhãn, ALT còn phải gọi `lower_bound`, đọc `4k` số của `u` và `t`. Trong nhóm trên 10 km, ALT k=16 duyệt ít hơn Dijkstra 11,72 lần nhưng thời gian trung bình chỉ giảm khoảng 5 lần (5.348 µs xuống 1.064 µs, cùng một lần chạy, khi tải trung bình 1 phút của máy là 24,26). Số µs này nhiễu và chỉ đáng tin ở cỡ tỉ lệ.
 
-Còn một giới hạn quan trọng của ALT: landmark học từ **trọng số lúc tính**. Khi tốc độ theo giờ đổi (kẹt xe, bài 27), điều gì xảy ra tuỳ chiều thay đổi. Nếu mọi trọng số chỉ tăng so với lúc tính (học ở giờ thông thoáng, dùng ở cao điểm), chặn dưới vẫn hợp lệ, vì nó không vượt chi phí cũ mà chi phí cũ không vượt chi phí mới, nhưng lỏng dần. Nếu trọng số giảm (học ở cao điểm, dùng ban đêm), chặn dưới có thể vượt chi phí thật và A* trả đường sai mà không báo lỗi. Đây là cái giá chung của mọi thuật toán có tiền xử lý; bài 25 và bài 27 quay lại câu hỏi dựng lại hay chỉnh trọng số.
+Còn một giới hạn quan trọng của ALT: landmark học từ **trọng số lúc tính**. Khi tốc độ theo giờ đổi (kẹt xe, bài 27), kết quả tuỳ thuộc chiều thay đổi. Nếu mọi trọng số chỉ tăng so với lúc tính (học ở giờ thông thoáng, dùng ở cao điểm), chặn dưới vẫn hợp lệ, vì nó không vượt chi phí cũ mà chi phí cũ không vượt chi phí mới, nhưng lỏng dần. Nếu trọng số giảm (học ở cao điểm, dùng ban đêm), chặn dưới có thể vượt chi phí thật và A* trả đường sai mà không báo lỗi. Đây là cái giá chung của mọi thuật toán có tiền xử lý; bài 25 và bài 27 quay lại câu hỏi dựng lại hay chỉnh trọng số.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -226,7 +226,7 @@ Cấu hình đo: `--release`, Apple M1 Max, 10 lõi, đồ thị HCM 126.699 nú
   tỉ lệ nút duyệt so với Dijkstra (mọi nhóm): A* 1.61x, hai chiều 1.97x, ALT k=4 6.39x, ALT k=8 10.72x, ALT k=16 13.76x ít hơn
 ```
 
-Số nút đã duyệt, số truy vấn sai và các tỉ lệ tái lập từng chữ số với cùng seed; thời gian tiền xử lý và cột µs thì không. Kiểm tự động: `crates/route-engine/tests/proptest_vs_dijkstra.rs` chạy A*, ALT (k=8), hai chiều với điều kiện dừng đúng và CH, so chi phí với Dijkstra trên 400 trường hợp ngẫu nhiên, ở cả ba profile trên đồ thị fixture.
+Số nút đã duyệt, số truy vấn sai và các tỉ lệ tái lập từng chữ số với cùng seed; thời gian tiền xử lý và cột µs thì không. Kiểm thử tự động: `crates/route-engine/tests/proptest_vs_dijkstra.rs` chạy A*, ALT (k=8), hai chiều với điều kiện dừng đúng và CH, so chi phí với Dijkstra trên 400 trường hợp ngẫu nhiên, ở cả ba profile trên đồ thị fixture.
 
 ## Giới hạn của ví dụ
 
@@ -248,7 +248,7 @@ Số nút đã duyệt, số truy vấn sai và các tỉ lệ tái lập từng
 **Bài 2.** Vì sao `mu` phải được cập nhật lúc nới cạnh chạm nút có nhãn của chiều kia, mà không phải lúc chốt nút? Chỉ ra cạnh nào ở Hình 1 sẽ bị bỏ sót nếu chỉ cập nhật lúc chốt.
 
 <details><summary>Lời giải bài 2</summary>
-<p>Đường tối ưu 12 đi qua cạnh a→b. Nút a chỉ được chiều xuôi chốt, nút b chỉ được chiều ngược chốt, không nút nào được cả hai chốt trước khi điều kiện dừng đúng thoả. Nếu μ chỉ cập nhật khi một nút được chốt ở cả hai chiều, đường 12 không bao giờ được ghi nhận; μ sẽ kẹt ở 13 (qua m). Nới cạnh a→b lúc chốt a thấy b đã có nhãn ngược, và μ được hạ xuống 12 ngay.</p>
+<p>Đường tối ưu 12 đi qua cạnh a→b. Nút a chỉ được chiều xuôi chốt, nút b chỉ được chiều ngược chốt, không nút nào được cả hai chốt trước khi điều kiện dừng đúng thoả. Nếu μ chỉ cập nhật khi một nút được chốt ở cả hai chiều, đường 12 không bao giờ được ghi nhận; μ sẽ kẹt ở 13 (qua m). Khi nới cạnh a→b lúc chốt a, thuật toán thấy b đã có nhãn ngược, và μ được hạ xuống 12 ngay.</p>
 </details>
 
 **Bài 3.** Tính bộ nhớ landmark nếu dùng k = 32 trên đồ thị 126.699 nút (mỗi giá trị là `u32`, hai chiều cho mỗi landmark). Gấp bao nhiêu lần đồ thị gốc 2,9 MB?

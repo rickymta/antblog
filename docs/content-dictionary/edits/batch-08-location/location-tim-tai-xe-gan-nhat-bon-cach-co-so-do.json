@@ -1,0 +1,215 @@
+{
+ "file": "location-tim-tai-xe-gan-nhat-bon-cach-co-so-do.md",
+ "edits": [
+  {
+   "old": "cách ngây thơ nhất là duyệt hết",
+   "new": "cách đơn giản nhất là duyệt hết",
+   "reason": "«Ngây thơ» là dịch gượng của naive",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài đặt R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong) cạnh lưới H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring), quét toàn bộ và Redis GEO.",
+   "new": "Bài đặt R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong) cạnh lưới H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring), cách quét toàn bộ và Redis GEO.",
+   "reason": "Danh sách thiếu danh từ chung, dễ đọc nhầm",
+   "severity": "low"
+  },
+  {
+   "old": "**Mọi số đo là trên dữ liệu mô phỏng**",
+   "new": "**Mọi số đo đều lấy trên dữ liệu mô phỏng**",
+   "reason": "Trật tự câu kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "cho mỗi trong 70 truy vấn mỗi giây",
+   "new": "cho mỗi truy vấn trong 70 truy vấn mỗi giây",
+   "reason": "Sai trật tự từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Quy mô 2.500 và 250.000 (×0,1 và ×10) co dãn cả hai theo tỉ lệ.",
+   "new": "Ở quy mô 2.500 và 250.000 (×0,1 và ×10), cả hai luồng tải co giãn theo tỉ lệ.",
+   "reason": "Thiếu chủ ngữ rõ ràng, «co dãn» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Mỗi cách được đo qua bốn pha, một luồng,",
+   "new": "Lab đo mỗi cách qua bốn pha, một luồng,",
+   "reason": "Chuyển bị động sang chủ động",
+   "severity": "low"
+  },
+  {
+   "old": "Ngân sách mỗi cập nhật nếu chỉ để cập nhật là 1 s chia 6.250, tức 160 µs.",
+   "new": "Nếu chỉ tính riêng việc cập nhật, ngân sách cho mỗi cập nhật là 1 s chia 6.250, tức 160 µs.",
+   "reason": "Câu cụt, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "R-tree hợp nhất khi có nhiều truy vấn và ít lần chèn, đúng chỗ mà tải của tài xế (ghi liên tục) thử nó.",
+   "new": "R-tree phù hợp nhất khi có nhiều truy vấn và ít lần chèn, và tải ghi liên tục của tài xế thử thách R-tree đúng ở điểm đó.",
+   "reason": "«Hợp nhất» dễ đọc nhầm là merge; «thử nó» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "đổi ô thì chuyển giỏ.",
+   "new": "đổi ô thì chuyển tài xế sang giỏ của ô mới.",
+   "reason": "«Giỏ» là calque của bucket, khác cách gọi ở vế trước",
+   "severity": "medium"
+  },
+  {
+   "old": "Nguyên nhân hợp lý của chiều hướng chung là chỉ khoảng",
+   "new": "Lý giải hợp lý cho xu hướng chung là chỉ khoảng",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nhưng đổi bằng dữ liệu cũ tối đa một giây",
+   "new": "nhưng phải đánh đổi bằng dữ liệu cũ tối đa một giây",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Các cách trong bộ nhớ đều nhỏ hơn nhiều ngân sách 160 µs",
+   "new": "Các cách trong bộ nhớ đều thấp hơn nhiều so với ngân sách 160 µs",
+   "reason": "Trật tự so sánh kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "cùng lần chạy:",
+   "new": "trong cùng lần chạy:",
+   "reason": "Thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "chia đều, 250.000 tài xế trên 349,8 km²",
+   "new": "nếu chia đều thì 250.000 tài xế trên 349,8 km²",
+   "reason": "Câu cụt, thiếu liên từ điều kiện",
+   "severity": "medium"
+  },
+  {
+   "old": "Điều khác biệt nằm ở vị trí của nó: ngoài tiến trình.",
+   "new": "Điểm khác biệt là Redis nằm ngoài tiến trình.",
+   "reason": "«Vị trí của nó» không rõ chỉ cái gì",
+   "severity": "high"
+  },
+  {
+   "old": "Chi phí tối thiểu của **mọi** lệnh được đo bằng",
+   "new": "Lab đo chi phí tối thiểu của **mọi** lệnh bằng",
+   "reason": "Chuyển bị động sang chủ động",
+   "severity": "low"
+  },
+  {
+   "old": "quanh hình tìm, nên",
+   "new": "quanh vùng tìm kiếm, nên",
+   "reason": "«Hình tìm» là cụm tự ghép cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "tức 10 trên 1.000 truy vấn được đối chiếu.",
+   "new": "tức 10 trên 1.000 truy vấn được đối chiếu bị lệch.",
+   "reason": "Thiếu vị ngữ, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "lab không tách riêng phần của từng yếu tố",
+   "new": "lab không tách riêng phần đóng góp của từng yếu tố",
+   "reason": "Thiếu danh từ chính",
+   "severity": "low"
+  },
+  {
+   "old": "Những điều này **không** nói Redis dở.",
+   "new": "Những số đo này **không** có nghĩa là Redis dở.",
+   "reason": "Câu thiếu chủ ngữ hợp lý (style guide mục 3)",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó đo một thứ cụ thể: giá của một vòng mạng",
+   "new": "Lab đo một thứ cụ thể: giá của một vòng mạng",
+   "reason": "«Nó» chỉ vật trừu tượng, không rõ chỉ gì",
+   "severity": "medium"
+  },
+  {
+   "old": "(image chưa có sẵn trên máy viết, và kéo image mới từ Docker Hub có thể treo)",
+   "new": "(image chưa có sẵn trên máy của tác giả, và tải image mới từ Docker Hub có thể bị treo)",
+   "reason": "«Máy viết» và «kéo image» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "**chưa được đo**, là ở 6.250 lần sửa mỗi giây một bảng",
+   "new": "**chưa được đo**, là khi sửa 6.250 lần mỗi giây thì một bảng",
+   "reason": "Câu thiếu động từ, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "từ gốc repo:",
+   "new": "từ thư mục gốc của repo:",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "để bỏ Redis một cách tường minh",
+   "new": "để chủ động bỏ qua Redis",
+   "reason": "Cách nói gượng, kiểu dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "không bỏ qua âm thầm (đã xảy ra",
+   "new": "không lặng lẽ bỏ qua (đã xảy ra",
+   "reason": "Calque «âm thầm»",
+   "severity": "medium"
+  },
+  {
+   "old": "Output rút gọn của lần 1, máy tải nặng:",
+   "new": "Kết quả chạy rút gọn của lần 1 (máy tải nặng):",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm cả ba cách trong bộ nhớ khớp quét toàn bộ trên 3.000 điểm và 200 truy vấn ngẫu nhiên, và kiểm cập nhật, xoá",
+   "new": "kiểm tra cả ba cách trong bộ nhớ có khớp với quét toàn bộ trên 3.000 điểm và 200 truy vấn ngẫu nhiên hay không, và kiểm tra cập nhật, xoá",
+   "reason": "«Kiểm» cụt, thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa có tài xế im lặng, TTL,",
+   "new": "chưa có tài xế mất tín hiệu, TTL,",
+   "reason": "«Im lặng» là dịch gượng của silent",
+   "severity": "medium"
+  },
+  {
+   "old": "Số của Redis không thay cho Redis riêng",
+   "new": "Số đo của Redis này không đại diện cho Redis chạy riêng",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "**Máy đo bị tải nặng**, số thời gian nhiễu;",
+   "new": "**Máy đo bị tải nặng**, nên số thời gian bị nhiễu;",
+   "reason": "Thiếu liên từ",
+   "severity": "low"
+  },
+  {
+   "old": "nó đỡ nổi bao nhiêu cập nhật mỗi giây?",
+   "new": "nó xử lý nổi bao nhiêu cập nhật mỗi giây?",
+   "reason": "Cách nói thiếu tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "nên một giây cũ thêm là cỡ 11 m",
+   "new": "nên độ trễ thêm một giây tương ứng cỡ 11 m",
+   "reason": "«Một giây cũ thêm» là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Đổi lại cách này rẻ hơn mỗi cập nhật",
+   "new": "Bù lại, cách này rẻ hơn ở mỗi cập nhật",
+   "reason": "Calque của in return",
+   "severity": "low"
+  },
+  {
+   "old": "Nó sẽ không phù hợp nếu cần thấy",
+   "new": "Cách này sẽ không phù hợp nếu cần thấy",
+   "reason": "Tránh «Nó» chỉ sự vật trừu tượng đầu câu",
+   "severity": "medium"
+  }
+ ]
+}

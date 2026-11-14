@@ -1,0 +1,143 @@
+{
+ "file": "location-chi-phi-re-u-turn-do-thi-theo-canh.md",
+ "edits": [
+  {
+   "old": "bỏ qua 784 có điều kiện và 112 có via là way",
+   "new": "bỏ qua 784 quan hệ có điều kiện và 112 quan hệ có via là way",
+   "reason": "Lược mất danh từ 'quan hệ'",
+   "severity": "medium"
+  },
+  {
+   "old": "ở một nút giao đang chạy xe cả hai chiều",
+   "new": "ở một nút giao có xe chạy cả hai chiều",
+   "reason": "Câu tối nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "không được dựng ra bộ nhớ",
+   "new": "không được dựng sẵn trong bộ nhớ",
+   "reason": "Dịch gượng",
+   "severity": "high"
+  },
+  {
+   "old": "kiểm điều đó trên 100 cặp",
+   "new": "kiểm tra điều đó trên 100 cặp",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm lại ở cả ba profile",
+   "new": "kiểm tra lại ở cả ba profile",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "còn lại dương là rẽ phải",
+   "new": "các trường hợp còn lại, góc dương là rẽ phải",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng 3 s và 6 s là số đặt, không đo",
+   "new": "nhưng 3 s và 6 s là số lab tự đặt, không đo",
+   "reason": "Thiếu chủ thể",
+   "severity": "low"
+  },
+  {
+   "old": "làm phương án D để đo mức nhạy",
+   "new": "làm phương án D để đo độ nhạy",
+   "reason": "'mức nhạy' dịch gượng của sensitivity",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi `forbids` kiểm trong lúc duyệt",
+   "new": "rồi `forbids` kiểm tra trong lúc duyệt",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "muốn làm cần trạng thái",
+   "new": "muốn hỗ trợ thì cần trạng thái",
+   "reason": "Thiếu từ nối, 'làm' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "11 quan hệ có thẻ `except` loại ô tô (199 loại xe máy)",
+   "new": "11 quan hệ có thẻ `except` loại trừ ô tô (với xe máy là 199 quan hệ)",
+   "reason": "Sai nghĩa: except loại trừ chứ không 'loại' ô tô",
+   "severity": "high"
+  },
+  {
+   "old": "nếu km rỗng của tài xế tính theo",
+   "new": "nếu số km chạy rỗng (không chở khách) của tài xế tính theo",
+   "reason": "Thuật ngữ chưa được định nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "40,3 s chênh lệch là thời gian đón khách chênh nhau giữa hai mô hình",
+   "new": "Chênh lệch 40,3 s là phần thời gian đón khách mà hai mô hình tính khác nhau",
+   "reason": "Câu lủng củng",
+   "severity": "medium"
+  },
+  {
+   "old": "Mà chi phí rẽ 3 s và 6 s là số lab đặt",
+   "new": "Vì chi phí rẽ 3 s và 6 s do lab đặt",
+   "reason": "Văn nói 'Mà'",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng đổi đuôi nhiều",
+   "new": "nhưng làm đuôi phân bố thay đổi nhiều",
+   "reason": "Cụm 'đổi đuôi' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Cái giá của sự đúng nằm ở độ phức tạp cài đặt",
+   "new": "Cái giá của việc tính đúng nằm ở độ phức tạp khi cài đặt",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nó là cái `u_turns` mà simulator",
+   "new": "nó chính là chỉ số `u_turns` mà simulator",
+   "reason": "Khẩu ngữ 'cái'",
+   "severity": "low"
+  },
+  {
+   "old": "Ca C nói riêng ghi lại điều mô hình theo nút làm sai nhất",
+   "new": "Riêng ca C ghi lại chỗ mô hình theo nút sai nặng nhất",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm tự động trong `turn.rs`",
+   "new": "Kiểm thử tự động trong `turn.rs`",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "1.619 cạnh có thể gồm nhầm và sót.",
+   "new": "Việc gắn nhãn 1.619 cạnh có thể nhận nhầm hoặc bỏ sót.",
+   "reason": "Sai ngữ pháp 'gồm nhầm và sót'",
+   "severity": "high"
+  },
+  {
+   "old": "mà sai thì tuyến đổi theo",
+   "new": "mà sai thì tuyến cũng thay đổi theo",
+   "reason": "Diễn đạt tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "có thể kiểm bằng cách so với Dijkstra",
+   "new": "có thể kiểm tra bằng cách so với Dijkstra",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Kiểm C bằng cách nào?",
+   "new": "Kiểm tra C bằng cách nào?",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  }
+ ]
+}

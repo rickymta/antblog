@@ -8,9 +8,9 @@ tags: [toi-noi, location, go, parquet, retention, privacy, downsampling, kafka]
 language: vi
 ---
 
-Một tài xế khiếu nại cước chuyến hôm qua sai vì «xe đi đường vòng». Đội phân tích muốn huấn luyện ETA trên quỹ đạo thật của ba tháng. Một người khác lại hỏi rất khác: vị trí của tôi được giữ bao lâu và ai xem được? Cả ba cùng đòi một thứ, lịch sử GPS, nhưng cần ở ba mức khác nhau, và mỗi mức đều là dữ liệu về nơi một con người đã đi qua.
+Một tài xế khiếu nại rằng cước chuyến hôm qua sai vì «xe đi đường vòng». Đội phân tích muốn huấn luyện ETA trên quỹ đạo thật của ba tháng. Một người khác lại hỏi rất khác: vị trí của tôi được giữ bao lâu và ai xem được? Cả ba cùng đòi một thứ, lịch sử GPS, nhưng cần ở ba mức khác nhau, và mỗi mức đều là dữ liệu về nơi một con người đã đi qua.
 
-Đây là bài 20 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối [bài 13](/articles/location-go-backpressure-coalesce-drop-race-detector), nơi coalesce quyết định điểm nào không bao giờ tới Kafka, và [bài 14](/articles/location-validate-gps-timestamp-accuracy-gia-mao), nơi cờ của điểm sinh ra. Phía Python (bài đọc lịch sử để dựng đặc trưng chuyến, LOC-51) là bên đọc file mà bài này ghi ra, nên schema ở đây là một hợp đồng.
+Đây là bài 20 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối [bài 13](/articles/location-go-backpressure-coalesce-drop-race-detector), nơi bước gộp điểm (coalesce) quyết định điểm nào không bao giờ tới Kafka, và [bài 14](/articles/location-validate-gps-timestamp-accuracy-gia-mao), nơi cờ của điểm sinh ra. Phía Python (bài đọc lịch sử để dựng đặc trưng chuyến, LOC-51) là bên đọc file mà bài này ghi ra, nên schema ở đây là một hợp đồng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,17 +20,17 @@ Một tài xế khiếu nại cước chuyến hôm qua sai vì «xe đi đườ
 
 ## Hai luồng từ cùng một topic
 
-Kiến trúc §8.2 nói nên có hai luồng: **luồng nóng** cho vị trí mới nhất, và **luồng lịch sử** cho replay, phân tích, điều tra. §4.8 thêm: không ghi mọi điểm GPS vào cơ sở dữ liệu giao dịch, mà dùng kho phù hợp, áp dụng sampling, retention, partitioning và chính sách quyền riêng tư. Ở lab, luồng lịch sử là chương trình `history-writer`, đọc cùng topic `location.updates.v1` với hub nhưng bằng consumer group riêng.
+Kiến trúc §8.2 nói nên có hai luồng: **luồng nóng** cho vị trí mới nhất, và **luồng lịch sử** cho replay, phân tích, điều tra. §4.8 thêm: không ghi mọi điểm GPS vào cơ sở dữ liệu giao dịch, mà dùng kho phù hợp, áp dụng giảm mẫu (sampling), retention, phân vùng (partitioning) và chính sách quyền riêng tư. Ở lab, luồng lịch sử là chương trình `history-writer`, đọc cùng topic `location.updates.v1` với hub nhưng bằng consumer group riêng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 330" role="img" aria-label="Hình 1. Hai luồng từ cùng một topic Kafka: luồng nóng phục vụ vị trí mới nhất và được phép mất điểm cũ; luồng lịch sử do history-writer đọc bằng consumer group riêng, giảm mẫu, giảm định danh, ghi Parquet theo ngày và thành phố rồi xoá theo hạn."><defs><marker id="location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="130" width="150" height="80" rx="8" class="f-pk-soft s-pk"/><text x="95" y="156" class="t-b" text-anchor="middle">Kafka</text><text x="95" y="174" class="t-small" text-anchor="middle">location.updates.v1</text><text x="95" y="192" class="t-small" text-anchor="middle">key driver_id</text><rect x="220" y="15" width="640" height="84" rx="8" class="f-surface s-muted"/><text x="232" y="34" class="t-b">Luồng nóng: vị trí mới nhất, được phép gộp hoặc bỏ điểm cũ</text><rect x="235" y="48" width="270" height="40" rx="8" class="f-phys-soft s-phys"/><text x="370" y="73" text-anchor="middle">tracking-hub (bài 19)</text><rect x="520" y="48" width="325" height="40" rx="8" class="f-phys-soft s-phys"/><text x="682.5" y="73" text-anchor="middle">kho vị trí mới nhất (bài 18)</text><path d="M170 150 L218 70" class="f-none s-pk" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="220" y="115" width="640" height="200" rx="8" class="f-surface s-muted"/><text x="232" y="134" class="t-b">Luồng lịch sử: history-writer, consumer group riêng</text><rect x="232" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="284" y="175" class="t-b" text-anchor="middle">Giảm mẫu</text><text x="284" y="193" class="t-small" text-anchor="middle">Sampler.Keep</text><path d="M336 179 L358 179" class="f-none s-phys" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="358" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="410" y="175" class="t-b" text-anchor="middle">Định danh</text><text x="410" y="193" class="t-small" text-anchor="middle">id-level</text><path d="M462 179 L484 179" class="f-none s-phys" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="484" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="536" y="175" class="t-b" text-anchor="middle">Bộ đệm</text><text x="536" y="193" class="t-small" text-anchor="middle">ngày × thành phố</text><path d="M588 179 L610 179" class="f-none s-phys" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="610" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="662" y="175" class="t-b" text-anchor="middle">Parquet</text><text x="662" y="193" class="t-small" text-anchor="middle">tạm rồi rename</text><path d="M714 179 L736 179" class="f-none s-phys" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="736" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="788" y="175" class="t-b" text-anchor="middle">Retention</text><text x="788" y="193" class="t-small" text-anchor="middle">xoá thư mục ngày</text><path d="M170 190 L218 190" class="f-none s-pk" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><text x="232" y="238" class="t-small">Commit offset Kafka sau khi file đã đổi tên: giao ít nhất một lần, có thể có dòng trùng.</text><text x="232" y="260" class="t-small">Python đọc lại bằng Polars hoặc PyArrow (hive_partitioning), không cần biết Go.</text><text x="232" y="282" class="t-warn">Điểm đã bị gộp ở hàng đợi (bài 13) không tới Kafka, nên không có trong lịch sử.</text><text x="232" y="302" class="t-small">Cờ của điểm luôn được giữ khi giảm mẫu: sample_reason = flagged.</text></svg>
+<svg viewBox="0 0 880 330" role="img" aria-label="Hình 1. Hai luồng từ cùng một topic Kafka: luồng nóng phục vụ vị trí mới nhất và được phép mất điểm cũ; luồng lịch sử do history-writer đọc bằng consumer group riêng, giảm mẫu, giảm định danh, ghi Parquet theo ngày và thành phố rồi xoá theo hạn."><defs><marker id="location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="130" width="150" height="80" rx="8" class="f-pk-soft s-pk"/><text x="95" y="156" class="t-b" text-anchor="middle">Kafka</text><text x="95" y="174" class="t-small" text-anchor="middle">location.updates.v1</text><text x="95" y="192" class="t-small" text-anchor="middle">key driver_id</text><rect x="220" y="15" width="640" height="84" rx="8" class="f-surface s-muted"/><text x="232" y="34" class="t-b">Luồng nóng: vị trí mới nhất, được phép gộp hoặc bỏ điểm cũ</text><rect x="235" y="48" width="270" height="40" rx="8" class="f-phys-soft s-phys"/><text x="370" y="73" text-anchor="middle">tracking-hub (bài 19)</text><rect x="520" y="48" width="325" height="40" rx="8" class="f-phys-soft s-phys"/><text x="682.5" y="73" text-anchor="middle">kho vị trí mới nhất (bài 18)</text><path d="M170 150 L218 70" class="f-none s-pk" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="220" y="115" width="640" height="200" rx="8" class="f-surface s-muted"/><text x="232" y="134" class="t-b">Luồng lịch sử: history-writer, consumer group riêng</text><rect x="232" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="284" y="175" class="t-b" text-anchor="middle">Giảm mẫu</text><text x="284" y="193" class="t-small" text-anchor="middle">Sampler.Keep</text><path d="M336 179 L358 179" class="f-none s-phys" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="358" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="410" y="175" class="t-b" text-anchor="middle">Định danh</text><text x="410" y="193" class="t-small" text-anchor="middle">id-level</text><path d="M462 179 L484 179" class="f-none s-phys" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="484" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="536" y="175" class="t-b" text-anchor="middle">Bộ đệm</text><text x="536" y="193" class="t-small" text-anchor="middle">ngày × thành phố</text><path d="M588 179 L610 179" class="f-none s-phys" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="610" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="662" y="175" class="t-b" text-anchor="middle">Parquet</text><text x="662" y="193" class="t-small" text-anchor="middle">tạm rồi đổi tên</text><path d="M714 179 L736 179" class="f-none s-phys" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><rect x="736" y="150" width="104" height="58" rx="8" class="f-phys-soft s-phys"/><text x="788" y="175" class="t-b" text-anchor="middle">Retention</text><text x="788" y="193" class="t-small" text-anchor="middle">xoá thư mục ngày</text><path d="M170 190 L218 190" class="f-none s-pk" stroke-width="2" marker-end="url(#location-lich-su-gps-parquet-retention-quyen-rieng-tu-1-a)"/><text x="232" y="238" class="t-small">Commit offset Kafka sau khi file đã đổi tên: giao ít nhất một lần, có thể có dòng trùng.</text><text x="232" y="260" class="t-small">Python đọc lại bằng Polars hoặc PyArrow (hive_partitioning), không cần biết Go.</text><text x="232" y="282" class="t-warn">Điểm đã bị gộp ở hàng đợi (bài 13) không tới Kafka, nên không có trong lịch sử.</text><text x="232" y="302" class="t-small">Cờ của điểm luôn được giữ khi giảm mẫu: sample_reason = flagged.</text></svg>
 </div>
 
 <figcaption>Hình 1. Hai luồng. Luồng nóng chấp nhận mất điểm cũ; luồng lịch sử giảm mẫu có chủ đích, giảm định danh theo mức đã chọn, và xoá theo hạn.</figcaption>
 </figure>
 
-Tách luồng có hai lợi ích. Hub cần độ trễ thấp và không cần lịch sử; writer cần ghi lô lớn, đã nén, và không cần nhanh từng giây. Nếu gộp thì mỗi bên làm bên kia chậm. Kết hợp với bài 13 cho một hệ quả cần nói thẳng: lịch sử chỉ có những điểm **tới được Kafka**. Khi ingest đang gộp vì sink chậm, điểm trung gian đã mất ở hàng đợi và không có trong lịch sử. Với luồng thật, writer đọc tới đâu commit tới đó, và có sự cố thì đọc lại:
+Tách luồng có hai lợi ích. Hub cần độ trễ thấp và không cần lịch sử; writer cần ghi lô lớn, đã nén, và không cần nhanh từng giây. Nếu gộp thì mỗi bên làm bên kia chậm. Kết hợp với bài 13, cách làm này dẫn tới một hệ quả cần nói thẳng: lịch sử chỉ có những điểm **tới được Kafka**. Khi ingest đang gộp vì sink chậm, điểm trung gian đã mất ở hàng đợi và không có trong lịch sử. Với luồng thật, writer đọc tới đâu thì ghi nhận offset (commit) tới đó, và khi có sự cố thì đọc lại:
 
 Tệp `examples/toi-noi-location/go/cmd/history-writer/main.go` (dòng 116–119 và 126–131):
 
@@ -48,11 +48,11 @@ Tệp `examples/toi-noi-location/go/cmd/history-writer/main.go` (dòng 116–119
 		_ = cl.CommitUncommittedOffsets(cctx)
 ```
 
-Commit offset **sau khi** file đã được đổi tên xong: nếu tiến trình chết giữa chừng thì offset chưa commit, và lần sau đọc lại những bản ghi đã ghi. Đây là giao hàng ít nhất một lần: **trùng còn hơn mất**, và người đọc phải khử trùng lặp theo `(driver_ref, event_time, seq)`. Lab chưa có bước khử trùng lặp; hợp đồng schema ghi điều này cho phía Python. Ở mức coarse `driver_ref` là NULL nên khoá đó không đủ, và hợp đồng chưa nói cách khử trùng lặp cho mức này.
+Commit offset **sau khi** file đã được đổi tên xong: nếu tiến trình chết giữa chừng thì offset chưa commit, và lần sau đọc lại những bản ghi đã ghi. Đây là cơ chế giao ít nhất một lần: **trùng còn hơn mất**, và người đọc phải khử trùng lặp theo `(driver_ref, event_time, seq)`. Lab chưa có bước khử trùng lặp; hợp đồng schema ghi điều này cho phía Python. Ở mức coarse `driver_ref` là NULL nên khoá đó không đủ, và hợp đồng chưa nói cách khử trùng lặp cho mức này.
 
 ## Giảm mẫu: giữ điểm có ý nghĩa, không giữ nhịp 4 giây
 
-Mỗi 4 giây một điểm, một tài xế đứng chờ khách 10 phút ở một chỗ sinh ra 150 dòng gần như giống hệt nhau. Bộ giảm mẫu giữ một điểm khi nó là điểm đầu của tài xế, hoặc có cờ, hoặc đã di chuyển đủ xa, hoặc đã đổi hướng đủ gắt, hoặc đã quá lâu chưa giữ điểm nào:
+Mỗi 4 giây một điểm, một tài xế đứng chờ khách 10 phút ở một chỗ sinh ra 150 dòng gần như giống hệt nhau. Bộ giảm mẫu giữ một điểm khi điểm đó là điểm đầu của tài xế, hoặc có cờ, hoặc đã di chuyển đủ xa, hoặc đã đổi hướng đủ gắt, hoặc đã quá lâu chưa giữ điểm nào:
 
 Tệp `examples/toi-noi-location/go/internal/history/downsample.go` (dòng 19–22 và 46–73):
 
@@ -95,20 +95,20 @@ func (s *Sampler) Keep(ev *pb.DriverLocationUpdated) (bool, string) {
 Thứ tự của `switch` là thứ tự ưu tiên của lý do (cột `sample_reason` ghi lại). Ba điểm đáng chú ý:
 
 - **Điểm có cờ luôn được giữ**, bất kể tài xế có di chuyển không: chính điểm đáng nghi là thứ điều tra cần xem (bài 14).
-- **`heartbeat`**: tài xế đứng yên vẫn có một dòng mỗi 60 giây. Nếu không có nó thì «không có dòng nào» không phân biệt được tài xế đứng yên với app mất sóng.
-- **`turn` chỉ nhìn hướng, không nhìn tốc độ.** Điều kiện chỉ yêu cầu đã cách ít nhất 4 giây và hướng đổi từ 30 độ. Hướng báo cáo khi xe đứng yên thường nhiễu, nên đây là một nguồn dòng thừa mà bài tập 1 quay lại.
+- **`heartbeat`**: tài xế đứng yên vẫn có một dòng mỗi 60 giây. Nếu thiếu cơ chế này thì «không có dòng nào» không phân biệt được tài xế đứng yên với app mất sóng.
+- **`turn` chỉ nhìn hướng, không nhìn tốc độ.** Điều kiện chỉ yêu cầu đã cách ít nhất 4 giây và hướng đổi từ 30 độ. Hướng báo cáo khi xe đứng yên thường nhiễu, nên đây là một nguyên nhân sinh ra dòng thừa, và bài tập 1 quay lại vấn đề này.
 
-Khoảng cách giữa hai dòng liên tiếp vì thế **không đều**; ai dựng đặc trưng từ lịch sử (bài Python) không được giả định lấy mẫu 4 giây. Kết quả trên 2.000 tài xế mô phỏng chạy 30 phút (900.000 điểm, seed 1):
+Khoảng cách giữa hai dòng liên tiếp vì thế **không đều**; ai dựng đặc trưng từ lịch sử (bài Python) không được giả định điểm được lấy mẫu mỗi 4 giây. Kết quả trên 2.000 tài xế mô phỏng chạy 30 phút (900.000 điểm, seed 1):
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 340" role="img" aria-label="Hình 2. Trên 900.000 điểm mô phỏng: file Parquet giảm mẫu nhỏ hơn 2,8 lần so với không giảm mẫu và 13 lần so với protobuf của chính các sự kiện; 239.990 điểm được giữ, chủ yếu vì di chuyển và vì rẽ hướng."><defs><marker id="location-lich-su-gps-parquet-retention-quyen-rieng-tu-2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="24" class="t-b">Kích thước cho cùng 900.000 điểm (MB, 10^6 byte)</text><text x="240" y="56" text-anchor="end">protobuf (event)</text><rect x="250" y="40" width="542.051" height="24" rx="3" class="f-pk-soft s-pk"/><text x="800.051" y="56" class="t-b">53,24</text><text x="240" y="92" text-anchor="end">Parquet, không giảm mẫu</text><rect x="250" y="76" width="115.924" height="24" rx="3" class="f-phys-soft s-phys"/><text x="373.924" y="92" class="t-b">11,39</text><text x="240" y="128" text-anchor="end">Parquet, giảm mẫu</text><rect x="250" y="112" width="41.456" height="24" rx="3" class="f-phys s-phys"/><text x="299.456" y="128" class="t-b">4,07</text><path d="M250 36 L250 142" class="f-none s-muted" stroke-width="1"/><text x="20" y="180" class="t-b">Lý do giữ 239.990 dòng (26,7% của 900.000)</text><rect x="250" y="196" width="4.66686" height="34" rx="0" class="f-muted s-line"/><rect x="254.667" y="196" width="4.37752" height="34" rx="0" class="f-warn s-line"/><rect x="259.044" y="196" width="356.21" height="34" rx="0" class="f-phys-soft s-line"/><text x="437.149" y="218" class="t-b" text-anchor="middle">move 152.655</text><rect x="615.254" y="196" width="194.746" height="34" rx="0" class="f-pk-soft s-line"/><text x="712.627" y="218" class="t-b" text-anchor="middle">turn 83.459</text><rect x="250" y="252" width="14" height="12" rx="2" class="f-muted s-line"/><text x="270" y="262" class="t-small">first 2.000</text><rect x="400" y="252" width="14" height="12" rx="2" class="f-warn s-line"/><text x="420" y="262" class="t-small">heartbeat 1.876</text><rect x="550" y="252" width="14" height="12" rx="2" class="f-phys-soft s-line"/><text x="570" y="262" class="t-small">move 152.655</text><rect x="700" y="252" width="14" height="12" rx="2" class="f-pk-soft s-line"/><text x="720" y="262" class="t-small">turn 83.459</text><text x="20" y="300" class="t-small">Sai số khi vẽ lại quỹ đạo từ điểm giữ: p50 5,0 m, p95 15,3 m, p99 20,9 m, lớn nhất 44,7 m.</text><text x="20" y="320" class="t-small">Chỉ đúng cho simulator: đường đi ngẫu nhiên đổi hướng mỗi bước nên turn nhiều hơn đường thật.</text></svg>
 </div>
 
-<figcaption>Hình 2. Vẽ từ output của <code>history-writer demo</code>. Mọi số là trên dữ liệu mô phỏng.</figcaption>
+<figcaption>Hình 2. Vẽ từ kết quả chạy của <code>history-writer demo</code>. Mọi số đều lấy từ dữ liệu mô phỏng.</figcaption>
 </figure>
 
-Giữ 26,7% số điểm (239.990 trên 900.000), file Parquet nhỏ đi 2,8 lần (4,07 MB so với 11,39 MB không giảm mẫu). So với 53,2 MB protobuf của chính các sự kiện đó là nhỏ hơn 13 lần, phần lớn cùng nhờ bố cục cột, nén ZSTD và việc bảng lịch sử không chép các trường như `event_id` hay `producer` (lab không tách phần đóng góp của từng yếu tố). Cần đọc đúng ba điều:
+Giữ 26,7% số điểm (239.990 trên 900.000), file Parquet nhỏ đi 2,8 lần (4,07 MB so với 11,39 MB không giảm mẫu). So với 53,2 MB protobuf của chính các sự kiện đó thì nhỏ hơn 13 lần, phần lớn là nhờ bố cục cột, nén ZSTD và việc bảng lịch sử không chép các trường như `event_id` hay `producer` (lab không tách phần đóng góp của từng yếu tố). Cần đọc đúng ba điều:
 
 1. **Byte trên mỗi dòng tăng**, từ 12,7 lên 17,0, vì điểm giữ lại ít lặp hơn nên nén kém hơn. Đừng đọc «byte mỗi dòng» thành chỉ số tiết kiệm; tổng byte mới là thứ ta trả tiền.
 2. **Sai số vẽ lại quỹ đạo**, đo bằng khoảng cách từ điểm bị bỏ tới đoạn nối hai điểm giữ liền kề: p50 5,0 m, p95 15,3 m, p99 20,9 m, lớn nhất 44,7 m (655.220 điểm bị bỏ). Simulator thêm nhiễu accuracy từ 3 đến 25 m, nên một phần sai số này là nhiễu chứ không phải do bỏ điểm.
@@ -116,13 +116,13 @@ Giữ 26,7% số điểm (239.990 trên 900.000), file Parquet nhỏ đi 2,8 l�
 
 ## Parquet theo ngày và thành phố
 
-Lịch sử ghi dưới dạng Parquet, định dạng cột nén mà Polars, PyArrow, Spark và các engine truy vấn đều đọc trực tiếp. Bố cục thư mục kiểu Hive, mỗi lần flush một file mới:
+Lịch sử ghi dưới dạng Parquet, định dạng cột nén mà Polars, PyArrow, Spark và các engine truy vấn đều đọc trực tiếp. Bố cục thư mục kiểu Hive, mỗi lần flush ghi ra một file mới:
 
 ```text
 date=2026-11-06/city=HCM/part-<unix_ms>-<n>.parquet
 ```
 
-Hai quyết định về đường dẫn: **`date` tính theo giờ Việt Nam (UTC+7)**, không phải UTC, nên một điểm lúc 18:00 UTC ngày 6 nằm ở `date=2026-11-07` (có test riêng); và `date`, `city` **chỉ nằm trong đường dẫn**, không trong file, nên engine đọc cắt được cả thư mục mà không mở file. Xoá dữ liệu cũ cũng nhờ vậy là xoá nguyên thư mục. File được ghi vào tên tạm bắt đầu bằng dấu chấm rồi mới đổi tên, nên người đọc không bao giờ thấy file dở:
+Hai quyết định về đường dẫn: **`date` tính theo giờ Việt Nam (UTC+7)**, không phải UTC, nên một điểm lúc 18:00 UTC ngày 6 nằm ở `date=2026-11-07` (có test riêng); và `date`, `city` **chỉ nằm trong đường dẫn**, không trong file, nên engine đọc có thể bỏ qua cả thư mục mà không cần mở file. Nhờ vậy, xoá dữ liệu cũ cũng là xoá nguyên một thư mục. File được ghi vào tên tạm bắt đầu bằng dấu chấm rồi mới đổi tên, nên người đọc không bao giờ thấy file dở:
 
 Tệp `examples/toi-noi-location/go/internal/history/writer.go` (dòng 104–133):
 
@@ -182,13 +182,13 @@ type Row struct {
 }
 ```
 
-Đọc lại từ Python để kiểm hợp đồng (`uv run ... readback_history.py`, thư mục là lần chạy thật 60 giây dưới đây): Polars 2.1.0 và PyArrow đều đọc được thư mục Hive; `event_time` là `Datetime[ms, UTC]`, các cột nullable giữ NULL, và `speed_dmps` có 7.869 giá trị 0 tách biệt hẳn với NULL (không có NULL nào trong lần chạy này vì mọi điểm đều có tốc độ). `date` và `city` đến từ đường dẫn.
+Đọc lại từ Python để kiểm tra hợp đồng (`uv run ... readback_history.py`, thư mục là kết quả lần chạy thật 60 giây ở đoạn dưới): Polars 2.1.0 và PyArrow đều đọc được thư mục Hive; `event_time` là `Datetime[ms, UTC]`, các cột nullable giữ NULL, và `speed_dmps` có 7.869 giá trị 0 tách biệt hẳn với NULL (không có NULL nào trong lần chạy này vì mọi điểm đều có tốc độ). `date` và `city` đến từ đường dẫn.
 
 Với luồng thật, loadgen đẩy 25.000 tài xế ở 6.250 điểm/giây trong 60 giây qua ingest và Kafka thật, `history-writer run` đọc topic bằng consumer group mới (`--from end`): writer nhận đúng **393.882** sự kiện, bằng số ingest đã ghi vào Kafka; giữ 142.693 (36,2%) và ghi 42 file, tổng 3,7 MB. Tỉ lệ giữ cao hơn lần demo vì 60 giây chưa đủ để tài xế đi xa: 25.000 điểm «đầu tiên» (6,3%) đều được giữ. Số 42 file cho 142.693 dòng cũng nhắc một cái giá: mỗi lần flush là một file mới cho mỗi phân vùng, nên chạy lâu sẽ sinh nhiều file nhỏ, và lab chưa có bước gộp file.
 
 ## Mức định danh: ai cần thấy gì
 
-Không phải mọi người đọc đều cần thấy mã tài xế hay toạ độ chính xác. Schema có `id_level`, hằng số trong một thư mục đầu ra, và `Row` dựng dòng theo mức:
+Không phải mọi người đọc đều cần thấy mã tài xế hay toạ độ chính xác. Schema có `id_level`, giá trị không đổi trong một thư mục đầu ra, và `Row` dựng dòng theo mức:
 
 Tệp `examples/toi-noi-location/go/internal/history/schema.go` (dòng 77–86 và 100–110):
 
@@ -219,13 +219,13 @@ func (a Anonymizer) Pseudonym(driverID string, t time.Time) string {
 
 | Mức | `driver_ref` | Toạ độ | Dùng cho |
 | --- | --- | --- | --- |
-| 0 raw | mã tài xế thật, ví dụ `DR-00009` | nguyên | điều tra, tranh chấp; truy cập hạn chế, giữ ngắn nhất |
+| 0 raw | mã tài xế thật, ví dụ `DR-00009` | nguyên | điều tra, tranh chấp; truy cập hạn chế, thời hạn giữ ngắn nhất |
 | 1 pseudonym | HMAC theo tháng, 16 ký tự hex, ví dụ `015e3d6bec00c070` | nguyên | pipeline ETA và đặc trưng chuyến |
 | 2 coarse | NULL, và bỏ cả `trip_id` | làm tròn cỡ 111 m | nhu cầu theo khu vực, huấn luyện dự báo |
 
-Vài chi tiết có chủ đích. **HMAC hai tầng**: khoá của tháng là HMAC của khoá gốc với chuỗi `YYYY-MM`, rồi `driver_ref` là HMAC của mã tài xế bằng khoá tháng, nên cùng một tài xế có hai `driver_ref` khác nhau ở hai tháng và không nối được qua tháng bằng cột này (test kiểm điều này); quỹ đạo, như nơi xuất phát mỗi sáng hay chỗ đỗ quen, thì vẫn có thể nối. Cái giá: đặc trưng nào cần lịch sử dài hơn một tháng của cùng tài xế thì không dựng được ở mức này. **Mức coarse bỏ `trip_id`** vì chuyến cộng với quỹ đạo thô vẫn nối lại được với một người. Khoá của lab (`toi-noi-lab-history-key`) chỉ để chạy thử; production lấy khoá từ KMS và xoay theo chính sách.
+Vài chi tiết có chủ đích. **HMAC hai tầng**: khoá của tháng là HMAC của khoá gốc với chuỗi `YYYY-MM`, rồi `driver_ref` là HMAC của mã tài xế bằng khoá tháng, nên cùng một tài xế có hai `driver_ref` khác nhau ở hai tháng và không nối được qua tháng bằng cột này (test kiểm tra điều này); quỹ đạo, như nơi xuất phát mỗi sáng hay chỗ đỗ quen, thì vẫn có thể nối. Cái giá: đặc trưng nào cần lịch sử dài hơn một tháng của cùng tài xế thì không dựng được ở mức này. **Mức coarse bỏ `trip_id`** vì chuyến cộng với quỹ đạo thô vẫn nối lại được với một người. Khoá của lab (`toi-noi-lab-history-key`) chỉ để chạy thử; môi trường production lấy khoá từ KMS và đổi khoá định kỳ theo chính sách.
 
-Cùng một lần chạy (300 tài xế × 5 phút, 6.459 dòng sau giảm mẫu) cho kích thước: mức raw 130.226 byte, mức coarse 80.655 byte (nhỏ hơn khoảng 38%), vì `driver_ref` NULL và toạ độ làm tròn nén tốt hơn. Bên được lợi ở mức coarse là người bị ghi lại và đội dự báo nhu cầu (không cần danh tính); bên chịu thiệt là đội điều tra và đội ETA theo tài xế, những người cần mức cao hơn và phải xin quyền truy cập. Bài này **chưa đánh giá** khả năng tái định danh của mức coarse: làm tròn 111 m không đồng nghĩa ẩn danh, và mức này vẫn giữ `event_time` với `seq`, nên các dòng của một tài xế có thể được nối lại thành chuỗi.
+Cùng một lần chạy (300 tài xế × 5 phút, 6.459 dòng sau giảm mẫu) cho kích thước: mức raw 130.226 byte, mức coarse 80.655 byte (nhỏ hơn khoảng 38%), vì `driver_ref` NULL và toạ độ làm tròn nén tốt hơn. Bên được lợi ở mức coarse là người có dữ liệu được ghi lại và đội dự báo nhu cầu (không cần danh tính); bên chịu thiệt là đội điều tra và đội ETA theo tài xế, những người cần mức cao hơn và phải xin quyền truy cập. Bài này **chưa đánh giá** khả năng tái định danh của mức coarse: làm tròn 111 m không đồng nghĩa ẩn danh, và mức này vẫn giữ `event_time` với `seq`, nên các dòng của một tài xế có thể được nối lại thành chuỗi.
 
 ## Retention: xoá theo ngày trong tên thư mục
 
@@ -278,7 +278,7 @@ Hai thiết kế đáng nói. **Quyết định dựa trên ngày trong tên th�
 
 Thí nghiệm: ghi thêm 45 ngày dữ liệu nhẹ (50 tài xế × 10 phút mỗi ngày). Giữ 30 ngày thì xoá 15 phân vùng ngày (cũ nhất 2026-09-23, mới nhất bị xoá 2026-10-07), 90 file, 801.438 byte, còn 30 phân vùng. Sau đó `--days 7` xoá thêm 23 phân vùng, 138 file, 1.231.634 byte.
 
-**Con số 30 và 7 ngày là tham số thí nghiệm của lab, không phải khuyến nghị pháp lý.** Chúng chỉ để chạy retention và có số đếm để kiểm. Các số thật cho từng mức định danh phải do pháp chế và chủ sản phẩm chốt, sau khi trả lời các câu ở mục sau.
+**Con số 30 và 7 ngày là tham số thí nghiệm của lab, không phải khuyến nghị pháp lý.** Chúng chỉ để chạy thử retention và có số đếm để kiểm tra. Các số thật cho từng mức định danh phải do pháp chế và chủ sản phẩm chốt, sau khi trả lời các câu ở mục sau.
 
 ## Nghĩa vụ pháp lý: phần lab chưa làm
 
@@ -294,7 +294,7 @@ Danh sách câu hỏi nên mang tới pháp chế trước khi chốt số reten
 
 ## Chạy ví dụ và kiểm chứng
 
-Phần giảm mẫu và retention không cần Kafka (từ gốc repository):
+Phần giảm mẫu và retention không cần Kafka (chạy từ thư mục gốc của repository):
 
 ```bash
 go -C examples/toi-noi-location/go build -o bin/ ./cmd/...
@@ -303,7 +303,7 @@ examples/toi-noi-location/go/bin/history-writer inspect --out examples/toi-noi-l
 examples/toi-noi-location/go/bin/history-writer retention --out examples/toi-noi-location/go/out/history-retention --days 30 --dry-run --now 2026-11-06T12:00:00+07:00
 ```
 
-Output của `demo` (rút gọn; cấu hình 2.000 tài xế × 30 phút, điểm mỗi 4 giây, seed 1):
+Kết quả chạy của `demo` (rút gọn; cấu hình 2.000 tài xế × 30 phút, điểm mỗi 4 giây, seed 1):
 
 ```text
 đầu vào: 900000 điểm, 53237116 byte protobuf (event)
@@ -338,7 +338,7 @@ date=2026-11-06/city=HCM     rows=95761    bytes=1618533
 tổng: 239990 dòng trong 6 phân vùng
 ```
 
-Các test của package (`go test -race ./internal/history`) kiểm: giảm mẫu theo từng lý do, phân vùng ngày theo giờ Việt Nam, đọc lại đúng schema và NULL khác 0 cùng metadata `toinoi.schema_version`, pseudonym ổn định trong tháng và đổi giữa các tháng, retention theo tên thư mục không đụng thư mục lạ. Luồng thật qua Kafka dùng lệnh `history-writer run --out examples/toi-noi-location/go/out/history-live --id-level pseudonym --flush-every 10s --from end` song song với loadgen như ở bài 12. Đọc lại từ Python:
+Các test của package (`go test -race ./internal/history`) kiểm tra: giảm mẫu theo từng lý do, phân vùng ngày theo giờ Việt Nam, đọc lại đúng schema và NULL khác 0 cùng metadata `toinoi.schema_version`, pseudonym ổn định trong tháng và đổi giữa các tháng, retention theo tên thư mục không đụng thư mục lạ. Luồng thật qua Kafka dùng lệnh `history-writer run --out examples/toi-noi-location/go/out/history-live --id-level pseudonym --flush-every 10s --from end` song song với loadgen như ở bài 12. Đọc lại từ Python:
 
 ```bash
 uv run --no-project --with polars --with pyarrow python -I examples/toi-noi-location/go/scripts/readback_history.py examples/toi-noi-location/go/out/history-live
@@ -348,22 +348,22 @@ Số đếm (điểm, dòng, file) tái lập được; kích thước byte ph�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Mọi dữ liệu là do simulator sinh; tỉ lệ giữ điểm, sai số quỹ đạo và tỉ lệ <code>turn</code> chỉ đúng cho simulator, không suy ra cho đường thật. Lab ghi vào đĩa cục bộ, chưa có object storage, chưa gộp file nhỏ, chưa khử trùng lặp dòng (giao hàng ít nhất một lần), chưa có bước xoá theo từng tài xế, và khoá HMAC là khoá lab. Mức coarse chưa được đánh giá khả năng tái định danh. Retention chỉ xoá file cục bộ; bản sao, backup và log nằm ngoài phạm vi. Nghĩa vụ pháp lý của Việt Nam chưa được khảo sát: 30 và 7 ngày chỉ là tham số thí nghiệm.</p>
+<p>Mọi dữ liệu là do simulator sinh; tỉ lệ giữ điểm, sai số quỹ đạo và tỉ lệ <code>turn</code> chỉ đúng cho simulator, không suy ra cho đường thật. Lab ghi vào đĩa cục bộ, chưa có object storage, chưa gộp file nhỏ, chưa khử trùng lặp dòng (giao ít nhất một lần), chưa có bước xoá theo từng tài xế, và khoá HMAC là khoá lab. Mức coarse chưa được đánh giá khả năng tái định danh. Retention chỉ xoá file cục bộ; bản sao, backup và log nằm ngoài phạm vi. Nghĩa vụ pháp lý của Việt Nam chưa được khảo sát: 30 và 7 ngày chỉ là tham số thí nghiệm.</p>
 </div>
 
 ## Bài tập
 
 **Bài 1.** Một tài xế đỗ chờ khách đúng một chỗ 10 phút, điểm gốc mỗi 4 giây, không có cờ. Với ngưỡng mặc định, lịch sử giữ khoảng bao nhiêu dòng cho 10 phút đó, và mỗi dòng có `sample_reason` gì?
 
-<details><summary>Xem lời giải</summary><p>10 phút có 150 điểm gốc. Đứng yên thì không có <code>move</code>, nên chỉ còn <code>heartbeat</code>: một dòng sau mỗi 60 giây, tức khoảng 10 dòng (cộng <code>first</code> nếu đó là điểm đầu của tài xế). Nhưng đây là cận dưới trên lý thuyết: điều kiện <code>turn</code> chỉ nhìn hướng, không nhìn tốc độ, nên nếu hướng báo cáo dao động khi xe đứng (điện thoại thật thường vậy, và simulator cũng đổi hướng mỗi bước kể cả khi tốc độ 0) thì có thể có thêm dòng <code>turn</code>. Lab không có kịch bản đỗ lâu nên bài không có số đo cho ca này; muốn biết phải chạy thử trên dữ liệu thật và cân nhắc thêm điều kiện tốc độ vào <code>turn</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>10 phút có 150 điểm gốc. Đứng yên thì không có <code>move</code>, nên chỉ còn <code>heartbeat</code>: một dòng sau mỗi 60 giây, tức khoảng 10 dòng (cộng <code>first</code> nếu đó là điểm đầu của tài xế). Nhưng đây là cận dưới theo lý thuyết: điều kiện <code>turn</code> chỉ nhìn hướng, không nhìn tốc độ, nên nếu hướng báo cáo dao động khi xe đứng (điện thoại thật thường vậy, và simulator cũng đổi hướng mỗi bước kể cả khi tốc độ 0) thì có thể có thêm dòng <code>turn</code>. Lab không có kịch bản đỗ lâu nên bài không có số đo cho trường hợp này; muốn biết phải chạy thử trên dữ liệu thật và cân nhắc thêm điều kiện tốc độ vào <code>turn</code>.</p></details>
 
 **Bài 2.** Chạy `retention --days 7` vào ngày 2026-11-06 (giờ Việt Nam). Thư mục `date=2026-10-31` và `date=2026-10-30` thì cái nào còn, cái nào bị xoá?
 
-<details><summary>Xem lời giải</summary><p>Tham số <code>days</code> gồm cả hôm nay, nên <code>cutoff</code> = 2026-11-06 trừ 6 ngày = 2026-10-31. Thư mục có ngày nhỏ hơn <code>cutoff</code> bị xoá: <code>date=2026-10-30</code> bị xoá, <code>date=2026-10-31</code> còn. Bảy ngày được giữ là từ 31/10 tới 06/11. Tính bằng chuỗi ngày trong tên thư mục, không phải thời gian sửa file.</p></details>
+<details><summary>Xem lời giải</summary><p>Tham số <code>days</code> gồm cả hôm nay, nên <code>cutoff</code> = 2026-11-06 trừ 6 ngày = 2026-10-31. Thư mục có ngày nhỏ hơn <code>cutoff</code> bị xoá: <code>date=2026-10-30</code> bị xoá, <code>date=2026-10-31</code> còn. Bảy ngày được giữ là từ 31/10 tới 06/11. Lab so sánh bằng chuỗi ngày trong tên thư mục, không phải thời gian sửa file.</p></details>
 
 **Bài 3.** Đội phân tích cần «số chuyến theo ô lưới H3 và theo giờ» trong ba tháng. Mức định danh nào là hợp lý để họ dùng, và họ mất gì so với mức pseudonym?
 
-<details><summary>Xem lời giải</summary><p>Mức coarse (2): nhu cầu theo khu vực không cần biết tài xế nào, nên NULL <code>driver_ref</code> và toạ độ làm tròn đủ dùng, đồng thời giảm lượng dữ liệu cá nhân mà đội đó chạm tới. Họ mất khả năng dựng đặc trưng theo từng tài xế (thời gian chờ trung bình của riêng một tài xế) và nối quỹ đạo với chuyến vì <code>trip_id</code> cũng bị bỏ. Ngoài ra độ phân giải làm tròn cỡ 111 m thô hơn một ô H3 nhỏ, nên không có ý nghĩa khi chọn ô lưới mịn hơn mức làm tròn này.</p></details>
+<details><summary>Xem lời giải</summary><p>Mức coarse (2): nhu cầu theo khu vực không cần biết tài xế nào, nên NULL <code>driver_ref</code> và toạ độ làm tròn đủ dùng, đồng thời giảm lượng dữ liệu cá nhân mà đội đó chạm tới. Họ mất khả năng dựng đặc trưng theo từng tài xế (thời gian chờ trung bình của riêng một tài xế) và nối quỹ đạo với chuyến vì <code>trip_id</code> cũng bị bỏ. Ngoài ra độ phân giải làm tròn cỡ 111 m thô hơn một ô H3 nhỏ, nên chọn ô lưới mịn hơn mức làm tròn này cũng không có ý nghĩa.</p></details>
 
 Bài trước: [bài 19](/articles/location-go-fan-out-tracking-khach-noi-suy-marker). Bài tiếp: [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr).
 

@@ -8,19 +8,19 @@ tags: [toi-noi, location, rust, rstar, h3, redis, geo, benchmark, nearest-neighb
 language: vi
 ---
 
-Giờ tan tầm, mưa. Mỗi giây có khoảng 70 khách bấm đặt xe, và mỗi khách cần danh sách 10 tài xế gần nhất để chào chuyến. Cùng lúc, 25.000 tài xế đang trực tuyến gửi vị trí mỗi 4 giây một lần, tức 6.250 cập nhật mỗi giây. Hai con số này là hồ sơ của [Tới Nơi](/articles/du-an-mau-toi-noi): một luồng ghi liên tục và một luồng đọc theo khoảng cách. Câu hỏi của bài: giữ «vị trí mới nhất của mọi tài xế» trong cấu trúc nào để cả hai luồng chạy đủ nhanh, và nhanh hơn bao nhiêu so với cách ngây thơ nhất là duyệt hết?
+Giờ tan tầm, mưa. Mỗi giây có khoảng 70 khách bấm đặt xe, và mỗi khách cần danh sách 10 tài xế gần nhất để chào chuyến. Cùng lúc, 25.000 tài xế đang trực tuyến gửi vị trí mỗi 4 giây một lần, tức 6.250 cập nhật mỗi giây. Hai con số này là hồ sơ của [Tới Nơi](/articles/du-an-mau-toi-noi): một luồng ghi liên tục và một luồng đọc theo khoảng cách. Câu hỏi của bài: giữ «vị trí mới nhất của mọi tài xế» trong cấu trúc nào để cả hai luồng chạy đủ nhanh, và nhanh hơn bao nhiêu so với cách đơn giản nhất là duyệt hết?
 
-«Gần nhất» ở đây là gần theo đường chim bay, chỉ là bước lọc thô; km rỗng thật phải tính theo đường đi (các bài sau). Đây là bài 09 của lộ trình **Nền tảng định vị** qua Tới Nơi. Bài đặt R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong) cạnh lưới H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring), quét toàn bộ và Redis GEO. **Mọi số đo là trên dữ liệu mô phỏng**; vị trí tài xế do lab sinh, không có GPS người thật. **Redis chạy trong Docker, qua mạng loopback của Docker Desktop**, nên số của nó chỉ có giá trị tương đối. **PostGIS không được chạy** trong lab; phần đó chỉ là đối chiếu khái niệm, không có số.
+«Gần nhất» ở đây là gần theo đường chim bay, chỉ là bước lọc thô; km rỗng thật phải tính theo đường đi (các bài sau). Đây là bài 09 của lộ trình **Nền tảng định vị** qua Tới Nơi. Bài đặt R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong) cạnh lưới H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring), cách quét toàn bộ và Redis GEO. **Mọi số đo đều lấy trên dữ liệu mô phỏng**; vị trí tài xế do lab sinh, không có GPS người thật. **Redis chạy trong Docker, qua mạng loopback của Docker Desktop**, nên số của nó chỉ có giá trị tương đối. **PostGIS không được chạy** trong lab; phần đó chỉ là đối chiếu khái niệm, không có số.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Duyệt tuyến tính cả 25.000 tài xế cho mỗi trong 70 truy vấn mỗi giây, cộng 6.250 cập nhật mỗi giây, một luồng CPU: dùng bao nhiêu phần trăm một lõi?</p>
+<p>Duyệt tuyến tính cả 25.000 tài xế cho mỗi truy vấn trong 70 truy vấn mỗi giây, cộng 6.250 cập nhật mỗi giây, một luồng CPU: dùng bao nhiêu phần trăm một lõi?</p>
 <details><summary>Xem đáp án</summary><p>Rất ít: cả một giây tải tốn <b>2,7 ms</b> CPU ở lần chạy lúc phát triển (máy ít tải), và 3,0–11,0 ms khi máy chịu tải nặng, tức dưới 2% một lõi. Quét toàn bộ <b>không cần chỉ mục</b> ở đúng quy mô hồ sơ; chỉ mục có giá trị khi số tài xế hoặc tần suất truy vấn tăng, như phần ×10 bên dưới.</p></details>
 </div>
 
 ## Dựng tải theo hồ sơ và cách đo
 
-Lab sinh tải giống hồ sơ: 25.000 tài xế, mỗi người báo vị trí 4 giây một lần nên mỗi giây có N/4 tài xế báo (quay vòng), và 70 truy vấn «10 tài xế gần nhất» mỗi giây (k = 10). Quy mô 2.500 và 250.000 (×0,1 và ×10) co dãn cả hai theo tỉ lệ. Vị trí: 70% quanh 8 điểm nóng (σ 1,5 km), 30% rải đều trong bbox lat 10,70–10,86, lng 106,60–106,78; tài xế đi 0–40 km/h và đổi hướng ngẫu nhiên σ 20° mỗi lần báo.
+Lab sinh tải giống hồ sơ: 25.000 tài xế, mỗi người báo vị trí 4 giây một lần nên mỗi giây có N/4 tài xế báo (quay vòng), và 70 truy vấn «10 tài xế gần nhất» mỗi giây (k = 10). Ở quy mô 2.500 và 250.000 (×0,1 và ×10), cả hai luồng tải co giãn theo tỉ lệ. Vị trí: 70% quanh 8 điểm nóng (σ 1,5 km), 30% rải đều trong bbox lat 10,70–10,86, lng 106,60–106,78; tài xế đi 0–40 km/h và đổi hướng ngẫu nhiên σ 20° mỗi lần báo.
 
 `examples/toi-noi-location/rust/labs/src/bin/loc09_gan_nhat.rs`
 
@@ -68,7 +68,7 @@ pub trait DriverIndex {
 }
 ```
 
-Mỗi cách được đo qua bốn pha, một luồng, không khoá, không tranh chấp: nạp ban đầu; 8 giây mô phỏng chỉ cập nhật (đo ns mỗi cập nhật); chỉ truy vấn trên trạng thái cuối (2.000 điểm hỏi, đo p50 và p99 từng truy vấn, 1.000 điểm đầu được đối chiếu với quét toàn bộ); và 8 giây mô phỏng xen kẽ như thật.
+Lab đo mỗi cách qua bốn pha, một luồng, không khoá, không tranh chấp: nạp ban đầu; 8 giây mô phỏng chỉ cập nhật (đo ns mỗi cập nhật); chỉ truy vấn trên trạng thái cuối (2.000 điểm hỏi, đo p50 và p99 từng truy vấn, 1.000 điểm đầu được đối chiếu với quét toàn bộ); và 8 giây mô phỏng xen kẽ như thật.
 
 `examples/toi-noi-location/rust/labs/src/bin/loc09_gan_nhat.rs`
 
@@ -89,7 +89,7 @@ Mỗi cách được đo qua bốn pha, một luồng, không khoá, không tran
     let sec_ms = t.elapsed().as_secs_f64() * 1e3 / (w.updates.len() - half) as f64;
 ```
 
-Cột **«1 giây tải»** là thời gian CPU của một luồng để xử lý trọn một giây tải (cập nhật, `flush` rồi các truy vấn). Dưới 1.000 ms nghĩa là kịp; 10 ms là 1% một lõi. Ngân sách mỗi cập nhật nếu chỉ để cập nhật là 1 s chia 6.250, tức 160 µs.
+Cột **«1 giây tải»** là thời gian CPU của một luồng để xử lý trọn một giây tải (cập nhật, `flush` rồi các truy vấn). Dưới 1.000 ms nghĩa là kịp; 10 ms là 1% một lõi. Nếu chỉ tính riêng việc cập nhật, ngân sách cho mỗi cập nhật là 1 s chia 6.250, tức 160 µs.
 
 **Điều kiện đo.** Apple M1 Max, `--release`, seed 20261106. Máy dùng chung với nhiều phiên làm việc khác, **tải trung bình 1 phút từ khoảng 120 đến 180 trong lô đo chính** (theo `uptime`, ghi trong `results/p01.md`). Mọi số thời gian bị phóng đại và dao động; số đếm, tỉ lệ khớp thì không. Vì vậy bài chỉ so tương đối trong cùng một lần chạy và ghi khoảng giá trị qua nhiều lần chạy.
 
@@ -116,7 +116,7 @@ Cột **«1 giây tải»** là thời gian CPU của một luồng để xử l
     }
 ```
 
-**R-tree** (`rstar`, trên mặt phẳng mét của bài 07) có hai biến thể; chính tài liệu của `rstar` nhận xét R-tree hợp nhất khi có nhiều truy vấn và ít lần chèn, đúng chỗ mà tải của tài xế (ghi liên tục) thử nó. Bản «xoá + chèn» sửa cây ngay: tìm và xoá mục cũ rồi chèn mục mới. Bản «dựng lại theo lô» chỉ ghi vị trí, rồi mỗi giây dựng lại cây bằng `bulk_load`; đổi lại, truy vấn giữa hai lần `flush` thấy trạng thái cũ tối đa một giây.
+**R-tree** (`rstar`, trên mặt phẳng mét của bài 07) có hai biến thể; chính tài liệu của `rstar` nhận xét R-tree phù hợp nhất khi có nhiều truy vấn và ít lần chèn, và tải ghi liên tục của tài xế thử thách R-tree đúng ở điểm đó. Bản «xoá + chèn» sửa cây ngay: tìm và xoá mục cũ rồi chèn mục mới. Bản «dựng lại theo lô» chỉ ghi vị trí, rồi mỗi giây dựng lại cây bằng `bulk_load`; đổi lại, truy vấn giữa hai lần `flush` thấy trạng thái cũ tối đa một giây.
 
 `examples/toi-noi-location/rust/crates/driver-store/src/rtree.rs`
 
@@ -148,7 +148,7 @@ Cột **«1 giây tải»** là thời gian CPU của một luồng để xử l
     }
 ```
 
-**Ô H3** giữ một danh sách tài xế cho mỗi ô; cập nhật không đổi ô thì chỉ ghi vị trí mới, đổi ô thì chuyển giỏ.
+**Ô H3** giữ một danh sách tài xế cho mỗi ô; cập nhật không đổi ô thì chỉ ghi vị trí mới, đổi ô thì chuyển tài xế sang giỏ của ô mới.
 
 `examples/toi-noi-location/rust/crates/driver-store/src/h3_buckets.rs`
 
@@ -187,7 +187,7 @@ Chi phí cập nhật ở quy mô hồ sơ, đơn vị ns mỗi cập nhật, qu
 | Redis GEO, 1 lệnh/vòng mạng | 782.309 | 3.182.126,5 | 3.143.026,0 | 2.963.746,1 | 817.925,4 |
 | Redis GEO, pipeline 500/lô | 4.853 | 7.024,2 | 24.858,0 | 22.535,2 | 4.544,0 |
 
-Quét chỉ ghi một ô nhớ nên rẻ nhất. R-tree xoá + chèn **đắt hơn H3 từ 2,4 đến 7,1 lần** ở bốn trong năm lần chạy; ở lần 3, H3 res 8 vẫn rẻ hơn (930,5 ns, 2,8 lần) nhưng H3 res 9 đo ra 2.744,6 ns, không rẻ hơn R-tree (2.631,9 ns): nhiễu của máy tải nặng đủ lớn để đảo thứ tự, nên đừng đọc con số riêng lẻ. Nguyên nhân hợp lý của chiều hướng chung là chỉ khoảng 7,1–7,4% cập nhật làm tài xế đổi ô res 9, còn cây phải xoá và chèn mọi lần. R-tree dựng lại theo lô rẻ hơn mỗi cập nhật (508–1.196 ns, đã gồm dựng lại mỗi giây) nhưng đổi bằng dữ liệu cũ tối đa một giây; vị trí vốn đã cũ tới 4 giây theo chu kỳ báo, nên một giây trễ thêm có thể chấp nhận được. Các cách trong bộ nhớ đều nhỏ hơn nhiều ngân sách 160 µs; Redis từng lệnh thì không.
+Quét chỉ ghi một ô nhớ nên rẻ nhất. R-tree xoá + chèn **đắt hơn H3 từ 2,4 đến 7,1 lần** ở bốn trong năm lần chạy; ở lần 3, H3 res 8 vẫn rẻ hơn (930,5 ns, 2,8 lần) nhưng H3 res 9 đo ra 2.744,6 ns, không rẻ hơn R-tree (2.631,9 ns): nhiễu của máy tải nặng đủ lớn để đảo thứ tự, nên đừng đọc con số riêng lẻ. Lý giải hợp lý cho xu hướng chung là chỉ khoảng 7,1–7,4% cập nhật làm tài xế đổi ô res 9, còn cây phải xoá và chèn mọi lần. R-tree dựng lại theo lô rẻ hơn mỗi cập nhật (508–1.196 ns, đã gồm dựng lại mỗi giây) nhưng phải đánh đổi bằng dữ liệu cũ tối đa một giây; vị trí vốn đã cũ tới 4 giây theo chu kỳ báo, nên một giây trễ thêm có thể chấp nhận được. Các cách trong bộ nhớ đều thấp hơn nhiều so với ngân sách 160 µs; Redis từng lệnh thì không.
 
 ## Số đo ở quy mô hồ sơ và ở ×10
 
@@ -205,7 +205,7 @@ Bảng dưới là **lần 1** của lô đo chính, N = 25.000 (6.250 cập nh�
 
 **Đọc bảng.** Ở đúng quy mô hồ sơ, mọi cách trong bộ nhớ đều thừa sức: p50 truy vấn của quét ổn định quanh 37 µs (37,0–37,9 qua cả năm lần chạy), R-tree 1,8–2,8 µs, H3 res 9 3,6–4,1 µs, H3 res 8 8,8–9,3 µs; một giây tải tốn 2,2–4,3 ms lúc phát triển và tối đa khoảng 20 ms khi máy tải nặng, tức dưới 2% một lõi. Cột p99 của quét (2.970,2 µs) là nhiễu của máy tải, không phải bản chất: các lần chạy khác cho 505,5, 213,1 và 67,4 µs, lúc phát triển 45,6 µs. Quét toàn bộ **không cần chỉ mục** nếu chỉ phục vụ một thành phố ở tải này.
 
-Chỉ mục có giá trị khi tải tăng. Ở ×10 (250.000 tài xế, 62.500 cập nhật/giây, 700 truy vấn/giây), cùng lần chạy:
+Chỉ mục có giá trị khi tải tăng. Ở ×10 (250.000 tài xế, 62.500 cập nhật/giây, 700 truy vấn/giây), trong cùng lần chạy:
 
 | Cách | Hỏi p50 (µs) | 1 giây tải (ms) | Lúc phát triển (ms) |
 |---|---:|---:|---:|
@@ -215,7 +215,7 @@ Chỉ mục có giá trị khi tải tăng. Ở ×10 (250.000 tài xế, 62.500 
 | H3 res 8 | 81,0 | 215,0 | 65,7 |
 | H3 res 9 | 18,0 | 99,5 | 28,1 |
 
-Quét tốn 269–357 ms mỗi giây tải, tức 27–36% một lõi, và truy vấn p50 chậm hơn R-tree cỡ 100 lần (341,5 µs so với 3,0–4,0 µs). H3 res 8 kém res 9 ở đây vì mỗi ô chứa nhiều tài xế hơn: chia đều, 250.000 tài xế trên 349,8 km² là khoảng 527 người mỗi ô res 8 và 75 người mỗi ô res 9, chưa tính việc tài xế dồn về điểm nóng. **Độ phân giải H3 phải khớp mật độ.**
+Quét tốn 269–357 ms mỗi giây tải, tức 27–36% một lõi, và truy vấn p50 chậm hơn R-tree cỡ 100 lần (341,5 µs so với 3,0–4,0 µs). H3 res 8 kém res 9 ở đây vì mỗi ô chứa nhiều tài xế hơn: nếu chia đều thì 250.000 tài xế trên 349,8 km² là khoảng 527 người mỗi ô res 8 và 75 người mỗi ô res 9, chưa tính việc tài xế dồn về điểm nóng. **Độ phân giải H3 phải khớp mật độ.**
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -226,7 +226,7 @@ Quét tốn 269–357 ms mỗi giây tải, tức 27–36% một lõi, và truy 
 
 ## Redis GEO: vòng mạng quyết định tất cả
 
-Redis GEO lưu vị trí trong một sorted set với geohash 52 bit làm score: `GEOADD` ghi, `GEOSEARCH ... BYRADIUS ... ASC COUNT k` tìm. Điều khác biệt nằm ở vị trí của nó: ngoài tiến trình. Thứ tự tham số của Redis là **kinh độ trước, vĩ độ sau**, ngược với `LatLng`, nên lab đổi bằng `to_lnglat` ở một chỗ duy nhất.
+Redis GEO lưu vị trí trong một sorted set với geohash 52 bit làm score: `GEOADD` ghi, `GEOSEARCH ... BYRADIUS ... ASC COUNT k` tìm. Điểm khác biệt là Redis nằm ngoài tiến trình. Thứ tự tham số của Redis là **kinh độ trước, vĩ độ sau**, ngược với `LatLng`, nên lab đổi bằng `to_lnglat` ở một chỗ duy nhất.
 
 `examples/toi-noi-location/rust/crates/driver-store/src/redis_geo.rs`
 
@@ -281,24 +281,24 @@ Redis GEO lưu vị trí trong một sorted set với geohash 52 bit làm score:
     }
 ```
 
-Container Redis 7.4.12 (`redis:7`) chạy bằng `docker compose` ở `127.0.0.1:6391`, qua máy ảo Linux của Docker Desktop. Chi phí tối thiểu của **mọi** lệnh được đo bằng `PING`: trung vị 354,8 µs lúc phát triển, 1.218,4 µs ở lần 1, và tới 3.450,3 µs ở lần 3 (p99 từ 1.135,2 µs tới 27.426,8 µs). Hệ quả:
+Container Redis 7.4.12 (`redis:7`) chạy bằng `docker compose` ở `127.0.0.1:6391`, qua máy ảo Linux của Docker Desktop. Lab đo chi phí tối thiểu của **mọi** lệnh bằng `PING`: trung vị 354,8 µs lúc phát triển, 1.218,4 µs ở lần 1, và tới 3.450,3 µs ở lần 3 (p99 từ 1.135,2 µs tới 27.426,8 µs). Hệ quả:
 
 - **Một lệnh một vòng mạng không kịp.** `GEOADD` lẻ tốn 782–3.182 µs mỗi lệnh, nên một giây tải (6.250 cập nhật và 70 truy vấn) mất **3,4 đến 20,4 giây**, quá một giây, không theo kịp trên một kết nối.
 - **Pipeline cứu phần cập nhật.** Gộp 500 lệnh mỗi lô đưa cập nhật về 4,5–25 µs mỗi lệnh, một giây tải còn 125–732 ms.
-- **Truy vấn vẫn chậm.** `GEOSEARCH` p50 từ 1,3 đến 6,5 ms, so với 2–3 µs của R-tree: chậm hơn cỡ nghìn lần, ví dụ 680 lần ở lần phát triển (1.283,9 µs so với 1,9 µs) và khoảng 1.600 lần ở lần 1 (3.130,3 µs so với 2,0 µs); tỉ lệ tính từ bảng. Chi phí tăng theo bán kính tìm: p50 ở bán kính 300, 1.000, 3.000 m là 458,6, 662,3 và 1.569,8 µs lúc phát triển, 2.061,5, 2.217,2 và 2.935,5 µs ở lần 1. Tài liệu của Redis ghi độ phức tạp của `GEOSEARCH` là O(N + log M), với N là số phần tử trong hộp bao lưới quanh hình tìm, nên `COUNT 10` không rẻ khi vùng đông.
-- **Kết quả khớp quét 99,0%**, không phải 100%, tức 10 trên 1.000 truy vấn được đối chiếu. Lab in thêm khoảng cách giữa người thứ 10 và thứ 11 theo quét ở đúng 10 truy vấn đó: trung vị 0,107 m, lớn nhất 0,437 m. Cả 10 ca đều là **gần hoà** ở ranh giới tốp 10, không phải Redis bỏ sót người gần. Điều này khớp với việc Redis lưu vị trí trong geohash 52 bit, mỗi ô cỡ 0,6 m × 0,3 m ở vĩ độ này, và dùng công thức, bán kính khác; lab không tách riêng phần của từng yếu tố. Bộ nhớ Redis tăng 2,0–2,3 MB cho 25.000 tài xế.
+- **Truy vấn vẫn chậm.** `GEOSEARCH` p50 từ 1,3 đến 6,5 ms, so với 2–3 µs của R-tree: chậm hơn cỡ nghìn lần, ví dụ 680 lần ở lần phát triển (1.283,9 µs so với 1,9 µs) và khoảng 1.600 lần ở lần 1 (3.130,3 µs so với 2,0 µs); tỉ lệ tính từ bảng. Chi phí tăng theo bán kính tìm: p50 ở bán kính 300, 1.000, 3.000 m là 458,6, 662,3 và 1.569,8 µs lúc phát triển, 2.061,5, 2.217,2 và 2.935,5 µs ở lần 1. Tài liệu của Redis ghi độ phức tạp của `GEOSEARCH` là O(N + log M), với N là số phần tử trong hộp bao lưới quanh vùng tìm kiếm, nên `COUNT 10` không rẻ khi vùng đông.
+- **Kết quả khớp quét 99,0%**, không phải 100%, tức 10 trên 1.000 truy vấn được đối chiếu bị lệch. Lab in thêm khoảng cách giữa người thứ 10 và thứ 11 theo quét ở đúng 10 truy vấn đó: trung vị 0,107 m, lớn nhất 0,437 m. Cả 10 ca đều là **gần hoà** ở ranh giới tốp 10, không phải Redis bỏ sót người gần. Điều này khớp với việc Redis lưu vị trí trong geohash 52 bit, mỗi ô cỡ 0,6 m × 0,3 m ở vĩ độ này, và dùng công thức, bán kính khác; lab không tách riêng phần đóng góp của từng yếu tố. Bộ nhớ Redis tăng 2,0–2,3 MB cho 25.000 tài xế.
 
-Những điều này **không** nói Redis dở. Nó đo một thứ cụ thể: giá của một vòng mạng, trên Docker Desktop, qua loopback. Redis ngoài Docker, hoặc kết nối Unix socket, sẽ nhanh hơn; điều đó chưa đo. Redis còn giải quyết việc khác mà ba cách trong bộ nhớ không làm được, như chia sẻ trạng thái giữa nhiều tiến trình; bài này chưa đo phần đó, và để lại cho bài về kho vị trí mới nhất.
+Những số đo này **không** có nghĩa là Redis dở. Lab đo một thứ cụ thể: giá của một vòng mạng, trên Docker Desktop, qua loopback. Redis ngoài Docker, hoặc kết nối Unix socket, sẽ nhanh hơn; điều đó chưa đo. Redis còn giải quyết việc khác mà ba cách trong bộ nhớ không làm được, như chia sẻ trạng thái giữa nhiều tiến trình; bài này chưa đo phần đó, và để lại cho bài về kho vị trí mới nhất.
 
 ## PostGIS: đối chiếu khái niệm, chưa đo
 
-**PostGIS không chạy trong lab** (image chưa có sẵn trên máy viết, và kéo image mới từ Docker Hub có thể treo), nên không có con số nào cho nó và bài không ước lượng thay. Phần này chỉ để đặt nó vào bản đồ khái niệm.
+**PostGIS không chạy trong lab** (image chưa có sẵn trên máy của tác giả, và tải image mới từ Docker Hub có thể bị treo), nên không có con số nào cho nó và bài không ước lượng thay. Phần này chỉ để đặt nó vào bản đồ khái niệm.
 
-PostGIS đặt chỉ mục không gian GiST (một biến thể của R-tree) lên cột hình học, hỗ trợ lọc theo bán kính (`ST_DWithin`) và sắp xếp theo khoảng cách bằng toán tử `<->` kèm `LIMIT`. Về truy vấn, đó là cùng họ với R-tree của bài 07. Khác biệt nằm ở **cập nhật**: mỗi lần sửa một dòng, PostgreSQL ghi một phiên bản dòng mới, và khi cột có chỉ mục đổi giá trị thì cả mục chỉ mục cũng phải đổi, đều đi qua nhật ký ghi trước (WAL). Giả thuyết của loạt bài, **chưa được đo**, là ở 6.250 lần sửa mỗi giây một bảng «vị trí mới nhất» như vậy là gánh nặng không cần thiết cho dữ liệu chỉ cần tươi vài giây. Hồ sơ Tới Nơi coi bảng `driver_locations` là bảng chỉ chèn (6.250 dòng mỗi giây, chủ yếu đọc vài phút gần nhất), không phải bảng «vị trí mới nhất» để sửa tại chỗ. PostGIS vẫn là lựa chọn tự nhiên cho các truy vấn không gian phức tạp trên dữ liệu bền như vùng cấm đón.
+PostGIS đặt chỉ mục không gian GiST (một biến thể của R-tree) lên cột hình học, hỗ trợ lọc theo bán kính (`ST_DWithin`) và sắp xếp theo khoảng cách bằng toán tử `<->` kèm `LIMIT`. Về truy vấn, đó là cùng họ với R-tree của bài 07. Khác biệt nằm ở **cập nhật**: mỗi lần sửa một dòng, PostgreSQL ghi một phiên bản dòng mới, và khi cột có chỉ mục đổi giá trị thì cả mục chỉ mục cũng phải đổi, đều đi qua nhật ký ghi trước (WAL). Giả thuyết của loạt bài, **chưa được đo**, là khi sửa 6.250 lần mỗi giây thì một bảng «vị trí mới nhất» như vậy là gánh nặng không cần thiết cho dữ liệu chỉ cần tươi vài giây. Hồ sơ Tới Nơi coi bảng `driver_locations` là bảng chỉ chèn (6.250 dòng mỗi giây, chủ yếu đọc vài phút gần nhất), không phải bảng «vị trí mới nhất» để sửa tại chỗ. PostGIS vẫn là lựa chọn tự nhiên cho các truy vấn không gian phức tạp trên dữ liệu bền như vùng cấm đón.
 
 ## Chạy ví dụ và kiểm chứng
 
-Cần Redis ở `127.0.0.1:6391`; từ gốc repo:
+Cần Redis ở `127.0.0.1:6391`; từ thư mục gốc của repo:
 
 ```bash
 export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
@@ -307,7 +307,7 @@ cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc09_gan_nhat -- --scales 25000
 ```
 
-Lệnh cuối chỉ chạy quy mô theo hồ sơ, để xem độ dao động giữa các lần. Thêm `--no-redis` để bỏ Redis một cách tường minh; không có cờ này mà Redis thiếu thì lab báo lỗi và dừng với mã 2, không bỏ qua âm thầm (đã xảy ra thật trong lô đo đầu, khi container bị một tiến trình khác gỡ). Cấu hình: seed 20261106, mỗi pha 8 giây mô phỏng, k = 10. Output rút gọn của lần 1, máy tải nặng:
+Lệnh cuối chỉ chạy quy mô theo hồ sơ, để xem độ dao động giữa các lần. Thêm `--no-redis` để chủ động bỏ qua Redis; không có cờ này mà Redis thiếu thì lab báo lỗi và dừng với mã 2, không lặng lẽ bỏ qua (đã xảy ra thật trong lô đo đầu, khi container bị một tiến trình khác gỡ). Cấu hình: seed 20261106, mỗi pha 8 giây mô phỏng, k = 10. Kết quả chạy rút gọn của lần 1 (máy tải nặng):
 
 ```text
 Redis 7.4.12 tại redis://127.0.0.1:6391/: PING trung vị 1218.4 µs, p99 11340.5 µs (2000 lần): chi phí tối thiểu của MỌI lệnh, vì đi qua mạng loopback/Docker
@@ -319,21 +319,21 @@ Redis GEO, 1 lệnh/vòng mạng        256.1    3182126.5     3130.3    27787.2
 PostGIS: không chạy (lab không có PostGIS; image chưa có sẵn), nên không có số đo. Không ước lượng thay.
 ```
 
-Số **thời gian** đo khi máy tải nặng, nên chỉ so tương đối trong cùng lần chạy; số **đếm** (khớp quét, tỉ lệ đổi ô) tái lập. Test của `driver-store` (6 test) kiểm cả ba cách trong bộ nhớ khớp quét toàn bộ trên 3.000 điểm và 200 truy vấn ngẫu nhiên, và kiểm cập nhật, xoá. Test cần Redis thật chạy riêng: `cargo test --manifest-path examples/toi-noi-location/rust/Cargo.toml -p driver-store --features redis -- --ignored` (1 test, qua).
+Số **thời gian** đo khi máy tải nặng, nên chỉ so tương đối trong cùng lần chạy; số **đếm** (khớp quét, tỉ lệ đổi ô) tái lập. Test của `driver-store` (6 test) kiểm tra cả ba cách trong bộ nhớ có khớp với quét toàn bộ trên 3.000 điểm và 200 truy vấn ngẫu nhiên hay không, và kiểm tra cập nhật, xoá. Test cần Redis thật chạy riêng: `cargo test --manifest-path examples/toi-noi-location/rust/Cargo.toml -p driver-store --features redis -- --ignored` (1 test, qua).
 
 ## Giới hạn của ví dụ
 
 - **Một luồng, không khoá.** Chưa đo ghi và đọc cùng lúc từ nhiều luồng; một service thật sẽ cần khoá hoặc cấu trúc đọc nhiều ghi nhiều, và con số sẽ khác.
 - **Không đo bộ nhớ trong tiến trình** của ba cách trong bộ nhớ; chỉ đo `used_memory` của Redis.
-- **Khoảng cách chim bay, k cố định bằng 10**, tài xế đang trực tuyến mọi lúc; chưa có tài xế im lặng, TTL, hay lọc theo trạng thái nhận chuyến.
-- **Redis qua Docker loopback.** Số của Redis không thay cho Redis riêng, socket Unix hay cụm.
+- **Khoảng cách chim bay, k cố định bằng 10**, tài xế đang trực tuyến mọi lúc; chưa có tài xế mất tín hiệu, TTL, hay lọc theo trạng thái nhận chuyến.
+- **Redis qua Docker loopback.** Số đo của Redis này không đại diện cho Redis chạy riêng, socket Unix hay cụm.
 - **PostGIS không chạy**; mọi phát biểu về nó là khái niệm hoặc giả thuyết, không phải kết quả.
-- **Máy đo bị tải nặng**, số thời gian nhiễu; p99 đặc biệt không đáng tin.
+- **Máy đo bị tải nặng**, nên số thời gian bị nhiễu; p99 đặc biệt không đáng tin.
 - **Tải mô phỏng**: điểm nóng, tốc độ, hướng đi do lab chọn; không có GPS người thật.
 
 ## Bài tập
 
-**Bài 1.** R-tree xoá + chèn tốn 2.648,7 ns mỗi cập nhật (lần 1). Nếu chỉ tính riêng việc cập nhật trên một lõi, nó đỡ nổi bao nhiêu cập nhật mỗi giây? So với 6.250.
+**Bài 1.** R-tree xoá + chèn tốn 2.648,7 ns mỗi cập nhật (lần 1). Nếu chỉ tính riêng việc cập nhật trên một lõi, nó xử lý nổi bao nhiêu cập nhật mỗi giây? So với 6.250.
 
 <details><summary>Lời giải bài 1</summary>
 <p>1 giây chia 2.648,7 ns là xấp xỉ 377.000 cập nhật mỗi giây cho một lõi, cỡ 60 lần nhu cầu 6.250, chưa tính truy vấn, <code>flush</code> và tranh chấp khoá. Đây là cận trên lý thuyết trên máy đo, trong lúc máy bị tải nặng; không phải năng lực của service.</p>
@@ -342,7 +342,7 @@ Số **thời gian** đo khi máy tải nặng, nên chỉ so tương đối tro
 **Bài 2.** Vì sao R-tree dựng lại theo lô, dữ liệu cũ tối đa một giây, vẫn có thể chấp nhận cho việc chọn 10 tài xế gần nhất?
 
 <details><summary>Lời giải bài 2</summary>
-<p>Vị trí của mỗi tài xế vốn cũ tới 4 giây theo chu kỳ báo, và xe đi tối đa 40 km/h (khoảng 11 m/s) trong mô phỏng, nên một giây cũ thêm là cỡ 11 m ở tốc độ lớn nhất. Danh sách 10 tài xế chỉ là bước lọc thô trước khi tính đường đi thật. Đổi lại cách này rẻ hơn mỗi cập nhật (508–1.196 ns) và truy vấn nhanh nhất (p50 2,0 µs). Nó sẽ không phù hợp nếu cần thấy tài xế vừa nhận chuyến ngay lập tức, tức nhu cầu loại tài xế khỏi danh sách tức thì.</p>
+<p>Vị trí của mỗi tài xế vốn cũ tới 4 giây theo chu kỳ báo, và xe đi tối đa 40 km/h (khoảng 11 m/s) trong mô phỏng, nên độ trễ thêm một giây tương ứng cỡ 11 m ở tốc độ lớn nhất. Danh sách 10 tài xế chỉ là bước lọc thô trước khi tính đường đi thật. Bù lại, cách này rẻ hơn ở mỗi cập nhật (508–1.196 ns) và truy vấn nhanh nhất (p50 2,0 µs). Cách này sẽ không phù hợp nếu cần thấy tài xế vừa nhận chuyến ngay lập tức, tức nhu cầu loại tài xế khỏi danh sách tức thì.</p>
 </details>
 
 **Bài 3.** Dùng «hỏi TB» và «cập nhật ns» của dòng Redis pipeline ở lần 1 để ước lượng một giây tải, rồi so với 380,4 ms đã đo.

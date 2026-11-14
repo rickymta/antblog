@@ -1,0 +1,197 @@
+{
+  "file": "location-hoc-diem-don-tu-lich-su-dbscan-python.md",
+  "edits": [
+    {
+      "old": "Trên dữ liệu mô phỏng, chỉ chứng minh phương pháp.",
+      "new": "Trên dữ liệu mô phỏng, bài chỉ chứng minh phương pháp.",
+      "reason": "Câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó đến từ simulator.",
+      "new": "Dữ liệu ấy đến từ simulator.",
+      "reason": "Tránh «Nó» chỉ sự vật trừu tượng đầu câu",
+      "severity": "low"
+    },
+    {
+      "old": "Dựng đường ống: xuất lịch sử",
+      "new": "Dựng pipeline: xuất lịch sử",
+      "reason": "«Đường ống» là calque của pipeline; giữ thuật ngữ quen dùng",
+      "severity": "medium"
+    },
+    {
+      "old": "Mọi số trong bài là **trên dữ liệu mô phỏng**;",
+      "new": "Mọi số trong bài đều đo **trên dữ liệu mô phỏng**;",
+      "reason": "Câu thiếu động từ, trật tự kiểu Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "So sánh cặp theo 20 seed đánh giá (20270001…20270020, khoảng tin cậy t 95%) như đã định nghĩa ở",
+      "new": "Bài so sánh cặp theo 20 seed đánh giá (20270001…20270020, khoảng tin cậy t 95%) như đã định nghĩa ở",
+      "reason": "Câu thiếu chủ ngữ và động từ",
+      "severity": "high"
+    },
+    {
+      "old": "không giao với dải chỉnh (",
+      "new": "không giao với dải seed dùng để chỉnh (",
+      "reason": "Cụm «dải chỉnh» cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "trên 40 seed, được 8.723 dòng",
+      "new": "trên 40 seed, thu được 8.723 dòng",
+      "reason": "«Được» dùng gượng",
+      "severity": "low"
+    },
+    {
+      "old": "nếu đưa độ vĩ độ, kinh độ thẳng vào",
+      "new": "nếu đưa thẳng giá trị vĩ độ, kinh độ (tính theo độ) vào",
+      "reason": "Lặp «độ vĩ độ», trật tự từ gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "một quy tắc đặt trước, một cái so ngẫu nhiên",
+      "new": "một quy tắc đặt trước, một mốc so sánh ngẫu nhiên",
+      "reason": "Cụm «một cái so ngẫu nhiên» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "chấm trên kiểm định bằng **độ phủ**",
+      "new": "chấm điểm trên tập kiểm định bằng **độ phủ**",
+      "reason": "Thiếu động từ và danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "hoà thì ít hub hơn.",
+      "new": "nếu hoà thì chọn cấu hình ít hub hơn.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Độ phủ của hub chỉ **3,2%** điểm đón kiểm định",
+      "new": "Độ phủ của hub chỉ đạt **3,2%** điểm đón kiểm định",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chênh +0,020 lại được chọn",
+      "new": "Mức chênh +0,020 lại được chọn",
+      "reason": "Thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "nên nó lạc quan; không nên đọc là bằng chứng chắc rằng học hơn ngẫu nhiên.",
+      "new": "nên con số này lạc quan; không nên đọc đó là bằng chứng chắc chắn rằng cách học hơn ngẫu nhiên.",
+      "reason": "Câu cụt, thiếu chủ ngữ và đại từ chỉ rõ",
+      "severity": "medium"
+    },
+    {
+      "old": "có hub gần nhất chỉ 64–65 m và hàng chục hub quanh đó",
+      "new": "có hub gần nhất chỉ cách 64–65 m và có hàng chục hub quanh đó",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Script đo mỗi hub bằng σ riêng của điểm nóng:",
+      "new": "Script đo khoảng cách từ mỗi hub tới điểm nóng theo σ riêng của điểm nóng đó:",
+      "reason": "Câu cụt, thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "không phải chuyện ngẫu nhiên.",
+      "new": "không phải do ngẫu nhiên.",
+      "reason": "Văn nói «chuyện»",
+      "severity": "low"
+    },
+    {
+      "old": "Vì khách đứng ngẫu nhiên và trơn quanh điểm nóng",
+      "new": "Vì khách đứng ngẫu nhiên, phân bố mượt quanh điểm nóng",
+      "reason": "«Trơn» dùng không tự nhiên trong ngữ cảnh mật độ",
+      "severity": "medium"
+    },
+    {
+      "old": "Mô phỏng này không có, nên nó không thể cho thấy DBSCAN học được gì từ chúng.",
+      "new": "Mô phỏng này không có những đỉnh đó, nên không thể cho thấy DBSCAN học được gì từ chúng.",
+      "reason": "Câu thiếu tân ngữ; «nó» mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nếu bảng học được được đưa lại vào bộ chọn điểm đón",
+      "new": "Nếu bảng học được quay lại làm đầu vào của bộ chọn điểm đón",
+      "reason": "Lặp «được được», câu bị động gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Cái bạn học được là thói quen",
+      "new": "Điều bạn học được là thói quen",
+      "reason": "«Cái» là văn nói",
+      "severity": "low"
+    },
+    {
+      "old": "Bảng học thẳng từ lịch sử học luôn cả các chỗ đó.",
+      "new": "Vì học thẳng từ lịch sử, bảng học luôn cả các chỗ đó.",
+      "reason": "Câu thiếu liên kết, đọc cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Nó cũng giải thích kết quả rỗng ở mục sau.",
+      "new": "Cơ chế lọc này cũng giải thích kết quả rỗng ở mục sau.",
+      "reason": "«Nó» mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "thêm một hub chỉ thêm một chỗ được chấm như mọi chỗ khác",
+      "new": "thêm một hub chỉ là thêm một ứng viên được chấm điểm như mọi ứng viên khác",
+      "reason": "Cụm cụt, lặp «chỗ»",
+      "severity": "medium"
+    },
+    {
+      "old": "Nếu hub có ích thì lệch sẽ làm nó có hại",
+      "new": "Nếu hub có ích thì độ lệch này sẽ làm nó có hại",
+      "reason": "Thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Nơi nhiều người đón (trung tâm) được hub thêm ứng viên tốt",
+      "new": "Nơi nhiều người đón (trung tâm) được hub bổ sung thêm ứng viên tốt",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "cần kiểm ngay khi có dữ liệu thật",
+      "new": "cần kiểm tra ngay khi có dữ liệu thật",
+      "reason": "Thiếu chữ «tra»",
+      "severity": "medium"
+    },
+    {
+      "old": "Output thật của bước 1",
+      "new": "Kết quả chạy thật của bước 1",
+      "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "Nó xác nhận hub nằm trong vùng đã đặt",
+      "new": "Phép đo này xác nhận hub nằm trong vùng đã đặt",
+      "reason": "Tránh «Nó» chỉ sự vật trừu tượng đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "`min_samples` = 5 độ phủ vượt ngẫu nhiên lớn nhất",
+      "new": "`min_samples` = 5 có độ phủ vượt ngẫu nhiên lớn nhất",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chỉ rõ cái gì thay đổi giữa các thế hệ",
+      "new": "Chỉ rõ điều gì thay đổi giữa các thế hệ",
+      "reason": "«Cái gì» là văn nói",
+      "severity": "low"
+    },
+    {
+      "old": "Ngoài đời, cần kiểm không phân biệt đối xử theo khu vực trước khi bật.",
+      "new": "Ngoài đời, cần kiểm tra việc không phân biệt đối xử theo khu vực trước khi bật.",
+      "reason": "Thiếu chữ «tra», câu cụt",
+      "severity": "medium"
+    }
+  ]
+}

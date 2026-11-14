@@ -1,0 +1,197 @@
+{
+ "file": "location-go-goroutine-channel-nhap-mon-cho-ingest.md",
+ "edits": [
+  {
+   "old": "tái hiện một data race mất hơn nửa số đếm rồi để -race bắt.",
+   "new": "tái hiện một data race làm mất hơn nửa số đếm rồi để cờ -race phát hiện.",
+   "reason": "Câu thiếu động từ; «bắt» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "và ở loạt này nó viết bằng Go.",
+   "new": "và ở loạt này dịch vụ đó được viết bằng Go.",
+   "reason": "«Nó» mơ hồ, câu thiếu bị động",
+   "severity": "medium"
+  },
+  {
+   "old": "khi không có công cụ bắt.",
+   "new": "khi không có công cụ phát hiện.",
+   "reason": "Cách nói thiếu tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "Vì sao service này viết bằng Go mà không phải Rust nằm ở",
+   "new": "Lý do service này viết bằng Go chứ không phải Rust nằm ở",
+   "reason": "Chủ ngữ là mệnh đề hỏi, đọc vấp",
+   "severity": "medium"
+  },
+  {
+   "old": "nên đánh đổi của Go, có bộ gom rác và không có kiểm tra data race lúc biên dịch, chấp nhận được ở đây.",
+   "new": "nên cái giá phải đánh đổi của Go (có bộ gom rác, không kiểm tra data race lúc biên dịch) là chấp nhận được ở đây.",
+   "reason": "Câu chêm lủng củng",
+   "severity": "medium"
+  },
+  {
+   "old": "viết code theo kiểu tuần tự, chặn thẳng:",
+   "new": "viết code theo kiểu tuần tự, chặn trực tiếp:",
+   "reason": "«Chặn thẳng» là cụm tự ghép",
+   "severity": "low"
+  },
+  {
+   "old": "Go không có sự phân biệt hàm",
+   "new": "Go không phân biệt hàm",
+   "reason": "Danh từ hoá thừa",
+   "severity": "low"
+  },
+  {
+   "old": "Hàng cuối là khác biệt quan trọng nhất",
+   "new": "Hàng cuối là điểm khác biệt quan trọng nhất",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "chương trình truy cập dữ liệu chung không đồng bộ;",
+   "new": "chương trình truy cập dữ liệu chung mà không đồng bộ hoá;",
+   "reason": "«Không đồng bộ» dễ nhầm với async",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ có công cụ kiểm lúc chạy.",
+   "new": "chỉ có công cụ kiểm tra lúc chạy.",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Điều đáng đọc là hai thứ:",
+   "new": "Có hai chỗ đáng đọc:",
+   "reason": "Câu gượng",
+   "severity": "low"
+  },
+  {
+   "old": "khởi một goroutine; không có",
+   "new": "khởi chạy một goroutine; không có",
+   "reason": "«Khởi» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi channel chỉ nên có một chủ đóng.",
+   "new": "mỗi channel chỉ nên có một bên đóng.",
+   "reason": "«Chủ đóng» là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "những người khác gửi tin nhắn tới chủ đó qua channel",
+   "new": "các goroutine khác gửi thông điệp tới goroutine sở hữu đó qua channel",
+   "reason": "Nhân hoá mơ hồ, «tin nhắn» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "compiler không cấm nó ghi tiếp.",
+   "new": "trình biên dịch không cấm worker ghi tiếp.",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi; «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "output thật của lab",
+   "new": "kết quả chạy thật của lab",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "huỷ trong Go là hợp tác, hàm phải tự kiểm `ctx.Done()` hoặc gọi thứ có kiểm.",
+   "new": "huỷ trong Go mang tính hợp tác, tức hàm phải tự kiểm tra `ctx.Done()` hoặc gọi hàm khác có kiểm tra.",
+   "reason": "«Hợp tác» gượng; «gọi thứ có kiểm» cụt",
+   "severity": "high"
+  },
+  {
+   "old": "Mất hơn một nửa mà không lỗi nào,",
+   "new": "Mất hơn một nửa mà không có lỗi nào,",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Thêm `-race`, Go chèn mã theo dõi",
+   "new": "Khi thêm `-race`, Go chèn mã theo dõi",
+   "reason": "Câu thiếu liên từ",
+   "severity": "low"
+  },
+  {
+   "old": "Báo cáo chỉ đúng dòng 25,",
+   "new": "Báo cáo chỉ ra đúng dòng 25,",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đường code không được test chạm tới thì không được kiểm,",
+   "new": "Đoạn mã mà test không chạy tới thì không được kiểm tra,",
+   "reason": "Lẫn tiếng Anh, câu lặp chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "`-race` chỉ bắt truy cập bộ nhớ không đồng bộ.",
+   "new": "`-race` chỉ bắt truy cập bộ nhớ không được đồng bộ hoá.",
+   "reason": "«Không đồng bộ» dễ nhầm với async",
+   "severity": "medium"
+  },
+  {
+   "old": "nó chỉ dùng cho test và cho lab bài này.",
+   "new": "cờ này chỉ dùng cho test và cho lab của bài này.",
+   "reason": "«Nó» mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Bộ đếm nóng như số lô, số điểm dùng",
+   "new": "Bộ đếm bị nhiều goroutine ghi liên tục, như số lô và số điểm, dùng",
+   "reason": "«Bộ đếm nóng» là calque của hot counter",
+   "severity": "medium"
+  },
+  {
+   "old": "Safe Rust chặn lỗi này ngay lúc biên dịch: `count++` từ nhiều thread không qua `Mutex` hay `Atomic*` không compile được.",
+   "new": "Safe Rust chặn lỗi này ngay lúc biên dịch: `count++` từ nhiều thread không qua `Mutex` hay `Atomic*` sẽ không biên dịch được.",
+   "reason": "Thống nhất «biên dịch»",
+   "severity": "low"
+  },
+  {
+   "old": "Đổi lại Go cho bạn goroutine rẻ và code chặn thẳng,",
+   "new": "Bù lại, Go cho bạn goroutine rẻ và code chặn trực tiếp,",
+   "reason": "Calque của in return",
+   "severity": "low"
+  },
+  {
+   "old": "Từ gốc repository (",
+   "new": "Từ thư mục gốc của repo (",
+   "reason": "Tiếng Anh lọt vào câu Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy lại phần này và kiểm hai điều:",
+   "new": "chạy lại phần này và kiểm tra hai điều:",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Mỗi số trong bài là một lần chạy.",
+   "new": "Mỗi số trong bài là kết quả của một lần chạy.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Bỏ nhánh này và để chỉ có",
+   "new": "Bỏ nhánh này và chỉ giữ lại",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "có đủ để `-race` im lặng",
+   "new": "có đủ để `-race` không báo gì",
+   "reason": "«Im lặng» là dịch gượng của silent",
+   "severity": "medium"
+  },
+  {
+   "old": "làm đọc-cộng-ghi thành một thao tác",
+   "new": "biến chuỗi đọc-cộng-ghi thành một thao tác",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  }
+ ]
+}

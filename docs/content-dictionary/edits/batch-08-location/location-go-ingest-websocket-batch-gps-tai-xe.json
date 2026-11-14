@@ -1,0 +1,221 @@
+{
+ "file": "location-go-ingest-websocket-batch-gps-tai-xe.md",
+ "edits": [
+  {
+   "old": "để chịu được 25.000 tài xế cùng online,",
+   "new": "để chịu được 25.000 tài xế cùng trực tuyến,",
+   "reason": "Thống nhất «trực tuyến» với các bài trước",
+   "severity": "low"
+  },
+  {
+   "old": "mỗi lô được trả một",
+   "new": "mỗi lô nhận lại một",
+   "reason": "Bị động gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "giữ được sự khác nhau giữa",
+   "new": "giữ được sự phân biệt giữa",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "và để gRPC streaming cho luồng service với service.",
+   "new": "và dành gRPC streaming cho luồng giữa các service.",
+   "reason": "Câu cụt thiếu giới từ",
+   "severity": "medium"
+  },
+  {
+   "old": "thì gửi theo stream ở giao thức nào cũng phải tự định nghĩa.",
+   "new": "thì dù gửi theo stream trên giao thức nào cũng phải tự định nghĩa.",
+   "reason": "Trật tự câu khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "(ack, độ sâu hàng đợi) phải tự làm.",
+   "new": "(ack, độ sâu hàng đợi) phải tự cài đặt.",
+   "reason": "«Tự làm» quá chung",
+   "severity": "low"
+  },
+  {
+   "old": "bài tập 2 nói chỗ hở khi nối lại.",
+   "new": "bài tập 2 chỉ ra chỗ hở khi nối lại.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "goroutine kiểm từng điểm, đưa vào hàng đợi",
+   "new": "goroutine kiểm tra từng điểm, đưa vào hàng đợi",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "(kiểm chữ ký bằng so sánh thời gian hằng số, rồi kiểm hạn).",
+   "new": "(kiểm tra chữ ký bằng phép so sánh thời gian hằng số, rồi kiểm tra hạn).",
+   "reason": "«Kiểm» cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "vòng đọc là một hàm chặn thẳng:",
+   "new": "vòng đọc là một hàm chặn trực tiếp:",
+   "reason": "«Chặn thẳng» là cụm tự ghép",
+   "severity": "low"
+  },
+  {
+   "old": "app im lặng quá lâu thì goroutine tự thoát",
+   "new": "app không gửi gì quá lâu thì goroutine tự thoát",
+   "reason": "«Im lặng» là dịch gượng của silent",
+   "severity": "medium"
+  },
+  {
+   "old": "nên partition theo tài xế nằm sẵn trong cách nhận kết nối.",
+   "new": "nên việc chia partition theo tài xế đã có sẵn ngay trong cách nhận kết nối.",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Cái giá: nối lại là goroutine mới và",
+   "new": "Cái giá phải trả là khi nối lại sẽ có goroutine mới và",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chứ không im lặng bỏ qua.",
+   "new": "chứ không lặng lẽ bỏ qua.",
+   "reason": "«Im lặng» là dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Ack được ghi trước khi đo",
+   "new": "Server ghi ack trước khi đo",
+   "reason": "Chuyển bị động sang chủ động",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm từng điểm rồi đưa điểm đạt vào hàng đợi:",
+   "new": "kiểm tra từng điểm rồi đưa điểm đạt vào hàng đợi:",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "; nó chỉ giữ mutex của hàng đợi trong chốc lát.",
+   "new": "; hàm này chỉ giữ mutex của hàng đợi trong chốc lát.",
+   "reason": "«Nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "hàng đợi phía sau gộp hoặc bỏ có đếm;",
+   "new": "hàng đợi phía sau gộp hoặc bỏ điểm, đồng thời có đếm;",
+   "reason": "Cụm cụt, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Kết quả của tính chất đó được đo ở bài 13.",
+   "new": "Bài 13 đo kết quả của tính chất đó.",
+   "reason": "Chuyển bị động sang chủ động",
+   "severity": "low"
+  },
+  {
+   "old": "nên chiều hướng đáng tin hơn độ lớn.",
+   "new": "nên xu hướng đáng tin hơn độ lớn.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Nhìn về bộ nhớ:",
+   "new": "Về bộ nhớ:",
+   "reason": "Calque của looking at",
+   "severity": "low"
+  },
+  {
+   "old": "Một tài xế vẫn luôn về một phần nên",
+   "new": "Một tài xế vẫn luôn rơi vào cùng một phần nên",
+   "reason": "Cách nói khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "**không dời điểm gãy một cách rõ ràng**",
+   "new": "**không làm điểm gãy dịch chuyển rõ rệt**",
+   "reason": "«Dời» gượng, «một cách» thừa",
+   "severity": "medium"
+  },
+  {
+   "old": "Ở 150.000 là 41.726 và 77.380",
+   "new": "Ở 150.000 thì đạt 41.726 và 77.380",
+   "reason": "Câu cụt thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ thêm một lần kiểm độ dài.",
+   "new": "chỉ thêm một lần kiểm tra độ dài.",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Ingest dừng ở dưới một lõi có thể vì",
+   "new": "Việc ingest dừng ở mức dưới một lõi có thể do",
+   "reason": "Câu cụt, thiếu danh từ hoá",
+   "severity": "medium"
+  },
+  {
+   "old": "Vẽ từ output của lab (bảng dòng <code>STEP</code> của hai sweep)",
+   "new": "Vẽ từ kết quả chạy của lab (bảng gồm các dòng <code>STEP</code> của hai sweep)",
+   "reason": "Tiếng Anh lọt vào văn xuôi; câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Output của lần chạy chính (dòng cuối",
+   "new": "Kết quả in ra của lần chạy chính (dòng cuối",
+   "reason": "Tiếng Anh lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Đầy đủ lệnh và output thô nằm ở",
+   "new": "Lệnh đầy đủ và kết quả thô nằm ở",
+   "reason": "Tiếng Anh lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "chưa lặp để có phương sai.",
+   "new": "chưa chạy lặp lại để tính phương sai.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi điểm cách nhau 4 giây.",
+   "new": "hai điểm liên tiếp cách nhau 4 giây.",
+   "reason": "Câu cụt, dễ hiểu nhầm",
+   "severity": "medium"
+  },
+  {
+   "old": "Phần độ trễ mạng bỏ qua.",
+   "new": "Bỏ qua phần độ trễ mạng.",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "điểm gửi lại <b>không</b> bị loại là <code>duplicate</code> hay <code>out_of_order</code>",
+   "new": "điểm gửi lại <b>không</b> bị loại với lý do <code>duplicate</code> hay <code>out_of_order</code>",
+   "reason": "Câu cụt, không rõ ý",
+   "severity": "medium"
+  },
+  {
+   "old": "nên cả vòng đó chưa được kiểm.",
+   "new": "nên cả vòng đó chưa được kiểm chứng.",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "ingest chờ thứ gì đó chứ không bận tính, mà thứ đó chưa xác định",
+   "new": "ingest đang chờ một thứ gì đó chứ không bận tính toán, mà thứ đó chưa xác định",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Thử chia 8 phần hàng đợi không dời điểm gãy rõ ràng",
+   "new": "Thử chia hàng đợi thành 8 phần không làm điểm gãy dịch chuyển rõ rệt",
+   "reason": "Câu cụt, «dời» gượng",
+   "severity": "medium"
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+{"file":"location-khoang-cach-haversine-equirectangular-sai-so.md","edits":[
+{"old":"hệ số vòng đường đi trên chim bay ở TP.HCM","new":"hệ số vòng (đường đi so với chim bay) ở TP.HCM","reason":"\"đường đi trên chim bay\" sai trật tự, người đọc phải đoán ý","severity":"high"},
+{"old":"Kết quả là mét ở kiểu `f64`;","new":"Kết quả tính bằng mét, kiểu `f64`;","reason":"\"là mét ở kiểu\" gượng","severity":"medium"},
+{"old":"gần cực bắc lãnh thổ, chỉ 0,056 m ở 50 km","new":"gần cực bắc lãnh thổ, độ lệch cũng chỉ 0,056 m ở 50 km","reason":"Thiếu chủ ngữ cho vế sau","severity":"medium"},
+{"old":"Vì thế ở vài km nó nhỏ hơn nhiễu GPS hàng nghìn lần","new":"Vì thế ở vài km sai số này nhỏ hơn nhiễu GPS hàng nghìn lần","reason":"Nhắc lại danh từ thay cho \"nó\"","severity":"low"},
+{"old":"vì nó đến từ một hệ số co sai chứ không đến từ độ cong","new":"vì nguyên nhân là hệ số co theo cos bị lệch chứ không phải độ cong","reason":"\"hệ số co sai\" là cụm tự ghép, khó hiểu","severity":"high"},
+{"old":"nhưng lớn hơn equirect «cos trung bình hai đầu» cỡ mười nghìn lần","new":"nhưng lớn hơn sai số của equirect «cos trung bình hai đầu» cỡ mười nghìn lần","reason":"So sánh sai đối tượng: sai số với công thức","severity":"medium"},
+{"old":"Thực tế nó là ellipsoid","new":"Thực tế Trái Đất là ellipsoid","reason":"Nhắc lại danh từ thay cho \"nó\"","severity":"low"},
+{"old":"Máy viết khi đó đang chịu tải rất nặng","new":"Máy của tác giả khi đó đang chịu tải rất nặng","reason":"\"Máy viết\" gượng, dễ hiểu nhầm","severity":"low"},
+{"old":"Điều đọc được một cách đáng tin:","new":"Điều có thể rút ra một cách đáng tin:","reason":"\"Điều đọc được\" gượng","severity":"medium"},
+{"old":"chia khoảng cách chim bay, trên đồ thị OSM TP.HCM (126.699","new":"chia cho khoảng cách chim bay, trên đồ thị OSM TP.HCM (126.699","reason":"Thiếu \"cho\" sau \"chia\"","severity":"medium"},
+{"old":"chia khoảng cách chim bay, trên đồ thị OSM TP.HCM của lab","new":"chia cho khoảng cách chim bay, trên đồ thị OSM TP.HCM của lab","reason":"Thiếu \"cho\" sau \"chia\" (chữ trong hình)","severity":"medium"},
+{"old":"Nên «chim bay nhân một hằng số» là phương án lùi tồi","new":"Vì vậy «chim bay nhân một hằng số» là phương án lùi tồi","reason":"\"Nên\" đầu câu là cách nói dịch từ \"So\"","severity":"low"},
+{"old":"Ba giới hạn bắt buộc khi đọc con số này.","new":"Có ba giới hạn bắt buộc phải nhớ khi đọc con số này.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"có thể bị thổi cao vì lối tắt thật nằm ngoài khung","new":"có thể bị đẩy cao hơn thực tế vì lối tắt thật nằm ngoài khung","reason":"\"thổi cao\" quá khẩu ngữ","severity":"medium"},
+{"old":"Và nó đo độ dài ngắn nhất","new":"Và phép đo này tính độ dài ngắn nhất","reason":"Tránh \"nó\" chỉ sự vật trừu tượng","severity":"low"},
+{"old":"Số của đồ thị OSM TP.HCM trong khung lab, bỏ qua cấm rẽ.","new":"Số liệu đo trên đồ thị OSM TP.HCM trong khung lab, bỏ qua cấm rẽ.","reason":"\"Số của đồ thị\" cụt","severity":"low"},
+{"old":"Phương án lùi khi route engine lỗi","new":"Phương án lùi khi bộ định tuyến (route engine) lỗi","reason":"Từ tiếng Anh lọt vào bảng, có từ Việt quen dùng","severity":"low"},
+{"old":"Nó nhanh hơn vài lần nhưng không chính xác hơn.","new":"Equirect nhanh hơn vài lần nhưng không chính xác hơn.","reason":"Nhắc lại danh từ thay cho \"Nó\"","severity":"low"}
+]}

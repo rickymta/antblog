@@ -1,16 +1,16 @@
 ---
 slug: location-routing-service-tonic-cache-fallback-p99
 title: "Dịch vụ định tuyến: gRPC với tonic, deadline, cache H3, dự phòng và p99"
-summary: "Bài 29: bọc engine thành dịch vụ gRPC Route và Matrix bằng tonic, deadline và giấy phép tính toán, cache theo ô H3 và khung giờ, dự phòng chim bay, client C# chạy thật, đo p50 và p99 khi máy chịu tải."
+summary: "Bài 29: bọc engine thành dịch vụ gRPC Route và Matrix bằng tonic, kèm deadline, giấy phép tính toán, cache theo ô H3 và khung giờ, dự phòng bằng ước lượng chim bay, client C# chạy thật, đo p50 và p99 khi máy chịu tải."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, tonic, grpc, cache, h3, fallback, csharp]
 language: vi
 ---
 
-Màn hình đặt xe của khách đang chờ báo giá. Backend C# gọi sang `geo-engine` để biết ETA, và nó gọi với một deadline: quá 250 ms thì khách thấy vòng xoay. Cùng lúc đó hàng chục khách khác ở quanh Chợ Bến Thành hỏi những cặp điểm gần như giống nhau. Engine tính một tuyến mất chừng một phần mười mili giây, nên tính toán không phải chỗ nghẽn. Chỗ nghẽn là hàng đợi, và câu hỏi của bài này là dịch vụ nên làm gì khi hàng đợi dài hơn deadline: báo lỗi, hay trả lời một con số kém chính xác nhưng nói rõ nó kém chính xác.
+Màn hình đặt xe của khách đang chờ báo giá. Backend C# gọi sang `geo-engine` để biết ETA, và lời gọi đó kèm một deadline: quá 250 ms thì khách thấy vòng xoay. Cùng lúc đó hàng chục khách khác ở quanh Chợ Bến Thành hỏi những cặp điểm gần như giống nhau. Engine tính một tuyến mất chừng một phần mười mili giây, nên tính toán không phải chỗ nghẽn. Chỗ nghẽn là hàng đợi, và câu hỏi của bài này là dịch vụ nên làm gì khi hàng đợi dài hơn deadline: báo lỗi, hay trả lời một con số kém chính xác nhưng nói rõ nó kém chính xác.
 
-Đây là bài 29 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài bọc engine của [bài 26](/articles/location-ma-tran-many-to-many-bucket-ch) và [bài 27](/articles/location-toc-do-theo-gio-customizable-ch-ket-xe) bằng gRPC, dùng lại bộ ước lượng chim bay của [bài 28](/articles/location-self-host-osrm-valhalla-hay-map-provider) và ô H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring). Dịch vụ gọi thẳng `Engine`, chưa đi qua trait `RoutingProvider`. Mọi số đo là trên đồ thị HCM (© OpenStreetMap contributors), máy chủ và bộ tạo tải **cùng một máy đang chịu tải nặng**, nên chỉ so sánh tương đối trong cùng một lần chạy.
+Đây là bài 29 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài bọc engine của [bài 26](/articles/location-ma-tran-many-to-many-bucket-ch) và [bài 27](/articles/location-toc-do-theo-gio-customizable-ch-ket-xe) bằng gRPC, dùng lại bộ ước lượng chim bay của [bài 28](/articles/location-self-host-osrm-valhalla-hay-map-provider) và ô H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring). Dịch vụ gọi thẳng `Engine`, chưa đi qua trait `RoutingProvider`. Mọi số đo đều lấy trên đồ thị HCM (© OpenStreetMap contributors), máy chủ và bộ tạo tải **cùng một máy đang chịu tải nặng**, nên chỉ so sánh tương đối trong cùng một lần chạy.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -47,7 +47,7 @@ message RouteRequest {
 }
 ```
 
-`Route` và `Matrix` là hai RPC. Ma trận trả mảng `duration_ms` hàng-chính, `4294967295` (u32::MAX) nghĩa là không tới được. Profile là trường bắt buộc: thiếu thì dịch vụ trả `InvalidArgument` thay vì đoán, vì một câu trả lời giả cho ô tô khi khách hỏi xe máy tệ hơn một lỗi rõ ràng.
+`Route` và `Matrix` là hai RPC. Ma trận trả mảng `duration_ms` theo thứ tự hàng (row-major), `4294967295` (u32::MAX) nghĩa là không tới được. Profile là trường bắt buộc: thiếu thì dịch vụ trả `InvalidArgument` thay vì đoán, vì một câu trả lời giả cho ô tô khi khách hỏi xe máy tệ hơn một lỗi rõ ràng.
 
 ## Luồng xử lý và deadline
 
@@ -91,11 +91,11 @@ Phần cốt lõi là hàm `compute`. Chờ giấy phép tối đa bằng ngân 
         }
 ```
 
-Có một điều trung thực cần nói về đoạn này: tác vụ tính toán đã bắt đầu thì **không huỷ được** khi quá hạn. Nó chạy tiếp tới cùng và giữ giấy phép của nó. Nếu quá hạn nhiều, các giấy phép cạn và yêu cầu sau bị shed. Đó là cơ chế bảo vệ, không phải miễn phí. Lab cấu hình tối đa 4 tính toán đồng thời, máy chủ 4 luồng tokio.
+Có một điều cần nói thẳng về đoạn này: tác vụ tính toán đã bắt đầu thì **không huỷ được** khi quá hạn. Nó chạy tiếp tới cùng và giữ giấy phép của nó. Nếu quá hạn nhiều, các giấy phép cạn và yêu cầu sau bị shed. Cơ chế bảo vệ này không miễn phí. Lab cấu hình tối đa 4 tính toán đồng thời, máy chủ 4 luồng tokio.
 
-### Deadline chặt: đổi chính xác lấy khả năng trả lời đúng hạn
+### Deadline chặt: đánh đổi độ chính xác để trả lời đúng hạn
 
-Lab chạy Route lạnh (hầu như mọi yêu cầu trượt cache) với ba deadline:
+Lab chạy Route lạnh (hầu như mọi yêu cầu không trúng cache) với ba deadline:
 
 | Deadline client | n | req/s | p50 (ms) | p99 (ms) | ROUTED | ESTIMATED | lỗi gRPC |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -103,11 +103,11 @@ Lab chạy Route lạnh (hầu như mọi yêu cầu trượt cache) với ba de
 | 10 ms | 1.500 | 24.125 | 2,54 | 3,80 | 98,7% | 0,9% | 0,0% |
 | 4 ms | 1.500 | 41.392 | 1,43 | 2,80 | 40,6% | 59,3% | 0,0% |
 
-Với 50 ms và 10 ms gần như mọi yêu cầu được tính; phần ESTIMATED nhỏ là các yêu cầu không có đường (điểm snap vào đoạn nằm ngoài thành phần liên thông mạnh của ô tô, máy chủ trả `straight-line:no-route`). Ở 4 ms, chỉ còn 1 ms ngân sách sau dự trữ 3 ms, nên 59,3% yêu cầu nhận ước lượng chim bay, p99 vẫn 2,80 ms và **0 lỗi gRPC**. Dịch vụ không báo lỗi vì chậm ở mức này mà hạ chất lượng và nói rõ qua trường `quality`.
+Với 50 ms và 10 ms gần như mọi yêu cầu được tính; phần ESTIMATED nhỏ là các yêu cầu không có đường (điểm snap vào đoạn nằm ngoài thành phần liên thông mạnh của ô tô, máy chủ trả `straight-line:no-route`). Ở 4 ms, chỉ còn 1 ms ngân sách sau dự trữ 3 ms, nên 59,3% yêu cầu nhận ước lượng chim bay, p99 vẫn 2,80 ms và **0 lỗi gRPC**. Dịch vụ không báo lỗi khi chậm ở mức này, mà hạ chất lượng và nói rõ qua trường `quality`.
 
-«0 lỗi gRPC» chỉ đúng khi máy còn lập lịch kịp. Một lần chạy lại khi máy bị quá tải nặng hơn nhiều (tải 1 phút khoảng 365 trên 10 lõi, so với 24 ở bảng trên) cho kết quả khác hẳn: deadline 10 ms có 42,5% yêu cầu lỗi gRPC, phần lớn là `CANCELLED`, và deadline 4 ms có 27,1%. Cờ hiệu suy giảm không cứu được khi chính luồng phục vụ không được chạy trước hạn, nên phía client vẫn phải xử lý `CANCELLED`, không chỉ đọc `quality`.
+«0 lỗi gRPC» chỉ đúng khi máy còn lập lịch kịp. Một lần chạy lại khi máy bị quá tải nặng hơn nhiều (tải 1 phút khoảng 365 trên 10 lõi, so với 24 ở bảng trên) cho kết quả khác hẳn: deadline 10 ms có 42,5% yêu cầu lỗi gRPC, phần lớn là `CANCELLED`, và deadline 4 ms có 27,1%. Cờ báo suy giảm chất lượng không cứu được khi chính luồng phục vụ không được chạy trước hạn, nên phía client vẫn phải xử lý `CANCELLED`, không chỉ đọc `quality`.
 
-Ma trận lớn cho thấy điều ngược lại. Với ma trận 500×500 và deadline 12 ms, **100% yêu cầu bị tầng truyền của tonic cắt** bằng mã `CANCELLED` («Timeout expired», không phải `DEADLINE_EXCEEDED` như client có thể đoán), vì dựng 250.000 ô ước lượng và mã hoá khoảng 1 MB mất hơn phần deadline còn lại. Fallback cũng phải nằm trong ngân sách. Dịch vụ giữ thêm 1 ms mỗi 100.000 ô, chưa đủ ở cỡ này. Deadline 40 ms thì ma trận 500×500 vẫn được tính xong (p50 17,29 ms).
+Ma trận lớn cho thấy điều ngược lại. Với ma trận 500×500 và deadline 12 ms, **100% yêu cầu bị tầng truyền của tonic cắt** bằng mã `CANCELLED` («Timeout expired», không phải `DEADLINE_EXCEEDED` như client có thể đoán), vì dựng 250.000 ô ước lượng và mã hoá khoảng 1 MB mất hơn phần deadline còn lại. Đường dự phòng cũng phải nằm trong ngân sách. Dịch vụ giữ thêm 1 ms mỗi 100.000 ô, chưa đủ ở cỡ này. Deadline 40 ms thì ma trận 500×500 vẫn được tính xong (p50 17,29 ms).
 
 ## Cache theo ô H3 và khung giờ
 
@@ -138,7 +138,7 @@ Khoá cache gồm ô H3 độ phân giải 9 của điểm đi (cạnh ô cỡ 2
     }
 ```
 
-Hai trường hợp không dùng cache: cặp điểm cùng một ô (sai số có thể lớn hơn chính quãng đường) và yêu cầu có hình học (cache chỉ lưu thời gian và quãng đường). Cache có 16 phân đoạn, mỗi phân đoạn một khoá riêng, đuổi theo thứ tự vào trước ra trước (FIFO), dung lượng 200.000 mục.
+Hai trường hợp không dùng cache: cặp điểm cùng một ô (sai số có thể lớn hơn chính quãng đường) và yêu cầu có hình học (cache chỉ lưu thời gian và quãng đường). Cache có 16 phân đoạn, mỗi phân đoạn một khoá riêng, loại mục theo thứ tự vào trước ra trước (FIFO), dung lượng 200.000 mục.
 
 Đo với nhu cầu lệch: 150 điểm đi và 150 điểm đến phổ biến chọn theo luật Zipf, mỗi yêu cầu lệch tối đa 40 m.
 
@@ -155,11 +155,11 @@ Cái giá của cache là sai số. Với 400 mẫu, đáp án CACHED so với t
 
 ## Dự phòng chim bay và ma trận
 
-Khi quá hạn, quá tải hoặc không có đường, dịch vụ trả `StraightLineProvider::estimate`: chim bay nhân hệ số vòng 1,3, chia cho tốc độ 35 km/h cho ô tô (hiệu chỉnh ở bài 28: |sai số| trung vị cỡ 9,6% so với engine). Trường `source` ghi lý do: `straight-line:deadline`, `straight-line:overload` hay `straight-line:no-route`. Với ma trận lớn, dự phòng dùng `estimate_fast` (equirectangular, rẻ hơn haversine và sai rất nhỏ trong một thành phố, xem [bài 04](/articles/location-khoang-cach-haversine-equirectangular-sai-so)) vì phải dựng hàng trăm nghìn ô.
+Khi quá hạn, quá tải hoặc không có đường, dịch vụ trả `StraightLineProvider::estimate`: chim bay nhân hệ số vòng 1,3, chia cho tốc độ 35 km/h cho ô tô (hiệu chỉnh ở bài 28: |sai số| trung vị cỡ 9,6% so với engine). Trường `source` ghi lý do: `straight-line:deadline`, `straight-line:overload` hay `straight-line:no-route`. Với ma trận lớn, dự phòng dùng `estimate_fast` (equirectangular, rẻ hơn haversine và sai số rất nhỏ trong một thành phố, xem [bài 04](/articles/location-khoang-cach-haversine-equirectangular-sai-so)) vì phải dựng hàng trăm nghìn ô.
 
 ## Ma trận qua gRPC
 
-Số đo ở lần chạy chính, chung 4 giấy phép tính toán:
+Số đo ở lần chạy chính, dùng chung 4 giấy phép tính toán:
 
 | Hình dạng | n | req/s | p50 (ms) | p99 (ms) |
 |---|---:|---:|---:|---:|
@@ -170,7 +170,7 @@ Số đo ở lần chạy chính, chung 4 giấy phép tính toán:
 | 300×300 (8 client) | 40 | 126 | 60,51 | 87,49 |
 | 500×500, deadline 2.000 ms | 12 | 54 | 18,08 | 20,37 |
 
-Với một client, 100×100 mất 4,51 ms, so với 2,40–2,81 ms của riêng ma trận ở bài 26; phần thêm là snap, mã hoá và gRPC, lab chưa đo tách. Với 8 client chung 4 giấy phép, p50 tăng lên 23,01 ms: thời gian chờ, không phải thời gian tính. Mẫu nhỏ (12–80 yêu cầu mỗi hàng) nên p99 của các hàng này chỉ là mức lớn nhất gần đó, không phải ước lượng ổn định.
+Với một client, 100×100 mất 4,51 ms, so với 2,40–2,81 ms của riêng ma trận ở bài 26; phần thêm là snap, mã hoá và gRPC, lab chưa đo riêng từng phần. Với 8 client dùng chung 4 giấy phép, p50 tăng lên 23,01 ms: thời gian chờ, không phải thời gian tính. Mẫu nhỏ (12–80 yêu cầu mỗi hàng) nên p99 của các hàng này chỉ xấp xỉ giá trị lớn nhất đã đo, không phải ước lượng ổn định.
 
 ## Client C# gọi được máy chủ thật
 
@@ -182,7 +182,7 @@ Client C# nằm ở `dotnet/GeoEngineClient`. Hợp đồng được nhập th�
     <Protobuf Include="../../proto/location/v1/routing.proto" ProtoRoot="../../proto" GrpcServices="Client" Link="Protos/routing.proto" />
 ```
 
-Bước 2 của client kiểm đúng hành vi cache: gọi lần đầu, rồi gọi lần hai lệch khoảng 2 m và 2 phút, hy vọng trúng cache với cùng đáp án.
+Bước 2 của client kiểm tra đúng hành vi cache: gọi lần đầu, rồi gọi lần hai lệch khoảng 2 m và 2 phút, kỳ vọng trúng cache và cho cùng đáp án.
 
 `examples/toi-noi-location/dotnet/GeoEngineClient/Program.cs`
 
@@ -193,7 +193,7 @@ Bước 2 của client kiểm đúng hành vi cache: gọi lần đầu, rồi g
     ok &= first.Quality == RoutingQuality.Routed && second.Quality == RoutingQuality.Cached && first.DurationMs == second.DurationMs;
 ```
 
-Client này **đã chạy thật** với máy chủ `geo-engine` thật (đồ thị HCM), hai lần, thoát với kết quả «các bước 1-4 đúng như mong đợi»: Route có hình học (polyline precision 6), lần hai trúng cache với cùng thời gian, Matrix 4×4, và thiếu profile thì trả `InvalidArgument`. Nó **không nằm trong `verify-p03.sh`**, vì cần .NET SDK và NuGet (cần mạng ở lần khôi phục gói đầu), trong khi script verify cố ý không dùng mạng ngoài. Output lần 1:
+Client này **đã chạy thật** với máy chủ `geo-engine` thật (đồ thị HCM), hai lần, thoát với kết quả «các bước 1-4 đúng như mong đợi»: Route có hình học (polyline precision 6), lần hai trúng cache với cùng thời gian, Matrix 4×4, và thiếu profile thì trả `InvalidArgument`. Client này **không nằm trong `verify-p03.sh`**, vì cần .NET SDK và NuGet (cần mạng ở lần khôi phục gói đầu), trong khi script verify cố ý không dùng mạng ngoài. Output lần 1:
 
 ```text
 1. Route Chợ Bến Thành → Sân bay Tân Sơn Nhất: 12,8 phút, 7,09 km, chất lượng Routed, nguồn «ch», polyline6 776 ký tự, khứ hồi 72,0 ms
@@ -208,11 +208,11 @@ Client này **đã chạy thật** với máy chủ `geo-engine` thật (đồ t
 6. 300 Route tuần tự từ C#: p50 0,29 ms, p99 0,75 ms, lớn nhất 1,05 ms (lần đầu có chi phí mở kết nối)
 ```
 
-Đường chéo ma trận bằng 0,0 phút nhờ xử lý cặp cùng cạnh. Các bước 5 và 6 chỉ được in ra chứ không được kiểm trong mã thoát. Ở bước 5, ma trận 400×400 với deadline 30 ms máy chủ kịp tính ở cả hai lần chạy (18,7 và 17,4 ms), nên đường dự phòng không được thấy từ C#; nó được kiểm bằng test và bằng lab ở trên. Bước 6 là độ trễ khứ hồi nhìn từ C# trên loopback: 300 Route tuần tự p50 0,29–0,32 ms, p99 0,57–0,75 ms, **không có hàng đợi** vì chỉ một client.
+Đường chéo ma trận bằng 0,0 phút nhờ xử lý cặp cùng cạnh. Các bước 5 và 6 chỉ được in ra chứ không được kiểm trong mã thoát. Ở bước 5, ma trận 400×400 với deadline 30 ms máy chủ kịp tính ở cả hai lần chạy (18,7 và 17,4 ms), nên từ phía C# không thấy được đường dự phòng; nó được kiểm bằng test và bằng lab ở trên. Bước 6 là độ trễ khứ hồi nhìn từ C# trên loopback: 300 Route tuần tự p50 0,29–0,32 ms, p99 0,57–0,75 ms, **không có hàng đợi** vì chỉ một client.
 
 ## Chạy ví dụ và kiểm chứng
 
-Cần `data/hcm-graph.bin`. Lab đo tải chạy máy chủ và bộ tạo tải trong cùng một tiến trình, trên hai runtime tokio riêng, qua TCP loopback. Từ gốc repo:
+Cần `data/hcm-graph.bin`. Trong lab đo tải, máy chủ và bộ tạo tải chạy chung một tiến trình, trên hai runtime tokio riêng, qua TCP loopback. Từ gốc repo:
 
 ```bash
 export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
@@ -246,18 +246,18 @@ Các số đếm (tỉ lệ ROUTED, CACHED, ESTIMATED, sai số của cache) tá
 - **Máy chủ và bộ tạo tải cùng một máy đang chịu tải nặng**, tranh nhau CPU; p99 và tỉ lệ lỗi gRPC đổi hẳn theo tải (xem lần chạy lại ở tải 365). Chưa có lần đo trên máy rảnh hay hai máy riêng.
 - **Không TLS, không xác thực, một bản đồ**; CH nạp từ cache nên không đo thời gian khởi động; hồ sơ giờ không bật khi đo tải (khung giờ chỉ nằm trong khoá cache).
 - **Tính toán đã bắt đầu không huỷ được** khi quá hạn; quá hạn dày sẽ làm cạn giấy phép.
-- **Fallback phải nằm trong ngân sách**: ma trận 500×500 với deadline 12 ms bị cắt bằng `CANCELLED`.
+- **Đường dự phòng phải nằm trong ngân sách**: ma trận 500×500 với deadline 12 ms bị cắt bằng `CANCELLED`.
 - **Đáp án cache phụ thuộc thứ tự đến**, lệch tới 37,2% ở ca xấu nhất đã đo. Hình học không đi qua cache.
-- **FIFO, không phải LRU**: mục nóng vẫn có thể bị đuổi sớm.
+- **FIFO, không phải LRU**: mục nóng vẫn có thể bị loại sớm.
 - **Client C# không nằm trong `verify-p03.sh`**, cần .NET SDK và NuGet; bước 5 và 6 của nó không được kiểm trong mã thoát.
-- **p99 với vài nghìn mẫu** (3.000 yêu cầu mỗi pha) là giá trị của khoảng ba mươi yêu cầu chậm nhất, dao động giữa các lần chạy; với ma trận chỉ 12–80 mẫu nó chỉ là mức lớn nhất gần đó.
+- **p99 với vài nghìn mẫu** (3.000 yêu cầu mỗi pha) là giá trị của khoảng ba mươi yêu cầu chậm nhất, dao động giữa các lần chạy; với ma trận chỉ 12–80 mẫu nó chỉ xấp xỉ giá trị lớn nhất đã đo.
 
 ## Bài tập
 
 **Bài 1.** Dùng luật Little, ước lượng thời gian trung bình một yêu cầu Route lạnh nằm trong hệ thống ở lần chạy chính, và so với p50 đo được. Số này nói gì về chỗ nghẽn?
 
 <details><summary>Lời giải bài 1</summary>
-<p>64 client chia cho 21.076 req/s ra khoảng 0,00304 s, tức 3,04 ms, so với p50 2,86 ms. Hai số gần nhau, trong khi gọi thẳng engine mất 0,105 ms, và client C# gọi tuần tự, không có hàng đợi, thấy p50 0,29–0,32 ms cả gRPC. Vậy phần lớn thời gian của một yêu cầu là chờ giấy phép và chờ lịch của các luồng, không phải tính toán. Tăng số tính toán đồng thời hay số luồng chỉ hữu ích nếu còn lõi CPU rảnh; trên máy đang quá tải thì không.</p>
+<p>64 client chia cho 21.076 req/s ra khoảng 0,00304 s, tức 3,04 ms, so với p50 2,86 ms. Hai số gần nhau, trong khi gọi thẳng engine mất 0,105 ms, và client C# gọi tuần tự, không có hàng đợi, thấy p50 0,29–0,32 ms, kể cả gRPC. Vậy phần lớn thời gian của một yêu cầu là chờ giấy phép và chờ tới lượt các luồng được lập lịch, không phải tính toán. Tăng số tính toán đồng thời hay số luồng chỉ hữu ích nếu còn lõi CPU rảnh; trên máy đang quá tải thì không.</p>
 </details>
 
 **Bài 2.** Vì sao yêu cầu có `want_geometry = true` không dùng cache, và điều đó ảnh hưởng thế nào tới thiết kế client?
@@ -269,7 +269,7 @@ Các số đếm (tỉ lệ ROUTED, CACHED, ESTIMATED, sai số của cache) tá
 **Bài 3.** Đề xuất một cách để ma trận 500×500 với deadline 12 ms không bị tonic cắt bằng `CANCELLED`, và nêu một điều kiện cần đo để biết cách đó có đủ.
 
 <details><summary>Lời giải bài 3</summary>
-<p>Cách đề xuất, chưa được lab thử: kiểm tra cỡ ma trận và ngân sách ngay từ đầu, và nếu số ô vượt ngưỡng mà ngân sách không đủ cho dựng ước lượng thì trả lỗi rõ ràng ngay (ví dụ `DeadlineExceeded` kèm thông báo deadline quá chặt) thay vì chạy fallback quá dài; hoặc tăng khoản dự trữ theo số ô. Cần đo thời gian dựng và mã hoá một ma trận ước lượng theo số ô trên cùng máy, để biết khoản dự trữ mỗi 100.000 ô phải là bao nhiêu.</p>
+<p>Cách đề xuất, chưa được lab thử: kiểm tra cỡ ma trận và ngân sách ngay từ đầu, và nếu số ô vượt ngưỡng mà ngân sách không đủ cho dựng ước lượng thì trả lỗi rõ ràng ngay (ví dụ `DeadlineExceeded` kèm thông báo deadline quá chặt) thay vì chạy đường dự phòng quá dài; hoặc tăng khoản dự trữ theo số ô. Cần đo thời gian dựng và mã hoá một ma trận ước lượng theo số ô trên cùng máy, để biết khoản dự trữ mỗi 100.000 ô phải là bao nhiêu.</p>
 </details>
 
 Bài trước: [bài 28](/articles/location-self-host-osrm-valhalla-hay-map-provider). Bài tiếp: [bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed).

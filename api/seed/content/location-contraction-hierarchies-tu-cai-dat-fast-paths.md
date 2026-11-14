@@ -1,36 +1,36 @@
 ---
 slug: location-contraction-hierarchies-tu-cai-dat-fast-paths
 title: "Contraction Hierarchies: tự cài đặt rồi đối chiếu fast_paths"
-summary: "Bài 25: tự cài Contraction Hierarchies bằng Rust (thứ tự co, shortcut, truy vấn hai chiều đi lên), đối chiếu fast_paths và Dijkstra trên đồ thị HCM, và vì sao CH theo nút không mang chi phí rẽ."
+summary: "Bài 25: tự cài Contraction Hierarchies bằng Rust (thứ tự co, shortcut, truy vấn hai chiều đi lên), đối chiếu fast_paths và Dijkstra trên đồ thị HCM, và giải thích vì sao CH theo nút không mang chi phí rẽ."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, contraction-hierarchies, fast-paths, openstreetmap]
 language: vi
 ---
 
-Ghép chuyến cần biết chi phí đường từ **mỗi** tài xế rảnh tới **mỗi** khách đang chờ. Với 100 khách và 100 tài xế, đó là 10.000 cặp. Trung vị một truy vấn Dijkstra trên đồ thị HCM của lab là 3.355,9 µs; 10.000 truy vấn là khoảng 34 giây. Cùng 10.000 cặp, bằng Contraction Hierarchies (CH) tự cài của lab với trung vị 6,2 µs mỗi cặp, là khoảng 0,06 giây. Hai phép nhân đơn giản từ số đo, và cả hai số đo lấy khi máy đang chịu tải rất nặng, nên chỉ cho biết cỡ: cách nhau gần ba bậc độ lớn, và đó là lý do ghép chuyến ở phần P05 dựa trên CH.
+Ghép chuyến cần biết chi phí đường từ **mỗi** tài xế rảnh tới **mỗi** khách đang chờ. Với 100 khách và 100 tài xế, đó là 10.000 cặp. Trung vị một truy vấn Dijkstra trên đồ thị HCM của lab là 3.355,9 µs; 10.000 truy vấn là khoảng 34 giây. Cùng 10.000 cặp đó, dùng Contraction Hierarchies (CH) tự cài của lab với trung vị 6,2 µs mỗi cặp thì mất khoảng 0,06 giây. Đây là hai phép nhân đơn giản từ số đo, và cả hai số đo đều lấy khi máy đang chịu tải rất nặng, nên chỉ cho biết cỡ: cách nhau gần ba bậc độ lớn, và đó là lý do ghép chuyến ở phần P05 dựa trên CH.
 
-Đây là bài 25 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối [bài 22](/articles/location-bidirectional-alt-landmark-tang-toc-truy-van) (tìm hai chiều và điều kiện dừng đúng) và dùng đồ thị theo nút của [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr). Ý tưởng là của Geisberger, Sanders, Schultes và Delling trong «Contraction Hierarchies: Faster and Simpler Hierarchical Routing in Road Networks» (WEA 2008): đánh số nút theo độ quan trọng tăng dần rồi dựng phân cấp bằng cách co lần lượt từng nút. Bài này cài lại **theo ý tưởng đó**, với hàm ưu tiên đơn giản hơn bản gốc, để học; engine của lab không được tuyên bố thay thế OSRM hay Valhalla (bài 28 bàn chuyện đó).
+Đây là bài 25 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối [bài 22](/articles/location-bidirectional-alt-landmark-tang-toc-truy-van) (tìm hai chiều và điều kiện dừng đúng) và dùng đồ thị theo nút của [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr). Ý tưởng là của Geisberger, Sanders, Schultes và Delling trong «Contraction Hierarchies: Faster and Simpler Hierarchical Routing in Road Networks» (WEA 2008): đánh số nút theo độ quan trọng tăng dần rồi dựng phân cấp bằng cách co lần lượt từng nút. Bài này cài lại **theo ý tưởng đó**, với hàm ưu tiên đơn giản hơn bản gốc, để học; lab không tuyên bố engine này thay thế được OSRM hay Valhalla (bài 28 bàn chuyện đó).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Dựng CH cho cả đồ thị HCM mất khoảng một giây (một luồng). Mỗi truy vấn sau đó nhanh hơn Dijkstra khoảng ba nghìn µs. Bạn đoán cần bao nhiêu truy vấn thì thời gian dựng được «hoàn vốn»?</p>
-<details><summary>Xem đáp án</summary><p>Khoảng <b>336 truy vấn</b> (320 đến 369 qua ba lần chạy): 1,13 s chia cho 3.361 µs tiết kiệm mỗi truy vấn. Một lần dựng đủ cho cả một ngày truy vấn, nên CH gần như luôn đáng, miễn là bản đồ và trọng số không đổi liên tục. Với bản đồ đổi mỗi phút (kẹt xe), câu trả lời khác, và bài 27 bàn tới.</p></details>
+<details><summary>Xem đáp án</summary><p>Khoảng <b>336 truy vấn</b> (320 đến 369 qua ba lần chạy): 1,13 s chia cho 3.361 µs tiết kiệm mỗi truy vấn. Một lần dựng đủ cho cả một ngày truy vấn, nên CH gần như luôn đáng, miễn là bản đồ và trọng số không đổi liên tục. Với bản đồ đổi mỗi phút (kẹt xe), câu trả lời sẽ khác, và bài 27 bàn tới chuyện đó.</p></details>
 </div>
 
 ## Ý tưởng: đường tắt đã tính sẵn, nút quan trọng ở trên cùng
 
 Hãy nghĩ tới việc đi từ một hẻm này sang một hẻm khác cách đó 15 km. Ta không cần xét mọi ngõ nhỏ trên đường: ta đi từ hẻm ra đường nhỏ, ra đường lớn, lên trục chính, rồi ngược lại xuống. Đồ thị có sẵn **thứ bậc** như vậy; CH khai thác nó. Mỗi nút được gán một hạng: hẻm cụt có hạng thấp, ngã tư trục chính có hạng cao. Rồi nút được **co** (contract) từ hạng thấp lên cao: nhấc nút `v` ra khỏi đồ thị, và nếu đường ngắn nhất giữa hai láng giềng `u`, `x` của nó từng đi qua `v`, thêm một cạnh tắt (shortcut) `u → x` với trọng số `w(u,v) + w(v,x)` để không mất đường đó.
 
-Điều kiện «từng đi qua `v`» được kiểm bằng **tìm kiếm nhân chứng** (witness search): chạy một Dijkstra nhỏ từ `u`, bỏ qua `v`. Nếu tìm được đường tới `x` không dài hơn `w(u,v) + w(v,x)`, nhân chứng chứng tỏ shortcut thừa. Ngược lại phải thêm.
+Ta kiểm điều kiện «từng đi qua `v`» bằng **tìm kiếm nhân chứng** (witness search): chạy một Dijkstra nhỏ từ `u`, bỏ qua `v`. Nếu tìm được đường tới `x` không dài hơn `w(u,v) + w(v,x)`, nhân chứng chứng tỏ shortcut thừa. Ngược lại phải thêm.
 
-Hình 1 chạy tay trên một đồ thị bảy cạnh dựng tay (không phải dữ liệu OSM): a và b là hai hẻm, c là ngã ba, d và e là hai đường nhỏ, f là điểm đón. Thứ tự co là a, d, e, b, f, c, do chính `Ch::build` của lab cho ra trên đồ thị này (test `article_toy_graph_gives_the_order_and_shortcut_in_the_text` trong `ch.rs` kiểm thứ tự, shortcut và truy vấn ở Hình 2). Co a và co d không tạo shortcut vì có nhân chứng; co e tạo đúng một shortcut hai chiều c–f = 7, vì không có đường nào khác từ c tới f dài không quá 7 (đường qua d dài 8 và d cũng đã co).
+Hình 1 chạy tay trên một đồ thị bảy cạnh dựng tay (không phải dữ liệu OSM): a và b là hai hẻm, c là ngã ba, d và e là hai đường nhỏ, f là điểm đón. Thứ tự co là a, d, e, b, f, c, do chính `Ch::build` của lab cho ra trên đồ thị này (test `article_toy_graph_gives_the_order_and_shortcut_in_the_text` trong `ch.rs` kiểm tra thứ tự, shortcut và truy vấn ở Hình 2). Co a và co d không tạo shortcut vì có nhân chứng; co e tạo đúng một shortcut hai chiều c–f = 7, vì không có đường nào khác từ c tới f dài không quá 7 (đường qua d dài 8 và d cũng đã co).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 392" role="img" aria-label="Hình 1. Contraction Hierarchies trên đồ thị bảy cạnh dựng tay, co theo thứ tự a, d, e, b, f, c. Co a và d không cần shortcut vì có nhân chứng (b–c = 5 ≤ 6; c–e–f = 7 ≤ 8). Co e cần shortcut c–f = 7 vì không có nhân chứng."><rect x="20" y="20" width="420" height="352" rx="10" class="f-bg s-line" stroke-width="1.5"/><text x="36" y="46" class="t-b">Đồ thị (cạnh hai chiều, trọng số là giây) và hạng</text><path d="M80 125 L195 205" class="f-none s-dead" stroke-width="3" stroke-linecap="round"/><path d="M80 285 L195 205" class="f-none s-dead" stroke-width="3" stroke-linecap="round"/><path d="M195 205 L310 125" class="f-none s-dead" stroke-width="3" stroke-linecap="round"/><path d="M195 205 L310 285" class="f-none s-dead" stroke-width="3" stroke-linecap="round"/><path d="M310 125 L405 205" class="f-none s-dead" stroke-width="3" stroke-linecap="round"/><path d="M310 285 L405 205" class="f-none s-dead" stroke-width="3" stroke-linecap="round"/><path d="M80 125 L80 285" class="f-none s-dead" stroke-width="3" stroke-linecap="round"/><path d="M195 205 L405 205" class="f-none s-warn dash" stroke-width="2.5" stroke-linecap="round"/><text x="140" y="150" class="t-mono" text-anchor="middle">2</text><text x="126" y="278" class="t-mono" text-anchor="middle">5</text><text x="236" y="150" class="t-mono" text-anchor="middle">5</text><text x="236" y="262" class="t-mono" text-anchor="middle">2</text><text x="375" y="148" class="t-mono" text-anchor="middle">3</text><text x="375" y="262" class="t-mono" text-anchor="middle">5</text><text x="62" y="206" class="t-mono" text-anchor="middle">4</text><text x="300" y="196" class="t-small" text-anchor="middle">7, nút giữa e</text><circle cx="80" cy="125" r="15" class="f-phys-soft s-phys" stroke-width="2"/><text x="80" y="129" class="t-b" text-anchor="middle">a</text><text x="80" y="101" class="t-small" text-anchor="middle">hạng 1</text><circle cx="80" cy="285" r="15" class="f-phys-soft s-phys" stroke-width="2"/><text x="80" y="289" class="t-b" text-anchor="middle">b</text><text x="80" y="317" class="t-small" text-anchor="middle">hạng 4</text><circle cx="195" cy="205" r="15" class="f-phys-soft s-phys" stroke-width="2"/><text x="195" y="209" class="t-b" text-anchor="middle">c</text><text x="195" y="181" class="t-small" text-anchor="middle">hạng 6</text><circle cx="310" cy="125" r="15" class="f-phys-soft s-phys" stroke-width="2"/><text x="310" y="129" class="t-b" text-anchor="middle">d</text><text x="310" y="101" class="t-small" text-anchor="middle">hạng 2</text><circle cx="310" cy="285" r="15" class="f-warn-soft s-warn" stroke-width="2"/><text x="310" y="289" class="t-b" text-anchor="middle">e</text><text x="310" y="317" class="t-small" text-anchor="middle">hạng 3</text><circle cx="405" cy="205" r="15" class="f-phys-soft s-phys" stroke-width="2"/><text x="405" y="209" class="t-b" text-anchor="middle">f</text><text x="405" y="237" class="t-small" text-anchor="middle">hạng 5</text><text x="36" y="360" class="t-small">Nét cam đứt: shortcut c–f thêm khi co e.</text><rect x="460" y="20" width="400" height="352" rx="10" class="f-bg s-line" stroke-width="1.5"/><text x="476" y="46" class="t-b">Từng bước co</text><rect x="476" y="64" width="368" height="80" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="488" y="84" class="t-b">Bước 1: co a (hạng 1)</text><text x="488" y="103" class="t-small">b–c qua a = 4 + 2 = 6;</text><text x="488" y="118" class="t-small">nhân chứng b–c trực tiếp = 5 ≤ 6</text><text x="488" y="133" class="t-small">→ không thêm shortcut</text><rect x="476" y="152" width="368" height="80" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="488" y="172" class="t-b">Bước 2: co d (hạng 2)</text><text x="488" y="191" class="t-small">c–f qua d = 5 + 3 = 8;</text><text x="488" y="206" class="t-small">nhân chứng c–e–f = 2 + 5 = 7 ≤ 8</text><text x="488" y="221" class="t-small">→ không thêm shortcut</text><rect x="476" y="240" width="368" height="80" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="488" y="260" class="t-b">Bước 3: co e (hạng 3)</text><text x="488" y="279" class="t-small">c–f qua e = 2 + 5 = 7; d đã co,</text><text x="488" y="294" class="t-small">không có nhân chứng dài ≤ 7</text><text x="488" y="309" class="t-small">→ THÊM shortcut c–f = 7 (nút giữa e)</text><text x="476" y="342" class="t-small">Bước 4–6: co b, f, c: mỗi nút còn nhiều nhất một láng giềng</text><text x="476" y="358" class="t-small">nên không có cặp nào để xét. Thêm 1 shortcut cho 7 cạnh.</text></svg>
 </div>
-<figcaption>Hình 1. Co nút trên đồ thị bảy cạnh dựng tay (cạnh hai chiều, trọng số giây). Trái: đồ thị, hạng của từng nút, shortcut c–f nét cam đứt. Phải: ba bước đầu. Bước 1 và 2 có nhân chứng (b–c = 5 ≤ 6; c–e–f = 7 ≤ 8), bước 3 không có nhân chứng nên thêm shortcut. Đồ thị dựng tay; thứ tự và shortcut là output của <code>Ch::build</code>, kiểm bằng test trong <code>ch.rs</code>.</figcaption>
+<figcaption>Hình 1. Co nút trên đồ thị bảy cạnh dựng tay (cạnh hai chiều, trọng số giây). Trái: đồ thị, hạng của từng nút, shortcut c–f nét cam đứt. Phải: ba bước đầu. Bước 1 và 2 có nhân chứng (b–c = 5 ≤ 6; c–e–f = 7 ≤ 8), bước 3 không có nhân chứng nên thêm shortcut. Đồ thị dựng tay; thứ tự và shortcut là kết quả của <code>Ch::build</code>, được kiểm bằng test trong <code>ch.rs</code>.</figcaption>
 </figure>
 
 Kết quả của cả quá trình là hai đồ thị «chỉ đi lên»: với mỗi nút, các cung tới láng giềng có hạng **cao hơn** (cạnh gốc hoặc shortcut). `UpGraph` lưu chúng ở dạng CSR, kèm nút giữa của shortcut để giải nén sau.
@@ -50,7 +50,7 @@ pub struct UpGraph {
 }
 ```
 
-Mọi chỉ số nút bên trong `Ch` là **hạng**, không phải chỉ số nút gốc; `new_id` đổi nút gốc sang hạng và `old_id` đổi ngược lại. Chọn hạng làm chỉ số cho phép «cung đi lên» chỉ là so sánh hai số nguyên.
+Mọi chỉ số nút bên trong `Ch` là **hạng**, không phải chỉ số nút gốc; `new_id` đổi nút gốc sang hạng và `old_id` đổi ngược lại. Chọn hạng làm chỉ số thì việc kiểm tra «cung đi lên» chỉ còn là so sánh hai số nguyên.
 
 ## Co một nút: tìm kiếm nhân chứng
 
@@ -115,11 +115,11 @@ Co `v` nghĩa là xét mọi cặp (`u` có cạnh vào `v`, `x` có cạnh ra `
     }
 ```
 
-Điểm cốt lõi là `self.ws.dist(x) > s`: chỉ khi nhân chứng **không** tìm được đường tới `x` với chi phí không quá `s` mới thêm shortcut `(u, x, s)`. Có hai chỗ cần để ý. Một: `limit` chặn số nút nhân chứng được chốt (lab dùng 500 khi co thật, 60 khi chỉ mô phỏng để tính độ ưu tiên). Nếu nhân chứng bị cắt sớm, ta có thể **thêm shortcut thừa** nhưng không bao giờ thiếu shortcut: thiếu mới là sai, thừa chỉ tốn bộ nhớ. Hai: `witness` dùng `Labels` có phiên bản của bài 21 nên chạy rất nhiều lần không phải khởi tạo lại mảng.
+Điểm cốt lõi là `self.ws.dist(x) > s`: chỉ khi nhân chứng **không** tìm được đường tới `x` với chi phí không quá `s` mới thêm shortcut `(u, x, s)`. Có hai chỗ cần để ý. Thứ nhất, `limit` chặn số nút nhân chứng được chốt (lab dùng 500 khi co thật, 60 khi chỉ mô phỏng để tính độ ưu tiên). Nếu nhân chứng bị cắt sớm, ta có thể **thêm shortcut thừa** nhưng không bao giờ thiếu shortcut: thiếu mới là sai, thừa chỉ tốn bộ nhớ. Thứ hai, `witness` tái dùng `Labels` có đánh dấu phiên bản của bài 21, nên chạy rất nhiều lần mà không phải khởi tạo lại mảng.
 
 ## Thứ tự co: độ ưu tiên và cập nhật lười
 
-Chất lượng CH phụ thuộc gần như hoàn toàn vào **thứ tự co**. Co một nút «xấu» (nhiều láng giềng, mọi cặp đều cần shortcut) sớm sẽ đẻ ra rất nhiều shortcut. Lab đo mỗi nút bằng một con số, càng nhỏ càng co sớm:
+Chất lượng CH phụ thuộc gần như hoàn toàn vào **thứ tự co**. Co một nút «xấu» (nhiều láng giềng, mọi cặp đều cần shortcut) sớm sẽ sinh ra rất nhiều shortcut. Lab đo mỗi nút bằng một con số, càng nhỏ càng co sớm:
 
 `examples/toi-noi-location/rust/crates/route-engine/src/ch.rs`
 
@@ -131,11 +131,11 @@ Chất lượng CH phụ thuộc gần như hoàn toàn vào **thứ tự co**. 
         };
 ```
 
-`sc − removed` là «chênh lệch cạnh» (edge difference): số shortcut sẽ thêm trừ số cung bị bỏ khi co `v`. Co nút có chênh lệch âm làm đồ thị **nhỏ đi**. `dn` là số láng giềng đã bị co (nhằm trải đều việc co, tránh dồn vào một vùng) và `lvl` là độ sâu phân cấp (nút có láng giềng đã co ở mức cao thì nên co muộn). Hệ số `2` ưu tiên chênh lệch cạnh hơn hai số kia. Đây là hàm **đơn giản** của lab, không phải hàm ưu tiên đầy đủ của bài báo.
+`sc − removed` là «chênh lệch cạnh» (edge difference): số shortcut sẽ thêm trừ số cung bị bỏ khi co `v`. Co nút có chênh lệch âm làm đồ thị **nhỏ đi**. `dn` là số láng giềng đã bị co (nhằm trải đều việc co, tránh dồn vào một vùng) và `lvl` là độ sâu phân cấp (nút có láng giềng đã co ở độ sâu lớn thì nên co muộn). Hệ số `2` khiến chênh lệch cạnh có trọng số lớn hơn hai số kia. Đây là hàm **đơn giản** của lab, không phải hàm ưu tiên đầy đủ của bài báo.
 
 Áp lên đồ thị bảy cạnh ở Hình 1, tính tay theo công thức trên, độ ưu tiên ban đầu của a, b, c, d, e, f là −8, −8, 4, −8, −4, −8. Nút c (ngã ba nối nhiều đường) có độ ưu tiên cao nhất nên co cuối cùng; các nút có độ ưu tiên −8 (hai láng giềng, co không cần shortcut) co trước, rồi tới e (−4), nút duy nhất cần shortcut. Hạng cuối cùng khớp cách vẽ ở Hình 1: c cao nhất.
 
-Vì co một nút làm đổi độ ưu tiên của nút khác, lab làm hai việc: tính lại ngay độ ưu tiên của các láng giềng vừa bị ảnh hưởng, và dùng **cập nhật lười** cho phần còn lại: khi lấy nút ra, tính lại độ ưu tiên; nếu tệ hơn đỉnh hàng đợi thì đẩy lại, chưa co.
+Vì co một nút làm đổi độ ưu tiên của nút khác, lab làm hai việc: tính lại ngay độ ưu tiên của các láng giềng vừa bị ảnh hưởng, và dùng **cập nhật lười** cho phần còn lại, nghĩa là khi lấy nút ra thì tính lại độ ưu tiên, và nếu tệ hơn đỉnh hàng đợi thì đẩy nút lại vào hàng đợi mà chưa co.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/ch.rs`
 
@@ -156,9 +156,9 @@ Trên đồ thị HCM, quá trình này mất **1,13 s** (một luồng; 1,13 đ
 
 ## Truy vấn: hai chiều, chỉ đi lên
 
-Đây là chỗ CH có lợi. Với mỗi cặp nút, đồ thị gốc cộng shortcut luôn có **một** đường ngắn nhất dạng «đi lên theo hạng tới một nút cao nhất, rồi đi xuống».
+Đây là chỗ CH phát huy lợi thế. Với mỗi cặp nút, đồ thị gốc cộng shortcut luôn có **một** đường ngắn nhất dạng «đi lên theo hạng tới một nút cao nhất, rồi đi xuống».
 
-Vì sao có đường như vậy? Lấy một đường ngắn nhất bất kỳ, và giả sử nó có một «đáy» `u → v → x`, tức `v` có hạng thấp hơn cả `u` và `x`. Lúc co `v`, cả `u` và `x` còn trong đồ thị, nên chỉ có hai khả năng: lab thêm shortcut `u → x` với trọng số `w(u,v) + w(v,x)`, hoặc nhân chứng đã tìm được một đường từ `u` tới `x` không dài hơn, đi qua toàn nút chưa co, tức hạng cao hơn `v`. Thay `u → v → x` bằng đường đó thì độ dài không tăng và đáy biến mất. Mỗi lần thay, các nút trên đường chỉ có thể thay bằng nút hạng cao hơn, nên quá trình phải dừng, và đường lúc dừng không còn đáy. Lý lẽ này chỉ cần «không bao giờ thiếu shortcut», nên thừa shortcut do nhân chứng bị cắt sớm không làm hỏng nó.
+Vì sao có đường như vậy? Lấy một đường ngắn nhất bất kỳ, và giả sử nó có một «đáy» `u → v → x`, tức `v` có hạng thấp hơn cả `u` và `x`. Lúc co `v`, cả `u` và `x` còn trong đồ thị, nên chỉ có hai khả năng: lab thêm shortcut `u → x` với trọng số `w(u,v) + w(v,x)`, hoặc nhân chứng đã tìm được một đường từ `u` tới `x` không dài hơn, đi qua toàn nút chưa co, tức hạng cao hơn `v`. Thay `u → v → x` bằng đường đó thì độ dài không tăng và đáy biến mất. Mỗi lần thay, các nút trên đường chỉ có thể thay bằng nút hạng cao hơn, nên quá trình phải dừng, và đường lúc dừng không còn đáy. Lập luận này chỉ cần điều kiện «không bao giờ thiếu shortcut», nên thừa shortcut do nhân chứng bị cắt sớm không làm hỏng nó.
 
 Vì vậy truy vấn chạy hai Dijkstra: chiều **xuôi** từ nguồn trên `fwd`, chiều **ngược** từ đích trên `bwd`, cả hai chỉ đi lên. Chúng gặp nhau ở nút hạng cao nhất của đường đó. Không gian đi lên rất nhỏ so với cả đồ thị: một truy vấn chỉ chốt trung bình 172 nút tính cả hai chiều (con số đo ở phần dưới).
 
@@ -176,9 +176,9 @@ Vì vậy truy vấn chạy hai Dijkstra: chiều **xuôi** từ nguồn trên `
             };
 ```
 
-Chú ý điều kiện dừng. Bài 22 dừng khi `top_f + top_b ≥ μ`. Ở CH, mỗi chiều chạy trên **một đồ thị đi lên riêng** và nút gặp nhau là nút cao nhất của đường, nên chiều xuôi không đi qua phần «đi xuống» của đường. Tổng hai khoá vì thế không còn chặn dưới được đường chưa thấy: nút gặp có thể đã được chiều xuôi chốt từ lâu với khoảng cách nhỏ, trong khi chiều ngược chưa tới. Lab dùng điều kiện đơn giản hơn và đúng: mỗi chiều chỉ tiếp tục chừng nào khoá nhỏ nhất của nó còn nhỏ hơn μ (`filter(|&k| k < mu)`); khoá đã đạt μ không thể cho đường ngắn hơn vì trọng số không âm. Khi một nút được chốt, nếu chiều kia đã có nhãn của nó thì cập nhật μ và nút gặp.
+Chú ý điều kiện dừng. Bài 22 dừng khi `top_f + top_b ≥ μ`. Ở CH, mỗi chiều chạy trên **một đồ thị đi lên riêng** và nút gặp nhau là nút cao nhất của đường, nên chiều xuôi không đi qua phần «đi xuống» của đường. Tổng hai khoá vì thế không còn là cận dưới cho độ dài của đường chưa thấy: nút gặp có thể đã được chiều xuôi chốt từ lâu với khoảng cách nhỏ, trong khi chiều ngược chưa tới. Lab dùng điều kiện đơn giản hơn và đúng: mỗi chiều chỉ tiếp tục chừng nào khoá nhỏ nhất trong hàng đợi của chiều đó còn nhỏ hơn μ (`filter(|&k| k < mu)`); khoá đã đạt μ thì không thể cho ra đường ngắn hơn vì trọng số không âm. Khi một nút được chốt, nếu chiều kia đã có nhãn của nó thì cập nhật μ và nút gặp.
 
-Hình 2 chạy truy vấn a tới f trên đồ thị đi lên của ví dụ ở Hình 1. Chiều xuôi từ a thấy a→c (2) và a→b (4); chiều ngược từ f thấy f→c (7), cung này chính là shortcut c–f. Khi chiều xuôi chốt c với khoảng cách 2, chiều ngược đã có nhãn c bằng 7, nên μ = 9. Hai chiều còn xử lý b và c phía ngược, không cải thiện, và dừng.
+Hình 2 chạy truy vấn a tới f trên đồ thị đi lên của ví dụ ở Hình 1. Chiều xuôi từ a thấy a→c (2) và a→b (4); chiều ngược từ f thấy f→c (7), cung này chính là shortcut c–f. Khi chiều xuôi chốt c với khoảng cách 2, chiều ngược đã có nhãn c bằng 7, nên μ = 9. Hai chiều còn xử lý b và c phía ngược nhưng không cải thiện được μ, rồi dừng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -211,21 +211,21 @@ Hình 2 chạy truy vấn a tới f trên đồ thị đi lên của ví dụ �
     }
 ```
 
-Trong Hình 2, shortcut `c → f` lưu ở `bwd` của f, có `mid = e`, nên giải nén thành `c → e` rồi `e → f`, cả hai là cạnh gốc, cho đường a, c, e, f dài 9, đúng bằng Dijkstra. Hai nhánh `a < b` và `a > b` cho biết cung nằm ở đồ thị thuận hay ngược, vì cả hai chỉ lưu cung hướng lên.
+Trong Hình 2, shortcut `c → f` lưu ở `bwd` của f, có `mid = e`, nên giải nén thành `c → e` rồi `e → f`, cả hai là cạnh gốc, cho đường a, c, e, f dài 9, đúng bằng kết quả của Dijkstra. Hai nhánh `a < b` và `a > b` cho biết cung nằm ở đồ thị thuận hay ngược, vì cả hai chỉ lưu cung hướng lên.
 
 ## Đúng: so với Dijkstra, fast_paths và truy vấn ngẫu nhiên
 
-CH thay gần như toàn bộ cách tìm đường của Dijkstra, nên lập luận trên giấy chưa đủ, phải đối chiếu từng đáp án. Lab kiểm ba lớp trên đồ thị HCM, seed 20261106, ô tô, trọng số thời gian:
+CH thay gần như toàn bộ cách tìm đường của Dijkstra, nên lập luận trên giấy chưa đủ, phải đối chiếu từng đáp án. Lab kiểm tra ba lớp trên đồ thị HCM, seed 20261106, ô tô, trọng số thời gian:
 
 - **So với Dijkstra**: 0 khác biệt chi phí trên 500 truy vấn đầu.
-- **So với `fast_paths`**: 0 khác biệt trên 2.000 truy vấn ngẫu nhiên. Đây là so với một cài đặt CH **độc lập** của người khác, dựng trên đúng cùng đầu vào.
-- **Đường giải nén**: 0 đường sai (không liền mạch, sai tổng, hoặc sai nút đầu cuối) trên 2.000 truy vấn. Kiểm: tổng trọng số cạnh bằng chi phí báo cáo, nút cuối của cạnh trước là nút đầu của cạnh sau, và hai đầu đúng là nguồn và đích.
+- **So với `fast_paths`**: 0 khác biệt trên 2.000 truy vấn ngẫu nhiên. Đây là phép so với một cài đặt CH **độc lập** của người khác, dựng trên đúng cùng đầu vào.
+- **Đường giải nén**: 0 đường sai (không liền mạch, sai tổng, hoặc sai nút đầu cuối) trên 2.000 truy vấn. Cách kiểm tra: tổng trọng số cạnh bằng chi phí báo cáo, nút cuối của cạnh trước là nút đầu của cạnh sau, và hai đầu đúng là nguồn và đích.
 
 Test tự động nằm ở `crates/route-engine/tests/proptest_vs_dijkstra.rs` (CH, ALT, hai chiều, A* so với Dijkstra trên 400 trường hợp ngẫu nhiên, cả ba profile của fixture) và trong `ch.rs`.
 
 ## Nhanh bao nhiêu, và trả giá bao nhiêu
 
-Truy vấn 2.000 cặp ngẫu nhiên trong thành phần liên thông mạnh lớn nhất; Dijkstra và A* chỉ chạy 500 cặp đầu vì chậm; mỗi truy vấn chạy nóng một lần trước khi bấm giờ.
+Truy vấn 2.000 cặp ngẫu nhiên trong thành phần liên thông mạnh lớn nhất; Dijkstra và A* chỉ chạy 500 cặp đầu vì chậm; mỗi truy vấn chạy khởi động một lần trước khi bấm giờ.
 
 | Cách làm | Trung vị (µs) | p99 (µs) |
 |---|---:|---:|
@@ -235,7 +235,7 @@ Truy vấn 2.000 cặp ngẫu nhiên trong thành phần liên thông mạnh l�
 | A* chim bay | 2.016,2 | 7.424,9 |
 | Dijkstra CSR | 3.355,9 | 7.101,1 |
 
-Bảng lấy từ lần chạy có thời gian dựng thấp nhất, **đo khi máy chịu tải nặng** (tải 1 phút 20,36); qua ba lần, trung vị CH có đường là 10,6–10,9 µs và Dijkstra 3,4–3,7 ms. Hãy đọc tỉ lệ, đừng đọc số tuyệt đối. Mỗi truy vấn CH chốt trung bình 172 nút (cả hai chiều), Dijkstra chốt 56.142 nút: **ít hơn 326 lần**. Thời gian trung bình của Dijkstra trên CH cộng giải nén là 311 lần. Đuôi p99 của CH dài hơn trung vị nhiều lần (31,9 đến 46,4 µs), nên khi đặt ngân sách độ trễ (bài 29) phải nhìn p99 chứ không chỉ trung vị.
+Bảng lấy từ lần chạy có thời gian dựng thấp nhất, **đo khi máy chịu tải nặng** (tải 1 phút 20,36); qua ba lần, trung vị CH có đường là 10,6–10,9 µs và Dijkstra 3,4–3,7 ms. Hãy đọc tỉ lệ, đừng đọc số tuyệt đối. Mỗi truy vấn CH chốt trung bình 172 nút (cả hai chiều), Dijkstra chốt 56.142 nút: **ít hơn 326 lần**. Về thời gian trung bình, Dijkstra gấp 311 lần CH cộng giải nén. Đuôi p99 của CH dài hơn trung vị nhiều lần (31,9 đến 46,4 µs), nên khi đặt ngân sách độ trễ (bài 29) phải nhìn p99 chứ không chỉ trung vị.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -244,7 +244,7 @@ Bảng lấy từ lần chạy có thời gian dựng thấp nhất, **đo khi m
 <figcaption>Hình 3. Trên: trung vị thời gian một truy vấn ô tô trên đồ thị HCM (µs, thang log), đo khi máy chịu tải nặng. Dưới: so sánh tiền xử lý và cấu trúc giữa CH của lab và fast_paths. Hai số bộ nhớ không cùng phương pháp đo (một là đo, một là ước tính từ cấu trúc). © OpenStreetMap contributors (ODbL).</figcaption>
 </figure>
 
-Tiền xử lý hoà vốn sau 336 truy vấn so với Dijkstra (320 đến 369 qua ba lần chạy), cùng máy và cùng tải. Cỡ một giây cho cả thành phố nghĩa là dựng lại CH khi bản đồ đổi là chấp nhận được; khi **trọng số** đổi liên tục (kẹt xe theo giờ) thì không, và đó là câu hỏi của bài 27.
+Tiền xử lý hoà vốn sau 336 truy vấn so với Dijkstra (320 đến 369 qua ba lần chạy), cùng máy và cùng tải. Cỡ một giây cho cả thành phố nghĩa là dựng lại CH mỗi khi bản đồ đổi vẫn chấp nhận được; khi **trọng số** đổi liên tục (kẹt xe theo giờ) thì không, và đó là câu hỏi của bài 27.
 
 ## So với fast_paths
 
@@ -267,21 +267,21 @@ Lab chậm hơn 1,46 lần (1,46 đến 1,54) khi dựng và có nhiều hơn 9,
         timed(|| fast_paths::prepare_with_order(&input, &order).expect("thứ tự hợp lệ"));
 ```
 
-Kết quả: `fast_paths` với thứ tự của lab ra 431.244 cung, gần như bằng 432.115 của lab, và co xong chỉ trong 0,18 s. Hai điều rút ra. Một: chênh lệch số cung đến từ **thứ tự nút** (hàm ưu tiên của lab đơn giản hơn), không phải từ tìm kiếm nhân chứng hay cách lưu. Hai: với `fast_paths`, phần lớn thời gian dựng là **tìm thứ tự**, không phải co: 0,18 s co so với 0,77 s tổng cộng. Phép đo này không tách được phần tương ứng của lab. Truy vấn thì gần như ngang nhau: thời gian trung bình của `fast_paths` bằng 0,95 lần của CH lab (khoảng cách cộng đường).
+Kết quả: `fast_paths` với thứ tự của lab ra 431.244 cung, gần như bằng 432.115 của lab, và co xong chỉ trong 0,18 s. Hai điều rút ra. Thứ nhất, chênh lệch số cung đến từ **thứ tự nút** (hàm ưu tiên của lab đơn giản hơn), không phải từ tìm kiếm nhân chứng hay cách lưu. Thứ hai, với `fast_paths`, phần lớn thời gian dựng là **tìm thứ tự**, không phải co: 0,18 s co so với 0,77 s tổng cộng. Phép đo này không tách được phần tương ứng của lab. Truy vấn thì gần như ngang nhau: thời gian trung bình của `fast_paths` bằng 0,95 lần của CH lab (khoảng cách cộng đường).
 
-Hai con số cần đọc thận trọng. Bộ nhớ 8,53 so với 17,94 MB so hai thứ khác phương pháp (lab đo mảng `u32` thật; `fast_paths` ước tính từ cấu trúc: 3 `usize` mỗi nút, 40 byte mỗi cung), nên chỉ biết cỡ. Còn «chậm hơn 1,46 lần» không phải so sánh công bằng về chất lượng cài đặt.
+Hai con số cần đọc thận trọng. Bộ nhớ 8,53 so với 17,94 MB là so sánh hai thứ khác phương pháp đo (lab đo mảng `u32` thật; `fast_paths` ước tính từ cấu trúc: 3 `usize` mỗi nút, 40 byte mỗi cung), nên chỉ cho biết cỡ. Còn «chậm hơn 1,46 lần» không phải là phép so sánh công bằng về chất lượng cài đặt.
 
 ## CH này là theo nút: không mang chi phí rẽ
 
-Đây là hệ quả quan trọng nhất của bài, và các bài sau dựa vào nó. CH của lab dựng trên `View`, tức đồ thị **theo nút** của bài 21 (comment đầu hàm `Ch::build` ghi rõ: «theo nút, bỏ qua chi phí rẽ»). Một shortcut `u → x` qua `v` lưu một con số: `w(u,v) + w(v,x)`. Nhưng chi phí rẽ và cấm rẽ ở bài 23 phụ thuộc vào **cặp cạnh** (cạnh vào `v`, cạnh ra `v`), mà shortcut đã gộp hai cạnh thành một cung mất thông tin đó.
+Đây là hệ quả quan trọng nhất của bài, và các bài sau dựa vào nó. CH của lab dựng trên `View`, tức kiểu đồ thị **theo nút** của bài 21 (chú thích đầu hàm `Ch::build` ghi rõ: «theo nút, bỏ qua chi phí rẽ»). Một shortcut `u → x` qua `v` lưu một con số: `w(u,v) + w(v,x)`. Nhưng chi phí rẽ và cấm rẽ ở bài 23 phụ thuộc vào **cặp cạnh** (cạnh vào `v`, cạnh ra `v`), mà shortcut gộp hai cạnh thành một cung nên làm mất thông tin đó.
 
 Hệ quả cụ thể:
 
-- Truy vấn CH có thể trả đường quay ngược miễn phí tại một nút, hoặc rẽ vào chỗ OSM cấm, vì nó không biết gì về chuyện đó.
-- **Chỉ có A\* theo cạnh của bài 23, và simulator dùng nó, mới có chi phí rẽ, cấm rẽ và quay đầu.** CH và ma trận many-to-many dựng trên CH (bài 26) là theo nút. Ma trận «đúng phía đường» ở bài 26 chỉ mô hình việc đi vòng để vào đúng chiều của cạnh, không phải chi phí rẽ đầy đủ.
-- Khoảng cách giữa hai mô hình là con số đã đo ở bài 23: trên 300 truy vấn HCM, tuyến theo nút vi phạm luật rẽ đầy đủ ở 49,7% và ước thời gian thấp hơn trung bình 80,7 s, phần lớn là chi phí rẽ giả định cộng dồn. Con số phụ thuộc bảng giả định; cái cần nhớ là CH trả lời nhanh một mô hình thô hơn, không cho chi phí đúng tới từng chỗ rẽ.
+- Truy vấn CH có thể trả về đường quay ngược miễn phí tại một nút, hoặc rẽ vào chỗ OSM cấm, vì CH không biết gì về chuyện đó.
+- **Chỉ có A\* theo cạnh của bài 23, và simulator dùng nó, mới có chi phí rẽ, cấm rẽ và quay đầu.** CH và ma trận many-to-many dựng trên CH (bài 26) là theo nút. Ma trận «đúng phía đường» ở bài 26 chỉ mô hình hoá việc đi vòng để vào đúng chiều của cạnh, không phải chi phí rẽ đầy đủ.
+- Khoảng cách giữa hai mô hình là con số đã đo ở bài 23: trên 300 truy vấn HCM, tuyến theo nút vi phạm luật rẽ đầy đủ ở 49,7% và ước lượng thời gian thấp hơn trung bình 80,7 s, phần lớn là chi phí rẽ giả định cộng dồn. Con số phụ thuộc bảng giả định; cái cần nhớ là CH trả lời nhanh trên một mô hình thô hơn, không cho chi phí đúng tới từng chỗ rẽ.
 
-CH dựng trên đồ thị theo cạnh là hướng khác; lab **không** làm nó. Mỗi bài sau phải nêu rõ dùng mô hình nào, vì lựa chọn đó đổi cả `u_turns` lẫn km rỗng đo được.
+CH dựng trên đồ thị theo cạnh là một hướng khác; lab **không** làm hướng này. Mỗi bài sau phải nêu rõ dùng mô hình nào, vì lựa chọn đó làm thay đổi cả `u_turns` lẫn km rỗng đo được.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -324,7 +324,7 @@ Cấu hình đo: `--release`, Apple M1 Max, đồ thị HCM 126.699 nút, ô tô
   mỗi truy vấn CH nhanh hơn Dijkstra 3361 µs; tiền xử lý 1.13 s hoà vốn sau 336 truy vấn (so với Dijkstra, cùng máy, cùng tải)
 ```
 
-Các số đếm (cung, shortcut, nút chốt, số khác biệt) tái lập từng chữ số với cùng seed; thời gian dựng và µs thì không. Lệnh có thêm cờ `--save-ch PATH` để ghi CH ra file nhị phân dùng lại, và `Ch::save` và `Ch::load` làm việc đó bằng `postcard`.
+Các số đếm (cung, shortcut, nút chốt, số khác biệt) tái lập từng chữ số với cùng seed; thời gian dựng và µs thì không. Lệnh có thêm cờ `--save-ch PATH` để ghi CH ra file nhị phân dùng lại, còn `Ch::save` và `Ch::load` làm việc đó bằng `postcard`.
 
 ## Giới hạn của ví dụ
 
@@ -340,7 +340,7 @@ Các số đếm (cung, shortcut, nút chốt, số khác biệt) tái lập t�
 **Bài 1.** Trên đồ thị bảy cạnh ở Hình 1, đổi thứ tự co thành a, e, d, b, f, c (co e trước d). Có mấy shortcut và trọng số bao nhiêu? Vì sao kết quả giống hay khác thứ tự trong bài?
 
 <details><summary>Lời giải bài 1</summary>
-<p>Co a: như cũ, không shortcut (nhân chứng b–c = 5 ≤ 6). Co e: c–f qua e = 2 + 5 = 7; d chưa bị co nên nhân chứng c–d–f = 8 không ngắn hơn 7 (8 &gt; 7), nên <b>thêm shortcut c–f = 7</b> qua e. Co d: c–f qua d = 8, nhưng bây giờ đã có shortcut c–f = 7 ≤ 8 làm nhân chứng, nên không thêm. Tổng vẫn đúng một shortcut c–f = 7, cùng trọng số như trong bài. Khác nhau chỉ ở chỗ nhân chứng của bước co d là shortcut vừa tạo, không phải đường c–e–f. Ở đồ thị nhỏ này thứ tự không đổi số shortcut; ở đồ thị lớn thì có (432.115 cung của lab so với 394.394 của <code>fast_paths</code>), nhưng không bao giờ đổi đáp án.</p>
+<p>Co a: như cũ, không shortcut (nhân chứng b–c = 5 ≤ 6). Co e: c–f qua e = 2 + 5 = 7; d chưa bị co nên nhân chứng c–d–f = 8 không ngắn hơn 7 (8 &gt; 7), nên <b>thêm shortcut c–f = 7</b> qua e. Co d: c–f qua d = 8, nhưng bây giờ đã có shortcut c–f = 7 ≤ 8 làm nhân chứng, nên không thêm. Tổng vẫn đúng một shortcut c–f = 7, cùng trọng số như trong bài. Khác nhau chỉ ở chỗ nhân chứng của bước co d là shortcut vừa tạo, không phải đường c–e–f. Ở đồ thị nhỏ này thứ tự không đổi số shortcut; ở đồ thị lớn thì có đổi (432.115 cung của lab so với 394.394 của <code>fast_paths</code>), nhưng không bao giờ đổi đáp án.</p>
 </details>
 
 **Bài 2.** Chi phí dựng 1,13 s và mỗi truy vấn tiết kiệm 3.361 µs so với Dijkstra. Nếu bản đồ được dựng lại mỗi lần cập nhật OSM, và mỗi ngày service chạy 5.000 truy vấn định tuyến, thì tỉ lệ thời gian dựng trên thời gian tiết kiệm trong một ngày là bao nhiêu? Kết luận về việc dựng lại CH hằng ngày.
@@ -349,10 +349,10 @@ Các số đếm (cung, shortcut, nút chốt, số khác biệt) tái lập t�
 <p>5.000 truy vấn tiết kiệm <code>5.000 × 3.361 µs ≈ 16,8 s</code>; thời gian dựng 1,13 s, tức khoảng 7% thời gian tiết kiệm. Dựng lại hằng ngày hoàn toàn chấp nhận được, và hoà vốn sau 336 truy vấn. Số này dựa trên số đo khi máy chịu tải nặng và số truy vấn 5.000 là số giả định của bài tập, nên chỉ cho thấy cỡ. Khi trọng số đổi từng phút thì cần cách khác (bài 27).</p>
 </details>
 
-**Bài 3.** Vì sao điều kiện dừng `top_f + top_b ≥ μ` của bài 22 không được dùng nguyên xi cho truy vấn CH, và lab dùng điều kiện nào?
+**Bài 3.** Vì sao điều kiện dừng `top_f + top_b ≥ μ` của bài 22 không thể dùng nguyên vẹn cho truy vấn CH, và lab dùng điều kiện nào?
 
 <details><summary>Lời giải bài 3</summary>
-<p>Chứng minh ở bài 22 dựa vào việc mọi nút có khoảng cách nhỏ hơn khoá nhỏ nhất đã được chốt với đúng khoảng cách, trên cùng một đồ thị. Ở CH, hai chiều chạy trên hai đồ thị đi lên khác nhau và chỉ gặp nhau ở nút hạng cao nhất của đường; chiều xuôi không bao giờ đi qua phần đường «đi xuống», nên nút gặp có thể đã chốt ở một chiều trong khi chiều kia còn xa, và tổng hai khoá có thể vượt μ trước khi đường tốt nhất lộ ra. Điều kiện hợp lệ cho cấu trúc này là mỗi chiều chỉ dừng khi khoá nhỏ nhất của nó đã không nhỏ hơn μ, và đó là điều lab làm bằng <code>filter(|&k| k &lt; mu)</code>. Tính đúng của cách đó được kiểm bằng so sánh với Dijkstra trên 500 truy vấn và với <code>fast_paths</code> trên 2.000 truy vấn, 0 khác biệt.</p>
+<p>Chứng minh ở bài 22 dựa vào việc mọi nút có khoảng cách nhỏ hơn khoá nhỏ nhất đã được chốt với đúng khoảng cách, trên cùng một đồ thị. Ở CH, hai chiều chạy trên hai đồ thị đi lên khác nhau và chỉ gặp nhau ở nút hạng cao nhất của đường; chiều xuôi không bao giờ đi qua phần đường «đi xuống», nên nút gặp có thể đã chốt ở một chiều trong khi chiều kia còn xa, và tổng hai khoá có thể vượt μ trước khi đường tốt nhất lộ ra. Điều kiện hợp lệ cho cấu trúc này là mỗi chiều chỉ dừng khi khoá nhỏ nhất của nó không còn nhỏ hơn μ, và đó là điều lab làm bằng <code>filter(|&k| k &lt; mu)</code>. Tính đúng của cách đó được kiểm bằng so sánh với Dijkstra trên 500 truy vấn và với <code>fast_paths</code> trên 2.000 truy vấn, 0 khác biệt.</p>
 </details>
 
 Bài trước: [bài 24](/articles/location-profile-xe-may-o-to-di-bo-trong-hem). Bài tiếp: [bài 26](/articles/location-ma-tran-many-to-many-bucket-ch).

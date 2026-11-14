@@ -1,0 +1,179 @@
+{
+ "file": "location-kalman-loc-nhieu-gps-rust.md",
+ "edits": [
+  {
+   "old": "Bài 15: Kalman vận tốc không đổi cho điểm GPS, nhiễu đo theo accuracy,",
+   "new": "Bài 15: bộ lọc Kalman với mô hình vận tốc không đổi cho điểm GPS, nhiễu đo lấy từ accuracy,",
+   "reason": "cụm danh từ cụt, thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi con số trong bài là **trên dữ liệu mô phỏng**:",
+   "new": "Mọi con số trong bài đều **tính trên dữ liệu mô phỏng**:",
+   "reason": "câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "việc đó là của bài 16 và 17.",
+   "new": "việc đó thuộc về bài 16 và 17.",
+   "reason": "diễn đạt gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Lọc trung bình hoá rất nhanh những sai số độc lập",
+   "new": "Bộ lọc trung bình hoá rất nhanh những sai số độc lập",
+   "reason": "câu thiếu chủ ngữ rõ ràng",
+   "severity": "medium"
+  },
+  {
+   "old": "Mô hình nói: sau `dt` giây",
+   "new": "Mô hình cho rằng sau `dt` giây",
+   "reason": "calque «model says»",
+   "severity": "low"
+  },
+  {
+   "old": "Lớn thì bộ lọc bám sát điểm đo, nhỏ thì bộ lọc mượt nhưng chậm theo khi xe tăng tốc",
+   "new": "Nếu giá trị này lớn thì bộ lọc bám sát điểm đo, nếu nhỏ thì bộ lọc mượt nhưng chậm bám theo khi xe tăng tốc",
+   "reason": "câu thiếu chủ ngữ, người đọc phải đoán «lớn», «nhỏ» là gì",
+   "severity": "high"
+  },
+  {
+   "old": "phần chênh gọi là «đổi mới» ν.",
+   "new": "phần chênh gọi là «đổi mới» (innovation) ν.",
+   "reason": "gloss thuật ngữ lần đầu",
+   "severity": "medium"
+  },
+  {
+   "old": "Mã dưới đây là đúng hai bước đó cho một điểm;",
+   "new": "Mã dưới đây thể hiện đúng hai bước đó cho một điểm;",
+   "reason": "câu kiểu tiếng Anh, thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Hình 1 chạy đúng công thức này với số tự chọn.",
+   "new": "Hình 1 minh hoạ đúng công thức này với số tự chọn.",
+   "reason": "hình không «chạy» công thức",
+   "severity": "medium"
+  },
+  {
+   "old": "để một giá trị báo sai không làm bộ lọc tin tuyệt đối hay bỏ qua điểm, và dùng 8 m",
+   "new": "để một giá trị báo sai không khiến bộ lọc tin hẳn vào điểm đo hay bỏ qua hẳn điểm đo, và dùng 8 m",
+   "reason": "«tin tuyệt đối» cụt, thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Một: vắng accuracy là `None`",
+   "new": "Thứ nhất: vắng accuracy là `None`",
+   "reason": "liệt kê gượng",
+   "severity": "low"
+  },
+  {
+   "old": "test `missing_accuracy_differs_from_zero` kiểm đúng điều này",
+   "new": "test `missing_accuracy_differs_from_zero` kiểm tra đúng điều này",
+   "reason": "«kiểm» đứng một mình cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai: cùng `NoiseModel` này sẽ làm xác suất phát của HMM ở bài 16,",
+   "new": "Thứ hai: cùng `NoiseModel` này sẽ dùng để tính xác suất phát của HMM ở bài 16,",
+   "reason": "«sẽ làm xác suất phát» sai nghĩa/khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "nó **hiệu chuẩn tốt** hơn mức ta nên mong",
+   "new": "nó **được hiệu chuẩn tốt** hơn mức ta nên mong",
+   "reason": "thiếu từ «được», đọc cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Cổng giúp rõ ràng ở đúng chỗ nó được thiết kế.",
+   "new": "Cổng cho hiệu quả rõ ràng ở đúng chỗ nó được thiết kế.",
+   "reason": "câu thiếu tân ngữ, gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó **không** giúp khi nhiễu lớn đều",
+   "new": "Cổng **không** giúp khi nhiễu lớn đều",
+   "reason": "tránh «Nó» đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "accuracy báo sai của GPS thật chưa được kiểm.",
+   "new": "accuracy báo sai của GPS thật chưa được kiểm tra.",
+   "reason": "«kiểm» đứng một mình cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Lab tách chọn tham số khỏi báo cáo.",
+   "new": "Lab tách việc chọn tham số khỏi phần báo cáo.",
+   "reason": "câu đảo cú pháp gượng, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "chưa được kiểm** bằng một lần chạy tắt điểm nhảy; bài tập 3 là cách kiểm.",
+   "new": "chưa được kiểm chứng** bằng một lần chạy tắt điểm nhảy; bài tập 3 là cách kiểm chứng.",
+   "reason": "«kiểm» đứng một mình cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Nhỏ so với nhiễu (cỡ 9 m), nhưng đây là",
+   "new": "Các số này nhỏ so với nhiễu (cỡ 9 m), nhưng đây là",
+   "reason": "câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đọc bảng này như một danh sách điều kiện để **không** kỳ vọng ở Kalman.",
+   "new": "Hãy đọc bảng này như danh sách những điều **không** nên kỳ vọng ở Kalman.",
+   "reason": "«danh sách điều kiện» là dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không sửa được độ lệch ổn định",
+   "new": "Kalman không sửa được độ lệch ổn định",
+   "reason": "tránh «Nó» đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không giúp khi lấy mẫu thưa",
+   "new": "Kalman không giúp khi lấy mẫu thưa",
+   "reason": "tránh «Nó» đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Và nó rất nhạy với",
+   "new": "Và Kalman rất nhạy với",
+   "reason": "tránh «nó» mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Muốn dùng nó để làm marker mượt hơn",
+   "new": "Muốn dùng Kalman để làm marker mượt hơn",
+   "reason": "tránh «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Toàn phần:",
+   "new": "Chạy toàn bộ:",
+   "reason": "«Toàn phần» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "**Chưa kiểm** rằng phần lớn mức giảm",
+   "new": "**Chưa kiểm chứng** rằng phần lớn mức giảm",
+   "reason": "«kiểm» đứng một mình cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "giảm 9,3% RMSE ở trễ 2 giây rồi dừng,",
+   "new": "giảm 9,3% RMSE ở độ trễ 2 giây rồi không giảm thêm,",
+   "reason": "«rồi dừng» thiếu chủ thể",
+   "severity": "medium"
+  },
+  {
+   "old": "Đề xuất một lần chạy để kiểm giả thuyết",
+   "new": "Đề xuất một lần chạy để kiểm chứng giả thuyết",
+   "reason": "«kiểm» đứng một mình cụt",
+   "severity": "medium"
+  }
+ ]
+}

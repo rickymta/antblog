@@ -1,21 +1,21 @@
 ---
 slug: location-self-host-osrm-valhalla-hay-map-provider
 title: "ADR: tự viết engine, self-host OSRM/Valhalla hay dùng map provider?"
-summary: "Bài 28: ADR thứ hai của loạt. So ba hướng định tuyến theo tiêu chí, chưa chạy OSRM hay Valhalla thật, port RoutingProvider để thay adapter, dự phòng chim bay có số đo, và kế hoạch đo trước khi chọn."
+summary: "Bài 28: ADR thứ hai của loạt. So ba hướng định tuyến theo tiêu chí, nói rõ lab chưa chạy OSRM hay Valhalla thật, giữ port RoutingProvider để thay adapter, đo dự phòng chim bay, và lập kế hoạch đo trước khi chọn."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, adr, routing, osrm, valhalla, architecture]
 language: vi
 ---
 
-Sau bài 27, ai đọc loạt này cũng sẽ hỏi cùng một câu: engine định tuyến tự viết thì hay, nhưng sao không chạy OSRM, hoặc gọi thẳng một dịch vụ bản đồ? Câu hỏi này không có đáp án chung, và một bài viết không nên giả vờ có. Tới Nơi cần ba thứ từ lớp định tuyến: tuyến và ETA cho từng chuyến, ma trận cho ghép chuyến (bài 26), và mô phỏng chạy hàng vạn lượt gọi không tốn tiền, không cần mạng. Mỗi hướng trong ba hướng dưới đây đáp ứng được vài thứ trong đó và để hở những thứ khác.
+Sau bài 27, ai đọc loạt này cũng sẽ hỏi cùng một câu: engine định tuyến tự viết thì hay, nhưng sao không chạy OSRM, hoặc gọi thẳng một dịch vụ bản đồ? Câu hỏi này không có đáp án chung, và một bài viết không nên giả vờ có. Tới Nơi cần ba thứ từ lớp định tuyến: tuyến và ETA cho từng chuyến, ma trận cho ghép chuyến (bài 26), và mô phỏng chạy hàng vạn lượt gọi không tốn tiền, không cần mạng. Mỗi hướng trong ba hướng dưới đây đáp ứng được vài thứ trong đó và bỏ ngỏ những thứ khác.
 
-Đây là bài 28 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), và là ADR (bản ghi quyết định kiến trúc) thứ hai của loạt, sau [ADR phân vai ngôn ngữ ở bài 02](/articles/location-adr-rust-go-python-csharp-ranh-gioi-service). Bài này **không** tuyên bố hướng nào thắng ở production. Nó ghi tiêu chí, ghi những gì lab đã đo và chưa đo, và chốt một quyết định nhỏ hơn: giữ một port để về sau đổi hướng chủ yếu là đổi adapter.
+Đây là bài 28 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), và là ADR (bản ghi quyết định kiến trúc) thứ hai của loạt, sau [ADR phân vai ngôn ngữ ở bài 02](/articles/location-adr-rust-go-python-csharp-ranh-gioi-service). Bài này **không** tuyên bố hướng nào thắng ở production. Bài này ghi tiêu chí, ghi những gì lab đã đo và chưa đo, và chốt một quyết định nhỏ hơn: giữ một port để về sau đổi hướng chủ yếu là đổi adapter.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Adapter OSRM của lab đọc JSON, dựng URL, và qua bộ kiểm tra hợp đồng với 0 vi phạm trên 50 cặp. Theo bạn, điều đó có nghĩa là Tới Nơi dùng OSRM được chưa?</p>
-<details><summary>Xem đáp án</summary><p>Chưa. Adapter chỉ chạy qua một <b>transport giả</b> sinh JSON đúng schema OSRM từ chính engine của lab, nên nó chỉ kiểm tra mã dựng URL và đọc JSON. Lab chưa chạy với server OSRM hay Valhalla thật: máy viết không có server nào trong hai cái đó và không có bản đồ đã biên dịch cho chúng. Lưu lượng, độ trễ, chi phí vận hành của hai hệ thống đó là các điều chưa đo.</p></details>
+<p>Adapter OSRM của lab đọc JSON, dựng URL, và vượt qua bộ kiểm tra hợp đồng với 0 vi phạm trên 50 cặp. Theo bạn, điều đó có nghĩa là Tới Nơi dùng OSRM được chưa?</p>
+<details><summary>Xem đáp án</summary><p>Chưa. Adapter chỉ chạy qua một <b>transport giả</b> sinh JSON đúng schema OSRM từ chính engine của lab, nên phép thử chỉ kiểm tra được mã dựng URL và đọc JSON. Lab chưa chạy với server OSRM hay Valhalla thật: máy viết không có server nào trong hai hệ thống đó và không có bản đồ đã biên dịch cho chúng. Lưu lượng, độ trễ, chi phí vận hành của hai hệ thống đó đều là những điều chưa đo.</p></details>
 </div>
 
 ## Bối cảnh: Tới Nơi cần gì ở lớp định tuyến
@@ -29,17 +29,17 @@ Từ các bài trước, danh sách nhu cầu đã khá cụ thể:
 - **Mô phỏng**: hàng vạn lượt gọi cho mỗi lần chạy, tất định, không phụ thuộc mạng.
 - **Cache và dự phòng.** Bài 29 đặt cache theo ô H3 và khung giờ; việc có được cache kết quả hay không phụ thuộc vào ai trả lời.
 
-Engine của lab trả lời được vài nhu cầu đầu, nhưng không cùng lúc: CH và ma trận thì nhanh mà không có chi phí rẽ, A* theo cạnh thì có chi phí rẽ, phía đường mà chậm hơn nhiều bậc. Còn dữ liệu tốc độ, kẹt xe và hồ sơ xe máy đều là giả định. Đó là lý do quyết định này cần được ghi lại thay vì ngầm hiểu.
+Engine của lab trả lời được vài nhu cầu đầu, nhưng không cùng lúc: CH và ma trận thì nhanh nhưng không có chi phí rẽ, A* theo cạnh thì có chi phí rẽ và phía đường nhưng chậm hơn nhiều bậc. Còn dữ liệu tốc độ, kẹt xe và hồ sơ xe máy đều là giả định. Đó là lý do cần ghi lại quyết định này thay vì ngầm hiểu.
 
 ## Ba hướng, nói bằng điều đã biết
 
 **A. Engine tự viết (lab này).** Có sẵn: CH, ma trận bucket, A* theo cạnh với chi phí rẽ, ba profile, dịch vụ gRPC. Kiểm soát hoàn toàn hình dạng API và có thể thêm bất cứ thứ gì P04 cần. Chưa có: dữ liệu kẹt xe thật, xử lý cấm rẽ đầy đủ (trong bbox HCM có 784 trên 1.262 quan hệ cấm rẽ có điều kiện thời gian và 112 quan hệ có `via` là way bị bỏ qua), nhiều thành phố, vận hành ở quy mô lớn, nhiều năm sửa lỗi dữ liệu bản đồ mà các dự án lâu đời đã làm.
 
-**B. Self-host OSRM hoặc Valhalla.** Cả hai là engine định tuyến mã nguồn mở có API HTTP. OSRM có dịch vụ route và table (ma trận); trong lab, yêu cầu Valhalla được dựng thành thân JSON để gửi bằng POST. Tài liệu Route API của Valhalla liệt kê các costing `motor_scooter` và `motorcycle`; OSRM tính tốc độ theo file profile Lua nên hồ sơ xe máy là việc phải tự viết hoặc tự chọn. Bạn tự vận hành, tự chọn bản đồ OSM và cập nhật nó. Điều chưa biết với Tới Nơi: độ trễ và thông lượng trên cấu hình thật, chất lượng hồ sơ xe máy trên đường Việt Nam, khả năng trả lời đúng phía đường, và công sức vận hành. Lab chưa chạy cái nào trong hai cái này.
+**B. Self-host OSRM hoặc Valhalla.** Cả hai là engine định tuyến mã nguồn mở có API HTTP. OSRM có dịch vụ route và table (ma trận); trong lab, yêu cầu Valhalla được dựng thành thân JSON để gửi bằng POST. Tài liệu Route API của Valhalla liệt kê các costing `motor_scooter` và `motorcycle`; OSRM tính tốc độ theo file profile Lua nên hồ sơ xe máy là việc phải tự viết hoặc tự chọn. Bạn tự vận hành, tự chọn bản đồ OSM và tự cập nhật bản đồ đó. Điều chưa biết với Tới Nơi: độ trễ và thông lượng trên cấu hình thật, chất lượng hồ sơ xe máy trên đường Việt Nam, khả năng trả lời đúng phía đường, và công sức vận hành. Lab chưa chạy hệ thống nào trong hai hệ thống này.
 
-**C. Map provider qua API.** Dịch vụ do bên thứ ba vận hành, có thể có dữ liệu kẹt xe thực mà các hướng kia không có. Điều cần xem kỹ: điều khoản cache, giới hạn lưu kết quả, giới hạn tốc độ gọi, toạ độ khách và tài xế được gửi ra ngoài, và tính phụ thuộc vào một nhà cung cấp. Bài này cố ý không nêu giá tiền và không nêu điều khoản cụ thể của provider nào.
+**C. Map provider qua API.** Dịch vụ do bên thứ ba vận hành, có thể có dữ liệu kẹt xe thật mà các hướng kia không có. Điều cần xem kỹ: điều khoản cache, giới hạn lưu kết quả, giới hạn tốc độ gọi, việc gửi toạ độ khách và tài xế ra ngoài, và tính phụ thuộc vào một nhà cung cấp. Bài này cố ý không nêu giá tiền và không nêu điều khoản cụ thể của provider nào.
 
-Điều cần nhấn: ba hướng không loại trừ nhau. Một kiến trúc hợp lý có thể dùng hướng C cho ETA hiển thị cho khách, hướng A cho mô phỏng và lô ghép, và hướng B làm đối chiếu. Port ở mục sau nhằm làm kiểu kết hợp đó rẻ hơn.
+Điều cần nhấn mạnh: ba hướng không loại trừ nhau. Một kiến trúc hợp lý có thể dùng hướng C cho ETA hiển thị cho khách, hướng A cho mô phỏng và lô ghép, và hướng B làm đối chiếu. Port ở mục sau nhằm làm cho kiểu kết hợp đó rẻ hơn.
 
 ## Tiêu chí so sánh và cách đo trước khi chọn
 
@@ -55,9 +55,9 @@ Bảng dưới là danh sách câu hỏi cho từng tiêu chí, không phải b�
 | Hồ sơ xe máy | Xe máy được xử lý riêng hay xấp xỉ bằng ô tô? | So ETA và tuyến xe máy với dữ liệu chạy thật |
 | Quyền riêng tư | Toạ độ khách và tài xế có rời hệ thống của Tới Nơi không? | Xem luồng dữ liệu; với vị trí là dữ liệu cá nhân, đây có thể là ràng buộc cứng |
 | Công sức vận hành | Ai cập nhật, giám sát, nâng cấp? | Ước lượng theo số người và số giờ, không phải một con số công khai |
-| Tính phụ thuộc | Đổi sang hướng khác mất bao lâu? | Chính là lý do cho port bên dưới |
+| Tính phụ thuộc | Đổi sang hướng khác mất bao lâu? | Chính là lý do có lớp port bên dưới |
 
-Cột «cách đo» có ba dòng mà lab chưa làm được: kẹt xe thật, hồ sơ xe máy với dữ liệu chạy thật, và mọi phép đo với server OSRM hay Valhalla. Dòng điều khoản cache cần một người đọc điều khoản hiện hành của đúng provider đang cân nhắc, vì điều khoản thay đổi và khác nhau giữa các nhà cung cấp. Lưu ý quan trọng với bài 29: cache theo ô H3 của dịch vụ gRPC lưu kết quả của engine của lab. Nếu sau này adapter provider cắm vào cùng đường, việc cache kết quả của provider phải được kiểm tra lại với điều khoản trước khi dùng.
+Cột «cách đo» có ba dòng mà lab chưa làm được: kẹt xe thật, hồ sơ xe máy với dữ liệu chạy thật, và mọi phép đo với server OSRM hay Valhalla. Dòng điều khoản cache cần một người đọc điều khoản hiện hành của đúng provider đang cân nhắc, vì điều khoản thay đổi và khác nhau giữa các nhà cung cấp. Lưu ý quan trọng với bài 29: cache theo ô H3 của dịch vụ gRPC lưu kết quả do engine của lab tính. Nếu sau này adapter của provider nối vào cùng luồng gọi đó, phải kiểm tra lại việc cache kết quả của provider theo điều khoản trước khi dùng.
 
 ## Port RoutingProvider: đường để đổi adapter
 
@@ -85,9 +85,9 @@ pub trait RoutingProvider: Send + Sync {
 }
 ```
 
-Trường `quality` trong câu trả lời để bên gọi biết đáp án là tính thật hay ước lượng. Hình 1 vẽ các adapter có trong crate và trạng thái của từng cái.
+Trường `quality` trong câu trả lời giúp bên gọi biết đáp án là tính thật hay ước lượng. Hình 1 vẽ các adapter có trong crate và trạng thái của từng cái.
 
-Phải nói thẳng hiện trạng: trong lab, chỉ `loc28_routing_provider` đi qua trait này. Simulator và dịch vụ gRPC còn gọi thẳng `Engine`, vì simulator cần A* theo cạnh với đích có hướng, mà `RouteQuery` chưa có chỗ cho đích có hướng. Muốn đổi hướng thật thì phải mở rộng trait và chuyển hai bên gọi đó sang trait trước; phần này chưa làm.
+Phải nói thẳng hiện trạng: trong lab, chỉ `loc28_routing_provider` đi qua trait này. Simulator và dịch vụ gRPC còn gọi thẳng `Engine`, vì simulator cần A* theo cạnh với đích có hướng, mà `RouteQuery` chưa có chỗ cho đích có hướng. Muốn đổi hướng thật thì phải mở rộng trait và chuyển hai bên gọi đó sang dùng trait trước; phần này chưa làm.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -144,16 +144,16 @@ pub fn valhalla_route_request(q: &RouteQuery) -> Value {
 
 Hai chỗ khác nhau về hình dạng hiện ra ngay khi viết hai adapter: OSRM dùng URL với `lng,lat`, Valhalla dùng POST JSON với `lat` và `lon`; và adapter OSRM ánh xạ xe máy sang `car`, ghi chú là xấp xỉ (theo chú thích trong code, vì OSRM không có profile xe máy mặc định; cần kiểm lại với bản OSRM và profile bạn dùng). Những khác biệt kiểu này là lý do cần một lớp adapter chứ không phải gọi trực tiếp.
 
-Bộ kiểm tra hợp đồng `contract_violations` là thứ giữ port trung thực: nó chạy cho mọi adapter, kiểm thời gian dương, quãng đường không ngắn hơn chim bay quá dung sai snap 60 m, hình học bắt đầu gần điểm đi, và ma trận 1×1 khớp `route` trong 5%. Dung sai snap có lý do: điểm đầu vào được snap lên đường nên tuyến có thể ngắn hơn chim bay giữa hai điểm thô.
+Bộ kiểm tra hợp đồng `contract_violations` là thứ giữ cho port đáng tin: bộ này chạy cho mọi adapter, kiểm tra thời gian dương, quãng đường không ngắn hơn chim bay quá dung sai snap 60 m, hình học bắt đầu gần điểm đi, và ma trận 1×1 khớp `route` trong 5%. Dung sai snap có lý do: điểm đầu vào được snap lên đường nên tuyến có thể ngắn hơn chim bay giữa hai điểm thô.
 
 ## Đã chạy gì, chưa chạy gì
 
-Lab lấy 300 cặp điểm GPS có seed (cách nút 5–30 m nên phải snap), hồ sơ ô tô, và chạy:
+Lab lấy 300 cặp điểm GPS có seed (cách nút 5–30 m nên phải snap), dùng hồ sơ ô tô, và chạy:
 
 - **Hợp đồng cho từng adapter**: `own-engine`, `osrm-http` (qua transport giả) và `straight-line` đều có **0 vi phạm trên 50 cặp**.
 - **Adapter OSRM qua transport giả so với engine của lab** (298 cặp): chênh thời gian trung vị 0,006 s, lớn nhất 4,120 s; chênh quãng đường trung vị 0,027 m, lớn nhất 19,738 m; điểm đầu hình học lệch tối đa 0,76 m. Không trùng tuyệt đối vì toạ độ đi qua URL bị làm tròn 6 chữ số thập phân (khoảng 0,1 m) và hình học qua polyline precision 5. Transport giả được gọi 400 lần.
 
-Đọc đúng ý nghĩa của hai dòng trên: **transport giả sinh JSON từ chính engine của lab**, nên việc khớp gần tuyệt đối chỉ chứng minh mã dựng URL và đọc JSON hoạt động; nó không nói gì về OSRM thật. Không có con số nào ở đây nói về độ trễ, thông lượng, độ chính xác ETA, hay chi phí vận hành của OSRM hay Valhalla.
+Đọc đúng ý nghĩa của hai dòng trên: **transport giả sinh JSON từ chính engine của lab**, nên việc khớp gần tuyệt đối chỉ chứng minh mã dựng URL và đọc JSON hoạt động; kết quả này không nói gì về OSRM thật. Không có con số nào ở đây nói về độ trễ, thông lượng, độ chính xác ETA, hay chi phí vận hành của OSRM hay Valhalla.
 
 ## Dự phòng chim bay: số đo cho đường suy giảm
 
@@ -171,9 +171,9 @@ Dù chọn hướng nào, một nhà cung cấp có lúc chậm hoặc hỏng. `
 
 Đoán tay «hệ số vòng 1,4 và 22 km/h» lệch trung bình **+71,4%**, vì 22 km/h thấp hơn nhiều tốc độ chạy trên đường của engine. Hiệu chỉnh trên nửa đầu mẫu rồi đo ngoài mẫu: sai số trung bình −0,3%, |sai số| trung vị 9,2%, p95 33,3%. Mặc định của `StraightLineProvider` (1,3 và 35 km/h, chọn từ cùng mẫu này nên không hoàn toàn ngoài mẫu) cho |sai số| trung vị 9,6%, p95 33,0%.
 
-Hai lưu ý. Một: engine của lab cũng chạy trên tốc độ giả định, nên đây là độ lệch giữa **hai mô hình**, không phải so với đường thật; nếu đổi sang provider, phải hiệu chỉnh lại dự phòng theo provider đó. Hai: bài học thực tế là bộ kiểm tra hợp đồng của dự phòng nên gồm cả một bước hiệu chỉnh, vì con số đoán tay sai tới 71%.
+Hai lưu ý. Thứ nhất, engine của lab cũng chạy trên tốc độ giả định, nên đây là độ lệch giữa **hai mô hình**, không phải so với đường thật; nếu đổi sang provider, phải hiệu chỉnh lại dự phòng theo provider đó. Thứ hai, bài học thực tế là bộ kiểm tra hợp đồng của dự phòng nên gồm cả một bước hiệu chỉnh, vì con số đoán tay sai tới 71%.
 
-Lab cũng thử chuỗi: adapter chính giả lập «down» lỗi thì trả lời đến từ `straight-line` với chất lượng `Estimated` (2.040 s, 19.833 m cho cặp ví dụ); adapter chính `own-engine` sống thì trả lời `Routed` (1.964 s).
+Lab cũng thử chuỗi dự phòng: khi adapter chính được giả lập lỗi «down», câu trả lời đến từ `straight-line` với chất lượng `Estimated` (2.040 s, 19.833 m cho cặp ví dụ); khi adapter chính `own-engine` còn hoạt động thì câu trả lời là `Routed` (1.964 s).
 
 ## Quyết định (bản ghi ADR)
 
@@ -181,7 +181,7 @@ Lab cũng thử chuỗi: adapter chính giả lập «down» lỗi thì trả l�
 - **Bối cảnh**: xem các mục trên.
 - **Quyết định**:
   1. Hướng đi: mã cần tuyến hoặc ma trận (simulator, dịch vụ gRPC, chọn điểm đón) nên chỉ phụ thuộc trait `RoutingProvider`. Hiện chưa đạt: simulator và dịch vụ gRPC còn gọi thẳng `Engine`, và trait chưa có đích có hướng.
-  2. Engine của lab là hướng dùng để học, để mô phỏng, để chạy test và để làm nền cho phần cần phía đường và chi phí rẽ. Lab **không tuyên bố** nó thay được OSRM hay Valhalla.
+  2. Engine của lab là hướng dùng để học, để mô phỏng, để chạy test và để làm nền cho phần cần phía đường và chi phí rẽ. Lab **không tuyên bố** engine này thay được OSRM hay Valhalla.
   3. Trước khi chọn hướng cho production, chạy cùng một bộ truy vấn có seed và cùng bộ kiểm tra hợp đồng qua cả ba hướng, ghi cấu hình máy, tải và điều kiện đo; đọc điều khoản cache và lưu trữ hiện hành của provider; ghi lại ai cập nhật bản đồ.
   4. Thêm một adapter mới nghĩa là thêm mã adapter và chạy `contract_violations`, không sửa bên gọi.
 - **Hệ quả**: có một lớp trừu tượng để bảo trì; adapter phải ánh xạ khác biệt giữa các hệ thống (thứ tự toạ độ, hồ sơ xe máy, đơn vị) và bộ kiểm tra hợp đồng phải đủ chặt để bắt các khác biệt đó.
@@ -217,14 +217,14 @@ Mọi số ở đây là số đếm hoặc sai số nên tái lập từng ch�
 
 - **Chưa chạy với OSRM hay Valhalla thật.** Adapter OSRM chỉ qua `MockOsrmTransport`; Valhalla chỉ dựng thân yêu cầu. Không có số đo lưu lượng, độ trễ hay chi phí vận hành của hai hệ thống này.
 - **Chưa có adapter cho map provider nào.** Hướng C chưa được viết hay thử; bài không nêu giá hay điều khoản của provider.
-- **Số hiệu chỉnh dự phòng là giữa hai mô hình**, không phải so với đường thật; 1,3 và 35 km/h chọn từ chính mẫu 300 cặp nên không hoàn toàn ngoài mẫu.
-- **Port chưa được dùng bởi simulator hay dịch vụ gRPC.** Chúng gọi thẳng `Engine`; chỉ lab của bài này đi qua trait.
-- **Ma trận qua adapter chỉ được kiểm bằng ô 1×1** trong bộ kiểm tra hợp đồng; chưa có kiểm tra ma trận lớn qua adapter bên ngoài.
-- **Không có đo thời gian** trong lab này; các lab khác của P03 đo khi máy chịu tải nặng.
+- **Số hiệu chỉnh dự phòng là độ lệch giữa hai mô hình**, không phải so với đường thật; 1,3 và 35 km/h chọn từ chính mẫu 300 cặp nên không hoàn toàn ngoài mẫu.
+- **Simulator và dịch vụ gRPC chưa dùng port.** Chúng gọi thẳng `Engine`; chỉ lab của bài này đi qua trait.
+- **Ma trận qua adapter chỉ được kiểm tra bằng ô 1×1** trong bộ kiểm tra hợp đồng; chưa có kiểm tra ma trận lớn qua adapter bên ngoài.
+- **Không đo thời gian** trong lab này; các lab khác của P03 đo khi máy chịu tải nặng.
 
 ## Bài tập
 
-**Bài 1.** Lập kế hoạch đo cho hướng B (self-host OSRM): ghi ba chỉ số bạn đo, và ba điều kiện đo phải ghi kèm.
+**Bài 1.** Lập kế hoạch đo cho hướng B (self-host OSRM): ghi ba chỉ số bạn sẽ đo, và ba điều kiện đo phải ghi kèm.
 
 <details><summary>Lời giải bài 1</summary>
 <p>Chỉ số: p50 và p99 của Route; p50 và p99 của Matrix ở các cỡ 50×50, 100×100, 300×300; thông lượng tối đa trước khi p99 vượt ngân sách. Điều kiện: cấu hình máy chủ (CPU, RAM) và phiên bản OSRM cùng profile dùng; kích thước và ngày của bản đồ OSM đã biên dịch; tải của máy trong lúc đo và việc client với server có chung máy hay không. Bộ truy vấn phải có seed để chạy lại được, và chạy qua cùng bộ kiểm tra hợp đồng như hai adapter đã có.</p>
@@ -233,7 +233,7 @@ Mọi số ở đây là số đếm hoặc sai số nên tái lập từng ch�
 **Bài 2.** Vì sao bộ kiểm tra hợp đồng dùng dung sai snap 60 m cho quãng đường tối thiểu, thay vì đòi quãng đường không ngắn hơn chim bay?
 
 <details><summary>Lời giải bài 2</summary>
-<p>Điểm đầu vào được snap lên đường trước khi tính tuyến, nên tuyến có thể ngắn hơn chim bay giữa hai điểm thô khoảng bằng tổng hai khoảng snap. Đòi nghiêm ngặt sẽ báo vi phạm giả. Dung sai 60 m cho phép hai hướng snap mà vẫn bắt được adapter trả quãng đường ngắn phi lý.</p>
+<p>Điểm đầu vào được snap lên đường trước khi tính tuyến, nên tuyến có thể ngắn hơn chim bay giữa hai điểm thô khoảng bằng tổng hai khoảng snap. Đòi nghiêm ngặt như vậy sẽ báo vi phạm giả. Dung sai 60 m cho phép cả hai đầu bị snap mà vẫn bắt được adapter trả quãng đường ngắn phi lý.</p>
 </details>
 
 **Bài 3.** Dự phòng đoán tay (1,4; 22 km/h) lệch +71,4%. Nếu bạn chỉ thấy số này lúc hệ thống đã chạy, triệu chứng sẽ là gì với khách đặt xe, và cách phát hiện sớm hơn?
@@ -246,7 +246,7 @@ Bài trước: [bài 27](/articles/location-toc-do-theo-gio-customizable-ch-ket-
 
 ## Tài liệu gốc
 
-- [Tài liệu API của OSRM](https://project-osrm.org/docs/v5.24.0/api/): dịch vụ Route và Table. Phiên bản và hồ sơ xe mà bạn dùng phải kiểm lại trong tài liệu hiện hành.
+- [Tài liệu API của OSRM](https://project-osrm.org/docs/v5.24.0/api/): dịch vụ Route và Table. Cần kiểm lại phiên bản và hồ sơ xe bạn dùng trong tài liệu hiện hành.
 - [Route API của Valhalla](https://valhalla.github.io/valhalla/api/route/api-reference/): thân yêu cầu JSON, costing.
 - Điều khoản sử dụng, cache và lưu trữ của map provider: đọc trực tiếp bản **hiện hành** của provider đang cân nhắc; bài này cố ý không trích.
 - [Bản quyền và giấy phép của OpenStreetMap](https://www.openstreetmap.org/copyright): điều kiện ghi công cho dữ liệu OSM.

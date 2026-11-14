@@ -1,0 +1,173 @@
+{
+ "file": "location-routing-service-tonic-cache-fallback-p99.md",
+ "edits": [
+  {
+   "old": "bằng tonic, deadline và giấy phép tính toán, cache theo ô H3 và khung giờ, dự phòng chim bay",
+   "new": "bằng tonic, kèm deadline, giấy phép tính toán, cache theo ô H3 và khung giờ, dự phòng bằng ước lượng chim bay",
+   "reason": "Danh sách rời rạc, cụm «dự phòng chim bay» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và nó gọi với một deadline",
+   "new": "và lời gọi đó kèm một deadline",
+   "reason": "«nó» chỉ sự vật trừu tượng, mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi số đo là trên đồ thị HCM",
+   "new": "Mọi số đo đều lấy trên đồ thị HCM",
+   "reason": "Trật tự câu kiểu dịch",
+   "severity": "medium"
+  },
+  {
+   "old": "mảng `duration_ms` hàng-chính",
+   "new": "mảng `duration_ms` theo thứ tự hàng (row-major)",
+   "reason": "«hàng-chính» là calque, chưa rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "Có một điều trung thực cần nói về đoạn này",
+   "new": "Có một điều cần nói thẳng về đoạn này",
+   "reason": "Calque «honest thing»",
+   "severity": "medium"
+  },
+  {
+   "old": "Đó là cơ chế bảo vệ, không phải miễn phí.",
+   "new": "Cơ chế bảo vệ này không miễn phí.",
+   "reason": "Câu cụt, thiếu chủ ngữ rõ ràng",
+   "severity": "medium"
+  },
+  {
+   "old": "Deadline chặt: đổi chính xác lấy khả năng trả lời đúng hạn",
+   "new": "Deadline chặt: đánh đổi độ chính xác để trả lời đúng hạn",
+   "reason": "Cụm «đổi chính xác lấy khả năng» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "hầu như mọi yêu cầu trượt cache",
+   "new": "hầu như mọi yêu cầu không trúng cache",
+   "reason": "«trượt cache» dịch gượng cho cache miss",
+   "severity": "low"
+  },
+  {
+   "old": "Dịch vụ không báo lỗi vì chậm ở mức này mà hạ chất lượng",
+   "new": "Dịch vụ không báo lỗi khi chậm ở mức này, mà hạ chất lượng",
+   "reason": "Câu dễ hiểu nhầm nguyên nhân",
+   "severity": "medium"
+  },
+  {
+   "old": "Cờ hiệu suy giảm không cứu được",
+   "new": "Cờ báo suy giảm chất lượng không cứu được",
+   "reason": "«cờ hiệu suy giảm» dịch gượng, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "Fallback cũng phải nằm trong ngân sách.",
+   "new": "Đường dự phòng cũng phải nằm trong ngân sách.",
+   "reason": "Thống nhất cách gọi «dự phòng» trong bài",
+   "severity": "medium"
+  },
+  {
+   "old": "đuổi theo thứ tự vào trước ra trước (FIFO)",
+   "new": "loại mục theo thứ tự vào trước ra trước (FIFO)",
+   "reason": "«đuổi theo» dịch gượng cho eviction",
+   "severity": "high"
+  },
+  {
+   "old": "sai rất nhỏ trong một thành phố",
+   "new": "sai số rất nhỏ trong một thành phố",
+   "reason": "Thiếu danh từ «sai số»",
+   "severity": "medium"
+  },
+  {
+   "old": "Số đo ở lần chạy chính, chung 4 giấy phép tính toán",
+   "new": "Số đo ở lần chạy chính, dùng chung 4 giấy phép tính toán",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "lab chưa đo tách.",
+   "new": "lab chưa đo riêng từng phần.",
+   "reason": "«đo tách» cụt, tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Với 8 client chung 4 giấy phép",
+   "new": "Với 8 client dùng chung 4 giấy phép",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên p99 của các hàng này chỉ là mức lớn nhất gần đó, không phải ước lượng ổn định",
+   "new": "nên p99 của các hàng này chỉ xấp xỉ giá trị lớn nhất đã đo, không phải ước lượng ổn định",
+   "reason": "«mức lớn nhất gần đó» khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "Bước 2 của client kiểm đúng hành vi cache",
+   "new": "Bước 2 của client kiểm tra đúng hành vi cache",
+   "reason": "Thiếu «tra»",
+   "severity": "medium"
+  },
+  {
+   "old": "hy vọng trúng cache với cùng đáp án",
+   "new": "kỳ vọng trúng cache và cho cùng đáp án",
+   "reason": "Diễn đạt gượng kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó **không nằm trong `verify-p03.sh`**",
+   "new": "Client này **không nằm trong `verify-p03.sh`**",
+   "reason": "Tránh «Nó» chỉ sự vật ở đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "nên đường dự phòng không được thấy từ C#",
+   "new": "nên từ phía C# không thấy được đường dự phòng",
+   "reason": "Bị động gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Lab đo tải chạy máy chủ và bộ tạo tải trong cùng một tiến trình",
+   "new": "Trong lab đo tải, máy chủ và bộ tạo tải chạy chung một tiến trình",
+   "reason": "Câu đứt ý, chủ ngữ không rõ",
+   "severity": "high"
+  },
+  {
+   "old": "**Fallback phải nằm trong ngân sách**",
+   "new": "**Đường dự phòng phải nằm trong ngân sách**",
+   "reason": "Thống nhất cách gọi «dự phòng»",
+   "severity": "medium"
+  },
+  {
+   "old": "mục nóng vẫn có thể bị đuổi sớm",
+   "new": "mục nóng vẫn có thể bị loại sớm",
+   "reason": "«đuổi» dịch gượng cho evict",
+   "severity": "medium"
+  },
+  {
+   "old": "với ma trận chỉ 12–80 mẫu nó chỉ là mức lớn nhất gần đó",
+   "new": "với ma trận chỉ 12–80 mẫu nó chỉ xấp xỉ giá trị lớn nhất đã đo",
+   "reason": "«mức lớn nhất gần đó» khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "thấy p50 0,29–0,32 ms cả gRPC",
+   "new": "thấy p50 0,29–0,32 ms, kể cả gRPC",
+   "reason": "«cả gRPC» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chờ lịch của các luồng",
+   "new": "chờ tới lượt các luồng được lập lịch",
+   "reason": "«chờ lịch của các luồng» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "thay vì chạy fallback quá dài",
+   "new": "thay vì chạy đường dự phòng quá dài",
+   "reason": "Thống nhất cách gọi «dự phòng»",
+   "severity": "low"
+  }
+ ]
+}

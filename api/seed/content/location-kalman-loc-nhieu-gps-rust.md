@@ -1,7 +1,7 @@
 ---
 slug: location-kalman-loc-nhieu-gps-rust
 title: "Lọc nhiễu GPS bằng Kalman: giúp được bao nhiêu và trả giá gì"
-summary: "Bài 15: Kalman vận tốc không đổi cho điểm GPS, nhiễu đo theo accuracy, cổng NIS cho điểm nhảy, làm mượt RTS; đo với ground truth của simulator: giảm 23,2% RMSE khi nhiễu trắng nhưng chỉ 3,7% khi nhiễu tương quan 8 s."
+summary: "Bài 15: bộ lọc Kalman với mô hình vận tốc không đổi cho điểm GPS, nhiễu đo lấy từ accuracy, cổng NIS cho điểm nhảy, làm mượt RTS; đo với ground truth của simulator: giảm 23,2% RMSE khi nhiễu trắng nhưng chỉ 3,7% khi nhiễu tương quan 8 s."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, kalman, gps, filtering, rts-smoother, synthetic-data]
@@ -10,19 +10,19 @@ language: vi
 
 Xe của tài xế dừng đèn đỏ ở một ngã tư. Khách đang nhìn marker trên bản đồ: nó run lên, lệch sang trái 8 m, về giữa, lệch sang phải 14 m, dù chiếc xe không nhúc nhích. Chạy tiếp, marker còn lúc nằm trên vỉa hè, lúc nằm trong một căn nhà. Cách chữa quen thuộc là lọc: không tin từng điểm đo, mà tin một mô hình chuyển động rồi dùng điểm đo để chỉnh nó. Bộ lọc Kalman là cách làm sạch kinh điển nhất cho việc này.
 
-Đây là bài 15 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối phần nhận GPS ở [bài 14](/articles/location-validate-gps-timestamp-accuracy-gia-mao), nơi `accuracy` còn là một trường để kiểm tra; ở đây nó trở thành độ tin cậy của từng điểm đo. Mọi con số trong bài là **trên dữ liệu mô phỏng**: xe chạy trên lộ trình thật của đồ thị TP.HCM, nhưng nhiễu GPS do chính lab sinh ra, không phải GPS người thật. Điều đó làm lệch kết quả theo hướng mà mô hình nhiễu của chúng ta cho phép, và các mục dưới nói rõ chỗ nào bị ảnh hưởng. Chuyện marker nhảy giữa cầu vượt và đường bên dưới không thuộc bài này: Kalman không biết đường ở đâu, việc đó là của bài 16 và 17.
+Đây là bài 15 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối phần nhận GPS ở [bài 14](/articles/location-validate-gps-timestamp-accuracy-gia-mao), nơi `accuracy` còn là một trường để kiểm tra; ở đây nó trở thành độ tin cậy của từng điểm đo. Mọi con số trong bài đều **tính trên dữ liệu mô phỏng**: xe chạy trên lộ trình thật của đồ thị TP.HCM, nhưng nhiễu GPS do chính lab sinh ra, không phải GPS người thật. Điều đó làm lệch kết quả theo hướng mà mô hình nhiễu của chúng ta cho phép, và các mục dưới nói rõ chỗ nào bị ảnh hưởng. Chuyện marker nhảy giữa cầu vượt và đường bên dưới không thuộc bài này: Kalman không biết đường ở đâu, việc đó thuộc về bài 16 và 17.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Cùng độ lệch chuẩn σ = 6 m mỗi trục, ta làm hỏng vị trí thật theo hai cách: sai số <b>độc lập</b> giữa các điểm (nhiễu trắng), và sai số <b>tương quan theo thời gian</b> (hằng số 8 s, gần với cách GPS thật trôi chậm). Bộ lọc Kalman giảm RMSE so với vị trí thật được bao nhiêu phần trăm ở mỗi loại?</p>
-<details><summary>Xem đáp án</summary><p>Nhiễu trắng: giảm <b>23,2%</b> (9,20 m xuống 7,07 m). Nhiễu tương quan 8 s: chỉ giảm <b>3,7%</b> (9,22 m xuống 8,87 m). Lọc trung bình hoá rất nhanh những sai số độc lập, nhưng không xoá được độ lệch chậm, vì nhiều điểm liên tiếp cùng lệch một phía thì trung bình của chúng vẫn lệch phía đó.</p></details>
+<details><summary>Xem đáp án</summary><p>Nhiễu trắng: giảm <b>23,2%</b> (9,20 m xuống 7,07 m). Nhiễu tương quan 8 s: chỉ giảm <b>3,7%</b> (9,22 m xuống 8,87 m). Bộ lọc trung bình hoá rất nhanh những sai số độc lập, nhưng không xoá được độ lệch chậm, vì nhiều điểm liên tiếp cùng lệch một phía thì trung bình của chúng vẫn lệch phía đó.</p></details>
 </div>
 
 ## Mô hình vận tốc không đổi, từng bước
 
-Trạng thái của mỗi trục (đông, bắc) gồm hai số: vị trí và vận tốc, tính bằng mét trên mặt phẳng cục bộ quanh điểm đầu tiên của chuyến (phép chiếu `LocalProjection` của `geo-core`, xem [bài 04](/articles/location-khoang-cach-haversine-equirectangular-sai-so) và [bài 05](/articles/location-geometry-crate-geo-chieu-diem-polyline-bearing)). Mô hình nói: sau `dt` giây, vị trí tăng thêm `vận tốc × dt`, còn vận tốc đổi do một gia tốc ngẫu nhiên có độ lệch chuẩn `accel_sigma` (m/s²). Gia tốc ngẫu nhiên này là chỗ ta thừa nhận xe không chạy đều: nó là «nhiễu quá trình». Lớn thì bộ lọc bám sát điểm đo, nhỏ thì bộ lọc mượt nhưng chậm theo khi xe tăng tốc, phanh hay rẽ.
+Trạng thái của mỗi trục (đông, bắc) gồm hai số: vị trí và vận tốc, tính bằng mét trên mặt phẳng cục bộ quanh điểm đầu tiên của chuyến (phép chiếu `LocalProjection` của `geo-core`, xem [bài 04](/articles/location-khoang-cach-haversine-equirectangular-sai-so) và [bài 05](/articles/location-geometry-crate-geo-chieu-diem-polyline-bearing)). Mô hình cho rằng sau `dt` giây, vị trí tăng thêm `vận tốc × dt`, còn vận tốc đổi do một gia tốc ngẫu nhiên có độ lệch chuẩn `accel_sigma` (m/s²). Gia tốc ngẫu nhiên này là chỗ ta thừa nhận xe không chạy đều: nó là «nhiễu quá trình». Nếu giá trị này lớn thì bộ lọc bám sát điểm đo, nếu nhỏ thì bộ lọc mượt nhưng chậm bám theo khi xe tăng tốc, phanh hay rẽ.
 
-Mỗi điểm GPS mới đi qua hai bước. **Dự đoán**: đẩy trạng thái tới thời điểm điểm đo, độ bất định của vị trí tăng lên. **Cập nhật**: so điểm đo với dự đoán; phần chênh gọi là «đổi mới» ν. Hệ số khuếch đại `K = P' / (P' + R)` quyết định bộ lọc tin điểm đo bao nhiêu: `P'` là phương sai dự đoán, `R` là phương sai nhiễu đo. Nếu `R` lớn so với `P'`, `K` nhỏ và điểm đo chỉ nhích ước lượng một chút. Mã dưới đây là đúng hai bước đó cho một điểm; hai trục có cùng mô hình và cùng nhiễu đo (accuracy là bán kính nên đều hướng), nên ma trận hiệp phương sai 2×2 giống nhau ở cả hai trục và được tính một lần.
+Mỗi điểm GPS mới đi qua hai bước. **Dự đoán**: đẩy trạng thái tới thời điểm điểm đo, độ bất định của vị trí tăng lên. **Cập nhật**: so điểm đo với dự đoán; phần chênh gọi là «đổi mới» (innovation) ν. Hệ số khuếch đại `K = P' / (P' + R)` quyết định bộ lọc tin điểm đo bao nhiêu: `P'` là phương sai dự đoán, `R` là phương sai nhiễu đo. Nếu `R` lớn so với `P'`, `K` nhỏ và điểm đo chỉ nhích ước lượng một chút. Mã dưới đây thể hiện đúng hai bước đó cho một điểm; hai trục có cùng mô hình và cùng nhiễu đo (accuracy là bán kính nên đều hướng), nên ma trận hiệp phương sai 2×2 giống nhau ở cả hai trục và được tính một lần.
 
 Tệp `examples/toi-noi-location/rust/crates/map-match/src/kalman.rs` (dòng 124–158):
 
@@ -71,11 +71,11 @@ Tệp `examples/toi-noi-location/rust/crates/map-match/src/kalman.rs` (dòng 124
 <figcaption>Hình 1. Một bước Kalman trên một trục, <b>số minh hoạ tự chọn</b> (không phải output của lab): dự đoán x' = 52 m với σ = 4 m, điểm đo có σ = 6 m. Hàng trên: K = 0,31, ước lượng nằm gần dự đoán hơn điểm đo. Hàng dưới: điểm nhảy 30 m vượt cổng NIS 9,21 nên R bị phóng to và ước lượng chỉ nhích 5,7 m thay vì 9,2 m.</figcaption>
 </figure>
 
-Hình 1 chạy đúng công thức này với số tự chọn. Hàng trên: dự đoán 52 m (σ = 4 m), điểm đo cách 8 m (σ = 6 m). `K` = 16 / 52 = 0,31, nên ước lượng nhích 2,5 m về phía điểm đo thay vì nhảy hết 8 m, và độ bất định sau cập nhật nhỏ hơn cả hai nguồn. Đó là toàn bộ «phép màu»: một trung bình có trọng số, trọng số lấy từ độ tin cậy của từng bên.
+Hình 1 minh hoạ đúng công thức này với số tự chọn. Hàng trên: dự đoán 52 m (σ = 4 m), điểm đo cách 8 m (σ = 6 m). `K` = 16 / 52 = 0,31, nên ước lượng nhích 2,5 m về phía điểm đo thay vì nhảy hết 8 m, và độ bất định sau cập nhật nhỏ hơn cả hai nguồn. Đó là toàn bộ «phép màu»: một trung bình có trọng số, trọng số lấy từ độ tin cậy của từng bên.
 
 ## Nhiễu đo lấy từ accuracy của từng điểm
 
-`R` không thể là một hằng số: điểm báo accuracy 5 m và điểm báo 40 m không đáng tin như nhau. Android định nghĩa accuracy là bán kính tin cậy 68% của vị trí; iOS chỉ gọi là bán kính bất định, không nêu mức tin cậy, nên lab dùng chung cách hiểu của Android. Với sai số hai chiều đều hướng và độ lệch chuẩn σ mỗi trục, xác suất sai số nằm trong bán kính ρ là `1 − exp(−ρ²/2σ²)`; đặt bằng 0,68 thì ρ = σ·√(−2·ln 0,32) ≈ 1,51σ. Vì vậy `NoiseModel` đổi accuracy thành σ bằng hệ số 0,67 (khoảng 1/1,5), kẹp vào đoạn từ 3 m đến 40 m để một giá trị báo sai không làm bộ lọc tin tuyệt đối hay bỏ qua điểm, và dùng 8 m khi app không báo gì.
+`R` không thể là một hằng số: điểm báo accuracy 5 m và điểm báo 40 m không đáng tin như nhau. Android định nghĩa accuracy là bán kính tin cậy 68% của vị trí; iOS chỉ gọi là bán kính bất định, không nêu mức tin cậy, nên lab dùng chung cách hiểu của Android. Với sai số hai chiều đều hướng và độ lệch chuẩn σ mỗi trục, xác suất sai số nằm trong bán kính ρ là `1 − exp(−ρ²/2σ²)`; đặt bằng 0,68 thì ρ = σ·√(−2·ln 0,32) ≈ 1,51σ. Vì vậy `NoiseModel` đổi accuracy thành σ bằng hệ số 0,67 (khoảng 1/1,5), kẹp vào đoạn từ 3 m đến 40 m để một giá trị báo sai không khiến bộ lọc tin hẳn vào điểm đo hay bỏ qua hẳn điểm đo, và dùng 8 m khi app không báo gì.
 
 Tệp `examples/toi-noi-location/rust/crates/map-match/src/lib.rs` (dòng 63–94):
 
@@ -114,21 +114,21 @@ impl NoiseModel {
 }
 ```
 
-Hai chi tiết nhỏ nhưng quan trọng. Một: vắng accuracy là `None`, **khác** với `Some(0.0)`; test `missing_accuracy_differs_from_zero` kiểm đúng điều này (vắng cho 8 m, 0 bị kẹp về sàn 3 m), nối với quy ước «vắng khác 0» của hợp đồng protobuf ở các bài ingest. Hai: cùng `NoiseModel` này sẽ làm xác suất phát của HMM ở bài 16, nên hai bài dùng chung một cách hiểu về accuracy.
+Hai chi tiết nhỏ nhưng quan trọng. Thứ nhất: vắng accuracy là `None`, **khác** với `Some(0.0)`; test `missing_accuracy_differs_from_zero` kiểm tra đúng điều này (vắng cho 8 m, 0 bị kẹp về sàn 3 m), nối với quy ước «vắng khác 0» của hợp đồng protobuf ở các bài ingest. Thứ hai: cùng `NoiseModel` này sẽ dùng để tính xác suất phát của HMM ở bài 16, nên hai bài dùng chung một cách hiểu về accuracy.
 
-Vì accuracy trong lab do chính simulator sinh (bằng 1,5σ nhân một hệ số lognormal với độ lệch chuẩn 0,25, và vắng ở 10% điểm), nó **hiệu chuẩn tốt** hơn mức ta nên mong ở điện thoại thật. Lab thử bỏ hẳn accuracy: RMSE chỉ đổi từ 8,87 m sang 8,85 m. Kết luận «accuracy không quan trọng» sẽ sai ngoài đời, nơi nhiều máy báo accuracy lệch hẳn so với sai số thật; ở đây nó chỉ phản ánh mô hình nhiễu của ta.
+Vì accuracy trong lab do chính simulator sinh (bằng 1,5σ nhân một hệ số lognormal với độ lệch chuẩn 0,25, và vắng ở 10% điểm), nó **được hiệu chuẩn tốt** hơn mức ta nên mong ở điện thoại thật. Lab thử bỏ hẳn accuracy: RMSE chỉ đổi từ 8,87 m sang 8,85 m. Kết luận «accuracy không quan trọng» sẽ sai ngoài đời, nơi nhiều máy báo accuracy lệch hẳn so với sai số thật; ở đây nó chỉ phản ánh mô hình nhiễu của ta.
 
 ## Cổng NIS: điểm nhảy xa không được kéo cả bộ lọc
 
 Đa đường (tín hiệu dội qua nhà cao tầng) tạo ra điểm nhảy xa vài chục mét. Một điểm như vậy có «đổi mới» rất lớn so với dự đoán. Nếu cứ tin theo `K`, ước lượng bị kéo đi. Cách xử lý trong mã: tính `NIS = ν² / (P' + R)`, tức bình phương khoảng cách Mahalanobis của đổi mới với hai bậc tự do. Dưới giả định nhiễu Gaussian, NIS vượt 9,21 chỉ xảy ra khoảng 1% số lần (phân phối χ² hai bậc tự do), nên vượt ngưỡng là dấu hiệu điểm lạ. Khi đó bộ lọc phóng to `R` lên `R · NIS / 9,21`, làm điểm đó ít ảnh hưởng chứ không loại hẳn.
 
-Hàng dưới của Hình 1 minh hoạ: điểm nhảy 30 m cho NIS = 17,3 nên `R` hiệu dụng tăng lên 67,7 và ước lượng chỉ nhích 5,7 m thay vì 9,2 m. Đo thật trên 3% điểm nhảy xa 25–70 m: RMSE thô 12,05 m; Kalman không cổng 10,98 m; Kalman có cổng NIS 9,21 là 9,99 m. Cổng giúp rõ ràng ở đúng chỗ nó được thiết kế. Nó **không** giúp khi nhiễu lớn đều chứ không nhảy: ở σ = 20 m, có cổng và không cổng cho 29,23 m và 29,24 m.
+Hàng dưới của Hình 1 minh hoạ: điểm nhảy 30 m cho NIS = 17,3 nên `R` hiệu dụng tăng lên 67,7 và ước lượng chỉ nhích 5,7 m thay vì 9,2 m. Đo thật trên 3% điểm nhảy xa 25–70 m: RMSE thô 12,05 m; Kalman không cổng 10,98 m; Kalman có cổng NIS 9,21 là 9,99 m. Cổng cho hiệu quả rõ ràng ở đúng chỗ nó được thiết kế. Cổng **không** giúp khi nhiễu lớn đều chứ không nhảy: ở σ = 20 m, có cổng và không cổng cho 29,23 m và 29,24 m.
 
 ## Đo trên nhiễu tổng hợp có ground truth
 
-Ground truth ở đây do simulator của lab cho: xe chạy trên lộ trình ngắn nhất của đồ thị HCM với gia tốc 1,8 m/s², phanh 2,5 m/s², chậm ở khúc cua, dừng đèn ở khoảng 8% nút giao từ 8 đến 35 giây; mỗi giây lấy một mẫu. Sau đó điểm bị làm hỏng bằng sai số Gaussian mỗi trục tương quan theo thời gian (tiến trình AR(1) với hằng số 8 giây), 0,5% điểm nhảy xa 25–70 m, 1% điểm vắng ngẫu nhiên, accuracy báo cáo như đã nói ở trên. Đây là mô hình nhiễu **của chúng ta**: phân phối đuôi dày, lỗi phụ thuộc thiết bị và accuracy báo sai của GPS thật chưa được kiểm. Kết quả đúng cho mô hình này, và chỉ cho thấy thuật toán chạy đúng chứ không cho biết độ chính xác ngoài đời.
+Ground truth ở đây do simulator của lab cho: xe chạy trên lộ trình ngắn nhất của đồ thị HCM với gia tốc 1,8 m/s², phanh 2,5 m/s², chậm ở khúc cua, dừng đèn ở khoảng 8% nút giao từ 8 đến 35 giây; mỗi giây lấy một mẫu. Sau đó điểm bị làm hỏng bằng sai số Gaussian mỗi trục tương quan theo thời gian (tiến trình AR(1) với hằng số 8 giây), 0,5% điểm nhảy xa 25–70 m, 1% điểm vắng ngẫu nhiên, accuracy báo cáo như đã nói ở trên. Đây là mô hình nhiễu **của chúng ta**: phân phối đuôi dày, lỗi phụ thuộc thiết bị và accuracy báo sai của GPS thật chưa được kiểm tra. Kết quả đúng cho mô hình này, và chỉ cho thấy thuật toán chạy đúng chứ không cho biết độ chính xác ngoài đời.
 
-Lab tách chọn tham số khỏi báo cáo. `accel_sigma` và cổng NIS được chọn trên 40 chuyến seed 1106 (29.734 điểm thật, σ = 6 m tương quan 8 s); mọi bảng báo cáo dưới đây dùng 40 chuyến khác seed 20261106 (26.392 điểm). Bảng chọn tham số gần như hoà giữa `accel_sigma` = 2 và 4 (8,820 m và 8,810 m); lab chọn 4 và đó cũng là giá trị mặc định trong `KalmanConfig::default()`. Tham số chỉ chọn một lần ở σ = 6 m, rồi dùng nguyên cho mọi σ khác.
+Lab tách việc chọn tham số khỏi phần báo cáo. `accel_sigma` và cổng NIS được chọn trên 40 chuyến seed 1106 (29.734 điểm thật, σ = 6 m tương quan 8 s); mọi bảng báo cáo dưới đây dùng 40 chuyến khác seed 20261106 (26.392 điểm). Bảng chọn tham số gần như hoà giữa `accel_sigma` = 2 và 4 (8,820 m và 8,810 m); lab chọn 4 và đó cũng là giá trị mặc định trong `KalmanConfig::default()`. Tham số chỉ chọn một lần ở σ = 6 m, rồi dùng nguyên cho mọi σ khác.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -137,7 +137,7 @@ Lab tách chọn tham số khỏi báo cáo. `accel_sigma` và cổng NIS đư�
 <figcaption>Hình 2. Mức giảm RMSE của Kalman so với điểm thô, lấy từ mục 2 của output <code>loc15_kalman</code> (tham số đã chọn trên seed 1106, báo cáo trên seed 20261106). Cùng σ = 6 m: nhiễu trắng giảm 23,2%, nhiễu tương quan 8 s chỉ giảm 3,7%; ở σ = 20 m tương quan, Kalman làm tệ hơn 2,2%. Nhiễu do lab sinh, không phải GPS thật.</figcaption>
 </figure>
 
-Hình 2 cho thấy hai điều. Thứ nhất, **sai số tương quan là kẻ thù của bộ lọc**. Cùng σ = 6 m, nhiễu trắng giảm 23,2% còn nhiễu tương quan 3,7%; σ = 10 m tương quan chỉ giảm 0,2%; σ = 20 m tương quan thì Kalman làm **tệ hơn** 2,2% (28,59 m lên 29,23 m). Kalman giả định các lần đo sai độc lập; khi sai số trôi chậm, bộ lọc coi chuỗi điểm cùng lệch là bằng chứng và bám theo độ lệch đó. Thứ hai, **mức giảm lớn nhất không đáng tin hoàn toàn**: ở σ = 2 m tương quan, giảm 24,2% nghe rất tốt. Nhưng ở mức này, 0,5% điểm nhảy xa 25–70 m đã đóng góp khoảng 12 trong tổng khoảng 20 m² bình phương sai số (ước tính nhanh: bình phương trung bình của khoảng 25–70 m là cỡ 2.400 m², nhân 0,005), và p95 lại **xấu đi** nhẹ (5,01 m lên 5,17 m). Nên có khả năng phần lớn mức giảm đến từ việc dập điểm nhảy chứ không phải từ làm mượt. Giả thuyết này **chưa được kiểm** bằng một lần chạy tắt điểm nhảy; bài tập 3 là cách kiểm.
+Hình 2 cho thấy hai điều. Thứ nhất, **sai số tương quan là kẻ thù của bộ lọc**. Cùng σ = 6 m, nhiễu trắng giảm 23,2% còn nhiễu tương quan 3,7%; σ = 10 m tương quan chỉ giảm 0,2%; σ = 20 m tương quan thì Kalman làm **tệ hơn** 2,2% (28,59 m lên 29,23 m). Kalman giả định các lần đo sai độc lập; khi sai số trôi chậm, bộ lọc coi chuỗi điểm cùng lệch là bằng chứng và bám theo độ lệch đó. Thứ hai, **mức giảm lớn nhất không đáng tin hoàn toàn**: ở σ = 2 m tương quan, giảm 24,2% nghe rất tốt. Nhưng ở mức này, 0,5% điểm nhảy xa 25–70 m đã đóng góp khoảng 12 trong tổng khoảng 20 m² bình phương sai số (ước tính nhanh: bình phương trung bình của khoảng 25–70 m là cỡ 2.400 m², nhân 0,005), và p95 lại **xấu đi** nhẹ (5,01 m lên 5,17 m). Nên có khả năng phần lớn mức giảm đến từ việc dập điểm nhảy chứ không phải từ làm mượt. Giả thuyết này **chưa được kiểm chứng** bằng một lần chạy tắt điểm nhảy; bài tập 3 là cách kiểm chứng.
 
 Cũng lưu ý p95 xấu đi ở cả năm mức nhiễu tương quan, kể cả những mức RMSE tốt hơn (σ = 4 m: 10,03 m lên 10,23 m; σ = 6 m: 15,04 m lên 15,35 m), trong khi với nhiễu trắng p95 cải thiện rõ (σ = 6 m: 15,00 m xuống 12,08 m). Với nhiễu tương quan, đuôi sai số, tức những điểm tệ nhất, không được cải thiện; đó là loại điểm dễ gây lỗi ở bước bám đường.
 
@@ -153,7 +153,7 @@ Bộ lọc không làm vị trí «đến muộn»: nó trả ước lượng ng
 | Dừng | 5.686 | 9,29 | 8,83 | −0,28 m | −0,44 m |
 | Rẽ | 2.089 | 8,76 | 8,76 | −0,65 m | −0,09 m |
 
-Nhỏ so với nhiễu (cỡ 9 m), nhưng đây là sai số **có hướng**: điểm thô lệch ngẫu nhiên hai phía, còn Kalman lệch có hệ thống ra sau xe khi tăng tốc và ra trước khi phanh. Khi GPS tốt (σ = 2 m, nhiễu trắng), con số tương ứng là −0,54 m, +0,58 m và −0,29 m ở ba pha đó. Hình 3 vẽ khúc cua gắt nhất của chuyến báo cáo số 0 từ chính output của lab; trên 15 điểm này, RMSE sau Kalman (11,63 m, tính lại từ CSV) còn **cao hơn** điểm thô (10,84 m), và Kalman gần đường thật hơn ở 6 trên 15 điểm. Đó chỉ là một ví dụ để nhìn cơ chế, không phải thống kê, nhưng nó nhắc rằng số trung bình 8,87 so với 9,22 che đi những đoạn lọc làm xấu hơn.
+Các số này nhỏ so với nhiễu (cỡ 9 m), nhưng đây là sai số **có hướng**: điểm thô lệch ngẫu nhiên hai phía, còn Kalman lệch có hệ thống ra sau xe khi tăng tốc và ra trước khi phanh. Khi GPS tốt (σ = 2 m, nhiễu trắng), con số tương ứng là −0,54 m, +0,58 m và −0,29 m ở ba pha đó. Hình 3 vẽ khúc cua gắt nhất của chuyến báo cáo số 0 từ chính output của lab; trên 15 điểm này, RMSE sau Kalman (11,63 m, tính lại từ CSV) còn **cao hơn** điểm thô (10,84 m), và Kalman gần đường thật hơn ở 6 trên 15 điểm. Đó chỉ là một ví dụ để nhìn cơ chế, không phải thống kê, nhưng nó nhắc rằng số trung bình 8,87 so với 9,22 che đi những đoạn lọc làm xấu hơn.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -218,9 +218,9 @@ Mục 5 của lab gom những tình huống thử bộ lọc ở chỗ nó yếu
 | `accel_sigma` = 0,25 (quá mượt so với gia tốc thật) | 9,22 | 13,19 | +43,1% |
 | `accel_sigma` = 8 (bám sát đo) | 9,22 | 9,04 | −1,9% |
 
-Đọc bảng này như một danh sách điều kiện để **không** kỳ vọng ở Kalman. Nó không sửa được độ lệch ổn định (khu nhà cao tầng đẩy cả đoạn về một phía, giảm 1,8%). Nó không giúp khi lấy mẫu thưa (suy từ công thức, chưa kiểm riêng: với `accel_sigma` = 4, sau 5 giây riêng nhiễu quá trình đã cho phương sai vị trí 2.500 m², so với `R` cỡ 36 m², nên `K` gần 1 và bộ lọc gần như chép lại điểm đo). Và nó rất nhạy với `accel_sigma`: chọn mô hình quá mượt (0,25) làm RMSE tệ hơn 43,1%, nên tham số này phải được chọn bằng dữ liệu, không đoán.
+Hãy đọc bảng này như danh sách những điều **không** nên kỳ vọng ở Kalman. Kalman không sửa được độ lệch ổn định (khu nhà cao tầng đẩy cả đoạn về một phía, giảm 1,8%). Kalman không giúp khi lấy mẫu thưa (suy từ công thức, chưa kiểm riêng: với `accel_sigma` = 4, sau 5 giây riêng nhiễu quá trình đã cho phương sai vị trí 2.500 m², so với `R` cỡ 36 m², nên `K` gần 1 và bộ lọc gần như chép lại điểm đo). Và Kalman rất nhạy với `accel_sigma`: chọn mô hình quá mượt (0,25) làm RMSE tệ hơn 43,1%, nên tham số này phải được chọn bằng dữ liệu, không đoán.
 
-Trong loạt này, Kalman là bước tuỳ chọn trước khi bám đường. Ở bài 16, chạy HMM trên điểm đã lọc chỉ thêm 0,4 điểm phần trăm cạnh nới nút (87,26% so với 86,87% ở σ = 10 m) và 1,1 điểm cạnh chặt (70,21% so với 69,09%), trên simulator của chính lab. Muốn dùng nó để làm marker mượt hơn cho khách thì phải chấp nhận sai số có hướng ở trên; muốn dùng để giảm sai cạnh thì lợi ích đo được rất nhỏ. Quyết định có đưa Kalman vào đường nóng nên dựa trên dữ liệu GPS thật, thứ ta chưa có.
+Trong loạt này, Kalman là bước tuỳ chọn trước khi bám đường. Ở bài 16, chạy HMM trên điểm đã lọc chỉ thêm 0,4 điểm phần trăm cạnh nới nút (87,26% so với 86,87% ở σ = 10 m) và 1,1 điểm cạnh chặt (70,21% so với 69,09%), trên simulator của chính lab. Muốn dùng Kalman để làm marker mượt hơn cho khách thì phải chấp nhận sai số có hướng ở trên; muốn dùng để giảm sai cạnh thì lợi ích đo được rất nhỏ. Quyết định có đưa Kalman vào đường nóng nên dựa trên dữ liệu GPS thật, thứ ta chưa có.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -252,7 +252,7 @@ chọn: accel_sigma = 4, gate_nis = Some(9.21) (RMSE tune 8.810 m); mặc địn
 
 ```
 
-Các số trong bài này là RMSE, tỉ lệ và số đếm nên tái lập từng chữ số với cùng seed; bài **không có số thời gian nào**, nên không bị nhiễu do máy chịu tải (lúc chạy chính thức tải 1 phút khoảng 69 trên 10 lõi, ghi trong output). Kiểm tra mã: `cargo test --manifest-path examples/toi-noi-location/rust/Cargo.toml -p map-match` chạy các test của `kalman.rs` (bám vận tốc không đổi mà không lệch, bỏ điểm đến muộn và khởi tạo lại sau khoảng trống, vắng accuracy khác 0, làm mượt có trễ không tệ hơn lọc thường) và property test «Kalman theo đúng một đường thẳng không nhiễu». Toàn phần: `bash examples/toi-noi-location/verify-p02-rust.sh`.
+Các số trong bài này là RMSE, tỉ lệ và số đếm nên tái lập từng chữ số với cùng seed; bài **không có số thời gian nào**, nên không bị nhiễu do máy chịu tải (lúc chạy chính thức tải 1 phút khoảng 69 trên 10 lõi, ghi trong output). Kiểm tra mã: `cargo test --manifest-path examples/toi-noi-location/rust/Cargo.toml -p map-match` chạy các test của `kalman.rs` (bám vận tốc không đổi mà không lệch, bỏ điểm đến muộn và khởi tạo lại sau khoảng trống, vắng accuracy khác 0, làm mượt có trễ không tệ hơn lọc thường) và property test «Kalman theo đúng một đường thẳng không nhiễu». Chạy toàn bộ: `bash examples/toi-noi-location/verify-p02-rust.sh`.
 
 ## Giới hạn của ví dụ
 
@@ -260,7 +260,7 @@ Các số trong bài này là RMSE, tỉ lệ và số đếm nên tái lập t�
 - **Kalman không biết đường.** Ước lượng đã lọc vẫn có thể nằm trên vỉa hè hay ngoài đường; việc ép vào mạng đường là bám đường (bài 16, 17).
 - **`accel_sigma` chọn một lần** ở σ = 6 m tương quan, rồi dùng cho mọi σ; chưa chọn lại theo từng mức nhiễu.
 - **Chưa dùng speed và heading do app báo**, chưa thử xe máy (tăng, phanh và dừng khác ô tô), chưa thử bộ lọc đa mô hình.
-- **Chưa kiểm** rằng phần lớn mức giảm ở σ = 2 m đến từ việc dập điểm nhảy (suy luận từ số học, xem bài tập 3).
+- **Chưa kiểm chứng** rằng phần lớn mức giảm ở σ = 2 m đến từ việc dập điểm nhảy (suy luận từ số học, xem bài tập 3).
 - **Không đo thời gian chạy của bộ lọc** trong bài này; lab không có số µs cho Kalman.
 
 ## Bài tập
@@ -271,13 +271,13 @@ Các số trong bài này là RMSE, tỉ lệ và số đếm nên tái lập t�
 <p><code>K</code> = 16 / (16 + 36) = 0,308; ước lượng = 52 + 0,308 × 8 = 54,46 m. Với <code>R</code> = 144: <code>K</code> = 16 / 160 = 0,1; ước lượng = 52 + 0,1 × 8 = 52,8 m. Điểm đo kém tin cậy hơn thì bộ lọc gần như bỏ qua nó, nên accuracy của từng điểm là đầu vào chứ không phải trang trí.</p>
 </details>
 
-**Bài 2.** Làm mượt RTS giảm 9,3% RMSE ở trễ 2 giây rồi dừng, dù có thêm điểm sau. Vì sao? Nếu nhiễu là trắng mà giữ nguyên tham số, bạn dự đoán chỗ dừng đó thay đổi thế nào (đây là dự đoán, lab chưa đo)?
+**Bài 2.** Làm mượt RTS giảm 9,3% RMSE ở độ trễ 2 giây rồi không giảm thêm, dù có thêm điểm sau. Vì sao? Nếu nhiễu là trắng mà giữ nguyên tham số, bạn dự đoán chỗ dừng đó thay đổi thế nào (đây là dự đoán, lab chưa đo)?
 
 <details><summary>Lời giải bài 2</summary>
 <p>Trọng số của điểm đo tương lai giảm theo cấp số nhân, và chỉ tham số bộ lọc quyết định nó: với <code>accel_sigma</code> = 4, <code>R</code> = 36 là cỡ 0,22, 0,07, 0,02, 0,007 ở bước 1, 2, 3, 4 (tính tay). Trọng số không phụ thuộc nhiễu thật, nên với nhiễu trắng và cùng tham số, đường cong cũng phẳng ở cỡ 2 đến 3 bước; chỉ mức giảm có thể lớn hơn, vì các điểm sau mang thông tin độc lập. Muốn chỗ phẳng đến muộn hơn phải giảm <code>accel_sigma</code> (0,25 cho cỡ 0,19, 0,14, 0,11, 0,08), đổi lại lệch nhiều hơn khi xe đổi vận tốc. Muốn biết thật, thêm một dòng thử nhiễu trắng vào mục 4 của lab và chạy lại.</p>
 </details>
 
-**Bài 3.** Đề xuất một lần chạy để kiểm giả thuyết «mức giảm 24,2% ở σ = 2 m chủ yếu là nhờ dập điểm nhảy». Bạn kỳ vọng thấy gì nếu giả thuyết đúng, và thấy gì nếu sai?
+**Bài 3.** Đề xuất một lần chạy để kiểm chứng giả thuyết «mức giảm 24,2% ở σ = 2 m chủ yếu là nhờ dập điểm nhảy». Bạn kỳ vọng thấy gì nếu giả thuyết đúng, và thấy gì nếu sai?
 
 <details><summary>Lời giải bài 3</summary>
 <p>Chạy lại mục 2 với <code>p_outlier = 0</code> trong <code>NoiseConfig</code> (hàm <code>noise</code> của lab). Nếu giả thuyết đúng, mức giảm ở σ = 2 m tương quan 8 s phải tụt mạnh, có thể về cỡ vài phần trăm như σ = 6 m. Nếu mức giảm vẫn gần 24%, thì phần lớn lợi ích đến từ làm mượt và giả thuyết sai. Ghi kết quả vào <code>results/</code> kèm lệnh, đúng quy tắc «số trong bài phải có output sinh ra nó».</p>

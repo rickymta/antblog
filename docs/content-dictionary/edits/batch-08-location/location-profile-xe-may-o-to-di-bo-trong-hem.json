@@ -1,0 +1,167 @@
+{
+ "file": "location-profile-xe-may-o-to-di-bo-trong-hem.md",
+ "edits": [
+  {
+   "old": "quyền đi đọc từ thẻ OSM, tốc độ theo loại đường là giả định, hẻm, và đo",
+   "new": "quyền đi lấy từ thẻ OSM, tốc độ theo loại đường là giả định, xử lý hẻm, và đo",
+   "reason": "Cụm 'quyền đi đọc' dễ hiểu nhầm; thiếu động từ cho 'hẻm'",
+   "severity": "medium"
+  },
+  {
+   "old": "riêng quyền vào hẻm đáng 10,1%",
+   "new": "riêng quyền vào hẻm đã giúp nhanh hơn 10,1%",
+   "reason": "'đáng 10,1%' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "thêm cho đồ thị ba cách di chuyển",
+   "new": "thêm ba cách di chuyển vào đồ thị",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Cách ngây thơ nhất là dựng",
+   "new": "Cách làm đơn giản nhất là dựng",
+   "reason": "'ngây thơ' là calque của naive",
+   "severity": "medium"
+  },
+  {
+   "old": "Cái được thật là",
+   "new": "Lợi ích thật là",
+   "reason": "Khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Ai được đi cạnh nào được quyết định",
+   "new": "Profile nào được đi cạnh nào sẽ được quyết định",
+   "reason": "Câu dễ hiểu nhầm, nêu rõ chủ thể",
+   "severity": "low"
+  },
+  {
+   "old": "một lựa chọn dễ phản tác dụng mà phần dưới đo",
+   "new": "một lựa chọn dễ phản tác dụng, như phần dưới sẽ đo",
+   "reason": "Câu cụt, thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "Nhờ vậy khách đi bộ ngược đường một chiều được",
+   "new": "Nhờ vậy khách đi bộ có thể đi ngược đường một chiều",
+   "reason": "Trật tự từ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó đặt một bảng tốc độ theo loại đường (Hình 2), có hiệu chỉnh bởi `maxspeed` và hẻm",
+   "new": "Lab đặt một bảng tốc độ theo loại đường (Hình 2), rồi hiệu chỉnh theo `maxspeed` và hẻm",
+   "reason": "Tránh 'Nó' và bị động kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi bị chặn trên bởi `maxspeed` nếu có",
+   "new": "rồi không được vượt quá `maxspeed` nếu có",
+   "reason": "Calque 'chặn trên bởi'",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó là thẻ truy cập: theo loại đường",
+   "new": "Nguyên nhân chính là thẻ truy cập: theo loại đường",
+   "reason": "Tránh 'Nó' chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "không phải do ai đó ghi `width=2.2`",
+   "new": "không phải do người lập bản đồ ghi `width=2.2`",
+   "reason": "Văn nói",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ bị chặn tốc độ ở 10 km/h",
+   "new": "chỉ bị giới hạn tốc độ ở 10 km/h",
+   "reason": "Dùng từ chính xác",
+   "severity": "low"
+  },
+  {
+   "old": "Đo cái sai đó cần",
+   "new": "Đo mức sai lệch đó cần",
+   "reason": "Khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "và so sánh vô nghĩa.",
+   "new": "nên phép so sánh trở nên vô nghĩa.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Trong 150 ca khác vì quyền đi",
+   "new": "Trong 150 cặp khác vì quyền đi",
+   "reason": "Thống nhất 'cặp' với phần trên",
+   "severity": "low"
+  },
+  {
+   "old": "Thời gian xe máy trên ô tô: trung bình 0,925",
+   "new": "Tỉ lệ thời gian xe máy so với ô tô: trung bình 0,925",
+   "reason": "Lược mất danh từ 'tỉ lệ'",
+   "severity": "medium"
+  },
+  {
+   "old": "Thời gian xe máy trên ô tô đi từ 0,857 lên 0,955",
+   "new": "Tỉ lệ thời gian xe máy so với ô tô tăng từ 0,857 lên 0,955",
+   "reason": "Lược mất danh từ 'tỉ lệ'",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng lab chưa kiểm giả thuyết đó",
+   "new": "nhưng lab chưa kiểm chứng giả thuyết đó",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Hai ca thật cho cảm nhận.",
+   "new": "Hai ca thật giúp hình dung rõ hơn.",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó chỉ nói nếu đuổi xe máy khỏi phần đường của mình",
+   "new": "Nó chỉ cho biết rằng nếu đuổi xe máy khỏi phần đường dành riêng cho xe máy",
+   "reason": "Câu khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "đừng lấy làm ví dụ về đời thật",
+   "new": "không nên dùng làm ví dụ ngoài đời thực",
+   "reason": "Giọng khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "lab không kiểm ngoài thực địa",
+   "new": "lab không kiểm chứng ngoài thực địa",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "số µs này đo khi máy chịu tải nặng nên chỉ cho biết cỡ",
+   "new": "số µs này đo khi máy chịu tải nặng nên chỉ cho biết bậc độ lớn",
+   "reason": "'cho biết cỡ' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm tự động: test",
+   "new": "Kiểm thử tự động: test",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Chênh lệch ô tô và xe máy là số được mô hình hoá.",
+   "new": "Chênh lệch giữa ô tô và xe máy là số do mô hình tạo ra.",
+   "reason": "Thiếu từ nối, bị động",
+   "severity": "medium"
+  },
+  {
+   "old": "Tuyến tính ra chậm (10 km/h)",
+   "new": "Tuyến được tính là chậm (10 km/h)",
+   "reason": "'Tuyến tính ra' dễ đọc nhầm thành 'tuyến tính'",
+   "severity": "high"
+  }
+ ]
+}

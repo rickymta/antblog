@@ -1,21 +1,21 @@
 ---
 slug: location-geocoding-dia-chi-viet-nam-autocomplete
 title: "Từ địa chỉ tới toạ độ: geocoding và gợi ý địa chỉ Việt Nam"
-summary: "Bài 31: chuẩn hoá có dấu, số nhà và hẻm, chỉ mục địa chỉ từ OSM thưa, gợi ý khi gõ, tìm ngược, độ tin cậy; tập thử sinh từ chính OSM nên chỉ đo độ bền trước nhiễu chữ; kiểm đổi tên hành chính 2025 chưa đầy đủ."
+summary: "Bài 31: chuẩn hoá chữ có dấu, số nhà và hẻm, chỉ mục địa chỉ dựng từ OSM còn thưa, gợi ý khi gõ, tìm ngược, độ tin cậy; tập thử sinh từ chính OSM nên chỉ đo độ bền trước nhiễu chữ; việc kiểm tra đổi tên đơn vị hành chính 2025 chưa đầy đủ."
 category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, geocoding, openstreetmap, unicode, autocomplete, reverse-geocoding]
 language: vi
 ---
 
-Khách gõ vào ô điểm đến: `Hem 45 Nguyen Trai, P12 Q10`. Không dấu, «hẻm» viết thành «hem», phường và quận dính liền với số. Người đọc tiếng Việt hiểu ngay, còn service định vị phải đưa ra một toạ độ, vì điểm trả `dest` là số hạng `T_trip` trong hàm mục tiêu của phần P04: nếu toạ độ lệch 500 m thì đoạn có khách của mọi ứng viên điểm đón đều bị đo sai, và thứ hạng của chúng có thể đổi. Bài này đứng trước cả phần tối ưu: nó trả lời «địa chỉ gõ vào là chỗ nào» và, quan trọng hơn, «ta tin câu trả lời đó tới đâu».
+Khách gõ vào ô điểm đến: `Hem 45 Nguyen Trai, P12 Q10`. Không dấu, «hẻm» viết thành «hem», phường và quận dính liền với số. Người đọc tiếng Việt hiểu ngay, còn dịch vụ định vị phải đưa ra một toạ độ, vì điểm trả `dest` là số hạng `T_trip` trong hàm mục tiêu của phần P04: nếu toạ độ lệch 500 m thì đoạn có khách của mọi ứng viên điểm đón đều bị đo sai, và thứ hạng của chúng có thể đổi. Bài này đứng trước cả phần tối ưu: nó trả lời «địa chỉ gõ vào là chỗ nào» và, quan trọng hơn, «ta tin câu trả lời đó tới đâu».
 
 Đây là bài 31 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong) cho tìm ngược và dữ liệu OpenStreetMap đã đọc ở [bài 06](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to). Mọi con số bên dưới đo trên dữ liệu OSM của TP.HCM trong bbox của lab (lat 10,70–10,86, lng 106,60–106,78; © OpenStreetMap contributors), bản PBF có dấu thời gian `2026-11-04T21:21:03Z`, seed 20261106. **Tập thử của bài được sinh từ chính OSM**, nên nó không nói gì về độ chính xác ngoài đời; mục thứ tư giải thích thiên lệch đó trước khi đưa bất kỳ phần trăm nào.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Chữ «Nguyễn Trãi» trong một cơ sở dữ liệu có thể đến dưới hai dạng Unicode trông giống hệt nhau. Theo bạn chúng khác nhau bao nhiêu byte, và nếu so sánh chuỗi thô thì điều gì xảy ra với một người dùng gõ trên máy này và một địa chỉ lưu từ máy kia?</p>
-<details><summary>Xem đáp án</summary><p>Dạng dựng sẵn (NFC) chiếm 14 byte, dạng tách rời (NFD, chữ cái cộng dấu kết hợp) chiếm 17 byte. Hai chuỗi hiển thị giống nhau nhưng so sánh byte thì khác, nên tìm kiếm thô trượt hoàn toàn. Lab đưa cả hai về cùng một khoá chuẩn hoá và kiểm tra bằng một dòng <code>kiểm tra: NFC và NFD cho cùng khoá chuẩn hoá = true</code>.</p></details>
+<details><summary>Xem đáp án</summary><p>Dạng dựng sẵn (NFC) chiếm 14 byte, dạng tách rời (NFD, chữ cái cộng dấu kết hợp) chiếm 17 byte. Hai chuỗi hiển thị giống nhau nhưng so sánh byte thì khác, nên tìm kiếm thô hoàn toàn không khớp được. Lab đưa cả hai về cùng một khoá chuẩn hoá và kiểm tra bằng một dòng <code>kiểm tra: NFC và NFD cho cùng khoá chuẩn hoá = true</code>.</p></details>
 </div>
 
 ## Địa chỉ Việt Nam khác địa chỉ trong sách giáo khoa
@@ -48,9 +48,9 @@ Phép phân tích (`parse`) đọc các đơn vị hành chính trước, rồi 
 | `3 Tháng 2` | `3 thang 2` | đường `3 thang 2`, không có số nhà |
 | `Huyen Tran Cong Chua` | `huyen tran cong chua` | **đọc sai** thành huyện `tran cong chua` |
 
-Dòng cuối là một giới hạn đã biết, không phải lỗi giấu: khi bỏ dấu, «Huyền» (tên người) trùng chữ với «huyện» (đơn vị hành chính), và nếu không có chữ «đường» đứng trước thì parser chọn huyện. Có dấu (`Huyền Trân Công Chúa, Quận 1`) thì đọc đúng. Mức mơ hồ do bỏ dấu đo được trên tên đường trong chỉ mục: 247 trong 24.993 khoá tên đường không dấu (0,99%) ứng với từ hai dạng có dấu khác nhau trở lên, nhưng nguyên nhân chủ yếu hoá ra là **người vẽ bản đồ viết cùng một tên khi có dấu, khi không** (`chu van an` và `chu văn an`), chứ không phải cặp từ đồng âm thật như «Bà» và «Ba».
+Dòng cuối là một giới hạn đã biết, không phải lỗi bị giấu đi: khi bỏ dấu, «Huyền» (tên người) trùng chữ với «huyện» (đơn vị hành chính), và nếu không có chữ «đường» đứng trước thì parser chọn huyện. Có dấu (`Huyền Trân Công Chúa, Quận 1`) thì đọc đúng. Mức mơ hồ do bỏ dấu đo được trên tên đường trong chỉ mục: 247 trong 24.993 khoá tên đường không dấu (0,99%) ứng với từ hai dạng có dấu khác nhau trở lên, nhưng nguyên nhân chủ yếu hoá ra là **người vẽ bản đồ viết cùng một tên khi có dấu, khi không** (`chu van an` và `chu văn an`), chứ không phải cặp từ đồng âm thật như «Bà» và «Ba».
 
-## OSM ở TP.HCM có bao nhiêu địa chỉ để mà tìm
+## OSM ở TP.HCM có bao nhiêu địa chỉ để tra cứu
 
 Chỉ mục dựng từ ba loại bản ghi: địa chỉ có số nhà (25.725), địa điểm có tên (8.612) và địa danh (2.168), tổng cộng 36.505 bản ghi, cộng 41.987 way đường có tên để tra tên đường. Con số quyết định chất lượng của mọi thứ phía sau là **độ phủ `addr:*`**, đếm trực tiếp từ PBF:
 
@@ -61,11 +61,11 @@ Chỉ mục dựng từ ba loại bản ghi: địa chỉ có số nhà (25.725)
 <figcaption>Hình 1. Độ phủ addr:* của OSM trong bbox của lab, đếm trực tiếp từ bản PBF 2026-11-04. Trong 79.839 toà nhà chỉ 7.567 có addr:housenumber (9,48%); thẻ phường, quận, tỉnh thưa hơn nhiều so với số nhà. Hai số 963 và 71.309 ở chú giải là phép trừ từ các số lab in ra. © OpenStreetMap contributors.</figcaption>
 </figure>
 
-Hơn 9 trên 10 toà nhà trong OSM không có số nhà. Điều đó có nghĩa địa chỉ thật mà khách gõ thường **không có trong chỉ mục**, và hệ thống phải rơi về «số nhà gần nhất cùng đường» (`HouseNearest`) hoặc mức đường. Thẻ hành chính còn thưa hơn: 7.521 điểm có `addr:subdistrict` và 126 có `addr:ward` so với 25.725 số nhà, nên không thể suy ra phường từ toạ độ; lab không có ranh giới hành chính, phường chỉ là thẻ gắn trên điểm. Khoá `addr:interpolation` chỉ có 16 đối tượng, quá ít để nội suy số nhà theo hình học. Dữ liệu cũng nhiễu: `addr:city` có `Ho Chi Minh City` ×1.233, `HCMC` ×179 và cả `Phường An Lạc`; `addr:district` có `Phường An Lạc` ×349 và quận không có chữ «Quận» (`Gò Vấp`).
+Hơn 9 trên 10 toà nhà trong OSM không có số nhà. Điều đó có nghĩa là địa chỉ thật mà khách gõ thường **không có trong chỉ mục**, và hệ thống phải lùi về «số nhà gần nhất cùng đường» (`HouseNearest`) hoặc mức đường. Thẻ hành chính còn thưa hơn: 7.521 điểm có `addr:subdistrict` và 126 có `addr:ward` so với 25.725 số nhà, nên không thể suy ra phường từ toạ độ; lab không có ranh giới hành chính, phường chỉ là thẻ gắn trên điểm. Khoá `addr:interpolation` chỉ có 16 đối tượng, quá ít để nội suy số nhà theo hình học. Dữ liệu cũng nhiễu: `addr:city` có `Ho Chi Minh City` ×1.233, `HCMC` ×179 và cả `Phường An Lạc`; `addr:district` có `Phường An Lạc` ×349 và quận không có chữ «Quận» (`Gò Vấp`).
 
 ## Chỉ mục, mức khớp và độ tin cậy
 
-Mỗi truy vấn đi qua khoá chuẩn hoá rồi được xếp vào một **mức khớp**, từ chắc chắn nhất tới yếu nhất: `HouseExact` (đúng số nhà trên đúng đường), `AlleyRoot` (chỉ khớp lối vào hẻm, số đầu của chuỗi `123/45/6`), `HouseNearest` (số nhà không có trong dữ liệu, lấy số gần nhất cùng đường), `Poi` (tên địa điểm), `Street`, `Place`, và `Ward` (chỉ có phường). Mức khớp quyết định điểm gốc (0,90; 0,60; 0,50; 0,85; 0,40; 0,45; 0,20), là tham số của lab chứ không đo từ dữ liệu. Sửa lỗi gõ dùng khoảng cách Damerau–Levenshtein với ngân sách theo độ dài khoá: tên ngắn phải khớp đúng, vì cho phép sửa trên tên ngắn sẽ khớp bừa:
+Mỗi truy vấn đi qua khoá chuẩn hoá rồi được xếp vào một **mức khớp**, từ chắc chắn nhất tới yếu nhất: `HouseExact` (đúng số nhà trên đúng đường), `AlleyRoot` (chỉ khớp lối vào hẻm, số đầu của chuỗi `123/45/6`), `HouseNearest` (số nhà không có trong dữ liệu, lấy số gần nhất cùng đường), `Poi` (tên địa điểm), `Street`, `Place`, và `Ward` (chỉ có phường). Mức khớp quyết định điểm cơ sở (0,90; 0,60; 0,50; 0,85; 0,40; 0,45; 0,20), là tham số của lab chứ không đo từ dữ liệu. Sửa lỗi gõ dùng khoảng cách Damerau–Levenshtein với ngân sách theo độ dài khoá: tên ngắn phải khớp đúng, vì cho phép sửa trên tên ngắn sẽ khớp bừa:
 
 `examples/toi-noi-location/rust/crates/geocode/src/index.rs`
 
@@ -80,7 +80,7 @@ pub fn fuzzy_budget(len: usize) -> usize {
 }
 ```
 
-Từ điểm gốc, lab nhân thêm các hệ số (độ giống chữ, khớp phường, dấu, số nhà gần nhất) rồi chặn bởi **trần hành chính**. Công thức nằm ở đầu `index.rs`:
+Từ điểm cơ sở, lab nhân thêm các hệ số (độ giống chữ, khớp phường, dấu, số nhà gần nhất) rồi giới hạn bằng **trần hành chính**. Công thức nằm ở đầu `index.rs`:
 
 `examples/toi-noi-location/rust/crates/geocode/src/index.rs`
 
@@ -91,7 +91,7 @@ Từ điểm gốc, lab nhân thêm các hệ số (độ giống chữ, khớp 
 //! ```
 ```
 
-Hệ số `dup = 1/√G` đáng một đoạn riêng, vì nó đến từ một bất ngờ. Tên đường lặp rất nhiều ở thành phố này (Đường số 1, 6, 8, 27, …, mỗi tên có hàng chục cụm cách xa nhau). Một khớp số nhà đúng ở cụm này không chứng minh người dùng nghĩ tới cụm đó. Truy vấn `16 Đường số 6` trả `14;16 Đường số 6` cách đáp án 19.907,5 m với điểm 0,873, tức trông rất tự tin nếu chỉ nhìn điểm; nhân thêm hệ số này thì độ tin cậy còn 0,098. Hệ số được thêm sau lần chạy đầu trên tập thử, chưa kiểm trên tập khác.
+Hệ số `dup = 1/√G` đáng có một đoạn riêng, vì nó xuất phát từ một điều bất ngờ. Tên đường lặp rất nhiều ở thành phố này (Đường số 1, 6, 8, 27, …, mỗi tên có hàng chục cụm cách xa nhau). Một khớp số nhà đúng ở cụm này không chứng minh người dùng nghĩ tới cụm đó. Truy vấn `16 Đường số 6` trả `14;16 Đường số 6` cách đáp án 19.907,5 m với điểm 0,873, tức trông rất tự tin nếu chỉ nhìn điểm; nhân thêm hệ số này thì độ tin cậy còn 0,098. Hệ số được thêm sau lần chạy đầu trên tập thử, chưa kiểm trên tập khác.
 
 **Gợi ý khi gõ** là bài toán khác: mỗi ký tự gõ vào là một truy vấn tiền tố trên khoá chuẩn hoá đã sắp xếp. Cài đặt là tìm nhị phân vị trí bắt đầu rồi duyệt các khoá cùng tiền tố, giữ top `limit` bằng một heap nhỏ:
 
@@ -106,13 +106,13 @@ Hệ số `dup = 1/√G` đáng một đoạn riêng, vì nó đến từ một 
             }
 ```
 
-Số đo trên 1.000 khoá đích (19.812 lần gọi, mỗi ký tự một lần): p50 mỗi lần gọi 4,1 µs, p99 300,8 µs, đo khi máy đang chịu tải nặng nên chỉ so tương đối. Điều đáng chú ý là chất lượng: ở tiền tố 5 ký tự khoá đích chỉ vào top 5 ở 22,7% ca, ở 11–15 ký tự là 60,9%; trung bình phải gõ 53,6% độ dài khoá để đích vào top 5 lần đầu, và 103 trên 1.000 đích không bao giờ vào top 5, phần lớn là nhãn bắt đầu bằng `Hẻm N`, vì số đầu bị đọc là hẻm. Gợi ý chỉ khớp tiền tố của cả tên (không khớp giữa từ, không sửa lỗi gõ).
+Số đo trên 1.000 khoá đích (19.812 lần gọi, mỗi ký tự một lần): p50 mỗi lần gọi 4,1 µs, p99 300,8 µs, đo khi máy đang chịu tải nặng nên chỉ so sánh tương đối. Điều đáng chú ý là chất lượng: ở tiền tố 5 ký tự khoá đích chỉ lọt vào top 5 ở 22,7% trường hợp, còn ở 11–15 ký tự là 60,9%; trung bình phải gõ 53,6% độ dài khoá để đích vào top 5 lần đầu, và 103 trên 1.000 đích không bao giờ vào top 5, phần lớn là nhãn bắt đầu bằng `Hẻm N`, vì số đầu bị đọc là hẻm. Gợi ý chỉ khớp tiền tố của cả tên (không khớp giữa từ, không sửa lỗi gõ).
 
 ## Tập thử sinh từ chính OSM: thiên lệch cần nói thẳng
 
-Muốn biết geocoder đúng bao nhiêu phần trăm thì phải có câu hỏi và đáp án. Lab làm cách rẻ nhất: lấy 21.610 điểm có cả số nhà lẫn tên đường, tách ngẫu nhiên 20% (4.322 điểm) làm tập thử, dựng câu hỏi từ thẻ OSM rồi thêm nhiễu (bỏ dấu, 1 hoặc 2 lỗi gõ, viết tắt, thiếu phường), đáp án là toạ độ OSM. Dùng tối đa 2.000 điểm mỗi nhóm.
+Muốn biết geocoder đúng bao nhiêu phần trăm thì phải có câu hỏi và đáp án. Lab chọn cách rẻ nhất: lấy 21.610 điểm có cả số nhà lẫn tên đường, tách ngẫu nhiên 20% (4.322 điểm) làm tập thử, dựng câu hỏi từ thẻ OSM rồi thêm nhiễu (bỏ dấu, 1 hoặc 2 lỗi gõ, viết tắt, thiếu phường), đáp án là toạ độ OSM. Mỗi nhóm dùng tối đa 2.000 điểm.
 
-**Thiên lệch ở đây là cấu trúc, không phải chi tiết.** Câu hỏi dựng từ OSM, đáp án lấy từ OSM, chỉ mục cũng dựng từ OSM. Vì vậy tập thử đo **độ bền trước nhiễu chữ viết** và cơ chế của hệ thống; nó **không** đo: người dùng gõ địa danh hay tên thân mật, số hẻm không có trong OSM, tên phường cũ, hoặc chuyện OSM thưa đúng ở chỗ họ cần. Hai chế độ đo cố gắng bù một phần. Chế độ GIỮ để đối tượng thử nằm trong chỉ mục: đo thuần nhiễu chữ. Chế độ GỠ gỡ đối tượng thử khỏi chỉ mục trước khi tra, mô phỏng «địa chỉ không có trong OSM»: không bao giờ khớp lại đúng điểm đã gỡ.
+**Thiên lệch ở đây mang tính cấu trúc, không phải chi tiết.** Câu hỏi dựng từ OSM, đáp án lấy từ OSM, chỉ mục cũng dựng từ OSM. Vì vậy tập thử đo **độ bền trước nhiễu chữ viết** và cơ chế của hệ thống; nó **không** đo: người dùng gõ địa danh hay tên thân mật, số hẻm không có trong OSM, tên phường cũ, hoặc chuyện OSM thưa đúng ở chỗ họ cần. Hai chế độ đo cố gắng bù một phần. Chế độ GIỮ để đối tượng thử nằm trong chỉ mục: đo thuần nhiễu chữ. Chế độ GỠ gỡ đối tượng thử khỏi chỉ mục trước khi tra, mô phỏng «địa chỉ không có trong OSM»: không bao giờ khớp lại đúng điểm đã gỡ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -123,17 +123,17 @@ Muốn biết geocoder đúng bao nhiêu phần trăm thì phải có câu hỏi
 
 Ba điều đọc được, mỗi điều kèm giới hạn:
 
-- **Lỗi gõ làm tụt nhiều hơn bỏ dấu.** Ở chế độ GIỮ, câu sạch trúng 88,2% trong 50 m, bỏ dấu còn 86,9% (khoá tìm kiếm đã bỏ dấu nên gần như không đổi), một lỗi gõ 74,3%, hai lỗi 67,5%. Phần lớn chỗ mất là «không có kết quả» (408 trên 2.000 ca ở một lỗi gõ), do tên đường ngắn chỉ cho 0–1 lần sửa.
+- **Lỗi gõ làm tụt nhiều hơn bỏ dấu.** Ở chế độ GIỮ, câu sạch trúng 88,2% trong 50 m, bỏ dấu còn 86,9% (khoá tìm kiếm đã bỏ dấu nên gần như không đổi), một lỗi gõ 74,3%, hai lỗi 67,5%. Phần lớn lượng hụt là các câu «không có kết quả» (408 trên 2.000 ca ở một lỗi gõ), do tên đường ngắn chỉ cho 0–1 lần sửa.
 - **Địa chỉ không có trong OSM chỉ trúng khoảng một nửa.** Ở chế độ GỠ câu sạch trúng 50,6% trong 50 m và 72,5% trong 200 m. Ứng viên đầu cách đáp án trung vị 44 m nhưng p90 tới 5.267 m: số nhà gần nhất cùng đường thường nằm sát, nhưng khi đường dài hoặc trùng tên ở nhiều nơi thì sai hàng kilômét.
 - **Độ tin cậy có ý nghĩa ở nửa trên, không đơn điệu ở nửa dưới.** Chế độ GIỮ: nhóm tin cậy [0,9; 1,0] đúng 99,3% (trong 50 m), nhóm [0,5; 0,6) đúng 95,4%. Chế độ GỠ: nhóm [0,7; 0,8) chỉ đúng 55,8%, vì mô hình không thể biết địa chỉ thật đã thiếu trong dữ liệu.
 
-Và một điều thành thật nữa: sau lần chạy đầu (trúng 79,7% trong 50 m ở chế độ GIỮ, câu sạch), lab đã sửa parser (tách theo dấu phẩy, nhận biết dấu khi tách tên đường, số nhà gần nhất theo cụm, hệ số `dup`) **trên chính tập thử này**. Kết quả cuối (88,2%) vì thế lạc quan hơn so với một tập thử mới chưa từng nhìn. Hệ số `dup` chưa được kiểm trên tập khác.
+Một điều cần nói thẳng nữa: sau lần chạy đầu (trúng 79,7% trong 50 m ở chế độ GIỮ, câu sạch), lab đã sửa parser (tách theo dấu phẩy, nhận biết dấu khi tách tên đường, số nhà gần nhất theo cụm, hệ số `dup`) **trên chính tập thử này**. Kết quả cuối (88,2%) vì thế lạc quan hơn so với một tập thử mới chưa từng nhìn. Hệ số `dup` chưa được kiểm trên tập khác.
 
 ## Tìm ngược: từ toạ độ về nhãn
 
-Chiều ngược lại dùng R-tree: tìm điểm địa chỉ gần nhất trong bán kính, nếu không có thì đường có tên gần nhất. Lab hỏi bằng toạ độ OSM của 3.000 điểm địa chỉ đã gỡ khỏi chỉ mục, nên kết quả luôn là một địa chỉ **khác**, và «sai số» là khoảng cách từ điểm thật tới nhãn trả về. Với GPS hoàn hảo (σ = 0 m), 2.519 truy vấn ra mức địa chỉ (p50 7,7 m, p95 40,5 m), 475 ra mức đường (p50 12,0 m), 6 không có kết quả; đúng tên đường 85,0%. Thêm nhiễu GPS σ = 10 m: p50 14,8 m, p95 43,3 m, đúng tên đường 78,9%. Hiểu đúng các số này: chúng cho biết nhãn hàng xóm gần nhất nằm sát tới đâu và độ nhạy với nhiễu GPS, chứ không phải «độ chính xác của app» ngoài đời.
+Chiều ngược lại dùng R-tree: tìm điểm địa chỉ gần nhất trong bán kính, nếu không có thì đường có tên gần nhất. Lab hỏi bằng toạ độ OSM của 3.000 điểm địa chỉ đã gỡ khỏi chỉ mục, nên kết quả luôn là một địa chỉ **khác**, và «sai số» là khoảng cách từ điểm thật tới nhãn trả về. Với GPS hoàn hảo (σ = 0 m), 2.519 truy vấn ra mức địa chỉ (p50 7,7 m, p95 40,5 m), 475 ra mức đường (p50 12,0 m), 6 không có kết quả; đúng tên đường 85,0%. Thêm nhiễu GPS σ = 10 m: p50 14,8 m, p95 43,3 m, đúng tên đường 78,9%. Hiểu đúng các số này: chúng cho biết nhãn hàng xóm gần nhất nằm sát tới đâu và độ nhạy với nhiễu GPS, chứ không phải «độ chính xác của ứng dụng» ngoài đời.
 
-## Đổi tên hành chính 2025: đã kiểm gì, chưa kiểm gì
+## Đổi tên hành chính 2025: đã kiểm tra gì, chưa kiểm tra gì
 
 Địa chỉ Việt Nam có thêm một lớp bất ổn: đơn vị hành chính đã đổi năm 2025. Lab ghi lại những gì kiểm được ngày 07/11/2026, và nói rõ kiểm bằng cách nào. Mọi nguồn dưới đây là trang tổng hợp luật và báo, đọc qua công cụ tìm kiếm và tải trang có tóm tắt, **chưa đối chiếu với văn bản gốc trên vbpl.vn hay Công báo**. Ba ý chính dưới đây khớp nhau giữa ít nhất hai nguồn độc lập; chi tiết ở `results/p04.md`.
 
@@ -145,7 +145,7 @@ Phần **chưa kiểm** quan trọng không kém: bảng ánh xạ phường cũ
 
 OSM trong bbox gắn tên phường **lẫn cả hai thời kỳ**: `addr:subdistrict` có `Phường 12` ×125, `Phường 14` ×123 (kiểu cũ) cạnh `Phường Xóm Chiếu` ×183 (tên chỉ có sau sáp nhập). Các quan hệ ranh giới `boundary=administrative` trong file PBF toàn Việt Nam có `Phường Sài Gòn`, `Bàn Cờ`, `Bến Thành`, `Nhiêu Lộc`… và không có `Phường Bến Nghé`, `Phường Thảo Điền`, `Quận 1`, `Quận 3`, `Quận 4`, tức ranh giới trong PBF đã theo mô hình mới. Hệ quả: tên phường trong truy vấn và trong thẻ có thể thuộc hai thời kỳ, và hệ thống chỉ so chuỗi.
 
-Cách lab xử lý: câu hỏi mang tên cũ phải được ánh xạ hoặc gắn cờ, **không bao giờ trả lời tự tin sai**. Mỗi trạng thái hành chính có một trần độ tin cậy, và phường cũ bị tách vào nhiều phường mới (như Đa Kao vào Sài Gòn và Tân Định) được gắn `OldSplit` thay vì chọn bừa:
+Cách lab xử lý: câu hỏi mang tên cũ phải được ánh xạ hoặc gắn cờ, **không bao giờ trả lời sai với độ tin cậy cao**. Mỗi trạng thái hành chính có một trần độ tin cậy, và phường cũ bị tách vào nhiều phường mới (như Đa Kao vào Sài Gòn và Tân Định) được gắn `OldSplit` thay vì chọn bừa:
 
 `examples/toi-noi-location/rust/crates/geocode/src/admin.rs`
 
@@ -167,7 +167,7 @@ fn lookup(district: Option<&str>, ward: &str) -> Option<&'static WardMapping> {
 }
 ```
 
-Output của lab cho thấy hiệu ứng: `3 Đại lộ 2` (không nêu hành chính) tin cậy 0,900; thêm `Phường Sài Gòn` còn 0,855; thêm `Phường Bến Nghé, Quận 1` (ánh xạ được sang Sài Gòn) tin cậy 0,800 kèm cảnh báo; thêm `Phường 12, Quận Tân Bình` (không có trong bảng) chỉ 0,500 kèm cảnh báo «câu hỏi dùng tên quận/phường số kiểu cũ». Tên phường trong PBF không phải thứ để tin vô điều kiện, vì cả dữ liệu lẫn luật đều đang đổi.
+Kết quả in ra của lab cho thấy hiệu ứng: `3 Đại lộ 2` (không nêu hành chính) tin cậy 0,900; thêm `Phường Sài Gòn` còn 0,855; thêm `Phường Bến Nghé, Quận 1` (ánh xạ được sang Sài Gòn) tin cậy 0,800 kèm cảnh báo; thêm `Phường 12, Quận Tân Bình` (không có trong bảng) chỉ 0,500 kèm cảnh báo «câu hỏi dùng tên quận/phường số kiểu cũ». Tên phường trong PBF không phải thứ để tin vô điều kiện, vì cả dữ liệu lẫn luật đều đang đổi.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -178,7 +178,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc31_geocode
 ```
 
-Cấu hình: Apple Silicon, `--release`, seed 20261106, nguồn `data/vietnam-latest.osm.pbf` (PBF ngày 2026-11-04), chỉ mục lưu ở `data/geocode-index.bin` (không commit). **Số thời gian đo khi máy đang chịu tải nặng** (`uptime` lúc bắt đầu: load averages 363,18 365,92 323,88); nạp chỉ mục mất 6,4 s, tổng lab 84,6 s. Số đếm, tỉ lệ và sai số mét tái lập từng chữ số với cùng seed và cùng PBF. Output (rút gọn):
+Cấu hình: Apple Silicon, `--release`, seed 20261106, nguồn `data/vietnam-latest.osm.pbf` (PBF ngày 2026-11-04), chỉ mục lưu ở `data/geocode-index.bin` (không commit). **Các số đo thời gian lấy khi máy đang chịu tải nặng** (`uptime` lúc bắt đầu: load averages 363,18 365,92 323,88); nạp chỉ mục mất 6,4 s, tổng lab 84,6 s. Số đếm, tỉ lệ và sai số mét tái lập từng chữ số với cùng seed và cùng PBF. Kết quả in ra (rút gọn):
 
 ```text
 -- 4. Đánh giá trên tập thử sinh từ chính OSM --
@@ -215,10 +215,10 @@ Test của hai crate chạy bằng `bash examples/toi-noi-location/verify-p04.sh
 <p>9,48% là tỉ lệ toà nhà có số nhà, nên địa chỉ khách gõ phần lớn rơi vào trường hợp «không có trong OSM», gần với chế độ GỠ hơn. Nhưng chế độ GỠ chỉ gỡ những điểm vốn có đủ thẻ địa chỉ trong OSM, tức nơi OSM đã khá đầy đủ, nên đường lân cận vẫn nhiều số nhà để «gần nhất» có nghĩa; ở khu vực OSM hoàn toàn thiếu, kết quả còn tệ hơn. Chế độ GIỮ thì đo thuần nhiễu chữ và bỏ qua hoàn toàn việc thiếu dữ liệu. Cả hai đều dựa trên câu hỏi sinh từ thẻ OSM nên không có địa danh, tên thân mật hay tên phường cũ.</p>
 </details>
 
-**Bài 2.** Parser không đọc được `Nguyễn Trãi 12` (số đứng sau tên đường). Đề xuất cách mở rộng mà không làm hỏng ca `3 Tháng 2`, và nêu một ca thử làm bạn nghi ngờ cách đó.
+**Bài 2.** Parser không đọc được `Nguyễn Trãi 12` (số đứng sau tên đường). Đề xuất cách mở rộng mà không làm hỏng ca `3 Tháng 2`, và nêu một ca thử khiến bạn nghi ngờ cách đó.
 
 <details><summary>Lời giải bài 2</summary>
-<p>Có thể thử: nếu phần còn lại kết thúc bằng một token số (hoặc số cộng hậu tố) và trước nó là tên đường đã có trong chỉ mục, coi token đó là số nhà. Ca `3 Tháng 2` vẫn đúng vì «3 thang» đứng trước số cuối, và «2» ở cuối là một phần của khoá tên đường `3 thang 2` có trong chỉ mục; cần kiểm tên đường trước khi tách số. Ca đáng nghi: `Đường số 7` hay `Đại lộ 2`, nơi số cuối chính là tên đường, và `Lê Lợi 12` có thể là số nhà 12 hoặc không. Cần đo lại trên tập thử có nhãn chứ không chỉ chạy ví dụ.</p>
+<p>Có thể thử: nếu phần còn lại kết thúc bằng một token số (hoặc số cộng hậu tố) và trước nó là tên đường đã có trong chỉ mục, coi token đó là số nhà. Ca `3 Tháng 2` vẫn đúng vì «3 thang» đứng trước số cuối, và «2» ở cuối là một phần của khoá tên đường `3 thang 2` có trong chỉ mục; cần kiểm tên đường trước khi tách số. Ca đáng nghi: `Đường số 7` hay `Đại lộ 2`, nơi số cuối chính là tên đường, và `Lê Lợi 12` có thể là số nhà 12 hoặc không phải. Cần đo lại trên tập thử có nhãn chứ không chỉ chạy ví dụ.</p>
 </details>
 
 **Bài 3.** Vì sao lab gắn trần độ tin cậy 0,5 cho `OldUnmapped` thay vì từ chối trả kết quả? Khi nào từ chối mới là lựa chọn đúng?

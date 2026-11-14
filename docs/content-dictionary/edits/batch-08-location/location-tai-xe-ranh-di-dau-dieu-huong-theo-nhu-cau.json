@@ -1,0 +1,227 @@
+{
+  "file": "location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau.md",
+  "edits": [
+    {
+      "old": "chống bầy đàn, chỉ gợi ý không ép.",
+      "new": "chống bầy đàn, chỉ gợi ý chứ không ép.",
+      "reason": "Câu cụt, thiếu liên từ",
+      "severity": "low"
+    },
+    {
+      "old": "Trên dữ liệu mô phỏng khách chờ đón ít hơn 36,1 s nhưng km rỗng tổng tăng 1.428,9 m mỗi khách đặt: tài xế gánh chi phí.",
+      "new": "Trên dữ liệu mô phỏng, khách chờ đón ít hơn 36,1 s nhưng km rỗng tổng tăng 1.428,9 m mỗi khách đặt, và tài xế gánh chi phí đó.",
+      "reason": "Thiếu dấu ngắt, hai vế nối bằng dấu hai chấm gây khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "trong khi khu họ rời đi thành trống.",
+      "new": "trong khi khu họ vừa rời đi trở nên trống.",
+      "reason": "Thiếu động từ, cụm «thành trống» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Bài dùng chỉ mục H3 của",
+      "new": "Bài này dùng chỉ mục H3 của",
+      "reason": "Câu thiếu chủ ngữ rõ ràng",
+      "severity": "low"
+    },
+    {
+      "old": "**Mọi số trong bài là trên dữ liệu mô phỏng**",
+      "new": "**Mọi số trong bài đều lấy trên dữ liệu mô phỏng**",
+      "reason": "Cấu trúc «là trên» kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "nghe theo gợi ý theo nhu cầu với xác suất 70%.",
+      "new": "nghe theo gợi ý dựa trên nhu cầu với xác suất 70%.",
+      "reason": "Lặp «theo» liên tiếp, khó đọc",
+      "severity": "medium"
+    },
+    {
+      "old": "So với baseline là Hungarian ghép ngay, không gợi ý.",
+      "new": "Các số trên so với baseline là Hungarian ghép ngay, không gợi ý.",
+      "reason": "Câu cụt, thiếu chủ ngữ và vị ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "lấy từ 10 seed **chỉnh** 9001…9010,",
+      "new": "lấy từ 10 seed **chỉnh tham số** 9001…9010,",
+      "reason": "«seed chỉnh» cụt, thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "**Nó là một dự báo lý tưởng**, vì dựng từ cùng phân bố",
+      "new": "**Bảng này là một dự báo lý tưởng**, vì dựng từ cùng phân bố",
+      "reason": "Tránh «Nó» chỉ sự vật, nhắc lại danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ 0,726 ngay cả khi vậy, có lẽ vì",
+      "new": "chỉ đạt 0,726 dù vậy, có lẽ vì",
+      "reason": "«ngay cả khi vậy» gượng, kiểu dịch",
+      "severity": "medium"
+    },
+    {
+      "old": "luật không dùng hạn ngạch cứng. Nó dùng một ước lượng",
+      "new": "luật không dùng hạn ngạch cứng mà dùng một ước lượng",
+      "reason": "Tránh «Nó» đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Hàm ước lượng, cùng trần 3 giờ:",
+      "new": "Hàm ước lượng cùng trần 3 giờ như sau:",
+      "reason": "Câu cụt, thiếu vị ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "Gọi mỗi 120 giây, xét 40 ô nhu cầu cao nhất, tài xế chỉ đi nếu ETA tới ô đích không quá 420 s và lợi ròng đạt lề 60 s.",
+      "new": "Luật được gọi mỗi 120 giây, xét 40 ô nhu cầu cao nhất, và tài xế chỉ đi nếu ETA tới ô đích không quá 420 s và lợi ròng đạt biên 60 s.",
+      "reason": "Thiếu chủ ngữ; «lề» thống nhất thành «biên» như bài 48",
+      "severity": "medium"
+    },
+    {
+      "old": "Có ba chi tiết trung thực cần nêu.",
+      "new": "Có ba chi tiết cần nói thẳng.",
+      "reason": "«chi tiết trung thực» là calque",
+      "severity": "medium"
+    },
+    {
+      "old": "ở đây là **thước xếp hạng**,",
+      "new": "ở đây là **thước đo xếp hạng**,",
+      "reason": "«thước» đứng một mình là từ tự ghép",
+      "severity": "medium"
+    },
+    {
+      "old": "Muốn biết chống bầy đàn có đáng không, lab có sẵn",
+      "new": "Muốn biết chống bầy đàn có đáng làm hay không, lab có sẵn",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "Đo bằng chỉ số Herfindahl (HHI) của đích đến, trong đó 1 nghĩa là mọi xe về một ô, và số xe lớn nhất về cùng ô trong một lần gọi:",
+      "new": "Lab đo bằng chỉ số Herfindahl (HHI) của đích đến, trong đó 1 nghĩa là mọi xe về một ô, kèm số xe lớn nhất về cùng ô trong một lần gọi:",
+      "reason": "Thiếu chủ ngữ, nối «và» gây hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "tức xấu hơn rõ so với không gợi ý gì.",
+      "new": "tức là xấu hơn rõ so với khi không có gợi ý nào.",
+      "reason": "«không gợi ý gì» lủng củng",
+      "severity": "medium"
+    },
+    {
+      "old": "Thử nghe theo 30%, 70% (mặc định) và 100%, trên dữ liệu mô phỏng,",
+      "new": "Ta thử mức nghe theo 30%, 70% (mặc định) và 100%, trên dữ liệu mô phỏng,",
+      "reason": "Câu thiếu chủ ngữ và danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Chia thô km rỗng tổng thêm cho số giây chờ đón giảm được cho khoảng 29 m, 40 m và 39 m mỗi giây ở ba mức",
+      "new": "Chia thô km rỗng tổng thêm cho số giây chờ đón giảm được thì ra khoảng 29 m, 40 m và 39 m cho mỗi giây ở ba mức",
+      "reason": "Câu cụt, thiếu động từ kết quả của phép chia",
+      "severity": "high"
+    },
+    {
+      "old": "Lợi cho khách thì không đi theo: lớn nhất ở «thường», ở «dày xe» khách chờ",
+      "new": "Lợi ích cho khách thì không tăng theo: lớn nhất ở «thường», còn ở «dày xe» khách chờ",
+      "reason": "«không đi theo» cụt; thiếu liên từ",
+      "severity": "medium"
+    },
+    {
+      "old": "là khoảng 326 km rỗng thêm, tức 2,7 km mỗi xe.",
+      "new": "là khoảng 326 km rỗng thêm, tức là 2,7 km mỗi xe.",
+      "reason": "Thiếu «là» sau «tức»",
+      "severity": "low"
+    },
+    {
+      "old": "trừ 166,7 m km đón tiết kiệm được mỗi khách đặt.",
+      "new": "trừ 166,7 m quãng đón tiết kiệm được mỗi khách đặt.",
+      "reason": "«m km» thừa đơn vị, gây khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "do tài xế gánh, phần lớn lợi do khách hưởng.",
+      "new": "đều do tài xế gánh, còn phần lớn lợi ích do khách hưởng.",
+      "reason": "Câu thiếu liên từ, hai vế dính nhau",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab không có đơn vị chung để nói 326 km có đáng 2,05 giờ không; đó là quyết định chính sách, và nó phải đi cùng câu hỏi ai trả tiền.",
+      "new": "Lab không có đơn vị chung để nói 326 km có đáng đổi lấy 2,05 giờ hay không; đó là quyết định chính sách, và quyết định đó phải đi cùng câu hỏi ai trả tiền.",
+      "reason": "Câu cụt; tránh «nó» mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Theo vùng (khoảng cách từ ghim của khách tới một tâm quy chiếu cố định của lab), «thường», nghe 70%:",
+      "new": "Chia theo vùng (khoảng cách từ ghim của khách tới một tâm quy chiếu cố định của lab), ở bộ «thường», nghe 70%:",
+      "reason": "Câu thiếu động từ và giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "thì có cơ chế để rời khu ít khách, và đó là lý do",
+      "new": "thì về cơ chế có thể khiến xe rời khu ít khách, và đó là lý do",
+      "reason": "«có cơ chế để rời» cụt, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "nên cần kiểm thêm.",
+      "new": "nên cần kiểm tra thêm.",
+      "reason": "«kiểm thêm» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "nâng lề lợi ròng (hiện cố định 60 s)",
+      "new": "nâng biên lợi ròng (hiện cố định 60 s)",
+      "reason": "Thống nhất «biên»",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ là một điểm trong không gian đó.",
+      "new": "chỉ là một điểm trong không gian tham số đó.",
+      "reason": "«không gian đó» thiếu định ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "thời gian chạy thì không. Output cho bộ «thường»",
+      "new": "thời gian chạy thì không. Kết quả chạy cho bộ «thường»",
+      "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "- **Chưa quét tham số** của luật (lề, trần ETA, chu kỳ, số ô xét).",
+      "new": "- **Chưa quét tham số** của luật (biên, trần ETA, chu kỳ, số ô xét).",
+      "reason": "Thống nhất «biên»",
+      "severity": "low"
+    },
+    {
+      "old": "ràng buộc nào chặn gợi ý trước khi lề 60 s kịp chặn?",
+      "new": "ràng buộc nào chặn gợi ý trước khi biên 60 s kịp chặn?",
+      "reason": "Thống nhất «biên»",
+      "severity": "medium"
+    },
+    {
+      "old": "lớn hơn lề 60 s nhiều, nên đi. Lề 60 s chỉ chặn",
+      "new": "lớn hơn biên 60 s nhiều, nên đi. Biên 60 s chỉ chặn",
+      "reason": "Thống nhất «biên»",
+      "severity": "medium"
+    },
+    {
+      "old": "không phải lề. (Tính tay",
+      "new": "không phải biên. (Tính tay",
+      "reason": "Thống nhất «biên»",
+      "severity": "low"
+    },
+    {
+      "old": "quãng di chuyển dọn chỗ lớn hơn nhiều",
+      "new": "quãng di chuyển theo gợi ý lớn hơn nhiều",
+      "reason": "«di chuyển dọn chỗ» là calque, thống nhất «chạy/di chuyển theo gợi ý»",
+      "severity": "medium"
+    },
+    {
+      "old": "Đề xuất một cách chia sẻ chi phí km rỗng cho tài xế và hai chỉ số cần đo thêm để biết nó có làm mất lợi của khách không.",
+      "new": "Đề xuất một cách chia sẻ chi phí km rỗng với tài xế và hai chỉ số cần đo thêm để biết cách đó có làm mất lợi ích của khách hay không.",
+      "reason": "«nó» mơ hồ; «cho tài xế» dễ hiểu nhầm",
+      "severity": "medium"
+    }
+  ]
+}

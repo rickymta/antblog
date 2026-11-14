@@ -1,26 +1,26 @@
 ---
 slug: location-dijkstra-a-star-rust-do-thi-csr
 title: "Dijkstra và A* trên đồ thị CSR: tuyến đường đầu tiên"
-summary: "Bài 21: cài Dijkstra và A* trên đồ thị CSR bằng BinaryHeap, kiểm heuristic chim bay hợp lệ trên mọi cạnh, đếm nút đã duyệt trên đồ thị HCM 126.699 nút và đối chiếu Vec<Vec>, petgraph."
+summary: "Bài 21: cài Dijkstra và A* trên đồ thị CSR bằng BinaryHeap, kiểm tra heuristic chim bay hợp lệ trên mọi cạnh, đếm nút đã duyệt trên đồ thị HCM 126.699 nút và đối chiếu Vec<Vec>, petgraph."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, dijkstra, a-star, csr, petgraph, openstreetmap]
 language: vi
 ---
 
-Tài xế DR-001 nhận chuyến TN-0001, khách ở bên kia thành phố. Service cần một con số trước khi báo giờ đón: đường ô tô từ chỗ tài xế tới chỗ khách dài bao nhiêu mét và mất bao nhiêu giây. Ở đồ thị HCM của lab, một cặp như vậy là nút 120147 tới nút 94147: chim bay 19.263 m, nhưng đường ô tô dài 23.687 m, đi qua 408 cạnh, ước tính 2.193,9 s. Để tìm ra tuyến đó, A* phải chốt 81.881 nút và xét 181.241 cạnh, tức 73% số nút của thành phần liên thông lớn nhất của ô tô.
+Tài xế DR-001 nhận chuyến TN-0001, khách ở bên kia thành phố. Service cần một con số trước khi báo giờ đón: đường ô tô từ chỗ tài xế tới chỗ khách dài bao nhiêu mét và mất bao nhiêu giây. Ở đồ thị HCM của lab, một cặp như vậy là nút 120147 tới nút 94147: chim bay 19.263 m, nhưng đường ô tô dài 23.687 m, đi qua 408 cạnh, ước tính 2.193,9 s. Để tìm ra tuyến đó, A* phải chốt 81.881 nút và xét 181.241 cạnh, tức 73% số nút của thành phần liên thông lớn nhất trong đồ thị ô tô.
 
-Đây là bài 21 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), và là bài đầu tiên của phần P03 (định tuyến). Bài dùng đồ thị CSR của [bài 06](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to). Mọi tốc độ ở đây là **giả định của lab** theo loại đường, không đo từ xe thật; mọi số thời gian đo khi máy đang chịu tải rất nặng, nên bài ưu tiên số nút đã duyệt và tỉ lệ, là những số tái lập được từng chữ số.
+Đây là bài 21 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), và là bài đầu tiên của phần P03 (định tuyến). Bài dùng đồ thị CSR của [bài 06](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to). Mọi tốc độ ở đây là **giả định của lab** theo loại đường, không đo từ xe thật; mọi số thời gian đo khi máy đang chịu tải rất nặng, nên bài ưu tiên số nút đã duyệt và tỉ lệ, vốn là những số tái lập được từng chữ số.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>A* dùng khoảng cách chim bay để «nhìn trước» về phía đích. Bạn kỳ vọng nó giảm số nút phải duyệt bao nhiêu lần so với Dijkstra? Và kỳ vọng đó khác thế nào khi trọng số cạnh là <b>khoảng cách</b> so với khi là <b>thời gian</b>?</p>
-<details><summary>Xem đáp án</summary><p>Trên 300 truy vấn ô tô ở HCM, với trọng số khoảng cách A* duyệt ít hơn Dijkstra <b>3,50 đến 6,66 lần</b> tuỳ nhóm khoảng cách. Với trọng số thời gian chỉ còn <b>1,43 đến 2,15 lần</b>. Heuristic vẫn hợp lệ, nhưng nó phải giả định xe đi nhanh nhất mạng đường (80 km/h trên cao tốc) nên «nhìn trước» rất lỏng. Phần dưới giải thích bằng số.</p></details>
+<p>A* dùng khoảng cách chim bay để «nhìn trước» về phía đích. Bạn kỳ vọng A* giảm số nút phải duyệt bao nhiêu lần so với Dijkstra? Và kỳ vọng đó khác thế nào khi trọng số cạnh là <b>khoảng cách</b> so với khi là <b>thời gian</b>?</p>
+<details><summary>Xem đáp án</summary><p>Trên 300 truy vấn ô tô ở HCM, với trọng số khoảng cách A* duyệt ít hơn Dijkstra <b>3,50 đến 6,66 lần</b> tuỳ nhóm khoảng cách. Với trọng số thời gian thì chỉ còn <b>1,43 đến 2,15 lần</b>. Heuristic vẫn hợp lệ, nhưng nó phải giả định xe đi với tốc độ nhanh nhất của mạng đường (80 km/h trên cao tốc), nên «nhìn trước» rất lỏng. Phần dưới giải thích bằng số.</p></details>
 </div>
 
-## Đồ thị CSR: vì sao không dùng đối tượng con trỏ
+## Đồ thị CSR: vì sao không dùng đồ thị kiểu đối tượng và con trỏ
 
-Đồ thị HCM có 126.699 nút và 319.074 cạnh có hướng, trong đó 251.687 cạnh ô tô đi được. CSR giữ chúng trong ba mảng phẳng: `first_out` (dài số nút cộng một), `head` (nút đích của mỗi cạnh) và một mảng trọng số cùng chỉ số cạnh. Các cạnh ra khỏi nút `u` nằm liền nhau ở đoạn `first_out[u]..first_out[u+1]`, nên duyệt láng giềng là đọc một đoạn bộ nhớ liên tục. Đồ thị kiểu đối tượng (mỗi nút một đối tượng, mỗi cạnh một con trỏ) thì mỗi bước duyệt là một lần nhảy tới vùng nhớ khác, và mỗi cạnh tốn thêm phần đầu đối tượng.
+Đồ thị HCM có 126.699 nút và 319.074 cạnh có hướng, trong đó 251.687 cạnh ô tô đi được. CSR giữ chúng trong ba mảng phẳng: `first_out` (độ dài bằng số nút cộng một), `head` (nút đích của mỗi cạnh) và một mảng trọng số dùng chung chỉ số cạnh. Các cạnh ra khỏi nút `u` nằm liền nhau ở đoạn `first_out[u]..first_out[u+1]`, nên duyệt láng giềng là đọc một đoạn bộ nhớ liên tục. Đồ thị kiểu đối tượng (mỗi nút một đối tượng, mỗi cạnh một con trỏ) thì mỗi bước duyệt là một lần nhảy tới vùng nhớ khác, và mỗi cạnh tốn thêm phần tiêu đề (header) của đối tượng.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/net.rs`
 
@@ -38,7 +38,7 @@ Tài xế DR-001 nhận chuyến TN-0001, khách ở bên kia thành phố. Serv
 
 `View` chỉ là ba tham chiếu (đồ thị, CSR chiều ngược, mảng trọng số), nên sao chép gần như miễn phí. Cạnh mà profile không đi được có trọng số `INF` và bị bỏ qua ngay trong iterator. Nhờ vậy ô tô, xe máy và đi bộ chạy chung một bản đồ trong bộ nhớ (bài 24 đi sâu hơn).
 
-Lab so CSR với hai cách làm quen thuộc, cùng 300 truy vấn Dijkstra trọng số thời gian:
+Lab so CSR với hai cách làm quen thuộc, trên cùng 300 truy vấn Dijkstra dùng trọng số thời gian:
 
 | Cách làm | Bộ nhớ | Thời gian so với CSR |
 |---|---:|---:|
@@ -46,13 +46,13 @@ Lab so CSR với hai cách làm quen thuộc, cùng 300 truy vấn Dijkstra tr�
 | `Vec<Vec<(đích, trọng số)>>`, chỉ giữ cạnh đi được | 6,39 MB | 1,17–1,19 |
 | `petgraph::algo::dijkstra` trên `DiGraph<(), u32>` | không đo | 1,38–1,41 |
 
-Cột cuối là tỉ lệ thời gian trung bình, giá trị nhỏ nhất đến lớn nhất qua ba lần chạy, đo khi máy chịu tải nặng. Cả ba cho đúng chi phí ở 300/300 truy vấn. Hãy đọc con số cho đúng cỡ: CSR **không** làm Dijkstra nhanh hơn một bậc độ lớn, chỉ nhanh hơn dưới 1,5 lần. Lý do giữ CSR là nó gọn (chưa tới một nửa bộ nhớ, dù còn giữ cả cạnh ô tô không đi được) và là nền tự nhiên cho những thứ sau: CSR chiều ngược cho tìm hai chiều (bài 22), nhãn theo hạng cho Contraction Hierarchies (bài 25).
+Cột cuối là tỉ lệ thời gian trung bình, khoảng từ giá trị nhỏ nhất đến lớn nhất qua ba lần chạy, đo khi máy chịu tải nặng. Cả ba cho đúng chi phí ở 300/300 truy vấn. Hãy đọc con số cho đúng độ lớn: CSR **không** làm Dijkstra nhanh hơn một bậc độ lớn, chỉ nhanh hơn dưới 1,5 lần. Lý do giữ CSR là nó gọn (chưa tới một nửa bộ nhớ, dù còn giữ cả cạnh ô tô không đi được) và là nền tự nhiên cho những thứ sau: CSR chiều ngược cho tìm hai chiều (bài 22), nhãn theo hạng cho Contraction Hierarchies (bài 25).
 
 ## Dijkstra: hàng đợi ưu tiên và nhãn có phiên bản
 
-Dijkstra giữ một tập nút «đã chốt» (khoảng cách chắc chắn nhỏ nhất) và một hàng đợi ưu tiên các nút «đã chạm nhưng chưa chốt». Mỗi vòng lặp: lấy nút `u` có khoảng cách tạm nhỏ nhất ra khỏi hàng đợi, chốt nó, rồi với mỗi cạnh `u → v` có trọng số `c`, nếu `d(u) + c < d(v)` thì cập nhật `d(v)` và đẩy `v` vào hàng đợi. Nó dừng khi chốt được nút đích. Tính đúng đến từ trọng số không âm: nút nhỏ nhất trong hàng đợi không thể được cải thiện bằng đường đi qua một nút còn lớn hơn.
+Dijkstra giữ một tập nút «đã chốt» (khoảng cách chắc chắn nhỏ nhất) và một hàng đợi ưu tiên các nút «đã chạm nhưng chưa chốt». Mỗi vòng lặp: lấy nút `u` có khoảng cách tạm nhỏ nhất ra khỏi hàng đợi, chốt nó, rồi với mỗi cạnh `u → v` có trọng số `c`, nếu `d(u) + c < d(v)` thì cập nhật `d(v)` và đẩy `v` vào hàng đợi. Thuật toán dừng khi chốt được nút đích. Tính đúng đắn của thuật toán đến từ trọng số không âm: nút nhỏ nhất trong hàng đợi không thể cải thiện thêm bằng đường đi qua một nút có khoảng cách lớn hơn.
 
-`BinaryHeap` của Rust là max-heap, nên lab bọc khoá trong `Reverse` và đóng gói khoá với nút vào một `u64`: 32 bit cao là khoá, 32 bit thấp là nút. So sánh một số nguyên 64 bit đơn giản hơn so sánh một cặp, và khi hai nút bằng khoá thì nút có chỉ số nhỏ hơn đi trước, làm kết quả tất định.
+`BinaryHeap` của Rust là max-heap, nên lab bọc khoá trong `Reverse` và đóng gói khoá với nút vào một `u64`: 32 bit cao là khoá, 32 bit thấp là nút. So sánh một số nguyên 64 bit đơn giản hơn so sánh một cặp, và khi hai nút có cùng khoá thì nút có chỉ số nhỏ hơn đi trước, nên kết quả tất định.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/net.rs`
 
@@ -74,9 +74,9 @@ impl MinHeap {
 }
 ```
 
-`BinaryHeap` không có thao tác «giảm khoá». Cách thông thường, và cách lab dùng, là **xoá lười**: khi khoảng cách của `v` giảm, đẩy thêm một mục mới và để mục cũ nằm lại; lúc lấy ra, mục nào có nút đã chốt thì bỏ qua. Hàng đợi vì thế có thể chứa vài mục cho cùng một nút, nhưng mỗi nút chỉ được chốt một lần.
+`BinaryHeap` không có thao tác «giảm khoá». Cách thông thường, và cách lab dùng, là **xoá lười** (lazy deletion): khi khoảng cách của `v` giảm, đẩy thêm một mục mới và để mục cũ nằm lại; lúc lấy ra, mục nào có nút đã chốt thì bỏ qua. Hàng đợi vì thế có thể chứa vài mục cho cùng một nút, nhưng mỗi nút chỉ được chốt một lần.
 
-Chuyện thứ hai là khởi tạo. Cấp một mảng khoảng cách `vec![INF; 126_699]` cho mỗi truy vấn là việc tốn hơn cả truy vấn nhỏ. `Labels` giải quyết bằng số phiên bản: mỗi nút có `seen[v]` và `closed[v]`, và nhãn chỉ hợp lệ nếu bằng `cur` của truy vấn hiện tại. Đặt lại cho truy vấn kế tiếp chỉ là `cur += 1`.
+Vấn đề thứ hai là việc khởi tạo. Cấp phát một mảng khoảng cách `vec![INF; 126_699]` cho mỗi truy vấn còn tốn hơn cả một truy vấn nhỏ. `Labels` giải quyết bằng số phiên bản: mỗi nút có `seen[v]` và `closed[v]`, và nhãn chỉ hợp lệ nếu bằng `cur` của truy vấn hiện tại. Đặt lại cho truy vấn kế tiếp chỉ là `cur += 1`.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/net.rs`
 
@@ -104,7 +104,7 @@ Chỉ khi bộ đếm 32 bit quay về 0 (sau hơn bốn tỉ truy vấn) mới 
 
 ## A*: cùng một vòng lặp với khoá cộng thêm h
 
-Dijkstra thực chất là A* với heuristic bằng 0. Vì vậy lab chỉ có **một** hàm lõi, `Searcher::run`, nhận heuristic `h` là một closure. Khoá trong hàng đợi là `d(v) + h(v)` thay vì `d(v)`, còn mọi thứ khác giữ nguyên.
+Dijkstra thực chất là A* với heuristic bằng 0. Vì vậy lab chỉ có **một** hàm lõi, `Searcher::run`, nhận heuristic `h` dưới dạng một closure. Khoá trong hàng đợi là `d(v) + h(v)` thay vì `d(v)`, còn mọi thứ khác giữ nguyên.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/search.rs`
 
@@ -135,11 +135,11 @@ Dijkstra thực chất là A* với heuristic bằng 0. Vì vậy lab chỉ có 
 
 Hai dòng quan trọng nhất: `is_closed(u)` bỏ mục cũ của xoá lười, và `st.settled += 1` đếm số nút đã chốt, con số mà mọi so sánh trong bài dựa vào. Để dựng lại đường, mỗi nút lưu cạnh đã cải thiện nó (`pred`); `trace_back` đi ngược từ đích về nguồn rồi đảo mảng.
 
-Tính đúng của A* phụ thuộc vào hai tính chất của `h`. **Hợp lệ** (admissible): `h(u)` không vượt chi phí thật từ `u` tới đích. **Nhất quán** (consistent): `h(u) ≤ w(u,v) + h(v)` trên mọi cạnh. Vòng lặp ở trên chốt mỗi nút một lần và không mở lại, nên nó cần tính mạnh hơn là nhất quán: với `h(t) = 0`, cộng dồn bất đẳng thức dọc đường đi sẽ ra hợp lệ, và nút lấy ra khỏi hàng đợi đã có khoảng cách đúng. Chỉ hợp lệ mà không nhất quán thì phải cho phép mở lại nút, nếu không đáp án có thể sai.
+Tính đúng đắn của A* phụ thuộc vào hai tính chất của `h`. **Hợp lệ** (admissible): `h(u)` không vượt chi phí thật từ `u` tới đích. **Nhất quán** (consistent): `h(u) ≤ w(u,v) + h(v)` trên mọi cạnh. Vòng lặp ở trên chốt mỗi nút một lần và không mở lại, nên nó cần tính chất mạnh hơn, là nhất quán: với `h(t) = 0`, cộng dồn bất đẳng thức dọc đường đi sẽ suy ra tính hợp lệ, và nút lấy ra khỏi hàng đợi đã có khoảng cách đúng. Chỉ hợp lệ mà không nhất quán thì phải cho phép mở lại nút, nếu không đáp án có thể sai.
 
-Với chim bay, nhất quán suy ra từ bất đẳng thức tam giác miễn là `h` đổi từ mét sang đơn vị trọng số bằng cách chia cho một tốc độ **không nhỏ hơn** tốc độ nhanh nhất của đồ thị: `h(u) − h(v)` không vượt chim bay từ `u` tới `v` chia tốc độ đó, và số này không vượt `w(u,v)`. Làm tròn xuống bằng `as u32` không phá tính chất này, vì `w` là số nguyên.
+Với heuristic chim bay, tính nhất quán suy ra từ bất đẳng thức tam giác miễn là `h` đổi từ mét sang đơn vị trọng số bằng cách chia cho một tốc độ **không nhỏ hơn** tốc độ nhanh nhất của đồ thị: `h(u) − h(v)` không vượt chim bay từ `u` tới `v` chia tốc độ đó, và số này không vượt `w(u,v)`. Làm tròn xuống bằng `as u32` không phá tính chất này, vì `w` là số nguyên.
 
-Tốc độ đó là `vmax`: số cm đi được trong một đơn vị trọng số, lớn nhất trên mọi cạnh đi được. Lab lấy nó **từ chính dữ liệu**, nhân thêm hệ số an toàn 0,99 vì đoạn thẳng trên mặt phẳng cục bộ có thể dài hơn đường thật cỡ 0,1%.
+Tốc độ đó là `vmax`: số cm đi được trong một đơn vị trọng số, lớn nhất trên mọi cạnh đi được. Lab lấy nó **từ chính dữ liệu**, nhân thêm hệ số an toàn 0,99 vì đoạn thẳng trên mặt phẳng cục bộ có thể dài hơn đường thật khoảng 0,1%.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/search.rs`
 
@@ -166,7 +166,7 @@ Tốc độ đó là `vmax`: số cm đi được trong một đơn vị trọng
     }
 ```
 
-Hình 1 vẽ cơ chế trên một lưới 9×5 nút dựng tay (không phải dữ liệu OSM), mỗi cạnh 100 m, hai đoạn bị chặn nằm chắn giữa xe và khách. Số trong nút là thứ tự chốt, tính bằng đúng hai quy tắc ở trên, kể cả quy tắc hoà theo chỉ số nút. Dijkstra lan thành một vòng tròn quanh xe và chốt 28 nút trước khi chạm khách. A* đi về phía khách, chốt 15 nút và vẫn trả đúng chi phí 700 m.
+Hình 1 vẽ cơ chế trên một lưới 9×5 nút dựng tay (không phải dữ liệu OSM), mỗi cạnh 100 m, hai đoạn bị chặn nằm chắn giữa xe và khách. Số trong nút là thứ tự chốt, tính theo đúng hai quy tắc ở trên, kể cả quy tắc hoà theo chỉ số nút. Dijkstra lan thành một vòng tròn quanh xe và chốt 28 nút trước khi chạm khách. A* đi về phía khách, chốt 15 nút và vẫn trả đúng chi phí 700 m.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -177,7 +177,7 @@ Hình 1 vẽ cơ chế trên một lưới 9×5 nút dựng tay (không phải d
 
 ## Số nút đã duyệt trên đồ thị thật
 
-Trên đồ thị HCM, lab lấy 300 cặp nút ngẫu nhiên trong thành phần liên thông mạnh lớn nhất của ô tô (111.441 nút, 88,0% đồ thị), seed 20261106, để mọi cặp đều có đường. Trước hết là kiểm heuristic: lab duyệt **mọi** 251.687 cạnh ô tô và kiểm chim bay quy đổi giữa hai đầu cạnh không vượt `w`. Kiểm từng cạnh là đủ, vì bất đẳng thức này cộng với bất đẳng thức tam giác cho nhất quán trên cả đồ thị, và nhất quán cho hợp lệ. Số vi phạm bằng 0 ở cả hai loại trọng số; tỉ lệ `h/w` lớn nhất là 0,9981 (khoảng cách) và 0,9898 (thời gian), tức chim bay gần như chạm chi phí thật ở một số cạnh rất thẳng (với thời gian là cạnh thẳng chạy đúng tốc độ `vmax`).
+Trên đồ thị HCM, lab lấy 300 cặp nút ngẫu nhiên trong thành phần liên thông mạnh lớn nhất của đồ thị ô tô (111.441 nút, 88,0% đồ thị), seed 20261106, để mọi cặp đều có đường. Trước hết là kiểm tra heuristic: lab duyệt **mọi** 251.687 cạnh ô tô và kiểm tra khoảng cách chim bay quy đổi giữa hai đầu cạnh không vượt `w`. Kiểm tra từng cạnh là đủ, vì bất đẳng thức này kết hợp với bất đẳng thức tam giác suy ra nhất quán trên cả đồ thị, và nhất quán suy ra hợp lệ. Số vi phạm bằng 0 ở cả hai loại trọng số; tỉ lệ `h/w` lớn nhất là 0,9981 (khoảng cách) và 0,9898 (thời gian), tức chim bay gần như chạm chi phí thật ở một số cạnh rất thẳng (với thời gian là cạnh thẳng chạy đúng tốc độ `vmax`).
 
 Rồi A* và Dijkstra trả cùng chi phí ở 300/300 truy vấn, cả hai loại trọng số. Điều khác nhau là số nút phải chốt (Hình 2):
 
@@ -188,26 +188,26 @@ Rồi A* và Dijkstra trả cùng chi phí ở 300/300 truy vấn, cả hai lo�
 <figcaption>Hình 2. Số nút đã chốt trung bình mỗi truy vấn theo nhóm khoảng cách chim bay, ô tô, HCM, 300 truy vấn, seed 20261106. Xám: Dijkstra. Xanh: A*. Trọng số thời gian cho A* ít hơn 1,43 đến 2,15 lần, trọng số khoảng cách ít hơn 3,50 đến 6,66 lần. © OpenStreetMap contributors (ODbL).</figcaption>
 </figure>
 
-Vì sao trọng số thời gian kém đến vậy? `vmax` lấy từ dữ liệu là 2,2229 cm/ms, tức 80 km/h của đường cao tốc trong bảng tốc độ giả định, trong khi phần lớn đường nội thành được gán 12 đến 38 km/h. Hai nút cách nhau 1 km chim bay cho `h = 44,5 s` (100.000 cm × 0,99 / 2,2229 cm/ms), còn đi thật ở 28 km/h mất 128,6 s. Heuristic hợp lệ nhưng chỉ «biết» khoảng một phần ba chi phí, nên A* vẫn phải duyệt phần lớn vùng mà Dijkstra duyệt. Với trọng số khoảng cách thì `vmax` là 1 cm/đơn vị, chim bay sát đường thật hơn nhiều, và A* thu hẹp được nhiều.
+Vì sao với trọng số thời gian, A* kém hiệu quả đến vậy? `vmax` lấy từ dữ liệu là 2,2229 cm/ms, tức 80 km/h của đường cao tốc trong bảng tốc độ giả định, trong khi phần lớn đường nội thành được gán 12 đến 38 km/h. Hai nút cách nhau 1 km chim bay cho `h = 44,5 s` (100.000 cm × 0,99 / 2,2229 cm/ms), còn đi thật ở 28 km/h mất 128,6 s. Heuristic hợp lệ nhưng chỉ «biết» khoảng một phần ba chi phí, nên A* vẫn phải duyệt phần lớn vùng mà Dijkstra duyệt. Với trọng số khoảng cách thì `vmax` là 1 cm/đơn vị, chim bay sát đường thật hơn nhiều, và A* thu hẹp được nhiều vùng tìm kiếm.
 
-Muốn heuristic thời gian sát hơn mà vẫn đúng thì phải thay chim bay bằng một chặn dưới rút ra từ chính đồ thị; bài 22 làm việc đó bằng landmark. Đặt `vmax` nhỏ hơn tốc độ thật để «cho nhanh» thì **không** an toàn: heuristic mất tính hợp lệ và A* có thể trả đường dài hơn tối ưu mà không báo lỗi. Đó là lý do bài tập 3 bắt phải có một kiểm tra tự động.
+Muốn heuristic thời gian sát hơn mà vẫn đúng thì phải thay chim bay bằng một chặn dưới rút ra từ chính đồ thị; bài 22 làm việc đó bằng landmark. Đặt `vmax` nhỏ hơn tốc độ thật để «cho nhanh» thì **không** an toàn: heuristic mất tính hợp lệ và A* có thể trả đường dài hơn tối ưu mà không báo lỗi. Đó là lý do bài tập 3 đòi phải có một bước kiểm tra tự động.
 
 ## Đối chiếu petgraph
 
 `petgraph` là thư viện đồ thị phổ biến nhất của Rust, nên lab dựng cùng đồ thị (`DiGraph<(), u32>`, chỉ cạnh ô tô đi được) và chạy `algo::dijkstra` và `algo::astar` cùng 300 truy vấn. Hai thuật toán đó cho đúng chi phí của lab ở 300/300 truy vấn; đây là kiểm tra chéo giữa hai cài đặt độc lập, mạnh hơn việc chỉ so lab với chính nó.
 
-Về tốc độ, bảng ở đầu bài đã nêu: `petgraph::dijkstra` chậm hơn CSR của lab 1,38–1,41 lần. Hai điều cần nói thẳng. Một: `petgraph` là thư viện tổng quát (kiểu nút, kiểu cạnh, `HashMap` cho nhãn), còn lab chuyên biệt hoá cho nút số nguyên và nhãn có phiên bản; lab không «hơn» petgraph, chỉ nhỏ gọn hơn cho đúng một bài toán. Hai: `petgraph::dijkstra` trả bản đồ nhãn trung bình 58.539 nút mỗi truy vấn, gồm cả nút đã chạm nhưng chưa chốt, nên không so trực tiếp được với số «nút đã chốt» ở trên.
+Về tốc độ, bảng ở đầu bài đã nêu: `petgraph::dijkstra` chậm hơn CSR của lab 1,38–1,41 lần. Hai điều cần nói thẳng. Một: `petgraph` là thư viện tổng quát (kiểu nút, kiểu cạnh, `HashMap` cho nhãn), còn lab chuyên biệt hoá cho nút số nguyên và nhãn có phiên bản; lab không «hơn» petgraph, chỉ nhỏ gọn hơn cho đúng một bài toán. Hai: `petgraph::dijkstra` trả về bảng ánh xạ nhãn có trung bình 58.539 nút mỗi truy vấn, gồm cả nút đã chạm nhưng chưa chốt, nên không so trực tiếp được với số «nút đã chốt» ở trên.
 
 ## Chạy ví dụ và kiểm chứng
 
-Cần `data/hcm-graph.bin` do lab bài 06 ghi (hoặc thêm `-- --fixture` để chạy trên đồ thị tổng hợp nhỏ). Từ gốc repo:
+Cần `data/hcm-graph.bin` do lab của bài 06 ghi ra (hoặc thêm `-- --fixture` để chạy trên đồ thị tổng hợp nhỏ). Chạy từ thư mục gốc của repo:
 
 ```bash
 export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc21_dijkstra_astar
 ```
 
-Cấu hình đo: `--release`, Apple M1 Max, đồ thị HCM 126.699 nút và 319.074 cạnh, ô tô, 300 cặp nút, seed 20261106. Dưới đây là phần output của lần chạy cho Dijkstra CSR nhanh nhất trong ba lần, **đo khi máy đang chịu tải rất nặng** (tải 1 phút 27,25 trên 10 lõi): chỉ so sánh tương đối trong cùng bảng.
+Cấu hình đo: `--release`, Apple M1 Max, đồ thị HCM 126.699 nút và 319.074 cạnh, ô tô, 300 cặp nút, seed 20261106. Dưới đây là phần kết quả của lần chạy có Dijkstra CSR nhanh nhất trong ba lần, **đo khi máy đang chịu tải rất nặng** (tải 1 phút 27,25 trên 10 lõi): chỉ so sánh tương đối trong cùng bảng.
 
 ```text
 -- 2. heuristic chim bay có hợp lệ không (kiểm trên mọi cạnh ô tô) --
@@ -234,13 +234,13 @@ Cấu hình đo: `--release`, Apple M1 Max, đồ thị HCM 126.699 nút và 319
   nút 120147 → nút 94147: chim bay 19263 m; thời gian 2193.9 s; độ dài 23687 m; 408 cạnh; A* duyệt 81.881 nút, xét 181.241 cạnh
 ```
 
-Các số đếm (nút đã duyệt, số cạnh vi phạm, số khác biệt) tái lập từng chữ số với cùng seed; các cột µs thì không, và dao động vài lần giữa các lần chạy. Kiểm tra tự động nằm trong `search.rs`: test `heuristic_never_exceeds_edge_cost_for_both_metrics` kiểm `h ≤ w` trên mọi cạnh fixture, test `astar_equals_dijkstra_equals_sssp` so A*, Dijkstra và Dijkstra một nguồn tới mọi nút trên 200 cặp ngẫu nhiên ở cả hai loại trọng số.
+Các số đếm (nút đã duyệt, số cạnh vi phạm, số khác biệt) tái lập từng chữ số với cùng seed; các cột µs thì không, và dao động vài lần giữa các lần chạy. Kiểm tra tự động nằm trong `search.rs`: test `heuristic_never_exceeds_edge_cost_for_both_metrics` kiểm tra `h ≤ w` trên mọi cạnh fixture, test `astar_equals_dijkstra_equals_sssp` so A*, Dijkstra và Dijkstra một nguồn tới mọi nút trên 200 cặp ngẫu nhiên ở cả hai loại trọng số.
 
 ## Giới hạn của ví dụ
 
 - **Tốc độ là giả định.** Chi phí thời gian dựa trên bảng tốc độ theo loại đường của lab (bài 24), chưa hiệu chuẩn bằng GPS thật. «2.193,9 s» là ước tính của mô hình, không phải thời gian một chuyến thật.
-- **Theo nút, chưa có chi phí rẽ.** Một cạnh nối tiếp cạnh nào cũng miễn phí, kể cả quay đầu. Bài 23 cho thấy điều này sai bao nhiêu.
-- **Heuristic thời gian lỏng.** 1,43–2,15 lần là cái giá của `vmax` lấy từ cao tốc. Bài 22 dùng landmark để thắt lại.
+- **Theo nút, chưa có chi phí rẽ.** Chuyển từ cạnh này sang cạnh nối tiếp nào cũng miễn phí, kể cả quay đầu. Bài 23 cho thấy điều này sai bao nhiêu.
+- **Heuristic thời gian lỏng.** 1,43–2,15 lần là cái giá của `vmax` lấy từ cao tốc. Bài 22 dùng landmark để siết chặt lại.
 - **Đo thời gian khi máy tải nặng.** Chưa có lần đo nào trên máy rảnh; các cột µs chỉ dùng so sánh tương đối.
 - **Một bản đồ, đồ thị cố định.** Cập nhật OSM nghĩa là dựng lại đồ thị; chưa có trọng số theo giờ (bài 27).
 
@@ -255,7 +255,7 @@ Các số đếm (nút đã duyệt, số cạnh vi phạm, số khác biệt) t
 **Bài 2.** Vì sao `Searcher::run` phải có dòng `if self.labels.is_closed(u) { continue; }` ngay sau khi lấy nút khỏi hàng đợi? Điều gì xảy ra nếu bỏ nó?
 
 <details><summary>Lời giải bài 2</summary>
-<p>Lab dùng xoá lười: khi khoảng cách của một nút giảm, mục mới được đẩy thêm và mục cũ ở lại trong <code>BinaryHeap</code>. Mục cũ có khoá lớn hơn nên đến sau, lúc nút đã chốt. Không bỏ qua nó thì nút bị chốt lần thứ hai (làm <code>settled</code> sai) và các cạnh của nó bị xét lại vô ích; kết quả vẫn đúng nhưng số nút đã duyệt, thứ mà bài này đo, không còn ý nghĩa.</p>
+<p>Lab dùng xoá lười: khi khoảng cách của một nút giảm, mục mới được đẩy thêm và mục cũ ở lại trong <code>BinaryHeap</code>. Mục cũ có khoá lớn hơn nên được lấy ra sau, lúc nút đã chốt. Nếu không bỏ qua mục cũ thì nút bị chốt lần thứ hai (làm <code>settled</code> sai) và các cạnh của nó bị xét lại vô ích; kết quả vẫn đúng nhưng số nút đã duyệt, thứ mà bài này đo, không còn ý nghĩa.</p>
 </details>
 
 **Bài 3.** Đồng nghiệp đề xuất đặt `vmax` bằng 40 km/h thay vì lấy từ dữ liệu «cho A* nhanh hơn». Chuyện gì có thể sai, và kiểm tra tự động nào trong lab bắt được?

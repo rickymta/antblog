@@ -8,28 +8,28 @@ tags: [toi-noi, location, go, backpressure, coalesce, graceful-shutdown, kafka, 
 language: vi
 ---
 
-Chiều tan tầm, Kafka của Tới Nơi chững lại vài chục giây vì bầu lại leader của partition hay vì ổ đĩa. Phía trước nó, 25.000 tài xế vẫn gửi vị trí mỗi 4 giây, `location-ingest` vẫn đang nhận. Có ba thứ có thể xảy ra với điểm GPS không đẩy đi được: chặn goroutine đọc kết nối (app không nhận ack và gửi lại), để bộ nhớ phình ra, hoặc **bỏ bớt**. Bài này chọn cách thứ ba, nhưng bỏ cái nào mới là câu hỏi.
+Chiều tan tầm, Kafka của Tới Nơi chững lại vài chục giây vì bầu lại leader của partition hay vì ổ đĩa. Phía trước Kafka, 25.000 tài xế vẫn gửi vị trí mỗi 4 giây, `location-ingest` vẫn đang nhận. Có ba thứ có thể xảy ra với điểm GPS không đẩy đi được: chặn goroutine đọc kết nối (app không nhận ack và gửi lại), để bộ nhớ phình ra, hoặc **bỏ bớt**. Bài này chọn cách thứ ba, nhưng bỏ điểm nào mới là câu hỏi.
 
 Đây là bài 13 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài tiếp nối [bài 12](/articles/location-go-ingest-websocket-batch-gps-tai-xe), nơi hàng đợi ở bước 4 của mỗi kết nối chưa được mở ra, và dùng `-race`, `errgroup` của [bài 11](/articles/location-go-goroutine-channel-nhap-mon-cho-ingest). Phía C#, ý tưởng hàng đợi giới hạn có ở [bài BackgroundService và Channel](/articles/dotnet10-backgroundservice-channel), nhưng ở đó producer **chờ** khi đầy (`FullMode.Wait`); ở ingest ta không được phép chờ.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Sink chỉ nhận được 1.000 điểm/giây trong khi 6.250 điểm/giây đến, kéo dài 40 giây. Hàng đợi giới hạn 30.000 điểm. Hai chính sách: <b>drop-newest</b> (đầy thì bỏ điểm vừa tới) và <b>coalesce</b> (mỗi tài xế chỉ giữ điểm mới nhất). Cả hai cùng giao được khoảng 40.000 điểm cho sink. Vậy chúng khác nhau ở đâu?</p>
-<details><summary>Xem đáp án</summary><p>Khác ở <b>điểm nào</b> được giao. Sink chỉ lấy từ đầu hàng, nên drop-newest giao đúng những điểm cũ nhất (p99 tuổi điểm lúc giao khoảng 30,6 giây), còn coalesce giao điểm mới nhất của từng tài xế (p99 khoảng 4,2 giây). Số điểm giao đi gần như nhau; chất lượng thì khác hẳn.</p></details>
+<p>Sink chỉ nhận được 1.000 điểm/giây trong khi có 6.250 điểm/giây đến, tình huống này kéo dài 40 giây. Hàng đợi giới hạn 30.000 điểm. Hai chính sách: <b>drop-newest</b> (đầy thì bỏ điểm vừa tới) và <b>coalesce</b> (mỗi tài xế chỉ giữ điểm mới nhất). Cả hai cùng giao được khoảng 40.000 điểm cho sink. Vậy chúng khác nhau ở đâu?</p>
+<details><summary>Xem đáp án</summary><p>Khác ở <b>điểm nào</b> được giao. Sink chỉ lấy từ đầu hàng, nên drop-newest giao đúng những điểm cũ nhất (p99 của tuổi điểm lúc giao khoảng 30,6 giây), còn coalesce giao điểm mới nhất của từng tài xế (p99 khoảng 4,2 giây). Số điểm giao đi gần như nhau; chất lượng thì khác hẳn.</p></details>
 </div>
 
 ## Vị trí là telemetry tạm thời, nên được phép mất, nhưng phải đếm
 
 Kiến trúc §10 tách hai loại message: sự kiện nghiệp vụ bền (gán chuyến, thanh toán) phải truy vết và khôi phục được, còn telemetry tạm thời như vị trí mới nhất thì được **coalesce hoặc bỏ** khi quá tải. Kiến trúc §4.8 thêm một ý: không để luồng GPS làm nghẽn topic của booking hay thanh toán. Từ đó rút ra hai quy tắc cho hàng đợi của ingest:
 
-1. `Offer` **không bao giờ chờ sink**. Nó chỉ giữ mutex trong chốc lát rồi trả về. Goroutine gọi nó là goroutine đọc WebSocket của tài xế; kẹt ở đó nghĩa là app không nhận ack, và lỗi của Kafka lan ngược tới điện thoại.
+1. `Offer` **không bao giờ chờ sink**. Hàm này chỉ giữ mutex trong chốc lát rồi trả về. Goroutine gọi nó là goroutine đọc WebSocket của tài xế; kẹt ở đó nghĩa là app không nhận ack, và lỗi của Kafka lan ngược tới điện thoại.
 2. Mọi điểm mất đều **có bộ đếm riêng** (`coalesced`, `dropped`, `evicted`, `stale_ignored`, `shutdown_dropped`), để biết đã mất bao nhiêu và vì sao. Mất mà không đếm thì không thể trả lời «vị trí khách đang thấy cũ bao nhiêu».
 
-Vị trí mới nhất của một tài xế quan trọng hơn mọi điểm cũ của chính tài xế đó: marker của khách chỉ cần điểm hiện tại. Điểm cũ chỉ còn giá trị cho lịch sử, và lịch sử có luồng riêng (bài 20). Đây là lập luận cho coalesce; phần còn lại của bài đo xem nó có đúng trong lab không.
+Vị trí mới nhất của một tài xế quan trọng hơn mọi điểm cũ của chính tài xế đó: marker của khách chỉ cần điểm hiện tại. Điểm cũ chỉ còn giá trị cho lịch sử, và lịch sử có luồng riêng (bài 20). Đây là lập luận cho coalesce; phần còn lại của bài đo xem lập luận đó có đúng trong lab không.
 
 ## Ba chính sách trong một file
 
-`Queue` là cấu trúc dữ liệu giới hạn, an toàn cho nhiều producer và nhiều consumer. Ba chính sách:
+`Queue` là cấu trúc dữ liệu có giới hạn kích thước, an toàn cho nhiều producer và nhiều consumer. Ba chính sách:
 
 Tệp `examples/toi-noi-location/go/internal/backpressure/queue.go` (dòng 16–27):
 
@@ -52,7 +52,7 @@ Phần quyết định nằm ở `Offer`. Hình 1 vẽ nhánh Coalesce; mã ngu�
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 340" role="img" aria-label="Hình 1. Các nhánh của Queue.Offer khi chính sách là Coalesce: hàng đã đóng, gộp theo tài xế khi độ sâu vượt ngưỡng, đẩy điểm đầu hàng ra khi đầy, hoặc thêm vào cuối hàng; mọi nhánh trả về ngay."><defs><marker id="location-go-backpressure-coalesce-drop-race-detector-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="380" height="46" rx="8" class="f-surface s-muted"/><text x="210" y="48" class="t-b" text-anchor="middle">Hàng đã đóng (Close)?</text><rect x="20" y="96" width="380" height="46" rx="8" class="f-surface s-muted"/><text x="210" y="124" class="t-b" text-anchor="middle">Tài xế đã có điểm chờ và độ sâu ≥ 3.000?</text><rect x="20" y="190" width="380" height="46" rx="8" class="f-surface s-muted"/><text x="210" y="218" class="t-b" text-anchor="middle">Độ sâu ≥ sức chứa (30.000)?</text><rect x="20" y="270" width="380" height="46" rx="8" class="f-phys-soft s-phys"/><text x="210" y="298" class="t-b" text-anchor="middle">Thêm vào cuối hàng (Queued)</text><rect x="470" y="20" width="390" height="46" rx="8" class="f-surface s-dead"/><text x="665" y="48" text-anchor="middle">Trả Closed, không nhận điểm</text><rect x="470" y="76" width="390" height="86" rx="8" class="f-warn-soft s-warn"/><text x="665" y="100" text-anchor="middle">Giữ vị trí trong hàng, đổi nội dung:</text><text x="665" y="120" class="t-small" text-anchor="middle">ord ≤ ord cũ → StaleIgnore (bỏ điểm đến sau)</text><text x="665" y="140" class="t-small" text-anchor="middle">ngược lại → Coalesced (điểm mới thay điểm cũ)</text><rect x="470" y="190" width="390" height="46" rx="8" class="f-warn-soft s-warn"/><text x="665" y="218" text-anchor="middle">Đẩy điểm đầu hàng ra (Evicted), rồi thêm điểm mới</text><path d="M400 43 L468 43" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="434" y="37" class="t-small" text-anchor="middle">có</text><path d="M400 119 L468 119" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="434" y="113" class="t-small" text-anchor="middle">có</text><path d="M400 213 L468 213" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="434" y="207" class="t-small" text-anchor="middle">có</text><path d="M210 66 L210 94" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="220" y="85" class="t-small">không</text><path d="M210 142 L210 188" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="220" y="170" class="t-small">không</text><path d="M210 236 L210 268" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="220" y="257" class="t-small">không</text><text x="20" y="336" class="t-small">Offer không bao giờ chờ sink: mọi nhánh trả về ngay và có bộ đếm riêng.</text></svg>
+<svg viewBox="0 0 880 340" role="img" aria-label="Hình 1. Các nhánh của Queue.Offer khi chính sách là Coalesce: hàng đã đóng, gộp theo tài xế khi độ sâu vượt ngưỡng, đẩy điểm đầu hàng ra khi đầy, hoặc thêm vào cuối hàng; mọi nhánh trả về ngay."><defs><marker id="location-go-backpressure-coalesce-drop-race-detector-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="380" height="46" rx="8" class="f-surface s-muted"/><text x="210" y="48" class="t-b" text-anchor="middle">Hàng đã đóng (Close)?</text><rect x="20" y="96" width="380" height="46" rx="8" class="f-surface s-muted"/><text x="210" y="124" class="t-b" text-anchor="middle">Tài xế đã có điểm chờ và độ sâu ≥ 3.000?</text><rect x="20" y="190" width="380" height="46" rx="8" class="f-surface s-muted"/><text x="210" y="218" class="t-b" text-anchor="middle">Độ sâu ≥ sức chứa (30.000)?</text><rect x="20" y="270" width="380" height="46" rx="8" class="f-phys-soft s-phys"/><text x="210" y="298" class="t-b" text-anchor="middle">Thêm vào cuối hàng (Queued)</text><rect x="470" y="20" width="390" height="46" rx="8" class="f-surface s-dead"/><text x="665" y="48" text-anchor="middle">Trả Closed, không nhận điểm</text><rect x="470" y="76" width="390" height="86" rx="8" class="f-warn-soft s-warn"/><text x="665" y="100" text-anchor="middle">Giữ vị trí trong hàng, đổi nội dung:</text><text x="665" y="120" class="t-small" text-anchor="middle">ord ≤ ord cũ → StaleIgnore (bỏ điểm đến muộn)</text><text x="665" y="140" class="t-small" text-anchor="middle">ngược lại → Coalesced (điểm mới thay điểm cũ)</text><rect x="470" y="190" width="390" height="46" rx="8" class="f-warn-soft s-warn"/><text x="665" y="218" text-anchor="middle">Đẩy điểm đầu hàng ra (Evicted), rồi thêm điểm mới</text><path d="M400 43 L468 43" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="434" y="37" class="t-small" text-anchor="middle">có</text><path d="M400 119 L468 119" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="434" y="113" class="t-small" text-anchor="middle">có</text><path d="M400 213 L468 213" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="434" y="207" class="t-small" text-anchor="middle">có</text><path d="M210 66 L210 94" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="220" y="85" class="t-small">không</text><path d="M210 142 L210 188" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="220" y="170" class="t-small">không</text><path d="M210 236 L210 268" class="f-none s-phys" stroke-width="2" marker-end="url(#location-go-backpressure-coalesce-drop-race-detector-1-a)"/><text x="220" y="257" class="t-small">không</text><text x="20" y="336" class="t-small">Offer không bao giờ chờ sink: mọi nhánh trả về ngay và có bộ đếm riêng.</text></svg>
 </div>
 
 <figcaption>Hình 1. Thứ tự quyết định của Offer với chính sách Coalesce. Nhánh gộp chỉ bật khi hàng đã sâu (≥ capacity/10); dưới ngưỡng đó hàng vẫn là FIFO và giữ đủ mọi điểm.</figcaption>
@@ -115,10 +115,10 @@ func (q *Queue[T]) Offer(key string, ord int64, v T) Outcome {
 Mấy chi tiết thiết kế đáng nói:
 
 - **Gộp tại chỗ.** Khi gộp, điểm mới ghi đè nội dung của phần tử cũ và **giữ vị trí** của nó trong hàng (`*old = e`), nên tài xế không bị xếp lại cuối hàng. Một tài xế liên tục gửi không thể đẩy mọi người khác lùi mãi.
-- **Chỉ gộp khi quá ngưỡng.** `high` mặc định là `capacity/10`, tức 3.000 điểm. Lúc sink khoẻ hàng gần như rỗng và mọi điểm đều được giao, nên lịch sử đầy đủ không mất. Chỉ khi sink không theo kịp thì điểm mới của một tài xế đã có điểm chờ mới thay vào đó thay vì xếp thêm, nên độ sâu dừng ở cỡ số tài xế (đỉnh 24.925 với 25.000 tài xế).
-- **`ord`** (thứ tự thời gian của điểm) chặn điểm đến sau: nếu điểm vừa tới không mới hơn điểm đang chờ thì bỏ ngay (`StaleIgnore`) thay vì thay điểm mới bằng điểm cũ.
+- **Chỉ gộp khi quá ngưỡng.** `high` mặc định là `capacity/10`, tức 3.000 điểm. Lúc sink khoẻ hàng gần như rỗng và mọi điểm đều được giao, nên lịch sử đầy đủ không mất. Chỉ khi sink không theo kịp thì điểm mới của một tài xế đã có điểm chờ sẽ thay chính điểm chờ đó, không xếp thêm, nên độ sâu dừng ở cỡ số tài xế (đỉnh 24.925 với 25.000 tài xế).
+- **`ord`** (thứ tự thời gian của điểm) chặn điểm đến muộn: nếu điểm vừa tới không mới hơn điểm đang chờ thì bỏ ngay (`StaleIgnore`) thay vì thay điểm mới bằng điểm cũ.
 - **Đầy hẳn** (≥ sức chứa) thì đẩy phần tử ở đầu hàng, tức điểm chờ lâu nhất, ra; đây là nhánh `Evicted`.
-- Một `sync.Mutex` bảo vệ mọi thứ, và `ready` là channel đệm 1 làm tín hiệu đánh thức consumer: `signal()` gửi không chặn, nên tín hiệu thừa bị bỏ mà không mất gì.
+- Một `sync.Mutex` bảo vệ mọi thứ, và `ready` là channel có bộ đệm cỡ 1 làm tín hiệu đánh thức consumer: `signal()` gửi không chặn, nên tín hiệu thừa bị bỏ mà không mất gì.
 
 `TakeBatch` là phía consumer: chờ tới khi có ít nhất một điểm hoặc `ctx` bị huỷ, rồi lấy tối đa `max` điểm. Hàng đã `Close` và cạn thì trả `ErrClosed` để các worker cùng thoát.
 
@@ -139,24 +139,24 @@ Tổng kết pha chậm (khoảng 253.000 đến 263.000 điểm đến tuỳ l�
 | | unbounded | drop-newest | coalesce |
 | --- | --- | --- | --- |
 | Độ sâu đỉnh (điểm) | 221.012 | 30.000 (chạm trần) | 24.925 |
-| Bộ nhớ sống đỉnh | 97,5 MB | 17,3 MB | 16,0 MB |
+| Đỉnh bộ nhớ sống | 97,5 MB | 17,3 MB | 16,0 MB |
 | Tuổi điểm lúc giao, p99 | 35.449 ms và còn tăng | 30.567 ms | 4.240 ms |
 | Điểm đã giao nhưng đã lỗi thời | 88,7% | 88,3% | 5,0% |
 | Điểm mất, có đếm | 0 | 183.305 (bỏ điểm mới) | 190.446 (gộp điểm cũ) |
 | Sau 70 giây | còn 92.612 điểm trong hàng, tuổi trên 15 giây | hàng rỗng | hàng rỗng, tuổi 7 ms |
 
-Cả ba cùng giao ~40.000 điểm vì sink chỉ có 1.000 điểm/giây. Khác nhau là **điểm nào**:
+Cả ba cùng giao ~40.000 điểm vì sink chỉ có 1.000 điểm/giây. Chỗ khác nhau là **điểm nào được giao**:
 
 - **unbounded** giữ mọi thứ. Bộ nhớ sống tăng đều cỡ 2,3 MB mỗi giây trong pha chậm và điểm giao đi cũ dần, tới 35 giây. Hết cả pha hồi phục, ở giây 70, vẫn còn hơn 92.000 điểm xếp hàng và tuổi điểm vẫn trên 15 giây: **hồi phục chậm hơn sự cố nhiều**. Đây là đối chứng, đừng dùng thật.
-- **drop-newest** chặn được bộ nhớ nhưng giao đúng những điểm cũ nhất. Ngược với điều khách cần, và 88,3% điểm giao đi đã lỗi thời. Nó chỉ khá lên khi hàng cạn ở pha hồi phục.
-- **coalesce** giao điểm mới nhất của từng tài xế. Tuổi bị chặn ở cỡ khoảng cách giữa hai lần báo của chính tài xế (4 giây) cộng thời gian chờ ngắn; sau khi sink hồi phục, hàng rỗng và tuổi điểm về 7 ms.
+- **drop-newest** chặn được bộ nhớ nhưng giao đúng những điểm cũ nhất. Điều này ngược với điều khách cần, và 88,3% điểm giao đi đã lỗi thời. Chính sách này chỉ khá lên khi hàng cạn ở pha hồi phục.
+- **coalesce** giao điểm mới nhất của từng tài xế. Tuổi điểm bị giới hạn ở cỡ khoảng thời gian giữa hai lần báo của chính tài xế (4 giây) cộng thời gian chờ ngắn; sau khi sink hồi phục, hàng rỗng và tuổi điểm về 7 ms.
 
 Hai điều bất ngờ trong số liệu, cả hai đều quan trọng cho thiết kế:
 
 1. **Coalesce chưa làm gì trong 4 giây đầu của pha chậm.** Cột `coalesced` vẫn 0 đến giây 9: phải đợi tài xế báo điểm thứ hai thì mới có thứ để gộp, và hàng cần vượt ngưỡng 3.000 trước. Trong khoảng đó độ sâu tăng như unbounded.
-2. **Coalesce mất nhiều điểm hơn drop-newest** (190.446 so với 183.305). Nó đổi lịch sử đầy đủ lấy độ tươi. Hệ quả trực tiếp: điểm trung gian bị gộp sẽ **không bao giờ tới Kafka**, nên không có trong lịch sử GPS. Bài 20 sẽ phải sống với điều này khi làm luồng lịch sử.
+2. **Coalesce mất nhiều điểm hơn drop-newest** (190.446 so với 183.305). Coalesce đổi lịch sử đầy đủ lấy độ tươi. Hệ quả trực tiếp: điểm trung gian bị gộp sẽ **không bao giờ tới Kafka**, nên không có trong lịch sử GPS. Bài 20 sẽ phải sống với điều này khi làm luồng lịch sử.
 
-Số đo này của sink giả trên simulator. Nó chứng minh cơ chế, không nói gì về Kafka thật; phần dưới thử với Kafka thật.
+Đây là số đo của sink giả trên simulator. Số đo này chứng minh cơ chế, không nói gì về Kafka thật; phần dưới thử với Kafka thật.
 
 ## Tắt êm: xả trong hạn, phần còn lại bỏ có đếm
 
@@ -208,7 +208,7 @@ Tệp `examples/toi-noi-location/go/cmd/location-ingest/main.go` (dòng 123–13
 	wg.Wait()
 ```
 
-Thí nghiệm: hàng đợi có sẵn 20.000 điểm của 20.000 tài xế, sink 2.000 điểm/giây, lô 100, ba hạn tắt khác nhau (output nguyên văn của một lần chạy; số xả được dao động theo đồng hồ thật, lần chạy lại cho 9.600 ở hạn 5 giây):
+Thí nghiệm: hàng đợi có sẵn 20.000 điểm của 20.000 tài xế, sink 2.000 điểm/giây, lô 100, ba hạn tắt khác nhau (output nguyên văn của một lần chạy; số điểm xả được dao động theo đồng hồ thật, lần chạy lại cho 9.600 ở hạn 5 giây):
 
 ```text
 D	deadline	elapsed_ms	sink_got	dropped_at_shutdown	lost_in_flight	late_offer_result
@@ -217,7 +217,7 @@ D	5s	5000	9500	10400	100	Closed
 D	15s	10434	20000	0	0	Closed
 ```
 
-Mỗi dòng cộng lại đúng 20.000 (1.900 + 18.000 + 100; 9.500 + 10.400 + 100). Hạn 1 giây xả được 1.900 điểm, bỏ 18.000 (đã tính vào `shutdown_dropped`), và 100 điểm của lô đang gửi dở bị huỷ cùng worker (`lost_in_flight`, tính bằng phần còn lại của tổng). Hạn 15 giây đủ xả hết, thực tế mất 10,4 giây. Sau `Shutdown`, `Offer` trả `Closed`, nên không có điểm lọt vào hàng đã bỏ. Số lô bị huỷ dở là một lô cho mỗi worker nên là chi phí không tránh được của «huỷ khi hết hạn»; ở đây chỉ có một worker, nên 100 điểm.
+Mỗi dòng cộng lại đúng 20.000 (1.900 + 18.000 + 100; 9.500 + 10.400 + 100). Hạn 1 giây xả được 1.900 điểm, bỏ 18.000 (đã tính vào `shutdown_dropped`), và 100 điểm của lô đang gửi dở bị huỷ cùng worker (`lost_in_flight`, tính bằng phần còn lại của tổng). Hạn 15 giây đủ xả hết, thực tế mất 10,4 giây. Sau `Shutdown`, `Offer` trả `Closed`, nên không có điểm lọt vào hàng đã bỏ. Mỗi worker bị huỷ dở một lô, nên đây là chi phí không tránh được của «huỷ khi hết hạn»; ở đây chỉ có một worker, nên số điểm mất là 100.
 
 ## Kafka thật bị dừng 25 giây
 
@@ -234,7 +234,7 @@ Thí nghiệm offline dùng sink giả. Lab thử thêm với Kafka thật: inge
 Những điều đọc được:
 
 - **Ack phía app không đổi.** `kafka_delivered` đóng băng (182.280 ở coalesce, 164.787 ở drop-newest), hàng đợi đầy lên (27.000 điểm ở coalesce, 30.000 ở drop-newest) rồi gộp hoặc bỏ (`q_coalesced` lên 136.126 hoặc `q_dropped` lên 108.090), nhưng `win_p99` của ack ở các cửa sổ có Kafka đứng nằm trong 7 đến 32 ms, ngang các cửa sổ khác, và `acked_pts_s` giữ quanh 6.2xx. Goroutine đọc WebSocket không bị kẹt: đúng ý đồ.
-- **Hàng đợi không tăng ngay.** Ở drop-newest, `kafka_delivered` không tăng giữa mốc giây 25 và 30 mà độ sâu ở mốc 25 vẫn 0, rồi mới leo lên 15.267 ở mốc 30. Cách hiểu hợp lý (khớp về bậc độ lớn, chưa được kiểm riêng): `kafkax.Sink` đặt `MaxBufferedRecords(20000)` cho client Kafka. **Bộ đệm nội bộ của client là hàng đợi thứ hai** nằm sau hàng đợi của ta; nó nhận ~20.000 bản ghi (khoảng 3,2 giây ở 6.250 điểm/giây) trước khi `Produce` chặn và hàng đợi phía trước bắt đầu đầy.
+- **Hàng đợi không tăng ngay.** Ở drop-newest, `kafka_delivered` không tăng giữa mốc giây 25 và 30, trong khi độ sâu ở mốc 25 vẫn là 0, rồi mới leo lên 15.267 ở mốc 30. Cách hiểu hợp lý (khớp về bậc độ lớn, chưa được kiểm riêng): `kafkax.Sink` đặt `MaxBufferedRecords(20000)` cho client Kafka. **Bộ đệm nội bộ của client là hàng đợi thứ hai** nằm sau hàng đợi của ta; nó nhận ~20.000 bản ghi (khoảng 3,2 giây ở 6.250 điểm/giây) trước khi `Produce` chặn và hàng đợi phía trước bắt đầu đầy.
 
 Tệp `examples/toi-noi-location/go/internal/kafkax/kafkax.go` (dòng 53–77):
 
@@ -275,9 +275,9 @@ coalesce:    {"queue": {"depth": 0, "max_depth": 27000, "offered": 643902, "coal
 drop-newest: {"queue": {"depth": 0, "max_depth": 30000, "offered": 643818, "coalesced": 0, "stale_ignored": 0, "dropped": 108090, "evicted": 0, "taken": 535728, "shutdown_dropped": 0}, "kafka": {"delivered": 535728, "failed": 0}, "max_rss_mb": 1104}
 ```
 
-**Hai chỗ chưa khớp, và điều tra cho thấy gì.** Lần coalesce báo `kafka.failed = 20000`, đúng bằng `MaxBufferedRecords(20000)`, trong khi lần drop-newest báo `failed = 0` với thời gian dừng gần như nhau (26 so với 25 giây) và `RecordDeliveryTimeout` 30 giây. Cạnh đó, ở coalesce `taken − (delivered + failed)` là 6.282, ở drop-newest là 0. Đây là hai chuyện tách nhau.
+**Hai chỗ chưa khớp, và điều tra cho thấy gì.** Lần coalesce báo `kafka.failed = 20000`, đúng bằng `MaxBufferedRecords(20000)`, trong khi lần drop-newest báo `failed = 0` với thời gian dừng gần như nhau (26 so với 25 giây) và `RecordDeliveryTimeout` 30 giây. Cạnh đó, ở coalesce `taken − (delivered + failed)` là 6.282, ở drop-newest là 0. Đây là hai chuyện riêng biệt.
 
-*Khoảng chênh `taken − (delivered + failed)` là bản ghi đang bay, không phải bản ghi mất.* `taken` tăng khi worker lấy lô khỏi hàng đợi, trước khi `Send` đưa bản ghi cho producer; `delivered` và `failed` chỉ tăng trong promise, sau khi broker trả lời. Bản ghi nằm giữa hai mốc đó đang đợi linger 5 ms hoặc đang trên đường tới broker. Bốn bộ đếm cuối của các lần đo ở bài 12 và 13 đều là `/debug/stats` chụp ngay sau khi loadgen kết thúc, và khoảng chênh ở ba trong bốn lần khác 0 (4.815, 473 và 6.282; lần thứ tư là 0). Để phân biệt «đang bay» với «mất» hoặc «đếm sai», lab chạy lại cấu hình của bài 12 (25.000 kết nối, 6.250 điểm/giây, lô 3, Kafka thật) và chụp bộ đếm nhiều lần:
+*Khoảng chênh `taken − (delivered + failed)` là các bản ghi đang trên đường đi (in-flight), không phải bản ghi mất.* `taken` tăng khi worker lấy lô khỏi hàng đợi, trước khi `Send` đưa bản ghi cho producer; `delivered` và `failed` chỉ tăng trong promise, sau khi broker trả lời. Bản ghi nằm giữa hai mốc đó đang đợi linger 5 ms hoặc đang trên đường tới broker. Bốn bộ đếm cuối của các lần đo ở bài 12 và 13 đều là `/debug/stats` chụp ngay sau khi loadgen kết thúc, và khoảng chênh ở ba trong bốn lần khác 0 (4.815, 473 và 6.282; lần thứ tư là 0). Để phân biệt «đang trên đường đi» với «mất» hoặc «đếm sai», lab chạy lại cấu hình của bài 12 (25.000 kết nối, 6.250 điểm/giây, lô 3, Kafka thật) và chụp bộ đếm nhiều lần:
 
 ```text
 22:52:39.879  taken 393870, delivered 390198, failed 0   chênh 3672
@@ -307,7 +307,7 @@ Lần coalesce 30 giây tái hiện đúng con số 20.000, và lỗi gốc tron
 | 34 giây, lần 1 | 4 | hạn 20 giây (19.717), hạn 25 giây (17), cả hai hạn 30 giây (19.742 và 19.717) |
 | 34 giây, lần 2 | 0 | |
 
-Mọi lỗi đều là `record_timeout`. Producer hạn 35 giây trở lên hoặc không đặt hạn không lỗi ở cả bốn lần; không producer nào lỗi khi dừng 26 giây, kể cả producer hạn 20 giây. Hai producer hạn 30 giây giống hệt nhau, cùng một lần dừng 30 giây, có một lỗi 19.628 bản ghi và một không lỗi; cùng thời gian dừng 34 giây, hai lần chạy cho kết quả khác nhau. Vậy ở vùng 30 đến 34 giây, cùng cấu hình mà lúc lỗi lúc không; gọi đó là một cuộc đua thời gian bên trong client mới là đặt tên cho hiện tượng, chưa phải lời giải thích. Hai điều **vẫn chưa giải quyết được**. Một: vì sao cùng hạn, cùng thời gian dừng mà lúc lỗi lúc không. Tài liệu nói hạn chỉ được xét trước khi ghi một request hoặc sau một phản hồi, và chỉ khi an toàn với idempotence; mã nguồn franz-go v1.22.2 tính tuổi từ `Timestamp` của bản ghi đầu lô và không huỷ lô đang ở trạng thái chưa rõ đã ghi hay chưa (`unsureIfProduced`). Bài chưa nối các chi tiết đó với từng lần chạy. Hai: lần coalesce gốc lỗi ở thời gian dừng danh nghĩa 26 giây (hiệu hai mốc giờ ghi theo giây, độ trễ của lệnh `docker pause` và `unpause` lúc máy rất nặng không ghi), còn các lần lặp 26 giây đều không lỗi. Có thể thời gian Kafka thực sự đóng băng dài hơn 26 giây, nhưng chưa chứng minh được. Các lần chạy này cũng chạy khi máy đang chịu tải nặng (`uptime` ghi trong file raw), và mỗi ô của bảng thứ nhất là một lần chạy. Hạn 30 giây là tham số chọn cho lab; đặt nó lớn hơn thời gian sự cố dự kiến là hướng sửa hiển nhiên, chưa thử.
+Mọi lỗi đều là `record_timeout`. Producer hạn 35 giây trở lên hoặc không đặt hạn không lỗi ở cả bốn lần; không producer nào lỗi khi dừng 26 giây, kể cả producer hạn 20 giây. Hai producer hạn 30 giây giống hệt nhau, cùng một lần dừng 30 giây, có một lỗi 19.628 bản ghi và một không lỗi; cùng thời gian dừng 34 giây, hai lần chạy cho kết quả khác nhau. Vậy ở vùng 30 đến 34 giây, cùng cấu hình mà lúc lỗi lúc không. Gọi đó là một race condition về thời gian bên trong client thì mới là đặt tên cho hiện tượng, chưa phải lời giải thích. Hai điều **vẫn chưa giải quyết được**. Thứ nhất: vì sao cùng hạn, cùng thời gian dừng mà lúc lỗi lúc không. Tài liệu nói hạn chỉ được xét trước khi ghi một request hoặc sau một phản hồi, và chỉ khi an toàn với idempotence; mã nguồn franz-go v1.22.2 tính tuổi từ `Timestamp` của bản ghi đầu lô và không huỷ lô đang ở trạng thái chưa rõ đã ghi hay chưa (`unsureIfProduced`). Bài chưa nối các chi tiết đó với từng lần chạy. Thứ hai: lần coalesce gốc lỗi ở thời gian dừng danh nghĩa 26 giây (hiệu hai mốc giờ ghi theo giây, độ trễ của lệnh `docker pause` và `unpause` lúc máy rất nặng không được ghi lại), còn các lần lặp 26 giây đều không lỗi. Có thể thời gian Kafka thực sự đóng băng dài hơn 26 giây, nhưng chưa chứng minh được. Các lần chạy này cũng chạy khi máy đang chịu tải nặng (`uptime` ghi trong file raw), và mỗi ô của bảng thứ nhất là một lần chạy. Hạn 30 giây là tham số chọn cho lab; đặt nó lớn hơn thời gian sự cố dự kiến là hướng sửa hiển nhiên, chưa thử.
 
 Điều chắc chắn rút ra: **bộ đếm của hàng đợi phía trước không thấy phần mất này**. Một sự cố có thể làm mất điểm ở client Kafka mà `queue.dropped` vẫn bằng 0. Vì vậy ingest phải xuất cả `queue.*` lẫn `kafka.failed` (`/debug/stats` hiện xuất cả hai, cùng `kafka.buffered` và `kafka.failed_<nguyên nhân>`), và cảnh báo nên đặt trên cả hai.
 
@@ -315,7 +315,7 @@ Một thiếu sót cần nêu: **tuổi điểm lúc giao khi Kafka thật bị 
 
 ## Race detector trong test hàng đợi
 
-`Queue` có mutex, bộ đếm trong `Stats()` được sao chép dưới khoá, `Pump.SendErrs` có khoá riêng. Những chỗ đó là nơi một người sửa code sau này dễ bỏ sót (đọc `q.st` ngoài khoá chẳng hạn), và `-race` bắt được nếu test chạy tới đường đó. Test `TestDongThoiKhongMatDauVet` chạy 8 producer (mỗi producer 5.000 điểm) và 3 consumer cho cả ba chính sách, kiểm một bất biến: **tổng điểm vào = tổng điểm ra + tổng điểm mất có đếm**. Các test khác kiểm coalesce chỉ bật khi vượt ngưỡng, gộp giữ điểm mới nhất, đầy thì đẩy tài xế chờ lâu nhất, và tắt êm cả trong hạn lẫn hết hạn. Bất biến bảo toàn này chính là điều kiện để các bộ đếm trong bài dùng được.
+`Queue` có mutex, bộ đếm trong `Stats()` được sao chép dưới khoá, `Pump.SendErrs` có khoá riêng. Những chỗ đó là nơi một người sửa code sau này dễ bỏ sót (đọc `q.st` ngoài khoá chẳng hạn), và `-race` bắt được nếu test chạy tới đường đó. Test `TestDongThoiKhongMatDauVet` chạy 8 producer (mỗi producer 5.000 điểm) và 3 consumer cho cả ba chính sách, kiểm tra một bất biến: **tổng điểm vào = tổng điểm ra + tổng điểm mất có đếm**. Các test khác kiểm tra rằng coalesce chỉ bật khi vượt ngưỡng, phép gộp giữ điểm mới nhất, khi đầy thì đẩy tài xế chờ lâu nhất ra, và tắt êm cả trong hạn lẫn hết hạn. Bất biến bảo toàn này chính là điều kiện để các bộ đếm trong bài dùng được.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -368,11 +368,11 @@ Mọi số đo chạy khi máy đang chịu tải nặng và là một lần ch�
 
 **Bài 1.** Với `Unbounded`, bộ nhớ sống tăng cỡ 2,3 MB mỗi giây trong pha chậm. Nếu sự cố kéo dài 10 phút thay vì 40 giây ở cùng tốc độ, kết luận «unbounded chấp nhận được vì 97,5 MB còn nhỏ» có còn đúng không?
 
-<details><summary>Xem lời giải</summary><p>Không. Mức tăng bộ nhớ là hàm của thời gian sự cố, không phải hằng số. Nếu mức tăng giữ tuyến tính như trong 40 giây đã đo (đây là phép ngoại suy, lab không đo 10 phút), 600 giây cho cỡ 1,4 GB cho riêng hàng đợi, và hàng càng dài thì hồi phục càng lâu vì tuổi điểm càng lớn. Giới hạn dung lượng là để biên độ tác hại không phụ thuộc vào độ dài sự cố.</p></details>
+<details><summary>Xem lời giải</summary><p>Không. Mức tăng bộ nhớ là hàm của thời gian sự cố, không phải hằng số. Nếu mức tăng giữ tuyến tính như trong 40 giây đã đo (đây là phép ngoại suy, lab không đo 10 phút), 600 giây cho ra cỡ 1,4 GB cho riêng hàng đợi, và hàng càng dài thì hồi phục càng lâu vì tuổi điểm càng lớn. Giới hạn dung lượng là để mức tác hại tối đa không phụ thuộc vào độ dài sự cố.</p></details>
 
 **Bài 2.** Vì sao `Coalesce` không gộp ngay từ điểm đầu tiên (đặt `high = 0`) mà đợi độ sâu vượt `capacity/10`? Cái giá của việc đợi là gì, và số liệu nào ở trên cho thấy cái giá đó?
 
-<details><summary>Xem lời giải</summary><p>Đợi để lúc sink khoẻ thì mọi điểm vẫn đi hết, nên luồng lịch sử không mất điểm trung gian khi không có sự cố. Cái giá là có một khoảng đầu sự cố mà hàng chưa gộp: bảng giây-theo-giây cho thấy <code>coalesced</code> còn 0 tới giây 9 của lần chạy coalesce và độ sâu tăng như unbounded cho tới khi chạm ngưỡng. Đặt <code>high</code> thấp hơn thì gộp sớm hơn nhưng giảm lịch sử cả khi sink chỉ chậm thóang qua.</p></details>
+<details><summary>Xem lời giải</summary><p>Đợi để lúc sink khoẻ thì mọi điểm vẫn đi hết, nên luồng lịch sử không mất điểm trung gian khi không có sự cố. Cái giá là có một khoảng đầu sự cố mà hàng chưa gộp: bảng số liệu theo từng giây cho thấy <code>coalesced</code> còn 0 tới giây 9 của lần chạy coalesce và độ sâu tăng như unbounded cho tới khi chạm ngưỡng. Đặt <code>high</code> thấp hơn thì gộp sớm hơn nhưng giảm lịch sử cả khi sink chỉ chậm thoáng qua.</p></details>
 
 **Bài 3.** Hạn tắt êm của ingest là 10 giây (`--drain-deadline`). Dựa vào ba hàng của bảng tắt êm, nêu hai điều cần cân nhắc khi chọn hạn này cho môi trường chạy thật.
 

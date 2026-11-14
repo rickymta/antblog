@@ -1,0 +1,257 @@
+{
+ "file": "location-dijkstra-a-star-rust-do-thi-csr.md",
+ "edits": [
+  {
+   "old": "kiểm heuristic chim bay hợp lệ trên mọi cạnh",
+   "new": "kiểm tra heuristic chim bay hợp lệ trên mọi cạnh",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "lớn nhất của ô tô.",
+   "new": "lớn nhất trong đồ thị ô tô.",
+   "reason": "Lược mất danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "nên bài ưu tiên số nút đã duyệt và tỉ lệ, là những số tái lập được từng chữ số",
+   "new": "nên bài ưu tiên số nút đã duyệt và tỉ lệ, vốn là những số tái lập được từng chữ số",
+   "reason": "Câu thiếu liên kết",
+   "severity": "low"
+  },
+  {
+   "old": "Bạn kỳ vọng nó giảm số nút",
+   "new": "Bạn kỳ vọng A* giảm số nút",
+   "reason": "Tránh Nó",
+   "severity": "low"
+  },
+  {
+   "old": "Với trọng số thời gian chỉ còn",
+   "new": "Với trọng số thời gian thì chỉ còn",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "nhưng nó phải giả định xe đi nhanh nhất mạng đường (80 km/h trên cao tốc) nên",
+   "new": "nhưng nó phải giả định xe đi với tốc độ nhanh nhất của mạng đường (80 km/h trên cao tốc), nên",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "vì sao không dùng đối tượng con trỏ",
+   "new": "vì sao không dùng đồ thị kiểu đối tượng và con trỏ",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "(dài số nút cộng một)",
+   "new": "(độ dài bằng số nút cộng một)",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "một mảng trọng số cùng chỉ số cạnh",
+   "new": "một mảng trọng số dùng chung chỉ số cạnh",
+   "reason": "Cụm khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi cạnh tốn thêm phần đầu đối tượng",
+   "new": "mỗi cạnh tốn thêm phần tiêu đề (header) của đối tượng",
+   "reason": "Dịch gượng object header",
+   "severity": "medium"
+  },
+  {
+   "old": "cùng 300 truy vấn Dijkstra trọng số thời gian:",
+   "new": "trên cùng 300 truy vấn Dijkstra dùng trọng số thời gian:",
+   "reason": "Thiếu giới từ và động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "giá trị nhỏ nhất đến lớn nhất qua ba lần chạy",
+   "new": "khoảng từ giá trị nhỏ nhất đến lớn nhất qua ba lần chạy",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Hãy đọc con số cho đúng cỡ:",
+   "new": "Hãy đọc con số cho đúng độ lớn:",
+   "reason": "Từ khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Nó dừng khi chốt được nút đích. Tính đúng đến từ trọng số không âm: nút nhỏ nhất trong hàng đợi không thể được cải thiện bằng đường đi qua một nút còn lớn hơn.",
+   "new": "Thuật toán dừng khi chốt được nút đích. Tính đúng đắn của thuật toán đến từ trọng số không âm: nút nhỏ nhất trong hàng đợi không thể cải thiện thêm bằng đường đi qua một nút có khoảng cách lớn hơn.",
+   "reason": "Tránh Nó, câu thiếu chủ ngữ, bị động",
+   "severity": "medium"
+  },
+  {
+   "old": "khi hai nút bằng khoá thì nút có chỉ số nhỏ hơn đi trước, làm kết quả tất định",
+   "new": "khi hai nút có cùng khoá thì nút có chỉ số nhỏ hơn đi trước, nên kết quả tất định",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "là **xoá lười**: khi khoảng cách",
+   "new": "là **xoá lười** (lazy deletion): khi khoảng cách",
+   "reason": "Giải thích kèm tên gốc lần đầu",
+   "severity": "medium"
+  },
+  {
+   "old": "Chuyện thứ hai là khởi tạo.",
+   "new": "Vấn đề thứ hai là việc khởi tạo.",
+   "reason": "Từ khẩu ngữ, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Cấp một mảng khoảng cách",
+   "new": "Cấp phát một mảng khoảng cách",
+   "reason": "Động từ cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "cho mỗi truy vấn là việc tốn hơn cả truy vấn nhỏ",
+   "new": "cho mỗi truy vấn còn tốn hơn cả một truy vấn nhỏ",
+   "reason": "Câu lủng củng",
+   "severity": "medium"
+  },
+  {
+   "old": "nhận heuristic `h` là một closure",
+   "new": "nhận heuristic `h` dưới dạng một closure",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Tính đúng của A* phụ thuộc",
+   "new": "Tính đúng đắn của A* phụ thuộc",
+   "reason": "Từ tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "nên nó cần tính mạnh hơn là nhất quán: với",
+   "new": "nên nó cần tính chất mạnh hơn, là nhất quán: với",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "cộng dồn bất đẳng thức dọc đường đi sẽ ra hợp lệ",
+   "new": "cộng dồn bất đẳng thức dọc đường đi sẽ suy ra tính hợp lệ",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Với chim bay, nhất quán suy ra từ bất đẳng thức tam giác",
+   "new": "Với heuristic chim bay, tính nhất quán suy ra từ bất đẳng thức tam giác",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "dài hơn đường thật cỡ 0,1%",
+   "new": "dài hơn đường thật khoảng 0,1%",
+   "reason": "Từ khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "tính bằng đúng hai quy tắc ở trên",
+   "new": "tính theo đúng hai quy tắc ở trên",
+   "reason": "Giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "liên thông mạnh lớn nhất của ô tô",
+   "new": "liên thông mạnh lớn nhất của đồ thị ô tô",
+   "reason": "Lược mất danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Trước hết là kiểm heuristic: lab duyệt",
+   "new": "Trước hết là kiểm tra heuristic: lab duyệt",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "và kiểm chim bay quy đổi giữa hai đầu cạnh không vượt",
+   "new": "và kiểm tra khoảng cách chim bay quy đổi giữa hai đầu cạnh không vượt",
+   "reason": "Động từ cụt, lược danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm từng cạnh là đủ, vì bất đẳng thức này cộng với bất đẳng thức tam giác cho nhất quán trên cả đồ thị, và nhất quán cho hợp lệ.",
+   "new": "Kiểm tra từng cạnh là đủ, vì bất đẳng thức này kết hợp với bất đẳng thức tam giác suy ra nhất quán trên cả đồ thị, và nhất quán suy ra hợp lệ.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Vì sao trọng số thời gian kém đến vậy?",
+   "new": "Vì sao với trọng số thời gian, A* kém hiệu quả đến vậy?",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "high"
+  },
+  {
+   "old": "và A* thu hẹp được nhiều.",
+   "new": "và A* thu hẹp được nhiều vùng tìm kiếm.",
+   "reason": "Câu thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "bắt phải có một kiểm tra tự động",
+   "new": "đòi phải có một bước kiểm tra tự động",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "trả bản đồ nhãn trung bình 58.539 nút mỗi truy vấn,",
+   "new": "trả về bảng ánh xạ nhãn có trung bình 58.539 nút mỗi truy vấn,",
+   "reason": "'bản đồ nhãn' dễ nhầm với bản đồ địa lý",
+   "severity": "high"
+  },
+  {
+   "old": "do lab bài 06 ghi (hoặc",
+   "new": "do lab của bài 06 ghi ra (hoặc",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Từ gốc repo:",
+   "new": "Chạy từ thư mục gốc của repo:",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Dưới đây là phần output của lần chạy cho Dijkstra CSR nhanh nhất trong ba lần",
+   "new": "Dưới đây là phần kết quả của lần chạy có Dijkstra CSR nhanh nhất trong ba lần",
+   "reason": "Từ Anh thông thường",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm `h ≤ w` trên mọi cạnh fixture",
+   "new": "kiểm tra `h ≤ w` trên mọi cạnh fixture",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Một cạnh nối tiếp cạnh nào cũng miễn phí",
+   "new": "Chuyển từ cạnh này sang cạnh nối tiếp nào cũng miễn phí",
+   "reason": "Câu khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài 22 dùng landmark để thắt lại.",
+   "new": "Bài 22 dùng landmark để siết chặt lại.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Mục cũ có khoá lớn hơn nên đến sau, lúc nút đã chốt.",
+   "new": "Mục cũ có khoá lớn hơn nên được lấy ra sau, lúc nút đã chốt.",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Không bỏ qua nó thì nút bị chốt lần thứ hai",
+   "new": "Nếu không bỏ qua mục cũ thì nút bị chốt lần thứ hai",
+   "reason": "Tránh Nó",
+   "severity": "medium"
+  }
+ ]
+}

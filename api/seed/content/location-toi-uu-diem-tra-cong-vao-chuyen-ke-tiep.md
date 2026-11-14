@@ -1,18 +1,18 @@
 ---
 slug: location-toi-uu-diem-tra-cong-vao-chuyen-ke-tiep
 title: "Tối ưu điểm trả: gần đích thật, đúng phía, dễ bắt chuyến kế, và vì sao số đo nhỏ"
-summary: "Bài 38: hàm mục tiêu cho điểm trả với chi phí thoát của tài xế. Riêng điểm trả không có ý nghĩa thống kê (km rỗng −16,3 m [−51,5; +18,9]) và khách đi thêm 10,6 m ở cuối chuyến. Trên dữ liệu mô phỏng."
+summary: "Bài 38: hàm mục tiêu cho điểm trả với chi phí thoát của tài xế. Riêng điểm trả không cho kết quả có ý nghĩa thống kê (km rỗng −16,3 m [−51,5; +18,9]) và khách đi thêm 10,6 m ở cuối chuyến. Trên dữ liệu mô phỏng."
 category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, dropoff, objective, simulation, deadhead, paired-evaluation]
 language: vi
 ---
 
-Khách xuống xe ở một con đường lớn có dải phân cách cứng. Đích của anh là căn nhà bên kia đường. Tài xế trả khách đúng điểm đích đã snap lên đường, nghĩa là ở làn bên này, nên anh phải đi qua cầu vượt dành cho người đi bộ. Hoặc ngược lại: tài xế trả bên kia đường, rồi mất cả một vòng quay đầu để quay ra, trong khi khách hàng kế tiếp đang đứng chờ ở hướng ngược lại. Điểm trả trông như phần dễ nhất của chuyến, nhưng nó là chỗ mà hai bên lại giành nhau: khách muốn xuống gần cửa, tài xế muốn thoát ra thuận hướng để bắt chuyến kế.
+Khách xuống xe ở một con đường lớn có dải phân cách cứng. Đích của anh là căn nhà bên kia đường. Tài xế trả khách đúng điểm đích đã snap lên đường, nghĩa là ở làn bên này, nên anh phải đi qua cầu vượt dành cho người đi bộ. Hoặc ngược lại: tài xế trả bên kia đường, rồi mất cả một vòng quay đầu để quay ra, trong khi khách hàng kế tiếp đang đứng chờ ở hướng ngược lại. Điểm trả trông như phần dễ nhất của chuyến, nhưng đó lại là chỗ hai bên giành nhau: khách muốn xuống gần cửa, tài xế muốn thoát ra thuận hướng để bắt chuyến kế.
 
-Kết luận của bài này khiêm tốn như bài 36 và 37: **riêng điểm trả không cải thiện km rỗng đến mức chứng minh được**, và khách phải đi bộ thêm ở cuối chuyến. Bài nói rõ vì sao, và giá trị của ý tưởng, nếu có, nằm ở đâu mà mô hình này có thể không nhìn thấy.
+Kết luận của bài này khiêm tốn như bài 36 và 37: **riêng điểm trả không cải thiện km rỗng đến mức chứng minh được**, và khách phải đi bộ thêm ở cuối chuyến. Bài giải thích vì sao, và chỉ ra giá trị của ý tưởng (nếu có) nằm ở chỗ nào mà mô hình này có thể không thấy.
 
-Đây là bài 38 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng hàm mục tiêu của [bài 32](/articles/location-ham-muc-tieu-diem-hen-khach-va-tai-xe), xếp hạng ứng viên của [bài 35](/articles/location-xep-hang-diem-don-one-to-many-ngan-sach-do-tre) và dữ liệu cổng OSM đã đo ở [bài 37](/articles/location-hem-chung-cu-tttm-san-bay-cong-sanh) (hàm `nearest_gate` đọc thẳng nút `entrance=*`, không qua lớp cổng của bài đó). Phương pháp so sánh cặp theo 20 seed đánh giá (20270001…20270020), khoảng tin cậy t 95% được định nghĩa ở bài 32. Mọi số trong bài là **trên dữ liệu mô phỏng**, kịch bản `hcm-baseline`, đồ thị HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), baseline là đón đúng ghim cộng tài xế gần nhất theo chim bay, trả đúng điểm đích đã snap. Simulator không dự đoán thế giới thật.
+Đây là bài 38 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng hàm mục tiêu của [bài 32](/articles/location-ham-muc-tieu-diem-hen-khach-va-tai-xe), xếp hạng ứng viên của [bài 35](/articles/location-xep-hang-diem-don-one-to-many-ngan-sach-do-tre) và dữ liệu cổng OSM đã đo ở [bài 37](/articles/location-hem-chung-cu-tttm-san-bay-cong-sanh) (hàm `nearest_gate` đọc thẳng nút `entrance=*`, không qua lớp cổng của bài đó). Phương pháp so sánh cặp theo 20 seed đánh giá (20270001…20270020), khoảng tin cậy t 95% được định nghĩa ở bài 32. Mọi số trong bài đều đo **trên dữ liệu mô phỏng**, kịch bản `hcm-baseline`, đồ thị HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), baseline là đón đúng ghim, ghép với tài xế gần nhất theo đường chim bay, và trả đúng điểm đích đã snap. Simulator không dự đoán thế giới thật.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,7 +22,7 @@ Kết luận của bài này khiêm tốn như bài 36 và 37: **riêng điểm 
 
 ## Hàm mục tiêu điểm trả: cùng dạng, đổi vai
 
-Bài 32 đặt khách và tài xế lên một cân cho điểm đón. Điểm trả dùng cùng ý nhưng đổi vai: khách không còn đi bộ **tới** điểm hẹn mà đi bộ **từ** điểm trả tới đích thật, còn tài xế đã có khách nên chi phí «km rỗng» thành chi phí **thoát ra** để bắt chuyến kế.
+Bài 32 đặt khách và tài xế lên cùng một cán cân khi chọn điểm đón. Điểm trả dùng cùng ý nhưng đổi vai: khách không còn đi bộ **tới** điểm hẹn mà đi bộ **từ** điểm trả tới đích thật, còn tài xế đã có khách nên chi phí «km rỗng» thành chi phí **thoát ra** để bắt chuyến kế.
 
 ```text
 J_trả(p) = a·T_bộ(p → đích thật hoặc cổng) + d·T_trip(xe → p) + e·T_thoát(p) + phạt(phía đường, đi bộ quá xa)
@@ -74,7 +74,7 @@ Vòng chấm điểm cho từng ứng viên đã qua lọc ma trận:
                 + pen;
 ```
 
-Phần đáng chú ý nhất là `exit`, chi phí thoát, vì nó là cách duy nhất lab biết cho «chuyến kế». Simulator **không biết** khách kế tiếp là ai lúc trả khách, nên lab dùng một đại diện:
+Phần đáng chú ý nhất là `exit`, chi phí thoát, vì đây là cách duy nhất lab có để biết về «chuyến kế». Simulator **không biết** khách kế tiếp là ai lúc trả khách, nên lab dùng một đại diện:
 
 `examples/toi-noi-location/rust/crates/pickup/src/dropoff.rs`
 
@@ -99,7 +99,7 @@ Phần đáng chú ý nhất là `exit`, chi phí thoát, vì nó là cách duy 
     }
 ```
 
-Chuyến kế được đại diện bằng **hai tâm điểm nóng của kịch bản gần đích nhất** (8 tâm tất cả). Đây là một giả định thô; mục «Vì sao số đo nhỏ» quay lại chuyện này.
+Lab đại diện cho chuyến kế bằng **hai tâm điểm nóng của kịch bản gần đích nhất** (8 tâm tất cả). Đây là một giả định thô; mục «Vì sao số đo nhỏ» quay lại chuyện này.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -108,7 +108,7 @@ Chuyến kế được đại diện bằng **hai tâm điểm nóng của kịc
 <figcaption>Hình 1. Ba số hạng của hàm mục tiêu điểm trả quanh một điểm trả: xe chở khách tới (T_trip), khách đi bộ tới đích thật (T_bộ), tài xế rời đi tìm khách kế (T_thoát). Hình minh hoạ, không theo tỉ lệ; số đo thật ở Hình 2.</figcaption>
 </figure>
 
-## Cái cắm vào simulator: hai điểm cắm mới
+## Gắn vào simulator: hai điểm tích hợp mới
 
 Để chiến lược chọn được điểm trả, simulator cần hai thứ mà baseline không có. Một là điểm đến thật của khách (chưa snap), vì baseline chỉ giữ điểm đã snap lên đường. Hai là một lời gọi cho chiến lược ngay khi xe đón xong khách.
 
@@ -123,11 +123,11 @@ Chuyến kế được đại diện bằng **hai tâm điểm nóng của kịc
     }
 ```
 
-Mặc định `None`, nên baseline không đổi từng byte (mã băm FNV-1a của nhật ký chuyến seed 20261106 vẫn là `100a862df76819aa`, in ở lab bài 32). Bên cạnh đó có `BaselineLogged`: một baseline y hệt `AtPin` nhưng ghi nhật ký quãng khách đi bộ từ điểm trả tới đích thật, để có số so sánh mà không đổi bất kỳ số nào của mô phỏng. Quãng đi bộ **sau khi xuống xe** không nằm trong chỉ số §3.4 của simulator nên phải đo riêng như vậy.
+Mặc định `None`, nên baseline giữ nguyên từng byte (mã băm FNV-1a của nhật ký chuyến seed 20261106 vẫn là `100a862df76819aa`, in ở lab bài 32). Bên cạnh đó có `BaselineLogged`: một baseline y hệt `AtPin` nhưng ghi nhật ký quãng khách đi bộ từ điểm trả tới đích thật, để có số so sánh mà không đổi bất kỳ số nào của mô phỏng. Quãng đi bộ **sau khi xuống xe** không nằm trong chỉ số §3.4 của simulator nên phải đo riêng như vậy.
 
 Bốn biến thể được so với baseline, mỗi biến thể trên 20 seed ghép cặp:
 
-- **(a)** chỉ điểm trả theo `J_trả` đầy đủ, điểm đón vẫn là ghim.
+- **(a)** chỉ đổi điểm trả theo `J_trả` đầy đủ, điểm đón vẫn là ghim.
 - **(b)** điểm trả không tính chi phí thoát.
 - **(c)** chỉ tối thiểu quãng khách đi bộ từ điểm trả (bỏ trip, thoát, phía đường).
 - **(d)** điểm đón `J` (`p04-v1`) cộng điểm trả `J_trả`.
@@ -153,7 +153,7 @@ Bảng chi tiết cho biến thể (a), cặp theo seed, trên dữ liệu mô p
 | Cước trung bình (đồng) | 33.857,4 | 33.781,2 | −76,2 [−140,5; −11,8] | nền tảng, tài xế thu ít hơn |
 | Khách đi bộ ở điểm trả (m, TB theo seed) | 25,9 | 36,5 | **+10,6** [+9,0; +12,2] | **khách trả giá** |
 
-Nguồn: `results/p04.md`, LOC-38 (a). Các khoảng loại 0 ở `pickup_eta_s` và `trip_m` có chênh nhỏ. Lab không có cơ chế tách riêng cho chúng, và bốn biến thể × 19 chỉ số là 76 khoảng 95%, nên kỳ vọng vài khoảng loại 0 chỉ vì tình cờ. Nên coi đây là giả thuyết.
+Nguồn: `results/p04.md`, LOC-38 (a). Các khoảng loại 0 ở `pickup_eta_s` và `trip_m` có chênh nhỏ. Lab không có cơ chế tách riêng cho chúng, và bốn biến thể × 19 chỉ số là 76 khoảng 95%, nên ta kỳ vọng sẽ có vài khoảng loại 0 chỉ vì tình cờ. Nên coi đây là giả thuyết.
 
 Đọc từng biến thể:
 
@@ -166,18 +166,18 @@ Nguồn: `results/p04.md`, LOC-38 (a). Các khoảng loại 0 ở `pickup_eta_s`
 
 Có ít nhất bốn lý do, đều thuộc về mô hình chứ không nhất thiết thuộc về ý tưởng.
 
-**Thước đi bộ để lại rất ít dư địa.** Baseline trả khách ở điểm đích đã snap, tức điểm trên đường gần đích thật nhất. Quãng đi bộ của lab đo dọc đồ thị đi bộ giữa hai điểm đã snap, **không gồm đoạn từ đường vào tới đích thật** (đích có thể cách đường tới 120 m). Vì vậy p50 bằng 0,0 m: ở hơn nửa số chuyến hai đầu snap vào cùng một chỗ. Trung bình là 25,8 m, và biến thể (c), tối ưu thuần cho khách, chỉ giảm 3,8 m. Con số đó nói về thước đo này, không nói khách thật hết chỗ để được lợi.
+**Thước đo quãng đi bộ để lại rất ít dư địa.** Baseline trả khách ở điểm đích đã snap, tức điểm trên đường gần đích thật nhất. Quãng đi bộ của lab đo dọc đồ thị đi bộ giữa hai điểm đã snap, **không gồm đoạn từ đường vào tới đích thật** (đích có thể cách đường tới 120 m). Vì vậy p50 bằng 0,0 m: ở hơn nửa số chuyến hai đầu snap vào cùng một chỗ. Trung bình là 25,8 m, và biến thể (c), tối ưu thuần cho khách, chỉ giảm 3,8 m. Con số đó nói về thước đo này, không có nghĩa là khách thật không còn gì để được lợi.
 
-**Chuyến kế là đại diện thô.** Chi phí thoát trung bình của điểm đã chọn là 506 s: tâm nhu cầu gần nhất cách điểm trả cả hơn tám phút lái xe, nên tín hiệu «dễ bắt chuyến kế» yếu. Giả thuyết: phần lớn ứng viên quanh một đích đều cách tâm đó xa tương tự, nên chênh lệch giữa chúng nhỏ so với 506 s; lab không in phân bố chi phí thoát giữa các ứng viên. Simulator không biết khách kế tiếp ở đâu lúc trả khách, nên lab không có thứ tốt hơn.
+**Chuyến kế là đại diện thô.** Chi phí thoát trung bình của điểm đã chọn là 506 s: tâm nhu cầu gần nhất cách điểm trả cả hơn tám phút lái xe, nên tín hiệu «dễ bắt chuyến kế» yếu. Giả thuyết: phần lớn ứng viên quanh một đích đều cách tâm đó xa tương tự, nên chênh lệch giữa chúng nhỏ so với 506 s; lab không in phân bố chi phí thoát giữa các ứng viên. Simulator không biết khách kế tiếp ở đâu lúc trả khách, nên lab không có đại diện nào tốt hơn.
 
-**Mô hình không đo cái điểm trả muốn tối ưu.** Phạt phía đường chỉ nằm trong `J`, không có trong số đo nào: simulator không mô phỏng thời gian băng đường, và quãng đi bộ sau khi xuống xe không nằm trong chỉ số §3.4. Nếu giá trị thật của «trả đúng phía» là khách khỏi phải qua đường, mô hình này không có cách để thấy.
+**Mô hình không đo điều mà điểm trả muốn tối ưu.** Phạt phía đường chỉ nằm trong `J`, không có trong số đo nào: simulator không mô phỏng thời gian băng đường, và quãng đi bộ sau khi xuống xe không nằm trong chỉ số §3.4. Nếu giá trị thật của «trả đúng phía» là khách khỏi phải qua đường, mô hình này không có cách nào nhìn ra điều đó.
 
-**Đuôi dài không phải chuyện điểm trả.** Dù ở baseline hay mọi chiến lược, quãng khách đi bộ từ điểm trả tới đích có max **4.167,6 m**: chính là loại ca đi vòng đã gặp ở bài 32 (hai điểm gần nhau nhưng đồ thị đi bộ nối ở rất xa). Chọn lại điểm trả trong tầm 150 m không sửa được liên thông của đồ thị đi bộ; max không đổi trong mọi biến thể. Cổng OSM trong 80 m quanh đích chỉ có ở 0,8% chuyến, khớp với bài 37.
+**Đuôi dài không phải do điểm trả.** Dù ở baseline hay mọi chiến lược, quãng khách đi bộ từ điểm trả tới đích có max **4.167,6 m**: chính là loại trường hợp đi vòng đã gặp ở bài 32 (hai điểm gần nhau nhưng đồ thị đi bộ nối ở rất xa). Chọn lại điểm trả trong tầm 150 m không sửa được tính liên thông của đồ thị đi bộ; max không đổi trong mọi biến thể. Cổng OSM trong 80 m quanh đích chỉ có ở 0,8% chuyến, khớp với bài 37.
 
 Vậy giá trị của ý tưởng, nếu có, nằm ở đâu? Có hai chỗ đáng thử, và **chưa chỗ nào được chứng minh ở đây**.
 
-- **Phía khách:** trả khách đúng phía, đúng cổng (nhất là khi có dữ liệu cổng do đối tác hay tài xế đóng góp, không chỉ OSM thưa). Mô hình không đo thời gian băng đường và chỉ có 0,8% chuyến có cổng, nên không thể hiện ra.
-- **Phía cơ chế:** tài xế thoát ra thuận hướng để bắt chuyến kế, giảm quay đầu. Nó cần tín hiệu «chuyến kế» tốt hơn tâm điểm nóng, chẳng hạn bản đồ nhu cầu theo ô H3 ([bài 49](/articles/location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau)), hoặc chuyến kế đã được ghép sẵn khi chuyến này sắp xong ([bài 47](/articles/location-chain-dispatch-tai-xe-sap-tra-khach)).
+- **Phía khách:** trả khách đúng phía, đúng cổng (nhất là khi có dữ liệu cổng do đối tác hay tài xế đóng góp, không chỉ OSM thưa). Mô hình không đo thời gian băng đường và chỉ có 0,8% chuyến có cổng, nên lợi ích này không thể hiện ra.
+- **Phía cơ chế:** tài xế thoát ra thuận hướng để bắt chuyến kế, giảm quay đầu. Hướng này cần tín hiệu «chuyến kế» tốt hơn tâm điểm nóng, chẳng hạn bản đồ nhu cầu theo ô H3 ([bài 49](/articles/location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau)), hoặc chuyến kế đã được ghép sẵn khi chuyến này sắp xong ([bài 47](/articles/location-chain-dispatch-tai-xe-sap-tra-khach)).
 
 Kết quả của bài là «chưa thấy lợi ích trong mô hình này», không phải «điểm trả không có lợi». Khoảng [−51,5; +18,9] vẫn chứa cả một mức giảm vài chục mét.
 
@@ -190,9 +190,9 @@ Kết quả của bài là «chưa thấy lợi ích trong mô hình này», kh�
 | Tài xế | Km rỗng ít hơn 16,3 m | không khác biệt rõ |
 | Nền tảng và tài xế (cước) | Cước trung bình thấp hơn 76,2 đồng mỗi chuyến vì quãng có khách ngắn đi 17,0 m | khoảng loại 0, nhỏ |
 
-Bên chịu thiệt có bằng chứng; bên được lợi chủ yếu không. Khi bảng cân bằng lệch như vậy, đây là lý do bình thường để **không** bật tính năng chỉ vì nó «có lý».
+Bên chịu thiệt có bằng chứng; bên được lợi chủ yếu không. Khi bảng được và mất lệch như vậy, đây là lý do bình thường để **không** bật tính năng chỉ vì nó «có lý».
 
-**Đổi đích khi đang đi.** Đề cương của bài nêu cả việc khách đổi đích giữa chuyến. Lab **chưa** có: nó không có sự kiện đổi đích, cũng không có đồng ý của khách hay tính lại cước. Khi làm, nó đụng thẳng vào bài 40: đổi đích là đổi quãng có khách, nên đổi cước, và cùng quy tắc «không tăng giá lén» phải áp dụng.
+**Đổi đích khi đang đi.** Đề cương của bài nêu cả việc khách đổi đích giữa chuyến. Lab **chưa** có tính năng này: không có sự kiện đổi đích, cũng không có đồng ý của khách hay tính lại cước. Khi làm, việc này ảnh hưởng trực tiếp tới bài 40: đổi đích là đổi quãng có khách, nên đổi cước, và cùng quy tắc «không tăng giá lén» phải áp dụng.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -203,7 +203,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run --release -q --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc38_diem_tra -- --jobs 6
 ```
 
-Output thật của biến thể (a), kịch bản `hcm-baseline`, 20 seed 20270001…20270020 (rút gọn từ `results/p04.md`):
+Kết quả chạy thật của biến thể (a), kịch bản `hcm-baseline`, 20 seed 20270001…20270020 (rút gọn từ `results/p04.md`):
 
 ```text
   chỉ số                             baseline chiến lược   chênh TB           KTC 95% (t)   KTC 95% (bootstrap)     ↓/↑  trung vị seed b→n
@@ -220,7 +220,7 @@ Output thật của biến thể (a), kịch bản `hcm-baseline`, 20 seed 20270
     đi bộ ở điểm trả TB theo seed: baseline 25.9 → 36.5 m, chênh cặp +10.6 [+9.0, +12.2] (KTC t 95%, 20 seed) *
 ```
 
-Dấu `*` là khoảng tin cậy t không chứa 0. Lệnh `bash examples/toi-noi-location/verify-p04.sh` chạy lab này trên fixture với 3 seed để kiểm đường ống, kèm test động cho điểm trả; nó không tái hiện bảng trên.
+Dấu `*` là khoảng tin cậy t không chứa 0. Lệnh `bash examples/toi-noi-location/verify-p04.sh` chạy lab này trên fixture với 3 seed để kiểm tra luồng xử lý, kèm test động cho điểm trả; nó không tái hiện bảng trên.
 
 ## Giới hạn của ví dụ
 
@@ -250,7 +250,7 @@ Dấu `*` là khoảng tin cậy t không chứa 0. Lệnh `bash examples/toi-no
 **Bài 3.** Đề xuất một đại diện tốt hơn cho «chuyến kế» so với hai tâm điểm nóng gần nhất, dùng được trong simulator, và nói rủi ro của nó.
 
 <details><summary>Lời giải bài 3</summary>
-<p>Dùng mật độ nhu cầu lịch sử theo ô H3 quanh điểm trả (bản đồ nhu cầu như [bài 49](/articles/location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau)), tính thời gian từ ứng viên tới các ô nhu cầu cao trong bán kính vài trăm mét, có trọng số nhu cầu. Rủi ro: nếu bản đồ nhu cầu học từ chính nơi tài xế đang đón thì lặp lại thiên lệch «đón ở đâu thì học ở đó» của bài 39, và nếu simulator sinh nhu cầu từ chính các tâm điểm nóng đó thì kết quả là vòng tròn.</p>
+<p>Dùng mật độ nhu cầu lịch sử theo ô H3 quanh điểm trả (bản đồ nhu cầu như [bài 49](/articles/location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau)), tính thời gian từ ứng viên tới các ô nhu cầu cao trong bán kính vài trăm mét, có trọng số nhu cầu. Rủi ro: nếu bản đồ nhu cầu học từ chính nơi tài xế đang đón thì lặp lại thiên lệch «đón ở đâu thì học ở đó» của bài 39, và nếu simulator sinh nhu cầu từ chính các tâm điểm nóng đó thì kết quả là lập luận vòng tròn.</p>
 </details>
 
 Bài trước: [bài 37](/articles/location-hem-chung-cu-tttm-san-bay-cong-sanh). Bài tiếp: [bài 39](/articles/location-hoc-diem-don-tu-lich-su-dbscan-python).

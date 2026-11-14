@@ -1,0 +1,155 @@
+{
+ "file": "location-osm-pbf-do-thi-duong-bo-xe-may-o-to.md",
+ "edits": [
+  {
+   "old": "đồ thị của ô tô sẽ cho vào cả những hẻm quá hẹp",
+   "new": "đồ thị dành cho ô tô sẽ cho phép đi vào cả những hẻm quá hẹp",
+   "reason": "«Cho vào» cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó đọc file Việt Nam, giữ phần",
+   "new": "Lab đọc file Việt Nam, giữ phần",
+   "reason": "Tránh «Nó» chỉ sự vật trừu tượng ở đầu câu",
+   "severity": "low"
+  },
+  {
+   "old": "Các giả định này là giả định có chủ đích của lab, ghi ở đầu",
+   "new": "Đây là những giả định có chủ đích của lab, ghi ở đầu",
+   "reason": "Lặp từ «giả định»",
+   "severity": "low"
+  },
+  {
+   "old": "Một chiều là chỗ xe máy khác ô tô.",
+   "new": "Đường một chiều là chỗ xe máy khác ô tô.",
+   "reason": "Lược mất danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai profile thế nào cũng cần đồ thị riêng",
+   "new": "Hai profile cần có đồ thị riêng",
+   "reason": "Văn nói, «thế nào cũng» không rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "tổng từ 2 là nút giao)",
+   "new": "tổng từ 2 trở lên là nút giao)",
+   "reason": "Vế cuối ngắt cụt, thiếu «trở lên»",
+   "severity": "medium"
+  },
+  {
+   "old": "nên không thể làm cạnh.",
+   "new": "nên không thể coi cả way là một cạnh.",
+   "reason": "«Làm cạnh» cụt, thiếu chủ thể",
+   "severity": "medium"
+  },
+  {
+   "old": "nên n4 thành nút giao cùng",
+   "new": "nên n4 trở thành nút giao cùng",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "là các cột mảng song song cùng chỉ số cạnh",
+   "new": "là các mảng cột song song, dùng chung chỉ số cạnh",
+   "reason": "Cụm tự ghép, trật tự từ kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "không đuổi con trỏ.",
+   "new": "không phải đuổi theo con trỏ.",
+   "reason": "Thiếu «theo», câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Bức tranh:",
+   "new": "Bức tranh như sau:",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "tính từ output của <code>loc06_osm_do_thi</code>",
+   "new": "tính từ kết quả chạy của <code>loc06_osm_do_thi</code>",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Chiều rộng gần như vắng mặt.",
+   "new": "Chiều rộng gần như không có trong dữ liệu.",
+   "reason": "«Vắng mặt» dịch gượng cho dữ liệu",
+   "severity": "low"
+  },
+  {
+   "old": "cũng bị tính là vắng, nên",
+   "new": "cũng bị tính là thiếu, nên",
+   "reason": "«Vắng» dùng cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Tên không tin được để suy loại.",
+   "new": "Không thể dựa vào tên để suy ra loại đường.",
+   "reason": "Dịch gượng, thiếu thành phần",
+   "severity": "high"
+  },
+  {
+   "old": "Cấm rẽ có nhưng chưa dùng được hết.",
+   "new": "Dữ liệu cấm rẽ có nhưng chưa dùng được hết.",
+   "reason": "Thiếu chủ ngữ rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "Cả hai được giữ nguyên thẻ gốc cho các bài sau.",
+   "new": "Cả hai loại dữ liệu này được giữ nguyên thẻ gốc cho các bài sau.",
+   "reason": "Thiếu danh từ sau «cả hai»",
+   "severity": "medium"
+  },
+  {
+   "old": "thành phần lớn nhất có 126.699 nút, hạng hai chỉ 431 nút,",
+   "new": "thành phần lớn nhất có 126.699 nút, thành phần hạng hai chỉ có 431 nút,",
+   "reason": "Câu cụt, thiếu chủ ngữ và động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "(1,5% trong 128.589)",
+   "new": "(1,5% của 128.589)",
+   "reason": "«Trong» gượng cho tỉ lệ",
+   "severity": "low"
+  },
+  {
+   "old": "thuật toán Tarjan lặp trên",
+   "new": "thuật toán Tarjan cài theo dạng lặp trên",
+   "reason": "«Tarjan lặp» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Output của lần chạy cuối (rút gọn):",
+   "new": "Kết quả của lần chạy cuối (rút gọn):",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Số thời gian được đo khi máy đang chịu tải nặng",
+   "new": "Các số liệu thời gian được đo khi máy đang chịu tải nặng",
+   "reason": "«Số thời gian» tự ghép, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi số về chất lượng thẻ là của bản trích Geofabrik",
+   "new": "Mọi số liệu về chất lượng thẻ lấy từ bản trích Geofabrik",
+   "reason": "Câu gượng, thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "có một chiều khác nhau giữa ô tô và xe máy",
+   "new": "có hướng một chiều khác nhau giữa ô tô và xe máy",
+   "reason": "«Có một chiều khác nhau» dễ hiểu sai",
+   "severity": "medium"
+  },
+  {
+   "old": "Chiều ngược nút 2 tới nút 1 không tồn tại.",
+   "new": "Chiều ngược lại, từ nút 2 tới nút 1, không tồn tại.",
+   "reason": "Câu cụt, thiếu giới từ",
+   "severity": "low"
+  }
+ ]
+}

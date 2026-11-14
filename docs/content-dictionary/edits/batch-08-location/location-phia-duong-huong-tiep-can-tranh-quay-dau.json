@@ -1,0 +1,143 @@
+{
+ "file": "location-phia-duong-huong-tiep-can-tranh-quay-dau.md",
+ "edits": [
+  {
+   "old": "Mọi số đo là **trên dữ liệu mô phỏng**",
+   "new": "Mọi số đo đều lấy **trên dữ liệu mô phỏng**",
+   "reason": "Cấu trúc 'là trên' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "mà simulator không thể đo lợi ích, vì",
+   "new": "mà simulator không thể đo được lợi ích, vì",
+   "reason": "Cụm 'đo lợi ích' nói thiếu",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài không chứng minh nó đáng giá; nó chỉ cho thấy nó được cài thế nào và cái giá đo được.",
+   "new": "Bài không chứng minh khoản phạt này đáng giá; bài chỉ cho thấy cách cài đặt và cái giá đo được.",
+   "reason": "Ba chữ 'nó' liên tiếp, mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu dùng nó một mình để chọn",
+   "new": "Nếu dùng riêng ma trận này để chọn",
+   "reason": "'nó' mơ hồ, trật tự kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "mà tính chính xác cũng chọn",
+   "new": "mà cách tính chính xác cũng chọn",
+   "reason": "Lược mất danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Ma trận và CH tính theo nút và không có chi phí rẽ, nên nó không thấy",
+   "new": "Ma trận và CH (Contraction Hierarchies) tính theo nút và không có chi phí rẽ, nên chúng không thấy",
+   "reason": "Giải thích viết tắt lần đầu, sửa đại từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hàm `side_of` quy mối quan hệ đó về một dấu",
+   "new": "Hàm `side_of` mã hoá quan hệ đó thành một dấu",
+   "reason": "Dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nhưng CH và ma trận many-to-many là theo **nút**",
+   "new": "Nhưng CH và ma trận many-to-many tính theo **nút**",
+   "reason": "Cấu trúc 'là theo' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "một xe đang chạy ngược phía phải quay đầu mất 20 giây hoặc bị cấm.",
+   "new": "một xe đang chạy ngược phía thì phải quay đầu, và việc đó mất 20 giây hoặc bị cấm.",
+   "reason": "Câu thiếu liên kết, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "có chi phí rẽ, và nó đắt hơn.",
+   "new": "có chi phí rẽ, nhưng cách này đắt hơn.",
+   "reason": "Tránh 'nó' trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "nếu `J` của nó hơn kém không quá 20 giây",
+   "new": "nếu `J` của nó không tệ hơn quá 20 giây",
+   "reason": "'hơn kém' mơ hồ, khớp với chú thích trong mã",
+   "severity": "medium"
+  },
+  {
+   "old": "Đếm trực tiếp quay đầu trên tuyến của tài xế gần nhất theo chim bay tới khách, so điểm ghim với điểm chọn",
+   "new": "Lab đếm trực tiếp số lần quay đầu trên tuyến của tài xế gần nhất theo chim bay tới khách, so sánh điểm ghim với điểm chọn",
+   "reason": "Câu thiếu chủ ngữ và động từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Năm biến thể, mỗi cái so với baseline",
+   "new": "Có năm biến thể, mỗi biến thể so với baseline",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "làm mất khoảng 18 m km rỗng",
+   "new": "làm mất khoảng 18 m quãng chạy rỗng",
+   "reason": "Đơn vị 'm km' tự mâu thuẫn",
+   "severity": "medium"
+  },
+  {
+   "old": "**Không thấy phạt phía đường làm giảm quay đầu.**",
+   "new": "**Không có dấu hiệu cho thấy phạt phía đường làm giảm quay đầu.**",
+   "reason": "Tiêu đề mơ hồ, dễ hiểu ngược",
+   "severity": "medium"
+  },
+  {
+   "old": "**Cam kết một hướng không thêm gì cho bộ ghép",
+   "new": "**Chốt một hướng tiếp cận không mang lại thêm gì cho bộ ghép",
+   "reason": "Calque của 'commit'",
+   "severity": "medium"
+  },
+  {
+   "old": "lợi ích của phạt phía đường cho khách.",
+   "new": "lợi ích của phạt phía đường đối với khách.",
+   "reason": "Giới từ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "bằng một con số 30 s đoán,",
+   "new": "bằng một con số 30 s ước đoán,",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Quyết định giữ hay bỏ khoản phạt này là chính sách phải dựa trên thứ khác",
+   "new": "Giữ hay bỏ khoản phạt này là quyết định chính sách, và phải dựa trên thứ khác",
+   "reason": "Chủ ngữ và vị ngữ lộn xộn",
+   "severity": "medium"
+  },
+  {
+   "old": "được lợi ở ETA và huỷ.",
+   "new": "được lợi ở ETA và tỉ lệ huỷ chuyến.",
+   "reason": "Thiếu danh từ sau 'huỷ'",
+   "severity": "medium"
+  },
+  {
+   "old": "cỡ 18 m km rỗng sang tài xế",
+   "new": "cỡ 18 m quãng chạy rỗng sang tài xế",
+   "reason": "Đơn vị 'm km' tự mâu thuẫn",
+   "severity": "medium"
+  },
+  {
+   "old": "các khoản phạt 30 s, 20 s là đoán.",
+   "new": "các khoản phạt 30 s, 20 s là số ước đoán.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "**Ma trận và CH vẫn là theo nút**; hai tầng là cách vòng qua chứ",
+   "new": "**Ma trận và CH vẫn tính theo nút**; hai tầng là cách lách chứ",
+   "reason": "Dịch gượng 'workaround'",
+   "severity": "medium"
+  }
+ ]
+}

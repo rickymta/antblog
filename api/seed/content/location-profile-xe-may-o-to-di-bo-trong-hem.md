@@ -1,16 +1,16 @@
 ---
 slug: location-profile-xe-may-o-to-di-bo-trong-hem
 title: "Profile xe máy, ô tô, đi bộ: cùng thành phố, ba đồ thị"
-summary: "Bài 24: một đồ thị CSR dùng chung, ba mảng trọng số cho ô tô, xe máy, đi bộ; quyền đi đọc từ thẻ OSM, tốc độ theo loại đường là giả định, hẻm, và đo tuyến ô tô khác tuyến xe máy trên 300 cặp nút HCM."
+summary: "Bài 24: một đồ thị CSR dùng chung, ba mảng trọng số cho ô tô, xe máy, đi bộ; quyền đi lấy từ thẻ OSM, tốc độ theo loại đường là giả định, xử lý hẻm, và đo tuyến ô tô khác tuyến xe máy trên 300 cặp nút HCM."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, profile, motorbike, openstreetmap, hem]
 language: vi
 ---
 
-Hai khách đứng ở cùng một chỗ trong một khu dân cư nội thành, một người đặt ô tô, một người đặt xe máy. Với đồ thị HCM của lab, cặp nút 90276 và 111467 cách nhau 3.534 m chim bay. Tuyến ô tô dài 6.166 m và mất 772,4 s. Tuyến xe máy dài 5.362 m và mất 599,4 s, đi qua tám cạnh mà ô tô không vào được; năm cạnh đầu được lab liệt kê thuộc «Hẻm 451 Đường Phạm Thế Hiển» và «Hẻm 1305 Phạm Thế Hiển». Nếu bắt xe máy chỉ chạy trên đường ô tô đi được, thời gian là 666,5 s: riêng quyền vào hẻm đáng 10,1%.
+Hai khách đứng ở cùng một chỗ trong một khu dân cư nội thành, một người đặt ô tô, một người đặt xe máy. Với đồ thị HCM của lab, cặp nút 90276 và 111467 cách nhau 3.534 m chim bay. Tuyến ô tô dài 6.166 m và mất 772,4 s. Tuyến xe máy dài 5.362 m và mất 599,4 s, đi qua tám cạnh mà ô tô không vào được; năm cạnh đầu được lab liệt kê thuộc «Hẻm 451 Đường Phạm Thế Hiển» và «Hẻm 1305 Phạm Thế Hiển». Nếu bắt xe máy chỉ chạy trên đường ô tô đi được, thời gian là 666,5 s: riêng quyền vào hẻm đã giúp nhanh hơn 10,1%.
 
-Đây là bài 24 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài nối [bài 06](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to) (đọc thẻ OSM) với [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr) (Dijkstra, A*): thêm cho đồ thị ba cách di chuyển. Cần nói rõ ngay từ đầu, vì mọi số trong bài đều chịu ràng buộc này: **tốc độ ở đây được giả định theo loại đường**, không đo từ GPS xe thật. «599,4 s» và «xe máy nhanh hơn 10,1%» là số của mô hình lab, không phải thời gian một chuyến xe máy ngoài đời.
+Đây là bài 24 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài nối [bài 06](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to) (đọc thẻ OSM) với [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr) (Dijkstra, A*): thêm ba cách di chuyển vào đồ thị. Cần nói rõ ngay từ đầu, vì mọi số trong bài đều chịu ràng buộc này: **tốc độ ở đây được giả định theo loại đường**, không đo từ GPS xe thật. «599,4 s» và «xe máy nhanh hơn 10,1%» là số của mô hình lab, không phải thời gian một chuyến xe máy ngoài đời.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Hai khách đứng ở cùng một chỗ trong một khu dân cư nội thành, 
 
 ## Một đồ thị, ba mảng trọng số
 
-Cách ngây thơ nhất là dựng ba đồ thị: giữ cạnh ô tô đi được cho đồ thị ô tô, cạnh xe máy đi được cho xe máy, cạnh đi bộ cho đi bộ. Ba bản đồ gần như trùng nhau (ô tô đi được 78,9% số cạnh, xe máy 83,9%, đi bộ 99,8%) và mỗi bản kèm một chỉ mục không gian riêng.
+Cách làm đơn giản nhất là dựng ba đồ thị: giữ cạnh ô tô đi được cho đồ thị ô tô, cạnh xe máy đi được cho xe máy, cạnh đi bộ cho đi bộ. Ba bản đồ gần như trùng nhau (ô tô đi được 78,9% số cạnh, xe máy 83,9%, đi bộ 99,8%) và mỗi bản kèm một chỉ mục không gian riêng.
 
 Lab làm khác: hình dạng đồ thị, gồm CSR xuôi, CSR ngược, `tail`, `head` và độ dài cạnh, **chỉ giữ một bản** (5,84 MB). Mỗi profile chỉ thêm một mảng trọng số `u32` dài bằng số cạnh (1,22 MB). Cạnh mà profile không đi được nhận trọng số `INF`, và `View::out` của bài 21 bỏ qua nó. Một `SnapIndex` (bài 07) dùng cho cả ba, vì chỉ mục giữ mặt nạ profile của từng đoạn.
 
@@ -52,7 +52,7 @@ Lab làm khác: hình dạng đồ thị, gồm CSR xuôi, CSR ngược, `tail`,
 
 Mỗi profile có `vmax` riêng (số cm đi được trong một đơn vị trọng số, nhanh nhất), nên heuristic chim bay của bài 21 tính riêng cho từng profile. A* của xe máy dùng `vmax` của xe máy, không dùng của ô tô.
 
-Tiết kiệm bộ nhớ không lớn: ba profile dùng chung tốn 9,49 MB, ba đồ thị riêng (chỉ giữ cạnh đi được, CSR cộng độ dài cộng trọng số) tốn 11,04 MB, ít hơn 14%, vì ba đồ thị rất giống nhau. Cái được thật là **một bản đồ trong bộ nhớ và một chỉ mục không gian**, và thêm một profile chỉ là thêm một mảng. Hình 1 minh hoạ bằng năm cạnh dựng tay, với trọng số tính từ đúng công thức `t(ms) = độ dài(cm) × 36 / km/h`.
+Tiết kiệm bộ nhớ không lớn: ba profile dùng chung tốn 9,49 MB, ba đồ thị riêng (chỉ giữ cạnh đi được, CSR cộng độ dài cộng trọng số) tốn 11,04 MB, ít hơn 14%, vì ba đồ thị rất giống nhau. Lợi ích thật là **một bản đồ trong bộ nhớ và một chỉ mục không gian**, và thêm một profile chỉ là thêm một mảng. Hình 1 minh hoạ bằng năm cạnh dựng tay, với trọng số tính từ đúng công thức `t(ms) = độ dài(cm) × 36 / km/h`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -63,7 +63,7 @@ Tiết kiệm bộ nhớ không lớn: ba profile dùng chung tốn 9,49 MB, ba 
 
 ## Quyền đi: đọc từ thẻ OSM
 
-Ai được đi cạnh nào được quyết định **một lần**, lúc biên dịch đồ thị (bài 06), bằng `tags::classify`. Quy tắc là giả định có chủ đích và được ghi ở đầu file để đối chiếu. Mặc định theo loại đường:
+Profile nào được đi cạnh nào sẽ được quyết định **một lần**, lúc biên dịch đồ thị (bài 06), bằng `tags::classify`. Quy tắc là giả định có chủ đích và được ghi ở đầu file để đối chiếu. Mặc định theo loại đường:
 
 `examples/toi-noi-location/rust/crates/road-graph/src/tags.rs`
 
@@ -89,7 +89,7 @@ Ai được đi cạnh nào được quyết định **một lần**, lúc biên
     }
 ```
 
-Hẻm hẹp hơn 3,0 m thì ô tô không vào. **Không có thẻ `width` thì không suy đoán và mặc định cho vào**, một lựa chọn dễ phản tác dụng mà phần dưới đo. Một chiều tính riêng cho ô tô và xe máy, còn đi bộ luôn hai chiều:
+Hẻm hẹp hơn 3,0 m thì ô tô không vào. **Không có thẻ `width` thì không suy đoán và mặc định cho vào**, một lựa chọn dễ phản tác dụng, như phần dưới sẽ đo. Một chiều tính riêng cho ô tô và xe máy, còn đi bộ luôn hai chiều:
 
 `examples/toi-noi-location/rust/crates/road-graph/src/tags.rs`
 
@@ -98,11 +98,11 @@ Hẻm hẹp hơn 3,0 m thì ô tô không vào. **Không có thẻ `width` thì 
     let moto_dir = dir_for(&["oneway:motorcycle", "oneway:motor_vehicle"]);
 ```
 
-`add(Mode::FOOT_BIT, Dir::Both)` ghi chiều đi bộ. Nhờ vậy khách đi bộ ngược đường một chiều được, điều mà bài 33 (sinh ứng viên điểm đón) cần. Kết quả trên bản đồ HCM: ô tô đi được 251.687 cạnh (78,9%), xe máy 267.578 (83,9%), đi bộ 318.446 (99,8%) trong 319.074 cạnh.
+`add(Mode::FOOT_BIT, Dir::Both)` ghi chiều đi bộ. Nhờ vậy khách đi bộ có thể đi ngược đường một chiều, điều mà bài 33 (sinh ứng viên điểm đón) cần. Kết quả trên bản đồ HCM: ô tô đi được 251.687 cạnh (78,9%), xe máy 267.578 (83,9%), đi bộ 318.446 (99,8%) trong 319.074 cạnh.
 
 ## Tốc độ theo loại đường: một bảng giả định
 
-Trọng số thời gian cần tốc độ, và lab không có dữ liệu tốc độ thật. Nó đặt một bảng tốc độ theo loại đường (Hình 2), có hiệu chỉnh bởi `maxspeed` và hẻm:
+Trọng số thời gian cần tốc độ, và lab không có dữ liệu tốc độ thật. Lab đặt một bảng tốc độ theo loại đường (Hình 2), rồi hiệu chỉnh theo `maxspeed` và hẻm:
 
 `examples/toi-noi-location/rust/crates/route-engine/src/profile.rs`
 
@@ -127,7 +127,7 @@ pub fn edge_speed_kmh(g: &Graph, e: u32, p: Profile, table: &SpeedTable) -> f32 
 }
 ```
 
-Đi bộ chạy 5 km/h ở hầu hết loại đường (bậc thang 3, đường mòn `track` 4,5), bỏ qua `maxspeed`. Ô tô và xe máy lấy tốc độ theo loại đường rồi bị chặn trên bởi `maxspeed` nếu có. Hẻm `service=alley` cho tối đa 10 km/h (ô tô) hoặc 18 km/h (xe máy); đường hẹp dưới 4 m chặn ô tô ở 10 km/h. Xe máy nhanh hơn ô tô trên đường nhỏ (26 so với 20 km/h ở `residential`, 20 so với 12 ở `service`), một giả định về việc xe máy luồn lách mà **chưa hiệu chuẩn bằng GPS xe máy thật**.
+Đi bộ chạy 5 km/h ở hầu hết loại đường (bậc thang 3, đường mòn `track` 4,5), bỏ qua `maxspeed`. Ô tô và xe máy lấy tốc độ theo loại đường rồi không được vượt quá `maxspeed` nếu có. Hẻm `service=alley` cho tối đa 10 km/h (ô tô) hoặc 18 km/h (xe máy); đường hẹp dưới 4 m chặn ô tô ở 10 km/h. Xe máy nhanh hơn ô tô trên đường nhỏ (26 so với 20 km/h ở `residential`, 20 so với 12 ở `service`), một giả định về việc xe máy luồn lách mà **chưa hiệu chuẩn bằng GPS xe máy thật**.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -148,18 +148,18 @@ Vậy tại sao xe máy đi được ở nơi ô tô không? Lab tách 17.513 c�
 | Một chiều chỉ với ô tô (chiều ngược còn cho ô tô: cạnh `twin` đi được) | 838 |
 | Lý do khác: thẻ `access`, `motor_vehicle`, `motorcycle`... | 16.629 |
 
-Phần lớn không phải bề rộng. Nó là thẻ truy cập: theo loại đường, cạnh chỉ xe máy gồm `service` 10.105, `residential` 6.498, `primary` 368, `tertiary` 260. Chiều ngược lại, 1.622 cạnh ô tô đi được mà xe máy không (`trunk` 765, `primary` 276, `service` 192, `tertiary` 114), và 49.874 cạnh chỉ đi bộ. Hệ quả cho bài toán điểm đón: «hẻm ô tô không vào» ở TP.HCM trong dữ liệu OSM thường không phải do ai đó ghi `width=2.2`, mà do thẻ truy cập, và những hẻm không có thẻ nào sẽ bị coi là ô tô vào được, chỉ bị chặn tốc độ ở 10 km/h nếu có `service=alley`. Đo cái sai đó cần dữ liệu thực địa mà lab không có.
+Phần lớn không phải bề rộng. Nguyên nhân chính là thẻ truy cập: theo loại đường, cạnh chỉ xe máy gồm `service` 10.105, `residential` 6.498, `primary` 368, `tertiary` 260. Chiều ngược lại, 1.622 cạnh ô tô đi được mà xe máy không (`trunk` 765, `primary` 276, `service` 192, `tertiary` 114), và 49.874 cạnh chỉ đi bộ. Hệ quả cho bài toán điểm đón: «hẻm ô tô không vào» ở TP.HCM trong dữ liệu OSM thường không phải do người lập bản đồ ghi `width=2.2`, mà do thẻ truy cập, và những hẻm không có thẻ nào sẽ bị coi là ô tô vào được, chỉ bị giới hạn tốc độ ở 10 km/h nếu có `service=alley`. Đo mức sai lệch đó cần dữ liệu thực địa mà lab không có.
 
 ## Tuyến ô tô khác tuyến xe máy bao nhiêu
 
-Lab lấy 300 cặp nút ngẫu nhiên trong **giao** của hai thành phần liên thông mạnh lớn nhất (ô tô và xe máy), gồm 110.548 nút, seed 20261106, để mọi cặp đều có đường cho cả hai profile. Lọc theo từng profile riêng sẽ cho hai tập nút khác nhau và so sánh vô nghĩa. Với mỗi cặp, A* chạy bốn lần: ô tô, xe máy, đi bộ, và một lần thứ tư của **xe máy chỉ trên cạnh ô tô đi được** (cùng tốc độ xe máy, chỉ khác quyền đi) để tách hai nguyên nhân.
+Lab lấy 300 cặp nút ngẫu nhiên trong **giao** của hai thành phần liên thông mạnh lớn nhất (ô tô và xe máy), gồm 110.548 nút, seed 20261106, để mọi cặp đều có đường cho cả hai profile. Lọc theo từng profile riêng sẽ cho hai tập nút khác nhau nên phép so sánh trở nên vô nghĩa. Với mỗi cặp, A* chạy bốn lần: ô tô, xe máy, đi bộ, và một lần thứ tư của **xe máy chỉ trên cạnh ô tô đi được** (cùng tốc độ xe máy, chỉ khác quyền đi) để tách hai nguyên nhân.
 
 - Tuyến ô tô khác tuyến xe máy (khác dãy cạnh) ở **74,8%** cặp, gồm cả khác do tốc độ và do quyền đi.
 - Khác **chỉ vì quyền đi** ở **50,3%** cặp; và đúng bằng 50,3% tuyến xe máy dùng ít nhất một cạnh ô tô không vào được.
-- Trong 150 ca khác vì quyền đi, xe máy nhanh hơn 6,8% trung bình, trung vị 3,6%, p95 24,0% so với xe máy bị giới hạn trên mạng ô tô.
-- Thời gian xe máy trên ô tô: trung bình 0,925 (trung vị 0,918, p5 0,828, p95 1,053). Độ dài: trung bình 0,979, trung vị 0,996.
+- Trong 150 cặp khác vì quyền đi, xe máy nhanh hơn 6,8% trung bình, trung vị 3,6%, p95 24,0% so với xe máy bị giới hạn trên mạng ô tô.
+- Tỉ lệ thời gian xe máy so với ô tô: trung bình 0,925 (trung vị 0,918, p5 0,828, p95 1,053). Độ dài: trung bình 0,979, trung vị 0,996.
 
-Hình 3 chia theo khoảng cách chim bay: càng xa, tuyến càng khác (91,1% ở trên 10 km). Có thể hiểu là tuyến dài có nhiều cơ hội đổi đường hơn, nhưng lab chưa kiểm giả thuyết đó. Thời gian xe máy trên ô tô đi từ 0,857 lên 0,955: lợi thế của xe máy giảm dần theo khoảng cách. Một cách giải thích có thể là đoạn đường lớn chiếm nhiều hơn ở tuyến dài, nơi hai bảng tốc độ gần nhau hơn (xe máy 40 so với ô tô 38 km/h ở `primary`), nhưng đó cũng chỉ là giả thuyết.
+Hình 3 chia theo khoảng cách chim bay: càng xa, tuyến càng khác (91,1% ở trên 10 km). Có thể hiểu là tuyến dài có nhiều cơ hội đổi đường hơn, nhưng lab chưa kiểm chứng giả thuyết đó. Tỉ lệ thời gian xe máy so với ô tô tăng từ 0,857 lên 0,955: lợi thế của xe máy giảm dần theo khoảng cách. Một cách giải thích có thể là đoạn đường lớn chiếm nhiều hơn ở tuyến dài, nơi hai bảng tốc độ gần nhau hơn (xe máy 40 so với ô tô 38 km/h ở `primary`), nhưng đó cũng chỉ là giả thuyết.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -168,9 +168,9 @@ Hình 3 chia theo khoảng cách chim bay: càng xa, tuyến càng khác (91,1% 
 <figcaption>Hình 3. Theo nhóm khoảng cách chim bay (số cặp trong ngoặc): tỉ lệ tuyến ô tô khác tuyến xe máy và thời gian xe máy trên ô tô. Tốc độ giả định, nên tỉ lệ thời gian là số của mô hình. 300 cặp nút HCM, seed 20261106. © OpenStreetMap contributors (ODbL).</figcaption>
 </figure>
 
-Hai ca thật cho cảm nhận. **Ca hẻm** (đã nói ở đầu bài): nút 90276 tới nút 111467, ô tô 772,4 s trên 6.166 m, xe máy 599,4 s trên 5.362 m, xe máy chỉ trên cạnh ô tô vào được 666,5 s trên 6.129 m. Xe máy đi qua tám cạnh không vào được cho ô tô; lab liệt kê năm cạnh đầu, đều thuộc «Hẻm 451 Đường Phạm Thế Hiển» hoặc «Hẻm 1305 Phạm Thế Hiển». Trong dữ liệu chúng là `highway=residential`, không có `width`, không có `service=alley`, và chiều ngược cũng không cho ô tô. Đọc thẳng file PBF: way 1322052085 ghi `motorcar=no`, way 686305068 ghi `motor_vehicle=no` và `motorcycle=yes`, đúng kiểu thẻ truy cập ở mục trên.
+Hai ca thật giúp hình dung rõ hơn. **Ca hẻm** (đã nói ở đầu bài): nút 90276 tới nút 111467, ô tô 772,4 s trên 6.166 m, xe máy 599,4 s trên 5.362 m, xe máy chỉ trên cạnh ô tô vào được 666,5 s trên 6.129 m. Xe máy đi qua tám cạnh không vào được cho ô tô; lab liệt kê năm cạnh đầu, đều thuộc «Hẻm 451 Đường Phạm Thế Hiển» hoặc «Hẻm 1305 Phạm Thế Hiển». Trong dữ liệu chúng là `highway=residential`, không có `width`, không có `service=alley`, và chiều ngược cũng không cho ô tô. Đọc thẳng file PBF: way 1322052085 ghi `motorcar=no`, way 686305068 ghi `motor_vehicle=no` và `motorcycle=yes`, đúng kiểu thẻ truy cập ở mục trên.
 
-**Ca lớn nhất** (nhanh hơn 58,7%) là nút 17055 tới nút 100680: tuyến xe máy dùng một way tên «Cầu Sài Gòn 2» (1.100 m, `primary`) và một đoạn Điện Biên Phủ, hai cạnh ô tô không đi được. Đây không phải lỗi luật của lab. Trong PBF, way 306073180 và way 192289472 đều ghi `motorcar=no`, `motorcycle=yes`, `oneway=yes`; còn way 306073179 cùng tên là `highway=trunk` với `motorcycle=no`. Tức dữ liệu OSM tách phần đường cho xe máy khỏi phần đường cho ô tô, và lab đọc đúng như vậy; lab không kiểm ngoài thực địa. Vì thế 58,7% **không** nói xe máy nhanh hơn ô tô: ở cặp này ô tô mất 298,4 s, xe máy 312,1 s. Nó chỉ nói nếu đuổi xe máy khỏi phần đường của mình mà phần đường ô tô lại cấm xe máy, thì xe máy phải vòng 755,9 s trên 7.861 m. Đó là hệ quả của phép so sánh phản thực tế, đừng lấy làm ví dụ về đời thật.
+**Ca lớn nhất** (nhanh hơn 58,7%) là nút 17055 tới nút 100680: tuyến xe máy dùng một way tên «Cầu Sài Gòn 2» (1.100 m, `primary`) và một đoạn Điện Biên Phủ, hai cạnh ô tô không đi được. Đây không phải lỗi luật của lab. Trong PBF, way 306073180 và way 192289472 đều ghi `motorcar=no`, `motorcycle=yes`, `oneway=yes`; còn way 306073179 cùng tên là `highway=trunk` với `motorcycle=no`. Tức dữ liệu OSM tách phần đường cho xe máy khỏi phần đường cho ô tô, và lab đọc đúng như vậy; lab không kiểm chứng ngoài thực địa. Vì thế 58,7% **không** nói xe máy nhanh hơn ô tô: ở cặp này ô tô mất 298,4 s, xe máy 312,1 s. Nó chỉ cho biết rằng nếu đuổi xe máy khỏi phần đường dành riêng cho xe máy mà phần đường ô tô lại cấm xe máy, thì xe máy phải vòng 755,9 s trên 7.861 m. Đó là hệ quả của phép so sánh phản thực tế, không nên dùng làm ví dụ ngoài đời thực.
 
 Đi bộ thì khác hẳn: tuyến đi bộ ngắn hơn tuyến ô tô trong 96,6% cặp (đi ngược đường một chiều, qua cầu bộ hành, hẻm), độ dài đi bộ trên ô tô trung bình 0,920, trung vị 0,934, nhỏ nhất 0,261. Thời gian đi bộ gấp 4,81 lần (dưới 2 km) đến 7,07 lần (trên 10 km) thời gian ô tô, kết quả trực tiếp của 5 km/h so với tốc độ ô tô giả định.
 
@@ -184,7 +184,7 @@ Khách đi bộ không cần «đường tới một nút» mà cần «mọi n�
 | 5 phút | 109 | 267 | 360 m | 4.341 |
 | 10 phút | 451 | 925 | 736 m | 19.666 |
 
-Trong 5 phút (khoảng 417 m ở 5 km/h) khách tới trung bình 109 nút, trong khi một xe máy cùng 5 phút tới 4.341 nút. Mỗi lần tìm chỉ mất vài tới vài chục µs vì chỉ duyệt nút trong ngân sách; số µs này đo khi máy chịu tải nặng nên chỉ cho biết cỡ. Đây là nền cho bài 33: sinh ứng viên điểm đón là chọn trong tập nút khách tới được trong ngưỡng đi bộ.
+Trong 5 phút (khoảng 417 m ở 5 km/h) khách tới trung bình 109 nút, trong khi một xe máy cùng 5 phút tới 4.341 nút. Mỗi lần tìm chỉ mất vài tới vài chục µs vì chỉ duyệt nút trong ngân sách; số µs này đo khi máy chịu tải nặng nên chỉ cho biết bậc độ lớn. Đây là nền cho bài 33: sinh ứng viên điểm đón là chọn trong tập nút khách tới được trong ngưỡng đi bộ.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -222,12 +222,12 @@ Cấu hình đo: `--release`, Apple M1 Max, 300 cặp nút trong giao hai thành
   đi bộ so với ô tô: đường đi bộ ngắn hơn đường ô tô trong 96.6% cặp (đi ngược đường một chiều, qua cầu bộ hành, hẻm); độ dài đi bộ/ô tô trung bình 0.920, trung vị 0.934, nhỏ nhất 0.261
 ```
 
-Kiểm tự động: test `disallowed_edges_are_inf_and_allowed_are_positive` (mọi cạnh profile không đi được có trọng số `INF`, mọi cạnh đi được có trọng số dương), `vmax_bounds_every_edge` (heuristic chim bay của từng profile hợp lệ), `foot_is_slower_than_car_on_an_avenue` (đi bộ chậm hơn ô tô trên đường lớn); và `proptest_vs_dijkstra.rs` chạy mọi thuật toán nhanh trên cả ba profile.
+Kiểm thử tự động: test `disallowed_edges_are_inf_and_allowed_are_positive` (mọi cạnh profile không đi được có trọng số `INF`, mọi cạnh đi được có trọng số dương), `vmax_bounds_every_edge` (heuristic chim bay của từng profile hợp lệ), `foot_is_slower_than_car_on_an_avenue` (đi bộ chậm hơn ô tô trên đường lớn); và `proptest_vs_dijkstra.rs` chạy mọi thuật toán nhanh trên cả ba profile.
 
 ## Giới hạn của ví dụ
 
 - **Tốc độ là giả định.** Bảng theo loại đường chưa hiệu chuẩn bằng GPS; mọi tỉ lệ thời gian (0,925; 10,1%...) là của mô hình. Xe máy 26 km/h trên `residential` là điều lab đặt, không phải điều lab đo.
-- **Chênh lệch ô tô và xe máy là số được mô hình hoá.** 74,8% tuyến khác nhau và 50,3% do quyền đi phụ thuộc cả luật quyền đi (đọc từ thẻ OSM) lẫn bảng tốc độ; đổi một trong hai là đổi con số.
+- **Chênh lệch giữa ô tô và xe máy là số do mô hình tạo ra.** 74,8% tuyến khác nhau và 50,3% do quyền đi phụ thuộc cả luật quyền đi (đọc từ thẻ OSM) lẫn bảng tốc độ; đổi một trong hai là đổi con số.
 - **Hẻm không có `width` được coi là ô tô vào được.** Chỉ 0,14% cạnh có thẻ này, nên luật bề rộng chỉ chặn 64 cạnh; thực tế ô tô không vào được nhiều hẻm hơn thế.
 - **Ca 58,7% là so sánh phản thực tế.** Thẻ OSM đã kiểm trong file PBF, nhưng chưa kiểm ngoài thực địa, và xe máy ở cặp đó vẫn chậm hơn ô tô; không dùng làm ví dụ ngoài đời.
 - **Không có thời gian chờ, đèn đỏ, chi phí rẽ.** Chi phí rẽ ở bài 23 chỉ áp cho A* theo cạnh; ba profile ở bài này là theo nút.
@@ -251,7 +251,7 @@ Kiểm tự động: test `disallowed_edges_are_inf_and_allowed_are_positive` (m
 **Bài 3.** Một hẻm `service=alley` không có thẻ `width`. Luật hiện tại cho ô tô đi vào với tốc độ tối đa 10 km/h. Chỉ ra rủi ro cho điểm đón và đề xuất một cách giảm thiểu mà không cần dữ liệu thực địa.
 
 <details><summary>Lời giải bài 3</summary>
-<p>Ô tô có thể được gợi ý vào một hẻm mà ngoài đời ô tô không vào được, vì chỉ 0,14% cạnh có thẻ <code>width</code>. Tuyến tính ra chậm (10 km/h) nhưng vẫn «đi được», nên thời gian đón bị ước thấp và tài xế bị gọi vào chỗ không có lối. Cách giảm thiểu: cho ô tô đi vào hẻm không thẻ <code>width</code> chỉ khi hẻm là đích hoặc điểm đầu (không đi xuyên qua), hoặc phạt nặng cạnh hẻm không thẻ bề rộng khi tính điểm đón ở P04. Cả hai cách cần kiểm bằng simulator, vì chúng đổi <code>deadhead_m</code>.</p>
+<p>Ô tô có thể được gợi ý vào một hẻm mà ngoài đời ô tô không vào được, vì chỉ 0,14% cạnh có thẻ <code>width</code>. Tuyến được tính là chậm (10 km/h) nhưng vẫn «đi được», nên thời gian đón bị ước thấp và tài xế bị gọi vào chỗ không có lối. Cách giảm thiểu: cho ô tô đi vào hẻm không thẻ <code>width</code> chỉ khi hẻm là đích hoặc điểm đầu (không đi xuyên qua), hoặc phạt nặng cạnh hẻm không thẻ bề rộng khi tính điểm đón ở P04. Cả hai cách cần kiểm bằng simulator, vì chúng đổi <code>deadhead_m</code>.</p>
 </details>
 
 Bài trước: [bài 23](/articles/location-chi-phi-re-u-turn-do-thi-theo-canh). Bài tiếp: [bài 25](/articles/location-contraction-hierarchies-tu-cai-dat-fast-paths).

@@ -1,7 +1,7 @@
 ---
 slug: location-bai-toan-quang-duong-khach-va-tai-xe
 title: "Quãng đường của hai người: bài toán thật của service định vị"
-summary: "Bài 01: ghim sai phía đường, tài xế «gần nhất» đi vòng hai cây số. Vì sao tối ưu cho một bên đều sai, và các chỉ số walk_m, deadhead_m, meet_gap_s đặt khách lẫn tài xế lên cùng một cân."
+summary: "Bài 01: ghim sai phía đường, tài xế «gần nhất» đi vòng hai cây số. Vì sao tối ưu cho một bên thì đều sai, và các chỉ số walk_m, deadhead_m, meet_gap_s đặt khách lẫn tài xế lên cùng một cân."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, dispatch, pickup, metrics]
@@ -10,12 +10,12 @@ language: vi
 
 Khách CU-001 ghim điểm đón ở số nhà bên vỉa hè phía bắc của một đại lộ có dải phân cách cứng. Tài xế DR-001 đang chạy trên làn phía nam, cách đó một cây số về phía tây. Rồi màn hình khách hiện «tài xế đã tới»: xe đang đứng ngay đối diện, cách khách một dải phân cách và hai làn đường. Cả hai nhìn thấy nhau mà không ai sang được. Chỗ quay đầu gần nhất nằm 600 m về phía đông, và để về lại đúng chỗ khách đứng, tài xế còn phải đi ngược lại 600 m nữa.
 
-Hai người ở gần nhau trên bản đồ nhưng xa nhau trên mặt đường. Service định vị của Tới Nơi tồn tại để xử lý đúng khoảng cách đó: nhận một cái ghim, một đội xe, một mạng đường, rồi trả lời làm sao **tổng quãng đường và thời gian của cả khách lẫn tài xế** nhỏ nhất. Bài này là bài mở đầu: nó chưa có dòng code nào, chỉ đặt bài toán, định nghĩa các chỉ số và vạch bản đồ cho cả loạt 64 bài. Đây là bài 01 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi).
+Hai người ở gần nhau trên bản đồ nhưng xa nhau trên mặt đường. Service định vị của Tới Nơi tồn tại để xử lý đúng khoảng cách đó: nhận một cái ghim, một đội xe, một mạng đường, rồi trả lời câu hỏi làm sao để **tổng quãng đường và thời gian của cả khách lẫn tài xế** nhỏ nhất. Bài này là bài mở đầu: bài này chưa có dòng code nào, chỉ đặt bài toán, định nghĩa các chỉ số và vạch bản đồ cho cả loạt 64 bài. Đây là bài 01 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Có một khách cần đón. Tài xế A cách ghim 1.000 m theo đường chim bay, tài xế B cách 1.400 m. Hệ thống nên gán chuyến cho ai?</p>
-<details><summary>Xem đáp án</summary><p><b>Chưa đủ dữ kiện để nói.</b> Đường chim bay không phải đường xe đi. Nếu A bị dải phân cách hoặc đường một chiều chặn thì quãng đường thật của A có thể dài hơn B. Ở phần «Tài xế gần nhất đo khoảng cách bằng gì» bên dưới, một ví dụ tự dựng cho A đi 2.200 m còn B đi 1.800 m, và số đo hệ số vòng trên bản đồ TP.HCM của lab cho thấy chuyện đó không hiếm.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Chưa đủ dữ kiện để nói.</b> Đường chim bay không phải đường xe đi. Nếu A bị dải phân cách hoặc đường một chiều chặn thì quãng đường thật của A có thể dài hơn B. Ở phần «Tài xế gần nhất đo khoảng cách bằng gì» bên dưới, một ví dụ tự dựng cho A đi 2.200 m còn B đi 1.800 m, và kết quả đo hệ số vòng trên bản đồ TP.HCM của lab cho thấy chuyện đó không hiếm.</p></details>
 </div>
 
 ## Ghim ở đâu và xe dừng được ở đâu là hai chuyện khác nhau
@@ -32,7 +32,7 @@ Hình 1 vẽ đúng tình huống mở bài theo tỉ lệ ngang. Tài xế xu�
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 304" role="img" aria-label="Hình 1. Đường có dải phân cách. Tài xế đi trên làn phía nam về hướng đông, khách ghim ở vỉa hè phía bắc. Dải phân cách chỉ hở ở chỗ quay đầu cách ghim 600 mét về phía đông, nên tài xế phải đi 1.000 cộng 600 cộng 600 bằng 2.200 mét. Năm điểm đón ứng viên P0 đến P4 nằm trên vỉa hè phía bắc, cách ghim 0, 150, 300, 450 và 600 mét."><defs><marker id="location-bai-toan-quang-duong-khach-va-tai-xe-0-m0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-warn"/></marker></defs><g transform="translate(0 -56)"><rect x="70" y="120" width="780" height="110" class="f-surface s-line"/><rect x="70" y="98" width="780" height="22" class="f-bg s-line"/><rect x="70" y="166" width="753" height="18" class="f-bg s-dead"/><rect x="837" y="166" width="13" height="18" class="f-bg s-dead"/><text x="90" y="179" class="t-small">dải phân cách</text><text x="90" y="113" class="t-small">vỉa hè phía bắc</text><text x="90" y="136" class="t-small">làn bắc, xe chạy về tây</text><text x="250" y="224" class="t-small">làn nam, xe chạy về đông</text><circle cx="560" cy="109" r="6" class="f-pk s-pk" stroke-width="1"/><text x="560" y="88" class="t-b" text-anchor="middle">P0 (ghim)</text><circle cx="627.5" cy="109" r="6" class="f-phys s-phys" stroke-width="1"/><text x="627.5" y="88" class="t-b" text-anchor="middle">P1</text><circle cx="695" cy="109" r="6" class="f-phys s-phys" stroke-width="1"/><text x="695" y="88" class="t-b" text-anchor="middle">P2</text><circle cx="762.5" cy="109" r="6" class="f-phys s-phys" stroke-width="1"/><text x="762.5" y="88" class="t-b" text-anchor="middle">P3</text><circle cx="830" cy="109" r="6" class="f-phys s-phys" stroke-width="1"/><text x="830" y="88" class="t-b" text-anchor="middle">P4</text><rect x="99" y="201" width="22" height="12" rx="3" class="f-warn s-warn"/><text x="99" y="250" class="t-small">tài xế (x = −1.000 m)</text><path d="M123 207 L826 207 C855 207 855 146 826 146 L568 146" class="f-none s-warn dash" stroke-width="3" marker-end="url(#location-bai-toan-quang-duong-khach-va-tai-xe-0-m0)"/><text x="846" y="250" class="t-small" text-anchor="end">chỗ quay đầu</text><path d="M830 186 L830 234" class="f-none s-dead dash" stroke-width="1"/><path d="M110 276 L560 276" class="f-none s-muted" stroke-width="1"/><path d="M110 270 L110 282" class="f-none s-muted" stroke-width="1"/><path d="M560 270 L560 282" class="f-none s-muted" stroke-width="1"/><path d="M830 270 L830 282" class="f-none s-muted" stroke-width="1"/><path d="M560 276 L830 276" class="f-none s-muted" stroke-width="1"/><text x="335" y="296" class="t-mono" text-anchor="middle">1.000 m</text><text x="695" y="296" class="t-small" text-anchor="middle">600 m tới chỗ quay đầu</text><text x="20" y="326" class="t-b">Tới P0 theo đường: 1.000 + 600 + 600 = 2.200 m, trong khi ghim nằm ngay bên kia dải phân cách.</text><text x="20" y="346" class="t-small">Ví dụ tự dựng với số đơn giản, không phải số đo.</text></g></svg>
 </div>
-<figcaption>Hình 1. Cùng một con đường, nhìn từ trên xuống. Chữ nhật cam là tài xế, đường cam đứt nét là lộ trình của anh ta tới ghim; chấm P0 là ghim, các chấm P1 đến P4 là ứng viên dọc vỉa hè phía bắc. Khoảng cách vẽ đúng tỉ lệ ngang.</figcaption>
+<figcaption>Hình 1. Cùng một con đường, nhìn từ trên xuống. Hình chữ nhật cam là tài xế, đường cam đứt nét là lộ trình của anh ta tới ghim; chấm P0 là ghim, các chấm P1 đến P4 là ứng viên dọc vỉa hè phía bắc. Khoảng cách vẽ đúng tỉ lệ ngang.</figcaption>
 </figure>
 
 Quãng đường tài xế đi tới ghim P0 là 1.000 m để tới chỗ hở, thêm 600 m quay đầu thành 1.600 m, rồi 600 m ngược lại: tổng **2.200 m xe chạy mà không có khách**. Dân vận tải gọi đó là km rỗng, và loạt bài này gọi là `deadhead_m`.
@@ -49,7 +49,7 @@ Quãng đường tài xế đi tới ghim P0 là 1.000 m để tới chỗ hở,
 
 *Bảng tự dựng với các số đơn giản (đi bộ 1 m/s, xe 5 m/s, bỏ qua thời gian quay đầu), không phải kết quả đo.* «Gặp nhau» là thời điểm cả hai có mặt, tức giá trị lớn hơn trong hai cột «tới». `meet_gap_s` là chênh lệch giữa hai cột đó: ai tới sớm thì đứng chờ người kia. Ở P0 khách là người chờ (440 s); ở P3 và P4 thì tài xế chờ.
 
-Bảng có hai điểm đáng chú ý. Thứ nhất, cột `walk_m` cộng với `deadhead_m` luôn bằng 2.200 m ở mọi dòng. Cộng mét thì năm phương án **hoà nhau**, và đó là lý do hàm mục tiêu của loạt bài tính bằng **thời gian**, không bằng mét: một mét đi bộ tốn nhiều giây hơn một mét xe chạy, nên hai thứ mét không cộng thẳng vào nhau được. Thứ hai, thời điểm gặp nhau không nhỏ nhất ở hai đầu mà ở giữa.
+Bảng có hai điểm đáng chú ý. Thứ nhất, cột `walk_m` cộng với `deadhead_m` luôn bằng 2.200 m ở mọi dòng. Cộng mét thì năm phương án **hoà nhau**, và đó là lý do hàm mục tiêu của loạt bài tính bằng **thời gian**, không bằng mét: một mét đi bộ tốn nhiều giây hơn một mét xe chạy, nên hai loại mét này không cộng thẳng vào nhau được. Thứ hai, thời điểm gặp nhau không nhỏ nhất ở hai đầu mà ở giữa.
 
 ## Hai cách tối ưu một phía, và vì sao cả hai đều sai
 
@@ -65,7 +65,7 @@ Cũng chưa có lý do để tin P2 là điểm tốt nhất trong mọi hoàn c
 
 ## Tài xế «gần nhất» đo khoảng cách bằng gì?
 
-Cùng lỗi ấy xuất hiện ở bước trước đó, lúc chọn tài xế. Cách ngây thơ nhất là sắp tài xế theo khoảng cách chim bay tới ghim và gán cho người đầu danh sách. Hình 2 cho một ví dụ tự dựng: A cách ghim 1.000 m chim bay nhưng đang ở bên kia dải phân cách nên phải đi 2.200 m; B cách 1.400 m chim bay và đi 1.800 m. Xếp theo chim bay, A đứng trước. Xếp theo đường đi, B đứng trước và tiết kiệm 400 m km rỗng.
+Cùng lỗi ấy xuất hiện ở bước trước đó, lúc chọn tài xế. Cách ngây thơ nhất là sắp tài xế theo khoảng cách chim bay tới ghim và gán cho người đầu danh sách. Hình 2 cho một ví dụ tự dựng: A cách ghim 1.000 m chim bay nhưng đang ở bên kia dải phân cách nên phải đi 2.200 m; B cách 1.400 m chim bay và đi 1.800 m. Xếp theo chim bay, A đứng trước. Xếp theo đường đi, B đứng trước và tiết kiệm 400 m chạy rỗng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -74,17 +74,17 @@ Cùng lỗi ấy xuất hiện ở bước trước đó, lúc chọn tài xế.
 <figcaption>Hình 2. Xếp theo chim bay thì A đứng trước B (1.000 so với 1.400 m); xếp theo đường đi thì B đứng trước A (1.800 so với 2.200 m).</figcaption>
 </figure>
 
-Có thể nghi ngờ rằng đó chỉ là ví dụ chọn sẵn. Số đo thật của lab nằm ở bài [khoảng cách và hệ số vòng](/articles/location-khoang-cach-haversine-equirectangular-sai-so): trên đồ thị đường bộ OSM của TP.HCM (126.699 nút, 319.074 cạnh có hướng), lấy 200 nút nguồn ngẫu nhiên, mỗi nguồn 15 đích mỗi dải, hệ số vòng, tức đường đi ngắn nhất theo đường chia cho khoảng cách chim bay, ở dải 1–2 km của ô tô có **trung bình 1,840, trung vị 1,456, p90 2,481**, và **17,7% số cặp có hệ số từ 2,0 trở lên**. Hai lưu ý để đọc đúng con số này: phép đo bỏ qua cấm rẽ (trên cùng đồ thị, tính cấm rẽ thì đường đi chỉ có thể dài hơn) và nó là của đồ thị bị cắt theo khung lab, không phải số của cả thành phố.
+Có thể nghi ngờ rằng đó chỉ là ví dụ chọn sẵn. Số đo thật của lab nằm ở bài [khoảng cách và hệ số vòng](/articles/location-khoang-cach-haversine-equirectangular-sai-so): trên đồ thị đường bộ OSM của TP.HCM (126.699 nút, 319.074 cạnh có hướng), lấy 200 nút nguồn ngẫu nhiên, mỗi nguồn 15 đích mỗi dải, hệ số vòng, tức đường đi ngắn nhất theo đường chia cho khoảng cách chim bay, ở dải 1–2 km của ô tô có **trung bình 1,840, trung vị 1,456, p90 2,481**, và **17,7% số cặp có hệ số từ 2,0 trở lên**. Hai lưu ý để đọc đúng con số này: phép đo bỏ qua cấm rẽ (trên cùng đồ thị, tính cấm rẽ thì đường đi chỉ có thể dài hơn) và đó là số của đồ thị bị cắt theo khung lab, không phải số của cả thành phố.
 
-Con số cho biết đường đi dài gấp đôi chim bay không hiếm. Nó **chưa** cho biết thứ tự hai tài xế bị đảo bao nhiêu lần, vì việc đó cần simulator chạy cả đội xe, và sẽ được đo ở bài LOC-41. Tương tự, mối nguy khác của cách «gần nhất» là tham lam: gán tài xế gần nhất cho khách này có thể cướp mất người duy nhất gần khách khác. Cả hai ý đều sẽ có số đo ở P05, không đặt thành kết luận ở bài này.
+Con số cho biết đường đi dài gấp đôi chim bay không hiếm. Con số này **chưa** cho biết thứ tự hai tài xế bị đảo bao nhiêu lần, vì việc đó cần simulator chạy cả đội xe, và sẽ được đo ở bài LOC-41. Tương tự, mối nguy khác của cách «gần nhất» là tham lam: gán tài xế gần nhất cho khách này có thể cướp mất người duy nhất gần khách khác. Cả hai ý đều sẽ có số đo ở P05, không đặt thành kết luận ở bài này.
 
 ## Một bộ chỉ số thay cho cảm giác
 
-Nói «tối ưu hơn» mà không có thước thì chỉ là cảm giác. Mọi thí nghiệm trong loạt bài báo cáo cùng một bộ chỉ số, và mỗi chỉ số gắn với bên chịu hậu quả của nó.
+Nói «tối ưu hơn» mà không có thước đo thì chỉ là cảm giác. Mọi thí nghiệm trong loạt bài báo cáo cùng một bộ chỉ số, và mỗi chỉ số gắn với bên chịu hậu quả của nó.
 
 | Chỉ số | Đo gì | Bên bị ảnh hưởng | Cái bẫy khi chỉ nhìn riêng nó |
 |---|---|---|---|
-| `walk_m` | Mét khách đi bộ từ chỗ đứng tới điểm đón | Khách | Đón đúng ghim cho 0, đổi lại km rỗng tăng |
+| `walk_m` | Mét khách đi bộ từ chỗ đứng tới điểm đón | Khách | Đón đúng ghim thì kết quả bằng 0, đổi lại km rỗng tăng |
 | `deadhead_m` | Mét xe chạy rỗng từ chỗ đang đứng tới điểm đón | Tài xế (và chi phí của nền tảng) | Khách phải đi bộ xa |
 | `pickup_eta_s` | Thời gian xe tới điểm đón kể từ lúc gán chuyến; báo p50 và p95 | Khách | Trung bình đẹp nhưng đuôi dài bị che |
 | `meet_gap_s` | Chênh lệch giữa lúc khách và lúc xe tới điểm hẹn | Cả hai: ai tới sớm thì chờ | Gặp nhau đúng giờ nhưng đường đi dài |
@@ -93,7 +93,7 @@ Nói «tối ưu hơn» mà không có thước thì chỉ là cảm giác. Mọ
 
 Hai ghi chú về cách dùng. Một là `pickup_eta_s` luôn đi kèm p95 cạnh p50: khách nhớ chuyến chờ quá lâu, không nhớ trung bình. Hai là ở ví dụ trên `meet_gap_s` lấy giá trị tuyệt đối; cách tính chính thức của các chỉ số sẽ được chốt khi có simulator (LOC-30), và `meet_gap_s` sẽ quay lại ở bài về điểm hẹn động.
 
-Một điều chi phối cả loạt: ngoài hệ số vòng ở trên, **không có số nào trong bài này là số đo**, và toàn bộ loạt bài sẽ không có GPS của người thật. Dữ liệu chuyến, vị trí tài xế và tắc nghẽn do simulator sinh ra với seed cố định. Mọi con số kiểu «giảm x% km rỗng» chỉ xuất hiện khi lệnh chạy lại được, so với một baseline, và kèm cụm «trên dữ liệu mô phỏng». Baseline mặc định của loạt chính là hai cách bị phê phán ở trên: đón đúng ghim, giao cho tài xế gần nhất.
+Một điều chi phối cả loạt: ngoài hệ số vòng ở trên, **không có số nào trong bài này là số đo**, và toàn bộ loạt bài sẽ không có GPS của người thật. Dữ liệu chuyến, vị trí tài xế và tắc nghẽn do simulator sinh ra với seed cố định. Mọi con số kiểu «giảm x% km rỗng» chỉ xuất hiện khi có lệnh chạy lại để tái hiện kết quả, so với một baseline, và kèm cụm «trên dữ liệu mô phỏng». Baseline mặc định của loạt chính là hai cách bị phê phán ở trên: đón đúng ghim, giao cho tài xế gần nhất.
 
 ## Một cái cân cho hai người
 
@@ -107,16 +107,16 @@ J(p) = a·T_walk(khách → p)                      khách đi bộ
      + phạt(cấm dừng, qua đường lớn, phía đường bất lợi, hẻm không vào được)
 ```
 
-Mỗi dòng là một người hoặc một hậu quả đang ngồi trên cân. Dòng 1 và dòng 3 là hai đĩa: khách đi bộ ở một bên, tài xế chạy rỗng ở bên kia. Dòng 2 là thứ cả hai cùng chịu: thời điểm gặp nhau. Dòng 4 nhắc rằng điểm đón không chỉ quyết định đoạn đi tìm khách; nó quyết định luôn hướng xe chạy khi đã có khách, và việc quay đầu ở đoạn đó tốn cước của chính khách. Trong bảng ở phần đầu, cột «Gặp nhau» chính là số hạng `max(T_walk, T_drive)`.
+Mỗi dòng là một người hoặc một hậu quả đang ngồi trên cân. Dòng 1 và dòng 3 là hai đĩa cân: khách đi bộ ở một bên, tài xế chạy rỗng ở bên kia. Dòng 2 là thứ cả hai cùng chịu: thời điểm gặp nhau. Dòng 4 nhắc rằng điểm đón không chỉ quyết định đoạn đi tìm khách; điểm đón còn quyết định cả hướng xe chạy khi đã có khách, và việc quay đầu ở đoạn đó làm chính khách tốn thêm cước. Trong bảng ở phần đầu, cột «Gặp nhau» chính là số hạng `max(T_walk, T_drive)`.
 
 Có hai loại luật khác hẳn nhau và không nên lẫn.
 
 - **Ràng buộc cứng** loại hẳn ứng viên: vượt ngưỡng đi bộ, điểm dừng bất hợp pháp, không có đường bộ an toàn tới điểm đó. Ứng viên vi phạm thì không có điểm số, không phải điểm số thấp.
 - **Phạt** cộng thêm vào `J` cho những thứ xấu nhưng chấp nhận được trong chừng mực: qua đường lớn, đón sai phía đường, hẻm xe không vào được.
 
-Bộ trọng số `a, b, c, d` không phải chân lý vật lý. Nó là **chính sách**: «một giây khách đi bộ nặng bằng bao nhiêu giây xe chạy rỗng» là câu trả lời về giá trị, không phải về hình học. Vì vậy mỗi bộ trọng số mang một `policy_version` và được lưu cùng snapshot của quote, và được hiệu chỉnh bằng simulator thay vì đoán. Ở bài này chưa chọn trọng số nào cả; chỉ cần nhớ rằng thứ tự ưu tiên giữa hai bên được viết ra, đặt tên, đo được và đổi được.
+Bộ trọng số `a, b, c, d` không phải chân lý vật lý. Nó là **chính sách**: «một giây khách đi bộ nặng bằng bao nhiêu giây xe chạy rỗng» là câu trả lời về giá trị, không phải về hình học. Vì vậy mỗi bộ trọng số mang một `policy_version` và được lưu cùng snapshot của quote, đồng thời được hiệu chỉnh bằng simulator thay vì đoán. Ở bài này chưa chọn trọng số nào cả; chỉ cần nhớ rằng thứ tự ưu tiên giữa hai bên được viết ra, đặt tên, đo được và đổi được.
 
-Điểm trả dùng hàm cùng dạng: khách đi bộ từ chỗ xuống xe tới đích thật, cộng với chi phí để tài xế thoát ra và bắt chuyến kế tiếp. Ghép chuyến ở P05 thay «tài xế gần nhất» bằng việc cực tiểu tổng chi phí này trên cả một lô chuyến và cả một lô tài xế.
+Điểm trả dùng hàm cùng dạng: khách đi bộ từ chỗ xuống xe tới đích thật, cộng với chi phí để tài xế thoát ra và bắt chuyến kế tiếp. Ghép chuyến ở P05 thay «tài xế gần nhất» bằng việc tối thiểu hoá tổng chi phí này trên cả lô chuyến lẫn lô tài xế.
 
 ## Bản đồ loạt bài
 
@@ -126,7 +126,7 @@ Loạt bài gồm ba lộ trình, bảy phần, 64 bài (Hình 3). Lộ trình �
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 330" role="img" aria-label="Hình 3. Bản đồ loạt bài gồm 64 bài, 7 phần, 3 lộ trình. Lộ trình Nền tảng định vị gồm P01 đến P03 với 30 bài. Lộ trình Tối ưu quãng đường hai phía gồm P04 và P05 với 20 bài. Lộ trình Dữ liệu và vận hành gồm P06 với 6 bài và P07 với 8 bài."><rect x="22" y="100" width="127.2" height="70" rx="8" class="f-phys-soft s-phys"/><text x="85.6" y="124" class="t-b" text-anchor="middle">P01</text><text x="85.6" y="142" class="t-small" text-anchor="middle">10 bài</text><text x="85.6" y="196" class="t-small" text-anchor="middle">hình học địa lý</text><rect x="153.2" y="100" width="127.2" height="70" rx="8" class="f-phys-soft s-phys"/><text x="216.9" y="124" class="t-b" text-anchor="middle">P02</text><text x="216.9" y="142" class="t-small" text-anchor="middle">10 bài</text><text x="216.9" y="196" class="t-small" text-anchor="middle">nhận GPS, bám đường</text><rect x="284.5" y="100" width="127.2" height="70" rx="8" class="f-phys-soft s-phys"/><text x="348.1" y="124" class="t-b" text-anchor="middle">P03</text><text x="348.1" y="142" class="t-small" text-anchor="middle">10 bài</text><text x="348.1" y="196" class="t-small" text-anchor="middle">định tuyến</text><rect x="415.8" y="100" width="127.2" height="70" rx="8" class="f-pk-soft s-pk"/><text x="479.4" y="124" class="t-b" text-anchor="middle">P04</text><text x="479.4" y="142" class="t-small" text-anchor="middle">10 bài</text><text x="479.4" y="196" class="t-small" text-anchor="middle">điểm đón, điểm trả</text><rect x="547" y="100" width="127.2" height="70" rx="8" class="f-pk-soft s-pk"/><text x="610.6" y="124" class="t-b" text-anchor="middle">P05</text><text x="610.6" y="142" class="t-small" text-anchor="middle">10 bài</text><text x="610.6" y="196" class="t-small" text-anchor="middle">ghép chuyến, km rỗng</text><rect x="678.2" y="100" width="74.8" height="70" rx="8" class="f-warn-soft s-warn"/><text x="715.6" y="124" class="t-b" text-anchor="middle">P06</text><text x="715.6" y="142" class="t-small" text-anchor="middle">6 bài</text><text x="715.6" y="196" class="t-small" text-anchor="middle">Python, dữ liệu</text><rect x="757" y="100" width="101" height="70" rx="8" class="f-warn-soft s-warn"/><text x="807.5" y="124" class="t-b" text-anchor="middle">P07</text><text x="807.5" y="142" class="t-small" text-anchor="middle">8 bài</text><text x="807.5" y="196" class="t-small" text-anchor="middle">vận hành</text><path d="M22 76 L411.8 76" class="f-none s-phys" stroke-width="2"/><text x="216.9" y="50" class="t-b" text-anchor="middle">Nền tảng định vị</text><text x="216.9" y="68" class="t-small" text-anchor="middle">30 bài</text><path d="M415.8 76 L674.2 76" class="f-none s-pk" stroke-width="2"/><text x="545" y="50" class="t-b" text-anchor="middle">Tối ưu quãng đường hai phía</text><text x="545" y="68" class="t-small" text-anchor="middle">20 bài</text><path d="M678.2 76 L858 76" class="f-none s-warn" stroke-width="2"/><text x="768.1" y="50" class="t-b" text-anchor="middle">Dữ liệu và vận hành</text><text x="768.1" y="68" class="t-small" text-anchor="middle">14 bài</text><path d="M407.8 170 L407.8 236" class="f-none s-muted dash" stroke-width="1"/><path d="M419.8 170 L419.8 236" class="f-none s-muted dash" stroke-width="1"/><text x="401.8" y="256" class="t-b" text-anchor="end">LOC-30: simulator là thước đo</text><text x="401.8" y="274" class="t-small" text-anchor="end">cho mọi con số tối ưu</text><text x="425.8" y="256" class="t-b">LOC-32: hàm mục tiêu J, khách và tài xế</text><text x="425.8" y="274" class="t-small">trên một cân, dùng lại ở P04, P05, P07</text><text x="20" y="316" class="t-small">Chiều rộng mỗi hộp tỉ lệ với số bài.</text></svg>
 </div>
-<figcaption>Hình 3. Bản đồ loạt bài. Teal là lộ trình nền tảng, xanh dương là lộ trình tối ưu, vàng là lộ trình dữ liệu và vận hành.</figcaption>
+<figcaption>Hình 3. Bản đồ loạt bài. Màu xanh ngọc là lộ trình nền tảng, xanh dương là lộ trình tối ưu, vàng là lộ trình dữ liệu và vận hành.</figcaption>
 </figure>
 
 Lab của loạt là một workspace tích luỹ, bài sau dùng crate của bài trước, đặt trong `examples/toi-noi-location/`. Ngôn ngữ chính là Rust, vì phần định vị nhạy với độ trễ và bộ nhớ; Go và Python được dùng ở những chỗ chúng có lợi thế thật, và bài kế tiếp (ADR) giải thích ranh giới đó. Các loạt Rust, Python và Flutter qua Tới Nơi là phần đọc kèm, chưa nằm trên nhánh này nên bài chỉ nhắc tên mà không liên kết.
@@ -135,7 +135,7 @@ Ai chỉ quan tâm tới tối ưu có thể đọc theo đường tắt: bài 0
 
 ## Giới hạn của ví dụ
 
-Ví dụ trong bài này chỉ minh hoạ cho cơ chế. Nó có đúng một con đường thẳng, một dải phân cách, một chỗ quay đầu, tốc độ đi bộ và tốc độ xe là hai hằng số tự đặt, và bỏ qua hoàn toàn thời gian quay đầu, tắc nghẽn, đèn đỏ, việc khách có thật sự đứng chờ ở ghim hay không. Bảng năm ứng viên không có trong lab: nó không do simulator sinh ra và không nên được trích như một kết quả. Số duy nhất đến từ máy đo là hệ số vòng, và nó chỉ đúng với đồ thị OSM trong khung TP.HCM của lab, bỏ qua cấm rẽ. Ở thời điểm viết bài này lab chưa có simulator, chưa có baseline, chưa có con số «tối ưu hơn» nào; những thứ đó là việc của P03 và P04.
+Ví dụ trong bài này chỉ minh hoạ cho cơ chế. Ví dụ này có đúng một con đường thẳng, một dải phân cách, một chỗ quay đầu, tốc độ đi bộ và tốc độ xe là hai hằng số tự đặt, và bỏ qua hoàn toàn thời gian quay đầu, tắc nghẽn, đèn đỏ, việc khách có thật sự đứng chờ ở ghim hay không. Bảng năm ứng viên không có trong lab: nó không do simulator sinh ra và không nên được trích như một kết quả. Số duy nhất đến từ phép đo thật là hệ số vòng, và nó chỉ đúng với đồ thị OSM trong khung TP.HCM của lab, bỏ qua cấm rẽ. Ở thời điểm viết bài này lab chưa có simulator, chưa có baseline, chưa có con số «tối ưu hơn» nào; những thứ đó là việc của P03 và P04.
 
 ## Bài tập
 
@@ -151,11 +151,11 @@ Thời gian khách tới là `x / 2` giây, thời gian xe tới vẫn là `(2.2
 
 <details><summary>Lời giải</summary>
 
-A: 2.200 / 1.000 = 2,2. B: 1.800 / 1.400 ≈ 1,29. A có hệ số ≥ 2,0, đúng loại cặp chiếm 17,7% trong dải 1–2 km của ô tô ở số đo bài 04 (số đó không nói về trường hợp cụ thể này, chỉ cho thấy hệ số ≥ 2,0 không hiếm). Chọn theo chim bay thì gán A, đi 2.200 m; chọn theo đường thì gán B, đi 1.800 m, nên km rỗng tăng thêm 400 m cho mỗi chuyến kiểu này.
+A: 2.200 / 1.000 = 2,2. B: 1.800 / 1.400 ≈ 1,29. A có hệ số ≥ 2,0, đúng loại cặp chiếm 17,7% trong dải 1–2 km của ô tô ở kết quả đo của bài 04 (số đó không nói về trường hợp cụ thể này, chỉ cho thấy hệ số ≥ 2,0 không hiếm). Chọn theo chim bay thì gán A, đi 2.200 m; chọn theo đường thì gán B, đi 1.800 m, nên km rỗng tăng thêm 400 m cho mỗi chuyến kiểu này.
 
 </details>
 
-3. Vì sao không thể định nghĩa «điểm tốt nhất» bằng cách cực tiểu `walk_m + deadhead_m`?
+3. Vì sao không thể định nghĩa «điểm tốt nhất» bằng cách tối thiểu hoá `walk_m + deadhead_m`?
 
 <details><summary>Lời giải</summary>
 

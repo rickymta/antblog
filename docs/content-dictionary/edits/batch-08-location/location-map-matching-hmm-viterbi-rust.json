@@ -1,0 +1,185 @@
+{
+ "file": "location-map-matching-hmm-viterbi-rust.md",
+ "edits": [
+  {
+   "old": "Bài 16: bám đường Newson–Krumm trên HCM",
+   "new": "Bài 16: bám đường theo Newson–Krumm trên HCM",
+   "reason": "Thiếu giới từ, cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Mọi độ chính xác trong bài là **trên dữ liệu mô phỏng**",
+   "new": "Mọi độ chính xác trong bài đều **đo trên dữ liệu mô phỏng**",
+   "reason": "Câu thiếu động từ, «là trên» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên kết quả bị chi phối bởi mô hình nhiễu của chúng ta và không phải số đo trên GPS người thật",
+   "new": "nên kết quả phụ thuộc vào mô hình nhiễu của chúng ta, không phải số đo trên GPS người thật",
+   "reason": "Bị động kiểu Anh, nối câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên nó mù với thứ tự thời gian",
+   "new": "nên nó không nhận biết thứ tự thời gian",
+   "reason": "«mù với» là dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab **không** chép nguyên bài báo; nó khác ở các điểm sau.",
+   "new": "Lab **không** chép nguyên bài báo mà khác ở các điểm sau.",
+   "reason": "Đại từ «nó» chỉ vật trừu tượng, ngắt câu rời",
+   "severity": "low"
+  },
+  {
+   "old": "Thêm ràng buộc vận tốc tối đa",
+   "new": "Lab thêm ràng buộc vận tốc tối đa",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Chỉ profile ô tô, bỏ qua cấm rẽ và chi phí rẽ.",
+   "new": "Lab chỉ dùng profile ô tô, bỏ qua cấm rẽ và chi phí rẽ.",
+   "reason": "Câu thiếu chủ ngữ và động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "`states_for` hỏi R-tree lấy các cạnh",
+   "new": "`states_for` truy vấn R-tree để lấy các cạnh",
+   "reason": "«hỏi R-tree» gượng, thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "bài 21 sẽ đào sâu thuật toán",
+   "new": "bài 21 sẽ đi sâu vào thuật toán",
+   "reason": "«đào sâu» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "chính ngữ cảnh loại nhánh ngược chiều, kể cả khi điểm đo gần nó hơn",
+   "new": "chính ngữ cảnh loại bỏ nhánh ngược chiều, kể cả khi điểm đo gần nhánh đó hơn",
+   "reason": "Thiếu động từ rõ nghĩa, «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "trôi về −∞ trên vết dài",
+   "new": "trôi về −∞ trên chuỗi dài",
+   "reason": "«vết» là calque của trace",
+   "severity": "medium"
+  },
+  {
+   "old": "nên bị trần thấp ngay cả khi",
+   "new": "nên bị chặn trần ở mức thấp ngay cả khi",
+   "reason": "«bị trần thấp» là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "bảng chọn tham số cho thấy mặt phẳng rất phẳng",
+   "new": "bảng chọn tham số cho thấy bề mặt tham số rất bằng phẳng",
+   "reason": "«mặt phẳng» dịch gượng của landscape",
+   "severity": "medium"
+  },
+  {
+   "old": "nên đúng cách đọc là: khi nhiễu nhỏ hơn khoảng cách giữa các đường thì «đang ở đường nào» đã gần như được snap giải xong, và chỗ HMM còn hơn là",
+   "new": "nên cách đọc đúng là: khi nhiễu nhỏ hơn khoảng cách giữa các đường thì snap đã gần như giải xong câu hỏi «đang ở đường nào», và chỗ HMM còn vượt trội là",
+   "reason": "Bị động, trật tự từ kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "**Lấy mẫu thưa là chỗ snap hỏng nhất**",
+   "new": "**Lấy mẫu thưa là chỗ snap yếu nhất**",
+   "reason": "«hỏng nhất» là khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài báo gốc cũng báo HMM chịu lấy mẫu thưa tốt",
+   "new": "Bài báo gốc cũng ghi nhận HMM chịu được lấy mẫu thưa tốt",
+   "reason": "«báo» cụt, thiếu từ",
+   "severity": "medium"
+  },
+  {
+   "old": "**Tham số của mô hình quan trọng không đều.**",
+   "new": "**Các tham số của mô hình không quan trọng như nhau.**",
+   "reason": "Câu gượng, thiếu rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ 3 ứng viên mỗi điểm còn 78,49%",
+   "new": "nếu chỉ giữ 3 ứng viên mỗi điểm thì còn 78,49%",
+   "reason": "Câu thiếu động từ, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "bán kính 25 m, nhỏ hơn nhiễu, còn 84,46%",
+   "new": "bán kính 25 m, nhỏ hơn nhiễu, thì còn 84,46%",
+   "reason": "Thiếu liên từ, đọc cụt",
+   "severity": "low"
+  },
+  {
+   "old": "bỏ accuracy gần như không đổi",
+   "new": "không dùng accuracy thì gần như không đổi",
+   "reason": "«bỏ accuracy» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "đáng ghi lại vì nó không lộ ra trong số tổng",
+   "new": "đáng ghi lại vì lỗi này không lộ ra trong số tổng",
+   "reason": "Nhắc lại danh từ thay «nó»",
+   "severity": "low"
+  },
+  {
+   "old": "Lỗi được phát hiện nhờ soi một chỗ gãy chuỗi ở σ = 3 m, không nhờ số tổng.",
+   "new": "Lỗi được phát hiện nhờ xem kỹ một chỗ gãy chuỗi ở σ = 3 m, chứ không nhờ số tổng.",
+   "reason": "«soi» khẩu ngữ, thiếu liên từ",
+   "severity": "low"
+  },
+  {
+   "old": "đây là loại lỗi chỉ kiểm thử trên ca cụ thể mới thấy",
+   "new": "đây là loại lỗi chỉ kiểm thử trên test case cụ thể mới thấy",
+   "reason": "Thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "Test hồi quy trên ca khó của fixture",
+   "new": "Test hồi quy trên test case khó của fixture",
+   "reason": "Thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ phần µs/điểm là nhiễu theo tải máy",
+   "new": "chỉ phần µs/điểm dao động theo tải máy",
+   "reason": "«là nhiễu» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "không có thẻ cấm, nên một chuyến",
+   "new": "không gắn thẻ (tag) cấm xe, nên một chuyến",
+   "reason": "«thẻ cấm» là calque của tag",
+   "severity": "medium"
+  },
+  {
+   "old": "nên chênh lệch 99,57% so với 99,16% chưa có nguyên nhân được kiểm",
+   "new": "nên chưa kiểm chứng được nguyên nhân của chênh lệch 99,57% so với 99,16%",
+   "reason": "Bị động, trật tự kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Đó là lý do thang β quyết định mô hình tin hình học mạng đường hay tin điểm đo hơn.",
+   "new": "Đó là lý do thang β quyết định mô hình tin vào hình học mạng đường nhiều hơn hay tin vào điểm đo nhiều hơn.",
+   "reason": "Cấu trúc so sánh cụt, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Đề xuất hai lần chạy phân biệt hai nghi vấn trong bài.",
+   "new": "Đề xuất hai lần chạy để phân biệt hai nghi vấn trong bài.",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Nếu cả hai không đổi gì, nguyên nhân nằm ở chỗ khác và phải soi từng điểm",
+   "new": "Nếu cả hai lần chạy đều không thay đổi kết quả, nguyên nhân nằm ở chỗ khác và phải xem xét từng điểm",
+   "reason": "Câu cụt, «soi» khẩu ngữ",
+   "severity": "medium"
+  }
+ ]
+}

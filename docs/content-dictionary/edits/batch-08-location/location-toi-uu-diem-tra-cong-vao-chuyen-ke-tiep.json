@@ -1,0 +1,173 @@
+{
+  "file": "location-toi-uu-diem-tra-cong-vao-chuyen-ke-tiep.md",
+  "edits": [
+    {
+      "old": "Riêng điểm trả không có ý nghĩa thống kê (km rỗng",
+      "new": "Riêng điểm trả không cho kết quả có ý nghĩa thống kê (km rỗng",
+      "reason": "Chủ ngữ «điểm trả» không thể «có ý nghĩa thống kê»",
+      "severity": "medium"
+    },
+    {
+      "old": "nhưng nó là chỗ mà hai bên lại giành nhau",
+      "new": "nhưng đó lại là chỗ hai bên giành nhau",
+      "reason": "Câu thừa chữ, giọng dịch",
+      "severity": "low"
+    },
+    {
+      "old": "Bài nói rõ vì sao, và giá trị của ý tưởng, nếu có, nằm ở đâu mà mô hình này có thể không nhìn thấy.",
+      "new": "Bài giải thích vì sao, và chỉ ra giá trị của ý tưởng (nếu có) nằm ở chỗ nào mà mô hình này có thể không thấy.",
+      "reason": "Câu thiếu động từ cho vế sau, khó theo dõi",
+      "severity": "medium"
+    },
+    {
+      "old": "Mọi số trong bài là **trên dữ liệu mô phỏng**, kịch bản",
+      "new": "Mọi số trong bài đều đo **trên dữ liệu mô phỏng**, kịch bản",
+      "reason": "Câu thiếu động từ, trật tự kiểu Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "baseline là đón đúng ghim cộng tài xế gần nhất theo chim bay, trả đúng",
+      "new": "baseline là đón đúng ghim, ghép với tài xế gần nhất theo đường chim bay, và trả đúng",
+      "reason": "«Cộng» tự ghép, «theo chim bay» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "lên một cân cho điểm đón",
+      "new": "lên cùng một cán cân khi chọn điểm đón",
+      "reason": "Cụm «một cân» cụt, thiếu nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "vì nó là cách duy nhất lab biết cho",
+      "new": "vì đây là cách duy nhất lab có để biết về",
+      "reason": "Tránh «nó» chỉ sự vật; câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Chuyến kế được đại diện bằng **hai",
+      "new": "Lab đại diện cho chuyến kế bằng **hai",
+      "reason": "Câu bị động kiểu Anh",
+      "severity": "low"
+    },
+    {
+      "old": "## Cái cắm vào simulator: hai điểm cắm mới",
+      "new": "## Gắn vào simulator: hai điểm tích hợp mới",
+      "reason": "Tiêu đề tự ghép, thân mật",
+      "severity": "medium"
+    },
+    {
+      "old": "nên baseline không đổi từng byte",
+      "new": "nên baseline giữ nguyên từng byte",
+      "reason": "«Không đổi từng byte» gượng",
+      "severity": "low"
+    },
+    {
+      "old": "- **(a)** chỉ điểm trả theo `J_trả` đầy đủ, điểm đón vẫn là ghim.",
+      "new": "- **(a)** chỉ đổi điểm trả theo `J_trả` đầy đủ, điểm đón vẫn là ghim.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "nên kỳ vọng vài khoảng loại 0 chỉ vì tình cờ",
+      "new": "nên ta kỳ vọng sẽ có vài khoảng loại 0 chỉ vì tình cờ",
+      "reason": "Câu thiếu chủ ngữ và động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "**Thước đi bộ để lại rất ít dư địa.**",
+      "new": "**Thước đo quãng đi bộ để lại rất ít dư địa.**",
+      "reason": "Cụm «thước đi bộ» tự ghép, thiếu danh từ chính",
+      "severity": "high"
+    },
+    {
+      "old": "không nói khách thật hết chỗ để được lợi",
+      "new": "không có nghĩa là khách thật không còn gì để được lợi",
+      "reason": "Cụm «hết chỗ để được lợi» gượng, thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "nên lab không có thứ tốt hơn",
+      "new": "nên lab không có đại diện nào tốt hơn",
+      "reason": "«Thứ» chỉ chung chung, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "**Mô hình không đo cái điểm trả muốn tối ưu.**",
+      "new": "**Mô hình không đo điều mà điểm trả muốn tối ưu.**",
+      "reason": "«Cái» là văn nói",
+      "severity": "low"
+    },
+    {
+      "old": "mô hình này không có cách để thấy.",
+      "new": "mô hình này không có cách nào nhìn ra điều đó.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "**Đuôi dài không phải chuyện điểm trả.**",
+      "new": "**Đuôi dài không phải do điểm trả.**",
+      "reason": "Văn nói «chuyện»",
+      "severity": "low"
+    },
+    {
+      "old": "chính là loại ca đi vòng",
+      "new": "chính là loại trường hợp đi vòng",
+      "reason": "«Ca» mơ hồ trong văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "không sửa được liên thông của đồ thị đi bộ",
+      "new": "không sửa được tính liên thông của đồ thị đi bộ",
+      "reason": "Thiếu danh từ «tính»",
+      "severity": "medium"
+    },
+    {
+      "old": "nên không thể hiện ra.",
+      "new": "nên lợi ích này không thể hiện ra.",
+      "reason": "Câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó cần tín hiệu «chuyến kế» tốt hơn",
+      "new": "Hướng này cần tín hiệu «chuyến kế» tốt hơn",
+      "reason": "Tránh «Nó» chỉ sự vật trừu tượng đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Khi bảng cân bằng lệch như vậy",
+      "new": "Khi bảng được và mất lệch như vậy",
+      "reason": "«Bảng cân bằng lệch» tự ghép, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab **chưa** có: nó không có sự kiện đổi đích",
+      "new": "Lab **chưa** có tính năng này: không có sự kiện đổi đích",
+      "reason": "Thiếu tân ngữ; «nó» mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Khi làm, nó đụng thẳng vào bài 40",
+      "new": "Khi làm, việc này ảnh hưởng trực tiếp tới bài 40",
+      "reason": "«Đụng thẳng vào» là khẩu ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Output thật của biến thể (a)",
+      "new": "Kết quả chạy thật của biến thể (a)",
+      "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "để kiểm đường ống, kèm test động",
+      "new": "để kiểm tra luồng xử lý, kèm test động",
+      "reason": "Thiếu chữ «tra»; «đường ống» là calque",
+      "severity": "medium"
+    },
+    {
+      "old": "thì kết quả là vòng tròn.",
+      "new": "thì kết quả là lập luận vòng tròn.",
+      "reason": "Thiếu danh từ chính, nghĩa mơ hồ",
+      "severity": "medium"
+    }
+  ]
+}

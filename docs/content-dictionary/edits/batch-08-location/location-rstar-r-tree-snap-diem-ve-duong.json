@@ -1,0 +1,173 @@
+{
+ "file": "location-rstar-r-tree-snap-diem-ve-duong.md",
+ "edits": [
+  {
+   "old": "Snap sai một lần như vậy là điểm đón nằm sai cả một con đường",
+   "new": "Snap sai một lần như vậy khiến điểm đón nằm sai cả một con đường",
+   "reason": "Thiếu quan hệ nhân quả, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "là **trên dữ liệu mô phỏng**",
+   "new": "đều lấy **trên dữ liệu mô phỏng**",
+   "reason": "Thiếu động từ/danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "là ca mà cả hai cách đều thua;",
+   "new": "là ca mà cả hai cách đều không xử lý được;",
+   "reason": "«Thua» là calque của lose",
+   "severity": "low"
+  },
+  {
+   "old": "Quét hết từng đoạn cho mỗi điểm GPS là tuyến tính theo số đoạn.",
+   "new": "Quét hết từng đoạn cho mỗi điểm GPS có chi phí tăng tuyến tính theo số đoạn.",
+   "reason": "Thiếu danh từ chính (chi phí)",
+   "severity": "medium"
+  },
+  {
+   "old": "khoảng cách từ điểm đo tới đường thật chính là thành phần nhiễu theo một trục, vuông góc với đường",
+   "new": "khoảng cách từ điểm đo tới đường thật chính là thành phần nhiễu dọc theo trục vuông góc với đường",
+   "reason": "Diễn đạt gượng, nói rõ trục",
+   "severity": "medium"
+  },
+  {
+   "old": "ở service thật, độ chính xác",
+   "new": "ở hệ thống thật, độ chính xác",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Vậy chênh lệch chủ yếu là nhiễu của máy, không phải do bộ điểm",
+   "new": "Vậy chênh lệch chủ yếu do nhiễu của máy, không phải do bộ điểm",
+   "reason": "Hai vế không song song",
+   "severity": "medium"
+  },
+  {
+   "old": "Kết luận chắc chắn chỉ là bậc độ lớn:",
+   "new": "Kết luận chắc chắn chỉ nằm ở bậc độ lớn:",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "«cạnh gần nhất» không xác định duy nhất,",
+   "new": "«cạnh gần nhất» không có đáp án duy nhất,",
+   "reason": "«Không xác định duy nhất» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi chọn điểm nhỏ nhất của `khoảng cách + 0,5 m × độ lệch hướng`",
+   "new": "rồi chọn ứng viên có giá trị nhỏ nhất của `khoảng cách + 0,5 m × độ lệch hướng`",
+   "reason": "«Điểm» dễ nhầm với điểm GPS",
+   "severity": "medium"
+  },
+  {
+   "old": "nó không cứu được hai đường cùng hướng.",
+   "new": "hướng đi không cứu được trường hợp hai đường cùng hướng.",
+   "reason": "Tránh «nó» chỉ sự vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "hai trong ba ca lab xuất ra GeoJSON",
+   "new": "hai trong ba ca mà lab xuất ra GeoJSON",
+   "reason": "Thiếu quan hệ từ",
+   "severity": "low"
+  },
+  {
+   "old": "chọn theo hướng đúng lại Hoàng Diệu.",
+   "new": "chọn theo hướng thì đúng lại là Hoàng Diệu.",
+   "reason": "Câu cụt, thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "dữ liệu có thể làm mọi thứ khó thêm:",
+   "new": "dữ liệu có thể làm mọi thứ khó hơn:",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Có một ca cầu: lab ghi",
+   "new": "Còn một ca liên quan đến cầu: lab ghi",
+   "reason": "Cụm «ca cầu» tự ghép, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "R-tree hai chiều không biết cầu nằm trên đường,",
+   "new": "R-tree hai chiều không biết cầu bắc qua phía trên đường,",
+   "reason": "«Hai chiều» dễ hiểu sai, «nằm trên đường» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Một: «sai» được định nghĩa bằng mã way,",
+   "new": "Thứ nhất, «sai» được xác định theo mã way,",
+   "reason": "Liệt kê gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Hai: nhiễu của lab là Gaussian",
+   "new": "Thứ hai, nhiễu của lab là Gaussian",
+   "reason": "Liệt kê gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nên số đo này không thể thay cho đo trên dữ liệu thật",
+   "new": "nên số đo này không thể thay cho phép đo trên dữ liệu thật",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Output (rút gọn),",
+   "new": "Kết quả in ra (rút gọn),",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "hồ sơ ô tô, seed",
+   "new": "profile ô tô, seed",
+   "reason": "Thống nhất «profile» như phần còn lại của bài",
+   "severity": "medium"
+  },
+  {
+   "old": "Không có bản đồ thật, chạy được trên đồ thị tổng hợp bằng cờ `--fixture`, cũng là lệnh mà `verify-p01.sh` gọi",
+   "new": "Nếu không có bản đồ thật, có thể chạy trên đồ thị tổng hợp bằng cờ `--fixture`; đây cũng là lệnh mà `verify-p01.sh` gọi",
+   "reason": "Câu thiếu chủ ngữ, nối cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "**Một profile, chưa có chuỗi điểm.**",
+   "new": "**Mới dùng một profile, chưa dùng chuỗi điểm.**",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Số 10,97% của «có hướng» là cận dưới lạc quan.",
+   "new": "Số 10,97% của cách «có hướng» là cận dưới, nên lạc quan hơn thực tế.",
+   "reason": "«Cận dưới lạc quan» gượng, chưa nói rõ ý",
+   "severity": "medium"
+  },
+  {
+   "old": "cập nhật bản đồ nghĩa là dựng lại cây.",
+   "new": "cập nhật bản đồ đồng nghĩa với dựng lại cây.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "**Hoà ở nút giao chưa có quy tắc phá.**",
+   "new": "**Hoà ở nút giao chưa có quy tắc phá hoà.**",
+   "reason": "Cụm «quy tắc phá» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "lab báo cạnh nào tuỳ thứ tự duyệt",
+   "new": "lab báo cạnh nào thì tuỳ thứ tự duyệt",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "nó xác nhận 3σ = 30 m",
+   "new": "bảng này xác nhận 3σ = 30 m",
+   "reason": "Tránh «nó» chỉ sự vật trừu tượng",
+   "severity": "low"
+  }
+ ]
+}

@@ -1,0 +1,191 @@
+{
+ "file": "location-diem-hen-dong-cap-nhat-khi-hai-ben-di-chuyen.md",
+ "edits": [
+  {
+   "old": "và kết quả rỗng của hysteresis",
+   "new": "và kết quả không có hiệu ứng của hysteresis",
+   "reason": "'kết quả rỗng' dịch gượng của null result",
+   "severity": "medium"
+  },
+  {
+   "old": "Kết quả rỗng, trên dữ liệu mô phỏng.",
+   "new": "Kết quả không có hiệu ứng, trên dữ liệu mô phỏng.",
+   "reason": "Thống nhất với tiêu đề",
+   "severity": "medium"
+  },
+  {
+   "old": "Rồi là chính sách có trễ (hysteresis)",
+   "new": "Tiếp theo là chính sách có trễ (hysteresis)",
+   "reason": "'Rồi là' khẩu ngữ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nói rõ kết quả này có chứng minh được gì và không chứng minh được gì về ý tưởng",
+   "new": "nói rõ kết quả này chứng minh được gì và không chứng minh được gì về ý tưởng",
+   "reason": "Cấu trúc 'có ... được gì' sai ngữ pháp",
+   "severity": "medium"
+  },
+  {
+   "old": "Đường đưa vị trí tới app đã có ở",
+   "new": "Luồng đưa vị trí tới app đã có ở",
+   "reason": "'đường' gượng, dễ hiểu nhầm",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi số trong bài là **trên dữ liệu mô phỏng**",
+   "new": "Mọi số trong bài đều lấy **trên dữ liệu mô phỏng**",
+   "reason": "Cấu trúc 'là trên' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Mặc định trong mã để `naive_interval_s` = 10 s",
+   "new": "Giá trị mặc định của `naive_interval_s` trong mã là 10 s",
+   "reason": "Câu cụt, trật tự kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab chọn một đường dốc hợp lý để có thứ mà mô phỏng chạy được",
+   "new": "Lab chọn một hàm xác suất giảm dần hợp lý để mô phỏng có thể chạy được",
+   "reason": "'đường dốc' dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "tới mức đường dốc này đáng tin",
+   "new": "tới mức hàm này đáng tin",
+   "reason": "Thống nhất với câu trước",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là cách giải thích hợp lý, lab không tách riêng",
+   "new": "Đây là cách giải thích hợp lý, nhưng lab không tách riêng",
+   "reason": "Thiếu từ nối giữa hai vế",
+   "severity": "low"
+  },
+  {
+   "old": "Nó đi kèm hai lần đổi mỗi ca trở lên",
+   "new": "Con số này đi kèm hai lần đổi mỗi ca trở lên",
+   "reason": "'Nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "giảm mạnh như vậy, nên không nên dùng nó như lợi ích",
+   "new": "giảm mạnh như vậy, nên không nên coi đó là lợi ích",
+   "reason": "'dùng nó như' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Mười sự kiện không đủ chống đỡ một kết luận.",
+   "new": "Mười sự kiện không đủ để rút ra một kết luận.",
+   "reason": "'chống đỡ' dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "kỳ vọng gần một khoảng loại 0 chỉ vì may rủi",
+   "new": "kỳ vọng có gần một khoảng loại 0 chỉ vì may rủi",
+   "reason": "Câu thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Kết quả rỗng cần một giải thích, không chỉ",
+   "new": "Kết quả không có hiệu ứng cần một lời giải thích, không chỉ",
+   "reason": "Thống nhất với tiêu đề",
+   "severity": "medium"
+  },
+  {
+   "old": "Số liệu cho ba manh mối.",
+   "new": "Số liệu cho thấy ba manh mối.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "cổng thứ nhất **không** là thủ phạm.",
+   "new": "cổng thứ nhất **không phải** là thủ phạm.",
+   "reason": "'không là' sai cấu trúc",
+   "severity": "medium"
+  },
+  {
+   "old": "nên điều kiện lệch quá 30 s thoả thường xuyên",
+   "new": "nên điều kiện lệch quá 30 s được thoả thường xuyên",
+   "reason": "Câu thiếu từ",
+   "severity": "medium"
+  },
+  {
+   "old": "ít nhất 10% là chặn chính.",
+   "new": "ít nhất 10% là cổng chặn chính.",
+   "reason": "Lược mất danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là quét khám phá, không kiểm định cặp",
+   "new": "Đây là phép quét khám phá, không kiểm định cặp",
+   "reason": "Lược danh từ chỉ loại",
+   "severity": "low"
+  },
+  {
+   "old": "Ba: vì sao cổng 10% nặng đến vậy?",
+   "new": "Ba: vì sao cổng 10% chặn mạnh đến vậy?",
+   "reason": "'nặng' dùng gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Cổng tỉ lệ so với toàn bộ `J` là cổng sai thước: nó so lợi ích",
+   "new": "Cổng tỉ lệ theo toàn bộ `J` là cổng dùng sai thước đo: cổng này so lợi ích",
+   "reason": "Cụm cụt, 'nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó chứng minh một điều hẹp:",
+   "new": "Kết quả này chứng minh một điều hẹp:",
+   "reason": "'Nó' trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó **không** chứng minh ý tưởng điểm hẹn động vô ích.",
+   "new": "Kết quả này **không** chứng minh ý tưởng điểm hẹn động là vô ích.",
+   "reason": "'Nó' trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "kết quả chỉ để kiểm đường ống",
+   "new": "kết quả chỉ để kiểm tra đường ống",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "với 3 seed để kiểm đường ống",
+   "new": "với 3 seed để kiểm tra đường ống",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "việc khách có bị làm phiền bởi lời đề nghị hay không không nằm trong mô hình",
+   "new": "việc lời đề nghị có làm phiền khách hay không không nằm trong mô hình",
+   "reason": "Bị động 'bởi' kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "là một chọn lựa của lab",
+   "new": "là một lựa chọn của lab",
+   "reason": "Trật tự từ",
+   "severity": "low"
+  },
+  {
+   "old": "nên chưa đạt các điều này",
+   "new": "nên chưa đạt các yêu cầu này",
+   "reason": "'các điều này' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Giải thích bằng ai tới trước, và nói ai chịu thiệt.",
+   "new": "Hãy giải thích dựa trên việc ai tới trước, và nói ai chịu thiệt.",
+   "reason": "Câu thiếu động từ, 'bằng' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nếu giải thích đúng, tăng <code>meet_gap_s</code> sẽ nằm ở nhóm",
+   "new": "nếu giải thích đúng, phần tăng của <code>meet_gap_s</code> sẽ nằm ở nhóm",
+   "reason": "Thiếu danh từ sau 'tăng'",
+   "severity": "medium"
+  }
+ ]
+}

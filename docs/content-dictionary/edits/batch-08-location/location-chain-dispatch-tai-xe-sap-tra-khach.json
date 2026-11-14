@@ -1,0 +1,227 @@
+{
+  "file": "location-chain-dispatch-tai-xe-sap-tra-khach.md",
+  "edits": [
+    {
+      "old": "nhưng khi xe thưa khách điển hình chờ lâu hơn; margin rủi ro không thấy giúp.",
+      "new": "nhưng khi xe thưa thì khách điển hình chờ lâu hơn; biên rủi ro không thấy có tác dụng.",
+      "reason": "Thiếu liên từ; thống nhất «biên rủi ro» thay cho margin; «không thấy giúp» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Bài dựng trên bộ ghép theo lô",
+      "new": "Bài này xây dựng trên bộ ghép theo lô",
+      "reason": "Câu thiếu chủ ngữ rõ ràng",
+      "severity": "low"
+    },
+    {
+      "old": "aria-label=\"Hình 1. Hai ứng viên cho cùng một điểm đón. Tài xế B đang bận nhưng tới điểm đón sớm hơn tài xế rảnh A ở xa. Hungarian so hai cột này như hai tài xế bình thường;",
+      "new": "aria-label=\"Hình 1. Hai ứng viên cho cùng một điểm đón. Tài xế B đang bận nhưng tới điểm đón sớm hơn tài xế rảnh A ở xa. Thuật toán Hungarian xử lý hai cột này như hai tài xế bình thường;",
+      "reason": "«so hai cột» mơ hồ, nêu rõ chủ thể và động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "<figcaption>Hình 1. Hai ứng viên cho cùng một điểm đón. Tài xế B đang bận nhưng tới điểm đón sớm hơn tài xế rảnh A ở xa. Hungarian so hai cột này như hai tài xế bình thường;",
+      "new": "<figcaption>Hình 1. Hai ứng viên cho cùng một điểm đón. Tài xế B đang bận nhưng tới điểm đón sớm hơn tài xế rảnh A ở xa. Thuật toán Hungarian xử lý hai cột này như hai tài xế bình thường;",
+      "reason": "«so hai cột» mơ hồ, nêu rõ chủ thể và động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chú ý chỗ nó **không biết gì về nhiễu tốc độ**",
+      "new": "Chú ý chỗ hàm này **không biết gì về nhiễu tốc độ**",
+      "reason": "Tránh «nó» chỉ sự vật ở giữa câu, nhắc lại danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "## ETA còn lại không chắc: độ lệch chuẩn và margin rủi ro",
+      "new": "## ETA còn lại không chắc: độ lệch chuẩn và biên rủi ro",
+      "reason": "Một khái niệm một tên trong bài: «biên»",
+      "severity": "medium"
+    },
+    {
+      "old": "đủ gần cho một cái lề.",
+      "new": "đủ gần để làm biên an toàn.",
+      "reason": "«lề» dùng nghĩa lạ, khẩu ngữ; thống nhất «biên»",
+      "severity": "medium"
+    },
+    {
+      "old": "Cấu hình `ChainConfig` có hai nút: tầm nhìn và margin rủi ro `risk_k`.",
+      "new": "Cấu hình `ChainConfig` có hai tham số: tầm nhìn và biên rủi ro `risk_k`.",
+      "reason": "«nút» dịch gượng; thống nhất «biên»",
+      "severity": "medium"
+    },
+    {
+      "old": "tức bắt xe sắp trả khách phải «thắng» với một biên an toàn.",
+      "new": "tức là xe sắp trả khách phải «thắng» ngay cả khi đã bị cộng thêm một biên an toàn.",
+      "reason": "«bắt xe phải thắng» dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Cần nhớ rằng margin này chỉ đổi **ai được chọn**. Nó không rút ngắn chuyến trước.",
+      "new": "Cần nhớ rằng biên này chỉ đổi **ai được chọn**. Biên này không rút ngắn chuyến trước.",
+      "reason": "Thống nhất thuật ngữ; tránh «Nó» đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Xác suất huỷ dùng ETA tổng",
+      "new": "Xác suất huỷ tính theo ETA tổng",
+      "reason": "Thiếu động từ phù hợp",
+      "severity": "low"
+    },
+    {
+      "old": "Điều này quan trọng cho cách đọc số.",
+      "new": "Điều này quan trọng với cách đọc số liệu.",
+      "reason": "Giọng dịch máy",
+      "severity": "low"
+    },
+    {
+      "old": "Chain-120 thêm 3,2 chuyến hoàn thành, huỷ giảm 0,0139,",
+      "new": "Chain-120 thêm 3,2 chuyến hoàn thành, tỉ lệ huỷ giảm 0,0139,",
+      "reason": "Lược mất danh từ chính «tỉ lệ»",
+      "severity": "medium"
+    },
+    {
+      "old": "Làm phép tính: để riêng 3,2 chuyến thêm kéo trung bình từ 576,6 s lên 603,4 s, mỗi chuyến đó phải chờ khoảng 1.864 s.",
+      "new": "Thử tính: muốn riêng 3,2 chuyến thêm kéo trung bình từ 576,6 s lên 603,4 s thì mỗi chuyến đó phải chờ khoảng 1.864 s.",
+      "reason": "Câu thiếu vế điều kiện, phải đoán ý",
+      "severity": "high"
+    },
+    {
+      "old": "điều vài chuyến thêm không làm được.",
+      "new": "điều mà vài chuyến thêm không làm được.",
+      "reason": "Thiếu quan hệ từ",
+      "severity": "low"
+    },
+    {
+      "old": "Tầm nhìn dài giảm km rỗng của chuyến hoàn thành, trả bằng chờ.",
+      "new": "Tầm nhìn dài giảm km rỗng của chuyến hoàn thành, đổi lại là thời gian chờ lâu hơn.",
+      "reason": "«trả bằng chờ» cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "20 seed có thể chưa đủ để thấy hiệu cỡ đó.",
+      "new": "20 seed có thể chưa đủ để thấy mức chênh lệch cỡ đó.",
+      "reason": "«hiệu cỡ đó» tự ghép, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "**Phân phối chuyến giữa tài xế lệch hơn một chút**",
+      "new": "**Số chuyến phân bố giữa các tài xế lệch hơn một chút**",
+      "reason": "Câu cụt, thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "có thể là các xe nằm gần nơi đông khách trả xe được nối chuyến nhiều hơn",
+      "new": "có thể là các xe nằm gần những nơi có nhiều khách xuống xe được nối chuyến nhiều hơn",
+      "reason": "«nơi đông khách trả xe» tự ghép, nghe cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "xe không khan nên lợi nhỏ, và vẫn có giá:",
+      "new": "xe không khan nên lợi ích nhỏ, và vẫn phải trả giá:",
+      "reason": "Cụm cụt, thiếu danh từ/động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Ở «cao điểm», chain-60 thêm 4,7 chuyến, huỷ −0,0105,",
+      "new": "Ở «cao điểm», chain-60 thêm 4,7 chuyến, tỉ lệ huỷ −0,0105,",
+      "reason": "Lược mất danh từ chính «tỉ lệ»",
+      "severity": "medium"
+    },
+    {
+      "old": "và hơn mười cột cho nhiều phép so sánh:",
+      "new": "và hơn mười cột tạo ra nhiều phép so sánh:",
+      "reason": "Câu thiếu động từ, giọng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "Đọc bảng này phải chậm lại.",
+      "new": "Phải đọc bảng này thật chậm.",
+      "reason": "Giọng dịch máy",
+      "severity": "low"
+    },
+    {
+      "old": "còn khoảng kia không **không** có nghĩa",
+      "new": "còn khoảng kia không, nhưng điều đó **không** có nghĩa",
+      "reason": "Lặp «không không», câu khó đọc",
+      "severity": "high"
+    },
+    {
+      "old": "Margin `risk_k = 1` cho +112,6 s [13,6; 211,5], chồng gần hết lên +82,7 s:",
+      "new": "Biên `risk_k = 1` cho +112,6 s [13,6; 211,5], chồng lấn gần hết với +82,7 s:",
+      "reason": "Thống nhất «biên»; «chồng gần hết lên» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "không thấy margin giúp,",
+      "new": "không thấy biên này giúp được gì,",
+      "reason": "Thống nhất «biên»; câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "cộng lề vào chi phí chỉ đổi người được chọn",
+      "new": "cộng biên vào chi phí chỉ đổi người được chọn",
+      "reason": "Thống nhất «biên»",
+      "severity": "medium"
+    },
+    {
+      "old": "chuyến phân bố lệch hơn giữa các tài xế.",
+      "new": "số chuyến phân bố lệch hơn giữa các tài xế.",
+      "reason": "Thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "Lab chạy khoảng 28 phút trên máy viết khi",
+      "new": "Lab chạy khoảng 28 phút trên máy của người viết bài khi",
+      "reason": "«máy viết» cụt, dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "Output, bộ «thưa xe» (nguyên văn từ",
+      "new": "Kết quả chạy của bộ «thưa xe» (nguyên văn từ",
+      "reason": "Từ tiếng Anh thông thường, câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "nên việc khách xếp hàng dễ huỷ hơn không vào quyết định.",
+      "new": "nên việc khách xếp hàng dễ huỷ hơn không được đưa vào quyết định.",
+      "reason": "«không vào quyết định» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "là cái simulator đo được, không phải cái chiến lược cân nhắc.",
+      "new": "là điều simulator đo được, không phải điều chiến lược cân nhắc.",
+      "reason": "«cái» khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "**Cỡ mẫu 20 seed**, KTC rộng ở nhiều chỉ số đuôi",
+      "new": "**Cỡ mẫu là 20 seed**, nên KTC rộng ở nhiều chỉ số đuôi",
+      "reason": "Câu thiếu động từ và quan hệ từ",
+      "severity": "medium"
+    },
+    {
+      "old": "nên margin rủi ro lớn gấp 3,3 lần ở thế giới nhiễu hơn,",
+      "new": "nên biên rủi ro lớn gấp 3,3 lần trong mô phỏng nhiễu hơn,",
+      "reason": "Thống nhất «biên»; «thế giới nhiễu» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "với «khách thật sự thiệt»",
+      "new": "với «khách thật sự bị thiệt»",
+      "reason": "Thiếu từ bị",
+      "severity": "low"
+    },
+    {
+      "old": "`wait_s` tính trên mọi khách đặt, đặt thời gian chờ của khách bị bỏ rơi bằng hạn kiên nhẫn,",
+      "new": "`wait_s` tính trên mọi khách đặt, gán thời gian chờ của khách bị bỏ rơi bằng hạn kiên nhẫn,",
+      "reason": "«đặt ... bằng» gượng; lặp «đặt»",
+      "severity": "medium"
+    },
+    {
+      "old": "một cách đọc là tầm nhìn 120 s xếp hàng ít khách hơn",
+      "new": "một cách đọc là với tầm nhìn 120 s, số khách xếp hàng ít hơn",
+      "reason": "Cấu trúc câu kiểu tiếng Anh, khó hiểu",
+      "severity": "medium"
+    }
+  ]
+}

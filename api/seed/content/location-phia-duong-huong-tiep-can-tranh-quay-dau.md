@@ -10,19 +10,19 @@ language: vi
 
 Một đại lộ có dải phân cách giữa. Tài xế đang chạy về phía đông, khách đứng ở vỉa hè phía nam. Điểm đón A nằm ở làn đi về đông, sát chỗ khách: xe tới, dừng, khách bước lên từ bên tay phải. Điểm đón B cách đó 60 m, ở làn đi về tây: khách phải băng cả mặt đường, và tài xế phải đi hết đoạn, tìm lối qua dải phân cách, quay đầu rồi quay lại. Trên bản đồ A và B gần như cùng một chỗ. Trong đời thực chúng khác nhau cỡ một vòng quay đầu và một lần băng qua đường lớn. Bài này làm cho `J` thấy được sự khác biệt đó, và nói thẳng phần nào của nó đo được, phần nào không.
 
-Đây là bài 34 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dựng trên đồ thị theo cạnh có chi phí rẽ của [bài 23](/articles/location-chi-phi-re-u-turn-do-thi-theo-canh), ma trận many-to-many của [bài 26](/articles/location-ma-tran-many-to-many-bucket-ch) và danh sách ứng viên của [bài 33](/articles/location-sinh-ung-vien-diem-don-do-thi-di-bo). Mọi số đo là **trên dữ liệu mô phỏng**: kịch bản `hcm-baseline`, đồ thị TP.HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), chính sách `p04-v1` (a = b = c = d = 1). Phần 1 và 2 đo trên 120 yêu cầu của seed 20270001; phần 3 trên 20 seed đánh giá 20270001–20270020 (so sánh cặp, như giải thích ở [bài 32](/articles/location-ham-muc-tieu-diem-hen-khach-va-tai-xe)).
+Đây là bài 34 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dựng trên đồ thị theo cạnh có chi phí rẽ của [bài 23](/articles/location-chi-phi-re-u-turn-do-thi-theo-canh), ma trận many-to-many của [bài 26](/articles/location-ma-tran-many-to-many-bucket-ch) và danh sách ứng viên của [bài 33](/articles/location-sinh-ung-vien-diem-don-do-thi-di-bo). Mọi số đo đều lấy **trên dữ liệu mô phỏng**: kịch bản `hcm-baseline`, đồ thị TP.HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), chính sách `p04-v1` (a = b = c = d = 1). Phần 1 và 2 đo trên 120 yêu cầu của seed 20270001; phần 3 trên 20 seed đánh giá 20270001–20270020 (so sánh cặp, như giải thích ở [bài 32](/articles/location-ham-muc-tieu-diem-hen-khach-va-tai-xe)).
 
-**Hãy đọc bài này như một bài về cơ chế.** Phạt phía đường là số hạng của `J` mà simulator không thể đo lợi ích, vì simulator không có mô hình băng đường. Bài không chứng minh nó đáng giá; nó chỉ cho thấy nó được cài thế nào và cái giá đo được.
+**Hãy đọc bài này như một bài về cơ chế.** Phạt phía đường là số hạng của `J` mà simulator không thể đo được lợi ích, vì simulator không có mô hình băng đường. Bài không chứng minh khoản phạt này đáng giá; bài chỉ cho thấy cách cài đặt và cái giá đo được.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Ma trận chi phí many-to-many của bài 26 trả lời «tài xế tới điểm đón mất bao lâu» rất nhanh. Nếu dùng nó một mình để chọn ứng viên có J nhỏ nhất trong 120 yêu cầu, theo bạn trong bao nhiêu phần trăm yêu cầu nó chọn đúng ứng viên mà tính chính xác cũng chọn?</p>
-<details><summary>Xem đáp án</summary><p>40,0%. Ma trận và CH tính theo nút và không có chi phí rẽ, nên nó không thấy việc quay đầu giữa đường bị cấm hay tốn 20 giây. Số hạng tài xế bị đánh thấp trung bình 49,8 giây, và chọn sai trung bình mất 19,4 giây giá trị J (p95 87,9 giây). Chấm lại 4 ứng viên đầu cộng điểm ghim bằng A* theo cạnh đưa tỉ lệ lên 82,5%.</p></details>
+<p>Ma trận chi phí many-to-many của bài 26 trả lời «tài xế tới điểm đón mất bao lâu» rất nhanh. Nếu dùng riêng ma trận này để chọn ứng viên có J nhỏ nhất trong 120 yêu cầu, theo bạn trong bao nhiêu phần trăm yêu cầu nó chọn đúng ứng viên mà cách tính chính xác cũng chọn?</p>
+<details><summary>Xem đáp án</summary><p>40,0%. Ma trận và CH (Contraction Hierarchies) tính theo nút và không có chi phí rẽ, nên chúng không thấy việc quay đầu giữa đường bị cấm hay tốn 20 giây. Số hạng tài xế bị đánh thấp trung bình 49,8 giây, và chọn sai trung bình mất 19,4 giây giá trị J (p95 87,9 giây). Chấm lại 4 ứng viên đầu cộng điểm ghim bằng A* theo cạnh đưa tỉ lệ lên 82,5%.</p></details>
 </div>
 
 ## Một vị trí, hai ứng viên
 
-Một cạnh đường hai chiều là hai cạnh có hướng. Ứng viên điểm đón vì thế là **vị trí có hướng**: cùng một toạ độ nhưng xe vào theo chiều nào thì khách ở bên phải hay bên trái của hướng xe. Xe ở Việt Nam chạy bên phải, nên khách ở bên phải hướng xe thì bước lên xe không phải băng đường, còn khách ở bên trái thì phải băng qua cả mặt đường. Hàm `side_of` quy mối quan hệ đó về một dấu: chiếu vị trí khách lên pháp tuyến bên phải của hướng cạnh.
+Một cạnh đường hai chiều là hai cạnh có hướng. Ứng viên điểm đón vì thế là **vị trí có hướng**: cùng một toạ độ nhưng xe vào theo chiều nào thì khách ở bên phải hay bên trái của hướng xe. Xe ở Việt Nam chạy bên phải, nên khách ở bên phải hướng xe thì bước lên xe không phải băng đường, còn khách ở bên trái thì phải băng qua cả mặt đường. Hàm `side_of` mã hoá quan hệ đó thành một dấu: chiếu vị trí khách lên pháp tuyến bên phải của hướng cạnh.
 
 `examples/toi-noi-location/rust/crates/pickup/src/candidates.rs`
 
@@ -112,7 +112,7 @@ Chi phí quay đầu nằm ở đồ thị theo cạnh. Cấu hình đô thị c
     }
 ```
 
-Nhưng CH và ma trận many-to-many là theo **nút** và không có chi phí rẽ. Chúng không thấy rằng một xe đang chạy ngược phía phải quay đầu mất 20 giây hoặc bị cấm. Chỉ A\* theo cạnh có chi phí rẽ, và nó đắt hơn. Đó là lý do xếp hạng hai tầng:
+Nhưng CH và ma trận many-to-many tính theo **nút** và không có chi phí rẽ. Chúng không thấy rằng một xe đang chạy ngược phía thì phải quay đầu, và việc đó mất 20 giây hoặc bị cấm. Chỉ A\* theo cạnh có chi phí rẽ, nhưng cách này đắt hơn. Đó là lý do xếp hạng hai tầng:
 
 - **Tầng 1:** ma trận rẻ cho mọi ứng viên, tính `J1`, cắt xuống `refine_top` ứng viên.
 - **Tầng 2:** chỉ ứng viên đứng đầu và điểm ghim (luôn luôn) được chấm lại bằng A\* theo cạnh, ra `J2`, con số mà simulator thực thi.
@@ -166,7 +166,7 @@ Nguyên nhân thấy rõ ở sai số từng số hạng (6.733 cặp ứng viê
 
 ## Hướng tiếp cận và hai chiều của một vị trí
 
-Khi ứng viên tốt nhất là một vị trí trên đường hai chiều, simulator cần biết xe được phép vào theo chiều nào. `JPickup` đưa chiều tốt nhất vào danh sách `approach`, và thêm chiều còn lại **nếu `J` của nó hơn kém không quá 20 giây** (`commit_margin_s`): nếu hai chiều gần như ngang nhau thì để tài xế chọn chiều nào tới sớm hơn thay vì ép một chiều.
+Khi ứng viên tốt nhất là một vị trí trên đường hai chiều, simulator cần biết xe được phép vào theo chiều nào. `JPickup` đưa chiều tốt nhất vào danh sách `approach`, và thêm chiều còn lại **nếu `J` của nó không tệ hơn quá 20 giây** (`commit_margin_s`): nếu hai chiều gần như ngang nhau thì để tài xế chọn chiều nào tới sớm hơn thay vì ép một chiều.
 
 `examples/toi-noi-location/rust/crates/pickup/src/strategy.rs`
 
@@ -185,11 +185,11 @@ Khi ứng viên tốt nhất là một vị trí trên đường hai chiều, si
 
 Hướng của tài xế trong simulator là một vị trí có hướng (cạnh, tỉ lệ dọc cạnh), thay cho hướng mà [bài 16](/articles/location-map-matching-hmm-viterbi-rust) và [bài 17](/articles/location-map-matching-online-cua-so-cau-vuot-duong-song-song) sẽ cho từ map matching trong hệ thống thật; lab không đo độ nhiễu hướng từ GPS thật.
 
-Đếm trực tiếp quay đầu trên tuyến của tài xế gần nhất theo chim bay tới khách, so điểm ghim với điểm chọn (118 yêu cầu có đủ tuyến, một seed, không có khoảng tin cậy): **96 lần quay đầu tới điểm ghim, 88 lần tới điểm chọn** (đi ngược trực tiếp 20 so với 22; qua lối dải phân cách 25 so với 24; loại «khác» 51 so với 42). Thời gian tài xế tới điểm hẹn trung bình 224,8 s so với 207,5 s. Chênh này nhỏ, đo trên một seed và 118 yêu cầu, và không được kiểm định.
+Lab đếm trực tiếp số lần quay đầu trên tuyến của tài xế gần nhất theo chim bay tới khách, so sánh điểm ghim với điểm chọn (118 yêu cầu có đủ tuyến, một seed, không có khoảng tin cậy): **96 lần quay đầu tới điểm ghim, 88 lần tới điểm chọn** (đi ngược trực tiếp 20 so với 22; qua lối dải phân cách 25 so với 24; loại «khác» 51 so với 42). Thời gian tài xế tới điểm hẹn trung bình 224,8 s so với 207,5 s. Chênh này nhỏ, đo trên một seed và 118 yêu cầu, và không được kiểm định.
 
 ## Thí nghiệm trên simulator
 
-Năm biến thể, mỗi cái so với baseline (đón đúng ghim, tài xế gần nhất theo chim bay) trên dữ liệu mô phỏng, 20 seed đánh giá 20270001–20270020, kịch bản `hcm-baseline`. Trong ngoặc là khoảng tin cậy t 95% của chênh cặp; cột `walk_m` p50 là chênh cặp, mét:
+Có năm biến thể, mỗi biến thể so với baseline (đón đúng ghim, tài xế gần nhất theo chim bay) trên dữ liệu mô phỏng, 20 seed đánh giá 20270001–20270020, kịch bản `hcm-baseline`. Trong ngoặc là khoảng tin cậy t 95% của chênh cặp; cột `walk_m` p50 là chênh cặp, mét:
 
 | Biến thể | `deadhead_m` TB | `u_turns` mỗi chuyến | `walk_m` p50 | `cancel_rate` |
 |---|---:|---:|---:|---:|
@@ -201,17 +201,17 @@ Năm biến thể, mỗi cái so với baseline (đón đúng ghim, tài xế g�
 
 Ba điều đọc được, và một điều không đọc được.
 
-**Phạt phía đường làm mất khoảng 18 m km rỗng, để đổi lấy lợi ích mà simulator không đo.** So (a) với (b): bỏ phạt cho `deadhead_m` −125,3 m thay vì −107,0 m, chênh 18,3 m. Đây là chênh của hai *ước lượng*, các khoảng tin cậy chồng nhau, và hai cấu hình chưa được so trực tiếp với nhau, nên «18 m» là một thứ tự độ lớn chứ không phải kết quả kiểm định. Điều khách được lợi, tức khỏi băng đường lớn, không hiện ra ở chỉ số nào: **simulator không tính thời gian băng đường**. Gần như chỉ có chi phí hiện ra. Một dấu hiệu gián tiếp: ở (a) `walk_m` p50 thấp hơn (b) khoảng 4 m (+26,5 so với +30,6), tức phạt có thể hơi kéo ứng viên về phía khách; cũng chưa kiểm định trực tiếp.
+**Phạt phía đường làm mất khoảng 18 m quãng chạy rỗng, để đổi lấy lợi ích mà simulator không đo.** So (a) với (b): bỏ phạt cho `deadhead_m` −125,3 m thay vì −107,0 m, chênh 18,3 m. Đây là chênh của hai *ước lượng*, các khoảng tin cậy chồng nhau, và hai cấu hình chưa được so trực tiếp với nhau, nên «18 m» là một thứ tự độ lớn chứ không phải kết quả kiểm định. Điều khách được lợi, tức khỏi băng đường lớn, không hiện ra ở chỉ số nào: **simulator không tính thời gian băng đường**. Gần như chỉ có chi phí hiện ra. Một dấu hiệu gián tiếp: ở (a) `walk_m` p50 thấp hơn (b) khoảng 4 m (+26,5 so với +30,6), tức phạt có thể hơi kéo ứng viên về phía khách; cũng chưa kiểm định trực tiếp.
 
-**Không thấy phạt phía đường làm giảm quay đầu.** `u_turns` từ 1,6 xuống 1,3 cả ở (a) lẫn (b). Giả thuyết: phần giảm đến từ việc chọn điểm gần tài xế hơn và để A\* theo cạnh thấy chi phí quay đầu thật; lab không tách riêng hai phần này. Một dấu hiệu ủng hộ: bỏ A\* và chỉ dùng ma trận (c) thì `u_turns` còn 1,4 và `deadhead_m` kém hơn (a) cỡ 11 m (−95,9 so với −107,0), cũng là chênh của hai ước lượng, chưa kiểm định.
+**Không có dấu hiệu cho thấy phạt phía đường làm giảm quay đầu.** `u_turns` từ 1,6 xuống 1,3 cả ở (a) lẫn (b). Giả thuyết: phần giảm đến từ việc chọn điểm gần tài xế hơn và để A\* theo cạnh thấy chi phí quay đầu thật; lab không tách riêng hai phần này. Một dấu hiệu ủng hộ: bỏ A\* và chỉ dùng ma trận (c) thì `u_turns` còn 1,4 và `deadhead_m` kém hơn (a) cỡ 11 m (−95,9 so với −107,0), cũng là chênh của hai ước lượng, chưa kiểm định.
 
-**Cam kết một hướng không thêm gì cho bộ ghép «gần nhất theo chim bay».** (d) gần như trùng (a): `deadhead_m` −108,2 m so với −107,0 m. Danh sách hai hướng không giúp, ít nhất với bộ ghép này.
+**Chốt một hướng tiếp cận không mang lại thêm gì cho bộ ghép «gần nhất theo chim bay».** (d) gần như trùng (a): `deadhead_m` −108,2 m so với −107,0 m. Danh sách hai hướng không giúp, ít nhất với bộ ghép này.
 
 **J phải khớp bộ ghép phía sau.** Ở (e), nếu J giả định bộ ghép chọn tài xế nhanh nhất (`BestTime`) trong khi bộ ghép thật chọn tài xế gần nhất theo chim bay, `deadhead_m` chỉ −70,5 m và `cancel_rate` **không khác biệt rõ** (khoảng tin cậy chứa 0). Một mô hình sai về người thực thi phía sau có vẻ làm mất khoảng một phần ba lợi ích của (a) (−70,5 so với −107,0 m, chưa so trực tiếp), trong khi khách lại đi bộ ít hơn (`walk_m` p50 +18,2 so với +26,5 m).
 
-Một điều lab **không** đọc được: lợi ích của phạt phía đường cho khách. Khách khỏi băng đường lớn là một lợi ích thật nếu nó thật, nhưng chúng ta đã đặt giá cho nó bằng một con số 30 s đoán, và simulator không có gì để xác nhận hay bác bỏ. Quyết định giữ hay bỏ khoản phạt này là chính sách phải dựa trên thứ khác (số vụ băng đường nguy hiểm, khảo sát khách), không phải trên bảng này.
+Một điều lab **không** đọc được: lợi ích của phạt phía đường đối với khách. Khách khỏi băng đường lớn là một lợi ích thật nếu nó thật, nhưng chúng ta đã đặt giá cho nó bằng một con số 30 s ước đoán, và simulator không có gì để xác nhận hay bác bỏ. Giữ hay bỏ khoản phạt này là quyết định chính sách, và phải dựa trên thứ khác (số vụ băng đường nguy hiểm, khảo sát khách), không phải trên bảng này.
 
-**Ai được lợi, ai chịu thiệt.** Tài xế được lợi ở `u_turns` (1,6 → 1,3) và `deadhead_m`; khách chờ xe được lợi ở ETA và huỷ. Khách điển hình chịu thiệt ở `walk_m` p50 (+26,5 m với (a)). Khoản phạt phía đường đẩy thêm cỡ 18 m km rỗng sang tài xế (chênh của hai ước lượng) để đổi lấy lợi ích cho khách mà chưa đo được; nếu lợi ích đó không có thật, tài xế đang trả cho nó mà không ai nhận.
+**Ai được lợi, ai chịu thiệt.** Tài xế được lợi ở `u_turns` (1,6 → 1,3) và `deadhead_m`; khách chờ xe được lợi ở ETA và tỉ lệ huỷ chuyến. Khách điển hình chịu thiệt ở `walk_m` p50 (+26,5 m với (a)). Khoản phạt phía đường đẩy thêm cỡ 18 m quãng chạy rỗng sang tài xế (chênh của hai ước lượng) để đổi lấy lợi ích cho khách mà chưa đo được; nếu lợi ích đó không có thật, tài xế đang trả cho nó mà không ai nhận.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -240,10 +240,10 @@ Cấu hình: Apple Silicon, `--release`, `--jobs 6`; phần 1–2 trên 120 yêu
 
 ## Giới hạn của ví dụ
 
-- **Phạt phía đường không đo được lợi ích** trong simulator (không có mô hình băng đường), và các khoản phạt 30 s, 20 s là đoán. Bài chỉ cho thấy cơ chế và cái giá.
+- **Phạt phía đường không đo được lợi ích** trong simulator (không có mô hình băng đường), và các khoản phạt 30 s, 20 s là số ước đoán. Bài chỉ cho thấy cơ chế và cái giá.
 - **Các so sánh giữa biến thể là chênh của hai ước lượng**, các khoảng tin cậy chồng nhau; lab chưa so trực tiếp (a) với (b), (c), (d).
 - **Phần 1 và 2 chỉ một seed, 120 yêu cầu**, không có khoảng tin cậy; đếm quay đầu là tổng số lần trên các tuyến chứ không phải kiểm định.
-- **Ma trận và CH vẫn là theo nút**; hai tầng là cách vòng qua chứ không giải quyết tận gốc (một CH theo cạnh có thể thay thế, lab không làm).
+- **Ma trận và CH vẫn tính theo nút**; hai tầng là cách lách chứ không giải quyết tận gốc (một CH theo cạnh có thể thay thế, lab không làm).
 - **J phải khớp bộ ghép:** `DriverModel::NearestCrow` mô hình hoá đúng bộ ghép baseline; P05 đổi bộ ghép thì phải đổi giả định này.
 - Hướng tài xế trong simulator là hướng thật của vị trí có hướng, không phải hướng suy ra từ GPS qua map matching.
 

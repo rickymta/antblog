@@ -1,7 +1,7 @@
 ---
 slug: location-map-matching-hmm-viterbi-rust
 title: "Map matching bằng HMM và Viterbi: tài xế đang ở đường nào"
-summary: "Bài 16: bám đường Newson–Krumm trên HCM, nhiễu mô phỏng: σ = 10 m, HMM 86,87% cạnh nới nút (69,09% chặt), snap 66,06% (49,85%); trên fixture σ = 3 m snap nhỉnh ở thước nới (99,57% so với 99,16%), thua ở thước chặt."
+summary: "Bài 16: bám đường theo Newson–Krumm trên HCM, nhiễu mô phỏng: σ = 10 m, HMM 86,87% cạnh nới nút (69,09% chặt), snap 66,06% (49,85%); trên fixture σ = 3 m snap nhỉnh ở thước nới (99,57% so với 99,16%), thua ở thước chặt."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, map-matching, hmm, viterbi, newson-krumm, synthetic-data]
@@ -10,7 +10,7 @@ language: vi
 
 Một đại lộ ở TP.HCM có dải phân cách ở giữa. Mỗi chiều xe chạy là một nhánh một chiều riêng, và sát bên là đường gom. Ba con đường cách nhau chưa tới hai chục mét, trong khi điểm GPS của tài xế lệch cỡ 10 m. Tài xế đang đi đúng chiều trên đại lộ; một điểm GPS nằm sát nhánh ngược chiều, hai điểm sau nằm sát đường gom. Nếu mỗi điểm chọn «đường gần nhất», marker của khách nhảy qua lại giữa ba đường, và điểm đón có thể bị đặt sang phía đường mà tài xế phải quay đầu cả trăm mét mới tới được.
 
-Đây là bài 16 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng ứng viên từ R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong) và `NoiseModel` của [bài 15](/articles/location-kalman-loc-nhieu-gps-rust). Mọi độ chính xác trong bài là **trên dữ liệu mô phỏng**: xe chạy trên lộ trình thật của đồ thị HCM, nhưng nhiễu GPS do chính lab sinh ra, nên kết quả bị chi phối bởi mô hình nhiễu của chúng ta và không phải số đo trên GPS người thật.
+Đây là bài 16 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng ứng viên từ R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong) và `NoiseModel` của [bài 15](/articles/location-kalman-loc-nhieu-gps-rust). Mọi độ chính xác trong bài đều **đo trên dữ liệu mô phỏng**: xe chạy trên lộ trình thật của đồ thị HCM, nhưng nhiễu GPS do chính lab sinh ra, nên kết quả phụ thuộc vào mô hình nhiễu của chúng ta, không phải số đo trên GPS người thật.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Một đại lộ ở TP.HCM có dải phân cách ở giữa. Mỗi chiều xe 
 
 ## Từ snap từng điểm tới bài toán chuỗi
 
-Snap xét mỗi điểm một mình, nên nó mù với thứ tự thời gian: nó không biết điểm trước đó nằm ở nhánh nào, và không biết xe không thể sang nhánh bên kia dải phân cách chỉ trong một giây. Bám đường (map matching) xử lý cả chuỗi: tìm dãy cạnh hợp lý nhất, trong đó mỗi điểm GPS vừa gần cạnh được gán, vừa nối được với điểm trước bằng một đoạn đường hợp lý.
+Snap xét mỗi điểm một mình, nên nó không nhận biết thứ tự thời gian: nó không biết điểm trước đó nằm ở nhánh nào, và không biết xe không thể sang nhánh bên kia dải phân cách chỉ trong một giây. Bám đường (map matching) xử lý cả chuỗi: tìm dãy cạnh hợp lý nhất, trong đó mỗi điểm GPS vừa gần cạnh được gán, vừa nối được với điểm trước bằng một đoạn đường hợp lý.
 
 Newson và Krumm (Microsoft Research, ACM SIGSPATIAL GIS 2009) mô hình hoá việc này bằng mô hình Markov ẩn. Trạng thái ẩn là «xe đang ở đoạn đường nào»; quan sát là điểm GPS. Hai xác suất làm nên mô hình, theo bản bài báo mà bài này đối chiếu:
 
@@ -29,11 +29,11 @@ Newson và Krumm (Microsoft Research, ACM SIGSPATIAL GIS 2009) mô hình hoá vi
 
 Chuỗi trạng thái tốt nhất được tìm bằng thuật toán Viterbi. Bài báo ước lượng hai tham số (độ lệch chuẩn nhiễu σ_z và thang β của phân phối mũ) từ dữ liệu có nhãn, đo trên một chuyến lái xe dài 80 km bằng dữ liệu thật, và đo độ sai bằng phần lộ trình sai (đoạn thừa cộng đoạn thiếu, chia cho độ dài lộ trình đúng). Chỉ số RMF trong bài này lấy đúng tinh thần đó.
 
-Lab **không** chép nguyên bài báo; nó khác ở các điểm sau. Trạng thái là **cạnh có hướng** (cạnh và cạnh ngược `twin` là hai trạng thái), nên hướng đi cũng được suy ra từ chuỗi điểm. σ của từng điểm lấy từ accuracy báo cáo (qua `NoiseModel`), không phải một hằng số. Thêm ràng buộc vận tốc tối đa và xử lý «gãy chuỗi» khi không còn đường nối. Bán kính ứng viên là 50 m và tối đa 8 cạnh vật lý gần nhất (tới 16 trạng thái có hướng), còn bài báo cắt ở 200 m. Chỉ profile ô tô, bỏ qua cấm rẽ và chi phí rẽ.
+Lab **không** chép nguyên bài báo mà khác ở các điểm sau. Trạng thái là **cạnh có hướng** (cạnh và cạnh ngược `twin` là hai trạng thái), nên hướng đi cũng được suy ra từ chuỗi điểm. σ của từng điểm lấy từ accuracy báo cáo (qua `NoiseModel`), không phải một hằng số. Lab thêm ràng buộc vận tốc tối đa và xử lý «gãy chuỗi» khi không còn đường nối. Bán kính ứng viên là 50 m và tối đa 8 cạnh vật lý gần nhất (tới 16 trạng thái có hướng), còn bài báo cắt ở 200 m. Lab chỉ dùng profile ô tô, bỏ qua cấm rẽ và chi phí rẽ.
 
 ## Xác suất phát: điểm GPS cách mỗi cạnh bao xa
 
-`states_for` hỏi R-tree lấy các cạnh trong bán kính quanh điểm GPS, rồi tạo một trạng thái cho mỗi chiều đi được. Điểm số phát là log của Gaussian bỏ hằng số: `−½ · (khoảng cách / σ)²`. Với điểm báo accuracy 10 m, σ = 6,7 m, nên cạnh cách 12 m có điểm −1,6 còn cạnh cách 5 m có −0,28. Nếu bật số hạng hướng đi (`heading_sigma_deg`, mặc định tắt) thì điểm của trạng thái còn bị trừ theo độ lệch giữa heading báo cáo và hướng cạnh.
+`states_for` truy vấn R-tree để lấy các cạnh trong bán kính quanh điểm GPS, rồi tạo một trạng thái cho mỗi chiều đi được. Điểm số phát là log của Gaussian bỏ hằng số: `−½ · (khoảng cách / σ)²`. Với điểm báo accuracy 10 m, σ = 6,7 m, nên cạnh cách 12 m có điểm −1,6 còn cạnh cách 5 m có −0,28. Nếu bật số hạng hướng đi (`heading_sigma_deg`, mặc định tắt) thì điểm của trạng thái còn bị trừ theo độ lệch giữa heading báo cáo và hướng cạnh.
 
 Tệp `examples/toi-noi-location/rust/crates/map-match/src/hmm.rs` (dòng 157–194):
 
@@ -82,7 +82,7 @@ Tệp `examples/toi-noi-location/rust/crates/map-match/src/hmm.rs` (dòng 157–
 
 ## Xác suất chuyển: quãng đường đi phải khớp đường chim bay
 
-Với hai điểm GPS liên tiếp, `link` tính khoảng cách chim bay `straight`, thang `β = beta_m + beta_frac · straight` (mặc định `beta_m` = 1 m, `beta_frac` = 0), rồi với mỗi cặp trạng thái tìm quãng đường ngắn nhất trên mạng từ điểm chiếu này tới điểm chiếu kia. Dijkstra có giới hạn (`Router::distances_to`, bài 21 sẽ đào sâu thuật toán) chỉ tìm tới `limit = straight + 6β + 40 m` và tối đa 4.000 nút, để mỗi điểm GPS chỉ tốn vài chục nút duyệt. Cặp nào không tới được trong giới hạn hoặc cần đi nhanh hơn 38 m/s thì bị loại.
+Với hai điểm GPS liên tiếp, `link` tính khoảng cách chim bay `straight`, thang `β = beta_m + beta_frac · straight` (mặc định `beta_m` = 1 m, `beta_frac` = 0), rồi với mỗi cặp trạng thái tìm quãng đường ngắn nhất trên mạng từ điểm chiếu này tới điểm chiếu kia. Dijkstra có giới hạn (`Router::distances_to`, bài 21 sẽ đi sâu vào thuật toán) chỉ tìm tới `limit = straight + 6β + 40 m` và tối đa 4.000 nút, để mỗi điểm GPS chỉ tốn vài chục nút duyệt. Cặp nào không tới được trong giới hạn hoặc cần đi nhanh hơn 38 m/s thì bị loại.
 
 Tệp `examples/toi-noi-location/rust/crates/map-match/src/hmm.rs` (dòng 248–252):
 
@@ -131,11 +131,11 @@ Dòng quan trọng là `sc = ps.score - (route - straight).abs() / beta - back /
 <figcaption>Hình 1. Lưới Viterbi tối giản: mỗi cột là một điểm GPS, mỗi ô là một cạnh có hướng ứng viên. <b>Số minh hoạ tự chọn</b> (khoảng cách d, σ, β), không phải output của lab; công thức giống mã trong <code>hmm.rs</code>. Nhiễu đẩy điểm 2 gần chiều ngược hơn, nhưng ngữ cảnh (không có đường nối hợp lý từ A sang B) giữ chuỗi ở chiều đúng.</figcaption>
 </figure>
 
-Hình 1 dùng số tự chọn (d, σ = 6 m, β = 1 m) để thấy cơ chế, không phải output của lab. Điều cần nhớ là thông tin nằm ở **cạnh nối** giữa các ô, không ở từng ô: chính ngữ cảnh loại nhánh ngược chiều, kể cả khi điểm đo gần nó hơn.
+Hình 1 dùng số tự chọn (d, σ = 6 m, β = 1 m) để thấy cơ chế, không phải output của lab. Điều cần nhớ là thông tin nằm ở **cạnh nối** giữa các ô, không ở từng ô: chính ngữ cảnh loại bỏ nhánh ngược chiều, kể cả khi điểm đo gần nhánh đó hơn.
 
 ## Viterbi: chọn cả chuỗi rồi truy ngược
 
-Viterbi là quy hoạch động trên lưới các lớp (một lớp cho mỗi điểm GPS). Mỗi trạng thái giữ điểm số tốt nhất của mọi chuỗi kết thúc ở nó, và con trỏ `back` về trạng thái trước trong chuỗi đó. `extend` dựng một lớp và trừ điểm tốt nhất của lớp khỏi mọi điểm số (chuẩn hoá) để điểm không trôi về −∞ trên vết dài. Bản offline dựng cả lưới rồi truy ngược từ trạng thái tốt nhất của lớp cuối:
+Viterbi là quy hoạch động trên lưới các lớp (một lớp cho mỗi điểm GPS). Mỗi trạng thái giữ điểm số tốt nhất của mọi chuỗi kết thúc ở nó, và con trỏ `back` về trạng thái trước trong chuỗi đó. `extend` dựng một lớp và trừ điểm tốt nhất của lớp khỏi mọi điểm số (chuẩn hoá) để điểm không trôi về −∞ trên chuỗi dài. Bản offline dựng cả lưới rồi truy ngược từ trạng thái tốt nhất của lớp cuối:
 
 Tệp `examples/toi-noi-location/rust/crates/map-match/src/hmm.rs` (dòng 348–364):
 
@@ -185,7 +185,7 @@ Tệp `examples/toi-noi-location/rust/crates/map-match/src/eval.rs` (dòng 114�
                 }
 ```
 
-Vì sao cần thước «nới nút»? Cạnh của đồ thị HCM rất ngắn: nhiều cạnh chỉ dài 5–40 m, vì OSM tách đường tại mỗi nút giao và mỗi chỗ đổi thuộc tính. Khi xe đi qua nút, điểm thật nằm cách nút vài mét, và việc gán nó sang cạnh kề là hợp lý chứ không phải lỗi bám đường. Thước chặt coi đó là sai, nên bị trần thấp ngay cả khi thuật toán rất tốt: HMM ở σ = 3 m chỉ đạt 83,65% chặt nhưng 99,15% nới. **Thước nới được thêm sau khi xem kết quả**, không đặt trước; lab nói rõ điều này và bài cũng vậy. Vì thế bảng dưới đây hiện cả hai thước, không chỉ thước dễ nhìn. Bộ chọn tham số (seed 1106, 40 chuyến khác hẳn) và bộ báo cáo (seed 20261106) tách nhau; bảng chọn tham số cho thấy mặt phẳng rất phẳng, mọi tổ hợp β và hệ số accuracy trong lưới 60 ô cho cạnh nới nút từ 87,44% đến 88,93%, nên giá trị mặc định (`beta_m` 1, `beta_frac` 0, hệ số accuracy 0,67) không phải một đỉnh nhọn.
+Vì sao cần thước «nới nút»? Cạnh của đồ thị HCM rất ngắn: nhiều cạnh chỉ dài 5–40 m, vì OSM tách đường tại mỗi nút giao và mỗi chỗ đổi thuộc tính. Khi xe đi qua nút, điểm thật nằm cách nút vài mét, và việc gán nó sang cạnh kề là hợp lý chứ không phải lỗi bám đường. Thước chặt coi đó là sai, nên bị chặn trần ở mức thấp ngay cả khi thuật toán rất tốt: HMM ở σ = 3 m chỉ đạt 83,65% chặt nhưng 99,15% nới. **Thước nới được thêm sau khi xem kết quả**, không đặt trước; lab nói rõ điều này và bài cũng vậy. Vì thế bảng dưới đây hiện cả hai thước, không chỉ thước dễ nhìn. Bộ chọn tham số (seed 1106, 40 chuyến khác hẳn) và bộ báo cáo (seed 20261106) tách nhau; bảng chọn tham số cho thấy bề mặt tham số rất bằng phẳng, mọi tổ hợp β và hệ số accuracy trong lưới 60 ô cho cạnh nới nút từ 87,44% đến 88,93%, nên giá trị mặc định (`beta_m` 1, `beta_frac` 0, hệ số accuracy 0,67) không phải một đỉnh nhọn.
 
 Kết quả trên đồ thị HCM, 26.146 điểm mỗi mức σ, lấy mẫu 1 Hz, **nhiễu mô phỏng do lab sinh** (tương quan 8 giây, không phải GPS thật), `MatchConfig::default()`:
 
@@ -229,15 +229,15 @@ Trên đồ thị HCM, HMM thắng snap ở mọi mức nhiễu, và khoảng c�
 | 10 | snap | 71,59% | 83,91% | 71,91% | 1,057 |
 | 10 | HMM | 84,69% | 94,12% | 93,72% | 0,136 |
 
-**Ở σ = 3 m trên fixture, snap có cạnh nới nút cao hơn HMM (99,57% so với 99,16%).** HMM vẫn hơn ở thước chặt, ở chiều và ở RMF, nên đúng cách đọc là: khi nhiễu nhỏ hơn khoảng cách giữa các đường thì «đang ở đường nào» đã gần như được snap giải xong, và chỗ HMM còn hơn là **chiều đi** và **lộ trình**. Lab chưa kiểm nguyên nhân của chênh lệch 0,41 điểm. Có hai nghi vấn hợp lý. Một: bảng này dùng `MatchConfig::default()` đã chọn trên HCM, còn bảng chọn tham số của chính fixture chọn giá trị khác hẳn (`beta_m` = 6, `beta_frac` = 0,3, hệ số accuracy = 1,5), nên HMM chạy với tham số không dành cho đồ thị này; **tham số không mang sang đồ thị khác**. Hai: HMM gãy chuỗi 11 lần trên 3.710 điểm, và mỗi lần gãy bắt đầu lại từ điểm không có ngữ cảnh. Chưa chạy lại fixture bằng tham số của chính nó, nên chưa nói được nghi vấn nào đúng.
+**Ở σ = 3 m trên fixture, snap có cạnh nới nút cao hơn HMM (99,57% so với 99,16%).** HMM vẫn hơn ở thước chặt, ở chiều và ở RMF, nên cách đọc đúng là: khi nhiễu nhỏ hơn khoảng cách giữa các đường thì snap đã gần như giải xong câu hỏi «đang ở đường nào», và chỗ HMM còn vượt trội là **chiều đi** và **lộ trình**. Lab chưa kiểm nguyên nhân của chênh lệch 0,41 điểm. Có hai nghi vấn hợp lý. Một: bảng này dùng `MatchConfig::default()` đã chọn trên HCM, còn bảng chọn tham số của chính fixture chọn giá trị khác hẳn (`beta_m` = 6, `beta_frac` = 0,3, hệ số accuracy = 1,5), nên HMM chạy với tham số không dành cho đồ thị này; **tham số không mang sang đồ thị khác**. Hai: HMM gãy chuỗi 11 lần trên 3.710 điểm, và mỗi lần gãy bắt đầu lại từ điểm không có ngữ cảnh. Chưa chạy lại fixture bằng tham số của chính nó, nên chưa nói được nghi vấn nào đúng.
 
 Những điểm yếu khác có số đo:
 
-- **Lấy mẫu thưa là chỗ snap hỏng nhất**, không phải HMM. Ở σ = 6 m, chu kỳ 10 giây: snap có recall lộ trình 70,12% (bỏ sót cạnh vì không nối khoảng trống) và RMF 0,595; HMM 99,12% và 0,023. HMM chỉ tụt từ 96,44% (1 giây) xuống 95,56% (10 giây) theo cạnh nới nút, và từ 76,99% xuống 75,80% theo cạnh chặt. Bài báo gốc cũng báo HMM chịu lấy mẫu thưa tốt (0,11% lộ trình sai ở chu kỳ 30 giây trên dữ liệu lái xe thật của họ), nhưng hai con số không so sánh được: dữ liệu, bản đồ, nhiễu và cách tính khác nhau.
+- **Lấy mẫu thưa là chỗ snap yếu nhất**, không phải HMM. Ở σ = 6 m, chu kỳ 10 giây: snap có recall lộ trình 70,12% (bỏ sót cạnh vì không nối khoảng trống) và RMF 0,595; HMM 99,12% và 0,023. HMM chỉ tụt từ 96,44% (1 giây) xuống 95,56% (10 giây) theo cạnh nới nút, và từ 76,99% xuống 75,80% theo cạnh chặt. Bài báo gốc cũng ghi nhận HMM chịu được lấy mẫu thưa tốt (0,11% lộ trình sai ở chu kỳ 30 giây trên dữ liệu lái xe thật của họ), nhưng hai con số không so sánh được: dữ liệu, bản đồ, nhiễu và cách tính khác nhau.
 - **Điểm nhảy xa làm gãy chuỗi.** Khi tỉ lệ điểm nhảy 25–70 m tăng từ 0% lên 0,5% rồi 3%, số lần gãy chuỗi đi từ 15 lên 38 rồi 183, và HMM đi từ 87,42% xuống 86,87% rồi 82,60% cạnh nới nút (70,55%, 69,09%, 63,87% cạnh chặt); snap gần như không đổi ở hai đầu (66,16% và 65,92% nới, 50,14% và 49,81% chặt) vì vốn đã sai nhiều. Lab chưa có cơ chế «bỏ điểm nhảy rồi nối tiếp».
-- **Tham số của mô hình quan trọng không đều.** Đổi từng thành phần ở σ = 10 m, mặc định 86,87% nới nút và 69,09% chặt (nới / chặt): chỉ 3 ứng viên mỗi điểm còn 78,49% / 61,52%; bán kính 25 m, nhỏ hơn nhiễu, còn 84,46% / 66,86%; `beta_m` = 30 (quá lỏng) còn 84,03% / 65,54%. Thêm số hạng hướng đi **tăng** lên 87,91% / 71,71%; chạy trên điểm đã lọc Kalman của bài 15 tăng lên 87,26% / 70,21%; bỏ accuracy gần như không đổi (87,07% / 69,26%, nhưng accuracy trong lab hiệu chuẩn tốt, như bài 15 đã nói).
+- **Các tham số của mô hình không quan trọng như nhau.** Đổi từng thành phần ở σ = 10 m, mặc định 86,87% nới nút và 69,09% chặt (nới / chặt): nếu chỉ giữ 3 ứng viên mỗi điểm thì còn 78,49% / 61,52%; bán kính 25 m, nhỏ hơn nhiễu, thì còn 84,46% / 66,86%; `beta_m` = 30 (quá lỏng) còn 84,03% / 65,54%. Thêm số hạng hướng đi **tăng** lên 87,91% / 71,71%; chạy trên điểm đã lọc Kalman của bài 15 tăng lên 87,26% / 70,21%; không dùng accuracy thì gần như không đổi (87,07% / 69,26%, nhưng accuracy trong lab hiệu chuẩn tốt, như bài 15 đã nói).
 
-Một lỗi đã gặp và sửa, đáng ghi lại vì nó không lộ ra trong số tổng. Bản đầu cho phép đi lùi một đoạn ngắn trên cùng cạnh với quãng đường tính bằng 0 và miễn phí, nên đi ngược chiều cạnh rẻ gần bằng đổi sang cạnh `twin`. Lỗi được phát hiện nhờ soi một chỗ gãy chuỗi ở σ = 3 m, không nhờ số tổng. Sau khi sửa (phạt mỗi mét lùi), hàng «không phạt đi lùi» cho 87,06% so với 86,87% mặc định (cạnh chặt 69,40% so với 69,09%): ảnh hưởng nhỏ trên tập này, nhưng đây là loại lỗi chỉ kiểm thử trên ca cụ thể mới thấy.
+Một lỗi đã gặp và sửa, đáng ghi lại vì lỗi này không lộ ra trong số tổng. Bản đầu cho phép đi lùi một đoạn ngắn trên cùng cạnh với quãng đường tính bằng 0 và miễn phí, nên đi ngược chiều cạnh rẻ gần bằng đổi sang cạnh `twin`. Lỗi được phát hiện nhờ xem kỹ một chỗ gãy chuỗi ở σ = 3 m, chứ không nhờ số tổng. Sau khi sửa (phạt mỗi mét lùi), hàng «không phạt đi lùi» cho 87,06% so với 86,87% mặc định (cạnh chặt 69,40% so với 69,09%): ảnh hưởng nhỏ trên tập này, nhưng đây là loại lỗi chỉ kiểm thử trên test case cụ thể mới thấy.
 
 ## Chi phí: vài micro-giây mỗi điểm
 
@@ -269,16 +269,16 @@ chọn (tối đa cạnh nới% − 10·RMF): beta_m = 1, beta_frac = 0, accurac
   HMM + Viterbi offline                   69.09%    86.87%    82.96%    98.68%   0.098      8.33  (gãy chuỗi 38)
 ```
 
-Số đếm và tỉ lệ tái lập từng chữ số với cùng seed; chỉ phần µs/điểm là nhiễu theo tải máy. Test hồi quy trên ca khó của fixture (cầu vượt, hai chiều đại lộ có dải phân cách): `cargo test --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p map-match --test hard_cases -- --nocapture`, in `snap 58.6%/65.4%  offline 85.5%/93.9%` (chặt/nới nút) và RMF 0,97 so với 0,14. Ngưỡng của test (offline hơn snap ít nhất 5 điểm, RMF offline thấp hơn) được đặt rộng hơn số đo và **đặt sau khi xem một lần chạy**, nên đây là kiểm tra hồi quy, không phải chứng minh. Toàn phần: `bash examples/toi-noi-location/verify-p02-rust.sh`.
+Số đếm và tỉ lệ tái lập từng chữ số với cùng seed; chỉ phần µs/điểm dao động theo tải máy. Test hồi quy trên test case khó của fixture (cầu vượt, hai chiều đại lộ có dải phân cách): `cargo test --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p map-match --test hard_cases -- --nocapture`, in `snap 58.6%/65.4%  offline 85.5%/93.9%` (chặt/nới nút) và RMF 0,97 so với 0,14. Ngưỡng của test (offline hơn snap ít nhất 5 điểm, RMF offline thấp hơn) được đặt rộng hơn số đo và **đặt sau khi xem một lần chạy**, nên đây là kiểm tra hồi quy, không phải chứng minh. Toàn phần: `bash examples/toi-noi-location/verify-p02-rust.sh`.
 
 ## Giới hạn của ví dụ
 
 - **Không có GPS người thật.** Nhiễu có hằng số tương quan 8 giây, accuracy hiệu chuẩn tốt, điểm nhảy xa do lab sinh; mọi tỉ lệ đúng cạnh chỉ đúng cho mô hình này.
-- **Chỉ profile ô tô.** Chưa bám đường cho xe máy (hẻm hẹp là chỗ xe máy khác ô tô), và đồ thị cho ô tô vào cả những hẻm không có thẻ cấm, nên một chuyến 2–4,5 km có nhiều đoạn hẻm.
+- **Chỉ profile ô tô.** Chưa bám đường cho xe máy (hẻm hẹp là chỗ xe máy khác ô tô), và đồ thị cho ô tô vào cả những hẻm không gắn thẻ (tag) cấm xe, nên một chuyến 2–4,5 km có nhiều đoạn hẻm.
 - **Bỏ qua cấm rẽ và chi phí rẽ** (dùng Dijkstra không có chi phí rẽ; bài 23 mới thêm). Việc quay đầu ở dải phân cách vì thế chỉ được mô hình hoá qua độ dài đường đi.
 - **Chưa có «bỏ điểm nhảy rồi nối tiếp»**: mỗi điểm đa đường làm gãy chuỗi.
 - **Tham số không mang sang đồ thị khác**; chọn lại cho từng bản đồ.
-- **Chưa chạy lại fixture bằng tham số của chính nó**, nên chênh lệch 99,57% so với 99,16% chưa có nguyên nhân được kiểm.
+- **Chưa chạy lại fixture bằng tham số của chính nó**, nên chưa kiểm chứng được nguyên nhân của chênh lệch 99,57% so với 99,16%.
 - Mô hình chỉ dùng heading nếu bật `heading_sigma_deg`; vì chưa kiểm với heading thật nên mặc định tắt.
 
 ## Bài tập
@@ -286,7 +286,7 @@ Số đếm và tỉ lệ tái lập từng chữ số với cùng seed; chỉ p
 **Bài 1.** Cho `σ` = 6 m, β = 1 m. Hai trạng thái ở điểm 2: A cách điểm đo 14 m, B cách 6 m. Giả sử có chuyển hợp lệ từ A và từ B ở điểm 1, đều có |đường đi − chim bay| = 1 m. Chênh lệch điểm số phát giữa A và B là bao nhiêu? Phải chênh lệch quãng đường đi tối thiểu bao nhiêu để B bị A vượt qua?
 
 <details><summary>Lời giải bài 1</summary>
-<p>Điểm phát A = −½ · (14/6)² = −2,72; B = −½ · (6/6)² = −0,5; B hơn 2,22 nat. Mỗi mét chênh lệch quãng đường đi trừ 1/β = 1 nat, nên nếu chuyển vào B có |đường đi − chim bay| lớn hơn chuyển vào A khoảng 2,22 m trở lên thì A thắng. Đó là lý do thang β quyết định mô hình tin hình học mạng đường hay tin điểm đo hơn.</p>
+<p>Điểm phát A = −½ · (14/6)² = −2,72; B = −½ · (6/6)² = −0,5; B hơn 2,22 nat. Mỗi mét chênh lệch quãng đường đi trừ 1/β = 1 nat, nên nếu chuyển vào B có |đường đi − chim bay| lớn hơn chuyển vào A khoảng 2,22 m trở lên thì A thắng. Đó là lý do thang β quyết định mô hình tin vào hình học mạng đường nhiều hơn hay tin vào điểm đo nhiều hơn.</p>
 </details>
 
 **Bài 2.** Vì sao thước «nới nút» không thể dùng để so sánh hai thuật toán nếu một bên được phép gán sang cạnh kề tuỳ ý? Lab chặn điều đó bằng cách nào?
@@ -295,10 +295,10 @@ Số đếm và tỉ lệ tái lập từng chữ số với cùng seed; chỉ p
 <p>Nếu cạnh kề nào cũng tính đúng thì một thuật toán chỉ cần gán sang cạnh bất kỳ chung nút là «đúng», nên thước mất khả năng phân biệt. Lab chặn bằng hai điều kiện đồng thời: cạnh phải chung nút với cạnh thật <i>và</i> điểm chiếu phải cách vị trí thật không quá 12 m (<code>JUNCTION_TOL_M</code>); hai thuật toán chịu cùng quy tắc. Vì thước được thêm sau khi xem kết quả nên bài luôn hiện cả thước chặt để người đọc tự kiểm.</p>
 </details>
 
-**Bài 3.** Cạnh nới nút của snap trên fixture ở σ = 3 m là 99,57%, cao hơn HMM (99,16%), dù thua ở cạnh chặt (83,85% so với 89,70%). Đề xuất hai lần chạy phân biệt hai nghi vấn trong bài.
+**Bài 3.** Cạnh nới nút của snap trên fixture ở σ = 3 m là 99,57%, cao hơn HMM (99,16%), dù thua ở cạnh chặt (83,85% so với 89,70%). Đề xuất hai lần chạy để phân biệt hai nghi vấn trong bài.
 
 <details><summary>Lời giải bài 3</summary>
-<p>Nghi vấn «tham số không hợp»: chạy lại fixture với <code>MatchConfig</code> mang giá trị mà bảng chọn tham số của fixture chọn (<code>beta_m</code> = 6, <code>beta_frac</code> = 0,3, hệ số accuracy 1,5) và so cạnh nới nút. Nghi vấn «gãy chuỗi»: giữ tham số mặc định nhưng tăng <code>gap_break_s</code> và nới giới hạn tìm đường (<code>slack_m</code>, <code>max_settled</code>) để số lần gãy giảm, rồi xem chênh lệch có thu hẹp không. Nếu cả hai không đổi gì, nguyên nhân nằm ở chỗ khác và phải soi từng điểm snap thắng HMM. Ghi mọi lần chạy vào <code>results/</code>.</p>
+<p>Nghi vấn «tham số không hợp»: chạy lại fixture với <code>MatchConfig</code> mang giá trị mà bảng chọn tham số của fixture chọn (<code>beta_m</code> = 6, <code>beta_frac</code> = 0,3, hệ số accuracy 1,5) và so cạnh nới nút. Nghi vấn «gãy chuỗi»: giữ tham số mặc định nhưng tăng <code>gap_break_s</code> và nới giới hạn tìm đường (<code>slack_m</code>, <code>max_settled</code>) để số lần gãy giảm, rồi xem chênh lệch có thu hẹp không. Nếu cả hai lần chạy đều không thay đổi kết quả, nguyên nhân nằm ở chỗ khác và phải xem xét từng điểm snap thắng HMM. Ghi mọi lần chạy vào <code>results/</code>.</p>
 </details>
 
 Bài trước: [bài 15](/articles/location-kalman-loc-nhieu-gps-rust). Bài tiếp: [bài 17](/articles/location-map-matching-online-cua-so-cau-vuot-duong-song-song).

@@ -1,16 +1,16 @@
 ---
 slug: location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka
 title: "Kho vị trí mới nhất: bộ nhớ theo ô H3, Redis GEO và Kafka"
-summary: "Bài 18: kho vị trí mới nhất của 25.000 tài xế trong bộ nhớ theo ô H3, TTL cho tài xế im lặng, Redis làm bản phụ, khởi động lại từ Redis, Kafka hoặc để nguội (đầy lại sau 4 giây), giảm mẫu sang lịch sử."
+summary: "Bài 18: kho vị trí mới nhất của 25.000 tài xế trong bộ nhớ theo ô H3, TTL cho tài xế im lặng, Redis làm bản phụ, khởi động lại từ Redis, Kafka hoặc khởi động nguội (đầy lại sau 4 giây), giảm mẫu để ghi sang lịch sử."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, h3, redis, kafka, ttl, synthetic-data]
 language: vi
 ---
 
-Giờ tan tầm, một khách đặt xe và matcher hỏi kho: «năm tài xế gần điểm đón nhất». Câu hỏi này phải được trả lời từ bộ nhớ trong vài micro-giây, vì có hàng chục truy vấn như vậy mỗi giây (hồ sơ tham chiếu ở bài 09 là 70). Nhưng kho có hai cách sai rất đời thường. Một: `geo-engine` vừa được triển khai lại và kho còn rỗng, nên suốt vài giây không có tài xế nào để ghép dù 25.000 người đang trực tuyến. Hai: nếu kho không có hạn, một tài xế vừa vào hầm hay tắt app cách đây hai phút vẫn nằm đầu danh sách «gần nhất», và khách được hứa một chiếc xe không ai nhìn thấy nữa.
+Giờ tan tầm, một khách đặt xe và matcher hỏi kho: «năm tài xế gần điểm đón nhất». Câu hỏi này phải được trả lời từ bộ nhớ trong vài micro-giây, vì có hàng chục truy vấn như vậy mỗi giây (tải tham chiếu ở bài 09 là 70 truy vấn mỗi giây). Nhưng kho có hai cách sai rất đời thường. Một: `geo-engine` vừa được triển khai lại và kho còn rỗng, nên suốt vài giây không có tài xế nào để ghép dù 25.000 người đang trực tuyến. Hai: nếu kho không có hạn, một tài xế vừa vào hầm hay tắt app cách đây hai phút vẫn nằm đầu danh sách «gần nhất», và khách được hứa một chiếc xe không ai nhìn thấy nữa.
 
-Đây là bài 18 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài ghép các mảnh trước đó: hợp đồng `location.updates.v1` từ phần Go ([bài 12](/articles/location-go-ingest-websocket-batch-gps-tai-xe) tới [bài 14](/articles/location-validate-gps-timestamp-accuracy-gia-mao)), ô H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring) và bài toán «tìm tài xế gần nhất» của [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do). Mọi số đo là **trên dữ liệu mô phỏng**: 25.000 tài xế do lab sinh, một broker Kafka và một Redis chạy trên chính máy viết, không có mạng thật. Thời gian đo khi máy đang chịu tải nặng nên chỉ so sánh tương đối trong cùng một lần chạy.
+Đây là bài 18 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài ghép các mảnh trước đó: hợp đồng `location.updates.v1` từ phần Go ([bài 12](/articles/location-go-ingest-websocket-batch-gps-tai-xe) tới [bài 14](/articles/location-validate-gps-timestamp-accuracy-gia-mao)), ô H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring) và bài toán «tìm tài xế gần nhất» của [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do). Mọi số đo đều **thực hiện trên dữ liệu mô phỏng**: 25.000 tài xế do lab sinh, một broker Kafka và một Redis chạy ngay trên máy của người viết, không có mạng thật. Thời gian đo khi máy đang chịu tải nặng nên chỉ so sánh tương đối trong cùng một lần chạy.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,9 +20,9 @@ Giờ tan tầm, một khách đặt xe và matcher hỏi kho: «năm tài xế 
 
 ## Kho này giữ gì, và không giữ gì
 
-Kho giữ **một vị trí mới nhất cho mỗi tài xế**, không phải lịch sử. Lịch sử có đường đi riêng (bài 20). Người dùng của kho là các bước phía sau: điểm điều phối của bài 36 đọc vị trí qua `get` và `nearest`, ghép chuyến của P05 hỏi `nearest`. Mỗi cập nhật là một `DriverLocationUpdated` trên topic `location.updates.v1` với key `driver_id`, nên mọi điểm của một tài xế về cùng một partition và giữ nguyên thứ tự.
+Kho giữ **một vị trí mới nhất cho mỗi tài xế**, không phải lịch sử. Lịch sử có đường đi riêng (bài 20). Các thành phần dùng kho nằm phía sau: điểm điều phối của bài 36 đọc vị trí qua `get` và `nearest`, ghép chuyến của P05 hỏi `nearest`. Mỗi cập nhật là một `DriverLocationUpdated` trên topic `location.updates.v1` với key `driver_id`, nên mọi điểm của một tài xế về cùng một partition và giữ nguyên thứ tự.
 
-Hai quyết định nhỏ ở mô hình dữ liệu có hệ quả lớn. Thứ nhất, `accuracy`, `speed` và `heading` là `Option`: «vắng» khác «0» và phải giữ nguyên khác biệt đó qua Kafka và Redis (test kiểm đúng điều này). Thứ hai, TTL tính theo `received_ms`, tức giờ ingest nhận lô theo **đồng hồ server**, không theo đồng hồ điện thoại; một điện thoại có đồng hồ lệch không làm tài xế bị coi là hết hạn hay còn tươi mãi, đúng điều bài 14 chuẩn bị ở tầng validator.
+Hai quyết định nhỏ ở mô hình dữ liệu có hệ quả lớn. Thứ nhất, `accuracy`, `speed` và `heading` là `Option`: «vắng» khác «0» và phải giữ nguyên khác biệt đó qua Kafka và Redis (test kiểm đúng điều này). Thứ hai, TTL tính theo `received_ms`, tức giờ mà ingest nhận lô, tính theo **đồng hồ server**, không theo đồng hồ điện thoại; một điện thoại có đồng hồ lệch không làm tài xế bị coi là hết hạn hay mãi được coi là còn mới, đúng điều bài 14 chuẩn bị ở tầng validator.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -33,7 +33,7 @@ Hai quyết định nhỏ ở mô hình dữ liệu có hệ quả lớn. Thứ 
 
 ## Tiêu thụ topic: assign cả partition, không commit
 
-Bình thường một consumer trong nhóm nhận một phần các partition. Kho thì khác: mỗi bản `geo-engine` cần **toàn bộ** vị trí của thành phố để trả lời «gần nhất», nên không dùng nhóm consumer chia partition. Mỗi bản `assign` tất cả partition, `group.id` chỉ là thủ tục cấu hình chứ không dùng để chia partition, và **không commit offset**. Khởi động lại thì đọc lại từ `now − TTL` bằng `offsets_for_times` (phép đo dùng mốc `now − 34 s`, phủ hết 8 vòng dữ liệu đã phát): kho chỉ cần các điểm còn trong TTL, nên phần phát lại rất ngắn. Cái giá là mỗi bản `geo-engine` đọc cả topic (băng thông đọc nhân với số bản); lab chưa đo cái giá này. `Ingest::handle` quyết định đường đi của một cập nhật:
+Bình thường một consumer trong nhóm nhận một phần các partition. Kho thì khác: mỗi bản `geo-engine` cần **toàn bộ** vị trí của thành phố để trả lời «gần nhất», nên không dùng nhóm consumer chia partition. Mỗi bản `assign` tất cả partition, `group.id` chỉ là thủ tục cấu hình chứ không dùng để chia partition, và **không commit offset**. Khởi động lại thì đọc lại từ `now − TTL` bằng `offsets_for_times` (phép đo dùng mốc `now − 34 s`, phủ hết 8 vòng dữ liệu đã phát): kho chỉ cần các điểm còn trong TTL, nên phần phát lại rất ngắn. Cái giá là mỗi bản `geo-engine` đọc cả topic (băng thông đọc nhân lên theo số bản); lab chưa đo cái giá này. `Ingest::handle` quyết định đường đi của một cập nhật:
 
 Tệp `examples/toi-noi-location/rust/crates/location-store/src/ingest.rs` (dòng 50–67):
 
@@ -58,11 +58,11 @@ Tệp `examples/toi-noi-location/rust/crates/location-store/src/ingest.rs` (dòn
     }
 ```
 
-Thứ tự là cố ý. Kho trong bộ nhớ trước vì nó là đường nóng phục vụ truy vấn. Điểm cũ đến sau bị kho bỏ (`Applied::Stale`) thì **không** được ghi sang Redis hay lịch sử. Redis và lịch sử sau và không bao giờ chặn kho. Bản ghi hỏng (không giải mã được hoặc thiếu trường bắt buộc) bị bỏ nhưng được đếm; test Kafka kiểm với 300 bản hợp lệ và 2 bản thêm (một điểm cũ đến sau, một bản hỏng).
+Thứ tự là cố ý. Kho trong bộ nhớ đi trước vì đây là đường nóng phục vụ truy vấn. Điểm cũ đến sau bị kho bỏ (`Applied::Stale`) thì **không** được ghi sang Redis hay lịch sử. Redis và lịch sử sau và không bao giờ chặn kho. Bản ghi hỏng (không giải mã được hoặc thiếu trường bắt buộc) bị bỏ nhưng được đếm; test Kafka kiểm với 300 bản hợp lệ và 2 bản thêm (một điểm cũ đến sau, một bản hỏng).
 
 ## Hai bảng, nhiều mảnh khoá: đọc nhiều ghi nhiều
 
-Kho có hai bảng, mỗi bảng chia 64 mảnh khoá. `drivers`: tài xế → (ô hiện tại, giờ, seq), mỗi mảnh một `Mutex`; một tài xế luôn qua đúng một khoá nên cập nhật của cùng một tài xế được tuần tự hoá và phát hiện điểm cũ đến sau là chính xác. `cells`: ô H3 (độ phân giải 9, cạnh ô trung bình khoảng 200,8 m theo bảng độ dài cạnh của H3) → danh sách tài xế trong ô, mỗi mảnh một `RwLock`. Truy vấn gần nhất chỉ lấy khoá đọc của các ô, không đụng `drivers`.
+Kho có hai bảng, mỗi bảng chia 64 mảnh khoá. `drivers`: tài xế → (ô hiện tại, giờ, seq), mỗi mảnh một `Mutex`; một tài xế luôn qua đúng một khoá nên cập nhật của cùng một tài xế được tuần tự hoá và việc phát hiện điểm cũ đến sau là chính xác. `cells`: ô H3 (độ phân giải 9, cạnh ô trung bình khoảng 200,8 m theo bảng độ dài cạnh của H3) → danh sách tài xế trong ô, mỗi mảnh một `RwLock`. Truy vấn gần nhất chỉ lấy khoá đọc của các ô, không đụng `drivers`.
 
 Tệp `examples/toi-noi-location/rust/crates/location-store/src/store.rs` (dòng 180–218):
 
@@ -108,7 +108,7 @@ Tệp `examples/toi-noi-location/rust/crates/location-store/src/store.rs` (dòng
     }
 ```
 
-Khi tài xế đổi ô, `apply` **chèn vào ô mới trước, xoá khỏi ô cũ sau**, nên truy vấn không bao giờ mất tài xế; trong khoảnh khắc đó có thể thấy hai bản, và truy vấn gộp theo `slot` rồi giữ bản mới hơn. Thứ tự khoá luôn là `drivers` rồi `cells` và không bao giờ giữ hai khoá `cells` cùng lúc, nên không có vòng chờ khoá. Truy vấn mở rộng từng vòng ô quanh điểm hỏi và dừng khi vòng kế tiếp chắc chắn xa hơn tài xế thứ `k`:
+Khi tài xế đổi ô, `apply` **chèn vào ô mới trước, xoá khỏi ô cũ sau**, nên truy vấn không bao giờ mất tài xế; trong khoảnh khắc đó có thể thấy hai bản, và truy vấn gộp theo `slot` rồi giữ bản mới hơn. Thứ tự khoá luôn là `drivers` rồi `cells` và không bao giờ giữ hai khoá `cells` cùng lúc, nên không có vòng chờ khoá. Truy vấn mở rộng từng vòng ô quanh điểm truy vấn và dừng khi vòng kế tiếp chắc chắn xa hơn tài xế thứ `k`:
 
 Tệp `examples/toi-noi-location/rust/crates/location-store/src/store.rs` (dòng 257–292):
 
@@ -151,11 +151,11 @@ Tệp `examples/toi-noi-location/rust/crates/location-store/src/store.rs` (dòng
         }
 ```
 
-Điều kiện dừng `safe` là heuristic có hệ số an toàn 0,8 cho độ méo của lưới, nên tính đúng của nó phải kiểm bằng cách so với vét cạn: test `nearest_matches_brute_force` (proptest, 48 ca mỗi lần chạy) và lab, trong đó 0 trên 200 truy vấn cho kết quả khác vét cạn.
+Điều kiện dừng `safe` là heuristic có hệ số an toàn 0,8 cho độ méo của lưới, nên tính đúng đắn của nó phải kiểm chứng bằng cách so với vét cạn: test `nearest_matches_brute_force` (proptest, 48 test case mỗi lần chạy) và lab, trong đó 0 trên 200 truy vấn cho kết quả khác vét cạn.
 
-**Một luồng, trong bộ nhớ** (25.000 tài xế, 60% quanh trung tâm HCM): chèn tài xế mới 0,60 µs mỗi lần; cập nhật 200.000 lần mất 0,73 µs mỗi lần, trong đó 21.563 lần (10,8%) đổi ô H3; điểm cũ đến sau bị bỏ trong 0,30 µs. Truy vấn gần nhất k = 5, bán kính tối đa 2 km: p50 5,25 µs, p95 6,21 µs, p99 7,75 µs, trung bình 5,00 tài xế mỗi truy vấn. Tải tham chiếu 6.250 cập nhật mỗi giây chỉ dùng một phần rất nhỏ của một lõi. Các số µs này **đo khi máy chịu tải nặng** (tải 1 phút khoảng 90) nên đừng trích tuyệt đối.
+**Một luồng, trong bộ nhớ** (25.000 tài xế, 60% quanh trung tâm HCM): chèn tài xế mới 0,60 µs mỗi lần; cập nhật 200.000 lần mất 0,73 µs mỗi lần, trong đó 21.563 lần (10,8%) đổi ô H3; điểm cũ đến sau bị bỏ trong 0,30 µs. Truy vấn gần nhất k = 5, bán kính tối đa 2 km: p50 5,25 µs, p95 6,21 µs, p99 7,75 µs, trung bình 5,00 tài xế mỗi truy vấn. Tải tham chiếu 6.250 cập nhật mỗi giây chỉ dùng một phần rất nhỏ của một lõi. Các số µs này **đo khi máy chịu tải nặng** (tải 1 phút khoảng 90) nên đừng trích số tuyệt đối.
 
-**Khi vừa đọc vừa ghi** thì khoá quyết định. Lab chạy mỗi cấu hình 2 giây, 25.000 tài xế, ghi là cập nhật theo vòng, đọc là truy vấn k = 5 liên tục, và so một mảnh khoá với 64 mảnh, hai lần ở hai mức tải máy (90 và 28):
+**Khi vừa đọc vừa ghi** thì khoá là yếu tố quyết định. Lab chạy mỗi cấu hình 2 giây, 25.000 tài xế, ghi là cập nhật theo vòng, đọc là truy vấn k = 5 liên tục, và so một mảnh khoá với 64 mảnh, hai lần ở hai mức tải máy (90 và 28):
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -173,7 +173,7 @@ Bảng đủ số của Hình 2 (ghi: cập nhật/giây; đọc: truy vấn/gi�
 | 1 ghi + 4 đọc | ít tải (tải 28) | 24.845 / 364.158 | 684.690 / 515.988 |
 | 4 ghi + 4 đọc | ít tải (tải 28) | 12.440 / 391.786 | 1.663.963 / 304.737 |
 
-Hai điều rút ra, và một điều không. Chia mảnh làm tốc độ ghi **cao hơn trong cả bốn cấu hình**, từ 3,0 lần lên 134 lần. Nhưng chiều ngược lại cũng có thật: ở 4 ghi + 4 đọc, 64 mảnh cho **ít** truy vấn đọc hơn một mảnh ở cả hai lần chạy (93.112 so với 188.216; 304.737 so với 391.786), còn luồng đọc thì chậm lại ở đúng cấu hình đó. Điều chưa rút ra được là **cơ chế** của cả hai chiều. Cách hiểu hợp lý: với một mảnh, luồng đọc giữ `RwLock` gần như liên tục nên luồng ghi chờ rất lâu; với 64 mảnh, luồng ghi chạy tự do và tranh CPU với luồng đọc. Lab không có phép đo riêng cho điều đó, và máy 10 lõi lúc đó đang chạy ở tải 28 đến 90, nên các con số đồng thời nhiễu mạnh. Độ trễ đọc p50 vẫn 5,7 đến 7,0 µs ở mọi cấu hình, còn p99 từ 20 đến 282 µs.
+Có hai điều rút ra được, và một điều chưa rút ra được. Chia mảnh khiến tốc độ ghi **cao hơn trong cả bốn cấu hình**, từ 3,0 lần lên 134 lần. Nhưng chiều ngược lại cũng có thật: ở 4 ghi + 4 đọc, 64 mảnh cho **ít** truy vấn đọc hơn một mảnh ở cả hai lần chạy (93.112 so với 188.216; 304.737 so với 391.786), còn luồng đọc thì chậm lại ở đúng cấu hình đó. Điều chưa rút ra được là **cơ chế** của cả hai chiều. Cách hiểu hợp lý: với một mảnh, luồng đọc giữ `RwLock` gần như liên tục nên luồng ghi chờ rất lâu; với 64 mảnh, luồng ghi chạy tự do và tranh CPU với luồng đọc. Lab không có phép đo riêng cho điều đó, và máy 10 lõi lúc đó đang chạy ở tải 28 đến 90, nên các số đo đồng thời dao động mạnh. Độ trễ đọc p50 vẫn 5,7 đến 7,0 µs ở mọi cấu hình, còn p99 từ 20 đến 282 µs.
 
 ## TTL cho tài xế im lặng
 
@@ -189,7 +189,7 @@ Kho rỗng sau khởi động, và có ba cách làm đầy nó. Lab đo cả ba
 | Kafka phát lại 34 giây cuối (`offsets_for_times`), 200.000 bản ghi, 3 partition | 0,08 s kết nối + 0,65 s | 0,07 s + 0,43 s | 3,05 s |
 | Nguội hoàn toàn (`Start::Latest`) | đầy sau 4 s | không đo lại | không đo lại |
 
-(«Ít tải» và «tải cao» là hai lần chạy khác được chép từ màn hình, đã ghi trong `results/`; tải 1 phút của ít tải, lần chính và tải cao lần lượt khoảng 28, 90 và 125.) Thời gian khác nhau nhiều giữa các lần chạy vì máy chịu tải thay đổi (Kafka phát lại từ 0,43 giây tới 3,05 giây, hơn bảy lần), nên chỉ so sánh được bậc độ lớn. Hình 3 vẽ cách kho đầy lại khi nguội:
+(«Ít tải» và «tải cao» là hai lần chạy khác được chép từ màn hình, đã ghi trong `results/`; tải 1 phút của ít tải, lần chính và tải cao lần lượt khoảng 28, 90 và 125.) Thời gian chênh lệch nhiều giữa các lần chạy vì máy chịu tải thay đổi (Kafka phát lại từ 0,43 giây tới 3,05 giây, hơn bảy lần), nên chỉ so sánh được bậc độ lớn. Hình 3 vẽ cách kho đầy lại khi nguội:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -198,11 +198,11 @@ Kho rỗng sau khởi động, và có ba cách làm đầy nó. Lab đo cả ba
 <figcaption>Hình 3. Mục 7(d) của output <code>loc18_kho_vi_tri --redis --kafka</code>: kho khởi động nguội (<code>Start::Latest</code>) đầy dần theo chu kỳ báo cáo 4 giây của 25.000 tài xế; số tài xế là số đếm, không phụ thuộc tải máy. Bảng bên phải gom thời gian nạp của ba lần chạy, <b>đều đo khi máy chịu tải</b> nên chỉ có giá trị so sánh bậc độ lớn. Dữ liệu tổng hợp.</figcaption>
 </figure>
 
-Kết luận chắc: **Kafka không cần Redis để khởi động nóng**, vì TTL chỉ 30 giây nên phần phát lại ngắn (200.000 bản ghi trong 0,65 giây ở lần chính). Redis có ích khi muốn khởi động dưới 0,1 giây, hoặc khi Kafka chậm hay đang gặp sự cố. Và ngay cả không nạp gì, kho tự đầy lại trong 4 giây vì nguồn của nó là luồng liên tục. Bài toán thật không nằm ở thời gian đầy lại mà ở chỗ trong 4 giây đó matcher đang nhìn một kho thiếu; nên readiness probe của bản `geo-engine` mới (bài 63) phải chờ kho đủ ấm thay vì chỉ chờ tiến trình lên.
+Kết luận chắc: **Kafka không cần Redis để khởi động nóng**, vì TTL chỉ 30 giây nên phần phát lại ngắn (200.000 bản ghi trong 0,65 giây ở lần chính). Redis có ích khi muốn khởi động dưới 0,1 giây, hoặc khi Kafka chậm hay đang gặp sự cố. Và ngay cả khi không nạp gì, kho tự đầy lại trong 4 giây vì nguồn của nó là luồng liên tục. Bài toán thật không nằm ở thời gian đầy lại mà ở chỗ trong 4 giây đó matcher đang dùng một kho chưa đầy đủ; nên readiness probe của bản `geo-engine` mới (bài 63) phải chờ kho nạp đủ dữ liệu thay vì chỉ chờ tiến trình khởi động xong.
 
 ## Redis là bản phụ
 
-Redis không nằm trên đường đọc nóng. Nó có hai việc: khởi động lại nhanh, và cho dịch vụ khác cần `GEOSEARCH` mà không muốn giữ bản đồ vị trí trong RAM. Mỗi tài xế ở hai chỗ: một sorted set `GEO` (member là mã tài xế) cho `GEOSEARCH`, và một hash mã tài xế → bản ghi nhị phân 46 byte (đủ giờ, seq, accuracy/speed/heading và cờ, kèm mặt nạ «có mặt» để giữ vắng khác 0) cho nạp lại. `GEOSEARCH` có từ Redis 6.2.0 và chấp nhận `FROMLONLAT`, `BYRADIUS`, `ASC`, `COUNT` như lab dùng; Redis của lab là 7.4.12.
+Redis không nằm trên đường đọc nóng. Redis có hai việc: khởi động lại nhanh, và cho dịch vụ khác cần `GEOSEARCH` mà không muốn giữ bản đồ vị trí trong RAM. Mỗi tài xế ở hai chỗ: một sorted set `GEO` (member là mã tài xế) cho `GEOSEARCH`, và một hash mã tài xế → bản ghi nhị phân 46 byte (đủ giờ, seq, accuracy/speed/heading và cờ, kèm mặt nạ «có mặt» để giữ vắng khác 0) cho nạp lại. `GEOSEARCH` có từ Redis 6.2.0 và chấp nhận `FROMLONLAT`, `BYRADIUS`, `ASC`, `COUNT` như lab dùng; Redis của lab là 7.4.12.
 
 Điều quan trọng nhất là Redis **không được làm chậm kho**. `MirrorWriter` có một luồng riêng nhận cập nhật qua hàng đợi có giới hạn, gộp theo tài xế và ghi theo lô (pipeline):
 
@@ -218,11 +218,11 @@ Tệp `examples/toi-noi-location/rust/crates/location-store/src/mirror.rs` (dòn
     }
 ```
 
-Hàng đợi đầy thì bỏ và đếm, không bao giờ chặn luồng tiêu thụ Kafka. Số đo: ghi 25.000 tài xế mất 1,25 giây lần chính (20.011 tài xế/giây) và 0,19 giây lần ít tải (130.653 tài xế/giây), 50 lô, 0 cập nhật bị bỏ, 0 lỗi; Redis có đủ 25.000 thành viên. Gộp theo tài xế hiệu quả: 5.000 cập nhật cho 1.000 tài xế trong một lần xả chỉ ghi 1.000 lệnh. `GEOSEARCH` của Redis trả cùng tập tài xế với kho trong bộ nhớ ở 100 trên 100 truy vấn (so theo tập, vì Redis làm tròn toạ độ về geohash 52 bit nên thứ tự có thể khác khi hai xe gần ngang nhau). Cũng cần nói về TTL: sorted set không có hạn riêng cho từng member, hạn của khoá thì áp cho cả tập, nên lab **không dùng hạn của khoá Redis**. Bản phụ chỉ bị xoá khi `sweep` của kho báo, nên nếu tiến trình chết, Redis giữ bản ghi cũ; khi nạp lại, lab lọc theo `received_ms` và báo số bản ghi quá hạn và hỏng (0 và 0 trong lần chạy này).
+Hàng đợi đầy thì bỏ và đếm, không bao giờ chặn luồng tiêu thụ Kafka. Số đo: ghi 25.000 tài xế mất 1,25 giây lần chính (20.011 tài xế/giây) và 0,19 giây lần ít tải (130.653 tài xế/giây), 50 lô, 0 cập nhật bị bỏ, 0 lỗi; Redis có đủ 25.000 thành viên. Gộp theo tài xế hiệu quả: 5.000 cập nhật cho 1.000 tài xế trong một lần xả chỉ ghi 1.000 lệnh. `GEOSEARCH` của Redis trả cùng tập tài xế với kho trong bộ nhớ ở 100 trên 100 truy vấn (so theo tập, vì Redis làm tròn toạ độ về geohash 52 bit nên thứ tự có thể khác khi hai xe gần ngang nhau). Cũng cần nói về TTL: sorted set không có hạn riêng cho từng member, hạn của khoá thì áp cho cả tập, nên lab **không dùng hạn của khoá Redis**. Bản phụ chỉ bị xoá khi `sweep` của kho thông báo, nên nếu tiến trình chết, Redis giữ bản ghi cũ; khi nạp lại, lab lọc theo `received_ms` và báo số bản ghi quá hạn và hỏng (0 và 0 trong lần chạy này).
 
 ## Giảm mẫu sang lịch sử
 
-Không phải điểm nào của kho cũng đáng lưu. Phần Rust chỉ quyết định điểm nào đi sang lịch sử (`history::Sampler`), còn ghi Parquet là việc của Go ([bài 20](/articles/location-lich-su-gps-parquet-retention-quyen-rieng-tu)). Chính sách giống `history-writer`: luôn giữ điểm đầu và điểm có cờ; giữ khi đã di chuyển từ 60 m; giữ khi hướng đổi từ 30° sau ít nhất 4 giây; và giữ một điểm «còn sống» mỗi 60 giây khi đứng yên. Trên 60 chuyến HCM sinh có seed (10.101 điểm, 4 giây một điểm, nhiễu σ = 6 m), lab giữ **33,7%** (3.400 điểm: 2.483 vì di chuyển, 848 vì rẽ, 60 điểm đầu, 9 nhịp, 0 cờ). Con số 60,2% ở thí nghiệm Kafka trực tiếp là của luồng đi ngẫu nhiên do lab sinh (đổi hướng nhiều) và **không đại diện** cho xe chạy trên đường. Bài 20 báo 26,7% trên dữ liệu và simulator của riêng nó; ba con số đến từ ba tập dữ liệu khác nhau nên không so trực tiếp được.
+Không phải điểm nào của kho cũng đáng lưu. Phần Rust chỉ quyết định điểm nào đi sang lịch sử (`history::Sampler`), còn ghi Parquet là việc của Go ([bài 20](/articles/location-lich-su-gps-parquet-retention-quyen-rieng-tu)). Chính sách giống `history-writer`: luôn giữ điểm đầu và điểm có cờ; giữ khi đã di chuyển từ 60 m; giữ khi hướng đổi từ 30° sau ít nhất 4 giây; và giữ một điểm nhịp (heartbeat) mỗi 60 giây khi đứng yên. Trên 60 chuyến HCM sinh có seed (10.101 điểm, 4 giây một điểm, nhiễu σ = 6 m), lab giữ **33,7%** (3.400 điểm: 2.483 vì di chuyển, 848 vì rẽ, 60 điểm đầu, 9 điểm nhịp, 0 điểm có cờ). Con số 60,2% ở thí nghiệm Kafka trực tiếp là của luồng đi ngẫu nhiên do lab sinh (đổi hướng nhiều) và **không đại diện** cho xe chạy trên đường. Bài 20 ghi nhận 26,7% trên dữ liệu và simulator của riêng nó; ba con số đến từ ba tập dữ liệu khác nhau nên không so trực tiếp được.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -262,15 +262,15 @@ bản sao khớp GEOSEARCH của Redis trên 100 truy vấn k = 5: 100/100 cùng
     số tài xế nhìn thấy được (điểm trong TTL 30 s) theo thời gian: t=0s: 0 (0%); t=1s: 6207 (25%); t=2s: 12197 (49%); t=3s: 18720 (75%); t=4s: 24924 (100%); t=5s: 25000 (100%); t=6s: 25000 (100%); t=7s: 25000 (100%); t=8s: 25000 (100%); t=9s: 25000 (100%); t=10s: 25000 (100%)
 ```
 
-Số tài xế, số bản ghi, tỉ lệ giữ và số khớp vét cạn tái lập từng chữ số; µs, ms, cập nhật/giây và truy vấn/giây thì nhiễu mạnh theo tải máy. Test: `cargo test --manifest-path examples/toi-noi-location/rust/Cargo.toml -p location-store` chạy 12 test đơn vị (đổi ô, TTL, nearest so với vét cạn, đồng thời giữ bất biến, vắng khác 0 qua proto và bản ghi nhị phân 46 byte); các test tích hợp Kafka và Redis chỉ chạy khi đặt `TOI_NOI_KAFKA=1 TOI_NOI_REDIS=1`, và khi Kafka không tới được thì **thất bại có hướng dẫn bật hạ tầng** chứ không bỏ qua âm thầm.
+Số tài xế, số bản ghi, tỉ lệ giữ và số khớp vét cạn tái lập từng chữ số; µs, ms, cập nhật/giây và truy vấn/giây thì dao động mạnh theo tải máy. Test: `cargo test --manifest-path examples/toi-noi-location/rust/Cargo.toml -p location-store` chạy 12 test đơn vị (đổi ô, TTL, nearest so với vét cạn, đồng thời giữ bất biến, vắng khác 0 qua proto và bản ghi nhị phân 46 byte); các test tích hợp Kafka và Redis chỉ chạy khi đặt `TOI_NOI_KAFKA=1 TOI_NOI_REDIS=1`, và khi Kafka không tới được thì **thất bại có hướng dẫn bật hạ tầng** chứ không bỏ qua mà không báo gì.
 
 ## Giới hạn của ví dụ
 
-- **Chưa chạy** Redis chết giữa lúc chạy (chỉ có test hàng đợi đầy: hàng đợi 4 chỗ, 50.000 `upsert` không chặn và có bản ghi bị bỏ), **chưa chạy** Kafka rebalance, **chưa commit offset** (cố ý; xem thiết kế ở trên), chưa chạy nhiều bản `geo-engine` cùng đọc một topic, chưa thử Redis cụm.
-- **Một broker, một Redis, cùng một máy, không có mạng thật.** Độ trễ gửi tới kho khi chạy trực tiếp qua Kafka là p50 5 đến 27 ms, p95 11 đến 214 ms, p99 26 đến 303 ms tuỳ tải máy và tuỳ khởi động nóng hay nguội; SLO tham chiếu (độ tươi vị trí p95 dưới 5–10 giây) còn dư rất xa, nhưng đó là điều kiện lý tưởng.
+- **Chưa chạy** tình huống Redis gặp sự cố giữa lúc chạy (chỉ có test hàng đợi đầy: hàng đợi 4 chỗ, 50.000 `upsert` không chặn và có bản ghi bị bỏ), **chưa chạy** Kafka rebalance, **chưa commit offset** (cố ý; xem thiết kế ở trên), chưa chạy nhiều bản `geo-engine` cùng đọc một topic, chưa thử Redis cụm.
+- **Một broker, một Redis, cùng một máy, không có mạng thật.** Độ trễ gửi tới kho khi chạy trực tiếp qua Kafka là p50 5 đến 27 ms, p95 11 đến 214 ms, p99 26 đến 303 ms tuỳ tải máy và tuỳ khởi động nóng hay nguội; SLO tham chiếu (độ tươi vị trí ở p95 dưới 5–10 giây) còn dư rất nhiều, nhưng đó là điều kiện lý tưởng.
 - **Cơ chế của số liệu đồng thời chưa được kiểm riêng**, và 64 mảnh làm giảm số truy vấn đọc ở 4 ghi + 4 đọc.
 - **Dữ liệu do lab sinh:** vị trí tài xế là bước đi ngẫu nhiên, không phải đường đi thật; 60% quanh trung tâm là giả định. Tỉ lệ giữ 33,7% là trên 60 chuyến.
-- **Độ ổn định của test tích hợp Kafka:** khi phát triển, `consume_apply_replay_ttl_against_real_kafka` thất bại 2 trong khoảng 7 lần chạy có đặt `TOI_NOI_KAFKA=1`, lúc container Kafka dùng chung đang ở trạng thái Paused (do một thí nghiệm khác). Đó là nguyên nhân hợp lý nhưng không được chứng minh riêng. Sau khi thêm thử lại 3 lần cho việc tạo topic, 6 trên 6 lần chạy liên tiếp qua.
+- **Độ ổn định của test tích hợp Kafka:** khi phát triển, `consume_apply_replay_ttl_against_real_kafka` thất bại 2 trong khoảng 7 lần chạy có đặt `TOI_NOI_KAFKA=1`, lúc container Kafka dùng chung đang ở trạng thái Paused (do một thí nghiệm khác). Đó là nguyên nhân hợp lý nhưng không được chứng minh riêng. Sau khi thêm thử lại 3 lần cho việc tạo topic, 6 trên 6 lần chạy liên tiếp đều qua.
 - **Kho chỉ lưu vị trí mới nhất theo `driver_id`**, không có cơ chế chia theo thành phố (P07) hay chuyển quyền sở hữu tài xế giữa hai tiến trình.
 
 ## Bài tập
@@ -290,7 +290,7 @@ Số tài xế, số bản ghi, tỉ lệ giữ và số khớp vét cạn tái 
 **Bài 3.** Kafka phát lại 34 giây cuối mất 0,65 giây nhưng Redis chỉ cần 46 ms. Khi nào bạn vẫn chọn Kafka làm nguồn khởi động?
 
 <details><summary>Lời giải bài 3</summary>
-<p>Khi muốn một nguồn sự thật duy nhất và không phụ thuộc bản phụ có thể cũ: Redis chỉ chứa những gì <code>MirrorWriter</code> kịp ghi, và hàng đợi đầy thì bỏ cập nhật. Phát lại từ Kafka là đúng theo luồng gốc nên không có khoảng trống do bản phụ bỏ cập nhật; còn với TTL chỉ 30 giây, 0,65 giây (lần chính) là chấp nhận được. Cần lưu ý số thời gian của hai cách đều nhiễu theo tải máy (Kafka phát lại từ 0,43 giây tới 3,05 giây giữa các lần chạy).</p>
+<p>Khi muốn một nguồn dữ liệu gốc duy nhất và không phụ thuộc bản phụ có thể cũ: Redis chỉ chứa những gì <code>MirrorWriter</code> kịp ghi, và hàng đợi đầy thì bỏ cập nhật. Phát lại từ Kafka là đúng theo luồng gốc nên không có khoảng trống do bản phụ bỏ cập nhật; còn với TTL chỉ 30 giây, 0,65 giây (lần chính) là chấp nhận được. Cần lưu ý số thời gian của hai cách đều nhiễu theo tải máy (Kafka phát lại từ 0,43 giây tới 3,05 giây giữa các lần chạy).</p>
 </details>
 
 Bài trước: [bài 17](/articles/location-map-matching-online-cua-so-cau-vuot-duong-song-song). Bài tiếp: [bài 19](/articles/location-go-fan-out-tracking-khach-noi-suy-marker).
