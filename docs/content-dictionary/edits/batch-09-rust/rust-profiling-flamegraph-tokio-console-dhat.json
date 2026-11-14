@@ -1,0 +1,143 @@
+{
+  "file": "rust-profiling-flamegraph-tokio-console-dhat.md",
+  "edits": [
+    {
+      "old": "Profile debug build chỉ ra chỗ không tồn tại ở production, nhưng release mặc định thiếu thông tin dòng.",
+      "new": "Profile bản debug chỉ ra những chỗ nóng không tồn tại ở production, nhưng bản release mặc định lại thiếu thông tin dòng.",
+      "reason": "Dịch gượng, thiếu chủ thể",
+      "severity": "medium"
+    },
+    {
+      "old": "Profiler chỉ đi theo frame pointer mà binary không giữ nó thì stack cụt hoặc sai,",
+      "new": "Nếu profiler chỉ đi theo frame pointer mà binary không giữ nó thì stack cụt hoặc sai,",
+      "reason": "Thiếu liên từ điều kiện",
+      "severity": "medium"
+    },
+    {
+      "old": "của máy viết bài nó có sẵn:",
+      "new": "của máy viết bài, frame pointer có sẵn:",
+      "reason": "Tránh 'nó' mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "Trên x86_64 Linux rustc mặc định không giữ;",
+      "new": "Trên x86_64 Linux rustc mặc định không giữ frame pointer;",
+      "reason": "Thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Quét toàn sổ có thật, nhưng thứ làm mỗi bước quét đắt là cấp phát.",
+      "new": "Việc quét toàn sổ có thật, nhưng thứ làm mỗi bước quét đắt lên là cấp phát.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Sửa một chỗ làm chỗ kế tiếp lộ ra,",
+      "new": "Sửa một chỗ làm lộ ra chỗ kế tiếp,",
+      "reason": "Trật tự từ",
+      "severity": "medium"
+    },
+    {
+      "old": "đếm cấp phát nên không. Binary đếm chỉ build khi bật feature",
+      "new": "đếm cấp phát nên không bị nhiễu. Binary đếm chỉ được build khi bật feature",
+      "reason": "Câu thiếu vị ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Khác bài 30, nó không dùng",
+      "new": "Khác với bài 30, binary này không dùng",
+      "reason": "Tránh 'nó' mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "là `Vec` của sổ tự lớn.",
+      "new": "là do `Vec` của sổ tự tăng dung lượng.",
+      "reason": "Cụm 'tự lớn' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Số tổng chưa nói dòng nào.",
+      "new": "Số tổng chưa cho biết dòng nào gây ra chúng.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Có một điều không đẹp:",
+      "new": "Có một điểm không như mong đợi:",
+      "reason": "Calque 'not pretty'",
+      "severity": "medium"
+    },
+    {
+      "old": "lần đầu gặp nó và tự lớn.",
+      "new": "lần đầu gặp nó và tự tăng dung lượng.",
+      "reason": "Cụm 'tự lớn' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "300 lần, cạnh một task",
+      "new": "300 lần, chạy cùng một task",
+      "reason": "Calque 'next to'",
+      "severity": "low"
+    },
+    {
+      "old": "mặc định nối `http://127.0.0.1:6669`",
+      "new": "mặc định kết nối tới `http://127.0.0.1:6669`",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "nối vào server của `console-subscriber`",
+      "new": "kết nối vào server của `console-subscriber`",
+      "reason": "Thống nhất 'kết nối'",
+      "severity": "low"
+    },
+    {
+      "old": "nên chỉ đọc theo hướng):",
+      "new": "nên chỉ đọc như xu hướng):",
+      "reason": "Dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "vì mỗi poll tốn thêm scheduler và span, cộng nhiễu.",
+      "new": "vì mỗi poll tốn thêm chi phí của scheduler và span, cộng thêm nhiễu.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Theo bằng chứng: dhat chỉ ra #2 và #3, sửa trước vì rẻ và chắc;",
+      "new": "Ta sửa theo bằng chứng: dhat chỉ ra #2 và #3, nên sửa trước vì rẻ và chắc;",
+      "reason": "Câu thiếu chủ ngữ và động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nên bảng dùng CPU, và kết luận chỉ ở mức hướng:",
+      "new": "Vì vậy bảng dùng CPU, và kết luận chỉ ở mức xu hướng:",
+      "reason": "Dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Bài 30 đã ghi vào PostgreSQL thật và trên máy viết bài chỉ cách gộp lô bằng `unnest` vượt mức đó.",
+      "new": "Bài 30 đã ghi vào PostgreSQL thật; trên máy viết bài, chỉ có cách gộp lô bằng `unnest` mới vượt được mức đó.",
+      "reason": "Câu dịch gượng, khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "Cái cần tái lập là một kịch bản cho cùng bộ đếm mỗi lần chạy,",
+      "new": "Cái cần tái lập là một kịch bản cho ra cùng bộ đếm mỗi lần chạy,",
+      "reason": "Thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "`cargo test` chạy 8 ca (6 ca tích hợp, 2 ca của `dhat-top`).",
+      "new": "`cargo test` chạy 8 test case (6 test case tích hợp, 2 test case của `dhat-top`).",
+      "reason": "Thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "để đổi cờ không bắt build lại.",
+      "new": "để việc đổi cờ không buộc build lại.",
+      "reason": "Dịch gượng",
+      "severity": "low"
+    }
+  ]
+}

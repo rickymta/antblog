@@ -1,7 +1,7 @@
 ---
 slug: rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach
 title: "Khuyến mãi và trợ giá: bút toán nhiều bên và ngân sách campaign"
-summary: "Bài 45: mã giảm 5.000 của TN-0002 do nền tảng chịu thành bút toán cân; ai chịu giảm giá thì posting đổi thế nào; ngân sách campaign là tài khoản có giới hạn, chứng minh bằng Barrier; hết ngân sách, hoàn chuyến, trợ giá."
+summary: "Bài 45: mã giảm 5.000 của TN-0002 do nền tảng chịu được ghi thành bút toán cân; ai chịu giảm giá thì posting đổi thế nào; ngân sách campaign là tài khoản có giới hạn, chứng minh bằng Barrier; cùng các tình huống hết ngân sách, hoàn chuyến và trợ giá."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, concurrency, promotion]
@@ -10,7 +10,7 @@ language: vi
 
 Khách `CU-002` đặt chuyến `TN-0002`, cước gốc 25.500 đồng, và nhập mã `WELCOME5K` giảm 5.000. Khách trả 20.500, nhưng tài xế `DR-002` vẫn nhận 20.400 và phí nền tảng 20% vẫn tính trên 25.500. Vậy 5.000 chênh lệch nằm ở đâu trong sổ? Và nếu nhiều khách nhập mã cùng lúc khi ngân sách chỉ còn 10.000, sổ có cho giảm quá số đó không?
 
-Đây là bài 45 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài dùng bất biến «bút toán cân» của [bài 13](/articles/rust-double-entry-journal-entry-posting) và [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace), cách ghi idempotent của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) và fixture schema riêng của [bài 27](/articles/rust-integration-test-postgresql-schema-rieng-ci). Lab chạy trên PostgreSQL 18 với `sqlx` 0.9 và `ledger-core` của bài 20.
+Đây là bài 45 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài dùng bất biến «bút toán cân» của [bài 13](/articles/rust-double-entry-journal-entry-posting) và [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace), cách ghi idempotent của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) và fixture dùng schema riêng của [bài 27](/articles/rust-integration-test-postgresql-schema-rieng-ci). Lab chạy trên PostgreSQL 18 với `sqlx` 0.9 và `ledger-core` của bài 20.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,13 +20,13 @@ Khách `CU-002` đặt chuyến `TN-0002`, cước gốc 25.500 đồng, và nh�
 
 ## Mã giảm 5.000 đi qua những tài khoản nào?
 
-Sơ đồ chuẩn của [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen) có `promo:budget:<campaign>` (asset, số dư là ngân sách còn lại) và `platform:promo-expense` (expense). Điều cần đạt: khách trả 20.500, tài xế nhận 20.400, doanh thu 5.100, chi phí 5.000, ngân sách giảm 5.000, tổng bằng 0. Cộng thử:
+Sơ đồ tài khoản chuẩn của [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen) có `promo:budget:<campaign>` (asset, số dư là ngân sách còn lại) và `platform:promo-expense` (expense). Điều cần đạt: khách trả 20.500, tài xế nhận 20.400, doanh thu 5.100, chi phí 5.000, ngân sách giảm 5.000, tổng bằng 0. Cộng thử:
 
 ```text
 -20.500 + 20.400 + 5.100 + 5.000 - 5.000 = +5.000
 ```
 
-Chỉ với sơ đồ chuẩn thì không cân được: trong sổ dòng tiền của bài 13, doanh thu và chi phí đều là ngăn chứa dương, nên còn 5.000 chưa có nguồn, đó là phần nền tảng trả thay khách. Lab thêm hai mẫu ngoài tám mẫu của bài 41:
+Chỉ với sơ đồ chuẩn thì không cân được: trong sổ dòng tiền của bài 13, doanh thu và chi phí đều là ngăn chứa có số dư dương, nên còn 5.000 chưa có nguồn; đó là phần nền tảng trả thay khách. Lab thêm hai mẫu ngoài tám mẫu của bài 41:
 
 - `platform:promo-wallet` (liability, cùng vai với ví khách: âm là đã trả ra): nguồn của phần trả thay.
 - `platform:treasury` (asset, quỹ nền tảng): nguồn cấp ngân sách. JE-000001 cấp 10.000 từ quỹ sang `promo:budget:WELCOME5K`, asset sang asset, doanh thu không đổi.
@@ -40,7 +40,7 @@ Chỉ với sơ đồ chuẩn thì không cân được: trong sổ dòng tiền
 <figcaption>Hình 1. Ba bút toán của <code>TN-0002</code>. Chỉ bút toán đầu có thể bị từ chối vì ngân sách; hai bút toán sau ghi tiền đã xảy ra.</figcaption>
 </figure>
 
-Output thật của lab (`cargo run`):
+Kết quả chạy thật của lab (`cargo run`):
 
 ```text
   JE-000002 trip:TN-0002:promo:WELCOME5K
@@ -100,7 +100,7 @@ for (account, amount) in [
 
 Ledger chỉ chặn điều làm sổ vô nghĩa: phần chịu âm, mức giảm vượt cước, hoặc tài xế chịu nhiều hơn phần họ nhận (`InvalidShares`). Luật «giảm tối đa bao nhiêu» thuộc về Promotion: giảm 100% cước vẫn ghi được, ví trả cả 25.500, doanh thu 5.100, chi phí 25.500, tức nền tảng lỗ 20.400.
 
-**Trợ giá tài xế** là mặt kia: khách trả đủ 25.500, `DR-003` của `TN-0003` được thưởng giờ cao điểm 3.000 từ campaign `PEAKDRV`, bằng một bút toán 4 posting:
+**Trợ giá tài xế** là mặt kia: khách trả đủ 25.500, `DR-003` của `TN-0003` được thưởng giờ cao điểm 3.000 từ campaign `PEAKDRV`, qua một bút toán gồm 4 posting:
 
 ```text
   JE-000035 trip:TN-0003:subsidy:PEAKDRV
@@ -110,11 +110,11 @@ Ledger chỉ chặn điều làm sổ vô nghĩa: phần chịu âm, mức giả
     driver:DR-003                    3000
 ```
 
-Cả chuyến: khách -25.500, tài xế +23.400, doanh thu +5.100, chi phí +3.000, ngân sách -3.000, ví -3.000; nền tảng còn lãi 2.100. Trợ giá cũng bị kiểm ngân sách như `redeem`.
+Cả chuyến: khách -25.500, tài xế +23.400, doanh thu +5.100, chi phí +3.000, ngân sách -3.000, ví -3.000; nền tảng còn lãi 2.100. Trợ giá cũng bị kiểm tra ngân sách như `redeem`.
 
 ## Ngân sách campaign là tài khoản có giới hạn: kiểm ở đâu cho đúng?
 
-Số dư ngân sách là phần còn lại nên không được dưới 0. Quota của Promotion C# bảo vệ sớm nhưng không biết tiền thật; chỗ biết số dư thật là Ledger, **trong cùng transaction với việc ghi bút toán**. Hai chế độ kiểm của lab chỉ khác nhau ở hai chỗ:
+Số dư ngân sách là phần còn lại nên không được dưới 0. Quota của Promotion C# bảo vệ sớm nhưng không biết tiền thật; chỗ biết số dư thật là Ledger, **trong cùng transaction với việc ghi bút toán**. Hai chế độ kiểm tra của lab chỉ khác nhau ở hai chỗ:
 
 ```rust
 // src/store.rs (rút gọn)
@@ -175,13 +175,13 @@ Kết quả thật của ba bản (5 yêu cầu × 5.000 vào ngân sách 10.000
   không khóa + trigger sàn   thành công 2, hết ngân sách 0, lỗi DB 3 ["23514", "23514", "23514"], ngân sách còn 0, chi phí +10000
 ```
 
-Bản không khoá không báo lỗi nào. Sổ vẫn cân, chỉ quy tắc «ngân sách không âm» bị phá, cùng gốc với write skew ở bài 24: quyết định dựa trên số đã đọc mà không khoá. Dòng thứ ba là lưới an toàn: trigger `budget_floor` (`sql/budget_floor.sql`, chỉ `BEFORE UPDATE` vì số dư được cập nhật bằng `INSERT ... ON CONFLICT DO UPDATE`) chặn số dư âm bằng SQLSTATE `23514`. Nhưng Promotion nhận lỗi hạ tầng mờ, nên trigger không thay được lệnh kiểm trong code.
+Bản không khoá không báo lỗi nào. Sổ vẫn cân, chỉ quy tắc «ngân sách không âm» bị vi phạm, cùng gốc với write skew ở bài 24: quyết định dựa trên số đã đọc mà không khoá. Dòng thứ ba là lưới an toàn: trigger `budget_floor` (`sql/budget_floor.sql`, chỉ `BEFORE UPDATE` vì số dư được cập nhật bằng `INSERT ... ON CONFLICT DO UPDATE`) chặn số dư âm bằng SQLSTATE `23514`. Nhưng Promotion nhận lỗi hạ tầng mơ hồ, nên trigger không thay được lệnh kiểm trong code.
 
-Test không kiểm ai thắng hay thời gian, chỉ kiểm bất biến: số thành công, số bị từ chối, số dư cuối, «đã tiêu + còn lại = đã cấp». Pool phải có ít nhất bằng số tác vụ cùng chờ ở `Barrier`, nếu không chúng chờ nhau mãi: lab đặt pool 8 cho 5 tác vụ.
+Test không kiểm ai thắng hay thời gian, chỉ kiểm bất biến: số thành công, số bị từ chối, số dư cuối, «đã tiêu + còn lại = đã cấp». Pool phải có số kết nối ít nhất bằng số tác vụ cùng chờ ở `Barrier`, nếu không chúng chờ nhau mãi: lab đặt pool 8 cho 5 tác vụ.
 
 ## Hợp đồng với Promotion service: ai quyết định gì, theo thứ tự nào, lỗi gì?
 
-Promotion (C#) quyết định mã nào hợp lệ, mức giảm, ai chịu, quota theo lượt dùng. Ledger (Rust) chỉ ghi tiền: nhận hai con số đã quyết, kiểm chúng khớp tiền thật, ghi hoặc từ chối. Hình 3 là thứ tự.
+Promotion (C#) quyết định mã nào hợp lệ, mức giảm, ai chịu, quota theo lượt dùng. Ledger (Rust) chỉ ghi tiền: nhận hai con số đã quyết, kiểm tra chúng có khớp tiền thật không, rồi ghi hoặc từ chối. Hình 3 cho thấy thứ tự đó.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -190,13 +190,13 @@ Promotion (C#) quyết định mã nào hợp lệ, mức giảm, ai chịu, quo
 <figcaption>Hình 3. Redeem là lời gọi đồng bộ vì Promotion cần câu trả lời trước khi khách thấy giá; capture và split đến qua sự kiện Kafka như ở <a href="/articles/rust-kafka-rdkafka-consumer-producer-schema">bài 36</a> và <a href="/articles/rust-outbox-inbox-idempotent-consumer">bài 37</a>.</figcaption>
 </figure>
 
-Redeem phải xảy ra trước khi Payment thu tiền: hết ngân sách thì Promotion báo giá 25.500 ngay, thay vì để khách thấy 20.500 rồi bị đổi giá. `PaymentCaptured` và `TripCompleted` đi hai luồng nên có thể lệch thứ tự: split đến trước capture nhận `TRIP_NOT_CAPTURED`, consumer giữ lại rồi thử lại sau. Ledger kiểm bốn điều: phần chịu không âm, phần tài xế chịu không vượt phần tài xế nhận, tiền VíXanh đã thu bằng cước trừ mức giảm, và phần nền tảng chịu bằng số đã redeem. Hai điều cuối bắt được hai service nói hai số khác nhau:
+Redeem phải xảy ra trước khi Payment thu tiền: hết ngân sách thì Promotion báo giá 25.500 ngay, thay vì để khách thấy 20.500 rồi bị đổi giá. `PaymentCaptured` và `TripCompleted` đi hai luồng nên có thể lệch thứ tự: nếu split đến trước capture thì nhận `TRIP_NOT_CAPTURED`; consumer giữ lại rồi thử lại sau. Ledger kiểm bốn điều: phần chịu không âm, phần tài xế chịu không vượt phần tài xế nhận, tiền VíXanh đã thu bằng cước trừ mức giảm, và phần nền tảng chịu bằng số đã redeem. Hai điều cuối bắt được hai service nói hai số khác nhau:
 
 ```text
   tiền thu lệch cước trừ giảm: cước 25.500 VND trừ giảm 5.000 VND phải là 20.500 VND, nhưng VíXanh đã thu 25.500 VND
 ```
 
-Lỗi trả về theo cách ở [bài 35](/articles/rust-tonic-grpc-get-balance-post-entry-interop-dotnet): mã gRPC cho cách xử lý chung, mã nghiệp vụ để bên gọi rẽ nhánh mà không đọc câu chữ.
+Lỗi trả về theo cách ở [bài 35](/articles/rust-tonic-grpc-get-balance-post-entry-interop-dotnet): mã gRPC quyết định cách xử lý chung, mã nghiệp vụ để bên gọi rẽ nhánh mà không đọc câu chữ.
 
 | Tình huống | gRPC | Mã nghiệp vụ | Gửi lại y nguyên? |
 | --- | --- | --- | --- |
@@ -214,7 +214,7 @@ Lỗi hết ngân sách mang đủ dữ kiện để Promotion quyết định:
   gRPC FAILED_PRECONDITION, mã PROMO_BUDGET_EXHAUSTED, gửi lại được: false; replay yêu cầu đã thắng vẫn Ok: true
 ```
 
-Lần bị từ chối rollback nên không để lại dấu vết. Bản phác lời gọi `RedeemPromotion` (không phải code lab; lab gọi hàm Rust tương đương):
+Lần bị từ chối được rollback nên không để lại dấu vết. Bản phác lời gọi `RedeemPromotion` (không phải code lab; lab gọi hàm Rust tương đương):
 
 ```json
 { "tripId": "TN-0002", "campaign": "WELCOME5K",
@@ -235,7 +235,7 @@ let reversal = JournalEntry::reversal_of(entry_id, &original)?;
 out.push(self.post(&reversal).await?); // bút toán đảo không đi qua kiểm ngân sách
 ```
 
-Key của bút toán đảo là `<key gốc>:reversal`, nên gọi hoàn chuyến lần hai chỉ ra replay. Output thật:
+Key của bút toán đảo là `<key gốc>:reversal`, nên gọi hoàn chuyến lần hai chỉ cho kết quả replay. Kết quả chạy thật:
 
 ```text
   JE-000026 trip:TN-0002:split:reversal
@@ -245,7 +245,7 @@ Key của bút toán đảo là `<key gốc>:reversal`, nên gọi hoàn chuyế
   chuyến + hoàn chuyến                  0        0        0        0        0        0        0
 ```
 
-Dòng cuối cộng thay đổi của chuyến với hoàn chuyến cho bảy tài khoản: toàn 0. Refund một phần, chargeback và maker-checker là việc của [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker).
+Dòng cuối cộng thay đổi số dư của chuyến với hoàn chuyến cho bảy tài khoản, kết quả toàn 0. Refund một phần, chargeback và maker-checker là việc của [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker).
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -258,7 +258,7 @@ cargo run  --manifest-path examples/toi-noi-rust/45-promo-budget/Cargo.toml -- -
 cargo test --manifest-path examples/toi-noi-rust/45-promo-budget/Cargo.toml
 ```
 
-`cargo test` chạy 7 test đơn vị (không cần database) và 14 ca trên PostgreSQL thật. `--verify` in `VERIFY OK`. Mỗi ca luôn dọn schema, kể cả khi trả `Err`, nhờ `with_db` nhận `impl AsyncFnOnce(&TestDb) -> Result<T>`. Thiếu biến môi trường thì lab **fail**, không bỏ qua:
+`cargo test` chạy 7 test đơn vị (không cần database) và 14 test case trên PostgreSQL thật. `--verify` in `VERIFY OK`. Mỗi test case luôn dọn schema, kể cả khi trả `Err`, nhờ `with_db` nhận `impl AsyncFnOnce(&TestDb) -> Result<T>`. Thiếu biến môi trường thì lab **báo lỗi**, không bỏ qua:
 
 ```text
 $ env -u TOI_NOI_PG_URL cargo run -- --verify
@@ -267,7 +267,7 @@ LỖI: thiếu TOI_NOI_PG_URL. Bật PostgreSQL lab: docker compose -f examples/
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Cách ghi nhận khuyến mãi ở đây là mô hình học tập, không phải khuyến nghị kế toán hay thuế. Lab không dựng số dư mở kỳ nên <code>platform:treasury</code> âm, thứ bảng metric của bài 41 coi là bất thường. Chi phí ghi từ lúc redeem, nên trước split nó chưa có ví đối ứng. <code>settle</code> nhận <code>Shares</code> làm tham số vì chưa có bảng lưu phần chịu, và chưa có inbox chờ đủ dữ kiện khi chúng lệch thứ tự. Chưa có gRPC hay Kafka thật, chưa có hết hạn campaign, chưa xử lý hoàn chuyến sau khi tài xế đã rút tiền. Khoá một dòng ngân sách nóng làm các yêu cầu cùng campaign xếp hàng; đánh đổi này chưa được đo.</p></div>
+<p>Cách ghi nhận khuyến mãi ở đây là mô hình học tập, không phải khuyến nghị kế toán hay thuế. Lab không dựng số dư mở kỳ nên <code>platform:treasury</code> âm, điều mà bảng metric của bài 41 coi là bất thường. Chi phí ghi từ lúc redeem, nên trước split nó chưa có ví đối ứng. <code>settle</code> nhận <code>Shares</code> làm tham số vì chưa có bảng lưu phần chịu, và chưa có inbox chờ đủ dữ kiện khi chúng lệch thứ tự. Chưa có gRPC hay Kafka thật, chưa có cơ chế hết hạn campaign, chưa xử lý hoàn chuyến sau khi tài xế đã rút tiền. Khoá một dòng ngân sách nóng bắt các yêu cầu cùng campaign phải xếp hàng; đánh đổi này chưa được đo.</p></div>
 
 **Bài tập:** chạy 8 yêu cầu × 3.000 đồng vào ngân sách 10.000, một lần bản có khoá, một lần bản không khoá dựng bằng `Barrier`. Dự đoán số yêu cầu thành công, số dư ngân sách cuối và chi phí tăng thêm của từng bản. Pool cần bao nhiêu kết nối?
 

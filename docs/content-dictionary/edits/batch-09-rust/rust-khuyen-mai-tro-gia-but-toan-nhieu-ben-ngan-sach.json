@@ -1,0 +1,143 @@
+{
+ "file": "rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach.md",
+ "edits": [
+  {
+   "old": "do nền tảng chịu thành bút toán cân;",
+   "new": "do nền tảng chịu được ghi thành bút toán cân;",
+   "reason": "Câu thiếu động từ, không rõ ai làm gì.",
+   "severity": "medium"
+  },
+  {
+   "old": "chứng minh bằng Barrier; hết ngân sách, hoàn chuyến, trợ giá.",
+   "new": "chứng minh bằng Barrier; cùng các tình huống hết ngân sách, hoàn chuyến và trợ giá.",
+   "reason": "Liệt kê cụt ở cuối, không rõ vai trò.",
+   "severity": "medium"
+  },
+  {
+   "old": "fixture schema riêng của",
+   "new": "fixture dùng schema riêng của",
+   "reason": "Cụm danh từ ghép kiểu tiếng Anh, thiếu động từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "Sơ đồ chuẩn của",
+   "new": "Sơ đồ tài khoản chuẩn của",
+   "reason": "Lược mất danh từ chính; thống nhất tên gọi.",
+   "severity": "low"
+  },
+  {
+   "old": "doanh thu và chi phí đều là ngăn chứa dương, nên còn 5.000 chưa có nguồn, đó là phần nền tảng trả thay khách.",
+   "new": "doanh thu và chi phí đều là ngăn chứa có số dư dương, nên còn 5.000 chưa có nguồn; đó là phần nền tảng trả thay khách.",
+   "reason": "\"ngăn chứa dương\" là dịch gượng của bucket; câu ghép nối bằng dấu phẩy.",
+   "severity": "medium"
+  },
+  {
+   "old": "được thưởng giờ cao điểm 3.000 từ campaign `PEAKDRV`, bằng một bút toán 4 posting:",
+   "new": "được thưởng giờ cao điểm 3.000 từ campaign `PEAKDRV`, qua một bút toán gồm 4 posting:",
+   "reason": "\"bằng một bút toán 4 posting\" cụt.",
+   "severity": "low"
+  },
+  {
+   "old": "Trợ giá cũng bị kiểm ngân sách như `redeem`.",
+   "new": "Trợ giá cũng bị kiểm tra ngân sách như `redeem`.",
+   "reason": "\"kiểm\" cụt, thiếu từ.",
+   "severity": "low"
+  },
+  {
+   "old": "Hai chế độ kiểm của lab chỉ khác nhau",
+   "new": "Hai chế độ kiểm tra của lab chỉ khác nhau",
+   "reason": "\"chế độ kiểm\" là cụm tự ghép.",
+   "severity": "medium"
+  },
+  {
+   "old": "Sổ vẫn cân, chỉ quy tắc «ngân sách không âm» bị phá,",
+   "new": "Sổ vẫn cân, chỉ quy tắc «ngân sách không âm» bị vi phạm,",
+   "reason": "\"bị phá\" gượng.",
+   "severity": "medium"
+  },
+  {
+   "old": "Nhưng Promotion nhận lỗi hạ tầng mờ,",
+   "new": "Nhưng Promotion nhận lỗi hạ tầng mơ hồ,",
+   "reason": "\"mờ\" là dịch từng chữ của vague.",
+   "severity": "medium"
+  },
+  {
+   "old": "Pool phải có ít nhất bằng số tác vụ cùng chờ ở `Barrier`,",
+   "new": "Pool phải có số kết nối ít nhất bằng số tác vụ cùng chờ ở `Barrier`,",
+   "reason": "Câu thiếu danh từ chính (số kết nối).",
+   "severity": "high"
+  },
+  {
+   "old": "kiểm chúng khớp tiền thật, ghi hoặc từ chối. Hình 3 là thứ tự.",
+   "new": "kiểm tra chúng có khớp tiền thật không, rồi ghi hoặc từ chối. Hình 3 cho thấy thứ tự đó.",
+   "reason": "Câu cụt, \"Hình 3 là thứ tự\" gượng.",
+   "severity": "medium"
+  },
+  {
+   "old": "split đến trước capture nhận `TRIP_NOT_CAPTURED`, consumer giữ lại rồi thử lại sau.",
+   "new": "nếu split đến trước capture thì nhận `TRIP_NOT_CAPTURED`; consumer giữ lại rồi thử lại sau.",
+   "reason": "Thiếu từ nối điều kiện.",
+   "severity": "medium"
+  },
+  {
+   "old": "mã gRPC cho cách xử lý chung,",
+   "new": "mã gRPC quyết định cách xử lý chung,",
+   "reason": "\"cho\" kiểu tiếng Anh, thiếu động từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "Lần bị từ chối rollback nên không để lại dấu vết.",
+   "new": "Lần bị từ chối được rollback nên không để lại dấu vết.",
+   "reason": "Thiếu từ nối, chủ ngữ mơ hồ.",
+   "severity": "low"
+  },
+  {
+   "old": "nên gọi hoàn chuyến lần hai chỉ ra replay.",
+   "new": "nên gọi hoàn chuyến lần hai chỉ cho kết quả replay.",
+   "reason": "\"chỉ ra\" là calque.",
+   "severity": "medium"
+  },
+  {
+   "old": "Dòng cuối cộng thay đổi của chuyến với hoàn chuyến cho bảy tài khoản: toàn 0.",
+   "new": "Dòng cuối cộng thay đổi số dư của chuyến với hoàn chuyến cho bảy tài khoản, kết quả toàn 0.",
+   "reason": "Câu cụt, thiếu danh từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "và 14 ca trên PostgreSQL thật.",
+   "new": "và 14 test case trên PostgreSQL thật.",
+   "reason": "Thống nhất \"test case\" theo bảng thuật ngữ.",
+   "severity": "medium"
+  },
+  {
+   "old": "Mỗi ca luôn dọn schema, kể cả khi trả `Err`, nhờ",
+   "new": "Mỗi test case luôn dọn schema, kể cả khi trả `Err`, nhờ",
+   "reason": "Thống nhất \"test case\".",
+   "severity": "medium"
+  },
+  {
+   "old": "thì lab **fail**, không bỏ qua:",
+   "new": "thì lab **báo lỗi**, không bỏ qua:",
+   "reason": "\"fail\" là từ tiếng Anh thông thường đã có từ Việt.",
+   "severity": "medium"
+  },
+  {
+   "old": "thứ bảng metric của bài 41 coi là bất thường.",
+   "new": "điều mà bảng metric của bài 41 coi là bất thường.",
+   "reason": "\"metric\" lọt vào văn xuôi; \"thứ\" khẩu ngữ.",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa có hết hạn campaign,",
+   "new": "chưa có cơ chế hết hạn campaign,",
+   "reason": "Thiếu danh từ chính.",
+   "severity": "medium"
+  },
+  {
+   "old": "làm các yêu cầu cùng campaign xếp hàng;",
+   "new": "bắt các yêu cầu cùng campaign phải xếp hàng;",
+   "reason": "\"làm ... xếp hàng\" gượng.",
+   "severity": "low"
+  }
+ ]
+}

@@ -1,14 +1,14 @@
 ---
 slug: rust-toi-uu-co-so-do-clone-cow-batching-copy-p99
 title: "Tối ưu có số đo: tránh clone, Cow, batching và COPY"
-summary: "Bài 61: đặt mục tiêu trước rồi đo. Cow giảm 10.000 cấp phát còn 500, mượn thay clone, gộp lô giảm 8.991 round trip còn 10, COPY và trigger, prepared statement, p99 với coordinated omission, khi nào dừng."
+summary: "Bài 61: đặt mục tiêu trước rồi đo. Cow giảm 10.000 lần cấp phát còn 500, mượn thay clone, gộp lô giảm 8.991 round trip còn 10; ngoài ra có COPY và trigger, prepared statement, p99 với coordinated omission, và lúc nào nên dừng."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, performance, cow, copy]
 language: vi
 ---
 
-Bài 60 dạy tìm chỗ chậm bằng profiler. Tìm ra rồi thì sửa gì, sửa tới đâu, bằng chứng nào cho thấy đã đủ? Bài này nhập lô bút toán vào PostgreSQL bằng bốn cách, giữ nguyên idempotency và `account_balances`, và ưu tiên con số không đổi theo tải máy.
+Bài 60 dạy tìm chỗ chậm bằng profiler. Tìm ra rồi thì sửa gì, sửa tới đâu, bằng chứng nào cho thấy đã đủ? Bài này nhập lô bút toán vào PostgreSQL bằng bốn cách, giữ nguyên idempotency và `account_balances`, và ưu tiên những con số không phụ thuộc vào tải của máy.
 
 Đây là bài 61 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài dùng `ledger-core` ([bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace)), schema và trigger của [bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition), cách đếm cấp phát của [bài 59](/articles/rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet), và đối chiếu với `unnest` của [bài 30](/articles/rust-criterion-benchmark-do-bo-nho-10k-but-toan).
 
@@ -20,7 +20,7 @@ Bài 60 dạy tìm chỗ chậm bằng profiler. Tìm ra rồi thì sửa gì, s
 
 ## Đặt mục tiêu trước: đo cái gì, trên máy nào?
 
-Mục tiêu viết trước khi sửa (giả định, không phải SLA): nhập lô tối thiểu 10.000 bút toán/giây, có idempotency và số dư; số cấp phát không tăng theo số dòng.
+Mục tiêu viết trước khi sửa (giả định, không phải SLA): nhập lô tối thiểu 10.000 bút toán/giây, kèm idempotency và cập nhật số dư; số lần cấp phát không tăng theo số dòng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -29,11 +29,11 @@ Mục tiêu viết trước khi sửa (giả định, không phải SLA): nhập
 <figcaption>Hình 1. Thứ tự làm việc, từ mục tiêu tới quyết định giữ hay bỏ.</figcaption>
 </figure>
 
-Máy là Apple M1 Max, 64 GB, rustc 1.98.1, PostgreSQL 18.6 trong Docker Desktop (Engine 29.7.2), dùng chung với việc khác: load average lúc đo từ 100 đến 440. Nên mỗi câu hỏi được trả lời trước bằng số đếm: cấp phát và byte (allocator bọc như bài 59, đếm theo thread), round trip và `Parse` (proxy TCP đọc message PostgreSQL), số lần trigger chạy (`pg_stat_user_functions`). Thông lượng, p50, p99 đến sau cùng.
+Máy là Apple M1 Max, 64 GB, rustc 1.98.1, PostgreSQL 18.6 trong Docker Desktop (Engine 29.7.2), dùng chung với việc khác: load average lúc đo từ 100 đến 440. Vì vậy ta trả lời mỗi câu hỏi bằng số đếm trước: cấp phát và byte (allocator bọc như bài 59, đếm theo thread), round trip và `Parse` (proxy TCP đọc message PostgreSQL), số lần trigger chạy (`pg_stat_user_functions`). Thông lượng, p50, p99 đến sau cùng.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Số đo trên máy viết bài, không phải SLA</span>
-<p>Số thời gian đo lúc máy tải cao, client và server cùng máy, không TLS: chỉ cho biết hướng. Số đếm chạy lại ra đúng số cũ và <code>--verify</code> kiểm chúng.</p>
+<p>Số đo thời gian lấy lúc máy tải cao, client và server cùng máy, không dùng TLS: chỉ cho biết xu hướng. Số đếm chạy lại ra đúng số cũ và <code>--verify</code> kiểm chúng.</p>
 </div>
 
 ## Cow và mượn: bớt cấp phát ở đâu?
@@ -64,9 +64,9 @@ Dữ liệu giả có 10.000 mã: 90% đã chuẩn, 5% chỉ thừa khoảng tr�
 | `normalize` (`Cow`) | 500 | 7.335 |
 | `AccountId::new` của `ledger-core` | 10.000 | 146.671 |
 
-Dòng cuối là giới hạn của `Cow`: `AccountId` sở hữu một `String`, nên đi vào kiểu miền là cấp phát lại. `Cow` chỉ thắng ở đoạn chỉ đọc, như bind `&[&str]` lên PostgreSQL: 10.000 mã thô chỉ khớp 9.000 tài khoản, sau `normalize` khớp đủ.
+Dòng cuối là giới hạn của `Cow`: `AccountId` sở hữu một `String`, nên đưa mã vào kiểu miền là phải cấp phát lại. `Cow` chỉ thắng ở đoạn chỉ đọc, như bind `&[&str]` lên PostgreSQL: 10.000 mã thô chỉ khớp 9.000 tài khoản, sau `normalize` khớp đủ.
 
-Cùng ý đó cho các cột của `unnest`: bài 30 sao chép từng chuỗi, bản mượn chỉ giữ `&str` trỏ vào `JournalEntry`:
+Cùng ý đó áp dụng cho các cột của `unnest`: bài 30 sao chép từng chuỗi, bản mượn chỉ giữ `&str` trỏ vào `JournalEntry`:
 
 ```rust
 // src/columns.rs (rút gọn)
@@ -79,7 +79,7 @@ pub struct Columns<'a> {
 }
 ```
 
-Với 10.000 bút toán (30.000 dòng), mượn tốn 5 cấp phát, 1.480.000 byte; sao chép tốn 70.005 cấp phát cộng 64 lần cấp phát lại, 5.958.270 byte. Cái giá là vòng đời: bút toán phải sống lâu hơn các cột, và trình biên dịch buộc điều đó.
+Với 10.000 bút toán (30.000 dòng), cách mượn tốn 5 lần cấp phát, 1.480.000 byte; cách sao chép tốn 70.005 lần cấp phát cộng 64 lần cấp phát lại, 5.958.270 byte. Cái giá là lifetime: bút toán phải sống lâu hơn các cột, và trình biên dịch bắt buộc điều đó.
 
 ```text
 error[E0505]: cannot move out of `entries` because it is borrowed
@@ -91,11 +91,11 @@ error[E0505]: cannot move out of `entries` because it is borrowed
   |                    --------- borrow later used here
 ```
 
-(Lỗi thật, rút gọn, đã bỏ khỏi lab.)
+(Đây là lỗi thật, đã rút gọn và đã bỏ khỏi lab.)
 
 ## Từng dòng, unnest hay COPY: bao nhiêu round trip?
 
-Bốn cách ghi cùng dữ liệu, cùng bảo đảm: key trùng bị bỏ qua (`ON CONFLICT DO NOTHING`), `account_balances` cập nhật cùng transaction và khớp tổng posting. `PerRow` ghi mỗi bút toán một transaction, mỗi posting một `INSERT` và một upsert số dư: 9 câu lệnh. `Unnest` ghi mỗi lô 3 câu lệnh mảng, cộng `BEGIN` và `COMMIT`. `Copy` đổi riêng bước posting sang `copy_in_raw`. `Cte` gom cả lô vào một câu lệnh ba CTE.
+Bốn cách ghi cùng một dữ liệu và cùng bảo đảm: key trùng bị bỏ qua (`ON CONFLICT DO NOTHING`), `account_balances` cập nhật cùng transaction và khớp tổng posting. `PerRow` ghi mỗi bút toán một transaction, mỗi posting một `INSERT` và một upsert số dư: 9 câu lệnh. `Unnest` ghi mỗi lô 3 câu lệnh mảng, cộng `BEGIN` và `COMMIT`. `Copy` đổi riêng bước posting sang `copy_in_raw`. `Cte` gom cả lô vào một câu lệnh gồm ba CTE.
 
 ```rust
 // src/strategies.rs (rút gọn): Unnest và Copy cùng khung, khác bước posting
@@ -112,7 +112,7 @@ if use_copy {
 tx.commit().await?;                                                // 5. COMMIT
 ```
 
-Round trip là một lần client dừng chờ server. Với sqlx đó là mỗi `ReadyForQuery`, vì nó chờ message này trước khi gửi lệnh kế. Riêng `COPY` có thêm một lần chờ không sinh `ReadyForQuery`: client gửi `Query`, chờ `CopyInResponse` rồi mới gửi `CopyData`. Proxy cộng cả hai. Số dưới đây trên 1.000 bút toán, lô 500, sau một bút toán làm ấm cache prepared statement:
+Round trip là một lần client dừng chờ server. Với sqlx đó là mỗi `ReadyForQuery`, vì nó chờ message này trước khi gửi lệnh kế. Riêng `COPY` có thêm một lần chờ không sinh `ReadyForQuery`: client gửi `Query`, chờ `CopyInResponse` rồi mới gửi `CopyData`. Proxy cộng cả hai. Số dưới đây trên 1.000 bút toán, lô 500, sau khi một bút toán làm ấm cache prepared statement:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -121,7 +121,7 @@ Round trip là một lần client dừng chờ server. Với sqlx đó là mỗi
 <figcaption>Hình 2. Round trip ghi 1.000 bút toán và byte gửi lên mỗi bút toán.</figcaption>
 </figure>
 
-Kết quả khớp công thức thiết kế (9 mỗi bút toán; mỗi lô 5 với `Unnest`, 6 với `Copy`, 1 với `Cte`), `--verify` kiểm trên 199 bút toán. `COPY` không giảm round trip mà thêm một lượt mỗi lô. Nó gửi ít byte hơn, và proxy chỉ ra vì sao: riêng posting, `Bind` tốn 152.091 byte còn `CopyData` 82.613, trên 2.997 dòng. Mảng nhị phân tốn 4 byte độ dài cho mỗi phần tử, nên một dòng mất 36 byte cộng độ dài mã tài khoản; dòng text chỉ có bốn dấu phân cách và vài chữ số, khoảng 13 byte cộng độ dài mã. Đổi lại ta phải tự thoát `\`, tab, xuống dòng (`escape_copy_text`, cũng trả `Cow`).
+Kết quả khớp công thức thiết kế (9 mỗi bút toán; mỗi lô 5 với `Unnest`, 6 với `Copy`, 1 với `Cte`), `--verify` kiểm trên 199 bút toán. `COPY` không giảm round trip mà thêm một lượt mỗi lô. Cách này gửi ít byte hơn, và proxy cho thấy lý do: riêng posting, `Bind` tốn 152.091 byte còn `CopyData` 82.613, trên 2.997 dòng. Mảng nhị phân tốn 4 byte độ dài cho mỗi phần tử, nên một dòng mất 36 byte cộng độ dài mã tài khoản; dòng text chỉ có bốn dấu phân cách và vài chữ số, khoảng 13 byte cộng độ dài mã. Đổi lại ta phải tự escape `\`, tab, xuống dòng (`escape_copy_text`, cũng trả `Cow`).
 
 Hai chi tiết nghiệp vụ. Cột `version` của `account_balances` đếm số lần hàng bị ghi: cùng 200 bút toán, lô gộp cho tổng version 2, từng dòng cho 199, số dư giống hệt; mã dựa vào `version` ([bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update)) phải biết điều này. Và số dư ghi theo thứ tự mã tài khoản, để hai writer không khoá chéo nhau.
 
@@ -135,11 +135,11 @@ Thời gian, 10.000 bút toán, lô 500, `--release`, trung vị ba lượt (t�
 | `Copy` | 2.576 | 3.131 | 12.777 | 8.854 |
 | `Cte` | 5.940 | 2.836 | 15.215 | 9.108 |
 
-Từng dòng chậm hơn gộp lô từ 50 lần trở lên ở cả hai đợt, cùng hướng với round trip. Giữa ba cách gộp lô, chênh lệch nằm trong nhiễu: `Copy` lúc load 430 thêm trigger lại nhanh hơn. Biến lớn nhất là máy: cùng code `Unnest`, load 430 chậm gấp bốn đến sáu lần load 100.
+Từng dòng chậm hơn gộp lô từ 50 lần trở lên ở cả hai đợt, cùng xu hướng với round trip. Giữa ba cách gộp lô, chênh lệch nằm trong nhiễu: `Copy` lúc load 430 thêm trigger lại nhanh hơn. Yếu tố ảnh hưởng lớn nhất là máy: cùng code `Unnest`, load 430 chậm gấp bốn đến sáu lần load 100.
 
-Vì sao khác 22.791 của bài 30 (load 14 đến 32)? `Bare` cùng đợt cho 18.153; thêm `ON CONFLICT`, `RETURNING` và `account_balances` còn 14.323; thêm trigger còn 8.815. Mỗi số từ một đợt nên chỉ đọc như hướng: idempotency và số dư tốn khoảng một phần năm, trigger hơn một phần ba, và phần lớn quãng từ 22.791 xuống 2.312 là load.
+Vì sao con số này khác 22.791 của bài 30 (load 14 đến 32)? `Bare` cùng đợt cho 18.153; thêm `ON CONFLICT`, `RETURNING` và `account_balances` còn 14.323; thêm trigger còn 8.815. Mỗi số từ một đợt nên chỉ đọc như hướng: idempotency và số dư tốn khoảng một phần năm, trigger hơn một phần ba, và phần lớn mức giảm từ 22.791 xuống 2.312 là do load.
 
-Mục tiêu đã viết chỉ nói idempotency và số dư: đợt load 100 vượt, đợt load 430 không cách nào chạm tới. Thêm trigger, thứ sổ cái thật phải có, thì còn 8.815 đến 9.108. Tôi không coi là đạt: mục tiêu viết thiếu trigger, và chưa đo trên máy rảnh.
+Mục tiêu đã viết chỉ nói idempotency và số dư: đợt load 100 vượt mục tiêu, đợt load 430 không thể chạm tới. Thêm trigger, thứ sổ cái thật phải có, thì còn 8.815 đến 9.108. Tôi không coi mục tiêu là đạt: mục tiêu viết thiếu trigger, và chưa đo trên máy rảnh.
 
 ## Prepared statement của sqlx: cache theo kết nối, đếm thế nào?
 
@@ -153,17 +153,17 @@ Mục tiêu đã viết chỉ nói idempotency và số dư: đợt load 100 vư
 | `= any($1)`, mảng dài 1..50 | 1 | 51 | 1 |
 | cache 8 chỗ, 20 câu khác nhau | 20 | 52 | 8 |
 
-Kết nối mới `Parse` lại câu quen vì cache thuộc về kết nối, không về pool. SQL động làm hỏng cache: mỗi số tham số là một câu mới, một `Parse` và thêm một round trip. Mảng với `= any($1)` hay `unnest` cho một câu với mọi kích thước. `persistent(false)` trên sqlx 0.9 tốn `Parse` và thêm một round trip mỗi lần, nên chỉ dùng cho câu hiếm. PgBouncer ở transaction pooling đổi kết nối server giữa các transaction và có `max_prepared_statements` cho việc này; lab chưa chạy qua PgBouncer, nên các số trên chỉ đúng cho kết nối thẳng.
+Kết nối mới `Parse` lại câu quen vì cache thuộc về kết nối, không về pool. SQL động làm hỏng cache: mỗi số tham số là một câu mới, một `Parse` và thêm một round trip. Mảng với `= any($1)` hay `unnest` cho ra một câu dùng được với mọi kích thước. `persistent(false)` trên sqlx 0.9 tốn một lần `Parse` và thêm một round trip mỗi lần, nên chỉ dùng cho câu hiếm. PgBouncer ở transaction pooling đổi kết nối server giữa các transaction và có `max_prepared_statements` để xử lý việc này; lab chưa chạy qua PgBouncer, nên các số trên chỉ đúng cho kết nối thẳng.
 
 ## COPY và trigger cân bút toán tốn thế nào?
 
-Bài 25 có hai constraint trigger `FOR EACH ROW` cùng gọi `check_entry_balanced`, hoãn tới lúc commit: `postings_balanced` trên `postings`, `entries_have_postings` trên `journal_entries`. `COPY FROM` kích hoạt trigger như `INSERT`: bút toán lệch nạp thẳng vào `postings` bằng `COPY` bị từ chối lúc commit với SQLSTATE 23514 (`--verify` thử đúng việc này). Trigger chạy theo dòng: 200 bút toán (600 posting) chạy 800 lần, 4 lần mỗi bút toán (1 cho dòng `journal_entries`, 3 cho posting), với cả `Unnest` lẫn `Copy`. Mỗi lần kiểm lại cả bút toán, nên ba trong bốn lần là kiểm thừa.
+Bài 25 có hai constraint trigger `FOR EACH ROW` cùng gọi `check_entry_balanced`, hoãn tới lúc commit: `postings_balanced` trên `postings`, `entries_have_postings` trên `journal_entries`. `COPY FROM` kích hoạt trigger như `INSERT`: bút toán lệch nạp thẳng vào `postings` bằng `COPY` bị từ chối lúc commit với SQLSTATE 23514 (`--verify` thử đúng việc này). Trigger chạy theo dòng: 200 bút toán (600 posting) chạy 800 lần, 4 lần mỗi bút toán (1 cho dòng `journal_entries`, 3 cho posting), với cả `Unnest` lẫn `Copy`. Mỗi lần trigger kiểm tra lại cả bút toán, nên ba trong bốn lần là kiểm tra thừa.
 
-Ở lượt 10.000 bút toán, server báo đúng 40.000 lần gọi ở cả hai đợt. Thời gian trong hàm thì đổi: 537 đến 1.114 ms lúc load 430 (17% đến 32% thời gian ghi), 416 đến 425 ms lúc load 100 (khoảng 37%). Tắt trigger để kiểm theo lô thì cần quyền chủ bảng và ảnh hưởng mọi phiên, nên tôi giữ nó làm lưới an toàn cuối.
+Ở lượt 10.000 bút toán, server báo đúng 40.000 lần gọi ở cả hai đợt. Thời gian chạy trong hàm thì dao động: 537 đến 1.114 ms lúc load 430 (17% đến 32% thời gian ghi), 416 đến 425 ms lúc load 100 (khoảng 37%). Tắt trigger rồi kiểm tra theo lô thì cần quyền chủ bảng và ảnh hưởng mọi phiên, nên tôi giữ trigger làm lưới an toàn cuối cùng.
 
 ## p50, p99 và coordinated omission
 
-Vấn đề nằm ở cách sinh tải. Vòng đóng gửi request kế khi request trước xong: server kẹt thì client ngừng gửi và không ghi những request lẽ ra đã phải gửi. Vòng mở gửi theo lịch, tính độ trễ từ giờ dự kiến.
+Vấn đề nằm ở cách sinh tải. Vòng đóng gửi request kế khi request trước xong: server kẹt thì client ngừng gửi và không ghi lại những request lẽ ra đã phải gửi. Vòng mở gửi theo lịch, tính độ trễ từ giờ dự kiến.
 
 ```rust
 // src/omission.rs: vòng mở, thời gian ảo
@@ -189,7 +189,7 @@ Trong thời gian ảo, kết quả chạy lại ra đúng số cũ:
 | Vòng đóng + `record_corrected` | 0,5 ms | 951 ms | 1.000 ms |
 | Vòng mở | 0,5 ms | 980 ms | 1.000 ms |
 
-Vòng đóng báo p99 tốt hơn thực tế gần 2.000 lần. `record_corrected` (như `record_correct` của HdrHistogram) kéo p99 về gần vòng mở. Trên PostgreSQL thật, lab khoá bảng `probe` 500 ms (load 429): vòng đóng 2 luồng ghi 570 mẫu, p99 55 ms, max 512 ms; vòng mở 100 request/giây ghi đủ 400 mẫu, p99 476 ms, max 517 ms. Số mẫu dài của vòng đóng tối đa bằng số luồng.
+Vòng đóng báo p99 tốt hơn thực tế gần 2.000 lần. `record_corrected` (như `record_correct` của HdrHistogram) kéo p99 về gần vòng mở. Trên PostgreSQL thật, lab giữ khoá trên bảng `probe` trong 500 ms (load 429): vòng đóng 2 luồng ghi 570 mẫu, p99 55 ms, max 512 ms; vòng mở 100 request/giây ghi đủ 400 mẫu, p99 476 ms, max 517 ms. Số mẫu dài của vòng đóng tối đa bằng số luồng.
 
 So trước và sau cho một bút toán mỗi request, vòng mở 20 request/giây, 5 giây:
 
@@ -200,9 +200,9 @@ So trước và sau cho một bút toán mỗi request, vòng mở 20 request/gi
 | 132–147 | 1 | 70 / 208 ms | 12 / 91 ms |
 | 132–147 | 2 | 153 / 445 ms | 15 / 137 ms |
 
-Hướng ổn định: đường một câu thấp hơn ở mọi lượt. Tỷ lệ thì không: p50 từ 2 đến 10 lần, p99 từ 2 đến 3 lần. Kết luận được phép: cùng điều kiện, đường ít round trip có đuôi ngắn hơn.
+Xu hướng ổn định: đường một câu có độ trễ thấp hơn ở mọi lượt. Tỷ lệ thì không: p50 từ 2 đến 10 lần, p99 từ 2 đến 3 lần. Kết luận có thể rút ra: cùng điều kiện, đường ít round trip có đuôi ngắn hơn.
 
-Vì sao giảm 9 lần round trip không cho 9 lần độ trễ? `--breakdown` dùng một kết nối, không tranh khoá, xen kẽ các trường hợp để cùng chịu nhiễu (200 vòng, hai lượt, load 115 đến 147). Tỷ lệ p50 giữa hai đường là 5,8 và 7,3 khi `synchronous_commit = on`, 8,9 và 9,3 khi `off`. Tắt flush, tỷ lệ về gần đúng 9: hai đường khác nhau gần như chỉ ở round trip. Bật flush, cả hai cùng cộng một phần không nhân theo round trip: `pg_stat_get_backend_io` báo mỗi commit tốn trung bình 2,1 đến 4,8 ms fsync WAL, và mỗi đường chỉ có một commit. Tức `9r + c` so với `r + c`. Tỷ lệ chỉ 2 lần lúc load 430 và p99 thì tôi chưa tách: không có số fsync của đợt đó, nên `c` lớn lên chỉ là giả thuyết. `off` chỉ để tách số; nó có thể mất transaction vừa commit, không dùng cho sổ cái.
+Vì sao giảm 9 lần round trip không cho 9 lần độ trễ? `--breakdown` dùng một kết nối, không tranh khoá, xen kẽ các trường hợp để cùng chịu nhiễu (200 vòng, hai lượt, load 115 đến 147). Tỷ lệ p50 giữa hai đường là 5,8 và 7,3 khi `synchronous_commit = on`, 8,9 và 9,3 khi `off`. Tắt flush, tỷ lệ về gần đúng 9: hai đường khác nhau gần như chỉ ở round trip. Bật flush, cả hai cùng cộng thêm một khoản không nhân theo số round trip: `pg_stat_get_backend_io` báo mỗi commit tốn trung bình 2,1 đến 4,8 ms fsync WAL, và mỗi đường chỉ có một commit. Tức `9r + c` so với `r + c`. Tỷ lệ chỉ 2 lần lúc load 430 và p99 thì tôi chưa tách: không có số fsync của đợt đó, nên `c` lớn lên chỉ là giả thuyết. `off` chỉ để tách số; nó có thể mất transaction vừa commit, không dùng cho sổ cái.
 
 ## Khi nào dừng tối ưu?
 
@@ -213,11 +213,11 @@ Dừng khi đạt mục tiêu đã viết, hoặc khi thay đổi tiếp theo c�
 | Gộp lô `unnest` | round trip 8.991 xuống 10 (1.000 bút toán) | Giữ |
 | Cột mượn `&str` | cấp phát 70.005 xuống 5 | Giữ |
 | `Cow` khi chuẩn hoá | cấp phát 10.000 xuống 500 | Giữ ở biên đọc |
-| `COPY` thay `unnest` | round trip 10 lên 12; byte 219 xuống 149 | Bỏ: thêm hàm thoát, thông lượng trong nhiễu |
+| `COPY` thay `unnest` | round trip 10 lên 12; byte 219 xuống 149 | Bỏ: thêm hàm escape, thông lượng nằm trong nhiễu |
 | Một câu CTE cho cả lô | round trip 10 xuống 2 | Bỏ: phải khử key trùng trước, thông lượng trong nhiễu |
 | Một câu CTE cho một bút toán | round trip 9 xuống 1, p50 và p99 thấp hơn ở mọi lượt | Giữ ở đường request đơn |
 
-Bước kế tiếp không phải thêm kỹ thuật mà sửa mục tiêu cho có trigger và chạy lại `--pg-bench` khi máy rảnh.
+Bước kế tiếp không phải thêm kỹ thuật mà là bổ sung trigger vào mục tiêu và chạy lại `--pg-bench` khi máy rảnh.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
@@ -256,7 +256,7 @@ Lệnh đầu không cần database. `--verify` in:
 VERIFY OK
 ```
 
-`--verify` không assert thời gian. Số mẫu vòng đóng ở dòng `[7/7]` đổi theo tải (14 và 879 ở hai lần chạy liền nhau). `cargo test` chạy 23 ca (16 đơn vị, 7 tích hợp). Thiếu `TOI_NOI_PG_URL`, lab thoát mã 1, không bỏ qua.
+`--verify` không assert thời gian. Số mẫu vòng đóng ở dòng `[7/7]` thay đổi theo tải (14 và 879 ở hai lần chạy liền nhau). `cargo test` chạy 23 ca (16 đơn vị, 7 tích hợp). Thiếu `TOI_NOI_PG_URL`, lab thoát mã 1, không bỏ qua.
 
 **Bài tập:** nhập 100.000 bút toán bằng `Unnest` lô 500. Cần bao nhiêu round trip? Nếu mỗi round trip 0,5 ms, riêng chờ round trip mất bao lâu, và so với cách từng dòng?
 

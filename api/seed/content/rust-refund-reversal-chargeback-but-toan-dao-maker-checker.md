@@ -15,12 +15,12 @@ Khách `CU-001` khiếu nại chuyến `TN-0001` sau khi 25.500 đồng đã đ�
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Sổ cái cấm UPDATE và DELETE. Muốn «xoá» bút toán thu cước sai, ta làm gì? Và nếu nhân viên bấm «đảo» hai lần thì sổ có hai bút toán đảo không?</p>
-<details><summary>Xem đáp án</summary><p>Ghi một bút toán mới đổi dấu mọi dòng và trỏ về bút toán gốc bằng <code>reversal_of</code>. Bấm hai lần không được tạo bản thứ hai: bài này chặn ở ba tầng, tầng cuối là chỉ mục duy nhất trong database.</p></details>
+<details><summary>Xem đáp án</summary><p>Ghi một bút toán mới đổi dấu mọi dòng và trỏ về bút toán gốc bằng <code>reversal_of</code>. Bấm hai lần cũng không tạo ra bản thứ hai: bài này chặn ở ba tầng, tầng cuối là chỉ mục duy nhất trong database.</p></details>
 </div>
 
 ## Sổ không xoá: ba cách trả tiền lại cho khách
 
-Cả ba cách đều là bút toán mới; khác nhau ở người khởi xướng và liên kết.
+Cả ba cách đều là bút toán mới; khác nhau ở người khởi xướng và ở liên kết tới bút toán gốc.
 
 | Cách | Ai khởi xướng | Bút toán | `reversal_of` |
 | --- | --- | --- | --- |
@@ -28,11 +28,11 @@ Cả ba cách đều là bút toán mới; khác nhau ở người khởi xướ
 | Hoàn một phần (refund) | Nhân viên tạo, người khác duyệt | Một bút toán mới theo tỷ lệ | Không |
 | Chargeback | VíXanh, không hỏi nền tảng | Tiền rời clearing | Chỉ khi nền tảng thắng và đảo lại |
 
-Hoàn một phần không đặt `reversal_of`, vì hai lý do. Nó không phải ảnh gương của bút toán nào: ba dòng khách, doanh thu, tài xế không đổi dấu đúng capture hay split. Và chỉ mục duy nhất ở mục sau chỉ cho mỗi bút toán một bản đảo, trong khi một chuyến có thể hoàn nhiều lần. Truy vết đi qua `refund_requests.entry_id` và key `trip:TN-0001:refund:<n>`, với `<n>` là mã yêu cầu.
+Hoàn một phần không đặt `reversal_of`, vì hai lý do. Nó không phải bản đảo dấu của bút toán nào: ba dòng khách, doanh thu, tài xế không trùng với capture hay split khi đổi dấu. Và chỉ mục duy nhất ở mục sau chỉ cho mỗi bút toán một bản đảo, trong khi một chuyến có thể hoàn nhiều lần. Truy vết đi qua `refund_requests.entry_id` và key `trip:TN-0001:refund:<n>`, với `<n>` là mã yêu cầu.
 
 ## Đảo toàn phần: reversal_of và không đảo được hai lần
 
-Đảo cả chuyến là đảo `split` rồi `capture`, ngược thứ tự lúc ghi. `reverse_entry` đổi dấu từng dòng bằng `JournalEntry::reversal_of` của `ledger-core` và ghi với key `<key gốc>:reversal`; kiểm tra bất biến (tổng bằng 0) vẫn do `JournalEntry` làm.
+Đảo cả chuyến là đảo `split` rồi `capture`, ngược thứ tự lúc ghi. `reverse_entry` đổi dấu từng dòng bằng `JournalEntry::reversal_of` của `ledger-core` và ghi với key `<key gốc>:reversal`; việc kiểm tra bất biến (tổng bằng 0) vẫn do `JournalEntry` đảm nhiệm.
 
 ```rust
 // src/ledger.rs (rút gọn: bỏ truy vấn lấy bút toán, giữ phần quyết định)
@@ -48,7 +48,7 @@ pub async fn reverse_entry(tx: &mut PgConnection, original_id: i64) -> Result<Po
 }
 ```
 
-Không đảo được hai lần nhờ ba lớp. Một: key suy ra từ bút toán gốc, nên gọi lần hai rơi vào `ON CONFLICT DO NOTHING` của `post_entry` và trả `replayed = true`. Hai: không đảo bút toán đã là bút toán đảo. Ba, ở dữ liệu, cho ai đó đi đường vòng với key khác:
+Việc không đảo được hai lần nhờ ba lớp bảo vệ. Một: key suy ra từ bút toán gốc, nên gọi lần hai rơi vào `ON CONFLICT DO NOTHING` của `post_entry` và trả `replayed = true`. Hai: không đảo bút toán đã là bút toán đảo. Ba, ở tầng dữ liệu, chặn trường hợp ai đó đi đường vòng bằng key khác:
 
 ```sql
 -- sql/01_schema.sql
@@ -82,7 +82,7 @@ chèn tay một bút toán đảo thứ hai: Some((Some("23505"), Some("journal_
 
 Chính sách của lab là hoàn theo tỷ lệ: khách nhận đủ số hoàn, nền tảng trả lại phần phí tương ứng, tài xế trả phần còn lại; khách không chịu phần nào. Nền tảng chịu hết, hay tài xế chịu hết khi lỗi do tài xế, là quyết định kinh doanh; chỉ `refund_split` cần đổi.
 
-Làm tròn là chỗ dễ lệch: làm tròn riêng từng lần thì nhiều lần hoàn nhỏ có thể cộng ra phí khác 5.100. Lab tính theo tổng luỹ kế: phần phí của một lần là hiệu giữa phí «đáng ra đã hoàn» sau lần này và trước lần này, còn tài xế nhận phần dư, nên tổng đúng từng đồng. Phép tính chỉ dùng số nguyên (`i128` để tích không tràn), làm tròn nửa lên, không `f64`:
+Làm tròn là chỗ dễ lệch: làm tròn riêng từng lần thì nhiều lần hoàn nhỏ có thể cộng ra phí khác 5.100. Lab tính theo tổng luỹ kế: phần phí của một lần là hiệu giữa phí «đáng ra đã hoàn» sau lần này và trước lần này, còn tài xế nhận phần dư, nên tổng đúng từng đồng. Phép tính chỉ dùng số nguyên (`i128` để tích không tràn), làm tròn nửa lên và không dùng `f64`:
 
 ```rust
 // src/model.rs (gộp dòng cho gọn)
@@ -107,7 +107,7 @@ pub fn refund_split(captured: Money, fee: Money, already_refunded: Money, amount
 | 15.500 | 10.000 | 3.100 | 12.400 |
 | 12.347 | 0 | 2.469 (từ 2.469,4) | 9.878 |
 
-Hai dòng đầu cộng ra đúng 5.100 và 20.400; unit test `pieces_add_up_to_original_fee` thử thêm bảy lần hoàn lẻ liên tiếp. Bút toán hoàn có ba posting (khách nhận, doanh thu và tài xế mỗi bên trả phần mình); dòng 0 đồng bị bỏ vì `CHECK (amount_dong <> 0)`.
+Hai dòng đầu cộng ra đúng 5.100 và 20.400; unit test `pieces_add_up_to_original_fee` thử thêm bảy lần hoàn lẻ liên tiếp. Bút toán hoàn có ba posting (khách nhận, doanh thu và tài xế mỗi bên trả phần mình); dòng 0 đồng không được ghi vì `CHECK (amount_dong <> 0)` không cho phép.
 
 ## Hai yêu cầu cùng lúc, tổng hoàn vượt số đã thu
 
@@ -121,13 +121,13 @@ refunded_dong bigint NOT NULL DEFAULT 0,
 CONSTRAINT refund_within_captured CHECK (refunded_dong >= 0 AND refunded_dong <= captured_dong)
 ```
 
-`UPDATE` cộng tương đối (`refunded_dong = refunded_dong + $2`) chứ không ghi đè bằng số vừa đọc, nếu không lost update lọt qua `CHECK`. Cuộc đua dựng bằng `Barrier`, không `sleep`. Với `Guard::Locked`, điểm dừng nằm trước khi mở transaction; với `Guard::Unlocked` (tham số chỉ có ở lab, để thấy `CHECK` làm gì), điểm dừng nằm ngay sau khi đọc `payments`, nên cả hai chắc chắn đọc cùng số cũ.
+`UPDATE` cộng tương đối (`refunded_dong = refunded_dong + $2`) chứ không ghi đè bằng số vừa đọc, nếu không lost update lọt qua `CHECK`. Race condition được dựng bằng `Barrier` chứ không dùng `sleep`. Với `Guard::Locked`, điểm dừng nằm trước khi mở transaction; với `Guard::Unlocked` (tham số chỉ có ở lab, để thấy `CHECK` làm gì), điểm dừng nằm ngay sau khi đọc `payments`, nên cả hai chắc chắn đọc cùng số cũ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 270" role="img" aria-label="Hình 2. Hai transaction duyệt hai yêu cầu 15.000 trên cùng chuyến. T1 khoá dòng payments, ghi bút toán và commit. T2 đứng chờ khoá, sau đó đọc refundable còn 10.500 và bị từ chối."><defs><marker id="rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="25" width="158" height="70" rx="10" class="f-phys-soft s-phys"/><text x="34" y="55" class="t-b">T1 · Barrier</text><text x="34" y="78" class="t-small">fin.binh, yêu cầu 1</text><rect x="195" y="25" width="200" height="70" rx="10" class="f-phys-soft s-phys"/><text x="209" y="55" class="t-b">FOR UPDATE</text><text x="209" y="78" class="t-small">refundable = 25.500</text><rect x="420" y="25" width="210" height="70" rx="10" class="f-phys-soft s-phys"/><text x="434" y="55" class="t-b">Ghi bút toán hoàn</text><text x="434" y="78" class="t-small">refunded 0 → 15.000</text><rect x="655" y="25" width="205" height="70" rx="10" class="f-pk-soft s-pk"/><text x="669" y="55" class="t-b">COMMIT</text><text x="669" y="78" class="t-small">khoá được nhả</text><path d="M178 60 L195 60" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><path d="M395 60 L420 60" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><path d="M630 60 L655 60" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><rect x="20" y="140" width="158" height="70" rx="10" class="f-phys-soft s-phys"/><text x="34" y="170" class="t-b">T2 · Barrier</text><text x="34" y="193" class="t-small">fin.cuong, yêu cầu 2</text><rect x="195" y="140" width="435" height="70" rx="10" class="f-warn-soft s-warn dash"/><text x="209" y="170" class="t-b">FOR UPDATE: đứng chờ</text><text x="209" y="193" class="t-small">dòng payments đang do T1 giữ, T2 chưa đọc được gì</text><rect x="655" y="140" width="205" height="70" rx="10" class="f-warn-soft s-warn"/><text x="669" y="170" class="t-b">refundable = 10.500</text><text x="669" y="193" class="t-small">15.000 &gt; 10.500: từ chối</text><path d="M178 175 L195 175" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><path d="M630 175 L655 175" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><path d="M757 95 L757 140" class="f-none s-pk" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><text x="20" y="245" class="t-small">Thiếu khoá: cả hai cùng đọc 25.500 và cùng qua kiểm; CHECK refund_within_captured chặn bên ghi sau (SQLSTATE 23514).</text></svg>
+<svg viewBox="0 0 880 270" role="img" aria-label="Hình 2. Hai transaction duyệt hai yêu cầu 15.000 trên cùng chuyến. T1 khoá dòng payments, ghi bút toán và commit. T2 đứng chờ khoá, sau đó đọc refundable còn 10.500 và bị từ chối."><defs><marker id="rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="25" width="158" height="70" rx="10" class="f-phys-soft s-phys"/><text x="34" y="55" class="t-b">T1 · Barrier</text><text x="34" y="78" class="t-small">fin.binh, yêu cầu 1</text><rect x="195" y="25" width="200" height="70" rx="10" class="f-phys-soft s-phys"/><text x="209" y="55" class="t-b">FOR UPDATE</text><text x="209" y="78" class="t-small">refundable = 25.500</text><rect x="420" y="25" width="210" height="70" rx="10" class="f-phys-soft s-phys"/><text x="434" y="55" class="t-b">Ghi bút toán hoàn</text><text x="434" y="78" class="t-small">refunded 0 → 15.000</text><rect x="655" y="25" width="205" height="70" rx="10" class="f-pk-soft s-pk"/><text x="669" y="55" class="t-b">COMMIT</text><text x="669" y="78" class="t-small">khoá được nhả</text><path d="M178 60 L195 60" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><path d="M395 60 L420 60" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><path d="M630 60 L655 60" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><rect x="20" y="140" width="158" height="70" rx="10" class="f-phys-soft s-phys"/><text x="34" y="170" class="t-b">T2 · Barrier</text><text x="34" y="193" class="t-small">fin.cuong, yêu cầu 2</text><rect x="195" y="140" width="435" height="70" rx="10" class="f-warn-soft s-warn dash"/><text x="209" y="170" class="t-b">FOR UPDATE: đứng chờ</text><text x="209" y="193" class="t-small">dòng payments đang do T1 giữ, T2 chưa đọc được gì</text><rect x="655" y="140" width="205" height="70" rx="10" class="f-warn-soft s-warn"/><text x="669" y="170" class="t-b">refundable = 10.500</text><text x="669" y="193" class="t-small">15.000 &gt; 10.500: từ chối</text><path d="M178 175 L195 175" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><path d="M630 175 L655 175" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><path d="M757 95 L757 140" class="f-none s-pk" stroke-width="2" marker-end="url(#rust-refund-reversal-chargeback-but-toan-dao-maker-checker-1-a)"/><text x="20" y="245" class="t-small">Thiếu khoá: cả hai cùng đọc 25.500 và cùng qua bước kiểm tra; CHECK refund_within_captured chặn bên ghi sau (SQLSTATE 23514).</text></svg>
 </div>
-<figcaption>Hình 2. Với khoá, bên thua nhận lỗi nghiệp vụ. Ai thắng thì tuỳ lần chạy, nhưng tổng hoàn luôn là 15.000. Hình vẽ T1 thắng.</figcaption>
+<figcaption>Hình 2. Với khoá, bên thua nhận lỗi nghiệp vụ. Bên nào thắng tuỳ lần chạy, nhưng tổng hoàn luôn là 15.000. Trong hình, T1 thắng.</figcaption>
 </figure>
 
 Kết quả thật của lab, hai biến thể liền nhau:
@@ -178,11 +178,11 @@ if req.status == "APPROVED" {
 }
 ```
 
-Rollback rồi `INSERT` là hai bước không nguyên tử. Tiến trình chết giữa hai bước, hoặc `INSERT` lỗi, thì tiền không đổi và không có bút toán nào, nhưng lần bị từ chối không để lại dòng audit; `INSERT` lỗi còn khiến người gọi nhận lỗi database thay vì `SelfApproval`. Dấu vết này chỉ là cố gắng tối đa, khác với audit của thay đổi, vốn cùng commit với thay đổi. Hệ thống thật nên ghi thêm log có cấu trúc trước khi ghi database. `reject` xử lý người tạo tự từ chối cũng theo cách này.
+Rollback rồi `INSERT` là hai bước không nguyên tử. Tiến trình chết giữa hai bước, hoặc `INSERT` lỗi, thì tiền không đổi và không có bút toán nào, nhưng lần bị từ chối không để lại dòng audit; `INSERT` lỗi còn khiến người gọi nhận lỗi database thay vì `SelfApproval`. Dấu vết này chỉ được ghi theo kiểu cố gắng hết mức (best effort), khác với audit của thay đổi, vốn cùng commit với thay đổi. Hệ thống thật nên ghi thêm log có cấu trúc trước khi ghi database. `reject` xử lý người tạo tự từ chối cũng theo cách này.
 
-Duyệt lặp lại idempotent theo hai cách: khoá dòng yêu cầu xếp hàng hai checker cùng bấm, và key `trip:TN-0001:refund:<mã yêu cầu>` là lưới thứ hai. Lab thử duyệt lại bởi cùng người, bởi người khác, và đồng thời: luôn đúng một bút toán. Rust báo lỗi dễ hiểu, còn `UPDATE` thẳng để người duyệt trùng người tạo vẫn bị `checker_differs_from_maker` chặn, vì có ngày ai đó sẽ viết script sửa dữ liệu.
+Duyệt lặp lại vẫn idempotent nhờ hai lớp: khoá dòng yêu cầu bắt hai checker cùng bấm phải xếp hàng, và key `trip:TN-0001:refund:<mã yêu cầu>` là lưới thứ hai. Lab thử duyệt lại do cùng người, do người khác, và đồng thời: luôn đúng một bút toán. Rust báo lỗi dễ hiểu; còn nếu ai đó `UPDATE` thẳng để người duyệt trùng người tạo thì vẫn bị `checker_differs_from_maker` chặn, vì có ngày ai đó sẽ viết script sửa dữ liệu.
 
-Trạng thái thanh toán đi theo máy trạng thái của [bài 14](/articles/rust-typestate-may-trang-thai-thanh-toan): tạo yêu cầu đưa `CAPTURED` sang `REFUND_PENDING`; hoàn đủ số đã thu thì sang `REFUNDED`. Hoàn một phần xong mà không còn yêu cầu chờ, hoặc mọi yêu cầu đều bị từ chối, thì phải về `CAPTURED`; bảng `transition` của `ledger-core` không có cạnh `REFUND_PENDING` về `CAPTURED`. Cạnh này do lab tự thêm: `approve_with` và `reject` gán thẳng, không qua `transition`, và lab 20 giữ nguyên. Thư viện vì thế không bảo vệ cạnh này, kiểm tra nằm ở code gọi. Nghiệp vụ thật đòi cạnh mà mô hình ban đầu chưa nghĩ tới; đưa nó vào thư viện chung là một quyết định riêng.
+Trạng thái thanh toán đi theo máy trạng thái của [bài 14](/articles/rust-typestate-may-trang-thai-thanh-toan): tạo yêu cầu đưa `CAPTURED` sang `REFUND_PENDING`; hoàn đủ số đã thu thì sang `REFUNDED`. Hoàn một phần xong mà không còn yêu cầu chờ, hoặc mọi yêu cầu đều bị từ chối, thì phải về `CAPTURED`; bảng `transition` của `ledger-core` không có cạnh `REFUND_PENDING` về `CAPTURED`. Cạnh này do lab tự thêm: `approve_with` và `reject` gán thẳng, không qua `transition`, và lab 20 giữ nguyên. Thư viện vì thế không bảo vệ cạnh này, kiểm tra nằm ở code gọi. Nghiệp vụ thật đòi hỏi một cạnh mà mô hình ban đầu chưa tính đến; đưa nó vào thư viện chung là một quyết định riêng.
 
 Audit ghi cùng transaction với thay đổi, trừ các lần bị từ chối ở trên. `audit_log` cũng bị trigger cấm sửa và xoá như `journal_entries`:
 
@@ -197,7 +197,7 @@ Audit ghi cùng transaction với thay đổi, trừ các lần bị từ chối
 
 ## Chargeback: tiền rời clearing, ai chịu tạm?
 
-Chargeback không qua maker-checker vì không ai hỏi nền tảng: VíXanh rút 25.500 khi nền tảng đã chia xong. Lab ghi bút toán hai dòng: `psp:vixanh:clearing` -25.500, `customer:CU-001` +25.500. Clearing về 0 sau split nên đi âm, và số âm đó là chỗ nền tảng chịu tạm: tiền nền tảng nợ VíXanh trong khi ví tài xế vẫn giữ 20.400. Không ai tự trừ ví tài xế; đòi lại là quyết định khi có kết luận.
+Chargeback không qua maker-checker vì không ai hỏi nền tảng: VíXanh rút 25.500 khi nền tảng đã chia xong. Lab ghi bút toán hai dòng: `psp:vixanh:clearing` -25.500, `customer:CU-001` +25.500. Clearing về 0 sau split nên đi âm, và số âm đó là chỗ nền tảng chịu tạm: khoản tiền nền tảng nợ VíXanh trong khi ví tài xế vẫn giữ 20.400. Không ai tự trừ ví tài xế; việc đòi lại là quyết định được đưa ra khi có kết luận.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -214,18 +214,18 @@ Kết luận có ba hướng, đều in ra từ lab:
 | Thua, nền tảng chịu | `revenue` -25.500, clearing +25.500 | 0 / 0 / -20.400 / +20.400 |
 | Thắng | Đảo bút toán chargeback (`reversal_of`) | -25.500 / 0 / +5.100 / +20.400 |
 
-Doanh thu -20.400 ở hàng hai là khoản lỗ nền tảng chịu: tài xế giữ tiền, nền tảng mất cả phần của tài xế. Sơ đồ tài khoản chuẩn chưa có tài khoản chi phí riêng cho chargeback nên lab trừ thẳng `platform:revenue`. Hàng một tái dùng `refund_split`.
+Doanh thu -20.400 ở hàng hai là khoản lỗ nền tảng chịu: tài xế giữ tiền, nền tảng mất cả phần của tài xế. Sơ đồ tài khoản chuẩn chưa có tài khoản chi phí riêng cho chargeback nên lab trừ thẳng `platform:revenue`. Hàng một dùng lại `refund_split`.
 
 Các ca lab chưa xử lý, cần chính sách riêng:
 
-- **Ví tài xế âm.** Thu hồi hoặc hoàn một phần khi tài xế đã rút hết tiền để lại số dư âm. Ví âm không vào lô payout ở [bài 44](/articles/rust-vi-tai-xe-chia-tien-payout-theo-lo), nhưng chưa có khấu trừ hay đòi nợ.
-- **Hoàn tiền chồng chargeback.** `open` chỉ so với số đã thu, không trừ số đã hoàn; chargeback đang mở cũng không chặn duyệt hoàn. Khách có thể được trả hai lần.
+- **Ví tài xế âm.** Thu hồi hoặc hoàn một phần khi tài xế đã rút hết tiền sẽ để lại số dư âm. Ví âm không vào lô payout ở [bài 44](/articles/rust-vi-tai-xe-chia-tien-payout-theo-lo), nhưng chưa có cơ chế khấu trừ hay đòi nợ.
+- **Hoàn tiền chồng lên chargeback.** `open` chỉ so với số đã thu, không trừ số đã hoàn; chargeback đang mở cũng không chặn duyệt hoàn. Khách có thể được trả hai lần.
 - **Nhiều vụ trên một chuyến.** Mỗi `psp_case_ref` chỉ so với số đã thu, nên tổng các vụ có thể vượt số đó.
-- **Một người quyết.** `reverse_trip` và `resolve_lost` chỉ ghi `actor`, không qua maker-checker.
+- **Một người quyết định.** `reverse_trip` và `resolve_lost` chỉ ghi `actor`, không qua maker-checker.
 
 ## Reason code là enum có bảng
 
-Mỗi yêu cầu hoàn và chargeback mang một reason code, giữ ở hai nơi: enum `ReasonCode` (đóng, thêm mã thì compiler chỉ chỗ phải sửa) và bảng `reason_codes` (khoá ngoại từ `refund_requests` và `chargebacks`, nên mã lạ không vào được database). Hai nơi có thể lệch, nên test so theo tập hợp:
+Mỗi yêu cầu hoàn và chargeback mang một reason code, giữ ở hai nơi: enum `ReasonCode` (đóng, thêm mã thì compiler chỉ ra chỗ phải sửa) và bảng `reason_codes` (khoá ngoại từ `refund_requests` và `chargebacks`, nên mã lạ không vào được database). Hai nơi có thể lệch, nên test so theo tập hợp:
 
 ```rust
 // src/main.rs (thí nghiệm 5, rút gọn)
@@ -237,16 +237,16 @@ en.sort();
 c.expect(table == en, "enum ReasonCode khớp bảng reason_codes");
 ```
 
-`kind()` tách mã hoàn tiền (`FARE_DISPUTE`, `DUPLICATE_CHARGE`...) khỏi mã chargeback (`FRAUD`, `NOT_RECEIVED`); dùng nhầm loại là `WrongReasonKind`. Có mã thay vì ghi chú tự do thì báo cáo gom được theo nguyên nhân.
+`kind()` tách mã hoàn tiền (`FARE_DISPUTE`, `DUPLICATE_CHARGE`...) khỏi mã chargeback (`FRAUD`, `NOT_RECEIVED`); dùng nhầm loại là `WrongReasonKind`. Dùng mã thay vì ghi chú tự do thì báo cáo có thể gom theo nguyên nhân.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là mô hình học tập. Người dùng chỉ là chuỗi (<code>cs.lan</code>, <code>fin.binh</code>), chưa có xác thực, phân quyền hay MFA theo §11.2 của kiến trúc; thực tế, ai được duyệt là dữ liệu phân quyền, không phải so sánh hai chuỗi. Lab hoàn về ví khách; hoàn về thẻ phải qua VíXanh, có trạng thái chờ và đối soát. Chưa có hạn mức duyệt theo số tiền hay hết hạn yêu cầu. Mọi tên và số liệu là hư cấu của Tới Nơi; quy tắc thật phụ thuộc hợp đồng với cổng thanh toán và quy định, không suy ra từ bài này.</p>
+<p>Đây là mô hình học tập. Người dùng chỉ là chuỗi (<code>cs.lan</code>, <code>fin.binh</code>), chưa có xác thực, phân quyền hay MFA theo §11.2 của kiến trúc; trong thực tế, người được phép duyệt là dữ liệu phân quyền, không phải so sánh hai chuỗi. Lab hoàn về ví khách; hoàn về thẻ phải qua VíXanh, có trạng thái chờ và đối soát. Chưa có hạn mức duyệt theo số tiền hay hết hạn yêu cầu. Mọi tên và số liệu là hư cấu của Tới Nơi; quy tắc thật phụ thuộc hợp đồng với cổng thanh toán và quy định, không suy ra từ bài này.</p>
 </div>
 
 ## Chạy ví dụ và kiểm chứng
 
-Lab dùng PostgreSQL của `examples/toi-noi-rust/infra`; mỗi thí nghiệm tạo schema `lab_<uuid>` riêng và xoá khi xong. Thiếu `TOI_NOI_PG_URL` thì lab fail rõ. Từ gốc repository:
+Lab dùng PostgreSQL của `examples/toi-noi-rust/infra`; mỗi thí nghiệm tạo schema `lab_<uuid>` riêng và xoá khi xong. Thiếu `TOI_NOI_PG_URL` thì lab báo lỗi rõ ràng. Từ gốc repository:
 
 ```bash
 export TOI_NOI_PG_URL='postgres://toi_noi:toi_noi_lab@127.0.0.1:5433/toi_noi_rust_lab'
@@ -255,11 +255,11 @@ cargo run --manifest-path examples/toi-noi-rust/43-refund-reversal-chargeback/Ca
 cargo test --manifest-path examples/toi-noi-rust/43-refund-reversal-chargeback/Cargo.toml
 ```
 
-`--verify` kiểm từng giá trị in ở trên; đạt thì in `VERIFY OK`, thoát mã 0. `cargo test` chạy 4 unit test (tách phí, reason code) và 11 test tích hợp, gồm trigger append-only, `CHECK` ở database và một cuộc đua ba checker bằng `Barrier` kiểm bất biến chứ không kiểm thứ tự. Lab dùng `sqlx` 0.9.0, `tokio` 1.54.1 và `ledger-core` của bài 20.
+`--verify` kiểm tra từng giá trị đã in ở trên; đạt thì in `VERIFY OK`, thoát mã 0. `cargo test` chạy 4 unit test (tách phí, reason code) và 11 test tích hợp, gồm trigger append-only, `CHECK` ở database và một race condition giữa ba checker dựng bằng `Barrier` kiểm bất biến chứ không kiểm thứ tự. Lab dùng `sqlx` 0.9.0, `tokio` 1.54.1 và `ledger-core` của bài 20.
 
 **Bài tập:** chuyến đã hoàn 10.000 qua yêu cầu 1. Sau đó có người gọi `reverse_trip`. Lab trả gì, và vì sao đó đúng hơn việc đảo hai bút toán rồi trừ phần đã hoàn?
 
-<details><summary>Xem lời giải</summary><p>Lab trả <code>PartialRefundExists</code> với số đã hoàn 10.000, vì <code>reverse_trip</code> chỉ chạy khi <code>refunded_dong = 0</code> và trạng thái <code>CAPTURED</code>. «Trừ phần đã hoàn» nghĩa là sửa bút toán đã ghi hoặc ghi bù một khoản mất dấu nguyên nhân, đều khó đối soát. Đường đúng là hoàn nốt 15.500 qua yêu cầu mới, vẫn có người tạo, người duyệt và audit.</p></details>
+<details><summary>Xem lời giải</summary><p>Lab trả <code>PartialRefundExists</code> với số đã hoàn 10.000, vì <code>reverse_trip</code> chỉ chạy khi <code>refunded_dong = 0</code> và trạng thái <code>CAPTURED</code>. «Trừ phần đã hoàn» nghĩa là sửa bút toán đã ghi hoặc ghi bù một khoản làm mất dấu nguyên nhân, đều khó đối soát. Đường đúng là hoàn nốt 15.500 qua yêu cầu mới, vẫn có người tạo, người duyệt và audit.</p></details>
 
 Bài trước: [bài 42](/articles/rust-hold-capture-void-so-du-kha-dung). Bài tiếp: [bài 44](/articles/rust-vi-tai-xe-chia-tien-payout-theo-lo).
 

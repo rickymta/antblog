@@ -1,0 +1,131 @@
+{
+ "file": "rust-so-du-theo-thoi-diem-snapshot-dong-ky.md",
+ "edits": [
+  {
+   "old": "dựng cuộc đua ghi/đóng kỳ bằng Barrier",
+   "new": "dựng race condition giữa ghi và đóng kỳ bằng Barrier",
+   "reason": "Thuật ngữ race condition giữ tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "và cuộc đua giữa lần ghi đang chạy với lần đóng kỳ",
+   "new": "và race condition giữa lần ghi đang chạy với lần đóng kỳ",
+   "reason": "Thống nhất thuật ngữ race condition",
+   "severity": "medium"
+  },
+  {
+   "old": "Cách gọn là ranh giới nửa mở",
+   "new": "Cách gọn nhất là dùng ranh giới nửa mở",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bên đầu cho báo cáo kế toán, bên sau trả lời",
+   "new": "Số đầu dùng cho báo cáo kế toán, số sau trả lời",
+   "reason": "Tham chiếu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "25.500 là con số báo cáo in lúc 00:00 đã thấy.",
+   "new": "25.500 là con số mà báo cáo in lúc 00:00 đã hiển thị.",
+   "reason": "Câu cụt, thiếu quan hệ từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Cái giá của `posted_at` do nghiệp vụ truyền là nó nhận giá trị",
+   "new": "Cái giá của việc để nghiệp vụ truyền `posted_at` là cột này nhận giá trị",
+   "reason": "Câu gượng, chủ ngữ không rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "Lạ, nếu coi buffer là thước đo công việc.",
+   "new": "Điều này lạ nếu coi buffer là thước đo công việc.",
+   "reason": "Câu cụt, thiếu chủ ngữ và vị ngữ",
+   "severity": "high"
+  },
+  {
+   "old": "cả câu xử lý chưa tới 1.000 dòng",
+   "new": "cả câu truy vấn chỉ xử lý chưa tới 1.000 dòng",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Kết luận đo được: snapshot đáng cho tài khoản nóng",
+   "new": "Kết luận đo được: snapshot đáng dùng cho tài khoản nóng",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Muốn giảm nữa thì snapshot dày hơn, hoặc chép",
+   "new": "Muốn giảm nữa thì làm snapshot dày hơn, hoặc chép",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Thử: job tạo snapshot ngày 05",
+   "new": "Thử như sau: job tạo snapshot ngày 05",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Chữa bằng một trigger xoá snapshot bị posting ghi lùi vượt qua",
+   "new": "Cách khắc phục là một trigger xoá những snapshot mà posting ghi lùi đã vượt qua",
+   "reason": "Từ 'chữa' gượng, thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Posting là sự thật, snapshot là bản nhớ đệm",
+   "new": "Posting là nguồn dữ liệu gốc, snapshot là bản nhớ đệm",
+   "reason": "Theo terminology: source of truth",
+   "severity": "medium"
+  },
+  {
+   "old": "16 ca chạy xanh.",
+   "new": "16 test case chạy xanh.",
+   "reason": "Thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Lúc đó đóng kỳ: snapshot chỉ thấy",
+   "new": "Lúc đó chạy đóng kỳ: snapshot chỉ thấy",
+   "reason": "Thiếu chủ thể/động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Phần chờ cũng không dùng thời gian",
+   "new": "Việc chờ cũng không dựa vào thời gian",
+   "reason": "Diễn đạt gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Bản sai (trigger không có `FOR SHARE`, đóng kỳ không khoá) và bản đúng cho:",
+   "new": "Bản sai (trigger không có `FOR SHARE`, đóng kỳ không khoá) và bản đúng cho kết quả:",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Khoá có giá. Đóng kỳ",
+   "new": "Khoá có cái giá của nó. Đóng kỳ",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Lab chưa đo đói khoá:",
+   "new": "Lab chưa đo tình huống đói khoá:",
+   "reason": "Thiếu danh từ, cụm gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "bị xoá cuối ca kể cả khi lỗi",
+   "new": "bị xoá cuối mỗi test case kể cả khi lỗi",
+   "reason": "Thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "thời gian mỗi lần mỗi khác.",
+   "new": "thời gian đo mỗi lần chạy mỗi khác.",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  }
+ ]
+}

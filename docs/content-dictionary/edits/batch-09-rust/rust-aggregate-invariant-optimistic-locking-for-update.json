@@ -1,0 +1,197 @@
+{
+  "file": "rust-aggregate-invariant-optimistic-locking-for-update.md",
+  "edits": [
+    {
+      "old": "kiểm bằng N task Barrier trên PostgreSQL",
+      "new": "kiểm chứng bằng N task dùng Barrier trên PostgreSQL",
+      "reason": "Cụm cụt, thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "Chạy lần lượt thì đúng. Chồng nhau thì mỗi bút toán vẫn cân, nhưng ví đã sai.",
+      "new": "Chạy lần lượt thì kết quả đúng. Chạy chồng nhau thì từng bút toán vẫn cân, nhưng số dư ví đã sai.",
+      "reason": "Câu cụt, thiếu chủ ngữ và đối tượng",
+      "severity": "medium"
+    },
+    {
+      "old": "chưa thử lại khi xung đột.",
+      "new": "chưa có bước thử lại khi xảy ra xung đột.",
+      "reason": "Câu thiếu động từ, nghe cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "và để ngỏ hướng khoá dòng;",
+      "new": "và để ngỏ hướng khoá hàng;",
+      "reason": "Thống nhất dùng hàng trong cả bài",
+      "severity": "low"
+    },
+    {
+      "old": "Bài này đặt cạnh nhau: invariant sống ở đâu, version hay khoá, và hai ví thì khoá theo thứ tự nào.",
+      "new": "Bài này đặt các hướng đó cạnh nhau để so sánh: invariant nằm ở đâu, dùng version hay khoá, và hai ví thì khoá theo thứ tự nào.",
+      "reason": "Câu thiếu tân ngữ, ẩn dụ sống ở đâu gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Bảng này chỉ của bài 53, nằm ngoài bốn bảng chuẩn của bài 25.",
+      "new": "Bảng này chỉ dùng trong bài 53, không thuộc bốn bảng chuẩn của bài 25.",
+      "reason": "Cụm chỉ của bài 53 gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Lịch đầu là lịch cố định dựng bằng `Notify`, không phải may rủi: A nạp ví",
+      "new": "Thứ tự chạy ở đây được dựng cố định bằng `Notify`, không phải do may rủi: A nạp ví",
+      "reason": "Từ lịch dễ hiểu thành lịch trình thời gian",
+      "severity": "medium"
+    },
+    {
+      "old": "rồi A mới ghi số nó tính từ bản cũ.",
+      "new": "rồi A mới ghi con số A tính từ bản cũ.",
+      "reason": "Tránh đại từ nó chỉ sự vật mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "biến khỏi projection",
+      "new": "biến mất khỏi projection",
+      "reason": "Thiếu động từ trọn nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "nằm trong hạn mức, nên `CHECK` im lặng:",
+      "new": "nằm trong hạn mức, nên `CHECK` không báo gì:",
+      "reason": "Calque im lặng",
+      "severity": "medium"
+    },
+    {
+      "old": "Ở READ COMMITTED nó đúng vì:",
+      "new": "Ở READ COMMITTED, cơ chế này đúng vì:",
+      "reason": "Nhắc lại danh từ thay cho Nó",
+      "severity": "medium"
+    },
+    {
+      "old": "thì cơ chế này mất tác dụng trong im lặng.",
+      "new": "thì cơ chế này mất tác dụng mà không báo gì.",
+      "reason": "Calque trong im lặng",
+      "severity": "medium"
+    },
+    {
+      "old": "Thời gian chờ ngẫu nhiên trong ",
+      "new": "Thời gian chờ là một số ngẫu nhiên trong ",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Số lần thử đổi giữa các lần chạy",
+      "new": "Số lần thử khác nhau giữa các lần chạy",
+      "reason": "Cách nói tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "cho mười sáu task đều thành công",
+      "new": "chạy mười sáu task, tất cả đều thành công",
+      "reason": "Câu thiếu động từ rõ nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "Số đo trên máy viết bài (load average khoảng 100 đến 207, rất tải), không phải SLA.",
+      "new": "Các số đo này lấy trên máy viết bài (load average khoảng 100 đến 207, máy chịu tải rất cao), không phải cam kết SLA.",
+      "reason": "Văn nói, rất tải là khẩu ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Bốn task mỗi ví: tổng 40 ở mọi lần đo, là quan sát chứ không phải bảo đảm.",
+      "new": "Với bốn task mỗi ví, tổng là 40 ở mọi lần đo; đây là quan sát chứ không phải bảo đảm.",
+      "reason": "Câu thiếu chủ ngữ, cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Hàm đọc hai câu thay vì một `JOIN`, và có lý do.",
+      "new": "Hàm này đọc bằng hai câu lệnh thay vì một `JOIN`, và có lý do.",
+      "reason": "Câu cụt, thiếu chủ ngữ rõ",
+      "severity": "medium"
+    },
+    {
+      "old": "B nạp bằng từng cách và bị chặn",
+      "new": "B nạp ví theo từng cách truy vấn và bị chặn",
+      "reason": "Thiếu danh từ, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Nên số dư mới đi cùng số đã rút cũ, và hạn mức thủng.",
+      "new": "Vì vậy số dư mới đi cùng số đã rút cũ, và hạn mức bị vượt.",
+      "reason": "Khẩu ngữ thủng",
+      "severity": "medium"
+    },
+    {
+      "old": "nó chỉ kiểm bất biến sau khi chạy.",
+      "new": "thí nghiệm này chỉ kiểm invariant sau khi chạy.",
+      "reason": "Thống nhất invariant, bỏ đại từ nó",
+      "severity": "medium"
+    },
+    {
+      "old": "Khoá không tốn, nhưng giữ khoá suốt transaction",
+      "new": "Bản thân việc khoá không tốn, nhưng khoá bị giữ suốt transaction",
+      "reason": "Câu nghe mâu thuẫn, cần rõ chủ thể",
+      "severity": "medium"
+    },
+    {
+      "old": "thông lượng một hàng tuần tự",
+      "new": "thông lượng trên một hàng là tuần tự",
+      "reason": "Cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "`SKIP LOCKED` lặng lẽ bỏ hàng đang bị khoá:",
+      "new": "`SKIP LOCKED` bỏ qua hàng đang bị khoá mà không báo gì:",
+      "reason": "Calque lặng lẽ",
+      "severity": "low"
+    },
+    {
+      "old": "nghĩa là lệnh bị bỏ qua trong im lặng.",
+      "new": "nghĩa là lệnh bị bỏ qua mà không ai biết.",
+      "reason": "Calque trong im lặng",
+      "severity": "medium"
+    },
+    {
+      "old": "ở đây nó nhường chỗ, và cái giá",
+      "new": "ở đây lời khuyên ấy phải nhường chỗ, và cái giá",
+      "reason": "Nhắc lại danh từ thay cho nó",
+      "severity": "medium"
+    },
+    {
+      "old": "Tài liệu nói bên nào bị huỷ thì khó đoán: chạy lại lab, dòng đầu ra cả 45.000/55.000",
+      "new": "Tài liệu nói khó đoán trước bên nào bị huỷ: chạy lại lab, dòng đầu cho ra cả 45.000/55.000",
+      "reason": "Câu thiếu động từ cho ra",
+      "severity": "high"
+    },
+    {
+      "old": "`--measure` tách riêng vì số liệu đổi mỗi lần chạy.",
+      "new": "`--measure` tách riêng vì số liệu thay đổi mỗi lần chạy.",
+      "reason": "Cách nói tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Hạn mức chưa có chu kỳ (đóng kỳ, đặt lại <code>withdrawn</code> chưa làm).",
+      "new": "Hạn mức chưa có chu kỳ (chưa làm phần đóng kỳ và đặt lại <code>withdrawn</code>).",
+      "reason": "Cấu trúc ngoặc cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ là cách dàn lịch của lab",
+      "new": "chỉ là cách dựng thứ tự chạy của lab",
+      "reason": "Dàn lịch dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Hạn mức bao gồm biên,",
+      "new": "Hạn mức tính cả giá trị biên,",
+      "reason": "Calque includes",
+      "severity": "low"
+    },
+    {
+      "old": "phần còn lại là chuyện qua được cuộc đua.",
+      "new": "phần còn lại là chuyện vượt qua race condition.",
+      "reason": "Thuật ngữ: «cuộc đua» → race condition",
+      "severity": "low"
+    }
+  ]
+}

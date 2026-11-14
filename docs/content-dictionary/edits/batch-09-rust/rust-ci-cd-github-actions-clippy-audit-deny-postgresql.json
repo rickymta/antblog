@@ -1,0 +1,233 @@
+{
+  "file": "rust-ci-cd-github-actions-clippy-audit-deny-postgresql.md",
+  "edits": [
+    {
+      "old": "quyền tối thiểu, pin SHA. Lệnh chạy thật ở local, workflow chưa chạy trên GitHub.",
+      "new": "quyền tối thiểu, ghim SHA. Các lệnh đã chạy thật ở máy local; workflow chưa chạy trên GitHub.",
+      "reason": "Câu cụt; thống nhất 'ghim'",
+      "severity": "medium"
+    },
+    {
+      "old": "Trước khi image đó đi đâu: ai bảo đảm",
+      "new": "Trước khi image đó được đưa đi đâu, cần biết ai bảo đảm",
+      "reason": "Câu cụt, thiếu vị ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Loạt C# trả lời ở [bài 35]",
+      "new": "Loạt C# đã trả lời câu này ở [bài 35]",
+      "reason": "Thiếu tân ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "công cụ chuỗi cung ứng (",
+      "new": "công cụ cho chuỗi cung ứng (",
+      "reason": "Cụm tự ghép nghe cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Đẩy tag vX.Y.Z build release và lưu artifact;",
+      "new": "Đẩy tag vX.Y.Z thì build release và lưu artifact;",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "(advisory mới xuất hiện không cần code đổi)",
+      "new": "(advisory mới xuất hiện dù code không đổi)",
+      "reason": "Câu dịch cứng",
+      "severity": "medium"
+    },
+    {
+      "old": "(nó trôi: máy viết bài 1.98.1",
+      "new": "(phiên bản này thay đổi theo thời gian: máy viết bài 1.98.1",
+      "reason": "'trôi' dịch sát drift",
+      "severity": "high"
+    },
+    {
+      "old": "là phiên bản thấp nhất `Cargo.toml` hứa hỗ trợ",
+      "new": "là phiên bản thấp nhất mà `Cargo.toml` hứa hỗ trợ",
+      "reason": "Thiếu từ nối",
+      "severity": "low"
+    },
+    {
+      "old": "MSRV không tự chọn:",
+      "new": "MSRV không do ta tự chọn:",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "MSRV không chạy thì chỉ là lời hứa",
+      "new": "MSRV mà không chạy thử thì chỉ là lời hứa",
+      "reason": "Câu cụt, dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "`--verify` đòi nó bằng `rust-version` trong `Cargo.toml`",
+      "new": "`--verify` đòi nó trùng với `rust-version` trong `Cargo.toml`",
+      "reason": "'bằng' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "trước khi lưu nó xoá artifact của chính crate repo",
+      "new": "trước khi lưu, nó xoá artifact của chính crate trong repo",
+      "reason": "Cụm tự ghép",
+      "severity": "low"
+    },
+    {
+      "old": "Đo trong `target` riêng, đếm đơn vị cargo in",
+      "new": "Lab đo trong `target` riêng, đếm số đơn vị mà cargo in",
+      "reason": "Thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Số đơn vị cargo in Compiling hoặc Checking; đếm, không phải đo giờ",
+      "new": "Số đơn vị mà cargo in Compiling hoặc Checking; đây là số đếm, không phải đo giờ",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Khác ở `ledger-core`, path dependency ngoài workspace: không có `--cap-lints` nên",
+      "new": "`ledger-core` thì khác: đây là path dependency ngoài workspace, được biên dịch mà không có `--cap-lints` nên",
+      "reason": "Thiếu chủ ngữ, câu cụt",
+      "severity": "high"
+    },
+    {
+      "old": "mỗi ca tạo schema",
+      "new": "mỗi test case tạo schema",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "medium"
+    },
+    {
+      "old": "kể cả khi assert hỏng:",
+      "new": "kể cả khi assert thất bại:",
+      "reason": "'hỏng' khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "Cuộc đua này chưa tái hiện được",
+      "new": "Race condition này chưa tái hiện được",
+      "reason": "Thống nhất thuật ngữ race condition",
+      "severity": "medium"
+    },
+    {
+      "old": "đây là phòng ngừa.",
+      "new": "đây là biện pháp phòng ngừa.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "không skip: test bị bỏ qua mà CI vẫn xanh là loại xanh nguy hiểm nhất.",
+      "new": "không bị bỏ qua: nếu test bị bỏ qua mà CI vẫn xanh thì đó là loại xanh nguy hiểm nhất.",
+      "reason": "Từ tiếng Anh lọt vào văn xuôi; câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Service container về nguyên tắc được, nhưng chưa thử trên runner.",
+      "new": "Về nguyên tắc có thể dùng service container, nhưng chưa thử trên runner.",
+      "reason": "Câu cụt thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Một cái do chính lab:",
+      "new": "Một cảnh báo do chính lab gây ra:",
+      "reason": "'Một cái' mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "là một quyết định pháp lý, nên nó đi qua review như mã.",
+      "new": "là một quyết định pháp lý, nên dòng đó phải qua review như mã.",
+      "reason": "'nó' mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "bản dựng sẵn là hướng khác.",
+      "new": "dùng bản dựng sẵn là một cách khác.",
+      "reason": "Câu lửng, 'hướng khác' mơ hồ",
+      "severity": "high"
+    },
+    {
+      "old": "Quyền tối thiểu, concurrency và pin SHA: lý do và cái giá",
+      "new": "Quyền tối thiểu, concurrency và ghim SHA: lý do và cái giá",
+      "reason": "Thống nhất 'ghim'",
+      "severity": "low"
+    },
+    {
+      "old": "cấp workflow thì job nào cần thêm quyền phải xin riêng",
+      "new": "ở cấp workflow thì job nào cần thêm quyền phải xin riêng",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "**Pin theo SHA**",
+      "new": "**Ghim theo SHA**",
+      "reason": "Thống nhất 'ghim'",
+      "severity": "low"
+    },
+    {
+      "old": "là cách pin action bên thứ ba",
+      "new": "là cách ghim action bên thứ ba",
+      "reason": "Thống nhất 'ghim'",
+      "severity": "low"
+    },
+    {
+      "old": "**không gì kiểm comment khớp SHA**",
+      "new": "**không công cụ nào kiểm tra comment có khớp SHA**",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "nếu không pin thành dependency cũ không ai nhìn",
+      "new": "nếu không, bản ghim thành dependency cũ không ai để ý",
+      "reason": "Câu cụt; thống nhất 'ghim'",
+      "severity": "medium"
+    },
+    {
+      "old": "Pin cũng chỉ cố định chính action",
+      "new": "Ghim cũng chỉ cố định chính action",
+      "reason": "Thống nhất 'ghim'",
+      "severity": "low"
+    },
+    {
+      "old": "Lab bớt bề mặt bằng cách bỏ",
+      "new": "Lab giảm số action phải ghim bằng cách bỏ",
+      "reason": "'bớt bề mặt' cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "không kiểm SHA đúng thật",
+      "new": "không kiểm SHA có đúng thật hay không",
+      "reason": "'đúng thật' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Release build trên máy viết bài là macOS",
+      "new": "Bản release build trên máy viết bài là macOS",
+      "reason": "Thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "Ngân sách thời gian, cạnh bảng của",
+      "new": "Ngân sách thời gian, để đối chiếu với bảng của",
+      "reason": "'cạnh' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "chứ không với kích thước diff",
+      "new": "chứ không theo kích thước diff",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "chỉ đọc ở mức hướng",
+      "new": "chỉ đọc như một xu hướng",
+      "reason": "'mức hướng' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "mà không thêm action cần pin",
+      "new": "mà không thêm action cần ghim",
+      "reason": "Thống nhất 'ghim' với các chỗ đã sửa trong cùng đoạn",
+      "severity": "low"
+    }
+  ]
+}

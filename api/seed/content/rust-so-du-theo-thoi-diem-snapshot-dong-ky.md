@@ -1,7 +1,7 @@
 ---
 slug: rust-so-du-theo-thoi-diem-snapshot-dong-ky
 title: "Số dư theo thời điểm, snapshot và đóng kỳ"
-summary: "Bài 48: tính số dư lúc 23:59 giờ Việt Nam bằng ranh giới nửa mở, so snapshot với tính lại trên 150.400 posting, đóng kỳ bằng trigger, sửa sai ở kỳ sau và dựng cuộc đua ghi/đóng kỳ bằng Barrier."
+summary: "Bài 48: tính số dư lúc 23:59 giờ Việt Nam bằng ranh giới nửa mở, so snapshot với tính lại trên 150.400 posting, đóng kỳ bằng trigger, sửa sai ở kỳ sau và dựng race condition giữa ghi và đóng kỳ bằng Barrier."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, snapshot, period-close]
@@ -10,7 +10,7 @@ language: vi
 
 Đây là bài 48 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 47](/articles/rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao) đối soát theo từng dòng; báo cáo thì cần số dư vào đúng một thời điểm. Sáng 06/11, kế toán hỏi số dư sổ của `psp:vixanh:clearing` (không phải tiền thật ở VíXanh, như [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen) đã nói) lúc 23:59 ngày 05/11. Bốn truy vấn trông đều hợp lý cho ra bốn con số khác nhau, và chỉ một con số đúng.
 
-Bài này chạy cả bốn trên PostgreSQL thật, rồi đi tiếp tới snapshot hằng ngày, đóng kỳ, và cuộc đua giữa lần ghi đang chạy với lần đóng kỳ.
+Bài này chạy cả bốn trên PostgreSQL thật, rồi đi tiếp tới snapshot hằng ngày, đóng kỳ, và race condition giữa lần ghi đang chạy với lần đóng kỳ.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,7 +22,7 @@ Bài này chạy cả bốn trên PostgreSQL thật, rồi đi tiếp tới snap
 
 `posted_at` là `timestamptz`: PostgreSQL lưu một mốc tuyệt đối, múi giờ chỉ xuất hiện khi đọc ra. Câu hỏi thật của kế toán là «tổng mọi posting có `posted_at` trước 00:00 ngày 06/11 giờ Việt Nam». Chữ «23:59» chỉ là cách nói: viết `<= 23:59:00` thì mất bút toán lúc 23:59:30.
 
-Cách gọn là ranh giới nửa mở `[from, to)`. Ngày 05 là `[05 00:00, 06 00:00)`, ngày 06 bắt đầu đúng chỗ ngày 05 dừng, hai ngày liền nhau không trùng và không hở. Lab tính mốc bằng `jiff`, đọc múi giờ theo tên chứ không cộng tay 7 tiếng:
+Cách gọn nhất là dùng ranh giới nửa mở `[from, to)`. Ngày 05 là `[05 00:00, 06 00:00)`, ngày 06 bắt đầu đúng chỗ ngày 05 dừng, hai ngày liền nhau không trùng và không hở. Lab tính mốc bằng `jiff`, đọc múi giờ theo tên chứ không cộng tay 7 tiếng:
 
 ```rust
 // src/tz.rs (rút gọn: bỏ chú thích)
@@ -97,7 +97,7 @@ Cùng dữ liệu, hai cột, hai câu hỏi:
   theo recorded_at < 06/11 00:00+07 =   25500  (điều hệ thống biết lúc 00:00)
 ```
 
-37.500 là số dư ngày 05 như ta biết hôm nay. 25.500 là con số báo cáo in lúc 00:00 đã thấy. Bên đầu cho báo cáo kế toán, bên sau trả lời «sao hôm qua báo khác?». Cái giá của `posted_at` do nghiệp vụ truyền là nó nhận giá trị từ bên ngoài: lab chỉ chặn khi nó rơi vào kỳ đã đóng hoặc ngoài mọi kỳ.
+37.500 là số dư ngày 05 như ta biết hôm nay. 25.500 là con số mà báo cáo in lúc 00:00 đã hiển thị. Số đầu dùng cho báo cáo kế toán, số sau trả lời «sao hôm qua báo khác?». Cái giá của việc để nghiệp vụ truyền `posted_at` là cột này nhận giá trị từ bên ngoài: lab chỉ chặn khi nó rơi vào kỳ đã đóng hoặc ngoài mọi kỳ.
 
 ## Snapshot hằng ngày giúp được bao nhiêu?
 
@@ -136,22 +136,22 @@ phần chênh của psp:vixanh:clearing: 494 posting nằm trên 12 trang heap
 TIMING OFF: toàn bộ Execution Time: 36.328 ms | snapshot + chênh Execution Time: 1.401 ms
 ```
 
-Thời gian giảm cỡ 70 lần mà buffer không giảm (1.823 và 1.989). Lạ, nếu coi buffer là thước đo công việc. Nhưng `Buffers` đếm số lần chạm trang, không phải số trang khác nhau. Bên tính lại chạm mỗi trang của hai bảng đúng một lần (1.254 + 569), và phải lọc 150.400 + 60.800 dòng, dựng hash 60.306 dòng, dò 60.800 lần. Bên snapshot có 1.976 hit ở một index scan lặp 494 vòng, mỗi vòng 4 hit (xuống cây index, đọc heap). 494 posting đó chỉ nằm trên 12 trang heap, nên phần lớn là chạm lại trang vừa chạm, và cả câu xử lý chưa tới 1.000 dòng. Khi cache nóng, một hit rất rẻ; thời gian đi theo số dòng xử lý, không theo số hit. Lab không đo cache lạnh.
+Thời gian giảm cỡ 70 lần mà buffer không giảm (1.823 và 1.989). Điều này lạ nếu coi buffer là thước đo công việc. Nhưng `Buffers` đếm số lần chạm trang, không phải số trang khác nhau. Bên tính lại chạm mỗi trang của hai bảng đúng một lần (1.254 + 569), và phải lọc 150.400 + 60.800 dòng, dựng hash 60.306 dòng, dò 60.800 lần. Bên snapshot có 1.976 hit ở một index scan lặp 494 vòng, mỗi vòng 4 hit (xuống cây index, đọc heap). 494 posting đó chỉ nằm trên 12 trang heap, nên phần lớn là chạm lại trang vừa chạm, và cả câu truy vấn chỉ xử lý chưa tới 1.000 dòng. Khi cache nóng, một hit rất rẻ; thời gian đi theo số dòng xử lý, không theo số hit. Lab không đo cache lạnh.
 
 Con số 70 cũng bị thổi phồng: `EXPLAIN ANALYZE` đọc đồng hồ ở từng dòng của từng node, nên câu nhiều dòng chịu thêm. Với `TIMING OFF`, bốn lần chạy cho khoảng 25–40 lần.
 
-Với khách bình thường, `customer:CU-0042` có 107 posting: 431 so với 123 buffer, cả hai chừng 1 ms, chênh lệch nằm trong nhiễu. Kết luận đo được: snapshot đáng cho tài khoản nóng, và phần chênh vẫn tốn theo số bút toán từ snapshot tới mốc hỏi. Muốn giảm nữa thì snapshot dày hơn, hoặc chép `posted_at` vào `postings` để lọc theo `(account_id, posted_at)`; bài này chưa đo cách thứ hai. Thêm 400 mẫu (tài khoản × mốc, một nửa đúng ranh giới ngày): hai cách khớp cả 400.
+Với khách bình thường, `customer:CU-0042` có 107 posting: 431 so với 123 buffer, cả hai chừng 1 ms, chênh lệch nằm trong nhiễu. Kết luận đo được: snapshot đáng dùng cho tài khoản nóng, và phần chênh vẫn tốn theo số bút toán từ snapshot tới mốc hỏi. Muốn giảm nữa thì làm snapshot dày hơn, hoặc chép `posted_at` vào `postings` để lọc theo `(account_id, posted_at)`; bài này chưa đo cách thứ hai. Thêm 400 mẫu (tài khoản × mốc, một nửa đúng ranh giới ngày): hai cách khớp cả 400.
 
 ## Khi nào snapshot sai, và dựng lại từ posting thế nào?
 
-Snapshot chỉ đúng nếu sau khi nó được tạo, không có posting nào của tài khoản đó có `posted_at` trước `as_of` được ghi thêm. Thử: job tạo snapshot ngày 05 lúc 00:01, rồi capture `TN-0003` tới lúc 00:03 với `posted_at` 23:59:59,5.
+Snapshot chỉ đúng nếu sau khi nó được tạo, không có posting nào của tài khoản đó có `posted_at` trước `as_of` được ghi thêm. Thử như sau: job tạo snapshot ngày 05 lúc 00:01, rồi capture `TN-0003` tới lúc 00:03 với `posted_at` 23:59:59,5.
 
 ```text
   không có trigger: snapshot + chênh = 25500, tính lại = 37500, snapshot còn lại của psp:vixanh:clearing = 1
   có trigger vô hiệu snapshot: snapshot + chênh = 37500, tính lại = 37500, snapshot còn lại của psp:vixanh:clearing = 0
 ```
 
-Không có gì báo lỗi: truy vấn trả 25.500 một cách tự tin, lệch 12.000. Chữa bằng một trigger xoá snapshot bị posting ghi lùi vượt qua; truy vấn lùi về snapshot cũ hơn, hoặc tính từ đầu, và vẫn đúng:
+Không có gì báo lỗi: truy vấn trả 25.500 một cách tự tin, lệch 12.000. Cách khắc phục là một trigger xoá những snapshot mà posting ghi lùi đã vượt qua; truy vấn lùi về snapshot cũ hơn, hoặc tính từ đầu, và vẫn đúng:
 
 ```sql
 -- sql/04_invalidate_snapshots.sql (rút gọn: bỏ chú thích)
@@ -183,7 +183,7 @@ fn secs() -> impl Strategy<Value = i64> {
 }
 ```
 
-16 ca chạy xanh. Tạm bỏ dòng `create trigger` thì test đỏ, và proptest rút gọn về ba thao tác: ghi một bút toán, chạy job snapshot, ghi lùi vào ngày đã chốt.
+16 test case chạy xanh. Tạm bỏ dòng `create trigger` thì test đỏ, và proptest rút gọn về ba thao tác: ghi một bút toán, chạy job snapshot, ghi lùi vào ngày đã chốt.
 
 Snapshot cũng có thể sai vì ai đó sửa tay. Lab cộng 1 đồng vào snapshot cuối ngày 29/10 của clearing:
 
@@ -192,7 +192,7 @@ snapshot sai +1 đồng: truy vấn lúc 12:00 ngày 30/10 = 94848001, đúng l�
 dựng lại 3 ngày từ posting (1206 dòng): còn 0 dòng lệch, truy vấn = 94848000
 ```
 
-Posting là sự thật, snapshot là bản nhớ đệm: `verify_snapshots` so từng snapshot với tính lại từ đầu, `rebuild_snapshots` dựng lại một khoảng ngày chỉ từ posting.
+Posting là nguồn dữ liệu gốc, snapshot là bản nhớ đệm: `verify_snapshots` so từng snapshot với tính lại từ đầu, `rebuild_snapshots` dựng lại một khoảng ngày chỉ từ posting.
 
 ## Đóng kỳ cấm gì, và sửa sai ở kỳ đã đóng bằng gì?
 
@@ -272,7 +272,7 @@ Báo cáo kỳ 11 vẫn là 4.500, đúng như đã công bố, và vết sai s�
 
 ## Ghi đang chạy lúc đóng kỳ thì ai thắng?
 
-Trigger kiểm `CLOSED` chưa đủ. Một lần ghi với `posted_at` ngày 30/11 đã `INSERT` xong, chưa commit; trigger đã thấy kỳ 11 còn mở và cho qua. Lúc đó đóng kỳ: snapshot chỉ thấy dữ liệu đã commit nên không có bút toán kia, kỳ thành `CLOSED`. Rồi lần ghi dở commit, và kỳ đã đóng có thêm một bút toán mà snapshot không biết.
+Trigger kiểm `CLOSED` chưa đủ. Một lần ghi với `posted_at` ngày 30/11 đã `INSERT` xong, chưa commit; trigger đã thấy kỳ 11 còn mở và cho qua. Lúc đó chạy đóng kỳ: snapshot chỉ thấy dữ liệu đã commit nên không có bút toán kia, kỳ thành `CLOSED`. Rồi lần ghi dở commit, và kỳ đã đóng có thêm một bút toán mà snapshot không biết.
 
 Lab dựng đúng chuỗi đó bằng `Barrier` và kênh, không `sleep`:
 
@@ -289,7 +289,7 @@ tx.commit().await?;
 close_period(&mut conn, "2026-11", closed_at).await
 ```
 
-Bất biến cần kiểm là «snapshot cuối kỳ bằng tính lại từ posting». Phần chờ cũng không dùng thời gian: main hỏi `pg_stat_activity` xem closer đã ở `wait_event_type = 'Lock'` chưa, hoặc đã xong chưa. Bản sai (trigger không có `FOR SHARE`, đóng kỳ không khoá) và bản đúng cho:
+Bất biến cần kiểm là «snapshot cuối kỳ bằng tính lại từ posting». Việc chờ cũng không dựa vào thời gian: main hỏi `pg_stat_activity` xem closer đã ở `wait_event_type = 'Lock'` chưa, hoặc đã xong chưa. Bản sai (trigger không có `FOR SHARE`, đóng kỳ không khoá) và bản đúng cho kết quả:
 
 ```text
 trigger không khoá, đóng kỳ không khoá: RaceOutcome { closer_waited: false, writer_committed: true, mismatches: 1, snapshot_psp: 25500, full_psp: 37500 }
@@ -311,7 +311,7 @@ Thứ tự ngược lại: closer giữ khoá trước, lần ghi đến sau b�
 <figcaption>Hình 2. Thời gian chảy từ trên xuống. Bên trái closer bỏ sót lần ghi dở; bên phải closer đợi writer commit.</figcaption>
 </figure>
 
-Khoá có giá. Đóng kỳ phải đợi lần ghi chậm nhất đang dở, nên transaction ghi phải ngắn. Lúc tính snapshot, các lần ghi mới vào kỳ đó bị chặn; job snapshot hằng ngày của lab cũng khoá `FOR UPDATE` mọi kỳ còn mở trước mốc, nên chặn ghi suốt lúc tính. Lab chưa đo đói khoá: khi `FOR UPDATE` đang đợi mà các lần ghi `FOR SHARE` mới vẫn tới, bên nào phải chờ và chờ bao lâu.
+Khoá có cái giá của nó. Đóng kỳ phải đợi lần ghi chậm nhất đang dở, nên transaction ghi phải ngắn. Lúc tính snapshot, các lần ghi mới vào kỳ đó bị chặn; job snapshot hằng ngày của lab cũng khoá `FOR UPDATE` mọi kỳ còn mở trước mốc, nên chặn ghi suốt lúc tính. Lab chưa đo tình huống đói khoá: khi `FOR UPDATE` đang đợi mà các lần ghi `FOR SHARE` mới vẫn tới, bên nào phải chờ và chờ bao lâu.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -324,7 +324,7 @@ cargo run --manifest-path examples/toi-noi-rust/48-snapshot-period-close/Cargo.t
 cargo test --manifest-path examples/toi-noi-rust/48-snapshot-period-close/Cargo.toml
 ```
 
-Lệnh đầu in mọi kết quả trích ở trên; thời gian mỗi lần mỗi khác. Lệnh thứ hai kiểm các số nghiệp vụ rồi in `VERIFY OK`, không kiểm thời gian. Lệnh thứ ba chạy 3 test múi giờ, 7 test PostgreSQL và 1 property test; thiếu `TOI_NOI_PG_URL` thì thất bại kèm cách bật compose. Schema `lab_<uuid>` bị xoá cuối ca kể cả khi lỗi.
+Lệnh đầu in mọi kết quả trích ở trên; thời gian đo mỗi lần chạy mỗi khác. Lệnh thứ hai kiểm các số nghiệp vụ rồi in `VERIFY OK`, không kiểm thời gian. Lệnh thứ ba chạy 3 test múi giờ, 7 test PostgreSQL và 1 property test; thiếu `TOI_NOI_PG_URL` thì thất bại kèm cách bật compose. Schema `lab_<uuid>` bị xoá cuối mỗi test case kể cả khi lỗi.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

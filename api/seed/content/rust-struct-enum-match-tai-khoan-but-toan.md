@@ -1,14 +1,14 @@
 ---
 slug: rust-struct-enum-match-tai-khoan-but-toan
 title: "Struct, enum và pattern matching: mô hình tài khoản và bút toán"
-summary: "Bài 05: mô hình tài khoản và bút toán bằng struct, enum có dữ liệu và match vét cạn; máy trạng thái thanh toán trả Option, cùng if let, let else, Display, đối chiếu class, record, enum C#."
+summary: "Bài 05: mô hình tài khoản và bút toán bằng struct, enum có dữ liệu và match vét cạn; máy trạng thái thanh toán trả về Option, cùng if let, let else, Display, đối chiếu với class, record, enum của C#."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, struct, enum, pattern-matching]
 language: vi
 ---
 
-Đây là bài 05 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Chuyến `TN-0001` đi 5 km, cước 25.500 VND: khách `CU-001` bị ghi nợ 25.500, tài xế `DR-001` được ghi có 20.400, nền tảng giữ 5.100. Trong code, số tiền của mỗi posting có dấu: âm là tiền ra khỏi tài khoản, dương là tiền vào, nên posting của khách là −25.500. Sổ cái cần một kiểu dữ liệu nói được điều đó, và cần từ chối ngay khi ai đó viết một bút toán không cân hoặc một chuyển trạng thái thanh toán không tồn tại.
+Đây là bài 05 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Chuyến `TN-0001` đi 5 km, cước 25.500 VND: khách `CU-001` bị ghi nợ 25.500, tài xế `DR-001` được ghi có 20.400, nền tảng giữ 5.100. Trong code, số tiền của mỗi posting có dấu: âm là tiền ra khỏi tài khoản, dương là tiền vào, nên posting của khách là −25.500. Sổ cái cần một kiểu dữ liệu nói được điều đó, và cần từ chối ngay khi ai đó viết một bút toán không cân hoặc một lần chuyển trạng thái thanh toán không tồn tại.
 
 Bài này dựng mô hình ấy bằng `struct`, `enum` và `match`. Bài 04 đã nói ai sở hữu giá trị; bài này nói giá trị có hình dạng gì. Lab chỉ dùng thư viện chuẩn, không có dependency.
 
@@ -20,7 +20,7 @@ Bài này dựng mô hình ấy bằng `struct`, `enum` và `match`. Bài 04 đ�
 
 ## Một bút toán ba posting trông thế nào trong code?
 
-Rust có ba dạng `struct`. Dạng có tên trường dùng cho dữ liệu nhiều thành phần như `Posting`. Dạng tuple struct bọc một giá trị để tạo kiểu riêng, gọi là newtype: `Money(i64)` khác `i64`, nên không ai cộng nhầm số dòng với số tiền. Dạng unit struct không có trường nào, chỉ làm nơi gắn hành vi.
+Rust có ba dạng `struct`. Dạng có tên trường dùng cho dữ liệu nhiều thành phần như `Posting`. Dạng tuple struct bọc một giá trị để tạo kiểu riêng, gọi là newtype: `Money(i64)` khác `i64`, nên không ai cộng nhầm số dòng với số tiền. Dạng unit struct không có trường nào, chỉ dùng làm nơi gắn hành vi.
 
 ```rust
 // src/main.rs (rút gọn: bỏ chú thích)
@@ -46,7 +46,7 @@ struct JournalEntry {
 }
 ```
 
-Dòng `#[derive(...)]` nhờ compiler sinh code mẫu. `Debug` cho phép in bằng `{:?}`; `Clone` cho phép `.clone()` tường minh; `PartialEq` cho phép so sánh `==` theo từng trường. Trong các struct trên, chỉ `Money` thêm `Copy`, vì 8 byte sao chép rẻ và không sở hữu gì; `JournalEntry` chứa `String` và `Vec` nên không thể `Copy`, đúng với những gì bài 04 đã nói về move.
+Dòng `#[derive(...)]` yêu cầu compiler sinh code mẫu. `Debug` cho phép in bằng `{:?}`; `Clone` cho phép `.clone()` tường minh; `PartialEq` cho phép so sánh `==` theo từng trường. Trong các struct trên, chỉ `Money` thêm `Copy`, vì kiểu này có 8 byte, sao chép rẻ và không sở hữu gì; `JournalEntry` chứa `String` và `Vec` nên không thể `Copy`, đúng với những gì bài 04 đã nói về move.
 
 Hình 1 vẽ cả `JournalEntry` lẫn `AccountKind`, enum ở mục sau. Hộp trái là một giá trị `JournalEntry` chứa `Vec<Posting>`; hộp phải liệt kê bốn biến thể của loại tài khoản.
 
@@ -59,7 +59,7 @@ Hình 1 vẽ cả `JournalEntry` lẫn `AccountKind`, enum ở mục sau. Hộp 
 
 ## `&self`, `&mut self` và `self` khác nhau thế nào?
 
-Method nằm trong khối `impl`. Tham số đầu tiên cho biết method dùng giá trị theo cách nào, và cách đó chính là ownership của bài 04 viết ngắn gọn. Hàm không có `self` là associated function, gọi bằng `JournalEntry::new(...)`, tương đương static factory của C#.
+Method nằm trong khối `impl`. Tham số đầu tiên cho biết method dùng giá trị theo cách nào, và cách đó chính là ownership ở bài 04, được viết gọn lại. Hàm không có `self` là associated function, gọi bằng `JournalEntry::new(...)`, tương đương static factory của C#.
 
 ```rust
 // src/main.rs (rút gọn: bỏ chú thích)
@@ -99,7 +99,7 @@ impl JournalEntry {
 }
 ```
 
-`&self` mượn chỉ đọc: `is_balanced` đọc được mọi posting mà không lấy đi quyền sở hữu. `&mut self` mượn có quyền sửa: `add_posting` đẩy thêm posting vào `Vec`. `self` nuốt luôn giá trị: sau `into_postings`, biến cũ không dùng được nữa. Thử dùng lại sẽ gặp đúng lỗi của bài 04 (thông điệp rút gọn):
+`&self` mượn chỉ đọc: `is_balanced` đọc được mọi posting mà không lấy đi quyền sở hữu. `&mut self` mượn có quyền sửa: `add_posting` đẩy thêm posting vào `Vec`. `self` lấy hẳn quyền sở hữu giá trị: sau `into_postings`, biến cũ không dùng được nữa. Thử dùng lại sẽ gặp đúng lỗi của bài 04 (thông điệp rút gọn):
 
 ```text
 error[E0382]: borrow of moved value: `entry`
@@ -112,7 +112,7 @@ error[E0382]: borrow of moved value: `entry`
 note: `JournalEntry::into_postings` takes ownership of the receiver `self`, which moves `entry`
 ```
 
-Đoạn gây lỗi chỉ còn là chú thích trong lab. Về `is_balanced`: bút toán cân khi có từ hai posting trở lên và tổng có dấu bằng 0. `checked_add` trả `Option<i64>`, nên tràn số cũng cho ra "không cân" thay vì quay vòng âm thầm.
+Đoạn gây lỗi chỉ còn là chú thích trong lab. Về `is_balanced`: bút toán cân khi có từ hai posting trở lên và tổng có dấu bằng 0. `checked_add` trả `Option<i64>`, nên tràn số cũng cho ra "không cân" thay vì quay vòng mà không báo gì.
 
 ## Enum của Rust khác enum của C# ở đâu?
 
@@ -143,9 +143,9 @@ enum PaymentState {
 }
 ```
 
-(Trong lab, mỗi enum đều có `#[derive(Debug, Clone, PartialEq)]`; `PaymentState` thêm `Copy` vì không mang dữ liệu.) `Customer(String)` là biến thể kiểu tuple, `PspClearing { provider }` có tên trường, `PlatformRevenue` không mang gì. `Reversal { of: String }` ghi bút toán nào bị đảo, đúng nguyên tắc sổ cái chỉ thêm, không sửa.
+(Trong lab, mỗi enum đều có `#[derive(Debug, Clone, PartialEq)]`; `PaymentState` thêm `Copy` vì không mang dữ liệu.) `Customer(String)` là biến thể kiểu tuple, `PspClearing { provider }` có tên trường, `PlatformRevenue` không mang gì. `Reversal { of: String }` ghi bút toán nào bị đảo, đúng với nguyên tắc sổ cái chỉ thêm, không sửa.
 
-Muốn in `customer:CU-001` thay vì `Customer("CU-001")`, ta cài `Display`, trait cho `{}`:
+Muốn in `customer:CU-001` thay vì `Customer("CU-001")`, ta cài đặt `Display`, trait dành cho `{}`:
 
 ```rust
 impl fmt::Display for AccountKind {
@@ -160,7 +160,7 @@ impl fmt::Display for AccountKind {
 }
 ```
 
-`Option<T>` cũng là một enum trong thư viện chuẩn, không phải cú pháp đặc biệt: `enum Option<T> { None, Some(T) }`. Vì vậy "không có giá trị" buộc phải được xử lý bằng `match` như mọi enum khác. Bài 07 sẽ đi sâu cùng `Result`.
+`Option<T>` cũng là một enum trong thư viện chuẩn, không phải cú pháp đặc biệt: `enum Option<T> { None, Some(T) }`. Vì vậy "không có giá trị" buộc phải được xử lý bằng `match` như mọi enum khác. Bài 07 sẽ đi sâu hơn, cùng với `Result`.
 
 ## `match` vét cạn: compiler không cho quên một trạng thái
 
@@ -179,7 +179,7 @@ fn is_terminal(state: PaymentState) -> bool {
 }
 ```
 
-Xoá nhánh `Refunded` và build lại, ta được lỗi thật từ rustc 1.98 (rút gọn phần `help`):
+Xoá nhánh `Refunded` và build lại, ta nhận được lỗi thật từ rustc 1.98 (rút gọn phần `help`):
 
 ```text
 error[E0004]: non-exhaustive patterns: `PaymentState::Refunded` not covered
@@ -198,9 +198,9 @@ note: `PaymentState` defined here
     |     -------- not covered
 ```
 
-Hệ quả thực tế: ngày ai đó thêm trạng thái `Disputed` vào enum, mọi `match` không có `_` sẽ ngừng build cho tới khi được cập nhật. Với sổ cái, đó là danh sách việc cần xem lại mà compiler tự lập. Nhánh `_` mọi-thứ-còn-lại tiện nhưng tắt cơ chế này; chỉ dùng khi thật sự muốn gom hết phần còn lại vào một xử lý.
+Hệ quả thực tế: ngày ai đó thêm trạng thái `Disputed` vào enum, mọi `match` không có `_` sẽ ngừng build cho tới khi được cập nhật. Với sổ cái, đó là danh sách việc cần xem lại mà compiler tự lập. Nhánh `_` (bắt mọi trường hợp còn lại) tiện nhưng làm tắt cơ chế này; chỉ dùng khi thật sự muốn gom hết phần còn lại vào một cách xử lý.
 
-Ngoài phủ biến thể, mẫu còn hỗ trợ khoảng, guard và binding:
+Ngoài phủ biến thể, mẫu còn hỗ trợ khoảng giá trị, guard và binding:
 
 ```rust
 fn classify(amount: Money) -> String {
@@ -213,7 +213,7 @@ fn classify(amount: Money) -> String {
 }
 ```
 
-`n if n < 0` là guard: nhánh chỉ khớp khi điều kiện sau `if` đúng. `small @ 1..=9_999` vừa kiểm tra khoảng vừa giữ lại giá trị trong biến `small`. Tên trần `other` bắt phần còn lại; nếu không cần giá trị, viết `_`. Lưu ý compiler vét cạn cho cả số nguyên: nhánh cuối là thứ khiến `i64` được phủ hết.
+`n if n < 0` là guard: nhánh chỉ khớp khi điều kiện sau `if` đúng. `small @ 1..=9_999` vừa kiểm tra khoảng vừa giữ lại giá trị trong biến `small`. Một tên biến đứng riêng như `other` bắt phần còn lại; nếu không cần giá trị, viết `_`. Lưu ý compiler vét cạn cho cả số nguyên: nhánh cuối là nhánh giúp phủ hết mọi giá trị của `i64`.
 
 ## Máy trạng thái thanh toán: chuyển không hợp lệ là `None`
 
@@ -243,11 +243,11 @@ fn next(state: PaymentState, event: PaymentEvent) -> Option<PaymentState> {
 }
 ```
 
-Ở đây nhánh `_` là chủ ý: số cặp (6 trạng thái × 5 sự kiện = 30) lớn, chỉ 6 cặp hợp lệ, phần còn lại thống nhất là "không hợp lệ". Trả `Option` thay vì lặng lẽ giữ nguyên trạng thái buộc người gọi quyết định phải làm gì với chuyển sai. Ở bài 07, `None` này sẽ được nâng thành `Err` có lý do.
+Ở đây nhánh `_` là chủ ý: số cặp (6 trạng thái × 5 sự kiện = 30) lớn, trong khi chỉ có 6 cặp hợp lệ, phần còn lại thống nhất là "không hợp lệ". Việc trả `Option` thay vì lặng lẽ giữ nguyên trạng thái buộc người gọi phải quyết định làm gì với lần chuyển trạng thái sai. Ở bài 07, `None` này sẽ được nâng thành `Err` có lý do.
 
 ## Khi nào dùng `if let` và `let else` thay cho `match`?
 
-Khi chỉ một biến thể cần xử lý, `match` đầy đủ nhiều chữ hơn mức cần. `if let` khớp một mẫu và bỏ qua phần còn lại; `let else` lấy giá trị ra khỏi mẫu, còn nhánh `else` bắt buộc phải thoát (`return`, `continue`, `break`, `panic!`):
+Khi chỉ có một biến thể cần xử lý, `match` đầy đủ dài dòng hơn mức cần thiết. `if let` khớp một mẫu và bỏ qua phần còn lại; `let else` lấy giá trị ra khỏi mẫu, còn nhánh `else` bắt buộc phải thoát (`return`, `continue`, `break`, `panic!`):
 
 ```rust
 fn reversal_target(kind: &EntryKind) -> Option<&str> {
@@ -266,7 +266,7 @@ fn describe_account(text: &str) -> String {
 }
 ```
 
-Cái giá của `if let`: bạn mất kiểm tra vét cạn. Nếu mọi biến thể đều quan trọng, như `is_terminal` ở trên, hãy giữ `match`. `parse_account` trong lab dùng thêm toán tử `?` để trả `None` sớm; đó là nội dung bài 07, tạm hiểu là "thiếu thì thoát".
+Cái giá của `if let`: bạn không còn được kiểm tra vét cạn. Nếu mọi biến thể đều quan trọng, như `is_terminal` ở trên, hãy giữ `match`. `parse_account` trong lab dùng thêm toán tử `?` để trả `None` sớm; đó là nội dung bài 07, tạm hiểu là "thiếu thì thoát".
 
 ## Đối chiếu với class, record và enum của C#
 
@@ -279,7 +279,7 @@ Cái giá của `if let`: bạn mất kiểm tra vét cạn. Nếu mọi biến 
 | Thiếu một trường hợp | `switch` expression thiếu trường hợp chỉ bị cảnh báo CS8509 (trừ khi bật warnings-as-errors) | `match` thiếu nhánh là lỗi E0004 |
 | Không có giá trị | `null` hoặc nullable ([bài pattern](/articles/csharp-nullable-pattern-matching)) | `Option<T>` |
 
-Pattern matching của C# mạnh và đọc tương tự, nhưng nó nằm trên `enum` không mang dữ liệu hoặc cây kế thừa mở, nên compiler khó biết bạn đã phủ hết hay chưa. Enum đóng của Rust cho compiler đủ thông tin để buộc điều đó. Điều này không làm C# kém đi; nó chỉ khiến Rust hợp với một bài toán cụ thể: tập trạng thái tiền cố định, mỗi trạng thái cần được xử lý có chủ đích.
+Pattern matching của C# mạnh và đọc tương tự, nhưng được áp dụng trên `enum` không mang dữ liệu hoặc cây kế thừa mở, nên compiler khó biết bạn đã phủ hết hay chưa. Enum đóng của Rust cho compiler đủ thông tin để buộc điều đó. Điều này không làm C# kém đi; điều đó chỉ khiến Rust phù hợp với một bài toán cụ thể: tập trạng thái tiền cố định, mỗi trạng thái cần được xử lý có chủ đích.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -324,16 +324,16 @@ Money(5100) -> ghi có nhỏ 5100
 Money(20400) -> ghi có 20400
 ```
 
-Lệnh `--verify` kiểm 23 điều kiện, gồm bút toán `JE-000001` cân (−25.500 + 20.400 + 5.100 = 0), bút toán lệch bị từ chối, bút toán đảo cân, các cạnh hợp lệ và không hợp lệ của máy trạng thái; kết thúc bằng `VERIFY OK` và exit code 0, sai một điều kiện thì in `VERIFY FAILED` và exit code 1. Ba test trong `cargo test` kiểm lại cùng các hành vi cốt lõi.
+Lệnh `--verify` kiểm tra 23 điều kiện, gồm bút toán `JE-000001` cân (−25.500 + 20.400 + 5.100 = 0), bút toán lệch bị từ chối, bút toán đảo cân, các cạnh hợp lệ và không hợp lệ của máy trạng thái; kết thúc bằng `VERIFY OK` và mã thoát 0; sai một điều kiện thì in `VERIFY FAILED` và mã thoát 1. Ba test trong `cargo test` kiểm tra lại cùng các hành vi cốt lõi.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là mô hình trong bộ nhớ để học cú pháp. Chưa có validation mã tài khoản, chưa có loại tiền, chưa kiểm số posting tối đa, chưa có <code>idempotency_key</code>, chưa lưu xuống PostgreSQL, và <code>next</code> chưa nói vì sao chuyển bị từ chối. <code>Posting.account</code> là <code>String</code> nên vẫn nhận mã sai chính tả; bài sau sẽ thay bằng kiểu chặt hơn. Máy trạng thái thật còn phải xử lý sự kiện trùng và đến muộn từ cổng thanh toán.</p>
+<p>Đây là mô hình trong bộ nhớ để học cú pháp. Chưa có validation mã tài khoản, chưa có loại tiền, chưa kiểm tra số posting tối đa, chưa có <code>idempotency_key</code>, chưa lưu xuống PostgreSQL, và <code>next</code> chưa cho biết vì sao việc chuyển trạng thái bị từ chối. <code>Posting.account</code> là <code>String</code> nên vẫn nhận mã sai chính tả; bài sau sẽ thay bằng kiểu chặt hơn. Máy trạng thái thật còn phải xử lý sự kiện trùng và đến muộn từ cổng thanh toán.</p>
 </div>
 
 **Bài tập:** thêm trạng thái `Disputed` vào `PaymentState`, rồi xem `cargo build` báo gì. Sau đó cho `is_terminal` trả `false` với trạng thái mới và cho phép chuyển `Captured` sang `Disputed` bằng sự kiện `OpenDispute`. Hàm nào trong lab bắt buộc bạn sửa, hàm nào không?
 
-<details><summary>Xem lời giải</summary><p>Ngay sau khi thêm biến thể, build lỗi E0004 ở <code>is_terminal</code>, hàm không có nhánh <code>_</code>; thêm <code>PaymentState::Disputed =&gt; false</code> là xong. <code>next</code> vẫn build vì có nhánh <code>_</code>, nhưng khi đó <code>Captured + OpenDispute</code> sẽ trả <code>None</code> cho tới khi bạn thêm biến thể <code>OpenDispute</code> vào <code>PaymentEvent</code> và nhánh <code>(Captured, OpenDispute) =&gt; Some(Disputed)</code>. Đây chính là chỗ nhánh <code>_</code> đánh đổi: tiện, nhưng compiler không nhắc bạn xem lại.</p></details>
+<details><summary>Xem lời giải</summary><p>Ngay sau khi thêm biến thể, build lỗi E0004 ở <code>is_terminal</code>, hàm không có nhánh <code>_</code>; thêm <code>PaymentState::Disputed =&gt; false</code> là xong. <code>next</code> vẫn build vì có nhánh <code>_</code>, nhưng khi đó <code>Captured + OpenDispute</code> sẽ trả <code>None</code> cho tới khi bạn thêm biến thể <code>OpenDispute</code> vào <code>PaymentEvent</code> và nhánh <code>(Captured, OpenDispute) =&gt; Some(Disputed)</code>. Đây chính là điểm đánh đổi của nhánh <code>_</code>: tiện, nhưng compiler không nhắc bạn xem lại.</p></details>
 
 Bài trước: [bài 04](/articles/rust-ownership-move-borrow-but-toan). Bài tiếp: [bài 06](/articles/rust-ham-dieu-kien-vong-lap-iterator-so-du).
 

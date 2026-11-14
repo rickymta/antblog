@@ -1,7 +1,7 @@
 ---
 slug: rust-transaction-isolation-append-only-idempotency-key
 title: "Transaction, isolation và idempotency key: ghi bút toán an toàn"
-summary: "Bài 24: ghi journal_entries và postings trong một transaction sqlx, chống ghi trùng bằng ON CONFLICT DO NOTHING, thấy write skew ở READ COMMITTED, retry 40001 ở SERIALIZABLE và cấm sửa sổ bằng trigger."
+summary: "Bài 24: ghi journal_entries và postings trong một transaction sqlx, chống ghi trùng bằng ON CONFLICT DO NOTHING, tái hiện write skew ở READ COMMITTED, retry 40001 ở SERIALIZABLE và cấm sửa sổ bằng trigger."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, sqlx, postgresql, transaction]
@@ -14,13 +14,13 @@ Payment (C#) gửi `PaymentCaptured` cho chuyến `TN-0001`, mạng chậm nên 
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Trong một transaction, <code>SELECT</code> kiểm xem <code>idempotency_key</code> đã có chưa, chưa có thì <code>INSERT</code>. Hai request cùng key chạy song song có thể tạo hai bút toán không?</p>
+<p>Trong một transaction, <code>SELECT</code> kiểm tra xem <code>idempotency_key</code> đã có chưa, chưa có thì <code>INSERT</code>. Hai request cùng key chạy song song có thể tạo hai bút toán không?</p>
 <details><summary>Xem đáp án</summary><p>Có, nếu chỉ dựa vào câu <code>SELECT</code> đó. Ở READ COMMITTED, cả hai <code>SELECT</code> có thể cùng thấy «chưa có» rồi cả hai <code>INSERT</code>. Người quyết định cuối cùng phải là ràng buộc <code>UNIQUE</code>.</p></details>
 </div>
 
 ## Transaction trong sqlx: commit tường minh, drop là rollback
 
-Một bút toán là một dòng `journal_entries` cộng nhiều dòng `postings`; ghi dở thì sổ có bút toán không cân. `pool.begin()` lấy một kết nối và gửi `BEGIN`, `tx.commit()` kết thúc có hiệu lực. Nếu `Transaction` bị drop mà chưa commit (vì `?` trả lỗi sớm, hoặc quên), sqlx xếp sẵn một `ROLLBACK` và gửi nó khi kết nối được dùng lại hoặc về pool: mặc định an toàn là «không có gì xảy ra».
+Một bút toán là một dòng `journal_entries` cộng nhiều dòng `postings`; ghi dở thì sổ có bút toán không cân. `pool.begin()` lấy một kết nối và gửi `BEGIN`, `tx.commit()` kết thúc và làm các thay đổi có hiệu lực. Nếu `Transaction` bị drop mà chưa commit (vì `?` trả lỗi sớm, hoặc quên), sqlx xếp sẵn một `ROLLBACK` và gửi nó khi kết nối được dùng lại hoặc về pool: mặc định an toàn là «không có gì xảy ra».
 
 ```rust
 // src/store.rs (rút gọn: bỏ chú thích tài liệu)
@@ -68,7 +68,7 @@ sau khi drop tx     : 1 bút toán, 3 posting
 ghi lại key đã drop : Created { id: 4 } (id có khoảng trống)
 ```
 
-Dòng cuối chứng minh rollback đã chạy: ghi lại đúng key của transaction đã drop mà không bị treo (nếu transaction cũ còn mở, `ON CONFLICT` sẽ chờ nó, xem mục sau). Và `id: 4` chứ không phải `2`: identity không hoàn lại khi rollback, id 2 và 3 đã bị tiêu cho hai lần thất bại.
+Dòng cuối chứng minh rollback đã chạy: ghi lại đúng key của transaction đã drop mà không bị treo (nếu transaction cũ còn mở, `ON CONFLICT` sẽ chờ nó, xem mục sau). Và `id: 4` chứ không phải `2`: identity không hoàn lại khi rollback, id 2 và 3 đã bị dùng mất cho hai lần thất bại.
 
 Một chi tiết của sqlx 0.9: `sqlx::query` nhận `impl SqlSafeStr`, nên literal `&'static str` thì được, còn `String` ghép bằng `format!` bị chặn lúc biên dịch (rút gọn):
 
@@ -83,7 +83,7 @@ Lab chỉ dùng `AssertSqlSafe` cho tên schema `lab_<uuid>` do chính lab sinh 
 
 ## Hai task cùng một idempotency_key thì ai thắng?
 
-Payment gửi lại thì lần hai phải trả bút toán lần một, không ghi thêm. Cơ chế có hai nửa: cột `idempotency_key` unique, và `INSERT ... ON CONFLICT (idempotency_key) DO NOTHING RETURNING id`. Key mới thì câu lệnh trả một dòng `id`; key đã có thì nó không báo lỗi mà trả **không dòng nào**. Không có dòng trả về nghĩa là đã có người ghi, lúc đó ta đọc lại bút toán cũ và so nội dung.
+Payment gửi lại thì lần hai phải trả bút toán lần một, không ghi thêm. Cơ chế gồm hai phần: cột `idempotency_key` unique, và `INSERT ... ON CONFLICT (idempotency_key) DO NOTHING RETURNING id`. Key mới thì câu lệnh trả một dòng `id`; key đã có thì câu lệnh không báo lỗi mà trả **không dòng nào**. Không có dòng trả về nghĩa là đã có người ghi, lúc đó ta đọc lại bút toán cũ và so nội dung.
 
 ```rust
 // src/store.rs (rút gọn: bỏ chú thích tài liệu)
@@ -109,25 +109,25 @@ pub async fn post_entry(pool: &PgPool, entry: &JournalEntry) -> Result<PostOutco
 }
 ```
 
-Cơ chế chờ là lý do câu lệnh này đúng ở READ COMMITTED. Giả sử T1 đã `INSERT` key nhưng chưa commit, T2 chạy cùng câu. T2 chưa thể quyết định: T1 commit thì T2 phải trả rỗng, T1 rollback thì T2 được chèn. Nên T2 chờ T1 kết thúc. Khi T1 commit, T2 nhận không dòng nào, và `SELECT` tiếp theo của T2 (statement mới, snapshot mới) thấy bút toán của T1.
+Cơ chế chờ là lý do câu lệnh này đúng ở READ COMMITTED. Giả sử T1 đã `INSERT` key nhưng chưa commit, T2 chạy cùng câu. T2 chưa thể quyết định: T1 commit thì T2 phải nhận về 0 dòng, T1 rollback thì T2 được chèn. Nên T2 chờ T1 kết thúc. Khi T1 commit, T2 nhận không dòng nào, và `SELECT` tiếp theo của T2 (statement mới, snapshot mới) thấy bút toán của T1.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 270" role="img" aria-label="Hình 1. T1 chèn key và các posting rồi commit; T2 chèn cùng key phải chờ T1 kết thúc, sau đó nhận không dòng nào, đọc lại bút toán của T1 và so nội dung."><defs><marker id="rust-transaction-isolation-append-only-idempotency-key-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="25" width="250" height="75" rx="10" class="f-phys-soft s-phys"/><text x="34" y="55" class="t-b">T1 · INSERT ... RETURNING</text><text x="34" y="80" class="t-small">key mới: nhận id, chưa commit</text><rect x="300" y="25" width="250" height="75" rx="10" class="f-phys-soft s-phys"/><text x="314" y="55" class="t-b">T1 · INSERT postings</text><text x="314" y="80" class="t-small">dòng 1, 2, 3 cùng transaction</text><rect x="580" y="25" width="270" height="75" rx="10" class="f-pk-soft s-pk"/><text x="594" y="55" class="t-b">T1 · COMMIT</text><text x="594" y="80" class="t-small">key hiện ra với mọi phiên</text><path d="M270 62 L300 62" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-transaction-isolation-append-only-idempotency-key-0-a)"/><path d="M550 62 L580 62" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-transaction-isolation-append-only-idempotency-key-0-a)"/><rect x="20" y="150" width="530" height="75" rx="10" class="f-warn-soft s-warn dash"/><text x="34" y="180" class="t-b">T2 · INSERT ... ON CONFLICT DO NOTHING</text><text x="34" y="205" class="t-small">đứng chờ T1 kết thúc (Lock / transactionid), chưa trả lời</text><rect x="580" y="150" width="270" height="75" rx="10" class="f-phys-soft s-phys"/><text x="594" y="180" class="t-b">T2 · nhận 0 dòng</text><text x="594" y="205" class="t-small">SELECT lại bản cũ, so nội dung</text><path d="M715 100 L715 150" class="f-none s-pk" stroke-width="2" marker-end="url(#rust-transaction-isolation-append-only-idempotency-key-0-a)"/><text x="20" y="252" class="t-small">Khớp: Replayed. Khác: IdempotencyConflict. T1 rollback thay vì commit: T2 chèn được và thành bút toán mới.</text></svg>
 </div>
-<figcaption>Hình 1. T2 không bị lỗi và không tạo bản sao: nó chờ T1 kết thúc rồi nhận kết quả đúng với cách T1 kết thúc.</figcaption>
+<figcaption>Hình 1. T2 không bị lỗi và không tạo bản sao: nó chờ T1 kết thúc rồi nhận kết quả tương ứng với cách T1 kết thúc.</figcaption>
 </figure>
 
-Lab kiểm bằng quan sát: T1 chèn key và giữ transaction mở; T2 lấy `pg_backend_pid()` rồi chèn cùng key; kết nối thứ ba đọc `pg_stat_activity` của T2 cho tới khi thấy nó đang chờ; rồi T1 commit hoặc rollback:
+Lab kiểm chứng bằng cách quan sát: T1 chèn key và giữ transaction mở; T2 lấy `pg_backend_pid()` rồi chèn cùng key; kết nối thứ ba đọc `pg_stat_activity` của T2 cho tới khi thấy nó đang chờ; rồi T1 commit hoặc rollback:
 
 ```text
 giao dịch đầu commit  : phiên hai chờ Lock/transactionid, bị chặn: true, kết quả: không chèn (đọc lại bút toán cũ)
 giao dịch đầu rollback: phiên hai chờ Lock/transactionid, bị chặn: true, kết quả: chèn được, id 2
 ```
 
-Nếu T1 rollback, T2 không replay mà thành người ghi thật. `DO NOTHING` cũng gọn hơn «INSERT rồi bắt lỗi 23505», vì ở PostgreSQL một câu lỗi làm hỏng cả transaction đang mở. Không dùng `DO UPDATE`: sổ cái không sửa bản cũ, và trigger ở mục cuối sẽ chặn nó.
+Nếu T1 rollback, T2 không replay mà thành người ghi thật. `DO NOTHING` cũng gọn hơn «INSERT rồi bắt lỗi 23505», vì ở PostgreSQL một câu lệnh gặp lỗi sẽ làm hỏng cả transaction đang mở. Không dùng `DO UPDATE`: sổ cái không sửa bản cũ, và trigger ở mục cuối sẽ chặn nó.
 
-Câu trả lời «0 dòng» ấy chỉ có ở READ COMMITTED. `pool.begin()` dùng mức mặc định của server, và mặc định của PostgreSQL chính là mức này. Ở REPEATABLE READ và SERIALIZABLE, snapshot chốt từ câu đầu tiên, nên bản commit sau đó nằm ngoài tầm nhìn. PostgreSQL không trả 0 dòng rồi để ta đọc lại vào chỗ trống: chính câu `INSERT` báo 40001 (`could not serialize access due to concurrent update`). Lab chốt snapshot trước, cho bản khác commit, rồi mới chèn:
+Câu trả lời «0 dòng» ấy chỉ có ở READ COMMITTED. `pool.begin()` dùng mức mặc định của server, và mặc định của PostgreSQL chính là mức này. Ở REPEATABLE READ và SERIALIZABLE, snapshot chốt từ câu đầu tiên, nên bản commit sau đó nằm ngoài tầm nhìn. PostgreSQL không trả 0 dòng rồi để ta đọc lại mà không thấy gì: chính câu `INSERT` báo 40001 (`could not serialize access due to concurrent update`). Lab chốt snapshot trước, cho bản khác commit, rồi mới chèn:
 
 ```text
 snapshot cũ ReadCommitted : 0 dòng, đọc lại thấy id 1
@@ -135,7 +135,7 @@ snapshot cũ RepeatableRead: SQLSTATE 40001, thử giao dịch mới: 0 dòng, �
 snapshot cũ Serializable  : SQLSTATE 40001, thử giao dịch mới: 0 dòng, đọc lại thấy id 1
 ```
 
-Thử trong psql, T2 đang đứng chờ T1 cũng vậy: T1 commit thì T2 nhận 40001, T1 rollback thì T2 chèn được. Muốn ghi idempotent ở mức cao hơn thì phải bọc trong vòng retry của mục sau: giao dịch mới có snapshot mới, thấy bản cũ và nhận 0 dòng.
+Thử trong psql, T2 đang chờ T1 cũng cho kết quả như vậy: T1 commit thì T2 nhận 40001, T1 rollback thì T2 chèn được. Muốn ghi idempotent ở mức cao hơn thì phải bọc trong vòng retry của mục sau: giao dịch mới có snapshot mới, thấy bản cũ và nhận 0 dòng.
 
 Rồi lab chạy đồng thời: `tokio::join!` hai lần `post_entry` cùng bút toán `TN-0001`, rồi tám task dùng `Barrier` để xuất phát cùng lúc với bút toán `TN-0002`. Task nào thắng có thể khác giữa các lần chạy, số bút toán được tạo thì không:
 
@@ -155,7 +155,7 @@ cùng key, cước khác : idempotency_key trip:TN-0001:capture đã dùng cho b
 
 Thông điệp là `Display` của `StoreError::IdempotencyConflict`, dựng bằng `thiserror` như [bài 17](/articles/rust-thiserror-anyhow-xu-ly-loi-thuc-te).
 
-`ON CONFLICT DO NOTHING` cũng tiêu một giá trị identity. Kiểm trong psql: chèn key `a` được id 1, chèn lại `a` không trả dòng, chèn key `b` được id 3. Vậy mã `JE-000001` (`format!("JE-{:06}", id)`) tăng dần nhưng **không liên tục**.
+`ON CONFLICT DO NOTHING` cũng dùng mất một giá trị identity. Thử trong psql: chèn key `a` được id 1, chèn lại `a` không trả dòng, chèn key `b` được id 3. Vậy mã `JE-000001` (`format!("JE-{:06}", id)`) tăng dần nhưng **không liên tục**.
 
 ## READ COMMITTED có chặn được write skew không?
 
@@ -183,13 +183,13 @@ insert_entry(&mut tx, &payout(key, driver, amount)?).await?;
 tx.commit().await?;
 ```
 
-`gate` là một `Barrier` hai bên, ép cả hai đọc `used` xong rồi mới cùng ghi, để lab tái hiện đúng lịch cuộc đua. Ở READ COMMITTED mỗi câu lệnh thấy dữ liệu đã commit lúc nó bắt đầu, cả hai `SELECT` chạy trước khi bên nào commit, và hai bên chèn **hai dòng khác nhau** nên không khoá chung gì. PostgreSQL không có lý do để chặn ai. REPEATABLE READ cũng lọt: hai bên đọc trên snapshot riêng, không ghi đè dòng của nhau, nên không có xung đột nào để nó phát hiện.
+`gate` là một `Barrier` hai bên, ép cả hai đọc `used` xong rồi mới cùng ghi, để lab tái hiện đúng thứ tự xen kẽ của race condition. Ở READ COMMITTED mỗi câu lệnh thấy dữ liệu đã commit lúc nó bắt đầu, cả hai `SELECT` chạy trước khi bên nào commit, và hai bên chèn **hai dòng khác nhau** nên không khoá chung dòng nào. PostgreSQL không có lý do để chặn ai. REPEATABLE READ cũng lọt: hai bên đọc trên snapshot riêng, không ghi đè dòng của nhau, nên không có xung đột nào để nó phát hiện.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 310" role="img" aria-label="Hình 2. Hai giao dịch cùng đọc tổng đã rút bằng 0, cùng thấy còn trong hạn mức rồi cùng ghi 20.400. READ COMMITTED để cả hai thành công, tổng 40.800 vượt 30.000; SERIALIZABLE huỷ một bên bằng 40001 và lần thử lại bị từ chối."><defs><marker id="rust-transaction-isolation-append-only-idempotency-key-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="15" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="42" class="t-b">T1 · SELECT tổng đã rút → 0 đồng</text><rect x="460" y="15" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="474" y="42" class="t-b">T2 · SELECT tổng đã rút → 0 đồng</text><rect x="20" y="85" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="112" class="t-b">T1 · 0 + 20.400 ≤ 30.000: được phép</text><rect x="460" y="85" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="474" y="112" class="t-b">T2 · 0 + 20.400 ≤ 30.000: được phép</text><rect x="20" y="155" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="34" y="182" class="t-b">T1 · INSERT bút toán rút, COMMIT</text><rect x="460" y="155" width="400" height="44" rx="10" class="f-phys-soft s-phys"/><text x="474" y="182" class="t-b">T2 · INSERT bút toán rút, COMMIT</text><path d="M220 59 L220 85" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-transaction-isolation-append-only-idempotency-key-1-a)"/><path d="M660 59 L660 85" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-transaction-isolation-append-only-idempotency-key-1-a)"/><path d="M220 129 L220 155" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-transaction-isolation-append-only-idempotency-key-1-a)"/><path d="M660 129 L660 155" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-transaction-isolation-append-only-idempotency-key-1-a)"/><rect x="20" y="225" width="400" height="70" rx="10" class="f-warn-soft s-warn"/><text x="34" y="252" class="t-b">READ COMMITTED</text><text x="34" y="276" class="t-small">cả hai thành công: tổng rút 40.800 &gt; 30.000</text><rect x="460" y="225" width="400" height="70" rx="10" class="f-pk-soft s-pk"/><text x="474" y="252" class="t-b">SERIALIZABLE</text><text x="474" y="276" class="t-small">một bên nhận 40001, lần thử lại bị từ chối</text></svg>
 </div>
-<figcaption>Hình 2. Write skew: mỗi giao dịch đúng khi nhìn riêng, sai khi cộng lại. Mức cô lập quyết định database có phát hiện được hay không.</figcaption>
+<figcaption>Hình 2. Write skew: mỗi giao dịch đúng khi nhìn riêng, sai khi cộng lại. Mức cô lập quyết định việc database có phát hiện được lỗi này hay không.</figcaption>
 </figure>
 
 Kết quả chạy ở hai mức đó:
@@ -199,11 +199,11 @@ ReadCommitted : 2 ok, 0 bị từ chối, 0 lần 40001, số lần thử [1, 1]
 RepeatableRead: 2 ok, 0 bị từ chối, 0 lần 40001, số lần thử [1, 1], tổng đã rút 40800 đồng
 ```
 
-Cả hai yêu cầu thành công, tổng 40.800 vượt 30.000. Không có lỗi nào để bắt: sổ vẫn cân, chỉ quy tắc nghiệp vụ ngoài ràng buộc của bảng bị phá. Hướng khác ngoài SERIALIZABLE là khoá một dòng chung (ví dụ `SELECT ... FOR UPDATE`) trước khi tính tổng; lab không làm hướng này, một bài ở cấp nâng cao sẽ quay lại.
+Cả hai yêu cầu thành công, tổng 40.800 vượt 30.000. Không có lỗi nào để bắt: sổ vẫn cân, chỉ có quy tắc nghiệp vụ nằm ngoài ràng buộc của bảng bị phá. Ngoài SERIALIZABLE, còn một hướng khác là khoá một dòng chung (ví dụ `SELECT ... FOR UPDATE`) trước khi tính tổng; lab không làm hướng này, một bài ở cấp nâng cao sẽ quay lại hướng này.
 
 ## SERIALIZABLE trả 40001: retry có giới hạn
 
-Lab mở giao dịch bằng `pool.begin_with("BEGIN ISOLATION LEVEL SERIALIZABLE")`. Ở mức này, PostgreSQL bảo đảm kết quả như thể các giao dịch SERIALIZABLE chạy lần lượt. Nó không khoá chặn trước mà theo dõi ai đọc gì, ai ghi gì (SSI); khi thấy mẫu phụ thuộc có thể thành vòng không xếp được thứ tự (mỗi bên ghi vào vùng bên kia vừa đọc), nó huỷ một giao dịch với SQLSTATE `40001`. Lỗi có thể đến ở bất kỳ câu nào, kể cả `COMMIT`. Bảo đảm chỉ có hiệu lực khi mọi giao dịch đụng tới dữ liệu đó cùng chạy SERIALIZABLE: một đường rút khác ở READ COMMITTED vẫn lọt.
+Lab mở giao dịch bằng `pool.begin_with("BEGIN ISOLATION LEVEL SERIALIZABLE")`. Ở mức này, PostgreSQL bảo đảm kết quả như thể các giao dịch SERIALIZABLE chạy lần lượt. PostgreSQL không khoá chặn trước mà theo dõi ai đọc gì, ai ghi gì (SSI); khi thấy mẫu phụ thuộc có thể thành vòng không xếp được thứ tự (mỗi bên ghi vào vùng bên kia vừa đọc), nó huỷ một giao dịch với SQLSTATE `40001`. Lỗi có thể đến ở bất kỳ câu nào, kể cả `COMMIT`. Bảo đảm này chỉ có hiệu lực khi mọi giao dịch đụng tới dữ liệu đó cùng chạy SERIALIZABLE: một đường rút khác ở READ COMMITTED vẫn lọt.
 
 Lấy SQLSTATE qua `sqlx::Error::Database`; lỗi không đến từ database (mất kết nối, timeout pool) trả `None`:
 
@@ -217,7 +217,7 @@ pub fn sqlstate(err: &sqlx::Error) -> Option<String> {
 }
 ```
 
-Thử lại cần ba điều kiện: chạy lại **cả transaction từ đầu** (kể cả bước kiểm hạn mức, vì bản đọc cũ vô hiệu); **có giới hạn** số lần; và chỉ với 40001, còn lỗi khác (khoá ngoại, `LimitExceeded`) trả ngay.
+Thử lại cần ba điều kiện: chạy lại **cả transaction từ đầu** (kể cả bước kiểm tra hạn mức, vì kết quả đã đọc trước đó không còn hiệu lực); **có giới hạn** số lần; và chỉ thử lại với 40001, còn lỗi khác (khoá ngoại, `LimitExceeded`) trả ngay.
 
 ```rust
 // src/store.rs (rút gọn: bỏ chú thích tài liệu)
@@ -246,19 +246,19 @@ where
 }
 ```
 
-`op` nhận số lần thử và mở transaction mới mỗi lần; lab dùng nó để `Barrier` chỉ chặn ở lần đầu. Hai yêu cầu rút ở `SERIALIZABLE`, mỗi bên tối đa 3 lần:
+`op` nhận số lần thử và mở transaction mới mỗi lần; lab dùng số lần thử này để `Barrier` chỉ chặn ở lần đầu. Hai yêu cầu rút ở `SERIALIZABLE`, mỗi bên tối đa 3 lần:
 
 ```text
 Serializable  : 1 ok, 1 bị từ chối, 1 lần 40001, số lần thử [1], tổng đã rút 20400 đồng
 ```
 
-Một bên thành công ngay lần đầu. Bên kia bị 40001, thử lại, đọc thấy 20.400 đã rút nên bị `LimitExceeded`: hạn mức được giữ. Số lần 40001 phụ thuộc lịch chạy; cái không đổi là tổng đã rút không vượt 30.000, và `--verify` kiểm điều đó. Vòng retry còn có test không cần dựng cuộc đua: khối `DO` với `RAISE EXCEPTION ... USING ERRCODE = '40001'` phát một lỗi 40001 thật, để kiểm giới hạn số lần và «lỗi 23505 không bị thử lại».
+Một bên thành công ngay lần đầu. Bên kia bị 40001, thử lại, đọc thấy 20.400 đã rút nên bị `LimitExceeded`: hạn mức được giữ. Số lần 40001 phụ thuộc thứ tự chạy của các task; cái không đổi là tổng đã rút không vượt 30.000, và `--verify` kiểm điều đó. Vòng retry còn có test không cần dựng race condition: khối `DO` với `RAISE EXCEPTION ... USING ERRCODE = '40001'` phát một lỗi 40001 thật, để kiểm tra giới hạn số lần thử và việc «lỗi 23505 không bị thử lại».
 
-SERIALIZABLE không miễn phí (phải theo dõi lần đọc, có thể huỷ oan), nên chỉ bật cho đường ghi có quy tắc trải trên nhiều dòng. Tài liệu PostgreSQL khuyên thử lại cả `40P01` (deadlock), nhưng `retry_serializable` **chưa xử lý** mã này: gặp là lỗi trả thẳng cho người gọi. Lab không dựng deadlock nên chưa có test; code thật phải thêm.
+SERIALIZABLE không miễn phí (phải theo dõi lần đọc, có thể huỷ nhầm), nên chỉ bật cho đường ghi có quy tắc liên quan đến nhiều dòng. Tài liệu PostgreSQL khuyên thử lại cả `40P01` (deadlock), nhưng `retry_serializable` **chưa xử lý** mã này: gặp mã này thì lỗi được trả thẳng cho người gọi. Lab không dựng deadlock nên chưa có test; code thật phải thêm.
 
 ## Làm sao cấm sửa sổ ngay trong database?
 
-Append-only ở bài 20 là quy ước của kiểu (không có hàm sửa). Xuống PostgreSQL, nó phải thành cơ chế để không client nào sửa được dòng đã ghi. Trigger `BEFORE UPDATE OR DELETE` làm việc đó:
+Append-only ở bài 20 là quy ước của kiểu (không có hàm sửa). Khi đưa xuống PostgreSQL, quy ước này phải thành cơ chế để không client nào sửa được dòng đã ghi. Trigger `BEFORE UPDATE OR DELETE` làm việc đó:
 
 ```sql
 -- sql/schema.sql
@@ -279,7 +279,7 @@ CREATE TRIGGER postings_no_truncate
     FOR EACH STATEMENT EXECUTE FUNCTION forbid_mutation();
 ```
 
-`journal_entries` có hai trigger tương tự. Trigger riêng cho `TRUNCATE` là bắt buộc: `TRUNCATE` không kích hoạt trigger theo dòng, và chỉ nhận trigger cấp statement. `TN001` là SQLSTATE tự đặt của loạt để Rust phân biệt với lỗi khác. Lab thử bốn câu lệnh phá sổ có `TN-0001`:
+`journal_entries` có hai trigger tương tự. Trigger riêng cho `TRUNCATE` là bắt buộc: `TRUNCATE` không kích hoạt trigger theo dòng, và chỉ gắn được trigger cấp statement. `TN001` là SQLSTATE tự đặt của loạt bài để Rust phân biệt với lỗi khác. Lab thử bốn câu lệnh phá sổ đang chứa `TN-0001`:
 
 ```text
 UPDATE postings SET amount_dong = 1 WHERE entry_id = 1 -> SQLSTATE TN001: sổ cái append-only: UPDATE trên postings bị cấm
@@ -289,7 +289,7 @@ TRUNCATE postings -> SQLSTATE TN001: sổ cái append-only: TRUNCATE trên posti
 sau khi thử phá: 1 bút toán, 3 posting, tổng 0 đồng
 ```
 
-Sai thì sửa bằng bút toán đảo, như `reverse` của `ledger-core`.
+Nếu ghi sai thì sửa bằng bút toán đảo, như `reverse` của `ledger-core`.
 
 ## So với EF Core ở bài C#
 
@@ -301,7 +301,7 @@ Bài [Transaction, optimistic concurrency và idempotency](/articles/dotnet10-tr
 | Chống ghi trùng | Bắt 23505 rồi đọc lại | `ON CONFLICT DO NOTHING RETURNING` |
 | Ghi chồng | Token phiên bản (optimistic) | `SERIALIZABLE`/khoá dòng, retry 40001 |
 
-Hai bên cùng giữ một nguyên tắc: ràng buộc unique là lớp quyết định cuối. sqlx đòi SQL tường minh ở từng bước; EF Core gọn hơn ở chỗ đó, đổi lại cần kiểm SQL do provider sinh ở các trường hợp biên.
+Hai bên cùng giữ một nguyên tắc: ràng buộc unique là lớp quyết định cuối. sqlx đòi SQL tường minh ở từng bước; EF Core gọn hơn ở chỗ đó, đổi lại phải kiểm tra SQL do provider sinh ra ở các trường hợp biên.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
@@ -321,7 +321,7 @@ cargo test --manifest-path examples/toi-noi-rust/24-transaction-idempotency/Carg
 
 **Bài tập:** sau thí nghiệm 1, bút toán thành công kế tiếp có `id` và mã hiển thị là gì? Vì sao không nên dùng «id liên tục» để kết luận sổ không thiếu bút toán?
 
-<details><summary>Xem lời giải</summary><p>Id 1 đến 4 đã được cấp (kể cả id 2 lỗi khoá ngoại và id 3 bị rollback), nên bút toán kế tiếp có id 5, mã <code>JE-000005</code>. Identity không hoàn lại khi rollback hay khi <code>ON CONFLICT DO NOTHING</code> không chèn gì, nên khoảng trống là bình thường. Muốn biết sổ có thiếu bút toán không phải đối soát với nguồn và kiểm tổng, không đếm id.</p></details>
+<details><summary>Xem lời giải</summary><p>Id 1 đến 4 đã được cấp (kể cả id 2 lỗi khoá ngoại và id 3 bị rollback), nên bút toán kế tiếp có id 5, mã <code>JE-000005</code>. Identity không hoàn lại khi rollback hay khi <code>ON CONFLICT DO NOTHING</code> không chèn gì, nên khoảng trống là bình thường. Muốn biết sổ có thiếu bút toán hay không thì phải đối soát với nguồn và kiểm tổng, không đếm id.</p></details>
 
 Bài trước: [bài 23](/articles/rust-sqlx-postgresql-pool-migration-query). Bài tiếp: [bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition).
 

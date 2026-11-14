@@ -1,7 +1,7 @@
 ---
 slug: rust-axum-api-test-oneshot-hop-dong-bff
 title: "API test với axum: oneshot, DB thật và hợp đồng với BFF C#"
-summary: "Bài 34: gọi Router bằng oneshot không cần socket, khi nào cần server thật; ca 401, 403, 409, 422 trên PostgreSQL thật; snapshot OpenAPI bằng insta; file JSON chung để test Rust và client C# cùng kiểm."
+summary: "Bài 34: gọi Router bằng oneshot không cần socket, khi nào cần server thật; các test case 401, 403, 409, 422 trên PostgreSQL thật; snapshot OpenAPI bằng insta; file JSON chung để test Rust và client C# cùng kiểm."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, testing, openapi]
@@ -15,7 +15,7 @@ Payment BFF viết bằng C# gọi `POST /v1/entries` của ledger-api. Một bu
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Test Rust xanh, test C# xanh. Hợp đồng giữa hai bên đã được chứng minh chưa?</p>
-<details><summary>Xem đáp án</summary><p>Chưa. Mỗi bên có thể đang kiểm một bản hợp đồng riêng của mình và hai bản đã lệch nhau. Chỉ khi hai test cùng đọc một nguồn dữ liệu, ví dụ một file JSON chung, thì "cả hai xanh" mới có nghĩa. Ngay cả khi đó nó chỉ chứng minh những gì file nói.</p></details>
+<details><summary>Xem đáp án</summary><p>Chưa. Mỗi bên có thể đang kiểm một bản hợp đồng riêng của mình và hai bản đã lệch nhau. Chỉ khi hai test cùng đọc một nguồn dữ liệu, ví dụ một file JSON chung, thì "cả hai xanh" mới có nghĩa. Ngay cả khi đó, kết quả chỉ chứng minh những gì file nói.</p></details>
 </div>
 
 ## Router là một Service: gọi nó không cần cổng
@@ -61,7 +61,7 @@ let task = tokio::spawn(async move {
 });
 ```
 
-Client là `TcpStream` ghi tay byte HTTP/1.1, để lab bớt một dependency; thực tế hãy dùng client HTTP thật.
+Client là `TcpStream` ghi tay byte HTTP/1.1, để lab bớt một thư viện phụ thuộc; thực tế hãy dùng client HTTP thật.
 
 Handler dùng địa chỉ client (ví dụ giới hạn theo IP, thứ `tower::limit` ở bài 33 không làm) là ví dụ rõ nhất:
 
@@ -84,17 +84,17 @@ assert_eq!(rawhttp::request(addr, "GET", "/ip", &[], None).await?.body, "127.0.0
 | Header `date`, `content-length` | Không có (`date` là `None`) | Có, do hyper thêm |
 | `ConnectInfo<SocketAddr>` | 500; chữa bằng `MockConnectInfo` | `127.0.0.1` thật |
 | Request sai giao thức (tên header chứa dấu cách) | Không dựng nổi: `Request` đã dựng sẵn | hyper trả 400, router không được gọi |
-| Chi phí mỗi request, máy tải cao | 120–191 µs | 1,29–1,49 ms |
+| Chi phí mỗi request, khi máy chịu tải cao | 120–191 µs | 1,29–1,49 ms |
 
-Dòng cuối do `cargo run --release -- --measure` đo: 2.000 lần `GET /api-docs/openapi.json` (không chạm database), ba lần chạy, server thật mở kết nối mới mỗi lần. Số trong bảng đo lúc load khoảng 180; bản lab đầu, tài liệu OpenAPI nhỏ hơn và không rõ tải máy, đo được 49–69 µs và 201–412 µs. Số tuyệt đối đổi theo tải, chỉ nên đọc chênh lệch. Số đo trên máy viết bài (Apple M1 Max), không phải SLA. Một điều tôi từng đoán sai: hyper không từ chối request HTTP/1.1 thiếu `Host`, nó trả 200; tôi thay bằng ca tên header sai, ca hyper thực sự trả 400.
+Dòng cuối do `cargo run --release -- --measure` đo: 2.000 lần `GET /api-docs/openapi.json` (không chạm database), ba lần chạy, server thật mở kết nối mới mỗi lần. Số trong bảng đo khi tải máy khoảng 180; bản lab đầu, tài liệu OpenAPI nhỏ hơn và không rõ tải máy, đo được 49–69 µs và 201–412 µs. Số tuyệt đối đổi theo tải, chỉ nên đọc chênh lệch. Số đo trên máy viết bài (Apple M1 Max), không phải SLA. Một điều tôi từng đoán sai: hyper không từ chối request HTTP/1.1 thiếu `Host`, nó trả 200; tôi thay bằng ca tên header sai, ca hyper thực sự trả 400.
 
-Viết hầu hết test bằng `oneshot`; chỉ mở cổng thật cho thứ phụ thuộc vào kết nối (địa chỉ client, hành vi của hyper, graceful shutdown ở bài 39). Cả hai đường đều không kiểm TLS hay reverse proxy.
+Viết hầu hết test bằng `oneshot`; chỉ mở cổng thật cho phần phụ thuộc vào kết nối (địa chỉ client, hành vi của hyper, graceful shutdown ở bài 39). Cả hai đường đều không kiểm TLS hay reverse proxy.
 
 ## Test với PostgreSQL thật: thêm gì so với bài 27?
 
 Test lỗi nghiệp vụ như 409 phải chạy trên PostgreSQL thật, vì `ON CONFLICT` và trigger là thứ cần kiểm. Fixture `TestDb` giữ nguyên ý bài 27: mỗi ca một schema `lab_<uuid>` có dấu tuổi trong `COMMENT ON SCHEMA`, `search_path` đặt bằng `after_connect`, migration chạy trong schema đó.
 
-Lab đổi một chỗ so với bài 27: `Drop` giờ cũng dọn. Bài 27 để ca panic sót schema rồi dọn từ ngoài, vì `Drop` đồng bộ không `await` được, còn `block_on` trong runtime của test thì panic. Điều đó vẫn đúng; ở đây ta đi vòng bằng một thread khác có runtime riêng. Lý do đổi: thí nghiệm đổi tên trường ở mục sau làm tám ca đỏ, sáu ca dùng database để sót schema trong database dùng chung.
+Lab đổi một chỗ so với bài 27: `Drop` giờ cũng dọn. Bài 27 để ca panic sót schema rồi dọn từ ngoài, vì `Drop` đồng bộ không `await` được, còn `block_on` trong runtime của test thì panic. Điều đó vẫn đúng; ở đây ta đi vòng bằng một thread khác có runtime riêng. Lý do đổi: thí nghiệm đổi tên trường ở mục sau làm tám test case đỏ, trong đó sáu test case dùng database và để sót schema trong database dùng chung.
 
 ```rust
 // src/testkit.rs (rút gọn)
@@ -121,7 +121,7 @@ Cái giá là `join` chặn thread của test. Tôi thử bằng test tạm cố
 | Như trên, runtime `current_thread` (mặc định của `#[tokio::test]`) | bản đầu **treo vô hạn**; có `lock_timeout` thì đỏ sau khoảng 4 giây, cảnh báo, schema sót |
 | Tiến trình bị kill | `Drop` không chạy, schema sót |
 
-Ca treo đáng nhớ: trong lúc `join`, runtime của test đứng yên nên transaction không rollback được và vẫn giữ khoá, còn `DROP SCHEMA` chờ khoá đó. Vì thế `drop_schema` đặt `lock_timeout = '3s'`: chấp nhận sót còn hơn treo cả bộ test. Schema sót vẫn mang dấu cùng dạng bài 27, nên `--cleanup-stale` của lab 27 dọn được theo tuổi.
+Trường hợp treo đáng nhớ: trong lúc `join`, runtime của test đứng yên nên transaction không rollback được và vẫn giữ khoá, còn `DROP SCHEMA` chờ khoá đó. Vì thế `drop_schema` đặt `lock_timeout = '3s'`: chấp nhận sót còn hơn treo cả bộ test. Schema sót vẫn mang dấu cùng dạng với bài 27, nên `--cleanup-stale` của lab 27 dọn được theo tuổi.
 
 ## Mỗi mã lỗi đến từ tầng nào?
 
@@ -148,12 +148,12 @@ match Json::<T>::from_request(req, state).await {
 
 Về token: `leeway` mặc định 60 giây của `jsonwebtoken`, bài 33 hạ xuống 5, lab này đặt 0.
 
-Thân lỗi theo đúng hợp đồng của [bài 32](/articles/rust-validation-problem-details-openapi-utoipa): `type` dạng `https://toi-noi.example/problems/<slug>`, cùng slug và mã trạng thái, có `instance`, `traceId`, `errors`. Bốn chỗ khác có chủ ý, vì đây là bản thu nhỏ trên PostgreSQL:
+Thân lỗi theo đúng hợp đồng của [bài 32](/articles/rust-validation-problem-details-openapi-utoipa): `type` dạng `https://toi-noi.example/problems/<slug>`, cùng slug và mã trạng thái, có `instance`, `traceId`, `errors`. Bốn điểm khác biệt có chủ ý, vì đây là bản thu nhỏ trên PostgreSQL:
 
 - `POST` vào tài khoản chưa mở là 422 `unknown-account`: bảng `accounts` có khoá ngoại, sổ trong bộ nhớ của bài 32 không có ca này.
-- `GET` tài khoản đã mở mà chưa có bút toán trả 200 số dư 0; 404 `unknown-account` chỉ dành cho tài khoản chưa mở. Bài 32 không có bảng tài khoản nên trả 404 cho cả hai.
+- `GET` tài khoản đã mở mà chưa có bút toán trả 200 kèm số dư 0; 404 `unknown-account` chỉ dành cho tài khoản chưa mở. Bài 32 không có bảng tài khoản nên trả 404 cho cả hai.
 - Có thêm 401 `unauthenticated` và 403 `forbidden`, vì bài 32 chưa có xác thực.
-- Tài liệu vẫn ở `/api-docs/openapi.json` nhưng không có Swagger UI, để bớt một dependency.
+- Tài liệu vẫn ở `/api-docs/openapi.json` nhưng không có Swagger UI, để bớt một thư viện phụ thuộc.
 
 Các ca chạy qua `oneshot` trên PostgreSQL thật, mỗi ca kiểm cả hệ quả trong database:
 
@@ -162,14 +162,14 @@ Các ca chạy qua `oneshot` trên PostgreSQL thật, mỗi ca kiểm cả hệ 
 | Gửi `post-entry.request.json` | 201, `JE-000001` | số dư tài xế `DR-001` = 20.400 |
 | Gửi lại cùng body | 200, `replayed: true` | số dư không nhân đôi |
 | Cùng key, khác số tiền | 409 `idempotency-conflict` | `journal_entries` vẫn có 1 dòng |
-| Lệch, một dòng, dòng 0 đồng, tài khoản chưa có, tràn `i64` | 422, mỗi loại một `type` | `journal_entries` có 0 dòng |
+| Bút toán lệch, bút toán một dòng, dòng 0 đồng, tài khoản chưa có, tràn `i64` | 422, mỗi loại một `type` | `journal_entries` có 0 dòng |
 | JSON cụt; thiếu trường; số viết dạng chuỗi; trường lạ | 400; ba ca 422 | |
 | Không `Content-Type` | 415 | |
 | Mã tài khoản rỗng trên đường dẫn; route lạ; sai method | 400; 404; 405 | đều là problem+json |
 | Không token, khoá lạ, hết hạn, `Basic` | 401 và `WWW-Authenticate: Bearer` | thân giống nhau cho mọi lý do |
-| Token chỉ đọc gọi POST, kể cả body hỏng; chỉ ghi gọi GET | 403 | 0 dòng được ghi |
+| Token chỉ đọc gọi POST, kể cả khi body hỏng; token chỉ ghi gọi GET | 403 | 0 dòng được ghi |
 
-Ca "tài khoản chưa có" chỉ lộ trên database thật: khoá ngoại (SQLSTATE `23503`) vỡ khi chèn posting, giữa transaction, nên cả header phải rollback; `journal_entries` còn 0 dòng.
+Test case "tài khoản chưa có" chỉ lộ trên database thật: khoá ngoại (SQLSTATE `23503`) bị vi phạm khi chèn posting, giữa transaction, nên cả header phải rollback; `journal_entries` còn 0 dòng.
 
 ## Snapshot OpenAPI: đổi hợp đồng phải hiện trong diff
 
@@ -198,11 +198,11 @@ insta::assert_json_snapshot!("openapi_document", reply.json());
 test openapi_document_matches_the_committed_snapshot ... FAILED
 ```
 
-Cùng thay đổi làm đỏ thêm 4 ca gọi API và 3 ca hợp đồng; ca đọc file mẫu báo `unknown field amountDong, expected account or amount`. Khôi phục `src/api.rs`, xoá `.snap.new`: toàn bộ xanh. Snapshot không nói thay đổi sai; nó buộc người đổi phải thấy diff và duyệt. Muốn giữ tên mới thì sửa snapshot, file mẫu và client C# trong cùng pull request.
+Cùng thay đổi làm đỏ thêm 4 ca gọi API và 3 ca hợp đồng; ca đọc file mẫu báo `unknown field amountDong, expected account or amount`. Khôi phục `src/api.rs`, xoá `.snap.new`: toàn bộ xanh. Snapshot không cho biết thay đổi có sai hay không; nó buộc người đổi phải thấy diff và duyệt. Muốn giữ tên mới thì sửa snapshot, file mẫu và client C# trong cùng pull request.
 
 ## Hai bên cùng đọc một file: hợp đồng với client C#
 
-Snapshot OpenAPI không nói gì về client. Cách rẻ nhất để hai bên cùng kiểm là chung một nguồn: ba file trong `contracts/`, gồm `post-entry.request.json`, `post-entry.response.json` của chuyến `TN-0001` và `post-entry.unbalanced.problem.json` cho thân lỗi. Hình 3 cho thấy ai đọc gì.
+Snapshot OpenAPI không nói gì về client. Cách rẻ nhất để hai bên cùng kiểm là dùng chung một nguồn: ba file trong `contracts/`, gồm `post-entry.request.json`, `post-entry.response.json` của chuyến `TN-0001` và `post-entry.unbalanced.problem.json` cho thân lỗi. Hình 3 cho thấy ai đọc gì.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -223,7 +223,7 @@ let expected: Value = serde_json::from_str(RESPONSE).unwrap();
 assert_eq!(reply.json(), expected, "thân trả về phải bằng file hợp đồng");
 ```
 
-Ca lỗi cũng so như vậy, chỉ trừ `traceId` sinh mới mỗi lần (kiểm dạng 32 hex). Phía C# (thư mục `dotnet-client/`, .NET SDK 10.0.401) dùng record, đọc đúng ba file đó và serialize ngược lại hai file đầu:
+Test case lỗi cũng so sánh như vậy, chỉ trừ `traceId` sinh mới mỗi lần (kiểm dạng 32 hex). Phía C# (thư mục `dotnet-client/`, .NET SDK 10.0.401) dùng record, đọc đúng ba file đó và serialize ngược lại hai file đầu:
 
 ```csharp
 // dotnet-client/src/LedgerClient/Contracts.cs (rút gọn)
@@ -233,7 +233,7 @@ public sealed record Posting(
 public static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
 ```
 
-Output thật của `dotnet run --project src/LedgerClient`:
+Kết quả chạy thật của `dotnet run --project src/LedgerClient`:
 
 ```text
 request:  key=trip:TN-0001:capture, 3 posting, tổng=0
@@ -251,16 +251,16 @@ OK   problem là unbalanced-entry 422 và có traceId 32 ký tự
 CONTRACT OK (C#)
 ```
 
-`dotnet test tests/LedgerClient.Tests` chạy 9 ca xanh. Hai ca là phát hiện thật khi viết bài, và là lý do hợp đồng phải được kiểm ở **cả hai** phía:
+`dotnet test tests/LedgerClient.Tests` chạy 9 test case, đều xanh. Hai trường hợp dưới đây là phát hiện thật khi viết bài, và là lý do hợp đồng phải được kiểm ở **cả hai** phía:
 
-- Với `JsonSerializerDefaults.Web`, body `{"account": "driver:DR-001"}` thiếu `amountDong` **không lỗi**: record không đánh dấu bắt buộc nhận `AmountDong = 0`. Lần đầu tôi viết test mong `JsonException` và nó đỏ. Rust trả 422 cho đúng body đó. Sửa bằng `[property: JsonRequired]` trên mọi tham số của record hợp đồng.
+- Với `JsonSerializerDefaults.Web`, body `{"account": "driver:DR-001"}` thiếu `amountDong` **không lỗi**: record không đánh dấu bắt buộc sẽ nhận `AmountDong = 0`. Lần đầu tôi viết test kỳ vọng có `JsonException` và nó đỏ. Rust trả 422 cho đúng body đó. Sửa bằng `[property: JsonRequired]` trên mọi tham số của record hợp đồng.
 - Web defaults cho phép đọc số viết dạng chuỗi: `"amountDong": "100"` vào được `long` 100, còn `serde` với `i64` từ chối nó (ca 422 ở trên). Nếu muốn client chặt như server, dùng `NumberHandling = JsonNumberHandling.Strict`; test `Strict_number_handling_...` kiểm điều đó.
 
 Đây là **hợp đồng thủ công**: các file do con người giữ cho khớp, chỉ chứng minh đúng các ví dụ trong file, không biết gì về ca lỗi khác, header hay trường tuỳ chọn mới. Khi số consumer tăng, bước tiếp theo là consumer-driven contract (Pact: consumer ghi kỳ vọng, provider chạy lại trong CI) hoặc schema registry cho sự kiện Kafka. Lab không có cả hai.
 
 ## So với WebApplicationFactory: giống và khác
 
-[Bài .NET về WebApplicationFactory](/articles/dotnet10-webapplicationfactory-integration-test) kiểm pipeline ASP.NET Core trong `TestServer`, cũng không mở cổng. `oneshot` đóng đúng vai đó: cả hai chạy pipeline ứng dụng trong tiến trình test và cùng không chứng minh Kestrel, TLS hay proxy.
+[Bài .NET về WebApplicationFactory](/articles/dotnet10-webapplicationfactory-integration-test) kiểm pipeline ASP.NET Core trong `TestServer`, cũng không mở cổng. `oneshot` đóng đúng vai đó: cả hai chạy pipeline ứng dụng trong tiến trình test và đều không chứng minh Kestrel, TLS hay proxy.
 
 Bên .NET, test thay dependency bằng cách cấu hình lại container DI. Bên Rust, `AppState` là struct test tự tạo, nên test chỉ cần truyền thứ khác vào `router(state)`. Cái giá là `router` phải nhận trạng thái từ ngoài, không tự đọc biến môi trường.
 
@@ -296,7 +296,7 @@ OpenAPI paths: ["/v1/accounts/{id}/balance", "/v1/entries"]
 VERIFY OK
 ```
 
-`cargo test` chạy 20 ca xanh: 9 ca API, 5 ca hợp đồng, 2 ca OpenAPI, 4 ca server thật; chạy lặp lại và song song được, không để sót schema. Bỏ `TOI_NOI_PG_URL` thì cả `--verify` lẫn test **fail** và nói cách bật PostgreSQL, không skip.
+`cargo test` chạy 20 test case, đều xanh: 9 test case API, 5 test case hợp đồng, 2 test case OpenAPI, 4 test case server thật; chạy lặp lại và song song được, không để sót schema. Bỏ `TOI_NOI_PG_URL` thì cả `--verify` lẫn test **thất bại** và nói cách bật PostgreSQL, không bỏ qua.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

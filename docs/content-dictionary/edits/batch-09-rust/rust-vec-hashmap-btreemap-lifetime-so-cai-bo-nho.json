@@ -1,0 +1,19 @@
+{"file":"rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho.md","edits":[
+{"old":"là mảng cấp phát trên heap, tự lớn khi `push`","new":"là mảng cấp phát trên heap, tự mở rộng khi `push`","reason":"'Tự lớn' gượng","severity":"low"},
+{"old":"Khoá phải implement `Eq + Hash`","new":"Khoá phải cài đặt `Eq + Hash`","reason":"Động từ tiếng Anh lọt vào văn xuôi","severity":"medium"},
+{"old":"thì băm hai ba lần và dài hơn","new":"thì băm hai đến ba lần và dài hơn","reason":"'Hai ba lần' viết cụt","severity":"low"},
+{"old":"giữ khoá luôn được sắp, nên duyệt theo thứ tự và hỏi theo khoảng được","new":"giữ khoá luôn ở trạng thái đã sắp xếp, nên duyệt theo thứ tự và truy vấn theo khoảng được","reason":"'Hỏi theo khoảng' nghe cụt; 'được sắp' gượng","severity":"medium"},
+{"old":"Ép kiểu cận thành `str` bằng","new":"Chỉ định kiểu cận là `str` bằng","reason":"Turbofish chỉ định tham số kiểu, không phải ép kiểu","severity":"medium"},
+{"old":"ở kiểu trả về nói iterator chỉ mượn `self`","new":"ở kiểu trả về cho biết iterator chỉ mượn `self`","reason":"'Nói' dùng cho vật vô tri, giọng dịch","severity":"low"},
+{"old":"`HashSet<String>` là tập hợp không trùng.","new":"`HashSet<String>` là tập hợp không chứa phần tử trùng.","reason":"Câu cụt, thiếu danh từ","severity":"low"},
+{"old":"Khi đó phải gói trong một transaction","new":"Khi đó phải gói chúng trong một transaction","reason":"Thiếu tân ngữ","severity":"low"},
+{"old":"Mỗi tham chiếu trỏ vào dữ liệu có một chủ.","new":"Mỗi tham chiếu trỏ vào dữ liệu có một chủ sở hữu.","reason":"Lược mất danh từ, thống nhất với phần trên","severity":"medium"},
+{"old":"Phần lớn thời gian nó tự suy ra, gọi là lifetime elision.","new":"Phần lớn trường hợp, compiler tự suy ra điều này; cơ chế đó gọi là lifetime elision (lược bỏ chú thích lifetime).","reason":"'Phần lớn thời gian' là calque; 'nó' mơ hồ; thuật ngữ chưa có chú thích","severity":"medium"},
+{"old":"không kéo dài sự sống của dữ liệu","new":"không làm dữ liệu sống lâu hơn","reason":"'Kéo dài sự sống' gượng","severity":"low"},
+{"old":"Cùng quy tắc giải thích lỗi hay gặp nhất với collection","new":"Cùng quy tắc này giải thích lỗi hay gặp nhất với collection","reason":"Thiếu từ chỉ định, câu cụt","severity":"medium"},
+{"old":"Rust chặn từ compile time.","new":"Rust chặn ngay từ lúc biên dịch.","reason":"Từ Anh lọt vào văn xuôi khi đã có từ Việt","severity":"low"},
+{"old":"Các đoạn lỗi trên đã được tạo và chạy `rustc` thật, rồi bỏ khỏi lab để lab biên dịch được.","new":"Các đoạn mã lỗi trên đã được viết ra và chạy với `rustc` thật, rồi bỏ khỏi mã nguồn của lab để lab biên dịch được.","reason":"Câu nói lệch: rõ đây là mã nguồn của lab, không phải bài viết","severity":"medium"},
+{"old":"kiểm các giá trị này bằng so sánh thật","new":"kiểm tra các giá trị này bằng phép so sánh thật","reason":"'Kiểm' viết cụt, thiếu 'tra'","severity":"low"},
+{"old":"Production cần database","new":"Môi trường thật cần database","reason":"Từ Anh thông thường lọt vào văn xuôi","severity":"medium"},
+{"old":"elision gán cho mọi tham chiếu trong kết quả lifetime của <code>self</code>","new":"elision gán lifetime của <code>self</code> cho mọi tham chiếu trong kết quả","reason":"Trật tự từ kiểu Anh, khó đọc","severity":"medium"}
+]}

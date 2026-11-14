@@ -1,0 +1,107 @@
+{
+"file": "rust-async-await-tokio-task-timeout-cancellation.md",
+"edits": [
+{
+"old": "con chưa xong thì `Pending`",
+"new": "future con chưa xong thì `Pending`",
+"reason": "\"con\" lơ lửng, thiếu danh từ chính",
+"severity": "medium"
+},
+{
+"old": "Rust chuẩn không kèm executor.",
+"new": "Thư viện chuẩn của Rust không kèm executor.",
+"reason": "\"Rust chuẩn\" cụt, thiếu danh từ chính",
+"severity": "medium"
+},
+{
+"old": "hai lần chạy trên máy viết bài ra 636/308",
+"new": "hai lần chạy trên máy viết bài cho ra 636/308",
+"reason": "\"ra\" thiếu động từ trọn nghĩa",
+"severity": "low"
+},
+{
+"old": "khi một future trả `Err`",
+"new": "khi một future trả về `Err`",
+"reason": "Thiếu \"về\"",
+"severity": "low"
+},
+{
+"old": "Mọi thứ future đang giữ được `Drop` dọn",
+"new": "Mọi thứ future đang giữ đều do `Drop` dọn",
+"reason": "Câu thiếu giới từ, đọc như bị động cụt",
+"severity": "medium"
+},
+{
+"old": "Mặc định `select!` kiểm từ một nhánh ngẫu nhiên",
+"new": "Mặc định `select!` bắt đầu kiểm tra từ một nhánh chọn ngẫu nhiên",
+"reason": "\"kiểm từ\" gượng, dịch sát tiếng Anh",
+"severity": "high"
+},
+{
+"old": "Drop future của ta là drop đầu nhận; máy chủ vẫn",
+"new": "Khi future phía ta bị drop, đầu nhận bị drop theo; máy chủ vẫn",
+"reason": "Cụm \"drop đầu nhận\" cụt, khó hiểu",
+"severity": "high"
+},
+{
+"old": "kết quả thật của lab:",
+"new": "kết quả chạy thật của lab:",
+"reason": "\"kết quả thật\" cụt",
+"severity": "low"
+},
+{
+"old": "`mpsc::Receiver::recv` đạt;",
+"new": "`mpsc::Receiver::recv` an toàn khi huỷ;",
+"reason": "\"đạt\" thiếu bổ ngữ, người đọc phải đoán",
+"severity": "medium"
+},
+{
+"old": "Bản ngây thơ gỡ dấu ở dòng sau",
+"new": "Bản ngây thơ gỡ cờ đánh dấu ở dòng sau",
+"reason": "\"gỡ dấu\" gượng",
+"severity": "medium"
+},
+{
+"old": "đưa việc gỡ dấu vào `Drop`",
+"new": "đưa việc gỡ cờ đánh dấu vào `Drop`",
+"reason": "Thống nhất cách gọi với đoạn trên",
+"severity": "low"
+},
+{
+"old": "các task nhường nó ở `.await`",
+"new": "các task nhường luồng ở `.await`",
+"reason": "\"nó\" chỉ sự vật trừu tượng, không rõ",
+"severity": "medium"
+},
+{
+"old": "kiểm các con số trong bài",
+"new": "kiểm tra các con số trong bài",
+"reason": "Lược mất chữ \"tra\"",
+"severity": "low"
+},
+{
+"old": "vì máy tải chỉ làm xấu từng lần",
+"new": "vì tải của máy chỉ làm xấu từng lần đo",
+"reason": "\"máy tải\" gượng, thiếu danh từ",
+"severity": "medium"
+},
+{
+"old": "Ledger cũng còn sống trong bộ nhớ",
+"new": "Ledger cũng vẫn nằm trong bộ nhớ",
+"reason": "\"còn sống\" dịch sát chữ",
+"severity": "low"
+},
+{
+"old": "không thay cho đo trên mạng thật.",
+"new": "không thay thế được việc đo trên mạng thật.",
+"reason": "Thiếu danh từ, câu cụt",
+"severity": "medium"
+},
+{
+"old": "hàm trả <code>Timeout</code> nhưng",
+"new": "hàm trả về <code>Timeout</code> nhưng",
+"reason": "Thiếu \"về\"",
+"severity": "low"
+}
+]
+}

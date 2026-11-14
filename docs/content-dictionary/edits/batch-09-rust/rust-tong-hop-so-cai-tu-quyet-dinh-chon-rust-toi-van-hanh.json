@@ -1,0 +1,305 @@
+{
+  "file": "rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh.md",
+  "edits": [
+    {
+      "old": "nói thẳng điều loạt không chứng minh, bản đồ 68 bài",
+      "new": "nói thẳng những điều loạt bài không chứng minh được, bản đồ 68 bài",
+      "reason": "Cụm cụt, thiếu từ nối",
+      "severity": "medium"
+    },
+    {
+      "old": "Trả lời «nên» hay «không nên» chỉ dựa vào cảm giác sau 67 bài đều không chính đáng.",
+      "new": "Dù đã qua 67 bài, trả lời «nên» hay «không nên» chỉ dựa vào cảm giác thì đều không chính đáng.",
+      "reason": "Câu lủng củng, chủ ngữ và phạm vi \"sau 67 bài\" không rõ",
+      "severity": "high"
+    },
+    {
+      "old": "thêm loại thứ năm mà quên nhãn là lỗi E0004.",
+      "new": "thêm loại thứ năm mà quên gán nhãn sẽ gây lỗi E0004.",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "biên dịch chặn + test bất biến | release tắt overflow-checks mặc định nên kỷ luật checked_* vẫn là việc người viết; property test không là chứng minh",
+      "new": "biên dịch chặn + test bất biến | release tắt overflow-checks mặc định nên kỷ luật checked_* vẫn là việc người viết; property test không phải là chứng minh",
+      "reason": "Câu thiếu \"phải\"",
+      "severity": "low"
+    },
+    {
+      "old": "chỉ trong code Rust; ở biên (cột state, JSON)",
+      "new": "chỉ có hiệu lực trong code Rust; ở biên (cột state, JSON)",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "bài 61 chỉ có hướng ở 20 request/giây; số đo ở máy tải cao qua Docker Desktop; so với .NET chỉ ở bài 59, khối lượng nhỏ, không phải production",
+      "new": "bài 61 chỉ cho thấy xu hướng ở 20 request/giây; số đo chạy trên máy tải cao qua Docker Desktop; so sánh với .NET chỉ có ở bài 59, với khối lượng nhỏ, không phải production",
+      "reason": "Cụm cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "ở bài 30 chỉ gộp lô unnest vượt 10.000 bút toán/giây, chưa gồm account_balances; bài 61 có idempotency và số dư thì vượt ở load 100 khi chưa có trigger, thêm trigger còn 8.815 đến 9.108, load 430 không đạt;",
+      "new": "ở bài 30 chỉ cách gộp lô unnest vượt 10.000 bút toán/giây, chưa gồm account_balances; bài 61 tính cả idempotency và số dư thì vượt ngưỡng ở load 100 khi chưa có trigger, thêm trigger thì còn 8.815 đến 9.108, và không đạt ở load 430;",
+      "reason": "Câu cụt, thiếu chủ ngữ và vị ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "thời gian tường nhiễu vì máy tải",
+      "new": "thời gian thực tế (wall-clock) nhiễu vì máy tải",
+      "reason": "\"Thời gian tường\" là calque của wall time",
+      "severity": "high"
+    },
+    {
+      "old": "quan sát khi viết lab, không so độ rộng với NuGet",
+      "new": "quan sát khi viết lab, không so sánh độ phong phú của hệ sinh thái với NuGet",
+      "reason": "\"So độ rộng\" dịch gượng",
+      "severity": "high"
+    },
+    {
+      "old": "nên không đo được công on-call hay chi phí hai ngôn ngữ",
+      "new": "nên không đo được công sức on-call hay chi phí hai ngôn ngữ",
+      "reason": "\"Công\" đứng một mình mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Đếm theo dòng, không theo sức nặng (hàm `summarize` đếm):",
+      "new": "Số liệu đếm theo dòng chứ không theo sức nặng (do hàm `summarize` đếm):",
+      "reason": "Câu cụt, thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó không biết một dòng có nói thật hay không.",
+      "new": "Hàm này không biết một dòng có nói đúng sự thật hay không.",
+      "reason": "Tránh \"Nó\" chỉ sự vật đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "sửa khi đang mượn đọc (E0502), `capture` sai thứ tự của typestate (E0599)",
+      "new": "sửa dữ liệu khi đang mượn đọc (E0502), gọi `capture` sai thứ tự của typestate (E0599)",
+      "reason": "Thiếu tân ngữ và động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "nhiều bản lỗi được viết cố ý để chứng minh.",
+      "new": "nhiều bản lỗi do lab cố ý viết ra để chứng minh.",
+      "reason": "Bị động kiểu tiếng Anh, thiếu chủ thể",
+      "severity": "low"
+    },
+    {
+      "old": "tám task không khoá rút 163.200 trên hạn mức 100.000.",
+      "new": "tám task chạy không có khoá rút tổng cộng 163.200, so với hạn mức 100.000.",
+      "reason": "Câu cụt, \"trên\" gây mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "rút gọn còn đầu vào 7 byte cắt chuỗi UTF-8 giữa ký tự, mà test gõ tay không thấy.",
+      "new": "rút gọn còn đầu vào 7 byte làm cắt chuỗi UTF-8 giữa một ký tự, mà test viết tay không phát hiện được.",
+      "reason": "Câu thiếu động từ; \"gõ tay\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "vốn đã viết Rust không thay thế invariant nghiệp vụ, nhưng nó đổi chỗ đặt niềm tin",
+      "new": "vốn đã viết rằng Rust không thay thế invariant nghiệp vụ, nhưng kết quả này đổi chỗ đặt niềm tin",
+      "reason": "Thiếu liên từ \"rằng\"; \"nó\" mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "hạn mức khi chạy đồng thời được giữ bởi PostgreSQL, thứ tự khoá và test;",
+      "new": "hạn mức khi chạy đồng thời do PostgreSQL, thứ tự khoá và test giữ;",
+      "reason": "Bị động \"được ... bởi\"",
+      "severity": "medium"
+    },
+    {
+      "old": "gộp lô 500 nhưng vẫn hai câu lệnh mỗi bút toán đạt 733 đến 930; chỉ gộp lô bằng `unnest` vượt ngưỡng,",
+      "new": "gộp lô 500 nhưng vẫn dùng hai câu lệnh cho mỗi bút toán thì đạt 733 đến 930; chỉ gộp lô bằng `unnest` mới vượt ngưỡng,",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Phép nhân này là của bài 68, không phải số đo, nhưng khớp lời bài 01:",
+      "new": "Phép nhân này do chính bài 68 tính, không phải số đo, nhưng khớp với lời bài 01:",
+      "reason": "\"Là của\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Code C# không tinh chỉnh mà một vòng không kích hoạt GC nào.",
+      "new": "Code C# không tinh chỉnh, vậy mà một vòng không kích hoạt GC nào.",
+      "reason": "Quan hệ ý giữa hai vế không rõ",
+      "severity": "medium"
+    },
+    {
+      "old": "Bộ nhớ đó kiểm soát được nhờ đẩy việc sang SQL, và phần chuyển sang PostgreSQL không được đo.",
+      "new": "Bộ nhớ đó kiểm soát được nhờ chuyển việc sang SQL, còn phần việc đã chuyển sang PostgreSQL thì không được đo.",
+      "reason": "Câu cụt, \"phần chuyển\" mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "đo sửa một dòng thì `cargo-chef` biên dịch lại 1 crate",
+      "new": "đo trường hợp sửa một dòng thì `cargo-chef` biên dịch lại 1 crate",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Chỉ bài 59, khối lượng nhỏ, một máy, không phải production.",
+      "new": "Chỉ có bài 59 làm phép so sánh này, với khối lượng nhỏ, trên một máy, không phải production.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "p99 đường một câu CTE 45 và 88 ms",
+      "new": "p99 của đường một câu CTE là 45 và 88 ms",
+      "reason": "Câu cụt thiếu \"của\", \"là\"",
+      "severity": "low"
+    },
+    {
+      "old": "nhiễu giữa hai lượt lớn bằng chênh lệch giữa hai đường.",
+      "new": "độ nhiễu giữa hai lượt lớn ngang với chênh lệch giữa hai đường.",
+      "reason": "Trật tự từ, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ đọc ở mức hướng.",
+      "new": "chỉ đọc như một xu hướng.",
+      "reason": "\"Mức hướng\" tự ghép",
+      "severity": "medium"
+    },
+    {
+      "old": "Ở bài 30 chỉ gộp lô `unnest` vượt, và chưa gồm `account_balances`. Bài 61 có số dư thì vượt ở load 100 khi chưa có trigger, thêm trigger còn 8.815 đến 9.108, và không đạt ở load 430.",
+      "new": "Ở bài 30, chỉ cách gộp lô `unnest` vượt ngưỡng, và chưa tính `account_balances`. Bài 61 tính cả số dư thì vượt ngưỡng ở load 100 khi chưa có trigger, thêm trigger thì còn 8.815 đến 9.108, và không đạt ở load 430.",
+      "reason": "Câu cụt, thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "chưa failover, chưa chạy dài ngày.",
+      "new": "chưa kiểm tra failover, chưa chạy liên tục nhiều ngày.",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ `samply` gộp mẫu bằng script ngoài lab,",
+      "new": "chỉ có `samply`, với mẫu được gộp bằng script ngoài lab,",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Bài 50 đo quyền bằng `SET ROLE`",
+      "new": "Bài 50 kiểm tra quyền bằng `SET ROLE`",
+      "reason": "\"Đo quyền\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "`--verify` kiểm nó với `api/seed/learning-paths.json`:",
+      "new": "`--verify` đối chiếu bản đồ đó với `api/seed/learning-paths.json`:",
+      "reason": "\"Nó\" mơ hồ, \"kiểm\" cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Hình 3. Bảy phần theo số bài, độ rộng tỉ lệ số bài, và ba lộ trình; nét đứt là việc bài này làm.",
+      "new": "Hình 3. Bảy phần với độ rộng tỉ lệ theo số bài, cùng ba lộ trình; nét đứt là phần việc của bài này.",
+      "reason": "Lặp \"số bài\", câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "`--verify` kiểm số bài tồn tại và tăng dần.",
+      "new": "`--verify` kiểm tra các số bài có tồn tại và tăng dần.",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Mỗi ô là bằng chứng chạy được hoặc khoảng trống ghi thẳng.",
+      "new": "Mỗi ô là bằng chứng chạy được hoặc một khoảng trống được ghi thẳng ra.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Ở dòng sự kiện, 44 ca với bốn reader",
+      "new": "Ở dòng sự kiện, 44 test case với bốn reader",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Phép đo đó lộ hai bẫy:",
+      "new": "Phép kiểm tra đó lộ ra hai bẫy:",
+      "reason": "\"Phép đo\" không đúng với kiểm thử tương thích",
+      "severity": "medium"
+    },
+    {
+      "old": "hợp đồng phải nói `int64` đi dưới dạng nào.",
+      "new": "hợp đồng phải nói rõ `int64` được truyền dưới dạng nào.",
+      "reason": "Câu thiếu từ, gượng",
+      "severity": "low"
+    },
+    {
+      "old": "thêm hai điều service C# phải biết:",
+      "new": "thêm hai điều mà service C# phải biết:",
+      "reason": "Thiếu từ nối",
+      "severity": "low"
+    },
+    {
+      "old": "một đội nhỏ sở hữu trọn, nói chuyện với phần còn lại bằng hợp đồng có version (W4).",
+      "new": "một đội nhỏ làm chủ toàn bộ, giao tiếp với phần còn lại qua hợp đồng có phiên bản (W4).",
+      "reason": "\"Sở hữu trọn\" gượng; \"version\" thay bằng \"phiên bản\"",
+      "severity": "high"
+    },
+    {
+      "old": "bộ nhớ dễ dự đoán, không vì thông lượng",
+      "new": "bộ nhớ dễ đoán, không vì thông lượng",
+      "reason": "Thống nhất \"dễ đoán\" như phần đầu bài",
+      "severity": "low"
+    },
+    {
+      "old": "trước khi tin chữ «dễ dự đoán» (R5, R6)",
+      "new": "trước khi tin vào cụm «dễ đoán» (R5, R6)",
+      "reason": "Thống nhất \"dễ đoán\"",
+      "severity": "low"
+    },
+    {
+      "old": "phần còn lại của độ đúng nằm ở nơi khác. Nó không cho thấy Rust thắng.",
+      "new": "phần còn lại của tính đúng đắn nằm ở nơi khác. Loạt không cho thấy Rust thắng.",
+      "reason": "\"Độ đúng\" dịch gượng của correctness; \"Nó\" mơ hồ",
+      "severity": "high"
+    },
+    {
+      "old": "thoát mã 1 kèm đúng chỗ thiếu,",
+      "new": "thoát mã 1 kèm thông báo đúng chỗ thiếu,",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "output thật là:",
+      "new": "kết quả in ra thật là:",
+      "reason": "Từ tiếng Anh thông thường",
+      "severity": "low"
+    },
+    {
+      "old": "đọc frontmatter, kiểm sổ bằng chứng.",
+      "new": "đọc frontmatter và kiểm tra sổ bằng chứng.",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Lab kiểm hình thức: file, thứ tự, id, số bài.",
+      "new": "Lab kiểm tra hình thức: file, thứ tự, id, số bài.",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Nó không chạy lại lab nào (việc của các script <code>verify-*.sh</code>) và không biết bài viết đúng không.",
+      "new": "Công cụ này không chạy lại lab nào (việc của các script <code>verify-*.sh</code>) và không biết bài viết có đúng hay không.",
+      "reason": "\"Nó\" mơ hồ; câu gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Bạn kiểm gì trước khi duyệt?",
+      "new": "Bạn cần kiểm tra gì trước khi duyệt?",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "khoảng min–max rộng hơn chênh lệch, cùng binary Rust cho 402 ms và 208 ms ở hai lô chỉ khác tải.",
+      "new": "khoảng min–max rộng hơn mức chênh lệch: cùng một binary Rust cho 402 ms và 208 ms ở hai lô chỉ khác nhau về tải.",
+      "reason": "Câu cụt, nối ý bằng dấu phẩy chưa rõ",
+      "severity": "medium"
+    }
+  ]
+}

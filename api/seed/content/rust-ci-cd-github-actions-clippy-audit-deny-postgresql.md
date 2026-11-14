@@ -1,14 +1,14 @@
 ---
 slug: rust-ci-cd-github-actions-clippy-audit-deny-postgresql
 title: "CI/CD: GitHub Actions với clippy, test, audit, deny và PostgreSQL"
-summary: "Bài 64: pipeline GitHub Actions cho crate Rust có PostgreSQL: matrix stable và MSRV, rust-cache, clippy -D warnings, audit, deny, sqlx offline, quyền tối thiểu, pin SHA. Lệnh chạy thật ở local, workflow chưa chạy trên GitHub."
+summary: "Bài 64: pipeline GitHub Actions cho crate Rust có PostgreSQL: matrix stable và MSRV, rust-cache, clippy -D warnings, audit, deny, sqlx offline, quyền tối thiểu, ghim SHA. Các lệnh đã chạy thật ở máy local; workflow chưa chạy trên GitHub."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, ci-cd, github-actions, supply-chain]
 language: vi
 ---
 
-Bài 63 đóng gói ledger thành image. Trước khi image đó đi đâu: ai bảo đảm mỗi commit vào `main` vẫn biên dịch, vẫn qua test với PostgreSQL thật, và không kéo vào dependency có lỗ hổng hay giấy phép không được phép dùng? Loạt C# trả lời ở [bài 35](/articles/dotnet10-container-ci-cd): quyền `contents: read`, PostgreSQL service container, artifact, không tự deploy. Bài này dựng bản Rust, thêm hai thứ đặc thù: công cụ chuỗi cung ứng (`cargo audit`, `cargo deny`) và cache biên dịch, vì Rust build lâu.
+Bài 63 đóng gói ledger thành image. Trước khi image đó được đưa đi đâu, cần biết ai bảo đảm mỗi commit vào `main` vẫn biên dịch, vẫn qua test với PostgreSQL thật, và không kéo vào dependency có lỗ hổng hay giấy phép không được phép dùng? Loạt C# đã trả lời câu này ở [bài 35](/articles/dotnet10-container-ci-cd): quyền `contents: read`, PostgreSQL service container, artifact, không tự deploy. Bài này dựng bản Rust, thêm hai thứ đặc thù: công cụ cho chuỗi cung ứng (`cargo audit`, `cargo deny`) và cache biên dịch, vì Rust build lâu.
 
 Đây là bài 64 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab `examples/toi-noi-rust/64-ci-cd/` là crate sổ cái nhỏ (ghi `TN-0001` thành hai bút toán vào PostgreSQL), ba workflow mẫu trong `workflows/` và `deny.toml`. Workflow không nằm trong `.github/` và **chưa chạy trên GitHub**; các lệnh bên trong đã chạy thật ở local.
 
@@ -24,18 +24,18 @@ Mỗi job trả lời một câu hỏi: `fmt` (đúng định dạng không), `c
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 312" role="img" aria-label="Hình 1. Ba đường chạy của pipeline. Mỗi push và pull request chạy năm job song song: fmt, clippy, test với matrix stable và 1.94 cùng PostgreSQL, sqlx offline, audit kèm deny. Đẩy tag vX.Y.Z build release và lưu artifact; image, registry và deploy chưa làm trong bài này. Hằng đêm chạy audit, mutation và fuzz, không chặn merge."><defs><marker id="rust-ci-cd-github-actions-clippy-audit-deny-postgresql-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="40" class="t-b">Mỗi push và PR</text><text x="20" y="62" class="t-small">chặn merge, song song</text><rect x="180" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="190" y="42" class="t-b">fmt</text><text x="190" y="68" class="t-small">fmt --check</text><rect x="318" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="328" y="42" class="t-b">clippy</text><text x="328" y="68" class="t-small">-D warnings</text><rect x="456" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="466" y="42" class="t-b">test</text><text x="466" y="68" class="t-small">stable + 1.94</text><rect x="594" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="604" y="42" class="t-b">sqlx</text><text x="604" y="68" class="t-small">prepare --check</text><rect x="732" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="742" y="42" class="t-b">supply-chain</text><text x="742" y="68" class="t-small">audit + deny</text><path d="M20 104 L860 104" class="f-none s-line dash"/><text x="20" y="144" class="t-b">Đẩy tag v*.*.*</text><text x="20" y="166" class="t-small">chỉ build</text><rect x="180" y="114" width="200" height="76" rx="10" class="f-phys-soft s-phys"/><text x="190" y="144" class="t-b">Build release</text><text x="190" y="170" class="t-small">--release --locked</text><rect x="430" y="114" width="220" height="76" rx="10" class="f-pk-soft s-pk"/><text x="440" y="144" class="t-b">Artifact</text><text x="440" y="170" class="t-small">binary + sha256, 30 ngày</text><path d="M380 152 L430 152" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-ci-cd-github-actions-clippy-audit-deny-postgresql-0-a)"/><rect x="700" y="114" width="162" height="76" rx="10" class="f-none s-line dash"/><text x="710" y="144" class="t-b">Chưa làm</text><text x="710" y="170" class="t-small">image và deploy sau</text><path d="M650 152 L700 152" class="f-none s-line dash" stroke-width="2" marker-end="url(#rust-ci-cd-github-actions-clippy-audit-deny-postgresql-0-a)"/><path d="M20 206 L860 206" class="f-none s-line dash"/><text x="20" y="246" class="t-b">Hằng đêm</text><text x="20" y="268" class="t-small">không chặn merge</text><rect x="180" y="216" width="130" height="76" rx="10" class="f-warn-soft s-warn"/><text x="190" y="246" class="t-b">audit</text><text x="190" y="272" class="t-small">advisory mới</text><rect x="318" y="216" width="130" height="76" rx="10" class="f-warn-soft s-warn"/><text x="328" y="246" class="t-b">mutants</text><text x="328" y="272" class="t-small">lab 57, split.rs</text><rect x="456" y="216" width="130" height="76" rx="10" class="f-warn-soft s-warn"/><text x="466" y="246" class="t-b">fuzz</text><text x="466" y="272" class="t-small">60 giây, nightly</text><rect x="594" y="216" width="268" height="76" rx="10" class="f-none s-line dash"/><text x="604" y="246" class="t-b">Báo cáo thành artifact</text><text x="604" y="272" class="t-small">crash thành test hồi quy (bài 57)</text></svg>
+<svg viewBox="0 0 880 312" role="img" aria-label="Hình 1. Ba đường chạy của pipeline. Mỗi push và pull request chạy năm job song song: fmt, clippy, test với matrix stable và 1.94 cùng PostgreSQL, sqlx offline, audit kèm deny. Đẩy tag vX.Y.Z thì build release và lưu artifact; image, registry và deploy chưa làm trong bài này. Hằng đêm chạy audit, mutation và fuzz, không chặn merge."><defs><marker id="rust-ci-cd-github-actions-clippy-audit-deny-postgresql-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="40" class="t-b">Mỗi push và PR</text><text x="20" y="62" class="t-small">chặn merge, song song</text><rect x="180" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="190" y="42" class="t-b">fmt</text><text x="190" y="68" class="t-small">fmt --check</text><rect x="318" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="328" y="42" class="t-b">clippy</text><text x="328" y="68" class="t-small">-D warnings</text><rect x="456" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="466" y="42" class="t-b">test</text><text x="466" y="68" class="t-small">stable + 1.94</text><rect x="594" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="604" y="42" class="t-b">sqlx</text><text x="604" y="68" class="t-small">prepare --check</text><rect x="732" y="12" width="130" height="76" rx="10" class="f-phys-soft s-phys"/><text x="742" y="42" class="t-b">supply-chain</text><text x="742" y="68" class="t-small">audit + deny</text><path d="M20 104 L860 104" class="f-none s-line dash"/><text x="20" y="144" class="t-b">Đẩy tag v*.*.*</text><text x="20" y="166" class="t-small">chỉ build</text><rect x="180" y="114" width="200" height="76" rx="10" class="f-phys-soft s-phys"/><text x="190" y="144" class="t-b">Build release</text><text x="190" y="170" class="t-small">--release --locked</text><rect x="430" y="114" width="220" height="76" rx="10" class="f-pk-soft s-pk"/><text x="440" y="144" class="t-b">Artifact</text><text x="440" y="170" class="t-small">binary + sha256, 30 ngày</text><path d="M380 152 L430 152" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-ci-cd-github-actions-clippy-audit-deny-postgresql-0-a)"/><rect x="700" y="114" width="162" height="76" rx="10" class="f-none s-line dash"/><text x="710" y="144" class="t-b">Chưa làm</text><text x="710" y="170" class="t-small">image và deploy sau</text><path d="M650 152 L700 152" class="f-none s-line dash" stroke-width="2" marker-end="url(#rust-ci-cd-github-actions-clippy-audit-deny-postgresql-0-a)"/><path d="M20 206 L860 206" class="f-none s-line dash"/><text x="20" y="246" class="t-b">Hằng đêm</text><text x="20" y="268" class="t-small">không chặn merge</text><rect x="180" y="216" width="130" height="76" rx="10" class="f-warn-soft s-warn"/><text x="190" y="246" class="t-b">audit</text><text x="190" y="272" class="t-small">advisory mới</text><rect x="318" y="216" width="130" height="76" rx="10" class="f-warn-soft s-warn"/><text x="328" y="246" class="t-b">mutants</text><text x="328" y="272" class="t-small">lab 57, split.rs</text><rect x="456" y="216" width="130" height="76" rx="10" class="f-warn-soft s-warn"/><text x="466" y="246" class="t-b">fuzz</text><text x="466" y="272" class="t-small">60 giây, nightly</text><rect x="594" y="216" width="268" height="76" rx="10" class="f-none s-line dash"/><text x="604" y="246" class="t-b">Báo cáo thành artifact</text><text x="604" y="272" class="t-small">crash thành test hồi quy (bài 57)</text></svg>
 </div>
 <figcaption>Hình 1. Ba đường chạy của pipeline mẫu: mỗi push, mỗi tag và theo lịch.</figcaption>
 </figure>
 
-Hai đường còn lại không chặn merge. Tag `vX.Y.Z` chỉ build release và lưu artifact. `nightly.yml` chạy lại `audit` (advisory mới xuất hiện không cần code đổi), cùng mutation và fuzz của [bài 57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao), vì hai việc đó tính bằng phút.
+Hai đường còn lại không chặn merge. Tag `vX.Y.Z` chỉ build release và lưu artifact. `nightly.yml` chạy lại `audit` (advisory mới xuất hiện dù code không đổi), cùng mutation và fuzz của [bài 57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao), vì hai việc đó tính bằng phút.
 
 ## Matrix chọn gì cho service chỉ deploy Linux?
 
-Một dòng: `toolchain: [stable, "1.94"]` trên `ubuntu-24.04`. Service chỉ chạy Linux nên thêm macOS và Windows chỉ nhân đôi thời gian mà không bắt lỗi nào ảnh hưởng production. **stable** bắt hồi quy từ compiler mới (nó trôi: máy viết bài 1.98.1, ảnh runner 1.99.1 theo tài liệu `actions/runner-images`). **MSRV** là phiên bản thấp nhất `Cargo.toml` hứa hỗ trợ.
+Một dòng: `toolchain: [stable, "1.94"]` trên `ubuntu-24.04`. Service chỉ chạy Linux nên thêm macOS và Windows chỉ nhân đôi thời gian mà không bắt lỗi nào ảnh hưởng production. **stable** bắt hồi quy từ compiler mới (phiên bản này thay đổi theo thời gian: máy viết bài 1.98.1, ảnh runner 1.99.1 theo tài liệu `actions/runner-images`). **MSRV** là phiên bản thấp nhất mà `Cargo.toml` hứa hỗ trợ.
 
-MSRV không tự chọn: `sqlx 0.9` khai `rust-version = 1.94`, edition 2024 chỉ cần 1.85. Compiler cũ hơn bị cargo từ chối ngay, không cần biên dịch:
+MSRV không do ta tự chọn: `sqlx 0.9` khai `rust-version = 1.94`, edition 2024 chỉ cần 1.85. Compiler cũ hơn bị cargo từ chối ngay, không cần biên dịch:
 
 ```text
 error: rustc 1.93.0 is not supported by the following packages:
@@ -43,11 +43,11 @@ error: rustc 1.93.0 is not supported by the following packages:
   sqlx@0.9.0 requires rustc 1.94.0
 ```
 
-(Rút gọn: bỏ các dòng lặp.) MSRV không chạy thì chỉ là lời hứa, nên matrix có `"1.94"` và `--verify` đòi nó bằng `rust-version` trong `Cargo.toml`: đổi một nơi mà quên nơi kia thì `--verify` đỏ. `cargo test` và `--verify` đã chạy xanh trên toolchain 1.94.0.
+(Rút gọn: bỏ các dòng lặp.) MSRV mà không chạy thử thì chỉ là lời hứa, nên matrix có `"1.94"` và `--verify` đòi nó trùng với `rust-version` trong `Cargo.toml`: đổi một nơi mà quên nơi kia thì `--verify` đỏ. `cargo test` và `--verify` đã chạy xanh trên toolchain 1.94.0.
 
 ## Cache cargo và cờ `-D warnings`: đặt ở đâu để không biên dịch lại?
 
-Crate này có 183 crate trong `Cargo.lock` (chủ yếu từ `sqlx`); biên dịch từ `target/` trống mất 3 phút 15 giây trên máy viết bài. `Swatinem/rust-cache` tốt hơn tự cache `target/` bằng `actions/cache` vì (theo README của action) khoá cache gồm phiên bản rustc, hash `Cargo.lock`/`Cargo.toml` và biến như `RUSTFLAGS`; trước khi lưu nó xoá artifact của chính crate repo, artifact incremental và file quá một tuần, nên cache chỉ giữ dependency, thứ ít đổi; và nó đặt `CARGO_INCREMENTAL=0`. Cache `target/` thô không có các bước dọn đó.
+Crate này có 183 crate trong `Cargo.lock` (chủ yếu từ `sqlx`); biên dịch từ `target/` trống mất 3 phút 15 giây trên máy viết bài. `Swatinem/rust-cache` tốt hơn tự cache `target/` bằng `actions/cache` vì (theo README của action) khoá cache gồm phiên bản rustc, hash `Cargo.lock`/`Cargo.toml` và biến như `RUSTFLAGS`; trước khi lưu, nó xoá artifact của chính crate trong repo, artifact incremental và file quá một tuần, nên cache chỉ giữ dependency, thứ ít đổi; và nó đặt `CARGO_INCREMENTAL=0`. Cache `target/` thô không có các bước dọn đó.
 
 Cờ `-D warnings` có hai cách viết:
 
@@ -56,16 +56,16 @@ cargo clippy --locked --all-targets -- -D warnings            # sau `--`: chỉ 
 RUSTFLAGS="-D warnings" cargo clippy --locked --all-targets   # mọi crate, kể cả dependency
 ```
 
-Khác biệt nằm ở cache: `RUSTFLAGS` là một phần fingerprint của từng crate. Đo trong `target` riêng, đếm đơn vị cargo in `Compiling`/`Checking` (không phụ thuộc tải máy).
+Khác biệt nằm ở cache: `RUSTFLAGS` là một phần fingerprint của từng crate. Lab đo trong `target` riêng, đếm số đơn vị mà cargo in `Compiling`/`Checking` (không phụ thuộc tải máy).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 236" role="img" aria-label="Hình 2. Số đơn vị biên dịch lại khi chạy cargo clippy. A: target trống, 142. B: sửa src/lib.rs và thêm -D warnings sau dấu --, 1. C: đặt RUSTFLAGS=-D warnings lần đầu, 142. D: sửa src/lib.rs khi RUSTFLAGS đã đặt, 1."><text x="20" y="38" class="t-small">A · target trống</text><rect x="270" y="14" width="568" height="36" rx="6" class="f-warn-soft s-warn"/><text x="284" y="38" class="t-b">142</text><text x="20" y="88" class="t-small">B · sửa lib.rs + -- -D warnings</text><rect x="270" y="64" width="6" height="36" rx="3" class="f-pk-soft s-pk"/><text x="288" y="88" class="t-b">1</text><text x="20" y="138" class="t-small">C · RUSTFLAGS lần đầu</text><rect x="270" y="114" width="568" height="36" rx="6" class="f-warn-soft s-warn"/><text x="284" y="138" class="t-b">142</text><text x="20" y="188" class="t-small">D · sửa lib.rs, có RUSTFLAGS</text><rect x="270" y="164" width="6" height="36" rx="3" class="f-pk-soft s-pk"/><text x="288" y="188" class="t-b">1</text><text x="20" y="226" class="t-small">Số đơn vị cargo in Compiling hoặc Checking; đếm, không phải đo giờ</text></svg>
+<svg viewBox="0 0 880 236" role="img" aria-label="Hình 2. Số đơn vị biên dịch lại khi chạy cargo clippy. A: target trống, 142. B: sửa src/lib.rs và thêm -D warnings sau dấu --, 1. C: đặt RUSTFLAGS=-D warnings lần đầu, 142. D: sửa src/lib.rs khi RUSTFLAGS đã đặt, 1."><text x="20" y="38" class="t-small">A · target trống</text><rect x="270" y="14" width="568" height="36" rx="6" class="f-warn-soft s-warn"/><text x="284" y="38" class="t-b">142</text><text x="20" y="88" class="t-small">B · sửa lib.rs + -- -D warnings</text><rect x="270" y="64" width="6" height="36" rx="3" class="f-pk-soft s-pk"/><text x="288" y="88" class="t-b">1</text><text x="20" y="138" class="t-small">C · RUSTFLAGS lần đầu</text><rect x="270" y="114" width="568" height="36" rx="6" class="f-warn-soft s-warn"/><text x="284" y="138" class="t-b">142</text><text x="20" y="188" class="t-small">D · sửa lib.rs, có RUSTFLAGS</text><rect x="270" y="164" width="6" height="36" rx="3" class="f-pk-soft s-pk"/><text x="288" y="188" class="t-b">1</text><text x="20" y="226" class="t-small">Số đơn vị mà cargo in Compiling hoặc Checking; đây là số đếm, không phải đo giờ</text></svg>
 </div>
 <figcaption>Hình 2. Đổi tham số sau <code>--</code> không đụng dependency; đặt <code>RUSTFLAGS</code> lần đầu biên dịch lại tất cả.</figcaption>
 </figure>
 
-Vì `rust-cache` đưa `RUSTFLAGS` vào khoá, job đổi cờ cũng bắt đầu từ cache khác. Lab chọn cách đầu và không đặt `RUSTFLAGS` cấp workflow. Về lint: `cargo -v` cho thấy crate registry như `uuid` luôn biên dịch với `--cap-lints allow`, nên cảnh báo của chúng không làm đỏ job dù dùng cách nào. Khác ở `ledger-core`, path dependency ngoài workspace: không có `--cap-lints` nên `RUSTFLAGS` nâng cả cảnh báo của nó thành lỗi, còn cờ sau `--` không tới nó (nó chạy bằng `rustc` thường, không qua `clippy-driver`). Nhớ `--all-targets` để lint cả test.
+Vì `rust-cache` đưa `RUSTFLAGS` vào khoá, job đổi cờ cũng bắt đầu từ cache khác. Lab chọn cách đầu và không đặt `RUSTFLAGS` cấp workflow. Về lint: `cargo -v` cho thấy crate registry như `uuid` luôn biên dịch với `--cap-lints allow`, nên cảnh báo của chúng không làm đỏ job dù dùng cách nào. `ledger-core` thì khác: đây là path dependency ngoài workspace, được biên dịch mà không có `--cap-lints` nên `RUSTFLAGS` nâng cả cảnh báo của nó thành lỗi, còn cờ sau `--` không tới nó (nó chạy bằng `rustc` thường, không qua `clippy-driver`). Nhớ `--all-targets` để lint cả test.
 
 Lint đỏ trông thế này (chèn tạm một biến thừa và `len() == 0`, rồi bỏ; rút gọn):
 
@@ -95,9 +95,9 @@ services:
       --health-interval 5s --health-timeout 3s --health-retries 20
 ```
 
-Runner đợi healthcheck xanh rồi mới chạy step đầu. `-h 127.0.0.1` có lý do: `pg_isready` mặc định đi qua unix socket, còn client của job nối bằng TCP. Log container thật có hai dòng `ready to accept connections` cách nhau khoảng nửa giây: server tạm của entrypoint (chỉ nghe socket) rồi server chính. Cuộc đua này chưa tái hiện được (lần chạy thật báo `healthy` sau 13 giây): đây là phòng ngừa. Mật khẩu trong YAML là giá trị lab.
+Runner đợi healthcheck xanh rồi mới chạy step đầu. `-h 127.0.0.1` có lý do: `pg_isready` mặc định đi qua unix socket, còn client của job nối bằng TCP. Log container thật có hai dòng `ready to accept connections` cách nhau khoảng nửa giây: server tạm của entrypoint (chỉ nghe socket) rồi server chính. Race condition này chưa tái hiện được (lần chạy thật báo `healthy` sau 13 giây): đây là biện pháp phòng ngừa. Mật khẩu trong YAML là giá trị lab.
 
-Test dùng chung fixture với máy dev: mỗi ca tạo schema `lab_<uuid>`, chạy migration (có trigger cân bút toán chuẩn của bài 25), và `with_db` dọn schema kể cả khi assert hỏng:
+Test dùng chung fixture với máy dev: mỗi test case tạo schema `lab_<uuid>`, chạy migration (có trigger cân bút toán chuẩn của bài 25), và `with_db` dọn schema kể cả khi assert thất bại:
 
 ```rust
 // src/testdb.rs (rút gọn)
@@ -108,7 +108,7 @@ if let Err(e) = outcome {
 }
 ```
 
-Thiếu `TOI_NOI_PG_URL` thì test **fail**, không skip: test bị bỏ qua mà CI vẫn xanh là loại xanh nguy hiểm nhất. Bộ test xanh cả trên database dùng chung của máy dev lẫn trên container `postgres:18` mới dựng đúng như job `test`.
+Thiếu `TOI_NOI_PG_URL` thì test **fail**, không bị bỏ qua: nếu test bị bỏ qua mà CI vẫn xanh thì đó là loại xanh nguy hiểm nhất. Bộ test xanh cả trên database dùng chung của máy dev lẫn trên container `postgres:18` mới dựng đúng như job `test`.
 
 Lab dùng `query!`, nên CI đặt `SQLX_OFFLINE=true` để build không cần database; dữ liệu nằm ở `.sqlx/`. Thêm `limit 1` vào một câu `query!` mà quên `cargo sqlx prepare` thì build offline đỏ, và `prepare --check` nêu nguyên nhân:
 
@@ -118,11 +118,11 @@ error: prepare check failed: .sqlx is missing one or more queries; you should re
 
 Job `sqlx-offline` riêng đáng giá ở trường hợp khó hơn: migration đổi schema mà câu SQL giữ nguyên, build offline vẫn xanh (bài tập cuối bài).
 
-**Kafka** không có trong pipeline mẫu, và đó là quyết định. Trên máy viết bài, image `apache/kafka:4.1.0` nén 235 MB so với 161 MB của `postgres:18` (`docker image inspect`), và mất 11 giây từ lúc chạy container đến dòng `Kafka Server started` khi load khoảng 440. Service container về nguyên tắc được, nhưng chưa thử trên runner. Test Kafka của [bài 36](/articles/rust-kafka-rdkafka-consumer-producer-schema) còn phải chờ topic có leader, nên đắt và dễ chập chờn hơn test PostgreSQL. Đề xuất: tách job riêng, chạy khi thư mục bài 36–37 đổi hoặc theo lịch. Cái giá: bộ lọc `paths` có thể làm một check bắt buộc không bao giờ báo kết quả, nên phải thử với branch protection trước khi tin.
+**Kafka** không có trong pipeline mẫu, và đó là quyết định. Trên máy viết bài, image `apache/kafka:4.1.0` nén 235 MB so với 161 MB của `postgres:18` (`docker image inspect`), và mất 11 giây từ lúc chạy container đến dòng `Kafka Server started` khi load khoảng 440. Về nguyên tắc có thể dùng service container, nhưng chưa thử trên runner. Test Kafka của [bài 36](/articles/rust-kafka-rdkafka-consumer-producer-schema) còn phải chờ topic có leader, nên đắt và dễ chập chờn hơn test PostgreSQL. Đề xuất: tách job riêng, chạy khi thư mục bài 36–37 đổi hoặc theo lịch. Cái giá: bộ lọc `paths` có thể làm một check bắt buộc không bao giờ báo kết quả, nên phải thử với branch protection trước khi tin.
 
 ## `cargo audit` và `cargo deny` nói gì về `Cargo.lock` này?
 
-Cả hai đọc cơ sở dữ liệu RustSec nên chồng nhau ở phần advisory. `cargo audit` quét `Cargo.lock` nhanh, hợp với job đêm; `cargo deny` thêm giấy phép, nguồn registry/git và crate trùng phiên bản. Kết quả thật, đo ngày 07/11/2026 (1.422 advisory, 183 crate):
+Cả hai đọc cơ sở dữ liệu RustSec nên chồng nhau ở phần advisory. `cargo audit` quét `Cargo.lock` nhanh, hợp với job đêm; `cargo deny` thêm giấy phép, nguồn registry/git và crate trùng phiên bản. Kết quả chạy thật, đo ngày 07/11/2026 (1.422 advisory, 183 crate):
 
 ```text
 $ cargo audit        # thoát mã 0: không có vulnerability, không có warning
@@ -130,7 +130,7 @@ $ cargo deny check   # thoát mã 0
 advisories ok, bans ok, licenses ok, sources ok
 ```
 
-`cargo deny` có 8 cảnh báo `duplicate` (`block-buffer`, `cpufeatures`, `crypto-common`, `digest`, `hashbrown`, `hashlink`, `sha2`, `syn`). Một cái do chính lab: `yaml-rust2` (chỉ để `--verify` đọc workflow) kéo `hashlink 0.12`, còn `sqlx` dùng `0.11`. Chính sách là `multiple-versions = "warn"`: phần lớn bản trùng đến từ dependency bắc cầu mà repo không quyết được.
+`cargo deny` có 8 cảnh báo `duplicate` (`block-buffer`, `cpufeatures`, `crypto-common`, `digest`, `hashbrown`, `hashlink`, `sha2`, `syn`). Một cảnh báo do chính lab gây ra: `yaml-rust2` (chỉ để `--verify` đọc workflow) kéo `hashlink 0.12`, còn `sqlx` dùng `0.11`. Chính sách là `multiple-versions = "warn"`: phần lớn bản trùng đến từ dependency bắc cầu mà repo không quyết được.
 
 Để thấy lệnh đỏ, dựng crate nháp ghim `smallvec =1.6.0`: `cargo audit` in `RUSTSEC-2021-0003` (9.8, critical), `error: 1 vulnerability found!` và thoát mã 1. Với giấy phép, allow-list trong `deny.toml` là nơi đưa ra quyết định:
 
@@ -144,9 +144,9 @@ unknown-registry = "deny"
 unknown-git = "deny"
 ```
 
-Bỏ `BSD-3-Clause` và `Zlib` khỏi bản sao của file thì `cargo deny check licenses` đỏ (mã 4) ở đúng hai crate: `encoding_rs` và `foldhash`. Thêm một dòng vào allow-list là một quyết định pháp lý, nên nó đi qua review như mã. Hai công cụ cài bằng `cargo install --locked --version …`, mất 12 phút 10 giây (`cargo-audit`) và 7 phút 39 giây (`cargo-deny`) khi load 330 đến 450. `rust-cache` mặc định lưu `~/.cargo/bin` nên workflow cài sau bước cache; bản dựng sẵn là hướng khác. Cả hai chưa thử trên runner.
+Bỏ `BSD-3-Clause` và `Zlib` khỏi bản sao của file thì `cargo deny check licenses` đỏ (mã 4) ở đúng hai crate: `encoding_rs` và `foldhash`. Thêm một dòng vào allow-list là một quyết định pháp lý, nên dòng đó phải qua review như mã. Hai công cụ cài bằng `cargo install --locked --version …`, mất 12 phút 10 giây (`cargo-audit`) và 7 phút 39 giây (`cargo-deny`) khi load 330 đến 450. `rust-cache` mặc định lưu `~/.cargo/bin` nên workflow cài sau bước cache; dùng bản dựng sẵn là một cách khác. Cả hai chưa thử trên runner.
 
-## Quyền tối thiểu, concurrency và pin SHA: lý do và cái giá
+## Quyền tối thiểu, concurrency và ghim SHA: lý do và cái giá
 
 ```yaml
 permissions:
@@ -156,9 +156,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 ```
 
-Khai `contents: read` cấp workflow thì job nào cần thêm quyền phải xin riêng, thấy ngay trong diff. `concurrency` huỷ lượt cũ của cùng PR khi có push mới, không huỷ lượt đang chạy trên `main` (lượt đang chờ vẫn có thể bị lượt mới hơn thay thế); `release.yml` đặt `cancel-in-progress: false` vì release đang build không nên bị bỏ ngang.
+Khai `contents: read` ở cấp workflow thì job nào cần thêm quyền phải xin riêng, thấy ngay trong diff. `concurrency` huỷ lượt cũ của cùng PR khi có push mới, không huỷ lượt đang chạy trên `main` (lượt đang chờ vẫn có thể bị lượt mới hơn thay thế); `release.yml` đặt `cancel-in-progress: false` vì release đang build không nên bị bỏ ngang.
 
-**Pin theo SHA**: `actions/checkout@v7` là tag có thể bị dời, commit SHA thì không; tài liệu bảo mật của GitHub nêu SHA đầy đủ là cách pin action bên thứ ba. Ba SHA tra bằng `git ls-remote`; tag có chú thích như `v2.9.3` của `rust-cache` phải lấy dòng `^{}`, tức commit, không phải tag object:
+**Ghim theo SHA**: `actions/checkout@v7` là tag có thể bị dời, commit SHA thì không; tài liệu bảo mật của GitHub nêu SHA đầy đủ là cách ghim action bên thứ ba. Ba SHA tra bằng `git ls-remote`; tag có chú thích như `v2.9.3` của `rust-cache` phải lấy dòng `^{}`, tức commit, không phải tag object:
 
 ```yaml
 - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -166,13 +166,13 @@ Khai `contents: read` cấp workflow thì job nào cần thêm quyền phải xi
 - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
 ```
 
-Cái giá có thật. SHA khó đọc nên phiên bản nằm trong comment, và **không gì kiểm comment khớp SHA**. Cần công cụ cập nhật (Dependabot hoặc Renovate), nếu không pin thành dependency cũ không ai nhìn. Pin cũng chỉ cố định chính action, không cố định thứ nó gọi bên trong. Lab bớt bề mặt bằng cách bỏ `dtolnay/rust-toolchain`: runner có sẵn `rustup`, nên `rustup toolchain install` làm cùng việc mà không thêm action cần pin. `--verify` chỉ kiểm hình dạng (SHA 40 ký tự), không kiểm SHA đúng thật, vì việc đó cần mạng.
+Cái giá có thật. SHA khó đọc nên phiên bản nằm trong comment, và **không công cụ nào kiểm tra comment có khớp SHA**. Cần công cụ cập nhật (Dependabot hoặc Renovate), nếu không, bản ghim thành dependency cũ không ai để ý. Ghim cũng chỉ cố định chính action, không cố định thứ nó gọi bên trong. Lab giảm số action phải ghim bằng cách bỏ `dtolnay/rust-toolchain`: runner có sẵn `rustup`, nên `rustup toolchain install` làm cùng việc mà không thêm action cần ghim. `--verify` chỉ kiểm hình dạng (SHA 40 ký tự), không kiểm SHA có đúng thật hay không, vì việc đó cần mạng.
 
 ## Artifact release, job theo lịch và ngân sách thời gian
 
-`release.yml` chạy khi đẩy tag `v*.*.*`: kiểm tag khớp version trong `Cargo.toml`, `cargo build --release --locked`, tạo `sha256`, `upload-artifact` với `retention-days: 30`. Không đăng nhập registry, không xin quyền ghi: artifact là đầu vào cho image ([bài 63](/articles/rust-container-dockerfile-da-stage-cargo-chef-distroless)) và triển khai ([bài 65](/articles/rust-trien-khai-aws-azure-secrets-health-autoscale)). Release build trên máy viết bài là macOS, không phải artifact Linux.
+`release.yml` chạy khi đẩy tag `v*.*.*`: kiểm tag khớp version trong `Cargo.toml`, `cargo build --release --locked`, tạo `sha256`, `upload-artifact` với `retention-days: 30`. Không đăng nhập registry, không xin quyền ghi: artifact là đầu vào cho image ([bài 63](/articles/rust-container-dockerfile-da-stage-cargo-chef-distroless)) và triển khai ([bài 65](/articles/rust-trien-khai-aws-azure-secrets-health-autoscale)). Bản release build trên máy viết bài là macOS, không phải artifact Linux.
 
-Ngân sách thời gian, cạnh bảng của [bài 57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao). Số đo ở máy viết bài khi **load average 330 đến 450**: không phải SLA, không phải thời gian trên runner GitHub (chưa đo):
+Ngân sách thời gian, để đối chiếu với bảng của [bài 57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao). Số đo ở máy viết bài khi **load average 330 đến 450**: không phải SLA, không phải thời gian trên runner GitHub (chưa đo):
 
 | Tầng | Lệnh | Số đo |
 |---|---|---|
@@ -186,7 +186,7 @@ Ngân sách thời gian, cạnh bảng của [bài 57](/articles/rust-cargo-muta
 | audit; deny | `cargo audit`; `cargo deny check` | 18 s (gồm tải advisory); 3 s |
 | Mutation `split.rs`; fuzz | bài 57 | 77 s; 55 s build + 60 s |
 
-Chênh lệch lớn nhất là hàng build: lab 57 chỉ có `jiff`, `serde`, `uuid` nên build trống 14,6 giây, lab này kéo `sqlx` nên hơn ba phút. Đó là lý do cache nằm trong pipeline. Ngân sách đề xuất (chính sách, không phải số đo): mỗi push, job chậm nhất dưới 10 phút khi cache nóng, `timeout-minutes` là trần cho cache nguội; mutation và fuzz ngoài đường chặn merge, vì chi phí tỉ lệ với số mutant chứ không với kích thước diff.
+Chênh lệch lớn nhất là hàng build: lab 57 chỉ có `jiff`, `serde`, `uuid` nên build trống 14,6 giây, lab này kéo `sqlx` nên hơn ba phút. Đó là lý do cache nằm trong pipeline. Ngân sách đề xuất (chính sách, không phải số đo): mỗi push, job chậm nhất dưới 10 phút khi cache nóng, `timeout-minutes` là trần cho cache nguội; mutation và fuzz ngoài đường chặn merge, vì chi phí tỉ lệ với số mutant chứ không theo kích thước diff.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -230,7 +230,7 @@ check-jsonschema --builtin-schema vendor.github-workflows workflows/*.yml
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Workflow chưa từng chạy trên GitHub: chưa biết thời gian thật trên runner, cache có trúng không. Không có job Kafka, không build image, không registry, không deploy, không secret thật. Số đo thời gian lấy khi máy rất tải, chỉ đọc ở mức hướng.</p></div>
+<p>Workflow chưa từng chạy trên GitHub: chưa biết thời gian thật trên runner, cache có trúng không. Không có job Kafka, không build image, không registry, không deploy, không secret thật. Số đo thời gian lấy khi máy rất tải, chỉ đọc như một xu hướng.</p></div>
 
 **Bài tập:** Một PR thêm migration đổi kiểu cột `account_balances.balance_dong` từ `bigint` sang `numeric`, không đụng câu SQL nào và không chạy lại `cargo sqlx prepare`. Job nào trong `ci.yml` bắt được ở bước biên dịch, job nào chưa?
 

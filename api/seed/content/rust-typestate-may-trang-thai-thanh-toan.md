@@ -1,7 +1,7 @@
 ---
 slug: rust-typestate-may-trang-thai-thanh-toan
 title: "Typestate và máy trạng thái: hold → capture → settle không thể đi sai"
-summary: "Bài 14: mô hình hoá sáu trạng thái thanh toán bằng enum và match trả Result, rồi bằng typestate Payment<S> với PhantomData để capture sai thứ tự không biên dịch được; cách nối với database và khi nào enum là đủ."
+summary: "Bài 14: mô hình hoá sáu trạng thái thanh toán bằng enum và match trả về Result, rồi bằng typestate Payment<S> với PhantomData để capture sai thứ tự không biên dịch được; cách nối với database và khi nào enum là đủ."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, typestate, state-machine]
@@ -20,7 +20,7 @@ Chuyến `TN-0001` kết thúc, VíXanh đã giữ 25.500 VND trên phương ti�
 
 ## Enum PaymentState: bảng chuyển trạng thái nằm một chỗ
 
-Cách quen thuộc nhất là một `enum` cho trạng thái, một `enum` cho sự kiện và một hàm quyết định cặp nào hợp lệ. Sáu trạng thái theo §9.1 kiến trúc Tới Nơi, năm sự kiện, 30 cặp ghép; chỉ 6 cặp có cạnh. Khác `Option` ở bài 05, hàm trả `Result` để lỗi nói rõ *vì sao* bị từ chối:
+Cách quen thuộc nhất là một `enum` cho trạng thái, một `enum` cho sự kiện và một hàm quyết định cặp nào hợp lệ. Sáu trạng thái theo §9.1 kiến trúc Tới Nơi, năm sự kiện, 30 cặp ghép; chỉ 6 cặp có cạnh. Khác với `Option` ở bài 05, hàm trả về `Result` để lỗi nói rõ *vì sao* bị từ chối:
 
 ```rust
 // src/state.rs
@@ -61,7 +61,7 @@ pub fn apply(
 
 Ghi sổ trước, đổi trạng thái sau: nếu `post` lỗi thì `?` thoát và `self.state` giữ nguyên. Thứ tự này thuộc về kỷ luật của người viết code. `capture_entry` trả bút toán ba dòng của bài 10: khách -25.500, nền tảng +5.100, tài xế +20.400, khoá `trip:TN-0001:capture` (lab gộp một bước cho gọn; bài 13 tách qua clearing). `refund_entry` đổi dấu cả ba dòng, khoá `trip:TN-0001:refund`.
 
-Bảng này dễ test: lab duyệt đủ 30 cặp, đếm đúng 6 hợp lệ và 24 bị từ chối. Điểm yếu là lỗi chỉ lộ khi chạy: `record.apply(PaymentEvent::Capture, …)` trên bản ghi `INITIATED` vẫn biên dịch.
+Bảng này dễ test: lab duyệt qua đủ 30 cặp, đếm đúng 6 hợp lệ và 24 bị từ chối. Điểm yếu là lỗi chỉ lộ khi chạy: `record.apply(PaymentEvent::Capture, …)` trên bản ghi `INITIATED` vẫn biên dịch.
 
 ## Typestate: đưa trạng thái lên thành tham số kiểu
 
@@ -80,7 +80,7 @@ pub struct Payment<S> {
 }
 ```
 
-`PhantomData<S>` cho compiler biết struct "gắn với" `S` dù không chứa giá trị `S` nào; không có nó, Rust báo tham số `S` không được dùng. Nó không chiếm byte nào: `size_of::<Payment<Initiated>>()` và `size_of::<Payment<Captured>>()` cùng bằng 88 trên máy 64-bit (ba `String` 24 byte, hai `Money` 8 byte), đúng bằng kích thước `PaymentTerms`. Con số 88 phụ thuộc nền tảng, nên `--verify` chỉ kiểm hai kích thước bằng nhau. Marker sinh bằng macro cho gọn, mỗi marker khai báo `KIND` là giá trị `enum` tương ứng:
+`PhantomData<S>` cho compiler biết struct "gắn với" `S` dù không chứa giá trị `S` nào; không có nó, Rust báo tham số `S` không được dùng. Trường này không chiếm byte nào: `size_of::<Payment<Initiated>>()` và `size_of::<Payment<Captured>>()` cùng bằng 88 trên máy 64-bit (ba `String` 24 byte, hai `Money` 8 byte), đúng bằng kích thước `PaymentTerms`. Con số 88 phụ thuộc nền tảng, nên `--verify` chỉ kiểm hai kích thước bằng nhau. Marker sinh bằng macro cho gọn, mỗi marker khai báo `KIND` là giá trị `enum` tương ứng:
 
 ```rust
 // src/typestate.rs
@@ -132,9 +132,9 @@ impl Payment<Captured> {
 }
 ```
 
-Ở đây `capture` *tạo bút toán*: nó chỉ trả `Payment<Captured>` khi `ledger.post` thành công, kèm mã `JE-000001`. Khác với `apply`, người gọi không có chỗ nào để quên ghi sổ hay đổi trạng thái trước khi ghi. `settle_refund` làm tương tự với bút toán hoàn tiền; `refund()` chỉ đổi kiểu, vì khách mới yêu cầu còn VíXanh chưa hoàn.
+Ở đây `capture` *tạo bút toán*: hàm chỉ trả `Payment<Captured>` khi `ledger.post` thành công, kèm mã `JE-000001`. Khác với `apply`, người gọi không có chỗ nào để quên ghi sổ hay đổi trạng thái trước khi ghi. `settle_refund` làm tương tự với bút toán hoàn tiền; `refund()` chỉ đổi kiểu, vì khách mới yêu cầu, còn VíXanh chưa hoàn tiền.
 
-Huỷ giao dịch (`fail`) hợp lệ từ hai trạng thái. Thay vì viết hai `impl`, ta dùng trait bound với một trait đánh dấu:
+Việc huỷ giao dịch (`fail`) hợp lệ từ hai trạng thái. Thay vì viết hai `impl`, ta dùng trait bound với một trait đánh dấu:
 
 ```rust
 // src/typestate.rs (rút gọn: ghép các đoạn)
@@ -152,7 +152,7 @@ impl<S: Cancellable> Payment<S> {
 
 `Payment<Captured>::fail()` không tồn tại, đúng với bảng chuyển ở phần trước: `(Captured, Fail)` không có cạnh.
 
-## Lỗi compile thật: `capture` trên `Payment<Initiated>`
+## Lỗi biên dịch thật: `capture` trên `Payment<Initiated>`
 
 Đây là chương trình sai thứ tự, thử biên dịch trong một file nháp:
 
@@ -161,7 +161,7 @@ let payment = Payment::new(terms);
 let _ = payment.capture(&mut ledger);
 ```
 
-Thông điệp thật của rustc 1.98.1:
+Thông báo lỗi thật của rustc 1.98.1:
 
 ```text
 error[E0599]: no method named `capture` found for struct `Payment<ledger_lab::Initiated>` in the current scope
@@ -173,7 +173,7 @@ error[E0599]: no method named `capture` found for struct `Payment<ledger_lab::In
    = note: the method was found for `Payment<ledger_lab::Authorized>`
 ```
 
-Rustc còn chỉ ra kiểu có method đó, nên bước bị thiếu là `authorize()`. Thu hai lần trong cùng một đoạn code cũng bị chặn, nhờ `capture(self, …)` tiêu thụ giá trị (rút gọn, bỏ phần note):
+Rustc còn chỉ ra kiểu có method đó, nên bước bị thiếu là `authorize()`. Thu tiền hai lần trong cùng một đoạn code cũng bị chặn, nhờ `capture(self, …)` tiêu thụ giá trị (rút gọn, bỏ phần note):
 
 ```text
 error[E0382]: use of moved value: `payment`
@@ -187,9 +187,9 @@ error[E0382]: use of moved value: `payment`
     |                   ^^^^^^^ value used here after move
 ```
 
-Hai đoạn này nằm trong lab dưới dạng doc test ```` ```compile_fail,E0599 ```` và ```` ```compile_fail,E0382 ````: nếu code đổi khiến chúng biên dịch được, `cargo test` báo đỏ. Nhưng như bài 10 đã lưu ý, doc test chỉ chứng minh "không biên dịch được"; trên stable, rustdoc không đối chiếu mã lỗi. Đổi tạm E0599 thành E0004, test vẫn pass. Thông điệp ở trên đến từ biên dịch file nháp, không phải từ doc test.
+Hai đoạn này nằm trong lab dưới dạng doc test ```` ```compile_fail,E0599 ```` và ```` ```compile_fail,E0382 ````: nếu code đổi khiến chúng biên dịch được, `cargo test` báo đỏ. Nhưng như bài 10 đã lưu ý, doc test chỉ chứng minh "không biên dịch được"; trên stable, rustdoc không đối chiếu mã lỗi. Đổi tạm E0599 thành E0004, test vẫn pass. Thông báo lỗi ở trên đến từ việc biên dịch file nháp, không phải từ doc test.
 
-Chuỗi `Payment::new(terms).authorize().capture(&mut ledger)` biên dịch được vì kiểu biết trước ở từng bước. Nếu trạng thái chỉ biết lúc chạy (đọc từ database), ta cần bước tiếp theo.
+Chuỗi `Payment::new(terms).authorize().capture(&mut ledger)` biên dịch được vì kiểu biết trước ở từng bước. Nếu trạng thái chỉ biết lúc chạy (đọc từ database), ta cần thêm một bước nữa, trình bày ở mục sau.
 
 ## Typestate không lưu xuống database được: enum ở biên
 
@@ -237,11 +237,11 @@ impl<S: State> TryFrom<PaymentRecord> for Payment<S> {
 }
 ```
 
-Khi chạy lab (mục sau), nạp bản ghi `CAPTURED` thành `Payment<Authorized>` cho `Err(WrongState …)`, còn chuỗi `"AUTHORISED"` gõ sai cho `Err(UnknownState …)`.
+Khi chạy lab (mục sau), việc nạp bản ghi `CAPTURED` thành `Payment<Authorized>` cho ra `Err(WrongState …)`, còn chuỗi `"AUTHORISED"` gõ sai cho ra `Err(UnknownState …)`.
 
 Biên cũng là chỗ typestate hết tác dụng, theo hai nghĩa. Thứ nhất, `TryFrom` tin cột `state`: `PaymentRecord::restore(terms, PaymentState::Captured)` rồi `try_from` cho ra `Payment<Captured>` dù sổ cái chưa có bút toán nào. Thứ hai, Kafka giao lại thông điệp nghĩa là một lần nạp mới, một giá trị mới, nên E0382 không chặn được: đó là việc của trạng thái đã lưu và khoá idempotency.
 
-Thiết kế `capture(self, …)` còn một cái giá: `self` bị tiêu thụ cả khi trả `Err`, nên nhánh lỗi không còn `Payment<Authorized>`. Không mất dữ liệu, vì bản ghi trong database vẫn là `AUTHORIZED`, nhưng muốn thử lại phải nạp lại. Thử lại chỉ có ích trong hai trường hợp. Một, lần trước đã ghi sổ mà chưa kịp lưu trạng thái: khoá `trip:TN-0001:capture` trả bút toán cũ, không ghi đôi (test `reload_and_retry_capture_is_idempotent`). Hai, lỗi tạm thời như mất kết nối database, thứ lab chưa có. Lỗi sổ cái trong lab đều xác định: thử lại ra đúng lỗi cũ và cần người xử lý (test `capture_error_consumes_value_and_retry_repeats_same_error`). Muốn giữ giá trị thì trả nó trong lỗi, `Result<_, (Payment<Authorized>, PaymentError)>`, đổi lại chữ ký nặng hơn; lab không chọn cách này.
+Thiết kế `capture(self, …)` còn một cái giá: `self` bị tiêu thụ cả khi trả `Err`, nên nhánh lỗi không còn `Payment<Authorized>`. Không mất dữ liệu, vì bản ghi trong database vẫn là `AUTHORIZED`, nhưng muốn thử lại phải nạp lại. Thử lại chỉ có ích trong hai trường hợp. Một, lần trước đã ghi sổ mà chưa kịp lưu trạng thái: khoá `trip:TN-0001:capture` trả bút toán cũ, không ghi đôi (test `reload_and_retry_capture_is_idempotent`). Hai, lỗi tạm thời như mất kết nối database, thứ lab chưa có. Lỗi sổ cái trong lab đều xác định: thử lại ra đúng lỗi cũ và cần người xử lý (test `capture_error_consumes_value_and_retry_repeats_same_error`). Muốn giữ giá trị thì trả nó trong lỗi, `Result<_, (Payment<Authorized>, PaymentError)>`, đổi lại là chữ ký hàm nặng nề hơn; lab không chọn cách này.
 
 ## Khi nào enum là đủ?
 
@@ -251,12 +251,12 @@ Typestate không rẻ: nhiều kiểu hơn, nhiều `impl` hơn, và vẫn cần
 | --- | --- | --- |
 | Trạng thái đọc từ database ở mỗi lệnh gọi | Hợp: giá trị đã là enum | Cần `TryFrom`/`AnyPayment` ở biên |
 | Số trạng thái và cạnh thay đổi thường xuyên | Hợp: sửa một bảng | Mỗi trạng thái mới là kiểu và `impl` mới |
-| Cạnh phụ thuộc dữ liệu (số tiền, thời hạn hold) | Hợp: `match` có guard | Khó: phải kiểm bằng giá trị, trả `Result` |
-| Sai thứ tự gây thiệt hại lớn, gọi trong cùng một hàm | Test và review phải bắt | Hợp: sai thì không biên dịch |
+| Cạnh phụ thuộc dữ liệu (số tiền, thời hạn hold) | Hợp: `match` có guard | Khó: phải kiểm tra bằng giá trị rồi trả `Result` |
+| Sai thứ tự gây thiệt hại lớn, gọi trong cùng một hàm | Test và review phải bắt lỗi | Hợp: sai thì không biên dịch |
 
-Với Tới Nơi, quy tắc tạm dùng ở lab: **enum ở biên và trong bảng chuyển, typestate cho đoạn mã nghiệp vụ ngắn đã biết trạng thái** (ví dụ luồng capture rồi settle trong một use case). Không nên bọc cả service bằng typestate: khoản thanh toán sống qua nhiều request, mỗi request nạp lại từ database. Một bài ở cấp nâng cao sẽ quay lại hold có thời hạn; ở đó cạnh phụ thuộc thời gian, loại cạnh typestate không chứa nổi.
+Với Tới Nơi, quy tắc tạm dùng ở lab: **enum ở biên và trong bảng chuyển, typestate cho đoạn mã nghiệp vụ ngắn đã biết trạng thái** (ví dụ luồng capture rồi settle trong một use case). Không nên bọc cả service bằng typestate: khoản thanh toán sống qua nhiều request, mỗi request nạp lại từ database. Một bài ở cấp nâng cao sẽ quay lại hold có thời hạn; ở đó cạnh phụ thuộc thời gian, loại cạnh mà typestate không biểu diễn được.
 
-Với người từ C#: có thể bắt chước `Payment<TState>` bằng generic và extension method trên `Payment<Authorized>`, nhưng C# không có move: sau `var captured = authorized.Capture()`, biến `authorized` vẫn dùng được, nên kiểu không chặn được thu hai lần. Phần enum thì C# có `switch` expression (xem [bài về nullable và pattern matching](/articles/csharp-nullable-pattern-matching)): không bao hết trường hợp là cảnh báo CS8509, còn Rust với `match` thiếu biến thể là lỗi E0004. Điểm riêng của Rust ở đây là move, nhờ nó typestate chặn được dùng lại giá trị cũ.
+Với người quen dùng C#: có thể bắt chước `Payment<TState>` bằng generic và extension method trên `Payment<Authorized>`, nhưng C# không có move: sau `var captured = authorized.Capture()`, biến `authorized` vẫn dùng được, nên kiểu không chặn được việc thu tiền hai lần. Phần enum thì C# có `switch` expression (xem [bài về nullable và pattern matching](/articles/csharp-nullable-pattern-matching)): không phủ hết các trường hợp thì bị cảnh báo CS8509, còn trong Rust, `match` thiếu biến thể là lỗi E0004. Điểm riêng của Rust ở đây là move, nhờ đó typestate chặn được việc dùng lại giá trị cũ.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -296,18 +296,18 @@ tài xế: 0 VND; tổng toàn sổ: 0 VND
 cặp hợp lệ: 6/30
 ```
 
-`-- --verify` kiểm các giá trị này và in `VERIFY OK`; sai thì in `VERIFY FAIL: …` và thoát với mã 1. `cargo test` chạy 37 unit test, 2 integration test (có test hai cách cho cùng một sổ cái) và 5 doc test, trong đó 3 là `compile_fail`.
+`-- --verify` kiểm tra các giá trị này và in `VERIFY OK`; sai thì in `VERIFY FAIL: …` và thoát với mã 1. `cargo test` chạy 37 unit test, 2 integration test (có test hai cách cho cùng một sổ cái) và 5 doc test, trong đó 3 là `compile_fail`.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là mô hình để học typestate, không phải service thanh toán. Không có database: <code>to_record</code> và <code>TryFrom</code> chỉ minh hoạ biên. <code>authorize()</code> không gọi VíXanh và chưa ghi gì vào sổ. Phí 5.100 được truyền vào. Không có đồng thời: hai request cùng nạp một bản ghi <code>AUTHORIZED</code> rồi cùng capture chỉ an toàn nhờ idempotency key, chưa có khoá hay phiên bản dòng. Chưa có thời hạn hold, capture một phần, hay <code>REFUND_PENDING</code> thất bại.</p>
+<p>Đây là mô hình để học typestate, không phải service thanh toán. Không có database: <code>to_record</code> và <code>TryFrom</code> chỉ minh hoạ biên. <code>authorize()</code> không gọi VíXanh và chưa ghi gì vào sổ. Phí 5.100 được truyền vào. Không có xử lý đồng thời: hai request cùng nạp một bản ghi <code>AUTHORIZED</code> rồi cùng capture chỉ an toàn nhờ idempotency key, chưa có khoá hay phiên bản dòng. Chưa có thời hạn hold, capture một phần, hay <code>REFUND_PENDING</code> thất bại.</p>
 </div>
 
 ## Bài tập
 
-Thêm trạng thái `Voided` (huỷ giữ tiền, cuối) đến được từ `Authorized` bằng sự kiện `Void`. Với mỗi cách (enum và typestate), nói compiler bắt buộc bạn sửa những chỗ nào và chỗ nào bạn có thể quên.
+Thêm trạng thái `Voided` (huỷ giữ tiền, là trạng thái cuối) đến được từ `Authorized` bằng sự kiện `Void`. Với mỗi cách (enum và typestate), hãy nêu những chỗ compiler buộc bạn phải sửa và những chỗ bạn có thể quên.
 
-<details><summary>Xem lời giải</summary><p>Cả hai cách đều phải thêm <code>Voided</code> vào <code>PaymentState</code> (typestate cần nó cho <code>KIND</code>). Việc đó làm <code>as_str</code> và <code>AnyPayment::from</code> báo E0004 vì không có nhánh <code>_</code>: compiler chỉ ra những chỗ phải sửa. Mảng <code>ALL</code> thì không: quên thêm <code>Voided</code> vào đó, code vẫn biên dịch, chỉ <code>FromStr</code> từ chối chuỗi <code>"VOIDED"</code>. <b>Enum:</b> thêm <code>Void</code> vào <code>PaymentEvent</code>; <code>transition</code> vẫn biên dịch nhờ nhánh cuối, nên nếu quên <code>(Authorized, Void) =&gt; Ok(Voided)</code> thì sự kiện luôn bị từ chối lúc chạy. Test đếm cặp đỏ ngay khi <code>ALL</code> có thêm phần tử, vì nó kiểm 6 hợp lệ và 24 bị từ chối; sửa xong phải là 7 và 35 trên 42 cặp. <b>Typestate:</b> thêm <code>marker!(Voided, PaymentState::Voided)</code> và <code>impl Payment&lt;Authorized&gt; { fn void(self) -&gt; Payment&lt;Voided&gt; }</code>. Không có bảng nào để quên, nhưng cũng không có gì nhắc bạn viết <code>void()</code>. Chỗ dễ quên ở cả hai cách: migration cho cột <code>state</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>Cả hai cách đều phải thêm <code>Voided</code> vào <code>PaymentState</code> (typestate cần nó cho <code>KIND</code>). Việc đó làm <code>as_str</code> và <code>AnyPayment::from</code> báo E0004 vì không có nhánh <code>_</code>: compiler chỉ ra những chỗ phải sửa. Mảng <code>ALL</code> thì không: quên thêm <code>Voided</code> vào đó, code vẫn biên dịch, chỉ <code>FromStr</code> từ chối chuỗi <code>"VOIDED"</code>. <b>Enum:</b> thêm <code>Void</code> vào <code>PaymentEvent</code>; <code>transition</code> vẫn biên dịch nhờ nhánh cuối, nên nếu quên <code>(Authorized, Void) =&gt; Ok(Voided)</code> thì sự kiện luôn bị từ chối lúc chạy. Test đếm cặp sẽ báo đỏ ngay khi <code>ALL</code> có thêm phần tử, vì nó kiểm 6 hợp lệ và 24 bị từ chối; sửa xong phải là 7 và 35 trên 42 cặp. <b>Typestate:</b> thêm <code>marker!(Voided, PaymentState::Voided)</code> và <code>impl Payment&lt;Authorized&gt; { fn void(self) -&gt; Payment&lt;Voided&gt; }</code>. Không có bảng nào để quên, nhưng cũng không có gì nhắc bạn viết <code>void()</code>. Chỗ dễ quên ở cả hai cách: migration cho cột <code>state</code>.</p></details>
 
 Bài trước: [bài 13](/articles/rust-double-entry-journal-entry-posting). Bài tiếp: [bài 15](/articles/rust-closure-iterator-adapter-doi-soat-bo-nho).
 

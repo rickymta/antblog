@@ -1,21 +1,21 @@
 ---
 slug: rust-command-handler-pipeline-domain-event-khong-framework
 title: "Command handler, pipeline và domain event không cần framework"
-summary: "Bài 52: trait Command có Output liên kết, dispatch generic bắt thiếu handler lúc biên dịch, pipeline validate, trace, transaction đo bằng log, domain event ghi outbox cùng transaction, chi phí Box, so với mediator của loạt C#."
+summary: "Bài 52: trait Command có Output liên kết, dispatch generic bắt thiếu handler lúc biên dịch, pipeline gồm validate, trace, transaction với thứ tự chứng minh bằng log, domain event ghi outbox cùng transaction, chi phí của Box, so với mediator của loạt C#."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, cqrs, pipeline, domain-event]
 language: vi
 ---
 
-Handler thu cước của service sổ cái lúc đầu chỉ dựng bút toán `trip:TN-0001:capture` rồi ghi. Sau đó nó thêm kiểm đầu vào, log, transaction và sự kiện `LedgerEntryPosted`. Đặt sai một dòng ở bước "phát sự kiện" là service báo cho cả hệ thống về một bút toán chưa từng tồn tại. Bài này tách các việc đó thành lớp có thứ tự bằng trait và generic, không framework, rồi chạy các ca hỏng để xem mỗi lớp làm gì.
+Handler thu cước của service sổ cái lúc đầu chỉ dựng bút toán `trip:TN-0001:capture` rồi ghi. Sau đó nó thêm bước kiểm tra đầu vào, log, transaction và sự kiện `LedgerEntryPosted`. Đặt sai một dòng ở bước "phát sự kiện" là service báo cho cả hệ thống về một bút toán chưa từng tồn tại. Bài này tách các việc đó thành các lớp có thứ tự bằng trait và generic, không framework, rồi chạy các kịch bản hỏng để xem mỗi lớp làm gì.
 
 Đây là bài 52 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter) chia workspace theo chiều phụ thuộc; bài này ở tầng application. Lab dùng lại `ledger-core` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace), schema và trigger cân bút toán của [bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition), outbox của [bài 37](/articles/rust-outbox-inbox-idempotent-consumer). Đối chiếu: [CQRS và Mediator của loạt C#](/articles/dotnet10-cqrs-mediator-pipeline).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Command <code>VoidHold</code> chưa có handler nào. Gửi nó qua pipeline sẽ lỗi lúc biên dịch hay lúc chạy? Và nếu ai đó quên bọc lớp <code>Transactional</code> quanh handler thì sao?</p>
-<details><summary>Xem đáp án</summary><p>Thiếu handler là lỗi biên dịch <code>E0277</code>, chương trình không ra binary. Quên lớp <code>Transactional</code> thì trình biên dịch không biết: handler chạy rồi báo <code>NoTransaction</code> lúc chạy. Kiểu hệ thống bắt được "có handler", chưa bắt được "có đủ lớp".</p></details>
+<details><summary>Xem đáp án</summary><p>Thiếu handler là lỗi biên dịch <code>E0277</code>, chương trình không ra binary. Quên lớp <code>Transactional</code> thì trình biên dịch không biết: handler chạy rồi báo <code>NoTransaction</code> lúc chạy. Hệ thống kiểu bắt được "có handler", chưa bắt được "có đủ lớp".</p></details>
 </div>
 
 ## Command mang theo kiểu kết quả, handler là trait generic
@@ -34,7 +34,7 @@ pub trait CommandHandler<C: Command>: Send + Sync {
 }
 ```
 
-`Output` là kiểu liên kết nên nằm ở command: `CapturePayment` quyết định kết quả là `CaptureReceipt`, người viết handler không chọn được. `CommandHandler<C>` là trait có tham số, nên một struct (`LedgerHandlers`) hiện thực nó cho nhiều command. Dạng `-> impl Future + Send` thay cho `async fn` trần là do giới hạn `Send` ở [bài 26](/articles/rust-repository-unit-of-work-trait-transaction).
+`Output` là kiểu liên kết nên nằm ở command: `CapturePayment` quyết định kết quả là `CaptureReceipt`, người viết handler không chọn được. `CommandHandler<C>` là trait có tham số, nên một struct (`LedgerHandlers`) cài đặt nó cho nhiều command. Dạng `-> impl Future + Send` thay cho `async fn` trần là do giới hạn `Send` ở [bài 26](/articles/rust-repository-unit-of-work-trait-transaction).
 
 Handler trả sai kiểu kết quả thì bị chặn ngay. Cho `Ping` (kết quả `u32`) trả `String`, rustc 1.98.1 báo (rút gọn):
 
@@ -43,7 +43,7 @@ error[E0271]: expected `impl Future<Output = Result<String, AppError>>` to be a 
 resolves to `Result<u32, AppError>`, but it resolves to `Result<String, AppError>`
 ```
 
-Đoạn thử nằm trong doc test `compile_fail,E0271` ở `src/lib.rs`. Trên stable, `compile_fail` chỉ kiểm code không biên dịch, không đối chiếu mã lỗi: đổi thẻ thành `E9999` doc test vẫn xanh. Mã lỗi trong bài lấy từ lần chạy rustc riêng. `&mut Ctx` là ngữ cảnh của đúng một lần gọi: clock, transaction đang mở, sự kiện chờ thu về, log thứ tự. Kiểm đầu vào là trait riêng `Validate`.
+Đoạn thử nằm trong doc test `compile_fail,E0271` ở `src/lib.rs`. Trên stable, `compile_fail` chỉ kiểm code không biên dịch, không đối chiếu mã lỗi: đổi thẻ thành `E9999` doc test vẫn xanh. Mã lỗi trong bài lấy từ lần chạy rustc riêng. `&mut Ctx` là ngữ cảnh của đúng một lần gọi: clock, transaction đang mở, sự kiện chờ thu về, log thứ tự. Việc kiểm tra đầu vào dùng trait riêng `Validate`.
 
 ## Thiếu handler: lỗi lúc biên dịch hay lúc chạy?
 
@@ -58,7 +58,7 @@ help: `LedgerHandlers` implements trait `CommandHandler<C>`
           to implement `CommandHandler<VoidHold>`
 ```
 
-Thông điệp liệt kê cả các command `LedgerHandlers` đã hiện thực. Đối chứng là `DynBus`, một `HashMap<TypeId, …>` tra handler lúc chạy như container. Cùng lời gọi biên dịch bình thường, rồi chạy ra:
+Thông điệp lỗi liệt kê cả các command `LedgerHandlers` đã cài đặt. Đối chứng là `DynBus`, một `HashMap<TypeId, …>` tra handler lúc chạy như container. Cùng lời gọi biên dịch bình thường, rồi chạy ra:
 
 ```text
 DynBus.send(VoidHold) biên dịch được, chạy ra: không có handler cho VoidHold
@@ -75,7 +75,7 @@ Gửi command chưa có handler qua pipeline thì không ra được binary. Ran
 
 ## Pipeline là các struct bọc nhau, thứ tự nằm trong kiểu
 
-Mỗi lớp là một struct generic hiện thực chính `CommandHandler<C>` bằng cách gọi handler bên trong, nên cả chuỗi vẫn là một handler. Lớp validate (`src/layers.rs`):
+Mỗi lớp là một struct generic cài đặt chính `CommandHandler<C>` bằng cách gọi handler bên trong, nên cả chuỗi vẫn là một handler. Lớp validate (`src/layers.rs`):
 
 ```rust
 pub struct Validated<H>(pub H);
@@ -102,7 +102,7 @@ where
 pub type LedgerPipeline = Validated<Traced<Transactional<LedgerHandlers>>>;
 ```
 
-Thứ tự chứng minh bằng log. Thu cước `TN-0001` (phí 5.100, tài xế 20.400) ra:
+Log chứng minh thứ tự này. Thu cước `TN-0001` (phí 5.100, tài xế 20.400) ra:
 
 ```text
 validate: ok
@@ -123,19 +123,19 @@ trace: kết thúc CapturePayment ok
 <figcaption>Hình 2. Bốn lớp lồng nhau dùng chung một <code>Ctx</code>. Thứ tự gọi là thứ tự lồng của kiểu.</figcaption>
 </figure>
 
-Đổi thứ tự là đổi một dòng lắp ráp, log đổi theo. Lệnh cước 0 qua `Validated` ngoài cùng chỉ để lại một dòng `validate: từ chối …`, không có `tx: begin`, không có dòng `trace`. Lắp `Traced(Validated(…))` thì cùng lệnh để lại ba dòng, từ `trace: bắt đầu` tới `trace: kết thúc CapturePayment lỗi`. Bài C# đặt telemetry bọc ngoài validation và nêu lý do: yêu cầu bị từ chối vẫn được tính vào metric ở biên application. Lab mặc định ngược lại; test `layer_order_is_visible_in_the_log` khoá lựa chọn đó.
+Đổi thứ tự là đổi một dòng lắp ráp, log đổi theo. Lệnh có cước 0 đi qua `Validated` ở ngoài cùng chỉ để lại một dòng `validate: từ chối …`, không có `tx: begin`, không có dòng `trace`. Lắp `Traced(Validated(…))` thì lệnh đó để lại ba dòng, từ `trace: bắt đầu` tới `trace: kết thúc CapturePayment lỗi`. Bài C# đặt telemetry bọc ngoài validation và nêu lý do: yêu cầu bị từ chối vẫn được tính vào metric ở biên application. Lab mặc định ngược lại; test `layer_order_is_visible_in_the_log` khoá lựa chọn đó.
 
 ## Lỗi ở lớp nào thì rollback ra sao?
 
-Sau ca thành công (1 bút toán, 1 dòng outbox), lab chạy ba ca hỏng và đọc lại hai bảng ngoài mọi transaction:
+Sau kịch bản thành công (1 bút toán, 1 dòng outbox), lab chạy ba kịch bản hỏng và đọc lại hai bảng ngoài mọi transaction:
 
-| Ca | Hỏng ở lớp | Log thấy | Sau đó trong DB |
+| Kịch bản | Hỏng ở lớp | Log thấy | Sau đó trong DB |
 |---|---|---|---|
 | Cước 0 | validate | một dòng `validate: từ chối …` | không đổi |
 | Khách `CU-404` | handler, lỗi khoá ngoại `23503` | `tx: rollback, bỏ 0 sự kiện chưa ghi` | không đổi; header `JE-000003` đã INSERT bị huỷ |
 | Bút toán lệch qua `PostRawEntry` | COMMIT, trigger `23514` | `tx: outbox +1 dòng`, rồi `tx: commit lỗi (SQLSTATE 23514), PostgreSQL đã rollback` | không đổi; dòng outbox vừa ghi cũng mất |
 
-Ca thứ ba đáng đọc kỹ. Trigger `postings_balanced` của bài 25 là `DEFERRABLE INITIALLY DEFERRED`, nên chỉ chạy lúc COMMIT. Handler ghi xong, `Transactional` thu sự kiện và ghi dòng outbox, mọi câu lệnh đều thành công; lỗi chỉ đến ở COMMIT. Thiết kế phát sự kiện "sau khi handler xong" đã nói dối ở thời điểm đó. `PostRawEntry` mô phỏng một bug lọt qua aggregate; trigger là tuyến phòng thủ cuối.
+Kịch bản thứ ba đáng đọc kỹ. Trigger `postings_balanced` của bài 25 là `DEFERRABLE INITIALLY DEFERRED`, nên chỉ chạy lúc COMMIT. Handler ghi xong, `Transactional` thu sự kiện và ghi dòng outbox, mọi câu lệnh đều thành công; lỗi chỉ đến ở COMMIT. Thiết kế phát sự kiện "sau khi handler xong" đã nói dối ở thời điểm đó. `PostRawEntry` mô phỏng một bug lọt qua aggregate; trigger là tuyến phòng thủ cuối.
 
 `Transactional` gọi `tx.rollback().await` tường minh thay vì dựa vào `Drop` (lý do ở bài 26). Mã `JE-000003` tới `JE-000005` không bao giờ vào sổ vì sequence `identity` không hoàn tác; `JE-000002` đã bị lần gửi lại đốt mất (`ON CONFLICT` lấy số trước khi phát hiện trùng, xem bài 26). Gửi lại đúng `TN-0001` cho thấy phía ngược lại: key đã có thì handler không ghi, không sinh sự kiện, log ghi `tx: outbox +0 dòng`.
 
@@ -154,7 +154,7 @@ pub fn take_events(&mut self) -> Vec<DomainEvent> {
 }
 ```
 
-Sự kiện được ghi nhận sau khi database cấp mã bút toán, vì payload cần `entryId`. Nó sinh ra trước commit nhưng chỉ ở RAM. Handler chuyển cho `ctx.raise(events)`; khi handler xong, `Transactional` thu về và ghi outbox trong chính transaction đó (`src/layers.rs`, đoạn giữa hai nhánh):
+Sự kiện được ghi nhận sau khi database cấp mã bút toán, vì payload cần `entryId`. Sự kiện sinh ra trước commit nhưng chỉ nằm ở RAM. Handler chuyển cho `ctx.raise(events)`; khi handler xong, `Transactional` thu về và ghi outbox trong chính transaction đó (`src/layers.rs`, đoạn giữa hai nhánh):
 
 ```rust
 let events = ctx.take_events();
@@ -187,7 +187,7 @@ trace: kết thúc PostRawEntry lỗi
 sự kiện đã phát ra ngoài: 1 (entryId JE-000005)
 ```
 
-Consumer nhận `LedgerEntryPosted` về `JE-000005` trong khi sổ không có bút toán đó. Pipeline chuẩn cùng hoàn cảnh để outbox đúng một dòng, của `TN-0001`, `published=false` vì lab không chạy relay:
+Consumer nhận `LedgerEntryPosted` về `JE-000005` trong khi sổ không có bút toán đó. Pipeline chuẩn trong cùng hoàn cảnh để outbox có đúng một dòng, của `TN-0001`, `published=false` vì lab không chạy relay:
 
 ```text
 ledger.entry-posted key=trip:TN-0001:capture published=false
@@ -198,7 +198,7 @@ Payload có ba dòng vì lab dùng `capture_entry` của `ledger-core`, dạng r
 
 ## `async fn` trong trait và `Box`: tốn gì, cần ở đâu?
 
-Đo bằng đếm, không bằng thời gian: kích thước future lấy bằng `size_of_val` trước khi poll, poll tay bằng `Waker::noop()`. Cấp phát đếm bằng allocator bọc `System` (`src/counting.rs`). Đó là nơi duy nhất có `unsafe`, vì `GlobalAlloc` là unsafe trait: code chỉ chuyển tiếp nguyên lời gọi sang `System` và đếm vào biến thread-local không cấp phát, nên hợp đồng của `System` vẫn giữ. Debug và release cho cùng số ở bảng này.
+Đo bằng đếm, không bằng thời gian: kích thước future lấy bằng `size_of_val` trước khi poll, poll tay bằng `Waker::noop()`. Số lần cấp phát đếm bằng allocator bọc `System` (`src/counting.rs`). Đó là nơi duy nhất có `unsafe`, vì `GlobalAlloc` là unsafe trait: code chỉ chuyển tiếp nguyên lời gọi sang `System` và đếm vào biến thread-local không cấp phát, nên hợp đồng của `System` vẫn giữ. Debug và release cho cùng số ở bảng này.
 
 | Đường gọi | Kích thước future | Cấp phát trong 1.000 lần gọi |
 |---|---|---|
@@ -223,9 +223,9 @@ Future của `CapturePayment` thì khác. Qua pipeline thật là 3.248 byte ở
 | Telemetry và validation | telemetry bọc ngoài validation | validate ngoài mặc định, đổi một dòng |
 | Transaction | không bao mọi query; commit qua UoW | một lớp `Transactional` cho mọi command của lab |
 
-Bài đó không dựng ca thiếu đăng ký handler, nên ở đây không khẳng định thông điệp lỗi của container; theo code, việc tra cứu nằm trong `SendAsync`, nên lỗi lộ muộn nhất là lúc lời gọi chạy. Lab này chưa có phía đọc.
+Bài đó không dựng kịch bản thiếu đăng ký handler, nên ở đây không khẳng định thông điệp lỗi của container; theo code, việc tra cứu nằm trong `SendAsync`, nên lỗi lộ muộn nhất là lúc lời gọi chạy. Lab này chưa có phía đọc.
 
-Lớp này tốn gì: ba trait (`Command`, `CommandHandler`, `Validate`), một kiểu `Ctx`, ba lớp generic, tên kiểu dài, và `Ctx` là cái túi mà handler lấy transaction từ đó, một phụ thuộc ngầm mà kiểu không ép được. So với một hàm thẳng `capture_direct` (`src/direct.rs`, 68 dòng cả chú thích): validate, `begin`, ghi, thu sự kiện, ghi outbox, `commit` trong một thân hàm, lỗi thoát bằng `?`. Test `direct_function_matches_pipeline` chạy hai bản trên hai schema riêng và khẳng định cùng biên lai, cùng payload outbox. Hàm thẳng đủ khi chỉ có một hai use case ghi. Pipeline có lời khi nhiều command cùng cần khung `begin`, outbox, `commit`, vì mỗi hàm thẳng sẽ chép lại khung đó và có bản sẽ lệch đi; hoặc khi cần ghép lớp khác nhau theo loại command.
+Lớp này tốn gì: ba trait (`Command`, `CommandHandler`, `Validate`), một kiểu `Ctx`, ba lớp generic, tên kiểu dài, và `Ctx` là ngữ cảnh chứa transaction mà handler lấy ra dùng, một phụ thuộc ngầm mà kiểu không ép được. So với một hàm thẳng `capture_direct` (`src/direct.rs`, 68 dòng cả chú thích): validate, `begin`, ghi, thu sự kiện, ghi outbox, `commit` trong một thân hàm, lỗi thoát bằng `?`. Test `direct_function_matches_pipeline` chạy hai bản trên hai schema riêng và khẳng định cùng biên lai, cùng payload outbox. Hàm thẳng đủ khi chỉ có một hoặc hai use case ghi. Pipeline đáng dùng khi nhiều command cùng cần khung `begin`, outbox, `commit`, vì mỗi hàm thẳng sẽ chép lại khung đó và có bản sẽ lệch đi; hoặc khi cần ghép lớp khác nhau theo loại command.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -238,17 +238,17 @@ cargo run --manifest-path examples/toi-noi-rust/52-command-pipeline/Cargo.toml -
 cargo test --manifest-path examples/toi-noi-rust/52-command-pipeline/Cargo.toml
 ```
 
-Lệnh đầu in năm phần ứng với năm mục trên. `--verify` kiểm mọi giá trị bài nêu (log từng ca, SQLSTATE `23503` và `23514`, số dòng sau mỗi ca, payload outbox, 0 cấp phát ở đường generic, đúng 1.000 ở `DynBus`) rồi in `VERIFY OK`; thiếu `TOI_NOI_PG_URL` thì thoát mã 1. `cargo test` chạy 7 test (3 test cần PostgreSQL, schema `lab_<uuid>` riêng, dọn cuối ca) cùng 3 doc test, trong đó 2 là `compile_fail`. Một test cho bốn lệnh cùng key chạy song song trên runtime nhiều thread qua `tokio::spawn`, chứng minh future của pipeline là `Send`, không lệnh nào lỗi và chỉ có một bút toán. Không test nào assert thời gian.
+Lệnh đầu in năm phần ứng với năm mục trên. `--verify` kiểm mọi giá trị bài nêu (log từng ca, SQLSTATE `23503` và `23514`, số dòng sau mỗi ca, payload outbox, 0 cấp phát ở đường generic, đúng 1.000 ở `DynBus`) rồi in `VERIFY OK`; thiếu `TOI_NOI_PG_URL` thì thoát mã 1. `cargo test` chạy 7 test (3 test cần PostgreSQL, schema `lab_<uuid>` riêng, dọn cuối test case) cùng 3 doc test, trong đó 2 là `compile_fail`. Một test cho bốn lệnh cùng key chạy song song trên runtime nhiều thread qua `tokio::spawn`, chứng minh future của pipeline là `Send`, không lệnh nào lỗi và chỉ có một bút toán. Không test nào assert thời gian.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Lab không có relay: dòng outbox ở lại <code>published=false</code> (gửi Kafka là bài 37). Chỉ một loại sự kiện, chưa versioning. Replay chỉ so theo key, không so nội dung như bài 24 và 26; <code>account_balances</code> không được cập nhật. Chưa có phía đọc, ca huỷ giữa chừng, timeout hay thử lại khi xung đột (bài 53). <code>PostRawEntry</code>, <code>NaivePublish</code> chỉ để dựng ca hỏng; <code>DynBus</code> không nối với pipeline thật.</p>
+<p>Lab không có relay: dòng outbox ở lại <code>published=false</code> (gửi Kafka là bài 37). Chỉ một loại sự kiện, chưa versioning. Replay chỉ so theo key, không so nội dung như bài 24 và 26; <code>account_balances</code> không được cập nhật. Chưa có phía đọc, kịch bản huỷ giữa chừng, timeout hay thử lại khi xung đột (bài 53). <code>PostRawEntry</code>, <code>NaivePublish</code> chỉ để dựng kịch bản hỏng; <code>DynBus</code> không nối với pipeline thật.</p>
 </div>
 
 **Bài tập:** viết `impl CommandHandler<VoidHold> for LedgerHandlers` trả `Ok(())`. Bài kiểm nào của lab chuyển đỏ, bài nào vẫn xanh, và vì sao đỏ ở đây là tin tốt?
 
 <details><summary>Xem lời giải</summary>
-<p>Pipeline giờ biên dịch được với <code>VoidHold</code>, nên doc test <code>compile_fail,E0277</code> ở <code>src/lib.rs</code> đỏ với thông điệp "Test compiled successfully, but it's marked <code>compile_fail</code>" (đã chạy thử trên lab). Cả 7 test tích hợp vẫn xanh, kể cả <code>dyn_bus_reports_missing_handler_at_runtime</code>, vì <code>DynBus</code> có bảng đăng ký riêng. Đỏ là tin tốt: doc test thật sự đo được "thiếu handler thì không biên dịch"; việc cần làm là đổi nó sang command khác chưa có handler.</p>
+<p>Pipeline giờ biên dịch được với <code>VoidHold</code>, nên doc test <code>compile_fail,E0277</code> ở <code>src/lib.rs</code> đỏ với thông điệp "Test compiled successfully, but it's marked <code>compile_fail</code>" (đã chạy thử trên lab). Cả 7 test tích hợp vẫn xanh, kể cả <code>dyn_bus_reports_missing_handler_at_runtime</code>, vì <code>DynBus</code> có bảng đăng ký riêng. Đỏ là tin tốt: doc test thật sự kiểm được "thiếu handler thì không biên dịch"; việc cần làm là đổi nó sang command khác chưa có handler.</p>
 </details>
 
 Bài trước: [bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter). Bài tiếp: [bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update).

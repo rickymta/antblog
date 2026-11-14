@@ -54,7 +54,7 @@ Với `n` bút toán và hai lần đọc mỗi chuyến, số posting phải du
 
 ## Vì sao đo trên release mà vẫn giữ debug và frame pointer?
 
-Profile debug build chỉ ra chỗ không tồn tại ở production, nhưng release mặc định thiếu thông tin dòng. Lab thêm một dòng:
+Profile bản debug chỉ ra những chỗ nóng không tồn tại ở production, nhưng bản release mặc định lại thiếu thông tin dòng. Lab thêm một dòng:
 
 ```toml
 # Cargo.toml
@@ -65,7 +65,7 @@ debug = true
 
 `debug = true` không đổi mức tối ưu, chỉ thêm thông tin gỡ lỗi. Trên macOS thông tin này nằm ở các file `.o` trong `target/`: binary chỉ to hơn 52 KB (942.224 so với 890.144 byte), nhưng profiler cần `target/` còn nguyên (hoặc `split-debuginfo = "packed"` để có `.dSYM`).
 
-Điều kiện thứ hai là dựng được call stack, theo một trong hai cách: đi theo chuỗi frame pointer, hoặc giải mã bảng unwind. `samply` dùng crate `framehop`, đọc bảng unwind; `cargo flamegraph` trên Linux gọi `perf record --call-graph dwarf`. Profiler chỉ đi theo frame pointer mà binary không giữ nó thì stack cụt hoặc sai, và flamegraph kể một câu chuyện không có thật. Trên `aarch64-apple-darwin` của máy viết bài nó có sẵn: `otool -tV` cho thấy `SlowBook::balance` mở đầu bằng `stp x29, x30` và `add x29, sp, ...`. Trên x86_64 Linux rustc mặc định không giữ; bật bằng `RUSTFLAGS="-C force-frame-pointers=yes"`.
+Điều kiện thứ hai là dựng được call stack, theo một trong hai cách: đi theo chuỗi frame pointer, hoặc giải mã bảng unwind. `samply` dùng crate `framehop`, đọc bảng unwind; `cargo flamegraph` trên Linux gọi `perf record --call-graph dwarf`. Nếu profiler chỉ đi theo frame pointer mà binary không giữ nó thì stack cụt hoặc sai, và flamegraph kể một câu chuyện không có thật. Trên `aarch64-apple-darwin` của máy viết bài, frame pointer có sẵn: `otool -tV` cho thấy `SlowBook::balance` mở đầu bằng `stp x29, x30` và `add x29, sp, ...`. Trên x86_64 Linux rustc mặc định không giữ frame pointer; bật bằng `RUSTFLAGS="-C force-frame-pointers=yes"`.
 
 ## Flamegraph CPU: công cụ nào chạy được không cần sudo?
 
@@ -108,7 +108,7 @@ luồng ledger-profiling: 704 mẫu, 476 ms CPU
     3.7     2.9     26  (chính nó)
 ```
 
-Output rút gọn, một lần chạy, load average khoảng 120. Mẫu nhiều hơn số mili giây CPU vì sampler vẫn ghi lúc luồng bị hoãn. `balance` có mặt trong mọi mẫu. Bên trong, `format!` (thân là `format_inner`) chiếm 46,4%, `libsystem_malloc` gọi trực tiếp 35,7%, `String::clone` 13,1%, chính vòng lặp chỉ 3,7% (Hình 2, thanh trên). Thư viện này không có ký hiệu nên không tách được `malloc` với `free`; theo thời gian riêng nó đứng đầu với 52,0%. Quét toàn sổ có thật, nhưng thứ làm mỗi bước quét đắt là cấp phát.
+Output rút gọn, một lần chạy, load average khoảng 120. Mẫu nhiều hơn số mili giây CPU vì sampler vẫn ghi lúc luồng bị hoãn. `balance` có mặt trong mọi mẫu. Bên trong, `format!` (thân là `format_inner`) chiếm 46,4%, `libsystem_malloc` gọi trực tiếp 35,7%, `String::clone` 13,1%, chính vòng lặp chỉ 3,7% (Hình 2, thanh trên). Thư viện này không có ký hiệu nên không tách được `malloc` với `free`; theo thời gian riêng nó đứng đầu với 52,0%. Việc quét toàn sổ có thật, nhưng thứ làm mỗi bước quét đắt lên là cấp phát.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -117,11 +117,11 @@ Output rút gọn, một lần chạy, load average khoảng 120. Mẫu nhiều 
 <figcaption>Hình 2. Biểu đồ thanh tự vẽ từ số do <code>scripts/samply_top.py</code> gộp, không phải ảnh flamegraph. Trên: bản chậm. Dưới: sau khi bỏ <code>clone</code> và <code>format!</code>.</figcaption>
 </figure>
 
-Sửa #2 và #3 (so `&posting.account == account`, duyệt bằng tham chiếu) rồi chạy lại với `ScanBook`, `n = 8.000`, `--focus "ScanBook as"`: `malloc` còn 1,0% và nằm ở phần dựng dữ liệu, vòng lặp 58,8%, `memcmp` 33,6% (Hình 2, thanh dưới). Giờ profile nói đúng điều thuật toán nói: tốn vì quét. Sửa một chỗ làm chỗ kế tiếp lộ ra, nên đo lại sau mỗi lần sửa.
+Sửa #2 và #3 (so `&posting.account == account`, duyệt bằng tham chiếu) rồi chạy lại với `ScanBook`, `n = 8.000`, `--focus "ScanBook as"`: `malloc` còn 1,0% và nằm ở phần dựng dữ liệu, vòng lặp 58,8%, `memcmp` 33,6% (Hình 2, thanh dưới). Giờ profile nói đúng điều thuật toán nói: tốn vì quét. Sửa một chỗ làm lộ ra chỗ kế tiếp, nên đo lại sau mỗi lần sửa.
 
 ## dhat: bao nhiêu block, từ dòng nào?
 
-Flamegraph đo thời gian nên nhiễu theo tải; `dhat` đếm cấp phát nên không. Binary đếm chỉ build khi bật feature `dhat-heap`, vì `#[global_allocator]` thay allocator của cả chương trình. Khác bài 30, nó không dùng `.testing()`, nên cuối chương trình `dhat` ghi `dhat-heap.json` có call stack của từng điểm cấp phát:
+Flamegraph đo thời gian nên nhiễu theo tải; `dhat` đếm cấp phát nên không bị nhiễu. Binary đếm chỉ được build khi bật feature `dhat-heap`, vì `#[global_allocator]` thay allocator của cả chương trình. Khác với bài 30, binary này không dùng `.testing()`, nên cuối chương trình `dhat` ghi `dhat-heap.json` có call stack của từng điểm cấp phát:
 
 ```rust
 // src/bin/alloc_profile.rs (rút gọn)
@@ -145,9 +145,9 @@ indexed           518 block         139920 byte  (đỉnh sống toàn tiến tr
 ALLOC OK
 ```
 
-Hiệu `slow − scan` là đúng `10 · n · (n + 1) = 903.000` block: mỗi bút toán được duyệt tốn 10 block (một `Vec` và ba `String` của `to_vec`, sáu chuỗi của hai `format!` cho ba posting), và chương trình `assert` đẳng thức đó. `scan` chỉ còn 8 block, là `Vec` của sổ tự lớn.
+Hiệu `slow − scan` là đúng `10 · n · (n + 1) = 903.000` block: mỗi bút toán được duyệt tốn 10 block (một `Vec` và ba `String` của `to_vec`, sáu chuỗi của hai `format!` cho ba posting), và chương trình `assert` đẳng thức đó. `scan` chỉ còn 8 block, là do `Vec` của sổ tự tăng dung lượng.
 
-Số tổng chưa nói dòng nào. Lệnh `dhat-top` của lab đọc `dhat-heap.json` (thay cho `dh_view.html`) và gộp mọi call stack về dòng mã đầu tiên của lab:
+Số tổng chưa cho biết dòng nào gây ra chúng. Lệnh `dhat-top` của lab đọc `dhat-heap.json` (thay cho `dh_view.html`) và gộp mọi call stack về dòng mã đầu tiên của lab:
 
 ```text
 $ ledger-profiling dhat-top target/dhat-slow.json 3
@@ -160,11 +160,11 @@ Tổng: 906612 block, 20600168 byte, 15 vị trí mã
 
 Ba dòng chiếm 99,6% số block và là đúng ba chỗ ta cài: dòng 66 là `to_vec` (bốn block mỗi lần duyệt một bút toán, 361.200 = 4 × 90.300), dòng 70 là hai lời gọi `format!`. Khác bài 30, giờ ta có số dòng chứ không chỉ có tổng.
 
-Có một điều không đẹp: `indexed` cấp phát nhiều hơn `scan` (518 so với 8 block, 139.920 so với 65.280 byte), vì bảng băm sao chép mã tài khoản lần đầu gặp nó và tự lớn. Ít cấp phát nhất không phải lúc nào cũng nhanh nhất.
+Có một điểm không như mong đợi: `indexed` cấp phát nhiều hơn `scan` (518 so với 8 block, 139.920 so với 65.280 byte), vì bảng băm sao chép mã tài khoản lần đầu gặp nó và tự tăng dung lượng. Ít cấp phát nhất không phải lúc nào cũng nhanh nhất.
 
 ## tokio-console: task nào đang chặn runtime?
 
-Triệu chứng "endpoint khác trễ" thường là một task giữ luồng runtime mà không `.await`. Lab dựng tình huống đó trên runtime một luồng (`current_thread`): handler quét sổ 4.096 bút toán, 300 lần, cạnh một task `heartbeat` giả lập `/health`.
+Triệu chứng "endpoint khác trễ" thường là một task giữ luồng runtime mà không `.await`. Lab dựng tình huống đó trên runtime một luồng (`current_thread`): handler quét sổ 4.096 bút toán, 300 lần, chạy cùng một task `heartbeat` giả lập `/health`.
 
 ```rust
 // src/runtime.rs (rút gọn)
@@ -183,7 +183,7 @@ for chunk in book.entries().chunks(CHUNK) {
 }
 ```
 
-Phía ứng dụng cần crate `console-subscriber` và `RUSTFLAGS="--cfg tokio_unstable"`; thiếu cờ, `console-subscriber` panic với thông báo đòi đúng cờ đó (lab đã thử). Feature `tracing` của tokio do `console-subscriber` tự bật qua dependency. Đặt tên task bằng `tokio::task::Builder` cũng cần cờ này. TUI `tokio-console` (bản 0.1.14) là chương trình tương tác, mặc định nối `http://127.0.0.1:6669`; `--help` của nó có cảnh báo `never-yielded`. Tôi **chưa mở TUI**, nên bài không có ảnh hay nhận xét nào về giao diện. `console-probe` dùng chính client gRPC của `console-api` (crate mà TUI dùng) nối vào server của `console-subscriber` trong cùng tiến trình và in số liệu từng task:
+Phía ứng dụng cần crate `console-subscriber` và `RUSTFLAGS="--cfg tokio_unstable"`; thiếu cờ, `console-subscriber` panic với thông báo đòi đúng cờ đó (lab đã thử). Feature `tracing` của tokio do `console-subscriber` tự bật qua dependency. Đặt tên task bằng `tokio::task::Builder` cũng cần cờ này. TUI `tokio-console` (bản 0.1.14) là chương trình tương tác, mặc định kết nối tới `http://127.0.0.1:6669`; `--help` của nó có cảnh báo `never-yielded`. Tôi **chưa mở TUI**, nên bài không có ảnh hay nhận xét nào về giao diện. `console-probe` dùng chính client gRPC của `console-api` (crate mà TUI dùng) kết nối vào server của `console-subscriber` trong cùng tiến trình và in số liệu từng task:
 
 ```rust
 // src/bin/console_probe.rs (rút gọn)
@@ -195,7 +195,7 @@ let mut client = InstrumentClient::new(channel);
 let mut updates = client.watch_updates(InstrumentRequest {}).await?.into_inner();
 ```
 
-Kết quả một lần chạy (release, load average trên 400, nên chỉ đọc theo hướng):
+Kết quả một lần chạy (release, load average trên 400, nên chỉ đọc như xu hướng):
 
 ```text
 4096 bút toán, 300 lần quét mỗi handler, runtime một luồng
@@ -209,7 +209,7 @@ Chunked: heartbeat đã đập 4800 nhịp khi handler xong
 VERIFY OK
 ```
 
-Handler chặn chỉ có một lần poll thật và bận 6,1 ms. Console báo 2, thừa đúng một, và mã nguồn giải thích được: tokio bọc future bằng `tracing::Instrumented`, `Instrumented` (tracing 0.1.44) vào span thêm một lần khi drop future, và `on_enter` của `console-subscriber` 0.5.0 đếm mỗi lần vào span của task là một poll. Hệ quả: `heartbeat-blocking` chờ 6,1 ms mới được poll lần đầu, xấp xỉ thời gian bận của handler, và đập 0 nhịp trước khi handler xong. Bản chia đoạn có 4.802 poll ngắn, `heartbeat` chờ 19,5 µs và đập 4.800 nhịp xen kẽ. Số poll và số nhịp là số đếm tất định, `--verify` kiểm chúng; cột thời gian chỉ tham khảo. Chia đoạn có giá: thời gian bận cao hơn (8,0 so với 6,1 ms; ba lần chạy cho 7,4 đến 10,5 ms) vì mỗi poll tốn thêm scheduler và span, cộng nhiễu.
+Handler chặn chỉ có một lần poll thật và bận 6,1 ms. Console báo 2, thừa đúng một, và mã nguồn giải thích được: tokio bọc future bằng `tracing::Instrumented`, `Instrumented` (tracing 0.1.44) vào span thêm một lần khi drop future, và `on_enter` của `console-subscriber` 0.5.0 đếm mỗi lần vào span của task là một poll. Hệ quả: `heartbeat-blocking` chờ 6,1 ms mới được poll lần đầu, xấp xỉ thời gian bận của handler, và đập 0 nhịp trước khi handler xong. Bản chia đoạn có 4.802 poll ngắn, `heartbeat` chờ 19,5 µs và đập 4.800 nhịp xen kẽ. Số poll và số nhịp là số đếm tất định, `--verify` kiểm chúng; cột thời gian chỉ tham khảo. Chia đoạn có giá: thời gian bận cao hơn (8,0 so với 6,1 ms; ba lần chạy cho 7,4 đến 10,5 ms) vì mỗi poll tốn thêm chi phí của scheduler và span, cộng thêm nhiễu.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -220,7 +220,7 @@ Handler chặn chỉ có một lần poll thật và bận 6,1 ms. Console báo 
 
 ## Sửa theo thứ tự nào, và số trước sau là bao nhiêu?
 
-Theo bằng chứng: dhat chỉ ra #2 và #3, sửa trước vì rẻ và chắc; `samply` sau đó chỉ ra #1, sửa bằng cấu trúc dữ liệu. `IndexedBook::post` cộng dồn vào bảng và chỉ `clone` mã tài khoản lần đầu gặp nó:
+Ta sửa theo bằng chứng: dhat chỉ ra #2 và #3, nên sửa trước vì rẻ và chắc; `samply` sau đó chỉ ra #1, sửa bằng cấu trúc dữ liệu. `IndexedBook::post` cộng dồn vào bảng và chỉ `clone` mã tài khoản lần đầu gặp nó:
 
 ```rust
 // src/books.rs, IndexedBook (rút gọn)
@@ -246,11 +246,11 @@ fn balance(&self, account: &AccountId) -> Money {
 | Byte cấp phát (dhat, n = 300) | 20.473.080 | 65.280 | 139.920 |
 | CPU user của tiến trình (n = 2.000) | khoảng 1,5 s | khoảng 0,02 s | dưới 0,01 s |
 
-Bốn hàng đầu là số đếm, ổn định giữa các lần chạy với cùng toolchain. Hàng cuối đo bằng `/usr/bin/time -p` (độ phân giải 10 ms): thời gian thực của `SlowBook` là 15 giây lúc load average khoảng 420 và 1,56 giây lúc khoảng 125, trong khi CPU vẫn khoảng 1,5 s. Nên bảng dùng CPU, và kết luận chỉ ở mức hướng: bỏ cấp phát giảm cỡ hai bậc độ lớn, bỏ quét giảm thêm. Cột thời gian thực của `--report` nhảy theo tải, không phải bằng chứng.
+Bốn hàng đầu là số đếm, ổn định giữa các lần chạy với cùng toolchain. Hàng cuối đo bằng `/usr/bin/time -p` (độ phân giải 10 ms): thời gian thực của `SlowBook` là 15 giây lúc load average khoảng 420 và 1,56 giây lúc khoảng 125, trong khi CPU vẫn khoảng 1,5 s. Vì vậy bảng dùng CPU, và kết luận chỉ ở mức xu hướng: bỏ cấp phát giảm cỡ hai bậc độ lớn, bỏ quét giảm thêm. Cột thời gian thực của `--report` nhảy theo tải, không phải bằng chứng.
 
 ## Khi nào dùng công cụ nào, và "tái lập tải" nghĩa là gì?
 
-Đề cương nhắc "tái lập tải 10.000 bút toán/giây". Bài 30 đã ghi vào PostgreSQL thật và trên máy viết bài chỉ cách gộp lô bằng `unnest` vượt mức đó. Bài này không lặp lại và không hứa thông lượng: tải ở đây là **số bút toán cố định** (`--n 2000`) trong một tiến trình, không PostgreSQL. Cái cần tái lập là một kịch bản cho cùng bộ đếm mỗi lần chạy, để so trước và sau một lần sửa. Thông lượng và p99 dưới tải thật là việc của [bài 61](/articles/rust-toi-uu-co-so-do-clone-cow-batching-copy-p99).
+Đề cương nhắc "tái lập tải 10.000 bút toán/giây". Bài 30 đã ghi vào PostgreSQL thật; trên máy viết bài, chỉ có cách gộp lô bằng `unnest` mới vượt được mức đó. Bài này không lặp lại và không hứa thông lượng: tải ở đây là **số bút toán cố định** (`--n 2000`) trong một tiến trình, không PostgreSQL. Cái cần tái lập là một kịch bản cho ra cùng bộ đếm mỗi lần chạy, để so trước và sau một lần sửa. Thông lượng và p99 dưới tải thật là việc của [bài 61](/articles/rust-toi-uu-co-so-do-clone-cow-batching-copy-p99).
 
 | Triệu chứng | Công cụ | Đọc gì | Trong lab |
 |---|---|---|---|
@@ -287,7 +287,7 @@ indexed : 1000 lần gọi, 0 posting đã duyệt
 VERIFY OK
 ```
 
-`--verify` kiểm đáp án giống nhau của ba cách cài, số lần gọi và số posting theo công thức `3 · n · (n + 1)` (với `n = 500`), và heartbeat đứng yên khi handler chặn; nó không kiểm giây nào. `cargo test` chạy 8 ca (6 ca tích hợp, 2 ca của `dhat-top`). Các lệnh `alloc-profile` và `console-probe` cần feature riêng nên không nằm trong `cargo build` mặc định; `CARGO_TARGET_DIR=.../target/console` tách bản build có `tokio_unstable` khỏi bản thường để đổi cờ không bắt build lại.
+`--verify` kiểm đáp án giống nhau của ba cách cài, số lần gọi và số posting theo công thức `3 · n · (n + 1)` (với `n = 500`), và heartbeat đứng yên khi handler chặn; nó không kiểm giây nào. `cargo test` chạy 8 test case (6 test case tích hợp, 2 test case của `dhat-top`). Các lệnh `alloc-profile` và `console-probe` cần feature riêng nên không nằm trong `cargo build` mặc định; `CARGO_TARGET_DIR=.../target/console` tách bản build có `tokio_unstable` khỏi bản thường để việc đổi cờ không buộc build lại.
 
 **Bài tập:** `console-probe` có `ENTRIES = 4.096`, `CHUNK = 256`, `ROUNDS = 300`. Handler chia đoạn có bao nhiêu lần poll thật? Nếu đổi `CHUNK` thành 4.096 thì còn bao nhiêu, và `heartbeat` được chạy xen kẽ bao nhiêu lần trong mỗi lần quét?
 

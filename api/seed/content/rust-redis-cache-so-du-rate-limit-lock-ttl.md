@@ -1,6 +1,6 @@
 ---
 slug: rust-redis-cache-so-du-rate-limit-lock-ttl
-title: "Redis: cache số dư, rate limit và lock có TTL; Redis không là nguồn sự thật"
+title: "Redis: cache số dư, rate limit và lock có TTL; Redis không phải là nguồn dữ liệu gốc"
 summary: "Bài 28: dùng Redis làm cache số dư có TTL, rate limit bằng token bucket Lua và lock SET NX PX trong Rust; thấy cache lệch thật, lock hết hạn thật, và vì sao sổ cái luôn nằm ở PostgreSQL."
 category: rust-intermediate
 level: intermediate
@@ -8,30 +8,30 @@ tags: [rust, toi-noi, ledger, redis, cache, rate-limit]
 language: vi
 ---
 
-Mỗi lần tài xế `DR-001` mở màn hình ví, Payment BFF gọi service sổ cái hỏi số dư. Giờ cao điểm có thể là hàng nghìn lần hỏi cùng một con số, nên ai cũng nghĩ tới Redis. Câu hỏi đáng hỏi hơn: khi con số trong Redis khác con số trong sổ cái, ta tin số nào, và còn điều gì trong Redis ta **không** được tin?
+Mỗi lần tài xế `DR-001` mở màn hình ví, Payment BFF gọi service sổ cái hỏi số dư. Giờ cao điểm có thể là hàng nghìn lần hỏi cùng một con số, nên ai cũng nghĩ tới Redis. Câu hỏi quan trọng hơn: khi con số trong Redis khác con số trong sổ cái, ta tin số nào, và còn điều gì trong Redis ta **không** được tin?
 
 Đây là bài 28 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab dùng PostgreSQL làm sổ cái với schema chuẩn của loạt ([bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition)) và ghi bút toán trong transaction theo [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Sổ cái ghi bút toán trong transaction, commit xong mới xoá key cache của số dư. Như vậy cache đã không bao giờ trả số dư cũ chưa?</p>
-<details><summary>Xem đáp án</summary><p><b>Chưa.</b> Có ít nhất hai cửa sổ: giữa lúc commit và lúc xoá key, và trường hợp người đọc đã đọc số cũ từ sổ cái rồi mới nạp vào cache sau khi key bị xoá. Cả hai chỉ tự hết khi TTL hết hoặc khi có đối chiếu với sổ cái.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Chưa.</b> Có ít nhất hai cửa sổ: giữa lúc commit và lúc xoá key, và trường hợp người đọc đã đọc số cũ từ sổ cái rồi mới nạp vào cache sau khi key bị xoá. Cả hai chỉ biến mất khi TTL hết hạn hoặc khi có đối chiếu với sổ cái.</p></details>
 </div>
 
 ## Redis giữ gì và không được giữ gì?
 
-Redis giữ dữ liệu trong bộ nhớ và chạy lệnh tuần tự trên một luồng. Nhờ vậy nó làm tốt bốn việc trong service sổ cái: cache số dư, đếm giới hạn tốc độ, lock ngắn hạn và chia sẻ trạng thái tạm giữa các instance. Cả bốn có chung một tính chất: mất đi thì hệ thống chậm hơn hoặc tạm thời lỏng hơn, nhưng không mất tiền.
+Redis giữ dữ liệu trong bộ nhớ và chạy lệnh tuần tự trên một luồng. Nhờ vậy Redis làm tốt bốn việc trong service sổ cái: cache số dư, đếm giới hạn tốc độ, lock ngắn hạn và chia sẻ trạng thái tạm giữa các instance. Cả bốn có chung một tính chất: mất đi thì hệ thống chậm hơn hoặc tạm thời lỏng hơn, nhưng không mất tiền.
 
-Bút toán, ràng buộc `UNIQUE (idempotency_key)` và số dư là sự thật, phải nằm ở PostgreSQL. Quy tắc của bài: **Redis được phép sai về thời gian, không được phép quyết định số tiền.** Mọi key trong lab có tiền tố `lab:28:<uuid>:` và TTL, để ca chạy không đụng ca khác và không để rác lại.
+Bút toán, ràng buộc `UNIQUE (idempotency_key)` và số dư là dữ liệu gốc, phải nằm ở PostgreSQL. Quy tắc của bài: **Redis được phép sai về thời gian, không được phép quyết định số tiền.** Mọi key trong lab có tiền tố `lab:28:<uuid>:` và TTL, để mỗi lần chạy không đụng lần chạy khác và không để lại rác.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 230" role="img" aria-label="Hình 1. Service sổ cái nói chuyện với hai kho khác bản chất: PostgreSQL giữ sự thật về tiền, Redis giữ cache, bucket và lock có thể mất."><defs><marker id="rust-redis-cache-so-du-rate-limit-lock-ttl-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="70" width="230" height="90" rx="10" class="f-phys-soft s-phys"/><text x="36" y="104" class="t-b">Service sổ cái</text><text x="36" y="128" class="t-small">Rust, tokio, một process</text><rect x="330" y="20" width="520" height="86" rx="10" class="f-pk-soft s-pk"/><text x="346" y="52" class="t-b">PostgreSQL: nguồn sự thật</text><text x="346" y="76" class="t-small">bút toán, UNIQUE idempotency_key, số dư; mất là mất tiền</text><rect x="330" y="124" width="520" height="86" rx="10" class="f-warn-soft s-warn"/><text x="346" y="156" class="t-b">Redis: cache, bucket, lock</text><text x="346" y="180" class="t-small">key có tiền tố và TTL; mất thì chậm hơn, giới hạn tạm nới, lock tạm hở</text><path d="M250 100 L328 66" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-redis-cache-so-du-rate-limit-lock-ttl-0-a)"/><path d="M250 132 L328 166" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-redis-cache-so-du-rate-limit-lock-ttl-0-a)"/></svg>
+<svg viewBox="0 0 880 230" role="img" aria-label="Hình 1. Service sổ cái làm việc với hai kho khác bản chất: PostgreSQL giữ dữ liệu gốc về tiền, Redis giữ cache, bucket và lock có thể mất."><defs><marker id="rust-redis-cache-so-du-rate-limit-lock-ttl-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="70" width="230" height="90" rx="10" class="f-phys-soft s-phys"/><text x="36" y="104" class="t-b">Service sổ cái</text><text x="36" y="128" class="t-small">Rust, tokio, một process</text><rect x="330" y="20" width="520" height="86" rx="10" class="f-pk-soft s-pk"/><text x="346" y="52" class="t-b">PostgreSQL: nguồn dữ liệu gốc</text><text x="346" y="76" class="t-small">bút toán, UNIQUE idempotency_key, số dư; mất là mất tiền</text><rect x="330" y="124" width="520" height="86" rx="10" class="f-warn-soft s-warn"/><text x="346" y="156" class="t-b">Redis: cache, bucket, lock</text><text x="346" y="180" class="t-small">key có tiền tố và TTL; mất thì chậm hơn, giới hạn tạm nới, lock tạm hở</text><path d="M250 100 L328 66" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-redis-cache-so-du-rate-limit-lock-ttl-0-a)"/><path d="M250 132 L328 166" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-redis-cache-so-du-rate-limit-lock-ttl-0-a)"/></svg>
 </div>
 <figcaption>Hình 1. Hai kho khác bản chất. Mọi quyết định về số tiền đi qua PostgreSQL.</figcaption>
 </figure>
 
-Crate `redis` bản 1.8.1 trong `Cargo.lock` có phần async qua feature `tokio-comp`. `ConnectionManager` (feature `connection-manager`) là kết nối ghép kênh, `clone()` rẻ để giao cho nhiều task và tự nối lại khi mất kết nối. Thiếu `TOI_NOI_REDIS` hoặc không kết nối được thì lab thoát với lỗi rõ ràng, không bỏ qua.
+Crate `redis` bản 1.8.1 trong `Cargo.lock` có phần async qua feature `tokio-comp`. `ConnectionManager` (feature `connection-manager`) là kết nối ghép kênh (multiplexed), `clone()` rẻ để giao cho nhiều task và tự nối lại khi mất kết nối. Thiếu `TOI_NOI_REDIS` hoặc không kết nối được thì lab thoát với lỗi rõ ràng, không bỏ qua.
 
 ## Cache-aside hoạt động ra sao?
 
@@ -56,7 +56,7 @@ pub async fn fill(&self, account: &str, balance: Money) -> Result<()> {
 }
 ```
 
-Số dư lưu là số nguyên đồng, đọc lại thành `Money` của `ledger-core`. Lab ghi `TN-0001` rồi đọc hai lần:
+Số dư lưu dưới dạng số nguyên tính bằng đồng, đọc lại thành `Money` của `ledger-core`. Lab ghi `TN-0001` rồi đọc hai lần:
 
 ```text
 đọc 1: 20.400 VND từ sổ cái
@@ -65,7 +65,7 @@ số lần đọc sổ cái sau 2 lần đọc: 1; TTL còn lại 1498 ms
 sau ghi TN-0002 và DEL: 33.600 VND từ sổ cái
 ```
 
-Lần đọc đầu miss và chạm PostgreSQL; lần hai là hit, bộ đếm đọc sổ cái vẫn bằng 1. Key mang TTL 1.500 ms (nhỏ để bài chạy nhanh; TTL production tuỳ mức chịu số cũ của từng màn hình). Sau khi ghi `TN-0002`, `post_and_invalidate` commit transaction rồi mới `DEL`; lần đọc kế tiếp thấy 33.600, đúng 20.400 + 13.200.
+Lần đọc đầu miss và chạm PostgreSQL; lần hai là hit, bộ đếm đọc sổ cái vẫn bằng 1. Key mang TTL 1.500 ms (nhỏ để bài chạy nhanh; TTL ở production tuỳ mức chịu được số cũ của từng màn hình). Sau khi ghi `TN-0002`, `post_and_invalidate` commit transaction rồi mới `DEL`; lần đọc kế tiếp thấy 33.600, đúng 20.400 + 13.200.
 
 Thứ tự «commit trước, xoá sau» là có chủ ý: xoá trước khi commit thì một người đọc chen vào sẽ nạp lại đúng số cũ ngay trước khi sổ cái đổi. Đây là lập luận, lab không đo.
 
@@ -80,7 +80,7 @@ cửa sổ A (commit xong, chưa DEL): cache Some(33600), sổ cái 50.400 VND
   sau DEL: 50.400 VND từ sổ cái
 ```
 
-Khe hở này ngắn và tự đóng khi `DEL` chạy xong; nếu tiến trình chết đúng lúc đó, nó mở cho tới khi TTL hết.
+Khe hở này ngắn và tự đóng khi `DEL` chạy xong; nếu tiến trình chết đúng lúc đó, khe hở này mở cho tới khi TTL hết.
 
 **Cửa sổ B** nguy hiểm hơn vì `DEL` đã chạy đúng thứ tự mà cache vẫn sai. Người đọc miss và đọc sổ cái được 50.400; người ghi commit `TN-0004` (tài xế được cộng 9.600) và xoá key, key lúc đó chưa tồn tại nên lệnh xoá không có tác dụng; rồi người đọc mới nạp 50.400 vào cache.
 
@@ -108,11 +108,11 @@ cửa sổ B (nạp số cũ sau DEL): cache Some(50400), sổ cái 60.000 VND
   nạp lại số cũ rồi đợi quá TTL: cache None, get trả 60.000 VND từ sổ cái
 ```
 
-Kết luận: **lệch thì tin sổ cái**. Hàm `reconcile` đọc cả hai nơi, nếu khác nhau thì ghi đè cache bằng số của sổ cái. Nếu không ai đối chiếu, TTL là lưới an toàn cuối: qua TTL, key biến mất và lần đọc sau trở lại sổ cái. Màn hình chỉ để xem có thể chấp nhận số cũ trong khoảng TTL; còn mọi quyết định dựa vào số dư (cho trừ tiền, duyệt hoàn tiền) phải đọc từ PostgreSQL, tốt nhất trong chính transaction ghi.
+Kết luận: **lệch thì tin sổ cái**. Hàm `reconcile` đọc cả hai nơi, nếu khác nhau thì ghi đè cache bằng số của sổ cái. Nếu không ai đối chiếu, TTL là lưới an toàn cuối: qua TTL, key biến mất và lần đọc sau trở lại sổ cái. Màn hình chỉ để xem thì có thể chấp nhận số cũ trong khoảng TTL; còn mọi quyết định dựa vào số dư (cho trừ tiền, duyệt hoàn tiền) phải đọc từ PostgreSQL, tốt nhất trong chính transaction ghi.
 
 ## Token bucket: vì sao phải viết bằng Lua?
 
-Token bucket cho mỗi khách một xô sức chứa 10 token, mỗi giây đổ thêm 1 token, mỗi yêu cầu lấy một token; hết token thì bị từ chối. Đặt xô trong Redis thì mọi instance của service dùng chung nó.
+Token bucket cho mỗi khách một xô có sức chứa 10 token, mỗi giây đổ thêm 1 token, mỗi yêu cầu lấy một token; hết token thì bị từ chối. Đặt xô trong Redis thì mọi instance của service dùng chung xô đó.
 
 Cách ngây thơ là `GET` số token, tính trong Rust rồi `SET` lại: nhiều yêu cầu cùng đọc `10` và cùng ghi `9`. Lab chạy 100 yêu cầu đồng thời cho cả hai bản:
 
@@ -121,7 +121,7 @@ GET rồi SET từ client: cho qua 100
 script Lua: cho qua 10 trong 1 ms
 ```
 
-Bản GET/SET có `Barrier` giữa hai bước: mọi yêu cầu đọc xong mới có ai ghi. Đây là thứ tự xấu nhất, ép ra để kết quả lặp lại được, nên 100 là chặn trên, không phải số điển hình. Script Lua đưa đọc, tính hoàn token và ghi vào một lệnh `EVAL`; Redis chạy script trọn vẹn rồi mới nhận lệnh khác, nên không ai chen giữa. Script trong `src/rate_limit.rs`:
+Bản GET/SET có `Barrier` giữa hai bước: mọi yêu cầu đọc xong mới có ai ghi. Đây là thứ tự xấu nhất, buộc xảy ra để kết quả lặp lại được, nên 100 là cận trên, không phải số điển hình. Script Lua gom việc đọc, tính hoàn token và ghi vào một lệnh `EVAL`; Redis chạy script trọn vẹn rồi mới nhận lệnh khác, nên không ai chen giữa. Script trong `src/rate_limit.rs`:
 
 ```lua
 local t = redis.call('TIME')
@@ -147,7 +147,7 @@ redis.call('PEXPIRE', KEYS[1], math.ceil(capacity / rate * 1000) + 1000)
 return {allowed, math.floor(tokens)}
 ```
 
-Giờ lấy từ `TIME` của Redis, không tin đồng hồ các instance; `PEXPIRE` để xô của khách đã ngừng gọi tự biến mất. Phía Rust, `invoke_async` gửi `EVALSHA` và tự nạp script nếu Redis chưa có:
+Giờ lấy từ `TIME` của Redis, không dựa vào đồng hồ của từng instance; `PEXPIRE` để xô của khách đã ngừng gọi tự biến mất. Phía Rust, `invoke_async` gửi `EVALSHA` và tự nạp script nếu Redis chưa có:
 
 ```rust
 // src/rate_limit.rs (rút gọn)
@@ -161,11 +161,11 @@ let (allowed, tokens_left): (i64, i64) = self
     .await?;
 ```
 
-Con số 10 không cứng: nếu chạy lâu hơn một giây, xô được hoàn thêm token, nên `--verify` kiểm `10 ≤ cho qua ≤ 10 + (số giây đã chạy + 1)`. Một xô 2 token hoàn 1 token mỗi giây cho `[true, true, false]` ở ba lần liên tiếp và `true` sau 1,1 giây, chứng minh phần hoàn token.
+Con số 10 không cố định: nếu chạy lâu hơn một giây, xô được hoàn thêm token, nên `--verify` kiểm `10 ≤ cho qua ≤ 10 + (số giây đã chạy + 1)`. Một xô 2 token hoàn 1 token mỗi giây cho `[true, true, false]` ở ba lần liên tiếp và `true` sau 1,1 giây, chứng minh phần hoàn token.
 
 ## Lock SET NX PX bảo vệ được đến đâu?
 
-Lock phổ biến nhất là `SET key token NX PX ttl`: tạo key nếu chưa có, kèm TTL để lock không kẹt vĩnh viễn nếu người giữ chết. Token ngẫu nhiên cho biết ai là chủ. Mở khoá phải so token rồi mới xoá, hai bước đó phải nguyên tử, nên cũng là Lua. Phần chính trong `src/lock.rs`:
+Lock phổ biến nhất là `SET key token NX PX ttl`: tạo key nếu chưa có, kèm TTL để lock không kẹt vĩnh viễn nếu người giữ chết. Token ngẫu nhiên cho biết ai là chủ. Mở khoá phải so token rồi mới xoá, hai bước đó phải nguyên tử, nên cũng phải viết bằng Lua. Phần chính trong `src/lock.rs`:
 
 ```rust
 // src/lock.rs (rút gọn)
@@ -202,9 +202,9 @@ hai lần ghi cùng key: [Posted { entry_id: 5 }, Replayed { entry_id: 5 }]
 bút toán mới trong sổ cái: 1; số dư driver:DR-001 tăng 20400 đồng
 ```
 
-Khi lock còn hạn, người thứ hai không lấy được: lock hoạt động. Nhưng khi A chậm hơn TTL, **hai worker cùng ở trong vùng găng**. Nhả bằng token chỉ cứu được một thứ: A nhả sai token nên trả `false` và không xoá nhầm lock của B; nó không ngăn A đang chạy.
+Khi lock còn hạn, người thứ hai không lấy được: lock hoạt động. Nhưng khi A chậm hơn TTL, **hai worker cùng ở trong vùng găng**. Nhả bằng token chỉ cứu được một thứ: A nhả sai token nên trả `false` và không xoá nhầm lock của B; việc này không ngăn được A đang chạy.
 
-Vì vậy lock có TTL giảm việc trùng, không phải mutual exclusion tuyệt đối, và **không được dùng để bảo vệ sổ cái**. Failover của Redis còn có thể làm mất key lock, điều lab không dựng. Muốn chặn cả worker cũ thì cần fencing token: mỗi lần lấy lock nhận một số tăng dần và nơi ghi từ chối số cũ; `SET NX` một mình không cấp số đó. Thứ bảo vệ sổ cái ở đây là ràng buộc của PostgreSQL: cả hai worker gọi `post_entry` với key `trip:TN-0099:capture`, một lần `Posted`, một lần `Replayed`, sổ cái thêm đúng một bút toán và số dư tăng đúng 20.400, như ở [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key). Lock chỉ là tối ưu để hai worker khỏi cùng gọi VíXanh, không phải bất biến.
+Vì vậy lock có TTL giảm việc trùng, không phải cơ chế loại trừ lẫn nhau (mutual exclusion) tuyệt đối, và **không được dùng để bảo vệ sổ cái**. Failover của Redis còn có thể làm mất key lock, điều lab không dựng. Muốn chặn cả worker cũ thì cần fencing token: mỗi lần lấy lock nhận một số tăng dần và nơi ghi từ chối số cũ; `SET NX` một mình không cấp số đó. Thứ bảo vệ sổ cái ở đây là ràng buộc của PostgreSQL: cả hai worker gọi `post_entry` với key `trip:TN-0099:capture`, một lần `Posted`, một lần `Replayed`, sổ cái thêm đúng một bút toán và số dư tăng đúng 20.400, như ở [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key). Lock chỉ là biện pháp tối ưu để hai worker không cùng gọi VíXanh, không phải bất biến.
 
 ## Pipeline nhanh hơn gọi lần lượt bao nhiêu?
 
@@ -229,11 +229,11 @@ một vòng PING: 0.48 ms
 lần lượt: 95.5 ms; pipeline: 1.6 ms; nhanh hơn 61.2 lần
 ```
 
-Đây là số đo trên máy viết bài, không phải SLA, và dao động theo tải: 60 lần chạy song song có tải CPU cho PING từ 0,43 đến 12,99 ms, tỷ lệ từ khoảng 30 đến gần 590 lần. Điều ổn định là hướng: gọi lần lượt tốn số lệnh nhân độ trễ mạng, pipeline gần như một độ trễ. Đổi lại pipeline không nguyên tử; muốn nguyên tử thì dùng `MULTI/EXEC` hoặc Lua. `--verify` không kiểm thời gian, chỉ đọc lại 200 key pipeline đã ghi.
+Đây là số đo trên máy viết bài, không phải SLA, và dao động theo tải: 60 lần chạy song song có tải CPU cho PING từ 0,43 đến 12,99 ms, tỷ lệ tăng tốc từ khoảng 30 đến gần 590 lần. Điều ổn định là hướng: gọi lần lượt tốn thời gian bằng số lệnh nhân độ trễ mạng, còn pipeline chỉ tốn gần bằng một độ trễ. Đổi lại pipeline không nguyên tử; muốn nguyên tử thì dùng `MULTI/EXEC` hoặc Lua. `--verify` không kiểm thời gian, chỉ đọc lại 200 key pipeline đã ghi.
 
 ## So với IDistributedCache của .NET thì sao?
 
-`IDistributedCache` của .NET là giao diện cache tối giản: `Get`/`Set`/`Refresh`/`Remove` (kèm bản async) trên `byte[]`, với `DistributedCacheEntryOptions` cho hạn tuyệt đối hoặc hạn trượt; Redis chỉ là một backend. Nó khớp phần cache-aside của bài, nhưng không có `SET NX`, script hay pipeline vì giao diện phải thay được giữa các backend. Với rate limit hoặc lock, .NET thường dùng thẳng StackExchange.Redis (`IDatabase`, có `LockTake`/`LockRelease` và chạy script), hoặc rate limiter có sẵn của ASP.NET Core cho giới hạn trong một process, như bài [cache, timeout, retry và rate limiting](/articles/dotnet10-cache-timeout-retry-rate-limit).
+`IDistributedCache` của .NET là giao diện cache tối giản: `Get`/`Set`/`Refresh`/`Remove` (kèm bản async) trên `byte[]`, với `DistributedCacheEntryOptions` cho hạn tuyệt đối hoặc hạn trượt; Redis chỉ là một backend. Giao diện này khớp phần cache-aside của bài, nhưng không có `SET NX`, script hay pipeline vì giao diện phải thay được giữa các backend. Với rate limit hoặc lock, .NET thường dùng thẳng StackExchange.Redis (`IDatabase`, có `LockTake`/`LockRelease` và chạy script), hoặc rate limiter có sẵn của ASP.NET Core cho giới hạn trong một process, như bài [cache, timeout, retry và rate limiting](/articles/dotnet10-cache-timeout-retry-rate-limit).
 
 Cửa sổ lệch không đổi giữa hai ngôn ngữ: đọc rồi nạp cache là hai bước. `UNIQUE` của cơ sở dữ liệu cũng là chốt chặn ở cả hai phía, xem [transaction, concurrency và idempotency trong .NET](/articles/dotnet10-transaction-concurrency-idempotency).
 
@@ -249,16 +249,16 @@ cargo run --manifest-path examples/toi-noi-rust/28-redis-cache/Cargo.toml -- --v
 cargo test --manifest-path examples/toi-noi-rust/28-redis-cache/Cargo.toml
 ```
 
-`--verify` chạy cả bốn kịch bản, kiểm kết quả và in `VERIFY OK`, thoát mã 1 nếu sai. `cargo test` có bốn test, mỗi test có schema `lab_<uuid>` và tiền tố key riêng nên chạy song song được. Cuối mỗi ca, lab xoá key bằng `SCAN` theo tiền tố rồi `DEL` (không dùng `FLUSHALL` hay `FLUSHDB`, vì Redis có thể đang phục vụ việc khác) và `DROP SCHEMA ... CASCADE`.
+`--verify` chạy cả bốn kịch bản, kiểm tra kết quả và in `VERIFY OK`, thoát mã 1 nếu sai. `cargo test` có bốn test, mỗi test có schema `lab_<uuid>` và tiền tố key riêng nên chạy song song được. Cuối mỗi test case, lab xoá key bằng `SCAN` theo tiền tố rồi `DEL` (không dùng `FLUSHALL` hay `FLUSHDB`, vì Redis có thể đang phục vụ việc khác) và `DROP SCHEMA ... CASCADE`.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Cửa sổ lệch ngoài đời hiếm và phụ thuộc tải. Lab dùng một Redis đơn, không replica nên không thể hiện failover làm mất key lock. Token bucket chưa có giới hạn theo endpoint hay header <code>Retry-After</code>. <code>post_entry</code> chỉ kiểm key, không so nội dung như bài 24.</p>
+<p>Ngoài đời thực, cửa sổ lệch hiếm khi xảy ra và phụ thuộc tải. Lab dùng một Redis đơn, không replica nên không minh hoạ được việc failover làm mất key lock. Token bucket chưa có giới hạn theo endpoint hay header <code>Retry-After</code>. <code>post_entry</code> chỉ kiểm tra key, không so nội dung như bài 24.</p>
 </div>
 
 **Bài tập:** cache lưu `20400` cho `driver:DR-001`, sổ cái đã là `60000`, key còn 40 giây TTL. Xử lý thế nào khi (a) màn hình ví chỉ để xem, (b) service sắp quyết định trừ 50.000 đồng khỏi ví tài xế?
 
-<details><summary>Xem lời giải</summary><p>(a) Chấp nhận số cũ tối đa 40 giây còn lại, hoặc <code>reconcile</code> để ghi đè bằng 60.000. (b) Không dùng cache: đọc số dư từ PostgreSQL trong cùng transaction ghi bút toán trừ tiền. Muốn chống hai yêu cầu cùng trừ, dùng <code>idempotency_key</code> hoặc khoá hàng của PostgreSQL, không dùng lock Redis có TTL.</p></details>
+<details><summary>Xem lời giải</summary><p>(a) Chấp nhận số cũ trong tối đa 40 giây TTL còn lại, hoặc <code>reconcile</code> để ghi đè bằng 60.000. (b) Không dùng cache: đọc số dư từ PostgreSQL trong cùng transaction ghi bút toán trừ tiền. Muốn chống hai yêu cầu cùng trừ, dùng <code>idempotency_key</code> hoặc khoá hàng của PostgreSQL, không dùng lock Redis có TTL.</p></details>
 
 Bài trước: [bài 27](/articles/rust-integration-test-postgresql-schema-rieng-ci). Bài tiếp: [bài 29](/articles/rust-config-secrets-tracing-structured-logging).
 

@@ -1,7 +1,7 @@
 ---
 slug: rust-kafka-rdkafka-consumer-producer-schema
 title: "Kafka với rdkafka: consume TripCompleted, produce LedgerEntryPosted"
-summary: "Bài 36: rdkafka FutureProducer và StreamConsumer, commit offset sau khi ghi bút toán, at-least-once chạy thật, chọn key partition, rebalance và bỏ qua thông điệp hỏng không kẹt partition, trên Kafka thật."
+summary: "Bài 36: rdkafka FutureProducer và StreamConsumer, commit offset sau khi ghi bút toán, at-least-once chạy thật, chọn key chia partition, rebalance và bỏ qua thông điệp hỏng để không kẹt partition, chạy trên Kafka thật."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, kafka, rdkafka, at-least-once]
@@ -27,9 +27,9 @@ Offset đã commit là con trỏ «group đã xử lý xong tới đâu» trên 
 | Commit rồi ghi | Thông điệp coi như xong, bút toán không có: mất tiền | at-most-once |
 | Ghi rồi commit | Thông điệp đến lần nữa; ghi lại sẽ trùng nếu không có chốt | at-least-once |
 
-Sổ cái chọn dòng dưới: trùng thì chặn được bằng `idempotency_key` ([bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key)), còn mất thì không ai biết để sửa. Bài không hứa «exactly-once»: at-least-once cộng ghi idempotent cho hiệu ứng trên sổ cái đúng một lần.
+Sổ cái chọn dòng dưới: trùng thì chặn được bằng `idempotency_key` ([bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key)), còn mất thì không ai biết để sửa. Bài không hứa «exactly-once»: at-least-once cộng với ghi idempotent sẽ cho hiệu ứng đúng một lần trên sổ cái.
 
-`enable.auto.commit=false` trong `src/kafka.rs` tắt commit nền (mặc định bật, và có thể commit offset của thông điệp chưa xử lý xong). `enable.auto.offset.store` để mặc định không ảnh hưởng, vì lab commit tường minh từng thông điệp; muốn commit theo lô thì bật lại commit nền, đặt nó `false` và gọi `store_offset` sau khi ghi. `auto.offset.reset=earliest` cho group chưa có offset đọc từ đầu; với mặc định `latest`, consumer chết trước lần commit đầu tiên sẽ không nhận lại thông điệp đó. Producer bật `enable.idempotence` (kéo theo `acks=all`) để librdkafka gửi lại khi lỗi tạm thời mà không sinh bản trùng hay đảo thứ tự; chỉ bảo vệ trong một phiên producer, không thay việc khử trùng lặp ở bên nhận.
+`enable.auto.commit=false` trong `src/kafka.rs` tắt commit nền (mặc định bật, và có thể commit offset của thông điệp chưa xử lý xong). `enable.auto.offset.store` để mặc định cũng không ảnh hưởng tới lab, vì lab commit tường minh từng thông điệp; muốn commit theo lô thì bật lại commit nền, đặt tham số đó thành `false` và gọi `store_offset` sau khi ghi. `auto.offset.reset=earliest` cho group chưa có offset đọc từ đầu; với mặc định `latest`, consumer chết trước lần commit đầu tiên sẽ không nhận lại thông điệp đó. Producer bật `enable.idempotence` (kéo theo `acks=all`) để librdkafka gửi lại khi lỗi tạm thời mà không sinh bản trùng hay đảo thứ tự; chỉ bảo vệ trong một phiên producer, không thay việc khử trùng lặp ở bên nhận.
 
 ```rust
 // src/kafka.rs (rút gọn)
@@ -67,7 +67,7 @@ pub async fn recv_within<'a, C: ConsumerContext + 'static>(
 }
 ```
 
-`recv()` trả `Err` chưa có nghĩa consumer đã chết. Subscribe ngay sau khi tạo topic, lúc metadata chưa đủ leader, cho `UnknownTopicOrPartition`; đọc tiếp thì hết. Vì vậy `create_topic` của lab chờ metadata rồi mới trả về.
+`recv()` trả `Err` chưa có nghĩa consumer đã chết. Subscribe ngay sau khi tạo topic, lúc metadata chưa đủ leader, sẽ nhận `UnknownTopicOrPartition`; lần đọc sau thì hết lỗi. Vì vậy `create_topic` của lab chờ metadata rồi mới trả về.
 
 ## Nhận lại thông điệp thì sổ cái ghi mấy lần?
 
@@ -100,13 +100,13 @@ bút toán trong sổ: 1; số dư driver:DR-001: 20400 đồng
 LedgerEntryPosted trên topic đầu ra: 2 sự kiện
 ```
 
-`Some(1)` là offset của thông điệp **sẽ đọc tiếp**: `commit_message` commit offset thông điệp cộng 1, và vì đó là con trỏ nên nó chốt luôn mọi offset thấp hơn của partition. Lần chạy 3 chờ được gán partition rồi mới đếm hai giây im lặng.
+`Some(1)` là offset của thông điệp **sẽ đọc tiếp**: `commit_message` commit offset thông điệp cộng 1, và vì đó là con trỏ nên lần commit này chốt luôn mọi offset thấp hơn của partition. Lần chạy 3 chờ được gán partition rồi mới đếm hai giây im lặng.
 
-Nhưng topic đầu ra có **hai** sự kiện `LedgerEntryPosted` cùng key `trip:TN-0001:capture`. Replay vẫn phát lại vì lần phát trước có thể chưa tới nơi, nên bên nhận cũng phải khử trùng lặp bằng `idempotencyKey`. Gốc là dual-write: ghi sổ và phát Kafka không chung transaction; bài 37 giải bằng outbox.
+Nhưng topic đầu ra có **hai** sự kiện `LedgerEntryPosted` cùng key `trip:TN-0001:capture`. Replay vẫn phát lại vì lần phát trước có thể chưa tới nơi, nên bên nhận cũng phải khử trùng lặp bằng `idempotencyKey`. Nguyên nhân gốc là dual-write: ghi sổ và phát Kafka không chung transaction; bài 37 giải bằng outbox.
 
 ## Chọn key thế nào khi một bút toán chạm ba tài khoản?
 
-Kafka chỉ bảo đảm thứ tự **trong một partition**. Producer chọn partition bằng hash của key, nên cùng key thì cùng partition, miễn là số partition không đổi (thêm partition cho topic đang chạy làm key đổi chỗ). Lab gửi thông điệp thử vào topic 6 partition theo ba cách:
+Kafka chỉ bảo đảm thứ tự **trong một partition**. Producer chọn partition bằng hash của key, nên cùng key thì cùng partition, miễn là số partition không đổi (thêm partition cho topic đang chạy làm key bị ánh xạ sang partition khác). Lab gửi thông điệp thử vào topic 6 partition theo ba cách:
 
 ```text
 key = tripId, 12 chuyến: {1: 1, 2: 4, 3: 4, 4: 3}
@@ -128,10 +128,10 @@ thứ tự nhận lại: [1, 2, 3, 4, 5]
 
 Key là id tài khoản thì hỏng theo hai cách.
 
-- **Một thông điệp chỉ có một key.** Bút toán chạm `customer:CU-001`, `driver:DR-001` và `platform:revenue`. Chọn một tài khoản thì hai tài khoản còn lại không có thứ tự nào với bút toán. Phát ba thông điệp thì một bút toán thành ba mảnh ở hai partition.
-- **Tài khoản nền tảng nằm trong mọi bút toán.** Với key `platform:revenue`, cả 12 bút toán vào partition 2. Mỗi partition chỉ một consumer đọc, nên thêm consumer cũng không chia được tải: hot partition.
+- **Một thông điệp chỉ có một key.** Bút toán chạm `customer:CU-001`, `driver:DR-001` và `platform:revenue`. Chọn một tài khoản thì thứ tự của hai tài khoản còn lại so với bút toán không được bảo đảm. Phát ba thông điệp thì một bút toán thành ba mảnh ở hai partition.
+- **Tài khoản nền tảng nằm trong mọi bút toán.** Với key `platform:revenue`, cả 12 bút toán vào partition 2. Mỗi partition chỉ một consumer đọc, nên thêm consumer cũng không chia được tải: đó là hot partition.
 
-`tripId` (và `idempotencyKey` cho topic `ledger.entry-posted`, với một lưu ý ở bài tập) có đúng tính chất cần: mọi sự kiện của một chuyến cùng partition và theo thứ tự (thu cước rồi mới hoàn tiền); năm thông điệp key `TN-0001` nằm ở partition 1, offset 1 đến 5, đến đúng thứ tự gửi. Cái giá là không có thứ tự giữa các chuyến; sổ cái chịu được vì số dư là tổng posting, cộng thứ tự nào cũng ra cùng kết quả. Quy tắc phụ thuộc thứ tự giữa các chuyến (hạn mức, chẳng hạn) cần thiết kế riêng.
+`tripId` (và `idempotencyKey` cho topic `ledger.entry-posted`, với một lưu ý ở bài tập) có đúng tính chất cần: mọi sự kiện của một chuyến cùng partition và theo thứ tự (thu cước rồi mới hoàn tiền); năm thông điệp key `TN-0001` nằm ở partition 1, offset 1 đến 5, đến đúng thứ tự gửi. Cái giá là không có thứ tự giữa các chuyến; sổ cái chịu được vì số dư là tổng posting, cộng theo thứ tự nào cũng ra cùng kết quả. Quy tắc phụ thuộc thứ tự giữa các chuyến (hạn mức, chẳng hạn) cần thiết kế riêng.
 
 Hash chạy ở client, không ở broker, nên hai client khác thuật toán có thể đưa cùng key vào hai partition. librdkafka mặc định `consistent_random` (CRC32), producer Java dùng murmur2. Cùng key, cùng topic, hai cấu hình:
 
@@ -141,7 +141,7 @@ key TN-0002: consistent_random -> partition 3, murmur2_random -> partition 4
 key TN-0003: consistent_random -> partition 3, murmur2_random -> partition 3
 ```
 
-Service Java và service Rust cùng ghi một topic thì đặt `partitioner=murmur2_random` phía librdkafka.
+Khi service Java và service Rust cùng ghi một topic, hãy đặt `partitioner=murmur2_random` phía librdkafka.
 
 ## Consumer group chia partition ra sao khi thêm hoặc bớt consumer?
 
@@ -177,13 +177,13 @@ rebalance của consumer 2: ["gán [2, 3]", "thu hồi [2, 3]", "gán [0, 1, 2, 
 <figcaption>Hình 3. Partition đi theo thành viên của group; thêm hay bớt consumer đều kích hoạt rebalance.</figcaption>
 </figure>
 
-Khi consumer 2 vào, consumer 1 **thu hồi cả bốn** partition rồi mới nhận lại `[0, 1]`. Đó là kiểu eager, mặc định của librdkafka 2.12 (`group.protocol=classic`, `partition.assignment.strategy=range,roundrobin`): trong lúc rebalance không ai đọc gì. `cooperative-sticky` chỉ chuyển phần cần chuyển; lab không chạy nó. Consumer nào nhận nửa nào phụ thuộc id thành viên, nên đây là kết quả một lần chạy.
+Khi consumer 2 vào, consumer 1 **thu hồi cả bốn** partition rồi mới nhận lại `[0, 1]`. Đó là kiểu eager, mặc định của librdkafka 2.12 (`group.protocol=classic`, `partition.assignment.strategy=range,roundrobin`): trong lúc rebalance không ai đọc gì. `cooperative-sticky` chỉ chuyển phần cần chuyển; lab không chạy nó. Consumer nào được giao nửa nào phụ thuộc vào id thành viên, nên đây là kết quả một lần chạy.
 
 Số partition là trần song song (consumer thứ năm của topic 4 partition ngồi không, theo tài liệu Kafka). Partition đổi chủ lúc đang xử lý dở thì chủ mới nhận lại thông điệp chưa commit: ghi idempotent đã lo chuyện đó. Consumer không gọi `recv()` quá `max.poll.interval.ms` (mặc định 5 phút) cũng bị đẩy khỏi group, nên xử lý quá chậm cũng gây rebalance.
 
-## Thông điệp hỏng hoặc version lạ có được làm kẹt partition không?
+## Thông điệp hỏng hoặc phiên bản lạ có được làm kẹt partition không?
 
-Sự kiện của loạt là JSON camelCase và luôn mang `schemaVersion`. Consumer đọc `schemaVersion` **trước**, chỉ đọc phần còn lại khi hiểu version đó. Trường lạ trong cùng version được bỏ qua, nên thêm trường tuỳ chọn không làm hỏng consumer cũ; đổi tên, xoá hoặc đổi nghĩa trường thì phải tăng version. Thông điệp v2 báo «version 2 chưa hỗ trợ», không phải «thiếu trường».
+Sự kiện của loạt là JSON camelCase và luôn mang `schemaVersion`. Consumer đọc `schemaVersion` **trước**, chỉ đọc phần còn lại khi hiểu phiên bản đó. Trường lạ trong cùng phiên bản được bỏ qua, nên thêm trường tuỳ chọn không làm hỏng consumer cũ; đổi tên, xoá hoặc đổi nghĩa trường thì phải tăng phiên bản. Thông điệp v2 báo «version 2 chưa hỗ trợ», không phải «thiếu trường».
 
 ```rust
 // src/events.rs
@@ -202,7 +202,7 @@ pub fn decode_trip_completed(bytes: &[u8]) -> Result<TripCompleted, DecodeError>
 }
 ```
 
-Lỗi là giá trị (`DecodeError`, như [bài 17](/articles/rust-thiserror-anyhow-xu-ly-loi-thuc-te)). Lab xếp năm thông điệp vào một partition: hợp lệ, JSON cụt, version 2, thiếu `fareDong`, rồi `TN-0002` hợp lệ. Consumer đúng log, bỏ qua và **vẫn commit**; consumer «ngây thơ» dừng khi gặp lỗi và không commit:
+Lỗi là giá trị (`DecodeError`, như [bài 17](/articles/rust-thiserror-anyhow-xu-ly-loi-thuc-te)). Lab xếp năm thông điệp vào một partition: hợp lệ, JSON cụt, phiên bản 2, thiếu `fareDong`, rồi `TN-0002` hợp lệ. Consumer đúng ghi log, bỏ qua và **vẫn commit**; consumer «ngây thơ» dừng khi gặp lỗi và không commit:
 
 ```text
 consumer bỏ qua thông điệp xấu và vẫn commit:
@@ -220,9 +220,9 @@ offset đã commit: Some(1); bút toán trong sổ: 1
 
 Consumer ngây thơ khởi động lại bao nhiêu lần cũng dừng đúng offset 1; `TN-0002` nằm sau đó và không bao giờ được ghi. Đó là poison message: thử lại bao nhiêu lần cũng không thành.
 
-Chính sách tạm thời của bài là **log, bỏ qua, commit**. Bỏ qua âm thầm là mất dữ liệu, nên log phải đủ để tìm lại (topic, partition, offset, lý do); lab chỉ in ra màn hình, service thật dùng log có cấu trúc ([bài 29](/articles/rust-config-secrets-tracing-structured-logging)). Cất thông điệp xấu sang topic riêng để xử lý sau, DLQ, là bài 37.
+Chính sách tạm thời của bài là **log, bỏ qua, commit**. Bỏ qua mà không báo gì là mất dữ liệu, nên log phải đủ để tìm lại (topic, partition, offset, lý do); lab chỉ in ra màn hình, service thật dùng log có cấu trúc ([bài 29](/articles/rust-config-secrets-tracing-structured-logging)). Việc cất thông điệp xấu sang topic riêng để xử lý sau (DLQ) nằm ở bài 37.
 
-Lỗi hạ tầng (cơ sở dữ liệu tạm chết) thì khác: phải thử lại, và chỉ không commit thì chưa đủ. Vị trí đọc nằm trong bộ nhớ consumer nên thông điệp kế tiếp vẫn đến, và commit nó sẽ che luôn thông điệp lỗi:
+Lỗi hạ tầng (cơ sở dữ liệu tạm chết) thì khác: phải thử lại, và chỉ việc không commit thì chưa đủ. Vị trí đọc nằm trong bộ nhớ consumer nên thông điệp kế tiếp vẫn đến, và commit thông điệp đó sẽ che luôn thông điệp lỗi:
 
 ```text
 offset 0: lỗi giả lập, không commit
@@ -236,9 +236,9 @@ Vậy phải thử lại tại chỗ, `seek` về offset đó, hoặc thoát đ�
 
 ## So với Confluent.Kafka của .NET thì sao?
 
-Confluent.Kafka, client Kafka phổ biến của .NET, cũng bọc librdkafka (lab dùng librdkafka 2.12.1 đi kèm `rdkafka-sys`). Vì vậy tên cấu hình gần như nguyên: `EnableAutoCommit`, `AutoOffsetReset`, `EnableIdempotence`, `Partitioner` ứng với `enable.auto.commit`, `auto.offset.reset`, `enable.idempotence`, `partitioner`, và mặc định cũng là `consistent_random`. Một lần kiểm riêng ngoài lab bằng Confluent.Kafka 2.12.0, topic 6 partition, cho đúng các partition Rust in ở trên với cả hai cấu hình (cùng key UTF-8, cùng số partition). Producer Java thì bài không chạy.
+Confluent.Kafka, client Kafka phổ biến của .NET, cũng bọc librdkafka (lab dùng librdkafka 2.12.1 đi kèm `rdkafka-sys`). Vì vậy tên cấu hình gần như giữ nguyên: `EnableAutoCommit`, `AutoOffsetReset`, `EnableIdempotence`, `Partitioner` ứng với `enable.auto.commit`, `auto.offset.reset`, `enable.idempotence`, `partitioner`, và mặc định cũng là `consistent_random`. Một lần kiểm riêng ngoài lab bằng Confluent.Kafka 2.12.0, topic 6 partition, cho đúng các partition Rust in ở trên với cả hai cấu hình (cùng key UTF-8, cùng số partition). Producer Java thì bài không chạy.
 
-Khác nhau ở mô hình lập trình. Phía .NET, `IConsumer<TKey, TValue>.Consume(...)` chặn một thread (nhận timeout hoặc `CancellationToken`) nên vòng đọc thường nằm trong `BackgroundService` ([bài .NET về BackgroundService và Channel](/articles/dotnet10-backgroundservice-channel)), và `consumer.Commit(result)` là commit thủ công, cũng lưu offset cộng 1. Phía Rust, `recv()` là future, huỷ được bằng `tokio::time::timeout`. `ProduceAsync` ứng với `FutureProducer::send`. Ý tưởng «ghi rồi commit, chặn trùng bằng khoá» giống hệt, xem [Outbox và Inbox trong .NET](/articles/dotnet10-outbox-inbox-idempotent-consumer). Phần mô hình lập trình dựa vào tài liệu của hai thư viện.
+Khác nhau ở mô hình lập trình. Phía .NET, `IConsumer<TKey, TValue>.Consume(...)` chặn một thread (nhận timeout hoặc `CancellationToken`) nên vòng đọc thường nằm trong `BackgroundService` ([bài .NET về BackgroundService và Channel](/articles/dotnet10-backgroundservice-channel)), và `consumer.Commit(result)` là commit thủ công, cũng lưu offset cộng 1. Phía Rust, `recv()` là future, huỷ được bằng `tokio::time::timeout`. `ProduceAsync` ứng với `FutureProducer::send`. Ý tưởng «ghi rồi commit, chặn trùng bằng khoá» giống hệt, xem [Outbox và Inbox trong .NET](/articles/dotnet10-outbox-inbox-idempotent-consumer). Phần so sánh mô hình lập trình này dựa vào tài liệu của hai thư viện.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -252,7 +252,7 @@ cargo run --manifest-path examples/toi-noi-rust/36-kafka-rdkafka/Cargo.toml -- -
 cargo test --manifest-path examples/toi-noi-rust/36-kafka-rdkafka/Cargo.toml
 ```
 
-`--verify` chạy cả sáu kịch bản, kiểm các giá trị trong bài và in `VERIFY OK`, thoát mã 1 nếu sai. `cargo test` có bốn unit test giải mã (không cần broker) và bảy test trên Kafka thật, trong đó một test kiểm thiếu biến môi trường và không có broker. Mỗi ca tạo topic `lab.36.<uuid>.*` và group `lab-36-<uuid>*` rồi xoá đúng những thứ đó bằng `AdminClient`. Một lần `--verify` mất khoảng 25 giây; tám tiến trình song song, ba vòng, đều qua, lâu nhất 50 giây (số đo trên máy viết bài, không phải SLA). Chờ thông điệp và chờ gán partition có hạn 30 giây, nên broker bận thì chậm hoặc fail rõ; trường hợp broker chết giữa chừng chưa được thử. Lần build đầu lâu vì `rdkafka-sys` biên dịch librdkafka kèm theo (cần trình biên dịch C và `make`).
+`--verify` chạy cả sáu kịch bản, kiểm các giá trị trong bài và in `VERIFY OK`, thoát mã 1 nếu sai. `cargo test` có bốn unit test giải mã (không cần broker) và bảy test trên Kafka thật, trong đó một test kiểm thiếu biến môi trường và không có broker. Mỗi ca tạo topic `lab.36.<uuid>.*` và group `lab-36-<uuid>*` rồi xoá đúng những thứ đó bằng `AdminClient`. Một lần `--verify` mất khoảng 25 giây; tám tiến trình song song, ba vòng, đều qua, lâu nhất 50 giây (số đo trên máy viết bài, không phải SLA). Chờ thông điệp và chờ gán partition có hạn 30 giây, nên broker bận thì chậm hoặc báo lỗi rõ; trường hợp broker chết giữa chừng chưa được thử. Lần build đầu lâu vì `rdkafka-sys` biên dịch librdkafka kèm theo (cần trình biên dịch C và `make`).
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

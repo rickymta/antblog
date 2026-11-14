@@ -50,7 +50,7 @@ unsafe impl<A: GlobalAlloc> GlobalAlloc for Counting<A> {
 static ALLOC: Counting<System> = Counting::new(System);
 ```
 
-`cargo run` in bảng sau. Đây là số đếm, không phải số giờ, nên máy tải thế nào cũng ra đúng như vậy. `realloc` tính là một block, như `dhat` ở [bài 30](/articles/rust-criterion-benchmark-do-bo-nho-10k-but-toan).
+`cargo run` in bảng sau. Đây là số đếm, không phải số đo thời gian, nên máy tải nặng hay nhẹ thì kết quả vẫn y hệt. `realloc` tính là một block, như `dhat` ở [bài 30](/articles/rust-criterion-benchmark-do-bo-nho-10k-but-toan).
 
 | Đoạn code | Block | Byte | `realloc` |
 | --- | ---: | ---: | ---: |
@@ -65,7 +65,7 @@ static ALLOC: Counting<System> = Counting::new(System);
 
 ## Drop chạy khi nào, và RAII thay finally ra sao?
 
-Khi chủ cuối cùng ra khỏi phạm vi, compiler chèn `Drop::drop` đúng chỗ đó. Biến cục bộ bị drop theo thứ tự ngược khai báo, field theo thứ tự khai báo, `drop(x)` giải phóng sớm:
+Khi chủ cuối cùng ra khỏi phạm vi, compiler chèn `Drop::drop` đúng chỗ đó. Biến cục bộ bị drop theo thứ tự ngược với khai báo, field theo đúng thứ tự khai báo, còn `drop(x)` giải phóng sớm:
 
 ```rust
 // src/raii.rs (rút gọn)
@@ -94,9 +94,9 @@ drop lock
 drop conn
 ```
 
-`Drop` không phải bảo đảm tuyệt đối: `mem::forget`, chu trình `Rc` hay `panic = "abort"` đều bỏ qua nó. Đặt lên `Drop` việc dọn tài nguyên cục bộ, không đặt tính đúng nghiệp vụ.
+`Drop` không phải bảo đảm tuyệt đối: `mem::forget`, chu trình `Rc` hay `panic = "abort"` đều bỏ qua nó. Hãy giao cho `Drop` việc dọn tài nguyên cục bộ, đừng giao cho nó việc bảo đảm tính đúng đắn của nghiệp vụ.
 
-Từ đó có RAII. `TxGuard` mở giao dịch ở `begin`; `commit` nhận `self` theo giá trị nên không dùng lại được; `Drop` tự `rollback` nếu chưa commit. Không có `finally`, và không đường ra nào quên rollback, kể cả `return` sớm hay panic: với `panic = "unwind"` mặc định, stack được tháo và `Drop` của mọi biến cục bộ vẫn chạy.
+Từ đó có RAII. `TxGuard` mở giao dịch ở `begin`; `commit` nhận `self` theo giá trị nên không dùng lại được; `Drop` tự `rollback` nếu chưa commit. Không có `finally`, và không có đường ra nào bỏ sót rollback, kể cả `return` sớm hay panic: với `panic = "unwind"` mặc định, stack được tháo và `Drop` của mọi biến cục bộ vẫn chạy.
 
 ```rust
 // src/raii.rs (rút gọn)
@@ -117,7 +117,7 @@ tx rollback
 panic caught: true
 ```
 
-Ba ca: commit, trả lỗi sớm, panic giữa chừng. `MutexGuard` cùng khuôn: ra phạm vi thì khoá được nhả. Bên C#, `using` giải cùng bài toán nhưng người gọi phải nhớ viết, còn finalizer chạy theo lịch GC ([bài 27 loạt C#](/articles/dotnet10-allocation-gc-disposal)).
+Ba tình huống: commit, trả lỗi sớm, panic giữa chừng. `MutexGuard` cùng khuôn: ra phạm vi thì khoá được nhả. Bên C#, `using` giải quyết cùng bài toán nhưng người gọi phải nhớ viết, còn finalizer chạy theo lịch GC ([bài 27 loạt C#](/articles/dotnet10-allocation-gc-disposal)).
 
 ## Ghi 10.000 bút toán cấp phát bao nhiêu lần?
 
@@ -130,7 +130,7 @@ Ba ca: commit, trả lỗi sớm, panic giữa chừng. `MutexGuard` cùng khuô
 | Bộ nhớ sống sau build, sau drop | 3.389.944 byte, 676 byte (bằng mức trước build) |
 | Block trả về khi drop sổ cái | 60.002 |
 
-90.026 block trùng đúng số `dhat` ở bài 30. Chín block mỗi bút toán: tám của `make_entry` (ba là chuỗi tạm do `format!`) và một cho bản sao khoá idempotency trong chỉ mục; 26 block còn lại là `Vec` và `HashMap` của `Ledger` tự tăng. Drop sổ cái trả 60.002 block trong một lời gọi và đưa bộ nhớ sống về mức trước build. «Trả» ở đây là trả cho allocator; RSS có giảm hay không còn tuỳ allocator, như mục sau đo.
+90.026 block trùng đúng số `dhat` ở bài 30. Chín block mỗi bút toán: tám của `make_entry` (ba là chuỗi tạm do `format!`) và một cho bản sao khoá idempotency trong chỉ mục; 26 block còn lại là của `Vec` và `HashMap` trong `Ledger` khi chúng tự tăng dung lượng. Drop sổ cái trả 60.002 block trong một lời gọi và đưa bộ nhớ sống về mức trước build. «Trả» ở đây là trả cho allocator; RSS có giảm hay không còn tuỳ allocator, như mục sau đo.
 
 ## Đổi allocator có đổi được gì?
 
@@ -155,9 +155,9 @@ Mỗi thread ghi 20 sổ cái 10.000 bút toán rồi bỏ từng sổ. Bảng l
 | `mimalloc` 0.1.52 | 95 ms (49–189) | 10,5 MiB | 290 ms (124–437) | 40,0 MiB | 40,0 MiB |
 | `tikv-jemallocator` 0.7.0 | 174 ms (69–240) | 7,6 MiB | 376 ms (178–780) | 24,8 MiB | 2,8 MiB |
 
-Đọc theo hướng: `mimalloc` nhanh nhất nhưng giữ nhiều bộ nhớ hơn; `jemalloc` nằm giữa, đỉnh RSS gần allocator hệ thống, và RSS tụt xuống sau khi sổ cái bị drop. Khoảng min–max ở lô này rộng bằng cả khoảng cách giữa các cấu hình. Lô kiểm lại lúc load khoảng 105 (5 lần) hẹp hơn hẳn và cùng thứ tự: 1 thread 83, 69, 51 ms; 4 thread 134, 76, 59 ms (hệ thống, `jemalloc`, `mimalloc`). RSS đỉnh ít đổi theo tải, trừ `mimalloc` 4 thread dao động 34 đến 53 MiB.
+Đọc như một xu hướng: `mimalloc` nhanh nhất nhưng giữ nhiều bộ nhớ hơn; `jemalloc` nằm giữa, đỉnh RSS gần allocator hệ thống, và RSS tụt xuống sau khi sổ cái bị drop. Khoảng min–max ở lô này rộng bằng cả khoảng cách giữa các cấu hình. Lô đo lại lúc load khoảng 105 (5 lần) có khoảng min–max hẹp hơn hẳn và cùng thứ tự: 1 thread 83, 69, 51 ms; 4 thread 134, 76, 59 ms (hệ thống, `jemalloc`, `mimalloc`). RSS đỉnh ít đổi theo tải, trừ `mimalloc` 4 thread dao động 34 đến 53 MiB.
 
-Hai cảnh báo. `mimalloc` và `jemalloc` đều biên dịch C, `jemalloc` chậm hơn rõ: build release sạch mất 37 giây so với 14 (hệ thống) và 11 (`mimalloc`) lúc load khoảng 110. Và mọi số allocator ở đây chỉ đo trên macOS. Trên `glibc` hay `musl` ([bài 63](/articles/rust-container-dockerfile-da-stage-cargo-chef-distroless)) allocator mặc định và cách trả bộ nhớ đều khác, nên phải đo lại trên môi trường chạy thật.
+Hai cảnh báo. `mimalloc` và `jemalloc` đều biên dịch C, `jemalloc` chậm hơn rõ rệt: build release sạch mất 37 giây so với 14 (hệ thống) và 11 (`mimalloc`) lúc load khoảng 110. Và mọi số allocator ở đây chỉ đo trên macOS. Trên `glibc` hay `musl` ([bài 63](/articles/rust-container-dockerfile-da-stage-cargo-chef-distroless)) allocator mặc định và cách trả bộ nhớ đều khác, nên phải đo lại trên môi trường chạy thật.
 
 ## Một tiến trình Rust so với .NET: so thế nào cho công bằng?
 
@@ -172,9 +172,9 @@ Hai chương trình **không giống hệt**. Rust kiểm tra và sao chép mọ
 <figcaption>Hình 2. Thời điểm giải phóng bộ nhớ: Drop đặt nó trong code, GC để runtime chọn.</figcaption>
 </figure>
 
-Trước hết kiểm khối lượng: mỗi vòng Rust cấp phát 5.738.224 byte, C# 5.939.536 byte (`--rounds 1`; 20 vòng thì 5,93 đến 6,15 MB mỗi vòng). Hai số không cùng định nghĩa: Rust đếm byte xin allocator, C# gồm header object và một lần `Summarize`. Chênh 3,5% chỉ nói «cùng cỡ»: chênh lệch bộ nhớ không đến từ chuyện một bên tạo nhiều rác hơn hẳn.
+Trước hết, kiểm tra khối lượng: mỗi vòng Rust cấp phát 5.738.224 byte, C# 5.939.536 byte (`--rounds 1`; 20 vòng thì 5,93 đến 6,15 MB mỗi vòng). Hai số không cùng định nghĩa: Rust đếm số byte đã xin allocator cấp, C# gồm header object và một lần `Summarize`. Mức chênh 3,5% chỉ cho biết «cùng cỡ»: chênh lệch bộ nhớ không đến từ chuyện một bên tạo nhiều rác hơn hẳn.
 
-Kế đến, lab chạy .NET với Workstation GC (mặc định của console), Workstation tắt concurrent (`DOTNET_gcConcurrent=0`), Server GC kèm DATAS (`DOTNET_gcServer=1`, DATAS mặc định từ .NET 9) và Server GC tắt DATAS (`DOTNET_GCDynamicAdaptationMode=0`). Bảng: 20 vòng một thread, trung vị 7 lần chạy xen kẽ, load khoảng 380. RSS đo bằng `/usr/bin/time -l` trên binary đã build, không qua `dotnet run`; dòng Rust là `alloc-bench`.
+Kế đến, lab chạy .NET với Workstation GC (mặc định của console), Workstation tắt concurrent (`DOTNET_gcConcurrent=0`), Server GC kèm DATAS (`DOTNET_gcServer=1`, DATAS mặc định từ .NET 9) và Server GC tắt DATAS (`DOTNET_GCDynamicAdaptationMode=0`). Bảng đo 20 vòng, một thread, lấy trung vị của 7 lần chạy xen kẽ, load khoảng 380. RSS đo bằng `/usr/bin/time -l` trên binary đã build, không qua `dotnet run`; dòng Rust là `alloc-bench`.
 
 | Cấu hình | Byte cấp phát mỗi vòng | Số lần GC | RSS đỉnh | Thời gian 20 vòng |
 | --- | ---: | ---: | ---: | ---: |
@@ -191,14 +191,14 @@ Kế đến, lab chạy .NET với Workstation GC (mặc định của console),
 <figcaption>Hình 3. RSS đỉnh sau 20 vòng (<code>/usr/bin/time -l</code>). Đoạn đầu mỗi thanh là RSS lúc chương trình bắt đầu: khoảng 1,5 MiB với Rust, 39 MiB với .NET.</figcaption>
 </figure>
 
-Bốn điều thấy được, và GC không phải điểm yếu mặc nhiên:
+Bốn điều rút ra được, và GC không mặc nhiên là điểm yếu:
 
 - **Một vòng không kích hoạt GC nào.** Với `--rounds 1`, Workstation và Server GC đều báo 0 lần GC; RSS đỉnh khoảng 47 MiB, tăng khoảng 7 MiB, còn Rust 6,2 MiB, tăng khoảng 4,7 MiB. Phần tăng cùng cỡ; 37,7 MiB sau 20 vòng là heap GC giữ lại, không phải dữ liệu sống.
-- **Số lần GC là núm vặn.** Workstation chạy 19 lần ở khoảng 77 MiB; Server GC chạy đúng 1 lần nhưng tới 158 MiB. DATAS không cho khác biệt đo được; tài liệu nói nó có ích nhất với tải lên xuống, còn đây là khối lượng đều.
-- **RSS cao của Server GC không có nghĩa là xấu.** Theo tài liệu, Server GC nhắm vào throughput, coi tiến trình là chủ đạo trên máy, mỗi CPU logic một heap (máy này 10) và nới heap khi còn bộ nhớ. Thêm `DOTNET_GCHeapCount=2` cho khoảng 100 MiB và 4 lần GC. Trong container, giới hạn heap mặc định là 75% giới hạn bộ nhớ. Chạy hàng trăm bản thì tài liệu khuyên Workstation tắt concurrent.
+- **Số lần GC là thứ có thể điều chỉnh.** Workstation chạy 19 lần ở khoảng 77 MiB; Server GC chạy đúng 1 lần nhưng tới 158 MiB. DATAS không cho khác biệt đo được; tài liệu nói nó có ích nhất với tải lên xuống, còn đây là khối lượng đều.
+- **RSS cao của Server GC không có nghĩa là xấu.** Theo tài liệu, Server GC nhắm vào throughput, coi tiến trình của mình là tiến trình chủ đạo trên máy, mỗi CPU logic một heap (máy này 10) và nới heap khi còn bộ nhớ. Đặt thêm `DOTNET_GCHeapCount=2` thì ra khoảng 100 MiB và 4 lần GC. Trong container, giới hạn heap mặc định là 75% giới hạn bộ nhớ. Chạy hàng trăm bản thì tài liệu khuyên Workstation tắt concurrent.
 - **Phần RSS có sẵn là runtime.** Trước khi chạy việc, CoreCLR và JIT đã chiếm khoảng 39 MiB, Rust khoảng 1,5 MiB. NativeAOT có thể cho số khác; lab chưa đo.
 
-Thời gian chỉ đọc theo hướng. Cùng binary Rust cho 402 ms ở lô này, 208 ms ở lô bảng allocator và 83 ms lúc load khoảng 105; lô đó cho .NET 323, 242 và 232 ms (Workstation, tắt concurrent, Server). Chưa tách được JIT khỏi GC: `DOTNET_TieredCompilation=0` cho một vòng 34 ms so với mặc định 19 ms ở load 100. Nên tôi không nêu «Rust nhanh gấp N lần»; trong workload ngắn này Rust thấp hơn vài lần về thời gian, không suy ra cho service đã warm up. Tổng pause GC đo được là thời gian tường trên máy quá tải, không dùng làm bằng chứng.
+Chỉ nên đọc số thời gian như một xu hướng. Cùng binary Rust cho 402 ms ở lô này, 208 ms ở lô bảng allocator và 83 ms lúc load khoảng 105; lô đó cho .NET 323, 242 và 232 ms (Workstation, tắt concurrent, Server). Chưa tách được JIT khỏi GC: `DOTNET_TieredCompilation=0` cho một vòng 34 ms so với mặc định 19 ms ở load 100. Vì vậy tôi không nêu «Rust nhanh gấp N lần»; trong workload ngắn này Rust thấp hơn vài lần về thời gian, nhưng không thể suy ra điều đó cho service đã warm up. Tổng thời gian pause GC đo được là thời gian thực (wall-clock) trên máy quá tải, không dùng làm bằng chứng.
 
 ## Lifetime nâng cao: `'static`, `Cow`, HRTB, struct tự tham chiếu và Pin
 
@@ -217,7 +217,7 @@ Hai lối ra: `move`, hoặc `thread::scope`, nơi mọi thread kết thúc trư
 
 **`Cow`** là «mượn nếu không phải sửa»: `normalize_memo` trả `Cow::Borrowed` khi ghi chú đã sạch (0 block) và chỉ cấp phát khi phải sửa (1 block). [Bài 61](/articles/rust-toi-uu-co-so-do-clone-cow-batching-copy-p99) bàn kỹ hơn.
 
-**HRTB**: `for<'a> Fn(&'a str) -> &'a str` nghĩa là «đúng với mọi lifetime». Hàm thường như `without_kind` thoả. Closure gán vào biến trước khi dùng thì không: compiler không nối lifetime của kết quả với lifetime của tham số, nên `'1` và `'2` tách rời. Truyền thẳng closure vào `apply_to_both` thì nó lấy chữ ký từ bound và biên dịch được.
+**HRTB**: `for<'a> Fn(&'a str) -> &'a str` nghĩa là «đúng với mọi lifetime». Hàm thường như `without_kind` thoả. Closure gán vào biến trước khi dùng thì không: compiler không nối lifetime của kết quả với lifetime của tham số, nên `'1` và `'2` tách rời. Truyền thẳng closure vào `apply_to_both` thì closure lấy chữ ký từ bound và biên dịch được.
 
 ```text
 error: lifetime may not live long enough
@@ -228,7 +228,7 @@ error[E0308]: mismatched types ... one type is more general than the other
 
 Bạn hiếm khi viết `for<'a>` tay: `Fn(&str) -> &str` đã là HRTB ngầm.
 
-**Struct tự tham chiếu** bị từ chối: `first_line: &str` trỏ vào `raw: String` của cùng struct cho E0515 và E0505, vì `raw` bị move trong lúc còn bị mượn.
+**Struct tự tham chiếu** bị từ chối: `first_line: &str` trỏ vào `raw: String` của cùng struct gây ra lỗi E0515 và E0505, vì `raw` bị move trong lúc còn bị mượn.
 
 ```text
 error[E0515]: cannot return value referencing function parameter `raw`
@@ -273,17 +273,17 @@ DOTNET_gcServer=1 /usr/bin/time -l examples/toi-noi-rust/59-memory-allocator/tar
 
 Bài 01 ghi tiêu chí «Độ trễ p99 và bộ nhớ dễ đoán», gọi phần so với .NET là **xu hướng, chưa đo**, và hẹn số ở lộ trình nâng cao. Số liệu ủng hộ được hai câu hẹp, đều về nửa bộ nhớ:
 
-- Cả hai ngôn ngữ cấp phát cỡ 6 MB mỗi vòng. Rust cho đọc thời điểm trả bộ nhớ cho allocator ngay trong code và đếm từng block; .NET đếm được tổng byte và cho tinh chỉnh số lần thu gom.
-- Tiến trình Rust nhỏ hơn cỡ một bậc về RSS đỉnh (8,7 so với 72 đến 161 MiB). Ở Workstation, hơn nửa chênh lệch là runtime có sẵn, phần còn lại là heap GC chủ động giữ. Lợi ích thật khi chạy nhiều bản nhỏ; mức sàn của .NET sau tinh chỉnh thì lab chưa đo.
+- Cả hai ngôn ngữ cấp phát cỡ 6 MB mỗi vòng. Rust cho phép đọc ra thời điểm trả bộ nhớ cho allocator ngay trong code và đếm từng block; .NET đếm được tổng byte và cho phép tinh chỉnh số lần thu gom.
+- Tiến trình Rust nhỏ hơn cỡ một bậc độ lớn về RSS đỉnh (8,7 so với 72 đến 161 MiB). Ở Workstation, hơn nửa chênh lệch là runtime có sẵn, phần còn lại là heap GC chủ động giữ. Lợi ích này có thật khi chạy nhiều bản nhỏ; mức sàn của .NET sau tinh chỉnh thì lab chưa đo.
 
-Số liệu **không** nói p99 của service (chưa đo độ trễ đuôi dưới tải thật), không nói .NET thiếu cho sổ cái (một lượt 6 MB nằm dưới ngân sách gen0 nên không nói gì về GC khi chạy dài), và không nói allocator nào hợp service thật. Nói gọn: nó ủng hộ nửa bộ nhớ của tiêu chí, ở mức «bộ nhớ nhỏ và đếm được», và chưa nói gì về nửa độ trễ p99. Quyết định bài 01 không đổi vì ba tiêu chí còn lại không phụ thuộc số này; điều kiện xét lại của bài 01 (.NET đáp ứng p99 và bộ nhớ theo số đo trên cùng tải) vẫn còn nguyên.
+Số liệu **không** nói p99 của service (chưa đo độ trễ đuôi dưới tải thật), không nói rằng .NET không đáp ứng được nhu cầu của sổ cái (một lượt 6 MB nằm dưới ngân sách gen0 nên không nói gì về GC khi chạy dài), và không nói allocator nào hợp service thật. Nói gọn: số liệu ủng hộ nửa bộ nhớ của tiêu chí, ở mức «bộ nhớ nhỏ và đếm được», và chưa nói gì về nửa độ trễ p99. Quyết định bài 01 không đổi vì ba tiêu chí còn lại không phụ thuộc số này; điều kiện xét lại của bài 01 (.NET đáp ứng p99 và bộ nhớ theo số đo trên cùng tải) vẫn còn nguyên.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
 <p>Máy dùng chung, load average tới vài trăm: số thời gian đo trên máy viết bài, không phải SLA. Mọi số đo trên một máy macOS arm64, chưa đo Linux. Workload hư cấu, thuần bộ nhớ, chưa có PostgreSQL, Kafka hay request đồng thời. Hai chương trình không giống hệt, như đã nêu.</p>
 </div>
 
-**Bài tập:** bạn muốn thử `mimalloc` trên service thật. Nêu ba việc để kết luận có nghĩa, và một kết luận không được rút từ một lần chạy.
+**Bài tập:** bạn muốn thử `mimalloc` trên service thật. Nêu ba việc cần làm để kết luận có ý nghĩa, và một kết luận không được rút ra từ một lần chạy.
 
 <details><summary>Xem lời giải</summary><p>Chạy xen kẽ nhiều lần, ghi load. So cả RSS đỉnh lẫn thời gian, kiểm nghiệp vụ không đổi. Đo trên khối lượng và image gần thật nhất. Không được kết luận «mimalloc nhanh hơn X%» từ một lần chạy.</p></details>
 

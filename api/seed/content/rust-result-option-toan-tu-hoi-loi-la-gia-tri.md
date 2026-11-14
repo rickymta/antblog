@@ -1,7 +1,7 @@
 ---
 slug: rust-result-option-toan-tu-hoi-loi-la-gia-tri
 title: "Result, Option và toán tử ?: lỗi là giá trị, không phải exception"
-summary: "Bài 07: Rust không có exception. Dùng Result, Option và ? để bút toán lệch tổng trả Err(Unbalanced), ghi trùng idempotency key trả bút toán cũ, và phân biệt lỗi nghiệp vụ với bug (panic)."
+summary: "Bài 07: Rust không có exception. Dùng Result, Option và ? để bút toán lệch tổng thì trả Err(Unbalanced), ghi trùng idempotency key thì trả bút toán cũ, và phân biệt lỗi nghiệp vụ với bug (panic)."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, error-handling, result]
@@ -10,7 +10,7 @@ language: vi
 
 Đây là bài 07 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Mỗi bài có một crate lab độc lập trong `examples/toi-noi-rust/`; bài này chỉ dùng thư viện chuẩn.
 
-Service Payment gửi sang sổ cái một bút toán có hai posting: khách -25.500 và tài xế +25.000. Lệch 500 đồng. Sổ cái không được ghi bút toán này, cũng không được sập vì nó; nó phải trả về một câu trả lời rõ ràng để bên gọi biết cần sửa gì. Bài này xem Rust diễn đạt câu trả lời đó thế nào khi ngôn ngữ không có `try/catch`.
+Service Payment gửi sang sổ cái một bút toán có hai posting: khách -25.500 và tài xế +25.000. Lệch 500 đồng. Sổ cái không được ghi bút toán này, cũng không được sập vì bút toán đó; sổ cái phải trả về một câu trả lời rõ ràng để bên gọi biết cần sửa gì. Bài này xem Rust diễn đạt câu trả lời đó thế nào khi ngôn ngữ không có `try/catch`.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Service Payment gửi sang sổ cái một bút toán có hai posting: khách -2
 
 ## Rust không có exception, vậy lỗi đi đâu?
 
-Rust không có `throw` và `catch`. Một hàm có thể thất bại nói điều đó ngay trong chữ ký bằng kiểu `Result<T, E>`: hoặc `Ok(T)` mang kết quả, hoặc `Err(E)` mang lỗi. Tương tự, `Option<T>` là `Some(T)` hoặc `None`. Cả hai là **enum** thường, giống enum bài 05; không có cơ chế đặc biệt nào đứng sau. Muốn lấy giá trị ra, bạn phải xử lý cả hai nhánh, vì `match` trên enum phải vét cạn.
+Rust không có `throw` và `catch`. Hàm nào có thể thất bại sẽ nói điều đó ngay trong chữ ký bằng kiểu `Result<T, E>`: hoặc `Ok(T)` mang kết quả, hoặc `Err(E)` mang lỗi. Tương tự, `Option<T>` là `Some(T)` hoặc `None`. Cả hai là **enum** thông thường, giống enum ở bài 05; không có cơ chế đặc biệt nào đứng sau. Muốn lấy giá trị ra, bạn phải xử lý cả hai nhánh, vì `match` trên enum phải vét cạn.
 
 Rust vẫn có `panic!`, dành cho bug chứ không phải luồng điều khiển thông thường (mục «Khi nào Err, khi nào panic?»). Đối chiếu với loạt C#:
 
@@ -35,7 +35,7 @@ Rust vẫn có `panic!`, dành cho bug chứ không phải luồng điều khi�
 
 ## Option cho «không có», Result cho «có nhưng thất bại»
 
-Tra số dư một tài khoản không tồn tại là chuyện bình thường, nên hàm trả `Option`. Đừng dùng giá trị canh như `-1` hay chuỗi rỗng: `-1` là một số dư hợp lệ của ví khách, và compiler không nhắc bạn kiểm tra nó.
+Tra số dư một tài khoản không tồn tại là chuyện bình thường, nên hàm trả `Option`. Đừng dùng giá trị đánh dấu đặc biệt (sentinel) như `-1` hay chuỗi rỗng: `-1` là một số dư hợp lệ của ví khách, và compiler không nhắc bạn kiểm tra nó.
 
 ```rust
 // src/main.rs (rút gọn từ impl Ledger)
@@ -49,7 +49,7 @@ fn require_balance(&self, account: &str) -> Result<Money, LedgerError> {
 }
 ```
 
-`ok_or_else` đổi `None` thành `Err` khi caller coi tài khoản thiếu là lỗi. Kết quả thật của lab:
+`ok_or_else` đổi `None` thành `Err` khi caller coi tài khoản thiếu là lỗi. Kết quả chạy thật của lab:
 
 ```text
 balance(driver:DR-001) = Some(Money(20400))
@@ -58,7 +58,7 @@ require_balance(driver:DR-999) = Err(UnknownAccount("driver:DR-999"))
 unwrap_or(Money(0)) chỉ để hiển thị: Money(0)
 ```
 
-`unwrap_or(Money(0))` an toàn khi chỉ để hiển thị. Đừng dùng nó để tính tiền: nó biến tài khoản không tồn tại thành số dư 0 và che mất lỗi nhập sai mã tài khoản.
+`unwrap_or(Money(0))` an toàn khi chỉ để hiển thị. Đừng dùng hàm này để tính tiền: hàm đó biến tài khoản không tồn tại thành số dư 0 và che mất lỗi nhập sai mã tài khoản.
 
 ## Lỗi nghiệp vụ của sổ cái là một enum
 
@@ -81,7 +81,7 @@ enum LedgerError {
 }
 ```
 
-Ngoài bốn biến thể nghiệp vụ, lab thêm `InvalidAmount` cho việc đọc số tiền từ chuỗi (mục `From` bên dưới). Để dùng với `Box<dyn Error>` và các thư viện, kiểu lỗi cần `Display` và `std::error::Error`. Bài này viết tay để thấy cơ chế; bài 17 sẽ dùng `thiserror` sinh các impl này.
+Ngoài bốn biến thể nghiệp vụ, lab thêm `InvalidAmount` cho việc đọc số tiền từ chuỗi (mục `From` bên dưới). Để dùng với `Box<dyn Error>` và các thư viện, kiểu lỗi cần `Display` và `std::error::Error`. Bài này viết tay để thấy cơ chế; bài 17 sẽ dùng `thiserror` để sinh các impl này.
 
 ```rust
 // src/main.rs (rút gọn: bỏ ba nhánh UnknownAccount, DuplicateIdempotencyKey, InvalidAmount)
@@ -118,7 +118,7 @@ impl JournalEntry {
 }
 ```
 
-Dùng `checked_add` thay cho `+` là quyết định từ bài 03: phép `+` tràn sẽ panic ở bản debug và quay vòng ở bản release. Ở đây tràn là `Err(Overflow)`, ghi rõ trong chữ ký. Với bút toán lệch và bút toán tràn, lab in:
+Dùng `checked_add` thay cho `+` là quyết định đã chốt từ bài 03: phép `+` tràn sẽ panic ở bản debug và quay vòng ở bản release. Ở đây tràn là `Err(Overflow)`, ghi rõ trong chữ ký. Với bút toán lệch và bút toán tràn, lab in:
 
 ```text
 == 2. Lệch tổng ==
@@ -129,7 +129,7 @@ Err: tổng tiền tràn i64  (Debug: Overflow)
 
 ## Toán tử ? làm gì và vì sao main phải trả Result?
 
-Viết `match` cho mọi lời gọi sẽ rất dài. Toán tử `?` đặt sau một biểu thức `Result` làm hai việc: nếu `Ok(v)` thì lấy `v` và chạy tiếp; nếu `Err(e)` thì **return ngay** khỏi hàm hiện tại với `Err` đó (sau khi đổi kiểu lỗi qua `From`, xem mục sau). Hiểu gần đúng, `x?` là `match x { Ok(v) => v, Err(e) => return Err(From::from(e)) }`.
+Viết `match` cho mọi lời gọi sẽ rất dài. Toán tử `?` đặt sau một biểu thức `Result` làm hai việc: nếu `Ok(v)` thì lấy `v` và chạy tiếp; nếu `Err(e)` thì **return ngay** khỏi hàm hiện tại với `Err` đó (sau khi đổi kiểu lỗi qua `From`, xem mục sau). Hiểu gần đúng thì `x?` tương đương `match x { Ok(v) => v, Err(e) => return Err(From::from(e)) }`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -138,7 +138,7 @@ Viết `match` cho mọi lời gọi sẽ rất dài. Toán tử `?` đặt sau 
 <figcaption>Hình 1. Result là ngã ba Ok hoặc Err. Dấu <code>?</code> giữ nhánh Ok chạy tiếp và đưa nhánh Err về thẳng caller, sau khi đổi kiểu lỗi qua <code>From</code>.</figcaption>
 </figure>
 
-Vì `?` có thể return, hàm chứa nó phải có kiểu trả về nhận được lỗi đó. Thử dùng `?` trong `main` không có kiểu trả về:
+Vì `?` có thể return, hàm chứa nó phải có kiểu trả về có thể nhận lỗi đó. Thử dùng `?` trong `main` không có kiểu trả về:
 
 ```rust
 // Lỗi E0277 nếu viết thế này (đoạn thử riêng, không nằm trong lab):
@@ -158,7 +158,7 @@ error[E0277]: the `?` operator can only be used in a function that returns `Resu
   |                                     ^ cannot use the `?` operator in a function that returns `()`
 ```
 
-Cách sửa là cho `main` trả `Result<(), Box<dyn Error>>`. `Box<dyn Error>` nhận được mọi kiểu lỗi có `Error` impl (bao gồm `LedgerError`), nên `?` trong `main` dùng được với nhiều loại lỗi. Khi `main` trả `Err`, chương trình in `Error: ` kèm dạng Debug của lỗi rồi thoát với mã 1:
+Cách sửa là cho `main` trả về `Result<(), Box<dyn Error>>`. `Box<dyn Error>` nhận được mọi kiểu lỗi đã cài đặt `Error` (bao gồm `LedgerError`), nên `?` trong `main` dùng được với nhiều loại lỗi. Khi `main` trả `Err`, chương trình in `Error: ` kèm dạng Debug của lỗi rồi thoát với mã 1:
 
 ```rust
 // src/main.rs (rút gọn nhánh --main-error)
@@ -179,7 +179,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 Error: InvalidAmount("invalid digit found in string")
 ```
 
-`?` cũng dùng được trên `Option` trong hàm trả `Option`, nhưng không trộn hai loại: `?` trên `Option` trong hàm trả `Result` bị E0277 như câu hỏi đầu bài. Phải viết `.ok_or(...)?` để chọn lỗi.
+`?` cũng dùng được trên `Option` trong hàm trả `Option`, nhưng không trộn hai loại: `?` trên `Option` trong hàm trả `Result` bị E0277 như trong câu hỏi đầu bài. Phải viết `.ok_or(...)?` để chọn lỗi.
 
 ## From: để ? đổi kiểu lỗi giúp bạn
 
@@ -212,7 +212,7 @@ fn parse_amount(text: &str) -> Result<Money, LedgerError> {
 }
 ```
 
-Cách viết thủ công cho cùng kết quả dùng `map_err`, tiện khi bạn không muốn (hoặc không thể) thêm `impl From`:
+Cách viết thủ công cho cùng kết quả là dùng `map_err`, tiện khi bạn không muốn (hoặc không thể) thêm `impl From`:
 
 ```rust
 // src/main.rs
@@ -224,7 +224,7 @@ fn parse_amount_explicit(text: &str) -> Result<Money, LedgerError> {
 }
 ```
 
-Để nối nhiều bước không cần `match`, dùng `and_then` (chạy bước tiếp nếu `Ok`) và `map` (đổi giá trị trong `Ok`). Ví dụ đọc một dòng `account=amount`:
+Để nối nhiều bước mà không cần `match`, hãy dùng `and_then` (chạy bước tiếp nếu `Ok`) và `map` (đổi giá trị trong `Ok`). Ví dụ đọc một dòng `account=amount`:
 
 ```rust
 // src/main.rs
@@ -263,13 +263,13 @@ Quy tắc dùng trong cả loạt: **`Err` cho tình huống nghiệp vụ dự 
 | Tình huống | Err hay panic | Lý do |
 | --- | --- | --- |
 | Bút toán -25.500 và +25.000 | `Err(Unbalanced { diff: -500 })` | Dữ liệu từ service khác; caller phải từ chối hoặc sửa |
-| Cộng tiền vượt `i64::MAX` | `Err(Overflow)` | Sổ cái không được sai âm thầm; số liệu cực đoan có thể đến từ ngoài |
-| Ghi lần hai cùng idempotency key | `Err(DuplicateIdempotencyKey)` | Retry là chuyện bình thường của hệ phân tán |
+| Cộng tiền vượt `i64::MAX` | `Err(Overflow)` | Sổ cái không được sai mà không báo lỗi; số liệu cực đoan có thể đến từ ngoài |
+| Ghi lần hai cùng idempotency key | `Err(DuplicateIdempotencyKey)` | Retry (gọi lại) là chuyện bình thường của hệ thống phân tán |
 | Chuỗi số tiền «25.500» | `Err(InvalidAmount)` | Đầu vào của người dùng hoặc service ngoài |
 | Key vừa báo trùng nhưng không có trong bảng `keys` | `panic!` qua `expect` | Chỉ xảy ra nếu code sai; không có cách xử lý hợp lý |
 | Tài khoản phải có từ lúc khởi tạo sổ nhưng thiếu | `panic!` | Invariant của chính chương trình bị phá |
 
-`unwrap()` và `expect("...")` lấy giá trị ra hoặc panic. Dùng chúng trong test, trong bản thử nhanh, hoặc khi bạn chứng minh được `None`/`Err` không thể xảy ra. Khi dùng cho trường hợp sau, viết lý do vào `expect` như trong lab; dòng đó sẽ là thông báo của lỗi:
+`unwrap()` và `expect("...")` lấy giá trị ra hoặc panic. Dùng chúng trong test, trong mã thử nghiệm nhanh (prototype), hoặc khi bạn chứng minh được `None`/`Err` không thể xảy ra. Khi dùng cho trường hợp sau, viết lý do vào `expect` như trong lab; dòng đó sẽ trở thành thông báo lỗi:
 
 ```rust
 // src/main.rs (rút gọn nhánh --panic-demo)
@@ -285,11 +285,11 @@ tài khoản phải được khai báo khi tạo sổ
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
 
-Trong ngoặc là mã thread, đổi mỗi lần chạy nên bài lược đi; `489:18` là vị trí `expect` trong `src/main.rs` của lab. Chương trình thoát với mã 101. Đừng dùng `unwrap` trên dữ liệu bên ngoài (chuỗi từ API, dòng trong file): một đầu vào xấu sẽ làm sập cả service.
+Số trong ngoặc là mã định danh của thread, đổi mỗi lần chạy nên bài lược đi; `489:18` là vị trí `expect` trong `src/main.rs` của lab. Chương trình thoát với mã 101. Đừng dùng `unwrap` trên dữ liệu bên ngoài (chuỗi từ API, dòng trong file): một đầu vào xấu sẽ làm sập cả service.
 
 ## Ghi lần hai cùng key: một lỗi mà caller xử lý được
 
-`Ledger::post` trả `Err(DuplicateIdempotencyKey)` khi key `trip:TN-0001:capture` đã dùng. Hàm cũng tính số dư mới vào một bảng tạm trước, chỉ ghi vào sổ khi mọi posting hợp lệ; nên `?` đẩy lỗi `UnknownAccount` hay `Overflow` ra giữa chừng không để sổ nửa vời. `post_idempotent` bọc lại để caller nhận id của bút toán cũ:
+`Ledger::post` trả `Err(DuplicateIdempotencyKey)` khi key `trip:TN-0001:capture` đã dùng. Hàm này cũng tính số dư mới vào một bảng tạm trước, và chỉ ghi vào sổ khi mọi posting hợp lệ; nên khi `?` trả lỗi `UnknownAccount` hay `Overflow` giữa chừng, sổ không bị ghi dở. `post_idempotent` bọc lại để caller nhận id của bút toán cũ:
 
 ```rust
 // src/main.rs
@@ -307,7 +307,7 @@ fn post_idempotent(&mut self, key: &str, entry: JournalEntry) -> Result<EntryId,
 }
 ```
 
-Chỗ này cho thấy cả hai cách cùng tồn tại: `match` bắt đúng một biến thể `Err` mà ta xử lý được, còn `expect` giữ cho dòng vô lý (key vừa báo trùng lại không tồn tại) thành bug. Kết quả của lab:
+Chỗ này cho thấy cả hai cách cùng tồn tại: `match` bắt đúng một biến thể `Err` mà ta xử lý được, còn `expect` coi trường hợp vô lý (key vừa báo trùng lại không tồn tại) là bug. Kết quả của lab:
 
 ```text
 == 4. Idempotency ==
@@ -315,7 +315,7 @@ post lần 2: Err(DuplicateIdempotencyKey("trip:TN-0001:capture"))
 post_idempotent lần 2: JE-000001 (entry cũ, sổ vẫn 1 bút toán)
 ```
 
-Idempotency thật phải bền qua restart và đúng khi có hai request đồng thời; phần đó cần ràng buộc unique trong database, xem [bài transaction và idempotency của loạt .NET](/articles/dotnet10-transaction-concurrency-idempotency) và P03 của loạt Rust.
+Idempotency thật phải bền qua lần khởi động lại và đúng khi có hai yêu cầu đồng thời; phần đó cần ràng buộc unique trong database, xem [bài transaction và idempotency của loạt .NET](/articles/dotnet10-transaction-concurrency-idempotency) và P03 của loạt Rust.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -329,13 +329,13 @@ cargo run --manifest-path examples/toi-noi-rust/07-result-option/Cargo.toml -- -
 cargo run --manifest-path examples/toi-noi-rust/07-result-option/Cargo.toml -- --panic-demo
 ```
 
-`--verify` assert các ca của bài và in:
+`--verify` dùng assert để kiểm tra các test case của bài và in:
 
 ```text
 VERIFY OK (32 kiểm tra)
 ```
 
-Các ca gồm `Unbalanced { diff: -500 }`, `Overflow` ở mức `try_new` lẫn số dư, `DuplicateIdempotencyKey` với số dư không đổi, `UnknownAccount` không để lại số dư sửa dở, `InvalidAmount` từ `From`. Kiểm tra sai thì `main` trả `Err`, in `Error: VERIFY FAIL: ...` và thoát mã 1. `cargo test` chạy lại chính các kiểm tra này. `--main-error` thoát mã 1 và `--panic-demo` thoát mã 101, cả hai là chủ ý.
+Các test case gồm `Unbalanced { diff: -500 }`, `Overflow` ở mức `try_new` lẫn số dư, `DuplicateIdempotencyKey` với số dư không đổi, `UnknownAccount` không để lại số dư sửa dở, `InvalidAmount` từ `From`. Kiểm tra sai thì `main` trả `Err`, in `Error: VERIFY FAIL: ...` và thoát mã 1. `cargo test` chạy lại chính các kiểm tra này. `--main-error` thoát mã 1 và `--panic-demo` thoát mã 101, cả hai là chủ ý.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
@@ -344,7 +344,7 @@ Các ca gồm `Unbalanced { diff: -500 }`, `Overflow` ở mức `try_new` lẫn 
 **Bài tập:** thêm biến thể `LedgerError::EmptyEntry` cho bút toán không có posting nào hoặc chỉ có một posting. Bạn phải sửa những chỗ nào, và compiler giúp gì?
 
 <details><summary>Xem lời giải</summary>
-<p>Thêm biến thể vào enum, rồi chạy <code>cargo build</code>: rustc báo E0004 «non-exhaustive patterns: <code>&amp;LedgerError::EmptyEntry</code> not covered» tại <code>match self</code> trong <code>impl Display</code>, buộc bạn thêm nhánh, ví dụ <code>LedgerError::EmptyEntry =&gt; write!(f, "bút toán phải có ít nhất 2 posting")</code>. Cuối cùng thêm vào đầu <code>try_new</code>: <code>if postings.len() &lt; 2 { return Err(LedgerError::EmptyEntry); }</code>. Khi thử trên bản sao của lab, 32 kiểm tra cũ vẫn đạt vì mọi ca cũ đều có từ hai posting trở lên. Đó là lợi ích của enum vét cạn: thêm một loại lỗi thì compiler chỉ ra mọi nơi cần xử lý.</p>
+<p>Thêm biến thể vào enum, rồi chạy <code>cargo build</code>: rustc báo E0004 «non-exhaustive patterns: <code>&amp;LedgerError::EmptyEntry</code> not covered» tại <code>match self</code> trong <code>impl Display</code>, buộc bạn thêm nhánh, ví dụ <code>LedgerError::EmptyEntry =&gt; write!(f, "bút toán phải có ít nhất 2 posting")</code>. Cuối cùng thêm vào đầu <code>try_new</code>: <code>if postings.len() &lt; 2 { return Err(LedgerError::EmptyEntry); }</code>. Khi thử trên bản sao của lab, 32 kiểm tra cũ vẫn đạt vì mọi test case cũ đều có từ hai posting trở lên. Đó là lợi ích của enum vét cạn: thêm một loại lỗi thì compiler chỉ ra mọi nơi cần xử lý.</p>
 </details>
 
 Bài trước: [bài 06](/articles/rust-ham-dieu-kien-vong-lap-iterator-so-du). Bài tiếp: [bài 08](/articles/rust-string-str-ngay-gio-dinh-dang-tien).

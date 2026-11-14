@@ -1,0 +1,257 @@
+{
+  "file": "rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version.md",
+  "edits": [
+    {
+      "old": "bảng đo sáu thay đổi schema,",
+      "new": "bảng đo kết quả của sáu thay đổi schema,",
+      "reason": "Cụm cụt, thiếu rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "người đọc nó sẽ viết bằng nhiều ngôn ngữ",
+      "new": "các consumer đọc sự kiện này sẽ viết bằng nhiều ngôn ngữ",
+      "reason": "Người đọc nó mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "cho gọn là lỗi không nằm ở compiler của nhóm nào.",
+      "new": "cho gọn thì không compiler nào của các nhóm bắt được lỗi đó.",
+      "reason": "Câu dài, rối, chủ ngữ vế lỗi không rõ",
+      "severity": "high"
+    },
+    {
+      "old": "Bài đưa sự kiện thành hợp đồng",
+      "new": "Bài này đưa sự kiện thành hợp đồng",
+      "reason": "Thiếu chủ ngữ rõ",
+      "severity": "low"
+    },
+    {
+      "old": "Nó nối [bài 35](/articles/rust-tonic-grpc-get-balance-post-entry-interop-dotnet)",
+      "new": "Bài này nối tiếp [bài 35](/articles/rust-tonic-grpc-get-balance-post-entry-interop-dotnet)",
+      "reason": "Tránh Nó chỉ sự vật ở đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Consumer cũ đọc byte do producer mới ghi: nó báo lỗi",
+      "new": "Consumer cũ đọc byte do producer mới ghi: consumer đó báo lỗi",
+      "reason": "Nhắc lại danh từ thay cho nó",
+      "severity": "low"
+    },
+    {
+      "old": "số 2 vắng mặt nên cả hai dòng có ",
+      "new": "số 2 vắng mặt, nên cả hai dòng đều có ",
+      "reason": "Cả hai dòng không rõ chỉ gì",
+      "severity": "medium"
+    },
+    {
+      "old": "số đo ở mục sáu thay đổi.",
+      "new": "số đo nằm ở mục «Sáu thay đổi schema».",
+      "reason": "Tên mục không rõ, dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "nên thêm trường là phải có tệp schema mới; tệp này kiểm đầu ra của producer, không để consumer đọc.",
+      "new": "nên muốn thêm trường thì phải có tệp schema mới; tệp này dùng để kiểm đầu ra của producer, không phải để consumer đọc.",
+      "reason": "Câu cụt, thiếu liên kết",
+      "severity": "medium"
+    },
+    {
+      "old": "sinh kiểu có kiểu bằng ",
+      "new": "sinh các kiểu Rust tương ứng bằng ",
+      "reason": "Kiểu có kiểu tự ghép, khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "nên máy không cần cài gì.",
+      "new": "nên máy không cần cài thêm gì.",
+      "reason": "Tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Cả ba nhận cùng danh sách ca,",
+      "new": "Cả ba nhận cùng danh sách test case,",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Dạng chuỗi chuẩn lại không thuộc schema thuần",
+      "new": "Dạng chuỗi chuẩn lại không hợp lệ với schema thuần",
+      "reason": "Không thuộc gượng",
+      "severity": "low"
+    },
+    {
+      "old": "đọc được nhưng sai âm thầm",
+      "new": "đọc được nhưng sai mà không báo",
+      "reason": "Calque âm thầm",
+      "severity": "medium"
+    },
+    {
+      "old": "nâng theo thứ tự nào cũng được. Luôn nói rõ cho dạng nhị phân hay JSON.",
+      "new": "nâng theo thứ tự nào cũng được. Luôn nói rõ là áp dụng cho dạng nhị phân hay JSON.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Tên BACKWARD và FORWARD theo schema nào đọc dữ liệu của schema nào, không theo thời gian.",
+      "new": "Tên BACKWARD và FORWARD đặt theo việc schema nào đọc dữ liệu của schema nào, không đặt theo thời gian.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Cả bốn reader cho cùng mã ở cả 36 ô;",
+      "new": "Cả bốn reader cho cùng mã kết quả ở cả 36 ô;",
+      "reason": "Mã không rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "Đổi tên và đổi số là hai mặt của một gương.",
+      "new": "Đổi tên và đổi số là hai mặt đối xứng nhau.",
+      "reason": "Ẩn dụ gương dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "mà không thư viện nào kêu;",
+      "new": "mà không thư viện nào báo lỗi;",
+      "reason": "Kêu là khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "dùng lại số 6 làm ",
+      "new": "dùng lại số 6 khiến ",
+      "reason": "Làm gây hiểu nhầm nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "Có hai dòng đó, `protoc` từ chối dùng lại số:",
+      "new": "Khi có hai dòng đó, `protoc` từ chối cho dùng lại số:",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "ô `LOSS` ở trên là hậu quả.",
+      "new": "ô `LOSS` ở trên là hậu quả của việc đó.",
+      "reason": "Thiếu bổ ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "Enum thêm giá trị là bẫy ở consumer.",
+      "new": "Thêm giá trị cho enum là cái bẫy phía consumer.",
+      "reason": "Trật tự từ kiểu Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "và code của nó phải có nhánh mặc định",
+      "new": "và code của consumer phải có nhánh mặc định",
+      "reason": "Nhắc lại danh từ thay cho nó",
+      "severity": "low"
+    },
+    {
+      "old": "Ba mức chính theo Hình 2:",
+      "new": "Ba mức chính như ở Hình 2:",
+      "reason": "Theo gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Mức thường chỉ so với phiên bản liền trước;",
+      "new": "Các mức thường chỉ so với phiên bản ngay trước đó;",
+      "reason": "Liền trước không tự nhiên",
+      "severity": "medium"
+    },
+    {
+      "old": "báo từng phát hiện kèm chiều và dạng nó phá:",
+      "new": "báo từng phát hiện, kèm chiều và dạng dữ liệu bị phá:",
+      "reason": "Cụm cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Test so checker với kết quả reader Rust đo thật trên sáu cặp",
+      "new": "Test đối chiếu checker với kết quả reader Rust đo thật trên sáu cặp",
+      "reason": "So gượng",
+      "severity": "low"
+    },
+    {
+      "old": "vì từ descriptor nó không phân biệt",
+      "new": "vì chỉ nhìn descriptor thì checker không phân biệt được",
+      "reason": "Nó mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai cột thứ tự rút từ chính bảng đo",
+      "new": "Hai cột thứ tự được rút ra từ chính bảng đo",
+      "reason": "Thiếu từ",
+      "severity": "low"
+    },
+    {
+      "old": "ở nhị phân nghĩa là thư viện không báo lỗi, không phải nghiệp vụ không đổi:",
+      "new": "ở nhị phân nghĩa là thư viện không báo lỗi, chứ không có nghĩa là nghiệp vụ không đổi:",
+      "reason": "Vế phủ định khó đọc",
+      "severity": "medium"
+    },
+    {
+      "old": "Với JSON, cho consumer bỏ qua trường lạ ngay từ đầu thì",
+      "new": "Với JSON, nếu để consumer bỏ qua trường lạ ngay từ đầu thì",
+      "reason": "Thiếu từ điều kiện",
+      "severity": "low"
+    },
+    {
+      "old": "hợp với thay đổi cộng thêm:",
+      "new": "phù hợp với thay đổi cộng thêm:",
+      "reason": "Tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Nó không cứu được thay đổi vỡ dây",
+      "new": "Cách này không cứu được thay đổi vỡ dây",
+      "reason": "Nó chỉ không rõ",
+      "severity": "medium"
+    },
+    {
+      "old": "mà giải mã đã sai hoặc lỗi.",
+      "new": "mà lúc đó giải mã đã sai hoặc đã báo lỗi.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "message cũ sống đến hết retention",
+      "new": "message cũ còn tồn tại đến hết retention",
+      "reason": "Sống ẩn dụ",
+      "severity": "low"
+    },
+    {
+      "old": "(dòng 4 có lời lỗi thật của JSON Schema)",
+      "new": "(dòng 4 có thông báo lỗi thật của JSON Schema)",
+      "reason": "Lời lỗi gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "thì thoát mã khác 0.",
+      "new": "thì thoát với mã khác 0.",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "Sáu thay đổi là kiểu hay gặp, không phải mọi kiểu",
+      "new": "Sáu thay đổi này là những kiểu hay gặp, không phải mọi kiểu thay đổi",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "(cùng số field) vì ",
+      "new": "(cùng số field), với lý do ",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "mới ra 9223372036854763058",
+      "new": "mới cho ra 9223372036854763058",
+      "reason": "Ra thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "Checker so loại trường nên báo",
+      "new": "Checker so kiểu của trường nên báo",
+      "reason": "Thống nhất kiểu",
+      "severity": "medium"
+    }
+  ]
+}

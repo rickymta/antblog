@@ -1,0 +1,161 @@
+{
+ "file": "rust-typestate-may-trang-thai-thanh-toan.md",
+ "edits": [
+  {
+   "old": "match trả Result, rồi",
+   "new": "match trả về Result, rồi",
+   "reason": "Thiếu từ 'về'",
+   "severity": "low"
+  },
+  {
+   "old": "Khác `Option` ở bài 05, hàm trả `Result`",
+   "new": "Khác với `Option` ở bài 05, hàm trả về `Result`",
+   "reason": "Câu cụt, thiếu 'với' và 'về'",
+   "severity": "low"
+  },
+  {
+   "old": "Nó không chiếm byte nào:",
+   "new": "Trường này không chiếm byte nào:",
+   "reason": "Tránh 'Nó' chỉ sự vật trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Bảng này dễ test: lab duyệt đủ 30 cặp",
+   "new": "Bảng này dễ test: lab duyệt qua đủ 30 cặp",
+   "reason": "Tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "nó chỉ trả `Payment<Captured>` khi",
+   "new": "hàm chỉ trả `Payment<Captured>` khi",
+   "reason": "Tránh 'nó' chỉ sự vật",
+   "severity": "low"
+  },
+  {
+   "old": "vì khách mới yêu cầu còn VíXanh chưa hoàn.",
+   "new": "vì khách mới yêu cầu, còn VíXanh chưa hoàn tiền.",
+   "reason": "Hai vế dính nhau, thiếu dấu ngắt và tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Huỷ giao dịch (`fail`) hợp lệ từ hai trạng thái.",
+   "new": "Việc huỷ giao dịch (`fail`) hợp lệ từ hai trạng thái.",
+   "reason": "Thiếu danh từ hoá chủ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "## Lỗi compile thật:",
+   "new": "## Lỗi biên dịch thật:",
+   "reason": "Thống nhất 'biên dịch' trong bài",
+   "severity": "medium"
+  },
+  {
+   "old": "Thông điệp thật của rustc 1.98.1:",
+   "new": "Thông báo lỗi thật của rustc 1.98.1:",
+   "reason": "'Thông điệp' dùng cho message Kafka; ở đây là thông báo lỗi",
+   "severity": "low"
+  },
+  {
+   "old": "Thu hai lần trong cùng một đoạn code cũng bị chặn",
+   "new": "Thu tiền hai lần trong cùng một đoạn code cũng bị chặn",
+   "reason": "'Thu hai lần' cụt, thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Thông điệp ở trên đến từ biên dịch file nháp",
+   "new": "Thông báo lỗi ở trên đến từ việc biên dịch file nháp",
+   "reason": "Thống nhất 'thông báo lỗi'",
+   "severity": "low"
+  },
+  {
+   "old": "ta cần bước tiếp theo.",
+   "new": "ta cần thêm một bước nữa, trình bày ở mục sau.",
+   "reason": "'bước tiếp theo' không rõ là bước nào",
+   "severity": "high"
+  },
+  {
+   "old": "Khi chạy lab (mục sau), nạp bản ghi `CAPTURED` thành `Payment<Authorized>` cho `Err(WrongState …)`, còn chuỗi `\"AUTHORISED\"` gõ sai cho `Err(UnknownState …)`.",
+   "new": "Khi chạy lab (mục sau), việc nạp bản ghi `CAPTURED` thành `Payment<Authorized>` cho ra `Err(WrongState …)`, còn chuỗi `\"AUTHORISED\"` gõ sai cho ra `Err(UnknownState …)`.",
+   "reason": "Câu thiếu chủ ngữ, 'cho' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "đổi lại chữ ký nặng hơn;",
+   "new": "đổi lại là chữ ký hàm nặng nề hơn;",
+   "reason": "Rõ nghĩa hơn",
+   "severity": "low"
+  },
+  {
+   "old": "Khó: phải kiểm bằng giá trị, trả `Result`",
+   "new": "Khó: phải kiểm tra bằng giá trị rồi trả `Result`",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Test và review phải bắt |",
+   "new": "Test và review phải bắt lỗi |",
+   "reason": "Thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "loại cạnh typestate không chứa nổi",
+   "new": "loại cạnh mà typestate không biểu diễn được",
+   "reason": "Dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Với người từ C#:",
+   "new": "Với người quen dùng C#:",
+   "reason": "Gượng",
+   "severity": "low"
+  },
+  {
+   "old": "không bao hết trường hợp là cảnh báo CS8509, còn Rust với `match` thiếu biến thể là lỗi E0004",
+   "new": "không phủ hết các trường hợp thì bị cảnh báo CS8509, còn trong Rust, `match` thiếu biến thể là lỗi E0004",
+   "reason": "Dịch gượng từ non-exhaustive, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "không chặn được thu hai lần.",
+   "new": "không chặn được việc thu tiền hai lần.",
+   "reason": "'thu hai lần' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "nhờ nó typestate chặn được dùng lại giá trị cũ.",
+   "new": "nhờ đó typestate chặn được việc dùng lại giá trị cũ.",
+   "reason": "Cấu trúc gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm các giá trị này và in",
+   "new": "kiểm tra các giá trị này và in",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Không có đồng thời: hai request",
+   "new": "Không có xử lý đồng thời: hai request",
+   "reason": "Cụm cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "(huỷ giữ tiền, cuối)",
+   "new": "(huỷ giữ tiền, là trạng thái cuối)",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "nói compiler bắt buộc bạn sửa những chỗ nào và chỗ nào bạn có thể quên.",
+   "new": "hãy nêu những chỗ compiler buộc bạn phải sửa và những chỗ bạn có thể quên.",
+   "reason": "Câu mệnh lệnh gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Test đếm cặp đỏ ngay khi",
+   "new": "Test đếm cặp sẽ báo đỏ ngay khi",
+   "reason": "Cụt",
+   "severity": "low"
+  }
+ ]
+}

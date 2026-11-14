@@ -1,7 +1,7 @@
 ---
 slug: rust-tong-hop-ledger-api-postgresql-kafka-end-to-end
 title: "Bài tổng hợp trung bình: ledger-api với PostgreSQL và Kafka chạy end-to-end"
-summary: "Bài 40: gom P03–P04 thành service ledger-api chạy thật. TripCompleted từ Kafka thành bút toán, inbox và outbox cùng transaction, HTTP và gRPC trả số dư, tắt có thứ tự; test chờ sự kiện thật, phát lại và kill giữa chừng."
+summary: "Bài 40: gom P03–P04 thành service ledger-api chạy thật. Biến TripCompleted từ Kafka thành bút toán, inbox và outbox cùng transaction, HTTP và gRPC trả số dư, tắt có thứ tự; test chờ sự kiện thật, phát lại và dừng đột ngột giữa chừng."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, kafka, postgresql, end-to-end]
@@ -58,7 +58,7 @@ Hình 1 vẽ đường đi của một `TripCompleted`. Booking (C#) phát lên 
 <figcaption>Hình 1. Đường đi của một <code>TripCompleted</code>. Khung lớn là phần phải nguyên khối: bút toán, số dư và dòng outbox cùng có hoặc cùng không.</figcaption>
 </figure>
 
-Vài lựa chọn đáng chú ý. Consumer và relay không gọi nhau: consumer chỉ `notify_one()` một `Notify` để relay dậy sớm, còn lại relay tự quét outbox mỗi 200 ms. Số dư không có cache vì bài 28 đã nói Redis không là nguồn sự thật, và lab không cần nó. HTTP và gRPC dùng chung một `Store`, nên hai giao thức không thể trả hai số khác nhau. Key partition là `tripId` ở topic vào và `idempotencyKey` ở topic ra; bài 36 đã giải thích vì sao không lấy id tài khoản, khi một bút toán chạm nhiều tài khoản.
+Vài lựa chọn đáng chú ý. Consumer và relay không gọi nhau: consumer chỉ `notify_one()` một `Notify` để relay dậy sớm, còn lại relay tự quét outbox mỗi 200 ms. Số dư không có cache vì bài 28 đã nói Redis không phải là nguồn dữ liệu gốc, và lab không cần cache. HTTP và gRPC dùng chung một `Store`, nên hai giao thức không thể trả hai số khác nhau. Key partition là `tripId` ở topic vào và `idempotencyKey` ở topic ra; bài 36 đã giải thích vì sao không lấy id tài khoản, khi một bút toán chạm nhiều tài khoản.
 
 ## Transaction nào ghi cả bốn thứ?
 
@@ -87,7 +87,7 @@ pub async fn apply_trip_completed(&self, ev: &TripCompleted) -> Result<Applied, 
 }
 ```
 
-`entry_for_trip` gọi `capture_entry(&charge, &default_policy())` của `ledger-core`: phí 20% của 25.500 là 5.100 và tài xế nhận 20.400, ba posting cộng lại bằng 0. Service không tự tính tiền; nó chỉ ghép sự kiện vào kiểu của lõi. Trigger `postings_balanced` ở `schema.sql` là lớp bảo vệ thứ hai, kiểm lúc commit.
+`entry_for_trip` gọi `capture_entry(&charge, &default_policy())` của `ledger-core`: phí 20% của 25.500 là 5.100 và tài xế nhận 20.400, ba posting cộng lại bằng 0. Service không tự tính tiền mà chỉ ghép sự kiện vào kiểu của lõi. Trigger `postings_balanced` ở `schema.sql` là lớp bảo vệ thứ hai, kiểm lúc commit.
 
 Mọi thứ trong `tx` tự rollback khi `tx` bị drop, kể cả dòng inbox. Đó là lý do inbox nằm **trong** transaction: nếu ghi inbox trước rồi mới ghi bút toán ở transaction khác, một lần chết giữa hai bước sẽ đánh dấu sự kiện là "đã xử lý" mà sổ không có gì.
 
@@ -129,13 +129,13 @@ pub async fn shutdown(mut self) -> ShutdownReport {
 }
 ```
 
-Vì sao hai endpoint sức khoẻ? `/healthz` không hỏi DB hay Kafka: nó chỉ nói process còn chạy, để một lần PostgreSQL chậm không khiến orchestrator giết nhầm. `/readyz` hỏi nhiều hơn: DB trả lời `SELECT 1`, consumer **đã được gán partition**, và chưa bắt đầu tắt. Điều kiện giữa nhận từ `post_rebalance` của `ConsumerContext`. Subscribe xong chưa có nghĩa là nhận được việc, nên cờ này chỉ bật khi broker thật sự giao partition.
+Vì sao hai endpoint sức khoẻ? `/healthz` không hỏi DB hay Kafka: nó chỉ nói process còn chạy, để một lần PostgreSQL chậm không khiến trình điều phối giết nhầm. `/readyz` hỏi nhiều hơn: DB trả lời `SELECT 1`, consumer **đã được gán partition**, và chưa bắt đầu tắt. Điều kiện ở giữa lấy từ `post_rebalance` của `ConsumerContext`. Subscribe xong chưa có nghĩa là nhận được việc, nên cờ này chỉ bật khi broker thật sự giao partition.
 
 `request_id` đi theo hai đường. HTTP: `SetRequestIdLayer` giữ `x-request-id` do client gửi hoặc sinh UUID, `TraceLayer` mở span `http` mang nó, `PropagateRequestIdLayer` trả lại trong response. gRPC: handler đọc metadata `x-request-id` rồi mở span `grpc`. Log JSON mang span ở khoá `span`, nên mọi dòng trong request đều có `request_id`.
 
 ## Kiểm bằng sự kiện thật, không dùng sleep cố định
 
-Test không giả Kafka: nó phát `TripCompleted` thật lên topic `lab.40.<uuid>.trip.completed`, rồi đọc `LedgerEntryPosted` từ topic ra như một service khác. Hàm chờ có hạn chót chứ không ngủ một khoảng cố định:
+Test không giả lập Kafka: nó phát `TripCompleted` thật lên topic `lab.40.<uuid>.trip.completed`, rồi đọc `LedgerEntryPosted` từ topic ra như một service khác. Hàm chờ có hạn chót chứ không ngủ một khoảng cố định:
 
 ```rust
 // src/scenario.rs (rút gọn)
@@ -161,11 +161,11 @@ Từ đó có ba kịch bản:
 - **Phát lại.** Chứng minh "không có gì xảy ra" cần một tín hiệu dương. Test phát lại đúng sự kiện đó, rồi phát tiếp chuyến `TN-0002` làm cột mốc. Topic một partition giữ thứ tự, nên khi `LedgerEntryPosted` của `TN-0002` (`JE-000002`) về, bản phát lại đã được xử lý. Lúc đó sổ có đúng 2 bút toán, inbox có 2 dòng, một bút toán cho key `trip:TN-0001:capture`.
 - **Chết giữa chừng.** Cấu hình có một `Fault` do test đặt. `AfterDbCommitBeforeOffset` làm consumer trả về ngay sau `COMMIT`, không commit offset; test gọi `App::kill` (huỷ cứng mọi task), dựng `App` mới cùng consumer group và chờ kết quả. Bản chạy lại nhận message giao lại, inbox chặn (`duplicates == 1`, `processed == 0`), sổ vẫn một bút toán, số dư tài xế 13.200.
 
-Đây là **giả lập** cái chết, không phải `kill -9` ở thời điểm ngẫu nhiên; đổi lại nó chết đúng khe hở mà ta muốn kiểm, lần nào cũng vậy. Cái chết thật được kiểm ở chỗ khác: test chạy binary `ledger-api serve` như tiến trình con, gửi `SIGTERM` bằng lệnh `kill`, và kiểm thoát mã 0, log JSON có span `http` mang đúng `request_id` mà test gửi.
+Đây là **giả lập** cái chết, không phải `kill -9` ở thời điểm ngẫu nhiên; đổi lại service chết đúng khe hở mà ta muốn kiểm, lần nào cũng vậy. Cái chết thật được kiểm ở chỗ khác: test chạy binary `ledger-api serve` như tiến trình con, gửi `SIGTERM` bằng lệnh `kill`, và kiểm tra mã thoát là 0, log JSON có span `http` mang đúng `request_id` mà test gửi.
 
-Khi cố ý phá, test đỏ đúng chỗ. Đưa `commit_message` lên trước `handle`, cả hai test chết giữa chừng đỏ sau hạn 30 giây: `không thấy LedgerEntryPosted của trip:TN-0003:capture` và `quá 30s mà chưa thấy: giao lại bị inbox chặn`. Kafka không giao lại message đã commit offset, nên bút toán mất vĩnh viễn.
+Khi cố ý phá, test đỏ đúng chỗ. Đưa `commit_message` lên trước `handle`, cả hai test chết giữa chừng đều đỏ khi hết hạn 30 giây: `không thấy LedgerEntryPosted của trip:TN-0003:capture` và `quá 30s mà chưa thấy: giao lại bị inbox chặn`. Kafka không giao lại message đã commit offset, nên bút toán mất vĩnh viễn.
 
-Một chi tiết đáng nhớ ở ca `BeforeDbCommit`: sau khi chạy lại, bút toán của `TN-0003` mang mã `JE-000002`, không phải `JE-000001`. Lần thử bị rollback đã dùng `1` của cột identity, và sequence PostgreSQL không hoàn lại. Replay qua `PostEntry` cũng đốt một id, vì `ON CONFLICT DO NOTHING` chỉ xét sau khi giá trị mặc định đã được lấy. Khoảng trống trong dãy id không phải lỗi; đừng bao giờ coi mã bút toán là số thứ tự liền để đối soát.
+Một chi tiết đáng nhớ ở ca `BeforeDbCommit`: sau khi chạy lại, bút toán của `TN-0003` mang mã `JE-000002`, không phải `JE-000001`. Lần thử bị rollback đã dùng `1` của cột identity, và sequence PostgreSQL không hoàn lại. Replay qua `PostEntry` cũng tiêu mất một id, vì `ON CONFLICT DO NOTHING` chỉ xét sau khi giá trị mặc định đã được lấy. Khoảng trống trong dãy id không phải lỗi; đừng bao giờ coi mã bút toán là số thứ tự liền để đối soát.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -221,15 +221,15 @@ Liệt kê thẳng:
 - **Đối soát.** Chưa đọc sao kê VíXanh, chưa có `PaymentCaptured` hay webhook, chưa so sổ với bên ngoài.
 - **Hold và capture.** Lab ghi thẳng một bút toán thu cước ba dòng khi chuyến xong; chưa có `AUTHORIZED`, giữ tiền, hoàn tiền, payout.
 - **Partition.** Một partition; với nhiều partition thì thứ tự chỉ còn trong từng partition, và việc chọn key phải tính tới đó.
-- **Sự kiện hỏng và backpressure.** Chưa có DLQ. Consumer xử lý ngay trong vòng `recv`, nên DB chết lâu hơn `max.poll.interval.ms` thì bị đá khỏi group ([bài 39](/articles/rust-graceful-shutdown-health-readiness-backpressure)).
+- **Sự kiện hỏng và backpressure.** Chưa có DLQ. Consumer xử lý ngay trong vòng `recv`, nên DB chết lâu hơn `max.poll.interval.ms` thì bị loại khỏi group ([bài 39](/articles/rust-graceful-shutdown-health-readiness-backpressure)).
 - **Deploy và vận hành.** Chưa container, CI, migration thật, metric, OpenTelemetry, đo tải.
-- **Sửa cước.** Cùng `TN-0001` với cước mới bị bỏ qua im lặng, như đã nói ở mục transaction. Sửa đúng nghĩa cần bút toán đảo cộng bút toán mới.
+- **Sửa cước.** Cùng `TN-0001` với cước mới bị bỏ qua mà không báo gì, như đã nói ở mục transaction. Sửa đúng nghĩa cần bút toán đảo cộng bút toán mới.
 
 Các mục trên thuộc phần P05, nghiệp vụ sổ cái, và các phần sau ở lộ trình Rust nâng cao.
 
 **Bài tập:** `TripCompleted` của `TN-0001` đến lần thứ hai với `fareDong = 26000` (sửa cước). Lab làm gì với nó, số dư `driver:DR-001` là bao nhiêu, và lớp nào của hệ thống đáng lẽ phải lên tiếng?
 
-<details><summary>Xem lời giải</summary><p>Lab bỏ qua im lặng: <code>event_id</code> là <code>TripCompleted:TN-0001</code> đã có trong inbox nên <code>apply_trip_completed</code> trả <code>Duplicate</code> trước khi đụng tới sổ; số dư tài xế vẫn 20.400. Lớp thứ hai (<code>idempotency_key</code> unique, kèm so sánh nội dung ở <code>replayed</code>) có thể báo <code>IdempotencyConflict</code> nhưng không bao giờ được chạm tới. Cách xử lý đúng không nằm ở inbox: dùng <code>eventId</code> riêng cho từng sự kiện, phát hiện cước đổi, và ghi bút toán đảo cho bản cũ rồi bút toán mới. Test <code>same_trip_with_other_fare_is_ignored_silently</code> ghi nhận hành vi hiện tại.</p></details>
+<details><summary>Xem lời giải</summary><p>Lab bỏ qua mà không báo gì: <code>event_id</code> là <code>TripCompleted:TN-0001</code> đã có trong inbox nên <code>apply_trip_completed</code> trả <code>Duplicate</code> trước khi đụng tới sổ; số dư tài xế vẫn 20.400. Lớp thứ hai (<code>idempotency_key</code> unique, kèm so sánh nội dung ở <code>replayed</code>) có thể báo <code>IdempotencyConflict</code> nhưng không bao giờ được chạm tới. Cách xử lý đúng không nằm ở inbox: dùng <code>eventId</code> riêng cho từng sự kiện, phát hiện cước đổi, và ghi bút toán đảo cho bản cũ rồi bút toán mới. Test <code>same_trip_with_other_fare_is_ignored_silently</code> ghi nhận hành vi hiện tại.</p></details>
 
 Bài trước: [bài 39](/articles/rust-graceful-shutdown-health-readiness-backpressure). Bài tiếp: [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen), đầu lộ trình Rust nâng cao.
 

@@ -1,7 +1,7 @@
 ---
 slug: rust-tower-middleware-timeout-request-id-jwt-rate-limit
 title: "Middleware với tower: timeout, request id, JWT và rate limit"
-summary: "Bài 33: dựng chồng middleware tower cho API sổ cái, chạy thật: thứ tự layer, request id vào span, timeout 504, JWT HS256, phân quyền finance/cs, giới hạn tải bằng tower::limit và các bẫy axum gặp phải."
+summary: "Bài 33: dựng chồng middleware tower cho API sổ cái, chạy thật: thứ tự layer, request id vào span, timeout 504, JWT HS256, phân quyền finance/cs, giới hạn tải bằng tower::limit và các bẫy thường gặp khi dùng axum."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, tower, jwt]
@@ -10,7 +10,7 @@ language: vi
 
 Payment BFF viết bằng C# gọi `POST /v1/entries` suốt ngày. Đội vận hành hỏi ba câu trước mọi câu hỏi nghiệp vụ: yêu cầu quá lâu thì bị cắt ra sao, một lần gọi chậm tìm lại trong log bằng gì, và ai được ghi bút toán còn ai chỉ xem số dư. Cả ba nằm ở middleware.
 
-Đây là bài 33 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab nối tiếp [bài 31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du) (endpoint) và [bài 32](/articles/rust-validation-problem-details-openapi-utoipa) (Problem Details) nhưng tự chứa: sổ cái là `ledger-core` trong bộ nhớ, không cần PostgreSQL, handler viết lại gọn, thân lỗi cùng tiền tố `type` với bài 32 nhưng rút gọn, chưa có `instance` và `traceId`.
+Đây là bài 33 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab nối tiếp [bài 31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du) (endpoint) và [bài 32](/articles/rust-validation-problem-details-openapi-utoipa) (Problem Details) nhưng đọc độc lập được: sổ cái là `ledger-core` trong bộ nhớ, không cần PostgreSQL, handler viết lại gọn, thân lỗi cùng tiền tố `type` với bài 32 nhưng rút gọn, chưa có `instance` và `traceId`.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -51,7 +51,7 @@ ServiceBuilder A, B, C : A:in B:in C:in handler C:out B:out A:out
 Router.layer A, B, C   : C:in B:in A:in handler A:out B:out C:out
 ```
 
-`Router::layer` bọc từng route hiện có, lớp gọi sau nằm ngoài lớp gọi trước, nên gọi ba lần cho thứ tự đảo. `ServiceBuilder` gom layer thành một khối đọc từ trên xuống; tài liệu axum cũng nói cách này dễ đọc hơn, và lab dùng nó cho chồng thật. Tài liệu `Router::layer` còn dặn: chỉ route đã có lúc gọi mới được bọc.
+`Router::layer` bọc từng route hiện có, lớp gọi sau nằm ngoài lớp gọi trước, nên gọi liên tiếp ba lần sẽ cho thứ tự đảo ngược. `ServiceBuilder` gom layer thành một khối đọc từ trên xuống; tài liệu axum cũng nói cách này dễ đọc hơn, và lab dùng nó cho chồng thật. Tài liệu `Router::layer` còn dặn: chỉ những route đã tồn tại vào thời điểm gọi layer mới được bọc.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -60,7 +60,7 @@ Router.layer A, B, C   : C:in B:in A:in handler A:out B:out C:out
 <figcaption>Hình 1. Cùng ba lớp, hai cách ghép, hai thứ tự.</figcaption>
 </figure>
 
-ASP.NET Core cùng quy tắc: thứ tự đăng ký là thứ tự request đi vào, response quay ngược ([middleware, DI, cấu hình và logging](/articles/dotnet10-middleware-di-options-logging)). Ở lab này, xác thực và quyền không nằm trong chồng mà ở tham số handler (xem mục extractor).
+ASP.NET Core theo cùng quy tắc: thứ tự đăng ký là thứ tự request đi vào, response quay ngược ([middleware, DI, cấu hình và logging](/articles/dotnet10-middleware-di-options-logging)). Ở lab này, xác thực và quyền không nằm trong chồng mà ở tham số handler (xem mục extractor).
 
 ## Chồng middleware của service gồm những lớp nào?
 
@@ -90,7 +90,7 @@ router.with_state(()).layer(stack)
 <figcaption>Hình 2. Chồng middleware thật của lab; xác thực và quyền là extractor của handler.</figcaption>
 </figure>
 
-Che header phải đứng trước mọi lớp ghi log. Request id phải được gán trước `TraceLayer` vì span đọc id từ request (tài liệu `tower-http` dặn đúng vậy). `PropagateRequestId` nằm trong `TraceLayer` và ngoài `TimeoutLayer` nên response quá hạn vẫn mang id và `TraceLayer` thấy nó; mục sau chứng minh.
+Lớp che header phải đứng trước mọi lớp ghi log. Request id phải được gán trước `TraceLayer` vì span đọc id từ request (tài liệu `tower-http` dặn đúng vậy). `PropagateRequestId` nằm trong `TraceLayer` và ngoài `TimeoutLayer` nên response quá hạn vẫn mang id và `TraceLayer` thấy nó; mục sau chứng minh.
 
 CORS là cơ chế của trình duyệt; Payment BFF là server gọi server nên không có preflight. Lab không gắn `CorsLayer` mặc định. Khi một trang quản trị cần gọi thẳng, `Settings.cors_origin` bật nó cho đúng một origin:
 
@@ -100,7 +100,7 @@ gắn CORS, origin được phép  : 200 OK, allow-origin = Some("https://admin.
 gắn CORS, origin lạ         : allow-origin = None
 ```
 
-`allow_origin(HeaderValue)` cố định trả header cho cả origin lạ (trình duyệt tự chặn, nhưng header là thừa); `AllowOrigin::list` chỉ trả khi origin khớp, nên lab dùng nó. CORS không thay xác thực: nó không ngăn `curl` hay BFF.
+`allow_origin(HeaderValue)` với giá trị cố định thì trả header cho cả origin lạ (trình duyệt tự chặn, nhưng header là thừa); `AllowOrigin::list` chỉ trả khi origin khớp, nên lab dùng nó. CORS không thay xác thực: nó không ngăn `curl` hay BFF.
 
 ## Request id, trace và timeout cho thấy gì khi chạy?
 
@@ -136,9 +136,9 @@ TimeoutLayer::new (deprecated), mặc định        : 408 Request Timeout
 
 Response 504 có body rỗng, vẫn mang request id, và `TraceLayer` ghi đúng `status=504`. Handler không chạy tới cuối: future bị drop tại điểm `.await`, cùng cơ chế huỷ ở [bài 21](/articles/rust-async-await-tokio-task-timeout-cancellation). Thân request gửi dở cũng bị cắt, vì extractor đọc body nằm trong future của handler. `TimeoutLayer::new` (deprecated từ `tower-http` 0.6.7) mặc định trả 408; `with_status_code` bắt người viết chọn mã.
 
-RFC 9110 định nghĩa 408 là server không nhận đủ request trong thời gian chờ; 504 dành cho gateway hoặc proxy không nhận kịp phản hồi từ upstream. Không mã nào khớp hoàn toàn với «handler của chính ta chậm». Lab chọn 504; 503 cũng hợp lý. Quan trọng là ghi vào OpenAPI của bài 32.
+RFC 9110 định nghĩa 408 là server không nhận đủ request trong thời gian chờ; 504 dành cho gateway hoặc proxy không nhận kịp phản hồi từ upstream. Không mã nào khớp hoàn toàn với «handler của chính ta chậm». Lab chọn 504; 503 cũng hợp lý. Điều quan trọng là ghi mã đã chọn vào OpenAPI của bài 32.
 
-Timeout không nói handler đã commit hay chưa. Đoạn này là suy luận từ cơ chế huỷ, không phải kết quả đo: sổ cái của lab nằm trong bộ nhớ nên lab không dựng ca này. Future bị drop tại một `.await`; commit xong trước điểm đó thì bút toán vẫn nằm trong sổ cái dù BFF nhận 504, còn bị huỷ đúng lúc đang chờ `COMMIT` thì service cũng không biết kết quả. Vì thế BFF chỉ retry `POST` an toàn nhờ `idempotencyKey`: cùng key trả 200 nếu bút toán đã có, 201 nếu chưa, như [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) và [bài .NET về transaction và idempotency](/articles/dotnet10-transaction-concurrency-idempotency).
+Timeout không cho biết handler đã commit hay chưa. Đoạn này là suy luận từ cơ chế huỷ, không phải kết quả đo: sổ cái của lab nằm trong bộ nhớ nên lab không dựng trường hợp này. Future bị drop tại một `.await`; commit xong trước điểm đó thì bút toán vẫn nằm trong sổ cái dù BFF nhận 504, còn bị huỷ đúng lúc đang chờ `COMMIT` thì service cũng không biết kết quả. Vì thế BFF chỉ retry `POST` an toàn nhờ `idempotencyKey`: cùng key trả 200 nếu bút toán đã có, 201 nếu chưa, như [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) và [bài .NET về transaction và idempotency](/articles/dotnet10-transaction-concurrency-idempotency).
 
 ## JWT HS256 được kiểm những gì, và bẫy nào có thật?
 
@@ -165,16 +165,16 @@ Bảng dưới là kết quả `GET /v1/accounts/driver:DR-001/balance` với t�
 | thiếu `roles` | 401 |
 | chuỗi rác, không header, scheme `Basic` | 401 |
 
-Hai bẫy `--verify` đã chặn. Một, `leeway` mặc định là 60 giây: token hết hạn 30 giây trước vẫn được chấp nhận, còn lab (5 giây) trả 401. Hai, `aud` chỉ bị kiểm khi token có `aud`, và `required_spec_claims` mặc định chỉ có `exp`:
+Có hai bẫy mà `--verify` đã chặn. Một, `leeway` mặc định là 60 giây: token hết hạn 30 giây trước vẫn được chấp nhận, còn lab (5 giây) trả 401. Hai, `aud` chỉ bị kiểm khi token có `aud`, và `required_spec_claims` mặc định chỉ có `exp`:
 
 ```text
 hết hạn 30 giây trước: leeway mặc định (60 s) chấp nhận ; lab (5 s) -> 401 Unauthorized
 token không có aud: rule mặc định chấp nhận = true; có required_spec_claims -> Some("MissingRequiredClaim(\"aud\")")
 ```
 
-`Claims` của lab còn khai `aud` không phải `Option`. `decode` của `jsonwebtoken` 11.1.0 deserialize claims trước khi kiểm, nên trong lab token thiếu `aud` bị serde chặn trước (`missing field`); `required_spec_claims` là lớp cho kiểu claims để `aud` tuỳ chọn.
+`Claims` của lab còn khai báo `aud` với kiểu không phải `Option`. `decode` của `jsonwebtoken` 11.1.0 deserialize claims trước khi kiểm, nên trong lab token thiếu `aud` bị serde chặn trước (`missing field`); `required_spec_claims` là lớp kiểm tra dành cho kiểu claims có `aud` tuỳ chọn.
 
-Response 401 giống nhau cho mọi lý do, kèm `WWW-Authenticate: Bearer realm="ledger"` và không nêu nguyên nhân. Lý do chỉ vào log dưới dạng tên lỗi (`ExpiredSignature`, `InvalidSignature`, `InvalidAudience`, `InvalidAlgorithm`); `--verify` kiểm không token nào của bảng xuất hiện trong log.
+Response 401 giống nhau cho mọi lý do, kèm `WWW-Authenticate: Bearer realm="ledger"` và không nêu nguyên nhân. Lý do chỉ vào log dưới dạng tên lỗi (`ExpiredSignature`, `InvalidSignature`, `InvalidAudience`, `InvalidAlgorithm`); `--verify` kiểm tra rằng không token nào của bảng xuất hiện trong log.
 
 Phần «không log token» có đối chứng: lab bật ghi cả header vào span, rồi bỏ lớp che để thấy token lộ thật.
 
@@ -183,11 +183,11 @@ che Authorization : {"authorization": Sensitive, "x-request-id": "cd305151-..."}
 bỏ lớp che        : token có trong log = true
 ```
 
-Lớp che đánh dấu `Authorization` là nhạy cảm nên `Debug` của header chỉ in `Sensitive`. Nó chỉ che header: token trong query hay body vẫn bị ghi nếu bạn ghi chúng, nên span chỉ lấy `path`.
+Lớp che đánh dấu `Authorization` là nhạy cảm nên `Debug` của header chỉ in `Sensitive`. Lớp này chỉ che header: token trong query hay body vẫn bị ghi nếu bạn ghi chúng, nên span chỉ lấy `path`.
 
 ## Extractor AuthUser và phân quyền: 401, 403 hay 400 đến trước?
 
-Extractor cài `FromRequestParts`: axum chạy nó trước thân handler, nó trả lỗi thì thân handler không chạy. `AuthUser` đọc `Authorization`, kiểm token, trả người gọi hoặc 401. Quyền là lớp thứ hai, khai báo ở kiểu:
+Extractor cài đặt `FromRequestParts`: axum chạy extractor trước thân handler, và nếu nó trả lỗi thì thân handler không chạy. `AuthUser` đọc `Authorization`, kiểm token, trả người gọi hoặc 401. Quyền là lớp thứ hai, khai báo ở kiểu:
 
 ```rust
 // src/auth.rs (rút gọn)
@@ -213,7 +213,7 @@ async fn post_entry(
 ) -> Result<(StatusCode, Json<EntryCreated>), ApiError> { /* ... */ }
 ```
 
-Bản đầu của tôi gọi `user.require(...)` trong thân handler. `--verify` bắt lỗi ngay: `cs` gửi body rác nhận 400 chứ không phải 403, vì mọi extractor, kể cả `Json`, chạy xong thân hàm mới được vào. Chuyển kiểm quyền vào extractor đặt trước `Json` sửa được thứ tự:
+Bản đầu của tôi gọi `user.require(...)` trong thân handler. `--verify` bắt lỗi ngay: `cs` gửi body rác nhận 400 chứ không phải 403, vì mọi extractor, kể cả `Json`, chạy xong thì thân hàm mới được chạy. Chuyển kiểm quyền vào extractor đặt trước `Json` sửa được thứ tự:
 
 ```text
 body rác: không token 401 Unauthorized, cs 403 Forbidden, finance 400 Bad Request
@@ -239,7 +239,7 @@ GlobalConcurrencyLimit(2) + LoadShed : 2 trả 200, 4 trả 503, đỉnh đồng
 
 Ba dòng đầu là hai bẫy thật, không kèm lỗi biên dịch hay cảnh báo. Một: `Router` chưa gọi `with_state` giữ handler ở dạng chưa dựng, kèm cả layer. Dùng nó làm service thì `MethodRouter::call_with_state` của axum 0.8.9 gọi `handler.clone().into_route(state)`, nên `ConcurrencyLimitLayer` mang semaphore mới cho **mỗi request**. Đi qua `axum::serve(listener, router)` thì axum gọi `with_state(())` cho **mỗi kết nối**: 6 kết nối vào một route vẫn ra đỉnh 6. Router đã `with_state` (như `routes(state)` của lab) hoặc qua `into_make_service()` chỉ dựng một lần; `apply` gọi `with_state(())` để router nào vào cũng an toàn.
 
-Hai: dù đã dựng một lần, `ConcurrencyLimitLayer` tạo semaphore riêng cho từng method của từng route, hai route cho tới 2 + 2 request. `GlobalConcurrencyLimitLayer` giữ một semaphore ngay trong layer nên mới là giới hạn của cả service.
+Hai: dù đã dựng một lần, `ConcurrencyLimitLayer` tạo semaphore riêng cho từng method của từng route, hai route cho tối đa 2 + 2 request đồng thời. `GlobalConcurrencyLimitLayer` giữ một semaphore ngay trong layer nên mới là giới hạn của cả service.
 
 `RateLimit` gặp trở ngại khác: nó giữ bộ hẹn giờ nên không `Clone`, trong khi `Router::layer` đòi `Clone`. Viết thẳng `router.layer(RateLimitLayer::new(5, Duration::from_secs(1)))` cho lỗi thật:
 
@@ -268,7 +268,7 @@ Router::layer, 2 route : /a lần 4: 503 Service Unavailable; /b lần đầu: 2
 một service, 2 route   : bff-a /a 3 lần: [200, 200, 200]; bff-b /b: 503 Service Unavailable; sau 650 ms: 200 OK
 ```
 
-Khi bọc thành một service, `bff-b` chưa gọi lần nào vẫn nhận 503 vì `tower::limit` không biết client là ai: hạn mức chung cho cả process. Nó là cầu chì bảo vệ process, không công bằng giữa các client. Rate limit theo client, dùng chung giữa các instance, là token bucket Redis ở [bài 28](/articles/rust-redis-cache-so-du-rate-limit-lock-ttl).
+Khi bọc thành một service, `bff-b` chưa gọi lần nào vẫn nhận 503 vì `tower::limit` không biết client là ai: hạn mức chung cho cả process. Nó là cầu chì bảo vệ process, không đảm bảo công bằng giữa các client. Rate limit theo client, dùng chung giữa các instance, là token bucket Redis ở [bài 28](/articles/rust-redis-cache-so-du-rate-limit-lock-ttl).
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -280,11 +280,11 @@ cargo run --manifest-path examples/toi-noi-rust/33-tower-middleware/Cargo.toml -
 cargo test --manifest-path examples/toi-noi-rust/33-tower-middleware/Cargo.toml
 ```
 
-`--verify` chạy mười kiểm chứng, thoát mã 1 nếu có cái sai và in `VERIFY OK` khi xong. `cargo test` có mười test tương ứng, chạy song song được: socket bind `127.0.0.1:0` rồi đọc cổng thật. Log đi qua một subscriber toàn cục ghi vào bộ đệm theo thread, nên test dùng runtime một thread. Bản đầu dùng `set_default` cho từng test và đỏ oan 1 trong 72 lần chạy dưới tải: span rớt khỏi log. Tôi suy ra nguyên nhân là `tracing` cache `Interest` của callsite cho cả process; cài subscriber trước mọi callsite thì 480 lần không đỏ.
+`--verify` chạy mười kiểm chứng, thoát mã 1 nếu có cái sai và in `VERIFY OK` khi xong. `cargo test` có mười test tương ứng, chạy song song được: socket bind `127.0.0.1:0` rồi đọc cổng thật. Log đi qua một subscriber toàn cục ghi vào bộ đệm theo thread, nên test dùng runtime một thread. Bản đầu dùng `set_default` cho từng test và đỏ oan 1 trong 72 lần chạy dưới tải: span bị mất khỏi log. Tôi suy ra nguyên nhân là `tracing` cache `Interest` của callsite cho cả process; cài subscriber trước mọi callsite thì 480 lần không đỏ.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Khoá JWT sinh tại chỗ, không xoay vòng, không kiểm <code>iss</code>, và token chỉ an toàn qua TLS mà lab không có. Sổ cái trong bộ nhớ nên mất khi tắt process. Body 503 là chữ trần, body 504 rỗng: chưa phải Problem Details. <code>TimeoutLayer</code> chỉ đếm tới khi có response head: thân response stream chậm không bị cắt (tower-http có lớp riêng cho chặng body). Kiểm chứng timeout và rate limit dựa vào đồng hồ thật (150 ms, 600 ms); 480 lần chạy song song ở load trên 300 không đỏ, nhưng đó không phải bảo đảm, máy quá chậm có thể phải nới.</p>
+<p>Khoá JWT sinh tại chỗ, không xoay vòng, không kiểm tra <code>iss</code>, và token chỉ an toàn qua TLS mà lab không có. Sổ cái trong bộ nhớ nên mất khi tắt process. Body 503 là chữ trần, body 504 rỗng: chưa phải Problem Details. <code>TimeoutLayer</code> chỉ đếm tới khi có response head: thân response stream chậm không bị cắt (tower-http có lớp riêng cho chặng body). Kiểm chứng timeout và rate limit dựa vào đồng hồ thật (150 ms, 600 ms); 480 lần chạy song song ở load trên 300 không đỏ, nhưng đó không phải bảo đảm, máy quá chậm thì có thể phải nới các mốc thời gian.</p>
 </div>
 
 **Bài tập:** BFF gọi `POST /v1/entries` và nhận 504 sau hai giây. Nó nên làm gì, và service cần thêm gì để BFF phân biệt «xử lý chậm» với «đang quá tải»?

@@ -1,0 +1,167 @@
+{
+"file": "rust-kafka-rdkafka-consumer-producer-schema.md",
+"edits": [
+{
+"old": "chọn key partition,",
+"new": "chọn key chia partition,",
+"reason": "Cụm tự ghép 'key partition' nghe cụt",
+"severity": "low"
+},
+{
+"old": "bỏ qua thông điệp hỏng không kẹt partition, trên Kafka thật",
+"new": "bỏ qua thông điệp hỏng để không kẹt partition, chạy trên Kafka thật",
+"reason": "Câu thiếu từ nối, khó đọc",
+"severity": "medium"
+},
+{
+"old": "cộng ghi idempotent cho hiệu ứng trên sổ cái đúng một lần",
+"new": "cộng với ghi idempotent sẽ cho hiệu ứng đúng một lần trên sổ cái",
+"reason": "Trật tự từ kiểu tiếng Anh, câu khó đọc",
+"severity": "medium"
+},
+{
+"old": "để mặc định không ảnh hưởng, vì lab commit",
+"new": "để mặc định cũng không ảnh hưởng tới lab, vì lab commit",
+"reason": "Câu cụt, thiếu đối tượng chịu ảnh hưởng",
+"severity": "medium"
+},
+{
+"old": "bật lại commit nền, đặt nó `false` và gọi",
+"new": "bật lại commit nền, đặt tham số đó thành `false` và gọi",
+"reason": "'nó' không rõ chỉ tham số nào",
+"severity": "medium"
+},
+{
+"old": "lúc metadata chưa đủ leader, cho `UnknownTopicOrPartition`; đọc tiếp thì hết.",
+"new": "lúc metadata chưa đủ leader, sẽ nhận `UnknownTopicOrPartition`; lần đọc sau thì hết lỗi.",
+"reason": "Câu khẩu ngữ, thiếu động từ rõ",
+"severity": "medium"
+},
+{
+"old": "vì đó là con trỏ nên nó chốt luôn",
+"new": "vì đó là con trỏ nên lần commit này chốt luôn",
+"reason": "'nó' chỉ sự vật trừu tượng, mơ hồ",
+"severity": "low"
+},
+{
+"old": "Gốc là dual-write:",
+"new": "Nguyên nhân gốc là dual-write:",
+"reason": "Câu cụt, thiếu danh từ",
+"severity": "medium"
+},
+{
+"old": "làm key đổi chỗ",
+"new": "làm key bị ánh xạ sang partition khác",
+"reason": "Cách diễn đạt gượng, không rõ nghĩa",
+"severity": "medium"
+},
+{
+"old": "thì hai tài khoản còn lại không có thứ tự nào với bút toán",
+"new": "thì thứ tự của hai tài khoản còn lại so với bút toán không được bảo đảm",
+"reason": "Câu dịch máy, khó hiểu",
+"severity": "medium"
+},
+{
+"old": "không chia được tải: hot partition.",
+"new": "không chia được tải: đó là hot partition.",
+"reason": "Câu thiếu chủ ngữ và động từ",
+"severity": "low"
+},
+{
+"old": "cộng thứ tự nào cũng ra cùng kết quả",
+"new": "cộng theo thứ tự nào cũng ra cùng kết quả",
+"reason": "Thiếu giới từ, câu cụt",
+"severity": "medium"
+},
+{
+"old": "Service Java và service Rust cùng ghi một topic thì đặt",
+"new": "Khi service Java và service Rust cùng ghi một topic, hãy đặt",
+"reason": "Câu mệnh lệnh thiếu mở đầu điều kiện, nghe cụt",
+"severity": "low"
+},
+{
+"old": "Consumer nào nhận nửa nào phụ thuộc id thành viên",
+"new": "Consumer nào được giao nửa nào phụ thuộc vào id thành viên",
+"reason": "Khẩu ngữ, thiếu giới từ",
+"severity": "medium"
+},
+{
+"old": "Thông điệp hỏng hoặc version lạ có được làm kẹt partition không?",
+"new": "Thông điệp hỏng hoặc phiên bản lạ có được làm kẹt partition không?",
+"reason": "Văn xuôi dùng 'phiên bản'",
+"severity": "low"
+},
+{
+"old": "chỉ đọc phần còn lại khi hiểu version đó",
+"new": "chỉ đọc phần còn lại khi hiểu phiên bản đó",
+"reason": "Văn xuôi dùng 'phiên bản'",
+"severity": "low"
+},
+{
+"old": "Trường lạ trong cùng version",
+"new": "Trường lạ trong cùng phiên bản",
+"reason": "Văn xuôi dùng 'phiên bản'",
+"severity": "low"
+},
+{
+"old": "thì phải tăng version",
+"new": "thì phải tăng phiên bản",
+"reason": "Văn xuôi dùng 'phiên bản'",
+"severity": "low"
+},
+{
+"old": "JSON cụt, version 2, thiếu",
+"new": "JSON cụt, phiên bản 2, thiếu",
+"reason": "Văn xuôi dùng 'phiên bản'",
+"severity": "low"
+},
+{
+"old": "Consumer đúng log, bỏ qua",
+"new": "Consumer đúng ghi log, bỏ qua",
+"reason": "Thiếu động từ",
+"severity": "high"
+},
+{
+"old": "Bỏ qua âm thầm là mất dữ liệu",
+"new": "Bỏ qua mà không báo gì là mất dữ liệu",
+"reason": "'Âm thầm' là calque của silently",
+"severity": "medium"
+},
+{
+"old": "Cất thông điệp xấu sang topic riêng để xử lý sau, DLQ, là bài 37.",
+"new": "Việc cất thông điệp xấu sang topic riêng để xử lý sau (DLQ) nằm ở bài 37.",
+"reason": "Câu cụt, thiếu chủ ngữ",
+"severity": "medium"
+},
+{
+"old": "chỉ không commit thì chưa đủ",
+"new": "chỉ việc không commit thì chưa đủ",
+"reason": "Câu khó hiểu, thiếu danh từ hoá",
+"severity": "high"
+},
+{
+"old": "và commit nó sẽ che luôn thông điệp lỗi",
+"new": "và commit thông điệp đó sẽ che luôn thông điệp lỗi",
+"reason": "'nó' mơ hồ, nhắc lại danh từ",
+"severity": "medium"
+},
+{
+"old": "Vì vậy tên cấu hình gần như nguyên:",
+"new": "Vì vậy tên cấu hình gần như giữ nguyên:",
+"reason": "Cụm 'gần như nguyên' thiếu bổ ngữ",
+"severity": "medium"
+},
+{
+"old": "Phần mô hình lập trình dựa vào tài liệu của hai thư viện.",
+"new": "Phần so sánh mô hình lập trình này dựa vào tài liệu của hai thư viện.",
+"reason": "Câu cụt, thiếu danh từ chính",
+"severity": "medium"
+},
+{
+"old": "nên broker bận thì chậm hoặc fail rõ",
+"new": "nên broker bận thì chậm hoặc báo lỗi rõ",
+"reason": "Từ Anh thông thường có từ Việt quen dùng",
+"severity": "medium"
+}
+]
+}

@@ -1,0 +1,101 @@
+{
+"file": "rust-send-sync-arc-mutex-channel-concurrency.md",
+"edits": [
+{
+"old": "Nhiều task ghi cùng idempotency_key chỉ ra một bút toán",
+"new": "Nhiều task ghi cùng idempotency_key chỉ tạo ra một bút toán",
+"reason": "\"chỉ ra\" thiếu động từ, dễ hiểu nhầm",
+"severity": "medium"
+},
+{
+"old": "thông điệp ở đây lấy từ",
+"new": "thông báo lỗi ở đây lấy từ",
+"reason": "\"thông điệp\" là calque của message",
+"severity": "low"
+},
+{
+"old": "Mọi thứ task đang giữ đi theo",
+"new": "Mọi thứ task đang giữ đều đi theo",
+"reason": "Câu cụt, thiếu \"đều\"",
+"severity": "low"
+},
+{
+"old": "Thông điệp thật khi giữ guard",
+"new": "Thông báo lỗi thật khi giữ guard",
+"reason": "\"thông điệp\" là calque, thiếu \"lỗi\"",
+"severity": "medium"
+},
+{
+"old": "`lock()` lần hai trên cùng thread không trả về",
+"new": "`lock()` gọi lần hai trên cùng thread đang giữ khoá thì không trả về",
+"reason": "Câu tối nghĩa, thiếu ngữ cảnh",
+"severity": "high"
+},
+{
+"old": "nhiều task ghi cùng key chỉ ra một bút toán",
+"new": "nhiều task ghi cùng key chỉ tạo ra một bút toán",
+"reason": "\"chỉ ra\" thiếu động từ, dễ hiểu nhầm",
+"severity": "medium"
+},
+{
+"old": "Phần «kiểm key rồi ghi»",
+"new": "Phần «kiểm tra key rồi ghi»",
+"reason": "Lược mất chữ \"tra\"",
+"severity": "low"
+},
+{
+"old": "mọi `lock()` sau đó trả `Err`",
+"new": "mọi `lock()` sau đó trả về `Err`",
+"reason": "Thiếu \"về\"",
+"severity": "low"
+},
+{
+"old": "Nó không tự nhanh hơn.",
+"new": "Loại khoá này không tự động nhanh hơn.",
+"reason": "Tránh \"Nó\" chỉ sự vật trừu tượng",
+"severity": "medium"
+},
+{
+"old": "Chỉ cần 1 thao tác ghi trên 20,",
+"new": "Chỉ cần 1 trong 20 thao tác là ghi,",
+"reason": "\"1 trên 20\" theo trật tự Anh, khó đọc",
+"severity": "medium"
+},
+{
+"old": "đáng hơn đổi loại khoá",
+"new": "đáng làm hơn việc đổi loại khoá",
+"reason": "Thiếu động từ và danh từ",
+"severity": "high"
+},
+{
+"old": "nên nhà sản xuất nhanh hơn actor",
+"new": "nên bên gửi nhanh hơn actor",
+"reason": "\"nhà sản xuất\" dịch sát chữ producer",
+"severity": "medium"
+},
+{
+"old": "(báo bận, bỏ, thử lại sau)",
+"new": "(báo bận, bỏ qua, thử lại sau)",
+"reason": "\"bỏ\" cụt, không rõ nghĩa",
+"severity": "low"
+},
+{
+"old": "nó ghi đè sự kiện cũ",
+"new": "kênh ghi đè sự kiện cũ",
+"reason": "Tránh \"nó\" chỉ sự vật trừu tượng",
+"severity": "low"
+},
+{
+"old": "Kênh dung lượng 2, ghi 5 bút toán,",
+"new": "Với kênh dung lượng 2, ghi 5 bút toán,",
+"reason": "Câu mở đầu rời rạc, thiếu từ nối",
+"severity": "medium"
+},
+{
+"old": "`--verify` kiểm các giá trị ở trên",
+"new": "`--verify` kiểm tra các giá trị ở trên",
+"reason": "Lược mất chữ \"tra\"",
+"severity": "low"
+}
+]
+}

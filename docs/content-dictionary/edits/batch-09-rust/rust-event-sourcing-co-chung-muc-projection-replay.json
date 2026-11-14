@@ -1,0 +1,101 @@
+{
+ "file": "rust-event-sourcing-co-chung-muc-projection-replay.md",
+ "edits": [
+  {
+   "old": "Finance hỏi thu nhập theo ngày, CS hỏi số dư ví của khách",
+   "new": "Bên tài chính hỏi thu nhập theo ngày, bên chăm sóc khách hàng hỏi số dư ví của khách",
+   "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "làm nguồn sự thật, còn trạng thái",
+   "new": "làm nguồn dữ liệu gốc, còn trạng thái",
+   "reason": "Theo terminology: source of truth",
+   "severity": "medium"
+  },
+  {
+   "old": "Chuỗi sự kiện là nguồn sự thật |",
+   "new": "Chuỗi sự kiện là nguồn dữ liệu gốc |",
+   "reason": "Theo terminology: source of truth",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab dựng cuộc đua bằng hai transaction",
+   "new": "Lab dựng race condition bằng hai transaction",
+   "reason": "Thuật ngữ race condition giữ tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Sửa logic là phiên bản 2 và dựng lại từ log.",
+   "new": "Sửa logic thành phiên bản 2 rồi dựng lại từ log.",
+   "reason": "Thiếu động từ nối",
+   "severity": "high"
+  },
+  {
+   "old": "Lab lưu xid của giao dịch ghi vào cột",
+   "new": "Lab lưu xid của transaction ghi vào cột",
+   "reason": "Thống nhất transaction/giao dịch",
+   "severity": "low"
+  },
+  {
+   "old": "Cái giá: projection chậm đúng bằng thời gian giao dịch chậm nhất còn mở.",
+   "new": "Cái giá phải trả: projection chậm đúng bằng thời gian của transaction chậm nhất còn mở.",
+   "reason": "Thống nhất thuật ngữ, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Kịch bản B: giao dịch cũ lấy xid sớm",
+   "new": "Kịch bản B: transaction cũ lấy xid sớm",
+   "reason": "Thống nhất transaction",
+   "severity": "low"
+  },
+  {
+   "old": "giao dịch mới ghi id 1 chưa commit, giao dịch cũ ghi id 2 rồi commit",
+   "new": "transaction mới ghi id 1 chưa commit, transaction cũ ghi id 2 rồi commit",
+   "reason": "Thống nhất transaction",
+   "severity": "low"
+  },
+  {
+   "old": "Logical decoding hay một khoá chung để id trùng thứ tự commit là hai hướng khác",
+   "new": "Logical decoding, hoặc một khoá chung để id cùng thứ tự với commit, là hai hướng khác",
+   "reason": "Cụm gượng, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "giữ `xmin` lại, mọi projection đứng yên",
+   "new": "khiến `xmin` không tiến lên được, mọi projection đứng yên",
+   "reason": "Cụm 'giữ lại' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên giao dịch ghi ở database khác cũng có thể giữ",
+   "new": "nên transaction ghi ở database khác cũng có thể giữ",
+   "reason": "Thống nhất transaction",
+   "severity": "low"
+  },
+  {
+   "old": "Vì phiên lạ giữ được, `drain` của lab",
+   "new": "Vì phiên lạ cũng có thể giữ như vậy, `drain` của lab",
+   "reason": "Câu thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "## Khi nào không nên event sourcing toàn hệ thống?",
+   "new": "## Khi nào không nên dùng event sourcing cho toàn hệ thống?",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Giao dịch nhận id nhỏ mà commit muộn",
+   "new": "Transaction nhận id nhỏ mà commit muộn",
+   "reason": "Thống nhất transaction",
+   "severity": "low"
+  },
+  {
+   "old": "để chặn giao dịch treo",
+   "new": "để chặn transaction treo",
+   "reason": "Thống nhất transaction",
+   "severity": "low"
+  }
+ ]
+}

@@ -1,0 +1,89 @@
+{
+ "file": "rust-graceful-shutdown-health-readiness-backpressure.md",
+ "edits": [
+  {
+   "old": "hàng đợi bounded với pause/resume; bị SIGKILL vẫn không mất bút toán",
+   "new": "hàng đợi có giới hạn (bounded) với pause/resume; dù bị SIGKILL vẫn không mất bút toán",
+   "reason": "Giải nghĩa bounded; câu thiếu liên từ",
+   "severity": "medium"
+  },
+  {
+   "old": "cùng <code>idempotency_key</code> hấp thụ nó",
+   "new": "cùng <code>idempotency_key</code> chặn bản trùng đó",
+   "reason": "Hấp thụ là calque của absorb",
+   "severity": "medium"
+  },
+  {
+   "old": "4 bị tín hiệu thứ hai ép",
+   "new": "4 do tín hiệu thứ hai ép thoát",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Request HTTP đang bay chạy nốt",
+   "new": "Request HTTP đang xử lý dở chạy nốt",
+   "reason": "Đang bay là calque của in-flight",
+   "severity": "medium"
+  },
+  {
+   "old": "Tin đó chưa lưu offset nên đến lại",
+   "new": "Tin đó chưa lưu offset nên được giao lại",
+   "reason": "Thống nhất cách nói giao lại",
+   "severity": "low"
+  },
+  {
+   "old": "Chỉ số tin giao lại và thời gian chờ khác nhau",
+   "new": "Chỉ có số tin giao lại và thời gian chờ là khác nhau.",
+   "reason": "Chỉ số gượng, số tin rõ hơn",
+   "severity": "low"
+  },
+  {
+   "old": "phải tự dedupe, như bài 37",
+   "new": "phải tự khử trùng lặp, như bài 37",
+   "reason": "Thống nhất theo terminology: khử trùng lặp",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai phụ thuộc kiểm lần lượt nên tệ nhất là gấp đôi",
+   "new": "Hai phụ thuộc được kiểm lần lượt nên trường hợp xấu nhất lâu gấp đôi",
+   "reason": "Chủ ngữ không rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "Vì thế giảm tham số này lại tệ hơn",
+   "new": "Vì thế nếu giảm tham số này thì tình hình còn tệ hơn",
+   "reason": "Cụm gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "để việc còn trong hàng đợi che được độ trễ lấy lại tin",
+   "new": "để lượng việc còn trong hàng đợi đủ lấp khoảng trễ khi lấy lại tin",
+   "reason": "Che được là calque",
+   "severity": "high"
+  },
+  {
+   "old": "Còn đứng ở `send().await` khi hàng đợi đầy thì không có `recv` nào để đánh thức",
+   "new": "Còn khi consumer đang chờ ở `send().await` vì hàng đợi đầy thì không có `recv` nào để đánh thức",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "consumer bị đá khỏi group dù heartbeat vẫn đều",
+   "new": "consumer bị loại khỏi group dù heartbeat vẫn đều",
+   "reason": "Khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "thiếu thì lab thất bại rõ ràng",
+   "new": "thiếu thì lab báo lỗi rõ ràng",
+   "reason": "Calque của fail loudly",
+   "severity": "medium"
+  },
+  {
+   "old": "Mỗi ca có schema, topic và group riêng, dọn cuối ca,",
+   "new": "Mỗi test case có schema, topic và group riêng, dọn khi test case kết thúc,",
+   "reason": "Thống nhất test case theo terminology",
+   "severity": "medium"
+  }
+ ]
+}

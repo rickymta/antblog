@@ -1,7 +1,7 @@
 ---
 slug: rust-outbox-inbox-idempotent-consumer
 title: "Outbox, inbox và idempotent consumer trong Rust"
-summary: "Bài 37: tái hiện dual-write mất và sinh sự kiện bằng tiến trình con thoát giữa hai bước, ghi outbox cùng transaction sqlx, relay SKIP LOCKED, inbox event_id, DLQ và thứ tự khi nhiều worker, chạy trên PostgreSQL và Kafka."
+summary: "Bài 37: tái hiện lỗi dual-write làm mất hoặc sinh thừa sự kiện, bằng cách cho một tiến trình con thoát giữa hai bước, ghi outbox cùng transaction sqlx, relay SKIP LOCKED, inbox event_id, DLQ và thứ tự khi nhiều worker, chạy trên PostgreSQL và Kafka."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, kafka, outbox, sqlx]
@@ -76,7 +76,7 @@ Một bên mất sự kiện, một bên có sự kiện ma: người nhận th�
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Hai thứ tự dual-write và chỗ mỗi thứ tự hỏng: ghi DB rồi gửi thì mất sự kiện khi chết giữa chừng, gửi rồi ghi DB thì để lại sự kiện ma khi DB lỗi."><defs><marker id="rust-outbox-inbox-idempotent-consumer-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="26" class="t-b">A. Ghi DB rồi gửi Kafka</text><rect x="20" y="38" width="240" height="72" rx="10" class="f-pk-soft s-pk"/><text x="36" y="68" class="t-b">1. INSERT và COMMIT</text><text x="36" y="92" class="t-small">bút toán đã bền trong PostgreSQL</text><path d="M260 74 L298 74" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-outbox-inbox-idempotent-consumer-0-a)"/><rect x="300" y="38" width="240" height="72" rx="10" class="f-warn-soft s-warn"/><text x="316" y="68" class="t-b">Tiến trình chết</text><text x="316" y="92" class="t-small">kill, hết bộ nhớ, mất điện</text><path d="M540 74 L578 74" class="f-none s-muted dash" stroke-width="2" marker-end="url(#rust-outbox-inbox-idempotent-consumer-0-a)"/><rect x="580" y="38" width="280" height="72" rx="10" class="f-none s-muted dash"/><text x="596" y="68" class="t-b">2. Gửi Kafka: không chạy</text><text x="596" y="92" class="t-small">sổ có bút toán, Kafka không có gì</text><text x="20" y="146" class="t-b">B. Gửi Kafka rồi ghi DB</text><rect x="20" y="158" width="240" height="72" rx="10" class="f-pk-soft s-pk"/><text x="36" y="188" class="t-b">1. Gửi Kafka, đã ack</text><text x="36" y="212" class="t-small">broker đã nhận thông điệp</text><path d="M260 194 L298 194" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-outbox-inbox-idempotent-consumer-0-a)"/><rect x="300" y="158" width="240" height="72" rx="10" class="f-warn-soft s-warn"/><text x="316" y="188" class="t-b">2. Ghi DB lỗi, ROLLBACK</text><text x="316" y="212" class="t-small">khoá ngoại, timeout, deadlock</text><path d="M540 194 L578 194" class="f-none s-muted dash" stroke-width="2" marker-end="url(#rust-outbox-inbox-idempotent-consumer-0-a)"/><rect x="580" y="158" width="280" height="72" rx="10" class="f-none s-muted dash"/><text x="596" y="188" class="t-b">Sự kiện ma</text><text x="596" y="212" class="t-small">người nhận thấy bút toán sổ không có</text></svg>
+<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Hai thứ tự dual-write và chỗ mỗi thứ tự hỏng: ghi DB rồi gửi thì mất sự kiện khi chết giữa chừng, gửi rồi ghi DB thì để lại sự kiện ma khi DB lỗi."><defs><marker id="rust-outbox-inbox-idempotent-consumer-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><text x="20" y="26" class="t-b">A. Ghi DB rồi gửi Kafka</text><rect x="20" y="38" width="240" height="72" rx="10" class="f-pk-soft s-pk"/><text x="36" y="68" class="t-b">1. INSERT và COMMIT</text><text x="36" y="92" class="t-small">bút toán đã bền trong PostgreSQL</text><path d="M260 74 L298 74" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-outbox-inbox-idempotent-consumer-0-a)"/><rect x="300" y="38" width="240" height="72" rx="10" class="f-warn-soft s-warn"/><text x="316" y="68" class="t-b">Tiến trình chết</text><text x="316" y="92" class="t-small">kill, hết bộ nhớ, mất điện</text><path d="M540 74 L578 74" class="f-none s-muted dash" stroke-width="2" marker-end="url(#rust-outbox-inbox-idempotent-consumer-0-a)"/><rect x="580" y="38" width="280" height="72" rx="10" class="f-none s-muted dash"/><text x="596" y="68" class="t-b">2. Gửi Kafka: không chạy</text><text x="596" y="92" class="t-small">sổ có bút toán, Kafka không có gì</text><text x="20" y="146" class="t-b">B. Gửi Kafka rồi ghi DB</text><rect x="20" y="158" width="240" height="72" rx="10" class="f-pk-soft s-pk"/><text x="36" y="188" class="t-b">1. Gửi Kafka, đã ack</text><text x="36" y="212" class="t-small">broker đã nhận thông điệp</text><path d="M260 194 L298 194" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-outbox-inbox-idempotent-consumer-0-a)"/><rect x="300" y="158" width="240" height="72" rx="10" class="f-warn-soft s-warn"/><text x="316" y="188" class="t-b">2. Ghi DB lỗi, ROLLBACK</text><text x="316" y="212" class="t-small">khoá ngoại, timeout, deadlock</text><path d="M540 194 L578 194" class="f-none s-muted dash" stroke-width="2" marker-end="url(#rust-outbox-inbox-idempotent-consumer-0-a)"/><rect x="580" y="158" width="280" height="72" rx="10" class="f-none s-muted dash"/><text x="596" y="188" class="t-b">Sự kiện ma</text><text x="596" y="212" class="t-small">người nhận thấy bút toán mà sổ không có</text></svg>
 </div>
 <figcaption>Hình 1. Hai thứ tự dual-write, hai kiểu hỏng. Ô nét đứt là việc không xảy ra (A) hoặc hậu quả (B).</figcaption>
 </figure>
@@ -103,7 +103,7 @@ CREATE TABLE inbox (
 );
 ```
 
-Hàm ghi nhận `&mut PgConnection` nên người gọi giữ ranh giới transaction, như `insert_entry` ở bài 24:
+Hàm nhận tham chiếu `&mut PgConnection` nên người gọi giữ ranh giới transaction, như `insert_entry` ở bài 24:
 
 ```rust
 // src/store.rs (rút gọn: bỏ chú thích tài liệu)
@@ -133,7 +133,7 @@ Kafka sau relay         : key=trip:TN-0001:capture event-id=ledger:1
 payload                 : {"entryId": "JE-000001", "postedAt": "2026-11-06T13:55:22.580882Z", "postings": [{"account": "customer:CU-001", "amountDong": -25500}, {"account": "platform:revenue", "amountDong": 5100}, {"account": "driver:DR-001", "amountDong": 20400}], "schemaVersion": 1, "idempotencyKey": "trip:TN-0001:capture"}
 ```
 
-Lần lỗi không để lại gì: bút toán chèn dở rollback, dòng outbox chưa kịp ghi, số đếm giữ nguyên. `postedAt` đổi mỗi lần chạy. Cột `jsonb` không giữ thứ tự khoá và khoảng trắng; cần đúng từng byte, ví dụ khi ký thông điệp, thì lưu `text` hoặc `bytea`.
+Lần ghi lỗi không để lại gì: bút toán chèn dở bị rollback, dòng outbox chưa kịp ghi, số đếm giữ nguyên. `postedAt` đổi mỗi lần chạy. Cột `jsonb` không giữ thứ tự khoá và khoảng trắng; cần đúng từng byte, ví dụ khi ký thông điệp, thì lưu `text` hoặc `bytea`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -169,9 +169,9 @@ sqlx::query("UPDATE outbox SET published_at = now() WHERE id = ANY($1)")
 tx.commit().await?;
 ```
 
-`FOR UPDATE` khoá các hàng đã nhận, `SKIP LOCKED` làm relay khác bỏ qua hàng đang bị khoá thay vì chờ. Khoá này giữ suốt lúc gửi Kafka, tới tận `commit`. Transaction ghi bút toán không bị kéo theo, vì nó chỉ `INSERT` dòng mới. Giá phải trả nằm ở relay: mỗi batch chiếm một kết nối của pool, và transaction đã có XID nên khi Kafka chậm tới `message.timeout.ms` (lab đặt 10 giây), `VACUUM` cũng không dọn được tuple chết mới hơn nó. Vì thế batch phải nhỏ và producer phải có hạn chót. Muốn transaction ngắn thì đổi sang lease (cột `claimed_until`): commit trước, gửi sau, đổi lại phải chọn hạn lease. Điều kiện `md5` dùng ở mục thứ tự; `$2 = 0` là không chia.
+`FOR UPDATE` khoá các hàng đã nhận, `SKIP LOCKED` làm relay khác bỏ qua hàng đang bị khoá thay vì chờ. Khoá này giữ suốt lúc gửi Kafka, tới tận `commit`. Transaction ghi bút toán không bị kéo theo, vì nó chỉ `INSERT` dòng mới. Giá phải trả nằm ở relay: mỗi batch chiếm một kết nối của pool, và transaction đã có XID nên khi Kafka chậm tới `message.timeout.ms` (lab đặt 10 giây), `VACUUM` cũng không dọn được tuple chết mới hơn nó. Vì thế batch phải nhỏ và producer phải có hạn chót. Muốn transaction ngắn thì đổi sang lease (cột `claimed_until`): commit trước, gửi sau, đổi lại phải chọn hạn lease. Điều kiện `md5` dùng ở mục về thứ tự bên dưới; `$2 = 0` nghĩa là không chia.
 
-Hai relay chạy song song trên 10 dòng, mỗi relay một lượt 5 dòng. A nhận xong thì đứng lại, B bắt đầu đúng lúc đó, B gửi xong A mới đi tiếp. Lịch dùng `tokio::sync::Notify`, không dùng giờ, nên không đổi theo tải máy. Kết quả với `SELECT` thường, rồi với `SKIP LOCKED`:
+Hai relay chạy song song trên 10 dòng, mỗi relay chạy một lượt 5 dòng. A nhận xong thì đứng lại, B bắt đầu đúng lúc đó, B gửi xong thì A mới đi tiếp. Lịch dùng `tokio::sync::Notify`, không dùng giờ, nên không đổi theo tải máy. Kết quả với `SELECT` thường, rồi với `SKIP LOCKED`:
 
 ```text
 == 4a. Hai relay song song, SELECT không khóa ==
@@ -185,7 +185,7 @@ Kafka                   : 10 thông điệp, 10 event-id khác nhau
 xả thêm 100 dòng        : hai worker gửi 100, Kafka thêm 100 thông điệp, 100 event-id mới
 ```
 
-Có khoá thì không trùng, kể cả khi hai worker xả thêm 100 dòng. Nhưng khoá chỉ chặn trùng giữa các relay còn sống. Relay chết sau khi gửi thì khác: kết nối đóng, PostgreSQL rollback, khoá được nhả, các dòng vẫn `published_at IS NULL`. `process::exit` đóng socket nên PostgreSQL biết gần như ngay (lab vẫn thử lại có hạn chót). Máy mất điện hay đứt mạng thì server chưa hay gì, khoá nằm lại tới khi TCP keepalive báo (`tcp_keepalives_idle`), và trong lúc đó `SKIP LOCKED` im lặng bỏ qua các dòng ấy. Relay con của lab thoát ngay sau khi Kafka xác nhận:
+Có khoá thì không trùng, kể cả khi hai worker xả thêm 100 dòng. Nhưng khoá chỉ chặn trùng giữa các relay còn sống. Relay chết sau khi gửi thì khác: kết nối đóng, PostgreSQL rollback, khoá được nhả, các dòng vẫn `published_at IS NULL`. `process::exit` đóng socket nên PostgreSQL biết gần như ngay (lab vẫn thử lại có hạn chót). Máy mất điện hay đứt mạng thì server chưa biết gì, khoá nằm lại tới khi TCP keepalive báo (`tcp_keepalives_idle`), và trong lúc đó `SKIP LOCKED` bỏ qua các dòng ấy mà không báo gì. Relay con của lab thoát ngay sau khi Kafka xác nhận:
 
 ```text
 == 3a. Relay chết sau khi gửi, consumer KHÔNG có inbox ==
@@ -199,7 +199,7 @@ Mỗi dòng tới hai lần với cùng header `event-id` (`ledger:1` đến `le
 
 ## Inbox biến giao lại thành xử lý một lần
 
-Consumer chặn bản trùng bằng bảng `inbox`. Hợp đồng sự kiện chung của loạt không có `eventId` trong payload, nên lab này mang nó trong header. Mỗi thông điệp được xử lý trong một transaction: chèn `event_id` trước, rồi làm hiệu ứng, cùng một commit.
+Consumer chặn bản trùng bằng bảng `inbox`. Hợp đồng sự kiện chung của loạt không có `eventId` trong payload, nên lab này đặt nó trong header. Mỗi thông điệp được xử lý trong một transaction: chèn `event_id` trước, rồi làm hiệu ứng, cùng một commit.
 
 ```rust
 // src/consumer.rs (rút gọn: bỏ nhánh TripCompleted)
@@ -241,7 +241,7 @@ let outcome = match handler {
 tx.commit().await?;
 ```
 
-Ba điều làm cách này đúng. Một, `PRIMARY KEY` là chốt chặn cuối: tám task cùng nhận một `event_id` thì chỉ một task tạo hiệu ứng (lab đo `applied 1, duplicates 7`). Hai, hiệu ứng lỗi thì dòng inbox cũng rollback, nên lần giao lại sau vẫn được xử lý. Ba, inbox và hiệu ứng phải cùng database: nếu hiệu ứng là gọi API ngoài, dual-write quay lại ở phía consumer.
+Ba điều khiến cách này đúng. Một, `PRIMARY KEY` là chốt chặn cuối: tám task cùng nhận một `event_id` thì chỉ một task tạo hiệu ứng (lab đo `applied 1, duplicates 7`). Hai, hiệu ứng lỗi thì dòng inbox cũng rollback, nên lần giao lại sau vẫn được xử lý. Ba, inbox và hiệu ứng phải cùng database: nếu hiệu ứng là gọi API ngoài, dual-write quay lại ở phía consumer.
 
 Kiểm bằng số dư. Consumer hạ nguồn cộng số tiền có dấu của `LedgerEntryPosted` vào `account_balances`. Sau kịch bản relay chết, sáu thông điệp tới consumer, một lần không inbox, một lần có:
 
@@ -316,11 +316,11 @@ DLQ                     : x-source=lab.37.<uuid>.trip-completed/0/3 x-attempts=3
                           x-error=error returned from database: insert or update on table "postings" violates foreign key constraint "postings_account_id_fkey" ...
 ```
 
-Offset đã commit là 5: consumer đi qua cả hai thông điệp hỏng nên partition không kẹt. Tổng 9 lần thử: 3 × 1 + 2 × 3. Thông điệp hỏng không để lại dòng inbox vì transaction của nó đã rollback, nên sau khi sửa nguyên nhân (thêm tài khoản `DR-999`) có thể phát lại từ DLQ. DLQ giữ nguyên byte gốc và thêm `x-error`, `x-attempts`, `x-source`. Gửi DLQ xong mà chết trước khi commit thì thông điệp vào DLQ hai lần, nên DLQ cũng cần xử lý idempotent. Đi DLQ cũng là chấp nhận mất thứ tự: thông điệp sau cùng key vẫn chạy tiếp trong khi bản hỏng nằm chờ.
+Offset đã commit là 5: consumer đi qua cả hai thông điệp hỏng nên partition không kẹt. Tổng 9 lần thử: 3 × 1 + 2 × 3. Thông điệp hỏng không để lại dòng inbox vì transaction của nó đã rollback, nên sau khi sửa nguyên nhân (thêm tài khoản `DR-999`) có thể phát lại từ DLQ. DLQ giữ nguyên byte gốc và thêm `x-error`, `x-attempts`, `x-source`. Gửi DLQ xong mà chết trước khi commit thì thông điệp vào DLQ hai lần, nên DLQ cũng cần xử lý idempotent. Gửi vào DLQ cũng là chấp nhận mất thứ tự: thông điệp đứng sau và cùng key vẫn chạy tiếp trong khi bản hỏng nằm chờ.
 
 ## Thứ tự: nhiều worker đảo những gì?
 
-Một relay lấy theo `ORDER BY id` thì giữ thứ tự id trong partition, như thí nghiệm relay chết. Có một lỗ lab không đo: id cấp lúc `INSERT`, không phải lúc `COMMIT`, nên hai transaction ghi song song có thể commit ngược id và relay gửi id lớn trước. Hai worker thì đảo rõ hơn: mỗi worker giữ một batch, batch gửi xong trước tới trước. Lab dùng 6 dòng xen kẽ hai key. Worker A nhận id 1, 2, 3 rồi đứng lại, worker B nhận 4, 5, 6 và gửi xong trước:
+Một relay lấy theo `ORDER BY id` thì giữ thứ tự id trong partition, như thí nghiệm relay chết. Có một lỗ hổng mà lab không đo: id cấp lúc `INSERT`, không phải lúc `COMMIT`, nên hai transaction ghi song song có thể commit ngược id và relay gửi id lớn trước. Hai worker thì đảo rõ hơn: mỗi worker giữ một batch, batch nào gửi xong trước thì tới trước. Lab dùng 6 dòng xen kẽ hai key. Worker A nhận id 1, 2, 3 rồi đứng lại, worker B nhận 4, 5, 6 và gửi xong trước:
 
 ```text
 == 5a. Thứ tự với hai worker, không chia ==
@@ -330,7 +330,7 @@ mỗi key đúng thứ tự     : false
 toàn topic đúng thứ tự  : false
 ```
 
-Đảo xảy ra cả trong một key chứ không chỉ giữa các key: `trip:TN-0003:capture` có các dòng 1, 3, 5 nhưng topic thấy 5, 1, 3. Cách chữa là chia hàng theo key để mỗi key chỉ qua một worker: điều kiện `md5(key)` chia lấy dư trong câu `SELECT` ở trên phải bằng phần của worker. Điều kiện kèm theo, lab không tự kiểm: mỗi phần chỉ một worker tại một thời điểm và số phần không đổi lúc chạy.
+Thứ tự bị đảo cả trong một key chứ không chỉ giữa các key: `trip:TN-0003:capture` có các dòng 1, 3, 5 nhưng topic thấy 5, 1, 3. Cách chữa là chia hàng theo key để mỗi key chỉ qua một worker: điều kiện `md5(key)` chia lấy dư trong câu `SELECT` ở trên phải bằng phần của worker. Có hai điều kiện đi kèm mà lab không tự kiểm: mỗi phần chỉ có một worker tại một thời điểm và số phần không đổi lúc chạy.
 
 ```text
 == 5b. Thứ tự với hai worker, chia theo md5(key) ==
@@ -360,7 +360,7 @@ Mỗi key giữ thứ tự, còn thứ tự giữa các key không được bả
 | Nhiều worker | Một dispatcher, chưa claim | `FOR UPDATE SKIP LOCKED`, chia theo key |
 | Transaction lúc gửi | Không: đọc, `PublishAsync`, rồi `SaveChanges` từng dòng | Có: giữ khoá hàng suốt batch |
 | Tái hiện chết giữa hai bước | Cờ test ném exception | Tiến trình con `process::exit(137)` |
-| Broker | `IPublisher` ghi trong memory | Kafka thật, `acks=all`, producer idempotent |
+| Broker | `IPublisher` ghi vào bộ nhớ | Kafka thật, `acks=all`, producer idempotent |
 | Thông điệp hỏng | Chưa có | DLQ sau 3 lần |
 
 

@@ -1,0 +1,179 @@
+{
+ "file": "rust-serde-json-but-toan-decimal-thoi-gian.md",
+ "edits": [
+  {
+   "old": "lỗi đọc JSON có dòng, cột.",
+   "new": "lỗi đọc JSON kèm số dòng, cột.",
+   "reason": "'có dòng, cột' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "nên bất biến «tổng bằng 0» vẫn đứng.",
+   "new": "nên bất biến «tổng bằng 0» vẫn được giữ.",
+   "reason": "'vẫn đứng' dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab kiểm bằng test",
+   "new": "Lab kiểm tra bằng test",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "trông vào mặc định của một phía: ở C#, `JsonSerializer` trơn giữ PascalCase",
+   "new": "trông cậy vào mặc định của một phía: ở C#, `JsonSerializer` với cấu hình mặc định giữ PascalCase",
+   "reason": "'trơn' dịch gượng từ plain",
+   "severity": "medium"
+  },
+  {
+   "old": "trên dây nó chỉ là số nguyên đồng",
+   "new": "trên đường truyền, nó chỉ là số nguyên đồng",
+   "reason": "'trên dây' là calque của 'on the wire'",
+   "severity": "medium"
+  },
+  {
+   "old": "camelCase trên dây, nên",
+   "new": "camelCase trên đường truyền, nên",
+   "reason": "Thống nhất thay 'trên dây'",
+   "severity": "low"
+  },
+  {
+   "old": "<text x=\"326\" y=\"46\" class=\"t-b\">JSON trên dây</text>",
+   "new": "<text x=\"326\" y=\"46\" class=\"t-b\">JSON trên đường truyền</text>",
+   "reason": "Thống nhất thay 'trên dây'",
+   "severity": "low"
+  },
+  {
+   "old": "số tổng hợp lớn, dùng chuỗi:",
+   "new": "số tổng hợp lớn, thì dùng chuỗi:",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Mỗi trường chỉ một dạng;",
+   "new": "Mỗi trường chỉ dùng một dạng;",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "một crate khác bật `serde-float` là mọi `Decimal` không có `with` đổi dạng JSON mà ta",
+   "new": "một crate khác bật `serde-float` thì mọi `Decimal` không có `with` đều đổi dạng JSON dù ta",
+   "reason": "'là' dùng sai thay cho 'thì'",
+   "severity": "medium"
+  },
+  {
+   "old": "cùng `skip_serializing_if` cho trường có thể vắng:",
+   "new": "cùng `skip_serializing_if` dùng cho trường có thể vắng:",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "bên đọc strict vỡ khi producer",
+   "new": "bên đọc ở chế độ strict bị vỡ khi producer",
+   "reason": "Thiếu 'bị', mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Ai gửi `schemaVersion: 2` bị từ chối ngay lúc đọc",
+   "new": "Sự kiện mang `schemaVersion: 2` bị từ chối ngay lúc đọc",
+   "reason": "'Ai gửi' sai chủ thể bị từ chối",
+   "severity": "medium"
+  },
+  {
+   "old": "cho lỗi `unknown variant` kèm",
+   "new": "cho ra lỗi `unknown variant` kèm",
+   "reason": "'cho' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "đi qua cửa kiểm: lỗi có vị trí ở đâu?",
+   "new": "đi qua cửa kiểm tra: lỗi có vị trí ở đâu?",
+   "reason": "'cửa kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bốn cửa kiểm khi đọc JSON vào",
+   "new": "Bốn cửa kiểm tra khi đọc JSON vào",
+   "reason": "Thống nhất 'cửa kiểm tra'",
+   "severity": "low"
+  },
+  {
+   "old": "Bốn cửa kiểm khi đọc <code>",
+   "new": "Bốn cửa kiểm tra khi đọc <code>",
+   "reason": "Thống nhất 'cửa kiểm tra'",
+   "severity": "low"
+  },
+  {
+   "old": "vẫn dựng được struct (code sinh ra nằm cùng module), tức JSON",
+   "new": "vẫn dựng được struct (code sinh ra nằm cùng module), tức là JSON",
+   "reason": "Thiếu 'là'",
+   "severity": "low"
+  },
+  {
+   "old": "Với lỗi cú pháp, đó là chỗ parser nhận ra sai:",
+   "new": "Với lỗi cú pháp, vị trí báo là chỗ parser nhận ra sai:",
+   "reason": "'đó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "vị trí mất nhiều hơn:",
+   "new": "vị trí bị mất nhiều hơn:",
+   "reason": "Thiếu 'bị'",
+   "severity": "low"
+  },
+  {
+   "old": "đều ra dòng 0.",
+   "new": "đều báo dòng 0.",
+   "reason": "'ra' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Nên vị trí chỉ là phụ trợ:",
+   "new": "Vì vậy vị trí chỉ là phụ trợ:",
+   "reason": "'Nên' đầu câu là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "qua enum có `tag` nó cũng mất (đã thử)",
+   "new": "qua enum có `tag` thì đường dẫn đó cũng mất (đã thử)",
+   "reason": "'nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "## Với người từ C#: System.Text.Json",
+   "new": "## Với người quen dùng C#: System.Text.Json",
+   "reason": "Gượng",
+   "severity": "low"
+  },
+  {
+   "old": "; `JsonSerializer` trơn giữ PascalCase |",
+   "new": "; `JsonSerializer` mặc định giữ PascalCase |",
+   "reason": "'trơn' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "giá trị mặc định, im lặng (trừ",
+   "new": "giá trị mặc định, không báo lỗi (trừ",
+   "reason": "'im lặng' là calque của silently",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm JSON khớp file golden",
+   "new": "kiểm tra JSON khớp file golden",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "ghi lại, ra đúng từng ký tự.",
+   "new": "ghi lại, và kết quả phải khớp đúng từng ký tự.",
+   "reason": "'ra' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa có đọc luồng, giới hạn",
+   "new": "chưa có cách đọc theo luồng, giới hạn",
+   "reason": "Cụm tự ghép",
+   "severity": "low"
+  }
+ ]
+}

@@ -8,13 +8,13 @@ tags: [rust, toi-noi, ledger, repository, unit-of-work, sqlx]
 language: vi
 ---
 
-Hàm thu cước của service sổ cái dựng bút toán `trip:TN-0001:capture`, ghi vào PostgreSQL và cập nhật số dư. Nếu hàm gọi thẳng `sqlx`, mọi test nghiệp vụ, kể cả "ghi hai lần cùng key chỉ ra một bút toán", đều đòi một database đang chạy. Bài này tách nghiệp vụ khỏi lưu trữ bằng một trait, rồi chứng minh bằng chạy thật rằng hai cách lưu (bộ nhớ và PostgreSQL) cư xử như nhau.
+Hàm thu cước của service sổ cái dựng bút toán `trip:TN-0001:capture`, ghi vào PostgreSQL và cập nhật số dư. Nếu hàm gọi thẳng `sqlx`, mọi test nghiệp vụ, kể cả "ghi hai lần cùng key chỉ tạo ra một bút toán", đều đòi một database đang chạy. Bài này tách nghiệp vụ khỏi lưu trữ bằng một trait, rồi chứng minh bằng chạy thật rằng hai cách lưu (bộ nhớ và PostgreSQL) hành xử như nhau.
 
 Đây là bài 26 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab dùng lại `ledger-core` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) và cách ghi idempotent trong transaction ở [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Trait <code>LedgerRepository</code> của lab khai báo <code>fn begin(&amp;self) -&gt; impl Future&lt;Output = …&gt; + Send</code> thay vì <code>async fn begin</code>. Nếu viết <code>async fn</code> trần, service generic còn biên dịch không? Còn <code>tokio::spawn</code> nó thì sao?</p>
+<p>Trait <code>LedgerRepository</code> của lab khai báo <code>fn begin(&amp;self) -&gt; impl Future&lt;Output = …&gt; + Send</code> thay vì <code>async fn begin</code>. Nếu viết <code>async fn</code> trần, service generic còn biên dịch không? Còn khi <code>tokio::spawn</code> service đó thì sao?</p>
 <details><summary>Xem đáp án</summary><p>Service vẫn biên dịch và chạy được khi gọi trực tiếp. Nhưng với kiểu generic <code>R</code>, <code>tokio::spawn</code> báo <code>future cannot be sent between threads safely</code>, vì trait không hứa future là <code>Send</code>. Với kiểu cụ thể (như <code>PgRepository</code>) trình biên dịch thấy future thật nên qua được.</p></details>
 </div>
 
@@ -24,7 +24,7 @@ Hàm thu cước của service sổ cái dựng bút toán `trip:TN-0001:capture
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 300" role="img" aria-label="Hình 1. Crate ledger-pg (adapter sqlx) và adapter bộ nhớ cùng hiện thực cổng trong ledger-port; ledger-port phụ thuộc ledger-core; ledger-core và ledger-port không có sqlx."><defs><marker id="rust-repository-uow-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="250" height="110" rx="10" class="f-warn-soft s-warn"/><text x="36" y="48" class="t-b">ledger-pg · adapter</text><text x="36" y="72" class="t-small">PgRepository, PgUow</text><text x="36" y="92" class="t-small">bao sqlx::Transaction</text><text x="36" y="112" class="t-small">crate duy nhất có sqlx</text><rect x="20" y="150" width="250" height="110" rx="10" class="f-phys-soft s-phys"/><text x="36" y="178" class="t-b">MemoryRepository · adapter</text><text x="36" y="202" class="t-small">nằm trong ledger-port</text><text x="36" y="222" class="t-small">khoá + bản nháp, test nhanh</text><text x="36" y="242" class="t-small">không cần database</text><rect x="325" y="20" width="230" height="240" rx="10" class="f-pk-soft s-pk"/><text x="341" y="48" class="t-b">ledger-port · cổng</text><text x="341" y="76" class="t-small">trait LedgerRepository</text><text x="341" y="96" class="t-small">trait LedgerUnitOfWork</text><text x="341" y="116" class="t-small">post_trip_capture&lt;R&gt;</text><text x="341" y="136" class="t-small">contract::run&lt;R&gt;</text><text x="341" y="170" class="t-small">deps: ledger-core,</text><text x="341" y="190" class="t-small">thiserror, tokio</text><text x="341" y="224" class="t-b">không có sqlx</text><rect x="610" y="20" width="250" height="240" rx="10" class="f-phys-soft s-phys"/><text x="626" y="48" class="t-b">ledger-core · domain</text><text x="626" y="76" class="t-small">Money, JournalEntry</text><text x="626" y="96" class="t-small">capture_entry, FeePolicy</text><text x="626" y="116" class="t-small">tổng posting bằng 0</text><text x="626" y="170" class="t-small">deps: rust_decimal,</text><text x="626" y="190" class="t-small">serde, thiserror</text><text x="626" y="224" class="t-b">không có sqlx</text><path d="M270 75 L325 75" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-0-a)"/><path d="M270 205 L325 205" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-0-a)"/><path d="M555 140 L610 140" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-0-a)"/><text x="20" y="288" class="t-small">Mũi tên là chiều phụ thuộc: adapter biết cổng, cổng biết domain, domain không biết ai.</text></svg>
+<svg viewBox="0 0 880 300" role="img" aria-label="Hình 1. Crate ledger-pg (adapter sqlx) và adapter bộ nhớ cùng cài đặt cổng trong ledger-port; ledger-port phụ thuộc ledger-core; ledger-core và ledger-port không có sqlx."><defs><marker id="rust-repository-uow-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="250" height="110" rx="10" class="f-warn-soft s-warn"/><text x="36" y="48" class="t-b">ledger-pg · adapter</text><text x="36" y="72" class="t-small">PgRepository, PgUow</text><text x="36" y="92" class="t-small">bao sqlx::Transaction</text><text x="36" y="112" class="t-small">crate duy nhất có sqlx</text><rect x="20" y="150" width="250" height="110" rx="10" class="f-phys-soft s-phys"/><text x="36" y="178" class="t-b">MemoryRepository · adapter</text><text x="36" y="202" class="t-small">nằm trong ledger-port</text><text x="36" y="222" class="t-small">khoá + bản nháp, test nhanh</text><text x="36" y="242" class="t-small">không cần database</text><rect x="325" y="20" width="230" height="240" rx="10" class="f-pk-soft s-pk"/><text x="341" y="48" class="t-b">ledger-port · cổng</text><text x="341" y="76" class="t-small">trait LedgerRepository</text><text x="341" y="96" class="t-small">trait LedgerUnitOfWork</text><text x="341" y="116" class="t-small">post_trip_capture&lt;R&gt;</text><text x="341" y="136" class="t-small">contract::run&lt;R&gt;</text><text x="341" y="170" class="t-small">deps: ledger-core,</text><text x="341" y="190" class="t-small">thiserror, tokio</text><text x="341" y="224" class="t-b">không có sqlx</text><rect x="610" y="20" width="250" height="240" rx="10" class="f-phys-soft s-phys"/><text x="626" y="48" class="t-b">ledger-core · domain</text><text x="626" y="76" class="t-small">Money, JournalEntry</text><text x="626" y="96" class="t-small">capture_entry, FeePolicy</text><text x="626" y="116" class="t-small">tổng posting bằng 0</text><text x="626" y="170" class="t-small">deps: rust_decimal,</text><text x="626" y="190" class="t-small">serde, thiserror</text><text x="626" y="224" class="t-b">không có sqlx</text><path d="M270 75 L325 75" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-0-a)"/><path d="M270 205 L325 205" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-0-a)"/><path d="M555 140 L610 140" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-0-a)"/><text x="20" y="288" class="t-small">Mũi tên là chiều phụ thuộc: adapter biết cổng, cổng biết domain, domain không biết ai.</text></svg>
 </div>
 <figcaption>Hình 1. Ba lớp. Chỉ <code>ledger-pg</code> kéo <code>sqlx</code> vào; cổng và domain test được không cần database.</figcaption>
 </figure>
@@ -57,7 +57,7 @@ pub trait LedgerUnitOfWork: Send {
 }
 ```
 
-Lỗi của cổng là `RepoError` (dựng bằng `thiserror`, như [bài 17](/articles/rust-thiserror-anyhow-xu-ly-loi-thuc-te)): `Domain(LedgerError)`, `UnknownAccount`, `ZeroAmount`, `Unsupported` và `Storage(Box<dyn Error + Send + Sync>)` cho mọi lỗi hạ tầng. Cổng không thể viết `Storage(sqlx::Error)`, nên adapter gói lỗi sqlx vào hộp.
+Lỗi của cổng là `RepoError` (dựng bằng `thiserror`, như [bài 17](/articles/rust-thiserror-anyhow-xu-ly-loi-thuc-te)): `Domain(LedgerError)`, `UnknownAccount`, `ZeroAmount`, `Unsupported` và `Storage(Box<dyn Error + Send + Sync>)` cho mọi lỗi hạ tầng. Cổng không thể viết `Storage(sqlx::Error)`, nên adapter gói lỗi sqlx vào một Box.
 
 ## `async fn` trong trait chạy được; hai giới hạn thật là gì?
 
@@ -74,7 +74,7 @@ async fn use_plain<R: PlainRepo>(repo: &R) -> Money {
 }
 ```
 
-Cái này biên dịch và test `plain_async_fn_works_when_not_spawned` xanh. Hai giới hạn dưới đây có thông điệp chép từ rustc 1.98.1 trên một crate nháp ngoài lab.
+Đoạn này biên dịch được và test `plain_async_fn_works_when_not_spawned` xanh. Hai giới hạn dưới đây có thông báo lỗi chép từ rustc 1.98.1 trên một crate nháp ngoài lab.
 
 **Giới hạn 1: không dùng được `dyn`.** Viết `Box<dyn PlainRepo>` (trong crate nháp trait tên `Repo`) thì:
 
@@ -87,7 +87,7 @@ error[E0038]: the trait `Repo` is not dyn compatible
 
 Lý do: mỗi `impl` trả về một kiểu future riêng, kích thước riêng, nên vtable không có một chữ ký chung để gọi. Dạng `-> impl Future` của lab cũng bị E0038 (`method balance references an impl Trait type in its return type`), nên cách dùng của lab là generic (`R: LedgerRepository`, gọi tĩnh). Cái giá: kiểu `R` lan lên mọi hàm dùng nó, và không thể chứa nhiều adapter khác nhau trong một `Vec<Box<dyn …>>`. Nếu thật sự cần `dyn`, có hai lối ra mà lab không dùng: crate `async-trait` (đưa mỗi future vào `Box`, tốn một lần cấp phát mỗi lệnh gọi) hoặc một enum bọc các adapter.
 
-**Giới hạn 2: không biết future có `Send`.** Với `async fn` trần, trait không nói gì về `Send` của future. Generic `R` nên trình biên dịch không nhìn được vào bên trong:
+**Giới hạn 2: không biết future có `Send`.** Với `async fn` trần, trait không nói gì về `Send` của future. Vì `R` là generic nên trình biên dịch không nhìn được vào bên trong:
 
 ```text
 error: future cannot be sent between threads safely
@@ -98,20 +98,20 @@ help: `Send` can be made part of the associated future's guarantees for all impl
   + fn balance(&self, account: &str) -> impl std::future::Future<Output = i64> + Send;
 ```
 
-Gợi ý của rustc chính là cách lab dùng: viết `-> impl Future<…> + Send` ở trait, còn bên `impl` vẫn viết `async fn`, và trình biên dịch kiểm future của từng adapter. Nếu một adapter giữ `Rc` qua điểm `await`, lỗi báo ngay tại `async fn` của nó (`has type Rc<i64> which is not Send`), không phải ở nơi spawn xa tít. Với trait công khai, lint `async_fn_in_trait` còn cảnh báo ngay từ khai báo (`use of async fn in public traits is discouraged as auto trait bounds cannot be specified`), vì thêm hay bỏ `Send` về sau đều phá API. Crate `trait-variant` sinh sẵn bản có `Send` từ một khai báo; lab không dùng.
+Gợi ý của rustc chính là cách lab dùng: viết `-> impl Future<…> + Send` ở trait, còn bên `impl` vẫn viết `async fn`, và trình biên dịch kiểm future của từng adapter. Nếu một adapter giữ `Rc` qua điểm `await`, lỗi báo ngay tại `async fn` của nó (`has type Rc<i64> which is not Send`), chứ không phải ở nơi spawn ở xa. Với trait công khai, lint `async_fn_in_trait` còn cảnh báo ngay từ khai báo (`use of async fn in public traits is discouraged as auto trait bounds cannot be specified`), vì thêm hay bỏ `Send` về sau đều phá API. Crate `trait-variant` sinh sẵn bản có `Send` từ một khai báo; lab không dùng.
 
 ## Unit of Work: giao dịch là một giá trị
 
-**Unit of Work** (UoW) là đối tượng giữ một giao dịch đang mở. Hai quy tắc nằm trong chữ ký trait: `post(&mut self, …)` cần quyền mượn duy nhất nên không hai chỗ cùng ghi vào một giao dịch; `commit(self)` nhận theo giá trị nên dùng lại sau commit là lỗi biên dịch. Quy tắc thứ ba kiểu không ép được, mỗi adapter tự giữ và hợp đồng kiểm: UoW bị thả mà chưa commit thì giao dịch bị huỷ (Hình 2).
+**Unit of Work** (UoW) là đối tượng giữ một giao dịch đang mở. Hai quy tắc nằm trong chữ ký trait: `post(&mut self, …)` cần quyền mượn duy nhất nên không thể có hai chỗ cùng ghi vào một giao dịch; `commit(self)` nhận theo giá trị nên dùng lại sau commit là lỗi biên dịch. Quy tắc thứ ba thì hệ thống kiểu không ép buộc được; mỗi adapter tự giữ và bộ hợp đồng kiểm tra: UoW bị thả mà chưa commit thì giao dịch bị huỷ (Hình 2).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 250" role="img" aria-label="Hình 2. Vòng đời Unit of Work: begin mở giao dịch, post ghi bút toán và số dư; commit(self) chốt và tiêu thụ UoW; thả UoW hoặc gặp lỗi giữa chừng thì rollback, không để lại dòng nào."><defs><marker id="rust-repository-uow-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="75" width="190" height="80" rx="10" class="f-phys-soft s-phys"/><text x="36" y="104" class="t-b">repo.begin()</text><text x="36" y="128" class="t-small">BEGIN, trả PgUow</text><rect x="240" y="75" width="230" height="80" rx="10" class="f-phys-soft s-phys"/><text x="256" y="104" class="t-b">uow.post(&amp;entry) × N</text><text x="256" y="128" class="t-small">bút toán + số dư, một tx</text><rect x="520" y="20" width="340" height="80" rx="10" class="f-pk-soft s-pk"/><text x="536" y="48" class="t-b">uow.commit() · COMMIT</text><text x="536" y="72" class="t-small">nhận self: UoW bị tiêu thụ</text><rect x="520" y="130" width="340" height="80" rx="10" class="f-warn-soft s-warn"/><text x="536" y="158" class="t-b">drop, hoặc lỗi rồi dùng ?</text><text x="536" y="182" class="t-small">chưa commit: giao dịch bị huỷ, sổ như cũ</text><path d="M210 115 L240 115" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-1-a)"/><path d="M470 100 L520 62" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-1-a)"/><path d="M470 130 L520 168" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-repository-uow-1-a)"/><text x="20" y="238" class="t-small">Mọi post trong cùng UoW cùng sống hoặc cùng chết. Nhánh rollback không cần code, nó là hành vi của drop.</text></svg>
 </div>
-<figcaption>Hình 2. Vòng đời của Unit of Work. Nhánh thất bại không có dòng code nào, vì nó là <code>Drop</code>.</figcaption>
+<figcaption>Hình 2. Vòng đời của Unit of Work. Nhánh thất bại không có dòng code nào, vì đó là hành vi của <code>Drop</code>.</figcaption>
 </figure>
 
-Adapter PostgreSQL bao `sqlx::Transaction`. `Pool::begin` trả `Transaction<'static, Postgres>`: nó giữ một kết nối lấy từ pool và không mượn gì từ `PgRepository`, nên `PgUow` không cần tham số lifetime. Hình thức `Transaction<'c, Postgres>` với lifetime cụ thể xuất hiện khi giao dịch mở trên một `&mut PgConnection` có sẵn (`ledger-pg/src/pg.rs`):
+Adapter PostgreSQL bao `sqlx::Transaction`. `Pool::begin` trả `Transaction<'static, Postgres>`: transaction này giữ một kết nối lấy từ pool và không mượn gì từ `PgRepository`, nên `PgUow` không cần tham số lifetime. Dạng `Transaction<'c, Postgres>` có lifetime cụ thể xuất hiện khi giao dịch mở trên một `&mut PgConnection` có sẵn (`ledger-pg/src/pg.rs`):
 
 ```rust
 pub struct PgUow {
@@ -183,13 +183,13 @@ let Some(entry_id) = inserted else {
 };
 ```
 
-Nhánh `replay` đọc lại các posting đã lưu và so với bút toán mới: giống thì `replayed: true`, khác thì `IdempotencyConflict`. Số dư trong `account_balances` được cập nhật bằng `INSERT … ON CONFLICT DO UPDATE` theo thứ tự tài khoản (một `BTreeMap`), để hai lần `post` cùng chạm một tập tài khoản luôn khoá hàng cùng thứ tự. Thứ tự đó chỉ giữ trong từng `post`: hai UoW nhiều `post` vẫn có thể kẹt nhau (`40P01`, xem bài 25). Số dư vì vậy là projection cập nhật trong cùng transaction với bút toán, đúng thiết kế ở [bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition).
+Nhánh `replay` đọc lại các posting đã lưu và so với bút toán mới: giống thì `replayed: true`, khác thì `IdempotencyConflict`. Số dư trong `account_balances` được cập nhật bằng `INSERT … ON CONFLICT DO UPDATE` theo thứ tự tài khoản (một `BTreeMap`), để hai lần `post` cùng chạm một tập tài khoản luôn khoá các dòng theo cùng một thứ tự. Thứ tự đó chỉ giữ trong từng `post`: hai UoW mà mỗi bên có nhiều `post` vẫn có thể kẹt nhau (`40P01`, xem bài 25). Số dư vì vậy là projection cập nhật trong cùng transaction với bút toán, đúng thiết kế ở [bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition).
 
-Với sqlx 0.9, `sqlx::query` chỉ nhận `&'static str`; chuỗi ghép động (tên schema `lab_<uuid>` ở `harness.rs`) phải bọc `AssertSqlSafe(...)`, tức tự cam kết không chứa dữ liệu ngoài. Lab dùng `sqlx::query` kiểm lúc chạy, không dùng `query!`, vì bài bàn về hình dạng trait.
+Với sqlx 0.9, `sqlx::query` chỉ nhận `&'static str`; chuỗi ghép động (tên schema `lab_<uuid>` ở `harness.rs`) phải bọc `AssertSqlSafe(...)`, tức tự cam kết không chứa dữ liệu ngoài. Lab dùng `sqlx::query` (kiểm tra lúc chạy), không dùng `query!`, vì bài bàn về hình dạng của trait.
 
 ## Hai adapter, một bộ hợp đồng
 
-Phần đáng giá nhất của ranh giới là test viết một lần, chạy cho mọi adapter. `contract::run` là một hàm generic, nằm trong crate cổng (`ledger-port/src/contract.rs`, rút gọn một ca):
+Phần đáng giá nhất của ranh giới là test viết một lần, chạy cho mọi adapter. `contract::run` là một hàm generic, nằm trong crate cổng (`ledger-port/src/contract.rs`, rút gọn, chỉ giữ một test case):
 
 ```rust
 pub async fn run<R>(repo: Arc<R>) -> Result<Vec<&'static str>, String>
@@ -210,13 +210,13 @@ where
 }
 ```
 
-`run` có bảy ca, `run_concurrent` thêm ca thứ tám; cả tám nằm trong output ở mục chạy ví dụ. Sau mỗi ca, `expect_totals` kiểm số dư từng tài khoản và tổng bằng 0 (sổ cân). Ca thứ tám là nơi `+ Send` được dùng thật: `tokio::spawn` nhận future của `post_trip_capture` với `R` generic.
+`run` có bảy test case, `run_concurrent` thêm test case thứ tám; cả tám nằm trong output ở mục chạy ví dụ. Sau mỗi test case, `expect_totals` kiểm tra số dư từng tài khoản và tổng bằng 0 (sổ cân). Test case thứ tám là nơi `+ Send` được dùng thật: `tokio::spawn` nhận future của `post_trip_capture` với `R` generic.
 
 Hai test chạy cùng hợp đồng (`ledger-pg/tests/contract.rs`).
 
-Hai adapter dễ lệch nhau ở hai chỗ. PostgreSQL có `CHECK (amount_dong <> 0)`, còn sổ trong bộ nhớ viết ngây thơ sẽ nhận posting 0; PostgreSQL có khoá ngoại `reversal_of`, bộ nhớ thì không. Lab chặn cả hai ở cổng: `validate_entry` từ chối posting 0 (hợp đồng có ca này) và trả `Unsupported` với bút toán đảo vì lab chưa hỗ trợ, còn CHECK của database là tuyến phòng thủ cuối.
+Hai adapter dễ lệch nhau ở hai chỗ. PostgreSQL có `CHECK (amount_dong <> 0)`, còn sổ trong bộ nhớ viết ngây thơ sẽ nhận posting 0; PostgreSQL có khoá ngoại `reversal_of`, bộ nhớ thì không. Lab chặn cả hai ở cổng: `validate_entry` từ chối posting 0 (hợp đồng có test case này) và trả `Unsupported` với bút toán đảo vì lab chưa hỗ trợ, còn CHECK của database là tuyến phòng thủ cuối.
 
-Một khác biệt vẫn còn, và hợp đồng cố tình không khẳng định: mã bút toán. Test `pg_identity_has_gaps_memory_does_not` ghi `TN-0001`, ghi lại (replay), rồi ghi `TN-0002`. Bộ nhớ cấp `JE-000002`. PostgreSQL cấp `JE-000003`, vì sequence của cột `identity` không hoàn tác: câu `INSERT … ON CONFLICT DO NOTHING` ở lần replay đã lấy một số trước khi phát hiện trùng. Rollback cũng đốt số. Mã có lỗ hổng không sai (chỉ cần duy nhất), nhưng đừng viết test đòi mã liên tục.
+Một khác biệt vẫn còn, và hợp đồng cố tình không khẳng định: mã bút toán. Test `pg_identity_has_gaps_memory_does_not` ghi `TN-0001`, ghi lại (replay), rồi ghi `TN-0002`. Bộ nhớ cấp `JE-000002`. PostgreSQL cấp `JE-000003`, vì sequence của cột `identity` không hoàn tác: câu `INSERT … ON CONFLICT DO NOTHING` ở lần replay đã lấy một số trước khi phát hiện trùng. Rollback cũng làm mất số. Mã có khoảng trống không sai (chỉ cần duy nhất), nhưng đừng viết test đòi mã liên tục.
 
 ## So với EF Core `DbContext`, và khi nào lớp này thừa?
 
@@ -230,9 +230,9 @@ Một khác biệt vẫn còn, và hợp đồng cố tình không khẳng đị
 | Theo dõi thay đổi | Change tracker | Không có; mỗi `post` là các lệnh SQL tường minh |
 | Tráo adapter | Interface + DI, gọi ảo | Generic `R`, gọi tĩnh; `dyn` cần thêm công |
 
-Khác biệt lớn là dòng "Theo dõi thay đổi": sqlx không có tracker, nên UoW ở đây chỉ là ranh giới giao dịch cộng bảo đảm dùng một lần lúc biên dịch.
+Khác biệt lớn là dòng "Theo dõi thay đổi": sqlx không có tracker, nên UoW ở đây chỉ là ranh giới giao dịch, cộng thêm bảo đảm về việc dùng một lần do trình biên dịch kiểm tra.
 
-Lớp này có giá: thêm một thao tác phải sửa trait, hai adapter và hợp đồng; kiểu generic lan lên các hàm gọi. Lab chọn nó vì nghiệp vụ sổ cái cần test không có database và có hơn một adapter. Nếu service chỉ có một nơi lưu và test với database thật trong container đã đủ nhanh, lớp này thừa: gọi `sqlx` thẳng trong một module `storage` là hợp lý. Test double chỉ chứng minh rằng mock trả đúng thứ mình hứa nếu không có hợp đồng chạy trên adapter thật giữ nó trung thực (so sánh [test double trong C#](/articles/csharp-unit-test-test-double)).
+Lớp này có giá: thêm một thao tác phải sửa trait, hai adapter và hợp đồng; kiểu generic lan lên các hàm gọi. Lab chọn nó vì nghiệp vụ sổ cái cần test không phụ thuộc database và có hơn một adapter. Nếu service chỉ có một nơi lưu và test với database thật trong container đã đủ nhanh, lớp này thừa: gọi `sqlx` thẳng trong một module `storage` là hợp lý. Nếu không có hợp đồng chạy trên adapter thật để giữ cho test double trung thực, test double chỉ chứng minh được rằng mock trả đúng thứ mình đã hứa (so sánh [test double trong C#](/articles/csharp-unit-test-test-double)).
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -245,7 +245,7 @@ cargo run --manifest-path examples/toi-noi-rust/26-repository-uow/Cargo.toml -- 
 cargo test --manifest-path examples/toi-noi-rust/26-repository-uow/Cargo.toml
 ```
 
-Lệnh đầu chạy cùng kịch bản trên hai adapter, in kết quả giống nhau từng dòng, rồi in tám ca hợp đồng của mỗi adapter:
+Lệnh đầu chạy cùng kịch bản trên hai adapter, in kết quả giống nhau từng dòng, rồi in tám test case hợp đồng của mỗi adapter:
 
 ```text
 == adapter bộ nhớ ==
@@ -271,17 +271,17 @@ post_trip_capture(TN-0001) -> JE-000001 replayed=true
   ok  8 task đồng thời cùng key: đúng 1 bản ghi mới, 7 replay, số dư -78.000 / 15.600 / 62.400
 ```
 
-Khối `== hợp đồng trên bộ nhớ ==` in đúng tám dòng như trên. `--verify` kiểm hai adapter qua cùng danh sách tám ca, kiểm schema `lab_<uuid>` của lần chạy đã bị xoá, rồi in `VERIFY OK`. Thiếu `TOI_NOI_PG_URL` thì thoát mã 1 và nói cách bật compose. `cargo test` chạy 7 test: 4 của `ledger-port` (không database) và 3 của `ledger-pg` (hai test dùng PostgreSQL thật: hợp đồng và lỗ hổng mã; một test chỉ bộ nhớ).
+Khối `== hợp đồng trên bộ nhớ ==` in đúng tám dòng như trên. `--verify` kiểm hai adapter qua cùng danh sách tám test case, kiểm schema `lab_<uuid>` của lần chạy đã bị xoá, rồi in `VERIFY OK`. Thiếu `TOI_NOI_PG_URL` thì thoát mã 1 và nói cách bật compose. `cargo test` chạy 7 test: 4 của `ledger-port` (không database) và 3 của `ledger-pg` (hai test dùng PostgreSQL thật: hợp đồng và khoảng trống trong mã; một test chỉ dùng bộ nhớ).
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Adapter bộ nhớ giữ một khoá suốt đời UoW (một người ghi tại một thời điểm), nên gọi <code>repo.balance</code> hay mở UoW thứ hai trên cùng task khi UoW cũ còn sống sẽ treo; PostgreSQL cho nhiều giao dịch chạy song song ở mức READ COMMITTED. Hợp đồng không chứng minh gì về mức cô lập, <code>SERIALIZABLE</code> hay thử lại lỗi <code>40001</code>. Bút toán đảo chưa đi qua cổng được (<code>validate_entry</code> trả <code>RepoError::Unsupported</code>); schema lab chưa có constraint trigger của bài 25. Lab cũng chưa có đọc lịch sử, phân trang, migration thật hay pool cấu hình cho production, và dùng schema tự dựng chứ chưa phải <code>#[sqlx::test]</code> (bài sau).</p>
+<p>Adapter bộ nhớ giữ một khoá suốt vòng đời của UoW (một người ghi tại một thời điểm), nên gọi <code>repo.balance</code> hay mở UoW thứ hai trên cùng task khi UoW cũ còn sống sẽ treo; PostgreSQL cho nhiều giao dịch chạy song song ở mức READ COMMITTED. Hợp đồng không chứng minh gì về mức cô lập, về <code>SERIALIZABLE</code> hay về việc thử lại lỗi <code>40001</code>. Bút toán đảo chưa đi qua cổng được (<code>validate_entry</code> trả <code>RepoError::Unsupported</code>); schema lab chưa có constraint trigger của bài 25. Lab cũng chưa có chức năng đọc lịch sử, phân trang, migration thật hay pool cấu hình cho production, và dùng schema tự dựng chứ chưa phải <code>#[sqlx::test]</code> (bài sau).</p>
 </div>
 
-**Bài tập:** thêm vào trait `LedgerUnitOfWork` phương thức `count_entries(&mut self)`, trả `impl Future<Output = Result<u64, RepoError>> + Send`. Bạn phải sửa những nơi nào để `cargo build` xanh, và hợp đồng cần thêm ca nào?
+**Bài tập:** thêm vào trait `LedgerUnitOfWork` phương thức `count_entries(&mut self)`, trả `impl Future<Output = Result<u64, RepoError>> + Send`. Bạn phải sửa những nơi nào để `cargo build` xanh, và hợp đồng cần thêm test case nào?
 
 <details><summary>Xem lời giải</summary>
-<p>Rustc báo <code>E0046: not all trait items implemented</code> ở cả hai <code>impl LedgerUnitOfWork</code>: <code>MemoryUow</code> (trả <code>staged.entries.len()</code>) và <code>PgUow</code> (<code>SELECT count(*) FROM journal_entries</code> trên <code>&amp;mut *self.tx</code>). Service và hợp đồng chỉ biết trait nên không phải sửa. Ca hợp đồng đáng thêm: 0 ở sổ mới; 1 sau một bút toán; vẫn 1 sau replay; đếm ngoài giao dịch vẫn như cũ sau rollback khi drop.</p>
+<p>Rustc báo <code>E0046: not all trait items implemented</code> ở cả hai <code>impl LedgerUnitOfWork</code>: <code>MemoryUow</code> (trả <code>staged.entries.len()</code>) và <code>PgUow</code> (<code>SELECT count(*) FROM journal_entries</code> trên <code>&amp;mut *self.tx</code>). Service và hợp đồng chỉ biết trait nên không phải sửa. Test case đáng thêm vào hợp đồng: 0 ở sổ mới; 1 sau một bút toán; vẫn 1 sau replay; đếm ngoài giao dịch vẫn như cũ sau rollback khi drop.</p>
 </details>
 
 Bài trước: [bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition). Bài tiếp: [bài 27](/articles/rust-integration-test-postgresql-schema-rieng-ci).

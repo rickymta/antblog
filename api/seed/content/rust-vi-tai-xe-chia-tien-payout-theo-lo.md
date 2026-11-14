@@ -1,7 +1,7 @@
 ---
 slug: rust-vi-tai-xe-chia-tien-payout-theo-lo
 title: "Ví tài xế: chia tiền, thu nhập và payout theo lô"
-summary: "Bài 44: thu nhập theo ngày giờ Việt Nam khi chuyến qua nửa đêm UTC, payout theo lô với bốn trạng thái và bút toán đảo, hạn mức rút theo clock truyền vào, SKIP LOCKED, ngân hàng giả timeout, đối chiếu sao kê, trên PostgreSQL."
+summary: "Bài 44: thu nhập theo ngày giờ Việt Nam khi chuyến qua nửa đêm UTC, payout theo lô với bốn trạng thái và bút toán đảo, hạn mức rút tính theo clock được truyền vào, SKIP LOCKED, ngân hàng giả lập bị timeout, đối chiếu sao kê, trên PostgreSQL."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, payout, postgresql, jiff]
@@ -52,7 +52,7 @@ let rows = sqlx::query(
 .await?;
 ```
 
-Năm chuyến của `DR-001`, hai chuyến cách nhau một giây quanh nửa đêm giờ Việt Nam (16:59:59Z và 17:00:00Z). Cùng truy vấn, chỉ đổi múi giờ:
+Năm chuyến của `DR-001` có hai chuyến cách nhau một giây quanh nửa đêm giờ Việt Nam (16:59:59Z và 17:00:00Z). Cùng truy vấn, chỉ đổi múi giờ:
 
 ```text
 -- cắt ngày theo Asia/Ho_Chi_Minh
@@ -63,7 +63,7 @@ Năm chuyến của `DR-001`, hai chuyến cách nhau một giây quanh nửa đ
 2026-11-06  1 chuyến  20.400 VND
 ```
 
-Hạn mức rút cũng tính theo ngày của tài xế, nên Rust phải biết ngày nào. `jiff` ([bài 8](/articles/rust-string-str-ngay-gio-dinh-dang-tien)) làm việc đó và lab kiểm nó khớp PostgreSQL ở bốn mốc sát nửa đêm. Cửa sổ ngày là nửa mở `[đầu ngày, đầu ngày sau)` và dùng `start_of_day` thay vì cộng 24 giờ:
+Hạn mức rút cũng tính theo ngày của tài xế, nên Rust phải biết đó là ngày nào. `jiff` ([bài 8](/articles/rust-string-str-ngay-gio-dinh-dang-tien)) làm việc đó và lab kiểm tra kết quả của nó có khớp PostgreSQL ở bốn mốc sát nửa đêm. Cửa sổ ngày là nửa mở `[đầu ngày, đầu ngày sau)` và dùng `start_of_day` thay vì cộng 24 giờ:
 
 ```rust
 // src/clock.rs
@@ -83,7 +83,7 @@ pub fn local_day_bounds(at: Timestamp) -> Result<(Timestamp, Timestamp)> {
 cửa sổ ngày của 2026-11-06T10:00:00Z: [2026-11-05T17:00:00Z, 2026-11-06T17:00:00Z)
 ```
 
-Đúng 17:00:00Z thuộc ngày mới, 16:59:59Z thuộc ngày cũ: không thời điểm nào rơi vào hai ngày hay lọt khe.
+Đúng 17:00:00Z thuộc ngày mới, 16:59:59Z thuộc ngày cũ: không có thời điểm nào rơi vào hai ngày hoặc lọt khe giữa hai ngày.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -96,14 +96,14 @@ cửa sổ ngày của 2026-11-06T10:00:00Z: [2026-11-05T17:00:00Z, 2026-11-06T1
 
 Khi gom ví vào lô, tiền rời ví ngay: `driver:<id>` âm, `bank:payout:clearing` dương (asset, tiền đang chi ra ngân hàng, xem [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen)). Không chờ ngân hàng trả lời mới trừ ví, vì trong lúc chờ ví đó có thể bị chi lần nữa.
 
-Mỗi lô có một dòng `payout_batches`; mỗi tài xế trong lô có một dòng `payouts` mang `payout_key = payout:<mã lô>:<tài xế>`. Chuỗi này vừa là `idempotency_key` của bút toán, vừa là mã tham chiếu gửi ngân hàng, vừa là cột unique. Thêm một chỉ mục unique một phần theo kỳ:
+Mỗi lô có một dòng `payout_batches`; mỗi tài xế trong lô có một dòng `payouts` mang `payout_key = payout:<mã lô>:<tài xế>`. Chuỗi này vừa là `idempotency_key` của bút toán, vừa là mã tham chiếu gửi ngân hàng, vừa là giá trị của cột unique. Ngoài ra còn có một chỉ mục unique một phần theo kỳ:
 
 ```sql
 -- sql/schema.sql (trích)
 CREATE UNIQUE INDEX payouts_period_driver_uq ON payouts (period, driver_id) WHERE status <> 'FAILED';
 ```
 
-Mỗi tài xế nhiều nhất một khoản còn hiệu lực trong một kỳ; khoản `FAILED` đã đảo nên không chiếm chỗ. Trạng thái lô suy ra từ các khoản chứ không lưu độc lập.
+Mỗi tài xế có nhiều nhất một khoản còn hiệu lực trong một kỳ; khoản `FAILED` đã đảo nên không chiếm chỗ. Trạng thái lô suy ra từ các khoản chứ không lưu độc lập.
 
 ```rust
 // src/payout.rs
@@ -128,9 +128,9 @@ pub fn derive_batch_status(c: Counts) -> Status {
 }
 ```
 
-Mỗi lần đổi trạng thái là `UPDATE ... WHERE id = $1 AND status = $2`: hai tiến trình cùng đổi một khoản thì một bên thấy 0 hàng được cập nhật và bỏ qua.
+Mỗi lần đổi trạng thái là một lệnh `UPDATE ... WHERE id = $1 AND status = $2`: hai tiến trình cùng đổi một khoản thì một bên thấy 0 hàng được cập nhật và bỏ qua.
 
-`SENT` chỉ có nghĩa ngân hàng đã nhận lệnh. Trạng thái này không biết kết quả xử lý: tiền có thể đã tới, còn đang chờ, hoặc sẽ bị trả lại. Kết cục đến từ sao kê, nên `SENT` chưa phải «đã chi xong».
+`SENT` chỉ có nghĩa là ngân hàng đã nhận lệnh. Trạng thái này không biết kết quả xử lý: tiền có thể đã tới, còn đang chờ, hoặc sẽ bị trả lại. Kết cục đến từ sao kê, nên `SENT` chưa phải «đã chi xong».
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -141,7 +141,7 @@ Mỗi lần đổi trạng thái là `UPDATE ... WHERE id = $1 AND status = $2`:
 
 ## Chọn ví vào lô: ngưỡng, hạn mức và đồng hồ truyền vào
 
-Chính sách của lab: ví đủ 50.000 mới vào lô, mỗi tài xế rút tối đa 150.000 mỗi ngày giờ Việt Nam. Khoản chi là số nhỏ hơn giữa số dư và hạn mức còn lại; nhỏ hơn ngưỡng thì ví bị bỏ qua kèm lý do.
+Chính sách của lab: ví đủ 50.000 mới vào lô, mỗi tài xế rút tối đa 150.000 mỗi ngày giờ Việt Nam. Khoản chi là số nhỏ hơn trong hai số: số dư và hạn mức còn lại; nếu số này nhỏ hơn ngưỡng thì ví bị bỏ qua kèm lý do.
 
 ```rust
 // src/payout.rs, trong create_batch (rút gọn)
@@ -154,7 +154,7 @@ if amount < request.policy.min_payout.dong() {
 }
 ```
 
-`create_batch` nhận `&impl Clock` và không đọc giờ hệ thống. `created_at` của khoản chi, `posted_at` của bút toán và cửa sổ ngày của hạn mức đều từ `clock.now()`. Test đẩy `FixedClock` qua nửa đêm giờ Việt Nam bằng một lệnh gán, không `sleep`:
+`create_batch` nhận `&impl Clock` và không đọc giờ hệ thống. `created_at` của khoản chi, `posted_at` của bút toán và cửa sổ ngày của hạn mức đều lấy từ `clock.now()`. Test đẩy `FixedClock` qua nửa đêm giờ Việt Nam bằng một lệnh gán chứ không dùng `sleep`:
 
 ```text
 10:00:00Z  lô .1: DR-003 rút 150.000 VND
@@ -169,7 +169,7 @@ Ví `DR-003` có 244.800 nên lô đầu chỉ chi 150.000. Một giây trước
 
 ## Hai lô chạy song song: SKIP LOCKED và unique theo kỳ
 
-Cron bắn hai lần hay một người bấm chạy tay đều làm hai lô cùng kỳ chồng nhau. Lab dựng năm ví 61.200, mỗi lô lấy tối đa 3 ví, và cho hai lô cùng chờ ở một `Barrier` sau bước chọn, trước bước ghi. Có ba cách chạy; bước chọn của cách thứ ba là:
+Cron bắn hai lần hay một người bấm chạy tay đều khiến hai lô cùng kỳ chạy chồng lên nhau. Lab dựng năm ví, mỗi ví 61.200, mỗi lô lấy tối đa 3 ví, và cho hai lô cùng chờ ở một `Barrier` sau bước chọn, trước bước ghi. Có ba cách chạy; bước chọn của cách thứ ba là:
 
 ```rust
 // src/payout.rs
@@ -194,13 +194,13 @@ lô thứ hai: chọn DR-004, DR-005
 ví                  : DR-001 0 VND, DR-002 0 VND, DR-003 0 VND, DR-004 0 VND, DR-005 0 VND
 ```
 
-`SELECT` thường, không chỉ mục unique: hai lô chi trùng, ba ví âm 61.200. Có chỉ mục unique theo kỳ: lô thua nhận 23505 và rollback toàn bộ, sổ đúng nhưng một lô bị bỏ phí. `FOR UPDATE SKIP LOCKED`: lô sau bỏ qua ví đang khoá và lấy phần còn lại, không trùng, ví nào cũng về 0.
+Với `SELECT` thường và không có chỉ mục unique, hai lô chi trùng, ba ví âm 61.200. Khi có chỉ mục unique theo kỳ, lô thua nhận 23505 và rollback toàn bộ, sổ đúng nhưng một lô bị bỏ phí. Với `FOR UPDATE SKIP LOCKED`, lô sau bỏ qua ví đang khoá và lấy phần còn lại, không trùng, ví nào cũng về 0.
 
-Lô nào lấy ví nào là may rủi, hai tập còn có thể xen kẽ; khối trên chỉ là một lần chạy. Test chỉ kiểm bất biến: hai tập rời nhau, hợp lại đủ năm ví, kích thước 2 và 3, mọi ví về 0. Khoá trên hàng ví còn khiến việc kiểm hạn mức rồi ghi của một tài xế không thể xen với lô khác. Chỉ mục unique vẫn giữ làm lưới thứ hai cho đường ghi không đi qua khoá, như một script SQL chạy tay.
+Lô nào lấy ví nào là chuyện may rủi, hai tập còn có thể xen kẽ; khối trên chỉ là một lần chạy. Test chỉ kiểm bất biến: hai tập rời nhau, hợp lại đủ năm ví, kích thước 2 và 3, mọi ví về 0. Khoá trên hàng ví còn khiến việc kiểm tra hạn mức rồi ghi của một tài xế không thể bị lô khác xen vào giữa. Chỉ mục unique vẫn giữ làm lưới thứ hai cho đường ghi không đi qua khoá, như một script SQL chạy tay.
 
 ## Timeout sau khi ngân hàng đã nhận lệnh
 
-Ngân hàng nằm sau một trait, trả `impl Future<...> + Send` để gọi được trong `tokio::spawn` mà không cần crate `async-trait`:
+Ngân hàng nằm sau một trait, và các hàm của trait trả về `impl Future<...> + Send` để gọi được trong `tokio::spawn` mà không cần crate `async-trait`:
 
 ```rust
 // src/bank.rs (rút gọn: bỏ chú thích tài liệu)
@@ -219,7 +219,7 @@ pub trait Bank {
 }
 ```
 
-`FakeBank` giữ các lệnh đã nhận trong bộ nhớ, với một `Behavior` cho từng tài xế: `Accept`, `Reject`, `ReturnedLater` (nhận rồi trả tiền lại, hiện trên sao kê), `TimeoutOnce` (ghi nhận lệnh rồi mới trả `Timeout`) và `LostOnce` (trả `Timeout`, không ghi nhận gì). Từ phía ta, hai ca cuối giống hệt nhau; chỉ tra cứu mới phân biệt được.
+`FakeBank` giữ các lệnh đã nhận trong bộ nhớ, với một `Behavior` cho từng tài xế: `Accept`, `Reject`, `ReturnedLater` (nhận rồi trả tiền lại, hiện trên sao kê), `TimeoutOnce` (ghi nhận lệnh rồi mới trả `Timeout`) và `LostOnce` (trả `Timeout`, không ghi nhận gì). Từ phía ta, hai trường hợp cuối giống hệt nhau; chỉ tra cứu mới phân biệt được.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -273,7 +273,7 @@ lượt 2 (tra cứu: chưa có): SendReport { sent: 1, rejected: 0, timed_out: 
 ngân hàng đã nhận      : 1 lệnh
 ```
 
-`Ok(None)` ở đây tin được vì `FakeBank` trả lời tức thời và idempotent theo `reference`. Ngân hàng thật có thể chưa kịp hiện lệnh đang xử lý; gửi lại chỉ an toàn khi họ cam kết idempotency theo mã, nếu không thì chuyển điều tra tay.
+`Ok(None)` ở đây đáng tin vì `FakeBank` trả lời tức thời và idempotent theo `reference`. Ngân hàng thật có thể chưa kịp hiện lệnh đang xử lý; gửi lại chỉ an toàn khi họ cam kết idempotency theo mã, nếu không thì chuyển sang điều tra thủ công.
 
 ## Thất bại và sao kê: bút toán đảo, rồi đối chiếu
 
@@ -315,19 +315,19 @@ bank:payout:clearing    : 252.000 VND
 tổng mọi posting        : 0
 ```
 
-`DR-002` có 40.800, dưới ngưỡng, nên không vào lô. Lô `SETTLED` nghĩa là mọi khoản có kết cục, không phải mọi khoản thành công. Clearing cuối bằng 252.000, đúng tổng hai khoản `SETTLED`, và không về 0: sơ đồ tài khoản chuẩn chưa có `bank:cash` để tất toán, và lab không thêm tài khoản ngoài chuẩn. Lab còn kiểm `account_balances` bằng tổng posting của chính tài khoản đó.
+`DR-002` có 40.800, dưới ngưỡng, nên không vào lô. Lô `SETTLED` nghĩa là mọi khoản đều đã có kết cục, không phải mọi khoản thành công. Clearing cuối bằng 252.000, đúng tổng hai khoản `SETTLED`, và không về 0: sơ đồ tài khoản chuẩn chưa có `bank:cash` để tất toán, và lab không thêm tài khoản ngoài chuẩn. Lab còn kiểm tra `account_balances` khớp với tổng posting của chính tài khoản đó.
 
-`DR-005` là ca chỉ sao kê mới biết: ngân hàng báo nhận rồi trả tiền lại. `reconcile` xếp từng khoản vào một nhóm; chỉ nhóm có kết cục rõ ràng mới được tự sửa sổ.
+`DR-005` là trường hợp chỉ sao kê mới cho biết: ngân hàng báo nhận rồi trả tiền lại. `reconcile` xếp từng khoản vào một nhóm; chỉ nhóm có kết cục rõ ràng mới được tự sửa sổ.
 
 | Dòng sao kê | Khoản của ta | Việc làm |
 |---|---|---|
 | khớp mã và tiền, đã tới | `SENT` | sang `SETTLED` |
 | khớp mã và tiền, đã tới | `CREATED` (timeout) | sang `SENT` rồi `SETTLED`, ghi `recovered_after_timeout` |
-| khớp mã, bị trả lại | `CREATED` hoặc `SENT` | sang `FAILED` kèm bút toán đảo |
-| khớp mã, lệch tiền | bất kỳ | chỉ báo, chờ người xem |
+| khớp mã, tiền bị trả lại | `CREATED` hoặc `SENT` | sang `FAILED` kèm bút toán đảo |
+| khớp mã, lệch tiền | bất kỳ | chỉ báo cáo, chờ người xem xét |
 | không có dòng | `SENT` | báo thiếu |
 | không có dòng | `CREATED` | bỏ qua, lượt gửi sau tra cứu |
-| có dòng mà ta không có mã | không có | báo lạ |
+| có dòng mà ta không có khoản nào mang mã đó | không có | báo dòng lạ |
 
 ```text
 == 6. Đối chiếu với sao kê có lệch ==
@@ -375,15 +375,15 @@ cargo run --manifest-path examples/toi-noi-rust/44-driver-wallet-payout/Cargo.to
 cargo test --manifest-path examples/toi-noi-rust/44-driver-wallet-payout/Cargo.toml
 ```
 
-`--verify` in các khối kết quả ở trên (bài trích từng dòng nguyên văn) rồi kiểm từng giá trị; đạt thì in `VERIFY OK` và thoát mã 0. `cargo test` chạy 7 unit test và 10 test tích hợp, mỗi test một schema `lab_<uuid>` xoá khi xong. Lab dùng `sqlx` 0.9.0, `tokio` 1.54.1, `jiff` 0.2.39 và `ledger-core` của lab 20.
+`--verify` in các khối kết quả ở trên (bài trích từng dòng nguyên văn) rồi kiểm tra từng giá trị; nếu đạt thì in `VERIFY OK` và thoát mã 0. `cargo test` chạy 7 unit test và 10 test tích hợp, mỗi test một schema `lab_<uuid>` xoá khi chạy xong. Lab dùng `sqlx` 0.9.0, `tokio` 1.54.1, `jiff` 0.2.39 và `ledger-core` của lab 20.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Ngân hàng là một struct trong bộ nhớ, không có phí chuyển khoản hay file lô. Chart chưa có <code>bank:cash</code> nên <code>bank:payout:clearing</code> không được tất toán khi khoản <code>SETTLED</code> và số dư chỉ tăng theo tổng đã chi; sổ thật còn một bút toán lúc ngân hàng trừ tiền. Thu nhập theo ngày chưa trừ khoản hoàn của bài 43. <code>send_batch</code> gọi ngân hàng tuần tự, chưa giành quyền gửi giữa hai lượt đồng thời (dựa vào <code>reference</code>), chưa có backoff hay hạn chót chuyển khoản timeout sang điều tra tay. Payout chưa có maker-checker. Số liệu và ngưỡng đều hư cấu.</p></div>
+<p>Ngân hàng là một struct trong bộ nhớ, không có phí chuyển khoản hay file lô. Sơ đồ tài khoản chuẩn chưa có <code>bank:cash</code> nên <code>bank:payout:clearing</code> không được tất toán khi khoản <code>SETTLED</code> và số dư chỉ tăng theo tổng đã chi; sổ thật còn một bút toán lúc ngân hàng trừ tiền. Thu nhập theo ngày chưa trừ khoản hoàn của bài 43. <code>send_batch</code> gọi ngân hàng tuần tự, chưa có cơ chế giành quyền gửi giữa hai lượt đồng thời (dựa vào <code>reference</code>), chưa có backoff, cũng chưa có hạn chót để chuyển khoản bị timeout sang điều tra thủ công. Payout chưa có maker-checker. Số liệu và ngưỡng đều hư cấu.</p></div>
 
 **Bài tập:** giả sử `send_batch` gọi `fail_payout` ngay khi `Timeout`. Với dữ liệu của lab, `DR-001` gặp chuyện gì ở các lô sau, và chỉ mục unique theo kỳ có cứu được không?
 
-<details><summary>Xem lời giải</summary><p>Ngân hàng đã nhận lệnh 102.000 nên tiền tới tài xế, còn ví lại có thêm 102.000 do bút toán đảo. Ví vẫn đủ ngưỡng nên lô kỳ sau chi thêm 102.000: tài xế nhận 204.000 trên 102.000 thu nhập. Chỉ mục unique một phần chỉ chặn trong cùng kỳ, và khoản đã đảo bị loại khỏi chỉ mục. Sổ cũng lệch ngân hàng: ngân hàng có một lệnh mà sổ nói đã đảo. Vì vậy timeout giữ khoản ở <code>CREATED</code>, và chỉ kết quả tra cứu hoặc sao kê mới được quyết định bước tiếp theo.</p></details>
+<details><summary>Xem lời giải</summary><p>Ngân hàng đã nhận lệnh 102.000 nên tiền tới tài xế, còn ví lại có thêm 102.000 do bút toán đảo. Ví vẫn đủ ngưỡng nên lô kỳ sau chi thêm 102.000: tài xế nhận 204.000 so với 102.000 thu nhập. Chỉ mục unique một phần chỉ chặn trong cùng kỳ, và khoản đã đảo bị loại khỏi chỉ mục. Sổ cũng lệch ngân hàng: ngân hàng có một lệnh mà sổ nói đã đảo. Vì vậy timeout giữ khoản ở <code>CREATED</code>, và chỉ kết quả tra cứu hoặc sao kê mới được quyết định bước tiếp theo.</p></details>
 
 Bài trước: [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker). Bài tiếp: [bài 45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach).
 

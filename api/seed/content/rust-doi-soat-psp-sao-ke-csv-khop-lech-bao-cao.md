@@ -10,17 +10,17 @@ language: vi
 
 Sáng nào Finance cũng hỏi cùng một câu: «VíXanh nói đã thu 52.000 đồng mã `vx_ch_0005`, sổ ta không thấy». Webhook ở [bài 38](/articles/rust-webhook-psp-hmac-chong-replay-xu-ly-tre-trung) có thể mất, đến trễ hay sai số tiền; thứ duy nhất cả hai bên cùng công nhận là **sao kê** VíXanh gửi mỗi ngày, một file CSV. Đối soát là đem file đó so với sổ cái, và chỉ ra chỗ không khớp để người có thẩm quyền xử lý.
 
-Đây là bài 47 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 15](/articles/rust-closure-iterator-adapter-doi-soat-bo-nho) đã đối soát năm dòng trong bộ nhớ; bài này làm với file thật, chạy trên PostgreSQL, và đo ở một triệu dòng. Tài khoản `psp:vixanh:clearing` và dấu của bút toán thu tiền theo [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen). Định dạng sao kê là **giả định của lab**.
+Đây là bài 47 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 15](/articles/rust-closure-iterator-adapter-doi-soat-bo-nho) đã đối soát năm dòng trong bộ nhớ; bài này làm với file thật, chạy trên PostgreSQL, và đo ở một triệu dòng. Tài khoản `psp:vixanh:clearing` và dấu của bút toán thu tiền lấy theo [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen). Định dạng sao kê là **giả định của lab**.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Chuyến <code>TN-0007</code> thu 60.000 đồng. Sổ ta ghi bút toán lúc 23:58:30 ngày 5 (giờ Việt Nam), VíXanh ghi lúc 00:02:10 ngày 6. Cùng số tiền. Khi đối soát ngày 5, đây là «thiếu bên ta», «thiếu bên PSP» hay «lệch tiền»?</p>
-<details><summary>Xem đáp án</summary><p>Không loại nào. Số tiền đúng, chỉ khác kỳ vì hai bên cắt ngày ở hai nơi khác nhau. Lab gọi là <code>DATE_SHIFT</code>: báo cho người xem nhưng không coi là mất tiền.</p></details>
+<details><summary>Xem đáp án</summary><p>Không loại nào. Số tiền đúng, chỉ khác kỳ vì hai bên cắt ngày ở hai nơi khác nhau. Lab gọi là <code>DATE_SHIFT</code>: báo để có người xem xét nhưng không coi là mất tiền.</p></details>
 </div>
 
 ## Một dòng hỏng có nên làm hỏng cả file sao kê không?
 
-Không. File 40 MB có một dòng sai thì ta vẫn muốn 999.999 dòng còn lại được đối soát, và muốn biết **dòng nào** sai để hỏi VíXanh. `csv` đọc từng bản ghi vào một bộ đệm dùng lại; lỗi của một bản ghi chỉ hỏng bản ghi đó. Lab dùng `StringRecord::deserialize` thay cho `Reader::deserialize()` vì cần số dòng của cả dòng tốt (iterator kia chỉ đưa vị trí kèm lỗi):
+Không. File 40 MB có một dòng sai thì ta vẫn muốn 999.999 dòng còn lại được đối soát, và muốn biết **dòng nào** sai để hỏi VíXanh. `csv` đọc từng bản ghi vào một bộ đệm dùng lại; lỗi của một bản ghi chỉ hỏng bản ghi đó. Lab dùng `StringRecord::deserialize` thay cho `Reader::deserialize()` vì cần số dòng của cả dòng hợp lệ (iterator kia chỉ cho biết vị trí khi gặp lỗi):
 
 ```rust
 // src/statement.rs (rút gọn: bỏ chú thích tài liệu)
@@ -47,7 +47,7 @@ pub fn next_row(&mut self) -> Result<Option<StatementRow>, StatementError> {
 }
 ```
 
-`parse_record` để serde ghép cột theo tên tiêu đề rồi kiểm thêm: `external_ref` không rỗng, số tiền khác 0, `settled_at` là RFC 3339 (`jiff::Timestamp`, nên `Z` hay `+07:00` đều ra cùng một thời điểm). Sao kê mẫu có bốn dòng hỏng, mỗi dòng một kiểu; tiêu đề là dòng 1.
+`parse_record` để serde ghép cột theo tên tiêu đề rồi kiểm tra thêm: `external_ref` không rỗng, số tiền khác 0, `settled_at` là RFC 3339 (`jiff::Timestamp`, nên `Z` hay `+07:00` đều cho ra cùng một thời điểm). Sao kê mẫu có bốn dòng hỏng, mỗi dòng một kiểu; tiêu đề là dòng 1.
 
 ```text
 dòng hợp lệ 11, dòng hỏng 4; dòng hợp lệ cuối: Some((13, "vx_ch_0010"))
@@ -57,13 +57,13 @@ dòng hợp lệ 11, dòng hỏng 4; dòng hợp lệ cuối: Some((13, "vx_ch_0
   dòng 16: settled_at không phải RFC 3339: "hôm qua"
 ```
 
-Hai giới hạn có chủ ý. Chỉ giữ chi tiết 1.000 dòng hỏng đầu tiên, còn số đếm vẫn đủ (có test: 1.500 dòng hỏng cho `bad_lines = 1500`, 1.000 item). Và **tiêu đề sai là lỗi cả file**: không đoán cột thì không biết số nào là số tiền.
+Hai giới hạn có chủ ý. Lab chỉ giữ chi tiết 1.000 dòng hỏng đầu tiên, còn số đếm vẫn đầy đủ (có test: 1.500 dòng hỏng cho `bad_lines = 1500`, 1.000 item). Và **tiêu đề sai là lỗi của cả file**: không đoán cột thì không biết số nào là số tiền.
 
 ## Vì sao băm file trước khi đọc nó?
 
-Job có thể chạy lại, VíXanh có thể gửi lại cùng file. Tạo lần đối soát thứ hai cho cùng file, cùng kỳ thì Finance nhận hai bộ việc giống hệt. Khoá idempotent ở đây là **SHA-256 của nội dung file** cộng với kỳ: `UNIQUE (file_sha256, period_start, period_end)` của `reconciliation_runs`. Tên file không đáng tin vì tên không đổi khi nội dung đổi. Kỳ phải nằm trong khoá: chỉ có hash thì đối soát cùng file cho kỳ khác sẽ nhận nhầm kết quả của kỳ trước.
+Job có thể chạy lại, VíXanh có thể gửi lại cùng file. Nếu tạo lần đối soát thứ hai cho cùng file, cùng kỳ thì Finance nhận hai bộ việc giống hệt. Khoá idempotent ở đây là **SHA-256 của nội dung file** cộng với kỳ: `UNIQUE (file_sha256, period_start, period_end)` của `reconciliation_runs`. Tên file không đáng tin, vì tên vẫn giữ nguyên dù nội dung đã đổi. Kỳ phải nằm trong khoá: nếu chỉ có hash thì đối soát cùng file cho kỳ khác sẽ nhận nhầm kết quả của kỳ trước.
 
-Băm là một lượt đọc riêng (`sha256_file`, khối 64 KiB, không nạp cả file; file sinh 41 MiB mất 33–116 ms trên máy viết bài). Trùng khoá thì trả kết quả cũ ngay, không nạp lại một triệu dòng. Chưa có thì mở transaction, `INSERT ... ON CONFLICT (file_sha256, period_start, period_end) DO NOTHING RETURNING id`, cùng kỹ thuật với `idempotency_key` ở [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key). Hai job chạy cùng lúc: job sau chờ job trước commit rồi nhận 0 dòng. Lượt đọc chính băm lại bằng `HashingReader` và so với hash đã tính; file bị thay giữa hai lượt thì lỗi và rollback, không lưu gì.
+Băm là một lượt đọc riêng (`sha256_file`, khối 64 KiB, không nạp cả file; file sinh 41 MiB mất 33–116 ms trên máy viết bài). Trùng khoá thì trả kết quả cũ ngay, không nạp lại một triệu dòng. Chưa có thì mở transaction, `INSERT ... ON CONFLICT (file_sha256, period_start, period_end) DO NOTHING RETURNING id`, cùng kỹ thuật với `idempotency_key` ở [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key). Hai job chạy cùng lúc: job sau chờ job trước commit rồi nhận 0 dòng. Lượt đọc chính băm lại bằng `HashingReader` và so với hash đã tính; file bị thay giữa hai lượt thì báo lỗi và rollback, không lưu gì.
 
 ```text
 chạy lại cùng file    : AlreadyDone run 1 ; runs = 1, items = 9
@@ -106,11 +106,11 @@ Run, các bảng tạm và ngoại lệ nằm trong **một transaction**: lỗi
 
 ## Khớp theo `external_ref`: 1-1, 1-n và năm loại lệch
 
-Ghép từng dòng không được: một giao dịch có thể là hai bút toán ở ta và một dòng ở VíXanh. Lab gom **mỗi phía theo `external_ref`**, cộng tiền, rồi so hai tổng (`FULL JOIN`, nên ref chỉ có một phía vẫn hiện ra).
+Không thể ghép từng dòng: một giao dịch có thể là hai bút toán ở ta và một dòng ở VíXanh. Lab gom **mỗi phía theo `external_ref`**, cộng tiền, rồi so hai tổng (`FULL JOIN`, nên ref chỉ có một phía vẫn hiện ra).
 
 Phía ta lấy từ bảng `psp_refs(entry_id, external_ref)` nối `postings` của `psp:vixanh:clearing`. Bảng này do lab tự đặt, vì hai cách nối trước không dùng lại được. [Bài 15](/articles/rust-closure-iterator-adapter-doi-soat-bo-nho) đặt ref vào `idempotency_key` (`psp:vixanh:<external_ref>`), mà key chuẩn từ bài 41 là `trip:TN-0001:capture`. Bài 38 có `psp_webhooks` với `external_ref` là khoá chính và một `entry_id`, nên một ref chỉ trỏ được một bút toán, không diễn đạt được n-1. Chỉ bút toán capture có dòng trong `psp_refs`; bút toán chia `trip:TN-0001:split` là chuyển nội bộ, sao kê không có. Lab so từng dòng clearing theo ref, không so số dư: như bài 41 đã chốt, số dư clearing không phải tiền thật ở VíXanh và có thể âm.
 
-Dòng 1-1, 1-n (ta một bút toán, VíXanh hai dòng), n-1 đều khớp nếu tổng bằng nhau:
+Các trường hợp 1-1, 1-n (ta một bút toán, VíXanh hai dòng) và n-1 đều khớp nếu tổng bằng nhau:
 
 ```sql
 -- sql/joined.sql (rút gọn phần CASE)
@@ -128,13 +128,13 @@ END AS kind
 
 | Loại | Điều kiện | Việc Finance làm |
 | --- | --- | --- |
-| `MISSING_IN_LEDGER` | Chỉ sao kê có ref | Tìm webhook mất; ghi bút toán nếu đúng thu thật |
+| `MISSING_IN_LEDGER` | Chỉ sao kê có ref | Tìm webhook mất; ghi bút toán nếu đúng là khoản thu thật |
 | `MISSING_IN_PSP` | Chỉ sổ ta có ref | Hỏi VíXanh: có thu thật không |
 | `AMOUNT_MISMATCH` | Hai tổng khác nhau | Xác định bên sai |
 | `DUPLICATE` | Bỏ dòng trùng (cùng ref, cùng số tiền) thì khớp | Xem ai ghi hai lần; có thể phải hoàn tiền khách |
 | `DATE_SHIFT` | Tổng bằng nhau, một phía ngoài kỳ | Chỉ ghi nhận, chờ kỳ sau |
 
-Quy tắc này cũng viết lại trong Rust (`classify` trong `src/memory.rs`, nạp hai phía vào `HashMap` như `group_by` bài 15). Hai cách cho danh sách ngoại lệ y hệt trên mẫu nhỏ và trên 50.000 ref sinh sẵn. Trên sao kê mẫu (`diff = psp − ours`, dương là VíXanh báo nhiều hơn ta):
+Quy tắc này cũng được viết lại bằng Rust (`classify` trong `src/memory.rs`, nạp hai phía vào `HashMap` như `group_by` bài 15). Hai cách cho ra danh sách ngoại lệ y hệt trên mẫu nhỏ và trên 50.000 ref sinh sẵn. Trên sao kê mẫu (`diff = psp − ours`, dương là VíXanh báo nhiều hơn ta):
 
 ```text
   MISSING_IN_LEDGER vx_ch_0005 ours=None psp=Some(52000) diff=Some(52000) [OPEN]
@@ -168,7 +168,7 @@ Ngày 2026-11-05 ra `[2026-11-04T17:00:00Z, 2026-11-05T17:00:00Z)`. Mỗi phía 
 <figcaption>Hình 2. Ranh giới kỳ cắt đôi một giao dịch.</figcaption>
 </figure>
 
-Đối soát kỳ ngày 6 với cùng file, `vx_ch_0007` lại là `DATE_SHIFT`, vì lần này dòng VíXanh nằm trong kỳ còn bút toán của ta nằm ngoài (có test). Nhưng lab chỉ thấy những gì nằm trong file đang đọc. File mẫu gộp theo ngày UTC, nên `vx_ch_0009` (sổ ta thuộc ngày 6, dòng VíXanh ở file ngày 5) sẽ thành `MISSING_IN_PSP` giả nếu job ngày 6 chỉ đọc `vixanh_2026-11-06.csv`. PSP cắt kỳ khác ta thì phải đọc đủ các file phủ ranh giới rồi mới kết luận «thiếu»; lab chưa làm.
+Đối soát kỳ ngày 6 với cùng file, `vx_ch_0007` lại là `DATE_SHIFT`, vì lần này dòng VíXanh nằm trong kỳ còn bút toán của ta nằm ngoài (có test). Nhưng lab chỉ thấy những gì nằm trong file đang đọc. File mẫu gộp theo ngày UTC, nên `vx_ch_0009` (sổ ta thuộc ngày 6, dòng VíXanh ở file ngày 5) sẽ thành `MISSING_IN_PSP` giả nếu job ngày 6 chỉ đọc `vixanh_2026-11-06.csv`. Nếu PSP cắt kỳ khác với ta thì phải đọc đủ các file phủ ranh giới rồi mới kết luận «thiếu»; lab chưa làm.
 
 ## Lệch xong thì ai sửa? Không ai tự sửa
 
@@ -179,9 +179,9 @@ sổ cái trước/sau 3 run: (10, 20, 524000) / (10, 20, 524000) (bút toán, p
 việc mở cho Finance   : 29/29 item ở trạng thái OPEN
 ```
 
-Báo cáo đầu ra là CSV, mỗi dòng một việc. `external_ref` đến từ file ngoài, nên ô nào bắt đầu bằng `=`, `+`, `-`, `@` được thêm dấu `'` phía trước để bảng tính không hiểu là công thức.
+Báo cáo đầu ra là CSV, mỗi dòng một việc. `external_ref` đến từ file ngoài, nên ô nào bắt đầu bằng `=`, `+`, `-`, `@` được thêm dấu `'` phía trước để bảng tính không hiểu nhầm là công thức.
 
-Job định kỳ nhận **clock từ ngoài**: hôm qua theo giờ Việt Nam, tìm `vixanh_<ngày>.csv`, đối soát. Không có file thì chưa phải lỗi; có file đã làm thì `AlreadyDone`. Test dùng `FixedClock`, không `sleep`:
+Job định kỳ nhận **clock từ bên ngoài**: tính ngày hôm qua theo giờ Việt Nam, tìm `vixanh_<ngày>.csv`, đối soát. Không có file thì chưa phải lỗi; có file đã được đối soát thì `AlreadyDone`. Test dùng `FixedClock` chứ không dùng `sleep`:
 
 ```rust
 // src/job.rs (rút gọn: bỏ chú thích tài liệu)
@@ -206,22 +206,22 @@ run_at đã lưu          : 2026-11-05T18:30:00Z (đúng thời điểm của đ
 
 ## SQL hay Rust: bộ nhớ ở một triệu dòng
 
-File sinh tại chỗ (`gen`, không commit): 1.000.000 ref, 1.001.010 dòng, 40,9 MiB, 1.000 ref mỗi loại lệch, 10 dòng hỏng; sổ cái nạp bằng `generate_series`. Kết quả đúng suy từ công thức sinh dữ liệu, và cả hai cách đều ra đúng (995.000 ref khớp). Đo bằng `/usr/bin/time -l` trên bản release:
+File sinh tại chỗ (`gen`, không commit): 1.000.000 ref, 1.001.010 dòng, 40,9 MiB, 1.000 ref mỗi loại lệch, 10 dòng hỏng; sổ cái nạp bằng `generate_series`. Kết quả đúng được suy từ công thức sinh dữ liệu, và cả hai cách đều cho ra kết quả đúng (995.000 ref khớp). Đo bằng `/usr/bin/time -l` trên bản release:
 
 | Cách | 1.000 ref | 100.000 ref | 1.000.000 ref |
 | --- | ---: | ---: | ---: |
 | SQL: COPY + khớp trong PostgreSQL | 5,0 MB | 5,2 MB | 5,4 MB |
 | Rust: `HashMap` giữ hai phía | không đo | 45 MB | 521 MB |
 
-*(Số đo trên máy viết bài, không phải SLA; cột là peak RSS của riêng tiến trình Rust, không gồm PostgreSQL.)* Đường SQL gần như phẳng: 5,4 MB nhỏ hơn cả file 40,9 MiB nên không thể đã nạp file. Đường `HashMap` tăng gần tuyến tính, khoảng 520 byte mỗi ref.
+*(Số đo trên máy viết bài, không phải SLA; cột là peak RSS của riêng tiến trình Rust, không gồm PostgreSQL.)* Đường SQL gần như phẳng: 5,4 MB nhỏ hơn cả file 40,9 MiB nên không thể đã nạp cả file vào bộ nhớ. Đường `HashMap` tăng gần tuyến tính, khoảng 520 byte mỗi ref.
 
-Đừng đọc bảng này thành «SQL nhẹ hơn». Hash join, sort và bảng tạm vẫn tốn `work_mem`, `temp_buffers` và file tạm, chỉ là ở tiến trình PostgreSQL, và lab không đo phần đó. Tổng bộ nhớ cả hệ thống chưa so được. Điều bảng chứng minh hẹp hơn: đường SQL giữ bộ nhớ của service ledger không phụ thuộc cỡ file, bằng cách chuyển việc và tải sang cơ sở dữ liệu.
+Đừng đọc bảng này thành «SQL nhẹ hơn». Hash join, sort và bảng tạm vẫn tốn `work_mem`, `temp_buffers` và file tạm, chỉ là ở tiến trình PostgreSQL, và lab không đo phần đó. Tổng bộ nhớ cả hệ thống chưa so được. Điều bảng chứng minh hẹp hơn: đường SQL giữ cho bộ nhớ của service ledger không phụ thuộc vào cỡ file, bằng cách chuyển việc và tải sang cơ sở dữ liệu.
 
-Thời gian đo lúc máy tải cao nên chỉ xem thứ bậc. Ở load trên 180: SQL 24,5 s, Rust 12,5 s. Đo lại ở load 50–100: SQL 25,4 s (khớp và ghi ngoại lệ 22,2 s), Rust 5,9 s. Rust nhanh hơn cả hai lần, nhưng nó không ghi kết quả vào đâu, còn đường SQL gồm cả tạo run, ghi ngoại lệ và commit.
+Thời gian đo lúc máy tải cao nên chỉ xem thứ bậc. Ở load trên 180: SQL 24,5 s, Rust 12,5 s. Đo lại ở load 50–100: SQL 25,4 s (khớp và ghi ngoại lệ 22,2 s), Rust 5,9 s. Rust nhanh hơn cả hai lần, nhưng bản Rust không ghi kết quả vào đâu, còn đường SQL gồm cả tạo run, ghi ngoại lệ và commit.
 
 ## Chạy ví dụ và kiểm chứng
 
-Cần PostgreSQL của `examples/toi-noi-rust/infra`. Mỗi thí nghiệm chạy trong schema `lab_<uuid>` riêng, dọn cuối ca:
+Cần PostgreSQL của `examples/toi-noi-rust/infra`. Mỗi thí nghiệm chạy trong schema `lab_<uuid>` riêng, được dọn sau khi chạy xong:
 
 ```bash
 export TOI_NOI_PG_URL='postgres://toi_noi:toi_noi_lab@127.0.0.1:5433/toi_noi_rust_lab'
@@ -230,7 +230,7 @@ cargo run --manifest-path examples/toi-noi-rust/47-psp-reconciliation/Cargo.toml
 cargo test --manifest-path examples/toi-noi-rust/47-psp-reconciliation/Cargo.toml
 ```
 
-`--verify` in các khối kết quả ở trên, kiểm từng giá trị (gồm 50.000 ref sinh sẵn, SQL so với Rust), rồi in `VERIFY OK`. `cargo test` chạy 21 test đơn vị và 12 test tích hợp; không test nào assert thời gian. Đo file lớn:
+`--verify` in các khối kết quả ở trên, kiểm tra từng giá trị (gồm 50.000 ref sinh sẵn, SQL so với Rust), rồi in `VERIFY OK`. `cargo test` chạy 21 test đơn vị và 12 test tích hợp; không test nào assert thời gian. Đo file lớn:
 
 ```bash
 cargo build --release --manifest-path examples/toi-noi-rust/47-psp-reconciliation/Cargo.toml
@@ -244,11 +244,11 @@ $BIN gen examples/toi-noi-rust/47-psp-reconciliation/target/vixanh_1m.csv 100000
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Một PostgreSQL local, sao kê giả định (ba cột, giờ RFC 3339, số tiền có dấu). File sinh có phân bố lệch đều đặn, không giống dữ liệu thật; bảng <code>psp_refs</code> không phải schema chuẩn; giao dịch lệch quá 24 giờ thành thiếu một phía. Chưa có: đọc file bằng <code>spawn_blocking</code> (lab đọc đồng bộ ngay trong hàm async), nối các run của cùng một kỳ (file sửa lại tạo thêm bộ việc trùng), vòng đời việc của Finance sau <code>OPEN</code>, hay cảnh báo khi số lệch vượt ngưỡng (bài 67). Lab chỉ có capture: dòng hoàn tiền (số âm) được đọc nhưng chưa có kịch bản riêng, còn nạp ví có dòng clearing ngược dấu với capture nên so thẳng sẽ ra <code>AMOUNT_MISMATCH</code>.</p></div>
+<p>Một PostgreSQL local, sao kê giả định (ba cột, giờ RFC 3339, số tiền có dấu). File sinh có phân bố lệch đều đặn, không giống dữ liệu thật; bảng <code>psp_refs</code> không phải schema chuẩn; giao dịch lệch quá 24 giờ sẽ bị coi là thiếu một phía. Chưa có: đọc file bằng <code>spawn_blocking</code> (lab đọc đồng bộ ngay trong hàm async), nối các run của cùng một kỳ (file sửa lại tạo thêm bộ việc trùng), vòng đời việc của Finance sau <code>OPEN</code>, hay cảnh báo khi số lệch vượt ngưỡng (bài 67). Lab chỉ có capture: dòng hoàn tiền (số âm) được đọc nhưng chưa có kịch bản riêng, còn giao dịch nạp ví có dòng clearing ngược dấu với capture nên so thẳng sẽ ra <code>AMOUNT_MISMATCH</code>.</p></div>
 
 **Bài tập:** Sao kê có hai dòng `vx_ch_0030,5000` cùng giờ, sổ ta có đúng một bút toán 5.000. Lab báo `DUPLICATE`. Nếu hai dòng là hai lần thu thật (khách bị trừ 10.000) thì báo `DUPLICATE` có đủ không? Nên đổi gì để Finance không hiểu nhầm?
 
-<details><summary>Xem lời giải</summary><p>Chưa đủ. Quy tắc «cùng ref, cùng số tiền» chỉ nhìn thấy dòng lặp, không phân biệt VíXanh gửi lặp dòng với VíXanh thu hai lần; hai trường hợp đòi hỏi hai việc khác nhau (bỏ qua hay hoàn 5.000 cho khách). Lab giữ <code>diff_dong = 5000</code> và để Finance quyết, không tự coi bản trùng là vô hại. Có thể thêm cột mã dòng duy nhất của PSP vào sao kê (nếu PSP có) và coi trùng chỉ khi mã dòng trùng; còn khác mã dòng thì là hai lần thu, loại <code>AMOUNT_MISMATCH</code> với chi tiết «thu hai lần».</p></details>
+<details><summary>Xem lời giải</summary><p>Chưa đủ. Quy tắc «cùng ref, cùng số tiền» chỉ nhìn thấy dòng lặp, không phân biệt VíXanh gửi lặp dòng với VíXanh thu hai lần; hai trường hợp đòi hỏi hai việc khác nhau (bỏ qua hay hoàn 5.000 cho khách). Lab giữ <code>diff_dong = 5000</code> và để Finance quyết, không tự coi bản trùng là vô hại. Có thể thêm cột mã dòng duy nhất của PSP vào sao kê (nếu PSP có) và chỉ coi là trùng khi mã dòng trùng; còn khác mã dòng thì là hai lần thu, loại <code>AMOUNT_MISMATCH</code> với chi tiết «thu hai lần».</p></details>
 
 Bài trước: [bài 46](/articles/rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong). Bài tiếp: [bài 48](/articles/rust-so-du-theo-thoi-diem-snapshot-dong-ky).
 

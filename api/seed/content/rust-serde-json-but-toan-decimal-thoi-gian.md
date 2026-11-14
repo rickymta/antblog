@@ -1,7 +1,7 @@
 ---
 slug: rust-serde-json-but-toan-decimal-thoi-gian
 title: "serde: serialize bút toán sang JSON, Decimal và thời gian"
-summary: "Bài 18: serde và serde_json cho bút toán TN-0001: camelCase khớp service C#, Money số nguyên, tỷ lệ phí Decimal dạng chuỗi, jiff Timestamp UTC, schemaVersion, deny_unknown_fields và lỗi đọc JSON có dòng, cột."
+summary: "Bài 18: serde và serde_json cho bút toán TN-0001: camelCase khớp service C#, Money số nguyên, tỷ lệ phí Decimal dạng chuỗi, jiff Timestamp UTC, schemaVersion, deny_unknown_fields và lỗi đọc JSON kèm số dòng, cột."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, serde, json, jiff]
@@ -15,7 +15,7 @@ Sau khi ghi bút toán `JE-000001`, service sổ cái phát sự kiện `LedgerE
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Một thân JSON có hai posting, <code>-100</code> và <code>90</code>, được đọc vào <code>JournalEntry</code>. Kết quả là một bút toán lệch 10 đồng, hay một lỗi?</p>
-<details><summary>Xem đáp án</summary><p>Một lỗi. <code>Deserialize</code> của <code>JournalEntry</code> không dựng struct trực tiếp mà đi qua <code>JournalEntry::try_new</code>, nên bất biến «tổng bằng 0» vẫn đứng. Lab kiểm bằng test <code>reading_json_cannot_bypass_the_balance_invariant</code>.</p></details>
+<details><summary>Xem đáp án</summary><p>Một lỗi. <code>Deserialize</code> của <code>JournalEntry</code> không dựng struct trực tiếp mà đi qua <code>JournalEntry::try_new</code>, nên bất biến «tổng bằng 0» vẫn được giữ. Lab kiểm tra bằng test <code>reading_json_cannot_bypass_the_balance_invariant</code>.</p></details>
 </div>
 
 ## `derive` và `rename_all`: JSON của bút toán trông thế nào?
@@ -72,18 +72,18 @@ pub struct EntryPosted {
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Ba cột: struct Rust với tên snake_case, văn bản JSON camelCase ở giữa, kiểu C# PascalCase. serde và System.Text.Json cùng đổi tên về dạng camelCase trên dây, nên hai phía gặp nhau ở JSON."><defs><marker id="rust-serde-json-but-toan-decimal-thoi-gian-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="260" height="165" rx="10" class="f-phys-soft s-phys"/><text x="36" y="46" class="t-b">Rust · EntryPosted</text><text x="36" y="76" class="t-mono">entry_id: String</text><text x="36" y="102" class="t-mono">posted_at: Timestamp</text><text x="36" y="128" class="t-mono">fee_rate: Decimal</text><text x="36" y="154" class="t-mono">amount: Money</text><rect x="310" y="20" width="260" height="165" rx="10" class="f-pk-soft s-pk"/><text x="326" y="46" class="t-b">JSON trên dây</text><text x="326" y="76" class="t-mono">"entryId": "JE-000001"</text><text x="326" y="102" class="t-mono">"postedAt": "2026-11-06T03:15:00Z"</text><text x="326" y="128" class="t-mono">"feeRate": "0.20"</text><text x="326" y="154" class="t-mono">"amount": 25500</text><rect x="600" y="20" width="260" height="165" rx="10" class="f-phys-soft s-phys"/><text x="616" y="46" class="t-b">C# · System.Text.Json</text><text x="616" y="76" class="t-mono">string EntryId</text><text x="616" y="102" class="t-mono">DateTimeOffset PostedAt</text><text x="616" y="128" class="t-mono">decimal FeeRate</text><text x="616" y="154" class="t-mono">long Amount</text><path d="M282 102 L308 102" class="f-none s-phys" stroke-width="2" marker-start="url(#rust-serde-json-but-toan-decimal-thoi-gian-0-a)" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-0-a)"/><path d="M572 102 L598 102" class="f-none s-phys" stroke-width="2" marker-start="url(#rust-serde-json-but-toan-decimal-thoi-gian-0-a)" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-0-a)"/><rect x="20" y="200" width="840" height="38" rx="8" class="f-warn-soft s-warn"/><text x="36" y="224">Hai phía cùng đọc và ghi một văn bản. Lệch một chữ (entry_id thay vì entryId) là hợp đồng gãy.</text></svg>
+<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Ba cột: struct Rust với tên snake_case, văn bản JSON camelCase ở giữa, kiểu C# PascalCase. serde và System.Text.Json cùng đổi tên về dạng camelCase trên đường truyền, nên hai phía gặp nhau ở JSON."><defs><marker id="rust-serde-json-but-toan-decimal-thoi-gian-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="260" height="165" rx="10" class="f-phys-soft s-phys"/><text x="36" y="46" class="t-b">Rust · EntryPosted</text><text x="36" y="76" class="t-mono">entry_id: String</text><text x="36" y="102" class="t-mono">posted_at: Timestamp</text><text x="36" y="128" class="t-mono">fee_rate: Decimal</text><text x="36" y="154" class="t-mono">amount: Money</text><rect x="310" y="20" width="260" height="165" rx="10" class="f-pk-soft s-pk"/><text x="326" y="46" class="t-b">JSON trên đường truyền</text><text x="326" y="76" class="t-mono">"entryId": "JE-000001"</text><text x="326" y="102" class="t-mono">"postedAt": "2026-11-06T03:15:00Z"</text><text x="326" y="128" class="t-mono">"feeRate": "0.20"</text><text x="326" y="154" class="t-mono">"amount": 25500</text><rect x="600" y="20" width="260" height="165" rx="10" class="f-phys-soft s-phys"/><text x="616" y="46" class="t-b">C# · System.Text.Json</text><text x="616" y="76" class="t-mono">string EntryId</text><text x="616" y="102" class="t-mono">DateTimeOffset PostedAt</text><text x="616" y="128" class="t-mono">decimal FeeRate</text><text x="616" y="154" class="t-mono">long Amount</text><path d="M282 102 L308 102" class="f-none s-phys" stroke-width="2" marker-start="url(#rust-serde-json-but-toan-decimal-thoi-gian-0-a)" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-0-a)"/><path d="M572 102 L598 102" class="f-none s-phys" stroke-width="2" marker-start="url(#rust-serde-json-but-toan-decimal-thoi-gian-0-a)" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-0-a)"/><rect x="20" y="200" width="840" height="38" rx="8" class="f-warn-soft s-warn"/><text x="36" y="224">Hai phía cùng đọc và ghi một văn bản. Lệch một chữ (entry_id thay vì entryId) là hợp đồng gãy.</text></svg>
 </div>
 <figcaption>Hình 1. Rust ghi <code>rename_all = "camelCase"</code>, C# dùng camelCase của ASP.NET Core. Điểm chung duy nhất là văn bản JSON.</figcaption>
 </figure>
 
-Hợp đồng nên ghi rõ camelCase thay vì trông vào mặc định của một phía: ở C#, `JsonSerializer` trơn giữ PascalCase (bảng cuối bài).
+Hợp đồng nên ghi rõ camelCase thay vì trông cậy vào mặc định của một phía: ở C#, `JsonSerializer` với cấu hình mặc định giữ PascalCase (bảng cuối bài).
 
 ## Tiền là số nguyên, tỷ lệ phí là chuỗi: vì sao hai lựa chọn khác nhau?
 
-`Money` mang `#[serde(transparent)]`: trên dây nó chỉ là số nguyên đồng, `25500` hay `-25500`. `serde_json` vốn ghi newtype như vậy; thuộc tính này biến điều đó thành hợp đồng viết rõ. Số thực không lọt vào: `25500.5` đọc vào `Money` là lỗi, không bị cắt phần lẻ.
+`Money` mang `#[serde(transparent)]`: trên đường truyền, nó chỉ là số nguyên đồng, `25500` hay `-25500`. `serde_json` vốn ghi newtype như vậy; thuộc tính này biến điều đó thành hợp đồng viết rõ. Số thực không lọt vào: `25500.5` đọc vào `Money` là lỗi, không bị cắt phần lẻ.
 
-Số nguyên đủ với C# (`long`), nhưng JavaScript đọc mọi số JSON thành `double`, chính xác tới 2^53: trên Node, `JSON.parse("9223372036854775807")` ra `9223372036854776000`. Với client JavaScript hoặc số tổng hợp lớn, dùng chuỗi: `#[serde(with = "ledger_lab::money::as_string")]` ra `{"amount":"25500"}`. Mỗi trường chỉ một dạng; `as_string` từ chối số trần, `Money` mặc định từ chối chuỗi.
+Số nguyên đủ với C# (`long`), nhưng JavaScript đọc mọi số JSON thành `double`, chính xác tới 2^53: trên Node, `JSON.parse("9223372036854775807")` ra `9223372036854776000`. Với client JavaScript hoặc số tổng hợp lớn, thì dùng chuỗi: `#[serde(with = "ledger_lab::money::as_string")]` ra `{"amount":"25500"}`. Mỗi trường chỉ dùng một dạng; `as_string` từ chối số trần, `Money` mặc định từ chối chuỗi.
 
 Tỷ lệ phí là chuỗi `"0.20"`: nhiều bộ đọc JSON đưa số thực qua `double`, nơi `0.2` không biểu diễn đúng, còn chuỗi giữ nguyên từng chữ số. Các feature serde của `rust_decimal` 1.43:
 
@@ -95,20 +95,20 @@ Tỷ lệ phí là chuỗi `"0.20"`: nhiều bộ đọc JSON đưa số thực 
 | `serde-float` | đổi `impl Serialize` của `Decimal` trong cả bản build: ghi số thực |
 | `serde-str` | đổi `impl Deserialize` của `Decimal` trong cả bản build: đọc chỉ nhận chuỗi |
 
-Hai dòng cuối là bẫy: Cargo hợp nhất feature của một crate trong cả bản build, nên một crate khác bật `serde-float` là mọi `Decimal` không có `with` đổi dạng JSON mà ta không sửa dòng code nào. Lab chỉ bật `serde-with-str` và đặt `with = "rust_decimal::serde::str"` ngay trên trường; bật thêm `serde-float`, trường đó vẫn là chuỗi (đã thử). Đo được: `"feeRate": 0.2` (số) bị từ chối với `invalid type: floating point`; `"0.2"` đọc được và ghi lại đúng `"0.2"`, vì `Decimal` giữ scale. `0.20` và `0.2` so bằng nhau nhưng khác chữ, nên đừng so tỷ lệ bằng chuỗi. Phí tính bằng `Decimal`: `25.500 × 0.20` làm tròn về đồng ra `5.100 VND`.
+Hai dòng cuối là bẫy: Cargo hợp nhất feature của một crate trong cả bản build, nên một crate khác bật `serde-float` thì mọi `Decimal` không có `with` đều đổi dạng JSON dù ta không sửa dòng code nào. Lab chỉ bật `serde-with-str` và đặt `with = "rust_decimal::serde::str"` ngay trên trường; bật thêm `serde-float`, trường đó vẫn là chuỗi (đã thử). Đo được: `"feeRate": 0.2` (số) bị từ chối với `invalid type: floating point`; `"0.2"` đọc được và ghi lại đúng `"0.2"`, vì `Decimal` giữ scale. `0.20` và `0.2` so bằng nhau nhưng khác chữ, nên đừng so tỷ lệ bằng chuỗi. Phí tính bằng `Decimal`: `25.500 × 0.20` làm tròn về đồng ra `5.100 VND`.
 
 ## Thời gian, trường tuỳ chọn và trường lạ
 
 Với feature `serde`, `jiff::Timestamp` ghi `2026-11-06T03:15:00Z`. Đọc `2026-11-06T10:15:00+07:00` thì chuẩn hoá về `…03:15:00Z`; chuỗi thiếu `Z` hoặc offset bị từ chối, như ở bài 08. Phía C#, `DateTimeOffset` offset 0 ghi `…+00:00` chứ không ghi `Z` (đã thử). Cả hai là ISO 8601 và đọc chéo được, nhưng chuỗi khác nhau: so thời điểm, không so chuỗi.
 
-`Option` cùng `skip_serializing_if` cho trường có thể vắng: `memo: None` không xuất hiện trong JSON. `#[serde(default)]` cho phép trường thiếu khi đọc. Derive vốn coi `Option` thiếu là `None`, nhưng `Vec` thiếu là lỗi `missing field`, nên `labels` cần `default` để producer cũ vẫn đọc được. Lab in khoá ngoài cùng của hai sự kiện:
+`Option` cùng `skip_serializing_if` dùng cho trường có thể vắng: `memo: None` không xuất hiện trong JSON. `#[serde(default)]` cho phép trường thiếu khi đọc. Derive vốn coi `Option` thiếu là `None`, nhưng `Vec` thiếu là lỗi `missing field`, nên `labels` cần `default` để producer cũ vẫn đọc được. Lab in khoá ngoài cùng của hai sự kiện:
 
 ```text
 không có memo/labels: ["entry", "entryId", "feeRate", "postedAt", "schemaVersion", "type"]
 có memo/labels:       ["entry", "entryId", "feeRate", "labels", "memo", "postedAt", "schemaVersion", "type"]
 ```
 
-Mặc định serde bỏ qua trường lạ. `#[serde(deny_unknown_fields)]` biến nó thành lỗi: `idempotency_key` gõ sai bị bắt ngay, kèm vị trí, thay vì bị bỏ qua rồi báo «thiếu key». Cái giá: bên đọc strict vỡ khi producer thêm một trường tương thích. Lab đặt strict để lỗi hiện ra; consumer sự kiện ngoài sổ cái thường nên bỏ nó và dựa vào `schemaVersion`.
+Mặc định serde bỏ qua trường lạ. `#[serde(deny_unknown_fields)]` biến nó thành lỗi: `idempotency_key` gõ sai bị bắt ngay, kèm vị trí, thay vì bị bỏ qua rồi báo «thiếu key». Cái giá: bên đọc ở chế độ strict bị vỡ khi producer thêm một trường tương thích. Lab đặt strict để lỗi hiện ra; consumer sự kiện ngoài sổ cái thường nên bỏ nó và dựa vào `schemaVersion`.
 
 ## `schemaVersion` và `tag = "type"`: sự kiện nào, phiên bản nào?
 
@@ -127,7 +127,7 @@ impl<'de> Deserialize<'de> for SchemaV1 {
 }
 ```
 
-Ai gửi `schemaVersion: 2` bị từ chối ngay lúc đọc, thay vì bị hiểu nhầm theo luật của phiên bản 1. Khi cần v2, thêm kiểu mới và chọn kiểu theo số phiên bản đọc được; đừng đổi nghĩa trường của v1 tại chỗ.
+Sự kiện mang `schemaVersion: 2` bị từ chối ngay lúc đọc, thay vì bị hiểu nhầm theo luật của phiên bản 1. Khi cần v2, thêm kiểu mới và chọn kiểu theo số phiên bản đọc được; đừng đổi nghĩa trường của v1 tại chỗ.
 
 Sự kiện có nhiều loại nên ta dùng `enum` với tag:
 
@@ -140,11 +140,11 @@ pub enum LedgerEvent {
 }
 ```
 
-Tên biến thể thành giá trị của `"type"`, và trường này nằm cùng cấp với các trường khác. Đọc `"type": "LedgerEntryVoided"` cho lỗi `unknown variant` kèm danh sách biến thể hợp lệ. Phía C#, `[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]` cùng `[JsonDerivedType]` đọc được file golden của lab (thử tay trên .NET 10).
+Tên biến thể thành giá trị của `"type"`, và trường này nằm cùng cấp với các trường khác. Đọc `"type": "LedgerEntryVoided"` cho ra lỗi `unknown variant` kèm danh sách biến thể hợp lệ. Phía C#, `[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]` cùng `[JsonDerivedType]` đọc được file golden của lab (thử tay trên .NET 10).
 
-## Đọc JSON phải đi qua cửa kiểm: lỗi có vị trí ở đâu?
+## Đọc JSON phải đi qua cửa kiểm tra: lỗi có vị trí ở đâu?
 
-`derive(Deserialize)` thẳng trên struct có trường private vẫn dựng được struct (code sinh ra nằm cùng module), tức JSON đi vòng qua `try_new` và tạo được bút toán lệch. Lab chặn bằng `try_from`: đọc vào kiểu trung gian chỉ có hình dạng dữ liệu, rồi gọi `try_new` (`src/entry.rs`, rút gọn):
+`derive(Deserialize)` thẳng trên struct có trường private vẫn dựng được struct (code sinh ra nằm cùng module), tức là JSON đi vòng qua `try_new` và tạo được bút toán lệch. Lab chặn bằng `try_from`: đọc vào kiểu trung gian chỉ có hình dạng dữ liệu, rồi gọi `try_new` (`src/entry.rs`, rút gọn):
 
 ```rust
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -171,9 +171,9 @@ impl TryFrom<EntryWire> for JournalEntry {
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 280" role="img" aria-label="Hình 2. Bốn cửa kiểm khi đọc JSON vào JournalEntry: cú pháp, kiểu và tên trường, đủ trường, bất biến try_new. Ba cửa đầu báo lỗi có dòng và cột, cửa bất biến báo lỗi không có vị trí. Qua hết mới có JournalEntry hợp lệ."><defs><marker id="rust-serde-json-but-toan-decimal-thoi-gian-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="15" y="20" width="150" height="90" rx="10" class="f-phys-soft s-phys"/><text x="29" y="46" class="t-b">1 · Cú pháp</text><text x="29" y="70" class="t-small">JSON đúng ngữ pháp?</text><text x="29" y="88" class="t-small">(parser)</text><rect x="190" y="20" width="150" height="90" rx="10" class="f-phys-soft s-phys"/><text x="204" y="46" class="t-b">2 · Kiểu, tên</text><text x="204" y="70" class="t-small">amount là i64? có</text><text x="204" y="88" class="t-small">trường lạ không?</text><rect x="365" y="20" width="150" height="90" rx="10" class="f-phys-soft s-phys"/><text x="379" y="46" class="t-b">3 · Đủ trường</text><text x="379" y="70" class="t-small">có idempotencyKey,</text><text x="379" y="88" class="t-small">postings không?</text><rect x="540" y="20" width="150" height="90" rx="10" class="f-phys-soft s-phys"/><text x="554" y="46" class="t-b">4 · Bất biến</text><text x="554" y="70" class="t-small">try_new: tổng = 0,</text><text x="554" y="88" class="t-small">ít nhất 2 posting</text><rect x="715" y="20" width="150" height="90" rx="10" class="f-pk-soft s-pk"/><text x="729" y="46" class="t-b">5 · Giá trị</text><text x="729" y="70" class="t-small">JournalEntry hợp lệ</text><text x="729" y="88" class="t-small">mới được dùng</text><path d="M166 65 L188 65" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-1-a)"/><path d="M341 65 L363 65" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-1-a)"/><path d="M516 65 L538 65" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-1-a)"/><path d="M691 65 L713 65" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-1-a)"/><path d="M90 110 L90 150" class="f-none s-warn dash" stroke-width="2"/><path d="M265 110 L265 150" class="f-none s-warn dash" stroke-width="2"/><path d="M440 110 L440 150" class="f-none s-warn dash" stroke-width="2"/><path d="M615 110 L615 150" class="f-none s-warn dash" stroke-width="2"/><rect x="15" y="150" width="150" height="100" rx="10" class="f-warn-soft s-warn"/><text x="29" y="176" class="t-mono">(5, 5, Syntax)</text><text x="29" y="200" class="t-small">expected `,` or `]`</text><text x="29" y="220" class="t-small">có vị trí</text><rect x="190" y="150" width="150" height="100" rx="10" class="f-warn-soft s-warn"/><text x="204" y="176" class="t-mono">(4, 54, Data)</text><text x="204" y="200" class="t-small">invalid type</text><text x="204" y="220" class="t-small">có vị trí</text><rect x="365" y="150" width="150" height="100" rx="10" class="f-warn-soft s-warn"/><text x="379" y="176" class="t-mono">(7, 1, Data)</text><text x="379" y="200" class="t-small">missing field</text><text x="379" y="220" class="t-small">có vị trí</text><rect x="540" y="150" width="150" height="100" rx="10" class="f-warn-soft s-warn"/><text x="554" y="176" class="t-mono">(0, 0, Data)</text><text x="554" y="200" class="t-small">bút toán lệch,</text><text x="554" y="220" class="t-small">không có vị trí</text></svg>
+<svg viewBox="0 0 880 280" role="img" aria-label="Hình 2. Bốn cửa kiểm tra khi đọc JSON vào JournalEntry: cú pháp, kiểu và tên trường, đủ trường, bất biến try_new. Ba cửa đầu báo lỗi có dòng và cột, cửa bất biến báo lỗi không có vị trí. Qua hết mới có JournalEntry hợp lệ."><defs><marker id="rust-serde-json-but-toan-decimal-thoi-gian-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="15" y="20" width="150" height="90" rx="10" class="f-phys-soft s-phys"/><text x="29" y="46" class="t-b">1 · Cú pháp</text><text x="29" y="70" class="t-small">JSON đúng ngữ pháp?</text><text x="29" y="88" class="t-small">(parser)</text><rect x="190" y="20" width="150" height="90" rx="10" class="f-phys-soft s-phys"/><text x="204" y="46" class="t-b">2 · Kiểu, tên</text><text x="204" y="70" class="t-small">amount là i64? có</text><text x="204" y="88" class="t-small">trường lạ không?</text><rect x="365" y="20" width="150" height="90" rx="10" class="f-phys-soft s-phys"/><text x="379" y="46" class="t-b">3 · Đủ trường</text><text x="379" y="70" class="t-small">có idempotencyKey,</text><text x="379" y="88" class="t-small">postings không?</text><rect x="540" y="20" width="150" height="90" rx="10" class="f-phys-soft s-phys"/><text x="554" y="46" class="t-b">4 · Bất biến</text><text x="554" y="70" class="t-small">try_new: tổng = 0,</text><text x="554" y="88" class="t-small">ít nhất 2 posting</text><rect x="715" y="20" width="150" height="90" rx="10" class="f-pk-soft s-pk"/><text x="729" y="46" class="t-b">5 · Giá trị</text><text x="729" y="70" class="t-small">JournalEntry hợp lệ</text><text x="729" y="88" class="t-small">mới được dùng</text><path d="M166 65 L188 65" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-1-a)"/><path d="M341 65 L363 65" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-1-a)"/><path d="M516 65 L538 65" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-1-a)"/><path d="M691 65 L713 65" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-serde-json-but-toan-decimal-thoi-gian-1-a)"/><path d="M90 110 L90 150" class="f-none s-warn dash" stroke-width="2"/><path d="M265 110 L265 150" class="f-none s-warn dash" stroke-width="2"/><path d="M440 110 L440 150" class="f-none s-warn dash" stroke-width="2"/><path d="M615 110 L615 150" class="f-none s-warn dash" stroke-width="2"/><rect x="15" y="150" width="150" height="100" rx="10" class="f-warn-soft s-warn"/><text x="29" y="176" class="t-mono">(5, 5, Syntax)</text><text x="29" y="200" class="t-small">expected `,` or `]`</text><text x="29" y="220" class="t-small">có vị trí</text><rect x="190" y="150" width="150" height="100" rx="10" class="f-warn-soft s-warn"/><text x="204" y="176" class="t-mono">(4, 54, Data)</text><text x="204" y="200" class="t-small">invalid type</text><text x="204" y="220" class="t-small">có vị trí</text><rect x="365" y="150" width="150" height="100" rx="10" class="f-warn-soft s-warn"/><text x="379" y="176" class="t-mono">(7, 1, Data)</text><text x="379" y="200" class="t-small">missing field</text><text x="379" y="220" class="t-small">có vị trí</text><rect x="540" y="150" width="150" height="100" rx="10" class="f-warn-soft s-warn"/><text x="554" y="176" class="t-mono">(0, 0, Data)</text><text x="554" y="200" class="t-small">bút toán lệch,</text><text x="554" y="220" class="t-small">không có vị trí</text></svg>
 </div>
-<figcaption>Hình 2. Bốn cửa kiểm khi đọc <code>JournalEntry</code>. Ba cửa đầu do parser và visitor của serde phát hiện nên có dòng, cột; cửa 4 chạy sau khi đã đọc xong cả object nên không còn vị trí.</figcaption>
+<figcaption>Hình 2. Bốn cửa kiểm tra khi đọc <code>JournalEntry</code>. Ba cửa đầu do parser và visitor của serde phát hiện nên có dòng, cột; cửa 4 chạy sau khi đã đọc xong cả object nên không còn vị trí.</figcaption>
 </figure>
 
 Lab lấy thân bút toán sau (hằng `ENTRY_JSON` trong `src/main.rs`), sửa từng chỗ rồi in lỗi thật:
@@ -198,9 +198,9 @@ Lab lấy thân bút toán sau (hằng `ENTRY_JSON` trong `src/main.rs`), sửa 
 | Đổi thành `idempotency_key` | (2, 19) | `Data` | unknown field `idempotency_key`, expected `idempotencyKey` or `postings` |
 | Đổi `5100` thành `5000` | (0, 0) | `Data` | bút toán lệch, tổng bằng -100 VND |
 
-Với lỗi kiểu, serde báo sau khi parser đọc xong token: cột 54 của dòng 4 là ký tự cuối của `"-25500"`. Với lỗi cú pháp, đó là chỗ parser nhận ra sai: dấu phẩy thiếu ở cuối dòng 4 được báo tại `{` đầu dòng 5. Cột đếm theo byte, nên chữ có dấu chiếm nhiều cột (đã thử: `ệ` tính 3). Hàng cuối là lỗi từ `try_new`, thuộc cả bút toán, nên không có dòng, cột.
+Với lỗi kiểu, serde báo sau khi parser đọc xong token: cột 54 của dòng 4 là ký tự cuối của `"-25500"`. Với lỗi cú pháp, vị trí báo là chỗ parser nhận ra sai: dấu phẩy thiếu ở cuối dòng 4 được báo tại `{` đầu dòng 5. Cột đếm theo byte, nên chữ có dấu chiếm nhiều cột (đã thử: `ệ` tính 3). Hàng cuối là lỗi từ `try_new`, thuộc cả bút toán, nên không có dòng, cột.
 
-Qua enum có `tag`, vị trí mất nhiều hơn: serde đệm cả object để tìm `"type"` rồi đọc biến thể từ bản đệm, nên lỗi kiểu, lỗi giá trị hay thiếu trường bên trong biến thể đều ra dòng 0. Ba sự kiện sai trong lab:
+Qua enum có `tag`, vị trí bị mất nhiều hơn: serde đệm cả object để tìm `"type"` rồi đọc biến thể từ bản đệm, nên lỗi kiểu, lỗi giá trị hay thiếu trường bên trong biến thể đều báo dòng 0. Ba sự kiện sai trong lab:
 
 ```text
 schemaV 2    (dòng 0, cột 0, Data) schemaVersion 2 không được hỗ trợ, cần 1
@@ -208,14 +208,14 @@ type lạ      (dòng 2, cột 29, Data) unknown variant `LedgerEntryVoided`, ex
 amount chuỗi (dòng 0, cột 0, Data) invalid type: string "-25500", expected i64
 ```
 
-Trong ba lỗi này chỉ `unknown variant` còn vị trí (lỗi cú pháp cũng vậy). Nên vị trí chỉ là phụ trợ: khi dòng và cột bằng 0, log kèm mã định danh message để tìm lại. Crate `serde_path_to_error` thêm đường dẫn trường (`postings[0].amount`) khi đọc thẳng struct; qua enum có `tag` nó cũng mất (đã thử).
+Trong ba lỗi này chỉ `unknown variant` còn vị trí (lỗi cú pháp cũng vậy). Vì vậy vị trí chỉ là phụ trợ: khi dòng và cột bằng 0, log kèm mã định danh message để tìm lại. Crate `serde_path_to_error` thêm đường dẫn trường (`postings[0].amount`) khi đọc thẳng struct; qua enum có `tag` thì đường dẫn đó cũng mất (đã thử).
 
-## Với người từ C#: System.Text.Json ↔ serde
+## Với người quen dùng C#: System.Text.Json ↔ serde
 
 | System.Text.Json | serde |
 | --- | --- |
-| `JsonSerializerDefaults.Web` hoặc `JsonNamingPolicy.CamelCase`; `JsonSerializer` trơn giữ PascalCase | `#[serde(rename_all = "camelCase")]`, `rename` cho từng trường |
-| Thuộc tính thiếu trong JSON: giá trị mặc định, im lặng (trừ `required`/`[JsonRequired]`) | Trường thiếu: lỗi `missing field`, trừ khi có `default` hoặc là `Option` |
+| `JsonSerializerDefaults.Web` hoặc `JsonNamingPolicy.CamelCase`; `JsonSerializer` mặc định giữ PascalCase | `#[serde(rename_all = "camelCase")]`, `rename` cho từng trường |
+| Thuộc tính thiếu trong JSON: giá trị mặc định, không báo lỗi (trừ `required`/`[JsonRequired]`) | Trường thiếu: lỗi `missing field`, trừ khi có `default` hoặc là `Option` |
 | `JsonUnmappedMemberHandling.Disallow` | `#[serde(deny_unknown_fields)]` |
 | `JsonConverter<T>` | `with = "…"`, `impl Serialize/Deserialize`, `try_from` |
 | `JsonException.LineNumber`, `BytePositionInLine` (đếm từ 0), `Path` | `Error::line()`, `column()` (đếm từ 1); không có đường dẫn trường |
@@ -245,11 +245,11 @@ round-trip bằng nhau: true
 feeRate 0.20 nhân cước 25.500 = 5.100 VND
 ```
 
-`-- --verify` kiểm JSON khớp file golden, round-trip, hai dạng tiền, từng cặp (dòng, cột) trong bảng và `schemaVersion: 2` bị từ chối; sai thì thoát mã 1. `cargo test` chạy 16 unit test (module từ lab 10), 15 test hợp đồng ở `tests/json_contract.rs` và 2 doc test. Test quan trọng nhất là `golden_round_trip_is_stable`: đọc file golden, ghi lại, ra đúng từng ký tự. Đưa cùng file cho test của service C# đọc là cách giữ hai phía không lệch nhau.
+`-- --verify` kiểm tra JSON khớp file golden, round-trip, hai dạng tiền, từng cặp (dòng, cột) trong bảng và `schemaVersion: 2` bị từ chối; sai thì thoát mã 1. `cargo test` chạy 16 unit test (module từ lab 10), 15 test hợp đồng ở `tests/json_contract.rs` và 2 doc test. Test quan trọng nhất là `golden_round_trip_is_stable`: đọc file golden, ghi lại, và kết quả phải khớp đúng từng ký tự. Đưa cùng file cho test của service C# đọc là cách giữ hai phía không lệch nhau.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>JSON ở đây là chuỗi nhỏ trong bộ nhớ, đọc bằng <code>from_str</code>; chưa có đọc luồng, giới hạn kích thước payload, chữ ký hay mã hoá. Chỉ có <code>schemaVersion</code> 1, chưa có chiến lược nâng lên 2. Việc C# đọc được file golden là kết quả thử tay trên .NET 10; repo chưa có test C# đọc file này. Chưa có schema chung (OpenAPI, JSON Schema) và chưa có Kafka.</p>
+<p>JSON ở đây là chuỗi nhỏ trong bộ nhớ, đọc bằng <code>from_str</code>; chưa có cách đọc theo luồng, giới hạn kích thước payload, chữ ký hay mã hoá. Chỉ có <code>schemaVersion</code> 1, chưa có chiến lược nâng lên 2. Việc C# đọc được file golden là kết quả thử tay trên .NET 10; repo chưa có test C# đọc file này. Chưa có schema chung (OpenAPI, JSON Schema) và chưa có Kafka.</p>
 </div>
 
 ## Bài tập

@@ -1,14 +1,14 @@
 ---
 slug: rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh
 title: "Bài tổng hợp toàn loạt: sổ cái từ quyết định chọn Rust tới vận hành"
-summary: "Bài 68: quay lại ADR bài 01 với sổ bằng chứng 15 dòng kiểm được bằng lệnh, nói thẳng điều loạt không chứng minh, bản đồ 68 bài, ba đường đọc, hợp đồng với C#, Go, Python và điều lab chưa có."
+summary: "Bài 68: quay lại ADR bài 01 với sổ bằng chứng 15 dòng kiểm được bằng lệnh, nói thẳng những điều loạt bài không chứng minh được, bản đồ 68 bài, ba đường đọc, hợp đồng với C#, Go, Python và điều lab chưa có."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, adr, tong-hop]
 language: vi
 ---
 
-Một tech lead ở đội khác đọc xong bài 01 và hỏi: «Chúng tôi cũng có một service giữ tiền. Có nên chọn Rust như Tới Nơi không?» Trả lời «nên» hay «không nên» chỉ dựa vào cảm giác sau 67 bài đều không chính đáng.
+Một tech lead ở đội khác đọc xong bài 01 và hỏi: «Chúng tôi cũng có một service giữ tiền. Có nên chọn Rust như Tới Nơi không?» Dù đã qua 67 bài, trả lời «nên» hay «không nên» chỉ dựa vào cảm giác thì đều không chính đáng.
 
 [Bài 01](/articles/rust-vi-sao-so-cai-toi-noi-chon-rust) là một quyết định kiến trúc (ADR): tiêu chí của sổ cái, cái giá, và những lúc quyết định sai. Bài này quay lại từng dòng ấy và hỏi: loạt có gì chứng minh nó, thứ đó thuộc loại nào (trình biên dịch, test, số đo hay chỉ là lập luận), và nó **không** chứng minh điều gì.
 
@@ -24,7 +24,7 @@ Một tech lead ở đội khác đọc xong bài 01 và hỏi: «Chúng tôi c�
 
 Ba nhóm khẳng định. **Lý do chọn:** tiền không lặng lẽ sai, mọi trạng thái được xử lý, một chủ không alias, append-only và idempotent, p99 cùng bộ nhớ dễ đoán; kèm lời loại trừ rằng thông lượng thô *không* phải lý do. **Cái giá:** học, tuyển dụng, build, hệ sinh thái, hai toolchain. **Điều kiện sai:** mất kỹ năng, lượng nhỏ mà .NET đã đạt SLO, vận hành vượt lợi ích, ranh giới bị xói mòn.
 
-Lab chép 15 khẳng định đó vào một bảng dữ liệu, mỗi dòng nêu loại bằng chứng và điều nó không chứng minh. `label` dùng `match` vét cạn: thêm loại thứ năm mà quên nhãn là lỗi E0004.
+Lab chép 15 khẳng định đó vào một bảng dữ liệu, mỗi dòng nêu loại bằng chứng và điều nó không chứng minh. `label` dùng `match` vét cạn: thêm loại thứ năm mà quên gán nhãn sẽ gây lỗi E0004.
 
 ```rust
 // src/evidence.rs (rút gọn)
@@ -50,23 +50,23 @@ Bảng dưới là `CLAIMS` trong lab, in bằng `--evidence`. Mã `R` là lý d
 
 | Mã | Khẳng định | Bài | Loại bằng chứng | Loạt không chứng minh |
 | --- | --- | --- | --- | --- |
-| R1 | Tiền không lặng lẽ sai: Money(i64) và checked_add | 3, 12, 19, 46 | biên dịch chặn + test bất biến | release tắt overflow-checks mặc định nên kỷ luật checked_* vẫn là việc người viết; property test không là chứng minh |
-| R2 | Mọi trạng thái đều được xử lý: match vét cạn, typestate | 1, 5, 14, 32, 58 | biên dịch chặn | chỉ trong code Rust; ở biên (cột state, JSON) vẫn phải tin dữ liệu đưa vào |
-| R3 | Một chủ, không alias sửa dữ liệu: borrow checker và Send/Sync | 4, 22 | biên dịch chặn | chặn data race trong một process; không chặn cuộc đua giữa hai transaction (bài 24, 53) |
+| R1 | Tiền không lặng lẽ sai: Money(i64) và checked_add | 3, 12, 19, 46 | biên dịch chặn + test bất biến | release tắt overflow-checks mặc định nên kỷ luật checked_* vẫn là việc người viết; property test không phải là chứng minh |
+| R2 | Mọi trạng thái đều được xử lý: match vét cạn, typestate | 1, 5, 14, 32, 58 | biên dịch chặn | chỉ có hiệu lực trong code Rust; ở biên (cột state, JSON) vẫn phải tin dữ liệu đưa vào |
+| R3 | Một chủ, không alias sửa dữ liệu: borrow checker và Send/Sync | 4, 22 | biên dịch chặn | chặn data race trong một process; không chặn race condition giữa hai transaction (bài 24, 53) |
 | R4 | Append-only, idempotent, bút toán cân | 24–25, 50, 61, 67 | test bất biến | do PostgreSQL bảo đảm (trigger, unique), không do Rust; chủ bảng tắt được trigger (bài 50, bài 67 tắt trong schema tạm) |
-| R5 | Độ trễ p99 và bộ nhớ dễ đoán vì không có GC | 30, 47, 59, 61 | số đo + lập luận | bài 59 chỉ ủng hộ nửa bộ nhớ (đếm được block, RSS nhỏ); chưa đo p99 dưới tải thật, bài 61 chỉ có hướng ở 20 request/giây; số đo ở máy tải cao qua Docker Desktop; so với .NET chỉ ở bài 59, khối lượng nhỏ, không phải production |
-| R6 | Thông lượng KHÔNG phải lý do (bài 01 tự nói) | 30, 61 | số đo | ở bài 30 chỉ gộp lô unnest vượt 10.000 bút toán/giây, chưa gồm account_balances; bài 61 có idempotency và số dư thì vượt ở load 100 khi chưa có trigger, thêm trigger còn 8.815 đến 9.108, load 430 không đạt; không có phép đo .NET cùng tải |
+| R5 | Độ trễ p99 và bộ nhớ dễ đoán vì không có GC | 30, 47, 59, 61 | số đo + lập luận | bài 59 chỉ ủng hộ nửa bộ nhớ (đếm được block, RSS nhỏ); chưa đo p99 dưới tải thật, bài 61 chỉ cho thấy xu hướng ở 20 request/giây; số đo chạy trên máy tải cao qua Docker Desktop; so sánh với .NET chỉ có ở bài 59, với khối lượng nhỏ, không phải production |
+| R6 | Thông lượng KHÔNG phải lý do (bài 01 tự nói) | 30, 61 | số đo | ở bài 30 chỉ cách gộp lô unnest vượt 10.000 bút toán/giây, chưa gồm account_balances; bài 61 tính cả idempotency và số dư thì vượt ngưỡng ở load 100 khi chưa có trigger, thêm trigger thì còn 8.815 đến 9.108, và không đạt ở load 430; không có phép đo .NET cùng tải |
 | C1 | Đường cong học: ownership và borrow checker | 1, 4 | lập luận | loạt không đo thời gian học của đội nào |
 | C2 | Tuyển dụng: ít người có kinh nghiệm Rust production | 1 | lập luận | loạt không có dữ liệu thị trường lao động |
-| C3 | Thời gian build và số crate | 51, 58–59, 63–64 | số đo | số crate biên dịch ổn định, thời gian tường nhiễu vì máy tải (26 đến 94 giây cho cùng bước ở bài 63); không có phép đo dotnet build để so |
-| C4 | Hệ sinh thái nhỏ hơn: không ORM, rdkafka bọc thư viện C | 23, 26, 36, 63 | lập luận | quan sát khi viết lab, không so độ rộng với NuGet |
+| C3 | Thời gian build và số crate | 51, 58–59, 63–64 | số đo | số crate biên dịch ổn định, thời gian thực tế (wall-clock) nhiễu vì máy tải (26 đến 94 giây cho cùng bước ở bài 63); không có phép đo dotnet build để so |
+| C4 | Hệ sinh thái nhỏ hơn: không ORM, rdkafka bọc thư viện C | 23, 26, 36, 63 | lập luận | quan sát khi viết lab, không so sánh độ phong phú của hệ sinh thái với NuGet |
 | C5 | Hai toolchain: CI, image, triển khai, giám sát | 63–66 | số đo + lập luận | đo được image (bài 63) và lệnh CI chạy local (bài 64); workflow chưa chạy trên GitHub, chưa triển khai cloud thật, image chỉ linux/arm64; chi phí on-call hai ngôn ngữ không đo |
 | W1 | Đội không giữ được kỹ năng Rust | 1 | lập luận | không có thí nghiệm nào về đội, nhân sự hay bàn giao |
 | W2 | Lượng nhỏ và SLO đã đạt trên .NET | 30, 59 | số đo + lập luận | loạt không có bản .NET của ledger đủ tính năng, không có p99 .NET và chưa đặt SLO nào để đạt; bài 59 chỉ so RSS và GC trên khối lượng nhỏ trong bộ nhớ |
-| W3 | Chi phí vận hành hai ngôn ngữ vượt lợi ích | 64–65, 67 | lập luận | loạt chưa vận hành hệ thống thật nên không đo được công on-call hay chi phí hai ngôn ngữ |
+| W3 | Chi phí vận hành hai ngôn ngữ vượt lợi ích | 64–65, 67 | lập luận | loạt chưa vận hành hệ thống thật nên không đo được công sức on-call hay chi phí hai ngôn ngữ |
 | W4 | Ranh giới Rust bị xói mòn | 51, 55, 58 | test bất biến | kiểm ranh giới giữa crate trong một service, không kiểm ranh giới giữa service hay giữa đội; Go và Python mới đọc sự kiện từ tệp |
 
-Đếm theo dòng, không theo sức nặng (hàm `summarize` đếm): ba dòng có biên dịch chặn, ba có test bất biến, năm có số đo, tám có lập luận; năm dòng chỉ có lập luận (Hình 1). Tổng các cột lớn hơn 15 vì R1, R5, C5 và W2 mang hai loại.
+Số liệu đếm theo dòng chứ không theo sức nặng (do hàm `summarize` đếm): ba dòng có biên dịch chặn, ba có test bất biến, năm có số đo, tám có lập luận; năm dòng chỉ có lập luận (Hình 1). Tổng các cột lớn hơn 15 vì R1, R5, C5 và W2 mang hai loại.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -75,52 +75,52 @@ Bảng dưới là `CLAIMS` trong lab, in bằng `--evidence`. Mã `R` là lý d
 <figcaption>Hình 1. Mười lăm dòng của sổ theo loại bằng chứng; R1, R5, C5 và W2 nằm ở hai cột.</figcaption>
 </figure>
 
-Hàm `check` chỉ kiểm hình thức: id không trùng, số bài hợp lệ, `gap` không trống. Nó không biết một dòng có nói thật hay không.
+Hàm `check` chỉ kiểm hình thức: id không trùng, số bài hợp lệ, `gap` không trống. Hàm này không biết một dòng có nói đúng sự thật hay không.
 
 ## Rust chặn lỗi nào, và lỗi nào vẫn lọt?
 
-Cột «biên dịch chặn» đã chạy thật: thiếu nhánh `match` (E0004), sửa khi đang mượn đọc (E0502), `capture` sai thứ tự của typestate (E0599), dùng sau `move` (E0382). Cả bốn là lỗi trong một process.
+Cột «biên dịch chặn» đã chạy thật: thiếu nhánh `match` (E0004), sửa dữ liệu khi đang mượn đọc (E0502), gọi `capture` sai thứ tự của typestate (E0599), dùng sau `move` (E0382). Cả bốn là lỗi trong một process.
 
-Phần lớn lỗi mà các lab dựng lại và đo được thuộc lớp khác (Hình 2); nhiều bản lỗi được viết cố ý để chứng minh. [Bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key): hai transaction cùng đọc tổng đã rút bằng 0 rồi cùng ghi 20.400; dưới READ COMMITTED cả hai thành công, tổng 40.800 so với hạn mức 30.000. [Bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update): tám task không khoá rút 163.200 trên hạn mức 100.000. Code biên dịch xanh vì đó không phải data race bộ nhớ. [Bài 49](/articles/rust-event-sourcing-co-chung-muc-projection-replay): một bút toán commit muộn bị bỏ sót vĩnh viễn, bảng đọc của `DR-001` thiếu 20.400 đồng mà sổ vẫn cân. [Bài 57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao): `cargo-fuzz` tìm ra panic ở bản parser sao kê cố ý có lỗi, rút gọn còn đầu vào 7 byte cắt chuỗi UTF-8 giữa ký tự, mà test gõ tay không thấy.
+Phần lớn lỗi mà các lab dựng lại và đo được thuộc lớp khác (Hình 2); nhiều bản lỗi do lab cố ý viết ra để chứng minh. [Bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key): hai transaction cùng đọc tổng đã rút bằng 0 rồi cùng ghi 20.400; dưới READ COMMITTED cả hai thành công, tổng 40.800 so với hạn mức 30.000. [Bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update): tám task chạy không có khoá rút tổng cộng 163.200, so với hạn mức 100.000. Code biên dịch xanh vì đó không phải data race bộ nhớ. [Bài 49](/articles/rust-event-sourcing-co-chung-muc-projection-replay): một bút toán commit muộn bị bỏ sót vĩnh viễn, bảng đọc của `DR-001` thiếu 20.400 đồng mà sổ vẫn cân. [Bài 57](/articles/rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao): `cargo-fuzz` tìm ra panic ở bản parser sao kê cố ý có lỗi, rút gọn còn đầu vào 7 byte làm cắt chuỗi UTF-8 giữa một ký tự, mà test viết tay không phát hiện được.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 310" role="img" aria-label="Hình 2. Bên trái bốn lỗi trình biên dịch chặn: E0004, E0502, E0599, E0382, đều là lỗi trong một process. Bên phải năm lỗi biên dịch xanh nhưng vẫn có, mỗi lỗi kèm thứ đã chặn nó: khoá dòng hoặc SERIALIZABLE, con trỏ tx_id, fuzz, checked, và một lỗi chưa chặn."><rect x="20" y="20" width="340" height="270" rx="10" class="f-pk-soft s-pk"/><text x="36" y="48" class="t-b">Trình biên dịch chặn</text><text x="36" y="80" class="t-small">E0004 thiếu nhánh match (bài 01, 32)</text><text x="36" y="104" class="t-small">E0502 sửa khi đang mượn đọc (bài 01, 04)</text><text x="36" y="128" class="t-small">E0599 capture sai thứ tự (bài 14)</text><text x="36" y="152" class="t-small">E0382 dùng sau khi move (bài 04, 14)</text><text x="36" y="206" class="t-small">Cả bốn là lỗi trong một process:</text><text x="36" y="226" class="t-small">bộ nhớ, trạng thái, luồng điều khiển.</text><rect x="380" y="20" width="480" height="270" rx="10" class="f-warn-soft s-warn"/><text x="396" y="48" class="t-b">Biên dịch xanh, lỗi vẫn có</text><text x="396" y="78" class="t-b">Cuộc đua giữa hai transaction (bài 24, 53)</text><text x="396" y="98" class="t-small">chặn bởi: khoá dòng hoặc SERIALIZABLE kèm retry 40001</text><text x="396" y="120" class="t-b">Bỏ sót bút toán commit muộn (bài 49)</text><text x="396" y="140" class="t-small">chặn bởi: con trỏ (tx_id, id) thay cho id</text><text x="396" y="162" class="t-b">Panic khi cắt chuỗi UTF-8 (bài 57)</text><text x="396" y="182" class="t-small">chặn bởi: fuzz, rồi test hồi quy 7 byte</text><text x="396" y="204" class="t-b">Tràn số lặng lẽ ở bản release (bài 03)</text><text x="396" y="224" class="t-small">chặn bởi: kỷ luật dùng checked_* và test</text><text x="396" y="246" class="t-b">Sửa cước cùng chuyến bị bỏ qua (bài 58)</text><text x="396" y="266" class="t-small">chưa chặn: loạt ghi thẳng vào mục «chưa có»</text></svg>
+<svg viewBox="0 0 880 310" role="img" aria-label="Hình 2. Bên trái bốn lỗi trình biên dịch chặn: E0004, E0502, E0599, E0382, đều là lỗi trong một process. Bên phải năm lỗi biên dịch xanh nhưng vẫn có, mỗi lỗi kèm thứ đã chặn nó: khoá dòng hoặc SERIALIZABLE, con trỏ tx_id, fuzz, checked, và một lỗi chưa chặn."><rect x="20" y="20" width="340" height="270" rx="10" class="f-pk-soft s-pk"/><text x="36" y="48" class="t-b">Trình biên dịch chặn</text><text x="36" y="80" class="t-small">E0004 thiếu nhánh match (bài 01, 32)</text><text x="36" y="104" class="t-small">E0502 sửa khi đang mượn đọc (bài 01, 04)</text><text x="36" y="128" class="t-small">E0599 capture sai thứ tự (bài 14)</text><text x="36" y="152" class="t-small">E0382 dùng sau khi move (bài 04, 14)</text><text x="36" y="206" class="t-small">Cả bốn là lỗi trong một process:</text><text x="36" y="226" class="t-small">bộ nhớ, trạng thái, luồng điều khiển.</text><rect x="380" y="20" width="480" height="270" rx="10" class="f-warn-soft s-warn"/><text x="396" y="48" class="t-b">Biên dịch xanh, lỗi vẫn có</text><text x="396" y="78" class="t-b">Race condition giữa hai transaction (bài 24, 53)</text><text x="396" y="98" class="t-small">chặn bởi: khoá dòng hoặc SERIALIZABLE kèm retry 40001</text><text x="396" y="120" class="t-b">Bỏ sót bút toán commit muộn (bài 49)</text><text x="396" y="140" class="t-small">chặn bởi: con trỏ (tx_id, id) thay cho id</text><text x="396" y="162" class="t-b">Panic khi cắt chuỗi UTF-8 (bài 57)</text><text x="396" y="182" class="t-small">chặn bởi: fuzz, rồi test hồi quy 7 byte</text><text x="396" y="204" class="t-b">Tràn số lặng lẽ ở bản release (bài 03)</text><text x="396" y="224" class="t-small">chặn bởi: kỷ luật dùng checked_* và test</text><text x="396" y="246" class="t-b">Sửa cước cùng chuyến bị bỏ qua (bài 58)</text><text x="396" y="266" class="t-small">chưa chặn: loạt ghi thẳng vào mục «chưa có»</text></svg>
 </div>
 <figcaption>Hình 2. Lớp lỗi trình biên dịch chặn, và các lỗi lab dựng lại được khi code đã biên dịch xanh.</figcaption>
 </figure>
 
-Điều này không phản bác bài 01, vốn đã viết Rust không thay thế invariant nghiệp vụ, nhưng nó đổi chỗ đặt niềm tin: bút toán cân, append-only và hạn mức khi chạy đồng thời được giữ bởi PostgreSQL, thứ tự khoá và test; Rust giữ lớp bên trong process (dòng R3, R4).
+Điều này không phản bác bài 01, vốn đã viết rằng Rust không thay thế invariant nghiệp vụ, nhưng kết quả này đổi chỗ đặt niềm tin: bút toán cân, append-only và hạn mức khi chạy đồng thời do PostgreSQL, thứ tự khoá và test giữ; Rust giữ lớp bên trong process (dòng R3, R4).
 
 ## Số đo nói được gì, và loạt không chứng minh được gì?
 
-[Bài 30](/articles/rust-criterion-benchmark-do-bo-nho-10k-but-toan) hỏi sổ cái có ghi nổi 10.000 bút toán mỗi giây không. Trên PostgreSQL trong Docker Desktop (máy load 14 đến 32): mỗi bút toán một transaction đạt 324 đến 422; gộp lô 500 nhưng vẫn hai câu lệnh mỗi bút toán đạt 733 đến 930; chỉ gộp lô bằng `unnest` vượt ngưỡng, 13.269 đến 22.791. Một round trip `select 1` đã mất 440 đến 727 µs, nên trần nằm ở số round trip; ngôn ngữ nào cũng phải trả round trip, nhưng đó là lập luận, đường này không có phép đo .NET. Với 70 chuyến mỗi giây của bài 01 và hai bút toán mỗi chuyến theo [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen), sổ cần khoảng 140 bút toán mỗi giây. Phép nhân này là của bài 68, không phải số đo, nhưng khớp lời bài 01: thông lượng không phải lý do.
+[Bài 30](/articles/rust-criterion-benchmark-do-bo-nho-10k-but-toan) hỏi sổ cái có ghi nổi 10.000 bút toán mỗi giây không. Trên PostgreSQL trong Docker Desktop (máy load 14 đến 32): mỗi bút toán một transaction đạt 324 đến 422; gộp lô 500 nhưng vẫn dùng hai câu lệnh cho mỗi bút toán thì đạt 733 đến 930; chỉ gộp lô bằng `unnest` mới vượt ngưỡng, 13.269 đến 22.791. Một round trip `select 1` đã mất 440 đến 727 µs, nên trần nằm ở số round trip; ngôn ngữ nào cũng phải trả round trip, nhưng đó là lập luận, đường này không có phép đo .NET. Với 70 chuyến mỗi giây của bài 01 và hai bút toán mỗi chuyến theo [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen), sổ cần khoảng 140 bút toán mỗi giây. Phép nhân này do chính bài 68 tính, không phải số đo, nhưng khớp với lời bài 01: thông lượng không phải lý do.
 
 [Bài 61](/articles/rust-toi-uu-co-so-do-clone-cow-batching-copy-p99) thêm idempotency và `account_balances` vào cùng câu hỏi, lô 500, ở hai mức load. Load 429 đến 436, có và không trigger: `unnest` 2.312 đến 2.344 bút toán mỗi giây, `COPY` 2.576 đến 3.131, một câu CTE 2.836 đến 5.940, từng dòng 6 đến 7. Load 101 đến 133, chưa có trigger: `unnest` 14.323, `COPY` 12.777, CTE 15.215; thêm trigger còn 8.815 đến 9.108. Bài 61 không coi mục tiêu 10.000 là đạt, vì sổ cái thật phải có trigger và chưa đo trên máy rảnh. Chắc chắn hơn cả là số đếm: 1.000 bút toán từ 8.991 round trip xuống 10.
 
-Bộ nhớ và build cũng nói ít hơn cảm giác. [Bài 59](/articles/rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet) là phép so duy nhất với .NET: cùng 10.000 bút toán ba posting trong bộ nhớ, cấp phát gần bằng nhau (5.738.224 và 5.939.536 byte mỗi vòng), RSS đỉnh 8,7 MiB so với 72 đến 161 MiB tuỳ cấu hình GC, load khoảng 380. Ở Workstation, hơn nửa chênh lệch là runtime có sẵn: trước khi chạy việc, .NET đã chiếm khoảng 39 MiB, Rust khoảng 1,5 MiB; phần còn lại là heap GC chủ động giữ. Code C# không tinh chỉnh mà một vòng không kích hoạt GC nào. Bài 59 không nêu «nhanh gấp N lần» và tự kết luận: số liệu ủng hộ nửa «bộ nhớ nhỏ và đếm được», chưa nói gì về nửa p99.
+Bộ nhớ và build cũng nói ít hơn cảm giác. [Bài 59](/articles/rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet) là phép so duy nhất với .NET: cùng 10.000 bút toán ba posting trong bộ nhớ, cấp phát gần bằng nhau (5.738.224 và 5.939.536 byte mỗi vòng), RSS đỉnh 8,7 MiB so với 72 đến 161 MiB tuỳ cấu hình GC, load khoảng 380. Ở Workstation, hơn nửa chênh lệch là runtime có sẵn: trước khi chạy việc, .NET đã chiếm khoảng 39 MiB, Rust khoảng 1,5 MiB; phần còn lại là heap GC chủ động giữ. Code C# không tinh chỉnh, vậy mà một vòng không kích hoạt GC nào. Bài 59 không nêu «nhanh gấp N lần» và tự kết luận: số liệu ủng hộ nửa «bộ nhớ nhỏ và đếm được», chưa nói gì về nửa p99.
 
-[Bài 47](/articles/rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao) đối soát một triệu `external_ref`: đường SQL có peak RSS 5,4 MB, đường `HashMap` 521 MB. Bộ nhớ đó kiểm soát được nhờ đẩy việc sang SQL, và phần chuyển sang PostgreSQL không được đo. [Bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter) đếm 153 crate (169 khi bật Kafka) cho lần build nguội, [bài 63](/articles/rust-container-dockerfile-da-stage-cargo-chef-distroless) đo sửa một dòng thì `cargo-chef` biên dịch lại 1 crate so với 150 của Dockerfile một stage; loạt không có phép đo `dotnet build` để so.
+[Bài 47](/articles/rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao) đối soát một triệu `external_ref`: đường SQL có peak RSS 5,4 MB, đường `HashMap` 521 MB. Bộ nhớ đó kiểm soát được nhờ chuyển việc sang SQL, còn phần việc đã chuyển sang PostgreSQL thì không được đo. [Bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter) đếm 153 crate (169 khi bật Kafka) cho lần build nguội, [bài 63](/articles/rust-container-dockerfile-da-stage-cargo-chef-distroless) đo trường hợp sửa một dòng thì `cargo-chef` biên dịch lại 1 crate so với 150 của Dockerfile một stage; loạt không có phép đo `dotnet build` để so.
 
 Loạt **không** chứng minh được:
 
-- **So Rust với .NET.** Chỉ bài 59, khối lượng nhỏ, một máy, không phải production.
-- **p99 dưới tải thật.** Bài 30 không đo p99. Bài 61 đo vòng mở 20 request/giây trên máy tải cao: p99 đường một câu CTE 45 và 88 ms, từng dòng 108 và 277 ms qua hai lượt, nhiễu giữa hai lượt lớn bằng chênh lệch giữa hai đường. Số thời gian từ bài 59 đến 61 đo lúc load 330 đến 440, chỉ đọc ở mức hướng. Không có SLA.
-- **10.000 bút toán mỗi giây.** Ở bài 30 chỉ gộp lô `unnest` vượt, và chưa gồm `account_balances`. Bài 61 có số dư thì vượt ở load 100 khi chưa có trigger, thêm trigger còn 8.815 đến 9.108, và không đạt ở load 430.
-- **Độ sẵn sàng.** Một PostgreSQL, một broker Kafka replication 1, phần lớn topic một partition; chưa failover, chưa chạy dài ngày. [Bài 67](/articles/rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay) restore `pg_dump` khớp số dư và hash chain, nhưng PITR chưa dựng, RTO chưa đo, alert chưa có kênh gửi.
+- **So Rust với .NET.** Chỉ có bài 59 làm phép so sánh này, với khối lượng nhỏ, trên một máy, không phải production.
+- **p99 dưới tải thật.** Bài 30 không đo p99. Bài 61 đo vòng mở 20 request/giây trên máy tải cao: p99 của đường một câu CTE là 45 và 88 ms, từng dòng 108 và 277 ms qua hai lượt, độ nhiễu giữa hai lượt lớn ngang với chênh lệch giữa hai đường. Số thời gian từ bài 59 đến 61 đo lúc load 330 đến 440, chỉ đọc như một xu hướng. Không có SLA.
+- **10.000 bút toán mỗi giây.** Ở bài 30, chỉ cách gộp lô `unnest` vượt ngưỡng, và chưa tính `account_balances`. Bài 61 tính cả số dư thì vượt ngưỡng ở load 100 khi chưa có trigger, thêm trigger thì còn 8.815 đến 9.108, và không đạt ở load 430.
+- **Độ sẵn sàng.** Một PostgreSQL, một broker Kafka replication 1, phần lớn topic một partition; chưa kiểm tra failover, chưa chạy liên tục nhiều ngày. [Bài 67](/articles/rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay) restore `pg_dump` khớp số dư và hash chain, nhưng PITR chưa dựng, RTO chưa đo, alert chưa có kênh gửi.
 - **Triển khai và CI.** Chưa triển khai cloud thật (bài 65 chỉ viết cấu hình, chưa qua `aws` hay `az`); workflow GitHub Actions (bài 27, 64) chưa chạy trên GitHub, lệnh bên trong chỉ chạy local; image bài 63 chỉ `linux/arm64`.
-- **Công cụ.** Bài 60 không có flamegraph của `cargo flamegraph` (cần chấp nhận license Xcode bằng `sudo`), chỉ `samply` gộp mẫu bằng script ngoài lab, và chưa mở TUI `tokio-console`.
-- **Bảo mật.** Bài 50 đo quyền bằng `SET ROLE` trên kết nối superuser; JWT ở bài 58 dùng khoá chia sẻ.
+- **Công cụ.** Bài 60 không có flamegraph của `cargo flamegraph` (cần chấp nhận license Xcode bằng `sudo`), chỉ có `samply`, với mẫu được gộp bằng script ngoài lab, và chưa mở TUI `tokio-console`.
+- **Bảo mật.** Bài 50 kiểm tra quyền bằng `SET ROLE` trên kết nối superuser; JWT ở bài 58 dùng khoá chia sẻ.
 
 ## Bản đồ 68 bài và ba đường đọc
 
-Hình 3 là bản đồ lab dựng từ `docs/rust-master-curriculum.md`. `--verify` kiểm nó với `api/seed/learning-paths.json`: ba lộ trình đủ 20, 20, 28 bài, đúng thứ tự; mỗi bài có file khớp `slug` và thư mục lab có `Cargo.toml`.
+Hình 3 là bản đồ lab dựng từ `docs/rust-master-curriculum.md`. `--verify` đối chiếu bản đồ đó với `api/seed/learning-paths.json`: ba lộ trình đủ 20, 20, 28 bài, đúng thứ tự; mỗi bài có file khớp `slug` và thư mục lab có `Cargo.toml`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 250" role="img" aria-label="Hình 3. Bản đồ 68 bài: bảy phần P01 đến P07 xếp thành một dải theo số bài, chia thành ba lộ trình Cơ bản 20 bài, Trung bình 20 bài, Nâng cao 28 bài. Một nét đứt từ bài 68 quay về bài 01."><defs><marker id="rust-tong-hop-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="24" width="124" height="70" rx="8" class="f-phys-soft s-phys"/><text x="30" y="52" class="t-b">P01</text><text x="30" y="76" class="t-small">bài 01–10</text><rect x="144" y="24" width="123" height="70" rx="8" class="f-phys-soft s-phys"/><text x="154" y="52" class="t-b">P02</text><text x="154" y="76" class="t-small">bài 11–20</text><rect x="267" y="24" width="124" height="70" rx="8" class="f-pk-soft s-pk"/><text x="277" y="52" class="t-b">P03</text><text x="277" y="76" class="t-small">bài 21–30</text><rect x="391" y="24" width="123" height="70" rx="8" class="f-pk-soft s-pk"/><text x="401" y="52" class="t-b">P04</text><text x="401" y="76" class="t-small">bài 31–40</text><rect x="514" y="24" width="124" height="70" rx="8" class="f-warn-soft s-warn"/><text x="524" y="52" class="t-b">P05</text><text x="524" y="76" class="t-small">bài 41–50</text><rect x="638" y="24" width="98" height="70" rx="8" class="f-warn-soft s-warn"/><text x="648" y="52" class="t-b">P06</text><text x="648" y="76" class="t-small">bài 51–58</text><rect x="736" y="24" width="124" height="70" rx="8" class="f-warn-soft s-warn"/><text x="746" y="52" class="t-b">P07</text><text x="746" y="76" class="t-small">bài 59–68</text><rect x="20" y="108" width="243" height="48" rx="8" class="f-none s-phys"/><text x="34" y="130" class="t-b">Cơ bản · 20 bài</text><text x="34" y="148" class="t-small">rust-co-ban-qua-toi-noi</text><rect x="271" y="108" width="239" height="48" rx="8" class="f-none s-pk"/><text x="285" y="130" class="t-b">Trung bình · 20 bài</text><text x="285" y="148" class="t-small">rust-trung-binh-qua-toi-noi</text><rect x="518" y="108" width="342" height="48" rx="8" class="f-none s-warn"/><text x="532" y="130" class="t-b">Nâng cao · 28 bài</text><text x="532" y="148" class="t-small">rust-nang-cao-qua-toi-noi</text><path d="M840 160 C840 214 40 214 40 160" class="f-none s-warn dash" stroke-width="2" marker-end="url(#rust-tong-hop-0-a)"/><text x="300" y="232" class="t-small">bài 68 quay lại quyết định của bài 01</text></svg>
 </div>
-<figcaption>Hình 3. Bảy phần theo số bài, độ rộng tỉ lệ số bài, và ba lộ trình; nét đứt là việc bài này làm.</figcaption>
+<figcaption>Hình 3. Bảy phần với độ rộng tỉ lệ theo số bài, cùng ba lộ trình; nét đứt là phần việc của bài này.</figcaption>
 </figure>
 
 | Phần | Bài | Trọng tâm | Lộ trình |
@@ -133,7 +133,7 @@ Hình 3 là bản đồ lab dựng từ `docs/rust-master-curriculum.md`. `--ver
 | P06 | 51–58 | Workspace hexagonal, aggregate, hợp đồng sự kiện, kiểm thử nâng cao | Nâng cao |
 | P07 | 59–68 | Bộ nhớ, profiling, tối ưu, FFI, container, CI/CD, triển khai, OpenTelemetry, vận hành | Nâng cao |
 
-Không ai cần đọc cả 68 bài theo thứ tự. Lab giữ ba đường đọc, in bằng `--routes`; `--verify` kiểm số bài tồn tại và tăng dần.
+Không ai cần đọc cả 68 bài theo thứ tự. Lab giữ ba đường đọc, in bằng `--routes`; `--verify` kiểm tra các số bài có tồn tại và tăng dần.
 
 | Vai trò | Đọc bài | Vì sao |
 | --- | --- | --- |
@@ -143,7 +143,7 @@ Không ai cần đọc cả 68 bài theo thứ tự. Lab giữ ba đường đ�
 
 ## Hợp đồng với C#, Go và Python có gì thật?
 
-Ledger sở hữu database riêng, nên mọi thứ khác đi qua hợp đồng. Mỗi ô là bằng chứng chạy được hoặc khoảng trống ghi thẳng.
+Ledger sở hữu database riêng, nên mọi thứ khác đi qua hợp đồng. Mỗi ô là bằng chứng chạy được hoặc một khoảng trống được ghi thẳng ra.
 
 | Kênh | C# | Go | Python |
 | --- | --- | --- | --- |
@@ -151,7 +151,7 @@ Ledger sở hữu database riêng, nên mọi thứ khác đi qua hợp đồng.
 | gRPC `ledger.proto` (bài 35, 58) | Client `Grpc.Net.Client` chạy thật với server Rust ở bài 35, thêm `traceparent` ở bài 66; với server JWT của bài 58 chưa chạy | Chưa có | Chưa có |
 | Sự kiện `LedgerEntryPosted` (bài 55) | Đọc fixture bằng `Google.Protobuf` | Đọc bằng `google.golang.org/protobuf` | Đọc bằng `protobuf` |
 
-Ở dòng sự kiện, 44 ca với bốn reader (Rust, C#, Go, Python) khớp nhau, nhưng sự kiện là tệp: không qua Kafka, không có schema registry. Phép đo đó lộ hai bẫy: parser JSON của `Google.Protobuf` làm tròn `2^53 + 1`, còn Go đọc số vào `map[string]any` thành `float64`; hợp đồng phải nói `int64` đi dưới dạng nào. [Bài 58](/articles/rust-tong-hop-kien-truc-ledger-service-workspace) thêm hai điều service C# phải biết: một chuyến ra hai sự kiện, và tên topic mặc định đổi.
+Ở dòng sự kiện, 44 test case với bốn reader (Rust, C#, Go, Python) khớp nhau, nhưng sự kiện là tệp: không qua Kafka, không có schema registry. Phép kiểm tra đó lộ ra hai bẫy: parser JSON của `Google.Protobuf` làm tròn `2^53 + 1`, còn Go đọc số vào `map[string]any` thành `float64`; hợp đồng phải nói rõ `int64` được truyền dưới dạng nào. [Bài 58](/articles/rust-tong-hop-kien-truc-ledger-service-workspace) thêm hai điều mà service C# phải biết: một chuyến ra hai sự kiện, và tên topic mặc định đổi.
 
 Lab chưa có: client Go hay Python cho HTTP và gRPC; producer hoặc consumer C#, Go, Python trên Kafka thật; schema registry; client .NET với server dùng JWT; JWKS và mTLS; SASL hoặc TLS cho client Kafka (bài 65 ghi); contract test trong CI. Bài 62 thêm đường gọi trực tiếp cho C# (P/Invoke) và Python (PyO3), nhưng đó là FFI trong một process, không phải hợp đồng mạng.
 
@@ -159,14 +159,14 @@ Lab chưa có: client Go hay Python cho HTTP và gRPC; producer hoặc consumer 
 
 Từ sổ bằng chứng, quyết định ở bài 01 đứng được khi cả bốn điều sau cùng đúng:
 
-1. **Service hẹp, ranh giới rõ:** một đội nhỏ sở hữu trọn, nói chuyện với phần còn lại bằng hợp đồng có version (W4).
+1. **Service hẹp, ranh giới rõ:** một đội nhỏ làm chủ toàn bộ, giao tiếp với phần còn lại qua hợp đồng có phiên bản (W4).
 2. **Đủ người:** đủ người đọc code Rust để review và trực, không chỉ một hai người như bài 01 cảnh báo (C1, C2, W1).
-3. **Lý do đúng:** chọn vì bất biến ở kiểu và bộ nhớ dễ dự đoán, không vì thông lượng, và có người đo p99 trên tải thật trước khi tin chữ «dễ dự đoán» (R5, R6).
+3. **Lý do đúng:** chọn vì bất biến ở kiểu và bộ nhớ dễ đoán, không vì thông lượng, và có người đo p99 trên tải thật trước khi tin vào cụm «dễ đoán» (R5, R6).
 4. **Đúng chỗ giữ bất biến:** PostgreSQL, thứ tự khoá và test giữ append-only, bút toán cân và hạn mức; Rust giữ lớp trong process (R3, R4).
 
 Đội không nên làm theo khi chỉ có một hai người biết Rust; khi lý do duy nhất là «nhanh hơn», vì trần ghi nằm ở round trip; khi .NET đã đạt SLO trên số đo của chính đội (W2); và khi muốn Rust lan sang Booking, Payment hay giao diện, vì khi ấy «đảo nhỏ» của bài 01 không còn.
 
-Nếu sai thì sao? Việc đảo ngược rẻ hơn nhờ hợp đồng bên ngoài (gRPC, sự kiện có version, `problem+json`), nhưng đó là lập luận: loạt chưa viết lại ledger bằng ngôn ngữ khác. Câu trả lời gọn cho tech lead: loạt cho thấy Rust giữ được một lớp bất biến lúc biên dịch với chi phí chỉ đo được một phần, và phần còn lại của độ đúng nằm ở nơi khác. Nó không cho thấy Rust thắng.
+Nếu sai thì sao? Việc đảo ngược rẻ hơn nhờ hợp đồng bên ngoài (gRPC, sự kiện có version, `problem+json`), nhưng đó là lập luận: loạt chưa viết lại ledger bằng ngôn ngữ khác. Câu trả lời gọn cho tech lead: loạt cho thấy Rust giữ được một lớp bất biến lúc biên dịch với chi phí chỉ đo được một phần, và phần còn lại của tính đúng đắn nằm ở nơi khác. Loạt không cho thấy Rust thắng.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -199,7 +199,7 @@ Nâng cao · rust-nang-cao-qua-toi-noi · 28 bài
   P07 bài 59–68 (10 bài)  Hiệu năng, bộ nhớ và vận hành
 ```
 
-`--verify` in từng dòng đạt, và khi repo thiếu thứ gì thì thoát mã 1 kèm đúng chỗ thiếu, ví dụ `learning-paths.json: rust-nang-cao-qua-toi-noi thiếu 10 bài (59–68) so với curriculum`. Repo hiện đủ 68 bài, output thật là:
+`--verify` in từng dòng đạt, và khi repo thiếu thứ gì thì thoát mã 1 kèm thông báo đúng chỗ thiếu, ví dụ `learning-paths.json: rust-nang-cao-qua-toi-noi thiếu 10 bài (59–68) so với curriculum`. Repo hiện đủ 68 bài, kết quả in ra thật là:
 
 ```text
 OK   curriculum: 68 bài RS-01…RS-68, 7 phần (10, 10, 10, 10, 10, 8, 10), «Đọc trước» chỉ trỏ về bài nhỏ hơn
@@ -212,17 +212,17 @@ OK   sổ bằng chứng: 15 dòng; số dòng có mỗi loại: biên dịch ch
 VERIFY OK
 ```
 
-`cargo test` chạy 15 test: đọc curriculum, so thứ tự lộ trình (đủ, thiếu đuôi, đảo chỗ, thừa), đọc frontmatter, kiểm sổ bằng chứng.
+`cargo test` chạy 15 test: đọc curriculum, so thứ tự lộ trình (đủ, thiếu đuôi, đảo chỗ, thừa), đọc frontmatter và kiểm tra sổ bằng chứng.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Lab kiểm hình thức: file, thứ tự, id, số bài. Nó không chạy lại lab nào (việc của các script <code>verify-*.sh</code>) và không biết bài viết đúng không. Sổ bằng chứng do người điền; người review phải mở bài nguồn đối chiếu từng con số.</p>
+<p>Lab kiểm tra hình thức: file, thứ tự, id, số bài. Công cụ này không chạy lại lab nào (việc của các script <code>verify-*.sh</code>) và không biết bài viết có đúng hay không. Sổ bằng chứng do người điền; người review phải mở bài nguồn đối chiếu từng con số.</p>
 </div>
 
-**Bài tập:** một đồng nghiệp thêm vào `CLAIMS` dòng «Rust nhanh hơn .NET gấp N lần», loại `Measurement`, bài `[59]`, `gap` «đo ở một máy, khối lượng nhỏ, không phải production». `--verify` có chặn không? Bạn kiểm gì trước khi duyệt?
+**Bài tập:** một đồng nghiệp thêm vào `CLAIMS` dòng «Rust nhanh hơn .NET gấp N lần», loại `Measurement`, bài `[59]`, `gap` «đo ở một máy, khối lượng nhỏ, không phải production». `--verify` có chặn không? Bạn cần kiểm tra gì trước khi duyệt?
 
 <details><summary>Xem lời giải</summary>
-<p>Không chặn. Test <code>check_is_formal_only_it_cannot_judge_truth</code> giữ đúng trường hợp này. Người duyệt mở bài 59: bài đó cố ý không nêu «nhanh gấp N lần» vì khoảng min–max rộng hơn chênh lệch, cùng binary Rust cho 402 ms và 208 ms ở hai lô chỉ khác tải. Dòng ấy phải bị thu hẹp về đúng phạm vi đó, hoặc bỏ. Tự động hoá chỉ chặn được dòng không có lời giới hạn.</p>
+<p>Không chặn. Test <code>check_is_formal_only_it_cannot_judge_truth</code> giữ đúng trường hợp này. Người duyệt mở bài 59: bài đó cố ý không nêu «nhanh gấp N lần» vì khoảng min–max rộng hơn mức chênh lệch: cùng một binary Rust cho 402 ms và 208 ms ở hai lô chỉ khác nhau về tải. Dòng ấy phải bị thu hẹp về đúng phạm vi đó, hoặc bỏ. Tự động hoá chỉ chặn được dòng không có lời giới hạn.</p>
 </details>
 
 Bài trước: [bài 67](/articles/rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay).

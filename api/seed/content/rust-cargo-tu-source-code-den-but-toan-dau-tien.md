@@ -10,7 +10,7 @@ language: vi
 
 Khách `CU-001` vừa trả 25.500 VND cho chuyến `TN-0001` qua VíXanh. Với sổ cái của [Tới Nơi](/articles/du-an-mau-toi-noi), đó không phải một con số cập nhật vào cột `balance` mà là một **bút toán** gồm hai dòng ghi, tổng bằng 0. Bài này đi từ máy trống tới chương trình Rust nhỏ ghi đúng bút toán đó và in số dư.
 
-Đây là bài 02 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 01](/articles/rust-vi-sao-so-cai-toi-noi-chon-rust) đã giải thích vì sao riêng service sổ cái dùng Rust. Hôm nay ta làm quen công cụ: cài, tạo, build, chạy. Các từ khoá trong code (`struct`, `i64`, `&`) chỉ giới thiệu sơ lược; bài 03 và bài 05 sẽ đi sâu.
+Đây là bài 02 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 01](/articles/rust-vi-sao-so-cai-toi-noi-chon-rust) đã giải thích vì sao riêng service sổ cái dùng Rust. Hôm nay ta làm quen với các công cụ: cài, tạo, build, chạy. Các từ khoá trong code (`struct`, `i64`, `&`) chỉ giới thiệu sơ lược; bài 03 và bài 05 sẽ đi sâu.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,14 +22,14 @@ Khách `CU-001` vừa trả 25.500 VND cho chuyến `TN-0001` qua VíXanh. Với
 
 Loạt C# dùng một SDK mang theo compiler, CLI và runtime. Rust tách vai trò rõ hơn:
 
-| Thành phần | Trả lời câu hỏi nào? | Gần nhất ở .NET (tương ứng gần đúng) |
+| Thành phần | Trả lời câu hỏi nào? | Thành phần gần nhất trong .NET (tương ứng gần đúng) |
 | --- | --- | --- |
 | `rustup` | Cài và chọn phiên bản toolchain thế nào? | Trình cài SDK và `global.json` |
 | `rustc` | Biến source thành file thực thi thế nào? | Compiler C# (`csc`) |
 | `cargo` | Tạo, build, chạy, quản lý dependency thế nào? | `dotnet` CLI, MSBuild và NuGet |
 | `Cargo.toml` / `Cargo.lock` | Dự án khai báo và khoá gì? | `.csproj` / `packages.lock.json` (tuỳ chọn) |
 
-Một **toolchain** (ví dụ `stable`) gồm `rustc`, `cargo`, thư viện chuẩn và, với profile cài đặt mặc định của rustup, cả `rustfmt` và `clippy`. `rustup` đứng ngoài toolchain: nó tải, chuyển đổi phiên bản và có thể ghim phiên bản cho từng repository bằng `rust-toolchain.toml`, gần với `global.json` bên .NET. Ta hiếm khi gọi `rustc` trực tiếp vì `cargo` gọi giúp, nhưng `rustc` mới là chương trình biên dịch, như bài 01 loạt C# đã tách [SDK khỏi runtime](/articles/csharp-va-dotnet-10-tu-source-code-den-chuong-trinh).
+Một **toolchain** (ví dụ `stable`) gồm `rustc`, `cargo`, thư viện chuẩn và, với profile cài đặt mặc định của rustup, cả `rustfmt` và `clippy`. `rustup` đứng ngoài toolchain: công cụ này tải, chuyển đổi phiên bản và có thể ghim phiên bản cho từng repository bằng `rust-toolchain.toml`, gần với `global.json` bên .NET. Ta hiếm khi gọi `rustc` trực tiếp vì `cargo` gọi giúp, nhưng `rustc` mới là chương trình biên dịch, như bài 01 của loạt C# đã tách [SDK khỏi runtime](/articles/csharp-va-dotnet-10-tu-source-code-den-chuong-trinh).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -53,14 +53,14 @@ rustup show
 cargo --version
 ```
 
-`rustup show` liệt kê toolchain đã cài và đang dùng; trên máy viết bài, toolchain active là `stable-aarch64-apple-darwin` và `cargo --version` in `cargo 1.98.1`. Loạt này dùng **Rust stable 1.98, edition 2024**, không cần nightly.
+`rustup show` liệt kê toolchain đã cài và đang dùng; trên máy viết bài, toolchain đang dùng là `stable-aarch64-apple-darwin` và `cargo --version` in `cargo 1.98.1`. Loạt này dùng **Rust stable 1.98, edition 2024**, không cần nightly.
 
 ```bash
 cargo new ledger_demo
 cd ledger_demo
 ```
 
-`cargo new` tạo crate **binary** (có hàm `main`); nếu thư mục cha chưa là repository Git, nó khởi tạo Git và ghi `/target` vào `.gitignore`. `Cargo.toml` được sinh ra như sau:
+`cargo new` tạo crate **binary** (có hàm `main`); nếu thư mục cha chưa là repository Git, cargo khởi tạo Git và ghi `/target` vào `.gitignore`. `Cargo.toml` được sinh ra như sau:
 
 ```toml
 [package]
@@ -71,9 +71,9 @@ edition = "2024"
 [dependencies]
 ```
 
-`[package]` khai báo tên và phiên bản crate. `edition = "2024"` chọn **edition**: một tập quy tắc ngôn ngữ, không phải phiên bản compiler; `rustc` 1.98 hiểu cả edition cũ và crate khác edition vẫn liên kết được. `[dependencies]` rỗng: lab chỉ dùng `std`.
+`[package]` khai báo tên và phiên bản crate. `edition = "2024"` chọn **edition**: một tập quy tắc ngôn ngữ, không phải phiên bản compiler; `rustc` 1.98 hiểu cả các edition cũ, và các crate khác edition vẫn liên kết được với nhau. `[dependencies]` rỗng: lab chỉ dùng `std`.
 
-`src/main.rs` là điểm vào, mặc định in `Hello, world!`. Lần build đầu cargo sinh thêm `Cargo.lock`, ghi phiên bản chính xác của từng dependency. Với **binary**, hãy commit `Cargo.lock` để người khác và CI build ra đúng cùng bộ phiên bản. Lab này chưa có dependency nên lockfile mới chỉ chứa chính crate; giá trị của nó lộ ra từ bài 03, khi thêm `rust_decimal`. Đừng sửa tay file này.
+`src/main.rs` là điểm vào, mặc định in `Hello, world!`. Lần build đầu cargo sinh thêm `Cargo.lock`, ghi phiên bản chính xác của từng dependency. Với **binary**, hãy commit `Cargo.lock` để người khác và CI build ra đúng cùng bộ phiên bản. Lab này chưa có dependency nên lockfile mới chỉ chứa chính crate; giá trị của lockfile lộ ra từ bài 03, khi thêm `rust_decimal`. Đừng sửa tay file này.
 
 ## check, build, run và release khác nhau thế nào?
 
@@ -84,13 +84,13 @@ edition = "2024"
 | `cargo run` | Build nếu cần rồi chạy; tham số cho chương trình đặt sau `--` | Như `build`, rồi chạy |
 | `cargo build --release` | Biên dịch profile **release** (`opt-level = 3`, không debug info, tắt kiểm tra tràn số) | `target/release/<tên>` |
 
-Thư mục `target/` là đầu ra build, xoá và sinh lại được, không đưa vào Git. Vì cấu hình khác nhau, một phép cộng tràn `i64` có thể panic ở debug nhưng quay vòng im lặng ở release; bài 03 sẽ làm thí nghiệm này. Khi sửa code, dùng `cargo check` và `cargo run`; trước khi đo hiệu năng hoặc đóng gói, dùng `--release`. Các dòng `Compiling`, `Finished`, `Running` cargo ghi ra stderr.
+Thư mục `target/` là đầu ra build, xoá và sinh lại được, không đưa vào Git. Vì cấu hình khác nhau, một phép cộng tràn `i64` có thể panic ở debug nhưng quay vòng mà không báo lỗi ở release; bài 03 sẽ làm thí nghiệm này. Khi sửa code, dùng `cargo check` và `cargo run`; trước khi đo hiệu năng hoặc đóng gói, dùng `--release`. Các dòng `Compiling`, `Finished`, `Running` là do cargo ghi ra stderr.
 
 ## Từ source đến binary: Rust không có runtime đứng giữa
 
 Ở .NET, build tạo IL và metadata; JIT của runtime dịch IL sang mã máy khi cần. Rust đi hướng khác: `rustc` biên dịch trước (ahead of time) ra mã máy cho một **target** cụ thể. Lệnh `rustc -vV` trên máy viết bài cho `host: aarch64-apple-darwin` và `LLVM version: 22.1.8`.
 
-Luồng đại thể: source được phân tích và kiểm tra kiểu, hạ xuống **MIR** (biểu diễn trung gian của Rust, nơi borrow checker làm việc, xem bài 04), rồi sinh **LLVM IR**; LLVM tối ưu và sinh mã máy, cuối cùng linker ghép với thư viện chuẩn thành file thực thi.
+Luồng đại thể: source được phân tích và kiểm tra kiểu, chuyển thành **MIR** (biểu diễn trung gian của Rust, nơi borrow checker làm việc, xem bài 04), rồi sinh **LLVM IR**; LLVM tối ưu và sinh mã máy, cuối cùng linker ghép với thư viện chuẩn thành file thực thi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -99,7 +99,7 @@ Luồng đại thể: source được phân tích và kiểm tra kiểu, hạ xu
 <figcaption>Hình 2. Hai đường đi. Khung cuối của .NET có thêm runtime (JIT, GC) trên máy chạy; Native AOT là cách publish khác, không vẽ ở đây.</figcaption>
 </figure>
 
-"Không có runtime" cần hiểu đúng: không có máy ảo, không JIT, không garbage collector. Vẫn có đoạn mã khởi động nhỏ gọi `main`, cơ chế xử lý panic và phần thư viện chuẩn được liên kết tĩnh vào file; bộ nhớ heap mặc định xin từ allocator của hệ điều hành (`malloc`). Trên macOS, file của lab chỉ phụ thuộc `libSystem` của hệ điều hành (kiểm bằng `otool -L`). Đổi lại, file chỉ chạy trên đúng hệ điều hành và kiến trúc CPU đã build. Đây là đổi chác: .NET có assembly di động và dịch vụ runtime, đổi bằng việc máy chạy cần runtime (trừ self-contained hoặc Native AOT).
+"Không có runtime" cần hiểu đúng: không có máy ảo, không JIT, không garbage collector. Vẫn có đoạn mã khởi động nhỏ gọi `main`, cơ chế xử lý panic và phần thư viện chuẩn được liên kết tĩnh vào file; bộ nhớ heap mặc định xin từ allocator của hệ điều hành (`malloc`). Trên macOS, file của lab chỉ phụ thuộc `libSystem` của hệ điều hành (kiểm bằng `otool -L`). Đổi lại, file chỉ chạy trên đúng hệ điều hành và kiến trúc CPU đã build. Đây là một sự đánh đổi: .NET có assembly di động và dịch vụ runtime, nhưng bù lại máy chạy cần có runtime (trừ self-contained hoặc Native AOT).
 
 ## Bút toán đầu tiên của TN-0001
 
@@ -132,9 +132,9 @@ struct JournalEntry {
 }
 ```
 
-`struct` gom các trường có tên thành một kiểu, gần với `record` hay `class` ở C#. `i64` là số nguyên có dấu 64 bit. `&'static str` tạm đọc là chuỗi viết sẵn trong chương trình (bài 08, 09 sẽ giải thích). `Vec<Posting>` là danh sách động. `#[derive(Debug)]` nhờ compiler sinh code để in bằng `{:?}`.
+`struct` gom các trường có tên thành một kiểu, gần với `record` hay `class` ở C#. `i64` là số nguyên có dấu 64 bit. `&'static str` tạm đọc là chuỗi viết sẵn trong chương trình (bài 08, 09 sẽ giải thích). `Vec<Posting>` là danh sách động. `#[derive(Debug)]` yêu cầu compiler sinh code để in được bằng `{:?}`.
 
-Hai hàm tạo bút toán và cộng các posting (bỏ chú thích):
+Hai hàm, một hàm tạo bút toán và một hàm cộng các posting (đã bỏ chú thích):
 
 ```rust
 fn trip_capture_entry() -> JournalEntry {
@@ -163,7 +163,7 @@ fn total(entry: &JournalEntry) -> i64 {
 }
 ```
 
-`let` khai báo biến, mặc định **bất biến**; muốn đổi phải viết `let mut`, như `sum`. `25_500` là `25500` với dấu gạch dưới cho dễ đọc. `&JournalEntry` là tham chiếu chỉ để đọc (bài 04 nói rõ). Dòng cuối `sum` không có `;`: biểu thức cuối của hàm là giá trị trả về. Hàm `balance` cùng hình dạng, thêm `if posting.account == account`. Hàm `main` (rút gọn hai dòng in số dư):
+`let` khai báo biến, mặc định **bất biến**; muốn đổi phải viết `let mut`, như `sum`. `25_500` chính là `25500`, thêm dấu gạch dưới cho dễ đọc. `&JournalEntry` là tham chiếu chỉ để đọc (bài 04 nói rõ). Dòng cuối `sum` không có `;`: biểu thức cuối của hàm là giá trị trả về. Hàm `balance` có cùng hình dạng và thêm điều kiện `if posting.account == account`. Hàm `main` (rút gọn hai dòng in số dư):
 
 ```rust
 fn main() {
@@ -195,7 +195,7 @@ Từ gốc repository:
 cargo run --manifest-path examples/toi-noi-rust/02-cargo-but-toan-dau-tien/Cargo.toml -- --verify
 ```
 
-`--manifest-path` trỏ tới `Cargo.toml` của lab; `--` tách tham số của cargo khỏi tham số của chương trình. Kết quả thật:
+`--manifest-path` trỏ tới `Cargo.toml` của lab; `--` tách tham số của cargo khỏi tham số của chương trình. Kết quả chạy thật:
 
 ```text
 Bút toán JE-000001 (key trip:TN-0001:capture)
@@ -208,29 +208,29 @@ Posting đầu tiên: Posting { account: "customer:CU-001", amount: -25500 }
 VERIFY OK
 ```
 
-Chế độ `--verify` kiểm năm điều: đúng hai posting, tổng bằng 0, hai số dư là -25.500 và +25.500, tài khoản chưa có posting có số dư 0. Điều kiện sai thì hàm `expect` tự viết trong lab in `VERIFY FAIL` và gọi `std::process::exit(1)`. Đổi `25_500` ở posting thứ hai thành `25_000` rồi chạy lại: chương trình in `VERIFY FAIL: tổng các posting bằng 0` và thoát mã 1 (xem bằng `echo $?`). Bất biến đã thành thứ máy kiểm được; từ bài 10 ta chuyển sang `cargo test`.
+Chế độ `--verify` kiểm tra năm điều: đúng hai posting, tổng bằng 0, hai số dư là -25.500 và +25.500, tài khoản chưa có posting có số dư 0. Điều kiện sai thì hàm `expect` tự viết trong lab in `VERIFY FAIL` và gọi `std::process::exit(1)`. Đổi `25_500` ở posting thứ hai thành `25_000` rồi chạy lại: chương trình in `VERIFY FAIL: tổng các posting bằng 0` và thoát mã 1 (xem bằng `echo $?`). Bất biến giờ đã là điều máy có thể kiểm tra được; từ bài 10 ta chuyển sang `cargo test`.
 
 ## Lỗi thường gặp và giới hạn của ví dụ
 
 | Hiện tượng | Nguyên nhân và cách xử lý |
 | --- | --- |
 | `command not found: cargo` | Chưa cài rustup, hoặc terminal chưa nạp `PATH`. Mở terminal mới; kiểm tra `~/.cargo/bin` có trong `PATH`. |
-| `` error: expected `;`, found keyword `for` `` | Quên `;` sau `let mut sum: i64 = 0`. Rustc chỉ đúng dòng và gợi ý thêm `;` tại đó. |
+| `` error: expected `;`, found keyword `for` `` | Quên `;` sau `let mut sum: i64 = 0`. Rustc trỏ đúng dòng và gợi ý thêm `;` tại đó. |
 | `` E0423: expected function, found macro `println` `` | Viết `println(...)` thiếu `!`. Rustc gợi ý thêm `!` để gọi macro. |
-| `` E0308: mismatched types … expected `i64`, found `i32` `` | Trộn `i64` và `i32` trong một phép tính. Khác C#, Rust không tự nới `i32` sang `i64`. Dùng cùng kiểu, hoặc đổi tường minh bằng `i64::from(x)`. |
-| `` E0277: `Posting` doesn't implement `std::fmt::Display` `` | Dùng `{}` với kiểu chưa có `Display`. Dùng `{:?}` hoặc tự cài `Display` (bài 08). |
+| `` E0308: mismatched types … expected `i64`, found `i32` `` | Trộn `i64` và `i32` trong một phép tính. Khác với C#, Rust không tự động mở rộng `i32` thành `i64`. Dùng cùng kiểu, hoặc đổi tường minh bằng `i64::from(x)`. |
+| `` E0277: `Posting` doesn't implement `std::fmt::Display` `` | Dùng `{}` với kiểu chưa có `Display`. Dùng `{:?}` hoặc tự cài đặt `Display` (bài 08). |
 
 Lỗi `i32`/`i64` làm rustc báo cả `E0308` lẫn `E0277` cho cùng một dòng; đọc lỗi đầu tiên trước.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là bản học tập, chưa phải sổ cái. Bút toán chỉ nằm trong bộ nhớ. <code>JournalEntry</code> vẫn tạo được với tổng khác 0; ta mới kiểm sau khi tạo, bài 13 mới làm bút toán lệch không thể tồn tại. Phép cộng chưa dùng <code>checked_add</code>, <code>idempotency_key</code> mới là chuỗi chưa ai kiểm trùng, số dư chỉ tính trong một bút toán, và <code>args[1]</code> chỉ hợp cho một cờ duy nhất.</p></div>
+<p>Đây là bản học tập, chưa phải sổ cái. Bút toán chỉ nằm trong bộ nhớ. <code>JournalEntry</code> vẫn tạo được với tổng khác 0; ta mới kiểm tra sau khi tạo, đến bài 13 mới làm cho bút toán lệch không thể tồn tại. Phép cộng chưa dùng <code>checked_add</code>, <code>idempotency_key</code> mới là chuỗi chưa ai kiểm trùng, số dư chỉ tính trong một bút toán, và <code>args[1]</code> chỉ hợp cho một cờ duy nhất.</p></div>
 
 ## Bài tập
 
 Thêm bút toán `JE-000002` (key `trip:TN-0001:settle`) chia tiền khi VíXanh quyết toán: `psp:vixanh:clearing` -25.500, `driver:DR-001` +20.400, `platform:revenue` +5.100. Tổng các posting là bao nhiêu? Binary của `cargo build --release` nằm ở đâu?
 
-<details><summary>Xem lời giải</summary><p>Viết hàm <code>settlement_entry</code> cùng hình dạng <code>trip_capture_entry</code>, với <code>id: "JE-000002"</code> và ba <code>Posting</code> (<code>amount</code> lần lượt <code>-25_500</code>, <code>20_400</code>, <code>5_100</code>). Tổng là -25.500 + 20.400 + 5.100 = <b>0</b>, và <code>balance(&amp;entry, "driver:DR-001")</code> bằng 20.400 (đoạn này đã được biên dịch và chạy thử ngoài lab). Binary release nằm ở <code>target/release/ledger_02_cargo_but_toan</code> trong thư mục lab.</p></details>
+<details><summary>Xem lời giải</summary><p>Viết hàm <code>settlement_entry</code> có cùng hình dạng với <code>trip_capture_entry</code>, với <code>id: "JE-000002"</code> và ba <code>Posting</code> (<code>amount</code> lần lượt <code>-25_500</code>, <code>20_400</code>, <code>5_100</code>). Tổng là -25.500 + 20.400 + 5.100 = <b>0</b>, và <code>balance(&amp;entry, "driver:DR-001")</code> bằng 20.400 (đoạn này đã được biên dịch và chạy thử ngoài lab). Binary release nằm ở <code>target/release/ledger_02_cargo_but_toan</code> trong thư mục lab.</p></details>
 
 Bài trước: [bài 01](/articles/rust-vi-sao-so-cai-toi-noi-chon-rust). Bài tiếp: [bài 03](/articles/rust-kieu-so-tien-vnd-i64-decimal).
 

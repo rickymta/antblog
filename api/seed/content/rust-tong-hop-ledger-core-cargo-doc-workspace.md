@@ -1,7 +1,7 @@
 ---
 slug: rust-tong-hop-ledger-core-cargo-doc-workspace
 title: "Bài tổng hợp cấp cơ bản: thư viện ledger-core có bất biến, test và tài liệu"
-summary: "Bài 20: gom P02 thành workspace ledger-core và ledger-cli; bảng bất biến double-entry và test chứng minh; cargo doc với deny(missing_docs), clippy pedantic có chọn lọc; điều còn thiếu trước khi thành service."
+summary: "Bài 20: gom P02 thành workspace ledger-core và ledger-cli; bảng bất biến double-entry cùng test chứng minh; cargo doc với deny(missing_docs), clippy pedantic có chọn lọc; điều còn thiếu trước khi thành service."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, workspace, cargo-doc, clippy]
@@ -47,7 +47,7 @@ proptest = "1"
 ledger-core = { path = "ledger-core" }
 ```
 
-`default-members` ghi rõ lệnh không kèm `-p` chạy trên package nào. Workspace ảo (gốc không có `[package]`) mà không khai thì mặc định đã là mọi member, nên dòng này chỉ làm rõ ý định; `-p ledger-core` thu hẹp về một package. Chạy được từ gốc repo là nhờ `--manifest-path`. `resolver = "3"` là mặc định của edition 2024, nhưng workspace ảo phải tự khai: thiếu dòng này cargo cảnh báo và lùi về `resolver = "1"`. Lab không khai `rust-version` vì mới kiểm trên Rust 1.98.
+`default-members` ghi rõ lệnh không kèm `-p` chạy trên package nào. Workspace ảo (gốc không có `[package]`) mà không khai thì mặc định đã là mọi member, nên dòng này chỉ làm rõ ý định; `-p ledger-core` thu hẹp về một package. Chạy được từ gốc repo là nhờ `--manifest-path`. `resolver = "3"` là mặc định của edition 2024, nhưng workspace ảo phải tự khai: thiếu dòng này cargo cảnh báo và lùi về `resolver = "1"`. Lab không khai `rust-version` vì mới kiểm tra trên Rust 1.98.
 
 Package con không lặp lại số phiên bản, chỉ trỏ về gốc:
 
@@ -73,7 +73,7 @@ workspace = true
 | Bài | Chủ đề | Trong `ledger-core` |
 | --- | --- | --- |
 | [11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron) | Trait, generics | `FeePolicy` (default method `split`), `RoundingPolicy` (`HalfAwayFromZero`, `NearestEven`), `PercentageFee<R>`, `FlatFee`; `capture_entry` nhận cả generic lẫn `&dyn` |
-| [12](/articles/rust-newtype-value-object-money-account-id) | Newtype, value object | `Money`, `AccountId`, `EntryId` với trường private; `EntryId::parse` chỉ nhận dạng chuẩn. Lõi **không lấy** `Money<C>`. Thay đổi: `AccountId::new` thay `FromStr`, `checked_*` trả `Option` thay `Add`/`Sub` trả `Result` |
+| [12](/articles/rust-newtype-value-object-money-account-id) | Newtype, value object | `Money`, `AccountId`, `EntryId` với trường private; `EntryId::parse` chỉ nhận định dạng chuẩn. Lõi **không lấy** `Money<C>`. Thay đổi: `AccountId::new` thay `FromStr`, `checked_*` trả `Option` thay `Add`/`Sub` trả `Result` |
 | [13](/articles/rust-double-entry-journal-entry-posting) | Double-entry | `try_new`, `JournalEntryBuilder`, `reversal_of`, `Ledger::reverse`, `balances` là projection. `Flow`, `AccountKind` ở lại bài 13: lõi chỉ cần số tiền có dấu |
 | [14](/articles/rust-typestate-may-trang-thai-thanh-toan) | Typestate, máy trạng thái | `PaymentState`, `PaymentEvent`, `transition` bằng enum. Lõi **không lấy** typestate `Payment<S>` |
 | [15](/articles/rust-closure-iterator-adapter-doi-soat-bo-nho) | Closure, iterator | `reconcile` và sao kê VíXanh ở lại bài 15; lõi dùng cùng công cụ: `flat_map`, `filter`, `try_fold` trong `balance`, `balances`, `grand_total` |
@@ -119,7 +119,7 @@ fn validated(
 }
 ```
 
-`#[serde(try_from = "EntryWire")]` trên `JournalEntry` bảo serde đọc ra `EntryWire` rồi gọi `validated`: JSON lệch bị từ chối ngay khi đọc. Mười bất biến, cơ chế giữ chúng và test chứng minh ("unit" là test cạnh code, "integration" ở `tests/ledger.rs`, "property" ở `tests/properties.rs`):
+`#[serde(try_from = "EntryWire")]` trên `JournalEntry` bảo serde đọc ra `EntryWire` rồi gọi `validated`: JSON lệch bị từ chối ngay khi đọc. Bảng sau gồm mười bất biến, cơ chế giữ chúng và test chứng minh ("unit" là test cạnh code, "integration" ở `tests/ledger.rs`, "property" ở `tests/properties.rs`):
 
 | # | Bất biến | Cơ chế | Test chứng minh |
 | --- | --- | --- | --- |
@@ -134,7 +134,7 @@ fn validated(
 | 9 | Chỉ chuyển trạng thái qua sáu cạnh cho phép | `transition` với `match` | unit `exactly_six_edges_are_valid` (duyệt đủ 30 cặp), `terminal_states_go_nowhere` |
 | 10 | Không viết được `Money(5)`, tiền là số nguyên | Trường private | doc test `compile_fail` của `Money`; unit `serde_is_a_plain_integer` |
 
-Bảng chỉ có giá trị nếu test thật sự bắt được lỗi. Thử phá: tạm đổi dòng kiểm tổng trong `validated` thành `if false && sum != Money::ZERO` rồi chạy `cargo test -p ledger-core --no-fail-fast`. Bốn test đỏ: hai unit, một integration, một property (`unbalanced_entry_is_always_rejected`). `grand_total_stays_zero` vẫn xanh, và điều đó đúng: nó chỉ sinh bút toán đã cân, nên chứng minh `Ledger` không làm hỏng tổng, không chứng minh `validated` đúng. Sau thí nghiệm, khôi phục dòng đó và xoá `ledger-core/tests/properties.proptest-regressions` mà proptest vừa ghi.
+Bảng chỉ có giá trị nếu test thật sự bắt được lỗi. Thử phá code: tạm đổi dòng kiểm tra tổng trong `validated` thành `if false && sum != Money::ZERO` rồi chạy `cargo test -p ledger-core --no-fail-fast`. Bốn test đỏ: hai unit, một integration, một property (`unbalanced_entry_is_always_rejected`). `grand_total_stays_zero` vẫn xanh, và điều đó đúng: test này chỉ sinh bút toán đã cân, nên chứng minh `Ledger` không làm hỏng tổng, không chứng minh `validated` đúng. Sau thí nghiệm, khôi phục dòng đó và xoá `ledger-core/tests/properties.proptest-regressions` mà proptest vừa ghi.
 
 ## `deny(missing_docs)` và `cargo doc`: tài liệu cũng phải biên dịch
 
@@ -166,7 +166,7 @@ note: the lint level is defined here
 
 Thuộc tính `doc` nối `ledger-core/README.md` vào làm trang đầu của tài liệu. Ví dụ trong README là khối `rust` thật nên `cargo test` chạy nó như doc test; các ví dụ `///` cũng vậy. Dòng ẩn `# Ok::<(), ledger_core::LedgerError>(())` ở cuối cho phép dùng `?` trong ví dụ mà người đọc không thấy.
 
-Mỗi hàm trả `Result` có mục `# Errors` liệt kê biến thể lỗi có thể gặp, ví dụ `AccountId::new`:
+Mỗi hàm trả về `Result` có mục `# Errors` liệt kê biến thể lỗi có thể gặp, ví dụ `AccountId::new`:
 
 ```rust
 // ledger-core/src/account.rs (rút gọn)
@@ -177,7 +177,7 @@ Mỗi hàm trả `Result` có mục `# Errors` liệt kê biến thể lỗi có
 pub fn new(raw: &str) -> Result<AccountId, LedgerError> { /* … */ }
 ```
 
-Dấu ngoặc vuông là liên kết nội bộ; để liên kết hỏng cũng làm CI đỏ, chạy `RUSTDOCFLAGS="-D warnings" cargo doc --no-deps`.
+Dấu ngoặc vuông là liên kết nội bộ; muốn liên kết hỏng cũng làm CI đỏ thì chạy `RUSTDOCFLAGS="-D warnings" cargo doc --no-deps`.
 
 ## Clippy pedantic: bật cả nhóm, tắt có chọn lọc
 
@@ -194,7 +194,7 @@ pedantic = { level = "warn", priority = -1 }
 must_use_candidate = "allow"
 ```
 
-`priority = -1` để nhóm `pedantic` áp dụng trước, dòng `allow` bên dưới thắng. Bỏ dòng đó thì `ledger-core` có 18 cảnh báo, phần lớn là getter và constructor nhỏ; ta không thêm `#[must_use]` cho mọi hàm chỉ để im lặng clippy. Phần còn lại của `pedantic` vẫn bật và có ích: `missing_errors_doc` buộc ta viết mục `# Errors` ở trên. Xoá mục đó của `AccountId::new` thì clippy báo:
+`priority = -1` để nhóm `pedantic` áp dụng trước, dòng `allow` bên dưới thắng. Bỏ dòng đó thì `ledger-core` có 18 cảnh báo, phần lớn là getter và constructor nhỏ; ta không thêm `#[must_use]` cho mọi hàm chỉ để clippy hết cảnh báo. Phần còn lại của `pedantic` vẫn bật và có ích: `missing_errors_doc` buộc ta viết mục `# Errors` ở trên. Xoá mục đó của `AccountId::new` thì clippy báo:
 
 ```text
 warning: docs for function returning `Result` missing `# Errors` section
@@ -265,7 +265,7 @@ where
 }
 ```
 
-`-- --verify` kiểm cước, phí, số dư, replay, bút toán đảo, bút toán lệch và chuyển trạng thái sai, rồi in `VERIFY OK` với exit code 0; sai thì thoát mã 1. `cargo test` chạy 67 ca: 2 ở `ledger-cli`, và ở `ledger-core` có 41 unit, 7 integration, 6 property cùng 11 doc test (trong đó 2 `compile_fail`). Phần kiểm tĩnh:
+`-- --verify` kiểm tra cước, phí, số dư, replay, bút toán đảo, bút toán lệch và chuyển trạng thái sai, rồi in `VERIFY OK` với exit code 0; sai thì thoát mã 1. `cargo test` chạy 67 test case: 2 ở `ledger-cli`, và ở `ledger-core` có 41 unit, 7 integration, 6 property cùng 11 doc test (trong đó 2 `compile_fail`). Phần kiểm tĩnh:
 
 ```bash
 cd examples/toi-noi-rust/20-ledger-core-workspace
@@ -278,21 +278,21 @@ Cả ba lệnh đều sạch trên lab.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Sổ cái này sống trong bộ nhớ: tắt process là mất bút toán lẫn bảng idempotency. <code>balance</code> quét toàn bộ bút toán mỗi lần gọi; <code>grand_total</code> cộng tuần tự nên có thể báo <code>Overflow</code> dù tổng cuối bằng 0 nếu một tổng riêng phần vượt <code>i64</code>. Property test chạy 256 ca mỗi property (mặc định của <code>proptest</code>): đủ để bắt lỗi, không phải chứng minh hình thức.</p></div>
+<p>Sổ cái này sống trong bộ nhớ: tắt process là mất bút toán lẫn bảng idempotency. <code>balance</code> quét toàn bộ bút toán mỗi lần gọi; <code>grand_total</code> cộng tuần tự nên có thể báo <code>Overflow</code> dù tổng cuối bằng 0 nếu một tổng riêng phần vượt <code>i64</code>. Property test chạy 256 test case mỗi property (mặc định của <code>proptest</code>): đủ để bắt lỗi, không phải chứng minh hình thức.</p></div>
 
 ## Còn thiếu gì trước khi thành service?
 
 Thư viện đủ để học, chưa đủ cho production. Chưa có:
 
-- **Bền vững:** database; số dư được tính lại mỗi lần gọi.
+- **Lưu trữ bền vững:** database; số dư được tính lại mỗi lần gọi.
 - **Mạng:** gRPC cho Payment và Admin BFF, Kafka để nhận `PaymentCaptured` và phát `LedgerEntryPosted`.
 - **Async và đồng thời:** async, nhiều luồng ghi, khoá, transaction.
-- **Mô hình đầy đủ:** thời điểm ghi trên bút toán (`jiff` chưa vào lõi), kiểm định dạng `AccountId`, thuế, khuyến mãi, payout, chargeback.
+- **Mô hình đầy đủ:** thời điểm ghi của bút toán (`jiff` chưa vào lõi), kiểm tra định dạng `AccountId`, thuế, khuyến mãi, payout, chargeback.
 - **Vận hành:** log có cấu trúc, cấu hình, đo hiệu năng.
 
 Các mục này mở sang lộ trình cấp trung bình.
 
-**Bài tập:** sau kịch bản trên, đảo chính bút toán đảo `JE-000002`. Mã và key của bút toán mới là gì, `ledger.len()` bằng mấy, số dư của `driver:DR-001` là bao nhiêu? Gọi lại `reverse` với `JE-000001` thì sao? Có cần sửa `ledger-core` không?
+**Bài tập:** sau kịch bản trên, đảo lại chính bút toán đảo `JE-000002`. Mã và key của bút toán mới là gì, `ledger.len()` bằng mấy, số dư của `driver:DR-001` là bao nhiêu? Gọi lại `reverse` với `JE-000001` thì sao? Có cần sửa `ledger-core` không?
 
 <details><summary>Xem lời giải</summary><p>Bút toán mới là <code>JE-000003</code> với key <code>trip:TN-0001:capture:reversal:reversal</code>; <code>ledger.len()</code> bằng 3 và số dư tài xế trở lại 20.400 VND, tổng toàn sổ vẫn bằng 0. Gọi lại <code>reverse</code> với <code>JE-000001</code> chỉ là replay, vì key suy ra từ bản gốc nên trùng bản đã ghi; sổ vẫn có 3 bút toán. Không cần sửa thư viện: bút toán đảo cũng là một bút toán cân bình thường, nên <code>reverse</code> áp dụng được cho nó.</p></details>
 

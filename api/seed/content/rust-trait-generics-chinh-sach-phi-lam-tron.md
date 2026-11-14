@@ -1,14 +1,14 @@
 ---
 slug: rust-trait-generics-chinh-sach-phi-lam-tron
 title: "Trait, generics và trait bound: chính sách phí và làm tròn thay thế được"
-summary: "Bài 11: tách phí nền tảng và cách làm tròn thành hai trait, viết generic có trait bound, thêm chính sách phí thứ hai mà không sửa hàm dựng bút toán; so static với dynamic dispatch và đối chiếu interface C#."
+summary: "Bài 11: tách phí nền tảng và cách làm tròn thành hai trait, viết generic có trait bound, thêm chính sách phí thứ hai mà không sửa hàm dựng bút toán; so sánh static dispatch với dynamic dispatch và đối chiếu interface C#."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, trait, generics]
 language: vi
 ---
 
-Phí nền tảng của chuyến `TN-0001` là 20% của 25.500, tức 5.100 đồng. Ở bài 10 con số này viết cứng trong code. Giả sử quý sau Tới Nơi thêm một chính sách phí cố định cho chuyến ngắn, rồi một chính sách theo bậc cước. Nếu tỷ lệ 20% và cách làm tròn nằm ngay trong hàm dựng bút toán, mỗi chính sách mới là một lần sửa hàm đó, và một lần nguy cơ làm lệch sổ. Bài này tách hai thứ biến đổi (cách tính phí, cách làm tròn) thành hai trait, để hàm dựng bút toán không phải đổi.
+Phí nền tảng của chuyến `TN-0001` là 20% của 25.500, tức 5.100 đồng. Ở bài 10 con số này viết cứng trong code. Giả sử quý sau Tới Nơi thêm một chính sách phí cố định cho chuyến ngắn, rồi một chính sách theo bậc cước. Nếu tỷ lệ 20% và cách làm tròn nằm ngay trong hàm dựng bút toán, mỗi chính sách mới là một lần phải sửa hàm đó, và mỗi lần sửa là một nguy cơ làm lệch sổ. Bài này tách hai thứ hay thay đổi (cách tính phí, cách làm tròn) thành hai trait, để hàm dựng bút toán không phải đổi.
 
 Đây là bài 11 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab mở rộng thư viện của [bài 10](/articles/rust-module-crate-cargo-test-clippy) và dùng `rust_decimal` như ở [bài 03](/articles/rust-kieu-so-tien-vnd-i64-decimal) để làm tròn nửa đồng.
 
@@ -20,7 +20,7 @@ Phí nền tảng của chuyến `TN-0001` là 20% của 25.500, tức 5.100 đ�
 
 ## Trait là gì, và nó khác interface C# ở đâu?
 
-Trait là một hợp đồng: tập phương thức mà một kiểu hứa có. `impl Trait for Kiểu` là lời hứa đó. Một phương thức có thể có thân hàm ngay trong trait, gọi là default method, và mọi kiểu implement trait đều có sẵn nó.
+Trait là một hợp đồng: tập phương thức mà một kiểu hứa có. `impl Trait for Kiểu` là lời hứa đó. Một phương thức có thể có thân hàm ngay trong trait, gọi là default method, và mọi kiểu cài đặt trait đều có sẵn phương thức đó.
 
 | Việc | C# | Rust |
 | --- | --- | --- |
@@ -28,14 +28,14 @@ Trait là một hợp đồng: tập phương thức mà một kiểu hứa có.
 | Gắn hợp đồng vào kiểu | Ở chỗ khai báo: `class X : IFeePolicy` | Chỗ riêng: `impl FeePolicy for X`, có thể ở module khác |
 | Phương thức mặc định | Default interface method (C# 8) | Default method trong trait |
 | Ràng buộc generic | `where T : IFeePolicy` | `T: FeePolicy` (trait bound) |
-| Biến có kiểu hợp đồng | `IFeePolicy p`: gọi qua interface lúc chạy (JIT có thể devirtualize) | Chọn: generic hoặc `impl Trait` (tĩnh), `&dyn Trait` hoặc `Box<dyn Trait>` (động) |
+| Biến có kiểu hợp đồng | `IFeePolicy p`: gọi qua interface lúc chạy (JIT có thể tối ưu thành lời gọi trực tiếp, gọi là devirtualize) | Chọn: generic hoặc `impl Trait` (tĩnh), `&dyn Trait` hoặc `Box<dyn Trait>` (động) |
 | Mã sinh ra cho generic | Runtime sinh bản riêng cho từng value type, dùng chung một bản cho mọi reference type | Compiler sinh bản riêng cho từng kiểu cụ thể lúc biên dịch (monomorphization) |
 
-Vì `impl` đứng riêng, Rust có quy tắc mồ côi (orphan rule): chỉ được implement trait cho kiểu nếu trait hoặc kiểu là của crate mình. Theo quy tắc này, chính sách `TieredFee` trong `src/main.rs` implement trait của thư viện được, còn bạn không thể implement trait của thư viện chuẩn cho kiểu của thư viện khác. Chi tiết generic C# ở [bài về generics và collections](/articles/csharp-generics-collections); so sánh trên chỉ để định hướng.
+Vì `impl` đứng riêng, Rust có quy tắc mồ côi (orphan rule): chỉ được cài đặt trait cho một kiểu nếu trait hoặc kiểu đó thuộc crate của mình. Theo quy tắc này, chính sách `TieredFee` trong `src/main.rs` cài đặt trait của thư viện được, còn bạn không thể cài đặt trait của thư viện chuẩn cho kiểu của thư viện khác. Chi tiết generic C# ở [bài về generics và collections](/articles/csharp-generics-collections); phép so sánh trên chỉ để định hướng.
 
 ## RoundingPolicy và FeePolicy: hai trait của sổ cái
 
-`RoundingPolicy` trả lời câu hỏi "nửa đồng làm tròn thế nào". Phương thức bắt buộc là `round_to_dong`; `round_ratio` là default method, dùng lại nó:
+`RoundingPolicy` trả lời câu hỏi "nửa đồng làm tròn thế nào". Phương thức bắt buộc là `round_to_dong`; `round_ratio` là default method, gọi lại phương thức đó:
 
 ```rust
 // src/policy.rs (rút gọn chú thích)
@@ -56,7 +56,7 @@ pub trait RoundingPolicy {
 }
 ```
 
-Hai cách triển khai nằm cạnh nhau. Quy ước của Tới Nơi là `MidpointAwayFromZero`; bản thứ hai (banker's rounding) có để thấy sự khác nhau ở đúng nửa đồng:
+Hai cách triển khai nằm cạnh nhau. Quy ước của Tới Nơi là `MidpointAwayFromZero`; bản thứ hai (banker's rounding) có mặt để thấy sự khác biệt ngay ở trường hợp nửa đồng:
 
 ```rust
 // src/policy.rs (rút gọn: bỏ derive và hàm phụ round_with)
@@ -71,7 +71,7 @@ impl RoundingPolicy for HalfAwayFromZero {
 // NearestEven: giống hệt, dùng RoundingStrategy::MidpointNearestEven.
 ```
 
-`FeePolicy` có một phương thức bắt buộc, `fee`, và một default method, `split`, chia cước giữa nền tảng và tài xế. Trait chỉ ghi được kiểu của hợp đồng, không ghi được "phí không âm và không vượt cước". Điều kiện đó nằm ở default method, nên mọi chính sách, kể cả chính sách do người khác viết, đi qua cùng một bước kiểm:
+`FeePolicy` có một phương thức bắt buộc, `fee`, và một default method, `split`, chia cước giữa nền tảng và tài xế. Trait chỉ ghi được chữ ký kiểu của hợp đồng, không ghi được "phí không âm và không vượt cước". Điều kiện đó nằm ở default method, nên mọi chính sách, kể cả chính sách do người khác viết, đi qua cùng một bước kiểm tra:
 
 ```rust
 // src/policy.rs (rút gọn: bớt chú thích, gộp dòng cuối)
@@ -102,7 +102,7 @@ pub trait FeePolicy {
 
 ## Generic và trait bound: PercentageFee ghép chính sách bằng kiểu
 
-`PercentageFee` cần một cách làm tròn. Thay vì viết cứng, nó nhận tham số kiểu `R` ràng buộc bởi `RoundingPolicy`, và `impl<R: RoundingPolicy> FeePolicy for PercentageFee<R>` chỉ viết một lần cho mọi `R`:
+`PercentageFee` cần một cách làm tròn. Thay vì viết cứng, nó nhận tham số kiểu `R` có ràng buộc `RoundingPolicy`, và `impl<R: RoundingPolicy> FeePolicy for PercentageFee<R>` chỉ viết một lần cho mọi `R`:
 
 ```rust
 // src/policy.rs (rút gọn: bỏ derive và chú thích)
@@ -123,7 +123,7 @@ impl<R: RoundingPolicy> FeePolicy for PercentageFee<R> {
 }
 ```
 
-Chính sách mặc định của Tới Nơi dựng bằng `PercentageFee::new(Decimal::new(20, 2), HalfAwayFromZero)`. Hàm `default_policy()` trả về nó dưới dạng `impl FeePolicy`: người gọi chỉ biết "có một `FeePolicy`", không cần gõ ra tên `PercentageFee<HalfAwayFromZero>`. `impl Trait` ở vị trí tham số là cú pháp gọn của hàm generic: `fn summarize(policy: &impl FeePolicy, …)` tương đương `fn summarize<P: FeePolicy>(policy: &P, …)`.
+Chính sách mặc định của Tới Nơi dựng bằng `PercentageFee::new(Decimal::new(20, 2), HalfAwayFromZero)`. Hàm `default_policy()` trả về chính sách đó dưới dạng `impl FeePolicy`: người gọi chỉ biết "có một `FeePolicy`", không cần gõ ra tên `PercentageFee<HalfAwayFromZero>`. `impl Trait` ở vị trí tham số là cú pháp gọn của hàm generic: `fn summarize(policy: &impl FeePolicy, …)` tương đương `fn summarize<P: FeePolicy>(policy: &P, …)`.
 
 Nếu quên trait bound, lỗi nằm ngay chỗ dùng. Thử viết `fn total_fee<T>(policy: &T, fare: Money) -> … { policy.fee(fare) }` cho ra:
 
@@ -141,11 +141,11 @@ help: the following trait defines an item `fee`, perhaps you need to restrict ty
    |                   +++++++++++
 ```
 
-Hàm generic Rust được kiểm ngay lúc định nghĩa: chỉ phương thức có trong trait bound mới gọi được, không cần chờ tới lúc có kiểu cụ thể.
+Rust kiểm tra hàm generic ngay lúc định nghĩa: chỉ phương thức có trong trait bound mới gọi được, không cần chờ tới lúc có kiểu cụ thể.
 
 ## Thêm chính sách phí thứ hai mà không sửa code tính bút toán
 
-Đây là hàm dựng bút toán thu cước. Nó chỉ biết trait `FeePolicy`:
+Đây là hàm dựng bút toán thu cước. Hàm này chỉ biết trait `FeePolicy`:
 
 ```rust
 // src/capture.rs (rút gọn: bỏ chú thích tài liệu)
@@ -167,7 +167,7 @@ where
 }
 ```
 
-Bút toán vẫn đi qua `JournalEntry::try_new` của bài 10, nên dù chính sách trả gì, tổng posting phải bằng 0 mới ghi được. Giờ thêm chính sách thứ hai, phí cố định theo bậc cước. Nó nằm trong `src/main.rs`, tức ngoài thư viện, và `capture_entry` không đổi dòng nào:
+Bút toán vẫn đi qua `JournalEntry::try_new` của bài 10, nên dù chính sách trả về gì, tổng posting phải bằng 0 mới ghi được. Giờ ta thêm chính sách thứ hai, là phí cố định theo bậc cước. Chính sách này nằm trong `src/main.rs`, tức ngoài thư viện, và `capture_entry` không đổi dòng nào:
 
 ```rust
 // src/main.rs
@@ -189,7 +189,7 @@ impl FeePolicy for TieredFee {
 }
 ```
 
-Chạy cùng chuyến 25.500 đồng qua năm chính sách (hai phần trăm 5,5% chỉ khác cách làm tròn, vì 25.500 × 0,055 = 1.402,5):
+Chạy cùng chuyến 25.500 đồng qua năm chính sách (hai chính sách 5,5% chỉ khác cách làm tròn, vì 25.500 × 0,055 = 1.402,5):
 
 ```text
   20% · nửa ra xa 0      phí  5.100 VND  tài xế  20.400 VND
@@ -210,7 +210,7 @@ Có hai cách gọi phương thức của trait. Với generic (`<F: FeePolicy>`
   ledger_lab::policy::FlatFee
 ```
 
-Với `&dyn FeePolicy` hoặc `Box<dyn FeePolicy>`, chỉ có một bản code, và lời gọi đi qua vtable (bảng hàm) lúc chạy: dispatch động. Con trỏ phải mang thêm địa chỉ vtable nên là "fat pointer" gồm hai word. Lab đo được trên máy 64 bit:
+Với `&dyn FeePolicy` hoặc `Box<dyn FeePolicy>`, chỉ có một bản code, và lời gọi đi qua vtable (bảng hàm) lúc chạy: dispatch động. Con trỏ phải mang thêm địa chỉ vtable nên là "fat pointer" gồm hai word (hai ô nhớ cỡ một con trỏ). Lab đo được trên máy 64 bit:
 
 ```text
 kích thước con trỏ: &FlatFee = 8 byte, &dyn FeePolicy = 16 byte, Box<dyn FeePolicy> = 16 byte
@@ -238,7 +238,7 @@ fn policy_catalog() -> Vec<Box<dyn FeePolicy>> {
 }
 ```
 
-Để `capture_entry` nhận được `&*policy` (mượn `dyn FeePolicy` trong `Box`), nó phải có `?Sized`. Bỏ `?Sized` đi, lab không biên dịch (`cargo test`, rút gọn):
+Để `capture_entry` nhận được `&*policy` (mượn `dyn FeePolicy` trong `Box`), hàm này phải có `?Sized`. Bỏ `?Sized` đi thì lab không biên dịch được (`cargo test`, rút gọn):
 
 ```text
 error[E0277]: the size for values of type `dyn policy::FeePolicy` cannot be known at compilation time
@@ -266,7 +266,7 @@ error[E0038]: the trait `Convert` is not dyn compatible
 
 `FeePolicy` không có phương thức generic nên dùng được.
 
-Cách chọn: ưu tiên generic hoặc `impl Trait` khi kiểu cụ thể biết lúc biên dịch (mặc định của lab: một chính sách cho một service). Dùng `Box<dyn Trait>` khi cần một tập hợp chứa nhiều kiểu, khi chính sách chọn lúc chạy từ cấu hình, hoặc khi muốn tránh nhân bản code. Chi phí của dispatch động là một lần gọi gián tiếp và thường không inline được; với tính phí mỗi chuyến, chi phí này không đáng kể.
+Cách chọn: ưu tiên generic hoặc `impl Trait` khi kiểu cụ thể biết lúc biên dịch (mặc định của lab: một chính sách cho một service). Dùng `Box<dyn Trait>` khi cần một tập hợp chứa nhiều kiểu, khi chính sách được chọn lúc chạy theo cấu hình, hoặc khi muốn tránh nhân bản code. Chi phí của dispatch động là một lần gọi gián tiếp và thường không inline được; với tính phí mỗi chuyến, chi phí này không đáng kể.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -289,7 +289,7 @@ JE-000001 trip:TN-0001:capture (3 posting, replayed = false)
 Tổng toàn sổ: 0 VND
 ```
 
-`-- --verify` kiểm các số đó, kể cả phí theo bậc 4.500 và kích thước con trỏ, rồi in `VERIFY OK` (exit code 0). `cargo test` chạy 26 unit test, 3 integration test và 2 doc test; clippy với `-D warnings` và `cargo fmt --check` sạch. Lưu ý: `type_name` chỉ để chẩn đoán, định dạng của nó không được đảm bảo ổn định giữa các phiên bản compiler.
+`-- --verify` kiểm tra các số đó, kể cả phí theo bậc 4.500 và kích thước con trỏ, rồi in `VERIFY OK` (exit code 0). `cargo test` chạy 26 unit test, 3 integration test và 2 doc test; clippy với `-D warnings` và `cargo fmt --check` sạch. Lưu ý: `type_name` chỉ để chẩn đoán, định dạng của nó không được đảm bảo ổn định giữa các phiên bản compiler.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
@@ -298,7 +298,7 @@ Tổng toàn sổ: 0 VND
 
 **Bài tập:** thêm `CappedPercentageFee<R>`: phí theo tỷ lệ nhưng không quá 5.000 đồng. Gợi ý: dùng lại `PercentageFee<R>` thay vì viết lại phép nhân. Với cước 25.500 và tỷ lệ 20% thì phí và phần tài xế là bao nhiêu? `capture_entry` có phải sửa không?
 
-<details><summary>Xem lời giải</summary><p>Bọc một <code>PercentageFee&lt;R&gt;</code> và một <code>cap: Money</code>, rồi implement <code>FeePolicy</code>: <code>fee</code> gọi <code>self.inner.fee(fare)?</code> và trả <code>.min(self.cap)</code> (<code>Money</code> có <code>Ord</code> nên <code>min</code> dùng được, như <code>FlatFee</code> đã làm với cước). Cước 25.500 × 20% = 5.100 vượt mức trần, nên phí là 5.000 và tài xế nhận 20.500. <code>capture_entry</code> không phải sửa, chỉ thêm kiểu mới và một khối <code>impl</code> (gồm <code>name</code> và <code>fee</code>). Phương thức <code>split</code> tự kiểm hợp đồng, nên không cần viết lại bước kiểm.</p></details>
+<details><summary>Xem lời giải</summary><p>Bọc một <code>PercentageFee&lt;R&gt;</code> và một <code>cap: Money</code>, rồi cài đặt <code>FeePolicy</code>: <code>fee</code> gọi <code>self.inner.fee(fare)?</code> và trả <code>.min(self.cap)</code> (<code>Money</code> có <code>Ord</code> nên <code>min</code> dùng được, như <code>FlatFee</code> đã làm với cước). Cước 25.500 × 20% = 5.100 vượt mức trần, nên phí là 5.000 và tài xế nhận 20.500. <code>capture_entry</code> không phải sửa, chỉ thêm kiểu mới và một khối <code>impl</code> (gồm <code>name</code> và <code>fee</code>). Phương thức <code>split</code> tự kiểm hợp đồng, nên không cần viết lại bước kiểm.</p></details>
 
 Bài trước: [bài 10](/articles/rust-module-crate-cargo-test-clippy). Bài tiếp: [bài 12](/articles/rust-newtype-value-object-money-account-id).
 

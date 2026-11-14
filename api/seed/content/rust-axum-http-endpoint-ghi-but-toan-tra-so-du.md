@@ -1,14 +1,14 @@
 ---
 slug: rust-axum-http-endpoint-ghi-but-toan-tra-so-du
 title: "HTTP với axum: endpoint ghi bút toán và tra số dư"
-summary: "Bài 31: đưa sổ cái ra HTTP bằng axum. Router, handler async, extractor State/Json/Path và thứ tự của chúng, AppError thành 400/404/409/413/415/422, Router là tower::Service, chạy trên PostgreSQL thật."
+summary: "Bài 31: đưa sổ cái ra HTTP bằng axum. Router, handler async, extractor State/Json/Path và thứ tự của chúng, AppError đổi thành các mã 400/404/409/413/415/422, Router là tower::Service, chạy trên PostgreSQL thật."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, http, tower]
 language: vi
 ---
 
-Dịch vụ Payment viết bằng C# cần ghi một bút toán vào sổ cái sau khi thu cước chuyến `TN-0001`, và cần hỏi số dư của `driver:DR-001`. Đến bài 30, sổ cái mới chỉ là một thư viện cùng một repository chạy trên PostgreSQL. Muốn service C# gọi được, ta phải đặt một ranh giới mạng quanh nó: hai endpoint HTTP, trả đúng mã trạng thái cho từng kết quả.
+Dịch vụ Payment viết bằng C# cần ghi một bút toán vào sổ cái sau khi thu cước chuyến `TN-0001`, và cần hỏi số dư của `driver:DR-001`. Đến bài 30, sổ cái mới chỉ là một thư viện cùng với một repository chạy trên PostgreSQL. Muốn service C# gọi được, ta phải đặt một ranh giới mạng quanh nó: hai endpoint HTTP, trả đúng mã trạng thái cho từng kết quả.
 
 Đây là bài 31 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab dùng lại `ledger-core` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace), kho PostgreSQL rút gọn từ [bài 26](/articles/rust-repository-unit-of-work-trait-transaction) và cách cô lập schema từ [bài 27](/articles/rust-integration-test-postgresql-schema-rieng-ci). Cần Docker Compose của lab đang chạy.
 
@@ -46,7 +46,7 @@ pub fn router(state: AppState) -> Router {
 
 Từ axum 0.8, tham số đường dẫn viết `{id}`, không còn `:id`. `.fallback` bắt mọi request không khớp route nào, và `.with_state` gắn state dùng chung. `AppState` chỉ chứa `PgLedger`, bên trong là một `PgPool` (một `Arc`), nên `Clone` rẻ: axum clone state cho mỗi request.
 
-Server là ba dòng: bind, đọc cổng thật, `axum::serve`. Lab bind `127.0.0.1:0` để hệ điều hành chọn cổng trống, nhờ vậy `--verify` và `cargo test` chạy song song không đụng cổng của nhau.
+Phần khởi động server gồm ba dòng: bind, đọc cổng thật, `axum::serve`. Lab bind `127.0.0.1:0` để hệ điều hành chọn cổng trống, nhờ vậy `--verify` và `cargo test` chạy song song không đụng cổng của nhau.
 
 ```rust
 // src/scenario.rs (rút gọn)
@@ -57,7 +57,7 @@ tokio::spawn(async move { axum::serve(listener, app).await });
 
 ## Extractor là gì, và thứ tự tham số có quan trọng không?
 
-Handler là một `async fn` bình thường. Mỗi tham số là một extractor: kiểu của tham số quyết định axum lấy gì từ request. `State<T>` lấy state, `Path<T>` lấy phần `{id}` của đường dẫn, `Json<T>` đọc body rồi giải mã bằng serde. Trả về là bất kỳ kiểu nào có `IntoResponse`.
+Handler là một `async fn` bình thường. Mỗi tham số là một extractor: kiểu của tham số quyết định axum lấy gì từ request. `State<T>` lấy state, `Path<T>` lấy phần `{id}` của đường dẫn, `Json<T>` đọc body rồi giải mã bằng serde. Giá trị trả về là bất kỳ kiểu nào cài đặt `IntoResponse`.
 
 ```rust
 // src/app.rs
@@ -88,7 +88,7 @@ async fn post_entry(
 }
 ```
 
-Body HTTP là luồng chỉ đọc được một lần. axum chia extractor thành hai loại: loại cài `FromRequestParts` chỉ nhìn phần đầu request (`State`, `Path`, `Method`, `Uri`), loại cài `FromRequest` tiêu thụ cả request (`Json`, `String`, `Bytes`). Loại sau chỉ được đứng cuối. Đảo thứ tự thì handler không còn thoả trait `Handler`. Thử đặt `Json` lên trước `State` trong một file thử rồi `cargo build` (rút gọn):
+Body HTTP là luồng chỉ đọc được một lần. axum chia extractor thành hai loại: loại cài đặt `FromRequestParts` chỉ nhìn phần đầu request (`State`, `Path`, `Method`, `Uri`), loại cài đặt `FromRequest` tiêu thụ cả request (`Json`, `String`, `Bytes`). Loại sau chỉ được đứng cuối. Đảo thứ tự thì handler không còn thoả trait `Handler`. Thử đặt `Json` lên trước `State` trong một file thử rồi `cargo build` (rút gọn):
 
 ```text
 error[E0277]: the trait bound `fn(Json<PostEntryRequest>, ...) -> ... {post_entry}: Handler<_, _>` is not satisfied
@@ -107,7 +107,7 @@ error: `Json<_>` consumes the request body and thus must be the last argument to
  --> examples/dbg_order.rs:4:31
 ```
 
-Lab không bật `macros` để giữ ít dependency; tôi chạy ca này trong một bản sao tạm. Handler đã có `State<AppState>` trong tham số thì macro tự suy ra kiểu state, không cần viết `state = AppState`.
+Lab không bật `macros` để giữ ít dependency; tôi chạy trường hợp này trong một bản sao tạm. Handler đã có `State<AppState>` trong tham số thì macro tự suy ra kiểu state, không cần viết `state = AppState`.
 
 Lưu ý thứ hai nằm ở kiểu của `body`. Nếu viết `Json<PostEntryRequest>` trần, mọi lỗi body do axum tự trả về với thân `text/plain`, không đi qua code của ta: JSON cụt trả 400, sai hình dạng trả 422, thiếu `Content-Type: application/json` trả 415. Bọc trong `Result<_, JsonRejection>` thì lỗi trở thành một giá trị, và ta đổi nó sang `AppError` bằng toán tử `?` như mọi lỗi khác. `Path` cũng có rejection riêng (`%FF` giải mã không ra UTF-8), nên `get_balance` bọc nó theo cùng cách.
 
@@ -115,7 +115,7 @@ Lưu ý thứ ba là kích thước. `Json`, `String` và `Bytes` không nhận 
 
 ## AppError và IntoResponse: một đường ra cho mọi lỗi
 
-Handler trả `Result<T, AppError>`. Muốn dùng được, `AppError` phải có `IntoResponse`: axum gọi nó cho cả nhánh `Ok` lẫn nhánh `Err`. Đây là chỗ duy nhất quyết định lỗi nào thành mã nào, nên đổi chính sách chỉ phải sửa một nơi.
+Handler trả `Result<T, AppError>`. Muốn dùng được, `AppError` phải có `IntoResponse`: axum gọi nó cho cả nhánh `Ok` lẫn nhánh `Err`. Đây là chỗ duy nhất quyết định lỗi nào thành mã nào, nên khi đổi chính sách, ta chỉ cần sửa ở một nơi.
 
 ```rust
 // src/error.rs (rút gọn)
@@ -142,7 +142,7 @@ impl IntoResponse for AppError {
 
 Một tuple `(StatusCode, Json<T>)` tự là `IntoResponse`, nên không cần dựng `Response` bằng tay. Thân lỗi lúc này đơn giản, `{"code": "...", "message": "..."}`; bài 32 đổi nó sang `application/problem+json` mà bảng ánh xạ không đổi.
 
-Lỗi hạ tầng (mất kết nối PostgreSQL, SQL lỗi) trả 500 với thông điệp cố định «lỗi nội bộ». Chi tiết chỉ vào log của server. Test `storage_error_is_500_without_details` ghim điều này: dựng `sqlx::Error::PoolTimedOut`, kiểm response là 500, `message` là «lỗi nội bộ» và không chứa chữ `pool`. 
+Lỗi hạ tầng (mất kết nối PostgreSQL, SQL lỗi) trả 500 với thông điệp cố định «lỗi nội bộ». Chi tiết chỉ được ghi vào log của server. Test `storage_error_is_500_without_details` kiểm chứng điều này: dựng `sqlx::Error::PoolTimedOut`, kiểm response là 500, `message` là «lỗi nội bộ» và không chứa chữ `pool`. 
 
 ## Mỗi kết quả của sổ cái ứng với mã nào?
 
@@ -160,13 +160,13 @@ Lỗi hạ tầng (mất kết nối PostgreSQL, SQL lỗi) trả 500 với thô
 | Route có nhưng sai phương thức | 405 | (axum tự trả: thân rỗng, có header `Allow`) |
 | Lỗi hạ tầng | 500 | `internal` |
 
-Ranh giới 400 và 422 theo RFC 9110: 422 là server hiểu kiểu nội dung, cú pháp đúng, nhưng không xử lý được điều nội dung yêu cầu. JSON cụt không qua nổi bước cú pháp nên là 400. JSON thiếu trường và bút toán lệch 100 đồng đều đúng cú pháp nên là 422; client phân biệt hai ca đó bằng `code`, không phải bằng mã HTTP. Đây cũng là mã axum chọn sẵn, nên lab giữ nguyên. Riêng 201 và 200 mang một ý nghĩa quan trọng với client C# có retry: cả hai đều là thành công, và `replayed` cho biết lần gọi này có tạo thêm gì không. Idempotency ở tầng HTTP không phải phát minh mới, nó dựa trên `ON CONFLICT` của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key).
+Ranh giới 400 và 422 theo RFC 9110: 422 là server hiểu kiểu nội dung, cú pháp đúng, nhưng không xử lý được điều nội dung yêu cầu. JSON cụt không qua nổi bước cú pháp nên là 400. JSON thiếu trường và bút toán lệch 100 đồng đều đúng cú pháp nên là 422; client phân biệt hai trường hợp đó bằng `code`, không phải bằng mã HTTP. Đây cũng là mã axum chọn sẵn, nên lab giữ nguyên. Riêng 201 và 200 mang một ý nghĩa quan trọng với client C# có retry: cả hai đều là thành công, và `replayed` cho biết lần gọi này có tạo thêm gì không. Idempotency ở tầng HTTP không phải phát minh mới, nó dựa trên `ON CONFLICT` của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key).
 
 Số dư ở `GET` là số đã commit. `asOf` lấy từ đồng hồ PostgreSQL (`now()` đổi sang UTC) ngay trong câu truy vấn đọc số dư, chứ không phải đồng hồ của process axum, để hai giá trị đến từ cùng một nguồn. Tài khoản đã mở mà chưa có bút toán trả 200 với `balanceDong: 0` (như `psp:vixanh:clearing` trong ví dụ); tài khoản chưa từng mở trả 404.
 
 ## Vì sao nói Router là một tower::Service?
 
-axum không tự định nghĩa mô hình «nhận request, trả response». Nó dùng trait `Service` của crate `tower`: một Service có `poll_ready` (sẵn sàng nhận việc chưa) và `call` (nhận một request, trả về một future cho response). Source axum 0.8.9 viết `impl<B> Service<Request<B>> for Router<()>`, với `B` là mọi kiểu body thoả `HttpBody<Data = Bytes> + Send + 'static`, và `Error = Infallible`: lỗi không bao giờ là `Err` của Service mà luôn được đổi thành một response (như `AppError` ở trên).
+axum không tự định nghĩa mô hình «nhận request, trả response». Nó dùng trait `Service` của crate `tower`: một Service có `poll_ready` (sẵn sàng nhận việc chưa) và `call` (nhận một request, trả về một future cho response). Mã nguồn axum 0.8.9 viết `impl<B> Service<Request<B>> for Router<()>`, với `B` là mọi kiểu body thoả `HttpBody<Data = Bytes> + Send + 'static`, và `Error = Infallible`: lỗi không bao giờ là `Err` của Service mà luôn được đổi thành một response (như `AppError` ở trên).
 
 Chữ `()` đáng chú ý. Tham số `S` của `Router<S>` là kiểu state **còn thiếu**: `Router<AppState>` là router đang chờ một `AppState`, và `.with_state(state)` đổi nó thành `Router<()>`. Chỉ `Router<()>` là Service, nên quên `.with_state` là lỗi biên dịch chứ không phải lỗi lúc chạy. Router không dùng state thì ngay từ đầu đã là `Router<()>`. Thử gọi `oneshot` trên router còn thiếu state (rút gọn):
 
@@ -230,7 +230,7 @@ Hệ quả thứ hai nằm ở bài 33: timeout, request id, giới hạn tốc 
 
 ## So với Minimal API của .NET
 
-[Bài 16 của loạt C#](/articles/dotnet10-http-minimal-api) dựng `POST /quotes` bằng Minimal API. Hai mô hình giống nhau ở ý tưởng (hàm mỏng nối HTTP với logic nghiệp vụ) và khác ở chỗ lỗi được bắt.
+[Bài 16 của loạt C#](/articles/dotnet10-http-minimal-api) dựng `POST /quotes` bằng Minimal API. Hai mô hình giống nhau ở ý tưởng (hàm mỏng nối HTTP với logic nghiệp vụ) và khác ở cách bắt lỗi.
 
 | Ý | Minimal API (ASP.NET Core 10) | axum |
 | --- | --- | --- |
@@ -273,7 +273,7 @@ GET /v1/nope                               -> 404 {"code":"route_not_found","mes
 GET /healthz                               -> 200 {"status":"ok"}
 ```
 
-Số dư khớp bài toán `TN-0001`: khách -25.500, tài xế +20.400, nền tảng +5.100, tổng bằng 0. Để tự gọi bằng `curl`, chạy `cargo run --manifest-path … -- --serve` (Ctrl-C để dừng và dọn schema). Sau khi `POST` bút toán `TN-0001`, `GET` số dư cho thân JSON đúng thứ tự khai báo của struct (rút gọn header):
+Số dư khớp bài toán `TN-0001`: khách -25.500, tài xế +20.400, nền tảng +5.100, tổng bằng 0. Để tự gọi bằng `curl`, chạy `cargo run --manifest-path … -- --serve` (Ctrl-C để dừng và dọn schema). Sau khi `POST` bút toán `TN-0001`, `GET` số dư trả thân JSON theo đúng thứ tự khai báo của struct (rút gọn header):
 
 ```text
 HTTP/1.1 200 OK
@@ -282,16 +282,16 @@ content-type: application/json
 {"account":"driver:DR-001","balanceDong":20400,"asOf":"2026-11-06T13:51:53.561040Z"}
 ```
 
-`--verify` kiểm toàn bộ bảng mã ở trên, thêm các ca: thiếu trường, sai kiểu, trường lạ trả 422; thiếu `Content-Type` trả 415; `GET /v1/entries` trả 405 với `Allow: POST` (RFC 9110 bắt buộc header này); `%FF` trên đường dẫn trả 400; và tám request song song cùng một key mới cho đúng một 201 cùng bảy 200, số dư tài xế sau hai chuyến là 40.800. Kết thúc nó in `VERIFY OK`. `cargo test` chạy 8 ca: 2 ca đơn vị cho bảng ánh xạ lỗi (không cần PostgreSQL) và 6 ca `oneshot` với PostgreSQL thật. Biên 2 MB nằm ở `oneshot`: body đúng 2.097.152 byte qua được giới hạn rồi hỏng cú pháp (400), thêm 1 byte là 413. Qua TCP, server đóng kết nối khi chưa đọc hết body nên client có thể nhận reset thay vì 413; tôi đã gặp đúng ca đó. Thiếu `TOI_NOI_PG_URL`, lab thoát mã 1 và không bỏ qua.
+`--verify` kiểm toàn bộ bảng mã ở trên, thêm các trường hợp: thiếu trường, sai kiểu, trường lạ trả 422; thiếu `Content-Type` trả 415; `GET /v1/entries` trả 405 với `Allow: POST` (RFC 9110 bắt buộc header này); `%FF` trên đường dẫn trả 400; và tám request song song cùng một key mới cho đúng một 201 và bảy 200, số dư tài xế sau hai chuyến là 40.800. Kết thúc nó in `VERIFY OK`. `cargo test` chạy 8 test case: 2 test case đơn vị cho bảng ánh xạ lỗi (không cần PostgreSQL) và 6 test case `oneshot` với PostgreSQL thật. Ngưỡng 2 MB được kiểm tra ở `oneshot`: body đúng 2.097.152 byte qua được giới hạn rồi hỏng cú pháp (400), thêm 1 byte là 413. Qua TCP, server đóng kết nối khi chưa đọc hết body nên client có thể nhận reset thay vì 413; tôi đã gặp đúng trường hợp đó. Thiếu `TOI_NOI_PG_URL`, lab thoát mã 1 và không bỏ qua.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là hai endpoint để học cơ chế, chưa phải API production: chưa xác thực, chưa phân quyền, giới hạn body vẫn là 2 MB mặc định dù một bút toán chỉ cần vài KB, chưa timeout, chưa request id, chưa tracing, nên lỗi 5xx chỉ ghi bằng <code>eprintln!</code>. JSON lỗi tự đặt, chưa theo Problem Details. Server chưa tắt êm: <code>--serve</code> huỷ task thẳng tay, graceful shutdown là bài 39. Kho PostgreSQL là bản rút gọn, không có trait nên không thay được bằng bản giả. Máy lab chạy client và server cùng một máy, không TLS.</p>
+<p>Đây là hai endpoint để học cơ chế, chưa phải API production: chưa xác thực, chưa phân quyền, giới hạn body vẫn là 2 MB mặc định dù một bút toán chỉ cần vài KB, chưa timeout, chưa request id, chưa tracing, nên lỗi 5xx chỉ ghi bằng <code>eprintln!</code>. JSON lỗi tự đặt, chưa theo Problem Details. Server chưa tắt êm: <code>--serve</code> huỷ task thẳng tay, graceful shutdown là bài 39. Kho PostgreSQL là bản rút gọn, không có trait nên không thay được bằng bản giả. Máy lab chạy cả client lẫn server trên cùng một máy, không TLS.</p>
 </div>
 
 **Bài tập:** client gửi `POST /v1/entries` với `Content-Type: text/plain` và body `{}`. Response là gì? Nếu đổi tham số `body` của handler thành `Json<PostEntryRequest>` trần thì thân response đổi thế nào, và vì sao một client C# phân tích lỗi theo `code` sẽ gặp rắc rối?
 
-<details><summary>Xem lời giải</summary><p>Bản hiện tại trả 415 với thân JSON <code>{"code":"bad_body","message":"…"}</code> (ca này nằm trong <code>--verify</code>). Với <code>Json&lt;PostEntryRequest&gt;</code> trần, axum tự trả cùng mã 415 nhưng thân là <code>text/plain</code>: <code>Expected request with `Content-Type: application/json`</code>. Tôi đã chạy ca này trong một bản sao tạm. Mã không đổi, nhưng client phân tích thân theo <code>code</code> sẽ gặp một chuỗi không phải JSON, cả ở ca 400 và 422 của extractor. Bọc <code>Result&lt;Json&lt;_&gt;, JsonRejection&gt;</code> giữ cho mọi lỗi body cùng một dạng.</p></details>
+<details><summary>Xem lời giải</summary><p>Bản hiện tại trả 415 với thân JSON <code>{"code":"bad_body","message":"…"}</code> (trường hợp này nằm trong <code>--verify</code>). Với <code>Json&lt;PostEntryRequest&gt;</code> trần, axum tự trả cùng mã 415 nhưng thân là <code>text/plain</code>: <code>Expected request with `Content-Type: application/json`</code>. Tôi đã chạy trường hợp này trong một bản sao tạm. Mã không đổi, nhưng client phân tích thân theo <code>code</code> sẽ gặp một chuỗi không phải JSON, cả ở trường hợp 400 và 422 của extractor. Bọc <code>Result&lt;Json&lt;_&gt;, JsonRejection&gt;</code> giữ cho mọi lỗi body cùng một dạng.</p></details>
 
 Bài trước: [bài 30](/articles/rust-criterion-benchmark-do-bo-nho-10k-but-toan). Bài tiếp: [bài 32](/articles/rust-validation-problem-details-openapi-utoipa).
 

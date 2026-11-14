@@ -1,7 +1,7 @@
 ---
 slug: rust-proptest-property-test-bat-bien-so-cai
 title: "Property-based test với proptest: chứng minh bất biến sổ cái"
-summary: "Bài 19: dùng proptest kiểm bất biến sổ cái Tới Nơi: strategy sinh bút toán luôn cân, tổng bằng 0, idempotency, chia tiền không mất đồng, và shrinking thu nhỏ phản ví dụ về còn 1 đồng."
+summary: "Bài 19: dùng proptest kiểm tra bất biến của sổ cái Tới Nơi: strategy sinh bút toán luôn cân, tổng bằng 0, idempotency, chia tiền không mất đồng, và shrinking thu gọn phản ví dụ xuống còn 1 đồng."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, proptest, property-test]
@@ -10,7 +10,7 @@ language: vi
 
 Bút toán thu cước `TN-0001` có test xanh từ bài 10: khách -25.500, nền tảng +5.100, tài xế +20.400, tổng bằng 0. Test đó chỉ đúng với **một** bút toán do ta chọn. Còn bút toán 7 posting, hai posting cùng tài khoản, hay chia 10 đồng cho ba bên thì sao?
 
-Đây là bài 19 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài này dùng crate `proptest` để máy tự sinh hàng nghìn đầu vào và kiểm các **bất biến** của sổ cái ở [bài 13](/articles/rust-double-entry-journal-entry-posting). Lab xuất phát từ mô hình [bài 10](/articles/rust-module-crate-cargo-test-clippy), thêm hàm chia tiền và bộ strategy.
+Đây là bài 19 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài này dùng crate `proptest` để máy tự sinh hàng nghìn đầu vào và kiểm tra các **bất biến** của sổ cái ở [bài 13](/articles/rust-double-entry-journal-entry-posting). Lab xuất phát từ mô hình [bài 10](/articles/rust-module-crate-cargo-test-clippy), thêm hàm chia tiền và bộ strategy.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,13 +22,13 @@ Bút toán thu cước `TN-0001` có test xanh từ bài 10: khách -25.500, n�
 
 **Example test** ghi sẵn đầu vào lẫn kết quả: `split(10, [1, 1, 1])` phải ra `[4, 3, 3]`. **Property test** chỉ ghi một tính chất đúng với mọi đầu vào hợp lệ, ví dụ "tổng các phần luôn bằng tổng gốc"; máy chọn đầu vào.
 
-Example test mạnh ở các ca nghiệp vụ có tên như `TN-0001`; property test mạnh ở biên và tổ hợp ta chưa nghĩ tới. Mỗi property mặc định chạy 256 ca; các bất biến sổ cái trong lab nâng lên 1.000. Một property chạy như sau:
+Example test mạnh ở các test case nghiệp vụ có tên như `TN-0001`; property test mạnh ở biên và tổ hợp ta chưa nghĩ tới. Mỗi property mặc định chạy 256 ca; các bất biến sổ cái trong lab nâng lên 1.000. Một property chạy như sau:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 230" role="img" aria-label="Hình 1. Chu trình của một property test: strategy mô tả dữ liệu, runner sinh 1.000 ca, thân test kiểm tính chất; nếu có ca fail thì shrinking thu nhỏ đầu vào và proptest in phản ví dụ nhỏ nhất kèm seed."><defs><marker id="rust-proptest-property-test-bat-bien-so-cai-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="16" y="30" width="140" height="96" rx="10" class="f-phys-soft s-phys"/><text x="30" y="56" class="t-b">Strategy</text><text x="30" y="80" class="t-small">mô tả dữ liệu</text><text x="30" y="100" class="t-small">any::&lt;i64&gt;(), vec</text><rect x="194" y="30" width="140" height="96" rx="10" class="f-phys-soft s-phys"/><text x="208" y="56" class="t-b">1.000 ca</text><text x="208" y="80" class="t-small">RNG sinh đầu vào</text><text x="208" y="100" class="t-small">ProptestConfig</text><rect x="372" y="30" width="140" height="96" rx="10" class="f-pk-soft s-pk"/><text x="386" y="56" class="t-b">Thân test</text><text x="386" y="80" class="t-small">gọi hàm cần kiểm</text><text x="386" y="100" class="t-small">prop_assert_eq!</text><rect x="550" y="30" width="140" height="96" rx="10" class="f-warn-soft s-warn"/><text x="564" y="56" class="t-b">Shrinking</text><text x="564" y="80" class="t-small">thu nhỏ đầu vào</text><text x="564" y="100" class="t-small">vẫn fail thì giữ</text><rect x="728" y="30" width="140" height="96" rx="10" class="f-warn-soft s-warn"/><text x="742" y="56" class="t-b">Phản ví dụ</text><text x="742" y="80" class="t-small">nhỏ nhất, kèm seed</text><text x="742" y="100" class="t-small">ghi vào regressions</text><path d="M156 78 L188 78" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-proptest-property-test-bat-bien-so-cai-0-a)"/><path d="M334 78 L366 78" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-proptest-property-test-bat-bien-so-cai-0-a)"/><path d="M512 78 L544 78" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-proptest-property-test-bat-bien-so-cai-0-a)"/><path d="M690 78 L722 78" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-proptest-property-test-bat-bien-so-cai-0-a)"/><text x="556" y="146" class="t-small">chỉ khi có ca fail</text><rect x="16" y="168" width="848" height="48" rx="8" class="f-none s-line dash"/><text x="32" y="190" class="t-small">Cả 1.000 ca qua: test xanh. Có ca fail: runner không báo ngay mà thu nhỏ trước,</text><text x="32" y="207" class="t-small">rồi mới báo, để người đọc thấy ca nhỏ nhất thay vì ca ngẫu nhiên khổng lồ.</text></svg>
 </div>
-<figcaption>Hình 1. Một property test: ca fail đi qua shrinking trước khi được báo.</figcaption>
+<figcaption>Hình 1. Một property test: ca fail đi qua shrinking trước khi runner báo lỗi.</figcaption>
 </figure>
 
 ## `proptest!` và strategy: máy sinh dữ liệu thế nào?
@@ -51,9 +51,9 @@ proptest! {
 }
 ```
 
-Dùng `prop_assert_eq!` thay `assert_eq!`: khi sai nó trả `Err` thay vì panic, nên lúc thu nhỏ không sinh hàng loạt thông điệp panic (`assert_eq!` vẫn hoạt động, vì proptest bắt panic). Ngoài `any::<T>()` còn có khoảng (`-MAX..=MAX`), `prop::sample::select` (chọn từ danh sách), `prop::collection::vec(strategy, 2..=8)` và tuple của các strategy.
+Dùng `prop_assert_eq!` thay `assert_eq!`: khi sai, macro này trả `Err` thay vì panic, nên lúc thu nhỏ không sinh hàng loạt thông điệp panic (`assert_eq!` vẫn hoạt động, vì proptest bắt panic). Ngoài `any::<T>()` còn có khoảng (`-MAX..=MAX`), `prop::sample::select` (chọn từ danh sách), `prop::collection::vec(strategy, 2..=8)` và tuple của các strategy.
 
-Một lưu ý: `any::<i64>()` chia đều trên 2^64 giá trị, nên gần như không bao giờ ra số nhỏ hay đầu mút (thử 200.000 mẫu: không mẫu nào có trị tuyệt đối dưới 1 tỷ, không mẫu nào là `i64::MIN`). Muốn thử biên phải nói rõ, ta làm ở mục chia tiền. Hai bộ biến đổi quan trọng: `prop_map` đổi giá trị sinh ra thành giá trị khác (thu nhỏ vẫn chạy trên dữ liệu gốc rồi map lại), và `prop_filter` loại giá trị không thoả điều kiện. Loại quá nhiều thì proptest dừng báo lỗi. Với điều kiện như "bút toán cân", đừng lọc, hãy xây.
+Một lưu ý: `any::<i64>()` chia đều trên 2^64 giá trị, nên gần như không bao giờ ra số nhỏ hay đầu mút (thử 200.000 mẫu: không mẫu nào có trị tuyệt đối dưới 1 tỷ, không mẫu nào là `i64::MIN`). Muốn thử giá trị biên thì phải nói rõ; ta làm việc này ở mục chia tiền. Hai bộ biến đổi quan trọng: `prop_map` đổi giá trị sinh ra thành giá trị khác (thu nhỏ vẫn chạy trên dữ liệu gốc rồi map lại), và `prop_filter` loại giá trị không thoả điều kiện. Loại quá nhiều thì proptest dừng lại và báo lỗi. Với điều kiện như "bút toán cân", đừng lọc, hãy xây.
 
 ## Làm sao sinh bút toán luôn cân?
 
@@ -79,7 +79,7 @@ pub fn balanced_postings() -> impl Strategy<Value = Vec<Posting>> {
 }
 ```
 
-`amount()` giới hạn mỗi posting trong ±1.000 tỷ đồng để tổng tối đa 7 posting không tràn `i64`; tràn số đã có test riêng từ bài 10. Một bút toán mẫu (RNG cố định, `cargo run` in ra):
+`amount()` giới hạn mỗi posting trong ±1.000 tỷ đồng để tổng của tối đa 7 posting không tràn `i64`; tràn số đã có test riêng từ bài 10. Một bút toán mẫu (RNG cố định, `cargo run` in ra):
 
 ```text
 Một bút toán sinh ngẫu nhiên (3 posting):
@@ -105,10 +105,10 @@ Sáu tính chất trong `tests/ledger_properties.rs`, chỉ dùng API `pub`:
 | Sau mọi dãy `post`, tổng toàn sổ và tổng các số dư bằng 0 | `ledger_stays_balanced_after_any_sequence` |
 | Số dư từng tài khoản khớp mô hình tham chiếu (`HashMap` + `i128`) | `balances_match_a_reference_model` |
 | Ghi lại cả dãy cùng key: không thêm bút toán, số dư không đổi | `posting_twice_is_the_same_as_posting_once` |
-| Key trùng tự do: mỗi key một bút toán, xung đột bị từ chối, sổ vẫn cân | `colliding_keys_never_corrupt_the_ledger` |
-| Lệch một posting `delta` đồng thì bị từ chối đúng `Unbalanced { sum: delta }` | `perturbed_entry_is_rejected` |
+| Key trùng nhau tuỳ ý: mỗi key một bút toán, xung đột bị từ chối, sổ vẫn cân | `colliding_keys_never_corrupt_the_ledger` |
+| Lệch một posting đi `delta` đồng thì bị từ chối đúng `Unbalanced { sum: delta }` | `perturbed_entry_is_rejected` |
 
-`ProptestConfig { cases: 1000 }` đặt một lần cho cả khối `proptest!`. Hai trong số đó:
+`ProptestConfig { cases: 1000 }` đặt một lần cho cả khối `proptest!`. Hai trong sáu test này:
 
 ```rust
 // tests/ledger_properties.rs (rút gọn)
@@ -134,9 +134,9 @@ proptest! {
 }
 ```
 
-Mô hình tham chiếu đáng giá nhất: viết lại phép tính số dư theo cách đơn giản nhất rồi so với code thật.
+Mô hình tham chiếu đáng giá nhất: viết lại phép tính số dư theo cách đơn giản nhất rồi so sánh với code thật.
 
-Một cái bẫy: `matches!(e, LedgerError::IdempotencyConflict { .. })` đặt thẳng trong `prop_assert!` không biên dịch được, vì macro chèn text biểu thức vào chuỗi định dạng:
+Một cái bẫy: `matches!(e, LedgerError::IdempotencyConflict { .. })` đặt thẳng trong `prop_assert!` không biên dịch được, vì macro chèn nguyên văn biểu thức vào chuỗi định dạng:
 
 ```text
 error: invalid format string: expected `}`, found `.`
@@ -149,7 +149,7 @@ Sửa: `let is_conflict = matches!(…);` rồi `prop_assert!(is_conflict);`.
 
 ## Chia tiền cho nhiều bên mà không mất đồng
 
-Lab cài `split` theo largest remainder: mỗi bên nhận phần nguyên trước, số đồng còn dư cộng thêm 1 đồng cho các bên có phần dư lớn nhất, hoà thì bên đứng trước được ưu tiên.
+Lab cài `split` theo phương pháp largest remainder: mỗi bên nhận phần nguyên trước, số đồng còn dư thì phát thêm 1 đồng cho từng bên có phần dư lớn nhất, hoà thì bên đứng trước được ưu tiên.
 
 ```rust
 // src/split.rs
@@ -185,7 +185,7 @@ proptest! {
 }
 ```
 
-`split_input()` ghép một tổng tiền với một vector 1 đến 8 trọng số `0..=1000`, qua `prop_filter` để tổng trọng số khác 0. Tổng tiền lấy từ `total_dong()`, trộn bốn nhóm bằng `prop_oneof!`:
+`split_input()` ghép một tổng tiền với một vector 1 đến 8 trọng số `0..=1000`, rồi lọc bằng `prop_filter` để tổng trọng số khác 0. Tổng tiền lấy từ `total_dong()`, trộn bốn nhóm bằng `prop_oneof!`:
 
 ```rust
 // src/strategies.rs
@@ -199,7 +199,7 @@ pub fn total_dong() -> impl Strategy<Value = i64> {
 }
 ```
 
-Hai tính chất khác: mỗi bên lệch phần chính xác dưới 1 đồng (`each_part_is_within_one_dong`), bên có trọng số 0 không nhận đồng nào (`zero_weight_gets_nothing`). Chạy `cargo run`:
+Hai tính chất khác: phần của mỗi bên lệch khỏi phần chính xác dưới 1 đồng (`each_part_is_within_one_dong`), bên có trọng số 0 không nhận đồng nào (`zero_weight_gets_nothing`). Chạy `cargo run`:
 
 ```text
 Chia 25.500 VND theo [80, 20]: 20.400 VND, 5.100 VND
@@ -208,7 +208,7 @@ Chia 10 VND theo [1, 1, 1]: 4 VND, 3 VND, 3 VND
 
 ## Shrinking: cố ý sai để xem phản ví dụ nhỏ nhất
 
-Muốn tin một property test, hãy nhìn nó đỏ. Lab giữ thêm `split_floor_only`, bản **cố ý sai**: làm tròn xuống rồi quên phát số đồng dư. Test kiểm cùng bất biến nằm ở `tests/shrinking_demo.rs`, gắn `#[ignore]` để `cargo test` thường vẫn xanh. Chạy riêng bằng `cargo test --test shrinking_demo -- --ignored`:
+Muốn tin một property test, hãy nhìn nó đỏ. Lab giữ thêm `split_floor_only`, bản **cố ý sai**: làm tròn xuống rồi quên phát số đồng dư. Test kiểm tra cùng bất biến nằm ở `tests/shrinking_demo.rs`, gắn `#[ignore]` để `cargo test` thường vẫn xanh. Chạy riêng bằng `cargo test --test shrinking_demo -- --ignored`:
 
 ```text
 proptest: Saving this and future failures in .../tests/shrinking_demo.proptest-regressions
@@ -227,7 +227,7 @@ minimal failing input: (total, weights) = (
 )
 ```
 
-Phản ví dụ nhỏ nhất là chia **1 đồng cho hai bên bằng nhau**: mỗi bên được 0, tổng 0 thay vì 1. Output trên là của một lần chạy, đã rút gọn. RNG đổi theo lần chạy nên chuỗi `cc …` của bạn sẽ khác, và proptest có thể dừng ở `total = -1`, bản đối xứng của cùng lỗi (sáu lần thử: ba lần `1`, ba lần `-1`). Ca fail đầu tiên dài hơn nhiều; `cargo run` in cả hai nhờ RNG cố định:
+Phản ví dụ nhỏ nhất là chia **1 đồng cho hai bên bằng nhau**: mỗi bên được 0, tổng 0 thay vì 1. Kết quả trên là của một lần chạy, đã rút gọn. RNG đổi theo lần chạy nên chuỗi `cc …` của bạn sẽ khác, và proptest có thể dừng ở `total = -1`, bản đối xứng của cùng lỗi (sáu lần thử: ba lần `1`, ba lần `-1`). Ca fail đầu tiên dài hơn nhiều; `cargo run` in cả hai nhờ RNG cố định:
 
 ```text
 split_floor_only, phản ví dụ thô: total = 17332, weights = [188, 948, 321, 973, 341]
@@ -247,9 +247,9 @@ Dòng `cc 7a65…` là seed của ca fail; proptest ghi nó vào file regression
 cc 7a65285b554c1f715ac1d6a8c4cb587d8cda5a5307dffead3946f3bce1145eab # shrinks to (total, weights) = (1, [1, 1])
 ```
 
-Lần chạy sau, proptest dựng lại ca đó từ seed và chạy nó **trước** các ca ngẫu nhiên, nên bug đã gặp không âm thầm quay lại; dự án thật nên commit file này. Ở lab, bản sai chỉ để làm mẫu nên ta xoá file sau khi xem. Bản sửa chính là `split` ở mục trước, thêm bước phát số đồng dư.
+Lần chạy sau, proptest dựng lại ca đó từ seed và chạy nó **trước** các ca ngẫu nhiên, nên bug đã gặp không thể quay lại mà không bị phát hiện; dự án thật nên commit file này. Ở lab, bản sai chỉ để làm mẫu nên ta xoá file sau khi xem. Bản sửa chính là `split` ở mục trước, thêm bước phát số đồng dư.
 
-Để `cargo test` thường cũng kiểm shrinking, test `shrinking_reaches_a_tiny_counterexample` dùng `TestRunner` với RNG xác định và tắt `failure_persistence` nên không ghi file.
+Để `cargo test` thường cũng kiểm tra shrinking, test `shrinking_reaches_a_tiny_counterexample` dùng `TestRunner` với RNG xác định và tắt `failure_persistence` nên không ghi file.
 
 ## Test đặt ở đâu: `#[cfg(test)]` hay `tests/`?
 
@@ -264,11 +264,11 @@ Quy tắc của [bài 10](/articles/rust-module-crate-cargo-test-clippy) vẫn �
 
 `proptest` nằm ở `[dependencies]` và strategy ở module `pub` chỉ vì binary của lab cũng chạy property trong `--verify`. Dự án thật để `proptest` ở `[dev-dependencies]`, strategy trong `#[cfg(test)]` hoặc `tests/common/mod.rs`.
 
-Vị trí file regressions cần chú ý. Mặc định là `FileFailurePersistence::SourceParallel("proptest-regressions")`: từ file nguồn của test, proptest đi ngược lên cây thư mục tới thư mục đầu tiên chứa `lib.rs` hoặc `main.rs`, rồi ghi vào thư mục `proptest-regressions/` đặt **cạnh thư mục đó**. Test trong `src/split.rs` vì thế ghi `proptest-regressions/split.txt` ở gốc crate. Test trong `tests/` thì khác: gốc crate không có hai file đó nên proptest đi tiếp lên các thư mục cha. Không thấy, nó in cảnh báo `failed to find lib.rs or main.rs` rồi ghi cạnh file test, đuôi `.proptest-regressions`; một thư mục cha nào đó có `main.rs` thì file nằm ngoài crate. Vì vậy `shrinking_demo.rs` khai báo rõ `FileFailurePersistence::WithSource("proptest-regressions")`: luôn ghi cạnh file test.
+Vị trí file regressions cần chú ý. Mặc định là `FileFailurePersistence::SourceParallel("proptest-regressions")`: từ file nguồn của test, proptest đi ngược lên cây thư mục tới thư mục đầu tiên chứa `lib.rs` hoặc `main.rs`, rồi ghi vào thư mục `proptest-regressions/` đặt **cạnh thư mục đó**. Test trong `src/split.rs` vì thế ghi `proptest-regressions/split.txt` ở gốc crate. Test trong `tests/` thì khác: gốc crate không có hai file đó nên proptest đi tiếp lên các thư mục cha. Nếu không thấy, proptest in cảnh báo `failed to find lib.rs or main.rs` rồi ghi cạnh file test, đuôi `.proptest-regressions`; nếu một thư mục cha nào đó có `main.rs` thì file nằm ngoài crate. Vì vậy `shrinking_demo.rs` khai báo rõ `FileFailurePersistence::WithSource("proptest-regressions")`: luôn ghi cạnh file test.
 
 Hai cách điều khiển lúc chạy: `cargo test -- --nocapture` hiện `println!` của test đang xanh (lab in vài bút toán mẫu bằng `show_sample_entries`); `PROPTEST_CASES=20000` đổi số ca mà không sửa code, ghi đè cả `cases: 1000` trong khối `proptest!` (macro đọc biến môi trường sau khi nhận config).
 
-**Với người từ C#.** Công cụ tương ứng là FsCheck; test ở [bài về unit test và test double](/articles/csharp-unit-test-test-double) là example test.
+**Với người quen dùng C#.** Công cụ tương ứng là FsCheck; test ở [bài về unit test và test double](/articles/csharp-unit-test-test-double) là example test.
 
 | Ý | FsCheck (.NET) | proptest (Rust) |
 | --- | --- | --- |
@@ -277,7 +277,7 @@ Hai cách điều khiển lúc chạy: `cargo test -- --nocapture` hiện `print
 | Số ca mặc định | 100 | 256 |
 | Thu nhỏ phản ví dụ | Có | Có |
 
-Cột FsCheck theo tài liệu của FsCheck; lab này không chạy nó.
+Số liệu cột FsCheck lấy theo tài liệu của FsCheck; lab này không chạy FsCheck.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -296,11 +296,11 @@ Lệnh đầu in các khối đã trích, mở đầu bằng:
 Ghi 2 lần cùng key: replayed = false rồi true, sổ có 1 bút toán, tổng = 0 VND
 ```
 
-`-- --verify` kiểm các giá trị trên và chạy 1.000 ca cho hai bất biến, rồi in `VERIFY OK` (exit code 0); sai thì thoát với mã 1. `cargo test` báo 24 unit test, 12 integration test, 3 doc test pass và 1 test `ignored`. Lệnh cuối cố ý fail và ghi đúng một file, `examples/toi-noi-rust/19-proptest-bat-bien/tests/shrinking_demo.proptest-regressions`; xoá nó sau khi xem.
+`-- --verify` kiểm tra các giá trị trên và chạy 1.000 ca cho hai bất biến, rồi in `VERIFY OK` (exit code 0); sai thì thoát với mã 1. `cargo test` báo 24 unit test, 12 integration test, 3 doc test pass và 1 test `ignored`. Lệnh cuối cố ý fail và ghi đúng một file, `examples/toi-noi-rust/19-proptest-bat-bien/tests/shrinking_demo.proptest-regressions`; xoá nó sau khi xem.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Property test không phải chứng minh toán học: 1.000 ca vẫn có thể bỏ sót ca hiếm, và nó chỉ mạnh bằng strategy. Strategy của lab giới hạn ±1.000 tỷ đồng, tối đa 8 posting, 4 tài khoản. RNG cố định trong <code>shrink_demo</code> chỉ để bài in được kết quả lặp lại; test thật nên để RNG ngẫu nhiên và commit file regressions. Sổ cái vẫn nằm trong bộ nhớ, chưa có database, chưa có nhiều luồng ghi.</p>
+<p>Property test không phải chứng minh toán học: 1.000 ca vẫn có thể bỏ sót ca hiếm, và sức mạnh của nó chỉ bằng strategy. Strategy của lab giới hạn ±1.000 tỷ đồng, tối đa 8 posting, 4 tài khoản. RNG cố định trong <code>shrink_demo</code> chỉ để bài in ra kết quả lặp lại được; test thật nên để RNG ngẫu nhiên và commit file regressions. Sổ cái vẫn nằm trong bộ nhớ, chưa có database, chưa có nhiều luồng ghi.</p>
 </div>
 
 **Bài tập:** viết thêm tính chất «chia đều cho n bên (n từ 1 đến 8), hai phần bất kỳ chênh nhau không quá 1 đồng». Strategy nên là gì? Có cần `prop_filter` không?

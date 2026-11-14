@@ -10,7 +10,7 @@ language: vi
 
 Ứng dụng đặt chuyến viết bằng C# và công cụ phân tích của đội dữ liệu viết bằng Python đều phải chia cước 25.500 đồng thành phí nền tảng 5.100 và phần tài xế 20.400, đúng như sổ cái chia. Chép công thức sang thêm hai ngôn ngữ là thêm hai chỗ có thể lệch một đồng. Với phép tính thuần, không I/O, không trạng thái, nạp thẳng thư viện Rust vào tiến trình là lựa chọn có lý. Cái giá là `unsafe` ở ranh giới.
 
-Đây là bài 62 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab bọc chính sách phí 20% của `ledger-core` ([bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace)) và đối chiếu với quyết định dùng gRPC cho sổ cái ở [bài 35](/articles/rust-tonic-grpc-get-balance-post-entry-interop-dotnet). Đề cương nối bài này với loạt Python qua Tới Nơi; ở đây Python chỉ là người gọi module Rust.
+Đây là bài 62 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab bọc chính sách phí 20% của `ledger-core` ([bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace)) và đối chiếu với quyết định dùng gRPC cho sổ cái ở [bài 35](/articles/rust-tonic-grpc-get-balance-post-entry-interop-dotnet). Bài này nối với loạt Python qua Tới Nơi; ở đây Python chỉ là người gọi module Rust.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,9 +20,9 @@ language: vi
 
 ## Khi nào `unsafe` là hợp lý?
 
-`unsafe` không tắt borrow checker. Nó mở một nhóm thao tác mà compiler không chứng minh được, trong đó có hai thao tác ta cần ở đây: dereference con trỏ thô và gọi hàm mà người viết đã cam kết hợp đồng bằng lời. Ranh giới FFI là chỗ không tránh được, vì compiler không nhìn thấy code C# hay Python ở bên kia.
+`unsafe` không tắt borrow checker. Từ khoá này mở ra một nhóm thao tác mà compiler không thể chứng minh, trong đó có hai thao tác ta cần ở đây: dereference con trỏ thô và gọi hàm mà người viết hàm đã cam kết về hợp đồng bằng lời. Ranh giới FFI là chỗ không thể tránh khỏi, vì compiler không nhìn thấy code C# hay Python ở bên kia.
 
-Tới Nơi giữ ba nguyên tắc. Thu nhỏ: lõi `ledger-core` đặt `unsafe_code = "forbid"` (bài 20) nên không chứa `unsafe` nào, còn vỏ FFI là crate riêng `fee-ffi`, 8 khối `unsafe` trong khoảng 290 dòng. Ghi lý do: mỗi khối có `// SAFETY:` và `clippy::undocumented_unsafe_blocks` bắt khối thiếu lời giải thích. Đặt hàng rào: `#![deny(unsafe_op_in_unsafe_fn)]` buộc thân một `unsafe fn` cũng phải viết khối `unsafe` rõ ràng, không được ngầm hiểu cả hàm là vùng cho phép.
+Tới Nơi giữ ba nguyên tắc. Thu nhỏ: lõi `ledger-core` đặt `unsafe_code = "forbid"` (bài 20) nên không chứa `unsafe` nào, còn vỏ FFI là crate riêng `fee-ffi`, 8 khối `unsafe` trong khoảng 290 dòng. Ghi lý do: mỗi khối có `// SAFETY:` và `clippy::undocumented_unsafe_blocks` bắt khối thiếu lời giải thích. Dựng rào chắn: `#![deny(unsafe_op_in_unsafe_fn)]` buộc thân một `unsafe fn` cũng phải viết khối `unsafe` rõ ràng, không được ngầm hiểu cả hàm là vùng cho phép.
 
 ```text
 error[E0133]: dereference of raw pointer is unsafe and requires unsafe block
@@ -35,11 +35,11 @@ error[E0133]: dereference of raw pointer is unsafe and requires unsafe block
 note: an unsafe function restricts its caller, but its body is safe by default
 ```
 
-Đoạn trên là thông điệp rustc thật (rút gọn) cho một hàm nháp ngoài lab, khi có `deny(unsafe_op_in_unsafe_fn)`.
+Đoạn trên là thông điệp thật của rustc (đã rút gọn) cho một hàm nháp ngoài lab, khi bật `deny(unsafe_op_in_unsafe_fn)`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 260" role="img" aria-label="Hình 1. C# và Python gọi qua hai vỏ mỏng có unsafe, cả hai cùng bọc ledger-core là crate cấm unsafe."><defs><marker id="rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="230" height="80" rx="10" class="f-phys-soft s-phys"/><text x="36" y="58" class="t-b">C# · .NET 10</text><text x="36" y="80" class="t-small">LibraryImport + SafeHandle</text><rect x="20" y="150" width="230" height="80" rx="10" class="f-phys-soft s-phys"/><text x="36" y="178" class="t-b">Python 3</text><text x="36" y="200" class="t-small">import toi_noi_fee</text><rect x="340" y="30" width="230" height="80" rx="10" class="f-warn-soft s-warn"/><text x="356" y="58" class="t-b">fee-ffi (cdylib)</text><text x="356" y="80" class="t-small">extern C, 8 khối unsafe</text><rect x="340" y="150" width="230" height="80" rx="10" class="f-warn-soft s-warn"/><text x="356" y="178" class="t-b">fee-py (PyO3)</text><text x="356" y="200" class="t-small">PyO3 dựng ranh giới kiểu</text><rect x="650" y="70" width="210" height="120" rx="10" class="f-pk-soft s-pk"/><text x="666" y="108" class="t-b">ledger-core</text><text x="666" y="130" class="t-small">unsafe_code = forbid</text><text x="666" y="148" class="t-small">chính sách phí 20%</text><path d="M250 70 L336 70" class="f-none s-phys dash" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a)"/><path d="M250 190 L336 190" class="f-none s-phys dash" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a)"/><path d="M570 70 L646 110" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a)"/><path d="M570 190 L646 150" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a)"/><text x="262" y="60" class="t-small">C ABI</text><text x="258" y="180" class="t-small">C API CPython</text></svg>
+<svg viewBox="0 0 880 260" role="img" aria-label="Hình 1. C# và Python gọi qua hai vỏ mỏng có unsafe, cả hai cùng bọc ledger-core, một crate cấm unsafe."><defs><marker id="rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="230" height="80" rx="10" class="f-phys-soft s-phys"/><text x="36" y="58" class="t-b">C# · .NET 10</text><text x="36" y="80" class="t-small">LibraryImport + SafeHandle</text><rect x="20" y="150" width="230" height="80" rx="10" class="f-phys-soft s-phys"/><text x="36" y="178" class="t-b">Python 3</text><text x="36" y="200" class="t-small">import toi_noi_fee</text><rect x="340" y="30" width="230" height="80" rx="10" class="f-warn-soft s-warn"/><text x="356" y="58" class="t-b">fee-ffi (cdylib)</text><text x="356" y="80" class="t-small">extern C, 8 khối unsafe</text><rect x="340" y="150" width="230" height="80" rx="10" class="f-warn-soft s-warn"/><text x="356" y="178" class="t-b">fee-py (PyO3)</text><text x="356" y="200" class="t-small">PyO3 dựng ranh giới có kiểu</text><rect x="650" y="70" width="210" height="120" rx="10" class="f-pk-soft s-pk"/><text x="666" y="108" class="t-b">ledger-core</text><text x="666" y="130" class="t-small">unsafe_code = forbid</text><text x="666" y="148" class="t-small">chính sách phí 20%</text><path d="M250 70 L336 70" class="f-none s-phys dash" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a)"/><path d="M250 190 L336 190" class="f-none s-phys dash" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a)"/><path d="M570 70 L646 110" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a)"/><path d="M570 190 L646 150" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-0-a)"/><text x="262" y="60" class="t-small">C ABI</text><text x="258" y="180" class="t-small">C API CPython</text></svg>
 </div>
 <figcaption>Hình 1. Nét đứt là ranh giới ngôn ngữ, nơi <code>unsafe</code> được phép. Lõi bên phải không bao giờ thấy con trỏ thô.</figcaption>
 </figure>
@@ -76,7 +76,7 @@ pub unsafe extern "C" fn fee_split(fare_dong: i64, out: *mut FeeSplit) -> FeeSta
 }
 ```
 
-Có bốn chi tiết. Thiếu `#[repr(C)]`, Rust được quyền sắp xếp lại trường. Tên hàm phải giữ nguyên để C# tìm thấy: ở edition 2024 phải viết `#[unsafe(no_mangle)]`, còn `#[no_mangle]` trần là lỗi biên dịch (`error: unsafe attribute used without unsafe`). Hàm nhận con trỏ ghi nên là `unsafe fn`, và mục `# Safety` trong doc comment là hợp đồng mà người gọi phải giữ. Thân hàm nằm trong `guard`, mục sau giải thích. Crate khai báo `crate-type = ["cdylib", "rlib"]`: `cdylib` cho `libfee_ffi.dylib` (`.so` trên Linux), `rlib` để binary `--verify` và test gọi như Rust thường.
+Có bốn chi tiết. Thiếu `#[repr(C)]`, Rust được quyền sắp xếp lại trường. Tên hàm phải giữ nguyên để C# tìm thấy: ở edition 2024 phải viết `#[unsafe(no_mangle)]`, còn `#[no_mangle]` trần là lỗi biên dịch (`error: unsafe attribute used without unsafe`). Hàm nhận con trỏ ghi nên là `unsafe fn`, và mục `# Safety` trong doc comment là hợp đồng mà người gọi phải giữ. Thân hàm nằm trong `guard`, mục sau sẽ giải thích. Crate khai báo `crate-type = ["cdylib", "rlib"]`: `cdylib` cho `libfee_ffi.dylib` (`.so` trên Linux), `rlib` để binary `--verify` và test gọi như Rust thường.
 
 Header C do `cbindgen` sinh trong `build.rs` (cbindgen 0.29.4, đọc được cả `unsafe(no_mangle)` của edition 2024):
 
@@ -98,7 +98,7 @@ cbindgen đọc source, không biên dịch, nên header có thể lệch với 
 
 ## C# gọi qua P/Invoke: chuỗi, struct và SafeHandle
 
-`LibraryImport` là source generator: marshal được sinh lúc build thay vì lúc chạy như `DllImport`, nên project phải bật `AllowUnsafeBlocks`. Client nằm ở `dotnet-client/` và nhận đường dẫn thư viện qua biến `FEE_FFI_LIB`.
+`LibraryImport` là source generator: sinh code marshal lúc build thay vì lúc chạy như `DllImport`, nên project phải bật `AllowUnsafeBlocks`. Client nằm ở `dotnet-client/` và nhận đường dẫn thư viện qua biến `FEE_FFI_LIB`.
 
 ```csharp
 // dotnet-client/Native.cs (rút gọn)
@@ -128,18 +128,18 @@ internal static partial class Native
 }
 ```
 
-Struct chỉ gồm `long` nên blittable: `out FeeSplit` là con trỏ tới biến cục bộ, không có bản sao nào. `StringMarshalling.Utf8` đổi `string` .NET thành byte UTF-8 kết thúc NUL cho `const char *`. Marshal sai không báo lỗi: lab cố ý nhập thêm bản `Utf16` của cùng hàm, và Rust chỉ thấy chữ «T» vì byte thứ hai của `T` trong UTF-16 là NUL. Kết quả là dữ liệu sai lặng lẽ, không phải crash.
+Struct chỉ gồm `long` nên blittable: `out FeeSplit` là con trỏ tới biến cục bộ, không có bản sao nào. `StringMarshalling.Utf8` đổi `string` .NET thành byte UTF-8 kết thúc NUL cho `const char *`. Marshal sai không báo lỗi: lab cố ý nhập thêm bản `Utf16` của cùng hàm, và Rust chỉ thấy chữ «T» vì byte thứ hai của `T` trong UTF-16 là NUL. Kết quả là dữ liệu sai mà không có cảnh báo nào, không phải crash.
 
 Handle tới `FeeQuote` nằm trên heap của Rust (Hình 2). `SafeHandle` bảo đảm `fee_quote_free` chạy đúng một lần, qua `Dispose` hoặc qua finalizer nếu quên. Chuỗi mô tả cũng do Rust cấp, nên C# đọc bằng `Marshal.PtrToStringUTF8` rồi trả bằng `fee_string_free`. Gọi `Marshal.FreeHGlobal` hay `FreeCoTaskMem` trên con trỏ đó là sai: mỗi bên có allocator riêng ([bài 59](/articles/rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet)).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 270" role="img" aria-label="Hình 2. Bốn bước đời sống của một báo giá: Rust cấp handle, Rust cấp chuỗi, C# chép chuỗi rồi trả cho Rust, Dispose trả handle cho Rust."><defs><marker id="rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="15" y="30" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="29" y="58" class="t-b">1. fee_quote_new</text><text x="29" y="82" class="t-small">Rust cấp FeeQuote</text><text x="29" y="100" class="t-small">Box::into_raw + sổ</text><text x="29" y="118" class="t-small">SafeHandle giữ con trỏ</text><rect x="235" y="30" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="249" y="58" class="t-b">2. fee_quote_describe</text><text x="249" y="82" class="t-small">Rust cấp char* UTF-8</text><text x="249" y="100" class="t-small">CString::into_raw + sổ</text><text x="249" y="118" class="t-small">C# chỉ được đọc</text><rect x="455" y="30" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="469" y="58" class="t-b">3. fee_string_free</text><text x="469" y="82" class="t-small">C# chép sang string</text><text x="469" y="100" class="t-small">trả char* cho Rust</text><text x="469" y="118" class="t-small">Rust gỡ khỏi sổ rồi drop</text><rect x="675" y="30" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="689" y="58" class="t-b">4. Dispose</text><text x="689" y="82" class="t-small">hoặc finalizer</text><text x="689" y="100" class="t-small">fee_quote_free(handle)</text><text x="689" y="118" class="t-small">lần hai: BadHandle</text><rect x="15" y="180" width="850" height="60" rx="10" class="f-warn-soft s-warn"/><text x="29" y="206" class="t-b">Quy tắc</text><text x="29" y="226" class="t-small">Bộ nhớ do Rust cấp luôn do Rust giải phóng. .NET chỉ giữ con trỏ và bản sao của nó.</text><path d="M205 85 L231 85" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-1-a)"/><path d="M425 85 L451 85" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-1-a)"/><path d="M645 85 L671 85" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-1-a)"/></svg>
+<svg viewBox="0 0 880 270" role="img" aria-label="Hình 2. Bốn bước trong vòng đời của một báo giá: Rust cấp handle, Rust cấp chuỗi, C# chép chuỗi rồi trả cho Rust, Dispose trả handle cho Rust."><defs><marker id="rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="15" y="30" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="29" y="58" class="t-b">1. fee_quote_new</text><text x="29" y="82" class="t-small">Rust cấp FeeQuote</text><text x="29" y="100" class="t-small">Box::into_raw + sổ</text><text x="29" y="118" class="t-small">SafeHandle giữ con trỏ</text><rect x="235" y="30" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="249" y="58" class="t-b">2. fee_quote_describe</text><text x="249" y="82" class="t-small">Rust cấp char* UTF-8</text><text x="249" y="100" class="t-small">CString::into_raw + sổ</text><text x="249" y="118" class="t-small">C# chỉ được đọc</text><rect x="455" y="30" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="469" y="58" class="t-b">3. fee_string_free</text><text x="469" y="82" class="t-small">C# chép sang string</text><text x="469" y="100" class="t-small">trả char* cho Rust</text><text x="469" y="118" class="t-small">Rust gỡ khỏi sổ rồi drop</text><rect x="675" y="30" width="190" height="110" rx="10" class="f-phys-soft s-phys"/><text x="689" y="58" class="t-b">4. Dispose</text><text x="689" y="82" class="t-small">hoặc finalizer</text><text x="689" y="100" class="t-small">fee_quote_free(handle)</text><text x="689" y="118" class="t-small">lần hai: BadHandle</text><rect x="15" y="180" width="850" height="60" rx="10" class="f-warn-soft s-warn"/><text x="29" y="206" class="t-b">Quy tắc</text><text x="29" y="226" class="t-small">Bộ nhớ do Rust cấp luôn do Rust giải phóng. .NET chỉ giữ con trỏ và bản sao của nó.</text><path d="M205 85 L231 85" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-1-a)"/><path d="M425 85 L451 85" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-1-a)"/><path d="M645 85 L671 85" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-unsafe-ffi-goi-tu-csharp-pinvoke-python-pyo3-1-a)"/></svg>
 </div>
 <figcaption>Hình 2. Mọi ô là một lời gọi sang Rust; chỉ có bản sao string là nằm trong heap của .NET.</figcaption>
 </figure>
 
-Client C# thật in (rút gọn) như sau; `dotnet run` chạy trên .NET SDK 10.0.401:
+Client C# thật in ra kết quả (đã rút gọn) như sau; `dotnet run` chạy trên .NET SDK 10.0.401:
 
 ```text
 == 2. Handle và chuỗi UTF-8 ==
@@ -159,7 +159,7 @@ DOTNET OK
 
 ## Python gọi qua PyO3 và maturin
 
-PyO3 không đi qua C ABI của ta. Nó dùng C API của CPython để dựng một extension module, và lo thay ta phần ranh giới: đổi `int` Python sang `i64`, đổi `Result` thành exception, chặn panic. `fee-py` bọc cùng `ledger-core`, cùng phép chia cước, với vỏ khác.
+PyO3 không đi qua C ABI của ta. Thay vào đó, PyO3 dùng C API của CPython để dựng một extension module, và xử lý phần ranh giới giúp ta: đổi `int` Python sang `i64`, đổi `Result` thành exception, chặn panic. `fee-py` bọc cùng `ledger-core`, cùng phép chia cước, với vỏ khác.
 
 ```rust
 // fee-py/src/lib.rs (rút gọn)
@@ -186,7 +186,7 @@ mod toi_noi_fee {
 }
 ```
 
-Crate không có dòng `unsafe` nào do ta viết; phần đó nằm trong macro của PyO3 0.30.1. `maturin develop` biên dịch rồi cài module vào đúng venv đang dùng, và `--with-python` làm trọn chuỗi: tạo venv, `pip install maturin` (cần mạng, chỉ vào venv), `maturin develop`, rồi chạy `python-client/check_fee.py` bằng `python -B` để không sinh `__pycache__`. Output (rút gọn):
+Crate không có dòng `unsafe` nào do ta viết; phần đó nằm trong macro của PyO3 0.30.1. `maturin develop` biên dịch rồi cài module vào đúng venv đang dùng, và `--with-python` làm trọn chuỗi: tạo venv, `pip install maturin` (cần mạng, chỉ cài vào venv), `maturin develop`, rồi chạy `python-client/check_fee.py` bằng `python -B` để không sinh `__pycache__`. Output (rút gọn):
 
 ```text
 Python 3.9.6, module toi_noi_fee
@@ -200,11 +200,11 @@ Python 3.9.6, module toi_noi_fee
 PYTHON OK
 ```
 
-Ba hành vi nên nhớ. `int` Python không giới hạn nên `2**63` bị từ chối bằng `OverflowError` thay vì bị cắt. Một `float` đưa vào chỗ `i64` bị `TypeError`, nên tiền float không lọt vào đường này. Panic trong Rust thành `PanicException` kế thừa `BaseException`: `except Exception` không bắt được, và tiến trình Python vẫn sống để gọi tiếp. Python cũng nạp được `cdylib` của phần trước bằng `ctypes`; lab không chạy hướng đó.
+Ba hành vi nên nhớ. `int` Python không giới hạn nên `2**63` bị từ chối bằng `OverflowError` thay vì bị cắt. Một `float` đưa vào chỗ `i64` bị `TypeError`, nên tiền float không lọt vào đường này. Panic trong Rust thành `PanicException` kế thừa `BaseException`: `except Exception` không bắt được, và tiến trình Python vẫn sống để gọi tiếp. Python cũng nạp được `cdylib` của phần trước bằng `ctypes`; lab không chạy theo cách đó.
 
 ## Panic, double free và ai giải phóng
 
-Panic đi qua ranh giới `extern "C"` từng là hành vi không xác định. Từ Rust 1.81, nó abort tiến trình. Cái chết đó vẫn giết cả tiến trình chủ, kể cả .NET hay Python, nên vỏ FFI phải tự chặn bằng `catch_unwind` và trả mã lỗi:
+Panic đi qua ranh giới `extern "C"` từng là hành vi không xác định. Từ Rust 1.81, panic như vậy làm abort tiến trình. Nhưng abort vẫn kéo chết cả tiến trình chủ, kể cả .NET hay Python, nên vỏ FFI phải tự chặn bằng `catch_unwind` và trả mã lỗi:
 
 ```rust
 pub fn guard<T>(on_panic: T, f: impl FnOnce() -> T) -> T {
@@ -213,7 +213,7 @@ pub fn guard<T>(on_panic: T, f: impl FnOnce() -> T) -> T {
 }
 ```
 
-`--verify` kiểm cả hai nhánh. Với `guard`, một `panic!` giả lập trở thành `FeeStatus::Panic`. Không có `guard`, nó chạy lại chính binary ở chế độ `--child-unguarded-panic`, đọc stderr tới EOF và xác nhận tiến trình con chết vì SIGABRT (6) với thông điệp:
+`--verify` kiểm cả hai nhánh. Với `guard`, một `panic!` giả lập trở thành `FeeStatus::Panic`. Không có `guard`, bước kiểm tra chạy lại chính binary ở chế độ `--child-unguarded-panic`, đọc stderr tới EOF và xác nhận tiến trình con chết vì SIGABRT (6) với thông điệp:
 
 ```text
 panic in a function that cannot unwind
@@ -224,9 +224,9 @@ thread caused non-unwinding panic. aborting.
 
 Về giải phóng, quy tắc là ai cấp phát thì người đó giải phóng, và `fee_ffi.h` có sẵn cặp `fee_quote_new` / `fee_quote_free`, `fee_quote_describe` / `fee_string_free`. Để dựng double free mà lab không crash, thư viện ghi địa chỉ mọi con trỏ nó cấp vào một sổ có khoá. `fee_quote_free` gỡ địa chỉ khỏi sổ rồi mới `Box::from_raw`; lần gọi thứ hai không thấy địa chỉ và trả `BadHandle` mà không chạm vào bộ nhớ. Test `concurrent_free_has_exactly_one_winner` cho tám luồng cùng free một handle: đúng một luồng nhận `Ok`, bảy luồng nhận `BadHandle`.
 
-Ba hàm `fee_quote_describe`, `fee_quote_free`, `fee_string_free` nhận con trỏ mà không phải `unsafe fn`, nên mọi giá trị truyền vào, kể cả từ code Rust an toàn, đều không được gây UB. Tra sổ thôi chưa đủ: bản đầu của lab tra đúng địa chỉ rồi dereference chính con trỏ phía gọi đưa vào, và Miri bắt UB với một con trỏ chỉ có địa chỉ (`ptr::without_provenance_mut`, gọi được không cần `unsafe`). Bản hiện tại chỉ lấy `.addr()` của tham số; lúc cấp phát ghi sổ bằng `expose_provenance`, lúc dùng dựng con trỏ bằng `with_exposed_provenance`. Test `free_trusts_only_the_address_not_the_callers_pointer` giữ điều đó.
+Ba hàm `fee_quote_describe`, `fee_quote_free`, `fee_string_free` nhận con trỏ mà không phải `unsafe fn`, nên mọi giá trị truyền vào, kể cả từ code Rust an toàn, đều không được gây UB. Tra sổ thôi chưa đủ: bản đầu của lab tra đúng địa chỉ rồi dereference chính con trỏ mà phía gọi đưa vào, và Miri bắt UB với một con trỏ chỉ có địa chỉ (`ptr::without_provenance_mut`, gọi được không cần `unsafe`). Bản hiện tại chỉ lấy `.addr()` của tham số; lúc cấp phát ghi sổ bằng `expose_provenance`, lúc dùng dựng con trỏ bằng `with_exposed_provenance`. Test `free_trusts_only_the_address_not_the_callers_pointer` giữ điều đó.
 
-Sổ này là lưới an toàn, không thay được kỷ luật sở hữu. Nó có khoá toàn cục nên không dành cho đường nóng. Nếu địa chỉ đã free được cấp lại cho một báo giá khác thì free con trỏ cũ giải phóng báo giá mới: an toàn về bộ nhớ nhưng sai về logic, và `SafeHandle` ở phía C# ngăn chuyện đó.
+Sổ này là lưới an toàn, không thay được kỷ luật sở hữu. Sổ có khoá toàn cục nên không dành cho đường nóng. Nếu địa chỉ đã free được cấp lại cho một báo giá khác thì free con trỏ cũ giải phóng báo giá mới: an toàn về bộ nhớ nhưng sai về logic, và `SafeHandle` ở phía C# ngăn chuyện đó.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -236,7 +236,7 @@ Sổ này là lưới an toàn, không thay được kỷ luật sở hữu. Nó
 | Số lạ trong struct | thiếu `#[repr(C)]`, sai thứ tự hay kiểu trường |
 | `fee_live_allocations()` khác 0 sau khi xong | thiếu `Dispose`, hoặc quên `fee_string_free` |
 
-Miri diễn dịch MIR của Rust và bắt use-after-free, truy cập lệch căn lề, vi phạm quy tắc con trỏ. Mười test của `fee-ffi` xanh dưới `cargo miri test -p fee-ffi --lib` (cần nightly có component `miri`; Miri cảnh báo `integer-to-pointer cast` ở các chỗ dùng `with_exposed_provenance`, đúng thiết kế). Miri không chạy được code native hay CPython, nên phía bên kia dựa vào client thật, `--verify` và việc đọc từng `// SAFETY:`.
+Miri thông dịch MIR của Rust và bắt use-after-free, truy cập lệch căn lề, vi phạm quy tắc con trỏ. Mười test của `fee-ffi` xanh dưới `cargo miri test -p fee-ffi --lib` (cần nightly có component `miri`; Miri cảnh báo `integer-to-pointer cast` ở các chỗ dùng `with_exposed_provenance`, đúng thiết kế). Miri không chạy được code native hay CPython, nên phía bên kia dựa vào client thật, `--verify` và việc đọc từng `// SAFETY:`.
 
 ## Vì sao sổ cái dùng gRPC mà không dùng FFI?
 
@@ -250,11 +250,11 @@ Cùng một ranh giới ngôn ngữ, hai cách nối cho hai loại việc khác
 | Hợp đồng | ABI: bố cục, cấp phát, ai free | proto sinh code cho hai phía |
 | Đổi hợp đồng | tăng `fee_abi_version`, build lại mọi bên gọi | thêm trường, tương thích ngược |
 
-Sổ cái giữ transaction, khoá số dư và idempotency key trên database mà chỉ nó được ghi (kiến trúc §4.9). Một lỗi nặng ở đó phải chết trong tiến trình của nó, không kéo theo service gọi. Đó là lý do bài 35 chọn gRPC. FFI chỉ hợp với thư viện tính phí: thuần, không I/O, chạy trong tiến trình gọi. Ngay cả khi ấy, mỗi lần đổi chính sách phí là một lần build lại và phát hành lại ở mọi tiến trình nạp thư viện; số `fee_abi_version` có để bên gọi từ chối nạp bản lệch. Lab không đo độ trễ nên bài không khẳng định FFI nhanh hơn gRPC bao nhiêu.
+Sổ cái giữ transaction, khoá số dư và idempotency key trên database mà chỉ nó được ghi (kiến trúc §4.9). Một lỗi nặng ở đó phải chết trong tiến trình của nó, không kéo theo service gọi. Đó là lý do bài 35 chọn gRPC. FFI chỉ hợp với thư viện tính phí: thuần, không I/O, chạy trong tiến trình gọi. Ngay cả khi ấy, mỗi lần đổi chính sách phí là một lần build lại và phát hành lại ở mọi tiến trình nạp thư viện; số `fee_abi_version` được dùng để bên gọi từ chối nạp bản lệch. Lab không đo độ trễ nên bài không khẳng định FFI nhanh hơn gRPC bao nhiêu.
 
 ## Chạy ví dụ và kiểm chứng
 
-Từ gốc repository, `--verify` chỉ cần Rust. Máy không có `nm` thì bước kiểm symbol in dòng `--  BỎ QUA` và các bước khác vẫn chạy; `nm` có mà chạy lỗi thì FAIL.
+Từ gốc repository, `--verify` chỉ cần Rust. Máy không có `nm` thì bước kiểm tra symbol in dòng `--  BỎ QUA` và các bước khác vẫn chạy; `nm` có mà chạy lỗi thì FAIL.
 
 ```bash
 cargo run --manifest-path examples/toi-noi-rust/62-ffi-csharp-python/Cargo.toml -- --verify
@@ -289,7 +289,7 @@ VERIFY OK
 **Bài tập:** thêm hàm `fee_quote_trip_id(quote)` trả mã chuyến cho phía gọi, không cấp phát chuỗi mới. Ai phải giữ cho con trỏ trả về còn hợp lệ, và hợp đồng của hàm nên ghi gì?
 
 <details><summary>Xem lời giải</summary>
-<p>Con trỏ trỏ vào bộ nhớ của <code>FeeQuote</code>, nên chỉ hợp lệ tới khi <code>fee_quote_free</code> chạy; phía gọi không được giữ lâu hơn handle, không được ghi hay free nó. Hợp đồng ghi «chuỗi mượn, hết hạn khi free handle». Cần lưu mã chuyến dạng <code>CString</code> trong <code>FeeQuote</code> (hiện là <code>String</code>, không có NUL cuối), trả <code>as_ptr()</code> qua <code>with_quote</code>, cập nhật header và bản commit, thêm test dùng sau free. Cách mượn bớt một lần cấp phát nhưng đẩy trách nhiệm thời hạn sống sang người gọi; lab chọn chuỗi cấp mới kèm <code>fee_string_free</code> để C# đọc xong là trả ngay.</p>
+<p>Con trỏ trỏ vào bộ nhớ của <code>FeeQuote</code>, nên chỉ hợp lệ tới khi <code>fee_quote_free</code> chạy; phía gọi không được giữ lâu hơn handle, không được ghi hay free nó. Hợp đồng ghi «chuỗi mượn, hết hạn khi free handle». Cần lưu mã chuyến dạng <code>CString</code> trong <code>FeeQuote</code> (hiện là <code>String</code>, không có NUL cuối), trả <code>as_ptr()</code> qua <code>with_quote</code>, cập nhật header và bản commit, thêm test dùng sau free. Cách mượn bớt một lần cấp phát nhưng chuyển trách nhiệm về lifetime sang người gọi; lab chọn chuỗi cấp mới kèm <code>fee_string_free</code> để C# đọc xong là trả ngay.</p>
 </details>
 
 Bài trước: [bài 61](/articles/rust-toi-uu-co-so-do-clone-cow-batching-copy-p99). Bài tiếp: [bài 63](/articles/rust-container-dockerfile-da-stage-cargo-chef-distroless).

@@ -1,7 +1,7 @@
 ---
 slug: rust-box-rc-arc-refcell-smart-pointer
 title: "Box, Rc, Arc, RefCell và Cell: khi nào cần smart pointer"
-summary: "Bài 16: dùng Box cho kiểu đệ quy và Box<dyn FeePolicy>, Rc + Weak cho cây tài khoản, RefCell và Cell cho sửa qua tham chiếu chung, Arc<Mutex> cho nhiều luồng; chọn theo ba câu hỏi."
+summary: "Bài 16: dùng Box cho kiểu đệ quy và Box<dyn FeePolicy>, Rc + Weak cho cây tài khoản, RefCell và Cell để sửa dữ liệu qua tham chiếu chung, Arc<Mutex> cho nhiều luồng; chọn theo ba câu hỏi."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, smart-pointer, rc, refcell]
@@ -15,7 +15,7 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p><code>RefCell&lt;Ledger&gt;</code> có ngăn được hai chỗ cùng sửa sổ cái ngay lúc biên dịch không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> <code>RefCell</code> dời việc kiểm tra mượn sang lúc chạy. Vi phạm là panic <code>RefCell already borrowed</code>, hoặc <code>Err</code> nếu bạn dùng <code>try_borrow_mut</code>.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> <code>RefCell</code> dời việc kiểm tra mượn sang lúc chạy. Vi phạm sẽ gây panic <code>RefCell already borrowed</code>, hoặc trả <code>Err</code> nếu bạn dùng <code>try_borrow_mut</code>.</p></details>
 </div>
 
 ## Dữ liệu nằm ở stack hay heap, và `Box` thêm gì?
@@ -24,7 +24,7 @@ Biến cục bộ nằm trên **stack**: kích thước biết lúc biên dịch
 
 `Box<T>` đặt một `T` lên heap, vẫn một chủ: khi `Box` ra khỏi phạm vi, giá trị bị `drop` và heap được trả lại, tất định như ở bài 01. Trên stack chỉ còn con trỏ 8 byte. Hai lý do để dùng:
 
-**Kiểu đệ quy.** Công thức cước là một cây: tổng hoặc số nhỏ hơn (trần cước) của hai công thức con. Viết thẳng, compiler không biết `FareExpr` chiếm bao nhiêu byte:
+**Kiểu đệ quy.** Công thức cước là một cây: tổng hoặc số nhỏ hơn (trần cước) của hai công thức con. Nếu viết thẳng, compiler không biết `FareExpr` chiếm bao nhiêu byte:
 
 ```text
 error[E0072]: recursive type `FareExpr` has infinite size
@@ -73,7 +73,7 @@ impl FareExpr {
 
 Chuyến `TN-0001` là `Sum(Fixed(12.000), PerUnit { unit: 4.500, count: 3 })`, cho 25.500 VND. Phép cộng và nhân vẫn là `checked_*` như bài 03.
 
-**Struct lớn.** `RawStatement` trong lab là mảng 512 `Money` nằm thẳng trong struct, 4.096 byte. Về ngữ nghĩa, move là một phép `memcpy` các byte của giá trị: move `RawStatement` là 4.096 byte, move `Box<RawStatement>` là 8 byte và không chạm vào heap. Compiler có thể tối ưu bỏ bản sao, nhưng đó không phải cam kết của ngôn ngữ; đừng thêm `Box` vì thói quen, hãy đo trước.
+**Struct lớn.** `RawStatement` trong lab là mảng 512 `Money` nằm thẳng trong struct, 4.096 byte. Về ngữ nghĩa, move là một phép `memcpy` các byte của giá trị: move `RawStatement` sao chép 4.096 byte, còn move `Box<RawStatement>` sao chép 8 byte và không chạm vào heap. Compiler có thể tối ưu bỏ bản sao, nhưng đó không phải cam kết của ngôn ngữ; đừng thêm `Box` vì thói quen, hãy đo trước.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -122,7 +122,7 @@ pub fn default_policies() -> Vec<Box<dyn FeePolicy>> {
 }
 ```
 
-`PercentFee`, `FlatFee` và `CappedPercentFee` mỗi kiểu `impl FeePolicy` (trait rút gọn từ bài 11). Trên cước 25.500 VND, lab in:
+`PercentFee`, `FlatFee` và `CappedPercentFee` mỗi kiểu `impl FeePolicy` (trait rút gọn từ bài 11). Với cước 25.500 VND, lab in:
 
 ```text
   phần trăm            5.100 VND
@@ -130,13 +130,13 @@ pub fn default_policies() -> Vec<Box<dyn FeePolicy>> {
   phần trăm có trần    4.000 VND
 ```
 
-Hàm nhận một chính sách chỉ cần `&dyn FeePolicy`: `capture_entry(.., policies[0].as_ref())` cho bút toán `-25.500 / +5.100 / +20.400`. Giá của `Box<dyn>`: một lần cấp phát heap mỗi chính sách và một lần gọi gián tiếp. Tập chính sách đóng và biết trước thì `enum` (bài 05) cũng giải được; chọn `dyn` khi tập kiểu mở rộng được.
+Hàm nhận một chính sách chỉ cần `&dyn FeePolicy`: `capture_entry(.., policies[0].as_ref())` cho bút toán `-25.500 / +5.100 / +20.400`. Cái giá của `Box<dyn>`: một lần cấp phát heap mỗi chính sách và một lần gọi gián tiếp. Nếu tập chính sách đã đóng và biết trước thì `enum` (bài 05) cũng giải được; chọn `dyn` khi tập kiểu có thể mở rộng thêm.
 
 ## `Rc` và `Weak`: cây tài khoản có cha và con
 
 `Rc<T>` cho nhiều chủ cùng giữ một giá trị trong **một luồng**. `Rc::clone` không copy dữ liệu, chỉ tăng bộ đếm; giá trị được giải phóng khi chủ cuối buông. Cây tài khoản cần điều đó: `platform` có hai con `platform:revenue` và `platform:fee`; cha giữ con bằng `Rc`, và chỗ khác cũng muốn giữ cùng nút.
 
-Con trỏ về cha là chỗ dễ sai. Con giữ cha bằng `Rc` thì bộ đếm hai bên không bao giờ về 0 và bộ nhớ rò. `Weak<T>` trỏ tới nút nhưng không giữ nút sống; `upgrade()` trả `Option<Rc<T>>`, `None` nếu nút đã bị giải phóng (`src/tree.rs`, rút gọn):
+Con trỏ về cha là chỗ dễ sai. Con giữ cha bằng `Rc` thì bộ đếm hai bên không bao giờ về 0 và bộ nhớ bị rò. `Weak<T>` trỏ tới nút nhưng không giữ nút sống; `upgrade()` trả `Option<Rc<T>>`, `None` nếu nút đã bị giải phóng (`src/tree.rs`, rút gọn):
 
 ```rust
 pub struct AccountNode {
@@ -173,7 +173,7 @@ impl AccountNode {
 <figcaption>Hình 2. Chủ sở hữu đi xuống (<code>Rc</code>), con trỏ ngược đi lên (<code>Weak</code>). Không có chu trình <code>Rc</code>, nên cây được giải phóng khi chủ cuối cùng buông.</figcaption>
 </figure>
 
-Lab chứng minh bằng một `Weak` quan sát. Hai nút giữ nhau bằng `Rc` mạnh: buông cả hai handle, `probe.upgrade().is_some()` vẫn `true`, nút còn sống tức là rò. Với cây dùng `Weak` cho cha, cùng phép thử trả `None` cho cả gốc lẫn con. Rò bộ nhớ không vi phạm an toàn bộ nhớ nên Rust không chặn.
+Lab chứng minh bằng một `Weak` dùng để quan sát. Hai nút giữ nhau bằng `Rc` mạnh: buông cả hai handle, `probe.upgrade().is_some()` vẫn `true`, nút còn sống tức là rò. Với cây dùng `Weak` cho cha, cùng phép thử trả `None` cho cả gốc lẫn con. Rò bộ nhớ không vi phạm an toàn bộ nhớ nên Rust không chặn.
 
 ## `RefCell` và `Cell`: sửa qua tham chiếu chung
 
@@ -189,7 +189,7 @@ error[E0596]: cannot borrow data in an `Rc` as mutable
   = help: trait `DerefMut` is required to modify through a dereference, but it is not implemented for `Rc<Ledger>`
 ```
 
-Đó là lý do có **interior mutability**: sửa bên trong giá trị đang chỉ có `&`. `RefCell<T>` cho `borrow()` (trả `Ref`) và `borrow_mut()` (trả `RefMut`). Luật vẫn như borrow checker: nhiều chỗ đọc, hoặc đúng một chỗ ghi; khác ở chỗ được đếm **lúc chạy**, và vi phạm là panic. Lỗi sau viết cố ý trong `src/shared.rs`:
+Đó là lý do có **interior mutability** (khả năng thay đổi từ bên trong): sửa giá trị bên trong dù chỉ đang có `&`. `RefCell<T>` cho `borrow()` (trả `Ref`) và `borrow_mut()` (trả `RefMut`). Luật vẫn như borrow checker: nhiều chỗ đọc, hoặc đúng một chỗ ghi; khác ở chỗ việc đếm diễn ra **lúc chạy**, và vi phạm thì panic. Đoạn code sau được cố ý viết sai trong `src/shared.rs`:
 
 ```rust
 pub type SharedLedger = Rc<RefCell<Ledger>>;
@@ -210,7 +210,7 @@ RefCell already borrowed
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
 
-Nguyên nhân: guard `view` có `Drop`, nên sống đến hết hàm chứ không chỉ đến lần dùng cuối. Lúc dòng 25 xin mượn ghi, một mượn đọc vẫn đang mở.
+Nguyên nhân: guard `view` có `Drop`, nên sống đến hết hàm chứ không chỉ đến lần dùng cuối. Lúc dòng 25 xin mượn để ghi, lần mượn đọc trước vẫn đang mở.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -219,7 +219,7 @@ Nguyên nhân: guard `view` có `Drop`, nên sống đến hết hàm chứ khô
 <figcaption>Hình 3. Cùng hai lời gọi, khác ở lúc guard đọc hết sống. Compiler không thấy khác biệt; <code>RefCell</code> thấy lúc chạy.</figcaption>
 </figure>
 
-Hai cách sửa. Thu hẹp guard: `let before = shared.borrow().len();` để guard tạm hết ở dấu `;` (`post_fixed`, in `JE-000001 (trước đó có 0 bút toán)`). Hoặc trả lỗi thay vì panic: `shared.try_borrow_mut().map_err(|_| LedgerError::Busy)?` (`post_try`, in `Err(Busy)` khi có `borrow()` đang mở).
+Có hai cách sửa. Một là thu hẹp guard: `let before = shared.borrow().len();` để guard tạm hết ở dấu `;` (`post_fixed`, in `JE-000001 (trước đó có 0 bút toán)`). Hai là trả lỗi thay vì panic: `shared.try_borrow_mut().map_err(|_| LedgerError::Busy)?` (`post_try`, in `Err(Busy)` khi có `borrow()` đang mở).
 
 **`Cell<T>`** nhẹ hơn. `get` sao chép giá trị ra (nên cần `T: Copy`), `set` ghi đè; không bao giờ phát tham chiếu vào bên trong, nên không thể vi phạm luật mượn và không cần kiểm tra lúc chạy. Hợp với bộ đếm hay cờ. Lab đếm lượt tra cứu số dư dù `balance` chỉ nhận `&self` (`src/shared.rs`, rút gọn):
 
@@ -238,7 +238,7 @@ impl MeteredLedger {
 }
 ```
 
-Sau hai lần gọi, `lookups()` trả 2. Cái giá của `RefCell` thấy ở kích thước: `size_of::<Cell<i64>>()` là 8, còn `RefCell<i64>` là 16 vì có thêm cờ đếm mượn. Cả hai đều **không** `Sync`: không chia sẻ được giữa các luồng.
+Sau hai lần gọi, `lookups()` trả 2. Cái giá của `RefCell` thể hiện ở kích thước: `size_of::<Cell<i64>>()` là 8, còn `RefCell<i64>` là 16 vì có thêm cờ đếm mượn. Cả hai đều **không** `Sync`: không chia sẻ được giữa các luồng.
 
 ## `Arc<Mutex<_>>`: khi các chủ nằm ở nhiều luồng
 
@@ -254,7 +254,7 @@ error[E0277]: `Rc<std::sync::Mutex<Ledger>>` cannot be sent between threads safe
    = help: within `{closure@src/main.rs:13:27: 13:34}`, the trait `Send` is not implemented for `Rc<std::sync::Mutex<Ledger>>`
 ```
 
-`Arc` chỉ cho `&T`, nên để ghi cần thêm `Mutex<T>`: dữ liệu nằm *bên trong* khoá, chỉ chạm được qua `lock()` trả guard, và guard nhả khoá khi hết phạm vi. Bốn chuyến, mỗi chuyến ghi từ một luồng (`src/threads.rs`, bỏ chú thích):
+`Arc` chỉ cho `&T`, nên để ghi cần thêm `Mutex<T>`: dữ liệu nằm *bên trong* khoá, chỉ chạm được qua `lock()` trả guard, và guard nhả khoá khi hết phạm vi. Ví dụ gồm bốn chuyến, mỗi chuyến ghi từ một luồng (`src/threads.rs`, bỏ chú thích):
 
 ```rust
 pub fn capture_in_threads(trips: usize) -> Result<Ledger, LedgerError> {
@@ -277,11 +277,11 @@ pub fn capture_in_threads(trips: usize) -> Result<Ledger, LedgerError> {
 }
 ```
 
-`lock()` trả `Err` nếu luồng khác từng panic khi giữ khoá (poisoning); lab đổi nó thành `LedgerError::Poisoned`. Kết quả không phụ thuộc thứ tự luồng: 4 bút toán, `platform:revenue` bằng 20.400 VND (4 × 5.100), tổng toàn sổ bằng 0; mã `JE-00000x` tuỳ luồng nào vào trước.
+`lock()` trả `Err` nếu luồng khác từng panic khi giữ khoá (poisoning); lab đổi lỗi này thành `LedgerError::Poisoned`. Kết quả không phụ thuộc thứ tự luồng: 4 bút toán, `platform:revenue` bằng 20.400 VND (4 × 5.100), tổng toàn sổ bằng 0; mã `JE-00000x` tuỳ luồng nào vào trước.
 
 ## Chọn loại nào: ba câu hỏi và đối chiếu với C#
 
-Câu đầu tiên: có thật cần không? Mặc định vẫn là ownership thường cộng borrow. Khi không đủ, hỏi ba câu: **một chủ hay nhiều chủ; một luồng hay nhiều luồng; có cần sửa qua tham chiếu chung không**.
+Câu hỏi đầu tiên: có thật sự cần không? Mặc định vẫn là ownership thường kết hợp với borrow. Khi không đủ, hỏi ba câu: **một chủ hay nhiều chủ; một luồng hay nhiều luồng; có cần sửa qua tham chiếu chung không**.
 
 | Tình huống | Chọn | Giá phải trả |
 | --- | --- | --- |
@@ -292,18 +292,18 @@ Câu đầu tiên: có thật cần không? Mặc định vẫn là ownership th
 | Sửa qua `&`, một luồng, kiểu `Copy` nhỏ | `Cell<T>` | Không phát tham chiếu vào trong |
 | Sửa qua `&`, nhiều luồng | `Mutex<T>` (đi với `Arc`) | Luồng khác phải chờ; poisoning |
 
-Với người từ C#, xem thêm [bài về allocation, GC và dọn tài nguyên](/articles/dotnet10-allocation-gc-disposal):
+Với người quen dùng C#, xem thêm [bài về allocation, GC và dọn tài nguyên](/articles/dotnet10-allocation-gc-disposal):
 
 | C# / .NET | Rust |
 | --- | --- |
-| `class` là tham chiếu do GC quản, chia sẻ tự do, không phải nghĩ ai là chủ | Mặc định một chủ; chia sẻ phải ghi ra kiểu (`Rc`, `Arc`) |
+| `class` là tham chiếu do GC quản lý, chia sẻ tự do, không cần nghĩ xem ai là chủ | Mặc định một chủ; chia sẻ phải ghi ra kiểu (`Rc`, `Arc`) |
 | GC truy vết, dọn được cả chu trình | `Rc` chỉ đếm, chu trình bị rò; `Weak<T>` gần `WeakReference<T>` |
 | `lock (obj)`: khoá tách khỏi dữ liệu | `Mutex<T>`: dữ liệu nằm trong khoá |
 | `IDisposable` + `using`: người gọi phải viết `using`; bộ nhớ thường do GC dọn | `Drop` tự chạy khi chủ cuối buông; chu trình `Rc` thì không chạy |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p><code>Rc&lt;RefCell&lt;Ledger&gt;&gt;</code> và bốn luồng ghi cùng một <code>Mutex</code> là minh hoạ cơ chế, không phải thiết kế production. Service thật nên cho đúng một nơi sở hữu <code>Ledger</code> và truyền <code>&amp;mut Ledger</code> hoặc nhận lệnh qua hàng đợi. Phí ở đây là phần trăm nguyên, làm tròn nửa lên, chưa dùng <code>rust_decimal</code> như bài 03; sổ cái chỉ nằm trong bộ nhớ.</p>
+<p><code>Rc&lt;RefCell&lt;Ledger&gt;&gt;</code> và bốn luồng ghi cùng một <code>Mutex</code> là minh hoạ cơ chế, không phải thiết kế production. Service thật nên để đúng một nơi sở hữu <code>Ledger</code> và truyền <code>&amp;mut Ledger</code> hoặc nhận lệnh qua hàng đợi. Phí ở đây là phần trăm nguyên, làm tròn nửa lên, chưa dùng <code>rust_decimal</code> như bài 03; sổ cái chỉ nằm trong bộ nhớ.</p>
 </div>
 
 ## Chạy ví dụ và kiểm chứng
@@ -317,7 +317,7 @@ cargo run --manifest-path examples/toi-noi-rust/16-box-rc-arc-refcell/Cargo.toml
 cargo test --manifest-path examples/toi-noi-rust/16-box-rc-arc-refcell/Cargo.toml
 ```
 
-Lệnh đầu in từng nhóm ví dụ. Phần chưa trích ở trên:
+Lệnh đầu in ra từng nhóm ví dụ; dưới đây là phần chưa trích ở trên:
 
 ```text
   cước TN-0001 = 25.500 VND (cây sâu 2)
@@ -332,11 +332,11 @@ Lệnh đầu in từng nhóm ví dụ. Phần chưa trích ở trên:
   tổng toàn sổ = 0 VND
 ```
 
-`-- --verify` kiểm các giá trị trên và bắt panic thật của `post_buggy` bằng `catch_unwind`: đúng thì in `VERIFY OK`, thoát 0; sai thì thoát 1. Bước này chỉ so phần `already borrowed`, vì thông điệp có thể đổi theo phiên bản Rust. `-- --panic-demo` để panic không bắt, thoát mã 101. `cargo test` chạy 33 unit test và 2 doc test.
+`-- --verify` kiểm tra các giá trị trên và bắt panic thật của `post_buggy` bằng `catch_unwind`: đúng thì in `VERIFY OK`, thoát 0; sai thì thoát 1. Bước này chỉ so phần `already borrowed`, vì thông báo lỗi có thể đổi theo phiên bản Rust. `-- --panic-demo` để panic không bị bắt, thoát mã 101. `cargo test` chạy 33 unit test và 2 doc test.
 
 **Bài tập:** (1) Trong `post_buggy`, thêm `drop(view);` ngay sau dòng `let before = view.len();`. Hàm còn panic không? (2) Đổi `Arc<Mutex<Ledger>>` thành `Arc<RefCell<Ledger>>` rồi đưa vào `thread::spawn`. Compiler nói gì, và vì sao?
 
-<details><summary>Xem lời giải</summary><p>(1) Không còn panic: <code>drop(view)</code> nhả guard đọc trước khi <code>borrow_mut()</code>; hàm trả <code>JE-000001</code> với <code>before = 0</code>. (2) Lỗi E0277: <code>RefCell&lt;Ledger&gt;</code> cannot be shared between threads safely. <code>RefCell</code> không cài <code>Sync</code> vì đếm mượn không nguyên tử, và <code>Arc&lt;T&gt;</code> chỉ <code>Send</code> khi <code>T</code> là <code>Send + Sync</code>. Compiler gợi ý <code>RwLock</code>; <code>Mutex</code> cũng đúng cho việc này.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Không còn panic: <code>drop(view)</code> nhả guard đọc trước khi <code>borrow_mut()</code>; hàm trả <code>JE-000001</code> với <code>before = 0</code>. (2) Lỗi E0277: <code>RefCell&lt;Ledger&gt;</code> cannot be shared between threads safely. <code>RefCell</code> không implement <code>Sync</code> vì đếm mượn không nguyên tử, và <code>Arc&lt;T&gt;</code> chỉ <code>Send</code> khi <code>T</code> là <code>Send + Sync</code>. Compiler gợi ý <code>RwLock</code>; <code>Mutex</code> cũng đúng cho việc này.</p></details>
 
 Bài trước: [bài 15](/articles/rust-closure-iterator-adapter-doi-soat-bo-nho). Bài tiếp: [bài 17](/articles/rust-thiserror-anyhow-xu-ly-loi-thuc-te).
 

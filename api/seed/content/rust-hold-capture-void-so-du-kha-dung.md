@@ -10,7 +10,7 @@ language: vi
 
 Khách `CU-001` có 40.000 VND trong ví. Khi chuyến `TN-0001` bắt đầu, app cần chắc rằng ví đủ trả cước ước tính 25.500 VND, nhưng chuyến chưa xong nên chưa được ghi thu tiền. Nếu khách mở thêm chuyến trong lúc đó, ví phải trả lời được «còn bao nhiêu có thể tiêu».
 
-Đây là bài 42 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài 14 đã dựng [máy trạng thái hold → capture → settle](/articles/rust-typestate-may-trang-thai-thanh-toan) trong bộ nhớ; bài 24 đã cho thấy [hai giao dịch chồng nhau phá hạn mức](/articles/rust-transaction-isolation-append-only-idempotency-key). Bài này đặt chúng lên PostgreSQL thật, chỉ cho hold trong ví do sổ cái Tới Nơi quản lý.
+Đây là bài 42 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài 14 đã dựng [máy trạng thái hold → capture → settle](/articles/rust-typestate-may-trang-thai-thanh-toan) trong bộ nhớ; bài 24 đã cho thấy [hai giao dịch chồng nhau phá hạn mức](/articles/rust-transaction-isolation-append-only-idempotency-key). Bài này đặt chúng lên PostgreSQL thật, chỉ áp dụng cho hold trong ví do sổ cái Tới Nơi quản lý.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -70,7 +70,7 @@ gửi lại cùng key    : Replayed { id: 1 }, giữ vẫn 25.500 VND
 hold thêm 14.501    : Err(không đủ số dư khả dụng: còn 14.500 VND, cần 14.501 VND)
 ```
 
-Số bút toán và posting không đổi. Gửi lại cùng `trip:TN-0001:hold` trả hold cũ thay vì giữ thêm một lần nữa, và biên là 14.500: xin thêm 14.501 bị từ chối, đúng một đồng.
+Số bút toán và posting không đổi. Gửi lại cùng `trip:TN-0001:hold` trả hold cũ thay vì giữ thêm một lần nữa, và ranh giới là 14.500: xin thêm 14.501 bị từ chối, đúng một đồng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -79,7 +79,7 @@ Số bút toán và posting không đổi. Gửi lại cùng `trip:TN-0001:hold`
 <figcaption>Hình 1. Chiều ngang là 40.000 VND. Chỉ capture làm sổ cái đổi; nhả phần dư và void chỉ đổi cách tính khả dụng.</figcaption>
 </figure>
 
-Hold khác authorization ở cổng thanh toán. `AUTHORIZED` ở bài 14 là PSP giữ hạn mức trên phương tiện thanh toán của khách, trong hệ thống và theo quy tắc của họ; Tới Nơi chỉ biết qua thông báo. Hold của bài này là phần ví mà **chính sổ cái** từ chối cho tiêu: ta sở hữu con số `available`, tự quyết hạn và tự chịu trách nhiệm nếu để nó âm.
+Hold khác authorization ở cổng thanh toán. `AUTHORIZED` ở bài 14 là PSP giữ hạn mức trên phương tiện thanh toán của khách, trong hệ thống và theo quy tắc của họ; Tới Nơi chỉ biết qua thông báo. Hold của bài này là phần ví mà **chính sổ cái** từ chối cho tiêu: ta tự quản lý con số `available`, tự quyết hạn và tự chịu trách nhiệm nếu để nó âm.
 
 ## Capture một phần và void: phần dư đi đâu?
 
@@ -155,7 +155,7 @@ Phần dư 13.500 không cần bút toán nào: hold không còn ACTIVE nên kh�
 
 `create_hold` đọc số dư, trừ các hold ACTIVE, rồi chèn nếu đủ: kiểm-rồi-ghi, cùng dạng với hạn mức rút ở bài 24. Hai chuyến `TN-0001` và `TN-0002` của cùng khách, mỗi chuyến 25.500, cùng đến lúc ví có 40.000: mỗi bên nhìn riêng đều đúng, cộng lại là 51.000.
 
-Lab dựng cuộc đua bằng `tokio::sync::Barrier`, không bằng may rủi. Với bản không khoá, cả hai task phải kiểm xong mới được cùng ghi:
+Lab dựng race condition bằng `tokio::sync::Barrier`, không bằng may rủi. Với bản không khoá, cả hai task phải kiểm xong mới được cùng ghi:
 
 ```rust
 // src/scenarios.rs (rút gọn: một task của race)
@@ -231,7 +231,7 @@ A: Created { id: 1 }
 B: Err(không đủ số dư khả dụng: còn 14.500 VND, cần 25.500 VND)
 ```
 
-Giá phải trả: mọi hold của cùng một ví xếp hàng, nên không gọi mạng bên trong transaction này.
+Giá phải trả: mọi hold của cùng một ví xếp hàng, nên ta không gọi mạng bên trong transaction này.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -273,13 +273,13 @@ trạng thái cuối     : ["CAPTURED", "EXPIRED", "EXPIRED"] (capture ghi bút 
 CU-002 sau hết hạn  : số dư 40.000 VND, giữ 0 VND, khả dụng 40.000 VND
 ```
 
-Dòng `NOWAIT` là bằng chứng dòng 1 đang bị khoá (mã 55P03). Lần chạy đầu bỏ qua hold 1, capture hoàn tất rồi hold 1 thành `CAPTURED`, lần chạy sau không còn gì để làm. Nếu capture bị rollback, hold 1 vẫn ACTIVE và lần chạy sau nhặt nó. Cái giá: một lần chạy không thấy trọn tập hold, hợp lý cho job lặp lại, không hợp khi cần ảnh chụp đầy đủ.
+Dòng `NOWAIT` là bằng chứng dòng 1 đang bị khoá (mã 55P03). Lần chạy đầu bỏ qua hold 1, capture hoàn tất rồi hold 1 thành `CAPTURED`, lần chạy sau không còn gì để làm. Nếu capture bị rollback, hold 1 vẫn ACTIVE và lần chạy sau nhặt nó. Cái giá: một lần chạy không thấy trọn tập hold, hợp lý với job chạy lặp lại, nhưng không phù hợp khi cần ảnh chụp đầy đủ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 270" role="img" aria-label="Hình 3. Vòng đời của hold. Từ ACTIVE có ba lối ra: capture khi đồng hồ nhỏ hơn expires_at sang CAPTURED, void khi huỷ chuyến sang VOIDED, job khi expires_at nhỏ hơn hoặc bằng đồng hồ sang EXPIRED. Cả ba đều giữ khoá dòng và thấy status ACTIVE rồi mới đổi trạng thái nên chỉ một lối thắng."><defs><marker id="rust-hold-capture-void-so-du-kha-dung-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="40" y="75" width="200" height="64" rx="10" class="f-pk-soft s-pk"/><text x="56" y="102" class="t-b">ACTIVE</text><text x="56" y="124" class="t-small">đang trừ khả dụng</text><rect x="560" y="15" width="290" height="58" rx="10" class="f-phys-soft s-phys"/><text x="576" y="40" class="t-b">CAPTURED</text><text x="576" y="60" class="t-small">có bút toán, phần dư nhả</text><rect x="560" y="82" width="290" height="58" rx="10" class="f-phys-soft s-phys"/><text x="576" y="107" class="t-b">VOIDED</text><text x="576" y="127" class="t-small">không bút toán</text><rect x="560" y="149" width="290" height="58" rx="10" class="f-phys-soft s-phys"/><text x="576" y="174" class="t-b">EXPIRED</text><text x="576" y="194" class="t-small">không bút toán</text><path d="M240 92 L558 46" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hold-capture-void-so-du-kha-dung-0-a)"/><text x="400" y="56" text-anchor="middle" class="t-small">capture · now &lt; expires_at</text><path d="M240 107 L558 111" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hold-capture-void-so-du-kha-dung-0-a)"/><text x="400" y="101" text-anchor="middle" class="t-small">void · huỷ chuyến</text><path d="M240 122 L558 178" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hold-capture-void-so-du-kha-dung-0-a)"/><text x="400" y="172" text-anchor="middle" class="t-small">job · expires_at ≤ now</text><text x="40" y="250" class="t-small">Mỗi mũi tên là UPDATE dưới khoá dòng; sau mũi tên đầu tiên, hold không còn ACTIVE nên các mũi tên còn lại bị từ chối.</text></svg>
 </div>
-<figcaption>Hình 3. Ba lối ra, không lối quay lại. Ranh giới hạn dùng hai vế đối nhau của cùng một thời điểm.</figcaption>
+<figcaption>Hình 3. Ba lối ra, không lối quay lại. Ranh giới hạn dùng hai vế đối nhau, cùng so với một thời điểm.</figcaption>
 </figure>
 
 ## Capture đến sau hạn thì xử lý thế nào?
@@ -302,9 +302,9 @@ Từ chối chưa phải là xong: chuyến đã chạy mà chưa thu được t
 
 ## Typestate đến đâu, enum ở đâu?
 
-Bài 14 đặt trạng thái vào kiểu `Payment<Authorized>`. Với hold, cách đó đi được một đoạn ngắn. Trạng thái thật nằm trong cột `status`, nhiều tiến trình cùng đổi, và hai tiến trình có thể cùng cầm một `Hold<Active>` trong bộ nhớ riêng mà kiểu không biết bên kia đã void. Ai thắng do khoá dòng và trạng thái đọc dưới khoá quyết định.
+Bài 14 đặt trạng thái vào kiểu `Payment<Authorized>`. Với hold, cách đó đi được một đoạn ngắn. Trạng thái thật nằm trong cột `status`, nhiều tiến trình cùng đổi, và hai tiến trình có thể cùng cầm một `Hold<Active>` trong bộ nhớ riêng mà kiểu không biết bên kia đã void. Khoá dòng và trạng thái đọc dưới khoá quyết định bên nào thắng.
 
-Lab dùng hai mức. Ở **biên DB** là `enum HoldStatus`, đọc từ chuỗi bằng `FromStr` và từ chối chuỗi lạ:
+Lab dùng hai mức. Ở **ranh giới với DB** là `enum HoldStatus`, đọc từ chuỗi bằng `FromStr` và từ chối chuỗi lạ:
 
 ```rust
 // src/hold.rs (rút gọn)
@@ -339,7 +339,7 @@ error[E0382]: use of moved value: `active`
   |     ^^^^^^ value used here after move
 ```
 
-Hai lỗi này tạo thật bằng ví dụ riêng, đã gỡ khỏi lab. Kiểu chặn được capture mà chưa kiểm hold ACTIVE, và capture hai lần trên cùng một bằng chứng. Nó không chặn được tiến trình khác đổi trạng thái giữa hai transaction; đó vẫn là việc của khoá và DB. Nó cũng không buộc bằng chứng vào đúng transaction đã khoá: truyền kết nối khác vẫn biên dịch, muốn chặt hơn thì `ActiveHold` phải mượn transaction. Job hết hạn cũng không dùng `ActiveHold`: nó là một câu `UPDATE` theo lô.
+Hai lỗi này tạo thật bằng ví dụ riêng, đã gỡ khỏi lab. Kiểu này chặn được việc capture khi chưa kiểm hold ACTIVE, và việc capture hai lần trên cùng một bằng chứng. Nó không chặn được tiến trình khác đổi trạng thái giữa hai transaction; đó vẫn là việc của khoá và DB. Nó cũng không buộc bằng chứng vào đúng transaction đã khoá: truyền kết nối khác vẫn biên dịch, muốn chặt hơn thì `ActiveHold` phải mượn transaction. Job hết hạn cũng không dùng `ActiveHold`: nó là một câu `UPDATE` theo lô.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

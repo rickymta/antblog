@@ -10,12 +10,12 @@ language: vi
 
 Chuyến ghép `TN-0012` có ba khách cùng chia cước 25.501 đồng. Service thanh toán lấy 25.501 chia 3 được 8.500,33, làm tròn thành 8.500 cho mỗi khách rồi gửi ba lệnh trừ ví. VíXanh đã thu 25.501, ví khách chỉ bị trừ 25.500, và sổ cái thiếu một đồng cho đến khi đối soát cuối ngày báo lệch.
 
-Đây là bài 46 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài [19](/articles/rust-proptest-property-test-bat-bien-so-cai) đã có hàm `split` kiểu largest remainder để minh hoạ proptest. Bài này biến nó thành thành phần dùng thật: bên nhận có `key`, phá hoà tất định, số âm cho hoàn tiền, nối với `FeePolicy` của [bài 11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron) và ghi quy tắc đã dùng cùng bút toán. [Bài 44](/articles/rust-vi-tai-xe-chia-tien-payout-theo-lo) và [bài 45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach) chia hai bên bằng `FeePolicy::split`; thuật toán này dành cho lúc có nhiều bên hơn.
+Đây là bài 46 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài [19](/articles/rust-proptest-property-test-bat-bien-so-cai) đã có hàm `split` kiểu largest remainder để minh hoạ proptest. Bài này biến nó thành một thành phần dùng được trong thực tế: bên nhận có `key`, phá hoà tất định, số âm cho hoàn tiền, nối với `FeePolicy` của [bài 11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron) và ghi quy tắc đã dùng cùng bút toán. [Bài 44](/articles/rust-vi-tai-xe-chia-tien-payout-theo-lo) và [bài 45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach) chia hai bên bằng `FeePolicy::split`; thuật toán này dành cho lúc có nhiều bên hơn.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Chia 25.501 đồng theo tỷ lệ 80/20, làm tròn từng phần theo nửa ra xa 0. Hai phần cộng lại có bằng 25.501 không?</p>
-<details><summary>Xem đáp án</summary><p><b>Có:</b> 20.401 + 5.100 = 25.501. Vì thế bug này hay lọt qua test: với hai bên, hai phần lẻ bù nhau. Chia 40/40/20 hoặc 50/50 thì tổng lệch ngay.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Có:</b> 20.401 + 5.100 = 25.501. Vì thế lỗi này hay lọt qua test: với hai bên, hai phần lẻ bù nhau. Chia 40/40/20 hoặc 50/50 thì tổng lệch ngay.</p></details>
 </div>
 
 ## Làm tròn từng phần sai ở đâu, và vì sao test 80/20 vẫn xanh?
@@ -44,9 +44,9 @@ Kết quả `cargo run`:
 | 25.501 | `[40, 40, 20]` | 10.200, 10.200, 5.100 | 25.500 | -1 |
 | 25.501 | `[50, 50]` | 12.751, 12.751 | 25.502 | +1 |
 
-Với hai bên, hai phần lẻ cộng lại đúng bằng 1 (hoặc 0): 0,8 và 0,2 làm tròn thành 1 và 0, bù nhau. Chỉ điểm giữa (hai nửa đồng cùng làm tròn lên) làm vỡ quy luật, như dòng 50/50. Từ ba bên, các phần lẻ không còn bù nhau và lệch xuất hiện ở cả hai chiều.
+Với hai bên, hai phần lẻ cộng lại đúng bằng 1 (hoặc 0): chẳng hạn 0,8 và 0,2 làm tròn thành 1 và 0, bù nhau. Chỉ điểm giữa (hai nửa đồng cùng làm tròn lên) phá vỡ quy luật, như dòng 50/50. Từ ba bên, các phần lẻ không còn bù nhau và lệch xuất hiện ở cả hai chiều.
 
-`rust_decimal` không cứu được chuyện này. `Decimal` không biểu diễn hết 1/3: lab in `1/3 = 0.3333333333333333333333333333, ba lần 1/3 = 0.9999999999999999999999999999`. Và dù biểu diễn chính xác, làm tròn từng phần vẫn sai về cấu trúc: tổng các phần chưa bao giờ được so với tổng gốc.
+`rust_decimal` không cứu được chuyện này. `Decimal` không biểu diễn chính xác được 1/3: lab in `1/3 = 0.3333333333333333333333333333, ba lần 1/3 = 0.9999999999999999999999999999`. Và dù biểu diễn chính xác, làm tròn từng phần vẫn sai về cấu trúc: tổng các phần chưa bao giờ được so với tổng gốc.
 
 ## Bảy RoundingStrategy của rust_decimal cho kết quả khác nhau thế nào?
 
@@ -62,7 +62,7 @@ Với hai bên, hai phần lẻ cộng lại đúng bằng 1 (hoặc 0): 0,8 và
 | `ToNegativeInfinity` | 2 | 2 | 3 | -3 | -3 | -1 | -1 | -1 |
 | `ToPositiveInfinity` | 3 | 3 | 4 | -2 | -2 | +2 | +1 | +1 |
 
-Ba strategy `Midpoint*` chỉ khác nhau ở đúng điểm giữa; `ToZero` và `AwayFromZero` luôn cắt hoặc luôn đẩy; hai strategy hướng về vô cực phụ thuộc dấu. Không hàng nào có ba số 0 ở cột lệch. Strategy quyết định **một giá trị** được làm tròn ra sao, ví dụ phí 20% của một chuyến ([bài 3](/articles/rust-kieu-so-tien-vnd-i64-decimal) chọn `MidpointAwayFromZero`); bảo toàn tổng khi chia cho nhiều bên cần thuật toán khác. Người từ .NET gặp cùng vấn đề ở `MidpointRounding` ([bài về `decimal`](/articles/csharp-bien-kieu-du-lieu-decimal)).
+Ba strategy `Midpoint*` chỉ khác nhau ở đúng điểm giữa; `ToZero` và `AwayFromZero` luôn cắt bớt hoặc luôn đẩy lên; hai strategy hướng về vô cực phụ thuộc dấu. Không strategy nào cho độ lệch 0 ở cả ba cột. Strategy quyết định **một giá trị** được làm tròn ra sao, ví dụ phí 20% của một chuyến ([bài 3](/articles/rust-kieu-so-tien-vnd-i64-decimal) chọn `MidpointAwayFromZero`); bảo toàn tổng khi chia cho nhiều bên cần thuật toán khác. Người từ .NET gặp cùng vấn đề ở `MidpointRounding` ([bài về `decimal`](/articles/csharp-bien-kieu-du-lieu-decimal)).
 
 ## Largest remainder: phát phần nguyên trước, đồng lẻ cho phần dư lớn nhất
 
@@ -75,7 +75,7 @@ Ba bước: mỗi bên nhận phần nguyên của `tổng × trọng số / t�
 <figcaption>Hình 1. Largest remainder trên 25.501 đồng chia ba khách; đồng lẻ đi theo key nhỏ nhất.</figcaption>
 </figure>
 
-Phần lõi của `allocate`, cài trong `src/allocate.rs`:
+Phần lõi của `allocate`, được cài đặt trong `src/allocate.rs`:
 
 ```rust
 // src/allocate.rs (rút gọn: bỏ chú thích)
@@ -102,15 +102,15 @@ pub fn allocate(total: Money, parties: &[Party]) -> Result<Vec<Share>, AllocErro
 }
 ```
 
-Ba chi tiết đáng dừng lại.
+Ba chi tiết đáng chú ý.
 
-**Số nguyên rộng.** `|i64::MIN|` là 2^63 và trọng số `u64` gần 2^64, tích gần 2^127 nên vừa `i128`. Nhân bằng `i64` tràn rất sớm: lab in `25.500 × 1000000000000000: i64 = None, i128 = 25500000000000000000`.
+**Số nguyên đủ rộng.** `|i64::MIN|` là 2^63 và trọng số `u64` gần 2^64, tích gần 2^127 nên vừa `i128`. Nhân bằng `i64` tràn rất sớm: lab in `25.500 × 1000000000000000: i64 = None, i128 = 25500000000000000000`.
 
-**Số âm.** `/` và `%` của Rust cắt về 0, phần dư mang dấu số bị chia, nên chia thẳng số âm sẽ xếp sai thứ tự phần dư. `allocate` làm việc trên độ lớn rồi gắn dấu, nên `allocate(-t)` là đối xứng từng đồng của `allocate(t)`: `25.501 chia ba: 8.501 VND, 8.500 VND, 8.500 VND | hoàn: -8.501 VND, -8.500 VND, -8.500 VND`. Hoàn toàn bộ trả đồng lẻ về đúng người đã gánh nó.
+**Số âm.** `/` và `%` của Rust cắt về 0, phần dư mang dấu số bị chia, nên chia thẳng số âm sẽ xếp sai thứ tự phần dư. `allocate` làm việc trên độ lớn rồi gắn dấu, nên `allocate(-t)` đối xứng từng đồng với `allocate(t)`: `25.501 chia ba: 8.501 VND, 8.500 VND, 8.500 VND | hoàn: -8.501 VND, -8.500 VND, -8.500 VND`. Hoàn toàn bộ trả đồng lẻ về đúng người đã gánh nó.
 
-**Phá hoà tất định.** Phần dư lớn nhất đứng trước, hoà thì `key` nhỏ hơn (so sánh byte) đứng trước. `key` là duy nhất (trùng thì `DuplicateKey`) nên thứ tự là toàn phần và kết quả chỉ phụ thuộc (key, trọng số, tổng): `100 chia ba, thứ tự a,b,c: 34 VND, 33 VND, 33 VND | thứ tự c,b,a: 33 VND, 33 VND, 34 VND`; key `a` nhận 34 trong cả hai. Phá hoà theo thứ tự duyệt `HashMap` là bug thật: mỗi `HashMap` có hạt giống băm riêng, qua 200 lần thử lab thấy nhiều hơn một bên nhận đồng lẻ, nên một lần thử lại có thể ra bút toán khác bản đã ghi.
+**Phá hoà tất định.** Phần dư lớn nhất đứng trước, hoà thì `key` nhỏ hơn (so sánh byte) đứng trước. `key` là duy nhất (trùng thì `DuplicateKey`) nên thứ tự là toàn phần và kết quả chỉ phụ thuộc vào (key, trọng số, tổng): `100 chia ba, thứ tự a,b,c: 34 VND, 33 VND, 33 VND | thứ tự c,b,a: 33 VND, 33 VND, 34 VND`; key `a` nhận 34 trong cả hai. Phá hoà theo thứ tự duyệt `HashMap` là lỗi thật: mỗi `HashMap` có hạt giống băm riêng, qua 200 lần thử, lab thấy đồng lẻ rơi vào nhiều hơn một bên, nên một lần thử lại có thể ra bút toán khác bản đã ghi.
 
-Các biên đều có test: trọng số 0 không nhận đồng nào (`10 theo [1, 0, 1, 1]: 4 VND, 0 VND, 3 VND, 3 VND`); tổng trọng số 0 là `ZeroWeightSum`, danh sách rỗng là `NoParties`.
+Các trường hợp biên đều có test: trọng số 0 không nhận đồng nào (`10 theo [1, 0, 1, 1]: 4 VND, 0 VND, 3 VND, 3 VND`); tổng trọng số 0 là `ZeroWeightSum`, danh sách rỗng là `NoParties`.
 
 ## Ai nhận đồng lẻ là quyết định nghiệp vụ: ghi vào bút toán
 
@@ -120,7 +120,7 @@ Toán học chỉ nói tổng phải khớp; ai nhận đồng lẻ thì kế to
 6 đồng cho 4 bên bằng nhau: phần còn lại cho d = 2 VND, 2 VND, 2 VND, 0 VND | largest remainder = 2 VND, 2 VND, 1 VND, 1 VND
 ```
 
-Bên nhận «phần còn lại» chỉ được 0 đồng trong khi phần đúng là 1,5; với số liệu khác nó còn có thể âm. Largest remainder giữ mỗi bên dưới 1 đồng, nhưng không chỉ định sẵn ai chịu: quy tắc phải được nói ra.
+Bên nhận «phần còn lại» chỉ được 0 đồng trong khi phần đúng là 1,5; với số liệu khác nó còn có thể âm. Largest remainder giữ độ lệch của mỗi bên dưới 1 đồng so với phần chính xác, nhưng không chỉ định sẵn ai chịu: quy tắc phải được nói ra.
 
 `AllocatedFee` cắm largest remainder vào trait `FeePolicy` của bài 11, với hai key cố định `"driver"` và `"platform"`. Phí 50% trên cước 25.501 (cố ý lẻ), hai chính sách đặt cạnh nhau:
 
@@ -129,7 +129,7 @@ Bên nhận «phần còn lại» chỉ được 0 đồng trong khi phần đú
 50% · largest remainder, hòa: key tăng dần   → [-25501, 12750, 12751]
 ```
 
-Các posting theo thứ tự khách, nền tảng, tài xế: đồng lẻ chuyển từ nền tảng sang tài xế.
+Các posting xếp theo thứ tự khách, nền tảng, tài xế: đồng lẻ chuyển từ nền tảng sang tài xế.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -138,19 +138,19 @@ Các posting theo thứ tự khách, nền tảng, tài xế: đồng lẻ chuy�
 <figcaption>Hình 2. Cùng một phí 50%, đồng lẻ đi hai hướng; quy tắc phải đi kèm bút toán.</figcaption>
 </figure>
 
-`AllocationRecord` của lab chuẩn hoá trọng số theo key, nên cùng quyết định cho cùng chuỗi dù đầu vào xếp thế nào:
+`AllocationRecord` của lab chuẩn hoá trọng số theo key, nên cùng quyết định cho ra cùng chuỗi, dù đầu vào xếp thế nào:
 
 ```text
 bản ghi quy tắc: rule=largest-remainder/v1 tie=key-asc total=-25501 weights=customer:CU-001:1,customer:CU-002:1,customer:CU-003:1
 ```
 
-Chuỗi này nên đi cùng bút toán, ví dụ trong payload sự kiện `LedgerEntryPosted`. Đây là đề xuất của bài: schema chuẩn không có cột ghi chú, lab chỉ in chuỗi. `distribute_entry` thêm một dòng `pool` bằng âm tổng các phần nên bút toán luôn cân. Ba khách `TN-0012` ra `JE-000002: -8.501 VND, -8.500 VND, -8.500 VND`; ghi lại cùng quy tắc trả `replayed = true`. Đổi sang `Plug("customer:CU-003")` mà giữ key `trip:TN-0012:capture` thì sổ từ chối: `key trip:TN-0012:capture đã dùng cho bút toán khác nội dung`.
+Chuỗi này nên đi cùng bút toán, ví dụ trong payload sự kiện `LedgerEntryPosted`. Đây là đề xuất của bài: schema chuẩn không có cột ghi chú, lab chỉ in chuỗi. `distribute_entry` thêm một dòng `pool` có giá trị bằng âm của tổng các phần, nên bút toán luôn cân. Ba khách của `TN-0012` cho ra bút toán `JE-000002: -8.501 VND, -8.500 VND, -8.500 VND`; ghi lại với cùng quy tắc thì trả `replayed = true`. Đổi sang `Plug("customer:CU-003")` mà giữ key `trip:TN-0012:capture` thì sổ từ chối: `key trip:TN-0012:capture đã dùng cho bút toán khác nội dung`.
 
-Hoàn toàn bộ: `allocate(+25.501)` cho đúng các posting của bút toán đảo mà `Ledger::reverse` tạo. Hoàn một phần nhiều lần phức tạp hơn, xem bài tập.
+Hoàn toàn bộ: `allocate(+25.501)` cho ra đúng các posting của bút toán đảo do `Ledger::reverse` tạo. Hoàn một phần nhiều lần phức tạp hơn, xem bài tập.
 
 ## VND không có phần lẻ, và những lỗi hay gặp
 
-Tiền trong sổ cái là `Money(i64)` đơn vị đồng; VND không có đơn vị nhỏ hơn (bảng mã ISO 4217 ghi 0 chữ số thập phân, dùng để tham khảo), nên không có «xu» để chứa phần lẻ. Quy tắc rút ra: **làm tròn đúng một lần, ở biên, trên tổng gốc, bằng thuật toán bảo toàn tổng**. Mọi lệnh làm tròn thêm là chỗ đồng tiền rò rỉ. Lỗi hay gặp:
+Tiền trong sổ cái là `Money(i64)` đơn vị đồng; VND không có đơn vị nhỏ hơn (bảng mã ISO 4217 ghi 0 chữ số thập phân, dùng để tham khảo), nên không có «xu» để chứa phần lẻ. Quy tắc rút ra: **làm tròn đúng một lần, ở ranh giới, trên tổng gốc, bằng thuật toán bảo toàn tổng**. Mọi lệnh làm tròn thêm là chỗ đồng tiền rò rỉ. Lỗi hay gặp:
 
 | Lỗi | Hậu quả | Cách tránh |
 | --- | --- | --- |
@@ -164,7 +164,7 @@ Tiền trong sổ cái là `Money(i64)` đơn vị đồng; VND không có đơn
 
 ## Property test chứng minh gì, và không chứng minh gì?
 
-Test của lab nằm ở `tests/properties.rs`, mỗi property chạy 1.000 ca, tổng sinh đến cả `i64::MIN` và `i64::MAX` (riêng test bút toán dùng tổng cỡ ±1 tỷ, test hoàn tiền bỏ `i64::MIN` vì nó không có số đối):
+Test của lab nằm ở `tests/properties.rs`, mỗi property chạy 1.000 test case, với tổng được sinh trải đến cả `i64::MIN` và `i64::MAX` (riêng test bút toán dùng tổng cỡ ±1 tỷ, test hoàn tiền bỏ `i64::MIN` vì nó không có số đối):
 
 | Bất biến | Test |
 | --- | --- |
@@ -176,7 +176,7 @@ Test của lab nằm ở `tests/properties.rs`, mỗi property chạy 1.000 ca, 
 | `allocate(-t)` là đối xứng của `allocate(t)` | `refund_mirrors_payment` |
 | Phần chia dựng được bút toán cân, tổng toàn sổ bằng 0 | `distribution_is_a_balanced_entry` |
 
-«Đơn điệu» cần nói đúng mức. Chứng minh được: trọng số A lớn hơn B thì phần của A không nhỏ hơn B (phần nguyên của A lớn hơn thì A đã hơn B ít nhất 1 đồng; bằng nhau thì A có phần dư lớn hơn nên đứng trước B trong hàng nhận đồng lẻ). Không chứng minh được, vì sai: tăng **tổng** thêm 1 đồng thì phần mỗi bên không giảm. Lab vét cạn và tìm ra nghịch lý Alabama:
+«Đơn điệu» cần nói đúng mức. Chứng minh được: trọng số A lớn hơn B thì phần của A không nhỏ hơn B (phần nguyên của A lớn hơn thì A đã hơn B ít nhất 1 đồng; bằng nhau thì A có phần dư lớn hơn nên đứng trước B trong hàng nhận đồng lẻ). Không thể chứng minh, vì nó sai: tăng **tổng** thêm 1 đồng thì phần mỗi bên không giảm. Lab vét cạn và tìm ra nghịch lý Alabama:
 
 ```text
 tăng tổng 3 → 4 theo trọng số [1, 3, 3]: [1, 1, 1] → [0, 2, 2]
@@ -184,9 +184,9 @@ tăng tổng 3 → 4 theo trọng số [1, 3, 3]: [1, 1, 1] → [0, 2, 2]
 
 Bên trọng số 1 nhận 1 đồng khi tổng là 3 nhưng 0 đồng khi tổng là 4. Test `total_monotonicity_does_not_hold` ghi sự thật này; hệ quả cho hoàn tiền một phần nằm ở bài tập.
 
-Proptest cũng tìm phản ví dụ của bản ngây thơ. Với RNG cố định, nó bị bắt ở ca đầu `(20, [2, 2, 1, 3])`, sau shrinking còn `(9, [2, 1, 2])`: 9 đồng chia 2:1:2 ra 4, 2, 4, tổng 10. Chưa phải ca nhỏ nhất: `(1, [1, 1])` cũng sai (mỗi bên 0,5 làm tròn thành 1). Shrinking là tìm kiếm cục bộ, không vét cạn, nên có thể dừng ở cực tiểu cục bộ.
+Proptest cũng tìm phản ví dụ của bản ngây thơ. Với RNG cố định, bản ngây thơ bị bắt ở test case đầu tiên `(20, [2, 2, 1, 3])`, sau shrinking còn `(9, [2, 1, 2])`: 9 đồng chia 2:1:2 ra 4, 2, 4, tổng 10. Chưa phải test case nhỏ nhất: `(1, [1, 1])` cũng sai (mỗi bên 0,5 làm tròn thành 1). Shrinking là tìm kiếm cục bộ, không vét cạn, nên có thể dừng ở cực tiểu cục bộ.
 
-Về strategy: thử sửa tiêu chí phá hoà thành «theo vị trí trong đầu vào». Khi trọng số sinh trong khoảng rộng, test đảo thứ tự lúc xanh lúc đỏ (12 lần chạy trên máy viết bài, đỏ 5) vì phần dư hoà nhau hiếm. Với `tie_prone_parties()` (trọng số 0 đến 3, nhiều bên bằng nhau) cả 12 lần đều đỏ:
+Về strategy của proptest: hãy thử sửa tiêu chí phá hoà thành «theo vị trí trong đầu vào». Khi trọng số sinh trong khoảng rộng, test đảo thứ tự lúc xanh lúc đỏ (12 lần chạy trên máy viết bài, đỏ 5) vì phần dư hoà nhau hiếm. Với `tie_prone_parties()` (trọng số 0 đến 3, nhiều bên bằng nhau) cả 12 lần đều đỏ:
 
 ```rust
 // tests/properties.rs
@@ -202,7 +202,7 @@ fn result_does_not_depend_on_input_order(
 }
 ```
 
-Property chỉ mạnh bằng strategy; hãy thử phá code để xem test có đỏ thật. Đoạn trên đã rút gọn (bỏ dòng kiểm gọi lại cùng đầu vào).
+Property chỉ mạnh ngang với strategy sinh dữ liệu của nó; hãy thử phá code để xem test có đỏ thật. Đoạn trên đã rút gọn (bỏ dòng kiểm tra việc gọi lại với cùng đầu vào).
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -214,16 +214,16 @@ cargo run --manifest-path examples/toi-noi-rust/46-largest-remainder/Cargo.toml 
 cargo test --manifest-path examples/toi-noi-rust/46-largest-remainder/Cargo.toml
 ```
 
-Lệnh đầu in sáu mục; mọi số trong bài lấy từ đó. `-- --verify` kiểm các giá trị này, chạy thêm 1.000 ca cho hai bất biến, rồi in `VERIFY OK` (exit code 0, sai thì exit 1). `cargo test` chạy 9 unit test và 13 test trong `tests/properties.rs`. Khi một property fail, proptest ghi `tests/properties.proptest-regressions`; dự án thật nên commit file đó.
+Lệnh đầu in sáu mục; mọi số trong bài đều lấy từ đó. `-- --verify` kiểm tra các giá trị này, chạy thêm 1.000 test case cho hai bất biến, rồi in `VERIFY OK` (exit code 0, sai thì exit 1). `cargo test` chạy 9 unit test và 13 test trong `tests/properties.rs`. Khi một property không đạt, proptest ghi `tests/properties.proptest-regressions`; dự án thật nên commit file đó.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Sổ cái ở đây là <code>Ledger</code> trong bộ nhớ của <code>ledger-core</code>: chưa có PostgreSQL, chưa lưu <code>AllocationRecord</code>. Cước 25.501 và phí 50% là số liệu chọn để thấy hiện tượng, không phải chính sách của Tới Nơi. Largest remainder không phải quy tắc hợp lệ duy nhất; điều bắt buộc là quy tắc cố định, tất định và được ghi lại.</p>
+<p>Sổ cái ở đây là <code>Ledger</code> trong bộ nhớ của <code>ledger-core</code>: chưa có PostgreSQL, chưa lưu <code>AllocationRecord</code>. Cước 25.501 và phí 50% là số liệu được chọn để thấy rõ hiện tượng, không phải chính sách của Tới Nơi. Largest remainder không phải quy tắc hợp lệ duy nhất; điều bắt buộc là quy tắc cố định, tất định và được ghi lại.</p>
 </div>
 
 **Bài tập:** chuyến ghép được hoàn một phần hai lần, mỗi lần 10.000 đồng vào ví ba khách `a`, `b`, `c` (trọng số bằng nhau). Nếu mỗi lần gọi `allocate(10_000)` riêng, tổng mỗi khách được hoàn có bằng `allocate(20_000)` không? Cách nào làm chúng khớp?
 
-<details><summary>Xem lời giải</summary><p>Không khớp. Mỗi lần chia riêng cho <code>[3.334, 3.333, 3.333]</code>, hai lần cộng thành <code>[6.668, 6.666, 6.666]</code>, trong khi <code>allocate(20_000)</code> cho <code>[6.667, 6.667, 6.666]</code>: khách <code>a</code> nhận cả hai đồng lẻ. Muốn khớp, tính theo luỹ kế: phần lần hai bằng <code>allocate(20_000)</code> trừ phần đã hoàn lần một, tức <code>[3.333, 3.334, 3.333]</code>, tổng 10.000. Test <code>partial_refunds_are_consistent_only_when_cumulative</code> trong <code>src/allocate.rs</code> kiểm các số này. Vì nghịch lý Alabama, hiệu luỹ kế có thể âm ở ca hiếm; bài này chưa giải quyết trường hợp đó.</p></details>
+<details><summary>Xem lời giải</summary><p>Không khớp. Mỗi lần chia riêng cho <code>[3.334, 3.333, 3.333]</code>, hai lần cộng thành <code>[6.668, 6.666, 6.666]</code>, trong khi <code>allocate(20_000)</code> cho <code>[6.667, 6.667, 6.666]</code>: khách <code>a</code> nhận cả hai đồng lẻ. Muốn khớp, tính theo luỹ kế: phần lần hai bằng <code>allocate(20_000)</code> trừ phần đã hoàn lần một, tức <code>[3.333, 3.334, 3.333]</code>, tổng 10.000. Test <code>partial_refunds_are_consistent_only_when_cumulative</code> trong <code>src/allocate.rs</code> kiểm các số này. Vì nghịch lý Alabama, hiệu luỹ kế có thể âm ở trường hợp hiếm; bài này chưa giải quyết trường hợp đó.</p></details>
 
 Bài trước: [bài 45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach). Bài tiếp: [bài 47](/articles/rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao).
 

@@ -1,14 +1,14 @@
 ---
 slug: rust-config-secrets-tracing-structured-logging
 title: "Cấu hình, secrets và tracing: log có cấu trúc cho service sổ cái"
-summary: "Bài 29: nạp cấu hình bằng config và biến môi trường, validate rồi fail fast; SecretString che mật khẩu; tracing span, #[instrument], JSON log và request_id đi qua tokio::spawn mà không log PII."
+summary: "Bài 29: nạp cấu hình bằng config và biến môi trường, kiểm tra rồi dừng ngay khi cấu hình sai; SecretString che mật khẩu; tracing span, #[instrument], JSON log và request_id đi qua tokio::spawn mà không ghi PII vào log."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, tracing, config, observability]
 language: vi
 ---
 
-Hai giờ sáng, kế toán báo bút toán `JE-000001` của chuyến `TN-0001` có vẻ bị ghi hai lần. Người trực mở log và gặp hàng nghìn dòng văn bản tự do, không biết dòng nào thuộc request nào. Chiều hôm trước, một bản triển khai khởi động với `max_connections = 0` và chỉ chết ở request đầu tiên cần kết nối. Cả hai sự cố có chung gốc: service chưa nói rõ nó đang chạy với cấu hình nào, và log chưa có cấu trúc để truy vết.
+Hai giờ sáng, kế toán báo bút toán `JE-000001` của chuyến `TN-0001` có vẻ bị ghi hai lần. Người trực mở log và gặp hàng nghìn dòng văn bản tự do, không biết dòng nào thuộc request nào. Chiều hôm trước, một bản triển khai khởi động với `max_connections = 0` và chỉ chết ở request đầu tiên cần kết nối. Cả hai sự cố có chung nguyên nhân gốc: service chưa nói rõ nó đang chạy với cấu hình nào, và log chưa có cấu trúc để truy vết.
 
 Đây là bài 29 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab dùng lại `ledger-core` từ [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace), chạy trên runtime của [bài 21](/articles/rust-async-await-tokio-task-timeout-cancellation) và không cần PostgreSQL.
 
@@ -20,7 +20,7 @@ Hai giờ sáng, kế toán báo bút toán `JE-000001` của chuyến `TN-0001`
 
 ## Cấu hình đến từ đâu và nguồn nào thắng?
 
-Ta chồng hai nguồn: file `config/default.toml` chứa giá trị mặc định không nhạy cảm, và biến môi trường để từng nơi triển khai ghi đè. Crate `config` gộp theo thứ tự thêm vào; nguồn thêm sau thắng nguồn thêm trước. Quy ước đặt tên: tiền tố `LEDGER`, dấu `__` ngăn các cấp, nên `LEDGER__DATABASE__MAX_CONNECTIONS` ghi đè khoá `database.max_connections`. Người dùng ASP.NET Core sẽ thấy quen: `IConfiguration` cũng chồng `appsettings.json` với biến môi trường và cũng dùng `__` (xem [bài options và logging](/articles/dotnet10-middleware-di-options-logging) của loạt .NET).
+Ta chồng hai nguồn: file `config/default.toml` chứa giá trị mặc định không nhạy cảm, và biến môi trường để từng nơi triển khai ghi đè. Crate `config` gộp theo thứ tự thêm vào; nguồn thêm sau thắng nguồn thêm trước. Quy ước đặt tên: tiền tố `LEDGER`, dấu `__` phân tách các cấp, nên `LEDGER__DATABASE__MAX_CONNECTIONS` ghi đè khoá `database.max_connections`. Người dùng ASP.NET Core sẽ thấy quen: `IConfiguration` cũng chồng `appsettings.json` với biến môi trường và cũng dùng `__` (xem [bài options và logging](/articles/dotnet10-middleware-di-options-logging) của loạt .NET).
 
 Mật khẩu cố ý không có trong file mặc định. File được commit; secret thì không.
 
@@ -69,11 +69,11 @@ pub fn load_from(
 }
 ```
 
-Biến môi trường luôn là chuỗi, và `config` tự đổi `"20"` sang số khi deserialize vào `u32`, nên không cần `try_parsing(true)`; bật nó thì mọi biến bị thử parse trước và mật khẩu `00012345678` âm thầm thành `12345678`. Tham số `env` chỉ để test truyền một `HashMap` thay cho biến môi trường thật: sửa môi trường toàn tiến trình trong test vừa dễ lẫn giữa các test chạy song song, vừa phải dùng `unsafe` từ edition 2024.
+Biến môi trường luôn là chuỗi, và `config` tự đổi `"20"` sang số khi deserialize vào `u32`, nên không cần `try_parsing(true)`; bật nó thì mọi biến bị thử parse trước và mật khẩu `00012345678` bị đổi thành `12345678` mà không báo gì. Tham số `env` dành cho test, để truyền một `HashMap` thay cho biến môi trường thật: sửa môi trường toàn tiến trình trong test vừa dễ lẫn giữa các test chạy song song, vừa bắt buộc phải dùng `unsafe` từ edition 2024.
 
 ## Làm sao khởi động sai thì chết ngay, và chết có thông tin?
 
-Fail fast nghĩa là mọi kiểm tra tĩnh nằm ở giây đầu tiên, trước khi nhận request. Việc `serde` báo lỗi kiểu "thiếu trường" chưa đủ, vì giá trị `0` vẫn là `u32` hợp lệ. `validate` kiểm miền giá trị và gom vấn đề vào một `Vec` thay vì dừng ở lỗi đầu tiên; người vận hành sửa một lượt, không phải khởi động lại bốn lần.
+Fail fast nghĩa là mọi kiểm tra tĩnh nằm ở giây đầu tiên, trước khi nhận request. Việc `serde` báo lỗi kiểu "thiếu trường" chưa đủ, vì giá trị `0` vẫn là `u32` hợp lệ. `validate` kiểm tra miền giá trị và gom vấn đề vào một `Vec` thay vì dừng ở lỗi đầu tiên; người vận hành sửa một lượt, không phải khởi động lại bốn lần.
 
 ```rust
 // src/settings.rs (rút gọn)
@@ -97,7 +97,7 @@ fn validate(&self) -> Result<(), SettingsError> {
 }
 ```
 
-`main` chỉ làm một việc khi gặp lỗi: in ra `stderr` và trả mã thoát 2. Chạy với hai giá trị sai, thiếu mật khẩu:
+`main` chỉ làm một việc khi gặp lỗi: in ra `stderr` và trả mã thoát 2. Chạy với hai giá trị sai và thiếu mật khẩu:
 
 ```text
 $ LEDGER__DATABASE__MAX_CONNECTIONS=0 LEDGER__SERVER__PORT=0 \
@@ -113,7 +113,7 @@ Hai loại lỗi tách biệt: giá trị không phải số (`MAX_CONNECTIONS=n
 
 ## Secret và dữ liệu cá nhân làm sao không lọt vào log?
 
-`SecretString` của crate `secrecy` bọc chuỗi và làm ba việc: `Debug` luôn in `[REDACTED]`, không có `Display`, và bộ nhớ nó giữ được xoá khi drop (bản sao trung gian, như chuỗi `config` đọc từ môi trường, thì không). Muốn dùng giá trị thật, ta gọi `expose_secret()`; lệnh gọi đó nổi bật khi đọc code và tìm được bằng `grep`. Hàm dựng chuỗi kết nối trả luôn `SecretString` để chuỗi chứa mật khẩu không tự trôi sang `println!`. Test dưới đây chạy thật:
+`SecretString` của crate `secrecy` bọc chuỗi và làm ba việc: `Debug` luôn in `[REDACTED]`, không có `Display`, và bộ nhớ nó giữ được xoá khi drop (còn bản sao trung gian, như chuỗi `config` đọc từ môi trường, thì không được xoá). Muốn dùng giá trị thật, ta gọi `expose_secret()`; lệnh gọi đó nổi bật khi đọc code và tìm được bằng `grep`. Hàm dựng chuỗi kết nối trả luôn `SecretString` để chuỗi chứa mật khẩu không tự trôi sang `println!`. Test dưới đây chạy thật:
 
 ```rust
 // src/settings.rs (trong mod tests)
@@ -150,7 +150,7 @@ pub fn audit_safe(req: &CaptureRequest) {
 }
 ```
 
-Test đọc output và xác nhận: bản đầu chứa số điện thoại và số thẻ, bản sau thì không. Quy tắc của loạt: không log số điện thoại, số thẻ, và không log số tiền hay số dư. Log thường sống lâu và nhiều người đọc hơn database; id bút toán đủ để truy vết, còn giá trị tra từ sổ cái. Mặc định hãy `skip` mọi tham số, rồi thêm lại từng trường cần bằng `fields(...)`.
+Test đọc output rồi xác nhận: bản đầu chứa số điện thoại và số thẻ, bản sau thì không. Quy tắc của loạt: không log số điện thoại, số thẻ, và không log số tiền hay số dư. Log thường sống lâu và nhiều người đọc hơn database; id bút toán đủ để truy vết, còn giá trị thì tra từ sổ cái. Mặc định hãy `skip` mọi tham số, rồi thêm lại từng trường cần bằng `fields(...)`.
 
 ## Span, event và `#[instrument]` khác nhau thế nào?
 
@@ -209,7 +209,7 @@ async fn post_entry(&self, key: &str, req: &CaptureRequest) -> Result<Outcome, L
 }
 ```
 
-`%key` ghi bằng `Display`, `?x` bằng `Debug`. `key` vừa được `skip` vừa khai lại trong `fields` để không xuất hiện hai lần dưới hai tên. `err(Display)` biến `Err` thành event `ERROR`: request thứ ba của lab ghi cùng key nhưng khác quãng đường nên nhận `IdempotencyConflict`, và dòng ERROR mang sẵn `request_id` `req-0003`.
+`%key` ghi bằng `Display`, `?x` bằng `Debug`. `key` vừa được `skip` vừa khai lại trong `fields` để không xuất hiện hai lần dưới hai tên. `err(Display)` biến `Err` thành event `ERROR`: request thứ ba của lab ghi cùng key nhưng với quãng đường khác nên nhận `IdempotencyConflict`, và dòng ERROR mang sẵn `request_id` `req-0003`.
 
 ## `request_id` đi theo event con thế nào, kể cả qua `tokio::spawn`?
 
@@ -223,7 +223,7 @@ pub async fn handle(&self, req: CaptureRequest) -> Result<Outcome, LedgerError> 
 }
 ```
 
-Mọi event bên trong, kể cả của hàm con, nằm dưới span này nên mang `request_id`. Chỗ vỡ là `tokio::spawn`: task mới là một future độc lập, không thừa hưởng span của nơi gọi. Lab cho phép chọn cả hai cách:
+Mọi event bên trong, kể cả của hàm con, nằm dưới span này nên mang `request_id`. Chuỗi truyền span bị đứt ở `tokio::spawn`: task mới là một future độc lập, không thừa hưởng span của nơi gọi. Lab cho phép chọn một trong hai cách:
 
 ```rust
 // src/service.rs (trong process)
@@ -235,7 +235,7 @@ let task = match self.propagation {
 };
 ```
 
-Nhánh `Forgotten` chỉ có trong lab để dựng sự cố. Output thật của event thông báo khi quên:
+Nhánh `Forgotten` chỉ có trong lab để dựng sự cố. Kết quả chạy thật của event thông báo khi quên gắn span:
 
 ```json
 {"timestamp":"2026-11-06T11:50:09.492788Z","level":"INFO","fields":{"message":"đã đẩy thông báo cho tài xế","driver":"DR-001"},"target":"ledger_29_config_tracing::service"}
@@ -293,7 +293,7 @@ Với bản sai, event "việc không liên quan" của task khác mang `"reques
 {"timestamp":"2026-11-06T11:50:09.493137Z","level":"INFO","fields":{"message":"việc không liên quan"},"target":"ledger_29_config_tracing::scenarios","span":{"request_id":"req-A","name":"request"},"spans":[{"request_id":"req-A","name":"request"}]}
 ```
 
-Với bản đúng, event đó không có span, còn "tiếp tục sau await" vẫn đúng `req-A`: `.instrument(span)` vào span lúc future được poll và ra khỏi span lúc nó nhường, mỗi lần một lượt. `#[instrument]` trên `async fn` làm đúng việc đó cho ta.
+Với bản đúng, event đó không có span, còn "tiếp tục sau await" vẫn đúng `req-A`: `.instrument(span)` vào span lúc future được poll và ra khỏi span lúc nó nhường, ở mỗi lượt poll. `#[instrument]` trên `async fn` làm đúng việc đó cho ta.
 
 Compiler chỉ cứu được một nửa. Thử `span.entered()` (trả `EnteredSpan`) trong future truyền cho `tokio::spawn`, rustc từ chối (thông báo rút gọn):
 
@@ -305,7 +305,7 @@ note: future is not `Send` as this value is used across an await
     |             -- has type `EnteredSpan` which is not `Send`
 ```
 
-Nhưng `span.enter()` (trả `Entered<'_>`) vẫn là `Send` và **compile bình thường** trong cùng đoạn code, nên lỗi này chỉ lộ ở log. Quy tắc gọn: dùng `.instrument(span)`, `#[instrument]` hoặc `span.in_scope(|| ...)` cho đoạn đồng bộ; không `enter()` rồi `await`. Cùng họ lỗi với giữ `MutexGuard` qua `.await` ([bài 22](/articles/rust-send-sync-arc-mutex-channel-concurrency)).
+Nhưng `span.enter()` (trả `Entered<'_>`) vẫn là `Send` và **compile bình thường** trong cùng đoạn code, nên lỗi này chỉ lộ ở log. Quy tắc gọn: dùng `.instrument(span)`, `#[instrument]` hoặc `span.in_scope(|| ...)` cho đoạn đồng bộ; không `enter()` rồi `await`. Lỗi này cùng họ với việc giữ `MutexGuard` qua `.await` ([bài 22](/articles/rust-send-sync-arc-mutex-channel-concurrency)).
 
 ## Test log bằng subscriber ghi vào buffer thế nào?
 
@@ -333,7 +333,7 @@ impl io::Write for LogBuffer {
 
 `LogBuffer` còn `impl MakeWriter` để `fmt()` dùng được, và có `text()`/`events()` để đọc lại. Mỗi kịch bản có bộ đệm riêng và chạy trên runtime một luồng với `set_default`. Subscriber đó chỉ có hiệu lực trên luồng gọi, nên các test chạy song song không lẫn log, và task `spawn` vẫn chạy trên cùng luồng nên vẫn thấy nó.
 
-Đổi sang runtime nhiều luồng thì khác: task chạy trên worker, worker không có subscriber đó, event mất âm thầm. Lab có test chứng minh, kèm cách sửa: gắn subscriber vào future bằng `.with_subscriber(...)`, thêm `.with_current_subscriber()` cho task `spawn`. `set_global_default` không hợp với test vì mỗi tiến trình chỉ đặt được một lần. Một test điển hình:
+Đổi sang runtime nhiều luồng thì khác: task chạy trên worker, worker không có subscriber đó, event bị mất mà không báo gì. Lab có test chứng minh, kèm cách sửa: gắn subscriber vào future bằng `.with_subscriber(...)`, thêm `.with_current_subscriber()` cho task `spawn`. `set_global_default` không hợp với test vì mỗi tiến trình chỉ đặt được một lần. Một test điển hình:
 
 ```rust
 // tests/logging.rs
@@ -349,7 +349,7 @@ fn forgetting_instrument_on_spawned_task_loses_request_id() {
 }
 ```
 
-Cùng bộ test kiểm: mọi event của luồng chính có `request_id`; event ERROR mang `req-0003`; filter `info` không có `DEBUG`; luồng ghi bút toán ở cấp `debug` không chứa số điện thoại, số thẻ, `25500`, `20400`, `5100` hay chữ `balance`. Phép so bỏ trường `timestamp` trước: micro giây đôi khi chứa đúng `5100`, và bản đầu của test đỏ 5 trong 1.500 lượt vì thế. Thêm hai test chạy chính binary: cấu hình sai thì mã thoát là 2, `stdout` rỗng và `stderr` liệt kê đủ ba vấn đề; cấu hình đúng thì mọi dòng là JSON và không có mật khẩu.
+Cùng bộ test kiểm tra: mọi event của luồng chính có `request_id`; event ERROR mang `req-0003`; filter `info` không có `DEBUG`; luồng ghi bút toán ở cấp `debug` không chứa số điện thoại, số thẻ, `25500`, `20400`, `5100` hay chữ `balance`. Phép so sánh bỏ trường `timestamp` trước: phần micro giây của timestamp đôi khi chứa đúng chuỗi `5100`, và bản đầu của test bị đỏ 5 trong 1.500 lượt vì thế. Thêm hai test chạy chính binary: cấu hình sai thì mã thoát là 2, `stdout` rỗng và `stderr` liệt kê đủ ba vấn đề; cấu hình đúng thì mọi dòng là JSON và không có mật khẩu.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -369,7 +369,7 @@ Lệnh đầu thiếu mật khẩu nên thoát mã 2 ngay; lệnh hai in chín d
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
 <p>Lab chưa có kết nối database thật (<code>max_connections</code> chưa được pool nào dùng), đường dẫn <code>config/default.toml</code> gắn lúc biên dịch bằng <code>CARGO_MANIFEST_DIR</code> để chạy được từ gốc repo, chưa xuất log tới hệ thống tập trung, chưa có sampling, chưa gắn <code>trace_id</code> của OpenTelemetry và chưa nhận <code>request_id</code> từ header của client. Mật khẩu <code>lab-only-secret</code>, số điện thoại và số thẻ là dữ liệu giả. <code>SecretString</code> chặn rò qua <code>Debug</code>, không thay cho kho secret hay quản lý quyền truy cập.</p></div>
 
-**Bài tập:** một người thêm vào `process` dòng `tokio::spawn(async move { info!(driver = %driver, "audit"); });`. Event có `request_id` không? Nêu hai cách sửa.
+**Bài tập:** một người thêm vào hàm `process` dòng `tokio::spawn(async move { info!(driver = %driver, "audit"); });`. Event có `request_id` không? Nêu hai cách sửa.
 
 <details><summary>Xem lời giải</summary><p>Không: task mới là future độc lập nên không thừa hưởng span của nơi gọi, và event sẽ giống dòng mồ côi ở trên. Cách 1: gắn span hiện tại bằng <code>.instrument(Span::current())</code> (hoặc <code>.in_current_span()</code>) lên async block. Cách 2: mở span con riêng rồi gắn vào task, <code>.instrument(info_span!("audit"))</code>; span tạo ngay trong <code>process</code> nên nhận span hiện tại làm cha, event vẫn thấy <code>request_id</code> trong <code>spans</code>.</p></details>
 

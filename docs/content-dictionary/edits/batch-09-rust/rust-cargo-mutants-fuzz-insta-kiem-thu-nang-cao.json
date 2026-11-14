@@ -1,0 +1,119 @@
+{
+ "file": "rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao.md",
+ "edits": [
+  {
+   "old": "clock giả và seed cố định chặn test flaky",
+   "new": "đồng hồ giả và seed cố định chặn test flaky",
+   "reason": "Thống nhất 'đồng hồ giả' như trong bài",
+   "severity": "low"
+  },
+  {
+   "old": "để trả lời «test có đủ chặt không» bằng chạy thật",
+   "new": "để trả lời «test có đủ chặt không» bằng cách chạy thật",
+   "reason": "Thiếu 'cách'",
+   "severity": "low"
+  },
+  {
+   "old": "vì đột biến code đã biết là sai không cho thông tin gì",
+   "new": "vì mutant của đoạn code đã biết là sai không cho thông tin gì",
+   "reason": "Dịch gượng 'đột biến code'; thống nhất dùng mutant",
+   "severity": "medium"
+  },
+  {
+   "old": "Bốn còn lại là biên độ dài `external_ref` (64 byte)",
+   "new": "Bốn còn lại là ranh giới độ dài `external_ref` (64 byte)",
+   "reason": "'biên độ dài' là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Test thêm, trong `tests/split_boundary.rs`, nhắm đúng ba chỗ đó:",
+   "new": "Các test thêm vào, nằm trong `tests/split_boundary.rs`, nhắm đúng ba chỗ đó:",
+   "reason": "Câu cụt, thiếu rõ chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai giới hạn. Mutation không chứng minh đúng, chỉ cho biết",
+   "new": "Hai giới hạn. Mutation không chứng minh code đúng, chỉ cho biết",
+   "reason": "Thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Và mutant tương đương hành vi thì không test nào diệt được",
+   "new": "Và mutant tương đương về hành vi thì không test nào diệt được",
+   "reason": "Thiếu giới từ",
+   "severity": "medium"
+  },
+  {
+   "old": "giữ đầu vào đi vào nhánh code mới và dừng",
+   "new": "giữ lại những đầu vào đi vào nhánh code mới và dừng",
+   "reason": "Câu dịch máy, thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "Fuzzer tìm ra sau khoảng 111.000 lần chạy",
+   "new": "Fuzzer tìm ra lỗi sau khoảng 111.000 lần chạy",
+   "reason": "Thiếu tân ngữ của 'tìm ra'",
+   "severity": "medium"
+  },
+  {
+   "old": "Bản sửa làm việc trên byte;",
+   "new": "Bản sửa thao tác trên byte;",
+   "reason": "Calque 'works on'",
+   "severity": "low"
+  },
+  {
+   "old": "Test thứ hai giữ bằng chứng rằng input này **thật sự** làm bản v1 panic",
+   "new": "Test thứ hai giữ bằng chứng rằng đầu vào này **thật sự** làm bản v1 panic",
+   "reason": "Thống nhất 'đầu vào'",
+   "severity": "low"
+  },
+  {
+   "old": "Không chứng minh parser đúng, chỉ cho biết nhiều đầu vào kỳ quặc",
+   "new": "Kết quả này không chứng minh parser đúng, chỉ cho biết nhiều đầu vào kỳ quặc",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Báo cáo đối soát cho Finance là văn bản dài;",
+   "new": "Báo cáo đối soát gửi bộ phận tài chính là văn bản dài;",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "khác biệt là ở máy dev `insta` ghi thêm",
+   "new": "chỗ khác nhau là ở máy dev `insta` ghi thêm",
+   "reason": "Câu gượng, dễ hiểu nhầm 'khác biệt' là diff",
+   "severity": "low"
+  },
+  {
+   "old": "Thời gian giải bằng cùng nguyên tắc:",
+   "new": "Vấn đề thời gian được giải bằng cùng nguyên tắc:",
+   "reason": "Câu cụt thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi assert in `seed={seed}`; đặt `LEDGER_TEST_SEED=<n>` để chạy lại đúng ca hỏng.",
+   "new": "Mọi assert đều in `seed={seed}`; đặt `LEDGER_TEST_SEED=<n>` để chạy lại đúng test case hỏng.",
+   "reason": "Thiếu 'đều'; thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Thời gian mutation xấp xỉ số mutant nhân với build cộng test một lần.",
+   "new": "Thời gian chạy mutation xấp xỉ số mutant nhân với thời gian build cộng test của một lần chạy.",
+   "reason": "Cụm cụt thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Crate 2.000 mutant sẽ không chạy nổi mỗi push.",
+   "new": "Crate có 2.000 mutant sẽ không chạy nổi trên mỗi push.",
+   "reason": "Thiếu động từ 'có'",
+   "severity": "low"
+  },
+  {
+   "old": "điểm giữa nửa đồng, input hồi quy,",
+   "new": "điểm giữa nửa đồng, đầu vào hồi quy,",
+   "reason": "Thống nhất 'đầu vào'",
+   "severity": "low"
+  }
+ ]
+}

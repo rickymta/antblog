@@ -1,0 +1,209 @@
+{
+  "file": "rust-tong-hop-kien-truc-ledger-service-workspace.md",
+  "edits": [
+    {
+      "old": "luồng TripCompleted tới số dư HTTP và gRPC",
+      "new": "luồng TripCompleted đến số dư qua HTTP và gRPC",
+      "reason": "Thiếu giới từ, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "biến câu hỏi review thành lệnh chạy được",
+      "new": "biến câu hỏi khi review thành lệnh chạy được",
+      "reason": "Cụm cụt, thiếu từ nối",
+      "severity": "low"
+    },
+    {
+      "old": "của nó cho biên dịch được",
+      "new": "của nó để biên dịch được",
+      "reason": "Dùng 'để' cho mục đích",
+      "severity": "medium"
+    },
+    {
+      "old": "Điều đáng nhìn: không có cạnh nào",
+      "new": "Điều đáng chú ý: không có cạnh nào",
+      "reason": "Cụm dịch gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Điểm khác [bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter): ở đó",
+      "new": "Điểm khác so với [bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter): ở đó",
+      "reason": "Thiếu giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Cái giá là thêm một crate.",
+      "new": "Cái giá phải trả là thêm một crate.",
+      "reason": "Tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Cái giá: `Ledger<S>` generic theo `S`,",
+      "new": "Cái giá phải trả: `Ledger<S>` là kiểu generic theo `S`,",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "chạy `cargo tree` và so tên là hai hàm riêng, nên so tên test được",
+      "new": "việc chạy `cargo tree` và việc so tên là hai hàm riêng, nên có thể test riêng việc so tên",
+      "reason": "Câu cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "(vì parse sai đầu ra, hay cargo đổi định dạng)",
+      "new": "(do parse sai đầu ra hoặc do cargo đổi định dạng)",
+      "reason": "Dùng 'vì' hai lần gây rối",
+      "severity": "medium"
+    },
+    {
+      "old": "Đọc đồng hồ thì `cargo tree` không thấy,",
+      "new": "Việc đọc đồng hồ thì `cargo tree` không thấy được,",
+      "reason": "Thiếu danh từ hoá",
+      "severity": "medium"
+    },
+    {
+      "old": "bộ kiểm đọc cạnh khai báo, không đọc ý định.",
+      "new": "bộ kiểm đọc các cạnh đã khai báo, không đọc ý định.",
+      "reason": "Cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "khoá theo hai thứ tự khác nhau là công thức của deadlock.",
+      "new": "khoá theo hai thứ tự khác nhau là công thức dẫn đến deadlock.",
+      "reason": "Calque 'recipe for'",
+      "severity": "low"
+    },
+    {
+      "old": "cuộc đua đó ở [bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update)",
+      "new": "race condition đó được trình bày ở [bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update)",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "đổi 503, consumer xong message dở, relay xả outbox",
+      "new": "đổi sang 503, consumer xử lý xong message đang dở, relay xả outbox",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "sai dạng hoặc version khác 1 thì",
+      "new": "sai dạng hoặc phiên bản khác 1 thì",
+      "reason": "Thống nhất 'phiên bản'",
+      "severity": "medium"
+    },
+    {
+      "old": "Khử trùng lặp theo `idempotencyKey` thì đằng nào cũng cần vì relay là at-least-once.",
+      "new": "Dù sao cũng phải khử trùng lặp theo `idempotencyKey`, vì relay là at-least-once.",
+      "reason": "Văn nói, lặp ý",
+      "severity": "medium"
+    },
+    {
+      "old": "không nhận lỗi nào, chỉ ngừng thấy tin.",
+      "new": "không nhận lỗi nào, chỉ không còn nhận được sự kiện.",
+      "reason": "Cụm dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "đổi tên phải theo ba bước ghi song song, chuyển consumer, dọn topic cũ của [bài 55](/articles/rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version);",
+      "new": "đổi tên phải theo ba bước của [bài 55](/articles/rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version): ghi song song, chuyển consumer, dọn topic cũ;",
+      "reason": "Câu khó đọc, đặt lại trật tự",
+      "severity": "medium"
+    },
+    {
+      "old": "khoá tối thiểu 32 byte và không vào log.",
+      "new": "khoá dài tối thiểu 32 byte và không được ghi vào log.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "nên 401, 403 đến trước lỗi đọc body.",
+      "new": "nên lỗi 401, 403 trả về trước lỗi đọc body.",
+      "reason": "Thiếu chủ ngữ rõ",
+      "severity": "medium"
+    },
+    {
+      "old": "Lỗi ánh xạ như sau, cả hai phía là",
+      "new": "Các lỗi được ánh xạ như sau, cả hai phía đều là",
+      "reason": "'Lỗi ánh xạ' dễ đọc nhầm thành một loại lỗi",
+      "severity": "medium"
+    },
+    {
+      "old": "gRPC cùng key trả về cùng",
+      "new": "gRPC với cùng key sẽ trả về cùng",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Hết hạn do domain quyết định, nhận giờ như một đối số:",
+      "new": "Việc hết hạn do domain quyết định, và domain nhận giờ như một đối số:",
+      "reason": "Thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "chạy thêm 901 giây và hold đó thôi trừ khả dụng, không",
+      "new": "chạy thêm 901 giây thì hold đó không còn bị trừ vào số khả dụng, không",
+      "reason": "Cụm 'thôi trừ' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Đây không phải largest remainder của [bài 46](/articles/rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong)",
+      "new": "Đây không phải thuật toán largest remainder của [bài 46](/articles/rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong)",
+      "reason": "Thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "khoá JWT riêng mỗi ca; không có CI",
+      "new": "khoá JWT riêng cho mỗi test case; không có CI",
+      "reason": "Thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "Mỗi ca có schema `lab_<uuid>`",
+      "new": "Mỗi test case có schema `lab_<uuid>`",
+      "reason": "Thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "Chưa Dockerfile, image, kiểm non-root hay kích thước.",
+      "new": "Chưa có Dockerfile, image, kiểm tra non-root hay kích thước.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chưa pipeline nào chạy",
+      "new": "Chưa có pipeline nào chạy",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chưa secrets manager, autoscale",
+      "new": "Chưa có secrets manager, autoscale",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "chưa payout, khuyến mãi,",
+      "new": "chưa có payout, khuyến mãi,",
+      "reason": "Câu thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "Chưa OpenAPI, timeout, rate limit;",
+      "new": "Chưa có OpenAPI, timeout, rate limit;",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "chưa DLQ; tên topic",
+      "new": "chưa có DLQ; tên topic",
+      "reason": "Câu thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "bị bỏ qua im lặng như ở bài 40",
+      "new": "bị bỏ qua mà không báo gì như ở bài 40",
+      "reason": "Calque 'im lặng' theo style guide",
+      "severity": "medium"
+    }
+  ]
+}

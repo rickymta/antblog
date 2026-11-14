@@ -1,0 +1,101 @@
+{
+ "file": "rust-hexagonal-clean-workspace-crates-port-adapter.md",
+ "edits": [
+  {
+   "old": "feature kafka, khi nào chưa cần tách.",
+   "new": "feature kafka và khi nào chưa cần tách.",
+   "reason": "Danh sách cụt, thiếu quan hệ từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Ranh giới giữa chúng là thoả thuận miệng.",
+   "new": "Ranh giới giữa chúng là quy ước ngầm.",
+   "reason": "Cách dịch gượng của informal agreement",
+   "severity": "medium"
+  },
+  {
+   "old": "thì thoả thuận đó càng dễ vỡ",
+   "new": "thì quy ước đó càng dễ vỡ",
+   "reason": "Thống nhất với câu trước",
+   "severity": "medium"
+  },
+  {
+   "old": "Khai báo sai chiều hợp lệ thì cần test hoặc review.",
+   "new": "Khai báo sai chiều nhưng vẫn hợp lệ thì cần test hoặc review.",
+   "reason": "Câu cụt, thiếu quan hệ từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Cargo chặn thứ chưa khai báo và thứ tạo vòng.",
+   "new": "Cargo chặn thứ chưa khai báo và thứ gây ra vòng phụ thuộc.",
+   "reason": "Cụm cụt, thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "cộng một lớp chuyển đổi, cho một thư viện ta không định thay",
+   "new": "cộng thêm một lớp chuyển đổi, trong khi ta không định thay thư viện đó",
+   "reason": "Câu gượng, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "nên cổng không biết",
+   "new": "nên port không biết",
+   "reason": "Thống nhất thuật ngữ port",
+   "severity": "medium"
+  },
+  {
+   "old": "không thể «dễ tính» hơn PostgreSQL một cách lặng lẽ",
+   "new": "không thể «dễ tính» hơn PostgreSQL mà không bị phát hiện",
+   "reason": "Calque 'một cách lặng lẽ'",
+   "severity": "medium"
+  },
+  {
+   "old": "là `rdkafka` vào build",
+   "new": "thì `rdkafka` sẽ vào build",
+   "reason": "Thiếu quan hệ từ",
+   "severity": "low"
+  },
+  {
+   "old": "nên test đó có giá chủ yếu khi workspace thêm crate",
+   "new": "nên test đó chủ yếu có giá trị khi workspace có thêm crate",
+   "reason": "Cụm 'có giá' gượng, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và khi sửa đổi thường nằm ở phía ngoài",
+   "new": "và khi các lần sửa thường nằm ở phía ngoài",
+   "reason": "Từ 'sửa đổi' dùng như danh từ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Lab không đo một crate duy nhất, nên không so được với đó.",
+   "new": "Lab không đo cách gộp thành một crate duy nhất, nên không so được với cách đó.",
+   "reason": "Đại từ 'đó' không rõ chỉ gì",
+   "severity": "high"
+  },
+  {
+   "old": "Tách crate có giá cụ thể.",
+   "new": "Tách crate có cái giá cụ thể.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "và mỗi phụ thuộc phải được nghĩ tới ở đúng crate",
+   "new": "và phải cân nhắc từng phụ thuộc nên đặt ở crate nào",
+   "reason": "Câu bị động gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Đường đi từ bài 40, rẻ trước (",
+   "new": "Đường đi từ bài 40, làm bước rẻ trước (",
+   "reason": "Cụm cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "tức sự kiện mất;",
+   "new": "tức là sự kiện bị mất;",
+   "reason": "Thiếu từ nối, câu cụt",
+   "severity": "medium"
+  }
+ ]
+}

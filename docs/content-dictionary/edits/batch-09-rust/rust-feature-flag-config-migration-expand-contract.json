@@ -1,0 +1,251 @@
+{
+  "file": "rust-feature-flag-config-migration-expand-contract.md",
+  "edits": [
+    {
+      "old": "Expand/contract tách nó thành ba pha, mỗi bước tương thích",
+      "new": "Expand/contract tách thay đổi thành ba pha, mỗi pha tương thích",
+      "reason": "Nó mơ hồ, thống nhất pha",
+      "severity": "medium"
+    },
+    {
+      "old": "cùng một ý: thêm trước, đổi người ghi, gỡ sau.",
+      "new": "cũng theo một ý đó: thêm trước, đổi người ghi, gỡ sau.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "ở đây là thứ tự áp dụng nó.",
+      "new": "bài này bàn về thứ tự áp dụng nó.",
+      "reason": "Vế sau thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Expand thêm cột nullable, không giá trị mặc định.",
+      "new": "Expand thêm cột nullable, không có giá trị mặc định.",
+      "reason": "Thiếu từ có",
+      "severity": "low"
+    },
+    {
+      "old": "Phần của `postings` (rút gọn,",
+      "new": "Phần áp dụng cho `postings` (rút gọn,",
+      "reason": "Phần của gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Expand nới đúng một kiểu:",
+      "new": "Expand chỉ nới đúng một trường hợp:",
+      "reason": "Kiểu gây nhầm với kiểu dữ liệu",
+      "severity": "low"
+    },
+    {
+      "old": "Mỗi `UPDATE` còn sinh bản dòng mới",
+      "new": "Mỗi `UPDATE` còn sinh một phiên bản dòng mới",
+      "reason": "Bản dòng là calque của row version",
+      "severity": "medium"
+    },
+    {
+      "old": "thay chỗ nó.",
+      "new": "thay thế cho cột đó.",
+      "reason": "Thay chỗ nó cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Hai chuyến ghi giữa chừng:",
+      "new": "Hai chuyến được ghi giữa lúc đang chuyển đổi:",
+      "reason": "Giữa chừng không rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "làm lô idempotent;",
+      "new": "khiến lô idempotent;",
+      "reason": "Làm gượng",
+      "severity": "low"
+    },
+    {
+      "old": "trên dòng checkpoint để hai tiến trình cùng tên xếp hàng:",
+      "new": "đặt trên dòng checkpoint để hai tiến trình cùng tên phải xếp hàng:",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "nên mỗi dòng bị sửa kích hoạt lại kiểm «tổng bằng 0» lúc commit.",
+      "new": "nên mỗi dòng bị sửa sẽ kích hoạt lại phép kiểm «tổng bằng 0» lúc commit.",
+      "reason": "Cấu trúc kích hoạt lại kiểm cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "giữ nó mở thì bút toán mới vẫn ghi được.",
+      "new": "giữ khoá đó mở thì bút toán mới vẫn ghi được.",
+      "reason": "Nó mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Còn `NULL` mà `VALIDATE` thì PostgreSQL trả",
+      "new": "Nếu còn `NULL` mà chạy `VALIDATE` thì PostgreSQL trả",
+      "reason": "Câu cụt thiếu điều kiện",
+      "severity": "medium"
+    },
+    {
+      "old": "hàng rào chặn contract sớm.",
+      "new": "đây là hàng rào chặn việc contract quá sớm.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Giá trị là hằng thì từ PostgreSQL 11,",
+      "new": "Nếu giá trị là hằng thì từ PostgreSQL 11,",
+      "reason": "Thiếu từ điều kiện",
+      "severity": "low"
+    },
+    {
+      "old": "bài đi đường dài vì giá trị phải tính từ dữ liệu thì không có lối tắt này.",
+      "new": "bài này đi đường dài vì với giá trị phải tính từ dữ liệu thì không có lối tắt này.",
+      "reason": "Câu lủng củng",
+      "severity": "medium"
+    },
+    {
+      "old": "Mọi số đo trên PostgreSQL 18.6, khớp tài liệu",
+      "new": "Mọi số đo lấy trên PostgreSQL 18.6 và khớp với tài liệu",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "trả trigger append-only về chặt",
+      "new": "siết lại trigger append-only như ban đầu",
+      "reason": "Về chặt dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "C là `SELECT count(*)` ngắn đến sau B.",
+      "new": "C chạy `SELECT count(*)` ngắn, đến sau B.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Mẫu của lab: 200 ms",
+      "new": "Thông số của lab: 200 ms",
+      "reason": "Mẫu mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "Phiên đọc dài còn giữ bảng thì ",
+      "new": "Nếu phiên đọc dài còn giữ bảng thì ",
+      "reason": "Thiếu từ điều kiện",
+      "severity": "low"
+    },
+    {
+      "old": "hết hạn ở lần 1, hoàn tác sạch,",
+      "new": "hết thời gian chờ ở lần 1, hoàn tác sạch,",
+      "reason": "Hết hạn không đúng nghĩa timeout",
+      "severity": "low"
+    },
+    {
+      "old": "phiên đọc xong thì lần 2 thành công:",
+      "new": "khi phiên đọc xong thì lần 2 thành công:",
+      "reason": "Thiếu từ nối",
+      "severity": "low"
+    },
+    {
+      "old": "production nên nghỉ có jitter giữa các lần.",
+      "new": "production nên chờ một khoảng có jitter giữa các lần.",
+      "reason": "Calque nghỉ có jitter",
+      "severity": "medium"
+    },
+    {
+      "old": "Biến môi trường hay file cần triển khai lại.",
+      "new": "Đổi biến môi trường hay file thì phải triển khai lại.",
+      "reason": "Câu thiếu động từ rõ nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "nhưng không là nguồn sự thật",
+      "new": "nhưng không phải là nguồn dữ liệu gốc",
+      "reason": "Thiếu từ phải",
+      "severity": "high"
+    },
+    {
+      "old": "Đúng một lần cho mỗi chuyến, tại chỗ quyết định phí, và kết quả vào sự kiện",
+      "new": "Đọc đúng một lần cho mỗi chuyến, tại nơi quyết định phí, và kết quả được ghi vào sự kiện",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "vẫn ra cùng một phiên bản.",
+      "new": "vẫn cho ra cùng một phiên bản.",
+      "reason": "Ra thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "Quy tắc mới có sàn, cài trên ",
+      "new": "Quy tắc mới có sàn, được cài đặt trên ",
+      "reason": "Cài trên gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Nhóm của chuyến là hàm thuần của tên cờ và mã chuyến.",
+      "new": "Nhóm của chuyến là kết quả của một hàm thuần nhận tên cờ và mã chuyến làm đầu vào.",
+      "reason": "Của gượng, giọng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "Dòng cuối là cách sai, chọn «ngẫu nhiên» mỗi lần hỏi: hơn nửa số chuyến đổi ý.",
+      "new": "Dòng cuối là cách làm sai: chọn «ngẫu nhiên» mỗi lần hỏi thì hơn nửa số chuyến đổi ý.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "ra đúng từng đồng, còn áp quy tắc hiện hành thì lệch:",
+      "new": "cho ra đúng từng đồng, còn replay bằng quy tắc hiện hành thì lệch:",
+      "reason": "Câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Rollback code không rollback dữ liệu:",
+      "new": "Rollback code không kéo theo rollback dữ liệu:",
+      "reason": "Cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Chỉ bằng dựng lại",
+      "new": "Chỉ bằng cách dựng lại",
+      "reason": "Thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "đọc báo cáo lỗi `42703`",
+      "new": "đọc báo cáo thì lỗi `42703`",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Lab suy lại được vì `policy_version` còn và tỷ lệ danh nghĩa của mỗi phiên bản biết trước.",
+      "new": "Lab suy lại được vì `policy_version` vẫn còn và tỷ lệ danh nghĩa của mỗi phiên bản đã biết trước.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "và chỉ contract B khi chắc không còn lùi.",
+      "new": "và chỉ chạy contract B khi chắc chắn không còn cần lùi.",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Cấu hình là chuỗi thì gõ sai không báo gì:",
+      "new": "Nếu cấu hình là chuỗi thì gõ sai không báo gì:",
+      "reason": "Thiếu từ điều kiện",
+      "severity": "low"
+    },
+    {
+      "old": "âm thầm thành `V1`.",
+      "new": "bị đổi thành `V1` mà không báo gì.",
+      "reason": "Calque âm thầm",
+      "severity": "medium"
+    },
+    {
+      "old": "(Rút gọn: bỏ ca `lockTimeoutMs = 60000`.)",
+      "new": "(Rút gọn: bỏ trường hợp `lockTimeoutMs = 60000`.)",
+      "reason": "Ca gây nhầm, thống nhất trường hợp",
+      "severity": "low"
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+ "file": "rust-integration-test-postgresql-schema-rieng-ci.md",
+ "edits": [
+  {
+   "old": "schema riêng mỗi ca, fixture, CI",
+   "new": "schema riêng cho mỗi test case, fixture, CI",
+   "reason": "Thống nhất 'test case'; 'mỗi ca' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Chỉ test chạy trên chính PostgreSQL, mỗi ca một chỗ riêng, mới trả lời được.",
+   "new": "Chỉ test chạy trên chính PostgreSQL, mỗi test case một chỗ riêng, mới trả lời được.",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "schema của ca đó không?",
+   "new": "schema của test case đó không?",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi một lệnh dọn xoá schema nào có dấu đó và quá tuổi.",
+   "new": "rồi một lệnh dọn xoá những schema có dấu đó và đã quá tuổi.",
+   "reason": "'schema nào có' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "cho thấy nói \"SQLite không có upsert\" là sai;",
+   "new": "cho thấy câu \"SQLite không có upsert\" là sai;",
+   "reason": "'cho thấy nói' sai ngữ pháp",
+   "severity": "medium"
+  },
+  {
+   "old": "## Một ca test, một schema: fixture dựng thế nào?",
+   "new": "## Một test case, một schema: fixture dựng thế nào?",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi ca tạo schema `lab_<uuid>` của riêng nó,",
+   "new": "mỗi test case tạo schema `lab_<uuid>` của riêng mình,",
+   "reason": "Thống nhất 'test case'; 'của riêng nó' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Vòng đời nằm ở Hình 1.",
+   "new": "Hình 1 cho thấy vòng đời đó.",
+   "reason": "'nằm ở' gượng, kiểu dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Hình 1. Vòng đời một ca test: tạo schema,",
+   "new": "Hình 1. Vòng đời một test case: tạo schema,",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Hình 1. Vòng đời một ca test. Đường nét đứt",
+   "new": "Hình 1. Vòng đời một test case. Đường nét đứt",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Nên fixture đòi gọi tường minh:",
+   "new": "Vì vậy fixture yêu cầu gọi tường minh:",
+   "reason": "'đòi' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "compiler giữ giúp phần đó.",
+   "new": "trình biên dịch đảm bảo phần đó.",
+   "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi; 'giữ giúp' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Ngưỡng tuổi tránh xoá nhầm ca đang chạy.",
+   "new": "Ngưỡng tuổi giúp tránh xoá nhầm test case đang chạy.",
+   "reason": "Thống nhất 'test case'; câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và ca đang sống vẫn còn nguyên.",
+   "new": "và test case đang chạy vẫn còn nguyên.",
+   "reason": "Thống nhất 'test case'; 'đang sống' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "cả ba ca xanh, ca in ra database tên dạng",
+   "new": "cả ba test case xanh, mỗi test case in ra database có tên dạng",
+   "reason": "Thống nhất 'test case'; thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "một **database** mới cho mỗi ca",
+   "new": "một **database** mới cho mỗi test case",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "chạy lại cùng ca thì database cùng tên bị xoá và dựng lại",
+   "new": "chạy lại cùng test case thì database cùng tên bị xoá và dựng lại",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "cho cả loạt, môi trường dùng chung không phải lúc nào cũng cấp",
+   "new": "cho cả loạt bài, môi trường dùng chung không phải lúc nào cũng cấp",
+   "reason": "Câu liệt kê thiếu liên từ, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Một điểm trừ của cách schema:",
+   "new": "Một điểm trừ của cách dùng schema:",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên migration của các ca song song xếp hàng dù mỗi ca ở một schema.",
+   "new": "nên migration của các test case chạy song song xếp hàng dù mỗi test case ở một schema.",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy các ca song song theo mặc định. Nếu hai ca chia sẻ một schema, ca ghi sau sẽ thấy bút toán của ca trước",
+   "new": "chạy các test case song song theo mặc định. Nếu hai test case chia sẻ một schema, test case ghi sau sẽ thấy bút toán của test case trước",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca dưới đây chứng minh điều ngược lại (Hình 2): tám ca cùng lúc ghi đúng một key, mỗi ca ở schema của mình,",
+   "new": "Test case dưới đây chứng minh điều ngược lại (Hình 2): tám test case cùng lúc ghi đúng một key, mỗi test case ở schema của mình,",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Hình 2. Ba ca test chạy song song, mỗi ca có pool và schema",
+   "new": "Hình 2. Ba test case chạy song song, mỗi test case có pool và schema",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Hình 2. Mỗi ca chỉ nhìn thấy schema của mình.",
+   "new": "Hình 2. Mỗi test case chỉ nhìn thấy schema của mình.",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Ca `same_key_same_content_is_a_replay_and_different_content_conflicts` là đối chứng:",
+   "new": "Test case `same_key_same_content_is_a_replay_and_different_content_conflicts` là đối chứng:",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Thêm `nothing_is_created_in_the_public_schema` đếm bảng sổ cái ở `public` bằng 0 và ở schema của ca bằng 1:",
+   "new": "Một test case nữa, `nothing_is_created_in_the_public_schema`, đếm bảng sổ cái ở `public` bằng 0 và ở schema của test case bằng 1:",
+   "reason": "Câu 'Thêm X đếm' thiếu chủ ngữ; thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "bên sau nhận `40001`, tín hiệu để lớp ghi thử lại (bài 24):",
+   "new": "bên sau nhận `40001`, là tín hiệu để lớp ghi thử lại (bài 24):",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "pool của một ca và các bước chạy tuần tự trong test; ca dựng đúng tình huống mà retry loop ở bài 24 phải xử lý thay vì chờ nó xảy ra ngẫu nhiên.",
+   "new": "pool của một test case và các bước chạy tuần tự trong test; test case dựng đúng tình huống mà retry loop ở bài 24 phải xử lý thay vì chờ tình huống đó xảy ra ngẫu nhiên.",
+   "reason": "Thống nhất 'test case'; 'nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy 11 ca xanh (3 ca nữa của `#[sqlx::test]` khi bật feature).",
+   "new": "chạy 11 test case xanh (3 test case nữa của `#[sqlx::test]` khi bật feature).",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Dựng một `TestDb` (schema, pool, ba migration) đo bằng",
+   "new": "Thời gian dựng một `TestDb` (schema, pool, ba migration) được đo bằng",
+   "reason": "Câu thiếu chủ ngữ, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "<code>lab_&lt;uuid&gt;</code> chung database vẫn dùng chung thứ ở mức database:",
+   "new": "<code>lab_&lt;uuid&gt;</code> nằm chung một database vẫn dùng chung những tài nguyên ở mức database:",
+   "reason": "Lặp 'dùng chung', 'thứ' tối nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "Mỗi ca giữ tối đa 4 kết nối, nên số ca song song nhân 4",
+   "new": "Mỗi test case giữ tối đa 4 kết nối, nên số test case chạy song song nhân 4",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "viết thêm một ca kiểm rằng bút toán đảo",
+   "new": "viết thêm một test case kiểm tra rằng bút toán đảo",
+   "reason": "Thống nhất 'test case'; 'kiểm rằng' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca dùng `JournalEntry::reversal_of` của `ledger-core`.",
+   "new": "Test case này dùng `JournalEntry::reversal_of` của `ledger-core`.",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Trong một ca <code>TestDb::new()</code>:",
+   "new": "Trong một test case, dùng <code>TestDb::new()</code>:",
+   "reason": "Câu cụt thiếu động từ; thống nhất 'test case'",
+   "severity": "medium"
+  }
+ ]
+}

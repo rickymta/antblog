@@ -1,0 +1,101 @@
+{
+"file": "rust-tong-hop-ledger-core-cargo-doc-workspace.md",
+"edits": [
+{
+"old": "bảng bất biến double-entry và test chứng minh",
+"new": "bảng bất biến double-entry cùng test chứng minh",
+"reason": "Liệt kê rõ hơn, tránh hai \"và\" liền trong summary",
+"severity": "low"
+},
+{
+"old": "vì mới kiểm trên Rust 1.98",
+"new": "vì mới kiểm tra trên Rust 1.98",
+"reason": "Lược mất chữ \"tra\"",
+"severity": "low"
+},
+{
+"old": "chỉ nhận dạng chuẩn.",
+"new": "chỉ nhận định dạng chuẩn.",
+"reason": "\"dạng chuẩn\" cụt",
+"severity": "medium"
+},
+{
+"old": "Mười bất biến, cơ chế giữ chúng và test chứng minh (",
+"new": "Bảng sau gồm mười bất biến, cơ chế giữ chúng và test chứng minh (",
+"reason": "Câu thiếu vị ngữ",
+"severity": "high"
+},
+{
+"old": "Thử phá: tạm đổi dòng kiểm tổng",
+"new": "Thử phá code: tạm đổi dòng kiểm tra tổng",
+"reason": "Thiếu tân ngữ và chữ \"tra\"",
+"severity": "medium"
+},
+{
+"old": "nó chỉ sinh bút toán đã cân",
+"new": "test này chỉ sinh bút toán đã cân",
+"reason": "Tránh \"nó\" chỉ sự vật trừu tượng",
+"severity": "medium"
+},
+{
+"old": "Mỗi hàm trả `Result` có mục",
+"new": "Mỗi hàm trả về `Result` có mục",
+"reason": "Thiếu \"về\"",
+"severity": "low"
+},
+{
+"old": "để liên kết hỏng cũng làm CI đỏ, chạy",
+"new": "muốn liên kết hỏng cũng làm CI đỏ thì chạy",
+"reason": "Cấu trúc câu lủng củng",
+"severity": "medium"
+},
+{
+"old": "chỉ để im lặng clippy",
+"new": "chỉ để clippy hết cảnh báo",
+"reason": "\"im lặng clippy\" là calque",
+"severity": "medium"
+},
+{
+"old": "`-- --verify` kiểm cước",
+"new": "`-- --verify` kiểm tra cước",
+"reason": "Lược mất chữ \"tra\"",
+"severity": "low"
+},
+{
+"old": "`cargo test` chạy 67 ca:",
+"new": "`cargo test` chạy 67 test case:",
+"reason": "Thống nhất \"test case\"",
+"severity": "low"
+},
+{
+"old": "Property test chạy 256 ca mỗi property",
+"new": "Property test chạy 256 test case mỗi property",
+"reason": "Thống nhất \"test case\"",
+"severity": "low"
+},
+{
+"old": "**Bền vững:** database;",
+"new": "**Lưu trữ bền vững:** database;",
+"reason": "\"Bền vững\" thiếu danh từ chính",
+"severity": "medium"
+},
+{
+"old": "thời điểm ghi trên bút toán",
+"new": "thời điểm ghi của bút toán",
+"reason": "Giới từ sai",
+"severity": "low"
+},
+{
+"old": "kiểm định dạng `AccountId`",
+"new": "kiểm tra định dạng `AccountId`",
+"reason": "Lược mất chữ \"tra\"",
+"severity": "low"
+},
+{
+"old": "đảo chính bút toán đảo",
+"new": "đảo lại chính bút toán đảo",
+"reason": "\"đảo chính\" gượng, dễ hiểu nhầm",
+"severity": "high"
+}
+]
+}

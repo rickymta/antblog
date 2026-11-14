@@ -1,0 +1,209 @@
+{
+  "file": "rust-container-dockerfile-da-stage-cargo-chef-distroless.md",
+  "edits": [
+    {
+      "old": "Build đa kiến trúc chưa làm.",
+      "new": "Chưa build đa kiến trúc.",
+      "reason": "Trật tự từ gượng",
+      "severity": "low"
+    },
+    {
+      "old": "nó trả lời bằng số đo năm câu vận hành: image nặng bao nhiêu",
+      "new": "bài trả lời bằng số đo năm câu hỏi vận hành: image nặng bao nhiêu",
+      "reason": "'nó' mơ hồ; thiếu 'hỏi'",
+      "severity": "medium"
+    },
+    {
+      "old": "tiến trình chạy bằng ai, ai kiểm nó còn sống, và nó có tắt đúng khi nhận SIGTERM không.",
+      "new": "tiến trình chạy dưới quyền ai, ai kiểm tra xem nó còn sống không, và nó có tắt đúng cách khi nhận SIGTERM không.",
+      "reason": "Câu cụt, 'chạy bằng ai' mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "chép tối thiểu từ lab 58",
+      "new": "chép lại phần tối thiểu từ lab 58",
+      "reason": "Thiếu danh từ",
+      "severity": "low"
+    },
+    {
+      "old": "Nó chạy được, nhưng mang theo toolchain",
+      "new": "Image này chạy được, nhưng mang theo toolchain",
+      "reason": "Tránh 'Nó' đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Phải đọc đúng con số này.",
+      "new": "Cần hiểu đúng con số này.",
+      "reason": "'đọc đúng' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Bài chỉ so trên cùng thước đo, nên chỉ kết luận chiều lớn nhỏ.",
+      "new": "Bài chỉ so sánh trên cùng một thước đo, nên chỉ kết luận được bên nào lớn hơn.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "lab dựng hai runtime để so (debian slim, distroless)",
+      "new": "lab dựng hai runtime để so sánh (debian slim, distroless)",
+      "reason": "'để so' cụt",
+      "severity": "low"
+    },
+    {
+      "old": "nó không thay việc giới hạn quyền và mạng.",
+      "new": "việc này không thay thế cho việc giới hạn quyền và mạng.",
+      "reason": "'nó' mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Base image chỉ ghim theo tag, mà `nonroot` hay `bookworm-slim` vẫn trôi;",
+      "new": "Base image chỉ được ghim theo tag, trong khi `nonroot` hay `bookworm-slim` vẫn có thể thay đổi ngầm;",
+      "reason": "'vẫn trôi' dịch sát drift",
+      "severity": "high"
+    },
+    {
+      "old": "ưu tiên nhỏ hơn nhanh",
+      "new": "ưu tiên kích thước nhỏ thay vì tốc độ",
+      "reason": "Cụm cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "cho binary chỉ chạy trên CPU giống máy build",
+      "new": "tạo ra binary chỉ chạy được trên CPU giống máy build",
+      "reason": "'cho binary' calque",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó chạy và `HEALTHCHECK` vẫn healthy. Với service nhỏ này, static musl hợp lệ.",
+      "new": "Image này chạy và `HEALTHCHECK` vẫn healthy. Với service nhỏ này, dùng static musl là hợp lệ.",
+      "reason": "'Nó' mơ hồ; câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Docker cache theo layer, và `COPY . .` đổi mỗi khi bạn sửa một dòng.",
+      "new": "Docker cache theo từng layer, và layer `COPY . .` thay đổi mỗi khi bạn sửa một dòng.",
+      "reason": "Thiếu danh từ chính (layer)",
+      "severity": "medium"
+    },
+    {
+      "old": "Thời gian chỉ cho hướng:",
+      "new": "Thời gian chỉ cho biết xu hướng:",
+      "reason": "Cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Phần 30 giây còn lại là biên dịch crate của mình",
+      "new": "Phần 30 giây còn lại là thời gian biên dịch crate của mình",
+      "reason": "'Phần 30 giây còn lại' không rõ là phần nào",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab đếm byte thực sự tới bước build",
+      "new": "Lab đếm số byte thực sự đến được bước build",
+      "reason": "Thiếu động từ rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "Con số tuỳ `target/` lúc đó chứa gì.",
+      "new": "Con số thay đổi tuỳ theo lúc đó `target/` chứa gì.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "lab kiểm hai cách",
+      "new": "lab kiểm tra bằng hai cách",
+      "reason": "'kiểm' cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Binary tự đảm nhiệm:",
+      "new": "Binary tự đảm nhiệm việc này:",
+      "reason": "Thiếu tân ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "`/readyz` hỏi phụ thuộc cần thiết dùng được không.",
+      "new": "`/readyz` hỏi các phụ thuộc cần thiết có dùng được không.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "trong khi tiến trình không có lỗi nào để sửa bằng restart.",
+      "new": "trong khi tiến trình không có lỗi nào mà restart có thể khắc phục.",
+      "reason": "Câu dịch cứng",
+      "severity": "medium"
+    },
+    {
+      "old": "chờ một hạn (ở lab là 5 giây)",
+      "new": "chờ một khoảng thời gian (ở lab là 5 giây)",
+      "reason": "'một hạn' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "và nó không chuyển tín hiệu cho con.",
+      "new": "và dash không chuyển tín hiệu cho tiến trình con.",
+      "reason": "'nó', 'con' mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Kết quả gắn với shell của base image",
+      "new": "Kết quả phụ thuộc vào shell của base image",
+      "reason": "'gắn với' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "BusyBox `exec` thẳng lệnh đơn",
+      "new": "BusyBox chạy `exec` thẳng cho lệnh đơn",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "SIGKILL sau hết hạn",
+      "new": "SIGKILL khi hết hạn",
+      "reason": "Trật tự từ gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Handler được đăng ký trước khi in dòng `listening` để tín hiệu tới sớm không mất;",
+      "new": "Service đăng ký handler trước khi in dòng `listening` để không làm mất tín hiệu gửi đến sớm;",
+      "reason": "Bị động và câu dịch cứng",
+      "severity": "medium"
+    },
+    {
+      "old": "Linux đối xử PID 1 riêng: tín hiệu không có handler thì không có hành vi mặc định là kết thúc",
+      "new": "Linux xử lý PID 1 theo cách riêng: tín hiệu không có handler thì không kích hoạt hành vi mặc định là kết thúc tiến trình",
+      "reason": "'đối xử PID 1 riêng' gượng, câu nặng",
+      "severity": "medium"
+    },
+    {
+      "old": "Service đóng gói ở đây cũng không phải service 58: không Kafka, gRPC hay JWT.",
+      "new": "Service đóng gói ở đây cũng không phải service ở bài 58: không có Kafka, gRPC hay JWT.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Bài chứng minh cơ chế đóng gói, không phải rằng service đầy đủ đã sẵn sàng cho production.",
+      "new": "Bài chứng minh cơ chế đóng gói, không chứng minh rằng service đầy đủ đã sẵn sàng cho production.",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "user không-root, `HEALTHCHECK` dạng exec, tag ghim, không",
+      "new": "user không phải root, `HEALTHCHECK` dạng exec, tag được ghim, không",
+      "reason": "Cụm tự ghép",
+      "severity": "low"
+    },
+    {
+      "old": "kể cả khi lỗi (qua",
+      "new": "kể cả khi gặp lỗi (qua",
+      "reason": "Cụt",
+      "severity": "low"
+    },
+    {
+      "old": "vì nó chính là phản mẫu",
+      "new": "vì chính stage này là phản mẫu",
+      "reason": "'nó' mơ hồ",
+      "severity": "low"
+    }
+  ]
+}

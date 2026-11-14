@@ -1,0 +1,22 @@
+{"file":"rust-newtype-value-object-money-account-id.md","edits":[
+{"old":"chọn derive đúng, cộng trừ tiền trả Result và chặn cộng khác loại tiền","new":"chọn derive phù hợp; phép cộng, trừ tiền trả về Result; chặn cộng tiền khác loại","reason":"Cụm cụt, thiếu từ nối; 'cộng khác loại tiền' sai trật tự","severity":"medium"},
+{"old":"test trong lab kiểm điều này","new":"test trong lab kiểm tra điều này","reason":"'Kiểm' viết cụt","severity":"low"},
+{"old":"Lab giữ bốn ca thành doc test","new":"Lab giữ bốn test case thành doc test","reason":"Thống nhất thuật ngữ test case","severity":"medium"},
+{"old":"rustdoc chỉ kiểm đoạn code không biên dịch được","new":"rustdoc chỉ kiểm tra rằng đoạn code không biên dịch được","reason":"Câu cụt, 'kiểm đoạn code' khó hiểu","severity":"low"},
+{"old":"kiểm bốn điều","new":"kiểm tra bốn điều","reason":"'Kiểm' viết cụt","severity":"low"},
+{"old":"`Money` và `EntryId` được.","new":"`Money` và `EntryId` thoả điều kiện đó.","reason":"Câu cụt, thiếu vị ngữ rõ ràng","severity":"medium"},
+{"old":"gỡ nó đi sau này làm vỡ mọi chỗ đã dùng bản sao ngầm","new":"sau này gỡ nó đi sẽ làm hỏng mọi chỗ đang dựa vào việc sao chép ngầm","reason":"'Bản sao ngầm' là cụm tự ghép, nghe cụt","severity":"high"},
+{"old":"ở release âm thầm quay vòng ra","new":"ở release thì quay vòng mà không báo lỗi, ra","reason":"'Âm thầm' là calque của silently","severity":"medium"},
+{"old":"Panic dừng luồng xử lý giữa chừng một bút toán","new":"Panic dừng luồng xử lý ngay giữa lúc đang ghi một bút toán","reason":"Trật tự từ kiểu Anh, câu khó đọc","severity":"medium"},
+{"old":"vì không nói lý do","new":"vì không cho biết nguyên nhân thất bại","reason":"'Không nói lý do' mơ hồ, ý là Option không báo được nguyên nhân","severity":"high"},
+{"old":"vì nó không báo lỗi được","new":"vì toán tử này không báo lỗi được","reason":"Đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"không impl `Add`; hướng đó cũng ổn","new":"không cài đặt `Add`; hướng đó cũng ổn","reason":"Động từ tiếng Anh viết tắt lọt vào văn xuôi","severity":"low"},
+{"old":"Nói chặt,","new":"Nói chính xác,","reason":"'Nói chặt' gượng","severity":"low"},
+{"old":"Một: ràng buộc","new":"Thứ nhất: ràng buộc","reason":"Đánh số kiểu cụt","severity":"low"},
+{"old":"Hai: tham số mặc định","new":"Thứ hai: tham số mặc định","reason":"Đánh số kiểu cụt","severity":"low"},
+{"old":"Ba: `Add` được cài cho","new":"Thứ ba: `Add` được cài cho","reason":"Đánh số kiểu cụt","severity":"low"},
+{"old":"Cái giá là thêm tham số generic trong chữ ký.","new":"Cái giá phải trả là phải thêm tham số generic vào chữ ký.","reason":"Câu cụt, thiếu động từ","severity":"low"},
+{"old":"`EntryId` là thứ đi tiếp.","new":"`EntryId` là kiểu được giữ lại cho các bài sau.","reason":"Câu cụt, 'thứ đi tiếp' tự ghép","severity":"high"},
+{"old":"kiểm các giá trị trên cùng các ca lỗi và in","new":"kiểm tra các giá trị trên cùng các trường hợp lỗi và in","reason":"'Kiểm' cụt; 'ca lỗi' lẫn với test case","severity":"medium"},
+{"old":"chỉ kiểm hình dạng, chưa kiểm loại tài khoản có tồn tại","new":"chỉ kiểm tra hình dạng, chưa kiểm tra loại tài khoản có tồn tại hay không","reason":"'Kiểm' cụt, câu thiếu vế","severity":"medium"}
+]}

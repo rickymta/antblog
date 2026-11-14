@@ -1,0 +1,131 @@
+{
+ "file": "rust-tonic-grpc-get-balance-post-entry-interop-dotnet.md",
+ "edits": [
+  {
+   "old": "server tonic map LedgerError sang Status",
+   "new": "server tonic ánh xạ LedgerError sang Status",
+   "reason": "Dùng từ Việt quen dùng thay cho 'map'",
+   "severity": "low"
+  },
+  {
+   "old": "Cái cần là một hợp đồng viết đúng một lần",
+   "new": "Điều cần có là một hợp đồng viết đúng một lần",
+   "reason": "Câu cụt, gượng",
+   "severity": "low"
+  },
+  {
+   "old": "mới là danh tính của trường trên dây",
+   "new": "mới là định danh của trường trên dây",
+   "reason": "'Danh tính' là dịch gượng của identity",
+   "severity": "medium"
+  },
+  {
+   "old": "để hiện thực và",
+   "new": "để triển khai và",
+   "reason": "'Hiện thực' là calque của implement",
+   "severity": "medium"
+  },
+  {
+   "old": "đổi message sang kiểu miền",
+   "new": "đổi message sang kiểu thuộc miền nghiệp vụ",
+   "reason": "'Kiểu miền' là cụm tự ghép, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "tự là `Interceptor`",
+   "new": "tự nó đã là `Interceptor`",
+   "reason": "Câu thiếu từ nối, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Và một lỗi có thể mang mã khác nhau theo RPC",
+   "new": "Ngoài ra, một lỗi có thể mang mã khác nhau tuỳ theo RPC",
+   "reason": "Bỏ lối mở câu bằng 'Và' kiểu dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "một test map `StoreError::Aborted` sang mã",
+   "new": "một test ánh xạ `StoreError::Aborted` sang mã",
+   "reason": "Dùng từ Việt quen dùng thay cho 'map'",
+   "severity": "low"
+  },
+  {
+   "old": "nhưng client phân biệt hai mã sẽ xử lý sai.",
+   "new": "nhưng client nào phân biệt hai mã này sẽ xử lý sai.",
+   "reason": "Câu mơ hồ về chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ mã trả về là có.",
+   "new": "chỉ mã trả về mới phụ thuộc vào nó.",
+   "reason": "Diễn đạt gượng, khó đoán ý",
+   "severity": "high"
+  },
+  {
+   "old": "lab này không dựng lại ca đó",
+   "new": "lab này không dựng lại trường hợp đó",
+   "reason": "Tránh 'ca' cụt nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "ba mã lỗi đúng bảng",
+   "new": "ba mã lỗi khớp với bảng",
+   "reason": "Câu cụt, thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "sẽ bỏ sót phần lớn ca hết giờ",
+   "new": "sẽ bỏ sót phần lớn trường hợp hết giờ",
+   "reason": "Tránh 'ca' cụt nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "Cái giá của gRPC là công cụ:",
+   "new": "Cái giá của gRPC nằm ở công cụ:",
+   "reason": "Câu gượng, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Tiếp theo là bảng lỗi sang",
+   "new": "Tiếp theo là bảng ánh xạ lỗi sang",
+   "reason": "Cụm 'bảng lỗi sang' cụt, thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "ba ca deadline, tám lời gọi",
+   "new": "ba test case deadline, tám lời gọi",
+   "reason": "Thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "Cột identity của PostgreSQL cấp số cho cả lần",
+   "new": "Cột tự tăng (identity) của PostgreSQL cấp số cho cả lần",
+   "reason": "Giải nghĩa thuật ngữ ở lần nhắc đầu",
+   "severity": "medium"
+  },
+  {
+   "old": "(không hằng thời gian), không phải JWT hay mTLS",
+   "new": "(không phải so sánh hằng thời gian), không phải JWT hay mTLS",
+   "reason": "Cụm 'không hằng thời gian' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Nhiều nhóm cần kho proto riêng và quy trình đổi hợp đồng.",
+   "new": "Khi có nhiều nhóm thì cần kho proto riêng và quy trình đổi hợp đồng.",
+   "reason": "Câu cụt, dễ hiểu nhầm chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Handler tự đếm là một cuộc đua, không phải bảo đảm",
+   "new": "Handler tự đếm là một race condition, không phải bảo đảm",
+   "reason": "terminology.json: race condition giữ tiếng Anh, tránh \"cuộc đua\"; thống nhất trong phần",
+   "severity": "medium"
+  },
+  {
+   "old": "Việc dừng không phụ thuộc cuộc đua này",
+   "new": "Việc dừng không phụ thuộc race condition này",
+   "reason": "terminology.json: race condition giữ tiếng Anh, tránh \"cuộc đua\"; thống nhất trong phần",
+   "severity": "medium"
+  }
+ ]
+}
