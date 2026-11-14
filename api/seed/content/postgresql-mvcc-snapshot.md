@@ -8,9 +8,9 @@ tags: [postgresql, pg-032, mvcc, snapshot, xmin-xmax, transaction-id, vacuum, to
 language: vi
 ---
 
-Khách gọi tổng đài Tới Nơi hỏi cước chuyến 400101. Tổng đài viên mở màn chi tiết đúng lúc server điều phối đang chạy một giao dịch tăng cước chuyến đó từ 31.000 lên 35.000 đ vì khách đổi điểm đón. Màn hình của tổng đài viên hiện số nào? Màn có phải đứng chờ giao dịch kia xong không? Và nếu giao dịch kia `ROLLBACK`, có còn dấu vết gì không?
+Khách gọi tổng đài Tới Nơi hỏi cước chuyến 400101. Tổng đài viên mở màn chi tiết đúng lúc server điều phối đang chạy một giao dịch tăng cước chuyến đó từ 31.000 lên 35.000 đ vì khách đổi điểm đón. Màn hình của tổng đài viên hiện số nào? Màn hình có phải đứng chờ giao dịch kia xong không? Và nếu giao dịch kia `ROLLBACK`, có còn dấu vết gì không?
 
-Ở PG-031, phiên B «không thấy» dữ liệu chưa commit của phiên A mà cũng không bị chặn. Bài này mở nắp cơ chế đứng sau: PostgreSQL không ghi đè dòng mà giữ **nhiều phiên bản**, và mỗi câu đọc nhìn qua một **snapshot**. Mọi thứ được chứng minh bằng hai phiên chạy thật, kèm cột hệ thống, trang dữ liệu và trạng thái giao dịch.
+Ở PG-031, phiên B «không thấy» dữ liệu chưa commit của phiên A mà cũng không bị chặn. Bài này đi vào cơ chế phía sau: PostgreSQL không ghi đè dòng mà giữ **nhiều phiên bản**, và mỗi câu đọc nhìn qua một **snapshot**. Bài chứng minh mọi điều trên bằng hai phiên chạy thật, kèm cột hệ thống, trang dữ liệu và trạng thái giao dịch.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-032 · Phần 4/6 · Cơ bản</span>
@@ -27,7 +27,7 @@ node pg/run-pg.mjs p04 --only 32
 node pg/run-pg.mjs --nen p04/lab.json:p04 p04/thu-nghiem/pg032-snapshot-dang-chay-rr-delete.sql
 ```
 
-**Mã giao dịch** (transaction ID, **xid**) là số tăng dần dùng chung cho cả cluster, nên số thật khác nhau giữa các lần chạy và các máy. Lab in **tương đối**: đầu tệp, `lab_dat_moc_xid()` lấy xid của chính nó làm mốc **X**; giao dịch ghi kế tiếp là **X+1**, rồi X+2…; `<X` là giao dịch đã commit từ trước mốc (dữ liệu fixture). Các hàm `xid_td()`, `snap_td()`, `xid_x()` chỉ là tiện ích hiển thị của lab (`p04/00-mo-rong-schema.sql`), không phải mẫu dùng ở production.
+**Mã giao dịch** (transaction ID, **xid**) là số tăng dần dùng chung cho cả cluster, nên số thật khác nhau giữa các lần chạy và các máy. Lab in số **tương đối**: đầu tệp, `lab_dat_moc_xid()` lấy xid của chính nó làm mốc **X**; giao dịch ghi kế tiếp là **X+1**, rồi X+2…; `<X` là giao dịch đã commit từ trước mốc (dữ liệu fixture). Các hàm `xid_td()`, `snap_td()`, `xid_x()` chỉ là tiện ích hiển thị của lab (`p04/00-mo-rong-schema.sql`), không phải mẫu dùng ở production.
 
 ## 2. UPDATE không ghi đè: phiên bản dòng, xmin và xmax
 
@@ -38,7 +38,7 @@ node pg/run-pg.mjs --nen p04/lab.json:p04 p04/thu-nghiem/pg032-snapshot-dang-cha
 
 Lợi ích, theo tài liệu: với MVCC, "reading never blocks writing and writing never blocks reading". Phần còn lại của bài kiểm chứng câu đó trên chuyến 400101.
 
-## 3. Giao dịch chỉ đọc chưa có xid
+## 3. Giao dịch chỉ đọc chưa được cấp xid
 
 ```sql
 -- Phiên A
@@ -86,7 +86,7 @@ T5 cho thấy cả hai phiên bản cùng nằm trong page của bảng (extensi
 (2 rows)
 ```
 
-Ô 31 là bản cũ, `t_ctid` trỏ sang bản mới ở ô 41. Bản mới cùng page và không cột có index nào bị đổi nên đây là **HOT update** — cơ chế và điều kiện của nó đã có ở [PG-024](/articles/heap-ctid-va-primary-key), bài này chỉ cần thấy: hai phiên bản tồn tại song song, ai thấy bản nào là chuyện của snapshot.
+Ô 31 là bản cũ, `t_ctid` trỏ sang bản mới ở ô 41. Bản mới nằm cùng page và không có cột nào có index bị đổi, nên đây là **HOT update** — cơ chế và điều kiện của HOT update đã được trình bày ở [PG-024](/articles/heap-ctid-va-primary-key), bài này chỉ cần thấy: hai phiên bản tồn tại song song, ai thấy bản nào là chuyện của snapshot.
 
 Sau `COMMIT` (T7), câu đọc kế tiếp của B thấy bản mới. B đang ở mức mặc định **Read Committed**: **mỗi câu lệnh** chụp một snapshot mới, nên câu chạy sau COMMIT của A thấy dữ liệu A vừa commit.
 
@@ -102,7 +102,7 @@ Sau `COMMIT` (T7), câu đọc kế tiếp của B thấy bản mới. B đang �
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Bẫy: xmax của snapshot không phải «xid sắp cấp»</span>
-<p>Ở T3, A (X+1) rõ ràng đang chạy mà danh sách «đang chạy» lại rỗng. Lý do: giao dịch đã kết thúc gần nhất là X (lệnh đặt mốc), nên <code>xmax = X+1</code>; A có xid ≥ xmax nên đã vô hình mà không cần nằm trong danh sách. Vẽ sơ đồ kiểu «xmax = xid mới nhất + 1, mọi giao dịch đang chạy đều trong danh sách» là sai với PostgreSQL 18.</p>
+<p>Ở T3, A (X+1) rõ ràng đang chạy mà danh sách «đang chạy» lại rỗng. Lý do: giao dịch đã kết thúc gần nhất là X (lệnh đặt mốc), nên <code>xmax = X+1</code>; A có xid ≥ xmax nên đã vô hình mà không cần nằm trong danh sách. Hiểu snapshot theo kiểu «xmax = xid mới nhất + 1, mọi giao dịch đang chạy đều trong danh sách» là sai với PostgreSQL 18.</p>
 </div>
 
 Danh sách chỉ có phần tử khi một giao dịch **cũ hơn** vẫn chạy trong lúc một giao dịch **mới hơn** đã kết thúc. Thí nghiệm `pg032-snapshot-dang-chay-rr-delete.sql` §A dựng đúng cảnh đó: A (X+1) sửa chuyến 400104 và để mở, B chạy một câu lẻ sửa 400105 (X+2, commit ngay), rồi B chụp:
@@ -159,7 +159,7 @@ FROM trips WHERE code = 400103;
 (1 row)
 ```
 
-`ROLLBACK` không «xoá» phiên bản 99.000 đã ghi vào page, cũng không xoá `xmax = X+3` trên bản cũ. Nó chỉ ghi X+3 là `aborted`. Từ đó, người đọc tra trạng thái và hiểu: bản 99.000 không bao giờ có hiệu lực, bản 33.000 **vẫn sống** dù `xmax ≠ 0`. Vì vậy đừng bao giờ suy «`xmax` khác 0 ⇒ dòng đã bị xoá»: nó còn có thể là giao dịch đang chạy, giao dịch đã huỷ, hoặc chỉ là khoá dòng (`FOR UPDATE` — [PG-033](/articles/postgresql-lock-row-table)).
+`ROLLBACK` không «xoá» phiên bản 99.000 đã ghi vào page, cũng không xoá `xmax = X+3` trên bản cũ. Lệnh này chỉ ghi nhận X+3 là `aborted`. Từ đó, phiên đọc tra trạng thái và biết: bản 99.000 không bao giờ có hiệu lực, bản 33.000 **vẫn sống** dù `xmax ≠ 0`. Vì vậy đừng bao giờ suy «`xmax` khác 0 ⇒ dòng đã bị xoá»: giá trị đó còn có thể do giao dịch đang chạy, giao dịch đã huỷ, hoặc chỉ là khoá dòng (`FOR UPDATE` — [PG-033](/articles/postgresql-lock-row-table)).
 
 Lúc này bảng `trips` có ba phiên bản không ai còn thấy — **dòng chết** (dead tuple): bản cũ của 400101 (thay bởi X+1), bản cũ của 400102 (thay bởi X+2), bản 99.000 của 400103 (X+3 huỷ). Extension `pgstattuple` đếm được:
 
@@ -197,9 +197,9 @@ Ba cách gọi cùng một thứ: cột hệ thống `xmin`/`xmax` dùng kiểu 
 
 ## 10. Đánh đổi
 
-- **Đọc không chờ, nhưng có thể «cũ».** B ở T2 thấy 31.000 trong khi A đã quyết 35.000. Với màn xem chi tiết thì ổn. Với «đọc rồi quyết định ghi» (hai tài xế cùng nhận một chuyến) thì đọc theo snapshot là chưa đủ — PG-033 (khoá dòng), PG-035 (cập nhật có điều kiện) xử lý.
+- **Đọc không chờ, nhưng có thể «cũ».** B ở T2 thấy 31.000 trong khi A đã quyết 35.000. Với màn xem chi tiết thì ổn. Với «đọc rồi quyết định ghi» (hai tài xế cùng nhận một chuyến) thì đọc theo snapshot là chưa đủ — PG-033 (khoá dòng) và PG-035 (cập nhật có điều kiện) giải quyết trường hợp này.
 - **Read Committed hay Repeatable Read.** RC luôn thấy dữ liệu mới nhất ở mỗi câu nhưng hai câu trong cùng giao dịch có thể lệch nhau; RR cho cả báo cáo một mốc nhất quán nhưng giữ snapshot lâu hơn và phải chịu lỗi xung đột khi ghi (PG-034).
-- **Không gian và VACUUM.** Đa phiên bản đổi lấy chỗ trống tạm thời và việc dọn dẹp; giao dịch mở lâu làm việc dọn bị chặn.
+- **Không gian và VACUUM.** Giữ nhiều phiên bản phải trả giá bằng dung lượng tạm thời và việc dọn dẹp; giao dịch mở lâu khiến việc dọn bị chặn.
 
 ## 11. Bài tập
 

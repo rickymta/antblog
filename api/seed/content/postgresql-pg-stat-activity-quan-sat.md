@@ -1,7 +1,7 @@
 ---
 slug: postgresql-pg-stat-activity-quan-sat
 title: "Quan sát phiên làm việc và truy vấn chậm: đọc pg_stat_activity khi API đứng"
-summary: "Tối thứ Sáu, API hoàn tiền của Tới Nơi treo dù CPU database gần như rảnh. Đọc pg_stat_activity, sự kiện chờ, pg_blocking_pids và pg_locks trên PostgreSQL 18.1 thật; kiểm ai được xem câu SQL; giới hạn thời gian chờ bằng lock_timeout và idle_in_transaction_session_timeout; biết lúc nào một ảnh chụp là không đủ."
+summary: "Tối thứ Sáu, API hoàn tiền của Tới Nơi treo dù CPU database gần như rảnh. Đọc pg_stat_activity, sự kiện chờ, pg_blocking_pids và pg_locks trên PostgreSQL 18.1 thật; kiểm tra ai được xem câu SQL; giới hạn thời gian chờ bằng lock_timeout và idle_in_transaction_session_timeout; biết khi nào một ảnh chụp tức thời không đủ."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-043, monitoring, pg-stat-activity, wait-event, lock-timeout, observability, toi-noi]
@@ -14,7 +14,7 @@ Nâng cấp không giúp gì nếu các request **không làm việc mà đang c
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-043 · Phần 5/6 · Cơ bản</span>
-<p>Đọc trước: <a href="/articles/postgresql-ket-noi-auth-tls">PG-042 · Xác thực và bảo vệ kết nối</a>; cơ chế khoá và cách gỡ hàng chờ ở <a href="/articles/postgresql-lock-row-table">PG-033 · Khoá dòng, khoá bảng và thời gian chờ</a>. Lab: <code>examples/toi-noi-postgresql/p05</code>, chạy <code>npm run p05</code> trên PostgreSQL 18.1 thật. Sau bài này, bạn đọc được trạng thái, sự kiện chờ và tuổi giao dịch của từng phiên, chỉ ra phiên chặn bằng bằng chứng, và biết cần thêm dữ liệu gì trước khi kết luận «query chậm».</p>
+<p>Đọc trước: <a href="/articles/postgresql-ket-noi-auth-tls">PG-042 · Xác thực và bảo vệ kết nối</a>; cơ chế khoá và cách gỡ hàng chờ ở <a href="/articles/postgresql-lock-row-table">PG-033 · Khoá dòng, khoá bảng và thời gian chờ</a>. Lab: <code>examples/toi-noi-postgresql/p05</code>, chạy <code>npm run p05</code> trên PostgreSQL 18.1 thật. Sau bài này, bạn đọc được trạng thái, sự kiện chờ và tuổi giao dịch của từng phiên, chỉ ra phiên chặn dựa trên bằng chứng, và biết cần thêm dữ liệu gì trước khi kết luận «query chậm».</p>
 </div>
 
 ## 1. Dữ liệu và cách chạy
@@ -30,24 +30,24 @@ Mỗi **phiên** (session) là một kết nối psql riêng, tức một tiến
 
 ## 2. `pg_stat_activity`: mỗi dòng là một tiến trình
 
-Theo [tài liệu thống kê](https://www.postgresql.org/docs/18/monitoring-stats.html), view có **một dòng cho mỗi tiến trình server** — cả kết nối ứng dụng lẫn tiến trình nền như autovacuum launcher, checkpointer. Cột `backend_type` phân biệt chúng; khi trực sự cố thường lọc `backend_type = 'client backend'`. Các cột hay dùng:
+Theo [tài liệu thống kê](https://www.postgresql.org/docs/18/monitoring-stats.html), view có **một dòng cho mỗi tiến trình server** — cả kết nối ứng dụng lẫn tiến trình nền như autovacuum launcher, checkpointer. Cột `backend_type` phân biệt chúng; khi trực sự cố, ta thường lọc `backend_type = 'client backend'`. Các cột hay dùng:
 
 | Cột | Ý nghĩa |
 |---|---|
 | `pid` | Mã tiến trình; nối sang `pg_locks`, `pg_blocking_pids()` |
 | `usename`, `application_name`, `client_addr` | Ai, service nào (tên client tự đặt), từ đâu |
 | `xact_start` | Lúc giao dịch hiện tại bắt đầu; `NULL` nếu không trong giao dịch |
-| `query_start`, `state_change` | Lúc câu lệnh (đang chạy hoặc cuối) bắt đầu; lúc `state` đổi lần cuối |
+| `query_start`, `state_change` | Lúc câu lệnh (đang chạy hoặc câu cuối đã chạy) bắt đầu; lúc `state` đổi lần cuối |
 | `state` | `active`, `idle`, `idle in transaction`, … |
 | `wait_event_type`, `wait_event` | Nếu đang chờ: loại gì, sự kiện nào |
-| `backend_xmin` | Chân trời snapshot phiên đang giữ — quan trọng cho VACUUM ở PG-044 |
+| `backend_xmin` | Xmin horizon của snapshot mà phiên đang giữ — quan trọng cho VACUUM ở PG-044 |
 | `query` | Câu lệnh gần nhất |
 
 Ba điểm dễ đọc sai:
 
 - **`query` là câu gần nhất, không phải câu đang chạy.** Tài liệu nói rõ: khi `state = 'active'` đó là câu đang thực thi; ở mọi trạng thái khác, đó là câu **đã xong** cuối cùng. Phiên `idle in transaction` hiện `UPDATE …` nghĩa là UPDATE đã chạy xong và giao dịch còn mở.
 - **Câu lệnh bị cắt** theo `track_activity_query_size` (mặc định 1024 byte). SQL do ORM sinh thường dài hơn.
-- **Ảnh chụp, không phải lịch sử.** Ngoài ra, khi đọc view thống kê trong một giao dịch, thông tin hoạt động được chụp một lần và giữ tới hết giao dịch (tài liệu mô tả cùng hàm `pg_stat_clear_snapshot()`). Vòng lặp giám sát chạy trong một giao dịch dài sẽ thấy mãi một bức ảnh cũ.
+- **Ảnh chụp, không phải lịch sử.** Ngoài ra, nếu đọc view thống kê trong một giao dịch thì thông tin hoạt động được chụp một lần và giữ tới hết giao dịch (tài liệu mô tả kèm hàm `pg_stat_clear_snapshot()`). Vòng lặp giám sát chạy trong một giao dịch dài sẽ thấy mãi một bức ảnh cũ.
 
 Ba mốc thời gian, ba câu hỏi: `now() - xact_start` là **tuổi giao dịch** (đã giữ khoá và snapshot bao lâu), `now() - query_start` là tuổi câu lệnh, `now() - state_change` là thời gian ở trạng thái hiện tại — với `idle in transaction`, đó là thời gian **ngồi yên** trong giao dịch.
 
@@ -57,7 +57,7 @@ Ba mốc thời gian, ba câu hỏi: `now() - xact_start` là **tuổi giao dị
 
 `wait_event_type`/`wait_event` trả lời câu thứ hai: **nếu đang chờ, thì chờ gì**. PostgreSQL 18 nhóm sự kiện chờ thành: `Activity` (tiến trình nền chờ việc), `BufferPin`, `Client` (chờ client), `Extension`, `InjectionPoint`, `IO` (đọc/ghi), `IPC` (chờ tiến trình khác), `Lock` (khoá nặng: bảng, dòng qua mã giao dịch, advisory…), `LWLock` (khoá nhẹ bảo vệ bộ nhớ dùng chung), `Timeout`. Từ PostgreSQL 17 có view `pg_wait_events` liệt kê mọi sự kiện kèm mô tả — tra ở đó thay vì đoán.
 
-Hai cột độc lập. Phiên `active` vẫn có thể chờ `Lock`: đã nhận câu lệnh nhưng không làm được gì. Phiên `idle in transaction` thường hiện `Client: ClientRead`: chờ ứng dụng gửi câu tiếp, trong khi vẫn **giữ mọi khoá** đã lấy. Phiên `active` có `wait_event` là `NULL` không ở trong sự kiện chờ nào được theo dõi — thường là đang dùng CPU, nhưng đó chỉ là «không chờ thứ PostgreSQL có đo», chưa phải bằng chứng.
+Hai cột độc lập. Phiên `active` vẫn có thể chờ `Lock`: đã nhận câu lệnh nhưng không làm được gì. Phiên `idle in transaction` thường hiện `Client: ClientRead`: chờ ứng dụng gửi câu tiếp, trong khi vẫn **giữ mọi khoá** đã lấy. Phiên `active` có `wait_event` là `NULL` tức là không ở trong sự kiện chờ nào được theo dõi — thường là đang dùng CPU, nhưng đó chỉ có nghĩa là «không chờ thứ gì mà PostgreSQL đo được», chưa phải bằng chứng.
 
 Với sự cố 19:40, «CPU 10 % mà API treo» thường có lời giải ngay ở đây: rất nhiều phiên `active` với `wait_event_type = 'Lock'`.
 
@@ -73,7 +73,7 @@ PG-033 đã giải thích vì sao UPDATE cùng dòng phải chờ; ở đây ta 
 | 4 | | ⏳ | đọc `wait_event_type`, chụp `pg_stat_activity`, `pg_locks` |
 | 5 | `ROLLBACK;` | ✔ hoàn thành | B không lỗi |
 
-`SET fare=fare` không đổi giá trị nhưng vẫn lấy khoá dòng. Ở bước 3, runner **không** `sleep` cố định rồi đoán; nó hỏi catalog mỗi 100 ms (tối đa 15 giây) cho tới khi quan hệ chặn hiện ra, rồi mới kiểm:
+`SET fare=fare` không đổi giá trị nhưng vẫn lấy khoá dòng. Ở bước 3, runner **không** `sleep` cố định rồi đoán; nó hỏi catalog mỗi 100 ms (tối đa 15 giây) cho tới khi quan hệ chặn hiện ra, rồi mới kiểm tra:
 
 ```text
 PASS 043 identifies lock wait: Lock
@@ -93,7 +93,7 @@ PASS 043 identifies lock wait: Lock
 - **A** `idle in transaction`, chờ `Client: ClientRead` — không chạy gì, đợi ứng dụng. `query` là câu **cuối** đã xong. Không ai chặn A: A là **gốc**.
 - **B** `active`, chờ `Lock: transactionid`, bị chặn bởi `<PID A>`. Cùng chuỗi `query`, nhưng ở B đó là câu **đang** chạy.
 
-Chỉ nhìn cột `query`, hai dòng giống hệt. Thứ phân biệt người gây ra và người chịu là `state`, `wait_event_type` và `pg_blocking_pids()`.
+Chỉ nhìn cột `query`, hai dòng giống hệt. Thứ phân biệt người gây ra và người chịu ảnh hưởng là `state`, `wait_event_type` và `pg_blocking_pids()`.
 
 Vì sao chờ `transactionid` mà không phải tên bảng? Khoá dòng được ghi trên chính dòng, không nằm trong bảng khoá dùng chung; phiên muốn sửa dòng chờ **giao dịch** đang giữ nó kết thúc:
 
@@ -109,23 +109,23 @@ B xin `ShareLock` trên mã giao dịch của A, chưa được cấp. A `ROLLBA
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Dùng pg_blocking_pids(), đừng tự nối pg_locks</span>
-<p>Tự nối <code>pg_locks</code> đúng ở ca đơn giản này nhưng bỏ sót thứ tự hàng chờ và «chặn mềm». <a href="https://www.postgresql.org/docs/18/functions-info.html">System Information Functions</a> khuyên dùng <code>pg_blocking_pids()</code>; hàm này cần truy cập độc quyền bảng khoá trong chốc lát, nên gọi khi chẩn đoán, không gọi mỗi giây cho mọi phiên. PG-033 có truy vấn tìm gốc của chuỗi chờ dài.</p>
+<p>Tự nối <code>pg_locks</code> đúng ở trường hợp đơn giản này nhưng bỏ sót thứ tự hàng chờ và «chặn mềm». <a href="https://www.postgresql.org/docs/18/functions-info.html">System Information Functions</a> khuyên dùng <code>pg_blocking_pids()</code>; hàm này cần truy cập độc quyền bảng khoá trong chốc lát, nên gọi khi chẩn đoán, không gọi mỗi giây cho mọi phiên. PG-033 có truy vấn tìm gốc của chuỗi chờ dài.</p>
 </div>
 
 ## 5. Ai được xem câu SQL của người khác
 
-`query` có thể chứa số điện thoại khách, địa chỉ đón, token dán nhầm. Theo tài liệu, superuser và role có quyền của `pg_read_all_stats` thấy đầy đủ mọi phiên; role khác chỉ thấy đầy đủ phiên **của chính mình**, còn với phiên khác thì `query` hiện `<insufficient privilege>`. `pg_monitor` gồm `pg_read_all_settings`, `pg_read_all_stats` và `pg_stat_scan_tables` ([Predefined Roles](https://www.postgresql.org/docs/18/predefined-roles.html)). Lab kiểm hai phía trên phiên B:
+`query` có thể chứa số điện thoại khách, địa chỉ đón, token dán nhầm. Theo tài liệu, superuser và role có quyền của `pg_read_all_stats` thấy đầy đủ mọi phiên; role khác chỉ thấy đầy đủ phiên **của chính mình**, còn với phiên khác thì `query` hiện `<insufficient privilege>`. `pg_monitor` gồm `pg_read_all_settings`, `pg_read_all_stats` và `pg_stat_scan_tables` ([Predefined Roles](https://www.postgresql.org/docs/18/predefined-roles.html)). Lab kiểm tra cả hai phía trên phiên B:
 
 ```text
 PASS 043 tn_monitor sees query text: t
 PASS 043 tn_report does not see query text: <insufficient privilege>
 ```
 
-`tn_report` đọc được toàn bộ bảng `ops.trips` nhưng không đọc được câu của B. Quyền đọc **dữ liệu** và quyền đọc **hoạt động của người khác** tách biệt. Cho Tới Nơi: một role giám sát riêng có `pg_monitor`, không cấp cho `tn_app`; ứng dụng dùng tham số ràng buộc (`$1`, `$2`) để `query` chứa placeholder thay vì giá trị; không đưa nguyên văn `query` lên dashboard ai cũng xem.
+`tn_report` đọc được toàn bộ bảng `ops.trips` nhưng không đọc được câu của B. Quyền đọc **dữ liệu** và quyền đọc **hoạt động của người khác** là hai quyền tách biệt nhau. Với Tới Nơi: một role giám sát riêng có `pg_monitor`, không cấp cho `tn_app`; ứng dụng dùng bind parameter (`$1`, `$2`) để `query` chứa placeholder thay vì giá trị; không đưa nguyên văn `query` lên dashboard ai cũng xem.
 
 ## 6. Truy vấn trực ca
 
-Lab chạy bản rút gọn chỉ cho hai PID. Bản mở rộng dưới đây **không** được chạy nguyên văn trong lab; các cột đều có trong tài liệu PostgreSQL 18:
+Lab chạy bản rút gọn chỉ cho hai PID. Lab **không** chạy nguyên văn bản mở rộng dưới đây; các cột đều có trong tài liệu PostgreSQL 18:
 
 ```sql
 SELECT pid, usename, application_name, client_addr, state,
@@ -150,13 +150,13 @@ WHERE backend_type = 'client backend'
 GROUP BY 1, 2 ORDER BY 3 DESC;
 ```
 
-40 phiên `active` mà 37 phiên `Lock` là một hàng chờ khoá, không phải server thiếu CPU.
+40 phiên `active` mà 37 phiên `Lock` cho thấy một hàng chờ khoá, không phải server thiếu CPU.
 
 `application_name` chỉ có ích khi ứng dụng đặt nó trong chuỗi kết nối (`application_name=refund-api`). Lab làm đúng điều này: mỗi phiên psql của runner mang tên `lab-<nhãn>`. Không có nó, `pid` chỉ là một con số và bạn phải dò ngược từ `client_addr` qua NAT, pod, container.
 
 ## 7. Đặt trần cho thời gian chờ
 
-`pg_stat_activity` tìm ra phiên gây tắc; cấu hình **giới hạn thiệt hại** khi lần sau có người quên đóng giao dịch. PG-033 đã so sánh bốn loại timeout; lab P05 kiểm lại hai loại liên quan trực tiếp.
+`pg_stat_activity` tìm ra phiên gây tắc; còn cấu hình dưới đây giúp **giới hạn thiệt hại** khi lần sau có người quên đóng giao dịch. PG-033 đã so sánh bốn loại timeout; lab P05 kiểm tra lại hai loại liên quan trực tiếp.
 
 **`lock_timeout`** giới hạn **mỗi lần** xin khoá. Trong lúc A vẫn giữ dòng id=1, phiên C chạy:
 
@@ -199,16 +199,16 @@ ALTER ROLE tn_app SET idle_in_transaction_session_timeout = '30s';
 ALTER ROLE tn_app SET lock_timeout = '2s';
 ```
 
-Thiết lập theo role áp cho **kết nối mới**; kết nối đang nằm trong pool giữ giá trị cũ tới khi được mở lại.
+Thiết lập theo role áp dụng cho **kết nối mới**; kết nối đang nằm trong pool giữ giá trị cũ tới khi được mở lại.
 
 ## 8. Khi không phải chờ khoá: truy vấn chậm thật
 
-Nếu ảnh chụp cho thấy nhiều phiên `active` với `wait_event` `NULL` hoặc loại `IO`, tuổi câu lệnh dài và **không** ai bị chặn, có thể câu lệnh chậm thật: thiếu index, kế hoạch sai do thống kê cũ, sort tràn đĩa (Phần 3).
+Nếu ảnh chụp cho thấy nhiều phiên `active` với `wait_event` `NULL` hoặc loại `IO`, tuổi câu lệnh dài và **không** ai bị chặn, thì có thể câu lệnh chậm thật: thiếu index, query plan sai do thống kê cũ, sort tràn đĩa (Phần 3).
 
 Khi đó `pg_stat_activity` chỉ cho **vài mẫu** ở một thời điểm. Năm request đang chạy lúc 19:41 không đại diện cho phân bố độ trễ cả buổi tối; câu 5 ms chạy 10.000 lần mỗi phút có thể tốn hơn câu 3 giây chạy một lần, mà câu nhanh hiếm khi lọt vào ảnh chụp. Cần nguồn có **lịch sử**. Các mục dưới là cấu hình để bạn tự thử; **lab P05 không bật và không chạy chúng**, nên bài không đưa kết quả:
 
 - **`log_min_duration_statement`** ([Error Reporting and Logging](https://www.postgresql.org/docs/18/runtime-config-logging.html)): ghi log mọi câu chạy lâu hơn ngưỡng (mặc định `-1`, tắt).
-- **`log_lock_waits`**: ghi log khi phiên chờ khoá lâu hơn `deadlock_timeout` — bằng chứng hàng chờ sau khi sự cố đã qua. Lab Phần 4 ghi nhận nó mặc định `off` trên 18.1 (PG-037).
+- **`log_lock_waits`**: ghi log khi phiên chờ khoá lâu hơn `deadlock_timeout` — bằng chứng hàng chờ sau khi sự cố đã qua. Lab Phần 4 ghi nhận tham số này mặc định `off` trên 18.1 (PG-037).
 - **`pg_stat_statements`** ([tài liệu](https://www.postgresql.org/docs/18/pgstatstatements.html)): thống kê tích luỹ theo dạng chuẩn hoá của câu lệnh — số lần gọi, tổng và trung bình thời gian, block đọc. Cần `shared_preload_libraries`, khởi động lại, rồi `CREATE EXTENSION`. Cột `query_id` của `pg_stat_activity` khớp `queryid` của nó khi `compute_query_id` bật (mặc định `auto` bật khi module được nạp).
 
 ```sql
@@ -220,19 +220,19 @@ ORDER BY total_exec_time DESC
 LIMIT 10;
 ```
 
-- **`auto_explain`** ([tài liệu](https://www.postgresql.org/docs/18/auto-explain.html)): tự ghi kế hoạch của câu chạy quá `auto_explain.log_min_duration`; bật `log_analyze` có thời gian thật từng nút nhưng thêm overhead cho mọi câu.
+- **`auto_explain`** ([tài liệu](https://www.postgresql.org/docs/18/auto-explain.html)): tự ghi query plan của câu chạy quá `auto_explain.log_min_duration`; bật `log_analyze` có thời gian thật từng nút nhưng thêm overhead cho mọi câu.
 
-Có câu nghi vấn rồi thì quay về Phần 3: `EXPLAIN (ANALYZE, BUFFERS)` trên bản sao dữ liệu ([PG-021](/articles/postgresql-explain-ke-hoach-thuc-thi)), kiểm thống kê ([PG-027](/articles/postgresql-statistics-analyze-cardinality)).
+Khi đã có câu nghi vấn thì quay về Phần 3: `EXPLAIN (ANALYZE, BUFFERS)` trên bản sao dữ liệu ([PG-021](/articles/postgresql-explain-ke-hoach-thuc-thi)), kiểm tra thống kê ([PG-027](/articles/postgresql-statistics-analyze-cardinality)).
 
 ## 9. Từ PID tới hành động
 
 1. **Tổng hợp** `state` × `wait_event_type`. Nhiều `Lock` → hàng chờ khoá. Ứng dụng báo hết kết nối → PG-047. Nhiều `active` không chờ → mục 8.
 2. **Tìm gốc** bằng `pg_blocking_pids()` (truy vấn ở PG-033). Ghi lại `pid`, `usename`, `application_name`, `xact_age`, `in_state_for`, `query_sample` **trước khi** làm gì — cắt phiên rồi thì bằng chứng mất.
 3. **Nối PID với người chịu trách nhiệm**: `application_name` → service → nhóm. Giao dịch này đáng lẽ dài bao lâu? Migration đã báo trước khác hẳn request quên COMMIT.
-4. **Gỡ có chủ đích**: `pg_cancel_backend(pid)` huỷ câu đang chạy, `pg_terminate_backend(pid)` cắt kết nối và huỷ giao dịch. Phiên `idle in transaction` không chạy câu nào để huỷ; chỉ terminate mới nhả khoá. PG-033 mục 7 cho thấy hậu quả của gỡ sai chỗ.
+4. **Gỡ có chủ đích**: `pg_cancel_backend(pid)` huỷ câu đang chạy, `pg_terminate_backend(pid)` cắt kết nối và huỷ giao dịch. Phiên `idle in transaction` không chạy câu nào để huỷ; chỉ terminate mới nhả khoá. PG-033 mục 7 cho thấy hậu quả của việc gỡ sai chỗ.
 5. **Sửa lâu dài**: rút ngắn giao dịch (không gọi HTTP ra ngoài, không chờ người dùng khi đang giữ giao dịch), timeout theo role, cảnh báo khi `idle in transaction` quá N giây.
 
-Đừng tự động kill mọi phiên có tuổi câu lệnh lớn. Báo cáo đối soát chạy 5 phút có thể hợp lệ và không chặn ai; giao dịch ngồi yên 40 giây giữ khoá chuyến đang tranh chấp mới là vấn đề. Tiêu chí phải dựa trên **quan hệ chặn và trạng thái**, không chỉ thời gian.
+Đừng tự động kill mọi phiên có câu lệnh chạy lâu. Báo cáo đối soát chạy 5 phút có thể hợp lệ và không chặn ai; giao dịch ngồi yên 40 giây giữ khoá chuyến đang tranh chấp mới là vấn đề. Tiêu chí phải dựa trên **quan hệ chặn và trạng thái**, không chỉ thời gian.
 
 ## 10. Lỗi thường gặp
 

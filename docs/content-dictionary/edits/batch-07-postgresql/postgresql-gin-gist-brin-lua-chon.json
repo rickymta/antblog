@@ -1,0 +1,15 @@
+{"file":"postgresql-gin-gist-brin-lua-chon.md","edits":[
+{"old":"Lập ma trận workload × toán tử × loại index kèm giới hạn đo trên PostgreSQL 18.","new":"Bài lập ma trận workload × toán tử × loại index kèm giới hạn, đo trên PostgreSQL 18.","reason":"Câu cụt thiếu chủ ngữ","severity":"medium"},
+{"old":"và kiểm từng ô của ma trận bằng EXPLAIN","new":"và kiểm tra từng ô của ma trận bằng EXPLAIN","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"mọi chữ có dấu thành dấu cách, và","new":"mọi chữ có dấu đều biến thành dấu cách, và","reason":"Câu lược động từ 'X thành Y'","severity":"medium"},
+{"old":"Ràng buộc tự tạo index `gist` cùng tên.","new":"Ràng buộc tự tạo một index `gist` cùng tên.","reason":"Thiếu lượng từ, câu cụt","severity":"low"},
+{"old":"không tự cưỡng chế uniqueness","new":"không tự bảo đảm tính duy nhất (uniqueness)","reason":"'cưỡng chế uniqueness' gượng, pha tiếng Anh","severity":"medium"},
+{"old":"Nhưng nó chỉ có ích khi giá trị **đi cùng thứ tự vật lý**.","new":"Nhưng BRIN chỉ có ích khi thứ tự giá trị **trùng với thứ tự vật lý** của dòng trong bảng.","reason":"'đi cùng thứ tự' gượng, 'nó' chỉ sự vật","severity":"medium"},
+{"old":"BRIN 24 KB đạt cùng bậc tốc độ với B-tree 14 MB","new":"BRIN 24 KB cho tốc độ ngang tầm B-tree 14 MB","reason":"'cùng bậc tốc độ' calque","severity":"low"},
+{"old":"Đây là sản phẩm của bài.","new":"Đây là kết quả chính của bài.","reason":"'sản phẩm' calque của deliverable","severity":"medium"},
+{"old":"câu ghi đẩy hàng chờ vượt `gin_pending_list_limit` sẽ tự dọn và chậm hẳn","new":"câu lệnh ghi làm hàng chờ vượt `gin_pending_list_limit` sẽ tự dọn hàng chờ và chậm hẳn","reason":"Câu thiếu chủ ngữ cho 'tự dọn', 'đẩy' gượng","severity":"medium"},
+{"old":"một bất biến mà ứng dụng không tự kiểm an toàn được khi có nhiều phiên ghi đồng thời","new":"một bất biến mà ứng dụng không tự kiểm tra đáng tin cậy được khi có nhiều phiên ghi đồng thời","reason":"'kiểm an toàn' gượng","severity":"medium"},
+{"old":"chỉ được cho phép bằng (2.467 quán","new":"chỉ áp dụng được cho phép so sánh bằng (2.467 quán","reason":"Cụm 'cho phép bằng' tự ghép, khó hiểu","severity":"medium"},
+{"old":"512 page lossy thành 1.212 sau khi nạp","new":"lossy tăng từ 512 lên 1.212 page sau khi nạp","reason":"Câu lược động từ 'X thành Y'","severity":"medium"},
+{"old":"GIN jsonb hoàn toàn bất lực: cần","new":"GIN jsonb không làm được gì: cần","reason":"'bất lực' dịch máy","severity":"low"}
+]}

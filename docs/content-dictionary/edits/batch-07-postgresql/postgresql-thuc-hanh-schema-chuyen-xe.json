@@ -1,0 +1,9 @@
+{"file":"postgresql-thuc-hanh-schema-chuyen-xe.md","edits":[
+{"old":"chọn kiểu tiền, thời gian, định danh có lý do;","new":"chọn kiểu dữ liệu cho tiền, thời gian, định danh và nêu lý do;","reason":"Cụm 'kiểu tiền' cụt, 'có lý do' mơ hồ","severity":"medium"},
+{"old":"và kiểm chính schema (ràng buộc chưa validate","new":"và kiểm tra chính schema (ràng buộc chưa validate","reason":"'kiểm' cụt","severity":"low"},
+{"old":"vẫn tiêu số của IDENTITY","new":"vẫn tiêu thụ một số của IDENTITY","reason":"'tiêu số' cụt","severity":"medium"},
+{"old":"gồm so <code>OUTPUT.txt</code> từng byte","new":"gồm so sánh <code>OUTPUT.txt</code> từng byte","reason":"'so' cụt","severity":"low"},
+{"old":"vì sao dữ liệu chuyến cần một nguồn sự thật","new":"vì sao dữ liệu chuyến cần một nguồn dữ liệu gốc","reason":"'nguồn sự thật' là calque của source of truth","severity":"medium"},
+{"old":"Sản phẩm của phần đúng như khung đã đặt:","new":"Sản phẩm của phần này đúng như khung đã đặt:","reason":"Câu cụt","severity":"low"},
+{"old":"Những gì **chưa** có cũng rõ:","new":"Những gì **chưa** có cũng được nêu rõ:","reason":"Câu cụt, thiếu động từ","severity":"low"}
+]}

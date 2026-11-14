@@ -1,7 +1,7 @@
 ---
 slug: postgresql-deadlock-lock-order-timeout
 title: "Deadlock, thứ tự lấy khoá và timeout: thanh toán và hoàn tiền chéo nhau trên ví VíXanh"
-summary: "Thanh toán chuyến trừ ví khách rồi cộng ví tài xế, hoàn tiền đi chiều ngược lại — chạy cùng lúc trên cùng cặp ví là PostgreSQL báo deadlock. Tái hiện vòng chờ, đọc nhật ký server, thử lại, sửa bằng thứ tự khoá và lock_timeout."
+summary: "Thanh toán chuyến trừ ví khách rồi cộng ví tài xế, hoàn tiền đi chiều ngược lại — nếu chạy cùng lúc trên cùng cặp ví thì PostgreSQL báo deadlock. Tái hiện vòng chờ, đọc nhật ký server, thử lại, sửa bằng thứ tự khoá và lock_timeout."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-037, deadlock, lock, lock-timeout, transaction, retry, toi-noi]
@@ -27,7 +27,7 @@ node pg/run-pg.mjs p04 --only 37
 node pg/run-pg.mjs --nen p04/lab.json:p04 p04/thu-nghiem/pg037-vong-ba-phien-lock-timeout.sql
 ```
 
-Bảng `wallets` có 44 ví: khách 1001–1020 mỗi ví 500.000 đ, tài xế 2001–2024 mỗi ví 200.000 đ, **tổng 14.800.000 đ**. Bất biến của bài: dù giao dịch nào bị huỷ, tổng tiền không đổi. Kết quả dưới đây chép từ `p04/OUTPUT.txt`; runner thay PID bằng nhãn phiên `[A]`, xid bằng `<XID>`, thời gian chờ bằng `T`.
+Bảng `wallets` có 44 ví: khách 1001–1020 mỗi ví 500.000 đ, tài xế 2001–2024 mỗi ví 200.000 đ, **tổng 14.800.000 đ**. Điều bất biến của bài: dù giao dịch nào bị huỷ, tổng tiền không đổi. Kết quả dưới đây chép từ `p04/OUTPUT.txt`; runner thay PID bằng nhãn phiên `[A]`, xid bằng `<XID>`, thời gian chờ bằng `T`.
 
 | Phiên | Nghiệp vụ | Thứ tự đụng ví |
 |---|---|---|
@@ -78,11 +78,11 @@ CONTEXT:  while updating tuple (0,1) in relation "wallets"
 -- [lab] SQLSTATE 40P01
 ```
 
-B bị huỷ thì khoá của B được nhả ngay, và câu đang chờ của A chạy xong với **230000** = 200.000 + 30.000: khoản trừ 10.000 của B đã biến mất cùng giao dịch của B. A commit bình thường. `COMMIT` của B không báo lỗi mà trả thẻ `ROLLBACK` (PG-031) — ứng dụng phải kiểm. Kết quả cuối: chỉ thanh toán có hiệu lực, tổng vẫn 14.800.000 đ. Deadlock **không làm sai dữ liệu**; nó làm một nghiệp vụ thất bại.
+B bị huỷ thì B nhả khoá ngay, và câu đang chờ của A chạy xong với **230000** = 200.000 + 30.000: khoản trừ 10.000 của B đã biến mất cùng giao dịch của B. A commit bình thường. `COMMIT` của B không báo lỗi mà trả thẻ `ROLLBACK` (PG-031) — ứng dụng phải kiểm tra kết quả này. Kết quả cuối: chỉ thanh toán có hiệu lực, tổng vẫn 14.800.000 đ. Deadlock **không làm sai dữ liệu**, nhưng khiến một nghiệp vụ thất bại.
 
 ## 4. Ai bị huỷ — và vì sao lab «chọn» được B
 
-Kiểm vòng chờ tốn kém, nên PostgreSQL không kiểm mỗi lần một phiên phải chờ. Theo tài liệu `deadlock_timeout`, server lạc quan giả định deadlock hiếm, cứ chờ khoá một lúc, **đủ `deadlock_timeout`** mới chạy bộ dò. Mặc định là 1 giây; trong lab, phiên vượt ngưỡng đó trước sẽ chạy bộ dò, thấy vòng và chính nó nhận `40P01`.
+Việc dò vòng chờ tốn kém, nên PostgreSQL không dò mỗi lần một phiên phải chờ. Theo tài liệu `deadlock_timeout`, server lạc quan giả định deadlock hiếm, cứ chờ khoá một lúc, **đủ `deadlock_timeout`** mới chạy bộ dò. Mặc định là 1 giây; trong lab, phiên vượt ngưỡng đó trước sẽ chạy bộ dò, thấy vòng và chính phiên đó nhận `40P01`.
 
 Bài ép lịch chạy tất định bằng cách đặt `deadlock_timeout` của A là **10 s**, của B là **200 ms** — B luôn vượt ngưỡng trước. Đây là mẹo của lab, **không phải quy tắc** kiểu «phiên đến sau luôn chết». Tài liệu PostgreSQL nói thẳng rằng giao dịch nào bị huỷ là khó đoán và không nên dựa vào. Ứng dụng phải sẵn sàng cho **bất kỳ** bên nào nhận `40P01`.
 
@@ -97,11 +97,11 @@ Thí nghiệm cũng đọc `pg_settings` của cluster lab:
 (3 rows)
 ```
 
-`context = superuser`: chỉ superuser hoặc người được cấp quyền `SET` mới đổi được `deadlock_timeout` — lab làm được vì chạy bằng superuser. Tăng nó thì bớt lần kiểm thừa nhưng deadlock thật bị báo chậm hơn; tài liệu khuyên giá trị này nên lớn hơn thời gian giao dịch điển hình.
+`context = superuser`: chỉ superuser hoặc người được cấp quyền `SET` mới đổi được `deadlock_timeout` — lab làm được vì chạy bằng superuser. Tăng ngưỡng này thì bớt được các lần dò thừa nhưng deadlock thật bị báo chậm hơn; tài liệu khuyên giá trị này nên lớn hơn thời gian giao dịch điển hình.
 
 ## 5. Lỗi trả về không đủ — đọc nhật ký server
 
-Thông báo gửi cho client chỉ có số tiến trình và mã giao dịch: không biết câu lệnh nào. `HINT` chỉ đường: chi tiết nằm ở **nhật ký server**. Bản ghi tương ứng (B có bật `log_lock_waits`):
+Thông báo gửi cho client chỉ có số tiến trình và mã giao dịch, không cho biết câu lệnh nào. `HINT` chỉ đường: chi tiết nằm ở **nhật ký server**. Bản ghi tương ứng (B có bật `log_lock_waits`):
 
 ```text
 [B] LOG:  process [B] detected deadlock while waiting for ShareLock on transaction <XID> after T ms
@@ -114,7 +114,7 @@ Thông báo gửi cho client chỉ có số tiến trình và mã giao dịch: k
 	Process [A]: UPDATE wallets SET balance = balance + 30000, updated_at = now() WHERE id = 2001 RETURNING balance;
 ```
 
-Dòng `ERROR` trong nhật ký có **câu lệnh của cả hai phiên** — đủ để biết hai đường code nào đâm nhau. Thí nghiệm ba phiên (mục 9) chạy với `log_lock_waits` tắt vẫn có dòng `ERROR` kèm câu lệnh; thứ mất đi là dòng `LOG … detected deadlock … after T ms`. `log_lock_waits` còn ghi mọi lần chờ khoá lâu hơn `deadlock_timeout` dù không thành deadlock — hữu ích để tìm chỗ chờ khoá làm chậm hệ thống. Trên PostgreSQL 18 nó mặc định `off`.
+Dòng `ERROR` trong nhật ký có **câu lệnh của cả hai phiên** — đủ để biết hai đường code nào đâm nhau. Thí nghiệm ba phiên (mục 9) chạy với `log_lock_waits` tắt vẫn có dòng `ERROR` kèm câu lệnh; thứ mất đi là dòng `LOG … detected deadlock … after T ms`. `log_lock_waits` còn ghi mọi lần chờ khoá lâu hơn `deadlock_timeout` dù không thành deadlock — hữu ích để tìm chỗ chờ khoá làm chậm hệ thống. Trên PostgreSQL 18 tham số này mặc định `off`.
 
 ## 6. Thử lại sau `40P01`
 
@@ -135,7 +135,7 @@ COMMIT;
 (2 rows)
 ```
 
-Tài liệu PostgreSQL (mục xử lý lỗi tuần tự hoá) khuyên có thể thử lại lỗi deadlock, và phải thử lại **cả giao dịch kèm logic quyết định câu lệnh nào chạy**. Phép thử đồng thời của lab dùng hàm `giaoDich()` (`pg/lib/dong-thoi.mjs`): gặp `40001`/`40P01` thì ROLLBACK, chờ ngẫu nhiên trong [0, min(trần, 2 ms · 2^lần)] rồi chạy lại toàn bộ hàm giao dịch, có **giới hạn số lần** (K037 cho tối đa 20). PG-038 đi chi tiết vào vòng thử lại này.
+Tài liệu PostgreSQL (mục xử lý lỗi tuần tự hoá) cho biết có thể thử lại khi gặp lỗi deadlock, và phải thử lại **cả giao dịch kèm logic quyết định câu lệnh nào chạy**. Phép thử đồng thời của lab dùng hàm `giaoDich()` (`pg/lib/dong-thoi.mjs`): gặp `40001`/`40P01` thì ROLLBACK, chờ ngẫu nhiên trong [0, min(trần, 2 ms · 2^lần)] rồi chạy lại toàn bộ hàm giao dịch, có **giới hạn số lần** (K037 cho tối đa 20). PG-038 đi chi tiết vào vòng thử lại này.
 
 Thử lại chữa được triệu chứng, không chữa nguyên nhân: deadlock vẫn xảy ra, mỗi lần tốn ít nhất một `deadlock_timeout` chờ cộng một lần làm lại. Mục 8 cho thấy cái giá đó lớn cỡ nào.
 
@@ -158,11 +158,11 @@ SELECT id FROM wallets WHERE id IN (1001, 2001) ORDER BY id FOR NO KEY UPDATE;
 | T5 | B | trừ 2001, cộng 1001, `COMMIT` | `COMMIT` |
 | T6 | C | đọc số dư | 1001 = **460000**, 2001 = **240000** |
 
-B vẫn phải chờ — tranh chấp là thật — nhưng chờ ngay ở ví **đầu tiên**, khi tay chưa cầm khoá nào, nên không ai có thể chờ ngược lại B. Hai giao dịch xếp hàng thay vì kẹt nhau.
+B vẫn phải chờ — tranh chấp là thật — nhưng chờ ngay ở ví **đầu tiên**, khi chưa giữ khoá nào, nên không ai có thể chờ ngược lại B. Hai giao dịch xếp hàng thay vì kẹt nhau.
 
 Ba chi tiết đáng giữ:
 
-- **Vì sao câu này khoá đúng thứ tự.** Kế hoạch của nó (thí nghiệm §4) có nút `LockRows` nằm **trên** nút `Sort`: dòng được sắp theo `id` trước, rồi mới khoá lần lượt.
+- **Vì sao câu này khoá đúng thứ tự.** Kế hoạch của câu này (thí nghiệm §4) có nút `LockRows` nằm **trên** nút `Sort`: dòng được sắp theo `id` trước, rồi mới khoá lần lượt.
 
 ```text
  LockRows
@@ -172,14 +172,14 @@ Ba chi tiết đáng giữ:
                Filter: (id = ANY ('{1001,2001}'::integer[]))
 ```
 
-- **`UPDATE … WHERE id IN (…)` một câu không đủ.** Nó khoá dòng theo thứ tự quét mà planner chọn — không có gì bảo đảm thứ tự đó giống nhau giữa các câu và các kế hoạch.
-- **`FOR NO KEY UPDATE` thay vì `FOR UPDATE`.** Đủ mạnh để sửa số dư (cũng là khoá mà `UPDATE` thường tự lấy), nhưng không chặn các câu chỉ cần `FOR KEY SHARE` như kiểm khoá ngoại khi chèn dòng con (PG-033, PG-036). Tài liệu còn khuyên khoá **đầu tiên** lấy trên một đối tượng nên là khoá mạnh nhất sẽ cần — đọc bằng `FOR SHARE` rồi sau đó mới nâng lên để sửa là một cách tự tạo deadlock.
+- **`UPDATE … WHERE id IN (…)` một câu không đủ.** Câu lệnh này khoá dòng theo thứ tự quét mà planner chọn — không có gì bảo đảm thứ tự đó giống nhau giữa các câu và các kế hoạch.
+- **`FOR NO KEY UPDATE` thay vì `FOR UPDATE`.** Đủ mạnh để sửa số dư (cũng là khoá mà `UPDATE` thường tự lấy), nhưng không chặn các câu chỉ cần `FOR KEY SHARE` như bước kiểm tra khoá ngoại khi chèn dòng con (PG-033, PG-036). Tài liệu còn khuyên khoá **đầu tiên** lấy trên một đối tượng nên là khoá mạnh nhất sẽ cần — đọc bằng `FOR SHARE` rồi sau đó mới nâng lên để sửa là một cách tự tạo deadlock.
 
-Khi giao dịch đụng nhiều bảng, «thứ tự» phải là thứ tự toàn cục: bảng nào trước (ví dụ luôn `trips` rồi mới `wallets`), trong mỗi bảng theo khoá chính. Viết nó thành một hàm/thư viện dùng chung — quy tắc chỉ có giá trị khi **mọi** đường ghi tuân theo.
+Khi giao dịch đụng nhiều bảng, «thứ tự» phải là thứ tự toàn cục: bảng nào trước (ví dụ luôn `trips` rồi mới `wallets`), trong mỗi bảng theo khoá chính. Hãy đóng gói quy tắc này thành một hàm/thư viện dùng chung — quy tắc chỉ có giá trị khi **mọi** đường ghi tuân theo.
 
 ## 8. Bằng chứng khi chạy đua thật: K037
 
-Lịch tất định chứng minh cơ chế; phép thử K037 cho tám phiên chạy đua thật. Cấu hình (trích `p04/DO-DAC.md`): i7-10700 (16 luồng), 64 GB RAM, NVMe Kingston SA2000, Windows 11 Pro, Node 22.18, PostgreSQL 18.1, tải CPU nền ~6 %. Mỗi phiên làm 150 lần chuyển 1.000 đ giữa bốn ví tài xế 2001–2004 (cặp và chiều ngẫu nhiên), nghỉ `pg_sleep(0.001)` giữa hai câu `UPDATE`, `deadlock_timeout = 20ms` cho nhanh, thử lại tối đa 20 lần; mỗi kịch bản **3 lần**, mỗi lần một database mới.
+Lịch tất định chứng minh cơ chế; phép thử K037 chạy tám phiên đua nhau thật. Cấu hình (trích `p04/DO-DAC.md`): i7-10700 (16 luồng), 64 GB RAM, NVMe Kingston SA2000, Windows 11 Pro, Node 22.18, PostgreSQL 18.1, tải CPU nền ~6 %. Mỗi phiên làm 150 lần chuyển 1.000 đ giữa bốn ví tài xế 2001–2004 (cặp và chiều ngẫu nhiên), nghỉ `pg_sleep(0.001)` giữa hai câu `UPDATE`, `deadlock_timeout = 20ms` cho nhanh, thử lại tối đa 20 lần; mỗi kịch bản **3 lần**, mỗi lần một database mới.
 
 | Kịch bản | Giây/lần (min–max) | Chuyển xong | Lần `40P01` | Tổng 4 ví |
 |---|---|---|---|---|
@@ -196,7 +196,7 @@ Vòng không nhất thiết chỉ có hai bên. Thí nghiệm §1 cho ba phiên,
 |---|---|---|
 | T1–T3 | A, B, C | mỗi phiên trừ ví của mình: 499000 |
 | T4 | A | cộng 1002 ⏳ chờ B |
-| T5 | B | cộng 1003 ⏳ chờ C — chuỗi A → B → C, chưa vòng |
+| T5 | B | cộng 1003 ⏳ chờ C — chuỗi A → B → C, chưa thành vòng |
 | T6 | C | cộng 1001 ⏳ chờ A ⇒ **vòng ba phiên** ⇒ `40P01` |
 | T7 | B | ✔ 501000 (C bị huỷ, khoản trừ của C mất) |
 | T8 | C, B | `COMMIT` → `ROLLBACK`; `COMMIT` |
@@ -212,7 +212,7 @@ Cuối cùng 1001 = 499000, 1002 = 500000, 1003 = 501000, tổng ba ví vẫn 1.
 
 ## 10. `lock_timeout`: lưới an toàn, không phải thuốc chữa
 
-`deadlock_timeout` **không** phải thời hạn bỏ cuộc: nó chỉ là lúc bắt đầu kiểm vòng. Một giao dịch chờ một giao dịch khác đang «ngồi yên» (ví dụ giữ khoá trong lúc gọi API ngoài) sẽ chờ mãi mà không có deadlock nào. `lock_timeout` mới là giới hạn chờ: câu lệnh nào chờ **một** lần lấy khoá quá thời gian đó thì bị huỷ với `55P03`. Lab §3: A giữ ví 1002, B đặt `SET LOCAL lock_timeout = '300ms'` rồi sửa cùng ví.
+`deadlock_timeout` **không** phải thời hạn bỏ cuộc: tham số này chỉ là thời điểm bắt đầu dò vòng chờ. Một giao dịch chờ một giao dịch khác đang «ngồi yên» (ví dụ giữ khoá trong lúc gọi API ngoài) sẽ chờ mãi mà không có deadlock nào. `lock_timeout` mới là giới hạn chờ: câu lệnh nào chờ **một** lần lấy khoá quá thời gian đó thì bị huỷ với `55P03`. Lab §3: A giữ ví 1002, B đặt `SET LOCAL lock_timeout = '300ms'` rồi sửa cùng ví.
 
 ```text
 -- [lab] [B] ⏳ đã chờ khoá (Lock: transactionid) — bị chặn bởi [A] trước khi xong
@@ -221,11 +221,11 @@ CONTEXT:  while updating tuple (0,2) in relation "wallets"
 -- [lab] SQLSTATE 55P03
 ```
 
-Điều dễ quên: `55P03` huỷ **câu lệnh**, nhưng giao dịch quanh nó đã hỏng. Thí nghiệm §2 cho B trừ ví 1004 trước rồi mới vấp `lock_timeout`; câu `SELECT` kế tiếp nhận `25P02 current transaction is aborted`, `COMMIT` trả `ROLLBACK`, và ví 1004 vẫn **500000** — khoản trừ đã mất theo. Ứng dụng phải ROLLBACK rồi quyết định: báo lỗi «hệ thống bận» hay thử lại cả giao dịch sau một khoảng chờ.
+Điều dễ quên: `55P03` huỷ **câu lệnh**, nhưng giao dịch chứa câu lệnh đó đã hỏng. Thí nghiệm §2 cho B trừ ví 1004 trước rồi mới vấp `lock_timeout`; câu `SELECT` kế tiếp nhận `25P02 current transaction is aborted`, `COMMIT` trả `ROLLBACK`, và ví 1004 vẫn **500000** — khoản trừ đã mất theo. Ứng dụng phải ROLLBACK rồi quyết định: báo lỗi «hệ thống bận» hay thử lại cả giao dịch sau một khoảng chờ.
 
-Theo tài liệu PostgreSQL 18: mặc định 0 (tắt); giới hạn áp riêng cho **từng lần** xin khoá, cả khoá tường minh (`LOCK TABLE`, `SELECT … FOR UPDATE`) lẫn khoá ngầm của `UPDATE`; không nên đặt trong `postgresql.conf` vì ảnh hưởng mọi phiên; và nếu `statement_timeout` khác 0 thì đặt `lock_timeout` bằng hoặc lớn hơn nó là vô nghĩa. Đặt theo phiên/giao dịch (`SET LOCAL`) hoặc theo role của ứng dụng.
+Theo tài liệu PostgreSQL 18, tham số này mặc định là 0 (tắt); giới hạn áp riêng cho **từng lần** xin khoá, cả khoá tường minh (`LOCK TABLE`, `SELECT … FOR UPDATE`) lẫn khoá ngầm của `UPDATE`; không nên đặt trong `postgresql.conf` vì ảnh hưởng mọi phiên; và nếu `statement_timeout` khác 0 thì đặt `lock_timeout` bằng hoặc lớn hơn nó là vô nghĩa. Đặt theo phiên/giao dịch (`SET LOCAL`) hoặc theo role của ứng dụng.
 
-`lock_timeout` không xoá deadlock: nếu nó nhỏ hơn `deadlock_timeout`, một vòng chờ sẽ hiện ra dưới dạng `55P03` thay vì `40P01` — sớm hơn, nhưng mất dấu hiệu «đây là deadlock» trong log.
+`lock_timeout` không loại bỏ được deadlock: nếu giá trị này nhỏ hơn `deadlock_timeout`, một vòng chờ sẽ hiện ra dưới dạng `55P03` thay vì `40P01` — sớm hơn, nhưng mất dấu hiệu «đây là deadlock» trong log.
 
 ## 11. Lỗi thường gặp
 
@@ -239,10 +239,10 @@ Theo tài liệu PostgreSQL 18: mặc định 0 (tắt); giới hạn áp riêng
 
 ## 12. Đánh đổi
 
-- **Khoá trước toàn bộ hay khoá dần:** khoá trước mọi dòng sẽ đụng làm giao dịch giữ khoá lâu hơn một chút và phải biết trước tập dòng; đổi lại không có vòng chờ.
+- **Khoá trước toàn bộ hay khoá dần:** khoá trước mọi dòng sẽ đụng tới khiến giao dịch giữ khoá lâu hơn một chút và phải biết trước tập dòng; đổi lại không có vòng chờ.
 - **Thử lại hay sửa thứ tự:** thử lại là bắt buộc (deadlock có thể đến từ chỗ bạn chưa nghĩ tới), nhưng chỉ dựa vào thử lại thì trả giá bằng độ trễ — K037 cho thấy gần một lần làm lại cho mỗi giao dịch.
 - **`lock_timeout` ngắn hay dài:** ngắn thì người dùng nhận lỗi sớm, nhưng giao dịch dài hợp lệ cũng bị cắt; dài thì kết nối đứng chờ, dễ cạn pool khi có sự cố.
-- **Giao dịch ngắn:** giữ khoá trong lúc chờ người dùng hay gọi dịch vụ ngoài làm mọi kịch bản trên tệ hơn.
+- **Giao dịch ngắn:** giữ khoá trong lúc chờ người dùng hay gọi dịch vụ ngoài khiến mọi kịch bản trên tệ hơn.
 
 ## 13. Bài tập
 
@@ -260,7 +260,7 @@ COMMIT;</code></pre>
 **Bài 2.** Một đồng nghiệp đặt trong `postgresql.conf`: `lock_timeout = 2s`, `deadlock_timeout = 5s`, «để bớt deadlock». Chuyện gì xảy ra với vòng chờ ở mục 3, và với một lệnh `ALTER TABLE` bảo trì ban đêm?
 
 <details><summary><b>Lời giải</b></summary>
-<p>Vòng chờ vẫn hình thành y như cũ. Sau 2 giây, phiên nào chờ đủ trước sẽ nhận <code>55P03</code> chứ không phải <code>40P01</code> — bộ dò (5 s) không bao giờ kịp chạy, nên log không còn dòng «deadlock detected» kèm câu lệnh của các bên, việc tìm hai đường code đâm nhau khó hơn. Số deadlock không giảm; chỉ đổi tên lỗi. Đặt trong <code>postgresql.conf</code> ảnh hưởng mọi phiên — kể cả <code>ALTER TABLE</code> bảo trì, lệnh này sẽ bỏ cuộc sau 2 giây chờ khoá dù người vận hành muốn nó chờ. Tài liệu PostgreSQL khuyên không đặt <code>lock_timeout</code> ở cấp server; đặt theo phiên, giao dịch (<code>SET LOCAL</code>) hoặc role.</p>
+<p>Vòng chờ vẫn hình thành y như cũ. Sau 2 giây, phiên nào chờ đủ trước sẽ nhận <code>55P03</code> chứ không phải <code>40P01</code> — bộ dò (5 s) không bao giờ kịp chạy, nên log không còn dòng «deadlock detected» kèm câu lệnh của các bên, và việc tìm hai đường code đâm nhau khó hơn. Số deadlock không giảm; chỉ đổi tên lỗi. Đặt trong <code>postgresql.conf</code> ảnh hưởng mọi phiên — kể cả <code>ALTER TABLE</code> bảo trì, lệnh này sẽ bỏ cuộc sau 2 giây chờ khoá dù người vận hành muốn nó chờ. Tài liệu PostgreSQL khuyên không đặt <code>lock_timeout</code> ở cấp server; đặt theo phiên, giao dịch (<code>SET LOCAL</code>) hoặc role.</p>
 </details>
 
 **Bài 3.** Ứng dụng bắt được `55P03` ở câu cộng tiền, ghi log rồi chạy tiếp câu kế tiếp và `COMMIT`. Dự đoán kết quả và số dư.

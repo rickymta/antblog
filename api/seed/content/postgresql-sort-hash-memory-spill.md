@@ -1,7 +1,7 @@
 ---
 slug: postgresql-sort-hash-memory-spill
 title: "Sort, hash và truy vấn tràn ra đĩa: work_mem, file tạm và cái giá khi nhiều phiên cùng chạy"
-summary: "Nhật ký database Tới Nơi mỗi đêm có dòng «temporary file … size 22134784» và có người đề xuất work_mem = 256MB cho cả server. Đọc Sort Method, Batches, Disk Usage, đếm file tạm và đo bộ nhớ nhân theo nút, phiên, worker."
+summary: "Nhật ký database Tới Nơi mỗi đêm có dòng «temporary file … size 22134784» và có người đề xuất work_mem = 256MB cho cả server. Đọc Sort Method, Batches, Disk Usage, đếm file tạm và đo bộ nhớ nhân lên theo nút, phiên, worker."
 category: postgresql
 level: advanced
 tags: [postgresql, pg-029, work-mem, sort, hash-join, temp-files, explain, toi-noi]
@@ -18,21 +18,21 @@ Câu báo cáo chỉ sắp 1 triệu chuyến theo cước, nhưng PostgreSQL đ
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-029 · Phần 3/6 · Nâng cao</span>
-<p>Đọc trước: <a href="/articles/postgresql-explain-ke-hoach-thuc-thi">PG-021 · Đọc EXPLAIN từ truy vấn tìm chuyến</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>29-sort-hash-spill.sql</code>, số đo ở <code>DO-DAC.md</code>) và thí nghiệm <code>p03/thu-nghiem/pg029-spill-bai-tap.sql</code>. Sau bài này, bạn đo được tràn đĩa của sort/hash và nêu được đánh đổi bộ nhớ khi có tải đồng thời.</p>
+<p>Đọc trước: <a href="/articles/postgresql-explain-ke-hoach-thuc-thi">PG-021 · Đọc EXPLAIN từ truy vấn tìm chuyến</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>29-sort-hash-spill.sql</code>, số đo ở <code>DO-DAC.md</code>) và thí nghiệm <code>p03/thu-nghiem/pg029-spill-bai-tap.sql</code>. Sau bài này, bạn đo được mức tràn đĩa của sort/hash và nêu được đánh đổi bộ nhớ khi có tải đồng thời.</p>
 </div>
 
 ## 1. Bộ nhớ làm việc của một câu truy vấn
 
-Ba nút hay gặp nhất cần chỗ để "giữ hết rồi mới trả": **Sort** (sắp), **Hash** (bảng băm của Hash Join) và **HashAggregate** (gom nhóm bằng bảng băm); tài liệu liệt kê thêm merge join, Memoize, `IN` subquery dạng băm. Mỗi nút được một hạn mức:
+Ba nút hay gặp nhất cần chỗ để "giữ hết rồi mới trả": **Sort** (sắp), **Hash** (bảng băm của Hash Join) và **HashAggregate** (gom nhóm bằng bảng băm); tài liệu liệt kê thêm merge join, Memoize, `IN` subquery dạng băm. Mỗi nút có một hạn mức:
 
 | Tham số | Áp cho | Mặc định PG 18 | Lab |
 |---|---|---|---|
-| `work_mem` | Sort và là cơ số cho nút băm | 4MB | 4MB |
+| `work_mem` | Sort; đồng thời là cơ số tính hạn mức cho nút băm | 4MB | 4MB |
 | `hash_mem_multiplier` | Nhân với `work_mem` cho nút băm | 2,0 (từ PG 15; trước đó 1,0) | 2 |
 
 Hạn mức của một nút băm = `work_mem × hash_mem_multiplier` = 8 MB trong lab. Vượt hạn mức, nút không lỗi mà **ghi phần dư ra file tạm** rồi đọc lại — đó là "tràn đĩa" (spill). Tài liệu nói rõ hạn mức này tính cho *từng thao tác*: một câu phức tạp có nhiều nút sort/hash chạy cùng lúc, và nhiều phiên làm vậy song song, nên tổng bộ nhớ "có thể gấp nhiều lần" `work_mem`.
 
-Mọi số trong bài chạy trên **PostgreSQL 18.1** thật, dữ liệu 1.000.000 chuyến (19.441 page), 200.003 khách, song song (parallel query) và JIT tắt trong cluster lab trừ chỗ ghi khác.
+Mọi số trong bài chạy trên **PostgreSQL 18.1** thật, dữ liệu 1.000.000 chuyến (19.441 page), 200.003 khách, song song (parallel query) và JIT tắt trong cluster lab, trừ chỗ có ghi chú khác.
 
 ## 2. Sort: ba cách sắp và dòng "Sort Method"
 
@@ -68,7 +68,7 @@ Ba điều đọc ra từ bảng:
 
 ## 3. Thấy file tạm ở đâu
 
-`EXPLAIN` không `ANALYZE` chỉ là kế hoạch: nó có nút `Sort` nhưng **không có** dòng `Sort Method` — tràn hay không chỉ biết khi câu chạy thật (thí nghiệm A, `pg029-spill-bai-tap.sql`; không có trong lab chính). Bốn nơi cho bằng chứng:
+`EXPLAIN` không `ANALYZE` chỉ là kế hoạch: nó có nút `Sort` nhưng **không có** dòng `Sort Method` — tràn hay không chỉ biết khi câu chạy thật (thí nghiệm A, `pg029-spill-bai-tap.sql`; không có trong lab chính). Có bốn nơi cho thấy bằng chứng:
 
 | Nơi | Cho biết | Lab đo được |
 |---|---|---|
@@ -77,7 +77,7 @@ Ba điều đọc ra từ bảng:
 | `pg_stat_database.temp_files/temp_bytes` | Đếm luỹ kế theo database, mọi file bất kể `log_temp_files` | +1 file, > 10 MB |
 | `pg_stat_statements.temp_blks_written` | Luỹ kế theo **câu** (đã chuẩn hoá hằng số) | câu GROUP BY khách: vài nghìn khối |
 
-Tài liệu ghi `log_temp_files = 0` ghi mọi file, giá trị dương chỉ ghi file từ cỡ đó trở lên, mặc định `-1` tắt. Trên server thật, đặt một ngưỡng (ví dụ vài chục MB) cho cả server rẻ hơn nhiều so với bật `0`.
+Theo tài liệu, `log_temp_files = 0` ghi nhật ký mọi file, giá trị dương chỉ ghi file từ cỡ đó trở lên, mặc định `-1` tắt. Trên server thật, đặt một ngưỡng (ví dụ vài chục MB) cho cả server rẻ hơn nhiều so với bật `0`.
 
 Thí nghiệm C reset `pg_stat_statements` rồi chạy ba câu báo cáo; chỉ câu đếm theo khách có khối tạm:
 
@@ -148,7 +148,7 @@ Thời gian dưới đây lấy từ `p03/DO-DAC.md`, **không** đo lại cho b
 | G6-f | Hash Join, `hash_mem_multiplier` 2 (2 batch) | 696 | 675–802 |
 | G6-g | Hash Join, `hash_mem_multiplier` 8 (1 batch) | 585 | 561–626 |
 
-Hai nút băm nhanh hơn khi vừa bộ nhớ (≈ −33 % và −16 %; khoảng min–max của G6-d rộng, min 406 ms — nhiễu). Với Sort thì ngược kỳ vọng: **quicksort 256MB chậm hơn external merge 4MB** ở cả ba lần chạy đủ của lệnh đo. Đây là *quan sát* trên một máy; lab chưa kiểm nguyên nhân, nên bài không đưa lời giải thích. Điều rút ra được là hẹp hơn: "tràn đĩa luôn chậm, tăng `work_mem` luôn nhanh" không đứng vững trên số đo này. Muốn kết luận cho máy của bạn, đo trên máy của bạn.
+Hai nút băm nhanh hơn khi vừa bộ nhớ (≈ −33 % và −16 %; khoảng min–max của G6-d rộng, min 406 ms — nhiễu). Với Sort thì kết quả ngược với kỳ vọng: **quicksort 256MB chậm hơn external merge 4MB** ở cả ba lần chạy đủ của lệnh đo. Đây là *quan sát* trên một máy; lab chưa kiểm tra nguyên nhân, nên bài không đưa lời giải thích. Điều rút ra được là hẹp hơn: "tràn đĩa luôn chậm, tăng `work_mem` luôn nhanh" không đứng vững trên số đo này. Muốn kết luận cho máy của bạn, đo trên máy của bạn.
 
 Giới hạn: một máy, một loại câu, một phiên, dữ liệu tổng hợp, file tạm ~21 MB nằm gọn trong page cache. Trên server có đĩa chậm hơn hoặc file tạm hàng GB, kết quả có thể khác hẳn.
 
@@ -185,7 +185,7 @@ Ba tiến trình (dòng `Sort Method` đầu là của tiến trình chính, hai
 
 **Đo thật bằng pgbench** (`DO-DAC.md`, cùng máy): mỗi giao dịch là câu đếm chuyến theo khách trên cả bảng, 10 giây mỗi cấu hình, `work_mem` đặt cho mọi phiên.
 
-| `work_mem` | Phiên | tps | Độ trễ TB (ms) | File tạm | Dữ liệu tạm (MB) | Đỉnh bộ nhớ riêng các backend (MB) |
+| `work_mem` | Phiên | tps | Độ trễ TB (ms) | File tạm | Dữ liệu tạm (MB) | Đỉnh bộ nhớ riêng của các backend (MB) |
 |---|---:|---:|---:|---:|---:|---:|
 | 4MB | 1 · 4 · 8 | 2,3 · 8,2 · 11,3 | 434 · 489 · 708 | 23 · 84 · 116 | 345 · 1.169 · 1.598 | 15 · 60 · 119 |
 | 64MB | 1 · 4 · 8 | 3,0 · 9,1 · 15,0 | 335 · 441 · 534 | 0 · 0 · 0 | 0 | 22 · 88 · 172 |
@@ -220,8 +220,8 @@ Cùng trần đó, câu `LIMIT 20` chạy bình thường; và `CREATE TEMP TABL
 ## 9. Lỗi thường gặp
 
 - **Đọc `EXPLAIN` thiếu `ANALYZE` rồi kết luận "không tràn".** Kế hoạch không chứa `Sort Method` hay `Batches` thật.
-- **Coi `work_mem` là bộ nhớ của cả câu hay cả server.** Nó là hạn mức mỗi nút, mỗi tiến trình; nhân với số nút, số phiên, số worker.
-- **Suy `work_mem` cần đặt từ con số `Disk:`.** Bản trong bộ nhớ to hơn file tạm (55.827 kB vs 21.616 kB).
+- **Coi `work_mem` là bộ nhớ của cả câu hay cả server.** Đó là hạn mức cho mỗi nút, mỗi tiến trình; nhân với số nút, số phiên, số worker.
+- **Suy ra mức `work_mem` cần đặt từ con số `Disk:`.** Bản trong bộ nhớ to hơn file tạm (55.827 kB vs 21.616 kB).
 - **Quên `hash_mem_multiplier`.** Nút băm được gấp đôi `work_mem` từ PG 15; tính trần mà bỏ hệ số là thiếu một nửa.
 - **Đặt `work_mem` lớn trong `postgresql.conf` vì một báo cáo.** Dùng `SET LOCAL` cho báo cáo đó.
 - **Tin "tràn đĩa luôn chậm".** Mục 6 có phản ví dụ trên một máy; đo trước khi chỉnh.
@@ -262,7 +262,7 @@ ORDER BY temp_blks_written DESC, query;</code></pre>
 **Bài 3.** Server production giả định: <code>max_connections = 200</code>, <code>work_mem = 16MB</code>, <code>hash_mem_multiplier = 2</code>, bật <code>max_parallel_workers_per_gather = 2</code>. Tính trần bộ nhớ sort/hash nếu 50 phiên cùng chạy câu ba nút ở mục 7, mỗi nút đều chạy song song với 2 worker. Vì sao con số này không phải "RAM cần mua"?
 
 <details><summary><b>Lời giải</b></summary>
-<p>Một tiến trình: 32 + 32 + 16 = 80 MB. Mỗi phiên song song có 3 tiến trình (chính + 2 worker) ⇒ 240 MB. 50 phiên ⇒ 12.000 MB ≈ 11,7 GB — chỉ riêng sort/hash, chưa kể <code>shared_buffers</code> và bộ nhớ nền mỗi backend. Thí nghiệm D xác nhận phần "mỗi worker một Sort, mỗi Sort một hạn mức" (Worker 0, Worker 1 và tiến trình chính đều có dòng <code>Sort Method</code> riêng). Đây là <b>trần</b>: không phải nút nào cũng đầy, không phải câu nào cũng được chạy song song (thí nghiệm D: câu chỉ lấy <code>code, fare</code> thì planner không chọn song song). Nhưng nó là con số phải so với RAM trước khi đổi cấu hình; đo thực tế bằng tải giống production như cách pgbench ở mục 7.</p>
+<p>Một tiến trình: 32 + 32 + 16 = 80 MB. Mỗi phiên song song có 3 tiến trình (chính + 2 worker) ⇒ 240 MB. 50 phiên ⇒ 12.000 MB ≈ 11,7 GB — chỉ riêng sort/hash, chưa kể <code>shared_buffers</code> và bộ nhớ nền mỗi backend. Thí nghiệm D xác nhận phần "mỗi worker một Sort, mỗi Sort một hạn mức" (Worker 0, Worker 1 và tiến trình chính đều có dòng <code>Sort Method</code> riêng). Đây là <b>trần</b>: không phải nút nào cũng đầy, không phải câu nào cũng được chạy song song (thí nghiệm D: câu chỉ lấy <code>code, fare</code> thì planner không chọn song song). Nhưng nó là con số phải so với RAM trước khi đổi cấu hình; đo thực tế bằng tải giống production, như cách làm với pgbench ở mục 7.</p>
 </details>
 
 ## 12. Đọc tiếp

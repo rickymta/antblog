@@ -1,7 +1,7 @@
 ---
 slug: postgresql-la-gi-va-vai-tro-trong-toi-noi
 title: "PostgreSQL là gì và nằm ở đâu trong Tới Nơi?"
-summary: "Khách gọi tổng đài hỏi chuyến 100004 có thật không và bị tính bao nhiêu tiền: câu trả lời phải đến từ đâu? Phân biệt DBMS, database, schema, bảng và xác định PostgreSQL giữ trách nhiệm gì trong Tới Nơi."
+summary: "Khách gọi tổng đài hỏi chuyến 100004 có thật không và bị tính bao nhiêu tiền: câu trả lời phải đến từ đâu? Bài này phân biệt DBMS, database, schema, bảng và xác định PostgreSQL giữ trách nhiệm gì trong Tới Nơi."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-001, dbms, schema, client-server, toi-noi]
@@ -17,9 +17,9 @@ Hệ thống chỉ trả lời được khi đã quyết định trước: **d�
 <p>Đọc trước: <a href="/articles/du-an-mau-toi-noi">Dự án mẫu Tới Nơi</a>. Không cần biết SQL. Lab: <code>examples/toi-noi-postgresql/p01</code>. Sau bài này, bạn phân biệt được DBMS, database, schema, bảng và nói rõ trách nhiệm lưu dữ liệu nằm ở đâu trong Tới Nơi.</p>
 </div>
 
-## 1. Nguồn sự thật của Tới Nơi
+## 1. Nguồn dữ liệu gốc của Tới Nơi
 
-**Source of truth** (nguồn sự thật, còn gọi là *system of record*) là nơi giữ bản gốc của một loại dữ liệu: khi các nơi khác lệch nhau, bản ở đây thắng. Một hệ thống có thể có nhiều nguồn sự thật cho nhiều loại dữ liệu khác nhau, nhưng mỗi loại chỉ nên có một.
+**Source of truth** (nguồn dữ liệu gốc, còn gọi là *system of record*) là nơi giữ bản gốc của một loại dữ liệu: khi các nơi khác lệch nhau, bản ở đây thắng. Một hệ thống có thể có nhiều nguồn dữ liệu gốc cho nhiều loại dữ liệu khác nhau, nhưng mỗi loại chỉ nên có một.
 
 Với Tới Nơi, những dữ liệu sau không được phép mất hoặc sai, vì chúng là tiền và là lời hứa với khách, tài xế, quán:
 
@@ -33,7 +33,7 @@ Hồ sơ [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) đã chốt: *
 
 ## 2. Vì sao không để dữ liệu chuyến trong file hay trong bộ nhớ ứng dụng?
 
-Trả lời rõ câu này cho ta danh sách việc một hệ quản trị cơ sở dữ liệu phải làm. Theo hồ sơ, lúc cao điểm Tới Nơi tạo khoảng **70 chuyến/giây** và sửa bảng `trips` khoảng **560 lần/giây**. Thử đặt dữ liệu đó vào ba chỗ "dễ làm":
+Trả lời rõ câu này sẽ cho ta danh sách việc một hệ quản trị cơ sở dữ liệu phải làm. Theo hồ sơ, lúc cao điểm Tới Nơi tạo khoảng **70 chuyến/giây** và sửa bảng `trips` khoảng **560 lần/giây**. Thử đặt dữ liệu đó vào ba chỗ "dễ làm":
 
 | Phương án | Chuyện xảy ra với Tới Nơi |
 |---|---|
@@ -48,13 +48,13 @@ Từ bảng trên, ta rút ra bốn yêu cầu với nơi giữ bản gốc:
 3. **Tự giữ luật dữ liệu**: số điện thoại không trùng, cước không âm, chuyến phải thuộc một khách có thật.
 4. **Hỏi được nhiều kiểu**: theo khách, theo tài xế, theo thành phố và khoảng thời gian, mà không phải viết chương trình đọc file riêng cho mỗi câu hỏi.
 
-Ghi log ra file hay đặt cache trước database vẫn là chuyện bình thường; điểm quan trọng là phân vai: log để điều tra, cache để đọc nhanh, **PostgreSQL giữ bản gốc**. Series lần lượt học cách PostgreSQL đáp ứng bốn yêu cầu: luật dữ liệu ở Phần 1, truy vấn ở Phần 2, lưu trữ và index ở Phần 3, đồng thời ở Phần 4, độ bền và phục hồi ở Phần 5.
+Ghi log ra file hay đặt cache trước database vẫn là chuyện bình thường; điểm quan trọng là phân vai: log để điều tra, cache để đọc nhanh, **PostgreSQL giữ bản gốc**. Series lần lượt học cách PostgreSQL đáp ứng bốn yêu cầu: luật dữ liệu ở Phần 1, truy vấn ở Phần 2, lưu trữ và index ở Phần 3, xử lý đồng thời ở Phần 4, độ bền và phục hồi ở Phần 5.
 
 ## 3. DBMS, database, schema, bảng
 
 Bốn từ này hay bị dùng lẫn. Trong PostgreSQL chúng là bốn lớp lồng nhau.
 
-**DBMS** (*Database Management System*, hệ quản trị cơ sở dữ liệu) là phần mềm quản lý dữ liệu thay cho ứng dụng: lưu xuống đĩa, nhận câu lệnh, kiểm luật, điều phối nhiều người dùng. PostgreSQL là một DBMS. Tài liệu chính thức tự giới thiệu nó là một hệ quản trị cơ sở dữ liệu quan hệ–đối tượng (*object-relational*), phát triển từ dự án POSTGRES ở Đại học California, Berkeley, và phát hành theo giấy phép mã nguồn mở cho phép dùng miễn phí cả cho mục đích thương mại.
+**DBMS** (*Database Management System*, hệ quản trị cơ sở dữ liệu) là phần mềm quản lý dữ liệu thay cho ứng dụng: lưu xuống đĩa, nhận câu lệnh, kiểm tra luật, điều phối nhiều người dùng. PostgreSQL là một DBMS. Tài liệu chính thức tự giới thiệu nó là một hệ quản trị cơ sở dữ liệu quan hệ–đối tượng (*object-relational*), phát triển từ dự án POSTGRES ở Đại học California, Berkeley, và phát hành theo giấy phép mã nguồn mở cho phép dùng miễn phí cả cho mục đích thương mại.
 
 Một server PostgreSQL đang chạy quản lý một **database cluster** (cụm database). Chữ *cluster* ở đây không có nghĩa là nhiều máy: tài liệu định nghĩa nó là tập các database do **một** server quản lý, và trên đĩa là **một thư mục dữ liệu** (*data directory*). Bài [PG-002](/articles/postgresql-cai-dat-lab-psql-ket-noi) sẽ cho bạn nhìn tận mắt thư mục đó.
 
@@ -141,10 +141,10 @@ PostgreSQL làm việc theo mô hình **client–server** (máy khách – máy 
 |---|---|---|
 | Dịch vụ đặt chuyến (C# theo hồ sơ) | client | mở kết nối, gửi câu lệnh ghi chuyến, nhận kết quả |
 | `psql` trên máy người vận hành | client | công cụ dòng lệnh chính thức, dùng từ PG-002 |
-| Tiến trình `postgres` | server | giữ dữ liệu, kiểm luật, trả kết quả |
+| Tiến trình `postgres` | server | giữ dữ liệu, kiểm tra luật, trả kết quả |
 | Ứng dụng trên điện thoại khách | **không** kết nối trực tiếp | đi qua API của dịch vụ |
 
-Điện thoại khách không bao giờ nói chuyện thẳng với PostgreSQL. Hồ sơ Tới Nơi còn đặt luật service sở hữu dữ liệu của mình, không để service khác ghi thẳng vào bảng nội bộ; cấp quyền cho từng client là chủ đề của Phần 5.
+Điện thoại khách không bao giờ nói chuyện thẳng với PostgreSQL. Hồ sơ Tới Nơi còn đặt ra luật: service sở hữu dữ liệu của mình, không để service khác ghi thẳng vào bảng nội bộ; cấp quyền cho từng client là chủ đề của Phần 5.
 
 Ngoại lệ của lab P01: runner dùng **PGlite** — mã nguồn PostgreSQL 17.5 chạy ngay trong tiến trình Node, **một** kết nối, không qua mạng. Đủ để học luật dữ liệu và SQL, chưa đủ để mô phỏng nhiều client đồng thời; Phần 4 sẽ dùng server thật.
 
@@ -211,7 +211,7 @@ Bảng `trips` không biến mất; PostgreSQL chỉ không tìm thấy nó tron
 
 ## 6. DBMS giữ luật, ứng dụng giữ quyết định
 
-"PostgreSQL là nguồn sự thật" không có nghĩa dồn hết logic vào database. Hai bên chia việc:
+"PostgreSQL là nguồn dữ liệu gốc" không có nghĩa là dồn hết logic vào database. Hai bên chia việc:
 
 | Việc | Ai chịu trách nhiệm | Ví dụ Tới Nơi |
 |---|---|---|
@@ -220,14 +220,14 @@ Bảng `trips` không biến mất; PostgreSQL chỉ không tìm thấy nó tron
 | Nhiều yêu cầu đồng thời không phá nhau | PostgreSQL + cách ứng dụng viết giao dịch | hai tài xế bấm nhận cùng một chuyến (Phần 4) |
 | Quyết định nghiệp vụ | ứng dụng | chọn tài xế nào, tính cước bao nhiêu, gửi thông báo |
 
-Lab có sẵn bằng chứng cho dòng thứ hai. File `03-fixture-invalid.sql` cố thêm một khách mới dùng số điện thoại đã thuộc về khách Nguyễn Văn An. PostgreSQL từ chối, kể cả khi ứng dụng quên kiểm (trích `OUTPUT.txt`):
+Lab có sẵn bằng chứng cho dòng thứ hai. File `03-fixture-invalid.sql` cố thêm một khách mới dùng số điện thoại đã thuộc về khách Nguyễn Văn An. PostgreSQL từ chối, kể cả khi ứng dụng quên kiểm tra (trích `OUTPUT.txt`):
 
 ```text
 ERROR:  duplicate key value violates unique constraint "uq_customers_phone"
 DETAIL:  Key (phone)=(0900000001) already exists.
 ```
 
-Cách khai báo `uq_customers_phone` học ở [PG-005](/articles/postgresql-create-table-constraints). Điều cần giữ lúc này: luật nằm trong database thì **mọi** client đều phải tuân theo, kể cả script sửa dữ liệu viết vội lúc nửa đêm.
+Cách khai báo `uq_customers_phone` được trình bày ở [PG-005](/articles/postgresql-create-table-constraints). Điều cần giữ lúc này: luật nằm trong database thì **mọi** client đều phải tuân theo, kể cả script sửa dữ liệu viết vội lúc nửa đêm.
 
 ## 7. PostgreSQL và các database khác trong blog
 
@@ -245,8 +245,8 @@ Theo hồ sơ Tới Nơi, MySQL và MongoDB có mặt để học so sánh và m
 ## 8. Những hiểu nhầm thường gặp
 
 - **"Database" và "PostgreSQL" là một.** PostgreSQL là DBMS; một server quản lý nhiều database. Nghe "database chậm", hãy hỏi: server nào, database nào?
-- **Không tìm thấy bảng là bảng bị mất.** Lỗi `relation "trips" does not exist` thường do `search_path` hoặc đang kết nối nhầm database. Kiểm `current_database()` và `SHOW search_path` trước khi hoảng.
-- **Luật đã kiểm ở ứng dụng thì database không cần kiểm.** Ứng dụng có nhiều đường ghi (API, job, script vận hành); chỉ ràng buộc trong database chặn được tất cả.
+- **Không tìm thấy bảng là bảng bị mất.** Lỗi `relation "trips" does not exist` thường do `search_path` hoặc đang kết nối nhầm database. Kiểm tra `current_database()` và `SHOW search_path` trước khi hoảng.
+- **Luật đã kiểm tra ở ứng dụng thì database không cần kiểm tra.** Ứng dụng có nhiều đường ghi (API, job, script vận hành); chỉ ràng buộc trong database chặn được tất cả.
 
 ## 9. Bài tập
 
@@ -258,7 +258,7 @@ Theo hồ sơ Tới Nơi, MySQL và MongoDB có mặt để học so sánh và m
 
 <details><summary><b>Lời giải</b></summary><p>Database cluster (do một server PostgreSQL 17.5 quản lý) → database (<code>template1</code>; trên Docker là <code>toinoi</code>) → schema (<code>toinoi</code>) → bảng (ví dụ <code>trips</code>) → dòng (ví dụ chuyến <code>100004</code>).</p></details>
 
-**Bài 3.** Một đồng nghiệp chạy `SELECT count(*) FROM trips;` và nhận `ERROR:  relation "trips" does not exist`, trong khi bạn vừa đếm được 15 chuyến. Liệt kê ba khả năng và câu lệnh để kiểm từng khả năng.
+**Bài 3.** Một đồng nghiệp chạy `SELECT count(*) FROM trips;` và nhận `ERROR:  relation "trips" does not exist`, trong khi bạn vừa đếm được 15 chuyến. Liệt kê ba khả năng và câu lệnh để kiểm tra từng khả năng.
 
 <details><summary><b>Lời giải</b></summary><p>(1) <code>search_path</code> không chứa <code>toinoi</code>: chạy <code>SHOW search_path;</code> hoặc thử tên đầy đủ <code>toinoi.trips</code>. (2) Kết nối nhầm database: chạy <code>SELECT current_database();</code>. (3) Bảng chưa được tạo hoặc đã bị dọn (vừa chạy <code>00-reset</code> mà chưa chạy <code>01</code>): liệt kê bảng bằng câu <code>information_schema.tables</code> ở mục 3. Không kết luận "mất dữ liệu" trước khi loại trừ ba khả năng này.</p></details>
 

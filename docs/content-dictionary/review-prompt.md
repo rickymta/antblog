@@ -71,6 +71,7 @@ Lưu các tệp đề xuất đã áp vào `docs/content-dictionary/edits/<đợ
   2. Văn xuôi nằm giữa hai khối code làm cả tệp bị huỷ, vì regex backtick chạy trên cả tệp đã ghép nhầm hai dấu ``` lại với nhau. Giờ bước kiểm tra tính token theo từng dòng.
   Sau khi sửa công cụ, gửi thêm yêu cầu cho 7 agent để thêm lại khoảng 22 đề xuất đã phải bỏ. Người duyệt chỉnh 2 đề xuất: một chỗ agent tự thêm thông tin, một chỗ mất chữ hoa đầu câu.
 - Cách sửa chuẩn "trượt" → "không đạt" và "im lặng" → "không báo gì" thêm chữ "không" nhưng giữ đúng nghĩa. Đây là nguồn chính của các cờ "đổi số lần không".
+- Đợt 7 (50 bài PostgreSQL): 771 đề xuất. Người duyệt chỉnh 2 đề xuất làm lệch mức độ khẳng định so với bản gốc: "là phần thưởng của bảng tĩnh" bị đổi thành "chỉ phát huy tác dụng với bảng tĩnh" (quá mạnh), và "Chỉ vì…" bị đổi thành "Nhờ…" (mất ý giới hạn). Từ "mỗi" theo nghĩa khẩu ngữ là "chỉ" ("đo mỗi đoạn replay"), nên khi gặp phải đọc ngữ cảnh trước khi đánh giá.
 - Câu mơ hồ mà agent phải đoán nghĩa thì người duyệt cần xem kèm ngữ cảnh, và ghi vào technical-notes để tác giả xác nhận.
 - Trên Windows, truyền **thư mục** cho `content:apply` thay vì liệt kê từng tệp, để tránh lỗi "command line is too long".
 - Việc thống nhất "ca" → "test case" chiếm phần lớn đề xuất. Agent thường chỉ sửa ở văn xuôi chính và để nguyên trong bảng hay hình. Cách làm này chấp nhận được.

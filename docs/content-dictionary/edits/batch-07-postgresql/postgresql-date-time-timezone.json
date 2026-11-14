@@ -1,0 +1,19 @@
+{"file":"postgresql-date-time-timezone.md","edits":[
+{"old":"Học timestamptz, AT TIME ZONE, date_trunc có múi giờ và cách kiểm hai biên","new":"Bài học về timestamptz, AT TIME ZONE, date_trunc có múi giờ và cách kiểm tra hai biên","reason":"Câu cụt, 'kiểm' đứng một mình","severity":"medium"},
+{"old":"nhận về chuyến 07:00 sáng 15/10 thành","new":"nhận về chuyến 07:00 sáng 15/10 bị đổi thành","reason":"Câu lược động từ kiểu 'X thành Y'","severity":"medium"},
+{"old":"mốc ghi `+07`, nửa hở»","new":"mốc ghi `+07`, nửa mở»","reason":"Thống nhất 'nửa mở' trong cả bài","severity":"medium"},
+{"old":"**383** chuyến đặt 00:00–06:59 giờ VN — tức vẫn là ngày hôm trước theo UTC.","new":"Có **383** chuyến đặt 00:00–06:59 giờ VN — tức vẫn là ngày hôm trước theo UTC.","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"thêm ba cách quen tay nữa","new":"thêm ba cách hay viết nữa","reason":"'quen tay' gượng","severity":"low"},
+{"old":"**hai tham số**, so với hằng","new":"**hai tham số**, so sánh với hằng","reason":"Thiếu động từ 'so sánh'","severity":"medium"},
+{"old":"Cả hai cách ra","new":"Cả hai cách đều cho ra","reason":"Câu thiếu động từ","severity":"low"},
+{"old":"về **00:00 thứ hai**.","new":"đưa mốc về **00:00 thứ hai**.","reason":"Câu lược động từ","severity":"medium"},
+{"old":"giờ 0–6 ra 68","new":"giờ 0–6 lần lượt ra 68","reason":"Câu lược, thiếu 'lần lượt'","severity":"low"},
+{"old":"«giờ cao điểm» thành 11, 5 và 4 giờ","new":"«giờ cao điểm» trở thành 11, 5 và 4 giờ","reason":"Câu lược động từ kiểu 'X thành Y'","severity":"medium"},
+{"old":"một **lịch đủ** để ngày không có chuyến vẫn có dòng","new":"một **lịch ngày đầy đủ** để ngày không có chuyến vẫn có dòng","reason":"'lịch đủ' cụt, tự ghép","severity":"medium"},
+{"old":"Coi chừng kiểu:","new":"Hãy chú ý kiểu dữ liệu:","reason":"'Coi chừng kiểu' cụt, khó hiểu","severity":"medium"},
+{"old":"So nó với cột","new":"Đem kết quả so với cột","reason":"Tránh 'nó' chỉ sự vật","severity":"medium"},
+{"old":"với biên dựng như mục 4 cho Đà Nẵng 19/10: 13 chuyến","new":"với biên dựng như mục 4 cho ra, với Đà Nẵng, 19/10: 13 chuyến","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"và 07:00 sáng 15/10 giờ VN thành 17:00 chiều 14/10","new":"và 07:00 sáng 15/10 giờ VN bị đổi thành 17:00 chiều 14/10","reason":"Câu lược động từ kiểu 'X thành Y'","severity":"medium"},
+{"old":"gom nhanh và hết lo phiên","new":"gom nhanh và không còn lo chuyện phụ thuộc phiên","reason":"'hết lo phiên' cụt","severity":"medium"},
+{"old":"nên kiểm biên bằng giá trị dựng tay","new":"nên kiểm tra biên bằng giá trị dựng tay","reason":"'kiểm' đứng một mình","severity":"low"}
+]}

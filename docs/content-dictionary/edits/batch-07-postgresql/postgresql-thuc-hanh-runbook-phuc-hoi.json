@@ -1,0 +1,15 @@
+{"file":"postgresql-thuc-hanh-runbook-phuc-hoi.md","edits":[
+{"old":"kết thúc recovery sang timeline 2,","new":"kết thúc recovery và chuyển sang timeline 2,","reason":"Câu lược động từ","severity":"medium"},
+{"old":"vai trò và RPO/RTO phân rã trung thực.","new":"vai trò và RPO/RTO tách thành từng mốc một cách trung thực.","reason":"'phân rã' là calque của decompose, theo gợi ý khảo sát","severity":"medium"},
+{"old":"chỉ nghe localhost:","new":"chỉ lắng nghe trên localhost:","reason":"'nghe' cụt, calque của listen","severity":"low"},
+{"old":"| Phân rã thành từng mốc;","new":"| Tách thành từng mốc;","reason":"'phân rã' gượng","severity":"low"},
+{"old":"kết luận về target vô hiệu, dựng lại.","new":"kết luận về target là vô hiệu, hãy dựng lại.","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"<td>Người kiểm thứ hai</td>","new":"<td>Người kiểm tra thứ hai</td>","reason":"'kiểm' cụt","severity":"low"},
+{"old":"<td>Chủ nghiệp vụ</td>","new":"<td>Người phụ trách nghiệp vụ</td>","reason":"'Chủ' là calque của owner, theo style guide","severity":"medium"},
+{"old":"<td>Chủ ứng dụng</td>","new":"<td>Người phụ trách ứng dụng</td>","reason":"'Chủ' là calque của owner, theo style guide","severity":"medium"},
+{"old":"Nó cho biết bước kỹ thuật ở quy mô đồ chơi tốn vài giây.","new":"Số này cho biết bước kỹ thuật ở quy mô đồ chơi tốn vài giây.","reason":"Tránh 'Nó' trừu tượng ở đầu câu","severity":"low"},
+{"old":"Sản phẩm của phần đúng như khung:","new":"Sản phẩm của phần này đúng như khung đã đặt ra:","reason":"Câu cụt","severity":"medium"},
+{"old":"partition, replication logic, nâng phiên bản","new":"partition, logical replication, nâng phiên bản","reason":"'replication logic' là cách gọi sai (logical replication)","severity":"medium"},
+{"old":"Thành việc cụ thể trước khi dùng cho production:","new":"Cần chuyển các mục này thành việc cụ thể trước khi dùng cho production:","reason":"Câu lược động từ kiểu 'X thành Y'","severity":"high"},
+{"old":"**Đích archive ngay khi mở ghi**","new":"**Bật archive trên đích ngay khi mở ghi**","reason":"Câu thiếu động từ","severity":"medium"}
+]}

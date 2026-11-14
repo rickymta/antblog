@@ -10,7 +10,7 @@ language: vi
 
 Sáng 31/10, đội Vận hành Tới Nơi chốt báo cáo tháng 10 cho buổi giao ban, và ba con số bị hỏi lại ngay. Tỉ lệ huỷ TP. HCM ghi **14 %**, bảng tính của đội tài chính ra 14,10 %. Cước trung bình TP. HCM ghi **68.269 đ**, cao hơn mọi con số đội giá từng thấy. Đội Marketing cộng «khách hoạt động» của ba dịch vụ được **1.103**, nhưng cả công ty chỉ có 569 khách đi chuyến hoàn thành trong tháng.
 
-Cả ba đến từ những câu `GROUP BY` chạy không lỗi. Lỗi nằm ở **mẫu số**: chia số nguyên, lấy trung bình trên cả chuyến huỷ, cộng những con số không cộng được. Quy tắc xuyên suốt bài: mỗi cột của báo cáo phải nói được nó chia cho cái gì.
+Cả ba đến từ những câu `GROUP BY` chạy không lỗi. Lỗi nằm ở **mẫu số**: chia số nguyên, lấy trung bình trên cả chuyến huỷ, cộng những con số không cộng được. Quy tắc xuyên suốt bài: mỗi cột của báo cáo phải cho biết nó lấy gì làm mẫu số.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-012 · Phần 2/6 · Cơ bản</span>
@@ -27,7 +27,7 @@ node run.mjs p01/00-reset.sql p01/01-schema.sql p02/00-mo-rong-schema.sql \
   p02/01-fixture.sql p02/02-kiem-tra-fixture.sql p02/12-aggregate-group-by.sql
 ```
 
-Trước khi viết SQL, viết **định nghĩa chỉ số** — data dictionary cho số liệu, như data dictionary cho cột ở PG-004:
+Trước khi viết SQL, hãy viết **định nghĩa chỉ số** — một data dictionary cho số liệu, giống data dictionary cho cột ở PG-004:
 
 | Chỉ số | Định nghĩa | Mẫu số |
 |---|---|---|
@@ -38,7 +38,7 @@ Trước khi viết SQL, viết **định nghĩa chỉ số** — data dictionar
 | Cước trung bình | doanh thu ÷ chuyến hoàn thành | hoàn thành |
 | Điểm sao trung bình | trung bình `stars` khác NULL | lượt có sao |
 
-Sáu chuyến đặt sau nửa đêm 31/10 còn đang chạy nên nằm ngoài kỳ. Kỳ có **3.168 dòng**, cả 3.168 đã kết thúc (thí nghiệm 4 của `pg012-thu-nghiem.sql`) — con số mọi bảng trong bài phải cộng lại được.
+Sáu chuyến đặt sau nửa đêm 31/10 còn đang chạy nên nằm ngoài kỳ. Kỳ có **3.168 dòng**, cả 3.168 đã kết thúc (thí nghiệm 4 của `pg012-thu-nghiem.sql`) — con số mà mọi bảng trong bài phải cộng lại ra.
 
 ## 2. Hàm tổng hợp
 
@@ -61,11 +61,11 @@ FROM trips;
 
 `count(*)` đếm **dòng**; `count(cột)` đếm giá trị **khác NULL**; `count(DISTINCT cột)` đếm giá trị **khác nhau**, bỏ NULL. Lab có 54 tài xế nhưng chỉ 52 từng chạy — 8219 và 8220 chưa có chuyến nào.
 
-Kiểu kết quả: `pg_typeof` cho `sum(fare)` là **`bigint`**, `avg(fare)` là **`numeric`**, `count(*)` là **`bigint`**. `fare` là `integer` (tối đa khoảng 2,1 tỉ), chỉ khoảng 32.000 chuyến 67.000 đ đã vượt, nên `sum` nâng kiểu để không tràn. Nhớ kiểu `bigint` của `count` — nó gây ra lỗi «14 %» ở mục 6. Hai điều từ PG-011 vẫn đúng: hàm tổng hợp bỏ NULL, và trên tập rỗng `count` ra 0 còn `sum`/`avg` ra NULL.
+Kiểu kết quả: `pg_typeof` cho `sum(fare)` là **`bigint`**, `avg(fare)` là **`numeric`**, `count(*)` là **`bigint`**. `fare` là `integer` (tối đa khoảng 2,1 tỉ), chỉ khoảng 32.000 chuyến 67.000 đ đã vượt, nên `sum` nâng kiểu để không tràn. Nhớ kiểu `bigint` của `count` — kiểu này gây ra lỗi «14 %» ở mục 6. Hai điều từ PG-011 vẫn đúng: hàm tổng hợp bỏ NULL, và trên tập rỗng `count` ra 0 còn `sum`/`avg` ra NULL.
 
 ## 3. GROUP BY: từ dòng thành nhóm
 
-**`GROUP BY`** chia dòng thành **nhóm** theo giá trị của một hay nhiều biểu thức, rồi tính hàm tổng hợp cho từng nhóm — một dòng kết quả mỗi nhóm.
+**`GROUP BY`** chia dòng thành **nhóm** theo giá trị của một hay nhiều biểu thức, rồi tính hàm tổng hợp cho từng nhóm — mỗi nhóm cho ra một dòng kết quả.
 
 ```sql
 SELECT ci.id, ci.code, ci.name, count(*) AS so_chuyen
@@ -84,17 +84,17 @@ ORDER BY ci.id;
 
 1.606 + 1.108 + 460 = 3.174: mỗi chuyến rơi vào đúng một nhóm. (`JOIN … ON` ghép chuyến với thành phố — PG-013.)
 
-**Quy tắc:** mỗi cột trong `SELECT` phải có một giá trị duy nhất mỗi nhóm. Nhóm «SG» chứa ba loại dịch vụ, nên hỏi «`kind` của nhóm SG?» không có đáp án — PostgreSQL từ chối `SELECT c.code, t.kind, count(*) … GROUP BY c.code` thay vì chọn đại:
+**Quy tắc:** mỗi cột trong `SELECT` phải có một giá trị duy nhất trong mỗi nhóm. Nhóm «SG» chứa ba loại dịch vụ, nên hỏi «`kind` của nhóm SG?» không có đáp án — PostgreSQL từ chối `SELECT c.code, t.kind, count(*) … GROUP BY c.code` thay vì chọn đại:
 
 ```text
 ERROR:  column "t.kind" must appear in the GROUP BY clause or be used in an aggregate function
 ```
 
-Mã `42803`. Sửa bằng cách thêm `t.kind` vào `GROUP BY`, hoặc bọc trong hàm tổng hợp. Câu `cities` phía trên là ngoại lệ hợp lệ: nhóm theo **khoá chính** `ci.id` thì chọn được `ci.code`, `ci.name` — mỗi `id` chỉ có một `name`, tài liệu gọi là **phụ thuộc hàm** (functional dependency). `GROUP BY` cũng nhận biểu thức hoặc số thứ tự cột như `GROUP BY 1`; nhóm theo cột của select list là phần PostgreSQL mở rộng so với SQL chuẩn.
+Mã `42803`. Sửa bằng cách thêm `t.kind` vào `GROUP BY`, hoặc bọc trong hàm tổng hợp. Câu truy vấn `cities` phía trên là ngoại lệ hợp lệ: nhóm theo **khoá chính** `ci.id` thì chọn được `ci.code`, `ci.name` — mỗi `id` chỉ có một `name`, tài liệu gọi là **phụ thuộc hàm** (functional dependency). `GROUP BY` cũng nhận biểu thức hoặc số thứ tự cột như `GROUP BY 1`; nhóm theo cột của select list là phần PostgreSQL mở rộng so với SQL chuẩn.
 
 ## 4. Thứ tự logic: WHERE trước nhóm, HAVING sau nhóm
 
-Thứ tự đọc nghĩa của PG-007 thêm hai bước: `FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT`. Bảng dưới đếm số dòng từng bước cho câu «nhóm có tỉ lệ huỷ trên 15 %» ở mục 7:
+Thứ tự đọc nghĩa ở PG-007 nay có thêm hai bước: `FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT`. Bảng dưới đếm số dòng còn lại sau từng bước cho câu «nhóm có tỉ lệ huỷ trên 15 %» ở mục 7:
 
 | Bước | Làm việc trên | Còn lại |
 |---|---|---|
@@ -150,7 +150,7 @@ ORDER BY c.code COLLATE "C", t.kind COLLATE "C";
 
 Cột `da_ket_thuc` cộng lại đúng 3.168. Chú thích `-- huỷ / đã kết thúc` cạnh biểu thức cho người đọc thấy mẫu số mà không phải đoán.
 
-Trong mã cũ bạn sẽ gặp dạng `CASE` (PG-011): `count(CASE WHEN status = 'cancelled' THEN 1 END)` và `sum(CASE WHEN … THEN 1 ELSE 0 END)` đều ra 461 chuyến huỷ, `sum(CASE WHEN status = 'completed' THEN fare END)` ra 182.287.000 đ — trùng `FILTER` (thí nghiệm 5). `FILTER` nói thẳng ý định; bài dùng nó từ đây.
+Trong mã cũ bạn sẽ gặp dạng `CASE` (PG-011): `count(CASE WHEN status = 'cancelled' THEN 1 END)` và `sum(CASE WHEN … THEN 1 ELSE 0 END)` đều ra 461 chuyến huỷ, `sum(CASE WHEN status = 'completed' THEN fare END)` ra 182.287.000 đ — khớp với kết quả của `FILTER` (thí nghiệm 5). `FILTER` nói thẳng ý định; bài dùng nó từ đây.
 
 ## 6. Ba lỗi mẫu số trên cùng một dữ liệu
 
@@ -190,7 +190,7 @@ ORDER BY c.code COLLATE "C";
 
 ## 7. WHERE lọc dòng, HAVING lọc nhóm
 
-**`HAVING`** là điều kiện trên **nhóm**, chạy sau `GROUP BY` nên dùng được hàm tổng hợp. Nhóm thành phố × dịch vụ có tỉ lệ huỷ trên 15 %:
+**`HAVING`** là điều kiện trên **nhóm**, chạy sau `GROUP BY` nên dùng được hàm tổng hợp. Câu sau lọc ra các nhóm thành phố × dịch vụ có tỉ lệ huỷ trên 15 %:
 
 ```sql
 SELECT c.code AS tp, t.kind, count(*) AS da_ket_thuc,
@@ -212,9 +212,9 @@ ORDER BY ty_le_huy_pct DESC, c.code COLLATE "C", t.kind COLLATE "C";
  DN | ride   |         177 |          16.4
 ```
 
-`HAVING` phải viết lại biểu thức vì tên `ty_le_huy_pct` chưa có ở bước đó (mục 4); `ORDER BY` thì dùng được tên. Để ý `HAVING` so trên tỉ lệ **chưa làm tròn**: so trên số đã `round` thì nhóm 15,04 % thành 15,0 và trượt điều kiện.
+`HAVING` phải viết lại biểu thức vì tên `ty_le_huy_pct` chưa có ở bước đó (mục 4); `ORDER BY` thì dùng được tên. Để ý `HAVING` so trên tỉ lệ **chưa làm tròn**: so trên số đã `round` thì nhóm 15,04 % bị làm tròn thành 15,0 và trượt điều kiện.
 
-Câu kế tiếp trong tệp lab dùng cả hai mệnh đề — tài xế hoàn thành từ 63 chuyến: `WHERE t.status = 'completed' AND <kỳ> … GROUP BY d.code, c.code HAVING count(*) >= 63` ra 7 tài xế, đầu danh sách là 8101 và 8109 cùng 68 chuyến (`ORDER BY hoan_thanh DESC, tai_xe` — mã tài xế làm tie-breaker như PG-007). `status = 'completed'` là điều kiện trên **dòng** nên ở `WHERE`, để `count(*)` chỉ đếm chuyến hoàn thành; `count(*) >= 63` trên **nhóm** nên ở `HAVING`.
+Câu kế tiếp trong tệp lab dùng cả hai mệnh đề, để tìm tài xế hoàn thành từ 63 chuyến trở lên: `WHERE t.status = 'completed' AND <kỳ> … GROUP BY d.code, c.code HAVING count(*) >= 63` ra 7 tài xế, đầu danh sách là 8101 và 8109 cùng 68 chuyến (`ORDER BY hoan_thanh DESC, tai_xe` — mã tài xế làm tie-breaker như PG-007). `status = 'completed'` là điều kiện trên **dòng** nên ở `WHERE`, để `count(*)` chỉ đếm chuyến hoàn thành; `count(*) >= 63` trên **nhóm** nên ở `HAVING`.
 
 ## 8. Tổng phụ và tổng cộng với ROLLUP
 
@@ -243,7 +243,7 @@ ORDER BY grouping(c.code), c.code COLLATE "C", grouping(t.kind), t.kind COLLATE 
  TỔNG | (mọi dịch vụ) |       2707 | 182287000
 ```
 
-Một con số tổng chỉ đáng tin khi một đường tính **độc lập** ra cùng kết quả. Lab đối chiếu bằng câu tổng thẳng trên `trips` — không `JOIN`, không `ROLLUP`: `count(*), sum(fare) … WHERE status = 'completed'` trong kỳ ra đúng `2707 | 182287000`. Con số **182.287.000 đ** sẽ theo bạn tới PG-013 (khi `JOIN` với `payments` làm nó phình) và PG-020 (khi đối chiếu tiền thật).
+Một con số tổng chỉ đáng tin khi một cách tính **độc lập** cho ra cùng kết quả. Lab đối chiếu bằng câu tổng thẳng trên `trips` — không `JOIN`, không `ROLLUP`: `count(*), sum(fare) … WHERE status = 'completed'` trong kỳ ra đúng `2707 | 182287000`. Con số **182.287.000 đ** sẽ theo bạn tới PG-013 (khi `JOIN` với `payments` làm nó phình) và PG-020 (khi đối chiếu tiền thật).
 
 **NULL của ROLLUP và NULL của dữ liệu.** Tài liệu cảnh báo: cột được nhóm mà có NULL thật thì NULL đó không phân biệt được với NULL của dòng tổng phụ. Ở bảng trên `c.code`, `t.kind` đều NOT NULL nên an toàn. Thử với khu đón của chuyến Đà Nẵng — 4 chuyến mất GPS — và gắn nhãn bằng `coalesce(z.code, 'TỔNG')` thay vì `grouping()` (thí nghiệm 6): sau bốn dòng khu `DN-BI-01` … `DN-TT-02` là **hai** dòng `TỔNG | 4` và `TỔNG | 460` — dòng 4 là nhóm mất GPS, dòng 460 mới là tổng. Viết `CASE WHEN grouping(z.code) = 1 THEN 'TỔNG' ELSE coalesce(z.code, 'không rõ (mất GPS)') END` thì ra đúng. Vẫn là bài học PG-011: một ô NULL, hai nghĩa, phân biệt bằng một nguồn khác.
 
@@ -259,7 +259,7 @@ Câu 7 của lab nối chuyến hoàn thành trong kỳ với `trip_ratings` b�
  SG |       1377 |         955 |       69.4 |    868 |    4.23
 ```
 
-**Độ phủ** chia cho chuyến hoàn thành; `r.trip_id` chỉ NULL ở chuyến không có dòng đánh giá (PG-011), nên `count(r.trip_id)` đếm chuyến *có* đánh giá. **Điểm trung bình** chia cho lượt có sao — `avg` tự bỏ NULL. Đặt `co_danh_gia` và `co_sao` ngay trong bảng là cách rẻ nhất để người đọc kiểm mẫu số: 4,30 của Đà Nẵng dựa trên 251 lượt, ít hơn hẳn 868 lượt của TP. HCM.
+**Độ phủ** chia cho chuyến hoàn thành; `r.trip_id` chỉ NULL ở chuyến không có dòng đánh giá (PG-011), nên `count(r.trip_id)` đếm chuyến *có* đánh giá. **Điểm trung bình** chia cho lượt có sao — `avg` tự bỏ NULL. Đặt `co_danh_gia` và `co_sao` ngay trong bảng là cách rẻ nhất để người đọc kiểm tra mẫu số: 4,30 của Đà Nẵng dựa trên 251 lượt, ít hơn hẳn 868 lượt của TP. HCM.
 
 ## 10. Những con số không cộng được
 
@@ -300,10 +300,10 @@ Tỉ lệ cũng không lấy trung bình cộng được: tỉ lệ huỷ cả t
 
 Lời giải đã chạy thật trong `p02/thu-nghiem/pg012-bai-tap.sql` (nền như mục 1).
 
-**Bài 1.** Lập bảng tháng 10 theo **dịch vụ** cho cả nước: đã kết thúc, hoàn thành, huỷ, tỉ lệ huỷ, doanh thu, cước trung bình. Kiểm hai tổng trước khi nộp.
+**Bài 1.** Lập bảng tháng 10 theo **dịch vụ** cho cả nước: đã kết thúc, hoàn thành, huỷ, tỉ lệ huỷ, doanh thu, cước trung bình. Hãy kiểm tra hai tổng trước khi nộp.
 
 <details><summary><b>Lời giải</b></summary>
-<p>Câu ở mục 5, bỏ <code>c.code</code> khỏi <code>SELECT</code>/<code>GROUP BY</code> và bỏ <code>JOIN cities</code>. Kết quả: food <code>1430 | 1201 | 229 | 16.0 | 102825000 | 85616</code>, parcel <code>488 | 409 | 79 | 16.2 | 19711000 | 48193</code>, ride <code>1250 | 1097 | 153 | 12.2 | 59751000 | 54468</code>. Hai tổng kiểm: đã kết thúc cộng lại 3.168, doanh thu cộng lại 182.287.000 đ. Tỉ lệ huỷ và cước trung bình thì không cộng; tỉ lệ cả nước tính lại là 14,55 %.</p>
+<p>Câu ở mục 5, bỏ <code>c.code</code> khỏi <code>SELECT</code>/<code>GROUP BY</code> và bỏ <code>JOIN cities</code>. Kết quả: food <code>1430 | 1201 | 229 | 16.0 | 102825000 | 85616</code>, parcel <code>488 | 409 | 79 | 16.2 | 19711000 | 48193</code>, ride <code>1250 | 1097 | 153 | 12.2 | 59751000 | 54468</code>. Hai tổng đối chiếu: đã kết thúc cộng lại 3.168, doanh thu cộng lại 182.287.000 đ. Tỉ lệ huỷ và cước trung bình thì không cộng; tỉ lệ cả nước tính lại là 14,55 %.</p>
 </details>
 
 **Bài 2.** Liệt kê quán có **ít nhất 50 đơn** trong tháng **và** tỉ lệ huỷ từ 20 % trở lên. Điều kiện nào ở `WHERE`, điều kiện nào ở `HAVING`? Chọn được `m.name` khi chỉ nhóm theo `m.id` không?

@@ -1,7 +1,7 @@
 ---
 slug: postgresql-isolation-read-committed-repeatable-read
 title: "Read Committed và Repeatable Read: cùng một lịch chạy, hai kết quả"
-summary: "Báo cáo của Tới Nơi đọc cước một chuyến hai lần ra hai số; hai nhân viên cùng nạp tiền vào một ví thì mất một khoản. Chạy cùng bốn lịch tranh chấp dưới Read Committed và Repeatable Read trên PostgreSQL 18.1 để so kết quả."
+summary: "Báo cáo của Tới Nơi đọc cước một chuyến hai lần ra hai số; hai nhân viên cùng nạp tiền vào một ví thì mất một khoản. Bài chạy cùng bốn lịch tranh chấp dưới Read Committed và Repeatable Read trên PostgreSQL 18.1 để so kết quả."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-034, isolation, read-committed, repeatable-read, lost-update, serialization-failure, toi-noi]
@@ -27,7 +27,7 @@ node pg/run-pg.mjs p04 --only 34
 node pg/run-pg.mjs --nen p04/lab.json:p04 p04/thu-nghiem/pg034-snapshot-cau-dau-va-bai-tap.sql
 ```
 
-Ba phiên: A và B là hai giao dịch tranh chấp, C đặt lại dữ liệu trước mỗi lịch và đọc kết quả. Câu lẻ của B không có `BEGIN` thì tự commit ngay. Bước rơi vào chờ khoá được runner ghi `⏳`; kết quả của nó xuất hiện ở dòng `✔` sau khi bước kia nhả khoá — các bảng dưới đây xếp theo thứ tự xảy ra thật. Kết quả chép từ `p04/OUTPUT.txt`.
+Ba phiên: A và B là hai giao dịch tranh chấp, C đặt lại dữ liệu trước mỗi lịch và đọc kết quả. Câu lẻ của B không có `BEGIN` thì tự commit ngay. Runner ghi `⏳` cho bước phải chờ khoá; kết quả của nó xuất hiện ở dòng `✔` sau khi bước kia nhả khoá — các bảng dưới đây xếp theo thứ tự xảy ra thật. Kết quả chép từ `p04/OUTPUT.txt`.
 
 ## 2. Hai mức, khác nhau ở thời điểm chụp snapshot
 
@@ -45,7 +45,7 @@ Chuẩn SQL định nghĩa mức cô lập bằng các hiện tượng bị cấ
 | Repeatable Read | không | không | chuẩn cho phép, **PG không** | có thể |
 | Serializable | không | không | không | không |
 
-Hai ô «PG không» là chỗ PostgreSQL chặt hơn chuẩn — chuẩn chỉ quy định hiện tượng nào *không được* xảy ra, chặt hơn vẫn hợp lệ. Read Uncommitted được nhận về cú pháp (lab: `SHOW transaction_isolation` → `read uncommitted`) nhưng chạy y như Read Committed. Cột cuối, Serializable, là chủ đề PG-038.
+Hai ô «PG không» là chỗ PostgreSQL chặt hơn chuẩn — chuẩn chỉ quy định hiện tượng nào *không được* xảy ra, chặt hơn vẫn hợp lệ. Read Uncommitted được chấp nhận về mặt cú pháp (lab: `SHOW transaction_isolation` → `read uncommitted`) nhưng chạy y như Read Committed. Cột cuối và mức Serializable là chủ đề của PG-038.
 
 ## 3. S1 · Đọc lại một dòng
 
@@ -104,7 +104,7 @@ Cùng hai khoản nạp, nhưng để database tự cộng: `UPDATE wallets SET 
 | T5 | B | `COMMIT;` | COMMIT | thẻ `ROLLBACK` |
 | T6 | C | đọc số dư | **570000** | **520000** — B phải thử lại |
 
-Đảo ngược S3: ở đây RC cho kết quả đúng mà không cần thử lại, còn RR từ chối B dù phép cộng hoàn toàn an toàn. RR không phân biệt «ghi đè giá trị cũ» với «cộng thêm»; nó chỉ thấy dòng đã bị giao dịch khác commit sau snapshot của B.
+Ngược với S3: ở đây RC cho kết quả đúng mà không cần thử lại, còn RR từ chối B dù phép cộng hoàn toàn an toàn. RR không phân biệt «ghi đè giá trị cũ» với «cộng thêm»; nó chỉ thấy dòng đã bị giao dịch khác commit sau snapshot của B.
 
 Bảng tóm tắt bốn lịch:
 
@@ -117,7 +117,7 @@ Bảng tóm tắt bốn lịch:
 
 ## 7. Vì sao: RC đọc lại dòng, RR từ chối
 
-Khi một câu UPDATE/DELETE/`SELECT … FOR UPDATE` ở **Read Committed** gặp dòng đang bị giao dịch khác sửa, nó **chờ** (PG-033). Nếu giao dịch kia ROLLBACK, nó sửa dòng nó đã tìm thấy. Nếu kia COMMIT, nó lấy **phiên bản mới** của dòng, kiểm lại điều kiện `WHERE` trên phiên bản đó, khớp thì áp phép sửa lên phiên bản mới (trong mã nguồn cơ chế này gọi là EvalPlanQual). Vì thế:
+Khi một câu UPDATE/DELETE/`SELECT … FOR UPDATE` ở **Read Committed** gặp dòng đang bị giao dịch khác sửa, nó **chờ** (PG-033). Nếu giao dịch kia ROLLBACK, nó sửa dòng nó đã tìm thấy. Nếu giao dịch kia COMMIT, câu lệnh lấy **phiên bản mới** của dòng, kiểm lại điều kiện `WHERE` trên phiên bản đó, khớp thì áp phép sửa lên phiên bản mới (trong mã nguồn cơ chế này gọi là EvalPlanQual). Vì thế:
 
 - S4 đúng: `balance + 50000` được tính trên 520000 vừa commit.
 - S3 sai: biểu thức là hằng 550000 tính sẵn trong ứng dụng; đọc lại dòng không làm hằng đó đổi.
@@ -136,7 +136,7 @@ Nhưng câu lệnh chỉ đọc lại **những dòng nó đã tìm thấy**, kh
 
 400102 bị huỷ ⇒ B kiểm lại, bỏ qua — đúng. Nhưng 400101 nằm ngoài lần quét ban đầu của B (lúc đó nó còn ở khu 112) nên bị **bỏ sót**, dù A commit trước khi B xong. Kết quả của B không ứng với *bất kỳ* snapshot nào: không phải trước A (thì 400102 được tăng), không phải sau A (thì 400101 được tăng). Tài liệu kết luận RC hợp với điều kiện đơn giản, không hợp với câu ghi có điều kiện tìm kiếm phức tạp.
 
-**Repeatable Read** không đọc lại: dòng cần sửa đã bị giao dịch commit sau snapshot sửa trước ⇒ báo `40001` và để ứng dụng làm lại từ đầu với snapshot mới. Bất thường kiểu trên không xảy ra; đổi lại là lỗi phải xử lý, kể cả ở S4.
+**Repeatable Read** không đọc lại: dòng cần sửa đã bị một giao dịch khác sửa và commit sau snapshot ⇒ báo `40001` và để ứng dụng làm lại từ đầu với snapshot mới. Bất thường kiểu trên không xảy ra; đổi lại là lỗi phải xử lý, kể cả ở S4.
 
 ## 8. Snapshot chụp lúc nào, và khi nào RR không lỗi
 
@@ -148,7 +148,7 @@ Thí nghiệm `pg034-snapshot-cau-dau-va-bai-tap.sql` (không có trong lab chí
 | §2 RR chụp ở câu đầu | B `BEGIN ISOLATION LEVEL REPEATABLE READ;` (chưa chạy gì) · A đổi cước thành 34000, tự commit · B `SELECT` · A đổi 35000 · B `SELECT` | B thấy **34000** rồi **34000** |
 | §3 RR, người ghi trước ROLLBACK | A `BEGIN RR; UPDATE wallets … + 20000 WHERE id = 1002;` · B `BEGIN RR; UPDATE … + 50000 … RETURNING balance` ⏳ · A `ROLLBACK` | B ✔ **550000**, không `40001` |
 
-§2 nghĩa là `BEGIN ISOLATION LEVEL REPEATABLE READ` chưa «đóng băng» gì: thay đổi commit giữa `BEGIN` và câu đầu tiên vẫn được thấy. Cần mốc chính xác thì chạy câu đọc đầu tiên ngay. §3 khớp tài liệu: RR chỉ báo `40001` khi giao dịch sửa trước **commit**; nếu nó rollback, người chờ sửa tiếp bình thường.
+Kết quả §2 cho thấy `BEGIN ISOLATION LEVEL REPEATABLE READ` chưa «đóng băng» gì: thay đổi commit giữa `BEGIN` và câu đầu tiên vẫn được thấy. Cần mốc chính xác thì chạy câu đọc đầu tiên ngay. §3 khớp tài liệu: RR chỉ báo `40001` khi giao dịch sửa trước **commit**; nếu nó rollback, người chờ sửa tiếp bình thường.
 
 ## 9. Đặt mức cô lập và xử lý 40001
 
@@ -177,7 +177,7 @@ Ba quy tắc khi dùng RR:
 | Câu ghi có điều kiện trên nhiều dòng mà dòng có thể «trở nên khớp» | RR + thử lại, hoặc Serializable | Tránh bỏ sót như mục 7 |
 | Quy tắc trải trên nhiều dòng («mỗi khu ≥ 1 tài xế trực») | Serializable | RR vẫn để lọt — PG-038 |
 
-**Đánh đổi.** RC không bao giờ trả `40001` cho bốn lịch trên, nhưng để lọt S3 và mục 7 một cách im lặng — lỗi chỉ lộ khi đối soát. RR biến các trường hợp đó thành lỗi rõ ràng, đổi lại mọi giao dịch ghi cần vòng thử lại và từ chối cả phép ghi an toàn như S4. Không mức nào miễn phí; chọn theo từng giao dịch, không phải một lần cho cả hệ thống.
+**Đánh đổi.** RC không bao giờ trả `40001` cho bốn lịch trên, nhưng để lọt S3 và mục 7 mà không báo lỗi — lỗi chỉ lộ khi đối soát. RR biến các trường hợp đó thành lỗi rõ ràng, đổi lại mọi giao dịch ghi cần vòng thử lại và từ chối cả phép ghi an toàn như S4. Không mức nào miễn phí; chọn theo từng giao dịch, không phải một lần cho cả hệ thống.
 
 ## 11. Lỗi thường gặp
 
@@ -187,7 +187,7 @@ Ba quy tắc khi dùng RR:
 | Báo cáo hai câu lệch nhau | RC chụp snapshot mỗi câu | Chạy báo cáo trong một giao dịch RR |
 | `40001` ở mức RR rồi dữ liệu không đổi | `COMMIT` sau lỗi trả `ROLLBACK`, ứng dụng tưởng đã lưu | Bắt `40001` ở câu lệnh, thử lại cả giao dịch |
 | Thử lại chỉ câu UPDATE lỗi | Vẫn dùng số đọc từ snapshot cũ | Thử lại từ `BEGIN` |
-| Đặt READ UNCOMMITTED để «nhanh hơn» | PostgreSQL chạy như RC | Không có gì để được |
+| Đặt READ UNCOMMITTED để «nhanh hơn» | PostgreSQL chạy như RC | Không được lợi gì |
 | RR «không thấy» thay đổi đã commit trước `BEGIN`… mà lại thấy | Snapshot chụp ở câu đầu, không phải `BEGIN` | Chạy câu đọc đầu ngay sau `BEGIN` |
 
 ## 12. Bài tập

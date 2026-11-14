@@ -1,7 +1,7 @@
 ---
 slug: page-don-vi-doc-ghi
 title: "Đơn vị đọc ghi nhỏ nhất của cơ sở dữ liệu là gì?"
-summary: "Đội Tới Nơi đề xuất «chỉ SELECT fare cho nhẹ» và tin rằng «count(*) luôn phải đọc cả bảng». Đo bằng pageinspect, EXPLAIN BUFFERS và WAL trên bảng trips để thấy vì sao lấy một chuyến cũng phải đọc cả 8 KB."
+summary: "Đội Tới Nơi đề xuất «chỉ SELECT fare cho nhẹ» và tin rằng «count(*) luôn phải đọc cả bảng». Ta đo bằng pageinspect, EXPLAIN BUFFERS và WAL trên bảng trips để thấy vì sao lấy một chuyến cũng phải đọc cả 8 KB."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-022, page, buffer, storage, wal, pageinspect, toi-noi]
@@ -10,11 +10,11 @@ language: vi
 
 Màn hình theo dõi chuyến của Tới Nơi chỉ cần `fare` và `status`. Trong buổi rà hiệu năng, một bạn đề xuất «đổi `SELECT *` thành `SELECT fare` cho đọc ít đi», bạn khác khẳng định «`count(*)` lúc nào cũng phải đọc hết bảng». Nghe hợp lý, nhưng cả hai đang đếm chi phí theo **dòng** và **cột** — trong khi PostgreSQL không đọc ghi theo đơn vị đó.
 
-Bài này đo đơn vị thật trên bảng `trips` và đặt hai khẳng định ấy về đúng chỗ.
+Bài này đo đơn vị thật trên bảng `trips` và đánh giá lại hai khẳng định ấy cho đúng.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-022 · Phần 3/6 · Cơ bản</span>
-<p>Đọc trước: <a href="/articles/postgresql-explain-ke-hoach-thuc-thi">PG-021 · Đọc EXPLAIN từ truy vấn tìm chuyến</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>22-page-buffer.sql</code>, schema <code>bai_cu</code> dựng ở <code>03-bai-cu-20k.sql</code>). Sau bài này, bạn đọc được số page và buffer của một truy vấn, mổ được một page bằng pageinspect, và biết kết luận nào rút ra được từ các con số đó.</p>
+<p>Đọc trước: <a href="/articles/postgresql-explain-ke-hoach-thuc-thi">PG-021 · Đọc EXPLAIN từ truy vấn tìm chuyến</a>. Lab: <code>examples/toi-noi-postgresql/p03</code> (tệp <code>22-page-buffer.sql</code>, schema <code>bai_cu</code> dựng ở <code>03-bai-cu-20k.sql</code>). Sau bài này, bạn đọc được số page và buffer của một truy vấn, soi được bên trong một page bằng pageinspect, và biết kết luận nào rút ra được từ các con số đó.</p>
 </div>
 
 Trước khi đọc tiếp, thử trả lời — chọn một đáp án trong đầu rồi mới mở phần giải thích.
@@ -50,7 +50,7 @@ SHOW block_size;
  8192
 ```
 
-8.192 byte được chọn lúc biên dịch PostgreSQL — không đổi bằng cấu hình khi đang chạy, và mọi bảng, mọi index trong cluster dùng chung.
+8.192 byte được chọn lúc biên dịch PostgreSQL — không đổi được bằng cấu hình khi đang chạy, và dùng chung cho mọi bảng, mọi index trong cluster.
 
 Mọi số trong bài là kết quả chạy thật trên **PostgreSQL 18.1** bằng lab Phần 3 (`node pg/run-pg.mjs p03 --only 22`). Phần lớn bài dùng schema `bai_cu`: bộ sinh **20.000 chuyến** của hồ sơ Tới Nơi, thay `random()` và `now()` bằng bản tất định để ai chạy cũng ra cùng số. Mục 6 đo lại trên bảng 1 triệu chuyến của Phần 3.
 
@@ -76,9 +76,9 @@ ORDER BY relname;
  uq_trips_code           |       57 |  466944 |         350.9
 ```
 
-20.000 chuyến nằm trong **374 page** (374 × 8.192 = 3.063.808 byte — kích thước tệp luôn là bội số của page), trung bình 53,5 chuyến một page. Index chứa nhiều mục hơn trên một page vì mỗi mục chỉ có khoá và vị trí dòng (`ctid`).
+20.000 chuyến nằm trong **374 page** (374 × 8.192 = 3.063.808 byte — kích thước tệp luôn là bội số của page), trung bình 53,5 chuyến một page. Một page index chứa được nhiều mục hơn vì mỗi mục chỉ có khoá và vị trí dòng (`ctid`).
 
-Dòng `relnamespace` không phải trang trí. Database lab có hai bảng tên `trips` (`toinoi.trips` 1 triệu chuyến và `bai_cu.trips`); bỏ điều kiện schema thì cùng câu trả **7 dòng** lẫn của hai bảng. Truy vấn catalog theo tên mà không lọc schema là cách nhanh nhất để đọc nhầm số của bảng khác.
+Dòng `relnamespace` không phải chi tiết thừa. Database lab có hai bảng tên `trips` (`toinoi.trips` 1 triệu chuyến và `bai_cu.trips`); bỏ điều kiện schema thì cùng câu lệnh trả về **7 dòng**, lẫn số của hai bảng. Truy vấn catalog theo tên mà không lọc schema là cách nhanh nhất để đọc nhầm số của bảng khác.
 
 Mở page đầu tiên bằng extension `pageinspect`:
 
@@ -150,7 +150,7 @@ SELECT fare FROM trips WHERE ctid = '(100,7)';
    Buffers: shared hit=1
 ```
 
-Một dòng, một cột 4 byte — vẫn **một page 8.192 byte**. Lặp lại với các kiểu truy vấn khác (mỗi câu chạy hai lần, ghi lần hai khi cache đã ấm):
+Một dòng, một cột 4 byte — vẫn **một page 8.192 byte**. Lặp lại với các kiểu truy vấn khác (mỗi câu chạy hai lần, lấy số của lần hai, khi cache đã ấm):
 
 | Truy vấn trên `bai_cu.trips` | Dòng trả về | Page đã đọc |
 |---|---:|---:|
@@ -162,7 +162,7 @@ Một dòng, một cột 4 byte — vẫn **một page 8.192 byte**. Lặp lại
 | `SELECT count(fare) FROM trips` | 20.000 | 374 — `Seq Scan` cả bảng |
 | `SELECT count(*) FROM trips` | 20.000 | **51** — `Index Only Scan` trên `ix_trips_driver_id`, `Heap Fetches: 0` |
 
-Hai dòng giữa bảng là điểm mấu chốt: **cùng 53 chuyến**, một cách đọc tốn 4 page, cách kia 159 page — gấp gần 40 lần. Khác nhau không ở số dòng mà ở chỗ các dòng **nằm trên bao nhiêu page**: 53 chuyến liền mã nằm gọn trên page 224 và 225, còn 53 chuyến rải rác nằm trên 53 page khác nhau, mỗi chuyến tốn trọn 3 page (2 index + 1 heap).
+Hai dòng ở giữa bảng là điểm mấu chốt: **cùng 53 chuyến**, một cách đọc tốn 4 page, cách kia 159 page — gấp gần 40 lần. Điểm khác nhau không nằm ở số dòng mà ở chỗ các dòng **nằm trên bao nhiêu page**: 53 chuyến liền mã nằm gọn trên page 224 và 225, còn 53 chuyến rải rác nằm trên 53 page khác nhau, mỗi chuyến tốn trọn 3 page (2 index + 1 heap).
 
 Hai dòng cuối trả lời khẳng định thứ hai ở đầu bài. Bảng vừa `VACUUM` nên mọi page được đánh dấu «mọi dòng đều nhìn thấy được» trong visibility map; khi đó `count(*)` không cần ghé heap, PostgreSQL đếm trên index **nhỏ nhất** — `ix_trips_driver_id` chỉ 51 page vì gộp các khoá trùng. Muốn thấy đọc hết 374 page thì đếm một cột không có index (`count(fare)`), hoặc đếm khi bảng vừa bị sửa nhiều mà chưa `VACUUM` (bài tập 3). Cơ chế này là chủ đề của [PG-026](/articles/postgresql-index-only-scan-visibility-map).
 
@@ -170,7 +170,7 @@ Hai dòng cuối trả lời khẳng định thứ hai ở đầu bài. Bảng v
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">«Chỉ SELECT vài cột cho nhanh» — đúng một nửa</span>
-<p>Lấy ít cột giúp giảm dữ liệu gửi qua mạng và giảm việc giải nén giá trị lớn, nhưng với dòng nhỏ như <code>trips</code> thì <b>không giảm số page phải đọc</b>: <code>fare</code> nằm chung page với mọi cột khác của chuyến đó (3 page cho cả <code>SELECT *</code> lẫn <code>SELECT fare</code>). Muốn đọc ít page hơn thì phải đọc ít dòng hơn, làm các dòng cần đọc nằm gần nhau hơn, hoặc trả lời được chỉ từ index.</p>
+<p>Lấy ít cột giúp giảm dữ liệu gửi qua mạng và giảm việc giải nén giá trị lớn, nhưng với dòng nhỏ như <code>trips</code> thì <b>không giảm số page phải đọc</b>: <code>fare</code> nằm chung page với mọi cột khác của chuyến đó (3 page cho cả <code>SELECT *</code> lẫn <code>SELECT fare</code>). Muốn đọc ít page hơn thì phải đọc ít dòng hơn, làm các dòng cần đọc nằm gần nhau hơn, hoặc làm sao để chỉ cần index là trả lời được truy vấn.</p>
 </div>
 
 ## 4. Buffer: page nằm trong bộ nhớ
@@ -198,7 +198,7 @@ WHERE relfilenode = pg_relation_filenode('bai_cu.trips')
        374 |          1
 ```
 
-374 page đọc vào thành đúng 374 buffer — không có «nửa page» trong bộ nhớ. Lần chạy sau, cùng câu ra `shared hit=374`.
+374 page đọc vào chiếm đúng 374 buffer — không có «nửa page» trong bộ nhớ. Lần chạy sau, cùng câu ra `shared hit=374`.
 
 Giới hạn khi đọc con số: `read` nghĩa là PostgreSQL phải xin page từ hệ điều hành, **không nhất thiết** từ đĩa — page có thể đang nằm trong cache của hệ điều hành, và PostgreSQL không phân biệt được. Lab cũng không xoá được cache hệ điều hành, nên mọi «lạnh» trong Phần 3 chỉ là lạnh với `shared_buffers`. Điều rút ra được từ `Buffers` là **số page phải chạm** — thước đo khối lượng việc; thời gian đọc thật cần đo riêng.
 
@@ -206,7 +206,7 @@ Giới hạn khi đọc con số: `read` nghĩa là PostgreSQL phải xin page t
 
 Khi `UPDATE` một chuyến, PostgreSQL sửa trong buffer, đánh dấu page đó «bẩn», về sau checkpoint (hoặc tiến trình nền) ghi **nguyên page 8 KB** xuống tệp dữ liệu. Không có cách ghi riêng 4 byte của `fare`.
 
-Còn một lớp ghi nữa: **WAL** (write-ahead log), nhật ký mọi thay đổi được ghi trước để khôi phục khi sập. Lab sửa giá hai chuyến **cùng nằm trên page 373** (page cuối) ngay sau một `CHECKPOINT`, lưu vị trí WAL trước, giữa, sau vào biến psql, rồi đọc từng bản ghi bằng extension `pg_walinspect`:
+Còn một lớp ghi nữa: **WAL** (write-ahead log), nhật ký ghi trước mọi thay đổi để khôi phục khi máy sập. Lab sửa giá hai chuyến **cùng nằm trên page 373** (page cuối) ngay sau một `CHECKPOINT`, lưu vị trí WAL trước, giữa, sau vào biến psql, rồi đọc từng bản ghi bằng extension `pg_walinspect`:
 
 ```sql
 CHECKPOINT;
@@ -232,9 +232,9 @@ ORDER BY start_lsn;
    2 | Transaction      | COMMIT      |            34 |          0
 ```
 
-Cùng kiểu thay đổi, cùng một page, nhưng câu đầu ghi **6.607 byte** WAL còn câu sau chỉ **114 byte**. Câu đầu chứa một **full page image** (ảnh nguyên page, cột `fpi_length`) 6.508 byte. Điều kiện `Standby` bỏ bản ghi do tiến trình nền tự ghi định kỳ; trừ thẳng hai vị trí LSN thì ra khoảng 6.640 và 120 byte vì gồm cả phần đệm căn lề.
+Cùng kiểu thay đổi, cùng một page, nhưng câu đầu ghi **6.607 byte** WAL còn câu sau chỉ **114 byte**. Câu đầu chứa một **full page image** (ảnh nguyên page, cột `fpi_length`) 6.508 byte. Điều kiện `Standby` loại các bản ghi do tiến trình nền tự ghi định kỳ; nếu trừ thẳng hai vị trí LSN thì ra khoảng 6.640 và 120 byte, vì hiệu số đó gồm cả phần đệm căn lề.
 
-Lý do: hệ điều hành và ổ đĩa ghi theo khối nhỏ hơn 8 KB. Nếu máy sập đúng lúc PostgreSQL đang ghi một page, page trên đĩa có thể nửa cũ nửa mới — *torn page* — và bản ghi WAL «chỉ phần thay đổi» không đủ để dựng lại nó. Vì vậy, với `full_page_writes = on` (mặc định), lần **đầu tiên** một page bị sửa sau mỗi checkpoint, PostgreSQL chép nguyên nội dung page đó vào WAL; các lần sửa sau trên cùng page, tới checkpoint kế tiếp, chỉ ghi phần thay đổi. Ảnh page nhỏ hơn 8.192 byte vì phần trống giữa `lower` và `upper` không cần chép — page 373 là page cuối, trước khi sửa còn 1.800 byte trống.
+Lý do là hệ điều hành và ổ đĩa ghi theo khối nhỏ hơn 8 KB. Nếu máy sập đúng lúc PostgreSQL đang ghi một page, page trên đĩa có thể nửa cũ nửa mới — *torn page* — và bản ghi WAL «chỉ phần thay đổi» không đủ để dựng lại nó. Vì vậy, với `full_page_writes = on` (mặc định), lần **đầu tiên** một page bị sửa sau mỗi checkpoint, PostgreSQL chép nguyên nội dung page đó vào WAL; các lần sửa sau trên cùng page, tới checkpoint kế tiếp, chỉ ghi phần thay đổi. Ảnh page nhỏ hơn 8.192 byte vì phần trống giữa `lower` và `upper` không cần chép — page 373 là page cuối, trước khi sửa còn 1.800 byte trống.
 
 Trường hợp thứ ba: sửa giá một chuyến **cũ** (mã 110000) trên page đã đầy, ngay sau checkpoint. Phiên bản mới không vừa page cũ nên phải sang page khác — không còn là HOT update — và mỗi index của `trips` phải thêm một mục trỏ tới vị trí mới:
 
@@ -257,13 +257,13 @@ Lab đo lại cùng các ý trên `toinoi.trips` 1 triệu chuyến (lược đ�
 | Chỉ số | `bai_cu` · 20.000 chuyến | `toinoi` · 1 triệu chuyến |
 |---|---:|---:|
 | Page của bảng | 374 | 19.441 |
-| Chuyến mỗi page · byte mỗi chuyến | 53,5 · 147,3 | 51,4 · 149,2 (mẫu 20.000 chuyến) |
+| Số chuyến mỗi page · số byte mỗi chuyến | 53,5 · 147,3 | 51,4 · 149,2 (mẫu 20.000 chuyến) |
 | Số tầng của `uq_trips_code` | 2 (`bt_metap` level 1) | 3 (level 2) |
 | Tra một mã chuyến | 3 page | 4 page (lạnh `hit=1 read=3`, nóng `hit=4`) |
 | 53 chuyến liền mã | 4 page | 5 page |
 | 53 chuyến rải rác | 159 page | 212 page (`hit=102 read=110`) |
 
-Số chuyến gấp 50 lần, nhưng tra một mã chỉ thêm **một** page vì cây index thêm một tầng. Thứ tăng theo kích thước là truy vấn đọc nhiều dòng rải rác — mỗi dòng vẫn tốn trọn đường xuống cây cộng một page heap. [PG-023](/articles/postgresql-btree-index-co-ban) mổ cây B-tree này.
+Số chuyến gấp 50 lần, nhưng tra một mã chỉ thêm **một** page vì cây index thêm một tầng. Chi phí tăng theo kích thước bảng ở truy vấn đọc nhiều dòng rải rác — mỗi dòng vẫn tốn trọn một lượt đi xuống cây, cộng thêm một page heap. [PG-023](/articles/postgresql-btree-index-co-ban) đi sâu vào cây B-tree này.
 
 ## 7. Vì sao không đọc ghi từng dòng?
 
@@ -292,7 +292,7 @@ Lời giải chạy được: `p03/thu-nghiem/pg022-bai-tap.sql` (không có tro
 <p>1.000 ÷ 53,5 ≈ 19 page heap (thêm 1 nếu dải bắt đầu giữa page), cộng gốc và vài lá index. Đo: các chuyến nằm trên đúng 19 page heap; <code>Index Scan using uq_trips_code</code> ra <code>actual rows=1000.00</code>, <code>Buffers: shared hit=24</code> = 19 heap + 5 index. Số dòng gấp 19 lần dải 53 chuyến, số page chỉ gấp 6 lần.</p>
 </details>
 
-**Bài 2.** Đẩy `trips` và `uq_trips_code` ra khỏi `shared_buffers`, đọc chuyến 112345, rồi đếm bằng `pg_buffercache` mỗi quan hệ đang chiếm mấy buffer.
+**Bài 2.** Đẩy `trips` và `uq_trips_code` ra khỏi `shared_buffers`, đọc chuyến 112345, rồi dùng `pg_buffercache` đếm xem bảng và index đang chiếm mấy buffer.
 
 <details><summary><b>Lời giải</b></summary>
 <pre><code class="language-sql">CREATE EXTENSION pg_buffercache WITH SCHEMA public;

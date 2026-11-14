@@ -1,0 +1,14 @@
+{"file":"postgresql-transaction-commit-rollback.md","edits":[
+{"old":"Thực hành: tối ưu truy vấn bằng bằng chứng</a>","new":"Thực hành: tối ưu truy vấn dựa trên bằng chứng</a>","reason":"Đồng bộ với tiêu đề đã sửa của PG-030; lặp 'bằng'","severity":"medium"},
+{"old":"WAL thuộc Phần 5","new":"WAL được trình bày ở Phần 5","reason":"'thuộc Phần 5' gượng","severity":"low"},
+{"old":"ở mức cô lập nào;","new":"ở bất kỳ isolation level nào;","reason":"Câu phủ định mơ hồ; giữ thuật ngữ isolation level","severity":"medium"},
+{"old":"Muốn giờ thật đang trôi, dùng","new":"Muốn lấy giờ thực tế đang chạy, dùng","reason":"'giờ thật đang trôi' gượng, thiếu động từ","severity":"medium"},
+{"old":"app dùng driver không có nó","new":"app dùng driver không có tính năng này","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"NULL nếu chưa — PG-032 dùng nhiều.","new":"NULL nếu chưa — PG-032 dùng hàm này nhiều.","reason":"Câu thiếu tân ngữ","severity":"medium"},
+{"old":"không dọn được phiên bản chết","new":"không dọn được tuple chết","reason":"Dùng thuật ngữ tuple thay cho 'phiên bản chết'","severity":"medium"},
+{"old":"PG-033 so nó với","new":"PG-033 so sánh tham số này với","reason":"Tránh 'nó' chỉ sự vật","severity":"medium"},
+{"old":"Bất biến cuối bài (B kiểm)","new":"Bất biến cuối bài (phiên B kiểm tra)","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Không kiểm kết quả COMMIT (thẻ","new":"Không kiểm tra kết quả COMMIT (thẻ","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Kiểm thẻ/trạng thái hoặc","new":"Kiểm tra thẻ/trạng thái hoặc","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Đừng gọi chúng giữa giao dịch","new":"Đừng thực hiện các việc đó giữa giao dịch","reason":"'gọi chúng' calque","severity":"medium"}
+]}

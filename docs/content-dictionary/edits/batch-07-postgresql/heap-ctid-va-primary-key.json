@@ -1,0 +1,20 @@
+{"file":"heap-ctid-va-primary-key.md","edits":[
+{"old":"dễ tưởng primary key quyết định","new":"dễ khiến ta tưởng primary key quyết định","reason":"Câu thiếu chủ thể, cụt","severity":"medium"},
+{"old":"Mổ heap, ctid, HOT update và CLUSTER","new":"Đi sâu vào heap, ctid, HOT update và CLUSTER","reason":"'Mổ' gượng, câu thiếu chủ ngữ rõ ràng","severity":"medium"},
+{"old":"tin rằng `SELECT` không `ORDER BY` trả theo `id`, lưu `ctid` làm khoá, hoặc chạy `CLUSTER` lúc cao điểm","new":"tin rằng `SELECT` không có `ORDER BY` sẽ trả dòng theo `id`, lưu `ctid` làm khoá, hoặc chạy `CLUSTER` lúc cao điểm","reason":"Câu lược động từ và tân ngữ","severity":"medium"},
+{"old":"Bài này đi qua hai lớp bằng chính bảng `trips`.","new":"Bài này lần lượt xem từng lớp trên chính bảng `trips`.","reason":"'đi qua hai lớp' gượng","severity":"low"},
+{"old":"lần chạy thật, lược bằng","new":"lần chạy thật, chỗ lược bỏ ghi bằng","reason":"'lược bằng' cụt, thiếu động từ","severity":"medium"},
+{"old":"bằng mốc chụp cố định","new":"bằng một mốc thời gian cố định","reason":"'mốc chụp' là cụm tự ghép","severity":"medium"},
+{"old":"uuid sắp được theo thời gian","new":"uuid có thể sắp xếp theo thời gian","reason":"Trật tự từ kiểu Anh (sortable)","severity":"medium"},
+{"old":"Với ≈ 560 UPDATE/giây vào `trips` lúc cao điểm theo hồ sơ, đây là chi tiết đáng giá nhất của bài.","new":"Hồ sơ cho biết `trips` nhận ≈ 560 UPDATE/giây lúc cao điểm, nên đây là chi tiết đáng chú ý nhất của bài.","reason":"Câu mở bằng 'Với' lửng, 'đáng giá' gượng","severity":"medium"},
+{"old":"mỗi chuyến vẫn là chính nó","new":"mỗi chuyến vẫn là cùng một chuyến","reason":"'là chính nó' gượng","severity":"low"},
+{"old":"Đổi thêm 17 % dung lượng heap lấy 100 % HOT","new":"Ta tốn thêm 17 % dung lượng heap để đổi lấy 100 % HOT","reason":"Câu lược động từ","severity":"medium"},
+{"old":"Primary key = một index B-tree **UNIQUE** + ràng buộc **NOT NULL** + đánh dấu \"primary\" (mỗi bảng tối đa một).","new":"Primary key gồm một index B-tree **UNIQUE**, ràng buộc **NOT NULL** và cờ \"primary\" (mỗi bảng tối đa một).","reason":"Viết kiểu phương trình, không thành câu","severity":"medium"},
+{"old":"sự thẳng hàng tự nhiên với thời gian đặt mà báo cáo đang hưởng","new":"sự thẳng hàng tự nhiên với thời gian đặt, thứ mà các báo cáo đang tận dụng","reason":"'đang hưởng' gượng","severity":"low"},
+{"old":"có chữ CLUSTER, nhưng không gì được duy trì","new":"có chữ CLUSTER, nhưng không có gì được duy trì","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"không chen vào chỗ theo id","new":"không chen vào đúng vị trí theo id","reason":"'chỗ theo id' cụt","severity":"medium"},
+{"old":"Yêu cầu khoá xếp hàng: một lệnh","new":"Các yêu cầu khoá xếp thành hàng đợi: một lệnh","reason":"Câu cụt, lược danh từ","severity":"medium"},
+{"old":"là `CLUSTER` biến thành \"không ai mở được lịch sử chuyến\" cho tới khi","new":"là `CLUSTER` khiến không ai mở được lịch sử chuyến cho tới khi","reason":"Kiểu 'X biến thành \"câu\"' gượng","severity":"medium"},
+{"old":"| Code có nên dựa vào |","new":"| Có nên dựa vào trong code không |","reason":"Nhãn hàng cụt","severity":"medium"},
+{"old":"chỉ sắp một lần","new":"chỉ sắp xếp một lần","reason":"'sắp' đứng một mình gượng","severity":"low"}
+]}

@@ -1,0 +1,53 @@
+{
+  "file": "postgresql-index-nhieu-cot-partial-expression.md",
+  "edits": [
+    {
+      "old": "Đọc thứ tự cột, skip scan của PostgreSQL 18, partial và expression index bằng kế hoạch thật",
+      "new": "Bài này đọc thứ tự cột, skip scan của PostgreSQL 18, partial và expression index bằng kế hoạch thật",
+      "reason": "Câu cụt thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chỉ vì `count(*)` không cần heap nên vẫn rẻ hơn quét 19.441 page bảng.",
+      "new": "Chỉ nhờ `count(*)` không cần đọc heap nên cách này vẫn rẻ hơn quét 19.441 page bảng.",
+      "reason": "'Chỉ vì' gây hiểu nhầm, đúng nghĩa là 'nhờ' (đã chỉnh khi duyệt: giữ ý giới hạn \"chỉ\" của bản gốc)",
+      "severity": "medium"
+    },
+    {
+      "old": "Skip scan là lưới đỡ khi thứ tự cột chưa khớp câu hỏi",
+      "new": "Skip scan là lưới an toàn khi thứ tự cột chưa khớp câu hỏi",
+      "reason": "'lưới đỡ' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "## 4. Partial index: chỉ đánh index phần hay hỏi",
+      "new": "## 4. Partial index: chỉ đánh index phần hay được truy vấn",
+      "reason": "'phần hay hỏi' gượng",
+      "severity": "low"
+    },
+    {
+      "old": "### Partial UNIQUE: index làm luật nghiệp vụ",
+      "new": "### Partial UNIQUE: dùng index để thực thi luật nghiệp vụ",
+      "reason": "'index làm luật' thiếu động từ, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "- **Expression:** đúng câu hỏi khó viết lại",
+      "new": "- **Expression:** đáp ứng đúng câu hỏi khó viết lại",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "bằng cách viết <code>::date</code>)",
+      "new": "giống kết quả của cách viết <code>::date</code>)",
+      "reason": "'bằng cách viết' dễ hiểu nhầm là 'by writing'",
+      "severity": "medium"
+    },
+    {
+      "old": "Sau khi nghiệp vụ quyết (lab huỷ chuyến nhận sau, 3 dòng)",
+      "new": "Sau khi bên nghiệp vụ quyết định xử lý (lab huỷ chuyến nhận sau, 3 dòng)",
+      "reason": "Câu thiếu chủ ngữ và tân ngữ",
+      "severity": "medium"
+    }
+  ]
+}

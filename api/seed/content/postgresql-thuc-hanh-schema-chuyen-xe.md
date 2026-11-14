@@ -46,10 +46,10 @@ Schema phục vụ ba dịch vụ của [Tới Nơi](/articles/du-an-mau-toi-noi
 
 | Mã | Sản phẩm | Yêu cầu tối thiểu |
 |---|---|---|
-| D1 | DDL | Sáu bảng; mọi ràng buộc được **đặt tên** theo quy ước `pk_/fk_/uq_/ck_`; chọn kiểu tiền, thời gian, định danh có lý do; chú thích `COMMENT ON` cho cột khó hiểu |
+| D1 | DDL | Sáu bảng; mọi ràng buộc được **đặt tên** theo quy ước `pk_/fk_/uq_/ck_`; chọn kiểu dữ liệu cho tiền, thời gian, định danh và nêu lý do; chú thích `COMMENT ON` cho cột khó hiểu |
 | D2 | Fixture hợp lệ | Chạy lại được từ trạng thái trống; giá trị cố định (UUID, thời gian có múi giờ); phủ đủ 8 trạng thái và 3 loại; có ca biên |
 | D3 | Fixture sai | Mỗi câu vi phạm **đúng một** quy tắc, ghi trước SQLSTATE và tên ràng buộc mong đợi; mỗi quy tắc R1–R13 ít nhất một ca; có ca sai kiểu dữ liệu |
-| D4 | Truy vấn bất biến | Mỗi truy vấn tìm dòng vi phạm, kết quả đúng là 0 dòng; phủ R14 và kiểm chính schema (ràng buộc chưa validate, tên sai quy ước) |
+| D4 | Truy vấn bất biến | Mỗi truy vấn tìm dòng vi phạm, kết quả đúng là 0 dòng; phủ R14 và kiểm tra chính schema (ràng buộc chưa validate, tên sai quy ước) |
 | D5 | Bằng chứng | Kết quả chạy từ database trống với tổng kết 0 lỗi ngoài kỳ vọng; ghi phiên bản PostgreSQL và những gì **chưa** kiểm |
 
 Tuỳ chọn cộng điểm: một migration tương thích ngược kèm rollback theo [PG-009](/articles/postgresql-schema-migration-tuong-thich).
@@ -148,7 +148,7 @@ CONSTRAINT ck_trips_completed_after_accepted CHECK (completed_at &gt;= accepted_
 <p>Một ca tiêu biểu — tên ràng buộc trong thông báo chính là quy tắc bị vi phạm:</p>
 <pre><code class="language-text">ERROR:  new row for relation "trips" violates check constraint "ck_trips_status"
 DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000012, 100020, ride, 1, c0000000-0000-4000-8000-000000000001, null, null, done, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).</code></pre>
-<p>Hai hiện tượng nên ghi vào hồ sơ bàn giao. (1) Mã trong <code>DETAIL</code> là 100020 dù chỉ có 15 chuyến: câu INSERT lỗi ở bước ràng buộc vẫn tiêu số của IDENTITY, nên chuyến hợp lệ tiếp theo ở <code>04</code> nhận mã <b>100029</b> — mã chuyến không bảo đảm liên tục. (2) Bẫy không báo lỗi: <code>'03/11/2026'::date</code> ra <code>2026-03-11</code> với <code>DateStyle</code> <code>ISO, MDY</code>. Cuối tệp, số dòng vẫn là 3/6/6/15: không câu sai nào lọt.</p>
+<p>Hai hiện tượng nên ghi vào hồ sơ bàn giao. (1) Mã trong <code>DETAIL</code> là 100020 dù chỉ có 15 chuyến: câu INSERT lỗi ở bước ràng buộc vẫn tiêu thụ một số của IDENTITY, nên chuyến hợp lệ tiếp theo ở <code>04</code> nhận mã <b>100029</b> — mã chuyến không bảo đảm liên tục. (2) Bẫy không báo lỗi: <code>'03/11/2026'::date</code> ra <code>2026-03-11</code> với <code>DateStyle</code> <code>ISO, MDY</code>. Cuối tệp, số dòng vẫn là 3/6/6/15: không câu sai nào lọt.</p>
 </details>
 
 ### 3.4 D4 — Truy vấn bất biến (`07-checks.sql`)
@@ -185,7 +185,7 @@ DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000012, 100020, rid
 -- [lab] Kiểm số dòng (expect-rows): 56
 -- [lab] FAIL: 0
 -- [lab] KẾT QUẢ: ĐẠT</code></pre>
-<p>38 lỗi mong đợi = 33 ở <code>03</code> + 2 ở <code>04</code> (vòng đời) + 3 ở <code>06</code> (migration). Runner coi câu lẽ ra phải lỗi mà lại chạy được là <code>FAIL</code> — đó chính là cách phát hiện schema thiếu quy tắc. <code>npm test</code> báo <code>pass 6</code>, <code>fail 0</code>: gồm so <code>OUTPUT.txt</code> từng byte, đủ 9 SQLSTATE ở <code>03</code>, mọi truy vấn <code>07</code> trả 0 dòng, số dòng cuối 3/6/7/3/16/7, và chuỗi rollback → rollback → <code>06</code> → <code>07</code> của migration.</p>
+<p>38 lỗi mong đợi = 33 ở <code>03</code> + 2 ở <code>04</code> (vòng đời) + 3 ở <code>06</code> (migration). Runner coi câu lẽ ra phải lỗi mà lại chạy được là <code>FAIL</code> — đó chính là cách phát hiện schema thiếu quy tắc. <code>npm test</code> báo <code>pass 6</code>, <code>fail 0</code>: gồm so sánh <code>OUTPUT.txt</code> từng byte, đủ 9 SQLSTATE ở <code>03</code>, mọi truy vấn <code>07</code> trả 0 dòng, số dòng cuối 3/6/7/3/16/7, và chuỗi rollback → rollback → <code>06</code> → <code>07</code> của migration.</p>
 <p>Phần "chưa kiểm" phải ghi thẳng: mới chạy trên PGlite 0.3.16 (PostgreSQL 17.5), <b>chưa</b> chạy trên server PostgreSQL thật; một kết nối nên không có bằng chứng nào về khoá hay đồng thời; quy tắc R13 "chỉ thêm" và R14 chỉ được canh bằng truy vấn, không bị chặn lúc ghi.</p>
 </details>
 
@@ -219,7 +219,7 @@ Mỗi tiêu chí 10 điểm. Từ 80 điểm là đạt để sang Phần 2; ti�
 
 | Bài | Bạn đã có gì cho sản phẩm cuối phần |
 |---|---|
-| [PG-001 · PostgreSQL là gì và nằm ở đâu trong Tới Nơi?](/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi) | Phân biệt DBMS, database, schema, bảng; vì sao dữ liệu chuyến cần một nguồn sự thật |
+| [PG-001 · PostgreSQL là gì và nằm ở đâu trong Tới Nơi?](/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi) | Phân biệt DBMS, database, schema, bảng; vì sao dữ liệu chuyến cần một nguồn dữ liệu gốc |
 | [PG-002 · Dựng môi trường lab](/articles/postgresql-cai-dat-lab-psql-ket-noi) | Lab chạy được, ghi phiên bản và cách dọn — nền của D5 |
 | [PG-003 · Bảng, dòng, cột và khoá](/articles/postgresql-bang-dong-cot-primary-foreign-key) | Quan hệ khách–chuyến–tài xế, PK/FK, `uuid` và `code` |
 | [PG-004 · Kiểu dữ liệu cho tiền, thời gian, định danh](/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid) | Data dictionary có đơn vị, NULL, múi giờ — tiêu chí 3 |
@@ -229,7 +229,7 @@ Mỗi tiêu chí 10 điểm. Từ 80 điểm là đạt để sang Phần 2; ti�
 | [PG-008 · Chuẩn hoá và ranh giới mô hình](/articles/postgresql-mo-hinh-quan-he-chuan-hoa) | Hiểu vì sao R14 tồn tại và đánh đổi khi tách bảng |
 | [PG-009 · Thay đổi schema tương thích](/articles/postgresql-schema-migration-tuong-thich) | Migration expand–contract và rollback — phần cộng điểm |
 
-Sản phẩm của phần đúng như khung đã đặt: schema tối thiểu cho khách, tài xế và chuyến, fixture nhỏ, và kiểm tra dữ liệu sai. Những gì **chưa** có cũng rõ: chưa có truy vấn tổng hợp và đối soát (Phần 2), chưa đo index hay kế hoạch thực thi (Phần 3), chưa có hai phiên tranh nhau một chuyến (Phần 4).
+Sản phẩm của phần này đúng như khung đã đặt: schema tối thiểu cho khách, tài xế và chuyến, fixture nhỏ, và kiểm tra dữ liệu sai. Những gì **chưa** có cũng được nêu rõ: chưa có truy vấn tổng hợp và đối soát (Phần 2), chưa đo index hay kế hoạch thực thi (Phần 3), chưa có hai phiên tranh nhau một chuyến (Phần 4).
 
 ## 7. Bài tập mở rộng
 

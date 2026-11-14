@@ -1,14 +1,14 @@
 ---
 slug: postgresql-thuc-hanh-sql-doi-soat
 title: "Thực hành: truy vấn vận hành và đối soát thanh toán"
-summary: "Kế toán Tới Nơi chốt tháng 10: hệ chuyến báo phải thu 182.287.000 đ, tiền về thực tế 182.555.000 đ. Bài thực hành cuối Phần 2: bàn giao sổ đối soát, expected output đúng 7 chuyến lệch và lời giải thích cho từng đồng chênh +268.000 đ."
+summary: "Kế toán Tới Nơi chốt tháng 10: hệ chuyến báo phải thu 182.287.000 đ, tiền về thực tế 182.555.000 đ. Bài thực hành cuối Phần 2: bàn giao sổ đối soát, expected output đúng 7 chuyến lệch và lời giải thích cho từng khoản chênh lệch +268.000 đ."
 category: postgresql
 level: advanced
 tags: [postgresql, pg-020, thuc-hanh, doi-soat, payments, reconciliation, toi-noi]
 language: vi
 ---
 
-Ngày 31/10, kế toán Tới Nơi chốt sổ tháng 10. Hệ thống chuyến nói phải thu **182.287.000 đ**; cộng giao dịch ví, thẻ và tiền mặt thì ra **182.555.000 đ**. Chênh **+268.000 đ** — nhỏ so với doanh thu, nhưng không ai ký biên bản khi chưa biết số đó gồm những chuyến nào và vì sao. Một câu `SUM` không trả lời được. Thứ cần bàn giao là một **bộ truy vấn đối soát**: định nghĩa rõ, chạy lại được, có expected output, và giải thích được từng dòng chênh lệch — kể cả những dòng **không** được báo.
+Ngày 31/10, kế toán Tới Nơi chốt sổ tháng 10. Hệ thống chuyến nói phải thu **182.287.000 đ**; cộng giao dịch ví, thẻ và tiền mặt thì ra **182.555.000 đ**. Mức chênh là **+268.000 đ** — nhỏ so với doanh thu, nhưng không ai ký biên bản khi chưa biết số đó gồm những chuyến nào và vì sao. Một câu `SUM` không trả lời được. Thứ cần bàn giao là một **bộ truy vấn đối soát**: định nghĩa rõ, chạy lại được, có expected output, và giải thích được từng dòng chênh lệch — kể cả những dòng **không** được báo.
 
 Đây là bài thực hành cuối Phần 2. Bạn nhận đề, tự làm, rồi mới mở lời giải mẫu dựa trên lab và tự chấm theo mục 4.
 
@@ -37,7 +37,7 @@ Tổng `payments` có 2.826 dòng: 485 chuyến không có giao dịch nào, 2.5
 ### Câu hỏi của kế toán
 
 1. Tháng 10 phải thu bao nhiêu, thực thu bao nhiêu, chênh bao nhiêu?
-2. Chênh nằm ở những chuyến nào, mỗi chuyến thuộc loại sai gì?
+2. Chênh lệch nằm ở những chuyến nào, mỗi chuyến thuộc loại sai lệch nào?
 3. Những chuyến **trông** bất thường (thẻ lỗi rồi thu lại, trả một phần, điều chỉnh của CSKH, giao dịch treo) có bị báo nhầm không?
 4. Vì sao bảng kê ngân hàng theo ngày không khớp số theo ngày đặt chuyến?
 
@@ -46,22 +46,22 @@ Tổng `payments` có 2.826 dòng: 485 chuyến không có giao dịch nào, 2.5
 | Mã | Sản phẩm | Yêu cầu tối thiểu |
 |---|---|---|
 | D1 | Đặc tả đối soát | Phạm vi, "phải thu", "thực thu", "khớp", phân loại lệch có thứ tự ưu tiên — viết thành lời trước khi viết SQL |
-| D2 | Sổ đối soát theo chuyến | **Một** định nghĩa dùng chung, đúng một dòng mỗi chuyến trong phạm vi, có bằng chứng không nở/mất dòng |
+| D2 | Sổ đối soát theo chuyến | **Một** định nghĩa dùng chung, đúng một dòng mỗi chuyến trong phạm vi, có bằng chứng số dòng không bị nhân lên hay mất đi |
 | D3 | Đối soát tổng và số dòng | Ba tổng của câu 1; mọi chuyến rơi vào đúng một nhóm, các nhóm cộng lại bằng phạm vi |
 | D4 | Danh sách chênh lệch | Expected output từng dòng, tổng theo loại cộng lại bằng chênh của D3 |
 | D5 | Giải thích | Giả thuyết cho từng dòng lệch; ca khó nhưng đúng; chênh do thời điểm; việc cần theo dõi |
-| D6 | Bằng chứng | Chạy từ database trống, kỳ vọng ghi bằng máy kiểm được, phiên bản và những gì **chưa** kiểm |
+| D6 | Bằng chứng | Chạy từ database trống, kỳ vọng để máy kiểm tra được, phiên bản và những gì **chưa** kiểm |
 
 Chỉ dùng kiến thức P01–P02. Không thêm bảng, không sửa dữ liệu (trừ trong giao dịch có `ROLLBACK`).
 
 ## 2. Gợi ý trước khi làm
 
-- **Chốt hạt của sổ trước** (grain — một dòng đại diện cho cái gì): một dòng một chuyến. Giao dịch là một–nhiều, nên **gom giao dịch theo chuyến trước rồi mới JOIN** — JOIN rồi `sum(fare)` là nhân tiền như [PG-013](/articles/postgresql-join-quan-he-cardinality) (2.707 chuyến thành 2.800 dòng, doanh thu thành 191.644.000).
+- **Chốt grain của sổ trước** (mỗi dòng đại diện cho cái gì): một dòng một chuyến. Giao dịch là một–nhiều, nên **gom giao dịch theo chuyến trước rồi mới JOIN** — JOIN rồi `sum(fare)` làm tiền bị nhân lên như ở [PG-013](/articles/postgresql-join-quan-he-cardinality) (2.707 chuyến thành 2.800 dòng, doanh thu thành 191.644.000).
 - Chuyến không có giao dịch vẫn phải có dòng: `LEFT JOIN` + `coalesce` ([PG-011](/articles/postgresql-null-case-coalesce)). Tính nhiều tổng có điều kiện trong một lần quét bằng `FILTER` ([PG-012](/articles/postgresql-aggregate-group-by-having)).
-- Phạm vi theo ngày đặt giờ VN, nửa hở, mốc ghi `+07` ([PG-016](/articles/postgresql-date-time-timezone)). Lọc `::date` theo phiên là đếm sai ở phiên UTC.
+- Phạm vi theo ngày đặt giờ VN, nửa hở, mốc ghi `+07` ([PG-016](/articles/postgresql-date-time-timezone)). Lọc `::date` theo múi giờ của phiên sẽ đếm sai khi phiên chạy ở UTC.
 - Tách bước bằng CTE, mỗi bước có câu kiểm kê ([PG-014](/articles/postgresql-subquery-exists-cte)); câu "có/không có giao dịch" dùng `EXISTS`/`NOT EXISTS`, đừng `NOT IN` trên cột có thể NULL.
 - Đặt định nghĩa vào **một** chỗ (VIEW tạm sống trong phiên), các truy vấn sau chỉ đọc từ đó.
-- Kỳ vọng ghi thành chỉ thị `-- expect-line:` / `-- expect-value:` của runner, để máy so chứ không phải mắt.
+- Kỳ vọng ghi thành chỉ thị `-- expect-line:` / `-- expect-value:` của runner, để máy tự so sánh thay cho việc đọc bằng mắt.
 
 ```bash
 cd examples/toi-noi-postgresql
@@ -83,10 +83,10 @@ Lời giải là `20-doi-soat-thanh-toan.sql`. Mở từng phần **sau khi** đ
 <tr><td>Phải thu</td><td><code>completed</code> ⇒ <code>fare</code>; <code>cancelled</code> ⇒ 0 đ</td></tr>
 <tr><td>Thực thu</td><td>Σ charge − Σ refund + Σ adjustment, <b>chỉ</b> <code>succeeded</code>; không lọc theo ngày giao dịch — tiền của chuyến tính cho chuyến, dù thu sau nửa đêm</td></tr>
 <tr><td>Khớp</td><td>Thực thu = phải thu</td></tr>
-<tr><td>Loại lệch (lấy loại <b>đầu tiên</b> đúng)</td><td>1 HOÀN KHÔNG CÓ THU — có refund thành công, không có charge thành công · 2 THU CHUYẾN HUỶ — huỷ mà thực thu &gt; 0 · 3 THIẾU THANH TOÁN — hoàn thành, cước &gt; 0, không có charge thành công · 4 THU TRÙNG — ≥ 2 charge thành công cùng số tiền · 5 LỆCH SỐ TIỀN — còn lại</td></tr>
+<tr><td>Loại lệch (lấy loại <b>đầu tiên</b> khớp điều kiện)</td><td>1 HOÀN KHÔNG CÓ THU — có refund thành công, không có charge thành công · 2 THU CHUYẾN HUỶ — huỷ mà thực thu &gt; 0 · 3 THIẾU THANH TOÁN — hoàn thành, cước &gt; 0, không có charge thành công · 4 THU TRÙNG — ≥ 2 charge thành công cùng số tiền · 5 LỆCH SỐ TIỀN — còn lại</td></tr>
 </tbody>
 </table>
-<p>Hai quyết định phải viết ra vì chúng đổi con số: <code>pending</code>/<code>failed</code> không làm đổi tiền, và hai charge thành công <b>khác</b> số tiền là trả một phần (ví + thẻ), không phải thu trùng. Thứ tự ưu tiên tồn tại vì một chuyến có thể đúng nhiều mô tả cùng lúc — chuyến huỷ chỉ có refund vừa "hoàn không có thu" vừa "lệch số tiền"; người nhận báo cáo cần đúng một nhãn.</p>
+<p>Hai quyết định phải viết ra vì chúng đổi con số: <code>pending</code>/<code>failed</code> không làm đổi tiền, và hai charge thành công <b>khác</b> số tiền là trả một phần (ví + thẻ), không phải thu trùng. Thứ tự ưu tiên tồn tại vì một chuyến có thể khớp nhiều mô tả cùng lúc — chuyến huỷ chỉ có refund vừa "hoàn không có thu" vừa "lệch số tiền"; người nhận báo cáo cần đúng một nhãn.</p>
 </details>
 
 ### 3.2 D2 — Sổ đối soát
@@ -103,8 +103,8 @@ Lời giải là `20-doi-soat-thanh-toan.sql`. Mở từng phần **sau khi** đ
        string_agg(kind || '/' || method || '/' || status || '/' || amount, ', ' ORDER BY paid_at, id) AS chi_tiet
 FROM payments AS p
 GROUP BY p.trip_id</code></pre>
-<p>View còn tính <code>thuc_thu</code>, <code>chenh = thuc_thu − phai_thu</code> và <code>loai_lech</code> bằng một <code>CASE</code> theo đúng thứ tự D1 (<code>NULL</code> khi khớp). <code>so_thu_lap_tien</code> = số charge thành công trừ số mức tiền khác nhau: &gt; 0 nghĩa là có hai charge cùng số tiền. Cột <code>chi_tiet</code> không dùng để tính; nó là bằng chứng đọc được cho người nhận báo cáo.</p>
-<p>Hai bất biến chứng minh sổ đúng hạt:</p>
+<p>View còn tính <code>thuc_thu</code>, <code>chenh = thuc_thu − phai_thu</code> và <code>loai_lech</code> bằng một <code>CASE</code> theo đúng thứ tự D1 (<code>NULL</code> khi khớp). <code>so_thu_lap_tien</code> = số charge thành công trừ số mức tiền khác nhau: &gt; 0 nghĩa là có hai charge cùng số tiền. Cột <code>chi_tiet</code> không dùng để tính; đó là bằng chứng đọc được cho người nhận báo cáo.</p>
+<p>Hai bất biến chứng minh sổ đúng grain:</p>
 <pre><code class="language-text"> dong_so | chuyen_khac_nhau | dem_doc_lap
 ---------+------------------+-------------
     3168 |             3168 |        3168</code></pre>
@@ -162,14 +162,14 @@ GROUP BY p.trip_id</code></pre>
 <li>102739: chuyến huỷ nhưng ví bị trừ 96.000 — hoàn cho khách.</li>
 </ul>
 <p><b>Ca khó nhưng đúng</b> — không được báo, và là lý do quy tắc phải tính đủ refund, adjustment, chỉ lấy <code>succeeded</code>: 100042 thẻ lỗi rồi thu lại thành công 82.000; 100048 trả một phần ví 104.000 + thẻ 15.000 = 119.000; 102235 ví trừ 82.000, CSKH sửa cước còn 72.000 và ghi adjustment −10.000; 103162 có thêm một charge <code>pending</code> 57.000 bên cạnh lần thu thành công; 103165 tiền mặt 23.000 + adjustment +5.000 = 28.000; 12 chuyến huỷ đã trừ thẻ rồi hoàn đủ (như 100366, 103.000 thu và hoàn); 31 chuyến cước 0 đ không có giao dịch.</p>
-<p><b>Quy tắc ngây thơ</b> — cộng mọi charge bất kể trạng thái, bỏ qua refund và adjustment — báo lệch <b>115</b> chuyến, so với 7 của quy tắc đúng. Đối soát báo nhầm trăm dòng còn tệ hơn không đối soát: người đọc sẽ bỏ qua cả 7 dòng thật.</p>
+<p><b>Quy tắc quá đơn giản</b> — cộng mọi charge bất kể trạng thái, bỏ qua refund và adjustment — báo lệch <b>115</b> chuyến, so với 7 của quy tắc đúng. Đối soát báo nhầm trăm dòng còn tệ hơn không đối soát: người đọc sẽ bỏ qua cả 7 dòng thật.</p>
 <p><b>Chênh lệch thời điểm, không phải lỗi.</b> Bảng kê cổng thanh toán gom theo ngày giao dịch; sổ gom theo ngày đặt chuyến. Chuyến đặt cuối ngày được thu sang ngày sau:</p>
 <pre><code class="language-text">    ngay    | theo_ngay_dat_chuyen | theo_ngay_giao_dich
 ------------+----------------------+---------------------
  2026-10-15 |              5862000 |             5823000
  2026-10-16 |              5244000 |             5228000</code></pre>
 <p>Cả tháng: theo ngày giao dịch trong tháng 10 ra 182.550.000, ít hơn sổ đúng 5.000 — adjustment +5.000 của 103165 (đặt 30/10) được CSKH ghi lúc 00:05 ngày 31/10. Hai cách đều đúng; biên bản phải ghi rõ dùng cách nào.</p>
-<p><b>Việc cần theo dõi.</b> Charge <code>TH-103162-P</code> 57.000 còn <code>pending</code> lúc chụp dữ liệu dù chuyến đã hoàn thành hơn 1 giờ. Không đổi tiền hôm nay, nhưng nếu cổng chuyển nó sang <code>succeeded</code>, 103162 sẽ thành THU TRÙNG.</p>
+<p><b>Việc cần theo dõi.</b> Charge <code>TH-103162-P</code> 57.000 còn <code>pending</code> lúc chụp dữ liệu dù chuyến đã hoàn thành hơn 1 giờ. Không đổi tiền hôm nay, nhưng nếu cổng chuyển giao dịch này sang <code>succeeded</code>, 103162 sẽ trở thành THU TRÙNG.</p>
 </details>
 
 ### 3.6 D6 — Bằng chứng
@@ -184,7 +184,7 @@ GROUP BY p.trip_id</code></pre>
 -- [lab] Kiểm md5 kết quả (expect-md5): 3
 -- [lab] FAIL: 0
 -- [lab] KẾT QUẢ: ĐẠT</code></pre>
-<p>Mọi bảng kết quả của <code>20</code> đều có kỳ vọng; đổi một giao dịch là runner báo <code>FAIL</code> và in dòng khác. <code>npm test</code> báo <code>pass 32</code>, <code>fail 0</code>, gồm so <code>p02/OUTPUT.txt</code> từng byte. Fixture sinh tất định bằng hàm băm số học, không <code>random()</code>, nên lần chạy nào cũng cùng 7 dòng. Phần "chưa kiểm" ghi thẳng: mới chạy trên PGlite 0.3.16 (PostgreSQL 17.5), <b>chưa</b> chạy trên server thật; một kết nối nên chưa có gì về hai phiên cùng ghi giao dịch; chưa đo tốc độ — truy vấn chạy nhanh trên 2.826 giao dịch không nói gì về bảng lớn gấp nghìn lần.</p>
+<p>Mọi bảng kết quả của <code>20</code> đều có kỳ vọng; đổi một giao dịch là runner báo <code>FAIL</code> và in dòng khác. <code>npm test</code> báo <code>pass 32</code>, <code>fail 0</code>, gồm so <code>p02/OUTPUT.txt</code> từng byte. Fixture sinh tất định bằng hàm băm số học, không <code>random()</code>, nên lần chạy nào cũng cùng 7 dòng. Phần "chưa kiểm" ghi thẳng: mới chạy trên PGlite 0.3.16 (PostgreSQL 17.5), <b>chưa</b> chạy trên server thật; dùng một kết nối nên chưa kiểm được gì về hai phiên cùng ghi giao dịch; chưa đo tốc độ — truy vấn chạy nhanh trên 2.826 giao dịch không nói gì về bảng lớn gấp nghìn lần.</p>
 </details>
 
 ## 4. Tiêu chí tự chấm
@@ -194,7 +194,7 @@ Mỗi tiêu chí 10 điểm. Từ 80 điểm là đạt để sang Phần 3; ti�
 | # | Tiêu chí | Đạt khi |
 |---|---|---|
 | 1 | Đặc tả viết trước | Phạm vi, phải thu, thực thu, khớp, thứ tự phân loại có bằng lời, khớp với SQL |
-| 2 | Đúng hạt | Một dòng một chuyến; bất biến số dòng 3.168 = 3.168 = 3.168 |
+| 2 | Đúng grain | Một dòng một chuyến; bất biến số dòng 3.168 = 3.168 = 3.168 |
 | 3 | Một định nghĩa | Công thức thực thu và phân loại nằm ở một chỗ, không chép lại ở từng truy vấn |
 | 4 | Ba tổng đúng | 3.168 / 182.287.000 / 182.555.000 / +268.000 |
 | 5 | Đối soát số dòng | Các nhóm rời nhau, cộng lại bằng phạm vi; có cầu nối từ tổng charge tới thực thu |
@@ -208,8 +208,8 @@ Mỗi tiêu chí 10 điểm. Từ 80 điểm là đạt để sang Phần 3; ti�
 
 - **JOIN `trips` với `payments` rồi `sum(fare)`.** Chuyến có hai giao dịch bị cộng cước hai lần; `sum(DISTINCT fare)` thì gộp nhầm các chuyến cùng giá (PG-013).
 - **`INNER JOIN` với giao dịch đã gom.** 485 chuyến không có giao dịch biến mất, trong đó có 100724 — một trong 7 đáp án.
-- **Lọc `status = 'succeeded'` ở `WHERE` trước khi gom.** Tổng tiền vẫn đúng, nhưng chuyến chỉ có giao dịch `failed` (101084) mất khỏi cột bằng chứng.
-- **Phân loại không có thứ tự.** Chuyến huỷ chỉ có refund đúng cả loại 1 và loại 5; không có thứ tự là đếm hai lần hoặc tuỳ hứng.
+- **Lọc `status = 'succeeded'` ở `WHERE` trước khi gom.** Tổng tiền vẫn đúng, nhưng chuyến chỉ có giao dịch `failed` (101084) biến mất khỏi cột bằng chứng.
+- **Phân loại không có thứ tự.** Chuyến huỷ chỉ có refund đúng cả loại 1 và loại 5; nếu không có thứ tự thì sẽ đếm hai lần hoặc phân loại tuỳ hứng.
 - **Coi hai charge thành công là thu trùng.** 100048 trả một phần bằng hai phương thức; chỉ cùng số tiền mới là dấu hiệu lặp yêu cầu — và ngay cả thế vẫn chỉ là tín hiệu (bài tập 3).
 - **Lọc theo ngày giao dịch cho sổ theo chuyến.** Mất 5.000 của 103165 và gán nhầm tiền chuyến cuối ngày sang hôm sau.
 - **Expected output chỉ để trong đầu.** Không có `expect-line`, lần sửa sau không ai biết đáp án đã đổi.
@@ -253,10 +253,10 @@ ORDER BY grouping(c.code), c.code COLLATE "C";</code></pre>
 <p>Dòng TỔNG trùng mục 3.3 từng số. SG gánh +451.000 nhưng đó là tổng của bốn dòng ngược dấu (−72.000, +85.000, +96.000, +342.000): con số ròng nhỏ có thể che các dòng lớn, nên báo cáo theo thành phố phải đi kèm danh sách.</p>
 </details>
 
-**Bài 2.** CSKH muốn giảm 10.000 đ cho chuyến 100048 (cước 119.000). Ba cách ghi: (a) chỉ thêm một refund 10.000 vào ví; (b) chỉ thêm adjustment −10.000; (c) sửa cước còn 109.000 **và** thêm adjustment −10.000. Đối soát báo gì mỗi cách? Thử trong `BEGIN … ROLLBACK`.
+**Bài 2.** CSKH muốn giảm 10.000 đ cho chuyến 100048 (cước 119.000). Ba cách ghi: (a) chỉ thêm một refund 10.000 vào ví; (b) chỉ thêm adjustment −10.000; (c) sửa cước còn 109.000 **và** thêm adjustment −10.000. Mỗi cách làm khiến đối soát báo kết quả gì? Thử trong `BEGIN … ROLLBACK`.
 
 <details><summary><b>Lời giải</b></summary>
-<p>(a) và (b) đều cho <code>100048 | 119000 | 109000 | -10000 | 5 LỆCH SỐ TIỀN</code>; với (a), sổ có 8 dòng lệch, tổng chênh 258.000. Refund không thành loại 1 vì chuyến có charge thành công. (c) khớp: <code>109000 | 109000 | 0 | NULL</code>, sổ trở lại 7 dòng, +268.000 — đúng cách của ca 102235. Bài học: giảm giá phải đổi <b>cả</b> phải thu lẫn tiền; đối soát chính là phép kiểm hai nơi đó nhất quán. Loại giao dịch (refund hay adjustment) là quy ước kế toán cần chốt trong đặc tả, đối soát không tự quyết thay.</p>
+<p>(a) và (b) đều cho <code>100048 | 119000 | 109000 | -10000 | 5 LỆCH SỐ TIỀN</code>; với (a), sổ có 8 dòng lệch, tổng chênh 258.000. Refund không thành loại 1 vì chuyến có charge thành công. (c) khớp: <code>109000 | 109000 | 0 | NULL</code>, sổ trở lại 7 dòng, +268.000 — đúng cách của ca 102235. Bài học: giảm giá phải đổi <b>cả</b> phải thu lẫn tiền; đối soát chính là phép kiểm tra xem hai nơi đó có nhất quán hay không. Loại giao dịch (refund hay adjustment) là quy ước kế toán cần chốt trong đặc tả, đối soát không tự quyết thay.</p>
 </details>
 
 **Bài 3.** Tín hiệu THU TRÙNG của lab chỉ nhìn "cùng số tiền". Siết thành "cùng số tiền, cùng phương thức, cách nhau ≤ 60 giây". Trên fixture, đáp án có đổi không? Dựng một ca làm hai tín hiệu khác nhau.

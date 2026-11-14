@@ -1,0 +1,14 @@
+{"file":"postgresql-kieu-du-lieu-tien-thoi-gian-uuid.md","edits":[
+{"old":"Chọn kiểu cho tiền, thời điểm, định danh và lập data dictionary.","new":"Bài này chọn kiểu cho tiền, thời điểm, định danh rồi lập data dictionary.","reason":"Câu cụt thiếu chủ ngữ trong summary","severity":"medium"},
+{"old":"đủ để đối soát với cổng thanh toán không bao giờ khớp tuyệt đối","new":"đủ để khiến việc đối soát với cổng thanh toán không bao giờ khớp tuyệt đối","reason":"Câu thiếu động từ, khó hiểu","severity":"medium"},
+{"old":"Chọn kiểu dữ liệu là quyết định database chặn sai sót nào","new":"Chọn kiểu dữ liệu là quyết định xem database chặn sai sót nào","reason":"Câu thiếu từ nối, đọc vấp","severity":"medium"},
+{"old":"Trước khi gõ tên kiểu cho một cột, trả lời ba câu:","new":"Trước khi gõ tên kiểu cho một cột, hãy trả lời ba câu:","reason":"Câu mệnh lệnh cụt","severity":"low"},
+{"old":"Tài liệu cho biết phần lẻ của nó do thiết lập","new":"Tài liệu cho biết phần lẻ của kiểu này do thiết lập","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"«00:10» không còn biết là giờ ở đâu.","new":"không ai biết «00:10» là giờ ở đâu nữa.","reason":"Chủ ngữ sai: giá trị không 'biết'","severity":"high"},
+{"old":"sẽ lệch 7 tiếng mà không cách nào tách lại","new":"sẽ lệch 7 tiếng và không có cách nào tách lại","reason":"Câu thiếu động từ","severity":"low"},
+{"old":"theo giờ VN) là bài","new":"theo giờ VN) được trình bày ở bài","reason":"'là bài' gượng, thiếu động từ","severity":"medium"},
+{"old":"Cái giá: gấp đôi `bigint`, khó đọc,","new":"Cái giá phải trả: dung lượng gấp đôi `bigint`, khó đọc,","reason":"Câu cụt, lược danh từ chính","severity":"medium"},
+{"old":"mặc nhiên `NOT NULL`","new":"mặc định `NOT NULL`","reason":"'mặc nhiên' gượng","severity":"low"},
+{"old":"NULL không phải 0 hay chuỗi rỗng; nó nói giá trị **không có**.","new":"NULL không phải 0 hay chuỗi rỗng; NULL cho biết giá trị **không có**.","reason":"'nó nói' kiểu dịch máy","severity":"medium"},
+{"old":"logic ba giá trị của NULL trong truy vấn thuộc Phần 2.","new":"logic ba giá trị của NULL trong truy vấn được trình bày ở Phần 2.","reason":"'thuộc Phần 2' gượng","severity":"low"}
+]}

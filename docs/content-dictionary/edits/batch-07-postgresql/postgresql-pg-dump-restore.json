@@ -1,0 +1,16 @@
+{"file":"postgresql-pg-dump-restore.md","edits":[
+{"old":"những gì một dump schema không chứa (role, extension)","new":"những gì một bản dump theo schema không chứa (role, extension)","reason":"'dump schema' mơ hồ (dễ hiểu là schema-only), viết rõ cho tự nhiên","severity":"low"},
+{"old":"Có một file backup không đồng nghĩa có thể khôi phục.","new":"Có file backup không đồng nghĩa với việc khôi phục được.","reason":"Trật tự kiểu Anh, câu thiếu từ nối","severity":"medium"},
+{"old":"rẻ hơn kiểm từng dòng lúc chèn","new":"rẻ hơn so với kiểm tra từng dòng lúc chèn","reason":"'kiểm' đứng một mình gượng, thiếu từ so sánh","severity":"medium"},
+{"old":"biến «bảng có dữ liệu» thành «bảng dùng được đúng người»","new":"biến «bảng có dữ liệu» thành «bảng mà đúng người dùng được»","reason":"'dùng được đúng người' tự ghép, khó hiểu","severity":"medium"},
+{"old":"cũng lặng lẽ đi vào mọi bản dump theo cách này","new":"cũng đi vào mọi bản dump theo cách này mà không ai hay biết","reason":"'lặng lẽ' là calque của 'silently'","severity":"medium"},
+{"old":"Runner kiểm điều đó:","new":"Runner kiểm tra điều đó:","reason":"'kiểm' đứng một mình gượng","severity":"medium"},
+{"old":"quan trọng hơn vẻ ngoài của nó.","new":"quan trọng hơn người ta tưởng.","reason":"Calque của 'more important than it looks'","severity":"medium"},
+{"old":"Kiểm quyền dương («report đọc được») mà không kiểm quyền âm («report không sửa được») thì","new":"Kiểm tra quyền được phép («report đọc được») mà không kiểm tra quyền bị cấm («report không sửa được») thì","reason":"'quyền dương/âm' tự ghép, 'kiểm' đứng một mình","severity":"medium"},
+{"old":"thành một lỗi im lặng","new":"thành một lỗi ngầm","reason":"'im lặng' là calque của 'silent'","severity":"medium"},
+{"old":"nếu không lab đã chứng minh rằng digest không bắt được loại sai này.","new":"vì lab đã chứng minh rằng digest không bắt được loại sai này.","reason":"Câu 'nếu không' lược vế, mất mạch (suy từ ngữ cảnh)","severity":"medium"},
+{"old":"Những điểm phải kiểm thêm khi làm thật:","new":"Những điểm phải kiểm tra thêm khi làm thật:","reason":"'kiểm' đứng một mình gượng","severity":"medium"},
+{"old":"những dòng đã bị xoá mà có trước 02:00","new":"những dòng đã bị xoá nhưng có từ trước 02:00","reason":"Câu tối nghĩa, trật tự kiểu Anh","severity":"low"},
+{"old":"kiểm owner/ACL.","new":"kiểm tra owner/ACL.","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"kiểm cả owner, ACL dương và một lệnh ghi bị cấm","new":"kiểm tra cả owner, quyền được phép và một lệnh ghi bị cấm","reason":"'ACL dương' tự ghép; thống nhất với mục 7","severity":"low"}
+]}

@@ -120,3 +120,27 @@ Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứn
   - `flutter-fastlane-match-gym-pilot-supply-tu-dong-hoa-build.md:426`;
   - `flutter-hieu-nang-rebuild-isolate-devtools.md` ("nên im lặng đúng lúc");
   - `flutter-realtime-websocket-reconnect-backoff-theo-doi-tai-xe.md` ("chỉ dành cho vai trò driver").
+
+## Đợt 7 — nhóm postgresql (11/2026)
+
+Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứng.
+
+- [ ] `heap-ctid-va-primary-key.md:3`, `:13`, `:14`, `:194`, `:298`: bài gọi heap là "clustered index thật", và bài `postgresql-btree-index-co-ban.md:266` cũng nhắc lại. Đây là lỗi khái niệm, vì PostgreSQL không có clustered index theo nghĩa của SQL Server hay InnoDB. Cần tác giả sửa nội dung, không chỉ sửa câu chữ.
+- [ ] `heap-ctid-va-primary-key.md:329`: bài nói `pg_stat_xact_user_tables` ra `4 | 2` thay vì `1 | 1` mà không giải thích lý do.
+- [ ] `postgresql-pg-dump-restore.md:79` và `:102`: hai chỗ giải thích dung lượng bản dump mâu thuẫn nhau. Một chỗ nói do mục lục, chỗ kia nói do bảng `churn`.
+- [ ] `postgresql-window-function-frame.md:106` và `:130`: hai truy vấn khác nhau cùng được gọi là "Câu 2 của tệp lab".
+- [ ] `postgresql-create-table-constraints.md`, mục 3: bài nói PostgreSQL 17 không lưu NOT NULL vào `pg_constraint`, nhưng chỗ khác lại trích tài liệu PostgreSQL 18. Cần thống nhất phiên bản được nói tới.
+- [ ] `postgresql-for-update-skip-locked.md`, mục 7.3: cụm "(không đổi khoá)" mơ hồ. Có lẽ ý là "không đổi cột khoá chính hoặc khoá duy nhất".
+- [ ] Các câu mơ hồ agent không dám sửa:
+  - `postgresql-wal-checkpoint-durability.md:108` ("Hai tham số kéo hai hướng") và `:228-240` (tiêu đề "Lời giải phải chứng minh");
+  - `postgresql-isolation-read-committed-repeatable-read.md:191`;
+  - `postgresql-la-gi-va-vai-tro-trong-toi-noi.md:243`;
+  - `postgresql-lock-row-table.md:78`;
+  - `postgresql-btree-index-co-ban.md:22` ("chép từ nền");
+  - `postgresql-statistics-analyze-cardinality.md:121`;
+  - `postgresql-select-filter-order-limit.md:288`;
+  - `postgresql-recursive-cte-cay-khu-vuc.md:82-91`;
+  - `postgresql-mvcc-snapshot.md:121`;
+  - `postgresql-date-time-timezone.md`, mục 3;
+  - `postgresql-thuc-hanh-sql-doi-soat.md:228` ("Hồ sơ Tới Nơi").
+- [ ] Câu agent viết lại theo nghĩa suy đoán, người duyệt đã đối chiếu ngữ cảnh: `postgresql-pg-dump-restore.md:215` ("nếu không" → "vì"), `postgresql-schema-migration-tuong-thich.md:346`, `postgresql-isolation-read-committed-repeatable-read.md:139`.

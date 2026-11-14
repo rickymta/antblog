@@ -10,7 +10,7 @@ language: vi
 
 22:40 tối thứ Năm, script dọn dữ liệu thử nghiệm chạy nhầm sang database thật của Tới Nơi và thực thi `DELETE FROM ops.trips` — **không có `WHERE`**. PG-046 đã cho thấy bản `pg_dump` lúc 02:00 restore được, đối soát được, nhưng chỉ mang trạng thái lúc 02:00. Mọi chuyến từ sáng tới 22:39 — khách đã đi, tài xế đã chạy, tiền đã thu — không có trong đó.
 
-Thứ nhóm vận hành cần là trạng thái của database **ngay trước câu DELETE**. PostgreSQL làm được điều đó bằng **PITR** (point-in-time recovery — khôi phục theo thời điểm): lấy một bản chụp vật lý của cluster từ trước, rồi phát lại (replay) nhật ký WAL tới đúng điểm mình chọn và dừng ở đó.
+Nhóm vận hành cần có trạng thái của database **ngay trước câu DELETE**. PostgreSQL làm được điều đó bằng **PITR** (point-in-time recovery — khôi phục theo thời điểm): lấy một bản chụp vật lý của cluster từ trước, rồi phát lại (replay) nhật ký WAL tới đúng điểm mình chọn và dừng ở đó.
 
 Bài này chạy trọn chuỗi đó trên hai cluster PostgreSQL 18.1 tạm, dừng đúng trước DELETE và **đối soát khi còn đang pause**, rồi nói rõ lab chứng minh được gì về RPO và RTO, và chưa chứng minh được gì.
 
@@ -95,7 +95,7 @@ START TIMELINE: 1
 - **LABEL**: nhãn tự đặt, để biết file này thuộc lần backup nào.
 - **START TIMELINE: 1**: lịch sử WAL hiện tại. Mỗi lần kết thúc một đợt archive recovery, PostgreSQL mở một timeline mới; PG-050 xem kỹ.
 
-`backup_label` là thứ báo cho PostgreSQL «đây là bản backup, bắt đầu phát lại từ checkpoint này», chứ không phải «đây là cluster vừa crash». Xoá nó đi để server «khởi động được» là một cách làm hỏng dữ liệu được tài liệu cảnh báo rõ.
+`backup_label` là thứ báo cho PostgreSQL «đây là bản backup, bắt đầu phát lại từ checkpoint này», chứ không phải «đây là cluster vừa crash». Xoá nó đi để server «khởi động được» là cách làm hỏng dữ liệu mà tài liệu đã cảnh báo rõ.
 
 ## 4. Đánh dấu mốc, rồi gây tai nạn có kiểm soát
 
@@ -115,7 +115,7 @@ PASS 048 source damaged deliberately: 0
 
 `pg_create_restore_point` ghi một bản ghi có tên vào WAL và trả về LSN của nó. Trước đó, runner tính digest của bảng (101 chuyến) làm đáp án mong đợi cho bước đối soát.
 
-`pg_switch_wal()` buộc server đóng segment hiện tại và chuyển sang segment mới. Nó cần thiết vì `archive_command` chỉ chạy khi một segment **hoàn tất**: segment `…04` chứa restore point (ở `0/4001DF0`, tức mới vài KB đầu segment) và câu DELETE; nếu không switch thì nó nằm trong `pg_wal` tới khi đầy 16 MB. Runner đợi tới khi file xuất hiện trong kho **và** `pg_stat_archiver` ghi nhận:
+`pg_switch_wal()` buộc server đóng segment hiện tại và chuyển sang segment mới. Việc này cần thiết vì `archive_command` chỉ chạy khi một segment **hoàn tất**: segment `…04` chứa restore point (ở `0/4001DF0`, tức mới vài KB đầu segment) và câu DELETE; nếu không switch thì nó nằm trong `pg_wal` tới khi đầy 16 MB. Runner đợi tới khi file xuất hiện trong kho **và** `pg_stat_archiver` ghi nhận:
 
 ```text
  archived_count |    last_archived_wal     | failed_count
@@ -124,7 +124,7 @@ PASS 048 source damaged deliberately: 0
 (1 row)
 ```
 
-`failed_count = 0` và `last_archived_wal` đã tới `…04`. Có restore point trong nguồn chưa đủ: nếu máy nguồn mất trước khi segment chứa nó vào kho, mốc đó không tồn tại với bất kỳ bản phục hồi nào. Lab không liệt kê năm file đã archive là những file nào; con số chỉ dùng để thấy archiver đang chạy và chưa thất bại lần nào.
+`failed_count = 0` và `last_archived_wal` đã tới `…04`. Restore point mới chỉ nằm trên nguồn thì chưa đủ: nếu máy nguồn mất trước khi segment chứa nó vào kho, mốc đó không tồn tại với bất kỳ bản phục hồi nào. Lab không liệt kê năm file đã archive là những file nào; con số chỉ dùng để thấy archiver đang chạy và chưa thất bại lần nào.
 
 **Sự cố thật không có restore point.** Không ai gọi `pg_create_restore_point` trước khi script chạy nhầm. Khi đó mục tiêu thường là:
 
@@ -136,7 +136,7 @@ Lab **không chạy** ba kiểu target này (README ghi rõ). Theo tài liệu, 
 
 ## 5. Dựng đích riêng
 
-Không phục hồi đè lên nguồn: đó là bằng chứng, và còn giao dịch hợp lệ *sau* 22:40 (mục 8). Runner tạo một cluster thứ hai, dừng nó, đổi tên data directory ban đầu sang `unused-initial-data` trong cùng thư mục tạm, chép base backup vào chỗ đó, rồi thêm cấu hình:
+Không phục hồi đè lên nguồn, vì nguồn là bằng chứng, và trên đó còn có giao dịch hợp lệ *sau* 22:40 (mục 8). Runner tạo một cluster thứ hai, dừng nó, đổi tên data directory ban đầu sang `unused-initial-data` trong cùng thư mục tạm, chép base backup vào chỗ đó, rồi thêm cấu hình:
 
 ```text
 port = <PORT_DICH>
@@ -151,7 +151,7 @@ và tạo file rỗng `recovery.signal` trong data directory.
 
 - **`recovery.signal`**: từ PostgreSQL 12, sự có mặt của file này bảo server khởi động ở chế độ **targeted recovery** — phát lại WAL từ archive tới target rồi kết thúc. (`standby.signal` là chế độ standby, phát lại mãi.) Không có file signal thì `backup_label` chỉ dẫn tới crash recovery với WAL đang có trong `pg_wal`, không đọc archive, không dừng ở target.
 - **`restore_command`**: chiều ngược lại của `archive_command` — lấy file `%f` từ kho về `%p`. Theo tài liệu, server sẽ hỏi cả những file **không có** trong kho (ví dụ file `.history` của timeline tương lai, hay segment kế tiếp ở cuối chuỗi), nên lệnh phải trả khác 0 khi không tìm thấy thay vì treo hay tạo file rỗng.
-- **`archive_mode = off`** ở đích: cấu hình chép từ nguồn có `archive_command` trỏ vào cùng kho. Để nguyên thì cluster phục hồi, khi mở ghi ở timeline mới, sẽ đẩy WAL của nó vào kho của nguồn. Helper từ chối ghi đè, nhưng tốt nhất là tránh từ cấu hình.
+- **`archive_mode = off`** ở đích: cấu hình chép từ nguồn có `archive_command` trỏ vào cùng kho. Để nguyên thì cluster phục hồi, khi mở ghi ở timeline mới, sẽ đẩy WAL của nó vào kho của nguồn. Helper từ chối ghi đè, nhưng tốt nhất là chặn ngay từ cấu hình.
 - **Cổng khác**: ứng dụng không thể vô tình kết nối vào bản chưa nghiệm thu.
 
 ## 6. Đọc log recovery
@@ -178,7 +178,7 @@ Từng dòng:
 6. **`recovery stopping at restore point`**: gặp bản ghi restore point thì dừng. INSERT 101 commit trước mốc được giữ; DELETE commit sau mốc không được áp.
 7. **`pausing at the end of recovery`**: do `recovery_target_action = 'pause'`.
 
-Tài liệu PostgreSQL (từ bản 13) nói nếu WAL hết trước khi gặp target, recovery kết thúc bằng lỗi thay vì lặng lẽ mở database ở một trạng thái sớm hơn. Bài tập 2 cho bạn tự kiểm điều này; lab chính không chạy ca thiếu WAL.
+Tài liệu PostgreSQL (từ bản 13) nói nếu WAL hết trước khi gặp target, recovery kết thúc bằng lỗi thay vì mở database ở một trạng thái sớm hơn mà không báo lỗi. Bài tập 2 cho bạn tự kiểm điều này; lab chính không chạy ca thiếu WAL.
 
 ## 7. Đối soát khi còn đang pause
 
@@ -186,7 +186,7 @@ Tài liệu PostgreSQL (từ bản 13) nói nếu WAL hết trước khi gặp t
 
 | Giá trị | Khi tới target | Dùng khi |
 |---|---|---|
-| `pause` (mặc định) | Dừng replay, cho truy vấn chỉ đọc, chờ quyết định | Cần kiểm trước khi cam kết |
+| `pause` (mặc định) | Dừng replay, cho truy vấn chỉ đọc, chờ quyết định | Cần kiểm tra trước khi chốt |
 | `promote` | Kết thúc recovery, mở ghi ngay | Target đã được kiểm ở lần diễn tập trước |
 | `shutdown` | Dừng server sau khi tới target | Tự động hoá: chuẩn bị đích rồi để người khác quyết định |
 
@@ -236,7 +236,7 @@ Số duy nhất về thời gian mà lab ghi:
 MEASURE 048 start-to-verified-paused-recovery ms: 4284.1 (excludes base-copy and incident detection)
 ```
 
-Khoảng 4,3 giây, từ lúc gọi start cluster đích tới lúc đối soát xong ở trạng thái pause, trên cluster lab 100 chuyến, hai segment WAL được lấy từ kho, máy dev Windows, mỗi bước kiểm tốn một lần mở `psql`. README ghi rõ đây **không phải RTO đầu cuối**, và runner không assert số millisecond — lần chạy khác cho số khác.
+Con số đó là khoảng 4,3 giây, tính từ lúc gọi start cluster đích tới lúc đối soát xong ở trạng thái pause, đo trên cluster lab 100 chuyến, lấy hai segment WAL từ kho, chạy trên máy dev Windows, mỗi bước kiểm tra tốn một lần mở `psql`. README ghi rõ đây **không phải RTO đầu cuối**, và runner không assert số millisecond — lần chạy khác cho số khác.
 
 | Thành phần | Lab | Production phải đo |
 |---|---|---|
@@ -248,11 +248,11 @@ Khoảng 4,3 giây, từ lúc gọi start cluster đích tới lúc đối soát
 | Đối soát | Một bảng, 3 cổng | Toàn bộ bảng nghiệp vụ, đối soát với hệ ngoài |
 | Chuyển traffic, bù dữ liệu | Không làm | DNS/pool, cache, job nền, giao dịch sau target |
 
-Về RPO, lab chỉ chứng minh: **với target đã chọn và WAL đã nằm trong kho**, không mất dòng nào trước target. Lab không chứng minh RPO của sự cố mất máy. Ở production, RPO bị chặn bởi **độ trễ archive**: WAL còn trong `pg_wal` của máy nguồn mà chưa vào kho sẽ mất cùng máy. Vì archive chỉ chạy khi segment đầy, một hệ thống ghi ít có thể mất nhiều phút dữ liệu. Các cách thu hẹp, **không chạy trong lab**:
+Về RPO, lab chỉ chứng minh: **với target đã chọn và WAL đã nằm trong kho**, không mất dòng nào trước target. Lab không chứng minh RPO của sự cố mất máy. Ở production, RPO bị giới hạn bởi **độ trễ archive**: WAL còn trong `pg_wal` của máy nguồn mà chưa vào kho sẽ mất cùng máy. Vì archive chỉ chạy khi segment đầy, một hệ thống ghi ít có thể mất nhiều phút dữ liệu. Các cách thu hẹp, **không chạy trong lab**:
 
 - `archive_timeout`: ép switch segment sau một khoảng thời gian, đổi lại nhiều file archive gần rỗng.
 - `pg_receivewal`: stream WAL liên tục sang máy khác qua giao thức replication thay vì chờ segment đầy.
-- Replication đồng bộ: giao dịch chỉ commit khi bản sao đã nhận WAL — đổi bằng độ trễ commit.
+- Replication đồng bộ: giao dịch chỉ commit khi bản sao đã nhận WAL — đổi lại là độ trễ commit tăng.
 
 Riêng với DELETE nhầm, replication không cứu được: standby nhận câu DELETE gần như ngay lập tức. Chỉ backup + WAL mới quay ngược được thời gian. Chỉ số cần cảnh báo: `pg_stat_archiver.failed_count` tăng, `last_archived_wal` đứng yên, tuổi của base backup gần nhất.
 
@@ -265,7 +265,7 @@ Riêng với DELETE nhầm, replication không cứu được: standby nhận c�
 | Server khởi động nhưng thiếu dữ liệu sau backup | Quên `recovery.signal`, hoặc `restore_command` sai nên chỉ có WAL trong `pg_wal` | Kiểm dòng «starting point-in-time recovery to …» và «restored log file … from archive» |
 | Bản phục hồi có cả câu DELETE | Target quá muộn, hoặc không đặt target | Đặt target trước lỗi; dùng `pause` để kiểm trước khi kết thúc recovery |
 | Xoá `backup_label` để «khởi động được» | Hiểu nhầm đó là file khoá | Không xoá; tìm nguyên nhân thật trong log |
-| Gọi số giây diễn tập là RTO | Đo mỗi đoạn replay | Đo đủ chuỗi phát hiện → quyết định → chép → replay → đối soát → chuyển traffic |
+| Gọi số giây diễn tập là RTO | Chỉ đo đoạn replay | Đo đủ chuỗi phát hiện → quyết định → chép → replay → đối soát → chuyển traffic |
 
 ## 11. Đánh đổi: backup logic hay vật lý
 

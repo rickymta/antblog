@@ -25,7 +25,7 @@ PG-041 đã tách role theo trách nhiệm: `tn_owner` sở hữu schema `ops` v
    trips       | {tn_owner=arwdDxtm/tn_owner,tn_app=arw/tn_owner,tn_report=r/tn_owner}
 ```
 
-`GRANT` trả lời câu hỏi «role này có được làm thao tác X trên **bảng** không». Nó không có cách nào nói «được đọc, nhưng chỉ những dòng có `tenant_id = 1`». RLS là lớp thứ hai, chạy **sau** khi GRANT đã cho phép: với mỗi câu lệnh, PostgreSQL lấy các **policy** (chính sách — một biểu thức boolean gắn với bảng, áp cho một số role và một số lệnh) phù hợp, rồi ghép biểu thức đó vào câu lệnh như một điều kiện bắt buộc.
+`GRANT` trả lời câu hỏi «role này có được làm thao tác X trên **bảng** không». GRANT không có cách nào nói «được đọc, nhưng chỉ những dòng có `tenant_id = 1`». RLS là lớp thứ hai, chạy **sau** khi GRANT đã cho phép: với mỗi câu lệnh, PostgreSQL lấy các **policy** (chính sách — một biểu thức boolean gắn với bảng, áp cho một số role và một số lệnh) phù hợp, rồi ghép biểu thức đó vào câu lệnh như một điều kiện bắt buộc.
 
 Thiếu GRANT thì bạn nhận `42501 permission denied` trước khi RLS kịp xét. GRANT đủ mà policy loại dòng thì câu đọc **không lỗi gì cả** — chỉ trả ít dòng hơn. Phần lớn bài này xoay quanh hệ quả của chữ «không lỗi gì cả» đó.
 
@@ -68,11 +68,11 @@ Catalog `pg_policies` ghi lại đúng như vậy:
 
 - **`TO tn_app`** — policy chỉ áp cho `tn_app` (và thành viên của nó). Role khác **không có policy nào** — giữ ý này cho mục 6.
 - **`cmd = ALL`** — không ghi `FOR …` thì policy áp cho mọi lệnh.
-- **`USING` (cột `qual`)** — điều kiện cho **dòng đang có**: dòng nào được thấy khi `SELECT`, được nhắm tới khi `UPDATE`/`DELETE`. Dòng không thoả bị loại **âm thầm**.
-- **`WITH CHECK`** — điều kiện cho **dòng mới** của `INSERT` hoặc phiên bản mới sau `UPDATE`. Không thoả thì **câu lệnh lỗi**. Theo [CREATE POLICY](https://www.postgresql.org/docs/18/sql-createpolicy.html), bỏ trống `WITH CHECK` thì `USING` được dùng cho cả chiều ghi; lab ghi cả hai cho rõ.
+- **`USING` (cột `qual`)** — điều kiện cho **dòng đang có**: dòng nào được thấy khi `SELECT`, được nhắm tới khi `UPDATE`/`DELETE`. Dòng không thoả bị loại mà không báo lỗi.
+- **`WITH CHECK`** — điều kiện cho **dòng mới** của `INSERT` hoặc nội dung mới của dòng sau `UPDATE`. Không thoả thì **câu lệnh lỗi**. Theo [CREATE POLICY](https://www.postgresql.org/docs/18/sql-createpolicy.html), bỏ trống `WITH CHECK` thì `USING` được dùng cho cả chiều ghi; lab ghi cả hai cho rõ.
 - **`current_setting('app.tenant_id', true)`** — đọc tham số tuỳ biến (*custom setting*, tên có dấu chấm) mà ứng dụng đặt cho phiên. `missing_ok = true`: tham số chưa tồn tại thì trả `NULL` thay vì báo lỗi ([System Administration Functions](https://www.postgresql.org/docs/18/functions-admin.html)).
 - **`NULLIF(…, '')`** — tham số tuỳ biến đã từng được đặt trong phiên (kể cả bằng `SET LOCAL` rồi transaction kết thúc) có thể còn tồn tại với giá trị rỗng; `''::int` sẽ làm câu lệnh lỗi thay vì trả 0 dòng. `NULLIF` đưa «rỗng» và «chưa đặt» về cùng một nghĩa.
-- **`::int`** — giá trị như `'abc'` vẫn gây lỗi. Lỗi đáng có: ứng dụng truyền rác vào ngữ cảnh tenant thì nên vỡ to.
+- **`::int`** — giá trị như `'abc'` vẫn gây lỗi. Đây là lỗi nên có: nếu ứng dụng truyền giá trị rác vào ngữ cảnh tenant thì nên báo lỗi rõ ràng.
 
 `tenant_id = NULL` cho `NULL`, không phải `true`, nên thiếu ngữ cảnh thì mọi dòng bị loại: thiết kế «đóng khi thiếu» (*fail closed*) — và là bẫy gỡ lỗi lớn nhất của RLS.
 
@@ -92,7 +92,7 @@ PASS 049 tenant 1: 50
 
 Endpoint CSV quên `WHERE` giờ chỉ trả 50 chuyến của tenant 1 — đúng điều ta cần. Còn dòng đầu: **0 dòng, không lỗi**.
 
-- **An toàn:** quên đặt ngữ cảnh không làm lộ dữ liệu. Policy kiểu «không có tenant thì cho xem hết» sẽ biến một middleware lỗi thành rò toàn bộ.
+- **An toàn:** quên đặt ngữ cảnh không làm lộ dữ liệu. Policy kiểu «không có tenant thì cho xem hết» sẽ khiến một middleware lỗi dẫn tới rò toàn bộ dữ liệu.
 - **Bẫy:** «0 dòng» trông giống hệt «công ty này chưa có chuyến nào». Không SQLSTATE, không log server. Kỹ sư trực sẽ tìm lỗi ở dữ liệu, bộ lọc ngày, cache — trước khi nghĩ tới middleware không đặt `app.tenant_id`.
 
 Cách giảm bẫy: ứng dụng tự kiểm «đã có tenant chưa» và trả lỗi rõ; log ghi tenant của mỗi transaction; theo dõi tỉ lệ request trả 0 dòng theo endpoint. Database cố tình im lặng; phần ồn ào phải nằm ở ứng dụng.
@@ -119,7 +119,7 @@ PASS 049 UPDATE of other tenant row touches: 0
 Ba kết quả, hai cơ chế:
 
 1. **INSERT dòng tenant 2** — dòng mới không thoả `WITH CHECK` → `42501`, không dòng nào được ghi.
-2. **UPDATE chuyến 1 sang tenant 2** — chuyến 1 thoả `USING` nên được nhắm tới, nhưng phiên bản mới không thoả `WITH CHECK` → lỗi. Đây là đường một tenant «đẩy» dữ liệu sang tenant khác, hoặc một bug làm chuyến biến mất khỏi công ty mình.
+2. **UPDATE chuyến 1 sang tenant 2** — chuyến 1 thoả `USING` nên được nhắm tới, nhưng dòng sau khi sửa không thoả `WITH CHECK` → lỗi. Đây là đường một tenant «đẩy» dữ liệu sang tenant khác, hoặc một bug làm chuyến biến mất khỏi công ty mình.
 3. **UPDATE chuyến 60** — không thoả `USING` nên **không được nhìn thấy**; câu lệnh thành công và chạm 0 dòng.
 
 Điểm thứ ba lặp lại bài học của [PG-035](/articles/postgresql-optimistic-version-conditional-update): **đọc số dòng bị ảnh hưởng**; nhận `UPDATE 0` mà báo «đã cập nhật» là lỗi ứng dụng. `42501` cũng là mã của «permission denied» do GRANT — phân biệt bằng nội dung thông báo, đừng chỉ bắt theo SQLSTATE.
@@ -128,7 +128,7 @@ Lab không chạy `DELETE` (`tn_app` không có quyền này, ACL `arw`) và `IN
 
 ## 5. Ngữ cảnh sống bao lâu: SET, SET LOCAL và connection pool
 
-`SET app.tenant_id = '1'` đặt giá trị cho **cả phiên**, tức cả đời một kết nối. PG-047 đã cho thấy ứng dụng thật dùng pool: vài kết nối được trao lần lượt cho các request. Request của tenant 1 đặt ngữ cảnh bằng `SET` rồi trả kết nối; request kế tiếp của tenant 2 mượn đúng kết nối đó, middleware lỗi không đặt ngữ cảnh — và nó đọc dữ liệu tenant 1. RLS vẫn hoạt động hoàn hảo, chỉ là với sai ngữ cảnh.
+`SET app.tenant_id = '1'` đặt giá trị cho **cả phiên**, tức cả đời một kết nối. PG-047 đã cho thấy ứng dụng thật dùng pool: vài kết nối được trao lần lượt cho các request. Request của tenant 1 đặt ngữ cảnh bằng `SET` rồi trả kết nối; request kế tiếp của tenant 2 mượn đúng kết nối đó, middleware lỗi không đặt ngữ cảnh — và request này đọc được dữ liệu của tenant 1. RLS vẫn hoạt động hoàn hảo, chỉ là với sai ngữ cảnh.
 
 `SET LOCAL` giới hạn giá trị trong **transaction hiện tại**. Lab kiểm đúng vòng đời này trong một phiên:
 
@@ -157,10 +157,10 @@ COMMIT;
 `set_config(name, value, is_local)` với `is_local = true` tương đương `SET LOCAL` nhưng nhận **tham số bind**. `SET` không nhận tham số bind nên dễ bị ghép chuỗi — mở đường injection ngay tại chỗ quan trọng nhất.
 
 - **`SET LOCAL` ngoài transaction vô dụng.** Ở autocommit, `SET LOCAL` hết hiệu lực ngay khi câu của nó xong (PostgreSQL cảnh báo khi dùng ngoài khối transaction); `SELECT` sau đó không có ngữ cảnh.
-- **Transaction pooling** (PgBouncer chế độ transaction) có thể đưa mỗi transaction tới một backend khác: `SET` cấp phiên vừa rò sang client khác vừa có thể mất với client hiện tại; dạng ổn định là `set_config(…, true)` trong transaction. Lab **không** chạy PgBouncer; đây là suy ra từ ngữ nghĩa chế độ pool, cần kiểm với cấu hình thật.
+- **Transaction pooling** (PgBouncer chế độ transaction) có thể đưa mỗi transaction tới một backend khác: `SET` cấp phiên vừa có thể rò sang client khác, vừa có thể mất ngữ cảnh với client hiện tại; dạng ổn định là `set_config(…, true)` trong transaction. Lab **không** chạy PgBouncer; đây là điều suy ra từ ngữ nghĩa của chế độ pool, cần kiểm với cấu hình thật.
 - **Lỗi giữa chừng phải `ROLLBACK`** trước khi trả kết nối; kiểm trong test tích hợp, đừng giả định driver làm hộ.
 
-## 6. Default-deny: job báo cáo lặng lẽ hỏng
+## 6. Default-deny: job báo cáo hỏng mà không báo lỗi
 
 Trước khi bật RLS, PG-041 đã chứng minh `tn_report` đọc được 100 dòng (`PASS 041 report reads: 100`). Sau khi bật RLS với policy chỉ `TO tn_app`:
 
@@ -222,7 +222,7 @@ Hệ quả cho kiểm thử: **phép kiểm policy chạy bằng `postgres` là 
 
 Các trường hợp dưới đây **không chạy trong lab**; là SQL để bạn tự thử, theo tài liệu PostgreSQL 18.
 
-**Kênh rò qua ràng buộc duy nhất.** Kiểm khoá chính bỏ qua RLS. `id` duy nhất toàn bảng, nên tenant 1 thử `INSERT … VALUES (60, 1, …)` sẽ nhận lỗi trùng khoá — tức biết chuyến 60 tồn tại dù không đọc được. Cách giảm: khoá gồm `(tenant_id, id)` hoặc định danh khó đoán.
+**Kênh rò qua ràng buộc duy nhất.** Việc kiểm tra khoá chính không chịu RLS. `id` duy nhất toàn bảng, nên tenant 1 thử `INSERT … VALUES (60, 1, …)` sẽ nhận lỗi trùng khoá — tức biết chuyến 60 tồn tại dù không đọc được. Cách giảm: khoá gồm `(tenant_id, id)` hoặc định danh khó đoán.
 
 **View và hàm `SECURITY DEFINER`.** Mặc định view truy cập bảng gốc bằng quyền của **chủ view**; view do `tn_owner` tạo trên bảng chưa FORCE sẽ đi vòng qua RLS. Từ PostgreSQL 15, `WITH (security_invoker = true)` buộc view xét quyền và policy theo người gọi ([CREATE VIEW](https://www.postgresql.org/docs/18/sql-createview.html)). Hàm `SECURITY DEFINER` chạy bằng quyền chủ hàm, cùng rủi ro.
 
@@ -230,7 +230,7 @@ Các trường hợp dưới đây **không chạy trong lab**; là SQL để b�
 
 **Policy restrictive.** Thêm «chỉ chuyến `completed`» cho báo cáo: `CREATE POLICY only_completed ON ops.trips AS RESTRICTIVE FOR SELECT TO tn_report USING (status = 'completed');`. Nó ghép bằng `AND`, nên chỉ có tác dụng khi đã có policy permissive cho phép; một mình nó vẫn ra default-deny.
 
-**Sao lưu logic.** `pg_dump` mặc định đặt `row_security = off`: truy vấn lẽ ra bị policy lọc sẽ **báo lỗi** thay vì trả thiếu dòng ([row_security](https://www.postgresql.org/docs/18/runtime-config-client.html)), nên dump bằng role không vượt được RLS thất bại to thay vì thiếu dữ liệu âm thầm. Bản dump PG-046 của lab tạo **trước** khi bật RLS, không chứng minh gì về điều này.
+**Sao lưu logic.** `pg_dump` mặc định đặt `row_security = off`: truy vấn lẽ ra bị policy lọc sẽ **báo lỗi** thay vì trả thiếu dòng ([row_security](https://www.postgresql.org/docs/18/runtime-config-client.html)), nên dump bằng role không vượt được RLS sẽ báo lỗi rõ ràng thay vì thiếu dữ liệu mà không ai biết. Bản dump PG-046 của lab tạo **trước** khi bật RLS, không chứng minh gì về điều này.
 
 ## 9. Policy là dữ liệu catalog: còn nguyên sau PITR
 
@@ -270,7 +270,7 @@ RLS kiểu này là **lưới an toàn cho bug truy vấn**, không phải ranh 
 - **Kiểm policy bằng superuser hoặc owner.** Luôn ra đủ dòng, không chứng minh gì.
 - **Chiều ghi lỏng hơn chiều đọc.** `WITH CHECK (true)` viết «cho tiện», hay một policy permissive khác cho cùng role (ghép `OR`), sẽ mở chiều ghi. Đọc đúng không suy ra ghi đúng: luôn kiểm INSERT sai tenant và UPDATE chuyển tenant.
 - **Coi 0 dòng là «không có dữ liệu».** Thiếu ngữ cảnh, role không có policy, owner sau FORCE đều trả 0 không lỗi.
-- **Bật RLS mà quên role khác.** Job báo cáo im lặng ra 0.
+- **Bật RLS mà quên role khác.** Job báo cáo trả về 0 mà không báo lỗi.
 - **`SET` cấp phiên với pool, hoặc ghép chuỗi tenant id.** Dùng `set_config(…, true)` với tham số bind, trong transaction.
 - **API chạy bằng owner.** RLS bị bỏ qua hoàn toàn khi chưa FORCE.
 - **Quên index.** Mọi truy vấn thêm `tenant_id = …`; bảng lớn không có index bắt đầu bằng `tenant_id` trả giá ở mọi câu. Lab 100 dòng chỉ có khoá chính, không đo chi phí này.

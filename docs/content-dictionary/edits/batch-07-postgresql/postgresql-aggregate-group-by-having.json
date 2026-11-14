@@ -1,0 +1,19 @@
+{"file":"postgresql-aggregate-group-by-having.md","edits":[
+{"old":"mỗi cột của báo cáo phải nói được nó chia cho cái gì.","new":"mỗi cột của báo cáo phải cho biết nó lấy gì làm mẫu số.","reason":"Gượng, khẩu ngữ","severity":"low"},
+{"old":"Trước khi viết SQL, viết **định nghĩa chỉ số** — data dictionary cho số liệu, như data dictionary cho cột ở PG-004:","new":"Trước khi viết SQL, hãy viết **định nghĩa chỉ số** — một data dictionary cho số liệu, giống data dictionary cho cột ở PG-004:","reason":"Trật tự từ, so sánh gượng","severity":"medium"},
+{"old":"con số mọi bảng trong bài phải cộng lại được.","new":"con số mà mọi bảng trong bài phải cộng lại ra.","reason":"Cụm cụt, thiếu quan hệ từ","severity":"medium"},
+{"old":"— nó gây ra lỗi «14 %» ở mục 6","new":"— kiểu này gây ra lỗi «14 %» ở mục 6","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"một dòng kết quả mỗi nhóm.","new":"mỗi nhóm cho ra một dòng kết quả.","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"một giá trị duy nhất mỗi nhóm.","new":"một giá trị duy nhất trong mỗi nhóm.","reason":"Thiếu giới từ, trật tự từ kiểu Anh","severity":"medium"},
+{"old":"Câu `cities` phía trên là ngoại lệ hợp lệ","new":"Câu truy vấn `cities` phía trên là ngoại lệ hợp lệ","reason":"Lược danh từ chính","severity":"medium"},
+{"old":"Thứ tự đọc nghĩa của PG-007 thêm hai bước:","new":"Thứ tự đọc nghĩa ở PG-007 nay có thêm hai bước:","reason":"Câu thiếu động từ rõ ràng","severity":"low"},
+{"old":"Bảng dưới đếm số dòng từng bước cho câu","new":"Bảng dưới đếm số dòng còn lại sau từng bước cho câu","reason":"Câu cụt, thiếu ý","severity":"medium"},
+{"old":"ra 182.287.000 đ — trùng `FILTER` (thí nghiệm 5)","new":"ra 182.287.000 đ — khớp với kết quả của `FILTER` (thí nghiệm 5)","reason":"'trùng' gượng","severity":"low"},
+{"old":"Nhóm thành phố × dịch vụ có tỉ lệ huỷ trên 15 %:","new":"Câu sau lọc ra các nhóm thành phố × dịch vụ có tỉ lệ huỷ trên 15 %:","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"so trên số đã `round` thì nhóm 15,04 % thành 15,0 và trượt điều kiện","new":"so trên số đã `round` thì nhóm 15,04 % bị làm tròn thành 15,0 và trượt điều kiện","reason":"Câu lược động từ kiểu 'X thành Y'","severity":"medium"},
+{"old":"dùng cả hai mệnh đề — tài xế hoàn thành từ 63 chuyến:","new":"dùng cả hai mệnh đề, để tìm tài xế hoàn thành từ 63 chuyến trở lên:","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"Một con số tổng chỉ đáng tin khi một đường tính **độc lập** ra cùng kết quả.","new":"Một con số tổng chỉ đáng tin khi một cách tính **độc lập** cho ra cùng kết quả.","reason":"'đường tính' tự ghép","severity":"medium"},
+{"old":"là cách rẻ nhất để người đọc kiểm mẫu số","new":"là cách rẻ nhất để người đọc kiểm tra mẫu số","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Kiểm hai tổng trước khi nộp.","new":"Hãy kiểm tra hai tổng trước khi nộp.","reason":"'Kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Hai tổng kiểm: đã kết thúc","new":"Hai tổng đối chiếu: đã kết thúc","reason":"'tổng kiểm' tự ghép","severity":"medium"}
+]}

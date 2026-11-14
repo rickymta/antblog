@@ -1,7 +1,7 @@
 ---
 slug: postgresql-pagination-keyset
 title: "Phân trang lịch sử chuyến bằng keyset: khoá trùng và điều kiện trang kế tiếp"
-summary: "Kế toán của một khách doanh nghiệp Tới Nơi đối chiếu hoá đơn và thấy màn Lịch sử chuyến thiếu đúng hai chuyến đặt cùng giây. Dùng keyset với so sánh bộ (requested_at, code), chứng minh mọi trang ghép lại không mất, không lặp dòng."
+summary: "Kế toán của một khách doanh nghiệp Tới Nơi đối chiếu hoá đơn và thấy màn Lịch sử chuyến thiếu đúng hai chuyến đặt cùng giây. Dùng keyset với so sánh theo bộ giá trị (requested_at, code), rồi chứng minh ghép mọi trang lại thì không mất, không lặp dòng."
 category: postgresql
 level: advanced
 tags: [postgresql, pg-018, pagination, keyset, row-comparison, order-by, toi-noi]
@@ -10,11 +10,11 @@ language: vi
 
 Đầu tháng 11, kế toán của **Cửa hàng Phụ Kiện Lab** — khách doanh nghiệp đặt giao bưu kiện qua API của Tới Nơi — đối chiếu hoá đơn tháng 10 với màn «Lịch sử chuyến» trên web doanh nghiệp. Hoá đơn có 18 chuyến; lật hết các trang, chị chỉ đếm được 16. Hai chuyến biến mất, 101883 và 101882, cùng được đặt lúc 18/10 14:30:00 trong một lô API bốn chuyến. Đội web vừa thay phân trang `OFFSET` bằng nút «Xem thêm»: trang sau lấy các chuyến **cũ hơn giờ đặt của chuyến cuối** trang trước. Nghe hợp lý, và chạy đúng trên mọi dữ liệu thử — vì dữ liệu thử không có hai chuyến nào cùng giây.
 
-[PG-007](/articles/postgresql-select-filter-order-limit) đã dùng `LIMIT … OFFSET` kèm khoá phụ để mỗi dòng có một vị trí duy nhất, và hẹn bài này cho hai giới hạn còn lại của `OFFSET`: chi phí bỏ qua dòng và trang bị trôi khi dữ liệu thay đổi. Kỹ thuật thay thế — **keyset** — giải được cả hai, nhưng mang theo cái bẫy của câu chuyện trên. Bài này xử lý cái bẫy đó và **chứng minh** điều kiện trang kế tiếp: ghép mọi trang lại thì không mất, không lặp dòng nào.
+[PG-007](/articles/postgresql-select-filter-order-limit) đã dùng `LIMIT … OFFSET` kèm khoá phụ để mỗi dòng có một vị trí duy nhất, và để dành cho bài này hai giới hạn còn lại của `OFFSET`: chi phí bỏ qua dòng và trang bị trôi khi dữ liệu thay đổi. Kỹ thuật thay thế — **keyset** — giải được cả hai, nhưng mang theo cái bẫy của câu chuyện trên. Bài này xử lý cái bẫy đó và **chứng minh** điều kiện trang kế tiếp: ghép mọi trang lại thì không mất, không lặp dòng nào.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-018 · Phần 2/6 · Nâng cao</span>
-<p>Đọc trước: <a href="/articles/postgresql-select-filter-order-limit">PG-007 · SELECT, lọc, sắp xếp và giới hạn</a>, <a href="/articles/postgresql-subquery-exists-cte">PG-014 · Subquery, EXISTS và CTE</a>, <a href="/articles/postgresql-window-function-frame">PG-015 · Window function</a>. Lab: <code>examples/toi-noi-postgresql/p02</code> (tệp <code>18-pagination-keyset.sql</code>). Sau bài này, bạn xử lý được khoá sắp xếp trùng và chứng minh được điều kiện trang kế tiếp — bằng lập luận và bằng truy vấn kiểm trên fixture.</p>
+<p>Đọc trước: <a href="/articles/postgresql-select-filter-order-limit">PG-007 · SELECT, lọc, sắp xếp và giới hạn</a>, <a href="/articles/postgresql-subquery-exists-cte">PG-014 · Subquery, EXISTS và CTE</a>, <a href="/articles/postgresql-window-function-frame">PG-015 · Window function</a>. Lab: <code>examples/toi-noi-postgresql/p02</code> (tệp <code>18-pagination-keyset.sql</code>). Sau bài này, bạn xử lý được khoá sắp xếp trùng và chứng minh được điều kiện trang kế tiếp — bằng lập luận và bằng truy vấn kiểm tra trên fixture.</p>
 </div>
 
 ## 1. Dữ liệu: 18 chuyến, hai lô cùng giây
@@ -148,11 +148,11 @@ LIMIT 5;
 
 Đúng vị trí 6–10. Trong nhóm 14:30:00, `code` quyết định: 101883 và 101882 nhỏ hơn 101884 nên được lấy; 101885 lớn hơn nên đã nằm ở trang 1. Trang 3 với con trỏ (2026-10-10 09:00:00+07, 100976) bắt đầu **giữa** lô 10/10: 100975, 100974, 100973, 100972, 100971 — vị trí 11–15.
 
-Dạng viết tách `requested_at < $1 OR (requested_at = $1 AND code < $2)` cho cùng tập dòng; lab kiểm bằng `EXCEPT` hai chiều giữa hai dạng và đếm được `0` dòng lệch. Dạng tách dùng khi hệ khác không hỗ trợ so sánh bộ, hoặc khi hai cột sắp ngược chiều (mục 6). Dạng bộ ngắn hơn, khó viết sai hơn, và là dạng mà chỉ mục nhiều cột phục vụ trực tiếp (Phần 3).
+Dạng viết tách `requested_at < $1 OR (requested_at = $1 AND code < $2)` cho cùng tập dòng; lab kiểm bằng `EXCEPT` hai chiều giữa hai dạng và đếm được `0` dòng lệch. Dạng tách dùng khi hệ quản trị cơ sở dữ liệu khác không hỗ trợ so sánh bộ, hoặc khi hai cột sắp ngược chiều (mục 6). Dạng bộ ngắn hơn, khó viết sai hơn, và chỉ mục nhiều cột phục vụ trực tiếp được dạng này (Phần 3).
 
 <div class="tkh-callout tkh-callout--warn">
-<span class="tkh-callout-title">Khoá sắp xếp có NULL là lỗ hổng im lặng</span>
-<p>Theo cùng mục tài liệu, gặp cặp có NULL trước khi gặp cặp khác nhau thì kết quả so sánh bộ là NULL — dòng bị <code>WHERE</code> loại, không báo gì. <code>requested_at</code> và <code>code</code> đều <code>NOT NULL</code> trong lược đồ nên an toàn. Phân trang theo cột có thể NULL (ví dụ <code>completed_at</code>, NULL với chuyến huỷ) phải xử lý riêng: thay bằng biểu thức không NULL hoặc tách nhóm NULL — đừng để nó lặng lẽ mất dòng.</p>
+<span class="tkh-callout-title">Khoá sắp xếp có NULL là lỗ hổng không báo lỗi</span>
+<p>Theo cùng mục tài liệu, gặp cặp có NULL trước khi gặp cặp khác nhau thì kết quả so sánh bộ là NULL — dòng bị <code>WHERE</code> loại, không báo gì. <code>requested_at</code> và <code>code</code> đều <code>NOT NULL</code> trong schema nên an toàn. Phân trang theo cột có thể NULL (ví dụ <code>completed_at</code>, NULL với chuyến huỷ) phải xử lý riêng: thay bằng biểu thức không NULL hoặc tách nhóm NULL — đừng để dòng bị mất mà không có dấu hiệu nào.</p>
 </div>
 
 ## 5. Chứng minh điều kiện trang kế tiếp
@@ -161,7 +161,7 @@ Gọi `K(r) = (requested_at, code)` là khoá của dòng `r`, và sắp toàn b
 
 **Mệnh đề.** Nếu trang 1 = n dòng đầu của `L`, và trang k+1 = n dòng đầu (theo cùng thứ tự) của tập `{ r : K(r) < c_k }`, với `c_k` là khoá dòng cuối trang k, thì trang k là đúng các vị trí `(k−1)·n + 1 … k·n` của `L`.
 
-**Quy nạp.** Đúng với k = 1 theo định nghĩa. Giả sử trang k là vị trí `(k−1)n+1 … kn`; dòng cuối của nó ở vị trí kn, nên `c_k = K(L[kn])`. Vì thứ tự chặt và toàn phần, `K(r) < c_k` **khi và chỉ khi** `r` đứng sau vị trí kn trong `L` — không dòng nào đứng sau mà có khoá bằng `c_k`, không dòng nào đứng trước mà có khoá nhỏ hơn. Lấy n dòng đầu của tập đó là vị trí `kn+1 … kn+n`. Khi tập rỗng, dừng.
+**Quy nạp.** Đúng với k = 1 theo định nghĩa. Giả sử trang k là vị trí `(k−1)n+1 … kn`; dòng cuối của nó ở vị trí kn, nên `c_k = K(L[kn])`. Vì thứ tự chặt và toàn phần, `K(r) < c_k` **khi và chỉ khi** `r` đứng sau vị trí kn trong `L` — không dòng nào đứng sau mà có khoá bằng `c_k`, không dòng nào đứng trước mà có khoá nhỏ hơn. Lấy n dòng đầu của tập đó thì được các vị trí `kn+1 … kn+n`. Khi tập rỗng, dừng.
 
 Hệ quả: các trang là những đoạn **liên tiếp, rời nhau** của `L` và phủ hết `L` — không mất, không lặp. Chứng minh cũng chỉ ra chính xác chỗ nó gãy: `K` không duy nhất thì «khi và chỉ khi» sai — dòng cùng khoá với `c_k` ở sau vị trí kn bị `<` loại (mất), còn `<=` kéo lại dòng cùng khoá ở trước (lặp). Điều kiện so sánh khác chiều với `ORDER BY` cũng làm gãy cùng bước đó.
 
@@ -201,7 +201,7 @@ SELECT so_trang, ma FROM trang ORDER BY so_trang;
 (4 rows)
 ```
 
-Câu kiểm thứ hai của lab đếm trên cùng truy vấn đệ quy:
+Câu kiểm tra thứ hai của lab đếm trên cùng truy vấn đệ quy:
 
 ```text
  so_trang | tong_ma_qua_cac_trang | ma_khac_nhau | so_chuyen
@@ -210,7 +210,7 @@ Câu kiểm thứ hai của lab đếm trên cùng truy vấn đệ quy:
 (1 row)
 ```
 
-18 mã qua các trang = 18 mã khác nhau (không lặp) = 18 chuyến của khách (không mất), và bốn trang khớp từng dòng với cột `trang` của bảng đối chiếu ở mục 1. Truy vấn kiểm này nên nằm trong bộ test của API phân trang, chạy trên fixture có khoá trùng cố ý — fixture không có khoá trùng thì cách sai ở mục 3 cũng qua test.
+18 mã qua các trang = 18 mã khác nhau (không lặp) = 18 chuyến của khách (không mất), và bốn trang khớp từng dòng với cột `trang` của bảng đối chiếu ở mục 1. Truy vấn kiểm tra này nên nằm trong bộ test của API phân trang, chạy trên fixture có khoá trùng cố ý — fixture không có khoá trùng thì cách sai ở mục 3 cũng qua test.
 
 ## 6. Hai cột sắp ngược chiều
 
@@ -237,7 +237,7 @@ LIMIT 5;
 (5 rows)
 ```
 
-Con trỏ (18/10 14:30, 101883) là dòng cuối trang 1 theo thứ tự này (trang 1 kết thúc bằng 101882, 101883). Trong nhóm 14:30 điều kiện là `code > 101883`, còn nhóm 10/10 bắt đầu từ 100971 — mã nhỏ nhất. Với cột số còn một cách: đổi dấu để hai cột cùng chiều, `(requested_at, -code) < ('2026-10-18 14:30:00+07', -101883)` kèm `ORDER BY requested_at DESC, -code DESC` — thí nghiệm `pg018-nguoc-chieu-doi-dau.sql` ra đúng 5 dòng trên. Cách này không dùng được cho cột chữ, và chỉ mục phục vụ nó phải được tạo trên biểu thức `-code` (Phần 3).
+Con trỏ (18/10 14:30, 101883) là dòng cuối trang 1 theo thứ tự này (trang 1 kết thúc bằng 101882, 101883). Trong nhóm 14:30 điều kiện là `code > 101883`, còn nhóm 10/10 bắt đầu từ 100971 — mã nhỏ nhất. Với cột số còn một cách: đổi dấu để hai cột cùng chiều, `(requested_at, -code) < ('2026-10-18 14:30:00+07', -101883)` kèm `ORDER BY requested_at DESC, -code DESC` — thí nghiệm `pg018-nguoc-chieu-doi-dau.sql` ra đúng 5 dòng trên. Cách này không dùng được cho cột chữ, và chỉ mục phục vụ cách này phải được tạo trên biểu thức `-code` (Phần 3).
 
 ## 7. Trang trước và «còn trang sau?»
 
@@ -256,7 +256,7 @@ ORDER BY requested_at DESC, code DESC;
 
 Kết quả: 101883, 101882, 101555, 101224, 100976 — đúng trang 2. Quên đảo chiều sắp (giữ `DESC` bên trong) thì `LIMIT 5` lấy 5 dòng **mới nhất** trong mọi dòng phía trước — tức trang 1, không phải trang 2. Lỗi này cũng không báo gì; thí nghiệm `pg018-trang-truoc-con-trang-sau.sql` chạy cả hai.
 
-Để biết có nên hiện nút «Xem thêm», xin **n + 1** dòng, hiển thị n: sau con trỏ của trang 2 (100976) truy vấn `LIMIT 6` trả 6 dòng ⇒ còn trang; sau con trỏ của trang 3 (100971) chỉ trả 3 ⇒ trang 4 là trang cuối, ẩn nút. Không cần `count(*)` cho việc đó.
+Để biết có nên hiện nút «Xem thêm», lấy **n + 1** dòng, hiển thị n dòng: sau con trỏ của trang 2 (100976) truy vấn `LIMIT 6` trả 6 dòng ⇒ còn trang; sau con trỏ của trang 3 (100971) chỉ trả 3 ⇒ trang 4 là trang cuối, ẩn nút. Không cần `count(*)` cho việc đó.
 
 ## 8. Dữ liệu đổi giữa hai lần tải trang
 
@@ -283,9 +283,9 @@ Chuyến mới chen vào đầu danh sách, mọi dòng dịch xuống một b�
 
 Keyset không biến danh sách thành ảnh chụp cố định. Chuyến mới hơn trang 1 không hiện cho tới khi người dùng tải lại từ đầu — với lịch sử «mới nhất trước», đó là hành vi mong muốn. Nhưng một dòng được chèn **với giờ cũ** (nhập bù, đồng bộ trễ) nằm sau con trỏ sẽ xuất hiện ở trang sau, còn nằm trước con trỏ thì người đang lật trang không thấy. Mỗi trang là một câu lệnh riêng nhìn dữ liệu ở thời điểm của nó; muốn mọi trang cùng nhìn một thời điểm là chuyện giao dịch và snapshot của Phần 4.
 
-## 9. Vì sao keyset rẻ — chỉ nói ý
+## 9. Vì sao keyset rẻ — chỉ nêu ý chính
 
-Với `OFFSET k`, server vẫn phải tạo ra k dòng đầu theo thứ tự rồi bỏ đi; trang càng sâu càng đắt. Với keyset, nếu có chỉ mục theo đúng thứ tự `(customer_id, requested_at, code)`, PostgreSQL có thể bắt đầu đọc **ngay tại con trỏ** và dừng sau n dòng, nên trang thứ 1.000 tốn gần bằng trang 1. Lược đồ lab có `ix_trips_customer_requested ON trips (customer_id, requested_at DESC)` — chưa gồm `code`. Chỉ mục ấy đã đủ chưa, kế hoạch thực thi trông ra sao và đo thế nào cho đúng là nội dung Phần 3; bài này không đo hiệu năng, và fixture 18 dòng cũng không đủ để đo.
+Với `OFFSET k`, server vẫn phải tạo ra k dòng đầu theo thứ tự rồi bỏ đi; trang càng sâu càng đắt. Với keyset, nếu có chỉ mục theo đúng thứ tự `(customer_id, requested_at, code)`, PostgreSQL có thể bắt đầu đọc **ngay tại con trỏ** và dừng sau n dòng, nên trang thứ 1.000 tốn gần bằng trang 1. Schema của lab có `ix_trips_customer_requested ON trips (customer_id, requested_at DESC)` — chưa gồm `code`. Chỉ mục ấy đã đủ chưa, query plan trông ra sao và đo thế nào cho đúng là nội dung Phần 3; bài này không đo hiệu năng, và fixture 18 dòng cũng không đủ để đo.
 
 ## 10. Lỗi thường gặp và đánh đổi
 
@@ -301,7 +301,7 @@ Với `OFFSET k`, server vẫn phải tạo ra k dòng đầu theo thứ tự r�
 Đánh đổi:
 
 - **Keyset hay `OFFSET`:** keyset ổn định khi dữ liệu đổi và không đắt dần theo độ sâu, nhưng chỉ đi «trang sau/trang trước», không nhảy tới trang 7 và không tự cho tổng số trang. `OFFSET` có khoá phụ vẫn hợp với danh sách ngắn, ít đổi, cần nhảy trang (màn quản trị).
-- **Con trỏ lộ giá trị hay mã hoá:** con trỏ dạng `2026-10-18T14:30:00+07:00|101884` dễ gỡ lỗi; mã hoá thành chuỗi mờ (*opaque token*) giữ được quyền đổi khoá sắp xếp sau này. Dù dạng nào, server phải kiểm con trỏ thuộc đúng `ORDER BY` đang dùng.
+- **Con trỏ lộ giá trị hay mã hoá:** con trỏ dạng `2026-10-18T14:30:00+07:00|101884` dễ gỡ lỗi; mã hoá thành chuỗi mờ (*opaque token*) giữ được quyền đổi khoá sắp xếp sau này. Dù dạng nào, server phải kiểm tra rằng con trỏ thuộc đúng `ORDER BY` đang dùng.
 - **Khoá phụ là `code` hay `id`:** cả hai duy nhất; `code` tăng theo thời điểm tạo nên con trỏ dễ đọc, `id` là uuid ngẫu nhiên — đúng về thứ tự nhưng vô nghĩa với người vận hành.
 
 ## 11. Bài tập
@@ -316,7 +316,7 @@ WHERE customer_id = 'cb000000-0000-4000-8000-000000000001'
   AND (fare, code) &lt; (57000, 101555)
 ORDER BY fare DESC, code DESC
 LIMIT 5;</code></pre>
-<p>Chạy thật: trang 1 là 100975 (78.000), 100500 (75.000), 102611 (61.000), 100976 (61.000), 101555 (57.000) ⇒ con trỏ (57000, 101555). Trang 2: 100669 (57.000), 101883, 100972 (53.000), 101885, 100974 (49.000). Con trỏ chỉ có cước với <code>fare &lt; 57000</code> bắt đầu từ 101883 — <b>mất 100669</b>, chuyến cùng 57.000 đ với dòng cuối trang 1. Truy vấn đệ quy như mục 5 đổi khoá thành <code>(fare, code)</code> cho 4 trang, 18 mã, 18 mã khác nhau. Không có trong lab chính, nằm ở <code>p02/thu-nghiem/pg018-bai-tap-1-theo-cuoc.sql</code>.</p>
+<p>Chạy thật: trang 1 là 100975 (78.000), 100500 (75.000), 102611 (61.000), 100976 (61.000), 101555 (57.000) ⇒ con trỏ (57000, 101555). Trang 2: 100669 (57.000), 101883, 100972 (53.000), 101885, 100974 (49.000). Nếu con trỏ chỉ có cước thì điều kiện <code>fare &lt; 57000</code> bắt đầu từ 101883 — <b>mất 100669</b>, chuyến cùng 57.000 đ với dòng cuối trang 1. Truy vấn đệ quy như mục 5 đổi khoá thành <code>(fare, code)</code> cho kết quả 4 trang, 18 mã, 18 mã khác nhau. Không có trong lab chính, nằm ở <code>p02/thu-nghiem/pg018-bai-tap-1-theo-cuoc.sql</code>.</p>
 </details>
 
 **Bài 2.** Người dùng đang ở trang 2 (dòng đầu là 101883) và bấm «Trang trước». Viết câu lệnh. Khi đang ở trang 1, câu «trang trước» trả gì, và ứng dụng dùng kết quả đó thế nào?

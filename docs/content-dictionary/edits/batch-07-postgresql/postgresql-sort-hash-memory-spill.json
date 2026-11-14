@@ -1,0 +1,15 @@
+{"file":"postgresql-sort-hash-memory-spill.md","edits":[
+{"old":"đo bộ nhớ nhân theo nút, phiên, worker.","new":"đo bộ nhớ nhân lên theo nút, phiên, worker.","reason":"Thiếu 'lên', khó hiểu","severity":"medium"},
+{"old":"Mỗi nút được một hạn mức:","new":"Mỗi nút có một hạn mức:","reason":"Bị động gượng","severity":"low"},
+{"old":"| Sort và là cơ số cho nút băm |","new":"| Sort; đồng thời là cơ số tính hạn mức cho nút băm |","reason":"Câu cụt, thiếu chủ ngữ cho 'là'","severity":"medium"},
+{"old":"song song (parallel query) và JIT tắt trong cluster lab trừ chỗ ghi khác.","new":"song song (parallel query) và JIT tắt trong cluster lab, trừ chỗ có ghi chú khác.","reason":"'ghi khác' cụt","severity":"medium"},
+{"old":"Bốn nơi cho bằng chứng:","new":"Có bốn nơi cho thấy bằng chứng:","reason":"Câu cụt","severity":"low"},
+{"old":"Tài liệu ghi `log_temp_files = 0` ghi mọi file,","new":"Theo tài liệu, `log_temp_files = 0` ghi nhật ký mọi file,","reason":"Lặp 'ghi ghi', thiếu rõ nghĩa","severity":"medium"},
+{"old":"Với Sort thì ngược kỳ vọng:","new":"Với Sort thì kết quả ngược với kỳ vọng:","reason":"Thiếu danh từ","severity":"medium"},
+{"old":"lab chưa kiểm nguyên nhân,","new":"lab chưa kiểm tra nguyên nhân,","reason":"'kiểm' cụt","severity":"medium"},
+{"old":"| Đỉnh bộ nhớ riêng các backend (MB) |","new":"| Đỉnh bộ nhớ riêng của các backend (MB) |","reason":"Thiếu 'của'","severity":"low"},
+{"old":"**Suy `work_mem` cần đặt từ con số `Disk:`.**","new":"**Suy ra mức `work_mem` cần đặt từ con số `Disk:`.**","reason":"Câu thiếu động từ/danh từ","severity":"medium"},
+{"old":"Nó là hạn mức mỗi nút, mỗi tiến trình;","new":"Đó là hạn mức cho mỗi nút, mỗi tiến trình;","reason":"Tránh 'Nó' ở đầu câu","severity":"low"},
+{"old":"đo thực tế bằng tải giống production như cách pgbench ở mục 7.","new":"đo thực tế bằng tải giống production, như cách làm với pgbench ở mục 7.","reason":"Câu cụt","severity":"low"},
+{"old":"bạn đo được tràn đĩa của sort/hash","new":"bạn đo được mức tràn đĩa của sort/hash","reason":"Thiếu danh từ","severity":"low"}
+]}

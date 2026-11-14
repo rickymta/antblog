@@ -8,7 +8,7 @@ tags: [postgresql, pg-019, recursive-cte, with-recursive, cay, chu-trinh, toi-no
 language: vi
 ---
 
-Tới Nơi không điều phối theo quận huyện hành chính mà theo một **cây khu vực** riêng: thành phố chia thành vùng, vùng chia thành các khu đón khách. Bảng thưởng tài xế và báo cáo doanh thu vùng đều hỏi một kiểu câu: "tổng của mọi thứ nằm **dưới** nút này". Cây hôm nay sâu ba tầng, nhưng vận hành đã báo trước sẽ tách khu đông thành "tiểu khu" — câu SQL không được giả định số tầng.
+Tới Nơi không điều phối theo quận huyện hành chính mà theo một **cây khu vực** riêng: thành phố chia thành vùng, vùng chia thành các khu đón khách. Bảng thưởng tài xế và báo cáo doanh thu vùng đều cần trả lời cùng một kiểu câu hỏi: "tổng của mọi thứ nằm **dưới** nút này". Cây hôm nay sâu ba tầng, nhưng vận hành đã báo trước sẽ tách khu đông thành "tiểu khu" — câu SQL không được giả định số tầng.
 
 Một buổi sáng, báo cáo vùng Hà Nội chỉ còn 340 chuyến thay vì 1.094. Không truy vấn nào lỗi, không ràng buộc nào báo vi phạm: một bản cập nhật cây đã tạo ra **chu trình**. Bài này dùng `WITH RECURSIVE` để duyệt cây có điều kiện dừng, cộng dồn số liệu theo cây có đối chiếu, và phát hiện dữ liệu cây bị vòng trước khi tin vào con số.
 
@@ -19,7 +19,7 @@ Một buổi sáng, báo cáo vùng Hà Nội chỉ còn 340 chuyến thay vì 1
 
 ## 1. Cây khu vực nằm trong một bảng
 
-Bảng `areas` (thêm ở `p02/00-mo-rong-schema.sql`) lưu cây kiểu **danh sách kề** (adjacency list): mỗi nút một dòng, `parent_id` trỏ tới nút cha trong chính bảng đó qua FK tự tham chiếu `fk_areas_parent`. Gốc là thành phố, `parent_id` NULL. Cột `level` nhận `city` / `district` (vùng) / `zone` (khu); `id` là số nhỏ dễ đọc (2 = HN, 21 = HN-TT, 211 = HN-TT-01). Hai CHECK đáng chú ý: `ck_areas_root_no_parent` — là thành phố **khi và chỉ khi** không có cha; `ck_areas_not_own_parent` — `parent_id <> id`. Mục 5 cho thấy CHECK thứ hai chưa đủ.
+Bảng `areas` (thêm ở `p02/00-mo-rong-schema.sql`) lưu cây kiểu **danh sách kề** (adjacency list): mỗi nút một dòng, `parent_id` trỏ tới nút cha trong chính bảng đó qua FK tự tham chiếu `fk_areas_parent`. Gốc là thành phố, `parent_id` NULL. Cột `level` nhận `city` / `district` (vùng) / `zone` (khu); `id` là số nhỏ dễ đọc (2 = HN, 21 = HN-TT, 211 = HN-TT-01). Hai CHECK đáng chú ý: `ck_areas_root_no_parent` — nút là thành phố **khi và chỉ khi** không có cha; `ck_areas_not_own_parent` — `parent_id <> id`. Mục 5 cho thấy CHECK thứ hai chưa đủ.
 
 Fixture có **34 nút**: 3 thành phố, 10 vùng, 21 khu; vùng `HN-NA` mới mở, chưa có khu. Chuyến gắn với khu đón qua `trips.pickup_area_id` (36 chuyến NULL vì mất GPS); K8 của `02-kiem-tra-fixture.sql` bảo đảm khu đón là nút `zone` đúng thành phố.
 
@@ -42,7 +42,7 @@ SELECT n FROM dem;               -- 5 dòng: 1 … 5
 Chữ "đệ quy" dễ gây hiểu lầm. Theo [tài liệu PostgreSQL 17](https://www.postgresql.org/docs/17/queries-with.html), đây là một **vòng lặp** trên hai bảng tạm:
 
 1. Chạy phần neo; các dòng vừa vào kết quả, vừa vào **bảng làm việc** (working table).
-2. Chạy phần đệ quy, trong đó tên CTE **chỉ chứa bảng làm việc** — các dòng mới của vòng trước, không phải toàn bộ kết quả. Dòng sinh ra vào **bảng trung gian** và được nối vào kết quả.
+2. Chạy phần đệ quy, trong đó tên CTE **chỉ chứa bảng làm việc** — các dòng mới của vòng trước, không phải toàn bộ kết quả. Các dòng sinh ra được đưa vào **bảng trung gian** rồi nối vào kết quả.
 3. Bảng trung gian thay cho bảng làm việc; quay lại bước 2.
 4. **Dừng khi bảng làm việc rỗng** — một vòng không sinh dòng nào.
 
@@ -55,9 +55,9 @@ Với `UNION` (không `ALL`), PostgreSQL còn bỏ dòng trùng với dòng đã
 | 2 | 10 khu `SG-DO-01` … `SG-TT-03` | 15 dòng |
 | 3 | con của 10 khu: không có ⇒ **dừng** | 15 dòng |
 
-- **Phải có đường tới vòng rỗng.** Bỏ `WHERE n < 5` là chạy mãi. Trên cây, vòng rỗng đến khi gặp lá — chỉ đúng khi dữ liệu thật sự là cây (mục 5).
-- **Thứ tự dòng không được hứa.** Tài liệu nói thuật toán ra kết quả theo bề rộng nhưng đó là chi tiết cài đặt, không nên dựa vào. Muốn thứ tự nào, viết `ORDER BY`.
-- **Phần đệ quy có giới hạn cú pháp**: không hàm gộp, không tham chiếu CTE hai lần, không đặt tham chiếu ở phía "có thể NULL" của outer join (mục 6). Gộp và LEFT JOIN để cho truy vấn **ngoài**.
+- **Phải bảo đảm truy vấn tới được vòng rỗng.** Bỏ `WHERE n < 5` là chạy mãi. Trên cây, vòng rỗng đến khi gặp lá — chỉ đúng khi dữ liệu thật sự là cây (mục 5).
+- **Thứ tự dòng không được hứa.** Tài liệu nói thuật toán ra kết quả theo chiều rộng nhưng đó là chi tiết cài đặt, không nên dựa vào. Muốn thứ tự nào, viết `ORDER BY`.
+- **Phần đệ quy có giới hạn cú pháp**: không hàm gộp, không tham chiếu CTE hai lần, không đặt tham chiếu ở phía "có thể NULL" của outer join (mục 6). Hãy để truy vấn **ngoài** làm việc gộp và LEFT JOIN.
 
 ## 3. Đi xuống, đi lên
 
@@ -88,7 +88,7 @@ ORDER BY thu_tu_duyet;
 (15 rows)
 ```
 
-`a.parent_id = c.id` nghĩa là "tìm dòng có cha nằm trong bảng làm việc" — đi **xuống**. Mệnh đề `SEARCH` (có từ PostgreSQL 14) không đổi cách đánh giá; nó chỉ thêm một cột để `ORDER BY`. Trên 17.5, `DEPTH FIRST` sinh mảng đường đi như `{(SG),(SG-DO),(SG-DO-01)}` (hết nhánh này mới sang nhánh kia), còn `BREADTH FIRST` sinh bản ghi (độ sâu, khoá) như `(2,SG-DO-01)` (hết tầng này mới sang tầng sau). Cột trong `BY` quyết định thứ tự giữa anh em. Trước bản 14, tự mang mảng `ARRAY[code]`, nối `c.duong_di || a.code` mỗi vòng rồi sắp theo nó (lab có cách viết này). Lọc như `WHERE code LIKE 'SG-TT-%'` phải đặt ở truy vấn **ngoài**: lọc trong phần đệ quy là cắt luôn nhánh con.
+`a.parent_id = c.id` nghĩa là "tìm dòng có cha nằm trong bảng làm việc" — đi **xuống**. Mệnh đề `SEARCH` (có từ PostgreSQL 14) không đổi cách đánh giá; nó chỉ thêm một cột để `ORDER BY`. Trên 17.5, `DEPTH FIRST` sinh mảng đường đi như `{(SG),(SG-DO),(SG-DO-01)}` (hết nhánh này mới sang nhánh kia), còn `BREADTH FIRST` sinh bản ghi (độ sâu, khoá) như `(2,SG-DO-01)` (hết tầng này mới sang tầng sau). Cột trong `BY` quyết định thứ tự giữa anh em. Trước bản 14, phải tự mang theo mảng `ARRAY[code]`, nối `c.duong_di || a.code` mỗi vòng rồi sắp theo nó (lab có cách viết này). Lọc như `WHERE code LIKE 'SG-TT-%'` phải đặt ở truy vấn **ngoài**: lọc trong phần đệ quy là cắt luôn nhánh con.
 
 Lật JOIN thành `a.id = t.parent_id` là đi **lên** — màn trực ca cần biết khu `HN-TA-02` thuộc vùng nào, thành phố nào:
 
@@ -146,9 +146,9 @@ ORDER BY n.code COLLATE "C";
 
 Ba chi tiết giữ số đúng, đều là bài học cũ của Phần 2: cặp (nút, chính nó) để chuyến ở chính một nút được tính cho nút đó; `LEFT JOIN` + `count(t.id)` để vùng `HN-NA` hiện 0 chứ không bị đếm thành 1 ([PG-011](/articles/postgresql-null-case-coalesce), [PG-013](/articles/postgresql-join-quan-he-cardinality)); doanh thu chỉ tính `completed` bằng `FILTER`, bọc `coalesce` vì `sum` trên tập rỗng là NULL ([PG-012](/articles/postgresql-aggregate-group-by-having)).
 
-Không có nhân dòng kiểu PG-013 vì mỗi khu chỉ có **một** đường lên gốc — một **giả định** về dữ liệu, nên lab đối chiếu ngay: cộng ba thành phố qua cây ra **3.138** chuyến, bằng đếm thẳng các chuyến có khu đón (3.138); cộng 36 chuyến mất GPS là đủ 3.174 chuyến của bảng. Đây là kiểu "tổng qua đường vòng = tổng đếm thẳng" của [PG-014](/articles/postgresql-subquery-exists-cte), và mục 5 cho thấy nó bắt được lỗi thật.
+Không xảy ra hiện tượng nhân dòng như ở PG-013 vì mỗi khu chỉ có **một** đường lên gốc — một **giả định** về dữ liệu, nên lab đối chiếu ngay: cộng ba thành phố qua cây ra **3.138** chuyến, bằng đếm thẳng các chuyến có khu đón (3.138); cộng 36 chuyến mất GPS là đủ 3.174 chuyến của bảng. Đây là kiểu "tổng qua đường vòng = tổng đếm thẳng" của [PG-014](/articles/postgresql-subquery-exists-cte), và mục 5 cho thấy nó bắt được lỗi thật.
 
-Cuối tệp là câu kiểm sức khoẻ cây: đi xuống từ mọi gốc với **chốt an toàn** `WHERE c.do_sau < 10`, rồi so số nút đi tới được với tổng số nút. Kết quả `34 | 34 | 2 | 22`: 34 nút, cả 34 tới được từ gốc, sâu nhất 2, 22 lá (21 khu + `HN-NA`). Ngưỡng chốt phải rộng hơn độ sâu nghiệp vụ để không cắt nhầm cây hợp lệ, đủ nhỏ để dừng khi dữ liệu hỏng.
+Cuối tệp là câu kiểm tra sức khoẻ của cây: đi xuống từ mọi gốc với **chốt an toàn** `WHERE c.do_sau < 10`, rồi so số nút đi tới được với tổng số nút. Kết quả `34 | 34 | 2 | 22`: 34 nút, cả 34 tới được từ gốc, sâu nhất 2, 22 lá (21 khu + `HN-NA`). Ngưỡng chốt phải rộng hơn độ sâu nghiệp vụ để không cắt nhầm cây hợp lệ, đủ nhỏ để dừng khi dữ liệu hỏng.
 
 ## 5. Khi dữ liệu không còn là cây
 
@@ -188,11 +188,11 @@ Câu lệnh thành công: cha tồn tại (FK), vùng có cha, không nút nào 
 <figcaption><b>Hình 1 · Cây Hà Nội sau bản cập nhật đảo cha.</b> Vòng đi từ con tới cha: 21 → 221 → 22 → 211 → 21. Ba khu 212, 213, 222 không nằm trên vòng nhưng treo vào nó nên cũng mất đường về gốc. Số liệu: <code>19-chu-trinh.sql</code>.</figcaption>
 </figure>
 
-### 5.2 Hệ quả im lặng, và vì sao đi xuống vẫn dừng
+### 5.2 Hệ quả không báo lỗi, và vì sao đi xuống vẫn dừng
 
 Chạy closure chỉ cho gốc Hà Nội (neo `WHERE code = 'HN'`): **5 nút, 340 chuyến** thay vì 12 nút, 1.094 chuyến. Không lỗi, không cảnh báo. Câu đối chiếu của mục 4 thì lệch ngay: qua cây 340, đếm thẳng các chuyến Hà Nội có khu đón vẫn 1.094 (thí nghiệm ngoài lab trong cùng giao dịch).
 
-Vì sao đi xuống từ gốc **vẫn dừng** trên dữ liệu có vòng? Mỗi nút chỉ có một cha. Nếu đi xuống từ gốc chạm được một nút trên vòng, thì cha của nút đó — cũng trên vòng — phải được chạm trước, rồi cha của cha… lần ngược mãi trên vòng, không bao giờ về tới gốc. Vô lý. Vậy với cây lưu bằng một cột `parent_id`, **vòng không bao giờ tới được từ gốc**: đi xuống từ gốc luôn dừng, cái giá là nút trên vòng và hậu duệ của chúng lặng lẽ biến khỏi báo cáo.
+Vì sao đi xuống từ gốc **vẫn dừng** trên dữ liệu có vòng? Mỗi nút chỉ có một cha. Nếu đi xuống từ gốc chạm được một nút trên vòng, thì cha của nút đó — cũng trên vòng — phải được chạm trước, rồi cha của cha… lần ngược mãi trên vòng, không bao giờ về tới gốc. Vô lý. Vậy với cây lưu bằng một cột `parent_id`, **vòng không bao giờ tới được từ gốc**: đi xuống từ gốc luôn dừng, cái giá là nút trên vòng và hậu duệ của chúng biến mất khỏi báo cáo mà không có cảnh báo nào.
 
 Ngược lại, hai kiểu truy vấn sau **chạy mãi**: đi **lên** từ một nút trên vòng hoặc treo vào vòng (như `HN-TT-01`), và bảng closure của mục 4 — phần neo là **mọi nút**, kể cả nút 21. Lab không chạy hai truy vấn "trần" đó. Mẹo `LIMIT` ở truy vấn ngoài mà tài liệu nhắc khi thử truy vấn có thể lặp thường vô tác dụng nếu truy vấn ngoài sắp xếp hay nối kết quả, và tài liệu khuyên không dùng ở production. Dùng một trong ba cách dưới.
 
@@ -234,7 +234,7 @@ Còn đổi `UNION ALL` thành `UNION`? `UNION` chỉ bỏ dòng **trùng hoàn 
 | Chỉ `id`, `UNION` | 4 dòng | Dòng `211` lần hai trùng hoàn toàn ⇒ bị loại, vòng sau rỗng |
 | `id` + `bac`, `UNION`, chốt `bac < 12` | 13 dòng, 4 nút, `bac` lớn nhất 12 | Chỉ nhờ chốt; bỏ chốt là chạy mãi |
 
-Tài liệu nói đúng điều này: một vòng thường không tạo dòng trùng hoàn toàn, nên cần cột độ sâu là `UNION` không cứu được.
+Tài liệu nói đúng điều này: một vòng thường không tạo dòng trùng hoàn toàn, nên khi truy vấn mang theo cột độ sâu thì `UNION` không cứu được.
 
 ### 5.4 Truy vấn kiểm tra cho cả bảng
 
@@ -296,7 +296,7 @@ Lời giải không nằm trong luồng chính của lab; mỗi tệp đã chạ
 **Bài 2.** Viết lại phép cộng dồn cấp vùng và thành phố của mục 4 **không dùng đệ quy**, dựa vào cây ba tầng. Đối chiếu, rồi nói cách này vỡ khi nào.
 
 <details><summary><b>Lời giải</b></summary>
-<p>CTE <code>chuyen_vung</code> nối mỗi chuyến có khu đón lên khu <code>z</code> rồi vùng <code>v = z.parent_id</code>, giữ <code>v.id AS vung_id</code> và <code>v.parent_id AS tp_id</code>; truy vấn ngoài lấy mọi nút không phải khu, <code>LEFT JOIN chuyen_vung AS cv ON cv.vung_id = n.id OR cv.tp_id = n.id</code>, rồi đếm và cộng doanh thu như mục 4. Ra đúng 13 dòng của mục 4 (HN 1.094 / 62.246.000, HN-NA 0 / 0…). Mỗi chuyến khớp đúng một vùng và một thành phố nên <code>OR</code> không làm nở dòng. Thêm tầng "tiểu khu" là vỡ không báo lỗi: <code>z.parent_id</code> khi đó là khu chứ không phải vùng. Cách này còn dựa vào K8 (khu đón luôn là nút <code>zone</code>), nên K8 phải chạy cùng báo cáo.</p>
+<p>CTE <code>chuyen_vung</code> nối mỗi chuyến có khu đón lên khu <code>z</code> rồi vùng <code>v = z.parent_id</code>, giữ <code>v.id AS vung_id</code> và <code>v.parent_id AS tp_id</code>; truy vấn ngoài lấy mọi nút không phải khu, <code>LEFT JOIN chuyen_vung AS cv ON cv.vung_id = n.id OR cv.tp_id = n.id</code>, rồi đếm và cộng doanh thu như mục 4. Ra đúng 13 dòng của mục 4 (HN 1.094 / 62.246.000, HN-NA 0 / 0…). Mỗi chuyến khớp đúng một vùng và một thành phố nên <code>OR</code> không làm nở dòng. Thêm tầng "tiểu khu" thì cách này vỡ mà không báo lỗi: <code>z.parent_id</code> khi đó là khu chứ không phải vùng. Cách này còn dựa vào K8 (khu đón luôn là nút <code>zone</code>), nên K8 phải chạy cùng báo cáo.</p>
 </details>
 
 **Bài 3.** Với cây cố định ba tầng, chặn chu trình ngay ở **schema**, rồi chứng minh bản cập nhật đảo cha bị từ chối.

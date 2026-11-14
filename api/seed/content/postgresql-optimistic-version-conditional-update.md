@@ -1,20 +1,20 @@
 ---
 slug: postgresql-optimistic-version-conditional-update
 title: "Optimistic concurrency và cập nhật có điều kiện: version, trạng thái và số dòng đã đổi"
-summary: "Tổng đài viên Tới Nơi sửa cước chuyến 400108 trong một phút; khách huỷ chuyến giữa chừng, bấm Lưu xong chuyến «sống lại». Học cách ghi kèm điều kiện version/trạng thái và đọc số dòng đã đổi để bắt xung đột."
+summary: "Tổng đài viên Tới Nơi sửa cước chuyến 400108 trong một phút; khách huỷ chuyến giữa chừng, bấm Lưu xong thì chuyến «sống lại». Học cách ghi kèm điều kiện version/trạng thái và đọc số dòng đã đổi để bắt xung đột."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-035, optimistic-concurrency, version, lost-update, read-committed, toi-noi]
 language: vi
 ---
 
-Một khách gọi tổng đài Tới Nơi xin đổi điểm đón của chuyến **400108**; tổng đài viên mở màn sửa chuyến, thấy cước 38.000 đ, trạng thái `requested`, rồi mất một phút trao đổi và gõ cước mới 45.000 đ. Trong phút đó, chính khách đã bấm **Huỷ** trên app. Tổng đài viên bấm **Lưu**: màn sửa gửi lại mọi trường của form, kể cả trạng thái `requested` đọc từ một phút trước. Chuyến đã huỷ «sống lại», hệ thống đi tìm tài xế cho một khách không còn cần xe. Không có lỗi nào được báo.
+Một khách gọi tổng đài Tới Nơi xin đổi điểm đón của chuyến **400108**; tổng đài viên mở màn sửa chuyến, thấy cước 38.000 đ, trạng thái `requested`, rồi mất một phút trao đổi và gõ cước mới 45.000 đ. Trong phút đó, chính khách đã bấm **Huỷ** trên app. Tổng đài viên bấm **Lưu**: màn sửa gửi lại mọi trường của form, kể cả trạng thái `requested` đọc từ một phút trước. Chuyến đã huỷ «sống lại», hệ thống đi tìm tài xế cho một khách không còn cần xe. Hệ thống không báo lỗi nào.
 
 Ở PG-034 ta đã thấy lost update (mất cập nhật) giữa hai giao dịch ngắn. Lần này khoảng hở giữa «đọc» và «ghi» là thời gian con người gõ phím — không thể mở giao dịch và giữ khoá dòng suốt một phút. Bài này dùng cách **lạc quan**: không khoá khi đọc, nhưng lúc ghi chỉ ghi nếu dòng *chưa đổi* kể từ khi đọc, và đọc **số dòng đã đổi** để biết mình thắng hay thua.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-035 · Phần 4/6 · Trung bình</span>
-<p>Đọc trước: <a href="/articles/postgresql-isolation-read-committed-repeatable-read">PG-034 · Read Committed và Repeatable Read</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>35-optimistic-version.sql</code>, thí nghiệm <code>thu-nghiem/pg035-version-rr-ham-luu-updated-at-xmin.sql</code>). Sau bài này, bạn ngăn được ghi đè trạng thái bằng cột version và kiểm số dòng đã đổi, kể cả khi hai lần lưu chạy đồng thời thật.</p>
+<p>Đọc trước: <a href="/articles/postgresql-isolation-read-committed-repeatable-read">PG-034 · Read Committed và Repeatable Read</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>35-optimistic-version.sql</code>, thí nghiệm <code>thu-nghiem/pg035-version-rr-ham-luu-updated-at-xmin.sql</code>). Sau bài này, bạn ngăn được ghi đè trạng thái bằng cột version và kiểm tra số dòng đã đổi, kể cả khi hai lần lưu chạy đồng thời thật.</p>
 </div>
 
 ## 1. Lab dùng trong bài
@@ -27,11 +27,11 @@ node pg/run-pg.mjs p04 --only 35
 node pg/run-pg.mjs --nen p04/lab.json:p04 p04/thu-nghiem/pg035-version-rr-ham-luu-updated-at-xmin.sql
 ```
 
-Nền của Phần 4 thêm cột `trips.version integer NOT NULL DEFAULT 1` (kèm `CHECK (version > 0)`) và 10 chuyến đang chờ nhận 400101–400110, đều `requested`, version 1; chuyến 400108 có cước 38.000 đ. Hai phiên psql thật `[A]` (tổng đài viên) và `[B]` (khách) chạy theo lịch tất định. Lệnh `SELECT … \gset` của psql lưu kết quả vào biến của *phiên* (`:v`, `:'trang_thai'`) — giả lập giá trị form mà ứng dụng giữ; `:ROW_COUNT` là số dòng câu trước đã đổi. Kết quả dưới đây chép từ `p04/OUTPUT.txt`, đã bỏ các dòng `-- [lab]`.
+Nền của Phần 4 thêm cột `trips.version integer NOT NULL DEFAULT 1` (kèm `CHECK (version > 0)`) và 10 chuyến đang chờ nhận 400101–400110, đều `requested`, version 1; chuyến 400108 có cước 38.000 đ. Hai phiên psql thật `[A]` (tổng đài viên) và `[B]` (khách) chạy theo lịch tất định. Lệnh `SELECT … \gset` của psql lưu kết quả vào biến của *phiên* (`:v`, `:'trang_thai'`) — giả lập giá trị form mà ứng dụng giữ; `:ROW_COUNT` là số dòng mà câu trước đã đổi. Kết quả dưới đây chép từ `p04/OUTPUT.txt`, đã bỏ các dòng `-- [lab]`.
 
 ## 2. Lỗi gốc: form ghi lại mọi trường
 
-Lịch §1 của lab, không kiểm gì cả:
+Lịch §1 của lab, không kiểm tra gì cả:
 
 | Bước | [A] tổng đài viên | [B] khách |
 |---|---|---|
@@ -49,13 +49,13 @@ Lịch §1 của lab, không kiểm gì cả:
 
 Cả hai câu UPDATE đều thành công, đều chạy dưới Read Committed mặc định, không ai chờ ai — chúng cách nhau cả phút. Database làm đúng điều được yêu cầu: ghi `status = 'requested'`. Lỗi nằm ở chỗ câu ghi của A **dựa trên một lần đọc đã cũ** mà không nói ra điều đó. Mức cô lập không cứu được: hai giao dịch không chồng nhau về thời gian, nên không mức nào coi đây là xung đột.
 
-Hai sửa vội thường gặp đều không đủ. «Chỉ gửi trường đã đổi» (không gửi `status`) giữ được lệnh huỷ, nhưng cước 45.000 đ vẫn ghi vào một chuyến đã huỷ, và hai người cùng sửa cước thì người sau vẫn đè người trước. «Đọc lại ngay trước khi ghi rồi so trong ứng dụng» thu hẹp khoảng hở chứ không đóng nó: giữa câu đọc lại và câu ghi vẫn có thể có người chen vào (PG-040 đếm được điều này bằng phép thử đồng thời).
+Hai cách sửa vội thường gặp đều không đủ. «Chỉ gửi trường đã đổi» (không gửi `status`) giữ được lệnh huỷ, nhưng cước 45.000 đ vẫn ghi vào một chuyến đã huỷ, và hai người cùng sửa cước thì người sau vẫn đè người trước. «Đọc lại ngay trước khi ghi rồi so trong ứng dụng» thu hẹp khoảng hở chứ không đóng nó: giữa câu đọc lại và câu ghi vẫn có thể có người chen vào (PG-040 đếm được điều này bằng phép thử đồng thời).
 
 ## 3. Optimistic concurrency: điều kiện nằm trong chính câu ghi
 
-**Optimistic concurrency control** (kiểm soát đồng thời lạc quan) giả định xung đột hiếm: không khoá gì khi đọc, chỉ *kiểm* lúc ghi. Ngược lại, **pessimistic** (bi quan) khoá dòng ngay khi đọc (`SELECT … FOR UPDATE`, PG-036) và bắt người khác chờ.
+**Optimistic concurrency control** (kiểm soát đồng thời lạc quan) giả định xung đột hiếm: không khoá gì khi đọc, chỉ *kiểm tra* lúc ghi. Ngược lại, **pessimistic** (bi quan) khoá dòng ngay khi đọc (`SELECT … FOR UPDATE`, PG-036) và bắt người khác chờ.
 
-Công cụ là một cột **version** (phiên bản dòng): mỗi lần sửa thì `version = version + 1`, và câu ghi kèm điều kiện `version = <giá trị đã đọc>`. Kiểm và ghi nằm trong **một** câu UPDATE, nên không có khoảng hở giữa chúng — đây là dạng compare-and-set (so rồi gán) ở mức dòng. Lịch §2:
+Công cụ là một cột **version** (phiên bản dòng): mỗi lần sửa thì `version = version + 1`, và câu ghi kèm điều kiện `version = <giá trị đã đọc>`. Kiểm tra và ghi nằm trong **một** câu UPDATE, nên không có khoảng hở giữa chúng — đây là dạng compare-and-set (so rồi gán) ở mức dòng. Lịch §2:
 
 ```sql
 -- [B] khách huỷ, cũng theo quy ước tăng version
@@ -95,7 +95,7 @@ UPDATE 0
 (1 row)
 ```
 
-Lệnh huỷ của khách còn nguyên. Tổng đài viên thấy chuyến đã huỷ và tự quyết định — đó là điểm của cách lạc quan: database không chọn người thắng theo ý nghĩa nghiệp vụ, nó chỉ từ chối ghi đè mù.
+Lệnh huỷ của khách còn nguyên. Tổng đài viên thấy chuyến đã huỷ và tự quyết định — đó là mấu chốt của cách lạc quan: database không chọn người thắng theo ý nghĩa nghiệp vụ, mà chỉ từ chối ghi đè mù.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Version chỉ có tác dụng khi MỌI đường ghi tuân thủ</span>
@@ -115,9 +115,9 @@ Lệnh huỷ của khách còn nguyên. Tổng đài viên thấy chuyến đã 
 | T5 | | ✔ `UPDATE 0` |
 | T6 | | Đọc: `41000 \| 3` |
 
-Câu của B bắt đầu khi bản đã commit vẫn là version 2 — điều kiện khớp — nhưng dòng đang bị A khoá nên B chờ. Sau khi A commit, Read Committed không bỏ cuộc mà **đọc lại đúng dòng đó** ở phiên bản mới và đánh giá lại `WHERE`. Tài liệu PostgreSQL mô tả: «The search condition of the command (the WHERE clause) is re-evaluated» trên phiên bản đã cập nhật. Version giờ là 3 ⇒ điều kiện sai ⇒ B đổi 0 dòng. Kết quả cuối `41000 | 3`: không ai bị ghi đè âm thầm.
+Câu của B bắt đầu khi bản đã commit vẫn là version 2 — điều kiện khớp — nhưng dòng đang bị A khoá nên B chờ. Sau khi A commit, Read Committed không bỏ cuộc mà **đọc lại đúng dòng đó** ở phiên bản mới và đánh giá lại `WHERE`. Tài liệu PostgreSQL mô tả: «The search condition of the command (the WHERE clause) is re-evaluated» trên phiên bản đã cập nhật. Version giờ là 3 ⇒ điều kiện sai ⇒ B đổi 0 dòng. Kết quả cuối `41000 | 3`: không ai bị ghi đè mà không hay biết.
 
-Cơ chế «đọc lại dòng» này (thường gọi là EvalPlanQual) là lý do UPDATE có điều kiện vẫn đúng khi chạy đồng thời thật ở mức mặc định. Giới hạn của nó (PG-034 có thí nghiệm riêng): câu UPDATE chỉ đọc lại những dòng nó đã gặp, không quét lại bảng — dòng *vừa trở nên* khớp điều kiện bị bỏ sót. Với UPDATE theo khoá một dòng như ở đây, điều đó không gây hại.
+Cơ chế «đọc lại dòng» này (thường gọi là EvalPlanQual) là lý do UPDATE có điều kiện vẫn đúng khi chạy đồng thời thật ở mức mặc định. Giới hạn của cơ chế này (PG-034 có thí nghiệm riêng): câu UPDATE chỉ đọc lại những dòng nó đã gặp, không quét lại bảng — dòng *vừa trở nên* khớp điều kiện bị bỏ sót. Với UPDATE theo khoá một dòng như ở đây, điều đó không gây hại.
 
 ### Dưới Repeatable Read: 40001 thay vì 0 dòng
 
@@ -130,7 +130,7 @@ Thí nghiệm §1 chạy lại lịch trên, nhưng B mở `BEGIN ISOLATION LEVE
 ERROR:  could not serialize access due to concurrent update
 ```
 
-SQLSTATE **`40001`**. Repeatable Read không được phép sửa dòng mà giao dịch khác đã đổi sau khi snapshot được chụp, nên thay vì đọc lại, nó huỷ cả giao dịch của B. B `ROLLBACK`, đọc lại thấy `41000 | 2`, và xử lý như xung đột.
+SQLSTATE **`40001`**. Repeatable Read không được phép sửa dòng mà giao dịch khác đã đổi sau khi snapshot được chụp, nên thay vì đọc lại, PostgreSQL huỷ cả giao dịch của B. B `ROLLBACK`, đọc lại thấy `41000 | 2`, và xử lý như xung đột.
 
 Vậy ứng dụng phải coi **cả hai** là «có người sửa trước»: `UPDATE 0` (Read Committed) và lỗi `40001` (Repeatable Read/Serializable). Điểm khác: sau `40001` giao dịch đã hỏng, mọi việc khác trong giao dịch đó cũng mất — phải chạy lại từ đầu (PG-038 bàn kỹ về thử lại).
 
@@ -164,7 +164,7 @@ Chuyến không thể đi từ `cancelled` sang `picked_up`, dù app tài xế g
 
 ## 6. 0 dòng có hai nghĩa — và ai tăng version?
 
-`UPDATE 0` xảy ra cả khi version sai lẫn khi chuyến không tồn tại (mã gõ nhầm, đã bị xoá). Muốn báo đúng, đọc lại sau khi thua. Hàm dưới (thí nghiệm §2) gói cả hai bước:
+`UPDATE 0` xảy ra cả khi version sai lẫn khi chuyến không tồn tại (mã gõ nhầm, đã bị xoá). Muốn báo đúng, ứng dụng phải đọc lại sau khi thua. Hàm dưới (thí nghiệm §2) gói cả hai bước:
 
 ```sql
 CREATE FUNCTION luu_cuoc(p_code bigint, p_fare integer, p_version integer) RETURNS text
@@ -188,9 +188,9 @@ END
 $$;
 ```
 
-A gọi `luu_cuoc(400105, 40000, 1)` → `da_luu version=2`; B vẫn cầm version 1 gọi `luu_cuoc(400105, 42000, 1)` → `xung_dot version_hien_tai=2`; `luu_cuoc(499999, …)` → `khong_ton_tai`. Trả version mới cho client là quan trọng: lần lưu kế tiếp của chính A phải dùng version 2, không phải 1.
+A gọi `luu_cuoc(400105, 40000, 1)` → `da_luu version=2`; B vẫn cầm version 1 gọi `luu_cuoc(400105, 42000, 1)` → `xung_dot version_hien_tai=2`; `luu_cuoc(499999, …)` → `khong_ton_tai`. Việc trả version mới cho client rất quan trọng: lần lưu kế tiếp của chính A phải dùng version 2, không phải 1.
 
-Bước đọc lại chỉ để *báo*, không để quyết định ghi — quyết định đã nằm trong câu UPDATE. Đọc lại rồi «thử ghi lần nữa với version mới» một cách tự động là đè lên người khác bằng đường vòng.
+Bước đọc lại chỉ để *báo*, không để quyết định ghi — quyết định đã nằm trong câu UPDATE. Việc tự động đọc lại rồi «thử ghi lần nữa với version mới» chính là đè lên người khác bằng đường vòng.
 
 ### Trigger tự tăng version
 
@@ -209,9 +209,9 @@ CREATE TRIGGER trg_trips_tang_version BEFORE UPDATE ON trips
 FOR EACH ROW EXECUTE FUNCTION tang_version();
 ```
 
-Chuyến 400110 đang version **1**. `UPDATE trips SET fare = fare + 1000 WHERE code = 400110 RETURNING version` (quên version) → **2**. Câu đúng quy ước `… version = version + 1 WHERE code = 400110 AND version = 2 RETURNING version` → **3**, không phải 4: trigger gán `NEW.version := OLD.version + 1` đè lên giá trị câu lệnh tự tính, nên không tăng đôi.
+Chuyến 400110 đang ở version **1**. `UPDATE trips SET fare = fare + 1000 WHERE code = 400110 RETURNING version` (quên version) → **2**. Câu đúng quy ước `… version = version + 1 WHERE code = 400110 AND version = 2 RETURNING version` → **3**, không phải 4: trigger gán `NEW.version := OLD.version + 1` đè lên giá trị câu lệnh tự tính, nên không tăng đôi.
 
-Trigger chữa được «quên tăng version», không chữa được «quên kiểm version» — câu `WHERE` vẫn là việc của mỗi đường ghi. Và nó tăng version cả với những câu sửa không liên quan tới form (job nền cập nhật cột kỹ thuật), sinh ra xung đột «giả» làm tổng đài viên phải tải lại dù không ai đổi trường họ đang sửa. Chọn trigger là chọn an toàn hơn đổi lấy vài lần tải lại thừa.
+Trigger chữa được «quên tăng version», không chữa được «quên kiểm version» — câu `WHERE` vẫn là việc của mỗi đường ghi. Ngoài ra, trigger còn tăng version cả với những câu sửa không liên quan tới form (job nền cập nhật cột kỹ thuật), sinh ra xung đột «giả» làm tổng đài viên phải tải lại dù không ai đổi trường họ đang sửa. Chọn trigger là chọn sự an toàn hơn, đổi lại phải chấp nhận vài lần tải lại thừa.
 
 ## 7. Chọn gì làm «version»?
 
@@ -228,7 +228,7 @@ Thí nghiệm §3–§4 thử hai ứng viên khác ngoài cột `version`:
 
 `di_lui = t`: lần sửa sau ghi mốc *nhỏ hơn* lần sửa trước. Dùng mốc thời gian làm version thì có thể so «bằng» được, nhưng giá trị không tăng đơn điệu, phụ thuộc đồng hồ, và hai lần sửa trong cùng giao dịch mang cùng mốc. Giữ `updated_at` để hiển thị, đừng dùng làm điều kiện.
 
-**Cột hệ thống `xmin`.** Mỗi dòng có sẵn `xmin` — theo tài liệu, là định danh của giao dịch đã chèn *phiên bản dòng* này; UPDATE tạo phiên bản mới nên `xmin` đổi. Thí nghiệm: khoá dòng bằng `FOR NO KEY UPDATE` không đổi `xmin` (`t`); câu `UPDATE trips SET fare = fare` — không đổi dữ liệu — vẫn đổi `xmin`, và câu lưu `… AND xmin = :'xm'::xid` của A ra **`UPDATE 0`** dù không trường nghiệp vụ nào đổi.
+**Cột hệ thống `xmin`.** Mỗi dòng có sẵn `xmin` — theo tài liệu, là định danh của giao dịch đã chèn *phiên bản dòng* này; UPDATE tạo phiên bản mới nên `xmin` đổi. Thí nghiệm: khoá dòng bằng `FOR NO KEY UPDATE` không đổi `xmin` (`t`); câu `UPDATE trips SET fare = fare` — không đổi dữ liệu — vẫn đổi `xmin`, và câu lưu `… AND xmin = :'xm'::xid` của A ra **`UPDATE 0`** dù không có trường nghiệp vụ nào đổi.
 
 | Ứng viên | Ưu | Nhược |
 |---|---|---|
@@ -247,11 +247,11 @@ Tới Nơi chọn cột `version` cho bảng `trips` — giá trị nằm trong 
 | Bấm Lưu «thành công» nhưng không có gì đổi | Ứng dụng bỏ qua `UPDATE 0` | Đọc số dòng đã đổi; 0 ⇒ báo xung đột |
 | Kiểm version bằng `SELECT` rồi mới `UPDATE` không điều kiện | Kiểm và ghi tách hai câu | Gộp điều kiện vào `WHERE` của câu ghi |
 | Ở Repeatable Read, lưu bị lỗi thay vì 0 dòng | `40001` khi dòng bị sửa đồng thời | Xử lý như xung đột, rollback, tải lại |
-| Tự động «thử lại với version mới» | Đè người khác bằng đường vòng | Trả xung đột cho người dùng quyết |
+| Tự động «thử lại với version mới» | Đè người khác bằng đường vòng | Báo xung đột để người dùng quyết định |
 
 ## 9. Đánh đổi
 
-- **Lạc quan hay bi quan.** Lạc quan không giữ khoá trong lúc người gõ, hợp với form và API không trạng thái; cái giá là người thua phải làm lại. Bi quan (`FOR UPDATE`, PG-036) hợp khi xung đột dày và làm lại đắt — nhưng chỉ trong giao dịch ngắn, không bao giờ xuyên qua thời gian người dùng nghĩ.
+- **Lạc quan hay bi quan.** Lạc quan không giữ khoá trong lúc người gõ, hợp với form và API stateless; cái giá là người thua phải làm lại. Bi quan (`FOR UPDATE`, PG-036) hợp khi xung đột dày và làm lại đắt — nhưng chỉ trong giao dịch ngắn, không bao giờ kéo dài qua thời gian người dùng suy nghĩ.
 - **Tỉ lệ xung đột.** Lạc quan rẻ khi xung đột hiếm (sửa form một chuyến). Bảng `trips` nhận khoảng 560 UPDATE/giây lúc cao điểm (hồ sơ Tới Nơi), nhưng đó là ≈ 8 lần sửa mỗi chuyến rải trên mọi chuyến đang chạy; xung đột chỉ dày khi nhiều người ghi cùng **một** dòng. Với dòng nóng như vậy, người dùng sẽ gặp «tải lại» liên tục — khi đó tách trường hay đổi thiết kế (ghi tương đối `balance = balance + x`, PG-034) tốt hơn.
 - **Version hay điều kiện trạng thái.** Trạng thái diễn đạt đúng luật nghiệp vụ và không cần cột mới; version bắt được mọi thay đổi, kể cả trường bạn không nghĩ tới.
 
@@ -279,7 +279,7 @@ RETURN 'xung_dot version_hien_tai=' || v_hien_tai;</code></pre>
 **Bài 3.** Một thành viên đề nghị bỏ cột `version`, dùng `WHERE updated_at = :ts_da_doc` vì «bảng nào cũng có updated_at». Phản biện bằng một lịch hai phiên.
 
 <details><summary><b>Lời giải</b></summary>
-<p>A <code>BEGIN</code> (now() của A chốt tại đây); B sửa chuyến và commit với <code>updated_at = now()</code> muộn hơn; A ghi <code>updated_at = now()</code> rồi commit. Kết quả thí nghiệm §3: <code>38500 | t</code> — mốc mới <em>nhỏ hơn</em> mốc của B. Mốc thời gian không tăng đơn điệu, không duy nhất (hai lần sửa cùng giao dịch cùng mốc) và phụ thuộc đồng hồ máy chủ. So bằng vẫn có thể bắt được nhiều xung đột, nhưng cột <code>version</code> rõ nghĩa và không có các góc cạnh này.</p>
+<p>A <code>BEGIN</code> (now() của A chốt tại đây); B sửa chuyến và commit với <code>updated_at = now()</code> muộn hơn; A ghi <code>updated_at = now()</code> rồi commit. Kết quả thí nghiệm §3: <code>38500 | t</code> — mốc mới <em>nhỏ hơn</em> mốc của B. Mốc thời gian không tăng đơn điệu, không duy nhất (hai lần sửa cùng giao dịch cùng mốc) và phụ thuộc đồng hồ máy chủ. So bằng vẫn có thể bắt được nhiều xung đột, nhưng cột <code>version</code> rõ nghĩa và không có các trường hợp biên này.</p>
 </details>
 
 ## 11. Đọc tiếp

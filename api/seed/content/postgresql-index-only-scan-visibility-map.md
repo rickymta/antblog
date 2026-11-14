@@ -1,7 +1,7 @@
 ---
 slug: postgresql-index-only-scan-visibility-map
 title: "Index-only scan, INCLUDE và visibility map"
-summary: "Màn lịch sử chuyến của khách doanh nghiệp Tới Nơi đọc 50 page buổi sáng, chiều sau đợt sửa giá đọc 18.540 page dù kế hoạch vẫn là Index Only Scan. Quan sát Heap Fetches, visibility map, VACUUM và cái giá của INCLUDE."
+summary: "Màn lịch sử chuyến của khách doanh nghiệp Tới Nơi đọc 50 page buổi sáng, chiều sau đợt sửa giá đọc 18.540 page dù kế hoạch vẫn là Index Only Scan. Bài này quan sát Heap Fetches, visibility map, VACUUM và cái giá của INCLUDE."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-026, index-only-scan, visibility-map, vacuum, covering-index, include, toi-noi]
@@ -57,7 +57,7 @@ WHERE customer_id = :'kh_b1' AND requested_at >= TIMESTAMPTZ '2026-10-01 00:00+0
 
 3.384 page thay vì 50; DO-DAC đo **4,46 ms** so với **0,59 ms**. 9.365 chuyến của B1 rải trên 3.335 page heap khác nhau vì heap xếp theo giờ đặt, không theo khách.
 
-Điều kiện thứ hai kín hơn. Index B-tree **không lưu thông tin MVCC**: nó không biết mục đang trỏ tới phiên bản dòng còn sống, đã bị xoá, hay chưa commit. Thông tin đó (xmin/xmax) chỉ nằm trong tuple ở heap — PG-024 đã thấy một UPDATE để lại phiên bản cũ ngay trong page. Vậy làm sao Index Only Scan dám bỏ qua heap? Nhờ visibility map.
+Điều kiện thứ hai khó thấy hơn. Index B-tree **không lưu thông tin MVCC**: nó không biết mục đang trỏ tới phiên bản dòng còn sống, đã bị xoá, hay chưa commit. Thông tin đó (xmin/xmax) chỉ nằm trong tuple ở heap — PG-024 đã thấy một UPDATE để lại phiên bản cũ ngay trong page. Vậy làm sao Index Only Scan dám bỏ qua heap? Nhờ visibility map.
 
 ## 3. Visibility map: 2 bit cho mỗi page
 
@@ -87,7 +87,7 @@ FROM pg_visibility_map_summary('trips');
        19441 |   19441
 ```
 
-Bảng vừa VACUUM: mọi page đều all-visible. Tài liệu nêu một quy tắc quan trọng: bit VM chỉ được **VACUUM bật**, nhưng bị **xoá bởi bất kỳ thao tác sửa dữ liệu nào** trên page. Bản đồ «bảo thủ»: bit bật thì chắc chắn đúng; bit tắt thì có thể page vẫn sạch, chỉ là chưa ai kiểm lại.
+Bảng vừa VACUUM: mọi page đều all-visible. Tài liệu nêu một quy tắc quan trọng: bit VM chỉ do **VACUUM bật**, còn **bất kỳ thao tác sửa dữ liệu nào** trên page cũng **xoá** bit này. Bản đồ «bảo thủ»: bit bật thì chắc chắn đúng; bit tắt thì có thể page vẫn sạch, chỉ là chưa ai kiểm lại.
 
 ## 4. Một lệnh UPDATE làm Index Only Scan thoái hoá
 
@@ -137,7 +137,7 @@ Lần đọc đầu đã gặp các phiên bản cũ chết với mọi giao d�
          Buffers: shared hit=171807 read=58
 ```
 
-3.512 page mất bit, ~51 chuyến/page ⇒ 180.881 lần ghé heap, hơn 170.000 lần chạm buffer — nhiều hơn cả quét tuần tự 19.615 page. Planner ước chi phí Index Only Scan theo tỉ lệ page all-visible lưu ở `pg_class.relallvisible`; số này chỉ được cập nhật bởi những lệnh như VACUUM, ANALYZE, nên lúc này planner vẫn «tưởng» bảng sạch.
+3.512 page mất bit, ~51 chuyến/page ⇒ 180.881 lần ghé heap, hơn 170.000 lần chạm buffer — nhiều hơn cả quét tuần tự 19.615 page. Planner ước chi phí Index Only Scan theo tỉ lệ page all-visible lưu ở `pg_class.relallvisible`; số này chỉ do những lệnh như VACUUM, ANALYZE cập nhật, nên lúc này planner vẫn «tưởng» bảng sạch.
 
 ## 5. VACUUM đặt lại bản đồ
 
@@ -151,7 +151,7 @@ VACUUM trips;
        19615 |   19615
 ```
 
-Page của B1: `t | t`. Câu màn B1 về `Heap Fetches: 0`, **96 page** (index đã to thêm vì các mục mới), DO-DAC **0,64 ms**. `VACUUM (VERBOSE)` cho thấy nó làm gì (thí nghiệm, trích):
+Page của B1: `t | t`. Câu của màn B1 trở về `Heap Fetches: 0`, **96 page** (index đã to thêm vì các mục mới), DO-DAC **0,64 ms**. `VACUUM (VERBOSE)` cho thấy nó làm gì (thí nghiệm, trích):
 
 ```text
 index scan needed: 3309 pages from table (16.87% of total) had 9171 dead item identifiers removed
@@ -224,9 +224,9 @@ Partial index cũng phủ được câu hỏi mà không chứa cột của pred
 
 ## 9. Đánh đổi
 
-- **Index Only Scan là phần thưởng của bảng «tĩnh».** Bảng lịch sử, chuyến đã kết thúc, dữ liệu theo tháng cũ hưởng trọn; phần đang nóng của bảng thì không.
+- **Index Only Scan phát huy tác dụng tốt nhất với bảng «tĩnh».** Bảng lịch sử, chuyến đã kết thúc, dữ liệu theo tháng cũ hưởng trọn; phần đang nóng của bảng thì không.
 - **INCLUDE đổi chi phí đọc lấy chi phí ghi**: +44 % dung lượng, mất HOT cho cột đi kèm. Chọn cột ít đổi (`requested_at`, `kind`, `city_id`), tránh `status`, `fare`, `updated_at`.
-- **VACUUM nhiều hơn** giữ VM sạch nhưng tốn I/O; `INDEX_CLEANUP ON` thường xuyên trên bảng lớn có thể đắt hơn lợi ích — tài liệu mặc định `AUTO` có lý do.
+- **VACUUM nhiều hơn** giữ VM sạch nhưng tốn I/O; `INDEX_CLEANUP ON` thường xuyên trên bảng lớn có thể đắt hơn lợi ích — PostgreSQL đặt mặc định `AUTO` là có lý do.
 
 ## 10. Bài tập
 

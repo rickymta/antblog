@@ -1,0 +1,65 @@
+{
+ "file": "postgresql-select-filter-order-limit.md",
+ "edits": [
+  {
+   "old": "do vòng đời ở PG-006 tạo — 16 chuyến",
+   "new": "do phần vòng đời ở PG-006 tạo ra, thành 16 chuyến",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "**`AND` mạnh hơn `OR`.**",
+   "new": "**`AND` được ưu tiên trước `OR`.**",
+   "reason": "'mạnh hơn' là calque của 'binds tighter'",
+   "severity": "medium"
+  },
+  {
+   "old": "Muốn «chuyến hoàn thành hoặc bị huỷ",
+   "new": "Giả sử bạn muốn lấy «chuyến hoàn thành hoặc bị huỷ",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Thêm một lý do sẽ rõ ở Phần 3: so sánh trực tiếp trên cột để nguyên giá trị cột, nên index trên",
+   "new": "Còn một lý do nữa, sẽ rõ ở Phần 3: so sánh trực tiếp trên cột giữ nguyên giá trị của cột, nên index trên",
+   "reason": "Câu cụt, lặp 'cột'",
+   "severity": "medium"
+  },
+  {
+   "old": "tuần, tháng và kiểm hai biên",
+   "new": "tuần, tháng và việc kiểm tra hai đầu của khoảng",
+   "reason": "'kiểm hai biên' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nhiều lần liền",
+   "new": "nhiều lần liên tiếp",
+   "reason": "'liền' đứng một mình gượng",
+   "severity": "low"
+  },
+  {
+   "old": "mà không có `ORDER BY` ràng thứ tự duy nhất",
+   "new": "mà không có `ORDER BY` cho ra một thứ tự duy nhất",
+   "reason": "'ràng thứ tự' là cụm tự ghép, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "**Dữ liệu chạy:**",
+   "new": "**Dữ liệu thay đổi liên tục:**",
+   "reason": "'dữ liệu chạy' là calque của moving data",
+   "severity": "medium"
+  },
+  {
+   "old": "Cả hai được giải bằng",
+   "new": "Cả hai giới hạn này được giải quyết bằng",
+   "reason": "Thiếu danh từ, 'giải bằng' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "`*` để khám phá, liệt kê trong mã ứng dụng.",
+   "new": "Dùng `*` để khám phá, còn trong mã ứng dụng thì liệt kê cột.",
+   "reason": "Câu lược động từ",
+   "severity": "medium"
+  }
+ ]
+}

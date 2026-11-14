@@ -1,0 +1,10 @@
+{"file":"postgresql-subquery-exists-cte.md","edits":[
+{"old":"giải thích vì sao `NOT IN` gặp NULL thì im lặng sai,","new":"giải thích vì sao `NOT IN` gặp NULL thì cho kết quả sai mà không báo lỗi,","reason":"Calque 'im lặng sai', theo style guide","severity":"medium"},
+{"old":"(mẫu của PG-013) cho đúng ba con số này","new":"(mẫu của PG-013) sẽ ra đúng ba con số này","reason":"'cho đúng' cụt, thiếu động từ","severity":"medium"},
+{"old":"hai cách viết cùng nghĩa, kế hoạch thực thi để Phần 3.","new":"hai cách viết cùng nghĩa, còn kế hoạch thực thi của chúng để dành cho Phần 3.","reason":"Câu lược động từ, khó hiểu","severity":"medium"},
+{"old":"Câu 1 của tệp thí nghiệm kiểm trên hằng số:","new":"Câu 1 của tệp thí nghiệm kiểm tra điều này trên hằng số:","reason":"'kiểm' cụt","severity":"low"},
+{"old":"quên GROUP BY ở b2 làm b3 thành 3.209 dòng","new":"quên GROUP BY ở b2 làm b3 tăng lên 3.209 dòng","reason":"Câu lược động từ kiểu 'X thành Y'","severity":"medium"},
+{"old":"nhưng b4 thành 102 dòng","new":"nhưng b4 tăng lên 102 dòng","reason":"Câu lược động từ kiểu 'X thành Y'","severity":"medium"},
+{"old":"lại *biến khỏi* danh sách","new":"lại *biến mất khỏi* danh sách","reason":"'biến khỏi' cụt","severity":"medium"},
+{"old":"subquery lồng ngắn khi chỉ một tầng;","new":"subquery lồng viết ngắn hơn khi chỉ có một tầng;","reason":"Câu thiếu động từ","severity":"medium"}
+]}

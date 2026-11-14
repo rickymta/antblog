@@ -1,0 +1,11 @@
+{"file":"postgresql-statistics-analyze-cardinality.md","edits":[
+{"old":"để tìm và sửa chỗ ước lượng lệch thực tế trên dữ liệu phân bố không đều.","new":"để tìm và sửa chỗ ước lượng lệch so với thực tế trên dữ liệu phân bố không đều.","reason":"'lệch thực tế' thiếu 'so với'","severity":"medium"},
+{"old":"bạn tìm được chỗ ước lượng lệch thực tế trên dữ liệu phân bố không đều,","new":"bạn tìm được chỗ ước lượng lệch so với thực tế trên dữ liệu phân bố không đều,","reason":"'lệch thực tế' thiếu 'so với'","severity":"medium"},
+{"old":"**Cardinality** (bản số, ở đây là số dòng) mà mỗi nút kế hoạch trả ra được planner *ước lượng* từ hai nguồn:","new":"Planner *ước lượng* **cardinality** (bản số, ở đây là số dòng) mà mỗi nút kế hoạch trả ra, dựa trên hai nguồn:","reason":"Câu bị động dài kiểu Anh, chuyển sang chủ động","severity":"medium"},
+{"old":"Trên server thật, autovacuum ANALYZE một bảng khi","new":"Trên server thật, autovacuum chạy ANALYZE cho một bảng khi","reason":"Thiếu động từ","severity":"medium"},
+{"old":"Tìm nút **thấp nhất** lệch từ khoảng 10 lần;","new":"Tìm nút **thấp nhất** có độ lệch từ khoảng 10 lần;","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"Kiểm độ tươi:","new":"Kiểm tra xem thống kê còn mới không:","reason":"'độ tươi' là calque của freshness; 'kiểm' cụt","severity":"medium"},
+{"old":"Truy vấn quan trọng chỉ đúng nhờ «may mắn của mẫu» thì","new":"Truy vấn quan trọng mà chỉ có kế hoạch tốt nhờ «may mắn của mẫu» thì","reason":"'chỉ đúng' mơ hồ","severity":"low"},
+{"old":"Hệ quả lên câu báo cáo:","new":"Hệ quả đối với câu báo cáo:","reason":"'lên' kiểu Anh (on)","severity":"low"},
+{"old":"phụ thuộc hàm không áp cho so sánh khoảng","new":"phụ thuộc hàm không áp dụng cho so sánh khoảng","reason":"'áp cho' cụt","severity":"low"}
+]}

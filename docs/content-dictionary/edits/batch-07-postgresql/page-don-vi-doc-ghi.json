@@ -1,0 +1,21 @@
+{"file":"page-don-vi-doc-ghi.md","edits":[
+{"old":"Đo bằng pageinspect, EXPLAIN BUFFERS và WAL trên bảng trips để thấy","new":"Ta đo bằng pageinspect, EXPLAIN BUFFERS và WAL trên bảng trips để thấy","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"và đặt hai khẳng định ấy về đúng chỗ.","new":"và đánh giá lại hai khẳng định ấy cho đúng.","reason":"'đặt về đúng chỗ' gượng","severity":"low"},
+{"old":"mổ được một page bằng pageinspect","new":"soi được bên trong một page bằng pageinspect","reason":"'mổ' gượng","severity":"low"},
+{"old":"8.192 byte được chọn lúc biên dịch PostgreSQL — không đổi bằng cấu hình khi đang chạy, và mọi bảng, mọi index trong cluster dùng chung.","new":"8.192 byte được chọn lúc biên dịch PostgreSQL — không đổi được bằng cấu hình khi đang chạy, và dùng chung cho mọi bảng, mọi index trong cluster.","reason":"Thiếu 'được', trật tự từ","severity":"medium"},
+{"old":"Index chứa nhiều mục hơn trên một page vì mỗi mục chỉ có khoá và vị trí dòng","new":"Một page index chứa được nhiều mục hơn vì mỗi mục chỉ có khoá và vị trí dòng","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"không phải trang trí.","new":"không phải chi tiết thừa.","reason":"'trang trí' gượng (gợi ý khảo sát)","severity":"low"},
+{"old":"cùng câu trả **7 dòng** lẫn của hai bảng","new":"cùng câu lệnh trả về **7 dòng**, lẫn số của hai bảng","reason":"Câu cụt, thiếu động từ và danh từ","severity":"high"},
+{"old":"ghi lần hai khi cache đã ấm","new":"lấy số của lần hai, khi cache đã ấm","reason":"'ghi lần hai' cụt","severity":"medium"},
+{"old":"Hai dòng giữa bảng là điểm mấu chốt","new":"Hai dòng ở giữa bảng là điểm mấu chốt","reason":"'giữa bảng' dễ hiểu nhầm","severity":"low"},
+{"old":"Khác nhau không ở số dòng mà ở chỗ","new":"Điểm khác nhau không nằm ở số dòng mà ở chỗ","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"hoặc trả lời được chỉ từ index.","new":"hoặc làm sao để chỉ cần index là trả lời được truy vấn.","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"374 page đọc vào thành đúng 374 buffer","new":"374 page đọc vào chiếm đúng 374 buffer","reason":"Câu lược động từ kiểu 'X thành Y'","severity":"medium"},
+{"old":"nhật ký mọi thay đổi được ghi trước để khôi phục khi sập.","new":"nhật ký ghi trước mọi thay đổi để khôi phục khi máy sập.","reason":"Bỏ bị động, 'khi sập' thiếu chủ thể","severity":"medium"},
+{"old":"bỏ bản ghi do tiến trình nền tự ghi định kỳ; trừ thẳng hai vị trí LSN thì ra khoảng 6.640 và 120 byte vì gồm cả phần đệm căn lề","new":"loại các bản ghi do tiến trình nền tự ghi định kỳ; nếu trừ thẳng hai vị trí LSN thì ra khoảng 6.640 và 120 byte, vì hiệu số đó gồm cả phần đệm căn lề","reason":"Câu cụt, thiếu chủ ngữ cho 'gồm'","severity":"medium"},
+{"old":"Lý do: hệ điều hành và ổ đĩa ghi theo khối nhỏ hơn 8 KB.","new":"Lý do là hệ điều hành và ổ đĩa ghi theo khối nhỏ hơn 8 KB.","reason":"Câu cụt","severity":"low"},
+{"old":"Chuyến mỗi page · byte mỗi chuyến","new":"Số chuyến mỗi page · số byte mỗi chuyến","reason":"Nhãn hàng cụt","severity":"medium"},
+{"old":"Thứ tăng theo kích thước là truy vấn đọc nhiều dòng rải rác — mỗi dòng vẫn tốn trọn đường xuống cây cộng một page heap.","new":"Chi phí tăng theo kích thước bảng ở truy vấn đọc nhiều dòng rải rác — mỗi dòng vẫn tốn trọn một lượt đi xuống cây, cộng thêm một page heap.","reason":"'Thứ tăng' và 'đường xuống cây cộng' gượng","severity":"medium"},
+{"old":"mổ cây B-tree này.","new":"đi sâu vào cây B-tree này.","reason":"'mổ' gượng","severity":"low"},
+{"old":"rồi đếm bằng `pg_buffercache` mỗi quan hệ đang chiếm mấy buffer.","new":"rồi dùng `pg_buffercache` đếm xem bảng và index đang chiếm mấy buffer.","reason":"'quan hệ' là calque của relation; trật tự từ","severity":"medium"}
+]}

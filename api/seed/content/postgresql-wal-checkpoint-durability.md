@@ -1,7 +1,7 @@
 ---
 slug: postgresql-wal-checkpoint-durability
 title: "WAL, checkpoint và độ bền dữ liệu: khoản thanh toán có sống sót sau cú mất điện?"
-summary: "API của Tới Nơi vừa báo thanh toán thành công thì máy chủ database mất điện. COMMIT đã hứa điều gì? Đi qua WAL, flush khi commit, checkpoint, điểm redo và full-page write, rồi đọc phép đo nhỏ trên PostgreSQL 18.1: cùng một UPDATE 100 dòng ghi 29.952 byte WAL ngay sau checkpoint và 7.544 byte khi lặp lại."
+summary: "API của Tới Nơi vừa báo thanh toán thành công thì máy chủ database mất điện. COMMIT đã hứa điều gì? Bài này đi qua WAL, flush khi commit, checkpoint, điểm redo và full-page write, rồi đọc phép đo nhỏ trên PostgreSQL 18.1: cùng một UPDATE 100 dòng ghi 29.952 byte WAL ngay sau checkpoint và 7.544 byte khi lặp lại."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-045, wal, checkpoint, durability, full-page-writes, synchronous-commit, toi-noi]
@@ -10,7 +10,7 @@ language: vi
 
 21:47 tối thứ Bảy, khách của Tới Nơi trả 85.000 đ cho chuyến xe bằng ví VíXanh. Dịch vụ thanh toán chạy `COMMIT`, nhận `COMMIT` từ PostgreSQL và trả về app «Thanh toán thành công». Hai giây sau, máy chủ ảo chạy database bị tắt đột ngột vì sự cố nguồn ở máy vật lý bên dưới. Mười phút sau database khởi động lại. Câu hỏi đầu tiên trong kênh trực: **khoản thanh toán đó còn không?** Câu hỏi thứ hai, từ một người đang lo chuyện hiệu năng: «Nếu bật `synchronous_commit = off` thì nhanh hơn bao nhiêu, và cho checkpoint chạy mỗi phút có làm dữ liệu an toàn hơn không?»
 
-Trả lời cả hai cần hiểu đường ghi của PostgreSQL: dữ liệu đi từ bộ nhớ xuống đĩa theo thứ tự nào, `COMMIT` chờ cái gì, và checkpoint thực sự làm gì. Bài này nối giao dịch của Phần 4 ([PG-031](/articles/postgresql-transaction-commit-rollback)) với storage, rồi đọc một phép đo nhỏ trong lab — đọc kèm giới hạn của nó.
+Muốn trả lời cả hai thì cần hiểu đường ghi của PostgreSQL: dữ liệu đi từ bộ nhớ xuống đĩa theo thứ tự nào, `COMMIT` chờ cái gì, và checkpoint thực sự làm gì. Bài này nối giao dịch của Phần 4 ([PG-031](/articles/postgresql-transaction-commit-rollback)) với storage, rồi đọc một phép đo nhỏ trong lab — đọc kèm giới hạn của nó.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-045 · Phần 5/6 · Trung bình</span>
@@ -32,7 +32,7 @@ Lab **không** mô phỏng mất điện, hỏng đĩa hay failover (README nói
 
 Một số thuật ngữ:
 
-- **Shared buffers**: vùng nhớ chung nơi PostgreSQL giữ bản sao các page 8 KB của bảng và index. Mọi đọc ghi đi qua đây. Page đã sửa trong bộ nhớ mà chưa ghi xuống file gọi là **page bẩn** (dirty page).
+- **Shared buffers**: vùng nhớ chung nơi PostgreSQL giữ bản sao các page 8 KB của bảng và index. Mọi thao tác đọc ghi đều đi qua đây. Page đã sửa trong bộ nhớ mà chưa ghi xuống file gọi là **page bẩn** (dirty page).
 - **WAL** (write-ahead log, nhật ký ghi trước): chuỗi bản ghi mô tả mọi thay đổi trên page, lưu thành các file 16 MB trong thư mục `pg_wal`.
 - **LSN** (log sequence number): vị trí byte trong dòng WAL, viết dạng `0/4001DF0`. Hiệu hai LSN là số byte WAL sinh ra giữa hai thời điểm. Mỗi page cũng ghi LSN của bản ghi WAL cuối cùng đã sửa nó.
 
@@ -40,25 +40,25 @@ Khi giao dịch thanh toán `UPDATE` một dòng rồi `COMMIT`:
 
 | Bước | Ở đâu | Việc gì xảy ra |
 |---|---|---|
-| 1 | Shared buffers | Page chứa dòng được sửa trong bộ nhớ (phiên bản mới theo MVCC, PG-032), trở thành page bẩn |
+| 1 | Shared buffers | Page chứa dòng được sửa trong bộ nhớ (tạo phiên bản dòng mới theo MVCC, PG-032) và trở thành page bẩn |
 | 2 | WAL buffers | Một bản ghi WAL mô tả thay đổi được thêm vào; page ghi nhận LSN của bản ghi đó |
 | 3 | `COMMIT` | Bản ghi commit được thêm vào WAL; WAL **tới LSN của bản ghi commit** được ghi và **flush** (ép xuống thiết bị lưu trữ bằng `fsync` hoặc tương đương) |
 | 4 | Trả về client | Chỉ sau bước 3, client mới nhận `COMMIT` (khi `synchronous_commit = on`) |
 | 5 | Về sau | Page bẩn được ghi vào file dữ liệu — bởi background writer, checkpointer, hoặc backend cần chỗ trong buffer |
 
-Quy tắc trung tâm, theo tài liệu (WAL Introduction): thay đổi trên file dữ liệu chỉ được ghi **sau khi** bản ghi WAL mô tả nó đã được flush. Trước khi ghi một page bẩn xuống đĩa, PostgreSQL bảo đảm WAL đã flush ít nhất tới LSN ghi trên page đó. Vì thế, nếu máy sập giữa bước 4 và 5, file dữ liệu chưa có thay đổi nhưng WAL thì có; khi khởi động lại, PostgreSQL **phát lại** (redo) WAL để dựng lại thay đổi.
+Quy tắc cốt lõi, theo tài liệu (WAL Introduction): thay đổi trên file dữ liệu chỉ được ghi **sau khi** bản ghi WAL mô tả nó đã được flush. Trước khi ghi một page bẩn xuống đĩa, PostgreSQL bảo đảm WAL đã flush ít nhất tới LSN ghi trên page đó. Vì thế, nếu máy sập giữa bước 4 và 5, file dữ liệu chưa có thay đổi nhưng WAL thì có; khi khởi động lại, PostgreSQL **phát lại** (redo) WAL để dựng lại thay đổi.
 
-Vì sao không ghi thẳng page lúc commit? Flush **file WAL** là ghi tuần tự, một lần flush có thể phủ nhiều giao dịch cùng lúc; còn page giao dịch đã chạm nằm rải rác khắp các file. Một page bị sửa nhiều lần (chuyến đổi trạng thái tám lần) cũng chỉ cần ghi xuống file một lần về sau.
+Vì sao không ghi thẳng page lúc commit? Flush **file WAL** là ghi tuần tự, một lần flush có thể phục vụ nhiều giao dịch cùng lúc; còn page mà giao dịch đã sửa thì nằm rải rác khắp các file. Một page bị sửa nhiều lần (ví dụ chuyến đổi trạng thái tám lần) cũng chỉ cần ghi xuống file một lần về sau.
 
 ## 3. COMMIT đã hứa gì
 
 Với `fsync = on` và `synchronous_commit = on`, khi client nhận `COMMIT`, bản ghi commit đã nằm trên thiết bị lưu trữ bền vững. Sau mất điện, phát lại WAL sẽ dựng lại khoản thanh toán. **Câu trả lời cho câu hỏi đầu bài là «còn»** — với ba điều kiện:
 
-1. Cấu hình đúng như trên. Lab kiểm trước tiên: `PASS 045 durability settings: on/on/on` (`fsync`, `synchronous_commit`, `full_page_writes`).
+1. Cấu hình đúng như trên. Lab kiểm tra đầu tiên: `PASS 045 durability settings: on/on/on` (`fsync`, `synchronous_commit`, `full_page_writes`).
 2. Storage không nói dối. Tài liệu (WAL Reliability) cảnh báo bộ nhớ đệm ghi của ổ đĩa hay bộ điều khiển có thể báo «đã ghi» khi dữ liệu mới nằm trong cache không được bảo vệ bằng pin. Khi đó flush của PostgreSQL không còn nghĩa là bền vững — đây là việc của người vận hành hạ tầng, PostgreSQL không tự kiểm được.
 3. Ổ đĩa chứa WAL còn đọc được. Mất ổ là chuyện của backup và replica (PG-046, PG-048), không phải của crash recovery.
 
-COMMIT **không** hứa: file dữ liệu đã có thay đổi (bước 5 xảy ra sau); một replica đã nhận (trừ khi cấu hình standby đồng bộ); hay bản backup đã có giao dịch đó.
+COMMIT **không** hứa: file dữ liệu đã có thay đổi (bước 5 xảy ra sau); replica đã nhận được giao dịch (trừ khi cấu hình standby đồng bộ); hay bản backup đã có giao dịch đó.
 
 **`synchronous_commit = off`** (lab **không chạy**). Server trả `COMMIT` trước khi flush WAL; WAL writer flush sau. Tài liệu PostgreSQL 18 nêu độ trễ tối đa giữa lúc báo thành công và lúc thực sự an toàn là **ba lần `wal_writer_delay`** (mặc định 200 ms). Mất điện trong khoảng đó thì giao dịch đã báo thành công **biến mất** — nhưng database vẫn nhất quán: không có nửa giao dịch, không hỏng dữ liệu. Tham số này đặt được theo từng giao dịch:
 
@@ -71,7 +71,7 @@ INSERT INTO driver_locations ...;
 COMMIT;
 ```
 
-Với thanh toán VíXanh thì không: khách đã thấy «thành công», mất giao dịch là mất tiền hoặc đối soát sai. Quyết định này thuộc về từng loại dữ liệu, ghi rõ trong thiết kế, không áp đại trà vì «tăng TPS».
+Với thanh toán VíXanh thì không: khách đã thấy «thành công», mất giao dịch là mất tiền hoặc đối soát sai. Quyết định này tuỳ theo từng loại dữ liệu, cần ghi rõ trong thiết kế, không áp dụng đại trà vì «tăng TPS».
 
 **`fsync = off`** (lab **không chạy**) nguy hiểm hơn hẳn: PostgreSQL không còn ép dữ liệu xuống đĩa, và tài liệu cảnh báo sau sự cố hệ điều hành hoặc mất điện có thể dẫn tới **hỏng dữ liệu không phục hồi được**. Tài liệu chỉ gợi ý tắt nó khi nạp dữ liệu ban đầu có thể làm lại từ đầu. Một benchmark không có crash không chứng minh được rằng tắt nó «miễn phí».
 
@@ -85,7 +85,7 @@ Checkpoint xảy ra khi:
 - lượng WAL sắp vượt `max_wal_size` (mặc định 1 GB);
 - có người chạy lệnh `CHECKPOINT` (lab làm vậy), lúc tắt server, lúc bắt đầu base backup (PG-048 dùng `pg_basebackup --checkpoint=fast`).
 
-Checkpoint theo lịch không xả hết page bẩn một lúc: `checkpoint_completion_target` (mặc định 0,9) trải việc ghi ra khoảng 90 % thời gian tới checkpoint kế tiếp để tránh dội I/O.
+Checkpoint theo lịch không xả hết page bẩn một lúc: `checkpoint_completion_target` (mặc định 0,9) dàn việc ghi ra trong khoảng 90 % thời gian tới checkpoint kế tiếp để tránh I/O tăng vọt.
 
 Cấu hình WAL của cluster lab:
 
@@ -105,15 +105,15 @@ Cấu hình WAL của cluster lab:
 
 Lưu ý: `checkpoint_timeout = 1800` giây (30 phút) và `max_wal_size = 4096` MB là **cấu hình chung của lab** (`pg/lib/cluster.mjs`), không phải mặc định PostgreSQL — chúng được nới để checkpoint theo lịch không chen vào phép đo. `archive_mode = on` và `wal_level = replica` phục vụ PITR ở PG-048. `wal_compression = off` là mặc định.
 
-Hai tham số kéo hai hướng. Checkpoint **dày** hơn: ít WAL phải phát lại sau crash, nên khởi động lại nhanh hơn; nhưng ghi page nhiều hơn và — như mục 5 — sinh nhiều WAL hơn. Checkpoint **thưa** hơn: ngược lại, và `pg_wal` cần chỗ hơn. `max_wal_size` là **giới hạn mềm**: tài liệu nói nó có thể bị vượt khi tải nặng, khi `archive_command` lỗi, hoặc khi `wal_keep_size` lớn.
+Hai tham số kéo hai hướng. Checkpoint **dày** hơn: ít WAL phải phát lại sau crash, nên khởi động lại nhanh hơn; nhưng ghi page nhiều hơn và — như mục 5 — sinh nhiều WAL hơn. Checkpoint **thưa** hơn: ngược lại, và `pg_wal` cần nhiều dung lượng hơn. `max_wal_size` là **giới hạn mềm**: tài liệu nói nó có thể bị vượt khi tải nặng, khi `archive_command` lỗi, hoặc khi `wal_keep_size` lớn.
 
 Vậy «cho checkpoint chạy mỗi phút để an toàn hơn» có đúng không? Không. Độ bền của giao dịch đã commit đến từ **WAL đã flush**, không từ checkpoint. Checkpoint dày chỉ rút ngắn thời gian **khôi phục**, đổi lại chi phí I/O và WAL.
 
 ## 5. Page rách và full-page write
 
-Page của PostgreSQL là 8 KB, nhưng hệ điều hành và ổ đĩa không bảo đảm ghi nguyên tử 8 KB. Mất điện giữa lúc ghi có thể để lại **page rách** (torn page): nửa cũ, nửa mới. Bản ghi WAL thường chỉ mô tả thay đổi nhỏ («đặt cột fare của tuple số 7 thành 30.001»), giả định page gốc nguyên vẹn; phát lại lên page rách không sửa được nó.
+Page của PostgreSQL là 8 KB, nhưng hệ điều hành và ổ đĩa không bảo đảm ghi nguyên tử 8 KB. Mất điện giữa lúc ghi có thể để lại **page rách** (torn page): nửa cũ, nửa mới. Bản ghi WAL thường chỉ mô tả thay đổi nhỏ («đặt cột fare của tuple số 7 thành 30.001»), giả định page gốc nguyên vẹn; phát lại lên page rách thì không sửa được page đó.
 
-**`full_page_writes = on`** (mặc định) xử lý bằng cách: lần **đầu tiên** một page bị sửa sau mỗi checkpoint, PostgreSQL ghi **toàn bộ nội dung page** vào WAL — gọi là **full-page image** (FPI). Khi khôi phục, bắt đầu từ điểm redo, PostgreSQL chép đè FPI lên page trên đĩa — rách hay không — rồi mới phát lại các thay đổi sau đó. Vì recovery luôn bắt đầu từ điểm redo, chỉ cần FPI cho lần sửa đầu tiên sau checkpoint là đủ phủ mọi page có thể bị rách.
+**`full_page_writes = on`** (mặc định) xử lý vấn đề này như sau: lần **đầu tiên** một page bị sửa sau mỗi checkpoint, PostgreSQL ghi **toàn bộ nội dung page** vào WAL — gọi là **full-page image** (FPI). Khi khôi phục, bắt đầu từ điểm redo, PostgreSQL chép đè FPI lên page trên đĩa — rách hay không — rồi mới phát lại các thay đổi sau đó. Vì recovery luôn bắt đầu từ điểm redo, chỉ cần FPI cho lần sửa đầu tiên sau checkpoint là đủ phủ mọi page có thể bị rách.
 
 Cái giá: ngay sau mỗi checkpoint, lượng WAL tăng vọt vì hàng loạt page bị sửa lần đầu. Đây là lý do thứ hai khiến checkpoint dày làm tăng WAL. `wal_compression` (lab **không bật**) nén FPI, đổi CPU lấy dung lượng WAL. Tắt `full_page_writes` thì tài liệu xếp rủi ro cùng loại với tắt `fsync`, chỉ nên cân nhắc khi phần cứng hoặc filesystem tự bảo đảm không có page rách.
 
@@ -140,8 +140,8 @@ Kết quả (dòng `MEASURE 045 warm local 100-row updates, includes psql startu
 
 Đọc cẩn thận:
 
-- **Mili-giây ở đây không phải độ trễ SQL.** Mỗi số gồm cả thời gian khởi động `psql`, kết nối, chạy và thoát. Lượt 2 gần gấp đôi lượt 1 và 3 cho cùng một câu — một lần đo đơn lẻ trên Windows không đủ nói tại sao. Không dùng bảng này để kết luận throughput hay «checkpoint mất 100 ms».
-- **`walBytes` dao động 21.848–32.312** cho cùng một câu lệnh. `pg_current_wal_insert_lsn()` là vị trí của **cả cluster**, nên hiệu LSN gồm mọi WAL sinh ra trong khoảng đó, kể cả việc nền. Cluster bật autovacuum, và mỗi lượt để lại 100 tuple chết trên bảng 100 dòng — vượt ngưỡng 50 + 0,2 × 100 = 70 của PG-044 — nên autovacuum ghé `ops.trips` giữa chừng là một **giả thuyết** hợp lý; lab không ghi log autovacuum để xác nhận.
+- **Mili-giây ở đây không phải độ trễ SQL.** Mỗi số gồm cả thời gian khởi động `psql`, kết nối, chạy và thoát. Lượt 2 gần gấp đôi lượt 1 và 3 cho cùng một câu — một lần đo đơn lẻ trên Windows không đủ để giải thích vì sao. Không dùng bảng này để kết luận throughput hay «checkpoint mất 100 ms».
+- **`walBytes` dao động 21.848–32.312** cho cùng một câu lệnh. `pg_current_wal_insert_lsn()` là vị trí của **cả cluster**, nên hiệu LSN gồm mọi WAL sinh ra trong khoảng đó, kể cả việc nền. Cluster bật autovacuum, và mỗi lượt để lại 100 tuple chết trên bảng 100 dòng — vượt ngưỡng 50 + 0,2 × 100 = 70 của PG-044 — nên việc autovacuum xử lý `ops.trips` giữa chừng là một **giả thuyết** hợp lý; lab không ghi log autovacuum để xác nhận.
 
 ### 6.2. Bộ đếm checkpoint
 
@@ -166,11 +166,11 @@ UPDATE ops.trips SET fare = fare + 1;   -- lần 2: ngay sau đó, không có ch
 MEASURE 045 same 100-row UPDATE right after CHECKPOINT vs repeated: walBytes [29952,7544]
 ```
 
-Lần đầu **29.952 byte**, lần lặp **7.544 byte**. Runner assert lần đầu lớn hơn lần sau. Hiệu 22.408 byte nhỏ hơn ba page 8 KB, khớp với giả thuyết vài page (heap, có thể kèm page khác) được ghi nguyên ảnh ở lần sửa đầu sau checkpoint. FPI có thể nhỏ hơn 8.192 byte vì phần trống giữa page thường không được ghi. Lần lặp 7.544 byte, khoảng 75 byte cho mỗi dòng, gần với chi phí thuần của 100 bản ghi cập nhật.
+Lần đầu **29.952 byte**, lần lặp **7.544 byte**. Runner assert lần đầu lớn hơn lần sau. Hiệu 22.408 byte nhỏ hơn ba page 8 KB, khớp với giả thuyết rằng vài page (heap, có thể kèm page khác) được ghi nguyên ảnh ở lần sửa đầu sau checkpoint. FPI có thể nhỏ hơn 8.192 byte vì phần trống giữa page thường không được ghi. Lần lặp 7.544 byte, khoảng 75 byte cho mỗi dòng, gần với chi phí thuần của 100 bản ghi cập nhật.
 
 Lab **không giải mã WAL**, nên đây là quan sát phù hợp với cơ chế, chưa phải phép đếm FPI. Bài tập 2 dùng `pg_walinspect` để đếm thật.
 
-Bài học thực tế: ước lượng dung lượng WAL hoặc archive bằng «kích thước cột × số UPDATE» sẽ sai. Cùng một câu có thể sinh WAL gấp bốn lần tuỳ vị trí so với checkpoint, chưa kể index và việc nền.
+Bài học thực tế: ước lượng dung lượng WAL hoặc archive bằng «kích thước cột × số UPDATE» sẽ sai. Cùng một câu có thể sinh WAL gấp bốn lần tuỳ thời điểm chạy so với checkpoint, chưa kể index và việc nền.
 
 ### 6.4. Log checkpoint
 
@@ -187,7 +187,7 @@ LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL f
 - `WAL file(s) added, removed, recycled`: file WAL tạo mới, xoá, hoặc đổi tên để dùng lại sau khi đã qua điểm redo.
 - `write`, `sync`, `total`: thời gian ghi, flush và tổng của checkpoint.
 
-Runner không gắn nhãn dòng nào ứng với lệnh nào, và timestamp đã bị che. Phần PG-042 có khởi động lại server, nên dòng đầu nhiều khả năng là checkpoint lúc tắt server ở bước đó, không thuộc vòng đo. Đọc ba dòng này như mẫu định dạng và độ lớn: checkpoint trên dữ liệu lab nhỏ ghi vài buffer tới vài trăm buffer, trong vài chục mili-giây.
+Runner không ghi rõ dòng nào ứng với lệnh nào, và timestamp đã bị che đi. Phần PG-042 có khởi động lại server, nên dòng đầu nhiều khả năng là checkpoint lúc tắt server ở bước đó, không thuộc vòng đo. Đọc ba dòng này như mẫu định dạng và độ lớn: checkpoint trên dữ liệu lab nhỏ ghi vài buffer tới vài trăm buffer, trong vài chục mili-giây.
 
 ## 7. Lab chứng minh gì và không chứng minh gì
 
@@ -196,11 +196,11 @@ README của lab ghi rõ: fixture 100 dòng, cache ấm, không tải đồng th
 - **Chứng minh được:** ba tham số độ bền đang bật; lệnh `CHECKPOINT` được đếm trong `pg_stat_checkpointer`; trong lần chạy này, `UPDATE` đầu tiên sau checkpoint sinh nhiều WAL hơn hẳn chính câu đó lặp lại — phù hợp với cơ chế full-page write.
 - **Không chứng minh được:** checkpoint làm production chậm bao nhiêu; `checkpoint_timeout` hay `max_wal_size` nào tối ưu; `synchronous_commit = off` nhanh hơn bao nhiêu; dữ liệu sống sót sau mất điện.
 
-Muốn quyết định tuning (chưa làm trong lab): giữ nguyên dữ liệu, phân bố cập nhật, số client và storage; chạy qua nhiều chu kỳ checkpoint; thu throughput, percentile độ trễ, tốc độ WAL, số FPI và thời gian checkpoint; mỗi lần đổi **một** tham số với giả thuyết cụ thể, lặp nhiều lần. View `pg_stat_wal` cho `wal_records`, `wal_fpi`, `wal_bytes` toàn cluster. Log cảnh báo «checkpoints are occurring too frequently» (ngưỡng `checkpoint_warning`, mặc định 30 giây) là dấu hiệu `max_wal_size` quá nhỏ.
+Để quyết định tuning (lab chưa làm bước này), cần giữ nguyên dữ liệu, phân bố cập nhật, số client và storage; chạy qua nhiều chu kỳ checkpoint; thu throughput, percentile độ trễ, tốc độ WAL, số FPI và thời gian checkpoint; mỗi lần đổi **một** tham số với giả thuyết cụ thể, lặp nhiều lần. View `pg_stat_wal` cho `wal_records`, `wal_fpi`, `wal_bytes` toàn cluster. Log cảnh báo «checkpoints are occurring too frequently» (ngưỡng `checkpoint_warning`, mặc định 30 giây) là dấu hiệu `max_wal_size` quá nhỏ.
 
 ## 8. Checkpoint không phải backup
 
-Checkpoint chỉ dọn đường cho crash recovery trên **chính** cluster đó. Nó không tạo bản sao độc lập để mang sang máy khác, không bảo vệ khỏi `DELETE` nhầm, mất ổ hay mã hoá tống tiền. Backup logic là PG-046; base backup cộng chuỗi WAL archive để khôi phục theo thời điểm là [PG-048](/articles/postgresql-pitr-base-backup-wal).
+Checkpoint chỉ dọn đường cho crash recovery trên **chính** cluster đó. Checkpoint không tạo bản sao độc lập để mang sang máy khác, không bảo vệ khỏi `DELETE` nhầm, mất ổ hay mã hoá tống tiền. Backup logic là PG-046; base backup cộng chuỗi WAL archive để khôi phục theo thời điểm là [PG-048](/articles/postgresql-pitr-base-backup-wal).
 
 Ngược lại, chính chuỗi WAL là nguyên liệu của PITR và replication, nên WAL bị **giữ lại** khi archive lỗi hoặc replication slot không được tiêu thụ — bất kể checkpoint. `pg_wal` khi đó phình vượt `max_wal_size`, và nếu đầy đĩa, server không ghi WAL được nữa. Checkpoint thành công **không** chứng minh WAL đã tới kho backup; muốn biết phải xem `pg_stat_archiver` (PG-048).
 
@@ -213,13 +213,13 @@ Ngược lại, chính chuỗi WAL là nguyên liệu của PITR và replication
 | Bật `synchronous_commit = off` toàn cluster cho nhanh | Có thể mất giao dịch đã báo thành công | Chỉ dùng theo giao dịch cho dữ liệu chấp nhận mất |
 | Tắt `fsync` vì benchmark không có crash | Rủi ro hỏng dữ liệu không phục hồi | Giữ `on`; benchmark không crash không chứng minh an toàn |
 | Dự toán WAL = kích thước cột × số UPDATE | FPI làm cùng câu sinh WAL gấp nhiều lần (lab: 29.952 vs 7.544) | Đo `pg_stat_wal`, `pg_walinspect` trên workload thật |
-| `pg_wal` vượt `max_wal_size`, đĩa sắp đầy | Archive lỗi hoặc replication slot bị bỏ rơi giữ WAL | Kiểm `pg_stat_archiver`, `pg_replication_slots` trước khi đổi checkpoint |
+| `pg_wal` vượt `max_wal_size`, đĩa sắp đầy | Archive lỗi hoặc replication slot bị bỏ rơi giữ WAL | Kiểm tra `pg_stat_archiver`, `pg_replication_slots` trước khi đổi checkpoint |
 
 ## 10. Đánh đổi
 
 - **Độ bền và độ trễ commit.** `synchronous_commit = on` buộc mỗi commit chờ một lần flush; `off` bỏ chờ, đổi lấy cửa sổ mất dữ liệu ngắn. Ranh giới nên đặt theo loại dữ liệu: thanh toán `on`, vị trí tài xế có thể cân nhắc `off` theo giao dịch.
 - **Tần suất checkpoint.** Dày: khôi phục nhanh, nhiều FPI và I/O. Thưa: ít FPI, I/O mượt, nhưng khôi phục lâu hơn và `pg_wal` lớn hơn.
-- **`wal_compression`.** Giảm WAL và băng thông archive/replica, tốn CPU. Đáng thử khi FPI chiếm phần lớn WAL — phải đo.
+- **`wal_compression`.** Giảm WAL và băng thông archive/replica, nhưng tốn CPU. Đáng thử khi FPI chiếm phần lớn WAL — phải đo.
 
 ## 11. Bài tập
 
@@ -238,7 +238,7 @@ Ngược lại, chính chuỗi WAL là nguyên liệu của PITR và replication
 **Bài 3. Báo cáo tần suất checkpoint có đối chứng.** Trên bản sao lab lớn hơn, so sánh `checkpoint_timeout` 5 phút và 30 phút với cùng workload ghi.
 
 <details><summary><b>Lời giải phải chứng minh</b></summary>
-<p>Ghi đủ cấu hình (phần cứng, phiên bản, <code>shared_buffers</code>, <code>max_wal_size</code>), số dòng, số client, thời gian chạy đủ nhiều chu kỳ checkpoint, số lần lặp mỗi cấu hình. Thu <code>wal_bytes</code>/<code>wal_fpi</code> từ <code>pg_stat_wal</code>, <code>num_timed</code>/<code>num_requested</code>, throughput và p95/p99 độ trễ đo trong một kết nối giữ nguyên, và — nếu làm Bài 1 — thời gian recovery. Chênh lệch nào nằm trong biên dao động giữa các lần lặp thì không được quy cho checkpoint. Báo cáo kết thúc bằng phần «giới hạn kết luận».</p>
+<p>Ghi đủ cấu hình (phần cứng, phiên bản, <code>shared_buffers</code>, <code>max_wal_size</code>), số dòng, số client, thời gian chạy đủ nhiều chu kỳ checkpoint, số lần lặp mỗi cấu hình. Thu <code>wal_bytes</code>/<code>wal_fpi</code> từ <code>pg_stat_wal</code>, <code>num_timed</code>/<code>num_requested</code>, throughput và p95/p99 độ trễ đo trong một kết nối giữ nguyên, và — nếu làm Bài 1 — thời gian recovery. Chênh lệch nào nằm trong mức dao động giữa các lần lặp thì không được quy cho checkpoint. Báo cáo kết thúc bằng phần «giới hạn kết luận».</p>
 </details>
 
 ## 12. Đọc tiếp

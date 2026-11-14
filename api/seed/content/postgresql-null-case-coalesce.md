@@ -1,7 +1,7 @@
 ---
 slug: postgresql-null-case-coalesce
 title: "NULL, CASE và COALESCE trong dữ liệu chuyến"
-summary: "Hai bản báo cáo chất lượng tháng 10 của Tới Nơi ghi điểm sao 4,22 và 3,88 từ cùng một bảng; bảng điều khiển ngày bão ghi Đà Nẵng «0 % huỷ» dù không có chuyến nào. Học logic ba giá trị của NULL, CASE, COALESCE và NULLIF để tách thiếu dữ liệu, không áp dụng và số 0 thật."
+summary: "Hai bản báo cáo chất lượng tháng 10 của Tới Nơi ghi điểm sao 4,22 và 3,88 từ cùng một bảng; bảng điều khiển ngày bão ghi Đà Nẵng «0 % huỷ» dù không có chuyến nào. Học logic ba giá trị của NULL, CASE, COALESCE và NULLIF để phân biệt dữ liệu thiếu, giá trị không áp dụng và số 0 thật."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-011, null, case, coalesce, nullif, is-distinct-from, toi-noi]
@@ -10,7 +10,7 @@ language: vi
 
 Sáng 31/10, ban điều hành Tới Nơi nhận hai bản báo cáo chất lượng tháng 10: một bản ghi điểm sao trung bình **4,22**, bản kia **3,88** — cùng bảng `trip_ratings`, cùng ảnh chụp dữ liệu. Cùng lúc, ô «tỉ lệ huỷ theo thành phố ngày 20/10» trên bảng điều khiển báo `division by zero`. Người trực sửa vội bằng cách thay mẫu số rỗng bằng 0, và màn hình ghi Đà Nẵng «0 % huỷ» cho đúng ngày bão — ngày không có lấy một chuyến.
 
-Không câu nào sai cú pháp. Mỗi người đã ngầm quyết định một ô trống nghĩa là gì. Bài này chỉ ra cách PostgreSQL đối xử với NULL và bốn công cụ để nói rõ ý định: `IS NULL`, `CASE`, `COALESCE`, `NULLIF`.
+Không câu nào sai cú pháp. Mỗi người đã ngầm quyết định một ô trống nghĩa là gì. Bài này chỉ ra cách PostgreSQL xử lý NULL và bốn công cụ để nói rõ ý định: `IS NULL`, `CASE`, `COALESCE`, `NULLIF`.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-011 · Phần 2/6 · Cơ bản</span>
@@ -19,7 +19,7 @@ Không câu nào sai cú pháp. Mỗi người đã ngầm quyết định một
 
 ## 1. Dữ liệu dùng trong bài
 
-Phần 2 dùng lược đồ Phần 1 với bộ dữ liệu lớn hơn: **3.174 chuyến** đặt từ 01/10, ảnh chụp lúc **01:00 ngày 31/10/2026 giờ VN**, sinh tất định (chạy lại luôn ra đúng các số trong bài). Bài này dùng thêm `trips.pickup_area_id` (khu đón, NULL khi mất GPS) và `trip_ratings` (tối đa một dòng mỗi chuyến; `stars` 1–5 hoặc NULL, `tip` ≥ 0 đ hoặc NULL).
+Phần 2 dùng lại schema của Phần 1 với bộ dữ liệu lớn hơn: **3.174 chuyến** đặt từ 01/10, ảnh chụp lúc **01:00 ngày 31/10/2026 giờ VN**, sinh tất định (chạy lại luôn ra đúng các số trong bài). Bài này dùng thêm `trips.pickup_area_id` (khu đón, NULL khi mất GPS) và `trip_ratings` (tối đa một dòng mỗi chuyến; `stars` 1–5 hoặc NULL, `tip` ≥ 0 đ hoặc NULL).
 
 ```bash
 cd examples/toi-noi-postgresql
@@ -42,11 +42,11 @@ Kết quả chép từ lần chạy thật trên PGlite (PostgreSQL 17.5), bỏ 
 | `trip_ratings.tip` | khách bỏ qua bước tip | **thiếu** | 541 |
 | `tip = 0` · `fare = 0` | chọn «không tip» · chuyến khuyến mãi | **giá trị thật** | 660 · 38 |
 
-SQL chỉ có **một** NULL cho cả hai nghĩa đầu; nghĩa nào phải suy từ chỗ khác — cột `status`, ràng buộc (CHECK `ck_trips_merchant_only_food` của PG-005 buộc chỉ đơn đồ ăn mới có quán), hay chú thích cột (lab ghi `COMMENT ON COLUMN trip_ratings.tip` là «NULL = bỏ qua bước tip, 0 = chọn không tip»). Còn số 0 là một **khẳng định**. Biến NULL thành 0 là thay «không biết» bằng một khẳng định — phần lớn lỗi trong bài bắt đầu từ đó.
+SQL chỉ có **một** NULL cho cả hai nghĩa đầu; muốn biết là nghĩa nào thì phải suy từ chỗ khác — cột `status`, ràng buộc (CHECK `ck_trips_merchant_only_food` của PG-005 buộc chỉ đơn đồ ăn mới có quán), hay chú thích cột (lab ghi `COMMENT ON COLUMN trip_ratings.tip` là «NULL = bỏ qua bước tip, 0 = chọn không tip»). Còn số 0 là một **khẳng định**. Biến NULL thành 0 là thay «không biết» bằng một khẳng định — phần lớn lỗi trong bài bắt đầu từ đó.
 
 ## 3. Logic ba giá trị
 
-So sánh với NULL không ra `true`/`false` mà ra NULL — giá trị chân lý thứ ba, đọc là «không biết»:
+So sánh với NULL không ra `true`/`false` mà ra NULL — giá trị chân trị thứ ba, đọc là «không biết»:
 
 ```sql
 SELECT NULL = NULL AS bang_nhau, NULL <> 1 AS khac_1, NULL IS NULL AS la_null,
@@ -59,7 +59,7 @@ SELECT NULL = NULL AS bang_nhau, NULL <> 1 AS khac_1, NULL IS NULL AS la_null,
            |        | t       | f              | t
 ```
 
-Khi ghép điều kiện, kết quả chắc chắn nếu vế đã biết đủ quyết định: `false AND NULL` là `false`, `true OR NULL` là `true`; còn `true AND NULL`, `false OR NULL`, `NOT NULL` vẫn là NULL (bảng chân trị ở thí nghiệm 1 của `pg011-logic-ba-gia-tri.sql`).
+Khi ghép điều kiện, kết quả chắc chắn khi vế đã biết đã đủ để quyết định: `false AND NULL` là `false`, `true OR NULL` là `true`; còn `true AND NULL`, `false OR NULL`, `NOT NULL` vẫn là NULL (bảng chân trị ở thí nghiệm 1 của `pg011-logic-ba-gia-tri.sql`).
 
 Điều quan trọng nhất: **`WHERE` chỉ giữ dòng có điều kiện ra `true`**; dòng ra NULL bị loại như dòng `false`.
 
@@ -95,7 +95,7 @@ ORDER BY 2 DESC;
  chưa có — đang tìm tài xế                   |         2
 ```
 
-(`GROUP BY 1` gom dòng cùng giá trị cột thứ nhất để `count(*)` đếm từng nhóm — PG-012.) Nhánh `ELSE` là câu kiểm tra miễn phí: hễ nó xuất hiện là có chuyến đã nhận mà mất tài xế. Hôm nay nó vắng nhờ ràng buộc `ck_trips_assigned_has_driver`.
+(`GROUP BY 1` gom dòng cùng giá trị cột thứ nhất để `count(*)` đếm từng nhóm — PG-012.) Nhánh `ELSE` là câu kiểm tra miễn phí: hễ nhóm này xuất hiện là có chuyến đã nhận mà mất tài xế. Hôm nay nhóm này vắng mặt nhờ ràng buộc `ck_trips_assigned_has_driver`.
 
 ### Bốn trạng thái đánh giá sau LEFT JOIN
 
@@ -129,7 +129,7 @@ Bốn nhóm cộng lại 3.168 — đúng số chuyến đã kết thúc. Chỉ 
 
 ### Hai bẫy của CASE
 
-- **Thứ tự nhánh.** Đưa nhánh `status = 'cancelled'` lên đầu câu `driver_id` ở trên: nhóm «huỷ trước khi có người nhận» phình từ 295 lên **461**, vì 166 chuyến huỷ *sau* khi đã có tài xế bị nhánh đầu bắt mất (thí nghiệm 3). Nhánh hẹp đặt trước, và tổng các nhóm phải khớp tổng số dòng.
+- **Thứ tự nhánh.** Đưa nhánh `status = 'cancelled'` lên đầu câu `driver_id` ở trên: nhóm «huỷ trước khi có người nhận» phình từ 295 lên **461**, vì 166 chuyến huỷ *sau* khi đã có tài xế bị nhánh đầu lấy mất (thí nghiệm 3). Nhánh hẹp đặt trước, và tổng các nhóm phải khớp tổng số dòng.
 - **Dạng CASE đơn giản không bắt được NULL.** `CASE stars WHEN NULL THEN 'không rõ' ELSE 'có sao' END` so sánh bằng `=`, nên cả 1.891 lượt — kể cả 153 lượt bỏ trống — thành «có sao» (thí nghiệm 2). Viết `CASE WHEN stars IS NULL THEN …`.
 
 ## 5. Hàm tổng hợp bỏ qua NULL
@@ -151,7 +151,7 @@ FROM trip_ratings;
 
 `avg(stars)` chia cho 1.738 lượt có sao. Bản 3,88 dùng `coalesce(stars, 0)` (mục 8) «cho khỏi NULL» — biến 153 lượt «không biết» thành 0 sao, một mức điểm không tồn tại, rồi chia cho 1.891.
 
-Cũng vì NULL, `stars = 5` (896) và `stars <> 5` (842) chỉ phủ 1.738 dòng; 153 dòng còn lại không thuộc nhóm nào. Chia khách thành hai nhóm bằng `=`/`<>` thì luôn hỏi: nhóm NULL nằm đâu?
+Cũng vì NULL, `stars = 5` (896) và `stars <> 5` (842) chỉ phủ 1.738 dòng; 153 dòng còn lại không thuộc nhóm nào. Chia khách thành hai nhóm bằng `=`/`<>` thì phải luôn tự hỏi: nhóm NULL nằm ở đâu?
 
 **Tập rỗng.** Tài liệu ghi rõ: trừ `count`, hàm tổng hợp trả NULL khi không có dòng nào — `sum` của 0 dòng là NULL, không phải 0. Đà Nẵng ngày 20/10 cho `count(*) = 0`, `sum(fare)` và `avg(fare)` đều NULL (thí nghiệm 5). Với **tiền**, `coalesce(sum(fare), 0)` đúng nghĩa: không có chuyến thì doanh thu là 0 đ. Với **trung bình** thì không: cước trung bình của 0 chuyến không phải 0 đ.
 
@@ -190,13 +190,13 @@ FROM trips AS t JOIN trip_ratings AS r ON r.trip_id = t.id;
      134142000 |           98163000 |          134142000
 ```
 
-Thiếu gần 36 triệu đồng, im lặng. Ở đây `coalesce(r.tip, 0)` đúng nghĩa vì câu hỏi là **tiền**: bỏ qua tip thì tài xế nhận 0 đ tip. Cùng một hàm, đúng với tiền, sai với điểm sao — điều quyết định là nghĩa của con số.
+Thiếu gần 36 triệu đồng mà không có lỗi hay cảnh báo nào. Ở đây `coalesce(r.tip, 0)` đúng nghĩa vì câu hỏi là **tiền**: bỏ qua tip thì tài xế nhận 0 đ tip. Cùng một hàm, đúng với tiền, sai với điểm sao — điều quyết định là nghĩa của con số.
 
 ## 7. NULLIF: biến một giá trị thành NULL có chủ đích
 
 **`NULLIF(a, b)`** trả NULL nếu `a = b`, ngược lại trả `a` — chiều ngược của `COALESCE`.
 
-**Cước 0 đ.** 31 chuyến hoàn thành có cước 0 đ (khuyến mãi) — dữ liệu đúng. `avg(fare)` trên 2.707 chuyến hoàn thành ra **67.339 đ**; «cước trung bình của chuyến có thu tiền» là `avg(nullif(fare, 0))` = **68.119 đ**. Lưu sự thật (0 đ), quyết định loại hay không ở câu truy vấn.
+**Cước 0 đ.** 31 chuyến hoàn thành có cước 0 đ (khuyến mãi) — dữ liệu đúng. `avg(fare)` trên 2.707 chuyến hoàn thành ra **67.339 đ**; «cước trung bình của chuyến có thu tiền» là `avg(nullif(fare, 0))` = **68.119 đ**. Lưu dữ liệu thật (0 đ), còn việc loại hay không thì quyết định ở câu truy vấn.
 
 **Chống chia cho 0.** Câu tỉ lệ huỷ ngày 20/10 đi từ `cities`, `LEFT JOIN trips` để thành phố không có chuyến vẫn có dòng, rồi chia cho `count(t.id)` — với Đà Nẵng là 0:
 
@@ -226,11 +226,11 @@ ORDER BY c.code COLLATE "C";
  SG   |   49 |          14.3
 ```
 
-Cột tỉ lệ giữ NULL để biểu đồ, cảnh báo phía sau biết «không xác định»; câu lab có thêm cột `hien_thi` = `coalesce(tỉ_lệ::text, 'không có chuyến')` cho người đọc. Cách sửa vội `coalesce(…, 0)` biến một ngày không có dữ liệu thành khẳng định «Đà Nẵng không huỷ chuyến nào» — và cảnh báo tỉ lệ huỷ bất thường không bao giờ kêu cho ngày đó.
+Cột tỉ lệ giữ NULL để biểu đồ và cảnh báo phía sau biết đó là «không xác định»; câu lab có thêm cột `hien_thi` = `coalesce(tỉ_lệ::text, 'không có chuyến')` cho người đọc. Cách sửa vội `coalesce(…, 0)` biến một ngày không có dữ liệu thành khẳng định «Đà Nẵng không huỷ chuyến nào» — và cảnh báo tỉ lệ huỷ bất thường không bao giờ được kích hoạt cho ngày đó.
 
 ## 8. COALESCE: lấp chỗ trống khi hiển thị
 
-**`COALESCE(a, b, …)`** trả đối số **đầu tiên khác NULL**. Theo tài liệu, nó chỉ tính các đối số cần thiết (giống `CASE`), và mọi đối số phải chuyển được về **một kiểu chung**. Chỗ đúng nhất của nó là tầng hiển thị — câu 7 của lab gắn nghĩa cho từng ô trống (trích hai cột):
+**`COALESCE(a, b, …)`** trả đối số **đầu tiên khác NULL**. Theo tài liệu, hàm này chỉ tính các đối số cần thiết (giống `CASE`), và mọi đối số phải chuyển được về **một kiểu chung**. Chỗ dùng hợp lý nhất là ở tầng hiển thị — câu 7 của lab gắn nghĩa cho từng ô trống (trích hai cột):
 
 ```sql
 SELECT t.code, t.status,
@@ -273,7 +273,7 @@ FROM trips;
  3174 |   162 |     2976 |          3012
 ```
 
-162 + 2.976 thiếu đúng 36 chuyến mất GPS. **`IS DISTINCT FROM`** so sánh như `<>` nhưng coi NULL là một giá trị (chiều ngược: `IS NOT DISTINCT FROM`). «Chắc chắn đón ngoài SG-TT-01» là 2.976, «không chắc đón ở SG-TT-01» là 3.012 — chọn câu nào tuỳ nghiệp vụ, miễn là chọn có chủ đích. Cùng họ là `NOT IN (danh sách có NULL)` trả 0 dòng — PG-014.
+162 + 2.976 thiếu đúng 36 chuyến mất GPS. **`IS DISTINCT FROM`** so sánh như `<>` nhưng coi NULL là một giá trị (dạng phủ định: `IS NOT DISTINCT FROM`). «Chắc chắn đón ngoài SG-TT-01» là 2.976, «không chắc đón ở SG-TT-01» là 3.012 — chọn câu nào tuỳ nghiệp vụ, miễn là chọn có chủ đích. Bẫy cùng loại là `NOT IN (danh sách có NULL)` trả 0 dòng — PG-014.
 
 Một điểm ngược với `=`: `DISTINCT` và `GROUP BY` gom mọi NULL vào **một** nhóm, còn `count(DISTINCT cột)` bỏ NULL — `SELECT DISTINCT stars` ra 6 dòng, `count(DISTINCT stars)` ra 5 (thí nghiệm 8).
 

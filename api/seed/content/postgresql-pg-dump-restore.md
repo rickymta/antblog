@@ -1,7 +1,7 @@
 ---
 slug: postgresql-pg-dump-restore
 title: "Backup logic với pg_dump: restore vào database riêng và đối soát cả dữ liệu lẫn quyền"
-summary: "22:40, một script vận hành chạy DELETE không có WHERE trên bảng chuyến. Bản pg_dump đêm qua có cứu được không? Bài đi qua cách pg_dump chụp một snapshot nhất quán, những gì một dump schema không chứa (role, extension), rồi restore vào database riêng và đối soát số dòng, tổng tiền, digest, owner, ACL và một lệnh ghi bị cấm — kể cả khi --no-owner --no-acl làm dữ liệu đúng mà quyền mất."
+summary: "22:40, một script vận hành chạy DELETE không có WHERE trên bảng chuyến. Bản pg_dump đêm qua có cứu được không? Bài đi qua cách pg_dump chụp một snapshot nhất quán, những gì một bản dump theo schema không chứa (role, extension), rồi restore vào database riêng và đối soát số dòng, tổng tiền, digest, owner, ACL và một lệnh ghi bị cấm — kể cả khi --no-owner --no-acl làm dữ liệu đúng mà quyền mất."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-046, backup, restore, pg-dump, pg-restore, pg-dumpall, toi-noi]
@@ -10,7 +10,7 @@ language: vi
 
 22:40 tối thứ Năm, một script vận hành dọn dữ liệu thử nghiệm chạy nhầm sang database thật của Tới Nơi. Câu lệnh trong script là `DELETE FROM ops.trips` — **không có `WHERE`**. Màn hình điều phối trống trơn, báo cáo doanh thu ngày về 0. Người trực mở thư mục backup và thấy file `ops-0200.dump` của job `pg_dump` chạy lúc 02:00 sáng nay. Câu hỏi đầu tiên ai cũng hỏi: «có backup rồi, restore là xong chứ?»
 
-Chưa chắc. Có một file backup không đồng nghĩa có thể khôi phục. Bản phục hồi phải đủ chuyến, đúng giá tiền, đúng chủ sở hữu (owner) và đúng quyền truy cập. Lần diễn tập trước, nhóm đã restore thành công — exit code 0 — nhưng tài khoản báo cáo không đọc được bảng nào, vì người chạy thêm `--no-owner --no-acl` để «bớt lỗi». Và kể cả restore hoàn hảo, file 02:00 cũng không có những chuyến phát sinh từ 02:00 đến 22:40.
+Chưa chắc. Có file backup không đồng nghĩa với việc khôi phục được. Bản phục hồi phải đủ chuyến, đúng giá tiền, đúng chủ sở hữu (owner) và đúng quyền truy cập. Lần diễn tập trước, nhóm đã restore thành công — exit code 0 — nhưng tài khoản báo cáo không đọc được bảng nào, vì người chạy thêm `--no-owner --no-acl` để «bớt lỗi». Và kể cả restore hoàn hảo, file 02:00 cũng không có những chuyến phát sinh từ 02:00 đến 22:40.
 
 Bài này chạy trọn một vòng **backup logic**: dump, xem bên trong archive, lấy phần cấp cluster, restore vào **database riêng** rồi đối soát. Giữ được chuyến tới 22:39 là việc của PITR ở PG-048.
 
@@ -96,12 +96,12 @@ DEFAULT ACL ops DEFAULT PRIVILEGES FOR TABLES tn_owner
 Đọc từng nhóm:
 
 - **`SCHEMA` và `ACL - SCHEMA ops`**: lệnh tạo schema với owner `tn_owner`, cùng các `GRANT USAGE` cho app và report. Thiếu dòng ACL này thì report có quyền trên bảng mà vẫn không «đi vào» được schema.
-- **`TABLE` / `TABLE DATA`**: định nghĩa bảng và dữ liệu là hai mục riêng. `pg_restore` tạo bảng trước, nạp dữ liệu, rồi mới tới **`CONSTRAINT … trips_pkey`** — primary key được dựng sau khi có dữ liệu, rẻ hơn kiểm từng dòng lúc chèn.
-- **`ACL ops TABLE trips`**: các `GRANT` trên bảng. Đây là thứ biến «bảng có dữ liệu» thành «bảng dùng được đúng người».
+- **`TABLE` / `TABLE DATA`**: định nghĩa bảng và dữ liệu là hai mục riêng. `pg_restore` tạo bảng trước, nạp dữ liệu, rồi mới tới **`CONSTRAINT … trips_pkey`** — primary key được dựng sau khi có dữ liệu, rẻ hơn so với kiểm tra từng dòng lúc chèn.
+- **`ACL ops TABLE trips`**: các `GRANT` trên bảng. Đây là thứ biến «bảng có dữ liệu» thành «bảng mà đúng người dùng được».
 - **`DEFAULT ACL`**: `ALTER DEFAULT PRIVILEGES` của PG-041. Không có nó, bảng mới tạo sau khi restore sẽ không tự cấp `SELECT` cho report.
-- **`TABLE ops churn postgres`**: bảng thí nghiệm VACUUM của PG-044 vẫn nằm trong `ops`, owner là `postgres` vì runner tạo nó bằng superuser. Dump theo schema lấy **mọi thứ trong schema**, kể cả rác thí nghiệm, và phần lớn dung lượng archive nhiều khả năng đến từ dữ liệu bảng này chứ không phải 100 chuyến. Bảng tạm, bảng backup tay cũng lặng lẽ đi vào mọi bản dump theo cách này.
+- **`TABLE ops churn postgres`**: bảng thí nghiệm VACUUM của PG-044 vẫn nằm trong `ops`, owner là `postgres` vì runner tạo nó bằng superuser. Dump theo schema lấy **mọi thứ trong schema**, kể cả rác thí nghiệm, và phần lớn dung lượng archive nhiều khả năng đến từ dữ liệu bảng này chứ không phải 100 chuyến. Bảng tạm, bảng backup tay cũng đi vào mọi bản dump theo cách này mà không ai hay biết.
 
-Điều quan trọng nhất là thứ **không có**: không một dòng `ROLE` nào. Runner kiểm điều đó:
+Điều quan trọng nhất là thứ **không có**: không một dòng `ROLE` nào. Runner kiểm tra điều đó:
 
 ```text
 PASS 046 roles live in globals, not in schema dump: true
@@ -147,7 +147,7 @@ CREATE DATABASE p05_restored;
 pg_restore -h 127.0.0.1 -p <PORT> -U postgres -d p05_restored --exit-on-error <ROOT>/ops.dump
 ```
 
-`--exit-on-error` quan trọng hơn vẻ ngoài của nó. Mặc định `pg_restore` gặp lỗi ở một lệnh SQL thì **in lỗi rồi chạy tiếp**, và chỉ báo số lỗi bị bỏ qua ở cuối. Một restore «xong» với vài lỗi `GRANT` bị trôi trong log là đúng loại thành công giả mà bài này muốn tránh. Với cờ này, lỗi đầu tiên dừng restore và exit code khác 0. Nếu muốn «hoặc tất cả, hoặc không gì», có thêm `--single-transaction` (không dùng trong lab).
+`--exit-on-error` quan trọng hơn người ta tưởng. Mặc định `pg_restore` gặp lỗi ở một lệnh SQL thì **in lỗi rồi chạy tiếp**, và chỉ báo số lỗi bị bỏ qua ở cuối. Một restore «xong» với vài lỗi `GRANT` bị trôi trong log là đúng loại thành công giả mà bài này muốn tránh. Với cờ này, lỗi đầu tiên dừng restore và exit code khác 0. Nếu muốn «hoặc tất cả, hoặc không gì», có thêm `--single-transaction` (không dùng trong lab).
 
 Lab restore vào cùng cluster nên `tn_owner`, `tn_app`, `tn_report` đã có sẵn. Đây là giới hạn được ghi trong README: lab **không** thử restore sang cluster mới với role mapping khác (mục 9).
 
@@ -188,7 +188,7 @@ PASS 046 restored owner: tn_owner
 PASS 046 restored report ACL: t
 ```
 
-Lớp thứ ba là một **lệnh ghi bị cấm**: runner chạy `SET ROLE tn_report; UPDATE ops.trips SET fare = 0;` trên `p05_restored` và yêu cầu nó thất bại với SQLSTATE `42501` (thiếu quyền). Assertion này nằm trong `run.mjs`; `OUTPUT.txt` không in lại thông báo lỗi. Kiểm quyền dương («report đọc được») mà không kiểm quyền âm («report không sửa được») thì chưa biết bản restore có vô tình rộng quyền hơn nguồn không.
+Lớp thứ ba là một **lệnh ghi bị cấm**: runner chạy `SET ROLE tn_report; UPDATE ops.trips SET fare = 0;` trên `p05_restored` và yêu cầu nó thất bại với SQLSTATE `42501` (thiếu quyền). Assertion này nằm trong `run.mjs`; `OUTPUT.txt` không in lại thông báo lỗi. Kiểm tra quyền được phép («report đọc được») mà không kiểm tra quyền bị cấm («report không sửa được») thì chưa biết bản restore có vô tình rộng quyền hơn nguồn không.
 
 Ba lớp đó là định nghĩa «restore đạt» trong bài: **dữ liệu khớp, chủ sở hữu khớp, ma trận quyền khớp cả chiều được phép lẫn chiều bị cấm**.
 
@@ -212,7 +212,7 @@ Digest **giống hệt** — nếu chỉ đối soát dữ liệu, bản này «
 - `--no-owner` bỏ các lệnh đặt owner, nên mọi đối tượng thuộc về **người chạy restore** — ở đây là superuser `postgres`. Migration chạy bằng `tn_owner` sẽ không `ALTER` được bảng của chính nó nữa.
 - `--no-acl` bỏ mọi `GRANT`/`REVOKE`, kể cả default privileges. `tn_report` mất quyền đọc; `tn_app` cũng vậy. Ứng dụng lên lại sẽ nhận toàn lỗi `42501`.
 
-Hai cờ này hợp lý khi dựng bản sao cho dev với mô hình role khác. Khi khôi phục production, chúng biến một lỗi hiển nhiên («role không tồn tại») thành một lỗi im lặng («restore xong, không ai dùng được» — hoặc tệ hơn, ai đó cấp `ALL` cho xong). Bài học: **đối soát quyền phải là một phần của nghiệm thu**, nếu không lab đã chứng minh rằng digest không bắt được loại sai này.
+Hai cờ này hợp lý khi dựng bản sao cho dev với mô hình role khác. Khi khôi phục production, chúng biến một lỗi hiển nhiên («role không tồn tại») thành một lỗi ngầm («restore xong, không ai dùng được» — hoặc tệ hơn, ai đó cấp `ALL` cho xong). Bài học: **đối soát quyền phải là một phần của nghiệm thu**, vì lab đã chứng minh rằng digest không bắt được loại sai này.
 
 ## 9. Sang một cluster khác (chưa chạy trong lab)
 
@@ -227,7 +227,7 @@ createdb -h <DICH> -U postgres toinoi_restore
 pg_restore -h <DICH> -U postgres -d toinoi_restore --exit-on-error toinoi.dump
 ```
 
-Những điểm phải kiểm thêm khi làm thật:
+Những điểm phải kiểm tra thêm khi làm thật:
 
 - **Role mapping khác**: nếu cluster đích đặt tên role khác (ví dụ `prod_owner` thay vì `tn_owner`), không có cờ nào tự đổi tên. Cách thường dùng là tạo role cùng tên ở đích, hoặc restore với `--no-owner` rồi chạy một script `ALTER … OWNER TO` và `GRANT` *đã review* — và đối soát quyền giống mục 7.
 - **Extension**: extension phải có sẵn trên máy đích (đúng phiên bản file cài đặt). Dump toàn database có `CREATE EXTENSION`; dump theo schema như lab thì không.
@@ -239,10 +239,10 @@ Những điểm phải kiểm thêm khi làm thật:
 Áp vào sự cố:
 
 1. **Không đụng vào nguồn.** Chặn script, chặn ghi nếu cần, giữ nguyên hiện trạng để điều tra.
-2. Restore `ops-0200.dump` (và globals nếu sang cluster khác) vào **database riêng**, `--exit-on-error`, đối soát count/tổng/digest so với số liệu ghi lúc dump, kiểm owner/ACL.
+2. Restore `ops-0200.dump` (và globals nếu sang cluster khác) vào **database riêng**, `--exit-on-error`, đối soát count/tổng/digest so với số liệu ghi lúc dump, kiểm tra owner/ACL.
 3. Biết chính xác bản này có gì: trạng thái lúc **02:00 bắt đầu dump**. Mọi chuyến từ 02:00 đến 22:40 không có ở đây.
 
-Từ đó có hai lựa chọn, và cả hai đều không hoàn hảo. Thay database bằng bản restore thì mất gần 21 giờ dữ liệu — RPO (lượng dữ liệu chấp nhận mất) của backup logic chính là khoảng cách tới lần dump gần nhất. Hoặc giữ database hiện tại, chép từ bản restore sang những dòng đã bị xoá mà có trước 02:00, và chấp nhận rằng chuyến trong ngày vẫn mất. Không có cách nào chỉ bằng `pg_dump` để lấy lại trạng thái lúc 22:39. Đó là lý do cần base backup và WAL — PG-048.
+Từ đó có hai lựa chọn, và cả hai đều không hoàn hảo. Thay database bằng bản restore thì mất gần 21 giờ dữ liệu — RPO (lượng dữ liệu chấp nhận mất) của backup logic chính là khoảng cách tới lần dump gần nhất. Hoặc giữ database hiện tại, chép từ bản restore sang những dòng đã bị xoá nhưng có từ trước 02:00, và chấp nhận rằng chuyến trong ngày vẫn mất. Không có cách nào chỉ bằng `pg_dump` để lấy lại trạng thái lúc 22:39. Đó là lý do cần base backup và WAL — PG-048.
 
 ## 11. Lỗi thường gặp
 
@@ -281,7 +281,7 @@ Hai họ không thay thế nhau. Một chính sách hợp lý cho Tới Nơi: ba
 **Bài 2.** Đồng nghiệp đề xuất: «Restore đêm nào cũng lỗi role, cứ thêm <code>--no-owner --no-acl</code> cho xanh pipeline.» Viết phản hồi có bằng chứng.
 
 <details><summary><b>Lời giải phải chứng minh được</b></summary>
-<p>Dẫn lại ba dòng <code>PASS 046 bare restore …</code>: digest giống hệt nhưng owner thành <code>postgres</code> và <code>tn_report</code> mất <code>SELECT</code>. Chỉ ra rằng đối soát chỉ dữ liệu sẽ cho «đạt», nên pipeline phải kiểm cả owner, ACL dương và một lệnh ghi bị cấm. Đề xuất đúng là sửa nguyên nhân: restore globals trước, hoặc tạo role ở đích, rồi giữ owner/ACL.</p>
+<p>Dẫn lại ba dòng <code>PASS 046 bare restore …</code>: digest giống hệt nhưng owner thành <code>postgres</code> và <code>tn_report</code> mất <code>SELECT</code>. Chỉ ra rằng đối soát chỉ dữ liệu sẽ cho «đạt», nên pipeline phải kiểm tra cả owner, quyền được phép và một lệnh ghi bị cấm. Đề xuất đúng là sửa nguyên nhân: restore globals trước, hoặc tạo role ở đích, rồi giữ owner/ACL.</p>
 </details>
 
 **Bài 3.** Thiết kế đối soát cho một bảng 50 triệu chuyến, có cột <code>NULL</code> được (<code>driver_id</code> khi chuyến bị huỷ trước khi có tài xế).

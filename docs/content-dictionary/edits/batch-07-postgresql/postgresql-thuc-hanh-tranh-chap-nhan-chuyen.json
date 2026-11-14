@@ -1,0 +1,18 @@
+{"file":"postgresql-thuc-hanh-tranh-chap-nhan-chuyen.md","edits":[
+{"old":"và **bằng chứng** khi các phiên chạy đua thật.","new":"và **bằng chứng** khi các phiên thật sự chạy đua với nhau.","reason":"Câu cụt, gượng","severity":"low"},
+{"old":"bàn giao được lịch chạy, invariant và bằng chứng chỉ một người thắng","new":"bàn giao được lịch chạy, bất biến và bằng chứng rằng chỉ một người thắng","reason":"Thống nhất 'bất biến' trong bài; câu cụt","severity":"medium"},
+{"old":"đếm vi phạm; ghi máy và giới hạn","new":"đếm vi phạm; ghi rõ máy đo và giới hạn","reason":"'ghi máy' cụt","severity":"low"},
+{"old":"Viết nó trước, để có đối chứng.","new":"Hãy viết cách này trước để có đối chứng.","reason":"Tránh 'nó' chỉ sự vật","severity":"medium"},
+{"old":"— dùng nó thế nào cho đúng?","new":"— dùng cơ chế này thế nào cho đúng?","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"Kết quả của nó thuộc về sau bước nhả khoá.","new":"Kết quả của bước đó xuất hiện sau bước nhả khoá.","reason":"'thuộc về sau' tự ghép, khó hiểu","severity":"medium"},
+{"old":"Kiểm mỗi <code>trips</code> sẽ không bao giờ thấy lỗi.","new":"Chỉ kiểm tra <code>trips</code> thì sẽ không bao giờ thấy lỗi.","reason":"'Kiểm mỗi' gượng, câu thiếu liên kết","severity":"medium"},
+{"old":"nên đổi lịch mà kết quả đổi là runner báo <code>FAIL</code>","new":"nên nếu đổi lịch mà kết quả đổi thì runner báo <code>FAIL</code>","reason":"Câu lược liên từ","severity":"low"},
+{"old":"Cách (e) là <b>đúng code sai của (a)</b> nhưng","new":"Cách (e) dùng <b>chính code sai của (a)</b> nhưng","reason":"'đúng code sai' gượng","severity":"medium"},
+{"old":"Giữ khoá trong lúc ứng dụng nghĩ ⇒ giữ giao dịch ngắn","new":"Khoá bị giữ suốt lúc ứng dụng xử lý, nên hãy giữ giao dịch ngắn","reason":"Câu dùng ký hiệu thay lời, 'nghĩ' gượng","severity":"medium"},
+{"old":"không xoá/đổi khoá chính thì dùng <code>FOR NO KEY UPDATE</code>","new":"nếu không xoá hay đổi khoá chính thì dùng <code>FOR NO KEY UPDATE</code>","reason":"Câu cụt, thiếu 'nếu'","severity":"medium"},
+{"old":"Hợp lệ, nhưng mọi người thua","new":"Cách này hợp lệ, nhưng mọi người thua","reason":"Câu thiếu chủ ngữ","severity":"low"},
+{"old":"Nó hợp cho hàng đợi","new":"SKIP LOCKED hợp với hàng đợi","reason":"Tránh 'Nó' chỉ sự vật","severity":"medium"},
+{"old":"| 8 | Không trích sai số |","new":"| 8 | Không dùng số sai ngữ cảnh |","reason":"'trích sai số' dễ hiểu nhầm là sai số đo","severity":"medium"},
+{"old":"giao dịch không làm hai lần đọc–ghi của hai người thành tuần tự.","new":"giao dịch không biến hai lần đọc–ghi của hai người thành tuần tự.","reason":"Calque 'làm … thành'","severity":"low"},
+{"old":"quyền truy cập, sao lưu và khôi phục (Phần 5)","new":"quyền truy cập, backup và restore (Phần 5)","reason":"Giữ thuật ngữ backup/restore","severity":"medium"}
+]}

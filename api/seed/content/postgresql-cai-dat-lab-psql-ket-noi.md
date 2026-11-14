@@ -8,7 +8,7 @@ tags: [postgresql, pg-002, lab, psql, pglite, docker, toi-noi]
 language: vi
 ---
 
-Ngày đầu vào nhóm backend của Tới Nơi, bạn được giao kiểm tra một luật: "cước chuyến không được âm". Cách nhanh nhất có vẻ là mở công cụ quản trị, kết nối vào database đang chạy và thử chèn một chuyến cước −1.000 đ. Đó cũng là cách nhanh nhất để để lại một dòng rác trong dữ liệu tiền của công ty, hoặc tệ hơn, xoá nhầm thứ không được xoá.
+Ngày đầu vào nhóm backend của Tới Nơi, bạn được giao kiểm tra một luật: "cước chuyến không được âm". Cách nhanh nhất có vẻ là mở công cụ quản trị, kết nối vào database đang chạy và thử chèn một chuyến cước −1.000 đ. Đó cũng là cách nhanh nhất để bỏ lại một dòng rác trong dữ liệu tiền của công ty, hoặc tệ hơn, xoá nhầm thứ không được xoá.
 
 Người làm database cẩn thận luôn có một **lab**: môi trường riêng, dựng lại được bằng vài lệnh, biết chính xác phiên bản, dọn sạch khi xong. Bài này dựng lab cho Phần 1 theo hai cách, chạy truy vấn đầu tiên và ghi "phiếu lab" để mọi kết quả về sau có ngữ cảnh.
 
@@ -35,7 +35,7 @@ Hai cách chạy, khác nhau ở mức độ kiểm chứng:
 | Kết nối | một kết nối duy nhất | nhiều phiên như server thật |
 | Trạng thái kiểm chứng | **đã chạy thật** khi viết bài | **chưa chạy** trên máy viết bài |
 
-Mọi kết quả trong Phần 1 chép từ cách A; chạy cách B thì so với `p01/OUTPUT.txt` và ghi lại chỗ khác.
+Mọi kết quả trong Phần 1 chép từ cách A; chạy cách B thì so với `p01/OUTPUT.txt` và ghi lại chỗ khác biệt.
 
 ## 2. Cách A: Node + PGlite
 
@@ -79,7 +79,7 @@ Thứ tự quan trọng: `05-select.sql` cần dữ liệu của `00`→`02`, n�
 
 ## 3. Truy vấn đầu tiên
 
-Tạo một file `thu-nghiem.sql` ở thư mục của riêng bạn (đừng sửa file trong `p01/`, bộ test so `OUTPUT.txt` từng byte):
+Tạo một file `thu-nghiem.sql` ở thư mục của riêng bạn (đừng sửa file trong `p01/`, bộ test đối chiếu `OUTPUT.txt` từng byte):
 
 ```sql
 SELECT version();
@@ -90,7 +90,7 @@ SELECT current_database(), current_user;
 SELECT 1 + 1 AS ket_qua;
 ```
 
-Chạy `node run.mjs <đường-dẫn>/thu-nghiem.sql`. Kết quả thật (lược phần lặp lại câu lệnh):
+Chạy `node run.mjs <đường-dẫn>/thu-nghiem.sql`. Kết quả thật (đã lược phần in lại câu lệnh):
 
 ```text
 -- [lab] Engine: PostgreSQL 17.5 qua PGlite 0.3.16 (WebAssembly, một kết nối)
@@ -124,7 +124,7 @@ Chạy `node run.mjs <đường-dẫn>/thu-nghiem.sql`. Kết quả thật (lư�
 
 - **`version()`** trả về chuỗi mô tả phiên bản server. Chuỗi của PGlite nói "aarch64-unknown-linux-gnu … emcc … 32-bit" dù máy viết bài chạy Windows x64: đó là thông tin bản build WebAssembly, không phải máy của bạn. Server thật in chuỗi của bản build Linux.
 - **`server_version`** là con số dễ đọc; **`server_version_num`** là dạng số để chương trình so sánh (170005 = 17.5). Tài liệu PostgreSQL khuyên chương trình dùng `server_version_num` thay vì tự tách chuỗi `version()`.
-- **`SHOW`** hiện giá trị hiện tại của một tham số cấu hình (*run-time parameter*); `SHOW timezone` ra `Asia/Ho_Chi_Minh` vì runner đã đặt.
+- **`SHOW`** cho thấy giá trị hiện tại của một tham số cấu hình (*run-time parameter*); `SHOW timezone` ra `Asia/Ho_Chi_Minh` vì runner đã đặt.
 - **`current_database()`** là `template1` và **`current_user`** là `postgres` — đặc thù PGlite. Với Docker của lab, cả hai sẽ là `toinoi`. Lab chỉ dựa vào schema `toinoi`, không phụ thuộc tên database hay tên user.
 
 ### Múi giờ mặc định không phải múi giờ của bạn
@@ -146,7 +146,7 @@ RESET
 SET
 ```
 
-Bỏ thiết lập của runner, PGlite quay về `GMT`. Với ảnh Docker, giá trị mặc định thường là `Etc/UTC` (chưa kiểm — hãy chạy `SHOW timezone` và ghi vào phiếu lab). Vì mặc định khác nhau giữa các môi trường, lab **luôn đặt múi giờ tường minh**. Đây là chuyện của cách *hiển thị* thời điểm; PG-004 giải thích vì sao giá trị đã lưu không đổi khi đổi múi giờ phiên.
+Khi bỏ thiết lập của runner, PGlite quay về `GMT`. Với ảnh Docker, giá trị mặc định thường là `Etc/UTC` (chưa kiểm — hãy chạy `SHOW timezone` và ghi vào phiếu lab). Vì mặc định khác nhau giữa các môi trường, lab **luôn đặt múi giờ tường minh**. Đây là chuyện của cách *hiển thị* thời điểm; PG-004 giải thích vì sao giá trị đã lưu không đổi khi đổi múi giờ phiên.
 
 ## 4. Ghi phiếu lab
 
@@ -202,11 +202,11 @@ SELECT
 (1 row)
 ```
 
-Mở thư mục `.pgdata` ra, bạn sẽ thấy đúng hình hài **thư mục dữ liệu** (*data directory*) mà PG-001 nhắc tới: file `PG_VERSION` chứa `17`, các thư mục `base`, `global`, `pg_wal`, `pg_xact`… và hai file cấu hình `postgresql.conf`, `pg_hba.conf`. Trên máy viết bài thư mục này nặng khoảng 27 MB. Các thư mục con được giải thích ở Phần 3 và 5; lúc này nhớ: **cụm database trên đĩa là một thư mục**, và đừng sửa tay file trong đó.
+Mở thư mục `.pgdata` ra, bạn sẽ thấy đúng hình hài **thư mục dữ liệu** (*data directory*) mà PG-001 nhắc tới: file `PG_VERSION` chứa `17`, các thư mục `base`, `global`, `pg_wal`, `pg_xact`… và hai file cấu hình `postgresql.conf`, `pg_hba.conf`. Trên máy viết bài, thư mục này có dung lượng khoảng 27 MB. Các thư mục con được giải thích ở Phần 3 và 5; lúc này nhớ: **cụm database trên đĩa là một thư mục**, và đừng sửa tay file trong đó.
 
 ## 6. Cách B: Docker và psql
 
-> **Chưa chạy trên máy viết bài** (máy không có Docker hay psql). Lệnh dưới theo README của lab, tài liệu ảnh `postgres` và tài liệu psql. Mọi khối "kết quả" trong mục này là **ví dụ minh hoạ**, không phải kết quả đã chạy.
+> **Chưa chạy trên máy viết bài** (máy không có Docker hay psql). Lệnh dưới đây lấy theo README của lab, tài liệu ảnh `postgres` và tài liệu psql. Mọi khối "kết quả" trong mục này là **ví dụ minh hoạ**, không phải kết quả đã chạy.
 
 **psql** là client dòng lệnh chính thức của PostgreSQL: gõ câu SQL tương tác, chạy SQL từ file, và có thêm các **lệnh meta** bắt đầu bằng dấu `\` để xem cấu trúc, đổi định dạng hiển thị. File `docker-compose.yml` của lab dựng `postgres:17.5-bookworm` với user và database cùng tên `toinoi`, chỉ mở cổng trên `127.0.0.1:5433`, và gắn thư mục `p01` vào container ở `/lab/p01` (chỉ đọc).
 
@@ -235,7 +235,7 @@ Sau đó dùng các truy vấn ở mục 3 và các lệnh meta chỉ psql mới
 | `\d trips` | cấu trúc bảng `trips` (cột, kiểu, ràng buộc, index) |
 | `\q` | thoát psql |
 
-Ví dụ minh hoạ (chưa chạy) cho `\conninfo` qua socket trong container; với `\dt toinoi.*` bạn sẽ thấy sáu bảng như PG-001 đã liệt kê:
+Dưới đây là ví dụ minh hoạ (chưa chạy) cho `\conninfo` qua socket trong container; còn với `\dt toinoi.*` bạn sẽ thấy sáu bảng như PG-001 đã liệt kê:
 
 ```text
 You are connected to database "toinoi" as user "toinoi" via socket in "/var/run/postgresql" at port "5432".
@@ -254,11 +254,11 @@ docker compose exec db psql -X -a -U toinoi -d toinoi -v ON_ERROR_STOP=1 \
   -f /lab/p01/00-reset.sql -f /lab/p01/01-schema.sql -f /lab/p01/02-fixture-valid.sql
 ```
 
-`-a` in lại mọi dòng đọc được (để so với `OUTPUT.txt`), `-v ON_ERROR_STOP=1` dừng ngay khi có lỗi. **Đừng** bật `ON_ERROR_STOP` cho `03`, `04`, `06`: chúng cố ý chứa câu lỗi. Khi đọc từ file, psql thêm tiền tố `psql:/lab/p01/<file>:<dòng>:` trước mỗi `ERROR`. Có psql trên máy thì kết nối từ ngoài bằng `psql -h 127.0.0.1 -p 5433 -U toinoi -d toinoi` (mật khẩu giữ chỗ trong `docker-compose.yml`, đừng dùng mật khẩu thật).
+`-a` in lại mọi dòng đọc được (để so với `OUTPUT.txt`), `-v ON_ERROR_STOP=1` dừng ngay khi có lỗi. **Đừng** bật `ON_ERROR_STOP` cho `03`, `04`, `06`: chúng cố ý chứa câu lỗi. Khi đọc từ file, psql thêm tiền tố `psql:/lab/p01/<file>:<dòng>:` trước mỗi `ERROR`. Có psql trên máy thì kết nối từ ngoài bằng `psql -h 127.0.0.1 -p 5433 -U toinoi -d toinoi` (mật khẩu mẫu trong `docker-compose.yml`, đừng dùng mật khẩu thật).
 
 ## 7. Dọn môi trường
 
-Dọn là một phần của thí nghiệm, không phải việc làm thêm. Thử thật trên thư mục `--persist` ở mục 5:
+Dọn dẹp là một phần của thí nghiệm, không phải việc làm thêm. Thử thật trên thư mục `--persist` ở mục 5:
 
 ```sql
 DROP SCHEMA toinoi CASCADE;
@@ -280,7 +280,7 @@ DROP SCHEMA
 (1 row)
 ```
 
-Đếm lại ở lần chạy sau thì nhận `ERROR:  relation "toinoi.cities" does not exist` — schema đã đi cùng sáu bảng. `NOTICE` liệt kê đúng những gì bị xoá; hãy đọc nó mỗi lần dùng `CASCADE`.
+Đếm lại ở lần chạy sau thì nhận được `ERROR:  relation "toinoi.cities" does not exist`, vì schema đã biến mất cùng sáu bảng. `NOTICE` liệt kê đúng những gì bị xoá; hãy đọc nó mỗi lần dùng `CASCADE`.
 
 | Muốn | Cách A (PGlite) | Cách B (Docker) |
 |---|---|---|
@@ -316,7 +316,7 @@ Phần 1 chỉ dùng SQL thuần và không cần extension, nên kết quả ha
 
 **Bài 2.** Dùng `--persist` để: (1) chạy `00`→`02`; (2) ở lệnh thứ hai, đếm số chuyến bằng `SELECT count(*) FROM toinoi.trips;`; (3) ở lệnh thứ ba, dọn schema; (4) đếm lại. Dự đoán kết quả từng bước trước khi chạy.
 
-<details><summary><b>Lời giải</b></summary><p>(1) Kết thúc với <code>INSERT 0 15</code> và bảng 8 trạng thái. (2) <code>15</code>: dữ liệu sống qua tiến trình mới nhờ thư mục lưu. (3) <code>NOTICE:  drop cascades to 6 other objects</code> rồi <code>DROP SCHEMA</code>. (4) <code>ERROR:  relation "toinoi.trips" does not exist</code>, SQLSTATE 42P01. Cuối cùng xoá thư mục <code>--persist</code>.</p></details>
+<details><summary><b>Lời giải</b></summary><p>(1) Kết thúc với <code>INSERT 0 15</code> và bảng 8 trạng thái. (2) <code>15</code>: dữ liệu sống qua tiến trình mới nhờ thư mục lưu dữ liệu. (3) <code>NOTICE:  drop cascades to 6 other objects</code> rồi <code>DROP SCHEMA</code>. (4) <code>ERROR:  relation "toinoi.trips" does not exist</code>, SQLSTATE 42P01. Cuối cùng xoá thư mục <code>--persist</code>.</p></details>
 
 **Bài 3.** Một đồng nghiệp gửi kết quả truy vấn có giờ lệch 7 tiếng so với của bạn trên cùng fixture. Bạn hỏi gì đầu tiên, và vì sao lab không phụ thuộc vào câu trả lời?
 

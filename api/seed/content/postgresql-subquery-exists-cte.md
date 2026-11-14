@@ -12,7 +12,7 @@ Cuối tháng 10, đội tài chính Tới Nơi chạy câu đối soát «chuy�
 
 Cùng tuần, bộ phận tuyển dụng hỏi «tài xế nào đã đăng ký nhưng chưa chạy chuyến nào» để gọi hỗ trợ. Câu `NOT IN` của họ trả **0 dòng**; họ kết luận ai cũng đã chạy. Thật ra có hai tài xế như vậy.
 
-Bài này đi qua các dạng subquery, phân biệt `IN` với `EXISTS`, giải thích vì sao `NOT IN` gặp NULL thì im lặng sai, rồi viết lại câu đối soát bằng **CTE** — mỗi bước có tên và có một con số để đối chiếu.
+Bài này đi qua các dạng subquery, phân biệt `IN` với `EXISTS`, giải thích vì sao `NOT IN` gặp NULL thì cho kết quả sai mà không báo lỗi, rồi viết lại câu đối soát bằng **CTE** — mỗi bước có tên và có một con số để đối chiếu.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-014 · Phần 2/6 · Trung bình</span>
@@ -58,7 +58,7 @@ ORDER BY c.code COLLATE "C";
 (3 rows)
 ```
 
-`t2.city_id = t.city_id` là chỗ «tương quan»: `t` thuộc câu ngoài. Viết lại bằng cách gom trung bình theo thành phố trong `FROM` rồi nối (mẫu của PG-013) cho đúng ba con số này (câu 3 của `pg014-kiem-ke-bat-loi.sql`) — hai cách viết cùng nghĩa, kế hoạch thực thi để Phần 3.
+`t2.city_id = t.city_id` là chỗ «tương quan»: `t` thuộc câu ngoài. Viết lại bằng cách gom trung bình theo thành phố trong `FROM` rồi nối (mẫu của PG-013) sẽ ra đúng ba con số này (câu 3 của `pg014-kiem-ke-bat-loi.sql`) — hai cách viết cùng nghĩa, còn kế hoạch thực thi của chúng để dành cho Phần 3.
 
 Một subquery vô hướng trả **hơn một dòng** là lỗi lúc *chạy*, không phải lúc viết. Chuyến 100042 có hai giao dịch:
 
@@ -115,7 +115,7 @@ ORDER BY d.code;
 (0 rows)
 ```
 
-Không lỗi, không cảnh báo, không dòng nào. Nguyên nhân là logic ba giá trị của PG-011: `x NOT IN (a, b, NULL)` nghĩa là `x <> a AND x <> b AND x <> NULL`, mà `x <> NULL` ra NULL. Tài liệu PostgreSQL nói đúng điều đó: nếu không có giá trị nào bằng và có ít nhất một dòng bên phải là NULL, kết quả của `NOT IN` là **NULL, không phải true** — và `WHERE` loại dòng NULL. Câu 1 của tệp thí nghiệm kiểm trên hằng số: `1 IN (1, NULL)` ra `true`, `1 IN (2, NULL)` ra NULL, `1 NOT IN (1, NULL)` ra `false`, `1 NOT IN (2, NULL)` ra **NULL**, chỉ `1 NOT IN (2, 3)` ra `true`. Chỉ cần **một** trong 297 chuyến có `driver_id` NULL là mọi tài xế đều bị loại. `NOT EXISTS` không có vấn đề này, vì nó chỉ hỏi «có dòng nào khớp không»:
+Không lỗi, không cảnh báo, không dòng nào. Nguyên nhân là logic ba giá trị của PG-011: `x NOT IN (a, b, NULL)` nghĩa là `x <> a AND x <> b AND x <> NULL`, mà `x <> NULL` ra NULL. Tài liệu PostgreSQL nói đúng điều đó: nếu không có giá trị nào bằng và có ít nhất một dòng bên phải là NULL, kết quả của `NOT IN` là **NULL, không phải true** — và `WHERE` loại dòng NULL. Câu 1 của tệp thí nghiệm kiểm tra điều này trên hằng số: `1 IN (1, NULL)` ra `true`, `1 IN (2, NULL)` ra NULL, `1 NOT IN (1, NULL)` ra `false`, `1 NOT IN (2, NULL)` ra **NULL**, chỉ `1 NOT IN (2, 3)` ra `true`. Chỉ cần **một** trong 297 chuyến có `driver_id` NULL là mọi tài xế đều bị loại. `NOT EXISTS` không có vấn đề này, vì nó chỉ hỏi «có dòng nào khớp không»:
 
 ```sql
 SELECT d.code, d.created_at FROM drivers AS d
@@ -231,7 +231,7 @@ Dòng kiểm cuối cùng trả lời câu hỏi thứ ba của kế toán: chê
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 920 300" role="img" aria-label="Chuỗi CTE đối soát: b1 phạm vi 3.168 chuyến và b2 thực thu 2.688 chuyến ghép thành b3 3.168 dòng, rồi lọc thành b4 7 dòng lệch. Mỗi bước có một câu kiểm. Ba lỗi cố ý: quên GROUP BY ở b2 làm b3 thành 3.209 dòng, dùng JOIN thay LEFT JOIN làm b3 còn 2.688 dòng — cả hai bị câu kiểm bắt; quên lọc succeeded thì số dòng vẫn khớp nhưng b4 thành 102 dòng — câu kiểm số dòng không bắt được.">
+<svg viewBox="0 0 920 300" role="img" aria-label="Chuỗi CTE đối soát: b1 phạm vi 3.168 chuyến và b2 thực thu 2.688 chuyến ghép thành b3 3.168 dòng, rồi lọc thành b4 7 dòng lệch. Mỗi bước có một câu kiểm. Ba lỗi cố ý: quên GROUP BY ở b2 làm b3 tăng lên 3.209 dòng, dùng JOIN thay LEFT JOIN làm b3 còn 2.688 dòng — cả hai bị câu kiểm bắt; quên lọc succeeded thì số dòng vẫn khớp nhưng b4 tăng lên 102 dòng — câu kiểm số dòng không bắt được.">
 <rect x="20" y="20" width="250" height="56" rx="8" class="f-pk-soft s-pk"/><text x="34" y="42" class="t-b t-pk">b1 · phạm vi · 3.168</text><text x="34" y="62" class="t-small">kiểm: = 3.168 của PG-012</text>
 <rect x="20" y="96" width="250" height="56" rx="8" class="f-pk-soft s-pk"/><text x="34" y="118" class="t-b t-pk">b2 · thực thu · 2.688</text><text x="34" y="138" class="t-small">GROUP BY trip_id ⇒ 1 dòng/chuyến</text>
 <rect x="340" y="56" width="250" height="56" rx="8" class="f-pk-soft s-pk"/><text x="354" y="78" class="t-b t-pk">b3 · b1 LEFT JOIN b2</text><text x="354" y="98" class="t-small">kiểm: 3.168 dòng = b1, 3.168 id</text>
@@ -260,7 +260,7 @@ Tệp `pg014-kiem-ke-bat-loi.sql` cố ý làm hỏng chuỗi theo ba cách rồ
 
 A và B là lỗi *cấu trúc* (nở dòng, mất dòng — hai lỗi của PG-013), câu kiểm tóm được ngay. B nguy hiểm hơn vẻ ngoài: danh sách vẫn trông hợp lý (5 dòng) nhưng mất đúng hai chuyến thiếu thanh toán 100724 và 101084.
 
-C là lỗi *định nghĩa*: cộng cả giao dịch `failed`/`pending` vào thực thu. Mọi số dòng vẫn khớp; b4 nhảy lên 102 — và 101084, chuyến thiếu tiền thật, lại *biến khỏi* danh sách vì lần thu thẻ `failed` được tính như đã thu. Bắt lỗi này cần đối chiếu nguồn độc lập (có **97** giao dịch không thành công: 96 `failed`, 1 `pending`). Câu kiểm chứng minh các bước **nhất quán với nhau**; định nghĩa có đúng nghiệp vụ không thì phải đối chiếu với đặc tả — việc của PG-020.
+C là lỗi *định nghĩa*: cộng cả giao dịch `failed`/`pending` vào thực thu. Mọi số dòng vẫn khớp; b4 nhảy lên 102 — và 101084, chuyến thiếu tiền thật, lại *biến mất khỏi* danh sách vì lần thu thẻ `failed` được tính như đã thu. Bắt lỗi này cần đối chiếu nguồn độc lập (có **97** giao dịch không thành công: 96 `failed`, 1 `pending`). Câu kiểm chứng minh các bước **nhất quán với nhau**; định nghĩa có đúng nghiệp vụ không thì phải đối chiếu với đặc tả — việc của PG-020.
 
 ## 8. CTE có bị tính riêng không? MATERIALIZED và NOT MATERIALIZED
 
@@ -296,7 +296,7 @@ Kết quả giống nhau — đây là lựa chọn về **kế hoạch thực t
 
 ## 11. Đánh đổi
 
-- **Subquery lồng hay CTE:** subquery lồng ngắn khi chỉ một tầng; từ hai tầng trở lên, CTE dài hơn nhưng đọc từ trên xuống và kiểm được từng bước.
+- **Subquery lồng hay CTE:** subquery lồng viết ngắn hơn khi chỉ có một tầng; từ hai tầng trở lên, CTE dài hơn nhưng đọc từ trên xuống và kiểm được từng bước.
 - **Câu kiểm kê trong cùng truy vấn:** đếm đúng các bước đang chạy, đổi lại phải chép chuỗi `WITH` sang câu danh sách (PG-020 gom vào một VIEW).
 - **`NOT IN` có lọc NULL hay `NOT EXISTS`:** cả hai đúng hôm nay; `NOT EXISTS` vẫn đúng khi ai đó xoá dòng lọc NULL.
 

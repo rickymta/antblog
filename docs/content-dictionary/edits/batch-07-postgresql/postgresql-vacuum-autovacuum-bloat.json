@@ -1,0 +1,12 @@
+{"file":"postgresql-vacuum-autovacuum-bloat.md","edits":[
+{"old":"«đường chân trời» (horizon) mà một giao dịch mở lâu giữ lại","new":"«ranh giới dọn được» (horizon) mà một giao dịch mở lâu giữ lại","reason":"'đường chân trời' là calque của horizon, khó hiểu","severity":"medium"},
+{"old":"**Thu hồi chỗ** của tuple chết","new":"**Thu hồi chỗ trống** của tuple chết","reason":"'chỗ' cụt, thiếu danh từ","severity":"low"},
+{"old":"Tài liệu nói nó chỉ trả dung lượng","new":"Tài liệu nói VACUUM thường chỉ trả dung lượng","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"nên các phiên bản nó xoá phải được giữ cho H","new":"nên các phiên bản mà giao dịch này xoá phải được giữ lại cho H","reason":"Câu thiếu liên từ, 'nó' mơ hồ","severity":"medium"},
+{"old":"nên giữ tuple chết của **mọi** bảng","new":"nên tuple chết của **mọi** bảng đều bị giữ lại","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"**Mức cô lập quyết định ai giữ snapshot.**","new":"**Isolation level quyết định ai giữ snapshot.**","reason":"Giữ thuật ngữ isolation level","severity":"low"},
+{"old":"Bộ câu kiểm sau **không chạy trong lab**","new":"Bộ câu truy vấn kiểm tra sau **không chạy trong lab**","reason":"'bộ câu kiểm' tự ghép","severity":"medium"},
+{"old":"**tự nhường**: chặn một yêu cầu khoá xung đột như","new":"**tự nhường**: nếu đang chặn một yêu cầu khoá xung đột như","reason":"Câu thiếu 'nếu', mất quan hệ điều kiện","severity":"medium"},
+{"old":"Viết lại bảng trực tuyến, khoá ngắn","new":"Viết lại bảng online, khoá ngắn","reason":"'trực tuyến' là calque của online","severity":"low"},
+{"old":"cửa sổ bảo trì hoặc công cụ trực tuyến đã thử","new":"maintenance window hoặc công cụ online đã thử","reason":"Thống nhất thuật ngữ, tránh calque","severity":"low"}
+]}

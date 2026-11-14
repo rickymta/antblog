@@ -1,7 +1,7 @@
 ---
 slug: postgresql-bang-dong-cot-primary-foreign-key
 title: "Bảng, dòng, cột và khoá trong nghiệp vụ chuyến xe"
-summary: "Khách gọi tổng đài hỏi về «chuyến đồ ăn lúc 12 giờ trưa qua» — fixture Tới Nơi có hai chuyến như thế. Học bảng, dòng, cột, primary key và foreign key để luôn tìm đúng một chuyến."
+summary: "Khách gọi tổng đài hỏi về «chuyến đồ ăn lúc 12 giờ trưa hôm qua» — fixture Tới Nơi có hai chuyến như thế. Học bảng, dòng, cột, primary key và foreign key để luôn tìm đúng một chuyến."
 category: postgresql
 level: beginner
 tags: [postgresql, pg-003, primary-key, foreign-key, data-model, toi-noi]
@@ -10,7 +10,7 @@ language: vi
 
 Tổng đài Tới Nơi nhận cuộc gọi: «Tôi đặt đồ ăn lúc 12 giờ trưa hôm qua, chuyến đó bị sao vậy?». Nhân viên mở dữ liệu ngày 02/11 và thấy **hai** chuyến đồ ăn cùng đặt đúng 12:00 — một ở Hà Nội đã huỷ, một ở Đà Nẵng đã hoàn thành. Giờ đặt không đủ để chỉ ra chuyến nào; tên khách cũng không đủ, vì người trùng tên là chuyện thường.
 
-«Làm sao chỉ đúng **một** chuyến, rồi từ đó tới đúng **một** khách, **một** tài xế» chính là câu hỏi về khoá — chủ đề của bài này.
+Câu hỏi «Làm sao chỉ ra đúng **một** chuyến, rồi từ đó tới đúng **một** khách, **một** tài xế?» chính là câu hỏi về khoá — chủ đề của bài này.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-003 · Phần 1/6 · Cơ bản</span>
@@ -59,9 +59,9 @@ Mỗi cột có tên, **data type** (kiểu dữ liệu) và quy định có đ�
 
 ## 3. Nhận diện một dòng: khoá và primary key
 
-Một **key** (khoá) là tập cột mà giá trị không bao giờ trùng giữa hai dòng — biết giá trị khoá là chỉ ra đúng một dòng. Một bảng có thể có vài ứng viên: với `customers`, cả `id` lẫn `phone` đều không trùng.
+Một **key** (khoá) là tập cột mà giá trị không bao giờ trùng giữa hai dòng — biết giá trị khoá là chỉ ra đúng một dòng. Một bảng có thể có vài khoá ứng viên (candidate key): với `customers`, cả `id` lẫn `phone` đều không trùng.
 
-Ta chọn **một** ứng viên làm **primary key** (khoá chính). Tài liệu PostgreSQL yêu cầu giá trị primary key *«both unique and not null»* — không trùng và không `NULL`. Một bảng có nhiều nhất một primary key; các khoá còn lại khai báo bằng `UNIQUE`. PostgreSQL tự tạo một unique index B-tree cho primary key — index là chuyện của Phần 3.
+Ta chọn **một** khoá ứng viên làm **primary key** (khoá chính). Tài liệu PostgreSQL yêu cầu giá trị primary key *«both unique and not null»* — không trùng và không `NULL`. Một bảng có tối đa một primary key; các khoá còn lại khai báo bằng `UNIQUE`. PostgreSQL tự tạo một unique index B-tree cho primary key — index là chuyện của Phần 3.
 
 Lab đặt tên ràng buộc theo tiền tố `pk_`, `uq_`, `fk_`, `ck_` để thông báo lỗi chỉ thẳng vào quy tắc. Database thật sự **chặn** dữ liệu vi phạm khoá — hai câu trong `03-fixture-invalid.sql` thêm thành phố trùng `id` và khách trùng số điện thoại:
 
@@ -74,9 +74,9 @@ ERROR:  duplicate key value violates unique constraint "uq_customers_phone"
 DETAIL:  Key (phone)=(0900000001) already exists.
 ```
 
-Cả hai cùng mã `23505` (unique_violation): primary key và unique dùng chung cơ chế «không trùng»; primary key còn cấm `NULL` và là khoá mà bảng khác trỏ tới. Viết các câu lệnh này là việc của [PG-005](/articles/postgresql-create-table-constraints) và PG-006.
+Cả hai cùng mã `23505` (unique_violation): primary key và unique dùng chung cơ chế «không trùng»; primary key còn cấm `NULL` và là khoá mà bảng khác trỏ tới. Cách viết các câu lệnh này nằm ở [PG-005](/articles/postgresql-create-table-constraints) và PG-006.
 
-**Vì sao không lấy số điện thoại làm primary key?** `phone` là **natural key** (khoá tự nhiên — có nghĩa ngoài đời): khách đổi số, nhà mạng cấp lại số cũ cho người khác, và mọi chuyến trỏ tới số đó sẽ phải sửa theo. Tới Nơi dùng **surrogate key** (khoá thay thế — không mang nghĩa nghiệp vụ) `id uuid`, giữ `phone` là `UNIQUE`. Đây là đánh đổi, không phải luật: `cities` dùng `id smallint` do quản trị đặt vì danh mục nhỏ, gần như không đổi.
+**Vì sao không lấy số điện thoại làm primary key?** `phone` là **natural key** (khoá tự nhiên — có nghĩa ngoài đời): khách đổi số, nhà mạng cấp lại số cũ cho người khác, và mọi chuyến trỏ tới số đó sẽ phải sửa theo. Tới Nơi dùng **surrogate key** (khoá thay thế — không mang nghĩa nghiệp vụ) `id uuid`, giữ `phone` là `UNIQUE`. Đây là đánh đổi, không phải luật: `cities` dùng `id smallint` do quản trị viên đặt, vì danh mục nhỏ và gần như không đổi.
 
 ## 4. Hai cách gọi một chuyến: `id` uuid và `code`
 
@@ -85,7 +85,7 @@ Cả hai cùng mã `23505` (unique_violation): primary key và unique dùng chun
 | `id` | `pk_trips` | `70000000-0000-4000-8000-000000100004` | ứng dụng, bảng khác qua foreign key |
 | `code` | `uq_trips_code` | `100004` | khách, tổng đài, tài xế — đọc được qua điện thoại |
 
-Tổng đài chỉ cần hỏi mã chuyến rồi «đi theo khoá». Ba truy vấn chạy trên lab sau `00`→`02`, mỗi truy vấn lọc bằng một khoá nên trả **đúng một dòng**:
+Tổng đài chỉ cần hỏi mã chuyến rồi «đi theo khoá». Ba truy vấn dưới đây chạy trên lab sau khi chạy các tệp `00`→`02`, mỗi truy vấn lọc bằng một khoá nên trả **đúng một dòng**:
 
 ```sql
 SELECT code, customer_id, driver_id FROM trips WHERE code = 100004;
@@ -114,14 +114,14 @@ Chuyến 100004 là của khách Võ Minh Đức, tài xế Lý Thị Oanh (mã 
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">UUID trong fixture được viết cho dễ đọc</span>
-<p>Fixture ghi sẵn UUID có đuôi trùng mã (<code>…100004</code> ↔ 100004) chỉ để kết quả ổn định. Trong hệ thật <code>id</code> ngẫu nhiên, không liên quan tới <code>code</code>: đừng suy cái này từ cái kia. <code>code</code> cũng không liên tục — chuyến tạo sau trong lab nhận 100029 chứ không phải 100015 (PG-004, PG-006 giải thích), nên mã dùng để gọi tên, không dùng để đếm.</p>
+<p>Fixture ghi sẵn UUID có đuôi trùng mã (<code>…100004</code> ↔ 100004) chỉ để kết quả ổn định. Trong hệ thống thật, <code>id</code> ngẫu nhiên, không liên quan tới <code>code</code>: đừng suy cái này từ cái kia. <code>code</code> cũng không liên tục — chuyến tạo sau trong lab nhận 100029 chứ không phải 100015 (PG-004, PG-006 giải thích), nên mã dùng để gọi tên, không dùng để đếm.</p>
 </div>
 
 ## 5. Foreign key: nối chuyến với khách, tài xế, quán
 
 Để database bảo đảm `trips.customer_id` **trỏ tới một khách có thật**, lab khai báo **foreign key** (khoá ngoại) `fk_trips_customer FOREIGN KEY (customer_id) REFERENCES customers(id)`; `trips` là bảng con, `customers` là bảng cha. Theo tài liệu, foreign key phải trỏ tới primary key hoặc cột có ràng buộc unique — nếu không, «đúng một dòng» mất nghĩa.
 
-Foreign key chặn cả hai chiều. Thêm chuyến cho khách không tồn tại, và xoá thành phố Đà Nẵng khi còn tài xế trỏ tới (cả hai từ `03-fixture-invalid.sql`):
+Foreign key chặn cả hai chiều. Hai ví dụ dưới đây là thêm chuyến cho khách không tồn tại, và xoá thành phố Đà Nẵng khi còn tài xế trỏ tới (cả hai từ `03-fixture-invalid.sql`):
 
 ```text
 ERROR:  insert or update on table "trips" violates foreign key constraint "fk_trips_customer"
@@ -134,7 +134,7 @@ DETAIL:  Key (id)=(3) is still referenced from table "drivers".
 
 Cả hai mang mã `23503` (foreign_key_violation). Lỗi thứ hai do hành vi mặc định `NO ACTION`: từ chối xoá dòng cha còn dòng con. `CASCADE` xoá luôn dòng con — với dữ liệu chuyến và tiền, thường là điều ta **không** muốn.
 
-**NULL trong cột foreign key.** `driver_id` được phép `NULL`; theo tài liệu, dòng có `NULL` ở cột tham chiếu không bị foreign key kiểm. Fixture có ba chuyến như vậy (100006 huỷ khi chưa ai nhận, 100013 `searching`, 100014 `requested`). Còn gán một tài xế không tồn tại cho chuyến 100012 thì bị chặn ngay với `fk_trips_driver`. Vậy quy tắc «từ `accepted` trở đi phải có tài xế» không do foreign key quyết định; lab giao nó cho CHECK `ck_trips_assigned_has_driver` (PG-005).
+**NULL trong cột foreign key.** `driver_id` được phép `NULL`; theo tài liệu, dòng có `NULL` ở cột tham chiếu không bị foreign key kiểm tra. Fixture có ba chuyến như vậy (100006 huỷ khi chưa ai nhận, 100013 `searching`, 100014 `requested`). Còn gán một tài xế không tồn tại cho chuyến 100012 thì bị chặn ngay với `fk_trips_driver`. Vậy quy tắc «từ `accepted` trở đi phải có tài xế» không do foreign key quyết định; lab giao nó cho CHECK `ck_trips_assigned_has_driver` (PG-005).
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Foreign key chỉ kiểm «có tồn tại», không kiểm «có hợp lý»</span>
@@ -203,10 +203,10 @@ Gom các foreign key lại, ta có sơ đồ của P01. Mỗi đường nối đ
 <figcaption><b>Hình 1 · Quan hệ giữa sáu bảng của lab P01.</b> Foreign key luôn nằm ở phía «n». Nét đứt: chuyến có thể chưa có tài xế, và chỉ đơn đồ ăn mới có quán.</figcaption>
 </figure>
 
-Đọc thành câu: một khách nhiều chuyến (khách `0900000001` có 3 chuyến trong fixture), một tài xế nhiều chuyến theo thời gian, một chuyến nhiều sự kiện. Hai điểm hay bị vẽ sai:
+Đọc thành câu: một khách có nhiều chuyến (khách `0900000001` có 3 chuyến trong fixture), một tài xế có nhiều chuyến theo thời gian, một chuyến có nhiều sự kiện. Hai điểm hay bị vẽ sai:
 
 - Foreign key luôn ở phía «n»: không có cột `trip_ids` nào trong `customers`.
-- «Tài xế – chuyến» là một–nhiều **theo thời gian**. Quy tắc «tại một thời điểm, tài xế chỉ chạy một chuyến» không nằm trong sơ đồ; lab kiểm bằng B3 của `07-checks.sql`, còn tranh chấp thật là chủ đề Phần 4.
+- «Tài xế – chuyến» là một–nhiều **theo thời gian**. Quy tắc «tại một thời điểm, tài xế chỉ chạy một chuyến» không nằm trong sơ đồ; lab kiểm tra bằng B3 của `07-checks.sql`, còn tranh chấp thật là chủ đề Phần 4.
 
 ## 7. Lỗi thường gặp và đánh đổi
 
@@ -215,7 +215,7 @@ Gom các foreign key lại, ta có sơ đồ của P01. Mỗi đường nối đ
 - **Tin foreign key bảo đảm dữ liệu hợp lý, hoặc dùng `ON DELETE CASCADE` cho dữ liệu có giá trị lịch sử** — xoá một khách mà mất mọi chuyến là sự cố.
 - **Nghĩ primary key quyết định dòng nằm ở đâu trên đĩa** — với PostgreSQL thì không; xem [Clustered index thật và clustered index nhìn thấy](/articles/heap-ctid-va-primary-key) khi tới Phần 3.
 
-Đánh đổi: `uuid` cho phép ứng dụng tự sinh id trước khi ghi và không lộ số lượng chuyến, nhưng khó đọc — nên cần thêm `code`. Mỗi foreign key là một lần kiểm tra khi ghi dòng con và khi xoá dòng cha; PostgreSQL cũng **không** tự tạo index cho cột tham chiếu (lab tạo `ix_trips_driver_id` bằng tay). Chi phí đó được đo ở Phần 3 — không phải lý do bỏ foreign key.
+Đánh đổi: `uuid` cho phép ứng dụng tự sinh id trước khi ghi và không lộ số lượng chuyến, nhưng khó đọc — nên cần thêm `code`. Mỗi foreign key là một lần kiểm tra khi ghi dòng con và khi xoá dòng cha; PostgreSQL cũng **không** tự tạo index cho cột tham chiếu (lab tạo `ix_trips_driver_id` bằng tay). Phần 3 sẽ đo chi phí này, và đây không phải lý do để bỏ foreign key.
 
 ## 8. Bài tập
 
@@ -223,9 +223,9 @@ Gom các foreign key lại, ta có sơ đồ của P01. Mỗi đường nối đ
 
 <details><summary><b>Lời giải</b></summary><p>Một dòng là một đánh giá của một chuyến. <code>trip_id</code> có foreign key tới <code>trips(id)</code> và <code>NOT NULL</code>. Đặt <code>UNIQUE (trip_id)</code> — hoặc dùng luôn <code>trip_id</code> làm primary key vì quan hệ chuyến–đánh giá là một–(0..1). Không thêm <code>customer_id</code>: suy ra được qua chuyến, thêm vào là lặp dữ liệu (PG-008). «Chỉ chuyến completed mới được đánh giá» là quy tắc nhiều bảng, foreign key không kiểm được.</p></details>
 
-**Bài 2.** Không chạy, đoán mã lỗi và tên ràng buộc trên fixture: (a) thêm tài xế mới mã 8002; (b) đặt `merchant_id` của chuyến 100002 thành UUID quán không tồn tại; (c) xoá khách id `c0000000-0000-4000-8000-000000000001`.
+**Bài 2.** Không chạy lệnh, hãy đoán mã lỗi và tên ràng buộc trên fixture: (a) thêm tài xế mới mã 8002; (b) đặt `merchant_id` của chuyến 100002 thành UUID quán không tồn tại; (c) xoá khách id `c0000000-0000-4000-8000-000000000001`.
 
-<details><summary><b>Lời giải</b></summary><p>(a) <code>23505</code> <code>uq_drivers_code</code>. (b) <code>23503</code> <code>fk_trips_merchant</code>. (c) <code>23503</code> <code>fk_trips_customer</code> — khách còn chuyến 100000, 100006, 100012, hành vi mặc định <code>NO ACTION</code> chặn xoá. Tự kiểm: chép câu lệnh vào một tệp, đặt dòng <code>-- expect-error: …</code> phía trên mỗi câu, chạy <code>node run.mjs</code> sau <code>00</code>→<code>02</code>.</p></details>
+<details><summary><b>Lời giải</b></summary><p>(a) <code>23505</code> <code>uq_drivers_code</code>. (b) <code>23503</code> <code>fk_trips_merchant</code>. (c) <code>23503</code> <code>fk_trips_customer</code> — khách còn chuyến 100000, 100006, 100012, hành vi mặc định <code>NO ACTION</code> chặn xoá. Tự kiểm tra: chép câu lệnh vào một tệp, đặt dòng <code>-- expect-error: …</code> phía trên mỗi câu, chạy <code>node run.mjs</code> sau <code>00</code>→<code>02</code>.</p></details>
 
 ## 9. Đọc tiếp
 

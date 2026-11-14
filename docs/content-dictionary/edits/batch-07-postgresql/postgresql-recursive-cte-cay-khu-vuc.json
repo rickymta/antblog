@@ -1,0 +1,83 @@
+{
+ "file": "postgresql-recursive-cte-cay-khu-vuc.md",
+ "edits": [
+  {
+   "old": "đều hỏi một kiểu câu:",
+   "new": "đều cần trả lời cùng một kiểu câu hỏi:",
+   "reason": "'hỏi một kiểu câu' là calque, gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "— là thành phố **khi và chỉ khi** không có cha",
+   "new": "— nút là thành phố **khi và chỉ khi** không có cha",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Dòng sinh ra vào **bảng trung gian** và được nối vào kết quả.",
+   "new": "Các dòng sinh ra được đưa vào **bảng trung gian** rồi nối vào kết quả.",
+   "reason": "Câu thiếu động từ ('sinh ra vào')",
+   "severity": "medium"
+  },
+  {
+   "old": "**Phải có đường tới vòng rỗng.**",
+   "new": "**Phải bảo đảm truy vấn tới được vòng rỗng.**",
+   "reason": "Câu cụt, gượng",
+   "severity": "low"
+  },
+  {
+   "old": "theo bề rộng",
+   "new": "theo chiều rộng",
+   "reason": "'bề rộng' không phải cách gọi quen của breadth-first",
+   "severity": "medium"
+  },
+  {
+   "old": "Gộp và LEFT JOIN để cho truy vấn **ngoài**",
+   "new": "Hãy để truy vấn **ngoài** làm việc gộp và LEFT JOIN",
+   "reason": "'để cho' kiểu dịch máy, câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Trước bản 14, tự mang mảng",
+   "new": "Trước bản 14, phải tự mang theo mảng",
+   "reason": "Câu cụt, thiếu chủ thể",
+   "severity": "low"
+  },
+  {
+   "old": "### 5.2 Hệ quả im lặng, và vì sao đi xuống vẫn dừng",
+   "new": "### 5.2 Hệ quả không báo lỗi, và vì sao đi xuống vẫn dừng",
+   "reason": "'im lặng' là calque của silent",
+   "severity": "medium"
+  },
+  {
+   "old": "hậu duệ của chúng lặng lẽ biến khỏi báo cáo",
+   "new": "hậu duệ của chúng biến mất khỏi báo cáo mà không có cảnh báo nào",
+   "reason": "'lặng lẽ biến khỏi' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "nên cần cột độ sâu là",
+   "new": "nên khi truy vấn mang theo cột độ sâu thì",
+   "reason": "Câu méo, thiếu liên kết",
+   "severity": "high"
+  },
+  {
+   "old": "Không có nhân dòng kiểu PG-013",
+   "new": "Không xảy ra hiện tượng nhân dòng như ở PG-013",
+   "reason": "Cụm tự ghép 'nhân dòng kiểu'",
+   "severity": "low"
+  },
+  {
+   "old": "câu kiểm sức khoẻ cây",
+   "new": "câu kiểm tra sức khoẻ của cây",
+   "reason": "'kiểm sức khoẻ' cụt, gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Thêm tầng \"tiểu khu\" là vỡ không báo lỗi",
+   "new": "Thêm tầng \"tiểu khu\" thì cách này vỡ mà không báo lỗi",
+   "reason": "Thiếu chủ ngữ, 'là vỡ' gượng",
+   "severity": "medium"
+  }
+ ]
+}

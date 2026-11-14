@@ -1,0 +1,15 @@
+{"file":"postgresql-idempotency-outbox-transaction.md","edits":[
+{"old":"Idempotency key và outbox trên PostgreSQL 18, kiểm bằng lab.","new":"Bài trình bày idempotency key và outbox trên PostgreSQL 18, kiểm chứng bằng lab.","reason":"Câu cụt thiếu chủ ngữ và vị ngữ","severity":"medium"},
+{"old":"Sau bài này, bạn kiểm được request lặp","new":"Sau bài này, bạn kiểm tra được request lặp","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"phải báo lỗi chứ không lặng lẽ trả kết quả cũ","new":"phải báo lỗi chứ không được trả kết quả cũ mà không cảnh báo","reason":"'lặng lẽ' là calque của silently","severity":"medium"},
+{"old":"Lỗi client dùng lại khoá ⇒ lặng lẽ trả kết quả của request khác","new":"Lỗi client dùng lại khoá ⇒ trả kết quả của request khác mà không báo lỗi","reason":"'lặng lẽ' là calque của silently","severity":"medium"},
+{"old":"**Khoá, chuyến, sự kiện, outbox và kết quả cùng một giao dịch.**","new":"**Khoá, chuyến, sự kiện, outbox và kết quả đều nằm trong cùng một giao dịch.**","reason":"Câu thiếu động từ","severity":"medium"},
+{"old":"B chèn được khoá và **tự làm**.","new":"B chèn được khoá và **tự xử lý request**.","reason":"'tự làm' gượng, thiếu tân ngữ","severity":"medium"},
+{"old":"So với thiết kế **hai giao dịch** — «chèn khoá, COMMIT, rồi mới tạo chuyến»: server chết giữa hai bước để lại khoá không có kết quả;","new":"Thiết kế **hai giao dịch** («chèn khoá, COMMIT, rồi mới tạo chuyến») thì khác: server chết giữa hai bước sẽ để lại khoá không có kết quả;","reason":"Câu lỏng, thiếu vị ngữ cho vế so sánh","severity":"medium"},
+{"old":"giao hàng **ít nhất một lần** (at-least-once)","new":"giao tin **ít nhất một lần** (at-least-once)","reason":"'giao hàng' là calque của delivery, ở đây là giao tin","severity":"medium"},
+{"old":"**cùng giao dịch** với tác dụng (§6)","new":"**cùng giao dịch** với phần xử lý chính (§6)","reason":"'tác dụng' là calque của effect","severity":"medium"},
+{"old":"Chống trùng bằng khoá chính, cùng giao dịch với tác dụng","new":"Chống trùng bằng khoá chính, cùng giao dịch với phần xử lý chính","reason":"'tác dụng' là calque của effect","severity":"medium"},
+{"old":"**Tác dụng ngoài database.**","new":"**Phần xử lý nằm ngoài database.**","reason":"'tác dụng' là calque của effect","severity":"medium"},
+{"old":"Nếu tác dụng là gọi nhà cung cấp SMS thật","new":"Nếu phần xử lý chính là gọi nhà cung cấp SMS thật","reason":"'tác dụng' là calque của effect","severity":"medium"},
+{"old":"Outbox tách việc làm hai bước:","new":"Outbox chia việc này thành hai bước:","reason":"'tách việc làm' gượng","severity":"low"}
+]}

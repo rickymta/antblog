@@ -1,7 +1,7 @@
 ---
 slug: postgresql-idempotency-outbox-transaction
 title: "Idempotency và transactional outbox: gửi lại mà không tạo trùng"
-summary: "Khách Tới Nơi bấm «Đặt chuyến», mạng rớt, app gửi lại: không được thành hai chuyến; tạo chuyến xong phải báo dịch vụ thông báo, không mất tin, không báo trùng. Idempotency key và outbox trên PostgreSQL 18, kiểm bằng lab."
+summary: "Khách Tới Nơi bấm «Đặt chuyến», mạng rớt, app gửi lại: không được thành hai chuyến; tạo chuyến xong phải báo dịch vụ thông báo, không mất tin, không báo trùng. Bài trình bày idempotency key và outbox trên PostgreSQL 18, kiểm chứng bằng lab."
 category: postgresql
 level: advanced
 tags: [postgresql, pg-039, idempotency, outbox, on-conflict, at-least-once, giao-dich, toi-noi]
@@ -16,7 +16,7 @@ Bài này giải hai việc bằng hai mẫu chạy trên PostgreSQL: **idempote
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-039 · Phần 4/6 · Nâng cao</span>
-<p>Đọc trước: <a href="/articles/postgresql-for-update-skip-locked">PG-036 · FOR UPDATE, NOWAIT và SKIP LOCKED</a> và <a href="/articles/postgresql-upsert-on-conflict">PG-017 · UPSERT và xung đột khoá duy nhất</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>39-idempotency-outbox.sql</code>, phép thử K039 ở <code>DO-DAC.md</code>) và thí nghiệm <code>p04/thu-nghiem/pg039-idempotency-outbox-bai-tap.sql</code>. Sau bài này, bạn kiểm được request lặp, lỗi giữa chừng và xử lý sự kiện trùng.</p>
+<p>Đọc trước: <a href="/articles/postgresql-for-update-skip-locked">PG-036 · FOR UPDATE, NOWAIT và SKIP LOCKED</a> và <a href="/articles/postgresql-upsert-on-conflict">PG-017 · UPSERT và xung đột khoá duy nhất</a>. Lab: <code>examples/toi-noi-postgresql/p04</code> (tệp <code>39-idempotency-outbox.sql</code>, phép thử K039 ở <code>DO-DAC.md</code>) và thí nghiệm <code>p04/thu-nghiem/pg039-idempotency-outbox-bai-tap.sql</code>. Sau bài này, bạn kiểm tra được request lặp, lỗi giữa chừng và xử lý sự kiện trùng.</p>
 </div>
 
 ## 1. Ba kết cục mà client nhìn thấy
@@ -97,12 +97,12 @@ INSERT 0 0
  {"status": "requested", "trip_code": 400200} | t
 ```
 
-`ON CONFLICT DO NOTHING` không chèn được (0 dòng) ⇒ server đọc và trả lại **đúng** phản hồi đã lưu, không tạo chuyến thứ hai. Cột `cung_noi_dung` so hash của request: khoá giống mà nội dung khác là lỗi phía client, phải báo lỗi chứ không lặng lẽ trả kết quả cũ.
+`ON CONFLICT DO NOTHING` không chèn được (0 dòng) ⇒ server đọc và trả lại **đúng** phản hồi đã lưu, không tạo chuyến thứ hai. Cột `cung_noi_dung` so hash của request: khoá giống mà nội dung khác là lỗi phía client, phải báo lỗi chứ không được trả kết quả cũ mà không cảnh báo.
 
 Ba quyết định thiết kế ở đây đều có lý do:
 
 - **Chèn khoá trước, không `SELECT` trước.** «Đọc xem có chưa rồi mới chèn» là đọc–rồi–ghi: hai request đồng thời cùng đọc thấy «chưa có» ([PG-034](/articles/postgresql-isolation-read-committed-repeatable-read)). Khoá chính mới là trọng tài.
-- **Khoá, chuyến, sự kiện, outbox và kết quả cùng một giao dịch.** Có khoá thì có chuyến, và ngược lại. Mục 5 cho thấy vì sao điều này gỡ được ca khó nhất.
+- **Khoá, chuyến, sự kiện, outbox và kết quả đều nằm trong cùng một giao dịch.** Có khoá thì có chuyến, và ngược lại. Mục 5 cho thấy vì sao điều này gỡ được ca khó nhất.
 - **Lưu `response`, không chỉ lưu «đã làm».** Request lặp cần trả **cùng nội dung** (mã chuyến 400200), không phải một thông báo chung chung.
 
 ## 3. Gói thành một hàm
@@ -191,7 +191,7 @@ Ca khó nhất (§4): request đầu tạo xong mọi thứ nhưng server sập 
 | T5 | | ✔ `{"status": "requested", "lap_lai": false, "trip_code": 400204}` | |
 | T6 | `COMMIT` → ✖ **MẤT KẾT NỐI** | | |
 
-A bị huỷ ⇒ khoá của A biến mất cùng chuyến, sự kiện và tin outbox ⇒ B chèn được khoá và **tự làm**. Không có khoá mồ côi để dọn, không có chuyến nửa vời:
+A bị huỷ ⇒ khoá của A biến mất cùng chuyến, sự kiện và tin outbox ⇒ B chèn được khoá và **tự xử lý request**. Không có khoá mồ côi để dọn, không có chuyến nửa vời:
 
 ```text
       key      |  code  | su_kien | outbox
@@ -204,11 +204,11 @@ A bị huỷ ⇒ khoá của A biến mất cùng chuyến, sự kiện và tin 
 
 `SELECT count(*) FROM trips WHERE code = 400203` → `0`. Mã 400203 bị «đốt» vì sequence không quay lui khi ROLLBACK (PG-031).
 
-So với thiết kế **hai giao dịch** — «chèn khoá, COMMIT, rồi mới tạo chuyến»: server chết giữa hai bước để lại khoá không có kết quả; với đúng hàm `dat_chuyen` ở trên, mọi lần gửi lại đều nhận `NULL` mãi mãi (bài tập 2). Thiết kế đó cần thêm trạng thái «đang xử lý» và thời hạn để người khác tiếp quản — lab không làm, và bạn chỉ nên chọn nó khi phần xử lý không nằm gọn trong một giao dịch database.
+Thiết kế **hai giao dịch** («chèn khoá, COMMIT, rồi mới tạo chuyến») thì khác: server chết giữa hai bước sẽ để lại khoá không có kết quả; với đúng hàm `dat_chuyen` ở trên, mọi lần gửi lại đều nhận `NULL` mãi mãi (bài tập 2). Thiết kế đó cần thêm trạng thái «đang xử lý» và thời hạn để người khác tiếp quản — lab không làm, và bạn chỉ nên chọn nó khi phần xử lý không nằm gọn trong một giao dịch database.
 
 ## 6. Transactional outbox: sự kiện cùng giao dịch, gửi sau
 
-Gửi broker trực tiếp từ server là **ghi hai nơi** (dual write) không có giao dịch chung: broker đã nhận thì không rollback được. Outbox tách việc làm hai bước:
+Gửi broker trực tiếp từ server là **ghi hai nơi** (dual write) không có giao dịch chung: broker đã nhận thì không rollback được. Outbox chia việc này thành hai bước:
 
 1. Ghi sự kiện vào bảng `outbox` **cùng giao dịch** với chuyến (đã thấy ở `dat_chuyen`). Có chuyến thì có sự kiện, chuyến bị huỷ thì sự kiện cũng mất.
 2. Một **publisher** đọc các dòng `published_at IS NULL`, gửi broker, rồi đánh dấu `published_at`.
@@ -235,11 +235,11 @@ Dòng outbox id 4 không có: nó thuộc giao dịch đã huỷ ở mục 5 (id
          5 |     1 | publisher-B
 ```
 
-Không mất tin nào, nhưng tin 1 và 2 tới **hai lần**. Đây là bản chất của outbox: giao hàng **ít nhất một lần** (at-least-once). `FOR UPDATE SKIP LOCKED` cho nhiều publisher chạy song song mà không lấy trùng dòng **đang bị khoá** ([PG-036](/articles/postgresql-for-update-skip-locked)); nó không chống được trùng sau khi publisher chết, vì khoá dòng chết theo giao dịch.
+Không mất tin nào, nhưng tin 1 và 2 tới **hai lần**. Đây là bản chất của outbox: giao tin **ít nhất một lần** (at-least-once). `FOR UPDATE SKIP LOCKED` cho nhiều publisher chạy song song mà không lấy trùng dòng **đang bị khoá** ([PG-036](/articles/postgresql-for-update-skip-locked)); nó không chống được trùng sau khi publisher chết, vì khoá dòng chết theo giao dịch.
 
 ## 7. Consumer chống trùng
 
-Vì broker có thể giao trùng, phía nhận phải idempotent. Consumer «gửi thông báo cho khách» ghi `(consumer, outbox_id)` vào bảng có khoá chính `processed_messages`, **cùng giao dịch** với tác dụng (§6):
+Vì broker có thể giao trùng, phía nhận phải idempotent. Consumer «gửi thông báo cho khách» ghi `(consumer, outbox_id)` vào bảng có khoá chính `processed_messages`, **cùng giao dịch** với phần xử lý chính (§6):
 
 ```sql
 CREATE FUNCTION xu_ly_tin(p_seq bigint) RETURNS text
@@ -303,16 +303,16 @@ Lịch tất định chỉ ra cơ chế; phép thử K039 cho các phiên chạy
 | `SELECT` khoá trước rồi `INSERT` | Hai request đồng thời cùng thấy «chưa có»: hai chuyến, hoặc 23505 trả về khách như lỗi 500 | `INSERT … ON CONFLICT DO NOTHING` làm trọng tài |
 | Khoá chèn trong giao dịch riêng | Server chết giữa chừng ⇒ khoá mồ côi, gửi lại nhận `NULL` (bài tập 2) | Cùng giao dịch, hoặc thêm trạng thái + thời hạn |
 | Sinh khoá cho mỗi lần gửi HTTP | Lần gửi lại có khoá mới ⇒ vẫn trùng | Khoá theo hành động của người dùng |
-| Không so nội dung request | Lỗi client dùng lại khoá ⇒ lặng lẽ trả kết quả của request khác | Lưu hash, khác ⇒ 422 |
+| Không so nội dung request | Lỗi client dùng lại khoá ⇒ trả kết quả của request khác mà không báo lỗi | Lưu hash, khác ⇒ 422 |
 | Gửi broker trong/sau giao dịch | Tin của chuyến đã huỷ, hoặc mất tin | Outbox |
-| Consumer giả định «đúng một lần» | Khách nhận hai thông báo | Chống trùng bằng khoá chính, cùng giao dịch với tác dụng |
+| Consumer giả định «đúng một lần» | Khách nhận hai thông báo | Chống trùng bằng khoá chính, cùng giao dịch với phần xử lý chính |
 
 Đánh đổi cần ghi vào thiết kế:
 
 - **Bảng khoá và outbox lớn dần.** Mỗi request thêm một dòng khoá; mỗi lần đánh dấu outbox là một UPDATE để lại phiên bản cũ. Cần chính sách giữ khoá bao lâu và dọn dòng đã gửi — thuộc Phần 5 (VACUUM, bảo trì). Lab không đặt con số thời hạn nào.
 - **Publisher giữ khoá dòng trong lúc gọi mạng.** Ở lab, giao dịch của publisher mở suốt thời gian gửi broker. Lô nhỏ thì giao dịch ngắn nhưng nhiều vòng hơn.
 - **Thứ tự.** Nhiều publisher song song với SKIP LOCKED không còn gửi theo đúng thứ tự `id`; consumer không được dựa vào thứ tự tin nếu chưa thiết kế riêng cho việc đó.
-- **Tác dụng ngoài database.** `processed_messages` chống trùng được vì `notifications` nằm cùng database. Nếu tác dụng là gọi nhà cung cấp SMS thật, không có giao dịch chung: cần khoá idempotency phía nhà cung cấp hoặc chấp nhận một khoảng trùng nhỏ.
+- **Phần xử lý nằm ngoài database.** `processed_messages` chống trùng được vì `notifications` nằm cùng database. Nếu phần xử lý chính là gọi nhà cung cấp SMS thật, không có giao dịch chung: cần khoá idempotency phía nhà cung cấp hoặc chấp nhận một khoảng trùng nhỏ.
 
 ## 10. Bài tập
 

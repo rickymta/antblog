@@ -1,0 +1,14 @@
+{"file":"postgresql-ket-noi-auth-tls.md","edits":[
+{"old":"API của Tới Nơi «kết nối được database» chưa có nghĩa là","new":"Việc API của Tới Nơi «kết nối được database» chưa có nghĩa là","reason":"Câu thiếu chủ ngữ (mệnh đề làm chủ ngữ cần danh từ hoá)","severity":"high"},
+{"old":"không kiểm server là ai (trừ một ngoại lệ ở mục 6)","new":"không kiểm tra server là ai (trừ một ngoại lệ ở mục 6)","reason":"'kiểm' đứng một mình gượng","severity":"medium"},
+{"old":"mật khẩu lưu và kiểm bằng SCRAM.","new":"mật khẩu được lưu và kiểm tra bằng SCRAM.","reason":"Thiếu động từ, 'kiểm' gượng","severity":"medium"},
+{"old":"Sau bài này, bạn kiểm được kết nối hợp lệ và các kết nối phải bị từ chối,","new":"Sau bài này, bạn kiểm tra được kết nối hợp lệ lẫn các kết nối phải bị từ chối,","reason":"'kiểm được' gượng","severity":"medium"},
+{"old":"Binary không ở vị trí mặc định thì đặt","new":"Nếu binary không nằm ở vị trí mặc định thì đặt","reason":"Câu cụt, thiếu từ nối","severity":"medium"},
+{"old":"đừng chép các dòng này đi đâu","new":"đừng chép các dòng này sang nơi khác","reason":"Cách nói gượng, giọng dịch","severity":"low"},
+{"old":"nên dùng được để kiểm thay đổi **trước** khi reload","new":"nên dùng được để kiểm tra thay đổi **trước** khi reload","reason":"'kiểm' đứng một mình gượng","severity":"low"},
+{"old":"Rồi kiểm phần đầu của giá trị lưu trong `pg_authid`:","new":"Sau đó kiểm tra phần đầu của giá trị đã lưu trong `pg_authid`:","reason":"'Rồi kiểm' gượng, thiếu tự nhiên","severity":"medium"},
+{"old":"là góc nhìn của server: nó biết đường truyền được mã hoá, không biết","new":"là góc nhìn của server: server biết đường truyền được mã hoá, nhưng không biết","reason":"Tránh 'nó' chỉ sự vật, thêm quan hệ đối lập cho rõ","severity":"medium"},
+{"old":"(Prefix thời gian và PID đã được runner bỏ.)","new":"(Runner đã bỏ prefix thời gian và PID.)","reason":"Bỏ bị động kiểu Anh","severity":"low"},
+{"old":"Hai điều cần đọc đúng trong excerpt này:","new":"Hai điều cần hiểu đúng khi đọc đoạn trích này:","reason":"Tiếng Anh thừa trong văn xuôi, câu gượng","severity":"low"},
+{"old":"Lab không đo nó.","new":"Lab không đo chi phí này.","reason":"Tránh 'nó' chỉ sự vật trừu tượng","severity":"medium"}
+]}

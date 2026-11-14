@@ -1,16 +1,16 @@
 ---
 slug: postgresql-date-time-timezone
 title: "Ngày giờ và múi giờ trong truy vấn: bộ lọc ngày nghiệp vụ có kiểm tra hai biên"
-summary: "Ba người đếm «chuyến ngày 15/10» của Tới Nơi ra 105, 106 và 107; báo cáo tháng theo UTC thiếu 12 chuyến; một câu AT TIME ZONE '+07' lùi chuyến về chiều hôm trước. Học timestamptz, AT TIME ZONE, date_trunc có múi giờ và cách kiểm hai biên để mỗi ngày, tuần, tháng có đúng một đáp án."
+summary: "Ba người đếm «chuyến ngày 15/10» của Tới Nơi ra 105, 106 và 107; báo cáo tháng theo UTC thiếu 12 chuyến; một câu AT TIME ZONE '+07' lùi chuyến về chiều hôm trước. Bài học về timestamptz, AT TIME ZONE, date_trunc có múi giờ và cách kiểm tra hai biên để mỗi ngày, tuần, tháng có đúng một đáp án."
 category: postgresql
 level: intermediate
 tags: [postgresql, pg-016, timestamptz, timezone, date-trunc, interval, toi-noi]
 language: vi
 ---
 
-Cuối tháng 10, ba người ở Tới Nơi cùng trả lời câu «hôm 15/10 có bao nhiêu chuyến?». Kế toán báo **105**, CSKH báo **107**, đội dữ liệu báo **106**. Cùng tuần, báo cáo tháng 10 trên công cụ BI (phiên đặt UTC) thiếu 12 chuyến so với số của vận hành; và một kỹ sư viết `AT TIME ZONE '+07'` để «đổi sang giờ Việt Nam», nhận về chuyến 07:00 sáng 15/10 thành **17:00 chiều 14/10**.
+Cuối tháng 10, ba người ở Tới Nơi cùng trả lời câu «hôm 15/10 có bao nhiêu chuyến?». Kế toán báo **105**, CSKH báo **107**, đội dữ liệu báo **106**. Cùng tuần, báo cáo tháng 10 trên công cụ BI (phiên đặt UTC) thiếu 12 chuyến so với số của vận hành; và một kỹ sư viết `AT TIME ZONE '+07'` để «đổi sang giờ Việt Nam», nhận về chuyến 07:00 sáng 15/10 bị đổi thành **17:00 chiều 14/10**.
 
-PG-007 đã đặt quy tắc «mốc ghi `+07`, nửa hở». Bài này đi tiếp: vì sao từng cách sai lệch đúng một vài chuyến, cách dựng biên từ tham số ngày, gom theo ngày/tuần/tháng/giờ mà không phụ thuộc phiên, ghi múi giờ bằng tên chứ không bằng độ lệch, và thói quen **kiểm tra hai biên** cho mọi bộ lọc thời gian.
+PG-007 đã đặt quy tắc «mốc ghi `+07`, nửa mở». Bài này đi tiếp: vì sao từng cách sai lệch đúng một vài chuyến, cách dựng biên từ tham số ngày, gom theo ngày/tuần/tháng/giờ mà không phụ thuộc phiên, ghi múi giờ bằng tên chứ không bằng độ lệch, và thói quen **kiểm tra hai biên** cho mọi bộ lọc thời gian.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">PG-016 · Phần 2/6 · Trung bình</span>
@@ -19,7 +19,7 @@ PG-007 đã đặt quy tắc «mốc ghi `+07`, nửa hở». Bài này đi ti�
 
 ## 1. Dữ liệu dùng trong bài
 
-Fixture Phần 2: 3.174 chuyến đặt từ 01/10 tới 00:58 ngày 31/10/2026 giờ VN. **383** chuyến đặt 00:00–06:59 giờ VN — tức vẫn là ngày hôm trước theo UTC. Năm chuyến cài sát biên ngày 15/10 (giờ VN): **101489** 00:00:00 · **101502** 06:59:59 · **101503** 07:00:00 · **101594** 23:59:59.5 · **101595** 00:00:00 ngày 16/10.
+Fixture Phần 2: 3.174 chuyến đặt từ 01/10 tới 00:58 ngày 31/10/2026 giờ VN. Có **383** chuyến đặt 00:00–06:59 giờ VN — tức vẫn là ngày hôm trước theo UTC. Năm chuyến cài sát biên ngày 15/10 (giờ VN): **101489** 00:00:00 · **101502** 06:59:59 · **101503** 07:00:00 · **101594** 23:59:59.5 · **101595** 00:00:00 ngày 16/10.
 
 ```bash
 cd examples/toi-noi-postgresql
@@ -76,7 +76,7 @@ Câu 2 của `16-date-time-timezone.sql` đếm bằng sáu cách trong một c�
 - **f (107)** lấy cả 101595 lúc đúng 00:00:00 ngày 16 — `<=` gồm mốc cuối, nên chuyến đó bị đếm vào hai ngày.
 - **d** đúng ở phiên VN và sai ở phiên UTC: `::date` cắt ngày theo `TimeZone` của **phiên**. Tương tự, mốc không ghi múi giờ ở e, f được hiểu theo phiên (tài liệu: chuỗi không nêu múi giờ thì «assumed to be in the time zone indicated by the system's TimeZone parameter»). Ở phiên UTC cả ba dồn về 105 nhưng vì lý do khác: ngày 15/10 UTC là 07:00 ngày 15 tới 06:59 ngày 16 giờ VN.
 
-Chỉ a, b, c không đổi theo phiên — cả ba **ghi rõ múi giờ** trong câu. Thí nghiệm B của `pg016-mui-gio.sql` thêm ba cách quen tay nữa, cũng phụ thuộc phiên (106 ở phiên VN, 105 ở phiên UTC): `date_trunc('day', requested_at)` **hai tham số**, so với hằng `DATE '2026-10-15'` (PostgreSQL ép `date` thành nửa đêm **theo phiên**), và ép `requested_at::timestamp`. Dạng `date_trunc` ba tham số (có múi giờ) có từ **PostgreSQL 12** (release notes 12: «additional argument to control the time zone»).
+Chỉ a, b, c không đổi theo phiên — cả ba **ghi rõ múi giờ** trong câu. Thí nghiệm B của `pg016-mui-gio.sql` thêm ba cách hay viết nữa, cũng phụ thuộc phiên (106 ở phiên VN, 105 ở phiên UTC): `date_trunc('day', requested_at)` **hai tham số**, so sánh với hằng `DATE '2026-10-15'` (PostgreSQL ép `date` thành nửa đêm **theo phiên**), và ép `requested_at::timestamp`. Dạng `date_trunc` ba tham số (có múi giờ) có từ **PostgreSQL 12** (release notes 12: «additional argument to control the time zone»).
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Phép thử một dòng</span>
@@ -122,7 +122,7 @@ SELECT make_timestamptz(2026, 10, 15, 0, 0, 0, 'Asia/Ho_Chi_Minh')          AS t
        (DATE '2026-10-15' + 1)::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh'  AS den_truoc;
 ```
 
-Cả hai cách ra `2026-10-15 00:00:00+07`, biên trên `2026-10-16 00:00:00+07`, và lọc nửa mở bằng chúng đếm đúng **106**. Cách 2 là chiều thứ hai của bảng mục 2: `date` → `timestamp` nửa đêm → «nửa đêm đó ở Việt Nam là khoảnh khắc nào».
+Cả hai cách đều cho ra `2026-10-15 00:00:00+07`, biên trên `2026-10-16 00:00:00+07`, và lọc nửa mở bằng chúng đếm đúng **106**. Cách 2 là chiều thứ hai của bảng mục 2: `date` → `timestamp` nửa đêm → «nửa đêm đó ở Việt Nam là khoảnh khắc nào».
 
 ## 5. Gom theo ngày, tuần, tháng
 
@@ -141,7 +141,7 @@ Tổng ba ngày gần bằng nhau nhưng từng ngày đều sai — loại lỗ
 
 **Tháng.** Kỳ «01/10 → hết 30/10» theo ngày VN có **3.168** chuyến; gom theo các ngày UTC tương ứng (30/09 → 30/10) ra **3.174** — thừa 6 chuyến đang chạy đặt 00:30–00:58 ngày 31/10 giờ VN, vốn là ngày 30/10 theo UTC. Ở đầu tháng thì ngược lại: tháng 10 theo UTC bắt đầu lúc 07:00 sáng 01/10 giờ VN, nên đếm cả tháng theo UTC được **3.162** — thiếu đúng **12** chuyến đặt trước 07:00 ngày 01/10 (bài tập 3). `date_trunc('month', TIMESTAMPTZ '2026-11-01 00:30:00+07', 'UTC')` trả `2026-10-01 07:00:00+07`: chuyến nửa đêm 01/11 giờ VN vẫn thuộc tháng 10 UTC (thí nghiệm D).
 
-**Tuần.** `date_trunc('week', …)` về **00:00 thứ hai**. Thí nghiệm C gom theo tuần giờ VN:
+**Tuần.** `date_trunc('week', …)` đưa mốc về **00:00 thứ hai**. Thí nghiệm C gom theo tuần giờ VN:
 
 ```text
         dau_tuan        | so_chuyen
@@ -158,11 +158,11 @@ Tổng ba ngày gần bằng nhau nhưng từng ngày đều sai — loại lỗ
 
 ## 6. Giờ trong ngày
 
-`extract(hour FROM requested_at)` dùng múi giờ **phiên**. Viết `extract(hour FROM requested_at AT TIME ZONE 'Asia/Ho_Chi_Minh')`: giờ 0–6 ra 68 · 28 · 39 · 39 · 25 · 61 · 123 chuyến, cộng lại **383** — đúng số chuyến lệch ngày UTC ở mục 5. Giờ cao điểm (thí nghiệm E): theo giờ VN là **18 giờ** (289 chuyến), 12 giờ (280), 11 giờ (255); gom theo giờ UTC thì «giờ cao điểm» thành 11, 5 và 4 giờ — đúng số chuyến, sai nhãn, và ai đọc biểu đồ sẽ xếp ca tài xế lệch 7 tiếng.
+`extract(hour FROM requested_at)` dùng múi giờ **phiên**. Viết `extract(hour FROM requested_at AT TIME ZONE 'Asia/Ho_Chi_Minh')`: giờ 0–6 lần lượt ra 68 · 28 · 39 · 39 · 25 · 61 · 123 chuyến, cộng lại **383** — đúng số chuyến lệch ngày UTC ở mục 5. Giờ cao điểm (thí nghiệm E): theo giờ VN là **18 giờ** (289 chuyến), 12 giờ (280), 11 giờ (255); gom theo giờ UTC thì «giờ cao điểm» trở thành 11, 5 và 4 giờ — đúng số chuyến, sai nhãn, và ai đọc biểu đồ sẽ xếp ca tài xế lệch 7 tiếng.
 
 ## 7. Lịch ngày cho báo cáo
 
-Báo cáo theo ngày cần một **lịch đủ** để ngày không có chuyến vẫn có dòng (PG-015 dùng nó cho trung bình 7 ngày). Coi chừng kiểu:
+Báo cáo theo ngày cần một **lịch ngày đầy đủ** để ngày không có chuyến vẫn có dòng (PG-015 dùng nó cho trung bình 7 ngày). Hãy chú ý kiểu dữ liệu:
 
 ```sql
 SELECT pg_typeof(g), pg_typeof(g::date), pg_typeof(DATE '2026-10-01' + 1)
@@ -177,7 +177,7 @@ LIMIT 1;
 (1 row)
 ```
 
-`generate_series(date, date, interval)` trả **`timestamptz`** — nửa đêm theo phiên — không phải `date`. So nó với cột `date` thì PostgreSQL ép kiểu ngầm: đúng ở phiên VN, lệch ở phiên khác. Dùng `DATE '2026-10-01' + n` với `generate_series(0, 29)`, hoặc ép `::date` ngay khi sinh. Lịch + `LEFT JOIN` với biên dựng như mục 4 cho Đà Nẵng 19/10: 13 chuyến · 20/10 (bão): **0** · 21/10: 17 — ngày bão vẫn có dòng.
+`generate_series(date, date, interval)` trả **`timestamptz`** — nửa đêm theo phiên — không phải `date`. Đem kết quả so với cột `date` thì PostgreSQL ép kiểu ngầm: đúng ở phiên VN, lệch ở phiên khác. Dùng `DATE '2026-10-01' + n` với `generate_series(0, 29)`, hoặc ép `::date` ngay khi sinh. Lịch + `LEFT JOIN` với biên dựng như mục 4 cho ra, với Đà Nẵng, 19/10: 13 chuyến · 20/10 (bão): **0** · 21/10: 17 — ngày bão vẫn có dòng.
 
 ## 8. Ghi múi giờ bằng tên, không bằng độ lệch
 
@@ -199,7 +199,7 @@ FROM trips WHERE code = 101503;
 (1 row)
 ```
 
-Chuỗi `'UTC+7'` và `'+07'` được hiểu theo **quy ước POSIX**; tài liệu PostgreSQL 17 (mục B.5) ghi: dấu dương dùng cho múi giờ **phía tây** Greenwich, «ngược với quy ước ISO-8601 dùng ở những chỗ khác trong PostgreSQL». Vậy `'+07'` là UTC−7, và 07:00 sáng 15/10 giờ VN thành 17:00 chiều 14/10. `SET TIME ZONE 'UTC+7'` cũng vậy: chuyến 101503 hiện `2026-10-14 17:00:00-07`. Nhưng `SET TIME ZONE '+07'` — một **số** — lại là phía đông (tài liệu `SET`: «Positive values are east from UTC») và hiện đúng `+07`. Cùng ký tự, hai nghĩa ngược nhau giữa `SET` và `AT TIME ZONE`.
+Chuỗi `'UTC+7'` và `'+07'` được hiểu theo **quy ước POSIX**; tài liệu PostgreSQL 17 (mục B.5) ghi: dấu dương dùng cho múi giờ **phía tây** Greenwich, «ngược với quy ước ISO-8601 dùng ở những chỗ khác trong PostgreSQL». Vậy `'+07'` là UTC−7, và 07:00 sáng 15/10 giờ VN bị đổi thành 17:00 chiều 14/10. `SET TIME ZONE 'UTC+7'` cũng vậy: chuyến 101503 hiện `2026-10-14 17:00:00-07`. Nhưng `SET TIME ZONE '+07'` — một **số** — lại là phía đông (tài liệu `SET`: «Positive values are east from UTC») và hiện đúng `+07`. Cùng ký tự, hai nghĩa ngược nhau giữa `SET` và `AT TIME ZONE`.
 
 Lý do thứ hai để dùng tên là **giờ mùa hè**. Việt Nam không có, nhưng New York lùi đồng hồ ngày 01/11/2026:
 
@@ -242,7 +242,7 @@ Cộng **tháng** có luật riêng (thí nghiệm F): `DATE '2026-01-31' + inte
 ## 11. Đánh đổi
 
 - **Lọc bằng mốc hay bằng biểu thức trên cột:** mốc nửa mở (a) để nguyên cột, hợp với index (Phần 3); `(… AT TIME ZONE …)::date = …` (b) dễ đọc, hợp để gom nhóm, nhưng biến đổi mọi dòng.
-- **Lưu thêm cột «ngày nghiệp vụ» `date`:** gom nhanh và hết lo phiên, nhưng phải giữ đồng bộ với `requested_at` và với định nghĩa ngày (ngày vận hành bắt đầu 04:00 thì sao — bài tập 2?). Cột sinh tự động là một lựa chọn; đánh giá ở Phần 3 khi có số đo.
+- **Lưu thêm cột «ngày nghiệp vụ» `date`:** gom nhanh và không còn lo chuyện phụ thuộc phiên, nhưng phải giữ đồng bộ với `requested_at` và với định nghĩa ngày (ngày vận hành bắt đầu 04:00 thì sao — bài tập 2?). Cột sinh tự động là một lựa chọn; đánh giá ở Phần 3 khi có số đo.
 - **`AT TIME ZONE` hay `date_trunc` 3 tham số:** hai cách cho cùng ngày VN; `date_trunc` giữ kiểu `timestamptz` (so được với mốc `+07`), `AT TIME ZONE … ::date` ra `date` (so được với tham số ngày).
 
 ## 12. Bài tập
@@ -270,7 +270,7 @@ SELECT ((requested_at AT TIME ZONE 'Asia/Ho_Chi_Minh') - interval '4 hours')::da
 FROM trips
 WHERE requested_at &gt;= '2026-10-15 00:00:00+07' AND requested_at &lt; '2026-10-17 04:00:00+07'
 GROUP BY 1 ORDER BY 1;</code></pre>
-<p>Kết quả: <b>107</b> chuyến (khác 106 của ngày lịch); câu gom ra 14/10: 6 · 15/10: 107 · 16/10: 102 — dòng 15/10 khớp câu lọc. Dữ liệu không có chuyến nào đúng 04:00, nên kiểm biên bằng giá trị dựng tay (<code>VALUES</code> trong <code>pg016-bai-tap.sql</code>): 15/10 03:59:59.5 → ngày vận hành 14/10; 15/10 04:00:00 → 15/10; 16/10 03:59:59.5 → 15/10; 16/10 04:00:00 → 16/10.</p>
+<p>Kết quả: <b>107</b> chuyến (khác 106 của ngày lịch); câu gom ra 14/10: 6 · 15/10: 107 · 16/10: 102 — dòng 15/10 khớp câu lọc. Dữ liệu không có chuyến nào đúng 04:00, nên kiểm tra biên bằng giá trị dựng tay (<code>VALUES</code> trong <code>pg016-bai-tap.sql</code>): 15/10 03:59:59.5 → ngày vận hành 14/10; 15/10 04:00:00 → 15/10; 16/10 03:59:59.5 → 15/10; 16/10 04:00:00 → 16/10.</p>
 </details>
 
 **Bài 3.** Ứng dụng truyền tham số tháng là ngày đầu tháng (`DATE '2026-10-01'`). Dựng hai biên tháng giờ VN trong SQL, đếm chuyến, rồi so với «tháng 10 theo UTC». Giải thích chênh lệch.

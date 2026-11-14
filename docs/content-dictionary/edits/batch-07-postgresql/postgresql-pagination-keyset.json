@@ -1,0 +1,21 @@
+{"file":"postgresql-pagination-keyset.md","edits":[
+{"old":"so sánh bộ (requested_at, code), chứng minh mọi trang ghép lại không mất, không lặp dòng.","new":"so sánh theo bộ giá trị (requested_at, code), rồi chứng minh ghép mọi trang lại thì không mất, không lặp dòng.","reason":"'so sánh bộ' tự ghép; câu cụt thiếu từ nối (khảo sát + summary)","severity":"medium"},
+{"old":"và hẹn bài này cho hai giới hạn còn lại của","new":"và để dành cho bài này hai giới hạn còn lại của","reason":"'hẹn bài này cho' trật tự kiểu Anh","severity":"medium"},
+{"old":"bằng truy vấn kiểm trên fixture.","new":"bằng truy vấn kiểm tra trên fixture.","reason":"'kiểm' đứng một mình gượng","severity":"medium"},
+{"old":"Dạng tách dùng khi hệ khác không hỗ trợ so sánh bộ","new":"Dạng tách dùng khi hệ quản trị cơ sở dữ liệu khác không hỗ trợ so sánh bộ","reason":"'hệ khác' thiếu danh từ chính","severity":"medium"},
+{"old":"và là dạng mà chỉ mục nhiều cột phục vụ trực tiếp","new":"và chỉ mục nhiều cột phục vụ trực tiếp được dạng này","reason":"Câu rườm, trật tự kiểu Anh","severity":"medium"},
+{"old":"Khoá sắp xếp có NULL là lỗ hổng im lặng","new":"Khoá sắp xếp có NULL là lỗ hổng không báo lỗi","reason":"'im lặng' là calque của 'silent'","severity":"medium"},
+{"old":"trong lược đồ nên an toàn","new":"trong schema nên an toàn","reason":"Giữ 'schema' theo thuật ngữ","severity":"low"},
+{"old":"đừng để nó lặng lẽ mất dòng","new":"đừng để dòng bị mất mà không có dấu hiệu nào","reason":"'lặng lẽ' là calque của 'silently'","severity":"medium"},
+{"old":"Lấy n dòng đầu của tập đó là vị trí","new":"Lấy n dòng đầu của tập đó thì được các vị trí","reason":"Câu 'X là vị trí' thiếu động từ","severity":"medium"},
+{"old":"Câu kiểm thứ hai của lab","new":"Câu kiểm tra thứ hai của lab","reason":"'kiểm' đứng một mình gượng","severity":"medium"},
+{"old":"Truy vấn kiểm này nên nằm","new":"Truy vấn kiểm tra này nên nằm","reason":"'kiểm' đứng một mình gượng","severity":"medium"},
+{"old":"và chỉ mục phục vụ nó phải được tạo trên biểu thức","new":"và chỉ mục phục vụ cách này phải được tạo trên biểu thức","reason":"Tránh 'nó' chỉ sự vật","severity":"low"},
+{"old":"xin **n + 1** dòng, hiển thị n:","new":"lấy **n + 1** dòng, hiển thị n dòng:","reason":"'xin' là calque của 'ask for'","severity":"medium"},
+{"old":"## 9. Vì sao keyset rẻ — chỉ nói ý","new":"## 9. Vì sao keyset rẻ — chỉ nêu ý chính","reason":"'chỉ nói ý' gượng","severity":"low"},
+{"old":"Lược đồ lab có","new":"Schema của lab có","reason":"Giữ 'schema' theo thuật ngữ","severity":"low"},
+{"old":"kế hoạch thực thi trông ra sao","new":"query plan trông ra sao","reason":"Giữ 'query plan' theo thuật ngữ","severity":"low"},
+{"old":"Dù dạng nào, server phải kiểm con trỏ thuộc đúng","new":"Dù dạng nào, server phải kiểm tra rằng con trỏ thuộc đúng","reason":"'kiểm' đứng một mình gượng, thiếu từ nối","severity":"medium"},
+{"old":"Con trỏ chỉ có cước với <code>fare &lt; 57000</code> bắt đầu từ 101883","new":"Nếu con trỏ chỉ có cước thì điều kiện <code>fare &lt; 57000</code> bắt đầu từ 101883","reason":"Câu cụt, thiếu quan hệ điều kiện","severity":"medium"},
+{"old":"cho 4 trang, 18 mã, 18 mã khác nhau","new":"cho kết quả 4 trang, 18 mã, 18 mã khác nhau","reason":"Câu thiếu danh từ","severity":"low"}
+]}
