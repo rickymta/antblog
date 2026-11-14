@@ -1,18 +1,15 @@
 'use client';
 
+import { useEffect, useId, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, Calendar, Clock } from 'lucide-react';
-import { Skeleton } from '@tkh/ui';
-import { type LearningPathCard } from '@tkh/shared';
-import { formatDay } from '../../lib/dates';
-import { useLocale } from '../../i18n';
+import { X } from 'lucide-react';
+import { api, type LearningPathCard } from '@tkh/shared';
 import { formatDuration } from '../../lib/format';
-import { countReadInPath, useReadArticles } from '../../lib/reading';
-import { btnPrimary, card } from '../../lib/ui';
-import { CategoryChip, LevelTag } from './Badges';
-import { Cover } from './Cover';
-import { learningPathCover } from '../../lib/path-cover';
+import { useReadArticles } from '../../lib/reading';
+import { btnPrimary, btnSecondary, card } from '../../lib/ui';
+import { articleHref } from './ArticleCard';
 
 export const pathHref = (slug: string) => `/learning-paths/${encodeURIComponent(slug)}`;
 
@@ -32,76 +29,90 @@ export function ProgressBar({ value, max, label }: { value: number; max: number;
   );
 }
 
-/**
- * Thẻ lộ trình (A6): nhãn chủ đề chữ hoa + nhãn cấp độ, tiêu đề lớn, mô tả, số bài + thời lượng / ngày,
- * thanh tiến độ (đã đọc trên máy này) và nút rộng hết thẻ dính đáy.
- */
-export function PathCard({ path, showDate = false, headingLevel = 3 }: { path: LearningPathCard; showDate?: boolean; headingLevel?: 2 | 3 }) {
+function PreviewLessons({ path }: { path: LearningPathCard }) {
   const { t } = useTranslation();
-  const locale = useLocale();
-  const Heading = headingLevel === 2 ? 'h2' : 'h3';
-  const read = countReadInPath(useReadArticles(), path.slug, path.articleCount);
+  const read = useReadArticles();
+  const query = useQuery({
+    queryKey: ['learning-path-preview', path.slug],
+    queryFn: () => api.learningPaths.get(path.slug),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const lessons = query.data?.articles ?? [];
+  const preview = lessons.slice(0, 5);
+  const unread = lessons.find(lesson => !read[lesson.id]);
+  const target = unread ?? lessons[0];
+  const hasRead = lessons.some(lesson => read[lesson.id]);
+  const action = !hasRead ? 'paths.start' : unread ? 'paths.continue' : 'paths.review';
+  const count = query.data ? lessons.length : path.articleCount;
 
   return (
-    <article className={`flex h-full flex-col overflow-hidden ${card} transition-shadow hover:shadow-lg hover:shadow-slate-900/5 dark:hover:shadow-black/30`}>
-      <div className="aspect-video overflow-hidden border-b border-line">
-        <Cover src={learningPathCover(path.slug)} category={path.category ?? { name: { vi: path.title, en: path.title }, color: '#2563EB', icon: 'code' }} />
+    <>
+      {query.isPending ? <p role="status">{t('common.loading')}</p> : query.isError && !query.data ? (
+        <div>
+          <p role="alert">{t('paths.previewError')}</p>
+          <button type="button" className={`${btnSecondary} mt-2 min-h-11`} onClick={() => query.refetch()}>{t('common.retry')}</button>
+        </div>
+      ) : preview.length ? (
+        <section>
+          <h3 className="mb-2 font-semibold text-ink">{t('paths.previewLessons', { n: preview.length, total: count })}</h3>
+          <ol className="list-decimal space-y-2 pl-6 text-ink">
+            {preview.map(lesson => <li key={lesson.id} lang={lesson.language}>{lesson.title}</li>)}
+          </ol>
+        </section>
+      ) : <p>{t('paths.emptyArticles')}</p>}
+      <div className="flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:flex-wrap">
+        {target && <Link href={articleHref(target.slug)} className={`${btnPrimary} min-h-11`}>{t(action)}</Link>}
+        <Link href={pathHref(path.slug)} className={`${btnSecondary} min-h-11`}>
+          {count ? t('paths.previewAll', { n: count }) : t('paths.view')}
+        </Link>
       </div>
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          {path.category ? <CategoryChip category={path.category} uppercase /> : <span />}
-          <LevelTag level={path.level} />
-        </div>
-        <div className="space-y-2">
-          <Heading className="text-lg leading-snug font-bold text-ink"><Link href={pathHref(path.slug)} className="hover:text-primary-ink hover:underline">{path.title}</Link></Heading>
-          <p className="text-base leading-relaxed text-muted">{path.description}</p>
-        </div>
-        <div className="mt-auto space-y-3">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
-            <span className="inline-flex items-center gap-1">
-              <BookOpen aria-hidden="true" className="h-3.5 w-3.5" />
-              {t('common.lessonCount', { count: path.articleCount, n: path.articleCount })}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Clock aria-hidden="true" className="h-3.5 w-3.5" />
-              {formatDuration(path.totalMinutes, t)}
-            </span>
-            {showDate && (
-              <span className="inline-flex items-center gap-1">
-                <Calendar aria-hidden="true" className="h-3.5 w-3.5" />
-                {t('common.updatedOn', { date: formatDay(path.updatedAt, locale) })}
-              </span>
-            )}
-          </div>
-          {path.articleCount > 0 ? <div className="space-y-1.5">
-            <ProgressBar value={read} max={path.articleCount} label={t('paths.progressLabel', { title: path.title })} />
-            <p className="text-sm text-muted">{t('paths.progress', { read, total: path.articleCount })}</p>
-          </div> : <p className="text-sm text-muted">{t('paths.emptyArticles')}</p>}
-          <Link href={pathHref(path.slug)} className={`${btnPrimary} min-h-11 w-full`}>
-            {t('paths.view')}
-            <span className="sr-only">: {path.title}</span>
-          </Link>
-        </div>
-      </div>
-    </article>
+    </>
   );
 }
 
-export function PathCardSkeleton() {
+export function PathCard({ path }: { path: LearningPathCard }) {
+  const { t } = useTranslation();
+  const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [open]);
+
   return (
-    <div className={`flex flex-col overflow-hidden ${card}`}>
-      <Skeleton className="aspect-video rounded-none" />
-      <div className="flex flex-col gap-4 p-5">
-        <div className="flex justify-between">
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-5 w-16" />
+    <>
+      <article className={`relative flex h-full flex-col gap-2 p-4 hover:border-primary ${card}`}>
+        <h3 className="text-base leading-snug font-semibold text-ink">
+          <Link href={pathHref(path.slug)} prefetch={false} aria-haspopup="dialog"
+            className="after:absolute after:inset-0 hover:text-primary-ink focus-visible:after:rounded-card focus-visible:after:ring-2 focus-visible:after:ring-primary"
+            onClick={event => {
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !dialog.current) return;
+              event.preventDefault();
+              dialog.current.showModal();
+              setOpen(true);
+            }}>
+            {path.title}
+          </Link>
+        </h3>
+        <p className="mt-auto text-sm text-muted">{t(`common.levels.${path.level}`)} · {t('common.lessonCount', { count: path.articleCount, n: path.articleCount })}</p>
+      </article>
+      <dialog ref={dialog} aria-labelledby={titleId} onClose={() => setOpen(false)}
+        className="fixed inset-0 m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto overscroll-contain rounded-card border border-line bg-surface p-0 text-ink shadow-xl backdrop:bg-black/50">
+        <div className="flex items-start justify-between gap-4 border-b border-line p-5">
+          <h2 id={titleId} className="text-xl leading-snug font-bold">{path.title}</h2>
+          <button type="button" aria-label={t('common.close')} onClick={() => dialog.current?.close()} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-ui hover:bg-surface-2"><X aria-hidden="true" size={20} /></button>
         </div>
-        <Skeleton className="h-6 w-3/4" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="mt-4 h-2 w-full" />
-        <Skeleton className="h-9 w-full" />
-      </div>
-    </div>
+        {open && <div className="space-y-5 p-5 leading-relaxed text-muted">
+          <p>{path.description}</p>
+          <p className="text-sm">{t(`common.levels.${path.level}`)} · {t('paths.totalTime')}: {formatDuration(path.totalMinutes, t)}</p>
+          <PreviewLessons path={path} />
+        </div>}
+      </dialog>
+    </>
   );
 }

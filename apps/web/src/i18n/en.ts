@@ -226,6 +226,9 @@ export const en: Messages = {
     notFound: 'This topic could not be found.',
   },
   paths: {
+    previewLessons: 'First {{n}} of {{total}} lessons',
+    previewAll: 'View all {{n}} lessons',
+    previewError: 'Could not load the lesson list.',
     topicGuide: 'Choose a path below and build your knowledge one lesson at a time.',
     count_one: '{{n}} learning path',
     count_other: '{{n}} learning paths',

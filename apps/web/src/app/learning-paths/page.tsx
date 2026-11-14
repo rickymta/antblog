@@ -64,8 +64,8 @@ export default async function LearningPathsPage({ searchParams }: Props) {
                       <h2 id={`paths-${key}`} className="scroll-mt-28 text-2xl font-bold text-ink">{group.title}</h2>
                       <p className="text-sm text-muted">{t('paths.count', { count: group.paths.length, n: group.paths.length })} · {t('common.lessonCount', { count: group.paths.reduce((sum, p) => sum + p.articleCount, 0), n: group.paths.reduce((sum, p) => sum + p.articleCount, 0) })}</p>
                     </header>
-                    <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                      {orderTopicParts(group.paths).map(p => <li key={p.id}><PathCard path={p} showDate /></li>)}
+                    <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                      {orderTopicParts(group.paths).map(p => <li key={p.id}><PathCard path={p} /></li>)}
                     </ul>
                   </section>
                 ))}

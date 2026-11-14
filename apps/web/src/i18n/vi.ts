@@ -226,6 +226,9 @@ export const vi = {
     notFound: 'Không tìm thấy chủ đề này.',
   },
   paths: {
+    previewLessons: '{{n}} bài đầu trong {{total}} bài',
+    previewAll: 'Xem đủ {{n}} bài',
+    previewError: 'Chưa tải được danh sách bài.',
     topicGuide: 'Chọn một lộ trình bên dưới và học từng bước theo thứ tự bài viết.',
     count_one: '{{n}} lộ trình',
     count_other: '{{n}} lộ trình',
