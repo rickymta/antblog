@@ -1,0 +1,77 @@
+{
+ "file": "ba-phu-thuoc-yeu-cau-xuyen-doi.md",
+ "edits": [
+  {
+   "old": "Làm rõ đầu ra, owner và điều kiện sẵn sàng",
+   "new": "Làm rõ đầu ra, người phụ trách và điều kiện sẵn sàng",
+   "reason": "Từ Anh thông thường có từ Việt tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "mobile báo đang chờ backend, CS chưa biết",
+   "new": "mobile báo đang chờ backend, CSKH chưa biết",
+   "reason": "Thống nhất CSKH",
+   "severity": "medium"
+  },
+  {
+   "old": "Có ca trước/sau/qua mốc",
+   "new": "Có test case trước/sau/qua mốc",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Kết quả case biên theo build",
+   "new": "Kết quả test case biên theo build",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Nghiệp vụ/API → CS | Cách tra policy của chuyến | CS giải thích được ca mẫu",
+   "new": "Nghiệp vụ/API → CSKH | Cách tra policy của chuyến | CSKH giải thích được ca mẫu",
+   "reason": "Thống nhất CSKH",
+   "severity": "low"
+  },
+  {
+   "old": "Định nghĩa mốc contract-ready, implementation-ready và integration-verified riêng.",
+   "new": "Định nghĩa riêng từng mốc contract-ready, implementation-ready và integration-verified.",
+   "reason": "Trật tự từ kiểu tiếng Anh, 'riêng' đặt cuối câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Một dependency chưa đóng chỉ vì demo với dữ liệu cứng thành công.",
+   "new": "Không thể đóng một dependency chỉ vì demo với dữ liệu cứng thành công.",
+   "reason": "Câu thiếu động từ, sai ngữ pháp",
+   "severity": "high"
+  },
+  {
+   "old": "Chốt outcome và contract tối thiểu trước rồi hai đội",
+   "new": "Chốt trước outcome và contract tối thiểu, rồi hai đội",
+   "reason": "Trật tự từ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Nếu rule hiệu lực đổi, thông báo, analytics và bộ test phải được thông báo cùng phiên bản.",
+   "new": "Nếu rule hiệu lực đổi, nội dung thông báo, analytics và bộ test đều phải cập nhật theo cùng phiên bản.",
+   "reason": "'thông báo' vừa là danh từ vừa là động từ, câu không rõ nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "Một change log ở API mà consumer không biết chưa đủ",
+   "new": "Change log ở API mà consumer không biết thì chưa đủ",
+   "reason": "Câu thiếu quan hệ điều kiện",
+   "severity": "low"
+  },
+  {
+   "old": "CS chưa có công cụ xem policy của chuyến, nhưng API",
+   "new": "CSKH chưa có công cụ xem policy của chuyến, nhưng API",
+   "reason": "Thống nhất CSKH",
+   "severity": "medium"
+  },
+  {
+   "old": "với owner, quyền truy cập, thời gian đáp ứng và giới hạn số ca rõ.",
+   "new": "với người phụ trách, quyền truy cập, thời gian đáp ứng và giới hạn số ca được xác định rõ.",
+   "reason": "Thiếu động từ; owner có từ Việt tự nhiên",
+   "severity": "medium"
+  }
+ ]
+}

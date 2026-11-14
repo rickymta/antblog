@@ -1,0 +1,14 @@
+{"file":"ba-kiem-tra-nhat-quan-mo-hinh.md","edits":[
+{"old":"Dữ kiện ở đâu, có nghĩa gì, version nào?","new":"Dữ kiện ở đâu, có nghĩa gì, phiên bản nào?","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"Đưa vào bản nháp ba lỗi:","new":"Đưa ba lỗi vào bản nháp:","reason":"Trật tự từ","severity":"low"},
+{"old":"rồi để bảng case cũ.","new":"rồi để nguyên bảng case cũ.","reason":"Thiếu 'nguyên'","severity":"medium"},
+{"old":"liệt kê mọi sản phẩm bị ảnh hưởng","new":"liệt kê mọi tài liệu bị ảnh hưởng","reason":"'sản phẩm' dịch máy của artifact/work product","severity":"low"},
+{"old":"Nó bổ sung cho case cụ thể","new":"Invariant bổ sung cho case cụ thể","reason":"Tránh 'Nó' chỉ khái niệm","severity":"medium"},
+{"old":"| Walkthrough declined, timeout hết lượt và thành công |","new":"| Walkthrough các trường hợp declined, timeout hết lượt và thành công |","reason":"Lược danh từ","severity":"medium"},
+{"old":"| Owner/status | Người sở hữu mô hình xác nhận;","new":"| Người phụ trách/trạng thái | Người phụ trách mô hình xác nhận;","reason":"owner và 'người sở hữu' thành người phụ trách","severity":"medium"},
+{"old":"## 6. Review thứ tự, dữ liệu và version","new":"## 6. Review thứ tự, dữ liệu và phiên bản","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"Không buộc một giải pháp khoá cụ thể,","new":"Không buộc dùng một cơ chế khoá cụ thể,","reason":"Câu cụt, 'giải pháp khoá' gượng","severity":"medium"},
+{"old":"Với mỗi ca ghi actor,","new":"Với mỗi case ghi actor,","reason":"Thống nhất 'case' trong bài","severity":"low"},
+{"old":"hoặc hiệu lực version mới.","new":"hoặc hiệu lực phiên bản mới.","reason":"Thống nhất 'phiên bản'","severity":"low"},
+{"old":"có đủ chứng minh đúng không?","new":"có đủ để chứng minh là đúng không?","reason":"Thiếu 'để'","severity":"low"}
+]}

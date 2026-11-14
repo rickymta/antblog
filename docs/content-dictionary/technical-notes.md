@@ -28,3 +28,19 @@ Những chỗ dưới đây do agent ghi nhận và chưa được kiểm chứn
 - [ ] `metamorphic-testing.md:297`: "31/50 … khoảng 4 lần chạy thì có 1 lần trượt". Tỉ lệ trượt thực là 19/50 (khoảng 38%).
 - [ ] `mc-dc-testing.md:429`: câu "không có điều kiện ghép thì MC/DC là lãng phí" khó hiểu. Có lẽ ý là "không có quyết định nhiều điều kiện".
 - [ ] `branch-coverage-decision-coverage.md:355`: bài ghi "hàm 16 dòng", nhưng hàm dài khoảng 19 dòng, còn 16 là số nhánh.
+
+## Đợt 3 — nhóm business-analysis (11/2026)
+
+Các câu dưới đây có nghĩa mơ hồ mà agent không chắc ý tác giả, nên chưa sửa hoặc chỉ sửa một phần. Tác giả cần xác nhận.
+
+- [ ] `ba-capability-map-nang-luc-to-chuc.md:26`: "xử lý hoàn tiền đề xuất". Không rõ "đề xuất" bổ nghĩa cho "hoàn tiền" hay cho "xử lý".
+- [ ] `ba-nghiem-thu-co-dieu-kien-go-no-go.md:24`: ô bảng "Không đáp ứng rule quyền, chặn theo tiêu chí đề xuất" còn cụt.
+- [ ] `ba-facilitation-ke-chuyen-bang-chung.md:39`: "Khi tranh luận lệch sang chat". Không rõ là tính năng chat của sản phẩm hay chuyện bên lề.
+- [ ] `ba-domain-glossary-mo-hinh-du-lieu.md:32`: "invariant tổng hoàn/giữ chỗ" khó hiểu. Có lẽ ý là "số tiền đang giữ".
+- [ ] `ba-defect-change-cau-hoi-mo.md:52`: "Tài liệu nói đúng revision mới được xác nhận" có nghĩa mơ hồ.
+- [ ] `ba-thuc-hanh-de-xuat-cai-thien-diem-don.md:82`: "xác nhận cách vận hành hỗ trợ" mơ hồ.
+- [ ] Các câu đã được agent viết lại theo nghĩa suy ra từ ngữ cảnh, người duyệt thấy hợp lý nhưng tác giả nên xác nhận:
+  - `ba-business-rule-chinh-sach-nghiep-vu.md:74` (nhận lại tài xế);
+  - `ba-pilot-ab-test-tuong-quan-tac-dong.md:19`;
+  - `ba-phu-thuoc-yeu-cau-xuyen-doi.md:43`;
+  - `ba-la-gi-tu-tinh-nang-den-bai-toan.md:107`.

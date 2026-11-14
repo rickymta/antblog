@@ -1,0 +1,12 @@
+{"file":"ba-problem-statement-muc-tieu-chi-so.md","edits":[
+{"old":"và tác động với khách, tài xế, CSKH.","new":"và tác động đến khách, tài xế, CSKH.","reason":"Giới từ kiểu dịch sát tiếng Anh","severity":"low"},
+{"old":"Nó không khẳng định “vì thiếu chat”","new":"Đoạn này không khẳng định “vì thiếu chat”","reason":"Tránh \"Nó\" ở đầu câu; nhắc lại danh từ","severity":"medium"},
+{"old":"dùng cùng múi giờ và mốc biên đầu bao gồm, cuối không bao gồm","new":"dùng cùng múi giờ; ranh giới đầu kỳ được tính, ranh giới cuối kỳ không được tính","reason":"\"mốc biên\" là cụm tự ghép; dùng \"ranh giới\" theo style guide","severity":"medium"},
+{"old":"Đây là **đề xuất hợp đồng đo**,","new":"Đây là **đề xuất quy ước đo**,","reason":"\"hợp đồng đo\" là dịch sát từ \"measurement contract\"; bài đã dùng \"quy ước đo\"","severity":"medium"},
+{"old":"ca quá hạn phải được đối soát","new":"lượt quá hạn phải được đối soát","reason":"\"ca\" ở đây chỉ lượt đặt xe, thống nhất với phần còn lại","severity":"medium"},
+{"old":"Không lấy trung bình đơn giản tỷ lệ từng tuần khi mẫu số khác nhau.","new":"Không lấy trung bình cộng các tỷ lệ từng tuần khi mẫu số khác nhau.","reason":"Trật tự từ kiểu tiếng Anh","severity":"low"},
+{"old":"“Nhiều người dùng tính năng” chưa có nghĩa “ít ca đón thất bại”.","new":"“Nhiều người dùng tính năng” chưa có nghĩa “ít lượt đón thất bại”.","reason":"Thống nhất cách gọi \"lượt\"","severity":"medium"},
+{"old":"Bốn tuần không tự bảo đảm đủ mẫu hoặc quan hệ nhân quả.","new":"Bốn tuần không tự bảo đảm có đủ mẫu hay chứng minh được quan hệ nhân quả.","reason":"Câu thiếu động từ cho vế sau","severity":"medium"},
+{"old":"nếu lần lượt không có hoặc cả 300 lượt đều huỷ trước đón","new":"nếu không lượt nào hoặc cả 300 lượt đều huỷ trước đón","reason":"Cụm \"lần lượt không có\" tối nghĩa","severity":"medium"},
+{"old":"nguồn cần kiểm tra và owner xác nhận.","new":"nguồn cần kiểm tra và người phụ trách xác nhận.","reason":"Từ tiếng Anh đã có từ Việt tự nhiên","severity":"low"}
+]}

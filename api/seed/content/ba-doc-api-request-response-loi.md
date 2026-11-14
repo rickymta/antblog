@@ -8,7 +8,7 @@ tags: [business-analysis, ba-035, api, contract, toi-noi]
 language: vi
 ---
 
-Response 200 không tự giải thích “thành công” là gì. Trong lab, huỷ chuyến có thể thành công nhưng thu ví failed. BA đọc API cần nối cấu trúc dữ liệu với outcome nghiệp vụ.
+Response 200 không tự giải thích “thành công” là gì. Trong lab, huỷ chuyến có thể thành công nhưng việc thu tiền qua ví failed. Khi đọc API, BA cần nối cấu trúc dữ liệu với outcome nghiệp vụ.
 
 <div class="tkh-callout"><span class="tkh-callout-title">BA-035 · Phần 5/8 · Cơ bản</span><p>Đầu ra: bản đọc hợp đồng báo giá và danh sách câu hỏi. Nguồn baseline: SPEC R-QUOTE/R-VALID/R-IDEM; không gọi API thật.</p></div>
 
@@ -29,27 +29,27 @@ Khi tạo chuyến phải dùng báo giá của chính khách đó. Chuyến gi�
 | Không có hoặc không thuộc khách | QUOTE_NOT_FOUND, 422 |
 | Hết hạn | QUOTE_EXPIRED, 422 |
 | Đã dùng | QUOTE_ALREADY_USED, 409 |
-| Vượt lượt voucher | VOUCHER_USAGE_LIMIT, 422 |
+| Vượt số lượt dùng voucher | VOUCHER_USAGE_LIMIT, 422 |
 
 Nếu nhiều điều kiện sai, thứ tự kiểm trong SPEC quyết định lỗi đầu tiên. UI cần cách phản hồi phù hợp; không chỉ hiện “có lỗi”.
 
 ## 4. Status code và nghiệp vụ
 
-[RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html) định nghĩa 202 là tiếp nhận để xử lý, chưa cam kết hoàn tất. Với refund đề xuất, nếu chọn 202 phải có cách theo dõi kết quả; không hiển thị “đã hoàn tiền” ngay.
+[RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html) định nghĩa 202 là tiếp nhận để xử lý, chưa cam kết hoàn tất. Với refund đang được đề xuất, nếu chọn 202 phải có cách theo dõi kết quả; không hiển thị “đã hoàn tiền” ngay.
 
-Đây là ví dụ thiết kế, không nói API refund 202 đã có trong lab. Mã lỗi chi tiết và response schema cần hợp đồng riêng.
+Đây là ví dụ thiết kế, không có nghĩa là API refund 202 đã có trong lab. Mã lỗi chi tiết và response schema cần hợp đồng riêng.
 
 ## 5. Retry phải đọc cả hợp đồng
 
-Tạo chuyến yêu cầu Idempotency-Key theo lab. Gửi lại cùng key/payload trả kết quả đã lưu trong điều kiện hợp đồng; không dùng key mới mỗi lần mạng lỗi. Các lỗi trước bước idempotency có xử lý khác, cần đọc R-IDEM/R-VALID thay vì suy từ một response.
+Theo lab, tạo chuyến yêu cầu có Idempotency-Key. Gửi lại với cùng key và payload sẽ trả kết quả đã lưu trong điều kiện hợp đồng; không dùng key mới mỗi lần mạng lỗi. Các lỗi trước bước idempotency có xử lý khác, cần đọc R-IDEM/R-VALID thay vì suy từ một response.
 
 ## 6. Câu hỏi BA cần mang tới review
 
-Thời hạn đo theo nguồn nào? Ai xem được dữ liệu? Có thể xử lý lặp không? Lỗi có làm thay đổi một phần không? Kết quả nào cần người dùng hành động, kết quả nào nên hệ thống tự phục hồi? Những câu hỏi này ảnh hưởng trực tiếp trải nghiệm và kiểm thử.
+Thời hạn tính theo nguồn thời gian nào? Ai xem được dữ liệu? Có thể xử lý lặp không? Lỗi có làm thay đổi một phần không? Kết quả nào cần người dùng hành động, kết quả nào hệ thống nên tự phục hồi? Những câu hỏi này ảnh hưởng trực tiếp trải nghiệm và kiểm thử.
 
 ## 7. Thực hành
 
-Viết luồng khi khách bấm đặt đúng expiresAt, và khi mất response sau tạo chuyến. Nêu điều UI nên thông báo và dữ kiện cần giữ để không tạo thêm chuyến.
+Viết luồng khi khách bấm đặt đúng thời điểm expiresAt, và khi mất response sau khi tạo chuyến. Nêu điều UI nên thông báo và dữ kiện cần giữ để không tạo thêm chuyến.
 
 <details><summary>Vì sao không suy “200 = đã thu tiền”?</summary><p>200 diễn đạt thành công theo ngữ nghĩa endpoint. Endpoint huỷ có thể hoàn tất huỷ nhưng paymentStatus failed; phải đọc outcome và rule.</p></details>
 

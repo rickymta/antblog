@@ -1,0 +1,47 @@
+{
+  "file": "ba-sql-kiem-chung-gia-thuyet.md",
+  "edits": [
+    {
+      "old": "Ba chuyến join với ba ticket tạo bốn dòng vì một chuyến có hai ticket.",
+      "new": "Khi join ba chuyến với ba ticket, kết quả có bốn dòng vì một chuyến có hai ticket.",
+      "reason": "Câu thiếu động từ, trật tự kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Cần tính tỷ lệ lượt huỷ và lượt có ticket, không tính tỷ lệ ticket.",
+      "new": "Cần tính tỷ lệ lượt huỷ và tỷ lệ lượt có ticket, không tính tỷ lệ ticket.",
+      "reason": "Thiếu danh từ chính 'tỷ lệ' ở vế sau",
+      "severity": "medium"
+    },
+    {
+      "old": "EXISTS hỏi có ít nhất một ticket, không thêm dòng cho từng ticket.",
+      "new": "EXISTS chỉ kiểm tra có ít nhất một ticket hay không, nên không thêm dòng cho từng ticket.",
+      "reason": "Thiếu liên kết lập luận, 'hỏi' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Tỷ lệ 2/4 = 50% sai câu hỏi theo chuyến.",
+      "new": "Tỷ lệ 2/4 = 50% là sai so với câu hỏi tính theo chuyến.",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "kết quả null nghĩa không có tỷ lệ để báo, không phải 0% tốt đẹp.",
+      "new": "kết quả null nghĩa là không có tỷ lệ để báo cáo, không phải 0% tốt đẹp.",
+      "reason": "Thiếu 'là', 'báo' cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Xoá toàn ticket: vẫn 3 lượt",
+      "new": "Xoá hết ticket: vẫn 3 lượt",
+      "reason": "'toàn' dùng sai",
+      "severity": "medium"
+    },
+    {
+      "old": "COUNT(s.id) bỏ null nhưng vẫn đếm ticket, không tự trở thành số chuyến có ticket.",
+      "new": "COUNT(s.id) bỏ qua null nhưng vẫn đếm từng ticket, nên không cho ra số chuyến có ticket.",
+      "reason": "Câu thiếu liên kết, 'bỏ null' cụt",
+      "severity": "high"
+    }
+  ]
+}

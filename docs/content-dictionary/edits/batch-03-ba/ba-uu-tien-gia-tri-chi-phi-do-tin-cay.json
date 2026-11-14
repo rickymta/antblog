@@ -1,0 +1,11 @@
+{"file":"ba-uu-tien-gia-tri-chi-phi-do-tin-cay.md","edits":[
+{"old":"để so phương án, tránh biến","new":"để so sánh phương án, tránh biến","reason":"'so phương án' cụt, thiếu động từ","severity":"low"},
+{"old":"không phải estimate hoặc kết quả thực của Tới Nơi","new":"không phải ước lượng hoặc kết quả thực của Tới Nơi","reason":"Có từ Việt tự nhiên","severity":"medium"},
+{"old":"Nó có chi phí cơ hội, nhưng","new":"Phương án này có chi phí cơ hội, nhưng","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"là công cụ gợi thảo luận, không phải","new":"là công cụ để gợi mở thảo luận, không phải","reason":"'gợi thảo luận' thiếu động từ","severity":"low"},
+{"old":"Điểm hoà của A là confidence 0,24","new":"Điểm hoà của A nằm ở confidence 0,24","reason":"Thiếu động từ","severity":"low"},
+{"old":"effort vượt ngưỡng mới, review lại.”","new":"effort vượt ngưỡng mới, xem xét lại.”","reason":"Có từ Việt tự nhiên","severity":"low"},
+{"old":"tính effort A tại điểm hoà với B = 120.","new":"tính effort của A để hoà với B (S = 120).","reason":"'B = 120' mơ hồ, 120 là điểm S của B","severity":"medium"},
+{"old":"Hỏi estimate đã gồm nội dung hướng dẫn, kiểm tra accessibility, đo lường và đào tạo CS chưa;","new":"Hỏi xem ước lượng đã gồm nội dung hướng dẫn, kiểm tra accessibility, đo lường và đào tạo CSKH chưa;","reason":"Thiếu 'xem'; estimate/CS chưa Việt hoá, thống nhất CSKH","severity":"medium"},
+{"old":"không áp một chuẩn chứng chỉ.","new":"không áp dụng một chuẩn chứng chỉ nào.","reason":"Lược động từ","severity":"medium"}
+]}

@@ -1,0 +1,59 @@
+{
+ "file": "ba-ai-ho-tro-kiem-chung-nguon-du-lieu.md",
+ "edits": [
+  {
+   "old": "kiểm từng nhận định về nguồn",
+   "new": "kiểm tra từng nhận định về nguồn",
+   "reason": "'kiểm' đứng một mình gượng",
+   "severity": "low"
+  },
+  {
+   "old": "hỗ trợ nhóm câu hỏi",
+   "new": "hỗ trợ gom nhóm câu hỏi",
+   "reason": "'nhóm' thiếu động từ, dễ hiểu nhầm là danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "đề xuất case biên",
+   "new": "đề xuất test case biên",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "AI không tự có quyền duyệt yêu cầu",
+   "new": "AI không có quyền tự duyệt yêu cầu",
+   "reason": "Trật tự từ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "giúp kiểm nhanh hơn yêu cầu",
+   "new": "giúp kiểm tra nhanh hơn so với yêu cầu",
+   "reason": "'kiểm' cụt và thiếu so sánh",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm quyền sử dụng công cụ",
+   "new": "Kiểm tra quyền sử dụng công cụ",
+   "reason": "'Kiểm quyền' tự ghép",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm xem có tồn tại",
+   "new": "kiểm tra xem có tồn tại",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "đổi đề xuất thành approval",
+   "new": "đổi đề xuất thành phê duyệt",
+   "reason": "Có từ Việt tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "cung cấp hướng tiếp cận quản lý rủi ro AI tự nguyện",
+   "new": "cung cấp hướng tiếp cận tự nguyện áp dụng để quản lý rủi ro AI",
+   "reason": "'tự nguyện' đặt sai chỗ, dễ hiểu nhầm",
+   "severity": "medium"
+  }
+ ]
+}

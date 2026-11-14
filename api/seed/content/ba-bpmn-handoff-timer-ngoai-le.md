@@ -16,13 +16,13 @@ Ngoại lệ cần được mô tả như một phần của quy trình. Chúng 
 
 ## 1. Handoff cần cả nội dung và cách biết đã được nhận
 
-Với phí huỷ qua ví, bên gửi cần nêu số tiền, định danh chuyến và khoá chống xử lý lặp. Bên nhận trả thành công, declined hoặc lỗi/không phản hồi theo hợp đồng. Mũi tên “gửi sang ví” chưa đủ diễn đạt trách nhiệm khi phản hồi bị mất.
+Với phí huỷ qua ví, bên gửi cần nêu số tiền, định danh chuyến và khoá chống xử lý lặp. Bên nhận trả về kết quả thành công, declined hoặc lỗi/không phản hồi theo hợp đồng. Mũi tên “gửi sang ví” chưa đủ diễn đạt trách nhiệm khi phản hồi bị mất.
 
 | Handoff | Điều cần xác định |
 |---|---|
 | Tới Nơi → VíXanh | Số tiền, khoá `trip:<id>:cancel-fee`, điều kiện gửi |
 | VíXanh → Tới Nơi | Kết quả, ý nghĩa lỗi, cách nối với yêu cầu |
-| Tới Nơi → xử lý sau | Trường hợp failed, thông tin cần giữ và owner cần chốt |
+| Tới Nơi → xử lý sau | Trường hợp failed, thông tin cần giữ và người phụ trách cần chốt |
 
 Phần xử lý sau là điểm cần thiết kế thêm nếu mở rộng lab; không ghi “CSKH tự động nhận ticket” như thể đã được SPEC định nghĩa.
 
@@ -60,9 +60,9 @@ Không đổi K theo số lần gọi. Khoá mới khiến cổng ví có thể 
 | Timeout hoặc lỗi tạm thời | Chưa có kết quả dùng được của lần gọi | Retry nếu còn lượt, giữ K |
 | Hết lượt thử | Chưa thành công sau giới hạn | failed; chuyến vẫn cancelled |
 
-Timeout là trạng thái hiểu biết của bên chờ, không tự là bằng chứng không có giao dịch. Khi thiết kế vận hành thật cần làm rõ đối soát, phản hồi muộn và phục hồi, nhưng không tự bổ sung cách xử lý chưa có vào baseline lab.
+Timeout chỉ phản ánh điều bên chờ biết được, không tự là bằng chứng không có giao dịch. Khi thiết kế vận hành thật cần làm rõ đối soát, phản hồi muộn và phục hồi, nhưng không tự bổ sung cách xử lý chưa có vào baseline lab.
 
-## 5. Bàn giao sau lỗi cần owner và dữ liệu
+## 5. Bàn giao sau lỗi cần người phụ trách và dữ liệu
 
 Đề xuất bản ghi xử lý sau có thể gồm mã chuyến, số tiền, khoá nghiệp vụ, kết quả từng lần và nguồn đối soát. Quyền xem và thời hạn lưu cần được chốt theo bối cảnh; bài chỉ dùng dữ liệu giả.
 

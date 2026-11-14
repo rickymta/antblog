@@ -1,0 +1,8 @@
+{"file":"ba-traceability-muc-tieu-yeu-cau-test.md","edits":[
+{"old":"Các test UAT dưới đây mới là ca đề xuất.","new":"Các test UAT dưới đây mới là test case đề xuất.","reason":"Thống nhất test case","severity":"medium"},
+{"old":"| Nhu cầu/giả thuyết | Yêu cầu P04 | Ví dụ kiểm đề xuất | Trạng thái |","new":"| Nhu cầu/giả thuyết | Yêu cầu P04 | Ví dụ kiểm thử đề xuất | Trạng thái |","reason":"Ví dụ kiểm cụt, thiếu chữ","severity":"low"},
+{"old":"yêu cầu kiểm revision chưa có ca kiểm chứng là lỗ hổng coverage","new":"yêu cầu kiểm tra revision chưa có test case kiểm chứng là lỗ hổng coverage","reason":"Thiếu chữ tra; thống nhất test case","severity":"medium"},
+{"old":"Ngoài ra kiểm chiều sâu:","new":"Ngoài ra cần kiểm tra chiều sâu:","reason":"Câu thiếu động từ, kiểm cụt","severity":"medium"},
+{"old":"Tạo hai ca: response mất","new":"Tạo hai test case: response mất","reason":"Thống nhất test case","severity":"medium"},
+{"old":"Cả hai ca đều có thể trông giống timeout","new":"Cả hai test case đều có thể trông giống timeout","reason":"Thống nhất test case","severity":"medium"}
+]}

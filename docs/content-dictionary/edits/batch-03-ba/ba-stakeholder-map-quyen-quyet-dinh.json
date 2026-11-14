@@ -1,0 +1,71 @@
+{
+ "file": "ba-stakeholder-map-quyen-quyet-dinh.md",
+ "edits": [
+  {
+   "old": "bằng cuộc họp với PO, vận hành và Tech Lead.",
+   "new": "bằng cuộc họp với PO, bộ phận vận hành và Tech Lead.",
+   "reason": "Thiếu chủ thể khi nhắc bộ phận",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó còn giúp phát hiện tiếng nói dễ bị bỏ qua",
+   "new": "Stakeholder map còn giúp phát hiện tiếng nói dễ bị bỏ qua",
+   "reason": "Tránh 'Nó' chỉ khái niệm trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "giúp BA biết cần học từ ai, ai chịu ảnh hưởng",
+   "new": "giúp BA biết cần tìm hiểu từ ai, ai chịu ảnh hưởng",
+   "reason": "'học từ ai' là calque 'learn from'",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa duyệt chat hoặc pilot.",
+   "new": "chat hoặc pilot chưa được duyệt.",
+   "reason": "Trật tự từ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nhưng không được dùng nó để loại nhóm",
+   "new": "nhưng không được dùng ma trận này để loại nhóm",
+   "reason": "Tránh 'nó' trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Không cần giao mọi thuộc tính thành hàng chục ô tuyển người không khả thi.",
+   "new": "Không cần kết hợp mọi thuộc tính để tạo ra hàng chục ô tuyển người không khả thi.",
+   "reason": "'giao' dịch sai từ 'cross'; câu khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "đổi kết luận, ghi nhóm chưa tiếp cận được.",
+   "new": "đổi kết luận, và ghi lại nhóm chưa tiếp cận được.",
+   "reason": "Câu nối cụt",
+   "severity": "low"
+  },
+  {
+   "old": "| Có nối ticket với lượt được không? |",
+   "new": "| Có thể nối ticket với lượt không? |",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "Walkthrough quy trình, kiểm mẫu",
+   "new": "Walkthrough quy trình, kiểm tra mẫu",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "“Nhờ vận hành mời giúp” cần kèm",
+   "new": "“Nhờ bộ phận vận hành mời giúp” cần kèm",
+   "reason": "Thiếu chủ thể khi nhắc bộ phận",
+   "severity": "medium"
+  },
+  {
+   "old": "hữu ích hơn gửi toàn bộ hồ sơ",
+   "new": "hữu ích hơn việc gửi toàn bộ hồ sơ",
+   "reason": "Thiếu danh từ hoá",
+   "severity": "low"
+  }
+ ]
+}

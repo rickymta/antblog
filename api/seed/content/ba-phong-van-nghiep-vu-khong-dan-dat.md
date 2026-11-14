@@ -1,7 +1,7 @@
 ---
 slug: ba-phong-van-nghiep-vu-khong-dan-dat
 title: "Phỏng vấn nghiệp vụ: hỏi để hiểu thay vì dẫn dắt"
-summary: "Soạn interview guide cho tình huống điểm đón, hỏi về sự kiện thực tế, xử lý lời kể chưa rõ và ghi chép phân biệt phát ngôn, diễn giải với giả thuyết của BA."
+summary: "Soạn interview guide cho tình huống điểm đón, hỏi về sự kiện thực tế, xử lý lời kể chưa rõ và ghi chép tách riêng phát ngôn, diễn giải và giả thuyết của BA."
 category: business-analysis
 level: beginner
 tags: [business-analysis, ba-010, interview, elicitation, toi-noi]
@@ -14,12 +14,12 @@ Phỏng vấn có ích khi giúp hiểu trải nghiệm, cách làm và điều 
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">BA-010 · Phần 2/8 · Cơ bản</span>
-<p>Đọc trước: <a href="/articles/ba-stakeholder-map-quyen-quyet-dinh">Stakeholder map</a>. Đầu ra: interview guide và ghi chép một phiên giả lập. Sau bài này, bạn có thể hỏi về tình huống cụ thể, truy vấn sâu mà không gợi đáp án và giữ dấu vết nguồn.</p>
+<p>Đọc trước: <a href="/articles/ba-stakeholder-map-quyen-quyet-dinh">Stakeholder map</a>. Đầu ra: interview guide và ghi chép một phiên giả lập. Sau bài này, bạn có thể hỏi về tình huống cụ thể, hỏi đào sâu mà không gợi đáp án và giữ dấu vết nguồn.</p>
 </div>
 
-## 1. Research question khác câu hỏi hỏi người tham gia
+## 1. Research question khác với câu hỏi dành cho người tham gia
 
-Nhóm cần trả lời RQ-02: “Thông tin điểm đón được tạo, truyền và nhận biết ở bước nào?” Đây là câu hỏi nghiên cứu, không nhất thiết đọc nguyên văn cho khách. Khách có thể kể lần đặt xe gần nhất; BA nối các chi tiết thành hiểu biết về luồng thông tin.
+Nhóm cần trả lời RQ-02: “Thông tin điểm đón được tạo, truyền và nhận biết ở bước nào?” Đây là câu hỏi nghiên cứu, không nhất thiết đọc nguyên văn cho khách. Khách có thể kể lần đặt xe gần nhất; BA nối các chi tiết để hiểu luồng thông tin.
 
 | Cần hiểu | Câu hỏi có thể hỏi |
 |---|---|
@@ -83,9 +83,9 @@ Cuối phiên, nói lại ngắn gọn: “Mình hiểu lần đó bạn đã nh
 
 ## 6. Xử lý khi người tham gia không nhớ hoặc nói rất chung
 
-Nếu người tham gia nói “lần nào cũng thế”, hãy xin một ví dụ gần đây và một trường hợp khác thuận lợi hơn. Nếu không nhớ, ghi không nhớ. Không ép người đó đoán thời gian hoặc số lần để đủ ô biểu mẫu.
+Nếu người tham gia nói “lần nào cũng thế”, hãy xin một ví dụ gần đây và một trường hợp khác thuận lợi hơn. Nếu không nhớ, ghi không nhớ. Không ép người đó đoán thời gian hoặc số lần để điền đủ ô biểu mẫu.
 
-Nếu họ chỉ muốn đề xuất chat, ghi nhận ý tưởng rồi hỏi trải nghiệm khiến họ nghĩ tới nó. Lời đề xuất là dữ liệu về nhu cầu cảm nhận, nhưng cần thêm sự kiện để hiểu bài toán. BA không cần tranh luận tính năng ngay trong phiên học từ người dùng.
+Nếu họ chỉ muốn đề xuất chat, ghi nhận ý tưởng rồi hỏi về trải nghiệm đã khiến họ nghĩ tới ý tưởng đó. Lời đề xuất là dữ liệu về nhu cầu cảm nhận, nhưng cần thêm sự kiện để hiểu bài toán. BA không cần tranh luận tính năng ngay trong phiên học từ người dùng.
 
 ## 7. Bài tập và câu hỏi ôn tập
 

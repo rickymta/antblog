@@ -1,0 +1,71 @@
+{
+ "file": "ba-story-mapping-lat-cat-gia-tri.md",
+ "edits": [
+  {
+   "old": "nhìn phần giá trị được hoàn thành qua toàn hành trình.",
+   "new": "nhìn thấy phần giá trị được hoàn thành xuyên suốt hành trình.",
+   "reason": "Giọng dịch 'across the journey'",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó giúp hỏi liệu phạm vi dự định có kết thúc",
+   "new": "Story map giúp đặt câu hỏi liệu phạm vi dự định có kết thúc",
+   "reason": "Tránh 'Nó' trừu tượng; 'giúp hỏi' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Với P04, chỉ ghi khi searching là một giới hạn rõ. Nó giảm vấn đề phối hợp sau nhận chuyến nhưng",
+   "new": "Với P04, chỉ cho phép ghi khi chuyến đang searching là một giới hạn rõ. Giới hạn này giảm vấn đề phối hợp sau khi nhận chuyến nhưng",
+   "reason": "Câu thiếu động từ, 'Nó' trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nếu thiếu kiểm revision khiến khách xác nhận dữ liệu cũ.",
+   "new": "nếu việc thiếu kiểm revision khiến khách xác nhận dữ liệu cũ.",
+   "reason": "Thiếu danh từ hoá làm câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Chưa có điểm đón trong lab nên không ước lượng như chỉ thêm một nút.",
+   "new": "Lab chưa có điểm đón nên không thể ước lượng như thể chỉ thêm một nút.",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "dữ liệu chuẩn, quyền, version và hợp đồng",
+   "new": "dữ liệu chuẩn, quyền, phiên bản và hợp đồng",
+   "reason": "'version' trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "## 5. Đặt tiêu chí ra khỏi một lát cắt",
+   "new": "## 5. Đặt tiêu chí hoàn thành cho một lát cắt",
+   "reason": "'ra khỏi' là calque của 'exit criteria'",
+   "severity": "medium"
+  },
+  {
+   "old": "đo khả năng hiểu, adoption và kết quả theo mục tiêu; không dùng số story hoàn thành thay chỉ số sản phẩm.",
+   "new": "đo khả năng hiểu, mức độ sử dụng và kết quả theo mục tiêu; không lấy số story hoàn thành thay cho chỉ số sản phẩm.",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi; thiếu 'cho'",
+   "severity": "low"
+  },
+  {
+   "old": "Thẻ ở hàng trên không tự là Must.",
+   "new": "Thẻ ở hàng trên không mặc nhiên là Must.",
+   "reason": "'không tự là' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "mỗi lát có mục tiêu, scope out, phụ thuộc và ví dụ demo.",
+   "new": "mỗi lát có mục tiêu, phần nằm ngoài phạm vi, phụ thuộc và ví dụ demo.",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "**Câu hỏi:** API xong có được coi story khách hoàn thành không?",
+   "new": "**Câu hỏi:** Khi API xong, có được coi story của khách là hoàn thành không?",
+   "reason": "Câu thiếu cấu trúc",
+   "severity": "medium"
+  }
+ ]
+}

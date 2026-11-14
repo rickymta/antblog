@@ -1,0 +1,59 @@
+{
+ "file": "ba-pilot-ab-test-tuong-quan-tac-dong.md",
+ "edits": [
+  {
+   "old": "nhận diện tự chọn và ảnh hưởng chéo; đọc chênh lệch tỷ lệ với giới hạn",
+   "new": "nhận diện hiện tượng tự chọn và ảnh hưởng chéo; đọc chênh lệch tỷ lệ kèm giới hạn",
+   "reason": "Thiếu danh từ chính; 'với giới hạn' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Không dùng chính sự hoàn thành tính năng để chọn nhóm treatment sau khi kết quả đã bị ảnh hưởng.",
+   "new": "Không chọn nhóm treatment dựa trên việc đã hoàn thành các bước của tính năng, vì lúc đó kết quả đã bị ảnh hưởng.",
+   "reason": "Câu khó hiểu, lược danh từ",
+   "severity": "high"
+  },
+  {
+   "old": "Nó có thể cung cấp tín hiệu giá trị, nhưng không tự là thí nghiệm có đối chứng.",
+   "new": "Pilot có thể cung cấp tín hiệu có giá trị, nhưng bản thân pilot không phải là thí nghiệm có đối chứng.",
+   "reason": "Tránh 'Nó' chỉ sự vật; 'không tự là' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu đo theo trip, phải xét một khách có nhiều trip",
+   "new": "Nếu đo theo chuyến, phải xét việc một khách có nhiều chuyến",
+   "reason": "Thống nhất 'chuyến' trong bài",
+   "severity": "medium"
+  },
+  {
+   "old": "Randomize theo khách không tự loại ảnh hưởng chéo này.",
+   "new": "Phân nhóm ngẫu nhiên theo khách không tự loại bỏ ảnh hưởng chéo này.",
+   "reason": "Từ Anh có từ Việt tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "## 4. Chọn outcome không bị đổi mẫu số tuỳ tiện",
+   "new": "## 4. Chọn outcome sao cho mẫu số không bị đổi tuỳ tiện",
+   "reason": "Tiêu đề trật tự gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "cho mục đích so vận hành nhưng phải",
+   "new": "cho mục đích so sánh vận hành nhưng phải",
+   "reason": "Lược động từ 'so sánh'",
+   "severity": "medium"
+  },
+  {
+   "old": "Cần thời gian bao phủ chu kỳ hành vi và độ trễ outcome.",
+   "new": "Thời gian chạy cần bao phủ chu kỳ hành vi và độ trễ của outcome.",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Kết quả chưa phân biệt được với không hiệu ứng không chứng minh chắc chắn tính năng vô dụng.",
+   "new": "Kết quả chưa phân biệt được với trường hợp không có hiệu ứng thì không chứng minh chắc chắn rằng tính năng vô dụng.",
+   "reason": "Hai vị ngữ chồng nhau, khó đọc",
+   "severity": "medium"
+  }
+ ]
+}

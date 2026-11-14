@@ -1,7 +1,7 @@
 ---
 slug: ba-business-rule-chinh-sach-nghiep-vu
 title: "Business rule: tách chính sách khỏi màn hình"
-summary: "Viết quy tắc nghiệp vụ có nguồn, phạm vi, điều kiện biên và version. Dùng phí huỷ Tới Nơi để phân biệt chính sách, quy trình và cách thể hiện trên giao diện."
+summary: "Viết quy tắc nghiệp vụ có nguồn, phạm vi, điều kiện biên và phiên bản. Dùng phí huỷ Tới Nơi để phân biệt chính sách, quy trình và cách thể hiện trên giao diện."
 category: business-analysis
 level: beginner
 tags: [business-analysis, ba-019, business-rule, cancellation, toi-noi]
@@ -10,7 +10,7 @@ language: vi
 
 Thiết kế ghi “hiện cảnh báo phí sau hai phút”. Developer hỏi: hai phút tính từ lúc đặt hay lúc tài xế nhận? Tester hỏi: đúng hai phút có phí chưa? CSKH hỏi: tài xế đến trễ thì sao? Một câu về màn hình chưa đủ để cả nhóm thực hiện cùng một chính sách.
 
-Business rule cần diễn đạt quyết định nghiệp vụ độc lập với vị trí nút hoặc màu thông báo. Giao diện trình bày và hỗ trợ người dùng hiểu rule; nó không phải nguồn duy nhất định nghĩa rule.
+Business rule cần diễn đạt quyết định nghiệp vụ độc lập với vị trí nút hoặc màu thông báo. Giao diện trình bày và hỗ trợ người dùng hiểu rule; giao diện không phải nguồn duy nhất định nghĩa rule.
 
 <div class="tkh-callout"><span class="tkh-callout-title">BA-019 · Phần 3/8 · Cơ bản</span><p>Đọc trước: <a href="/articles/ba-bpmn-task-event-gateway-lane">BPMN cơ bản</a>. Đầu ra: rule catalog có nguồn và ví dụ biên. Bài dùng R-CANCEL của SPEC lab làm baseline, không đề xuất đổi mức phí hiện hành.</p></div>
 
@@ -32,7 +32,7 @@ Thay vì “huỷ sớm miễn phí”, viết rõ phạm vi và điều kiện:
 
 Đây là cách diễn giải R-CANCEL-01/02. Điều kiện hợp lệ rất quan trọng: chuyến picked_up không được khách huỷ theo baseline; không thể dùng điều kiện thời gian để vượt qua giới hạn trạng thái.
 
-Một rule đơn lẻ cũng chưa là toàn bộ quyết định. Ở accepted từ hai phút hoặc arriving, phải xét R-CANCEL-04: khi `now > acceptedAt + etaMinutes + 10 phút` thì miễn do trễ. Đúng bằng mốc trễ chưa đủ điều kiện miễn này.
+Một rule đơn lẻ cũng chưa phải toàn bộ quyết định. Ở accepted từ hai phút hoặc arriving, phải xét R-CANCEL-04: khi `now > acceptedAt + etaMinutes + 10 phút` thì miễn do trễ. Đúng bằng mốc trễ chưa đủ điều kiện miễn này.
 
 ## 3. Rule catalog cho ca huỷ
 
@@ -63,15 +63,15 @@ Ví dụ không thay thế định nghĩa. Nếu chỉ cho bốn dòng ví dụ,
 
 Nếu accepted nhưng acceptedAt bị thiếu, nhóm không biết đã qua hai phút hay chưa. Không được tự coi là 0 đ hoặc lấy thời điểm tạo chuyến thay vào mà không có quyết định nghiệp vụ.
 
-Ghi đây là dữ liệu bất thường và câu hỏi xử lý: từ chối, đối soát, chuyển hỗ trợ hay cơ chế khác? Mỗi phương án có ảnh hưởng khác. Bài không bổ sung hành vi mới cho lab; mục tiêu là phát hiện lỗ hổng cần được quyết định thay vì để từng nơi tự đoán.
+Ghi lại rằng đây là dữ liệu bất thường, kèm câu hỏi về cách xử lý: từ chối, đối soát, chuyển hỗ trợ hay cơ chế khác? Mỗi phương án có ảnh hưởng khác. Bài không bổ sung hành vi mới cho lab; mục tiêu là phát hiện lỗ hổng cần được quyết định thay vì để từng nơi tự đoán.
 
 Tương tự, một ETA được cập nhật trên giao diện không tự là ETA dùng cho rule. Cần định nghĩa nguồn và thời điểm chốt dữ liệu nếu hệ thống phát triển vượt baseline.
 
-## 6. Quản lý thay đổi bằng version
+## 6. Quản lý thay đổi bằng phiên bản
 
 CR-BA-01 trong hồ sơ P03 đề xuất đổi khoảng miễn ở accepted từ dưới hai phút sang dưới ba phút. Giữ rule hiện tại làm baseline, ghi đề xuất riêng. Điều này chưa đổi arriving, ngưỡng trễ hay quyền huỷ.
 
-Trước khi duyệt, cần xác định chuyến đang chạy theo version nào, nhận lại tài xế có đổi version không, nội dung thông báo và cách xử lý yêu cầu gửi lại. Sửa con số trong một tài liệu mà không nối các nơi phụ thuộc sẽ tạo ra hai chính sách cùng tồn tại ngoài ý muốn.
+Trước khi duyệt, cần xác định chuyến đang chạy theo phiên bản nào, khi chuyến được tài xế khác nhận lại thì có đổi phiên bản không, nội dung thông báo và cách xử lý yêu cầu gửi lại. Sửa con số trong một tài liệu mà không nối các nơi phụ thuộc sẽ tạo ra hai chính sách cùng tồn tại ngoài ý muốn.
 
 ## 7. Bài tập và câu hỏi ôn tập
 
@@ -79,7 +79,7 @@ Viết rule đề xuất ba phút theo mẫu: ID riêng, nguồn yêu cầu, ph�
 
 **Câu hỏi:** Một yêu cầu khách huỷ không hợp lệ có nên trả phí 0 không?
 
-<details><summary>Gợi ý trả lời</summary><p>Không nên dùng 0 để biểu diễn từ chối. Phí 0 là kết quả của một quyết định phí trong phạm vi phù hợp; từ chối nghĩa là không thực hiện huỷ. Hai outcome dẫn tới hành vi khác nhau.</p></details>
+<details><summary>Gợi ý trả lời</summary><p>Không nên dùng 0 để biểu diễn từ chối. Phí 0 là kết quả của một quyết định phí trong phạm vi phù hợp; từ chối nghĩa là không thực hiện huỷ. Hai kết quả này dẫn tới hành vi khác nhau.</p></details>
 
 ## 8. Tham khảo và bài tiếp theo
 

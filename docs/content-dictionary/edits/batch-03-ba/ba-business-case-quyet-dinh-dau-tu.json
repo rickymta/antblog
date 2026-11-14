@@ -1,0 +1,29 @@
+{
+"file": "ba-business-case-quyet-dinh-dau-tu.md",
+"edits": [
+{
+"old": "Tăng chi phí trước khi biết effect",
+"new": "Tăng chi phí trước khi biết tác động",
+"reason": "effect -> tác động",
+"severity": "medium"
+},
+{
+"old": "Nếu thời gian CS được giải phóng",
+"new": "Nếu thời gian của CSKH được giải phóng",
+"reason": "CS chưa định nghĩa; các bài khác dùng CSKH",
+"severity": "medium"
+},
+{
+"old": "Gán người theo dõi metric,",
+"new": "Chỉ định người theo dõi metric,",
+"reason": "'Gán người' gượng",
+"severity": "medium"
+},
+{
+"old": "Năng lực giải phóng là 1.000 phút",
+"new": "Năng lực được giải phóng là 1.000 phút",
+"reason": "Thiếu 'được'",
+"severity": "low"
+}
+]
+}

@@ -8,13 +8,13 @@ tags: [business-analysis, ba-009, stakeholder, discovery, toi-noi]
 language: vi
 ---
 
-Nhóm bắt đầu discovery bằng cuộc họp với PO, vận hành và Tech Lead. Sau một giờ, mọi người thống nhất khách cần nhập ghi chú rõ hơn. Nhưng chưa ai hỏi khách khó mô tả cổng ở đâu, hay tài xế nhìn thông tin vào thời điểm nào. Một phòng họp đủ người có chức danh chưa chắc đã đủ góc nhìn.
+Nhóm bắt đầu discovery bằng cuộc họp với PO, bộ phận vận hành và Tech Lead. Sau một giờ, mọi người thống nhất khách cần nhập ghi chú rõ hơn. Nhưng chưa ai hỏi khách khó mô tả cổng ở đâu, hay tài xế nhìn thông tin vào thời điểm nào. Một phòng họp đủ người có chức danh chưa chắc đã đủ góc nhìn.
 
-Stakeholder map giúp BA biết cần học từ ai, ai chịu ảnh hưởng và ai quyết định. Nó còn giúp phát hiện tiếng nói dễ bị bỏ qua trước khi giải pháp trở thành cam kết.
+Stakeholder map giúp BA biết cần tìm hiểu từ ai, ai chịu ảnh hưởng và ai quyết định. Stakeholder map còn giúp phát hiện tiếng nói dễ bị bỏ qua trước khi giải pháp trở thành cam kết.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">BA-009 · Phần 2/8 · Cơ bản</span>
-<p>Đọc trước: <a href="/articles/ba-thuc-hanh-de-xuat-cai-thien-diem-don">Thực hành phần 1</a>. Đầu ra: stakeholder map và kế hoạch tham gia. Phần 2 giả định discovery một tuần đã được chấp thuận trong bài tập; chưa duyệt chat hoặc pilot. Tất cả nhân vật và dữ liệu đều hư cấu.</p>
+<p>Đọc trước: <a href="/articles/ba-thuc-hanh-de-xuat-cai-thien-diem-don">Thực hành phần 1</a>. Đầu ra: stakeholder map và kế hoạch tham gia. Phần 2 giả định discovery một tuần đã được chấp thuận trong bài tập; chat hoặc pilot chưa được duyệt. Tất cả nhân vật và dữ liệu đều hư cấu.</p>
 </div>
 
 ## 1. Bắt đầu từ thay đổi, không bắt đầu từ sơ đồ tổ chức
@@ -36,7 +36,7 @@ Với điểm đón, hãy lần theo hành trình: ai nhập thông tin, ai nh�
 
 PO có quyền ưu tiên nhưng không thể thay lời mọi tài xế. Tài xế có trải nghiệm trực tiếp nhưng không tự duyệt ngân sách. Nhóm dữ liệu biết cách truy vấn nhưng cần nghiệp vụ xác nhận ý nghĩa của sự kiện huỷ.
 
-Có thể dùng ma trận ảnh hưởng–mức quan tâm để chuẩn bị trao đổi, nhưng không được dùng nó để loại nhóm ít quyền lực mà chịu tác động lớn. Bản đồ cần thêm mức ảnh hưởng của thay đổi lên mỗi nhóm và kiến thức họ mang tới.
+Có thể dùng ma trận ảnh hưởng–mức quan tâm để chuẩn bị trao đổi, nhưng không được dùng ma trận này để loại nhóm ít quyền lực mà chịu tác động lớn. Bản đồ cần thêm mức ảnh hưởng của thay đổi lên mỗi nhóm và kiến thức họ mang tới.
 
 | Stakeholder | Quyền quyết định cần xác nhận | Tác động dự kiến | Kiến thức cần học |
 |---|---|---|---|
@@ -50,7 +50,7 @@ Các mức trên là giả định ban đầu để lập kế hoạch, phải c
 
 Nếu chỉ mời khách đã gọi CSKH, nhóm dễ bỏ sót người tự xử lý hoặc bỏ cuộc không gọi. Nếu chỉ hỏi tài xế quen khu vực, nhóm có thể đánh giá thấp khó khăn với tên cổng. Nếu chỉ gặp trưởng ca, BA có thể nghe quy trình mong muốn thay vì cách nhân viên đang làm.
 
-Chia nhóm theo khác biệt có liên quan tới câu hỏi nghiên cứu: quen/lạ địa điểm, nhiều/một cổng, ca đón thuận lợi/có khó khăn, đã/chưa dùng hỗ trợ. Không cần giao mọi thuộc tính thành hàng chục ô tuyển người không khả thi. Ưu tiên các khác biệt có thể làm đổi kết luận, ghi nhóm chưa tiếp cận được.
+Chia nhóm theo khác biệt có liên quan tới câu hỏi nghiên cứu: quen/lạ địa điểm, nhiều/một cổng, ca đón thuận lợi/có khó khăn, đã/chưa dùng hỗ trợ. Không cần kết hợp mọi thuộc tính để tạo ra hàng chục ô tuyển người không khả thi. Ưu tiên các khác biệt có thể làm đổi kết luận, và ghi lại nhóm chưa tiếp cận được.
 
 Trong hồ sơ P02, INT-01 là lời kể một khách và INT-02 là lời kể một tài xế **ở ca khác**. Hai nguồn này giúp mở câu hỏi, không đại diện hai phía của cùng một sự kiện.
 
@@ -60,16 +60,16 @@ Trong hồ sơ P02, INT-01 là lời kể một khách và INT-02 là lời kể
 |---|---|---|---|
 | Khách xác định cổng thế nào? | Khách quen và chưa quen địa điểm | Phỏng vấn tình huống gần đây, quan sát | Từ ngữ thực tế, bước gây lúng túng |
 | Thông tin đến tài xế lúc nào? | Tài xế có trải nghiệm khác nhau | Quan sát khi đã dừng, hỏi lại sau thao tác | Dòng thời gian và điều kiện sử dụng |
-| Có nối ticket với lượt được không? | CSKH và phụ trách dữ liệu | Walkthrough quy trình, kiểm mẫu | Quy tắc liên kết và giới hạn |
+| Có thể nối ticket với lượt không? | CSKH và phụ trách dữ liệu | Walkthrough quy trình, kiểm tra mẫu | Quy tắc liên kết và giới hạn |
 | Ai chốt phương án? | PO và người được uỷ quyền liên quan | Review quyết định cuối tuần | Decision log có thẩm quyền |
 
-Ghi thêm người tổ chức, thời gian thoả thuận và phương án khi nhóm quan trọng không tham gia. “Nhờ vận hành mời giúp” cần kèm tiêu chí tuyển để tránh chỉ gặp người thuận tiện hoặc thân quen.
+Ghi thêm người tổ chức, thời gian thoả thuận và phương án khi nhóm quan trọng không tham gia. “Nhờ bộ phận vận hành mời giúp” cần kèm tiêu chí tuyển để tránh chỉ gặp người thuận tiện hoặc thân quen.
 
 ## 5. Xác nhận kết quả khác với phê duyệt giải pháp
 
 Khách xác nhận “BA đã ghi đúng điều tôi kể” không đồng nghĩa khách phê duyệt yêu cầu hệ thống. Trưởng CSKH xác nhận luồng xử lý không tự cấp quyền xem mọi dữ liệu. Mỗi lần xin phản hồi cần nêu rõ đang xác nhận sự kiện, cách diễn giải hay quyết định.
 
-[IIBA nhấn mạnh việc xác nhận kết quả sớm và dùng hình thức phù hợp với stakeholder](https://www.iiba.org/professional-development/knowledge-centre/articles/engaging-stakeholders-in-elicitation-and-collaboration/). Với P02, một đoạn tóm tắt ngắn kèm câu hỏi cụ thể hữu ích hơn gửi toàn bộ hồ sơ rồi hỏi “anh/chị duyệt nhé”. Không có phản hồi vẫn là chờ xác nhận.
+[IIBA nhấn mạnh việc xác nhận kết quả sớm và dùng hình thức phù hợp với stakeholder](https://www.iiba.org/professional-development/knowledge-centre/articles/engaging-stakeholders-in-elicitation-and-collaboration/). Với P02, một đoạn tóm tắt ngắn kèm câu hỏi cụ thể hữu ích hơn việc gửi toàn bộ hồ sơ rồi hỏi “anh/chị duyệt nhé”. Không có phản hồi vẫn là chờ xác nhận.
 
 ## 6. Những lỗi cần tránh
 

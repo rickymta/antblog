@@ -1,0 +1,59 @@
+{
+ "file": "ba-moscow-uu-tien-theo-muc-tieu.md",
+ "edits": [
+  {
+   "old": "không phải ra mắt mọi kênh liên lạc",
+   "new": "không nhằm ra mắt mọi kênh liên lạc",
+   "reason": "'không phải ra mắt' gượng, lệch nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "Won't have this time ghi rõ ngoài đợt này; không đồng nghĩa cam kết chắc chắn làm ở đợt sau.",
+   "new": "Won't have this time ghi rõ là nằm ngoài đợt này, và không đồng nghĩa với cam kết chắc chắn làm ở đợt sau.",
+   "reason": "Lược từ nối, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Sai quyền làm pilot không thể chấp nhận",
+   "new": "Sai quyền thì pilot không thể chấp nhận",
+   "reason": "Câu gượng, thiếu quan hệ điều kiện",
+   "severity": "medium"
+  },
+  {
+   "old": "Chưa có bằng chứng và vượt lát cắt",
+   "new": "Chưa có bằng chứng và nằm ngoài lát cắt của đợt này",
+   "reason": "Thiếu động từ, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "CS sẽ xử lý thủ công” chỉ là workaround khi CS thực sự có",
+   "new": "CSKH sẽ xử lý thủ công” chỉ là workaround khi CSKH thực sự có",
+   "reason": "'CS' chưa định nghĩa; các bài BA khác dùng CSKH",
+   "severity": "medium"
+  },
+  {
+   "old": "Không lặng lẽ đổi nhãn để bảng cân đối.",
+   "new": "Không lặng lẽ đổi nhãn để bảng trông cân đối.",
+   "reason": "Thiếu động từ, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "mà thiếu đánh giá tác động.",
+   "new": "mà không có đánh giá tác động.",
+   "reason": "Giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Viết câu hỏi để kiểm lý do và bằng chứng nào khiến bạn đổi ưu tiên.",
+   "new": "Viết câu hỏi để kiểm tra lý do ấy, và nêu bằng chứng nào sẽ khiến bạn đổi ưu tiên.",
+   "reason": "Câu thiếu động từ cho vế sau, 'kiểm lý do' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Hỏi nếu không có mẫu thì người dùng có thể xác nhận đúng không,",
+   "new": "Hỏi xem nếu không có mẫu thì người dùng có xác nhận đúng được không,",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "low"
+  }
+ ]
+}

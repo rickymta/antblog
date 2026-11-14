@@ -22,7 +22,7 @@ Chưa đủ bằng chứng để chọn một nguyên nhân. Quan sát và đọ
 | Nguồn | Giúp hiểu | Không tự chứng minh |
 |---|---|---|
 | Phỏng vấn | Cách người tham gia nhớ, giải thích và đánh giá sự việc | Hành vi chính xác trong mọi lần sử dụng |
-| Quan sát | Hành động và điều kiện nhìn thấy trong phiên | Mức phổ biến toàn bộ người dùng hoặc ý nghĩ bên trong |
+| Quan sát | Hành động và điều kiện nhìn thấy trong phiên | Mức độ phổ biến trong toàn bộ người dùng hoặc ý nghĩ bên trong |
 | Tài liệu | Quy tắc, thiết kế, hướng dẫn đã được ghi lại | Phiên bản đang chạy hoặc mức tuân thủ thực tế |
 
 [Hướng dẫn contextual research của GOV.UK](https://www.gov.uk/service-manual/user-research/contextual-research-and-observation) nhấn mạnh việc hiểu cách người dùng làm việc trong bối cảnh thực tế. Trong bài này, các phiên quan sát đều được mô phỏng; thực hành nhằm học cách ghi bằng chứng và giới hạn của nó.
@@ -33,7 +33,7 @@ RQ-02 hỏi thông tin điểm đón được nhận biết lúc nào. Với tà
 
 Phân biệt quan sát hoạt động tự nhiên với giao một nhiệm vụ thử nghiệm. Nếu BA nói “hãy tìm ghi chú”, phiên đó cho thấy khả năng tìm khi được yêu cầu, chưa cho biết tài xế có tự nhận ra cần tìm hay không. Ghi mọi lời nhắc vì chúng có thể làm thay đổi hành vi.
 
-Thông báo cách ghi nhận, người có thể xem và quyền dừng phiên. Chỉ thu thông tin cần cho câu hỏi; dùng dữ liệu giả cho bài tập. Ghi hạn chế như môi trường mô phỏng hoặc sự hiện diện của người quan sát.
+Thông báo cách ghi nhận, người có thể xem và quyền dừng phiên. Chỉ thu thông tin cần cho câu hỏi; dùng dữ liệu giả cho bài tập. Ghi lại các hạn chế như môi trường mô phỏng hoặc sự hiện diện của người quan sát.
 
 ## 3. Observation log: mô tả trước, diễn giải sau
 
@@ -47,7 +47,7 @@ Nguồn OBS-01 trong hồ sơ P02: ở C-02, khi xe đã dừng, D-02 mở chi t
 | Nội dung thấy được | “Cổng số 2” xuất hiện trong phần chi tiết |
 | Diễn giải có thể | Ghi chú cần thêm thao tác để nhận biết trong phiên này |
 | Điều chưa biết | Có lời nhắc không; phiên bản; hành vi lúc không bị quan sát; dữ liệu C-01 |
-| Câu hỏi tiếp | Ghi chú có được nhận biết đúng lúc trong các ca khác? |
+| Câu hỏi tiếp | Ghi chú có được nhận biết đúng lúc trong các trường hợp khác? |
 
 Không ghi “tài xế lười đọc” vào cột quan sát. Đó là phán xét, không phải hành động nhìn thấy. Nếu chưa ghi thời lượng, không bổ sung một con số ước đoán rồi dùng làm chỉ số hiệu năng.
 
@@ -57,10 +57,10 @@ Document register cho hồ sơ P02 có thể bắt đầu như sau:
 
 | ID | Tài liệu | Thông tin có thể dùng | Điều cần xác nhận |
 |---|---|---|---|
-| DOC-01 | Hướng dẫn hỗ trợ v0.8 | Có yêu cầu ghi ID lượt vào ticket | Owner, ngày hiệu lực, đối tượng áp dụng, ngoại lệ |
+| DOC-01 | Hướng dẫn hỗ trợ v0.8 | Có yêu cầu ghi ID lượt vào ticket | Người phụ trách, ngày hiệu lực, đối tượng áp dụng, ngoại lệ |
 | DOC-02 | Bản thiết kế màn hình chi tiết | Có vùng ghi chú trong thiết kế | Phiên bản triển khai, điều kiện hiển thị, mapping dữ liệu |
 
-Đọc tài liệu để tìm từ ngữ nghiệp vụ, luồng, ngoại lệ và yêu cầu liên quan; ghi tham chiếu mục/đoạn để người khác kiểm tra. Thiếu owner hoặc ngày hiệu lực thì đánh dấu chưa xác nhận, không tự coi tài liệu là baseline.
+Đọc tài liệu để tìm từ ngữ nghiệp vụ, luồng, ngoại lệ và yêu cầu liên quan; ghi tham chiếu mục/đoạn để người khác kiểm tra. Thiếu người phụ trách hoặc ngày hiệu lực thì đánh dấu chưa xác nhận, không tự coi tài liệu là baseline.
 
 Trong dự án thật, tài liệu còn có thể là mẫu biểu, ticket, biên bản và hợp đồng API. Chúng không có cùng thẩm quyền. Một comment trên ticket là manh mối khác với quyết định chính sách được người có quyền chốt.
 
@@ -70,8 +70,8 @@ DOC-01 và DATA-01 cho thấy khoảng cách giữa nội dung hướng dẫn v�
 
 | Chênh lệch | Câu hỏi kiểm tra | Người phối hợp đề xuất |
 |---|---|---|
-| Hướng dẫn đòi ID, mẫu có record thiếu | Ticket tạo lúc nào, thuộc loại nào, hướng dẫn có hiệu lực khi đó không? | CSKH và owner tài liệu |
-| Thiết kế có ghi chú, khách nói tài xế tới khác cổng | Dữ liệu và phiên bản trong cùng ca có thể kiểm tra không? | Developer, UX, phụ trách dữ liệu |
+| Hướng dẫn đòi ID, mẫu có record thiếu | Ticket tạo lúc nào, thuộc loại nào, hướng dẫn có hiệu lực khi đó không? | CSKH và người phụ trách tài liệu |
+| Thiết kế có ghi chú, khách nói tài xế tới khác cổng | Dữ liệu và phiên bản trong cùng trường hợp có thể kiểm tra không? | Developer, UX, phụ trách dữ liệu |
 | Nhân viên nói tìm bằng số điện thoại | Khi nào cần cách này, quyền và luồng được duyệt là gì? | CSKH và người quản lý truy cập |
 
 8/20 = 40% **trong mẫu đã chọn**, không phải 40% của tất cả ticket. Mẫu này cũng độc lập với 80 cuộc gọi của P01, nên không dùng phép nhân 80 × 40% để suy ra 32 cuộc gọi thiếu ID.
@@ -86,11 +86,11 @@ Phát hiện nên kèm nguồn, phạm vi, tác động tới quyết định v�
 
 Từ OBS-02, viết một observation log: khách K-02 nhìn biển và nói không biết tên cổng tương ứng trong app. Tách phần nhìn thấy, lời nói và giả thuyết. Thêm hai câu hỏi xác minh mà không tự kết luận bản đồ sai.
 
-Sau đó lập ba mục cần xác nhận cho DOC-01. Bài làm đạt yêu cầu khi nêu hiệu lực, phạm vi/ngoại lệ và owner, đồng thời giữ nguyên hạn chế chọn mẫu của DATA-01.
+Sau đó lập ba mục cần xác nhận cho DOC-01. Bài làm đạt yêu cầu khi nêu hiệu lực, phạm vi/ngoại lệ và người phụ trách, đồng thời giữ nguyên hạn chế chọn mẫu của DATA-01.
 
 **Câu hỏi:** OBS-01 có bác bỏ INT-01 không?
 
-<details><summary>Gợi ý trả lời</summary><p>Không. Chúng là hai ca khác nhau. Một phiên đọc được ghi chú không chứng minh khách C-01 gửi đúng hoặc tài xế C-01 đã nhận và hiểu thông tin đó.</p></details>
+<details><summary>Gợi ý trả lời</summary><p>Không. Chúng là hai trường hợp khác nhau. Một phiên đọc được ghi chú không chứng minh khách C-01 gửi đúng hoặc tài xế C-01 đã nhận và hiểu thông tin đó.</p></details>
 
 ## 8. Tham khảo và bài tiếp theo
 

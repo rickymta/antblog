@@ -8,17 +8,17 @@ tags: [business-analysis, ba-061, facilitation, communication, toi-noi]
 language: vi
 ---
 
-PO muốn biết có mở rộng không, CS lo số ca hỗ trợ, kỹ thuật muốn biết phải sửa gì. BA không cần ba phiên bản sự thật; cần một bộ bằng chứng với cách trình bày phù hợp từng quyết định.
+PO muốn biết có mở rộng không, CS lo số ca hỗ trợ, kỹ thuật muốn biết phải sửa gì. BA không cần ba phiên bản sự thật, mà cần một bộ bằng chứng với cách trình bày phù hợp từng quyết định.
 
-<div class="tkh-callout"><span class="tkh-callout-title">BA-061 · Phần 8/8 · Trung bình</span><p>Đầu ra: agenda và decision narrative cho P07. Số liệu vẫn là giả lập; cuộc họp không tạo approval nếu thiếu người có thẩm quyền.</p></div>
+<div class="tkh-callout"><span class="tkh-callout-title">BA-061 · Phần 8/8 · Trung bình</span><p>Đầu ra: agenda và decision narrative cho P07. Số liệu vẫn là giả lập; cuộc họp không tạo ra phê duyệt nếu thiếu người có thẩm quyền.</p></div>
 
 ## 1. Xác định kết quả cuộc họp
 
-Thay mục tiêu “cập nhật pilot” bằng “quyết định ưu tiên kiểm chứng trong đợt tiếp theo và owner của từng việc”. Gửi trước câu hỏi, dữ liệu, giới hạn và phương án để người tham gia có thời gian xem. Nếu cần quyết định ngân sách, mời đúng người hoặc ghi rõ buổi này chỉ đề xuất.
+Thay mục tiêu “cập nhật pilot” bằng “quyết định ưu tiên kiểm chứng trong đợt tiếp theo và người phụ trách của từng việc”. Gửi trước câu hỏi, dữ liệu, giới hạn và phương án để người tham gia có thời gian xem. Nếu cần quyết định ngân sách, mời đúng người hoặc ghi rõ buổi này chỉ đề xuất.
 
 ## 2. Cấu trúc câu chuyện
 
-Bắt đầu từ quyết định cần xin, rồi bối cảnh, bằng chứng, điều chưa biết, các phương án và khuyến nghị. Với P07: 240/1.000 chuyến xác nhận, 118/1.000 huỷ; chưa cô lập được tác động. Khuyến nghị kiểm telemetry và rào cản sử dụng trước khi mở rộng, với lý do và điều kiện xem lại.
+Bắt đầu từ quyết định cần xin, rồi bối cảnh, bằng chứng, điều chưa biết, các phương án và khuyến nghị. Với P07: 240/1.000 chuyến xác nhận, 118/1.000 huỷ; chưa cô lập được tác động. Khuyến nghị kiểm tra telemetry và rào cản sử dụng trước khi mở rộng, với lý do và điều kiện xem lại.
 
 Tránh mở đầu bằng danh sách mọi việc nhóm đã làm. Người quyết định cần hiểu ý nghĩa trước, chi tiết có thể nằm trong phụ lục.
 
@@ -27,20 +27,20 @@ Tránh mở đầu bằng danh sách mọi việc nhóm đã làm. Người quy�
 | Người nghe | Câu hỏi chính | Chi tiết cần nhấn |
 |---|---|---|
 | Sponsor/PO | Có nên đầu tư tiếp? | Giá trị chưa chắc, phương án và chi phí học |
-| CS/vận hành | Có phục vụ được không? | Ngoại lệ, công suất, owner và hướng dẫn |
+| CS/vận hành | Có phục vụ được không? | Ngoại lệ, công suất, người phụ trách và hướng dẫn |
 | Dev/QA/analytics | Cần kiểm/sửa gì? | Event, cohort, rule, case và bằng chứng |
 
-Không che giới hạn dữ liệu với sponsor để “dễ duyệt”. Rút gọn là giữ điều quyết định, không xoá điều bất lợi.
+Không che giấu giới hạn dữ liệu trước sponsor để “dễ duyệt”. Rút gọn là giữ lại những điều ảnh hưởng đến quyết định, không xoá điều bất lợi.
 
 ## 4. Agenda 30 phút minh hoạ
 
-Năm phút xác nhận câu hỏi và thẩm quyền; bảy phút dữ kiện/giới hạn; tám phút so phương án; bảy phút quyết định và điều kiện; ba phút đọc lại owner/mốc. Điều chỉnh theo độ phức tạp, không cắt ngang vấn đề trọng yếu chỉ để đúng giờ.
+Năm phút xác nhận câu hỏi và thẩm quyền; bảy phút dữ kiện/giới hạn; tám phút so sánh phương án; bảy phút quyết định và điều kiện; ba phút đọc lại người phụ trách/mốc. Điều chỉnh theo độ phức tạp, không cắt ngang vấn đề trọng yếu chỉ để đúng giờ.
 
-Khi tranh luận lệch sang chat, ghi vào parking lot với owner và cách xử lý sau. Parking lot không phải nơi chôn câu hỏi không muốn trả lời.
+Khi tranh luận lệch sang chat, ghi vào parking lot kèm người phụ trách và cách xử lý sau. Parking lot không phải nơi chôn câu hỏi không muốn trả lời.
 
 ## 5. Điều phối bất đồng
 
-Mời từng bên nêu quan sát, nguồn và điều kiện khiến họ đổi ý. Tách “tôi thấy ba ca khách không hiểu” khỏi “mọi khách đều không hiểu”. Dùng lượt phát biểu hoặc viết ý kiến trước để tránh người nói lớn nhất quyết định kết luận.
+Mời từng bên nêu quan sát, nguồn và điều kiện khiến họ đổi ý. Tách “tôi thấy ba ca khách không hiểu” khỏi “mọi khách đều không hiểu”. Dùng lượt phát biểu hoặc viết ý kiến trước để tránh việc người nói to nhất quyết định kết luận.
 
 Nếu cần lựa chọn nhưng chưa đủ bằng chứng, quyết định hợp lệ có thể là làm một kiểm chứng nhỏ, chứ không ép đồng thuận giả tạo.
 
@@ -52,7 +52,7 @@ Nếu cần lựa chọn nhưng chưa đủ bằng chứng, quyết định hợ
 
 Viết phần mở đầu 90 giây cho ba nhóm trong bảng, dùng cùng dữ liệu P07. Mỗi bản phải nói rõ một giới hạn và một quyết định cần xin.
 
-<details><summary>Câu nên sửa</summary><p>“Tính năng giảm huỷ 5,66 điểm phần trăm” cần đổi thành chênh lệch quan sát giữa nhóm tự chọn, chưa chứng minh nhân quả. Cách kể hấp dẫn không được làm bằng chứng mạnh hơn thực tế.</p></details>
+<details><summary>Câu nên sửa</summary><p>“Tính năng giảm huỷ 5,66 điểm phần trăm” cần đổi thành chênh lệch quan sát giữa nhóm tự chọn, chưa chứng minh nhân quả. Cách kể hấp dẫn không được làm cho bằng chứng trông mạnh hơn thực tế.</p></details>
 
 ## 8. Đọc tiếp
 

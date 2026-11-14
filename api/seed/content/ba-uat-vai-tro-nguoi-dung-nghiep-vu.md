@@ -8,7 +8,7 @@ tags: [business-analysis, ba-049, uat, acceptance, toi-noi]
 language: vi
 ---
 
-Một màn hình chạy đúng trên máy developer chưa trả lời liệu CS có xử lý được ca khách xác nhận nhầm cổng hay không. UAT — user acceptance testing — đưa hành trình và nhu cầu nghiệp vụ vào hoạt động kiểm tra chấp nhận.
+Một màn hình chạy đúng trên máy developer chưa cho biết liệu CS có xử lý được ca khách xác nhận nhầm cổng hay không. UAT — user acceptance testing — đưa hành trình và nhu cầu nghiệp vụ vào hoạt động kiểm tra chấp nhận.
 
 <div class="tkh-callout"><span class="tkh-callout-title">BA-049 · Phần 7/8 · Cơ bản</span><p>Đầu ra: UAT charter cho điểm đón đề xuất P04. Giả định phục vụ bài học là đã có một bản triển khai để nghiệm thu; repository không cung cấp tính năng đó và bài không tuyên bố đã chạy UAT thật.</p></div>
 
@@ -30,17 +30,17 @@ Với điểm đón, cần góc nhìn khách đặt chuyến, tài xế được
 | Dev | Điều tra, sửa và cung cấp bản mới có thể nhận diện |
 | Người có thẩm quyền nghiệm thu | Quyết định chấp nhận theo phạm vi được giao |
 
-Một người có thể kiêm vai trò, nhưng quyền nghiệm thu phải rõ. BA điều phối không có nghĩa BA tự ký thay nghiệp vụ.
+Một người có thể kiêm vai trò, nhưng quyền nghiệm thu phải rõ. BA điều phối không có nghĩa là BA tự ký thay bên nghiệp vụ.
 
 ## 4. Viết charter ngắn
 
-Mục tiêu: kiểm hành trình khách xác nhận đúng điểm trước accepted và tài xế được phân công đọc được. Phạm vi gồm revision cũ, actor sai, chuyến đổi trạng thái và timeout. Ngoài phạm vi là chat, chỉnh điểm sau accepted và chứng minh giảm huỷ ngoài thực tế.
+Mục tiêu: kiểm tra hành trình khách xác nhận đúng điểm trước accepted và tài xế được phân công đọc được. Phạm vi gồm revision cũ, actor sai, chuyến đổi trạng thái và timeout. Ngoài phạm vi là chat, chỉnh điểm sau accepted và việc chứng minh giảm huỷ ngoài thực tế.
 
 Đầu vào cần có baseline, build, tài khoản/role, dữ liệu và môi trường đủ đại diện. Thiếu điều kiện đầu vào thì ghi blocked, không đánh dấu fail sản phẩm một cách tuỳ tiện.
 
 ## 5. Hướng dẫn vừa đủ
 
-Cho người tham gia mục tiêu nghiệp vụ và dữ kiện, tránh đọc từng cú click khiến họ chỉ làm theo kịch bản. Quan sát chỗ họ hiểu sai, hỏi lý do sau hành động. Một scenario có thể pass về dữ liệu nhưng vẫn tạo phản hồi usability đáng xem xét.
+Cho người tham gia mục tiêu nghiệp vụ và dữ kiện, tránh đọc từng cú click vì như vậy họ chỉ làm theo kịch bản. Quan sát chỗ họ hiểu sai, hỏi lý do sau hành động. Một scenario có thể pass về dữ liệu nhưng vẫn tạo phản hồi usability đáng xem xét.
 
 ## 6. Bằng chứng có thể dùng lại
 
@@ -48,9 +48,9 @@ Lưu scenario ID, người thực hiện, build, dữ liệu đầu vào, actual
 
 ## 7. Thực hành
 
-Viết charter mười dòng, chỉ định người chấp nhận và một nhóm người dùng chưa được đại diện. Nêu hạn chế đó ảnh hưởng mức tự tin thế nào.
+Viết charter mười dòng, chỉ định người chấp nhận và một nhóm người dùng chưa được đại diện. Nêu hạn chế đó ảnh hưởng thế nào tới mức tự tin.
 
-<details><summary>Có phải UAT pass là chắc chắn tạo giá trị?</summary><p>Không. UAT kiểm khả năng chấp nhận theo phạm vi và điều kiện đã chọn. Adoption, tác động lên hành vi và outcome cần được đo ngoài thực tế với thiết kế phù hợp.</p></details>
+<details><summary>Có phải UAT pass là chắc chắn tạo giá trị?</summary><p>Không. UAT kiểm tra khả năng chấp nhận theo phạm vi và điều kiện đã chọn. Adoption, tác động lên hành vi và outcome cần được đo ngoài thực tế với thiết kế phù hợp.</p></details>
 
 ## 8. Đọc tiếp
 

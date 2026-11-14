@@ -1,0 +1,47 @@
+{
+ "file": "ba-acceptance-criteria-given-when-then.md",
+ "edits": [
+  {
+   "old": "trạng thái đổi, sai quyền",
+   "new": "trạng thái thay đổi, sai quyền",
+   "reason": "'đổi' cụt trong summary",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó phải chỉ ra thành công của việc gì",
+   "new": "Mệnh đề đó phải chỉ ra thành công của việc gì",
+   "reason": "Tránh 'Nó' chỉ khái niệm trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Viết case làm lộ mâu thuẫn",
+   "new": "Viết scenario làm lộ mâu thuẫn",
+   "reason": "Thống nhất 'scenario' trong bài",
+   "severity": "low"
+  },
+  {
+   "old": "Không tự thêm case ",
+   "new": "Không tự thêm scenario ",
+   "reason": "Thống nhất 'scenario'",
+   "severity": "low"
+  },
+  {
+   "old": "có thể làm che mất rule chính",
+   "new": "có thể che mất rule chính",
+   "reason": "'làm che mất' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "thì nó chưa phải kiểm thử thực thi",
+   "new": "thì file đó chưa phải kiểm thử thực thi",
+   "reason": "Tránh 'nó' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "đòi outcome khác nhau",
+   "new": "đòi kết quả khác nhau",
+   "reason": "Có từ Việt tự nhiên",
+   "severity": "low"
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+{"file":"ba-po-pm-ux-dev-tester-phoi-hop.md","edits":[
+{"old":"Vận hành nghĩ nhóm đã đồng ý làm chat.","new":"Bộ phận vận hành nghĩ nhóm đã đồng ý làm chat.","reason":"Thiếu chủ thể khi nhắc tới bộ phận","severity":"medium"},
+{"old":"Vận hành nói “nhiều cuộc gọi”.","new":"Bộ phận vận hành nói “nhiều cuộc gọi”.","reason":"Thiếu chủ thể khi nhắc tới bộ phận","severity":"medium"},
+{"old":"Câu hỏi họ đem tới ca điểm đón","new":"Câu hỏi họ đem tới tình huống điểm đón","reason":"\"ca\" lược danh từ, dễ lẫn với ca kiểm thử","severity":"medium"},
+{"old":"“Chốt” không có nghĩa người đó tự nghĩ ra toàn bộ nội dung. Nó có nghĩa khi đã xem xét ý kiến và bằng chứng, nhóm biết","new":"“Chốt” không có nghĩa người đó tự nghĩ ra toàn bộ nội dung. “Chốt” có nghĩa là sau khi đã xem xét ý kiến và bằng chứng, nhóm biết","reason":"Tránh \"Nó\" chỉ khái niệm trừu tượng; câu thiếu \"là\"","severity":"medium"},
+{"old":"BA cùng vận hành xác nhận bằng chứng.","new":"BA cùng bộ phận vận hành xác nhận bằng chứng.","reason":"Thiếu chủ thể khi nhắc tới bộ phận","severity":"medium"},
+{"old":"Nhóm chọn các ca có nhiều cổng và ca thông thường để so sánh.","new":"Nhóm chọn các trường hợp có nhiều cổng và trường hợp thông thường để so sánh.","reason":"\"ca\" lược danh từ, dễ lẫn với ca kiểm thử","severity":"medium"},
+{"old":"Không tự biến một mong muốn trong cuộc họp thành cam kết thời hạn.","new":"PM không tự biến một mong muốn trong cuộc họp thành cam kết thời hạn.","reason":"Câu thiếu chủ ngữ","severity":"low"},
+{"old":"Chẳng hạn vận hành muốn ra mắt nhanh","new":"Chẳng hạn bộ phận vận hành muốn ra mắt nhanh","reason":"Thiếu chủ thể khi nhắc tới bộ phận","severity":"medium"},
+{"old":"Developer không được hỏi vận hành, tester","new":"Developer không được hỏi bộ phận vận hành, tester","reason":"Thiếu chủ thể khi nhắc tới bộ phận","severity":"medium"}
+]}

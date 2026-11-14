@@ -1,0 +1,16 @@
+{"file":"ba-capstone-bao-ve-ho-so-phan-tich.md","edits":[
+{"old":"Người review cần lần được từ vấn đề tới bằng chứng","new":"Người review cần lần theo được từ vấn đề tới bằng chứng","reason":"'lần được' thiếu 'theo'","severity":"low"},
+{"old":"đề xuất, thiết kế ca, giả định nghiệm thu","new":"đề xuất, thiết kế test case, giả định nghiệm thu","reason":"'thiết kế ca' cụt; dùng 'test case'","severity":"low"},
+{"old":"Nó chỉ cho thấy cách nhóm học tiếp","new":"Đường nối này chỉ cho thấy cách nhóm học tiếp","reason":"Tránh 'Nó' chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"“7,5% so 13,16% có nghĩa thành công chưa?”. Giải thích tự chọn và thiết kế đánh giá còn thiếu.","new":"“7,5% so với 13,16% có nghĩa thành công chưa?”. Giải thích về thiên lệch tự chọn và thiết kế đánh giá còn thiếu.","reason":"Thiếu 'với'; 'tự chọn' thiếu danh từ chính","severity":"medium"},
+{"old":"Khả năng giữ ranh giới hiểu biết là một phần","new":"Khả năng phân định rõ điều đã biết và chưa biết là một phần","reason":"Cụm tự ghép, khó hiểu","severity":"medium"},
+{"old":"Giả sử stakeholder muốn cho sửa điểm sau accepted. Trong mười phút, chỉ ra yêu cầu, state/rule, quyền, revision, tài xế đọc, UAT và hỗ trợ bị ảnh hưởng.","new":"Giả sử stakeholder muốn cho phép sửa điểm sau khi chuyến đã accepted. Trong mười phút, chỉ ra yêu cầu, state/rule, quyền, revision, tài xế đọc, UAT và hỗ trợ nào bị ảnh hưởng.","reason":"Lược động từ và chủ thể; câu cuối thiếu 'nào'","severity":"high"},
+{"old":"telemetry tài xế đọc bị thiếu trên một app version","new":"dữ liệu telemetry về việc tài xế đọc bị thiếu trên một phiên bản app","reason":"Lược danh từ; 'version' thành 'phiên bản'","severity":"medium"},
+{"old":"so phương án; yêu cầu kiểm chứng được","new":"so sánh phương án; yêu cầu kiểm chứng được","reason":"Thiếu 'sánh'","severity":"low"},
+{"old":"Nếu biến số giả thành dữ liệu thật, tự ghi approval hoặc","new":"Nếu coi dữ liệu giả lập là dữ liệu thật, tự ghi nhận phê duyệt hoặc","reason":"'biến số giả thành dữ liệu thật' khó hiểu; approval thành phê duyệt","severity":"high"},
+{"old":"danh mục artifact có version, decision log","new":"danh mục artifact có phiên bản, decision log","reason":"version thành phiên bản","severity":"medium"},
+{"old":"đọc xong series chưa thay việc thực hành.","new":"đọc xong series không thể thay cho việc thực hành.","reason":"Câu cụt","severity":"medium"},
+{"old":"Nêu giả định từng tin, bằng chứng khiến bạn đổi ý","new":"Nêu giả định bạn từng tin, bằng chứng khiến bạn đổi ý","reason":"Thiếu chủ ngữ của 'từng tin'","severity":"high"},
+{"old":"và so cách đặt câu hỏi của mình trước/sau.","new":"và so sánh cách đặt câu hỏi của mình trước và sau khi học.","reason":"'so' thiếu 'sánh'; 'trước/sau' lược","severity":"medium"},
+{"old":"hoàn thành tài liệu là một mốc học tập, không phải bằng chứng mọi giả thuyết đã đúng.","new":"hoàn thành tài liệu là một mốc học tập, không chứng minh mọi giả thuyết đã đúng.","reason":"Trật tự gượng, kiểu dịch","severity":"medium"}
+]}

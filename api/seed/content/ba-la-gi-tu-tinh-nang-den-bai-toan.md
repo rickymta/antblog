@@ -1,7 +1,7 @@
 ---
 slug: ba-la-gi-tu-tinh-nang-den-bai-toan
 title: "BA là gì? Từ lời đề nghị tính năng đến bài toán nghiệp vụ"
-summary: "Vận hành đề nghị thêm chat để khách và tài xế tìm nhau dễ hơn. BA cần làm gì trước khi viết yêu cầu? Cùng phân biệt vấn đề, nhu cầu và giải pháp, đọc số liệu đúng mẫu số và lập problem brief cho Tới Nơi."
+summary: "Bộ phận vận hành đề nghị thêm chat để khách và tài xế tìm nhau dễ hơn. BA cần làm gì trước khi viết yêu cầu? Cùng phân biệt vấn đề, nhu cầu và giải pháp, đọc số liệu đúng mẫu số và lập problem brief cho Tới Nơi."
 category: business-analysis
 level: beginner
 tags: [business-analysis, ba-001, discovery, problem-statement, toi-noi]
@@ -21,7 +21,7 @@ language: vi
 
 Theo cách diễn giải từ [định nghĩa của IIBA](https://www.iiba.org/knowledgehub/the-business-analysis-standard/2-understanding-business-analysis/2-1-defining-business-analysis/), business analysis là hoạt động hỗ trợ thay đổi trong tổ chức bằng cách xác định nhu cầu và đề xuất giải pháp tạo giá trị cho các bên liên quan trong một bối cảnh cụ thể.
 
-**Business Analysis** là hoạt động phân tích nghiệp vụ; **Business Analyst** là một vai trò thường thực hiện hoạt động đó. Một PO, developer hay người vận hành cũng có thể thực hiện công việc phân tích nghiệp vụ. Có chức danh BA không đồng nghĩa một người là nơi duy nhất được quyền phân tích.
+**Business Analysis** là hoạt động phân tích nghiệp vụ; **Business Analyst** là một vai trò thường thực hiện hoạt động đó. Một PO, developer hay người vận hành cũng có thể thực hiện công việc phân tích nghiệp vụ. Có chức danh BA không đồng nghĩa với việc chỉ một người được quyền phân tích.
 
 Với tình huống điểm đón, BA cần giúp nhóm trả lời: khó khăn xảy ra ở bước nào, ai chịu tác động, dữ kiện nào đáng tin, có những cách xử lý nào và làm sao biết cách đã chọn tạo ra giá trị. Tài liệu là phương tiện lưu lại hiểu biết và quyết định để mọi người phối hợp.
 
@@ -34,7 +34,7 @@ Với tình huống điểm đón, BA cần giúp nhóm trả lời: khó khăn 
 | Nhu cầu | Hai bên xác định được cùng một điểm đón và cách tiếp cận | Ai cần thông tin nào, tại thời điểm nào |
 | Giải pháp đề xuất | Chat trong app | Chat có xử lý đúng nguyên nhân với chi phí chấp nhận được? |
 
-“Cần có chat” đã chứa lựa chọn giải pháp. Nó có thể hợp lý, nhưng chưa giải thích vì sao chat tốt hơn hướng dẫn chọn cổng, cải thiện ghi chú hay điều chỉnh quy trình hỗ trợ. BA giữ lại đề nghị này trong danh sách phương án và tìm bằng chứng để so sánh.
+“Cần có chat” đã chứa lựa chọn giải pháp. Lựa chọn này có thể hợp lý, nhưng chưa giải thích vì sao chat tốt hơn hướng dẫn chọn cổng, cải thiện ghi chú hay điều chỉnh quy trình hỗ trợ. BA giữ lại đề nghị này trong danh sách phương án và tìm bằng chứng để so sánh.
 
 Một câu hỏi mở đầu hữu ích là: **“Anh/chị kể lại một trường hợp gần đây, từ lúc khách đặt xe đến khi hai bên không gặp được nhau, được không?”** Câu trả lời thường giúp xác định bước vướng cụ thể hơn câu hỏi “Anh/chị muốn nút chat màu gì?”.
 
@@ -58,7 +58,7 @@ BA nên ghi rõ ranh giới giữa điều đã quan sát và điều đang đo�
 | Giả thuyết | Cách tìm bằng chứng tiếp theo |
 |---|---|
 | Địa điểm có nhiều cổng khiến hai bên đứng khác nhau | Phân nhóm lượt huỷ theo địa điểm; quan sát ca đón tại nơi nhiều cổng |
-| Ghi chú của khách khó thấy | Quan sát tài xế dùng màn hình; kiểm tra khả năng đo việc hiển thị/đọc ghi chú |
+| Ghi chú của khách khó thấy | Quan sát tài xế dùng màn hình; kiểm tra xem có đo được việc ghi chú hiển thị và được đọc hay không |
 | Nhãn huỷ đang bị dùng như lựa chọn mặc định | Đối chiếu một mẫu ca có trao đổi với khách và tài xế |
 
 Đây là kế hoạch tìm hiểu, chưa phải kết luận nguyên nhân gốc.
@@ -86,17 +86,17 @@ Mốc 9% chỉ là **mục tiêu đề xuất của bài tập**, không phải 
 |---|---|---|
 | Giữ nguyên, đo và quan sát thêm | Tránh quyết định khi chưa hiểu nguyên nhân | Vấn đề hiện tại tiếp diễn; cần giới hạn thời gian discovery |
 | Bổ sung hướng dẫn cổng/điểm đón | Có thể xử lý nhầm địa điểm | Phải duy trì hướng dẫn; không phù hợp mọi nơi |
-| Làm ghi chú điểm đón dễ nhận biết hơn | Tận dụng thông tin đã có | Phải biết thông tin có đủ đúng và tài xế có thể xem an toàn |
+| Làm ghi chú điểm đón dễ nhận biết hơn | Tận dụng thông tin đã có | Phải biết thông tin đã đủ chính xác chưa và tài xế có xem được an toàn không |
 | Xây chat trong app | Có kênh trao đổi bổ sung | Chi phí phát triển, bảo vệ thông tin, vận hành và xử lý tin nhắn không được đọc |
 
 Ở bước này chưa đủ dữ liệu để chấm điểm chính xác. Gán ROI hoặc số ngày công tuỳ ý chỉ khiến bảng trông chắc chắn hơn thực tế. BA cần lấy ước lượng từ nhóm thực hiện và ghi giả định đi kèm.
 
-Một kết quả tốt của buổi làm việc đầu có thể là **đồng ý discovery**, chưa phải đồng ý xây chat. Quyết định nhỏ này vẫn hữu ích vì nó có phạm vi, người chịu trách nhiệm và bằng chứng cần mang về.
+Một kết quả tốt của buổi làm việc đầu có thể là **đồng ý discovery**, chưa phải đồng ý xây chat. Quyết định nhỏ này vẫn hữu ích vì quyết định này có phạm vi, người chịu trách nhiệm và bằng chứng cần mang về.
 
 ## 6. Những lỗi dễ gặp
 
-- **Viết mục tiêu bằng tên tính năng:** “Ra mắt chat” đo việc giao sản phẩm. Bổ sung kết quả mong muốn với khách/tài xế và cách đo.
-- **Đổi lời kể thành sự thật:** “Tài xế không đọc ghi chú” cần nguồn hoặc nhãn giả thuyết.
+- **Viết mục tiêu bằng tên tính năng:** “Ra mắt chat” chỉ đo việc giao sản phẩm. Bổ sung kết quả mong muốn với khách/tài xế và cách đo.
+- **Coi lời kể là sự thật:** “Tài xế không đọc ghi chú” cần nguồn hoặc nhãn giả thuyết.
 - **Dùng sai mẫu số:** 50/120 mô tả cơ cấu các lượt huỷ; 50/1.000 mô tả tỷ lệ trên lượt được nhận.
 - **BA tự duyệt giải pháp:** BA làm rõ lựa chọn và đề xuất; người có thẩm quyền chốt theo cơ chế của nhóm.
 
@@ -104,7 +104,7 @@ Một kết quả tốt của buổi làm việc đầu có thể là **đồng 
 
 Viết problem brief tối đa một trang từ bộ số liệu trên. Thêm ba câu hỏi cho vận hành, hai câu hỏi cho tài xế và hai phương án ngoài chat. Gắn nhãn rõ dữ kiện, giả thuyết và đề xuất.
 
-Tự chấm theo năm tiêu chí: nêu đúng nhóm bị ảnh hưởng; dùng đúng mẫu số; không mặc định nguyên nhân; có phương án so sánh; ghi quyết định cần xin cùng người sở hữu. Nếu còn thiếu một mục, brief chưa đủ rõ để dùng cho cuộc họp tiếp theo.
+Tự chấm theo năm tiêu chí: nêu đúng nhóm bị ảnh hưởng; dùng đúng mẫu số; không mặc định nguyên nhân; có phương án so sánh; ghi rõ quyết định nào cần người phụ trách phê duyệt. Nếu còn thiếu một mục, brief chưa đủ rõ để dùng cho cuộc họp tiếp theo.
 
 **Câu 1.** Có 50 lượt huỷ mang nhãn “không tìm thấy nhau”. Có thể kết luận chat sẽ cứu được 50 lượt không?
 

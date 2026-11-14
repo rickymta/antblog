@@ -1,14 +1,14 @@
 ---
 slug: ba-risk-assumption-log
 title: "Risk và assumption log: theo dõi điều có thể làm lệch quyết định"
-summary: "Tách rủi ro, giả định và vấn đề đã xảy ra; ghi tín hiệu, owner, phản ứng và thời hạn kiểm chứng thay vì chỉ lập danh sách lo ngại."
+summary: "Tách rủi ro, giả định và vấn đề đã xảy ra; ghi tín hiệu, người phụ trách, phản ứng và thời hạn kiểm chứng thay vì chỉ lập danh sách lo ngại."
 category: business-analysis
 level: beginner
 tags: [business-analysis, ba-059, risk, assumptions, toi-noi]
 language: vi
 ---
 
-“Chắc tài xế sẽ đọc thông tin” là một giả định quan trọng của điểm đón. Nếu không kiểm nó, nhóm có thể làm đúng toàn bộ chức năng phía khách mà vẫn không cải thiện việc gặp nhau.
+“Chắc tài xế sẽ đọc thông tin” là một giả định quan trọng của điểm đón. Nếu không kiểm chứng giả định này, nhóm có thể làm đúng toàn bộ chức năng phía khách mà vẫn không cải thiện việc gặp nhau.
 
 <div class="tkh-callout"><span class="tkh-callout-title">BA-059 · Phần 8/8 · Cơ bản</span><p>Đầu ra: log có hành động cho P07. Đánh giá mức rủi ro là minh hoạ định tính; không phải xác suất được đo từ dữ liệu thật.</p></div>
 
@@ -26,14 +26,14 @@ Thay “rủi ro tài xế” bằng “nếu thông tin xác nhận khó tìm k
 
 ## 3. Log mẫu
 
-| ID/loại | Nội dung | Owner đề xuất | Bước tiếp |
+| ID/loại | Nội dung | Người phụ trách đề xuất | Bước tiếp |
 |---|---|---|---|
-| A-01 giả định | Tài xế tìm được thông tin khi cần | UX + vận hành | Quan sát ca dùng với app version rõ |
+| A-01 giả định | Tài xế tìm được thông tin khi cần | UX + vận hành | Quan sát các lượt dùng với phiên bản app rõ ràng |
 | R-01 rủi ro | Telemetry thiếu làm đọc sai adoption | Analytics | Đối chiếu trip mẫu từ đầu tới dashboard |
 | I-01 issue | Guardrail chưa có baseline tin cậy | PO + CS | Chốt định nghĩa và thu baseline |
-| R-02 rủi ro | Mở rộng vượt công suất hỗ trợ | Vận hành | Ước lượng và diễn tập ca ngoại lệ |
+| R-02 rủi ro | Mở rộng vượt công suất hỗ trợ | Vận hành | Ước lượng và diễn tập trường hợp ngoại lệ |
 
-Thêm hạn, trạng thái và bằng chứng khi áp dụng. Owner là người theo dõi tới kết luận, không nhất thiết tự làm mọi việc.
+Thêm hạn, trạng thái và bằng chứng khi áp dụng. Người phụ trách là người theo dõi tới kết luận, không nhất thiết tự làm mọi việc.
 
 ## 4. Xác suất và tác động có căn cứ
 
@@ -41,7 +41,7 @@ Có thể dùng thấp/trung bình/cao với định nghĩa chung. Ví dụ tác
 
 ## 5. Chọn phản ứng cụ thể
 
-Giảm rủi ro bằng kiểm telemetry; tránh bằng chưa mở rộng khi điều kiện chưa đạt; chấp nhận một rủi ro còn lại trong thẩm quyền với trigger review. Nếu chuyển việc cho đối tác, trách nhiệm hiểu ảnh hưởng tới khách không tự biến mất. Luôn ghi ai làm gì và bằng chứng nào xác nhận hiệu quả.
+Giảm rủi ro bằng cách kiểm tra telemetry; tránh rủi ro bằng cách chưa mở rộng khi điều kiện chưa đạt; chấp nhận một rủi ro còn lại trong thẩm quyền với trigger review. Nếu chuyển việc cho đối tác, trách nhiệm hiểu ảnh hưởng tới khách không tự biến mất. Luôn ghi ai làm gì và bằng chứng nào xác nhận hiệu quả.
 
 ## 6. Đặt trigger để hành động
 
@@ -49,9 +49,9 @@ Giảm rủi ro bằng kiểm telemetry; tránh bằng chưa mở rộng khi đi
 
 ## 7. Thực hành
 
-Thêm giả định “CS xử lý được mọi ca pilot bằng tra cứu thủ công”. Chỉ ra bằng chứng cần có, tín hiệu bác bỏ và quyết định phải xem lại nếu giả định sai.
+Thêm giả định “CS xử lý được mọi trường hợp trong pilot bằng tra cứu thủ công”. Chỉ ra bằng chứng cần có, tín hiệu bác bỏ và quyết định phải xem lại nếu giả định sai.
 
-<details><summary>Gợi ý</summary><p>Cần thời gian xử lý mỗi ca, số ca, ca trực và quyền truy cập. Nếu công suất không đủ, xem lại phạm vi pilot, công cụ hoặc lịch; không chỉ yêu cầu CS cố gắng hơn.</p></details>
+<details><summary>Gợi ý</summary><p>Cần thời gian xử lý mỗi trường hợp, số trường hợp, ca trực và quyền truy cập. Nếu công suất không đủ, xem lại phạm vi pilot, công cụ hoặc lịch; không chỉ yêu cầu CS cố gắng hơn.</p></details>
 
 ## 8. Đọc tiếp
 

@@ -1,0 +1,10 @@
+{"file":"ba-transition-migration-dao-tao-van-hanh.md","edits":[
+{"old":"## 1. Yêu cầu tạm thời cũng cần owner","new":"## 1. Yêu cầu tạm thời cũng cần người phụ trách","reason":"owner đã có từ Việt tự nhiên","severity":"medium"},
+{"old":"yêu cầu lâu dài như kiểm quyền ở mọi lần xác nhận.","new":"yêu cầu lâu dài như kiểm tra quyền ở mọi lần xác nhận.","reason":"kiểm quyền tự ghép","severity":"medium"},
+{"old":"có được tham gia hay chỉ chuyến mới.","new":"có được tham gia hay chỉ dành cho chuyến mới.","reason":"Câu thiếu vị ngữ ở vế sau","severity":"medium"},
+{"old":"## 4. Kiểm migration theo ý nghĩa","new":"## 4. Kiểm tra migration theo ý nghĩa","reason":"Kiểm cụt","severity":"low"},
+{"old":"Kiểm khoá, quan hệ, đơn vị, trạng thái và mẫu ngoại lệ.","new":"Kiểm tra khoá, quan hệ, đơn vị, trạng thái và mẫu ngoại lệ.","reason":"Kiểm cụt","severity":"low"},
+{"old":"Đây là phân công giả lập, cần thay bằng owner có thẩm quyền","new":"Đây là phân công giả lập, cần thay bằng người phụ trách có thẩm quyền","reason":"owner đã có từ Việt tự nhiên","severity":"medium"},
+{"old":"Nếu tra cứu thủ công trong pilot, ghi giới hạn công suất,","new":"Nếu phải tra cứu thủ công trong pilot, hãy ghi giới hạn công suất,","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Với mỗi yêu cầu ghi tiêu chí, owner và cách kiểm trước/sau.","new":"Với mỗi yêu cầu, ghi tiêu chí, người phụ trách và cách kiểm tra trước/sau.","reason":"owner đã có từ Việt; kiểm cụt","severity":"medium"}
+]}

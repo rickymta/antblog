@@ -138,6 +138,17 @@
       ]
     },
     {
+      "id": "race-condition",
+      "use": "race condition",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Lỗi xảy ra khi kết quả phụ thuộc vào thứ tự chạy của các thao tác đồng thời, ví dụ hai yêu cầu cùng nhận một chuyến và cả hai đều tưởng mình thành công.",
+      "note": "Chỉ sửa khi \"cuộc đua\" mang nghĩa race condition; giữ các cách nói tự nhiên như \"thua cuộc đua\"",
+      "avoid": [
+        { "text": "cuộc đua", "severity": "low" }
+      ]
+    },
+    {
       "id": "version",
       "use": "phiên bản",
       "english": "version",

@@ -1,0 +1,59 @@
+{
+  "file": "ba-la-gi-tu-tinh-nang-den-bai-toan.md",
+  "edits": [
+    {
+      "old": "Vận hành đề nghị thêm chat để khách",
+      "new": "Bộ phận vận hành đề nghị thêm chat để khách",
+      "reason": "Thiếu chủ thể bộ phận",
+      "severity": "high"
+    },
+    {
+      "old": "không đồng nghĩa một người là nơi duy nhất được quyền phân tích.",
+      "new": "không đồng nghĩa với việc chỉ một người được quyền phân tích.",
+      "reason": "Câu gượng, thiếu 'với việc'",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó có thể hợp lý, nhưng chưa giải thích",
+      "new": "Lựa chọn này có thể hợp lý, nhưng chưa giải thích",
+      "reason": "Tránh 'Nó' chỉ khái niệm",
+      "severity": "medium"
+    },
+    {
+      "old": "kiểm tra khả năng đo việc hiển thị/đọc ghi chú",
+      "new": "kiểm tra xem có đo được việc ghi chú hiển thị và được đọc hay không",
+      "reason": "Câu cụt, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Phải biết thông tin có đủ đúng và tài xế có thể xem an toàn",
+      "new": "Phải biết thông tin đã đủ chính xác chưa và tài xế có xem được an toàn không",
+      "reason": "Câu thiếu cấu trúc nghi vấn",
+      "severity": "medium"
+    },
+    {
+      "old": "vì nó có phạm vi, người chịu trách nhiệm",
+      "new": "vì quyết định này có phạm vi, người chịu trách nhiệm",
+      "reason": "Tránh 'nó'",
+      "severity": "low"
+    },
+    {
+      "old": "“Ra mắt chat” đo việc giao sản phẩm.",
+      "new": "“Ra mắt chat” chỉ đo việc giao sản phẩm.",
+      "reason": "Rõ nghĩa hơn",
+      "severity": "low"
+    },
+    {
+      "old": "**Đổi lời kể thành sự thật:**",
+      "new": "**Coi lời kể là sự thật:**",
+      "reason": "'Đổi … thành' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "ghi quyết định cần xin cùng người sở hữu.",
+      "new": "ghi rõ quyết định nào cần người phụ trách phê duyệt.",
+      "reason": "'xin cùng người sở hữu' sai ngữ pháp (đã chỉnh khi duyệt)",
+      "severity": "medium"
+    }
+  ]
+}

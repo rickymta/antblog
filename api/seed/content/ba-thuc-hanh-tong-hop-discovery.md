@@ -8,7 +8,7 @@ tags: [business-analysis, ba-016, discovery, evidence, case-study, toi-noi]
 language: vi
 ---
 
-Cuối tuần discovery, BA có lời kể khách đã nhập cổng Đông, quan sát một tài xế đọc được ghi chú, tài liệu yêu cầu ticket có ID và một mẫu ticket lại thiếu ID. Nếu chỉ gom các câu thành bản tóm tắt, nhóm vẫn không biết nên tin điều gì hoặc làm bước nào tiếp.
+Cuối tuần discovery, BA có lời kể khách đã nhập cổng Đông, quan sát một tài xế đọc được ghi chú, tài liệu yêu cầu ticket có ID và một mẫu ticket lại thiếu ID. Nếu chỉ gom các câu thành bản tóm tắt, nhóm vẫn không biết nên tin điều gì hoặc nên làm bước nào tiếp theo.
 
 Bài cuối phần 2 yêu cầu biến các nguồn thành nhận định có phạm vi và khuyến nghị. Những điều chưa biết phải hiện rõ trong kết luận, không bị làm mờ để hồ sơ trông hoàn chỉnh.
 
@@ -38,9 +38,9 @@ Giữ baseline P01 riêng với mẫu P02. Không cộng 20 ticket vào 80 cuộ
 | OBS-01 | D-02 mở chi tiết, kéo xuống và đọc cổng số 2 | C-02; một phiên mô phỏng |
 | OBS-02 | K-02 chưa biết tên cổng tương ứng trong app | C-03; khác C-01 và C-02 |
 | DOC-01 | Hướng dẫn v0.8 yêu cầu ghi ID lượt vào ticket | Chưa xác nhận hiệu lực |
-| DATA-01 | 8/20 ticket trong mẫu thiếu ID lượt | Mẫu thuận tiện, độc lập tập cuộc gọi P01 |
+| DATA-01 | 8/20 ticket trong mẫu thiếu ID lượt | Mẫu thuận tiện, độc lập với tập cuộc gọi P01 |
 | DOC-02 | Thiết kế có vùng ghi chú | Chưa xác nhận phiên bản triển khai |
-| WS-01 | Vận hành muốn xem lịch sử trao đổi | Đề nghị chưa duyệt |
+| WS-01 | Bộ phận vận hành muốn xem lịch sử trao đổi | Đề nghị chưa duyệt |
 | WS-02 | PO muốn review cuối tuần | Mốc quyết định, không phải ngày phát hành |
 
 Tách **nguồn** khỏi **claim — nhận định**. Một nguồn có thể hỗ trợ nhiều nhận định, và một nhận định cần nhiều nguồn. Tóm tắt lời INT-01 trong biên bản workshop không tạo thêm một xác nhận độc lập cho INT-01.
@@ -61,9 +61,9 @@ Mức hỗ trợ phải gắn với **câu cụ thể**. DATA-01 hỗ trợ “c
 
 ## 4. Phân loại mâu thuẫn và chọn cách giải
 
-**INT-01 với OBS-01:** chưa phải mâu thuẫn trực tiếp vì khác case. Việc C-02 đọc được ghi chú không giải thích dữ liệu của C-01. Cần kiểm cùng lượt, phiên bản và thời điểm nếu muốn xác minh đường đi thông tin của C-01.
+**INT-01 với OBS-01:** chưa phải mâu thuẫn trực tiếp vì khác case. Việc C-02 đọc được ghi chú không giải thích dữ liệu của C-01. Cần kiểm tra cùng lượt, phiên bản và thời điểm nếu muốn xác minh đường đi thông tin của C-01.
 
-**DOC-01 với DATA-01:** có chênh lệch giữa quy định được ghi và mẫu thực tế. Chưa biết tài liệu còn hiệu lực, record thuộc thời kỳ nào hoặc có ngoại lệ gì. Cần owner tài liệu và dữ liệu xác nhận trước khi kết luận vi phạm quy trình hoặc lỗi hệ thống.
+**DOC-01 với DATA-01:** có chênh lệch giữa quy định được ghi và mẫu thực tế. Chưa biết tài liệu còn hiệu lực, record thuộc thời kỳ nào hoặc có ngoại lệ gì. Cần người phụ trách tài liệu và dữ liệu xác nhận trước khi kết luận vi phạm quy trình hoặc lỗi hệ thống.
 
 **WS-01 với nhu cầu giới hạn dữ liệu:** đây là xung đột phương án/đánh đổi cần làm rõ, không phải hai dữ kiện đối nghịch. Hãy phân loại case hỗ trợ, dữ liệu cần có và người có quyền chốt.
 
@@ -74,21 +74,21 @@ Mức hỗ trợ phải gắn với **câu cụ thể**. DATA-01 hỗ trợ “c
 | ID | Điều cần xác nhận | Người phù hợp đề xuất | Nếu chưa có phản hồi |
 |---|---|---|---|
 | CF-01 | INT-01 được ghi đúng lời kể và giới hạn hiểu biết | Người đóng vai K-01 trong bài tập | Giữ nguồn ở trạng thái chưa xác nhận bản tóm tắt |
-| CF-02 | DOC-01 còn hiệu lực, áp dụng cho loại ticket nào | Owner quy trình CSKH | Chưa dùng làm baseline quy trình |
+| CF-02 | DOC-01 còn hiệu lực, áp dụng cho loại ticket nào | Người phụ trách quy trình CSKH | Chưa dùng làm baseline quy trình |
 | CF-03 | Cách chọn 20 ticket, định nghĩa thiếu ID và khả năng nối khác | Người cung cấp DATA-01 và phụ trách dữ liệu | Không suy rộng hay dùng để tính tỷ lệ toàn hệ thống |
-| CF-04 | Dữ liệu tối thiểu cần cho các loại ca hỗ trợ | CSKH và owner dữ liệu/truy cập | Giữ WS-01 là đề nghị chưa duyệt |
+| CF-04 | Dữ liệu tối thiểu cần cho các loại ca hỗ trợ | CSKH và người phụ trách dữ liệu/truy cập | Giữ WS-01 là đề nghị chưa duyệt |
 
 Ghi hạn đã thoả thuận khi có người nhận việc. Không tự ghi người dùng hoặc đồng nghiệp đã xác nhận chỉ để khép bài tập. Nếu mô phỏng thêm phản hồi để luyện tập, đánh dấu dữ kiện bổ sung và không trộn vào gói nguồn gốc.
 
-Ưu tiên xác minh theo ảnh hưởng quyết định. Kiểm liên kết ticket/lượt và điều kiện hiển thị ghi chú giúp định hướng phương án; tranh luận màu nút chat chưa hỗ trợ câu hỏi cần chốt cuối tuần.
+Ưu tiên xác minh theo ảnh hưởng quyết định. Kiểm tra liên kết ticket/lượt và điều kiện hiển thị ghi chú giúp định hướng phương án; tranh luận màu nút chat chưa hỗ trợ câu hỏi cần chốt cuối tuần.
 
 ## 6. Gợi ý discovery memo
 
 > **Vấn đề:** có tín hiệu khó khăn xác định điểm đón, nhưng nguồn hiện có chưa giải thích được nguyên nhân hoặc tỷ lệ toàn khu vực. Baseline 12% và target đề xuất 9% của P01 không phải kết quả discovery mới.
 >
-> **Phát hiện có giới hạn:** C-03 cho thấy khó gọi tên cổng trong một phiên; C-02 cho thấy ghi chú được đọc sau thao tác mở chi tiết/kéo xuống. Mẫu ticket có record thiếu ID; cần kiểm khả năng nối dữ liệu trước khi dùng cho đo theo lượt.
+> **Phát hiện có giới hạn:** C-03 cho thấy khó gọi tên cổng trong một phiên; C-02 cho thấy ghi chú được đọc sau thao tác mở chi tiết/kéo xuống. Mẫu ticket có record thiếu ID; cần kiểm tra khả năng nối dữ liệu trước khi dùng để đo theo lượt.
 >
-> **Khuyến nghị:** chưa cam kết chat hoặc pilot. Chuẩn bị thử cách mô tả/nhận biết điểm đón với dữ liệu giả để phân biệt giả thuyết; đồng thời xác nhận quy trình và chất lượng liên kết dữ liệu. Kế hoạch tiếp cần owner, nguồn lực và thời hạn được PO/người có thẩm quyền duyệt, không tự kéo dài discovery.
+> **Khuyến nghị:** chưa cam kết chat hoặc pilot. Chuẩn bị thử cách mô tả/nhận biết điểm đón với dữ liệu giả để phân biệt giả thuyết; đồng thời xác nhận quy trình và chất lượng liên kết dữ liệu. Kế hoạch tiếp theo cần người phụ trách, nguồn lực và thời hạn được PO/người có thẩm quyền duyệt, không tự kéo dài discovery.
 >
 > **Quyết định cần xin:** chọn hoạt động xác minh nào trước và có cấp nguồn lực hay không. Nếu không thể tiếp cận bằng chứng quan trọng, thu hẹp kết luận, đổi ưu tiên hoặc dừng hướng hiện tại với lý do được ghi lại.
 
@@ -114,7 +114,7 @@ Ba câu phản biện nên tự trả lời trước khi nộp:
 2. Nhóm stakeholder nào đang thiếu, nên kết luận nào phải thu hẹp?
 3. Nếu chỉ được thực hiện một hoạt động tiếp theo, bạn chọn gì và vì sao?
 
-<details><summary>Gợi ý cho câu thứ ba</summary><p>Không có đáp án duy nhất. Nếu chọn kiểm dữ liệu, phải giải thích quyết định nào phụ thuộc chất lượng liên kết. Nếu chọn quan sát thông tin điểm đón, phải nêu giả thuyết cần phân biệt và giới hạn của mẫu. Chọn vì “dễ làm nhất” mà không nối với quyết định là chưa đủ.</p></details>
+<details><summary>Gợi ý cho câu thứ ba</summary><p>Không có đáp án duy nhất. Nếu chọn kiểm tra dữ liệu, phải giải thích quyết định nào phụ thuộc chất lượng liên kết. Nếu chọn quan sát thông tin điểm đón, phải nêu giả thuyết cần phân biệt và giới hạn của mẫu. Chọn vì “dễ làm nhất” mà không nối với quyết định là chưa đủ.</p></details>
 
 ## 8. Tham khảo và bước tiếp theo
 

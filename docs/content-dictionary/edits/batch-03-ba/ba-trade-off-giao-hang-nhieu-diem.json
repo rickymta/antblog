@@ -1,0 +1,9 @@
+{"file":"ba-trade-off-giao-hang-nhieu-diem.md","edits":[
+{"old":"chưa nằm trong baseline lab hoặc tự kế thừa rule một chuyến thành rule từng điểm.","new":"chưa nằm trong baseline của lab, cũng không tự kế thừa rule một chuyến thành rule từng điểm.","reason":"Câu ghép sai logic và thiếu từ","severity":"medium"},
+{"old":"Giả thuyết cửa hàng muốn giảm công điều phối và chi phí tổng;","new":"Giả thuyết là cửa hàng muốn giảm công điều phối và tổng chi phí;","reason":"Thiếu động từ là; chi phí tổng là trật tự kiểu Anh","severity":"medium"},
+{"old":"ba điểm gần nhau khác nhiều điểm xa có cửa sổ nhận hàng hẹp.","new":"ba điểm gần nhau khác với nhiều điểm xa nhau có cửa sổ nhận hàng hẹp.","reason":"Câu cụt, khó tách hai vế so sánh","severity":"low"},
+{"old":"Lựa chọn phải dựa trên nhu cầu và năng lực chứ không chỉ thuật toán hấp dẫn.","new":"Lựa chọn phải dựa trên nhu cầu và năng lực chứ không chỉ vì thuật toán hấp dẫn.","reason":"Thiếu từ nối","severity":"low"},
+{"old":"Trip là hành trình tài xế,","new":"Trip là hành trình của tài xế,","reason":"Thiếu từ nối sở hữu","severity":"low"},
+{"old":"và có owner xử lý giao thất bại.","new":"và có người phụ trách xử lý giao thất bại.","reason":"owner đã có từ Việt tự nhiên","severity":"medium"},
+{"old":"mô hình khái niệm, ca A/B/C, câu hỏi giá","new":"mô hình khái niệm, tình huống A/B/C, câu hỏi giá","reason":"ca A/B/C là các tình huống ở mục 4, thống nhất cách gọi","severity":"medium"}
+]}

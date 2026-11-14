@@ -1,0 +1,9 @@
+{"file":"ba-user-story-vai-tro-nhu-cau-gia-tri.md","edits":[
+{"old":"nhưng không nên dùng nó để che câu hỏi","new":"nhưng không nên dùng vai trò này để che câu hỏi","reason":"nó chỉ khái niệm trừu tượng","severity":"medium"},
+{"old":"Đừng hoàn thiện câu văn rồi coi refinement xong.","new":"Đừng hoàn thiện câu văn rồi coi như refinement đã xong.","reason":"Thiếu từ nối","severity":"low"},
+{"old":"Sau accepted, sửa điểm đón chưa thuộc lát cắt đầu; tài xế được gán xem dữ liệu là story liên quan.","new":"Sau accepted, việc sửa điểm đón chưa thuộc lát cắt đầu; việc tài xế được phân công xem dữ liệu là story liên quan.","reason":"Thiếu danh từ hoá làm chủ ngữ; được gán gượng","severity":"medium"},
+{"old":"Nó chỉ ghi khách đã xác nhận revision nào.","new":"Thao tác này chỉ ghi lại khách đã xác nhận revision nào.","reason":"Tránh Nó đầu câu","severity":"medium"},
+{"old":"có thể trình diễn một luồng trọn không;","new":"có thể trình diễn một luồng trọn vẹn không;","reason":"trọn cụt","severity":"low"},
+{"old":"Viết lợi ích gần với kết quả story kiểm được,","new":"Viết lợi ích sát với kết quả kiểm được của story,","reason":"Trật tự từ kiểu Anh, khó hiểu","severity":"medium"},
+{"old":"khiến quyền của khách, tài xế và hỗ trợ bị gộp.","new":"vì như vậy quyền của khách, tài xế và hỗ trợ sẽ bị gộp.","reason":"khiến thiếu chủ ngữ rõ","severity":"medium"}
+]}

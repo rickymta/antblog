@@ -8,7 +8,7 @@ tags: [business-analysis, ba-052, acceptance, release-readiness, toi-noi]
 language: vi
 ---
 
-Một báo cáo có 99 ca pass và một ca fail không đủ để quyết định phát hành. Nếu ca fail cho phép người khác sửa điểm đón, tác động không thể được che bằng tỷ lệ 99%.
+Một báo cáo có 99 test case pass và một test case fail không đủ để quyết định phát hành. Nếu test case fail cho phép người khác sửa điểm đón, tác động không thể được che bằng tỷ lệ 99%.
 
 <div class="tkh-callout"><span class="tkh-callout-title">BA-052 · Phần 7/8 · Trung bình</span><p>Đầu ra: decision record cho bản triển khai giả lập. Không có go/no-go thật được ký trong bài; các ngưỡng và quyền phải do dự án cụ thể xác định.</p></div>
 
@@ -22,20 +22,20 @@ Nghiệm thu xác nhận phạm vi yêu cầu có được chấp nhận theo b�
 |---|---|---|
 | Happy path | Pass theo build B | Bằng chứng trong điều kiện đã chạy |
 | Sai actor | Fail | Không đáp ứng rule quyền, chặn theo tiêu chí đề xuất |
-| Câu chữ hướng dẫn | Có lỗi nhỏ | Xem tác động hiểu sai, không chỉ hình thức |
+| Câu chữ hướng dẫn | Có lỗi nhỏ | Xét xem có gây hiểu sai không, không chỉ về hình thức |
 | Runbook CS | Chưa diễn tập | Readiness chưa có bằng chứng |
 
-Không cộng blocked vào passed. Với ca chưa chạy, ghi rõ giới hạn mức tự tin và kế hoạch bổ sung.
+Không cộng blocked vào passed. Với test case chưa chạy, ghi rõ giới hạn mức tự tin và kế hoạch bổ sung.
 
 ## 3. Điều kiện phải hoàn thành trước phát hành
 
-Ví dụ: sửa lỗi quyền, chạy lại ca liên quan trên build xác định, diễn tập hỗ trợ và xác nhận dữ liệu đo. Gán owner, bằng chứng hoàn thành và người kiểm. Khi điều kiện chưa đạt, “chấp nhận có điều kiện” không phải giấy phép bỏ qua điều kiện.
+Ví dụ: sửa lỗi quyền, chạy lại test case liên quan trên build xác định, diễn tập hỗ trợ và xác nhận dữ liệu đo. Gán người phụ trách, bằng chứng hoàn thành và người kiểm. Khi điều kiện chưa đạt, “chấp nhận có điều kiện” không phải giấy phép bỏ qua điều kiện.
 
 Nếu build thay đổi sau review, phải đánh giá lại phạm vi bằng chứng bị ảnh hưởng.
 
 ## 4. Tồn đọng được chấp nhận sau phát hành
 
-Một lỗi câu chữ không làm hiểu sai có thể được người có thẩm quyền chấp nhận tạm, với hạn sửa và owner. Ghi tác động, workaround, phạm vi người dùng và trigger xem lại. Không xếp lỗi quyền hoặc tính đúng tiền vào loại này chỉ vì lịch gấp.
+Một lỗi câu chữ không làm hiểu sai có thể được người có thẩm quyền chấp nhận tạm, với hạn sửa và người phụ trách. Ghi tác động, workaround, phạm vi người dùng và trigger xem lại. Không xếp lỗi quyền hoặc tính đúng tiền vào loại này chỉ vì lịch gấp.
 
 Hai danh sách trước/sau phát hành cần tách rõ; nếu dùng chung nhãn “follow-up”, nhóm dễ hiểu nhầm việc nào được phép để lại.
 
@@ -45,7 +45,7 @@ Hai danh sách trước/sau phát hành cần tách rõ; nếu dùng chung nhãn
 
 ## 6. Decision record mẫu
 
-Ghi build/phạm vi, tóm tắt bằng chứng, rủi ro còn lại, quyết định, điều kiện, người có thẩm quyền, thời điểm và mốc review tiếp. Trong tình huống còn lỗi sai actor, khuyến nghị no-go cho phạm vi bị ảnh hưởng. Nếu tách phạm vi khác, phải chứng minh nó độc lập và đáp ứng điều kiện riêng.
+Ghi build/phạm vi, tóm tắt bằng chứng, rủi ro còn lại, quyết định, điều kiện, người có thẩm quyền, thời điểm và mốc review tiếp. Trong tình huống còn lỗi sai actor, khuyến nghị no-go cho phạm vi bị ảnh hưởng. Nếu tách phạm vi khác, phải chứng minh phạm vi đó độc lập và đáp ứng điều kiện riêng.
 
 ## 7. Thực hành
 

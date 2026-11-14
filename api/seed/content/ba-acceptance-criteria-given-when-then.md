@@ -1,7 +1,7 @@
 ---
 slug: ba-acceptance-criteria-given-when-then
 title: "Acceptance criteria và ví dụ Given–When–Then"
-summary: "Viết tiêu chí chấp nhận quan sát được cho xác nhận điểm đón, bao gồm revision cũ, trạng thái đổi, sai quyền và kết quả chưa biết khi timeout."
+summary: "Viết tiêu chí chấp nhận quan sát được cho xác nhận điểm đón, bao gồm revision cũ, trạng thái thay đổi, sai quyền và kết quả chưa biết khi timeout."
 category: business-analysis
 level: beginner
 tags: [business-analysis, ba-026, acceptance-criteria, gherkin, toi-noi]
@@ -34,9 +34,9 @@ Feature: Xác nhận thông tin điểm đón
     And trạng thái chuyến vẫn là searching
 ```
 
-Then không nên chỉ viết “thành công”. Nó phải chỉ ra thành công của việc gì, trên dữ liệu nào và điều gì không bị biến thành một hành vi khác.
+Then không nên chỉ viết “thành công”. Mệnh đề đó phải chỉ ra thành công của việc gì, trên dữ liệu nào và điều gì không bị biến thành một hành vi khác.
 
-## 3. Viết case làm lộ mâu thuẫn
+## 3. Viết scenario làm lộ mâu thuẫn
 
 ```gherkin
   Scenario: Khách đang xem một bản cũ
@@ -60,7 +60,7 @@ Không tự chọn mã HTTP khi hợp đồng API chưa chốt. Ở mức BA, c�
 | 04 | Không sở hữu lượt | Không ghi, không lộ dữ liệu ngoài quyền |
 | 05 | Mất phản hồi | Hiển thị chưa biết kết quả; kiểm tra lại bằng định danh ổn định |
 
-Ghi chú rỗng là câu hỏi mở trong hồ sơ P04. Không tự thêm case “rỗng luôn được phép” hoặc “rỗng luôn lỗi” chỉ để làm bảng đủ hàng.
+Ghi chú rỗng là câu hỏi mở trong hồ sơ P04. Không tự thêm scenario “rỗng luôn được phép” hoặc “rỗng luôn lỗi” chỉ để làm bảng đủ hàng.
 
 ## 5. Phân biệt timeout và thất bại chắc chắn
 
@@ -70,9 +70,9 @@ Request có thể đã được lưu trước khi response mất. Nếu app báo
 
 ## 6. AC không phải toàn bộ test suite
 
-AC nêu kỳ vọng cần chấp nhận; test design có thể thêm nhiều dữ liệu, biên, phân quyền và tải. Một scenario luồng thuận không đủ cho bảo mật hoặc hiệu năng. Ngược lại, hàng trăm scenario lặp chi tiết click có thể làm che mất rule chính.
+AC nêu kỳ vọng cần chấp nhận; test design có thể thêm nhiều dữ liệu, biên, phân quyền và tải. Một scenario luồng thuận không đủ cho bảo mật hoặc hiệu năng. Ngược lại, hàng trăm scenario lặp chi tiết click có thể che mất rule chính.
 
-Review cùng BA/nghiệp vụ, developer và tester: mỗi ví dụ đang kiểm rule nào, dữ kiện có hợp lệ không, kết quả có quan sát được không? Nếu hai scenario đòi outcome khác nhau cho cùng dữ kiện, tìm quyết định còn thiếu trước khi tự động hoá.
+Review cùng BA/nghiệp vụ, developer và tester: mỗi ví dụ đang kiểm rule nào, dữ kiện có hợp lệ không, kết quả có quan sát được không? Nếu hai scenario đòi kết quả khác nhau cho cùng dữ kiện, tìm quyết định còn thiếu trước khi tự động hoá.
 
 ## 7. Bài tập và câu hỏi ôn tập
 
@@ -80,7 +80,7 @@ Viết scenario cho state đã accepted và scenario request đã lưu nhưng re
 
 **Câu hỏi:** Một file Gherkin parse được có nghĩa yêu cầu đã đúng không?
 
-<details><summary>Gợi ý trả lời</summary><p>Không. Đúng cú pháp chỉ giúp công cụ đọc cấu trúc. Nội dung vẫn có thể mơ hồ, sai nghiệp vụ hoặc thiếu ngoại lệ; và chưa có step definition thì nó chưa phải kiểm thử thực thi.</p></details>
+<details><summary>Gợi ý trả lời</summary><p>Không. Đúng cú pháp chỉ giúp công cụ đọc cấu trúc. Nội dung vẫn có thể mơ hồ, sai nghiệp vụ hoặc thiếu ngoại lệ; và chưa có step definition thì file đó chưa phải kiểm thử thực thi.</p></details>
 
 ## 8. Tham khảo và bài tiếp theo
 

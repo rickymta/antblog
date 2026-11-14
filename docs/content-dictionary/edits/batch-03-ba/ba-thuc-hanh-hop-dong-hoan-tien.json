@@ -1,0 +1,7 @@
+{"file":"ba-thuc-hanh-hop-dong-hoan-tien.md","edits":[
+{"old":"có thể che hợp đồng chưa xác định ai xử lý","new":"có thể che việc hợp đồng chưa xác định ai xử lý","reason":"Thiếu danh từ, câu dễ hiểu sai","severity":"medium"},
+{"old":"bằng chứng kiểm cạnh tranh từ triển khai","new":"bằng chứng kiểm thử tình huống cạnh tranh từ triển khai","reason":"Cụm tự ghép 'kiểm cạnh tranh'","severity":"medium"},
+{"old":"kiểm rule giải phóng tiền giữ.","new":"kiểm tra rule giải phóng tiền đang giữ.","reason":"Động từ cụt, thiếu từ","severity":"medium"},
+{"old":"Gán owner và hạn cho từng mục.","new":"Gán người phụ trách và hạn cho từng mục.","reason":"owner đã có từ Việt","severity":"low"},
+{"old":"tìm đường gây hoàn lặp","new":"tìm đường đi gây hoàn lặp","reason":"Thiếu từ","severity":"low"}
+]}

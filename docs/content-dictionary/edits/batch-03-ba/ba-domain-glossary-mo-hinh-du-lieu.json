@@ -1,0 +1,12 @@
+{"file":"ba-domain-glossary-mo-hinh-du-lieu.md","edits":[
+{"old":"Việc thu tiền và kết quả riêng với trạng thái chuyến","new":"Việc thu tiền và kết quả của nó, tách riêng với trạng thái chuyến","reason":"Câu cụt, kết quả riêng với gượng","severity":"medium"},
+{"old":"không tự là khoá nghiệp vụ ổn định.","new":"không mặc nhiên là khoá nghiệp vụ ổn định.","reason":"không tự là gượng","severity":"medium"},
+{"old":"Đừng suy quan hệ từ một mẫu có đúng một record.","new":"Đừng suy ra quan hệ từ một mẫu chỉ có một record.","reason":"Thiếu ra, có đúng gượng","severity":"medium"},
+{"old":"## 4. Chọn source of truth theo thuộc tính","new":"## 4. Chọn nguồn chuẩn theo thuộc tính","reason":"Thống nhất nguồn chuẩn như summary và đoạn sau","severity":"medium"},
+{"old":"Ghi owner, cách lấy dữ liệu","new":"Ghi người phụ trách, cách lấy dữ liệu","reason":"owner thành người phụ trách","severity":"medium"},
+{"old":"“Nguồn chuẩn” không có nghĩa nguồn đó","new":"“Nguồn chuẩn” không có nghĩa là nguồn đó","reason":"Thiếu là","severity":"medium"},
+{"old":"Ghi “huỷ” có thể là khách","new":"Ghi rằng “huỷ” có thể là khách","reason":"Câu thiếu liên kết","severity":"medium"},
+{"old":"Khi nghĩa đổi, tìm API, báo cáo, AC và hướng dẫn hỗ trợ dùng từ đó.","new":"Khi nghĩa đổi, hãy tìm các API, báo cáo, AC và hướng dẫn hỗ trợ có dùng từ đó.","reason":"Câu cụt","severity":"medium"},
+{"old":"mà giữ báo cáo cũ như không ảnh hưởng.","new":"mà coi báo cáo cũ như không bị ảnh hưởng.","reason":"giữ như gượng","severity":"medium"},
+{"old":"thêm nguồn, owner cần xác nhận, ví dụ trái nghĩa.","new":"thêm nguồn, người phụ trách cần xác nhận, phản ví dụ.","reason":"owner; thống nhất phản ví dụ với phần 5","severity":"medium"}
+]}

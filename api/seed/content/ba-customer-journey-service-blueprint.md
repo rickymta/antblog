@@ -10,7 +10,7 @@ language: vi
 
 Khách thấy “đã gửi ghi chú”. Tài xế chỉ nhìn ghim trên bản đồ. CSKH tìm lượt đặt xe bằng một thông tin khác. Mỗi màn hình riêng có thể trông hợp lý, trong khi toàn bộ hành trình vẫn có chỗ đứt giữa các bên.
 
-Journey giúp nhìn từ mục tiêu và trải nghiệm của khách. Blueprint mở rộng xuống hoạt động cung cấp dịch vụ phía sau các điểm tiếp xúc. Dùng cả hai, BA có thể chỉ ra nơi cần xác minh hoặc thay đổi thay vì chỉ đề nghị sửa một màn hình.
+Journey giúp nhìn từ mục tiêu và trải nghiệm của khách. Blueprint mở rộng xuống hoạt động cung cấp dịch vụ phía sau các điểm tiếp xúc. Khi dùng cả hai, BA có thể chỉ ra nơi cần xác minh hoặc thay đổi thay vì chỉ đề nghị sửa một màn hình.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">BA-014 · Phần 2/8 · Trung bình</span>
@@ -19,7 +19,7 @@ Journey giúp nhìn từ mục tiêu và trải nghiệm của khách. Blueprint
 
 ## 1. Chọn hành trình và góc nhìn trước khi vẽ
 
-Phạm vi bài là khách đặt xe tại A, từ xác định điểm chờ tới gặp tài xế hoặc tìm hỗ trợ khi không gặp được. Đây là góc nhìn khách; hành trình làm việc của tài xế là mô hình liên quan nhưng không được trộn thành một người dùng có mọi hành động.
+Phạm vi bài là khách đặt xe tại A, từ lúc xác định điểm chờ tới lúc gặp tài xế hoặc tìm hỗ trợ khi không gặp được. Đây là góc nhìn khách; hành trình làm việc của tài xế là mô hình liên quan nhưng không được trộn thành một người dùng có mọi hành động.
 
 [GOV.UK mô tả experience map như cách thể hiện hành động, suy nghĩ và cảm nhận qua thời gian](https://www.gov.uk/service-manual/user-research/creating-an-experience-map/). Với hồ sơ P02 còn ít nguồn, ta xây **bản nháp tổng hợp để tìm khoảng trống**, không tuyên bố đó là hành trình đại diện đã được xác thực.
 
@@ -33,7 +33,7 @@ Không ghép lời khách C-01, thao tác tài xế C-02 và quan sát khách C-
 | Gửi thông tin điểm đón | Khách cung cấp thông tin để tài xế tìm | INT-01: K-01 kể đã ghi cổng Đông | Nội dung thực tế và thời điểm gửi trong C-01 |
 | Chờ tài xế | Khách biết hai bên có cùng điểm đón không | INT-01 nói tài xế tới cổng Tây | Hai phía nhìn thấy gì, thay đổi nào xảy ra |
 | Tìm hỗ trợ | Hai bên có cách xử lý khi không gặp | INT-03: CSKH có thể nhận nhiều cuộc gọi cho một ca | Dòng thời gian hỗ trợ của chính C-01 |
-| Kết quả | Đón được hoặc kết thúc theo luồng nghiệp vụ | Baseline P01 có lượt huỷ ở mức tổng hợp | Kết quả cụ thể các case và nguyên nhân |
+| Kết quả | Đón được hoặc kết thúc theo luồng nghiệp vụ | Baseline P01 có lượt huỷ ở mức tổng hợp | Kết quả cụ thể của các case và nguyên nhân |
 
 Cột suy nghĩ/cảm xúc chỉ nên thêm khi có lời kể hoặc nguồn phù hợp. Chưa có dữ kiện thì ghi “chưa biết”, không vẽ đường cảm xúc giảm mạnh chỉ vì câu chuyện nghe có vẻ bực bội. Trải nghiệm có thể khác nhau giữa khách quen và khách mới, cần tách nhánh nếu khác biệt đó ảnh hưởng quyết định.
 
@@ -45,10 +45,10 @@ Cột suy nghĩ/cảm xúc chỉ nên thêm khi có lời kể hoặc nguồn ph
 |---|---|---|---|
 | Khách | Nhập/chọn thông tin, cần xác minh chi tiết | Theo dõi và xác định nơi chờ | Liên hệ theo kênh đang có |
 | Tương tác nhìn thấy | Thông tin phản hồi trên app, chưa xác minh C-01 | Thông tin tài xế/điểm đón khách thấy, cần kiểm | Trao đổi với CSKH, chi tiết chưa đủ nguồn |
-| Hậu trường | Tiếp nhận/lưu thông tin: giả thuyết cần dev xác nhận | Cung cấp thông tin cho tài xế; OBS-01 chỉ xác nhận C-02 đọc được sau thao tác | CSKH tìm lượt liên quan; INT-03 |
+| Hậu trường | Tiếp nhận/lưu thông tin: giả thuyết cần nhóm kỹ thuật xác nhận | Cung cấp thông tin cho tài xế; OBS-01 chỉ xác nhận C-02 đọc được sau thao tác | CSKH tìm lượt liên quan; INT-03 |
 | Hỗ trợ | Hợp đồng dữ liệu và phiên bản, chưa kiểm | Điều kiện hiển thị, DOC-02 mới là thiết kế | Ticket và hướng dẫn DOC-01; chất lượng DATA-01 |
 
-Ranh giới giữa tương tác nhìn thấy và hậu trường thường được gọi là line of visibility. Một ứng dụng có giao diện không khiến mọi hoạt động của nó đều nằm phía trước: khách thấy kết quả, nhưng không thấy toàn bộ xử lý bên trong.
+Ranh giới giữa tương tác nhìn thấy và hậu trường thường được gọi là line of visibility. Dù ứng dụng có giao diện, không phải mọi hoạt động của nó đều nằm phía trước: khách thấy kết quả, nhưng không thấy toàn bộ xử lý bên trong.
 
 Blueprint này không khẳng định kiến trúc backend hiện có. Mọi hoạt động chưa có nguồn được gắn nhãn để nhóm kỹ thuật xác nhận; không suy ra service mới chỉ từ một ô trên bảng.
 
@@ -64,7 +64,7 @@ Blueprint này không khẳng định kiến trúc backend hiện có. Mọi ho�
 
 ## 5. Từ as-is sang to-be mà vẫn giữ lịch sử
 
-Để thử hướng dẫn cổng, tạo bản to-be riêng: khách nhận chỉ dẫn theo địa điểm; vận hành có người cập nhật; tài xế nhận cùng tham chiếu. Ghi rõ đó là phương án thiết kế và chưa có bằng chứng tác động.
+Để thử hướng dẫn cổng, tạo bản to-be riêng: khách nhận chỉ dẫn theo địa điểm; bộ phận vận hành có người cập nhật; tài xế nhận cùng tham chiếu. Ghi rõ đó là phương án thiết kế và chưa có bằng chứng tác động.
 
 Mỗi thay đổi phía trước cần nhìn xuống hậu trường: ai tạo dữ liệu cổng, ai xác nhận còn đúng, nếu cổng đóng thì xử lý ra sao? Đây là cách blueprint giúp phát hiện chi phí vận hành trước khi nhóm chỉ ước lượng giao diện.
 
@@ -72,11 +72,11 @@ Không sửa bản as-is cho đẹp theo phương án mong muốn. Lưu phiên b
 
 ## 6. Những lỗi thường gặp
 
-- Journey là danh sách màn hình, bỏ hoạt động ngoài app như tìm biển cổng.
+- Coi journey chỉ là danh sách màn hình, bỏ sót hoạt động ngoài app như tìm biển cổng.
 - Vẽ một luồng thuận duy nhất rồi coi không có ngoại lệ.
 - Điền cảm xúc và backend bằng suy đoán nhưng không gắn nhãn.
 - Gộp nhiều case thành một “câu chuyện thật”.
-- Blueprint kết thúc ở ô hệ thống mà không có owner cho việc hỗ trợ hoặc cập nhật dữ liệu.
+- Blueprint kết thúc ở ô hệ thống mà không có người phụ trách việc hỗ trợ hoặc cập nhật dữ liệu.
 
 Giải pháp không phải thêm thật nhiều lớp; chỉ thêm lớp giúp giải thích vấn đề hoặc quyết định đang cần làm rõ.
 

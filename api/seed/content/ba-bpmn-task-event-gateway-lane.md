@@ -1,14 +1,14 @@
 ---
 slug: ba-bpmn-task-event-gateway-lane
 title: "BPMN cơ bản: task, event, gateway và lane"
-summary: "Đọc và dựng một luồng BPMN phân tích yêu cầu huỷ chuyến của Tới Nơi. Phân biệt công việc, sự kiện, quyết định, trách nhiệm và giao tiếp giữa participant."
+summary: "Đọc và dựng một luồng BPMN phân tích yêu cầu huỷ chuyến của Tới Nơi. Phân biệt công việc, sự kiện, quyết định, trách nhiệm và giao tiếp giữa các participant."
 category: business-analysis
 level: beginner
 tags: [business-analysis, ba-018, bpmn, process-model, toi-noi]
 language: vi
 ---
 
-Hai người vẽ cùng quy trình, nhưng một người dùng hình thoi cho “tính phí”, người kia dùng nó cho “được huỷ không?”. Một người kéo mũi tên từ khách sang hệ thống như cùng một tiến trình. Sơ đồ có vẻ quen mắt nhưng cách hiểu về việc gì chạy và ai kiểm soát đã khác nhau.
+Hai người vẽ cùng quy trình, nhưng một người dùng hình thoi cho “tính phí”, người kia dùng nó cho “được huỷ không?”. Một người kéo mũi tên từ khách sang hệ thống như thể cùng một tiến trình. Sơ đồ có vẻ quen mắt nhưng cách hiểu về việc gì chạy và ai kiểm soát đã khác nhau.
 
 BPMN cung cấp ký pháp chung để trao đổi quy trình. Ở bài này, ta dùng một tập nhỏ đủ biểu diễn luồng phân tích, chưa xây quy trình thực thi bằng engine.
 
@@ -44,9 +44,9 @@ Nếu mở rộng để mô tả khách, tạo pool riêng và nối trao đổi
 
 ## 4. Viết điều kiện sao cho đọc được
 
-“Được phép?” phải có định nghĩa ở bảng đi kèm: khách đúng quyền và trạng thái thuộc searching, accepted, arriving; quy trình thực tế còn bước xác thực và replay được tách khỏi sơ đồ nhập môn. Người review phải biết phần nào đã giản lược.
+“Được phép?” phải có định nghĩa ở bảng đi kèm: khách đúng quyền và trạng thái thuộc searching, accepted, arriving; quy trình thực tế còn bước xác thực và replay, các bước này được tách khỏi sơ đồ nhập môn. Người review phải biết phần nào đã giản lược.
 
-Nhãn “Có” và “Không” gắn với cùng một câu hỏi. Nếu thêm nhánh “Không biết”, xác định dữ liệu nào khiến chưa thể kết luận và owner xử lý. Không để thiếu dữ liệu rơi vào nhánh miễn phí mặc định.
+Nhãn “Có” và “Không” gắn với cùng một câu hỏi. Nếu thêm nhánh “Không biết”, xác định dữ liệu nào khiến chưa thể kết luận và người phụ trách xử lý. Không để thiếu dữ liệu rơi vào nhánh miễn phí mặc định.
 
 ## 5. Tên task diễn đạt công việc, không diễn đạt trạng thái
 
@@ -56,9 +56,9 @@ Một sơ đồ đọc được vẫn cần rule và dữ liệu đi kèm. BPMN 
 
 ## 6. Walkthrough để tìm lỗi mô hình
 
-Đi một case khách huỷ searching: đường cho phép, kết quả phí 0. Đi một case picked_up: đường từ chối. Hỏi người review tại sao token đi mỗi nhánh; câu trả lời phải dựa vào điều kiện và dữ kiện case.
+Đi qua một case khách huỷ searching: đường cho phép, kết quả phí 0. Đi qua một case picked_up: đường từ chối. Hỏi người review tại sao token đi theo mỗi nhánh; câu trả lời phải dựa vào điều kiện và dữ kiện case.
 
-Kiểm các lỗi phổ biến: task không có đầu ra, gateway hỏi điều chưa được tính/đọc, message flow trong cùng pool, sequence flow qua pool, nhánh song song ghép sai hoặc end bị hiểu nhầm thành completed của chuyến.
+Kiểm các lỗi phổ biến: task không có đầu ra, gateway hỏi về điều chưa được tính hoặc chưa được đọc, message flow trong cùng pool, sequence flow qua pool, nhánh song song ghép sai hoặc end bị hiểu nhầm thành completed của chuyến.
 
 ## 7. Bài tập và câu hỏi ôn tập
 

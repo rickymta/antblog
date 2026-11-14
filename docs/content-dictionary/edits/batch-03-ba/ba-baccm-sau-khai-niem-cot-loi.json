@@ -1,0 +1,71 @@
+{
+ "file": "ba-baccm-sau-khai-niem-cot-loi.md",
+ "edits": [
+  {
+   "old": "Câu trả lời còn phụ thuộc tài xế có thể đọc",
+   "new": "Câu trả lời còn phụ thuộc vào việc tài xế có thể đọc",
+   "reason": "Thiếu 'vào việc'",
+   "severity": "medium"
+  },
+  {
+   "old": "Không phải hoàn thành ô Need rồi mới",
+   "new": "Không có chuyện phải hoàn thành ô Need rồi mới",
+   "reason": "Câu thiếu chủ ngữ/vị ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "phương án đang thích không còn phù hợp",
+   "new": "phương án đang được ưa chuộng không còn phù hợp",
+   "reason": "'đang thích' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Áp dụng vào ca điểm đón",
+   "new": "Áp dụng vào tình huống điểm đón",
+   "reason": "'ca' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "chưa đủ cho ca này",
+   "new": "chưa đủ cho tình huống này",
+   "reason": "'ca' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "số ca đứng khác cổng",
+   "new": "số trường hợp đứng khác cổng",
+   "reason": "'ca' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "bớt ca đón thất bại",
+   "new": "bớt lượt đón thất bại",
+   "reason": "'ca' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "; nó có thể đổi cả nhu cầu",
+   "new": "; việc đó có thể đổi cả nhu cầu",
+   "reason": "Tránh 'nó'",
+   "severity": "low"
+  },
+  {
+   "old": "| Owner và quy trình xác nhận |",
+   "new": "| Người phụ trách và quy trình xác nhận |",
+   "reason": "owner có từ Việt tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "| Owner, tần suất kiểm tra",
+   "new": "| Người phụ trách, tần suất kiểm tra",
+   "reason": "owner có từ Việt tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "Các owner ở đây là đề xuất phân công",
+   "new": "Những người phụ trách ở đây là đề xuất phân công",
+   "reason": "owner có từ Việt tự nhiên",
+   "severity": "medium"
+  }
+ ]
+}

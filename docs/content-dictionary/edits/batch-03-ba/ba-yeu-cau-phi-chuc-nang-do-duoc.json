@@ -1,0 +1,14 @@
+{"file":"ba-yeu-cau-phi-chuc-nang-do-duoc.md","edits":[
+{"old":"Mỗi lần mở tối đa năm giây rồi phân loại lỗi nếu chưa có nội dung dùng được.","new":"Mỗi lần mở được chờ tối đa năm giây, sau đó phân loại là lỗi nếu chưa có nội dung dùng được.","reason":"Câu thiếu chủ ngữ và động từ","severity":"medium"},
+{"old":"Định nghĩa điểm cuối rất quan trọng.","new":"Định nghĩa điểm kết thúc của phép đo rất quan trọng.","reason":"'điểm cuối' mơ hồ","severity":"low"},
+{"old":"“Dùng được” cần diễn đạt dữ liệu cần thấy và khả năng thao tác.","new":"“Dùng được” cần nêu rõ dữ liệu người dùng phải thấy và khả năng thao tác.","reason":"Lược chủ thể, lặp 'cần'","severity":"medium"},
+{"old":"| Owner | Nghiệp vụ xác nhận mục tiêu; kỹ thuật/test xác nhận phép đo khả thi |","new":"| Người phụ trách | Bên nghiệp vụ xác nhận mục tiêu; bên kỹ thuật/test xác nhận phép đo khả thi |","reason":"owner → người phụ trách; thiếu chủ thể 'bên'","severity":"medium"},
+{"old":"Không dùng một con số concurrency thay mọi đặc điểm tải.","new":"Không dùng một con số concurrency để thay cho mọi đặc điểm tải.","reason":"Thiếu giới từ","severity":"low"},
+{"old":"Đo nhiều lần nhanh không bù cho một nhóm đáng kể trải nghiệm rất chậm","new":"Nhiều lần đo nhanh không bù được cho một nhóm đáng kể có trải nghiệm rất chậm","reason":"Trật tự từ gượng, lược động từ","severity":"medium"},
+{"old":"Chọn tình huống liên quan phạm vi: người dùng nhận biết trạng thái mà không chỉ dựa màu;","new":"Chọn tình huống liên quan đến phạm vi: người dùng nhận biết trạng thái mà không chỉ dựa vào màu;","reason":"Thiếu giới từ","severity":"medium"},
+{"old":"phạm vi kiểm khi đặc tả.","new":"phạm vi kiểm tra ngay khi đặc tả.","reason":"'kiểm' cụt","severity":"low"},
+{"old":"Ngưỡng càng chặt có thể cần thay đổi kiến trúc, chi phí hoặc scope.","new":"Ngưỡng càng chặt có thể kéo theo thay đổi kiến trúc, chi phí hoặc scope.","reason":"Câu thiếu logic chủ vị","severity":"medium"},
+{"old":"người có quyền chốt đánh đổi.","new":"người có quyền chốt mức đánh đổi.","reason":"Thiếu danh từ","severity":"low"},
+{"old":"thành một scenario mất phản hồi, kết quả người dùng thấy,","new":"thành một scenario nêu rõ tình huống mất phản hồi, kết quả người dùng thấy,","reason":"Danh sách thiếu động từ","severity":"medium"},
+{"old":"<p>Chưa nếu điều kiện đó không khớp hợp đồng đo. Cần cùng workload,","new":"<p>Chưa đủ, nếu điều kiện đó không khớp hợp đồng đo. Cần dùng đúng workload,","reason":"Câu cụt, thiếu động từ","severity":"medium"}
+]}

@@ -1,0 +1,10 @@
+{"file":"ba-dashboard-do-ket-qua-sau-phat-hanh.md","edits":[
+{"old":"Snapshot lấy sau cuối tuần bảy ngày;","new":"Snapshot lấy bảy ngày sau khi tuần kết thúc;","reason":"Trật tự từ khó hiểu","severity":"medium"},
+{"old":"để kết luận về mọi booking hoặc việc tính năng có ảnh hưởng khả năng được nhận hay không.","new":"để kết luận về mọi booking, hoặc kết luận tính năng có ảnh hưởng tới khả năng được nhận chuyến hay không.","reason":"Câu thiếu động từ cho vế sau","severity":"medium"},
+{"old":"240/1.000 = 24% là adoption trên toàn cohort, khác 40%.","new":"240/1.000 = 24% là adoption trên toàn cohort, khác với 40%.","reason":"Thiếu 'với'","severity":"low"},
+{"old":"thời gian quan sát, nguồn và owner. Event schema cần version và quy tắc dedup. Nếu có late event, mô tả dashboard cập nhật lại số cũ hay chốt snapshot để người đọc hiểu chênh lệch.","new":"thời gian quan sát, nguồn và người phụ trách. Event schema cần phiên bản và quy tắc khử trùng lặp. Nếu có late event, mô tả rõ dashboard cập nhật lại số cũ hay chốt snapshot, để người đọc hiểu chênh lệch.","reason":"owner, version, dedup theo bảng thuật ngữ; tách vế","severity":"medium"},
+{"old":"Một tỷ lệ đẹp từ telemetry lỗi không phải bằng chứng sản phẩm tốt.","new":"Một tỷ lệ đẹp từ telemetry lỗi không phải là bằng chứng cho thấy sản phẩm tốt.","reason":"Câu cụt","severity":"low"},
+{"old":"## 6. So baseline có giới hạn","new":"## 6. So sánh với baseline có giới hạn","reason":"'So baseline' cụt","severity":"low"},
+{"old":"Guardrail khiếu nại chưa có baseline đáng tin thì ghi chưa đủ đánh giá.","new":"Với guardrail khiếu nại chưa có baseline đáng tin, ghi là chưa đủ để đánh giá.","reason":"Câu thiếu chủ thể, lược chữ","severity":"medium"},
+{"old":"mô tả so tuần chỉ là quan sát,","new":"mô tả việc so sánh hai tuần chỉ là quan sát,","reason":"'so tuần' cụt","severity":"medium"}
+]}

@@ -1,0 +1,11 @@
+{"file":"ba-risk-assumption-log.md","edits":[
+{"old":"ghi tín hiệu, owner, phản ứng","new":"ghi tín hiệu, người phụ trách, phản ứng","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Nếu không kiểm nó, nhóm có thể","new":"Nếu không kiểm chứng giả định này, nhóm có thể","reason":"\"kiểm nó\" cụt, tự ghép","severity":"medium"},
+{"old":"| ID/loại | Nội dung | Owner đề xuất | Bước tiếp |","new":"| ID/loại | Nội dung | Người phụ trách đề xuất | Bước tiếp |","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Quan sát ca dùng với app version rõ","new":"Quan sát các lượt dùng với phiên bản app rõ ràng","reason":"\"version\" thành \"phiên bản\"; \"ca\" lược danh từ","severity":"medium"},
+{"old":"Ước lượng và diễn tập ca ngoại lệ","new":"Ước lượng và diễn tập trường hợp ngoại lệ","reason":"\"ca\" lược danh từ","severity":"medium"},
+{"old":"Owner là người theo dõi tới kết luận,","new":"Người phụ trách là người theo dõi tới kết luận,","reason":"Owner đã có từ Việt tự nhiên","severity":"low"},
+{"old":"Giảm rủi ro bằng kiểm telemetry; tránh bằng chưa mở rộng khi điều kiện chưa đạt; chấp nhận một rủi ro còn lại","new":"Giảm rủi ro bằng cách kiểm tra telemetry; tránh rủi ro bằng cách chưa mở rộng khi điều kiện chưa đạt; chấp nhận một rủi ro còn lại","reason":"Câu cụt, thiếu động từ và danh từ","severity":"medium"},
+{"old":"“CS xử lý được mọi ca pilot bằng tra cứu thủ công”","new":"“CS xử lý được mọi trường hợp trong pilot bằng tra cứu thủ công”","reason":"\"ca\" lược danh từ","severity":"low"},
+{"old":"Cần thời gian xử lý mỗi ca, số ca, ca trực và quyền truy cập.","new":"Cần thời gian xử lý mỗi trường hợp, số trường hợp, ca trực và quyền truy cập.","reason":"\"ca\" lược danh từ (giữ \"ca trực\")","severity":"low"}
+]}

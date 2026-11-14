@@ -1,0 +1,9 @@
+{"file":"ba-uat-vai-tro-nguoi-dung-nghiep-vu.md","edits":[
+{"old":"chưa trả lời liệu CS có xử lý được","new":"chưa cho biết liệu CS có xử lý được","reason":"trả lời liệu gượng","severity":"medium"},
+{"old":"BA điều phối không có nghĩa BA tự ký thay nghiệp vụ.","new":"BA điều phối không có nghĩa là BA tự ký thay bên nghiệp vụ.","reason":"Thiếu là; nghiệp vụ cần chủ thể","severity":"medium"},
+{"old":"Mục tiêu: kiểm hành trình khách xác nhận","new":"Mục tiêu: kiểm tra hành trình khách xác nhận","reason":"kiểm cụt","severity":"medium"},
+{"old":"và chứng minh giảm huỷ ngoài thực tế.","new":"và việc chứng minh giảm huỷ ngoài thực tế.","reason":"Thiếu danh từ hoá trong danh sách","severity":"low"},
+{"old":"tránh đọc từng cú click khiến họ chỉ làm theo kịch bản.","new":"tránh đọc từng cú click vì như vậy họ chỉ làm theo kịch bản.","reason":"khiến thiếu chủ ngữ rõ","severity":"medium"},
+{"old":"Nêu hạn chế đó ảnh hưởng mức tự tin thế nào.","new":"Nêu hạn chế đó ảnh hưởng thế nào tới mức tự tin.","reason":"Trật tự từ kiểu Anh","severity":"medium"},
+{"old":"UAT kiểm khả năng chấp nhận theo phạm vi","new":"UAT kiểm tra khả năng chấp nhận theo phạm vi","reason":"kiểm cụt","severity":"low"}
+]}

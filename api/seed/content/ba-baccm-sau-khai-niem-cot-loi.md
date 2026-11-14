@@ -8,7 +8,7 @@ tags: [business-analysis, ba-004, baccm, discovery, toi-noi]
 language: vi
 ---
 
-Nhóm Tới Nơi đã có problem brief, danh sách người tham gia và vài yêu cầu đề xuất. Một người hỏi: “Nếu cải thiện ghi chú rẻ hơn chat thì chọn ghi chú luôn được không?” Câu trả lời còn phụ thuộc tài xế có thể đọc ghi chú đúng lúc, khách có biết ghi gì và điểm đón có đủ rõ để mô tả hay không.
+Nhóm Tới Nơi đã có problem brief, danh sách người tham gia và vài yêu cầu đề xuất. Một người hỏi: “Nếu cải thiện ghi chú rẻ hơn chat thì chọn ghi chú luôn được không?” Câu trả lời còn phụ thuộc vào việc tài xế có thể đọc ghi chú đúng lúc, khách có biết ghi gì và điểm đón có đủ rõ để mô tả hay không.
 
 Để xem xét các mối liên hệ đó, BA cần một khung câu hỏi gọn. BACCM giúp nhóm nhìn cùng một thay đổi qua nhiều góc, thay vì chỉ tranh luận tính năng nào có nhiều ưu điểm hơn.
 
@@ -21,13 +21,13 @@ Nhóm Tới Nơi đã có problem brief, danh sách người tham gia và vài y
 
 Theo [IIBA](https://www.iiba.org/knowledgehub/the-business-analysis-standard/2-understanding-business-analysis/2-2-a-model-for-effective-analysis-baccm/), Business Analysis Core Concept Model — BACCM — gồm sáu khái niệm liên hệ với nhau: **Change, Need, Solution, Value, Stakeholder và Context**. Chúng cung cấp ngôn ngữ chung để phân tích nghiệp vụ.
 
-Không phải hoàn thành ô Need rồi mới được nghĩ tới Stakeholder. Một quan sát mới từ tài xế có thể khiến nhóm sửa cách hiểu nhu cầu; một giới hạn bối cảnh có thể làm phương án đang thích không còn phù hợp. Các bảng dưới đây là cách áp dụng riêng cho bài tập Tới Nơi, không phải biểu mẫu bắt buộc của IIBA.
+Không có chuyện phải hoàn thành ô Need rồi mới được nghĩ tới Stakeholder. Một quan sát mới từ tài xế có thể khiến nhóm sửa cách hiểu nhu cầu; một giới hạn bối cảnh có thể làm phương án đang được ưa chuộng không còn phù hợp. Các bảng dưới đây là cách áp dụng riêng cho bài tập Tới Nơi, không phải biểu mẫu bắt buộc của IIBA.
 
 ## 2. Điền sáu ô bằng một tình huống cụ thể
 
 Toàn bộ dữ kiện và đề xuất trong bài thuộc hồ sơ giả lập của series. Chưa có quyết định xây chat hoặc thay đổi SPEC của hệ thống.
 
-| Khái niệm | Cách hiểu để đặt câu hỏi | Áp dụng vào ca điểm đón |
+| Khái niệm | Cách hiểu để đặt câu hỏi | Áp dụng vào tình huống điểm đón |
 |---|---|---|
 | Need — nhu cầu | Vấn đề hoặc cơ hội nào cần được xử lý? | Hai bên cần xác định cùng điểm đón; chưa rõ nguyên nhân nào làm việc này thất bại |
 | Change — thay đổi | Điều gì trong cách vận hành sẽ khác đi? | Có thể thay cách khách mô tả điểm chờ và cách tài xế nhận thông tin |
@@ -36,7 +36,7 @@ Toàn bộ dữ kiện và đề xuất trong bài thuộc hồ sơ giả lập 
 | Stakeholder — bên liên quan | Ai có quan hệ với nhu cầu, thay đổi hoặc giải pháp? | Khách, tài xế, CSKH, vận hành, PO, nhóm kỹ thuật và người chịu trách nhiệm dữ liệu |
 | Context — bối cảnh | Điều kiện nào làm thay đổi có ý nghĩa hoặc bị giới hạn? | Địa điểm nhiều cổng, chất lượng mạng, thời điểm sử dụng, phiên bản app, khu vực pilot |
 
-Viết “Value = tăng doanh thu” chưa đủ cho ca này. Nếu không biết lượt đón được cải thiện thế nào hoặc chi phí phát sinh là gì, giá trị đó mới là mong muốn. Viết “Stakeholder = người dùng” cũng che mất sự khác nhau giữa khách, tài xế và người hỗ trợ.
+Viết “Value = tăng doanh thu” chưa đủ cho tình huống này. Nếu không biết lượt đón được cải thiện thế nào hoặc chi phí phát sinh là gì, giá trị đó mới là mong muốn. Viết “Stakeholder = người dùng” cũng che mất sự khác nhau giữa khách, tài xế và người hỗ trợ.
 
 ## 3. Giá trị của bảng nằm ở các mối nối
 
@@ -44,7 +44,7 @@ Viết “Value = tăng doanh thu” chưa đủ cho ca này. Nếu không biế
 
 Nếu vấn đề chủ yếu là địa điểm nhiều cổng, chat có thể giúp trao đổi thêm nhưng vẫn yêu cầu khách mô tả đúng cổng. Một danh sách điểm đón có hướng dẫn có thể phù hợp hơn ở địa điểm được quản lý tốt. Ngược lại, danh sách cứng dễ lỗi thời ở nơi đang sửa đường. Cả hai nhận định đều cần kiểm chứng trong bối cảnh cụ thể.
 
-BA nên viết quan hệ dưới dạng giả thuyết: “Nếu khách chọn được cổng nhận biết rõ và tài xế nhận cùng thông tin trước khi tới, số ca đứng khác cổng có thể giảm.” Câu này cho thấy điều kiện cần quan sát, thay vì khẳng định “thêm tính năng sẽ giảm huỷ”.
+BA nên viết quan hệ dưới dạng giả thuyết: “Nếu khách chọn được cổng nhận biết rõ và tài xế nhận cùng thông tin trước khi tới, số trường hợp đứng khác cổng có thể giảm.” Câu này cho thấy điều kiện cần quan sát, thay vì khẳng định “thêm tính năng sẽ giảm huỷ”.
 
 ### Stakeholder ↔ Value: lợi ích có đang chuyển thành gánh nặng cho bên khác?
 
@@ -56,7 +56,7 @@ Yêu cầu khách nhập một đoạn mô tả dài có thể cung cấp thêm 
 
 ### Change ↔ Value: thay đổi hành vi nào phải xảy ra trước khi có lợi ích?
 
-Ra mắt giao diện chưa đồng nghĩa khách sẽ nhập thông tin hữu ích. Chuỗi kỳ vọng có thể là: khách hiểu cần mô tả gì → dữ liệu có ích được tạo → tài xế nhận biết dữ liệu → hai bên cùng xác định địa điểm → bớt ca đón thất bại. Mỗi mối nối có thể đứt. Chỉ đo số lượt mở màn hình không cho biết toàn bộ chuỗi hoạt động.
+Ra mắt giao diện chưa đồng nghĩa khách sẽ nhập thông tin hữu ích. Chuỗi kỳ vọng có thể là: khách hiểu cần mô tả gì → dữ liệu có ích được tạo → tài xế nhận biết dữ liệu → hai bên cùng xác định địa điểm → bớt lượt đón thất bại. Mỗi mối nối có thể đứt. Chỉ đo số lượt mở màn hình không cho biết toàn bộ chuỗi hoạt động.
 
 ## 4. Khi bối cảnh đổi, cập nhật cả phân tích
 
@@ -65,13 +65,13 @@ Giả sử sau discovery tại A, PO muốn mở pilot sang khu vực B có nhi�
 | Nội dung phải xem lại | Câu hỏi cần trả lời | Đầu ra cập nhật |
 |---|---|---|
 | Context | Điểm đón thay đổi theo ngày hay theo giờ? | Danh sách điều kiện mới |
-| Stakeholder | Ai cập nhật và xác nhận điểm đón tạm? | Owner và quy trình xác nhận |
+| Stakeholder | Ai cập nhật và xác nhận điểm đón tạm? | Người phụ trách và quy trình xác nhận |
 | Solution | Hướng dẫn cố định còn phù hợp? | So sánh phương án theo bối cảnh B |
 | Change | Vận hành cần làm thêm việc gì? | Quy trình mới và nhu cầu hướng dẫn |
 | Value | Lợi ích có bù chi phí duy trì không? | Giả thuyết giá trị và cách đo |
 | Need | Vẫn là khó nhận diện cổng hay vấn đề đã khác? | Problem statement được kiểm tra lại |
 
-Không nên lấy tỷ lệ 12% của A làm baseline B. Thay phạm vi không chỉ là sửa tên khu vực trong tài liệu; nó có thể đổi cả nhu cầu và cách đo.
+Không nên lấy tỷ lệ 12% của A làm baseline B. Thay phạm vi không chỉ là sửa tên khu vực trong tài liệu; việc đó có thể đổi cả nhu cầu và cách đo.
 
 ## 5. Từ mô hình sang việc cần làm
 
@@ -80,11 +80,11 @@ Một bảng sáu ô đầy chữ nhưng không dẫn tới hành động sẽ n
 | Khoảng trống | Người phối hợp đề xuất | Bằng chứng cần mang về |
 |---|---|---|
 | Khách có biết mô tả cổng bằng từ ngữ nào? | BA và UX | Ghi chép quan sát, cách gọi địa điểm thực tế |
-| Ai duy trì hướng dẫn điểm đón? | Vận hành | Owner, tần suất kiểm tra và cách báo thông tin sai |
+| Ai duy trì hướng dẫn điểm đón? | Vận hành | Người phụ trách, tần suất kiểm tra và cách báo thông tin sai |
 | Tài xế có nhận được ghi chú đúng lúc? | UX, developer, tài xế tham gia nghiên cứu | Quan sát thao tác và kiểm tra luồng dữ liệu |
 | Chi phí vận hành có thể vượt lợi ích? | PO và vận hành | Ước lượng có giả định; chưa điền ROI khi thiếu dữ liệu |
 
-Các owner ở đây là đề xuất phân công. BA cần xác nhận với người tham gia trước khi ghi thành cam kết.
+Những người phụ trách ở đây là đề xuất phân công. BA cần xác nhận với người tham gia trước khi ghi thành cam kết.
 
 ## 6. Lỗi thường gặp
 

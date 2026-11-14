@@ -1,6 +1,6 @@
 ---
 slug: ba-baseline-version-approval
-title: "Baseline, version và approval: biết nhóm đã chốt điều gì"
+title: "Baseline, phiên bản và phê duyệt: biết nhóm đã chốt điều gì"
 summary: "Tách bản nháp, bản được chấp nhận và phiên bản có hiệu lực; lưu quyết định đủ rõ để triển khai, nghiệm thu và giải thích thay đổi."
 category: business-analysis
 level: intermediate
@@ -14,9 +14,9 @@ Tài liệu có tên final-v3 không đảm bảo mọi người đang dùng cù
 
 ## 1. Ba điều cần tách
 
-Version nhận diện nội dung cụ thể. Approval ghi người có thẩm quyền đã chấp nhận điều gì, với điều kiện nào. Baseline là tập thông tin được chọn làm mốc tham chiếu cho công việc tiếp theo. Một tài liệu có thể có version mới nhưng chưa được duyệt, hoặc được duyệt nhưng chưa có hiệu lực vận hành.
+Phiên bản nhận diện nội dung cụ thể. Phê duyệt ghi người có thẩm quyền đã chấp nhận điều gì, với điều kiện nào. Baseline là tập thông tin được chọn làm mốc tham chiếu cho công việc tiếp theo. Một tài liệu có thể có phiên bản mới nhưng chưa được duyệt, hoặc được duyệt nhưng chưa có hiệu lực vận hành.
 
-Git commit giúp nhận diện và xem diff nội dung; tự nó không thay chữ ký hoặc quyết định nghiệp vụ cần thiết.
+Git commit giúp nhận diện và xem diff nội dung; tự nó không thay thế chữ ký hoặc quyết định nghiệp vụ cần thiết.
 
 ## 2. Mẫu baseline nhỏ
 
@@ -25,19 +25,19 @@ Git commit giúp nhận diện và xem diff nội dung; tự nó không thay ch�
 | Baseline | BL-P06-01, bản phân tích hiện hành |
 | Rule nền | accepted miễn phí khi elapsed < 120 giây |
 | Thay đổi đang xét | CR-BA-01 đề xuất < 180 giây |
-| Tài liệu đi cùng | Decision table, state model, thông báo, case biên |
+| Tài liệu đi cùng | Decision table, state model, thông báo, trường hợp biên |
 | Trạng thái CR | Chưa duyệt |
 | Người quyết định | Đại diện nghiệp vụ có thẩm quyền, cần xác nhận danh tính thực tế |
 
 Không ghi CR vào baseline đang dùng rồi chỉ chú thích nhỏ “draft”. Người triển khai cần phân biệt ngay trạng thái từng phần.
 
-## 3. Approval phải có nội dung
+## 3. Phê duyệt phải có nội dung
 
 “OK nhé” dưới một cuộc chat dài không rõ duyệt giá, phạm vi hay ngày phát hành. Bản ghi nên có ID quyết định, nội dung/diff, phạm vi, điều kiện, người quyết định, thời điểm và bằng chứng xác nhận. Nếu chỉ duyệt phân tích tiếp, đừng đánh dấu sẵn sàng triển khai.
 
 ## 4. Thời điểm hiệu lực là một rule
 
-Phương án A áp chính sách theo thời điểm accepted; phương án B theo thời điểm khách huỷ. Chuyến nhận trước mốc bật và huỷ sau mốc sẽ khác kết quả giữa hai phương án. Cần chọn và mô tả rõ, không để developer tự quyết từ cách code tiện nhất.
+Phương án A áp chính sách theo thời điểm accepted; phương án B theo thời điểm khách huỷ. Chuyến nhận trước mốc bật và huỷ sau mốc sẽ cho kết quả khác nhau giữa hai phương án. Cần chọn và mô tả rõ, không để developer tự quyết từ cách code tiện nhất.
 
 Nếu chọn snapshot theo lần accepted, phải phân tích trường hợp tài xế rời, chuyến về searching rồi được nhận lại. Có snapshot mới không? Đó là câu hỏi thiết kế chưa được baseline hiện tại trả lời.
 
@@ -53,7 +53,7 @@ Rollback phần mềm không tự thu hồi tiền hay thông báo đã gửi. D
 
 Viết decision log cho tình huống PO đồng ý thử chính sách nhưng chưa chốt cách xử lý chuyến đang accepted. Đánh dấu phần nào được tiếp tục và phần nào còn chờ.
 
-<details><summary>Gợi ý</summary><p>Có thể tiếp tục phân tích/ước lượng các phương án. Chưa coi rule hiệu lực đủ rõ để triển khai. Gán owner và hạn chốt cách xử lý chuyến qua mốc, thay vì diễn giải sự đồng ý chung thành approval toàn bộ.</p></details>
+<details><summary>Gợi ý</summary><p>Có thể tiếp tục phân tích/ước lượng các phương án. Chưa coi rule hiệu lực đủ rõ để triển khai. Gán người phụ trách và hạn chốt cách xử lý chuyến qua mốc, thay vì diễn giải sự đồng ý chung thành phê duyệt toàn bộ.</p></details>
 
 ## 8. Đọc tiếp
 

@@ -1,0 +1,71 @@
+{
+"file": "ba-brd-srs-tai-lieu-theo-rui-ro.md",
+"edits": [
+{
+"old": "cho rule, version và approval",
+"new": "cho rule, phiên bản và phê duyệt",
+"reason": "Thuật ngữ trong văn xuôi",
+"severity": "medium"
+},
+{
+"old": "| Approval và thay đổi |",
+"new": "| Phê duyệt và thay đổi |",
+"reason": "approval -> phê duyệt",
+"severity": "low"
+},
+{
+"old": "## 4. Version phải có ý nghĩa",
+"new": "## 4. Phiên bản phải có ý nghĩa",
+"reason": "version -> phiên bản",
+"severity": "medium"
+},
+{
+"old": "Đặt version gói, ngày",
+"new": "Đặt phiên bản gói, ngày",
+"reason": "version -> phiên bản",
+"severity": "medium"
+},
+{
+"old": "đều approved.",
+"new": "đều đã được phê duyệt.",
+"reason": "approved -> phê duyệt",
+"severity": "medium"
+},
+{
+"old": "không chỉ nhớ bằng trí nhớ tác giả",
+"new": "không chỉ dựa vào trí nhớ của tác giả",
+"reason": "Lặp 'nhớ... trí nhớ', gượng",
+"severity": "medium"
+},
+{
+"old": "Ghi issue chưa đóng, owner, hạn và ảnh hưởng",
+"new": "Ghi vấn đề chưa đóng, người phụ trách, hạn và ảnh hưởng",
+"reason": "owner/issue -> từ Việt tự nhiên",
+"severity": "medium"
+},
+{
+"old": "Phê duyệt là cơ chế chịu trách nhiệm quyết định, không thay",
+"new": "Phê duyệt là cơ chế quy trách nhiệm cho quyết định, không thay thế",
+"reason": "'cơ chế chịu trách nhiệm quyết định' khó hiểu",
+"severity": "medium"
+},
+{
+"old": "hai ví dụ approval có phạm vi",
+"new": "hai ví dụ phê duyệt có phạm vi",
+"reason": "approval -> phê duyệt",
+"severity": "low"
+},
+{
+"old": "truy cập, version và duy trì",
+"new": "truy cập, đánh phiên bản và duy trì",
+"reason": "version -> phiên bản",
+"severity": "medium"
+},
+{
+"old": "Gửi người review các câu hỏi cụ thể",
+"new": "Gửi cho người review các câu hỏi cụ thể",
+"reason": "Thiếu giới từ",
+"severity": "low"
+}
+]
+}

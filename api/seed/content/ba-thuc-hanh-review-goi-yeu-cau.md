@@ -14,7 +14,7 @@ language: vi
 
 ## 1. Xác định chuẩn để review
 
-Hồ sơ P04 là đề xuất chung cho bài tập: chỉ chủ lượt ghi khi searching, xác nhận gắn revision, thành công dựa nguồn chuẩn, không đổi trip state. Nó chưa phải baseline sản phẩm được duyệt. SPEC lab xác nhận điểm đón chưa được triển khai; P03 có đề xuất ba phút chưa duyệt, ngoài phạm vi P04.
+Hồ sơ P04 là đề xuất chung cho bài tập: chỉ chủ lượt ghi khi searching, xác nhận gắn revision, thành công dựa nguồn chuẩn, không đổi trip state. Hồ sơ này chưa phải baseline sản phẩm được duyệt. SPEC lab xác nhận điểm đón chưa được triển khai; P03 có đề xuất ba phút chưa duyệt, ngoài phạm vi P04.
 
 Review phải phân biệt lỗi trái giả định thiết kế của bài, câu hỏi chưa chốt và vấn đề cần người có quyền quyết định. Không sửa hết bằng ý kiến cá nhân rồi ghi “đã duyệt”.
 
@@ -31,7 +31,7 @@ Review phải phân biệt lỗi trái giả định thiết kế của bài, c�
 | F07 | “Nhanh, an toàn” không đo được | Quality scenario và rule quyền cụ thể |
 | F08 | Retry vô hạn | Chốt giới hạn, định danh, đối soát và phản hồi |
 
-Thêm F09 nếu nháp đưa phí ba phút vào: không có approval và ngoài scope. Thêm F10 cho cách chia API trước/UI sau: kế hoạch kỹ thuật chưa chứng minh một lát cắt có thể nghiệm thu theo story khách.
+Thêm F09 nếu nháp đưa phí ba phút vào: không có phê duyệt và ngoài scope. Thêm F10 cho cách chia API trước/UI sau: kế hoạch kỹ thuật chưa chứng minh một lát cắt có thể nghiệm thu theo story khách.
 
 ## 3. Bản sửa tối thiểu có thể review
 
@@ -48,23 +48,23 @@ Không tự điền hành vi ghi chú rỗng vì OPEN-01 còn mở. Không tuyê
 | RULE-P04-03 | Nhận kết quả chuẩn | 05 | Trạng thái đang gửi/chưa biết/thành công |
 | NFR-P04-01 | Mở chi tiết | Quality scenario riêng | Đo đầu cuối và tỷ lệ lỗi |
 
-Traceability không phải chỉ đánh dấu có liên kết. Đọc nội dung hai đầu để kiểm cùng nghĩa và version. AC trỏ đúng ID nhưng mô tả sai state vẫn là lỗi.
+Traceability không phải chỉ đánh dấu có liên kết. Đọc nội dung hai đầu để kiểm tra cùng nghĩa và cùng phiên bản. AC trỏ đúng ID nhưng mô tả sai state vẫn là lỗi.
 
 ## 5. Walkthrough các trường hợp quyết định
 
-Đi qua chủ lượt r4 khớp; r4 cũ; accepted thắng trước ghi; sai quyền; request đã lưu nhưng response mất. Với mỗi ca nêu trạng thái cuối, dữ liệu được ghi và điều người dùng biết.
+Đi qua chủ lượt r4 khớp; r4 cũ; accepted thắng trước ghi; sai quyền; request đã lưu nhưng response mất. Với mỗi trường hợp nêu trạng thái cuối, dữ liệu được ghi và điều người dùng biết.
 
 Một reviewer đóng vai khách, một người làm kỹ thuật/test nếu có thể. Nếu tự học, thay vai theo lượt và ghi câu hỏi còn mở. Không tự dựng kết quả “người dùng thích” khi chưa có phiên nghiên cứu.
 
 ## 6. Kết luận review có phạm vi
 
-Ví dụ: “Các rule quyền/state/revision đã được diễn đạt nhất quán trong bản đề xuất. Chưa đủ chốt triển khai vì nội dung bắt buộc, hợp đồng retry và môi trường NFR còn mở. Đề nghị review ba mục với owner trước khi baseline; có thể chuẩn bị prototype và hợp đồng nháp song song.”
+Ví dụ: “Các rule quyền/state/revision đã được diễn đạt nhất quán trong bản đề xuất. Chưa đủ chốt triển khai vì nội dung bắt buộc, hợp đồng retry và môi trường NFR còn mở. Đề nghị review ba mục với người phụ trách trước khi baseline; có thể chuẩn bị prototype và hợp đồng nháp song song.”
 
 Không dùng “tài liệu xong 100%” khi điều kiện ảnh hưởng kết quả còn thiếu. Cũng không chặn mọi công việc chỉ vì một câu hỏi không liên quan chưa được trả lời; nêu phụ thuộc cụ thể.
 
 ## 7. Rubric tự đánh giá
 
-Chấm 0–2 cho: phát hiện đúng trigger; sửa có căn cứ; nhất quán liên sản phẩm; nêu câu hỏi/thẩm quyền còn mở; kế hoạch kiểm có luồng lỗi. Mục tiêu tự học từ 8/10, không mục nào 0.
+Chấm 0–2 cho: phát hiện đúng trigger; sửa có căn cứ; nhất quán liên sản phẩm; nêu câu hỏi/thẩm quyền còn mở; kế hoạch kiểm thử có luồng lỗi. Mục tiêu tự học từ 8/10, không mục nào 0.
 
 **Câu hỏi:** Có cần thêm code để hoàn thành bài này không?
 

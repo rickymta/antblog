@@ -1,0 +1,41 @@
+{
+ "file": "ba-phong-van-nghiep-vu-khong-dan-dat.md",
+ "edits": [
+  {
+   "old": "ghi chép phân biệt phát ngôn, diễn giải với giả thuyết của BA.",
+   "new": "ghi chép tách riêng phát ngôn, diễn giải và giả thuyết của BA.",
+   "reason": "'phân biệt ... với' ba thành phần gượng",
+   "severity": "low"
+  },
+  {
+   "old": "truy vấn sâu mà không gợi đáp án",
+   "new": "hỏi đào sâu mà không gợi đáp án",
+   "reason": "'truy vấn' là calque của probe",
+   "severity": "medium"
+  },
+  {
+   "old": "## 1. Research question khác câu hỏi hỏi người tham gia",
+   "new": "## 1. Research question khác với câu hỏi dành cho người tham gia",
+   "reason": "'câu hỏi hỏi' lặp, gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "BA nối các chi tiết thành hiểu biết về luồng thông tin.",
+   "new": "BA nối các chi tiết để hiểu luồng thông tin.",
+   "reason": "'thành hiểu biết' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "để đủ ô biểu mẫu.",
+   "new": "để điền đủ ô biểu mẫu.",
+   "reason": "Lược động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "ghi nhận ý tưởng rồi hỏi trải nghiệm khiến họ nghĩ tới nó.",
+   "new": "ghi nhận ý tưởng rồi hỏi về trải nghiệm đã khiến họ nghĩ tới ý tưởng đó.",
+   "reason": "Tránh 'nó' mơ hồ; lược giới từ",
+   "severity": "medium"
+  }
+ ]
+}

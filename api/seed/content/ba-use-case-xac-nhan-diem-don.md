@@ -24,23 +24,23 @@ Mục tiêu: khách biết nội dung nào được ghi nhận là đã xác nh�
 |---|---|
 | Trigger | Khách chọn xem/xác nhận thông tin điểm đón |
 | Actor chính | Khách đã xác thực, có quyền với lượt |
-| Precondition | Lượt tồn tại và khách có quyền truy cập; ở lúc mở đang trong phạm vi thao tác |
+| Precondition | Lượt tồn tại và khách có quyền truy cập; lúc mở màn hình, lượt vẫn còn trong phạm vi thao tác |
 | Thành công | Xác nhận gắn với revision chuẩn đã xem |
 | Bảo đảm tối thiểu | Không ghi xác nhận sai revision/quyền; không tự chuyển state chuyến |
 | Ngoài scope | Sửa sau nhận chuyến, chat, ảnh, xác nhận của tài xế |
 
-Precondition là điều dùng để mô tả bối cảnh vào luồng; không có nghĩa hệ thống được bỏ kiểm tra quyền khi thực thi. Một yêu cầu trực tiếp hoặc phiên hết hạn vẫn cần xử lý theo hợp đồng.
+Precondition là điều dùng để mô tả bối cảnh vào luồng; không có nghĩa hệ thống được bỏ kiểm tra quyền khi thực thi. Một yêu cầu gọi trực tiếp hoặc phiên đã hết hạn vẫn cần xử lý theo hợp đồng.
 
 ## 3. Main flow đủ chi tiết để theo dõi dữ liệu
 
 1. Khách yêu cầu xem thông tin điểm đón của lượt.
 2. Hệ thống trả thông tin chuẩn, revision và khả năng thao tác hiện tại.
 3. Khách đọc nội dung, chọn xác nhận bản đang xem.
-4. Hệ thống kiểm quyền, state và revision nhất quán tại quyết định ghi.
+4. Hệ thống kiểm tra quyền, state và revision còn nhất quán tại thời điểm quyết định ghi.
 5. Hệ thống ghi xác nhận cho revision đó, trả kết quả.
 6. Giao diện hiển thị nội dung/revision đã xác nhận theo phản hồi chuẩn.
 
-Không chèn “click nút xanh ở góc phải” vào logic nếu đó chưa là quyết định cần ràng buộc. Chi tiết giao diện ở wireframe, cùng liên kết bước use case để tránh hai nơi mô tả khác nhau.
+Không chèn “click nút xanh ở góc phải” vào logic nếu đó chưa là quyết định cần ràng buộc. Chi tiết giao diện nằm ở wireframe; giữ liên kết với bước use case tương ứng để tránh hai nơi mô tả khác nhau.
 
 ## 4. Alternative flow phải có điểm rẽ và điểm kết
 
@@ -49,7 +49,7 @@ Không chèn “click nút xanh ở góc phải” vào logic nếu đó chưa l
 | A1: revision đổi | Bước 4 | Không ghi bản cũ, tải nội dung mới | Về bước 2 để khách xem lại |
 | A2: state không còn searching | Bước 4 | Không ghi, hiển thị trạng thái hiện tại | Kết thúc không thành công cho thao tác ghi |
 | A3: sai quyền/phiên không hợp lệ | Bước đọc hoặc ghi | Không trả dữ liệu/không ghi ngoài quyền | Theo luồng xác thực/truy cập đã chốt |
-| A4: không biết kết quả do timeout | Bước 5–6 | Ghi nhận trạng thái chưa biết, kiểm lại bằng định danh | Thành công hoặc lỗi xác định sau đối soát |
+| A4: không biết kết quả do timeout | Bước 5–6 | Ghi nhận trạng thái chưa biết, kiểm tra lại bằng mã định danh | Thành công hoặc lỗi xác định sau đối soát |
 
 Không dùng nhánh “lỗi khác: làm lại” cho mọi trường hợp. Mỗi loại lỗi có thể đòi quyết định khác; việc lặp không giới hạn có thể làm khách chờ mãi và gây tải.
 
@@ -61,7 +61,7 @@ Nếu ghi thắng trước transition nhận chuyến, xác nhận có thể h�
 
 ## 6. Nối use case với các sản phẩm khác
 
-US-P04-01 giải thích mục tiêu; RULE-P04-01/02 ràng buộc quyền/state/revision; AC-P04-01–05 đưa ví dụ kiểm; wireframe minh hoạ trạng thái hiển thị. Use case không sao chép toàn bộ rule hoặc NFR vào từng bước, nhưng cần dẫn ID đúng version.
+US-P04-01 giải thích mục tiêu; RULE-P04-01/02 ràng buộc quyền/state/revision; AC-P04-01–05 đưa ví dụ kiểm thử; wireframe minh hoạ trạng thái hiển thị. Use case không sao chép toàn bộ rule hoặc NFR vào từng bước, nhưng cần dẫn ID đúng phiên bản.
 
 Một bảng truy vết ngắn giúp tìm ảnh hưởng khi đổi scope: cho phép ghi sau accepted sẽ tác động bước 4, nhánh A2, rule quyền/state, AC và nội dung cho tài xế. Không chỉ sửa một dòng trong use case.
 
@@ -71,7 +71,7 @@ Viết postcondition cho A1 và A4. Với A1 phải rõ chưa xác nhận bản 
 
 **Câu hỏi:** Use case nhiều bước hơn có luôn tốt hơn không?
 
-<details><summary>Gợi ý trả lời</summary><p>Không. Chi tiết cần đủ để giải thích tương tác và quyết định. Lặp mọi thao tác giao diện hoặc chi tiết lưu trữ làm luồng khó đọc mà không nhất thiết giảm rủi ro hiểu sai.</p></details>
+<details><summary>Gợi ý trả lời</summary><p>Không. Chi tiết cần đủ để giải thích tương tác và quyết định. Lặp mọi thao tác giao diện hoặc chi tiết lưu trữ khiến luồng khó đọc mà không nhất thiết giảm rủi ro hiểu sai.</p></details>
 
 ## 8. Tham khảo và bài tiếp theo
 

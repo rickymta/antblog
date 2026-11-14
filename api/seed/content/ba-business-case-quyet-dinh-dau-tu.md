@@ -24,13 +24,13 @@ Ghi phạm vi quyết định, thời hạn, người có thẩm quyền và b�
 |---|---|---|
 | Giữ nguyên, tiếp tục đo | Tránh đầu tư vội, làm rõ baseline | Vấn đề hiện tại tiếp diễn |
 | Cải thiện hướng dẫn và kiểm chứng | Học về rào cản với phạm vi nhỏ | Tốn nghiên cứu và vận hành |
-| Mở rộng tính năng | Tiếp cận nhiều người hơn | Tăng chi phí trước khi biết effect |
+| Mở rộng tính năng | Tiếp cận nhiều người hơn | Tăng chi phí trước khi biết tác động |
 
 Giữ nguyên không phải phương án miễn phí: nó có chi phí cơ hội. Nhưng chi phí cơ hội cũng cần căn cứ, không dùng số phóng đại để ép lựa chọn.
 
 ## 3. Tách tiền và năng lực được giải phóng
 
-Giả sử một phương án giảm 200 cuộc gọi/tháng, mỗi cuộc 5 phút, chi phí quy đổi 60.000 đồng/giờ. Năng lực giải phóng là 1.000 phút, khoảng 16,67 giờ, quy đổi khoảng 1 triệu đồng/tháng. Đây chưa chắc là tiền mặt tiết kiệm nếu số nhân sự và chi phí thực trả không đổi.
+Giả sử một phương án giảm 200 cuộc gọi/tháng, mỗi cuộc 5 phút, chi phí quy đổi 60.000 đồng/giờ. Năng lực được giải phóng là 1.000 phút, khoảng 16,67 giờ, quy đổi khoảng 1 triệu đồng/tháng. Đây chưa chắc là tiền mặt tiết kiệm nếu số nhân sự và chi phí thực trả không đổi.
 
 Không lấy 80 cuộc gọi của baseline P01 để suy ra con số 200; bộ tính này hoàn toàn độc lập và cần dữ liệu thực khi áp dụng.
 
@@ -44,7 +44,7 @@ Nếu chỉ giảm 100 cuộc gọi, lợi ích quy đổi còn 0,5 triệu/thá
 
 ## 6. Ai sở hữu lợi ích?
 
-Gán người theo dõi metric, điều kiện ghi nhận lợi ích và mốc review. Nếu thời gian CS được giải phóng, họ dùng vào việc gì và ai xác nhận? Nếu outcome không cải thiện, ai quyết định sửa, dừng hoặc đổi phương án? Business case cần sống tiếp sau phê duyệt.
+Chỉ định người theo dõi metric, điều kiện ghi nhận lợi ích và mốc review. Nếu thời gian của CSKH được giải phóng, họ dùng vào việc gì và ai xác nhận? Nếu outcome không cải thiện, ai quyết định sửa, dừng hoặc đổi phương án? Business case cần sống tiếp sau phê duyệt.
 
 ## 7. Thực hành
 
